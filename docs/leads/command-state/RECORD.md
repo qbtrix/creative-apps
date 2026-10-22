@@ -1,22 +1,22 @@
 # command-state lead record
 
 Issue: #3771 · Packet: docs/blueprints/suite/features/command-state.md
-Run: act-1a16391fd34-thw9 · Resumed: 2026-10-22T12:30Z (previous run act-1a1601c3538-r0c9, started 2026-10-21T10:50Z)
-Stage: All slices done (run 39836789801); Belt-Slice-Done posted for all 8 slices
+Run: act-1a1659bd4ae-sr68 · Resumed: 2026-10-22T22:00Z (previous runs act-1a16391fd34-thw9, act-1a1601c3538-r0c9)
+Stage: All slices done (Linux check 39857152000); Mac-Finish-Wanted for the ui slices (39836789801); Belt-Contact-Sheet posted
 Base: dc87ad2b0bcebf2b6bef749328a03ba06687275f
-Next: Belt-Contact-Sheet once journeys run 39855707652 (after CI run 39836789801) completes
+Next: beta-hardening lane verifies the ui slices; critic panel (ui:true) on journeys run 39855707652 screens
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| CS-a | ControlEntry.selected reported by SuiteUI toggles; command-path max limits | CS-1, CS-2 | see packet | - | yes | 0 | planned | | |
-| CS-library-1 | Library catalog + wiring (part 1) | CS-3, CS-4 | see packet | CS-a (CS-3) | yes | 0 | planned | | |
-| CS-library-2 | Library catalog + wiring (part 2) | CS-5, CS-6 | see packet | CS-a, CS-library-1 (CS-5) | yes | 0 | planned | | |
-| CS-halo | Halo catalog + wiring | CS-7, CS-8 | see packet | CS-a (CS-7) | yes | 0 | planned | | |
-| CS-photo | Photo catalog + wiring | CS-9, CS-10 | see packet | CS-a (CS-9) | yes | 0 | planned | | |
-| CS-flare | Flare catalog + wiring | CS-11, CS-12 | see packet | CS-a (CS-11) | yes | 0 | planned | | |
-| CS-design | Design catalog + wiring | CS-13, CS-14 | see packet | CS-a (CS-13) | yes | 0 | planned | | |
-| CS-z | RJ-X61 job + journey on; feature-done | CS-15, CS-16 | see packet | all app slices (CS-15) | no | 0 | planned | | |
+| CS-a | ControlEntry.selected reported by SuiteUI toggles; command-path max limits | CS-1, CS-2 | see packet | - | yes | 0 | done | 39857152000 | wanted (39836789801) |
+| CS-library-1 | Library catalog + wiring (part 1) | CS-3, CS-4 | see packet | CS-a (CS-3) | yes | 0 | done | 39857152000 | wanted (39836789801) |
+| CS-library-2 | Library catalog + wiring (part 2) | CS-5, CS-6 | see packet | CS-a, CS-library-1 (CS-5) | yes | 0 | done | 39857152000 | wanted (39836789801) |
+| CS-halo | Halo catalog + wiring | CS-7, CS-8 | see packet | CS-a (CS-7) | yes | 0 | done | 39857152000 | wanted (39836789801) |
+| CS-photo | Photo catalog + wiring | CS-9, CS-10 | see packet | CS-a (CS-9) | yes | 0 | done | 39857152000 | wanted (39836789801) |
+| CS-flare | Flare catalog + wiring | CS-11, CS-12 | see packet | CS-a (CS-11) | yes | 0 | done | 39857152000 | wanted (39836789801) |
+| CS-design | Design catalog + wiring | CS-13, CS-14 | see packet | CS-a (CS-13) | yes | 0 | done | 39857152000 | wanted (39836789801) |
+| CS-z | RJ-X61 job + journey on; feature-done | CS-15, CS-16 | see packet | all app slices (CS-15) | no | 0 | done | 39857152000 | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
