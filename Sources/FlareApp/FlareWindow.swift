@@ -46,6 +46,8 @@ struct FlareWindow: View {
     static var bodyRuns = 0
     /// The model the last body ran on, for the hosted-window tests to read back.
     static var shownModel: FlareWorkspace?
+    /// The last body's `perform`, for the hosted-window tests to send intents through (FlareFileFlowLiveTests).
+    static var shownPerform: ((FlareIntent) -> Void)?
     #endif
 
     /// The inspector column: the editor's panel width plus SuiteWindow's
@@ -58,6 +60,7 @@ struct FlareWindow: View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
         let _ = Self.shownModel = model
+        let _ = Self.shownPerform = { perform($0) }
         #endif
         SuiteWindow(
             title: model.document == nil ? "Flare" : model.title, actions: toolbar,

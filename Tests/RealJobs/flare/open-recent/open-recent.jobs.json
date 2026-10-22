@@ -11,6 +11,8 @@
   ],
   "atomic": true,
   "output": {"dir": "out", "name": "{stem}", "format": "flare"},
-  "expect": {},
+  "expect": {
+    "out/bounce.flare": {"json": {"format": "flare", "version": 1}}
+  },
   "platforms": []
 }
