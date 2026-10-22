@@ -85,7 +85,7 @@ struct FlareInspector<Easing: View>: View {
                 if let paint = model.paint {
                     FlareInspectorFill(
                         paint: paint, reasonFor: { FlareWindow.inspectorHelp($0, in: model) }, perform: perform,
-                        keyState: { FlareInspectorGeometry.keyState(model.keyState(FlareWorkspace.PaintKey(rawValue: $0) ?? .fill)) },
+                        keyState: { FlareGeometryRow.keyState(model.keyState(FlareWorkspace.PaintKey(rawValue: $0) ?? .fill)) },
                         keyHelp: { FlareWindow.inspectorHelp(.toggleKey($0), in: model) })
                 }
                 FlareInspectorTiming(easing: easing)
