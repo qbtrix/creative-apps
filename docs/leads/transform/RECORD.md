@@ -58,3 +58,4 @@ Wave 3: HT-m as #4415 on dev 30120a8; HT-z (#4422) stacked on it at once, labell
 - 17:59Z: #4422 (HT-z) merged 17:55Z as 55d96ee. It was stacked on HT-m, so it carries HT-m too: merging #4415 into dev is an empty diff. Closed #4415 as superseded. Next: a green ci.yml run on dev holding 55d96ee, then Belt-Slice-Done HT-m and HT-z, Mac-Finish-Wanted HT-z, Belt-Contact-Sheet.
 - 18:21Z: full CI 39829329352 on dev 8f25082 (holds 55d96ee) pending; Linux check 39829394350 running
 - 18:42Z: Linux check 39829394350 on dev 8f25082 (holds 55d96ee) green; full CI 39829329352 still pending (no macOS runner yet). Waiting for it, or a halo-scoped run, for the screens.
+- 19:05Z: full CI 39829329352 was cancelled (superseded at 18:59Z). Now waiting on full CI 39836126860 on dev a102c34 (holds 55d96ee), pending.
