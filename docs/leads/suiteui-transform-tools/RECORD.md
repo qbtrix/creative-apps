@@ -34,6 +34,7 @@ Next: lane batches #3577 → #4429 (feature-done; retarget to dev once #3577 mer
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T17:25Z heartbeat: no change. #3577's macOS rebuild 39815190852 is still pending, #4429 is still stacked, and scoped suiteui 39810321089 is still queued. The macOS runners are saturated.
 - 2026-10-22T17:04Z heartbeat: #3577 is still waiting on macOS. Build 39813540395 was cancelled, and the lane's rebuild 39815190852 is in the queue. #4429 is still stacked on it. Scoped suiteui 39810321089 (dev 401242a5) is still queued. No needs-fix or needs-rebase.
 - 2026-10-22T16:42Z heartbeat: #3577 is waiting on its macOS build 39813540395, which is queued (the runners are saturated; the lane re-dispatched it after an earlier build was cancelled). #4429 is still stacked on it. On dev 401242a5, scoped suiteui 39810321089 is still queued and full CI 39810338100 was cancelled. No needs-fix or needs-rebase.
 - 2026-10-22T16:20Z heartbeat: #3577 (TT-7) is clean on dev at eca74db6 and waits for a lane batch. #4429 is still stacked on it. Dev 401242a5 holds #3513 (d96c2645); its runs are pending: scoped suiteui 39810321089 (the TT-4 screens for the critic panel) and full CI 39810338100.
