@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-22T07:57Z	heartbeat	#4297 macOS build 39732985757 on f4d6350e still queued (66 min; macOS runners busy, 31 runs queued repo-wide); #4295 in lane (dev-red #3856 open); 0 open findings.
 2026-10-22T08:19Z	heartbeat	#4297 macOS build 39732985757 on f4d6350e still queued (88 min; macOS runners busy); #4295 in lane (dev-red #3856 open); 0 open findings.
 2026-10-22T08:40Z	heartbeat	#4297 macOS build 39732985757 on f4d6350e still queued (110 min; macOS runners busy); #4295 in lane (dev-red #3856 open); 0 open findings.
+2026-10-22T09:03Z	heartbeat	#4297 macOS build 39732985757 on f4d6350e still queued (2h12m; macOS runners busy); #4295 in lane (dev-red #3856 open); 0 open findings.
