@@ -2,9 +2,9 @@
 
 Issue: #3711 · Packet: docs/blueprints/suite/features/shell-media.md
 Run: act-1a16391fd34-thw9 · Resumed: 2026-10-22T12:30Z (previous run act-1a1601c3538-r0c9, started 2026-10-21T10:50Z)
-Stage: SM-w done (run 39785758185); SM-r merged (#4128 721ac8e9, #4239 c322dde1), waits a successful suite or full run containing both; SM-9 #4421 rebuilt on dev, gating
+Stage: SM-a, SM-m, SM-w, SM-r done; SM-z merged (de96b149a, f304220a3, 57306b1f8), waits a green suite or full run containing all three
 Base: dc87ad2b0bcebf2b6bef749328a03ba06687275f
-Next: SM-9 ready once CI: PASS; SM-10 C4 PR and SM-10b feature-done PR; Belt-Slice-Done for SM-w, SM-r, SM-z as runs land
+Next: Belt-Slice-Done SM-z, then Belt-Contact-Sheet
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -27,9 +27,9 @@ Next: SM-9 ready once CI: PASS; SM-10 C4 PR and SM-10b feature-done PR; Belt-Sli
 | SM-6 | SM-w | 3 | GIF/APNG + still encoders | packet SM-6 | ShellMediaImageWriteTests (macOS); Mutate: none, live-only | #4237 (draft, on #4123) | merged 222bc695 |
 | SM-7 | SM-r | 3 | still decoder, upright 8-bit sRGB | packet SM-7 | read suite (macOS) | #4128 (draft) | merged 721ac8e9 |
 | SM-8 | SM-r | 3 | FootageReader info + exact frame | packet SM-8 | ShellMediaFootageTests (macOS); Mutate: none, live-only | #4239 (draft, on #4125) | merged c322dde1 |
-| SM-9 | SM-z | 4 | LiveMedia slot live; SuiteLiveServices pending 6 (text live too, ST-8) | 4 files | ShellMediaLiveTests (macOS); Mutate: none, live-only | #4421 | dev merged in 18ffebda, gating |
-| SM-10 | SM-z | 5 | C4 prose: shell-media coders and the services.media rule | 1 docs/c4/parts file | scripts/ci --changed | - | gating |
-| SM-10b | SM-z | 5 | shell-media.wave.json built, feature_issue #3711; feature-done | 1 file | scripts/ci --changed | - | gating |
+| SM-9 | SM-z | 4 | LiveMedia slot live; SuiteLiveServices pending 6 (text live too, ST-8) | 4 files | ShellMediaLiveTests (macOS); Mutate: none, live-only | #4421 | merged de96b149 |
+| SM-10 | SM-z | 5 | C4 prose: shell-media coders and the services.media rule | 1 docs/c4/parts file | scripts/ci --changed | - | #4461 merged f304220a |
+| SM-10b | SM-z | 5 | shell-media.wave.json built, feature_issue #3711; feature-done | 1 file | scripts/ci --changed | - | #4462 merged 57306b1f |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
