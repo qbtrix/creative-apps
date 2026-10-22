@@ -49,3 +49,4 @@ utc	stage	event	ref	note
 2026-10-22T02:43Z	3	fix	-	#4259 held: lane Linux run 39710240958 red on FormatListRatchetTests.realTreePasses (SuiteModel Media.swift, red on dev e9933116 too; dev b5a6e7e0 Linux green). Merging dev into fl2, gate running.
 2026-10-22T02:46Z	3	fix	-	fl2 merged dev b5a6e7e0, ci --changed PASS, pushed 593d9118; #4259 Head moved, footer stripped. Lane needs a new macOS build for this head.
 2026-10-22T03:12Z	3	heartbeat	-	Heartbeat: #4259 (593d9118) and #4257 (d417a35f) wait on lane macOS builds; #4035 too. dev Linux green at 66a84588.
+2026-10-22T03:39Z	3	heartbeat	-	Heartbeat: #4259 macOS build queued, #4257 macOS build running; #4035 macOS+Linux green, awaiting lane merge.
