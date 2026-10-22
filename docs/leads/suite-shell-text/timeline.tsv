@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-22T02:35:12Z	check	ST-m	scripts/ci --changed on ST-a PASS; pushed 62773ab45; #4157 Head updated (draft)
 2026-10-22T02:35:12Z	check	ST-live	scripts/ci --changed on ST-a PASS; pushed f1f7a91a8; #4156 Head updated (draft)
 2026-10-22T02:35:12Z	stage	ST-live	ST-live merged into ST-live2 (#4161); gate running
+2026-10-22T02:41:10Z	check	ST-live	#4161 ST-live2 gate PASS on merged ST-live; pushed 01b3ce229; Head updated (draft)

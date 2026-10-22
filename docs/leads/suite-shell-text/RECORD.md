@@ -4,7 +4,7 @@ Issue: #3725 · Packet: docs/blueprints/suite/features/shell-text.md
 Run: act-1a15ef24f0e-t1j1 · Session: cse_01Mv9wxYxE6yTZhCjfP2rdUH · Started: 2026-10-21T14:56Z
 Stage: 3 wave B (stacked)
 Base: 3f96cd10c74f0eb4da8641e8fe511a2e5e42a466
-Next: ST-a #4135 ready in the lane (head 1f0949ff0). #4157 ST-m (62773ab45) and #4156 ST-live (f1f7a91a8) restacked on it, gated, Heads updated, drafts. #4161 ST-live2 gate running after merging ST-live; then push and move its Head. When #4135 merges, retarget #4157 and #4156 to dev, merge dev, gate, ready. Wave D (ST-z) after ST-m and ST-live merge.
+Next: ST-a #4135 ready in the lane (head 1f0949ff0). #4157 ST-m (62773ab45) and #4156 ST-live (f1f7a91a8) restacked on it, gated, Heads updated, drafts. #4161 ST-live2 (01b3ce229) restacked on ST-live, gated, Head updated. When #4135 merges, retarget #4157 and #4156 to dev, merge dev, gate, ready. Wave D (ST-z) after ST-m and ST-live merge.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
