@@ -26,5 +26,12 @@
     "find": "Self.placeCatalog.availability(\"place.image\", on: self).why ?? panelHelp",
     "replace": "panelHelp ?? Self.placeCatalog.availability(\"place.image\", on: self).why",
     "tests": "PhotoPlaceMenuTests"
+  },
+  {
+    "label": "svgRefusalNamesPhotosFormats: an SVG's refusal names SVG among the formats Photo takes",
+    "file": "Sources/PhotoModel/PhotoPlace+Menu.swift",
+    "find": "case .unavailable(_, let why) where why == PlaceRules.formatHelp: placeFormatHelp",
+    "replace": "case .unavailable(_, let why) where why == PlaceRules.formatHelp: why",
+    "tests": "PhotoPlaceTests"
   }
 ]

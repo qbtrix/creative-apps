@@ -7,8 +7,8 @@
 // without its own type switch (`editorTypes`), whose gestures send
 // `.runFill(_)`, and fills that differ read Mixed. The switch
 // and the editor are off, with the router's reason as their tooltip and as a
-// note under the switch (`flare.inspector.fillHelp`), while `fillEditHelp`
-// says why. STROKE is the color row
+// note under the switch (`flare.inspector.fillHelp`), while the kernel's
+// `fillHelp` says why. STROKE is the color row
 // (`flare.inspector.stroke`, `.setStrokeColor`), the Width bar
 // (`flare.inspector.strokeWidth`, in pt: each drag sample sends
 // `.scrubStrokeWidth`, so the canvas shows the width live, and the release

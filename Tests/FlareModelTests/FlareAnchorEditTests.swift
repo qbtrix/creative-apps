@@ -128,6 +128,36 @@ import Testing
         #expect(Self.anchors(workspace) == before && workspace.layerError == .refused(help))
     }
 
+    @Test func aMultiItemPickHasNoPathInEdit() {
+        var workspace = FlareWorkspace(services: .built)
+        workspace.newDocument()
+        workspace.selectTool(.rectangle)
+        workspace.drag(from: Point(x: 10, y: 10), to: Point(x: 50, y: 40))
+        workspace.drag(from: Point(x: 60, y: 10), to: Point(x: 100, y: 40))
+        workspace.selectTool(.directSelect)
+        workspace.selectAll()
+        #expect(workspace.selection.count == 2)
+        #expect(workspace.pathInEdit == nil && workspace.editablePath == nil)
+        #expect(workspace.pathHelp == "Select one shape with Direct Select to edit its points.")
+        #expect(workspace.statusPills(measuredFPS: nil).pathHelp == workspace.pathHelp)
+        workspace.runPath(.selectAll)
+        #expect(workspace.anchorSelection.ordered.isEmpty)
+    }
+
+    @Test func theOnlyShapeOnALockedLayerShowsNoEditMarksAndSaysToUnlock() throws {
+        var workspace = Self.picked()
+        #expect(workspace.editablePath == workspace.pathInEdit && workspace.editablePath != nil)
+        #expect(workspace.statusPills(measuredFPS: nil).pathHelp == nil)
+        let layer = try #require(workspace.selection.first?.layerID)
+        let name = try #require(workspace.ownerLayers?.first { $0.id == layer }?.name)
+        workspace.toggleLayerFlag(layer, .locked)
+        #expect(workspace.pathInEdit != nil && workspace.editablePath == nil)
+        #expect(workspace.pathHelp == FlareWorkspace.unlockMessage(name))
+        #expect(workspace.statusPills(measuredFPS: nil).pathHelp == FlareWorkspace.unlockMessage(name))
+        workspace.selectTool(.select)
+        #expect(workspace.statusPills(measuredFPS: nil).pathHelp == nil)
+    }
+
     @Test func aDragOnALayerScaledTwiceMapsThroughItsScale() throws {
         var workspace = Self.picked()
         var document = try #require(workspace.document)

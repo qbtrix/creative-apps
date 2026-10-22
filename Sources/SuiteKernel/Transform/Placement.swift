@@ -1,4 +1,4 @@
-// Transform/Placement.swift (anchor-parenting AN-1 stubs, AN-3 bodies): a
+// Transform/Placement.swift (anchor-parenting AN-1 shape, AN-3 bodies): a
 // layer's place in its parent. The kernel's geometry is FlareCore's (editor-kernel
 // design decision 2), and FlareCore's `Transform` already holds position,
 // scale, clockwise degrees and the anchor in the layer's own space, with the
@@ -18,15 +18,22 @@ public typealias Placement = FlareCore.Transform
 
 extension Placement {
     /// The same layer with its anchor at `p` (layer space) and x, y moved so
-    /// nothing moves on screen: (x, y) += R·S·(p − anchor). AN-3 builds it;
-    /// the stub returns the placement unchanged.
+    /// nothing moves on screen: (x, y) += R·S·(p − anchor), Halo's
+    /// keep-in-place step. A point that isn't finite is no change.
     public func movingAnchor(to p: Point) -> Placement {
-        self
+        guard p.x.isFinite, p.y.isFinite else { return self }
+        let offset = Point(x: p.x - anchorX, y: p.y - anchorY)
+        // R·S with no translation: where the offset lands once scaled and turned.
+        let turned = (Matrix.rotation(degrees: rotation) * Matrix.scale(x: scaleX, y: scaleY)).apply(offset)
+        var moved = self
+        (moved.x, moved.y, moved.anchorX, moved.anchorY) = (x + turned.x, y + turned.y, p.x, p.y)
+        return moved
     }
 
     /// One of the nine points of `box` (layer space), for the picker and
-    /// `{at:}`. AN-3 builds it; the stub answers the box's top-left corner.
+    /// `{at:}`: the corners, the edge middles and the centre.
     public static func anchorPoint(at a: BoxAnchor, in box: Rect) -> Point {
-        Point(x: box.minX, y: box.minY)
+        let (u, v) = TransformRules.fraction(a)
+        return Point(x: box.minX + (box.maxX - box.minX) * u, y: box.minY + (box.maxY - box.minY) * v)
     }
 }

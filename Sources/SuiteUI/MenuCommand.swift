@@ -11,22 +11,24 @@ public struct MenuCommand: View {
     public let shortcut: KeyboardShortcut?
     public let help: String
     public let isEnabled: Bool
+    public let role: ButtonRole?
     public let perform: @MainActor () -> Void
 
     public init(
         _ title: String, systemImage: String? = nil, shortcut: KeyboardShortcut? = nil, help: String,
-        isEnabled: Bool = true, perform: @escaping @MainActor () -> Void
+        isEnabled: Bool = true, role: ButtonRole? = nil, perform: @escaping @MainActor () -> Void
     ) {
         self.title = title
         self.systemImage = systemImage
         self.shortcut = shortcut
         self.help = help
         self.isEnabled = isEnabled
+        self.role = role
         self.perform = perform
     }
 
     public var body: some View {
-        Button(action: perform) {
+        Button(role: role, action: perform) {
             if let systemImage { Label(title, systemImage: systemImage) } else { Text(title) }
         }
         .keyboardShortcut(shortcut)
