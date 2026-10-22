@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-22T05:50Z	3	pr-opened	#4324	DT-u fix round 2: #4223 turned resize, #4224 knob over several
 2026-10-22T06:24Z	3	heartbeat	-	relaunch nudge; both PRs wait on macOS build-only runs (queue 21)
 2026-10-22T06:35Z	3	heartbeat	-	#4323 #4324 clean, macOS builds 39728806153 / 39730381324 still queued
+2026-10-22T06:52Z	3	heartbeat	-	#4323 #4324 clean; macOS builds 39728806153 / 39730381324 still queued (~80 min, runner backlog)
