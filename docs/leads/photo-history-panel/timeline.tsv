@@ -92,3 +92,4 @@ utc	stage	event	ref	note
 2026-10-22T06:07:14Z	check	PH-z	#4271 merged ae7bce19 (batch of 4); all slices merged; proof runs queued: scoped photo 39722915670 + full 39722978870 at 71987f72, full 39725694977 at b2794c20, full 39730395919 at b2bde159 (39727624590 cancelled)
 2026-10-22T06:29:01Z	check	PH-m,PH-z	no green proof yet: full 39733090477 at 9adf3186 (contains add701fc, 4c6ad5ed, ae7bce19) pending; scoped photo 39722915670 + full 39722978870 (71987f72) and full 39725694977 (b2794c20) queued; 39730395919 cancelled; no open finding on this feature
 2026-10-22T06:52:21Z	check	PH-m,PH-z	no green proof yet: full 39733090477 (9adf3186) cancelled; scoped photo 39722915670 at 71987f72 (contains add701fc, 4c6ad5ed) in progress; full 39734272718 at 4f2b89eb (contains all three) pending
+2026-10-22T07:26:00Z	done	PH-m	Belt-Slice-Done PH-m on scoped photo 39722915670 (71987f72, success); PH-z done per brief; Belt-Contact-Sheet posted; no open finding
