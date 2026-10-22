@@ -73,3 +73,4 @@ utc	stage	event	ref	note
 2026-10-22T19:19Z	poll	DS-m full CI 39836126860 still pending; #4386 macOS build 39825433352 now in_progress, open, fast-lane only
 2026-10-22T19:37Z	poll	DS-m: full CI 39836126860 queued, newer full CI 39840605751 (fbe2a8727) pending, both contain 62400e4d4; #4386 macOS build 39825433352 in_progress, open, fast-lane only
 2026-10-22T19:53Z	poll	#4386 macOS build 39825433352 success, awaiting lane merge; DS-m full CI 39836126860/39840605751 still queued/pending
+2026-10-22T20:10Z	poll	#4386 build green, still awaiting lane batch merge; DS-m full CI 39840605751 cancelled, 39836126860 queued, newer 39844810755 (0f8414ad2) pending, all contain 62400e4d4
