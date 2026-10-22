@@ -51,10 +51,10 @@ public struct SuiteTypeRegistry: Sendable {
                           owner: .halo, readers: [.halo]),
         SuiteDocumentType(id: .photoOpenRaster, name: "Photo Document", extensions: ["ora"],
                           owner: .photo, readers: [.photo]),
-        SuiteDocumentType(id: .png, name: "PNG image", extensions: ["png"], owner: nil, readers: [.photo, .library]),
-        SuiteDocumentType(id: .jpeg, name: "JPEG image", extensions: ["jpg", "jpeg"], owner: nil, readers: [.photo, .library]),
-        SuiteDocumentType(id: .heic, name: "HEIC image", extensions: ["heic"], owner: nil, readers: [.photo, .library]),
-    ])
+    ] + SuiteImageFormats.all.map {
+        // The public image rows: every format the suite reads, opened by Photo and Library, owned by none.
+        SuiteDocumentType(id: $0.typeID, name: $0.name, extensions: $0.extensions, owner: nil, readers: [.photo, .library])
+    })
 
     /// Types the plists export that no app opens as a document.
     public static let declaredOnly: [SuiteTypeID] = [.handOff, .assetEnvelope, .designLayers, .flareLayers]
@@ -72,8 +72,3 @@ public struct SuiteTypeRegistry: Sendable {
         return t.owner ?? t.readers.first
     }
 }
-
-/// The still image formats the suite writes (shell-media SM-1's media
-/// service). Kept here, beside the document types, so the suite lists image
-/// formats in one baselined file until SuiteImageFormats (SC-14) owns them.
-public enum StillFormat: String, Codable, Sendable, CaseIterable { case png, jpeg, heic, tiff }
