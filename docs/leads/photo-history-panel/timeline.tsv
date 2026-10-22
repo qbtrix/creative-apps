@@ -83,3 +83,4 @@ utc	stage	event	ref	note
 2026-10-22T02:33:14Z	check	-	#4162@69ee6383 and #4271@09aa3019 clean, waiting on lane macOS builds; no open findings
 2026-10-22T02:55:27Z	check	-	#4162@69ee6383, #4271@09aa3019 clean, waiting on lane macOS builds; scoped photo runs red on Free Transform budget (fix #4252/#4219, not ours); no open findings
 2026-10-22T03:17:09Z	check	-	dev Linux green again (39713604043 @66a84588); scoped photo 39712698310 @b5a6e7e0 queued (Free Transform fix #4252/#4219 still open); #4162/#4267/#4271 clean, waiting on lane macOS builds; no open findings; export-pack planned
+2026-10-22T03:41:28Z	check	PH-m	#4162 merged (4c6ad5ed); #4271 needs-fix (cancelled Linux) -> dev merged, head dffd1c42, Head moved

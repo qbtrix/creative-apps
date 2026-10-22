@@ -5,7 +5,7 @@ Run: act-1a15fc7d29e-gz1t (line lead with #3471 file-flow) · Session: claude/hi
 Earlier run: act-1a15ac118a1-s70v (PH-a, PH-u done)
 Stage: 3 wave A
 Base: origin/dev 1b3913c
-Next: #4162 (PH-5) in the lane at 4d654c47 (carries #4215's RenderBudgetPhotoPlaceTests compile fix); then PH-m done on a scoped photo run; PH-z #4271 open (PH-7, PH-8; stacked on #4162; head 09aa3019, ci --changed PASS)
+Next: PH-m (#4160, #4162 merged; #4162 squash 4c6ad5ed) done on a green scoped photo or full run containing 4c6ad5ed; PH-z #4271 open (PH-7, PH-8; head dffd1c42 after dev merge, ci --changed PASS; needs-fix was a cancelled Linux job)
 Record: docs/leads/photo-history-panel/RECORD.md on lead/photo-history-panel (lead/history-panel holds the copy before 20:05Z)
 
 ## Slices
@@ -21,9 +21,9 @@ Record: docs/leads/photo-history-panel/RECORD.md on lead/photo-history-panel (le
 |---|---|---|---|---|
 | PH-1, PH-2 | PH-a | stubs, tab, menu | #3708 | merged |
 | PH-3, PH-4 | PH-u | listing, snapshots, budget | #3762, #3818 | merged (mac fixes #3979, #4111) |
-| PH-5 | PH-m | jump body, catalog specs (additive), PhotoHistoryJumpTests on, plan PhotoModel.PhotoHistory+Kernel | #4162 | 4d654c47: dev merged (fd295c72) + #4215 port; CI --changed PASS, Head moved; in the lane |
+| PH-5 | PH-m | jump body, catalog specs (additive), PhotoHistoryJumpTests on, plan PhotoModel.PhotoHistory+Kernel | #4162 | merged 03:29Z as 4c6ad5ed |
 | PH-6 | PH-m | autosave on RecoveryFolder | #4160 | merged 8c75b620 |
-| PH-7 | PH-z | journeys on live | #4271 | open at 86489973, stacked on #4162 |
+| PH-7 | PH-z | journeys on live | #4271 | open at dffd1c42 (dev merged after #4162 landed; diff now 2 files +4 -10) |
 | PH-8 | PH-z | status built, feature-done | #4271 | open (same PR, one PR per slice) |
 
 ## Reviews
