@@ -11,6 +11,7 @@ Next: reopen FR-8b after #4341; open FR-10b after #4293
 
 
 
+
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
 - 07:56Z: FR-10b branch merged with FR-10 head (d1c5cb529), pushed, gate running; PR opens after #4293 merges (stacked diff vs dev is 19 files).
