@@ -1,5 +1,7 @@
 // Contracts/DevelopValues.swift: a photo's develop settings (ten sliders, a
 // tone curve, levels), its crop, and the histogram the develop panel draws.
+// Levels and curve points are SuiteImaging's types; ToneCurve stays Library's
+// own (its ends pinned to 0 and 1, a 0.01 gap) with AdjustCurve conversions.
 // Settings are edit instructions, never pixels; neutral settings render the
 // photo unchanged. Coded by hand so a catalog written before a field existed
 // opens with it neutral, and a neutral new field adds no key.
@@ -9,6 +11,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
+import SuiteImaging
 import SuiteModel
 
 /// One develop slider. The raw value is the row's label.
@@ -39,11 +42,9 @@ public enum DevelopGroup: String, CaseIterable, Sendable {
     public var sliders: [DevelopSlider] { DevelopSlider.allCases.filter { $0.group == self } }
 }
 
-/// One point of the tone curve, both coordinates sRGB values in 0...1.
-public struct DevelopCurvePoint: Hashable, Sendable, Codable {
-    public var x: Double, y: Double
-    public init(x: Double, y: Double) { self.x = x; self.y = y }
-}
+/// One point of the tone curve, both coordinates sRGB values in 0...1:
+/// SuiteImaging's point, with the catalog's `x` and `y` keys.
+public typealias DevelopCurvePoint = AdjustCurvePoint
 
 /// The develop tone curve: a monotone cubic through its points (CoreRaster
 /// `curves`), applied to sRGB values. Always valid: built only through `init?`.
@@ -106,59 +107,10 @@ public struct ToneCurve: Hashable, Sendable, Codable {
     }
 }
 
-/// The develop levels, CoreRaster `levels` on sRGB values.
-public struct DevelopLevels: Hashable, Sendable, Codable {
-    /// The raw value is the row's label.
-    public enum Field: String, CaseIterable, Sendable {
-        case inBlack = "Black Point", gamma = "Midtones", inWhite = "White Point"
-        case outBlack = "Output Black", outWhite = "Output White"
-    }
-    public static let neutral = DevelopLevels()
-    public static let gammaRange: ClosedRange<Double> = 0.1...9.99
-    /// The least gap between the black and white points: one byte level.
-    public static let pointGap = 1.0 / 255
-    /// sRGB values in 0...1 (the rows show them as 0...255); gamma over 1 brightens.
-    public private(set) var inBlack = 0.0, inWhite = 1.0, gamma = 1.0, outBlack = 0.0, outWhite = 1.0
-    public init() {}
-
-    /// A decoded file goes through `setting`, so damaged levels can't reach the renderer.
-    public init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        var levels = DevelopLevels.neutral
-        for (field, key) in [(Field.outBlack, CodingKeys.outBlack), (.outWhite, .outWhite), (.gamma, .gamma),
-                             (.inWhite, .inWhite), (.inBlack, .inBlack)] {
-            if let value = try container.decodeIfPresent(Double.self, forKey: key) {
-                levels = levels.setting(field, to: value)
-            }
-        }
-        self = levels
-    }
-
-    public func value(_ field: Field) -> Double {
-        switch field {
-        case .inBlack: inBlack
-        case .gamma: gamma
-        case .inWhite: inWhite
-        case .outBlack: outBlack
-        case .outWhite: outWhite
-        }
-    }
-
-    /// Clamped to the field's range; NaN or infinity gives the neutral value. The
-    /// black and white points stay at least `pointGap` apart: the one being moved stops there.
-    public func setting(_ field: Field, to value: Double) -> DevelopLevels {
-        let wanted = value.isFinite ? value : Self.neutral.value(field)
-        var copy = self
-        switch field {
-        case .inBlack: copy.inBlack = min(max(wanted, 0), inWhite - Self.pointGap)
-        case .gamma: copy.gamma = min(max(wanted, Self.gammaRange.lowerBound), Self.gammaRange.upperBound)
-        case .inWhite: copy.inWhite = min(max(wanted, inBlack + Self.pointGap), 1)
-        case .outBlack: copy.outBlack = min(max(wanted, 0), 1)
-        case .outWhite: copy.outWhite = min(max(wanted, 0), 1)
-        }
-        return copy
-    }
-}
+/// The develop levels, CoreRaster `levels` on sRGB values: SuiteImaging's
+/// levels, which read and write the catalog's keys (`inBlack` ... `outWhite`,
+/// 0...1). The rows, `Field` and the setters are LibraryDevelop+Imaging.swift.
+public typealias DevelopLevels = AdjustLevels
 
 public struct DevelopSettings: Hashable, Sendable, Codable {
     public private(set) var exposure: Double = 0
