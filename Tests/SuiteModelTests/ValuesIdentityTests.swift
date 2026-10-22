@@ -26,6 +26,9 @@ import Testing
 
     @Test func defaultAppPerRegistryType() {
         let registry = SuiteTypeRegistry.standard
+        // shared-codecs SC-14: the image formats after HEIC, read by Photo first.
+        let images = ["public.heif", "public.tiff", "org.webmproject.webp", "com.compuserve.gif", "com.microsoft.bmp",
+                      "com.ilm.openexr-image", "com.truevision.tga-image", "public.camera-raw-image"]
         let expected: [(SuiteTypeID, String, SuiteApp)] = [
             (.flareAnimation, "org.creativesuite.flare.animation", .flare),
             (.designDocument, "org.creativesuite.design.document", .design),
@@ -34,7 +37,7 @@ import Testing
             (.png, "public.png", .photo),
             (.jpeg, "public.jpeg", .photo),
             (.heic, "public.heic", .photo),
-        ]
+        ] + images.map { (SuiteTypeID(rawValue: $0), $0, .photo) }
         #expect(registry.types.map(\.id) == expected.map(\.0))
         for (id, raw, app) in expected {
             #expect(id.rawValue == raw)

@@ -36,6 +36,7 @@ fill.stop-color
 fill.stop-move
 fill.stop-remove
 fill.type
+frame.label
 guide.add
 guide.move
 guide.remove
@@ -77,6 +78,8 @@ mask.set
 mask.set-matte
 object.bring-forward
 object.send-backward
+recovery.discard
+recovery.restore
 scene.add
 scene.remove
 scene.rename
@@ -111,6 +114,9 @@ text.set-font
 text.set-on-path
 text.set-paragraph
 text.set-string
+timeline.delete-keys
+timeline.insert-frames
+timeline.remove-frames
 timeline.select-all-keys
 tool.direct-select
 tool.ellipse

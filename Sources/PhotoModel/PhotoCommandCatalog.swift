@@ -16,7 +16,8 @@ extension PhotoWorkspace {
     public struct NameParams: Codable, Sendable { public var name: String }
     public struct ImageParams: Codable, Sendable { public var name: String?; public var width, height: Int; public var rgba8: [UInt8] }
     public struct StraightenParams: Codable, Sendable { public var degrees: Double; public var cropToFit: Bool }
-    public struct ExportParams: Codable, Sendable { public var format: String }
+    /// Export's sheet values: the format and, for JPEG, the quality (0.1...1; the last choice when left out).
+    public struct ExportParams: Codable, Sendable { public var format: String; public var quality: Double? }
     /// A rectangle in canvas pixels (select.rect).
     public struct RectParams: Codable, Sendable { public var x, y, width, height: Int }
     /// image.gradient's: "linear" or "radial", stops as sRGB 0...1, and the two points in canvas pixels.
@@ -109,6 +110,7 @@ extension PhotoWorkspace {
             act("tool.\(tool.rawValue)", tool.rawValue.capitalized, "Picks the \(tool.rawValue) tool for canvas drags.", .view,
                 gate { $0.toolHelp(tool) }) { $0.selectTool(tool) }
         }
+        + HistoryCommands.specs(PhotoWorkspace.self)
 
     static let fileCommands: [CommandSpec<PhotoWorkspace>] = [
         .typed("file.new", title: "New Image", summary: "Opens a new white image of the given size.", kind: .file,
@@ -124,12 +126,19 @@ extension PhotoWorkspace {
                schema: nameSchema, example: .object(["name": .string("copy.ora")]), availability: menu()) { w, p in
             w.didSave(as: p.name, kind: fileKind(forName: p.name)); return JSONValue.object([:])
         },
-        .typed("file.export", title: "Export", summary: "Flattens the image for export as png or jpeg.", kind: .file, params: ExportParams.self,
-               schema: .object(["format": .string("png or jpeg.", oneOf: ["png", "jpeg"])], required: ["format"]),
-               result: .object(["name": .string(), "width": .integer(), "height": .integer()], required: ["name", "width", "height"]),
+        .typed("file.export", title: "Export", summary: "Flattens the image for export as png or jpeg.",
+               kind: .file, params: ExportParams.self,
+               schema: .object(["format": .string("png or jpeg.", oneOf: ["png", "jpeg"]),
+                                "quality": .optional(.number("JPEG quality.", minimum: 0.1, maximum: 1))], required: ["format", "quality"]),
+               result: .object(["name": .string(), "width": .integer(), "height": .integer(), "quality": .number()],
+                               required: ["name", "width", "height", "quality"]),
                example: .object(["format": .string("png")]), availability: bar(.export)) { w, p in
             let format = ImageFormat(rawValue: p.format) ?? .png, image = try w.exportPixels(as: format)
-            return ["name": JSONValue.string(w.fileName(for: format)), "width": .number(Double(image.width)), "height": .number(Double(image.height))]
+            let o = ExportOptions(format: format, quality: p.quality ?? w.exportOptions.quality, size: w.exportOptions.size)
+            // The sheet's confirm starts its one write on the choice; without the sheet, the choice is kept for next time.
+            if !w.startExport(o) { w.exportOptions = o }
+            return ["name": JSONValue.string(w.fileName(for: format)), "width": .number(Double(image.width)),
+                    "height": .number(Double(image.height)), "quality": .number(o.quality)]
         },
     ]
 
@@ -223,9 +232,7 @@ extension PhotoWorkspace {
             }
             w.addAdjustmentLayer(kind); return JSONValue.object([:])
         },
-        act("layer.delete", "Delete Layer", "Deletes the selected layers.", .edit, menu { w in
-            w.selectedLayer == nil ? noLayer : w.canRemoveLayer ? w.removeSelectedHelp : "The last layer can't be deleted."
-        }) { w in _ = try w.selectedID("layer.delete"); w.removeSelectedLayers() },
+        act("layer.delete", "Delete Layer", "Deletes the selected layers.", .edit, menu { $0.deleteLayersHelp }) { w in _ = try w.selectedID("layer.delete"); w.removeSelectedLayers() },
         act("layer.duplicate", "Duplicate Layer", "Duplicates the selected layer.", .edit, gate { $0.duplicateLayerHelp }) { $0.duplicateSelectedLayer() },
         act("layer.merge-down", "Merge Down", "Merges the selected layer into the one below.", .edit, gate { $0.mergeDownHelp }) { $0.mergeDown() },
         act("layer.flatten", "Flatten Image", "Merges every layer into one.", .edit, gate { $0.flattenHelp }) { $0.flattenImage() },

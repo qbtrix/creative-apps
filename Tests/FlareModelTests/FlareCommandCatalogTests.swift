@@ -70,9 +70,18 @@ struct FlareCommandCatalogTests {
         ws.runFill(.type(.linear))
         ws.runFill(.add(offset: 0.5))
         let problems = CatalogConformance.check(FlareLawsDocument.self, fixture: FlareLawsDocument(ws: ws))
-        // The file-flow examples need a recent file or a saved animation on disk: FlareFileFlowTests runs them.
-        let needsFiles = ["file.clear-recent", "file.open-in", "file.open-recent"].map { "\($0): exampleRuns" }
-        #expect(problems.filter { p in appIDs.contains(String(p.prefix { $0 != ":" })) && !needsFiles.contains { p.hasPrefix($0) } } == [])
+        #expect(problems.filter { appIDs.contains(String($0.prefix { $0 != ":" })) && !Self.exempt($0) } == [])
+    }
+    /// CS-11's controls that can't act on the laws' fixture, as their window controls can't: Restore and Discard keep
+    /// its unsaved edits, Delete Keyframe has no key selected, and a frame inserted or removed at frame 5 moves no key
+    /// or label, so it changes nothing and records no step (FlareCommandPathTests runs each where it acts).
+    /// The file-flow examples need a recent file or a saved animation on disk: FlareFileFlowTests runs them.
+    static func exempt(_ problem: String) -> Bool {
+        let id = String(problem.prefix { $0 != ":" })
+        if ["file.clear-recent", "file.open-in", "file.open-recent"].contains(id) { return problem.contains("exampleRuns") }
+        if ["recovery.restore", "recovery.discard", "timeline.delete-keys"].contains(id) { return problem.contains("exampleRuns") }
+        return ["timeline.insert-frames", "timeline.remove-frames"].contains(id)
+            && ["stepNamedTitle", "editRecordsOneStep", "undoRestoresBytes"].contains { problem.contains($0) }
     }
     @Test func ledger() throws {
         let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../command-ids/flare.txt")

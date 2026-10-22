@@ -61,5 +61,26 @@
     "find": "if node.kind != .group, let defs = gradient(node, x: x, y: y)",
     "replace": "if node.kind != .group, node.kind != .text, let defs = gradient(node, x: x, y: y)",
     "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": ".rotateAboutCentre: a turn is written about the box's origin, not the layer's centre",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "parts.append(\"rotate(\\(number(node.rotation)) \\(cx) \\(cy))\")",
+    "replace": "parts.append(\"rotate(\\(number(node.rotation)))\")",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": ".flipWritesScale: a mirrored layer writes no scale",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "if node.flipX || node.flipY {",
+    "replace": "if false {",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": ".frameTurnsItsClip: a turned frame's clip stays upright",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "<rect \\(box)\\(corner(node))\\(turned)/></clipPath>",
+    "replace": "<rect \\(box)\\(corner(node))/></clipPath>",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
   }
 ]

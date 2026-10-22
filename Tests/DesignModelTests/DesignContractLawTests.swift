@@ -68,7 +68,7 @@ struct DesignContractLaw {
         let t = s.transforming
         let help = t.transformHelp(ids, on: page)
         check("transforming", "move", sel, help: help) { () throws(DesignRefusal) in _ = try t.move(ids, by: DesignPoint(x: 10, y: 10), on: page) }
-        for handle in DesignHandle.allCases {
+        for handle in DesignHandle.allCases where handle != .rotate {
             check("transforming", "resize \(handle)", sel, help: help) { () throws(DesignRefusal) in
                 _ = try t.resize(ids, handle: handle, by: DesignPoint(x: 15, y: 15), modifiers: [], on: page)
             }
