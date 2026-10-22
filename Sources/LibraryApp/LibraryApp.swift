@@ -7,6 +7,7 @@
 // File-flow (LF-2): the scene takes part in switching (`.suiteApp`), File
 // gets the suite's Open Recent ▸ and Open In ▸ (SuiteFileCommands), and the
 // window takes drops; all three read the process's one documents bridge.
+// Launch empties the last session's share copies (share-sheet SH-5).
 import Foundation
 import LibraryModel
 import SuiteModel
@@ -31,6 +32,10 @@ import SwiftUI
 
 @main
 struct LibraryApp: App {
+    /// Empties the last session's share copies (`Share/` beside the catalog file, share-sheet SH-5); a folder that
+    /// can't be emptied waits for the next launch.
+    init() { try? SharePrep.cleanup(support: CatalogStore().folder.path(percentEncoded: false)) }
+
     var body: some Scene {
         Window("Library", id: "library") { LibraryWindow() }
             .commands {
