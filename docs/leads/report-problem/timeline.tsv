@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-21T23:16Z	2026-10-21T23:16Z	check	heartbeat	#4201	no merges yet; batch lane/batch-20261021221623 bisecting
 2026-10-22T00:07Z	2026-10-22T00:07Z	check	merged	#4110	RP-4 merged
 2026-10-22T00:29Z	2026-10-22T00:29Z	check	heartbeat	-	no merges since 00:07Z; all ready PRs clean on the lane (#4258 macOS build dispatched); no open findings for this feature
+2026-10-22T00:53:09Z	2026-10-22T00:53:09Z	check	macos-build-red	dev#4215	our heads predate cb79b076f (RenderBudgetPhotoPlaceTests fix); merging dev into each, gate, push
