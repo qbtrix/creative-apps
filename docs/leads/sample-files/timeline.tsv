@@ -47,3 +47,4 @@ utc	stage	event	ref	note
 2026-10-22T00:32:45Z	check	SS-z	#4129 macOS build in progress on 2e336bb38; waiting on lane batch
 2026-10-22T00:49:19Z	check	SS-z	#4129 macOS build success on 2e336bb38; waiting on lane batch
 2026-10-22T01:06:03Z	check	SS-z	#4129 still open, ready in lane, no needs-fix
+2026-10-22T01:23:12Z	check	SS-z	#4129 open; lane batch 20261022004326 running (run 39704640868)
