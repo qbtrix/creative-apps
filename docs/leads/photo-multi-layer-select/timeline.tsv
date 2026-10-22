@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-21T22:40:00Z	3 wave 3	pr	PM-z	#4243 open (Delete on every picked layer, PJ-M1 on, PM-10 docs); ci --changed PASS; Mutate 6/6; #4242 filed for stress steps
 2026-10-21T23:25:00Z	3 wave 3	check	PM-z	#4243 lane mac build red on dev place-test break (#4164); ported #4215, head 0972834, ci --changed PASS; no green dev run yet; no findings
 2026-10-22T00:01:00Z	3 wave 3	check	PM-z	#4243 lane macOS build 39693769769 queued on 0972834; #4215 open; dev Linux check green at be9aa35bc; full CI de0f324d1 pending; no findings
+2026-10-22T00:31:00Z	3 wave 3	check	PM-z	#4215 merged (port now no-op); #4243 waits on lane macOS build 39693769769 (queued, no runner); dev Linux red at cb79b076f, c4607f1ca running; no findings
