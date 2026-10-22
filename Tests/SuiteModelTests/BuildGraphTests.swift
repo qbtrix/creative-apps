@@ -94,7 +94,7 @@ enum BuildGraph {
         try String(contentsOf: root.appendingPathComponent(path), encoding: .utf8)
     }
 
-    static let expected = Set(["SuiteUI", "SuiteModel", "SuiteKernel", "SuiteShell", "AfterGlowApp"])
+    static let expected = Set(["SuiteUI", "SuiteModel", "SuiteKernel", "SuiteImaging", "SuiteShell", "AfterGlowApp"])
         .union(["Flare", "Design", "Photo", "Library", "Halo"].flatMap { ["\($0)Model", "\($0)App"] })
 
     @Test func packageScanFindsTheMacOSTargets() throws {
@@ -134,6 +134,16 @@ enum BuildGraph {
             #expect(block.contains { $0.contains("dependencies") && $0.contains("{ target: CreativeEngines }") },
                     "\(name) doesn't link CreativeEngines")
         }
+    }
+
+    /// xcodegen's bundle build must use the engines the Models were tested
+    /// against: a stale pin fails every macOS bundle and journeys build (#3856).
+    @Test func projectYmlPinsCreativeCoreAtPackageSwiftsRevision() throws {
+        let sha = #"([0-9a-f]{40})"#
+        let package = BuildGraph.captures(#"creative-core", revision: ""# + sha, in: try Self.read("Package.swift"))
+        let project = BuildGraph.captures(#"(?m)^    revision: "# + sha, in: try Self.read("project.yml"))
+        #expect(package.count == 1)
+        #expect(project == package)
     }
 
     @Test func afterGlowJourneyBundleCompilesTheSuiteValues() throws {

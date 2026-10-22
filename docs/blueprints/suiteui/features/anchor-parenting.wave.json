@@ -1,0 +1,281 @@
+{
+  "title": "Anchor point and parenting on SuiteKernel: Halo's anchor matrix lifted into a kernel Placement, set-anchor that keeps the layer in place, parent and null layers through LayerFollow, an anchor mark and rows in SuiteUI; Halo moves onto it and Flare adopts",
+  "wave": "XK4",
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 C6 (Flare B1 and B4, Halo 'drag the anchor point'); feature map suiteui/anchor-parenting (new); real job RJ-X75 (new), RJ-F14",
+  "waits_on": "creative-core: FlareCore Transform anchor, Layer parentID and Lottie a/parent (not filed; AN-flare-m and AN-flare-u only); the Flare stopgap fix/flare-stage-matches-export (in flight; AN-flare-m starts after it merges); adopt-kernel-easing AE-halo and adopt-kernel-layers AL-halo (HaloKeyRules.swift); the Halo and Flare catalog chains (cross-line)",
+  "depends": [
+    "editor-kernel",
+    "command-catalog",
+    "adopt-command-catalog"
+  ],
+  "longest_chain": "8 (AN-1 → AN-2 → AN-5 → AN-6 → AN-11 → AN-12 → AN-13 → AN-14)",
+  "journeys": [
+    "SuiteAnchorJourneyTests.testDragAnchorAndParentInGallery",
+    "HaloAnchorJourneyTests.testDragAnchorKeepsPlace",
+    "FlareInspectorJourneys.testAnchorAndParent"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Transform/Placement.swift",
+    "Sources/SuiteKernel/Transform/AnchorCommands.swift",
+    "Tests/SuiteKernelTests/PlacementTests.swift",
+    "Tests/SuiteKernelTests/AnchorCommandsTests.swift",
+    "Tests/mutations/SuiteKernel.Placement.json",
+    "Tests/mutations/SuiteKernel.AnchorCommands.json",
+    "Sources/SuiteUI/CanvasMarks+Anchor.swift",
+    "Sources/SuiteUI/AnchorRows.swift",
+    "Sources/SuiteUI/Gallery/GalleryAnchor.swift",
+    "Sources/SuiteUI/SuiteGallery.swift",
+    "Tests/SuiteUITests/AnchorRowsTests.swift",
+    "UITests/SuiteJourneyTests+Anchor.swift",
+    "Tests/AppSnapshotTests/RenderBudgetAnchorTests.swift",
+    "Tests/HaloModelTests/HaloPlacementTests.swift",
+    "UITests/HaloJourneyTests+Anchor.swift",
+    "Tests/RealJobs/suite/spin-in-place/spin-in-place.jobs.json",
+    "Sources/HaloModel/HaloPlacement+Kernel.swift",
+    "Sources/HaloModel/Live/HaloKeyRules.swift",
+    "Sources/HaloApp/HaloWindow+Viewer.swift",
+    "Sources/HaloApp/HaloInspector+Anchor.swift",
+    "Tests/mutations/HaloModel.HaloPlacement+Kernel.json",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/command-ids/halo.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/halo.list-commands.json",
+    "Tests/FlareModelTests/FlareAnchorParentTests.swift",
+    "Sources/FlareModel/FlarePlacement+Kernel.swift",
+    "Sources/FlareModel/FlareLayers+Kernel.swift",
+    "Tests/mutations/FlareModel.FlarePlacement+Kernel.json",
+    "Sources/FlareModel/FlareCommandCatalog.swift",
+    "Tests/command-ids/flare.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json",
+    "Sources/FlareApp/FlareInspectorGeometry.swift",
+    "Sources/FlareApp/FlareStage+Anchor.swift",
+    "Sources/FlareApp/FlareCommands.swift",
+    "Tests/command-path-baseline/flare.txt",
+    "UITests/FlareJourneyTests+Inspector.swift",
+    "Tests/AppSnapshotTests/RenderBudgetFlareTests.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-transform.json",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-layers.json",
+    "docs/blueprints/suiteui/features/anchor-parenting.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "AN-a",
+      "behavior": "The kernel declares Placement with its anchor, set-anchor that keeps place, and the three anchor and parent command specs as stubs, with their tests written and disabled.",
+      "tasks": [
+        "AN-1",
+        "AN-2"
+      ],
+      "journeys": [
+        "MJ-AN"
+      ],
+      "owned": [
+        "Sources/SuiteKernel/Transform/Placement.swift",
+        "Sources/SuiteKernel/Transform/AnchorCommands.swift",
+        "Tests/SuiteKernelTests/PlacementTests.swift",
+        "Tests/SuiteKernelTests/AnchorCommandsTests.swift"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "AN-m",
+      "behavior": "A layer turns and scales about its anchor, moving the anchor keeps the layer where it is on screen, and parenting or clearing a parent keeps the child in place through LayerFollow.",
+      "tasks": [
+        "AN-3",
+        "AN-4"
+      ],
+      "journeys": [
+        "MJ-AN"
+      ],
+      "owned": [
+        "Sources/SuiteKernel/Transform/Placement.swift",
+        "Tests/SuiteKernelTests/PlacementTests.swift",
+        "Tests/mutations/SuiteKernel.Placement.json",
+        "Sources/SuiteKernel/Transform/AnchorCommands.swift",
+        "Tests/SuiteKernelTests/AnchorCommandsTests.swift",
+        "Tests/mutations/SuiteKernel.AnchorCommands.json"
+      ],
+      "waits": {
+        "AN-a": [
+          "AN-3",
+          "AN-4"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AN-u",
+      "behavior": "SuiteUI draws the anchor mark on the canvas and drags it as one command, and the inspector shows anchor rows with a nine-point picker and a Parent menu, reachable from the gallery on the fakes.",
+      "tasks": [
+        "AN-5",
+        "AN-6"
+      ],
+      "journeys": [
+        "SJ-AN"
+      ],
+      "owned": [
+        "Sources/SuiteUI/CanvasMarks+Anchor.swift",
+        "Sources/SuiteUI/AnchorRows.swift",
+        "Sources/SuiteUI/Gallery/GalleryAnchor.swift",
+        "Sources/SuiteUI/SuiteGallery.swift",
+        "Tests/SuiteUITests/AnchorRowsTests.swift",
+        "UITests/SuiteJourneyTests+Anchor.swift",
+        "Tests/AppSnapshotTests/RenderBudgetAnchorTests.swift"
+      ],
+      "waits": {
+        "AN-a": [
+          "AN-5"
+        ],
+        "orientation-crop:OC-u": [
+          "AN-5"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AN-halo",
+      "behavior": "Halo's layers place through the kernel's Placement with its files and renders unchanged, the anchor can be dragged in the viewer and set from the nine-point picker without the layer moving, and Halo's parent command is the kernel's.",
+      "tasks": [
+        "AN-7",
+        "AN-8"
+      ],
+      "journeys": [
+        "MJ-AN-halo",
+        "HJ-AN"
+      ],
+      "owned": [
+        "Tests/HaloModelTests/HaloPlacementTests.swift",
+        "UITests/HaloJourneyTests+Anchor.swift",
+        "Tests/RealJobs/suite/spin-in-place/spin-in-place.jobs.json",
+        "Sources/HaloModel/HaloPlacement+Kernel.swift",
+        "Sources/HaloModel/Live/HaloKeyRules.swift",
+        "Sources/HaloApp/HaloWindow+Viewer.swift",
+        "Sources/HaloApp/HaloInspector+Anchor.swift",
+        "Tests/mutations/HaloModel.HaloPlacement+Kernel.json",
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/command-ids/halo.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/halo.list-commands.json"
+      ],
+      "waits": {
+        "AN-a": [
+          "AN-7"
+        ],
+        "AN-m": [
+          "AN-8"
+        ],
+        "AN-u": [
+          "AN-8"
+        ],
+        "adopt-kernel-easing:AE-halo": [
+          "AN-8"
+        ],
+        "adopt-kernel-layers:AL-halo": [
+          "AN-8"
+        ],
+        "document-setup:DS-halo": [
+          "AN-8"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AN-flare-m",
+      "behavior": "A Flare layer carries an anchor and a parent from the bumped core, new shapes get their anchor at the shape's centre, set-anchor and set-parent keep layers in place, and Lottie writes and reads a and parent.",
+      "tasks": [
+        "AN-9",
+        "AN-10"
+      ],
+      "journeys": [
+        "MJ-AN-flare"
+      ],
+      "owned": [
+        "Tests/FlareModelTests/FlareAnchorParentTests.swift",
+        "Sources/FlareModel/FlarePlacement+Kernel.swift",
+        "Sources/FlareModel/FlareLayers+Kernel.swift",
+        "Tests/mutations/FlareModel.FlarePlacement+Kernel.json",
+        "Sources/FlareModel/FlareCommandCatalog.swift",
+        "Tests/command-ids/flare.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json"
+      ],
+      "waits": {
+        "AN-a": [
+          "AN-9"
+        ],
+        "AN-m": [
+          "AN-10"
+        ],
+        "adopt-kernel-layers:AL-flare": [
+          "AN-10"
+        ],
+        "document-setup:DS-flare": [
+          "AN-10"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AN-flare-u",
+      "behavior": "Flare's stage shows and drags the anchor, its inspector has the anchor rows and Parent menu, and Layer > New Null adds a null to parent to.",
+      "tasks": [
+        "AN-11",
+        "AN-12"
+      ],
+      "journeys": [
+        "FJ-AN"
+      ],
+      "owned": [
+        "Sources/FlareApp/FlareInspectorGeometry.swift",
+        "Sources/FlareApp/FlareStage+Anchor.swift",
+        "Sources/FlareApp/FlareCommands.swift",
+        "Tests/command-path-baseline/flare.txt",
+        "UITests/FlareJourneyTests+Inspector.swift",
+        "Tests/AppSnapshotTests/RenderBudgetFlareTests.swift"
+      ],
+      "waits": {
+        "AN-u": [
+          "AN-11"
+        ],
+        "AN-flare-m": [
+          "AN-11"
+        ],
+        "adopt-kernel-autosave:AK-z": [
+          "AN-11"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AN-z",
+      "behavior": "The kernel's C4 parts name Placement and the parent commands, RJ-X75 and RJ-F14 pass, and the feature is built.",
+      "tasks": [
+        "AN-13",
+        "AN-14"
+      ],
+      "journeys": [
+        "MJ-AN",
+        "HJ-AN",
+        "FJ-AN"
+      ],
+      "owned": [
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-transform.json",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-layers.json",
+        "docs/blueprints/suiteui/features/anchor-parenting.wave.json"
+      ],
+      "waits": {
+        "AN-halo": [
+          "AN-13"
+        ],
+        "AN-flare-u": [
+          "AN-13"
+        ],
+        "transform-tools:TT-z": [
+          "AN-13"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

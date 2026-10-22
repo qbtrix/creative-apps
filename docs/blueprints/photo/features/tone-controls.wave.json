@@ -6,7 +6,7 @@
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "photo/tone-controls (adopter of S1); RJ-P12, RJ-P13, RJ-P14",
-  "waits_on": "suiteui tone-controls's TC-a (cross-line; PT-3 needs TC-5, PT-4 TC-6, PT-5 TC-3); photo #3144 (PhotoLiveTone, the core pin); gradient-fill's PG-m (the catalog files) and PG-z (photo.md), slice waits",
+  "waits_on": "suiteui tone-controls's TC-a (cross-line; PT-3 needs TC-5, PT-4 TC-6, PT-5 TC-3); suiteui suite-imaging's IM-photo before PT-3 (cross-line; re-cut 2026-10-20: #3144's PhotoLiveTone became SuiteImaging's LiveToneSurface); gradient-fill's PG-m (the catalog files) and PG-z (photo.md), slice waits",
   "depends": [
     "photo-seams",
     "photo-adjustment-layers"
@@ -20,9 +20,9 @@
     "Sources/PhotoModel/PhotoTone+Kernel.swift",
     "Tests/PhotoModelTests/PhotoToneTests.swift",
     "Sources/PhotoApp/AdjustmentsInspector.swift",
-    "Sources/PhotoModel/PhotoLiveTone.swift",
+    "Sources/PhotoModel/PhotoAdjust+Imaging.swift",
     "Sources/PhotoModel/PhotoRender.swift",
-    "Tests/mutations/PhotoModel.PhotoLiveTone.json",
+    "Tests/mutations/PhotoModel.PhotoAdjust+Imaging.json",
     "Tests/mutations/PhotoModel.PhotoRender.json",
     "Sources/PhotoModel/PhotoCommandCatalog.swift",
     "Tests/command-ids/photo.txt",
@@ -113,10 +113,10 @@
       },
       "ui": false,
       "owned": [
-        "Sources/PhotoModel/PhotoLiveTone.swift",
+        "Sources/PhotoModel/PhotoAdjust+Imaging.swift",
         "Sources/PhotoModel/PhotoRender.swift",
         "Tests/PhotoModelTests/PhotoToneTests.swift",
-        "Tests/mutations/PhotoModel.PhotoLiveTone.json",
+        "Tests/mutations/PhotoModel.PhotoAdjust+Imaging.json",
         "Tests/mutations/PhotoModel.PhotoRender.json",
         "Sources/PhotoModel/PhotoTone+Kernel.swift",
         "Sources/PhotoModel/PhotoCommandCatalog.swift",

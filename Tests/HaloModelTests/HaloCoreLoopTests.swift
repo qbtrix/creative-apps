@@ -3,7 +3,7 @@
 // composition, a solid, a Position X key, a viewer drag that keys frame 24,
 // Ease Out on the first key, Play, a text layer, Undo and Redo, then the file
 // round trip. `walkRenders` adds File > Render… through the kernel adapter
-// (HaloRenderJob+Kernel) and waits on CL-6. The live set has no rasterizer
+// (HaloRenderJob+Kernel), on since CL-6. The live set has no rasterizer
 // until HaloApp sets one, so `services.text` is the fake's. Linux and macOS.
 @testable import HaloModel
 import Testing
@@ -105,7 +105,7 @@ import Testing
         try Self.expectRoundTrip(project)
     }
 
-    @Test(.disabled("waits on CL-6")) func walkRenders() throws {
+    @Test func walkRenders() throws {
         var project = try Self.walked()
         let begun = project.beginRender(HaloRenderSettings(format: .pngSequence, halfSize: true))
         #expect(begun)

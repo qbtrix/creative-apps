@@ -1,11 +1,13 @@
 // HaloLayer.swift: one layer in a Halo composition: what kind it is, the
 // frames it is visible for, its color, opacity, blend mode, the rectangle a
 // solid fills, its keyframe tracks, the layer it follows, a text layer's
-// words and a solid's or shape's gradient (gradient-fill HG-1). Codable; decoding goes through the clamping init. Linux-safe: no UI imports. Layers live in `HaloComposition.layers`,
+// words, a solid's or shape's gradient (gradient-fill HG-1), a shape
+// layer's ShapeSpec (shape-tools HS-1) and its stroke (stroke-style HK-1). Codable; decoding goes through the clamping init. Linux-safe: no UI imports. Layers live in `HaloComposition.layers`,
 // top first; HaloProject adds and selects them. `blendMode` is CoreRaster's
 // BlendMode, never a mirror of it.
 import CoreRaster
 import FlareCore
+import SuiteKernel
 
 /// What a layer draws: a solid fill, a shape, text, or nothing (a null that
 /// other layers can follow).
@@ -90,9 +92,15 @@ public struct HaloLayer: Identifiable, Codable, Sendable, Hashable {
     /// HG-1: the layer's gradient, its points in a unit box (0...1 across the
     /// layer's bounds); nil fills `color`. Coded under "gradient" only when set.
     public var gradient: Fill?
+    /// HS-1: what a shape layer draws in its box (a star's points, a
+    /// polygon's sides); nil draws the ellipse. Coded under "shape" only when set.
+    public var shape: ShapeSpec?
+    /// HK-1: a shape layer's outline, the kernel's VectorStroke; nil draws
+    /// none. Coded under "stroke" only when set.
+    public var stroke: VectorStroke?
 
     enum CodingKeys: String, CodingKey {
-        case id, name, kind, inFrame, outFrame, color, storedOpacity = "opacity", blendMode, rect, tracks, parentID, text, gradient
+        case id, name, kind, inFrame, outFrame, color, storedOpacity = "opacity", blendMode, rect, tracks, parentID, text, gradient, shape, stroke
     }
 
     /// Decodes through the clamping init, so a file can't carry an opacity
@@ -110,6 +118,8 @@ public struct HaloLayer: Identifiable, Codable, Sendable, Hashable {
         parentID = try c.decodeIfPresent(String.self, forKey: .parentID)
         text = try c.decodeIfPresent(HaloTextContent.self, forKey: .text)
         gradient = try c.decodeIfPresent(Fill.self, forKey: .gradient)
+        shape = try c.decodeIfPresent(ShapeSpec.self, forKey: .shape)
+        stroke = try c.decodeIfPresent(VectorStroke.self, forKey: .stroke)
     }
 
     /// Clamps `opacity` to 0...1; a NaN opacity falls back to 1, the default.
@@ -143,6 +153,8 @@ public struct HaloLayer: Identifiable, Codable, Sendable, Hashable {
         copy.parentID = parentID  // W0: duplicateComposition remaps it to the copy's ids
         copy.text = text
         copy.gradient = gradient
+        copy.shape = shape
+        copy.stroke = stroke
         return copy
     }
 }

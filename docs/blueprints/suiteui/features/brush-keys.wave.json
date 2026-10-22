@@ -1,0 +1,287 @@
+{
+  "title": "Brush and opacity keys: [ and ] step the brush size, Shift-[ and Shift-] its hardness, number keys set brush or layer opacity, on one SuiteKernel rule and one SuiteUI key route that never fires while a field has focus; Photo, Design and Flare adopt",
+  "wave": "XK4",
+  "order": 70,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 C12 (Photo row 11); feature map suiteui/brush-keys (new); real job RJ-X76 (new)",
+  "waits_on": "adopt-kernel-brush AB-photo and adopt-suiteui-chrome AC-colour (Photo's ToolOptions.swift and PhotoToolOptions.swift, BK-photo); the Photo, Design and Flare catalog chains (cross-line)",
+  "depends": [
+    "editor-kernel",
+    "command-catalog",
+    "adopt-command-catalog"
+  ],
+  "longest_chain": "7 (BK-1 → BK-2 → BK-3 → BK-4 → BK-8 → BK-13 → BK-14)",
+  "journeys": [
+    "SuiteBrushKeysJourneyTests.testKeysStepSizeAndOpacity",
+    "PhotoBrushKeysJourneyTests.testBracketsAndDigits",
+    "DesignStyleJourneyTests.testDigitsSetOpacity",
+    "FlareInspectorJourneys.testDigitsSetOpacity"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Stroke/BrushKeys.swift",
+    "Sources/SuiteKernel/Stroke/BrushKeyCommands.swift",
+    "Tests/SuiteKernelTests/BrushKeysTests.swift",
+    "Tests/mutations/SuiteKernel.BrushKeys.json",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-stroke.json",
+    "Sources/SuiteUI/ToolKeys.swift",
+    "Sources/SuiteUI/BrushKeyReadout.swift",
+    "Sources/SuiteUI/Gallery/GalleryBrushKeys.swift",
+    "Sources/SuiteUI/SuiteGallery.swift",
+    "Tests/SuiteUITests/BrushKeyRouteTests.swift",
+    "UITests/SuiteJourneyTests+BrushKeys.swift",
+    "Tests/AppSnapshotTests/RenderBudgetBrushKeysTests.swift",
+    "Tests/PhotoModelTests/PhotoBrushKeysTests.swift",
+    "UITests/PhotoJourneyTests+BrushKeys.swift",
+    "Tests/RealJobs/photo/brush-keys/brush-keys.jobs.json",
+    "Sources/PhotoModel/PhotoBrushKeys+Kernel.swift",
+    "Sources/PhotoApp/PhotoToolOptions.swift",
+    "Sources/PhotoApp/PhotoCommands+Edit.swift",
+    "Tests/mutations/PhotoModel.PhotoBrushKeys+Kernel.json",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/command-ids/photo.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/photo.list-commands.json",
+    "Tests/DesignModelTests/DesignOpacityKeysTests.swift",
+    "UITests/DesignJourneyTests+Style.swift",
+    "Sources/DesignModel/DesignOpacityKeys+Kernel.swift",
+    "Sources/DesignApp/DesignObjectMenu.swift",
+    "Sources/DesignApp/DesignCanvas.swift",
+    "Tests/mutations/DesignModel.DesignOpacityKeys+Kernel.json",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Tests/command-ids/design.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/design.list-commands.json",
+    "Tests/FlareModelTests/FlareOpacityKeysTests.swift",
+    "UITests/FlareJourneyTests+Inspector.swift",
+    "Sources/FlareModel/FlareOpacityKeys+Kernel.swift",
+    "Sources/FlareApp/FlareCommands.swift",
+    "Sources/FlareApp/FlareStage+Keys.swift",
+    "Tests/mutations/FlareModel.FlareOpacityKeys+Kernel.json",
+    "Sources/FlareModel/FlareCommandCatalog.swift",
+    "Tests/command-ids/flare.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json",
+    "docs/blueprints/suiteui/features/brush-keys.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "BK-a",
+      "behavior": "The kernel declares the key rule (size steps, hardness steps, the digit buffer) and the six brush and opacity specs as stubs, with their tests written and disabled.",
+      "tasks": [
+        "BK-1",
+        "BK-2"
+      ],
+      "journeys": [
+        "MJ-BK"
+      ],
+      "owned": [
+        "Sources/SuiteKernel/Stroke/BrushKeys.swift",
+        "Sources/SuiteKernel/Stroke/BrushKeyCommands.swift",
+        "Tests/SuiteKernelTests/BrushKeysTests.swift"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "BK-m",
+      "behavior": "Size steps grow with the size and stay in BrushSettings' range, hardness moves in quarters, a digit sets tens and two quick digits set an exact percent, and the right target (brush or layers) gets each key.",
+      "tasks": [
+        "BK-3",
+        "BK-4"
+      ],
+      "journeys": [
+        "MJ-BK"
+      ],
+      "owned": [
+        "Sources/SuiteKernel/Stroke/BrushKeys.swift",
+        "Sources/SuiteKernel/Stroke/BrushKeyCommands.swift",
+        "Tests/SuiteKernelTests/BrushKeysTests.swift",
+        "Tests/mutations/SuiteKernel.BrushKeys.json",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-stroke.json"
+      ],
+      "waits": {
+        "BK-a": [
+          "BK-3"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "BK-u",
+      "behavior": "SuiteUI routes the bracket and digit keys from any canvas to the kernel's rule, never while a text field or numeric input has focus, and shows the new size or opacity in a brief readout, reachable from the gallery on the fakes.",
+      "tasks": [
+        "BK-5",
+        "BK-6"
+      ],
+      "journeys": [
+        "SJ-BK"
+      ],
+      "owned": [
+        "Sources/SuiteUI/ToolKeys.swift",
+        "Sources/SuiteUI/BrushKeyReadout.swift",
+        "Sources/SuiteUI/Gallery/GalleryBrushKeys.swift",
+        "Sources/SuiteUI/SuiteGallery.swift",
+        "Tests/SuiteUITests/BrushKeyRouteTests.swift",
+        "UITests/SuiteJourneyTests+BrushKeys.swift",
+        "Tests/AppSnapshotTests/RenderBudgetBrushKeysTests.swift"
+      ],
+      "waits": {
+        "BK-a": [
+          "BK-5"
+        ],
+        "anchor-parenting:AN-u": [
+          "BK-5"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "BK-photo",
+      "behavior": "In Photo the bracket keys size and harden the active brush, eraser, clone or heal tool, the digits set its opacity (or the selected layers' with the Move tool), and Edit > Brush lists the same commands.",
+      "tasks": [
+        "BK-7",
+        "BK-8"
+      ],
+      "journeys": [
+        "MJ-BK-photo",
+        "PJ-BK"
+      ],
+      "owned": [
+        "Tests/PhotoModelTests/PhotoBrushKeysTests.swift",
+        "UITests/PhotoJourneyTests+BrushKeys.swift",
+        "Tests/RealJobs/photo/brush-keys/brush-keys.jobs.json",
+        "Sources/PhotoModel/PhotoBrushKeys+Kernel.swift",
+        "Sources/PhotoApp/PhotoToolOptions.swift",
+        "Sources/PhotoApp/PhotoCommands+Edit.swift",
+        "Tests/mutations/PhotoModel.PhotoBrushKeys+Kernel.json",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/photo.list-commands.json"
+      ],
+      "waits": {
+        "BK-m": [
+          "BK-8"
+        ],
+        "BK-u": [
+          "BK-8"
+        ],
+        "BK-a": [
+          "BK-7"
+        ],
+        "adopt-kernel-brush:AB-photo": [
+          "BK-8"
+        ],
+        "adopt-suiteui-chrome:AC-colour": [
+          "BK-8"
+        ],
+        "area-selection:AR-photo-u": [
+          "BK-8"
+        ],
+        "orientation-crop:OC-photo-m": [
+          "BK-8"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "BK-design",
+      "behavior": "In Design the number keys set the selected layers' opacity as one undo step, and Object > Opacity lists the same values.",
+      "tasks": [
+        "BK-9",
+        "BK-10"
+      ],
+      "journeys": [
+        "DJ-BK"
+      ],
+      "owned": [
+        "Tests/DesignModelTests/DesignOpacityKeysTests.swift",
+        "UITests/DesignJourneyTests+Style.swift",
+        "Sources/DesignModel/DesignOpacityKeys+Kernel.swift",
+        "Sources/DesignApp/DesignObjectMenu.swift",
+        "Sources/DesignApp/DesignCanvas.swift",
+        "Tests/mutations/DesignModel.DesignOpacityKeys+Kernel.json",
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Tests/command-ids/design.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/design.list-commands.json"
+      ],
+      "waits": {
+        "BK-m": [
+          "BK-10"
+        ],
+        "BK-u": [
+          "BK-10"
+        ],
+        "adopt-suiteui-chrome:AC-tools": [
+          "BK-10"
+        ],
+        "document-setup:DS-design": [
+          "BK-10"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "BK-flare",
+      "behavior": "In Flare the number keys set the selected layers' opacity, keyed at the playhead when auto-key is on, and Object > Opacity lists the same values.",
+      "tasks": [
+        "BK-11",
+        "BK-12"
+      ],
+      "journeys": [
+        "FJ-BK"
+      ],
+      "owned": [
+        "Tests/FlareModelTests/FlareOpacityKeysTests.swift",
+        "UITests/FlareJourneyTests+Inspector.swift",
+        "Sources/FlareModel/FlareOpacityKeys+Kernel.swift",
+        "Sources/FlareApp/FlareCommands.swift",
+        "Sources/FlareApp/FlareStage+Keys.swift",
+        "Tests/mutations/FlareModel.FlareOpacityKeys+Kernel.json",
+        "Sources/FlareModel/FlareCommandCatalog.swift",
+        "Tests/command-ids/flare.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json"
+      ],
+      "waits": {
+        "BK-m": [
+          "BK-12"
+        ],
+        "BK-u": [
+          "BK-12"
+        ],
+        "anchor-parenting:AN-flare-u": [
+          "BK-12"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "BK-z",
+      "behavior": "RJ-X76 passes and the feature is built.",
+      "tasks": [
+        "BK-13",
+        "BK-14"
+      ],
+      "journeys": [
+        "MJ-BK",
+        "PJ-BK",
+        "DJ-BK",
+        "FJ-BK"
+      ],
+      "owned": [
+        "Tests/RealJobs/photo/brush-keys/brush-keys.jobs.json",
+        "docs/blueprints/suiteui/features/brush-keys.wave.json"
+      ],
+      "waits": {
+        "BK-photo": [
+          "BK-13"
+        ],
+        "BK-design": [
+          "BK-13"
+        ],
+        "BK-flare": [
+          "BK-13"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

@@ -1,7 +1,9 @@
 // DesignExportSheet+Kernel.swift: what File > Export…'s sheet reads (design-export DE-6):
 // the scope chips' titles, the options it opens with (Selection falls back to Frame when nothing
-// exportable is selected), a whole 1x to 3x scale (PNG only; `scaleHelp` says why it's off), the run's options until idle, and the file
-// list: the plan's files, then (Selection) each hidden selected layer, skipped. Linux-safe.
+// exportable is selected), a whole 1x to 3x scale (PNG only; `scaleHelp` says why it's off), the run's
+// options until idle, and the file list: the plan's files, then (Selection) each hidden selected
+// layer, skipped. The fake run (DE-7): its files, its steps (one fails on `-DesignExportFail`) and
+// the finished summary. Linux-safe.
 import SuiteKernel
 
 /// One line of the sheet's file list: a planned file, or a selected layer the run skips.
@@ -37,9 +39,9 @@ extension DesignExportOptions {
         return options
     }
 
-    /// Why the Scale chips are off: SVG and PDF are vectors, written at 1x whatever the scale.
+    /// Why the Scale chips are off: SVG and PDF are vectors, written at 1x whatever the scale (PNG and JPEG take one).
     public var scaleHelp: String? {
-        format == .png ? nil : "SVG and PDF are vectors, so they don't take a scale."
+        [.png, .jpeg].contains(format) ? nil : "SVG and PDF are vectors, so they don't take a scale."
     }
 }
 
@@ -51,6 +53,20 @@ extension ExportRun where Options == DesignExportOptions {
         case .editing(let options), .running(let options, _, _), .finished(let options, _), .failed(let options, _): options
         }
     }
+
+    /// The run as the sheet shows it: a finished run's files as `exportSummary` after the sheet's "Exported ".
+    public var summarized: DesignExportRun {
+        guard case .finished(let options, let files) = self else { return self }
+        return .finished(options, [String(DesignWorkspace.exportSummary(files).dropFirst("Exported ".count))])
+    }
+}
+
+/// Why a fake run stopped, in words: a refused plan's help or a file that couldn't be written.
+public struct DesignExportFailure: Error, Hashable, Sendable, CustomStringConvertible {
+    public let description: String
+    public init(_ description: String) { self.description = description }
+    /// The step `-DesignExportFail <name>` fails.
+    public static func unwritten(_ fileName: String) -> Self { Self("\(fileName) couldn't be written.") }
 }
 
 extension DesignWorkspace {
@@ -68,8 +84,9 @@ extension DesignWorkspace {
         guard let plan = try? exportPlan(options, existing: []) else { return [] }
         let files = plan.map { item in
             let size = "\(Self.whole(item.width)) × \(Self.whole(item.height))"
-            let text = options.format == .png
-                ? "\(item.fileName) \(size), \(exportFactor(options.format, options.scale))x, \(item.pixelWidth) × \(item.pixelHeight) px"
+            let factor = options.size == .scale(Double(options.scale)) ? "\(exportFactor(options.format, options.scale))x, " : ""
+            let text = [.png, .jpeg].contains(options.format)
+                ? "\(item.fileName) \(size), \(factor)\(item.pixelWidth) × \(item.pixelHeight) px"
                 : "\(item.fileName) \(size) pt"
             return DesignExportRow(id: item.nodeID, text: text, skipped: nil)
         }
@@ -78,6 +95,24 @@ extension DesignWorkspace {
             page.nodes.node(id).map { DesignExportRow(id: id, text: $0.name, skipped: "Hidden layers aren't exported") }
         }
         return files + hidden
+    }
+
+    /// The fake run's files for `options` (DE-7): the plan's names, or its refusal's help.
+    public func exportFiles(_ options: DesignExportOptions) -> Result<[String], DesignExportFailure> {
+        do { return .success(try exportPlan(options, existing: []).map(\.fileName)) } catch {
+            return .failure(DesignExportFailure(error.help))
+        }
+    }
+
+    /// One fake step: writes nothing, and fails only for the file `-DesignExportFail` names.
+    public static func fakeWrite(_ fileName: String, failing: String?) throws(DesignExportFailure) {
+        if fileName == failing { throw .unwritten(fileName) }
+    }
+
+    /// The finished note: "Exported 1 file: Desktop.png.", "Exported 3 files.".
+    public static func exportSummary(_ names: [String]) -> String {
+        if let only = names.first, names.count == 1 { return "Exported 1 file: \(only)." }
+        return names.isEmpty ? "Exported nothing." : "Exported \(names.count) files."
     }
 
     /// A side in whole points; a non-finite one reads 0.

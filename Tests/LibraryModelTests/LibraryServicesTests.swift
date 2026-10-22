@@ -63,8 +63,8 @@ private func liveServices() -> LibraryServices {
 @Test func liveListsAReasonForEveryStub() {
     let services = liveServices()
     #expect(!services.isPreview)
-    // Only sidecars wait: the window passes no writer until MD-18.
-    #expect(services.unavailable == ["sidecars": UnconnectedSidecars.unavailable])
+    // Sidecars wait (the window passes no writer until MD-18), and the Trash until cull-finish DR-8.
+    #expect(services.unavailable == ["sidecars": UnconnectedSidecars.unavailable, "trash": LiveTrash.unavailable ?? ""])
     #expect(LiveCrop.unavailable == nil)
     #expect(LiveImporter.unavailable == nil)
     #expect(LiveThumbnails.unavailable == nil)
@@ -110,7 +110,7 @@ private func liveServices() -> LibraryServices {
     #expect(abs(crop.rect.width - 4000.0 / 6000.0) < 1e-9)
     #expect(DevelopSettings.neutral.setting(.exposure, to: .nan).isNeutral)
     #expect(DevelopSettings.neutral.setting(.contrast, to: 500).value(.contrast) == 100)
-    #expect(HistogramBins.empty.heights.red.allSatisfy { $0 == 0 })
+    #expect(HistogramBins.empty.tone.heights.isEmpty)
     let loupe = try await services.loupe.render(photo, settings: .neutral, longSide: 2048, quality: .full)
     #expect(loupe.image.size.longSide == 2048)
     #expect(PhotoFileKind.kind(forFileName: "a.JPG") == .jpeg && PhotoFileKind.kind(forFileName: ".heic") == nil)
@@ -122,7 +122,7 @@ private func liveServices() -> LibraryServices {
     #expect(services.unavailable["coding"] == nil && services.unavailable["loupe"] == nil)
     #expect(services.unavailable["thumbnails"] == nil)
     #expect(services.unavailable["develop"] == nil && services.unavailable["exporter"] == nil)
-    #expect(services.unavailable.keys.sorted() == ["sidecars"])
+    #expect(services.unavailable.keys.sorted() == ["sidecars", "trash"])
     // The importer is live: the fake decoder's empty folder has no photos.
     await #expect(throws: LibraryError.noPhotos("f")) {
         try await services.importer.importFolder("/f", known: [], progress: { _ in }, added: { _ in })

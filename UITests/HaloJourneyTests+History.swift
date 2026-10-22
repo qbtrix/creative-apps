@@ -233,3 +233,129 @@ final class HaloHistoryJourneyTests: XCTestCase {
         return condition()
     }
 }
+
+/// J-HA (autosave-history, HA-2 written, HA-7 turned on): the History panel
+/// from the transport's History button (`halo.history.show`) jumps back
+/// through key edits, and a force-quit's recovery copy comes back. `keyed` is
+/// saved as title.halo with autosave off, then reopened; Ball
+/// (`comp-1-layer-2`, keyed on x at 0 and 24) gets ten typed Position X
+/// values at frames 0 to 9, ten "Change Position X" steps under "Open". The
+/// panel is SuiteUI's (`suite.history`, rows `suite.history.row.<n>`, the
+/// current one selected); a jump shows on the timeline as Ball's keys
+/// (`halo.timeline.key.comp-1-layer-2.<frame>`). Down and Return, then Up and
+/// Return, jump from the keyboard. Step 3: the window autosaves to
+/// `<support>/Halo/Recovery/` (HaloRecoveryStore, HA-7b) as `halo.main.halo`;
+/// the relaunch offers it under the file's name, "title", and Restore puts it
+/// in the window through `HaloProject.restoreRecovered`. Shots `halo-history-panel`,
+/// `-jumped`, `-keyboard`, `halo-recovery-offer`, `-restored`.
+extension HaloHistoryJourneyTests {
+    private static let ball = "comp-1-layer-2"
+
+    @MainActor func testJumpAndRecover() throws {
+        let folder = FileManager.default.temporaryDirectory.appending(path: "halo-jump-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        addTeardownBlock { try? FileManager.default.removeItem(at: folder) }
+        let title = folder.appending(path: "title.halo"), support = folder.appending(path: "support")
+        let size = ["-HaloWindowSize", "1000x640"], store = ["-SuiteSupportDir", support.path]
+
+        // 1. Save keyed as title.halo, reopen it, make 10 key edits, click History: "Open" and 10 steps.
+        var halo = Journey("Halo", self, arguments: size + ["-HaloSample", "keyed", "-HaloSaveTo", title.path])
+        XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        halo.press(character: "s", .command)
+        XCTAssert(waitFor { FileManager.default.fileExists(atPath: title.path) }, "⌘S wrote no title.halo")
+        halo.app.terminate()
+        halo = Journey("Halo", self, arguments: size + store + ["-HaloOpenFile", title.path])
+        XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        let row = halo.element("halo.layer.row.\(Self.ball)")
+        XCTAssert(row.waitForExistence(timeout: 10), "title.halo shows no Ball row")
+        row.click()
+        let track = halo.trackName("Ball")
+        XCTAssert(track.waitForExistence(timeout: 10), "no Ball track title in the timeline")
+        track.click()
+        halo.press(.home)
+        for frame in 0..<10 {
+            typeX(100 + frame * 10, halo)
+            track.click()
+            halo.press(.rightArrow)
+        }
+        expectUndo("Undo Change Position X", halo)
+        halo.element("halo.history.show").click()
+        XCTAssert(halo.element("suite.history").waitForExistence(timeout: 5), "the History button showed no panel")
+        XCTAssert(halo.element("suite.history.row.0").label.hasPrefix("Open"), "the panel's first row isn't Open")
+        let ten = halo.element("suite.history.row.10")
+        XCTAssert(ten.waitForExistence(timeout: 5), "the panel lists fewer than 10 steps")
+        XCTAssertFalse(halo.element("suite.history.row.11").exists, "the panel lists more than 10 steps")
+        XCTAssert(ten.isSelected, "the last step isn't current")
+        halo.shot("history-panel")
+
+        // 2. Click step 4: Ball keeps its keys at 0 to 3 only, the later steps stay listed, the project reads edited.
+        let four = halo.element("suite.history.row.4")
+        four.click()
+        XCTAssert(waitFor { four.isSelected }, "step 4 isn't current after the click")
+        expectKeys(through: 3, halo)
+        XCTAssert(ten.exists, "the jump dropped the later steps")
+        XCTAssert(subtitle("Edited", halo).waitForExistence(timeout: 5), "the jumped project isn't marked edited")
+        halo.shot("history-panel-jumped")
+
+        // Keyboard parity: the click focused the panel; Down and Return jump to step 5, Up and Return back to 4.
+        halo.press(.downArrow)
+        halo.press(.return)
+        let five = halo.element("suite.history.row.5")
+        XCTAssert(waitFor { five.isSelected }, "Down and Return didn't jump to step 5")
+        expectKeys(through: 4, halo)
+        halo.press(.upArrow)
+        halo.press(.return)
+        XCTAssert(waitFor { four.isSelected }, "Up and Return didn't jump back to step 4")
+        expectKeys(through: 3, halo)
+        halo.shot("history-panel-keyboard")
+
+        // 3. Quit unsaved once autosaved, relaunch: the offer names title; Restore shows the 4-step project, edited.
+        let recovery = support.appending(path: "Halo/Recovery")
+        let autosaved = waitFor(seconds: 20) {
+            ((try? FileManager.default.contentsOfDirectory(atPath: recovery.path)) ?? []).contains { $0.hasSuffix(".halo") }
+        }
+        XCTAssert(autosaved, "no copy autosaved under \(recovery.path)")
+        halo.app.terminate()
+        halo = Journey("Halo", self, arguments: size + store)
+        let offer = "Restore the autosaved changes to \u{201C}title\u{201D}?"
+        let prompt = halo.app.staticTexts.matching(NSPredicate(format: "label == %@ OR value == %@", offer, offer)).firstMatch
+        XCTAssert(prompt.waitForExistence(timeout: 30), "the relaunch didn't offer \(offer)")
+        halo.shot("recovery-offer")
+        halo.app.buttons["suite.recovery.restore"].firstMatch.click()
+        XCTAssert(subtitle("Edited", halo).waitForExistence(timeout: 10), "the restored project isn't marked edited")
+        expectKeys(through: 3, halo)
+        halo.shot("recovery-restored")
+    }
+
+    /// Types `value` into the selected layer's Position X row (`halo.inspector.row.x`), as H-J23 types.
+    @MainActor private func typeX(_ value: Int, _ halo: Journey) {
+        let bar = halo.element("halo.inspector.row.x")
+        XCTAssert(bar.waitForExistence(timeout: 5), "no Position X row (halo.inspector.row.x)")
+        bar.click()
+        let field = halo.element("suite.inspector").textFields.firstMatch
+        XCTAssert(field.waitForExistence(timeout: 5), "clicking Position X opened no field")
+        halo.press(character: "a", .command)
+        field.typeText("\(value)")
+        halo.press(.return)
+        XCTAssert(waitFor { !field.exists }, "Return didn't close Position X's field")
+    }
+
+    /// Ball's x keys sit at 0 through `last` and at 24, none at `last + 1`: the project after `last + 1` edits.
+    @MainActor private func expectKeys(through last: Int, _ halo: Journey) {
+        let key = { (frame: Int) in halo.element("halo.timeline.key.\(Self.ball).\(frame)") }
+        XCTAssert(waitFor { !key(last + 1).exists }, "Ball still has a key at \(last + 1)")
+        for frame in Array(0...last) + [24] {
+            XCTAssert(key(frame).exists, "Ball has no key at \(frame)")
+        }
+    }
+
+    /// Whether `condition` holds within `seconds`.
+    @MainActor private func waitFor(seconds: Double, _ condition: () -> Bool) -> Bool {
+        let deadline = Date().addingTimeInterval(seconds)
+        while Date() < deadline {
+            if condition() { return true }
+            Thread.sleep(forTimeInterval: 0.25)
+        }
+        return condition()
+    }
+}

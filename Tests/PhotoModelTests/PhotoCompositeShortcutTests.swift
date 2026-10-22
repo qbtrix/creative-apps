@@ -53,6 +53,39 @@ import Testing
         #expect(try composited(clear, onto: below, mode: .screen, opacity: 0.6) == below)
     }
 
+    @Test func aWindowLimitsThePaintedScanToItsRows() throws {
+        var pixels = try PixelBuffer(width: size, height: size)
+        let ink = RGBA(r: 0.2, g: 0.05, b: 0.5, a: 0.7)
+        try pixels.setPixel(x: 90, y: 3, ink)
+        try pixels.setPixel(x: 40, y: 200, ink)
+        let top = PixelRect(x: 0, y: 0, width: size, height: 1)
+        #expect(try PhotoLayerComposite.paintedRect(of: pixels, in: top) == nil)
+        #expect(try PhotoLayerComposite.paintedRect(of: pixels, in: PixelRect(x: 0, y: 0, width: size, height: 10))
+                == PixelRect(x: 90, y: 3, width: 1, height: 1))
+        // A window past the tile's edge is clipped to the tile; one off it finds nothing.
+        #expect(try PhotoLayerComposite.paintedRect(of: pixels, in: PixelRect(x: -50, y: 150, width: size, height: size))
+                == PixelRect(x: 40, y: 200, width: 1, height: 1))
+        #expect(try PhotoLayerComposite.paintedRect(of: pixels, in: PixelRect(x: size, y: 0, width: 9, height: 9)) == nil)
+    }
+
+    @Test func aOneRowPieceMatchesThatRowOfTheWholeComposite() throws {
+        var pixels = try PixelBuffer(width: size, height: size)
+        for (x, y) in [(40, 30), (41, 200), (180, 31), (90, 120)] {
+            try pixels.setPixel(x: x, y: y, RGBA(r: 0.2, g: 0.05, b: 0.5, a: 0.7))
+        }
+        let whole = try reference(pixels, onto: backdrop(), mode: .multiply, opacity: 0.6, offset: (13, -21))
+        var layer = PhotoLayer(id: "top", name: "Top", opacity: 0.6, blendMode: .multiply)
+        (layer.offsetX, layer.offsetY) = (13, -21)
+        // The rows a histogram reads one at a time: painted, clear and at the layer's edge.
+        for y in [9, 10, 99, 179, 234] {
+            let below = try backdrop().cropped(x: 0, y: y, width: size, height: 1)
+            let row = try PhotoLayerComposite.composite(
+                LayerContent(layer: layer, pixels: TiledPixels(pixels)), onto: below, origin: (0, y),
+                adjusting: LiveAdjustmentLayers.make(), masking: LiveSelection.masking())
+            #expect(try row == whole.cropped(x: 0, y: y, width: size, height: 1), "row \(y)")
+        }
+    }
+
     /// One tile of mixed, partly transparent color.
     private func backdrop() throws -> PixelBuffer {
         var below = try PixelBuffer(width: size, height: size, fill: RGBA(r: 0.1, g: 0.4, b: 0.2, a: 0.8))

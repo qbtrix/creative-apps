@@ -29,6 +29,9 @@ extension HaloLayer {
         case .scaleX, .scaleY: return 1
         case .rotation: return 0
         case .opacity: return opacity
+        case .trimStart: return stroke?.trim?.start ?? 0
+        case .trimEnd: return stroke?.trim?.end ?? 1
+        case .trimOffset: return stroke?.trim?.offset ?? 0
         }
     }
 }

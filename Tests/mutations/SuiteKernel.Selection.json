@@ -19,5 +19,19 @@
     "find": "} else if canAdd(id) {",
     "replace": "} else if true {",
     "tests": "SelectionTests"
+  },
+  {
+    "label": "selectionIsLinear: contains scans the ordered list again, so a 5,000-anchor selection turns quadratic",
+    "file": "Sources/SuiteKernel/Selection/Selection.swift",
+    "find": "public func contains(_ id: ID) -> Bool { members.contains(id) }",
+    "replace": "public func contains(_ id: ID) -> Bool { ordered.contains(id) }",
+    "tests": "AnchorBudgetTests/selectionIsLinear"
+  },
+  {
+    "label": "toggle: toggling a picked id off leaves it in the membership set",
+    "file": "Sources/SuiteKernel/Selection/Selection.swift",
+    "find": "if members.remove(id) != nil {",
+    "replace": "if members.contains(id) {",
+    "tests": "SelectionTests"
   }
 ]

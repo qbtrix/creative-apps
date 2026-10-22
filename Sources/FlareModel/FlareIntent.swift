@@ -2,8 +2,10 @@
 // value: a top-level area and a nested case with plain-value payloads. Each case has a stable `identifier`,
 // "flare.<area>.<case name>", that no payload changes, so a menu item, toolbar action or UI test can name it.
 // The cases are the packet's contract slice in full (docs/blueprints/flare/features/draw-key-save.md);
-// DK-2b adds the titles in FlareIntent+Titles.swift. Linux-safe.
+// DK-2b adds the titles in FlareIntent+Titles.swift. `.inspector(.runFill(_))` carries a gradient editor's gesture
+// (gradient-fill FG-2). Linux-safe.
 import FlareCore
+import SuiteKernel
 
 /// One thing a person can ask Flare's window to do.
 public enum FlareIntent: Sendable, Equatable {
@@ -19,7 +21,7 @@ public enum FlareIntent: Sendable, Equatable {
 
     public enum File: Sendable, Equatable {
         case new, create(preset: String?, width: Double, height: Double,
-                         fps: Int, durationFrames: Int, backgroundHex: String), open, openRecent(path: String),
+                         fps: FrameRate, durationFrames: Int, backgroundHex: String), open, openRecent(path: String),
              clearRecent, openSample(name: String), save, saveAs, close
     }
 
@@ -45,17 +47,17 @@ public enum FlareIntent: Sendable, Equatable {
     public enum Inspector: Sendable, Equatable {
         case showTab(String), scrub(property: String, value: Double, dragStart: Double), endScrub,
              toggleAnimated(String), toggleKey(String), setFill(hex: String), setStrokeColor(hex: String),
-             setStrokeWidth(Double), setStrokeCap(String), setStrokeJoin(String),
+             setStrokeWidth(Double), scrubStrokeWidth(Double), setStrokeCap(String), setStrokeJoin(String),
              setSceneSize(width: Double, height: Double), setSceneBackground(hex: String),
-             setSceneTiming(fps: Int, durationFrames: Int), easingPreset(String),
-             easingHandle(index: Int, x: Double, y: Double), endEasingHandle
+             setSceneTiming(rate: FrameRate, durationFrames: Int), easingPreset(String),
+             easingHandle(index: Int, x: Double, y: Double), endEasingHandle, runFill(GradientIntent)
     }
 
     public enum Timeline: Sendable, Equatable {
         case scrub(frame: Int), goToStart, goToEnd, step(Int), nextKeyframe, previousKeyframe, togglePlay,
              setLoops(Bool), toggleAutoKey, selectKey(layerID: String, property: String?, frame: Int, extending: Bool),
              moveKeys(by: Int, dragStart: Int), endKeyDrag, removeKeys, addKey, removeKey,
-             insertFrames(Int), removeFrames(Int), setLabel(String?)
+             insertFrames(Int), removeFrames(Int), setLabel(String?), selectAllKeys
     }
 
     public enum Layers: Sendable, Equatable {
@@ -126,8 +128,8 @@ public enum FlareIntent: Sendable, Equatable {
     /// One representative value of every case, in contract order, so tests can enumerate them all.
     /// A new case must be added here too; FlareIntentTests counts them.
     public static let examples: [FlareIntent] = [
-        .file(.new), .file(.create(preset: nil, width: 1920, height: 1080, fps: 24, durationFrames: 48,
-                                   backgroundHex: "#FFFFFF")),
+        .file(.new), .file(.create(preset: nil, width: 1920, height: 1080, fps: FrameRate(whole: 24),
+                                   durationFrames: 48, backgroundHex: "#FFFFFF")),
         .file(.open), .file(.openRecent(path: "")), .file(.clearRecent), .file(.openSample(name: "")),
         .file(.save), .file(.saveAs), .file(.close),
         .edit(.undo), .edit(.redo), .edit(.cut), .edit(.copy), .edit(.paste), .edit(.duplicate), .edit(.delete),
@@ -142,17 +144,18 @@ public enum FlareIntent: Sendable, Equatable {
         .view(.endGuideDrag), .view(.removeGuide(index: 0)),
         .inspector(.showTab("")), .inspector(.scrub(property: "", value: 0, dragStart: 0)), .inspector(.endScrub),
         .inspector(.toggleAnimated("")), .inspector(.toggleKey("")), .inspector(.setFill(hex: "")),
-        .inspector(.setStrokeColor(hex: "")), .inspector(.setStrokeWidth(1)), .inspector(.setStrokeCap("")),
+        .inspector(.setStrokeColor(hex: "")), .inspector(.setStrokeWidth(1)), .inspector(.scrubStrokeWidth(1)),
+        .inspector(.setStrokeCap("")),
         .inspector(.setStrokeJoin("")), .inspector(.setSceneSize(width: 1, height: 1)),
-        .inspector(.setSceneBackground(hex: "")), .inspector(.setSceneTiming(fps: 24, durationFrames: 48)),
+        .inspector(.setSceneBackground(hex: "")), .inspector(.setSceneTiming(rate: FrameRate(whole: 24), durationFrames: 48)),
         .inspector(.easingPreset("")), .inspector(.easingHandle(index: 0, x: 0, y: 0)),
-        .inspector(.endEasingHandle),
+        .inspector(.endEasingHandle), .inspector(.runFill(.type(.solid))),
         .timeline(.scrub(frame: 0)), .timeline(.goToStart), .timeline(.goToEnd), .timeline(.step(1)),
         .timeline(.nextKeyframe), .timeline(.previousKeyframe), .timeline(.togglePlay), .timeline(.setLoops(true)),
         .timeline(.toggleAutoKey), .timeline(.selectKey(layerID: "", property: nil, frame: 0, extending: false)),
         .timeline(.moveKeys(by: 0, dragStart: 0)), .timeline(.endKeyDrag), .timeline(.removeKeys),
         .timeline(.addKey), .timeline(.removeKey), .timeline(.insertFrames(1)), .timeline(.removeFrames(1)),
-        .timeline(.setLabel(nil)),
+        .timeline(.setLabel(nil)), .timeline(.selectAllKeys),
         .layers(.select(id: "")), .layers(.toggle(id: "", flag: "")), .layers(.move(section: "", from: 0, to: 0)),
         .layers(.rename(id: "", name: "")), .layers(.addLayer), .layers(.addScene), .layers(.remove(id: "")),
         .layers(.duplicate(id: "")),
@@ -251,6 +254,7 @@ extension FlareIntent.Inspector {
         case .setFill: "setFill"
         case .setStrokeColor: "setStrokeColor"
         case .setStrokeWidth: "setStrokeWidth"
+        case .scrubStrokeWidth: "scrubStrokeWidth"
         case .setStrokeCap: "setStrokeCap"
         case .setStrokeJoin: "setStrokeJoin"
         case .setSceneSize: "setSceneSize"
@@ -259,6 +263,7 @@ extension FlareIntent.Inspector {
         case .easingPreset: "easingPreset"
         case .easingHandle: "easingHandle"
         case .endEasingHandle: "endEasingHandle"
+        case .runFill: "runFill"
         }
     }
 }
@@ -284,6 +289,7 @@ extension FlareIntent.Timeline {
         case .insertFrames: "insertFrames"
         case .removeFrames: "removeFrames"
         case .setLabel: "setLabel"
+        case .selectAllKeys: "selectAllKeys"
         }
     }
 }

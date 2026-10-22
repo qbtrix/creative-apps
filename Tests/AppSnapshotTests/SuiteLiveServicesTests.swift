@@ -2,7 +2,7 @@
 // folder (suite-contracts SC-5b, SC-5c). It is not a preview; recents is
 // live and writes recents.json there, creating and home are live (HM-2a),
 // preferences is live over preferences.json (onboarding OB-9), onboarding is
-// SuiteOnboarding (OB-12); each other
+// SuiteOnboarding (OB-12), pasteboard is SuitePasteboardCoding (clipboard-interop CB-4), text is LiveText (shell-text ST-8); each other
 // slotted member is pending with its "<What> isn't available yet."
 // sentence, and each throwing one throws notAvailable with that sentence.
 // `animations` and `updates` are the fakes until `with(animations:updates:)`
@@ -61,16 +61,19 @@ import Testing
     @Test func everyOtherSlottedMemberIsPendingWithItsFeature() {
         let pending = makeLive().services.pending
         var expected = SuiteServices.slotFeatures.mapValues(SuiteIdentity.notConnected)
-        let live = ["recents", "creating", "home", "switching", "sending", "receiving", "preferences", "onboarding"]
+        let live = ["recents", "creating", "home", "switching", "sending", "receiving", "preferences", "onboarding",
+                    "pasteboard", "text"]
         for member in live { expected[member] = nil }
         #expect(pending == expected)
         #expect(pending.count == 7)
+        #expect(pending["text"] == nil)
+        #expect(pending["media"] == "Movie and image export isn't available yet.")
         #expect(pending["thumbnails"] == "Opening recent work isn't available yet.")
         #expect(pending["home"] == nil)
         #expect(pending["creating"] == nil)
         #expect(pending["onboarding"] == nil)
         #expect(pending["roundTrips"] == "Editing in Photo and back isn't available yet.")
-        #expect(pending["pasteboard"] == "Copy and paste between apps isn't available yet.")
+        #expect(pending["pasteboard"] == nil)
         #expect(pending["assets"] == "The shared asset library isn't available yet.")
         #expect(pending["linking"] == "Linking assets between apps isn't available yet.")
         #expect(pending["preferences"] == nil)
@@ -81,10 +84,10 @@ import Testing
         let pending = makeLive().services.pending
         let members: Set<String> = ["switching", "recents", "creating", "routing", "sending", "receiving",
                                     "roundTrips", "pasteboard", "assets", "linking", "preferences", "settings",
-                                    "onboarding", "thumbnails", "home"]
+                                    "onboarding", "thumbnails", "home", "media", "text"]
         #expect(Set(SuiteServices.slotFeatures.keys) == members)
         let live: Set<String> = ["recents", "creating", "home", "switching", "sending", "receiving", "preferences",
-                                  "onboarding"]
+                                  "onboarding", "pasteboard", "text"]
         #expect(Set(pending.keys).union(live) == members)
     }
 
@@ -102,7 +105,7 @@ import Testing
         #expect(try s.routing.route(fileName: "Logo.design") == .design)
         #expect(s.creating.tiles(missing: []).allSatisfy { $0.disabledReason == nil })
         #expect(s.onboarding.pages.count == 3)
-        #expect(s.pasteboard is FakePasteboard)
+        #expect(s.pasteboard is SuitePasteboardCoding)
         #expect(s.linking is FakeLinking)
     }
 

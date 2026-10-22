@@ -10,7 +10,7 @@
 // its accessibility value) that drags over `sizeBarRange`, so the usual
 // sizes sit clear of its label, and types over `fontSizeRange` (#2180), and
 // sends .setFontSize per sample and .endTextSizeScrub at the end, one step;
-// an InspectorColorRow (`halo.inspector.text.color`, from
+// an InspectorColorWellRow (`halo.inspector.text.color`, from
 // `selectedLayerColor`) that sends .setLayerColor in 8-bit sRGB. A refusal
 // naming one of these controls shows once, right under that control
 // (`textRefusal(at:)`, #2181); `owns` keeps the layer inspector's catch-all
@@ -19,8 +19,9 @@
 // can't act. It only reads the model and calls `perform`; it owns the draft
 // and the field's focus. A draft left on another layer neither shows nor
 // commits, and the next keystroke starts a draft for the selected one. A new
-// selection drops the draft, ends editing and rebuilds the field (keyed by
-// `selectedLayerID`), so the old edit buffer never shows on the next layer.
+// selection, or an Undo or Redo that changes the words, drops the draft, ends
+// editing and rebuilds the field (keyed by `textFieldKey`, #4310), so a stale
+// edit buffer never shows over the stored words.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -83,8 +84,8 @@ struct HaloTextInspector: View {
                 .help(help ?? "Text")
                 .accessibilityLabel("Text")
                 .haloControl(id: Self.stringID, enabled: help == nil, help: help)
-                .id(layerID)
-                .onChange(of: model.selectedLayerID) { reset() }
+                .id(model.textFieldKey)
+                .onChange(of: model.textFieldKey) { reset() }
         }
     }
 
@@ -109,9 +110,8 @@ struct HaloTextInspector: View {
     /// The layer color as an 8-bit sRGB well and hex field.
     private func color(_ current: HaloLayerColor) -> some View {
         let help = model.unavailableHelp(for: .setLayerColor(current))
-        let b = current.bytes
-        return InspectorColorRow("Color", hex: HexColor(b.red, b.green, b.blue)) { hex in
-            perform(.setLayerColor(HaloLayerColor(bytes: hex.red, hex.green, hex.blue)))
+        return InspectorColorWellRow("Color", color: current.hex) {
+            perform(.setLayerColor(HaloLayerColor(hex: $0)))
         }
         .disabled(help != nil)
         .help(help ?? "Color")
@@ -126,9 +126,20 @@ struct HaloTextInspector: View {
         if let command = pending.commit(on: model) { perform(command) }
     }
 
-    /// On a new selection: drops the old layer's draft unsent, then ends editing.
+    /// On a new selection or new stored words: drops the draft unsent, then ends editing.
     private func reset() {
         draft = nil
         editing = false
+    }
+}
+
+/// Halo's one bridge to SuiteUI's HexColor, over the layer color's 8-bit
+/// sRGB `bytes` (each channel clamped, times 255, rounded).
+extension HaloLayerColor {
+    init(hex: HexColor) { self.init(bytes: hex.red, hex.green, hex.blue) }
+
+    var hex: HexColor {
+        let b = bytes
+        return HexColor(b.red, b.green, b.blue)
     }
 }

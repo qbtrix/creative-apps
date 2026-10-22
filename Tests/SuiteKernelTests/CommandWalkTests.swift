@@ -7,19 +7,29 @@ import SuiteKernel
 
 @Suite struct CommandWalkTests {
     let catalog = FakeCanvasDocument.catalog
-    /// Every id in an order whose examples all run on one fixture: reads first, then an add (which selects the free
-    /// new rect), a move of it, undo and redo of that move, and last the remove.
-    static let walk = ["rect.list", "rect.select", "doc.export-json", "rect.add", "rect.move", "edit.undo", "edit.redo", "rect.remove"]
+    /// Every id in an order whose examples all run on one fixture: reads first, the file-flow commands, the fill
+    /// commands on Rect 1 (the stop edits while it has three stops, `fill.gradient` last), then an add (which selects the
+    /// free new rect), a move of it, undo and redo of that move, and last the remove. `file.drop` places a rect as a
+    /// step, which a file command may not do here, so FakeCanvasFileFlowTests walks it instead; `history.jump` to 0
+    /// would take the walk back to the fixture, so FakeHistoryTests walks it.
+    static let fills = ["fill.read", "fill.type", "fill.stop-add", "fill.stop-move", "fill.stop-remove", "fill.stop-color",
+                        "fill.angle", "fill.gradient"]
+    static let walk = ["rect.list", "history.read", "rect.select", "doc.export-json", "file.recent", "file.open-recent", "file.open-in",
+                       "file.clear-recent"] + fills + ["rect.add", "rect.move", "edit.undo", "edit.redo", "rect.remove"]
 
     /// `doc` saved and opened again: a document at its saved state, with a clean history.
     static func reopened(_ doc: FakeCanvasDocument) throws -> FakeCanvasDocument {
         try FakeCanvasDocument.open(doc.save(), name: "canvas.fake")
     }
 
-    @Test func listNamesTheFakesEightIdsSorted() {
+    @Test func listNamesTheFakesTwentyThreeIdsSorted() {
         #expect(catalog.app == "fake")
-        #expect(catalog.ids == ["doc.export-json", "edit.redo", "edit.undo", "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select"])
-        #expect(catalog.ids == catalog.ids.sorted() && Set(catalog.ids) == Set(Self.walk) && catalog.ids.count == Self.walk.count)
+        #expect(catalog.ids == ["doc.export-json", "edit.redo", "edit.undo", "file.clear-recent", "file.drop", "file.open-in",
+                              "file.open-recent", "file.recent", "fill.angle", "fill.gradient", "fill.read", "fill.stop-add",
+                              "fill.stop-color", "fill.stop-move", "fill.stop-remove", "fill.type", "history.jump", "history.read",
+                              "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select"])
+        #expect(catalog.ids == catalog.ids.sorted() && Set(catalog.ids) == Set(Self.walk + ["file.drop", "history.jump"])
+                && catalog.ids.count == Self.walk.count + 2)
         #expect(catalog.ids.allSatisfy(CommandCatalog<FakeCanvasDocument>.isValidID))
     }
 
@@ -54,15 +64,19 @@ import SuiteKernel
             case .view: #expect(outcome.undoStep == nil)
             }
         }
-        // add, move, undo and redo of the move, then remove of the added rect: back to the fixture's rects.
-        #expect(doc.rects == FakeCanvasDocument.fixture.rects && doc.selection == nil)
-        #expect(doc.history.steps == ["Add Rectangle", "Move Rectangle", "Remove Rectangle"])
-        // Each example also runs alone on a fresh fixture, except undo and redo, which refuse with nothing to take back.
+        // The fills, then add, move, undo and redo of the move, and remove of the added rect: the fixture's rects,
+        // Rect 1 with the new gradient.
+        let fixture = FakeCanvasDocument.fixture.rects
+        #expect(doc.rects.map(\.id) == fixture.map(\.id) && doc.rects.dropFirst() == fixture.dropFirst() && doc.selection == nil)
+        #expect(doc.rects.first?.fill != fixture.first?.fill && doc.rects.first?.fill?.stops.count == 2)
+        #expect(doc.history.steps == Self.fills.dropFirst().compactMap { catalog.spec($0)?.title }
+                + ["Add Rectangle", "Move Rectangle", "Remove Rectangle"])
+        // Each example also runs alone on a fresh fixture, except undo, redo and the jump, which refuse with no steps.
         for id in catalog.ids {
             var fresh = FakeCanvasDocument.fixture
             let example = try #require(catalog.spec(id)?.example)
             do { _ = try catalog.run(id, params: example, on: &fresh) } catch {
-                #expect(CatalogConformance.historyIDs.contains(id), "\(id)'s example refused on the fixture: \(error)")
+                #expect(CatalogConformance.historyIDs.contains(id) || id == "history.jump", "\(id)'s example refused on the fixture: \(error)")
                 guard case .unavailable = error else { Issue.record("\(id) refused with \(error)"); continue }
             }
         }
