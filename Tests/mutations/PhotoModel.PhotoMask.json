@@ -1,0 +1,9 @@
+[
+  {"label": "selectionInverted: From Selection hides the marquee and shows the rest", "file": "Sources/PhotoModel/PhotoMask.swift", "find": "let c = selectionCoverage(x: x + layer.offsetX, y: y + layer.offsetY)", "replace": "let c = 1 - selectionCoverage(x: x + layer.offsetX, y: y + layer.offsetY)", "tests": "PhotoLayerMaskTests"},
+  {"label": "cropSkipped: a crop leaves the mask where and as big as it was", "file": "Sources/PhotoModel/PhotoMask.swift", "find": "            return cut\n", "replace": "            return mask\n", "tests": "PhotoLayerMaskTests"},
+  {"label": "applyTwoSteps: Apply records a second step for the dropped mask", "file": "Sources/PhotoModel/PhotoMask.swift", "find": "        pixels[id] = TiledPixels(buffer)\n", "replace": "        pixels[id] = TiledPixels(buffer)\n        recordLayers(named: \"Delete Layer Mask\")\n", "tests": "PhotoLayerMaskTests"},
+  {"label": "applyIgnoresAlpha: Apply hides the colour but keeps the alpha", "file": "Sources/PhotoModel/PhotoMask.swift", "find": "a: p.a * c))", "replace": "a: p.a))", "tests": "PhotoLayerMaskTests"},
+  {"label": "revealHides: Reveal All starts black", "file": "Sources/PhotoModel/PhotoMask.swift", "find": "fill: start == .hide ? Self.hidden : Self.shown)", "replace": "fill: Self.hidden)", "tests": "PhotoLayerMaskTests"},
+  {"label": "resizeNotFitted: Image Size leaves the mask its old size", "file": "Sources/PhotoModel/PhotoMask.swift", "find": "        default: return fitted(mask, pixels)\n", "replace": "        default: return mask\n", "tests": "PhotoLayerMaskTests"},
+  {"label": "canvasGrowSkipped: Canvas Size leaves a padded background's mask small", "file": "Sources/PhotoModel/PhotoMask.swift", "find": "            return grown\n", "replace": "            return mask\n", "tests": "PhotoLayerMaskTests"}
+]

@@ -134,8 +134,9 @@ func maskGrey(_ ws: PhotoWorkspace, _ id: PhotoLayer.ID, _ x: Int, _ y: Int) -> 
         #expect(ws.masks[id] == nil && ws.selectedLayer?.hasMask == false)
         ws.undo()
         #expect(ws.masks[id] != nil && ws.selectedLayer?.hasMask == true)
+        let steps = (ws.historySteps, ws.historyIndex)
         ws.setEditsMask(true)
-        #expect(ws.editsMask && ws.historySteps.count == count)
+        #expect(ws.editsMask && ws.historySteps == steps.0 && ws.historyIndex == steps.1)
     }
 }
 
