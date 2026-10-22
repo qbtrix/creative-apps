@@ -60,6 +60,17 @@ private func layer(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> PhotoLay
         #expect(workspace.layers == before)
     }
 
+    /// The Layers panel's Delete button and its tooltip: the same refusal the
+    /// command catalog gives, so the button and the menu never disagree.
+    @Test func deleteLayersHelpRefusesAllAndTheLastLayer() throws {
+        var workspace = try fourLayers()
+        #expect(workspace.deleteLayersHelp == nil)
+        workspace.selectAllLayers()
+        #expect(workspace.deleteLayersHelp == "At least one layer must stay.")
+        #expect(try whiteImage(4, 4).deleteLayersHelp == "The last layer can't be deleted.")
+        #expect(PhotoWorkspace().deleteLayersHelp == "Select a layer first.")
+    }
+
     @Test func threePickedDeleteInOneStepAndUndoKeepsTheOrder() throws {
         var (workspace, one, two, three) = try onePlusThree()
         let before = workspace.layers.map(\.id)
