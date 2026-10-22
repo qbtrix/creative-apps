@@ -56,13 +56,6 @@
     "Sources/FlareModel/FlareCommandCatalog.swift",
     "Tests/command-ids/flare.txt",
     "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json",
-    "Sources/FlareModel/FlareIntent.swift",
-    "Sources/FlareModel/FlarePlayback.swift",
-    "Sources/FlareModel/FlareStatusRead.swift",
-    "Sources/FlareModel/FlareHeadless.swift",
-    "Tests/FlareModelTests/FlareNewDocumentTests.swift",
-    "Tests/AppSnapshotTests/FlareNewSheetSnapshots.swift",
-    "UITests/FlareJourneyTests+SceneInspector.swift",
     "Tests/SuiteKernelTests/FrameRateHomeTests.swift",
     "docs/blueprints/suiteui/features/frame-rates.wave.json"
   ],
@@ -208,14 +201,7 @@
         "Tests/mutations/FlareModel.FlareFrameRate+Kernel.json",
         "Sources/FlareModel/FlareCommandCatalog.swift",
         "Tests/command-ids/flare.txt",
-        "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json",
-        "Sources/FlareModel/FlareIntent.swift",
-        "Sources/FlareModel/FlarePlayback.swift",
-        "Sources/FlareModel/FlareStatusRead.swift",
-        "Sources/FlareModel/FlareHeadless.swift",
-        "Tests/FlareModelTests/FlareNewDocumentTests.swift",
-        "Tests/AppSnapshotTests/FlareNewSheetSnapshots.swift",
-        "UITests/FlareJourneyTests+SceneInspector.swift"
+        "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json"
       ],
       "waits": {
         "FR-m": [
