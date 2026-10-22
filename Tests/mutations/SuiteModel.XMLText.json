@@ -19,5 +19,19 @@
     "find": "case \"<\": out += \"&lt;\"",
     "replace": "case \"<\": out += \"<\"",
     "tests": "XMLTextTests"
+  },
+  {
+    "label": "unescapedAmpFirst: &amp; is read before &lt;",
+    "file": "Sources/SuiteModel/Values/XMLText.swift",
+    "find": "String(text).replacing(\"&quot;\", with: \"\\\"\")",
+    "replace": "String(text).replacing(\"&amp;\", with: \"&\").replacing(\"&quot;\", with: \"\\\"\")",
+    "tests": "XMLTextTests"
+  },
+  {
+    "label": "unescapedApos: &apos; is left as written",
+    "file": "Sources/SuiteModel/Values/XMLText.swift",
+    "find": ".replacing(\"&apos;\", with: \"'\")",
+    "replace": "",
+    "tests": "XMLTextTests"
   }
 ]

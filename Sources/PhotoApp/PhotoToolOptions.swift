@@ -10,7 +10,7 @@ import SwiftUI
 
 /// The active tool's options: a preset, size, hardness and opacity for the brush (plus
 /// its color) and the eraser, each tool's own; what to do with a selection;
-/// applying a crop.
+/// applying a crop; the eyedropper's sample size and the brush color it picks into.
 struct ToolOptionsSection: View {
     let model: PhotoWorkspace
     let perform: PhotoPerform
@@ -65,6 +65,8 @@ struct ToolOptionsSection: View {
             case .eyedropper:
                 hint(Self.eyedropperHint)
                 SampleOptions(model: model, perform: perform)
+                // The brush colour a pick lands in, so the pick shows without switching tools.
+                colorRow(options)
             case .gradient:
                 hint(Self.gradientHint)
                 PhotoFillToolOptions(model: model, perform: perform)
