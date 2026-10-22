@@ -4,7 +4,7 @@ Issue: #3725 · Packet: docs/blueprints/suite/features/shell-text.md
 Run: act-1a1643afacf-vq3h (wrap-up; earlier runs act-1a15ef24f0e-t1j1, act-1a16278ef53-kw2i) · Started: 2026-10-21T14:56Z
 Stage: 3 polling (every task merged; wrap-up)
 Base: 18902a68c36c4c6ec07cdc171f68881007f22ca8
-Next: wait for a CI run on dev whose Linux job contains 18902a6 (#4431, the Halo trim-keys test fix) and #4350 (817bc5271); on green post Belt-Slice-Done ST-live and ST-z, then Belt-Contact-Sheet. Linux check 39802370482 (3fcea2844) contains every slice PR but is red only on HaloModelTests.HaloStrokeTrimKeysTests (dev-red #3856, line:halo); every text suite passed there.
+Next: wait for Linux check 39805588695 on dev at 18902a6 (contains #4350 817bc5271 and the #4431 Halo test fix); on green post Belt-Slice-Done ST-live and ST-z, then Belt-Contact-Sheet. 39802370482 (3fcea2844) holds every slice PR but is red only on HaloModelTests.HaloStrokeTrimKeysTests (dev-red #3856, line:halo); every text suite passed there.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
