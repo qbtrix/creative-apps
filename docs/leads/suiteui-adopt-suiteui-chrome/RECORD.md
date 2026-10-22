@@ -34,6 +34,7 @@ Next: #4002 (head cbada801) merges via the lane, then a green ci.yml run (app=su
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T01:46Z: #4002's lane macOS build run 39704298251 succeeded (01:24Z). Open and clean, waiting for a lane sweep to merge it. SC-f unchanged; AC-export-sheet stays unstarted per the supervisor.
 - 2026-10-22T01:24Z: #4002 head 0c0e686b: lane macOS build run 39704298251 passed `swift build` (journey bundles still running). Supervisor answered (#1942 issuecomment-6329700665): don't hold the run; finish AC-tools; if SC-15 and SC-16 haven't merged by then, leave AC-export-sheet unstarted and say so here for the next lead. SC-f today: SC-14 #4238 open (on the local Mac gate), SC-15/SC-16 no PRs. AC-export-sheet is unstarted.
 - 2026-10-22T01:01Z: #4002's lane macOS build (run 39695603914) failed only in RenderBudgetPhotoPlaceTests.swift:35, a dev test fixed by #4215. Merged origin/dev 6ccc77ad, scripts/ci --changed PASS, pushed head 0c0e686b, moved the Head line. Waiting on the lane's rebuild. AC-export-sheet still blocked on SC-f (SC-14 #4238 open, SC-15/16 no PRs).
 - 2026-10-22T00:31Z: poll: #4002 lane macOS build 39695603914 in progress (started 00:25Z) on cbada801, not merged, no needs-fix. SC-f unchanged (#4238 open, SC-15/16 not opened): blocked poll 3 of 3, so asked the supervisor on #1942 to hold or release AC-export-sheet
