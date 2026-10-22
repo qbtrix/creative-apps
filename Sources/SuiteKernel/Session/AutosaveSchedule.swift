@@ -42,6 +42,17 @@ public struct AutosaveSchedule: Hashable, Sendable {
         return Ticket(edit: edit, resets: resets)
     }
 
+    /// A ticket for the write the app's quit runs at `now`: due at once while `dirty` and the newest edit's bytes
+    /// aren't on disk, whatever the delay; nil for a clean window or one whose copy is current. A dirty window with
+    /// no edit noted writes as of `now`.
+    public mutating func beginQuit(now: Double, dirty: Bool) -> Ticket? {
+        guard dirty, !isWritten else { return nil }
+        let edit = lastEdit ?? now
+        lastEdit = edit
+        writtenEdit = edit
+        return Ticket(edit: edit, resets: resets)
+    }
+
     /// The write for `ticket` ended, landing its bytes when `wrote`. A failed write keeps `writtenEdit`, so the
     /// next edit tries again, not the next tick.
     public mutating func finish(_ ticket: Ticket, wrote: Bool) -> Finish {

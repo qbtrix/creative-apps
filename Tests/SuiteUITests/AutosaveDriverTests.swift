@@ -13,18 +13,28 @@ private final class FakeDocument {
     var dirty = false
     var bytes = Data("poster".utf8)
     var restored: [Data] = []
+    /// Set to make Restore throw, as a damaged copy's decode does.
+    var restoreFails = false
     let encodes = EncodeLog()
 
     var hooks: AutosaveHooks {
         AutosaveHooks(
             window: "w1", documentName: { "Poster" }, isDirty: { self.dirty },
             encoder: { [bytes, encodes] in { encodes.note(onMain: Thread.isMainThread); return bytes } },
-            restore: { self.restored.append($0) })
+            restore: {
+                if self.restoreFails { throw DamagedCopy() }
+                self.restored.append($0)
+            })
     }
 
     func driver(_ folder: RecoveryFolder?, delay: Double = 2) -> AutosaveDriver {
         AutosaveDriver(folder: folder, delay: delay, now: { self.time })
     }
+}
+
+/// The error a damaged copy's restore throws.
+private struct DamagedCopy: LocalizedError {
+    var errorDescription: String? { "The copy is damaged." }
 }
 
 /// Counts encodes and whether each ran on main, from whatever thread runs it.
@@ -92,6 +102,7 @@ private final class EncodeLog: @unchecked Sendable {
         #expect(AutosaveDriver.message(item).hasPrefix("Autosaved "))
         await driver.restore(item, doc.hooks)
         #expect(doc.restored == [Data("left".utf8)])
+        #expect(driver.restoreError == nil)
         #expect(driver.offer == nil)
         #expect(try recovery.leftBehind().count == 1)
         await driver.didTurnClean(doc.hooks)
@@ -109,6 +120,39 @@ private final class EncodeLog: @unchecked Sendable {
         #expect(driver.offer == nil)
         #expect(doc.restored.isEmpty)
         #expect(try recovery.leftBehind().isEmpty)
+    }
+
+    @Test func aDirtyWindowsQuitWritesInsideTheDelayAndACleanOneWritesNothing() throws {
+        let (doc, recovery) = (FakeDocument(), folder())
+        let driver = doc.driver(recovery)
+        driver.willTerminate(doc.hooks)
+        #expect(try recovery.leftBehind().isEmpty)
+        driver.noteEdit()
+        doc.time = 0.5
+        driver.willTerminate(doc.hooks)
+        #expect(try recovery.leftBehind().isEmpty)
+        doc.dirty = true
+        driver.willTerminate(doc.hooks)
+        #expect(try recovery.leftBehind() == [RecoveryItem(window: "w1", name: "Poster", savedAt: 0.5, data: Data("poster".utf8))])
+        driver.willTerminate(doc.hooks)
+        #expect(doc.encodes.count == 1)
+    }
+
+    @Test func aRestoreThatThrowsKeepsTheCopyAndShowsTheError() async throws {
+        let (doc, recovery) = (FakeDocument(), folder())
+        try recovery.write(Data("bad".utf8), window: "old", name: "Poster", at: 100)
+        let driver = doc.driver(recovery)
+        await driver.launch()
+        let item = try #require(driver.offer)
+        doc.restoreFails = true
+        await driver.restore(item, doc.hooks)
+        #expect(driver.offer == nil)
+        let error = try #require(driver.restoreError)
+        #expect(error.contains("Poster") && error.contains("The copy is damaged."))
+        await driver.didTurnClean(doc.hooks)
+        #expect(try recovery.leftBehind().map(\.window) == ["old"])
+        driver.dismissRestoreError()
+        #expect(driver.restoreError == nil)
     }
 
     @Test func encodesOffMain() async {

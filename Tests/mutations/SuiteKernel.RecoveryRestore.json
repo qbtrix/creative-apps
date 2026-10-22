@@ -1,0 +1,23 @@
+[
+  {
+    "label": "failureDeletesCopy: a restore that threw lets the next save delete its copy",
+    "file": "Sources/SuiteKernel/Session/RecoveryRestore.swift",
+    "find": "public var deletesCopyOnSave: Bool { self == .restored }",
+    "replace": "public var deletesCopyOnSave: Bool { true }",
+    "tests": "AutosaveQuitTests"
+  },
+  {
+    "label": "failureIsSilent: a restore that threw with an empty reason counts as restored",
+    "file": "Sources/SuiteKernel/Session/RecoveryRestore.swift",
+    "find": "guard let failure else {",
+    "replace": "guard let failure, failure.isEmpty == false else {",
+    "tests": "AutosaveQuitTests"
+  },
+  {
+    "label": "messageDropsReason: the failure message leaves out why",
+    "file": "Sources/SuiteKernel/Session/RecoveryRestore.swift",
+    "find": "let reason = failure.isEmpty ? \"\" : \" \\(failure)\"",
+    "replace": "let reason = \"\"",
+    "tests": "AutosaveQuitTests"
+  }
+]

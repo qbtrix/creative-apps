@@ -2,7 +2,10 @@
 // window. `AutosaveDriver` decides over the kernel's `AutosaveSchedule` and the store's `RecoveryFolder`: while dirty
 // it ticks each second, copies the document on main and encodes and writes it off main; turning clean deletes the
 // copy. At launch the newest copy left behind is offered in a system alert naming the document and its time; Restore
-// hands its bytes back and keeps the file until the next save, Discard deletes it.
+// hands its bytes back and keeps the file until the next save, Discard deletes it. A Restore that throws keeps the
+// file and shows why (`RecoveryRestore`). The app's quit writes a dirty window's newest edit at once, on main, since
+// the process ends when the notification returns (`AutosaveSchedule.beginQuit`); a clean window writes nothing.
+import AppKit
 import SuiteKernel
 import SuiteModel
 import SwiftUI
@@ -40,6 +43,8 @@ public struct AutosaveHooks: Sendable {
 final class AutosaveDriver {
     /// The copy left behind that the alert offers; nil when there is none or it was answered.
     private(set) var offer: RecoveryItem?
+    /// Why the last Restore failed; nil when it worked or the alert was closed.
+    private(set) var restoreError: String?
     /// The schedule that says when a write is due, on `now`'s clock.
     @ObservationIgnored private var schedule: AutosaveSchedule
     /// Where the copies go; nil turns autosave and the offer off.
@@ -81,6 +86,20 @@ final class AutosaveDriver {
         if schedule.finish(ticket, wrote: wrote) == .discard { await remove([window]) }
     }
 
+    /// The app is quitting: a dirty window whose newest edit isn't on disk writes it now, on main, because the
+    /// process ends when this returns; a clean or already-written window writes nothing.
+    func willTerminate(_ hooks: AutosaveHooks) {
+        guard let folder, let ticket = schedule.beginQuit(now: now(), dirty: hooks.isDirty()) else { return }
+        var wrote = false
+        if let encode = hooks.encoder() {
+            do {
+                try folder.write(try encode(), window: hooks.window, name: hooks.documentName(), at: now())
+                wrote = true
+            } catch {}
+        }
+        _ = schedule.finish(ticket, wrote: wrote)
+    }
+
     /// The document turned clean (saved, or undone to its saved state): nothing is due and its copy goes, with a
     /// restored copy's file.
     func didTurnClean(_ hooks: AutosaveHooks) async {
@@ -99,12 +118,19 @@ final class AutosaveDriver {
         if let found { offer = found }
     }
 
-    /// Restore: hands `item`'s bytes to the window and keeps its file until the next save.
+    /// Restore: hands `item`'s bytes to the window and keeps its file until the next save. A restore that throws
+    /// keeps the file for the next launch and sets `restoreError`.
     func restore(_ item: RecoveryItem, _ hooks: AutosaveHooks) async {
         offer = nil
-        restoredWindow = item.window
-        try? await hooks.restore(item.data)
+        var failure: String?
+        do { try await hooks.restore(item.data) } catch { failure = error.localizedDescription }
+        let outcome = RecoveryRestore(name: Self.recoveryOffer(item).name, failure: failure)
+        if outcome.deletesCopyOnSave { restoredWindow = item.window }
+        restoreError = outcome.message
     }
+
+    /// The restore error's alert closed.
+    func dismissRestoreError() { restoreError = nil }
 
     /// Discard: deletes `item`'s files.
     func discard(_ item: RecoveryItem) async {
@@ -167,6 +193,9 @@ private struct AutosaveRecoveryModifier: ViewModifier {
                 }
             }
             .task { await driver.launch() }
+            .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
+                driver.willTerminate(hooks)
+            }
             .alert(
                 driver.offer.map { AutosaveDriver.recoveryOffer($0).prompt } ?? "",
                 isPresented: Binding(get: { driver.offer != nil }, set: { if !$0 { driver.dismissOffer() } }),
@@ -178,6 +207,13 @@ private struct AutosaveRecoveryModifier: ViewModifier {
                     .accessibilityIdentifier("suite.recovery.discard")
             } message: { item in
                 Text(AutosaveDriver.message(item))
+            }
+            .alert(
+                driver.restoreError ?? "",
+                isPresented: Binding(get: { driver.restoreError != nil }, set: { if !$0 { driver.dismissRestoreError() } })
+            ) {
+                Button("OK") { driver.dismissRestoreError() }
+                    .accessibilityIdentifier("suite.recovery.restoreError")
             }
     }
 }
