@@ -133,3 +133,5 @@ utc	stage	event	ref	note
 2026-10-22T05:11Z	3	dispatch	round-1 fixers	#4310-#4312 and #4313-#4314 (CL-z)
 2026-10-22T05:21Z	3	pr	#4321	fixes #4310-#4312 (4c43b1a, 5 files +90/-7, CI: PASS)
 2026-10-22T05:22Z	3	pr	#4322	fixes #4313-#4314 (a0729e8, 3 files +100/-25, CI: PASS)
+2026-10-22T06:04Z	3	merge	#4285 #4286 #4290	#4264-#4266, #4278-#4280 fixed on dev
+2026-10-22T06:04Z	3	dispatch	perf fixers	#4274+#4276 (CL-measure), #4275+#4277 (CL-probe)

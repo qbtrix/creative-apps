@@ -4,7 +4,7 @@ Issue: #1971 · Packet: docs/blueprints/halo/features/core-loop.md
 Run: act-1a15f92d2f2-kvrn (from 2026-10-21T18:00Z; before: act-1a15d0eeefb-6z9l from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0) (from 2026-10-20T18:45Z; before: act-1a15728f2a2-zb1o) · Session: claude/halo-feature-lead-run-02scrb · Started: 2026-10-20T02:37Z
 Stage: 3 wave 5
 Base: 6d5f3a4025ffce3bb843003a158f64bf282020e6
-Next: round-1 PRs #4321 (#4310-#4312) and #4322 (#4313-#4314) open with Fast-Check. Waiting on the lane: #4285 #4286 #4290 #4321 #4322. Then perf fixers #4274-#4277 after #4285+#4286; next journeys run re-checks H-J12 screens (inspector now 240 pt). Blocked on SuiteUI: #4273 (#4283), #4281 (#4282). Open findings >5, no new feature work
+Next: #4285 #4286 #4290 merged (05:35Z, 06:03Z). Round-1 perf fixers in flight: #4274+#4276 (viewer/playback, Sources only) and #4275+#4277 (probes and perf series, incl. #4276 per-leg check). Waiting on the lane: #4321 #4322. Next journeys run re-checks H-J12 and the H-P series. Blocked on SuiteUI: #4273 (#4283), #4281 (#4282). Open findings >5, no new feature work
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -76,17 +76,17 @@ Next: round-1 PRs #4321 (#4310-#4312) and #4322 (#4313-#4314) open with Fast-Che
 | Finding | Slice | Sev | Lens | Round | State |
 |---|---|---|---|---|---|
 | #4264 | CL-probe | CI | journey | 1 | PR #4286 (timeline scroll bar strips; hide indicators) |
-| #4265 | CL-measure | CI | journey | 1 | PR #4285 (test pressed the empty label cell, not the ruler) |
-| #4266 | CL-probe | CI | journey | 1 | PR #4286 |
+| #4265 | CL-measure | CI | journey | 1 | PR #4285 merged 05:35Z (test pressed the empty label cell, not the ruler) |
+| #4266 | CL-probe | CI | journey | 1 | PR #4286 merged 05:35Z |
 | #4272 | CL-measure | major | mouse | 1 | PR #4287 merged 04:41Z (bare transport left at 440 pt; History drops; tight ~8 pt) |
 | #4273 | CL-measure | major | clarity | - | waits #4283 |
-| #4274 | CL-measure | major | job | - | held |
-| #4275 | CL-probe | major | job | - | held |
-| #4276 | CL-measure | major | job | - | held |
-| #4277 | CL-measure | minor | job | - | held |
-| #4278 | CL-ui | minor | clarity | 1 | PR #4290 |
-| #4279 | CL-ui | minor | design | 1 | PR #4290 |
-| #4280 | CL-ui | minor | design | 1 | PR #4290 |
+| #4274 | CL-measure | major | job | 1 | round-1 fixer dispatched 06:05Z |
+| #4275 | CL-probe | major | job | 1 | round-1 fixer dispatched 06:05Z |
+| #4276 | CL-measure | major | job | 1 | round-1 fixer dispatched 06:05Z |
+| #4277 | CL-measure | minor | job | 1 | round-1 fixer dispatched 06:05Z |
+| #4278 | CL-ui | minor | clarity | 1 | PR #4290 merged 06:03Z |
+| #4279 | CL-ui | minor | design | 1 | PR #4290 merged 06:03Z |
+| #4280 | CL-ui | minor | design | 1 | PR #4290 merged 06:03Z |
 | #4281 | CL-ui | minor | design | - | waits #4282 |
 
 ## Critic panel, journeys run 39705462811 (8d08e083)
