@@ -169,3 +169,8 @@ utc	stage	event	ref	note
 2026-10-22T16:46Z	3	needs-ui	#4558 onScrubEnd	TimelineStrip drag end for #4448 write-back
 2026-10-22T17:14Z	3	merge	#4460 #4470 merged	closes #4447 #4450 #4458
 2026-10-22T17:14Z	3	panel	run 39778735669 at 06d331b0	taste+design, clarity+mouse critics
+2026-10-22T17:19Z	3	finding	#4586	CL-z blocker: Play not hittable while playing
+2026-10-22T17:19Z	3	finding	#4587	CL-measure: H-P5 preflight
+2026-10-22T17:19Z	3	finding	#4588	CL-probe: scrub double count
+2026-10-22T17:19Z	3	finding	#4589	CL-probe: HB-U2 lag
+2026-10-22T17:19Z	3	fixer	#4586,#4587,#4588	launched
