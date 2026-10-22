@@ -65,7 +65,7 @@ struct HaloLayerInspector: View {
                         HaloFillInspector(model: model, perform: perform, runFill: runFill)
                     }
                     if HaloStrokeInspector.shows(layer.kind) {
-                        HaloStrokeInspector(model: model, runStroke: runStroke)
+                        HaloStrokeInspector(model: model, perform: perform, runStroke: runStroke)
                     }
                 }
                 HaloEasingInspector(model: model, perform: perform)
