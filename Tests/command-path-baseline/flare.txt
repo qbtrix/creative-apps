@@ -1,5 +1,3 @@
 # FlareApp's menu items and buttons built without a command spec (command-catalog CC-11).
 # max: 3
 Sources/FlareApp/FlareFilePanels.swift: Button("OK", role: .cancel) {}
-Sources/FlareApp/FlareRecovery.swift: Button("Restore") {
-Sources/FlareApp/FlareRecovery.swift: Button("Discard", role: .destructive) {

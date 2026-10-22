@@ -222,8 +222,8 @@ services, the empty state) and `-HaloSaveTo <tmp>/Loop.halo -HaloRenderTo
 9. Edit > Undo (menu, mouse): the summary loses "Hello"; Edit > Redo: it is
    back. Shot `loop-undo-redo`. Expect the Edit menu titles flip to "Redo
    Edit Text" and back.
-10. File > Render…: click PNG sequence, Half, Render; wait for "Rendered 48
-    frames."; click Close. Shot `loop-rendered`. Expect `<tmp>/Loop/` holds
+10. File > Render…: click PNG sequence, Half, Render; wait for "Exported 48
+    PNG files into "Loop""; click Close. Shot `loop-rendered`. Expect `<tmp>/Loop/` holds
     `Loop_0001.png` … `Loop_0048.png` at 960 × 540.
 11. ⌘S (File > Save by menu is the mouse step; ⌘S the parity). Shot
     `loop-saved`. Expect the window title "Loop" with no unsaved dot and
