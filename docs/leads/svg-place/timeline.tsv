@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-22T06:51Z	heartbeat	#4297 macOS build 39732985757 on f4d6350e still queued; #4295 waiting (Linux red = dev #3856); 0 findings
 2026-10-22T07:14Z	heartbeat	#4297 macOS build 39732985757 still queued; #4295 in lane; 0 findings
 2026-10-22T07:15Z	sync	record synced from lead/flare-svg-place for Belt; PRs unchanged
+2026-10-22T07:36Z	heartbeat	#4297 macOS build 39732985757 on f4d6350e still queued (45 min, waiting for a macOS runner); #4295 in lane (dev-red #3856 open); 0 open findings.
