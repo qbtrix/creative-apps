@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: (17:54Z) #4426 unchanged: in supervisor's local Mac gate (16:54Z), lane macOS build 39821015197 queued since 17:15Z on 2d3e024a; don't push. On merge: retarget #4437 to dev, ready, fast-lane; then #4438. PH-m waits on HT-6 #4415 (300375f6, open, clean). No new supervisor comment.
+Next: PH-m builders running (PH-6 -> lead/halo-placed-images-PH-m, PH-5 -> -PH-m2, stacked drafts on PH-a); #4415 superseded by #4422 (HT-m on dev); #4426 still in supervisor Mac gate (2d3e024a); #4437 dirty, fixer merges dev after PH-a lands. (18:19Z)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

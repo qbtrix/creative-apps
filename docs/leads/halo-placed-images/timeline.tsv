@@ -59,3 +59,4 @@ utc	stage	event	ref	note
 2026-10-22T17:11:06Z	3	check	PH-a	supervisor Mac gate holds #4426; lane integrated dev 2d3e024a; #4415 open
 2026-10-22T17:33:03Z	3	check	PH-a	still held by Mac gate; mac build 39821015197 queued; #4415 open; footer stripped from 6341272508
 2026-10-22T17:54:54Z	3	check	PH-a	unchanged: Mac gate holds #4426, build 39821015197 queued; #4415 open
+2026-10-22T18:19:36Z	3	stage	PH-m	builders started for PH-6 and PH-5 (two PRs, 400-line cap); HT-m on dev via #4422; PH-a held in Mac gate
