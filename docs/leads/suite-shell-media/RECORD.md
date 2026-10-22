@@ -49,6 +49,7 @@ Next: SM-9 ready once CI: PASS; SM-10 C4 PR and SM-10b feature-done PR; Belt-Sli
 - SM-9 #4421: merged dev (text+media live, 6 pending), gate PASS, pushed 18ffebda5, ready with fast-lane.
 - SM-10 #4461 (C4 description only) opened as draft at 0f8a539c; ready once #4421 merges.
 - SM-10b #4462 (wave.json built, feature-done) opened as draft at 93ab231b; ready once #4421 and #4461 merge.
+- #4421 held by lane: its head Linux check (run 39812795490) red on HaloStrokeTrimKeysTests (dev-red #3856), fixed on dev by #4431 (18902a68c). Merged origin/dev into SM-9 (e1157a561) to carry the fix; gating before push.
 
 ## Open
 - none

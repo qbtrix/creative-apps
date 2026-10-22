@@ -87,3 +87,4 @@ utc	stage	event	ref	note
 2026-10-22T15:46:42Z	SM-z	draft	#4462	SM-10b gate pass, draft until #4421 and #4461 merge
 2026-10-22T16:17:14Z	lead	waiting	-	SM-r runs 39800767524/39802350745 still queued; #4421 in lane; #4461/#4462 draft
 2026-10-22T17:16:43Z	SM-r	waiting	-	runs 39810338100/39801392118/39814071339 cancelled, 39791265992 Halo-red; waiting for a green run
+2026-10-22T17:18:23Z	SM-z	fixing	#4421	head Linux red on Halo test; merged dev (has #4431 fix), gating
