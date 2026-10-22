@@ -20,7 +20,7 @@ Loop: v3 (the packet has a `## Slices` table).
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | FV-1 | FV-a | 1 | .mp4 and .gif with fps and loop, refused until FV-3 | Sources/FlareModel/FlareExport.swift, Tests/FlareModelTests/FlareVideoExportTests.swift | export tests pass; MP4 refused | #4414 | merged |
-| FV-3 | FV-m | 2 | frame plan: every frame, even MP4, GIF alpha; RJ-F07/F08 folders | FlareExport+Kernel.swift, FlareVideoExportTests, mutations, RealJobs | FlareVideoExportTests; Mutate 3+ | #4435 | PR open (fast-lane), head 9b8a50f0, gate PASS, Mutate 9/9 |
+| FV-3 | FV-m | 2 | frame plan: every frame, even MP4, GIF alpha; RJ-F07/F08 folders | FlareExport+Kernel.swift, FlareVideoExportTests, mutations, RealJobs | FlareVideoExportTests; Mutate 3+ | #4435 | PR open (fast-lane), head 8acab202 (dev merged in for #4431), gate PASS, Mutate 9/9 |
 | FV-4 | FV-m | 2 | live adapter streams to media sinks; cancel deletes | LiveExportAdapter, FakeExport, FlareVideoWriteTests | FlareVideoWriteTests; Mutate 2 | #4436 | PR open, base lead/export-pack-fv3, head ea0f7047, gate PASS, Mutate 7/7 |
 
 ## Decisions
