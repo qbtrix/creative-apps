@@ -19,9 +19,19 @@
 // Picked, Unflagged and Rejected (checkmarks), Rating ▸, Label ▸, Hide
 // Rejected, Clear Filter. Each is disabled with its Model help until its
 // slice lights it up.
+// The menu bar's own items (command-state CS-4) are built from Library's
+// command catalog: `MenuCommand(id, on: catalog)` takes the spec's title and
+// availability on the focused window's catalog, and runs the window's action
+// for that command; the collections and filter items follow in their slice.
 import LibraryModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
+
+extension FocusedValues {
+    /// The focused Library window's catalog, which the menu items' specs read.
+    @Entry var libraryCatalog: LibraryCatalog?
+}
 
 extension MenuCommand {
     /// One menu item: disabled while `action` is nil, with `reason` as its help.
@@ -34,14 +44,32 @@ extension MenuCommand {
             title, systemImage: systemImage, shortcut: shortcut, help: action == nil ? "\(named): \(reason)" : named,
             isEnabled: action != nil) { action?() }
     }
+
+    /// The item for Library catalog command `id`: its spec's title unless `title` names more; disabled while
+    /// `action` is nil (with `reason`, as before) or the spec can't run on `target` (with the spec's why).
+    init(
+        _ id: String, on target: LibraryCatalog, title: String? = nil, systemImage: String? = nil,
+        action: LibraryMenu.Action?, reason: String, key: String? = nil, shortcut: KeyboardShortcut? = nil
+    ) {
+        let spec = LibraryCatalog.catalog.spec(id)
+        let name = title ?? spec?.title ?? id
+        let named = key.map { "\(name) (\($0))" } ?? name
+        let why = action == nil ? reason : spec?.availability(target).why
+        self.init(
+            name, systemImage: systemImage, shortcut: shortcut, help: why.map { "\(named): \($0)" } ?? named,
+            isEnabled: why == nil) { action?() }
+    }
 }
 
 struct LibraryCommands: Commands {
     @FocusedValue(\.libraryMenu) private var focused
     @FocusedValue(\.libraryFilters) private var focusedFilters
+    @FocusedValue(\.libraryCatalog) private var focusedCatalog
 
     private var menu: LibraryMenu { focused ?? .disabled }
     private var filters: LibraryFiltersMenu { focusedFilters ?? LibraryFiltersMenu() }
+    /// What the items' specs read; an empty catalog with no window, where every action is nil anyway.
+    private var catalog: LibraryCatalog { focusedCatalog ?? LibraryCatalog() }
     private static let noWindow = "Open the Library window first."
 
     /// The services' reason for `member`, else `fallback`; no window says so.
@@ -64,14 +92,16 @@ struct LibraryCommands: Commands {
             collectionFileItems
             Divider()
             MenuCommand(
-                title: "Import Folder…", systemImage: "folder.badge.plus", action: menu.file.importFolder,
+                "file.import-folder", on: catalog, title: "Import Folder…", systemImage: "folder.badge.plus",
+                action: menu.file.importFolder,
                 reason: menu.file.importHelp ?? why("importer", "Import isn't available right now."),
                 shortcut: KeyboardShortcut("i", modifiers: [.command, .shift]))
             MenuCommand(
-                title: "Load Sample Photos", systemImage: "photo.badge.plus", action: menu.edit.loadSamples,
+                "file.load-samples", on: catalog, title: "Load Sample Photos", systemImage: "photo.badge.plus",
+                action: menu.edit.loadSamples,
                 reason: why(nil, "This catalog was made by a newer Library. Update Library to open it."))
             MenuCommand(
-                title: "Export…", systemImage: "square.and.arrow.up", action: menu.export.export,
+                "file.export", on: catalog, title: "Export…", systemImage: "square.and.arrow.up", action: menu.export.export,
                 reason: menu.export.exportHelp ?? why("exporter", "Export isn't connected yet."),
                 shortcut: KeyboardShortcut("e", modifiers: [.command, .shift]))
             MenuCommand(
@@ -80,18 +110,22 @@ struct LibraryCommands: Commands {
         }
         CommandGroup(replacing: .undoRedo) {
             MenuCommand(
-                title: menu.edit.undoTitle, action: menu.edit.undo, reason: why(nil, "There is nothing to undo."),
+                "edit.undo", on: catalog, title: menu.edit.undoTitle,
+                action: menu.edit.undo, reason: why(nil, "There is nothing to undo."),
                 shortcut: KeyboardShortcut("z"))
             MenuCommand(
-                title: menu.edit.redoTitle, action: menu.edit.redo, reason: why(nil, "There is nothing to redo."),
+                "edit.redo", on: catalog, title: menu.edit.redoTitle,
+                action: menu.edit.redo, reason: why(nil, "There is nothing to redo."),
                 shortcut: KeyboardShortcut("z", modifiers: [.command, .shift]))
         }
         CommandGroup(replacing: .pasteboard) {
             MenuCommand(
-                title: "Select All", action: menu.edit.selectAll, reason: why(nil, "There are no photos to select."),
+                "edit.select-all", on: catalog, title: "Select All",
+                action: menu.edit.selectAll, reason: why(nil, "There are no photos to select."),
                 shortcut: KeyboardShortcut("a"))
             MenuCommand(
-                title: "Deselect", action: menu.edit.deselect, reason: why(nil, "No photos are selected."),
+                "edit.deselect", on: catalog, title: "Deselect",
+                action: menu.edit.deselect, reason: why(nil, "No photos are selected."),
                 shortcut: KeyboardShortcut("a", modifiers: [.command, .shift]))
         }
         CommandGroup(before: .toolbar) {
@@ -106,10 +140,10 @@ struct LibraryCommands: Commands {
     @ViewBuilder private var viewItems: some View {
         let view = menu.view
         MenuCommand(
-            title: "Grid", systemImage: "square.grid.2x2", action: view.grid,
+            "view.grid", on: catalog, title: "Grid", systemImage: "square.grid.2x2", action: view.grid,
             reason: why(nil, "The grid is already showing."), key: "G")
         MenuCommand(
-            title: "Loupe", systemImage: "rectangle", action: view.loupe,
+            "view.loupe", on: catalog, title: "Loupe", systemImage: "rectangle", action: view.loupe,
             reason: why(nil, "The loupe is already showing, or there are no photos."))
         Divider()
         // In the grid Zoom In/Out size the thumbnails; in the loupe they step
@@ -119,16 +153,16 @@ struct LibraryCommands: Commands {
         let zoomWhy: (String) -> String = { inGrid ? why(nil, $0) : why("loupe", $0) }
         let openFirst = why(nil, "Open a photo in the loupe to zoom.")
         MenuCommand(
-            title: view.zoomInTitle, systemImage: "plus.magnifyingglass", action: view.zoomIn,
+            "view.zoom-in", on: catalog, title: view.zoomInTitle, systemImage: "plus.magnifyingglass", action: view.zoomIn,
             reason: zoomWhy("Can't zoom in further."), shortcut: KeyboardShortcut("+"))
         MenuCommand(
-            title: view.zoomOutTitle, systemImage: "minus.magnifyingglass", action: view.zoomOut,
+            "view.zoom-out", on: catalog, title: view.zoomOutTitle, systemImage: "minus.magnifyingglass", action: view.zoomOut,
             reason: zoomWhy("Can't zoom out further."), shortcut: KeyboardShortcut("-"))
         MenuCommand(
-            title: "Zoom to Fit", action: view.zoomToFit,
+            "view.zoom-to-fit", on: catalog, title: "Zoom to Fit", action: view.zoomToFit,
             reason: inGrid ? openFirst : zoomWhy("The photo already fits."), shortcut: KeyboardShortcut("0"))
         MenuCommand(
-            title: "Actual Size", action: view.actualSize,
+            "view.actual-size", on: catalog, title: "Actual Size", action: view.actualSize,
             reason: inGrid ? openFirst : zoomWhy("The photo is already at actual size."),
             shortcut: KeyboardShortcut("1"))
         Divider()
@@ -138,7 +172,7 @@ struct LibraryCommands: Commands {
         Menu("Sort By") {
             ForEach(LibrarySort.allCases, id: \.self) { sort in
                 MenuCommand(
-                    title: sort.rawValue, systemImage: sort == view.sort ? "checkmark" : nil,
+                    "view.sort", on: catalog, title: sort.rawValue, systemImage: sort == view.sort ? "checkmark" : nil,
                     action: bind(view.setSort, sort), reason: noSort)
             }
         }
@@ -151,15 +185,16 @@ struct LibraryCommands: Commands {
         let develop = why("develop", "Develop isn't connected yet.")
         let crop = why("crop", "Crop isn't connected yet.")
         MenuCommand(
-            title: "Copy Settings", action: photo.copySettings, reason: develop,
+            "photo.copy-settings", on: catalog, title: "Copy Settings", action: photo.copySettings, reason: develop,
             shortcut: KeyboardShortcut("c", modifiers: [.command, .shift]))
         MenuCommand(
-            title: "Paste Settings", action: photo.pasteSettings, reason: develop,
+            "photo.paste-settings", on: catalog, title: "Paste Settings", action: photo.pasteSettings, reason: develop,
             shortcut: KeyboardShortcut("v", modifiers: [.command, .shift]))
-        MenuCommand(title: "Reset Develop", action: photo.resetDevelop, reason: develop)
+        MenuCommand("photo.reset-develop", on: catalog, title: "Reset Develop", action: photo.resetDevelop, reason: develop)
         Divider()
-        MenuCommand(title: photo.cropTitle, systemImage: "crop", action: photo.toggleCrop, reason: crop, key: "R")
-        MenuCommand(title: "Reset Crop", action: photo.resetCrop, reason: crop)
+        MenuCommand("photo.crop", on: catalog, title: photo.cropTitle, systemImage: "crop",
+            action: photo.toggleCrop, reason: crop, key: "R")
+        MenuCommand("photo.reset-crop", on: catalog, title: "Reset Crop", action: photo.resetCrop, reason: crop)
         Divider()
         collectionPhotoItems
     }
@@ -173,19 +208,23 @@ struct LibraryCommands: Commands {
         Menu("Set Rating") {
             ForEach(0...5, id: \.self) { stars in
                 MenuCommand(
-                    title: stars == 0 ? "No Stars" : stars == 1 ? "1 Star" : "\(stars) Stars",
+                    "metadata.set-rating", on: catalog, title: stars == 0 ? "No Stars" : stars == 1 ? "1 Star" : "\(stars) Stars",
                     action: bind(cull.setRating, stars), reason: reason, key: named("\(stars)"))
             }
         }
         Menu("Set Flag") {
-            MenuCommand(title: "Pick", action: bind(cull.setFlag, .pick), reason: reason, key: named("P"))
-            MenuCommand(title: "Reject", action: bind(cull.setFlag, .reject), reason: reason, key: named("X"))
-            MenuCommand(title: "Clear Flag", action: bind(cull.setFlag, PhotoFlag.none), reason: reason, key: named("U"))
+            MenuCommand("metadata.pick", on: catalog, title: "Pick",
+                action: bind(cull.setFlag, .pick), reason: reason, key: named("P"))
+            MenuCommand("metadata.reject", on: catalog, title: "Reject",
+                action: bind(cull.setFlag, .reject), reason: reason, key: named("X"))
+            MenuCommand("metadata.clear-flag", on: catalog, title: "Clear Flag",
+                action: bind(cull.setFlag, PhotoFlag.none), reason: reason, key: named("U"))
         }
         Menu("Set Label") {
-            MenuCommand(title: "None", action: bind(cull.setLabel, nil), reason: reason)
+            MenuCommand("metadata.set-label", on: catalog, title: "None", action: bind(cull.setLabel, nil), reason: reason)
             ForEach(PhotoLabel.allCases, id: \.self) { label in
-                MenuCommand(title: label.rawValue, action: bind(cull.setLabel, label), reason: reason)
+                MenuCommand("metadata.set-label", on: catalog, title: label.rawValue,
+                    action: bind(cull.setLabel, label), reason: reason)
             }
         }
         Divider()

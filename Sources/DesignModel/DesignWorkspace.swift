@@ -64,10 +64,9 @@ public enum DesignTool: String, CaseIterable, Sendable {
     /// reason names the tool and its key itself.
     public var unavailableHelp: String? {
         switch self {
-        case .move, .frame, .rectangle, .ellipse, .text: nil
+        case .move, .frame, .rectangle, .ellipse, .text, .eyedropper: nil
         case .shape: "Drawing shapes isn't built yet."
         case .pen: "Drawing paths isn't built yet."
-        case .eyedropper: "Eyedropper (I): picking a fill or stroke color from the canvas isn't built yet."
         }
     }
 

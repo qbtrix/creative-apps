@@ -56,7 +56,8 @@ struct DesignCanvas: View {
         return CanvasViewport(
             documentSize: CGSize(width: page.frameWidth, height: page.frameHeight), zoom: zoom,
             pointer: feedback.pointer, unit: "pt", onSize: onViewport, onZoom: onZoom,
-            onDrag: { perform(.drag($0, $1, .current)) }, onDragEnd: { perform(.endDrag) },
+            // The Eyedropper picks through DesignSampleLoupe's tap alone, so a click picks once, not twice.
+            onDrag: model.tool == .eyedropper ? nil : { perform(.drag($0, $1, .current)) }, onDragEnd: { perform(.endDrag) },
             onKey: model.editingTextID == nil ? { key($0) } : nil, onPointer: feedback.onPointer
         ) {
             DesignArtwork(painted: painted, zoom: zoom, editingTextID: model.editingTextID)
