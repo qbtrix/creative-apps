@@ -3,7 +3,7 @@
 Issue: #3449 · Packet: docs/blueprints/suiteui/features/shape-tools.md
 Run: act-1a1646f0a9f-d1ei (resumed; first run act-1a1579fdd22-6z1j) · Session: claude/suiteui-feature-lead-v7e2hk · Started: 2026-10-20T04:46Z · Resumed: 2026-10-22T16:30Z
 Stage: 3 awaiting supervisor (SH-z blocked on eyedropper:EY-z)
-Base: dev 066cd28d6 (21:42Z poll)
+Base: dev 38a65b10d (22:13Z poll)
 Next: once EY-z #4583 merges, build SH-8 on FakeRect.stroke (with the star-drag budget row), then SH-9 with feature-done, as one slice PR to dev.
 
 ## Slices
@@ -34,6 +34,7 @@ Next: once EY-z #4583 merges, build SH-8 on FakeRect.stroke (with the star-drag 
 |---|---|---|---|---|---|
 
 ## Decisions
+- 22:13Z poll: EY-z #4583 still open (head 76eb19d64). SH-z stays blocked on it.
 - 21:42Z poll: TT-z #4429 merged (434b1d1db). EY-z is open as #4583 (lead/eyedropper-EY-z); SH-z now waits only on it.
 - 2026-10-22T21:11Z: poll on dev be18ab62: TT-z #4429 still open; no EY-7/8/9 PR. No supervisor reply; SH-8, SH-9 stay unstarted.
 - 2026-10-22T20:40Z: SS-8 #4607 merged (a4326ce9): FakeRect.stroke is on dev, so the stroke-style:SS-d link in the FakeCanvasDocument.swift chain is cleared for SH-8. Still blocked: TT-z #4429 open, then eyedropper:EY-z (no EY-7/8/9 PR). No supervisor reply; SH-8, SH-9 stay unstarted.
