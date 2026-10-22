@@ -4,7 +4,7 @@ Issue: #3448 · Packet: docs/blueprints/suiteui/features/eyedropper.md
 Run: act-1a1647a67aa-dau5 (relaunch) · Started: 2026-10-22T16:45Z
 Stage: EY-z waiting on lane
 Base: 18464f26b93c6826d069e0107545d7aacfac033c
-Next: Poll #4429 (macOS build), then #4583, #4585; Belt-Slice-Done on a green run
+Next: After #4429 merges, retarget #4583 to dev, then #4585 after #4583; Belt-Slice-Done on a green run
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: Poll #4429 (macOS build), then #4583, #4585; Belt-Slice-Done on a green ru
 |---|---|---|---|---|---|
 
 ## Decisions
+- 20:11Z #4429's macOS build (run 39840342516) passed; the lane merges it next sweep.
 - 19:36Z #4429 is now based on dev (retargeted by its lead); its lane macOS build is dispatched. #4583/#4585 follow it.
 - 2026-10-22T17:50Z: The lead dir moved to docs/leads/suiteui-eyedropper on lead/suiteui-eyedropper, the names Belt reads (lead/eyedropper keeps a copy). EY-8+EY-9 opened as #4583 and the C4 part as #4585 (separate PR because check-c4-descriptions refuses a description rewrite beside code). The proxy re-appends a tool footer to PR bodies on every edit; the lane strips it from the squash.
 - 2026-10-22T16:45Z Relaunch under act-1a1647a67aa-dau5. EY-7 #3597 merged (f5e9be31). Only EY-8 and EY-9 remain.
