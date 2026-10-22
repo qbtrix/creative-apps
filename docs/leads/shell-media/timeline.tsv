@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-22T02:58:06Z	redev	dev-merge	#4035	dev merged again, gate CI: PASS, Head lines moved
 2026-10-22T03:07:38Z	check-in	lane	#4035,#4119	macOS builds queued on lane; nothing merged since 02:55Z; pre-gating next stacked slice
 2026-10-22T03:28:56Z	check-in	lane	#4035,#4119	all 7 redev PRs pushed + Head moved; SM-3 pre-gated PASS; lane macOS builds queued/in progress
+2026-10-22T03:52:18Z	lane	heartbeat	-	SM-2 #4035 macOS build green, awaiting lane sweep; SM-6 #4237 reworked through SuiteImageIO (one ImageIO adapter), re-gating; SM-7/SM-8 pre-gates running
