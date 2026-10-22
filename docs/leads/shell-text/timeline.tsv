@@ -43,3 +43,5 @@ utc	stage	event	ref	note
 2026-10-22T01:40:22Z	check	ST-a	#4258 still open; batch 20261022013736 running; #4135 held
 2026-10-22T01:56:43Z	check	ST-a	#4258 head f9e7698c1 Linux green, macOS build queued; #4135 held
 2026-10-22T02:13:02Z	stage	ST-a	#4238 SC-14 on dev (Media.swift uses SuiteImageFormats); merged dev into ST-a, gate running
+2026-10-22T02:20:47Z	stage	ST-a	dev (with #4238) merged into ST-a, scripts/ci --changed PASS, pushed 1f0949ff0; #4135 marked ready with Fast-Check/Head
+2026-10-22T02:20:47Z	stage	ST-m,ST-live	merged new ST-a into #4157 and #4156 cleanly; gates running
