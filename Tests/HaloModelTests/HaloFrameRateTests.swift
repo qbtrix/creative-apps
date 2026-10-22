@@ -18,7 +18,7 @@ import Testing
     /// 29.97 fps, the NTSC rate.
     static let ntsc = FrameRate(numerator: 30000, denominator: 1001)
 
-    @Test(.disabled("waits on FR-8")) func oldFilesUnchanged() throws {
+    @Test func oldFilesUnchanged() throws {
         let data = try Self.oldFile()
         let files = LiveProjectFiles()
         let state = try files.decode(data)
@@ -30,7 +30,7 @@ import Testing
         #expect(!String(decoding: saved, as: UTF8.self).contains("\"frameRate\""), "a whole rate wrote frameRate")
     }
 
-    @Test(.disabled("waits on FR-8")) func renderUsesExactRate() throws {
+    @Test func renderUsesExactRate() throws {
         #expect(abs(Self.ntsc.seconds(ofFrame: 300) - 10.01) < 1e-9)
         let frames = Self.ntsc.frames(forDuration: 10)
         #expect(frames == 300)
