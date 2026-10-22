@@ -57,3 +57,4 @@ Wave 1: HA-a (one slice PR), alongside transform HT-a. Wave 2: HA-5 stacked on H
 - 2026-10-22T10:28Z HA-6 #4342 merged (ba8009b05). Slice HA-m is done once its critic panel has screens (no UI in HA-6; the catalog and RJ-H33 are Linux-proved). HA-z waits on HA-7b #4371.
 - 2026-10-22T10:53Z HA-7b #4371 is mergeable and clean at a3a05044, waiting on the lane's batch. HA-8 (status built, feature-done) opens after it merges.
 - 2026-10-22T11:08Z HA-7b #4371 merged (21c3e7bc4). HA-8 built on lead/autosave-history-HA-8 (ddaf38bb: status built, feature_issue #3442; waves render --dry-run OK); full scripts/ci running, then its PR opens with feature-done.
+- 2026-10-22T11:17Z HA-8 PR #4397 opened (fast-lane, feature-done), head ddaf38bb, full scripts/ci PASS. Once it merges: Belt-Slice-Done for HA-m and HA-z on the next scoped halo run, then the critic panel and Belt-Contact-Sheet.
