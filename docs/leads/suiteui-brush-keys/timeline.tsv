@@ -27,3 +27,4 @@ utc	stage	event	ref	note
 2026-10-22T16:54:00Z	poll	BK-u waits AN-u (waits OC-u); BK-photo/design/flare prereqs not on dev; blocked poll 1
 2026-10-22T17:43:19Z	poll	AN-u, AN-flare-u, AR-photo-u, DS-design, AB-photo, OC-photo-m not done (no Slice-Done on #4522/#4506/#3757/#4494); blocked poll 2
 2026-10-22T18:06:39Z	nudge	Belt nudge read; records moved from lead/brush-keys to this branch (Belt reads lead/suiteui-brush-keys)
+2026-10-22T18:15:42Z	stopped	#4531 closed as duplicate of #3758; work recorded on #3758; run ends

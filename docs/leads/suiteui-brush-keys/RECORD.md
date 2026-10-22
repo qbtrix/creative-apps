@@ -1,10 +1,10 @@
 # brush-keys lead record
 
-Issue: #4531 (was #3758) · Packet: docs/blueprints/suiteui/features/brush-keys.md
+Issue: #3758 (#4531 was a duplicate, closed 18:08) · Packet: docs/blueprints/suiteui/features/brush-keys.md
 Run: act-1a164855f49-5pe1 · Session: cloud line lead (line:suiteui, with #4528) · Started: 2026-10-22T16:52Z
 Stage: 3 wave 3 (blocked)
 Base: 3578eaee20f317d368feda7ba35e4911285eebc5
-Next: (records live on lead/suiteui-brush-keys from now) polling. BK-u waits anchor-parenting:AN-u (which waits orientation-crop OC-u, building now in this run); BK-photo waits AB-photo, AR-photo-u, OC-photo-m; BK-design waits DS-design; BK-flare waits AN-flare-u.
+Next: STOPPED 2026-10-22T18:15:42Z: supervisor closed #4531 as a duplicate of #3758 and asked the lead to stop and record its work there (comment on #3758). BK-u..BK-z remain, all blocked on other features.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
