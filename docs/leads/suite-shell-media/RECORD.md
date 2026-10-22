@@ -2,7 +2,7 @@
 
 Issue: #3711 · Packet: docs/blueprints/suite/features/shell-media.md
 Run: act-1a16391fd34-thw9 · Resumed: 2026-10-22T12:30Z (previous run act-1a1601c3538-r0c9, started 2026-10-21T10:50Z)
-Stage: SM-w and SM-r merged (#4237 222bc695, #4128 721ac8e9, #4239 c322dde1), each waits a successful suite or full run containing it; SM-9 #4421 rebuilt on dev, gating
+Stage: SM-w done (run 39785758185); SM-r merged (#4128 721ac8e9, #4239 c322dde1), waits a successful suite or full run containing both; SM-9 #4421 rebuilt on dev, gating
 Base: dc87ad2b0bcebf2b6bef749328a03ba06687275f
 Next: SM-9 ready once CI: PASS; SM-10 C4 PR and SM-10b feature-done PR; Belt-Slice-Done for SM-w, SM-r, SM-z as runs land
 
@@ -11,7 +11,7 @@ Next: SM-9 ready once CI: PASS; SM-10 C4 PR and SM-10b feature-done PR; Belt-Sli
 |---|---|---|---|---|---|---|---|---|---|
 | SM-a | Callers code against MediaEncoding, MediaDecoding, the media values and FakeMedia through SuiteServices.media; Linux checks and macOS live checks written and disabled | SM-1, SM-2 | MJ-SM0 | - | no | 0 | planned | | |
 | SM-m | Settings refuse what each codec can't write; FrameClock gives exact times and drift-free GIF delays | SM-3, SM-4 | MJ-SM1 | SM-a | no | 0 | planned | | |
-| SM-w | On a Mac, movies write in four codecs, GIF/APNG and stills encode, cancel deletes | SM-5, SM-6 | MJ-SM2 | SM-a | no | 0 | planned | | |
+| SM-w | On a Mac, movies write in four codecs, GIF/APNG and stills encode, cancel deletes | SM-5, SM-6 | MJ-SM2 | SM-a | no | 0 | done | 39785758185 | |
 | SM-r | On a Mac, stills decode upright to 8-bit sRGB, movie info and frames read back | SM-7, SM-8 | MJ-SM3 | SM-a, SM-w (SM-8) | no | 0 | planned | | |
 | SM-z | Slot live, write/read walk on the Mac, shared prose, feature built | SM-9, SM-10 | MJ-SM4 | SM-m, SM-w, SM-r | no | 0 | planned | | |
 
