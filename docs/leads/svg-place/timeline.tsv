@@ -39,3 +39,4 @@ utc	stage	event	ref	note
 2026-10-22T09:03Z	heartbeat	#4297 macOS build 39732985757 on f4d6350e still queued (2h12m; macOS runners busy); #4295 in lane (dev-red #3856 open); 0 open findings.
 2026-10-22T09:24Z	mac-build	#4297 macOS build 39732985757 on f4d6350e green (merged FlareCommands compiles); waiting on the lane's batch; #4295 in lane (dev-red #3856 open); 0 open findings.
 2026-10-22T09:46Z	heartbeat	#4297 green on f4d6350e (macOS build success), waiting for the lane's next merge; #4295 in lane (dev-red #3856 open); 0 open findings.
+2026-10-22T10:08Z	heartbeat	#4297 green on f4d6350e, queued for a lane batch (lane merging, last merge 09:59Z); #4295 in lane (dev-red #3856 open); 0 open findings.

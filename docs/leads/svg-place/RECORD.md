@@ -8,7 +8,7 @@ Next: wave 2 PRs in the lane (#4297 PF-u, #4295 PF-5); then PF-z once both land;
 
 Loop: v3 (the packet has a `## Slices` table).
 
-Last stage: 09:46Z #4297 green on f4d6350e (macOS build success), waiting for the lane's next merge; #4295 in lane (dev-red #3856 open); 0 open findings.
+Last stage: 10:08Z #4297 green on f4d6350e, queued for a lane batch (lane merging, last merge 09:59Z); #4295 in lane (dev-red #3856 open); 0 open findings.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
