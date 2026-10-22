@@ -52,3 +52,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T01:00Z: SM-2 #4035 failed lane macOS build (run 39698491954), owned by the shell-media lead
 - 2026-10-22T01:24Z: heartbeat 01:24Z: #4259 lane rebuild 39703409910 still queued; #4257 not merged yet (build green); #4035 open; full run 39700185524 Linux red on FormatListRatchetTests.realTreePasses (SuiteModel Media.swift, not ours), no slice credit
 - 2026-10-22T01:35Z: Records now also live on lead/flare-* (the branches Belt watches); every stage pushes there.
+- 2026-10-22T01:44Z: Heartbeat: #4259 build 39703409910 still queued (macOS runners busy); #4257, #4035 open; no green-Linux run containing FG-m yet.
