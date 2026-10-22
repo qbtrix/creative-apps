@@ -38,3 +38,5 @@ Next: #4189 merges -> Belt-Slice-Done DG-m on a green design run; #4197 merges; 
 - DG-u adds DesignInspectorFill.swift beyond DG-3/DG-6's file lists: GradientEditor merged after DG-2, so the swap DG-2 promised rides here.
 - none
 - Belt's 00:0xZ nudge names lead/gradient-fill and lead/autosave-history; those hold other runs' records (flare pe5i, suiteui c6w5), left untouched. This run's records are lead/design-*.
+
+- 2026-10-22T00:35Z Lane macOS builds red on dev's RenderBudgetPhotoPlaceTests (PhotoPlaceIntent.files), fixed on dev by #4215; merged origin/dev into #4197 (DG-7); regating. DG-m done line waits on a green design run.

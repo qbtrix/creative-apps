@@ -50,3 +50,4 @@ time	kind	note
 2026-10-21T23:12Z	3	merged	#4189	DG-m on dev e0fb99190; slice done waits on a green design/full ci.yml run (dev-red #3856 open)
 2026-10-21T23:22Z	4	heartbeat	#4197	DG-7 PR still open in the lane; DG-m done line waits on a green design/full run (dev-red #3856)
 2026-10-21T23:54Z	4	heartbeat	#4197	scoped design run 39693638859 on be9aa35bc (has DG-m, LP-b) queued; Linux check green there
+2026-10-22T00:35Z	DG-z	lane-mac-red	#4197	merged dev, regating
