@@ -1,8 +1,10 @@
 // PhotoTextEditTests.swift (text-layers TX-4): editing a text layer's words. A Type tool click (so a
 // double-click) on a text layer opens a box over it holding its words and selects it; its commit runs
-// `text.set-words`, one "Edit Text" step; unchanged words add no step. Linux and macOS.
+// `text.set-words`, one "Edit Text" step; unchanged words add no step. The inspector's gestures run their
+// text command as one step each; a refusal says why in the status line. Linux and macOS.
 import CoreRaster
 @testable import PhotoModel
+import SuiteKernel
 import Testing
 
 /// An 800 × 600 white image with a "SALE" text layer at (40, 60), the Type tool picked.
@@ -68,5 +70,28 @@ private func click(_ workspace: inout PhotoWorkspace, _ x: Double, _ y: Double) 
         workspace.toggleVisibility(try #require(workspace.selectedLayerID))
         click(&workspace, 45, 70)
         #expect(workspace.textBox?.editing == nil && workspace.textBox?.draft == "")
+    }
+
+    @Test func anInspectorGestureIsOneStep() throws {
+        var workspace = try withText()
+        workspace.runText(.size(120, drag: nil))
+        workspace.runText(.alignment(.center))
+        #expect(workspace.textStyle?.size == 120 && workspace.textStyle?.paragraph.alignment == .center)
+        workspace.undo()
+        #expect(workspace.textStyle?.size == 120 && workspace.textStyle?.paragraph.alignment == .leading)
+        #expect(workspace.statusMessage == nil)
+    }
+
+    @Test func aRefusedGestureSaysWhy() throws {
+        var workspace = try withText()
+        workspace.selectLayer(try #require(workspace.layers.last?.id))
+        workspace.runText(.size(120, drag: nil))
+        #expect(workspace.statusMessage == "Select a text layer first.")
+    }
+
+    @Test func theFamiliesAreTheTextServicesOwn() {
+        let workspace = PhotoWorkspace()
+        #expect(workspace.textFamilyNames == workspace.services.text.families().map(\.name))
+        #expect(!workspace.textFamilyNames.isEmpty)
     }
 }
