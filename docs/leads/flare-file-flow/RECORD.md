@@ -66,3 +66,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T02:21Z: scripts/ci --changed PASS on flm3 6fc01d59 and flu 8f62b766 (dev b5a6e7e0 merged in). #4259 still waits for the lane sweep.
 - 2026-10-22T02:43Z: #4259 held: lane Linux run 39710240958 red on FormatListRatchetTests.realTreePasses (SuiteModel Media.swift, red on dev e9933116 too; dev b5a6e7e0 Linux green). Merging dev into fl2, gate running.
 - 2026-10-22T02:46Z: fl2 merged dev b5a6e7e0, ci --changed PASS, pushed 593d9118; #4259 Head moved, footer stripped. Lane needs a new macOS build for this head.
+- 2026-10-22T03:12Z: Heartbeat: #4259 (593d9118) and #4257 (d417a35f) wait on lane macOS builds; #4035 too. dev Linux green at 66a84588.
