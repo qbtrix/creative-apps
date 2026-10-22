@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-22T02:36:18Z	2026-10-22T02:36:18Z	SM-a	redev	#4035	merged dev (took SC-14 StillFormat), gate PASS, head 10b9aefb; #4258 closed as redundant
 2026-10-22T02:44:55Z	2026-10-22T02:44:55Z	stack	restack	#4119 #4123 #4125 #4237 #4128 #4239	SM-2's dev-merged head merged up SM-3..SM-8 (dev's StillFormat everywhere); SM-6 StillEncoder reads type id/title from SuiteImageFormats (24ce097a); #4035 Linux check running
 2026-10-22T02:58:06Z	redev	dev-merge	#4035	dev merged again, gate CI: PASS, Head lines moved
+2026-10-22T03:07:38Z	check-in	lane	#4035,#4119	macOS builds queued on lane; nothing merged since 02:55Z; pre-gating next stacked slice
