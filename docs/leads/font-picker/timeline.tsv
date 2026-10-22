@@ -34,3 +34,4 @@ utc	stage	event	ref	note
 2026-10-22T21:42Z	pr-opened	FP-m #4644 (head 94cdfc3a, stacked on FP-a)
 2026-10-22T21:47Z	pushed	FP-u 562cd0da (PR held for size cap until #4638 merges)
 2026-10-22T21:47Z	agent-start	FP-z builder (FP-6, FP-7)
+2026-10-22T21:55Z	restart	container restart: FP-z and SR-2 builders relaunched on their worktrees; lane dispatched macOS builds for #4638 and #4644 (queued)
