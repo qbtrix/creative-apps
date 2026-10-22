@@ -1,18 +1,18 @@
 # gradient-fill lead record
 
 Issue: #3419 · Packet: docs/blueprints/flare/features/gradient-fill.md
-Run: act-1a15d4ed024-1wsg (line lead: gradient-fill #3419, export-pack #3481, file-flow #3482; resumed from act-1a1574f6742-pe5i) · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-20T03:17Z
-Stage: 3 wave 3 (FG-2 + FG-4 in #3959)
-Base: b64cbb8cf55ea16b62f0a293c83e1820b3e4b572 (origin/dev)
-Next: #3959 (FG-a, FG-4 folded in) in the lane; after it lands and a scoped flare run shows flare-fill-gradient, critic panel + Belt-Slice-Done FG-a and Mac-Finish-Wanted; FG-3 once GF-3 #3760 merges; FG-5 once GF-6 #3742, KS-a #3921, AC-flare
+Run: act-1a160bffba1-bvv3 (line lead: gradient-fill #3419, export-pack #3481, file-flow #3482; resumed from act-1a1574f6742-pe5i) · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-20T03:17Z · resumed from act-1a15d4ed024-1wsg at 23:2xZ
+Stage: 3 wave 4 (FG-z)
+Base: 8c55f0bf9 (origin/dev)
+Next: next heartbeat
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | FG-a | FlareWorkspace conforms to GradientFillTarget as stubs; PaintReadout carries the gradient; FILL shows the switch and the editor | FG-1, FG-2 | MJ-FG | suiteui GF-2 (merged #3695) | yes | 0 | building | – | – |
 | FG-u | FILL snapshots, stop-drag render budget, journey written | FG-3, FG-4 | FJ-G1 | FG-a; GF-3 #3760 open (FG-3) | yes | 0 | building (FG-4) | – | – |
-| FG-m | fill commands as one undo step through the engine; Mixed for differing gradients | FG-5, FG-6 | MJ-FG | FG-a; KS-a #3921 open; GF-6 #3742 open, AC-flare (FG-5) | no | 0 | blocked | – | – |
-| FG-z | live services, journey on live, feature built | FG-7, FG-8 | FJ-G1 | FG-u, FG-m | yes | 0 | blocked | – | – |
+| FG-m | fill commands as one undo step through the engine; Mixed for differing gradients | FG-5, FG-6 | MJ-FG | FG-a; KS-a #3921 open; GF-6 #3742 open, AC-flare (FG-5) | no | 0 | merged | – | – |
+| FG-z | live services, journey on live, feature built | FG-7, FG-8 | FJ-G1 | FG-u, FG-m | yes | 0 | building | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -21,10 +21,10 @@ Next: #3959 (FG-a, FG-4 folded in) in the lane; after it lands and a scoped flar
 | FG-2 | FG-a | 1 | FILL shows switch + GradientEditor on stubs; refusal string gone | Sources/FlareApp/FlareInspectorFill.swift | FlareGradientSnapshots.fillGradient | – | building (wave 3) |
 | FG-3 | FG-u | 2 | snapshots + render budget | Tests/AppSnapshotTests/FlareGradientSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetFlareGradientTests.swift | RenderBudgetFlareGradientTests.stopDragInThreeBodies | – | waiting FG-a, GF-3 |
 | FG-4 | FG-u | 2 | journey written, skipped | UITests/FlareJourneyTests+Gradient.swift | compiles, skipped | – | building (wave 3, stacked on FG-2) |
-| FG-5 | FG-m | 2 | conformance bodies, specs in catalog, RJ-F31 | Sources/FlareModel/FlareFill+Kernel.swift, Tests/FlareModelTests/FlareGradientTests.swift, Tests/mutations/FlareModel.FlareFill+Kernel.json, Sources/FlareModel/FlareCommandCatalog.swift, Tests/command-ids/flare.txt, Tests/RealJobs/flare/gradient-edit/gradient-edit.jobs.json, Tests/RealJobs/flare/gradient-edit/input/gradient-circle.flare | FlareGradientTests | – | waiting FG-a, GF-6, AC-flare |
+| FG-5 | FG-m | 2 | conformance bodies, specs in catalog, RJ-F31 | Sources/FlareModel/FlareFill+Kernel.swift, Tests/FlareModelTests/FlareGradientTests.swift, Tests/mutations/FlareModel.FlareFill+Kernel.json, Sources/FlareModel/FlareCommandCatalog.swift, Tests/command-ids/flare.txt, Tests/RealJobs/flare/gradient-edit/gradient-edit.jobs.json, Tests/RealJobs/flare/gradient-edit/input/gradient-circle.flare | FlareGradientTests | #4181 | merged de0f324d |
 | FG-6 | FG-m | 2 | Mixed for differing gradients; solid setter replaces gradient | Sources/FlareModel/FlarePaint.swift, Tests/FlareModelTests/FlarePaintGradientTests.swift, Tests/mutations/FlareModel.FlarePaint.json | FlarePaintGradientTests | #3532 | merged a454b5c9 |
-| FG-7 | FG-z | 3 | journey on live | UITests/FlareJourneyTests+Gradient.swift | FlareGradientJourneyTests.testEditImportedGradient | – | waiting FG-u, FG-m |
-| FG-8 | FG-z | 4 | flare.md, status built, feature-done | docs/blueprints/flare.md, docs/blueprints/flare/features/gradient-fill.wave.json | scripts/waves render --dry-run | – | waiting FG-7 |
+| FG-7 | FG-z | 3 | journey on live | UITests/FlareJourneyTests+Gradient.swift | FlareGradientJourneyTests.testEditImportedGradient | #4257 | lane |
+| FG-8 | FG-z | 4 | flare.md, status built, feature-done | docs/blueprints/flare.md, docs/blueprints/flare/features/gradient-fill.wave.json | scripts/waves render --dry-run | #4257 | lane |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -67,31 +67,10 @@ Next: #3959 (FG-a, FG-4 folded in) in the lane; after it lands and a scoped flar
 - 12:46Z: Fix PRs #4054 #4055 #4065 open on lane, no needs-fix. Full CI 39600323802 on dev 737541328 (contains 78812f8e) pending: FG-a/FG-u Slice-Done waits on its Linux job. No scoped flare run with 78812f8e yet. GF-6 #3742 open; 8 open findings: no FG-5.
 - 13:08Z: No change: #4054 #4055 #4065 #4004 open on lane; full CI 39600323802 still pending (dev Linux checks red on Photo); no scoped flare run with 78812f8e; #3742 open; 8 open findings. Stray remote branch 'heartbeat' (4e450c3d, 12:46Z slip) needs supervisor delete: proxy 403.
 - 13:28Z: Belt-Slice-Done + Mac-Finish-Wanted posted on #3419 for FG-a and FG-u (run 39604117821, dev 5bec80894, Linux green). Scoped flare run 39607068579 at ac7f95c9f (contains 78812f8e) queued: FG-u critic panel once its journeys upload ui-screens. Fix PRs #4054 #4055 #4065 still on lane; #3742 open; 8 open findings.
-- 14:45Z: Records moved to lead/flare-* branches (Belt watches these). FG-a round 1: #4054 merged; #4055, #4065 open in lane. 7 open findings (>5), so no FG-5 yet; FG-5 also waits on GF-6 #3742. FG-u review: scoped flare run 39607068579 built and tested green and uploaded snapshots (fill-gradient/radial PNGs downloaded); it failed only at bundle-apps (FlareModel Catalog.swift:117 cannot find SetLayerParent, release build), an existing dev break covered by dev-red #3856, not FG-u. Waiting on journeys 39618454489 for ui-screens, then critic panel. Stray remote branches heartbeat and lead-flare-gradient-fill need a supervisor delete (403 for the lead).
-- 15:06Z: Journeys 39618454489 still queued (no macOS runner). #4055, #4065, #3742 open in lane; 7 open findings; #4047 open. No new comments.
-- 15:26Z: #4065 merged 15:19Z (Fixes #4040); 6 open findings. #4055 still in lane; FG-a round 2 waits on it. Journeys 39618454489 still queued. #3742, #4047 open.
-- 15:46Z: No change: journeys 39618454489 still queued (~1.5h, no macOS runner); #4055, #3742, #4047 open; 6 open findings.
-- 16:09Z: Journeys 39618454489 done: job failed in the Xcode build (FlareModel Catalog.swift:117 cannot find SetLayerParent), no ui-screens uploaded, so FG-u review is blocked. Root cause: project.yml pins creative-core 2258b625 while Package.swift pins 7966e5a (bump #3825 left project.yml behind); SPM passes, xcodegen builds fail for every app. Spawned fixer: project.yml pin to Package.swift's revision (+ match test), PR to dev Refs #3856. #4055, #3742, #4047 open; 6 open findings.
-- 16:14Z: Opened #4116 fix(build): project.yml pins creative-core at Package.swift's revision (head 544938d0, BuildGraphTests match test proven to fail on the old pin, CI: PASS). Refs #3856. After it merges, FG-u needs a scoped flare run's journeys for ui-screens.
-- 16:28Z: #4116 in lane; lane dispatched its macOS build. #4055, #3742, #4047 open; 6 open findings. No new comments.
-- 16:48Z: #4116 macOS build in progress. #4055, #3742, #4047 open; 6 open findings. No new comments.
-- 17:11Z: heartbeat: #4116 lane macOS build green, Linux batch run in progress; #4055 #3742 #4047 open; 6 open findings (no FG-5); FG-u critics wait on #4116 merge + scoped flare run
-- 17:31Z: #4116 merged 17:12Z (project.yml core pin; Flare bundle/journeys build unblocked). Asked supervisor on #3419 for a scoped flare run on dev; FG-u critics run on its ui-screens. #4055 #3742 #4047 open; 6 open findings (no FG-5).
-- 17:51Z: Supervisor dispatched scoped flare run 39645308209 (pending, macOS queue); FG-u critics wait for its journeys ui-screens. #4055 still in lane (FG-a round 2 after merge). 6 open findings, #3742 open: no FG-5.
-- 18:12Z: Mac-Finish FG-a at d6d545f9 (18:04Z), gap #4097 (line:library, release test build; not Flare's). Scoped flare run 39645308209 still pending on macOS queue; FG-u critics wait for its journeys. #4055 still in lane; 6 open findings, #3742 open: no FG-5.
-- 18:32Z: Scoped flare run 39645308209 still pending (macOS queue). Full journeys 39645095817 at 3f96cd10 predates #4116, macOS journeys failed, no ui-screens. #4055 #3742 still in lane; 6 open findings.
-- 18:54Z: FG-a: #4055 conflicts with dev; its red Linux run failed only Library tenThousandPaths timing (not Flare). Fixer dispatched: merge dev, ci --changed, move Head, drop attribution footer. FG-u: scoped run 39645308209 still pending macOS. FG-5 blocked (6 findings open, #3742 in lane).
-- 19:03Z: FG-a: #4055 merged dev (only a header-comment conflict in FlareInspectorFill.swift), ci --changed PASS, new head f91904b8, Head line moved. Back in the lane.
-- 19:14Z: #4055 head f91904b8 waiting on lane macOS build (dispatched 19:05Z). FG-u scoped run 39645308209 still pending macOS; no flare journeys yet. FG-5 blocked (6 findings, #3742 in lane).
-- 19:36Z: No change: #4055 (f91904b8) and #3742 waiting on lane macOS builds; FG-u scoped run 39645308209 still pending macOS; 6 findings open, FG-5 blocked.
-- 19:59Z: FG-a round 1 done: #4055 merged 19:56Z, #3742 (GF-6) merged 19:55Z. 4 open findings (#4039 #4041 #4042 #4043, all waiting needs-ui #4047), <=5, and KS-a #3921 and AC-flare are done: FG-m (FG-5; FG-6 is #3532) builder started on lead/gradient-fill-fg5. FG-u critics, plus the FG-a round-2 look, wait on scoped flare run 39645308209 (still pending macOS) and its journeys.
-- 20:19Z: FG-m: FG-5 opened #4181 (head 985c6ef5, 12 files +143/-41, Mutate 6/6 FlareModel.FlareFill+Kernel, CI: PASS, fast-lane, Refs #3419). Fill commands run through the engine as one undo step; a stop drag coalesces under fill-<token>; fillHelp nil with a shape selected; RJ-F31 gradient-edit. Waits on the lane batch macOS gate.
-- 20:21Z: #4181 (FG-m) in the lane, no lane comment yet. Scoped flare run 39645308209 still pending macOS; no flare journeys run (full journeys 39647568644 at 3f96cd10 predates #4116, failed, no ui-screens). 4 open findings, all on needs-ui #4047 (open).
-- 20:43Z: #4181 (FG-m): lane dispatched its macOS build (flare) at 20:33Z; the lane's attribution note is the server-appended footer, stripped on squash. Scoped flare run 39645308209 still queued. Flare journeys 39669994652 queued at 5f332421, which predates #4116 (xcodegen core pin), so its build is expected to fail and FG-u critics keep waiting on 39645308209. 4 open findings, all on needs-ui #4047.
-- 21:05Z: No change: #4181 lane macOS build 39671303530 queued; scoped flare run 39645308209 and flare journeys 39669994652 queued (macOS runners). 4 open findings on needs-ui #4047.
-- 21:26Z: No change: #4181 macOS build 39671303530, scoped flare 39645308209 (3.5h) and flare journeys 39669994652 all queued on macOS runners. 4 open findings on needs-ui #4047.
-- 21:48Z: No change: #4181 macOS build 39671303530, scoped flare 39645308209 and flare journeys 39669994652 still queued. Full journeys 39665682657 (4d4ebb24) is green but predates #4116 and has no artifacts, so not usable for FG-u critics. 4 findings open on #4047.
-- 22:10Z: needs-ui #4047 closed by #4186 (merged 22:07Z, on dev). FG-a fix round 2 (the last) dispatched: fix-batch wf_69e19deb-20c on findings #4039 #4041 #4042 #4043 at dev d8b1b2109, Flare adopts GradientEditor's segmented switch and selected-stop label; #4181's files busy. #4181 macOS build 39671303530, scoped 39645308209, journeys 39669994652 still queued.
-- 22:23Z: FG-a fix round 2 (last) done: PR #4236 (head 54c18181, fast-lane, Fast-Check pass) fixes #4039 #4041; #4042 #4043 closed as already fixed on dev by #4186. Nothing deferred, so no gap issues. FG-m #4181 still waits on lane macOS build. FG-u critics wait on usable flare ui-screens.
-- 22:33Z: Heartbeat: #4181 (FG-m) and #4236 (FG-a r2) open, fast-lane, waiting on lane macOS builds (39671303530 queued). Open findings 2 (#4039 #4041, fixed by #4236). Scoped run 39645308209 still queued; no usable flare journeys yet. FG-u critics and FG-z wait.
-- 22:57Z: heartbeat: scoped run 39645308209 (af840a6d) red on FlareFillSnapshots.anOffSwitchShowsItsReasonAsANote (note label nil); af840a6d predates #4109, which made the off-switch note read by label, so dev already carries the fix, no finding. #4181 (FG-m) lane mac build 39671303530 and #4236 (FG-a r2) build 39686705313 queued; flare journeys 39689170691 at af840a6d queued (FG-u panel waits on it). Open flare gradient findings 2 (#4039 #4041, fixed by #4236).
+- 23:30Z: Resumed as act-1a160bffba1-bvv3. Since 13:28Z: round 1 #4054 #4055 #4065 merged; FG-5 is #4181 (FG-m, Mutate 6/6, macOS build 39671303530 green, waiting a lane sweep); round 2 (last) is #4236 (Fixes #4039 #4041 using needs-ui #4047, macOS build 39686705313 running); Mac-Finish FG-a gaps #4097. Mac-finish PR #4163 (FG-u, not ours) is needs-rebase. Both PR bodies moved to this run id, footer stripped via MCP. Open gradient-fill findings: 2 (#4039 #4041, both in #4236). dev Linux red on Photo (dev-red #3856), not ours. FG-z builder started, stacked on #4181 (gradient-circle sample fixture missing from FlareFixtures, so FG-7 adds it).
+- 2026-10-21T23:55Z: 23:5xZ: #4181 (FG-m) merged as de0f324d. FG-z #4257 opened (FG-7 + FG-8, head 767243df, 8 files +89/-14, Mutate 3/3, feature-done). No dev run contains #4181 yet.
+- 2026-10-22T00:14Z: #4257 merged dev, head 1342653f, relabelled fast-lane
+- 2026-10-22T00:36Z: full run 39695935370 cancelled; Linux checks red on shell-media FormatListRatchet (not ours); #4257 in lane
+- 2026-10-22T01:00Z: heartbeat: #4257 awaiting lane macOS build; scoped flare 39690220595 in progress
+- 2026-10-22T01:14Z: #4257 (FG-z) lane macOS build 39699101753 success; awaiting lane merge. Scoped flare run 39690220595 (e0fb9919) red on macOS compile of AppSnapshotTests, predates FG-m de0f324d, no slice credit; full run 39700185524 queued
+- 2026-10-22T01:24Z: heartbeat 01:24Z: #4259 lane rebuild 39703409910 still queued; #4257 not merged yet (build green); #4035 open; full run 39700185524 Linux red on FormatListRatchetTests.realTreePasses (SuiteModel Media.swift, not ours), no slice credit
