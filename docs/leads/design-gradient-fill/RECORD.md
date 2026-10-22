@@ -1,33 +1,34 @@
 # design-gradient-fill lead record
 
 Issue: #3415 · Packet: docs/blueprints/design/features/gradient-fill.md
-Run: act-1a15da1b26c-9qo6 · Session: claude/design-feature-lead-run-1k035k · Started: 2026-10-21T08:46:56Z (prior run act-1a15ac70747-ky1f)
-Stage: 3 DG-m #4189 merged (e0fb99190, 23:0xZ), waiting on a green design/full ci.yml run (dev red, #3856; Linux run 39689070230 failed with the dev-red set); DG-z: DG-7 PR #4197 open (journey file alone off dev; #4192 closed, oversize when stacked)
-Base: 896cafe3 (origin/dev); main verified at 0dd23d65
-Next: #4189 merges -> Belt-Slice-Done DG-m on a green design run; #4197 merges; DG-8 after DG-7 + design-export built (design-export still planned at 2026-10-21T22:05Z)
+Run: act-1a1657aa3cf-vhsw · Session: claude/design-feature-lead-run-1k035k · Started: 2026-10-21T08:46:56Z (relaunched 2026-10-22T21:00Z; prior runs act-1a15da1b26c-9qo6, act-1a15ac70747-ky1f)
+Stage: 3 DG-z: DG-7 #4197 merged (20d00ab3); DG-8 (first-cut line, status built, feature-done) gating on branch design-gradient-fill-dg8
+Base: be18ab62 (origin/dev); main verified at 0dd23d65
+Next: DG-8 PR (fast-lane, feature-done) merges -> green dev Linux run containing it -> Belt-Slice-Done DG-z, Mac-Finish-Wanted DG-z, Belt-Contact-Sheet on #3415
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| DG-a | DesignNode.gradient, GradientFillTarget stubs, Fill section on them | DG-1, DG-2 | MJ-DG | GF-a | yes | 0 | done | – | – |
-| DG-u | canvas, text, PNG and PDF paint the gradient; snapshots, budget | DG-3, DG-6 | DJ-G1 | DG-a; GF-3 (DG-6) | yes | 0 | in lane | – | – |
-| DG-m | fill commands as one step; SVG gradients | DG-4, DG-5 | MJ-DG | DG-a; GF-6, AC-design (DG-4); GF-7, DE-s (DG-5) | no | 0 | waiting | – | – |
-| DG-z | journey on live; first-cut line; built | DG-7, DG-8 | DJ-G1 | DG-u, DG-m; design-export | no | 0 | waiting | – | – |
+| DG-a | DesignNode.gradient, GradientFillTarget stubs, Fill section on them | DG-1, DG-2 | MJ-DG | GF-a | yes | 0 | merged-done | – | wanted |
+| DG-u | canvas, text, PNG and PDF paint the gradient; snapshots, budget | DG-3, DG-6 | DJ-G1 | DG-a; GF-3 (DG-6) | yes | 0 | merged-done | – | Mac-Finish a78dda7d gaps: #4355 |
+| DG-m | fill commands as one step; SVG gradients | DG-4, DG-5 | MJ-DG | DG-a; GF-6, AC-design (DG-4); GF-7, DE-s (DG-5) | no | 0 | merged-done | 39709889487 | – |
+| DG-z | journey on live; first-cut line; built | DG-7, DG-8 | DJ-G1 | DG-u, DG-m (design-export unchained, see Decisions) | yes | 0 | DG-7 merged; DG-8 gating | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | DG-1 | DG-a | 1 | DesignNode.gradient, conformance and runFill stubs; DesignGradientTests disabled | Sources/DesignModel/DesignNode.swift, Sources/DesignModel/DesignFill+Kernel.swift, Tests/DesignModelTests/DesignGradientTests.swift | DesignGradientTests | #3687 | merged (b17264bf) |
 | DG-2 | DG-a | 1 | Fill section on the stubs (placeholder until GF-2's GradientEditor) | Sources/DesignApp/DesignInspectorFill.swift, Sources/DesignApp/DesignInspector.swift | DesignInspectorSnapshots | #3687 | merged (b17264bf) |
-| DG-3 | DG-u | 2 | canvas and text paint the gradient (exports draw through DesignArtwork); Fill section shows GradientEditor | Sources/DesignApp/DesignCanvasMarks.swift, Sources/DesignApp/DesignTextArtwork.swift, Sources/DesignApp/DesignInspectorFill.swift, Tests/AppSnapshotTests/DesignGradientPaintTests.swift | DesignGradientPaintTests | #3978 | in lane |
-| DG-6 | DG-u | 2 | snapshots, render budget, journey skipped until DG-7 | Tests/AppSnapshotTests/DesignGradientSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetDesignGradientTests.swift, UITests/DesignJourneyTests+Gradient.swift | RenderBudgetDesignGradientTests | #3978 | in lane |
+| DG-3 | DG-u | 2 | canvas and text paint the gradient (exports draw through DesignArtwork); Fill section shows GradientEditor | Sources/DesignApp/DesignCanvasMarks.swift, Sources/DesignApp/DesignTextArtwork.swift, Sources/DesignApp/DesignInspectorFill.swift, Tests/AppSnapshotTests/DesignGradientPaintTests.swift | DesignGradientPaintTests | #3978 | merged |
+| DG-6 | DG-u | 2 | snapshots, render budget, journey skipped until DG-7 | Tests/AppSnapshotTests/DesignGradientSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetDesignGradientTests.swift, UITests/DesignJourneyTests+Gradient.swift | RenderBudgetDesignGradientTests | #3978 | merged |
 
 ## Critic reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
-| – | – | – | – | – | – |
+| DG-u, DG-z | 39802358033 (scoped design) | 3fcea284 | clarity, mouse, taste, job, design (snapshots) | none | 0 |
 
 ## Decisions
+- Run act-1a1657aa3cf-vhsw: DG-8 no longer waits on design-export. That wait is prose only (design-export is still planned and has no feature issue), and DG-7 merged without it. DG-8 marks gradients in the first cut and sets status built, with Refs #3415 and the feature-done label.
 - Run act-1a15a9a4e8b-kn6a: the prior run's DG-a builder opened no PR; this run rebuilds DG-a. On dev: GF-1 (#3421) only; GF-2 (editor and shading stubs), GF-5/6/7 (rule, command and SVG bodies) are not merged, so DG-2 uses a plain placeholder (CLAUDE.md, missing SuiteUI component) and DG-u, DG-m wait.
 - Branch is lead/design-gradient-fill, not lead/gradient-fill: lead/gradient-fill belongs to another line's lead of the same feature name.
 - PRs target dev (CLAUDE.md); main b3011ab9 is an ancestor of dev and only fast-forwards to green dev.
