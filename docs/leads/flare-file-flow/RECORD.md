@@ -71,3 +71,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T04:02Z: #4259 (593d9118) lane macOS build still queued; FL-m/FL-u branches ready behind it
 - 2026-10-22T04:24Z: #4259 macOS build still queued
 - 2026-10-22T04:52Z: #4259 macOS build still queued (since 02:48Z)
+- 2026-10-22T05:19Z: #4259 macOS build still queued (since 02:48Z)
