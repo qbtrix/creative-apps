@@ -1,6 +1,7 @@
 // HaloLayerInspector.swift: the selected layer in Halo's inspector: its
 // header (`selectedLayerHeader`), the TRANSFORM group, a refusal's caption,
-// the LAYER group, then the EASING and TEXT slots. TRANSFORM has one InspectorSliderRow per
+// the LAYER group, FILL for a solid or shape (HaloFillInspector, its
+// gestures to `runFill`), then the EASING and TEXT slots. TRANSFORM has one InspectorSliderRow per
 // `propertyRows` row (shown value, range, step, unit, decimals; keyed while
 // a key sits at the playhead) with a KeyframeButton beside it, or under it
 // when the full titles and widest typical values (`widestTypicalText`) don't
@@ -29,12 +30,15 @@
 // With no layer selected nothing shows here (HaloCompositionInspector shows
 // the composition instead).
 import HaloModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
 struct HaloLayerInspector: View {
     let model: HaloProject
     var perform: @MainActor (HaloCommand) -> Void = { _ in }
+    /// Runs one fill editor gesture on the window's project (`HaloProject.runFill`).
+    var runFill: @MainActor (GradientIntent) -> Void = { _ in }
 
     var body: some View {
         if let header = model.selectedLayerHeader {
@@ -52,6 +56,9 @@ struct HaloLayerInspector: View {
                 }
                 if let layer = model.selectedLayer {
                     HaloLayerGroup(layer: layer, model: model, perform: perform)
+                    if HaloFillInspector.shows(layer.kind) {
+                        HaloFillInspector(model: model, perform: perform, runFill: runFill)
+                    }
                 }
                 HaloEasingInspector(model: model, perform: perform)
                 HaloTextInspector(model: model, perform: perform)
@@ -177,7 +184,7 @@ struct HaloPropertyRowView: View, Equatable {
         + SuiteSpacing.xs + 2 * SuiteSize.keyframeButton
 
     /// HaloModel's key state as SuiteUI's, one to one.
-    static func keyState(_ state: HaloKeyState) -> KeyState {
+    static func keyState(_ state: HaloKeyState) -> SuiteUI.KeyState {
         switch state {
         case .notAnimated: .idle
         case .animated: .animated
