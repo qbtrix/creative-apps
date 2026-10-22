@@ -55,3 +55,4 @@ utc	stage	event	ref	note
 2026-10-22T03:30Z	resume-fr8	resume, new run id	-	act-1a161a658a7-2jql
 2026-10-22T06:55Z	resume-fr8	heartbeat: FR-8 rebased, #4293 at d1c5cb529	-	act-1a161a658a7-2jql
 2026-10-22T07:00Z	fr8-pr	FR-8 #4341 opened	-	act-1a161a658a7-2jql
+2026-10-22T07:17Z	fr8b-pr	FR-8b #4345 opened	-	act-1a161a658a7-2jql
