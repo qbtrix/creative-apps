@@ -1,9 +1,12 @@
-// GalleryPlaceImage.swift: the gallery's `place-image` page (placed-images PL-2 and PL-3; PL-4 turns its journey on).
+// GalleryPlaceImage.swift: the gallery's `place-image` page (placed-images PL-2 and PL-3; PL-8 runs it live).
 // An 800 × 600 canvas, drawn at half size, that takes dropped files, with Place… (the panel) and two samples whose bytes
-// are made here: `Wide PNG`, a 1200 × 400 picture, and `Logo SVG`, 240 × 80 with a red and a blue part. A sample
-// places through `PlaceRules.fitted`; the page applies each intent to its one image (Replace… keeps the box, Reset Size
-// takes `resetBox`), and each intent writes one line, `<command id> <intent>`, to `suite.gallery.log`.
+// are made here: `Wide PNG`, a 1200 × 400 picture, and `Logo SVG`, 240 × 80 with a red and a blue part. The page drives
+// `GalleryPlaceBoard`, a local PlacedImageTarget with a History: every intent (a sample, the panel, a drop, the rows)
+// runs through `PlaceCommands` in the board's catalog as one step and writes one line, `<command id> <outcome>`, to
+// `suite.gallery.log`. On the canvas a drag on the selected image's right edge resizes its box (one `Resize` step) and
+// a ⌥-drag inside it moves the picture in its box (`place.focus` per sample under one drag token: one `Move Inside`).
 // The canvas reads "Image, <name>, W by H pixels" to VoiceOver. The page is its own area in `SuiteGallery.areas`.
+import AppKit
 import CoreGraphics
 import Foundation
 import ImageIO
@@ -67,12 +70,127 @@ enum GalleryPlaceImage {
     }
 }
 
+/// The page's document: its placed images in paint order, their assets, the selection, and one History step per edit.
+struct GalleryPlaceBoard: PlacedImageTarget {
+    struct Layer: Hashable, Sendable { var id: String; var image: PlacedImage }
+    struct State: Hashable, Sendable { var layers: [Layer] = [], assets = PlacedAssets(), selected: String? }
+    /// What a canvas drag grabbed: the selected image's right edge, or its inside with ⌥ held.
+    enum Grab: Sendable { case edge, focus }
+    /// How near the right edge (canvas points) a drag grabs it, and the narrowest box a resize leaves.
+    static let edgeSlop = 12.0, minimumSide = 8.0
+
+    private(set) var state = State(), history = History<State>()
+
+    static let catalog = try? CommandCatalog<GalleryPlaceBoard>(
+        app: "gallery", PlaceCommands.specs(GalleryPlaceBoard.self), history: { $0.history })
+
+    var placeHelp: String? { nil }
+    var placeCanvas: Rect { GalleryPlaceImage.canvas }
+    var placeFillBox: Rect? { nil }
+    var placeFormats: Set<PlacedFormat> { Set(PlacedFormat.allCases) }
+    var placedSelection: (id: String, image: PlacedImage, asset: PlacedAsset)? {
+        guard let layer = state.layers.first(where: { $0.id == state.selected }),
+            let asset = state.assets.byID[layer.image.assetID]
+        else { return nil }
+        return (layer.id, layer.image, asset)
+    }
+    /// Every image with its asset, in paint order.
+    var drawn: [(asset: PlacedAsset, image: PlacedImage)] {
+        state.layers.compactMap { layer in state.assets.byID[layer.image.assetID].map { ($0, layer.image) } }
+    }
+
+    func rasterSize(_ data: Data, format: PlacedFormat) throws -> Size {
+        guard let size = PlacedRaster.pixelSize(data), size.width > 0, size.height > 0 else {
+            throw CatalogError.failed(id: "place.image", message: "The file has no readable size.")
+        }
+        return size
+    }
+
+    mutating func insertPlaced(_ asset: PlacedAsset, _ image: PlacedImage, name: String) -> String {
+        history.record(name, state)
+        let id = "image\(state.layers.count + 1)"
+        state.layers.append(Layer(id: id, image: image))
+        (state.assets, state.selected) = (state.assets.adding(asset), id)
+        return id
+    }
+
+    mutating func setPlaced(_ image: PlacedImage, asset: PlacedAsset?, name: String, drag: String?) {
+        guard let index = state.layers.firstIndex(where: { $0.id == state.selected }) else { return }
+        history.record(name, state, key: drag.map { "\(name):\($0)" })
+        state.layers[index].image = image
+        if let asset { state.assets = state.assets.adding(asset) }
+    }
+
+    /// `intent` through the catalog; the log line: `<command id> <undo step>, n in History`, or why it was refused.
+    mutating func run(_ intent: PlaceIntent) -> String {
+        let (id, params) = intent.command
+        guard let catalog = Self.catalog else { return "\(id): no catalog" }
+        do {
+            let outcome = try catalog.run(id, params: params, on: &self)
+            return "\(id) \(outcome.undoStep ?? "no step"), \(history.steps.count) in History"
+        } catch { return "\(id): refused, \(error)" }
+    }
+
+    /// The right-edge drag: `start`'s box to `right` (its left, top and height kept), one `Resize` step per `drag`.
+    mutating func resize(_ start: PlacedImage, right: Double, drag: String) -> String {
+        guard right.isFinite else { return "resize: no edge" }
+        var image = start
+        image.box = Rect(
+            minX: start.box.minX, minY: start.box.minY, maxX: max(right, start.box.minX + Self.minimumSide), maxY: start.box.maxY)
+        setPlaced(image, asset: nil, name: "Resize", drag: drag)
+        return "resize \(PlacedImageText.whole(image.box.width)) × \(PlacedImageText.whole(image.box.height))"
+    }
+
+    /// The ⌥-drag: the picture moved `delta` (canvas points) from `start`, as `place.focus` under `drag`. Moving the
+    /// picture right shows more of its left, so the focus moves against the drag by the share of the spare room.
+    mutating func moveFocus(_ start: PlacedImage, by delta: Point, drag: String) -> String {
+        guard let natural = placedSelection?.asset.natural else { return "place.focus: nothing selected" }
+        let drawn = PlaceRules.drawnRect(start, natural: natural)
+        func moved(_ focus: Double, _ by: Double, _ spare: Double) -> Double {
+            spare > 0 && by.isFinite ? min(max(focus - by / spare, 0), 1) : focus
+        }
+        let focus = Point(
+            x: moved(start.focus.x, delta.x, drawn.width - start.box.width),
+            y: moved(start.focus.y, delta.y, drawn.height - start.box.height))
+        return run(.focus(focus, drag: drag))
+    }
+
+    /// The canvas drag ended: the next drag is its own step.
+    mutating func endDrag() { history.endRun() }
+
+    /// What a drag starting at `point` (canvas points) grabs of `image`: its right edge, or its inside with ⌥ held.
+    static func grab(_ image: PlacedImage, at point: Point, option: Bool) -> Grab? {
+        let box = image.box
+        guard point.y >= box.minY, point.y <= box.maxY else { return nil }
+        if abs(point.x - box.maxX) <= edgeSlop { return .edge }
+        return option && point.x >= box.minX && point.x <= box.maxX ? .focus : nil
+    }
+
+    /// Undoes the last step; false when there is none.
+    mutating func undo() -> Bool {
+        var current = state
+        let undid = history.undo { old in
+            defer { current = old }
+            return current
+        }
+        state = current
+        return undid
+    }
+}
+
+/// One canvas drag: its token, what it grabbed, and the image as it began.
+private struct GalleryPlaceDrag {
+    let token: String, grab: GalleryPlaceBoard.Grab, start: PlacedImage
+}
+
 /// The `place-image` page: the canvas, Place… and the samples, the file row once placed, and the log.
 struct GalleryPlaceImagePage: View {
-    @State private var placed: (asset: PlacedAsset, image: PlacedImage)?
+    @State private var board = GalleryPlaceBoard()
+    @State private var drag: GalleryPlaceDrag?
     @State private var log: [String] = []
 
     var body: some View {
+        let selected = board.placedSelection
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             HStack(spacing: SuiteSpacing.s) {
                 Button("Place…", action: choose)
@@ -80,18 +198,24 @@ struct GalleryPlaceImagePage: View {
                     .help(PlacePanel.unbuiltHelp ?? "Choose an image to place.")
                     .suiteControl(id: "suite.place.choose", enabled: PlacePanel.unbuiltHelp == nil, reason: PlacePanel.unbuiltHelp)
                 ForEach(GalleryPlaceImage.samples, id: \.name) { sample in
-                    Button(sample.label) { place(sample) }
+                    Button(sample.label) { apply(.place(name: sample.name, data: sample.data, at: nil)) }
                         .suiteControl(id: "suite.place.sample.\(sample.format.rawValue)", enabled: true, reason: nil)
                 }
             }
-            GalleryPlaceCanvas(placed: placed)
+            GalleryPlaceCanvas(drawn: board.drawn, selected: selected?.asset)
+                .gesture(DragGesture(minimumDistance: 1)
+                    .onChanged(dragged)
+                    .onEnded { _ in
+                        drag = nil
+                        board.endDrag()
+                    })
                 .placeDropTarget(formats: Set(PlacedFormat.allCases)) { files, point in
                     let scale = GalleryPlaceImage.scale
                     for file in files { apply(.place(name: file.name, data: file.data, at: Point(x: point.x / scale, y: point.y / scale))) }
                     return true
                 }
-            if let placed {
-                PlacedImageRows(asset: placed.asset, formats: Set(PlacedFormat.allCases), onIntent: apply)
+            if let selected {
+                PlacedImageRows(asset: selected.asset, formats: Set(PlacedFormat.allCases), onIntent: apply)
                     .frame(width: SuiteSize.inspectorWidth.ideal)
             }
             Text(log.last ?? "Nothing yet").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText).lineLimit(1)
@@ -103,11 +227,6 @@ struct GalleryPlaceImagePage: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
-    private func place(_ sample: GalleryPlaceImage.Sample) {
-        placed = GalleryPlaceImage.placed(sample)
-        send(.place(name: sample.name, data: sample.data, at: nil))
-    }
-
     private func choose() {
         Task { @MainActor in
             for file in await PlacePanel.choose(formats: Set(PlacedFormat.allCases)) {
@@ -116,52 +235,54 @@ struct GalleryPlaceImagePage: View {
         }
     }
 
-    /// `intent` on the page's one image, then its log line.
-    private func apply(_ intent: PlaceIntent) {
-        let canvas = GalleryPlaceImage.canvas
-        switch intent {
-        case .place(let name, let data, let at):
-            guard let asset = PlacedRaster.asset(name: name, data: data) else { return }
-            placed = (asset, PlacedImage(assetID: asset.id, box: PlaceRules.fitted(natural: asset.natural, in: canvas, at: at)))
-        case .replace(let name, let data):
-            guard let old = placed?.image, let asset = PlacedRaster.asset(name: name, data: data) else { return }
-            placed = (asset, PlacedImage(assetID: asset.id, box: old.box, focus: old.focus))
-        case .resetSize:
-            guard var current = placed else { return }
-            current.image.box = PlaceRules.resetBox(current.image, natural: current.asset.natural)
-            placed = current
-        case .focus(let point, _):
-            placed?.image.focus = point
+    /// A canvas drag: its first change grabs the selected image's edge, or (⌥) its inside; every change after that
+    /// resizes the box or moves the picture under the drag's token, so the whole drag is one step.
+    private func dragged(_ value: DragGesture.Value) {
+        let scale = GalleryPlaceImage.scale
+        if drag == nil, let image = board.placedSelection?.image {
+            let start = Point(x: value.startLocation.x / scale, y: value.startLocation.y / scale)
+            let grab = GalleryPlaceBoard.grab(image, at: start, option: NSEvent.modifierFlags.contains(.option))
+            drag = grab.map { GalleryPlaceDrag(token: UUID().uuidString, grab: $0, start: image) }
         }
-        send(intent)
+        guard let drag else { return }
+        let delta = Point(x: value.translation.width / scale, y: value.translation.height / scale)
+        switch drag.grab {
+        case .edge: send(board.resize(drag.start, right: drag.start.box.maxX + delta.x, drag: drag.token))
+        case .focus: send(board.moveFocus(drag.start, by: delta, drag: drag.token))
+        }
     }
 
-    private func send(_ intent: PlaceIntent) {
-        log.append("\(intent.command.id) \(intent)")
+    /// `intent` through the board's catalog, then its log line.
+    private func apply(_ intent: PlaceIntent) { send(board.run(intent)) }
+
+    private func send(_ line: String) {
+        log.append(line)
         if log.count > 40 { log.removeFirst(log.count - 40) }
     }
 }
 
-/// The canvas at half size: empty with its prompt, or the placed image through `drawPlaced`.
+/// The canvas at half size: empty with its prompt, or every placed image through `drawPlaced`.
 private struct GalleryPlaceCanvas: View {
-    let placed: (asset: PlacedAsset, image: PlacedImage)?
+    let drawn: [(asset: PlacedAsset, image: PlacedImage)]
+    let selected: PlacedAsset?
 
     var body: some View {
         let canvas = GalleryPlaceImage.canvas, scale = GalleryPlaceImage.scale
         Canvas { context, size in
             context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(SuiteColor.panel))
-            if let placed { context.drawPlaced(placed.asset, placed.image, scale: scale) }
+            for placed in drawn { context.drawPlaced(placed.asset, placed.image, scale: scale) }
         }
         .frame(width: canvas.width * scale, height: canvas.height * scale)
         .overlay {
-            if placed == nil {
+            if drawn.isEmpty {
                 Text("Drop an image here, or choose Place…").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText)
             }
         }
         .clipShape(.rect(cornerRadius: SuiteRadius.medium))
+        .contentShape(.rect)
         .accessibilityElement()
-        .accessibilityLabel(placed == nil ? "Empty canvas" : "Image")
-        .accessibilityValue(placed.map { PlacedImageText.spoken($0.asset) } ?? "")
+        .accessibilityLabel(selected == nil ? "Empty canvas" : "Image")
+        .accessibilityValue(selected.map(PlacedImageText.spoken) ?? "")
         .accessibilityIdentifier("suite.place.canvas")
     }
 }

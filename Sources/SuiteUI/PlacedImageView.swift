@@ -1,7 +1,8 @@
-// PlacedImageView.swift: the one draw of a placed image (placed-images PL-3): a PNG or JPEG drawn by
-// `PlaceRules.drawnRect`, clipped to the box with its corners; an SVG keeps the PL-2 placeholder, a grey box with the
-// file's name, until PL-8 draws the vector. A raster is decoded once per asset id and kept in `PlacedRaster`. A SwiftUI
-// `Canvas` renderer calls `drawPlaced` directly; `PlacedImageView` wraps it in a view the size of the box.
+// PlacedImageView.swift: the one draw of a placed image (placed-images PL-3, PL-8): a PNG or JPEG, or an SVG's
+// `PlacedVector` (even-odd fills through `Fill.shading`, strokes at their width), drawn by `PlaceRules.drawnRect` and
+// clipped to the box with its corners; bytes that read as neither draw a grey box with the file's name. A raster is
+// decoded, and a vector flattened, once per asset id and kept in `PlacedRaster`. A SwiftUI `Canvas` renderer calls
+// `drawPlaced` directly; `PlacedImageView` wraps it in a view the size of the box.
 import CoreGraphics
 import Foundation
 import ImageIO
@@ -23,10 +24,35 @@ extension GraphicsContext {
             context.draw(Image(decorative: raster, scale: 1), in: drawn)
             return
         }
+        if asset.format == .svg, let vector = PlacedRaster.vector(asset) {
+            context.drawVector(vector, in: drawn, strokes: strokes)
+            return
+        }
         context.fill(Path(drawn), with: .color(SuiteColor.valueFill))
         context.draw(
             Text(asset.name).font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText),
             at: CGPoint(x: box.midX, y: box.midY))
+    }
+
+    /// `vector`'s items in paint order, from its own units into `rect`: each fill even-odd, each stroke at its width
+    /// times the scale, each item at its opacity.
+    fileprivate func drawVector(_ vector: PlacedVector, in rect: CGRect, strokes: Bool) {
+        guard vector.size.width > 0, vector.size.height > 0 else { return }
+        let (sx, sy) = (Double(rect.width) / vector.size.width, Double(rect.height) / vector.size.height)
+        let units = Rect(minX: 0, minY: 0, maxX: vector.size.width, maxY: vector.size.height)
+        for item in vector.items {
+            var path = Path()
+            for contour in item.contours where contour.count > 1 {
+                path.addLines(contour.map { CGPoint(x: Double(rect.minX) + $0.x * sx, y: Double(rect.minY) + $0.y * sy) })
+                path.closeSubpath()
+            }
+            var layer = self
+            layer.opacity *= item.opacity
+            if let fill = item.fill { layer.fill(path, with: fill.shading(in: rect, box: units), style: FillStyle(eoFill: true)) }
+            if strokes, let color = item.strokeColor, item.strokeWidth > 0 {
+                layer.stroke(path, with: .color(color.swiftUI), lineWidth: item.strokeWidth * min(sx, sy))
+            }
+        }
     }
 }
 
@@ -34,6 +60,7 @@ extension GraphicsContext {
 enum PlacedRaster {
     static let limit = 16
     private static let decoded = Mutex<[String: CGImage]>([:])
+    private static let flattened = Mutex<[String: PlacedVector]>([:])
 
     /// `asset`'s picture; nil when ImageIO can't decode its bytes.
     static func image(_ asset: PlacedAsset) -> CGImage? {
@@ -48,24 +75,25 @@ enum PlacedRaster {
         return image
     }
 
-    /// The asset for `data` named `name`: its format sniffed, its natural size from ImageIO (a raster) or the SVG's
-    /// own size; nil when the bytes are none of `PlacedFormat` or carry no size.
-    static func asset(name: String, data: Data) -> PlacedAsset? {
-        guard let format = PlaceRules.format(of: data) else { return nil }
-        let natural: Size
-        if format == .svg {
-            guard let vector = try? PlaceRules.vector(data, name: name) else { return nil }
-            natural = vector.size
-        } else {
-            guard let source = CGImageSourceCreateWithData(data as CFData, nil),
-                let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
-                let width = properties[kCGImagePropertyPixelWidth] as? NSNumber,
-                let height = properties[kCGImagePropertyPixelHeight] as? NSNumber
-            else { return nil }
-            natural = Size(width: width.doubleValue, height: height.doubleValue)
+    /// `asset`'s SVG flattened for drawing; nil when its bytes don't import.
+    static func vector(_ asset: PlacedAsset) -> PlacedVector? {
+        if let held = flattened.withLock({ $0[asset.id] }) { return held }
+        guard let vector = try? PlaceRules.vector(asset.data, name: asset.name) else { return nil }
+        flattened.withLock { vectors in
+            if vectors.count >= limit { vectors.removeAll() }
+            vectors[asset.id] = vector
         }
-        guard natural.width > 0, natural.height > 0 else { return nil }
-        return PlacedAsset(id: PlaceRules.assetID(of: data), name: name, format: format, natural: natural, data: data)
+        return vector
+    }
+
+    /// A PNG's or JPEG's pixel size from its header; nil when ImageIO can't read one.
+    static func pixelSize(_ data: Data) -> Size? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+            let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+            let width = properties[kCGImagePropertyPixelWidth] as? NSNumber,
+            let height = properties[kCGImagePropertyPixelHeight] as? NSNumber
+        else { return nil }
+        return Size(width: width.doubleValue, height: height.doubleValue)
     }
 }
 
