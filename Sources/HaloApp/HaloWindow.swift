@@ -76,7 +76,9 @@ struct HaloWindow: View {
             } inspector: {
                 Group {
                     if model.selectedComposition != nil {
-                        HaloCompositionInspector(model: model, perform: perform, runFill: { model.runFill($0) })
+                        HaloCompositionInspector(
+                            model: model, perform: perform, runFill: { model.runFill($0) },
+                            runStroke: { model.runStroke($0) })
                     } else {
                         EmptyStateView(
                             "No Selection", systemImage: "rectangle.stack", message: "Select a composition to see its settings.")

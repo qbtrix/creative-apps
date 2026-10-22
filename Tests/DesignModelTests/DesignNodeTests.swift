@@ -37,23 +37,13 @@ import Testing
     #expect(DesignTool.move.nodeKind == nil && DesignTool.pen.nodeKind == nil)
 }
 
-@Test func onlyThePenTheEyedropperAndTheShapeToolAreDisabledAndSayWhy() {
-    for tool in DesignTool.allCases where tool != .pen && tool != .eyedropper && tool != .shape {
+@Test func onlyThePenAndTheShapeToolAreDisabledAndSayWhy() {
+    for tool in DesignTool.allCases where tool != .pen && tool != .shape {
         #expect(tool.isEnabled && tool.unavailableHelp == nil)
     }
     #expect(!DesignTool.pen.isEnabled && DesignTool.pen.unavailableHelp == "Drawing paths isn't built yet.")
-    // Until DY-5 makes its drag act.
-    #expect(!DesignTool.eyedropper.isEnabled && DesignTool.eyedropper.unavailableHelp != nil)
     // Until DS-5 makes its drag draw.
     #expect(!DesignTool.shape.isEnabled && DesignTool.shape.unavailableHelp == "Drawing shapes isn't built yet.")
-}
-
-// #3860: the palette shows a disabled tool's reason in place of "Title (Key)", so the
-// icon-only Eyedropper's reason names the tool, its I key and what it will do, in user terms.
-@Test func theDisabledEyedropperTooltipNamesTheToolAndItsKey() {
-    let help = DesignTool.eyedropper.unavailableHelp ?? ""
-    #expect(help.hasPrefix("Eyedropper (I): "))
-    #expect(help.contains("fill or stroke color from the canvas"))
 }
 
 @Test func pageSizeTextShowsWholePoints() throws {

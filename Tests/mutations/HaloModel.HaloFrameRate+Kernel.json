@@ -1,0 +1,6 @@
+[
+{"label":"renderUsesExactRate: a render times frames by the rate rounded to 30","file":"Sources/HaloModel/HaloFrameRate+Kernel.swift","find":"public func seconds(ofFrame frame: Int) -> Double { frameRate.seconds(ofFrame: frame) }","replace":"public func seconds(ofFrame frame: Int) -> Double { Double(frame) / Double(max(frameRate.nominal, 1)) }","tests":"HaloFrameRateTests.swift"},
+{"label":"oldFilesUnchanged: a whole rate writes frameRate too","file":"Sources/HaloModel/HaloFrameRate+Kernel.swift","find":"if !frameRate.isWhole { try c.encode(frameRate, forKey: .frameRate) }","replace":"try c.encode(frameRate, forKey: .frameRate)","tests":"HaloFrameRateTests.swift"},
+{"label":"a file's exact rate is dropped on open","file":"Sources/HaloModel/HaloFrameRate+Kernel.swift","find":"frameRate: try c.decodeIfPresent(FrameRate.self, forKey: .frameRate) ?? FrameRate(whole: whole),","replace":"frameRate: FrameRate(whole: whole),","tests":"HaloFrameRateTests.swift"},
+{"label":"Set Frame Rate takes a rate off the list","file":"Sources/HaloModel/HaloFrameRate+Kernel.swift","find":"guard FrameRate.common.contains(rate), let id = selectedCompositionID,","replace":"guard let id = selectedCompositionID,","tests":"HaloFrameRateTests.swift"}
+]

@@ -455,7 +455,8 @@
                 "description": "What Help > Report a Problem… and Beta Notes show: ProblemReport (the app, its version and build, macOS, the Mac model and the newest three suite crashes at most 7 days old, each a CrashFile trimmed to its header and crashed thread, with the home path, user and host redacted; text puts the person's note on top) and BetaNotes.current, the build's known issues. Built from values the caller reads; nothing here reads a disk or opens a socket (report-problem RP-1 stubs, RP-4 bodies).",
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
-                  "Sources/SuiteModel/Help/"
+                  "Sources/SuiteModel/Help/",
+                  "Sources/AfterGlowCLICore/HelpReports.swift"
                 ]
               }
             ]
@@ -482,7 +483,7 @@
               {
                 "id": "kernel-history",
                 "name": "History",
-                "description": "History<Payload>, the one undo history: named steps, a run under one key folded into one step, endRun, undo and redo through an apply closure, jump to a step, step ids that never repeat and dirty read as savedStepID against currentStepID; HistoryReading, what menus and title bars read. EK-2 declares it as a stub that answers like an empty history; EK-8 fills the bodies. HistoryCommands.swift: HistoryListing (the base state, every step's name, the applied index and the saved index) read from a History, the HistoryJumping protocol an app's document conforms to, and HistoryCommands.specs, the History panel's history.read query and history.jump view command; autosave-history AH-1 declares them with ids, schemas and availability, AH-6 fills the bodies.",
+                "description": "History<Payload>, the one undo history: named steps, a run under one key folded into one step, endRun, undo and redo through an apply closure, jump to a step, step ids that never repeat and dirty read as savedStepID against currentStepID; HistoryReading, what menus and title bars read. EK-2 declares it as a stub that answers like an empty history; EK-8 fills the bodies. HistoryCommands.swift: HistoryListing (the base state, every step's name, the applied index and the saved index) read from a History, the HistoryJumping protocol an app's document conforms to, and HistoryCommands.specs, the History panel's history.read query and history.jump view command; autosave-history AH-1 declares them with ids, schemas and availability, AH-6 fills the bodies; SuiteUI's History panel lists the steps through history.read and jumps through history.jump, beside the .autosaveRecovery modifier that offers a recovered draft on open, and AH-9 makes the fake app conform so RJ-X31 runs a jump on Linux.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/History/"
@@ -660,6 +661,36 @@
             ]
           },
           {
+            "id": "suite-imaging",
+            "name": "SuiteImaging",
+            "description": "The suite's one imaging library (docs/blueprints/suiteui/features/suite-imaging.md): the adjustment values Photo and Library share, the tone program they compile to, the CPU or GPU route and the live GPU tone surface. Linked by the Design, Photo, Library and Halo Models, SuiteUI and the CLI. Linux-safe over CoreRaster, CoreRender and CoreColor; CoreRenderMetal only on macOS. The only module outside SuiteUI's canvas host that may import Metal (ImagingBoundaryTests). Imports no app Model and no SuiteUI.",
+            "technology": "Swift 6, Foundation (FoundationEssentials), CoreRaster, CoreRender, CoreColor; CoreRenderMetal and Metal on macOS",
+            "tags": [
+              "internal"
+            ],
+            "components": [
+              {
+                "id": "imaging-adjust",
+                "name": "Adjust",
+                "description": "Adjust/ and the SuiteImaging namespace: AdjustSettings (exposure, levels, curve, hue and saturation) with its clamps and its one Codable form Photo and Library both read, and ImagingProgram, which compiles settings to CoreRender's tone adjustments (CPU) and tone program (GPU) in one fixed order. suite-imaging IM-2 declares them as stubs; IM-3 and IM-4 fill the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and CoreRender, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Adjust/",
+                  "Sources/SuiteImaging/SuiteImaging.swift"
+                ]
+              },
+              {
+                "id": "imaging-route",
+                "name": "Route",
+                "description": "Route/: ImagingRoute (CPU or GPU for a list of tone steps, CPU whenever a step is not on Metal yet) and, on macOS, LiveToneSurface, which keeps the base resident on the GPU and folds each step's tone program into the display encode. suite-imaging IM-2 declares them as stubs; IM-4 and IM-5 fill the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), CoreRender and CoreRaster; CoreRenderMetal and Metal on macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Route/"
+                ]
+              }
+            ]
+          },
+          {
             "id": "suite-shell",
             "name": "SuiteShell",
             "description": "macOS glue every app process links: live conformances needing AppKit or Launch Services, shared menu commands, the adoption modifier.",
@@ -767,16 +798,35 @@
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/SuiteShell/SuiteHelpCommands.swift",
-                  "Sources/SuiteShell/ShellHelpProvider.swift"
+                  "Sources/SuiteShell/ShellHelpProvider.swift",
+                  "Sources/SuiteShell/ProblemReportActions.swift"
+                ]
+              },
+              {
+                "id": "shell-media",
+                "name": "Media writers and readers",
+                "description": "The suite's one media I/O: AVFoundation and ImageIO behind SuiteModel's MediaEncoding and MediaDecoding. MovieWriter writes H.264, HEVC, HEVC with alpha and ProRes 4444 movies tagged BT.709, the canonical copy of Halo's movie writer.",
+                "technology": "Swift 6, AVFoundation, VideoToolbox and CoreGraphics, macOS 26",
+                "paths": [
+                  "Sources/SuiteShell/Media/"
                 ]
               },
               {
                 "id": "shell-text",
                 "name": "Text on Core Text",
-                "description": "The live half of SuiteModel's text contract: measures spans on Core Text into one advance per grapheme (ligatures split evenly, an emoji whole), ascent and descent, and names the fallback family.",
+                "description": "The live half of SuiteModel's text contract, reached as SuiteServices.text through LiveText: measures spans on Core Text into one advance per grapheme (ligatures split evenly, an emoji whole), ascent and descent, and names the fallback family; lists the Mac's font families with their faces; and draws placed glyphs at their origins and angles into an sRGB MediaFrame. It measures and draws only: line breaks, alignment and type on a path are creative-core text-engine's, so an app Model measures here, lays out in core, and draws here.",
                 "technology": "Swift 6, Core Text and AppKit, macOS 26",
                 "paths": [
                   "Sources/SuiteShell/Text/"
+                ]
+              },
+              {
+                "id": "shell-imageio",
+                "name": "SuiteImageIO",
+                "description": "The suite's one ImageIO adapter: encodes an image as a SuiteImageFormats format and writes animated GIF and APNG files for shell-media's writers. No other source file imports ImageIO.",
+                "technology": "Swift 6, ImageIO and CoreGraphics, macOS 26",
+                "paths": [
+                  "Sources/SuiteShell/SuiteImageIO.swift"
                 ]
               }
             ]
@@ -1252,6 +1302,42 @@
         "source": "suite-kernel",
         "target": "flarecore",
         "description": "uses FlareCore's Point, Rect, Matrix, Keyframe and Easing as they are",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "corerender",
+        "description": "compiles adjustments to CoreRender's tone adjustments and tone program",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "coreraster",
+        "description": "reads and writes tiled pixels",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "corecolor",
+        "description": "converts colours for the hue and saturation step",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "corerendermetal",
+        "description": "runs the tone program on the GPU (macOS only)",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "suite-kernel",
+        "description": "uses the kernel's shared editor values",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "suite-model",
+        "description": "reads the suite's format registry",
         "style": "sync"
       },
       {
