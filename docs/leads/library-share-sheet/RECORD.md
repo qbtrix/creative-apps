@@ -4,7 +4,7 @@ Issue: #3789 · Packet: docs/blueprints/library/features/share-sheet.md
 Run: act-1a15df37b73-k199 · Session: claude/library-line-lead-lqhhp8 (earlier act-1a15b98bc49-4lk9 on claude/task-k1zaw1) · Started: 2026-10-20T23:00Z
 Stage: 3 wave 2 done (SH-a, SH-u done); SH-m waits on LF-3 #4024 and BK-u #3967
 Base: e2b8aa76 (origin/dev)
-Next: #3814 fixer: build File > Share from a LibraryCommandCatalog spec (CommandPathTests), gate, move Head:; SH-m waits on file-flow LF-m and catalog-backup BK-m (only LF-a #3624, BK-a #3960 on dev); then SH-z
+Next: moved: run act-1a1648ae708-bncr keeps the record on lead/share-sheet at docs/leads/share-sheet/RECORD.md
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
