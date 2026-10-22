@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-21T10:43Z	heartbeat	parked; #3536 not done
 2026-10-22T13:10Z	3	stage-start	-	resumed: HK-a #4336 merged, PH-a waits met; building PH-a on dev 1a51808
 2026-10-22T13:25Z	3	wave-start	PH-a	W1: builder started on PH-1+PH-2 (branch lead/halo-placed-images-PH-a from dev)
+2026-10-22T13:45Z	3	check	PH-m	HT-6 #4415 and HK-6 #4400 open; PH-6 still waits; swift toolchain installed
