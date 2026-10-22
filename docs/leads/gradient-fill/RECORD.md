@@ -4,7 +4,7 @@ Issue: #3419 · Packet: docs/blueprints/flare/features/gradient-fill.md
 Run: act-1a160bffba1-bvv3 (line lead: gradient-fill #3419, export-pack #3481, file-flow #3482; resumed from act-1a1574f6742-pe5i) · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-20T03:17Z · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: 3 wave 4 (FG-z)
 Base: 8c55f0bf9 (origin/dev)
-Next: wait for a CI run on dev whose Linux job contains #4181 (de0f324d, FG-m) and then #4257 (FG-z); FG-a round 2 #4236 in the lane; FG-u critic panel on scoped flare run 39690220595's ui-screens
+Next: FG-z #4257 in lane; Slice-Done FG-m on green run
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -69,3 +69,4 @@ Next: wait for a CI run on dev whose Linux job contains #4181 (de0f324d, FG-m) a
 - 13:28Z: Belt-Slice-Done + Mac-Finish-Wanted posted on #3419 for FG-a and FG-u (run 39604117821, dev 5bec80894, Linux green). Scoped flare run 39607068579 at ac7f95c9f (contains 78812f8e) queued: FG-u critic panel once its journeys upload ui-screens. Fix PRs #4054 #4055 #4065 still on lane; #3742 open; 8 open findings.
 - 23:30Z: Resumed as act-1a160bffba1-bvv3. Since 13:28Z: round 1 #4054 #4055 #4065 merged; FG-5 is #4181 (FG-m, Mutate 6/6, macOS build 39671303530 green, waiting a lane sweep); round 2 (last) is #4236 (Fixes #4039 #4041 using needs-ui #4047, macOS build 39686705313 running); Mac-Finish FG-a gaps #4097. Mac-finish PR #4163 (FG-u, not ours) is needs-rebase. Both PR bodies moved to this run id, footer stripped via MCP. Open gradient-fill findings: 2 (#4039 #4041, both in #4236). dev Linux red on Photo (dev-red #3856), not ours. FG-z builder started, stacked on #4181 (gradient-circle sample fixture missing from FlareFixtures, so FG-7 adds it).
 - 2026-10-21T23:55Z: 23:5xZ: #4181 (FG-m) merged as de0f324d. FG-z #4257 opened (FG-7 + FG-8, head 767243df, 8 files +89/-14, Mutate 3/3, feature-done). No dev run contains #4181 yet.
+- 2026-10-22T00:14Z: #4257 merged dev, head 1342653f, relabelled fast-lane
