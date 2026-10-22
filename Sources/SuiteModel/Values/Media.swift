@@ -37,8 +37,33 @@ public enum MovieCodec: String, Codable, Sendable, CaseIterable {
 /// The animated image formats the suite writes.
 public enum AnimatedImageFormat: String, Codable, Sendable, CaseIterable { case gif, apng }
 
-/// The still image formats the suite writes.
-public enum StillFormat: String, Codable, Sendable, CaseIterable { case png, jpeg, heic, tiff }
+/// The still image formats the suite writes: `SuiteImageFormats.writable`, never a list of its own.
+/// Coded and spelled as the format's id ("png", "jpeg", "heic", "tiff").
+public struct StillFormat: RawRepresentable, Hashable, Codable, Sendable, CaseIterable {
+    public let format: SuiteImageFormat
+    public var rawValue: String { format.rawValue }
+
+    private init(writable format: SuiteImageFormat) { self.format = format }
+
+    /// Nil for a format the suite only reads.
+    public init?(_ format: SuiteImageFormat) {
+        guard SuiteImageFormats.writable.contains(format) else { return nil }
+        self.init(writable: format)
+    }
+
+    // One per writable format; MediaContractTests ties them to `allCases`.
+    public static let png = StillFormat(writable: .png)
+    public static let jpeg = StillFormat(writable: .jpeg)
+    public static let heic = StillFormat(writable: .heic)
+    public static let tiff = StillFormat(writable: .tiff)
+
+    public init?(rawValue: String) {
+        guard let format = SuiteImageFormat(rawValue: rawValue) else { return nil }
+        self.init(format)
+    }
+
+    public static var allCases: [StillFormat] { SuiteImageFormats.writable.compactMap { StillFormat($0) } }
+}
 
 /// What a movie is written as: its size, its whole-number rate, its codec and
 /// a quality from 0 to 1.
