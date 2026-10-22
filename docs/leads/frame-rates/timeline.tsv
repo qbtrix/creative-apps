@@ -76,3 +76,4 @@ utc	stage	event	ref	note
 2026-10-22T12:02Z	waiting on the lane for 4402 4407 4408	heartbeat	-	act-1a161a658a7-2jql
 2026-10-22T12:24Z	4407 and 4408 in macOS build	heartbeat	-	act-1a161a658a7-2jql
 2026-10-22T13:00Z	FR-flare merged, FR-z in progress	4408 merged	-	act-1a161a658a7-2jql
+2026-10-22T13:26Z	FR-halo 4407 rebase	needs-rebase	-	act-1a161a658a7-2jql
