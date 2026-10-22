@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "app": "halo",
+  "why": "RJ-H02, pending PH-5 (halo/placed-images): a logo reveal. Places a 480 x 160 SVG logo (red left half, blue right half) centred in a 1080p composition over a black solid, keys scale from 0 to 1 and opacity from 0 to 1 over 5 s (frames 0 to 150) with an overshoot ease, and exports frame 150 as a PNG; the H.264 movie renders on macOS only (render.start), where PH-m checks it in the scoped run. Until PH-5 the render draws a solid's colour, not its picture, and place.image is registered at PH-6, so platforms is [] and the harness skips the job on both. The trap: the movie shows the solid's colour or a stretched logo, or the scale key doesn't reach the picture. The assertion: at frame 150 (800, 540) is red and (1120, 540) blue within 2/255, and (700, 540), just left of the logo, is black. The turn-on sets platforms to linux and macos.",
+  "pending": "PH-5",
+  "waits_on": "PH-5",
+  "inputs": ["input/*.halo"],
+  "steps": [
+    {"id": "place.image", "params": {"name": "logo.svg", "base64": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0ODAiIGhlaWdodD0iMTYwIiB2aWV3Qm94PSIwIDAgNDgwIDE2MCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjI0MCIgaGVpZ2h0PSIxNjAiIGZpbGw9IiNGRjAwMDAiLz48cmVjdCB4PSIyNDAiIHk9IjAiIHdpZHRoPSIyNDAiIGhlaWdodD0iMTYwIiBmaWxsPSIjMDAwMEZGIi8+PC9zdmc+"}},
+    {"id": "timeline.scrub", "params": {"frame": 0}},
+    {"id": "inspector.toggle-animation", "params": {"property": "scaleX"}},
+    {"id": "inspector.toggle-animation", "params": {"property": "scaleY"}},
+    {"id": "inspector.toggle-animation", "params": {"property": "opacity"}},
+    {"id": "inspector.set-property", "params": {"property": "scaleX", "value": 0}},
+    {"id": "inspector.set-property", "params": {"property": "scaleY", "value": 0}},
+    {"id": "inspector.set-property", "params": {"property": "opacity", "value": 0}},
+    {"id": "timeline.scrub", "params": {"frame": 150}},
+    {"id": "inspector.set-property", "params": {"property": "scaleX", "value": 1}},
+    {"id": "inspector.set-property", "params": {"property": "scaleY", "value": 1}},
+    {"id": "inspector.set-property", "params": {"property": "opacity", "value": 1}},
+    {"id": "timeline.select-all-keys", "params": {}},
+    {"id": "easing.set-custom", "params": {"x1": 0.34, "y1": 1.56, "x2": 0.64, "y2": 1}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-150", "format": "png", "options": {"frame": 150}},
+  "expect": {
+    "out/empty-1080-150.png": {"pixels": {"tolerance": 2, "size": [1920, 1080], "at": [
+      {"x": 800, "y": 540, "rgb": [255, 0, 0]}, {"x": 1120, "y": 540, "rgb": [0, 0, 255]},
+      {"x": 700, "y": 540, "rgb": [0, 0, 0]}]}}
+  },
+  "platforms": []
+}

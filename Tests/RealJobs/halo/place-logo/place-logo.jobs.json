@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "app": "halo",
+  "why": "RJ-H36, pending PH-5 (halo/placed-images): places a 200 x 100 two-colour PNG logo (red left half, blue right half) into a 400 x 400 composition over a black solid by command and exports frame 0 as a PNG. Until PH-5 the render draws a solid's colour, not its picture, and place.image is registered at PH-6, so platforms is [] and the harness skips the job on both. The trap: the viewer shows the logo but the render draws the solid's colour, or stretches the logo to the composition. The assertion: centred at its own size, (110, 200) is red and (290, 200) blue within 2/255, and (98, 200) and (200, 148), just outside it, are the black background (HaloPlaceRenderTests.logoPixels). The turn-on sets platforms to linux and macos.",
+  "pending": "PH-5",
+  "waits_on": "PH-5",
+  "inputs": ["input/*.halo"],
+  "steps": [
+    {"id": "place.image", "params": {"name": "logo.png", "base64": "iVBORw0KGgoAAAANSUhEUgAAAMgAAABkCAYAAADDhn8LAAABRElEQVR42u3TsQkAAAzDsPz/dHpFIYMGP2BQmlQ7WTCWA4AIEEAECCACBBABAogAESCACBBABAggAgQQASJAABEggAgQQAQIIAJEgAAiQAARIIAIEEAECCAuACJAABEggAgQQAQIIAJEgAAiQAARIIAIEEAEiAABRIAAIkAAESCACBBZAIgAAUSAACJAABEggAgQAQKIAAFEgAAiQAARIAIEEAECiAABRIAAIkAECCACBBABAogAAUSAAGIDIAIEEAECiAABRIAAIkAECCACBBABAogAAUSACBBABAggAgQQAQKIABEggAgQQAQIIAIEEAECiAARIIAIEEAECCACBBABIkAAESCACBBABAggAkSAACJAABEggAgQQASIHABEgAAiQAARIIAIEEAEiAABRIAAIkAAESCACBABAogAAUSAAKLPDlYGrNa0kF6LAAAAAElFTkSuQmCC"}},
+    {"id": "timeline.scrub", "params": {"frame": 0}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-0", "format": "png", "options": {"frame": 0}},
+  "expect": {
+    "out/empty-400-0.png": {"pixels": {"tolerance": 2, "size": [400, 400], "at": [
+      {"x": 110, "y": 200, "rgb": [255, 0, 0]}, {"x": 290, "y": 200, "rgb": [0, 0, 255]},
+      {"x": 98, "y": 200, "rgb": [0, 0, 0]}, {"x": 200, "y": 148, "rgb": [0, 0, 0]}]}}
+  },
+  "platforms": []
+}
