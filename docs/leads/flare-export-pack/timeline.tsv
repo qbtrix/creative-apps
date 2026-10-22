@@ -69,3 +69,4 @@ utc	stage	event	ref	note
 2026-10-22T16:35Z	3	check	FV-3	heartbeat: #4435 still in lane (open false fast-lane); #4436 waits on it
 2026-10-22T16:55Z	3	check	FV-3	heartbeat: #4435 still in lane (open false fast-lane); #4436 waits on it
 2026-10-22T17:16Z	3	check	FV-3	#4435 lane macOS build 39812126183 queued since 16:13Z (28 ci.yml runs queued; 4 earlier builds cancelled by the lane re-dispatching); nothing to fix on our side
+2026-10-22T17:37Z	3	check	FV-3	#4435 lane macOS build 39812126183 still queued; #4436 waits on it
