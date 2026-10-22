@@ -7,7 +7,7 @@ import Foundation
 import FlareCore
 import SuiteKernel
 
-/// mp4 and gif are export-pack's (FV-1), refused with `unbuiltReason` until FV-3.
+/// mp4 and gif are export-pack's (FV-1), planned by FV-3 (`FlareVideoPlan`), refused with `unbuiltReason` until FV-4 writes them.
 public enum ExportFormat: String, CaseIterable, Hashable, Sendable { case svgFrame, lottie, pngSequence, mp4, gif }
 
 public struct ExportOptions: Hashable, Sendable {
