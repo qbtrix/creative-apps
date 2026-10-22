@@ -25,7 +25,7 @@ Next: fix round 1 for KE-a (#4232) and KE-m (#4233) in PR #4235 (head d09faab1c,
 | KE-6 | KE-u | 3 | render budget | Tests/AppSnapshotTests/RenderBudgetHaloKeyEditingTests.swift | RenderBudgetHaloKeyEditingTests | #4067 | merged |
 | KE-9 | KE-m, KE-z | 4 | RJ-H13 move-keys real job; journey turned on (KE-7's first half) | Tests/RealJobs/halo/move-keys/move-keys.jobs.json, Tests/RealJobs/halo/move-keys/input/bounce.halo, UITests/HaloJourneyTests+KeyEditing.swift | RealJobsTests, HaloKeyEditingJourneyTests | #4141 | merged 1b3913c07 |
 | KE-7 | KE-z | 5 | stress journey gains ⌘A and move-keys | UITests/HaloJourneyTests+StressPerf.swift | HaloStressPerfJourneyTests | - | waits #3499 |
-| F4232/F4233 | KE-a, KE-m | 5 | menu journey lists the key items; key-editing journey parks the playhead at 30 | UITests/HaloJourneyTests.swift, UITests/HaloJourneyTests+KeyEditing.swift | HaloJourneyTests, HaloKeyEditingJourneyTests | #4235 | open d09faab1c (lane macOS build 39699014299 running 01:01Z) |
+| F4232/F4233 | KE-a, KE-m | 5 | menu journey lists the key items; key-editing journey parks the playhead at 30 | UITests/HaloJourneyTests.swift, UITests/HaloJourneyTests+KeyEditing.swift | HaloJourneyTests, HaloKeyEditingJourneyTests | #4235 | open d09faab1c (macOS build 39699014299 green 01:04Z; awaiting lane merge) |
 | KE-8 | KE-z | 6 | halo.md, built, feature-done | docs/blueprints/halo.md, docs/blueprints/halo/features/key-editing.wave.json | waves render --dry-run | - | waits KE-7 (CL-z met 22:42Z) |
 
 ## Reviews
