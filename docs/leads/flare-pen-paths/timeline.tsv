@@ -73,3 +73,4 @@ utc	stage	event	ref	note
 2026-10-22T00:24Z	heartbeat	Photo fix #4215 merged 00:00Z; merged dev into #4204 (head ea6b7bec, scripts/ci --changed PASS, Head moved) for a lane macOS rebuild. PN-3 #4203 in lane macOS build.
 2026-10-22T00:46Z	heartbeat	#4204 (FP-a fix2, head ea6b7bec) macOS build queued (run 39699652394); then post-round-2 critics. FP-u waits on #4203 (PN-3) macOS build. FP-6 waits on FL-m (file-flow FL-a #4259 open; no FL-m PR yet).
 2026-10-22T01:08Z	heartbeat	#4204 (FP-a fix2, ea6b7bec) macOS build run 39699652394 still queued. #4203 (PN-3) has a new head 7d76d219, waiting on its macOS build; FP-u starts once it merges. FP-6 waits on FL-m (none open).
+2026-10-22T01:29Z	heartbeat	#4204 (FP-a fix2, ea6b7bec) macOS build run 39699652394 now running (macOS queue is deep). #4203 (PN-3, 7d76d219) macOS build queued; FP-u starts once it merges. FP-6 waits on FL-m (none open).
