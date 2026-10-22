@@ -2,9 +2,9 @@
 
 Issue: #3448 · Packet: docs/blueprints/suiteui/features/eyedropper.md
 Run: act-1a1647a67aa-dau5 (relaunch) · Started: 2026-10-22T16:45Z
-Stage: EY-z integrating #4583 with TT-z
+Stage: EY-z #4583 merged with TT-z (ab48a09), gate CI: PASS, pushed, Head moved; clean
 Base: 18464f26b93c6826d069e0107545d7aacfac033c
-Next: Gate the merge (scripts/ci --changed), push, move Head on #4583; retarget to dev once #4429 merges
+Next: Retarget #4583 to dev once #4429 merges; then #4585 and #4613
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: Gate the merge (scripts/ci --changed), push, move Head on #4583; retarget 
 |---|---|---|---|---|---|
 
 ## Decisions
+- Union merge keeps stroke-style and sample commands (39 ids)
 - 21:05Z #4429 build green (run 39850027667). #4583 went dirty after #4429's integration (stroke-style SS-8 on TT-z): merged TT-z into EY-z (ab48a09), unions of color.sample and the nine stroke commands (39 ids), list-commands golden regenerated from the CLI, mutation plan 17 entries. Gate running.
 - 20:33Z #4429 got needs-rebase (20:13Z); its lead pushed cba819f and moved Head (now clean). Waiting on its new macOS build and merge.
 - 20:11Z #4429's macOS build (run 39840342516) passed; the lane merges it next sweep.
