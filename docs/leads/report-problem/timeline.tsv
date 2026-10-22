@@ -68,3 +68,4 @@ utc	stage	event	ref	note
 2026-10-22T08:09:48Z	lane	heartbeat	4218	RP-3e, RP-5 macOS builds still queued
 2026-10-22T08:37:38Z	lane	heartbeat	4218	RP-3e, RP-5 macOS builds still queued
 2026-10-22T09:03:32Z	lane	heartbeat	#4209,#4218	RP-3e, RP-5 wait on macOS builds; RP-5b draft; RP-6 built docs-only on dev, gating
+2026-10-22T09:10:26Z	RP-6	pr	#4380	docs-only on dev, draft until RP-5b #4226 merges; gate PASS at c70e72644
