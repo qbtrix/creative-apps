@@ -2,7 +2,7 @@
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
 Run: act-1a1605b0534-rn47 · Session: claude/feature-leads-stroke-eyedropper-e84htn · Started: 2026-10-21T21:05Z (prior runs act-1a15e909498-4bkk, act-1a15abb305f-lc8g, act-1a159c9b6b4-va3c)
-Stage: DK-a done; DK-u waits on shape-tools DS-u (not started); DK-m on DS-m (2026-10-22T02:44Z)
+Stage: DK-a done; DK-u waits on shape-tools DS-u (not started); DK-m on DS-m (2026-10-22T03:06Z)
 Base: 5bec8089 (origin/dev); main verified at 0dd23d65
 Next: DK-u waits shape-tools:DS-u (waits transform DT-u, building: DT-4 behind #4159); DK-m waits shape-tools:DS-m (waits DT-m: #4187 open, DT-6 after DG-m; and eyedropper DY-m). Re-read waits every poll
 
