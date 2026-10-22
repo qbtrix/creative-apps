@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: PH-m stack: #4614 (PH-6) + #4615 (PH-5) on PH-a, #4618 (jobs RJ-H36/RJ-H02 live, 1384df7) on #4615; all draft. #4426 in supervisor Mac gate; on merge retarget #4437/#4438 then #4614, #4615, #4618 to dev. Note: pixel jobs assert pixels only after core#562; builder verified pixels by hand. Gap candidates: SVG gradient flat, SVG strokes. (check 19:33Z: lane sweep 39837529702 says #4426 eligible; waits for next sweep behind an in-flight batch)
+Next: #4426 (PH-a) merged 19:43Z (lane batch 39839090182). Fixers merging dev into PH-u stack (#4437, #4438) and PH-m stack (#4614, #4615, #4618); then lead retargets each to dev, undrafts, fast-lane, moves Head. Then PH-a Belt-Slice-Done once dev Linux green; PH-z after. Gap candidates: SVG gradient flat, SVG strokes. (check 19:50Z)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

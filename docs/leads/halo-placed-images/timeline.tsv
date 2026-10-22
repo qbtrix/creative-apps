@@ -67,3 +67,4 @@ utc	stage	event	ref	note
 2026-10-22T19:03:16Z	3	check	PH-a	#4426 macOS build 39821015197 success 18:52Z; waiting on lane sweep to merge
 2026-10-22T19:17:21Z	3	check	PH-a	#4426 still open, all proof green; lane sweep in progress since 19:08Z
 2026-10-22T19:33:53Z	3	check	PH-a	lane decision eligible for #4426 (19:28Z); batch in flight, merges next sweep
+2026-10-22T19:50:40Z	3	merge	PH-a	#4426 merged into dev 19:43Z; fixers started for PH-u and PH-m dev merges
