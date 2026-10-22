@@ -1,10 +1,10 @@
 # eyedropper lead record
 
 Issue: #3448 · Packet: docs/blueprints/suiteui/features/eyedropper.md
-Run: act-1a1579fdd22-6z1j · Session: session_01PjyLDm83LyEExMuxXuYsXP · Started: 2026-10-20T04:46Z
-Stage: 3 wave 2
+Run: act-1a1647a67aa-dau5 (relaunch) · Started: 2026-10-22T16:45Z
+Stage: 3 wave 3 (EY-z)
 Base: 18464f26b93c6826d069e0107545d7aacfac033c
-Next: #3531 and #3541 then #3597 restack to dev; EY-8 waits on transform-tools:TT-z; EY-a done once #3531 merges
+Next: EY-8+EY-9 as one EY-z PR stacked on lead/transform-tools-TT-z (#4429) since TT-8 holds FakeCanvasDocument.swift; retargets to dev when #3577/#4429 merge. EY-z done on a green ci.yml run holding it.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -23,7 +23,7 @@ Next: #3531 and #3541 then #3597 restack to dev; EY-8 waits on transform-tools:T
 | EY-4 | EY-u | 4 | Snapshots, the render budget test, the journey turned on | `Tests/AppSnapshotTests/SuiteEyedropperSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetEyedropperTests.swift`, `UITests/SuiteJourneyTests+Eyedropper.swift` | see packet Acceptance | #3541 | open |
 | EY-5 | EY-m | 2 | `SampleRules` bodies; turns on `SampleRulesTests` | `Sources/SuiteKernel/Sample/SampleRules.swift`, `Tests/SuiteKernelTests/SampleRulesTests.swift`, `Tests/mutations/SuiteKernel.SampleRules.json` | see packet Acceptance | #3540 | merged |
 | EY-6 | EY-m | 3 | The `color.sample` body; turns on `SampleCommandsTests` on a test target | `Sources/SuiteKernel/Sample/SampleCommands.swift`, `Tests/SuiteKernelTests/SampleCommandsTests.swift`, `Tests/mutations/SuiteKernel.SampleCommands.json` | see packet Acceptance | #3540 | merged |
-| EY-7 | EY-z | 5 | The gallery page's tool samples its canvas through `color.sample` on a local target and sets the row as one... | `Sources/SuiteUI/Gallery/GalleryEyedropper.swift`, `Tests/SuiteUITests/EyedropperLiveTests.swift` | see packet Acceptance | #3597 | open |
+| EY-7 | EY-z | 5 | The gallery page's tool samples its canvas through `color.sample` on a local target and sets the row as one... | `Sources/SuiteUI/Gallery/GalleryEyedropper.swift`, `Tests/SuiteUITests/EyedropperLiveTests.swift` | see packet Acceptance | #3597 | merged |
 | EY-8 | EY-z | 4 | The fake app samples: `FakeCanvasDocument` conforms to `SampleTarget` (the topmost rect under the point, it... | `Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift`, `Tests/SuiteKernelTests/FakeSampleTests.swift`, `Tests/mutations/SuiteKernel.FakeCanvasDocument.json`, `Tests/RealJobs/fake/sample-color/sample-color.jobs.json`, `Tests/RealJobs/fake/sample-color/input/two-fills.fake` | see packet Acceptance | – | planned |
 | EY-9 | EY-z | 6 | The C4 part names the command, the button and the loupe; `status: built`; `feature-done` | `docs/c4/parts/creative-apps/suite-kernel/kernel-sample.json`, `docs/blueprints/suiteui/features/eyedropper.wave.json` | see packet Acceptance | – | planned |
 
@@ -34,6 +34,9 @@ Next: #3531 and #3541 then #3597 restack to dev; EY-8 waits on transform-tools:T
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T16:45Z Relaunch under act-1a1647a67aa-dau5. EY-7 #3597 merged (f5e9be31). Only EY-8 and EY-9 remain.
+- 2026-10-22T16:45Z lead/eyedropper rebased onto main 0dd23d65 (record commits only) per brief.
+- 2026-10-22T16:45Z EY-8 stacks on lead/transform-tools-TT-z (#4429, TT-8/9) rather than waiting: both edit FakeCanvasDocument.swift and its mutation plan, and the packet orders TT-8 before EY-8. EY-9 rides the same PR with feature-done (one PR per slice).
 - 2026-10-20T20:28Z EY-z #3597 macOS build 39447943388 failed (CGPoint not in scope in EyedropperLiveTests); fixer adds import CoreGraphics.
 - 2026-10-20T14:32:09Z #3597 flagged needs-split was a stale-stack artifact; after restack its own diff is 263 lines / 2 files, so no split.
 - 2026-10-20T13:54Z #3597 needs-split is a stale-stack artifact (its own diff is 263 lines / 2 files): restack EY-u onto dev instead of splitting, leaving EY-2 (macOS build green) as is.

@@ -76,3 +76,5 @@ utc	stage	event	ref	note
 2026-10-20T20:28Z	3	mac-build-red	#3597	run 39447943388: EyedropperLiveTests missing import CoreGraphics; fixer dispatched
 2026-10-20T20:35Z	3	fix-pushed	#3597	head 7e809a9c: import CoreGraphics, mutating calls hoisted out of #expect
 2026-10-20T20:42Z	3	heartbeat	-	lead polling PRs 3597 
+2026-10-22T16:45Z	0	relaunch	-	run act-1a1647a67aa-dau5; EY-7 merged; rebased on main 0dd23d65
+2026-10-22T16:45Z	3	builder	EY-8	EY-8+EY-9 builder started, stacked on lead/transform-tools-TT-z
