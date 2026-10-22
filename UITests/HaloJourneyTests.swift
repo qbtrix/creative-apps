@@ -15,7 +15,8 @@
 // Window hold Halo's; testSwitchToMenu (A-HA-1, #865) reads Window > Switch
 // To. testLayoutAtWidths relaunches at five window sizes with a layer
 // selected from its timeline lane (blueprint 7.3): L1 is the audit on each
-// `halo-layout-<w>` shot, L2
+// `halo-layout-<w>` shot (`layout-<w>-clamped` when a display narrower than
+// w held the window back, so no shot claims a width it doesn't show), L2
 // takes the artboard as the drawn layers' frame (`halo.viewer.canvas`) and
 // checks it is centered within 1 pt (across: the surround on its two sides,
 // measured in the screen's pixels to where each panel starts, as a person
@@ -251,7 +252,10 @@ final class HaloJourneyTests: XCTestCase {
             let ball = halo.app.descendants(matching: .any).matching(
                 NSPredicate(format: "identifier == 'halo.inspector.header' AND label CONTAINS %@", "Frames 0–47")).firstMatch
             XCTAssert(ball.waitForExistence(timeout: 5), "clicking Ball's lane selected no layer at \(width)")
-            halo.shot("layout-\(width)")
+            // The runner's display is 1024 pt wide, so from 1280 up the window
+            // clamps: name the shot for the width it shows, not the one asked for.
+            let reached = window.frame.width >= size.width - 2
+            halo.shot(reached ? "layout-\(width)" : "layout-\(width)-clamped")
             let outside = haloControls(in: halo).compactMap { control -> String? in
                 guard let shown = visibleFrame(of: control, in: window) else { return nil }
                 return window.frame.insetBy(dx: -1, dy: -1).contains(shown) ? nil : "\(control.identifier) \(shown)"
@@ -339,11 +343,26 @@ final class HaloJourneyTests: XCTestCase {
         steps.expectEditItem("Undo Animate Position X")
         halo.shot("loop-stopwatch")
 
-        // 4. Scrub the ruler, then → or ← from the timeline to frame 24 (00:00:01:00).
-        halo.drag(on: "halo.timeline", from: CGVector(dx: 0.02, dy: 0.05), to: CGVector(dx: 0.5, dy: 0.05))
+        // 4. Drag the Frame Ruler off 0, then click Next / Previous Frame to frame 24 (00:00:01:00);
+        // one → after the assert is the keyboard parity, and Previous Frame brings it back.
+        // (dx 0.02 of halo.timeline is the name column, where a press scrubs nothing, #4451.)
+        let ruler = halo.app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Frame Ruler'")).firstMatch
+        XCTAssert(ruler.waitForExistence(timeout: 5), "no Frame Ruler in the timeline")
+        ruler.coordinate(withNormalizedOffset: CGVector(dx: 0.05, dy: 0.5))
+            .press(forDuration: 0.1, thenDragTo: ruler.coordinate(withNormalizedOffset: CGVector(dx: 0.4, dy: 0.5)))
+        XCTAssert(waitFor(seconds: 5) { (viewerFrame(halo) ?? 0) > 0 },
+                  "the ruler drag left the viewer at frame \(String(describing: viewerFrame(halo)))")
+        let scrubbed = viewerFrame(halo) ?? 0
+        let next = halo.element("halo.transport.next"), previous = halo.element("halo.transport.previous")
+        XCTAssert(next.waitForExistence(timeout: 5), "no Next Frame button (halo.transport.next)")
+        XCTAssert(previous.exists, "no Previous Frame button (halo.transport.previous)")
+        for _ in 0..<abs(24 - scrubbed) { (scrubbed < 24 ? next : previous).click() }
+        steps.expectPlayhead("00:00:01:00")
+        XCTAssert(waitFor(seconds: 5) { viewerFrame(halo) == 24 }, "Next / Previous Frame stopped at \(String(describing: viewerFrame(halo)))")
         steps.focusLane("Solid 1")
-        let frame = viewerFrame(halo) ?? 0
-        for _ in 0..<abs(24 - frame) { halo.press(frame < 24 ? .rightArrow : .leftArrow) }
+        halo.press(.rightArrow)
+        steps.expectPlayhead("00:00:01:01")
+        previous.click()
         steps.expectPlayhead("00:00:01:00")
         halo.shot("loop-frame-24")
 
@@ -360,7 +379,9 @@ final class HaloJourneyTests: XCTestCase {
         let span = halo.element("halo.easing.key.x.0")
         scrollInspector(toShow: span, halo)
         span.click()
-        chip("Ease Out", halo).click()
+        let easeOut = halo.element("halo.easing.preset.easeOut")
+        scrollInspector(toShow: easeOut, halo)
+        easeOut.click()
         expectRow("halo.easing.key.x.0", reads: "Ease Out", halo)
         expectUndo("Undo Keyframe Easing", halo)
         halo.shot("loop-ease-out")
@@ -440,8 +461,15 @@ final class HaloJourneyTests: XCTestCase {
         XCTAssert(FileManager.default.fileExists(atPath: file), "Save wrote no \(file)")
         halo.shot("loop-saved")
 
-        // 12. Quit and reopen Loop.halo: two layers, Ease Out then Linear, Hello at 0, nothing to undo.
-        halo.press(character: "q", .command)
+        // 12. Halo > Quit Halo by menu, then reopen Loop.halo: two layers, Ease Out then Linear,
+        // Hello at 0, nothing to undo.
+        // Index 0 is the Apple menu; index 1 is the app's own menu.
+        let appMenu = halo.app.menuBars.firstMatch.menuBarItems.element(boundBy: 1)
+        XCTAssert(appMenu.waitForExistence(timeout: 5), "no Halo menu")
+        appMenu.click()
+        let quit = appMenu.menus.firstMatch.children(matching: .menuItem)["Quit Halo"]
+        XCTAssert(quit.waitForExistence(timeout: 3), "no Halo > Quit Halo")
+        quit.click()
         if !halo.app.wait(for: .notRunning, timeout: 15) { halo.app.terminate() }
         halo = launch(["-HaloOpenFile", file])
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened on Loop.halo")

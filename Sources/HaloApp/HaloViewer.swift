@@ -96,14 +96,14 @@ struct HaloViewer: View {
             if timecode {
                 // The current time in primary ink, in the pill type so the
                 // bar fits the content column; the length is in the tooltip.
-                // The playing frame's time, re-run alone per frame (HaloLiveShown).
+                // The playing frame's time, re-run alone per frame (HaloPlayheadShown).
                 // Sized to the composition's widest line, drawn hidden under
                 // it, with fixed-width digits: a playing timecode never
                 // changes the row's width, so ViewThatFits keeps one shape and
                 // never swaps the transport out from under a click (#4586).
                 Text(comp.statusTimecodeWidest).hidden().accessibilityHidden(true)
                     .overlay(alignment: .leading) {
-                        HaloLiveShown(model: model) { Text(($0.selectedComposition ?? comp).statusTimecode) }
+                        HaloPlayheadShown(model: model) { Text(($0.selectedComposition ?? comp).statusTimecode) }
                     }
                     .monospacedDigit()
                     .foregroundStyle(SuiteColor.textPrimary)

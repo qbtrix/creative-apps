@@ -36,9 +36,10 @@ struct HaloViewerCanvas: View {
             .overlay { HaloLiveLayers(model: model, artboard: artboard) }
             .overlay { HaloRenderedFrameView(model: model, perform: perform) }
             .overlay { HaloViewerGestures(model: model, perform: perform) }
-            // The playing frame's, as the drawn layers show it (HaloLiveShown).
+            // The playing frame's; a drag or scrub moves layers, never which
+            // show, so its preview never re-runs these (HaloPlayheadShown).
             .overlay {
-                HaloLiveShown(model: model) { shown in
+                HaloPlayheadShown(model: model) { shown in
                     ProbeElement("halo.viewer.summary", label: shown.viewerSummary)
                     if let list = shown.viewerDrawList {
                         ProbeElement("halo.viewer.drawn", label: list.drawnSummary)
