@@ -4,7 +4,7 @@ Issue: #3440 · Packet: docs/blueprints/design/features/shape-tools.md
 Run: act-1a162d0f852-70vb · Started: 2026-10-22T08:56Z (prior run act-1a15abb305f-lc8g shipped DS-a)
 Stage: 3 wave 2 done; all slices in PRs, waiting for merges and scoped runs
 Base: dev 561ef1c5
-Next: slice-done lines once a ci.yml run (scoped design or full) contains each slice's last merged PR; retarget #4386 to dev when #4385 merges (DS-6 tip already merged in; merge dev with --merge-base 91ab122dd), then #4392 (DS-u tip already merged in; after #4386 merges, merge dev with --merge-base = #4386 final head)
+Next: #4385 lane Linux check 39794891984 red only on dev-red Halo test (HaloStrokeTrimKeysTests, #3856; fix #4431, line:halo, not ported); when #4431 merges, merge origin/dev into DS-m, scripts/ci --changed, push, move Head:, then re-merge the new DS-6 tip into DS-u and DS-z. Then: slice-done lines once a ci.yml run (scoped design or full) contains each slice's last merged PR; retarget #4386 to dev when #4385 merges (DS-6 tip already merged in; merge dev with --merge-base 91ab122dd), then #4392 (DS-u tip already merged in; after #4386 merges, merge dev with --merge-base = #4386 final head)
 
 ## Slices
 | slice | behavior | tasks | waits on | ui | rounds | state | run | mac finish |
