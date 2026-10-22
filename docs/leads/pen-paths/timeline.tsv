@@ -149,3 +149,4 @@ utc	stage	event	ref	note
 2026-10-22T05:35:15Z	3	check	#4319	lane macOS build dispatched 05:22Z (queued); PR body footer is re-added server-side on edit, lane strips it from the squash
 2026-10-22T05:52:16Z	3	check	#4319	macOS build 39727609546 queued
 2026-10-22T06:11:24Z	3	check	#4319	macOS build 39727609546 still queued
+2026-10-22T06:28:14Z	3	check	#4319	macOS build 39727609546 still queued (runner backlog)
