@@ -4,16 +4,16 @@ Issue: #4507 · Packet: docs/blueprints/suiteui/features/font-picker.md
 Run: act-1a16474bd3a-i9ae · Session: session_01Rid1ErRRerebigzwJKJtpV · Started: 2026-10-22T16:36Z
 Stage: 3 wave 2
 Base: 7e9f260ae8f69dea63663c1bc7ea945c6b1d2f80 (origin/dev)
-Next: open the FP-u PR (stacked on FP-a, #4638) when its builder pushes; then FP-z (FP-6 + FP-7) stacked on FP-u and FP-m (#4644)
+Next: open the FP-u PR (body ready) once #4638 merges, so its dev diff is its own 376 lines; open the FP-z PR when it pushes and FP-u, FP-m have merged
 
 ## Slices
 
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | FP-a | FontPick, FontPickerRules and FontPicker declared as stubs; gallery page; checks written, disabled | FP-1, FP-2 | SJ0 | EK-u (built), CC-u (built), shell-text:ST-a (built: FontFamily/FontFace in SuiteModel) | true | 0 | PR open #4638 | – | – |
-| FP-u | the picker lists, filters and previews families within the render budget | FP-3, FP-4 | testFontPickerPicksAFace | FP-a | true | 0 | building | – | – |
+| FP-u | the picker lists, filters and previews families within the render budget | FP-3, FP-4 | testFontPickerPicksAFace | FP-a | true | 0 | pushed 562cd0da; PR waits on #4638 (size cap) | – | – |
 | FP-m | rules: filter, face order, nearest face | FP-5, FP-8 | FJ-m | FP-a | false | 0 | PR open #4644 | – | – |
-| FP-z | live families; feature built | FP-6, FP-7 | testFontPickerPicksAFace | FP-u, FP-m | true | 0 | planned | – | – |
+| FP-z | live families; feature built | FP-6, FP-7 | testFontPickerPicksAFace | FP-u, FP-m | true | 0 | building | – | – |
 
 ## Tasks
 
@@ -21,12 +21,12 @@ Next: open the FP-u PR (stacked on FP-a, #4638) when its builder pushes; then FP
 |---|---|---|---|---|
 | FP-1 | FP-a | 1 | PR open | #4638 |
 | FP-2 | FP-a | 1 | PR open | #4638 |
-| FP-3 | FP-u | 2 | building (stacked on FP-a) | – |
-| FP-4 | FP-u | 2 | building (stacked on FP-a) | – |
+| FP-3 | FP-u | 2 | pushed (FP-u) | – |
+| FP-4 | FP-u | 2 | pushed (FP-u) | – |
 | FP-5 | FP-m | 2 | PR open #4644 | – |
 | FP-8 | FP-m | 2 | PR open #4644 | – |
-| FP-6 | FP-z | 3 | planned | – |
-| FP-7 | FP-z | 3 | planned | – |
+| FP-6 | FP-z | 3 | building (on FP-u + FP-m) | – |
+| FP-7 | FP-z | 3 | building (on FP-u + FP-m) | – |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -43,4 +43,5 @@ Next: open the FP-u PR (stacked on FP-a, #4638) when its builder pushes; then FP
 - Belt reads lead/suiteui-font-picker (docs/leads/suiteui-font-picker/); each push mirrors the RECORD and timeline there as well as to lead/font-picker.
 
 ## Open
+- FP-u's diff vs dev with FP-a unmerged is 651 lines (lane cap 400): its PR opens once #4638 merges. FP-z builds now on FP-u + FP-m merged.
 - FP-m's tests and mutations live in SuiteUITests (macOS only): its Mutate line needs a Mac pass.
