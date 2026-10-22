@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-22T15:51:42Z	stage	dev fixed; HT-m/HT-z re-gated PASS, markers moved to new heads
 2026-10-22T16:29Z	rebase-2	HT-m 300375f, HT-z d5afd56, CI: PASS
 2026-10-22T16:37:55Z	takeover	run act-1a16474bd28-v3ht starts
+2026-10-22T16:52Z	heartbeat	macOS builds on both; restored bodies from dup lead #4515

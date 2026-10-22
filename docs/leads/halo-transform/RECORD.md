@@ -1,10 +1,10 @@
 # transform lead record
 
-Issue: #4515 (was #3443) · Packet: docs/blueprints/halo/features/transform.md
-Run: act-1a16474bd28-v3ht · Session: claude/halo-feature-lead-3yp4w1 · Started: 2026-10-22T16:00Z (took over from earlier runs)
+Issue: #3443 · Packet: docs/blueprints/halo/features/transform.md
+Run: act-1a1638e0fe9-uiqj · Session: claude/halo-transform-lead-lek5s7 · continues on #3443 (#4515 closed as its duplicate)
 Stage: 3 wave 3 (HT-m #4415, HT-z #4422 in the lane)
 Base: e382f9d7fba02ffdefc8ba2f23c9461b4774fad6
-Next: when #4415 and #4422 merge, find a green halo-scoped or full run that holds them; post Belt-Slice-Done for HT-m and HT-z, then Belt-Contact-Sheet on #4515
+Next: when #4415 and #4422 merge, find a green halo-scoped or full run that holds them; post Belt-Slice-Done for HT-m and HT-z, then Belt-Contact-Sheet on #3443
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -52,3 +52,4 @@ Wave 3: HT-m as #4415 on dev 30120a8; HT-z (#4422) stacked on it at once, labell
 - 15:51Z stage: #4431 fixed the stroke test on dev. Merged origin/dev d96c264 into both slice branches; scripts/ci --changed prints CI: PASS on each. Markers set to Fast-Check: pass, Head 3bee765 (#4415, HT-m) and cc3ddcb (#4422, HT-z). Both are mergeable_state clean and wait on the lane batch. Told #3443 the question is moot.
 - 2026-10-22T16:29Z — needs-rebase #2 (FR-8b #4407 on the catalog line, tests, golden, mutation plan): merged origin/dev 7e9f260 into HT-m, kept both (… transforms + frameRateSpecs + window; golden 92); mutate 14/14, CI: PASS, Head 300375f. HT-z merged HT-m, CI: PASS, Head d5afd56. Both bodies moved to the new heads. Waiting on the lane.
 - 2026-10-22T16:37:55Z: New run act-1a16474bd28-v3ht for #4515. #4415 and #4422 bodies moved to the new Belt-Lead and Refs #4515; both clean, needs-rebase dropped by the lane, waiting on a sweep. Record stays here on lead/halo-transform (Belt reads it), mirrored from lead/transform.
+- 2026-10-22T16:52Z — heartbeat. needs-rebase dropped on both; lane building macOS on 300375f (run 39817206530) and d5afd56 (run 39815522916). The duplicate lead act-1a16474bd28-v3ht (#4515, closed not planned as a duplicate of #3443 by the supervisor) had rewritten both bodies to its run id and Refs #4515; restored Belt-Lead act-1a1638e0fe9-uiqj and Refs #3443, heads unchanged.
