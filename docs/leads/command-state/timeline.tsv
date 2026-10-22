@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-22T03:52:18Z	lane	heartbeat	-	CS-11 #4205 macOS build queued; children drafts wait on parents
 2026-10-22T04:08:01Z	lane	heartbeat	-	CS-11 #4205 / RP-3 #4103 macOS builds queued; children stay draft until parents merge
 2026-10-22T04:36:18Z	lane	heartbeat	-	CS-11 #4205 / RP-3 #4103 clean, awaiting lane sweep; children stay draft
+2026-10-22T04:57:54Z	lane	heartbeat	#4119,#4205,#4103	no merges: SM-3/CS-11/RP-3 clean, waiting on queued macOS builds; scoped suite run 39721019643 still queued
