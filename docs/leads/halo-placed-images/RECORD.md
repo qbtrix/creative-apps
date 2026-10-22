@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: PH-a merged 19:43Z (b6ca48aa). #4615 (PH-5) MERGED; #4614 (PH-6) macOS build green, awaiting lane sweep; then retarget #4618. #4437 fixed: new head cd253444 (##-delimited SVG), lane rebuild pending; #4438 head cd19282f (PH-u merged in + UITests:80 fix)..."## on PH-u + same bug in PH-u2 UITests/HaloJourneyTests+Place.swift:80, move Head lines. PH-a Belt-Slice-Done: run 39848684933 cancelled; now waits on CI 39852194708 (dev 62fe62aa, contains PH-a) Linux job. PH-z after. Gap candidates: SVG gradient flat, SVG strokes.
+Next: PH-a merged 19:43Z (b6ca48aa). #4615 (PH-5) MERGED; #4614 (PH-6) macOS build green, awaiting lane sweep; then retarget #4618. #4437 fixed: new head cd253444 (##-delimited SVG), lane rebuild pending; #4438 head cd19282f (PH-u merged in + UITests:80 fix), retarget after #4437 merges. PH-a Belt-Slice-Done: run 39848684933 cancelled; now waits on CI 39852194708 (dev 62fe62aa, contains PH-a) Linux job. PH-z after. Gap candidates: SVG gradient flat, SVG strokes.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
