@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 18:12Z	heartbeat	EY-z PRs #4583/#4585 wait on TT chain #4429/#3577
 18:40Z	heartbeat	#3577 macOS build green (39815190852), waits for a lane batch; #4429 -> #4583 -> #4585 follow
 19:20Z	heartbeat	#3577 merged; #4429 still based on lead/transform-tools-TT-7 (transform-tools lead act-1a163b2abfe-f182 to retarget); #4583/#4585 wait
+19:36Z	heartbeat	#4429 on dev, macOS build running
