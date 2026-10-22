@@ -79,16 +79,13 @@ struct FlareCommands: Commands {
                 }
             }
         }
-        // The suite's Open Recent ▸ and Open In ▸, after Open… (file-flow FL-2).
-        SuiteFileCommands(app: .flare, bridge: FlareShell.bridge, document: menu.document)
+        suiteFileMenu
         CommandGroup(replacing: .saveItem) {
             item(.file(.save), key: KeyboardShortcut("s"))
             item(.file(.saveAs), key: KeyboardShortcut("s", modifiers: [.command, .shift]))
             item(.export(.showSheet), key: KeyboardShortcut("e", modifiers: [.command, .shift]))
             item(.file(.close), key: KeyboardShortcut("w"))
         }
-        CommandGroup(replacing: .importExport) {}
-        CommandGroup(replacing: .printItem) {}
         CommandGroup(replacing: .undoRedo) {
             item(.edit(.undo), title: menu.undoTitle, key: KeyboardShortcut("z"))
             item(.edit(.redo), title: menu.redoTitle, key: KeyboardShortcut("z", modifiers: [.command, .shift]))
@@ -134,6 +131,14 @@ struct FlareCommands: Commands {
             item(.interactions(.toggleEditor), key: KeyboardShortcut("m", modifiers: [.command, .shift]))
             Divider()
         }
+    }
+
+    /// The suite's Open Recent ▸ and Open In ▸, after Open… (file-flow FL-2), and the File items Flare hides.
+    /// Its own builder keeps `body` within the builder's ten top-level commands.
+    @CommandsBuilder private var suiteFileMenu: some Commands {
+        SuiteFileCommands(app: .flare, bridge: FlareShell.bridge, document: menu.document)
+        CommandGroup(replacing: .importExport) {}
+        CommandGroup(replacing: .printItem) {}
     }
 
     /// Animate: Play/Pause … Animate with Assist…, section 3.4's order.
