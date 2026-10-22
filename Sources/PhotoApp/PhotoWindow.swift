@@ -66,13 +66,17 @@ struct PhotoWindow: View {
     @State var isTransforming = false
     /// The Export sheet's choices while it is open (PhotoWindow+Export.swift, PV-8).
     @State var exportDraft: ExportOptions?
+    /// The Canvas Size sheet's choices while it is open (PhotoWindow+Transform.swift, PT-3).
+    @State var canvasSizeDraft: CanvasSizeDraft?
     /// The inspector's tab (PhotoWindow+History.swift, history-panel PH-2).
     @State var inspectorTab = PhotoInspectorTab.adjust
     /// The app's View > Rendering; nil in tests, which draw on the CPU.
     @Environment(\.photoRendering) private var rendering
 
     /// A sheet or the rename alert is up, so Select > All never selects the canvas.
-    var isPresenting: Bool { model.isExportSheetOpen || isResizing || straightenDraft != nil || isRenaming }
+    var isPresenting: Bool {
+        model.isExportSheetOpen || isResizing || straightenDraft != nil || isRenaming || canvasSizeDraft != nil
+    }
 
     /// The launch file opens in the first window only.
     @MainActor static var launchFileOpened = false
@@ -158,7 +162,7 @@ struct PhotoWindow: View {
             .modifier(PhotoHistoryArea(model: model, perform: perform, tab: inspectorTab))
             .modifier(PhotoSelectArea(model: model, perform: perform))
             .modifier(PhotoAdjustmentLayerArea(model: model, perform: perform))
-            .modifier(PhotoTransformArea(model: model, perform: perform))
+            .modifier(PhotoTransformArea(model: model, perform: perform, canvasSize: canvasSizeDraft))
             .modifier(PhotoExportArea(model: model, perform: perform))
             .modifier(PhotoSampleArea(model: model, perform: perform))
     }
@@ -220,12 +224,14 @@ struct PhotoWindow: View {
         case .applyCrop: model.applyCrop()
         case .cancelCrop: model.cancelCrop()
         case .selectLayer(let id): model.selectLayer(id)
+        case .pickLayer(let id, let pick): model.pickLayer(id, pick)
+        case .selectAllLayers: model.selectAllLayers()
         case .toggleVisibility(let id): model.toggleVisibility(id)
         case .opacity(let id, let percent): model.setOpacity(id, percent: percent)
         case .blendMode(let id, let mode): model.setBlendMode(id, mode)
         case .moveLayers(let from, let to): model.moveLayers(fromOffsets: Array(from), toOffset: to)
         case .addLayer: model.addLayer()
-        case .deleteLayer: if let id = model.selectedLayerID { model.removeLayer(id) }
+        case .deleteLayer: model.removeSelectedLayers()
         case .renameLayer: beginRename()
         case .bringForward: model.bringSelectedLayerForward()
         case .sendBackward: model.sendSelectedLayerBackward()
@@ -245,6 +251,7 @@ struct PhotoWindow: View {
         case .export(let intent): performExport(intent)
         case .sample(let intent): performSample(intent)
         case .place(let intent): performPlace(intent)
+        case .text(let intent): performType(intent)
         case .confirm: if confirmTransform() {} else { model.applyCrop() }
         case .dismiss:
             if dismissTransform() {} else if model.pendingCrop != nil { model.cancelCrop() } else { model.deselect() }

@@ -74,6 +74,9 @@ import Testing
         #expect(MovieCodec.allCases.filter(\.keepsAlpha) == [.hevcAlpha, .prores4444])
         #expect(MovieCodec.allCases.filter(\.needsEvenSize) == [.h264, .hevc, .hevcAlpha])
         #expect(StillFormat.allCases.map(\.rawValue) == ["png", "jpeg", "heic", "tiff"])
+        #expect(StillFormat.allCases == [.png, .jpeg, .heic, .tiff])
+        #expect(StillFormat(rawValue: "tiff")?.format == SuiteImageFormat.tiff)
+        #expect(StillFormat(rawValue: "webp") == nil && StillFormat(.webp) == nil)
         #expect(AnimatedImageFormat.allCases.map(\.rawValue) == ["gif", "apng"])
     }
 

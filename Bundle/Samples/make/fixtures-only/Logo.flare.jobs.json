@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "app": "flare",
+  "inputs": ["seed.flare"],
+  "steps": [
+    {"id": "scenes.rename", "params": {"name": "Logo"}},
+    {"id": "layer.add", "params": {"sceneID": "scene-1", "layer": {"id": "layer-1", "name": "Mark", "tracks": {}, "instances": [], "isVisible": true, "isLocked": false,
+      "shapes": [{"closed": true, "fill": {"r": 0.25, "g": 0.4, "b": 0.95, "a": 1}, "points": [{"x": 0, "y": -50}, {"x": 50, "y": 0}, {"x": 0, "y": 50}, {"x": -50, "y": 0}]}]}}},
+    {"id": "keyframe.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "property": "x", "keyframe": {"frame": 0, "value": 275, "easing": {"linear": {}}}}},
+    {"id": "keyframe.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "property": "y", "keyframe": {"frame": 0, "value": 200, "easing": {"linear": {}}}}},
+    {"id": "keyframe.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "property": "rotation", "keyframe": {"frame": 0, "value": 0, "easing": {"linear": {}}}}},
+    {"id": "keyframe.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "property": "rotation", "keyframe": {"frame": 47, "value": 90, "easing": {"linear": {}}}}}
+  ],
+  "atomic": true,
+  "why": "A blue diamond mark at the centre of the Web preset that turns a quarter over the 2 s scene."
+}
