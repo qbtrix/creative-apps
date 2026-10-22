@@ -88,3 +88,9 @@
 - #4207 (HG-u, 959f433): open, clean, macOS build green; waiting for a lane batch.
 - #4216 (HG-m, 5f0a274): open, clean, macOS build 39712692785 still queued.
 - No red checks, no lane comments. Next check-in about 04:13Z.
+
+### 04:14Z: HG-u merged
+- #4207 (HG-u) merged into dev at 03:54Z as 82352f0b, in a batch of 8 PRs (Linux run 39717580611).
+- Scoped halo run 39720068263 (on dev 6e19f406, which contains 82352f0b) is queued. When it goes green: Belt-Slice-Done HG-u and Mac-Finish-Wanted HG-u.
+- #4216 (HG-m, 5f0a274): macOS build 39712692785 green; waiting for a lane batch.
+- KE-z is still `planned`, so HG-9 waits.
