@@ -4,7 +4,7 @@ Issue: #3446 · Packet: docs/blueprints/suiteui/features/transform-tools.md
 Run: act-1a163b2abfe-f182 (relaunch; first run act-1a1579fdd22-6z1j) · Started: 2026-10-22
 Stage: 3 wave 5 (TT-z) shipped; polling lane
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: fix round 1 PRs land; lane batches #4429; then TT-z done from the dev run holding it
+Next: #4429 macOS build compiles and the lane merges it; fix round 1 PRs land; then TT-z done from the dev run holding #4429
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -35,6 +35,7 @@ Next: fix round 1 PRs land; lane batches #4429; then TT-z done from the dev run 
 |---|---|---|---|---|---|
 
 ## Decisions
+- 20:56Z poll: #4429 waits on its macOS build (run 39850027667, in progress since 20:34Z); #4632-#4635 open, clean, fast-lane, no lane verdict yet.
 - 20:54Z fix round 1 opened: #4632 (#4625, TT-z), #4633 (#4627), #4634 (#4626+#4629), #4635 (#4628), all TT-u; each verified (head = Head line, fast-lane, end lines, no attribution). Tests are macOS-only, so the lane's batch gate is their first build.
 - 2026-10-22T20:40Z #4429 got needs-rebase (SS-8 #4607 added stroke commands in the same places): merged dev, every hunk a union (38 ids), describeAll budget 20 to 26 KiB (23,612 bytes); scripts/ci --changed CI: PASS; pushed cba819fc, Head moved. Fix round 1 started: 4 fixers, disjoint files (#4625 gallery; #4626+#4629 rows and snapshots; #4627 journey and budgets; #4628 pointers).
 - 2026-10-22T20:19Z critic panel on scoped suiteui 39810321089 (401242a5): filed #4625 (TT-z) and #4626-#4629 (TT-u), 5 open (cap). Not filed: InspectorAction pressed state equals hover (shared SuiteUI, outside this feature). Refuted: knob sends a total turn (TT-7 sends the difference); mirror in turned resize. Fix round 1 next.
