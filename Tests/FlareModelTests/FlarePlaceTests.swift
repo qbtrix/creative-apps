@@ -15,9 +15,9 @@ private func blank() -> FlareWorkspace {
     return w
 }
 
-/// The place commands on Flare's workspace, built here so the tests don't wait on PF-6's catalog line.
+/// Flare's place commands, built here so the tests don't wait on PF-6's catalog line.
 private let placeCatalog = try? CommandCatalog<FlareWorkspace>(
-    app: "flare", PlaceCommands.specs(FlareWorkspace.self), history: FlareCoreHistory.init)
+    app: "flare", FlareWorkspace.placeSpecs, history: FlareCoreHistory.init)
 
 /// Runs `place.image` with `svg` as `name`, centred.
 private func place(_ svg: String, as name: String = "logo.svg", on w: inout FlareWorkspace) throws {
@@ -73,6 +73,20 @@ private let blurred = """
         #expect(w.placeHelp == FlareLayerError.noDocument.message)
         #expect(w.placeCanvas.width == 0)
     }
+
+    @Test func pictureEditsSayFlareKeepsLayers() throws {
+        var w = blank()
+        #expect(throws: CatalogError.unavailable(id: "place.image", why: FlareWorkspace.placeFormatHelp)) {
+            try w.rasterSize(Data(), format: .png)
+        }
+        let catalog = try #require(placeCatalog)
+        for id in ["place.read", "place.replace", "place.reset-size", "place.focus"] {
+            #expect(catalog.availability(id, on: w).why == FlareWorkspace.placedBecomesLayers)
+        }
+        #expect(throws: (any Error).self) {
+            try w.setPlaced(PlacedImage(assetID: "a", box: w.placeCanvas), asset: nil, name: "Move Inside", drag: nil)
+        }
+    }
 }
 
 @Suite struct FlarePlaceTests {
@@ -99,6 +113,7 @@ private let blurred = """
         let box = try #require(layers(w).flatMap(\.shapes).compactMap(\.bounds).first)
         #expect(abs(box.width - 480) < 0.01 && abs(box.height - 160) < 0.01)
         #expect(abs(box.minX) < 0.01 && abs(box.minY - 55) < 0.01)
+        #expect(w.placeReport == "Placed wide.svg: 1 layer.")
     }
 
     @Test func oneUndoStep() throws {

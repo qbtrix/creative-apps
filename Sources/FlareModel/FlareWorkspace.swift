@@ -105,6 +105,8 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     var guideDragSerial = 0
     /// Why the last fill or stroke edit was refused (FlarePaint.swift).
     public internal(set) var paintError: String?
+    /// What the last SVG place did ("Placed logo.svg: 2 layers."); nil before one (FlarePlace+Kernel.swift).
+    public internal(set) var placeReport: String?
     /// The timeline's selected keys, why the last timeline edit was refused, and the key drag's coalesce serial,
     /// bumped to end the drag (FlareTimelineEdit.swift).
     public internal(set) var selectedKeys: [KeyRef] = []
