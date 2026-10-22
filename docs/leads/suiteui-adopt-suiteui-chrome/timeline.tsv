@@ -55,3 +55,4 @@ utc	stage	event	ref	note
 2026-10-22T02:39Z	3	build	#4002	still waiting for lane sweep
 2026-10-22T03:03Z	3	merged	#4002	merged 74b34fc; waiting for ci.yml run containing it
 2026-10-22T03:30Z	3	wait-ci	#4002	no completed run contains 74b34fc yet
+2026-10-22T04:00Z	3	wait-proof	#4002	containing runs 39714642994 (full) and 39719142992 (scoped suiteui) pending
