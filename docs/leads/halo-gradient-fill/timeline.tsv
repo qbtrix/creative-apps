@@ -70,3 +70,5 @@ utc	stage	event	ref	note
 2026-10-22T02:50Z	push	HG-m	5f0a274, gate pass
 2026-10-22T03:08Z	poll	HG-u	macOS build green (39712662587)
 2026-10-22T03:08Z	poll	HG-m	macOS build queued (39712692785)
+2026-10-22T03:39Z	poll	HG-u	ready, waiting on lane batch
+2026-10-22T03:39Z	poll	HG-m	macOS build still queued

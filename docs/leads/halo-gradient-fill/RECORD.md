@@ -81,3 +81,5 @@
 - 2026-10-22 02:50Z: scripts/ci --changed PASS on both. Pushed HG-u 959f433 (#4207) and HG-m 5f0a274 (#4216); Head lines moved, no footer. Waiting on the lane's builds and batch.
 
 - 2026-10-22 03:08Z check-in: HG-u 959f433 macOS build green (39712662587); waiting on the lane's Linux check and batch. HG-m 5f0a274 macOS build 39712692785 queued. Next check-in 03:38Z.
+
+- 2026-10-22 03:39Z (Belt nudge): HG-u 959f433 has a green macOS build and no red check; the lane's batch lane/batch-20261022033423 Linux run (39717580611) is in flight, so HG-u waits for that or the next batch. HG-m 5f0a274 macOS build 39712692785 still queued (macOS runners busy). No failures, nothing to fix.
