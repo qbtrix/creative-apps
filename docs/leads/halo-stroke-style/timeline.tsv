@@ -45,3 +45,5 @@ time	kind	step	ref	note
 2026-10-22T14:53Z	-	waiting	#4413 #4431	macOS builds still queued
 2026-10-22T15:21Z	-	merged	#4413	HK-u2 on dev as dc87ad2b0
 2026-10-22T15:21Z	-	pr	#4446	HK-z (HK-7, HK-8) rebuilt on dev, CI: PASS, mutate 9/9
+2026-10-22T15:30Z	-	merged	#4431	dev-red trim-keys fix on dev as 18902a68c
+2026-10-22T15:30Z	-	push	#4446	merged dev, kept HK-7 test file plus #4431 test; head 7c5c60024, CI: PASS, mutate 9/9
