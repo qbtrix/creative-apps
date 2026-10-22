@@ -122,3 +122,4 @@ utc	stage	event	ref	note
 2026-10-22T01:13Z	3	pr	#4285	fixes #4265: H-P3 drag now on the Frame Ruler, 4x600 pt
 2026-10-22T01:13Z	3	pr	#4286	fixes #4264 #4266: hide the timeline vertical scroll bar
 2026-10-22T01:19Z	3	pr	#4287	fixes #4272: transport kept at content minimum
+2026-10-22T01:21Z	3	pr	#4290	fixes #4278 #4279 #4280: render sheet finished text, folder row, disabled name

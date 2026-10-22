@@ -84,7 +84,7 @@ Next: critic panel on journeys 39691305165 (32fcc2c4) filed 10 findings #4272-#4
 | #4275 | CL-probe | major | job | - | held |
 | #4276 | CL-measure | major | job | - | held |
 | #4277 | CL-measure | minor | job | - | held |
-| #4278 | CL-ui | minor | clarity | 1 | fixer |
-| #4279 | CL-ui | minor | design | 1 | fixer |
-| #4280 | CL-ui | minor | design | 1 | fixer |
+| #4278 | CL-ui | minor | clarity | 1 | PR #4290 |
+| #4279 | CL-ui | minor | design | 1 | PR #4290 |
+| #4280 | CL-ui | minor | design | 1 | PR #4290 |
 | #4281 | CL-ui | minor | design | - | waits #4282 |
