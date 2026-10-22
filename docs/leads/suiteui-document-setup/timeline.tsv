@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-22T06:58:41Z	poll	waiting	#4309 open, macOS build 39722964879 queued; dev CI 39734272718 pending
 2026-10-22T07:15:10Z	poll	waiting	#4309 open; macOS build 39722964879 still queued (since 04:32Z)
 2026-10-22T07:19:32Z	poll	waiting	#4309 open; macOS build 39722964879 queued
+2026-10-22T07:47Z	poll	DS-6 #4309 open, macOS build 39722964879 in progress.
