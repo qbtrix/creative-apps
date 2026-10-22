@@ -65,3 +65,4 @@ utc	stage	event	ref	note
 2026-10-22T07:24:05Z	lane	heartbeat	#4209 #4218	ready, waiting on lane macOS builds
 2026-10-22T07:27:25Z	lane	heartbeat	4218	RP-3e, RP-5 in lane awaiting macOS builds
 2026-10-22T07:46:59Z	lane	heartbeat	4218	RP-3e, RP-5 macOS builds queued
+2026-10-22T08:09:48Z	lane	heartbeat	4218	RP-3e, RP-5 macOS builds still queued
