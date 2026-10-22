@@ -155,3 +155,4 @@ utc	stage	event	ref	note
 2026-10-22T07:35:40Z	#4346 PN-8 waits on lane macOS build; #3477 still waiting-on-prereq
 2026-10-22T07:57:00Z	heartbeat	#4346 macOS build 39740600538 queued; #3477 waiting-on-prereq
 2026-10-22T08:15:25Z	heartbeat	#4346 clean, macOS build 39740600538 queued; #3477 waiting-on-prereq
+2026-10-22T08:34:07Z	heartbeat	#4346 lane macOS build 39740600538 queued; #3477 waiting-on-prereq
