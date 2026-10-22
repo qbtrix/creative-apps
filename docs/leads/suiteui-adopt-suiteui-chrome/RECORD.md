@@ -2,8 +2,8 @@
 
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
 Run: act-1a1646f0a9f-d1ei (#1942; slice AC-export-sheet; earlier runs act-1a160ca3d68-sbnc, act-1a15ef870d6-3mm5, act-1a15ce4fb40-9k5r) · Session: claude/suiteui-feature-lead-v7e2hk · Resumed: 2026-10-22T16:30Z
-Stage: 3 polling (AC-export-sheet blocked on shared-codecs:SC-f; AC-zoom, AC-colour, AC-tools, AC-guides done)
-Base: dev a41e7f1f (main 0dd23d65 verified)
+Stage: 3 awaiting supervisor (AC-export-sheet blocked on shared-codecs:SC-f)
+Base: dev 1d3f98f9 (main 0dd23d65 verified)
 Next: re-read shared-codecs:SC-f each poll: SC-15 (owns Sources/PhotoApp/PhotoWindow+Export.swift) and SC-16 (replaces Sources/LibraryModel/Contracts/ExportFormats.swift) on dev? Once both merge, AC-e1 + AC-e2 ship as one slice PR to dev with feature-done
 
 ## Slices
@@ -34,6 +34,7 @@ Next: re-read shared-codecs:SC-f each poll: SC-15 (owns Sources/PhotoApp/PhotoWi
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T17:35Z: poll on dev 1d3f98f9: SC-15 and SC-16 still not on dev and have no PRs (ExportFormats.swift present). No supervisor reply. Asked the supervisor to hold or release the run (#1942 issuecomment-6347075135); default: leave AC-export-sheet unstarted for the next lead.
 - 2026-10-22T17:10Z: Belt nudge: status lives on this branch (lead/suiteui-adopt-suiteui-chrome), not lead/adopt-suiteui-chrome where this run first wrote; record moved here. Re-polled on dev a41e7f1f: SC-15 and SC-16 still not on dev (Library's ExportFormats.swift still present; shared-codecs.wave.json status planned). AC-export-sheet stays unstarted; nothing else in the brief can start.
 - 2026-10-22T16:45Z: blocked note on #1942 (issuecomment-6345841148): AC-e1 + AC-e2 ship as one slice PR once SC-15 and SC-16 merge.
 - 2026-10-22T16:30Z: run act-1a1646f0a9f-d1ei resumed for AC-export-sheet (brief: AC-zoom, AC-colour, AC-tools, AC-guides done). Waits re-read: shared-codecs posted Belt-Slice-Done: SC-f on run 39710840412 with only SC-13 (#4019) and SC-14 (#4238) merged; SC-15 and SC-16 are not on dev and #3718 now waits on suite-imaging:IM-a. The packet waits on the whole slice and SC-f owns PhotoWindow+Export.swift, and the supervisor (2026-10-22T07:43Z on #1942) holds AC-export-sheet for SC-15 and SC-16, so AC-e1 does not start. Slice PRs go to dev (CLAUDE.md; the lane retargets main).
