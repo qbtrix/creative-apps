@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-22T01:38:16Z	2026-10-22T01:38:16Z	check	heartbeat	-	#4258 macOS build 39705921002 queued; nothing merged
 2026-10-22T02:00:24Z	2026-10-22T02:00:24Z	check	heartbeat	#4258	macOS build 39705921002 still queued (17 runs in the macOS queue); all PRs wait on #4258
 2026-10-22T02:22:41Z	2026-10-22T02:22:41Z	check	redev	-	#4258 closed: superseded by SC-14 #4238 (StillFormat now a struct over SuiteImageFormats). #4035 merged dev taking dev's Media.swift; gate running. SM-6 (#4237) StillEncoder switches over StillFormat need a default/registry lookup when brought up
+2026-10-22T02:36:18Z	2026-10-22T02:36:18Z	SM-a	redev	#4035	merged dev (took SC-14 StillFormat), gate PASS, head 10b9aefb; #4258 closed as redundant
