@@ -2,36 +2,42 @@
 // commands the catalog's tests, the gallery page, the afterglow CLI and the MCP server drive before any app adopts;
 // file-flow SF-9 adds the five file-flow commands over fixed readers, so RJ-X43 runs `file.drop` on the CLI;
 // gradient-fill GF-9 gives each rect an optional fill and lists the eight fill commands, so RJ-X30 runs on the CLI;
-// autosave-history AH-9 lists `history.read` and `history.jump` over its one History, so RJ-X31 runs on the CLI.
+// autosave-history AH-9 lists `history.read` and `history.jump` over its one History, so RJ-X31 runs on the CLI;
+// stroke-style SS-8 gives each rect an optional stroke and lists the nine stroke commands, so RJ-X35 runs on the CLI.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
 
-/// One named rect on the fake canvas; a locked one refuses move, remove and a fill.
+/// One named rect on the fake canvas; a locked one refuses move, remove, a fill and a stroke.
 public struct FakeRect: Codable, Hashable, Sendable {
     /// The rect's id, its name ("Rect 1"), its frame and whether it is locked.
     public var id: Int, name: String, x, y, w, h: Double, locked: Bool
     /// The rect's fill, its points in the rect's own box (0, 0, w, h); nil reads as solid black and is left out of
     /// the JSON, so a rect with no fill saves what it did before fills.
     public var fill: Fill?
-    public init(id: Int, name: String, x: Double, y: Double, w: Double, h: Double, locked: Bool = false, fill: Fill? = nil) {
-        (self.id, self.name, self.x, self.y, self.w, self.h, self.locked, self.fill) = (id, name, x, y, w, h, locked, fill)
+    /// The rect's outline, dash and trim included; nil draws none and is left out of the JSON, as `fill` is.
+    public var stroke: VectorStroke?
+    public init(id: Int, name: String, x: Double, y: Double, w: Double, h: Double, locked: Bool = false, fill: Fill? = nil,
+                stroke: VectorStroke? = nil) {
+        (self.id, self.name, self.x, self.y, self.w, self.h, self.locked, self.fill, self.stroke) = (id, name, x, y, w, h, locked, fill, stroke)
     }
-    private enum CodingKeys: String, CodingKey { case id, name, x, y, w, h, locked, fill }
+    private enum CodingKeys: String, CodingKey { case id, name, x, y, w, h, locked, fill, stroke }
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         self.init(id: try c.decode(Int.self, forKey: .id), name: try c.decode(String.self, forKey: .name),
                   x: try c.decode(Double.self, forKey: .x), y: try c.decode(Double.self, forKey: .y),
                   w: try c.decode(Double.self, forKey: .w), h: try c.decode(Double.self, forKey: .h),
-                  locked: try c.decode(Bool.self, forKey: .locked), fill: try c.decodeIfPresent(Fill.self, forKey: .fill))
+                  locked: try c.decode(Bool.self, forKey: .locked), fill: try c.decodeIfPresent(Fill.self, forKey: .fill),
+                  stroke: try c.decodeIfPresent(VectorStroke.self, forKey: .stroke))
     }
     public func encode(to encoder: any Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
         try c.encode(id, forKey: .id); try c.encode(name, forKey: .name); try c.encode(x, forKey: .x); try c.encode(y, forKey: .y)
         try c.encode(w, forKey: .w); try c.encode(h, forKey: .h); try c.encode(locked, forKey: .locked)
         try c.encodeIfPresent(fill, forKey: .fill)
+        try c.encodeIfPresent(stroke, forKey: .stroke)
     }
     /// The box the rect's fill points are in: its own frame from the origin.
     public var fillBox: Rect { Rect(minX: 0, minY: 0, maxX: w, maxY: h) }
@@ -154,11 +160,11 @@ public struct FakeCanvasDocument: HeadlessDocument {
         .object(["rects": .number(Double(rects.count)), "selected": selected.map { .string($0.name) } ?? .null])
     }
 
-    /// The fake's twenty-three ids: its six commands, `edit.undo` and `edit.redo`, the five file-flow commands, the
-    /// eight fill commands and the two history commands. Empty only if an id were refused.
+    /// The fake's thirty-two ids: its six commands, `edit.undo` and `edit.redo`, the five file-flow commands, the
+    /// eight fill commands, the two history commands and the nine stroke commands. Empty only if an id were refused.
     public static let catalog = (try? CommandCatalog<FakeCanvasDocument>(
         app: app, specs + FileFlowCommands.specs(FakeCanvasDocument.self) + GradientCommands.specs(FakeCanvasDocument.self)
-            + HistoryCommands.specs(FakeCanvasDocument.self),
+            + HistoryCommands.specs(FakeCanvasDocument.self) + StrokeCommands.specs(FakeCanvasDocument.self),
         history: { $0.history })) ?? .empty(app: app)
     /// A rect's result schema.
     static let rectSchema = ParamSchema.object(["id": .integer(), "name": .string(), "x": .number(), "y": .number(),
@@ -233,6 +239,20 @@ extension FakeCanvasDocument: GradientFillTarget {
         let index = try editableIndex("fill")
         history.record(name, rects, key: drag.map { "\(name):\($0)" })
         rects[index].fill = GradientRules.mapped(fill, from: box, to: rects[index].fillBox)
+    }
+}
+
+/// The fake as a stroke target: the selected rect's stroke; a locked rect refuses with its reason, and every rect is
+/// an outline, so trim always runs.
+extension FakeCanvasDocument: StrokeTarget {
+    public var strokeHelp: String? { editable.why }
+    public var trimHelp: String? { nil }
+    public var selectedStroke: VectorStroke? { selected?.stroke }
+    /// Sets (nil removes) the selected rect's stroke as the step `name`; a scrub under one `drag` token is one step.
+    public mutating func setStroke(_ stroke: VectorStroke?, name: String, drag: String?) throws {
+        let index = try editableIndex("stroke")
+        history.record(name, rects, key: drag.map { "stroke:\(name):\($0)" })
+        rects[index].stroke = stroke
     }
 }
 

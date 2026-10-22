@@ -1,0 +1,16 @@
+[
+  {
+    "label": "outputLevelsRoundTrip: a save drops output white, so a file's output levels come back as 1",
+    "file": "Sources/PhotoModel/PhotoAdjust+Imaging.swift",
+    "find": "        if outputWhite != 1 { try c.encode(outputWhite, forKey: .outputWhite) }\n",
+    "replace": "",
+    "tests": "PhotoImagingTests"
+  },
+  {
+    "label": "hueSatFields: an opened file's hue and saturation land in each other's fields",
+    "file": "Sources/PhotoModel/PhotoAdjust+Imaging.swift",
+    "find": "            hue: try c.decode(Double.self, forKey: .hue),\n            saturation: try c.decode(Double.self, forKey: .saturation),",
+    "replace": "            hue: try c.decode(Double.self, forKey: .saturation),\n            saturation: try c.decode(Double.self, forKey: .hue),",
+    "tests": "PhotoImagingTests"
+  }
+]
