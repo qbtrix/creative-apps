@@ -4,7 +4,7 @@ Issue: #3418 · Packet: docs/blueprints/suiteui/features/gradient-fill.md
 Run: act-1a15f92d30e-mfnc · Session: claude/feature-lead-suiteui-srh349 · Started: 2026-10-20T03:19Z (relaunched 2026-10-21)
 Stage: 3 wave 5
 Base: aaa43f918e028249e0525eb468f37795638932d7
-Next: #4179 (GF-z), #4180 (C4), #4186 (#4047 editor fixes) wait on the lane; Belt-Slice-Done GF-m once a dev Linux job with #3742 is green.
+Next: critic panel on scoped suiteui run 39709885898 (queued), then Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: #4179 (GF-z), #4180 (C4), #4186 (#4047 editor fixes) wait on the lane; Bel
 | GF-a | kernel Fill/ module as stubs; gallery page; checks written, disabled | GF-1, GF-2 | SJ0 | command-catalog:CC-u (GF-2) | true | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39554157396 | wanted |
 | GF-u | the GradientEditor view, snapshots, budget, journey | GF-3, GF-4 | GJ1 | GF-a | true | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39646407505 | wanted |
 | GF-m | rules, commands (one undo step per edit), SVG writer | GF-5, GF-6, GF-7 | KJ-fill | GF-a; command-catalog:CC-run (met) | false | 0 | building | – | – |
-| GF-z | gallery live on GradientCommands, fake app takes fills (RJ-X30), built | GF-8, GF-9, GF-10 | GJ1, KJ-fill | GF-u, GF-m; command-catalog:CC-a (met) | true | 0 | built, PR waits #3742 (lead/suiteui-gradient-fill-GF-z b2667bac, Mutate 6/6, ci PASS) | – | – |
+| GF-z | gallery live on GradientCommands, fake app takes fills (RJ-X30), built | GF-8, GF-9, GF-10 | GJ1, KJ-fill | GF-u, GF-m; command-catalog:CC-a (met) | true | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39710840412 | wanted |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
