@@ -4,7 +4,7 @@ Issue: #3775 · Packet: docs/blueprints/suite/features/sample-files.md
 Run: act-1a15ef24f0e-t1j1 · Session: cse_01Mv9wxYxE6yTZhCjfP2rdUH · Started: 2026-10-21T14:56Z
 Stage: 3 wave 4
 Base: 9951eea7355e5a768f0ce1e1bad25656cf05cd82
-Next: SS-a, SS-vector and SS-raster are Belt-Slice-Done. #4129 SS-z merged 33e1597c1 at 01:30. Once a green dev Linux run contains it (dev red on FormatListRatchet until #4258 lands): Belt-Slice-Done SS-z, then Belt-Contact-Sheet.
+Next: none. Feature done: SS-a, SS-vector, SS-raster and SS-z are Belt-Slice-Done; Belt-Contact-Sheet posted on #3775 with run https://github.com/qbtrix/creative-apps/actions/runs/39710840412. Journey verification (XJ-SS) belongs to the beta-hardening lane.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
