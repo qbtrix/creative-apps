@@ -49,3 +49,4 @@ time	kind	step	ref	note
 2026-10-22T15:30Z	-	push	#4446	merged dev, kept HK-7 test file plus #4431 test; head 7c5c60024, CI: PASS, mutate 9/9
 2026-10-22T15:52Z	-	slice-done	HK-m	run 39806111520 Linux green
 2026-10-22T15:52Z	-	slice-done	HK-u	run 39806111520 Linux green; Mac-Finish-Wanted
+2026-10-22T16:02Z	-	build	#4446	macOS build 39807175605 cancelled; 39810248847 queued
