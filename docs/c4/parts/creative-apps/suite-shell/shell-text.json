@@ -1,0 +1,10 @@
+{
+  "id": "shell-text",
+  "name": "Text on Core Text",
+  "description": "The live half of SuiteModel's text contract: measures spans on Core Text into one advance per grapheme (ligatures split evenly, an emoji whole), ascent and descent, and names the fallback family.",
+  "technology": "Swift 6, Core Text and AppKit, macOS 26",
+  "paths": [
+    "Sources/SuiteShell/Text/"
+  ],
+  "order": 90
+}

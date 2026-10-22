@@ -1,20 +1,30 @@
-// PathEditOverlayTests.swift (pen-paths PN-2, PN-3): the contour stub joins each
-// contour's neighbours, closes a closed one, and keeps contours apart;
-// PathGesture turns presses, drags and keys into the kernel's PathIntents: a
-// Pen click adds a point, a press-drag adds one with a handle, a click near the
-// first anchor closes, an anchor drag moves under one token, Option breaks a
-// handle, Delete removes. Pure value tests. macOS only.
+// PathEditOverlayTests.swift (pen-paths PN-2, PN-3): the contour parts join each
+// contour's neighbours, close a closed one and keep contours apart; PathGesture
+// turns presses, drags and keys into the kernel's PathIntents: a Pen click adds
+// a point, a press-drag adds one with a handle, a click near the first anchor
+// closes, an anchor drag moves under one token, Option breaks a handle, Delete
+// removes. Pure value tests. macOS only.
 import SuiteKernel
 @testable import SuiteUI
 import SwiftUI
 import Testing
 
-private func contour(_ xs: [Double], closed: Bool) -> PathContourStandIn {
-    PathContourStandIn(anchors: xs.map { PathAnchor(point: CGPoint(x: $0, y: 0), kind: .corner) }, closed: closed)
+private func corner(_ x: Double, _ y: Double) -> VectorAnchor { VectorAnchor(point: Point(x: x, y: y)) }
+
+private func contour(_ xs: [Double], closed: Bool) -> VectorContour {
+    VectorContour(anchors: xs.map { corner($0, 0) }, closed: closed)
 }
 
+private func context(_ tool: PenTool, draft: [VectorAnchor]? = nil, selected: [AnchorRef] = [], zoom: Double = 2) -> PathContext {
+    let path = PathInEdit(id: "p", path: VectorPath(contours: [contour([0, 50, 100], closed: false)]), toDocument: .identity)
+    return PathContext(draft: draft.map { PenDraft(contour: VectorContour(anchors: $0, closed: false), scale: zoom) },
+                       path: path, selection: Selection(selected), tool: tool, zoom: zoom)
+}
+
+private let a1 = AnchorRef(contour: 0, index: 1)
+
 @Test func contourPartsJoinNeighboursAndCloseClosedOnes() {
-    let parts = PathMarks.parts([contour([0, 10, 20], closed: true), contour([30, 40], closed: false)])
+    let parts = PathMarks.parts([contour([0, 10, 20], closed: true), contour([30, 40], closed: false)], toView: .identity)
     #expect(parts.anchors.map(\.point.x) == [0, 10, 20, 30, 40])
     #expect(parts.segments == [
         PathSegment(from: 0, to: 1), PathSegment(from: 1, to: 2), PathSegment(from: 2, to: 0),
@@ -23,26 +33,11 @@ private func contour(_ xs: [Double], closed: Bool) -> PathContourStandIn {
 }
 
 @Test func shortContoursAddNoSegment() {
-    let parts = PathMarks.parts([contour([], closed: true), contour([5], closed: true)])
+    let parts = PathMarks.parts([contour([], closed: true), contour([5], closed: true)], toView: .identity)
     #expect(parts.anchors.count == 1)
     #expect(parts.segments.isEmpty)
     #expect(PenTool.allCases.map(\.title) == ["Pen", "Direct Selection"])
 }
-
-// PathGesture (PN-3), on the kernel's path types.
-private func corner(_ x: Double, _ y: Double) -> VectorAnchor { VectorAnchor(point: Point(x: x, y: y)) }
-
-private func vectorContour(_ xs: [Double], closed: Bool) -> VectorContour {
-    VectorContour(anchors: xs.map { corner($0, 0) }, closed: closed)
-}
-
-private func context(_ tool: PenTool, draft: [VectorAnchor]? = nil, selected: [AnchorRef] = [], zoom: Double = 2) -> PathContext {
-    let path = PathInEdit(id: "p", path: VectorPath(contours: [vectorContour([0, 50, 100], closed: false)]), toDocument: .identity)
-    return PathContext(draft: draft.map { PenDraft(contour: VectorContour(anchors: $0, closed: false), scale: zoom) },
-                       path: path, selection: Selection(selected), tool: tool, zoom: zoom)
-}
-
-private let a1 = AnchorRef(contour: 0, index: 1)
 
 @Test func penClickEmitsOnePenAdd() {
     var gesture = PathGesture()
@@ -118,4 +113,13 @@ private let a1 = AnchorRef(contour: 0, index: 1)
     let click = gesture.press(at: CGPoint(x: 40, y: 40), hit: nil, modifiers: [], token: "c", in: context(.directSelect))
         + gesture.release(at: CGPoint(x: 40, y: 40), modifiers: [])
     #expect(click == [.select(anchors: [], rect: nil, extend: false)])
+}
+
+@Test func aStandInContourIsTheKernelContourItDescribes() {
+    let smooth = PathAnchor(point: CGPoint(x: 10, y: 20), kind: .smooth, handleIn: CGPoint(x: 5, y: 20), handleOut: CGPoint(x: 15, y: 20))
+    let standIn = PathContourStandIn(anchors: [PathAnchor(point: CGPoint(x: 0, y: 0), kind: .corner), smooth], closed: true)
+    #expect(standIn.contour == VectorContour(anchors: [
+        corner(0, 0),
+        VectorAnchor(point: Point(x: 10, y: 20), handleIn: Point(x: 5, y: 20), handleOut: Point(x: 15, y: 20), kind: .smooth),
+    ], closed: true))
 }
