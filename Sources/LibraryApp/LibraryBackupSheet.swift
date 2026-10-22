@@ -53,15 +53,16 @@ struct LibraryBackupSheet: View {
                 Spacer()
                 Button("Cancel") { actions.close?() }.keyboardShortcut(.cancelAction)
                     .accessibilityIdentifier("library.backup.cancel")
-                Button("Restore…") { confirming = true }.keyboardShortcut(.defaultAction)
-                    .disabled(blocked != nil).help(blocked ?? "Restore the selected backup.")
+                MenuCommand(LibraryCatalog.restoreControlSpec, on: LibraryRestoreControl(help: blocked), title: "Restore…",
+                            shortcut: .defaultAction) { confirming = true }
                     .accessibilityIdentifier("library.backup.restore")
             }
         }
         .padding(SuiteSpacing.l)
         .frame(width: SuiteSize.contentIdealWidth)
         .confirmationDialog("Restore This Backup?", isPresented: $confirming, titleVisibility: .visible) {
-            Button("Restore", role: .destructive) { if let selected { actions.restore?(selected) } }
+            MenuCommand(LibraryCatalog.restoreControlSpec, on: LibraryRestoreControl(help: blocked), title: "Restore",
+                        role: .destructive) { if let selected { actions.restore?(selected) } }
                 .accessibilityIdentifier("library.backup.confirm")
             Button("Cancel", role: .cancel) {}
         } message: {
