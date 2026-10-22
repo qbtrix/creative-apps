@@ -18,3 +18,4 @@ time	kind	step	ref	note
 2026-10-21T11:52Z	poll	blocked	HK-a	still blocked: #3401 open
 2026-10-21T12:52Z	poll	waiting	HK-a	still blocked: #3401 open
 2026-10-22T06:25Z	run-start	act-1a162462636-ft6b base dev bdd92b41; wave 1 HK-a
+2026-10-22T06:27Z	wave	HK-a builder started
