@@ -68,3 +68,4 @@ utc	stage	event	ref	note
 2026-10-22T17:54Z	poll	DS-u	#4386	lane macOS build dispatched 17:45Z; no ci.yml design/full run on dev contains 62400e4d4 yet
 2026-10-22T18:12Z	poll	DS-u	#4386	lane macOS build still running; no design/full ci.yml run on dev contains 62400e4d4 yet
 2026-10-22T18:29Z	poll	DS-u	#4386	lane macOS build 39825433352 still in progress; no design/full ci.yml run on dev contains 62400e4d4 yet
+2026-10-22T18:46Z	poll	DS-u	#4386	lane macOS build 39825433352 job still queued for a runner; no design/full run on dev contains 62400e4d4
