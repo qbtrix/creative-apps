@@ -50,3 +50,4 @@
 2026-10-22T06:27Z	check	TS-m #3844 (supervisor landing, last update 05:59Z) and #3847 still open; TX-4/TX-5 wait; no new text-layers finding
 2026-10-22T06:53Z	check	TS-m #3844/#3847 still open (supervisor landing); TX-4/TX-5 wait; new photo journey findings #4332-#4334 (dev run 39712355440: recovery/place/documents, red-triage likely flaky) are not text-layers
 2026-10-22T07:20Z	check	TS-m #3844/#3847 still open (supervisor landing them); no new findings; TX-4/TX-5 waiting
+2026-10-22T07:46Z	check	now p0 (blocks layer-styles #3793); TS-m #3844/#3847 still open; no new findings; TX-4/TX-5 waiting
