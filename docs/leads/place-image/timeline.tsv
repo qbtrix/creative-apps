@@ -79,3 +79,4 @@ utc	stage	event	ref	note
 2026-10-22T02:49Z	02:52Z: builder merged dev into both fixes, scripts/ci --changed PASS on each
 2026-10-22T02:56Z	02:57Z: photo run 39700970657 (add701fc9) red only on RenderBudgetPhotoTransformTests = #4247, fixed by #4252; full 39700185524 red only on FormatListRatchet (fixed by #4238)
 2026-10-22T03:18Z	03:18Z: dev Linux 39713604043 green (66a845885); lane dispatched mac builds for both new heads
+2026-10-22T03:39Z	03:40Z heartbeat: no change; mac runners queued
