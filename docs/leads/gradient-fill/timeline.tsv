@@ -93,3 +93,4 @@ utc	stage	event	ref	note
 2026-10-22T02:51Z	3	fix	-	fgz merged dev b5a6e7e0, ci --changed PASS, pushed d417a35f; #4257 Head moved, footer stripped.
 2026-10-22T03:12Z	3	heartbeat	-	Heartbeat: #4259 (593d9118) and #4257 (d417a35f) wait on lane macOS builds; #4035 too. dev Linux green at 66a84588.
 2026-10-22T03:39Z	3	heartbeat	-	Heartbeat: #4259 macOS build queued, #4257 macOS build running; #4035 macOS+Linux green, awaiting lane merge.
+2026-10-22T04:02Z	3	heartbeat	-	#4257 (d417a35f) macOS build green, waiting on the lane sweep to merge; no green-Linux run with FG-m yet
