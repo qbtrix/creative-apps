@@ -99,3 +99,4 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 01:35Z: SS-9 #3826 ead55aa: lane says ready (all checks ok); waits for next batch while batch 20261022004326 bisects
 - 01:58Z: SS-9 #3826 ead55aa is first in lane batch 20261022013736 (Linux check running)
 - 02:20Z: SS-9 #3826: batch 20261022013736 bisecting; probe 2 (+#4002) red on FormatListRatchetTests (SuiteModel Media.swift, not this PR); probe 1 (+#3826) running
+- 02:42Z: SS-9 #3826: batch red on dev-only FormatListRatchetTests (SuiteModel Media.swift vs #4238 SuiteImageFormats); probe 0 (dev alone) red too, so it should land on its own proof; commented once on #3826
