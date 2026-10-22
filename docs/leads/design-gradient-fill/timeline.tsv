@@ -55,3 +55,5 @@ time	kind	note
 2026-10-22T01:03Z	wait	lane-mac	-	#4197 macOS build 39700686875 queued; DG-m waits on scoped design 39693638859 (queued)
 2026-10-22T01:29Z	wait	lane-mac	#4197	running
 2026-10-22T01:57Z	DG-z	linux-red-dev	#4197	waits #4258
+2026-10-22T02:29Z	DG-z	merge-dev	#4197	72232121
+2026-10-22T02:29Z	DG-m	design-run-red	39693638859	not ours (#4215)
