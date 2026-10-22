@@ -69,3 +69,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T03:12Z: Heartbeat: #4259 (593d9118) and #4257 (d417a35f) wait on lane macOS builds; #4035 too. dev Linux green at 66a84588.
 - 2026-10-22T03:39Z: Heartbeat: #4259 macOS build queued, #4257 macOS build running; #4035 macOS+Linux green, awaiting lane merge.
 - 2026-10-22T04:02Z: #4259 (593d9118) lane macOS build still queued; FL-m/FL-u branches ready behind it
+- 2026-10-22T04:24Z: #4259 macOS build still queued
