@@ -48,3 +48,4 @@ Next: #4309 (DS-6) in the lane, macOS build 39722964879 queued; then Belt-Slice-
 - 2026-10-22T05:10Z wait check: CB-photo, CB-design, CB-halo, CB-flare planned (clipboard-interop lead building CB-5/7/9/11 test halves); UP-halo blocked behind UP-photo/UP-flare (unsaved-prompt run released); FR-halo, FR-flare, AC-zoom, CB-s, CB-m, CB-u done.
 - DS-u waits on frame-rates:FR-u (held) and area-selection:AR-u (waiting).
 - Adopt slices wait on other features' app slices (FR-halo/flare, CB-photo/design/halo/flare, UP-halo).
+- 2026-10-22T06:15:11Z: rule 23, three identical blocked polls; Question for the supervisor posted on the issue.
