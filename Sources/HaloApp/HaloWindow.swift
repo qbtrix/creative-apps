@@ -34,6 +34,8 @@ struct HaloWindow: View {
     @State var request: HaloWindowRequest?
     /// The drag in progress, which the viewer draws without re-running this body (HaloLiveEdit.swift).
     @State var live = HaloLiveEdit()
+    /// The refresh link the window's scrubs pace on, handed to `live`.
+    @Environment(\.haloRefreshLink) private var makeLink
     /// The viewer's shape tool: on, its drag's draft, and its draw (HaloShapeTool.swift).
     @State var shapes = HaloShapeDrawing()
 
@@ -107,7 +109,10 @@ struct HaloWindow: View {
                 onRename: { perform(.renameComposition($0.id, $1)) },
                 onDismiss: { model.dismissRefusedRename() })))
         .environment(\.haloLiveEdit, live)
-        .onAppear { live.current = { model } }
+        .onAppear {
+            live.current = { model }
+            live.makeLink = makeLink
+        }
         .focusedSceneValue(\.haloPerform, perform)
         .focusedSceneValue(\.haloProject, model)
         .haloControlsProbe(HaloLaunch.current.controlsProbe)

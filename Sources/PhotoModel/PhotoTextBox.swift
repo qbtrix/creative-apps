@@ -2,7 +2,7 @@
 // opens one at the press (`endDrag`); the view's field sends what is typed to `typeText`, Esc to
 // `cancelTextBox` and Return or focus loss to `commitTextBox`, which runs `text.add` with the draft. Another
 // click or another tool commits the open box first. The box is the draft only: nothing in the document
-// changes until the commit, and until TX-5 builds `text.add` the commit says so in the status line.
+// changes until the commit; a refused commit says why in the status line.
 // Linux-safe.
 import CoreRaster
 import SuiteKernel
@@ -19,10 +19,6 @@ public struct PhotoTextBox: Hashable, Sendable {
 }
 
 extension PhotoWorkspace {
-    /// Photo's text commands, run by the box's commit until TX-5 appends them to `catalog`.
-    static let textCatalog = try? CommandCatalog<PhotoWorkspace>(
-        app: "photo", textCommands, history: { $0.history.kernel })
-
     /// Opens an empty box at `origin`, committing any open one first.
     mutating func openTextBox(at origin: Mask.Point) {
         commitTextBox()
@@ -48,8 +44,7 @@ extension PhotoWorkspace {
         let x = Self.pixel(box.origin.x, below: canvas.width), y = Self.pixel(box.origin.y, below: canvas.height)
         let params = JSONValue.object(["x": .number(Double(x)), "y": .number(Double(y)), "words": .string(box.draft)])
         do {
-            guard let catalog = Self.textCatalog else { throw Self.textCommandsNotBuilt }
-            _ = try catalog.run("text.add", params: params, on: &self)
+            _ = try Self.catalog.run("text.add", params: params, on: &self)
         } catch {
             statusMessage = textHelp ?? "Couldn't add the text."
         }

@@ -20,8 +20,9 @@ struct FlareExportSheetAdapter: ViewModifier {
     let model: FlareWorkspace
     let perform: @MainActor (FlareIntent) -> Void
 
-    /// The format menu: one choice per ExportFormat, its id the raw value.
-    nonisolated static let formats = ExportFormat.allCases.map { FormatChoice(id: $0.rawValue, name: title($0), hasQuality: false) }
+    /// The format menu: one choice per built ExportFormat, its id the raw value (MP4 and GIF chips are FV-2's).
+    nonisolated static let formats = ExportFormat.allCases.filter { $0.unbuiltReason == nil }
+        .map { FormatChoice(id: $0.rawValue, name: title($0), hasQuality: false) }
 
     /// A format's name in the menu.
     nonisolated static func title(_ format: ExportFormat) -> String {
@@ -29,6 +30,8 @@ struct FlareExportSheetAdapter: ViewModifier {
         case .svgFrame: "SVG frame"
         case .lottie: "Lottie"
         case .pngSequence: "PNG sequence"
+        case .mp4: "MP4"
+        case .gif: "GIF"
         }
     }
 
@@ -94,7 +97,7 @@ struct FlareExportOptionRows: View {
                     perform(.export(.setStep(Int($0.rounded()))))
                 }
                 .accessibilityIdentifier("flare.export.step")
-            case .lottie:
+            case .lottie, .mp4, .gif:
                 EmptyView()
             }
             if options.format != .lottie {
