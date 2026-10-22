@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-21T10:57Z	3	heartbeat	W4h	#4005 PT-3 open; fixer baselining CanvasSizeSheet buttons (CommandPathTests); dev red from #3976 PhotoPlace not ours; #3969 PT-5 open fast-lane; scoped photo run 39579629627 in progress
 2026-10-22T09:00Z	0	stage-start	act-1a1624626e1-8awa	relaunch for PE-m, PE-z; base dev bdd92b41
 2026-10-22T09:05Z	3	stage-start	W1	PE-6 builder
+2026-10-22T06:25:57Z	stage3	wave2 PE-z builder started (parallel, stacks on PE-m before PR)
