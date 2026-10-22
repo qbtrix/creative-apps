@@ -14,7 +14,7 @@ import Darwin
 public enum GradientRules {
     /// The most stops a gradient holds, and why a gradient can't drop below two.
     public static let maxStops = 64, stopHelp = "A gradient needs at least two stops."
-    /// What a fill command's run throws until GF-6 builds the bodies.
+    /// What an app's `setFill` throws until its adopt builds it.
     public static let notBuilt = CatalogError.notBuilt(id: "fill", feature: "gradient-fill GF-6")
 
     /// Which of the three fills `fill` is.

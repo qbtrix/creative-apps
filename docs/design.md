@@ -644,6 +644,32 @@ For every screen, name what is content and what is control before you build.
 - Full screen keeps the essential tools reachable; hiding chrome for focus is
   fine if hovering brings it back.
 
+## Catalog apps (Library)
+
+Library's own rules, moved here from `docs/blueprints/library.md` 6.1 by
+the feature that builds each one.
+
+- **Filter bar.** One flat row at the top of the content, above the grid
+  and the loupe, on the content layer (no glass). Left to right: the
+  caption while a smart collection is selected ("Rules of <name>"), one
+  `ChipRow` toggle chip each for Picked, Unflagged and Rejected, a system
+  `Menu` for the rating rule (Any Rating, At Least 1 to 5 Stars, Unrated,
+  Exactly 1 to 5 Stars), a Hide Rejected checkbox, a `Menu` of labels
+  ("Any Label", then "Labels (n)"), the summary and count in
+  `SuiteFont.caption` secondary text ("Picked; 12 of 60"), and Clear. The
+  flags OR together, and so do the labels; flags, rating, labels and Hide
+  Rejected AND. Every control is also in
+  View > Filter. Each control has `library.filter.<part>` and its reason
+  as help while disabled ("Import or load photos to filter them.", "No
+  filter is on."). Why: the culler narrows the grid most sessions, so the
+  rules sit in view and say what they hide.
+- **No matching photos.** A filter that hides every photo shows
+  `EmptyStateView` "No Matching Photos" with Clear Filter, never an empty
+  grid. Why: an empty grid reads as lost photos.
+- **Filter edits** are not undo steps; a smart collection's rule edits are
+  ("Edit Rules"), and so are collection edits (New, Rename, Add to, Remove
+  from, Delete Collection). Deleting a collection never removes its photos.
+
 ## Commands
 
 - **Every command is in the menu bar.** People learn a Mac app by its menus,

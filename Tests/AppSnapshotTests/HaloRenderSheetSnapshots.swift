@@ -55,7 +55,8 @@ import Testing
         #expect(project.renderRun == .editing(half))
         #expect(project.renderSummary(half, existing: []) == "48 PNG files, 960 × 540, into a new folder \"Bounce\"")
         let view = sheet(project)
-        #expect(view.readout.rows == [.format("pngSequence"), .size(0.5)])
+        // Size is the Full and Half chips in the options rows; the kernel's 0.25x-4x scrub would offer scales Halo has not got.
+        #expect(view.readout.rows == [.format("pngSequence")])
         #expect(view.readout.editable)
         #expect(HaloRenderExportAdapter.formats.map { ExportSheetIDs("halo.render").format($0.id) }
             == ["halo.render.format.pngSequence", "halo.render.format.movie"])
