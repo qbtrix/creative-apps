@@ -65,3 +65,4 @@ Wave 3: HT-m as #4415 on dev 30120a8; HT-z (#4422) stacked on it at once, labell
 - 2026-10-22T20:33:44Z: heartbeat. Full CI 39836126860 (a102c34): Linux green, macOS still queued. Newer full CI 39844810755 (0f8414a) was cancelled as superseded. Still waiting for a green macOS run on a dev head holding 55d96ee.
 - 2026-10-22T20:54:38Z: heartbeat. Full CI 39836126860 (a102c34): macOS still queued. The macOS queue is roughly 2.5 h deep (scoped library run 39830886816, queued 18:23Z, only now running). No newer full or halo-scoped dev run in progress. Waiting.
 - 2026-10-22T21:16:46Z: heartbeat. Full CI 39836126860 (a102c34): macOS still queued. The halo-scoped run now on macOS (39811894403, 7e9f260) predates 55d96ee, so it can't prove HT-m/HT-z. Waiting.
+- 2026-10-22T21:39:59Z: heartbeat. Full CI 39836126860 macOS still queued. New scoped halo run 39857142295 (dev 066cd28, holds 55d96ee) queued at 21:25Z; either one can close HT-m/HT-z.
