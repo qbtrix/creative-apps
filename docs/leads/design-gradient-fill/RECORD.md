@@ -50,3 +50,5 @@ Next: #4189 merges -> Belt-Slice-Done DG-m on a green design run; #4197 merges; 
 - 2026-10-22T01:57Z #4197 macOS build green. Lane Linux check red on FormatListRatchetTests.realTreePasses (Sources/SuiteModel/Values/Media.swift, from SM-1 #4034); dev is red on the same test (dev-red #3856), fix #4258 in the lane. Not ours; merge dev again once #4258 lands.
 
 - 2026-10-22T02:29Z Merged dev (b5a6e7e0a) into #4197, CI: PASS, pushed 72232121, Head moved. Scoped design run 39693638859 (be9aa35bc) failed on the old RenderBudgetPhotoPlaceTests break (fixed on dev by #4215), so no done lines yet; next design run is 39709889487. #4258 closed: #4238 (SC-14) fixed dev's ratchet.
+
+- 2026-10-22T03:26Z Heartbeat: #4197 (72232121) lane macOS build green; waits for its batch. Design run 39709889487 still queued.
