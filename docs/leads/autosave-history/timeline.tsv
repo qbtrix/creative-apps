@@ -68,3 +68,4 @@ utc	stage	event	ref	note
 2026-10-22T11:10:46Z	3	heartbeat	-	polling: lane merge of #4388/#4396
 2026-10-22T11:26:26Z	3	heartbeat	-	#4388 open, macOS build 39763938609 queued; #4396 open, awaiting lane sweep
 2026-10-22T11:43:14Z	3	heartbeat	-	#4388/#4396 open; macOS build 39763938609 still queued; lane run 39771983252 pending
+2026-10-22T12:07:52Z	3	merged	#4396	4a9c31f, lane batch Linux 39772161235; #4388 macOS build 39763938609 in progress
