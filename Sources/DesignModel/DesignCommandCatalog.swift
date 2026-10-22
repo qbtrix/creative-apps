@@ -28,10 +28,10 @@ extension DesignWorkspace {
     /// color.pick's params: the page point and where the colour goes ("fill" or "stroke").
     struct PickParams: Codable, Sendable { var x, y: Double; var to: String }
 
-    /// Every Design action as a command spec, in menu order, then the History panel's two.
+    /// Every Design action as a command spec, in menu order, the History panel's two after the tools, then the View menu's.
     public static let commands: [CommandSpec<DesignWorkspace>] =
         fileSpecs + editSpecs + objectSpecs + GradientCommands.specs(DesignWorkspace.self) + SampleCommands.specs(DesignWorkspace.self)
-            + [pick] + TransformCommands.specs(DesignWorkspace.self) + pageSpecs + toolSpecs + HistoryCommands.specs(DesignWorkspace.self)
+            + [pick] + TransformCommands.specs(DesignWorkspace.self) + pageSpecs + toolSpecs + HistoryCommands.specs(DesignWorkspace.self) + viewSpecs
 
     /// The specs as a catalog whose history is the workspace's own.
     public static let catalog: CommandCatalog<DesignWorkspace> =
@@ -65,6 +65,51 @@ extension DesignWorkspace {
         ) { w, p in try w.open(Data(p.text.utf8)); return JSONValue.object([:]) },
         save("file.save", "Save", "Writes the file and marks it saved; a path becomes where it saves next.", path: .optional(.string("Where it was written."))),
         save("file.save-as", "Save As…", "Writes the file to a new path and marks it saved there.", path: .string("Where it was written.")),
+        export,
+    ]
+
+    /// file.export's params: the sheet's format, whole scale and scope; its result, the files the run would write.
+    struct ExportParams: Codable, Sendable { var format: String; var scale: Int; var scope: String }
+    struct ExportedFiles: Encodable, Sendable { var files: [ExportedName] }
+    struct ExportedName: Encodable, Sendable { var name: String; var width: Int; var height: Int }
+
+    /// The window's reason for its file-wide View items and Export…: off with no file open.
+    static func openHelp(_ w: DesignWorkspace) -> Availability { reason(w.isOpen ? nil : DesignToolbarItem.noFile) }
+
+    /// File > Export…'s confirm: plans the sheet's options and names each file with its pixels. Writing is the window's.
+    static let export = CommandSpec<DesignWorkspace>.typed(
+        "file.export", title: "Export…", summary: "Plans the files an export writes: the format, the scale and the scope.",
+        kind: .file, params: ExportParams.self,
+        schema: .object(["format": .string("The file type.", oneOf: DesignExportFormat.allCases.map(\.rawValue)),
+                         "scale": .integer("PNG and JPEG's whole scale; vectors take 1.", minimum: 1, maximum: 3),
+                         "scope": .string("What it writes.", oneOf: DesignExportScope.allCases.map(\.rawValue))],
+                        required: ["format", "scale", "scope"]),
+        result: .object(["files": .array(of: .object(["name": .string("The file's name."), "width": .integer("Pixels wide."),
+                                                      "height": .integer("Pixels high.")], required: ["name", "width", "height"]))],
+                        required: ["files"]),
+        example: .object(["format": .string("svg"), "scale": .number(1), "scope": .string("page")]), availability: openHelp
+    ) { w, p in
+        guard let format = DesignExportFormat(rawValue: p.format), let scope = DesignExportScope(rawValue: p.scope)
+        else { throw DesignRefusal.unchanged }
+        let plan = try w.exportPlan(DesignExportOptions(format: format, scale: p.scale, scope: scope), existing: [])
+        return ExportedFiles(files: plan.map { ExportedName(name: $0.fileName, width: $0.pixelWidth, height: $0.pixelHeight) })
+    }
+
+    /// View's zoom items: zoom is the window's, so headless these check availability and change nothing; Zoom to
+    /// Selection returns the rect the window would show.
+    static let viewSpecs: [CommandSpec<DesignWorkspace>] = [
+        plain("view.zoom-in", "Zoom In", "Zooms the window in.", .view, openHelp) { _ in },
+        plain("view.zoom-out", "Zoom Out", "Zooms the window out.", .view, openHelp) { _ in },
+        plain("view.fit", "Fit Page", "Zooms the window to fit the page.", .view, openHelp) { _ in },
+        .typed("view.zoom-to-selection", title: "Zoom to Selection", summary: "Zooms the window to the selected layers.",
+               kind: .view, params: NoParams.self, schema: ParamSchema.none,
+               result: .object(["x": .number("Left."), "y": .number("Top."), "width": .number("Width."), "height": .number("Height.")],
+                               required: ["x", "y", "width", "height"]),
+               example: .object([:]), availability: { reason($0.zoomToSelectionHelp) }
+        ) { w, _ in
+            guard let rect = w.zoomToSelectionRect else { throw DesignRefusal.nothingSelected }
+            return rect
+        },
     ]
 
     /// Save and Save As: the file's text as the result; the save marks the session saved, at `path` when given.
