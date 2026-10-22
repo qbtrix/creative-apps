@@ -1,19 +1,11 @@
-// HaloInspectorScrub.swift: the inspector bar scrub's coalescer (core-loop
-// CL-probe, #4275, #1297). A drag on a TRANSFORM bar can deliver several
-// pointer samples per screen refresh; writing the live preview on each one
-// copied the project and redrew the viewer per sample, so the viewer fell
-// 47 to 62 frames behind. Each sample instead lands here: the bar's latest
-// value (when it changed) and the input event's time. At each refresh the
-// bar's row takes one `refresh()`: at most one value to write, and the event
-// times that write shows, so the probe stamps every one of them shown by
-// that refresh. The first sample after an idle refresh asks for a refresh
-// (`.askRefresh`); a refresh that finds nothing stops asking, so an idle bar
-// costs no refreshes. A sample that comes `longestWait` or more after the
-// last frame was taken writes at once (`.writeNow`): a link that never fires
-// (a headless runner, no screen) still shows the scrub as it goes, at about
-// 40 writes a second. `end()` hands back what is left when the drag ends.
-// Times are seconds on one clock. Pure value logic, Linux-safe
-// (HaloInspectorScrubTests).
+// HaloInspectorScrub.swift: the inspector bar scrub's coalescer (CL-probe,
+// #4275, #1297). Writing the live preview per pointer sample redrew the
+// viewer per sample, 47 to 62 frames behind. Each sample lands here instead
+// (the bar's latest value, the event's time); each refresh takes at most one
+// value to write and the events it shows. The first sample asks for a
+// refresh, an idle refresh stops asking, and a sample `longestWait` after the
+// last frame writes at once, for a link that never fires (a headless runner).
+// Times are seconds on one clock; Linux-safe (HaloInspectorScrubTests).
 
 /// What one refresh of a bar scrub writes and shows.
 public struct HaloScrubFrame: Sendable, Hashable {

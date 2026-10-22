@@ -15,14 +15,10 @@
 // each leg starts where the last one left that layer. At the runners'
 // 1000 by 640 window the artboard is narrower than 600 pt, so a leg spans at
 // most 80% of it, with as many legs as make up 4 × 600 pt, and a leg slows
-// below 300 pt a second so it lasts at least `legTime`: each viewer leg must
-// hold 60 samples of its own (#4276), split by when the test started it. The
-// Rotation bar's legs run from dx 0.05 to 0.95 and last `legTime` each, so a
-// scrub spans 60 refreshes or more (#4275). H-P5 scrolls with bursts of
-// `burstEvents` posted scroll-wheel events, one every 120th of a second,
-// before each XCUITest scroll call (which alone draws one frame per call,
-// about 1.5 s apart), and counts only the intervals between two frames drawn
-// inside one burst (#4277).
+// below 300 pt a second to last `legTime`, as the Rotation bar's 0.05 to 0.95
+// legs do (#4275); each viewer leg needs 60 samples of its own (#4276). H-P5
+// posts a burst of scroll-wheel events at 120 Hz before each scroll call and
+// counts only intervals inside a burst (#4277).
 // XCUIGestureVelocity is pixels a second, so 300 pt a second is scaled by the
 // screen's backing scale, as DesignJourneyTests+PerfScrub does.
 import AppKit

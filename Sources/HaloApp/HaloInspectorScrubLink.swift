@@ -1,18 +1,11 @@
 // HaloInspectorScrubLink.swift: a TRANSFORM bar's scrub on the screen's
-// refresh (core-loop CL-probe, #4275). HaloPropertyRowView hands it every
-// pointer sample of a drag on its bar: each value the bar takes and each
-// move of the drag itself. HaloInspectorScrub (HaloModel) holds them. The
-// first sample starts a HaloRefreshLink from the `haloRefreshLink`
-// environment value, and each refresh writes the latest value once, through
-// the row's `write`, which puts it in the window's HaloLiveEdit. So the
-// viewer redraws once per refresh, not once per pointer sample. Under
-// `-SuitePerfProbe` that refresh also records one `inspector-scrub` sample
-// per event it shows, stamped shown on the next main-actor turn as
-// HaloProbe's are. A refresh that finds nothing stops the link. A sample
-// that waited `HaloInspectorScrub.longestWait` writes at once, so a link
-// that never fires (a headless runner) still shows the scrub; with no link
-// at all (no screen) the first sample writes at once and later ones the
-// same way. `end()` writes and records what is left and stops the link.
+// refresh (CL-probe, #4275). HaloPropertyRowView hands it every pointer
+// sample of a drag on its bar; HaloInspectorScrub (HaloModel) holds them. The
+// first starts a link from `haloRefreshLink`; each refresh writes the latest
+// value once through `write` (the window's HaloLiveEdit) and, under
+// `-SuitePerfProbe`, records one `inspector-scrub` sample per event it shows,
+// stamped shown on the next main-actor turn as HaloProbe's are. An idle
+// refresh stops the link; `end()` writes what is left and stops it.
 import AppKit
 import HaloModel
 import SuiteUI
