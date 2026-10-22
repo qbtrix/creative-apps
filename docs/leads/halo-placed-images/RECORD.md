@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: PH-a merged 19:43Z. In lane on dev: #4437 (PH-u sources, 9b49023, 385 lines; macOS build 39846187838; supervisor sentinel put needs-split at 20:07Z from a stale 3939-line read, answered on the PR), #4614 (PH-6, a3dceb0, 115 lines), #4615 (PH-5, 37f6334, 156 lines). Stacked drafts: #4438 (PH-u tests, 26aa19d) on #4437; #4618 (jobs live, d8a393b) on #4615, retarget each after its bases merge. Then Belt-Slice-Done PH-a/PH-u/PH-m once dev Linux green; PH-z after. Gap candidates: SVG gradient flat, SVG strokes. (check 20:13Z)
+Next: PH-a merged 19:43Z. In lane on dev: #4437 (PH-u sources, 9b49023, 385 lines; macOS build 39846187838; supervisor sentinel put needs-split at 20:07Z from a stale 3939-line read, answered on the PR), #4614 (PH-6, a3dceb0, 115 lines), #4615 (PH-5, 37f6334, 156 lines). Stacked drafts: #4438 (PH-u tests, 26aa19d) on #4437; #4618 (jobs live, d8a393b) on #4615, retarget each after its bases merge. Then Belt-Slice-Done PH-a/PH-u/PH-m once dev Linux green; PH-z after. Gap candidates: SVG gradient flat, SVG strokes. (check 20:17Z: sentinel put needs-split on #4437/#4614/#4615 from ~3900-line reads; real diffs 385/115/156; Question for the supervisor posted on #3456; needs-split not in lane scripts, lane builds continue)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
