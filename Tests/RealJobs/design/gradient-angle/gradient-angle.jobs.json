@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "app": "design",
+  "why": "RJ-D13: selects a banner's solid background, turns its fill into a linear gradient and sets the angle to 90 degrees, then exports SVG: the gradient is written in the layer's frame, top to bottom, and its bytes are checked.",
+  "inputs": ["input/*.design"],
+  "steps": [
+    {"id": "edit.select", "params": {"ids": ["node-2"]}},
+    {"id": "fill.type", "params": {"type": "linear"}},
+    {"id": "fill.angle", "params": {"degrees": 90}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}", "format": "svg", "options": {}},
+  "expect": {
+    "out/background.svg": {"sha256": "0dc1791d0007de95fceadccea48437702890b66788c5441b18be93f7b6c12832"}
+  },
+  "platforms": ["linux", "macos"]
+}

@@ -94,15 +94,15 @@ import Testing
         }
     }
 
-    /// The Fill section's Solid/Linear/Radial switch over a solid rectangle, off with the Model's reason
-    /// until gradient fills are built (gradient-fill DG-2).
+    /// The Fill section's Solid/Linear/Radial switch over a solid rectangle, on now that gradient fills are
+    /// built (gradient-fill DG-4).
     @Test func fillTypeSwitch() throws {
         var model = DesignFixtures.cards
         model.useServices(.live)
         model.selectItem("node-2")
         let selection = try #require(model.fillSelection)
         #expect(GradientRules.type(of: selection.fill) == .solid)
-        #expect(model.fillHelp != nil)
+        #expect(model.fillHelp == nil)
         try shoot("fill", model)
     }
 
