@@ -77,7 +77,7 @@ final class HaloPlaceJourneyTests: XCTestCase {
     }
 
     /// A 480 × 160 SVG: a dark rounded bar with a light circle.
-    private static let logoSVG = #"<svg xmlns="http://www.w3.org/2000/svg" width="480" height="160"><rect width="480" height="160" rx="24" fill="#202840"/><circle cx="80" cy="80" r="48" fill="#F0C040"/></svg>"#
+    private static let logoSVG = ##"<svg xmlns="http://www.w3.org/2000/svg" width="480" height="160"><rect width="480" height="160" rx="24" fill="#202840"/><circle cx="80" cy="80" r="48" fill="#F0C040"/></svg>"##
 
     /// File > Place…, then the file at `url` chosen in the panel by its path.
     @MainActor private func place(_ url: URL, _ halo: Journey) {
