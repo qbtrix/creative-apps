@@ -14,8 +14,8 @@ import Testing
     /// The board with `format`'s sample placed through `place.image`.
     static func placed(_ format: PlacedFormat) throws -> GalleryPlaceBoard {
         var board = GalleryPlaceBoard()
-        let sample = try #require(sample(format))
-        let line = board.run(.place(name: sample.name, data: sample.data, at: nil))
+        let picked = try #require(Self.sample(format))
+        let line = board.run(.place(name: picked.name, data: picked.data, at: nil))
         #expect(line.hasPrefix("place.image Place Image"), "the page stays on the local log: \(line)")
         return board
     }
