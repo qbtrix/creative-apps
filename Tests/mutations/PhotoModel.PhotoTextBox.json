@@ -1,0 +1,6 @@
+[
+  {"label": "emptyCommits: an empty box runs text.add and fills the status line", "file": "Sources/PhotoModel/PhotoTextBox.swift", "find": "guard !box.draft.isEmpty, let canvas else { return }", "replace": "guard let canvas else { return }", "tests": "PhotoTextBoxTests"},
+  {"label": "commitKeepsBox: committing leaves the box open", "file": "Sources/PhotoModel/PhotoTextBox.swift", "find": "        textBox = nil\n        guard !box.draft.isEmpty", "replace": "        guard !box.draft.isEmpty", "tests": "PhotoTextBoxTests"},
+  {"label": "toolSwitchKeepsBox: picking another tool leaves the box open", "file": "Sources/PhotoModel/PhotoWorkspace.swift", "find": "if tool != .text { commitTextBox() }", "replace": "if tool == .text { commitTextBox() }", "tests": "PhotoTextBoxTests"},
+  {"label": "clickReplacesSilently: a new click drops the open box's words", "file": "Sources/PhotoModel/PhotoTextBox.swift", "find": "        commitTextBox()\n        textBox = PhotoTextBox(origin: origin, draft: \"\")", "replace": "        textBox = PhotoTextBox(origin: origin, draft: \"\")", "tests": "PhotoTextBoxTests"}
+]

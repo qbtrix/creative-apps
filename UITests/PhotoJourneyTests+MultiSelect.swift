@@ -1,5 +1,5 @@
 // PhotoJourneyTests+MultiSelect.swift: PJ-M1, several layers picked and
-// acted on at once (multi-layer-select PM-8 written, PM-9 turned on;
+// acted on at once (multi-layer-select PM-8 written, turned on in PM-z;
 // docs/blueprints/photo/features/multi-layer-select.md, Journey steps 1-7).
 // On `-PhotoFixture layered` (Paint, Curves 1, Background, top first; Paint
 // selected) Command-J first duplicates Paint, so the list holds the packet's
@@ -15,18 +15,14 @@
 // selected; the eye is `photo.layer.<id>.eye`, labelled "Hide <name>" or
 // "Show <name>". Undo steps are read from the window toolbar's Undo button,
 // as PhotoLayerOpsJourneyTests does. Step 8 (Group Layers) is PM-g's
-// testGroupLayers, not written here. It skips until PM-9, when the actions on
-// several layers (PM-5, PM-6) are on dev. Shots: `photo-multi-*`.
+// testGroupLayers, not written here. Shots: `photo-multi-*`.
 import XCTest
 
 final class PhotoMultiLayerJourneyTests: XCTestCase {
-    /// False until multi-layer-select PM-9 turns the journey on.
-    static let ready = false
     private static let rowPrefix = "photo.layer.row."
 
     /// PJ-M1: pick a range, toggle one off, hide, fade and move the pick, select all, delete all but one.
     @MainActor func testSelectSeveralLayers() throws {
-        guard Self.ready else { throw XCTSkip("waits on PM-9") }
         let photo = Journey("Photo", self, arguments: photoArguments(fixture: "layered"))
         XCTAssert(photo.element("photo.status.preview").waitForExistence(timeout: 30), "-PhotoFixture layered shows no Preview data pill")
         let list = photo.element("suite.sidebar").descendants(matching: .any)["photo.layers"]
