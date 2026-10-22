@@ -2,9 +2,9 @@
 
 Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: all slice PRs on dev; verification runs queued
+Stage: all slice PRs on dev; verification runs waiting for macOS runners
 Base: dev
-Next: scoped photo 39722915670 + full 39722978870 at 71987f724 (contain #4219, #4253): on green run critics + Belt-Slice-Done
+Next: scoped photo 39722915670 + full 39722978870 (Linux green) at 71987f724: on green run critics + Belt-Slice-Done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

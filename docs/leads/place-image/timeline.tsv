@@ -83,3 +83,4 @@ utc	stage	event	ref	note
 2026-10-22T04:02Z	04:05Z #4252 closed as superseded by #4219; #4253 build 39714456379 success
 2026-10-22T04:23Z	04:25Z #4253 merged in lane batch (Linux 39719953891)
 2026-10-22T04:46Z	04:47Z verification runs queued at 71987f724
+2026-10-22T05:08Z	05:09Z full 39722978870 Linux green; macOS jobs still queued
