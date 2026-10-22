@@ -4,7 +4,7 @@ Issue: #3440 · Packet: docs/blueprints/design/features/shape-tools.md
 Run: act-1a162d0f852-70vb · Started: 2026-10-22T08:56Z (prior run act-1a15abb305f-lc8g shipped DS-a)
 Stage: 3 wave 2 done; all slices in PRs, waiting for merges and scoped runs
 Base: dev 561ef1c5
-Next: slice-done lines once a ci.yml run (scoped design or full) contains each slice's last merged PR; retarget #4385 to dev when #4384 merges (merge dev with --merge-base of the squashed parent tip if it conflicts)
+Next: slice-done lines once a ci.yml run (scoped design or full) contains each slice's last merged PR; retarget #4386 to dev when #4385 merges (merge DS-6 tip 91ab122dd first, then dev with --merge-base 91ab122dd)
 
 ## Slices
 | slice | behavior | tasks | waits on | ui | rounds | state | run | mac finish |
