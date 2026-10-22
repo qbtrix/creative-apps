@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-22T02:45Z	slices-done-posted	Belt-Slice-Done FR-halo FR-flare FR-u + Mac-Finish-Wanted FR-u	run 39710840412	comment 6331425414
 2026-10-22T03:08Z	fr10-dev-merged	FR-10 head 6d3c178ec: dev merged for SC-14 ratchet fix, ci --changed PASS	run 39711831771	scoped suiteui 39709885898 queued; CB-u panel waits
 2026-10-22T03:30Z	resume-fr8	resume, new run id	-	act-1a161a658a7-2jql
+2026-10-22T06:55Z	resume-fr8	heartbeat: FR-8 rebased, #4293 at d1c5cb529	-	act-1a161a658a7-2jql
