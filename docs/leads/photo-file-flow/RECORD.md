@@ -25,7 +25,7 @@ Next: PF-a, PF-u wait on a green scoped photo or full ci.yml run containing add7
 | PF-5 | PF-u | snapshots, RenderBudgetPhotoFileDropTests.dragHoverInTwoBodies ≤ 2 | #4165 | in lane (fef845ec) |
 | PF-6 | PF-u | UITests/PhotoJourneyTests+FileFlow.swift, XCTSkip("waits on PF-7") | #4165 | in lane (fef845ec) |
 | PF-7 | PF-z | journey on live | #4267 | merged 57685d8b |
-| F-4260 | PF-m | PhotoDocumentHost + PhotoAppDelegate as SuiteAppDelegate (finding #4260) | #4307 | open at dfc59ff2, fast-lane, mutate 4/4 |
+| F-4260 | PF-m | PhotoDocumentHost + PhotoAppDelegate as SuiteAppDelegate (finding #4260) | #4307 | merged b2794c20 |
 | PF-8 | PF-z | photo.md, status built, feature-done | – | waits PX-z |
 
 ## Reviews
