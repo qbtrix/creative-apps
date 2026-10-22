@@ -2,9 +2,9 @@
 
 Issue: #3448 · Packet: docs/blueprints/suiteui/features/eyedropper.md
 Run: act-1a1647a67aa-dau5 (relaunch) · Started: 2026-10-22T16:45Z
-Stage: #4583 on dev, head 76eb19d, gate CI: PASS, Head moved; clean, 13 files; awaiting lane (macOS build)
+Stage: #4583 head 76eb19d: macOS build green; lane's Linux check (run 39862523082) in progress since 22:07Z; clean vs dev
 Base: 18464f26b93c6826d069e0107545d7aacfac033c
-Next: After #4583 merges: retarget #4585 and #4613 to dev, merge dev into them
+Next: Merge on the lane's next sweep; then retarget #4585 and #4613 to dev and merge dev into them
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: After #4583 merges: retarget #4585 and #4613 to dev, merge dev into them
 |---|---|---|---|---|---|
 
 ## Decisions
+- -
 - -
 - Conflicted files are identical on dev and TT-z, so EY-z's side is exact
 - Union merge keeps stroke-style and sample commands (39 ids)
