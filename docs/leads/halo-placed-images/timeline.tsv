@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-22T13:57Z	3	check	PH-m	HK-6 #4400 merged 13:18Z; HT-6 #4415 open needs-rebase; #4426 body footer removed; PH-u builder running
 2026-10-22T14:20Z	3	check	PH-a	#4426 macOS build 39786508249 in progress; HT-6 #4415 rebased, blocked by dev-red #3856 (HK-6 trim test); PH-u builder at lint fixes
 2026-10-22T14:21Z	3	pr-opened	#4437	PH-u draft, 568 lines over cap; builder splitting into u1/u2 and wiring HaloWindow
+2026-10-22T14:28Z	3	check	PH-u	#4426 macOS build 39786508249 success; PH-u split: #4437 u1 384 lines, #4438 u2 196 lines, both drafts CI: PASS
