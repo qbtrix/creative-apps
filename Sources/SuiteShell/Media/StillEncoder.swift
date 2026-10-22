@@ -1,13 +1,12 @@
 // StillEncoder.swift: shell-media's still encoder (SM-6), the encode half of
 // Photo's ImageIOCodec moved into the suite. It writes one MediaFrame as PNG,
-// JPEG, HEIC or TIFF through one ImageIO destination. PNG, TIFF and HEIC keep
+// JPEG, HEIC or TIFF through SuiteImageIO. PNG, TIFF and HEIC keep
 // the frame's alpha; JPEG has none, so the frame is drawn over opaque white
 // first. `quality` (0 to 1, clamped) sets the lossy compression of JPEG and
 // HEIC; PNG and TIFF are lossless and ignore it. `image(_:)` is also how
 // AnimatedImageWriter turns a frame into an image.
 import CoreGraphics
 import Foundation
-import ImageIO
 import SuiteModel
 
 public struct StillEncoder: Sendable {
@@ -15,31 +14,12 @@ public struct StillEncoder: Sendable {
 
     /// `frame` encoded as `format`, the bytes of a complete file.
     public func still(_ frame: MediaFrame, as format: StillFormat, quality: Double) throws(SuiteError) -> Data {
-        let image = format == .jpeg ? Self.opaque(frame) : Self.image(frame)
-        guard let image else { throw .notAvailable("The frame's pixels couldn't be read.") }
-        let data = NSMutableData()
-        guard let destination = CGImageDestinationCreateWithData(data as CFMutableData, Self.type(format), 1, nil) else {
-            throw .notAvailable("This Mac can't write \(Self.name(format)) images.")
+        let flattens = format == .jpeg
+        let lossy = flattens || format == .heic
+        guard let image = flattens ? Self.opaque(frame) : Self.image(frame) else {
+            throw .notAvailable("The frame's pixels couldn't be read.")
         }
-        var properties: [CFString: Any] = [:]
-        if format == .jpeg || format == .heic {
-            properties[kCGImageDestinationLossyCompressionQuality] = min(max(quality, 0), 1)
-        }
-        CGImageDestinationAddImage(destination, image, properties as CFDictionary)
-        guard CGImageDestinationFinalize(destination) else {
-            throw .ioFailed("the \(Self.name(format)) image couldn't be encoded")
-        }
-        return data as Data
-    }
-
-    /// The format's type id, from SuiteImageFormats.
-    static func type(_ format: StillFormat) -> CFString {
-        format.format.typeID.rawValue as CFString
-    }
-
-    /// "PNG": the format's title, from SuiteImageFormats.
-    static func name(_ format: StillFormat) -> String {
-        format.format.title
+        return try SuiteImageIO.encode(image, as: format.format, quality: lossy ? quality : nil)
     }
 
     /// The frame's straight-alpha sRGB bytes as an image.

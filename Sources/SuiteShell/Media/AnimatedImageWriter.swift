@@ -5,16 +5,14 @@
 // its frame count when it is created, so `append` keeps each frame as an image
 // and `finish()` writes them all through one `CGImageDestination`: the loop
 // count (0 loops forever) in the file properties, and each frame's delay in its
-// own. GIF delays are FrameClock's whole centiseconds, which carry the
-// rounding so n frames last exactly round(100 n / fps) cs; APNG delays are
-// 1 / fps. Palette reduction for GIF is ImageIO's. Both keep alpha (GIF as one
-// transparent palette entry). The file isn't touched until `finish()`;
+// own, all through SuiteImageIO. GIF delays are FrameClock's whole
+// centiseconds, which carry the rounding so n frames last exactly
+// round(100 n / fps) cs; APNG delays are 1 / fps. Palette reduction for GIF is
+// ImageIO's. Both keep alpha (GIF as one transparent palette entry). The file isn't touched until `finish()`;
 // `cancel()` drops the frames and deletes any file written so far.
 import CoreGraphics
 import Foundation
-import ImageIO
 import SuiteModel
-import UniformTypeIdentifiers
 
 public final class AnimatedImageWriter: FrameSink, @unchecked Sendable {
     private let url: URL
@@ -64,17 +62,14 @@ public final class AnimatedImageWriter: FrameSink, @unchecked Sendable {
         lock.unlock()
         guard wasOpen else { return }
         guard !frames.isEmpty else { throw .notAvailable("The animation has no frames.") }
-        guard let destination = CGImageDestinationCreateWithURL(
-            url as CFURL, Self.type(settings.format), frames.count, nil)
-        else { throw .ioFailed("\(url.lastPathComponent) couldn't be created") }
-        CGImageDestinationSetProperties(destination, fileProperties as CFDictionary)
         var clock = try FrameClock(fps: settings.fps)
-        for image in frames {
-            CGImageDestinationAddImage(destination, image, frameProperties(&clock) as CFDictionary)
-        }
-        guard CGImageDestinationFinalize(destination) else {
-            try? FileManager.default.removeItem(at: url)
-            throw .ioFailed("\(url.lastPathComponent) couldn't be written")
+        switch settings.format {
+        case .gif:
+            let delays = frames.map { _ in Double(clock.nextGIFDelay()) / 100 }
+            try SuiteImageIO.writeGIF(frames, delays: delays, loopCount: settings.loopCount, to: url)
+        case .apng:
+            let delays = Array(repeating: 1 / Double(settings.fps), count: frames.count)
+            try SuiteImageIO.writeAPNG(frames, delays: delays, loopCount: settings.loopCount, to: url)
         }
     }
 
@@ -84,36 +79,5 @@ public final class AnimatedImageWriter: FrameSink, @unchecked Sendable {
         open = false
         lock.unlock()
         try? FileManager.default.removeItem(at: url)
-    }
-
-    // MARK: Properties
-
-    private static func type(_ format: AnimatedImageFormat) -> CFString {
-        (format == .gif ? UTType.gif : UTType.png).identifier as CFString
-    }
-
-    /// The loop count, under the format's dictionary.
-    private var fileProperties: [CFString: Any] {
-        switch settings.format {
-        case .gif: [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: settings.loopCount]]
-        case .apng: [kCGImagePropertyPNGDictionary: [kCGImagePropertyAPNGLoopCount: settings.loopCount]]
-        }
-    }
-
-    /// The next frame's delay, under the format's dictionary: the clock's
-    /// carried centiseconds for GIF, 1 / fps for APNG.
-    private func frameProperties(_ clock: inout FrameClock) -> [CFString: Any] {
-        switch settings.format {
-        case .gif:
-            let delay = Double(clock.nextGIFDelay()) / 100
-            return [kCGImagePropertyGIFDictionary: [
-                kCGImagePropertyGIFDelayTime: delay, kCGImagePropertyGIFUnclampedDelayTime: delay,
-            ]]
-        case .apng:
-            let delay = 1 / Double(settings.fps)
-            return [kCGImagePropertyPNGDictionary: [
-                kCGImagePropertyAPNGDelayTime: delay, kCGImagePropertyAPNGUnclampedDelayTime: delay,
-            ]]
-        }
     }
 }
