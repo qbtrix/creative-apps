@@ -64,7 +64,7 @@ transform inspector, no Edit or File items of its own, no launch arguments.
 **Journeys** (`UITests/HaloJourneyTests.swift`): `testLaunchShowsWindowShell`,
 `testNewComposition`, `testScrubTheTimeline`, `testEveryMenuOpens`, and
 `testKeyLayerAndSave` as an `XCTSkip` placeholder ("arrives with #207, #208
-and #209").
+and #209"), now live as H-J12 (core-loop CL-13).
 
 **App audit** (`UITests/audit-baseline.json`): `halo` contrast 2,
 identifier 10, offscreen 8, unnamed 5.
@@ -164,7 +164,7 @@ pixel painting to Photo.
 | Project | Compositions: new (with validation), duplicate, rename, delete, select (shipped). One project per window | Several projects in tabs; composition folders |
 | Layers | Solid, shape (ellipse), text, null. New, delete, rename, reorder, duplicate; in and out points; select in the list, timeline or viewer | Image and footage layers (needs creative-core affine sampling); precomps (H4); Flare scenes as layers (H10); hide, lock and solo |
 | Transform | Position, scale, rotation, opacity, anchor point; parenting to another layer (keeps its place on screen) | Skew; 3D |
-| Keys | Stopwatch and key-here diamond per property; drag in the viewer keys position at the playhead; keys as diamonds on the layer's lane | Retiming keys by drag on the timeline; per-property sub-lanes; a value graph editor |
+| Keys | Stopwatch and key-here diamond per property; drag in the viewer keys position at the playhead; keys as diamonds on the layer's lane; pick keys on the timeline by click, Shift and ⌘, across layers; Select All Keys (⌘A in the timeline, the Animation menu, a key's context menu), hidden layers' keys too; move the picked keys by dragging, snapped to frames, as one "Move Keyframes" step, refused with a status line when a key would land on another; delete the picked keys as one "Delete Keyframes" step | Per-property sub-lanes; a value graph editor |
 | Easing | Linear, Ease In, Ease Out, Ease In and Out, Hold, from the Animation menu, a key's context menu and the inspector's chips; the custom curve editor (SuiteUI `CurveEditor`, as Flare) | Speed graph; roving keys |
 | Viewer | Draws the composition at the playhead, fitted, with the layer under the pointer selectable and draggable; selection box | Zoom and pan beyond fit; guides; safe-area overlays |
 | Playback | Play and pause (Space), loop, step a frame, go to start and end; holds the composition rate | Cached full-resolution preview; audio |
@@ -332,7 +332,7 @@ or nudge, so the next scrub of the same row is a new step. So:
   Composition", "New Layer", "Set In Point", "Set Out Point", "Change Opacity",
   "Change Blend Mode". Later features add "Move", "Change <Property title>",
   "Animate <title>", "Stop Animating <title>", "Add Key", "Remove Key", "Set
-  Parent", "Keyframe Easing", "Delete Layer", "Rename Layer", "Move Layer",
+  Parent", "Keyframe Easing", "Move Keyframes", "Delete Keyframes", "Delete Layer", "Rename Layer", "Move Layer",
   "Duplicate Layer", "Edit Text", "Change Text Size", "Change Color".
 
 The history keeps whole `HaloDocumentState` values (#208's call, marked
@@ -512,7 +512,8 @@ Sources (public, no product opened or run):
 | 2 | Effects stack (blur, fill, levels) | priorities.md | #39 | no |
 | 2 | Precompose | priorities.md; [S4] | – | no |
 | 2 | Image and footage layers | [S4], *inferred* | – | no |
-| 2 | Retime keys by dragging on the timeline; per-property lanes | *inferred* | – | no |
+| 2 | Move keys by dragging on the timeline, picked across layers | *inferred* | #3536 (key-editing) | yes |
+| 2 | Per-property lanes | *inferred* | – | no |
 | 2 | Open Recent | *inferred* (Flare ships it in v1) | #209 (in scope) | yes |
 | 3 | Expressions | priorities.md | – | no |
 | 3 | Masks and track mattes | priorities.md; [S3] | – | no |
@@ -570,7 +571,7 @@ claims come from the frame probe's JSON once #330 lands (section 7).
 | H-J9 | `testLayerHousekeeping` (`+Layers`, layer-panel) | `three-layers` | select Badge; Layer > Duplicate; rename "Badge copy" to "Badge 2" in the list; drag it to the bottom; Layer > Delete; ⌘Z | "Badge copy" appears above Badge; renamed; last in the list and drawn first (artboard value lists it first); gone, then back on ⌘Z; each step named in the Edit menu |
 | H-J10 | `testSaveAndReopen` (`+Files`, history-files) | `two-comps` with `-HaloSaveTo <tmp>/Spot.halo` (skips the save panel); then `huge` with `-HaloSaveTo <tmp>/Huge.halo` | ⌘S; quit; relaunch with `-HaloOpenFile <tmp>/Spot.halo`; New Composition… (makes the project unsaved); File > Open Recent > Spot, Don't Save; quit; launch on `huge`, ⌘S, quit, relaunch with `-HaloOpenFile <tmp>/Huge.halo` | the window title reads "Spot" with no unsaved dot; after reopen both compositions, their layers and Ball's keys in Outro are back and the history is empty (Undo disabled with "Nothing to undo."); Open Recent lists "Spot" and choosing it reopens the file from its saved path (the list persists across launches); opening Huge shows the progress row (it appears at `beginOpen`, so the shot after the command has it whatever the decode time; the probe mark measures HB-U5) and then 2,000 layers |
 | H-J11 | `testOpenBadFiles` (`+FileErrors`, history-files) | none, then `-HaloOpenFile` per file | write four files in the test's temp folder (`not json`; `{"format":"halo","version":2}`; `{"format":"halo","version":1,"project":{"compositions":[{"id":"a"}]}}`; 64 MiB + 1 byte of spaces) and open each | each alert's text is `HaloFileError.message` for its case (not a Halo project; newer format 2; damaged with the reason; too large); after each, the empty state stays |
-| H-J12 | `testKeyLayerAndSave` (`HaloJourneyTests.swift`, core-loop; replaces the `XCTSkip`) | live, `-HaloSaveTo` | New Composition…, Create; Layer > New > Solid; scrub to 0; Position X stopwatch; scrub to 24; drag the solid 300 px right; Ease Out on its first key; Space, wait 1 s, Space; ⌘Z; ⇧⌘Z; ⌘S; relaunch on the file | each step on live services; Edit menu names along the way; the reopened file has Position X keys at 0, 24 and 299 (the stopwatch also keys the last frame) with Ease Out on the first |
+| H-J12 | `testKeyLayerAndSave` (`HaloJourneyTests.swift`, core-loop CL-13; replaced the `XCTSkip`) | live (plain launch), `-HaloSaveTo`, `-HaloRenderTo`, `-HaloOpenFile` | New Composition… Loop, 24 fps, 2 s (48 frames), Create; Layer > New > Solid; Position X stopwatch at 0; scrub the ruler, then → or ← to 24; drag the solid 300 px right; Ease Out on the 0–24 span in EASING; Go to Start, Play, wait 1 s, Play (Space twice as parity); Layer > New > Text, Hello, Return; Edit > Undo, Edit > Redo by menu; Render… PNG Sequence, Half, Export, Done; File > Save (⌘S as parity); quit and relaunch on the file | each step on live services; Edit menu names along the way; the pause lands in 1…47; the render writes `Loop_0001.png` … `Loop_0048.png` at 960 × 540 ("Exported Loop" until #3402); the reopened file has two layers, Position X keys at 0, 24 and 47 (the stopwatch also keys the last frame) with Ease Out on 0–24 and Linear on 24–47, Hello drawn at 0, and Undo disabled |
 | H-J13 | `testEveryMenuOpens` (shipped) and `testEveryControlActsOrSaysWhy` (`HaloJourneyTests.swift`, W0) | `keyed` with `-HaloControlsProbe` | open each menu; then read the `halo.controls` JSON (every `halo.*` control with enabled and help, from `HaloControls.swift`), click each enabled one, Escape, ⌘Z | every menu shot; each menu holds exactly section 6's Halo items (the system's own Edit and Window items are not counted); every enabled control changed the shot or a value; every disabled one has help text (`QB-F1`). A sweep: the coverage matrix never cites it |
 
 ### States each journey passes through
@@ -2257,11 +2258,11 @@ them whole. Every `Sources/` file below has exactly one owning component in
 
 #### W3 · `core-loop`: The core loop, live, measured
 
-- **Covers:** the H-J12 XCTSkip in HaloJourneyTests.swift
+- **Covers:** the H-J12 XCTSkip in HaloJourneyTests.swift (built: #1971, packet `halo/features/core-loop.md`; H-J12 live since CL-13)
 - **Waits on (SuiteUI and harness):** #333; #330 FrameProbe for H-P1 to H-P5 (report-only until then)
 - **Waits on (creative-core):** none
 - **Proves:** H-J12 live; H-P1 to H-P5; layout L3 to L5; flips every fixture journey still on `-HaloFixture` to `-HaloSample`. Its feature issue is filed only once every W1 and W2 feature is done, because it edits their journey files.
-- **Owned files (17):** `UITests/HaloJourneyTests.swift`, `UITests/HaloJourneyTests+Perf.swift`, `UITests/HaloJourneyTests+Files.swift`, `UITests/HaloJourneyTests+FileErrors.swift`, `Tests/AppSnapshotTests/HaloViewerLatencyTests.swift`, `Tests/AppSnapshotTests/HaloLayoutTests.swift`, `UITests/HaloJourneyTests+Viewer.swift`, `UITests/HaloJourneyTests+Playback.swift`, `UITests/HaloJourneyTests+Drag.swift`, `UITests/HaloJourneyTests+Inspector.swift`, `UITests/HaloJourneyTests+Parent.swift`, `UITests/HaloJourneyTests+History.swift`, `UITests/HaloJourneyTests+Layers.swift`, `UITests/HaloJourneyTests+Easing.swift`, `UITests/HaloJourneyTests+Text.swift`, `UITests/HaloJourneyTests+RenderFrame.swift`, `UITests/HaloJourneyTests+Render.swift`
+- **Owned files (32, as built):** `Tests/HaloModelTests/HaloCoreLoopTests.swift`, `Tests/HaloModelTests/HaloRenderRunTests.swift`, `Sources/HaloModel/HaloRenderJob+Kernel.swift`, `UITests/HaloJourneyTests+Perf.swift`, `Tests/AppSnapshotTests/HaloLayoutTests.swift`, `Tests/AppSnapshotTests/HaloViewerLatencyTests.swift`, `Sources/HaloApp/HaloWindow+Render.swift`, `Sources/HaloApp/HaloRenderSheet.swift`, `Tests/AppSnapshotTests/HaloRenderSheetSnapshots.swift`, `UITests/HaloJourneyTests+Render.swift`, `Tests/AppSnapshotTests/RenderBudgetHaloRenderTests.swift`, `Sources/HaloModel/HaloRenderJob.swift`, `Tests/HaloModelTests/HaloRenderJobTests.swift`, `Tests/mutations/HaloModel.HaloRenderJob+Kernel.json`, `Sources/HaloModel/Availability/HaloAvailability+Render.swift`, `Tests/HaloModelTests/HaloRenderAvailabilityTests.swift`, `Tests/mutations/HaloModel.HaloAvailability+Render.json`, `Sources/HaloApp/HaloProbe.swift`, `Sources/HaloApp/HaloViewerGestures.swift`, `Sources/HaloApp/HaloPlaybackDriver.swift`, `Sources/HaloApp/HaloTimelineView.swift`, `Sources/HaloApp/HaloLayerList.swift`, `Sources/HaloApp/HaloLayerInspector.swift`, `Tests/AppSnapshotTests/RenderBudgetHaloProbeTests.swift`, `UITests/HaloJourneyTests.swift`, `UITests/HaloJourneyTests+Drag.swift`, `UITests/HaloJourneyTests+Inspector.swift`, `UITests/HaloJourneyTests+Parent.swift`, `UITests/HaloJourneyTests+Layers.swift`, `docs/blueprints/halo/features/core-loop.wave.json`, `docs/blueprints/halo/waves.in.md`, `docs/blueprints/halo.md`
 
 ### 8.4 creative-core work
 

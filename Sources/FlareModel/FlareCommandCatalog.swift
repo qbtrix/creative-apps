@@ -1,4 +1,4 @@
-// FlareCommandCatalog.swift (AC-f2): Flare's menu, palette, transport and SCENES (`scenes.*`) actions as catalog commands,
+// FlareCommandCatalog.swift (AC-f2): Flare's menu, palette, transport, SCENES (`scenes.*`) and fill (`fill.*`) actions as catalog commands,
 // each available exactly when the window's control is. An edit's title is its undo step. Command-state CS-11 adds the
 // bare controls' commands: the New sheet's values on `file.new`, frame labels, the timeline's key and frame edits and the
 // recovery offer's Restore and Discard (off while the open animation has unsaved changes).
@@ -167,7 +167,7 @@ extension FlareWorkspace {
             example: .object(["name": .string("Intro")]), noScene) { w, p in w.renameScene(w.selectedSceneID ?? "", to: p.name) },
         act("scenes.remove", "Delete Scene", "Removes the selected scene; its undo step is Delete Scene.", .edit,
             { w in w.selectedSceneID.map(w.removeSceneHelp) ?? FlareLayerError.noDocument.message }) { w in w.removeScene(w.selectedSceneID ?? "") },
-    ]
+    ] + GradientCommands.specs(FlareWorkspace.self)  // the eight fill.* commands (gradient-fill FG-5)
 }
 
 extension FlareWorkspace {
