@@ -21,7 +21,7 @@ private func route(
     guard let outcome = live.apply(step, model: model, shown: shown) else { return false }
     shown = outcome.shown
     guard let write = outcome.write else { return false }
-    model = write
+    model.landLive(write)
     return true
 }
 

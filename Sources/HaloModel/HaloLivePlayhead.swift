@@ -73,6 +73,14 @@ public struct HaloLivePlayhead: Sendable, Equatable {
     }
 }
 
+extension HaloProject {
+    /// Becomes `written`, a project HaloLivePlayhead worked out from this one
+    /// (a tick or scrub taken back). Never an undo step.
+    public mutating func landLive(_ written: HaloProject) {
+        self = written
+    }
+}
+
 extension HaloLivePlayhead.Step {
     /// Whether `other` is a step of the same kind (both ticks, or both scrubs).
     func isKind(of other: Self) -> Bool {

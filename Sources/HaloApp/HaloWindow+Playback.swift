@@ -44,7 +44,7 @@ extension HaloWindow {
     private func showLive(_ step: HaloLivePlayhead.Step) {
         guard let outcome = live.playhead.apply(step, model: model, shown: live.playing) else { return }
         if live.playing != outcome.shown { live.playing = outcome.shown }
-        if let write = outcome.write { model = write }
+        if let write = outcome.write { model.landLive(write) }
     }
 
     /// Writes the frame shown live (playing or scrubbed) into the window's
@@ -55,6 +55,6 @@ extension HaloWindow {
         guard live.playhead.pending != nil else { return }
         let next = live.playhead.take(model)
         live.playing = nil
-        if let next { model = next }
+        if let next { model.landLive(next) }
     }
 }
