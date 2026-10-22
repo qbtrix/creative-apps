@@ -4,7 +4,7 @@ Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
 Run: act-1a15e10a86f-7bk9 (took over from act-1a15c07caa7-sppq) · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T01:10Z (this run 10:40Z)
 Stage: 3 wave 2
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: (2026-10-21T23:55Z) Photo fix #4215 and PN-3 #4203 both in lane macOS builds (23:37Z/23:48Z); #4204 rebuilds once #4215 lands.
+Next: (2026-10-22T00:24Z) Photo fix #4215 merged 00:00Z; merged dev into #4204 (head ea6b7bec, scripts/ci --changed PASS, Head moved) for a lane macOS rebuild. PN-3 #4203 in lane macOS build.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

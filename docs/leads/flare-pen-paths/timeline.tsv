@@ -70,3 +70,4 @@ utc	stage	event	ref	note
 2026-10-21T23:12Z	heartbeat	#4204 (FP-a fix 2) waits on dev's Photo build fix #4215 (open, in lane) and a lane rebuild; then post-round-2 critic panel. FP-u waits on PN-3 #4203 (open).
 2026-10-21T23:34Z	heartbeat	#4204 waits on Photo fix #4215 (new head 5d0d3fc4, in lane) and a lane rebuild; PN-3 #4203 open (new head 045d7871).
 2026-10-21T23:55Z	heartbeat	Photo fix #4215 and PN-3 #4203 both in lane macOS builds (23:37Z/23:48Z); #4204 rebuilds once #4215 lands.
+2026-10-22T00:24Z	heartbeat	Photo fix #4215 merged 00:00Z; merged dev into #4204 (head ea6b7bec, scripts/ci --changed PASS, Head moved) for a lane macOS rebuild. PN-3 #4203 in lane macOS build.
