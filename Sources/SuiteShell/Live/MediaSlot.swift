@@ -1,11 +1,11 @@
-// MediaSlot.swift: the `media` member of SuiteServices.live. Not live until
-// shell-media's SM-9 joins its writers and readers into `LiveMedia`; until
-// then every call throws "Movie and image export isn't available yet.".
+// MediaSlot.swift: the `media` member of SuiteServices.live. Live since
+// shell-media's SM-9 joined its writers and readers into `LiveMedia`, so
+// `pending` no longer lists `media` (ShellMediaLiveTests).
 import SuiteModel
 
 /// Whether this slot holds the live conformance; `live` builds `pending` from it.
-let mediaIsLive = false
+let mediaIsLive = true
 
 func mediaSlot(_ c: SlotContext) -> any MediaCoding {
-    FakeMedia(unavailable: SuiteServices.notConnected("media"))
+    LiveMedia()
 }

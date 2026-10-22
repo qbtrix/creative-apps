@@ -1,0 +1,37 @@
+[
+  {
+    "label": ".shareDropsLocation: the share copies keep the location",
+    "file": "Sources/LibraryModel/LibraryShare+Kernel.swift",
+    "find": "        options.metadata = .noLocation\n",
+    "replace": "        options.metadata = .all\n",
+    "tests": "LibrarySharePrepTests.swift"
+  },
+  {
+    "label": ".shareFolderEmptiedAtLaunch: the launch cleanup leaves the copies",
+    "file": "Sources/LibraryModel/LibraryShare+Kernel.swift",
+    "find": "        try await writer.removeAll(in: root(support: support))\n",
+    "replace": "        _ = writer\n",
+    "tests": "LibrarySharePrepTests.swift"
+  },
+  {
+    "label": "the launch cleanup on disk removes nothing",
+    "file": "Sources/LibraryModel/LibraryShare+Kernel.swift",
+    "find": "            try files.removeItem(atPath: folder + \"/\" + name)\n",
+    "replace": "            _ = name\n",
+    "tests": "LibrarySharePrepTests.swift"
+  },
+  {
+    "label": "the copies come back out of the grid's order",
+    "file": "Sources/LibraryModel/LibraryShare+Kernel.swift",
+    "find": "        return summary.written.map { folder + \"/\" + $0 }\n",
+    "replace": "        return summary.written.reversed().map { folder + \"/\" + $0 }\n",
+    "tests": "LibrarySharePrepTests.swift"
+  },
+  {
+    "label": "the ids are ignored and the selection is shared",
+    "file": "Sources/LibraryModel/LibraryShare+Kernel.swift",
+    "find": "        let photos = ids.map { Set($0) }",
+    "replace": "        let photos = [String]?.none.map { Set($0) }",
+    "tests": "LibrarySharePrepTests.swift"
+  }
+]

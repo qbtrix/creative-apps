@@ -2,8 +2,8 @@
 // the canvas renders by compositing the visible layers bottom-up, each through
 // PhotoLayerComposite (a pixel layer at its offset with its blend mode and
 // opacity, CoreRaster's composite; an adjustment layer passes through), then
-// running the enabled adjustments in order: exposure, levels, curves,
-// hue/saturation, blur. Levels and curves work on display (sRGB-encoded)
+// running the enabled adjustments in order: SuiteImaging's ImagingProgram steps
+// (exposure, levels, curves, hue/saturation), then blur. Levels and curves work on display (sRGB-encoded)
 // values, as photo editors' tone tools do (CoreRaster's ToneEncoding.sRGB),
 // so mid grey sits near 0.5 on their axes; exposure stays linear. The blur reads a margin of 3 sigma around the region,
 // so a region renders exactly as the same pixels of the whole image would.
@@ -42,25 +42,17 @@ extension AdjustmentSettings {
     }
 
     /// The enabled adjustments applied to `buffer`, in order.
+    /// The tone sections are ImagingProgram's steps (`imagingSteps`), each
+    /// skipped at its identity, then the blur.
     func applied(to buffer: PixelBuffer) throws -> PixelBuffer {
-        var result = try appliedBeforeCurves(to: buffer)
-        if isEnabled(.curves) { result = try result.curves(points: curvePoints, encoding: .sRGB) }
-        if isEnabled(.hueSaturation) {
-            result = try result.hueSaturation(hue: hue, saturation: saturation, lightness: lightness)
-        }
+        var result = try runImaging(imagingSteps, on: buffer)
         if blurMargin > 0 { result = try result.gaussianBlur(sigma: blurSigma) }
         return result
     }
 
     /// Exposure then levels, where enabled: the image Curves maps.
     func appliedBeforeCurves(to buffer: PixelBuffer) throws -> PixelBuffer {
-        var result = buffer
-        if isEnabled(.exposure) { result = try result.exposure(stops: exposure) }
-        if isEnabled(.levels) {
-            result = try result.levels(
-                inBlack: blackPoint, inWhite: whitePoint, gamma: gamma, outBlack: 0, outWhite: 1, encoding: .sRGB)
-        }
-        return result
+        try runImaging(imagingSteps([.exposure, .levels]), on: buffer)
     }
 
     /// The tone curve at `count` evenly spaced display values from 0 through 1,
@@ -127,7 +119,9 @@ extension PhotoWorkspace {
         let defaults = AdjustmentSettings(), on = adjustments
         let exposure = on.isEnabled(.exposure) ? on : defaults, levels = on.isEnabled(.levels) ? on : defaults
         return CurvesHistogramKey(
-            content: contentRevision, tone: [exposure.exposure, levels.blackPoint, levels.whitePoint, levels.gamma])
+            content: contentRevision,
+            tone: [exposure.exposure, levels.blackPoint, levels.whitePoint, levels.gamma, levels.outputBlack,
+                   levels.outputWhite])
     }
 
     /// `rect` of the canvas, composited and adjusted.
