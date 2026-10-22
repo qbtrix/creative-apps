@@ -89,3 +89,4 @@ utc	stage	event	ref	note
 20:33Z	heartbeat	#4429 needs-rebase fixed by its lead, new head cba819f
 21:05Z	integrate	#4583 conflict resolved locally, gate running
 21:20Z	stage	EY-z #4583 integrated with TT-z, head ab48a09, clean
+21:41Z	stage	#4583 retargeted to dev; dev merged in, gating
