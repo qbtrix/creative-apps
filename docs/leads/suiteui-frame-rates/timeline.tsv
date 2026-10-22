@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-21T23:52Z	FR-u	FR-u reverted #4215 port	9205cfdab	gate PASS on 9205cfdab; Head moved
 2026-10-22T00:14Z	FR-halo	#4211 #4212 merged	bb7c17800	await covering Linux run
 2026-10-22T00:35Z	waiting	dev Linux red (FormatListRatchetTests, not ours)	39697907658	no action
+2026-10-22T00:57Z	wave-2	heartbeat	run 39701991485	Linux check on add701fc9 running (covers FR-halo/FR-flare); 39699955972 on c4607f1ca red, not ours; #4172 macOS build in progress
