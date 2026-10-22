@@ -95,3 +95,4 @@ utc	stage	event	ref	note
 2026-10-22T20:56Z	3	poll	TT-z	#4429 macOS build 39850027667 running
 2026-10-22T21:18Z	3	poll	TT-z	#4429 macOS build green; fix PR builds queued
 2026-10-22T21:41Z	3	merged	TT-z	#4429 merged 434b1d1d; full CI 39858933900 pending
+2026-10-22T22:09Z	3	poll	TT-u	#4632 #4633 merged; #4625 #4627 closed
