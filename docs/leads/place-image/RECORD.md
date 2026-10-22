@@ -2,9 +2,9 @@
 
 Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: lane: mac builds still queued (#4252 39714434724, #4253 39714456379)
+Stage: PT-m: #4252 closed, superseded by #4219 (merged 03:37Z); PP-m: #4253 mac build green, awaiting lane batch
 Base: dev
-Next: green photo run with #4252/#4253/#4175 -> critics, Belt-Slice-Done, contact sheets
+Next: await green scoped photo/full run on dev containing #4219, #4253, #4175; then critics + Belt-Slice-Done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
