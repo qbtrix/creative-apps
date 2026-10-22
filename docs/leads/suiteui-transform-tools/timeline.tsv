@@ -78,3 +78,4 @@ utc	stage	event	ref	note
 2026-10-22T14:58Z	3	heartbeat	-	#3513 macOS build queued; #3577 #4429 stacked
 2026-10-22T15:20Z	3	heartbeat	-	#3513 macOS build green; waits lane sweep
 2026-10-22T15:50Z	3	heartbeat	-	#3513 merged d96c2645; #3577 retargeted to dev at eca74db6
+2026-10-22T16:20Z	3	heartbeat	-	#3577 waits lane; dev 401242a5 (holds #3513) scoped suiteui 39810321089 pending
