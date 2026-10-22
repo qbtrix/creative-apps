@@ -1,8 +1,9 @@
 // AdjustSettingsTests.swift: AdjustSettings' ranges, the curve repair and the
-// one Codable form Photo and Library both read (suite-imaging IM-3). Written
-// with IM-2's stubs and disabled until IM-3 fills the bodies. The decode keys
-// below are IM-2's reading of the packet's intents; IM-3 fixes them with the
-// decoder. Mutations (IM-3): SuiteImaging.AdjustSettings.
+// one Codable form Photo and Library both read (suite-imaging IM-3). Neither
+// app stores a level as a percent or a byte today (both store 0...1), so the
+// percent keys are Photo's field unit (`blackPercent`) and the 0...255 keys
+// Library's row unit (`black`), beside both apps' stored keys. Mutations:
+// SuiteImaging.AdjustSettings.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -11,7 +12,7 @@ import Foundation
 import Testing
 import SuiteImaging
 
-@Suite(.disabled("waits on IM-3")) struct AdjustSettingsTests {
+@Suite struct AdjustSettingsTests {
     static func decode<T: Decodable>(_ type: T.Type, _ json: String) throws -> T {
         try JSONDecoder().decode(type, from: Data(json.utf8))
     }
@@ -35,6 +36,40 @@ import SuiteImaging
         #expect(abs(photo.inputBlack - 0.1) < 1e-9)
         #expect(abs(library.inputBlack - 0.1) < 1e-9)
         #expect(photo.inputWhite == 1 && library.gamma == 1)
+        let rows = try Self.decode(AdjustLevels.self, #"{"whitePercent": 80, "outputBlack": 51, "outputWhite": 204}"#)
+        #expect(abs(rows.inputWhite - 0.8) < 1e-9)
+        #expect(abs(rows.outputBlack - 0.2) < 1e-9 && abs(rows.outputWhite - 0.8) < 1e-9)
+    }
+
+    /// Both apps' stored keys (0...1) read as they are; Library's keys win.
+    @Test func storedKeys() throws {
+        let library = try Self.decode(AdjustLevels.self,
+                                      #"{"inBlack": 0.1, "inWhite": 0.9, "gamma": 2, "outBlack": 0.05, "outWhite": 0.95}"#)
+        #expect(library == AdjustLevels(inputBlack: 0.1, inputWhite: 0.9, gamma: 2, outputBlack: 0.05, outputWhite: 0.95))
+        let photo = try Self.decode(AdjustLevels.self, #"{"blackPoint": 0.2, "whitePoint": 0.7, "gamma": 10}"#)
+        #expect(photo == AdjustLevels(inputBlack: 0.2, inputWhite: 0.7, gamma: 9.99, outputBlack: 0, outputWhite: 1))
+        let both = try Self.decode(AdjustLevels.self, #"{"inBlack": 0.3, "blackPoint": 0.2, "black": 0}"#)
+        #expect(both.inputBlack == 0.3)
+    }
+
+    /// Levels encode Library's five keys, and read back as themselves.
+    @Test func levelsEncodeLibraryKeys() throws {
+        let levels = AdjustLevels(inputBlack: 0.25, inputWhite: 0.75, gamma: 1.5, outputBlack: 0, outputWhite: 1)
+        let object = try JSONDecoder().decode([String: Double].self, from: JSONEncoder().encode(levels))
+        #expect(object == ["inBlack": 0.25, "inWhite": 0.75, "gamma": 1.5, "outBlack": 0, "outWhite": 1])
+        #expect(try JSONDecoder().decode(AdjustLevels.self, from: JSONEncoder().encode(levels)) == levels)
+    }
+
+    /// A damaged file is read back in range, never refused.
+    @Test func decodeClamps() throws {
+        let settings = try Self.decode(AdjustSettings.self, #"""
+            {"exposure": 9, "levels": {"inBlack": 2, "gamma": 0}, "hueSaturation": {"hue": 400, "saturation": -300},
+             "curve": {"points": [{"x": 0.5, "y": 0.5}]}}
+            """#)
+        #expect(settings.exposure == 5)
+        #expect(settings.levels.inputBlack == 1 - AdjustCurve.minGap && settings.levels.gamma == 0.1)
+        #expect(settings.hueSaturation == AdjustHueSaturation(hue: 180, saturation: -100, lightness: 0))
+        #expect(settings.curve == .identity)
     }
 
     @Test func blackStaysBelowWhite() {

@@ -1,0 +1,44 @@
+[
+  {
+    "label": ".photoPercentKeys: percent divided by 255 instead of 100",
+    "file": "Sources/SuiteImaging/Adjust/AdjustSettings.swift",
+    "find": "let percent = 100.0, byte = 255.0",
+    "replace": "let percent = 255.0, byte = 255.0",
+    "tests": "AdjustSettingsTests"
+  },
+  {
+    "label": ".nearPointsMerge: minGap compared with <= for <",
+    "file": "Sources/SuiteImaging/Adjust/AdjustSettings.swift",
+    "find": "let nearPrevious = point.x - previous.x < Self.minGap",
+    "replace": "let nearPrevious = point.x - previous.x <= Self.minGap",
+    "tests": "AdjustSettingsTests"
+  },
+  {
+    "label": ".gammaCeiling: gamma clamps to 10",
+    "file": "Sources/SuiteImaging/Adjust/AdjustSettings.swift",
+    "find": "gammaRange: ClosedRange<Double> = 0.1...9.99",
+    "replace": "gammaRange: ClosedRange<Double> = 0.1...10",
+    "tests": "AdjustSettingsTests"
+  },
+  {
+    "label": "NaN curve point kept instead of refused",
+    "file": "Sources/SuiteImaging/Adjust/AdjustSettings.swift",
+    "find": "let sorted = points.filter { $0.x.isFinite && $0.y.isFinite }",
+    "replace": "let sorted = points.filter { $0.y.isFinite }",
+    "tests": "AdjustSettingsTests"
+  },
+  {
+    "label": "neutral parts encoded",
+    "file": "Sources/SuiteImaging/Adjust/AdjustSettings.swift",
+    "find": "if levels != .neutral { try c.encode(levels, forKey: .levels) }",
+    "replace": "try c.encode(levels, forKey: .levels)",
+    "tests": "AdjustSettingsTests"
+  },
+  {
+    "label": "curve keeps more than maxPoints",
+    "file": "Sources/SuiteImaging/Adjust/AdjustSettings.swift",
+    "find": "self.points = Array(kept.prefix(Self.maxPoints - 1)) + [last]",
+    "replace": "self.points = kept + [last]",
+    "tests": "AdjustSettingsTests"
+  }
+]
