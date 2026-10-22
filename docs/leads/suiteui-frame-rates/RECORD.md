@@ -2,7 +2,7 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a161a658a7-2jql · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: FR-halo and FR-flare second PRs open
+Stage: waiting on the lane for 4402 4407 4408
 Base: dev
 Next: critic round 2 for FR-u on run 39765697963; FR-z once 4407 and 4408 merge
 
@@ -26,8 +26,10 @@ Next: critic round 2 for FR-u on run 39765697963; FR-z once 4407 and 4408 merge
 
 
 
+
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 12:03Z: heartbeat. 4402 4407 4408 open and labelled, waiting for the lane. Run 39765697963 still queued.
 - 11:58Z: opened #4407 (FR-8b, FR-halo, mutate 17 of 17), #4408 (FR-10b, FR-flare, mutate 13 of 13), #4402 (FR-flare wave list, docs). All gates PASS, fast-lane labelled.
 - 11:50Z: #4293 (FR-10) and #4341 (FR-8) merged. FR-8b and FR-10b rebuilt on dev with only their own commits (squash-merged parents conflicted add-add). FR-8b: History merge resolved, anchors repointed, 14 files. FR-10b: gate PASS, 15 files (scene journey folded into FR-z, wave list to a docs PR). Mutate and gates running; both open next.
 - 11:12Z: no change. #4293 (macOS build) and #4341 waiting in the lane, both clean; scoped suiteui run 39765697963 still queued (23 runs queued repo-wide).
