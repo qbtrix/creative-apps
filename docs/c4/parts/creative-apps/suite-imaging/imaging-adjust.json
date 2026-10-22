@@ -1,10 +1,11 @@
 {
   "id": "imaging-adjust",
   "name": "Adjust",
-  "description": "Adjust/ and the SuiteImaging namespace: AdjustSettings (exposure, levels, curve, hue and saturation) with its clamps and its one Codable form Photo and Library both read, and ImagingProgram, which compiles settings to CoreRender's tone adjustments (CPU) and tone program (GPU) in one fixed order. suite-imaging IM-2 declares them as stubs; IM-3 and IM-4 fill the bodies.",
-  "technology": "Swift 6, Foundation (FoundationEssentials) and CoreRender, Linux and macOS",
+  "description": "Adjust/, Color/ and the SuiteImaging namespace: AdjustSettings (exposure, levels, curve, hue and saturation) with its clamps and its one Codable form Photo and Library both read; ImagingProgram, which compiles settings to CoreRender's tone adjustments (CPU) and tone program (GPU) in one fixed order; and ImagingColor, the colour pipeline: a picture enters one unclamped extended linear sRGB working space from its file's profile (CoreColor, CoreRaster), every adjustment runs there, and only the display step (none for sRGB, core's linear sRGB to Display P3 matrix for a P3 screen, as a CPU channel mixer and a GPU matrix) or the output transform to a file's profile at 8 or 16 bits leaves it. suite-imaging IM-2 declares the adjust types as stubs; IM-3 and IM-4 fill the bodies; IM-15 adds ImagingColor.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), CoreColor, CoreRaster and CoreRender, Linux and macOS",
   "paths": [
     "Sources/SuiteImaging/Adjust/",
+    "Sources/SuiteImaging/Color/",
     "Sources/SuiteImaging/SuiteImaging.swift"
   ],
   "order": 100

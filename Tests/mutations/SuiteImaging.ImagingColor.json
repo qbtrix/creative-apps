@@ -1,0 +1,23 @@
+[
+  {
+    "label": "the working space cut to 8-bit sRGB on entry clips wide colours and highlights",
+    "file": "Sources/SuiteImaging/Color/ImagingColor.swift",
+    "find": "        try buffer.converted(from: profile, to: workingProfile)\n",
+    "replace": "        try PixelBuffer(rgba8: try buffer.converted(from: profile, to: workingProfile).rgba8(), width: buffer.width, height: buffer.height)\n",
+    "tests": "WideGamutTests/keepsWideValues"
+  },
+  {
+    "label": "the display matrix transposed drifts from core's transform",
+    "file": "Sources/SuiteImaging/Color/ImagingColor.swift",
+    "find": "Float(m[r * 3 + c])",
+    "replace": "Float(m[c * 3 + r])",
+    "tests": "WideGamutTests/displayMatchesCore"
+  },
+  {
+    "label": "16-bit output rounded to 8-bit levels",
+    "file": "Sources/SuiteImaging/Color/ImagingColor.swift",
+    "find": "return UInt16((min(v, 1) * top).rounded())",
+    "replace": "return UInt16(((min(v, 1) * 255).rounded() / 255 * top).rounded())",
+    "tests": "WideGamutTests/sixteenBits"
+  }
+]
