@@ -2,16 +2,17 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a161a658a7-2jql · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: resume-fr8
+Stage: fr8-pr
 Base: dev
-Next: FR-8 rebased, gate running; open the FR-8 PR on PASS; FR-10b after #4293
+Next: FR-10b after #4293; FR-8b (catalog, movie writer, journey) after #4341
+
 
 
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
 - FR-a #4063 merged · FR-m #4142 merged · FR-u #4172 merged · FR-7 #4211 merged (disabled) · FR-9 #4212 merged (disabled)
 - FR-10 #4293 open at d1c5cb529 (dev merged in after the CLI golden conflict); the lane's macOS build is in flight
-- FR-8 built at e5d562c5 (rebased on dev 1da00fb9); mutate 4/4 HaloModel.HaloFrameRate+Kernel; gate re-running, PR follows
+- FR-8 #4341 open, fast-lane, head e5d562c5 (gate PASS on dev 1da00fb9, mutate 4/4); catalog command, movie writer timing, rate text and HJ-FR journey are the FR-8b follow-up
 - FR-10b (Flare UI half) stacked on lead/frame-rates-FR-flare-10b, PR after #4293 merges
 - FR-z (FR-11, FR-12) waits FR-8 and FR-10b
 
