@@ -2,9 +2,9 @@
 
 Issue: #3435 · Packet: docs/blueprints/photo/features/transform.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: 00:01Z: waiting on lane; #4253 mac build green (39693945226), #4252 mac build queued (39693915751); #4175 merged
+Stage: 00:24Z: #4252 mac build failed (stale .files in RenderBudgetPhotoPlaceTests, fixed on dev by #4215); #4253 Linux red on library command-path baseline (not ours); subagent merging dev into both
 Base: dev
-Next: on green photo run containing #4252/#4253/#4175: critics, then Belt-Slice-Done + Contact-Sheet
+Next: re-gate both, move Head lines; then wait for batch + green photo run
 
 Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transform: one combined wave plan, so the other two records show the same waves.
 
