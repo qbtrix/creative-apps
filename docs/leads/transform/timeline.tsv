@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-21T10:43Z	heartbeat	HT-6 waits on HG-m (#3417 held for CL-probe)
 2026-10-22T12:20Z	pr	HT-m #4415 opened (HT-6, gate pass b6f199ee)
 2026-10-22T12:35Z	pr	HT-z #4422 opened stacked on #4415 (HT-7, HT-8; gate pass 42c2cbe4)
+2026-10-22T13:16Z	heartbeat	#4415/#4422 bodies cleaned of footer; macOS builds queued (39783206639, 39783246483)
