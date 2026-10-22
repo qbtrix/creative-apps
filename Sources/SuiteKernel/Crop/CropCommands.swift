@@ -1,4 +1,4 @@
-// CropCommands.swift (orientation-crop OC-1 shape, OC-3 and OC-4 bodies): the image.rotate-*,
+// CropCommands.swift (orientation-crop OC-a shape and bodies, OC-m rules): the image.rotate-*,
 // image.flip and crop.* commands any app with an OrientationTarget and a CropTarget registers. Ids,
 // titles, schemas and availability are the contract; each edit applies one rule and sets once.
 #if canImport(FoundationEssentials)

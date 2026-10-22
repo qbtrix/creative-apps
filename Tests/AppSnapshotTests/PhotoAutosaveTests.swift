@@ -82,14 +82,14 @@ private func block(on semaphore: DispatchSemaphore) {
 
 @MainActor
 @Suite struct PhotoAutosaveTests {
-    private let folder = FileManager.default.temporaryDirectory
-        .appending(path: "PhotoAutosaveTests-\(UUID().uuidString)").appending(path: "Recovery")
+    private let folder = FileManager.default.temporaryDirectory.appending(path: "PhotoAutosaveTests-\(UUID().uuidString)")
 
     private var store: any RecoveryStoring { PhotoServices.live.recovering(in: folder).recovery }
 
-    /// The names in the recovery folder; none when it is missing.
+    /// The .ora copies in the store's Recovery folder (a .json sits beside each); none when it is missing.
     private func names() -> [String] {
-        (try? FileManager.default.contentsOfDirectory(atPath: folder.path(percentEncoded: false))) ?? []
+        let recovery = folder.appending(path: "Recovery").path(percentEncoded: false)
+        return ((try? FileManager.default.contentsOfDirectory(atPath: recovery)) ?? []).filter { $0.hasSuffix(".ora") }
     }
 
     /// beach.png, a 4 x 3 white image, opened clean on the live archive.
@@ -173,7 +173,7 @@ private func block(on semaphore: DispatchSemaphore) {
         await autosave.tick(model: try edited(), now: 5, codec: ImageIOCodec())
         defer { try? store.discard(window: id) }
         #expect(autosave.autosaved)
-        let users = LiveRecovery.defaultDirectory.appending(path: "\(id).ora")
+        let users = LiveRecovery.defaultDirectory.appending(path: "Recovery/\(id).ora")
         #expect(!FileManager.default.fileExists(atPath: users.path(percentEncoded: false)))
     }
 
@@ -239,8 +239,9 @@ private func block(on semaphore: DispatchSemaphore) {
 
     @Test func noOrDamagedFileGivesNoOfferAndIsGone() async throws {
         #expect(await makeAutosave().launch(model: PhotoWorkspace(services: .live)) == nil)
-        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        try Data("not a zip".utf8).write(to: folder.appending(path: "crashed.ora"))
+        let recovery = folder.appending(path: "Recovery")
+        try FileManager.default.createDirectory(at: recovery, withIntermediateDirectories: true)
+        try Data("not a zip".utf8).write(to: recovery.appending(path: "crashed.ora"))
         #expect(await makeAutosave().launch(model: PhotoWorkspace(services: .live)) == nil)
         #expect(names().isEmpty)
     }

@@ -64,7 +64,7 @@ import Testing
         #expect(LibraryHeadless.catalog.availability("file.load-samples", on: shoot) == .unavailable(LibraryHeadless.fileCommandHelp))
     }
 
-    @Test(arguments: ["cull-and-save", "import-rate-export"])
+    @Test(arguments: ["cull-and-save", "import-rate-export", "browse-folders"])
     func realJobPasses(job: String) throws {
         #expect(try LibraryJob.check(job) == [], "\(job)")
     }
@@ -94,8 +94,9 @@ enum LibraryJob {
             let o = script.output, out = "out/" + o.name.replacingOccurrences(of: "{stem}", with: String(name.dropLast(".library".count)))
             if o.format == "json" {
                 written.insert("\(out).json")
-                let saved = try ZipStore.entries(doc.save())["catalog.json"]
-                for data in try [doc.export("json", options: o.options).first?.data, saved] {
+                // A "shown" export is the grid's photos, not the catalog file, so the saved catalog isn't checked.
+                let saved = LibraryHeadless.wantsShown(o.options) ? [] : [try ZipStore.entries(doc.save())["catalog.json"]]
+                for data in try [doc.export("json", options: o.options).first?.data] + saved {
                     let got = try data.map { try JSONValue(json: $0) }
                     if got != script.expect["\(out).json"].flatMap(json) { failures.append("\(out).json: JSON differs") }
                 }

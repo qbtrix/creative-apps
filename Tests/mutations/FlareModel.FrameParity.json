@@ -1,0 +1,6 @@
+[
+  {"label": ".thresholdIsStrict: a pixel exactly 8 levels off counts as differing", "file": "Sources/FlareModel/FrameParity.swift", "find": "            for c in i..<(i + 4) where abs(Int(a[c]) - Int(b[c])) > levels {\n", "replace": "            for c in i..<(i + 4) where abs(Int(a[c]) - Int(b[c])) >= levels {\n", "tests": "FrameParityTests"},
+  {"label": ".fractionOfAllPixels: the share is taken over the byte count, not width x height", "file": "Sources/FlareModel/FrameParity.swift", "find": "        return Double(differing) / Double(pixels)\n", "replace": "        return Double(differing) / Double(a.count)\n", "tests": "FrameParityTests"},
+  {"label": "a frame exactly at the 2% share fails", "file": "Sources/FlareModel/FrameParity.swift", "find": "        mismatch(a, b, width: width, height: height) <= maxShare\n", "replace": "        mismatch(a, b, width: width, height: height) < maxShare\n", "tests": "FrameParityTests"},
+  {"label": "the loop rule passes a last frame that is frame 0 again", "file": "Sources/FlareModel/FrameParity.swift", "find": "        return !matches(first, last, width: width, height: height)\n", "replace": "        return true\n", "tests": "FrameParityTests"}
+]
