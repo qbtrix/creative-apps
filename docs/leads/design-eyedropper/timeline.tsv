@@ -98,3 +98,5 @@ utc	stage	event	ref	note
 2026-10-22T13:00Z	merged	#4357 (DY-m) merged 11:55Z; #4376 (DY-z) merged 12:45Z as 1c85591f7. Full CI 39781775747 on dev 1a518080 (contains both) pending. Run stays ended; relaunch posts slice-done and contact sheet	#4357 #4376	-
 2026-10-22T13:30Z	wait	full CI 39781775747 (dev 1a518080, has DY-m and DY-z) still queued; run ended per supervisor 10:47Z; asked supervisor whether this session posts slice-done and contact sheet	-	-
 2026-10-22T13:50Z	slice-done	Belt-Slice-Done DY-m, DY-z and Mac-Finish-Wanted DY-z on #3438 against Linux check 39782847630 (supervisor 13:33Z)	#4357 #4376	-
+2026-10-22T14:00Z	critics	DY-z panel (clarity, mouse, taste, job; code only): filed #4433 major, #4434 minor; 2 refuted	#4433 #4434	-
+2026-10-22T14:05Z	contact-sheet	Belt-Contact-Sheet on #3438 (39782847630); run done	-	-

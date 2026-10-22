@@ -2,9 +2,9 @@
 
 Issue: #3438 · Packet: docs/blueprints/design/features/eyedropper.md
 Run: act-1a1627ce3b4-ayhz · Session: claude/feature-lead-playbook-6guwwp · Started: 2026-10-22T07:24Z (prior runs act-1a1605b0534-rn47, act-1a15e909498-4bkk, act-1a15abb305f-lc8g)
-Stage: relaunch (supervisor 13:33Z on #3438). Belt-Slice-Done DY-m and DY-z, Mac-Finish-Wanted DY-z posted 13:50Z against dev Linux check https://github.com/qbtrix/creative-apps/actions/runs/39782847630 (dev 1a518080, contains #4357 and #4376). DY-z critic panel running (code only: no design or full run with screens contains 1c85591f7 yet)
+Stage: done. All four slices have Belt-Slice-Done (DY-a 39582236683, DY-u 39720061887, DY-m and DY-z 39782847630); Mac-Finish-Wanted DY-a, DY-z. DY-z critic panel (code only, no screens on 1c85591f7 yet) filed #4433 (major) and #4434 (minor). Belt-Contact-Sheet posted on #3438 at 14:05Z (comment 6342602371)
 Base: 5bec8089 (origin/dev); main verified at 0dd23d65
-Next: DY-z critic panel findings filed; Belt-Contact-Sheet on #3438; final RECORD
+Next: beta-hardening lane verifies DY-a, DY-u, DY-m, DY-z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: DY-z critic panel findings filed; Belt-Contact-Sheet on #3438; final RECOR
 | DY-a | Eyedropper tool on the palette; SampleTarget stubs | DY-1, DY-2 | MJ-DY | EY-a (done) | yes | 1 | merged (6f9c8928); round-1 fixes merged 45e8bd4d | – | wanted |
 | DY-u | loupe follows the pointer, click and Option-click picks; snapshots, budget | DY-3, DY-4 | J-DY | DY-a; EY-u (done) | yes | 2 | merged 6d7fcf14 (#3816); round 1 #3998 merged 97713e0d; round 2 #4081 | – | – |
 | DY-m | topmost visible colour; apply as one step; color.sample, color.pick, RJ-D34 | DY-5, DY-6 | MJ-DY | DY-a, transform:DT-m (met); EY-m (done) | no | 0 | #4356 merged; #4357 merged | https://github.com/qbtrix/creative-apps/actions/runs/39782847630 | – |
-| DY-z | journey on live; built | DY-7, DY-8 | J-DY | DY-u, DY-m (in lane) | yes | 0 | merged #4376 (1c85591f7) | https://github.com/qbtrix/creative-apps/actions/runs/39782847630 | wanted |
+| DY-z | journey on live; built | DY-7, DY-8 | J-DY | DY-u, DY-m (met) | yes | 0 | merged #4376 (1c85591f7) | https://github.com/qbtrix/creative-apps/actions/runs/39782847630 | wanted |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -27,7 +27,7 @@ Next: DY-z critic panel findings filed; Belt-Contact-Sheet on #3438; final RECOR
 ## Critic reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
-| – | – | – | – | – | – |
+| DY-z | 39782847630 (Linux; code-only review, no screens) | 1c85591f7 | clarity, mouse, taste, job | #4433 (major), #4434 (minor); 2 refuted | 0 (run done; fixes go to beta-hardening) |
 
 ## Decisions
 - 10:47Z supervisor confirmed: Design run only, end once #4357 and #4376 are in the lane. #4376 was retargeted to dev at c27bcab1 instead of waiting stacked, because the lane never deletes merged branches (gh pr merge --delete-branch=false) and skips non-dev bases, so a stacked PR never gets in. Its diff carries DY-6's identical files until #4357 merges.
