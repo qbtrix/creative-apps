@@ -130,3 +130,5 @@ Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-gro
 - LP-b fix round 2 (round 1 was #3316): P3 finds the list as `suite.sidebar`. This is test-only, on branch fix/design-p3-sidebar-list. If P3 is still red after this, #3307 becomes a gap and LP-b closes with `gaps:`.
 
 - 2026-10-21T23:22Z: #4178 (LP-b fix round 2, Closes #3307) merged as 8c55f0bf9. Belt-Slice-Done for LP-b waits on a successful design or full ci.yml run that contains it. None is green yet: dev-red #3856.
+
+- 2026-10-22T00:35Z LP-b round 2 (#4178) merged as 8c55f0bf9; done line waits on scoped design run 39693638859 (queued).
