@@ -59,3 +59,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T04:02Z: SM-2 #4035 merged 03:53Z, so SM-a is on dev; XP-1/XP-6 on dev, XP-3 not. FV-1 started on lead/export-pack-fva; the FV-a PR opens with FV-2 once XP-3 is on dev
 - 2026-10-22T04:18Z: FV-1 done on lead/export-pack-fva at ed2293cc (+140/-10, 8 files, gate PASS); the sheet hides unbuilt formats until FV-2. XP-3 not on dev yet.
 - 2026-10-22T04:24Z: XP-3 still not on dev; FV-2 waits
+- 2026-10-22T04:52Z: XP-3 still not on dev; FV-2 waits
