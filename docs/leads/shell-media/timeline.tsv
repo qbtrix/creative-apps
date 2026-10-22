@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-22T05:43:29Z	lane	heartbeat	#4119	SM-3 macOS build 39722780680 green, awaiting lane sweep; scoped run 39721019643 queued
 2026-10-22T06:08:50Z	lane	heartbeat	#4119 #4123 #4125	SM-3 #4119 merged 06:02Z; SM-4 merged dev at 0dbcb73, gating; SM-5 next
 2026-10-22T06:32:51Z	lane	heartbeat	4123,4125	SM-4 SM-5 in lane macOS builds; SM-6 SM-8 wait on them; scoped run 39721019643 queued
+2026-10-22T06:55:33Z	lane	heartbeat	4123,4125,4237	SM-4 merged; SM-a slice done posted; SM-6 merged with dev, gate queued; SM-5 in lane
