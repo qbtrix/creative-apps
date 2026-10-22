@@ -40,3 +40,4 @@ utc	stage	event	ref	note
 2026-10-21T23:34Z	heartbeat	LP-4 #4132 open (supervisor merge after macOS, blocked by dev Photo break until #4215); LP-6 ready.
 2026-10-21T23:55Z	heartbeat	LP-4 #4132 open (supervisor merge after macOS; dev Photo break fix #4215 building); LP-6 ready.
 2026-10-22T00:24Z	heartbeat	dev macOS break fixed (#4215); LP-4 #4132 awaits supervisor macOS run + merge; LP-6 ready.
+2026-10-22T00:46Z	heartbeat	LP-4 #4132 open (no-fast-lane, supervisor merges after macOS; dev macOS fixed by #4215). LP-6 ready on lead/lottie-player-check-LP-6; PR opens once #4132 merges.
