@@ -149,3 +149,4 @@ utc	stage	event	ref	note
 2026-10-22T11:54Z	3	pr	#4403	model half of #4329 (164 lines); #4329 closed; wiring branch pushed, PR after #4403 merges
 2026-10-22T12:43Z	3	merge	#4403	merged 12:40Z; wiring PR fixer dispatched
 2026-10-22T12:48Z	3	pr	#4423	wiring half of #4329 (242 lines), head 5f2a699d
+2026-10-22T13:40Z	3	rebase	#4423	needs-rebase 13:38Z (HaloLiveEdit.swift vs #4411), fixer dispatched
