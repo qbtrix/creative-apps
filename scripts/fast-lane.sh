@@ -276,6 +276,9 @@ REMOTE="${FAST_LANE_REMOTE:-https://github.com/${GH_REPO:-qbtrix/creative-apps}.
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # After dispatching, look this many times, 5s apart, for the new run's URL to comment.
 RUN_LOOKUP_RETRIES="${FAST_LANE_RUN_LOOKUP_RETRIES:-6}"
+# A cancelled build on a head is dispatched again once it has been cancelled
+# this many seconds: at most one re-dispatch per head per interval.
+BUILD_RETRY_SECS="${FAST_LANE_BUILD_RETRY_SECS:-1800}"
 
 # The worker's proof that scripts/ci passed on the head: this line, then `Head: <sha>`.
 MARKER_LINE="Fast-Check: pass"
@@ -438,7 +441,9 @@ build_apps() {
 # nothing when the PR touches no BUILD_RE code, else one line:
 #   ok|<proof>  dispatch|<paths>|<branch>|<apps>  wait|<url>  refuse|<what to do>
 # A green Mac-Check run on the head (it builds every app) counts; otherwise
-# the latest build-only run on the head ({} when none: dispatch one).
+# the latest build-only run on the head ({} when none: dispatch one). A
+# queued or running one waits; a cancelled one is dispatched again once it is
+# BUILD_RETRY_SECS old (by updatedAt), and waits until then.
 build_gate() {
   local pr="$1" paths head branch url run='{}' st
   paths=$(build_paths "$2")
@@ -457,6 +462,11 @@ build_gate() {
   st=$(jq -r '(.status // "" | ascii_downcase) + " " + (.conclusion // "" | ascii_downcase)' <<<"$run")
   case "$st" in
     "completed success") echo "ok|$BUILD_JOB $url" ;;
+    "completed cancelled")
+      local at
+      at=$(jq -r '(.updatedAt // .createdAt // "") as $d | if $d == "" then 0 else ($d | try fromdateiso8601 catch 0) end' <<<"$run")
+      if (( $(date +%s) - at >= BUILD_RETRY_SECS )); then echo "dispatch|$paths|$branch|$(build_apps "$2")"
+      else echo "wait|$url"; fi ;;
     completed*) echo "refuse|changes code ($paths), and its head $head doesn't build on macOS: $url (${st#completed }). Fix it and push; the lane builds the new head on macOS again" ;;
     *) echo "wait|$url" ;;
   esac
@@ -1496,8 +1506,11 @@ evaluate() {
     audit=("$tmp/before" "$tmp/after")
   fi
   # Code brings the run its Mac-Check line names, if any, and the latest
-  # build-only run on the head. A failed run list skips the PR this sweep, so
-  # an API hiccup never dispatches a second build for one head.
+  # build-only run on the head, a queued or running one first. A failed run
+  # list skips the PR this sweep, so an API hiccup never dispatches a second
+  # build for one head. Runs are listed by branch, not --commit: GitHub's
+  # head_sha filter sometimes answers an empty list, which read as "no build"
+  # and dispatched a new one that cancelled the queued one (#4441).
   local mac=() id fields=workflowName,status,conclusion,headSha,jobs,url
   if (( LANE_MAC_PER_PR )) && [[ -n "$(build_paths "$tmp/files.txt")" ]]; then
     echo '{}' >"$tmp/mac.json"
@@ -1505,9 +1518,9 @@ evaluate() {
     if [[ -n "$id" ]]; then
       gh run view "$id" -R "$REPO" --json "$fields" >"$tmp/mac.json" 2>/dev/null || echo '{}' >"$tmp/mac.json"
     fi
-    if ! gh run list -R "$REPO" --workflow "$CI_FILE" --commit "$head" --limit 20 \
-        --json databaseId,displayTitle,status,conclusion,url,headSha \
-        --jq "[.[] | select(.displayTitle == \"$BUILD_TITLE\")][0] // {}" >"$tmp/build.json"; then
+    if ! gh run list -R "$REPO" --workflow "$CI_FILE" --branch "$(jq -r '.headRefName // ""' "$tmp/pr.json")" --limit 20 \
+        --json databaseId,displayTitle,status,conclusion,url,headSha,updatedAt \
+        --jq "[.[] | select(.displayTitle == \"$BUILD_TITLE\" and .headSha == \"$head\")] | (map(select(.status != \"completed\"))[0] // .[0]) // {}" >"$tmp/build.json"; then
       log "PR #$n: could not list CI runs on the head; the next sweep looks again"; rm -rf "$tmp"; return
     fi
     (( ${#audit[@]} )) || audit=("" "")
@@ -1589,8 +1602,8 @@ evaluate() {
         log "could not dispatch CI on $branch; the next sweep tries again"; rm -rf "$tmp"; return
       fi
       for (( i = 0; i <= RUN_LOOKUP_RETRIES; i++ )); do
-        url=$(gh run list -R "$REPO" --workflow "$CI_FILE" --commit "$head" --limit 20 --json url,displayTitle \
-          --jq "[.[] | select(.displayTitle == \"$title\")][0].url // \"\"" 2>/dev/null || true)
+        url=$(gh run list -R "$REPO" --workflow "$CI_FILE" --branch "$branch" --limit 20 --json url,displayTitle,headSha \
+          --jq "[.[] | select(.displayTitle == \"$title\" and .headSha == \"$head\")][0].url // \"\"" 2>/dev/null || true)
         [[ -z "$url" && $i -lt $RUN_LOOKUP_RETRIES ]] || break
         sleep 5
       done

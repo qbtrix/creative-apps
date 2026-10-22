@@ -18,10 +18,11 @@ import SwiftUI
 @MainActor enum FlareShell {
     static let bridge: SuiteDocumentsBridge = {
         let arguments = ProcessInfo.processInfo.arguments
-        let services: SuiteServices = FlareLaunch(arguments: arguments).usesFakes
-            ? .fake()
-            : .live(support: SuiteLocations.supportFolder(arguments: arguments, home: NSHomeDirectory()),
-                    app: .flare, arguments: arguments)
+        let support = SuiteLocations.supportFolder(arguments: arguments, home: NSHomeDirectory())
+        let fakes = FlareLaunch(arguments: arguments).usesFakes
+        // A journey's `-SuiteFixture` goes into the store before the bridge's first read (#4604).
+        if !fakes { FlareLaunch.seedSuiteFixture(arguments: arguments, support: support) }
+        let services: SuiteServices = fakes ? .fake() : .live(support: support, app: .flare, arguments: arguments)
         return SuiteDocumentsBridge(app: .flare, services: services)
     }()
 

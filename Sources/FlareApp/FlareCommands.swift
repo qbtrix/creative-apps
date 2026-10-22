@@ -73,11 +73,6 @@ struct FlareCommands: Commands {
         CommandGroup(replacing: .newItem) {
             item(.file(.new), key: KeyboardShortcut("n"))
             item(.file(.open), key: KeyboardShortcut("o"))
-            Menu("Open Sample") {
-                ForEach(FlareMenu.samples, id: \.name) { sample in
-                    item(.file(.openSample(name: sample.name)), title: sample.title)
-                }
-            }
         }
         suiteFileMenu
         CommandGroup(replacing: .saveItem) {
@@ -133,10 +128,18 @@ struct FlareCommands: Commands {
         }
     }
 
-    /// The suite's Open Recent ▸ and Open In ▸, after Open… (file-flow FL-2), and the File items Flare hides.
+    /// The suite's Open Recent ▸ and Open In ▸, after Open… (file-flow FL-2), then Open Sample ▸ before Save, as
+    /// section 3.4 orders File (#4604), and the File items Flare hides.
     /// Its own builder keeps `body` within the builder's ten top-level commands.
     @CommandsBuilder private var suiteFileMenu: some Commands {
         SuiteFileCommands(app: .flare, bridge: FlareShell.bridge, document: menu.document)
+        CommandGroup(before: .saveItem) {
+            Menu("Open Sample") {
+                ForEach(FlareMenu.samples, id: \.name) { sample in
+                    item(.file(.openSample(name: sample.name)), title: sample.title)
+                }
+            }
+        }
         CommandGroup(replacing: .importExport) {}
         CommandGroup(replacing: .printItem) {}
     }

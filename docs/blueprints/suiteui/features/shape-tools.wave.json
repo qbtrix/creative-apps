@@ -6,7 +6,7 @@
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "feature map S19 (shape tools: polygon, star, rounded rect, line, arrow); real job RJ-X34; captain 2026-10-20: everyday tools in the beta, built once",
-  "waits_on": "eyedropper's EY-z slice before the fake-app task; editor-kernel (built); FlareCore PathBuilders on the pinned core",
+  "waits_on": "eyedropper's EY-z slice and stroke-style's SS-d (FakeRect.stroke, which SH-8 builds on) before the fake-app task; editor-kernel (built); FlareCore PathBuilders on the pinned core",
   "longest_chain": "6 (SH-1 → SH-2 → SH-3 → SH-4 → SH-7 → SH-9)",
   "journeys": [
     "SuiteJourneyTests.testGalleryOpensEveryPage",
@@ -137,6 +137,9 @@
           "SH-8"
         ],
         "eyedropper:EY-z": [
+          "SH-8"
+        ],
+        "stroke-style:SS-d": [
           "SH-8"
         ]
       },

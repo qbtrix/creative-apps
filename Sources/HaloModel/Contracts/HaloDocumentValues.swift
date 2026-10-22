@@ -29,14 +29,18 @@ public struct HaloDrawItem: Sendable, Hashable {
     public var shape: ShapeSpec?
     /// HK-5: a shape layer's stroke, its trim sampled at the frame; nil draws none.
     public var stroke: VectorStroke?
+    /// PH-1: a solid's picture and its box and focus; nil draws `color`. HaloDrawRules fills them in PH-5.
+    public var placedAsset: PlacedAsset?
+    public var placedImage: PlacedImage?
     public init(
         layerID: String, kind: HaloLayerKind, bounds: HaloLayerRect, matrix: HaloMatrix, opacity: Double,
         color: HaloLayerColor, blendMode: BlendMode, text: HaloTextContent? = nil, gradient: Fill? = nil,
-        shape: ShapeSpec? = nil, stroke: VectorStroke? = nil
+        shape: ShapeSpec? = nil, stroke: VectorStroke? = nil, placedAsset: PlacedAsset? = nil, placedImage: PlacedImage? = nil
     ) {
         self.layerID = layerID; self.kind = kind; self.bounds = bounds; self.matrix = matrix
         self.opacity = opacity; self.color = color; self.blendMode = blendMode; self.text = text
         self.gradient = gradient; self.shape = shape; self.stroke = stroke
+        self.placedAsset = placedAsset; self.placedImage = placedImage
     }
 }
 
