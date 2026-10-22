@@ -2,9 +2,9 @@
 
 Issue: #3448 · Packet: docs/blueprints/suiteui/features/eyedropper.md
 Run: act-1a1647a67aa-dau5 (relaunch) · Started: 2026-10-22T16:45Z
-Stage: EY-z c4 PR #4585 1 file clean, replied to supervisor
+Stage: EY-z last PR #4585 merged 23:15Z
 Base: 18464f26b93c6826d069e0107545d7aacfac033c
-Next: Belt-Slice-Done EY-z on first green ci.yml run containing #4585
+Next: Belt-Slice-Done EY-z when scoped suiteui run 39871846506 (be1ee9c22, contains #4585) is green
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: Belt-Slice-Done EY-z on first green ci.yml run containing #4585
 |---|---|---|---|---|---|
 
 ## Decisions
+- Watch the queued scoped run rather than dispatching
 - No split needed: the oversize content merged via #4583
 - -
 - Merge the merged EY-z head before dev so the C4 branch skips TT-z's conflicts

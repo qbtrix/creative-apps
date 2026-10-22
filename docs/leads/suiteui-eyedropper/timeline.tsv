@@ -95,3 +95,4 @@ utc	stage	event	ref	note
 22:35Z	stage	#4583 merged; #4585 retargeted to dev, gating
 22:42Z	stage	#4585 pushed 6bc5cdc
 23:08Z	ey-c4	#4585 1 docs file, supervisor answered
+23:40Z	ey-merged	#4585 merged; awaiting run 39871846506
