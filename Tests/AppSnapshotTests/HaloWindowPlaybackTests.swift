@@ -4,9 +4,10 @@
 // playing, with the transport's driver on a HaloFakeLink (the
 // `haloRefreshLink` environment value), since the headless CI runner can't
 // serve a real display link. It fires one second of 120 Hz refresh targets,
-// one per real 1/120 s, and counts body runs (debug-only counters). Spec:
-// HaloWindow's body runs about once per frame shown, at least 12 times (so
-// playback really ran) and at most 24 + 6, not once per refresh. With Ball
+// one per real 1/120 s, and counts body runs (debug-only counters). Spec
+// (#4274): ticks land in HaloLiveEdit, so HaloWindow runs at most 3 times and
+// the drawn layers about once per frame shown, at least 12 (so playback really
+// ran) and at most 24 + 12 with setup, not once per refresh. With Ball
 // selected, no timeline lane is rebuilt (neither lane's keys change), and a
 // TRANSFORM row runs only while its value or key state changes: at most its
 // two animated rows (x, opacity), in both of the inspector's layouts, per
@@ -25,17 +26,22 @@ import Testing
 
 extension BodyCountSuites {
     @MainActor @Suite struct HaloWindowPlaybackTests {
-        @Test(.timeLimit(.minutes(3))) func playbackRunsTheWindowOncePerFrame() async throws {
+        @Test(.timeLimit(.minutes(3))) func playbackRedrawsTheViewerNotTheWindow() async throws {
+            let before = Self.drawnLayers()
             let played = try await Self.playOneSecond()
             if let runs = played.step.bodies {
-                #expect(runs >= played.fps / 2, "the window barely updated while playing: \(played.step)")
-                #expect(runs <= played.fps + 6, "the window ran once per refresh, not once per frame: \(played.step)")
+                #expect(runs <= Self.windowRuns, "a playback tick ran the whole window: \(played.step)")
+            }
+            if let before, let after = Self.drawnLayers() {
+                let drawn = after - before
+                #expect(drawn >= played.fps / 2, "the viewer barely updated while playing: \(played.step), drawn \(drawn)")
+                #expect(drawn <= played.fps + 12, "the viewer ran once per refresh, not once per frame: \(played.step), drawn \(drawn)")
             }
         }
 
         @Test(.timeLimit(.minutes(3))) func playbackRebuildsOnlyTheLanesAndRowsThatChange() async throws {
             let played = try await Self.playOneSecond(selecting: "comp-1-layer-2")
-            if let runs = played.step.bodies { #expect(runs >= played.fps / 2, "the window barely updated: \(played.step)") }
+            if let runs = played.step.bodies { #expect(runs <= Self.windowRuns, "a playback tick ran the whole window: \(played.step)") }
             if let lanes = played.lanes { #expect(lanes == 0, "a lane whose keys didn't change was rebuilt: \(played.step), lanes \(lanes)") }
             if let rows = played.rows {
                 #expect(rows <= 2 * 2 * played.fps, "unchanged TRANSFORM rows ran per frame: \(played.step), rows \(rows)")
@@ -79,6 +85,18 @@ extension BodyCountSuites {
             }
             let after = childBodies()
             return (step, fps, after.flatMap { a in before.map { a.lanes - $0.lanes } }, after.flatMap { a in before.map { a.rows - $0.rows } })
+        }
+
+        /// The window bodies one second of playback may run (#4274): none per tick.
+        static let windowRuns = 3
+
+        /// HaloLiveLayers' body runs so far; nil in release.
+        static func drawnLayers() -> Int? {
+            #if DEBUG
+            return HaloLiveLayers.bodyRuns
+            #else
+            return nil
+            #endif
         }
 
         /// HaloWindow's body runs so far; nil in release, which has no counter.

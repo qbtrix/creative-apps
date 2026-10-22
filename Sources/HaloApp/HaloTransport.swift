@@ -9,7 +9,8 @@
 // `model.playback.playing`, stopped otherwise or once the transport leaves
 // the screen, on the `haloRefreshLink` the environment gives; each refresh
 // sends `.tick(now)` through `perform`, and a playhead that moved while
-// playing is a `playback` frame in the probe (HaloProbe). Each
+// playing (the live edit's playing frame, HaloLiveShown) is a `playback`
+// frame in the probe (HaloProbe). Each
 // control takes at least a SuiteSize.pillHit square (24 pt) to click, not
 // just its 10 pt glyph, the squares edge to edge so the row stays narrow
 // enough for the status bar, until TransportCapsule (#340) replaces it.
@@ -63,8 +64,12 @@ struct HaloTransport: View {
             }
         }
         .onChange(of: model.playback.playing, initial: true) { _, playing in follow(playing: playing) }
-        .onChange(of: model.selectedComposition?.playheadFrame) {
-            if model.playback.playing { driver?.frameShown() }
+        .background {
+            HaloLiveShown(model: model) { shown in
+                Color.clear.onChange(of: shown.selectedComposition?.playheadFrame) {
+                    if shown.playback.playing { driver?.frameShown() }
+                }
+            }
         }
         .onDisappear { driver?.stop() }
     }

@@ -71,14 +71,22 @@ struct HaloWindow: View {
             } content: {
                 HaloViewer(model: model, perform: perform, onShapeIntent: { intent in
                     shapes.isOn = true
+                    takePlayback()
                     model.runShape(intent)
                 })
             } inspector: {
                 Group {
                     if model.selectedComposition != nil {
                         HaloCompositionInspector(
-                            model: model, perform: perform, runFill: { model.runFill($0) },
-                            runStroke: { model.runStroke($0) })
+                            model: model, perform: perform,
+                            runFill: {
+                                takePlayback()
+                                model.runFill($0)
+                            },
+                            runStroke: {
+                                takePlayback()
+                                model.runStroke($0)
+                            })
                     } else {
                         EmptyStateView(
                             "No Selection", systemImage: "rectangle.stack", message: "Select a composition to see its settings.")
@@ -109,6 +117,7 @@ struct HaloWindow: View {
     /// built does nothing there; menus and controls disable it with
     /// `model.unavailableHelp(for:)` as help.
     func perform(_ command: HaloCommand) {
+        if case .tick = command {} else { takePlayback() }
         switch command.area {
         case .composition: viewerPerform(command)
         case .playback: playbackPerform(command)

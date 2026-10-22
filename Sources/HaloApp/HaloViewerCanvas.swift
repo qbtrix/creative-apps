@@ -36,10 +36,13 @@ struct HaloViewerCanvas: View {
             .overlay { HaloLiveLayers(model: model, artboard: artboard) }
             .overlay { HaloRenderedFrameView(model: model, perform: perform) }
             .overlay { HaloViewerGestures(model: model, perform: perform) }
+            // The playing frame's, as the drawn layers show it (HaloLiveShown).
             .overlay {
-                ProbeElement("halo.viewer.summary", label: model.viewerSummary)
-                if let list = model.viewerDrawList {
-                    ProbeElement("halo.viewer.drawn", label: list.drawnSummary)
+                HaloLiveShown(model: model) { shown in
+                    ProbeElement("halo.viewer.summary", label: shown.viewerSummary)
+                    if let list = shown.viewerDrawList {
+                        ProbeElement("halo.viewer.drawn", label: list.drawnSummary)
+                    }
                 }
             }
             .accessibilityElement(children: .contain)
@@ -50,7 +53,7 @@ struct HaloViewerCanvas: View {
 }
 
 /// The drawn layers over the artboard: the live drag's project while one
-/// lasts (HaloLiveEdit), else the window's. Only this view reads the live
+/// lasts (HaloLiveEdit), else the playing frame, else the window's. Only this view reads the live
 /// project, so a drag sample re-runs it and nothing around it.
 struct HaloLiveLayers: View {
     let model: HaloProject
@@ -66,7 +69,7 @@ struct HaloLiveLayers: View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
         #endif
-        let shown = live?.project ?? model
+        let shown = live?.shown(model) ?? model
         if let list = shown.viewerDrawList {
             HaloDrawnLayers(list: list, selectedLayerID: shown.selectedLayerID)
                 .aspectRatio(artboard, contentMode: .fit)

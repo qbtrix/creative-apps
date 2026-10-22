@@ -11,7 +11,11 @@
 // end sends its last value to the window as before, so the window changes
 // once and records one step. HaloWindow owns one and hands it down as the
 // `haloLiveEdit` environment value; without one (a view hosted alone) a drag
-// writes the window per sample, as it used to. Presentation state only.
+// writes the window per sample, as it used to. A playing tick lands in
+// `playing` the same way (#4274), so it re-runs only the leaves that read
+// `shown(_:)` (drawn layers, handles, playhead, timecode, HaloLiveShown),
+// never the window, lanes or inspector; the window takes the frame back
+// (`takePlayback`) before any other command. Presentation state only.
 import HaloModel
 import Observation
 import SwiftUI
@@ -22,6 +26,14 @@ import SwiftUI
     var project: HaloProject?
     /// The window's project now; HaloWindow sets it once it appears.
     @ObservationIgnored var current: @MainActor () -> HaloProject? = { nil }
+    /// The window's project ticked to the frame playing now; nil while paused.
+    var playing: HaloProject?
+    /// The media time `playing` was ticked at, for the window to take it back.
+    @ObservationIgnored var playedAt: Double?
+
+    /// What a viewer shows of `model`: the live drag's project, else the
+    /// playing frame, else `model` itself.
+    func shown(_ model: HaloProject) -> HaloProject { project ?? playing ?? model }
 
     /// Shows the window's current project with `change` applied; nothing
     /// before the window has set `current`.
@@ -30,6 +42,17 @@ import SwiftUI
         change(&shown)
         project = shown
     }
+}
+
+/// `content` on what the window's live edit shows of `model` (HaloLiveEdit
+/// `shown`), so only this leaf re-runs when a drag sample or a playing frame
+/// lands; `model` itself outside a HaloWindow.
+struct HaloLiveShown<Content: View>: View {
+    let model: HaloProject
+    @ViewBuilder let content: (HaloProject) -> Content
+    @Environment(\.haloLiveEdit) private var live
+
+    var body: some View { content(live?.shown(model) ?? model) }
 }
 
 extension EnvironmentValues {
