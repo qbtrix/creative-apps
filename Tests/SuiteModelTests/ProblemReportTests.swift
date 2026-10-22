@@ -1,4 +1,4 @@
-// ProblemReportTests.swift (report-problem RP-1, written first; RP-4 turns them on): MJ-RP's report rules on
+// ProblemReportTests.swift (report-problem RP-1, written first; RP-4 turned them on): MJ-RP's report rules on
 // fixture crash files. Only suite processes, newest first, at most three, none older than 7 days; no home path,
 // user or host string survives anywhere in the text; a report with no crashes says so. Linux-safe.
 #if canImport(FoundationEssentials)
@@ -41,53 +41,57 @@ import Testing
                             crashes: crashes, now: now, home: home, user: user, host: host)
     }
 
-    @Test(.disabled("waits on RP-4")) func keepsTheAppAndSystemFields() {
+    @Test func keepsTheAppAndSystemFields() {
         let report = Self.report()
         #expect(report.app == "Photo" && report.version == "0.9.0" && report.build == "412")
         #expect(report.macOS == "26.1" && report.model == "Mac16,1")
     }
 
-    @Test(.disabled("waits on RP-4")) func onlySuiteCrashesNewestFirstAtMostThree() {
+    @Test func onlySuiteCrashes() {
         let crashes = Self.report().crashes
         #expect(crashes.count == 3)
-        #expect(crashes.first?.contains("Photo-2026-10-20-121212") == true, "the newest suite crash comes first")
+        let order = ["Photo-2026-10-20-121212", "Photo-2026-10-19-101010", "AfterGlow-2026-10-18"]
+        #expect(zip(crashes, order).allSatisfy { $0.contains($1) }, "newest suite crash first")
         #expect(!crashes.contains { $0.contains("Safari") }, "another app's crash never enters the report")
         #expect(!crashes.contains { $0.contains("Design-2026-10-17") }, "the fourth suite crash is dropped")
     }
 
-    @Test(.disabled("waits on RP-4")) func dropsCrashesOlderThanSevenDays() {
+    @Test func onlyRecentCrashes() {
         let crashes = Self.report().crashes
         #expect(!crashes.contains { $0.contains("Halo") })
         #expect(Self.report([Self.crash("Halo-old.ips", days: 7.5, process: "Halo")]).crashes.isEmpty)
     }
 
-    @Test(.disabled("waits on RP-4")) func keepsTheCrashedThreadOnly() {
+    @Test func keepsTheCrashedThreadOnly() {
         let crash = Self.report([Self.fixture[0]]).crashes.first ?? ""
         #expect(crash.contains("EXC_BAD_ACCESS") && crash.contains("crashHere"))
         #expect(!crash.contains("idle"), "a thread that didn't crash is trimmed away")
     }
 
-    @Test(.disabled("waits on RP-4")) func redactsEveryOccurrenceOfHomeUserAndHost() {
-        let text = Self.report().text(note: "It crashed in /Users/tester/Pictures on testers-mac, tester here.")
+    @Test func redactsEveryOccurrence() {
+        let note = "It crashed in /Users/tester/Pictures on testers-mac, tester here. Again in /Users/Tester/Desktop "
+            + "on TESTERS-MAC, Tester again."
+        let text = Self.report().text(note: note)
         #expect(!text.contains("/Users/"))
         #expect(!text.lowercased().contains("tester"), "the user and host names go, in any case")
         #expect(text.contains("~/"), "the home path reads as ~")
         #expect(text.contains("<user>") && text.contains("<host>"))
+        for crash in Self.report().crashes { #expect(!crash.lowercased().contains("tester") && !crash.contains("/Users/")) }
     }
 
-    @Test(.disabled("waits on RP-4")) func textPutsTheNoteFirstThenTheReport() {
+    @Test func textPutsTheNoteFirstThenTheReport() {
         let text = Self.report().text(note: "The brush lagged.")
         #expect(text.hasPrefix("The brush lagged."))
         for field in ["Photo", "0.9.0", "412", "26.1", "Mac16,1"] { #expect(text.contains(field)) }
     }
 
-    @Test(.disabled("waits on RP-4")) func aReportWithNoCrashesSaysSo() {
+    @Test func aReportWithNoCrashesSaysSo() {
         let report = Self.report([])
         #expect(report.crashes.isEmpty)
         #expect(report.text(note: "").lowercased().contains("no crash"))
     }
 
-    @Test(.disabled("waits on RP-4")) func roundTripsAsJSON() throws {
+    @Test func roundTripsAsJSON() throws {
         let report = Self.report()
         let data = try JSONEncoder().encode(report)
         #expect(try JSONDecoder().decode(ProblemReport.self, from: data) == report)
