@@ -29,12 +29,12 @@ struct DesignSelectionMarks: View {
         if model.hasMultipleSelection {
             let ids = Set(model.selectedNodeIDs)
             ForEach(painted.map(\.node).filter { ids.contains($0.id) }) { node in
-                DesignSelectionBox(rect: node.frame, zoom: zoom, handles: false)
+                DesignSelectionBox(rect: node.frame, zoom: zoom, handles: false, degrees: node.rotation)
             }
             if let bounds = model.selectionBounds {
                 // A live marquee shows what it will select, not the box it will commit.
                 if model.marquee == nil {
-                    DesignSelectionBox(rect: bounds, zoom: zoom, handles: model.showsSelectionHandles)
+                    DesignSelectionBox(rect: bounds, zoom: zoom, handles: model.showsSelectionHandles, knob: true)
                 }
                 ProbeElement(Self.selectionID, label: "Selection", rect: bounds.cgRect, zoom: usable(zoom), traits: .isImage)
             }

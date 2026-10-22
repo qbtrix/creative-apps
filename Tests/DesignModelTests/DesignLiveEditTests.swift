@@ -4,6 +4,7 @@
 // one undo step, with the copy cleared. On `cards`, A is node-2 at (100, 100, 100 × 80).
 // Runs on Linux and macOS.
 import DesignModel
+import SuiteKernel
 import Testing
 
 /// `cards` on the fake services.
@@ -124,4 +125,42 @@ private func corner(_ i: Int) -> DesignPoint { pt(200 + 2 * Double(i), 180 + Dou
     #expect(model.selectedNode?.frame == shown)
     #expect(model.undoActionName == "Undo Resize")
     #expect(live.workspace == nil)
+}
+
+@Test func aRotationScrubPreviewsOnTheCopyAndLandsOneStep() throws {
+    var model = cards()
+    model.selectItem("node-2")
+    let box = try #require(model.transformSelection)
+    func turned(_ degrees: Double) -> TransformIntent {
+        var turned = box
+        turned.degrees = degrees
+        return .set(turned, drag: "rotation")
+    }
+    var live = DesignLiveEdit()
+    live.begin(from: model)
+    for degrees in 1...120 { live.preview(turned(Double(degrees))) }
+    #expect(model.selectedNode?.rotation == 0)
+    #expect(live.workspace?.selectedNode?.rotation == 120)
+
+    #expect(live.end(into: &model) == nil)
+    var direct = cards()
+    direct.selectItem("node-2")
+    for degrees in 1...120 { direct.runTransform(turned(Double(degrees))) }
+    direct.endEditRun()
+    // The history's step counters differ (one landed run against 120), never the document.
+    #expect(model.pages == direct.pages)
+    #expect(model.selectedNode?.rotation == 120)
+    #expect(model.undoActionName == direct.undoActionName)
+    #expect(live.workspace == nil)
+
+    // The run is closed: a second scrub, under the same drag token, is a second step.
+    live.begin(from: model)
+    live.preview(turned(45))
+    live.end(into: &model)
+    #expect(model.selectedNode?.rotation == 45)
+    model.undo()
+    #expect(model.selectedNode?.rotation == 120)
+    model.undo()
+    #expect(model.selectedNode?.rotation == 0)
+    #expect(!model.canUndo)
 }
