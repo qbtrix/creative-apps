@@ -39,3 +39,4 @@ utc	stage	event	ref	note
 2026-10-22T00:32:45Z	check	ST-a	dev run 39697907658 still red on FormatListRatchet (Media.swift); #4135 held as draft
 2026-10-22T00:49:19Z	check	ST-a	dev still red on FormatListRatchet (run 39699955972); fix #4258 open in lane; port would push #4135 to 16 files (cap 15), so wait for #4258 to merge
 2026-10-22T01:06:03Z	check	ST-a	#4258 still open (head f9e7698c1); dev Linux check 39701991485 red; #4135 held
+2026-10-22T01:23:12Z	check	ST-a	#4258 still open; lane batch running; #4135 held
