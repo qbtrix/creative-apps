@@ -68,3 +68,4 @@ utc	stage	event	ref	note
 2026-10-21T23:22Z	4	pr-opened	#4255	DT-6 (DT-m), head 487ff70e, fast-lane, ci --changed PASS
 2026-10-21T23:54Z	3	merged	#4159	DT-4 on dev 9829685ee; #4254 #4255 still in the lane, clean against dev
 2026-10-22T00:35Z	DT-u	lane-mac-red	#4254	merged dev, regating
+2026-10-22T00:36Z	push	regated	#4254→f9c5b8ac,#4255→5d611ef3	CI: PASS

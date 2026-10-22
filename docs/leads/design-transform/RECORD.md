@@ -46,3 +46,5 @@ Next: #4159, #4187, #4188-fix merge -> Belt-Slice-Done + Mac-Finish-Wanted DT-u 
 - 2026-10-21T23:54Z: #4159 (DT-4) merged as 9829685ee. #4254 and #4255 still merge cleanly against dev and are waiting for a lane batch.
 
 - 2026-10-22T00:35Z Lane macOS builds red on dev's RenderBudgetPhotoPlaceTests (PhotoPlaceIntent.files), fixed on dev by #4215; merged origin/dev into #4254 and #4255; regating.
+
+- 2026-10-22T00:36Z Gate CI: PASS after the dev merge; pushed #4254→f9c5b8ac,#4255→5d611ef3 and moved Head: lines. Waiting on the lane.
