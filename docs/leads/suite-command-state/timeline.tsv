@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-22T17:48:33Z	CS-z	waiting	#4382	lane macOS build on 188e78954 pending
 2026-10-22T18:17:01Z	CS-z	waiting	#4382	lane macOS build on 188e78954 still pending
 2026-10-22T18:20:48Z	CS-z	merged	#4382	merged as e35435996 (feature-done); waiting on a green dev CI run containing it
+2026-10-22T18:52:06Z	CS-z	waiting	#4382	merged e35435996; next full CI after 39829329352 needed; macOS runners idle-queued: full CI 39829329352 pending since 18:12, #4421 build 39823748876 queued since 17:33
