@@ -61,3 +61,4 @@ Wave 3: HT-m as #4415 on dev 30120a8; HT-z (#4422) stacked on it at once, labell
 - 19:05Z: full CI 39829329352 was cancelled (superseded at 18:59Z). Now waiting on full CI 39836126860 on dev a102c34 (holds 55d96ee), pending.
 - 19:27Z: full CI 39836126860 on dev a102c34 (holds 55d96ee) queued for a macOS runner. Still waiting.
 - 2026-10-22T19:49:21Z: heartbeat. Full CI 39836126860 (dev a102c34, holds 55d96ee): Linux green, macOS still queued for a runner. Waiting; slice-done lines go out once macOS is green.
+- 2026-10-22T20:11:58Z: heartbeat. Full CI 39836126860 (a102c34): Linux green, macOS still queued (runners backed up; scoped photo/suite runs also queued). A newer full CI 39844810755 on dev 0f8414a (holds 55d96ee) is pending and may supersede it; I'll follow whichever finishes green.
