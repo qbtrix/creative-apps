@@ -1,5 +1,5 @@
 // RenderBudgetNewDocumentTests.swift (document-setup DS-6's budget row): the gallery's `new-document` page in a
-// key-capable 1280 x 820 window; a click into Width and 20 typed digits run the page's body at most once, since
+// key-capable 1280 x 820 window; focus in Width and 20 typed digits run the page's body at most once, since
 // the form lives in the sheet's own state. The New Document snapshots sit beside it:
 // suite-new-document-{light,dark}.png and suite-document-settings-{light,dark}.png. Nested in BodyCountSuites: it
 // reads global body counters. macOS only.
@@ -25,12 +25,20 @@ extension BodyCountSuites {
             }
             try await w.settle(untilStable: bodies)
             let width = try #require(await w.element("suite.newdoc.width"), "no Width field (suite.newdoc.width)")
-            w.click(at: CGPoint(x: width.midX, y: width.midY))
+            // Focus the field directly: a test click into an NSTextField never returns, since the field
+            // editor's mouse tracking waits for a mouse up that `click` only sends after it (as RenderBudgetHelpTests).
+            let field = try #require(Self.fields(in: w.host).first { $0.isEditable && $0.convert($0.bounds, to: nil).intersects(width) },
+                                     "no text field under suite.newdoc.width")
+            w.window.makeFirstResponder(field)
             try await w.settle()
             let step = try await w.measure("new-document type width", bodies: bodies) {
                 try await w.ticks(20) { _ in Self.press("1", keyCode: 18, in: w.window) }
             }
             expectBodies(step, atMost: 1, target: 0)
+        }
+
+        static func fields(in view: NSView) -> [NSTextField] {
+            (view as? NSTextField).map { [$0] } ?? view.subviews.flatMap(fields)
         }
 
         /// A key down and up for `characters`, sent straight to `window`.
