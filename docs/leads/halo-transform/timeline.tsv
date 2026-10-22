@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-22T17:37Z	heartbeat	both clean, not merged; macOS queue saturated
 2026-10-22T17:55Z	merged	HT-z #4422 -> 55d96ee (carries HT-m)
 2026-10-22T17:59Z	closed	#4415 superseded by 55d96ee
+2026-10-22T18:21:29Z	heartbeat	full CI 39829329352 pending on dev 8f25082 (holds 55d96ee)
