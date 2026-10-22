@@ -556,6 +556,7 @@
                   "Sources/SuiteKernel/Export/ExportRun.swift",
                   "Sources/SuiteKernel/Session/AutosaveSchedule.swift",
                   "Sources/SuiteKernel/Session/DocumentSession.swift",
+                  "Sources/SuiteKernel/Session/RecoveryRestore.swift",
                   "Sources/SuiteKernel/Session/VersionedJSON.swift"
                 ]
               },
@@ -571,7 +572,7 @@
               {
                 "id": "kernel-stroke",
                 "name": "Stroke",
-                "description": "Stroke/: StrokeSample (point, pressure, time) and the strokeSamples fixture (40 samples), StrokeSegment (a cubic with a pressure range), StrokeSmoother (samples to segments one late, flattening), DabSpacer (dab centres between two points), BrushSettings with BrushEdit (size, hardness, opacity, flow, spacing, clamped), BrushPreset, and LiveCopy, the working copy a drag draws on until take(). EK-29 declares them as stubs; EK-28 fills the bodies. BrushKeys holds the brush keys' rule ([ and ] step size in bands of 1, 5, 25 and 50; Shift-brackets move hardness by 25; digits set opacity in tens, or an exact percent through OpacityDigits' 0.6 s window), and BrushKeyCommands its six commands on a BrushKeyTarget: brush.size-up, brush.size-down, brush.hardness-up, brush.hardness-down, brush.set-opacity and layer.set-opacity.",
+                "description": "Stroke/: StrokeSample (point, pressure, time) and the strokeSamples fixture (40 samples), StrokeSegment (a cubic with a pressure range), StrokeSmoother (samples to segments one late, flattening), DabSpacer (dab centres between two points), BrushSettings with BrushEdit (size, hardness, opacity, flow, spacing, clamped), BrushPreset, LiveCopy, the working copy a drag draws on until take(), and DabCoverage with CoverageGrid (a stroke's dabs as discs of the brush's size and hardness, max-combined into one coverage grid; fill-heal FH-1 stub, FH-5k body). EK-29 declares them as stubs; EK-28 fills the bodies. BrushKeys holds the brush keys' rule ([ and ] step size in bands of 1, 5, 25 and 50; Shift-brackets move hardness by 25; digits set opacity in tens, or an exact percent through OpacityDigits' 0.6 s window), and BrushKeyCommands its six commands on a BrushKeyTarget: brush.size-up, brush.size-down, brush.hardness-up, brush.hardness-down, brush.set-opacity and layer.set-opacity.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Stroke/"
@@ -673,9 +674,10 @@
                 "id": "imaging-adjust",
                 "name": "Adjust",
                 "description": "Adjust/ and the SuiteImaging namespace: AdjustSettings (exposure, levels, curve, hue and saturation) with its clamps and its one Codable form Photo and Library both read, and ImagingProgram, which compiles settings to CoreRender's tone adjustments (CPU) and tone program (GPU) in one fixed order. suite-imaging IM-2 declares them as stubs; IM-3 and IM-4 fill the bodies.",
-                "technology": "Swift 6, Foundation (FoundationEssentials) and CoreRender, Linux and macOS",
+                "technology": "Swift 6, Foundation (FoundationEssentials), CoreColor, CoreRaster and CoreRender, Linux and macOS",
                 "paths": [
                   "Sources/SuiteImaging/Adjust/",
+                  "Sources/SuiteImaging/Color/",
                   "Sources/SuiteImaging/SuiteImaging.swift"
                 ]
               },
@@ -686,6 +688,24 @@
                 "technology": "Swift 6, Foundation (FoundationEssentials), CoreRender and CoreRaster; CoreRenderMetal and Metal on macOS",
                 "paths": [
                   "Sources/SuiteImaging/Route/"
+                ]
+              },
+              {
+                "id": "imaging-retouch",
+                "name": "Retouch",
+                "description": "Retouch/: the paint bucket and the heal tools over creative-core. BucketOptions (tolerance 0 to 255, contiguous, all layers, anti-alias) and BucketRules (the seed's flood mask times the selection's coverage, the colour mixed in by it), HealRules (spot heal and remove through filledFromSurroundings, heal through healed from a source offset, and a stroke's DabCoverage grid placed into a buffer-sized mask), and RetouchCommands, the four edits a raster app adds on a RetouchTarget: fill.bucket, retouch.spot-heal, retouch.heal and retouch.remove, one undo step each. fill-heal FH-1 declares them as stubs; FH-5b, FH-5h and FH-6 fill the bodies.",
+                "technology": "Swift 6, CoreRaster and SuiteKernel, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Retouch/"
+                ]
+              },
+              {
+                "id": "imaging-tone",
+                "name": "Tone",
+                "description": "Tone/ (docs/blueprints/suiteui/features/tone-controls.md): the suite's one tone and sharpen adjustment. ToneSlider and ToneGroup (White Balance, Tone, Presence, Sharpen), ToneSettings with Library's Develop keys, ToneRules (the settings as one CoreRender tone program, the same CPU steps, one unsharp pass and Auto from CoreRaster's AutoTone, with the sliders still waiting on the engine), and ToneCommands: the ToneTarget protocol, the ToneIntents the SuiteUI tone rows send and the tone.read, tone.set, tone.reset and tone.auto specs every adopting app registers. tone-controls TC-1 declares them as stubs; TC-5 to TC-7 fill the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), SuiteKernel's command catalog, CoreRender and CoreRaster, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Tone/"
                 ]
               }
             ]

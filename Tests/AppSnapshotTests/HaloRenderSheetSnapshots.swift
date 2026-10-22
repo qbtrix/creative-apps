@@ -4,7 +4,9 @@
 // the summary), editing into a folder with a 40-character name (one line,
 // middle-truncated, at the Size row's inset), running at "Frame 12 of 48",
 // finished ("Exported 48 PNG files into "Bounce"", the folder name dimmed
-// with the sheet) and failed at frame 5.
+// with the sheet) and failed at frame 5. The summary, problem and progress
+// notes start at the Folder label's x (#4454), and while busy the folder
+// control's help is the Export button's words (#4457).
 // The control inventory stands in for the accessibility tree, so a state
 // missing a control fails; the readout pins the rows the sheet draws. Light
 // and Dark: halo-render-sheet-*.png. macOS only.
@@ -89,6 +91,9 @@ import Testing
         #expect(found["halo.render.cancel"]?.enabled == true)
         #expect(found["halo.render.start"]?.enabled == false)
         #expect(found["halo.render.destination"]?.enabled == false)
+        // One busy state, one name: the folder control's help is the Export button's (#4457).
+        #expect(found["halo.render.start"]?.reason == "The export is already under way or done.")
+        #expect(found["halo.render.destination"]?.reason == found["halo.render.start"]?.reason)
         #expect(found["halo.render.dismiss"] == nil)
         try shoot(view, "-progress")
     }
@@ -119,6 +124,59 @@ import Testing
         #expect(found["halo.render.tryAgain"]?.enabled == true)
         #expect(found["halo.render.reveal"] == nil)
         try shoot(view, "-failed")
+    }
+
+    /// The summary, the missing-folder problem and the progress line start where the Folder label does (#4454).
+    @Test(.timeLimit(.minutes(1))) func notesSitOnTheLabelInset() throws {
+        let cases: [(String, HaloRenderExportAdapter)] = [
+            ("halo.render.summary", sheet(try editing())),
+            ("halo.render.problem", HaloRenderExportAdapter(model: try editing(), destination: nil, output: nil) { _ in }),
+            ("halo.render.frame", sheet(try running())),
+        ]
+        for (id, view) in cases {
+            let window = Self.host(view)
+            defer { window.close() }
+            let nodes = Self.nodes(in: window.contentView as Any)
+            let label = try #require(Self.frame(nodes.first { Self.label($0) == "Folder" }, in: window), "no Folder label")
+            let note = try #require(Self.frame(nodes.first { ($0.accessibilityIdentifier?() ?? nil) == id }, in: window), "no \(id)")
+            #expect(abs(note.minX - label.minX) <= 0.5, "\(id) starts at \(note.minX), the Folder label at \(label.minX)")
+        }
+    }
+
+    /// `view` in a borderless window far off every screen, accessibility on, so its elements report frames.
+    private static func host(_ view: some View) -> NSWindow {
+        for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
+            NSApplication.shared.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: attribute))
+        }
+        let size = CGSize(width: SuiteSize.contentMinimum.width, height: 640)
+        let window = NSWindow(
+            contentRect: CGRect(origin: .zero, size: size), styleMask: [.borderless], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        window.contentView = NSHostingView(rootView: view.frame(width: size.width, height: size.height, alignment: .topLeading))
+        window.setFrameOrigin(NSPoint(x: -20_000, y: -20_000))
+        window.orderFrontRegardless()
+        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+        return window
+    }
+
+    private static func nodes(in element: Any) -> [AnyObject] {
+        let node = element as AnyObject
+        return [node] + ((node.accessibilityChildren?() ?? nil) ?? []).flatMap { nodes(in: $0) }
+    }
+
+    /// A node's accessibility label, else its value, when it is text; read untyped, as HaloLayoutTests does.
+    private static func label(_ node: AnyObject) -> String? {
+        guard let object = node as? NSObject else { return nil }
+        return ["accessibilityLabel", "accessibilityValue"].lazy.compactMap { getter -> String? in
+            let selector = NSSelectorFromString(getter)
+            guard object.responds(to: selector) else { return nil }
+            return object.perform(selector)?.takeUnretainedValue() as? String
+        }.first
+    }
+
+    private static func frame(_ node: AnyObject?, in window: NSWindow) -> CGRect? {
+        guard let screen = node?.accessibilityFrame?() else { return nil }
+        return window.convertFromScreen(screen)
     }
 
     @Test func progressSinkCountsEveryWrittenFrame() throws {
