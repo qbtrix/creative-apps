@@ -78,3 +78,4 @@ utc	stage	event	ref	note
 2026-10-22T19:27Z	heartbeat	#4435 head 8acab202: lane macOS build (run 39834021257) still queued; waiting
 2026-10-22T19:49Z	heartbeat	#4435 head 8acab202: lane macOS build 39834021257 still queued behind the shared macOS runner backlog (20 runs queued); waiting
 2026-10-22T20:11Z	heartbeat	#4435 head 8acab202: lane macOS build 39834021257 green; waiting on the lane Linux check and merge
+2026-10-22T20:33Z	heartbeat	#4435 head 8acab202 is in lane batch 20261022201503 (Linux check 39847209523 running); waiting on the batch
