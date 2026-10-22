@@ -1,7 +1,8 @@
 // SuiteImageIO.swift: the suite's one ImageIO adapter (shared-codecs rule 20).
 // No other file under Sources/ imports ImageIO (ImageIOImportRatchetTests).
-// Shell-media's writers land the first calls here: one image encoded as a
-// registry format, and frames written as an animated GIF or APNG. Shared-codecs'
+// Shell-media lands the first calls here: a still read upright at a size,
+// one image encoded as a registry format, and frames written as an animated
+// GIF or APNG. Shared-codecs'
 // SC-2 and SC-4 add decoding, file info and the CoreRaster paths beside them.
 // Formats come from SuiteImageFormats, so this file spells out no list of its own.
 import CoreGraphics
@@ -10,6 +11,35 @@ import ImageIO
 import SuiteModel
 
 public enum SuiteImageIO {
+    /// The first image in `data`, turned upright by its EXIF orientation and
+    /// shrunk so its longer side is at most `longestSide` (never enlarged);
+    /// nil keeps the stored size.
+    public static func uprightImage(_ data: Data, longestSide: Int?) throws(SuiteError) -> CGImage {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil), CGImageSourceGetCount(source) > 0,
+            let stored = storedLongestSide(source)
+        else { throw .readFailed("This isn't an image the Mac can read.") }
+        let options: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceShouldCacheImmediately: true,
+            kCGImageSourceThumbnailMaxPixelSize: min(longestSide ?? stored, stored),
+        ]
+        guard let upright = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) else {
+            throw .readFailed("The still couldn't be decoded.")
+        }
+        return upright
+    }
+
+    /// The longer of the stored pixel width and height, before any orientation.
+    static func storedLongestSide(_ source: CGImageSource) -> Int? {
+        guard let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+            let width = properties[kCGImagePropertyPixelWidth] as? Int,
+            let height = properties[kCGImagePropertyPixelHeight] as? Int,
+            width > 0, height > 0
+        else { return nil }
+        return max(width, height)
+    }
+
     /// `image` as a complete `format` file; `quality` (0 to 1, clamped) sets
     /// lossy compression, nil leaves the format lossless.
     public static func encode(_ image: CGImage, as format: SuiteImageFormat, quality: Double?) throws(SuiteError) -> Data {
