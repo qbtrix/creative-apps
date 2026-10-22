@@ -1,8 +1,9 @@
 // SuiteHelpCommandsTests.swift (report-problem RP-2): the Help group, read as text since SwiftUI doesn't
 // build on Linux. SuiteHelpCommands replaces the system's empty help item with the suite Help catalog's
 // items, each built with MenuCommand(spec, on:) and identified: Report a Problem…, Beta Notes and, in the
-// launcher only, Welcome to AfterGlow, which still opens the tour. An item whose run isn't built yet is
-// disabled with its reason (no dead controls). The launcher adds the group in place of its Welcome group.
+// launcher only, Welcome to AfterGlow, which still opens the tour. Since RP-3 Report a Problem… begins the
+// report sheet and Beta Notes opens its window, so no item is disabled; one that wasn't built would say why
+// (no dead controls). The launcher adds the group in place of its Welcome group.
 import Foundation
 import Testing
 
@@ -33,13 +34,14 @@ import Testing
         #expect(text.contains("id == \"help.welcome\" ? OnboardingControls.help : \"suite.\" + id"))
     }
 
-    @Test func welcomeOpensTheTourAndTheRestSayWhyNot() throws {
+    @Test func everyItemOpensItsWindow() throws {
         let text = try source(Self.help)
         #expect(text.contains("if id == \"help.welcome\" { openWindow(id: \"onboarding\") }"))
-        for id in ["help.report-problem", "help.beta-notes"] {
-            #expect(text.contains("\"\(id)\": \""), "\(id) runs nothing and says nothing")
-        }
-        #expect(!text.contains("\"help.welcome\": \""), "Welcome is disabled")
+        #expect(text.contains("if id == \"help.report-problem\" { SuiteHelpPresenter.shared.showReport(app: app) }"))
+        #expect(text.contains("if id == \"help.beta-notes\" { SuiteHelpPresenter.shared.showBetaNotes() }"))
+        #expect(text.contains("static let notBuilt: [String: String] = [:]"), "an item is still disabled")
+        #expect(text.contains("ProblemReportSheet(") && text.contains("beginSheet(panel)"), "the report isn't a sheet")
+        #expect(text.contains("BetaNotesView(notes: BetaNotes.current)") && text.contains("window.title = \"Beta Notes\""))
         #expect(text.contains("isEnabled: false"))
     }
 

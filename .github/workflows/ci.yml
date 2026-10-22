@@ -113,7 +113,8 @@ jobs:
     runs-on: ubuntu-latest
     # Official image; 6.3.3-noble is Ubuntu 24.04, the same OS as the cloud agents.
     container: swift:6.3.3-noble
-    timeout-minutes: 20
+    # A cold build alone takes 7-8 min and a full pass about 17, so 20 cut slow runners off mid-test.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - { uses: actions/setup-node@v4, with: { node-version: 22 } } # jscpd duplicate check; the swift image has no node
