@@ -20,8 +20,10 @@ Next: critic round 2 after #4373/#4375; FR-10b/FR-8b after #4293/#4341
 
 
 
+
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 09:55Z: #4293's macOS build passed (09:12Z); it waits for the lane's batch. #4341/#4373/#4375 builds still queued (25 queued repo-wide). Nothing red.
 - 09:33Z: no change: #4293, #4341, #4373, #4375 all wait on lane macOS builds; 27 runs queued repo-wide for macOS runners. Nothing red, nothing for the lead to build (FR-z held by findings, FR-10b/FR-8b by parents).
 - 09:11Z: #4341 (FR-8) was needs-rebase on NewCompositionSheet.swift (dev's #4210 made Create a MenuCommand): merged origin/dev, kept both (MenuCommand Create hands draft.settings.withFrameRate(frameRate)), gate PASS, pushed d99ea37a, Head moved. #4293 still waits on the lane's macOS build; #4373/#4375 in the lane's macOS gate.
 - 08:56Z: fix round 1 PRs open: #4373 (r-b2: #4362 #4366, head c516b940) and #4375 (r-b1: the other 9, head 24daa220). Moved r-b2's TimelineTime mutation entry into #4375 (array plans don't key-merge, so the pair would have conflicted). Both pass the gate; mutation plans can't be scored on Linux (SuiteUI), stated on the Mutate: line. Next: once both merge, critic round 2 on a scoped suiteui run.
