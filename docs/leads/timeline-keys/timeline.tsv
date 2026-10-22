@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-22T11:03Z	poll	journeys full 39751426611 pending, flare 39754262667 queued (macOS backlog); TK-u critics wait.
 2026-10-22T11:23Z	poll	journeys full 39751426611 pending, flare 39754262667 queued (macOS backlog); TK-u critics wait.
 2026-10-22T11:43Z	poll	journeys full 39751426611 pending, flare 39754262667 queued (macOS backlog); TK-u critics wait.
+2026-10-22T12:11Z	poll	flare journeys 39754262667 (4f2b89eb, contains TK-u) in progress; full 39751426611 pending. TK-u critics run on the flare run when it finishes.
