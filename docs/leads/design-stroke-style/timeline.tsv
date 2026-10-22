@@ -64,3 +64,4 @@ time	kind	note
 2026-10-22T02:44Z	heartbeat	DK-u waits on DS-u (not started)
 2026-10-22T03:06Z	heartbeat	full CI 39714642994 on 66a84588 (contains #4081) pending; #4255 unmerged; DS-u not started
 2026-10-22T03:33Z	heartbeat	full CI 39714642994 on 66a84588 still pending (macOS runner backlog); Linux 66a84588 green; #4255 unmerged; DS-u not started
+2026-10-22T03:54Z	heartbeat	full CI 39714642994 (66a84588) still pending; scoped design on e9933116 (pre-#4081) running; #4255 unmerged; DS-u not started
