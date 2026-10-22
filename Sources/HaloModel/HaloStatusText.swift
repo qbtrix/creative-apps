@@ -7,8 +7,8 @@ extension HaloComposition {
     /// The size as the inspector and status bar show it ("1920 × 1080").
     public var sizeText: String { "\(width) × \(height)" }
 
-    /// The frame rate ("30 fps").
-    public var frameRateText: String { "\(framesPerSecond) fps" }
+    /// The exact frame rate, as the rate menu titles it ("30 fps", "29.97 fps", "23.976 fps").
+    public var frameRateText: String { frameRate.description }
 
     /// The length in seconds to at most two decimals ("10 s", "10.03 s");
     /// "0 s" when the frame rate is not positive.
