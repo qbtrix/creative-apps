@@ -55,3 +55,4 @@ utc	stage	event	ref	note
 2026-10-22T14:30Z	heartbeat	#4415 lane Linux red only on dev-red #3856 stroke test; #4422 Linux running; no supervisor answer
 2026-10-22T14:53:15Z	heartbeat	dev-red stroke test reported on #3856; HT-m/HT-z blocked
 2026-10-22T15:21:16Z	heartbeat	dev dc87ad2 still red on stroke test; HT-m/HT-z waiting
+2026-10-22T15:51:42Z	stage	dev fixed; HT-m/HT-z re-gated PASS, markers moved to new heads
