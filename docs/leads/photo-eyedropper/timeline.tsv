@@ -67,3 +67,4 @@ utc	stage	event	ref	note
 2026-10-22T07:04:52Z	3	stage-start	polling	wait for dev Linux run containing both
 2026-10-22T07:45Z	3	heartbeat	#4339,#4343	both open, lane macOS builds queued
 2026-10-22T07:59Z	3	heartbeat	#4339,#4343	lane macOS builds still queued (runner wait)
+2026-10-22T08:17Z	3	heartbeat	#4339,#4343	macOS runner queue backed up repo-wide (32 queued); our builds wait in it
