@@ -2,16 +2,16 @@
 
 Issue: #3438 · Packet: docs/blueprints/design/features/eyedropper.md
 Run: act-1a1627ce3b4-ayhz · Session: claude/feature-lead-playbook-6guwwp · Started: 2026-10-22T07:24Z (prior runs act-1a1605b0534-rn47, act-1a15e909498-4bkk, act-1a15abb305f-lc8g)
-Stage: DY-m and DY-z PRs open: #4356 (DY-5 to dev; lane macOS build 39745527052 queued), #4357 (DY-6, stacked), #4376 (DY-z, stacked on #4357, feature-done) (2026-10-22T08:58Z)
+Stage: DY-5 merged (#4356, 09:59Z, 02d2e5be). #4357 (DY-6) merged dev in (bf4d0b8c, scripts/ci --changed PASS), retargeted to dev and waiting on the lane; #4376 (DY-z) is stacked on #4357 (2026-10-22T10:08Z)
 Base: 5bec8089 (origin/dev); main verified at 0dd23d65
-Next: as each base merges, retarget #4357 then #4376 to dev; Belt-Slice-Done DY-m and DY-z (+ Mac-Finish-Wanted DY-z) on a green design or full run containing their merges; critic panel for DY-z
+Next: once #4357 merges, merge dev into lead/design-eyedropper-DY-z and retarget #4376 to dev; then Belt-Slice-Done DY-m and DY-z (and Mac-Finish-Wanted DY-z) on a green design or full run containing their merges; run the critic panel for DY-z; post the contact sheet on #3438; end the run
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DY-a | Eyedropper tool on the palette; SampleTarget stubs | DY-1, DY-2 | MJ-DY | EY-a (done) | yes | 1 | merged (6f9c8928); round-1 fixes merged 45e8bd4d | – | wanted |
 | DY-u | loupe follows the pointer, click and Option-click picks; snapshots, budget | DY-3, DY-4 | J-DY | DY-a; EY-u (done) | yes | 2 | merged 6d7fcf14 (#3816); round 1 #3998 merged 97713e0d; round 2 #4081 | – | – |
-| DY-m | topmost visible colour; apply as one step; color.sample, color.pick, RJ-D34 | DY-5, DY-6 | MJ-DY | DY-a, transform:DT-m (met); EY-m (done) | no | 0 | pr-opened #4356, #4357 | – | – |
+| DY-m | topmost visible colour; apply as one step; color.sample, color.pick, RJ-D34 | DY-5, DY-6 | MJ-DY | DY-a, transform:DT-m (met); EY-m (done) | no | 0 | #4356 merged; #4357 open | – | – |
 | DY-z | journey on live; built | DY-7, DY-8 | J-DY | DY-u, DY-m (pr-opened, stacked) | yes | 0 | pr-opened #4376 (stacked) | – | – |
 
 ## Tasks
@@ -19,10 +19,10 @@ Next: as each base merges, retarget #4357 then #4376 to dev; Belt-Slice-Done DY-
 |---|---|---|---|---|---|---|---|
 | DY-1 | DY-a | 1 | DesignTool.eyedropper; SampleTarget stubs; DesignSampleTests disabled | Sources/DesignModel/DesignSample+Kernel.swift, Sources/DesignModel/DesignWorkspace.swift, Tests/DesignModelTests/DesignSampleTests.swift | DesignSampleTests | #3691 | merged |
 | DY-2 | DY-a | 1 | Eyedropper on the palette (I); journey skipped | Sources/DesignApp/DesignIntent.swift, UITests/DesignJourneyTests+Eyedropper.swift | DesignToolPaletteSnapshots | #3691 | merged |
-| DY-5 | DY-m | 2 | adapter bodies (topmost, hidden, gradient), one-step apply, Eyedropper enabled (#3987) | Sources/DesignModel/DesignSample+Kernel.swift, Sources/DesignModel/DesignWorkspace.swift, Sources/DesignApp/DesignCanvas.swift | DesignSampleTests; Mutate 6/6 | #4356 | pr-opened |
+| DY-5 | DY-m | 2 | adapter bodies (topmost, hidden, gradient), one-step apply, Eyedropper enabled (#3987) | Sources/DesignModel/DesignSample+Kernel.swift, Sources/DesignModel/DesignWorkspace.swift, Sources/DesignApp/DesignCanvas.swift | DesignSampleTests; Mutate 6/6 | #4356 | merged 02d2e5be |
 | DY-7 | DY-z | 3 | eyedropper journey on live (cards fixture colours stand in for the packet's red/blue) | UITests/DesignJourneyTests+Eyedropper.swift | DesignJourneyTests testPickFillFromShape (macOS only) | #4376 | pr-opened |
 | DY-8 | DY-z | 3 | eyedropper.wave.json status built | docs/blueprints/design/features/eyedropper.wave.json | scripts/waves render | #4376 | pr-opened |
-| DY-6 | DY-m | 2 | color.sample, color.pick; RJ-D34 pick-fill | Sources/DesignModel catalog, Tests/command-ids/design.txt, Tests/RealJobs/design/pick-fill/ | DesignSampleCommandTests | #4357 | pr-opened (stacked on DY-5) |
+| DY-6 | DY-m | 2 | color.sample, color.pick; RJ-D34 pick-fill | Sources/DesignModel catalog, Tests/command-ids/design.txt, Tests/RealJobs/design/pick-fill/ | DesignSampleCommandTests | #4357 | pr-opened (retargeted to dev at bf4d0b8c) |
 
 ## Critic reviews
 | slice | run | commit | lenses | filed | after round |
@@ -30,6 +30,7 @@ Next: as each base merges, retarget #4357 then #4376 to dev; Belt-Slice-Done DY-
 | – | – | – | – | – | – |
 
 ## Decisions
+- After #4356's squash, dev was merged into DY-m (conflict in the catalog and CLI golden: dev's viewSpecs and file.export kept beside color.*). The repo's JSON merge driver pointed at a removed builder worktree; it is repointed to scripts/merge-json in the main clone.
 - DY-m split in two stacked PRs (20 files > 15 cap): #4356 DY-5 to dev, #4357 DY-6 on lead/design-eyedropper-DY-5. The enabled tool changes design-tool-palette-light/dark.png.
 - Status branch is lead/design-<feature> (record docs/leads/design-<feature>/): lead/<feature> belongs to the SuiteUI lead of the same feature name.
 - PRs target dev, not main (CLAUDE.md, lead.md); main b3011ab9 is an ancestor of dev and only fast-forwards to green dev.

@@ -90,3 +90,4 @@ utc	stage	event	ref	note
 2026-10-22T08:59Z	poll	#4356 macOS build 39745527052 still queued; #4357 #4376 stacked	-	-
 2026-10-22T09:21Z	poll	#4356 macOS build 39745527052 still queued (73 min); supervisor: finish eyedropper slices then end run	-	-
 2026-10-22T09:43Z	poll	#4356 macOS build 39745527052 success (09:31Z); waiting on lane sweep to merge	-	-
+2026-10-22T10:08Z	merge	#4356 DY-5 merged 09:59Z (02d2e5be); DY-m merged dev (bf4d0b8c), ci --changed PASS, #4357 retargeted to dev	#4357	-
