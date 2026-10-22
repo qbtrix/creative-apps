@@ -86,3 +86,4 @@ utc	stage	event	ref	note
 2026-10-22T01:00Z	3	check	-	heartbeat: #4257 awaiting lane macOS build; scoped flare 39690220595 in progress
 2026-10-22T01:14Z	3	check	-	#4257 (FG-z) lane macOS build 39699101753 success; awaiting lane merge. Scoped flare run 39690220595 (e0fb9919) red on macOS compile of AppSnapshotTests, predates FG-m de0f324d, no slice credit; full run 39700185524 queued
 2026-10-22T01:24Z	3	check	-	heartbeat 01:24Z: #4259 lane rebuild 39703409910 still queued; #4257 not merged yet (build green); #4035 open; full run 39700185524 Linux red on FormatListRatchetTests.realTreePasses (SuiteModel Media.swift, not ours), no slice credit
+2026-10-22T01:35Z	3	decision	-	Records now also live on lead/flare-* (the branches Belt watches); every stage pushes there.
