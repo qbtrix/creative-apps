@@ -80,3 +80,4 @@ utc	stage	event	ref	note
 2026-10-22T18:05Z	3	poll	#3449	no supervisor reply; TT-z #4429 open, EY-z no PRs
 2026-10-22T18:36Z	3	poll	#3449	#4608 adds wait stroke-style:SS-d for SH-8; chain AH-z→SS-d→TT-z→EY-z→SH-z
 2026-10-22T19:07Z	3	poll	#3449	TT-7 #3577 merged; #4607, #4429 open; EY-z no PRs
+2026-10-22T19:37Z	3	poll	#3449	#4607, #4429 open; EY-z no PRs
