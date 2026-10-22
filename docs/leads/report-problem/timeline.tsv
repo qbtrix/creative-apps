@@ -79,3 +79,4 @@ utc	stage	event	ref	note
 2026-10-22T11:09:39Z	RP-5b	rebased	4226	dev merged in at b2552e9c9; earlier gate crashes were a stale incremental build; clean build CI: PASS; Head moved
 2026-10-22T11:43:11Z	RP-5b	building	4226	macOS build dispatched 11:19
 2026-10-22T12:31:42Z	lead	resumed	-	run act-1a16391fd34-thw9; RP-3, RP-3e, RP-5 merged; RP-5b waits macOS build
+2026-10-22T15:26:41Z	lead	resumed	-	worker restarted; #4226 merged, #4380 ready, RP-7 gating

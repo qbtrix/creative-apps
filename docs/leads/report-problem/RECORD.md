@@ -2,9 +2,9 @@
 
 Issue: #3772 · Packet: docs/blueprints/suite/features/report-problem.md
 Run: act-1a16391fd34-thw9 · Resumed: 2026-10-22T12:30Z (previous run act-1a1601c3538-r0c9, started 2026-10-21T10:50Z)
-Stage: RP-u merged; RP-m: RP-4, RP-5 merged, RP-5b #4226 waits its macOS build
-Base: d138c7b021dadf6fae7000e8795d687f139f91df
-Next: RP-6 C4 prose PR (docs-only), then RP-7 feature-done after #4226 merges
+Stage: RP-m: RP-5b #4226 merged 7499611d; RP-6 #4380 ready (Head 7a43418d); RP-7 gating
+Base: dc87ad2b0bcebf2b6bef749328a03ba06687275f
+Next: RP-7 feature-done PR (docs-only), then Belt-Contact-Sheet after the CI its merge triggers
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -22,7 +22,9 @@ Next: RP-6 C4 prose PR (docs-only), then RP-7 feature-done after #4226 merges
 | RP-4 | RP-m | 2 | report bodies: redaction, suite filter, 7 days, newest 3 | packet RP-4 | ProblemReportTests | #4110 | merged |
 | RP-3e | RP-u | 3 | Save… and Email… (ProblemReportOutput) | packet RP-3 (split) | Mutate 4/4 SuiteModel.ProblemReportOutput | #4209 | merged d27c95f2 |
 | RP-5 | RP-m | 3 | help catalog bodies + CLI `suite help.*` (HelpReports); fixes escaped-slash home-path leak in RP-4's encoder | packet RP-5 (split) | HelpReportsTests, SuiteHelpCatalogTests; Mutate 5/5 SuiteKernel.SuiteHelpCatalog | #4218 | merged cc919a54 |
-| RP-5b | RP-m | 4 | CrashFolder (SuiteModel) + CrashFolderReader (SuiteShell), Help journey on with -SuiteCrashDir | packet RP-5 (split) | CrashFolderTests; Mutate 6/6 SuiteModel.CrashFolder; journey first runs in scoped suite run | #4226 | ready; macOS build dispatched, Head b2552e9c |
+| RP-5b | RP-m | 4 | CrashFolder (SuiteModel) + CrashFolderReader (SuiteShell), Help journey on with -SuiteCrashDir | packet RP-5 (split) | CrashFolderTests; Mutate 6/6 SuiteModel.CrashFolder; journey first runs in scoped suite run | #4226 | merged 7499611d |
+| RP-6 | RP-m | 5 | C4 prose: suite-help callers; onboarding names SuiteHelpCommands | 2 docs/c4/parts files | scripts/ci --changed (C4 assemble) | #4380 | ready, Head 7a43418d |
+| RP-7 | RP-m | 5 | report-problem.wave.json built, feature_issue #3772; feature-done | 1 file | scripts/ci --changed (waves render) | - | gating |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -37,6 +39,7 @@ Next: RP-6 C4 prose PR (docs-only), then RP-7 feature-done after #4226 merges
 - The issue body names an RP-z slice; the packet and .wave.json have RP-a, RP-u, RP-m only (RP-7 feature-done sits in RP-m). Following the packet.
 
 - RP-6 must be a C4-only PR branched from dev after RP-5/RP-5b merge: scripts/check-c4-descriptions allows description rewrites only when every changed path is under docs/c4/parts/. It updates suite-help (callers: Help group, CLI) and shell-help (crash reader), and the afterglow onboarding part (still names the deleted LauncherCommands+Onboarding).
+- Status mirrored to lead/suite-<feature> (docs/leads/suite-<feature>/) from 2026-10-22T15:26:41Z, where Belt reads it; lead/<feature> keeps the same files.
 
 ## Open
 - none

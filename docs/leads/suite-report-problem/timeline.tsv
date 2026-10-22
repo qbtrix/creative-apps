@@ -1,0 +1,82 @@
+utc	stage	event	ref	note
+2026-10-21T10:48Z	0	stage-start	-	base 11919406886e89e9e02adea13b113b66e852334d
+2026-10-21T10:48Z	0	stage-end	-	lead branch created
+2026-10-21T10:52Z	1	stage-end	-	packet and code read
+2026-10-21T10:52Z	2	stage-end	-	wave plan: wave 1 tasks in the Tasks table
+2026-10-21T10:52Z	3	wave-start	w1	builders launched
+2026-10-21T11:11Z	3	poll	w1	builders running
+2026-10-21T11:29Z	3	poll	w1	builders running
+2026-10-21T11:47Z	3	poll	w1	builders running
+2026-10-21T11:49Z	2026-10-21T11:49:19Z	3 wave1	opened	#4048 #4049	RP-1/RP-2 PRs, gate held for dev-red #3856
+2026-10-21T11:52Z	2026-10-21T11:52:10Z	3	wave2-start	wf_ba938c1a-b7d	RP-4 (RP-m) on RP-1, RP-3 (RP-u) on RP-2; markers being restored on #4048
+2026-10-21T12:04Z	2026-10-21T12:03:56Z	3	wave2-restart	wf_d120983e-f26	RP-4 RP-3 relaunched on merge-base 965a76b with a dev merge first
+2026-10-21T12:06Z	3	poll	w1	builders running
+2026-10-21T12:26Z	3	poll	w1	builders running
+2026-10-21T12:45Z	3	poll	w1	builders running
+2026-10-21T13:12Z	3	poll	w1	builders running
+2026-10-21T13:31Z	3	poll	w1	builders running
+2026-10-21T13:51Z	3	poll	w1	builders running
+2026-10-21T14:09Z	3	poll	w1	builders running
+2026-10-21T14:27Z	3	poll	w1	builders running
+2026-10-21T14:45Z	3	poll	w1	builders running
+2026-10-21T14:53Z	2026-10-21T14:53:16Z	wave2	resume	-	session limit stopped every wave-2 builder and the marker agent at about 14:30Z; resuming from the journals
+2026-10-21T15:00Z	2026-10-21T15:00:58Z	3	gate-restored	#4048	dev-red cleared; dev merged, scripts/ci --changed PASS, markers restored at f59844e
+2026-10-21T15:18Z	2026-10-21T15:18:12Z	stage3	wave2-resumed	wf_f471d5ad-82e	RP-4 (RP-m) and RP-3 (RP-u) builders restarted on dev 9951eea
+2026-10-21T15:39Z	2026-10-21T15:39:44Z	stage3	poll	lane	macOS builds pending on 4021/4034/4048; 4023 merged dev, awaiting lane
+2026-10-21T15:53Z	2026-10-21T15:53:32Z	stage3	wave2	#4103	RP-3 (RP-u) draft PR #4103 stacked on #4049; RP-4 built locally (mutate 4/4), finisher merging dev and opening its draft on #4048
+2026-10-21T16:00Z	2026-10-21T16:00:55Z	stage3	poll	lane	#4048 macOS build green; #4034 building; #4021 #4023 queued; needs-rebase dropped on #4023
+2026-10-21T16:06Z	2026-10-21T16:06:34Z	stage3	wave2	#4110	RP-4 (RP-m) draft #4110 on #4048, mutate 4/4, gate pass; fixer moving #4048 CommandShape pin for dev's CopyAsCommands
+2026-10-21T16:23Z	2026-10-21T16:23Z	wave	lane	#4048	RP-1 in lane; #4049 #4103 #4110 stacked drafts
+2026-10-21T18:06Z	2026-10-21T18:06Z	lane	merged	#4048	RP-1 merged as 6afa46ab; bringing up #4049 RP-2 and #4110 RP-4
+2026-10-21T18:39Z	2026-10-21T18:39Z	lane	ready	#4049 #4110	RP-2 head fd92d1da, RP-4 head d6321ab0 (4/4 ProblemReport); dev merged, gate pass
+2026-10-21T20:21Z	2026-10-21T20:21Z	heartbeat	resume	-	run act-1a1601c3538-r0c9 resumed; #4049 #4110 in lane
+2026-10-21T20:57Z	2026-10-21T20:57Z	lane	bring-up	#4103	RP-3 merged origin/dev after #4049; conflicts in SuiteHelpCommands kept RP-3's side; gate running
+2026-10-21T21:06Z	2026-10-21T21:06Z	fix	pr	#4201	dev Linux red: CS-2 command-path baseline still listed RP-2's deleted LauncherCommands+Onboarding; one-line baseline fix, gate pass
+2026-10-21T21:09Z	2026-10-21T21:09Z	lane	ready	#4103	RP-3 dev merged + #4201 fix carried; gate pass, Head 94a89c8e
+2026-10-21T21:18Z	2026-10-21T21:18Z	heartbeat	lane	-	macOS build queue deep; dev Linux red only on CommandPathTests launcher, fix #4201 in lane
+2026-10-21T21:25Z	2026-10-21T21:25Z	build	pr	#4209	RP-3e draft stacked on #4103, Head cfd36f2d, 7 files +179/-5, mutate 4/4; no beta address in repo, mail has no recipients
+2026-10-21T21:40Z	2026-10-21T21:40Z	check	lane-wait	#3856	lane batches red on dev launcher.txt:21 (run 39676795156); #4201 fixes it, flagged on dev-red; our PRs built, queued
+2026-10-21T21:55Z	2026-10-21T21:55Z	build	draft	#4218	RP-5 draft (split; RP-5b next), gate pass, mutate 5/5; fixes escaped-slash redaction leak
+2026-10-21T22:02Z	2026-10-21T22:02Z	check	lane-wait	#4201	nothing of ours merged; lane still bisecting 20:57 batch (red on dev launcher.txt:21); dev merging other PRs
+2026-10-21T22:10Z	2026-10-21T22:10Z	build	draft	#4226	RP-5b draft, gate pass, mutate 6/6; RP-6 planned as C4-only PR from dev
+2026-10-21T22:24Z	2026-10-21T22:24Z	check	heartbeat	#4201	lane still red on launcher.txt:21 until #4201; no merges; drafts wait on parents; bodies clean
+2026-10-21T22:46Z	2026-10-21T22:46Z	check	heartbeat	#4201	no merges; batch lane/batch-20261021221623-4 red again; #4201 eligible (clean, marker on head) and waiting on the lane
+2026-10-21T23:16Z	2026-10-21T23:16Z	check	heartbeat	#4201	no merges yet; batch lane/batch-20261021221623 bisecting
+2026-10-22T00:07Z	2026-10-22T00:07Z	check	merged	#4110	RP-4 merged
+2026-10-22T00:29Z	2026-10-22T00:29Z	check	heartbeat	-	no merges since 00:07Z; all ready PRs clean on the lane (#4258 macOS build dispatched); no open findings for this feature
+2026-10-22T00:53:09Z	2026-10-22T00:53:09Z	check	macos-build-red	dev#4215	our heads predate cb79b076f (RenderBudgetPhotoPlaceTests fix); merging dev into each, gate, push
+2026-10-22T01:15:58Z	2026-10-22T01:15:58Z	check	heartbeat	-	#4103 gate red on dev's ratchet (Media.swift) until #4258 merges; re-merge dev after
+2026-10-22T01:38:16Z	2026-10-22T01:38:16Z	check	heartbeat	-	#4103 waits on #4258 (dev ratchet red)
+2026-10-22T02:00:24Z	2026-10-22T02:00:24Z	check	heartbeat	#4258	macOS build 39705921002 still queued (17 runs in the macOS queue); all PRs wait on #4258
+2026-10-22T02:22:41Z	2026-10-22T02:22:41Z	check	redev	-	dev ratchet green via SC-14; #4103 merging dev + gate running
+2026-10-22T02:45:00Z	2026-10-22T02:45:00Z	wave	redev	#4103	RP-3 in the redev queue (merge dev, gate, push); RP-4 #4110 merged earlier
+2026-10-22T02:58:03Z	redev	dev-merge	#4103	dev merged again, gate CI: PASS, Head lines moved
+2026-10-22T03:07:35Z	check-in	lane	#4103	macOS builds queued on lane; nothing merged since 02:55Z; pre-gating next stacked slice
+2026-10-22T03:28:53Z	check-in	lane	#4103	all 7 redev PRs pushed + Head moved; SM-3 pre-gated PASS; lane macOS builds queued/in progress
+2026-10-22T03:52:18Z	lane	heartbeat	-	RP-3 #4103 macOS build queued; RP-3e/RP-5/RP-5b drafts wait
+2026-10-22T04:08:01Z	lane	heartbeat	-	CS-11 #4205 / RP-3 #4103 macOS builds queued; children stay draft until parents merge
+2026-10-22T04:36:18Z	lane	heartbeat	-	CS-11 #4205 / RP-3 #4103 clean, awaiting lane sweep; children stay draft
+2026-10-22T04:57:54Z	lane	heartbeat	#4119,#4205,#4103	no merges: SM-3/CS-11/RP-3 clean, waiting on queued macOS builds; scoped suite run 39721019643 still queued
+2026-10-22T05:21:40Z	lane	heartbeat	#4103	RP-3 waits on macOS build
+2026-10-22T05:43:29Z	lane	heartbeat	#4103	RP-3 macOS build 39714212505 green, awaiting lane sweep
+2026-10-22T06:08:50Z	lane	heartbeat	#4103 #4209 #4218	RP-3 #4103 merged 06:02Z; RP-3e merged dev at d975059, gates after SM-5; RP-5 unblocked
+2026-10-22T06:32:51Z	lane	heartbeat	4209,4218	RP-3e in lane macOS build; RP-5 gate running
+2026-10-22T06:55:33Z	lane	heartbeat	4209,4218	RP-3e and RP-5 ready in lane
+2026-10-22T07:24:05Z	lane	heartbeat	#4209 #4218	ready, waiting on lane macOS builds
+2026-10-22T07:27:25Z	lane	heartbeat	4218	RP-3e, RP-5 in lane awaiting macOS builds
+2026-10-22T07:46:59Z	lane	heartbeat	4218	RP-3e, RP-5 macOS builds queued
+2026-10-22T08:09:48Z	lane	heartbeat	4218	RP-3e, RP-5 macOS builds still queued
+2026-10-22T08:37:38Z	lane	heartbeat	4218	RP-3e, RP-5 macOS builds still queued
+2026-10-22T09:03:32Z	lane	heartbeat	#4209,#4218	RP-3e, RP-5 wait on macOS builds; RP-5b draft; RP-6 built docs-only on dev, gating
+2026-10-22T09:10:26Z	RP-6	pr	#4380	docs-only on dev, draft until RP-5b #4226 merges; gate PASS at c70e72644
+2026-10-22T09:20:06Z	lane	heartbeat	-	waiting on lane sweep
+2026-10-22T09:42:14Z	RP-5	merged	4218	
+2026-10-22T09:50:42Z	RP-5b	ready	4226	dev merged in, gate pass c4582ba39
+2026-10-22T10:05:47Z	lane	heartbeat	-	lane sweep in flight
+2026-10-22T10:30:20Z	RP-5b	build-green	4226	macOS build 39759380876 green; waits on the lane sweep
+2026-10-22T10:38:24Z	RP-3e	merged	4209	lane merged after green macOS build
+2026-10-22T10:59:06Z	RP-5b	needs-rebase	4226	dev merged in (kept both RP-3e and RP-5b in SuiteHelpCommandsTests and shell-help.json); a Design fuzz test crashed once on Linux, passes on rerun; gate rerunning
+2026-10-22T11:09:39Z	RP-5b	rebased	4226	dev merged in at b2552e9c9; earlier gate crashes were a stale incremental build; clean build CI: PASS; Head moved
+2026-10-22T11:43:11Z	RP-5b	building	4226	macOS build dispatched 11:19
+2026-10-22T12:31:42Z	lead	resumed	-	run act-1a16391fd34-thw9; RP-3, RP-3e, RP-5 merged; RP-5b waits macOS build
+2026-10-22T15:26:41Z	lead	resumed	-	worker restarted; #4226 merged, #4380 ready, RP-7 gating
