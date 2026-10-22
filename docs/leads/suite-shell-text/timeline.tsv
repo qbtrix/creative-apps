@@ -71,3 +71,4 @@ utc	stage	event	ref	note
 2026-10-22T09:40:58Z	check	ST-live	#4161	macOS build 39736024768 success; #4161 open, waits for the lane sweep; run stays ended per supervisor
 2026-10-22T10:49:50Z	stage	ST-z	#4337	#4161 merged 1f58800c4; #4337 retargeted to dev, merged dev, CI: PASS, ready at e8dd61b8f; ST-live waits on full CI 39763986545
 2026-10-22T11:24:10Z	check	ST-live	#4161	full CI 39763986545 cancelled by newer run; 39769927851 (a332b3e27) pending; #4337 macOS build 39766466418 dispatched
+2026-10-22T11:55:16Z	check	ST-z	#4337	macOS build 39766466418 success, awaiting lane sweep; full CI 39769927851 still pending

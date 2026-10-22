@@ -4,7 +4,7 @@ Issue: #3725 · Packet: docs/blueprints/suite/features/shell-text.md
 Run: act-1a16278ef53-kw2i (resumed; first run act-1a15ef24f0e-t1j1) · Started: 2026-10-21T14:56Z
 Stage: 3 wave D (stacked), run ended on the supervisor's word (#3725, 08:38Z)
 Base: 9f1b3d565fb90acb54c7e3bc734da5f838c7f8dc
-Next (relaunch): #4161 merged 1f58800c4 (10:24Z). #4337 (ST-8) retargeted to dev, dev merged in, gated, ready at e8dd61b8f; the lane lands it after macOS build 39766466418. Post Belt-Slice-Done ST-live on the first green full or scoped suite run containing 1f58800c4 (39763986545 was cancelled; current full run 39769927851 at a332b3e27). After #4337 merges, mark #4350 (ST-9 built, feature-done) ready; Belt-Slice-Done ST-z on a green run containing #4350, then Belt-Contact-Sheet.
+Next (relaunch): #4161 merged 1f58800c4 (10:24Z). #4337 (ST-8) retargeted to dev, dev merged in, gated, ready at e8dd61b8f; macOS build 39766466418 passed; the next lane sweep lands it. Post Belt-Slice-Done ST-live on the first green full or scoped suite run containing 1f58800c4 (39763986545 was cancelled; current full run 39769927851 at a332b3e27). After #4337 merges, mark #4350 (ST-9 built, feature-done) ready; Belt-Slice-Done ST-z on a green run containing #4350, then Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
