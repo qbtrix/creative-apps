@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-22T06:08Z	fix	#4297 needs-rebase #2 (FlareCommands.swift, FlareWindow.swift vs file-flow FL-2): merged dev, Place… moved into suiteFileMenu importExport group (body stays <=10 commands), scripts/ci --changed PASS, pushed f4d6350e, Head moved, label dropped; #4295 waiting; 0 findings
 2026-10-22T06:29Z	heartbeat	#4297 macOS build 39732985757 on f4d6350e queued; #4295 waiting (Linux red = dev #3856); 0 findings
 2026-10-22T06:51Z	heartbeat	#4297 macOS build 39732985757 on f4d6350e still queued; #4295 waiting (Linux red = dev #3856); 0 findings
+2026-10-22T07:14Z	heartbeat	#4297 macOS build 39732985757 still queued; #4295 in lane; 0 findings
