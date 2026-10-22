@@ -39,6 +39,7 @@ Next: retarget #4428 to dev once #4427 merges, then end the AK side (parked: AK-
 
 ## Decisions
 
+- 18:10Z heartbeat: no change; #4427 build green, waiting for its lane batch
 - 17:47Z heartbeat: #4427 macOS build 39813862769 green, waiting for its lane batch; #4428 stacked
 - 2026-10-22T17:25Z heartbeat (parked): no change. #4427's macOS build 39813862769 is still queued, and #4428 is still stacked.
 - 2026-10-22T17:04Z heartbeat (parked): #4427's macOS build 39813862769 is still queued. #4428 is still stacked on it. Scoped flare 39810327753 is still pending.
