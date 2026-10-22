@@ -1,8 +1,8 @@
 // DesignGradientTests.swift (gradient-fill DG-1 written, DG-4 turns on): MJ-DG, the Model walk of a
 // node's gradient fill. A node keeps its gradient as the kernel's `Fill` with its points in the node's
 // unit box (0...1), so an old file without the key opens with none and a resize never touches it.
-// The schema tests run now; the fill commands' walk is disabled by name until DG-4 builds the bodies
-// of DesignFill+Kernel. Runs on Linux and macOS.
+// The fill commands run on the selection through Design's catalog as one undo step each (DG-4).
+// Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -49,7 +49,7 @@ private func sample() throws -> DesignWorkspace {
         #expect(!String(decoding: try JSONEncoder().encode(plain), as: UTF8.self).contains("gradient"))
     }
 
-    @Test(.disabled("DG-4 builds DesignFill+Kernel's bodies"))
+    @Test
     func linearStoresUnitPoints() throws {
         var workspace = try sample()
         workspace.runFill(.type(.linear))
@@ -61,7 +61,7 @@ private func sample() throws -> DesignWorkspace {
         #expect(end == Point(x: 1, y: 0.5))
     }
 
-    @Test(.disabled("DG-4 builds DesignFill+Kernel's bodies"))
+    @Test
     func resizeKeepsAngle() throws {
         var workspace = try sample()
         workspace.runFill(.type(.linear))
@@ -72,20 +72,31 @@ private func sample() throws -> DesignWorkspace {
             Issue.record("no linear gradient")
             return
         }
-        #expect(start.x == end.x)
-        #expect(start.y < end.y)
+        // The unit box follows the frame: the line runs down the new frame's middle, top to bottom.
+        #expect(start == Point(x: 300, y: 100))
+        #expect(end == Point(x: 300, y: 150))
     }
 
-    @Test(.disabled("DG-4 builds DesignFill+Kernel's bodies"))
+    @Test
     func lockedRefuses() throws {
         var workspace = try sample()
         try workspace.setNodeLocked("node-2", true)
         #expect(workspace.fillHelp == workspace.lockHelp("node-2"))
         workspace.runFill(.type(.linear))
         #expect(workspace.treeNode("node-2")?.gradient == nil)
+        // A locked layer in a selection whose primary is unlocked keeps its fill; the others take it.
+        try workspace.addNode(.rectangle, frame: rc(400, 100, 50, 50), in: "node-1")
+        try workspace.setNodeLocked("node-2", false)
+        workspace.selectItem("node-3")
+        workspace.toggleSelection("node-2")
+        try workspace.setNodeLocked("node-3", true)
+        #expect(workspace.fillHelp == nil)
+        workspace.runFill(.type(.linear))
+        #expect(workspace.treeNode("node-2")?.gradient != nil)
+        #expect(workspace.treeNode("node-3")?.gradient == nil)
     }
 
-    @Test(.disabled("DG-4 builds DesignFill+Kernel's bodies"))
+    @Test
     func oneStepForSeveral() throws {
         var workspace = try sample()
         try workspace.addNode(.rectangle, frame: rc(400, 100, 50, 50), in: "node-1")
@@ -99,7 +110,7 @@ private func sample() throws -> DesignWorkspace {
         #expect(["node-2", "node-3", "node-4"].allSatisfy { workspace.treeNode($0)?.gradient == nil })
     }
 
-    @Test(.disabled("DG-4 builds DesignFill+Kernel's bodies"))
+    @Test
     func oneStepPerGesture() throws {
         var workspace = try sample()
         workspace.runFill(.type(.linear))
