@@ -2,9 +2,10 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a161a658a7-2jql · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: fr8b-wait
+Stage: fr10b-gate
 Base: dev
-Next: reopen FR-8b after #4341; open FR-10b after #4293
+Next: open FR-10b after #4293 merges; reopen FR-8b after #4341
+
 
 
 
@@ -14,6 +15,7 @@ Next: reopen FR-8b after #4341; open FR-10b after #4293
 
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 07:59Z: FR-10b merge with dev surfaced a semantic conflict (dev's file.new command passed Int fps to the now-FrameRate spec); fixed, anchor repointed, gate rerunning. AN and CB parked per supervisor; frame-rates continues.
 - 07:56Z: FR-10b branch merged with FR-10 head (d1c5cb529), pushed, gate running; PR opens after #4293 merges (stacked diff vs dev is 19 files).
 - 07:56Z: FR-10b branch merged with FR-10 head (d1c5cb529), pushed, gate running; PR opens after #4293 merges (stacked diff vs dev is 19 files).
 - FR-a #4063 merged · FR-m #4142 merged · FR-u #4172 merged · FR-7 #4211 merged (disabled) · FR-9 #4212 merged (disabled)
