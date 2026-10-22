@@ -17,6 +17,7 @@ import Musl
 import Darwin
 #endif
 import CoreRaster
+import SuiteKernel
 
 public struct FakeLoupe: LoupeImaging {
     let mode: FakeMode
@@ -121,9 +122,10 @@ public struct FakeExporter: PhotoExporting {
         let stems = photos.enumerated().map { options.naming.stem(for: $1, index: $0, count: photos.count) }
         let names = ExportNames.unique(stems: stems, format: options.format, sidecar: options.sidecar,
                                        existing: existingNames)
+        let dropping = ExportRules.dropped(options.metadata).properties // as LiveExporter's plan
         let items = zip(photos, names).map { photo, name -> ExportPlan.Item in
             let size = options.longEdge.map { photo.pixelSize.fitting(longSide: $0) } ?? photo.pixelSize
-            return ExportPlan.Item(photoID: photo.id, fileName: name, size: size)
+            return ExportPlan.Item(photoID: photo.id, fileName: name, size: size, dropping: dropping)
         }
         return ExportPlan(items: items, options: options)
     }
