@@ -3,7 +3,9 @@
 // line, blend summary), a drop reordering through `layerListMove`; under it a
 // SuiteUI SidebarActionRow of New Layer, Delete Layer and Rename Layer…
 // (`photo.layer.new`, `.delete`, `.rename`). Delete is disabled on the last
-// layer and says why. Values in, intents out.
+// layer and says why. Every picked layer draws selected, and a row click
+// leaves as `pickLayer` with its mode (multi-layer-select PM-3). Values in,
+// intents out.
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -17,9 +19,9 @@ struct PhotoLayerList: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             LayerTreeList(
-                rows: model.layerRows, childCount: { _ in 0 }, selection: model.selectedLayerID,
+                rows: model.layerRows, childCount: { _ in 0 }, selected: Self.selected(model),
                 naming: PhotoLayerRow.naming, options: PhotoLayerRow.options,
-                decorations: Self.decorations(model), onSelect: { perform(.selectLayer($0)) }
+                decorations: Self.decorations(model), onPick: { perform(.pickLayer($0, $1)) }
             ) { action in
                 switch action {
                 case .toggleHidden(let id): perform(.toggleVisibility(id))
@@ -35,6 +37,11 @@ struct PhotoLayerList: View {
         }
     }
 
+    /// The rows drawn picked: every selected layer's id.
+    nonisolated static func selected(_ model: PhotoWorkspace) -> Set<String> {
+        Set(model.selectedLayerIDs)
+    }
+
     /// Each layer's kind symbol and caption by id; help names blend and opacity.
     nonisolated static func decorations(_ model: PhotoWorkspace) -> [String: LayerRowDecoration] {
         Dictionary(model.layers.map { layer -> (String, LayerRowDecoration) in
@@ -46,13 +53,14 @@ struct PhotoLayerList: View {
         }) { first, _ in first }
     }
 
-    /// New Layer, Delete Layer (disabled on the last layer) and Rename Layer….
+    /// New Layer, Delete Layer (every picked layer; disabled on the last
+    /// layer or when every layer is picked) and Rename Layer….
     static func commands(_ model: PhotoWorkspace, _ perform: @escaping PhotoPerform) -> [ToolbarAction] {
         [
             ToolbarAction("New Layer", systemImage: "plus", identifier: "photo.layer.new") { perform(.addLayer) },
             ToolbarAction(
                 "Delete Layer", systemImage: "trash",
-                unavailableHelp: model.canDeleteSelectedLayer ? nil : "The last layer can't be deleted.",
+                unavailableHelp: model.deleteLayersHelp,
                 identifier: "photo.layer.delete"
             ) { perform(.deleteLayer) },
             ToolbarAction("Rename Layer…", systemImage: "pencil", identifier: "photo.layer.rename") { perform(.renameLayer) },

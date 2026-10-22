@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-P46, pending PS-3 (psd-effects): opens badge-effects.psd (written by Tests/import_fidelity/gen.py: a gold badge with a 75% multiply drop shadow at 120 degrees, 6 px, and a 3 px outside stroke), sets the shadow's distance to 12 and exports a PNG. Assertion: style.read after open lists exactly dropShadow and stroke (the effects open editable, not baked into pixels, and none vanish without a warning); after the edit the PNG's shadow centroid sits 12 px from the badge's along the PSD's angle (y down) within 1 px. Opening a PSD refuses until PS-3, so platforms is [] and the harness skips the job on both; the turn-on adds expected/badge-effects-shadow.png and sets platforms to linux and macos.",
+  "pending": "PS-3",
+  "waits_on": "PS-3",
+  "inputs": ["input/*.psd"],
+  "steps": [
+    {"id": "doc.open", "params": {}},
+    {"id": "style.set", "params": {"kind": "dropShadow", "distance": 12}},
+    {"id": "file.export", "params": {"format": "png"}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-shadow", "format": "png", "options": {}},
+  "expect": {
+    "out/badge-effects-shadow.png": {"pixels": {"tolerance": 2, "reference": "expected/badge-effects-shadow.png"}}
+  },
+  "platforms": []
+}

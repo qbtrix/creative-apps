@@ -1,0 +1,37 @@
+[
+  {
+    "label": "refusalIsSuccess: a tool its help disables is offered as enabled, so a locked Pen's P picks it",
+    "file": "Sources/SuiteUI/ToolKeys.swift",
+    "find": "shortcut: tool.shortcut, unavailableHelp: tool.unavailableHelp)",
+    "replace": "shortcut: tool.shortcut, unavailableHelp: nil)",
+    "tests": "FlareToolsKeyTests"
+  },
+  {
+    "label": "firstToolAlways: any tool letter picks the first tool, so R picks Select",
+    "file": "Sources/SuiteUI/ToolKeys.swift",
+    "find": "return tools[index]",
+    "replace": "return tools.first",
+    "tests": "FlareToolsKeyTests"
+  },
+  {
+    "label": "shiftDropped: Shift no longer reaches a Flare or Design drag, so it can't constrain",
+    "file": "Sources/SuiteUI/ToolKeys.swift",
+    "find": "if flags.contains(.shift) { insert(.shift) }",
+    "replace": "_ = flags",
+    "tests": "FlareToolsKeyTests|DesignSnapSettingTests"
+  },
+  {
+    "label": "optionDropped: Option no longer reaches a Flare or Design drag, so it can't draw from the center",
+    "file": "Sources/SuiteUI/ToolKeys.swift",
+    "find": "if flags.contains(.option) { insert(.option) }",
+    "replace": "_ = flags",
+    "tests": "FlareToolsKeyTests|DesignSnapSettingTests"
+  },
+  {
+    "label": "commandDropped: Command no longer reaches Design's drag, so holding it doesn't turn snapping off",
+    "file": "Sources/SuiteUI/ToolKeys.swift",
+    "find": "if flags.contains(.command) { insert(.command) }",
+    "replace": "_ = flags",
+    "tests": "DesignSnapSettingTests"
+  }
+]

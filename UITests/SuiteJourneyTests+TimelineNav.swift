@@ -74,7 +74,8 @@ extension SuiteJourneyTests {
         XCTAssert(navWait { self.navText(log).contains("unit timecode") }, "Timecode logged \(navText(log))")
         XCTAssert(navWait { self.navPixels(ruler) != inFrames }, "Timecode left the ruler's labels as they were")
         // A macOS text reads in its value and leaves its label empty, so both are asked.
-        let timecode = #"\d\d:\d\d:\d\d"#
+        // A host that passes its rate reads HH:MM:SS:FF (HH:MM:SS;FF drop-frame), as its readout does (FR-u).
+        let timecode = #"\d\d:\d\d:\d\d([:;]\d\d)?"#
         let pill = gallery.app.staticTexts.matching(
             NSPredicate(format: "label MATCHES %@ OR value MATCHES %@", timecode, timecode)).firstMatch
         XCTAssert(pill.waitForExistence(timeout: 5), "the playhead's pill doesn't read 00:05:00 style")

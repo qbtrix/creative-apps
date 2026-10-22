@@ -123,7 +123,7 @@ extension BodyCountSuites {
     let window: NSWindow
     let host: CountingHostingView<AnyView>
 
-    init(_ project: HaloProject) async throws {
+    init(_ project: HaloProject, size: CGSize = CGSize(width: 1280, height: 820)) async throws {
         let app = NSApplication.shared
         for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
             app.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: attribute))
@@ -133,7 +133,7 @@ extension BodyCountSuites {
         // viewer takes those too, as it does in a key window.
         host = CountingHostingView(rootView: AnyView(
             HaloWindow(model: project).environment(\.haloViewerTakesActivationClicks, true)))
-        let frame = CGRect(x: 0, y: 0, width: 1280, height: 820)
+        let frame = CGRect(origin: .zero, size: size)
         host.frame = frame
         window = NSWindow(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false

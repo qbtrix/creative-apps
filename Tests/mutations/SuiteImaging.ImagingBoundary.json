@@ -1,0 +1,16 @@
+[
+  {
+    "label": "the folder allowlist matched as a bare prefix lets Sources/SuiteImagingX/ import Metal",
+    "file": "Tests/SuiteImagingTests/ImagingBoundaryTests.swift",
+    "find": "static let imagingFolder = \"Sources/SuiteImaging/\"",
+    "replace": "static let imagingFolder = \"Sources/SuiteImaging\"",
+    "tests": "ImagingBoundaryTests/exactFolder"
+  },
+  {
+    "label": "the baseline read as allow-all passes every Metal import once it lists anything",
+    "file": "Tests/SuiteImagingTests/ImagingBoundaryTests.swift",
+    "find": "        baseline.contains(hit)\n",
+    "replace": "        !baseline.isEmpty\n",
+    "tests": "ImagingBoundaryTests/baselineOnlyListed"
+  }
+]

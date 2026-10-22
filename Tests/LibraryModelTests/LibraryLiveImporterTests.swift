@@ -92,6 +92,7 @@ private func run(_ scan: FolderScan, known: Set<String>, step: Duration) async t
 }
 
 @Test func progressIsThrottledAndEndsAtTotal() async throws {
+    // not-timing: run(step:) injects the clock, so these times are simulated, not wall-clock.
     let (scan, known) = shoot()
     for step in [Duration.zero, .milliseconds(1), .milliseconds(20), .milliseconds(40)] {
         let (_, recorder) = try await run(scan, known: known, step: step)

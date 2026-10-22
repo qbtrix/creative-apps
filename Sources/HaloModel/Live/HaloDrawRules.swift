@@ -12,7 +12,8 @@ enum HaloDrawRules {
                 layerID: layer.id, kind: layer.kind, bounds: layer.bounds(in: c),
                 matrix: placing.worldMatrix(of: layer.id, in: c, at: frame) ?? .identity,
                 opacity: placing.value(.opacity, of: layer.id, in: c, at: frame) ?? layer.opacity,
-                color: layer.color, blendMode: layer.blendMode, text: layer.text)
+                color: layer.color, blendMode: layer.blendMode, text: layer.text, gradient: layer.gradient,
+                shape: layer.shape, stroke: HaloOutlines.stroke(of: layer, in: c, at: frame))
         }
         return HaloDrawList(width: c.width, height: c.height, frame: frame, items: items)
     }

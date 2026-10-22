@@ -6,7 +6,8 @@
 // `.automatic` one closed. The menus are SuiteCommands'
 // Window > Switch To plus one LauncherCommands stub per launcher feature,
 // each holding its blueprint 6.2 items disabled with their reason until that
-// feature wires them. LauncherDelegate (LauncherRouter.swift) is the app
+// feature wires them, and SuiteHelpCommands' Help menu, whose Welcome to
+// AfterGlow opens the onboarding window. LauncherDelegate (LauncherRouter.swift) is the app
 // delegate. No later feature edits this file: features fill their own
 // stubs, views and LauncherRouter+<Area>.swift extensions.
 import SuiteModel
@@ -36,6 +37,6 @@ struct AfterGlowApp: App {
             .defaultLaunchBehavior(OnboardingWindow.launchBehavior)
             .restorationBehavior(.disabled)
             .windowResizability(.contentSize)
-            .commands { LauncherCommandsOnboarding() }
+            .commands { SuiteHelpCommands(app: .launcher) }
     }
 }

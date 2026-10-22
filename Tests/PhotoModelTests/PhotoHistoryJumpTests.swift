@@ -1,9 +1,9 @@
 // PhotoHistoryJumpTests.swift: Photo as a HistoryJumping document
 // (history-panel PH-1, PH-5). The listing the History tab shows ("Open" or
-// "New Image", then every step, the current and the saved one) holds now; the
-// jump tests wait on PH-5, which writes the jump's body: 12 steps, a jump to
-// 2 lands on step 2's pixels with Undo and Redo naming steps 2 and 3, records
-// no step, ends an open slider run, and `history.jump` out of range throws.
+// "New Image", then every step, the current and the saved one), and the jump
+// PH-5 wrote: 12 steps, a jump to 2 lands on step 2's pixels with Undo and
+// Redo naming steps 2 and 3, records no step, ends an open slider run, and
+// `history.jump` out of range throws.
 // Runs on Linux and macOS.
 import CoreRaster
 @testable import PhotoModel
@@ -49,7 +49,7 @@ import Testing
 
     // MARK: The jump (PH-5)
 
-    @Test(.disabled("waits on PH-5")) func jumpLandsOnStepTwo() throws {
+    @Test func jumpLandsOnStepTwo() throws {
         var expected = try painted(2)
         expected.endAdjust()
         var workspace = try painted()
@@ -61,7 +61,7 @@ import Testing
         #expect(try workspace.composite() == expected.composite())
     }
 
-    @Test(.disabled("waits on PH-5")) func jumpRecordsNothing() throws {
+    @Test func jumpRecordsNothing() throws {
         var workspace = try painted()
         let steps = workspace.historyListing.steps
         try workspace.jumpHistory(to: 2)
@@ -71,7 +71,7 @@ import Testing
         #expect(workspace.historyListing.index == 12)
     }
 
-    @Test(.disabled("waits on PH-5")) func jumpEndsRun() throws {
+    @Test func jumpEndsRun() throws {
         var workspace = try painted(2)
         let id = try #require(workspace.selectedLayerID)
         workspace.setOpacity(id, percent: 80)
@@ -82,20 +82,23 @@ import Testing
         #expect(workspace.layers.first { $0.id == id }?.opacityPercent == 80)
     }
 
-    @Test(.disabled("waits on PH-5")) func jumpOutOfRangeThrows() throws {
+    @Test func jumpOutOfRangeThrows() throws {
         var workspace = try painted(3)
         let before = workspace
         let catalog = try CommandCatalog<PhotoWorkspace>(app: "photo-history", HistoryCommands.specs(PhotoWorkspace.self),
                                                          history: { $0.history.kernel })
-        for index in [-1, 4] {
-            #expect(throws: CatalogError.failed(id: "history.jump", message: "There is no step \(index).")) {
+        // Below 0 the schema refuses the params; past the last step the jump says there is no such step.
+        let refusals = [-1: "history.jump params: /index expected at least 0", 4: "history.jump failed: There is no step 4."]
+        for (index, sentence) in refusals {
+            let error = #expect(throws: CatalogError.self) {
                 _ = try catalog.run("history.jump", params: .object(["index": .number(Double(index))]), on: &workspace)
             }
+            #expect(error?.description == sentence)
         }
         #expect(workspace == before)
     }
 
-    @Test(.disabled("waits on PH-5")) func baseIsOpen() throws {
+    @Test func baseIsOpen() throws {
         var workspace = try painted(3)
         try workspace.jumpHistory(to: 0)
         #expect(workspace.historyListing.base == "Open")

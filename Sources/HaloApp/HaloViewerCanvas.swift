@@ -3,7 +3,8 @@
 // over the artboard's fitted frame in one SwiftUI Canvas, bottom layer first
 // (the live drag's project while one lasts, HaloLiveEdit.swift),
 // in linear light as LiveFrameRendering composites (the Canvas's colorMode
-// and its drawing group both .linear): each item at its matrix times the fit,
+// and its drawing group both .linear): each item at its matrix times the fit
+// (a CanvasLayout of the composition filling that frame),
 // at its opacity and blend mode; a solid fills its box, a shape the ellipse in it, a text layer
 // is a resolved Text on the pinned baseline rule (its line box's top-left at
 // bounds.origin, its first baseline at bounds.y + ascent). The selected
@@ -35,10 +36,13 @@ struct HaloViewerCanvas: View {
             .overlay { HaloLiveLayers(model: model, artboard: artboard) }
             .overlay { HaloRenderedFrameView(model: model, perform: perform) }
             .overlay { HaloViewerGestures(model: model, perform: perform) }
+            // The playing frame's, as the drawn layers show it (HaloLiveShown).
             .overlay {
-                ProbeElement("halo.viewer.summary", label: model.viewerSummary)
-                if let list = model.viewerDrawList {
-                    ProbeElement("halo.viewer.drawn", label: list.drawnSummary)
+                HaloLiveShown(model: model) { shown in
+                    ProbeElement("halo.viewer.summary", label: shown.viewerSummary)
+                    if let list = shown.viewerDrawList {
+                        ProbeElement("halo.viewer.drawn", label: list.drawnSummary)
+                    }
                 }
             }
             .accessibilityElement(children: .contain)
@@ -49,7 +53,7 @@ struct HaloViewerCanvas: View {
 }
 
 /// The drawn layers over the artboard: the live drag's project while one
-/// lasts (HaloLiveEdit), else the window's. Only this view reads the live
+/// lasts (HaloLiveEdit), else the playing frame, else the window's. Only this view reads the live
 /// project, so a drag sample re-runs it and nothing around it.
 struct HaloLiveLayers: View {
     let model: HaloProject
@@ -65,7 +69,7 @@ struct HaloLiveLayers: View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
         #endif
-        let shown = live?.project ?? model
+        let shown = live?.shown(model) ?? model
         if let list = shown.viewerDrawList {
             HaloDrawnLayers(list: list, selectedLayerID: shown.selectedLayerID)
                 .aspectRatio(artboard, contentMode: .fit)
@@ -87,7 +91,7 @@ private struct HaloDrawnLayers: View {
         // (.nonLinear) mixes each item's opacity in sRGB inside the Canvas,
         // before the linear drawing group ever sees it (HF-1 keyed-6, #1161).
         Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: false) { context, size in
-            let fit = HaloCanvasFit.transform(list: list, size: size)
+            let fit = HaloCanvasFit.transform(HaloCanvasFit.layout(list: list, size: size))
             for item in list.items {
                 drawItem(item, in: context, fit: fit)
             }
@@ -103,7 +107,7 @@ private struct HaloDrawnLayers: View {
                 if let id = selectedLayerID, let box = list.worldBox(of: id) {
                     SelectionOutline(
                         rect: CGRect(x: box.x, y: box.y, width: box.width, height: box.height),
-                        zoom: HaloCanvasFit.scale(list: list, size: proxy.size))
+                        zoom: HaloCanvasFit.layout(list: list, size: proxy.size)?.scale ?? 1)
                 }
             }
         }
@@ -137,18 +141,20 @@ private func drawItem(_ item: HaloDrawItem, in context: GraphicsContext, fit: CG
 
 /// The canvas's pure mappings: the fit, the blend switch, document colors.
 enum HaloCanvasFit {
-    /// Points per composition pixel; 1 for a list with no size.
-    static func scale(list: HaloDrawList, size: CGSize) -> Double {
-        guard list.width > 0 else { return 1 }
-        let s = Double(size.width) / Double(list.width)
-        return s.isFinite && s > 0 ? s : 1
+    /// The fitted artboard: the composition at the zoom that fills `size` (the frame the
+    /// artboard's aspect fit gives), placed in it with no margin. Nil for a list with no size.
+    static func layout(list: HaloDrawList, size: CGSize) -> CanvasLayout? {
+        guard list.width > 0, list.height > 0 else { return nil }
+        return CanvasLayout(
+            document: CGSize(width: list.width, height: list.height),
+            zoom: Double(size.width) / Double(list.width), viewport: size, margin: 0)
     }
 
-    /// Composition pixels to canvas points.
-    static func transform(list: HaloDrawList, size: CGSize) -> CGAffineTransform {
-        guard list.width > 0, list.height > 0 else { return .identity }
-        return CGAffineTransform(
-            scaleX: size.width / CGFloat(list.width), y: size.height / CGFloat(list.height))
+    /// Composition pixels to canvas points through `layout`: its scale, then its origin.
+    static func transform(_ layout: CanvasLayout?) -> CGAffineTransform {
+        guard let layout else { return .identity }
+        let s = CGFloat(layout.scale)
+        return CGAffineTransform(a: s, b: 0, c: 0, d: s, tx: layout.origin.x, ty: layout.origin.y)
     }
 
     /// Every W3C blend mode CoreRaster knows, as the context's own.

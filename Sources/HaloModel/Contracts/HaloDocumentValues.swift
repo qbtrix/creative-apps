@@ -5,6 +5,7 @@
 // stacks, on the kernel's History, in HaloHistory+Kernel.swift. Linux-safe.
 import CoreRaster
 import FlareCore
+import SuiteKernel
 
 /// One layer as the viewer and the renderer draw it at a frame.
 public struct HaloDrawItem: Sendable, Hashable {
@@ -24,13 +25,18 @@ public struct HaloDrawItem: Sendable, Hashable {
     /// HG-1: the layer's gradient in a unit box over `bounds`; nil fills
     /// `color`. HaloDrawRules carries it from the layer (HG-6).
     public var gradient: Fill?
+    /// HS-5: a shape layer's spec, drawn in `bounds`; nil keeps the ellipse.
+    public var shape: ShapeSpec?
+    /// HK-5: a shape layer's stroke, its trim sampled at the frame; nil draws none.
+    public var stroke: VectorStroke?
     public init(
         layerID: String, kind: HaloLayerKind, bounds: HaloLayerRect, matrix: HaloMatrix, opacity: Double,
-        color: HaloLayerColor, blendMode: BlendMode, text: HaloTextContent? = nil, gradient: Fill? = nil
+        color: HaloLayerColor, blendMode: BlendMode, text: HaloTextContent? = nil, gradient: Fill? = nil,
+        shape: ShapeSpec? = nil, stroke: VectorStroke? = nil
     ) {
         self.layerID = layerID; self.kind = kind; self.bounds = bounds; self.matrix = matrix
         self.opacity = opacity; self.color = color; self.blendMode = blendMode; self.text = text
-        self.gradient = gradient
+        self.gradient = gradient; self.shape = shape; self.stroke = stroke
     }
 }
 
@@ -112,12 +118,15 @@ public struct HaloRenderPlan: Sendable, Hashable {
     public var width: Int
     public var height: Int
     public var framesPerSecond: Int
+    /// The exact rate each frame is timed by (`seconds(ofFrame:)`); `framesPerSecond` is its whole rate.
+    public var frameRate: FrameRate
     /// Composition frames in order, 0 through the last.
     public var frames: [Int]
     /// "Intro_0001.png" for each frame of a PNG sequence; one "Intro.mp4" for a movie.
     public var fileNames: [String]
-    public init(width: Int, height: Int, framesPerSecond: Int, frames: [Int], fileNames: [String]) {
+    public init(width: Int, height: Int, framesPerSecond: Int, frameRate: FrameRate? = nil, frames: [Int], fileNames: [String]) {
         self.width = width; self.height = height; self.framesPerSecond = framesPerSecond
+        self.frameRate = frameRate ?? FrameRate(whole: framesPerSecond)
         self.frames = frames; self.fileNames = fileNames
     }
 }

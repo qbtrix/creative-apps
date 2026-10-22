@@ -76,7 +76,8 @@ final class PhotoRecoveryJourneyTests: XCTestCase {
         photo.app.terminate()
 
         // Packet note 3: a damaged recovery file is removed at launch, and nothing is offered.
-        let damaged = recovery.appending(path: "x.ora")
+        let damaged = recovery.appending(path: "Recovery/x.ora")
+        try FileManager.default.createDirectory(at: damaged.deletingLastPathComponent(), withIntermediateDirectories: true)
         try Data("not a zip".utf8).write(to: damaged)
         photo = relaunchExpectingNoOffer(recovery, step: "recovery-damaged-dropped")
         XCTAssert(
@@ -140,7 +141,8 @@ final class PhotoRecoveryJourneyTests: XCTestCase {
 
     /// The `.ora` files in `folder`.
     private func recoveryFiles(_ folder: URL) -> [String] {
-        ((try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? []).filter { $0.hasSuffix(".ora") }
+        let copies = folder.appending(path: "Recovery").path  // RecoveryFolder's, a .json beside each .ora
+        return ((try? FileManager.default.contentsOfDirectory(atPath: copies)) ?? []).filter { $0.hasSuffix(".ora") }
     }
 
     /// Whether `condition` holds within `seconds`.

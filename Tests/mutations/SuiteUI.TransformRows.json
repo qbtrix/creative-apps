@@ -1,0 +1,5 @@
+[
+{"label":"Flip Horizontal draws the move arrows again","file":"Sources/SuiteUI/TransformRows.swift","find":"? \"arrow.left.and.right.righttriangle.left.righttriangle.right\"","replace":"? \"arrow.left.and.right\"","tests":"TransformRowsTests.swift"},
+{"label":"Flip Vertical draws the horizontal mirror","file":"Sources/SuiteUI/TransformRows.swift","find":": \"arrow.up.and.down.righttriangle.up.righttriangle.down\"","replace":": \"arrow.left.and.right.righttriangle.left.righttriangle.right\"","tests":"TransformRowsTests.swift"},
+{"label":"Flip Vertical takes the horizontal name","file":"Sources/SuiteUI/TransformRows.swift","find":"self == .horizontal ? \"Flip Horizontal\" : \"Flip Vertical\"","replace":"\"Flip Horizontal\"","tests":"TransformRowsTests.swift"}
+]

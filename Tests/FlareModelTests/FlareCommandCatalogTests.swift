@@ -33,6 +33,8 @@ struct FlareCommandCatalogTests {
         ws.newDocument()
         for id in ["layer-a", "layer-b", "layer-c"] { ws.apply(AddLayer(owner: .scene("scene-1"), layer: Layer(id: id, name: id))) }
         ws.apply(AddScene(scene: Scene(id: "scene-2", name: "Scene 2")))
+        // A key, so Select All Keys (key-select-all KS-1) has one to pick.
+        ws.apply(SetKeyframe(owner: .scene("scene-1"), layerID: "layer-c", property: "x", keyframe: Keyframe(frame: 0, value: 0)))
         ws.selectLayer("layer-b")
         ws.selectTool(.rectangle)
         ws.drag(from: FlareCore.Point(x: 2, y: 2), to: FlareCore.Point(x: 30, y: 20))
@@ -62,8 +64,24 @@ struct FlareCommandCatalogTests {
     @Test func conformance() {
         #expect(FlareWorkspace.catalog.ids.count == FlareWorkspace.coreCommands.count + FlareWorkspace.appCommands.count)
         let appIDs = Set(FlareWorkspace.appCommands.map(\.id))
-        let problems = CatalogConformance.check(FlareLawsDocument.self, fixture: FlareLawsDocument(ws: Self.lawsFixture()))
-        #expect(problems.filter { appIDs.contains(String($0.prefix { $0 != ":" })) } == [])
+        var ws = Self.lawsFixture()
+        // The drawn rectangle with a three-stop linear fill, so every fill.* example can run (gradient-fill FG-5).
+        ws.selectLayer("rectangle-1")
+        ws.runFill(.type(.linear))
+        ws.runFill(.add(offset: 0.5))
+        let problems = CatalogConformance.check(FlareLawsDocument.self, fixture: FlareLawsDocument(ws: ws))
+        #expect(problems.filter { appIDs.contains(String($0.prefix { $0 != ":" })) && !Self.exempt($0) } == [])
+    }
+    /// CS-11's controls that can't act on the laws' fixture, as their window controls can't: Restore and Discard keep
+    /// its unsaved edits, Delete Keyframe has no key selected, and a frame inserted or removed at frame 5 moves no key
+    /// or label, so it changes nothing and records no step (FlareCommandPathTests runs each where it acts).
+    /// The file-flow examples need a recent file or a saved animation on disk: FlareFileFlowTests runs them.
+    static func exempt(_ problem: String) -> Bool {
+        let id = String(problem.prefix { $0 != ":" })
+        if ["file.clear-recent", "file.open-in", "file.open-recent"].contains(id) { return problem.contains("exampleRuns") }
+        if ["recovery.restore", "recovery.discard", "timeline.delete-keys"].contains(id) { return problem.contains("exampleRuns") }
+        return ["timeline.insert-frames", "timeline.remove-frames"].contains(id)
+            && ["stepNamedTitle", "editRecordsOneStep", "undoRestoresBytes"].contains { problem.contains($0) }
     }
     @Test func ledger() throws {
         let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../command-ids/flare.txt")
@@ -92,7 +110,7 @@ struct FlareCommandCatalogTests {
         switch id {
         case "file.new", "file.open": return .some(nil)
         case "file.save", "file.save-as": return .some(ws.document == nil ? "Open or create an animation first." : nil)
-        case "file.clear-recent": return .some(ws.recent.isEmpty ? "No recent animations." : nil)
+        case "file.clear-recent": return .some(ws.recentFiles.isEmpty ? "No Recent Files" : nil)
         case "edit.undo": return .some(ws.canUndo ? nil : "Nothing to undo.")
         case "edit.redo": return .some(ws.canRedo ? nil : "Nothing to redo.")
         case "edit.paste": return ws.editHelp(.paste, pasteboard: Data("[]".utf8))
@@ -153,5 +171,14 @@ struct FlareCommandCatalogTests {
             } + Self.samples.map { "\(FlareWorkspace.sampleTitle($0.key))|\(FlareWorkspace.sampleHelp($0.key) != nil)" }
             #expect(new == old, "\(state)")
         }
+    }
+
+    /// The ⌘A menu item's spec (key-select-all KS-a): the catalog's title and summary, off with the window's reason.
+    @Test func menuSpecTakesTheWindowsReason() throws {
+        let spec = try #require(FlareWorkspace.menuSpec("timeline.select-all-keys"))
+        #expect(spec.title == "Select All Keys" && spec.summary == FlareWorkspace.catalog.spec("timeline.select-all-keys")?.summary)
+        #expect(spec.availability(nil) == .available)
+        #expect(spec.availability(FlareWorkspace.noKeysToSelect) == .unavailable(FlareWorkspace.noKeysToSelect))
+        #expect(FlareWorkspace.menuSpec("timeline.no-such") == nil)
     }
 }

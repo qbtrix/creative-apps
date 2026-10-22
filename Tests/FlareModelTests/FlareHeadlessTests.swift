@@ -80,7 +80,7 @@ import Testing
         #expect(FlareHeadless.openExtensions == ["flare"] && FlareHeadless.exportFormats == ["svg", "lottie"])
     }
 
-    @Test(arguments: ["export-svg-frames", "key-and-save"])
+    @Test(arguments: ["export-svg-frames", "gradient-edit", "key-and-save"])
     func realJobPasses(job: String) throws {
         #expect(try FlareJob.check(job) == [], "\(job)")
     }

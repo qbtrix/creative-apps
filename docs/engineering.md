@@ -248,6 +248,10 @@ every step.
   goes in `Tests/perf-suites.txt` (the supervisor edits it). The gate and
   scoped runs skip it; it runs alone nightly on the captain's Mac (perf-nightly),
   which reports its numbers and warns when a bound is missed by more than 3x.
+  `scripts/ci` fails when an enabled test asserts a wall-clock bound and isn't
+  listed (`scripts/test-scope timing` names it): land a new one `.disabled` and
+  ask for its line in the PR body. A `// not-timing: <why>` comment in the
+  test's body is only for a look-alike (an injected clock, a hang guard).
   Gate: none, by design. A local gate on a different toolchain than CI can set
   `CI_LOCAL_SKIP='<swift-testing --skip regex>'` to skip tests that only differ
   there (rendering tint); CI never sets it and stays canonical.

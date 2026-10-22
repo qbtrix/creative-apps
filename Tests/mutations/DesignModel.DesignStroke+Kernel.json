@@ -1,0 +1,8 @@
+[
+{"label":"colorScrubKeepsDrag: a colour scrub's sample lands as a whole edit","file":"Sources/DesignModel/DesignStroke+Kernel.swift","find":"width: current.width)), drag != nil)","replace":"width: current.width)), false)","tests":"DesignStrokeTests"},
+{"label":"widthClampKept: the width scrub skips the clamp","file":"Sources/DesignModel/DesignStroke+Kernel.swift","find":"width: StrokeRules.clampedWidth(width))","replace":"width: width)","tests":"DesignStrokeTests"},
+{"label":"colorClamps: the shared converter drops the clamp","file":"Sources/DesignModel/DesignStroke+Kernel.swift","find":"UInt8(clamping: SampleRules.byte(part))","replace":"UInt8(truncatingIfNeeded: Int((part.isNaN ? 0 : part) * 255))","tests":"DesignStrokeTests"},
+{"label":"kernelColor scales by the wrong range","file":"Sources/DesignModel/DesignStroke+Kernel.swift","find":"FillColor(r: Double(red) / 255","replace":"FillColor(r: Double(red) / 256","tests":"DesignStrokeTests"},
+{"label":"joinCapDead: Join and Cap lose their reason on a stroked layer","file":"Sources/DesignModel/DesignStroke+Kernel.swift","find":"selectedStroke == nil ? nil : Self.joinCapHelp","replace":"nil","tests":"DesignStrokeTests"},
+{"label":"joinCapHelpUnstroked: the reason shows with no stroke","file":"Sources/DesignModel/DesignStroke+Kernel.swift","find":"selectedStroke == nil ? nil : Self.joinCapHelp","replace":"Self.joinCapHelp","tests":"DesignStrokeTests"}
+]

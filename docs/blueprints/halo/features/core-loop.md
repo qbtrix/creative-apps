@@ -222,8 +222,8 @@ services, the empty state) and `-HaloSaveTo <tmp>/Loop.halo -HaloRenderTo
 9. Edit > Undo (menu, mouse): the summary loses "Hello"; Edit > Redo: it is
    back. Shot `loop-undo-redo`. Expect the Edit menu titles flip to "Redo
    Edit Text" and back.
-10. File > Render…: click PNG sequence, Half, Render; wait for "Rendered 48
-    frames."; click Close. Shot `loop-rendered`. Expect `<tmp>/Loop/` holds
+10. File > Render…: click PNG sequence, Half, Render; wait for "Exported 48
+    PNG files into "Loop""; click Close. Shot `loop-rendered`. Expect `<tmp>/Loop/` holds
     `Loop_0001.png` … `Loop_0048.png` at 960 × 540.
 11. ⌘S (File > Save by menu is the mouse step; ⌘S the parity). Shot
     `loop-saved`. Expect the window title "Loop" with no unsaved dot and
@@ -246,9 +246,10 @@ placeholder, `enforced: false`).
   leg.
 - **H-P2** `testInspectorScrubLatency`, `reference`: `velocityDrag` across
   `halo.inspector.row.rotation`'s bar; series `inspector-scrub`, HB-U2.
-- **H-P3** `testPlayheadScrubLatency`, `reference`: `velocityDrag` on
-  `halo.timeline` from dx 0.02 to dx 0.98 at dy 0.05; series
-  `playhead-scrub`, HB-U3.
+- **H-P3** `testPlayheadScrubLatency`, `reference`: velocity drags on the
+  Frame Ruler itself (label `Frame Ruler`, not `halo.timeline`, whose dx 0.02
+  is the name column) from dx 0.02 to dx 0.98 and back, legs making up
+  4 × 600 pt at 300 pt/s; series `playhead-scrub`, HB-U3.
 - **H-P4** `testPlaybackHoldsRate`, `reference`: click Play, wait 5 s, click
   Pause; series `playback` (intervals), HB-U4.
 - **H-P5** `testTimelineAndLayerListScroll`, `-HaloSample crowd`: scroll

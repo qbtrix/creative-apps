@@ -21,7 +21,9 @@
 // no layers shows "No layers yet. Add one from Layer > New."
 // (`halo.layer.empty`). The list takes focus, so Delete (⌫) there sends
 // `deleteLayer` (in the viewer and timeline ⌫ deletes the picked keys first,
-// HaloViewer). Values in, commands out.
+// HaloViewer). Values in, commands out. The list sits in the inspector's
+// scroll view, so under `-SuitePerfProbe` each move of its top in that scroll
+// view records a `layers-scroll` frame (HaloProbe).
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -29,6 +31,7 @@ import SwiftUI
 struct HaloLayerList: View {
     let model: HaloProject
     var perform: @MainActor (HaloCommand) -> Void = { _ in }
+    @Environment(\.suiteProbeRecorder) private var recorder
 
     /// Halo's ids for the shared list, kept from the hand-rolled rows so the journeys still find them.
     static let naming = LayerTreeNaming.app(
@@ -65,6 +68,9 @@ struct HaloLayerList: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .onGeometryChange(for: Double.self) { Double($0.frame(in: .scrollView(axis: .vertical)).minY) } action: { _ in
+            HaloProbe(recorder).drew(HaloProbe.layersScroll)
+        }
         .focusable()
         .focusEffectDisabled()
         .onDeleteCommand { perform(.deleteLayer) }

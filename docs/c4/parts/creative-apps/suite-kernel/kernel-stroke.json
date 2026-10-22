@@ -1,7 +1,7 @@
 {
   "id": "kernel-stroke",
   "name": "Stroke",
-  "description": "Stroke/: StrokeSample (point, pressure, time) and the strokeSamples fixture (40 samples), StrokeSegment (a cubic with a pressure range), StrokeSmoother (samples to segments one late, flattening), DabSpacer (dab centres between two points), BrushSettings with BrushEdit (size, hardness, opacity, flow, spacing, clamped), BrushPreset, and LiveCopy, the working copy a drag draws on until take(). EK-29 declares them as stubs; EK-28 fills the bodies.",
+  "description": "Stroke/: StrokeSample (point, pressure, time) and the strokeSamples fixture (40 samples), StrokeSegment (a cubic with a pressure range), StrokeSmoother (samples to segments one late, flattening), DabSpacer (dab centres between two points), BrushSettings with BrushEdit (size, hardness, opacity, flow, spacing, clamped), BrushPreset, and LiveCopy, the working copy a drag draws on until take(). EK-29 declares them as stubs; EK-28 fills the bodies. BrushKeys holds the brush keys' rule ([ and ] step size in bands of 1, 5, 25 and 50; Shift-brackets move hardness by 25; digits set opacity in tens, or an exact percent through OpacityDigits' 0.6 s window), and BrushKeyCommands its six commands on a BrushKeyTarget: brush.size-up, brush.size-down, brush.hardness-up, brush.hardness-down, brush.set-opacity and layer.set-opacity.",
   "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
   "paths": [
     "Sources/SuiteKernel/Stroke/"

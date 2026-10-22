@@ -6,10 +6,43 @@
 // with no shape at all the write is a no-op that adds no undo entry. Before any write, a non-finite width throws "Stroke
 // width needs a number.", a negative one "Stroke width can't be negative." and a non-finite color channel "Each stroke
 // color channel needs a number."; a nil stroke is the "Remove Stroke" step, as FlareCore names it. This file also
-// completes the `PropertyAnimating` conformance.
+// completes the `PropertyAnimating` conformance, and adds `keyPaint`, a paint edit's keys (TK-7).
 import FlareCore
 
 extension LiveProperties: PropertyAnimating {}
+
+/// A fill or stroke colour key, or a stroke width key, at `frame` on a shape; a nil value removes the key there.
+public enum PaintKeyWrite: Sendable, Equatable {
+    case color(StageAddress, TrackTarget, frame: Int, FlareColor?)
+    case width(StageAddress, shape: Int, frame: Int, Double?)
+}
+
+extension PropertyAnimating {
+    /// Performs `writes` in order, keeping a replaced key's easing; with `coalesceKey` a Width drag's keys merge.
+    public func keyPaint(_ writes: [PaintKeyWrite], coalesceKey: String?, in engine: inout CommandEngine) throws {
+        for write in writes {
+            switch write {
+            case let .color(a, target, frame, value?):
+                let easing = Self.layer(a, engine)?.colorTracks[target.key]?.first { $0.frame == frame }?.easing
+                try engine.perform(SetColorKeyframe(owner: a.owner, layerID: a.layerID, target: target, frame: frame,
+                                                    value: value, easing: easing ?? .linear), coalesceKey: coalesceKey)
+            case let .color(a, target, frame, nil):
+                try engine.perform(RemoveColorKeyframe(owner: a.owner, layerID: a.layerID, target: target, frame: frame))
+            case let .width(a, i, frame, value?):
+                let property = Layer.trackKey(strokeWidthOf: i)
+                let easing = Self.layer(a, engine)?.tracks[property]?.first { $0.frame == frame }?.easing
+                let key = Keyframe(frame: frame, value: value, easing: easing ?? .linear)
+                try engine.perform(SetKeyframe(owner: a.owner, layerID: a.layerID, property: property, keyframe: key),
+                                   coalesceKey: coalesceKey)
+            case let .width(a, i, frame, nil):
+                try engine.perform(RemoveKeyframe(owner: a.owner, layerID: a.layerID,
+                                                  property: Layer.trackKey(strokeWidthOf: i), frame: frame))
+            }
+        }
+    }
+
+    private static func layer(_ a: StageAddress, _ e: CommandEngine) -> Layer? { e.document.layers(of: a.owner)?.first { $0.id == a.layerID } }
+}
 
 extension LiveProperties {
     /// Grouped "Set Fill": `fill` on every shape address in `items`.

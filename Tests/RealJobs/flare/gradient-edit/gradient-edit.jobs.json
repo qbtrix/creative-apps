@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "app": "flare",
+  "why": "RJ-F31: opens a circle whose three-stop linear fill runs left to right, selects it, recolours the middle stop red, turns the gradient to 90 degrees and saves; the saved fill runs top to bottom with the red stop, and FlareGradientTests exports the same edit as SVG.",
+  "inputs": ["input/*.flare"],
+  "steps": [
+    {"id": "edit.select-all", "params": {}},
+    {"id": "fill.stop-color", "params": {"index": 1, "r": 1, "g": 0, "b": 0, "a": 1}},
+    {"id": "fill.angle", "params": {"degrees": 90}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-edited", "format": "flare"},
+  "expect": {
+    "out/gradient-circle-edited.flare": {"json": {"format": "flare", "version": 1, "document": {"symbols": [], "scenes": [{
+      "id": "scene-1", "name": "Scene 1", "width": 200, "height": 100, "fps": 24, "durationFrames": 24,
+      "background": {"r": 1, "g": 1, "b": 1, "a": 1}, "guides": [], "labels": {},
+      "layers": [{"id": "layer-1", "name": "Circle", "instances": [], "isLocked": false, "isVisible": true, "tracks": {},
+        "shapes": [{"closed": true,
+          "fill": {"type": "linear", "start": {"x": 50, "y": 10}, "end": {"x": 50, "y": 90}, "stops": [
+            {"offset": 0, "color": {"r": 0, "g": 0, "b": 1, "a": 1}},
+            {"offset": 0.5, "color": {"r": 1, "g": 0, "b": 0, "a": 1}},
+            {"offset": 1, "color": {"r": 0, "g": 0, "b": 0, "a": 1}}]},
+          "points": [{"x": 90, "y": 50}, {"x": 78.25, "y": 78.25}, {"x": 50, "y": 90}, {"x": 21.75, "y": 78.25},
+            {"x": 10, "y": 50}, {"x": 21.75, "y": 21.75}, {"x": 50, "y": 10}, {"x": 78.25, "y": 21.75}]}]}]
+    }]}}}
+  },
+  "platforms": ["linux", "macos"]
+}

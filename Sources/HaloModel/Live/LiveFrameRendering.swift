@@ -3,8 +3,10 @@
 // HaloOutlines gives at its matrix: CoreRaster's exact Mask.rectangle /
 // Mask.ellipse when the matrix only translates and scales up, Mask.polygon of
 // the flattened outline otherwise. Its source is the linear premultiplied
-// color times that coverage, composited bottom first with the item's blend
-// mode and opacity. An outline, mask or composite that fails draws nothing
+// color, or its gradient's color at each pixel (HG-6), times that coverage,
+// composited bottom first with the item's blend mode and opacity. A shape's
+// stroke (HK-5) is then its outline polygon from HaloOutlines in the stroke's
+// color, with the same blend and opacity. An outline, mask or composite that fails draws nothing
 // and isn't counted. A text item (VP-5) is its TextRasterizing raster, top
 // left on bounds.origin (so its baseline sits at height - descent), resized by
 // HaloTextPlacement's scale, turned by its degrees about its center and
@@ -34,10 +36,12 @@ public struct LiveFrameRendering: FrameRendering {
             case .null:
                 continue
             }
-            guard let source,
-                  let next = try? composite(source, onto: out, mode: item.blendMode, opacity: Float(item.opacity))
-            else { continue }
-            out = next
+            for layer in [source, Self.strokeFill(item, width: width, height: height, scaleX: sx, scaleY: sy)] {
+                guard let layer,
+                      let next = try? composite(layer, onto: out, mode: item.blendMode, opacity: Float(item.opacity))
+                else { continue }
+                out = next
+            }
         }
         return HaloRenderedFrame(pixels: out, frame: list.frame, skippedLayerCount: skipped)
     }
@@ -73,22 +77,70 @@ public struct LiveFrameRendering: FrameRendering {
         return Int(v)
     }
 
-    /// A `width` × `height` buffer of `item`'s color times its outline's
-    /// coverage, premultiplied; nil when the outline or its mask is refused.
+    /// A `width` × `height` buffer of `item`'s color, or its gradient's color
+    /// at each pixel (HG-6), times its outline's coverage, premultiplied; nil
+    /// when the outline or its mask is refused.
     static func coverageFill(
         _ item: HaloDrawItem, width: Int, height: Int, scaleX sx: Double, scaleY sy: Double
     ) -> PixelBuffer? {
-        guard let color = item.color.linearPixel(),
-              let outline = HaloOutlines.outline(of: item, scale: max(sx, sy)),
-              let mask = try? outline.mask(width: width, height: height, scaleX: sx, scaleY: sy),
-              var buffer = try? PixelBuffer(width: width, height: height)
+        let shading = HaloGradientShading(item, scaleX: sx, scaleY: sy)
+        guard let solid = item.color.linearPixel(), let outline = HaloOutlines.outline(of: item, scale: max(sx, sy))
+        else { return nil }
+        return paint(outline, width: width, height: height, scaleX: sx, scaleY: sy) { x, y in
+            shading?.color(x: x, y: y) ?? solid
+        }
+    }
+
+    /// A `width` × `height` buffer of a shape's stroke color, premultiplied,
+    /// over its stroke outline (HK-5); nil with no stroke or a refused outline.
+    static func strokeFill(
+        _ item: HaloDrawItem, width: Int, height: Int, scaleX sx: Double, scaleY sy: Double
+    ) -> PixelBuffer? {
+        guard let stroke = item.stroke,
+              let opaque = HaloLayerColor(red: stroke.color.r, green: stroke.color.g, blue: stroke.color.b).linearPixel(),
+              let outline = HaloOutlines.strokeOutline(of: item, scale: max(sx, sy))
+        else { return nil }
+        let a = Float(stroke.color.a.isFinite ? min(max(stroke.color.a, 0), 1) : 1)
+        let color = RGBA(r: opaque.r * a, g: opaque.g * a, b: opaque.b * a, a: a)
+        return paint(outline, width: width, height: height, scaleX: sx, scaleY: sy) { _, _ in color }
+    }
+
+    /// `color` at each pixel times `outline`'s coverage, premultiplied; nil
+    /// when the mask or buffer is refused.
+    static func paint(
+        _ outline: HaloOutline, width: Int, height: Int, scaleX sx: Double, scaleY sy: Double,
+        color: (Int, Int) -> RGBA
+    ) -> PixelBuffer? {
+        guard var buffer = try? PixelBuffer(width: width, height: height),
+              let coverage = coverage(outline, width: width, height: height, scaleX: sx, scaleY: sy)
         else { return nil }
         for y in 0..<height {
             for x in 0..<width {
-                guard let c = try? mask.coverage(x: x, y: y), c > 0 else { continue }
+                let c = coverage(x, y)
+                guard c > 0 else { continue }
+                let color = color(x, y)
                 try? buffer.setPixel(x: x, y: y, RGBA(r: color.r * c, g: color.g * c, b: color.b * c, a: color.a * c))
             }
         }
         return buffer
+    }
+
+    /// `outline`'s coverage at a pixel: a polygon's from HaloScanline (the
+    /// same samples as Mask.polygon, a row at a time, HK-5), a box's or
+    /// ellipse's from CoreRaster's Mask; nil when refused or non-finite.
+    static func coverage(
+        _ outline: HaloOutline, width: Int, height: Int, scaleX sx: Double, scaleY sy: Double
+    ) -> ((Int, Int) -> Float)? {
+        if case .polygon(let points) = outline {
+            let scaled = points.map { HaloPoint(x: $0.x * sx, y: $0.y * sy) }
+            guard width > 0, height > 0, scaled.allSatisfy({ $0.x.isFinite && $0.y.isFinite }) else { return nil }
+            let cells = HaloScanline.coverage(scaled, width: width, height: height)
+            return { x, y in
+                let i = y * width + x
+                return x >= 0 && x < width && cells.indices.contains(i) ? cells[i] : 0
+            }
+        }
+        guard let mask = try? outline.mask(width: width, height: height, scaleX: sx, scaleY: sy) else { return nil }
+        return { x, y in (try? mask.coverage(x: x, y: y)) ?? 0 }
     }
 }

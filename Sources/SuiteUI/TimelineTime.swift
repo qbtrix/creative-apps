@@ -4,14 +4,36 @@
 // ("00:01:06" at 24 fps) and "H:MM:SS:FF" from an hour on. No fps (0 or
 // less) reads frames, never a division by zero. In timecode the ruler's
 // labels sit on whole seconds once the frame step reaches fps / 2. Plain
-// math, no SwiftUI (TimelineNavTests).
+// math, no SwiftUI (TimelineNavTests). A host that knows its document's
+// rate reads `label(frame:rate:unit:)` instead: SuiteKernel's Timecode at
+// that rate, "HH:MM:SS;FF" drop-frame at 29.97 and 59.94 (frame-rates FR-u,
+// FrameRateMenuTests).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteKernel
 
 public enum TimelineTime {
+    /// `frame` at the document's `rate`: its number in frames, else SuiteKernel's timecode for that rate.
+    public static func label(frame: Int, rate: FrameRate, unit: TimeUnit) -> String {
+        unit == .timecode ? Timecode.string(frame: frame, rate: rate) : "\(frame)"
+    }
+
+    /// `frame` at `rate` when the host gave one, else at `fps`: what the ruler
+    /// and the pill read, so they agree with a host's `label(frame:rate:unit:)` readout.
+    static func label(frame: Int, fps: Int, rate: FrameRate?, unit: TimeUnit) -> String {
+        rate.map { label(frame: frame, rate: $0, unit: unit) } ?? label(frame: frame, fps: fps, unit: unit)
+    }
+
+    /// The tooltip and VoiceOver label of a timecode readout at `rate`: what it
+    /// counts and how, ";" before the frames at a drop-frame rate.
+    public static func readoutHelp(rate: FrameRate) -> String {
+        let form = rate.isDropFrame ? "hours:minutes:seconds;frames, drop-frame" : "hours:minutes:seconds:frames"
+        return "Playhead time at \(rate.description) (\(form))"
+    }
+
     /// `frame` as the ruler, the playhead pill and a host's readout show it.
     public static func label(frame: Int, fps: Int, unit: TimeUnit) -> String {
         guard unit == .timecode, fps > 0 else { return "\(frame)" }

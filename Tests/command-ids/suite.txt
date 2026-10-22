@@ -1,0 +1,4 @@
+# The suite's command ids (report-problem RP-1). Never reuse one; mark a removed id "retired <id>".
+help.beta-notes
+help.report-problem
+help.welcome

@@ -3,11 +3,17 @@
 // (SelectionOverlay.swift), a pending crop (CropOverlay.swift), Free
 // Transform's box (TransformOverlay.swift) and the brush cursor at `hover`
 // (SuiteUI's BrushCursorMark, the brush's size; `photo.canvas.brush-cursor`),
-// in that order. SuiteUI's marks are hidden from
+// the Gradient tool's line while it drags (SuiteUI's PathMarks from the press
+// to the pointer: the window's LiveDragLine while it lasts, else the Model's
+// `gradientDrag`; `photo.canvas.gradient-line`)
+// and the Eyedropper's loupe (PhotoSampleLoupe, `suite.sample.loupe`), in
+// that order. SuiteUI's marks are hidden from
 // accessibility, so each visible mark also gets one probe (`probe(zoom:)`): a
 // clear rectangle at the mark's frame that the journeys find by identifier,
 // an image and never a control, that never takes a click. `marks` lists the
-// elements shown, for tests. Values in, nothing out.
+// elements shown, for tests. Values in; only Free Transform's handles send
+// intents out (`perform`).
+import CoreRaster
 import PhotoModel
 import SuiteUI
 import SwiftUI
@@ -17,16 +23,30 @@ struct PhotoCanvasOverlay: View {
     let zoom: Double
     /// The document point under the pointer (CanvasViewport's `onPointer`); nil when outside.
     let hover: CGPoint?
+    /// Where Free Transform's handles send their edits.
+    var perform: PhotoPerform = { _ in }
+    /// The window's live drag line; read here only, so its samples re-run this body and not the editor's.
+    var liveLine: LiveDragLine?
 
     var body: some View {
         ZStack(alignment: .topLeading) {
             SelectionOverlay(model: model, zoom: zoom)
             CropOverlay(model: model, zoom: zoom)
-            TransformOverlay(model: model, zoom: zoom)
+            TransformOverlay(model: model, zoom: zoom, perform: perform)
             if let diameter = model.brushCursorDiameter {
                 BrushCursorMark(point: hover, diameter: diameter, zoom: zoom)
                 if let mark = brushCursor { mark.probe(zoom: zoom) }
             }
+            if let line = dragLine, let mark = gradientLine {
+                PathMarks(
+                    anchors: [
+                        PathAnchor(point: CGPoint(x: line.from.x, y: line.from.y), kind: .corner),
+                        PathAnchor(point: CGPoint(x: line.to.x, y: line.to.y), kind: .corner),
+                    ],
+                    segments: [PathSegment(from: 0, to: 1)], zoom: zoom)
+                mark.probe(zoom: zoom)
+            }
+            PhotoSampleLoupe(model: model, zoom: zoom, hover: hover)
         }
     }
 
@@ -37,11 +57,22 @@ struct PhotoCanvasOverlay: View {
         return .brushCursor(CGRect(x: hover.x - diameter / 2, y: hover.y - diameter / 2, width: diameter, height: diameter))
     }
 
+    /// The Gradient tool's line's element: the box from the press to the
+    /// pointer, in document pixels; nil unless a gradient drag has moved.
+    var gradientLine: PhotoCanvasMark? {
+        guard let line = dragLine else { return nil }
+        let from = CGPoint(x: line.from.x, y: line.from.y), to = CGPoint(x: line.to.x, y: line.to.y)
+        return .gradientLine(CGRect(x: from.x, y: from.y, width: to.x - from.x, height: to.y - from.y).standardized)
+    }
+
+    /// The line a drag shows: the live copy's while one is live, else the workspace's.
+    private var dragLine: (from: Mask.Point, to: Mask.Point)? { liveLine?.line ?? model.gradientDrag }
+
     /// The accessibility elements the overlay shows, in drawing order.
     var marks: [PhotoCanvasMark] {
         [
             SelectionOverlay(model: model, zoom: zoom).mark, CropOverlay(model: model, zoom: zoom).mark,
-            TransformOverlay(model: model, zoom: zoom).mark, brushCursor,
+            TransformOverlay(model: model, zoom: zoom).mark, brushCursor, gradientLine,
         ].compactMap { $0 }
     }
 }
@@ -65,6 +96,9 @@ struct PhotoCanvasMark: Equatable {
     }
     static func brushCursor(_ rect: CGRect) -> Self {
         Self(identifier: "photo.canvas.brush-cursor", label: "Brush size", rect: rect)
+    }
+    static func gradientLine(_ rect: CGRect) -> Self {
+        Self(identifier: "photo.canvas.gradient-line", label: "Gradient line", rect: rect)
     }
 }
 

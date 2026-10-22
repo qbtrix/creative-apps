@@ -12,5 +12,19 @@
     "find": "\"Duplicates the selected layer.\", .edit,",
     "replace": "\"Duplicates the selected layer.\", .view,",
     "tests": "PhotoCommandCatalogTests"
+  },
+  {
+    "label": "reasonWhenUnavailable: Straighten is always available",
+    "file": "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "find": "\"cropToFit\": .bool(false)]), availability: menu())",
+    "replace": "\"cropToFit\": .bool(false)]), availability: gate { _ in nil })",
+    "tests": "PhotoCommandPathTests"
+  },
+  {
+    "label": "paramsReachRun: Export ignores the sheet's quality",
+    "file": "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "find": "quality: p.quality ?? w.exportOptions.quality",
+    "replace": "quality: w.exportOptions.quality",
+    "tests": "PhotoCommandPathTests"
   }
 ]

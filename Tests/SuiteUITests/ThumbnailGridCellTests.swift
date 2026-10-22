@@ -57,7 +57,7 @@ import Testing
     defer { window.orderOut(nil) }
     let cell = axNodes(in: window).first { ($0.accessibilityIdentifier?() ?? nil) == "t.cell.2" }
     #expect(cell?.accessibilityPerformPress?() == true)
-    RunLoop.main.run(until: Date().addingTimeInterval(0.2))
+    spinUntil { picked.selection == ["2"] }
     #expect(picked.selection == ["2"])
 }
 
@@ -71,6 +71,7 @@ import Testing
         selection: [], onSelectionChange: { _ in }, onVisibleChange: { picked.visible = $0 }),
         size: CGSize(width: 600, height: 300))
     defer { window.orderOut(nil) }
+    spinUntil { !picked.visible.isEmpty }
     #expect(!picked.visible.isEmpty)
     #expect(picked.visible.count < order.count)
     #expect(picked.visible == Array(order.prefix(picked.visible.count)))
@@ -89,7 +90,9 @@ import Testing
     let window = NSWindow(contentRect: CGRect(origin: .zero, size: size), styleMask: [.titled], backing: .buffered, defer: false)
     window.contentView = NSHostingView(rootView: view.frame(width: size.width, height: size.height))
     window.orderFrontRegardless()
-    RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+    spinUntil {
+        axNodes(in: window).contains { (($0.accessibilityLabel?() ?? nil) ?? "").contains(".heic") }
+    }
     return window
 }
 

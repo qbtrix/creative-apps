@@ -93,8 +93,10 @@ enum BadExample: BrokenLaw {
         #expect(problems.allSatisfy { $0.contains(id) && !$0.contains("item.add") }, "\(problems)", sourceLocation: sourceLocation)
     }
 
+    /// The fixture has no steps, so `history.jump`'s example refuses as unavailable, the filter the apps' laws use.
     @Test func theFakeConforms() {
-        #expect(CatalogConformance.check(FakeCanvasDocument.self, fixture: .fixture) == [])
+        #expect(CatalogConformance.check(FakeCanvasDocument.self, fixture: .fixture)
+            == ["history.jump: exampleRuns: the example refused on the fixture: history.jump is unavailable: There are no steps yet."])
     }
 
     @Test func anEditThatRecordsNoStepFails() { expectFails(NoStep.self, naming: "item.append") }

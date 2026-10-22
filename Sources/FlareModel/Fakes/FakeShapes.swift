@@ -1,7 +1,8 @@
-// FakeShapes.swift: ShapeBuilding by hand (docs/blueprints/flare.md, 6.3). Rectangles and ellipses are polygons, a pen
-// path is straight segments with dragged anchors marked smooth; a click within `anchorTolerance` stage points of its last
-// anchor adds nothing, it closes on 3 anchors that far apart, and one whose extent is under it doesn't commit (#561), at
-// the draft's fit scale (#619); a click within `closeDistance` stage points of its first anchor closes it (#649). Each write
+// FakeShapes.swift: ShapeBuilding by hand (docs/blueprints/flare.md, 6.3). Rectangles and ellipses are polygons; a pen
+// draft is the kernel's `PenRules`, as LiveShapes draws it (`ShapeDraft.penDraft`, pen-paths FP-5): a click within
+// `anchorTolerance` stage points of its last anchor adds nothing, it closes on 3 anchors that far apart, and one whose
+// extent is under it doesn't commit (#561), at the draft's fit scale (#619); a click within `closeDistance` stage points
+// of its first anchor closes it (#649). Each write
 // is one group named by section 2, of real FlareCore commands or `FixtureEdit` where FlareCore has none (path edit,
 // instance move, instance delete); a move with a text item throws `textMove` before anything changes, as LiveShapes.
 // Box gestures follow the not-animated / animated rule; a delete that empties a layer removes the layer. The pasteboard holds `AddLayer` envelopes from
@@ -12,6 +13,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import FlareCore
+import SuiteKernel
 
 public struct FakeShapes: ShapeBuilding {
     /// Why this member is off; nil when it works.
@@ -26,7 +28,7 @@ public struct FakeShapes: ShapeBuilding {
     public static let ellipseSides = 32
     /// How near the first pen anchor a click closes the path, in stage (view) points: `FlareWorkspace.hitSlop`, so
     /// the close click lands the same on-screen distance off at any fit scale (#649).
-    public static let closeDistance = 4.0
+    public static let closeDistance = PenRules.closeDistance
     /// `closeDistance` in scene points on a stage drawn at `stageScale` stage points per scene point, the pen draft's
     /// `stageScale`. A degenerate scale gives +infinity, as `anchorTolerance(atStageScale:)` does; no path closes
     /// then, since no second anchor lands.
@@ -38,7 +40,7 @@ public struct FakeShapes: ShapeBuilding {
     /// How near two pen anchors are the same anchor, and the smallest extent a pen path commits at, in stage (view)
     /// points: `FlareWorkspace.clickSlop`, so a click's sub-point jitter stacks no anchor and commits no layer at any
     /// fit scale (#619).
-    public static let anchorTolerance = 1.0
+    public static let anchorTolerance = PenRules.anchorTolerance
     /// `anchorTolerance` in scene points on a stage drawn at `stageScale` stage points per scene point, the pen
     /// draft's `stageScale`. A degenerate scale (zero, negative, NaN, -infinity, or one whose tolerance overflows)
     /// gives +infinity, so no second anchor lands and no path commits, as the ellipse minimum does.
@@ -48,7 +50,7 @@ public struct FakeShapes: ShapeBuilding {
         return tolerance.isFinite ? tolerance : .infinity
     }
     /// What `commit` throws for a pen path whose extent is under `anchorTolerance`.
-    public static let degeneratePath = "Click at least two separate places to draw a path."
+    public static let degeneratePath = PenRules.degenerate
 
     private func available() throws { if let unavailable { throw NotBuilt(reason: unavailable) } }
     public func unavailableHelp(for tool: FlareTool) -> String? { unavailable }
@@ -59,7 +61,7 @@ public struct FakeShapes: ShapeBuilding {
         guard unavailable == nil, start.isFinite, end.isFinite else { return nil }
         switch tool {
         case .select, .directSelect, .shape: return nil
-        case .pen: return pen(at: start, dragged: start != end, previous: previous)
+        case .pen: return ShapeDraft.penDraft(at: start, to: end, previous: previous)
         case .rectangle, .ellipse:
             var dx = end.x - start.x, dy = end.y - start.y
             let side = max(abs(dx), abs(dy))
@@ -71,25 +73,6 @@ public struct FakeShapes: ShapeBuilding {
         }
     }
 
-    private func pen(at point: Point, dragged: Bool, previous: ShapeDraft?) -> ShapeDraft {
-        var draft = previous.flatMap { $0.tool == .pen && !$0.isClosed ? $0 : nil }
-            ?? ShapeDraft(tool: .pen, shape: FlareShape(points: []), stageScale: previous?.stageScale ?? 1)
-        let tolerance = Self.anchorTolerance(atStageScale: draft.stageScale)
-        // A click near the last anchor adds no near zero-length segment.
-        if let last = draft.anchors.last, Self.near(last, point, tolerance) { return draft }
-        let (dx, dy) = (point.x - (draft.anchors.first?.x ?? .infinity), point.y - (draft.anchors.first?.y ?? 0))
-        if Self.distinct(draft.anchors, tolerance) >= 3, (dx * dx + dy * dy).squareRoot()
-            <= Self.closeDistance(atStageScale: draft.stageScale) {
-            draft.isClosed = true
-        } else {
-            if dragged { draft.smoothAnchors.insert(draft.anchors.count) }
-            draft.anchors.append(point)
-        }
-        draft.shape = FlareShape(points: draft.anchors, closed: draft.isClosed,
-                                 fill: .solid(FlareColor(r: 0, g: 0, b: 0, a: 0)), stroke: Stroke())
-        return draft
-    }
-
     public func commit(_ draft: ShapeDraft, owner: LayerOwner, aboveLayerID: String?,
                        in engine: inout CommandEngine) throws -> String {
         try available()
@@ -98,10 +81,7 @@ public struct FakeShapes: ShapeBuilding {
         case .select, .directSelect: throw CommandError.invalidDocument("Select doesn't draw.")
         case .shape: throw CommandError.invalidDocument(FlareTool.shapeHelp)
         }
-        let tolerance = Self.anchorTolerance(atStageScale: draft.stageScale)
-        if draft.tool == .pen, !Self.spans(draft.anchors, tolerance) || !Self.spans(draft.shape.points, tolerance) {
-            throw CommandError.invalidDocument(Self.degeneratePath)
-        }
+        try draft.checkPenPath()
         let above = try Self.anchor(aboveLayerID, owner: owner, in: engine.document)
         let taken = Self.taken(engine.document)
         var n = 1
@@ -297,21 +277,6 @@ public struct FakeShapes: ShapeBuilding {
     private static func index(_ a: StageAddress) -> Int { switch a.item { case .shape(let i), .text(let i), .instance(let i): i } }
     private static func end(_ e: PathElement) -> Point? {
         switch e { case .move(let p), .line(let p), .quad(_, let p), .cubic(_, _, let p): p; case .close: nil }
-    }
-    /// How many points of `points` are not `near` an earlier one.
-    private static func distinct(_ points: [Point], _ tolerance: Double) -> Int {
-        points.enumerated().filter { p in !points.prefix(p.offset).contains { near($0, p.element, tolerance) } }.count
-    }
-    /// Whether `a` and `b` are under `tolerance` scene points apart.
-    private static func near(_ a: Point, _ b: Point, _ tolerance: Double) -> Bool {
-        (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) < tolerance * tolerance
-    }
-    /// Whether `points` are all finite and span at least `tolerance` scene points across or down.
-    private static func spans(_ points: [Point], _ tolerance: Double) -> Bool {
-        let xs = points.map(\.x), ys = points.map(\.y)
-        guard (xs + ys).allSatisfy(\.isFinite), let x0 = xs.min(), let x1 = xs.max(), let y0 = ys.min(), let y1 = ys.max()
-        else { return false }
-        return x1 - x0 >= tolerance || y1 - y0 >= tolerance
     }
     /// Handle `h` (0...7 clockwise from top-left, taken mod 8) on `box`, where the stage draws it.
     public static func handle(_ h: Int, on box: Rect) -> Point { BoxGestureMath.handle(h, on: box) }

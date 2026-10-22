@@ -7,6 +7,11 @@
 // `suite.timeline.ruler`; lanes, keys and names are found by the identifiers
 // the gallery opts into (`suite.timeline.lane.<id>`, `.key.<id>.<frame>`,
 // `.name.<id>`), since XCUITest reads a lane's value as "" (#262, #1800).
+// SJ-FR (frame-rates FR-u) picks 29.97 fps from `timeline-long`'s rate menu,
+// scrubs to frame 1800 (found from the log's `scrub <n>` lines, since the
+// ruler reads no frame on macOS, #4361) and reads the drop-frame readout
+// `00:01:00;02`, its tooltip naming the form in Frames too (#4368); then it
+// reopens the menu and shoots `timeline-2997-menu` with 29.97 fps checked (#4369).
 import XCTest
 
 extension SuiteJourneyTests {
@@ -81,6 +86,68 @@ extension SuiteJourneyTests {
         long.drag(on: "suite.timeline.ruler", from: CGVector(dx: 0.2, dy: 0.5), to: CGVector(dx: 0.4, dy: 0.5))
         let longLog = long.element("suite.gallery.log")
         XCTAssert(lookWait { self.lookLastLine(longLog).hasPrefix("scrub ") }, "the ruler drag logged \(lookLastLine(longLog))")
+    }
+
+    /// SJ-FR: the rate menu sets 29.97 fps and the readout shows drop-frame timecode at frame 1800.
+    @MainActor func testTimecodeAtNTSCRates() throws {
+        let gallery = Journey("Library", self, name: "suiteui", arguments: ["-SuiteGallery", "timeline-long"])
+        let ruler = gallery.element("suite.timeline.ruler")
+        XCTAssert(ruler.waitForExistence(timeout: 30), "timeline-long has no ruler (suite.timeline.ruler)")
+        let log = gallery.element("suite.gallery.log")
+        // 1. The rate menu: open it, pick 29.97 fps.
+        let menu = gallery.element("suite.gallery.timeline.rate")
+        XCTAssert(menu.waitForExistence(timeout: 5), "no rate menu (suite.gallery.timeline.rate)")
+        menu.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click()
+        let ntsc = gallery.app.menuItems["29.97 fps"].firstMatch
+        XCTAssert(ntsc.waitForExistence(timeout: 5), "the rate menu has no 29.97 fps")
+        ntsc.click()
+        expectLookLog("rate 29.97 fps", log)
+        // 2. Scrub to frame 1800: a ruler click says where frames sit (2 pt a frame); the wheel brings 1800 into view.
+        let target = 1_800
+        var sign: CGFloat = -1
+        var gap = Int.max
+        for _ in 0..<16 {
+            if rateFrame(log) == target { break }
+            ruler.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click()
+            guard lookWait({ self.rateFrame(log) != nil }), let mid = rateFrame(log) else { break }
+            let x = ruler.frame.width / 2 + CGFloat(target - mid) * 2
+            if x > 12 && x < ruler.frame.width - 12 {
+                ruler.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: x, dy: ruler.frame.height / 2)).click()
+                continue
+            }
+            // Which way a wheel delta goes is the runner's setting: one that took us no nearer flips it.
+            if abs(target - mid) >= gap { sign = -sign }
+            gap = abs(target - mid)
+            let away = min(abs(x - ruler.frame.width / 2), 4_000)
+            ruler.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 3))
+                .scroll(byDeltaX: sign * (target > mid ? away : -away), deltaY: 0)
+            RunLoop.current.run(until: Date().addingTimeInterval(0.3))
+        }
+        XCTAssertEqual(rateFrame(log), target, "the playhead never reached frame 1800")
+        expectLookLog("scrub 1800", log)
+        // 3. The readout reads drop-frame timecode: minute 1 skips its frames 00 and 01.
+        let readout = gallery.element("suite.gallery.timeline.timecode")
+        XCTAssert(lookWait { readout.label == "00:01:00;02" }, "the readout reads \(readout.label), not 00:01:00;02")
+        gallery.shot("timeline-2997-readout")
+        // 4. The readout names what it counts, with or without its ";" (#4368).
+        let named = gallery.element("suite.gallery.timeline.readout")
+        XCTAssert(named.waitForExistence(timeout: 5), "no readout (suite.gallery.timeline.readout)")
+        XCTAssert(named.label.contains("hours:minutes:seconds;frames"), "the readout is labelled \(named.label)")
+        // 5. Reopen the menu: 29.97 fps carries the check, and the shot shows it (#4369).
+        menu.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click()
+        let checked = gallery.app.menuItems["29.97 fps"].firstMatch
+        XCTAssert(checked.waitForExistence(timeout: 5), "the reopened rate menu has no 29.97 fps")
+        // A checked item reads selected, or its mark ("✓", 1) in its value.
+        let mark = checked.value.map { "\($0)" } ?? ""
+        XCTAssert(checked.isSelected || !(mark.isEmpty || mark == "0"), "29.97 fps isn't checked in the reopened menu")
+        gallery.shot("timeline-2997-menu")
+        gallery.app.typeKey(.escape, modifierFlags: [])
+    }
+
+    /// The playhead's frame from the log's last `scrub <n>` line; nil before the first scrub.
+    @MainActor private func rateFrame(_ log: XCUIElement) -> Int? {
+        let line = lookLastLine(log)
+        return line.hasPrefix("scrub ") ? Int(line.dropFirst("scrub ".count)) : nil
     }
 
     /// The lane of track `id`, `suite.timeline.lane.<id>`.

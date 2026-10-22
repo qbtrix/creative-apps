@@ -1,0 +1,6 @@
+[
+  {"label": "an accepted open delivers nothing", "file": "Sources/PhotoModel/PhotoDocumentHost.swift", "find": "if !requests.isEmpty { await deliver(requests) }", "replace": "_ = requests", "tests": "PhotoDocumentHostTests"},
+  {"label": "an empty open is not refused", "file": "Sources/PhotoModel/PhotoDocumentHost.swift", "find": "guard !handOff.documents.isEmpty else { return .failure(openNeedsImage) }", "replace": "", "tests": "PhotoDocumentHostTests"},
+  {"label": "other verbs are accepted", "file": "Sources/PhotoModel/PhotoDocumentHost.swift", "find": "            return .failure(verbRefusal)", "replace": "            return .success([])", "tests": "PhotoDocumentHostTests"},
+  {"label": "an open opens only the first image", "file": "Sources/PhotoModel/PhotoDocumentHost.swift", "find": "handOff.documents.map { .open(path: $0.path) }", "replace": "handOff.documents.prefix(1).map { .open(path: $0.path) }", "tests": "PhotoDocumentHostTests"}
+]

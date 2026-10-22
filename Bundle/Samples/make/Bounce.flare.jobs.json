@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "app": "flare",
+  "new": {"fps": 30, "durationFrames": 60},
+  "inputs": ["seed.flare"],
+  "steps": [
+    {"id": "scenes.rename", "params": {"name": "Bounce"}},
+    {"id": "layer.add", "params": {"sceneID": "scene-1", "layer": {"id": "layer-2", "name": "Floor", "tracks": {}, "instances": [], "isVisible": true, "isLocked": false,
+      "shapes": [{"closed": true, "fill": {"r": 0.82, "g": 0.84, "b": 0.88, "a": 1}, "points": [{"x": 0, "y": 340}, {"x": 550, "y": 340}, {"x": 550, "y": 400}, {"x": 0, "y": 400}]}]}}},
+    {"id": "layer.add", "params": {"sceneID": "scene-1", "layer": {"id": "layer-1", "name": "Ball", "tracks": {}, "instances": [], "isVisible": true, "isLocked": false,
+      "shapes": [{"closed": true, "fill": {"r": 0.96, "g": 0.42, "b": 0.2, "a": 1}, "points": [{"x": -12, "y": -60}, {"x": 12, "y": -60}, {"x": 30, "y": -42}, {"x": 30, "y": -18}, {"x": 12, "y": 0}, {"x": -12, "y": 0}, {"x": -30, "y": -18}, {"x": -30, "y": -42}]}]}}},
+    {"id": "keyframe.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "property": "x", "keyframe": {"frame": 0, "value": 275, "easing": {"linear": {}}}}},
+    {"id": "keyframe.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "property": "y", "keyframe": {"frame": 0, "value": 120, "easing": {"cubicBezier": {"x1": 0.42, "y1": 0, "x2": 1, "y2": 1}}}}},
+    {"id": "keyframe.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "property": "y", "keyframe": {"frame": 30, "value": 340, "easing": {"cubicBezier": {"x1": 0, "y1": 0, "x2": 0.58, "y2": 1}}}}},
+    {"id": "keyframe.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "property": "y", "keyframe": {"frame": 60, "value": 120, "easing": {"linear": {}}}}},
+    {"id": "keyframe.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "property": "scaleX", "keyframe": {"frame": 0, "value": 1, "easing": {"cubicBezier": {"x1": 0.42, "y1": 0, "x2": 1, "y2": 1}}}}},
+    {"id": "keyframe.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "property": "scaleX", "keyframe": {"frame": 30, "value": 1.25, "easing": {"cubicBezier": {"x1": 0, "y1": 0, "x2": 0.58, "y2": 1}}}}},
+    {"id": "keyframe.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "property": "scaleX", "keyframe": {"frame": 60, "value": 1, "easing": {"linear": {}}}}},
+    {"id": "keyframe.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "property": "scaleY", "keyframe": {"frame": 0, "value": 1, "easing": {"cubicBezier": {"x1": 0.42, "y1": 0, "x2": 1, "y2": 1}}}}},
+    {"id": "keyframe.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "property": "scaleY", "keyframe": {"frame": 30, "value": 0.8, "easing": {"cubicBezier": {"x1": 0, "y1": 0, "x2": 0.58, "y2": 1}}}}},
+    {"id": "keyframe.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "property": "scaleY", "keyframe": {"frame": 60, "value": 1, "easing": {"linear": {}}}}}
+  ],
+  "atomic": true,
+  "why": "A 2 s, 30 fps loop: an orange ball falls onto a floor, squashes (scaleX and scaleY keys at 0, 30 and 60) and rises back to where it started."
+}

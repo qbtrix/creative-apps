@@ -21,7 +21,7 @@ struct LibraryGridToolbar: View {
     var menu = LibraryMenu()
 
     /// The catalog commands the row's controls are built from, in order.
-    static let commandIDs = ["view.thumbnail-size", "view.sort", "file.import", "file.export"]
+    static let commandIDs = ["view.thumbnail-size", "view.sort", "file.import-folder", "file.export"]
     static let identifier = "library.grid.toolbar"
 
     var body: some View {
@@ -81,8 +81,8 @@ struct LibraryGridToolbar: View {
         .libraryControl(id: "library.grid.toolbar.sort", enabled: why == nil, help: why)
     }
 
-    /// file.import, through the import area's open panel.
-    var importAction: ToolbarAction { action("file.import", "folder.badge.plus", "library.grid.toolbar.import", menu.file.importFolder) }
+    /// file.import-folder, through the import area's open panel.
+    var importAction: ToolbarAction { action("file.import-folder", "folder.badge.plus", "library.grid.toolbar.import", menu.file.importFolder) }
 
     /// file.export, through the export area's sheet.
     var exportAction: ToolbarAction { action("file.export", "square.and.arrow.up", "library.grid.toolbar.export", menu.export.export) }

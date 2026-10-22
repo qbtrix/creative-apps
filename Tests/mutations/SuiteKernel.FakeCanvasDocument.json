@@ -19,5 +19,47 @@
     "find": "history.record(\"Place\", rects)",
     "replace": "_ = rects",
     "tests": "FakeCanvasFileFlowTests"
+  },
+  {
+    "label": "fillSkipsLock: setFill finds the selected rect without the locked check, so a locked rect takes a fill",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "let index = try editableIndex(\"fill\")",
+    "replace": "guard let index = rects.firstIndex(where: { $0.id == selection }) else { return }",
+    "tests": "FakeCanvasFillTests"
+  },
+  {
+    "label": "nilFillEncoded: a rect with no fill writes \"fill\":null, so old JSON changes",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "try c.encodeIfPresent(fill, forKey: .fill)",
+    "replace": "try c.encode(fill, forKey: .fill)",
+    "tests": "FakeCanvasFillTests"
+  },
+  {
+    "label": "fillUndoKeyDropped: every stop-move sample is its own step, so a drag takes many undos",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "history.record(name, rects, key: drag.map { \"\\(name):\\($0)\" })",
+    "replace": "history.record(name, rects, key: nil)",
+    "tests": "FakeCanvasFillTests"
+  },
+  {
+    "label": "fakeJumpRecordsNothing: the fake's jump records a step of its own, so the panel grows a row and redo is lost",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "history.jumpEndingRun(to: index) { old in defer { current = old }; return current }",
+    "replace": "history.record(\"Jump\", rects); history.jumpEndingRun(to: index) { old in defer { current = old }; return current }",
+    "tests": "FakeHistoryTests"
+  },
+  {
+    "label": "fakeBaseIsOpen: the base row is named \"\", so the panel's first row is blank",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "history.listing(base: \"Open\")",
+    "replace": "history.listing(base: \"\")",
+    "tests": "FakeHistoryTests"
+  },
+  {
+    "label": "fakeJumpKeepsRun: the plain jump leaves the run open, so a drag after a jump to the current step folds into it",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "history.jumpEndingRun(to: index) { old in",
+    "replace": "history.jump(to: index) { old in",
+    "tests": "FakeHistoryTests"
   }
 ]

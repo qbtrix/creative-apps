@@ -35,6 +35,7 @@ struct LibraryApp: App {
         Window("Library", id: "library") { LibraryWindow() }
             .commands {
                 LibraryCommands()
+                LibraryBackupCommands()
                 SuiteFileCommands(app: .library, bridge: LibraryShell.bridge)
                 InspectorCommands()
             }
