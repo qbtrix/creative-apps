@@ -56,3 +56,4 @@ utc	stage	event	ref	note
 2026-10-22T05:19Z	3	heartbeat	-	#4259 macOS build still queued (since 02:48Z)
 2026-10-22T06:06Z	3	pr	-	#4259 FL-a merged 05:34Z (414b9220). FL-u opened as #4325 (35a8aa65, tests only). FL-m opened as #4326 (d0f43bbf) after merging dev; a stale shared build had segfaulted AfterGlowCLITests, and a clean rebuild passes the gate.
 2026-10-22T06:35Z	3	wait	-	Run 39730395919 was cancelled; #4325 FL-u and #4326 FL-m are open in the lane.
+2026-10-22T07:05Z	3	wait	-	FL-u #4325 merged by the lane; FL-m #4326 waiting on its macOS gate; full run 39734272718 still pending.

@@ -4,7 +4,7 @@ Issue: #3482 · Packet: docs/blueprints/flare/features/file-flow.md
 Run: act-1a160bffba1-bvv3 · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih) · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: FL-a
 Base: 8c55f0bf9 (origin/dev)
-Next: FL-a Slice-Done once a full ci.yml run containing 414b9220 has a green Linux job (now 39734272718 at 4f2b89eb, pending); FL-4 after FL-m merges
+Next: FL-a Slice-Done once full run 39734272718 (4f2b89eb) or newer has a green Linux job; FL-4 after FL-m #4326 merges
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -74,3 +74,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T05:19Z: #4259 macOS build still queued (since 02:48Z)
 - 2026-10-22T06:06Z: #4259 FL-a merged 05:34Z (414b9220). FL-u opened as #4325 (35a8aa65, tests only). FL-m opened as #4326 (d0f43bbf) after merging dev; a stale shared build had segfaulted AfterGlowCLITests, and a clean rebuild passes the gate.
 - 2026-10-22T06:35Z: Run 39730395919 was cancelled; #4325 FL-u and #4326 FL-m are open in the lane.
+- 2026-10-22T07:05Z: FL-u #4325 merged by the lane; FL-m #4326 waiting on its macOS gate; full run 39734272718 still pending.
