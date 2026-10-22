@@ -8,7 +8,7 @@
 // (`halo.render.start`, titled Export until #3402). The options rows' note
 // ("Frame n of 48") is shot when it is caught: 48 half-size frames can finish
 // before XCUITest looks, so then the finished line stands in for it. The
-// finished line reads "Exported Bounce" with `halo.render.reveal`; the test
+// finished line reads "Exported 48 PNG files into "Bounce"" with `halo.render.reveal`; the test
 // then lists `<tmp>/Bounce/`: exactly `Bounce_0001.png` … `Bounce_0048.png`,
 // each decoded with ImageIO at 960 × 540. Then ⌘Q and a relaunch on
 // `-HaloSample reference` (300 frames of 50 keyed layers, so the movie can't
@@ -36,13 +36,13 @@ final class HaloRenderJourneyTests: XCTestCase {
         expectText("48 PNG files, 960 × 540, into a new folder \"Bounce\"", halo)
         halo.shot("render-1-settings")
 
-        // 2. Start: the progress note if caught in time, then "Exported Bounce" with Reveal in Finder.
+        // 2. Start: the progress note if caught in time, then "Exported 48 PNG files into "Bounce"" with Reveal in Finder.
         clickStart(halo)
         let progress = progressText(of: 48, halo)
-        let done = text("Exported Bounce", halo)
+        let done = text("Exported 48 PNG files into \"Bounce\"", halo)
         XCTAssert(waitFor(seconds: 10) { progress.exists || done.exists }, "Render showed neither progress nor a result")
         if progress.exists { halo.shot("render-2-progress") }
-        XCTAssert(done.waitForExistence(timeout: 60), "the render never read \"Exported Bounce\"")
+        XCTAssert(done.waitForExistence(timeout: 60), "the render never read \"Exported 48 PNG files into \"Bounce\"\"")
         XCTAssert(halo.element("halo.render.reveal").waitForExistence(timeout: 5), "no Reveal in Finder (halo.render.reveal)")
         halo.shot("render-3-done")
 

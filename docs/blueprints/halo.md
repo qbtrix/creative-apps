@@ -162,9 +162,9 @@ pixel painting to Photo.
 | Area | In v1 | Out of v1 (later, in order) |
 |---|---|---|
 | Project | Compositions: new (with validation), duplicate, rename, delete, select (shipped). One project per window | Several projects in tabs; composition folders |
-| Layers | Solid, shape (ellipse), text, null. New, delete, rename, reorder, duplicate; in and out points; select in the list, timeline or viewer | Image and footage layers (needs creative-core affine sampling); precomps (H4); Flare scenes as layers (H10); hide, lock and solo |
+| Layers | Solid, shape (ellipse), text, null. New, delete, rename, reorder, duplicate; in and out points; select in the list, timeline or viewer; a solid's or shape's fill is a color or a linear or radial gradient (the inspector's FILL chips and the shared gradient editor: stops, their colors, the angle), drawn by the frame renderer and moving with the layer; a text layer takes a color | Image and footage layers (needs creative-core affine sampling); precomps (H4); Flare scenes as layers (H10); hide, lock and solo |
 | Transform | Position, scale, rotation, opacity, anchor point; parenting to another layer (keeps its place on screen) | Skew; 3D |
-| Keys | Stopwatch and key-here diamond per property; drag in the viewer keys position at the playhead; keys as diamonds on the layer's lane | Retiming keys by drag on the timeline; per-property sub-lanes; a value graph editor |
+| Keys | Stopwatch and key-here diamond per property; drag in the viewer keys position at the playhead; keys as diamonds on the layer's lane; pick keys on the timeline by click, Shift and ⌘, across layers; Select All Keys (⌘A in the timeline, the Animation menu, a key's context menu), hidden layers' keys too; move the picked keys by dragging, snapped to frames, as one "Move Keyframes" step, refused with a status line when a key would land on another; delete the picked keys as one "Delete Keyframes" step | Per-property sub-lanes; a value graph editor |
 | Easing | Linear, Ease In, Ease Out, Ease In and Out, Hold, from the Animation menu, a key's context menu and the inspector's chips; the custom curve editor (SuiteUI `CurveEditor`, as Flare) | Speed graph; roving keys |
 | Viewer | Draws the composition at the playhead, fitted, with the layer under the pointer selectable and draggable; selection box | Zoom and pan beyond fit; guides; safe-area overlays |
 | Playback | Play and pause (Space), loop, step a frame, go to start and end; holds the composition rate | Cached full-resolution preview; audio |
@@ -332,8 +332,10 @@ or nudge, so the next scrub of the same row is a new step. So:
   Composition", "New Layer", "Set In Point", "Set Out Point", "Change Opacity",
   "Change Blend Mode". Later features add "Move", "Change <Property title>",
   "Animate <title>", "Stop Animating <title>", "Add Key", "Remove Key", "Set
-  Parent", "Keyframe Easing", "Delete Layer", "Rename Layer", "Move Layer",
-  "Duplicate Layer", "Edit Text", "Change Text Size", "Change Color".
+  Parent", "Keyframe Easing", "Move Keyframes", "Delete Keyframes", "Delete Layer", "Rename Layer", "Move Layer",
+  "Duplicate Layer", "Edit Text", "Change Text Size", "Change Color", "Fill Type",
+  "Set Gradient", "Add Gradient Stop", "Move Gradient Stop", "Remove Gradient
+  Stop", "Gradient Stop Color", "Gradient Angle".
 
 The history keeps whole `HaloDocumentState` values (#208's call, marked
 `ponytail:` in the code: commands replace it once creative-core has a Halo
@@ -512,7 +514,9 @@ Sources (public, no product opened or run):
 | 2 | Effects stack (blur, fill, levels) | priorities.md | #39 | no |
 | 2 | Precompose | priorities.md; [S4] | – | no |
 | 2 | Image and footage layers | [S4], *inferred* | – | no |
-| 2 | Retime keys by dragging on the timeline; per-property lanes | *inferred* | – | no |
+| 2 | Move keys by dragging on the timeline, picked across layers | *inferred* | #3536 (key-editing) | yes |
+| 2 | Per-property lanes | *inferred* | – | no |
+| 2 | Gradient fills on solid and shape layers | *inferred* (the suite's shared gradient editor) | #3417 (gradient-fill) | yes |
 | 2 | Open Recent | *inferred* (Flare ships it in v1) | #209 (in scope) | yes |
 | 3 | Expressions | priorities.md | – | no |
 | 3 | Masks and track mattes | priorities.md; [S3] | – | no |

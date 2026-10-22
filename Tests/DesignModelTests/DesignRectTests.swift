@@ -29,8 +29,9 @@ private let base = rc(40, 40, 160, 120)
     let points: [DesignHandle: DesignPoint] = [
         .topLeft: pt(40, 40), .top: pt(120, 40), .topRight: pt(200, 40), .right: pt(200, 100),
         .bottomRight: pt(200, 160), .bottom: pt(120, 160), .bottomLeft: pt(40, 160), .left: pt(40, 100),
+        .rotate: pt(120, 100),
     ]
-    #expect(DesignHandle.allCases.count == 8)
+    #expect(DesignHandle.allCases.count == 9)
     for handle in DesignHandle.allCases { #expect(base.point(of: handle) == points[handle]) }
 }
 

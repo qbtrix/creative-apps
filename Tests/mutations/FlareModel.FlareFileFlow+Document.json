@@ -1,0 +1,23 @@
+[
+  {
+    "label": ".documentIsTheNamedFile: the newest recent file stands for the open document whatever its name",
+    "file": "Sources/FlareModel/FlareFileFlow+Document.swift",
+    "find": "path.split(separator: \"/\").last.map(String.init) == name else { return nil }",
+    "replace": "!name.isEmpty else { return nil }",
+    "tests": "FlareSuiteDocumentTests"
+  },
+  {
+    "label": ".refIsAFlareAnimation: Open In is handed the document as a Halo project",
+    "file": "Sources/FlareModel/FlareFileFlow+Document.swift",
+    "find": "type: .flareAnimation, displayName: name)",
+    "replace": "type: .haloProject, displayName: name)",
+    "tests": "FlareSuiteDocumentTests"
+  },
+  {
+    "label": ".suiteFileID: the ref's file id is its raw path, not the suite's one rule",
+    "file": "Sources/FlareModel/FlareFileFlow+Document.swift",
+    "find": "fileID: SuiteDocumentRef.fileID(forPath: path), app: .flare,",
+    "replace": "fileID: path, app: .flare,",
+    "tests": "FlareSuiteDocumentTests"
+  }
+]
