@@ -118,12 +118,15 @@ public struct HaloRenderPlan: Sendable, Hashable {
     public var width: Int
     public var height: Int
     public var framesPerSecond: Int
+    /// The exact rate each frame is timed by (`seconds(ofFrame:)`); `framesPerSecond` is its whole rate.
+    public var frameRate: FrameRate
     /// Composition frames in order, 0 through the last.
     public var frames: [Int]
     /// "Intro_0001.png" for each frame of a PNG sequence; one "Intro.mp4" for a movie.
     public var fileNames: [String]
-    public init(width: Int, height: Int, framesPerSecond: Int, frames: [Int], fileNames: [String]) {
+    public init(width: Int, height: Int, framesPerSecond: Int, frameRate: FrameRate? = nil, frames: [Int], fileNames: [String]) {
         self.width = width; self.height = height; self.framesPerSecond = framesPerSecond
+        self.frameRate = frameRate ?? FrameRate(whole: framesPerSecond)
         self.frames = frames; self.fileNames = fileNames
     }
 }

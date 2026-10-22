@@ -1,0 +1,16 @@
+[
+  {
+    "label": "scrubIsOneStep: a line height scrub drops its drag token, so each value is its own undo step",
+    "file": "Sources/SuiteKernel/Text/TextCommands.swift",
+    "find": "\"Line Height\", drag: p.drag",
+    "replace": "\"Line Height\", drag: nil",
+    "tests": "TextCommandsTests"
+  },
+  {
+    "label": "familyKeepsWeight: a new family resets to regular upright instead of the nearest face",
+    "file": "Sources/SuiteKernel/Text/TextCommands.swift",
+    "find": "(style.family, style.weight, style.italic) = (p.family, face.weight, face.italic)",
+    "replace": "(style.family, style.weight, style.italic) = (p.family, 400, false)",
+    "tests": "TextCommandsTests"
+  }
+]
