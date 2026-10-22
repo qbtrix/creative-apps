@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: PH-m builders running (PH-6 -> lead/halo-placed-images-PH-m, PH-5 -> -PH-m2, stacked drafts on PH-a); #4415 superseded by #4422 (HT-m on dev); #4426 still in supervisor Mac gate (2d3e024a); #4437 dirty, fixer merges dev after PH-a lands. (18:19Z)
+Next: PH-6 open as draft #4614 (3581626, 5/5 mutate, stacked on PH-a); PH-5 builder running on -PH-m2; #4426 in supervisor Mac gate; then retarget #4437/#4438/#4614/PH-5 PR to dev. Critic note: text-fill refusal uses kernel text, clear solid has no alpha (picture draws over). (18:36Z)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
