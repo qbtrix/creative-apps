@@ -4,7 +4,7 @@ Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
 Run: act-1a160bffba1-bvv3 · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih) · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: 3 build
 Base: 8c55f0bf9 (origin/dev)
-Next: FV-2 once XP-3 is on dev, then the FV-a PR
+Next: FV-2 once XP-3 is on dev
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -63,3 +63,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T05:19Z: XP-3 still not on dev; FV-2 waits
 - 2026-10-22T06:06Z: FV-1 still held on lead/export-pack-fva (ed2293cc); XP-3 not on dev yet.
 - 2026-10-22T06:35Z: XP-3 still not on dev.
+- 2026-10-22T07:05Z: XP-3 still not on dev.
