@@ -1,10 +1,10 @@
 # export-pack (Flare) lead record
 
 Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
-Run: act-1a15d4ed024-1wsg · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih)
+Run: act-1a160bffba1-bvv3 · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih) · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: 2 plan (blocked)
-Base: b64cbb8c (origin/dev)
-Next: check whether shell-media SM-a (MovieSettings, AnimatedImageSettings, FrameClock) is on dev. When it is, build FV-1, then FV-2 for the FV-a slice PR.
+Base: 8c55f0bf9 (origin/dev)
+Next: next heartbeat
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -46,27 +46,8 @@ Loop: v3 (the packet has a `## Slices` table).
 - 12:46Z: 
 - 13:08Z: SM-a #4034 #4035 still open on lane.
 - 13:28Z: SM-a #4034 #4035 still open on lane.
-- 14:45Z: Records moved to lead/flare-export-pack. Still blocked on SM-a PRs #4034 and #4035; re-polled, both open.
-- 15:06Z: #4034, #4035 still open in lane; waiting.
-- 15:26Z: #4034, #4035 still open in lane; waiting.
-- 15:46Z: #4034, #4035 still open in lane; waiting.
-- 16:09Z: #4034, #4035 still open in lane. Note: macOS Xcode builds on dev fail on a project.yml core-pin mismatch; gradient-fill lead has a fixer on it.
-- 16:28Z: #4034, #4035 still open in lane; waiting.
-- 16:48Z: #4034, #4035 still open in lane; waiting.
-- 17:11Z: heartbeat: waiting on SM-a #4034 #4035 (open in lane)
-- 17:31Z: heartbeat: waiting on SM-a #4034 #4035 (open in lane)
-- 17:51Z: Still waiting on SM-a #4034 #4035 (open in lane).
-- 18:12Z: Waiting on SM-a #4034 (now needs-rebase, owner's to fix) and #4035.
-- 18:32Z: Waiting on SM-a #4034 #4035 (in lane; #4034 needs-rebase cleared).
-- 18:54Z: Waiting on SM-a #4034 and #4035 in the lane.
-- 19:14Z: Waiting on SM-a #4034 and #4035 (open, fast-lane).
-- 19:36Z: SM-a #4034 head 880c41ce sent to lane macOS build 19:27Z; #4035 open.
-- 19:59Z: Waiting on SM-a #4034 (lane macOS build of 880c41ce) and #4035, both open.
-- 20:21Z: No change: SM-a #4034 and #4035 open in the lane.
-- 20:43Z: #4034 new head 8ca7a2e7: lane macOS build (every app) dispatched 20:26Z. #4035 open.
-- 21:05Z: No change: #4034 (macOS build of 8ca7a2e7) and #4035 open.
-- 21:26Z: No change: #4034 and #4035 open.
-- 21:48Z: No change: #4034 and #4035 open.
-- 22:10Z: No change: #4034 and #4035 open.
-- 22:33Z: Heartbeat: #4034 and #4035 still open with fast-lane; nothing new.
-- 22:57Z: heartbeat: #4034 #4035 open with fast-lane, waiting on the lane.
+- 23:30Z: Resumed as act-1a160bffba1-bvv3. SM-a #4034 #4035 still open; SM-m #4119 #4123, SM-w #4125 #4237, SM-r #4128 #4239 also open. Parked.
+- 2026-10-21T23:58Z: 23:58Z: SM-1 #4034 merged 23:32Z; SM-2 #4035 still open, so the SM-a slice isn't merged yet.
+- 2026-10-22T00:36Z: heartbeat: #4035 still open in lane
+- 2026-10-22T01:00Z: SM-2 #4035 failed lane macOS build (run 39698491954), owned by the shell-media lead
+- 2026-10-22T01:24Z: heartbeat 01:24Z: #4259 lane rebuild 39703409910 still queued; #4257 not merged yet (build green); #4035 open; full run 39700185524 Linux red on FormatListRatchetTests.realTreePasses (SuiteModel Media.swift, not ours), no slice credit

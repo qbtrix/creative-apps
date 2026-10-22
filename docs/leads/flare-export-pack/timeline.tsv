@@ -29,27 +29,8 @@ utc	stage	event	ref	note
 12:46Z	3	SM-a PRs now open: #4034 (SM-1 media contract), #4035 (SM-2). Export-pack waits until they merge.	-	
 13:08Z	3	heartbeat	-	SM-a #4034 #4035 still open on lane.
 13:28Z	3	heartbeat	-	SM-a #4034 #4035 still open on lane.
-14:45Z	3	stage	-	Records moved to lead/flare-export-pack. Still blocked on SM-a PRs #4034 and #4035; re-polled, both open.
-15:06Z	3	heartbeat	-	#4034, #4035 still open in lane; waiting.
-15:26Z	3	heartbeat	-	#4034, #4035 still open in lane; waiting.
-15:46Z	3	heartbeat	-	#4034, #4035 still open in lane; waiting.
-16:09Z	3	heartbeat	-	#4034, #4035 still open in lane. Note: macOS Xcode builds on dev fail on a project.yml core-pin mismatch; gradient-fill lead has a fixer on it.
-16:28Z	3	heartbeat	-	#4034, #4035 still open in lane; waiting.
-16:48Z	3	heartbeat	-	#4034, #4035 still open in lane; waiting.
-17:11Z	3	heartbeat	-	heartbeat: waiting on SM-a #4034 #4035 (open in lane)
-17:31Z	3	heartbeat	-	heartbeat: waiting on SM-a #4034 #4035 (open in lane)
-17:51Z	3	heartbeat	-	Still waiting on SM-a #4034 #4035 (open in lane).
-18:12Z	3	heartbeat	-	Waiting on SM-a #4034 (now needs-rebase, owner's to fix) and #4035.
-18:32Z	3	heartbeat	-	Waiting on SM-a #4034 #4035 (in lane; #4034 needs-rebase cleared).
-18:54Z	3	heartbeat	-	Waiting on SM-a #4034 and #4035 in the lane.
-19:14Z	3	heartbeat	-	Waiting on SM-a #4034 and #4035 (open, fast-lane).
-19:36Z	3	heartbeat	-	SM-a #4034 head 880c41ce sent to lane macOS build 19:27Z; #4035 open.
-19:59Z	3	heartbeat	-	Waiting on SM-a #4034 (lane macOS build of 880c41ce) and #4035, both open.
-20:21Z	3	heartbeat	-	No change: SM-a #4034 and #4035 open in the lane.
-20:43Z	3	heartbeat	-	#4034 new head 8ca7a2e7: lane macOS build (every app) dispatched 20:26Z. #4035 open.
-21:05Z	3	heartbeat	-	No change: #4034 (macOS build of 8ca7a2e7) and #4035 open.
-21:26Z	3	heartbeat	-	No change: #4034 and #4035 open.
-21:48Z	3	heartbeat	-	No change: #4034 and #4035 open.
-22:10Z	3	heartbeat	-	No change: #4034 and #4035 open.
-22:33Z	3	heartbeat	-	Heartbeat: #4034 and #4035 still open with fast-lane; nothing new.
-22:57Z	3	heartbeat	-	heartbeat: #4034 #4035 open with fast-lane, waiting on the lane.
+23:30Z	3	heartbeat	-	Resumed as act-1a160bffba1-bvv3. SM-a #4034 #4035 still open; SM-m #4119 #4123, SM-w #4125 #4237, SM-r #4128 #4239 also open. Parked.
+2026-10-21T23:58Z	3	heartbeat	-	23:58Z: SM-1 #4034 merged 23:32Z; SM-2 #4035 still open, so the SM-a slice isn't merged yet.
+2026-10-22T00:36Z	3	check	-	heartbeat: #4035 still open in lane
+2026-10-22T01:00Z	3	check	-	SM-2 #4035 failed lane macOS build (run 39698491954), owned by the shell-media lead
+2026-10-22T01:24Z	3	check	-	heartbeat 01:24Z: #4259 lane rebuild 39703409910 still queued; #4257 not merged yet (build green); #4035 open; full run 39700185524 Linux red on FormatListRatchetTests.realTreePasses (SuiteModel Media.swift, not ours), no slice credit
