@@ -46,3 +46,4 @@ utc	stage	event	ref	note
 2026-10-21T22:20Z	0	stopped	#4019	SC-13 merged; AC-export-sheet waits on SC-14..16
 2026-10-21T22:51Z	0	stopped	#4238	SC-14 open; AC-export-sheet waits on SC-14..16
 2026-10-22T00:00Z	3	build	#4002	AC-tools p2 in lane at cbada801; AC-export-sheet waits on SC-14..16 (#4238 open)
+2026-10-22T00:04Z	3	build	#4002	lane macOS build queued; SC-f unchanged (blocked poll 2)

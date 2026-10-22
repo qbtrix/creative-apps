@@ -34,6 +34,7 @@ Next: #4002 (head cbada801) merges via the lane, then a green ci.yml run (app=su
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T00:04Z: poll: #4002 lane macOS build 39695603914 queued on cbada801 (apps design,photo), not merged, no needs-fix. SC-f unchanged: #4238 (SC-14) open, SC-15/16 not opened; blocked poll 2 of 3 on AC-export-sheet
 - 2026-10-22T00:00Z: run act-1a160ca3d68-sbnc resumed from this record (Belt: status lives on this branch). AC-tools corrected from "done" to building: #4002 (AC-t1 Design/Photo + AC-t2 deletes) never merged. Merged origin/dev be9aa35b into #4002 (brings #4250's fix for dev's #3856 baseline), scripts/ci --changed PASS, pushed cbada801, Head line moved; mergeable clean, fast-lane. SC-f re-read: #4238 (SC-14) open and clean, SC-15/16 not opened; AC-e1 still waits
 - 2026-10-21T22:51Z: SC-14 opened as #4238 (open); SC-15, SC-16 not yet opened; no supervisor reply; AC-e1 still waits
 - 2026-10-21T22:20Z: #4019 (SC-13) merged into dev 22:09Z (lane note: dev red on its own, run 39682547538); no SC-14..16 PR yet; no supervisor reply; AC-e1 still waits
