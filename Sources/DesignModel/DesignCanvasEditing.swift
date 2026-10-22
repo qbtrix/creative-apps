@@ -52,7 +52,18 @@
 // The nudge step and its run key are SuiteKernel's `Nudge`, and the marquee's box
 // and the selection it leaves are its `Marquee` (adopt-kernel-selection AS-design). A press on
 // a full-size frame finds its handle with the kernel's `HandleHit` (adopt-kernel-transform
-// AT-d1). Linux-safe.
+// AT-d1), in the node's own unturned frame (`TransformRules.local`), so each handle hits where the
+// turned node shows it. The rotate knob above the top (`BoxMath.handles`) turns one selected layer
+// about its centre through `runTransform` (DT-5), Shift snapping to the kernel's
+// `BoxMath.snappedDegrees`; every sample rewinds as a service step does, so the drag is one step
+// (transform DT-u). The angle comes from libm's atan2 (Glibc/Musl/Darwin). Linux-safe.
+#if canImport(Glibc)
+import Glibc
+#elseif canImport(Musl)
+import Musl
+#elseif canImport(Darwin)
+import Darwin
+#endif
 import SuiteKernel
 
 /// A pointer gesture in progress, from its first `drag` to `endDrag`.
@@ -68,6 +79,8 @@ struct DesignGesture: Sendable, Equatable {
         case moveSeveral([String])
         /// Resize the box of these selected layers by its handle through `services.transforming`.
         case resizeSeveral([String], DesignHandle)
+        /// Turn the selected layer, whose box this was at the press, by the knob's sweep about its centre.
+        case turn(TransformBox)
         /// Duplicate these layers with the ids of this mint and drag the copies.
         case optionCopy([String], DesignIDMint)
         /// Draw a node of this kind (DesignDrawing).
@@ -101,26 +114,31 @@ extension DesignWorkspace {
     /// handles for a hidden subtree, #449) nearest `point` and within
     /// `handleTolerance` (Chebyshev distance) of where it shows (DesignRect.handles, a handle
     /// being `handleTolerance` across); corners win a tie. A press inside a compact node is never
-    /// a handle: its handles sit outside it, so the press moves it.
+    /// a handle: its handles sit outside it, so the press moves it. `point` is taken into the node's
+    /// unturned frame first, so a turned node's handles, knob included, hit where they show.
     public func handle(at point: DesignPoint) -> DesignHandle? {
         guard !hasMultipleSelection, let node = selectedNode, !isLockedInTree(node.id), !isHiddenInTree(node.id)
         else { return nil }
-        return handle(on: node.frame, at: point)
+        let local = TransformRules.local(Point(x: point.x, y: point.y), in: node.transformBox)
+        return handle(on: node.frame, at: DesignPoint(x: local.x, y: local.y))
     }
 
     /// With several layers selected, the handle of their box (`selectionBounds`) under `point`, as
-    /// `handle(at:)` finds one on a single layer; nil otherwise.
+    /// `handle(at:)` finds one on a single layer, but never the knob, which turns one layer; nil otherwise.
     func boxHandle(at point: DesignPoint) -> DesignHandle? {
         guard hasMultipleSelection, let box = selectionBounds else { return nil }
-        return handle(on: box, at: point)
+        return handle(on: box, at: point).flatMap { $0 == .rotate ? nil : $0 }
     }
 
-    /// A full-size frame asks the kernel's `HandleHit` (its inside and rotate knob are no Design
-    /// handle); a compact one tries its corners where they show, outside it.
+    /// A full-size frame asks the kernel's `HandleHit` (its inside is no Design handle), then the
+    /// knob's square; a compact one tries its corners and knob where they show, outside it.
     private func handle(on frame: DesignRect, at point: DesignPoint) -> DesignHandle? {
         guard frame.isCompact(handleSize: handleTolerance) else {
             let hit = HandleHit.handle(at: Point(x: point.x, y: point.y), in: frame.kernelRect, tolerance: handleTolerance)
-            return hit.flatMap(DesignHandle.init)
+            if let handle = hit.flatMap(DesignHandle.init) { return handle }
+            guard let knob = frame.handles(size: handleTolerance)[.rotate] else { return nil }
+            let distance = Swift.max((knob.x - point.x).magnitude, (knob.y - point.y).magnitude)
+            return distance <= handleTolerance ? .rotate : nil
         }
         let inside = point.x > frame.x && point.x < frame.maxX && point.y > frame.y && point.y < frame.maxY
         if inside { return nil }
@@ -215,7 +233,7 @@ extension DesignWorkspace {
             let found = services.marquee.layers(touching: rect, in: parent, on: page)
             selectedNodeIDs = Marquee.union(selectedNodeIDs, found, extending: false)
             for id in selectedNodeIDs { expandAncestors(of: id, in: page.nodes) }
-        case .moveSeveral, .resizeSeveral, .optionCopy:
+        case .moveSeveral, .resizeSeveral, .optionCopy, .turn:
             applyStep(&current, delta: delta, modifiers: modifiers)
         case .draw(let kind):
             let (from, to) = snapDraw(current, to: end, modifiers: modifiers)
@@ -262,6 +280,15 @@ extension DesignWorkspace {
                 }
                 apply(DesignEdit(name: "Duplicate", nodes: nodes, selection: copied.selection,
                                  coalescingKey: DesignEdit.runKey("option-drag", ids)), mint: mint)
+            case .turn(let box):
+                // The sweep from the press to the pointer about the centre, within ±180°.
+                let (c, end) = (box.box, DesignPoint(x: current.start.x + delta.x, y: current.start.y + delta.y))
+                let (cx, cy) = ((c.minX + c.maxX) / 2, (c.minY + c.maxY) / 2)
+                var turn = (atan2(end.y - cy, end.x - cx) - atan2(current.start.y - cy, current.start.x - cx)) * 180 / .pi
+                guard turn.isFinite else { return }
+                turn -= 360 * (turn / 360).rounded()
+                let degrees = BoxMath.snappedDegrees(box.degrees + turn, modifiers: modifiers.editModifiers)
+                runTransform(.rotate(by: degrees - box.degrees, drag: "knob"))
             default:
                 break
             }
@@ -380,7 +407,7 @@ extension DesignWorkspace {
         case .marquee(let frame):
             // A click without moving: the frame's background selects it; outside, nothing.
             if !done.moved, let frame { selectItem(frame) }
-        case .moveSeveral, .resizeSeveral, .optionCopy:
+        case .moveSeveral, .resizeSeveral, .optionCopy, .turn:
             break
         case .draw(let kind):
             record("Add \(kind.defaultName)", before: done.before)
@@ -407,7 +434,9 @@ extension DesignWorkspace {
         switch tool {
         case .move:
             let hit = hitTest(start)
-            if let handle = handle(at: start), let node = selectedNode {
+            if handle(at: start) == .rotate, let node = selectedNode {
+                route = .turn(node.transformBox)
+            } else if let handle = handle(at: start), let node = selectedNode {
                 route = .resize(node.id, handle, node.frame)
             } else if let handle = boxHandle(at: start) {
                 route = .resizeSeveral(ids, handle)

@@ -68,7 +68,7 @@ private func sample() throws -> DesignWorkspace {
     @Test func helpSaysWhyItCantTransform() throws {
         var workspace = try sample()
         #expect(workspace.transformSelection == workspace.treeNode("node-2")?.transformBox)
-        #expect(workspace.turnHelp == "Turning and mirroring a layer isn't built yet.")
+        #expect(workspace.turnHelp == nil)
         try workspace.setNodeLocked("node-2", true)
         #expect(workspace.turnHelp == workspace.lockHelp("node-2"))
         workspace.deselect()
@@ -76,12 +76,17 @@ private func sample() throws -> DesignWorkspace {
         #expect(workspace.turnHelp == "Select a layer first.")
     }
 
-    /// Object > Flip and Rotate 90° are off with the rows' reason until the catalog has the specs (DT-6).
+    /// Object > Flip and Rotate 90° are on over a layer (the catalog has the specs, DT-6) and off with
+    /// the rows' reason with nothing selected.
     @Test func objectItemsSayWhyTheyAreOff() throws {
-        let workspace = try sample()
+        var workspace = try sample()
+        for id in ["transform.flip", "transform.rotate"] {
+            #expect(DesignMenuState.spec(id).availability(DesignMenuState(workspace: workspace, hasWindow: true)) == .available)
+        }
+        workspace.deselect()
         let state = DesignMenuState(workspace: workspace, hasWindow: true)
         for id in ["transform.flip", "transform.rotate"] {
-            #expect(DesignMenuState.spec(id).availability(state) == .unavailable(workspace.turnHelp ?? ""))
+            #expect(DesignMenuState.spec(id).availability(state) == .unavailable("Select a layer first."))
         }
         #expect(DesignMenuState.spec("object.nothing").availability(state) == .unavailable("Design has no object.nothing command."))
         #expect(DesignControlID.all.contains(DesignControlID.inspectorFlip("horizontal")))

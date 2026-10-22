@@ -11,9 +11,9 @@
 // `halo.inspector.key.<raw>` stopwatch starts within 0.5 pt of the others
 // (one column), and each bar is wide enough for its title, the s gap and its
 // value inside its m padding. L5: HaloViewer hosted at the content minimum;
-// the status row's zoom, size, timecode and layer pills and the six
-// `halo.transport.*` controls overlap one another by 0 pt and stay inside the
-// row, and the timecode shows at its full width. A miss is a `finding` on
+// all six `halo.transport.*` controls show, left of the status row's zoom,
+// size, timecode and layer pills; none overlaps another by more than 0 pt or
+// leaves the row, and the timecode shows at its full width. A miss is a `finding` on
 // the view's owner, not a fix in the test. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -149,8 +149,10 @@ import Testing
         let host = try await AXHost(HaloViewer(model: project), size: size)
         defer { host.close() }
         var items: [(String, CGRect)] = []
+        // Every transport control stays at the minimum, so a mouse can still play and step (#4272).
         for id in ["start", "previous", "play", "next", "end", "loop"].map({ "halo.transport.\($0)" }) {
-            if let frame = host.frames(prefix: id)[id] { items.append((id, frame)) }
+            let frame = try #require(host.frames(prefix: id)[id], "\(id) is gone at \(size.width) pt")
+            items.append((id, frame))
         }
         let texts: [(String, (String) -> Bool)] = [
             ("zoom", { $0.hasPrefix("Zoom ") }), ("size", { $0 == comp.sizeText }),
@@ -173,6 +175,10 @@ import Testing
                 #expect(!overlap, "\(name) and \(other) overlap by \(across) pt: \(report)")
             }
         }
+        // Transport left, pills right.
+        let transportEnd = items.filter { $0.0.hasPrefix("halo.transport.") }.map(\.1.maxX).max() ?? 0
+        let pillsStart = items.filter { !$0.0.hasPrefix("halo.transport.") }.map(\.1.minX).min() ?? 0
+        #expect(transportEnd <= pillsStart + Self.statusOverlap + 0.001, "the transport isn't left of the pills: \(report)")
         let timecode = try #require(items.first { $0.0 == "timecode" }?.1, "no timecode at the content minimum: \(report)")
         let full = Self.fittingWidth(Text(verbatim: comp.statusTimecode).font(SuiteFont.pill))
         #expect(timecode.width >= full - Self.barTolerance, "the timecode is \(timecode.width) pt of its \(full): \(report)")
