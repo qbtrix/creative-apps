@@ -49,3 +49,4 @@ utc	stage	event	ref	note
 2026-10-22T07:19:32Z	poll	waiting	#4328 open; macOS build 39733072968 queued; flare journeys 39734406363 queued
 2026-10-22T07:47Z	fix	TK-flare #4328 round 1: macOS build failed (FlareInspector.swift:88 called keyState on FlareInspectorGeometry; it is on FlareGeometryRow). Fixed in 6f05c789, scripts/ci --changed PASS, Head moved.
 2026-10-22T08:11Z	poll	TK-flare #4328 head 6f05c789 macOS build 39744207685 queued; journeys 39734406363 still queued (TK-u critics wait).
+2026-10-22T08:31Z	poll	TK-flare macOS build 39744207685 still queued; journeys 39734406363 now running.
