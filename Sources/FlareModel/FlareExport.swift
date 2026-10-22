@@ -4,6 +4,7 @@
 // The setters change only an editing run, through the kernel's `begin` (rule 20: the run is the kernel's, never
 // app-local state); options are stored as given and `exportProblem` judges them, so Export is disabled with a reason.
 import FlareCore
+import SuiteKernel
 
 /// What the app's writer refused; the Model turns each into the sheet's sentence.
 public enum ExportWriteRefusal: Error, Equatable, Sendable {
@@ -29,11 +30,13 @@ extension FlareWorkspace {
         document.map { services.export.warnings($0, options: options) } ?? []
     }
 
-    /// Nil when Export can start; otherwise why not, in the sheet's words: no document, a scene that's gone, frames
-    /// outside the scene, a step under 1, a scale other than 1x or 2x (in that order). Nil while idle with a document.
+    /// Nil when Export can start; otherwise why not, in the sheet's words: no document, a format not built yet, a
+    /// scene that's gone, frames outside the scene, a step under 1, a scale other than 1x or 2x (in that order). Nil
+    /// while idle with a document.
     public var exportProblem: String? {
         guard document != nil else { return "Open or create an animation first." }
         guard let o = exportingOptions else { return nil }
+        if let why = o.format.unbuiltReason { return why }
         guard let scene = scenes.first(where: { $0.id == o.sceneID }) else { return "The scene to export is gone." }
         if o.frames.lowerBound < 0 || o.frames.upperBound >= scene.durationFrames {
             return Self.exportMessage(PNGExportError.frameOutOfRange(o.frames))
@@ -47,11 +50,17 @@ extension FlareWorkspace {
     public var exportFileCount: Int {
         guard exportProblem == nil, let o = exportingOptions else { return 0 }
         switch o.format {
-        case .svgFrame, .lottie: return 1
+        case .svgFrame, .lottie, .mp4, .gif: return 1
         case .pngSequence:
             guard let scene = scenes.first(where: { $0.id == o.sceneID }) else { return 0 }
             return (try? PNGExportPlan.plan(scene: scene, frames: o.frames, scale: o.scale, step: o.step))?.count ?? 0
         }
+    }
+
+    /// The run's frame rate for MP4 and GIF: the options' own, else the scene's; nil while idle or with the scene gone.
+    public var exportFrameRate: Int? {
+        guard let o = exportingOptions else { return nil }
+        return o.fps ?? scenes.first { $0.id == o.sceneID }?.fps
     }
 
     /// The finished run's line ("Exported scene-1.svg." or "Exported 7 files."); nil otherwise.
@@ -76,6 +85,15 @@ extension FlareWorkspace {
     /// Whether the editing run drops the background.
     public mutating func setExportTransparent(_ on: Bool) { editExport { $0.transparentBackground = on } }
 
+    /// The editing run's MP4 and GIF size, from the shared Size row.
+    public mutating func setExportSize(_ size: SuiteExportSize) { editExport { $0.size = size } }
+
+    /// The editing run's MP4 and GIF frame rate.
+    public mutating func setExportFrameRate(_ fps: Int) { editExport { $0.fps = fps } }
+
+    /// Whether the editing run's GIF loops forever.
+    public mutating func setExportLoop(_ on: Bool) { editExport { $0.loop = on } }
+
     /// Changes the editing run's options through the kernel's `begin`; every other state stays.
     private mutating func editExport(_ change: (inout ExportOptions) -> Void) {
         guard case .editing(var o) = exportState else { return }
@@ -94,6 +112,17 @@ extension FlareWorkspace {
         case PNGExportError.invalidStep: "The frame step must be 1 or more."
         case PNGExportError.invalidScale, PNGExportError.invalidSize: "That scale makes frames too small or too large to write."
         default: "The export couldn't be written."
+        }
+    }
+}
+
+extension ExportFormat {
+    /// Why this format can't export yet, the sentence the sheet and a refused run show; nil once it can.
+    public var unbuiltReason: String? {
+        switch self {
+        case .mp4: "MP4 lands with FV-3."
+        case .gif: "GIF lands with FV-3."
+        case .svgFrame, .lottie, .pngSequence: nil
         }
     }
 }

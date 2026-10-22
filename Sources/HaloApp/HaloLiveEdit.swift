@@ -22,6 +22,11 @@ import SwiftUI
     var project: HaloProject?
     /// The window's project now; HaloWindow sets it once it appears.
     @ObservationIgnored var current: @MainActor () -> HaloProject? = { nil }
+    /// The window's `haloRefreshLink`, which HaloWindow sets once it appears;
+    /// an inspector scrub paces its writes on it. A row reading the closure
+    /// from the environment would re-run whenever the window does, since
+    /// SwiftUI can't compare closures.
+    @ObservationIgnored var makeLink: HaloPlaybackDriver.LinkMaker = HaloScreenLink.make
 
     /// Shows the window's current project with `change` applied; nothing
     /// before the window has set `current`.
