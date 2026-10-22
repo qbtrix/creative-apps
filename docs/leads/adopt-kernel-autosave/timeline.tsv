@@ -1,0 +1,42 @@
+utc	stage	event	ref	note
+2026-10-21T01:21:08Z	0	stage-start	7277a83ac040f759d8bdefc150a72e7cdf2900d6	base 7277a83a, v3 packet
+2026-10-21T01:21:08Z	0	stage-end	#3713	lead branch and RECORD written
+2026-10-21T01:21:08Z	1	stage-end	adopt-kernel-autosave	packet read: slices and tasks recorded
+2026-10-21T01:21:08Z	3	stage-start	wave 1	AK-a builder
+2026-10-21T02:19Z	3	heartbeat	-	wave 1 PR open; wave 2 starting
+2026-10-21T02:19Z	3	pr-opened	#3835	AK-a app folders and legacy plan
+2026-10-21T02:19Z	3	stage-start	wave 2	AK-3 AK-5 AK-7
+2026-10-21T02:43Z	3	pr-opened	#3841	AK-7 Photo recovery root tests (disabled)
+2026-10-21T02:44Z	3	heartbeat	-	#3835 #3841 open clean; AK-3 AK-5 building; #3835 C4 description fix (#3837 rule) in gate
+2026-10-21T02:56Z	3	fix-pushed	#3835	C4 description kept as on dev; head d48dc817
+2026-10-21T03:02Z	3	pr-opened	#3842	AK-3 Flare recovery tests, stacked on #3835
+2026-10-21T03:02Z	3	pr-opened	#3848	AK-5 Library catalog tests, stacked on #3835
+2026-10-21T03:41Z	3	head-moved	#3841	merged #3835 fix; head 0e4d7dcd
+2026-10-21T03:41Z	3	mac-green	#3835	macOS build 39536987251 success
+2026-10-21T04:08Z	heartbeat	check	-	beat: #3835 AK-a macOS build 39536987251 green; waits on the lane's batch. Child
+2026-10-21T04:36Z	heartbeat	check	-	beat: #3835 AK-a built on macOS and is clean; the lane is batching (lane/batch-2
+2026-10-21T05:04Z	heartbeat	check	-	beat: #3835 still green and clean. Lane batch 20261021043428 (PRs #3466..#3703, 
+2026-10-21T05:30Z	heartbeat	check	-	beat: the lane integrated dev into #3835 (head 6b13c089) and dispatched macOS bu
+2026-10-21T05:40Z	AK-a	head-moved	#3835	gate PASS on 6b13c089
+2026-10-21T06:03Z	heartbeat	check	-	beat: #3835 macOS build 39549571625 green on 6b13c089, clean, Head: matches. Lan
+2026-10-21T06:30Z	heartbeat	check	-	beat: #3835 green and clean on 6b13c089. The lane landed batch 20261021053311 at
+2026-10-21T06:58Z	heartbeat	check	-	#3835 AK-a in lane batch 20261021065242 (Linux check 39558186618 running); children #3841 #3842 #3848 wait on it.
+2026-10-21T07:24Z	heartbeat	check	-	batch 20261021065242 red; bisect shows prefix 2 green and prefix 3 red (culprit #3823, not ours); #3835 rolls into the next batch.
+2026-10-21T07:53Z	heartbeat	check	-	#3835 AK-a MERGED to dev. Children #3841 #3842 #3848: merged dev in (new heads 4a8bfbd5 d3f55929 90df1e9b), retargeted to dev, gating.
+2026-10-21T08:06Z	heartbeat	gate	-	#3841 #3842 #3848 gated CI: PASS on the dev-merged heads, base dev, Head: lines moved; diffs 148/176/102 lines.
+2026-10-21T08:33Z	heartbeat	check	-	AK-a squash 7d5845e7 is in dev CI 39568091135 (733e8ef2, queued); Belt-Slice-Done for AK-a after it is green. Children's macOS builds: #3848 success, #3841 running, #3842 queued.
+2026-10-21T09:01Z	heartbeat	check	-	dev CI 39568091135 still queued; newer dev CI 39573184415 (296186f4) pending, either green run posts AK-a done. #3841 macOS build green, #3842 build queued, #3848 waits batch.
+2026-10-21T09:29Z	heartbeat	check	-	dev red #3856 (Design mutation anchors DY-a in DesignCanvasEditing, not this line); AK-a Belt-Slice-Done waits a green dev run. #3841 and #3842 macOS builds green; #3841/#3842/#3848 wait lane batch.
+2026-10-21T10:02Z	heartbeat	check	-	#3848 AK-library merged. #3841/#3842 macOS green, wait lane batch. Dev still red #3856 (Design anchors), so AK-a Belt-Slice-Done waits.
+2026-10-21T10:36Z	heartbeat	check	-	Belt-Slice-Done AK-a posted on #3713 (run 39568091135, Linux green; macOS red on UnsavedGuardTests is not AK-a's). AK-4 builder started (AH-8 #3629 merged, which is the task's dependency). AK-6 waits on spine feature-done; AK-8 on PH-z.
+2026-10-21T10:54Z	pr	AK-flare	#4010	opened, fast-lane
+2026-10-21T11:00Z	critic	AK-flare	#4010	1 blocking, fix round 1; finding #4015
+2026-10-21T11:03Z	heartbeat	check	-	#4010 (AK-flare) in fix round 1; AK-6/8/9/10 still blocked on spine, PH-z, DA-z/HA-z and AH-10
+2026-10-21T11:10Z	fix	AK-flare	#4010	round 1 pushed e284d05a; gap #4018; critic round 2
+2026-10-21T11:19Z	AK-flare	fix-round-2	#4010 legacy move under ignore-state
+2026-10-21T11:24Z	AK-flare	fix-round-2-pushed	#4010 ba534cf4
+2026-10-21T11:30Z	heartbeat		Heartbeat: #4010 at ba534cf4 waits on the lane's per-PR macOS build (dispatched 11:30Z); fix rounds used up. #4015 the only open AK finding. AK-6/8/9/10 still blocked.
+2026-10-21T11:57Z	heartbeat		Heartbeat: #4010 ba534cf4 macOS build (run 39592399191) still queued; no needs-fix.
+2026-10-21T12:25Z	heartbeat		Heartbeat: #4010 ba534cf4 macOS build (run 39592399191) green; waits on the lane's merge sweep.
+2026-10-21T12:52Z	heartbeat	heartbeat: #4010 AK-flare macOS build green, waits on lane merge sweep; #4015 only open finding; AK-6/8/9/10 blocked
+2026-10-22T13:04Z	relaunch		run act-1a163b2abfe-f182: AH-z merged so AK-10 builds; #4010 merge-dev fixer; #4015 fix
