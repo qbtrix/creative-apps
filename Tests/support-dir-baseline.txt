@@ -1,5 +1,4 @@
 # Files under Sources/ that still name the Application Support directory (adopt-kernel-autosave rule 20).
 # SupportFolderRatchetTests fails on a hit not listed here. Shrink only; AK-11 deletes this file.
-Sources/FlareApp/FlareRecovery.swift
 Sources/LibraryApp/Platform/CatalogStore.swift
 Sources/PhotoModel/Live/LiveRecovery.swift
