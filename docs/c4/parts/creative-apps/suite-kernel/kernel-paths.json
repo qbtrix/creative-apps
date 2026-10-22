@@ -1,0 +1,10 @@
+{
+  "id": "kernel-paths",
+  "name": "Paths",
+  "description": "Paths/: the suite's one path model. VectorPath, VectorAnchor, VectorContour and AnchorKind as FlareCore's Path, PathAnchor, PathContour and AnchorKind under kernel names, AnchorRef, HandleEnd, PathHit, PenDraft, PathInEdit and the PathEditTarget protocol an app's workspace conforms to; PenRules (the Pen's add, close, finish and degenerate rules, Flare's moved), AnchorEdit (move points and handles, insert, remove, convert, snap), AnchorIndex (anchors and handles on a 64-point grid for hover and marquee); PathIntent (the Pen's and point editor's gestures as commands) and PathCommands (the twelve path.* command specs every app registers). pen-paths PN-1 declares them as stubs (specs with real ids, schemas and availability); PN-5, PN-6 and PN-7 fill the bodies.",
+  "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+  "paths": [
+    "Sources/SuiteKernel/Paths/"
+  ],
+  "order": 115
+}

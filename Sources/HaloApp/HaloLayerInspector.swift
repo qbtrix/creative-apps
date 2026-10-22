@@ -1,6 +1,8 @@
 // HaloLayerInspector.swift: the selected layer in Halo's inspector: its
 // header (`selectedLayerHeader`), the TRANSFORM group, a refusal's caption,
-// the LAYER group, then the EASING and TEXT slots. TRANSFORM has one InspectorSliderRow per
+// the LAYER group, FILL for a solid or shape (HaloFillInspector, its
+// gestures to `runFill`), STROKE for a shape (HaloStrokeInspector, its
+// gestures to `runStroke`), then the EASING and TEXT slots. TRANSFORM has one InspectorSliderRow per
 // `propertyRows` row (shown value, range, step, unit, decimals; keyed while
 // a key sits at the playhead) with a KeyframeButton beside it, or under it
 // when the full titles and widest typical values (`widestTypicalText`) don't
@@ -8,11 +10,14 @@
 // picks per row from the width it gets, against `besideWidth`): the
 // stopwatch sends .toggleAnimation, the diamond .toggleKey. A scrub shows
 // its value in the bar and puts the window's project with it set
-// (`setProperty` on a copy, HaloLiveEdit.show) in the window's HaloLiveEdit, so only the bar and
-// the viewer's layers re-run per sample; once it ends (a drag, a key, a typed
-// value) the row sends .setProperty with the stored value and
+// (`setProperty` on a copy, HaloLiveEdit.show) in the window's HaloLiveEdit,
+// at most once per screen refresh (HaloInspectorScrubLink, #4275), so only the
+// bar and the viewer's layers re-run, once a refresh; once it ends (a drag, a
+// key, a typed value) the row sends .setProperty with the stored value and
 // .endPropertyScrub, one step. Hosted without a HaloLiveEdit, each value is
-// sent as it comes.
+// sent as it comes. Under `-SuitePerfProbe` every pointer sample of a drag on
+// the bar, whether or not it changes the value, records one `inspector-scrub`
+// sample, shown by the refresh that writes it (HaloProbe).
 // Each row is `halo.inspector.row.<raw>` and reads its value as text
 // (XCUITest reads values empty otherwise, #262); its stopwatch is
 // `halo.inspector.key.<raw>`, labelled "Animate <title>" with the key state
@@ -28,12 +33,17 @@
 // With no layer selected nothing shows here (HaloCompositionInspector shows
 // the composition instead).
 import HaloModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
 struct HaloLayerInspector: View {
     let model: HaloProject
     var perform: @MainActor (HaloCommand) -> Void = { _ in }
+    /// Runs one fill editor gesture on the window's project (`HaloProject.runFill`).
+    var runFill: @MainActor (GradientIntent) -> Void = { _ in }
+    /// Runs one stroke editor gesture on the window's project (`HaloProject.runStroke`).
+    var runStroke: @MainActor (StrokeIntent) -> Void = { _ in }
 
     var body: some View {
         if let header = model.selectedLayerHeader {
@@ -51,6 +61,12 @@ struct HaloLayerInspector: View {
                 }
                 if let layer = model.selectedLayer {
                     HaloLayerGroup(layer: layer, model: model, perform: perform)
+                    if HaloFillInspector.shows(layer.kind) {
+                        HaloFillInspector(model: model, perform: perform, runFill: runFill)
+                    }
+                    if HaloStrokeInspector.shows(layer.kind) {
+                        HaloStrokeInspector(model: model, runStroke: runStroke)
+                    }
                 }
                 HaloEasingInspector(model: model, perform: perform)
                 HaloTextInspector(model: model, perform: perform)
@@ -95,6 +111,10 @@ struct HaloPropertyRowView: View, Equatable {
     /// The bar's shown value while a scrub lasts; nil otherwise.
     @State private var scrubbed: Double?
     @Environment(\.haloLiveEdit) private var live
+    @Environment(\.suiteProbeRecorder) private var recorder
+    @Environment(\.haloRefreshLink) private var makeLink
+    /// The scrub's refresh-paced writes; made by the first sample of a scrub.
+    @State private var scrubLink: HaloInspectorScrubLink?
 
     #if DEBUG
     /// How many times a row's body ran; HaloWindowPlaybackTests counts playback's.
@@ -129,24 +149,34 @@ struct HaloPropertyRowView: View, Equatable {
             decimals: p.decimals, keyed: row.keyState == .keyedHere,
             onChange: { scrub(to: $0) },
             onEnd: {
+                scrubLink?.end()
                 if live != nil, let scrubbed { perform(.setProperty(p, p.stored(fromShown: scrubbed))) }
                 perform(.endPropertyScrub)
                 scrubbed = nil
                 live?.project = nil
             })
+            .simultaneousGesture(DragGesture(minimumDistance: 2).onChanged { _ in scrub(to: nil) })
             .disabled(rowHelp != nil)
             .help(rowHelp ?? p.title)
             .accessibilityValue(Text(verbatim: row.text))
             .haloControl(id: "halo.inspector.row.\(p.rawValue)", enabled: rowHelp == nil, help: rowHelp)
     }
 
-    /// One scrub value: the bar shows it and the viewer draws the window's
-    /// project with it set; the window gets it at the scrub's end.
-    private func scrub(to shown: Double) {
+    /// One scrub sample: a new value (the bar shows it at once, the viewer
+    /// draws the window's project with it set on the next refresh; the window
+    /// gets it at the scrub's end), or nil for a drag move that kept it.
+    private func scrub(to shown: Double?) {
         let p = row.property
-        scrubbed = shown
-        guard let live else { return perform(.setProperty(p, p.stored(fromShown: shown))) }
-        live.show { $0.setProperty(p, to: p.stored(fromShown: shown)) }
+        if let shown { scrubbed = shown }
+        guard let live else {
+            if let shown { perform(.setProperty(p, p.stored(fromShown: shown))) }
+            return HaloProbe(recorder).sample(HaloProbe.inspectorScrub)
+        }
+        let link = scrubLink ?? HaloInspectorScrubLink()
+        if scrubLink == nil { scrubLink = link }
+        link.take(shown, probe: HaloProbe(recorder), makeLink: makeLink) { value in
+            live.show { $0.setProperty(p, to: p.stored(fromShown: value)) }
+        }
     }
 
     /// The property's stopwatch and key diamond. KeyframeButton sets both
@@ -174,7 +204,7 @@ struct HaloPropertyRowView: View, Equatable {
         + SuiteSpacing.xs + 2 * SuiteSize.keyframeButton
 
     /// HaloModel's key state as SuiteUI's, one to one.
-    static func keyState(_ state: HaloKeyState) -> KeyState {
+    static func keyState(_ state: HaloKeyState) -> SuiteUI.KeyState {
         switch state {
         case .notAnimated: .idle
         case .animated: .animated

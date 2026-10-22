@@ -1,0 +1,14 @@
+# Tests/render-contract-baseline.txt: render-contract hits that predate the lint,
+# grandfathered (docs/render-contract.md). Written by scripts/check-render-contract
+# --update-baseline, never by hand. It only shrinks: fix the hit (or register a real
+# CPU op in Tests/render-cpu-ops.txt and mark it) and drop its line in the same PR.
+# Line: `path::Scope.rule`, rule one of drawingGroup, compositingGroup, ImagePaint,
+# Canvas, gpu-nil, readback.
+Sources/DesignApp/DesignCanvasMarks.swift::DesignArtwork.Canvas
+Sources/FlareApp/FlareStage.swift::FlareStage.drawingGroup
+Sources/FlareApp/FlareStage.swift::FlareStageArt.Canvas
+Sources/HaloApp/HaloViewerCanvas.swift::HaloDrawnLayers.Canvas
+Sources/HaloApp/HaloViewerCanvas.swift::HaloDrawnLayers.drawingGroup
+Sources/PhotoModel/PhotoRenderRoute.swift::applied.readback
+Sources/PhotoModel/PhotoRenderRoute.swift::composited.readback
+Sources/PhotoModel/PhotoRenderRoute.swift::residentComposited.gpu-nil

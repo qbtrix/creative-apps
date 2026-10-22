@@ -15,6 +15,7 @@
 // `suiteReduceMotion` on its components (SJ15, SJ20), and
 // `-SuiteGalleryFakes` swaps each conformance the page uses for IC-1's Fake.
 // `notes` draws InspectorNote in both kinds, inset like the rows.
+// `stroke-editor` (stroke-style SS-2) lives in GalleryStrokeEditor.swift.
 // The easing curve's samples come from the kernel's `EaseCurve`, so the
 // drawn line is empty until EK-15 fills that stub; the handles still drag.
 import enum SuiteKernel.EaseCurve
@@ -25,6 +26,7 @@ enum GalleryInspector {
         "inspector": { AnyView(GalleryInspectorPage()) },
         "curves": { AnyView(GalleryCurvesPage()) },
         "notes": { AnyView(GalleryNotesPage()) },
+        GalleryStrokeEditor.name: { AnyView(GalleryStrokeEditorPage()) },
     ]
 
     /// The Onion chip's tooltip: what onion skin does, not its label again.

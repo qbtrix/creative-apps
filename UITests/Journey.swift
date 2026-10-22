@@ -36,13 +36,13 @@ struct Journey {
     let name: String
     let test: XCTestCase
 
-    /// Launches `.build/apps/<appName>App.app` fresh, with no restored windows
-    /// and `arguments` added to its launch arguments. Shots and the audit tally
-    /// go under `name`; nil means the app's name in lower case.
-    init(_ appName: String, _ test: XCTestCase, name: String? = nil, arguments: [String] = []) {
+    /// Launches `.build/apps/<appName>App.app` (or `bundle`) fresh, with no
+    /// restored windows and `arguments` added to its launch arguments. Shots
+    /// and the audit tally go under `name`; nil means the app's name in lower case.
+    init(_ appName: String, _ test: XCTestCase, name: String? = nil, arguments: [String] = [], bundle: URL? = nil) {
         // This file is UITests/Journey.swift, so its grandparent is the repo root.
         let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
-        app = XCUIApplication(url: root.appending(path: ".build/apps/\(appName)App.app"))
+        app = XCUIApplication(url: bundle ?? root.appending(path: ".build/apps/\(appName)App.app"))
         self.name = name ?? appName.lowercased()
         self.test = test
         test.continueAfterFailure = false

@@ -1,18 +1,40 @@
 // FakeCanvasDocument.swift (command-catalog CC-2): a Linux headless document of named rects, with the six
-// commands the catalog's tests, the gallery page, the afterglow CLI and the MCP server drive before any app adopts.
+// commands the catalog's tests, the gallery page, the afterglow CLI and the MCP server drive before any app adopts;
+// file-flow SF-9 adds the five file-flow commands over fixed readers, so RJ-X43 runs `file.drop` on the CLI;
+// gradient-fill GF-9 gives each rect an optional fill and lists the eight fill commands, so RJ-X30 runs on the CLI;
+// autosave-history AH-9 lists `history.read` and `history.jump` over its one History, so RJ-X31 runs on the CLI.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
 
-/// One named rect on the fake canvas; a locked one refuses move and remove.
+/// One named rect on the fake canvas; a locked one refuses move, remove and a fill.
 public struct FakeRect: Codable, Hashable, Sendable {
     /// The rect's id, its name ("Rect 1"), its frame and whether it is locked.
     public var id: Int, name: String, x, y, w, h: Double, locked: Bool
-    public init(id: Int, name: String, x: Double, y: Double, w: Double, h: Double, locked: Bool = false) {
-        (self.id, self.name, self.x, self.y, self.w, self.h, self.locked) = (id, name, x, y, w, h, locked)
+    /// The rect's fill, its points in the rect's own box (0, 0, w, h); nil reads as solid black and is left out of
+    /// the JSON, so a rect with no fill saves what it did before fills.
+    public var fill: Fill?
+    public init(id: Int, name: String, x: Double, y: Double, w: Double, h: Double, locked: Bool = false, fill: Fill? = nil) {
+        (self.id, self.name, self.x, self.y, self.w, self.h, self.locked, self.fill) = (id, name, x, y, w, h, locked, fill)
     }
+    private enum CodingKeys: String, CodingKey { case id, name, x, y, w, h, locked, fill }
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(id: try c.decode(Int.self, forKey: .id), name: try c.decode(String.self, forKey: .name),
+                  x: try c.decode(Double.self, forKey: .x), y: try c.decode(Double.self, forKey: .y),
+                  w: try c.decode(Double.self, forKey: .w), h: try c.decode(Double.self, forKey: .h),
+                  locked: try c.decode(Bool.self, forKey: .locked), fill: try c.decodeIfPresent(Fill.self, forKey: .fill))
+    }
+    public func encode(to encoder: any Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id); try c.encode(name, forKey: .name); try c.encode(x, forKey: .x); try c.encode(y, forKey: .y)
+        try c.encode(w, forKey: .w); try c.encode(h, forKey: .h); try c.encode(locked, forKey: .locked)
+        try c.encodeIfPresent(fill, forKey: .fill)
+    }
+    /// The box the rect's fill points are in: its own frame from the origin.
+    public var fillBox: Rect { Rect(minX: 0, minY: 0, maxX: w, maxY: h) }
 }
 
 /// A headless document of named rects, a selection and one history: the catalog's fake app ("fake").
@@ -46,12 +68,23 @@ public struct FakeCanvasDocument: HeadlessDocument {
 
     /// The rects back to front, the selected rect's id, and the history whose steps hold the rects to go back to.
     public private(set) var rects: [FakeRect], selection: Int?, history = History<[FakeRect]>()
-    public init(rects: [FakeRect] = [], selection: Int? = nil) { (self.rects, self.selection) = (rects, selection) }
+    /// The fake's recent files, newest first; Clear Menu empties them.
+    public private(set) var recents: [RecentFileEntry]
+    public init(rects: [FakeRect] = [], selection: Int? = nil, recents: [RecentFileEntry] = []) {
+        (self.rects, self.selection, self.recents) = (rects, selection, recents)
+    }
 
-    /// The document every example runs on: "Rect 1" selected and free, "Rect 2" locked.
-    public static let fixture = FakeCanvasDocument(rects: [FakeRect(id: 1, name: "Rect 1", x: 10, y: 10, w: 100, h: 60),
+    /// The document every example runs on: "Rect 1" selected and free, with a three-stop linear fill so every fill
+    /// example runs on it, and "Rect 2" locked.
+    public static let fixture = FakeCanvasDocument(rects: [FakeRect(id: 1, name: "Rect 1", x: 10, y: 10, w: 100, h: 60, fill: fixtureFill),
                                                            FakeRect(id: 2, name: "Rect 2", x: 140, y: 40, w: 80, h: 80, locked: true)],
-                                                   selection: 1)
+                                                   selection: 1, recents: [example])
+    /// The fixture's one recent file, the file-flow examples' `path:/tmp/example`.
+    static let example = RecentFileEntry(fileID: "path:/tmp/example", name: "example", path: "/tmp/example", app: app,
+                                         lastUsed: Date(timeIntervalSince1970: 0))
+    /// Rect 1's fill: blue, white and black, left to right across its box.
+    static let fixtureFill = Fill.linear(stops: [GradientStop(offset: 0, color: FillColor(r: 0, g: 0, b: 1)), GradientStop(offset: 0.5, color: .white),
+                                                 GradientStop(offset: 1, color: .black)], start: Point(x: 0, y: 30), end: Point(x: 100, y: 30))
     public static let app = "fake", openExtensions = ["fake"], exportFormats = ["json"]
 
     /// The selected rect, nil when nothing is selected.
@@ -121,8 +154,12 @@ public struct FakeCanvasDocument: HeadlessDocument {
         .object(["rects": .number(Double(rects.count)), "selected": selected.map { .string($0.name) } ?? .null])
     }
 
-    /// The fake's eight ids: its six commands plus `edit.undo` and `edit.redo`. Empty only if an id were refused.
-    public static let catalog = (try? CommandCatalog<FakeCanvasDocument>(app: app, specs, history: { $0.history })) ?? .empty(app: app)
+    /// The fake's twenty-three ids: its six commands, `edit.undo` and `edit.redo`, the five file-flow commands, the
+    /// eight fill commands and the two history commands. Empty only if an id were refused.
+    public static let catalog = (try? CommandCatalog<FakeCanvasDocument>(
+        app: app, specs + FileFlowCommands.specs(FakeCanvasDocument.self) + GradientCommands.specs(FakeCanvasDocument.self)
+            + HistoryCommands.specs(FakeCanvasDocument.self),
+        history: { $0.history })) ?? .empty(app: app)
     /// A rect's result schema.
     static let rectSchema = ParamSchema.object(["id": .integer(), "name": .string(), "x": .number(), "y": .number(),
                                                 "w": .number(), "h": .number(), "locked": .boolean],
@@ -149,6 +186,70 @@ public struct FakeCanvasDocument: HeadlessDocument {
         .typed("edit.redo", title: "Redo", summary: "Redoes the last undone edit.", kind: .view, params: NoParams.self, example: .object([:]),
                availability: { $0.history.canRedo ? .available : .unavailable("There is nothing to redo.") }) { doc, _ in doc.step(redo: true) },
     ]
+}
+
+/// The fake as a file-flow target: it reads `.fake`, places `.png` as a rect named after the file, and hands its
+/// document to Halo. Its readers are a fixed table, never the suite's routing; nothing leaves the process.
+extension FakeCanvasDocument: FileFlowTarget {
+    /// The apps that read each extension the fake knows, default first.
+    static let readerTable: [String: [String]] = ["fake": ["fake"], "halo": ["halo"], "png": ["photo", "design", "fake"]]
+    public var appID: String { Self.app }
+    public var recentFiles: [RecentFileEntry] { recents }
+    public var hasDocument: Bool { true }
+    public var placesExtensions: Set<String> { ["png"] }
+    public var openInApps: [String] { ["halo"] }
+    public var openInHelp: String? { nil }
+    public func readers(ofExtension ext: String) -> [String] { Self.readerTable[ext] ?? [] }
+    /// Moves the file to the top of the list; the fake has no window to open it in.
+    public mutating func openRecent(_ fileID: String) throws {
+        guard let index = recents.firstIndex(where: { $0.fileID == fileID }) else { return }
+        recents.insert(recents.remove(at: index), at: 0)
+    }
+    public mutating func clearRecent() throws { recents = [] }
+    /// The fake has no other app to hand to, so Open In changes nothing.
+    public mutating func openIn(_ app: String) throws {}
+    /// Places each `.place` file as a 100 by 100 rect named after it, all as one "Place" step; opens and hand-offs
+    /// have no other window to go to in the fake, and refusals change nothing.
+    public mutating func perform(_ actions: [DropAction]) throws {
+        let placed = actions.compactMap { action -> String? in
+            guard case .place(let path) = action else { return nil }
+            return path.split(separator: "/").last.map(String.init) ?? path
+        }
+        guard !placed.isEmpty else { return }
+        history.record("Place", rects)
+        for name in placed {
+            let id = (rects.map(\.id).max() ?? 0) + 1
+            rects.append(FakeRect(id: id, name: name, x: 0, y: 0, w: 100, h: 100)); selection = id
+        }
+    }
+}
+
+/// The fake as a fill target: the selected rect's fill in its own box; a locked rect refuses with its reason.
+extension FakeCanvasDocument: GradientFillTarget {
+    public var fillSelection: FillSelection? { selected.map { FillSelection(fill: $0.fill ?? .solid(.black), box: $0.fillBox) } }
+    public var fillHelp: String? { editable.why }
+    /// Sets the selected rect's fill, mapped from `box` to its own, as the step `name` (one per `drag` token).
+    public mutating func setFill(_ fill: Fill, in box: Rect, name: String, drag: String?) throws {
+        let index = try editableIndex("fill")
+        history.record(name, rects, key: drag.map { "\(name):\($0)" })
+        rects[index].fill = GradientRules.mapped(fill, from: box, to: rects[index].fillBox)
+    }
+}
+
+/// The fake as the History panel's target: its one History listed from "Open", and a jump through the kernel's
+/// `jumpEndingRun`, so a jump records no step and the next edit never folds into the step it landed on.
+extension FakeCanvasDocument: HistoryJumping {
+    public var historyListing: HistoryListing { history.listing(base: "Open") }
+    /// Undoes or redoes until `index` steps are applied; an index outside `0...steps.count` throws and changes nothing.
+    public mutating func jumpHistory(to index: Int) throws {
+        guard (0...history.steps.count).contains(index) else {
+            throw CatalogError.failed(id: "history.jump", message: "There is no step \(index).")
+        }
+        var current = rects
+        history.jumpEndingRun(to: index) { old in defer { current = old }; return current }
+        rects = current
+        if !rects.contains(where: { $0.id == selection }) { selection = nil }
+    }
 }
 
 extension CommandCatalog {

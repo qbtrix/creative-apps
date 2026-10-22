@@ -1,0 +1,7 @@
+[
+  {"label": "savedIgnored: the listing's saved step is the kernel's default, which Photo never moves", "file": "Sources/PhotoModel/PhotoHistory+Kernel.swift", "find": "kernel.savedStepID = savedStepID ?? Self.neverSavedToken", "replace": "kernel.savedStepID = 0", "tests": "PhotoHistoryJumpTests"},
+  {"label": "neverSavedIsCurrent: a never-saved image lists its current step as saved", "file": "Sources/PhotoModel/PhotoHistory+Kernel.swift", "find": "savedStepID ?? Self.neverSavedToken", "replace": "savedStepID ?? currentStepID", "tests": "PhotoHistoryJumpTests"},
+  {"label": "jumpEndsRun: the jump moves without ending the open run", "file": "Sources/PhotoModel/PhotoHistory+Kernel.swift", "find": "        endAdjust()\n        jumpToHistoryStep(index)", "replace": "        jumpToHistoryStep(index)", "tests": "PhotoHistoryJumpTests"},
+  {"label": "jumpRecordsNothing: the jump records a step of its own", "file": "Sources/PhotoModel/PhotoHistory+Kernel.swift", "find": "jumpToHistoryStep(index)\n", "replace": "jumpToHistoryStep(index)\n        recordLayers(named: \"Jump\")\n", "tests": "PhotoHistoryJumpTests"},
+  {"label": "baseIsOpen: the listing names the base \"\"", "file": "Sources/PhotoModel/PhotoHistory+Kernel.swift", "find": "kernel.listing(base: history.baseName)", "replace": "kernel.listing(base: \"\")", "tests": "PhotoHistoryJumpTests"}
+]

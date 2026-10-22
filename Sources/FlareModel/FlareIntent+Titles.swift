@@ -90,6 +90,7 @@ extension FlareIntent.Tools {
             case .pen: "Pen"
             case .rectangle: "Rectangle"
             case .ellipse: "Ellipse"
+            case .shape: "Shape"
             }
         case .finishPath: "Finish Path"
         }
@@ -127,6 +128,7 @@ extension FlareIntent.Inspector {
         case .setFill: "Fill"
         case .setStrokeColor: "Stroke Color"
         case .setStrokeWidth: "Stroke Width"
+        case .scrubStrokeWidth: "Scrub Stroke Width"
         case .setStrokeCap: "Stroke Cap"
         case .setStrokeJoin: "Stroke Join"
         case .setSceneSize: "Scene Size"
@@ -135,6 +137,7 @@ extension FlareIntent.Inspector {
         case .easingPreset: "Easing"
         case .easingHandle: "Move Easing Handle"
         case .endEasingHandle: "End Easing Handle"
+        case .runFill: "Edit Fill"
         }
     }
 }
@@ -160,6 +163,7 @@ extension FlareIntent.Timeline {
         case .insertFrames: "Insert Frame"
         case .removeFrames: "Remove Frame"
         case .setLabel: "Add Label"
+        case .selectAllKeys: "Select All Keys"
         }
     }
 }

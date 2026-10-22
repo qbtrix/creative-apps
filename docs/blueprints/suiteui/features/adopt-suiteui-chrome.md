@@ -35,7 +35,7 @@ section the deleted file served (unchanged behaviour).
 | AC-colour | Design, Photo, Flare and Halo keep their file-format colour types but parse, format and pick through `HexColor` and `ColorWell`; the hex parser gets its tests. | AC-c1, AC-c2 | MJ-AC-colour | editor-kernel:EK-a, adopt-kernel-brush:AB-photo, adopt-suiteui-chrome:AC-zoom |
 | AC-tools | Flare, Design and Photo pick a tool from a key and read modifiers through SuiteUI's `ToolKeys`; the three letter lookups and three `NSEvent.modifierFlags` conversions are deleted. | AC-t1, AC-t2 | MJ-AC-tools | editor-kernel:EK-chrome, adopt-suiteui-chrome:AC-colour |
 | AC-guides | Flare's rulers and guides toggles do something: guides draw through `CanvasMarks` and the stub view is deleted; the rulers flag is filed on canvas-marks. | AC-g1, AC-g2 | MJ-AC-guides | editor-kernel:EK-a |
-| AC-export-sheet | Photo's, Library's and Flare's export sheets are SuiteUI's `ExportSheet` over each app's `ExportRun`, and the three app sheets are deleted. | AC-e1, AC-e2 | MJ-AC-export-sheet | editor-kernel:EK-chrome, adopt-kernel-export:AX-photo, adopt-kernel-export:AX-library, adopt-kernel-export:AX-flare |
+| AC-export-sheet | Photo's, Library's and Flare's export sheets are SuiteUI's `ExportSheet` over each app's `ExportRun`, and the three app sheets are deleted. | AC-e1, AC-e2 | MJ-AC-export-sheet | editor-kernel:EK-chrome, adopt-kernel-export:AX-photo, adopt-kernel-export:AX-library, adopt-kernel-export:AX-flare; shared-codecs:SC-f (AC-e1, AC-e2: the format registry first, 2026-10-21) |
 
 There is no new screen (`"ui_slice": "none"`); a slice that touches
 `Sources/*App/` (a layers panel becoming `LayerTreeList`, an autosave file) is

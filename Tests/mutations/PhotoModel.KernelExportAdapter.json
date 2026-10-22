@@ -1,0 +1,37 @@
+[
+  {
+    "label": "dropsEnd: endExport never forwards the write's outcome to the kernel's end, so the run Export started never finishes",
+    "file": "Sources/PhotoModel/PhotoExportRun+Kernel.swift",
+    "find": "        exportRun.end(outcome)\n",
+    "replace": "        _ = outcome\n",
+    "tests": "PhotoExportRunTests"
+  },
+  {
+    "label": "refusalIsSuccess: startExport reports true when the kernel's start refuses (no sheet open)",
+    "file": "Sources/PhotoModel/PhotoExportRun+Kernel.swift",
+    "find": "        guard isExportSheetOpen else { return false }\n",
+    "replace": "        guard isExportSheetOpen else { return true }\n",
+    "tests": "PhotoExportRunTests"
+  },
+  {
+    "label": "openRefusalIsSuccess: openExport skips the image check, so Export… opens the sheet with no image",
+    "file": "Sources/PhotoModel/PhotoExportRun+Kernel.swift",
+    "find": "        guard canvas != nil else { return false }\n",
+    "replace": "",
+    "tests": "PhotoExportRunTests"
+  },
+  {
+    "label": "runningOpenIsSuccess: openExport reports true over a running write the kernel's begin refuses",
+    "file": "Sources/PhotoModel/PhotoExportRun+Kernel.swift",
+    "find": "        return exportRun.begin(exportOptions)\n",
+    "replace": "        _ = exportRun.begin(exportOptions)\n        return true\n",
+    "tests": "PhotoExportRunTests"
+  },
+  {
+    "label": "dropsChoice: startExport starts on the last choices, not the sheet's",
+    "file": "Sources/PhotoModel/PhotoExportRun+Kernel.swift",
+    "find": "        _ = exportRun.begin(o)\n",
+    "replace": "",
+    "tests": "PhotoExportRunTests"
+  }
+]

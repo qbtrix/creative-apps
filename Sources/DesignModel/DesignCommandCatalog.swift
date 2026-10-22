@@ -2,7 +2,10 @@
 // DesignWorkspace, so a menu, the afterglow CLI and an agent run one path. Each spec's availability is the help the
 // window shows today and its run is today's method: every DesignCommand through `help(_:)` and `run(_:)`, the palette
 // tools through `unavailableHelp` and `selectTool`, the pages through `addPageHelp`/`deletePageHelp`, and the file
-// actions through the toolbar's help. Ids are `<menu>.<action>` in lowercase; Tests/command-ids/design.txt keeps them. Linux-safe.
+// actions through the toolbar's help. The History panel's history.read and history.jump are SuiteKernel's
+// HistoryCommands on the workspace's HistoryJumping adapter (autosave-history DA-6); the six transform.* are
+// SuiteKernel's TransformCommands on its TransformTarget (transform DT-6); color.sample is SampleCommands on its
+// SampleTarget and color.pick the Eyedropper's click (eyedropper DY-6). Ids are `<menu>.<action>` in lowercase; Tests/command-ids/design.txt keeps them. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -22,9 +25,13 @@ extension DesignWorkspace {
     struct NameParams: Codable, Sendable { var name: String }
     struct TextParams: Codable, Sendable { var text: String }
     struct PathParams: Codable, Sendable { var path: String? }
+    /// color.pick's params: the page point and where the colour goes ("fill" or "stroke").
+    struct PickParams: Codable, Sendable { var x, y: Double; var to: String }
 
-    /// Every Design action as a command spec, in menu order.
-    public static let commands: [CommandSpec<DesignWorkspace>] = fileSpecs + editSpecs + objectSpecs + pageSpecs + toolSpecs
+    /// Every Design action as a command spec, in menu order, the History panel's two after the tools, then the View menu's.
+    public static let commands: [CommandSpec<DesignWorkspace>] =
+        fileSpecs + editSpecs + objectSpecs + GradientCommands.specs(DesignWorkspace.self) + SampleCommands.specs(DesignWorkspace.self)
+            + [pick] + TransformCommands.specs(DesignWorkspace.self) + pageSpecs + toolSpecs + HistoryCommands.specs(DesignWorkspace.self) + viewSpecs
 
     /// The specs as a catalog whose history is the workspace's own.
     public static let catalog: CommandCatalog<DesignWorkspace> =
@@ -58,6 +65,51 @@ extension DesignWorkspace {
         ) { w, p in try w.open(Data(p.text.utf8)); return JSONValue.object([:]) },
         save("file.save", "Save", "Writes the file and marks it saved; a path becomes where it saves next.", path: .optional(.string("Where it was written."))),
         save("file.save-as", "Save As…", "Writes the file to a new path and marks it saved there.", path: .string("Where it was written.")),
+        export,
+    ]
+
+    /// file.export's params: the sheet's format, whole scale and scope; its result, the files the run would write.
+    struct ExportParams: Codable, Sendable { var format: String; var scale: Int; var scope: String }
+    struct ExportedFiles: Encodable, Sendable { var files: [ExportedName] }
+    struct ExportedName: Encodable, Sendable { var name: String; var width: Int; var height: Int }
+
+    /// The window's reason for its file-wide View items and Export…: off with no file open.
+    static func openHelp(_ w: DesignWorkspace) -> Availability { reason(w.isOpen ? nil : DesignToolbarItem.noFile) }
+
+    /// File > Export…'s confirm: plans the sheet's options and names each file with its pixels. Writing is the window's.
+    static let export = CommandSpec<DesignWorkspace>.typed(
+        "file.export", title: "Export…", summary: "Plans the files an export writes: the format, the scale and the scope.",
+        kind: .file, params: ExportParams.self,
+        schema: .object(["format": .string("The file type.", oneOf: DesignExportFormat.allCases.map(\.rawValue)),
+                         "scale": .integer("PNG and JPEG's whole scale; vectors take 1.", minimum: 1, maximum: 3),
+                         "scope": .string("What it writes.", oneOf: DesignExportScope.allCases.map(\.rawValue))],
+                        required: ["format", "scale", "scope"]),
+        result: .object(["files": .array(of: .object(["name": .string("The file's name."), "width": .integer("Pixels wide."),
+                                                      "height": .integer("Pixels high.")], required: ["name", "width", "height"]))],
+                        required: ["files"]),
+        example: .object(["format": .string("svg"), "scale": .number(1), "scope": .string("page")]), availability: openHelp
+    ) { w, p in
+        guard let format = DesignExportFormat(rawValue: p.format), let scope = DesignExportScope(rawValue: p.scope)
+        else { throw DesignRefusal.unchanged }
+        let plan = try w.exportPlan(DesignExportOptions(format: format, scale: p.scale, scope: scope), existing: [])
+        return ExportedFiles(files: plan.map { ExportedName(name: $0.fileName, width: $0.pixelWidth, height: $0.pixelHeight) })
+    }
+
+    /// View's zoom items: zoom is the window's, so headless these check availability and change nothing; Zoom to
+    /// Selection returns the rect the window would show.
+    static let viewSpecs: [CommandSpec<DesignWorkspace>] = [
+        plain("view.zoom-in", "Zoom In", "Zooms the window in.", .view, openHelp) { _ in },
+        plain("view.zoom-out", "Zoom Out", "Zooms the window out.", .view, openHelp) { _ in },
+        plain("view.fit", "Fit Page", "Zooms the window to fit the page.", .view, openHelp) { _ in },
+        .typed("view.zoom-to-selection", title: "Zoom to Selection", summary: "Zooms the window to the selected layers.",
+               kind: .view, params: NoParams.self, schema: ParamSchema.none,
+               result: .object(["x": .number("Left."), "y": .number("Top."), "width": .number("Width."), "height": .number("Height.")],
+                               required: ["x", "y", "width", "height"]),
+               example: .object([:]), availability: { reason($0.zoomToSelectionHelp) }
+        ) { w, _ in
+            guard let rect = w.zoomToSelectionRect else { throw DesignRefusal.nothingSelected }
+            return rect
+        },
     ]
 
     /// Save and Save As: the file's text as the result; the save marks the session saved, at `path` when given.
@@ -118,6 +170,20 @@ extension DesignWorkspace {
         return JSONValue.object([:])
     }
 
+    /// color.pick: the Eyedropper's click as a command, the colour at a page point onto the selection's fill or
+    /// stroke as one step (`applySample`, a `sampleSize` square). color.sample is SampleCommands' query.
+    static let pick = CommandSpec<DesignWorkspace>.typed(
+        "color.pick", title: "Pick Colour", summary: "Sets the selection's fill or stroke to the colour at a page point.", kind: .edit,
+        params: PickParams.self,
+        schema: .object(["x": .number("Page x."), "y": .number("Page y."), "to": .string("Fill or stroke.", oneOf: ["fill", "stroke"])],
+                        required: ["x", "y", "to"]),
+        example: .object(["x": .number(10), "y": .number(10), "to": .string("fill")]),
+        availability: { reason($0.sampleHelp ?? $0.fillHelp) }
+    ) { w, p in
+        try w.applySample(at: Point(x: p.x, y: p.y), toStroke: p.to == "stroke", size: w.sampleSize)
+        return JSONValue.object([:])
+    }
+
     static let pageSpecs: [CommandSpec<DesignWorkspace>] = [
         plain("page.add", "Add Page", "Adds a page and selects it.", .edit, { reason($0.addPageHelp) }, { $0.addPage() }),
         .typed("page.rename", title: "Rename Page", summary: "Renames the selected page.", kind: .edit, params: NameParams.self,
@@ -146,7 +212,8 @@ extension DesignWorkspace {
         return w.editingTextID == nil ? nil : "Finish editing the text first."
     }
 
-    static let toolSpecs:[CommandSpec<DesignWorkspace>] = DesignTool.allCases.map { tool in
+    // tool.shape comes from ShapeCommands (shape-tools DS-6).
+    static let toolSpecs:[CommandSpec<DesignWorkspace>] = DesignTool.allCases.filter { $0 != .shape }.map { tool in
         let title = tool.rawValue.prefix(1).uppercased() + tool.rawValue.dropFirst()
         return plain("tool." + tool.rawValue, title, "Picks the \(title) tool.", .view, { _ in reason(tool.unavailableHelp) }) { $0.selectTool(tool) }
     }

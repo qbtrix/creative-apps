@@ -33,5 +33,19 @@
     "find": "if let label = photo.label { out.append((\"xmp:Label\", label.rawValue)) }",
     "replace": "_ = photo.label",
     "tests": "LibraryExportSidecarTests"
+  },
+  {
+    "label": "the policy drops nothing: GPS is written under All but location",
+    "file": "Sources/LibraryModel/Contracts/ExportSidecar.swift",
+    "find": "|| !dropped.contains($0.name) }",
+    "replace": "|| true }",
+    "tests": "LibraryExportMetadataTests/sidecarDropsGPS"
+  },
+  {
+    "label": "None drops every attribute, the Library namespace too",
+    "file": "Sources/LibraryModel/Contracts/ExportSidecar.swift",
+    "find": "return attributes.filter {",
+    "replace": "return metadata == .none ? [] : attributes.filter {",
+    "tests": "LibraryExportMetadataTests/keepsLibraryFields"
   }
 ]

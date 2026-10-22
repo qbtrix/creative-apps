@@ -1,12 +1,5 @@
 # FlareApp's menu items and buttons built without a command spec (command-catalog CC-11).
-Sources/FlareApp/FlareCommands.swift: return Button(title ?? intent.title) { menu.perform(intent) }
+# max: 3
 Sources/FlareApp/FlareFilePanels.swift: Button("OK", role: .cancel) {}
-Sources/FlareApp/FlareNewSheet.swift: Button("Cancel", role: .cancel) { onCancel() }
-Sources/FlareApp/FlareNewSheet.swift: Button("Create") { if spec.problem == nil { onCreate(spec) } }
 Sources/FlareApp/FlareRecovery.swift: Button("Restore") {
 Sources/FlareApp/FlareRecovery.swift: Button("Discard", role: .destructive) {
-Sources/FlareApp/FlareStageContextMenu.swift: return Button(title) { perform(.edit(intent)) }.disabled(reason != nil).help(reason ?? title)
-Sources/FlareApp/FlareTimelineEdit.swift: Button("Add Label…") {
-Sources/FlareApp/FlareTimelineEdit.swift: Button("Remove Label") { perform(.timeline(.setLabel(nil))) }
-Sources/FlareApp/FlareTimelineEdit.swift: return Button(title) { perform(.timeline(intent)) }.disabled(reason != nil).help(reason ?? title)
-Sources/FlareApp/FlareTimelineEdit.swift: Button("Add Label", action: add).disabled(name.isEmpty)

@@ -3,7 +3,8 @@
 // Linux-safe; LibraryApp changes it only through the Model's methods. Invariants:
 // counts follow `items`; ids in `items` are unique; the selection holds only ids
 // the collection shows, and the loupe only a photo it shows. The selection is
-// SuiteKernel's `Selection<String>` (LibrarySelectionAdapter.swift).
+// SuiteKernel's `Selection<String>` (LibrarySelectionAdapter.swift), the export
+// sheet's run its `ExportRun<ExportOptions>` (LibraryExportAdapter.swift).
 import SuiteKernel
 
 /// A sidebar collection: a fixed source of photos.
@@ -23,14 +24,6 @@ public enum ImportState: Hashable, Sendable {
 public enum LoupeZoom: Hashable, Sendable {
     case fit, actual
     case scale(Double)
-}
-
-/// Where the export sheet is: closed, editing its options, writing, or done.
-public enum ExportState: Hashable, Sendable {
-    case idle
-    case editing(ExportOptions)
-    case running(done: Int, total: Int)
-    case finished(ExportSummary)
 }
 
 /// A thumbnail asked of the services; `token` lets a stale answer be dropped.
@@ -54,7 +47,8 @@ public struct LibraryCatalog: Sendable, Equatable {
     /// The sidebar's built-in rows; your collections follow them.
     static let builtInCollections = [
         LibraryCollection(id: "all", name: "All Photos", count: 0),
-        LibraryCollection(id: "favorites", name: "Favorites", count: 0),
+        // Id "favorites" predates the name; picks are called Picks everywhere a person reads (#3639).
+        LibraryCollection(id: "favorites", name: "Picks", count: 0),
         LibraryCollection(id: "recent", name: "Recently Added", count: 0),
     ]
 
@@ -80,22 +74,31 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var order: [String] = []  // the shown ids in sort order (LibraryOrder.swift)
     public internal(set) var importState = ImportState.idle
     public internal(set) var importNotice: ImportNotice?
+    /// The import notice whose failures are listed (CS-5); `showsImportFailures` reads it.
+    public internal(set) var failuresShownFor: ImportNotice?
     /// Its own thumbnails; `thumbnails` and the rest forward to it (LibraryThumbnails.swift).
     public internal(set) var thumbnailCache = LibraryThumbnailCache()
     public internal(set) var autoAdvance = true
     public internal(set) var loupeZoom = LoupeZoom.fit
     public internal(set) var loupeRender: RenderedPhoto?
     public internal(set) var loupeRenderToken = 0
+    /// The token the shown `loupeRender` landed under (the focus change's for the held thumbnail).
+    public internal(set) var loupeShownToken = 0
     public internal(set) var loupeError: String?
     public internal(set) var copiedSettings: DevelopSettings?
     public internal(set) var cropDraft: CropSettings?  // non-nil while cropping
-    public internal(set) var exportState = ExportState.idle
+    /// The loupe photo Show Original shows without its adjustments (CS-3); `showsOriginal` reads it.
+    public internal(set) var originalPhotoID: String?
+    /// The export sheet's run: the kernel's; `exportState` reads it (LibraryExportAdapter.swift).
+    public internal(set) var exportRun = ExportRun<ExportOptions>.idle
+    public internal(set) var exportSummary: ExportSummary?  // the finished run's summary
     public internal(set) var catalogState = CatalogFileState.ready
     public internal(set) var saveRevision = 0
     public internal(set) var savedRevision = 0
     public internal(set) var saveError: String?
     public internal(set) var showsTestValues = false  // -LibraryTestValues
     public internal(set) var cullError: String?  // a refused cull change
+    public internal(set) var fileRequests: [LibraryFileRequest] = []  // file-flow work for the window
     /// The filter bar's rules outside a smart collection (LibraryFilter.swift).
     public internal(set) var filter = LibraryFilter.all
     /// The collections you made and the smart ones, in sidebar order.
@@ -117,11 +120,14 @@ public struct LibraryCatalog: Sendable, Equatable {
             && lhs.history == rhs.history && lhs.order == rhs.order
             && lhs.filter == rhs.filter && lhs.userCollections == rhs.userCollections
         let work = lhs.importState == rhs.importState && lhs.importNotice == rhs.importNotice
+            && lhs.failuresShownFor == rhs.failuresShownFor
             && lhs.thumbnailCache == rhs.thumbnailCache && lhs.autoAdvance == rhs.autoAdvance
-            && lhs.cullError == rhs.cullError && lhs.exportState == rhs.exportState
+            && lhs.cullError == rhs.cullError && lhs.exportRun == rhs.exportRun
+            && lhs.exportState == rhs.exportState && lhs.fileRequests == rhs.fileRequests
         let loupe = lhs.loupeZoom == rhs.loupeZoom && lhs.loupeRender == rhs.loupeRender
-            && lhs.loupeRenderToken == rhs.loupeRenderToken && lhs.loupeError == rhs.loupeError
-            && lhs.copiedSettings == rhs.copiedSettings && lhs.cropDraft == rhs.cropDraft
+            && lhs.loupeRenderToken == rhs.loupeRenderToken && lhs.loupeShownToken == rhs.loupeShownToken
+            && lhs.loupeError == rhs.loupeError
+            && lhs.copiedSettings == rhs.copiedSettings && lhs.cropDraft == rhs.cropDraft && lhs.originalPhotoID == rhs.originalPhotoID
         let file = lhs.catalogState == rhs.catalogState && lhs.saveRevision == rhs.saveRevision
             && lhs.savedRevision == rhs.savedRevision && lhs.saveError == rhs.saveError
             && lhs.showsTestValues == rhs.showsTestValues
@@ -182,7 +188,7 @@ public struct LibraryCatalog: Sendable, Equatable {
     }
 
     /// Applies `edit` to every selected photo, then keeps the counts and the
-    /// selection true to the collection (unflagging in Favorites drops a photo).
+    /// selection true to the collection (unflagging in Picks drops a photo).
     mutating func editSelected(_ edit: (inout PhotoItem) -> Void) {
         guard !selection.isEmpty else { return }
         for index in items.indices where selection.contains(items[index].id) {
@@ -208,7 +214,7 @@ public struct LibraryCatalog: Sendable, Equatable {
 
     /// The counts after a metadata edit, undo or redo that replaced `before`
     /// with `after` in place: no photo was added or removed and no capture
-    /// date changed, so only Favorites moves, by the flags that changed.
+    /// date changed, so only Picks moves, by the flags that changed.
     /// A smart collection moves by the changed photos its rules admit.
     mutating func recount(replacing before: [PhotoItem], with after: [PhotoItem]) {
         let delta = after.count(where: \.isFlagged) - before.count(where: \.isFlagged)

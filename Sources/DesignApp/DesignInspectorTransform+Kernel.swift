@@ -1,0 +1,52 @@
+// DesignInspectorTransform+Kernel.swift (transform DT-2): the inspector's Transform section under Frame,
+// an adapter from the workspace onto SuiteKernel's TransformIntent with no Design maths (rule 20).
+// Rotation is a bar in degrees, clockwise about the layer's centre ("Mixed" when the selected layers
+// differ), and Flip Horizontal and Flip Vertical mirror the selection in place. Each sends a kernel
+// TransformIntent (`.transform`, run by `runTransform`); a Rotation scrub's values preview on the
+// window's live box (DesignLiveDrag), so the window doesn't run per value, and `.endEditRun` lands the
+// last as one step under its drag token. Hosted without a box, each value goes straight to `.transform`. On DT-1's stubs every control is off with `turnHelp` as its reason.
+// X, Y, W and H stay the Frame section's live scrub fields, so SuiteUI's TransformRows, which carries
+// its own X, Y, W and H, isn't used here yet. Values in, intents out.
+import DesignModel
+import SuiteKernel
+import SuiteUI
+import SwiftUI
+
+/// Rotation and the two flips over the selection; off with the Model's reason.
+struct DesignInspectorTransform: View {
+    let model: DesignWorkspace
+    let perform: DesignPerform
+    @Environment(\.designLiveDrag) private var live
+
+    var body: some View {
+        let help = model.turnHelp
+        let rotation = (live?.workspace ?? model).sharedValue(\.rotation)
+        InspectorSection("Transform") {
+            InspectorSliderRow(
+                "Rotation", value: rotation ?? 0, in: -180...180, step: 1, unit: "°", decimals: 0, mixed: rotation == nil,
+                onChange: { turn(to: $0) }, onEnd: { perform(.endEditRun) }
+            )
+            .disabled(help != nil)
+            .help(help ?? "")
+            .suiteControl(id: DesignControlID.inspectorRotation, enabled: help == nil, reason: help)
+            HStack(spacing: SuiteSpacing.xs) {
+                ForEach(FlipDirection.allCases, id: \.self) { direction in
+                    InspectorAction(ToolbarAction(
+                        direction.title, systemImage: direction.systemImage, unavailableHelp: help,
+                        identifier: DesignControlID.inspectorFlip(direction.rawValue)
+                    ) { perform(.transform(.flip(direction))) }, iconOnly: true)
+                }
+            }
+        }
+    }
+
+    /// One value of a Rotation scrub: the selection's box at `degrees`, under the scrub's drag token.
+    private func turn(to degrees: Double) {
+        guard var box = model.transformSelection else { return }
+        box.degrees = degrees
+        let intent = TransformIntent.set(box, drag: DesignControlID.inspectorRotation)
+        guard let live else { return perform(.transform(intent)) }
+        if !live.isLive { live.begin(from: model) }
+        live.preview(intent)
+    }
+}

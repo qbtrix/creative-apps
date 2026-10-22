@@ -1,0 +1,12 @@
+{
+  "id": "shell-help",
+  "name": "Help menu",
+  "description": "SuiteHelpCommands, the suite's Help menu: it replaces the system's empty help item with the suite Help catalog's items (Report a Problem…, Beta Notes and, in the launcher, Welcome to AfterGlow, which opens the tour), each a MenuCommand over a SuiteHelpDocument and disabled with its reason until its run is built. ShellHelpProvider adapts SuiteModel's ProblemReport and BetaNotes to the kernel's HelpProviding with this Mac's version, build, macOS and model. Built by report-problem RP-2.",
+  "technology": "Swift 6, SwiftUI, macOS 26",
+  "paths": [
+    "Sources/SuiteShell/SuiteHelpCommands.swift",
+    "Sources/SuiteShell/ShellHelpProvider.swift",
+    "Sources/SuiteShell/ProblemReportActions.swift"
+  ],
+  "order": 90
+}

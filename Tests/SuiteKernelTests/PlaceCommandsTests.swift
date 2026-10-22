@@ -1,6 +1,6 @@
 // PlaceCommandsTests.swift (placed-images PL-1 written, PL-7 turns on): the five place commands on a test target
 // with a kernel `History`. A place is one step, a focus drag is one step, a fill uses the selected layer, and
-// every why-not reads. The spec shape, the intents' params and the selection why-not run now.
+// every why-not reads.
 import Foundation
 import Testing
 import SuiteKernel
@@ -35,6 +35,7 @@ struct PlaceDoc: PlacedImageTarget {
     static let titles = ["place.read": "Read Placed Image", "place.image": "Place Image", "place.replace": "Replace Image",
                          "place.reset-size": "Reset Size", "place.focus": "Move Inside"]
     static let png = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 13])
+    static let svg = Data(#"<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"/>"#.utf8)
     static func place(_ data: Data, fill: Bool = false) -> JSONValue {
         guard case .object(var fields) = PlaceIntent.place(name: "wide.png", data: data, at: nil).command.params else { return .object([:]) }
         if fill { fields["fill"] = .bool(true) }
@@ -62,10 +63,13 @@ struct PlaceDoc: PlacedImageTarget {
         }
         #expect(catalog.availability("place.image", on: PlaceDoc()) == .available)
     }
-    @Test(.disabled("waits on PL-7")) func placeAndFocusDragAreOneStepEach() throws {
+    @Test func placeAndFocusDragAreOneStepEach() throws {
         let catalog = try #require(Self.catalog)
         var doc = PlaceDoc()
-        #expect(try catalog.run("place.image", params: Self.place(Self.png), on: &doc).result == .object(["id": .string("layer1")]))
+        #expect(try catalog.run("place.image", params: Self.place(Self.png), on: &doc) == CommandOutcome(
+            result: .object(["id": .string("layer1")]), undoStep: "Place Image"))
+        let fitted = try #require(doc.state.layers["layer1"]?.box)
+        #expect(fitted.minX == 0 && fitted.width == 800 && abs(fitted.height - 800.0 / 3) < 1e-9 && abs(fitted.minY + fitted.maxY - 600) < 1e-9)
         #expect(doc.placedSelection?.asset.natural == Size(width: 1200, height: 400))
         if let id = doc.state.selected { doc.state.layers[id]?.box = Rect(minX: 0, minY: 0, maxX: 300, maxY: 300) }
         for n in 0..<30 {
@@ -74,26 +78,77 @@ struct PlaceDoc: PlacedImageTarget {
         }
         #expect(doc.history.steps == ["Place Image", "Move Inside"] && doc.history.undoSteps.last?.payload.layers["layer1"]?.focus == Point(x: 0.5, y: 0.5))
     }
-    @Test(.disabled("waits on PL-7")) func fillUsesTheSelectedLayer() throws {
+    @Test func fillUsesTheSelectedLayer() throws {
         let catalog = try #require(Self.catalog)
         let box = Rect(minX: 0, minY: 0, maxX: 300, maxY: 300)
         var doc = PlaceDoc(placeFillBox: box), bare = PlaceDoc()
         doc.state.selected = "rect"
-        _ = try catalog.run("place.image", params: Self.place(Self.png, fill: true), on: &doc)
-        #expect(doc.state.layers.keys.sorted() == ["rect"] && doc.state.layers["rect"]?.box == box)
+        let outcome = try catalog.run("place.image", params: Self.place(Self.png, fill: true), on: &doc)
+        #expect(outcome == CommandOutcome(result: .object(["id": .string("rect")]), undoStep: "Place Image"))
+        #expect(doc.state.layers.keys.sorted() == ["rect"] && doc.state.layers["rect"]?.box == box && doc.history.steps.count == 1)
         #expect(throws: CatalogError.unavailable(id: "place.image", why: "Select a frame to fill.")) {
             try catalog.run("place.image", params: Self.place(Self.png, fill: true), on: &bare)
         }
     }
-    @Test(.disabled("waits on PL-7")) func refusesUnlistedFormatAndOver32MB() throws {
+    @Test func refusesUnlistedFormatAndOver32MB() throws {
         let catalog = try #require(Self.catalog)
         var doc = PlaceDoc(placeFormats: [.png, .jpeg])
         #expect(throws: CatalogError.unavailable(id: "place.image", why: PlaceRules.formatHelp)) {
             try catalog.run("place.image", params: Self.place(Data("plain text".utf8)), on: &doc)
         }
+        #expect(throws: CatalogError.unavailable(id: "place.image", why: PlaceRules.formatHelp)) {
+            try catalog.run("place.image", params: Self.place(Self.svg), on: &doc)
+        }
         #expect(throws: CatalogError.unavailable(id: "place.image", why: PlaceRules.sizeHelp)) {
             try catalog.run("place.image", params: Self.place(Self.png + Data(count: PlaceRules.maxBytes)), on: &doc)
         }
         #expect(doc.history.steps.isEmpty)
+    }
+    @Test func naturalAspectHasNothingToMoveOrReset() throws {
+        let catalog = try #require(Self.catalog)
+        var doc = PlaceDoc()
+        _ = try catalog.run("place.image", params: Self.place(Self.svg), on: &doc)
+        let box = Rect(minX: 280, minY: 260, maxX: 520, maxY: 340)
+        #expect(doc.state.layers["layer1"]?.box == box)
+        #expect(catalog.availability("place.focus", on: doc) == .unavailable("The image fits its box; there is nothing to move."))
+        #expect(catalog.availability("place.reset-size", on: doc) == .unavailable("The image already has its own shape."))
+        let read = try catalog.run("place.read", params: .object([:]), on: &doc)
+        let boxJSON = try JSONValue(encoding: box)
+        #expect(read.undoStep == nil && read.result == .object(
+            ["name": .string("wide.png"), "format": .string("svg"), "width": .number(240), "height": .number(80), "box": boxJSON,
+             "focus": .object(["x": .number(0.5), "y": .number(0.5)]), "drawn": boxJSON]))
+    }
+    @Test func replaceAndResetAreOneStepEach() throws {
+        let catalog = try #require(Self.catalog)
+        var doc = PlaceDoc()
+        _ = try catalog.run("place.image", params: Self.place(Self.svg), on: &doc)
+        if let id = doc.state.selected { doc.state.layers[id]?.box = Rect(minX: 0, minY: 0, maxX: 300, maxY: 300) }
+        let replace = PlaceIntent.replace(name: "wide.png", data: Self.png).command
+        #expect(try catalog.run(replace.id, params: replace.params, on: &doc).undoStep == "Replace Image")
+        #expect(doc.placedSelection?.asset.natural == Size(width: 1200, height: 400))
+        #expect(try catalog.run("place.reset-size", params: .object([:]), on: &doc).undoStep == "Reset Size")
+        #expect(doc.placedSelection?.image.box == Rect(minX: 0, minY: 100, maxX: 300, maxY: 200))
+        #expect(doc.history.steps == ["Place Image", "Replace Image", "Reset Size"])
+    }
+    @Test func intentCommandsRoundTrip() throws {
+        let intents: [PlaceIntent] = [.place(name: "a.png", data: Self.png, at: Point(x: 1, y: 2)), .place(name: "b.svg", data: Self.svg, at: nil),
+                                      .replace(name: "c.png", data: Self.png), .resetSize, .focus(Point(x: 0.25, y: 0.5), drag: "d1")]
+        for intent in intents { #expect(Self.intent(intent.command) == intent, "\(intent.command.id)") }
+    }
+
+    /// The intent a command's id and params name, read back by hand: what the panel, the drop and the rows sent.
+    static func intent(_ command: (id: String, params: JSONValue)) -> PlaceIntent? {
+        guard case .object(let f) = command.params else { return nil }
+        func string(_ key: String) -> String? { if case .string(let s)? = f[key] { s } else { nil } }
+        func number(_ key: String) -> Double? { if case .number(let n)? = f[key] { n } else { nil } }
+        let file = string("name").flatMap { name in string("base64").flatMap { Data(base64Encoded: $0) }.map { (name, $0) } }
+        let point = number("x").flatMap { x in number("y").map { Point(x: x, y: $0) } }
+        switch command.id {
+        case "place.image": return file.map { .place(name: $0.0, data: $0.1, at: point) }
+        case "place.replace": return file.map { .replace(name: $0.0, data: $0.1) }
+        case "place.reset-size": return f.isEmpty ? .resetSize : nil
+        case "place.focus": return point.flatMap { p in string("drag").map { .focus(p, drag: $0) } }
+        default: return nil
+        }
     }
 }

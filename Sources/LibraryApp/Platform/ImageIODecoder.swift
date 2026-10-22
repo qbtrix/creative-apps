@@ -3,7 +3,9 @@
 // hidden files and package contents, and reads each image-named file's
 // metadata only: its pixel size after the Exif orientation and its capture
 // date (Exif DateTimeOriginal with its offset when present, else the file's
-// creation date). A file ImageIO can't read is a failure, never a throw.
+// creation date), and its Exif and TIFF dictionaries for the Model's
+// `CameraDetails(exif:tiff:)` to read (metadata-more MD-7). A file ImageIO
+// can't read is a failure, never a throw.
 // `decode` makes an oriented thumbnail no bigger than asked, draws it into an
 // sRGB RGBA8 context (premultiplied, the only 8-bit RGBA layout CGContext
 // takes) and unpremultiplies it into DisplayImage's straight alpha.
@@ -43,7 +45,8 @@ struct ImageIODecoder: PhotoDecoding {
                 continue
             }
             let date = dates.captureDate(info.exif) ?? values.creationDate ?? Date(timeIntervalSince1970: 0)
-            candidates.append(ImportCandidate(path: url.path, captureDate: date, pixelSize: info.size, kind: kind))
+            candidates.append(ImportCandidate(
+                path: url.path, captureDate: date, pixelSize: info.size, kind: kind, camera: info.camera))
         }
         return FolderScan(candidates: candidates, failures: failures)
     }
@@ -67,9 +70,11 @@ struct ImageIODecoder: PhotoDecoding {
         return pixels
     }
 
-    /// The upright pixel size and the Exif dictionary of the file's first image;
-    /// nil when ImageIO can't read it as an image.
-    private static func metadata(of url: URL) -> (size: PixelSize, exif: [CFString: Any])? {
+    /// The upright pixel size, the Exif dictionary and the camera details of the
+    /// file's first image; nil when ImageIO can't read it as an image.
+    private static func metadata(
+        of url: URL
+    ) -> (size: PixelSize, exif: [CFString: Any], camera: CameraDetails)? {
         guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
             let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
             let width = properties[kCGImagePropertyPixelWidth] as? Int,
@@ -80,7 +85,11 @@ struct ImageIODecoder: PhotoDecoding {
         let orientation = properties[kCGImagePropertyOrientation] as? Int ?? 1
         let size = (5...8).contains(orientation)
             ? PixelSize(width: height, height: width) : PixelSize(width: width, height: height)
-        return (size, properties[kCGImagePropertyExifDictionary] as? [CFString: Any] ?? [:])
+        // The tag reading lives in the Model, keyed by the tags' plain names.
+        let camera = CameraDetails(
+            exif: properties[kCGImagePropertyExifDictionary] as? [String: Any] ?? [:],
+            tiff: properties[kCGImagePropertyTIFFDictionary] as? [String: Any] ?? [:])
+        return (size, properties[kCGImagePropertyExifDictionary] as? [CFString: Any] ?? [:], camera)
     }
 
     /// `image` as sRGB straight-alpha RGBA8, top row first; nil when it can't be drawn.

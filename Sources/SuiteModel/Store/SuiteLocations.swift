@@ -21,3 +21,20 @@ public enum SuiteLocations {
         return base + "/Library/Application Support/AfterGlow"
     }
 }
+
+/// One folder per app under the suite root, and where earlier builds kept an
+/// app's files (adopt-kernel-autosave AK-2). Every app's store is its own
+/// folder, so no app reads (or drops) another app's files. App names are the
+/// suite's ids, so they need no escaping.
+extension SuiteLocations {
+    /// `<supportFolder>/<app>`: one folder per app under the suite root ("Photo", "Flare", "Library", ...).
+    public static func appFolder(_ app: String, arguments: [String], home: String) -> String {
+        supportFolder(arguments: arguments, home: home) + "/" + app
+    }
+
+    /// Where an earlier build kept this app's files: `<home>/Library/Application Support/<legacy>`.
+    public static func legacyFolder(_ legacy: String, home: String) -> String {
+        let base = home.hasSuffix("/") ? String(home.dropLast()) : home
+        return base + "/Library/Application Support/" + legacy
+    }
+}

@@ -1,0 +1,3 @@
+[
+{"label": "a cancelled histogram count keeps counting", "file": "Sources/PhotoModel/PhotoRender.swift", "find": "            guard !Task.isCancelled else { return .empty }\n", "replace": "", "tests": "PhotoCurvesTests"}
+]
