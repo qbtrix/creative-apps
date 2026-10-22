@@ -72,14 +72,27 @@ final class HaloPerfJourneyTests: XCTestCase {
         halo.expectValid(document, series: "inspector-scrub")
     }
 
-    /// H-P3, `reference`: a velocity drag on `halo.timeline` from dx 0.02 to
-    /// 0.98 at dy 0.05 (the ruler); series `playhead-scrub` (HB-U3).
+    /// H-P3, `reference`: velocity drags on the Frame Ruler from dx 0.02 to
+    /// 0.98 and back, as many legs as make up 4 × 600 pt; series
+    /// `playhead-scrub` (HB-U3). The drags press on the ruler itself: dx 0.02
+    /// of `halo.timeline` is the empty name-column cell left of the ruler,
+    /// where a press starts no scrub, so no sample was taken (#4265).
     @MainActor func testPlayheadScrubLatency() {
         let halo = launch("reference")
         XCTAssert(halo.element("halo.timeline").waitForExistence(timeout: 10), "no timeline (halo.timeline)")
-        halo.velocityDrag(
-            on: "halo.timeline", from: CGVector(dx: 0.02, dy: 0.05), to: CGVector(dx: 0.98, dy: 0.05),
-            velocity: velocity, step: "perf-playhead-scrub")
+        let ruler = halo.app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Frame Ruler'")).firstMatch
+        XCTAssert(ruler.waitForExistence(timeout: 10), "no Frame Ruler in the timeline")
+        let width = ruler.frame.width
+        XCTAssertGreaterThan(width, 20, "the Frame Ruler is \(width) pt wide")
+        let left = CGVector(dx: 0.02, dy: 0.5), right = CGVector(dx: 0.98, dy: 0.5)
+        let legs = max(Self.legCount, Int((Self.legSpan * CGFloat(Self.legCount) / max(width * 0.96, 1)).rounded(.up)))
+        for leg in 0..<legs {
+            let (from, to) = leg.isMultiple(of: 2) ? (left, right) : (right, left)
+            ruler.coordinate(withNormalizedOffset: from).click(
+                forDuration: 0.05, thenDragTo: ruler.coordinate(withNormalizedOffset: to),
+                withVelocity: velocity, thenHoldForDuration: 0.05)
+        }
+        halo.shot("perf-playhead-scrub")
         guard let document = halo.perf() else { return }
         halo.expectValid(document, series: "playhead-scrub")
     }
