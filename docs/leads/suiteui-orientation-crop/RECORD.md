@@ -1,6 +1,6 @@
 # orientation-crop lead record
 
-Issue: #4528 (was #3756) · Packet: docs/blueprints/suiteui/features/orientation-crop.md
+Issue: #3756 (#4528 was a duplicate, closed 18:08) · Packet: docs/blueprints/suiteui/features/orientation-crop.md
 Run: act-1a164855f49-5pe1 · Session: cloud line lead (line:suiteui, with #4531) · Started: 2026-10-22T16:52Z
 Stage: 3 wave 3
 Base: 3578eaee20f317d368feda7ba35e4911285eebc5
