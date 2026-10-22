@@ -122,7 +122,10 @@ struct HaloWindow: View {
     /// built does nothing there; menus and controls disable it with
     /// `model.unavailableHelp(for:)` as help.
     func perform(_ command: HaloCommand) {
-        if case .tick = command {} else { takePlayback() }
+        switch command {
+        case .tick, .scrub: break
+        default: takePlayback()
+        }
         switch command.area {
         case .composition: viewerPerform(command)
         case .playback: playbackPerform(command)
