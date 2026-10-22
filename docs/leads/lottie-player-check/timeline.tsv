@@ -43,3 +43,4 @@ utc	stage	event	ref	note
 2026-10-22T00:46Z	heartbeat	LP-4 #4132 open (no-fast-lane, supervisor merges after macOS; dev macOS fixed by #4215). LP-6 ready on lead/lottie-player-check-LP-6; PR opens once #4132 merges.
 2026-10-22T01:08Z	heartbeat	LP-4 #4132 still open (no-fast-lane, supervisor merge). LP-6 PR opens once #4132 merges.
 2026-10-22T01:29Z	heartbeat	LP-4 #4132 still open (no-fast-lane, supervisor merge). LP-6 PR opens once #4132 merges.
+2026-10-22T01:51Z	heartbeat	LP-4 #4132 still open (no-fast-lane, supervisor merge). LP-6 PR opens once #4132 merges.

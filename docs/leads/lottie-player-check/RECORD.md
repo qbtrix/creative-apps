@@ -4,7 +4,7 @@ Issue: #3792 · Packet: docs/blueprints/flare/features/lottie-player-check.md
 Run: act-1a15e10a86f-7bk9 · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T10:50Z
 Stage: 3 wave 1
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: (2026-10-22T01:29Z) LP-4 #4132 still open (no-fast-lane, supervisor merge). LP-6 PR opens once #4132 merges.
+Next: (2026-10-22T01:51Z) LP-4 #4132 still open (no-fast-lane, supervisor merge). LP-6 PR opens once #4132 merges.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
