@@ -2,7 +2,7 @@
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
 Run: act-1a1627ce3b4-ayhz · Session: claude/feature-lead-playbook-6guwwp · Started: 2026-10-22T07:24Z (prior runs act-1a1605b0534-rn47, act-1a15e909498-4bkk, act-1a15abb305f-lc8g, act-1a159c9b6b4-va3c)
-Stage: DK-a done; DK-u waits on shape-tools DS-u, DK-m on DS-m (only DS-a #3857 merged) (2026-10-22T07:24Z)
+Stage: DK-a done; DK-u waits on shape-tools DS-u, DK-m on DS-m (Design shape-tools: only DS-a #3857 merged; #3440 marked prereq-priority 08:16Z) (2026-10-22T08:20Z)
 Base: 5bec8089 (origin/dev); main verified at 0dd23d65
 Next: DK-u waits shape-tools:DS-u (DT-u met); DK-m waits shape-tools:DS-m (DT-m met; needs eyedropper DY-m, building this run). Re-read waits every poll
 
