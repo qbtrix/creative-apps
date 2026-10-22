@@ -1,0 +1,16 @@
+[
+  {
+    "label": "tenthMinuteKeeps: drop-frame skips its labels at every tenth minute too",
+    "file": "Sources/SuiteKernel/Keys/Timecode.swift",
+    "find": "let (tens, rest) = count.quotientAndRemainder(dividingBy: tenMinutes)",
+    "replace": "let (tens, rest) = (0 * tenMinutes, count)",
+    "tests": "TimecodeTests"
+  },
+  {
+    "label": "dropCount5994: 59.94 skips 2 labels a minute instead of 4",
+    "file": "Sources/SuiteKernel/Keys/Timecode.swift",
+    "find": "rate.isDropFrame ? rate.nominal / 15 : 0",
+    "replace": "rate.isDropFrame ? 2 : 0",
+    "tests": "TimecodeTests"
+  }
+]

@@ -3,7 +3,8 @@
 // flag), a rating the `rating` rule admits, a label in `labels` (empty: any
 // label or none), and not rejected while `hidesRejected` is on. `summary`
 // is what the bar and VoiceOver read, for example "At least 3 stars, Rejects
-// hidden". Linux-safe.
+// hidden". A folder rule (`folder`, folders FO-5) shows one folder's photos,
+// with or without its subfolders'. Linux-safe.
 
 /// How many stars a photo needs: any, at least N, or exactly N. Exactly 0
 /// is unrated.
@@ -47,6 +48,8 @@ public struct LibraryFilter: Hashable, Sendable {
     public var rating = RatingRule.any
     public var labels: Set<PhotoLabel> = []
     public var hidesRejected = false
+    /// The folder whose photos show (FolderScope in LibraryFolders+Kernel.swift); nil: any folder.
+    public var folder: FolderScope?
 
     /// No rule on: every photo shows.
     public static let all = LibraryFilter()
@@ -62,6 +65,7 @@ public struct LibraryFilter: Hashable, Sendable {
             guard let label = photo.label, labels.contains(label) else { return false }
         }
         if hidesRejected, photo.flag == .reject { return false }
+        if let folder, !folder.admits(photo) { return false }
         return true
     }
 
@@ -79,6 +83,7 @@ public struct LibraryFilter: Hashable, Sendable {
         let labelList = PhotoLabel.allCases.filter(labels.contains).map(\.rawValue)
         if !labelList.isEmpty { parts.append(Self.orList(labelList)) }
         if hidesRejected { parts.append("Rejects hidden") }
+        if let folder { parts.append(folder.summaryPhrase) }
         return parts.joined(separator: ", ")
     }
 
@@ -123,14 +128,31 @@ extension LibraryCatalog {
         filterHelp ?? (activeFilter.isActive ? nil : "No filter is on.")
     }
 
-    public var newSmartCollectionHelp: String? { UserCollection.smartUnavailable }
+    /// Why New Smart Collection from Filter can't run: it needs photos, a
+    /// filter on, and no smart collection selected (the bar edits its rules).
+    public var newSmartCollectionHelp: String? {
+        if let unavailable = UserCollection.smartUnavailable ?? filterHelp { return unavailable }
+        if selectedUserCollection?.isSmart == true {
+            return "The filter bar edits this smart collection's rules. Select another collection first."
+        }
+        return filter.isActive ? nil : "Set a filter first: a smart collection keeps the filter's rules."
+    }
 
     /// Sets the bar's filter and refreshes what is shown: the selection
     /// keeps the photos still shown, and a loupe on a hidden photo goes back
     /// to the grid. View state like the sort: no undo step, but the
-    /// collections file is dirty. (A smart collection's rules: FC-12.)
+    /// collections file is dirty. While a smart collection is selected the
+    /// bar edits its rules instead, as one "Edit Rules" step, and `filter`
+    /// stays as it was.
     public mutating func setFilter(_ filter: LibraryFilter) {
         guard filterHelp == nil else { return }
+        if let smart = selectedUserCollection, smart.isSmart {
+            recordCollectionsEdit("Edit Rules") { collections in
+                guard let index = collections.firstIndex(where: { $0.id == smart.id }) else { return }
+                collections[index].contents = .rules(filter)
+            }
+            return
+        }
         self.filter = filter
         collectionsRevision += 1
         refreshShown()
@@ -177,10 +199,18 @@ extension LibraryCatalog {
         setFilter(.all)
     }
 
-    /// Makes "New Smart Collection" from the bar's filter; returns its id,
-    /// or nil while smart collections are unavailable.
+    /// Saves the bar's filter as a smart collection named by its summary,
+    /// as one "New Smart Collection" step, and selects it; `filter` stays as
+    /// it was. Returns its id, or nil when `newSmartCollectionHelp` says why not.
     @discardableResult public mutating func newSmartCollection() -> String? {
         guard newSmartCollectionHelp == nil else { return nil }
-        return nil
+        let taken = userCollections.map(\.id).filter { $0.hasPrefix("smart-") }.compactMap { Int($0.dropFirst(6)) }
+        let id = "smart-\((taken.max() ?? 0) + 1)"
+        let rules = filter
+        recordCollectionsEdit("New Smart Collection") { collections in
+            collections.append(UserCollection(id: id, name: rules.summary, contents: .rules(rules)))
+        }
+        selectCollection(id)
+        return id
     }
 }
