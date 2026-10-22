@@ -54,3 +54,4 @@ time	kind	note
 2026-10-21T22:52Z	check	waits	-	DT-5 #4187 and DG-m #4189 merged 22:42Z; DT-6 and DT-u #4159 pending; supervisor: keep going
 2026-10-21T23:18Z	DK-u	waiting DS-u (DT-u #4159 still queued on Mac gate)
 2026-10-21T23:41Z	DK-u	DT-u #4159 merged 23:38Z; waiting DS-u
+2026-10-22T00:03Z	DK-u	still waiting DS-u (no shape-tools progress on #3440)
