@@ -71,3 +71,5 @@ view.actual-size
 view.fit
 view.zoom-in
 view.zoom-out
+history.jump
+history.read
