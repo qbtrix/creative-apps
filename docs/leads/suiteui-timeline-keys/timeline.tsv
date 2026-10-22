@@ -35,3 +35,4 @@ utc	stage	event	ref	note
 2026-10-22T02:44:03Z	check	Linux green on held heads; #4184 #4185 #4191 #4299 queued for lane macOS build
 2026-10-22T02:55:32Z	check	Head markers moved on #4184 #4185 #4191; #4299 open, awaiting lane macOS build; DS-6 held
 2026-10-22T03:20:02Z	check	#4185 macOS build green; #4191 head e6567f819 (dev merged) gated PASS, Head moved; its macOS build queued
+2026-10-22T03:41:45Z	check	#4184 #4185 mac green, mergeable clean, lane run 39716412123 in progress; #4191 #4299 macOS builds queued; heads and markers match
