@@ -2,9 +2,9 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a15e33399d-zgll · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: wave-2
-Base: add701fc9
-Next: FR-u merge, then FR-10
+Stage: FR-10 PR #4293 opened
+Base: e99331166
+Next: FR-10 merge, then FR-10b PR; Belt-Slice-Done FR-halo/FR-flare/FR-u on green dev Linux check
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
