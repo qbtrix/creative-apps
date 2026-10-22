@@ -7,7 +7,10 @@
 // Model's loop flag; ← and → step a frame, Home and End jump; the transport's
 // driver sends `.tick(now)` each refresh. A tick or a ruler scrub writes the
 // Model only when the Model says it changes something, so a refresh or drag
-// sample between two frames writes nothing (#1296). Playback is never an undo step.
+// sample between two frames writes nothing (#1296). A playing tick goes to
+// HaloLiveEdit's `playing`, redrawing the viewer and playhead, not the window
+// (#4274); `takePlayback` writes it back before any other command and when
+// play-once ends. Playback is never an undo step.
 // `playbackScene(_:)` adds nothing.
 import HaloModel
 import QuartzCore
@@ -25,10 +28,27 @@ extension HaloWindow {
         case .previousFrame: model.stepFrame(by: -1)
         case .goToStart: model.goToStart()
         case .goToEnd: model.goToEnd()
-        case .tick(let now): if model.tickChanges(now: now) { model.tick(now: now) }
+        case .tick(let now):
+            var next = model
+            next.tick(now: now)
+            guard next != (live.playing ?? model) else { return }
+            if next.playback.playing {
+                (live.playing, live.playedAt) = (next, now)
+            } else {
+                (live.playing, live.playedAt) = (nil, nil)
+                model.tick(now: now)
+            }
         default: break
         }
     }
 
     func playbackScene(_ content: some View) -> some View { content }
+
+    /// Writes the frame playing now into the window's project, so a command
+    /// or an edit acts at the frame on screen; nothing while paused.
+    func takePlayback() {
+        guard let now = live.playedAt else { return }
+        (live.playing, live.playedAt) = (nil, nil)
+        if model.tickChanges(now: now) { model.tick(now: now) }
+    }
 }
