@@ -9,21 +9,26 @@
 // "type 400, press Return" never resizes with an older number; it stays
 // disabled, saying why, until both are whole numbers. Its controls carry
 // `photo.size.*` accessibility identifiers, and the Form's fields are named
-// for VoiceOver (a Form row's title doesn't name its field).
+// for VoiceOver (a Form row's title doesn't name its field). Resize is the
+// catalog's `image.resize` item (command-state CS-10).
 import PhotoModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
 struct ImageSizeSheet: View {
     let size: CanvasSize
+    /// What `image.resize`'s availability reads.
+    let workspace: PhotoWorkspace
     var onResize: @MainActor (Int, Int) -> Void = { _, _ in }
     var onCancel: @MainActor () -> Void = {}
     @State private var width: String
     @State private var height: String
     @State private var keepsProportions = true
 
-    init(size: CanvasSize, onResize: @escaping @MainActor (Int, Int) -> Void, onCancel: @escaping @MainActor () -> Void) {
+    init(size: CanvasSize, workspace: PhotoWorkspace, onResize: @escaping @MainActor (Int, Int) -> Void, onCancel: @escaping @MainActor () -> Void) {
         self.size = size
+        self.workspace = workspace
         self.onResize = onResize
         self.onCancel = onCancel
         _width = State(initialValue: String(size.width))
@@ -52,11 +57,12 @@ struct ImageSizeSheet: View {
                 Spacer()
                 Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
                     .accessibilityIdentifier("photo.size.cancel")
-                Button("Resize", action: resize)
-                    .keyboardShortcut(.defaultAction)
-                    .disabled(!typed)
-                    .help(typed ? "Resize" : "Type each side as a whole number of pixels.")
-                    .accessibilityIdentifier("photo.size.resize")
+                if let spec = PhotoWorkspace.catalog.spec("image.resize") {
+                    MenuCommand(spec, on: workspace, title: "Resize", shortcut: .defaultAction, perform: resize)
+                        .disabled(!typed)
+                        .help(typed ? spec.summary : "Type each side as a whole number of pixels.")
+                        .accessibilityIdentifier("photo.size.resize")
+                }
             }
         }
         .padding(SuiteSpacing.l)
