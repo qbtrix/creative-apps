@@ -80,3 +80,4 @@ utc	stage	event	ref	note
 2026-10-22T01:46:38Z	check	PH-m	#4162 conflicted with dev (#4243) on photo.list-commands golden; union-merged (history.* + tool.text), ci --changed PASS, AllAppsCatalogTests PASS; head 69ee6383
 2026-10-22T01:46:38Z	check	PH-z	#4271 merged new PH-5 head; ci --changed PASS; head 09aa3019
 2026-10-22T02:09:16Z	check	-	#4162@69ee6383+#4271@09aa3019 clean, lane macOS builds dispatched; no needs-fix; no open findings
+2026-10-22T02:33:14Z	check	-	#4162@69ee6383 and #4271@09aa3019 clean, waiting on lane macOS builds; no open findings
