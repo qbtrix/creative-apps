@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-22T06:08:50Z	lane	heartbeat	#4214	CS-12 macOS build 39728577096 green, awaiting lane sweep
 2026-10-22T06:32:51Z	lane	heartbeat	4214,4206,4213,4210,4225	CS-12 merged; CS-10 CS-4 CS-8 CS-5 merged with dev, gating one at a time
 2026-10-22T06:55:33Z	lane	heartbeat	4206,4213,4210,4225	CS-10 CS-4 CS-8 ready in lane; CS-5 gating
+2026-10-22T07:24:05Z	lane	heartbeat	#4144 #4206 #4213 #4210 #4225	all ready, waiting on lane macOS builds
