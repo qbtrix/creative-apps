@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-22T14:40Z	3	pr	FV-4	#4436 opened on lead/export-pack-fv3 head ea0f7047, gate PASS, Mutate 7/7
 2026-10-22T14:45Z	3	decision	FV-2	supervisor: no placeholder; end run after FV-3/FV-4 ship, relaunch after XP-3
 2026-10-22T15:14Z	3	check	FV-3	#4435 waits on lane macOS build 39801361170 (queued; 39795381004 cancelled); #4436 waits on it
+2026-10-22T15:34Z	3	check	FV-3	heartbeat: #4435 still in lane (open false fast-lane); #4436 waits on it
