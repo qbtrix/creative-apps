@@ -4,7 +4,7 @@ Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
 Run: act-1a147b718fd-n1ee · Session: unknown · Started: 2026-10-17T02:30Z
 Stage: 3 wave 2 (FC-2 part 1 in review)
 Base: 06371387 (origin/dev at setup; the brief's main 37d99630 is an ancestor, CLAUDE.md says dev)
-Next: FC-2 part 2: stub the catalog methods and FilterBar/collection APIs, and add MJ1 disabled until FC-7 (rule 13); then FC-3
+Next: full dev CI 39781775747 (contains 5d28cf9): on a green Linux job post Belt-Slice-Done AH-z + Mac-Finish-Wanted AH-z, then Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
