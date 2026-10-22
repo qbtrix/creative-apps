@@ -62,3 +62,6 @@ utc	stage	event	ref	note
 2026-10-22T09:00Z	0	stage-start	act-1a1624626e1-8awa	relaunch for PE-m, PE-z; base dev bdd92b41
 2026-10-22T09:05Z	3	stage-start	W1	PE-6 builder
 2026-10-22T06:25:57Z	stage3	wave2 PE-z builder started (parallel, stacks on PE-m before PR)
+2026-10-22T07:04:52Z	3	pr-opened	#4339	PE-m (PE-6) live sampling, color.sample, RJ-P36
+2026-10-22T07:04:52Z	3	pr-opened	#4343	PE-z (PE-7, PE-8) stacked on #4339, feature-done
+2026-10-22T07:04:52Z	3	stage-start	polling	wait for dev Linux run containing both
