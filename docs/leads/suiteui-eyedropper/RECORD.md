@@ -2,9 +2,9 @@
 
 Issue: #3448 · Packet: docs/blueprints/suiteui/features/eyedropper.md
 Run: act-1a1647a67aa-dau5 (relaunch) · Started: 2026-10-22T16:45Z
-Stage: #4585 (EY C4) on dev, head 6bc5cdc, gate CI: PASS, pushed, Head moved
+Stage: EY-z c4 PR #4585 1 file clean, replied to supervisor
 Base: 18464f26b93c6826d069e0107545d7aacfac033c
-Next: Lane merges #4585; Belt-Slice-Done EY-z on the first green ci.yml run containing it
+Next: Belt-Slice-Done EY-z on first green ci.yml run containing #4585
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: Lane merges #4585; Belt-Slice-Done EY-z on the first green ci.yml run cont
 |---|---|---|---|---|---|
 
 ## Decisions
+- No split needed: the oversize content merged via #4583
 - -
 - Merge the merged EY-z head before dev so the C4 branch skips TT-z's conflicts
 - -
