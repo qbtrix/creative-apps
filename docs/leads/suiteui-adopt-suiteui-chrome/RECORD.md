@@ -34,6 +34,7 @@ Next: #4002 (head cbada801) merges via the lane, then a green ci.yml run (app=su
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T03:03Z: #4002 merged to dev as 74b34fc (AC-tools' last PR). Waiting for a completed, successful ci.yml run on dev (scoped suiteui or full) containing 74b34fc; none yet (scoped runs on older heads still queued for macOS). Then Belt-Slice-Done and Mac-Finish-Wanted for AC-tools. SC-15/SC-16 have no PRs: AC-export-sheet stays unstarted per the supervisor, for the next lead.
 - 2026-10-22T02:39Z: #4002 still open, no new lane comment; dev unchanged since b5a6e7e (02:10Z). SC-15/SC-16 still have no PRs; AC-export-sheet stays unstarted.
 - 2026-10-22T02:14Z: #4002 still open and clean (macOS build 39704298251 green), waiting for a lane sweep; no needs-fix or needs-rebase. SC-14 #4238 merged to dev (6603b0f). SC-15 and SC-16 have no PRs, so AC-export-sheet stays unstarted per the supervisor.
 - 2026-10-22T01:46Z: #4002's lane macOS build run 39704298251 succeeded (01:24Z). Open and clean, waiting for a lane sweep to merge it. SC-f unchanged; AC-export-sheet stays unstarted per the supervisor.
