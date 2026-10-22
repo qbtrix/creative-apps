@@ -1,7 +1,8 @@
 // FakeCanvasDocument.swift (command-catalog CC-2): a Linux headless document of named rects, with the six
 // commands the catalog's tests, the gallery page, the afterglow CLI and the MCP server drive before any app adopts;
 // file-flow SF-9 adds the five file-flow commands over fixed readers, so RJ-X43 runs `file.drop` on the CLI;
-// gradient-fill GF-9 gives each rect an optional fill and lists the eight fill commands, so RJ-X30 runs on the CLI.
+// gradient-fill GF-9 gives each rect an optional fill and lists the eight fill commands, so RJ-X30 runs on the CLI;
+// autosave-history AH-9 lists `history.read` and `history.jump` over its one History, so RJ-X31 runs on the CLI.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -153,10 +154,11 @@ public struct FakeCanvasDocument: HeadlessDocument {
         .object(["rects": .number(Double(rects.count)), "selected": selected.map { .string($0.name) } ?? .null])
     }
 
-    /// The fake's twenty-one ids: its six commands, `edit.undo` and `edit.redo`, the five file-flow commands and the
-    /// eight fill commands. Empty only if an id were refused.
+    /// The fake's twenty-three ids: its six commands, `edit.undo` and `edit.redo`, the five file-flow commands, the
+    /// eight fill commands and the two history commands. Empty only if an id were refused.
     public static let catalog = (try? CommandCatalog<FakeCanvasDocument>(
-        app: app, specs + FileFlowCommands.specs(FakeCanvasDocument.self) + GradientCommands.specs(FakeCanvasDocument.self),
+        app: app, specs + FileFlowCommands.specs(FakeCanvasDocument.self) + GradientCommands.specs(FakeCanvasDocument.self)
+            + HistoryCommands.specs(FakeCanvasDocument.self),
         history: { $0.history })) ?? .empty(app: app)
     /// A rect's result schema.
     static let rectSchema = ParamSchema.object(["id": .integer(), "name": .string(), "x": .number(), "y": .number(),
@@ -231,6 +233,22 @@ extension FakeCanvasDocument: GradientFillTarget {
         let index = try editableIndex("fill")
         history.record(name, rects, key: drag.map { "\(name):\($0)" })
         rects[index].fill = GradientRules.mapped(fill, from: box, to: rects[index].fillBox)
+    }
+}
+
+/// The fake as the History panel's target: its one History listed from "Open", and a jump through the kernel's
+/// `jumpEndingRun`, so a jump records no step and the next edit never folds into the step it landed on.
+extension FakeCanvasDocument: HistoryJumping {
+    public var historyListing: HistoryListing { history.listing(base: "Open") }
+    /// Undoes or redoes until `index` steps are applied; an index outside `0...steps.count` throws and changes nothing.
+    public mutating func jumpHistory(to index: Int) throws {
+        guard (0...history.steps.count).contains(index) else {
+            throw CatalogError.failed(id: "history.jump", message: "There is no step \(index).")
+        }
+        var current = rects
+        history.jumpEndingRun(to: index) { old in defer { current = old }; return current }
+        rects = current
+        if !rects.contains(where: { $0.id == selection }) { selection = nil }
     }
 }
 

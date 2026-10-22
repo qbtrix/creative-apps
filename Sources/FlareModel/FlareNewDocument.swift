@@ -1,25 +1,25 @@
 // FlareNewDocument.swift: layers-files LF-3, what the New Animation sheet asks for: a preset or Custom, size, rate,
 // length and background, with `problem` saying why Create can't run. `newDocument(_:)` builds through
 // `services.scenes.newDocument` in a fresh engine (no undo history, not dirty) or refuses a spec with a problem. The
-// spec travels as the `.file(.create)` intent's fields, the background as "#RRGGBB". Linux-safe.
+// spec travels as the `.file(.create)` intent's fields, the background as "#RRGGBB"; the rate is an exact `FrameRate`
+// (frame-rates FR-10b), so 23.976 makes a 24000/1001 scene. Linux-safe.
 import FlareCore
+import SuiteKernel
 
 /// The New Animation sheet's choices.
 public struct NewDocumentSpec: Sendable, Equatable {
     /// The largest canvas side the format holds, in points.
     public static let maxSide: Double = 16_384
-    /// The sheet's frame rates.
-    public static let frameRates = [12, 24, 25, 30, 60]
     public static let fpsRange = 1...240
     public static let durationRange = 1...100_000
 
     /// The preset the values came from; nil is Custom.
     public var preset: CanvasPreset?
-    public var width: Double, height: Double, fps: Int, durationFrames: Int, background: FlareColor
+    public var width: Double, height: Double, fps: FrameRate, durationFrames: Int, background: FlareColor
 
     public init(preset: CanvasPreset) {
         self.preset = preset
-        (width, height, fps, durationFrames) = (preset.width, preset.height, preset.fps, preset.durationFrames)
+        (width, height, fps, durationFrames) = (preset.width, preset.height, FrameRate(whole: preset.fps), preset.durationFrames)
         background = .white
     }
 
@@ -37,7 +37,7 @@ public struct NewDocumentSpec: Sendable, Equatable {
         let sides = 1...Self.maxSide, side = "1 to \(Int(Self.maxSide)) px."
         if !sides.contains(width) { return "Width must be \(side)" }
         if !sides.contains(height) { return "Height must be \(side)" }
-        if !Self.fpsRange.contains(fps) {
+        if !fps.sceneRate.isValid || !Self.fpsRange.contains(fps.nominal) {
             return "Frame rate must be \(Self.fpsRange.lowerBound) to \(Self.fpsRange.upperBound) fps."
         }
         if !Self.durationRange.contains(durationFrames) {
@@ -51,7 +51,7 @@ public struct NewDocumentSpec: Sendable, Equatable {
     public mutating func pick(_ preset: CanvasPreset?) {
         self.preset = preset
         guard let preset else { return }
-        (width, height, fps, durationFrames) = (preset.width, preset.height, preset.fps, preset.durationFrames)
+        (width, height, fps, durationFrames) = (preset.width, preset.height, FrameRate(whole: preset.fps), preset.durationFrames)
     }
 
     /// A typed size is Custom.
@@ -83,7 +83,7 @@ public struct NewDocumentSpec: Sendable, Equatable {
 
     /// The canvas preset the scene service builds from.
     var canvas: CanvasPreset {
-        CanvasPreset(name: preset?.name ?? "Custom", width: width, height: height, fps: fps,
+        CanvasPreset(name: preset?.name ?? "Custom", width: width, height: height, fps: fps.nominal,
                      durationFrames: durationFrames)
     }
 }
@@ -94,7 +94,10 @@ extension FlareWorkspace {
     public mutating func newDocument(_ spec: NewDocumentSpec) {
         if let problem = spec.problem { return refuse(.refused(problem)) }
         var document = services.scenes.newDocument(spec.canvas)
-        for i in document.scenes.indices { document.scenes[i].background = spec.background }
+        for i in document.scenes.indices {
+            document.scenes[i].background = spec.background
+            document.scenes[i].rate = spec.fps.sceneRate
+        }
         load(document)
     }
 }
