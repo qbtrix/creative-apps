@@ -29,8 +29,9 @@ struct LibraryBackupCommands: Commands {
     var body: some Commands {
         CommandGroup(after: .importExport) {
             MenuCommand(
-                title: "Restore Catalog Backup…", systemImage: "clock.arrow.circlepath", action: focused?.open,
-                reason: focused == nil ? "Open the Library window first." : (focused?.help ?? "Backups aren't available right now."))
+                LibraryCatalog.restoreControlSpec,
+                on: LibraryRestoreControl(help: focused == nil ? "Open the Library window first." : focused?.help),
+                title: "Restore Catalog Backup…", systemImage: "clock.arrow.circlepath") { focused?.open?() }
                 .accessibilityIdentifier("library.backup.menu")
         }
     }
