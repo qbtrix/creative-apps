@@ -231,7 +231,7 @@ struct PhotoWindow: View {
         case .blendMode(let id, let mode): model.setBlendMode(id, mode)
         case .moveLayers(let from, let to): model.moveLayers(fromOffsets: Array(from), toOffset: to)
         case .addLayer: model.addLayer()
-        case .deleteLayer: if let id = model.selectedLayerID { model.removeLayer(id) }
+        case .deleteLayer: model.removeSelectedLayers()
         case .renameLayer: beginRename()
         case .bringForward: model.bringSelectedLayerForward()
         case .sendBackward: model.sendSelectedLayerBackward()
@@ -251,6 +251,7 @@ struct PhotoWindow: View {
         case .export(let intent): performExport(intent)
         case .sample(let intent): performSample(intent)
         case .place(let intent): performPlace(intent)
+        case .text(let intent): performType(intent)
         case .confirm: if confirmTransform() {} else { model.applyCrop() }
         case .dismiss:
             if dismissTransform() {} else if model.pendingCrop != nil { model.cancelCrop() } else { model.deselect() }
