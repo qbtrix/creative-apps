@@ -5,7 +5,7 @@ Run: act-1a15fc7d29e-gz1t (line lead with #3437 history-panel) · Session: claud
 Earlier run: act-1a15a9f4eba-h30y (PF-1, PF-3, PF-4 merged)
 Stage: 3 wave A
 Base: origin/dev 1b3913c
-Next: #4165 (PF-u) merged add701fc; scoped photo run 39700970657 at add701fc (queued) proves PF-a and PF-u; PF-7 building on photo-file-flow/PF-7; PF-8 waits export-pack:PX-z
+Next: #4165 (PF-u) merged add701fc; scoped photo run 39700970657 at add701fc (queued) proves PF-a and PF-u; PF-7 #4267 open (fast-lane, head 9583c10a, ci --changed PASS); PF-8 waits export-pack:PX-z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -24,7 +24,7 @@ Next: #4165 (PF-u) merged add701fc; scoped photo run 39700970657 at add701fc (qu
 | PF-4 | PF-m | window notes opens and saves | #3700 | merged 7ec53b5 |
 | PF-5 | PF-u | snapshots, RenderBudgetPhotoFileDropTests.dragHoverInTwoBodies ≤ 2 | #4165 | in lane (fef845ec) |
 | PF-6 | PF-u | UITests/PhotoJourneyTests+FileFlow.swift, XCTSkip("waits on PF-7") | #4165 | in lane (fef845ec) |
-| PF-7 | PF-z | journey on live | – | building (Journey+FileDrag.swift drop source, drop steps on) |
+| PF-7 | PF-z | journey on live | #4267 | open at 9583c10a, fast-lane (Journey+FileDrag.swift drop source, drop steps on) |
 | PF-8 | PF-z | photo.md, status built, feature-done | – | waits PX-z |
 
 ## Reviews
