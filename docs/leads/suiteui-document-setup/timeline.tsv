@@ -43,3 +43,4 @@ utc	stage	event	ref	note
 2026-10-22T06:15:11Z	question	blocked	Question for the supervisor posted (rule 23, three identical blocked polls)
 2026-10-22T06:35:40Z	poll	waiting	supervisor: stop after in-lane slice; macOS 39722964879 queued; scoped suite 39721019643 in progress
 2026-10-22T06:58:41Z	poll	waiting	#4309 open, macOS build 39722964879 queued; dev CI 39734272718 pending
+2026-10-22T07:15:10Z	poll	waiting	#4309 open; macOS build 39722964879 still queued (since 04:32Z)
