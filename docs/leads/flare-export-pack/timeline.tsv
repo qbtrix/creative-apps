@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-22T20:36Z	merged	#4435 FV-3 merged into dev (lane batch of 5)
 2026-10-22T20:58Z	pr	#4436 FV-4 rebased onto dev, gate PASS, head afb6d42c, base dev, fast-lane
 2026-10-22T20:58Z	end	run ended per supervisor; relaunch for FV-2/FV-5/FV-6 after XP-3
+2026-10-22T21:02Z	pr	#4436 base bounced fv3->dev so GitHub recomputed its stats against dev: 297 lines, 9 files (was a stale 4878/137 vs the old fv3 head)
