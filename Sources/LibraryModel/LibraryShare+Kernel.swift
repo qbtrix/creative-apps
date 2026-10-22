@@ -40,6 +40,15 @@ public enum SharePrep {
     public static func cleanup(support: String) throws {
         throw LibraryNotBuilt(notBuilt)
     }
+
+    /// The same cleanup through `writer`. Stub: throws until SH-3.
+    public static func cleanup(support: String, writer: any JPEGWriting) async throws {
+        throw LibraryNotBuilt(notBuilt)
+    }
+}
+
+extension JPEGWriting {
+    public func removeAll(in folder: String) async throws { throw LibraryNotBuilt(SharePrep.notBuilt) }
 }
 
 extension LibraryCatalog {
@@ -57,7 +66,7 @@ extension LibraryCatalog {
 
     /// Writes the share copies of `exportTargets` into `SharePrep.folder(support:run:)` and returns their paths in
     /// selection order. Stub: throws until SH-3.
-    public func prepareShare(support: String, run: String) async throws -> [String] {
+    public func prepareShare(support: String, run: String, ids: [String]? = nil) async throws -> [String] {
         throw LibraryNotBuilt(shareHelp ?? SharePrep.notBuilt)
     }
 
