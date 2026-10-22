@@ -97,3 +97,4 @@ utc	stage	event	ref	note
 2026-10-22T19:59:37Z	SM-r	waiting	-	full CI 39840605751 cancelled before running; still queued: 39836126860 (CI a102c34cc), 39836789801 (scoped: suite 28e2b8521), 39844810755 (CI 0f8414ad2)
 2026-10-22T20:11:24Z	SM-z	merged	#4421	SM-9 merged as de96b149a; #4461 (SM-10) marked ready, clean
 2026-10-22T20:25:40Z	SM-r	waiting	-	full CI 39844810755 cancelled before running (newer run supersedes); waiting on 39836789801 (scoped: suite 28e2b8521) and 39848684933 (CI 847f50721)
+2026-10-22T20:37:38Z	SM-z	merged	#4461	SM-10 merged as f304220a3; #4462 (SM-10b, feature-done) marked ready, clean
