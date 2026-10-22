@@ -2,9 +2,9 @@
 
 Issue: #3771 · Packet: docs/blueprints/suite/features/command-state.md
 Run: act-1a1601c3538-r0c9 · Session: https://claude.ai/code/session_011jo1mtCQ8wVpaGZxRnV16N · Started: 2026-10-21T10:50Z · Resumed: 2026-10-21T20:17Z
-Stage: wave 2: CS-1b/3/7/9/11/13 ready, in lane; CS-14/10/4 drafts stacked
+Stage: CS waves 2: eight wiring PRs ready on the lane
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: parents in lane; drafts #4202 #4206 #4213 #4210 #4214 #4225 ready after parents; CS-6 building; then CS-15, CS-16 feature-done. needs-ui #4208 filed (spec-built alert button)
+Next: parents merge, then stacked drafts merge dev and come ready
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -28,7 +28,7 @@ Next: parents in lane; drafts #4202 #4206 #4213 #4210 #4214 #4225 ready after pa
 | CS-9 | CS-photo | 2 | Photo catalog | packet CS-9 | Mutate 4/4 | #4140 | ready; gate pass, Head 0b6012c3 |
 | CS-13 | CS-design | 2 | Design catalog | packet CS-13 | Mutate 6/6 | #4144 | ready; merged dev after #4189, Head 45124d6 |
 | CS-7 | CS-halo | 2 | Halo catalog | packet CS-7 | Mutate 8/8 HaloModel.HaloCommandCatalog | #4196 | ready; gate pass, Head 84921163 |
-| CS-11 | CS-flare | 2 | Flare catalog (+6 commands, file.new params) | packet CS-11 | Mutate 7/7 FlareModel.FlareCommandCatalog | #4205 | ready; gate pass, Head 88d0c661 |
+| CS-11 | CS-flare | 2 | Flare catalog (+6 commands, file.new params) | packet CS-11 | Mutate 7/7 FlareModel.FlareCommandCatalog | #4205 | ready; needs-rebase resolved (merged dev after FG-5), Head 8e09b2d3 |
 | CS-14 | CS-design | 3 | Design wiring | packet CS-14 | CommandPathTests | #4202 | draft, stacked on #4144; gate pass, Head d902b346 |
 | CS-10 | CS-photo | 3 | Photo wiring (+1 line PhotoWindow+Export) | packet CS-10 | CommandPathTests; photo export/straighten snapshots may show confirm disabled | #4206 | draft, stacked on #4140; gate pass, Head 2aaaa0db |
 | CS-4 | CS-library-1 | 3 | Library wiring, 25 menu items; baseline max 48 to 23 | packet CS-4 | CommandPathTests, CommandPathLimitTests | #4213 | draft, stacked on #4134; gate pass, Head b449feb8 |
