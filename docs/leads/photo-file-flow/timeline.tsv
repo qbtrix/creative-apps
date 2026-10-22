@@ -88,3 +88,4 @@ utc	stage	event	ref	note
 2026-10-22T01:46:38Z	check	PF-a,PF-u	scoped photo run 39700970657 and full run 39700185524 still queued at add701fc; #4267 clean, waiting on lane batch
 2026-10-22T02:09:16Z	check	-	#4267@9583c10a clean; runs 39700970657/39700185524 still queued; export-pack still planned (PF-8 waits); no open findings
 2026-10-22T02:33:14Z	check	PF-z	#4267 Linux red only on FormatListRatchetTests (dev-red #3856, fixed on dev); merged origin/dev, ci --changed PASS, FormatListRatchetTests PASS; head 5d8cb7ef. Runs 39700970657/39700185524 in progress. export-pack still planned.
+2026-10-22T02:55:27Z	check	PF-a,PF-u	scoped photo run 39700970657 FAILED only on RenderBudgetPhotoTransformTests (Free Transform bodies 120>3; not file-flow, fix PRs #4252/#4219 open); full run 39700185524 red (dev-red #3856). Slices wait for the next green scoped photo run. #4267@5d8cb7ef waiting on lane macOS build.
