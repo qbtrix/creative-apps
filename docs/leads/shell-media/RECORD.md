@@ -2,9 +2,9 @@
 
 Issue: #3711 · Packet: docs/blueprints/suite/features/shell-media.md
 Run: act-1a16391fd34-thw9 · Resumed: 2026-10-22T12:30Z (previous run act-1a1601c3538-r0c9, started 2026-10-21T10:50Z)
-Stage: SM-m done (run 39736849778); SM-w merged (#4237 222bc695), waits a suite run containing it; SM-r #4128 #4239 wait macOS builds; SM-9 building
-Base: d138c7b021dadf6fae7000e8795d687f139f91df
-Next: SM-w done line once a scoped suite or full run contains 222bc695; SM-7/8 merge; SM-9 draft stacked on both; then SM-10
+Stage: SM-w and SM-r merged (#4237 222bc695, #4128 721ac8e9, #4239 c322dde1), each waits a successful suite or full run containing it; SM-9 #4421 rebuilt on dev, gating
+Base: dc87ad2b0bcebf2b6bef749328a03ba06687275f
+Next: SM-9 ready once CI: PASS; SM-10 C4 PR and SM-10b feature-done PR; Belt-Slice-Done for SM-w, SM-r, SM-z as runs land
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -25,8 +25,11 @@ Next: SM-w done line once a scoped suite or full run contains 222bc695; SM-7/8 m
 | SM-4 | SM-m | 2 | FrameClock | packet SM-4 | clock suite | #4123 (draft) | merged 1da00fb9 |
 | SM-5 | SM-w | 3 | movie writer, four codecs, cancel deletes | packet SM-5 | write suite (macOS) | #4125 (draft) | merged f8d7c5b6 |
 | SM-6 | SM-w | 3 | GIF/APNG + still encoders | packet SM-6 | ShellMediaImageWriteTests (macOS); Mutate: none, live-only | #4237 (draft, on #4123) | merged 222bc695 |
-| SM-7 | SM-r | 3 | still decoder, upright 8-bit sRGB | packet SM-7 | read suite (macOS) | #4128 (draft) | ready; macOS build queued, Head de099b96 |
-| SM-8 | SM-r | 3 | FootageReader info + exact frame | packet SM-8 | ShellMediaFootageTests (macOS); Mutate: none, live-only | #4239 (draft, on #4125) | ready; macOS build queued, Head c34a1112 |
+| SM-7 | SM-r | 3 | still decoder, upright 8-bit sRGB | packet SM-7 | read suite (macOS) | #4128 (draft) | merged 721ac8e9 |
+| SM-8 | SM-r | 3 | FootageReader info + exact frame | packet SM-8 | ShellMediaFootageTests (macOS); Mutate: none, live-only | #4239 (draft, on #4125) | merged c322dde1 |
+| SM-9 | SM-z | 4 | LiveMedia slot live; SuiteLiveServices pending 6 (text live too, ST-8) | 4 files | ShellMediaLiveTests (macOS); Mutate: none, live-only | #4421 | dev merged in 18ffebda, gating |
+| SM-10 | SM-z | 5 | C4 prose: shell-media coders and the services.media rule | 1 docs/c4/parts file | scripts/ci --changed | - | gating |
+| SM-10b | SM-z | 5 | shell-media.wave.json built, feature_issue #3711; feature-done | 1 file | scripts/ci --changed | - | gating |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -40,6 +43,8 @@ Next: SM-w done line once a scoped suite or full run contains 222bc695; SM-7/8 m
 - Base is origin/dev, not main: the brief names main (0dd23d6, verified) but CLAUDE.md and lead.md target dev, and report-problem and command-state packets exist only on dev. PRs go to base dev.
 - One line lead plan across shell-media, report-problem and command-state (rule 19).
 - Every slice is ui:false (ui_slice none): no critic panel with screens; Model walks prove SM-a/SM-m on Linux.
+- Status mirrored to lead/suite-<feature> (docs/leads/suite-<feature>/) from 2026-10-22T15:26:41Z, where Belt reads it; lead/<feature> keeps the same files.
+- Full runs 39776226443 and 39779408885 were cancelled by newer dev runs; SM-w and SM-r wait the next successful full or scoped suite run.
 
 ## Open
 - none
