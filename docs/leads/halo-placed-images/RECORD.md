@@ -4,14 +4,14 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: PH-a PR #4426 is with the lane; build PH-u stacked on lead/halo-placed-images-PH-a; PH-m after HT-6 #4415 and HK-6 #4400 merge
+Next: PH-a #4426 waits on its macOS build (run 39786508249); PH-u builder running on lead/halo-placed-images-PH-u; PH-m starts when HT-6 #4415 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | PH-a | picture fields, draw item copy, PlacedImageTarget stubs, checks and job folders disabled | PH-1, PH-2 | MJ-PH | HG-a (merged #3516), HS-a (merged #3676), HK-a (merged #4336), PL-a (done) | false | 0 | pr-open #4426 | – | – |
-| PH-u | Place… and viewer drop on the stubs, viewer draws by cover, inspector rows, snapshots, budget, journey | PH-3, PH-4 | HJ-P1 | PH-a; HG-u, CL-probe, HT-a, HS-a, HK-a all merged | true | 0 | waiting (PH-a) | – | – |
-| PH-m | render draws the picture inside its outline; place commands one undo step | PH-5, PH-6 | MJ-PH | PH-a; HG-m (built), HA-m (built), HS-m (done), HT-m (HT-6 open), HK-m (HK-5 merged; HK-6?) | false | 0 | waiting | – | – |
+| PH-u | Place… and viewer drop on the stubs, viewer draws by cover, inspector rows, snapshots, budget, journey | PH-3, PH-4 | HJ-P1 | PH-a; HG-u, CL-probe, HT-a, HS-a, HK-a all merged | true | 0 | building (stacked on PH-a, rule 22) | – | – |
+| PH-m | render draws the picture inside its outline; place commands one undo step | PH-5, PH-6 | MJ-PH | PH-a; HG-m (built), HA-m (built), HS-m (done), HT-m (HT-6 #4415 open, needs-rebase), HK-m (HK-6 #4400 merged) | false | 0 | waiting | – | – |
 | PH-z | live services, journey on live, blueprint, feature-done | PH-7, PH-8 | HJ-P1 | PH-u, PH-m; HG-z (merged #4318) | true | 0 | waiting | – | – |
 
 ## Tasks
