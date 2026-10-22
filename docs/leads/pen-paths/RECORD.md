@@ -4,7 +4,7 @@ Issue: #3518 · Packet: docs/blueprints/suiteui/features/pen-paths.md
 Run: act-1a15f92d30e-mfnc · Session: claude/feature-lead-suiteui-srh349 · Started: 2026-10-20T07:09Z (relaunched 2026-10-21)
 Stage: 3 wave 6
 Base: aaa43f918e028249e0525eb468f37795638932d7
-Next: #4203 (PN-3, head 01a576e2) waits on the lane macOS build 39712632560 (queued, runner backlog); then open PN-4 (lead/pen-paths-PN-4 3da37e78), then PN-8 (builder running on lead/pen-paths-PN-8, stacked on PN-4). PN-9 waits export-pack:XP-z (#3477 waiting-on-prereq).
+Next: #4203 (PN-3, head 01a576e2) waits on the lane macOS build 39712632560 (queued, runner backlog); then open PN-4 (lead/pen-paths-PN-4 3da37e78), then PN-8 (built, lead/pen-paths-PN-8 b01f7db4). PN-9 waits export-pack:XP-z (#3477 waiting-on-prereq).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -24,7 +24,7 @@ Next: #4203 (PN-3, head 01a576e2) waits on the lane macOS build 39712632560 (que
 | PN-5 | PN-m | – | PenRules and AnchorEdit bodies | Sources/SuiteKernel/Paths/PenRules.swift, Sources/SuiteKernel/Paths/AnchorEdit.swift, tests, mutation plans | PenRulesTests, AnchorEditTests | #3738 | merged |
 | PN-6 | PN-m | – | AnchorIndex body; Selection keeps a Set | Sources/SuiteKernel/Paths/AnchorIndex.swift, Sources/SuiteKernel/Selection/Selection.swift, tests, mutation plans | AnchorIndexTests, AnchorBudgetTests | #3739 | merged 5684f9dd |
 | PN-7 | PN-m | 5 | PathCommands bodies | Sources/SuiteKernel/Paths/PathCommands.swift, Tests/SuiteKernelTests/PathCommandsTests.swift, Tests/mutations/SuiteKernel.PathCommands.json | PathCommandsTests | #4153 | merged |
-| PN-8 | PN-z | 6 | Gallery runs intents through PathCommands | Sources/SuiteUI/Gallery/GalleryPenPaths.swift, Tests/SuiteUITests/PathEditOverlayLiveTests.swift | live test | – | building on lead/pen-paths-PN-8 (stacked on PN-4); PR after PN-4 merges |
+| PN-8 | PN-z | 6 | Gallery runs intents through PathCommands | Sources/SuiteUI/Gallery/GalleryPenPaths.swift, Tests/SuiteUITests/PathEditOverlayLiveTests.swift | live test | – | built on lead/pen-paths-PN-8 b01f7db4 (stacked on PN-4; 2 files +127/-18; CI: PASS); PR after PN-4 merges |
 | PN-9 | PN-z | – | Fake app takes paths; RJ-X37 | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeCanvasPathTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/pen-path/ | FakeCanvasPathTests | – | waiting |
 | PN-10 | PN-z | – | C4, status built, feature-done | docs/c4/parts/creative-apps/suite-kernel/kernel-paths.json, docs/blueprints/suiteui/features/pen-paths.wave.json | scripts/ci | – | waiting |
 
@@ -38,6 +38,7 @@ Next: #4203 (PN-3, head 01a576e2) waits on the lane macOS build 39712632560 (que
 - Relaunch (run act-1a15f92d30e-mfnc): #3770 had cancelled macOS builds and a Linux run red on dev's stale DesignCanvasEditing anchors; merged dev in, scripts/ci --changed PASS, pushed 92162512, moved Head and Belt-Lead.
 
 ## Open
+- 04:1xZ PN-8 built (b01f7db4): GalleryPenBoard runs intents through PathCommands with a History keyed by drag token; PathEditOverlayLiveTests 4 tests (logic checked on Linux via a temporary SuiteKernel copy). Follow-up for PN-z review: the journey flags penRulesWait/pageWait stay true (not in PN-8 files); the journey insert click lands at the pre-move midpoint and may be refused once live.
 - 08:37Z: the lane's macOS build has been queued for 30 min behind run 39362977551 (#3409, running since 03:11Z); third identical poll, so asked the supervisor on #3477 (6286926687).
 - 08:02Z: PN-2 PR #3553 opened (fast-lane). Its snapshot lands in PN-4 (rubric gap noted, rule 18 stand-ins).
 - 07:12Z supervisor answer on #3518 (6285500994): a core bump to core dev (contains e09c6c30) is being built as #758's PR; #3144 rebases onto it. Build what doesn't need it; don't poll the pin.
