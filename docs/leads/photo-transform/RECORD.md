@@ -2,9 +2,9 @@
 
 Issue: #3435 · Packet: docs/blueprints/photo/features/transform.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: PT-m: #4219 on dev; PP-m: #4253 merged 04:17Z (4cc2def23)
+Stage: all slice PRs on dev; verification runs queued
 Base: dev
-Next: await green scoped photo/full run on dev containing 4cc2def23; full CI 39720939785 (6e19f406d) pending holds #4219 but not #4253
+Next: scoped photo 39722915670 + full 39722978870 at 71987f724 (contain #4219, #4253): on green run critics + Belt-Slice-Done
 
 Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transform: one combined wave plan, so the other two records show the same waves.
 
