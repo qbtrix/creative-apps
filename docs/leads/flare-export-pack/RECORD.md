@@ -66,3 +66,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T07:05Z: XP-3 still not on dev.
 - 2026-10-22T07:31Z: XP-3 still not on dev.
 - 2026-10-22T07:59Z: XP-3 still not on dev.
+- 2026-10-22T08:26Z: XP-3 still not on dev.
