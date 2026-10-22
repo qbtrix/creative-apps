@@ -86,5 +86,3 @@ utc	stage	event	ref	note
 2026-10-22T12:32:40Z	3	heartbeat	-	#4388 macOS build 39763938609 success 12:09, awaiting lane batch merge
 2026-10-22T12:57:33Z	AH-z	merged	#4388	5d28cf9 12:44; full dev CI 39781775747 (1a51808) pending, contains it
 2026-10-22T13:21:29Z	heartbeat	AH-z	full dev CI 39781775747 Linux in_progress, macOS queued
-2026-10-22T13:44:28Z	slice-done	AH-z	https://github.com/qbtrix/creative-apps/actions/runs/39781775747
-2026-10-22T13:44:28Z	contact-sheet	-	https://github.com/qbtrix/creative-apps/actions/runs/39781775747

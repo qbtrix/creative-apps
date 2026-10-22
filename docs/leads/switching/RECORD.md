@@ -2,9 +2,9 @@
 
 Issue: #1507 · Packet: docs/blueprints/suite/features/switching.md
 Run: act-1a152d6e775-atvh · Session: claude/switching-feature-lead-2qhod5 · Started: 2026-10-18 (earlier runs act-1a150baa312-n5va on claude/switching-feature-lead-kyvcdx, act-1a146f2912a-581f on claude/switching-feature-lead-jm0d5f)
-Stage: 5 done (Belt-Contact-Sheet posted)
+Stage: 4 round 1, blocked on CI #3176 (scoped `suite` runs skip AfterGlowJourneyTests+Switch until it merges, #2971; SW-4a #2989 merged as 531550f)
 Base: origin/dev d481419
-Next: beta-hardening lane verifies AH-u, AH-m, AH-a, AH-z (journeys HJ1, KJ-history after CI run 39781775747's macOS job, feel gate, Mac-Finish; Mac-Finish-Wanted posted for AH-u, AH-a, AH-z; gap #4174). The lead is done.
+Next: full dev CI 39781775747 (contains 5d28cf9): on a green Linux job post Belt-Slice-Done AH-z + Mac-Finish-Wanted AH-z, then Belt-Contact-Sheet.
 
 Brief deviations (decided here, see Decisions): base is `dev`, not `main`; the status channel is this branch, not `lead/switching`.
 
