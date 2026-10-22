@@ -80,9 +80,9 @@ Next: #4285 #4286 #4290 merged (05:35Z, 06:03Z). Round-1 perf fixers in flight: 
 | #4266 | CL-probe | CI | journey | 1 | PR #4286 merged 05:35Z |
 | #4272 | CL-measure | major | mouse | 1 | PR #4287 merged 04:41Z (bare transport left at 440 pt; History drops; tight ~8 pt) |
 | #4273 | CL-measure | major | clarity | - | waits #4283 |
-| #4274 | CL-measure | major | job | 1 | round-1 fixer dispatched 06:05Z |
+| #4274 | CL-measure | major | job | 1 | PR #4329 (playback ticks redraw viewer only; drag paced to one write per refresh) |
 | #4275 | CL-probe | major | job | 1 | round-1 fixer dispatched 06:05Z |
-| #4276 | CL-measure | major | job | 1 | round-1 fixer dispatched 06:05Z |
+| #4276 | CL-measure | major | job | 1 | PR #4329 (playback ticks redraw viewer only; drag paced to one write per refresh) |
 | #4277 | CL-measure | minor | job | 1 | round-1 fixer dispatched 06:05Z |
 | #4278 | CL-ui | minor | clarity | 1 | PR #4290 merged 06:03Z |
 | #4279 | CL-ui | minor | design | 1 | PR #4290 merged 06:03Z |

@@ -135,3 +135,4 @@ utc	stage	event	ref	note
 2026-10-22T05:22Z	3	pr	#4322	fixes #4313-#4314 (a0729e8, 3 files +100/-25, CI: PASS)
 2026-10-22T06:04Z	3	merge	#4285 #4286 #4290	#4264-#4266, #4278-#4280 fixed on dev
 2026-10-22T06:04Z	3	dispatch	perf fixers	#4274+#4276 (CL-measure), #4275+#4277 (CL-probe)
+2026-10-22T06:28Z	3	pr	#4329	fixes #4274 #4276 (69acb1f, 15 files +361/-39, CI: PASS, mutate 4/4)
