@@ -91,3 +91,4 @@ utc	stage	event	ref	note
 2026-10-22T17:21:53Z	SM-z	ready	#4421	dev merged for Halo fix; gate pass; head e1157a561
 2026-10-22T17:49:42Z	SM-z	waiting	#4421	lane macOS build on e1157a561 pending; SM-r waits on full CI 39818716525
 2026-10-22T18:13:40Z	SM-r	waiting	-	full CI 39818716525 cancelled; next candidate 39829329352 at 8f25082ca
+2026-10-22T18:52:06Z	SM-z	waiting	#4421	macOS runners idle-queued: full CI 39829329352 pending since 18:12, #4421 build 39823748876 queued since 17:33
