@@ -199,7 +199,7 @@ struct DesignCatalogDoc: HeadlessDocument {
         "page.delete | Delete Page | A file keeps at least one page.", "page.select | Select Page | on",
         "tool.move | Move | on", "tool.frame | Frame | on", "tool.rectangle | Rectangle | on",
         "tool.ellipse | Ellipse | on", "tool.text | Text | on", "tool.pen | Pen | Drawing paths isn't built yet.",
-        "tool.eyedropper | Eyedropper | Eyedropper (I): picking a fill or stroke color from the canvas isn't built yet.",
+        "tool.eyedropper | Eyedropper | on",
         "history.read | Read History | on", "history.jump | Jump in History | There are no steps yet.",
         "view.zoom-in | Zoom In | on", "view.zoom-out | Zoom Out | on", "view.fit | Fit Page | on",
         "view.zoom-to-selection | Zoom to Selection | on",

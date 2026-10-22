@@ -1,8 +1,9 @@
 // PhotoSample+Kernel.swift: Photo's eyedropper as SuiteKernel's SampleTarget
 // (eyedropper PE-1 stubs, PE-6 bodies), so `color.sample` and the Eyedropper
 // tool read the same colour: the composite a person sees, in canvas pixels,
-// the mean of the tool's `SampleSize` square. Picking is tool state, not a
-// document edit, so it is never an undo step. The square's size is the
+// the mean of the tool's `SampleSize` square (SuiteKernel's SampleRules, the
+// one mean every sampler uses), rendering only that square. Picking is tool
+// state, not a document edit, so it is never an undo step. The square's size is the
 // tool's own option (`setSampleSize`). Which press picks and when the loupe
 // shows (eyedropper PE-3) are decided here too, so the window only routes.
 // Linux-safe.
@@ -14,16 +15,36 @@ extension PhotoWorkspace: SampleTarget {
     public var sampleHelp: String? { canvas == nil ? "Open an image first." : nil }
 
     /// The colour of the composite at `point` (canvas pixels), the mean of
-    /// the `size` square centred on it; nil outside the image or on empty
-    /// canvas. PE-1 stub: nil until PE-6 reads the composite.
+    /// the `size` square centred on the pixel under it (`SampleRules.mean`),
+    /// straight-alpha sRGB; nil when that pixel is outside the image, or on
+    /// empty canvas. Only the square, clipped to the image, renders: at most
+    /// 25 pixels, so never more than one tile, whatever the image's size.
     public func sampledColor(at point: Point, size: SampleSize) -> FillColor? {
-        nil
+        guard let canvas, point.x.isFinite, point.y.isFinite, abs(point.x) < 1e7, abs(point.y) < 1e7 else { return nil }
+        let column = Int(point.x.rounded(.down)), row = Int(point.y.rounded(.down)), half = size.rawValue / 2
+        let square = PixelRect(x: column - half, y: row - half, width: size.rawValue, height: size.rawValue)
+        guard (0..<canvas.width).contains(column), (0..<canvas.height).contains(row),
+            let region = square.intersection(canvas.rect), let seen = try? rendered(region),
+            let bytes = try? seen.rgba8()
+        else { return nil }
+        return SampleRules.mean(x: column - region.x, y: row - region.y, size: size) { x, y in
+            let at = (y * seen.width + x) * 4
+            guard x >= 0, y >= 0, x < seen.width, y < seen.height, at + 3 < bytes.count else { return nil }
+            return SampleRGBA(r: bytes[at], g: bytes[at + 1], b: bytes[at + 2], a: bytes[at + 3])
+        }
     }
 
     /// Samples the composite at `point` with the tool's `sampleSize` and makes
-    /// it the brush colour, with no undo step. PE-1 stub: refuses until PE-6.
+    /// it the brush colour, with no undo step. Refuses with no image, and
+    /// where there is nothing to sample (outside the image, or a fully
+    /// transparent square), leaving the brush as it was.
     public mutating func pickBrushColor(at point: Point) throws {
-        throw PhotoRefusal(sampleHelp ?? "Not built yet (PE-6).")
+        if let help = sampleHelp { throw PhotoRefusal(help) }
+        guard let picked = sampledColor(at: point, size: sampleSize) else {
+            throw PhotoRefusal("Nothing to sample there.")
+        }
+        func channel(_ value: Double) -> UInt8 { UInt8(clamping: SampleRules.byte(value)) }
+        setToolOption(.color(red: channel(picked.r), green: channel(picked.g), blue: channel(picked.b)))
     }
 
     /// Sets the square the eyedropper reads.
