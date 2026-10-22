@@ -13,9 +13,9 @@ import Testing
 
 @testable import PhotoModel
 
-@Suite(.disabled("waits on IM-7")) struct PhotoImagingTests {
+@Suite struct PhotoImagingTests {
     static let fixtures = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
-    static let root = fixtures.deletingLastPathComponent().deletingLastPathComponent()
+    static let root = fixtures.deletingLastPathComponent()
 
     static let legacy = fixtures.appendingPathComponent("Fixtures/adjust-legacy.ora")
     static let all = [
