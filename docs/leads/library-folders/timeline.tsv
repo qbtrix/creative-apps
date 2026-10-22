@@ -52,3 +52,4 @@ utc	stage	event	ref	note
 1792629832	-	watch	FO-z	Heartbeat: Linux check 39699955972 on c4607f1 and full CI 39700185524 on add701f pending.
 1792630745	-	watch	FO-z	Heartbeat: Linux at c4607f1 red on SuiteModel FormatListRatchetTests (not ours); waiting for a green dev Linux run.
 1792631116	-	watch	FO-z	Linux check 39701991485 at add701f red on SuiteModel FormatListRatchetTests.realTreePasses (Media.swift format list), not ours; FO-z still waits on a green dev Linux run
+1792631659	-	watch	FO-z	heartbeat: waiting on a green dev Linux run containing c4607f1 (dev Linux red on SuiteModel format ratchet, not ours)
