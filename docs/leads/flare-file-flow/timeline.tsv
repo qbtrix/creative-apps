@@ -66,3 +66,4 @@ utc	stage	event	ref	note
 2026-10-22T10:08Z	3	ship	#4387	#4326 merged; fl4 merged dev, gate PASS a363eeb5; opened #4387 (Slice FL-m, FL-z).
 2026-10-22T10:29Z	3	check	#4387	macOS build 39762231867 queued (blocked poll 1); no findings.
 2026-10-22T10:52Z	3	check	#4387	macOS build still queued (blocked poll 2).
+2026-10-22T11:14Z	3	question	#4387	blocked poll 3; asked supervisor for local Mac gate.

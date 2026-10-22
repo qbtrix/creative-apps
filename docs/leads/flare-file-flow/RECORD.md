@@ -84,3 +84,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T10:08Z: #4326 (FL-3) merged into dev via the supervisor's local Mac gate (1aa8448). Merged dev into fl4: two conflicts were stacked additions only (FlareWindow+File clearRecent drain, RJ-F42 test), kept ours; ci --changed PASS at a363eeb5. Opened #4387 (FL-4+FL-7+FL-8, Slice: FL-m, FL-z, fast-lane + feature-done, 11 files +203/-59).
 - 2026-10-22T10:29Z: #4387 open, labels fast-lane+feature-done, no needs-fix/needs-rebase. Lane's macOS build (flare) run 39762231867 queued since 10:19Z (blocked poll 1). No file-flow findings open (Flare findings #3506/#3502 are svg-import). No new comments on #3482.
 - 2026-10-22T10:52Z: #4387 unchanged; macOS build 39762231867 still queued since 10:19Z (blocked poll 2). No new comments, no file-flow findings.
+- 2026-10-22T11:14Z: #4387 macOS build 39762231867 still queued (blocked poll 3). Rule 23: asked the supervisor on #3482 to send #4387 through the local Mac gate.
