@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-22T10:30Z	poll	-	#4384 #4385 #4386	open, clean, no needs-fix; #4357 not merged; no design ci.yml run with our PRs yet
 2026-10-22T10:29Z	pr	wave 2	#4392	DS-z on DS-u, head a9d34d7e7 (steps 3 and 5 added); fast-lane + feature-done
 2026-10-22T10:45Z	poll	-	#4357 #4384 #4385 #4386 #4392	all open, clean, no needs-fix; #4357 not merged yet; no ci.yml run on dev contains our PRs
+2026-10-22T11:13Z	poll	-	#4357 #4384-#4386 #4392	all open, no needs-fix; #4357 waits on lane macOS build run 39760889343 (queued since 10:08Z, runner backlog); our stack waits on it
