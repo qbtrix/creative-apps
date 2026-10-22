@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: fixer on PH-a: FormatListRatchetTests/realTreePasses red on #4426 (lane Linux run 39797325748; HaloPlace+Kernel placeFormats literal), then update #4426 Head and carry into #4437/#4438; PH-m starts when HT-6 #4415 merges
+Next: PH-a #4426 fixed at 4bce186a (ratchet), Head moved; lane builds it on macOS then merges; then retarget #4437 (23c39ff5) to dev + fast-lane, then #4438 (8d0c4b94); PH-m starts when HT-6 #4415 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
