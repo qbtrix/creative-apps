@@ -71,7 +71,7 @@ final class SuitePenPathsJourneyTests: XCTestCase {
             expectPenLog(gallery, "breaking: true", count: 1, atLeast: true)
         }
         choose(gallery, tool: "Pen")
-        canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.7244, dy: 0.2396)).click() // The first segment's midpoint.
+        canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.7273, dy: 0.7708)).click() // Segment 2→3's midpoint, which steps 5 and 6 leave.
         expectPenLog(gallery, "path.anchor-insert", count: 1)
         if !Self.pageWait {
             gallery.press(.delete)
@@ -103,11 +103,12 @@ final class SuitePenPathsJourneyTests: XCTestCase {
         segment.click()
     }
 
-    /// Waits up to five seconds for the page's log to hold `text` `count` times (or more, when `atLeast`).
+    /// Waits up to five seconds for the page's log to hold `text` `count` times (or more, when `atLeast`); a line
+    /// the commands refused doesn't count.
     @MainActor private func expectPenLog(_ gallery: Journey, _ text: String, count: Int, atLeast: Bool = false) {
         var seen = 0
         for _ in 0..<10 {
-            seen = gallery.penLog.components(separatedBy: "\n").filter { $0.contains(text) }.count
+            seen = gallery.penLog.components(separatedBy: "\n").filter { $0.contains(text) && !$0.contains("[refused") }.count
             if seen == count || (atLeast && seen >= count) { return }
             Thread.sleep(forTimeInterval: 0.5)
         }

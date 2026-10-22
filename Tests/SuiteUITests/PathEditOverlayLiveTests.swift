@@ -61,4 +61,18 @@ import Testing
         #expect(line.hasPrefix("path.anchor-remove ") && line.contains("refused"), "\(line)")
         #expect(board.pathInEdit == GalleryPenPaths.sample && board.history.steps.isEmpty)
     }
+
+    /// The page's log folds a drag's moves into one line, keeps Pen clicks and refusals apart, and holds 200 lines.
+    @Test func theLogFoldsADragIntoOneLine() {
+        var board = GalleryPenBoard(), log: [String] = []
+        for _ in 0..<2 { log = GalleryPenBoard.logging(board.send(.penAdd(Point(x: 40, y: 40), handleOut: nil)), after: log) }
+        _ = board.send(.cancel)
+        for _ in 0..<2 { log = GalleryPenBoard.logging(board.send(.remove), after: log) }
+        _ = board.send(.selectAll)
+        for _ in 0..<10 { log = GalleryPenBoard.logging(board.send(.move(dx: 1, dy: 0, drag: "d1")), after: log) }
+        #expect(log.count == 2 + 2 + 1, "\(log)")
+        #expect(log.filter { $0.hasPrefix("path.anchor-move ") }.count == 1)
+        for i in 0..<300 { log = GalleryPenBoard.logging("line \(i) [no step]", after: log) }
+        #expect(log.count == 200 && log.last == "line 299 [no step]")
+    }
 }

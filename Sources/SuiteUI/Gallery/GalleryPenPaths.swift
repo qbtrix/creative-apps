@@ -61,7 +61,17 @@ struct GalleryPenBoard: PathEditTarget {
         do {
             let outcome = try catalog.run(command.id, params: command.params, on: &self)
             return "\(command.id) [\(outcome.undoStep ?? "no step"), \(history.steps.count) in History] \(intent)"
-        } catch { return "\(command.id) [refused: \(error)] \(intent)" }
+        } catch { return "\(command.id) [refused: \(error.description)] \(intent)" }
+    }
+
+    /// The log after `line`: a line whose step folded into the open one (same command, same step count) replaces the
+    /// last line, so one drag is one line; the newest 200 lines stay.
+    static func logging(_ line: String, after log: [String]) -> [String] {
+        var log = log
+        let head = { (line: String) in line.prefix { $0 != "]" } }
+        if let last = log.last, !line.contains("no step"), !line.contains("[refused"), head(last) == head(line) { log.removeLast() }
+        log.append(line)
+        return Array(log.suffix(200))
     }
 
     /// Takes back the last step; false when there is none. The selection is cleared, since its points may be gone.
@@ -92,12 +102,14 @@ struct GalleryPenPathsPage: View {
                 .overlay(alignment: .topLeading) {
                     ZStack(alignment: .topLeading) {
                         if !board.shapes.added.isEmpty {
-                            PathMarks(contours: board.shapes.added.flatMap(\.contours), toView: .identity, selected: [], hovered: nil, zoom: 1)
+                            let parts = PathMarks.parts(board.shapes.added.flatMap(\.contours), toView: .identity)
+                            PathMarks.outline(anchors: parts.anchors, segments: parts.segments, zoom: 1)
+                                .stroke(SuiteColor.overlayInk, lineWidth: 1)
                                 .allowsHitTesting(false)
                                 .accessibilityHidden(true)
                         }
                         PathEditOverlay(draft: board.penDraft, path: board.pathInEdit, selection: board.anchorSelection, tool: tool, zoom: 1) {
-                            log.append(board.send($0))
+                            log = GalleryPenBoard.logging(board.send($0), after: log)
                         }
                     }
                 }
