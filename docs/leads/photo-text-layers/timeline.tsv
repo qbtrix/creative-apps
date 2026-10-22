@@ -55,3 +55,4 @@
 2026-10-22T08:38Z	check	TS-m #3844/#3847 still open (#3844 idle since 07:25Z); no new findings; TX-4/TX-5 waiting
 2026-10-22T09:05Z	check	TS-m #3844/#3847 still open; new finding #4378 (multi-layer shift-click) is multi-layer-select, not text-layers (TX commits never touch layer picking); TX-4/TX-5 waiting
 2026-10-22T09:31Z	check	TX-4/TX-5 still wait on TS-m #3844 (open, last 07:25Z) and #3847 (open); no new text-layers findings
+2026-10-22T10:00Z	check	TS-5 (#3844) merged 758dc4db0; TX-5 started on photo-text-layers/TX-5; TX-4 waits on TS-6 #3847
