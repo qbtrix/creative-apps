@@ -180,3 +180,5 @@ utc	stage	event	ref	note
 2026-10-22T17:40Z	3	pr	#4596	fixes #4586, CI PASS; assert follow-up asked
 2026-10-22T17:44Z	3	push	#4596	f2fd561f asserts loosened, CI PASS
 2026-10-22T17:55Z	3	pr	#4609	fixes #4589, CI PASS
+2026-10-22T18:06Z	3	merge	#4557	fixes #4448
+2026-10-22T18:06Z	3	check-in	18:05Z	panel pending on 39798075384
