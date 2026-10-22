@@ -77,3 +77,5 @@
 - 2026-10-22 01:55Z (Belt nudge): HG-m (#4216) macOS build of ba788c4 green (run 39699713418). HG-u (#4207) macOS green, Linux red on the dev ratchet break only. Dev fix #4258 still in its lane macOS build (39705921002), not merged. Both slices wait on #4258; then merge dev into both, gate, move Head. KE-z still planned.
 
 - 2026-10-22 02:28Z: #4258 closed, superseded by #4238 (SC-14) on dev, which clears the ratchet break. Merged origin/dev (b5a6e7e0) into HG-m (5f0a2742) and HG-u (959f433c), clean. Gate running on both; then push and move Head.
+
+- 2026-10-22 02:50Z: scripts/ci --changed PASS on both. Pushed HG-u 959f433 (#4207) and HG-m 5f0a274 (#4216); Head lines moved, no footer. Waiting on the lane's builds and batch.
