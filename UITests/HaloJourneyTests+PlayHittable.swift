@@ -7,12 +7,17 @@
 // so the row keeps one shape. On `-HaloSample three-layers` (72 frames at
 // 24 fps, Loop on) at H-J4's 1000 by 640 window it clicks Play, waits past
 // frame 10, then samples the button five times over a second: each time it is
-// hittable at the frame it had before Play. A second click then pauses it,
+// hittable with every edge within 1 pt of where it was before Play, and the
+// artboard names more than one frame across the samples (loop-safe: Loop
+// stays on, so the playhead may wrap). A second click then pauses it,
 // read from the button's value or, when that reads empty (#262), from the
 // artboard's frame holding still. Shots `halo-play-hittable-<step>`.
 import XCTest
 
 final class HaloPlayHittableJourneyTests: XCTestCase {
+    /// How far, in points, any edge of the Play button may sit from where it was before Play.
+    private static let edgeTolerance: CGFloat = 1
+
     /// Play/Pause keeps its frame and stays hittable while playing, and a click pauses it.
     @MainActor func testPlayStaysHittableWhilePlaying() {
         let halo = Journey("Halo", self, arguments: ["-HaloSample", "three-layers", "-HaloWindowSize", "1000x640"])
@@ -23,13 +28,20 @@ final class HaloPlayHittableJourneyTests: XCTestCase {
 
         play.click()
         Thread.sleep(forTimeInterval: 1)
-        XCTAssertNotEqual(artboardFrame(halo), 0, "Play didn't move the playhead off frame 0")
         halo.shot("play-hittable-playing")
+        var seen = Set<Int>()
         for sample in 0..<5 {
+            if let frame = artboardFrame(halo) { seen.insert(frame) }
             XCTAssert(play.isHittable, "halo.transport.play isn't hittable while playing (sample \(sample)): \(play.frame)")
-            XCTAssertEqual(play.frame, rest, "halo.transport.play moved while playing (sample \(sample))")
+            let now = play.frame
+            let edges = [now.minX - rest.minX, now.minY - rest.minY, now.maxX - rest.maxX, now.maxY - rest.maxY]
+            XCTAssert(
+                edges.allSatisfy { abs($0) <= Self.edgeTolerance },
+                "halo.transport.play moved while playing (sample \(sample)): \(rest) → \(now)")
             Thread.sleep(forTimeInterval: 0.2)
         }
+        // Loop-safe: the playhead moved across the samples, wherever it wrapped.
+        XCTAssert(seen.count > 1, "the artboard named frames \(seen.sorted()) across a second of play, so it wasn't playing")
 
         play.click()
         expectPaused(play, halo)
