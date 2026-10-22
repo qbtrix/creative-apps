@@ -41,6 +41,7 @@ Next: RP-7 feature-done PR (docs-only), then Belt-Contact-Sheet after the CI its
 - RP-6 must be a C4-only PR branched from dev after RP-5/RP-5b merge: scripts/check-c4-descriptions allows description rewrites only when every changed path is under docs/c4/parts/. It updates suite-help (callers: Help group, CLI) and shell-help (crash reader), and the afterglow onboarding part (still names the deleted LauncherCommands+Onboarding).
 - Status mirrored to lead/suite-<feature> (docs/leads/suite-<feature>/) from 2026-10-22T15:26:41Z, where Belt reads it; lead/<feature> keeps the same files.
 - RP-7 #4459 (wave.json built, feature-done, fast-lane) opened as draft at bb49f6f15; goes ready once #4380 (RP-6) merges so feature CI contains it.
+- #4380 (RP-6) merged; #4459 (RP-7, feature-done) marked ready.
 
 ## Open
 - none
