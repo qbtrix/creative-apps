@@ -33,7 +33,7 @@ import Testing
             #expect(HaloHeadless.catalog.ids.contains(id), "\(id)")
         }
         let fills = GradientCommands.specs(HaloProject.self).count  // HG-7: the eight fill commands
-        #expect(HaloProject.catalog.ids.count == HaloCommand.allCases.count + 2 + fills + HaloProject.windowSpecs.count)
+        #expect(HaloProject.catalog.ids.count == HaloCommand.allCases.count + 2 + fills + 1 + HaloProject.windowSpecs.count)  // FR-8b: set-frame-rate
     }
 
     @Test func runShapeKeepsThePickedTool() throws {
