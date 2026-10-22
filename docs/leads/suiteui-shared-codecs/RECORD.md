@@ -74,3 +74,4 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-22T01:06Z: SC-14 #4238: lane macOS build 39695868336 has been running since 01:01Z. #4258 (dev's ratchet fix) is still open.
 - 2026-10-22T01:28Z: Build 39695868336 passed on 7b9039c. At 00:56Z the supervisor merged #4270 (StillFormat from SuiteImageFormats) into SC-14, giving head b60d61fd; landing #4238 turns dev's ratchet green. The lane's new macOS build 39704535700 is queued. I'm re-gating b60d61fd so the Head: line can move to it.
 - 2026-10-22T01:35Z: SC-14 #4238 head b60d61fd (dev merge + supervisor's #4270) re-gated: CI PASS; Head: line moved; lane macOS build 39704535700 queued.
+- 2026-10-22T01:50Z: SC-14 #4238: lane macOS build 39704535700 green on b60d61fd; Fast-Check/Head current; waits for the lane's merge sweep.
