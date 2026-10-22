@@ -9,7 +9,6 @@ import CoreGraphics
 import Foundation
 import ImageIO
 import SuiteModel
-import UniformTypeIdentifiers
 
 public struct StillEncoder: Sendable {
     public init() {}
@@ -33,23 +32,14 @@ public struct StillEncoder: Sendable {
         return data as Data
     }
 
+    /// The format's type id, from SuiteImageFormats.
     static func type(_ format: StillFormat) -> CFString {
-        let type: UTType = switch format {
-        case .png: .png
-        case .jpeg: .jpeg
-        case .heic: .heic
-        case .tiff: .tiff
-        }
-        return type.identifier as CFString
+        format.format.typeID.rawValue as CFString
     }
 
+    /// "PNG": the format's title, from SuiteImageFormats.
     static func name(_ format: StillFormat) -> String {
-        switch format {
-        case .png: "PNG"
-        case .jpeg: "JPEG"
-        case .heic: "HEIC"
-        case .tiff: "TIFF"
-        }
+        format.format.title
     }
 
     /// The frame's straight-alpha sRGB bytes as an image.
