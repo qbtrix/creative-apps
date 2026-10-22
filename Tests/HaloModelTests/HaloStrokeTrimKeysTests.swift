@@ -66,6 +66,16 @@ import Testing
         #expect(keys.allSatisfy { $0.help == "off" && HaloProject.trimKeyCommand($0, diamond: false) == nil })
     }
 
+    @Test func aBuiltStrokesTrimKeysActOnTheirProperties() throws {
+        let project = try Self.badge()
+        #expect(project.strokeHelp == nil, "a stroked shape layer edits its stroke (HK-6)")
+        let keys = project.trimKeys
+        #expect(keys.allSatisfy { $0.help == nil }, "every trim key acts on a stroked shape")
+        #expect(keys.map { HaloProject.trimKeyCommand($0, diamond: true) } == HaloProperty.trims.map { .toggleKey($0) })
+        #expect(
+            keys.map { HaloProject.trimKeyCommand($0, diamond: false) } == HaloProperty.trims.map { .toggleAnimation($0) })
+    }
+
     @Test func withoutAReasonTheDiamondKeysAndTheStopwatchAnimates() throws {
         let project = try Self.badge()
         let keys = HaloProject.trimKeys(of: project.selectedLayer, at: 0) { _ in nil }
