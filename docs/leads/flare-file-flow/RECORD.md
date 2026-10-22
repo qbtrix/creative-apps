@@ -4,7 +4,7 @@ Issue: #3482 · Packet: docs/blueprints/flare/features/file-flow.md
 Run: act-1a160bffba1-bvv3 · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih) · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: FL-a
 Base: 8c55f0bf9 (origin/dev)
-Next: open FL-m (flm3) and FL-u once #4259 merges
+Next: open FL-m/FL-u once #4259 merges
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -61,3 +61,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T01:14Z: flm3 head 1b88ac03: ci --changed PASS (1115 tests), mutate 4/4 re-run on the split; PR body drafted. #4259 lane rebuild 39703409910 queued
 - 2026-10-22T01:24Z: heartbeat 01:24Z: #4259 lane rebuild 39703409910 still queued; #4257 not merged yet (build green); #4035 open; full run 39700185524 Linux red on FormatListRatchetTests.realTreePasses (SuiteModel Media.swift, not ours), no slice credit
 - 2026-10-22T01:35Z: Records now also live on lead/flare-* (the branches Belt watches); every stage pushes there.
+- 2026-10-22T01:44Z: Heartbeat: #4259 build 39703409910 still queued (macOS runners busy); #4257, #4035 open; no green-Linux run containing FG-m yet.
