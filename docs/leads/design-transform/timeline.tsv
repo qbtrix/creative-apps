@@ -94,3 +94,4 @@ utc	stage	event	ref	note
 2026-10-22T08:50Z	3	heartbeat	-	scoped design 39747588205 still queued; full CI 39746443459 cancelled (superseded by 39748952777 at 9933cf8e)
 2026-10-22T09:12:08Z	poll	scoped design 39747588205 queued; full CI 39748952777 cancelled; newer full CI 39752648221 (06d331b0) pending, 39750872878 (cc0a7944) queued; no new findings
 2026-10-22T09:32:17Z	poll	scoped design 39747588205 queued; full CI 39752648221 cancelled, superseded by 39755561688 (06d331b0) pending; 39750872878 (cc0a7944) queued; no new findings
+2026-10-22T09:51:38Z	poll	scoped design 39747588205 still queued; full CI 39755561688 cancelled (superseded), now 39758044934 (1896483c) pending; 39750872878 (cc0a7944) queued; no new findings
