@@ -2,9 +2,9 @@
 
 Issue: #3457 · Packet: docs/blueprints/suiteui/features/placed-images.md
 Run: act-1a1647a67aa-dau5 (relaunch) · Started: 2026-10-22T16:45Z
-Stage: 3 wave 3 (PL-z, all PRs open; PL-8 fix pushed)
+Stage: PL-z waiting on lane
 Base: 854a3b52c66aaa12582e9190f404265b84594a05
-Next: #4578 (PL-8, head d2b2c73) waits on its new lane macOS build; #4613/#4616/#4617 wait on the TT -> EY-z chain. PL-z done on a green ci.yml run holding all four.
+Next: Poll #4578 build run 39838044012, then #4613, #4616, #4617
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -33,6 +33,7 @@ Next: #4578 (PL-8, head d2b2c73) waits on its new lane macOS build; #4613/#4616/
 |---|---|---|---|---|---|
 
 ## Decisions
+- 19:36Z #4578 head d2b2c73 macOS build run 39838044012 in progress; #4613/#4616/#4617 wait on the EY chain.
 - 2026-10-22T19:20Z: PL-8's macOS build (run 39819869147) failed: PlaceLiveTests' local 'let sample = try #require(sample(format))' shadowed the static helper. Renamed to 'picked' via Self.sample, pushed d2b2c73 (fix round 1 of 2), Head moved.
 - 2026-10-22T18:45Z: PL-9 opened as #4613 (17/17 mutations caught, CI: PASS, 14 files, 295 lines; catalog budget test raised 20 KB -> 24 KB for 35 command ids). PL-10 split into #4616 (wave.json) and #4617 (C4-only), because check-c4-descriptions refuses a description rewrite beside other files.
 - 2026-10-22T17:50Z: Relaunch act-1a1647a67aa-dau5. The upstream slices PL-z waited on are built or have their last PRs open, so PL-8 opened as #4578 on dev. GF-z is done. PL-9 follows EY-8 in the FakeCanvasDocument chain (TT-8 -> EY-8 -> PL-9).

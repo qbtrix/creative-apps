@@ -143,3 +143,4 @@ utc	stage	event	ref	note
 18:45Z	pr-opened	PL-9 #4613, PL-10 #4616 + #4617 (C4)
 18:40Z	heartbeat	PL-8 #4578 macOS build 39819869147 still queued; #4613/#4616/#4617 wait on the EY-z chain
 19:20Z	fix	PL-8 macOS build failure (shadowed name in PlaceLiveTests) fixed, d2b2c73
+19:36Z	heartbeat	#4578 build in progress
