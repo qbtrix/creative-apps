@@ -40,5 +40,26 @@
     "find": "history.record(name, rects, key: drag.map { \"\\(name):\\($0)\" })",
     "replace": "history.record(name, rects, key: nil)",
     "tests": "FakeCanvasFillTests"
+  },
+  {
+    "label": "fakeJumpRecordsNothing: the fake's jump records a step of its own, so the panel grows a row and redo is lost",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "history.jumpEndingRun(to: index) { old in defer { current = old }; return current }",
+    "replace": "history.record(\"Jump\", rects); history.jumpEndingRun(to: index) { old in defer { current = old }; return current }",
+    "tests": "FakeHistoryTests"
+  },
+  {
+    "label": "fakeBaseIsOpen: the base row is named \"\", so the panel's first row is blank",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "history.listing(base: \"Open\")",
+    "replace": "history.listing(base: \"\")",
+    "tests": "FakeHistoryTests"
+  },
+  {
+    "label": "fakeJumpKeepsRun: the plain jump leaves the run open, so a drag after a jump to the current step folds into it",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "history.jumpEndingRun(to: index) { old in",
+    "replace": "history.jump(to: index) { old in",
+    "tests": "FakeHistoryTests"
   }
 ]
