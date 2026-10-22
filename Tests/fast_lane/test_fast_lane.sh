@@ -286,7 +286,17 @@ build "the build still going: waits, no second dispatch" "pending|waiting for th
 build "the build compiled the head: eligible" "eligible|150|2|Fast-Check marker, macOS build $BUILD_URL" "$MARKED" "$APP" .
 build "the build failed: refused, with what to do" \
   "$BREFUSE (failure). Fix it and push; the lane builds the new head on macOS again" "$MARKED" "$APP" '.conclusion = "failure"'
-build "a cancelled build is refused too" "$BREFUSE (cancelled)" "$MARKED" "$APP" '.conclusion = "cancelled"'
+# A queued or running build waits; a re-dispatch would cancel it (ci.yml's
+# per-branch -build concurrency group). A cancelled one is dispatched again
+# once BUILD_RETRY_SECS after it was cancelled, and waits until then.
+build "a queued build waits, no second dispatch" "pending|waiting for the macOS build $BUILD_URL on head $HEAD_SHA" \
+  "$MARKED" "$APP" '.status = "queued" | .conclusion = ""'
+build "a build pending on its concurrency group waits" "pending|waiting for the macOS build $BUILD_URL on head $HEAD_SHA" \
+  "$MARKED" "$APP" '.status = "pending" | .conclusion = ""'
+build "a build cancelled minutes ago waits" "pending|waiting for the macOS build $BUILD_URL on head $HEAD_SHA" \
+  "$MARKED" "$APP" '.conclusion = "cancelled" | .updatedAt = (now - 300 | todate)'
+build "a build cancelled past the interval is dispatched again" "build-dispatch|Sources/LibraryApp, Sources/LibraryModel|feat/x" \
+  "$MARKED" "$APP" '.conclusion = "cancelled" | .updatedAt = (now - 7200 | todate)'
 build "a red macOS build check is the gate's to name, not just red" "$BREFUSE (failure)" "$MARKED" "$APP" '.conclusion = "failure"' \
   '[{"__typename":"CheckRun","name":"macOS build","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"},
     {"__typename":"CheckRun","name":"Linux","workflowName":"","status":"COMPLETED","conclusion":"SKIPPED"},
@@ -645,7 +655,19 @@ gh() {
     "run list "*"--commit "*)
       u="${a#*--commit }"; u="${u%% *}"
       [[ ! -e "$sw/runlist.fail.$u" ]] || return 1
+      # $sw/headsha.flaky: GitHub's head_sha filter answers an empty list (#4441).
+      [[ ! -e "$sw/headsha.flaky" ]] || { jq -rn '[]' | jq -r "${!#}"; return; }
       jq -r "${!#}" "$sw/runs.$u.json" 2>/dev/null || jq -rn '[]' | jq -r "${!#}" ;;
+    "run list "*"--branch "*"--json databaseId,"*|"run list "*"--branch "*"--json url,displayTitle,headSha "*)
+      # A branch's runs: every runs.<sha>.json of the fixture PRs on that branch.
+      u="${a#*--branch }"; u="${u%% *}"
+      local h=() f
+      for f in "$sw"/[0-9]*.json; do
+        [[ "$(jq -r .headRefName "$f")" == "$u" ]] || continue
+        f=$(jq -r .headRefOid "$f"); [[ ! -e "$sw/runlist.fail.$f" ]] || return 1
+        [[ ! -e "$sw/runs.$f.json" ]] || h+=("$sw/runs.$f.json")
+      done
+      if (( ${#h[@]} )); then jq -s 'add' "${h[@]}" | jq -r "${!#}"; else jq -rn '[]' | jq -r "${!#}"; fi ;;
     "workflow run "*)
       # A dispatch on a PR's head branch starts an in-progress CI run on its head.
       echo "$a" >>"$sw/calls"
@@ -957,6 +979,31 @@ expect "build: once it compiled the head, a later sweep merges it" "$(grep -c '^
 expect "build: the merge comment names the build" \
   "$(grep -c '^pr comment 30 .*merged into dev.*macOS build https://github.com/qbtrix/creative-apps/actions/runs/830' "$sw/calls")" 1
 expect "build: still one build for its head" "$(grep -c -- '--ref b30$' "$sw/calls")" 1
+# The cancel loop (#4441, #4472): GitHub's head_sha filter sometimes answers
+# an empty list, which read as "no build on the head", so each sweep
+# dispatched again and the new run cancelled the queued one (ci.yml's
+# per-branch -build group); in a full macOS queue nothing ever built. #40's
+# build is queued while head_sha answers empty: no dispatch. #42's build was
+# cancelled 5 minutes ago: it waits. #44's was cancelled 2 hours ago: one
+# dispatch, and the re-sweep waits on it.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"; touch "$sw/headsha.flaky"
+for n in 40 42 44; do
+  pr_at "$n" "h$n" '[{"filename": "Sources/LibraryApp/LibraryInspector.swift", "status": "modified"}]'
+  jq --arg b "b$n" '.headRefName = $b' "$sw/$n.json" >"$sw/x" && mv "$sw/x" "$sw/$n.json"
+done
+for spec in "40 queued null 0" "42 completed cancelled 300" "44 completed cancelled 7200"; do
+  read -r n st c ago <<<"$spec"
+  jq -n --arg n "$n" --arg st "$st" --arg c "$c" --argjson ago "$ago" '[{databaseId: "7\($n)", displayTitle: "macOS build",
+    status: $st, conclusion: (if $c == "null" then "" else $c end), updatedAt: (now - $ago | todate),
+    url: "https://github.com/qbtrix/creative-apps/actions/runs/7\($n)", headSha: "h\($n)"}]' >"$sw/runs.h$n.json"
+done
+lane_sweep
+expect "cancel loop: a queued build is never dispatched over" "$(grep -c -- '--ref b40$' "$sw/calls")" 0
+expect "cancel loop: a build cancelled minutes ago waits" "$(grep -c -- '--ref b42$' "$sw/calls")" 0
+expect "cancel loop: a build cancelled past the interval is dispatched again once" "$(grep -c -- 'build_only=true .*--ref b44$' "$sw/calls")" 1
+lane_sweep
+expect "cancel loop: the re-sweep waits on the new build" "$(grep -c -- '--ref b4[024]$' "$sw/calls")" 1
+expect "cancel loop: nothing merges before it compiles" "$(grep -c '^pr merge 4[024]' "$sw/calls")" 0
 # #36 touches only Tests/AppSnapshotTests (#1097's break): it gets the build too.
 rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
 pr_at 36 h36 '[{"filename": "Tests/AppSnapshotTests/HaloPlaybackDriverTests.swift", "status": "modified"}]'
