@@ -13,8 +13,14 @@
 // value inside its m padding. L5: HaloViewer hosted at the content minimum;
 // all six `halo.transport.*` controls show, left of the status row's zoom,
 // size, timecode and layer pills; none overlaps another by more than 0 pt or
-// leaves the row, and the timecode shows at its full width. A miss is a `finding` on
-// the view's owner, not a fix in the test. macOS only.
+// leaves the row, and the timecode shows at its full width. L7 (#4313): in
+// the hosted window at the journeys' 1000 by 640, the `suite.inspector`
+// column starts at the same x, and is at least HaloWindow.inspectorWidth
+// wide, with Ball selected at frame 12 and with its x 0 key picked and
+// eased Out, so ending a drag never moves the stage. L8 (#4314): the TEXT
+// color row's "Color" label, at the window's inspector width, is at least
+// its fitting width. A miss is a `finding` on the view's owner, not a fix in
+// the test. macOS only.
 #if canImport(AppKit)
 import AppKit
 import CoreGraphics
@@ -184,6 +190,30 @@ import Testing
         #expect(timecode.width >= full - Self.barTolerance, "the timecode is \(timecode.width) pt of its \(full): \(report)")
     }
 
+    // MARK: L8
+
+    /// L8: the TEXT color row keeps its whole "Color" label at the window's inspector width (#4314).
+    @Test(.timeLimit(.minutes(2))) func textColorLabelKeepsItsWidth() async throws {
+        var project = HaloLaunch(arguments: ["Halo", "-HaloSample", "empty"]).project()
+        project.newLayer(.text)
+        #expect(project.selectedText != nil, "no text layer selected")
+        #expect(project.selectedLayerColor != nil, "the text layer has no color row")
+        let width = HaloWindow.inspectorWidth - 2 * SuiteSpacing.m
+        let host = try await AXHost(
+            HaloLayerInspector(model: project).frame(width: width, alignment: .topLeading).background(SuiteColor.panel),
+            size: CGSize(width: width, height: 1600))
+        defer { host.close() }
+        let id = HaloTextInspector.colorID
+        #expect(host.frames(prefix: id)[id] != nil, "no \(id) at \(width) pt")
+        // The row's label is the leftmost "Color"; the swatch's hidden label reads the same, right of it.
+        let found = host.frames(text: { $0 == "Color" })
+        let label = try #require(found.min { $0.minX < $1.minX }, "no Color label at \(width) pt")
+        let full = Self.fittingWidth(Text(verbatim: "Color").font(SuiteFont.inspectorLabel))
+        let report = "L8 at \(width) pt: Color label \(Self.span(label)), fitting \(full); all \(found.map(Self.span))"
+        print(report)
+        #expect(label.width >= full - Self.barTolerance, "the Color label is cut: \(report)")
+    }
+
     // MARK: Helpers
 
     /// The width `view` takes on one line at its ideal size.
@@ -199,6 +229,39 @@ import Testing
 
     private static func span(_ frame: CGRect) -> String {
         "\(frame.minX)...\(frame.maxX) × \(frame.minY)...\(frame.maxY)"
+    }
+}
+
+extension BodyCountSuites {
+    /// L7 (#4313): the inspector column's left edge doesn't follow its content. It hosts the whole
+    /// window, whose body bumps HaloWindow.bodyRuns, so it runs with the counter-reading suites.
+    @MainActor @Suite struct HaloInspectorColumnTests {
+        /// The journeys' window, where the column sat at x 800 or 795 by selection.
+        static let window = CGSize(width: 1000, height: 640)
+
+        @Test(.timeLimit(.minutes(3))) func inspectorEdgeIgnoresAKeyedEasedPick() async throws {
+            var plain = HaloProject(services: .fake, document: try #require(HaloFixtures.project("keyed")))
+            let ball = try #require(plain.selectedComposition?.layers.first { $0.name == "Ball" }, "no Ball")
+            plain.selectLayer(ball.id)
+            plain.scrub(to: 12)
+            var eased = plain
+            let x0 = try #require(eased.keySegments.first { $0.key.property == .x && $0.key.frame == 0 }, "no x 0 key")
+            eased.selectKey(x0.key, extending: false)
+            eased.setEasing(.easeOut)
+            #expect(eased.pickedPreset == .easeOut, "the x 0 key isn't eased Out")
+            var columns: [CGRect] = []
+            for project in [plain, eased] {
+                let hosted = try await HostedHaloWindow(project, size: Self.window)
+                columns.append(try #require(hosted.frame(of: "suite.inspector"), "no suite.inspector"))
+                hosted.close()
+            }
+            let report = "L7 at \(Self.window.width) pt: plain \(columns[0]), keyed and eased \(columns[1])"
+            print(report)
+            #expect(abs(columns[0].minX - columns[1].minX) <= 0.5, "the inspector moves: \(report)")
+            for column in columns {
+                #expect(column.width >= HaloWindow.inspectorWidth - 0.5, "the inspector is under its width: \(report)")
+            }
+        }
     }
 }
 
@@ -243,16 +306,18 @@ import Testing
     }
 
     /// The first element whose label or value `matches`, as text.
-    func frame(text matches: (String) -> Bool) -> CGRect? {
-        for element in Self.walk(root) {
+    func frame(text matches: (String) -> Bool) -> CGRect? { frames(text: matches).first }
+
+    /// Every element whose label or value `matches`, as text, in walk order.
+    func frames(text matches: (String) -> Bool) -> [CGRect] {
+        Self.walk(root).compactMap { element in
             let label = element.accessibilityLabel?() ?? nil
             let value = (element.accessibilityValue?() ?? nil).map { "\($0)" }
             guard [label, value].contains(where: { $0.map(matches) ?? false }),
                 let frame = element.accessibilityFrame?()
-            else { continue }
+            else { return nil }
             return window.convertFromScreen(frame)
         }
-        return nil
     }
 
     private static func walk(_ element: Any) -> [AnyObject] {
