@@ -78,3 +78,4 @@ utc	stage	event	ref	note
 2026-10-22T01:01Z	poll	changed: #4235 lane macOS build 39699014299 now in progress (was queued); #4235 clean, no needs-fix; #3499 unchanged since 10-21 08:54Z; no halo journeys run with #4235 yet. Blocked count reset to 0/3.
 2026-10-22T01:23Z	poll	changed: #4235 lane macOS build 39699014299 green 01:04Z; PR clean, awaiting lane merge; #3499 unchanged; no halo journeys with #4235 yet. Blocked 0/3.
 2026-10-22T01:45Z	blocked	1/3: #4235 green and clean, still unmerged (lane batching; dev Linux red on other lines, #3856); #3499 unchanged; no halo journeys with #4235.
+2026-10-22T02:07Z	poll	changed: lane Linux check on #4235 (39705347770) red only on dev break FormatListRatchetTests (#3856); fix #4258 (shell-media) on lane, macOS build pending; noted on #4235. #3499 unchanged. Blocked 0/3.
