@@ -77,3 +77,4 @@ time	kind	note
 2026-10-22T08:20Z	poll	DK-u waits shape-tools:DS-u, DK-m waits DS-m (only DS-a merged; #3440 prereq-priority)	-	blocked poll 2
 2026-10-22T08:59Z	question	blocked poll 3: asked supervisor on #3441 (DS-u/DS-m unbuilt)	-	-
 2026-10-22T09:21Z	parked	supervisor answer: waiting-on-prereq shape-tools DS-u/DS-m (own lead #3440)	-	-
+2026-10-22T10:45Z	heartbeat	still parked (waiting-on-prereq) per supervisor 09:03Z on #3441; Belt nudge named lead/stroke-style (SuiteUI #3450, another run); asked supervisor on #3438	#3438	-
