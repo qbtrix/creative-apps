@@ -56,3 +56,5 @@ Next: #4159, #4187, #4188-fix merge -> Belt-Slice-Done + Mac-Finish-Wanted DT-u 
 - 2026-10-22T01:57Z #4254 and #4255 macOS builds green. #4255: Lane Linux check red on FormatListRatchetTests.realTreePasses (Sources/SuiteModel/Values/Media.swift, from SM-1 #4034); dev is red on the same test (dev-red #3856), fix #4258 in the lane. Not ours; merge dev again once #4258 lands.
 
 - 2026-10-22T02:29Z Merged dev (b5a6e7e0a) into #4255, CI: PASS, pushed f5833163, Head moved. #4254 still open at f9c5b8ac, clean. Scoped design run 39693638859 (be9aa35bc) failed on the old RenderBudgetPhotoPlaceTests break (fixed on dev by #4215), so no done lines yet; next design run is 39709889487. #4258 closed: #4238 (SC-14) fixed dev's ratchet.
+
+- 2026-10-22T02:59Z #4254 Linux check was red on the old ratchet test; merged dev (now green at b5a6e7e0a), CI: PASS, pushed e62d759d, Head moved. #4255 at f5833163 waits on its lane macOS build. Design run 39709889487 still queued.
