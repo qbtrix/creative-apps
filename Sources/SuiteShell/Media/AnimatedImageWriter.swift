@@ -55,11 +55,13 @@ public final class AnimatedImageWriter: FrameSink, @unchecked Sendable {
     }
 
     public func finish() async throws(SuiteError) {
-        lock.lock()
-        let frames = self.frames, wasOpen = open
-        self.frames = []
-        open = false
-        lock.unlock()
+        // `withLock`, not lock()/unlock(): NSLock's pair is unavailable from async code.
+        let (frames, wasOpen) = lock.withLock {
+            let taken = (self.frames, open)
+            self.frames = []
+            open = false
+            return taken
+        }
         guard wasOpen else { return }
         guard !frames.isEmpty else { throw .notAvailable("The animation has no frames.") }
         var clock = try FrameClock(fps: settings.fps)
