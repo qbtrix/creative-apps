@@ -51,6 +51,7 @@ Next: on the scoped photo run's journeys (journeys.yml after CI run 39722915670)
 - PP-5 starts now: PG-m is met (gradient-fill is built, #4064). The waits on transform:PT-m, PH-m and PE-m only order edits to the shared PhotoCommandCatalog, and transform PT-5 already dropped the same kind of wait. A catalog conflict is resolved by the lane's merge or by a dev merge on needs-rebase.
 - This run owns slices PP-m and PP-z only; PP-a and PP-u are counted as done per the brief.
 - Run act-1a1624aaf38-uvd0 (2026-10-22T06:30Z) takes over and owns PP-u only (PP-a, PP-m, PP-z skipped per its brief). Base stays dev (main is 420 commits behind and holds none of the slice PRs); status stays on lead/place-image.
+- PP-m and PP-z had no Belt-Slice-Done line, so this run posted them on the same run (it contains #4101, #4175, #4139) before the contact sheet.
 - PP-u merged-done per dev's lead.md rule 6: full CI run 39722978870 at 71987f724 contains #3976, #4003 and the fix #4215 (cb79b07), and its Linux job passed 04:50Z. No later merge carries `Feature: place-image`; no `finding` issue for the feature is open.
 
 ## Open
