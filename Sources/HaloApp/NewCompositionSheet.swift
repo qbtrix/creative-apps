@@ -6,8 +6,8 @@
 // CompositionSettings says what is valid and why not, and Create stays
 // disabled until it is. Each problem shows right under the field it's about
 // (CompositionDraft.problems(for:)), in stateError with the error circle.
-// Width and Height end in "px", their unit, inset beside the field. Create
-// hands the settings to `onCreate`; the window turns them into a composition.
+// Width and Height end in "px", their unit, inset beside the field. Create,
+// `composition.new`'s spec on the window's state (command-state CS-8), hands the settings to `onCreate`; the window turns them into a composition.
 // Each field is a form row of its own whose accessibility label is its column
 // label (the columns form draws the title apart from the field, #286), so no
 // LabeledContent wraps it, and every control has a
@@ -17,15 +17,18 @@ import SuiteUI
 import SwiftUI
 
 struct NewCompositionSheet: View {
+    /// The window's project as its menus see it, so Create is `composition.new`'s spec; with none, Create is off.
+    let state: HaloMenuState
     var onCreate: @MainActor (CompositionSettings) -> Void
     var onCancel: @MainActor () -> Void
     @State private var draft: CompositionDraft
 
     init(
-        settings: CompositionSettings, onCreate: @escaping @MainActor (CompositionSettings) -> Void = { _ in },
+        settings: CompositionSettings, state: HaloMenuState = HaloMenuState(project: nil), onCreate: @escaping @MainActor (CompositionSettings) -> Void = { _ in },
         onCancel: @escaping @MainActor () -> Void = {}
     ) {
         self._draft = State(initialValue: CompositionDraft(settings))
+        self.state = state
         self.onCreate = onCreate
         self.onCancel = onCancel
     }
@@ -70,7 +73,9 @@ struct NewCompositionSheet: View {
                 Button("Cancel", role: .cancel) { onCancel() }
                     .keyboardShortcut(.cancelAction)
                     .haloControl(id: "halo.composition.sheet.cancel", enabled: true, help: nil)
-                Button("Create") { if draft.isValid { onCreate(draft.settings) } }
+                MenuCommand(HaloMenuState.spec("composition.new"), on: state, title: "Create") {
+                    if draft.isValid { onCreate(draft.settings) }
+                }
                     .keyboardShortcut(.defaultAction)
                     .disabled(!draft.isValid)
                     .help(createHelp)

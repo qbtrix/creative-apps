@@ -51,8 +51,9 @@ public struct DesignHover: Sendable, Equatable {
 extension DesignWorkspace {
     /// nil `point` (the pointer left the artboard), a non-finite point or a live gesture gives no
     /// outline and `.tool`. With the Text tool the answer is its box at the point; with another
-    /// drawing tool, `.tool` and no outline. With Move, a handle of the selection wins, then the
-    /// layer under the point (`hitTest`), and Option makes that layer's pointer `.copy`.
+    /// drawing tool, `.tool` and no outline. With Move, a handle of the selection wins (several
+    /// layers: the knob above their box, #4224), then the layer under the point (`hitTest`), and
+    /// Option makes that layer's pointer `.copy`.
     public func hover(at point: DesignPoint?, modifiers: DesignModifiers) -> DesignHover {
         let idle = DesignHover(nodeID: nil, outline: nil, pointer: .tool)
         guard let point, point.isFinite, gesture == nil else { return idle }
@@ -64,6 +65,9 @@ extension DesignWorkspace {
         guard tool == .move else { return idle }
         if let handle = handle(at: point), let node = selectedNode {
             return DesignHover(nodeID: node.id, outline: node.frame, pointer: .resize(handle))
+        }
+        if boxHandle(at: point) == .rotate, let box = selectionBounds {
+            return DesignHover(nodeID: nil, outline: box, pointer: .resize(.rotate))
         }
         guard let id = hitTest(point), let node = findNode(id) else { return idle }
         return DesignHover(nodeID: id, outline: node.frame, pointer: modifiers.contains(.option) ? .copy : .move)

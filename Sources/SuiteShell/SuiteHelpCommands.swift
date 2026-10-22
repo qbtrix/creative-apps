@@ -3,8 +3,8 @@
 // Welcome to AfterGlow, which opens the tour. Each item is MenuCommand(spec, on:) over a SuiteHelpDocument
 // read through ShellHelpProvider. An item whose run isn't built yet is disabled and says why (no dead
 // controls). Report a Problem… begins ProblemReportSheet on the front window over ShellHelpProvider's report
-// (RP-3); Copy puts the text on the pasteboard and the app sends nothing itself. Beta Notes opens a window
-// titled Beta Notes over BetaNotes.current.
+// (RP-3); Copy puts the text on the pasteboard, and Save… and Email… hand it to ProblemReportActions (RP-3e),
+// so the app sends nothing itself. Beta Notes opens a window titled Beta Notes over BetaNotes.current.
 import AppKit
 import SuiteKernel
 import SuiteModel
@@ -57,16 +57,20 @@ public struct SuiteHelpCommands: Commands {
     private var host: NSWindow?
     private var sheet: NSWindow?
     private var notes: NSWindow?
+    private var report = ProblemReport(app: "", version: "", build: "", macOS: "", model: "", crashes: [])
 
     /// Begins the report sheet on the front window, or shows it as its own window when none is open.
     func showReport(app: SuiteApp) {
         if let sheet, sheet.sheetParent != nil || sheet.isVisible { sheet.makeKeyAndOrderFront(nil); return }
+        report = Self.report(ShellHelpProvider().report(app: app.rawValue, note: ""))
         let view = ProblemReportSheet(
-            report: Self.report(ShellHelpProvider().report(app: app.rawValue, note: "")),
+            report: report,
             onCopy: { text in
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(text, forType: .string)
             },
+            onSave: { [weak self] text in self?.save(text) },
+            onEmail: { [weak self] text in self?.email(text) },
             onClose: { [weak self] in self?.closeReport() })
         let panel = NSWindow(contentViewController: NSHostingController(rootView: view))
         panel.title = "Report a Problem"
@@ -75,6 +79,10 @@ public struct SuiteHelpCommands: Commands {
         host = NSApp.keyWindow ?? NSApp.mainWindow
         if let host { host.beginSheet(panel) } else { panel.makeKeyAndOrderFront(nil) }
     }
+
+    /// Save… and Email…: the sheet's text with this report's subject and file name.
+    func save(_ text: String) { ProblemReportActions.save(ProblemReportOutput(report: report, text: text)) }
+    func email(_ text: String) { ProblemReportActions.email(ProblemReportOutput(report: report, text: text)) }
 
     func closeReport() {
         guard let sheet else { return }

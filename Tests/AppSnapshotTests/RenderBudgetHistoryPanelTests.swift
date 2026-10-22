@@ -1,12 +1,12 @@
-// RenderBudgetHistoryPanelTests.swift (autosave-history AH-4, quality row "render: arrow-key walk down 50 steps of
-// the panel"): HistoryPanel over "Open" and fifty undone steps in a real 1280 x 820 window, hosted the way the
-// gallery's `history-panel` page hosts it, under a window that counts its own bodies. Fifty Down presses at 120 Hz
-// walk the selection from "Open" to step 50 without a jump: at most 3 window bodies (target 0: only the panel and
-// the two rows whose selection changed redraw). The p95 (packet: ≤ 8 ms) is printed, not gated: a step-time
-// budget belongs in a Tests/perf-suites.txt test. Keys need a key window, which the harness's borderless window
-// can't be, so this test asks the harness for a key-capable one, focuses the panel by a click on "Open" (which jumps
-// nowhere: "Open" is current), and sends the presses through the window as AppKit sends a hand's. Nested in
-// BodyCountSuites: it reads a global body counter. macOS only.
+// RenderBudgetHistoryPanelTests.swift (autosave-history AH-4, the packet's two render quality rows): HistoryPanel
+// over "Open" and fifty undone steps in a real 1280 x 820 window, hosted the way the gallery's `history-panel` page
+// hosts it, under a window that counts its own bodies. Fifty Down presses at 120 Hz walk the selection from "Open" to
+// step 50 without a jump, and 120 pointer samples hover down the rows without one: each in at most 3 window bodies
+// (target 0: only the panel and the rows whose state changed redraw). The p95s (packet: <= 8 ms) are printed, not
+// gated: a step-time budget belongs in a Tests/perf-suites.txt test. Keys need a key window, so the walk builds the
+// harness's key-capable one (never an isa swizzle, RenderBudgetHarness), focuses the panel by a click on "Open"
+// (which jumps nowhere: "Open" is current), and sends the presses through the window as AppKit sends a hand's.
+// Nested in BodyCountSuites: it reads a global body counter. macOS only.
 #if canImport(AppKit)
 import AppKit
 import SuiteKernel
@@ -45,6 +45,30 @@ extension BodyCountSuites {
             #expect(last?.isAccessibilitySelected?() == true, "the arrows didn't walk the selection to step \(Self.steps)")
             #expect(HistoryPanelBudgetPage.jumps == jumped, "the arrows jumped \(HistoryPanelBudgetPage.jumps - jumped) times")
             expectBodies(step, atMost: 3, target: 0)
+        }
+
+        @Test(.timeLimit(.minutes(2))) func hoverInThreeBodies() async throws {
+            let w = RenderBudgetWindow(HistoryPanelBudgetWindow())
+            defer { w.close() }
+            let bodies = { () -> Int? in
+                #if DEBUG
+                return HistoryPanelBudgetWindow.bodyRuns
+                #else
+                return nil
+                #endif
+            }
+            try await w.settle(untilStable: bodies)
+            let top = try #require(await w.element("suite.history.row.0"), "the panel shows no Open row")
+            let bottom = try #require(await w.element("suite.history.row.11"), "the panel shows no step 11")
+            let jumped = HistoryPanelBudgetPage.jumps
+            let hover = try await w.measure("history-panel hover across rows, 120 samples", bodies: bodies) {
+                try await w.ticks(120) { i in
+                    let y = top.midY + (bottom.midY - top.midY) * Double(i) / 120
+                    w.send(.mouseMoved, at: CGPoint(x: top.midX, y: y))
+                }
+            }
+            #expect(HistoryPanelBudgetPage.jumps == jumped, "a hover jumped \(HistoryPanelBudgetPage.jumps - jumped) times")
+            expectBodies(hover, atMost: 3, target: 0)
         }
 
         /// A key-down and key-up of `key` sent through `window`, which hands them to its first responder.
