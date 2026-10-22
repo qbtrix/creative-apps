@@ -194,6 +194,7 @@ public struct NewDocumentSheet: View {
         }
         .padding(SuiteSpacing.xl)
         .frame(width: SuiteSize.contentMinimum.width)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("suite.newdoc")
     }
 
