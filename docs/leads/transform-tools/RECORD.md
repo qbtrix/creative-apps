@@ -4,7 +4,7 @@ Issue: #3446 · Packet: docs/blueprints/suiteui/features/transform-tools.md
 Run: act-1a163b2abfe-f182 (relaunch; first run act-1a1579fdd22-6z1j) · Started: 2026-10-22
 Stage: 3 wave 5 (TT-z) shipped; polling lane
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: lane batches #3577 → #4429 (feature-done; retarget to dev once #3577 merges); then TT-z done from the dev CI run holding #4429; critic panel on TT-z screens from a scoped app=suiteui run
+Next: lane batches #4429 (feature-done); then TT-z done from the dev CI run holding it; critic panel on TT-z screens from a scoped app=suiteui run
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: lane batches #3577 → #4429 (feature-done; retarget to dev once #3577 mer
 |---|---|---|---|---|---|
 
 ## Decisions
+- 19:22Z #3577 (TT-7) merged (a1bf680bff). Merged dev into lead/transform-tools-TT-z (1f2ab442): transform-tools.wave.json conflicted because the merge-json driver pointed at a deleted worktree (now repointed); kept "status": "built" and took dev's waits_on and stroke-style:SS-d. scripts/ci --changed: CI: PASS. #4429 retargeted to dev, Head moved, no footer.
 - 18:58Z heartbeat: #3577 build green, still waiting for its lane batch; #4429 stacked; scoped suiteui 39810321089 queued; #4428 (AK) macOS build queued
 - 18:40Z heartbeat: #3577 macOS build 39815190852 green, waiting for its lane batch; #4429 stacked; scoped suiteui 39810321089 still queued
 - 18:10Z heartbeat: no change; #3577 rebuild 39815190852 pending, scoped suiteui 39810321089 queued
