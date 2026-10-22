@@ -174,3 +174,4 @@ utc	stage	event	ref	note
 2026-10-22T17:19Z	3	finding	#4588	CL-probe: scrub double count
 2026-10-22T17:19Z	3	finding	#4589	CL-probe: HB-U2 lag
 2026-10-22T17:19Z	3	fixer	#4586,#4587,#4588	launched
+2026-10-22T17:35Z	3	pr	#4594	fixes #4587 #4353, CI PASS
