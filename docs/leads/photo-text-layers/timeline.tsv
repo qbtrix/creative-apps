@@ -35,3 +35,4 @@
 2026-10-22T00:01Z	check	#4215 merged; TX-3 #4053 merged dev (ce6524fa5), gate running; TX-m Linux check 39695796699 on de0f324d1 in progress; TS-m #3844/#3847 open
 2026-10-22T00:31Z	check	TX-m slice-done waits: Linux 39697907658 on cb79b07 red on FormatListRatchetTests (SuiteModel Media.swift, not ours); 39699955972 running. #4053 open at ce6524fa5. TS-m #3844/#3847 open.
 2026-10-22T00:55Z	check	TX-m slice-done waits: Linux 39699955972 on c4607f1 red on the same FormatListRatchetTests (SuiteModel Media.swift, not ours). #4053 open at ce6524fa5. TS-m #3844/#3847 open.
+2026-10-22T01:21Z	check	TX-m slice-done waits: Linux 39701991485 on add701f red (dev-red, not ours). #4053 open at ce6524fa5. TS-m #3844/#3847 open.
