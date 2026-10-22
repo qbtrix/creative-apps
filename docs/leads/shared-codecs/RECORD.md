@@ -76,3 +76,4 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-22T01:35Z: SC-14 #4238 head b60d61fd (dev merge + supervisor's #4270) re-gated: CI PASS; Head: line moved; lane macOS build 39704535700 queued.
 - 2026-10-22T01:50Z: SC-14 #4238: lane macOS build 39704535700 green on b60d61fd; Fast-Check/Head current; waits for the lane's merge sweep.
 - 2026-10-22T02:10Z: SC-14 #4238 eligible (green macOS build, current Head:, no needs-fix/refusal); lane sweeps are active on dev (#4243 merged 02:07Z). Other SC slices are blocked: SC-2 on IM-a, SC-photo on export-pack, SC-library on library spine, SC-z on AK-z.
+- 2026-10-22T02:30Z: SC-14 #4238 merged as 6603b0f1d, so every SC-f task is merged (SC-13 #4019, SC-14 #4238). Merged-done waits on dev Linux check 39710840412 (b5a6e7e0, in progress); then Belt-Slice-Done SC-f on #3718. Scoped run 'suite' 39710836943 is queued on the same sha.
