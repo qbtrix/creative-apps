@@ -4,7 +4,7 @@ Issue: #3482 · Packet: docs/blueprints/flare/features/file-flow.md
 Run: act-1a162daef37-9ub3 · Session: claude/file-flow-lead-pfjzaz · Started: 2026-10-22T08:4xZ (resumes act-1a160bffba1-bvv3; HEAD checked at 0dd23d65)
 Stage: FL-a, FL-u done; FL-m part 1 #4326 in the lane; FL-4 + FL-7 ready on lead/file-flow-fl4
 Base: 8c55f0bf9 (origin/dev)
-Next: #4387 merges via the lane (macOS build), then a green dev run containing it gives Belt-Slice-Done FL-m and FL-z, Mac-Finish-Wanted FL-m, Belt-Contact-Sheet
+Next: none; all slices done and the contact sheet is posted. Wait for `Belt released this run.`
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -86,3 +86,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T10:52Z: #4387 unchanged; macOS build 39762231867 still queued since 10:19Z (blocked poll 2). No new comments, no file-flow findings.
 - 2026-10-22T11:14Z: #4387 macOS build 39762231867 still queued (blocked poll 3). Rule 23: asked the supervisor on #3482 to send #4387 through the local Mac gate.
 - 2026-10-22T11:38Z: Supervisor (11:18Z): #4387 is on their local Mac gate and merges on pass; post Belt-Slice-Done FL-m/FL-z on the first green dev Linux check containing it; stop polling until then. Branch head moved to 1a4cd2b (merge of dev into fl4, not mine); the lane dispatched a macOS build on it. fl4 fast-forwarded.
+- 2026-10-22T12:13Z: #4387 merged into dev (e76681b) via the supervisor's local Mac gate. First green dev Linux check containing it: https://github.com/qbtrix/creative-apps/actions/runs/39774574487 (head 30120a89). Posted on #3482: Belt-Slice-Done FL-m, Belt-Slice-Done FL-z, Mac-Finish-Wanted FL-m, Belt-Contact-Sheet, all against that run. Every slice (FL-a, FL-u, FL-m, FL-z) is done; file-flow is built. Waiting for Belt to release the run.
