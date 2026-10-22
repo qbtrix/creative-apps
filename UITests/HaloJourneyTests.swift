@@ -418,8 +418,8 @@ final class HaloJourneyTests: XCTestCase {
         let start = halo.element("halo.render.start")
         XCTAssert(waitFor(seconds: 5) { start.isEnabled }, "the start button is disabled with -HaloRenderTo set")
         start.click()
-        // "Exported Loop" until #3402 retitles the finished line "Rendered 48 frames.".
-        XCTAssert(Self.contains("Exported Loop", in: halo.app).waitForExistence(timeout: 60), "the render never finished")
+        XCTAssert(text("Exported 48 PNG files into \"Loop\"", halo).waitForExistence(timeout: 60),
+                  "the render never read \"Exported 48 PNG files into \"Loop\"\"")
         let pngs = folder.appending(path: "Loop", directoryHint: .isDirectory)
         let names = try FileManager.default.contentsOfDirectory(atPath: pngs.path).sorted()
         XCTAssertEqual(names, (1...48).map { String(format: "Loop_%04d.png", $0) }, "the files in \(pngs.path)")
@@ -722,6 +722,14 @@ final class HaloJourneyTests: XCTestCase {
         let predicate = NSPredicate(
             format: "label CONTAINS %@ OR (elementType == %@ AND value CONTAINS %@)", text, staticText, text)
         return root.descendants(matching: .any).matching(predicate).firstMatch
+    }
+
+    /// The first element whose label is `string`, or a static text whose
+    /// value is: SwiftUI's Text reads as either.
+    @MainActor private func text(_ string: String, _ halo: Journey) -> XCUIElement {
+        let staticText = NSNumber(value: XCUIElement.ElementType.staticText.rawValue)
+        let predicate = NSPredicate(format: "label == %@ OR (elementType == %@ AND value == %@)", string, staticText, string)
+        return halo.app.descendants(matching: .any).matching(predicate).firstMatch
     }
 
     /// The ControlDocument in `probe`'s label; nil when it's missing or isn't one.
