@@ -4,7 +4,7 @@ Issue: #1507 · Packet: docs/blueprints/suite/features/switching.md
 Run: act-1a152d6e775-atvh · Session: claude/switching-feature-lead-2qhod5 · Started: 2026-10-18 (earlier runs act-1a150baa312-n5va on claude/switching-feature-lead-kyvcdx, act-1a146f2912a-581f on claude/switching-feature-lead-jm0d5f)
 Stage: 4 round 1, blocked on CI #3176 (scoped `suite` runs skip AfterGlowJourneyTests+Switch until it merges, #2971; SW-4a #2989 merged as 531550f)
 Base: origin/dev d481419
-Next: full dev CI 39781775747 (contains 5d28cf9): on a green Linux job post Belt-Slice-Done AH-z + Mac-Finish-Wanted AH-z, then Belt-Contact-Sheet.
+Next: wait for #3176 (ci/scope-macos-per-app) to merge into dev, then for the next scoped `suite` run on dev that contains it; download ui-screens, snapshots and audit-suite json, run Anatomy round 1 (critic panel, clarity lens), then Belt-Contact-Sheet on #1507. SW-4b (#858) and SW-4c (#859) stay follow-ups
 
 Brief deviations (decided here, see Decisions): base is `dev`, not `main`; the status channel is this branch, not `lead/switching`.
 
