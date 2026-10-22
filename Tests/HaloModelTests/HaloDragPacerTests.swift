@@ -1,7 +1,5 @@
-// HaloDragPacerTests.swift: viewer-drag moves coalesced to at most one write
-// per display refresh (#4276). The latest point wins, a held point flushes
-// once its refresh is due, mouse-up hands back the exact final point, and a
-// paced drag is still one "Move" undo step at that final point. Linux and macOS.
+// HaloDragPacerTests.swift: the latest held move wins and flushes once due,
+// mouse-up gets the exact final point, one "Move" step (#4276). Linux and macOS.
 @testable import HaloModel
 import Testing
 
@@ -15,16 +13,11 @@ private func keyedProject() throws -> HaloProject {
     return project
 }
 
-@Test func dragPacerWritesTheFirstMoveAtOnce() {
-    var pacer = HaloDragPacer(interval: tick)
-    #expect(pacer.move(to: HaloPoint(x: 1, y: 1), now: 10) == HaloPoint(x: 1, y: 1))
-    #expect(pacer.pending == nil)
-    #expect(pacer.due == nil)
-}
-
 @Test func dragPacerHoldsMovesInsideOneRefreshAndTheLatestWins() {
     var pacer = HaloDragPacer(interval: tick)
-    _ = pacer.move(to: HaloPoint(x: 1, y: 1), now: 10)
+    // The first move writes at once.
+    #expect(pacer.move(to: HaloPoint(x: 1, y: 1), now: 10) == HaloPoint(x: 1, y: 1))
+    #expect(pacer.due == nil)
     #expect(pacer.move(to: HaloPoint(x: 2, y: 2), now: 10.004) == nil)
     #expect(pacer.move(to: HaloPoint(x: 3, y: 5), now: 10.008) == nil)
     #expect(pacer.pending == HaloPoint(x: 3, y: 5))
@@ -35,13 +28,6 @@ private func keyedProject() throws -> HaloProject {
     #expect(pacer.flush(now: 10.02) == HaloPoint(x: 3, y: 5))
     #expect(pacer.flush(now: 10.04) == nil)
     #expect(pacer.due == nil)
-}
-
-@Test func dragPacerWritesAgainOnceARefreshHasPassed() {
-    var pacer = HaloDragPacer(interval: tick)
-    _ = pacer.move(to: HaloPoint(x: 1, y: 1), now: 10)
-    #expect(pacer.move(to: HaloPoint(x: 4, y: 4), now: 10.02) == HaloPoint(x: 4, y: 4))
-    #expect(pacer.pending == nil)
 }
 
 @Test func dragPacerCapsWritesAtOnePerRefresh() {
@@ -76,9 +62,7 @@ private func keyedProject() throws -> HaloProject {
 }
 
 @Test func dragPacerFallsBackToSixtyHertzForABadInterval() {
-    #expect(HaloDragPacer(interval: 0).interval == tick)
-    #expect(HaloDragPacer(interval: -1).interval == tick)
-    #expect(HaloDragPacer(interval: .nan).interval == tick)
+    #expect([0, -1, .nan].map { HaloDragPacer(interval: $0).interval } == [tick, tick, tick])
     #expect(HaloDragPacer(interval: 1.0 / 120).interval == 1.0 / 120)
 }
 

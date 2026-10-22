@@ -1,10 +1,7 @@
-// HaloDragPacer.swift: viewer-drag moves coalesced to at most one model write
-// per display refresh (#4276). The pointer can report several moves inside one
-// refresh; only one of them can be shown, so the others are held. The latest
-// held point wins, `flush` writes it once its refresh is due, and `end` hands
-// back the exact last point so mouse-up records the true final position as
-// the drag's one "Move" step. Times are seconds on any monotonic clock.
-// Linux-safe.
+// HaloDragPacer.swift: viewer-drag moves coalesced to at most one write per
+// display refresh (#4276). Moves inside a refresh are held, the latest wins,
+// `flush` writes it once due, and `end` hands back the exact last point for
+// the drag's one "Move" step. Seconds on any monotonic clock. Linux-safe.
 
 public struct HaloDragPacer: Sendable, Equatable {
     /// Seconds between writes: one display refresh.
@@ -16,8 +13,7 @@ public struct HaloDragPacer: Sendable, Equatable {
     /// The latest move seen, written or not.
     public private(set) var latest: HaloPoint?
 
-    /// A pacer writing at most once per `interval`; one that isn't a finite
-    /// positive number paces at 60 Hz.
+    /// At most one write per `interval`; 60 Hz for a bad interval.
     public init(interval: Double) {
         self.interval = interval.isFinite && interval > 0 ? interval : 1.0 / 60
     }
@@ -49,8 +45,7 @@ public struct HaloDragPacer: Sendable, Equatable {
         return point
     }
 
-    /// Mouse-up: the exact last point of the drag (nil when it never moved),
-    /// and the pacer starts over.
+    /// Mouse-up: the drag's exact last point (nil if it never moved); starts over.
     public mutating func end() -> HaloPoint? {
         let point = latest
         self = HaloDragPacer(interval: interval)
