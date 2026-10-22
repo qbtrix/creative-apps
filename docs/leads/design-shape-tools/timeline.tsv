@@ -52,3 +52,4 @@ utc	stage	event	ref	note
 2026-10-22T12:47Z	poll	DS-m	#4384	lane macOS build 39776071155 success 12:46Z; waiting for the lane sweep to merge; #4385/#4386/#4392 open, clean
 2026-10-22T13:01Z	poll	DS-m	#4384	clean + macOS build green; lane sweeps since 12:52Z cancelled by newer events, not merged yet; #4385/#4386/#4392 open, clean
 2026-10-22T13:35Z	retarget	DS-m	#4385	#4384 merged as 912084bb2; merged DS-5 tip 68b98ae94 (catalog conflicts with viewSpecs/file.export resolved) then dev; diff = DS-6 own 12 files +135/-13; ci --changed PASS; head 91ab122dd, base dev
+2026-10-22T13:50Z	poll	DS-m	#4385	lane macOS build 39788523248 queued since 13:37Z; not merged; #4386/#4392 open, clean
