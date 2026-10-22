@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-22T03:30Z	4	check	critics	scoped suiteui 39709885898 in progress
 2026-10-22T03:47Z	4	check	critics	scoped 39709885898 macOS (suiteui) green, snapshots up; journeys 39718566695 pending
 2026-10-22T04:05Z	4	check	critics	journeys 39718566695 still pending
+2026-10-22T04:23:06Z	4	check	journeys 39718566695	still pending
