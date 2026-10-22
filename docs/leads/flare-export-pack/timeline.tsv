@@ -76,3 +76,4 @@ utc	stage	event	ref	note
 2026-10-22T18:43Z	3	check	FV-3	gate CI: PASS on 8acab202 (dev merged in; first rerun hit a signing-server 502 in a scratch-commit test); pushed, Head: moved on #4435
 2026-10-22T19:06Z	heartbeat	#4435 head 8acab202: lane macOS build queued; waiting
 2026-10-22T19:27Z	heartbeat	#4435 head 8acab202: lane macOS build (run 39834021257) still queued; waiting
+2026-10-22T19:49Z	heartbeat	#4435 head 8acab202: lane macOS build 39834021257 still queued behind the shared macOS runner backlog (20 runs queued); waiting
