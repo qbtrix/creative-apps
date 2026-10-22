@@ -4,7 +4,7 @@ Issue: #3482 · Packet: docs/blueprints/flare/features/file-flow.md
 Run: act-1a160bffba1-bvv3 · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih) · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: FL-a
 Base: 8c55f0bf9 (origin/dev)
-Next: push fl2 with dev merged, move Head on #4259
+Next: open FL-m/FL-u once #4259 merges
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -65,3 +65,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T02:16Z: #4259 macOS build 39703409910 green; lane sweep will merge. Merged dev (b5a6e7e0) into flm3 (6fc01d59) and flu (8f62b766), pushed; scripts/ci --changed running on both.
 - 2026-10-22T02:21Z: scripts/ci --changed PASS on flm3 6fc01d59 and flu 8f62b766 (dev b5a6e7e0 merged in). #4259 still waits for the lane sweep.
 - 2026-10-22T02:43Z: #4259 held: lane Linux run 39710240958 red on FormatListRatchetTests.realTreePasses (SuiteModel Media.swift, red on dev e9933116 too; dev b5a6e7e0 Linux green). Merging dev into fl2, gate running.
+- 2026-10-22T02:46Z: fl2 merged dev b5a6e7e0, ci --changed PASS, pushed 593d9118; #4259 Head moved, footer stripped. Lane needs a new macOS build for this head.
