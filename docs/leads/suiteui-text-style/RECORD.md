@@ -1,18 +1,18 @@
 # text-style lead record
 
-Issue: #3779 · Packet: docs/blueprints/suiteui/features/text-style.md
-Run: act-1a15c07cabb-mtlw · Session: e6bf0eb1-e2b8-518f-a36a-05b7f66e9a98 · Started: 2026-10-21T01:21:08Z
-Stage: 3 wave 2
-Base: 2ab0eb96320db973b5aad0644449ee5ed3980ab9
-Next: wave 2 builder TS-m (TS-5 then TS-6) stacks on feat/ts-1-text-contract (#3836); then wait for a CI run on dev whose Linux job contains #3836.
+Issue: #4519 (relaunch of #3779) · Packet: docs/blueprints/suiteui/features/text-style.md
+Run: act-1a164697376-dv7u · Started: 2026-10-22T16:40Z
+Stage: 3 wave 2 (blocked)
+Base: 7e9f260ae8f69dea63663c1bc7ea945c6b1d2f80 (dev)
+Next: wait on font-picker FP-a (TS-2) and FP-u (TS-u); poll every 20 min
 
 ## Slices
 
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| TS-a | TextStyle, rules, commands and rows declared; checks written, disabled | TS-1, TS-2 | – | font-picker:FP-a (TS-2) | true | 0 | building (TS-1 #3836 open) | – | – |
+| TS-a | TextStyle, rules, commands and rows declared; checks written, disabled | TS-1, TS-2 | – | font-picker:FP-a (TS-2) | true | 0 | TS-1 merged #3836; TS-2 blocked (FP-a) | – | – |
 | TS-u | the rows read and scrub the style | TS-3, TS-4 | – | TS-a, font-picker:FP-u | true | 0 | planned | – | – |
-| TS-m | ranges clamp, tracking em-relative, layout, one undo step per scrub | TS-5, TS-6 | – | TS-1 | false | 0 | planned | – | – |
+| TS-m | ranges clamp, tracking em-relative, layout, one undo step per scrub | TS-5, TS-6 | – | TS-1 | false | 0 | done | 39808732641 | – |
 | TS-design | Design adopts | TS-7, TS-8 | – | TS-m, TS-u, adopt-command-catalog:AC-design (built), brush-keys:BK-design (planned) | true | 0 | planned | – | – |
 | TS-halo | Halo adopts; feature built | TS-9, TS-10, TS-11, TS-12 | – | TS-design, TS-m, TS-u, AE-halo, AJ-halo, AN-halo (planned) | true | 0 | planned | – | – |
 
@@ -20,10 +20,10 @@ Next: wave 2 builder TS-m (TS-5 then TS-6) stacks on feat/ts-1-text-contract (#3
 
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| TS-1 | TS-a | 1 | contract types, specs that throw NotBuilt, disabled suites | Sources/SuiteKernel/Text/TextStyle.swift, Sources/SuiteKernel/Text/TextStyleRules.swift, Sources/SuiteKernel/Text/TextCommands.swift, Tests/SuiteKernelTests/TextStyleRulesTests.swift, Tests/SuiteKernelTests/TextStyleLayoutTests.swift, Tests/SuiteKernelTests/TextCommandsTests.swift, docs/c4/parts/creative-apps/suite-kernel/kernel-text.json | suites compile disabled; KernelShapeTests unchanged | #3836 | open |
+| TS-1 | TS-a | 1 | contract types, specs that throw NotBuilt, disabled suites | Sources/SuiteKernel/Text/TextStyle.swift, Sources/SuiteKernel/Text/TextStyleRules.swift, Sources/SuiteKernel/Text/TextCommands.swift, Tests/SuiteKernelTests/TextStyleRulesTests.swift, Tests/SuiteKernelTests/TextStyleLayoutTests.swift, Tests/SuiteKernelTests/TextCommandsTests.swift, docs/c4/parts/creative-apps/suite-kernel/kernel-text.json | suites compile disabled; KernelShapeTests unchanged | #3836 | merged |
 | TS-2 | TS-a | – | TextStyleRows | Sources/SuiteUI/TextStyleRows.swift | see packet | – | blocked (FP-a) |
-| TS-5 | TS-m | 2 | rule and layout bodies | Sources/SuiteKernel/Text/TextStyleRules.swift, Tests/SuiteKernelTests/TextStyleRulesTests.swift, Tests/SuiteKernelTests/TextStyleLayoutTests.swift, Tests/mutations/SuiteKernel.TextStyleRules.json | .trackingIsEmRelative .lineHeightClamps .lastLineNotJustified | #3844 | open (Mutate 3/3; base feat/ts-1-text-contract) |
-| TS-6 | TS-m | 2 | command bodies | Sources/SuiteKernel/Text/TextCommands.swift, Tests/SuiteKernelTests/TextCommandsTests.swift, Tests/mutations/SuiteKernel.TextCommands.json | .scrubIsOneStep .familyKeepsWeight | #3847 | open (Mutate 2/2; base feat/ts-5-text-rules) |
+| TS-5 | TS-m | 2 | rule and layout bodies | Sources/SuiteKernel/Text/TextStyleRules.swift, Tests/SuiteKernelTests/TextStyleRulesTests.swift, Tests/SuiteKernelTests/TextStyleLayoutTests.swift, Tests/mutations/SuiteKernel.TextStyleRules.json | .trackingIsEmRelative .lineHeightClamps .lastLineNotJustified | #3844 | merged |
+| TS-6 | TS-m | 2 | command bodies | Sources/SuiteKernel/Text/TextCommands.swift, Tests/SuiteKernelTests/TextCommandsTests.swift, Tests/mutations/SuiteKernel.TextCommands.json | .scrubIsOneStep .familyKeepsWeight | #3847 | merged |
 | TS-3 | TS-u | – | see packet | see packet | see packet | – | blocked |
 | TS-4 | TS-u | – | see packet | see packet | see packet | – | blocked |
 | TS-7..TS-12 | TS-design, TS-halo | – | see packet | see packet | see packet | – | blocked |
@@ -90,7 +90,10 @@ Next: wave 2 builder TS-m (TS-5 then TS-6) stacks on feat/ts-1-text-contract (#3
 - 2026-10-21T12:25Z Heartbeat: dev still red (#3856); #3844 held at a880a6f9, #3847 stacked.
 
 - 2026-10-21T12:52Z heartbeat: #3844 TS-5 held while dev red (#3856, photo line); #3847 stacked
+- 2026-10-22T16:40Z: run act-1a164697376-dv7u on new issue #4519. TS-1 #3836, TS-5 #3844, TS-6 #3847 merged and in green dev Linux run 39808732641 (401242a59): Belt-Slice-Done TS-m posted on #4519.
 
 ## Open
 
 - TS-2 and everything UI wait on font-picker FP-a, itself blocked on shell-text ST-a.
+- 2026-10-22T16:40Z: shell-text is built now, so font-picker FP-a (#3730, parked) can relaunch; TS-a, TS-u, TS-design, TS-halo wait on it.
+
