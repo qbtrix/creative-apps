@@ -57,6 +57,7 @@ tool.gradient
 tool.heal
 tool.marquee
 tool.move
+tool.text
 transform.begin
 transform.cancel
 transform.commit
