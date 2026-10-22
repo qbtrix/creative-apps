@@ -1,0 +1,64 @@
+utc	stage	event	ref	note
+2026-10-16T20:49Z	0	stage-start		setup; branch from origin/dev 1d68b22
+2026-10-16T20:49Z	0	stage-end		lead/design-seams created
+2026-10-16T20:49Z	1	stage-end		packet read; waits: design-contracts (built)
+2026-10-16T20:49Z	2	stage-end		wave 1: D0-3c, D0-4b
+2026-10-16T21:20Z	2	heartbeat		still blocked: no Swift toolchain; supervisor answers pending (base, issue filing)
+2026-10-16T21:50Z	2	heartbeat		still blocked: no Swift toolchain; supervisor answers pending
+2026-10-16T22:29Z	2	heartbeat		still blocked: no Swift toolchain; supervisor answers pending
+2026-10-17T15:40Z	3	resume		run act-1a14a8f0634-uwzw; Swift 6.3.3 installed; base origin/dev a575d03
+2026-10-17T15:45Z	3	wave 1 start	D0-3c,D0-4b	builders launched
+2026-10-17T16:15Z	3	pr-opened	#2162	D0-4b budget tests QD-S8/S9/S11
+2026-10-17T16:15Z	3	pr-opened	#2167	D0-3c gesture routes, Mutate 4/4; 403 lines, fixer trims
+2026-10-17T16:38Z	3	fix-round	#2167	size fix only: 403 -> 368 lines, head 6c68433, fast-lane relabelled
+2026-10-17T16:38Z	3	heartbeat	#2162	waiting on the lane's macOS build; dev 1a4e5e8
+2026-10-17T16:59Z	3	heartbeat	#2162,#2167	macOS builds 39048222835 and 39050802185 green; waiting on the lane sweep; 0 open findings
+2026-10-17T17:20Z	3	merged	#2162,#2167	#2162 2bee63e, #2167 6f4ab53 on dev; no dev CI run contains 6f4ab53 yet (scoped design 39052998799 has #2162 only); 0 open findings
+2026-10-17T17:42Z	3	heartbeat	#2162,#2167	full CI 39054585645 (c3dbf73) pending and scoped design 39054484681 (01d2b75) in progress, both contain #2162 and #2167; panel queued on the scoped run; 0 open findings
+2026-10-17T18:08Z	3	fix-round	#2075	scoped design 39054484681 (01d2b75): testShellLight "Undo left the rectangle in Layers", passed in 39052998799 (53e3127); suspects #2166/#2167/#2168; fixer dispatched (round 1 of 2); full CI 39054585645 cancelled, next full 39056193379 (e17b68f) pending; RenderBudget fails pre-date SE-a (#1974)
+2026-10-17T18:12Z	3	check	#2075	not SE-a: the fixer found the Model undo correct on dev e17b68f; testShellLight DS-J4 query matches Desktop's row after undo, and 39052998799 never reached the assertion; diagnosis and journey fix proposed on #2075; no fix round used
+2026-10-17T18:26Z	slice-done	SE-a Belt-Slice-Done and Belt-Contact-Sheet on #1493, run 39055200176 (Linux green, contains 6f4ab53)
+2026-10-18T02:28Z	done	check	39055200176	run act-1a14cd4adaa-upx1: SE-a done line re-checked, run completed with success; nothing to build
+2026-10-18T07:32Z	done	heartbeat	act-1a14ddefb3a-z1bl	re-checked: SE-a done, contact sheet on #1493; nothing to build
+2026-10-18T07:55Z	heartbeat	done; no new findings on SE-a
+2026-10-18T08:18Z	heartbeat	scoped design 39107691328 (cd81c77b, holds 148ade3e) in progress; full 39108958964 pending. #2696 #2701 awaiting lane macOS builds. CB-3 not merged. 10 line:design findings open
+2026-10-18T08:45Z	heartbeat	#2701 (DW-a round 2) awaiting lane macOS build; full 39108958964 pending; CB-3 not merged; select-several SS-a re-done, #2706 round 2
+2026-10-18T08:58Z	heartbeat	#2696 and #2701 macOS builds green, awaiting lane sweep; #2707 macOS build in progress; full 39108958964 in progress; CB-3 not opened; 9 line:design findings open (new feature tasks held); earlier 08:45Z rows were stamped late, real time ~08:37Z
+2026-10-18T09:21Z	heartbeat	#2696 #2701 #2707 macOS builds all green; held behind lane batch-20261018085947 bisect (21 ready PRs wait). Scoped design 39113458871 success (d6271ae4, none of ours). Full 39108958964 still in progress. CB-3 not opened. 9 line:design findings open
+2026-10-18T09:42Z	heartbeat	#2696 #2701 #2707 eligible (CLEAN, macOS builds green); lane draining older PRs oldest first, batch-20261018092239 Linux check running, 20 ready wait. Full 39108958964 still in progress. CB-3 not opened. 9 line:design findings open
+2026-10-18T10:07Z	heartbeat	#2696 in lane batch-20261018100429 (Linux check running); #2701 #2707 eligible, wait next sweep; full 39108958964 still running; CB-3 not opened; 9 design findings open (>5, no new feature task)
+2026-10-18T10:29Z	heartbeat	#2696 (S-8) merged f7d57daf in batch 39117820965; scoped design 39118734724 (a80ed944, holds it) queued; #2701 #2707 still waiting next sweep; full 39108958964 failed on Library perf LibraryLoupeBudgetTests (not design); CB-3 not opened; 9 design findings open
+2026-10-18T10:51Z	heartbeat	#2701 (DW-a r2, #2465 closed) merged be2260cd and #2707 (SS-a r2, #2706 closed) merged d353fee7 in batch 39118867527; full 39120347568 (5e1844e6) holds both, pending: J1/J5 there decide DW-a/SS-a re-done; scoped design 39118734724 (holds #2696 S-8) running; CB-3 not opened; 7 design findings open (>5)
+2026-10-18T11:12Z	heartbeat	full 39120347568 cancelled (superseded); full 39122016685 (7bd94d21, holds #2701 #2707) pending; scoped design 39118734724 (holds #2696 S-8) still running; CB-3 not opened; 7 design findings open (>5)
+2026-10-18T11:36Z	heartbeat	SE-a done; nothing open
+2026-10-18T11:58Z	heartbeat	scoped design 39122750799 in progress, full 39122776184 queued (e3a4582c); findings 9; CB-3 not open
+2026-10-18T12:22Z	heartbeat	SE-a done; nothing open
+2026-10-18T12:41Z	heartbeat	CB-3 not open; #2623 open; findings 8; full 39122776184 in progress
+2026-10-18T13:04Z	heartbeat	CB-3 not open; #2623 open; 8 line:design findings, 2 ours (#2538 #2751, both on #2623), 6 triaged to SuiteUI #2606; full 39122776184 in progress
+2026-10-18T13:25Z	heartbeat	no CB-3 PR yet; #2623 open, no fix; full CI 39122776184 macOS still running (Linux green); findings 8 (2 ours)
+2026-10-18T13:47Z	heartbeat	full CI 39122776184 macOS cancelled 13:34 (Linux green); in log J1 J5 J6 pass, J4 #2538 P1 #2751 fail (#2623 scroller); no CB-3 PR; #2623 open; findings 8 (2 ours)
+2026-10-18T14:10Z	heartbeat	no CB-3 PR; #2623 open; new full CI 39133431238 on dev in progress; findings 8 (2 ours)
+2026-10-18T14:32Z	heartbeat	full CI 39133431238 (3f5ae7f3) macOS red in SuiteUITests (SegmentedTabs, SidebarNesting), journeys not run; not our line; no CB-3 PR; #2623 open; findings 8 (2 ours)
+2026-10-18T14:53Z	heartbeat	no CB-3 PR; #2623 open; full CI 39137279211 in progress, 39137685526 pending; no dev-red; findings 8 (2 ours)
+2026-10-18T15:16Z	heartbeat	no change: CB-3 not opened, #2623 open, full CI 39137279211 running, 39137685526 pending, no dev-red, findings 8 (2 ours, blocked on #2623)
+2026-10-18T15:37Z	heartbeat	no change: CB-3 not opened, #2623 open; full CI 39137279211 macOS still running (Linux green), 39137685526 cancelled, 39141126140 pending; no dev-red; findings 8 (2 ours, blocked on #2623)
+2026-10-18T15:59Z	heartbeat	no change: CB-3 not opened, #2623 open; full CI 39137279211 macOS still running, 39141126140 cancelled, 39142469932 pending; no dev-red; findings 8 (2 ours, blocked on #2623)
+2026-10-18T16:21Z	ci	full CI 39137279211 (80c14eed): Linux green, macOS cancelled after journeys; J1 J5 J6 passed, J4 and P1 failed (blocked on #2623); testDrawShapesAddTextAndSave failed on contrast audit (design.fill on design-layer-hidden, 1.86:1; contrast line, cf #2302, not ours); 39142469932 cancelled, 39143942767 queued; no dev-red; CB-3 not opened; #2623 open
+2026-10-18T16:43Z	heartbeat	no change: CB-3 not opened, #2623 open; full CI 39143942767 in progress, 39145334588 pending; no dev-red; findings 8 (2 ours, blocked on #2623)
+2026-10-18T17:05Z	heartbeat	CB-3 opened as #2871 (head 080dea87, fast-lane, waiting on lane macOS build); S-5 and D0-9d start once it merges; #2623 open; full CI 39143942767 macOS running, 39145334588 cancelled, 39147480679 pending; no dev-red; findings 8
+2026-10-18T17:27Z	heartbeat	CB-3 #2871 open, macOS build 39147869454 queued; full CI 39143942767 macOS still running (Linux green); 39147480679 cancelled; #2623 open; 8 findings, 2 ours; no dev-red
+2026-10-18T17:50Z	heartbeat	CB-3 #2871 macOS build 39147869454 green, awaiting lane merge; full CI 39143942767 macOS still running; scoped design 39149361102 queued; #2623 open; no dev-red
+2026-10-18T18:12Z	heartbeat	CB-3 merged; S-5 and D0-9d builders started; full CI 39143942767 and 39149544175 cancelled; scoped design 39149361102 running; no dev-red
+2026-10-18T18:35Z	heartbeat	#2898 (S-5) and #2899 (D0-9d) open, no lane comment yet; scoped design 39149361102 macOS running; full CI 39152649677 running; #2623 open; no dev-red
+2026-10-18T18:58Z	check	scoped design 39149361102 (31dc204a) done: J1 J5 J6 pass, J4 skipped (blocked #2623), P1 fail 3 samples (#2751); new #2900 P2 is style-rows' (SR-b), not ours; #2898 waits lane macOS build 39155410272; #2899 needs-rebase (C4 parts), fixer sent; #2623 still open; no dev-red
+2026-10-18T19:19Z	heartbeat	#2898 lane macOS build 39155410272 still queued; #2899 needs-rebase dropped, lane macOS build dispatched 19:16Z; full CI 39152649677 running; #2623 open; no dev-red
+2026-10-18T19:42Z	heartbeat	#2898 lane macOS build 39155410272 in progress; #2899 lane macOS build 39157978420 queued; full CI 39152649677 running; #2623 open; no dev-red
+2026-10-18T20:04Z	heartbeat	#2898 lane macOS build 39155410272 success, awaiting lane merge; #2899 build 39157978420 queued; full CI 39152649677 cancelled; #2623 open; no dev-red
+2026-10-18T20:26Z	heartbeat	done; idle
+2026-10-18T20:49Z	heartbeat	done; idle
+2026-10-18T21:11Z	heartbeat	done; idle
+2026-10-18T21:33Z	heartbeat	done; idle
+2026-10-18T21:56Z	heartbeat	done; idle
+2026-10-18T22:18Z	heartbeat	done; idle
+2026-10-18T22:41Z	heartbeat	done; idle
+2026-10-18T23:04Z	heartbeat	done; idle
