@@ -29,7 +29,9 @@
 // So every frame and key shows, the strip never scrolls sideways and
 // no scroller covers the ruler; the height is the lanes, at least the slot
 // minimum, at most 40% of the window's column, and past that the lanes
-// scroll vertically so the canvas keeps its room.
+// scroll vertically so the canvas keeps its room. Under `-SuitePerfProbe` a
+// ruler scrub records a `playhead-scrub` sample and each lane scroll offset a
+// `lanes-scroll` frame (HaloProbe).
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -43,6 +45,7 @@ struct HaloTimelineView: View {
     /// The key drag under way: the dragStart its moves fold under.
     @State private var dragStart: Int?
     @Environment(\.suiteSnapshotRendering) private var snapshot
+    @Environment(\.suiteProbeRecorder) private var recorder
 
     /// SuiteUI's timeline tokens; the 1 pt is the strip's Divider.
     static let layout = HaloTimelineLayout(
@@ -65,6 +68,9 @@ struct HaloTimelineView: View {
                     .scrollBounceBehavior(.basedOnSize, axes: [.horizontal, .vertical])
                     .containerRelativeFrame(.vertical, alignment: .top) { length, _ in
                         CGFloat(layout.height(rows: rows.count, available: Double(length)))
+                    }
+                    .onScrollGeometryChange(for: Double.self) { Double($0.contentOffset.y) } action: { _, _ in
+                        HaloProbe(recorder).drew(HaloProbe.lanesScroll)
                     }
             }
         }
@@ -94,6 +100,7 @@ struct HaloTimelineView: View {
                     onScrub: { frame in
                         hasFocus = true
                         perform(.scrub(frame))
+                        HaloProbe(recorder).sample(HaloProbe.playheadScrub)
                     },
                     onSelectTrack: { perform(.selectLayer($0)) },
                     onPickKeyframe: { id, frame, mode in

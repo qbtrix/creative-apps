@@ -1,5 +1,5 @@
 // GroupPickTests.swift (area-selection AR-2 written, AR-4 turns on): the group-aware click on a three-level tree,
-// written from the packet before its bodies. `groupSpecsHaveSchemas` is AR-1's and runs now.
+// written from the packet before its bodies. `groupSpecsHaveSchemas` is AR-1's.
 import Testing
 import SuiteKernel
 
@@ -39,7 +39,8 @@ private struct PickDoc: GroupPickTarget {
         #expect(GroupScope.root.path.isEmpty && GroupScope(path: ["card"]) == Self.card)
     }
 
-    @Test(.disabled("waits on AR-4")) func clickPicksTheOutermostGroupInScope() {
+    /// A click picks the outermost group inside the entered scope, and nothing outside it.
+    @Test func clickPicksTheOutermostGroupInScope() {
         let picks = [("title", GroupScope.root, "card"), ("bg", .root, "bg"), ("title", Self.card, "face"), ("back", Self.card, "back"),
                      ("title", Self.face, "title")]
         for (hit, scope, picked) in picks { #expect(GroupPick.target(hit: hit, scope: scope, deep: false, in: tree) == picked, "\(hit)") }
@@ -47,19 +48,22 @@ private struct PickDoc: GroupPickTarget {
         #expect(GroupPick.target(hit: "bg", scope: Self.card, deep: false, in: tree) == nil && GroupPick.target(hit: "nowhere", scope: .root, deep: false, in: tree) == nil)
     }
 
-    @Test(.disabled("waits on AR-4")) func commandPicksTheDeepestAndLockedPicksNothing() {
+    /// Command picks the hit layer itself, and a layer under a locked group picks nothing.
+    @Test func commandPicksTheDeepestAndLockedPicksNothing() {
         #expect(GroupPick.target(hit: "title", scope: .root, deep: true, in: tree) == "title" && GroupPick.target(hit: "photo", scope: Self.card, deep: true, in: tree) == "photo")
         #expect(GroupPick.target(hit: "gold", scope: .root, deep: false, in: tree) == nil && GroupPick.target(hit: "gold", scope: .root, deep: true, in: tree) == nil)
     }
 
-    @Test(.disabled("waits on AR-4")) func enterAndExitOneLevel() {
+    /// Enter needs a group with children; exit steps out one level, not to the root.
+    @Test func enterAndExitOneLevel() {
         #expect(GroupPick.entering("card", scope: .root, in: tree) == Self.card)
         #expect(GroupPick.entering("face", scope: Self.card, in: tree) == Self.face)
         #expect(GroupPick.entering("bg", scope: .root, in: tree) == nil && GroupPick.entering("empty", scope: .root, in: tree) == nil)
         #expect(GroupPick.exiting(Self.face) == Self.card && GroupPick.exiting(Self.card) == .root && GroupPick.exiting(.root) == .root)
     }
 
-    @Test(.disabled("waits on AR-4")) func commandsPickEnterAndExit() throws {
+    /// The three commands pick, enter and exit through a catalog.
+    @Test func commandsPickEnterAndExit() throws {
         let catalog = try CommandCatalog(app: "test", GroupPick.specs(PickDoc.self), history: { _ in History<Int>() })
         var doc = PickDoc()
         let at: JSONValue = .object(["x": .number(5), "y": .number(5)]), none: JSONValue = .object([:])
@@ -69,5 +73,13 @@ private struct PickDoc: GroupPickTarget {
         for (id, params) in [("select.pick", at), ("select.enter-group", none), ("select.exit-group", none)] { _ = try catalog.run(id, params: params, on: &doc) }
         #expect(doc.groupScope == Self.card && doc.pickedLayer == "face")
         #expect(catalog.availability("select.exit-group", on: PickDoc()).why != nil)
+    }
+
+    /// Enter only takes an unlocked direct child of the scope, and a scope that is not the hit's ancestry picks nothing.
+    @Test func enterTakesADirectChildAndScopeMustBeAncestry() {
+        #expect(GroupPick.entering("face", scope: .root, in: tree) == nil && GroupPick.entering("card", scope: Self.card, in: tree) == nil)
+        #expect(GroupPick.target(hit: "title", scope: GroupScope(path: ["face"]), deep: false, in: tree) == nil)
+        #expect(GroupPick.target(hit: "title", scope: GroupScope(path: ["card", "face", "title"]), deep: true, in: tree) == nil)
+        #expect(GroupPick.entering("vault", scope: .root, in: tree) == nil)
     }
 }

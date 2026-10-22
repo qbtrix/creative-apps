@@ -1,8 +1,9 @@
-// FlareGradientTests.swift: gradient-fill FG-1 (MJ-FG, the Model walk). The readout half runs now: the selection's
-// fill and its bounds, the paint readout's gradient, and the no-shape help. The command half is written against the
-// FG-5 bodies and stays disabled until FG-5 turns it on: `fill.angle` 90 rewrites the points to the bounds' top and
-// bottom middle, a stop colour keeps them, two shapes take one undo step and a 120-move drag is one step.
+// FlareGradientTests.swift: gradient-fill FG-1 and FG-5 (MJ-FG, the Model walk). The readout half: the selection's
+// fill and its bounds, the paint readout's gradient, the no-shape help and a refused gesture's reason. The command
+// half runs the FG-5 bodies: `fill.angle` 90 rewrites the points to the bounds' top and bottom middle, a stop colour
+// keeps them, two shapes take one undo step, a 120-move drag is one step, and RJ-F31's edit exports top to bottom.
 import FlareCore
+import Foundation
 @testable import FlareModel
 import SuiteKernel
 import Testing
@@ -10,11 +11,15 @@ import Testing
 private let threeStops = [GradientStop(offset: 0, color: .black), GradientStop(offset: 0.5, color: .white),
                           GradientStop(offset: 1, color: .black)]
 
-/// Bounce with every Ball shape's fill set to `fill`, Ball selected, on `.built`.
-private func ball(_ fill: FlareCore.Fill? = nil) -> FlareWorkspace {
+/// Bounce with every Ball shape's fill set to `fill`, Ball selected, on `.built`. `twoShapes` adds the Shadow's ellipse
+/// to Ball after its circle, so Ball holds two shapes with different bounds.
+private func ball(_ fill: FlareCore.Fill? = nil, twoShapes: Bool = false) -> FlareWorkspace {
     var doc = FlareFixtures.bounce
-    if let fill, let i = doc.scenes.first?.layers.firstIndex(where: { $0.id == "ball" }) {
-        for s in doc.scenes[0].layers[i].shapes.indices { doc.scenes[0].layers[i].shapes[s].fill = fill }
+    if let i = doc.scenes.first?.layers.firstIndex(where: { $0.id == "ball" }) {
+        if twoShapes, let shadow = doc.scenes[0].layers.first(where: { $0.id == "shadow" })?.shapes.first {
+            doc.scenes[0].layers[i].shapes.append(shadow)
+        }
+        if let fill { for s in doc.scenes[0].layers[i].shapes.indices { doc.scenes[0].layers[i].shapes[s].fill = fill } }
     }
     var w = FlareWorkspace(services: .built)
     w.load(doc)
@@ -39,7 +44,20 @@ private func across(_ box: FlareCore.Rect) -> FlareCore.Fill {
         let selection = try #require(w.fillSelection)
         #expect(selection.fill == shape.fill)
         #expect(selection.box == shape.bounds)
-        #expect(w.fillHelp == nil)
+        #expect(w.fillHelp == nil, "a shape to paint and the fill commands registered")
+    }
+
+    @Test func fillSelectionIsTheFirstOfSeveralShapesInItsBounds() throws {
+        let box = try #require(ballShapes(ball()).first?.bounds)
+        let w = ball(across(box), twoShapes: true)
+        let shapes = ballShapes(w)
+        try #require(shapes.count == 2)
+        let first = try #require(shapes.first?.bounds), second = try #require(shapes.last?.bounds)
+        try #require(first != second)
+        let selection = try #require(w.fillSelection)
+        #expect(selection.box == first)
+        #expect(selection.box != second)
+        #expect(selection.fill == across(box))
     }
 
     @Test func nothingSelectedHasNoFillAndSaysWhy() {
@@ -57,17 +75,21 @@ private func across(_ box: FlareCore.Rect) -> FlareCore.Fill {
         #expect(w.paint?.gradient?.fill == across(box))
     }
 
-    @Test func runFillRefusesWithAReasonUntilTheCommandsAreBuilt() {
-        var w = ball()
+    @Test func aRefusedGestureSaysWhyAndChangesNothing() throws {
+        let box = try #require(ballShapes(ball()).first?.bounds)
+        var w = ball(across(box))
         let before = w.document
-        w.runFill(.type(.linear))
+        w.runFill(.remove(index: 0))
+        w.runFill(.remove(index: 0))
+        #expect(w.paintError != nil, "a gradient keeps two stops")
+        w.undo()
         #expect(w.document == before && !w.canUndo)
-        #expect(w.paintError != nil)
+        w.runFill(.type(.solid))
+        #expect(w.paintError == nil)
     }
 }
 
-@Suite(.disabled("FG-5 builds the fill command bodies"))
-struct FlareGradientCommandTests {
+@Suite struct FlareGradientCommandTests {
     @Test func angleRewritesPoints() throws {
         let box = try #require(ballShapes(ball()).first?.bounds)
         var w = ball(across(box))
@@ -89,7 +111,7 @@ struct FlareGradientCommandTests {
 
     @Test func oneStepForSeveral() throws {
         let box = try #require(ballShapes(ball()).first?.bounds)
-        var w = ball(across(box))
+        var w = ball(across(box), twoShapes: true)
         let before = w.document
         try #require(ballShapes(w).count > 1)
         w.runFill(.type(.radial))
@@ -106,5 +128,23 @@ struct FlareGradientCommandTests {
         #expect(w.document != before)
         w.undo()
         #expect(w.document == before && !w.canUndo)
+    }
+
+    /// RJ-F31's steps on its input: the saved fill runs top to bottom with a red middle stop, and so does the SVG.
+    @Test func realJobRecoloursAndTurnsTheGradient() throws {
+        let folder = FlareJob.root.appendingPathComponent("gradient-edit")
+        let script = try JSONDecoder().decode(FlareJob.Script.self,
+                                              from: Data(contentsOf: folder.appendingPathComponent("gradient-edit.jobs.json")))
+        var doc = try FlareHeadless.open(Data(contentsOf: folder.appendingPathComponent("input/gradient-circle.flare")),
+                                         name: "gradient-circle.flare")
+        #expect(FlareHeadless.catalog.runBatch(script.steps, on: &doc, atomic: true).stoppedAt == nil)
+        let saved = try FlareHeadless.open(doc.save(), name: "saved.flare")
+        let fill = saved.workspace.document?.layers(of: .scene("scene-1"))?.first?.shapes.first?.fill
+        guard case .linear(let stops, let start, let end)? = fill else { return #expect(Bool(false)) }
+        #expect(stops.map(\.color) == [FillColor(r: 0, g: 0, b: 1), FillColor(r: 1, g: 0, b: 0), FillColor(r: 0, g: 0, b: 0)])
+        #expect(abs(start.x - end.x) < 1e-9 && start.y < end.y)
+        let svg = String(decoding: try #require(doc.export("svg", options: .object([:])).first).data, as: UTF8.self)
+        #expect(svg.contains("x1=\"50\" y1=\"10\" x2=\"50\" y2=\"90\""), "\(svg)")
+        #expect(svg.contains("<stop offset=\"0.5\" stop-color=\"#ff0000\"/>"), "\(svg)")
     }
 }

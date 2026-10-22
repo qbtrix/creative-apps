@@ -1,0 +1,26 @@
+# AfterGlowApp's menu items and buttons built without a command spec (command-path, command-state CS-2).
+# max: 24
+Sources/AfterGlowApp/HomeGrid.swift: Button("Locate…") { HomeInspector.locate(ref, model: model) }
+Sources/AfterGlowApp/HomeGrid.swift: Button("Remove from Recents") { Task { await model.removeSelection(now: Date()) } }
+Sources/AfterGlowApp/HomeGrid.swift: Button("Undo") { Task { await model.undoRemove(now: Date()) } }
+Sources/AfterGlowApp/LauncherCommands+Assets.swift: Button("Cut") {}.keyboardShortcut("x")
+Sources/AfterGlowApp/LauncherCommands+Assets.swift: Button("Copy") {}.keyboardShortcut("c")
+Sources/AfterGlowApp/LauncherCommands+Assets.swift: Button("Add from Clipboard") {}.keyboardShortcut("v")
+Sources/AfterGlowApp/LauncherCommands+Assets.swift: Button("Select All") {}.keyboardShortcut("a")
+Sources/AfterGlowApp/LauncherCommands+Assets.swift: Button("Assets") {}.keyboardShortcut("a", modifiers: [.option, .command])
+Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: entry.item) {
+Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.open) { openWindow(id: "home") }.keyboardShortcut("o")
+Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: entry.item) {
+Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.clearMenu) {}
+Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.undo) { if let model { Task { await model.undoRemove(now: Date()) } } }
+Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.delete) { if let model { Task { await model.removeSelection(now: Date()) } } }
+Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.showSidebar) {}
+Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.showInspector) {}.keyboardShortcut("i", modifiers: [.option, .command])
+Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.larger) { model?.larger() }.keyboardShortcut("+")
+Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.smaller) { model?.smaller() }.keyboardShortcut("-")
+Sources/AfterGlowApp/LauncherCommands+Update.swift: Button("Check for Updates…") {}.disabled(true).help(SuiteIdentity.notConnected("updater"))
+Sources/AfterGlowApp/OnboardingStartPage.swift: Button("Open sample") { Task { await model.openSample(app, now: Date()) } }
+Sources/AfterGlowApp/OnboardingWindow.swift: Button("Skip") { Task { await model.skip() } }
+Sources/AfterGlowApp/OnboardingWindow.swift: Button("Back") { model.back() }
+Sources/AfterGlowApp/OnboardingWindow.swift: Button("Start from an empty home") { Task { await model.finish() } }
+Sources/AfterGlowApp/OnboardingWindow.swift: Button("Continue") { model.continue() }
