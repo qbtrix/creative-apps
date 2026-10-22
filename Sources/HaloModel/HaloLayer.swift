@@ -99,11 +99,9 @@ public struct HaloLayer: Identifiable, Codable, Sendable, Hashable {
     /// HK-1: a shape layer's outline, the kernel's VectorStroke; nil draws
     /// none. Coded under "stroke" only when set.
     public var stroke: VectorStroke?
-    /// PH-1: a solid's picture, the kernel's PlacedAsset, drawn into the
-    /// solid's box; nil fills `color`. Coded under "placedAsset" only when set.
+    /// PH-1: a solid's picture, drawn into the solid's box; nil fills `color`. Coded only when set.
     public var placedAsset: PlacedAsset?
-    /// PH-1: the picture's point (0...1 across it) kept in view when it
-    /// covers the box. The kernel's default, the centre, is coded as nothing.
+    /// PH-1: the picture's point (0...1) kept in view when it covers the box; the centre is coded as nothing.
     public var placedFocus: Point {
         get { storedPlacedFocus ?? Self.defaultPlacedFocus }
         set { storedPlacedFocus = newValue == Self.defaultPlacedFocus ? nil : newValue }

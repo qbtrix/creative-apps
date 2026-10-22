@@ -1,9 +1,5 @@
-// HaloPlaceTests.swift: placed-images MJ-PH, the Model walk. A solid keeps
-// its picture in `placedAsset` and `placedFocus`, coded only when set, so
-// every saved Halo project opens and saves byte-equal, and a duplicated solid
-// keeps its picture (PH-1). The place commands (a clear solid at the fitted
-// box, a refused fill on text, a focus drag as one step, undo of a place)
-// wait on PH-6's conformance bodies. Linux and macOS.
+// HaloPlaceTests.swift: placed-images MJ-PH, the Model walk. A solid's picture and focus are coded only when
+// set, so every saved project re-saves byte-equal, and a duplicate keeps them (PH-1). The place commands wait on PH-6.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -15,24 +11,17 @@ import Testing
 
 @Suite struct HaloPlaceTests {
     /// The repo's root: three folders up from this file.
-    static let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
-        .deletingLastPathComponent().deletingLastPathComponent()
+    static let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
 
     /// Every saved `.halo` file the tests and real jobs read, as repo paths.
     static func savedProjects() -> [String] {
-        let fm = FileManager.default
-        let jobs = "Tests/RealJobs/halo"
-        let folders = ((try? fm.contentsOfDirectory(atPath: root.appendingPathComponent(jobs).path)) ?? [])
-            .map { "\(jobs)/\($0)/input" } + ["Tests/HaloModelTests/Fixtures"]
-        return folders.flatMap { folder in
-            ((try? fm.contentsOfDirectory(atPath: root.appendingPathComponent(folder).path)) ?? [])
-                .filter { $0.hasSuffix(".halo") }.map { "\(folder)/\($0)" }
-        }.sorted()
+        let ls = { (dir: String) in (try? FileManager.default.contentsOfDirectory(atPath: root.appendingPathComponent(dir).path)) ?? [] }
+        let folders = ls("Tests/RealJobs/halo").map { "Tests/RealJobs/halo/\($0)/input" } + ["Tests/HaloModelTests/Fixtures"]
+        return folders.flatMap { folder in ls(folder).filter { $0.hasSuffix(".halo") }.map { "\(folder)/\($0)" } }.sorted()
     }
 
     /// A 2 × 1 PNG's bytes stand in for a file: these tests never decode it.
-    static let asset = PlacedAsset(
-        id: "a-1", name: "logo.png", format: .png, natural: Size(width: 200, height: 100), data: Data([1, 2, 3]))
+    static let asset = PlacedAsset(id: "a-1", name: "logo.png", format: .png, natural: Size(width: 200, height: 100), data: Data([1, 2, 3]))
 
     /// A 200 × 100 PNG, a red left half and a blue right half (RJ-H36's logo).
     static let logoPNG = Data(base64Encoded: HaloPlaceRenderTests.logoBase64) ?? Data()
@@ -44,6 +33,8 @@ import Testing
         project.selectLayer(try #require(project.selectedComposition?.layers.first { $0.name == select }).id)
         return project
     }
+
+    static let frame = Rect(minX: 0, minY: 0, maxX: 1920, maxY: 1080)
 
     static func place(_ fill: Bool = false) -> JSONValue {
         .object(["name": .string("logo.png"), "base64": .string(logoPNG.base64EncodedString()), "fill": .bool(fill)])
@@ -63,8 +54,7 @@ import Testing
     }
 
     @Test func aPictureAndItsFocusSaveOnlyWhenSet() throws {
-        var layer = HaloLayer(
-            id: "s", name: "Solid", kind: .solid, inFrame: 0, outFrame: 10, color: HaloLayerKind.solid.defaultColor)
+        var layer = HaloLayer(id: "s", name: "Solid", kind: .solid, inFrame: 0, outFrame: 10, color: HaloLayerKind.solid.defaultColor)
         #expect(layer.placedFocus == Point(x: 0.5, y: 0.5))
         layer.placedAsset = Self.asset
         let unfocused = String(decoding: try JSONEncoder().encode(layer), as: UTF8.self)
@@ -86,15 +76,12 @@ import Testing
         #expect(copy.placedAsset == Self.asset && copy.placedFocus == Point(x: 0, y: 1))
         let selection = try #require(project.placedSelection)
         #expect(selection.id == copy.id && selection.asset == Self.asset)
-        #expect(selection.image == PlacedImage(
-            assetID: "a-1", box: Rect(minX: 0, minY: 0, maxX: 1920, maxY: 1080), focus: Point(x: 0, y: 1)))
+        #expect(selection.image == PlacedImage(assetID: "a-1", box: Self.frame, focus: Point(x: 0, y: 1)))
     }
 
     @Test func theTargetReadsTheCompositionAndTheSelectedSolid() throws {
         let solid = try Self.project(select: "Background"), text = try Self.project(select: "Title")
-        #expect(solid.placeCanvas == Rect(minX: 0, minY: 0, maxX: 1920, maxY: 1080))
-        #expect(solid.placeFormats == [.png, .jpeg, .svg])
-        #expect(solid.placeFillBox == Rect(minX: 0, minY: 0, maxX: 1920, maxY: 1080))
+        #expect(solid.placeCanvas == Self.frame && solid.placeFillBox == Self.frame && solid.placeFormats == [.png, .jpeg, .svg])
         #expect(text.placeFillBox == nil && text.placedSelection == nil)
         #expect(try solid.rasterSize(Self.logoPNG, format: .png) == Size(width: 200, height: 100))
         #expect(HaloProject(services: .fake).placeHelp?.isEmpty == false)
@@ -108,16 +95,14 @@ import Testing
         #expect(layers.map(\.name) == ["Title", "logo", "Badge", "Background", "Rig"])
         #expect(placed.kind == .solid && placed.placedAsset?.natural == Size(width: 200, height: 100))
         #expect(placed.rect == HaloLayerRect(x: 860, y: 490, width: 200, height: 100))
-        #expect(project.selectedLayerID == placed.id)
-        #expect(project.history.undoTitle == "Undo Place Image")
+        #expect(project.selectedLayerID == placed.id && project.history.undoTitle == "Undo Place Image")
     }
 
     @Test(.disabled("waits on PH-6")) func textRefusesFill() throws {
         var project = try Self.project(select: "Title")
         let before = project.document
         #expect(throws: CatalogError.self) { try HaloProject.catalog.run("place.image", params: Self.place(true), on: &project) }
-        #expect(project.document == before)
-        #expect(project.placeFillBox == nil)
+        #expect(project.document == before && project.placeFillBox == nil)
     }
 
     @Test(.disabled("waits on PH-6")) func focusDragIsOneStep() throws {

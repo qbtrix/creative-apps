@@ -1,11 +1,6 @@
-// HaloPlace+Kernel.swift: Halo's project as the kernel's PlacedImageTarget
-// (placed-images PH-1 stubs, PH-6 bodies), so the `place.*` commands put a
-// PNG, JPEG or SVG picture into a solid layer. A solid keeps its picture in
-// `HaloLayer.placedAsset` and `placedFocus` and draws it into its own box
-// (its rect, or the whole composition), so the selection's box is the
-// solid's. Text, shape and null layers take no picture: `placeFillBox` is
-// nil there and the kernel refuses a fill. Until PH-6 the two mutating
-// requirements throw a not-built error and `placeHelp` says why. Linux-safe.
+// HaloPlace+Kernel.swift: Halo's project as the kernel's PlacedImageTarget (placed-images PH-1 stubs,
+// PH-6 bodies): a solid keeps a PNG, JPEG or SVG picture in its own box; other kinds take none, so
+// `placeFillBox` is nil there. Until PH-6 the mutating requirements throw not-built. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -22,14 +17,10 @@ extension HaloProject: PlacedImageTarget {
     /// What the mutating requirements throw until PH-6 lands their bodies.
     static let placeNotBuilt = CatalogError.notBuilt(id: "place.image", feature: "halo placed-images PH-6")
 
-    /// Why nothing can be placed now: no composition, or the stub's not-built
-    /// help, nil once PH-6 lands the bodies.
-    public var placeHelp: String? {
-        selectedComposition == nil ? Self.noPlaceComposition : Self.placeNotBuiltHelp
-    }
+    /// Why nothing can be placed now; nil once PH-6 lands the bodies.
+    public var placeHelp: String? { selectedComposition == nil ? Self.noPlaceComposition : Self.placeNotBuiltHelp }
 
-    /// What a new picture fits inside: the composition's frame, or an empty
-    /// rect with none.
+    /// What a new picture fits inside: the composition's frame, or an empty rect with none.
     public var placeCanvas: Rect {
         guard let comp = selectedComposition else { return Rect(minX: 0, minY: 0, maxX: 0, maxY: 0) }
         return Rect(minX: 0, minY: 0, maxX: Double(comp.width), maxY: Double(comp.height))
@@ -44,8 +35,7 @@ extension HaloProject: PlacedImageTarget {
     /// PNG and JPEG raster, SVG through the kernel's PlacedVector.
     public var placeFormats: Set<PlacedFormat> { [.png, .jpeg, .svg] }
 
-    /// The selected solid's picture in its box, with its focus; nil when the
-    /// selection shows none.
+    /// The selected solid's picture in its box, with its focus; nil when it shows none.
     public var placedSelection: (id: String, image: PlacedImage, asset: PlacedAsset)? {
         guard let box = placeFillBox, let layer = selectedLayer, let asset = layer.placedAsset else { return nil }
         return (layer.id, PlacedImage(assetID: asset.id, box: box, focus: layer.placedFocus), asset)
@@ -53,18 +43,10 @@ extension HaloProject: PlacedImageTarget {
 
     /// A PNG's or JPEG's pixel size from its header; the kernel sizes SVG itself.
     public func rasterSize(_ data: Data, format: PlacedFormat) throws -> Size {
-        let size: (width: Int, height: Int)
-        switch format {
-        case .png:
-            guard let info = try? PNG.info(data) else { throw CatalogError.unavailable(id: "place.image", why: Self.cantReadImage) }
-            size = (info.width, info.height)
-        case .jpeg:
-            guard let info = try? JPEG.info(data) else { throw CatalogError.unavailable(id: "place.image", why: Self.cantReadImage) }
-            size = (info.width, info.height)
-        case .svg:
-            throw CatalogError.unavailable(id: "place.image", why: PlaceRules.formatHelp)
-        }
-        return Size(width: Double(size.width), height: Double(size.height))
+        guard format != .svg else { throw CatalogError.unavailable(id: "place.image", why: PlaceRules.formatHelp) }
+        let size = format == .png ? (try? PNG.info(data)).map { ($0.width, $0.height) } : (try? JPEG.info(data)).map { ($0.width, $0.height) }
+        guard let size else { throw CatalogError.unavailable(id: "place.image", why: Self.cantReadImage) }
+        return Size(width: Double(size.0), height: Double(size.1))
     }
 
     /// PH-6: adds a solid showing `asset` in `image.box` above the selection.

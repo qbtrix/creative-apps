@@ -1,10 +1,6 @@
-// HaloPlaceRenderTests.swift: placed-images PH-2, the renderer's checks,
-// written first and off until PH-5 draws a solid's picture. RJ-H36's four
-// pixels (a red left half, a blue right half, the background around it), a
-// 2× scale doubles the picture's footprint, a picture never draws outside
-// its solid's outline at a 30° turn, an SVG ring keeps its hole, an asset
-// decodes once for two solids, and a full-frame 1080p picture's cost is
-// reported. Linux and macOS.
+// HaloPlaceRenderTests.swift: placed-images PH-2, the renderer's checks, off until PH-5 draws a solid's
+// picture: RJ-H36's four pixels, a 2× scale doubles the footprint, nothing outside the outline at a 30° turn,
+// an SVG ring keeps its hole, one decode per asset, and a full-frame 1080p picture's cost. Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -19,25 +15,16 @@ import Testing
 @Suite struct HaloPlaceRenderTests {
     /// RJ-H36's logo: a 200 × 100 PNG, #FF0000 left of x = 100, #0000FF right of it.
     static let logoBase64 = """
-        iVBORw0KGgoAAAANSUhEUgAAAMgAAABkCAYAAADDhn8LAAABRElEQVR42u3TsQkAAAzDsPz/dHpFIYMGP2BQmlQ7WTCWA4AIEEAE\
-        CCACBBABAogAESCACBBABAggAgQQASJAABEggAgQQAQIIAJEgAAiQAARIIAIEEAECCAuACJAABEggAgQQAQIIAJEgAAiQAARIIAI\
-        EEAEiAABRIAAIkAAESCACBBZAIgAAUSAACJAABEggAgQAQKIAAFEgAAiQAARIAIEEAECiAABRIAAIkAECCACBBABAogAAUSAAGID\
-        IAIEEAECiAABRIAAIkAECCACBBABAogAAUSACBBABAggAgQQAQKIABEggAgQQAQIIAIEEAECiAARIIAIEEAECCACBBABIkAAESCA\
-        CBBABAggAkSAACJAABEggAgQQASIHABEgAAiQAARIIAIEEAEiAABRIAAIkAAESCACBABAogAAUSAAKLPDlYGrNa0kF6LAAAAAElF\
-        TkSuQmCC
+        iVBORw0KGgoAAAANSUhEUgAAAMgAAABkCAYAAADDhn8LAAABRElEQVR42u3TsQkAAAzDsPz/dHpFIYMGP2BQmlQ7WTCWA4AIEEAECCACBBABAogAESCACBBABAggAgQQASJAABEggAgQQAQIIAJEgAAiQAARIIAIEEAECCAuAC\
+        JAABEggAgQQAQIIAJEgAAiQAARIIAIEEAEiAABRIAAIkAAESCACBBZAIgAAUSAACJAABEggAgQAQKIAAFEgAAiQAARIAIEEAECiAABRIAAIkAECCACBBABAogAAUSAAGIDIAIEEAECiAABRIAAIkAECCACBBABAogAAUSACBBA\
+        BAggAgQQAQKIABEggAgQQAQIIAIEEAECiAARIIAIEEAECCACBBABIkAAESCACBBABAggAkSAACJAABEggAgQQASIHABEgAAiQAARIIAIEEAEiAABRIAAIkAAESCACBABAogAAUSAAKLPDlYGrNa0kF6LAAAAAElFTkSuQmCC
         """
     /// A 64 × 64 blue square with a 32 × 32 hole, even-odd.
-    static let ring = """
-        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><path fill="#0000FF" fill-rule="evenodd" \
-        d="M0 0 H64 V64 H0 Z M16 16 H48 V48 H16 Z"/></svg>
-        """
+    static let ring = #"<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><path fill="#0000FF" fill-rule="evenodd" d="M0 0 H64 V64 H0 Z M16 16 H48 V48 H16 Z"/></svg>"#
     static let logo = PlacedAsset(
-        id: "logo", name: "logo.png", format: .png, natural: Size(width: 200, height: 100),
-        data: Data(base64Encoded: logoBase64) ?? Data())
-
+        id: "logo", name: "logo.png", format: .png, natural: Size(width: 200, height: 100), data: Data(base64Encoded: logoBase64) ?? Data())
     /// A 2/255 tolerance on each channel.
     static let tolerance: Float = 2.0 / 255
-
     static let black = HaloDrawItem(
         layerID: "bg", kind: .solid, bounds: HaloLayerRect(x: 0, y: 0, width: 400, height: 400), matrix: .identity,
         opacity: 1, color: HaloLayerColor(red: 0, green: 0, blue: 0), blendMode: .normal)
@@ -60,9 +47,10 @@ import Testing
         ).pixels
     }
 
-    static func isRed(_ p: RGBA) -> Bool { p.r >= 1 - tolerance && p.g <= tolerance && p.b <= tolerance && p.a >= 1 - tolerance }
-    static func isBlue(_ p: RGBA) -> Bool { p.r <= tolerance && p.g <= tolerance && p.b >= 1 - tolerance && p.a >= 1 - tolerance }
-    static func isBlack(_ p: RGBA) -> Bool { p.r <= tolerance && p.g <= tolerance && p.b <= tolerance && p.a >= 1 - tolerance }
+    /// Whether `p` is opaque `rgb` within the tolerance.
+    static func near(_ p: RGBA, _ rgb: [Float]) -> Bool {
+        zip([p.r, p.g, p.b, p.a], rgb + [1]).allSatisfy { abs($0 - $1) <= tolerance }
+    }
 
     /// `m` about the 400 × 400 frame's centre.
     static func about(_ m: HaloMatrix) -> HaloMatrix {
@@ -71,18 +59,14 @@ import Testing
 
     @Test(.disabled("waits on PH-5")) func logoPixels() throws {
         let pixels = try Self.render([Self.black, Self.placed()])
-        #expect(Self.isRed(try pixels.pixel(x: 110, y: 200)))
-        #expect(Self.isBlue(try pixels.pixel(x: 290, y: 200)))
-        #expect(Self.isBlack(try pixels.pixel(x: 98, y: 200)))
-        #expect(Self.isBlack(try pixels.pixel(x: 200, y: 148)))
+        #expect(try Self.near(pixels.pixel(x: 110, y: 200), [1, 0, 0]) && Self.near(pixels.pixel(x: 290, y: 200), [0, 0, 1]))
+        #expect(try Self.near(pixels.pixel(x: 98, y: 200), [0, 0, 0]) && Self.near(pixels.pixel(x: 200, y: 148), [0, 0, 0]))
     }
 
     @Test(.disabled("waits on PH-5")) func scaleKeyScalesPicture() throws {
         let pixels = try Self.render([Self.black, Self.placed(matrix: Self.about(.scale(x: 2, y: 2)))])
-        #expect(Self.isRed(try pixels.pixel(x: 5, y: 200)))
-        #expect(Self.isBlue(try pixels.pixel(x: 395, y: 200)))
-        #expect(Self.isRed(try pixels.pixel(x: 150, y: 105)))
-        #expect(Self.isBlack(try pixels.pixel(x: 200, y: 95)))
+        #expect(try Self.near(pixels.pixel(x: 5, y: 200), [1, 0, 0]) && Self.near(pixels.pixel(x: 395, y: 200), [0, 0, 1]))
+        #expect(try Self.near(pixels.pixel(x: 150, y: 105), [1, 0, 0]) && Self.near(pixels.pixel(x: 200, y: 95), [0, 0, 0]))
     }
 
     @Test(.disabled("waits on PH-5")) func staysInsideOutline() throws {
@@ -106,7 +90,7 @@ import Testing
     @Test(.disabled("waits on PH-5")) func svgRingKeepsHole() throws {
         let ring = PlacedAsset(id: "ring", name: "ring.svg", format: .svg, natural: Size(width: 64, height: 64), data: Data(Self.ring.utf8))
         let pixels = try Self.render([Self.placed(ring, bounds: HaloLayerRect(x: 0, y: 0, width: 64, height: 64))], width: 64, height: 64)
-        #expect(Self.isBlue(try pixels.pixel(x: 8, y: 8)))
+        #expect(Self.near(try pixels.pixel(x: 8, y: 8), [0, 0, 1]))
         #expect(try pixels.pixel(x: 32, y: 32).a <= Self.tolerance)
     }
 
@@ -121,19 +105,15 @@ import Testing
     }
 
     @Test(.disabled("waits on PH-5")) func fullFrameCost() throws {
-        let photo = try PNGCodec().encodePNG(
-            try PixelBuffer(width: 1920, height: 1080, fill: RGBA(r: 0.2, g: 0.4, b: 0.6, a: 1)), bitsPerChannel: 8)
+        let photo = try PNGCodec().encodePNG(try PixelBuffer(width: 1920, height: 1080, fill: RGBA(r: 0.2, g: 0.4, b: 0.6, a: 1)), bitsPerChannel: 8)
         let asset = PlacedAsset(id: "photo", name: "photo.png", format: .png, natural: Size(width: 1920, height: 1080), data: photo)
-        let bounds = HaloLayerRect(x: 0, y: 0, width: 1920, height: 1080)
-        let item = Self.placed(asset, bounds: bounds)
+        let item = Self.placed(asset, bounds: HaloLayerRect(x: 0, y: 0, width: 1920, height: 1080))
         var plain = item
         plain.placedAsset = nil; plain.placedImage = nil
         _ = try Self.render([item], width: 1920, height: 1080)  // the first decode
         let clock = ContinuousClock()
         let base = try clock.measure { _ = try Self.render([plain], width: 1920, height: 1080) }
-        let picture = try clock.measure { _ = try Self.render([item], width: 1920, height: 1080) }
-        let added = picture - base
-        let ms = Double(added.components.seconds) * 1000 + Double(added.components.attoseconds) / 1e15
-        print("HALO-PLACED-FRAME added \(ms) ms")
+        let added = try clock.measure { _ = try Self.render([item], width: 1920, height: 1080) } - base
+        print("HALO-PLACED-FRAME added \(Double(added.components.seconds) * 1000 + Double(added.components.attoseconds) / 1e15) ms")
     }
 }
