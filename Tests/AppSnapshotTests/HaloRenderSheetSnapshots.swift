@@ -1,7 +1,10 @@
 // HaloRenderSheetSnapshots.swift: File > Render… on SuiteUI's export sheet
 // (core-loop CL-4, #1971) on `keyed` with the fakes, each state set through
 // the Model's kernel methods on CL-2's stubs: editing (PNG sequence, Half,
-// the summary), running at "Frame 12 of 48", finished and failed at frame 5.
+// the summary), editing into a folder with a 40-character name (one line,
+// middle-truncated, at the Size row's inset), running at "Frame 12 of 48",
+// finished ("Exported 48 PNG files into "Bounce"", the folder name dimmed
+// with the sheet) and failed at frame 5.
 // The control inventory stands in for the accessibility tree, so a state
 // missing a control fails; the readout pins the rows the sheet draws. Light
 // and Dark: halo-render-sheet-*.png. macOS only.
@@ -35,8 +38,8 @@ import Testing
         return project
     }
 
-    private func sheet(_ project: HaloProject, output: URL? = nil) -> HaloRenderExportAdapter {
-        HaloRenderExportAdapter(model: project, destination: folder, output: output) { _ in }
+    private func sheet(_ project: HaloProject, output: URL? = nil, into destination: URL? = nil) -> HaloRenderExportAdapter {
+        HaloRenderExportAdapter(model: project, destination: destination ?? folder, output: output) { _ in }
     }
 
     private func controls(_ sheet: HaloRenderExportAdapter) throws -> [String: ControlEntry] {
@@ -67,6 +70,15 @@ import Testing
         try shoot(view, "")
     }
 
+    @Test func longFolderName() throws {
+        let long = URL(fileURLWithPath: "/nonexistent/halo-render-A775E2C6-0D1F-4B7A-9E21-3C4D", isDirectory: true)
+        #expect(long.lastPathComponent.count == 40)
+        let view = sheet(try editing(), into: long)
+        let found = try controls(view)
+        #expect(found["halo.render.destination"]?.enabled == true)
+        try shoot(view, "-long-folder")
+    }
+
     @Test func progress() throws {
         let project = try running()
         #expect(project.renderRun == .running(half, done: 12, total: 48))
@@ -86,7 +98,8 @@ import Testing
         project.endRender(.finished(frames: 48))
         #expect(project.renderOutcomeText == "Rendered 48 frames.")
         let view = sheet(project, output: folder.appending(path: "Bounce"))
-        #expect(view.readout.line == .finished("Exported Bounce"))
+        #expect(project.renderWrittenText(into: "Bounce") == "48 PNG files into \"Bounce\"")
+        #expect(view.readout.line == .finished("Exported 48 PNG files into \"Bounce\""))
         let found = try controls(view)
         #expect(found["halo.render.dismiss"]?.enabled == true)
         #expect(found["halo.render.reveal"]?.enabled == true)

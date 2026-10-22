@@ -61,5 +61,23 @@ import Testing
                 name: "design-eyedropper-options-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }
+
+    /// eyedropper #4061: in the inspector the chips share its width, so the selected Point chip reads "Point" in full,
+    /// not "Poi…" as it did when the chips sat sized to fit on the artboard. Writes design-eyedropper-point-light.png
+    /// and -dark.png.
+    @Test func theEyedropperShowsPointInFull() throws {
+        var model = DesignWorkspace()
+        model.useServices(.fake)
+        let opened = model.openFixture("cards")
+        #expect(opened)
+        model.selectTool(.eyedropper)
+        model.setSampleSize(.point)
+        #expect(model.sampleSize == .point)
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(
+                DesignEditor(model: model, zoom: 0.5),
+                name: "design-eyedropper-point-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        }
+    }
 }
 #endif

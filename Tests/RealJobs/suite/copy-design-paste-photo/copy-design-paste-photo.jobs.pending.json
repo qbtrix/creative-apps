@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "app": "suite",
+  "why": "RJ-X72, pending CB-6 (suiteui/clipboard-interop): named .jobs.pending.json so the harness skips it, since the harness runs one app per job and knows no 'suite' app, Design's catalog has no edit.copy onto the CLI's pasteboard folder until CB-6 builds DesignPasteboardAdapter, and the folder has no input (the job builds its files by commands). CB-6 renames it to copy-design-paste-photo.jobs.json once the harness runs its two stages in order over one pasteboard folder, and sets platforms to macos (Cm: it crosses NSPasteboard). The job: in Design, file.open of a page holding one 200 x 100 red rectangle at (100, 100) (Design's catalog adds no shape by command), edit.select it, edit.copy; in Photo, a new 800 x 600 white image, edit.paste, export PNG. The trap: Photo's Paste is greyed because Design wrote only its own layer type. The assertion: Photo gains one layer of 400 x 200 px (the copy's PNG at 2x), centred, whose centre pixel is pure red; the exported PNG is 800 x 600 with (400, 300) at #FF0000 and (100, 100) white. Mutations: SuiteModel.SuitePasteboardCoding .photoTakesPixels, DesignModel.DesignPasteboardAdapter .pngAtTwoX.",
+  "pending": "CB-6",
+  "waits_on": "CB-6",
+  "inputs": [],
+  "stages": [
+    {"app": "design", "steps": [
+      {"id": "file.open", "params": {"text": "{\"version\":1,\"pages\":[{\"id\":\"page-1\",\"name\":\"Page 1\",\"frameWidth\":1440,\"frameHeight\":1024,\"nodes\":[{\"id\":\"node-1\",\"kind\":\"rectangle\",\"name\":\"Red\",\"frame\":{\"x\":100,\"y\":100,\"width\":200,\"height\":100},\"children\":[],\"cornerRadius\":0,\"fill\":{\"red\":255,\"green\":0,\"blue\":0},\"isHidden\":false,\"isLocked\":false,\"opacity\":1,\"text\":\"\",\"textStyle\":{\"alignment\":\"leading\",\"family\":\"System\",\"size\":16,\"weight\":400}}]}]}"}},
+      {"id": "edit.select", "params": {"ids": ["node-1"]}},
+      {"id": "edit.copy", "params": {}}
+    ]},
+    {"app": "photo", "steps": [
+      {"id": "file.new", "params": {"width": 800, "height": 600}},
+      {"id": "edit.paste", "params": {}}
+    ], "output": {"dir": "out", "name": "pasted", "format": "png", "options": {}}}
+  ],
+  "atomic": true,
+  "expect": {
+    "out/pasted.png": {"pixels": {"size": [800, 600], "at": [
+      {"x": 400, "y": 300, "rgba": [255, 0, 0, 255]},
+      {"x": 100, "y": 100, "rgba": [255, 255, 255, 255]}
+    ], "tolerance": 0}}
+  },
+  "platforms": []
+}

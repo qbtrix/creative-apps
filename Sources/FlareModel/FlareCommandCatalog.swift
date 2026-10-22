@@ -1,5 +1,7 @@
 // FlareCommandCatalog.swift (AC-f2): Flare's menu, palette, transport, SCENES (`scenes.*`) and fill (`fill.*`) actions as catalog commands,
-// each available exactly when the window's control is. An edit's title is its undo step.
+// each available exactly when the window's control is. An edit's title is its undo step. Command-state CS-11 adds the
+// bare controls' commands: the New sheet's values on `file.new`, frame labels, the timeline's key and frame edits and the
+// recovery offer's Restore and Discard (off while the open animation has unsaved changes).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -14,6 +16,12 @@ extension FlareWorkspace {
     public struct DataParams: Codable, Sendable { public var data: String }
     public struct OpenParams: Codable, Sendable { public var name: String; public var data: String }
     public struct LoopParams: Codable, Sendable { public var on: Bool }
+    public struct LabelParams: Codable, Sendable { public var name: String? }
+    public struct CountParams: Codable, Sendable { public var count: Int? }
+    /// The New Animation sheet's values; none at all is File > New's default animation.
+    public struct NewParams: Codable, Sendable {
+        public var preset: String?, width: Double?, height: Double?, fps: Int?, durationFrames: Int?, background: String?
+    }
     typealias Help = @Sendable (FlareWorkspace) -> String?
 
     /// The FlareCore commands, then the app's; empty only if an id broke the id rule.
@@ -93,13 +101,16 @@ extension FlareWorkspace {
         ws.apply(AddLayer(owner: .scene("scene-1"), layer: Layer(id: "layer-1", name: "Ball")), selection: .layer("layer-1"))
         return ws.copy().map { .object(["data": .string(String(decoding: $0, as: UTF8.self))]) } ?? .null
     }()
-    static let openExample: JSONValue = {
+    static let exampleFile: JSONValue = {
         let data = (try? FlareFormat.encode(Document(scenes: [Scene(id: "scene-1", name: "Scene 1")]))) ?? Data()
-        return .object(["name": .string("Ball.flare"), "data": .string(String(decoding: data, as: UTF8.self))])
+        return .string(String(decoding: data, as: UTF8.self))
     }()
+    static let openExample: JSONValue = .object(["name": .string("Ball.flare"), "data": exampleFile])
 
     public static let appCommands: [CommandSpec<FlareWorkspace>] = [
-        act("file.new", "New", "Opens a new animation with one scene.", .file, { _ in nil }) { w in w.newDocument() },
+        .typed("file.new", title: "New", summary: "Opens a new animation with one scene, from the New Animation sheet's values when given.",
+               kind: .file, params: NewParams.self, schema: newSchema, example: .object(["preset": .string("Square")]),
+               availability: { _ in .available }) { w, p in try w.attemptNew(p) },
         take("file.open", "Open", "Opens a .flare file's bytes, as text.", .file, OpenParams.self, example: openExample, { _ in nil }) { w, p in
             if case .failure(let error) = decodeFile(Data(p.data.utf8)) { throw CatalogError.failed(id: "file.open", message: error.message) }
             try? w.open(Data(p.data.utf8), named: p.name)
@@ -140,10 +151,82 @@ extension FlareWorkspace {
         act("animate.previous-frame", "Previous Frame", "Steps one frame back.", .view, { $0.transportHelp(back: true, step: true) }) { w in w.stepFrame(by: -1) },
         act("animate.go-to-start", "Go to Start", "Moves the playhead to the first frame.", .view, { $0.transportHelp(back: true, step: false) }) { w in w.goToStart() },
         act("animate.go-to-end", "Go to End", "Moves the playhead to the last frame.", .view, { $0.transportHelp(back: false, step: false) }) { w in w.goToEnd() },
+        take("frame.label", "Set Frame Label", "Names the label at the playhead; no name removes it.", .edit, LabelParams.self,
+            example: .object(["name": .string("Intro")]), { $0.timelineHelp("Open an animation to label its frames.") }) { w, p in try w.label(p.name) },
+        take("timeline.delete-keys", "Delete Keyframe", "Deletes the selected keyframes as one step.", .edit, NoParams.self, example: .object([:]),
+            { $0.timelineHelp() ?? ($0.selectedKeys.isEmpty ? selectKeyFirst : nil) }) { w, _ in try w.timelineEdit("timeline.delete-keys") { $0.removeSelectedKeys() } },
+        take("timeline.insert-frames", "Insert Frame", "Inserts frames (count, default 1) at the playhead on every layer.", .edit, CountParams.self,
+            example: .object(["count": .number(1)]), { $0.timelineHelp() }) { w, p in try w.timelineEdit("timeline.insert-frames") { $0.insertFrames(p.count ?? 1) } },
+        take("timeline.remove-frames", "Remove Frame", "Removes frames (count, default 1) at the playhead on every layer.", .edit, CountParams.self,
+            example: .object(["count": .number(1)]), { $0.timelineHelp() }) { w, p in try w.timelineEdit("timeline.remove-frames") { $0.removeFrames(p.count ?? 1) } },
+        take("recovery.restore", "Restore", "Opens a recovered animation's bytes, as text, as unsaved work.", .file, DataParams.self,
+            example: .object(["data": exampleFile]), { $0.recoveryHelp }) { w, p in try w.restore(Data(p.data.utf8)) },
+        act("recovery.discard", "Discard", "Turns down the recovery offer; the window removes the recovery file.", .file, { $0.recoveryHelp }) { _ in },
         act("scenes.add", "Add Scene", "Adds a scene like the selected one and selects it.", .edit, { $0.document == nil ? "Open an animation to add a scene to." : nil }) { w in w.addScene() },
         take("scenes.rename", "Rename Scene", "Renames the selected scene.", .edit, NameParams.self,
             example: .object(["name": .string("Intro")]), noScene) { w, p in w.renameScene(w.selectedSceneID ?? "", to: p.name) },
         act("scenes.remove", "Delete Scene", "Removes the selected scene; its undo step is Delete Scene.", .edit,
             { w in w.selectedSceneID.map(w.removeSceneHelp) ?? FlareLayerError.noDocument.message }) { w in w.removeScene(w.selectedSceneID ?? "") },
     ] + GradientCommands.specs(FlareWorkspace.self)  // the eight fill.* commands (gradient-fill FG-5)
+}
+
+extension FlareWorkspace {
+    /// Why Restore and Discard wait: the recovery file holds the open animation's unsaved changes.
+    public static let recoveryKeepsEdits = "The open animation has unsaved changes; save them first."
+    var recoveryHelp: String? { isDirty ? Self.recoveryKeepsEdits : nil }
+    /// The timeline's reason with no animation open (FlareWindow.timelineHelp).
+    func timelineHelp(_ why: String = "Open an animation to edit its timeline.") -> String? { document == nil ? why : nil }
+
+    static let newSchema = ParamSchema.object([
+        "preset": .string("A canvas preset's name.", oneOf: CanvasPreset.all.map(\.name)),
+        "width": .number("Canvas width in points.", minimum: 1, maximum: NewDocumentSpec.maxSide),
+        "height": .number("Canvas height in points.", minimum: 1, maximum: NewDocumentSpec.maxSide),
+        "fps": .integer("Frame rate.", minimum: NewDocumentSpec.fpsRange.lowerBound, maximum: NewDocumentSpec.fpsRange.upperBound),
+        "durationFrames": .integer("Length in frames.", minimum: NewDocumentSpec.durationRange.lowerBound, maximum: NewDocumentSpec.durationRange.upperBound),
+        "background": .string("Background color, \"#RRGGBB\"."),
+    ], required: [])
+
+    /// File > New with no values; the sheet's Create with its values, refused with the sheet's problem.
+    mutating func attemptNew(_ p: NewParams) throws -> JSONValue {
+        guard p.preset != nil || p.width != nil || p.height != nil || p.fps != nil || p.durationFrames != nil || p.background != nil else {
+            newDocument()
+            return .object([:])
+        }
+        let named = CanvasPreset.all.first { $0.name == p.preset }
+        var spec = NewDocumentSpec(preset: named ?? .hd1080)
+        spec.preset = named
+        spec.width = p.width ?? spec.width
+        spec.height = p.height ?? spec.height
+        spec.fps = p.fps ?? spec.fps
+        spec.durationFrames = p.durationFrames ?? spec.durationFrames
+        guard let background = NewDocumentSpec.color(hex: p.background ?? "#FFFFFF") else {
+            throw CatalogError.failed(id: "file.new", message: "Pick a valid background color.")
+        }
+        spec.background = background
+        try attempt("file.new") { $0.newDocument(spec) }
+        return .object([:])
+    }
+
+    /// Add Label (a name) or Remove Label (none), refused as the timeline's menu disables them.
+    mutating func label(_ name: String?) throws {
+        let trimmed = name.map { String($0.drop { $0.isWhitespace }.reversed().drop { $0.isWhitespace }.reversed()) }
+        if trimmed?.isEmpty == true { throw CatalogError.failed(id: "frame.label", message: "Name the label first.") }
+        if trimmed == nil, timelineLabels[currentFrame] == nil { throw CatalogError.failed(id: "frame.label", message: "No label at the playhead.") }
+        try timelineEdit("frame.label") { $0.setLabel(trimmed) }
+    }
+
+    /// A timeline edit, its refusal (`timelineError`) thrown.
+    mutating func timelineEdit(_ id: String, _ body: (inout FlareWorkspace) -> Void) throws {
+        timelineError = nil
+        body(&self)
+        if let error = timelineError { throw CatalogError.failed(id: id, message: error) }
+    }
+
+    /// Restore's run: a recovered file that doesn't decode changes nothing.
+    mutating func restore(_ data: Data) throws {
+        switch Self.decodeFile(data) {
+        case .success(let document): restoreRecovery(document)
+        case .failure(let error): throw CatalogError.failed(id: "recovery.restore", message: error.message)
+        }
+    }
 }

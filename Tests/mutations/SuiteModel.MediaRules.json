@@ -1,0 +1,23 @@
+[
+ {
+  "label": ".proResTakesOddSizes: the even rule applies to ProRes 4444 too",
+  "file": "Sources/SuiteModel/Values/Media+Rules.swift",
+  "find": "if codec.needsEvenSize, !width.isMultiple(of: 2)",
+  "replace": "if codec.needsEvenSize || codec == .prores4444, !width.isMultiple(of: 2)",
+  "tests": "MediaRulesTests"
+ },
+ {
+  "label": ".gifCapsAtFifty: GIF takes 60 frames a second",
+  "file": "Sources/SuiteModel/Values/Media+Rules.swift",
+  "find": "static let maxGIFFPS = 50",
+  "replace": "static let maxGIFFPS = 60",
+  "tests": "MediaRulesTests"
+ },
+ {
+  "label": ".eightKAccepted: a side of 8192 is refused",
+  "file": "Sources/SuiteModel/Values/Media+Rules.swift",
+  "find": "width <= maxSide, height <= maxSide",
+  "replace": "width < maxSide, height < maxSide",
+  "tests": "MediaRulesTests"
+ }
+]

@@ -1,0 +1,30 @@
+[
+ {
+  "label": ".emojiIsOneAdvance: graphemes counted by utf16",
+  "file": "Sources/SuiteModel/Fakes/FakeText.swift",
+  "find": "count: span.string.count),",
+  "replace": "count: span.string.utf16.count),",
+  "tests": "TextContractTests"
+ },
+ {
+  "label": ".pendingNamesText: the fake's text reason dropped",
+  "file": "Sources/SuiteModel/SuiteServices.swift",
+  "find": "\"text\": SuiteIdentity.notConnected(\"shell-text\")]",
+  "replace": "\"text\": \"\"]",
+  "tests": "TextContractTests"
+ },
+ {
+  "label": ".oneMetricsPerSpanAndUnknownFamiliesFallBack: an unknown family kept as asked",
+  "file": "Sources/SuiteModel/Fakes/FakeText.swift",
+  "find": "names.contains(span.fontFamily) ? span.fontFamily : Self.systemFamily",
+  "replace": "span.fontFamily",
+  "tests": "TextContractTests"
+ },
+ {
+  "label": ".drawReturnsAClearFrameAndRecordsTheSpans: drawn spans not recorded",
+  "file": "Sources/SuiteModel/Fakes/FakeText.swift",
+  "find": "log.withLock { $0.append(contentsOf: spans) }",
+  "replace": "log.withLock { _ in }",
+  "tests": "TextContractTests"
+ }
+]
