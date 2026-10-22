@@ -54,3 +54,4 @@ utc	stage	event	ref	note
 1792634400	-	watch	BK-5m	heartbeat: BK-5m blocked behind LF-4 (#3928 open)
 1792635313	-	watch	BK-5m	heartbeat: BK-5m blocked behind LF-4 (#3928 open)
 1792636227	-	watch	BK-5m	heartbeat: BK-5m blocked behind LF-4 (#3928 open)
+1792637141	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library). File as gap at run end if still blocked.
