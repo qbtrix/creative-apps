@@ -74,8 +74,8 @@ extension HaloJourneyTests {
     }
 }
 
-/// H-J5's steps over one launched Halo.
-@MainActor private struct ViewerDragSteps {
+/// H-J5's steps over one launched Halo (H-J12 drags with them too).
+@MainActor struct ViewerDragSteps {
     let halo: Journey
 
     /// The fixture's composition width in pixels.
