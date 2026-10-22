@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "app": "halo",
+  "why": "RJ-H33: animates a solid's x, sets it at frames 0 to 9 (eleven steps), jumps back to four applied steps and saves; the saved project holds the four keys of those steps with their values and easings, and the jump records no step.",
+  "inputs": ["input/*.halo"],
+  "steps": [
+    {"id": "layer.select", "params": {"id": "comp-1-layer-1"}},
+    {"id": "inspector.toggle-animation", "params": {"property": "x"}},
+    {"id": "timeline.scrub", "params": {"frame": 0}},
+    {"id": "inspector.set-property", "params": {"property": "x", "value": 10}},
+    {"id": "inspector.end-property-scrub", "params": {}},
+    {"id": "timeline.scrub", "params": {"frame": 1}},
+    {"id": "inspector.set-property", "params": {"property": "x", "value": 15}},
+    {"id": "inspector.end-property-scrub", "params": {}},
+    {"id": "timeline.scrub", "params": {"frame": 2}},
+    {"id": "inspector.set-property", "params": {"property": "x", "value": 20}},
+    {"id": "inspector.end-property-scrub", "params": {}},
+    {"id": "timeline.scrub", "params": {"frame": 3}},
+    {"id": "inspector.set-property", "params": {"property": "x", "value": 25}},
+    {"id": "inspector.end-property-scrub", "params": {}},
+    {"id": "timeline.scrub", "params": {"frame": 4}},
+    {"id": "inspector.set-property", "params": {"property": "x", "value": 30}},
+    {"id": "inspector.end-property-scrub", "params": {}},
+    {"id": "timeline.scrub", "params": {"frame": 5}},
+    {"id": "inspector.set-property", "params": {"property": "x", "value": 35}},
+    {"id": "inspector.end-property-scrub", "params": {}},
+    {"id": "timeline.scrub", "params": {"frame": 6}},
+    {"id": "inspector.set-property", "params": {"property": "x", "value": 40}},
+    {"id": "inspector.end-property-scrub", "params": {}},
+    {"id": "timeline.scrub", "params": {"frame": 7}},
+    {"id": "inspector.set-property", "params": {"property": "x", "value": 45}},
+    {"id": "inspector.end-property-scrub", "params": {}},
+    {"id": "timeline.scrub", "params": {"frame": 8}},
+    {"id": "inspector.set-property", "params": {"property": "x", "value": 50}},
+    {"id": "inspector.end-property-scrub", "params": {}},
+    {"id": "timeline.scrub", "params": {"frame": 9}},
+    {"id": "inspector.set-property", "params": {"property": "x", "value": 55}},
+    {"id": "inspector.end-property-scrub", "params": {}},
+    {"id": "history.jump", "params": {"index": 4}}
+  ],
+  "atomic": true,
+  "expect": {
+    "out/one-solid.halo": {"json": {"format": "halo", "version": 1, "project": {
+      "compositions": [{"id": "comp-1", "name": "Gradient", "width": 64, "height": 64, "framesPerSecond": 24, "durationFrames": 24, "playheadFrame": 3,
+        "layers": [
+          {"id": "comp-1-layer-1", "name": "Solid", "kind": "solid", "inFrame": 0, "outFrame": 24, "opacity": 1, "blendMode": "normal",
+           "color": {"red": 0.5, "green": 0.5, "blue": 0.5}, "rect": {"x": 0, "y": 0, "width": 64, "height": 64},
+           "tracks": {"x": [
+             {"frame": 0, "value": 10, "easing": {"linear": {}}},
+             {"frame": 1, "value": 15, "easing": {"linear": {}}},
+             {"frame": 2, "value": 20, "easing": {"linear": {}}},
+             {"frame": 23, "value": 32, "easing": {"linear": {}}}]}}
+        ]}],
+      "selectedCompositionID": "comp-1", "selectedLayerID": "comp-1-layer-1",
+      "nextCompositionNumber": 2, "nextLayerNumber": 2
+    }}}
+  },
+  "platforms": ["linux", "macos"]
+}
