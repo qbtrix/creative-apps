@@ -1,17 +1,18 @@
 // SuiteServicesTests.swift: SuiteServices (SC-4b). `.fake` is a preview with
-// only `media` pending (shell-media SM-1), `with(animations:updates:)` swaps only those two members,
-// and `slotFeatures` names a feature for each of the 16 slotted members.
+// only `media` and `text` pending (shell-media SM-1, shell-text ST-1), `with(animations:updates:)` swaps
+// only those two members, and `slotFeatures` names a feature for each of the 17 slotted members.
 import SuiteModel
 import Testing
 
 @Suite struct SuiteServicesTests {
     static let slotted = ["switching", "recents", "creating", "routing", "sending", "receiving", "roundTrips",
-                          "pasteboard", "assets", "linking", "preferences", "settings", "onboarding", "thumbnails", "home", "media"]
+                          "pasteboard", "assets", "linking", "preferences", "settings", "onboarding", "thumbnails", "home", "media",
+                          "text"]
 
-    @Test func fakeIsAPreviewWithOnlyMediaPending() {
+    @Test func fakeIsAPreviewWithOnlyMediaAndTextPending() {
         let s = SuiteServices.fake()
         #expect(s.isPreview)
-        #expect(Array(s.pending.keys) == ["media"])
+        #expect(Set(s.pending.keys) == ["media", "text"])
     }
 
     @Test func fakeSharesOneSwitchingBetweenSendingAndReceiving() async throws {
@@ -44,7 +45,7 @@ import Testing
 
     @Test func slotFeaturesNamesAFeatureForEachSlottedMember() {
         #expect(Set(SuiteServices.slotFeatures.keys) == Set(Self.slotted))
-        #expect(SuiteServices.slotFeatures.count == 16)
+        #expect(SuiteServices.slotFeatures.count == 17)
         #expect(SuiteServices.slotFeatures["animations"] == nil && SuiteServices.slotFeatures["updates"] == nil)
         for member in Self.slotted {
             let feature = SuiteServices.slotFeatures[member] ?? ""

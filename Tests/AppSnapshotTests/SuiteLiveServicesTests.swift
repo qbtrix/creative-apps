@@ -65,7 +65,8 @@ import Testing
                     "pasteboard"]
         for member in live { expected[member] = nil }
         #expect(pending == expected)
-        #expect(pending.count == 7)
+        #expect(pending.count == 8)
+        #expect(pending["text"] == "Text measuring and drawing isn't available yet.")
         #expect(pending["media"] == "Movie and image export isn't available yet.")
         #expect(pending["thumbnails"] == "Opening recent work isn't available yet.")
         #expect(pending["home"] == nil)
@@ -83,7 +84,7 @@ import Testing
         let pending = makeLive().services.pending
         let members: Set<String> = ["switching", "recents", "creating", "routing", "sending", "receiving",
                                     "roundTrips", "pasteboard", "assets", "linking", "preferences", "settings",
-                                    "onboarding", "thumbnails", "home", "media"]
+                                    "onboarding", "thumbnails", "home", "media", "text"]
         #expect(Set(SuiteServices.slotFeatures.keys) == members)
         let live: Set<String> = ["recents", "creating", "home", "switching", "sending", "receiving", "preferences",
                                   "onboarding", "pasteboard"]
