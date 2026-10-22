@@ -152,3 +152,4 @@ utc	stage	event	ref	note
 2026-10-22T13:40Z	3	rebase	#4423	needs-rebase 13:38Z (HaloLiveEdit.swift vs #4411), fixer dispatched
 2026-10-22T13:46Z	3	rebase	#4423	dev merged in, head 3b97fb6b, ci --changed PASS
 2026-10-22T14:33Z	3	port	#4423	macOS build green; Linux red only on dev-red HaloStrokeTrimKeysTests; porting #4431
+2026-10-22T14:39Z	3	port	#4423	#4431 test fix ported at 52cb7114; ci PASS; 263 lines
