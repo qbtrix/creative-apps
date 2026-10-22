@@ -4,7 +4,7 @@ Issue: #3757 · Packet: docs/blueprints/suiteui/features/document-setup.md
 Run: act-1a1620043af-tzh0 · Started: 2026-10-22T05:00Z (resumed from act-1a15fddd101-68r5)
 Stage: 3 wave 2
 Base: 0dd23d659f4dbd8a0120aa85a321259327518251 (main); dev 8cf02113
-Next: #4309 (DS-6) in the lane, macOS build 39722964879 queued; then Belt-Slice-Done DS-u + Mac-Finish-Wanted. Adopt slices wait on clipboard-interop CB-photo/design/halo/flare (test halves building), UP-halo
+Next: supervisor (06:19Z): stop after DS-u (#4309) lands; post DS-u Belt-Slice-Done + Mac-Finish-Wanted, then stop. Adopt slices and DS-z wait for a relaunch (waiting-on-prereq) once CB adopt slices and UP-halo land.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -49,3 +49,4 @@ Next: #4309 (DS-6) in the lane, macOS build 39722964879 queued; then Belt-Slice-
 - DS-u waits on frame-rates:FR-u (held) and area-selection:AR-u (waiting).
 - Adopt slices wait on other features' app slices (FR-halo/flare, CB-photo/design/halo/flare, UP-halo).
 - 2026-10-22T06:15:11Z: rule 23, three identical blocked polls; Question for the supervisor posted on the issue.
+- 2026-10-22T06:35:40Z: supervisor answered (06:19Z): finish the in-lane slice, then stop; issue labelled waiting-on-prereq. Note: the API proxy appends an attribution footer to every PR body and comment written from this session and re-adds it after edits; the lane strips it from the squash commit.

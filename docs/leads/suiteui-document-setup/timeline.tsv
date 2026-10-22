@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-22T05:11:17Z	slice-done	Belt-Slice-Done DS-a posted (Linux check 39724795297 green on 4e683e840)
 2026-10-22T06:14:28Z	poll	blocked	#4309 DS-6 open in lane; CB-*, UP-halo still waiting
 2026-10-22T06:15:11Z	question	blocked	Question for the supervisor posted (rule 23, three identical blocked polls)
+2026-10-22T06:35:40Z	poll	waiting	supervisor: stop after in-lane slice; macOS 39722964879 queued; scoped suite 39721019643 in progress
