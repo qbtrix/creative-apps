@@ -106,7 +106,8 @@ import SuiteKernel
             _ = try catalog.run(id, params: step["params"] ?? .object([:]), on: &doc); ids.append(id)
         }
         #expect(ids.filter { $0 == "place.focus" }.count == 30 && ids.last == "edit.undo")
-        #expect(doc.history.steps == ["Place Image"])
+        // The 30 samples folded into one step, which the undo took back (it stays listed for redo).
+        #expect(doc.history.steps == ["Place Image", "Move Inside"])
         #expect(try JSONValue(json: doc.save()) == want)
         let fields = try read(&doc)
         #expect(try fields["drawn"] == JSONValue(encoding: Rect(minX: -50, minY: 150, maxX: 850, maxY: 450)))

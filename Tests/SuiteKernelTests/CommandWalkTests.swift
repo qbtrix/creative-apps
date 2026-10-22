@@ -12,8 +12,10 @@ import SuiteKernel
     /// free new rect), a move of it, undo and redo of that move, and last the remove. `file.drop` places a rect as a
     /// step, which a file command may not do here, so FakeCanvasFileFlowTests walks it instead; `history.jump` to 0
     /// would take the walk back to the fixture, so FakeHistoryTests walks it. The transform commands turn Rect 1 (a flip
-    /// records "Flip Horizontal", not its title "Flip"), so FakeTransformTests walks them.
+    /// records "Flip Horizontal", not its title "Flip"), so FakeTransformTests walks them. The place commands but
+    /// `place.image` need a placed picture, which the fixture has none of, so FakeCanvasPlaceTests walks them.
     static let transforms = TransformCommands.specs(FakeCanvasDocument.self).map(\.id)
+    static let places = PlaceCommands.specs(FakeCanvasDocument.self).map(\.id)
     static let fills = ["fill.read", "fill.type", "fill.stop-add", "fill.stop-move", "fill.stop-remove", "fill.stop-color",
                         "fill.angle", "fill.gradient"]
     static let walk = ["rect.list", "color.sample", "history.read", "rect.select", "doc.export-json", "file.recent", "file.open-recent", "file.open-in",
@@ -24,14 +26,14 @@ import SuiteKernel
         try FakeCanvasDocument.open(doc.save(), name: "canvas.fake")
     }
 
-    @Test func listNamesTheFakesThirtyIdsSorted() {
+    @Test func listNamesTheFakesThirtyFiveIdsSorted() {
         #expect(catalog.app == "fake")
         #expect(catalog.ids == ["color.sample", "doc.export-json", "edit.redo", "edit.undo", "file.clear-recent", "file.drop", "file.open-in",
                               "file.open-recent", "file.recent", "fill.angle", "fill.gradient", "fill.read", "fill.stop-add",
                               "fill.stop-color", "fill.stop-move", "fill.stop-remove", "fill.type", "history.jump", "history.read",
-                              "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select", "transform.flip", "transform.read", "transform.reset", "transform.rotate", "transform.scale", "transform.set"])
-        #expect(catalog.ids == catalog.ids.sorted() && Set(catalog.ids) == Set(Self.walk + ["file.drop", "history.jump"] + Self.transforms)
-                && catalog.ids.count == Self.walk.count + 2 + Self.transforms.count)
+                              "place.focus", "place.image", "place.read", "place.replace", "place.reset-size", "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select", "transform.flip", "transform.read", "transform.reset", "transform.rotate", "transform.scale", "transform.set"])
+        #expect(catalog.ids == catalog.ids.sorted() && Set(catalog.ids) == Set(Self.walk + ["file.drop", "history.jump"] + Self.transforms + Self.places)
+                && catalog.ids.count == Self.walk.count + 2 + Self.transforms.count + Self.places.count)
         #expect(catalog.ids.allSatisfy(CommandCatalog<FakeCanvasDocument>.isValidID))
     }
 
@@ -73,12 +75,14 @@ import SuiteKernel
         #expect(doc.rects.first?.fill != fixture.first?.fill && doc.rects.first?.fill?.stops.count == 2)
         #expect(doc.history.steps == Self.fills.dropFirst().compactMap { catalog.spec($0)?.title }
                 + ["Add Rectangle", "Move Rectangle", "Remove Rectangle"])
-        // Each example also runs alone on a fresh fixture, except undo, redo and the jump, which refuse with no steps.
+        // Each example also runs alone on a fresh fixture, except undo, redo and the jump, which refuse with no steps,
+        // and the place commands that need a placed picture.
         for id in catalog.ids {
             var fresh = FakeCanvasDocument.fixture
             let example = try #require(catalog.spec(id)?.example)
             do { _ = try catalog.run(id, params: example, on: &fresh) } catch {
-                #expect(CatalogConformance.historyIDs.contains(id) || id == "history.jump", "\(id)'s example refused on the fixture: \(error)")
+                #expect(CatalogConformance.historyIDs.contains(id) || id == "history.jump" || (Self.places.contains(id) && id != "place.image"),
+                        "\(id)'s example refused on the fixture: \(error)")
                 guard case .unavailable = error else { Issue.record("\(id) refused with \(error)"); continue }
             }
         }

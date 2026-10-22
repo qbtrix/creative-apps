@@ -4,14 +4,16 @@
 // gradient-fill GF-9 gives each rect an optional fill and lists the eight fill commands, so RJ-X30 runs on the CLI;
 // autosave-history AH-9 lists `history.read` and `history.jump` over its one History, so RJ-X31 runs on the CLI;
 // transform-tools TT-8 gives each rect a turn and mirrors and lists the six transform commands, so RJ-X32 runs on the CLI;
-// eyedropper EY-8 reads the topmost rect's fill at a point and lists `color.sample`, so RJ-X33 runs on the CLI.
+// eyedropper EY-8 reads the topmost rect's fill at a point and lists `color.sample`, so RJ-X33 runs on the CLI;
+// placed-images PL-9 lets a rect show a placed picture, saves each file's bytes once and lists the five place
+// commands, so RJ-X36 runs on the CLI.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
 
-/// One named rect on the fake canvas; a locked one refuses move, remove, a fill and a transform.
+/// One named rect on the fake canvas; a locked one refuses move, remove, a fill, a transform and a picture.
 public struct FakeRect: Codable, Hashable, Sendable {
     /// The rect's id, its name ("Rect 1"), its frame and whether it is locked.
     public var id: Int, name: String, x, y, w, h: Double, locked: Bool
@@ -21,10 +23,13 @@ public struct FakeRect: Codable, Hashable, Sendable {
     /// The rect's clockwise turn in degrees about its centre and its mirrors; at 0 and false they are left out of
     /// the JSON, so a rect never turned saves what it did before turns.
     public var degrees = 0.0, flipX = false, flipY = false
+    /// The picture the rect shows, by cover in its frame; nil is left out of the JSON, so a rect with no picture
+    /// saves what it did before pictures.
+    public var placed: PlacedImage?
     public init(id: Int, name: String, x: Double, y: Double, w: Double, h: Double, locked: Bool = false, fill: Fill? = nil) {
         (self.id, self.name, self.x, self.y, self.w, self.h, self.locked, self.fill) = (id, name, x, y, w, h, locked, fill)
     }
-    private enum CodingKeys: String, CodingKey { case id, name, x, y, w, h, locked, fill, degrees, flipX, flipY }
+    private enum CodingKeys: String, CodingKey { case id, name, x, y, w, h, locked, fill, degrees, flipX, flipY, placed }
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         self.init(id: try c.decode(Int.self, forKey: .id), name: try c.decode(String.self, forKey: .name),
@@ -33,6 +38,7 @@ public struct FakeRect: Codable, Hashable, Sendable {
                   locked: try c.decode(Bool.self, forKey: .locked), fill: try c.decodeIfPresent(Fill.self, forKey: .fill))
         degrees = try c.decodeIfPresent(Double.self, forKey: .degrees) ?? 0
         (flipX, flipY) = (try c.decodeIfPresent(Bool.self, forKey: .flipX) ?? false, try c.decodeIfPresent(Bool.self, forKey: .flipY) ?? false)
+        placed = try c.decodeIfPresent(PlacedImage.self, forKey: .placed)
     }
     public func encode(to encoder: any Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
@@ -42,9 +48,12 @@ public struct FakeRect: Codable, Hashable, Sendable {
         if degrees != 0 { try c.encode(degrees, forKey: .degrees) }
         if flipX { try c.encode(flipX, forKey: .flipX) }
         if flipY { try c.encode(flipY, forKey: .flipY) }
+        try c.encodeIfPresent(placed, forKey: .placed)
     }
     /// The box the rect's fill points are in: its own frame from the origin.
     public var fillBox: Rect { Rect(minX: 0, minY: 0, maxX: w, maxY: h) }
+    /// The rect's frame on the canvas.
+    public var frame: Rect { Rect(minX: x, minY: y, maxX: x + w, maxY: y + h) }
 }
 
 /// A headless document of named rects, a selection and one history: the catalog's fake app ("fake").
@@ -80,6 +89,8 @@ public struct FakeCanvasDocument: HeadlessDocument {
     public private(set) var rects: [FakeRect], selection: Int?, history = History<[FakeRect]>()
     /// The fake's recent files, newest first; Clear Menu empties them.
     public private(set) var recents: [RecentFileEntry]
+    /// The placed files' bytes, one per file; kept past an undo for redo, pruned to what the rects show on save.
+    public private(set) var assets = PlacedAssets()
     public init(rects: [FakeRect] = [], selection: Int? = nil, recents: [RecentFileEntry] = []) {
         (self.rects, self.selection, self.recents) = (rects, selection, recents)
     }
@@ -147,13 +158,23 @@ public struct FakeCanvasDocument: HeadlessDocument {
         return index
     }
 
-    /// The rects as JSON, keys sorted: the native format and the `json` export.
+    /// A file with pictures: the assets the rects show, by id, and the rects.
+    struct Saved: Codable { var assets: [PlacedAsset]; var rects: [FakeRect] }
+    /// The rects as JSON, keys sorted: the native format and the `json` export. With no picture shown it is the
+    /// rects alone, as before pictures; else the rects beside each shown file's asset, once.
     public func save() throws -> Data {
         let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
-        return try encoder.encode(rects)
+        let shown = assets.pruned(keeping: Set(rects.compactMap { $0.placed?.assetID }))
+        guard !shown.byID.isEmpty else { return try encoder.encode(rects) }
+        return try encoder.encode(Saved(assets: shown.byID.values.sorted { $0.id < $1.id }, rects: rects))
     }
     public static func open(_ data: Data, name: String) throws -> FakeCanvasDocument {
-        FakeCanvasDocument(rects: try JSONDecoder().decode([FakeRect].self, from: data))
+        guard let saved = try? JSONDecoder().decode(Saved.self, from: data) else {
+            return FakeCanvasDocument(rects: try JSONDecoder().decode([FakeRect].self, from: data))
+        }
+        var doc = FakeCanvasDocument(rects: saved.rects)
+        doc.assets = PlacedAssets(saved.assets)
+        return doc
     }
     public static func new(_ options: JSONValue) throws -> FakeCanvasDocument { FakeCanvasDocument() }
     public func export(_ format: String, options: JSONValue) throws -> [ExportedFile] {
@@ -164,13 +185,13 @@ public struct FakeCanvasDocument: HeadlessDocument {
         .object(["rects": .number(Double(rects.count)), "selected": selected.map { .string($0.name) } ?? .null])
     }
 
-    /// The fake's thirty ids: its six commands, `edit.undo` and `edit.redo`, the five file-flow commands, the eight
-    /// fill commands, the two history commands, the six transform commands and `color.sample`. Empty only if an id
-    /// were refused.
+    /// The fake's thirty-five ids: its six commands, `edit.undo` and `edit.redo`, the five file-flow commands, the eight
+    /// fill commands, the two history commands, the six transform commands, `color.sample` and the five place
+    /// commands. Empty only if an id were refused.
     public static let catalog = (try? CommandCatalog<FakeCanvasDocument>(
         app: app, specs + FileFlowCommands.specs(FakeCanvasDocument.self) + GradientCommands.specs(FakeCanvasDocument.self)
             + HistoryCommands.specs(FakeCanvasDocument.self) + TransformCommands.specs(FakeCanvasDocument.self)
-            + SampleCommands.specs(FakeCanvasDocument.self),
+            + SampleCommands.specs(FakeCanvasDocument.self) + PlaceCommands.specs(FakeCanvasDocument.self),
         history: { $0.history })) ?? .empty(app: app)
     /// A rect's result schema.
     static let rectSchema = ParamSchema.object(["id": .integer(), "name": .string(), "x": .number(), "y": .number(),
@@ -321,6 +342,49 @@ extension FakeCanvasDocument: SampleTarget {
             t = (dx * dx + dy * dy).squareRoot() / radius
         }
         return t.isFinite ? min(max(t, 0), 1) : 0
+    }
+}
+
+/// The fake as a place target: a picture fills the selected rect by cover, or lands as a new rect at its fitted size;
+/// a locked rect refuses with its reason. The fake takes PNG and SVG, reading a PNG's size from its header.
+extension FakeCanvasDocument: PlacedImageTarget {
+    /// The fake can always place.
+    public var placeHelp: String? { nil }
+    /// The fake's canvas, which a new picture fits inside: 800 × 600.
+    public var placeCanvas: Rect { Rect(minX: 0, minY: 0, maxX: 800, maxY: 600) }
+    public var placeFillBox: Rect? { selected?.frame }
+    public var placeFormats: Set<PlacedFormat> { [.png, .svg] }
+    /// The selected rect's picture in its current frame, and its asset.
+    public var placedSelection: (id: String, image: PlacedImage, asset: PlacedAsset)? {
+        guard let rect = selected, var image = rect.placed, let asset = assets.byID[image.assetID] else { return nil }
+        image.box = rect.frame
+        return (String(rect.id), image, asset)
+    }
+    /// A PNG's width and height from its IHDR chunk (bytes 16 to 23, big-endian); anything else is refused.
+    public func rasterSize(_ data: Data, format: PlacedFormat) throws -> Size {
+        let header = [UInt8](data.prefix(24))
+        guard format == .png, header.count == 24 else { throw CatalogError.unavailable(id: "place.image", why: PlaceRules.formatHelp) }
+        let word = { (at: Int) in Double(header[at..<at + 4].reduce(UInt32(0)) { $0 << 8 | UInt32($1) }) }
+        return Size(width: word(16), height: word(20))
+    }
+    /// Adds a rect named after the file in `image.box` showing `asset`, selects it, as the step `name`.
+    public mutating func insertPlaced(_ asset: PlacedAsset, _ image: PlacedImage, name: String) throws -> String {
+        let id = (rects.map(\.id).max() ?? 0) + 1, box = image.box
+        history.record(name, rects)
+        assets = assets.adding(asset)
+        var rect = FakeRect(id: id, name: asset.name, x: box.minX, y: box.minY, w: box.width, h: box.height)
+        rect.placed = image
+        rects.append(rect); selection = id
+        return String(id)
+    }
+    /// Sets the selected rect's picture and its frame to `image.box`, as the step `name` (one per `drag` token).
+    public mutating func setPlaced(_ image: PlacedImage, asset: PlacedAsset?, name: String, drag: String?) throws {
+        let index = try editableIndex("place")
+        history.record(name, rects, key: drag.map { "place.\(name):\($0)" })
+        if let asset { assets = assets.adding(asset) }
+        let box = image.box
+        (rects[index].x, rects[index].y, rects[index].w, rects[index].h) = (box.minX, box.minY, box.width, box.height)
+        rects[index].placed = image
     }
 }
 

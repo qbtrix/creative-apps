@@ -93,11 +93,16 @@ enum BadExample: BrokenLaw {
         #expect(problems.allSatisfy { $0.contains(id) && !$0.contains("item.add") }, "\(problems)", sourceLocation: sourceLocation)
     }
 
-    /// The fixture has no steps, so `history.jump`'s example refuses as unavailable, the filter the apps' laws use.
+    /// The fixture has no steps, so `history.jump`'s example refuses as unavailable, the filter the apps' laws use;
+    /// it has no placed picture, so the place commands but `place.image` refuse the same way.
     /// The kernel's `transform.flip` is titled Flip while its step names the axis, tolerated as in Photo's laws.
     @Test func theFakeConforms() {
         #expect(CatalogConformance.check(FakeCanvasDocument.self, fixture: .fixture)
             == ["history.jump: exampleRuns: the example refused on the fixture: history.jump is unavailable: There are no steps yet.",
+                "place.focus: exampleRuns: the example refused on the fixture: place.focus is unavailable: Select a placed image first.",
+                "place.read: exampleRuns: the example refused on the fixture: place.read is unavailable: Select a placed image first.",
+                "place.replace: exampleRuns: the example refused on the fixture: place.replace is unavailable: Select a placed image first.",
+                "place.reset-size: exampleRuns: the example refused on the fixture: place.reset-size is unavailable: Select a placed image first.",
                 "transform.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\""])
     }
 
