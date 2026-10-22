@@ -1,6 +1,5 @@
-// GalleryCrop.swift (orientation-crop OC-5): the gallery's `crop` page, CropAspectPicker beside a frame preview on a
-// landscape 6000 × 4000 fake photo (the largest frame of the pick, CropRules.largest via CropAspectChoices.frame),
-// which turns portrait on X, and a log line naming the command each control sent.
+// GalleryCrop.swift (orientation-crop OC-5): the gallery's `crop` page, CropAspectPicker beside the pick's largest
+// frame on a 6000 × 4000 fake photo, which turns portrait on X, and a log line naming each command sent.
 import SuiteKernel
 import SwiftUI
 
@@ -15,11 +14,9 @@ struct GalleryCropPage: View {
     // view-static: main-actor
     static var bodyRuns = 0
     #endif
-    @State private var aspect: CropAspect
-    @State private var orientation: CropOrientation
+    @State private var aspect: CropAspect, orientation: CropOrientation
     @State private var log: [String] = []
 
-    /// Opens on `aspect` standing `orientation`; the snapshot opens on 4:5 portrait.
     init(aspect: CropAspect = .free, orientation: CropOrientation = .landscape) {
         (_aspect, _orientation) = (State(initialValue: aspect), State(initialValue: orientation))
     }

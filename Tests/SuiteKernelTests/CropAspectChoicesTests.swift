@@ -1,13 +1,11 @@
-// CropAspectChoicesTests.swift (orientation-crop OC-5): the crop aspect picker's decisions on Linux: the chips and
-// the command each runs, when the orientation toggle can act and why not, the custom ratio's sentences, and the
-// frame a choice gives on a landscape image.
+// CropAspectChoicesTests.swift (orientation-crop OC-5): the crop aspect picker's rules on Linux: chips and commands,
+// the toggle's reasons, the custom ratio's sentences, and the frame a pick gives on a landscape image.
 import Testing
 import SuiteKernel
 
 @Suite struct CropAspectChoicesTests {
     static let photo = Rect(minX: 0, minY: 0, maxX: 6000, maxY: 4000)
 
-    /// Seven chips in order; each but Custom is one aspect, and every chip and the toggle name a crop command.
     @Test func everyChipNamesACommand() throws {
         let ids = Set(try CropShapeTarget.catalog().ids)
         #expect(CropAspectChoice.allCases.map(\.title) == ["Free", "Original", "1:1", "4:5", "3:2", "16:9", "Custom"])
@@ -19,22 +17,16 @@ import SuiteKernel
         #expect(Set(CropAspectChoice.allCases.map(\.identifier)).count == CropAspectChoice.allCases.count)
         #expect(CropAspectChoice.fourFive.aspect == .ratio(width: 4, height: 5) && CropAspectChoice.free.aspect == .free)
         #expect(CropAspectChoice.original.aspect == .original && CropAspectChoice.custom.aspect == nil)
-        #expect(CropAspectChoice.chip(for: .ratio(width: 16, height: 9)) == .sixteenNine)
-        #expect(CropAspectChoice.chip(for: .ratio(width: 7, height: 3)) == .custom)
-        #expect(CropAspectChoice.chip(for: .free) == .free)
+        #expect([.ratio(width: 16, height: 9), .ratio(width: 7, height: 3), .free].map(CropAspectChoice.chip) == [.sixteenNine, .custom, .free])
     }
 
-    /// The toggle is off, with a reason, for Free and any square; it acts on every other ratio and Original.
     @Test func toggleOffForFreeAndSquare() {
         #expect(CropAspectChoices.swapHelp(.free) != nil)
         #expect(CropAspectChoices.swapHelp(.ratio(width: 1, height: 1)) != nil)
         #expect(CropAspectChoices.swapHelp(.ratio(width: 5, height: 5)) != nil, "a typed 5:5 is a square too")
-        #expect(CropAspectChoices.swapHelp(.ratio(width: 4, height: 5)) == nil)
-        #expect(CropAspectChoices.swapHelp(.ratio(width: 7, height: 3)) == nil)
-        #expect(CropAspectChoices.swapHelp(.original) == nil)
+        #expect([.ratio(width: 4, height: 5), .ratio(width: 7, height: 3), .original].allSatisfy { CropAspectChoices.swapHelp($0) == nil })
     }
 
-    /// Custom W and H refuse 0, empty and non-numbers with a sentence; 7 and 3 give 7:3 standing landscape.
     @Test func customRefusesZeroWithASentence() {
         #expect(CropAspectChoices.custom(width: "7", height: "3") == .aspect(.ratio(width: 7, height: 3)))
         #expect(CropAspectChoices.custom(width: " 2 ", height: "3") == .aspect(.ratio(width: 2, height: 3)))
@@ -51,7 +43,6 @@ import SuiteKernel
         #expect(CropAspectChoices.orientation(of: .ratio(width: 2, height: 2), else: .portrait) == .portrait)
     }
 
-    /// 4:5 on a landscape image: landscape gives a wide 5:4, portrait the tall 3200 x 4000; Original turns too.
     @Test func frameTurnsPortrait() {
         let wide = CropAspectChoices.frame(.ratio(width: 4, height: 5), .landscape, in: Self.photo)
         let tall = CropAspectChoices.frame(.ratio(width: 4, height: 5), .portrait, in: Self.photo)

@@ -1,6 +1,5 @@
-// SuiteJourneyTests+Crop.swift: SJ-OC, the gallery's `crop` page (orientation-crop OC-6, the packet's Journey
-// steps; docs/blueprints/suiteui/features/orientation-crop.md): open the page, pick 4:5, press X and the frame turns
-// portrait, then type a Custom 7:3; the log names crop.set-aspect and crop.swap.
+// SuiteJourneyTests+Crop.swift: SJ-OC, the gallery's `crop` page (orientation-crop OC-6): open it, pick 4:5, press X
+// and the frame turns portrait, then type a Custom 7:3; the log names crop.swap and crop.set-aspect.
 import XCTest
 
 final class SuiteCropJourneyTests: XCTestCase {
@@ -22,10 +21,7 @@ final class SuiteCropJourneyTests: XCTestCase {
         gallery.shot("crop-portrait")
 
         gallery.element("suite.crop.aspect-custom").click() // 4. Type a Custom 7:3.
-        for (id, text) in [("width", "7"), ("height", "3")] {
-            gallery.element("suite.crop.custom-\(id)").click()
-            gallery.app.typeText(text)
-        }
+        for (id, text) in [("width", "7"), ("height", "3")] { gallery.element("suite.crop.custom-\(id)").click(); gallery.app.typeText(text) }
         XCTAssertEqual(gallery.element("suite.gallery.crop.frame").label, "Crop frame landscape")
         gallery.shot("crop-custom")
         let log = gallery.element("suite.gallery.log").value as? String ?? ""

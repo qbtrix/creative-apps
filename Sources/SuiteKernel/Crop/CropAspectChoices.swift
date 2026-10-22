@@ -1,16 +1,12 @@
-// CropAspectChoices.swift (orientation-crop OC-5): what the crop aspect picker decides, kept here so Linux tests it:
-// the chips and the crop.* command each runs, when the orientation toggle (X, crop.swap) can act and why not, a
-// custom W:H read from two fields or the sentence that refuses it, and the frame a choice gives in some bounds.
+// CropAspectChoices.swift (orientation-crop OC-5): the crop aspect picker's rules, here so Linux tests them: the chips
+// and their crop.* command, when the toggle (X, crop.swap) acts, a custom W:H or why not, and the frame a pick gives.
 
 /// One chip of the crop aspect picker, in the order it shows.
 public enum CropAspectChoice: String, CaseIterable, Hashable, Sendable, Identifiable {
     case free = "Free", original = "Original", square = "1:1", fourFive = "4:5", threeTwo = "3:2", sixteenNine = "16:9", custom = "Custom"
 
-    public var id: Self { self }
-    public var title: String { rawValue }
-    /// `suite.crop.aspect-4-5`: the chip's accessibility identifier.
+    public var id: Self { self }; public var title: String { rawValue }
     public var identifier: String { "suite.crop.aspect-" + String(rawValue.lowercased().map { $0 == ":" ? "-" : $0 }) }
-    /// The command picking the chip runs.
     public var command: String { CropAspectChoices.aspectCommand }
     /// The aspect the chip locks to; nil for Custom, whose fields give it.
     public var aspect: CropAspect? { self == .custom ? nil : CropAspect(rawValue: rawValue) }
@@ -31,13 +27,11 @@ public struct CropPick: Hashable, Sendable {
 
 /// A custom W:H as typed: the aspect, or the sentence that says why not.
 public enum CropCustomRatio: Hashable, Sendable {
-    case aspect(CropAspect)
-    case problem(String)
+    case aspect(CropAspect), problem(String)
 }
 
 public enum CropAspectChoices {
     public static let aspectCommand = "crop.set-aspect", swapCommand = "crop.swap"
-    /// The largest side a custom ratio takes.
     public static let largestSide = 1000
 
     /// Why the orientation toggle can't act on `aspect`; nil when it can.
@@ -76,7 +70,7 @@ public enum CropAspectChoices {
         return CropRules.swapped(rect, in: bounds)
     }
 
-    /// The log line for a pick: "crop.set-aspect 4:5 portrait".
+    /// "crop.set-aspect 4:5 portrait"
     public static func line(_ pick: CropPick) -> String {
         "\(pick.command) \(pick.aspect.rawValue) \(pick.orientation.rawValue)"
     }

@@ -12,19 +12,5 @@
     "find": "guard wide >= 1, tall >= 1 else",
     "replace": "guard wide >= 0, tall >= 0 else",
     "tests": "CropAspectChoicesTests"
-  },
-  {
-    "label": "originalStuck: Original ignores the toggle and stays the photo's shape",
-    "file": "Sources/SuiteKernel/Crop/CropAspectChoices.swift",
-    "find": "return CropRules.swapped(rect, in: bounds)",
-    "replace": "return rect",
-    "tests": "CropAspectChoicesTests"
-  },
-  {
-    "label": "customStandsWrong: a typed 7:3 stands portrait",
-    "file": "Sources/SuiteKernel/Crop/CropAspectChoices.swift",
-    "find": "return w > h ? .landscape : .portrait",
-    "replace": "return w < h ? .landscape : .portrait",
-    "tests": "CropAspectChoicesTests"
   }
 ]

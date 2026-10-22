@@ -13,8 +13,7 @@ import Testing
 extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetCropPickerTests {
         @Test(.timeLimit(.minutes(2))) func swapInOneBody() async throws {
-            let page = GalleryCropPage(aspect: .ratio(width: 4, height: 5), orientation: .landscape)
-            let w = RenderBudgetWindow(page.allowsWindowActivationEvents(), keyCapable: true)
+            let w = RenderBudgetWindow(GalleryCropPage(aspect: .ratio(width: 4, height: 5)).allowsWindowActivationEvents(), keyCapable: true)
             defer { w.close() }
             w.window.makeKey()
             let bodies = { () -> Int? in
@@ -26,8 +25,7 @@ extension BodyCountSuites {
             }
             try await w.settle(untilStable: bodies)
             #expect(w.label("suite.gallery.crop.frame") == "Crop frame landscape")
-            // The toggle is clicked, not keyed: a key event made in a test is not sure to reach a SwiftUI
-            // keyboard shortcut. The journey presses X itself.
+            // Clicked, not keyed: a test's key event may miss a SwiftUI shortcut. The journey presses X.
             let toggle = try #require(await w.element("suite.crop.orientation"), "no orientation toggle (suite.crop.orientation)")
             for (press, shape) in ["portrait", "landscape", "portrait"].enumerated() {
                 let step = try await w.measure("crop swap \(press + 1)", bodies: bodies) {
