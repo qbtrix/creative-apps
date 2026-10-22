@@ -81,3 +81,4 @@ utc	stage	event	ref	note
 2026-10-19T21:09:19Z	heartbeat	stage 4: macOS (suite) green; journeys running
 2026-10-19T21:18:26Z	heartbeat	crash-isolation fix: attach by bundle URL
 2026-10-19T22:10:37Z	stage	fix round 1 #3359 merged; fix round 2 (#3356 #3357) PR opened
+2026-10-22T11:43:14Z	3	heartbeat	-	#4388/#4396 open; macOS build 39763938609 still queued; lane run 39771983252 pending
