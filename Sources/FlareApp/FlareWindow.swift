@@ -19,7 +19,8 @@
 // isn't idle.
 // It publishes the menu bar's FlareMenu (FlareCommands.swift): `perform` and
 // `help` for every section 3.4 item, the Undo and Redo step names, the recent
-// files, Loop and the selection's Edit reasons.
+// files, Loop and the selection's Edit reasons, and File > Place…'s reason and
+// action; the window takes SVG drops (FlarePlace.swift).
 import FlareModel
 import SuiteUI
 import SwiftUI
@@ -46,6 +47,8 @@ struct FlareWindow: View {
     static var bodyRuns = 0
     /// The model the last body ran on, for the hosted-window tests to read back.
     static var shownModel: FlareWorkspace?
+    /// The last body's place (FlarePlace.swift), for RenderBudgetFlarePlaceTests to send the menu's place.
+    @MainActor static var placeProbe: (@MainActor ([(name: String, data: Data)]) -> Void)?
     #endif
 
     /// The inspector column: the editor's panel width plus SuiteWindow's
@@ -58,6 +61,7 @@ struct FlareWindow: View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
         let _ = Self.shownModel = model
+        let _ = Self.placeProbe = { _ = place($0) }
         #endif
         SuiteWindow(
             title: model.document == nil ? "Flare" : model.title, actions: toolbar,
@@ -93,13 +97,15 @@ struct FlareWindow: View {
         .modifier(FlareExportSheetAdapter(model: model, perform: perform))
         .modifier(FlareOpenStatus(model: model))
         .modifier(FlareRecovery(model: model, restore: { model.restoreRecovery($0) }))
+        .placeDropTarget(formats: model.placeFormats) { files, _ in place(files) }
         .focusedSceneValue(
             \.flareMenu,
             FlareMenu(
                 perform: { menuPerform($0) }, help: { menuHelp($0) },
                 undoTitle: model.undoActionName ?? "Undo", redoTitle: model.redoActionName ?? "Redo",
                 recent: model.recent, loops: model.loops, editHelps: model.editHelps,
-                selectionHelps: [model.deleteHelp, model.orderHelp(forward: true), model.orderHelp(forward: false)]))
+                selectionHelps: [model.deleteHelp, model.orderHelp(forward: true), model.orderHelp(forward: false)],
+                placeHelp: model.placeMenuHelp, place: { choosePlace() }))
     }
 
     /// The menu bar's door: File > Open Sample > Keyed Ball opens the keyed

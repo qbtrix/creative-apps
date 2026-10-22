@@ -8,7 +8,8 @@
 // titled by the step, as in "Undo Set Keyframe Easing". File > Open Sample
 // lists Bounce, Character, Button and Keyed Ball, the keyed document the
 // easing journey starts from; Open Recent lists the window's recent files,
-// then Clear Menu. The focused window publishes a FlareMenu as a focused
+// then Clear Menu. File > Place… (⇧⌘P, svg-place PF-3) is off with
+// `place.image`'s reason until an animation is open. The focused window publishes a FlareMenu as a focused
 // scene value (FlareWindow.swift); with none focused every item disables. The
 // value carries the selection's Edit reasons too, so a new selection is a new
 // value and the items re-read their reasons. ⌘A is Select All Keys while the
@@ -32,6 +33,9 @@ struct FlareMenu {
     var editHelps: [FlareEditAction: String] = [:]
     /// The keyframe Delete reason (`deleteHelp`), then Bring Forward's and Send Backward's.
     var selectionHelps: [String?] = []
+    /// Why File > Place… can't run (`place.image`'s reason), and the panel it opens (FlarePlace.swift).
+    var placeHelp: String? = "Open a Flare window first."
+    var place: @MainActor () -> Void = {}
 
     /// Open Sample's items: the sample's name for `.openSample(name:)`, and its title.
     static let samples: [(name: String, title: String)] = [
@@ -88,7 +92,13 @@ struct FlareCommands: Commands {
             item(.export(.showSheet), key: KeyboardShortcut("e", modifiers: [.command, .shift]))
             item(.file(.close), key: KeyboardShortcut("w"))
         }
-        CommandGroup(replacing: .importExport) {}
+        CommandGroup(replacing: .importExport) {
+            MenuCommand(
+                "Place…", shortcut: KeyboardShortcut("p", modifiers: [.command, .shift]),
+                help: menu.placeHelp.map { "Place…: \($0)" } ?? FlareWorkspace.placeMenuSummary,
+                isEnabled: menu.placeHelp == nil
+            ) { menu.place() }
+        }
         CommandGroup(replacing: .printItem) {}
         CommandGroup(replacing: .undoRedo) {
             item(.edit(.undo), title: menu.undoTitle, key: KeyboardShortcut("z"))

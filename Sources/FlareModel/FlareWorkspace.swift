@@ -105,6 +105,8 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     var guideDragSerial = 0
     /// Why the last fill or stroke edit was refused (FlarePaint.swift).
     public internal(set) var paintError: String?
+    /// The status line's word on the last place: its report, or why it refused (FlarePlace+Menu.swift).
+    public internal(set) var placeStatus: String?
     /// The timeline's selected keys, why the last timeline edit was refused, and the key drag's coalesce serial,
     /// bumped to end the drag (FlareTimelineEdit.swift).
     public internal(set) var selectedKeys: [KeyRef] = []
@@ -149,7 +151,7 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
         selectedLayerID = nil
         easingSelection = nil
         layerError = nil
-        (paintError, selectedKeys, timelineError, keyDragSerial) = (nil, [], nil, 0)
+        (paintError, placeStatus, selectedKeys, timelineError, keyDragSerial) = (nil, nil, [], nil, 0)
         cancelDrag(); selection = []; currentFrame = 0
         (isPlaying, playClock, editingSymbolID, symbolReturnFrame) = (false, 0, nil, 0)
         (machineID, machinePreview, machineError) = (nil, nil, nil)
@@ -280,7 +282,7 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
             && lhs.editingSymbolID == rhs.editingSymbolID && lhs.symbolReturnFrame == rhs.symbolReturnFrame
         let panels = lhs.machineID == rhs.machineID && lhs.machinePreview == rhs.machinePreview
             && lhs.machineError == rhs.machineError && lhs.exportState == rhs.exportState && lhs.assist == rhs.assist
-            && lhs.paintError == rhs.paintError && lhs.selectedKeys == rhs.selectedKeys
+            && lhs.paintError == rhs.paintError && lhs.placeStatus == rhs.placeStatus && lhs.selectedKeys == rhs.selectedKeys
             && lhs.timelineError == rhs.timelineError
         let files = lhs.fileName == rhs.fileName && lhs.isDirty == rhs.isDirty && lhs.saveError == rhs.saveError
             && lhs.loadState == rhs.loadState && lhs.recent == rhs.recent
