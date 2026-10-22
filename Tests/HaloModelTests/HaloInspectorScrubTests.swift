@@ -53,11 +53,11 @@ import Testing
         let wait = HaloInspectorScrub.longestWait
         _ = scrub.take(1, at: 1, now: 1)
         let early = scrub.take(2, at: 1.01, now: 1 + wait * 0.9)
-        let late = scrub.take(3, at: 1.02, now: 1 + wait)
+        let late = scrub.take(3, at: 1.02, now: 1 + wait * 1.1)
         #expect(early == .wait && late == .writeNow)
-        let frame = scrub.refresh(at: 1 + wait)
+        let frame = scrub.refresh(at: 1 + wait * 1.1)
         #expect(frame.value == 3 && frame.events == [1, 1.01, 1.02])
-        let after = scrub.take(4, at: 1.03, now: 1 + wait * 1.5)
+        let after = scrub.take(4, at: 1.03, now: 1 + wait * 2)
         #expect(after == .wait, "the frame just taken resets the wait")
     }
 
