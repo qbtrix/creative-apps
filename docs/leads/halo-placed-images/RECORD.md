@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: PH-m = #4614 (PH-6, 3581626) + #4615 (PH-5, 4982a2d, 5/5) drafts on PH-a; PH-m3 builder enabling RJ-H36/RJ-H02 on top of both; #4426 in supervisor Mac gate; then retarget #4437/#4438/#4614/#4615/PH-m3 to dev. Gap candidates: SVG gradient fill flat, SVG strokes not drawn. (18:37Z)
+Next: PH-m = #4614 (PH-6, 3581626) + #4615 (PH-5, 4982a2d, 5/5) drafts on PH-a; PH-m3 builder enabling RJ-H36/RJ-H02 on top of both; #4426 in supervisor Mac gate; then retarget #4437/#4438/#4614/#4615/PH-m3 to dev. Gap candidates: SVG gradient fill flat, SVG strokes not drawn. (check 18:40Z: #4426 still open in Mac gate, no new supervisor comment)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

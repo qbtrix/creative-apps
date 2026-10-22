@@ -62,3 +62,4 @@ utc	stage	event	ref	note
 2026-10-22T18:19:36Z	3	stage	PH-m	builders started for PH-6 and PH-5 (two PRs, 400-line cap); HT-m on dev via #4422; PH-a held in Mac gate
 2026-10-22T18:36:30Z	3	pr	PH-m	#4614 PH-6 draft open, gate pass, mutate 5/5; deviations: no alpha for clear solid, kernel fill message, setPlaced acts on selection
 2026-10-22T18:37:13Z	3	pr	PH-m	#4615 PH-5 draft open, gate pass, mutate 5/5; jobs pending on PH-6; PH-m3 builder started to enable RJ-H36/RJ-H02
+2026-10-22T18:40:57Z	3	check	PH-a	#4426 still open (2d3e024a) in supervisor Mac gate; PH-m3 builder running
