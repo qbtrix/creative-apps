@@ -1,18 +1,18 @@
 # place-image lead record
 
 Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
-Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: all slice PRs on dev; verification runs waiting for macOS runners
+Run: act-1a1624aaf38-uvd0 · Session: claude/feature-lead-playbook-gub3sk · Started: 2026-10-22T06:30Z (takes over from act-1a15eecbafe-u0f9 and the earlier runs below)
+Stage: every slice merged-done; Belt-Slice-Done lines and contact sheet posted
 Base: dev
-Next: scoped photo 39722915670 + full 39722978870 (Linux green) at 71987f724: on green run critics + Belt-Slice-Done
+Next: on the scoped photo run's journeys (journeys.yml after CI run 39722915670): critic panel for PP-u, confirm #4215 holds the render budget
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | PP-a | PlacedImageTarget conformance as stubs; checks and RJ-P37 job written, disabled | PP-1, PP-2 | MJ-PP | placed-images PL-1 (merged #3578) | no | 0 | done | 39514893774 | – |
-| PP-u | File > Place… and drop run place.image on stubs; snapshots, budget, journey written | PP-3, PP-4 | PJ-P1 | PP-a; placed-images PL-2 (PP-3, merged #3931) | yes | 0 | building | – | – |
-| PP-m | placing PNG/JPEG adds a fitted pixel layer above the selection as one step; SVG refused; catalog | PP-5, PP-6 | MJ-PP | PP-a; PG-m (PP-6) | no | 0 | waiting | – | – |
-| PP-z | live, journey on live, blueprint lists Place | PP-7, PP-8 | PJ-P1 | PP-u, PP-m; PG-z, PM-z (PP-8) | yes | 0 | waiting | – | – |
+| PP-u | File > Place… and drop run place.image on stubs; snapshots, budget, journey written | PP-3, PP-4 | PJ-P1 | PP-a; placed-images PL-2 (PP-3, merged #3931) | yes | 1 (#4215) | merged-done | 39722978870 | wanted |
+| PP-m | placing PNG/JPEG adds a fitted pixel layer above the selection as one step; SVG refused; catalog | PP-5, PP-6 | MJ-PP | PP-a; PG-m (PP-6) | no | 0 | done (brief) | – | – |
+| PP-z | live, journey on live, blueprint lists Place | PP-7, PP-8 | PJ-P1 | PP-u, PP-m; PG-z, PM-z (PP-8) | yes | 0 | done (brief) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -22,7 +22,7 @@ Next: scoped photo 39722915670 + full 39722978870 (Linux green) at 71987f724: on
 | PP-3 | PP-u | 2 | File > Place… ⇧⌘P and the drop | Sources/PhotoApp/PhotoPlace.swift, PhotoCommands+File.swift, PhotoEditor.swift | PhotoPlaceMenuTests (6), Mutate 4/4 | #3976 | merged 10:20Z; CommandPath fixed by #4008 |
 | PP-4 | PP-u | 3 | snapshots, budget, journey skipped | Tests/AppSnapshotTests/PhotoPlaceSnapshots.swift, RenderBudgetPhotoPlaceTests.swift, UITests/PhotoJourneyTests+Place.swift | snapshots (refused now; logo after PP-5), budget placeLargeInThreeBodies, journey skipped | #4003 | merged a47f41f75 |
 | PP-5 | PP-m | 4 | conformance bodies; insertPixelLayer from paste; tests on (PP-6 folded in) | PhotoPlace+Kernel.swift, PhotoClipboard.swift, tests, mutations, catalog, ids | PhotoPlaceTests; .centredOnCanvas .largeFitsCanvas .aboveSelection | #4101 | merged |
-| PP-7 | PP-z | 5 | journey on live | UITests/PhotoJourneyTests+Place.swift | journey | #4175 | lane |
+| PP-7 | PP-z | 5 | journey on live | UITests/PhotoJourneyTests+Place.swift | journey | #4175 | merged 36164d2 |
 | PP-8 | PP-z | 6 | photo.md, built, feature-done | docs/blueprints/photo.md, place-image.wave.json | scripts/ci | #4139 | merged |
 
 ## Waves (combined plan, all three features)
@@ -50,6 +50,8 @@ Next: scoped photo 39722915670 + full 39722978870 (Linux green) at 71987f724: on
 - #4004 closed as superseded by #4008.
 - PP-5 starts now: PG-m is met (gradient-fill is built, #4064). The waits on transform:PT-m, PH-m and PE-m only order edits to the shared PhotoCommandCatalog, and transform PT-5 already dropped the same kind of wait. A catalog conflict is resolved by the lane's merge or by a dev merge on needs-rebase.
 - This run owns slices PP-m and PP-z only; PP-a and PP-u are counted as done per the brief.
+- Run act-1a1624aaf38-uvd0 (2026-10-22T06:30Z) takes over and owns PP-u only (PP-a, PP-m, PP-z skipped per its brief). Base stays dev (main is 420 commits behind and holds none of the slice PRs); status stays on lead/place-image.
+- PP-u merged-done per dev's lead.md rule 6: full CI run 39722978870 at 71987f724 contains #3976, #4003 and the fix #4215 (cb79b07), and its Linux job passed 04:50Z. No later merge carries `Feature: place-image`; no `finding` issue for the feature is open.
 
 ## Open
 - PP-2's job is skipped by its `.jobs.pending.json` name (the real-jobs harness ignores `waits_on`); PP-6 renames it to `place-logo.jobs.json` to turn it on. `rasterSize` throws in the stub; PP-5 reads the header.
