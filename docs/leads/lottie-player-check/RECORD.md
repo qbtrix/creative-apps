@@ -4,7 +4,7 @@ Issue: #3792 · Packet: docs/blueprints/flare/features/lottie-player-check.md
 Run: act-1a15e10a86f-7bk9 · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T10:50Z
 Stage: 3 wave 1
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: (2026-10-21T23:55Z) LP-4 #4132 open (supervisor merge after macOS; dev Photo break fix #4215 building); LP-6 ready.
+Next: (2026-10-22T00:24Z) dev macOS break fixed (#4215); LP-4 #4132 awaits supervisor macOS run + merge; LP-6 ready.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
