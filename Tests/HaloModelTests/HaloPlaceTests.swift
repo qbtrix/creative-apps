@@ -1,5 +1,5 @@
 // HaloPlaceTests.swift: placed-images MJ-PH, the Model walk. A solid's picture and focus are coded only when
-// set, so every saved project re-saves byte-equal, and a duplicate keeps them (PH-1). The place commands wait on PH-6.
+// set, so every saved project re-saves byte-equal, and a duplicate keeps them (PH-1). The place commands run as one step each (PH-6).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -87,7 +87,7 @@ import Testing
         #expect(HaloProject(services: .fake).placeHelp?.isEmpty == false)
     }
 
-    @Test(.disabled("waits on PH-6")) func placeAddsAClearSolidAtTheFittedBoxOnTopOfTheSelection() throws {
+    @Test func placeAddsAClearSolidAtTheFittedBoxOnTopOfTheSelection() throws {
         var project = try Self.project(select: "Badge")
         let id = try HaloProject.catalog.run("place.image", params: Self.place(), on: &project).result
         let layers = try #require(project.selectedComposition?.layers)
@@ -98,14 +98,14 @@ import Testing
         #expect(project.selectedLayerID == placed.id && project.history.undoTitle == "Undo Place Image")
     }
 
-    @Test(.disabled("waits on PH-6")) func textRefusesFill() throws {
+    @Test func textRefusesFill() throws {
         var project = try Self.project(select: "Title")
         let before = project.document
         #expect(throws: CatalogError.self) { try HaloProject.catalog.run("place.image", params: Self.place(true), on: &project) }
         #expect(project.document == before && project.placeFillBox == nil)
     }
 
-    @Test(.disabled("waits on PH-6")) func focusDragIsOneStep() throws {
+    @Test func focusDragIsOneStep() throws {
         var project = try Self.project(select: "Background")
         _ = try HaloProject.catalog.run("place.image", params: Self.place(true), on: &project)
         let steps = project.history.undo.count
@@ -117,7 +117,7 @@ import Testing
         #expect(project.selectedLayer?.placedFocus == Point(x: 1, y: 0.5))
     }
 
-    @Test(.disabled("waits on PH-6")) func undoOfAPlaceRemovesTheSolid() throws {
+    @Test func undoOfAPlaceRemovesTheSolid() throws {
         var project = try Self.project(select: "Badge")
         let before = project.document
         _ = try HaloProject.catalog.run("place.image", params: Self.place(), on: &project)
