@@ -86,3 +86,4 @@ utc	stage	event	ref	note
 2026-10-22T21:11Z	3	poll	#3449	#4429 open; EY-z no PRs
 2026-10-22T21:42Z	poll	SH-z	TT-z merged; blocked on EY-z #4583
 2026-10-22T22:13Z	poll	SH-z	blocked on EY-z #4583
+2026-10-22T22:44Z	unblocked	SH-z	EY-z merged; building SH-8+SH-9

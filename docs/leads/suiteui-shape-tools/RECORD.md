@@ -2,9 +2,9 @@
 
 Issue: #3449 · Packet: docs/blueprints/suiteui/features/shape-tools.md
 Run: act-1a1646f0a9f-d1ei (resumed; first run act-1a1579fdd22-6z1j) · Session: claude/suiteui-feature-lead-v7e2hk · Started: 2026-10-20T04:46Z · Resumed: 2026-10-22T16:30Z
-Stage: 3 awaiting supervisor (SH-z blocked on eyedropper:EY-z)
-Base: dev 38a65b10d (22:13Z poll)
-Next: once EY-z #4583 merges, build SH-8 on FakeRect.stroke (with the star-drag budget row), then SH-9 with feature-done, as one slice PR to dev.
+Stage: 4 building (SH-z: SH-8 + SH-9)
+Base: dev c67fd3937 (22:44Z poll)
+Next: open the SH-z slice PR to dev with feature-done; then Belt-Slice-Done once a scoped suiteui run shows its screens.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: once EY-z #4583 merges, build SH-8 on FakeRect.stroke (with the star-drag 
 |---|---|---|---|---|---|
 
 ## Decisions
+- 22:44Z: EY-z #4583 merged (3f399c24c). Every SH-z wait is cleared; building SH-8 (FakeRect.shape on FakeRect.stroke, star-drag budget row) and SH-9 (feature-done) as one slice PR to dev, branch lead/shape-tools-SH-z.
 - 22:13Z poll: EY-z #4583 still open (head 76eb19d64). SH-z stays blocked on it.
 - 21:42Z poll: TT-z #4429 merged (434b1d1db). EY-z is open as #4583 (lead/eyedropper-EY-z); SH-z now waits only on it.
 - 2026-10-22T21:11Z: poll on dev be18ab62: TT-z #4429 still open; no EY-7/8/9 PR. No supervisor reply; SH-8, SH-9 stay unstarted.
