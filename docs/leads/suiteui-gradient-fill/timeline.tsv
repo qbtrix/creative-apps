@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-21T23:53Z	4	check	GF-z	#4180 merged 23:33Z; dev Linux 39693644795 green with #4179; waiting on 39695796699 (de0f324, has #4180)
 2026-10-22T00:12Z	4	check	GF-z	dev Linux 39695796699 (de0f324) red on FormatListRatchetTests (Media.swift, #4034), not GF-z; waiting for the next green run
 2026-10-22T00:29Z	4	check	GF-z	dev Linux 39697907658 (cb79b07) red on the same FormatListRatchetTests (Media.swift, #4034), not GF-z; still waiting
+2026-10-22T00:46Z	4	check	GF-z	dev Linux 39699955972 (c4607f1) still red on FormatListRatchetTests Media.swift (#4034), not GF-z; waiting
