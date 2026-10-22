@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "app": "halo",
+  "why": "RJ-X74, pending FR-8 (suiteui/frame-rates): a composition can't be 29.97 fps and the catalog has no composition.set-frame-rate until FR-8, so platforms is [] and the harness skips the job on both. From a blank project, by commands: a new 29.97 fps, 10 s composition, a text layer whose x is keyed from 0 at frame 0 to 600 at frame 299, then a PNG sequence render. The trap: the composition silently runs at 30, so frame 299 is timed at 9.967 s, not 9.977 s, and the key lands a frame early on an editor timeline. The assertion: the saved project keeps the rate as 30000/1001 with 300 frames and both keys; the sequence has 300 files and the render times frame 299 at 299 x 1001 / 30000 s within 1 microsecond (HaloFrameRateTests); the readout at frame 1800 of a 2 min copy is 00:01:00;02. The turn-on sets platforms to linux and macos and fixes the expected JSON to FR-8's file shape.",
+  "pending": "FR-8",
+  "waits_on": "FR-8",
+  "inputs": ["input/*.halo"],
+  "steps": [
+    {"id": "composition.new", "params": {}},
+    {"id": "composition.set-frame-rate", "params": {"num": 30000, "den": 1001}},
+    {"id": "layer.new", "params": {"kind": "text"}},
+    {"id": "text.set", "params": {"text": "Lower Third"}},
+    {"id": "timeline.scrub", "params": {"frame": 0}},
+    {"id": "inspector.toggle-animation", "params": {"property": "x"}},
+    {"id": "inspector.set-property", "params": {"property": "x", "value": 0}},
+    {"id": "timeline.scrub", "params": {"frame": 299}},
+    {"id": "inspector.set-property", "params": {"property": "x", "value": 600}},
+    {"id": "render.start", "params": {"format": "pngSequence"}}
+  ],
+  "atomic": true,
+  "expect": {
+    "out/blank.halo": {"json": {"format": "halo", "version": 1, "project": {
+      "compositions": [{"id": "comp-1", "name": "Comp 1", "width": 1920, "height": 1080, "framesPerSecond": 30,
+        "frameRate": {"num": 30000, "den": 1001}, "durationFrames": 300, "playheadFrame": 299,
+        "layers": [
+          {"id": "comp-1-layer-1", "name": "Lower Third", "kind": "text", "inFrame": 0, "outFrame": 300, "opacity": 1, "blendMode": "normal",
+           "tracks": {"x": [
+             {"frame": 0, "value": 0, "easing": {"linear": {}}},
+             {"frame": 299, "value": 600, "easing": {"linear": {}}}]}}
+        ]}],
+      "selectedCompositionID": "comp-1", "selectedLayerID": "comp-1-layer-1",
+      "nextCompositionNumber": 2, "nextLayerNumber": 2
+    }}}
+  },
+  "platforms": []
+}
