@@ -4,7 +4,7 @@ Issue: #3756 (#4528 was a duplicate, closed 18:08) · Packet: docs/blueprints/su
 Run: act-1a164855f49-5pe1 · Session: cloud line lead (line:suiteui, with #4531) · Started: 2026-10-22T16:52Z
 Stage: 3 wave 3
 Base: 3578eaee20f317d368feda7ba35e4911285eebc5
-Next: (records live on lead/suiteui-orientation-crop from now) #4582 (OC-u, 395 lines, mutate 2/2) in the fast lane; on merge post Belt-Slice-Done on a green dev Linux run, Mac-Finish-Wanted, then critic panel on a scoped suiteui run. Other slices blocked on IM-z, CB-library, DS-photo, AR-photo-u, CB-z.
+Next: STOPPED 2026-10-22T18:15:55Z: supervisor closed #4528 as a duplicate of #3756 and asked the lead to stop and record its work there (comment on #3756). OC-u PR #4582 (Refs #3756) stays in the lane; after it merges it still needs Belt-Slice-Done, Mac-Finish-Wanted and critics.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
