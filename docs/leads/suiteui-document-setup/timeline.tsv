@@ -23,3 +23,4 @@ utc	stage	event	ref	note
 2026-10-21T23:49:32Z	3	poll	#4184	no needs-fix/needs-rebase; #4215 still open; FR-u not started
 2026-10-22T00:06:30Z	3	poll	#4184	#4215 merged; supervisor merged dev into DS-m (ba144058d), lane Linux check running; hold
 2026-10-22T00:23:42Z	3	check	#4184	Linux red only on dev-red #3856 FormatListRatchetTests (Media.swift from #4034); fix #4258 on the lane; hold
+2026-10-22T00:40:23Z	3	poll	#4184	#4258 still waiting on its macOS build; hold; stripped 2 old comment footers on #3757
