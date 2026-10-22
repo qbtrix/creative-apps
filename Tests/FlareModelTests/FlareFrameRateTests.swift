@@ -2,11 +2,11 @@
 // `oldFilesUnchanged`: a file from before fractional rates (`"fps": 24`, no `frameRate`) opens at 24/1 and re-saves
 // byte for byte. `lottieExactFr`: a 23.976 scene's Lottie says `fr` 23.976 (24000/1001), not 24. `durationRounds`: its
 // `op` is the scene's length in frames, a duration in seconds turned into frames by `FrameRate.frames(forDuration:)`
-// (round, half up; 10 s at 23.976 is 240, where a floor gives 239). Disabled until FR-10 adds
-// `FlareFrameRate+Kernel.swift`; until then each test reaches the rate through today's `SetSceneTiming`.
+// (round, half up; 10 s at 23.976 is 240, where a floor gives 239). Each test sets the rate through the catalog's
+// `scene.set-frame-rate` and reads it back through `FlareFrameRate+Kernel.swift` (FR-10).
 import FlareCore
 import Foundation
-@testable import FlareModel
+import FlareModel
 import SuiteKernel
 import Testing
 
@@ -25,10 +25,11 @@ private func scene(at rate: FrameRate, seconds: Double) throws -> FlareHeadless 
     var workspace = FlareWorkspace(services: .built)
     workspace.newDocument(NewDocumentSpec(preset: .web))
     let id = try #require(workspace.selectedSceneID)
-    // FR-10: `scene.set-frame-rate` with the `FrameRate` (FlareFrameRate+Kernel) replaces this SetSceneTiming.
-    workspace.apply(SetSceneTiming(sceneID: id, fps: rate.nominal, durationFrames: rate.frames(forDuration: seconds),
-                                   rate: SceneRate(numerator: rate.numerator, denominator: rate.denominator)))
+    let params = JSONValue.object(["num": .number(Double(rate.numerator)), "den": .number(Double(rate.denominator)),
+                                   "seconds": .number(seconds)])
+    _ = try FlareWorkspace.catalog.run("scene.set-frame-rate", params: params, on: &workspace)
     #expect(workspace.layerError == nil)
+    #expect(workspace.scenes.first { $0.id == id }?.frameRate == rate)
     return FlareHeadless(workspace: workspace)
 }
 
@@ -39,11 +40,10 @@ private func lottieRoot(_ doc: FlareHeadless) throws -> [String: Any] {
 }
 
 @Suite struct FlareFrameRateTests {
-    @Test(.disabled("waits on FR-10")) func oldFilesUnchanged() throws {
+    @Test func oldFilesUnchanged() throws {
         let doc = try FlareHeadless.open(oldFile, name: "old.flare")
         let scene = try #require(doc.workspace.selectedScene)
-        // FR-10: the scene's `frameRate` (FlareFrameRate+Kernel) replaces this SceneRate-to-FrameRate conversion.
-        #expect(FrameRate(numerator: scene.rate.numerator, denominator: scene.rate.denominator) == FrameRate(whole: 24))
+        #expect(scene.frameRate == FrameRate(whole: 24))
         #expect(scene.fps == 24 && scene.durationFrames == 48)
         let saved = try doc.save()
         #expect(!String(decoding: saved, as: UTF8.self).contains("frameRate"))
@@ -52,7 +52,7 @@ private func lottieRoot(_ doc: FlareHeadless) throws -> [String: Any] {
         #expect(try reopened.save() == saved)
     }
 
-    @Test(.disabled("waits on FR-10")) func lottieExactFr() throws {
+    @Test func lottieExactFr() throws {
         #expect(ntsc24.description == "23.976 fps")
         let root = try lottieRoot(try scene(at: ntsc24, seconds: 10))
         let fr = try #require(root["fr"] as? Double)
@@ -60,7 +60,7 @@ private func lottieRoot(_ doc: FlareHeadless) throws -> [String: Any] {
         #expect((fr * 1000).rounded() == 23_976)
     }
 
-    @Test(.disabled("waits on FR-10")) func durationRounds() throws {
+    @Test func durationRounds() throws {
         #expect(ntsc24.frames(forDuration: 10) == 240)
         let doc = try scene(at: ntsc24, seconds: 10)
         #expect(doc.workspace.selectedScene?.durationFrames == 240)
