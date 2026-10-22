@@ -25,7 +25,7 @@ import SwiftUI
         return SuiteDocumentsBridge(app: .flare, services: services)
     }()
 
-    /// The hand-off host; Flare refuses every hand-off with its reason until FL-3 writes `accept`.
+    /// The hand-off host: it accepts open and new, and refuses an SVG place until SVG import (E11).
     static let host = FlareWorkspace(services: .fake())
 }
 

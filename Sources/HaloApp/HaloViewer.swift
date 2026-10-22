@@ -96,7 +96,8 @@ struct HaloViewer: View {
             if timecode {
                 // The current time in primary ink, in the pill type so the
                 // bar fits the content column; the length is in the tooltip.
-                Text(comp.statusTimecode)
+                // The playing frame's time, re-run alone per frame (HaloLiveShown).
+                HaloLiveShown(model: model) { Text(($0.selectedComposition ?? comp).statusTimecode) }
                     .foregroundStyle(SuiteColor.textPrimary)
                     .help(comp.statusTimecodeHelp)
             }

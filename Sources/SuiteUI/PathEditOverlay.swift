@@ -60,8 +60,8 @@ public struct PathEditOverlay: View {
         ZStack(alignment: .topLeading) {
             Color.clear.contentShape(.rect)
             if let path = context.path {
-                PathMarks(contours: path.path.contours, toView: path.toDocument, selected: context.selection.set,
-                          hovered: context.tool == .directSelect ? hovered : nil, zoom: context.zoom)
+                PathEditMarks(path: path, selection: context.selection, hovered: context.tool == .directSelect ? hovered : nil,
+                              zoom: context.zoom).equatable()
             }
             if let draft = context.draft {
                 PathMarks(contours: [draft.contour], toView: .identity, selected: [], hovered: nil, zoom: context.zoom)
@@ -159,6 +159,16 @@ public struct PathEditOverlay: View {
 
     private func send(_ intents: [PathIntent]) {
         for intent in intents { onIntent(intent) }
+    }
+}
+
+/// The edited path's marks, rebuilt only when the path, selection, hovered mark or zoom changes: a drag sample
+/// that moves only the marquee or the pointer re-runs the overlay, not these (RenderBudgetPenPathsTests).
+struct PathEditMarks: View, Equatable {
+    let path: PathInEdit, selection: Selection<AnchorRef>, hovered: PathHit?, zoom: Double
+
+    var body: some View {
+        PathMarks(contours: path.path.contours, toView: path.toDocument, selected: selection.set, hovered: hovered, zoom: zoom)
     }
 }
 

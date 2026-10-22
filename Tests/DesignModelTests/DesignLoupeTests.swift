@@ -1,6 +1,6 @@
 // DesignLoupeTests.swift (eyedropper DY-3): the loupe the Eyedropper shows at the pointer (DesignLoupe). Only
 // with the Eyedropper on an open page and the pointer at a finite point; it sits at the pointer, reads the
-// colour `sampledColor` reads there in the Model's `sampleSize` square (nil until DY-5's bodies), and picks onto
+// colour `sampledColor` reads there in the Model's `sampleSize` square, and picks onto
 // the fill or, with the Stroke option or Option held (each inverting the other), the stroke. A pick goes to
 // `applySample` at the same point, and its refusal comes back as a DesignRefusal. Linux and macOS.
 import DesignModel
@@ -84,12 +84,8 @@ import Testing
     @Test func aPickGoesToTheAdapter() {
         var w = Self.eyedropper()
         let before = w
-        do {
-            try w.pick(at: pt(120, 140), toStroke: false)
-        } catch {
-            // DY-1's stub refuses, changing nothing, until DY-5's apply.
-            #expect(error == .notBuilt("Picking a color"))
-            #expect(w.selectedPage == before.selectedPage)
-        }
+        // DY-5's apply: with nothing selected the pick refuses, as a DesignRefusal, and changes nothing.
+        #expect(throws: DesignRefusal.nothingSelected) { try w.pick(at: pt(120, 140), toStroke: false) }
+        #expect(w == before)
     }
 }

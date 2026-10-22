@@ -11,8 +11,10 @@
 // Each field is a form row of its own whose accessibility label is its column
 // label (the columns form draws the title apart from the field, #286), so no
 // LabeledContent wraps it, and every control has a
-// `halo.composition.sheet.*` identifier (#290).
+// `halo.composition.sheet.*` identifier (#290). The rate is SuiteUI's
+// FrameRateMenu over the kernel's list (frame-rates FR-8), held beside the draft.
 import HaloModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -22,12 +24,14 @@ struct NewCompositionSheet: View {
     var onCreate: @MainActor (CompositionSettings) -> Void
     var onCancel: @MainActor () -> Void
     @State private var draft: CompositionDraft
+    @State private var frameRate: FrameRate
 
     init(
         settings: CompositionSettings, state: HaloMenuState = HaloMenuState(project: nil), onCreate: @escaping @MainActor (CompositionSettings) -> Void = { _ in },
         onCancel: @escaping @MainActor () -> Void = {}
     ) {
         self._draft = State(initialValue: CompositionDraft(settings))
+        self._frameRate = State(initialValue: settings.frameRate)
         self.state = state
         self.onCreate = onCreate
         self.onCancel = onCancel
@@ -56,11 +60,8 @@ struct NewCompositionSheet: View {
                     .accessibilityLabel("Height")
                     .haloControl(id: "halo.composition.sheet.height", enabled: true, help: nil)
                 problems(for: .height)
-                Picker("Frame Rate", selection: $draft.framesPerSecond) {
-                    ForEach(CompositionSettings.frameRates, id: \.self) { Text("\($0) fps").tag($0) }
-                }
-                .accessibilityLabel("Frame Rate")
-                .haloControl(id: "halo.composition.sheet.frameRate", enabled: true, help: nil)
+                LabeledContent("Frame Rate") { FrameRateMenu(rate: frameRate) { frameRate = $0 } }
+                    .haloControl(id: "halo.composition.sheet.frameRate", enabled: true, help: nil)
                 problems(for: .frameRate)
                 TextField("Duration (seconds)", text: $draft.durationText)
                     .accessibilityLabel("Duration (seconds)")
@@ -74,7 +75,7 @@ struct NewCompositionSheet: View {
                     .keyboardShortcut(.cancelAction)
                     .haloControl(id: "halo.composition.sheet.cancel", enabled: true, help: nil)
                 MenuCommand(HaloMenuState.spec("composition.new"), on: state, title: "Create") {
-                    if draft.isValid { onCreate(draft.settings) }
+                    if draft.isValid { onCreate(draft.settings.withFrameRate(frameRate)) }
                 }
                     .keyboardShortcut(.defaultAction)
                     .disabled(!draft.isValid)

@@ -74,6 +74,8 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var order: [String] = []  // the shown ids in sort order (LibraryOrder.swift)
     public internal(set) var importState = ImportState.idle
     public internal(set) var importNotice: ImportNotice?
+    /// The import notice whose failures are listed (CS-5); `showsImportFailures` reads it.
+    public internal(set) var failuresShownFor: ImportNotice?
     /// Its own thumbnails; `thumbnails` and the rest forward to it (LibraryThumbnails.swift).
     public internal(set) var thumbnailCache = LibraryThumbnailCache()
     public internal(set) var autoAdvance = true
@@ -118,6 +120,7 @@ public struct LibraryCatalog: Sendable, Equatable {
             && lhs.history == rhs.history && lhs.order == rhs.order
             && lhs.filter == rhs.filter && lhs.userCollections == rhs.userCollections
         let work = lhs.importState == rhs.importState && lhs.importNotice == rhs.importNotice
+            && lhs.failuresShownFor == rhs.failuresShownFor
             && lhs.thumbnailCache == rhs.thumbnailCache && lhs.autoAdvance == rhs.autoAdvance
             && lhs.cullError == rhs.cullError && lhs.exportRun == rhs.exportRun
             && lhs.exportState == rhs.exportState && lhs.fileRequests == rhs.fileRequests

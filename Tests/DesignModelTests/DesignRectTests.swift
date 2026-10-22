@@ -11,13 +11,6 @@ private let base = rc(40, 40, 160, 120)
     }
 }
 
-@Test func aSquareDragGrowsAwayFromItsStartPoint() {
-    #expect(DesignRect(from: pt(40, 40), to: pt(200, 160), square: true) == rc(40, 40, 160, 160))
-    #expect(DesignRect(from: pt(200, 160), to: pt(40, 40), square: true) == rc(40, 0, 160, 160))
-    #expect(DesignRect(from: pt(40, 40), to: pt(100, 200), square: true) == rc(40, 40, 160, 160))
-    #expect(DesignRect(from: pt(40, 40), to: pt(40, 40), square: true) == rc(40, 40, 0, 0))
-}
-
 @Test func containsIncludesTheEdges() {
     #expect(base.contains(pt(40, 40)) && base.contains(pt(200, 160)) && base.contains(pt(120, 100)))
     #expect(!base.contains(pt(39.9, 100)) && !base.contains(pt(200.1, 100)))

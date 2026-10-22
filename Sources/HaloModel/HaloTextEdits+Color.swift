@@ -27,6 +27,12 @@ extension HaloLayerColor {
     }
 }
 
+extension HaloLayerKind {
+    /// Whether `setLayerColor` can color a layer of this kind: every kind but
+    /// a null. The color row's availability asks the same question.
+    var takesColor: Bool { self != .null }
+}
+
 extension HaloProject {
     /// The color row's identifier, where a color refusal shows.
     static let layerColorControl = "halo.inspector.text.color"
@@ -34,7 +40,7 @@ extension HaloProject {
     /// The selected layer's color; nil with no layer selected or on a null,
     /// which takes no color.
     public var selectedLayerColor: HaloLayerColor? {
-        guard let layer = selectedLayer, layer.kind != .null else { return nil }
+        guard let layer = selectedLayer, layer.kind.takesColor else { return nil }
         return layer.color
     }
 
@@ -48,7 +54,7 @@ extension HaloProject {
         let key = selectedLayerID.map { "\($0).color" }
         edit("Change Color", control: Self.layerColorControl, coalesceKey: key) { doc in
             let (c, l) = try doc.selectedLayerIndices()
-            guard doc.compositions[c].layers[l].kind != .null else { return }
+            guard doc.compositions[c].layers[l].kind.takesColor else { return }
             doc.compositions[c].layers[l].color = clamped
         }
     }

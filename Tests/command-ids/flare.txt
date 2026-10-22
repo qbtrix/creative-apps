@@ -85,6 +85,7 @@ scene.remove
 scene.rename
 scene.reorder
 scene.set-canvas
+scene.set-frame-rate
 scene.timing
 scenes.add
 scenes.remove
