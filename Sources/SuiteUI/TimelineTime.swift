@@ -21,6 +21,19 @@ public enum TimelineTime {
         unit == .timecode ? Timecode.string(frame: frame, rate: rate) : "\(frame)"
     }
 
+    /// `frame` at `rate` when the host gave one, else at `fps`: what the ruler
+    /// and the pill read, so they agree with a host's `label(frame:rate:unit:)` readout.
+    static func label(frame: Int, fps: Int, rate: FrameRate?, unit: TimeUnit) -> String {
+        rate.map { label(frame: frame, rate: $0, unit: unit) } ?? label(frame: frame, fps: fps, unit: unit)
+    }
+
+    /// The tooltip and VoiceOver label of a timecode readout at `rate`: what it
+    /// counts and how, ";" before the frames at a drop-frame rate.
+    public static func readoutHelp(rate: FrameRate) -> String {
+        let form = rate.isDropFrame ? "hours:minutes:seconds;frames, drop-frame" : "hours:minutes:seconds:frames"
+        return "Playhead time at \(rate.description) (\(form))"
+    }
+
     /// `frame` as the ruler, the playhead pill and a host's readout show it.
     public static func label(frame: Int, fps: Int, unit: TimeUnit) -> String {
         guard unit == .timecode, fps > 0 else { return "\(frame)" }

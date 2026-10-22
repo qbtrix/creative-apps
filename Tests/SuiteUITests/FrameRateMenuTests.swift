@@ -3,6 +3,10 @@
 // titled as the time.rates commands title it ("29.97 fps"), with the bound
 // rate checked; the timeline readout shows timecode at the document's rate
 // through SuiteKernel's Timecode (";" before the frames at a drop-frame rate).
+// The strip's pill and ruler read the same string at the host's rate (#4359);
+// the readout's tooltip names what it counts (#4360) and the gallery sets it
+// in SuiteFont.timecode, primary text, labelled "Timecode" (#4363, #4367, #4368).
+import Foundation
 import SuiteKernel
 import SwiftUI
 import Testing
@@ -75,5 +79,41 @@ import Testing
 
     @Test func readoutInFramesIsTheFrameNumber() {
         #expect(TimelineTime.label(frame: 30, rate: Self.ntsc, unit: .frames) == "30")
+    }
+
+    @MainActor @Test func pillAndRulerReadTheReadoutAtNTSC() {
+        let mapping = FrameMapping(duration: 9_999, frameWidth: 2)
+        let caption = TimelineTime.label(frame: 1_800, rate: Self.ntsc, unit: .timecode)
+        let playhead = TimelinePlayhead(
+            mapping: mapping, playhead: 1_800, unit: .timecode, fps: Self.ntsc.nominal, scroll: .zero, keys: [],
+            rate: Self.ntsc, onScrub: { _ in })
+        #expect(playhead.label == "00:01:00;02")
+        let rules = TimelineRulerLabels(mapping: mapping, unit: .timecode, fps: Self.ntsc.nominal, rate: Self.ntsc)
+        #expect(rules.text(1_800) == caption)
+        let whole = TimelineRulerLabels(mapping: mapping, unit: .timecode, fps: 24, rate: FrameRate(whole: 24))
+        #expect(whole.text(360) == "00:00:15:00")
+    }
+
+    @Test func readoutHelpNamesDropFrameOnlyAtDropRates() {
+        let ntsc = TimelineTime.readoutHelp(rate: Self.ntsc)
+        #expect(ntsc.contains("drop-frame") && ntsc.contains("frames") && ntsc.contains("29.97 fps"))
+        let film = TimelineTime.readoutHelp(rate: FrameRate(whole: 24))
+        #expect(!film.contains("drop-frame") && film.contains("frames"))
+    }
+
+    /// A source check: the gallery's timecode readout is set as a timecode value, not a caption.
+    @Test func galleryReadoutIsSetInTheTimecodeFace() throws {
+        let file = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent().appending(path: "Sources/SuiteUI/Gallery/GalleryTimeline.swift")
+        let source = try String(contentsOf: file, encoding: .utf8)
+        let start = try #require(source.range(of: "private func timecodeReadout("), "the readout moved; point this test at it")
+        let end = try #require(source.range(of: "private func logView(", range: start.upperBound..<source.endIndex))
+        let body = source[start.upperBound..<end.lowerBound]
+        #expect(body.contains("unit: .timecode"))
+        #expect(body.contains("Text(verbatim: timecode)\n                .font(SuiteFont.timecode)\n                .foregroundStyle(SuiteColor.textPrimary)"))
+        #expect(body.contains("Text(\"Timecode\")"), "nothing labels the readout as timecode")
+        #expect(body.contains(".help(TimelineTime.readoutHelp(rate: rate))"))
+        #expect(body.contains(".accessibilityLabel(Text(verbatim: TimelineTime.readoutHelp(rate: rate)))"))
+        #expect(!body.contains("SuiteColor.secondaryText") && !body.contains("monospacedDigit"))
     }
 }
