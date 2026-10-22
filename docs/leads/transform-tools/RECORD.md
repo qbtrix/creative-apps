@@ -34,6 +34,7 @@ Next: lane batches #3577 → #4429 (feature-done; retarget to dev once #3577 mer
 |---|---|---|---|---|---|
 
 ## Decisions
+- 18:58Z heartbeat: #3577 build green, still waiting for its lane batch; #4429 stacked; scoped suiteui 39810321089 queued; #4428 (AK) macOS build queued
 - 18:40Z heartbeat: #3577 macOS build 39815190852 green, waiting for its lane batch; #4429 stacked; scoped suiteui 39810321089 still queued
 - 18:10Z heartbeat: no change; #3577 rebuild 39815190852 pending, scoped suiteui 39810321089 queued
 - 17:47Z heartbeat: #3577 macOS rebuild 39815190852 still pending; #4429 stacked; scoped suiteui 39810321089 queued
