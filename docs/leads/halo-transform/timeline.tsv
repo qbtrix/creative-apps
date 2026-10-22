@@ -73,3 +73,4 @@ utc	stage	event	ref	note
 2026-10-22T20:54:38Z	heartbeat	39836126860 macOS queued; runner queue ~2.5h
 2026-10-22T21:16:46Z	heartbeat	39836126860 macOS queued
 2026-10-22T21:39:59Z	heartbeat	39836126860 queued; halo 39857142295 queued
+2026-10-22T22:04:58Z	heartbeat	both eligible runs queued
