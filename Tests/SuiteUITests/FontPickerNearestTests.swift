@@ -3,7 +3,7 @@
 // FP-8's acceptance row). The nearest face minimises
 // |weight - w| / 100 + 0.5 when the italic differs; ties go to the lighter
 // face; an empty family gives nil. Written by FP-2 against FP-1's stub and
-// disabled until FP-8 fills the body; the mutation plan
+// turned on by FP-8 with the body; the mutation plan
 // `SuiteUI.FontPickerNearest` names these tests. macOS only.
 import SuiteModel
 import SuiteUI
@@ -18,29 +18,29 @@ private let boldItalic = FontFace(name: "Bold Italic", weight: 700, italic: true
 private let black = FontFace(name: "Black", weight: 900, italic: false)
 
 @Suite struct FontPickerNearestTests {
-    @Test(.disabled("waits on FP-8")) func keepsTheNearestWeight() {
+    @Test func keepsTheNearestWeight() {
         let family = FontFamily(name: "Grotesk", faces: [regular, black, semibold])
         #expect(FontPickerRules.nearestFace(in: family, to: bold) == semibold)
     }
 
-    @Test(.disabled("waits on FP-8")) func withoutItalicsKeepsTheWeight() {
+    @Test func withoutItalicsKeepsTheWeight() {
         let family = FontFamily(name: "Grotesk", faces: [regular, bold, black])
         #expect(FontPickerRules.nearestFace(in: family, to: boldItalic) == bold)
     }
 
-    @Test(.disabled("waits on FP-8")) func keepsItalic() {
+    @Test func keepsItalic() {
         let family = FontFamily(name: "Serif", faces: [regular, italic])
         #expect(FontPickerRules.nearestFace(in: family, to: italic) == italic)
         #expect(FontPickerRules.nearestFace(in: FontFamily(name: "Grotesk", faces: [bold, regular, boldItalic]),
                                             to: boldItalic) == boldItalic)
     }
 
-    @Test(.disabled("waits on FP-8")) func tiesGoLighter() {
+    @Test func tiesGoLighter() {
         let family = FontFamily(name: "Grotesk", faces: [semibold, regular])
         #expect(FontPickerRules.nearestFace(in: family, to: medium) == regular)
     }
 
-    @Test(.disabled("waits on FP-8")) func anEmptyFamilyGivesNil() {
+    @Test func anEmptyFamilyGivesNil() {
         #expect(FontPickerRules.nearestFace(in: FontFamily(name: "Empty", faces: []), to: bold) == nil)
     }
 }
