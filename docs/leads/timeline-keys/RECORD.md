@@ -4,7 +4,7 @@ Issue: #3780 · Packet: docs/blueprints/suiteui/features/timeline-keys.md
 Run: act-1a1620043af-tzh0 · Started: 2026-10-22T05:00Z (resumed from act-1a15fddd101-68r5)
 Stage: 3 wave 2
 Base: 0dd23d659f4dbd8a0120aa85a321259327518251 (main); dev 8cf02113
-Next: build TK-flare (TK-7 + TK-8) as one slice PR off dev; TK-u critic panel once scoped suite run 39721019643 shows its screens; TK-6 waits on AJ-halo, TS-halo, AN-halo
+Next: #4328 TK-flare in the lane (needs-fix first if ejected); TK-u critic panel once scoped suite run 39721019643 shows its screens; TK-6 waits on AJ-halo, TS-halo, AN-halo
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: build TK-flare (TK-7 + TK-8) as one slice PR off dev; TK-u critic panel on
 | TK-a | ColorKeyRules/SpanRules stubs, Halo span spec stubs, disabled suites | TK-1, TK-2 | – | frame-rates:FR-a (merged) | false | 0 | done #4183 | 39724795297 | – |
 | TK-u | Flare key buttons; TimelineStrip onSlide; Halo timeline on stubs | TK-3, TK-4 | FlareJourneyTests+FillKeys, HaloJourneyTests+Span (skipped) | TK-a, timeline, timeline-select-all | true | 0 | done #4191 | 39724795297 | wanted |
 | TK-m | rule bodies; Halo span bodies | TK-5, TK-6 | – | TK-a; TK-6: AE-halo, AJ-halo, TS-halo, AN-halo | false | 0 | TK-5 merged #4185; TK-6 blocked | – | – |
-| TK-flare | Flare colour keys on live | TK-7, TK-8 | FJ-TK | TK-5 (#4185), AE-flare (done), TK-u (#4191) | true | 0 | building | – | – |
+| TK-flare | Flare colour keys on live | TK-7, TK-8 | FJ-TK | TK-5 (#4185), AE-flare (done), TK-u (#4191) | true | 0 | pr #4328 | – | – |
 | TK-z | Halo timeline on live; status built; feature-done | TK-9, TK-10 | HJ-TK, RJ-H51 | TK-m, TK-u, TK-flare | true | 0 | blocked | – | – |
 
 ## Tasks
@@ -24,7 +24,8 @@ Next: build TK-flare (TK-7 + TK-8) as one slice PR off dev; TK-u critic panel on
 | TK-4 | TK-u | 2 | TimelineStrip onSlide; Halo timeline passes slide/trim | Sources/SuiteUI/TimelineStrip.swift, Sources/SuiteUI/TimelineLaneInput.swift, Sources/HaloApp/HaloTimelineView.swift, UITests/HaloJourneyTests+Span.swift, Tests/AppSnapshotTests/RenderBudgetTimelineSpanTests.swift | RenderBudgetTimelineSpanTests.slideDragInThreeBodies | #4191 | merged |
 | TK-5 | TK-m | 2 | ColorKeyRules + SpanRules bodies | Sources/SuiteKernel/Keys/ColorKeyRules.swift, Sources/SuiteKernel/Keys/SpanRules.swift, Tests/SuiteKernelTests/ColorKeyRulesTests.swift, Tests/SuiteKernelTests/SpanRulesTests.swift, Tests/mutations/SuiteKernel.ColorKeyRules.json, Tests/mutations/SuiteKernel.SpanRules.json | ColorKeyRulesTests, SpanRulesTests | #4185 | merged |
 | TK-6 | TK-m | – | Halo span bodies, catalog, ledger | Sources/HaloModel/HaloSpan+Kernel.swift, Sources/HaloModel/HaloLayer.swift, Sources/HaloModel/HaloCommandCatalog.swift, Tests/command-ids/halo.txt, Tests/HaloModelTests/HaloSpanTests.swift, Tests/mutations/HaloModel.HaloSpan+Kernel.json | HaloSpanTests | – | blocked |
-| TK-7..TK-10 | TK-flare, TK-z | – | see packet | see packet | see packet | – | blocked |
+| TK-7, TK-8 | TK-flare | 3 | Flare colour keys, inspector, journey | see packet | FlareColorKeysTests; Mutate 4/4 | #4328 | pr |
+| TK-9, TK-10 | TK-z | – | see packet | see packet | see packet | – | blocked |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -37,7 +38,7 @@ Next: build TK-flare (TK-7 + TK-8) as one slice PR off dev; TK-u critic panel on
 
 - Hand-offs (packet): FG-a, FK-a (FlareInspectorFill), KE-a and CL-probe (HaloTimelineView) are in `planned` features. Open PRs #4055 (2 lines in FlareInspectorFill), #4147 and #4166 (8 lines in HaloTimelineView) touch the same files; their edits are small, so TK-u goes ahead and the lane integrates any conflict.
 - Builders build the stacked slices one after another in one worktree; the lead opens the PRs.
-- Status channel: this run's brief names `lead/timeline-keys` with `docs/leads/timeline-keys/`; the record is kept there (the suiteui- copy is frozen at 04:44Z).
+- Status channel: Belt watches `lead/suiteui-timeline-keys`, so the record is mirrored to `docs/leads/suiteui-timeline-keys/` there and to `lead/timeline-keys` (from 06:15Z).
 - TK-5 (#4185) is stacked with base `tk-a-timeline-keys-contract` (115 lines own; 446 against dev, over the cap); retargeted to dev and merged with dev once #4183 lands. TK-u is built on branch `tk-u-timeline-keys-ui` from TK-a and gets the same treatment.
 - TK-a deviations (builder): the kernel-keys C4 description stays as is (gate refuses description edits; the new files are owned through `paths`); no locked-layer check (HaloLayer has no lock); signatures use `FlareCore.Color` to avoid clashing with SwiftUI's `Color`.
 - Risk for TK-6: `TimelineEditing.trimmed` is in SuiteUI (macOS only), so HaloModel's trim body needs its maths in SuiteKernel.

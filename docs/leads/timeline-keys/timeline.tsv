@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-22T04:44:16Z	check	scoped: suite 39721019643 on bd793a5db still queued (TK-u critics wait); AJ/TS/AN-halo not merged, TK-6 blocked
 2026-10-22T05:12:00Z	start	run act-1a1620043af-tzh0 resumed at dev 8cf02113; TK-a, TK-5, TK-u merged; TK-7 unchained from TK-6, TK-flare starts
 2026-10-22T05:11:17Z	slice-done	Belt-Slice-Done TK-a, TK-u and Mac-Finish-Wanted TK-u posted (Linux check 39724795297 green on 4e683e840); TK-flare builder started on tk-flare-colour-keys
+2026-10-22T06:14:28Z	TK-flare	pr	#4328 opened, head ac5a97b3, CI: PASS, Mutate 4/4
