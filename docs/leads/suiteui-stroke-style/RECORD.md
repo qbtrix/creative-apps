@@ -109,3 +109,4 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 
 ## Run act-1a1646f0a8c-etnw
 - Resumed 2026-10-22 from main 0dd23d6. Supervisor: SS-8 before SH-8, flip the wait in the wave files; this run does not build export-pack or tone-controls (run d0s8 holds them).
+- 17:54Z: SS-8 PR #4607 (head b3d8735) is open: the fake keeps dashed, trimmed strokes (13 files, +203/-29; mutate SuiteKernel.FakeCanvasDocument 12/12; scripts/ci --changed PASS). The wave-order flip is in docs-only PR #4608, because #4607 was already at 13 files and the three wave files would have put it at 16: AH-z → SS-d → TT-z → EY-z → SH-z. The waves check needs one chain over FakeCanvasDocument.swift. No TT-8, EY-8 or SH-8 PR is open. Next: SS-10 (SS-z) once SS-8 lands.

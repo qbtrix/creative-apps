@@ -147,3 +147,4 @@ utc	stage	event	ref	note
 05:14Z	heartbeat	heartbeat: no open findings; SH-z (#3449) still planned, SS-8 and SS-10 wait
 17:26Z	resume	resume	act-1a1646f0a8c-etnw	supervisor: SS-8 goes first, wait flipped; export-pack and tone-controls are d0s8s
 17:26Z	wave 3	start	SS-8	branch from dev
+17:54Z	wave 3	pr	SS-8	#4607 fake strokes; #4608 wave order (AH-z > SS-d > TT-z, SH-z waits SS-d)
