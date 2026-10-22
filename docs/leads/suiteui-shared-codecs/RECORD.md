@@ -83,3 +83,4 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-22T03:45Z: Unchanged. Scoped suite run 39710836943 is still queued, so SC-f's critic panel is held.
 - 2026-10-22T04:06Z: Scoped suite run 39710836943 started at about 03:52Z and is in progress. SC-f's critic panel starts when its ui-screens are up.
 - 2026-10-22T04:23Z: Scoped suite run 39710836943 completed green: macOS (suite) passed, 03:52-04:09Z. It uploaded no snapshots or ui-screens. It handed the journeys to journeys.yml run 39720835412, which is pending behind three earlier journey runs. SC-f's critic panel runs on those ui-screens.
+- 2026-10-22T04:44Z: Journeys run 39720835412 (suite) is still pending in the macOS queue. SC-f's critic panel waits on its ui-screens.
