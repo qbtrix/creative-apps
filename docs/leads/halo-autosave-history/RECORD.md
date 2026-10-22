@@ -50,3 +50,5 @@ Wave 1: HA-a (one slice PR), alongside transform HT-a. Wave 2: HA-5 stacked on H
 - HA-5 is merged on dev (HaloRecovery+Kernel.swift bodies, HaloRecoveryTests on), so HA-m needs only HA-6. HG-m is built, so HA-6 is unblocked.
 - Wave 1: HA-6 (catalog specs history.jump and the second history spec, halo.txt, HaloHistoryCommandIDTests, RJ-H33 job folder).
 - Wave 2: HA-7 once suiteui AH-z's live recovery wiring is on dev; then HA-8 feature-done.
+- 2026-10-22T08:15Z wave 1 PRs: HA-6 #4342 (slice HA-m; Mutate HaloModel.HaloCommandCatalog 10/10) and HA-7 #4335 (slice HA-z). Both have the fast lane macOS builds dispatched. The attribution footers were removed from both bodies.
+- HA-7 gap: on dev, Sources/HaloApp/HaloHistoryArea.swift still passes folder: nil, and its restore hook throws HaloNotBuilt. So step 3 (force-quit and Restore) sits behind recoveryIsLive = false. A new task, HA-7b (HaloApp: a recovery folder from -SuiteSupportDir under <support>/Halo/Recovery, restore via HaloProject.recovered, and recoveryIsLive set to true), is added to HA-z as wave 2 and stacks on HA-7. HA-8 follows it.
