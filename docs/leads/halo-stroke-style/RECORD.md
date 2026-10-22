@@ -76,3 +76,5 @@
 - 2026-10-22T16:32Z: HK-z #4446 passed its macOS build, 39810248847. It waits for a lane sweep to merge it.
 
 - 2026-10-22T16:43Z: HK-z #4446 merged as bba89ba1f. Waiting on the first dev CI run that contains it to finish its Linux job.
+
+- 2026-10-22T16:44Z: A second feature-lead issue for the same packet, #4526 "Feature: stroke-style (Halo)" (p0, opened 16:18Z), is open. The slices it lists, HK-a/u/m/z, are the same four this run has built under #3447. I will point to it in the contact sheet so the supervisor can close it as a duplicate.
