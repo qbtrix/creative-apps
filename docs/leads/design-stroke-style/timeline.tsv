@@ -73,3 +73,4 @@ time	kind	note
 2026-10-22T06:16Z	heartbeat	DK-u waits on shape-tools DS-u (#3440 not started)
 2026-10-22T06:37Z	heartbeat	DY-m waits on DT-m (#3436); DK-u waits on DS-u (#3440)
 2026-10-22T07:00Z	heartbeat	DY-m waits on DT-m (#3436); DK-u waits on DS-u (#3440)
+2026-10-22T07:24Z	resume	run act-1a1627ce3b4-ayhz takes over	-	DK-u waits DS-u; DK-m waits DS-m
