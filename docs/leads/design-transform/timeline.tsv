@@ -78,3 +78,4 @@ utc	stage	event	ref	note
 2026-10-22T03:26Z	DT-u	heartbeat	#4254	mac build queued
 2026-10-22T03:52Z	DT-m	mac-green	#4255	f5833163
 2026-10-22T04:17Z	DT-u	heartbeat	#4254	waiting batch
+2026-10-22T04:39Z	DT-m	built	#4255	aa66f0e7e; done line waits on run 39722978870

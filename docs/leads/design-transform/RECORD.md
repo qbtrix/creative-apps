@@ -63,3 +63,4 @@ Next: #4159, #4187, #4188-fix merge -> Belt-Slice-Done + Mac-Finish-Wanted DT-u 
 
 - 2026-10-22T03:52Z Heartbeat: #4255 macOS build green (waits for batch); #4254 macOS build still queued. Design run 39709889487 in progress.
 - 2026-10-22T04:17Z heartbeat: #4254 (knob, e62d759d) and #4255 (DT-6, f5833163) are macOS green, clean, waiting for their batch. #4223/#4224 fixes are held until #4254 merges, then DT-7.
+- 2026-10-22T04:39Z DT-6 (#4255) merged as aa66f0e7e (batch run 39719953891); DT-m built (DT-5, DT-6; ui false). Its done line waits on full CI run 39722978870 (71987f724, contains aa66f0e7e), queued. #4254 (knob) is clean and green, waiting for the next batch; #4223/#4224 stay held behind it.
