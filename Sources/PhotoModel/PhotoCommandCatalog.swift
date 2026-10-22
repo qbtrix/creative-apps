@@ -224,9 +224,7 @@ extension PhotoWorkspace {
             }
             w.addAdjustmentLayer(kind); return JSONValue.object([:])
         },
-        act("layer.delete", "Delete Layer", "Deletes the selected layers.", .edit, menu { w in
-            w.selectedLayer == nil ? noLayer : w.canRemoveLayer ? w.removeSelectedHelp : "The last layer can't be deleted."
-        }) { w in _ = try w.selectedID("layer.delete"); w.removeSelectedLayers() },
+        act("layer.delete", "Delete Layer", "Deletes the selected layers.", .edit, menu { $0.deleteLayersHelp }) { w in _ = try w.selectedID("layer.delete"); w.removeSelectedLayers() },
         act("layer.duplicate", "Duplicate Layer", "Duplicates the selected layer.", .edit, gate { $0.duplicateLayerHelp }) { $0.duplicateSelectedLayer() },
         act("layer.merge-down", "Merge Down", "Merges the selected layer into the one below.", .edit, gate { $0.mergeDownHelp }) { $0.mergeDown() },
         act("layer.flatten", "Flatten Image", "Merges every layer into one.", .edit, gate { $0.flattenHelp }) { $0.flattenImage() },
