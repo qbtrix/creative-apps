@@ -1,6 +1,6 @@
 // StillDecoder.swift: the shell's still decoder (shell-media SM-7), the
-// decode half of Photo's ImageIOCodec moved into the suite. It reads any
-// still ImageIO knows (PNG, JPEG, HEIC, TIFF, ...), turns it upright by its
+// decode half of Photo's ImageIOCodec moved into the suite. Through
+// SuiteImageIO it reads any still the Mac knows (PNG, JPEG, HEIC, TIFF, ...), turns it upright by its
 // EXIF orientation, shrinks it so its longest side is at most `longestSide`
 // (never enlarging), and draws it into 8-bit sRGB. A bitmap context only
 // holds premultiplied alpha, so the bytes are unpremultiplied afterwards:
@@ -8,7 +8,6 @@
 import Accelerate
 import CoreGraphics
 import Foundation
-import ImageIO
 import SuiteModel
 
 public struct StillDecoder: Sendable {
@@ -19,30 +18,9 @@ public struct StillDecoder: Sendable {
         if let longestSide, longestSide < 1 {
             throw .notAvailable("A still can't be shrunk below 1 pixel.")
         }
-        guard let source = CGImageSourceCreateWithData(data as CFData, nil), CGImageSourceGetCount(source) > 0,
-            let stored = Self.storedLongestSide(source)
-        else { throw .readFailed("This isn't an image the Mac can read.") }
-        let limit = min(longestSide ?? stored, stored)
-        let options: [CFString: Any] = [
-            kCGImageSourceCreateThumbnailFromImageAlways: true,
-            kCGImageSourceCreateThumbnailWithTransform: true,
-            kCGImageSourceShouldCacheImmediately: true,
-            kCGImageSourceThumbnailMaxPixelSize: limit,
-        ]
-        guard let upright = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary),
-            let rgba = Self.straightRGBA(upright)
-        else { throw .readFailed("The still couldn't be decoded.") }
+        let upright = try SuiteImageIO.uprightImage(data, longestSide: longestSide)
+        guard let rgba = Self.straightRGBA(upright) else { throw .readFailed("The still couldn't be decoded.") }
         return try MediaFrame(width: upright.width, height: upright.height, rgba: rgba)
-    }
-
-    /// The longer of the stored pixel width and height, before any orientation.
-    static func storedLongestSide(_ source: CGImageSource) -> Int? {
-        guard let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
-            let width = properties[kCGImagePropertyPixelWidth] as? Int,
-            let height = properties[kCGImagePropertyPixelHeight] as? Int,
-            width > 0, height > 0
-        else { return nil }
-        return max(width, height)
     }
 
     /// `image` drawn into 8-bit sRGB RGBA with straight alpha, top row first.
