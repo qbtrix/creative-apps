@@ -34,8 +34,9 @@ extension HaloProject: HeadlessDocument {
         #expect(ids.count == 62 && Set(ids).count == ids.count)
         let shapes = ShapeCommands.specs(HaloProject.self).map(\.id)  // HS-6: the kernel's shape commands follow
         let fills = GradientCommands.specs(HaloProject.self).map(\.id)  // HG-7: then its fill commands
+        let strokes = StrokeCommands.specs(HaloProject.self).map(\.id)  // HK-6: then its stroke commands
         let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
-        let all = ids + shapes + fills + window
+        let all = ids + shapes + fills + strokes + window
         #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
     }
 
@@ -120,6 +121,7 @@ extension HaloProject: HeadlessDocument {
         "key editing's move is a stub until KE-4": ["timeline.move-keys: exampleRuns"],
         "the window's own steps need an open render or unsaved edits (CS-7)": ["file.answer-unsaved render.choose-folder: exampleRuns"],
         "the stop and angle examples need a gradient; Ball's fill is solid": ["fill.angle fill.stop-add fill.stop-move fill.stop-remove: exampleRuns"],
+        "strokes are for shape layers; Ball is a solid (HaloStrokeTests run them)": ["stroke.add stroke.cap stroke.color stroke.dash stroke.join stroke.read stroke.remove stroke.trim stroke.width: exampleRuns"],
     ]
 
     @Test func conformance() {

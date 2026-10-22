@@ -110,6 +110,8 @@ import Testing
         #expect(project.selectedStroke?.trim?.end == 0.5)
         project.scrub(to: 0)
         #expect(project.selectedStroke?.trim?.end == 0)
+        try project.setStroke(nil, name: "Remove Stroke", drag: nil)
+        #expect(project.selectedLayer?.tracks["trimEnd"] == nil && project.selectedStroke == nil)
     }
 
     @Test func theNineSpecsAreListed() throws {
