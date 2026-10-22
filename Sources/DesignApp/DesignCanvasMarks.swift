@@ -1,5 +1,5 @@
 // DesignCanvasMarks.swift: what DesignCanvas paints over the page. DesignArtwork is
-// the page's nodes in paint order (frames, rectangles, ellipses, and text through
+// the page's nodes in paint order (frames, rectangles, ellipses, shapes, and text through
 // DesignTextArtwork), at the canvas zoom, in one SwiftUI Canvas, each drawn as
 // stored (style-rows ST-5): corner radius, a stroke centered on the edge, and its
 // opacity times every enclosing layer's, so a frame fades its contents. The shape
@@ -18,6 +18,8 @@
 //   line width on screen at any zoom. A document stroke is artwork: its width scales.
 // - A node draws at `DesignPainted.opacity`, its own opacity times its ancestors'.
 // - A turned or mirrored node draws its upright shape through artworkPlacement, the kernel's matrix.
+// - A shape node draws its spec's path in its frame (DesignNode.path(in:), the kernel's ShapeRules), so a
+//   resize redraws it; its box only when the spec can't be drawn. A line or arrow is stroked, never filled.
 // - Colors come from SuiteColor, except the document's own fills (DesignColor).
 import DesignModel
 import SuiteKernel
@@ -61,18 +63,47 @@ func drawnOpacity(_ opacity: Double) -> Double {
 
 /// The outline `node` fills at `scale` (view points), or nil for a kind with no shape of its own:
 /// rectangles, frames and instances as rounded rectangles at `drawnCornerRadius`, ellipses as
-/// ellipses. Both keep their curves.
+/// ellipses, a shape as its spec's path in its frame (its box when the spec draws none). All keep their curves.
 func artworkPath(for node: DesignNode, scale: Double) -> Path? {
     let scale = usable(scale)
     let box = node.frame.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale))
     switch node.kind {
-    case .frame, .rectangle, .instance, .shape:  // a shape draws its box until DS-3 draws its path
+    case .frame, .rectangle, .instance, .shape:
+        if node.kind == .shape, let path = node.path(in: node.frame) { return artworkPath(path, scale: scale) }
         return RoundedRectangle(cornerRadius: node.drawnCornerRadius * scale).path(in: box)
     case .ellipse:
         return Path(ellipseIn: box)
     case .text, .group:
         return nil
     }
+}
+
+/// `path` (document space) at `scale`, in view points, curves kept.
+func artworkPath(_ path: VectorPath, scale: Double) -> Path {
+    let at = { (p: Point) in CGPoint(x: p.x * scale, y: p.y * scale) }
+    var drawn = Path()
+    for element in path.elements {
+        switch element {
+        case .move(let to): drawn.move(to: at(to))
+        case .line(let to): drawn.addLine(to: at(to))
+        case .quad(let control, let to): drawn.addQuadCurve(to: at(to), control: at(control))
+        case .cubic(let c1, let c2, let to): drawn.addCurve(to: at(to), control1: at(c1), control2: at(c2))
+        case .close: drawn.closeSubpath()
+        }
+    }
+    return drawn
+}
+
+/// Whether `node` is a line or an arrow, which the canvas strokes and never fills.
+func artworkIsOpen(_ node: DesignNode) -> Bool {
+    node.kind == .shape && (node.shape?.kind == .line || node.shape?.kind == .arrow)
+}
+
+/// How a line or arrow `node` strokes at `scale`: its own stroke, else a default-width line in its fill colour,
+/// so an open shape always shows.
+func artworkLine(for node: DesignNode, scale: Double) -> (color: Color, style: StrokeStyle) {
+    if let stroke = node.stroke, let style = artworkStroke(for: node, scale: scale) { return (stroke.color.color, style) }
+    return (node.fill.color, StrokeStyle(lineWidth: DesignStroke.default.width * usable(scale)))
 }
 
 /// What `node` fills with at `scale` (view points): its gradient, its unit box drawn over its frame
@@ -131,7 +162,10 @@ func paintArtwork(
         var faded = context
         faded.opacity = item.opacity * fade
         faded.concatenate(artworkPlacement(node.transformBox, scale: scale))
-        if let shape = artworkPath(for: node, scale: scale) {
+        if let shape = artworkPath(for: node, scale: scale), artworkIsOpen(node) {
+            let line = artworkLine(for: node, scale: scale)
+            faded.stroke(shape, with: .color(line.color), style: line.style)
+        } else if let shape = artworkPath(for: node, scale: scale) {
             faded.fill(shape, with: artworkShading(for: node, scale: scale))
             if let stroke = node.stroke, let style = artworkStroke(for: node, scale: scale) {
                 faded.stroke(shape, with: .color(stroke.color.color), style: style)
