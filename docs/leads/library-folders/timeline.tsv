@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 1792628504	-	merged	FO-z	#4256 c4607f1
 1792628918	-	watch	FO-z	Heartbeat: waiting for a dev CI run containing c4607f1 with green Linux (dev red on SuiteModel FormatListRatchetTests, not ours).
 1792629832	-	watch	FO-z	Heartbeat: Linux check 39699955972 on c4607f1 and full CI 39700185524 on add701f pending.
+1792630745	-	watch	FO-z	Heartbeat: Linux at c4607f1 red on SuiteModel FormatListRatchetTests (not ours); waiting for a green dev Linux run.
