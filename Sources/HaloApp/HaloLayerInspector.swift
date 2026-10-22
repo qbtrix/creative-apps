@@ -12,7 +12,8 @@
 // the viewer's layers re-run per sample; once it ends (a drag, a key, a typed
 // value) the row sends .setProperty with the stored value and
 // .endPropertyScrub, one step. Hosted without a HaloLiveEdit, each value is
-// sent as it comes.
+// sent as it comes. Under `-SuitePerfProbe` each scrub value records an
+// `inspector-scrub` sample (HaloProbe).
 // Each row is `halo.inspector.row.<raw>` and reads its value as text
 // (XCUITest reads values empty otherwise, #262); its stopwatch is
 // `halo.inspector.key.<raw>`, labelled "Animate <title>" with the key state
@@ -95,6 +96,7 @@ struct HaloPropertyRowView: View, Equatable {
     /// The bar's shown value while a scrub lasts; nil otherwise.
     @State private var scrubbed: Double?
     @Environment(\.haloLiveEdit) private var live
+    @Environment(\.suiteProbeRecorder) private var recorder
 
     #if DEBUG
     /// How many times a row's body ran; HaloWindowPlaybackTests counts playback's.
@@ -145,6 +147,7 @@ struct HaloPropertyRowView: View, Equatable {
     private func scrub(to shown: Double) {
         let p = row.property
         scrubbed = shown
+        defer { HaloProbe(recorder).sample(HaloProbe.inspectorScrub) }
         guard let live else { return perform(.setProperty(p, p.stored(fromShown: shown))) }
         live.show { $0.setProperty(p, to: p.stored(fromShown: shown)) }
     }

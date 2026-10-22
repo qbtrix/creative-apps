@@ -1,0 +1,19 @@
+{
+  "flows": [
+    {
+      "id": "open-an-image-in-photo",
+      "name": "Opening an image in Photo",
+      "description": "File > Open with a PNG, JPEG or HEIC: the window reads the file, PhotoModel decodes it into the canvas, and the window notes it in recents and draws it.",
+      "steps": [
+        { "at": "photo-app", "label": "File > Open runs the open panel; the person picks a PNG, JPEG or HEIC, and the window reads its bytes and pixel size" },
+        { "note": "A .ora Photo Document takes the archive path instead: it decodes off the main actor, then PhotoModel's openDocument." },
+        { "from": "photo-app", "to": "photo-model", "label": "openImage(data, name, codec: ImageIOCodec, longestSide)", "technology": "Swift call" },
+        { "at": "photo-model", "label": "decodes through the codec the window passed in, capped at Photo's open size" },
+        { "from": "photo-model", "to": "coreraster", "label": "lays the decoded RGBA8 pixels into the canvas PixelBuffer", "technology": "CoreRaster" },
+        { "from": "photo-model", "to": "photo-app", "label": "the window reads the new canvas and the document name", "reverse": true },
+        { "from": "photo-app", "to": "suite-shell", "label": "notes the file in Open Recent and the suite's shared recents", "technology": "SuiteDocumentsBridge" },
+        { "from": "photo-model", "to": "corerender", "label": "draws the canvas picture through RenderDispatcher", "technology": "CoreRender" }
+      ]
+    }
+  ]
+}
