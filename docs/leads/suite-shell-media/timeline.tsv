@@ -89,3 +89,4 @@ utc	stage	event	ref	note
 2026-10-22T17:16:43Z	SM-r	waiting	-	runs 39810338100/39801392118/39814071339 cancelled, 39791265992 Halo-red; waiting for a green run
 2026-10-22T17:18:23Z	SM-z	fixing	#4421	head Linux red on Halo test; merged dev (has #4431 fix), gating
 2026-10-22T17:21:53Z	SM-z	ready	#4421	dev merged for Halo fix; gate pass; head e1157a561
+2026-10-22T17:49:42Z	SM-z	waiting	#4421	lane macOS build on e1157a561 pending; SM-r waits on full CI 39818716525
