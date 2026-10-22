@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-22T22:52:52Z	3	merge	PH-m	#4618 merged e6eddf40; awaiting dev Linux run
 2026-10-22T23:14:06Z	3	check	PH-m	dev Linux check 39868481674 running with e6eddf40; #4437 mac build running
 2026-10-22T23:30:57Z	3	done	PH-m	Belt-Slice-Done PH-m run 39868481674
+2026-10-22T23:38:09Z	3	stage	PH-z	PH-8 draft #4658 b541b75b on PH-z
