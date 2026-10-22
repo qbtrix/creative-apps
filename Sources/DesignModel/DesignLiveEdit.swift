@@ -3,11 +3,14 @@
 // workspace itself, so the selection shows at once; `begin(from:)` then takes
 // a copy, each later sample reruns the gesture on that copy (`sample`) or sets
 // the scrubbed value on the copy taken at `begin` (`preview`), and the
-// workspace is left alone. `end(into:)` replays the last sample or value into
-// the workspace through its own methods (`drag` then `endDrag`, or `setStyle`
-// then `endEditRun`), so the gesture lands as the one undo step it would have
+// workspace is left alone. A transform scrub (the inspector's Rotation bar)
+// previews its kernel intent the same way (`preview(_: TransformIntent)`).
+// `end(into:)` replays the last sample or value into the workspace through its
+// own methods (`drag` then `endDrag`, `setStyle` or `runTransform` then
+// `endEditRun`), so the gesture lands as the one undo step it would have
 // been sample by sample, and clears the copy. DesignApp's DesignLiveDrag holds
 // one where SwiftUI can watch it without the window. Linux-safe.
+import SuiteKernel
 
 /// A drag or scrub shown on a copy of the workspace until it ends.
 public struct DesignLiveEdit: Sendable, Equatable {
@@ -15,6 +18,7 @@ public struct DesignLiveEdit: Sendable, Equatable {
     private enum Last: Sendable, Equatable {
         case drag(from: DesignPoint, to: DesignPoint, modifiers: DesignModifiers)
         case style(DesignStyleChange)
+        case transform(TransformIntent)
     }
 
     /// The copy the canvas draws while a gesture lasts; nil with none live.
@@ -46,6 +50,15 @@ public struct DesignLiveEdit: Sendable, Equatable {
         last = .style(change)
     }
 
+    /// One value of a transform scrub, run on the copy `begin` took, as `preview(_: DesignStyleChange)`
+    /// sets a style. Nothing before `begin`.
+    public mutating func preview(_ intent: TransformIntent) {
+        guard var shown = base else { return }
+        shown.runTransform(intent)
+        workspace = shown
+        last = .transform(intent)
+    }
+
     /// Replays the last sample or value into `model` and ends it there as one step, then clears
     /// the copy. A drag with no sample after the press only ends. Returns a refused value's reason.
     @discardableResult
@@ -58,6 +71,9 @@ public struct DesignLiveEdit: Sendable, Equatable {
         case .style(let change):
             defer { model.endEditRun() }
             do { try model.setStyle(change) } catch { return error }
+        case .transform(let intent):
+            model.runTransform(intent)
+            model.endEditRun()
         case nil:
             model.endDrag()
         }

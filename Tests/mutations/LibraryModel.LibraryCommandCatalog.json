@@ -19,5 +19,47 @@
     "find": "{ .setRating($1.stars) }",
     "replace": "{ _, _ in .setRating(3) }",
     "tests": "LibraryCommandCatalogTests"
+  },
+  {
+    "label": "reasonWhenUnavailable: Show Original is always available",
+    "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "find": "availability: { available($0.showOriginalHelp) }",
+    "replace": "availability: { _ in .available }",
+    "tests": "LibraryCommandPathTests"
+  },
+  {
+    "label": "paramsReachRun: Export… ignores its options but the folder",
+    "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "find": "c.beginExport(folder: o.folder, last: o)",
+    "replace": "c.beginExport(folder: o.folder)",
+    "tests": "LibraryCommandPathTests"
+  },
+  {
+    "label": "showOriginalToggles: Show Original only ever turns on",
+    "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "find": "originalPhotoID = showsOriginal ? nil : focusedItemID",
+    "replace": "originalPhotoID = focusedItemID",
+    "tests": "LibraryCommandPathTests"
+  },
+  {
+    "label": "reasonWhenUnavailable: Close Export is always available",
+    "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "find": "help: { $0.exportCloseHelp })",
+    "replace": "help: { _ in nil })",
+    "tests": "LibraryCommandPathTests"
+  },
+  {
+    "label": "paramsReachRun: Apply Preset ignores its quality",
+    "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "find": "quality: quality, folder: \"\",",
+    "replace": "quality: 85, folder: \"\",",
+    "tests": "LibraryCommandPathTests"
+  },
+  {
+    "label": "noticeControls: Show Failures never turns off",
+    "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "find": "c.failuresShownFor = c.showsImportFailures ? nil : c.importNotice",
+    "replace": "c.failuresShownFor = c.importNotice",
+    "tests": "LibraryCommandPathTests"
   }
 ]

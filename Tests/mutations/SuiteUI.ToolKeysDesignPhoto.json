@@ -1,0 +1,37 @@
+[
+  {
+    "label": "refusalIsSuccess: Photo's key faces drop the workspace's help, so a disabled Brush's B picks it",
+    "file": "Sources/PhotoApp/PhotoPaletteTool.swift",
+    "find": "PhotoPaletteTool(tool: $0, help: help($0))",
+    "replace": "PhotoPaletteTool(tool: $0, help: nil)",
+    "tests": "PhotoToolsKeyTests"
+  },
+  {
+    "label": "firstCharacterOnly: Photo reads the first of several typed characters, so \"bv\" picks Brush",
+    "file": "Sources/PhotoApp/PhotoPaletteTool.swift",
+    "find": "guard characters.count == 1, let key = characters.first else { return nil }",
+    "replace": "guard let key = characters.first else { return nil }",
+    "tests": "PhotoToolsKeyTests"
+  },
+  {
+    "label": "localLookup: Design matches the letter itself, case-sensitive and blind to a disabled tool, so P picks Pen",
+    "file": "Sources/DesignApp/DesignCanvas.swift",
+    "find": "return ToolKeys.tool(forKey: key, in: allCases)",
+    "replace": "return allCases.first { $0.shortcut == key }",
+    "tests": "DesignToolsKeyTests"
+  },
+  {
+    "label": "firstCharacterOnly: Design reads the first of several typed characters, so \"rv\" picks Rectangle",
+    "file": "Sources/DesignApp/DesignCanvas.swift",
+    "find": "guard characters.count == 1, let key = characters.first else { return nil }",
+    "replace": "guard let key = characters.first else { return nil }",
+    "tests": "DesignToolsKeyTests"
+  },
+  {
+    "label": "caseSensitive: ToolKeys stops lower-casing the key, so a Shift-typed R picks nothing in Design or Photo",
+    "file": "Sources/SuiteUI/SuiteToolPicking.swift",
+    "find": "let wanted = key.lowercased()",
+    "replace": "let wanted = String(key)",
+    "tests": "DesignToolsKeyTests|PhotoToolsKeyTests"
+  }
+]

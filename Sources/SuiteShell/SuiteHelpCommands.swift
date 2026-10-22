@@ -2,7 +2,10 @@
 // replaces the system's empty help item with Report a Problem…, Beta Notes and, in the launcher only,
 // Welcome to AfterGlow, which opens the tour. Each item is MenuCommand(spec, on:) over a SuiteHelpDocument
 // read through ShellHelpProvider. An item whose run isn't built yet is disabled and says why (no dead
-// controls); RP-5 wires the report sheet and the beta notes window and drops it from `notBuilt`.
+// controls). Report a Problem… begins ProblemReportSheet on the front window over ShellHelpProvider's report
+// (RP-3); Copy puts the text on the pasteboard, and Save… and Email… hand it to ProblemReportActions (RP-3e),
+// so the app sends nothing itself. Beta Notes opens a window titled Beta Notes over BetaNotes.current.
+import AppKit
 import SuiteKernel
 import SuiteModel
 import SuiteUI
@@ -19,11 +22,8 @@ public struct SuiteHelpCommands: Commands {
         ["help.report-problem", "help.beta-notes"] + (app == .launcher ? ["help.welcome"] : [])
     }
 
-    /// Why each item that runs nothing yet is disabled.
-    static let notBuilt = [
-        "help.report-problem": "The report sheet isn't in this build yet.",
-        "help.beta-notes": "The beta notes window isn't in this build yet.",
-    ]
+    /// Why each item that runs nothing yet is disabled: none since RP-3.
+    static let notBuilt: [String: String] = [:]
 
     /// The item's accessibility id: Welcome keeps the onboarding id its journeys use.
     static func identifier(_ id: String) -> String {
@@ -45,6 +45,79 @@ public struct SuiteHelpCommands: Commands {
 
     @MainActor private func perform(_ id: String) {
         if id == "help.welcome" { openWindow(id: "onboarding") }
+        if id == "help.report-problem" { SuiteHelpPresenter.shared.showReport(app: app) }
+        if id == "help.beta-notes" { SuiteHelpPresenter.shared.showBetaNotes() }
+    }
+}
+
+/// The process's Report a Problem sheet and Beta Notes window, one of each at a time.
+@MainActor final class SuiteHelpPresenter {
+    static let shared = SuiteHelpPresenter()
+
+    private var host: NSWindow?
+    private var sheet: NSWindow?
+    private var notes: NSWindow?
+    private var report = ProblemReport(app: "", version: "", build: "", macOS: "", model: "", crashes: [])
+
+    /// Begins the report sheet on the front window, or shows it as its own window when none is open.
+    func showReport(app: SuiteApp) {
+        if let sheet, sheet.sheetParent != nil || sheet.isVisible { sheet.makeKeyAndOrderFront(nil); return }
+        report = Self.report(ShellHelpProvider().report(app: app.rawValue, note: ""))
+        let view = ProblemReportSheet(
+            report: report,
+            onCopy: { text in
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(text, forType: .string)
+            },
+            onSave: { [weak self] text in self?.save(text) },
+            onEmail: { [weak self] text in self?.email(text) },
+            onClose: { [weak self] in self?.closeReport() })
+        let panel = NSWindow(contentViewController: NSHostingController(rootView: view))
+        panel.title = "Report a Problem"
+        panel.isReleasedWhenClosed = false
+        sheet = panel
+        host = NSApp.keyWindow ?? NSApp.mainWindow
+        if let host { host.beginSheet(panel) } else { panel.makeKeyAndOrderFront(nil) }
+    }
+
+    /// Save… and Email…: the sheet's text with this report's subject and file name.
+    func save(_ text: String) { ProblemReportActions.save(ProblemReportOutput(report: report, text: text)) }
+    func email(_ text: String) { ProblemReportActions.email(ProblemReportOutput(report: report, text: text)) }
+
+    func closeReport() {
+        guard let sheet else { return }
+        if let host, sheet.sheetParent != nil { host.endSheet(sheet) } else { sheet.close() }
+        self.sheet = nil
+        host = nil
+    }
+
+    /// Opens, or brings forward, the Beta Notes window.
+    func showBetaNotes() {
+        if notes == nil {
+            let window = NSWindow(contentViewController: NSHostingController(rootView: BetaNotesView(notes: BetaNotes.current) { [weak self] in
+                self?.notes?.close()
+            }))
+            window.title = "Beta Notes"
+            window.isReleasedWhenClosed = false
+            notes = window
+        }
+        notes?.makeKeyAndOrderFront(nil)
+    }
+
+    /// ShellHelpProvider's report object back as a ProblemReport; "" for a field it lacks.
+    static func report(_ value: JSONValue) -> ProblemReport {
+        guard case .object(let fields) = value else {
+            return ProblemReport(app: "", version: "", build: "", macOS: "", model: "", crashes: [])
+        }
+        func string(_ value: JSONValue?) -> String? {
+            if case .string(let text)? = value { return text }
+            return nil
+        }
+        var crashes: [String] = []
+        if case .array(let list)? = fields["crashes"] { crashes = list.compactMap(string) }
+        return ProblemReport(
+            app: string(fields["app"]) ?? "", version: string(fields["version"]) ?? "", build: string(fields["build"]) ?? "",
+            macOS: string(fields["macOS"]) ?? "", model: string(fields["model"]) ?? "", crashes: crashes)
     }
 }
 
