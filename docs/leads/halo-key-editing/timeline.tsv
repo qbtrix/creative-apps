@@ -81,3 +81,4 @@ utc	stage	event	ref	note
 2026-10-22T02:07Z	poll	changed: lane Linux check on #4235 (39705347770) red only on dev break FormatListRatchetTests (#3856); fix #4258 (shell-media) on lane, macOS build pending; noted on #4235. #3499 unchanged. Blocked 0/3.
 2026-10-22T02:40Z	pr	#4258 closed (superseded by #4238 SC-14, on dev, clears FormatListRatchet). Merged origin/dev into #4235, scripts/ci --changed PASS, pushed bbc7ade7a, moved Head:. #3499 unchanged. Blocked 0/3.
 2026-10-22T02:54Z	blocked	1/3: #4235 bbc7ade7a lane macOS build 39712739074 queued since 02:41Z; clean, no labels; #3499 unchanged.
+2026-10-22T03:15Z	blocked	2/3: #4235 bbc7ade7a lane macOS build 39712739074 still queued (since 02:41Z); clean, no labels; #3499 unchanged.
