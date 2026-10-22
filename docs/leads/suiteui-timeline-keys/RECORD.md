@@ -2,7 +2,7 @@
 
 Issue: #3780 · Packet: docs/blueprints/suiteui/features/timeline-keys.md
 Run: act-1a1620043af-tzh0 · Started: 2026-10-22T05:00Z (resumed from act-1a15fddd101-68r5)
-Stage: 3 wave 2 (finishing: TK-flare #4328 6f05c789 macOS build green, waiting on lane merge; TK-u critics wait on full journeys 39751426611 at 71987f72; polled 09:23Z)
+Stage: 3 wave 2 (finishing: TK-flare #4328 merged ec600875, waiting on dev Linux 39756689216; TK-u critics wait on full journeys 39751426611 at 71987f72; polled 09:43Z)
 Base: 0dd23d659f4dbd8a0120aa85a321259327518251 (main); dev 8cf02113
 Next: supervisor (06:19Z): stop after TK-flare (#4328) lands; post TK-flare Belt-Slice-Done + Mac-Finish-Wanted, run TK-u critic panel on full journeys 39751426611 at 71987f72 (flare journeys 39734406363 tested 6e19f406, before TK-u; the scoped suite run 39721019643 passed with no screens), then stop. TK-6, TK-z wait for a relaunch (waiting-on-prereq) once AJ-halo, TS-halo, AN-halo land.
 
@@ -12,7 +12,7 @@ Next: supervisor (06:19Z): stop after TK-flare (#4328) lands; post TK-flare Belt
 | TK-a | ColorKeyRules/SpanRules stubs, Halo span spec stubs, disabled suites | TK-1, TK-2 | – | frame-rates:FR-a (merged) | false | 0 | done #4183 | 39724795297 | – |
 | TK-u | Flare key buttons; TimelineStrip onSlide; Halo timeline on stubs | TK-3, TK-4 | FlareJourneyTests+FillKeys, HaloJourneyTests+Span (skipped) | TK-a, timeline, timeline-select-all | true | 0 | done #4191 | 39724795297 | wanted |
 | TK-m | rule bodies; Halo span bodies | TK-5, TK-6 | – | TK-a; TK-6: AE-halo, AJ-halo, TS-halo, AN-halo | false | 0 | TK-5 merged #4185; TK-6 blocked | – | – |
-| TK-flare | Flare colour keys on live | TK-7, TK-8 | FJ-TK | TK-5 (#4185), AE-flare (done), TK-u (#4191) | true | 0 | pr #4328 | – | – |
+| TK-flare | Flare colour keys on live | TK-7, TK-8 | FJ-TK | TK-5 (#4185), AE-flare (done), TK-u (#4191) | true | 1 | merged #4328 | – | – |
 | TK-z | Halo timeline on live; status built; feature-done | TK-9, TK-10 | HJ-TK, RJ-H51 | TK-m, TK-u, TK-flare | true | 0 | blocked | – | – |
 
 ## Tasks

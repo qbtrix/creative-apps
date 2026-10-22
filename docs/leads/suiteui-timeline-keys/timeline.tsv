@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-22T08:44Z	poll	TK-flare macOS build 39744207685 still queued; journeys 39734406363 running.
 2026-10-22T09:06Z	check	flare journeys 39734406363 passed but tested 6e19f406, which predates TK-u (bd793a5db): no tk-1-paint-keys screen. TK-u critics move to full journeys 39751426611 at 71987f72 (contains bd793a5db), pending. TK-flare #4328 macOS build 39744207685 still queued.
 2026-10-22T09:23Z	check	TK-flare #4328 macOS build 39744207685 green on 6f05c789; waiting for the lane to merge. Full journeys 39751426611 still pending.
+2026-10-22T09:43Z	merged	TK-flare #4328 merged 09:28Z as ec600875 (TK-flare rounds 1). dev Linux check 39756689216 on 1896483c (contains it) in progress.
