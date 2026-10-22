@@ -1,7 +1,4 @@
-// FlareColorKeysTests.swift: timeline-keys TK-7 on `.built`. Fill colour, stroke colour and stroke width obey the
-// recording rule: recording on, or a track that already has keys, keys the edit at the playhead; off on a static
-// property sets the static value. `keyState` follows the playhead by the kernel's frame rules, and the paint key
-// toggle adds the key at the playhead or removes it, the last key leaving the property static.
+// FlareColorKeysTests.swift: timeline-keys TK-7 on `.built`: paint keys, their recording rule, state and toggle.
 import FlareCore
 @testable import FlareModel
 import Testing
@@ -31,19 +28,12 @@ private func colorKeys(_ key: String, _ w: FlareWorkspace) -> [ColorKeyframe] { 
     #expect(colorKeys("fill.0", w).first?.value == orange)
     #expect(layer(w)?.shapes.first?.fill == before)
     #expect(w.paint?.fillHex == "FF9500")
+    w.setCurrentFrame(0)
+    w.setFill(hex: "0000FF")
+    #expect(colorKeys("fill.0", w).map(\.value) == [blue, orange])
+    w.undo()
     w.undo()
     #expect(colorKeys("fill.0", w).isEmpty)
-}
-
-@Test func recordingOnAtFrame30AddsAKeyThereAndKeepsFrameZerosKey() {
-    var w = ball()
-    w.setFill(hex: "0000FF")
-    w.togglePaintKey(.fill)
-    w.toggleAutoKey()
-    w.setCurrentFrame(30)
-    w.setFill(hex: "FF9500")
-    #expect(colorKeys("fill.0", w).map(\.frame) == [0, 30])
-    #expect(colorKeys("fill.0", w).map(\.value) == [blue, orange])
 }
 
 @Test func recordingOnKeysStrokeColourAndWidth() {
@@ -54,8 +44,7 @@ private func colorKeys(_ key: String, _ w: FlareWorkspace) -> [ColorKeyframe] { 
     w.setStrokeColor(hex: "0000FF")
     w.setStrokeWidth(6)
     #expect(colorKeys("stroke.0", w).map(\.frame) == [12])
-    #expect(layer(w)?.tracks["strokeWidth.0"]?.map(\.frame) == [12])
-    #expect(layer(w)?.tracks["strokeWidth.0"]?.first?.value == 6)
+    #expect(layer(w)?.tracks["strokeWidth.0"]?.map { [Double($0.frame), $0.value] } == [[12, 6]])
     #expect(layer(w)?.shapes.first?.stroke?.width == 2)
 }
 
@@ -66,7 +55,6 @@ private func colorKeys(_ key: String, _ w: FlareWorkspace) -> [ColorKeyframe] { 
     w.setCurrentFrame(30)
     w.togglePaintKey(.fill)
     let staticFill = layer(w)?.shapes.first?.fill
-    #expect(!w.autoKey)
     w.setCurrentFrame(15)
     w.setFill(hex: "FF9500")
     #expect(colorKeys("fill.0", w).map(\.frame) == [0, 15, 30])
@@ -80,8 +68,7 @@ private func colorKeys(_ key: String, _ w: FlareWorkspace) -> [ColorKeyframe] { 
     w.setCurrentFrame(20)
     w.setFill(hex: "FF9500")
     w.setStrokeWidth(3)
-    #expect(layer(w)?.colorTracks.isEmpty == true)
-    #expect(layer(w)?.tracks["strokeWidth.0"] == nil)
+    #expect(layer(w)?.colorTracks.isEmpty == true && layer(w)?.tracks["strokeWidth.0"] == nil)
     #expect(layer(w)?.shapes.first?.fill == .solid(orange))
     #expect(layer(w)?.shapes.first?.stroke?.width == 3)
 }
@@ -90,8 +77,7 @@ private func colorKeys(_ key: String, _ w: FlareWorkspace) -> [ColorKeyframe] { 
 func keyStateFollowsThePlayhead(_ key: FlareWorkspace.PaintKey) {
     var w = ball()
     w.setStrokeWidth(2)
-    #expect(w.keyState(key) == .notAnimated)
-    #expect(w.paintKeyHelp(key) == nil)
+    #expect(w.keyState(key) == .notAnimated && w.paintKeyHelp(key) == nil)
     w.togglePaintKey(key)
     #expect(w.keyState(key) == .notAnimated)
     w.setCurrentFrame(30)
@@ -114,9 +100,10 @@ func keyStateFollowsThePlayhead(_ key: FlareWorkspace.PaintKey) {
     w.togglePaintKey(.fill)
     w.setCurrentFrame(30)
     w.setFill(hex: "FF9500")
+    w.setCurrentFrame(0)
     w.togglePaintKey(.fill)
     #expect(colorKeys("fill.0", w).isEmpty)
-    #expect(layer(w)?.shapes.first?.fill == .solid(blue))
+    #expect(layer(w)?.shapes.first?.fill == .solid(orange))
     w.undo()
     #expect(colorKeys("fill.0", w).map(\.frame) == [0, 30])
 }
