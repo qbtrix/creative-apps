@@ -2,9 +2,10 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a161a658a7-2jql · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: 4407 and 4408 in macOS build
+Stage: FR-flare merged, FR-z in progress
 Base: dev
-Next: critic round 2 for FR-u on run 39765697963; FR-z once 4407 and 4408 merge
+Next: FR-z after 4407: RJ-X74 turn-on, journey, FR-12 feature-done; critic round 2 for FR-u
+
 
 
 
@@ -30,6 +31,7 @@ Next: critic round 2 for FR-u on run 39765697963; FR-z once 4407 and 4408 merge
 
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 12:58Z: 4402 and 4408 (FR-flare) merged. 4407 (FR-halo) waits on its per-PR macOS build. FR-z started in wt-frz: FR-11 FrameRateHomeTests written and building; RJ-X74 turn-on, FJ-FR journey and FR-12 follow once 4407 lands.
 - 12:25Z: heartbeat. Lane dispatched per-PR macOS builds for 4407 and 4408; 4402 waiting. Run 39765697963 still queued.
 - 12:03Z: heartbeat. 4402 4407 4408 open and labelled, waiting for the lane. Run 39765697963 still queued.
 - 11:58Z: opened #4407 (FR-8b, FR-halo, mutate 17 of 17), #4408 (FR-10b, FR-flare, mutate 13 of 13), #4402 (FR-flare wave list, docs). All gates PASS, fast-lane labelled.
