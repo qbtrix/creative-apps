@@ -37,3 +37,4 @@ utc	stage	event	ref	note
 2026-10-21T23:52:36Z	stage	ST-a	#4034 merged 3364dd9dc; #4135 restacked on dev, head 1d8d84fdd; gate red on dev ratchet (Media.swift from #4034 vs FormatListRatchet #4019), not ours; draft until dev green
 2026-10-22T00:14:52Z	check	ST-a	dev ratchet still red (run 39695796699); noted on #3856
 2026-10-22T00:32:45Z	check	ST-a	dev run 39697907658 still red on FormatListRatchet (Media.swift); #4135 held as draft
+2026-10-22T00:49:19Z	check	ST-a	dev still red on FormatListRatchet (run 39699955972); fix #4258 open in lane; port would push #4135 to 16 files (cap 15), so wait for #4258 to merge
