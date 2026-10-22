@@ -1,0 +1,78 @@
+utc	stage	event	ref	note
+2026-10-20T04:46Z	0	stage-start	#3449	base 18464f26b9
+2026-10-20T04:46Z	0	stage-end	#3449	lead/shape-tools created
+2026-10-20T04:46Z	1	stage-start	#3449	packet read
+2026-10-20T04:46Z	1	stage-end	#3449	slices and tasks copied
+2026-10-20T04:46Z	2	stage-start	#3449	combined plan with the other two features
+2026-10-20T04:50Z	2	stage-end	#3449	combined plan recorded
+2026-10-20T04:50Z	3	stage-start	SH-a	wave 1 builder started (worktree)
+2026-10-20T05:06Z	3	heartbeat	-	lead polling builders
+2026-10-20T05:21Z	3	heartbeat	-	lead polling builders
+2026-10-20T05:24Z	3	pr-opened	#3483	SH-a slice PR, 398 lines, 10 files, head 2539324
+2026-10-20T05:24Z	3	stage-end	SH-a	wave 1 shape-tools done
+2026-10-20T05:24Z	3	stage-start	SH-m	wave 2 builder (stacked on SH-a)
+2026-10-20T05:24Z	3	stage-start	SH-u	wave 2 builder (stacked on SH-a)
+2026-10-20T05:36Z	3	heartbeat	-	lead polling builders
+2026-10-20T05:42Z	3	fix	pr-bodies	attribution footer removed from slice PR bodies
+2026-10-20T05:48Z	3	pr-open	#3509	SH-u (SH-3, SH-4), 395 lines, stacked on #3483
+2026-10-20T05:51Z	3	heartbeat	-	lead polling builders
+2026-10-20T06:06Z	3	heartbeat	-	lead polling: #3483 open #3509 open
+2026-10-20T06:06Z	3	pr-open	#3523	SH-m (SH-5, SH-6), stacked on #3483
+2026-10-20T06:21Z	3	heartbeat	-	lead polling: #3483 open #3509 open #3523 open
+2026-10-20T06:36Z	3	heartbeat	-	lead polling: #3483 open #3509 open #3523 open
+2026-10-20T06:51Z	3	heartbeat	-	lead polling: #3483 open #3509 open #3523 open
+2026-10-20T07:06Z	3	heartbeat	-	lead polling: #3483 open #3509 open #3523 open
+2026-10-20T07:11Z	3	merged	#3483	SH-a into dev ddf5b86e; restack started
+2026-10-20T07:22Z	3	heartbeat	-	lead polling: #3509 open #3523 open
+2026-10-20T07:24Z	3	restacked	#3509,#3523	onto dev ddf5b86e, gate PASS
+2026-10-20T07:37Z	3	slice-done	SH-a	https://github.com/qbtrix/creative-apps/actions/runs/39386117416
+2026-10-20T07:37Z	3	heartbeat	-	lead polling: #3509 open #3523 open
+2026-10-20T08:06Z	3	heartbeat	-	lead polling: #3509 open #3523 merged
+2026-10-20T08:07Z	3	merged	#3523	SH-m into dev 83750492
+2026-10-20T08:07Z	3	building	SH-7	stacked on #3509
+2026-10-20T08:16Z	3	pr-open	#3567	SH-7, stacked on #3509
+2026-10-20T08:21Z	3	heartbeat	-	lead polling: #3509 open #3567 open
+2026-10-20T08:36Z	3	heartbeat	-	lead polling: #3509 open #3567 open
+2026-10-20T08:38Z	3	slice-done	#3523	SH-m Belt-Slice-Done https://github.com/qbtrix/creative-apps/actions/runs/39393071639
+2026-10-20T08:51Z	3	heartbeat	-	lead polling: #3509 open #3567 open
+2026-10-20T09:06Z	3	heartbeat	-	lead polling: #3509 open #3567 open
+2026-10-20T09:10Z	3	mac-build-red	#3509	journey comment line 7 missing //; fixer sent
+2026-10-20T09:19Z	3	fix-pushed	#3509	head e62e666f
+2026-10-20T09:19Z	3	restack	#3567	head d302cba5
+2026-10-20T09:22Z	3	heartbeat	-	lead polling: #3509 open #3567 open
+2026-10-20T09:33Z	3	needs-rebase	#3509	C4 part conflict; fixer sent
+2026-10-20T09:37Z	3	heartbeat	-	lead polling: #3509 open,needs-rebase #3567 open
+2026-10-20T09:42Z	3	restack	#3509	head f1913a62 (dev merged)
+2026-10-20T09:42Z	3	restack	#3567	head fd41010c
+2026-10-20T10:08Z	3	heartbeat	-	lead polling PRs 3509 3567 
+2026-10-20T10:38Z	3	heartbeat	-	lead polling PRs 3509 3567 
+2026-10-20T10:44Z	3	needs-rebase	#3509	C4 suiteui-sources description conflict again; fixer merging dev
+2026-10-20T11:08Z	3	heartbeat	-	lead polling PRs 3509 3567 
+2026-10-20T11:12Z	3	restack	#3509	fe695591; #3567 568ddaff
+2026-10-20T11:38Z	3	heartbeat	-	lead polling PRs 3509 3567 
+2026-10-20T12:08Z	3	heartbeat	-	lead polling PRs 3509 3567 
+2026-10-20T12:38Z	3	heartbeat	-	lead polling PRs 3509 3567 
+2026-10-20T12:43Z	3	merged	#3509	SH-u merged as 21acf3c0; restacking #3567 onto dev; waiting on Linux run
+2026-10-20T12:54Z	3	restacked	#3567	onto dev, head adb9337e, CI: PASS, 196 lines/2 files
+2026-10-20T13:00Z	3	slice-done	SH-u	https://github.com/qbtrix/creative-apps/actions/runs/39424989659 (Belt-Slice-Done + Mac-Finish-Wanted on #3449)
+2026-10-20T13:08Z	3	heartbeat	-	lead polling PRs 3567 
+2026-10-20T13:40Z	3	heartbeat	-	lead polling PRs 3567 
+2026-10-20T13:44Z	3	merged	#3567	SH-7 merged; SH-8 waits on eyedropper:EY-z (#3597)
+2026-10-20T14:10Z	3	heartbeat	-	lead polling PRs 
+2026-10-20T14:40Z	3	heartbeat	-	lead polling PRs 
+2026-10-20T15:11Z	3	heartbeat	-	lead polling PRs 
+2026-10-20T15:41Z	3	heartbeat	-	lead polling PRs 
+2026-10-20T16:11Z	3	heartbeat	-	lead polling PRs 
+2026-10-20T16:25:30Z	3	blocked	SH-8	waits on EY-8 <- TT-8 <- autosave-history AH-9 (FakeCanvasDocument.swift order)
+2026-10-20T16:41Z	3	heartbeat	-	lead polling PRs 
+2026-10-20T17:11Z	3	heartbeat	-	lead polling PRs 
+2026-10-20T17:41Z	3	heartbeat	-	lead polling PRs 
+2026-10-20T18:11Z	3	heartbeat	-	lead polling PRs 
+2026-10-20T18:41Z	3	heartbeat	-	lead polling PRs 
+2026-10-20T19:11Z	3	heartbeat	-	lead polling PRs 
+2026-10-20T19:41Z	3	heartbeat	-	lead polling PRs 
+2026-10-20T20:12Z	3	heartbeat	-	lead polling PRs 
+2026-10-20T20:42Z	3	heartbeat	-	lead polling PRs 
+2026-10-22T16:30Z	3	stage-start	#3449	run act-1a1646f0a9f-d1ei resumed for SH-z; branch rebuilt on main 0dd23d65
+2026-10-22T16:31Z	3	stopped	#3449	SH-8 waits on eyedropper:EY-z (TT-z #4429 open first); nothing can start
+2026-10-22T17:10Z	3	poll	#3449	record moved to lead/suiteui-shape-tools; TT-z #4429 open, EY-z unmerged
