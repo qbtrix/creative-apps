@@ -66,3 +66,4 @@ utc	stage	event	ref	note
 2026-10-22T17:40Z	merged	DS-m	#4385	lane merged DS-6 as 62400e4d4 at 17:30Z
 2026-10-22T17:40Z	retarget	DS-u	#4386	base dev, head 91d7f0b80 (merge of dev), ci --changed PASS
 2026-10-22T17:54Z	poll	DS-u	#4386	lane macOS build dispatched 17:45Z; no ci.yml design/full run on dev contains 62400e4d4 yet
+2026-10-22T18:12Z	poll	DS-u	#4386	lane macOS build still running; no design/full ci.yml run on dev contains 62400e4d4 yet
