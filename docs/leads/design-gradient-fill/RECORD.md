@@ -44,3 +44,5 @@ Next: #4189 merges -> Belt-Slice-Done DG-m on a green design run; #4197 merges; 
 - 2026-10-22T00:36Z Gate CI: PASS after the dev merge; pushed #4197→b54de0b5 and moved Head: lines. Waiting on the lane.
 
 - 2026-10-22T01:03Z Heartbeat: #4197 macOS build 39700686875 queued; DG-m waits on scoped design 39693638859 (queued).
+
+- 2026-10-22T01:29Z #4197 macOS build 39700686875 running. Scoped design 39693638859 still queued.
