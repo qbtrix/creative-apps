@@ -65,7 +65,7 @@ import UniformTypeIdentifiers
     }
 
     /// A 480 x 160 SVG: a dark rounded bar with a light circle.
-    static let logoSVG = #"<svg xmlns="http://www.w3.org/2000/svg" width="480" height="160"><rect width="480" height="160" rx="24" fill="#202840"/><circle cx="80" cy="80" r="48" fill="#F0C040"/></svg>"#
+    static let logoSVG = ##"<svg xmlns="http://www.w3.org/2000/svg" width="480" height="160"><rect width="480" height="160" rx="24" fill="#202840"/><circle cx="80" cy="80" r="48" fill="#F0C040"/></svg>"##
     static let logoAsset = PlacedAsset(
         id: "logo", name: "logo.svg", format: .svg, natural: Size(width: 480, height: 160), data: Data(logoSVG.utf8))
 
