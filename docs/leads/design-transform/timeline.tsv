@@ -71,3 +71,5 @@ utc	stage	event	ref	note
 2026-10-22T00:36Z	push	regated	#4254→f9c5b8ac,#4255→5d611ef3	CI: PASS
 2026-10-22T01:03Z	wait	lane-mac	-	#4254 (macOS build 39700862805) and #4255 (39700883014) queued for runners
 2026-10-22T01:29Z	DT-m	mac-green	#4255	39700883014
+2026-10-22T01:57Z	DT-m	linux-red-dev	#4255	waits #4258
+2026-10-22T01:57Z	DT-u	mac-green	#4254	39700862805
