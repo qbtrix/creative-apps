@@ -81,3 +81,4 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-22T03:04Z: SC-f's critic panel waits on scoped suite run 39710836943, queued since 02:20Z. I asked the supervisor about it in the same question on #3715. SC-2 waits on IM-a.
 - 2026-10-22T03:24Z: Scoped suite run 39710836943 is still queued (since 02:20Z), so SC-f's critic panel is held. No supervisor reply yet.
 - 2026-10-22T03:45Z: Unchanged. Scoped suite run 39710836943 is still queued, so SC-f's critic panel is held.
+- 2026-10-22T04:06Z: Scoped suite run 39710836943 started at about 03:52Z and is in progress. SC-f's critic panel starts when its ui-screens are up.
