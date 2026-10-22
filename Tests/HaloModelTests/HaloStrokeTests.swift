@@ -1,8 +1,8 @@
 // HaloStrokeTests.swift: stroke-style MJ-HK, the Model walk. A layer's stroke
 // saves under its own key and old projects open without one (HK-1); a stroke
 // on a shape layer as one step, refusals on text and nulls, one step per
-// gesture, trim keyed at the playhead and the nine specs wait on HK-6's
-// conformance bodies. Linux and macOS.
+// gesture, trim keyed at the playhead and the nine specs listed (HK-6's
+// conformance bodies). Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -47,16 +47,13 @@ import Testing
         #expect(decoded.withID("c").stroke == Self.drawn)
     }
 
-    @Test func theStubsRefuseAndChangeNothing() throws {
+    @Test func runStrokeAddsAStrokeThroughTheCatalog() throws {
         var project = try Self.selecting("Badge")
-        #expect(project.strokeHelp == HaloProject.strokeNotBuiltHelp)
         #expect(project.trimHelp == nil)
         #expect(project.selectedStroke == nil)
-        let before = project.document
-        #expect(throws: (any Error).self) { try project.setStroke(Self.drawn, name: "Add Stroke", drag: nil) }
         project.runStroke(.add)
-        #expect(project.document == before)
-        #expect(project.history.undo.isEmpty)
+        #expect(project.selectedStroke == VectorStroke())
+        #expect(project.history.undo.count == 1)
     }
 
     @Test func onlyShapeLayersTakeAStroke() throws {
@@ -65,7 +62,7 @@ import Testing
         }
     }
 
-    @Test(.disabled("waits on HK-6")) func aShapeLayerTakesAStrokeAsOneStep() throws {
+    @Test func aShapeLayerTakesAStrokeAsOneStep() throws {
         var project = try Self.selecting("Badge")
         #expect(project.strokeHelp == nil)
         try project.setStroke(VectorStroke(), name: "Add Stroke", drag: nil)
@@ -77,7 +74,7 @@ import Testing
         #expect(project.selectedLayer?.stroke == nil)
     }
 
-    @Test(.disabled("waits on HK-6")) func textAndNullsRefuse() throws {
+    @Test func textAndNullsRefuse() throws {
         for name in ["Title", "Rig", "Background"] {
             var project = try Self.selecting(name)
             #expect(project.strokeHelp == "Strokes are for shape layers.")
@@ -88,7 +85,7 @@ import Testing
         }
     }
 
-    @Test(.disabled("waits on HK-6")) func oneStepPerGesture() throws {
+    @Test func oneStepPerGesture() throws {
         var project = try Self.selecting("Badge")
         try project.setStroke(VectorStroke(), name: "Add Stroke", drag: nil)
         for i in 1...120 {
@@ -102,10 +99,10 @@ import Testing
         #expect(project.history.undo.count == steps + 1)
     }
 
-    @Test(.disabled("waits on HK-6")) func trimOnAnAnimatedTrimEndKeysAtThePlayhead() throws {
+    @Test func trimOnAnAnimatedTrimEndKeysAtThePlayhead() throws {
         var project = try Self.selecting("Badge")
         try project.setStroke(VectorStroke(trim: StrokeTrim(start: 0, end: 0)), name: "Add Stroke", drag: nil)
-        project.toggleKeyRaw("trimEnd")
+        project.toggleKey(.trimEnd)
         project.scrub(to: 12)
         try project.setStroke(VectorStroke(trim: StrokeTrim(start: 0, end: 0.5)), name: "Trim Path", drag: nil)
         let keys = try #require(project.selectedLayer?.tracks["trimEnd"])
@@ -113,19 +110,13 @@ import Testing
         #expect(project.selectedStroke?.trim?.end == 0.5)
         project.scrub(to: 0)
         #expect(project.selectedStroke?.trim?.end == 0)
+        try project.setStroke(nil, name: "Remove Stroke", drag: nil)
+        #expect(project.selectedLayer?.tracks["trimEnd"] == nil && project.selectedStroke == nil)
     }
 
-    @Test(.disabled("waits on HK-6")) func theNineSpecsAreListed() throws {
+    @Test func theNineSpecsAreListed() throws {
         let ids = StrokeCommands.specs(HaloProject.self).map(\.id)
         #expect(ids.count == 9)
         #expect(Set(ids).isSubset(of: Set(HaloProject.catalog.ids)))
-    }
-}
-
-extension HaloProject {
-    /// Keys the selected layer's track named `raw` at the playhead; HK-6
-    /// replaces it with `toggleKey(.trimEnd)` once HK-5 adds the property.
-    fileprivate mutating func toggleKeyRaw(_ raw: String) {
-        if let property = HaloProperty(rawValue: raw) { toggleKey(property) }
     }
 }
