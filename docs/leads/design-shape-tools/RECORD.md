@@ -4,7 +4,7 @@ Issue: #3440 · Packet: docs/blueprints/design/features/shape-tools.md
 Run: act-1a162d0f852-70vb · Started: 2026-10-22T08:56Z (prior run act-1a15abb305f-lc8g shipped DS-a)
 Stage: 3 wave 2 done; all slices in PRs, waiting for merges and scoped runs
 Base: dev 561ef1c5
-Next: DS-z PR when built; slice-done lines once a ci.yml run (scoped design or full) contains each slice's last merged PR; retarget #4384 to dev when #4357 merges
+Next: slice-done lines once a ci.yml run (scoped design or full) contains each slice's last merged PR; retarget #4384 to dev when #4357 merges
 
 ## Slices
 | slice | behavior | tasks | waits on | ui | rounds | state | run | mac finish |

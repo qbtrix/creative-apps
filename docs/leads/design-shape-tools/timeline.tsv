@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-22T10:30Z	built	wave 2	DS-z	42951ccde CI: PASS; follow-up adds journey steps 3 (stretch) and 5 (SVG export)
 2026-10-22T10:30Z	poll	-	#4384 #4385 #4386	open, clean, no needs-fix; #4357 not merged; no design ci.yml run with our PRs yet
 2026-10-22T10:29Z	pr	wave 2	#4392	DS-z on DS-u, head a9d34d7e7 (steps 3 and 5 added); fast-lane + feature-done
+2026-10-22T10:45Z	poll	-	#4357 #4384 #4385 #4386 #4392	all open, clean, no needs-fix; #4357 not merged yet; no ci.yml run on dev contains our PRs
