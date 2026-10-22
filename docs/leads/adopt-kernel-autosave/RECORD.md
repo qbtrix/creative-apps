@@ -2,9 +2,9 @@
 
 Issue: #3713 · Packet: docs/blueprints/suiteui/features/adopt-kernel-autosave.md
 Run: act-1a163b2abfe-f182 (relaunch; first run act-1a15c07cabb-mtlw) · Started: 2026-10-22
-Stage: 3 wave 5
+Stage: 3 wave 5 shipped; polling lane
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: fixer merges dev into #4010 (dirty); finding #4015 fixed first (rule 6); AK-10 stacked on #4010 (AH-z merged). AK-6, AK-8, AK-9, AK-11 blocked.
+Next: lane batches #4010 → #4427 → #4428 (stacked) and #4430 (Fixes #4015); AK-flare done from the dev CI run holding #4010; AK-6, AK-8, AK-9, AK-11 blocked (re-read waits each poll)
 
 ## Slices
 
@@ -20,16 +20,16 @@ Next: fixer merges dev into #4010 (dirty); finding #4015 fixed first (rule 6); A
 
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| AK-1 | AK-a | 1 | contract stubs, disabled tests, support-dir ratchet | Sources/SuiteModel/Store/SuiteLocations.swift, Sources/SuiteModel/Store/LegacySupport.swift, Tests/SuiteModelTests/SuiteLocationsAppFolderTests.swift, Tests/SuiteModelTests/SupportFolderRatchetTests.swift, Tests/support-dir-baseline.txt | SupportFolderRatchetTests | #3835 | open |
-| AK-2 | AK-a | 1 | bodies, tests on, mutation plan | Sources/SuiteModel/Store/SuiteLocations.swift, Sources/SuiteModel/Store/LegacySupport.swift, Tests/SuiteModelTests/SuiteLocationsAppFolderTests.swift, Tests/mutations/SuiteModel.SuiteLocations.json, docs/c4/parts/creative-apps/suite-model/suite-store.json | SuiteLocationsAppFolderTests; .appFolderHasAppSegment .neverOverwrites .flagReachesApp | #3835 | open (Mutate 3/3) |
-| AK-3 | AK-flare | 2 | see packet | see packet | see packet | #3842 | open (base feat/ak-a-app-folder) |
-| AK-4 | AK-flare | 4 | see packet | see packet | see packet | #4010 | open (rounds used; dirty) |
-| AK-5 | AK-library | 2 | see packet | see packet | see packet | #3848 | open (base feat/ak-a-app-folder) |
+| AK-1 | AK-a | 1 | contract stubs, disabled tests, support-dir ratchet | Sources/SuiteModel/Store/SuiteLocations.swift, Sources/SuiteModel/Store/LegacySupport.swift, Tests/SuiteModelTests/SuiteLocationsAppFolderTests.swift, Tests/SuiteModelTests/SupportFolderRatchetTests.swift, Tests/support-dir-baseline.txt | SupportFolderRatchetTests | #3835 | merged |
+| AK-2 | AK-a | 1 | bodies, tests on, mutation plan | Sources/SuiteModel/Store/SuiteLocations.swift, Sources/SuiteModel/Store/LegacySupport.swift, Tests/SuiteModelTests/SuiteLocationsAppFolderTests.swift, Tests/mutations/SuiteModel.SuiteLocations.json, docs/c4/parts/creative-apps/suite-model/suite-store.json | SuiteLocationsAppFolderTests; .appFolderHasAppSegment .neverOverwrites .flagReachesApp | #3835 | merged (Mutate 3/3) |
+| AK-3 | AK-flare | 2 | see packet | see packet | see packet | #3842 | merged |
+| AK-4 | AK-flare | 4 | see packet | see packet | see packet | #4010 | open (68b3c4e6, dev merged; rounds used) |
+| AK-5 | AK-library | 2 | see packet | see packet | see packet | #3848 | merged |
 | AK-6 | AK-library | – | see packet | see packet | see packet | – | blocked (spine) |
-| AK-7 | AK-photo | 2 | see packet | see packet | see packet | #3841 | open (base feat/ak-a-app-folder) |
+| AK-7 | AK-photo | 2 | see packet | see packet | see packet | #3841 | merged |
 | AK-8 | AK-photo | – | see packet | see packet | see packet | – | blocked (SC-f, PH-z) |
 | AK-9 | AK-z | – | see packet | see packet | see packet | – | blocked (DA-z, HA-z) |
-| AK-10 | AK-z | 5 | see packet | see packet | see packet | – | building (stacked on #4010) |
+| AK-10 | AK-z | 5 | see packet | see packet | see packet | #4427, #4428 | open (split: tests 292 lines, source 185 lines) |
 | AK-11 | AK-z | – | see packet | see packet | see packet | – | planned |
 
 ## Reviews
@@ -39,6 +39,7 @@ Next: fixer merges dev into #4010 (dirty); finding #4015 fixed first (rule 6); A
 
 ## Decisions
 
+- 2026-10-22T14:35Z: wave 5 shipped. #4010 merged dev (68b3c4e6, 400 lines, CI: PASS; command-path flare.txt conflict kept both removals). AK-10 came to 477 lines with deletions, so it split: #4427 deletes the two test files (stacked on #4010), #4428 deletes FlareAutosave.swift and renames FlareRecovery.swift to FlareAutosaveAdapter.swift, which holds the live .autosaveRecovery wiring (stacked on #4427). Finding #4015 fixed as #4430 (quit write via AutosaveSchedule.beginQuit, failed restore keeps the copy and shows the error; Mutate 8/8). Attribution footers the PR tool added to #4427-#4430 removed. #4018 (gap) stays for later.
 - 2026-10-22: relaunch as run act-1a163b2abfe-f182. Main HEAD verified 0dd23d65; main is 487 commits behind dev, so base stays origin/dev (1a518080) and the lead branch is rebuilt on dev with this folder.
 - 2026-10-22: AH-z merged (#4388): AK-10 unblocked. SC-f still open (SC-15, SC-16), library spine still building: AK-8 and AK-6 stay blocked, so AK-9 and AK-11 do too.
 - 2026-10-22: #4010 went dirty after its Linux run 39608399428 failed only on photo CommandPathTests from dev (not ours). Fixer merges dev in and moves Head:.
