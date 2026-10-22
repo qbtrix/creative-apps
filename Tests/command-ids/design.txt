@@ -5,6 +5,7 @@ edit.redo
 edit.select
 edit.select-all
 edit.undo
+file.export
 file.new
 file.open
 file.save
@@ -51,3 +52,7 @@ transform.reset
 transform.rotate
 transform.scale
 transform.set
+view.fit
+view.zoom-in
+view.zoom-out
+view.zoom-to-selection
