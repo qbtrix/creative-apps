@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-22T13:04Z	relaunch		run act-1a163b2abfe-f182: AH-z merged so AK-10 builds; #4010 merge-dev fixer; #4015 fix
 2026-10-22T14:35Z	wave		wave 5 shipped: #4010 68b3c4e6, AK-10 #4427+#4428, #4015 fix #4430; waiting on the lane
 2026-10-22T14:58Z	heartbeat		#4010 mac green, waits sweep; #4430 mac queued; AK-6/8/9/11 blocked (poll 1)
+2026-10-22T15:20Z	heartbeat		#4010 waits sweep; #4430 mac rebuild queued; AK-6/8/9/11 blocked (poll 2)
