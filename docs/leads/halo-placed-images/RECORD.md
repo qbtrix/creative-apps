@@ -37,5 +37,5 @@ Next: PH-a #4426 macOS build green, lane merges next sweep; then retarget #4437 
 - PH-u splits into two stacked PRs (PH-3 with snapshots, PH-4 budget+journey): one PR was 568 lines, over the 400 cap. PH-u also wires HaloWindow's haloPlace so Place isn't a dead control.
 
 ## Open
-- dev Linux red (#3856): HaloStrokeTrimKeysTests from HK-6 #4400, not ours; slice-done needs a green dev Linux run after our last PR, so slice-done waits on the stroke lead's fix.
+- dev Linux red (#3856): HaloStrokeTrimKeysTests from HK-6 #4400, not ours; slice-done needs a green dev Linux run after our last PR, so slice-done waits on the stroke lead's fix, #4431 (open, fast-lane, clean).
 - PH-m: re-read transform HT-m (HT-6) and stroke-style HK-m (HK-6) before starting; they share HaloDrawRules/LiveFrameRendering/HaloCommandCatalog.
