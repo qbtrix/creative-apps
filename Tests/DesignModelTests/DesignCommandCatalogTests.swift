@@ -57,7 +57,7 @@ struct DesignCatalogDoc: HeadlessDocument {
             + (DesignArrangeStep.allCases.map(\.title) + DesignAlignEdge.allCases.map(\.title)
                 + DesignDistributeAxis.allCases.map(\.title)).map { "object." + $0.lowercased().split(separator: " ").joined(separator: "-") }
         if let index = ids.firstIndex(of: id), commands.indices.contains(index) { return .some(w.help(commands[index])) }
-        if let tool = DesignTool.allCases.first(where: { "tool.\($0.rawValue)" == id }) { return .some(tool.unavailableHelp) }
+        if id != "tool.shape", let tool = DesignTool.allCases.first(where: { "tool.\($0.rawValue)" == id }) { return .some(tool.unavailableHelp) }
         let noPage = w.selectedPage == nil ? "Create or open a file first."
             : w.editingTextID == nil ? nil : "Finish editing the text first."
         return switch id {
@@ -74,6 +74,8 @@ struct DesignCatalogDoc: HeadlessDocument {
         case "color.sample": .some(w.sampleHelp)
         case "color.pick": .some(w.sampleHelp ?? w.fillHelp)
         case "history.jump": .some(w.historyListing.steps.isEmpty ? "There are no steps yet." : nil)
+        // The shape tool's two (DS-6): the workspace's own shapeHelp, which needs an open file.
+        case "shape.draw", "tool.shape": .some(w.shapeHelp)
         // The transform rows' and Object items' reason (transform DT-6): the workspace's own transformHelp.
         default: id.hasPrefix("transform.") ? .some(w.transformHelp) : nil
         }
@@ -137,8 +139,10 @@ struct DesignCatalogDoc: HeadlessDocument {
                 let upright = id == "transform.reset" && w.selectedNodes.allSatisfy { $0.rotation == 0 && !$0.flipX && !$0.flipY }
                 // A pick names its step for what it painted ("Fill" or "Stroke"), as the Eyedropper's click does.
                 let picked = id == "color.pick" && problem.contains("stepNamedTitle")
+                // The kernel's shape.draw names its step for the kind drawn ("Draw Star"), as the Shape tool's drag does.
+                let drawn = id == "shape.draw" && problem.contains("stepNamedTitle")
                 return !(off && problem.contains("exampleRuns")) && !noChange && !named && !joined && !jumped && !axis && !upright
-                    && !picked
+                    && !picked && !drawn
             }
             #expect(problems.isEmpty, "\(state): \(problems.joined(separator: "\n"))")
             ran.formUnion(DesignCatalogDoc.catalog.ids.filter { DesignCatalogDoc.catalog.availability($0, on: doc).why == nil })
@@ -204,7 +208,7 @@ struct DesignCatalogDoc: HeadlessDocument {
         "page.delete | Delete Page | A file keeps at least one page.", "page.select | Select Page | on",
         "tool.move | Move | on", "tool.frame | Frame | on", "tool.rectangle | Rectangle | on",
         "tool.ellipse | Ellipse | on", "tool.text | Text | on", "tool.pen | Pen | Drawing paths isn't built yet.",
-        "tool.eyedropper | Eyedropper | on",
+        "tool.eyedropper | Eyedropper | on", "shape.draw | Draw Shape | on", "tool.shape | Shape Tool | on",
         "history.read | Read History | on", "history.jump | Jump in History | There are no steps yet.",
     ]
 }

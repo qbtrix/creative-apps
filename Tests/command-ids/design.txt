@@ -40,12 +40,14 @@ page.add
 page.delete
 page.rename
 page.select
+shape.draw
 tool.ellipse
 tool.eyedropper
 tool.frame
 tool.move
 tool.pen
 tool.rectangle
+tool.shape
 tool.text
 transform.flip
 transform.read
