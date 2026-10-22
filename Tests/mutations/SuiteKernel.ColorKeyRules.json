@@ -1,0 +1,30 @@
+[
+  {
+    "label": "toggleRemovesKey: a toggle at a keyed frame removes nothing",
+    "file": "Sources/SuiteKernel/Keys/ColorKeyRules.swift",
+    "find": "KeyRules.removeKeys(&keys, [frame], leaving: leaving)",
+    "replace": "KeyRules.removeKeys(&keys, [], leaving: leaving)",
+    "tests": "ColorKeyRulesTests"
+  },
+  {
+    "label": "policyIgnored: removing a key always leaves the single key (propertyGoesStatic dropped)",
+    "file": "Sources/SuiteKernel/Keys/ColorKeyRules.swift",
+    "find": "KeyRules.removeKeys(&keys, [frame], leaving: leaving)",
+    "replace": "KeyRules.removeKeys(&keys, [frame], leaving: .singleStays)",
+    "tests": "ColorKeyRulesTests"
+  },
+  {
+    "label": "insertsOutOfOrder: a new key goes before the earlier keys",
+    "file": "Sources/SuiteKernel/Keys/ColorKeyRules.swift",
+    "find": "let index = track.firstIndex { $0.frame > frame } ?? track.endIndex",
+    "replace": "let index = track.firstIndex { $0.frame < frame } ?? track.endIndex",
+    "tests": "ColorKeyRulesTests"
+  },
+  {
+    "label": "sampleIgnoresEasing: sampling drops each key's easing for linear",
+    "file": "Sources/SuiteKernel/Keys/ColorKeyRules.swift",
+    "find": "colorTracks: [fill.key: track]",
+    "replace": "colorTracks: [fill.key: track.map { ColorKeyframe(frame: $0.frame, value: $0.value) }]",
+    "tests": "ColorKeyRulesTests"
+  }
+]

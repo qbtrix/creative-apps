@@ -178,10 +178,7 @@ struct PhotoCanvas: View {
             perform(.dismiss)
         default:
             // A disabled tool's key does nothing, as its palette button does.
-            guard
-                let tool = PhotoTool.allCases.first(where: { $0.shortcut.map(String.init) == press.characters.lowercased() }),
-                model.toolHelp(tool) == nil
-            else { return .ignored }
+            guard let tool = PhotoTool.picked(byTyped: press.characters, help: model.toolHelp) else { return .ignored }
             perform(.tool(tool))
         }
         return .handled

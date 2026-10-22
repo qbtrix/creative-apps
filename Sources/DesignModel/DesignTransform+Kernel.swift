@@ -12,9 +12,8 @@
 //   fold into one. A locked layer, or one inside a locked group, refuses with `transformHelp`.
 // - `contains` hit-tests the turned outline: the point taken into the box's own frame.
 //
-// `runTransform` sends an inspector, menu or knob gesture through `catalog`, or through the kernel's
-// own transform specs until the catalog registers them (DT-6); `turnHelp` keeps the rows' reason
-// until then. Linux-safe.
+// `runTransform` sends an inspector, menu or knob gesture through `catalog`, which registers the six
+// specs (DT-6); `turnHelp` is the rows' reason, `transformHelp`. Linux-safe.
 import SuiteKernel
 
 // `transformHelp`, the requirement's "why not", is the workspace's own (DesignActions): the help a
@@ -28,10 +27,8 @@ extension DesignWorkspace: TransformTarget {
     }
 
     /// Why the inspector's Rotation and Flip rows and Object's turn and flip items are off; nil when they
-    /// can act: `transformHelp`, and until the catalog has the transform specs (DT-6), that they wait.
-    public var turnHelp: String? {
-        transformHelp ?? (Self.catalog.spec("transform.rotate") == nil ? DesignRefusal.notBuilt("Turning and mirroring a layer").help : nil)
-    }
+    /// can act: `transformHelp`.
+    public var turnHelp: String? { transformHelp }
 
     /// Sets every selected node's box, each about its share of the selection, as one step named `name`;
     /// steps under one `drag` fold into one. A selection `transformHelp` refuses throws that help.
@@ -46,18 +43,12 @@ extension DesignWorkspace: TransformTarget {
         record(name, before: before, coalescing: key)
     }
 
-    /// Runs a transform gesture as its command through `catalog` (the kernel's transform specs until DT-6
-    /// registers them there). A refusal changes nothing; the window shows `transformHelp` as the reason.
+    /// Runs a transform gesture as its command through `catalog`. A refusal changes nothing; the window
+    /// shows `transformHelp` as the reason.
     public mutating func runTransform(_ intent: TransformIntent) {
         let (id, params) = intent.command
-        let catalog = Self.catalog.spec(id) == nil ? Self.transformCatalog : Self.catalog
-        _ = try? catalog.run(id, params: params, on: &self)
+        _ = try? Self.catalog.run(id, params: params, on: &self)
     }
-
-    /// The kernel's six transform specs over the workspace's own history.
-    static let transformCatalog: CommandCatalog<DesignWorkspace> =
-        (try? CommandCatalog(app: "design", TransformCommands.specs(DesignWorkspace.self), history: { $0.history.kernel }))
-        ?? .empty(app: "design")
 
     /// The selected nodes on the selected page, without one inside another selected node.
     var transformRoots: [DesignNode] {
