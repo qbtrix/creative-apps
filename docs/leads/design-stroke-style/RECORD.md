@@ -2,9 +2,9 @@
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
 Run: act-1a1627ce3b4-ayhz · Session: claude/feature-lead-playbook-6guwwp · Started: 2026-10-22T07:24Z (prior runs act-1a1605b0534-rn47, act-1a15e909498-4bkk, act-1a15abb305f-lc8g, act-1a159c9b6b4-va3c)
-Stage: blocked: DK-u waits shape-tools:DS-u, DK-m waits DS-m (only DS-a merged); Question for the supervisor posted on #3441 after 3 identical polls (2026-10-22T08:59Z)
+Stage: parked (waiting-on-prereq): supervisor answer 09:03Z on #3441 — shape-tools #3440 has its own lead (launched 08:53Z); stroke-style is relaunched for DK-u, DK-m, DK-z once DS-u and DS-m land (2026-10-22T09:21Z)
 Base: 5bec8089 (origin/dev); main verified at 0dd23d65
-Next: DK-u waits shape-tools:DS-u (DT-u met); DK-m waits shape-tools:DS-m (DT-m met; needs eyedropper DY-m, building this run). Re-read waits every poll
+Next: none in run act-1a1627ce3b4-ayhz; the next stroke-style lead starts DK-u (after shape-tools:DS-u) and DK-m (after DS-m), then DK-z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -26,6 +26,7 @@ Next: DK-u waits shape-tools:DS-u (DT-u met); DK-m waits shape-tools:DS-m (DT-m 
 | – | – | – | – | – | – |
 
 ## Decisions
+- 2026-10-22T09:03Z supervisor: don't take DS-u/DS-m into this run; finish the eyedropper slices and end the run; stroke-style relaunches after DS-u and DS-m.
 - Status branch is lead/design-<feature> (record docs/leads/design-<feature>/): lead/<feature> belongs to the SuiteUI lead of the same feature name.
 - PRs target dev, not main (CLAUDE.md, lead.md); main b3011ab9 is an ancestor of dev and only fast-forwards to green dev.
 - Rule 22: one PR per slice; each slice's PR opens with its failing test commit.

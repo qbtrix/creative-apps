@@ -76,3 +76,4 @@ time	kind	note
 2026-10-22T07:24Z	resume	run act-1a1627ce3b4-ayhz takes over	-	DK-u waits DS-u; DK-m waits DS-m
 2026-10-22T08:20Z	poll	DK-u waits shape-tools:DS-u, DK-m waits DS-m (only DS-a merged; #3440 prereq-priority)	-	blocked poll 2
 2026-10-22T08:59Z	question	blocked poll 3: asked supervisor on #3441 (DS-u/DS-m unbuilt)	-	-
+2026-10-22T09:21Z	parked	supervisor answer: waiting-on-prereq shape-tools DS-u/DS-m (own lead #3440)	-	-
