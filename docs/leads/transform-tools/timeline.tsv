@@ -77,3 +77,4 @@ utc	stage	event	ref	note
 2026-10-22T14:35Z	3	wave	-	TT-z shipped: #3513 9b339941, #3577 00e33bb1, #4429 TT-8+TT-9 feature-done; waiting on the lane
 2026-10-22T14:58Z	3	heartbeat	-	#3513 macOS build queued; #3577 #4429 stacked
 2026-10-22T15:20Z	3	heartbeat	-	#3513 macOS build green; waits lane sweep
+2026-10-22T15:50Z	3	heartbeat	-	#3513 merged d96c2645; #3577 retargeted to dev at eca74db6

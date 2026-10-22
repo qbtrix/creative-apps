@@ -4,7 +4,7 @@ Issue: #3446 · Packet: docs/blueprints/suiteui/features/transform-tools.md
 Run: act-1a163b2abfe-f182 (relaunch; first run act-1a1579fdd22-6z1j) · Started: 2026-10-22
 Stage: 3 wave 5 (TT-z) shipped; polling lane
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: lane batches #3513 → #3577 → #4429 (feature-done); then TT-z done from the dev CI run holding #4429; critic panel on TT-z screens from a scoped app=suiteui run
+Next: lane batches #3577 → #4429 (feature-done; retarget to dev once #3577 merges); then TT-z done from the dev CI run holding #4429; critic panel on TT-z screens from a scoped app=suiteui run
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: lane batches #3513 → #3577 → #4429 (feature-done); then TT-z done from
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T15:50Z heartbeat: #3513 (TT-4) merged into dev at 15:42Z as d96c2645. The lane left #3577 on the TT-4 base, so I merged dev into lead/transform-tools-TT-7 (eca74db6, scripts/ci --changed: CI: PASS), retargeted #3577 to dev, moved its Head line and removed the footer the API added to its body. #4429 is stacked on #3577; no dev CI run holds d96c2645 yet.
 - 2026-10-22T15:20Z heartbeat: #3513 macOS build 39786650299 green on 9b339941 (the @Test arguments fix compiles); waits on a lane sweep. #3577, #4429 stacked behind it.
 - 2026-10-22T14:58Z heartbeat: #3513 macOS build 39786650299 queued (9b339941); #3577 and #4429 stacked behind it; no needs-fix or needs-rebase.
 - 2026-10-22T14:35Z Wave 5 shipped: #3513 merged dev and inlined the Rects in the @Test arguments (9b339941, CI: PASS); #3577 merged it (00e33bb1, CI: PASS); TT-8+TT-9 opened as #4429 (191+/22-, 15 files, Mutate 12/12, feature-done) stacked on #3577. Attribution footers the PR tool added to #4427-#4430 removed. No needs-fix or needs-rebase.
