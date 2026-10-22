@@ -65,3 +65,4 @@ utc	stage	event	ref	note
 2026-10-22T08:09:48Z	lane	heartbeat	4125	SM-5 and SM-6 macOS builds still queued
 2026-10-22T08:37:38Z	lane	heartbeat	4237	SM-6 macOS build failed (run 39740448006): AnimatedImageWriter.finish NSLock lock/unlock in async; fix 7b422e68f, gate running. SM-5 build queued
 2026-10-22T08:39:39Z	lane	fix	4237	SM-6 withLock fix 7b422e68f, CI: PASS, pushed, Head moved
+2026-10-22T09:03:32Z	lane	heartbeat	#4125,#4237	SM-5 and SM-6 wait on macOS builds; SM-7, SM-8 drafts
