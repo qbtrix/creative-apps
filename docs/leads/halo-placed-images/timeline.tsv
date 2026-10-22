@@ -69,3 +69,4 @@ utc	stage	event	ref	note
 2026-10-22T19:33:53Z	3	check	PH-a	lane decision eligible for #4426 (19:28Z); batch in flight, merges next sweep
 2026-10-22T19:50:40Z	3	merge	PH-a	#4426 merged into dev 19:43Z; fixers started for PH-u and PH-m dev merges
 2026-10-22T20:04:12Z	3	retarget	PH-u	#4437 to dev with dev merged (9b49023, takePlayback first in runPlace); #4438 Head 26aa19d, waits on #4437
+2026-10-22T20:13:03Z	3	retarget	PH-m	#4614 a3dceb0 + #4615 37f6334 to dev, fast-lane; #4618 Head d8a393b stays stacked; needs-split on #4437 answered (stale size)
