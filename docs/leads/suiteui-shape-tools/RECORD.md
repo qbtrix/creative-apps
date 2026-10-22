@@ -3,7 +3,7 @@
 Issue: #3449 · Packet: docs/blueprints/suiteui/features/shape-tools.md
 Run: act-1a1646f0a9f-d1ei (resumed; first run act-1a1579fdd22-6z1j) · Session: claude/suiteui-feature-lead-v7e2hk · Started: 2026-10-20T04:46Z · Resumed: 2026-10-22T16:30Z
 Stage: 3 awaiting supervisor (SH-z blocked on eyedropper:EY-z)
-Base: dev 567d03bb (main 0dd23d65 verified)
+Base: dev 0f8414ad (main 0dd23d65 verified)
 Next: re-read the FakeCanvasDocument.swift chain each poll (stroke-style:SS-d via #4607, then transform-tools:TT-z #4429, then eyedropper:EY-z); once all three merge, build SH-8 on FakeRect.stroke (with the star-drag budget row), then SH-9 with feature-done, as one slice PR to dev
 
 ## Slices
@@ -34,6 +34,7 @@ Next: re-read the FakeCanvasDocument.swift chain each poll (stroke-style:SS-d vi
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T20:09Z: poll on dev 0f8414ad: SS-8 #4607 and TT-z #4429 still open; no EY-7/8/9 PR. No supervisor reply; SH-8, SH-9 stay unstarted.
 - 2026-10-22T19:37Z: poll on dev 567d03bb: SS-8 #4607 and TT-z #4429 still open; no EY-7/8/9 PR. No supervisor reply; SH-8, SH-9 stay unstarted.
 - 2026-10-22T19:07Z: poll on dev cf65010a: TT-7 #3577 merged (a1bf680b, doesn't touch the fake); SS-8 #4607 and TT-z #4429 still open; no EY-7/8/9 PR. No supervisor reply; SH-8, SH-9 stay unstarted.
 - 2026-10-22T18:36Z: #4608 (merged as e16b9852, supervisor's answer on #3450) puts stroke-style SS-d ahead in the FakeCanvasDocument.swift chain: AH-z → SS-d → TT-z → EY-z → SH-z. SH-8 now also waits on stroke-style:SS-d and builds FakeRect.shape on SS-8's FakeRect.stroke. SS-8 is #4607 (not merged); TT-z #4429 still open; no EY-7/8/9 PR. No supervisor reply to issuecomment-6347075135; SH-8, SH-9 stay unstarted.
