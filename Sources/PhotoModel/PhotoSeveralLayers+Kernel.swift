@@ -43,6 +43,13 @@ extension PhotoWorkspace {
         layers.isEmpty || selectedLayerIDs.count < layers.count ? nil : "At least one layer must stay."
     }
 
+    /// Why Delete Layer can't run, for the Layers panel's button and the
+    /// menu alike: no layer, the last layer, or every layer picked. Nil when
+    /// it can.
+    public var deleteLayersHelp: String? {
+        selectedLayer == nil ? Self.noLayer : canRemoveLayer ? removeSelectedHelp : "The last layer can't be deleted."
+    }
+
     /// Removes the picked layers as one step, refusing with
     /// `removeSelectedHelp` when they are every layer. One picked layer is
     /// Delete Layer; several are "Delete Layers", and the layer that took the
