@@ -4,7 +4,7 @@ Issue: #3440 · Packet: docs/blueprints/design/features/shape-tools.md
 Run: act-1a162d0f852-70vb · Started: 2026-10-22T08:56Z (prior run act-1a15abb305f-lc8g shipped DS-a)
 Stage: 3 wave 2 done; all slices in PRs, waiting for merges and scoped runs
 Base: dev 561ef1c5
-Next: #4385 (DS-6) head 6a270b800 (dev merged after #4431 fixed the dev-red Halo test) passed its lane macOS build 39818997671 (green 17:18Z) and waits on the lane merge. When it merges, retarget #4386 (DS-u, head 828e1b226) to dev and merge dev with --merge-base 6a270b800 (expect 4 files +206/-4). After #4386 merges, retarget #4392 (DS-z, head de801ce9e) with --merge-base = #4386 final head (expect 2 files +143/-2). Then slice-done lines once a ci.yml run (scoped design or full) contains each slice's last merged PR. PR bodies: update with MCP update_pull_request (the gh api PATCH appends a footer).
+Next: #4385 (DS-6) merged at 17:30Z as 62400e4d4. DS-m slice-done waits on a ci.yml run on dev (scoped design or full) that contains 62400e4d4. #4386 (DS-u) is retargeted to dev at head 91d7f0b80 (dev merged; 4 files +206/-4; ci --changed PASS) and waits on the lane macOS build and merge. After #4386 merges, retarget #4392 (DS-z, head de801ce9e) with --merge-base 91d7f0b80 (expect 2 files +143/-2). Then the DS-u and DS-z slice-done lines with Mac-Finish-Wanted. PR bodies: update with MCP update_pull_request (the gh api PATCH appends a footer).
 
 ## Slices
 | slice | behavior | tasks | waits on | ui | rounds | state | run | mac finish |
