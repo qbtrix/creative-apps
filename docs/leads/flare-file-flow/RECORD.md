@@ -109,3 +109,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 21:18Z check-in: CI finding #4636 (FLJ1, Open Recent lists no Bounce.flare) comes from journeys run 39830428433 at 721ac8e, a commit from before the fix (847f507 is not an ancestor). It repeats #4604. I commented on #4636 and left it open for a run at or after 847f507. That is not round 2 yet. No new comment on #3482.
 - 21:50Z check-in: no journeys run on dev includes 847f507 yet; all 10 recent journeys.yml runs test older SHAs and most are queued. #4636 stays open for that run. No other file-flow finding and no new comment on #3482.
 - 22:22Z check: no journeys run includes 847f507 yet; #4636 stays open; nothing new on #3482.
+- 22:54Z check: still no journeys run includes 847f507; #4636 stays open; nothing new on #3482.
