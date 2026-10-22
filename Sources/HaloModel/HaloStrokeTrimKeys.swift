@@ -3,8 +3,8 @@
 // and Trim Offset in that order, each with its track's key state at the
 // playhead (`HaloKeyRules.keyState`, the kernel's KeyRules, never a second
 // store) and why it can't act: the stroke's reason first, then the property's
-// own keying reason, and until HK-5 adds the trim properties "Keying the trim
-// isn't built yet.". A key without a reason maps to the property's
+// own keying reason (HK-5's `HaloProperty.trims`; HK-7 dropped the not-built
+// reason those replaced). A key without a reason maps to the property's
 // `toggleKey` (the diamond) or `toggleAnimation` (the stopwatch). Linux-safe.
 
 /// One trim row's stopwatch and diamond: its track, title, key state at the playhead and reason.
@@ -26,37 +26,31 @@ public struct HaloTrimKey: Sendable, Hashable, Identifiable {
 }
 
 extension HaloProject {
-    /// The trim tracks in row order, with their titles.
-    static let trimTracks = [("trimStart", "Trim Start"), ("trimEnd", "Trim End"), ("trimOffset", "Trim Offset")]
-
-    /// Why a trim key can't act while its property doesn't exist yet (HK-5).
-    static let trimKeysNotBuiltHelp = "Keying the trim isn't built yet."
-
     /// The selected layer's trim keys at the playhead; [] without a stroked shape layer.
     public var trimKeys: [HaloTrimKey] {
         let stroke = strokeHelp
-        return Self.trimKeys(of: selectedLayer, at: selectedComposition?.playheadFrame ?? 0) { raw in
-            Self.trimKeyHelp(raw, strokeHelp: stroke) { unavailableHelp(for: .toggleAnimation($0)) }
+        return Self.trimKeys(of: selectedLayer, at: selectedComposition?.playheadFrame ?? 0) { p in
+            Self.trimKeyHelp(p, strokeHelp: stroke) { unavailableHelp(for: .toggleAnimation($0)) }
         }
     }
 
-    /// `layer`'s trim keys at `frame`, each with `help(raw)`; [] unless `layer` is a shape with a stroke.
-    static func trimKeys(of layer: HaloLayer?, at frame: Int, help: (String) -> String?) -> [HaloTrimKey] {
+    /// `layer`'s trim keys at `frame` in `HaloProperty.trims` order, each with `help(p)`; [] unless
+    /// `layer` is a shape with a stroke.
+    static func trimKeys(of layer: HaloLayer?, at frame: Int, help: (HaloProperty) -> String?) -> [HaloTrimKey] {
         guard let layer, layer.kind == .shape, layer.stroke != nil else { return [] }
-        return trimTracks.map { raw, title in
+        return HaloProperty.trims.map { p in
             HaloTrimKey(
-                raw: raw, title: title, keyState: HaloKeyRules.keyState(layer.tracks[raw] ?? [], at: frame),
-                help: help(raw))
+                raw: p.rawValue, title: p.title,
+                keyState: HaloKeyRules.keyState(layer.tracks[p.rawValue] ?? [], at: frame), help: help(p))
         }
     }
 
-    /// Why trim track `raw` can't be keyed: `strokeHelp`, else its property's reason, else not built.
+    /// Why trim property `p` can't be keyed: `strokeHelp`, else the property's own reason.
     static func trimKeyHelp(
-        _ raw: String, strokeHelp: String?, propertyHelp: (HaloProperty) -> String?
+        _ p: HaloProperty, strokeHelp: String?, propertyHelp: (HaloProperty) -> String?
     ) -> String? {
         if let strokeHelp { return strokeHelp }
-        guard let property = HaloProperty(rawValue: raw) else { return trimKeysNotBuiltHelp }
-        return propertyHelp(property)
+        return propertyHelp(p)
     }
 
     /// The command a click on `key` sends: `toggleKey` for the diamond, `toggleAnimation` for the

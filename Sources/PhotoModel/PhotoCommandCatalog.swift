@@ -32,6 +32,10 @@ extension PhotoWorkspace {
     public struct OpacityParams: Codable, Sendable { public var percent: Double }
     /// layer.move-by's offset, in canvas pixels.
     public struct MoveParams: Codable, Sendable { public var dx, dy: Int }
+    /// layer.mask-add's start ("reveal", "hide" or "selection"); layer.mask-enable's state; layer.mask-edit's target.
+    public struct MaskAddParams: Codable, Sendable { public var from: String }
+    public struct MaskEnableParams: Codable, Sendable { public var enabled: Bool }
+    public struct MaskEditParams: Codable, Sendable { public var on: Bool }
 
     /// The reasons menu items give that the Model has no help property for.
     static let noImage = "Open an image first.", noLayer = "Select a layer first."
@@ -104,7 +108,7 @@ extension PhotoWorkspace {
     static let canvasSizeExample = JSONValue.object(["width": .number(24), "height": .number(18), "anchor": .string("center")])
 
     /// One command per menu item, toolbar item and palette tool, in menu order.
-    public static let commands: [CommandSpec<PhotoWorkspace>] = fileCommands + editCommands + imageCommands + layerCommands
+    public static let commands: [CommandSpec<PhotoWorkspace>] = fileCommands + editCommands + imageCommands + layerCommands + maskCommands
         + FileFlowCommands.specs(PhotoWorkspace.self) + PlaceCommands.specs(PhotoWorkspace.self) + viewCommands + transformCommands
         + PhotoTool.allCases.map { tool in
             act("tool.\(tool.rawValue)", tool.rawValue.capitalized, "Picks the \(tool.rawValue) tool for canvas drags.", .view,
@@ -266,6 +270,30 @@ extension PhotoWorkspace {
                                                          "dy": .integer("Pixels down.", minimum: -10_000_000, maximum: 10_000_000)], required: ["dx", "dy"]),
                example: .object(["dx": .number(40), "dy": .number(0)]), availability: menu { $0.canEditSelectedLayer ? nil : noLayer }) { w, p in
             w.moveSelectedLayers(dx: p.dx, dy: p.dy); return JSONValue.object([:])
+        },
+    ]
+    /// Layer masks (masks-clipping PK-1): each an undo step but Edit Mask, which only points the brush.
+    static let maskCommands: [CommandSpec<PhotoWorkspace>] = [
+        .typed("layer.mask-add", title: "Add Layer Mask", summary: "Adds a mask to the selected layer: reveal all, hide all or the selection.",
+               kind: .edit, params: MaskAddParams.self,
+               schema: .object(["from": .string("What the mask starts as.", oneOf: MaskStart.allCases.map(\.rawValue))], required: ["from"]),
+               example: .object(["from": .string("reveal")]), availability: gate { $0.addMaskHelp(.reveal) }) { w, p in
+            guard let start = MaskStart(rawValue: p.from) else {
+                throw CatalogError.failed(id: "layer.mask-add", message: "A mask can't start as \(p.from).")
+            }
+            try w.addMask(start); return JSONValue.object([:])
+        },
+        act("layer.mask-delete", "Delete Layer Mask", "Deletes the selected layer's mask.", .edit, gate { $0.maskHelp }) { try $0.deleteMask() },
+        act("layer.mask-apply", "Apply Layer Mask", "Bakes the selected layer's mask into its pixels.", .edit, gate { $0.maskHelp }) { try $0.applyMask() },
+        .typed("layer.mask-enable", title: "Disable Layer Mask", summary: "Turns the selected layer's mask off or back on, keeping it.",
+               kind: .edit, params: MaskEnableParams.self, schema: .object(["enabled": .boolean], required: ["enabled"]),
+               example: .object(["enabled": .bool(false)]), availability: gate { $0.maskHelp }) { w, p in
+            try w.setMaskEnabled(p.enabled); return JSONValue.object([:])
+        },
+        .typed("layer.mask-edit", title: "Edit Layer Mask", summary: "Points the brush and eraser at the selected layer's mask, or back at its pixels.",
+               kind: .view, params: MaskEditParams.self, schema: .object(["on": .boolean], required: ["on"]),
+               example: .object(["on": .bool(true)]), availability: gate { $0.maskHelp }) { w, p in
+            w.setEditsMask(p.on); return JSONValue.object([:])
         },
     ]
     static let pickModes: [(name: String, pick: Pick)] = [("replace", .replace), ("extend", .extend), ("toggle", .toggle)]
