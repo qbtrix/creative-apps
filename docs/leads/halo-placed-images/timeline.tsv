@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-22T22:30:17Z	3	fix	PH-u	#4437 lane Linux red: CommandPathTests halo MenuCommand without spec; fixer started
 2026-10-22T22:43:17Z	3	fix	PH-u	#4437 command-path fix pushed 242be347; #4438 c51d4b2b
 2026-10-22T22:52:52Z	3	merge	PH-m	#4618 merged e6eddf40; awaiting dev Linux run
+2026-10-22T23:14:06Z	3	check	PH-m	dev Linux check 39868481674 running with e6eddf40; #4437 mac build running
