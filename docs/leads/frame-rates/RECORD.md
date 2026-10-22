@@ -49,8 +49,10 @@ Next: 4610 merges via the lane, then the FR-u review after round 2; leftovers (4
 
 
 
+
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 19:01Z: the lane's macOS build for 4610 (39829271143) is still waiting for a runner (queued since 18:12Z).
 - 18:35Z: the lane's macOS build for 4610 (39829271143) is queued for a runner.
 - 18:12Z: FR-u fix round 2 opened as PR 4610 (head 448b575b, gate PASS), fixing 4597-4601 and 4603. 4602 is not fixed: it needs the shared label format and TimelineNavTests outside this round's files, so it becomes a gap after the follow-up review. Added the Mutate line to 4610 (unscored on Linux).
 - 18:05Z: Linux run 39823625676 green at 1d3f98f90. Posted Belt-Slice-Done for FR-halo, FR-flare and FR-z, plus Mac-Finish-Wanted for FR-halo and FR-flare (comment 6347464973), then Belt-Contact-Sheet (6347477759). FR-u fix round 2 is still running (wf_483ca51f-458).
