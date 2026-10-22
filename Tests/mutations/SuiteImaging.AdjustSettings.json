@@ -21,10 +21,10 @@
     "tests": "AdjustSettingsTests"
   },
   {
-    "label": "NaN curve point kept instead of refused",
+    "label": "NaN curve y kept instead of refused",
     "file": "Sources/SuiteImaging/Adjust/AdjustSettings.swift",
     "find": "let sorted = points.filter { $0.x.isFinite && $0.y.isFinite }",
-    "replace": "let sorted = points.filter { $0.y.isFinite }",
+    "replace": "let sorted = points.filter { $0.x.isFinite }",
     "tests": "AdjustSettingsTests"
   },
   {

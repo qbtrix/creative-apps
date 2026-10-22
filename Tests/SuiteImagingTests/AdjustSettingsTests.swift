@@ -99,6 +99,8 @@ import SuiteImaging
     @Test func nanRefused() {
         let curve = AdjustCurve(points: [AdjustCurvePoint(x: 0, y: 0), AdjustCurvePoint(x: .nan, y: 0.5), AdjustCurvePoint(x: 1, y: 1)])
         #expect(curve == .identity)
+        let nanY = AdjustCurve(points: [AdjustCurvePoint(x: 0, y: 0), AdjustCurvePoint(x: 0.5, y: .nan), AdjustCurvePoint(x: 1, y: 1)])
+        #expect(nanY == .identity)
         var levels = AdjustLevels.neutral
         levels.gamma = .nan
         #expect(levels.clamped() == .neutral)
