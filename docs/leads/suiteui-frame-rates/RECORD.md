@@ -1,10 +1,19 @@
 # frame-rates lead record
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
-Run: act-1a15e33399d-zgll · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: fr10-dev-merged
+Run: act-1a161a658a7-2jql · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
+Stage: resume-fr8
 Base: dev
-Next: FR-10b PR after #4293 merges
+Next: #4293 in lane; FR-8 building; FR-10b after #4293
+
+## Status now
+Run act-1a161a658a7-2jql resumed 2026-10-22T03:30Z; this block supersedes the Task table's PR/state columns.
+- FR-a #4063 merged · FR-m #4142 merged · FR-u #4172 merged · FR-7 #4211 merged (disabled) · FR-9 #4212 merged (disabled)
+- FR-10 #4293 open, fast-lane, macOS build 39715667843 queued
+- FR-10b (Flare UI half) stacked on lead/frame-rates-FR-flare-10b, PR after #4293 merges
+- FR-8 unblocked (AC-z, AD-halo built): building
+- FR-z (FR-11, FR-12) waits FR-8 and FR-10b
+- Correction: the 02:45Z Belt-Slice-Done lines for FR-halo and FR-flare were early; those slices finish with FR-8 and FR-10b.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
