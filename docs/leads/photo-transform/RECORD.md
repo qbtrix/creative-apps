@@ -2,9 +2,9 @@
 
 Issue: #3435 · Packet: docs/blueprints/photo/features/transform.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: 00:45Z: #4252 per-head mac build dispatched (2404bc6fe); #4253 lane Linux check 39700841445 running (d6f244af5); dev Linux red on non-photo tests (SuiteModel format list)
+Stage: 01:08Z: #4252 per-head mac build 39700821595 queued; #4253 lane Linux red on dev's FormatListRatchet (not ours, fix #4258 open, commented)
 Base: dev
-Next: lane batches both; then green photo run -> critics + slice-done
+Next: wait #4258 + lane; then green photo run -> critics + slice-done
 
 Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transform: one combined wave plan, so the other two records show the same waves.
 
