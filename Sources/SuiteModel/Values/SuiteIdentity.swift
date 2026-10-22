@@ -19,6 +19,7 @@ public enum SuiteIdentity {
         "clipboard-drag": "Copy and paste between apps", "photo-round-trip": "Editing in Photo and back",
         "shared-assets": "The shared asset library", "linked-assets": "Linking assets between apps",
         "onboarding": "The welcome tour", "updater": "Checking for updates",
+        "shell-media": "Movie and image export",
     ]
 
     /// The help text of a control whose feature is not built yet, as in
