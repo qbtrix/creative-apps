@@ -5,11 +5,12 @@
 # launches .build/apps/<X>App.app by path, which scripts/bundle-apps builds.
 #
 # The Release scheme (route R1, docs/blueprints/suite.md 2.5) builds the
-# targets of AfterGlow.app from the same folders as Package.swift: five
-# frameworks (SuiteUI, SuiteModel, SuiteKernel, SuiteShell, and
+# targets of AfterGlow.app from the same folders as Package.swift: six
+# frameworks (SuiteUI, SuiteModel, SuiteKernel, SuiteImaging, SuiteShell, and
 # CreativeEngines, which compiles only Bundle/Engines/CreativeEngines.swift and
 # is the only target linking the creative-core products; SuiteKernel and
-# SuiteUI read FlareCore's geometry through it), each <X>Model as a static library, each
+# SuiteUI read FlareCore's geometry through it, SuiteImaging the raster and
+# tone engines), each <X>Model as a static library, each
 # <X>App as an application with the helper run path, and the AfterGlowApp
 # launcher. Frameworks are not embedded here: bundle-apps assembles them into
 # AfterGlow.app/Contents/Frameworks. Every non-test target of Package.swift
@@ -42,7 +43,7 @@ settings:
 packages:
   creative-core:
     url: https://github.com/qbtrix/creative-core
-    revision: 2258b625546330596bc1fb611e658911d2318a03
+    revision: 7966e5a990ce887bbced25b58ee1134a5b170435
 targetTemplates:
   # Release graph: <X>Model compiles Sources/<X>Model and links SuiteModel,
   # SuiteKernel and the engines through CreativeEngines.
@@ -62,7 +63,8 @@ targetTemplates:
         LD_RUNPATH_SEARCH_PATHS: "@executable_path/../../../../Frameworks"
     dependencies:
       [{ target: SuiteUI, embed: false }, { target: SuiteShell, embed: false }, { target: SuiteModel, embed: false },
-       { target: SuiteKernel, embed: false }, { target: CreativeEngines, embed: false }]
+       { target: SuiteKernel, embed: false }, { target: SuiteImaging, embed: false },
+       { target: CreativeEngines, embed: false }]
   Journey:
     type: bundle.ui-testing
     platform: macOS
@@ -92,21 +94,29 @@ targets:
     platform: macOS
     sources: [Sources/SuiteKernel]
     dependencies: [{ target: CreativeEngines }]
+  # The imaging library (docs/blueprints/suiteui/features/suite-imaging.md):
+  # the adjustment values, tone program and CPU or GPU route, over the engines.
+  SuiteImaging:
+    type: framework
+    platform: macOS
+    sources: [Sources/SuiteImaging]
+    dependencies: [{ target: SuiteModel }, { target: SuiteKernel }, { target: CreativeEngines }]
   SuiteUI:
     type: framework
     platform: macOS
     sources: [Sources/SuiteUI]
-    dependencies: [{ target: SuiteModel }, { target: SuiteKernel }, { target: CreativeEngines }]
+    dependencies: [{ target: SuiteModel }, { target: SuiteKernel }, { target: SuiteImaging }, { target: CreativeEngines }]
   SuiteShell:
     type: framework
     platform: macOS
     sources: [Sources/SuiteShell]
     dependencies: [{ target: SuiteUI }, { target: SuiteModel }, { target: SuiteKernel }]
   FlareModel: { templates: [Model] }
-  DesignModel: { templates: [Model] }
-  PhotoModel: { templates: [Model] }
-  LibraryModel: { templates: [Model] }
-  HaloModel: { templates: [Model] }
+  # Every Model but Flare's links SuiteImaging (appended to the template's).
+  DesignModel: { templates: [Model], dependencies: [{ target: SuiteImaging }] }
+  PhotoModel: { templates: [Model], dependencies: [{ target: SuiteImaging }] }
+  LibraryModel: { templates: [Model], dependencies: [{ target: SuiteImaging }] }
+  HaloModel: { templates: [Model], dependencies: [{ target: SuiteImaging }] }
   # Each app adds its own Model, linked statically, to the template's
   # frameworks (target lists are appended to the template's).
   FlareApp:
@@ -142,7 +152,7 @@ targets:
         LD_RUNPATH_SEARCH_PATHS: "@executable_path/../Frameworks"
     dependencies:
       [{ target: SuiteUI, embed: false }, { target: SuiteShell, embed: false }, { target: SuiteModel, embed: false },
-       { target: SuiteKernel, embed: false }]
+       { target: SuiteKernel, embed: false }, { target: SuiteImaging, embed: false }]
   FlareJourneyTests: { templates: [Journey] }
   DesignJourneyTests: { templates: [Journey] }
   PhotoJourneyTests: { templates: [Journey] }

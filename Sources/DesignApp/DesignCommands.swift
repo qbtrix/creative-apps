@@ -18,7 +18,7 @@
 // Typing" from its undo manager; DesignFieldUndo watches the key window's focus),
 // else to the model's history (#275). Close (Command-W) replaces the system's in
 // `.saveItem`; it sends performClose: to the key window, so an edited window asks
-// first (DesignClosePrompt). The stock pasteboard group stays, so Select All still works there. Its Delete removes the
+// first (SuiteUI's unsaved guard). The stock pasteboard group stays, so Select All still works there. Its Delete removes the
 // selected layers while the canvas or the Layers list has focus (`canDeleteLayer`).
 import AppKit
 import DesignModel
@@ -181,10 +181,9 @@ struct DesignFileMenu: View {
         menu.item("file.save-as", systemImage: "square.and.arrow.down.on.square", shortcut: KeyboardShortcut("s", modifiers: [.command, .shift])) {
             menu.perform(.saveAs)
         }
-        Button("Export…", systemImage: "square.and.arrow.up") { menu.perform(.export) }
-            .keyboardShortcut("e", modifiers: [.command, .shift])
-            .disabled(!menu.isOpen)
-            .help(menu.noFileHelp ?? "")
+        menu.item("file.export", systemImage: "square.and.arrow.up", shortcut: KeyboardShortcut("e", modifiers: [.command, .shift])) {
+            menu.perform(.export)
+        }
     }
 }
 
@@ -285,23 +284,19 @@ struct DesignViewMenu: View {
     var snapStore: UserDefaults = .standard
 
     var body: some View {
-        Button("Zoom In", systemImage: DesignToolbarItem.zoomIn.systemImage) { menu.perform(.zoomIn) }
-            .keyboardShortcut("=")
-            .disabled(!menu.isOpen)
-            .help(menu.noFileHelp ?? "")
-        Button("Zoom Out", systemImage: DesignToolbarItem.zoomOut.systemImage) { menu.perform(.zoomOut) }
-            .keyboardShortcut("-")
-            .disabled(!menu.isOpen)
-            .help(menu.noFileHelp ?? "")
-        Button("Fit Page", systemImage: DesignToolbarItem.fit.systemImage) { menu.perform(.fit) }
-            .keyboardShortcut("0")
-            .disabled(!menu.isOpen)
-            .help(menu.noFileHelp ?? "")
+        menu.item("view.zoom-in", systemImage: DesignToolbarItem.zoomIn.systemImage, shortcut: KeyboardShortcut("=")) {
+            menu.perform(.zoomIn)
+        }
+        menu.item("view.zoom-out", systemImage: DesignToolbarItem.zoomOut.systemImage, shortcut: KeyboardShortcut("-")) {
+            menu.perform(.zoomOut)
+        }
+        menu.item("view.fit", systemImage: DesignToolbarItem.fit.systemImage, shortcut: KeyboardShortcut("0")) {
+            menu.perform(.fit)
+        }
         DesignSnapToLayersItem(store: snapStore)
-        Button("Zoom to Selection", systemImage: "viewfinder") { menu.perform(.zoomToSelection) }
-            .keyboardShortcut("2", modifiers: [.option, .command])
-            .disabled(menu.zoomToSelectionHelp != nil)
-            .help(menu.zoomToSelectionHelp ?? "")
+        menu.item("view.zoom-to-selection", systemImage: "viewfinder", shortcut: KeyboardShortcut("2", modifiers: [.option, .command])) {
+            menu.perform(.zoomToSelection)
+        }
     }
 }
 

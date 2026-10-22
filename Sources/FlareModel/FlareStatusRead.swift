@@ -5,6 +5,7 @@
 // link's ticks over the last second (`PlaybackDriver.measuredFPS`), capped at the document rate, since a 60 Hz link
 // still shows each of 24 frames once. Under the document rate it is dropping (QB-L4, report-only). A scene with text
 // the stage can't draw says so: "Text not shown (1)", and so does one with masks or mattes: "Masks not shown (1)".
+// Under Direct Select, `pathHelp` says why no points can be edited ("Unlock Layer 1 to edit its points.").
 // Integer math on clamped values, so nothing here can trap.
 import FlareCore
 
@@ -14,15 +15,16 @@ extension FlareWorkspace {
         guard let scene = selectedScene else { return StatusPills(aspect: "–", size: "–", fps: "–") }
         let width = Self.side(scene.width), height = Self.side(scene.height)
         var pills = StatusPills(
-            aspect: Self.aspectText(width, height), size: Self.sizeText(width, height), fps: "\(scene.fps) fps")
+            aspect: Self.aspectText(width, height), size: Self.sizeText(width, height), fps: scene.frameRate.description)
         if isPlaying, scene.fps > 0, let measuredFPS, measuredFPS.isFinite, measuredFPS > 0 {
             let shown = min(Int(min(measuredFPS, 1_000).rounded()), scene.fps)
-            pills.actualFPS = "\(shown) fps"
+            pills.actualFPS = shown < scene.fps ? "\(shown) fps" : scene.frameRate.description
             pills.isDropping = shown < scene.fps
         }
         if let hidden = stageList?.hiddenTextCount, hidden > 0 { pills.textWarning = "Text not shown (\(hidden))" }
         let masked = ExportScan.maskedLayers(scene.layers, document?.symbols ?? [])
         if masked > 0 { pills.maskWarning = "Masks not shown (\(masked))" }
+        if tool == .directSelect { pills.pathHelp = pathHelp }
         return pills
     }
 
@@ -54,6 +56,7 @@ public struct StatusPills: Sendable, Equatable {
     public var actualFPS: String?, isDropping: Bool         // while playing
     public var textWarning: String?                         // "Text not shown (1)"
     public var maskWarning: String?                         // "Masks not shown (1)"
+    public var pathHelp: String?                            // Direct Select: why no points can be edited
 
     public init(
         aspect: String, size: String, fps: String, actualFPS: String? = nil, isDropping: Bool = false,

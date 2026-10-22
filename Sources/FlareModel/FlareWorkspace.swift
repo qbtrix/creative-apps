@@ -44,9 +44,10 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     public internal(set) var tool: FlareTool = .select
     /// The Shape tool's options (FlareShape+Kernel.swift): view state, never an undo step.
     public internal(set) var shapeTool: ShapeSpec = .defaults(.star)
-    /// The stage selection (FlareSelection.swift); a change drops the picked anchors.
-    public internal(set) var selection: [StageAddress] = [] {
-        didSet { if oldValue != selection { anchorSelectionStore = Selection() } }
+    /// The stage selection: SuiteKernel's ordered selection, which `selection` reads (FlareSelectionAdapter.swift);
+    /// a change drops the picked anchors.
+    var picks = Selection<StageAddress>() {
+        didSet { if oldValue.ordered != picks.ordered { anchorSelectionStore = Selection() } }
     }
     /// The picked anchors of the path in edit (FlareAnchors+Kernel.swift).
     var anchorSelectionStore = Selection<AnchorRef>()
@@ -91,6 +92,8 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     public internal(set) var saveError: String?
     public internal(set) var loadState = LoadState.idle
     public internal(set) var recent: [String] = []
+    /// The suite's recents as the window last read them, and the requests the file-flow commands leave it.
+    public internal(set) var fileFlow = FlareFileFlowState()
     /// Why the last layer change or undo was refused; nil after one succeeds.
     public internal(set) var layerError: FlareLayerError?
     /// The easing editor's segment, as last picked; `selectedEasingSegment`

@@ -1,16 +1,19 @@
 // HaloDocumentType.swift: the `.halo` file type and the document Save As…'s
-// exporter writes. The type comes from the extension, conforming to JSON;
-// until the bundle's Info.plist declares it (an issue on line:suiteui asks
-// for that), the system gives it a dynamic type, which both panels accept.
+// exporter writes. The type is the suite's `org.creativesuite.halo.project`
+// (SuiteTypeID.haloProject) when the system knows it; until the bundle's
+// Info.plist declares it (an issue on line:suiteui asks for that), it comes
+// from the extension, conforming to JSON, a dynamic type both panels accept.
 // HaloProjectDocument carries a snapshot of the project and encodes it with
 // `fileData()` when the exporter writes, off the main actor.
 import HaloModel
+import SuiteModel
 import SwiftUI
 import UniformTypeIdentifiers
 
 extension UTType {
     /// A Halo project file, "Spot.halo".
-    static let halo = UTType(filenameExtension: "halo", conformingTo: .json) ?? .json
+    static let halo = UTType(SuiteTypeID.haloProject.rawValue)
+        ?? UTType(filenameExtension: "halo", conformingTo: .json) ?? .json
 }
 
 /// The project as the save panel writes it.

@@ -2,7 +2,7 @@
 // container identified `design.properties` inside the scroll view. A selected
 // layer shows its header (name, then kind unless the name says it, then size),
 // then Align (DesignAlignBar), then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
-// fields), Transform (Rotation and the flips, DesignInspectorTransform, on one layer or several) and Fill (the color well; a text layer's is its text color, a group
+// fields), Transform (Rotation and the flips, DesignInspectorTransform, on one layer or several) and Fill (the type switch, then the color well, or the gradient editor in its place on a gradient layer; a text layer's is its text color, a group
 // has none), then Text (DesignInspectorText, disabled on a layer that isn't text). A
 // locked layer, or one inside a locked group, can't be edited, so Frame and
 // Fill are disabled and a line says why. With only a page selected it shows
@@ -16,7 +16,8 @@
 // refuses what it must. Opacity, Corners and Stroke, the hint and the frame
 // fields' live scrub are DesignInspectorStyle. The scroll view shows no
 // indicators, so no legacy scroller reads as an unlabelled button. While the Shape
-// tool is active its Shape section (SuiteUI's ShapeToolOptions, shape-tools DS-2) comes first.
+// tool is active its Shape section (SuiteUI's ShapeToolOptions, shape-tools DS-2) comes first, and while
+// the Eyedropper is, its Eyedropper section (DesignSampleOptions: sample size, Fill or Stroke).
 import DesignModel
 import SuiteKernel
 import SuiteUI
@@ -34,6 +35,10 @@ struct DesignInspector: View {
                     InspectorSection("Shape") {
                         ShapeToolOptions(spec: model.shapeTool, help: ShapeRules.help(model.shapeTool)) { perform(.shape($0)) }
                     }
+                }
+                if model.tool == .eyedropper {
+                    // The Eyedropper's options (DesignSampleOptions), in the inspector, never on the artboard.
+                    InspectorSection("Eyedropper") { DesignSampleOptions(model: model, perform: perform) }
                 }
                 if model.hasMultipleSelection {
                     DesignSeveralProperties(model: model, perform: perform)
@@ -154,14 +159,17 @@ private struct DesignNodeProperties: View {
             if let label = node.kind.fillLabel {
                 InspectorSection("Fill") {
                     DesignInspectorFill(model: model, perform: perform)
-                    InspectorColorWellRow(label, color: node.fill.hex, sampleHelp: lockHelp) {
-                        perform(.setFill(node.id, DesignColor(hex: $0)))
+                    // A gradient's colours are the editor's stop row; the solid well would edit one it doesn't paint.
+                    if node.gradient == nil {
+                        InspectorColorWellRow(label, color: node.fill.hex, sampleHelp: lockHelp) {
+                            perform(.setFill(node.id, DesignColor(hex: $0)))
+                        }
+                        .accessibilityIdentifier("design.fill")
+                        .disabled(lockHelp != nil)
+                        .help(lockHelp ?? "")
+                        .suiteControl(
+                            id: DesignControlID.inspectorFill, enabled: lockHelp == nil, reason: lockHelp, identifies: false)
                     }
-                    .accessibilityIdentifier("design.fill")
-                    .disabled(lockHelp != nil)
-                    .help(lockHelp ?? "")
-                    .suiteControl(
-                        id: DesignControlID.inspectorFill, enabled: lockHelp == nil, reason: lockHelp, identifies: false)
                 }
             }
         }

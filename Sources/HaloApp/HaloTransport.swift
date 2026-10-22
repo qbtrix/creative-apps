@@ -1,6 +1,6 @@
 // HaloTransport.swift: the status bar's transport (viewer-playback #37,
 // VP-10): five plain SF Symbol buttons and a Loop toggle sending their
-// HaloCommand, disabled with `unavailableHelp(for:)` as the tooltip while the
+// HaloCommand (each button its catalog spec's MenuCommand, command-state CS-8), disabled with `unavailableHelp(for:)` as the tooltip while the
 // Model can't act, and drawn in textTertiary then so they look disabled
 // inside the pill. Play shows pause.fill while playing and reads `playLabel`
 // as its value. Loop is a button-style Toggle that reads `loopLabel` and
@@ -8,7 +8,8 @@
 // whether looping is on. It owns the HaloPlaybackDriver: running while
 // `model.playback.playing`, stopped otherwise or once the transport leaves
 // the screen, on the `haloRefreshLink` the environment gives; each refresh
-// sends `.tick(now)` through `perform`. Each
+// sends `.tick(now)` through `perform`, and a playhead that moved while
+// playing is a `playback` frame in the probe (HaloProbe). Each
 // control takes at least a SuiteSize.pillHit square (24 pt) to click, not
 // just its 10 pt glyph, the squares edge to edge so the row stays narrow
 // enough for the status bar, until TransportCapsule (#340) replaces it.
@@ -22,6 +23,7 @@ struct HaloTransport: View {
 
     @State private var driver: HaloPlaybackDriver?
     @Environment(\.haloRefreshLink) private var makeLink
+    @Environment(\.suiteProbeRecorder) private var recorder
 
     /// One transport button: its command, SF Symbol and control id.
     private struct Item: Identifiable, Sendable {
@@ -61,6 +63,9 @@ struct HaloTransport: View {
             }
         }
         .onChange(of: model.playback.playing, initial: true) { _, playing in follow(playing: playing) }
+        .onChange(of: model.selectedComposition?.playheadFrame) {
+            if model.playback.playing { driver?.frameShown() }
+        }
         .onDisappear { driver?.stop() }
     }
 
@@ -74,7 +79,8 @@ struct HaloTransport: View {
             .toggleStyle(.button)
             .tint(SuiteColor.accent)
         } else {
-            Button(model.title(for: item.command), systemImage: symbol(for: item)) { perform(item.command) }
+            MenuCommand(HaloMenuState.spec(item.command.commandID), on: HaloMenuState(project: model),
+                        title: model.title(for: item.command), systemImage: symbol(for: item)) { perform(item.command) }
         }
     }
 
@@ -106,6 +112,7 @@ struct HaloTransport: View {
         }
         let perform = perform
         let running = driver ?? HaloPlaybackDriver(onTick: { now in perform(.tick(now)) }, makeLink: makeLink)
+        running.probe = HaloProbe(recorder)
         driver = running
         running.start()
     }

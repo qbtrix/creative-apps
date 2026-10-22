@@ -64,10 +64,9 @@ public enum DesignTool: String, CaseIterable, Sendable {
     /// reason names the tool and its key itself.
     public var unavailableHelp: String? {
         switch self {
-        case .move, .frame, .rectangle, .ellipse, .text: nil
+        case .move, .frame, .rectangle, .ellipse, .text, .eyedropper: nil
         case .shape: "Drawing shapes isn't built yet."
         case .pen: "Drawing paths isn't built yet."
-        case .eyedropper: "Eyedropper (I): picking a fill or stroke color from the canvas isn't built yet."
         }
     }
 
@@ -105,6 +104,10 @@ public struct DesignWorkspace: Sendable, Equatable {
     public internal(set) var tool: DesignTool = .move
     /// The Shape tool's options, the spec its next drag draws: view state, never an undo step (DesignShape+Kernel).
     public internal(set) var shapeTool: ShapeSpec = .defaults(.star)
+    /// The Eyedropper's options (DesignLoupe): the square it reads, and whether a plain click picks the
+    /// stroke (Option inverts it). View state, never an undo step.
+    public internal(set) var sampleSize = SampleSize.point
+    public internal(set) var sampleToStroke = false
     /// The text node being edited inline, and its live text (DesignText).
     public internal(set) var editingTextID: String?
     public internal(set) var textDraft = ""

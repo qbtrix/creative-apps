@@ -192,7 +192,7 @@
               {
                 "id": "library-model-sources",
                 "name": "LibraryModel sources",
-                "description": "Linux-safe state and logic behind Library's window: LibraryCatalog (photos, collections with counts, the selected collection, sort order, the loupe's photo, stepping and position), the grid's selection on SuiteKernel's Selection (LibrarySelectionAdapter: a click's pick through the display order, the arrow move, select), PhotoItem with its sort orders, keywords, title, caption and camera details (PhotoDetails: CameraDetails cleaned from Exif, CameraField and the Info tab's camera rows for the selected photos),metadata edits on the selected photos with mixed values (PhotoMetadata, PhotoFlag) and the metadata inspector's accessibility identifiers (MetadataInspectorID), 60 seeded sample photos and the launch fixtures (LibraryFixtures: shoot, cameras with invented camera details and keywords, large), and LibraryThumbnailCache (the grid's held thumbnails, pending requests and size bucket, reading the catalog without changing it and returning failures as availability changes for applyThumbnailFailures), and the status contract (LibraryStatusRow and LibraryStatusPill: the row under the content with its count, selection, cell size or loupe zoom and place, import, render, save and Preview data pills; LibraryInspectorHeader: the inspector's title and facts), and the export contract: export names (ExportNaming+Kernel, an adapter onto SuiteModel's UniqueFileNames) and the Library-local export formats, presets and XMP sidecar (ExportFormats, ExportPresets, ExportSidecar) with the catalog's export methods and runner (LibraryExport), and the sidecar contract (SidecarContracts: SidecarWriting with its unconnected live default, SidecarFields and SidecarWrite; FakeSidecars in memory) on LibraryServices, and the metadata-more slots later slices fill (LibraryKeywords: KeywordState and the keyword edits, with keywordHelp real; title and caption on PhotoMetadata; XMPSidecar: the sidecar packet, name and write plan; PhotoSearch: the search field's value), and the menu and key actions (LibraryAction with the catalog's help and run, refusing with the menu's reason as a LibraryRefusal: LibraryActions), and those actions as SuiteKernel command specs with the catalog's history (LibraryCommandCatalog), and the catalog file on SuiteKernel's DocumentSession and VersionedJSON probe (LibrarySession+Kernel), and the headless document for the CLI and MCP (LibraryHeadless: a .library zip of catalog.json and its images, import, save, and the picks exported as PNG), and the file-flow adapter (LibraryFileFlow+Kernel: the catalog as a SuiteDocumentHost and FileFlowTarget, always open, placing the photo kinds it imports and handing other apps' documents to them).",
+                "description": "Linux-safe state and logic behind Library's window: LibraryCatalog (photos, collections with counts, the selected collection, sort order, the loupe's photo, stepping and position), the grid's selection on SuiteKernel's Selection (LibrarySelectionAdapter: a click's pick through the display order, the arrow move, select), PhotoItem with its sort orders, keywords, title, caption and camera details (PhotoDetails: CameraDetails cleaned from Exif, CameraField and the Info tab's camera rows for the selected photos),metadata edits on the selected photos with mixed values (PhotoMetadata, PhotoFlag) and the metadata inspector's accessibility identifiers (MetadataInspectorID), 60 seeded sample photos and the launch fixtures (LibraryFixtures: shoot, cameras with invented camera details and keywords, large), and LibraryThumbnailCache (the grid's held thumbnails, pending requests and size bucket, reading the catalog without changing it and returning failures as availability changes for applyThumbnailFailures), and the status contract (LibraryStatusRow and LibraryStatusPill: the row under the content with its count, selection, cell size or loupe zoom and place, import, render, save and Preview data pills; LibraryInspectorHeader: the inspector's title and facts), and the export contract: export names (ExportNaming+Kernel, an adapter onto SuiteModel's UniqueFileNames) and the Library-local export formats, presets and XMP sidecar (ExportFormats, ExportPresets, ExportSidecar) with the catalog's export methods and runner (LibraryExport), and the sidecar contract (SidecarContracts: SidecarWriting with its unconnected live default, SidecarFields and SidecarWrite; FakeSidecars in memory) on LibraryServices, and the metadata-more slots later slices fill (LibraryKeywords: KeywordState and the keyword edits, with keywordHelp real; title and caption on PhotoMetadata; XMPSidecar: the sidecar packet, name and write plan; PhotoSearch: the search field's value), and the menu and key actions (LibraryAction with the catalog's help and run, refusing with the menu's reason as a LibraryRefusal: LibraryActions), and those actions as SuiteKernel command specs with the catalog's history (LibraryCommandCatalog), and the catalog file on SuiteKernel's DocumentSession and VersionedJSON probe (LibrarySession+Kernel), and the headless document for the CLI and MCP (LibraryHeadless: a .library zip of catalog.json and its images, import, save, and the picks exported as PNG), and the file-flow adapter (LibraryFileFlow+Kernel: the catalog as a SuiteDocumentHost and FileFlowTarget, always open, placing the photo kinds it imports and handing other apps' documents to them), and filters and collections (LibraryFilter: flags, rating rule, labels and Hide Rejected over the selected collection, with the filter bar's methods and summary; LibraryCollections: collections you make and smart collections from the filter, each edit one undo step, and the collections.json codec, restore and set-aside notice).",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/LibraryModel/"
@@ -448,6 +448,16 @@
                 "paths": [
                   "Sources/SuiteModel/Presets/"
                 ]
+              },
+              {
+                "id": "suite-help",
+                "name": "Help reports",
+                "description": "What Help > Report a Problem… and Beta Notes show: ProblemReport (the app, its version and build, macOS, the Mac model and the newest three suite crashes at most 7 days old, each a CrashFile trimmed to its header and crashed thread, with the home path, user and host redacted; text puts the person's note on top) and BetaNotes.current, the build's known issues. Built from values the caller reads; nothing here reads a disk or opens a socket (report-problem RP-1 stubs, RP-4 bodies).",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Help/",
+                  "Sources/AfterGlowCLICore/HelpReports.swift"
+                ]
               }
             ]
           },
@@ -473,7 +483,7 @@
               {
                 "id": "kernel-history",
                 "name": "History",
-                "description": "History<Payload>, the one undo history: named steps, a run under one key folded into one step, endRun, undo and redo through an apply closure, jump to a step, step ids that never repeat and dirty read as savedStepID against currentStepID; HistoryReading, what menus and title bars read. EK-2 declares it as a stub that answers like an empty history; EK-8 fills the bodies. HistoryCommands.swift: HistoryListing (the base state, every step's name, the applied index and the saved index) read from a History, the HistoryJumping protocol an app's document conforms to, and HistoryCommands.specs, the History panel's history.read query and history.jump view command; autosave-history AH-1 declares them with ids, schemas and availability, AH-6 fills the bodies.",
+                "description": "History<Payload>, the one undo history: named steps, a run under one key folded into one step, endRun, undo and redo through an apply closure, jump to a step, step ids that never repeat and dirty read as savedStepID against currentStepID; HistoryReading, what menus and title bars read. EK-2 declares it as a stub that answers like an empty history; EK-8 fills the bodies. HistoryCommands.swift: HistoryListing (the base state, every step's name, the applied index and the saved index) read from a History, the HistoryJumping protocol an app's document conforms to, and HistoryCommands.specs, the History panel's history.read query and history.jump view command; autosave-history AH-1 declares them with ids, schemas and availability, AH-6 fills the bodies; SuiteUI's History panel lists the steps through history.read and jumps through history.jump, beside the .autosaveRecovery modifier that offers a recovered draft on open, and AH-9 makes the fake app conform so RJ-X31 runs a jump on Linux.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/History/"
@@ -495,13 +505,18 @@
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Keys/Keys.swift",
-                  "Sources/SuiteKernel/Keys/KeyRules.swift"
+                  "Sources/SuiteKernel/Keys/KeyRules.swift",
+                  "Sources/SuiteKernel/Keys/ColorKeyRules.swift",
+                  "Sources/SuiteKernel/Keys/SpanRules.swift",
+                  "Sources/SuiteKernel/Keys/FrameRate.swift",
+                  "Sources/SuiteKernel/Keys/Timecode.swift",
+                  "Sources/SuiteKernel/Keys/TimeCommands.swift"
                 ]
               },
               {
                 "id": "kernel-layers",
                 "name": "Layer tree and fixtures",
-                "description": "LayerTree<Payload>, the one layer tree: LayerPayload, LayerNode (nesting, hide, lock, a follow link), LayerRow (the layers panel's flat rows from rows(expanded:)), ArrangeStep and TreeRefusal; move, arrange, group, ungroup, duplicate and the follow link are stubs for EK-12 and EK-13. Fakes/KernelFixtures.swift holds the shared fixtures: tree200 (200 nodes, seven roots, groups three deep, one hidden, one locked) and cards (the snapping packet's page in Desktop). Fakes/FakeCanvasDocument.swift is the command catalog's fake app: a headless document of named rects with its six commands plus undo and redo, its fixture, and CommandCatalog.empty for an app that has adopted no command yet.",
+                "description": "LayerTree<Payload>, the one layer tree: LayerPayload, LayerNode (nesting, hide, lock, a follow link), LayerRow (the layers panel's flat rows from rows(expanded:)), ArrangeStep and TreeRefusal; move, arrange, group, ungroup, duplicate and the follow link are stubs for EK-12 and EK-13. Fakes/KernelFixtures.swift holds the shared fixtures: tree200 (200 nodes, seven roots, groups three deep, one hidden, one locked) and cards (the snapping packet's page in Desktop). Fakes/FakeCanvasDocument.swift is the command catalog's fake app: a headless document of named rects with its six commands plus undo and redo, the file-flow commands and the eight fill commands (each rect an optional fill in its own box, left out of the JSON when nil), its fixture, and CommandCatalog.empty for an app that has adopted no command yet.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Layers/",
@@ -523,8 +538,10 @@
                 "description": "Transform/BoxMath.swift: LayerTransform (scale, degrees, move) and BoxMath (resize by an EditorHandle with Shift aspect and Option centre, at least 1 and never flipping; several items scaled as one box; 15 degree rotate snap; the handle rects). Transform/HandleHit.swift: HandleHit (the handle under a point, Chebyshev with corners winning ties; a screen tolerance divided by zoom). Stubs from EK-3; bodies EK-20. Transform/TransformRules.swift: FlipDirection, BoxAnchor (nine points), TransformBox (an unturned box, its clockwise turn and its mirrors) and TransformRules (normalize, rotate, flip, scale about an anchor, corners, bounds, local and the matrix, the Canvas Size anchored origin). Transform/TransformCommands.swift: the TransformTarget protocol, TransformIntent and TransformCommands' six transform.* specs (read, set, rotate, scale, flip, reset). Stubs from transform-tools TT-1; bodies TT-5 and TT-6.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
+                  "Sources/SuiteKernel/Transform/AnchorCommands.swift",
                   "Sources/SuiteKernel/Transform/BoxMath.swift",
                   "Sources/SuiteKernel/Transform/HandleHit.swift",
+                  "Sources/SuiteKernel/Transform/Placement.swift",
                   "Sources/SuiteKernel/Transform/TransformCommands.swift",
                   "Sources/SuiteKernel/Transform/TransformRules.swift"
                 ]
@@ -554,7 +571,7 @@
               {
                 "id": "kernel-stroke",
                 "name": "Stroke",
-                "description": "Stroke/: StrokeSample (point, pressure, time) and the strokeSamples fixture (40 samples), StrokeSegment (a cubic with a pressure range), StrokeSmoother (samples to segments one late, flattening), DabSpacer (dab centres between two points), BrushSettings with BrushEdit (size, hardness, opacity, flow, spacing, clamped), BrushPreset, and LiveCopy, the working copy a drag draws on until take(). EK-29 declares them as stubs; EK-28 fills the bodies.",
+                "description": "Stroke/: StrokeSample (point, pressure, time) and the strokeSamples fixture (40 samples), StrokeSegment (a cubic with a pressure range), StrokeSmoother (samples to segments one late, flattening), DabSpacer (dab centres between two points), BrushSettings with BrushEdit (size, hardness, opacity, flow, spacing, clamped), BrushPreset, and LiveCopy, the working copy a drag draws on until take(). EK-29 declares them as stubs; EK-28 fills the bodies. BrushKeys holds the brush keys' rule ([ and ] step size in bands of 1, 5, 25 and 50; Shift-brackets move hardness by 25; digits set opacity in tens, or an exact percent through OpacityDigits' 0.6 s window), and BrushKeyCommands its six commands on a BrushKeyTarget: brush.size-up, brush.size-down, brush.hardness-up, brush.hardness-down, brush.set-opacity and layer.set-opacity.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Stroke/"
@@ -572,7 +589,7 @@
               {
                 "id": "kernel-fill",
                 "name": "Fill",
-                "description": "Fill/: the suite's one gradient model. Fill, GradientStop and FillColor as FlareCore's Fill, GradientStop and Color under kernel names, FillType (solid, linear, radial), FillSelection (a fill and its box) and the GradientFillTarget protocol an app's workspace conforms to; GradientRules (the stop, angle and box rules: maxStops, stopHelp, converted, angle, rotated, color, adding, moving, removing and recolouring stops, mapped); GradientIntent (the gradient editor's gestures as commands) and GradientCommands (the eight fill.* command specs every app registers); GradientSVG (a fill as an SVG gradient definition). gradient-fill GF-1 declares them as stubs (specs with real ids, schemas and availability); GF-5, GF-6 and GF-7 fill the bodies.",
+                "description": "Fill/: the suite's one gradient model. Fill, GradientStop and FillColor as FlareCore's Fill, GradientStop and Color under kernel names, FillType (solid, linear, radial), FillSelection (a fill and its box) and the GradientFillTarget protocol an app's workspace conforms to; GradientRules (the stop, angle and box rules: maxStops, stopHelp, converted, angle, rotated, color, adding, moving, removing and recolouring stops, mapped); GradientIntent (the gradient editor's gestures, each one fill.* command and its params) and GradientCommands (the eight fill.* command specs every app registers: fill.read, fill.type, fill.gradient, fill.stop-add, fill.stop-move, fill.stop-remove, fill.stop-color and fill.angle, each edit one undo step named for its command, a stop or angle drag folded into one step by its drag token); GradientSVG (a fill as an SVG gradient definition). The commands run on the fake canvas (FakeCanvasDocument) and behind SuiteUI's GradientEditor, whose gallery page sends each intent through them on a live local target with a History. gradient-fill GF-1 declared them; GF-5 to GF-10 built them.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Fill/"
@@ -594,6 +611,24 @@
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Sample/"
+                ]
+              },
+              {
+                "id": "kernel-crop",
+                "name": "Crop",
+                "description": "Crop/: Orientation (the eight EXIF orientations as a group: turn, flip, compose, the turned size and the unit-square matrix) and the OrientationTarget protocol; CropAspect (free, original, W:H, with Library's raw keys) and CropOrientation; CropFrame; CropRules (the largest frame of an aspect, a handle drag held to the aspect and the bounds, swap and nudge) and the CropTarget protocol; CropCommands (image.rotate-cw, -ccw, -180, image.flip and the five crop.* command specs). orientation-crop OC-1 declares them as stubs; OC-3 and OC-4 fill the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Crop/"
+                ]
+              },
+              {
+                "id": "kernel-document",
+                "name": "Document Setup",
+                "description": "Document/: DocumentSetup, a document's size in a length unit (px, pt, in, cm, mm) at a resolution, its background and, for timed apps, frame rate and duration in seconds, with the rules that turn it into whole pixels, convert units, swap the sides and name each field's problem; and DocumentSetupCommands, document.read-settings and document.set-settings over a DocumentSetupTarget, placing old content by a BoxAnchor through TransformRules. document-setup DS-1 declares them as stubs; DS-3 and DS-4 fill the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Document/"
                 ]
               },
               {
@@ -621,6 +656,36 @@
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Text/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "suite-imaging",
+            "name": "SuiteImaging",
+            "description": "The suite's one imaging library (docs/blueprints/suiteui/features/suite-imaging.md): the adjustment values Photo and Library share, the tone program they compile to, the CPU or GPU route and the live GPU tone surface. Linked by the Design, Photo, Library and Halo Models, SuiteUI and the CLI. Linux-safe over CoreRaster, CoreRender and CoreColor; CoreRenderMetal only on macOS. The only module outside SuiteUI's canvas host that may import Metal (ImagingBoundaryTests). Imports no app Model and no SuiteUI.",
+            "technology": "Swift 6, Foundation (FoundationEssentials), CoreRaster, CoreRender, CoreColor; CoreRenderMetal and Metal on macOS",
+            "tags": [
+              "internal"
+            ],
+            "components": [
+              {
+                "id": "imaging-adjust",
+                "name": "Adjust",
+                "description": "Adjust/ and the SuiteImaging namespace: AdjustSettings (exposure, levels, curve, hue and saturation) with its clamps and its one Codable form Photo and Library both read, and ImagingProgram, which compiles settings to CoreRender's tone adjustments (CPU) and tone program (GPU) in one fixed order. suite-imaging IM-2 declares them as stubs; IM-3 and IM-4 fill the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and CoreRender, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Adjust/",
+                  "Sources/SuiteImaging/SuiteImaging.swift"
+                ]
+              },
+              {
+                "id": "imaging-route",
+                "name": "Route",
+                "description": "Route/: ImagingRoute (CPU or GPU for a list of tone steps, CPU whenever a step is not on Metal yet) and, on macOS, LiveToneSurface, which keeps the base resident on the GPU and folds each step's tone program into the display encode. suite-imaging IM-2 declares them as stubs; IM-4 and IM-5 fill the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), CoreRender and CoreRaster; CoreRenderMetal and Metal on macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Route/"
                 ]
               }
             ]
@@ -724,6 +789,44 @@
                 "technology": "Swift 6, Foundation and Darwin sockets, macOS 26",
                 "paths": [
                   "Sources/SuiteShell/LiveCommandChannel.swift"
+                ]
+              },
+              {
+                "id": "shell-help",
+                "name": "Help menu",
+                "description": "SuiteHelpCommands, the suite's Help menu: it replaces the system's empty help item with the suite Help catalog's items (Report a Problem…, Beta Notes and, in the launcher, Welcome to AfterGlow, which opens the tour), each a MenuCommand over a SuiteHelpDocument and disabled with its reason until its run is built. ShellHelpProvider adapts SuiteModel's ProblemReport and BetaNotes to the kernel's HelpProviding with this Mac's version, build, macOS and model. Built by report-problem RP-2.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteShell/SuiteHelpCommands.swift",
+                  "Sources/SuiteShell/ShellHelpProvider.swift",
+                  "Sources/SuiteShell/ProblemReportActions.swift"
+                ]
+              },
+              {
+                "id": "shell-media",
+                "name": "Media writers and readers",
+                "description": "The suite's one media I/O: AVFoundation and ImageIO behind SuiteModel's MediaEncoding and MediaDecoding. MovieWriter writes H.264, HEVC, HEVC with alpha and ProRes 4444 movies tagged BT.709, the canonical copy of Halo's movie writer.",
+                "technology": "Swift 6, AVFoundation, VideoToolbox and CoreGraphics, macOS 26",
+                "paths": [
+                  "Sources/SuiteShell/Media/"
+                ]
+              },
+              {
+                "id": "shell-text",
+                "name": "Text on Core Text",
+                "description": "The live half of SuiteModel's text contract, reached as SuiteServices.text through LiveText: measures spans on Core Text into one advance per grapheme (ligatures split evenly, an emoji whole), ascent and descent, and names the fallback family; lists the Mac's font families with their faces; and draws placed glyphs at their origins and angles into an sRGB MediaFrame. It measures and draws only: line breaks, alignment and type on a path are creative-core text-engine's, so an app Model measures here, lays out in core, and draws here.",
+                "technology": "Swift 6, Core Text and AppKit, macOS 26",
+                "paths": [
+                  "Sources/SuiteShell/Text/"
+                ]
+              },
+              {
+                "id": "shell-imageio",
+                "name": "SuiteImageIO",
+                "description": "The suite's one ImageIO adapter: encodes an image as a SuiteImageFormats format and writes animated GIF and APNG files for shell-media's writers. No other source file imports ImageIO.",
+                "technology": "Swift 6, ImageIO and CoreGraphics, macOS 26",
+                "paths": [
+                  "Sources/SuiteShell/SuiteImageIO.swift"
                 ]
               }
             ]
@@ -1199,6 +1302,42 @@
         "source": "suite-kernel",
         "target": "flarecore",
         "description": "uses FlareCore's Point, Rect, Matrix, Keyframe and Easing as they are",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "corerender",
+        "description": "compiles adjustments to CoreRender's tone adjustments and tone program",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "coreraster",
+        "description": "reads and writes tiled pixels",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "corecolor",
+        "description": "converts colours for the hue and saturation step",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "corerendermetal",
+        "description": "runs the tone program on the GPU (macOS only)",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "suite-kernel",
+        "description": "uses the kernel's shared editor values",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "suite-model",
+        "description": "reads the suite's format registry",
         "style": "sync"
       },
       {

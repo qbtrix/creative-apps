@@ -43,6 +43,7 @@ struct DesignCatalogDoc: HeadlessDocument {
             ("two pages", DesignFixtures.twoPages), ("edited", nudged), ("undone", with(nudged) { $0.undo() }),
             ("mid-drag", with(one) { $0.drag(from: pt(150, 140), to: pt(170, 150)) }),
             ("editing text", with { try? $0.beginTextEdit("node-5") }),
+            ("gradient", with(one) { $0.runFill(.type(.linear)); $0.runFill(.add(offset: 0.5)) }),
         ]
     }
 
@@ -68,12 +69,21 @@ struct DesignCatalogDoc: HeadlessDocument {
         case "page.add", "page.select", "edit.select", "edit.select-all": .some(w.addPageHelp)
         case "page.delete": .some(w.deletePageHelp)
         case "page.rename": .some(noPage)
-        default: nil
+        case "history.read": .some(nil)
+        // The eyedropper's two (DY-6): the sample needs an open file; the pick also the fill rows' selection.
+        case "color.sample": .some(w.sampleHelp)
+        case "color.pick": .some(w.sampleHelp ?? w.fillHelp)
+        case "history.jump": .some(w.historyListing.steps.isEmpty ? "There are no steps yet." : nil)
+        case "file.export", "view.zoom-in", "view.zoom-out", "view.fit": .some(w.isOpen ? nil : DesignToolbarItem.noFile)
+        case "view.zoom-to-selection": .some(w.zoomToSelectionHelp)
+        // The transform rows' and Object items' reason (transform DT-6): the workspace's own transformHelp.
+        default: id.hasPrefix("transform.") ? .some(w.transformHelp) : nil
         }
     }
 
     @Test func availabilityMatchesHelp() {
-        for id in DesignWorkspace.catalog.ids {
+        // The fill commands had no help before the catalog: their rules are GradientCommands' (DesignGradientTests).
+        for id in DesignWorkspace.catalog.ids where !id.hasPrefix("fill.") {
             #expect(Self.oldHelp(id, DesignWorkspace()) != nil, "\(id) has no old help to match")
             for (state, w) in Self.states {
                 let old = Self.oldHelp(id, w) ?? nil
@@ -121,7 +131,16 @@ struct DesignCatalogDoc: HeadlessDocument {
                 let named = id == "edit.delete" && w.selectedNodeIDs.count == 1 && problem.contains("stepNamedTitle")
                 // A nudge right after a nudge joins its step, as the arrow keys do.
                 let joined = id == "object.nudge" && state == "edited"
-                return !(off && problem.contains("exampleRuns")) && !noChange && !named && !joined
+                // A jump moves the document to an earlier step, as undo does, so its bytes change.
+                let jumped = id == "history.jump" && problem.contains("queryOrViewChangesNoBytes")
+                // The kernel's flip names its step for the axis ("Flip Horizontal"), as in Photo; Reset Rotation on an
+                // upright layer changes nothing, so it records no step.
+                let axis = id == "transform.flip" && problem.contains("stepNamedTitle")
+                let upright = id == "transform.reset" && w.selectedNodes.allSatisfy { $0.rotation == 0 && !$0.flipX && !$0.flipY }
+                // A pick names its step for what it painted ("Fill" or "Stroke"), as the Eyedropper's click does.
+                let picked = id == "color.pick" && problem.contains("stepNamedTitle")
+                return !(off && problem.contains("exampleRuns")) && !noChange && !named && !joined && !jumped && !axis && !upright
+                    && !picked
             }
             #expect(problems.isEmpty, "\(state): \(problems.joined(separator: "\n"))")
             ran.formUnion(DesignCatalogDoc.catalog.ids.filter { DesignCatalogDoc.catalog.availability($0, on: doc).why == nil })
@@ -163,7 +182,7 @@ struct DesignCatalogDoc: HeadlessDocument {
 
     static let golden = [
         "file.new | New File | on", "file.open | Open… | This window holds a file; open it in a new one.",
-        "file.save | Save | on", "file.save-as | Save As… | on",
+        "file.save | Save | on", "file.save-as | Save As… | on", "file.export | Export… | on",
         "edit.undo | Undo | Nothing to undo.", "edit.redo | Redo | Nothing to redo.",
         "edit.select | Select | on", "edit.select-all | Select All | on",
         "edit.duplicate | Duplicate | on", "edit.delete | Delete | on",
@@ -175,10 +194,21 @@ struct DesignCatalogDoc: HeadlessDocument {
         "object.distribute-horizontally | Distribute Horizontally | Select three or more layers to distribute.",
         "object.distribute-vertically | Distribute Vertically | Select three or more layers to distribute.",
         "object.nudge | Nudge | on",
+        "fill.read | Read Fill | on", "fill.type | Fill Type | on", "fill.gradient | Set Gradient | on",
+        "fill.stop-add | Add Gradient Stop | Switch the fill to a gradient first.",
+        "fill.stop-move | Move Gradient Stop | Switch the fill to a gradient first.",
+        "fill.stop-remove | Remove Gradient Stop | Switch the fill to a gradient first.",
+        "fill.stop-color | Gradient Stop Color | on", "fill.angle | Gradient Angle | Angle is for a linear gradient.",
+        "color.sample | Sample Color | on", "color.pick | Pick Colour | on",
+        "transform.read | Transform | on", "transform.set | Transform | on", "transform.rotate | Rotate | on",
+        "transform.scale | Scale | on", "transform.flip | Flip | on", "transform.reset | Reset Rotation | on",
         "page.add | Add Page | on", "page.rename | Rename Page | on",
         "page.delete | Delete Page | A file keeps at least one page.", "page.select | Select Page | on",
         "tool.move | Move | on", "tool.frame | Frame | on", "tool.rectangle | Rectangle | on",
         "tool.ellipse | Ellipse | on", "tool.text | Text | on", "tool.pen | Pen | Drawing paths isn't built yet.",
-        "tool.eyedropper | Eyedropper | Eyedropper (I): picking a fill or stroke color from the canvas isn't built yet.",
+        "tool.eyedropper | Eyedropper | on",
+        "history.read | Read History | on", "history.jump | Jump in History | There are no steps yet.",
+        "view.zoom-in | Zoom In | on", "view.zoom-out | Zoom Out | on", "view.fit | Fit Page | on",
+        "view.zoom-to-selection | Zoom to Selection | on",
     ]
 }

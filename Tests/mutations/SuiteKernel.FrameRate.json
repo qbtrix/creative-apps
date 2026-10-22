@@ -1,0 +1,16 @@
+[
+  {
+    "label": "durationRounds: seconds become frames by floor instead of round",
+    "file": "Sources/SuiteKernel/Keys/FrameRate.swift",
+    "find": "let rounded = (exact + 0.5).rounded(.down)",
+    "replace": "let rounded = exact.rounded(.down)",
+    "tests": "FrameRateTests"
+  },
+  {
+    "label": "ntscExact: 29.97 kept as the decimal 2997/100 instead of 30000/1001",
+    "file": "Sources/SuiteKernel/Keys/FrameRate.swift",
+    "find": "FrameRate(numerator: 30000, denominator: 1001)",
+    "replace": "FrameRate(numerator: 2997, denominator: 100)",
+    "tests": "FrameRateTests"
+  }
+]

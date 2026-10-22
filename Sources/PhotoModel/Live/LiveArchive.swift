@@ -5,9 +5,11 @@
 // the composite as `mergedimage.png` and at most 256 px long (a box filter
 // in linear light) as `Thumbnails/thumbnail.png`, `stack.xml` for other
 // OpenRaster readers, and `photo/document.json` with what OpenRaster has no
-// word for. Decode reads only
-// the JSON and the images it names (stack.xml is written, never parsed back:
-// the packet's "Reading" decision) and throws only ArchiveError. Both run
+// word for. A text layer's PNG is its rasterized words, and its stack.xml
+// entry carries their `afterglow:text` (PhotoTextLayer+ORA). Decode reads
+// the JSON, the images it names and, from stack.xml, only those text
+// attributes (the rest is never parsed back: the packet's "Reading"
+// decision), and throws only ArchiveError. Both run
 // the codec on every image at once, across the cores. The zip is PhotoZip's.
 // Linux-safe.
 #if canImport(FoundationEssentials)
@@ -27,15 +29,17 @@ struct LiveArchive: DocumentArchiving {
     func encode(_ snapshot: PhotoDocumentSnapshot, codec: any PhotoImageCodec) throws -> PhotoPackage {
         var files: [String: Data] = [PhotoZip.mimetype: PhotoZip.mimetypeValue]
         var images: [(path: String, image: DecodedImage)] = []
-        var entries: [LayerEntry] = [], contents: [LayerContent] = []
+        var entries: [LayerEntry] = [], contents: [LayerContent] = [], texts: [String: String] = [:]
         for (index, layer) in snapshot.layers.enumerated() {
             let number = snapshot.layers.count - index
             var src: String?, mask: String?
-            if layer.kind == .pixels {
+            let text = layer.kind.textLayer
+            if layer.kind == .pixels || text != nil {
                 guard let image = snapshot.pixels[layer.id] else { throw RasterError.invalid("\(layer.name) has no pixels") }
                 let path = "data/layer-\(number).png"
                 images.append((path, image))
                 src = path
+                if let text { texts[path] = try text.oraValue() }
             }
             if let image = snapshot.masks[layer.id] {
                 let path = "photo/masks/layer-\(number).png"
@@ -54,7 +58,7 @@ struct LiveArchive: DocumentArchiving {
         // Every PNG at once, across the cores.
         let pngs = try PhotoLayerComposite.inParallel(all.count) { try codec.encode(all[$0].image, as: .png, quality: 1) }
         for (entry, png) in zip(all, pngs) { files[entry.path] = png }
-        files["stack.xml"] = Data(PhotoStackXML.stack(snapshot.canvas, entries).utf8)
+        files["stack.xml"] = Data(PhotoStackXML.stack(snapshot.canvas, entries, texts: texts).utf8)
         let document = DocumentEntry(
             format: formatVersion, canvas: SizeEntry(width: snapshot.canvas.width, height: snapshot.canvas.height),
             layers: entries, adjustments: snapshot.adjustments, selected: snapshot.selectedLayerID)
@@ -84,10 +88,15 @@ struct LiveArchive: DocumentArchiving {
         let byPath = Dictionary(zip(paths, decoded)) { first, _ in first }
         var pixels: [PhotoLayer.ID: DecodedImage] = [:], masks: [PhotoLayer.ID: DecodedImage] = [:]
         var layers: [PhotoLayer] = []
+        let texts = PhotoTextLayer.oraTexts(inStack: package.files["stack.xml"])
         for entry in document.layers {
-            if let src = entry.src { pixels[entry.id] = byPath[src] }
+            var layer = entry.layer
+            if let src = entry.src {
+                pixels[entry.id] = byPath[src]
+                if entry.kind == .pixels, let text = texts[src] { layer.kind = .text(text) }
+            }
             if let mask = entry.mask { masks[entry.id] = byPath[mask] }
-            layers.append(entry.layer)
+            layers.append(layer)
         }
         return PhotoDocumentSnapshot(
             canvas: canvas, layers: layers, pixels: pixels, masks: masks, adjustments: document.adjustments,
@@ -159,6 +168,8 @@ struct LayerEntry: Codable {
         switch layer.kind {
         case .pixels: kind = .pixels
         case .adjustment(let settings): kind = .adjustment; adjustment = settings
+        // Its words and style ride in stack.xml's afterglow:text (PhotoTextLayer+ORA).
+        case .text: kind = .pixels
         }
     }
 

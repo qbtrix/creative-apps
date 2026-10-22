@@ -74,6 +74,8 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var order: [String] = []  // the shown ids in sort order (LibraryOrder.swift)
     public internal(set) var importState = ImportState.idle
     public internal(set) var importNotice: ImportNotice?
+    /// The import notice whose failures are listed (CS-5); `showsImportFailures` reads it.
+    public internal(set) var failuresShownFor: ImportNotice?
     /// Its own thumbnails; `thumbnails` and the rest forward to it (LibraryThumbnails.swift).
     public internal(set) var thumbnailCache = LibraryThumbnailCache()
     public internal(set) var autoAdvance = true
@@ -85,6 +87,8 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var loupeError: String?
     public internal(set) var copiedSettings: DevelopSettings?
     public internal(set) var cropDraft: CropSettings?  // non-nil while cropping
+    /// The loupe photo Show Original shows without its adjustments (CS-3); `showsOriginal` reads it.
+    public internal(set) var originalPhotoID: String?
     /// The export sheet's run: the kernel's; `exportState` reads it (LibraryExportAdapter.swift).
     public internal(set) var exportRun = ExportRun<ExportOptions>.idle
     public internal(set) var exportSummary: ExportSummary?  // the finished run's summary
@@ -94,6 +98,7 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var saveError: String?
     public internal(set) var showsTestValues = false  // -LibraryTestValues
     public internal(set) var cullError: String?  // a refused cull change
+    public internal(set) var fileRequests: [LibraryFileRequest] = []  // file-flow work for the window
     /// The filter bar's rules outside a smart collection (LibraryFilter.swift).
     public internal(set) var filter = LibraryFilter.all
     /// The collections you made and the smart ones, in sidebar order.
@@ -115,13 +120,14 @@ public struct LibraryCatalog: Sendable, Equatable {
             && lhs.history == rhs.history && lhs.order == rhs.order
             && lhs.filter == rhs.filter && lhs.userCollections == rhs.userCollections
         let work = lhs.importState == rhs.importState && lhs.importNotice == rhs.importNotice
+            && lhs.failuresShownFor == rhs.failuresShownFor
             && lhs.thumbnailCache == rhs.thumbnailCache && lhs.autoAdvance == rhs.autoAdvance
             && lhs.cullError == rhs.cullError && lhs.exportRun == rhs.exportRun
-            && lhs.exportState == rhs.exportState
+            && lhs.exportState == rhs.exportState && lhs.fileRequests == rhs.fileRequests
         let loupe = lhs.loupeZoom == rhs.loupeZoom && lhs.loupeRender == rhs.loupeRender
             && lhs.loupeRenderToken == rhs.loupeRenderToken && lhs.loupeShownToken == rhs.loupeShownToken
             && lhs.loupeError == rhs.loupeError
-            && lhs.copiedSettings == rhs.copiedSettings && lhs.cropDraft == rhs.cropDraft
+            && lhs.copiedSettings == rhs.copiedSettings && lhs.cropDraft == rhs.cropDraft && lhs.originalPhotoID == rhs.originalPhotoID
         let file = lhs.catalogState == rhs.catalogState && lhs.saveRevision == rhs.saveRevision
             && lhs.savedRevision == rhs.savedRevision && lhs.saveError == rhs.saveError
             && lhs.showsTestValues == rhs.showsTestValues

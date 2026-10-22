@@ -10,7 +10,8 @@
 // them to the workspace as they come, at most twice a display frame, and each
 // apply starts the picture's render at once. A brush, eraser, clone or heal
 // stroke draws on LiveStroke's LiveCopy and comes back once, at its end or before
-// any other intent, so drawing never re-runs the panels. Its workspace runs on
+// any other intent, so drawing never re-runs the panels; a Free Transform
+// handle drag or row scrub runs on LiveTransformCopy the same way. Its workspace runs on
 // `fileServices(.live)`, or under `-PhotoFixture` on the fixture's fakes
 // (`launchOptions`, read once from the process; S-12), whose picture it
 // renders and keeps fitted while the window settles, until the user zooms. Open, Save, Save As and their
@@ -27,6 +28,7 @@
 import AppKit
 import CoreRaster
 import PhotoModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -35,6 +37,8 @@ struct PhotoWindow: View {
     @State var renderer = CanvasRenderer()
     @State var pacer = StrokePacer()
     @State var liveStroke = LiveStroke()
+    @State var dragLine = LiveDragLine()
+    @State var liveTransform = LiveTransformCopy()
     @State var zoom = 1.0
     @State var viewport = CGSize.zero
     /// A new image waits to be fitted until the canvas has a size.
@@ -65,13 +69,17 @@ struct PhotoWindow: View {
     @State var isTransforming = false
     /// The Export sheet's choices while it is open (PhotoWindow+Export.swift, PV-8).
     @State var exportDraft: ExportOptions?
+    /// The Canvas Size sheet's choices while it is open (PhotoWindow+Transform.swift, PT-3).
+    @State var canvasSizeDraft: CanvasSizeDraft?
     /// The inspector's tab (PhotoWindow+History.swift, history-panel PH-2).
     @State var inspectorTab = PhotoInspectorTab.adjust
     /// The app's View > Rendering; nil in tests, which draw on the CPU.
     @Environment(\.photoRendering) private var rendering
 
     /// A sheet or the rename alert is up, so Select > All never selects the canvas.
-    var isPresenting: Bool { model.isExportSheetOpen || isResizing || straightenDraft != nil || isRenaming }
+    var isPresenting: Bool {
+        model.isExportSheetOpen || isResizing || straightenDraft != nil || isRenaming || canvasSizeDraft != nil
+    }
 
     /// The launch file opens in the first window only.
     @MainActor static var launchFileOpened = false
@@ -95,6 +103,8 @@ struct PhotoWindow: View {
             model: model, tiles: renderer.tiles, renderMilliseconds: renderer.milliseconds,
             renderBackend: renderer.backend, note: renderer.failure ?? note, zoom: zoom, onViewport: viewportChanged, onZoom: setZoom, perform: perform,
             straighten: straightenDraft)
+            .environment(\.photoDragLine, dragLine)
+            .environment(\.photoLiveTransform, liveTransform)
             .focusedSceneValue(\.photoMenu, PhotoMenu(model: model, isPresenting: isPresenting, perform: perform))
             .onChange(of: model.revision) { renderer.show(model) }
             .onAppear { if let rendering { renderer.follow(rendering) { renderer.show(model) } } }
@@ -112,18 +122,18 @@ struct PhotoWindow: View {
             }
             .sheet(isPresented: Binding(get: { model.isExportSheetOpen }, set: { if !$0 { model.dismissExport() } })) {
                 ExportSheet(
-                    format: exportFormat, quality: exportQuality, onFormat: { exportFormat = $0 },
+                    format: exportFormat, quality: exportQuality, workspace: model, onFormat: { exportFormat = $0 },
                     onQuality: { exportQuality = $0 }, onExport: exportChosen, onCancel: { model.dismissExport() })
             }
             .sheet(isPresented: $isResizing) {
                 if let canvas = model.canvas {
-                    ImageSizeSheet(size: canvas, onResize: resize, onCancel: { isResizing = false })
+                    ImageSizeSheet(size: canvas, workspace: model, onResize: resize, onCancel: { isResizing = false })
                 }
             }
             .sheet(isPresented: Binding(get: { straightenDraft != nil }, set: { if !$0 { straightenDraft = nil } })) {
                 if let draft = straightenDraft {
                     StraightenSheet(
-                        draft: draft, frame: model.straightenFrame(degrees: draft.degrees, cropToFit: draft.cropToFit),
+                        draft: draft, frame: model.straightenFrame(degrees: draft.degrees, cropToFit: draft.cropToFit), workspace: model,
                         onDraft: { straightenDraft = $0 },
                         onApply: { perform(.applyStraighten(degrees: draft.degrees, cropToFit: draft.cropToFit)) },
                         onCancel: { straightenDraft = nil })
@@ -131,7 +141,9 @@ struct PhotoWindow: View {
             }
             .alert("Rename Layer", isPresented: $isRenaming) {
                 TextField("Name", text: $renameText).accessibilityIdentifier("photo.layer.name")
-                Button("Rename", action: commitRename)
+                if let spec = PhotoWorkspace.catalog.spec("layer.rename") {
+                    MenuCommand(spec, on: model, title: "Rename", perform: commitRename)
+                }
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text("Enter a new name for the layer.")
@@ -156,7 +168,7 @@ struct PhotoWindow: View {
             .modifier(PhotoHistoryArea(model: model, perform: perform, tab: inspectorTab))
             .modifier(PhotoSelectArea(model: model, perform: perform))
             .modifier(PhotoAdjustmentLayerArea(model: model, perform: perform))
-            .modifier(PhotoTransformArea(model: model, perform: perform))
+            .modifier(PhotoTransformArea(model: model, perform: perform, canvasSize: canvasSizeDraft))
             .modifier(PhotoExportArea(model: model, perform: perform))
             .modifier(PhotoSampleArea(model: model, perform: perform))
     }
@@ -165,7 +177,7 @@ struct PhotoWindow: View {
         // Drag samples still waiting for the display frame land first, then a live stroke goes back.
         if case .drag = intent {} else {
             pacer.flush()
-            takeStroke()
+            takeStroke(keepingTransform: Self.isTransformSample(intent))
         }
         switch intent {
         case .newImage:
@@ -193,6 +205,8 @@ struct PhotoWindow: View {
             // stroke draws on LiveStroke's copy, so its samples don't re-run the panels.
             pacer.add(move) { moves in
                 if samplePress(moves) { return }
+                // A Gradient drag's later samples move only its line, on LiveDragLine's copy.
+                if dragLine.drags(moves, on: model, zoom: zoom) { return }
                 guard let painted = liveStroke.drags(moves, on: model, zoom: zoom) else {
                     model.drags(moves, zoom: zoom)
                     return renderer.show(model)
@@ -216,12 +230,14 @@ struct PhotoWindow: View {
         case .applyCrop: model.applyCrop()
         case .cancelCrop: model.cancelCrop()
         case .selectLayer(let id): model.selectLayer(id)
+        case .pickLayer(let id, let pick): model.pickLayer(id, pick)
+        case .selectAllLayers: model.selectAllLayers()
         case .toggleVisibility(let id): model.toggleVisibility(id)
         case .opacity(let id, let percent): model.setOpacity(id, percent: percent)
         case .blendMode(let id, let mode): model.setBlendMode(id, mode)
         case .moveLayers(let from, let to): model.moveLayers(fromOffsets: Array(from), toOffset: to)
         case .addLayer: model.addLayer()
-        case .deleteLayer: if let id = model.selectedLayerID { model.removeLayer(id) }
+        case .deleteLayer: model.removeSelectedLayers()
         case .renameLayer: beginRename()
         case .bringForward: model.bringSelectedLayerForward()
         case .sendBackward: model.sendSelectedLayerBackward()
@@ -241,15 +257,19 @@ struct PhotoWindow: View {
         case .export(let intent): performExport(intent)
         case .sample(let intent): performSample(intent)
         case .place(let intent): performPlace(intent)
+        case .text(let intent): performType(intent)
         case .confirm: if confirmTransform() {} else { model.applyCrop() }
         case .dismiss:
             if dismissTransform() {} else if model.pendingCrop != nil { model.cancelCrop() } else { model.deselect() }
         }
     }
 
-    /// A live paint stroke's copy back into the workspace: one SwiftUI pass for the stroke.
-    private func takeStroke() {
+    /// A live paint stroke's, drag line's or transform's copy back into the workspace: one SwiftUI pass
+    /// for the gesture. A transform sample keeps the live transform going.
+    func takeStroke(keepingTransform: Bool = false) {
         if let painted = liveStroke.take() { model.adoptLiveStroke(painted) }
+        if let lined = dragLine.take() { model.adoptLiveStroke(lined) }
+        if !keepingTransform, let moved = liveTransform.take() { model.adoptLiveStroke(moved) }
     }
 
     // MARK: Zoom
@@ -296,10 +316,19 @@ struct PhotoWindow: View {
 
     private func resize(width: Int, height: Int) {
         isResizing = false
+        run("image.resize", ["width": .number(Double(width)), "height": .number(Double(height))],
+            failing: "The image can't be resized to \(width) × \(height).")
+    }
+
+    /// Runs catalog command `id` with a sheet's values (command-state CS-10); a refusal opens the alert under `title`.
+    @discardableResult
+    func run(_ id: String, _ params: [String: JSONValue], failing title: String) -> Bool {
         do {
-            try model.resizeImage(width: width, height: height)
+            _ = try PhotoWorkspace.catalog.run(id, params: .object(params), on: &model)
+            return true
         } catch {
-            problem = PhotoProblem("The image can't be resized to \(width) × \(height).", Self.reason(error))
+            problem = PhotoProblem(title, error.description)
+            return false
         }
     }
 
@@ -334,8 +363,7 @@ struct PhotoWindow: View {
     }
 
     private func commitRename() {
-        guard let id = model.selectedLayerID else { return }
-        model.renameLayer(id, to: renameText)
+        run("layer.rename", ["name": .string(renameText)], failing: "The layer can't be renamed.")
     }
 }
 

@@ -3,10 +3,12 @@
 // opens with the Solid / Linear / Radial switch (`flare.inspector.fillType`)
 // over every fill; a pick sends `.runFill(.type(_))`. Under it a solid fill is
 // a color row (`flare.inspector.fill`) whose pick or typed hex sends
-// `.setFill`, a gradient (`paint.gradient`) is SuiteUI's GradientEditor, whose
-// gestures send `.runFill(_)`, and fills that differ read Mixed. The switch
-// and the editor are off, with the router's reason as their tooltip, while
-// `fillEditHelp` says why. STROKE is the color row
+// `.setFill`, a gradient (`paint.gradient`) is SuiteUI's GradientEditor
+// without its own type switch (`editorTypes`), whose gestures send
+// `.runFill(_)`, and fills that differ read Mixed. The switch
+// and the editor are off, with the router's reason as their tooltip and as a
+// note under the switch (`flare.inspector.fillHelp`), while the kernel's
+// `fillHelp` says why. STROKE is the color row
 // (`flare.inspector.stroke`, `.setStrokeColor`), the Width bar
 // (`flare.inspector.strokeWidth`, in pt: each drag sample sends
 // `.scrubStrokeWidth`, so the canvas shows the width live, and the release
@@ -18,6 +20,11 @@
 // router's reason (`reasonFor`) while it can't act. Not through the focused scene
 // value: that one is nil whenever the window isn't key, and the rows would
 // then look enabled and do nothing. It only reads.
+// The fill colour, stroke colour and Width rows each carry a keyframe
+// stopwatch (timeline-keys TK-3: `flare.inspector.key.fill`, `.key.stroke`,
+// `.key.stroke-width`) that sends `.toggleAnimated` / `.toggleKey` by the
+// property's name at the playhead. Its state and reason come from `keyState`
+// and `keyHelp` (TK-8: the Model's `keyState(_:)` and `paintKeyHelp(_:)`).
 import FlareCore
 import FlareModel
 import SuiteKernel
@@ -29,11 +36,21 @@ struct FlareInspectorFill: View {
     /// Why an intent can't act now; nil while it can (`FlareWindow.inspectorHelp`).
     let reasonFor: @MainActor (FlareIntent.Inspector) -> String?
     let perform: @MainActor (FlareIntent) -> Void
+    /// A paint property's stopwatch state ("fill", "stroke", "strokeWidth").
+    var keyState: @MainActor (String) -> SuiteUI.KeyState = { _ in .idle }
+    /// Why a paint property's stopwatch can't act; nil while it can.
+    var keyHelp: @MainActor (String) -> String? = { _ in nil }
 
     /// The fill type switch's chips, one control each (`flare.inspector.fillType.<type>`).
     static let fillTypes = FillType.allCases.map {
         InspectorOption(id: $0, title: $0.rawValue.capitalized, identifier: "flare.inspector.fillType.\($0.rawValue)")
     }
+
+    /// The note under the switch that says why it is off.
+    static let fillHelpID = "flare.inspector.fillHelp"
+
+    /// The editor's own switch offers only `fill`'s type, so it hides: FILL's switch above is the one Type control.
+    nonisolated static func editorTypes(_ fill: Fill) -> [FillType] { [GradientRules.type(of: fill)] }
 
     var body: some View {
         InspectorSection("Fill") { fill }
@@ -47,26 +64,38 @@ struct FlareInspectorFill: View {
             .disabled(help != nil)
             .help(help ?? "Fill type")
             .suiteControl(id: "flare.inspector.fillType", enabled: help == nil, reason: help, identifies: false)
+        if let help { InspectorNote(help, kind: .secondary, identifier: Self.fillHelpID) }
         if let gradient = paint.gradient {
-            GradientEditor(fill: gradient.fill, box: gradient.box) { send(.runFill($0)) }
+            GradientEditor(fill: gradient.fill, box: gradient.box, types: Self.editorTypes(gradient.fill)) {
+                send(.runFill($0))
+            }
                 .disabled(help != nil)
                 .help(help ?? "Edit Fill")
         } else {
-            color("Fill", hex: paint.fillHex, id: "flare.inspector.fill") { .setFill(hex: $0) }
+            HStack(spacing: SuiteSpacing.xs) {
+                color("Fill", hex: paint.fillHex, id: "flare.inspector.fill") { .setFill(hex: $0) }
+                key("Fill", name: "fill", id: "flare.inspector.key.fill")
+            }
         }
     }
 
     @ViewBuilder private var stroke: some View {
-        color("Stroke", hex: paint.strokeHex, id: "flare.inspector.stroke") { .setStrokeColor(hex: $0) }
+        HStack(spacing: SuiteSpacing.xs) {
+            color("Stroke", hex: paint.strokeHex, id: "flare.inspector.stroke") { .setStrokeColor(hex: $0) }
+            key("Stroke", name: "stroke", id: "flare.inspector.key.stroke")
+        }
         let widthHelp = reasonFor(.setStrokeWidth(0))
-        InspectorSliderRow(
-            "Width", value: paint.strokeWidth ?? 0, in: 0...100, step: 0.5, unit: "pt", decimals: 1,
-            mixed: paint.strokeWidth == nil,
-            onChange: { send(.scrubStrokeWidth($0)) },
-            onEnd: { send(.endScrub) })
-            .accessibilityIdentifier("flare.inspector.strokeWidth")
-            .disabled(widthHelp != nil)
-            .help(widthHelp ?? "Stroke Width")
+        HStack(spacing: SuiteSpacing.xs) {
+            InspectorSliderRow(
+                "Width", value: paint.strokeWidth ?? 0, in: 0...100, step: 0.5, unit: "pt", decimals: 1,
+                mixed: paint.strokeWidth == nil,
+                onChange: { send(.scrubStrokeWidth($0)) },
+                onEnd: { send(.endScrub) })
+                .accessibilityIdentifier("flare.inspector.strokeWidth")
+                .disabled(widthHelp != nil)
+                .help(widthHelp ?? "Stroke Width")
+            key("Stroke Width", name: "strokeWidth", id: "flare.inspector.key.stroke-width")
+        }
         picker("Cap", id: "flare.inspector.cap", selection: paint.cap?.rawValue,
                choices: Stroke.Cap.allCases.map(\.rawValue)) { .setStrokeCap($0) }
         picker("Join", id: "flare.inspector.join", selection: paint.join?.rawValue,
@@ -108,5 +137,29 @@ struct FlareInspectorFill: View {
             .accessibilityIdentifier(id)
     }
 
+    private func key(_ title: String, name: String, id: String) -> some View {
+        FlarePaintKey(title: title, name: name, id: id, state: keyState(name), help: keyHelp(name), send: send)
+    }
+
     private func send(_ intent: FlareIntent.Inspector) { perform(.inspector(intent)) }
+}
+
+/// A paint property's stopwatch, as the geometry rows': no modifier wraps the row and it (#1282).
+struct FlarePaintKey: View {
+    let title: String, name: String, id: String
+    let state: SuiteUI.KeyState
+    let help: String?
+    let send: @MainActor (FlareIntent.Inspector) -> Void
+
+    var body: some View {
+        KeyframeButton(
+            title, id: id, state: state, unavailableHelp: help,
+            onToggle: { send(.toggleAnimated(name)) },
+            onKey: { send(.toggleKey(name)) })
+            .disabled(help != nil)
+            .suiteControl(id: id, enabled: help == nil, reason: help, identifies: false)
+            .suiteControl(
+                id: state.diamond == nil ? nil : KeyframeButton.diamondID(id), enabled: help == nil,
+                reason: help, identifies: false)
+    }
 }

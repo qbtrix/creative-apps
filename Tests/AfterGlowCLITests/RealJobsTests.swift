@@ -24,8 +24,8 @@ enum RealJobsHarness {
         .deletingLastPathComponent().deletingLastPathComponent()
     /// The real jobs, and the broken fixture tree laid out the same way.
     static let jobsTree = "Tests/RealJobs", brokenTree = "Tests/AfterGlowCLITests/Fixtures/RealJobsBroken"
-    /// The apps a job may name: the five and the fake.
-    static let apps = Apps.all + [Apps.fake]
+    /// The apps a job may name: the CLI's registry, the five, the suite and the fake.
+    static let apps = CLI.registry
 
     /// Every `<app>/<job>` folder under `tree` that holds a `*.jobs.json`, as repo paths, sorted.
     static func jobs(in tree: String) -> [String] {
@@ -72,7 +72,8 @@ enum RealJobsHarness {
 struct RealJobsLayoutTests {
     @Test func theTreesHoldTheFakeJobsAndTheBrokenFixture() {
         #expect(RealJobsHarness.jobs(in: RealJobsHarness.jobsTree).filter { $0.hasPrefix("Tests/RealJobs/fake/") }
-            == ["Tests/RealJobs/fake/add-rect", "Tests/RealJobs/fake/file-flow", "Tests/RealJobs/fake/move-each"])
+            == ["Tests/RealJobs/fake/add-rect", "Tests/RealJobs/fake/file-flow", "Tests/RealJobs/fake/gradient-fill",
+               "Tests/RealJobs/fake/history-jump", "Tests/RealJobs/fake/move-each"])
         #expect(RealJobsHarness.jobs(in: RealJobsHarness.brokenTree)
             == ["Tests/AfterGlowCLITests/Fixtures/RealJobsBroken/fake/wrong-sha"])
     }

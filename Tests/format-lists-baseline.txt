@@ -1,0 +1,28 @@
+# Files under Sources/ that still spell out their own image-format list (shared-codecs rule 20).
+# FormatListRatchetTests fails on a list in a file not listed here. Shrink only: a slice that
+# derives a file's list from SuiteImageFormats removes its line and lowers baselineCap.
+Sources/DesignApp/DesignExport+Kernel.swift
+Sources/DesignModel/Contracts/StyleTypes.swift
+Sources/DesignModel/DesignExport+Kernel.swift
+Sources/DesignModel/DesignExportSheet+Kernel.swift
+Sources/LibraryApp/Platform/JPEGWriter.swift
+Sources/LibraryModel/Contracts/ExportFormats.swift
+Sources/LibraryModel/Contracts/LibraryValues.swift
+Sources/LibraryModel/LibraryFileFlow+Kernel.swift
+Sources/PhotoApp/ImageIOCodec.swift
+Sources/PhotoApp/PhotoPasteboard.swift
+Sources/PhotoApp/PhotoWindow+Export.swift
+Sources/PhotoApp/PhotoWindow+File.swift
+Sources/PhotoModel/PhotoCommandCatalog.swift
+Sources/PhotoModel/PhotoFileFlow+Kernel.swift
+Sources/PhotoModel/PhotoHeadless.swift
+Sources/PhotoModel/PhotoImageFile.swift
+Sources/PhotoModel/PhotoPlace+Kernel.swift
+Sources/SuiteKernel/Place/Placed.swift
+Sources/SuiteModel/Fakes/FakePasteboard.swift
+Sources/SuiteModel/Pasteboard/PasteboardFolder.swift
+Sources/SuiteModel/Pasteboard/SuitePasteboardCoding.swift
+Sources/SuiteModel/Values/SuiteTypes.swift
+Sources/SuiteShell/PasteboardBridge.swift
+Sources/SuiteUI/Gallery/GalleryEditorKernelChrome.swift
+Sources/SuiteUI/PlaceDrop.swift

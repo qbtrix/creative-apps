@@ -120,11 +120,11 @@ The suite design's Flare MVP, made concrete.
 
 | Area | In v1 |
 |---|---|
-| Files | New from a preset (1080p 16:9, square, 9:16, 550x400 web, custom); open and save `.flare`; Open Recent; autosave to a recovery file with a restore offer after a crash; the title shows the file name; an unsaved dot; undo and redo named for the step. One document per window: New and Open act in the front window after the unsaved-changes prompt |
+| Files | New from a preset (1080p 16:9, square, 9:16, 550x400 web, custom); open and save `.flare`; Open Recent from the suite's shared list (this app's files only; Clear Menu clears them there); Open In ▸ another suite app that reads `.flare` (Halo), once the file is saved; a `.flare` dropped on the stage opens in its own window, a `.halo` goes to Halo, and a file Flare can't read is refused with a mark ("Flare can't import SVG yet."); autosave to a recovery file with a restore offer after a crash; the title shows the file name; an unsaved dot; undo and redo named for the step. One document per window: New and Open act in the front window after the unsaved-changes prompt |
 | Stage | Draws the scene at the current frame with curves kept as curves; zoom (pinch, menu, fit, 100%); pan (Space-drag, scroll); rulers; guides dragged out of the rulers, moved and removed; Retina-sharp |
 | Tools | Select (V): click, Shift-click, marquee, move, and the eight scale handles and the rotate zone. Direct Select (A): pick a path's anchors and handles and drag them. Rectangle (R) with corner radius, Ellipse (E), Pen (P): click for corners, drag for smooth points, close on the first point |
 | Edit | Delete, Cut, Copy, Paste, Duplicate of layers (Paste lands above the selection, offset by 10 pt), Select All, Deselect, Bring Forward, Send Backward |
-| Inspector | File-name title, info card, TRANSFORM (X, Y, scale X and Y, rotation, opacity) as bar sliders with keyframe buttons, FILL (solid editing; a gradient shows as a read-only gradient swatch), STROKE (color, width, cap, join), INSTANCE (symbol, loop mode, first frame) for an instance, SCENE when nothing is selected. A multi-selection shows "Mixed" for values that differ |
+| Inspector | File-name title, info card, TRANSFORM (X, Y, scale X and Y, rotation, opacity) as bar sliders with keyframe buttons, FILL (a Solid / Linear / Radial switch, solid editing, and the shared gradient editor for a gradient's stops, colours and angle, each edit one fill command and one undo step), STROKE (color, width, cap, join), INSTANCE (symbol, loop mode, first frame) for an instance, SCENE when nothing is selected. A multi-selection shows "Mixed" for values that differ |
 | Timeline | One lane per layer, key diamonds, playhead with a time pill, scrub, retime keys by drag, delete keys, insert and remove frames, frame labels, timecode and frame readout |
 | Animate | Auto-key (record) mode, keyframe buttons per property, motion tweens with easing presets and a custom cubic-bezier curve editor, hold keys |
 | Onion skin | Before and after ghosts with tints, counts and falloff; the motion path as a dotted line with frame ticks |
@@ -146,8 +146,8 @@ variable-width brush; frame-by-frame polish (blank keyframes, exposure
 holds); copy and paste of frames (G47); fps conversion (G53); asset import
 (G51); layer parenting; group and ungroup inside a layer (in v1, a symbol is
 the group); snapping to guides, edges and the pixel grid; an align and
-distribute panel; play range (in and out points); gradient editing with
-stops and on-canvas handles; dashed strokes; blend modes; state machine
+distribute panel; play range (in and out points); on-canvas gradient
+handles (stops, colours and angle are edited in FILL in v1); dashed strokes; blend modes; state machine
 listeners, blend states and runtime export; dragging machine nodes to
 positions you choose; play across scenes; swap symbol; renaming swatches; a
 version browser; the shared suite library.
@@ -549,7 +549,7 @@ damaged: <detail>." (`invalid`). The document that was open stays open.
 Every item works or is disabled with a reason, never hidden.
 
 - **Flare**: About, Hide, Quit (no Settings window in v1).
-- **File**: New ⌘N, Open… ⌘O, Open Recent, Open Sample (Bounce, Character, Button), Save ⌘S, Save As… ⇧⌘S, Export… ⇧⌘E, Close ⌘W.
+- **File**: New ⌘N, Open… ⌘O, Open Recent, Open In, Open Sample (Bounce, Character, Button), Save ⌘S, Save As… ⇧⌘S, Export… ⇧⌘E, Close ⌘W.
 - **Edit**: Undo <step> ⌘Z, Redo <step> ⇧⌘Z, Cut ⌘X, Copy ⌘C, Paste ⌘V, Duplicate ⌘D, Delete ⌫, Select All ⌘A, Deselect ⇧⌘A.
 - **View**: Zoom In ⌘+, Zoom Out ⌘−, Fit ⌘0, Actual Size ⌘1, Onion Skin ⌥⌘O, Motion Path, Show Rulers ⌘R, Show Guides ⌘;, Clear Guides.
 - **Object**: Convert to Symbol ⌥⌘K, Edit Symbol (Return on an instance), Exit Symbol (Escape); Bring Forward ⌘], Send Backward ⌘[.
@@ -663,7 +663,7 @@ never cited. QB ids are in `docs/review-rubric.md` section 6.
 |---|---|---|---|---|---|
 | New from preset | New sheet | J2 | `Document`, `Scene` init | exists | QB-F1 |
 | Open, save, title, dirty | File menu, top bar | J26 | `FlareFormat.decode/encode` | exists | QB-F1, byte round trip (LM-1) |
-| Open Recent | File menu | J26 | none (app list) | n/a | QB-F1 |
+| Open Recent, Open In, drop | File menu, stage | J26, FLJ1 | none (the suite's recents and hand-offs) | n/a | QB-F1 |
 | Open errors (not Flare, damaged, newer version, too large) | Alert | J27 | `FormatError` cases | exists | message per case (LM-1 test) |
 | Open a large file off the main thread | Stage progress | P7 | `FlareFormat.decode` | exists | QB-L9, QB-L12 |
 | Save failure | Top bar, alert | J28 | none (file write) | n/a | QB-F2 |
