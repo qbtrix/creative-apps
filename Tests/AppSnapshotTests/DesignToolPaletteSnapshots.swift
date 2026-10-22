@@ -1,5 +1,5 @@
 // DesignToolPaletteSnapshots.swift (eyedropper DY-2): Design's window on the `cards` fixture with the floating
-// tool palette showing every tool, the Eyedropper (I) last, disabled with its reason until DY-5 makes its click
+// tool palette showing every tool, the Eyedropper (I) last, enabled since DY-5 made its click
 // pick. Writes design-tool-palette-light.png and design-tool-palette-dark.png. macOS only.
 #if canImport(AppKit)
 import DesignModel
@@ -15,7 +15,7 @@ import Testing
         #expect(DesignTool.allCases.last == .eyedropper)
         #expect(DesignTool.eyedropper.title == "Eyedropper")
         #expect(DesignTool.eyedropper.shortcut == "i")
-        #expect(DesignTool.eyedropper.unavailableHelp?.isEmpty == false, "a disabled tool says why")
+        #expect(DesignTool.eyedropper.unavailableHelp == nil, "DY-5: a click picks")
         var model = DesignWorkspace()
         model.useServices(.fake)
         let opened = model.openFixture("cards")
