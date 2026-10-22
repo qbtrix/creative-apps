@@ -85,3 +85,4 @@ utc	stage	event	ref	note
 2026-10-22T00:46Z	PF-z	PF-7 #4267 opened, ci --changed PASS at 9583c10a
 2026-10-22T01:05Z	check	heartbeat: #4162 #4267 #4271 in lane (macOS builds dispatched); runs 39700970657, 39700185524 queued; no open findings
 2026-10-22T01:27Z	check	dev red #3856 at add701fc (FormatListRatchetTests, suite; fix #4258); runs 39700970657/39700185524 queued; #4267 in lane
+2026-10-22T01:46:38Z	check	PF-a,PF-u	scoped photo run 39700970657 and full run 39700185524 still queued at add701fc; #4267 clean, waiting on lane batch
