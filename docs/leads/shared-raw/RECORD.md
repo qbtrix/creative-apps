@@ -12,7 +12,7 @@ Next: open SR-2's PR once #4645 merges; SR-3, SR-4, SR-5 building on SR-2 (each 
 |---|---|---|---|---|---|---|---|---|---|
 | SR-a | test DNGs written in-repo; Raw/ module as stubs over a fake decoder; tests disabled | SR-1, SR-2 | MJ-SR | suite-imaging:IM-a (built: #4028) | false | 0 | SR-1 PR #4645; SR-2 pushed 00bab7ba (PR waits on #4645, 881 lines vs dev) | – | – |
 | SR-m | formats parse, plan, refusals, system decoder with headroom | SR-3, SR-4 | MJ-SR, MJ-SR-mac | SR-a; IM-4 (merged #4393) | false | 0 | SR-3 pushed; SR-4 building | – | – |
-| SR-photo | Photo opens RAW as a float layer | SR-5, SR-6 | MJ-SR-photo, PJ-SR | SR-a; shared-codecs SC-15, SC-4 (SR-6; not merged) | true | 0 | planned | – | – |
+| SR-photo | Photo opens RAW as a float layer | SR-5, SR-6 | MJ-SR-photo, PJ-SR | SR-a; shared-codecs SC-15, SC-4 (SR-6; not merged) | true | 0 | SR-5 pushed; SR-6 blocked | – | – |
 | SR-z | live, RJ-X50, concept line, built | SR-7, SR-8 | PJ-SR, MJ-SR | SR-m, SR-photo; tone-controls:TC-a, pen-paths:PN-a (SR-8) | true | 0 | planned | – | – |
 
 ## Tasks
@@ -23,7 +23,7 @@ Next: open SR-2's PR once #4645 merges; SR-3, SR-4, SR-5 building on SR-2 (each 
 | SR-2 | SR-a | 2 | pushed 00bab7ba; PR after #4645 | – |
 | SR-3 | SR-m | 3 | pushed a111888e (mutants 6/6); PR after SR-2 merges | – |
 | SR-4 | SR-m | 3 | building (on SR-2) | – |
-| SR-5 | SR-photo | 3 | building (on SR-2) | – |
+| SR-5 | SR-photo | 3 | pushed 833a2b5c; PR after SR-2 merges | – |
 | SR-6 | SR-photo | – | blocked (SC-15, SC-4) | – |
 | SR-7 | SR-z | – | planned | – |
 | SR-8 | SR-z | – | blocked (TC-a) | – |
