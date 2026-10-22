@@ -72,3 +72,5 @@
 - 2026-10-22T15:52Z: HK-m and HK-u are merged-done. The dev CI run 39806111520 at 18902a68c contains #4400 and #4413, and its Linux job is green. Posted Belt-Slice-Done for HK-m and HK-u, and Mac-Finish-Wanted for HK-u. HK-z #4446 is waiting on its macOS build, 39807175605.
 
 - 2026-10-22T16:02Z: HK-z #4446 macOS build 39807175605 was cancelled. The workflow started a new one, 39810248847, at 16:01Z, which is queued. #4446 head 7c5c60024 is clean.
+
+- 2026-10-22T16:32Z: HK-z #4446 passed its macOS build, 39810248847. It waits for a lane sweep to merge it.
