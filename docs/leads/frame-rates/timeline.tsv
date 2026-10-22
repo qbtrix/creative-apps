@@ -81,3 +81,4 @@ utc	stage	event	ref	note
 2026-10-22T14:03Z	FR-8b regate	ported 4431 trim test fix	-	act-1a161a658a7-2jql
 2026-10-22T14:08Z	FR-8b pushed	gate pass	-	act-1a161a658a7-2jql
 2026-10-22T14:16Z	FR-8b in lane mac build	heartbeat	-	act-1a161a658a7-2jql
+2026-10-22T14:26Z	waiting journeys and 4407 build	heartbeat	-	act-1a161a658a7-2jql
