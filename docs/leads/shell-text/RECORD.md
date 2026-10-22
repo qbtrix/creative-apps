@@ -4,7 +4,7 @@ Issue: #3725 · Packet: docs/blueprints/suite/features/shell-text.md
 Run: act-1a16278ef53-kw2i (resumed; first run act-1a15ef24f0e-t1j1) · Started: 2026-10-21T14:56Z
 Stage: 3 wave D (stacked), run ended on the supervisor's word (#3725, 08:38Z)
 Base: 9f1b3d565fb90acb54c7e3bc734da5f838c7f8dc
-Next (relaunch): #4161 lands via the lane (macOS build run 39736024768 passed; the next sweep merges it). Then retarget #4337 (ST-8) from lead/shell-text-ST-live2 to dev, rerun scripts/ci --changed, move its Head: line, mark ready. After #4337 merges, mark #4350 (ST-9 built, feature-done) ready. Then Belt-Slice-Done ST-live and ST-z on a green run with their last PRs, and Belt-Contact-Sheet.
+Next (relaunch): #4161 merged 1f58800c4 (10:24Z). #4337 (ST-8) retargeted to dev, dev merged in, gated, ready at e8dd61b8f; the lane lands it. Post Belt-Slice-Done ST-live once full CI 39763986545 (ba8009b05, contains #4161) goes green. After #4337 merges, mark #4350 (ST-9 built, feature-done) ready; Belt-Slice-Done ST-z on a green run containing #4350, then Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next (relaunch): #4161 lands via the lane (macOS build run 39736024768 passed; t
 | ST-a | the text service contract: values, protocols, FakeText, SuiteServices.text slot | ST-1, ST-2 | MJ-ST0 | shell-media:SM-a (ST-1) | no | 0 | done (#4135, run 39719146044) | 39719146044 | – |
 | ST-m | TextSpan/PlacedSpan validation, font fallback rules, FakeText measures by rule | ST-3, ST-6 | MJ-ST1 | ST-a | no | 0 | done (#4157, run 39728647575) | 39728647575 | – |
 | ST-live | Core Text measuring, font list, glyph rasterizer on the Mac; Halo's rasterizer moves | ST-4, ST-5, ST-7 | MJ-ST2, MJ-ST3 | ST-a (ST-4) | no | 0 | building: #4156 merged, #4161 in lane | – | – |
-| ST-z | slot live, walk on the Mac, shared prose, built | ST-8, ST-9 | MJ-ST4 | ST-m, ST-live | no | 0 | building: #4337 draft on #4161, #4349 merged, #4350 draft | – | – |
+| ST-z | slot live, walk on the Mac, shared prose, built | ST-8, ST-9 | MJ-ST4 | ST-m, ST-live | no | 0 | building: #4337 ready on dev (e8dd61b8f), #4349 merged, #4350 draft | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
