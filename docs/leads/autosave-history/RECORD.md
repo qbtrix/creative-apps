@@ -26,7 +26,7 @@ Next: wait for the lane to merge #4388 (AH-9+AH-10, macOS build 39763938609 queu
 | AH-7 | AH-m | 2 | see packet task table (waits: AH-1) | Sources/SuiteModel/Store/RecoveryFolder.swift, Tests/SuiteModelTests/RecoveryFolderTests.swift, Tests/mutations/SuiteModel.RecoveryFolder.json | packet acceptance row | #3572 | merged 10:23 (lane batch, Linux run 39405967473) |
 | AH-8 | AH-z | – | see packet task table (waits: AH-4, AH-5, AH-6, AH-7) | Sources/SuiteUI/AutosaveRecovery.swift, Sources/SuiteUI/Gallery/GalleryHistoryPanel.swift, Tests/SuiteUITests/AutosaveDriverTests.swift | packet acceptance row | #3629 | merged 2026-10-20 21:15, 0506808 |
 | AH-9 | AH-z | – | see packet task table (waits: AH-6) | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeHistoryTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/history-jump/history-jump.jobs.json, Tests/RealJobs/fake/history-jump/input/one.fake | packet acceptance row | #4388 | open, head 39f4830, Mutate 9/9, macOS build queued |
-| AH-10 | AH-z | – | see packet task table (waits: AH-8, AH-9) | docs/c4/parts/creative-apps/suite-kernel/kernel-history.json, docs/blueprints/suiteui/features/autosave-history.wave.json | packet acceptance row | #4388, #4396 | open (wave.json in #4388; C4 prose in docs-only #4396) |
+| AH-10 | AH-z | – | see packet task table (waits: AH-8, AH-9) | docs/c4/parts/creative-apps/suite-kernel/kernel-history.json, docs/blueprints/suiteui/features/autosave-history.wave.json | packet acceptance row | #4388, #4396 | #4396 merged 4a9c31f; #4388 open (wave.json) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
