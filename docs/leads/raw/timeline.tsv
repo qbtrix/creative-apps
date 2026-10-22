@@ -1,0 +1,9 @@
+utc	stage	event	ref	note
+2026-10-17T02:36Z	0	stage-start	#1530	setup; base 37d9963; all dependencies unmerged
+2026-10-17T02:36Z	0	stage-end		blocked, no task started
+2026-10-17T03:08Z	0	heartbeat		resumed; re-checked waits at dev 82ac5055: unmerged
+2026-10-17T03:39Z	0	heartbeat		nudged; re-checked waits at dev 1a8eea2a: unmerged
+2026-10-17T05:50Z	0	heartbeat		usage reset; re-checked waits at dev 0e3c08ea; needs-human comment posted
+2026-10-17T06:21Z	0	heartbeat		nudged; re-checked waits at dev fe0f5f17: unmerged
+2026-10-20T20:48Z	0	stage-start		run act-1a15b10caae-y18c on re-cut packet (RW-a/RW-m/RW-z), base dev 9781100b
+2026-10-20T20:48Z	0	stage-end	#1530	blocked at 0.4: shared-raw SR-a, shared-codecs SC-f, export-pack LX-a unmerged
