@@ -11,17 +11,21 @@ import SuiteKernel
 public struct PhotoTextBox: Hashable, Sendable {
     public var origin: Mask.Point
     public var draft: String
+    /// The text layer whose words the box edits (TX-4); nil for a box that adds a new one.
+    public var editing: PhotoLayer.ID?
 
-    public init(origin: Mask.Point, draft: String) {
+    public init(origin: Mask.Point, draft: String, editing: PhotoLayer.ID? = nil) {
         self.origin = origin
         self.draft = draft
+        self.editing = editing
     }
 }
 
 extension PhotoWorkspace {
-    /// Opens an empty box at `origin`, committing any open one first.
+    /// Opens an empty box at `origin`, committing any open one first; on a visible text layer, edits its words.
     mutating func openTextBox(at origin: Mask.Point) {
         commitTextBox()
+        if let id = textLayer(at: origin) { return editText(id) }
         textBox = PhotoTextBox(origin: origin, draft: "")
     }
 
@@ -40,6 +44,7 @@ extension PhotoWorkspace {
     public mutating func commitTextBox() {
         guard let box = textBox else { return }
         textBox = nil
+        if let id = box.editing { return commitEdit(of: id, words: box.draft) }
         guard !box.draft.isEmpty, let canvas else { return }
         let x = Self.pixel(box.origin.x, below: canvas.width), y = Self.pixel(box.origin.y, below: canvas.height)
         let params = JSONValue.object(["x": .number(Double(x)), "y": .number(Double(y)), "words": .string(box.draft)])
