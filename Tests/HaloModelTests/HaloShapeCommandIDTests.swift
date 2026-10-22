@@ -35,8 +35,10 @@ import Testing
         let fills = GradientCommands.specs(HaloProject.self).count  // HG-7: the eight fill commands
         let strokes = StrokeCommands.specs(HaloProject.self).count  // HK-6: the nine stroke commands
         let history = HistoryCommands.specs(HaloProject.self).count  // HA-6: read and jump
+        let transforms = TransformCommands.specs(HaloProject.self).count  // HT-6: the six transform commands
         #expect(HaloProject.catalog.ids.count  // FR-8b: + 1 for set-frame-rate
-            == HaloCommand.allCases.count + 2 + fills + strokes + history + 1 + HaloProject.windowSpecs.count)
+            == HaloCommand.allCases.count + 2 + fills + strokes + history + transforms + 1
+            + HaloProject.windowSpecs.count)
     }
 
     @Test func runShapeKeepsThePickedTool() throws {
