@@ -95,3 +95,4 @@ utc	stage	event	ref	note
 2026-10-22T19:01:31Z	SM-r	waiting	-	full CI 39829329352 cancelled; next candidate 39836126860 at a102c34cc
 2026-10-22T19:32:49Z	SM-z	ready	#4421	lane macOS build on e1157a561 passed; waits for its batch. SM-r: candidates queued: full CI 39836126860 (a102c34cc), scoped: suite 39836789801 (28e2b8521), full CI 39840605751 (fbe2a8727)
 2026-10-22T19:59:37Z	SM-r	waiting	-	full CI 39840605751 cancelled before running; still queued: 39836126860 (CI a102c34cc), 39836789801 (scoped: suite 28e2b8521), 39844810755 (CI 0f8414ad2)
+2026-10-22T20:11:24Z	SM-z	merged	#4421	SM-9 merged as de96b149a; #4461 (SM-10) marked ready, clean
