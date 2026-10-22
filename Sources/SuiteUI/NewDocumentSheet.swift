@@ -56,7 +56,7 @@ public struct NewDocumentForm: Sendable {
         let p = preset.parameters
         setup.width = p["width"].flatMap(Double.init) ?? setup.width
         setup.height = p["height"].flatMap(Double.init) ?? setup.height
-        setup.unit = p["unit"].flatMap(LengthUnit.init(rawValue:)) ?? .px
+        setup.unit = p["unit"].flatMap(SuiteKernel.LengthUnit.init(rawValue:)) ?? .px
         setup.resolution = p["resolution"].flatMap(Double.init) ?? 72
         setup.background = p["background"].map(Self.background) ?? .white
         if limits.rates != nil {
@@ -68,7 +68,7 @@ public struct NewDocumentForm: Sendable {
     }
 
     /// The same pixels typed in `unit`.
-    public mutating func setUnit(_ unit: LengthUnit) {
+    public mutating func setUnit(_ unit: SuiteKernel.LengthUnit) {
         setup = setup.converted(to: unit)
         chosen = nil
         refresh()
@@ -220,7 +220,7 @@ public struct NewDocumentSheet: View {
                     .labelStyle(.iconOnly).help("Swaps width and height").accessibilityIdentifier("suite.newdoc.swap")
                 field(.height, "Height")
                 Picker("Unit", selection: Binding(get: { form.setup.unit }, set: { form.setUnit($0) })) {
-                    ForEach(LengthUnit.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                    ForEach(SuiteKernel.LengthUnit.allCases, id: \.self) { Text($0.rawValue).tag($0) }
                 }
                 .labelsHidden().pickerStyle(.menu).fixedSize().help(NewDocumentForm.parameter("unit", mode))
                 .accessibilityIdentifier("suite.newdoc.unit")
