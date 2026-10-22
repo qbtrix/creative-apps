@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "app": "fake",
+  "why": "Adds a stroke to one free rect, makes it 4 pt and dashed, scrubs its trim end from 1 to 0.5 through 60 samples under one token, undoes once and checks the saved rects: the dash scaled with the width and the scrub was one step.",
+  "inputs": ["input/*.fake"],
+  "steps": [
+    {"id": "rect.select", "params": {"id": 1}},
+    {"id": "stroke.add", "params": {}},
+    {"id": "stroke.width", "params": {"width": 4}},
+    {"id": "stroke.dash", "params": {"preset": "dashed"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.9916666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.9833333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.975, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.9666666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.9583333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.95, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.9416666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.9333333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.925, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.9166666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.9083333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.9, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.8916666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.8833333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.875, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.8666666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.8583333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.85, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.8416666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.8333333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.825, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.8166666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.8083333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.8, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.7916666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.7833333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.775, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.7666666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.7583333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.75, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.7416666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.7333333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.725, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.7166666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.7083333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.7, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.6916666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.6833333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.675, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.6666666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.6583333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.65, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.6416666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.6333333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.625, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.6166666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.6083333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.6, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.5916666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.5833333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.575, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.5666666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.5583333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.55, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.5416666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.5333333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.525, "drag": "rj-x35"}},
+    {"id": "stroke.trim", "params": {"start": 0, "end": 0.5166666667, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.5083333333, "drag": "rj-x35"}}, {"id": "stroke.trim", "params": {"start": 0, "end": 0.5, "drag": "rj-x35"}},
+    {"id": "edit.undo", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-dashed", "format": "json", "options": {}},
+  "expect": {
+    "out/one-dashed.json": {"json": [
+      {"h": 60, "id": 1, "locked": false, "name": "Rect 1",
+       "stroke": {"cap": "butt", "color": {"a": 1, "b": 0, "g": 0, "r": 0}, "dash": [16, 8], "join": "miter", "width": 4},
+       "w": 100, "x": 10, "y": 10}
+    ]}
+  },
+  "platforms": ["linux", "macos"]
+}

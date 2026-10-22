@@ -5,13 +5,13 @@
 // in a child page that owns the path and selection and applies each select
 // and move, and counts the window's own bodies: a 120-sample drag of the
 // sample's first anchor, and a 120-sample marquee over 5,000 anchors (half
-// selected), each run at most 3 window bodies with a p95 step of at most 8 ms
-// (target 0 bodies: only the page and the overlay redraw). Until PN-5 the
-// kernel's AnchorEdit.moved returns its input, so the drag proves the moves
-// reach the page, not that the anchor moved. Timed, so the gate skips it
-// (Tests/perf-suites.txt). The page opts in to activation clicks, as a test
-// process's every press is one. Nested in BodyCountSuites: it reads a global
-// body counter. macOS only.
+// selected). `bodies` gates that each runs at most 3 window bodies (target 0:
+// only the page and the overlay redraw) and lands its select and move;
+// `timing` (Tests/perf-suites.txt, report-only) judges each p95 step within
+// 8 ms. Until PN-5 the kernel's AnchorEdit.moved returns its input, so the
+// drag proves the moves reach the page, not that the anchor moved. The page
+// opts in to activation clicks, as a test process's every press is one.
+// Nested in BodyCountSuites: it reads a global body counter. macOS only.
 #if canImport(AppKit)
 import AppKit
 import SuiteKernel
@@ -22,7 +22,20 @@ import Testing
 
 extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetPenPathsTests {
-        @Test(.timeLimit(.minutes(2))) func anchorDragInThreeBodies() async throws {
+        @Test(.timeLimit(.minutes(2))) func bodies() async throws {
+            let (drag, marquee) = try await (Self.anchorDrag(), Self.marquee())
+            expectBodies(drag, atMost: 3, target: 0)
+            expectBodies(marquee, atMost: 3, target: 0)
+        }
+
+        @Test(.timeLimit(.minutes(2))) func timing() async throws {
+            let (drag, marquee) = try await (Self.anchorDrag(), Self.marquee())
+            expectP95(drag, atMost: 8, target: 8)
+            expectP95(marquee, atMost: 8, target: 8)
+        }
+
+        /// A 120-sample drag of the sample's first anchor, which selects it and moves it.
+        static func anchorDrag() async throws -> RenderStep {
             let w = RenderBudgetWindow(PenPathsBudgetWindow(path: GalleryPenPaths.sample, artboard: SuiteSize.contentMinimum))
             defer { w.close() }
             try await w.settle(untilStable: Self.bodies)
@@ -31,14 +44,14 @@ extension BodyCountSuites {
             let step = try await w.measure("pen-paths anchor drag, 120 samples", bodies: Self.bodies) {
                 try await w.drag(from: start, by: CGVector(dx: 60, dy: -40))
             }
-            expectBodies(step, atMost: 3, target: 0)
-            expectP95(step, atMost: 8, target: 8)
             let state = await Self.state(in: w) { $0.hasPrefix("1 selected") && !$0.hasSuffix(" 0 moves") }
             #expect(state?.hasPrefix("1 selected") == true && state?.hasSuffix(" 0 moves") == false,
                     "the drag didn't select and move the anchor: \(state ?? "no state")")
+            return step
         }
 
-        @Test(.timeLimit(.minutes(2))) func marqueeOver5000InThreeBodies() async throws {
+        /// A 120-sample marquee over 5,000 anchors, half selected, which replaces the selection.
+        static func marquee() async throws -> RenderStep {
             let stars = PenPathsFixture.stars()
             let w = RenderBudgetWindow(PenPathsBudgetWindow(path: stars, artboard: PenPathsFixture.artboard,
                                                             selection: PenPathsFixture.half(stars)))
@@ -50,11 +63,10 @@ extension BodyCountSuites {
             let step = try await w.measure("pen-paths marquee over 5,000 anchors, 120 samples", bodies: Self.bodies) {
                 try await w.drag(from: start, by: CGVector(dx: end.x - start.x, dy: end.y - start.y))
             }
-            expectBodies(step, atMost: 3, target: 0)
-            expectP95(step, atMost: 8, target: 8)
             let state = await Self.state(in: w) { !$0.hasPrefix("2500 selected") }
             #expect(state.map { !$0.hasPrefix("2500 selected") && !$0.hasPrefix("0 selected") } == true,
                     "the marquee didn't replace the selection with the anchors inside it: \(state ?? "no state")")
+            return step
         }
 
         private static func bodies() -> Int? {
