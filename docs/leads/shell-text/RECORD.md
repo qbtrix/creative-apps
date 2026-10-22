@@ -1,18 +1,18 @@
 # shell-text lead record
 
 Issue: #3725 · Packet: docs/blueprints/suite/features/shell-text.md
-Run: act-1a16278ef53-kw2i (resumed; first run act-1a15ef24f0e-t1j1) · Started: 2026-10-21T14:56Z
-Stage: 3 wave D (stacked), run ended on the supervisor's word (#3725, 08:38Z)
-Base: 9f1b3d565fb90acb54c7e3bc734da5f838c7f8dc
-Next (relaunch): #4161 merged 1f58800c4; #4337 (ST-8) merged abca9ff2b (12:24Z); #4350 (ST-9 built, feature-done) marked ready at de1098d6f, the lane lands it. Post Belt-Slice-Done ST-live on the first green full or scoped suite run containing 1f58800c4 (full CI 39781775747 at 1a518080d contains it and #4337, pending). Belt-Slice-Done ST-z on a green run containing #4350's merge (its feature-done merge dispatches full CI), then Belt-Contact-Sheet.
+Run: act-1a1643afacf-vq3h (wrap-up; earlier runs act-1a15ef24f0e-t1j1, act-1a16278ef53-kw2i) · Started: 2026-10-21T14:56Z
+Stage: 3 polling (every task merged; wrap-up)
+Base: 18902a68c36c4c6ec07cdc171f68881007f22ca8
+Next: wait for a CI run on dev whose Linux job contains 18902a6 (#4431, the Halo trim-keys test fix) and #4350 (817bc5271); on green post Belt-Slice-Done ST-live and ST-z, then Belt-Contact-Sheet. Linux check 39802370482 (3fcea2844) contains every slice PR but is red only on HaloModelTests.HaloStrokeTrimKeysTests (dev-red #3856, line:halo); every text suite passed there.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | ST-a | the text service contract: values, protocols, FakeText, SuiteServices.text slot | ST-1, ST-2 | MJ-ST0 | shell-media:SM-a (ST-1) | no | 0 | done (#4135, run 39719146044) | 39719146044 | – |
 | ST-m | TextSpan/PlacedSpan validation, font fallback rules, FakeText measures by rule | ST-3, ST-6 | MJ-ST1 | ST-a | no | 0 | done (#4157, run 39728647575) | 39728647575 | – |
-| ST-live | Core Text measuring, font list, glyph rasterizer on the Mac; Halo's rasterizer moves | ST-4, ST-5, ST-7 | MJ-ST2, MJ-ST3 | ST-a (ST-4) | no | 0 | building: #4156 merged, #4161 in lane | – | – |
-| ST-z | slot live, walk on the Mac, shared prose, built | ST-8, ST-9 | MJ-ST4 | ST-m, ST-live | no | 0 | building: #4337 merged, #4349 merged, #4350 ready | – | – |
+| ST-live | Core Text measuring, font list, glyph rasterizer on the Mac; Halo's rasterizer moves | ST-4, ST-5, ST-7 | MJ-ST2, MJ-ST3 | ST-a (ST-4) | no | 0 | merged: #4156, #4161 (1f58800c4) | – | – |
+| ST-z | slot live, walk on the Mac, shared prose, built | ST-8, ST-9 | MJ-ST4 | ST-m, ST-live | no | 0 | merged: #4337, #4349, #4350 (817bc5271, feature-done) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -22,10 +22,10 @@ Next (relaunch): #4161 merged 1f58800c4; #4337 (ST-8) merged abca9ff2b (12:24Z);
 | ST-3 | ST-m | B | TextRules.validated | packet's ST-3 files | mutations SuiteModel.TextRules | #4157 | merged |
 | ST-6 | ST-m | B | FakeText measure rules | packet's ST-6 files | mutations SuiteModel.FakeText | #4157 | merged |
 | ST-4 | ST-live | B | SuiteShell/Text Core Text measuring + C4 part shell-text.json | Sources/SuiteShell/Text/, docs/c4/parts/creative-apps/suite-shell/shell-text.json | packet's ST-4 test | #4156 | merged |
-| ST-5 | ST-live | C | font list | packet's ST-5 files | packet's ST-5 test | #4161 | pr-open (ready, head 3f297e984) |
-| ST-7 | ST-live | C | glyph rasterizer; Halo's HaloTextRasterizer moves | packet's ST-7 files | packet's ST-7 test | #4161 | pr-open (ready, head 3f297e984; Halo swap stays W3 per packet) |
-| ST-8 | ST-z | D | slot live and the walk | packet's ST-8 files | MJ-ST4 | #4337 | pr-open (draft on #4161) |
-| ST-9 | ST-z | D | shared prose, status built, feature-done | packet's ST-9 files | scripts/waves render --dry-run | – | #4349 merged (C4), #4350 draft (built, feature-done) |
+| ST-5 | ST-live | C | font list | packet's ST-5 files | packet's ST-5 test | #4161 | merged |
+| ST-7 | ST-live | C | glyph rasterizer; Halo's HaloTextRasterizer moves | packet's ST-7 files | packet's ST-7 test | #4161 | merged (Halo swap stays W3 per packet) |
+| ST-8 | ST-z | D | slot live and the walk | packet's ST-8 files | MJ-ST4 | #4337 | merged |
+| ST-9 | ST-z | D | shared prose, status built, feature-done | packet's ST-9 files | scripts/waves render --dry-run | #4349, #4350 | merged (#4350 feature-done, 817bc5271) |
 
 Wave plan (one PR per slice; slice PRs stack as drafts): A = ST-a once SM-1 merges; B = ST-m and ST-live's ST-4 in parallel after ST-a merges; C = rest of ST-live; D = ST-z.
 
@@ -44,6 +44,7 @@ Wave plan (one PR per slice; slice PRs stack as drafts): A = ST-a once SM-1 merg
 - ST-9 is two docs-only PRs: scripts/check-c4-descriptions lets an existing part's description change only in a PR whose every path is under docs/c4/parts/, so the C4 prose can't ride with the wave.json status.
 
 ## Open
+- 15:28Z supervisor: wrap-up against a green dev Linux check that contains the slices; no full macOS run wait.
 - Belt watches lead/suite-shell-text; RECORD and timeline now go to both lead/shell-text and lead/suite-shell-text (docs/leads/shell-text and docs/leads/suite-shell-text).
 - 08:38Z supervisor: stop polling and end this run; the lane lands the PRs once the macOS runner backlog (32 queued at 08:17Z) clears; the supervisor relaunches the feature for feature-done and the contact sheet.
 - dev-red #3856 (Photo CommandPathTests, Flare SetLayerParent): not this feature's.
