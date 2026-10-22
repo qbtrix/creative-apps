@@ -5,7 +5,7 @@ Run: act-1a15fc7d29e-gz1t (line lead with #3437 history-panel) · Session: claud
 Earlier run: act-1a15a9f4eba-h30y (PF-1, PF-3, PF-4 merged)
 Stage: 3 wave A
 Base: origin/dev 1b3913c
-Next: #4165 (PF-u) merged add701fc; scoped photo run 39700970657 at add701fc (queued) proves PF-a and PF-u; PF-7 #4267 open (fast-lane, head 9583c10a, ci --changed PASS); PF-8 waits export-pack:PX-z
+Next: #4165 (PF-u) merged add701fc; scoped photo run 39700970657 at add701fc (queued) proves PF-a and PF-u; PF-7 #4267 open (fast-lane, head 5d8cb7ef, ci --changed PASS); PF-8 waits export-pack:PX-z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
