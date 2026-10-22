@@ -1,0 +1,8 @@
+[
+{"label": "no stroke still lists the trim keys", "file": "Sources/HaloModel/HaloStrokeTrimKeys.swift", "find": "layer.kind == .shape, layer.stroke != nil else", "replace": "layer.kind == .shape else", "tests": "HaloStrokeTrimKeysTests"},
+{"label": "a stroked text or solid layer lists trim keys", "file": "Sources/HaloModel/HaloStrokeTrimKeys.swift", "find": "guard let layer, layer.kind == .shape, ", "replace": "guard let layer, ", "tests": "HaloStrokeTrimKeysTests"},
+{"label": "the keys read frame 0, not the playhead", "file": "Sources/HaloModel/HaloStrokeTrimKeys.swift", "find": "at: selectedComposition?.playheadFrame ?? 0)", "replace": "at: 0)", "tests": "HaloStrokeTrimKeysTests"},
+{"label": "a key with a reason still sends its command", "file": "Sources/HaloModel/HaloStrokeTrimKeys.swift", "find": "guard key.help == nil, let property", "replace": "guard let property", "tests": "HaloStrokeTrimKeysTests"},
+{"label": "the stroke's reason is dropped", "file": "Sources/HaloModel/HaloStrokeTrimKeys.swift", "find": "        if let strokeHelp { return strokeHelp }\n", "replace": "", "tests": "HaloStrokeTrimKeysTests"},
+{"label": "a missing property says nothing", "file": "Sources/HaloModel/HaloStrokeTrimKeys.swift", "find": "else { return trimKeysNotBuiltHelp }", "replace": "else { return nil }", "tests": "HaloStrokeTrimKeysTests"}
+]

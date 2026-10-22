@@ -1,12 +1,11 @@
-// TextSlot.swift: the `text` member of SuiteServices.live. Not live until
-// shell-text's ST-8 joins the measurer, font catalog and rasterizer into
-// `LiveText`; until then measuring and drawing throw "Text measuring and
-// drawing isn't available yet.".
+// TextSlot.swift: the `text` member of SuiteServices.live. LiveText, the
+// Core Text measurer, font catalog and rasterizer joined (shell-text ST-8);
+// live, so `pending` no longer lists `text` (ShellTextLiveTests).
 import SuiteModel
 
 /// Whether this slot holds the live conformance; `live` builds `pending` from it.
-let textIsLive = false
+let textIsLive = true
 
 func textSlot(_ c: SlotContext) -> any TextServices {
-    FakeText(unavailable: SuiteServices.notConnected("text"))
+    LiveText()
 }
