@@ -1,6 +1,6 @@
 // FlareVideoExportTests.swift: MJ-FV, the Model walk of Flare's MP4 and GIF export
 // (docs/blueprints/flare/features/export-pack.md). FV-1: the formats are listed with their options (the shared size,
-// the scene's frame rate, loop on) and refused with their reason, while SVG, Lottie and PNG still export. The plan
+// the scene's frame rate, loop on), not refused since FV-4, while SVG, Lottie and PNG still export. The plan
 // tests are FV-3's: every frame of the scene at the rate with FrameClock's times and GIF delays, ExportRules' size
 // (even for MP4), GIF without the background fill and looping, and RJ-F07's and RJ-F08's plan halves.
 import FlareCore
@@ -36,19 +36,19 @@ struct FlareVideoExportTests {
         #expect(w.exportFrameRate == 15)
     }
 
-    @Test(arguments: [(ExportFormat.mp4, "MP4 lands with FV-4."), (.gif, "GIF lands with FV-4.")])
-    func exportingIsRefusedWithItsReason(format: ExportFormat, reason: String) async throws {
+    /// FV-4: no longer refused; the sheet leaves them out until FV-2, and they write through `writeVideo`, not `export`.
+    @Test(arguments: [(ExportFormat.mp4, "MP4 joins the Export sheet with FV-2."), (.gif, "GIF joins the Export sheet with FV-2.")])
+    func exportingStartsAndWritesThroughWriteVideo(format: ExportFormat, reason: String) async throws {
         var w = bounce()
         _ = w.openExport(); w.setExportFormat(format)
         #expect(format.unbuiltReason == reason)
-        #expect(w.exportProblem == reason && w.exportFileCount == 0)
-        let started = w.startExport()
-        #expect(!started && w.exportingOptions?.format == format)
+        #expect(w.exportProblem == nil && w.exportFileCount == 1)
         let o = try #require(w.exportingOptions), document = try #require(w.document)
-        await #expect(throws: NotBuilt(reason: reason)) {
+        let started = w.startExport()
+        #expect(started)
+        await #expect(throws: ExportOptionRefusal.self) {
             try await LiveExportAdapter(stage: FakeStage()).export(document, options: o, rasterizer: FakeRasterizer()) { _ in }
         }
-        #expect(FlareWorkspace.exportMessage(NotBuilt(reason: reason)) == reason)
     }
 
     @Test func svgLottieAndPNGStillExport() async throws {
