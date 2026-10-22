@@ -87,3 +87,4 @@ utc	stage	event	ref	note
 2026-10-22T04:15:52Z	check	PH-m	waiting on a green scoped photo or full run containing 4c6ad5ed (scoped photo 39712698310, full 39720939785 pending); PH-z #4271 clean, in lane
 2026-10-22T04:38:40Z	check	PH-m	scoped photo 39712698310 red only on RenderBudgetPhotoTransformTests (finding #4247, not this feature); next proof: scoped photo 39722915670 / full 39722978870 at 71987f72; #4271 clean, in lane
 2026-10-22T04:59:48Z	check	PH-m	proof runs at 71987f72 still queued (scoped photo 39722915670, full 39722978870; full 39725265458 at 4e683e84 pending); #4271 clean, in lane
+2026-10-22T05:21:07Z	check	PH-z	#4271 macOS build 39718685840 green, ready, waits for a lane batch; proof runs still queued: scoped photo 39722915670 + full 39722978870 at 71987f72, full 39725265458 at 4e683e84, full 39725694977 at b2794c20
