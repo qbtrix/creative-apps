@@ -2,9 +2,10 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a161a658a7-2jql · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: FR-8b pushed mac fix
+Stage: waiting mac runners
 Base: dev
-Next: lane mac build
+Next: 4407 merge then FR-z
+
 
 
 
@@ -39,6 +40,7 @@ Next: lane mac build
 
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 15:25Z: 4407 lane macOS build 39799793394 queued; journeys 39793942579 queued.
 - 15:20Z: 4407 gate PASS on 6f3729aaf, pushed, Head moved; the lane rebuilds on macOS.
 - 14:53Z: 4407 lane macOS build 39793695029 red: HaloNewCompositionRateSnapshots missed MainActor; fixed in 6f3729aaf, gating. Journeys 39793942579 still pending.
 - 14:27Z: scoped suiteui run 39765697963 green; FR-u critic round 2 waits for its journeys run 39793942579 (pending). 4407 lane macOS build 39793695029 queued.
