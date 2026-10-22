@@ -119,3 +119,4 @@ utc	stage	event	ref	note
 2026-10-22T01:00Z	3	fix	#4264 #4265 #4266	round 1 fixers launched
 2026-10-22T01:05Z	3	filed	#4272-#4284	10 findings, 2 needs-ui, 1 gap+job from panel on 39691305165
 2026-10-22T01:05Z	3	fix	#4272 #4278-#4280	round 1 fixers launched
+2026-10-22T01:13Z	3	pr	#4285	fixes #4265: H-P3 drag now on the Frame Ruler, 4x600 pt

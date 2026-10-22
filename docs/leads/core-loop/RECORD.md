@@ -76,7 +76,7 @@ Next: critic panel on journeys 39691305165 (32fcc2c4) filed 10 findings #4272-#4
 | Finding | Slice | Sev | Lens | Round | State |
 |---|---|---|---|---|---|
 | #4264 | CL-probe | CI | journey | 1 | fixer |
-| #4265 | CL-measure | CI | journey | 1 | fixer |
+| #4265 | CL-measure | CI | journey | 1 | PR #4285 (test pressed the empty label cell, not the ruler) |
 | #4266 | CL-probe | CI | journey | 1 | fixer |
 | #4272 | CL-measure | major | mouse | 1 | fixer |
 | #4273 | CL-measure | major | clarity | - | waits #4283 |
