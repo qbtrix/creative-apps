@@ -2,9 +2,9 @@
 
 Issue: #3449 · Packet: docs/blueprints/suiteui/features/shape-tools.md
 Run: act-1a1646f0a9f-d1ei (resumed; first run act-1a1579fdd22-6z1j) · Session: claude/suiteui-feature-lead-v7e2hk · Started: 2026-10-20T04:46Z · Resumed: 2026-10-22T16:30Z
-Stage: 4 building (SH-z: SH-8 + SH-9)
-Base: dev c67fd3937 (22:44Z poll)
-Next: open the SH-z slice PR to dev with feature-done; then Belt-Slice-Done once a scoped suiteui run shows its screens.
+Stage: 5 SH-z PRs open (#4655 code, #4657 C4 prose); status PR after #4655 merges
+Base: dev c67fd3937 (23:19Z poll)
+Next: once #4655 merges, open the docs PR setting shape-tools.wave.json status: built with feature-done (Slice: SH-z); then Belt-Slice-Done once a scoped suiteui run shows the screens, then Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: open the SH-z slice PR to dev with feature-done; then Belt-Slice-Done once
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T23:19Z: SH-z split into three PRs. The code PR #4655 sits at the 15-file cap, so it can't also carry the status line. The C4 lint (scripts/check-c4-descriptions) refuses description edits next to any other path, so the prose went alone in #4657. status: built and feature-done wait for #4655 to merge, so full CI covers SH-8. The packet's 2-sided polygon is asserted in FakeShapeTests.realJobX34, since a refused step would stop the RJ-X34 batch.
 - 22:44Z: EY-z #4583 merged (3f399c24c). Every SH-z wait is cleared; building SH-8 (FakeRect.shape on FakeRect.stroke, star-drag budget row) and SH-9 (feature-done) as one slice PR to dev, branch lead/shape-tools-SH-z.
 - 22:13Z poll: EY-z #4583 still open (head 76eb19d64). SH-z stays blocked on it.
 - 21:42Z poll: TT-z #4429 merged (434b1d1db). EY-z is open as #4583 (lead/eyedropper-EY-z); SH-z now waits only on it.
