@@ -106,3 +106,12 @@
 - Next:
   - Belt-Slice-Done for HG-u (with Mac-Finish-Wanted) and HG-m, once a green halo or full run contains them.
   - Critics, then HG-z through the lane, then Belt-Contact-Sheet.
+
+### 05:25Z check-in
+- Halo-scoped run 39720068263: `macOS (halo)` still queued.
+- Full CI 39722978870: Linux green, macOS still queued.
+- No Belt-Slice-Done line yet.
+- HG-z #4318 (cbda7a56):
+  - macOS build 39725251450 green.
+  - Lane Linux check 39727377659 running.
+  - Mergeable state clean.
