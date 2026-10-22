@@ -2,9 +2,9 @@
 
 Issue: #3442 · Packet: docs/blueprints/halo/features/autosave-history.md
 Run: act-1a15a9f4eda-rqhh · Session: session_01SEp2gy695K32UTCMdrBDFC · Started: 2026-10-20T18:43Z
-Stage: 3 wave 2
+Stage: 3 wave 2 (HA-7b #4371 open, HA-6 #4342 open)
 Base: e382f9d7fba02ffdefc8ba2f23c9461b4774fad6
-Next: watch #3683 (HA-a) and #3701 (HA-5, stacked on #3683, 370 lines/12 files vs dev) in the lane; then HA-3 (HA-u)
+Next: watch #4342 and #4371 for lane results; once both merge, HA-8 (wave.json status built, feature-done)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -52,3 +52,4 @@ Wave 1: HA-a (one slice PR), alongside transform HT-a. Wave 2: HA-5 stacked on H
 - Wave 2: HA-7 once suiteui AH-z's live recovery wiring is on dev; then HA-8 feature-done.
 - 2026-10-22T08:15Z wave 1 PRs: HA-6 #4342 (slice HA-m; Mutate HaloModel.HaloCommandCatalog 10/10) and HA-7 #4335 (slice HA-z). Both have the fast lane macOS builds dispatched. The attribution footers were removed from both bodies.
 - HA-7 gap: on dev, Sources/HaloApp/HaloHistoryArea.swift still passes folder: nil, and its restore hook throws HaloNotBuilt. So step 3 (force-quit and Restore) sits behind recoveryIsLive = false. A new task, HA-7b (HaloApp: a recovery folder from -SuiteSupportDir under <support>/Halo/Recovery, restore via HaloProject.recovered, and recoveryIsLive set to true), is added to HA-z as wave 2 and stacks on HA-7. HA-8 follows it.
+- 2026-10-22T09:43Z HA-7 #4335 merged (06d331b0). HA-7b #4371 opened (wave 2, slice HA-z; Mutate HaloRecoveryStore 7/7, HaloRecovery+Kernel 3/3). The lane gave it needs-rebase for UITests/HaloJourneyTests+History.swift; the lead merged origin/dev, kept HA-7b's live step 3 (no recoveryIsLive skip), CI: PASS, head a3a05044, Head line moved, attribution footer removed. HA-6 #4342 waits on its macOS build (run 39738543906).
