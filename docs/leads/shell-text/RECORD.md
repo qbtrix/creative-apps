@@ -4,7 +4,7 @@ Issue: #3725 · Packet: docs/blueprints/suite/features/shell-text.md
 Run: act-1a15ef24f0e-t1j1 · Session: cse_01Mv9wxYxE6yTZhCjfP2rdUH · Started: 2026-10-21T14:56Z
 Stage: 3 wave B (stacked)
 Base: 3f96cd10c74f0eb4da8641e8fe511a2e5e42a466
-Next: ST-a #4135 (head 1f0949ff0) macOS build green, waiting for the lane sweep to merge it. #4157 ST-m (62773ab45) and #4156 ST-live (f1f7a91a8) restacked on it, gated, Heads updated, drafts. #4161 ST-live2 (01b3ce229) restacked on ST-live, gated, Head updated. When #4135 merges, retarget #4157 and #4156 to dev, merge dev, gate, ready. Wave D (ST-z) after ST-m and ST-live merge.
+Next: ST-a #4135 merged (e02f36c36); post Belt-Slice-Done ST-a when dev Linux run 39719146044 (or a later green one) passes. #4157 ST-m (11c5abaf7) and #4156 ST-live (baede8ef5) on dev, ready, waiting for the lane. #4161 ST-live2 (93f711a20) stays draft on ST-live; retarget to dev when #4156 merges. Wave D (ST-z) after ST-m and ST-live merge.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
