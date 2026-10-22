@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-22T07:57Z	fr8b-wait	FR-10b prepped, gate running	-	act-1a161a658a7-2jql
 2026-10-22T07:59Z	fr10b-gate	FR-10b semantic conflict fixed, regating	-	act-1a161a658a7-2jql
 2026-10-22T08:07Z	fr10b-ready	FR-10b gate pass	-	act-1a161a658a7-2jql
+2026-10-22T08:21Z	fr-u-critics	FR-u critic panel started	-	act-1a161a658a7-2jql
