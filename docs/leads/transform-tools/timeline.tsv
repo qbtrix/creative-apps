@@ -1,0 +1,76 @@
+utc	stage	event	ref	note
+2026-10-20T04:46Z	0	stage-start	#3446	base 18464f26b9
+2026-10-20T04:46Z	0	stage-end	#3446	lead/transform-tools created
+2026-10-20T04:46Z	1	stage-start	#3446	packet read
+2026-10-20T04:46Z	1	stage-end	#3446	slices and tasks copied
+2026-10-20T04:46Z	2	stage-start	#3446	combined plan with the other two features
+2026-10-20T04:50Z	2	stage-end	#3446	combined plan recorded
+2026-10-20T04:50Z	3	stage-start	TT-a	wave 1 builder started (worktree)
+2026-10-20T05:06Z	3	heartbeat	-	lead polling builders
+2026-10-20T05:21Z	3	heartbeat	-	lead polling builders
+2026-10-20T05:25Z	3	pr-opened	#3485	TT-a part 1 (TT-1), 400 lines, head 71bb604
+2026-10-20T05:25Z	3	pr-opened	#3486	TT-a part 2 (TT-2), stacked on #3485, head ce2b650
+2026-10-20T05:25Z	3	stage-end	TT-a	wave 1 transform-tools done
+2026-10-20T05:25Z	3	stage-start	TT-m	wave 2 builder (stacked on TT-a)
+2026-10-20T05:25Z	3	stage-start	TT-u	wave 2 builder (stacked on TT-a-2)
+2026-10-20T05:36Z	3	heartbeat	-	lead polling builders
+2026-10-20T05:42Z	3	fix	pr-bodies	attribution footer removed from slice PR bodies
+2026-10-20T05:51Z	3	heartbeat	-	lead polling builders
+2026-10-20T05:55Z	3	pr-open	#3512	TT-u part 1 (TT-3), stacked on #3486
+2026-10-20T05:55Z	3	pr-open	#3513	TT-u part 2 (TT-4), stacked on #3512
+2026-10-20T06:06Z	3	heartbeat	-	lead polling: #3485 open #3486 open #3512 open #3513 open
+2026-10-20T06:07Z	3	pr-open	#3524	TT-m (TT-5, TT-6), stacked on #3485
+2026-10-20T06:21Z	3	heartbeat	-	lead polling: #3485 open #3486 open #3512 open #3513 open #3524 open
+2026-10-20T06:36Z	3	heartbeat	-	lead polling: #3485 open #3486 open #3512 open #3513 open #3524 open
+2026-10-20T06:46Z	3	merged	#3485	TT-a part 1 into dev 5a17e0e5; restack started
+2026-10-20T06:51Z	3	heartbeat	-	lead polling: #3486 open #3512 open #3513 open #3524 open
+2026-10-20T07:02Z	3	restacked	#3486,#3524,#3512,#3513	onto dev 5a17e0e5, gate PASS
+2026-10-20T07:06Z	3	heartbeat	-	lead polling: #3486 open #3512 open #3513 open #3524 open
+2026-10-20T07:22Z	3	heartbeat	-	lead polling: #3486 open #3512 open #3513 open #3524 open
+2026-10-20T07:37Z	3	heartbeat	-	lead polling: #3486 open #3512 open #3513 open #3524 open
+2026-10-20T08:06Z	3	heartbeat	-	lead polling: #3486 open #3512 open #3513 open #3524 open
+2026-10-20T08:21Z	3	heartbeat	-	lead polling: #3486 open #3512 open #3513 open #3524 open
+2026-10-20T08:31Z	3	merged	#3524	TT-m into dev be364d1e
+2026-10-20T08:31Z	3	building	TT-7	stacked on #3513
+2026-10-20T08:36Z	3	heartbeat	-	lead polling: #3486 open #3512 open #3513 open
+2026-10-20T08:44Z	3	pr-open	#3577	TT-7 on TT-u-4
+2026-10-20T08:44Z	3	restack	#3486,#3512,#3513	dev merged up the stack, Head lines moved
+2026-10-20T08:51Z	3	heartbeat	-	lead polling: #3486 open #3512 open #3513 open #3577 open
+2026-10-20T08:55Z	3	slice-done	#3524	TT-m Belt-Slice-Done https://github.com/qbtrix/creative-apps/actions/runs/39395513875
+2026-10-20T09:06Z	3	heartbeat	-	lead polling: #3486 open #3512 open #3513 open #3577 open
+2026-10-20T09:22Z	3	heartbeat	-	lead polling: #3486 open #3512 open #3513 open #3577 open
+2026-10-20T09:37Z	3	heartbeat	-	lead polling: #3486 open #3512 open #3513 open #3577 open
+2026-10-20T10:08Z	3	heartbeat	-	lead polling PRs 3486 3512 3513 3577 
+2026-10-20T10:38Z	3	heartbeat	-	lead polling PRs 3486 3512 3513 3577 
+2026-10-20T10:43Z	3	merged	#3486	TT-a part 2 squash b930e657
+2026-10-20T11:07Z	3	slice-done	TT-a	https://github.com/qbtrix/creative-apps/actions/runs/39411363661
+2026-10-20T11:08Z	3	heartbeat	-	lead polling PRs 3512 3513 3577 
+2026-10-20T11:08Z	3	restack	#3512	base dev a69a49ac; #3513 6bc71e0a; #3577 2c41699c
+2026-10-20T11:38Z	3	heartbeat	-	lead polling PRs 3512 3513 3577 
+2026-10-20T12:08Z	3	heartbeat	-	lead polling PRs 3512 3513 3577 
+2026-10-20T12:38Z	3	heartbeat	-	lead polling PRs 3512 3513 3577 
+2026-10-20T13:08Z	3	heartbeat	-	lead polling PRs 3512 3513 3577 
+2026-10-20T13:23Z	3	fixer	#3512	macOS build 39412308919 failed: two test compile errors (SelectionHandleTurnTests:51 mutating in #expect, TransformRowsTests:43 key path allSatisfy); fixer dispatched
+2026-10-20T13:31Z	3	fix-pushed	#3512	head 4878a4be, CI PASS; restacking #3513 and #3577
+2026-10-20T13:40Z	3	heartbeat	-	lead polling PRs 3512 3513 3577 
+2026-10-20T13:40Z	3	restack	#3513 #3577	TT-4 head 5878478e, TT-z head a776ea68 (+ #expect mutating fix in TransformLiveTests); CI PASS both
+2026-10-20T14:10Z	3	heartbeat	-	lead polling PRs 3512 3513 3577 
+2026-10-20T14:40Z	3	heartbeat	-	lead polling PRs 3512 3513 3577 
+2026-10-20T14:56:56Z	3	merged	#3512	TT-u merged 7347ed80efa96b02566ab933e396d6f25c7442c6
+2026-10-20T14:56:56Z	3	retarget	#3513	TT-4 base -> dev
+2026-10-20T15:07:39Z	3	restack	#3513	TT-4 head 8fab2f9b merges dev (holds TT-u); 221+/15- in 3 files; gate PASS
+2026-10-20T15:07:39Z	3	restack	#3577	TT-z head cb5dbe77 merges TT-4; 165+/26- in 2 files; gate PASS
+2026-10-20T15:11Z	3	heartbeat	-	lead polling PRs 3513 3577 
+2026-10-20T15:21:59Z	3	slice-done	TT-u	Linux https://github.com/qbtrix/creative-apps/actions/runs/39445745786 holds 7347ed80; Belt-Slice-Done + Mac-Finish-Wanted on #3446
+2026-10-20T15:41Z	3	heartbeat	-	lead polling PRs 3513 3577 
+2026-10-20T16:11Z	3	heartbeat	-	lead polling PRs 3513 3577 
+2026-10-20T16:41Z	3	heartbeat	-	lead polling PRs 3513 3577 
+2026-10-20T17:11Z	3	heartbeat	-	lead polling PRs 3513 3577 
+2026-10-20T17:41Z	3	heartbeat	-	lead polling PRs 3513 3577 
+2026-10-20T18:11Z	3	heartbeat	-	lead polling PRs 3513 3577 
+2026-10-20T18:41Z	3	heartbeat	-	lead polling PRs 3513 3577 
+2026-10-20T19:11Z	3	heartbeat	-	lead polling PRs 3513 3577 
+2026-10-20T19:41Z	3	heartbeat	-	lead polling PRs 3513 3577 
+2026-10-20T20:12Z	3	heartbeat	-	lead polling PRs 3513 3577 
+2026-10-20T20:42Z	3	heartbeat	-	lead polling PRs 3513 3577 
+2026-10-22T13:04Z	3	relaunch	-	run act-1a163b2abfe-f182: TT-z only; AH-z merged, TT-8 unblocked; fixing #3513 macOS build
