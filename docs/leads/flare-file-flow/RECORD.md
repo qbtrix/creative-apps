@@ -1,20 +1,20 @@
 # file-flow (Flare) lead record
 
 Issue: #3482 · Packet: docs/blueprints/flare/features/file-flow.md
-Run: act-1a160bffba1-bvv3 · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih) · resumed from act-1a15d4ed024-1wsg at 23:2xZ
-Stage: FL-a done
+Run: act-1a162daef37-9ub3 · Session: claude/file-flow-lead-pfjzaz · Started: 2026-10-22T08:4xZ (resumes act-1a160bffba1-bvv3; HEAD checked at 0dd23d65)
+Stage: FL-a, FL-u done; FL-m part 1 #4326 in the lane; FL-4 + FL-7 ready on lead/file-flow-fl4
 Base: 8c55f0bf9 (origin/dev)
-Next: FL-4 from lead/file-flow-fl4 once FL-m #4326 merges
+Next: open the FL-4 + FL-7 PR (Slice: FL-m, FL-z) once #4326 merges; FL-8 waits on export-pack FV-z and svg-place PF-z
 
 Loop: v3 (the packet has a `## Slices` table).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| FL-a | SuiteDocumentHost and FileFlowTarget on stubs; .suiteApp, Open Recent, Open In and the drop on the fakes | FL-1, FL-2 | MFL | SF-a (on dev); svg-place:PF-u (FL-2) | yes | 0 | FL-1 in lane (#3843) | | |
-| FL-u | menu and drop mark snapshots, render budget, journey written | FL-5, FL-6 | FLJ1 | FL-a | yes | 0 | waiting | | |
-| FL-m | hand-offs accepted, old recents imported once, suite list, opens and saves noted | FL-3, FL-4 | MFL | FL-a; SF-5, SF-6, SF-7 (on dev); gradient-fill:FG-m; shape-tools:FS-m, stroke-style:FK-m, svg-place:PF-m (FL-3) | yes | 0 | waiting | | |
-| FL-z | live drop, Open Recent, Open In; journey passes; built | FL-7, FL-8 | FLJ1 | FL-u, FL-m; SF-8; export-pack:FV-z; svg-place:PF-z | no | 0 | waiting | | |
+| FL-a | SuiteDocumentHost and FileFlowTarget on stubs; .suiteApp, Open Recent, Open In and the drop on the fakes | FL-1, FL-2 | MFL | SF-a (on dev); svg-place:PF-u (FL-2) | yes | 0 | done (#3843, #4259) | 39739110094 | wanted |
+| FL-u | menu and drop mark snapshots, render budget, journey written | FL-5, FL-6 | FLJ1 | FL-a | yes | 0 | done (#4325) | | |
+| FL-m | hand-offs accepted, old recents imported once, suite list, opens and saves noted | FL-3, FL-4 | MFL | FL-a; SF-5, SF-6, SF-7 (on dev); gradient-fill:FG-m; shape-tools:FS-m, stroke-style:FK-m, svg-place:PF-m (FL-3) | yes | 0 | FL-3 #4326 in lane; FL-4 on lead/file-flow-fl4 | | |
+| FL-z | live drop, Open Recent, Open In; journey passes; built | FL-7, FL-8 | FLJ1 | FL-u, FL-m; SF-8; export-pack:FV-z; svg-place:PF-z | no | 0 | FL-7 on lead/file-flow-fl4 (rides the FL-4 PR); FL-8 waits FV-z, PF-z | | |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -78,3 +78,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T07:31Z: Rule 23: three polls blocked the same way (full runs on dev cancelled before starting); asked the supervisor on #3482 (comment 6335298929).
 - 2026-10-22T07:59Z: Supervisor answered: cite the dev Linux check run. Posted Belt-Slice-Done and Mac-Finish-Wanted for FL-a with run 39739110094 (green Linux, dev 9f1b3d56 contains 414b9220).
 - 2026-10-22T08:26Z: FL-m #4326's macOS build 39733048354 has been queued for a runner since 06:17Z.
+- 2026-10-22T09:10Z (act-1a162daef37-9ub3): resumed. FL-7 (journey on, shared `dragFile` from Journey+FileDrag.swift instead of a private copy; -47 lines) committed on lead/file-flow-fl4 (8d5f425) and rides the FL-4 PR as `Slice: FL-m, FL-z` (rule 22, under 50 lines). The container lost its Swift toolchain; reinstalling via scripts/cloud-setup.sh before the gate. #4326 macOS build 39733048354 still queued since 06:17Z (2nd identical poll).
