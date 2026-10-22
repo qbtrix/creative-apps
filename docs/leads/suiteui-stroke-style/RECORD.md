@@ -95,3 +95,4 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 00:03Z: SS-9 #3826 head ead55aa: lane macOS build 39692915162 queued (runner backlog); #4215 merged so the port no-ops
 - 00:27Z: SS-9 #3826 head ead55aa: lane macOS build 39692915162 still queued (runner backlog)
 - 00:51Z: SS-9 #3826 head ead55aa: lane macOS build 39692915162 green; waiting for the lane to merge
+- 01:14Z: SS-9 #3826 ead55aa: mergeable clean, macOS build green; lane batch 20261022004326 probing, waiting to land
