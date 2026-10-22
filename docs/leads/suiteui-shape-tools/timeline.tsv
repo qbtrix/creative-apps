@@ -78,3 +78,4 @@ utc	stage	event	ref	note
 2026-10-22T17:10Z	3	poll	#3449	record moved to lead/suiteui-shape-tools; TT-z #4429 open, EY-z unmerged
 2026-10-22T17:35Z	3	ask-supervisor	#3449	supervisor asked hold-or-release on #1942 (issuecomment-6347075135); TT-z #4429 open, EY-z no PRs
 2026-10-22T18:05Z	3	poll	#3449	no supervisor reply; TT-z #4429 open, EY-z no PRs
+2026-10-22T18:36Z	3	poll	#3449	#4608 adds wait stroke-style:SS-d for SH-8; chain AH-z→SS-d→TT-z→EY-z→SH-z

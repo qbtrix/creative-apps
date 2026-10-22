@@ -3,8 +3,8 @@
 Issue: #3449 · Packet: docs/blueprints/suiteui/features/shape-tools.md
 Run: act-1a1646f0a9f-d1ei (resumed; first run act-1a1579fdd22-6z1j) · Session: claude/suiteui-feature-lead-v7e2hk · Started: 2026-10-20T04:46Z · Resumed: 2026-10-22T16:30Z
 Stage: 3 awaiting supervisor (SH-z blocked on eyedropper:EY-z)
-Base: dev 5b2cafad (main 0dd23d65 verified)
-Next: re-read eyedropper:EY-z each poll (EY-7, EY-8, EY-9 merged on dev?), itself behind transform-tools:TT-z (#4429 open); when EY-z is met, build SH-8 (with the star-drag budget row) then SH-9 with feature-done as one slice PR to dev
+Base: dev 2c94c354 (main 0dd23d65 verified)
+Next: re-read the FakeCanvasDocument.swift chain each poll (stroke-style:SS-d via #4607, then transform-tools:TT-z #4429, then eyedropper:EY-z); once all three merge, build SH-8 on FakeRect.stroke (with the star-drag budget row), then SH-9 with feature-done, as one slice PR to dev
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: re-read eyedropper:EY-z each poll (EY-7, EY-8, EY-9 merged on dev?), itsel
 | SH-a | The kernel's shape spec is complete and its rules, target, intents and two command specs are declared as stubs, the gall... | SH-1, SH-2 | SJ0 | editor-kernel | true | 0 | done | – | – |
 | SH-u | On the gallery page the kind chips switch the rows, each row edits its option and shows why a value is out of range, eve... | SH-3, SH-4 | PJ1 | SH-a | true | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39424989659 | wanted |
 | SH-m | The rules build every kind's path in a box and the drag's box with Shift and Option, refuse out-of-range counts in words... | SH-5, SH-6 | KJ-shapes | SH-a | false | 0 | done | – | – |
-| SH-z | The gallery draws through shape.draw on a live target, the fake app keeps shape specs so RJ-X34 runs on the CLI, and the... | SH-7, SH-8, SH-9 | PJ1, KJ-shapes | SH-u, SH-m, eyedropper:EY-z | true | 0 | building: SH-7 #3567 merged; SH-8, SH-9 wait on eyedropper:EY-z | – | – |
+| SH-z | The gallery draws through shape.draw on a live target, the fake app keeps shape specs so RJ-X34 runs on the CLI, and the... | SH-7, SH-8, SH-9 | PJ1, KJ-shapes | SH-u, SH-m, eyedropper:EY-z, stroke-style:SS-d | true | 0 | building: SH-7 #3567 merged; SH-8, SH-9 wait on stroke-style:SS-d and eyedropper:EY-z | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -34,6 +34,7 @@ Next: re-read eyedropper:EY-z each poll (EY-7, EY-8, EY-9 merged on dev?), itsel
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T18:36Z: #4608 (merged as e16b9852, supervisor's answer on #3450) puts stroke-style SS-d ahead in the FakeCanvasDocument.swift chain: AH-z → SS-d → TT-z → EY-z → SH-z. SH-8 now also waits on stroke-style:SS-d and builds FakeRect.shape on SS-8's FakeRect.stroke. SS-8 is #4607 (not merged); TT-z #4429 still open; no EY-7/8/9 PR. No supervisor reply to issuecomment-6347075135; SH-8, SH-9 stay unstarted.
 - 2026-10-22T18:05Z: poll on dev 5b2cafad: TT-z #4429 still open, no EY-7/8/9 PR. No supervisor reply yet; SH-8, SH-9 stay unstarted.
 - 2026-10-22T17:35Z: poll on dev 1d3f98f9: TT-z #4429 still open; no EY-7/8/9 PR. No supervisor reply on #3449. Asked the supervisor to hold or release the run (on #1942, issuecomment-6347075135, covering both features); default: leave SH-8, SH-9 unstarted for the next lead.
 - 2026-10-22T17:10Z: Belt nudge: status lives on lead/suiteui-shape-tools, not lead/shape-tools where this run first wrote; record moved here (branch cut from main 0dd23d65 with only docs/leads/suiteui-shape-tools). Re-polled on dev a41e7f1f: TT-z #4429 still open, no EY-7/8/9 on dev (last suiteui eyedropper merge #3597). SH-8 stays unstarted; nothing else in the brief can start.
