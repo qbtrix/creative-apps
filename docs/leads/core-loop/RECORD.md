@@ -4,7 +4,7 @@ Issue: #1971 · Packet: docs/blueprints/halo/features/core-loop.md
 Run: act-1a15f92d2f2-kvrn (from 2026-10-21T18:00Z; before: act-1a15d0eeefb-6z9l from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0) (from 2026-10-20T18:45Z; before: act-1a15728f2a2-zb1o) · Session: claude/halo-feature-lead-run-02scrb · Started: 2026-10-20T02:37Z
 Stage: 3 wave 5
 Base: 6d5f3a4025ffce3bb843003a158f64bf282020e6
-Next: #4321, #4322 and #4331 merged. #4329 got needs-rebase again at 10:42Z (HaloWindow.swift vs #4210 and #4336 on dev); a fixer is merging dev into it a second time. Halo journeys 39753811755 (still pending) tests 1da00fb9, which has #4285/#4290/#4321; when it finishes it gets the critic panel for H-J12 and H-P, and red there is round 2. Blocked on SuiteUI: #4273 (#4283), #4281 (#4282), #4275 duplicate series (#4330). Open findings >5, no new feature work
+Next: #4321, #4322 and #4331 merged. #4329 has dev merged in again (head e2f23e0b; runFill and runStroke both take playback first; ci --changed PASS) and waits on the lane's macOS build, then a batch. Halo journeys 39753811755 (pending) tests 1da00fb9, which has #4285/#4290/#4321; when it finishes it gets the critic panel for H-J12 and H-P, and red there is round 2. Blocked on SuiteUI: #4273 (#4283), #4281 (#4282), #4275 duplicate series (#4330). Open findings >5, no new feature work
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
