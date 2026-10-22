@@ -66,3 +66,4 @@ utc	stage	event	ref	note
 2026-10-22T11:10:46Z	3	pr-opened	#4388	AH-9 + AH-10 wave.json, feature-done, Mutate 9/9
 2026-10-22T11:10:46Z	3	pr-opened	#4396	AH-10 C4 prose, docs only
 2026-10-22T11:10:46Z	3	heartbeat	-	polling: lane merge of #4388/#4396
+2026-10-22T11:26:26Z	3	heartbeat	-	#4388 open, macOS build 39763938609 queued; #4396 open, awaiting lane sweep
