@@ -1,0 +1,14 @@
+utc	stage	event	ref	note
+2026-10-20T21:05Z	0	stage-start	#3459	line lead act-1a15b1de023-4xx7; base dev 6c2c7b05; lead/svg-place created
+2026-10-20T21:05Z	2	stage-end	plan	wave 1 = PF-a (PF-1+PF-2); PF-u waits KS-a; PF-m waits FG-m, FS-m, FK-m
+2026-10-20T21:39Z	3	heartbeat	-	wave 1 builders done; opening PRs
+2026-10-20T21:43Z	4	pr-opened	#3768	PF-a (PF-1, PF-2), fast-lane
+2026-10-20T22:14Z	4	heartbeat	#3768	lane dispatched macOS build run 39504439911 (queued)
+2026-10-20T22:44Z	4	heartbeat	#3768	macOS build still queued behind 5 macOS runs
+2026-10-20T23:46Z	4	heartbeat	-	macOS runners stuck; reported to supervisor on #3451
+2026-10-21T00:16Z	4	heartbeat	-	lane macOS build still queued
+2026-10-21T00:33Z	4	mac-build-pass	#3768	run 39504439911 success
+2026-10-21T01:04Z	4	batched	#3768	lane/batch-20261021005140
+2026-10-21T01:17:51Z	lane-batch	#3768 PF-a in lane batch-20261021005140; batch Linux red only on Library timing test planWithinBudget (not ours), lane bisecting
+2026-10-21T01:48:14Z	lane-bisect	#3768 PF-a waiting in lane bisect of batch-20261021005140 (probe -4 running; red was Library timing test, not ours)
+2026-10-21T02:18:29Z	lane-bisect	#3768 PF-a waiting in lane bisect of batch-20261021005140 (probe -4 timing retry 3 of 3 running)
