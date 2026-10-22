@@ -9,7 +9,7 @@
 // window changes once and records one step; the window writes that workspace
 // and `clearAfterLanding()` drops the copy a turn later, so the canvas never
 // draws the old workspace in between. `preview` and `land` do the same for an
-// inspector scrub or fill editor drag. DesignWindow owns one and hands it down as the
+// inspector scrub, a style row's, the Rotation bar's or a fill editor drag. DesignWindow owns one and hands it down as the
 // `designLiveDrag` environment value; without one (a view hosted alone) the
 // canvas draws the workspace. Presentation state only.
 import DesignModel
@@ -43,6 +43,9 @@ import SwiftUI
 
     /// One fill editor intent of a drag, run on the copy only.
     func preview(_ intent: GradientIntent) { edit.preview(intent) }
+
+    /// One value of a transform scrub, shown on the copy only.
+    func preview(_ intent: TransformIntent) { edit.preview(intent) }
 
     /// Replays the last sample or value into `model` as one step; a refused value's reason. The
     /// copy stays shown until `clear()` or `clearAfterLanding()`.

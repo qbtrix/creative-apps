@@ -455,7 +455,8 @@
                 "description": "What Help > Report a Problem… and Beta Notes show: ProblemReport (the app, its version and build, macOS, the Mac model and the newest three suite crashes at most 7 days old, each a CrashFile trimmed to its header and crashed thread, with the home path, user and host redacted; text puts the person's note on top) and BetaNotes.current, the build's known issues. Built from values the caller reads; nothing here reads a disk or opens a socket (report-problem RP-1 stubs, RP-4 bodies).",
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
-                  "Sources/SuiteModel/Help/"
+                  "Sources/SuiteModel/Help/",
+                  "Sources/AfterGlowCLICore/HelpReports.swift"
                 ]
               }
             ]
@@ -773,7 +774,7 @@
               {
                 "id": "shell-text",
                 "name": "Text on Core Text",
-                "description": "The live half of SuiteModel's text contract: measures spans on Core Text into one advance per grapheme (ligatures split evenly, an emoji whole), ascent and descent, and names the fallback family.",
+                "description": "The live half of SuiteModel's text contract, reached as SuiteServices.text through LiveText: measures spans on Core Text into one advance per grapheme (ligatures split evenly, an emoji whole), ascent and descent, and names the fallback family; lists the Mac's font families with their faces; and draws placed glyphs at their origins and angles into an sRGB MediaFrame. It measures and draws only: line breaks, alignment and type on a path are creative-core text-engine's, so an app Model measures here, lays out in core, and draws here.",
                 "technology": "Swift 6, Core Text and AppKit, macOS 26",
                 "paths": [
                   "Sources/SuiteShell/Text/"
