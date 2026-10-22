@@ -59,3 +59,4 @@ utc	stage	event	ref	note
 2026-10-22T11:43Z	poll	stopped (DS-u done); no action.
 2026-10-22T12:11Z	poll	stopped (DS-u done); no action.
 2026-10-22T12:44Z	poll	stopped (DS-u done); no action.
+2026-10-22T12:43:28Z	check	still stopped per supervisor; timeline-keys TK-u critics filed #4416-#4420
