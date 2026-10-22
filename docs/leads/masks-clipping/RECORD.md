@@ -4,7 +4,7 @@ Issue: #4517 · Packet: docs/blueprints/photo/features/masks-clipping.md
 Run: act-1a164697363-4fnm · Session: claude/feature-lead-photo-features-kilpzc · Started: 2026-10-22T16:00Z
 Stage: 3 wave 1
 Base: 7e9f260 (origin/dev)
-Next: open PK-a's first PR (PK-1, mask half); then PK-5 stacked on it
+Next: PK-1 builder running (belt/masks-clipping/pk-1), PK-5 stacked after it by the same builder
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
