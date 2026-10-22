@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-22T13:16Z	heartbeat	#4415/#4422 bodies cleaned of footer; macOS builds queued (39783206639, 39783246483)
 2026-10-22T13:58Z	rebase	#4415 f5e08d5, #4422 e153b4b merged with dev; gate blocked only by dev-red #3856 (HaloStrokeTrimKeysTests)
 2026-10-22T14:30Z	heartbeat	#4415 lane Linux red only on dev-red #3856 stroke test; #4422 Linux running; no supervisor answer
+2026-10-22T14:53:15Z	heartbeat	dev-red stroke test reported on #3856; HT-m/HT-z blocked
