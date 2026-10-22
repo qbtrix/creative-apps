@@ -1,0 +1,37 @@
+[
+  {
+    "label": "groupsStayLayers: the SVG's groups are merged into one layer",
+    "file": "Sources/FlareModel/FlarePlace+Kernel.swift",
+    "find": "        let placed = imported.scene.layers.map { svgLayer -> Layer in",
+    "replace": "        let merged = imported.scene.layers.dropFirst().reduce(Array(imported.scene.layers.prefix(1))) { acc, l in var a = acc; if !a.isEmpty { a[0].shapes += l.shapes }; return a }\n        let placed = merged.map { svgLayer -> Layer in",
+    "tests": "FlarePlaceTests"
+  },
+  {
+    "label": "fitsInsideScene: the fit matrix is skipped, so the art keeps the SVG's own size",
+    "file": "Sources/FlareModel/FlarePlace+Kernel.swift",
+    "find": "            var layer = Self.fitted(svgLayer, by: fit)",
+    "replace": "            var layer = svgLayer",
+    "tests": "FlarePlaceTests"
+  },
+  {
+    "label": "oneUndoStep: each layer gets its own apply group, so a place is several undo steps",
+    "file": "Sources/FlareModel/FlarePlace+Kernel.swift",
+    "find": "        applyGroup(name, selection: .layer(placed.first?.id)) { engine in\n            for (k, layer) in placed.enumerated() {",
+    "replace": "        for (k, layer) in placed.enumerated() {\n            applyGroup(name, selection: .layer(placed.first?.id)) { engine in",
+    "tests": "FlarePlaceTests"
+  },
+  {
+    "label": "pngIsRefused: the kernel's generic format refusal reaches the user, not Flare's",
+    "file": "Sources/FlareModel/FlarePlace+Kernel.swift",
+    "find": "        return .unavailable(id: id, why: placeFormatHelp)",
+    "replace": "        return error",
+    "tests": "FlarePlaceTests"
+  },
+  {
+    "label": "reportNamesASkippedFilter: the report drops what the reader skipped",
+    "file": "Sources/FlareModel/FlarePlace+Kernel.swift",
+    "find": "        return \"Placed \\(file): \\(count).\\(skips)\"",
+    "replace": "        return \"Placed \\(file): \\(count).\"",
+    "tests": "FlarePlaceTests"
+  }
+]
