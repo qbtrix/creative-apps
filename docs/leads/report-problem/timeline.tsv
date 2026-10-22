@@ -43,3 +43,4 @@ utc	stage	event	ref	note
 2026-10-21T22:46Z	2026-10-21T22:46Z	check	heartbeat	#4201	no merges; batch lane/batch-20261021221623-4 red again; #4201 eligible (clean, marker on head) and waiting on the lane
 2026-10-21T23:16Z	2026-10-21T23:16Z	check	heartbeat	#4201	no merges yet; batch lane/batch-20261021221623 bisecting
 2026-10-22T00:07Z	2026-10-22T00:07Z	check	merged	#4110	RP-4 merged
+2026-10-22T00:29Z	2026-10-22T00:29Z	check	heartbeat	-	no merges since 00:07Z; all ready PRs clean on the lane (#4258 macOS build dispatched); no open findings for this feature
