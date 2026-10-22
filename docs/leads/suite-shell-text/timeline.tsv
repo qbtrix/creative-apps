@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-22T04:09:58Z	stage	ST-m	#4157 merged dev (add/add resolved to ST-m), CI PASS, head 11c5abaf7, retargeted dev, ready
 2026-10-22T04:09:58Z	stage	ST-live	#4156 merged dev, CI PASS, head baede8ef5, retargeted dev, ready; #4161 restacked at 93f711a20
 2026-10-22T04:26:46Z	slice-done	ST-a	Belt-Slice-Done posted (run 39719146044 green); #4157 #4156 in lane, no labels; no findings
+2026-10-22T04:43:24Z	check	ST-m,ST-live	lane macOS builds 39720747678 (ST-m) and 39720731000 (ST-live) still queued; no labels, no findings
