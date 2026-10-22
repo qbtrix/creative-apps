@@ -86,3 +86,4 @@ utc	stage	event	ref	note
 2026-10-22T07:24Z	resume	run act-1a1627ce3b4-ayhz takes over	-	DT-m met; DY-m building
 2026-10-22T08:15Z	pr-opened	DY-m #4356 (DY-5) #4357 (DY-6 stacked)	215bb4de	lane macOS build 39745527052
 2026-10-22T08:20Z	building	DY-z builder stacked on lead/design-eyedropper-DY-6	-	-
+2026-10-22T08:58Z	pr-opened	DY-z #4376 (stacked on #4357; fast-lane, feature-done)	1cdf3a59	#4356 macOS build 39745527052 queued
