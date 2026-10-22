@@ -4,7 +4,8 @@
 //
 // The rules come from the W3C SVG 2 recommendation only (clean-room): the
 // outermost <svg> with `viewBox` and `width`/`height`, basic shapes (<rect>,
-// <ellipse>), <text> with `text-anchor`, <g> with `opacity`, and <clipPath>
+// <ellipse>), <path> for a shape layer (shape-tools DS-6: the kernel's path of
+// its spec in its frame, closed with Z only when the path closes), <text> with `text-anchor`, <g> with `opacity`, and <clipPath>
 // referenced by `clip-path="url(#…)"`. One element per visible layer in paint
 // order (a node, then its children); a hidden node drops its whole subtree.
 // Coordinates are page points minus the box's origin. An attribute whose value
@@ -52,8 +53,15 @@ enum DesignSVG {
         let turned = turn(node, x: x, y: y)
         if node.kind != .group, let defs = gradient(node, x: x, y: y) { lines.append(pad + defs) }
         switch node.kind {
-        case .rectangle, .instance, .shape:  // a shape writes its box until DS-6 writes its path
+        case .rectangle, .instance:
             lines.append(pad + "<rect \(box)\(corner(node))\(fill(node))\(paint(node))\(alpha(node))\(turned)/>")
+        case .shape:
+            let at = DesignRect(x: x, y: y, width: f.width, height: f.height)
+            guard let path = node.path(in: at) else {  // a shape with no spec, or one the kernel refuses: its box
+                lines.append(pad + "<rect \(box)\(fill(node))\(paint(node))\(alpha(node))\(turned)/>")
+                return
+            }
+            lines.append(pad + "<path d=\"\(data(path))\"\(fill(node))\(paint(node))\(alpha(node))\(turned)/>")
         case .ellipse:
             let (rx, ry) = (f.width / 2, f.height / 2)
             let at = "cx=\"\(number(x + rx))\" cy=\"\(number(y + ry))\" rx=\"\(number(rx))\" ry=\"\(number(ry))\""
@@ -72,6 +80,26 @@ enum DesignSVG {
             for child in node.children { write(child, origin: origin, depth: depth + 1, into: &lines) }
             lines.append(pad + "</g>")
         }
+    }
+
+    /// A path's `d`: absolute M, L, Q and C commands, and Z only where the path closes (an open line or arrow
+    /// has none). Coordinates are rounded to 4 decimals, so the text is the same on every platform.
+    private static func data(_ path: VectorPath) -> String {
+        func at(_ p: Point) -> String {
+            func n(_ v: Double) -> String { number((v * 10_000).rounded() / 10_000) }
+            return "\(n(p.x)) \(n(p.y))"
+        }
+        var parts: [String] = []
+        for element in path.elements {
+            switch element {
+            case .move(let to): parts.append("M" + at(to))
+            case .line(let to): parts.append("L" + at(to))
+            case .quad(let control, let to): parts.append("Q" + at(control) + " " + at(to))
+            case .cubic(let c1, let c2, let to): parts.append("C" + at(c1) + " " + at(c2) + " " + at(to))
+            case .close: parts.append("Z")
+            }
+        }
+        return parts.joined(separator: " ")
     }
 
     /// A text layer: its anchor follows the alignment, its baseline sits one font size below the top.

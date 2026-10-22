@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "app": "design",
+  "why": "RJ-D35: draws a five-point star (inner ratio 0.5) in a 100 x 100 box at 0, 0 inside the Badge frame with shape.draw, then exports SVG: the star is one <path> of 10 vertices from the kernel's ShapeRules, the first at the top centre (50, 0), closed with Z, and its bytes are checked. DesignSVGTests.starBadgeJob checks that the reopened node keeps kind shape and its spec, and the vertex count.",
+  "inputs": ["input/*.design"],
+  "steps": [
+    {"id": "shape.draw", "params": {"kind": "star", "points": 5, "innerRatio": 0.5, "x": 0, "y": 0, "w": 100, "h": 100}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}", "format": "svg", "options": {}},
+  "expect": {
+    "out/blank.svg": {"sha256": "72770e9804e7c9c0b0b997c178515e1249420ddd77821f7d1a8e2a0dd4a21a32"}
+  },
+  "platforms": ["linux", "macos"]
+}
