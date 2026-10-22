@@ -4,7 +4,7 @@ Issue: #3482 · Packet: docs/blueprints/flare/features/file-flow.md
 Run: act-1a162daef37-9ub3 · Session: claude/file-flow-lead-pfjzaz · Started: 2026-10-22T08:4xZ (resumes act-1a160bffba1-bvv3; HEAD checked at 0dd23d65)
 Stage: FL-a, FL-u done; FL-m part 1 #4326 in the lane; FL-4 + FL-7 ready on lead/file-flow-fl4
 Base: 8c55f0bf9 (origin/dev)
-Next: open the FL-4 + FL-7 PR (Slice: FL-m, FL-z) once #4326 merges; FL-8 waits on export-pack FV-z and svg-place PF-z
+Next: open the FL-4+FL-7+FL-8 PR (Slice: FL-m, FL-z, label feature-done) once #4326 merges via the supervisor's local Mac gate
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -80,3 +80,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T08:26Z: FL-m #4326's macOS build 39733048354 has been queued for a runner since 06:17Z.
 - 2026-10-22T09:10Z (act-1a162daef37-9ub3): resumed. FL-7 (journey on, shared `dragFile` from Journey+FileDrag.swift instead of a private copy; -47 lines) committed on lead/file-flow-fl4 (8d5f425) and rides the FL-4 PR as `Slice: FL-m, FL-z` (rule 22, under 50 lines). The container lost its Swift toolchain; reinstalling via scripts/cloud-setup.sh before the gate. #4326 macOS build 39733048354 still queued since 06:17Z (2nd identical poll).
 - 2026-10-22T09:15Z: fl4 8d5f4257 pushed, scripts/ci --changed PASS (1139 tests). Rule 23: #4326 macOS build 39733048354 queued since 06:17Z on three polls; asked the supervisor on #3482 (comment 6337175169), along with whether FL-8 may proceed without FV-z/PF-z.
+- 2026-10-22T09:41Z: Supervisor (comment 6337250518): #4326 goes through the local Mac gate (~1h), no GitHub re-dispatch; FL-8 may proceed after FL-m with only Open Recent / Open In / drop lines in flare.md. FL-8 written and folded into fl4 (2f9db9a2, ci --changed PASS, waves render OK); one PR for FL-4+FL-7+FL-8 (11 files, +203/-59) opens when #4326 merges.
