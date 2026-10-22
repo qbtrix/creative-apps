@@ -77,3 +77,4 @@ Waves: combined with shared-codecs (see its RECORD). Wave 1 = IM-1 beside SC-13 
 - 2026-10-22T04:23Z: Supervisor answered on #3715 at 03:06Z. #4028 is 4th in the local Mac gate queue, and they merge it once it passes. No pushes to it in the meantime. IM-2 is held until it merges.
 - 2026-10-22T04:44Z: #4028 is still open. Its head moved to e48f3225 (not my push; base is now dev 8a1d65345), and it is in the supervisor's Mac gate queue. IM-2 is held until it merges.
 - 2026-10-22T05:05Z: #4028 is still open on head e48f3225, in the supervisor's Mac gate queue. IM-2 is held.
+- 2026-10-22T05:25Z: #4028 is still open, clean on head e48f3225, in the supervisor's Mac gate queue. IM-2 is held.
