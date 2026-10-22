@@ -33,8 +33,10 @@ extension HaloProject: HeadlessDocument {
         let ids = HaloCommand.allCases.map(\.commandID)
         #expect(ids.count == 62 && Set(ids).count == ids.count)
         let shapes = ShapeCommands.specs(HaloProject.self).map(\.id)  // HS-6: the kernel's shape commands follow
+        let fills = GradientCommands.specs(HaloProject.self).map(\.id)  // HG-7: then its fill commands
         let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
-        #expect(catalog.ids == (ids + shapes + window).sorted() && HaloProject.commandSpecs.map(\.id) == ids + shapes + window)
+        let all = ids + shapes + fills + window
+        #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
     }
 
     @Test func areaHelpMatches() {
@@ -117,6 +119,7 @@ extension HaloProject: HeadlessDocument {
         "files and rendering run through HaloHeadless in AC-h2": ["file.open file.save file.save-as render.start: exampleRuns"],
         "key editing's move is a stub until KE-4": ["timeline.move-keys: exampleRuns"],
         "the window's own steps need an open render or unsaved edits (CS-7)": ["file.answer-unsaved render.choose-folder: exampleRuns"],
+        "the stop and angle examples need a gradient; Ball's fill is solid": ["fill.angle fill.stop-add fill.stop-move fill.stop-remove: exampleRuns"],
     ]
 
     @Test func conformance() {

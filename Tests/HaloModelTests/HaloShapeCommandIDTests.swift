@@ -32,7 +32,8 @@ import Testing
             #expect(HaloProject.catalog.ids.contains(id), "\(id)")
             #expect(HaloHeadless.catalog.ids.contains(id), "\(id)")
         }
-        #expect(HaloProject.catalog.ids.count == HaloCommand.allCases.count + 2 + HaloProject.windowSpecs.count)
+        let fills = GradientCommands.specs(HaloProject.self).count  // HG-7: the eight fill commands
+        #expect(HaloProject.catalog.ids.count == HaloCommand.allCases.count + 2 + fills + HaloProject.windowSpecs.count)
     }
 
     @Test func runShapeKeepsThePickedTool() throws {

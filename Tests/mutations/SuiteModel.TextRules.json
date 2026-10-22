@@ -1,0 +1,30 @@
+[
+ {
+  "label": ".sizeSixteenHundredAccepted: size bound < for <= at 1,600",
+  "file": "Sources/SuiteModel/Values/Text+Rules.swift",
+  "find": "span.fontSize <= sizes.upperBound",
+  "replace": "span.fontSize < sizes.upperBound",
+  "tests": "TextRulesTests"
+ },
+ {
+  "label": ".originsPerGrapheme: graphemes counted by utf8",
+  "file": "Sources/SuiteModel/Values/Text+Rules.swift",
+  "find": "let graphemes = placed.span.string.count",
+  "replace": "let graphemes = placed.span.string.utf8.count",
+  "tests": "TextRulesTests"
+ },
+ {
+  "label": ".weightInHundreds: weights between hundreds accepted",
+  "file": "Sources/SuiteModel/Values/Text+Rules.swift",
+  "find": ", span.weight % 100 == 0 else",
+  "replace": " else",
+  "tests": "TextRulesTests"
+ },
+ {
+  "label": ".nanTrackingRefused: tracking not checked",
+  "file": "Sources/SuiteModel/Values/Text+Rules.swift",
+  "find": "guard span.tracking.isFinite else",
+  "replace": "guard true else",
+  "tests": "TextRulesTests"
+ }
+]
