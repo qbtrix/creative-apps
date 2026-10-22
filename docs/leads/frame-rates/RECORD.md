@@ -4,7 +4,8 @@ Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a161a658a7-2jql · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
 Stage: 4 finish
 Base: dev
-Next: FR-u fix round 2 PRs merge, then the review after it (leftovers become gaps); beta-hardening lane verifies the slices
+Next: 4610 merges via the lane batch, then the FR-u review after round 2 on a scoped suiteui run; leftovers (4602) become gaps
+
 
 
 
@@ -49,6 +50,7 @@ Next: FR-u fix round 2 PRs merge, then the review after it (leftovers become gap
 
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 18:12Z: FR-u fix round 2 opened as PR 4610 (head 448b575b, gate PASS), fixing 4597-4601 and 4603. 4602 is not fixed: it needs the shared label format and TimelineNavTests outside this round's files, so it becomes a gap after the follow-up review. Added the Mutate line to 4610 (unscored on Linux).
 - 18:05Z: Linux run 39823625676 green at 1d3f98f90. Posted Belt-Slice-Done for FR-halo, FR-flare and FR-z, plus Mac-Finish-Wanted for FR-halo and FR-flare (comment 6347464973), then Belt-Contact-Sheet (6347477759). FR-u fix round 2 is still running (wf_483ca51f-458).
 - 17:58Z: FR-u critic round 2 (wf_7f9861ad-832 at 5da8c329): not clean, 13 confirmed, 1 refuted, filed 4597-4603. Fix round 2 (last) launched via fix-batch on dev 1dd51a3e (wf_483ca51f-458). Linux run 39823625676 still running.
 - 17:50Z: 4552 merged 17:30Z (feature-done); journeys 39793942579 green; critic round 2 on FR-u running; Linux run 39823625676 on dev at 1d3f98f90 (contains every slice) in progress, Belt-Slice-Done lines follow when green
