@@ -71,3 +71,4 @@ utc	stage	event	ref	note
 2026-10-22T08:35Z	3	heartbeat	#3439	third blocked poll on queued macOS builds; question posted to supervisor
 2026-10-22T08:40Z	3	stopped	#3439	supervisor ended run; PRs wait in lane on queued macOS builds
 2026-10-22T09:10Z	3	heartbeat	#4339,#4343	Belt nudge; both still unmerged in lane, macOS builds queued; run stays ended per supervisor 08:38Z (#3439), awaiting relaunch after merge
+2026-10-22T09:40Z	3	heartbeat	#4339,#4343	PE-m macOS build 39738004006 success (awaits lane batch); PE-z build 39738570198 still queued; run stays ended per supervisor 08:38Z
