@@ -42,3 +42,11 @@ Wave 1: HA-a (one slice PR), alongside transform HT-a. Wave 2: HA-5 stacked on H
 - AC-halo (#2999) not done: holds the Edit > Show History item.
 - HG-m (gradient-fill #3417) blocked on GF-6: holds HA-6.
 - HA-7 waits on suiteui autosave-history AH-z.
+
+## Run act-1a162462636-ft6b (2026-10-22T06:25Z)
+
+- Base: origin/dev bdd92b41 (PRs target dev; the lane retargets main).
+- Status branch stays lead/halo-autosave-history: lead/autosave-history is the SuiteUI lead's.
+- HA-5 is merged on dev (HaloRecovery+Kernel.swift bodies, HaloRecoveryTests on), so HA-m needs only HA-6. HG-m is built, so HA-6 is unblocked.
+- Wave 1: HA-6 (catalog specs history.jump and the second history spec, halo.txt, HaloHistoryCommandIDTests, RJ-H33 job folder).
+- Wave 2: HA-7 once suiteui AH-z's live recovery wiring is on dev; then HA-8 feature-done.

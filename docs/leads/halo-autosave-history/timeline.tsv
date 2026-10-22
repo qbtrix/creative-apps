@@ -49,3 +49,4 @@ utc	stage	event	ref	note
 2026-10-21T10:00Z	heartbeat	HA-6 waits on HG-m (#3417)
 2026-10-21T10:21Z	heartbeat	HA-6 waits on HG-m (#3417 held for CL-probe)
 2026-10-21T10:43Z	heartbeat	HA-6 waits on HG-m (#3417 held for CL-probe)
+2026-10-22T06:25Z	run-start	act-1a162462636-ft6b base dev bdd92b41; wave 1 HA-6
