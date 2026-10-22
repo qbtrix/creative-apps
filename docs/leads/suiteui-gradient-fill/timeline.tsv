@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-22T04:23:06Z	4	check	journeys 39718566695	still pending
 2026-10-22T04:39:46Z	4	check	journeys 39718566695	still pending
 2026-10-22T04:57:22Z	4	check	GF critics	journeys run 39718566695 still pending
+2026-10-22T05:18:05Z	4	check	GF critics	journeys 39718566695 cancelled; using scoped suiteui 39726708852
