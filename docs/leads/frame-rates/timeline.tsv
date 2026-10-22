@@ -67,3 +67,4 @@ utc	stage	event	ref	note
 2026-10-22T08:56Z	fix round 1 PRs open (FR-u)	fix round 1: #4373 #4375 open	-	act-1a161a658a7-2jql
 2026-10-22T09:11Z	fix round 1 PRs in lane; FR-8 rebased	FR-8 needs-rebase resolved	-	act-1a161a658a7-2jql
 2026-10-22T09:33Z	fix round 1 PRs in lane; FR-8 rebased	heartbeat: macOS queue saturated (27 queued)	-	act-1a161a658a7-2jql
+2026-10-22T09:55Z	fix round 1 PRs in lane; FR-8 rebased	heartbeat: #4293 mac build green, awaiting batch	-	act-1a161a658a7-2jql
