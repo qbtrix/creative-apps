@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-22T09:57Z	slice-done	TK-flare done: dev Linux 39756689216 green on 1896483c (contains ec600875). Belt-Slice-Done + Mac-Finish-Wanted posted on #3780 (6337949665, 6337950021).
 2026-10-22T09:57Z	stop	stopped per supervisor 06:19Z; TK-6, TK-z waiting-on-prereq. TK-u critic panel still waits on full journeys 39751426611 (pending).
 2026-10-22T10:18Z	poll	full journeys 39751426611 still pending (queued 08:55Z, no macOS runner); TK-u critic panel waits.
+2026-10-22T10:40Z	poll	macOS journeys backlog: full 39751426611 pending since 08:55Z; flare 39754262667 at 4f2b89eb (contains TK-u bd793a5db) queued. TK-u critics run on whichever completes first.
