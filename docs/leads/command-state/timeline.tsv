@@ -77,3 +77,4 @@ utc	stage	event	ref	note
 2026-10-22T10:30:20Z	CS-5	merged	4225	CS-4/CS-5/CS-14 merged; CS-6 rebuilt on dev, gating next
 2026-10-22T10:38:16Z	CS-6	ready	4234	rebuilt on dev, gate PASS, un-drafted
 2026-10-22T10:59:06Z	CS-6	building	4234	lane dispatched the macOS build
+2026-10-22T11:43:11Z	CS-6	building	4234	macOS build 39765003639 still queued
