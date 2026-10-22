@@ -64,11 +64,16 @@ struct LibraryWindow: View {
         SuiteWindow(
             title: "Library",
             sections: sidebarSections(filters),
-            selection: model.selectedCollectionID,
-            // A FOLDERS row's click runs view.show-folder once it can (FO-6); until then it selects nothing.
-            onSelect: { if !LibraryFolders.isRowID($0) { model.selectCollection($0) } },
+            selection: model.sidebarSelection,
+            // A FOLDERS row's click shows its folder (view.show-folder); any other row's selects its collection.
+            onSelect: { model.selectSidebarRow($0) },
             onRename: filters.renameCollection,
-            contextActions: { LibraryFolders.isRowID($0) ? LibraryFoldersSection.actions(help: model.showFolderHelp) : [] }
+            contextActions: { id in
+                guard LibraryFolders.isRowID(id) else { return [] }
+                return LibraryFoldersSection.actions(
+                    help: model.showFolderHelp, show: { model.selectSidebarRow(id) },
+                    toggleSubfolders: { model.toggleFolderSubfolders(row: id) })
+            }
         ) {
             VStack(spacing: 0) {
                 LibraryFilterBar(
