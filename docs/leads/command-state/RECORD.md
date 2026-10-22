@@ -2,9 +2,9 @@
 
 Issue: #3771 · Packet: docs/blueprints/suite/features/command-state.md
 Run: act-1a16391fd34-thw9 · Resumed: 2026-10-22T12:30Z (previous run act-1a1601c3538-r0c9, started 2026-10-21T10:50Z)
-Stage: All app slices merged except CS-6 #4234 (macOS build queued); CS-z #4382 draft with CS-16 folded in
-Base: d138c7b021dadf6fae7000e8795d687f139f91df
-Next: #4234 merges, then #4382 ready with feature-done
+Stage: All app slices merged (CS-6 #4234 fd76073f); CS-z #4382 ready with feature-done (Head 188e7895)
+Base: dc87ad2b0bcebf2b6bef749328a03ba06687275f
+Next: #4382 lands; Belt-Contact-Sheet after the CI its merge triggers
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -35,7 +35,8 @@ Next: #4234 merges, then #4382 ready with feature-done
 | CS-8 | CS-halo | 3 | Halo wiring: transport, render Choose…, New Composition Create | packet CS-8 | CommandPathTests | #4210 | merged cc0a7944 |
 | CS-12 | CS-flare | 3 | Flare wiring; baseline 10 to 3 | packet CS-12 | CommandPathTests, CommandPathLimitTests | #4214 | merged b4d0a077 |
 | CS-5 | CS-library-2 | 3 | Library catalog part 2 (+20 ids, CLI list regenerated) | packet CS-5 | Mutate 9/9 LibraryModel.LibraryCommandCatalog | #4225 | merged ed8e67f1 |
-| CS-6 | CS-library-2 | 4 | Library wiring part 2; baseline max 23 to 13 (alert Save waits #4208, loupe Grid waits #4227) | packet CS-6 | CommandPathTests, CommandPathLimitTests | #4234 | ready; macOS build queued, Head b5c1ba85 |
+| CS-6 | CS-library-2 | 4 | Library wiring part 2; baseline max 23 to 13 (alert Save waits #4208, loupe Grid waits #4227) | packet CS-6 | CommandPathTests, CommandPathLimitTests | #4234 | merged fd76073f |
+| CS-15 | CS-z | 5 | RJ-X61 job + journey on; CS-16 (wave.json built) folded in | packet CS-15, CS-16 | Mutate 3/3 LibraryModel.LibraryHeadless+Shown | #4382 | ready, feature-done, Head 188e7895 |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -49,6 +50,7 @@ Next: #4234 merges, then #4382 ready with feature-done
 - 21:20Z: dev Linux red on CommandPathTests launcher (RP-2 deleted LauncherCommands+Onboarding, CS-2 baseline still listed it); fix #4201, carried by #4103 and #4205.
 - Resumed 20:17Z under run act-1a1601c3538-r0c9 after the prior session ended; dev-red #3856 cleared (CS-2 and RP-1 merged).
 - Base is origin/dev, not main: this packet exists only on dev; PRs go to base dev.
+- Status mirrored to lead/suite-<feature> (docs/leads/suite-<feature>/) from 2026-10-22T15:26:41Z, where Belt reads it; lead/<feature> keeps the same files.
 
 ## Open
 - none

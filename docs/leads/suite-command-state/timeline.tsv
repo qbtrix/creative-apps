@@ -1,0 +1,82 @@
+utc	stage	event	ref	note
+2026-10-21T10:48Z	0	stage-start	-	base 11919406886e89e9e02adea13b113b66e852334d
+2026-10-21T10:48Z	0	stage-end	-	lead branch created
+2026-10-21T10:52Z	1	stage-end	-	packet and code read
+2026-10-21T10:52Z	2	stage-end	-	wave plan: wave 1 tasks in the Tasks table
+2026-10-21T10:52Z	3	wave-start	w1	builders launched
+2026-10-21T11:11Z	3	poll	w1	builders running
+2026-10-21T11:14Z	3	wave-end	w1	#4021 CS-1, #4023 CS-2 open; CS-1b follow-up planned
+2026-10-21T11:29Z	3	poll	w1	builders running
+2026-10-21T11:39Z	3	fix	w1	#4023 fixer: drop PhotoPlace baseline line (dev-red #3856)
+2026-10-21T11:47Z	3	poll	w1	builders running
+2026-10-21T11:49Z	2026-10-21T11:49:19Z	3 wave1	fixer	#4023	CS-2 head bc3bac0, gate held; footer via MCP
+2026-10-21T11:52Z	2026-10-21T11:52:10Z	3	wave2-start	wf_b0193cfc-9a0	CS-1b on CS-1; CS-3, CS-9, CS-13 on CS-2; markers being restored on #4023
+2026-10-21T12:06Z	3	poll	w1	builders running
+2026-10-21T12:26Z	3	poll	w1	builders running
+2026-10-21T12:45Z	3	poll	w1	builders running
+2026-10-21T13:12Z	3	poll	w1	builders running
+2026-10-21T13:32Z	3	poll	w1	builders running
+2026-10-21T13:51Z	3	poll	w1	builders running
+2026-10-21T14:09Z	3	poll	w1	builders running
+2026-10-21T14:27Z	3	poll	w1	builders running
+2026-10-21T14:45Z	3	poll	w1	builders running
+2026-10-21T14:53Z	2026-10-21T14:53:16Z	wave2	resume	-	session limit stopped every wave-2 builder and the marker agent at about 14:30Z; resuming from the journals
+2026-10-21T14:55Z	2026-10-21T14:55:54Z	3	gate-restored	#4023	dev-red #3856 cleared; origin/dev merged, scripts/ci --changed PASS, Fast-Check/Head restored at 6cd0756
+2026-10-21T15:12Z	2026-10-21T15:12:50Z	3	fix	#4021	macOS build fix: suiteControl(entry:identifies:) modifier moved to SuiteEnvironment.swift so ControlInventory.swift compiles alone in SuiteJourneyTests; gate PASS, head 244389b
+2026-10-21T15:34Z	2026-10-21T15:34:18Z	stage3	fix	#4023	dev merged, halo baseline max 8, gate pass, head 156e492
+2026-10-21T15:39Z	2026-10-21T15:39:47Z	stage3	poll	lane	macOS builds pending on 4021/4034/4048; 4023 merged dev, awaiting lane
+2026-10-21T16:00Z	2026-10-21T16:00:57Z	stage3	poll	lane	#4048 macOS build green; #4034 building; #4021 #4023 queued; needs-rebase dropped on #4023
+2026-10-21T16:23Z	2026-10-21T16:23Z	wave	lane	#4021 #4023	CS-1 CS-2 in lane; wave 2 after shell-media
+2026-10-21T17:50Z	2026-10-21T17:50Z	wave2	prs	#4130 #4134 #4140 #4144	CS-1b, CS-3 6/6, CS-9 4/4, CS-13 6/6 drafts; photo.txt max 9->10 for dev's CanvasSizeSheet
+2026-10-21T18:06Z	2026-10-21T18:06Z	lane	rebase-fixed	#4023	dev merged, photo.txt max 10, head 90a7a388
+2026-10-21T20:21Z	2026-10-21T20:21Z	heartbeat	resume	-	run act-1a1601c3538-r0c9 resumed; CS-1 #4021 and CS-2 #4023 merged
+2026-10-21T20:21Z	2026-10-21T20:21Z	wave2	stage-start	#4130 #4134 #4140 #4144	bringing up drafts on dev 0599560
+2026-10-21T20:57Z	2026-10-21T20:57Z	heartbeat	lane	#4130 #4134 #4140 #4144	four CS PRs in lane; builders running
+2026-10-21T21:18Z	2026-10-21T21:18Z	heartbeat	lane	-	macOS build queue deep; dev Linux red only on CommandPathTests launcher, fix #4201 in lane
+2026-10-21T21:20Z	2026-10-21T21:20Z	build	pr	#4196 #4205	CS-7 Halo (8/8) and CS-11 Flare (7/7) opened, gate pass
+2026-10-21T21:40Z	2026-10-21T21:40Z	check	lane-wait	#3856	lane batches red on dev launcher.txt:21 (run 39676795156); #4201 fixes it, flagged on dev-red; our PRs built, queued
+2026-10-21T21:41Z	2026-10-21T21:41Z	build	drafts	#4202 #4206 #4213	CS-14/10/4 drafts opened stacked, gate pass
+2026-10-21T22:02Z	2026-10-21T22:02Z	check	lane-wait	#4201	nothing of ours merged; lane still bisecting 20:57 batch (red on dev launcher.txt:21); dev merging other PRs
+2026-10-21T22:05Z	2026-10-21T22:05Z	build	drafts	#4210 #4214 #4225	CS-8/12/5 drafts, gate pass; needs-ui #4208 filed; CS-6 assigned
+2026-10-21T22:17Z	2026-10-21T22:17Z	build	draft	#4234	CS-6 draft, gate pass, library max 13; needs-ui #4227 filed
+2026-10-21T22:24Z	2026-10-21T22:24Z	check	heartbeat	#4201	lane still red on launcher.txt:21 until #4201; no merges; drafts wait on parents; bodies clean
+2026-10-21T22:46Z	2026-10-21T22:46Z	check	heartbeat	#4201	no merges; batch lane/batch-20261021221623-4 red again; #4201 eligible (clean, marker on head) and waiting on the lane
+2026-10-21T23:16Z	2026-10-21T23:16Z	fix	needs-rebase	#4144	merged origin/dev (conflict with #4189 gradient commands in DesignCommandCatalog + golden), gate pass, Head 45124d60
+2026-10-21T23:16Z	2026-10-21T23:16Z	check	heartbeat	#4201	no merges yet; batch lane/batch-20261021221623 bisecting
+2026-10-22T00:07Z	2026-10-22T00:07Z	CS-flare	needs-rebase	#4205	resolved conflicts with gradient fill FG-5; gate pass; Head moved
+2026-10-22T00:29Z	2026-10-22T00:29Z	check	heartbeat	-	no merges since 00:07Z; all ready PRs clean on the lane (#4258 macOS build dispatched); no open findings for this feature
+2026-10-22T00:53:09Z	2026-10-22T00:53:09Z	check	macos-build-red	dev#4215	our heads predate cb79b076f (RenderBudgetPhotoPlaceTests fix); merging dev into each, gate, push
+2026-10-22T01:15:58Z	2026-10-22T01:15:58Z	check	heartbeat	-	#4205 macOS build 39698783739 green; CS PRs re-merge dev after #4258
+2026-10-22T01:38:16Z	2026-10-22T01:38:16Z	check	heartbeat	-	#4205 Linux check red on dev's ratchet (Media.swift), not CS-11; re-merge dev after #4258
+2026-10-22T02:00:24Z	2026-10-22T02:00:24Z	check	heartbeat	#4258	macOS build 39705921002 still queued (17 runs in the macOS queue); all PRs wait on #4258
+2026-10-22T02:22:41Z	2026-10-22T02:22:41Z	check	redev	-	dev ratchet green via SC-14; #4205 #4130 #4134 #4140 #4144 #4196 merging dev + gate running
+2026-10-22T02:44:57Z	2026-10-22T02:44:57Z	wave	redev	#4205	CS-11 merged dev, gate PASS, head acb8a29b, Head line moved; CS-1b CS-3 CS-9 CS-13 CS-7 still in the redev queue
+2026-10-22T02:58:01Z	redev	dev-merge	#4134,#4205,#4130	dev merged again, gate CI: PASS, Head lines moved
+2026-10-22T03:07:32Z	check-in	lane	#4140,#4205	macOS builds queued on lane; nothing merged since 02:55Z; pre-gating next stacked slice
+2026-10-22T03:28:50Z	check-in	lane	#4144,#4196,#4205	all 7 redev PRs pushed + Head moved; SM-3 pre-gated PASS; lane macOS builds queued/in progress
+2026-10-22T03:52:18Z	lane	heartbeat	-	CS-11 #4205 macOS build queued; children drafts wait on parents
+2026-10-22T04:08:01Z	lane	heartbeat	-	CS-11 #4205 / RP-3 #4103 macOS builds queued; children stay draft until parents merge
+2026-10-22T04:36:18Z	lane	heartbeat	-	CS-11 #4205 / RP-3 #4103 clean, awaiting lane sweep; children stay draft
+2026-10-22T04:57:54Z	lane	heartbeat	#4119,#4205,#4103	no merges: SM-3/CS-11/RP-3 clean, waiting on queued macOS builds; scoped suite run 39721019643 still queued
+2026-10-22T05:21:40Z	lane	heartbeat	#4205 #4214	CS-11 #4205 merged 05:05Z; CS-12 #4214 merged dev, gating
+2026-10-22T05:27:28Z	CS-flare	ready	#4214	CS-12 merged dev at 244d668, CI: PASS, marked ready for the lane
+2026-10-22T05:43:29Z	lane	heartbeat	#4214	CS-12 macOS build 39728577096 queued
+2026-10-22T06:08:50Z	lane	heartbeat	#4214	CS-12 macOS build 39728577096 green, awaiting lane sweep
+2026-10-22T06:32:51Z	lane	heartbeat	4214,4206,4213,4210,4225	CS-12 merged; CS-10 CS-4 CS-8 CS-5 merged with dev, gating one at a time
+2026-10-22T06:55:33Z	lane	heartbeat	4206,4213,4210,4225	CS-10 CS-4 CS-8 ready in lane; CS-5 gating
+2026-10-22T07:24:05Z	lane	heartbeat	#4144 #4206 #4213 #4210 #4225	all ready, waiting on lane macOS builds
+2026-10-22T07:27:25Z	lane	heartbeat	4225	CS-4/5/8/10/13 in lane awaiting macOS builds
+2026-10-22T07:46:59Z	lane	heartbeat	4206	CS-10 merged; CS-13 macOS build green, awaiting sweep; CS-4/5/8 builds queued
+2026-10-22T08:09:48Z	lane	heartbeat	4144	CS-13 merged; CS-14 rebuilt on dev, gate running; CS-4/5/8 builds queued
+2026-10-22T08:14:58Z	lane	ready	4202	CS-14 gate CI: PASS on dd2e11dc8 (dev after CS-13), out of draft
+2026-10-22T08:37:38Z	lane	heartbeat	4210	CS-8 macOS build green, awaiting sweep; CS-4/5/14 builds queued
+2026-10-22T09:03:32Z	lane	heartbeat	#4213,#4225,#4202	CS-8 merged; CS-4, CS-5, CS-14 wait on macOS builds; CS-6 draft
+2026-10-22T09:19:44Z	CS-15	pr-open	4382	draft, waits on CS-4/5/6/14
+2026-10-22T09:42:14Z	CS-4	merged	4213	
+2026-10-22T10:05:47Z	lane	heartbeat	-	lane sweep in flight
+2026-10-22T10:30:20Z	CS-5	merged	4225	CS-4/CS-5/CS-14 merged; CS-6 rebuilt on dev, gating next
+2026-10-22T10:38:16Z	CS-6	ready	4234	rebuilt on dev, gate PASS, un-drafted
+2026-10-22T10:59:06Z	CS-6	building	4234	lane dispatched the macOS build
+2026-10-22T11:43:11Z	CS-6	building	4234	macOS build 39765003639 still queued
+2026-10-22T12:31:42Z	lead	resumed	-	run act-1a16391fd34-thw9; all wiring merged but CS-6; CS-16 folded into #4382
+2026-10-22T15:26:52Z	CS-15	ready	4382	CS-6 merged fd76073f; #4382 un-drafted
