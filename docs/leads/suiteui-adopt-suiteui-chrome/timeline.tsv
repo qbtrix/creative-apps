@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-22T01:01Z	3	build	#4002	merged dev for #4215 fix; head 0c0e686b
 2026-10-22T01:24Z	3	build	#4002	macOS swift build green; supervisor: leave AC-export-sheet unstarted if SC-f not merged
 2026-10-22T01:46Z	3	build	#4002	macOS build success; waiting on lane merge
+2026-10-22T02:14Z	3	build	#4002	waiting for lane sweep; SC-14 merged
