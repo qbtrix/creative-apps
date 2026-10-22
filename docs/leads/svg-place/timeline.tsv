@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-21T01:17:51Z	lane-batch	#3768 PF-a in lane batch-20261021005140; batch Linux red only on Library timing test planWithinBudget (not ours), lane bisecting
 2026-10-21T01:48:14Z	lane-bisect	#3768 PF-a waiting in lane bisect of batch-20261021005140 (probe -4 running; red was Library timing test, not ours)
 2026-10-21T02:18:29Z	lane-bisect	#3768 PF-a waiting in lane bisect of batch-20261021005140 (probe -4 timing retry 3 of 3 running)
+2026-10-22T00:00Z	resume	run act-1a1615504d4-d9p4; PF-a done (run 39540755137); wave 2: PF-u, PF-5
