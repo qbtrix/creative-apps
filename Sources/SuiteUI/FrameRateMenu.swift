@@ -4,7 +4,10 @@
 // SuiteKernel's FrameRate.common, slowest first; each item is titled as the
 // time.rates commands title the rate ("29.97 fps", FrameRate.description),
 // and an inline Picker checks the bound rate. It draws InspectorPickerRow's
-// value menu (InspectorValueMenu, #4362): the rate and a chevron, plain. It takes the rate and an
+// value menu (InspectorValueMenu, #4362): the rate and a chevron, plain. In a
+// toolbar row (`placement: .toolbar`, #4601) the same Menu is a raised chip
+// in ChipRow's SuiteChipStyle at SuiteSize.compactControl, so it matches the
+// chips beside it in height and fill. It takes the rate and an
 // `onSelect` closure, never a binding: apps can't bind to their Model. What
 // the menu lists is plain Swift, `items(checked:)` (FrameRateMenuTests).
 import SuiteKernel
@@ -20,13 +23,23 @@ public struct FrameRateMenuItem: Identifiable, Hashable, Sendable {
 
 /// A Menu of the common frame rates, its title the bound rate's, the bound rate checked.
 public struct FrameRateMenu: View {
+    /// Where the menu sits: an inspector row draws the plain value menu, a toolbar row a raised chip.
+    public enum Placement: Sendable { case row, toolbar }
+
     private let rate: FrameRate
+    let placement: Placement
     private let onSelect: @MainActor (FrameRate) -> Void
 
-    public init(rate: FrameRate, onSelect: @escaping @MainActor (FrameRate) -> Void) {
+    public init(
+        rate: FrameRate, placement: Placement = .row, onSelect: @escaping @MainActor (FrameRate) -> Void
+    ) {
         self.rate = rate
+        self.placement = placement
         self.onSelect = onSelect
     }
+
+    /// The control size either placement draws at.
+    let controlSize = SuiteSize.compactControl
 
     /// The menu's items in order, `rate`'s checked; a rate off the list checks none.
     nonisolated public static func items(checked rate: FrameRate) -> [FrameRateMenuItem] {
@@ -42,8 +55,35 @@ public struct FrameRateMenu: View {
     }
 
     public var body: some View {
-        menu
-            .controlSize(SuiteSize.compactControl)
-            .help("Frame Rate")
+        Group {
+            switch placement {
+            case .row: menu
+            case .toolbar: chip
+            }
+        }
+        .controlSize(controlSize)
+        .help("Frame Rate")
+    }
+
+    /// The toolbar chip: the value menu's Picker behind a ChipRow chip titled with the rate and a chevron.
+    private var chip: some View {
+        let value = menu
+        return Menu {
+            Picker(value.label, selection: value.pick) {
+                ForEach(value.options) { Text($0.title).tag($0.id) }
+            }
+            .pickerStyle(.inline)
+            .labelsHidden()
+        } label: {
+            HStack(spacing: SuiteSpacing.xs) {
+                Text(verbatim: value.choiceTitle)
+                Image(systemName: "chevron.up.chevron.down").imageScale(.small)
+            }
+        }
+        .menuStyle(.button)
+        .buttonStyle(SuiteChipStyle(kind: .chip, isOn: false))
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .accessibilityLabel(value.label)
     }
 }

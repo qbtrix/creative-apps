@@ -54,6 +54,14 @@ import Testing
         #expect(throws: CatalogError.self) { try catalog.run("layer.delete", params: .object([:]), on: &none) }
     }
 
+    @Test func placeReadsPlaceImage() {
+        let spec = HaloMenuState.spec("place.image")
+        #expect(spec.id == "place.image" && spec.title == "Place Image")
+        #expect(spec.availability(HaloMenuState(project: nil)).why == "Open a Halo window first.")
+        #expect(spec.availability(HaloMenuState(project: HaloProject(services: .fake))).why == HaloProject.noPlaceComposition)
+        #expect(spec.availability(HaloMenuState(project: HaloCommandCatalogTests.ballSelected())).why == nil)
+    }
+
     @Test func unknownIDIsNeverAvailable() {
         let spec = HaloMenuState.spec("halo.nothing")
         #expect(spec.availability(HaloMenuState(project: HaloCommandCatalogTests.ballSelected())).why != nil)

@@ -111,5 +111,6 @@ suiteui SuiteUITests.FrameProbeTests/summaryWithinBudget
 suiteui SuiteUITests.ListBudgetTests
 suiteui SuiteUITests.TimelineBudgetTests
 suiteui AppSnapshotTests.BodyCountSuites/RenderBudgetEyedropperTests/loupeTrackTiming
+suiteui AppSnapshotTests.BodyCountSuites/RenderBudgetPenPathsTests/timing
 suiteui AppSnapshotTests.GoldenImageTests/compareWithinBudget
 suiteui SuiteUITests.PlaceDropTests/largeFileOffMain

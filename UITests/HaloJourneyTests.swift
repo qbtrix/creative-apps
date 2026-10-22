@@ -23,7 +23,8 @@
 // sees it, or the viewer's frame when a panel is off the screen) with its
 // 16:9 aspect within 0.5%, L6 that it is
 // at least 160 pt wide at the minimum size; it also checks every halo.*
-// control lies inside the window and the viewer is narrower at 880 than at
+// control lies inside the window, History (halo.history.show) shows, and
+// the viewer is narrower at 880 than at
 // 1024 (the content column follows the window). Every other journey launches
 // pinned at the runner's launch size (`launch`), so a sized launch never
 // carries over. H-J3 (testScrubTheTimeline, viewer-playback VP-11) drags the
@@ -256,6 +257,8 @@ final class HaloJourneyTests: XCTestCase {
             // clamps: name the shot for the width it shows, not the one asked for.
             let reached = window.frame.width >= size.width - 2
             halo.shot(reached ? "layout-\(width)" : "layout-\(width)-clamped")
+            // History keeps its button at every width, the 880 minimum included (#4449).
+            XCTAssert(halo.element("halo.history.show").exists, "no History button (halo.history.show) at \(width)")
             let outside = haloControls(in: halo).compactMap { control -> String? in
                 guard let shown = visibleFrame(of: control, in: window) else { return nil }
                 return window.frame.insetBy(dx: -1, dy: -1).contains(shown) ? nil : "\(control.identifier) \(shown)"

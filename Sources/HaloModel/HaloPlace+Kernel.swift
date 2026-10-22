@@ -1,6 +1,8 @@
 // HaloPlace+Kernel.swift: Halo's project as the kernel's PlacedImageTarget (placed-images PH-1 stubs,
 // PH-6 bodies): a solid keeps a PNG, JPEG or SVG picture in its own box; other kinds take none, so
-// `placeFillBox` is nil there. Until PH-6 the mutating requirements throw not-built. Linux-safe.
+// `placeFillBox` is nil there. A place adds a solid above the selection; a fill, replace, reset or focus
+// changes the selected solid. Each is one step through `edit`, and a focus drag's token is its coalesce key.
+// Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -10,15 +12,28 @@ import CoreRaster
 import SuiteKernel
 
 extension HaloProject: PlacedImageTarget {
-    /// Why nothing can be placed: no composition, or (until PH-6) not built.
+    /// Why nothing can be placed: no composition; why the selected layer can't hold a picture.
     static let noPlaceComposition = "Make or open a composition to place into.",
-        placeNotBuiltHelp = "Placing images in Halo isn't built yet.",
-        cantReadImage = "Can't read this image."
-    /// What the mutating requirements throw until PH-6 lands their bodies.
-    static let placeNotBuilt = CatalogError.notBuilt(id: "place.image", feature: "halo placed-images PH-6")
+        cantReadImage = "Can't read this image.",
+        noPlaceLayer = "Select a solid layer first.",
+        textTakesNoPicture = "A text layer can't hold a picture.",
+        nullTakesNoPicture = "A null layer has nothing to fill.",
+        shapeTakesNoPicture = "Only a solid layer can hold a picture."
 
-    /// Why nothing can be placed now; nil once PH-6 lands the bodies.
-    public var placeHelp: String? { selectedComposition == nil ? Self.noPlaceComposition : Self.placeNotBuiltHelp }
+    /// Why nothing can be placed now: no composition; nil when one is selected.
+    public var placeHelp: String? { selectedComposition == nil ? Self.noPlaceComposition : nil }
+
+    /// Why the selected layer can't take a picture: no composition, no layer, or not a solid; nil on a solid.
+    var placeFillHelp: String? {
+        if let placeHelp { return placeHelp }
+        switch selectedLayer?.kind {
+        case .solid: return nil
+        case .text: return Self.textTakesNoPicture
+        case .null: return Self.nullTakesNoPicture
+        case .shape: return Self.shapeTakesNoPicture
+        case nil: return Self.noPlaceLayer
+        }
+    }
 
     /// What a new picture fits inside: the composition's frame, or an empty rect with none.
     public var placeCanvas: Rect {
@@ -49,13 +64,53 @@ extension HaloProject: PlacedImageTarget {
         return Size(width: Double(size.0), height: Double(size.1))
     }
 
-    /// PH-6: adds a solid showing `asset` in `image.box` above the selection.
+    /// Adds a solid showing `asset` in `image.box` on top of the selected layer (else on top of all), spanning the
+    /// composition, named after the file without its extension, and selects it: one step named `name`. The
+    /// picture draws in place of the solid's colour, so the solid is clear around it.
     public mutating func insertPlaced(_ asset: PlacedAsset, _ image: PlacedImage, name: String) throws -> String {
-        throw Self.placeNotBuilt
+        if let placeHelp { throw CatalogError.unavailable(id: "place.image", why: placeHelp) }
+        var id = ""
+        let added = edit(name, control: "halo.place") { doc in
+            guard let c = doc.compositions.firstIndex(where: { $0.id == doc.selectedCompositionID }) else {
+                throw HaloEditError.noComposition
+            }
+            let comp = doc.compositions[c]
+            var layer = HaloLayer(
+                id: doc.takeLayerID(in: comp.id), name: Self.placedLayerName(asset.name), kind: .solid, inFrame: 0,
+                outFrame: comp.durationFrames, color: HaloLayerKind.solid.defaultColor, rect: image.box.layerRect)
+            layer.placedAsset = asset
+            layer.placedFocus = image.focus
+            doc.compositions[c].layers.insert(layer, at: comp.layers.firstIndex { $0.id == doc.selectedLayerID } ?? 0)
+            doc.selectedLayerID = layer.id
+            id = layer.id
+        }
+        if !added { throw CatalogError.failed(id: "place.image", message: refusal?.message ?? Self.noPlaceComposition) }
+        return id
     }
 
-    /// PH-6: sets the selected solid's picture, box and focus as one step.
+    /// Puts `image` (and `asset`, when given) into the selected solid: its box, picture and focus, one step named
+    /// `name`; steps under one `drag` token fold into one. A text, null or shape layer refuses, changing nothing.
     public mutating func setPlaced(_ image: PlacedImage, asset: PlacedAsset?, name: String, drag: String?) throws {
-        throw Self.placeNotBuilt
+        if let help = placeFillHelp { throw CatalogError.unavailable(id: "place", why: help) }
+        let box = placeFillBox
+        let key = drag.flatMap { drag in selectedLayerID.map { "\($0).place.\(drag)" } }
+        let set = edit(name, control: "halo.place", coalesceKey: key) { doc in
+            let (c, l) = try doc.selectedLayerIndices()
+            if image.box != box { doc.compositions[c].layers[l].rect = image.box.layerRect }
+            if let asset { doc.compositions[c].layers[l].placedAsset = asset }
+            doc.compositions[c].layers[l].placedFocus = image.focus
+        }
+        if !set { throw CatalogError.failed(id: "place", message: refusal?.message ?? Self.noPlaceLayer) }
     }
+
+    /// "logo.png" places as "logo"; a name with nothing before its extension places as "Placed Image".
+    static func placedLayerName(_ file: String) -> String {
+        let stem = file.lastIndex(of: ".").map { String(file[..<$0]) } ?? file
+        return stem.isEmpty ? "Placed Image" : stem
+    }
+}
+
+extension Rect {
+    /// This box as a solid's rect in composition pixels.
+    var layerRect: HaloLayerRect { HaloLayerRect(x: minX, y: minY, width: width, height: height) }
 }

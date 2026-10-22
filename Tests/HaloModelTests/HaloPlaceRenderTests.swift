@@ -1,4 +1,4 @@
-// HaloPlaceRenderTests.swift: placed-images PH-2, the renderer's checks, off until PH-5 draws a solid's
+// HaloPlaceRenderTests.swift: placed-images PH-2, the renderer's checks, on since PH-5 draws a solid's
 // picture: RJ-H36's four pixels, a 2× scale doubles the footprint, nothing outside the outline at a 30° turn,
 // an SVG ring keeps its hole, one decode per asset, and a full-frame 1080p picture's cost. Linux and macOS.
 #if canImport(FoundationEssentials)
@@ -57,19 +57,19 @@ import Testing
         .translation(x: 200, y: 200) * m * .translation(x: -200, y: -200)
     }
 
-    @Test(.disabled("waits on PH-5")) func logoPixels() throws {
+    @Test func logoPixels() throws {
         let pixels = try Self.render([Self.black, Self.placed()])
         #expect(try Self.near(pixels.pixel(x: 110, y: 200), [1, 0, 0]) && Self.near(pixels.pixel(x: 290, y: 200), [0, 0, 1]))
         #expect(try Self.near(pixels.pixel(x: 98, y: 200), [0, 0, 0]) && Self.near(pixels.pixel(x: 200, y: 148), [0, 0, 0]))
     }
 
-    @Test(.disabled("waits on PH-5")) func scaleKeyScalesPicture() throws {
+    @Test func scaleKeyScalesPicture() throws {
         let pixels = try Self.render([Self.black, Self.placed(matrix: Self.about(.scale(x: 2, y: 2)))])
         #expect(try Self.near(pixels.pixel(x: 5, y: 200), [1, 0, 0]) && Self.near(pixels.pixel(x: 395, y: 200), [0, 0, 1]))
         #expect(try Self.near(pixels.pixel(x: 150, y: 105), [1, 0, 0]) && Self.near(pixels.pixel(x: 200, y: 95), [0, 0, 0]))
     }
 
-    @Test(.disabled("waits on PH-5")) func staysInsideOutline() throws {
+    @Test func staysInsideOutline() throws {
         // The picture's box is twice the solid's, so only the outline can stop it.
         var item = Self.placed(matrix: Self.about(.rotation(degrees: 30)))
         item.placedImage = PlacedImage(assetID: "logo", box: Rect(minX: 0, minY: 100, maxX: 400, maxY: 300))
@@ -87,14 +87,14 @@ import Testing
         #expect(inside > 1000)
     }
 
-    @Test(.disabled("waits on PH-5")) func svgRingKeepsHole() throws {
+    @Test func svgRingKeepsHole() throws {
         let ring = PlacedAsset(id: "ring", name: "ring.svg", format: .svg, natural: Size(width: 64, height: 64), data: Data(Self.ring.utf8))
         let pixels = try Self.render([Self.placed(ring, bounds: HaloLayerRect(x: 0, y: 0, width: 64, height: 64))], width: 64, height: 64)
         #expect(Self.near(try pixels.pixel(x: 8, y: 8), [0, 0, 1]))
         #expect(try pixels.pixel(x: 32, y: 32).a <= Self.tolerance)
     }
 
-    @Test(.disabled("waits on PH-5")) func decodesOncePerAsset() throws {
+    @Test func decodesOncePerAsset() throws {
         // Core decodes PNG on Linux but not JPEG, so two solids share the PNG logo.
         var drawing = HaloPlacedDrawing()
         for item in [Self.placed(id: "a"), Self.placed(id: "b", bounds: HaloLayerRect(x: 0, y: 0, width: 200, height: 100))] {
@@ -104,7 +104,7 @@ import Testing
         #expect(drawing.decodes == 1)
     }
 
-    @Test(.disabled("waits on PH-5")) func fullFrameCost() throws {
+    @Test func fullFrameCost() throws {
         let photo = try PNGCodec().encodePNG(try PixelBuffer(width: 1920, height: 1080, fill: RGBA(r: 0.2, g: 0.4, b: 0.6, a: 1)), bitsPerChannel: 8)
         let asset = PlacedAsset(id: "photo", name: "photo.png", format: .png, natural: Size(width: 1920, height: 1080), data: photo)
         let item = Self.placed(asset, bounds: HaloLayerRect(x: 0, y: 0, width: 1920, height: 1080))

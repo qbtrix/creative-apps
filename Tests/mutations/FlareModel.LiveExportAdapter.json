@@ -2,8 +2,8 @@
   {
     "label": "the cancellation check between PNG frames is dropped",
     "file": "Sources/FlareModel/Live/LiveExportAdapter.swift",
-    "find": "                try Task.checkCancellation()\n                let list = stage.drawList",
-    "replace": "                let list = stage.drawList",
+    "find": "                try Task.checkCancellation()\n                let list = stage.drawList(clean, sceneID: scene.id",
+    "replace": "                let list = stage.drawList(clean, sceneID: scene.id",
     "tests": "LiveExportTests"
   },
   {
@@ -26,5 +26,26 @@
     "find": "                files.append(ExportFile(name: frame.fileName, data: try rasterizer.png(",
     "replace": "                files.append(ExportFile(name: \"frame_\\(i).png\", data: try rasterizer.png(",
     "tests": "LiveExportTests"
+  },
+  {
+    "label": ".cancelDeletes: a failed or cancelled write never forwards cancel",
+    "file": "Sources/FlareModel/Live/LiveExportAdapter.swift",
+    "find": "            sink.cancel()\n",
+    "replace": "",
+    "tests": "FlareVideoWriteTests"
+  },
+  {
+    "label": ".finishLast: finish runs before the frames are appended",
+    "file": "Sources/FlareModel/Live/LiveExportAdapter.swift",
+    "find": "        do {\n            for frame in plan.frames {\n",
+    "replace": "        do {\n            try await sink.finish()\n            for frame in plan.frames {\n",
+    "tests": "FlareVideoWriteTests"
+  },
+  {
+    "label": "video frames are drawn from the scene without the plan applied",
+    "file": "Sources/FlareModel/Live/LiveExportAdapter.swift",
+    "find": "        clean.scenes[at] = plan.scene(clean.scenes[at])\n",
+    "replace": "",
+    "tests": "FlareVideoWriteTests"
   }
 ]
