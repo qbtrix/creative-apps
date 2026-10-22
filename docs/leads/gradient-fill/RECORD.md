@@ -4,7 +4,7 @@ Issue: #3419 · Packet: docs/blueprints/flare/features/gradient-fill.md
 Run: act-1a160bffba1-bvv3 (line lead: gradient-fill #3419, export-pack #3481, file-flow #3482; resumed from act-1a1574f6742-pe5i) · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-20T03:17Z · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: 3 wave 4 (FG-z)
 Base: 8c55f0bf9 (origin/dev)
-Next: lane merges #4257; Slice-Done FG-m/FG-z on a green run containing them; Contact-Sheet
+Next: next heartbeat
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -73,3 +73,4 @@ Next: lane merges #4257; Slice-Done FG-m/FG-z on a green run containing them; Co
 - 2026-10-22T00:36Z: full run 39695935370 cancelled; Linux checks red on shell-media FormatListRatchet (not ours); #4257 in lane
 - 2026-10-22T01:00Z: heartbeat: #4257 awaiting lane macOS build; scoped flare 39690220595 in progress
 - 2026-10-22T01:14Z: #4257 (FG-z) lane macOS build 39699101753 success; awaiting lane merge. Scoped flare run 39690220595 (e0fb9919) red on macOS compile of AppSnapshotTests, predates FG-m de0f324d, no slice credit; full run 39700185524 queued
+- 2026-10-22T01:24Z: heartbeat 01:24Z: #4259 lane rebuild 39703409910 still queued; #4257 not merged yet (build green); #4035 open; full run 39700185524 Linux red on FormatListRatchetTests.realTreePasses (SuiteModel Media.swift, not ours), no slice credit
