@@ -4,7 +4,7 @@ Issue: #3446 · Packet: docs/blueprints/suiteui/features/transform-tools.md
 Run: act-1a163b2abfe-f182 (relaunch; first run act-1a1579fdd22-6z1j) · Started: 2026-10-22
 Stage: 3 wave 5 (TT-z) shipped; polling lane
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: full CI holding 434b1d1d green, then TT-z comments on #3446; #4634 and #4635 land
+Next: full CI holding 434b1d1d green, then TT-z comments on #3446; #4635 lands
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -35,6 +35,7 @@ Next: full CI holding 434b1d1d green, then TT-z comments on #3446; #4634 and #46
 |---|---|---|---|---|---|
 
 ## Decisions
+- 22:36Z poll: #4634 merged; #4626 and #4629 are closed. #4635 (#4628) still waits on its macOS build 39853638631, queued since 21:00Z. Full CI 39861703512 (a7469d78, holds #4429) is still pending; macOS runners are backed up. Open findings: #4628.
 - 22:09Z poll: full CI 39858933900 was cancelled by a newer dev run. Full CI 39861703512 at a7469d78 (pending) holds #4429. Fix round 1: #4632 merged (15db8f48) and #4633 merged; their findings #4625 and #4627 are closed. #4634's build is green and it waits for the lane; #4635's build is still queued. Open findings: #4626, #4628, #4629.
 - 21:41Z #4429 merged at 21:25Z as 434b1d1d (TT-8, TT-9). Full dev CI run 39858933900 at 066cd28d holds it and is pending; TT-z is done when it's green. Fix round: #4632 and #4633 macOS builds passed, #4634 and #4635 builds still queued.
 - 21:18Z poll: #4429's macOS build 39850027667 passed; waiting for a lane sweep to merge it. The lane dispatched macOS builds for #4632-#4635 at about 21:00Z (39853562026, 39853585872, 39853610208, 39853638631), all queued.
