@@ -9,3 +9,4 @@ utc	stage	event	ref	note
 2026-10-17T06:33Z	3	pr-opened	-	FC-2 part 1 (state, UserCollection, refreshShown), head in PR body
 2026-10-22T11:43:14Z	3	heartbeat	-	#4388/#4396 open; macOS build 39763938609 still queued; lane run 39771983252 pending
 2026-10-22T12:07:52Z	3	merged	#4396	4a9c31f, lane batch Linux 39772161235; #4388 macOS build 39763938609 in progress
+2026-10-22T12:32:40Z	3	heartbeat	-	#4388 macOS build 39763938609 success 12:09, awaiting lane batch merge
