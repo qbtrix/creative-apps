@@ -115,3 +115,5 @@ utc	stage	event	ref	note
 2026-10-21T22:42Z	3	done	CL-measure, CL-z, contact sheet posted	run 39682861406 per supervisor ruling
 2026-10-21T23:14Z	3	check	#1971 closed by supervisor	scoped halo macOS failed on a Photo snapshot-test build error (not ours); waiting on journeys halo 39691305165 for critics
 2026-10-21T23:56Z	3	check	journeys halo 39691305165 still queued	critics wait; no new #1971 comments
+2026-10-22T01:00Z	3	critics	core-loop	panel launched on journeys 39691305165 at 32fcc2c4
+2026-10-22T01:00Z	3	fix	#4264 #4265 #4266	round 1 fixers launched

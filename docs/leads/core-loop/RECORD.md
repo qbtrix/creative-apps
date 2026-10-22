@@ -4,7 +4,7 @@ Issue: #1971 · Packet: docs/blueprints/halo/features/core-loop.md
 Run: act-1a15f92d2f2-kvrn (from 2026-10-21T18:00Z; before: act-1a15d0eeefb-6z9l from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0) (from 2026-10-20T18:45Z; before: act-1a15728f2a2-zb1o) · Session: claude/halo-feature-lead-run-02scrb · Started: 2026-10-20T02:37Z
 Stage: 3 wave 5
 Base: 6d5f3a4025ffce3bb843003a158f64bf282020e6
-Next: #1971 closed by the supervisor sentinel (22:45Z). Only critics remain: scoped halo run 39671767226 macOS failed at the test build (Photo RenderBudgetPhotoPlaceTests, not core-loop), no screens; critics run on journeys halo run 39691305165's ui-screens once it finishes
+Next: critic panel (clarity+mouse, taste+design, job) running on journeys halo run 39691305165 screens at 32fcc2c4; fixers round 1 on CI findings #4264+#4266 (CL-probe, unidentified button) and #4265 (CL-measure, playhead-scrub 0 samples); H-J12 screens wait for a journeys run at or past 4565e85
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
