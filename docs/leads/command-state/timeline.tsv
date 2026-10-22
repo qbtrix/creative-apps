@@ -52,3 +52,4 @@ utc	stage	event	ref	note
 2026-10-22T02:22:41Z	2026-10-22T02:22:41Z	check	redev	-	dev ratchet green via SC-14; #4205 #4130 #4134 #4140 #4144 #4196 merging dev + gate running
 2026-10-22T02:44:57Z	2026-10-22T02:44:57Z	wave	redev	#4205	CS-11 merged dev, gate PASS, head acb8a29b, Head line moved; CS-1b CS-3 CS-9 CS-13 CS-7 still in the redev queue
 2026-10-22T02:58:01Z	redev	dev-merge	#4134,#4205,#4130	dev merged again, gate CI: PASS, Head lines moved
+2026-10-22T03:07:32Z	check-in	lane	#4140,#4205	macOS builds queued on lane; nothing merged since 02:55Z; pre-gating next stacked slice
