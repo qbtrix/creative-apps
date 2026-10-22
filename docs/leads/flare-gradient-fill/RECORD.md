@@ -83,3 +83,4 @@ Next: unchanged
 - 2026-10-22T03:39Z: Heartbeat: #4259 macOS build queued, #4257 macOS build running; #4035 macOS+Linux green, awaiting lane merge.
 - 2026-10-22T04:02Z: #4257 (d417a35f) macOS build green, waiting on the lane sweep to merge; no green-Linux run with FG-m yet
 - 2026-10-22T04:24Z: FG-z #4257 merged 04:18Z (482dbe85). Full CI 39720939785 at 6e19f406 holds FG-m (pending); FG-z needs a later run
+- 2026-10-22T04:52Z: Full CI 39720939785 cancelled; full CI 39722978870 at 71987f72 holds FG-m and FG-z, queued
