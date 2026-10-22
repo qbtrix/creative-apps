@@ -1,0 +1,6 @@
+[
+{"label": "a shape layer refuses the stroke", "file": "Sources/HaloModel/HaloStroke+Kernel.swift", "find": "        return nil\n    }\n\n    /// nil: Halo trims", "replace": "        return Self.shapeOnlyStrokeHelp\n    }\n\n    /// nil: Halo trims", "tests": "HaloStrokeTests"},
+{"label": "a scrub is many undo steps", "file": "Sources/HaloModel/HaloStroke+Kernel.swift", "find": "coalesceKey: key)", "replace": "coalesceKey: nil)", "tests": "HaloStrokeTests"},
+{"label": "an animated trim is not keyed at the playhead", "file": "Sources/HaloModel/HaloStroke+Kernel.swift", "find": "            tracks[p.rawValue] = HaloKeyRules.keyed(track, frame: f, value: v)\n", "replace": "", "tests": "HaloStrokeTests"},
+{"label": "removing the stroke keeps its trim tracks", "file": "Sources/HaloModel/HaloStroke+Kernel.swift", "find": "for p in HaloProperty.trims { tracks[p.rawValue] = nil }", "replace": "_ = HaloProperty.trims", "tests": "HaloStrokeTests"}
+]
