@@ -86,3 +86,4 @@ utc	stage	event	ref	note
 2026-10-22T17:48:40Z	RP-m	waiting	-	full CI 39818716525 at a41e7f1f9 contains RP-7, pending
 2026-10-22T18:13:48Z	RP-m	waiting	-	full CI 39818716525 cancelled; next candidate 39829329352 at 8f25082ca
 2026-10-22T18:52:06Z	RP-m	waiting	-	macOS runners idle-queued: full CI 39829329352 pending since 18:12, #4421 build 39823748876 queued since 17:33
+2026-10-22T19:01:31Z	RP-m	waiting	-	full CI 39829329352 cancelled; next candidate 39836126860 at a102c34cc
