@@ -90,3 +90,4 @@ utc	stage	event	ref	note
 2026-10-22T20:45Z	check	no journeys run on 847f507 yet; no findings
 2026-10-22T21:18Z	check	#4636 stale (721ac8e, before fix 847f507); commented, waiting for a run on the fix
 2026-10-22T21:50Z	check	no journeys run includes 847f507 yet; #4636 waiting
+22:22Z	check	No journeys run on dev includes 847f507 yet (newest flare run is queued at 401242a). #4636 stays open. No new comments on #3482 and no new file-flow findings.
