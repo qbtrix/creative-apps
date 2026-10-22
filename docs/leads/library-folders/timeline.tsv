@@ -67,3 +67,4 @@ utc	stage	event	ref	note
 1792641709	-	watch	FO-z	Heartbeat: folders complete; LJ-FO waits on the next journeys run (not gating).
 1792642622	-	watch	FO-z	Heartbeat: folders complete; LJ-FO waits on the journeys run after full CI 39720939785 (not gating).
 1792643536	-	watch	FO-z	Heartbeat: folders complete; LJ-FO waits on the next journeys run (not gating).
+1792644452	-	watch	FO-z	Heartbeat: folders complete; full CI 39722978870 queued at 71987f7 (its journeys run gives LJ-FO, not gating).
