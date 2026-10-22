@@ -89,3 +89,4 @@ utc	stage	event	ref	note
 2026-10-22T08:58Z	pr-opened	DY-z #4376 (stacked on #4357; fast-lane, feature-done)	1cdf3a59	#4356 macOS build 39745527052 queued
 2026-10-22T08:59Z	poll	#4356 macOS build 39745527052 still queued; #4357 #4376 stacked	-	-
 2026-10-22T09:21Z	poll	#4356 macOS build 39745527052 still queued (73 min); supervisor: finish eyedropper slices then end run	-	-
+2026-10-22T09:43Z	poll	#4356 macOS build 39745527052 success (09:31Z); waiting on lane sweep to merge	-	-
