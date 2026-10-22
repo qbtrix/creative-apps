@@ -93,9 +93,9 @@ Next: #4287 merged (04:41Z). Round-1 fixers in flight: #4310-#4312 (text redo + 
 
 | Finding | Sev | Lens | State |
 |---|---|---|---|
-| #4310 inspector TEXT field stale after Redo | major | journey | round-1 fixer dispatched 05:12Z (no file overlap with open PRs) |
-| #4311 H-J12 step 9 never checks Undo removed "Hello" | minor | oracle | with #4310 |
-| #4312 H-J12 step 7 Space check passes when Space does nothing | minor | oracle | with #4310 |
+| #4310 inspector TEXT field stale after Redo | major | journey | PR #4321 (round 1; Model key re-syncs field on undo/redo) |
+| #4311 H-J12 step 9 never checks Undo removed "Hello" | minor | oracle | PR #4321 |
+| #4312 H-J12 step 7 Space check passes when Space does nothing | minor | oracle | PR #4321 |
 | #4313 inspector width tracks content (5 pt) | minor | layout | round-1 fixer dispatched 05:12Z (#4287 merged) |
 | #4314 text Color row label clipped | minor | layout | with #4313 |
 | #4315 easing chips lack identifiers (gap, p2) | – | audit | gap; predates core-loop |
