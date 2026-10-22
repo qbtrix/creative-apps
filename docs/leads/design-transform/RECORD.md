@@ -23,7 +23,7 @@ Next: wait for the lane to merge #4324 (DT-u r2) and #4323 (DT-z, feature-done);
 | DT-4 | DT-u | 2 | snapshots, render budget | Tests/AppSnapshotTests/DesignTransformSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetDesignTransformTests.swift | RenderBudgetDesignTransformTests | #4159 | merged (9829685e) |
 | DT-5 | DT-m | 2 | adapter bodies, contains | Sources/DesignModel/DesignTransform+Kernel.swift, Tests/DesignModelTests/DesignTransformTests.swift, Tests/mutations/DesignModel.DesignTransform+Kernel.json | DesignTransformTests | #4187 | merged (8684d700) |
 | DT-6 | DT-m | 3 | SVG turn, specs, RJ-D15 | Sources/DesignModel/Live/DesignSVG.swift, Sources/DesignModel/DesignCommandCatalog.swift, Tests/command-ids/design.txt, Tests/RealJobs/design/rotate-15/ | DesignSVGTests.turnedNode, RJ-D15 | – | waiting |
-| DT-7 | DT-z | 6 | journey on live | UITests/DesignJourneyTests+Transform.swift | DesignTransformJourneyTests | #4323 | in lane (macOS build queued) |
+| DT-7 | DT-z | 6 | journey on live | UITests/DesignJourneyTests+Transform.swift | DesignTransformJourneyTests | #4323 | macOS build green (39728806153), awaiting lane sweep |
 | R2 | DT-u | 6 | fix #4223 turned resize + #4224 knob over several | Sources/DesignModel/DesignCanvasEditing.swift, Sources/DesignModel/DesignCanvasHints.swift, their tests and plans | DesignTurnedResizeTests, knob-several test | #4324 | in lane (macOS build queued) |
 | DT-8 | DT-z | 6 | status built | docs/blueprints/design/features/transform.wave.json | scripts/waves render --dry-run | #4323 | in lane (with DT-7, one slice PR) |
 
