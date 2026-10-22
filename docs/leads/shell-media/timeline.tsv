@@ -78,3 +78,4 @@ utc	stage	event	ref	note
 2026-10-22T12:10:06Z	SM-6	merged	4237	lane batch of 4
 2026-10-22T12:10:06Z	SM-7	rebuilding	4128	three code commits on dev (C4 already landed with SM-5), gating
 2026-10-22T12:15:56Z	SM-7	ready	4128	rebuilt on dev at de099b96b, CI: PASS, un-drafted
+2026-10-22T12:31:42Z	lead	resumed	-	run act-1a16391fd34-thw9; SM-m done line posted (run 39736849778); SM-9 builder started

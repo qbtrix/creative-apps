@@ -1,10 +1,10 @@
 # shell-media lead record
 
 Issue: #3711 · Packet: docs/blueprints/suite/features/shell-media.md
-Run: act-1a1601c3538-r0c9 · Session: https://claude.ai/code/session_011jo1mtCQ8wVpaGZxRnV16N · Started: 2026-10-21T10:50Z · Resumed: 2026-10-21T20:17Z
-Stage: SM-a wave 1: SM-1 merged; dev red on the format ratchet, fix #4258 open; SM-2 ready
-Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: #4258 and #4035 merge, then SM-3, SM-4, SM-5 ready in stack order
+Run: act-1a16391fd34-thw9 · Resumed: 2026-10-22T12:30Z (previous run act-1a1601c3538-r0c9, started 2026-10-21T10:50Z)
+Stage: SM-m done (run 39736849778); SM-w merged (#4237 222bc695), waits a suite run containing it; SM-r #4128 #4239 wait macOS builds; SM-9 building
+Base: d138c7b021dadf6fae7000e8795d687f139f91df
+Next: SM-w done line once a scoped suite or full run contains 222bc695; SM-7/8 merge; SM-9 draft stacked on both; then SM-10
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -19,14 +19,14 @@ Next: #4258 and #4035 merge, then SM-3, SM-4, SM-5 ready in stack order
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | SM-1 | SM-a | 1 | contract: values, MediaEncoding/Decoding, FakeMedia, media member, fake slot | packet SM-1 (9 files) | MediaContractTests; Mutate SuiteModel.MediaFrame | #4034 | merged 3364dd9d |
-| SM-2 | SM-a | 1 | checks first: rules/clock (Linux) and write/read (macOS) suites disabled by name, fixtures | packet SM-2 | suites compile | #4035 | ready; merged dev + #4258, gate pass, Head 70825bfb |
-| SM-1f | SM-a | 1 | fix dev red: StillFormat to baselined SuiteTypes (FormatListRatchetTests) | dev-red #3856 | FormatListRatchetTests | #4258 | ready; gate pass, Head 81b418ec |
-| SM-3 | SM-m | 2 | codec rules | packet SM-3 | rules suite | #4119 (draft) | waits #4035 |
-| SM-4 | SM-m | 2 | FrameClock | packet SM-4 | clock suite | #4123 (draft) | waits #4119 |
-| SM-5 | SM-w | 3 | movie writer, four codecs, cancel deletes | packet SM-5 | write suite (macOS) | #4125 (draft) | waits parent |
-| SM-6 | SM-w | 3 | GIF/APNG + still encoders | packet SM-6 | ShellMediaImageWriteTests (macOS); Mutate: none, live-only | #4237 (draft, on #4123) | waits #4123 |
-| SM-7 | SM-r | 3 | still decoder, upright 8-bit sRGB | packet SM-7 | read suite (macOS) | #4128 (draft) | waits parent |
-| SM-8 | SM-r | 3 | FootageReader info + exact frame | packet SM-8 | ShellMediaFootageTests (macOS); Mutate: none, live-only | #4239 (draft, on #4125) | waits #4125 |
+| SM-2 | SM-a | 1 | checks first: rules/clock (Linux) and write/read (macOS) suites disabled by name, fixtures | packet SM-2 | suites compile | #4035 | merged 74c5e8dd |
+| SM-1f | SM-a | 1 | fix dev red: StillFormat to baselined SuiteTypes (FormatListRatchetTests) | dev-red #3856 | FormatListRatchetTests | #4258 | closed (fix landed elsewhere) |
+| SM-3 | SM-m | 2 | codec rules | packet SM-3 | rules suite | #4119 (draft) | merged 3beffe80 |
+| SM-4 | SM-m | 2 | FrameClock | packet SM-4 | clock suite | #4123 (draft) | merged 1da00fb9 |
+| SM-5 | SM-w | 3 | movie writer, four codecs, cancel deletes | packet SM-5 | write suite (macOS) | #4125 (draft) | merged f8d7c5b6 |
+| SM-6 | SM-w | 3 | GIF/APNG + still encoders | packet SM-6 | ShellMediaImageWriteTests (macOS); Mutate: none, live-only | #4237 (draft, on #4123) | merged 222bc695 |
+| SM-7 | SM-r | 3 | still decoder, upright 8-bit sRGB | packet SM-7 | read suite (macOS) | #4128 (draft) | ready; macOS build queued, Head de099b96 |
+| SM-8 | SM-r | 3 | FootageReader info + exact frame | packet SM-8 | ShellMediaFootageTests (macOS); Mutate: none, live-only | #4239 (draft, on #4125) | ready; macOS build queued, Head c34a1112 |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
