@@ -33,7 +33,7 @@ closed, and its `Depends on:` line names the one that closed last.
 | easing | the layer-keys and history-files feature issues; #333 | the last to close |
 | render-out | the viewer-playback feature issue; #333 | the last to close |
 | text-layers | the layer-keys, viewer-playback and history-files feature issues; #333 | the last to close |
-| core-loop (W3, packet to write) | every W1 and W2 feature issue | the last to close |
+| core-loop (W3, built: filed as #1971, packet `features/core-loop.md`) | every W1 and W2 feature issue | the last to close (filed and built; nothing left to file) |
 
 Why #333 gates every W1 and W2 feature: each owns its own
 `UITests/HaloJourneyTests+<Area>.swift`, and today `project.yml` compiles

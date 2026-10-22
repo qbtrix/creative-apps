@@ -1,0 +1,30 @@
+[
+  {
+    "label": "endHandlesSitInsideTheBar: no inset, so the first stop's handle hangs half outside the column",
+    "file": "Sources/SuiteKernel/Fill/GradientBar.swift",
+    "find": "handle / 2 + min(max(offset, 0), 1) * run(width: width, handle: handle)",
+    "replace": "min(max(offset, 0), 1) * run(width: width, handle: handle)",
+    "tests": "GradientBarTests"
+  },
+  {
+    "label": "aPressReadsBackItsOffset: the press not shifted by the inset, so it reads a stop right of where it was drawn",
+    "file": "Sources/SuiteKernel/Fill/GradientBar.swift",
+    "find": "return min(max((x - handle / 2) / run, 0), 1)",
+    "replace": "return min(max(x / run, 0), 1)",
+    "tests": "GradientBarTests"
+  },
+  {
+    "label": "aPressReadsBackItsOffset: the run is the whole bar, so offset 1 lands a handle past the end",
+    "file": "Sources/SuiteKernel/Fill/GradientBar.swift",
+    "find": "private static func run(width: Double, handle: Double) -> Double { max(width - handle, 0) }",
+    "replace": "private static func run(width: Double, handle: Double) -> Double { max(width, 0) }",
+    "tests": "GradientBarTests"
+  },
+  {
+    "label": "theColorRowNamesTheSelectedStop: zero-based, so the second stop reads Stop 1",
+    "file": "Sources/SuiteKernel/Fill/GradientBar.swift",
+    "find": "return \"Stop \\(index + 1) · ",
+    "replace": "return \"Stop \\(index) · ",
+    "tests": "GradientBarTests"
+  }
+]

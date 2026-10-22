@@ -47,5 +47,19 @@
     "find": "return radius > 0 ? \" rx=\\\"\\(number(radius))\\\"\" : \"\"",
     "replace": "return \"\"",
     "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": "gradientInFrameSpace: the gradient is written with its unit-box points",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "GradientSVG.definition(node.fill(in: frame), id: gradientID(node))",
+    "replace": "GradientSVG.definition(node.gradient ?? .solid(.white), id: gradientID(node))",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": "textGradient: a text layer's gradient definition is dropped",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "if node.kind != .group, let defs = gradient(node, x: x, y: y)",
+    "replace": "if node.kind != .group, node.kind != .text, let defs = gradient(node, x: x, y: y)",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
   }
 ]
