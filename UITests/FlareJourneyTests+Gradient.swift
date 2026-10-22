@@ -1,14 +1,11 @@
-// FlareJourneyTests+Gradient.swift: FJ-G1 (gradient-fill FG-4, turned on by FG-7). On the gradient-circle sample it
-// selects the circle (FILL shows the stop bar, not the word "Gradient"), recolours the middle stop red, types 90 in
-// the angle row, undoes both one step each, then picks Radial for the solid rectangle. Shots are `flare-fg-<step>`.
+// FlareJourneyTests+Gradient.swift: FJ-G1 (gradient-fill FG-4, live since FG-7). On the gradient-circle sample
+// (`FlareFixtures.gradientCircle` on live services) it selects the circle (FILL shows the stop bar, not the word
+// "Gradient"), recolours the middle stop red, types 90 in the angle row, undoes both one step each, then picks Radial
+// for the solid rectangle. Shots are `flare-fg-<step>`.
 import XCTest
 
 final class FlareGradientJourneyTests: XCTestCase {
-    /// FG-7 sets this once the fill commands run on live services; a guard, so the steps compile without a warning.
-    private static let live = false
-
     @MainActor func testEditImportedGradient() throws {
-        guard Self.live else { throw XCTSkip("waits on FG-7") }
         let flare = Journey("Flare", self, arguments: ["-FlareSample", "gradient-circle"])
         XCTAssert(flare.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         let stage = flare.element("suite.canvas")

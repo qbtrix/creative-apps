@@ -592,7 +592,7 @@ final class HaloJourneyTests: XCTestCase {
         ("Layer", ["New", "Duplicate", "Rename…", "Delete", "Bring Forward", "Send Backward"]),
         ("Animation", [
             "Play/Pause", "Loop", "Next Frame", "Previous Frame", "Go to Start", "Go to End", "Set In Point",
-            "Set Out Point", "Keyframe Easing",
+            "Set Out Point", "Keyframe Easing", "Select All Keys", "Move Keyframes Left", "Move Keyframes Right",
         ]),
     ]
 

@@ -7,17 +7,38 @@
     "tests": "FlareGradientTests"
   },
   {
-    "label": "runFillRefusesWithAReasonUntilTheCommandsAreBuilt: the refusal dropped",
+    "label": "aRefusedGestureSaysWhyAndChangesNothing: the refusal dropped",
     "file": "Sources/FlareModel/FlareFill+Kernel.swift",
     "find": "            paintError = error.description",
     "replace": "            paintError = nil",
     "tests": "FlareGradientTests"
   },
   {
-    "label": "aShapeSaysEditingIsNotBuiltUntilTheCommandsAre: no not-built reason",
+    "label": "noShapeSaysSelectOne: no reason without a shape",
     "file": "Sources/FlareModel/FlareFill+Kernel.swift",
-    "find": "        return Self.catalog.spec(GradientIntent.type(.solid).command.id) == nil ? Self.fillNotBuilt : nil",
-    "replace": "        return nil",
+    "find": "        if paintShapes.isEmpty { return Self.noShape }",
+    "replace": "        if paintShapes.isEmpty { return nil }",
     "tests": "FlareFillHelpTests"
+  },
+  {
+    "label": "angleRewritesPoints: the old fill written back",
+    "file": "Sources/FlareModel/FlareFill+Kernel.swift",
+    "find": "            (address, GradientRules.mapped(fill, from: box, to: shape.bounds ?? box))",
+    "replace": "            (address, GradientRules.mapped(shape.fill, from: box, to: shape.bounds ?? box))",
+    "tests": "FlareGradientCommandTests"
+  },
+  {
+    "label": "oneStepForSeveral: one undo step per shape",
+    "file": "Sources/FlareModel/FlareFill+Kernel.swift",
+    "find": "            step(name) { engine in",
+    "replace": "            step(nil) { engine in",
+    "tests": "FlareGradientCommandTests"
+  },
+  {
+    "label": "dragIsOneStep: the drag token dropped",
+    "file": "Sources/FlareModel/FlareFill+Kernel.swift",
+    "find": "                                       coalesceKey: \"fill-\\(drag)\")",
+    "replace": "                                       coalesceKey: nil)",
+    "tests": "FlareGradientCommandTests"
   }
 ]

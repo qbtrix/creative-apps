@@ -9,7 +9,7 @@
 // `.autosaveRecovery` reads the workspace through AutosaveHooks: the open file's name, whether it
 // is dirty, its `recoveryBytes()` and `restore` for a copy left behind (DesignRecovery+Kernel.swift).
 // Copies go to DesignRecoveryStore's folder for this launch (DA-7): `<support>/Design/Recovery/`,
-// none for a journey launch without `-SuiteSupportDir`. `panel` is the panel
+// none for a journey launch or a test host (the ignore-state default) without `-SuiteSupportDir`. `panel` is the panel
 // alone, under its "History" title and step count (#3945). DA-3 adds the toolbar's History button: the
 // modifier hands its panel state down as the environment value `designHistory`, and
 // DesignEditor draws `toolbarAction` from it, selected while the panel shows, off with the
@@ -80,9 +80,11 @@ struct DesignHistoryArea: ViewModifier {
         .autosaveRecovery(hooks, folder: Self.folder, delay: 2, edits: model.documentSession.currentToken)
     }
 
-    /// Where this launch's windows keep their recovery copies; nil keeps none.
+    /// Where this launch's windows keep their recovery copies; nil keeps none. The ignore-state default covers
+    /// the launch flag and a test host's registered one, so hosted windows never write or offer real copies.
     private static let folder = DesignRecoveryStore.folder(
-        arguments: ProcessInfo.processInfo.arguments, home: NSHomeDirectory())
+        arguments: ProcessInfo.processInfo.arguments, home: NSHomeDirectory(),
+        ignoringState: UserDefaults.standard.bool(forKey: "ApplePersistenceIgnoreState"))
 
     private var hooks: AutosaveHooks {
         let model = self.model

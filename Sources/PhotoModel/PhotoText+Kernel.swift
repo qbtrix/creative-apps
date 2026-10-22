@@ -14,8 +14,6 @@ extension PhotoWorkspace: TextStyleTarget {
 
     /// What every text run throws until TX-5.
     static let textCommandsNotBuilt = CatalogError.notBuilt(id: "text", feature: "photo text-layers TX-5")
-    /// What saving a document with a text layer throws until TX-6.
-    static let textNotBuilt = CatalogError.notBuilt(id: "text", feature: "photo text-layers TX-6")
 
     public var textStyle: TextStyle? {
         guard case .text(let text) = selectedLayer?.kind else { return nil }
