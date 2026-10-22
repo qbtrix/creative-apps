@@ -4,7 +4,7 @@ Issue: #3450 · Packet: docs/blueprints/suiteui/features/stroke-style.md
 Run: act-1a157ad4600-c6w5 · Session: 1dda8f22-4f7f-5e83-a997-571c40aa1288 · Started: 2026-10-20T05:01:16Z
 Stage: 3 wave 1
 Base: 424b4a60f1ea44dbabfd0ce8a0597674f31ecfc3
-Next: #3826 SS-9 on dev (head 21226b0, gate PASS after dev's anchors were fixed). SS-8 waits on shape-tools:SH-z; SS-10 on SS-8, SS-9 and GF-z
+Next: SS-9 #3826 merged into dev at 2026-10-22T02:43Z (ca4d6d7). SS-8 waits on shape-tools:SH-z (#3449 open). SS-10 waits on SS-8; gradient-fill is built. SS-z closes once SS-10 lands and a green dev run contains it.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -26,7 +26,7 @@ Next: #3826 SS-9 on dev (head 21226b0, gate PASS after dev's anchors were fixed)
 | SS-6 | SS-m | – | see packet task table (waits: SS-5) | Sources/SuiteKernel/Fill/StrokeCommands.swift, Tests/SuiteKernelTests/StrokeCommandsTests.swift, Tests/mutations/SuiteKernel.StrokeCommands.json | packet acceptance row | #3627 | merged (dev ac3e825, 23:01Z) |
 | SS-7 | SS-d | 2 | see packet task table (waits: SS-6) | Sources/SuiteKernel/Fill/StrokeRules.swift, Sources/SuiteKernel/Fill/StrokeCommands.swift, Sources/SuiteKernel/Fill/StrokeSVG.swift, Tests/SuiteKernelTests/StrokeDashTrimTests.swift, Tests/mutations/SuiteKernel.StrokeRules.json, Tests/mutations/SuiteKernel.StrokeCommands.json, Tests/mutations/SuiteKernel.StrokeSVG.json | packet acceptance row | #3823 | merged (779e08d) |
 | SS-8 | SS-d | – | see packet task table (waits: SS-7) | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeStrokeTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/dash-trim/dash-trim.jobs.json, Tests/RealJobs/fake/dash-trim/input/one.fake | packet acceptance row | – | waiting |
-| SS-9 | SS-z | 2 | see packet task table (waits: SS-4, SS-7) | Sources/SuiteUI/Gallery/GalleryStrokeEditor.swift, Tests/SuiteUITests/StrokeEditorLiveTests.swift, UITests/SuiteJourneyTests+Stroke.swift | packet acceptance row | #3826 | open on dev (head 21226b0) |
+| SS-9 | SS-z | 2 | see packet task table (waits: SS-4, SS-7) | Sources/SuiteUI/Gallery/GalleryStrokeEditor.swift, Tests/SuiteUITests/StrokeEditorLiveTests.swift, UITests/SuiteJourneyTests+Stroke.swift | packet acceptance row | #3826 | merged (ca4d6d7) |
 | SS-10 | SS-z | – | see packet task table (waits: SS-8, SS-9) | docs/c4/parts/creative-apps/suite-kernel/kernel-fill.json, docs/blueprints/suiteui/features/stroke-style.wave.json | packet acceptance row | – | waiting |
 
 ## Reviews
@@ -100,3 +100,4 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 01:58Z: SS-9 #3826 ead55aa is first in lane batch 20261022013736 (Linux check running)
 - 02:20Z: SS-9 #3826: batch 20261022013736 bisecting; probe 2 (+#4002) red on FormatListRatchetTests (SuiteModel Media.swift, not this PR); probe 1 (+#3826) running
 - 02:42Z: SS-9 #3826: batch red on dev-only FormatListRatchetTests (SuiteModel Media.swift vs #4238 SuiteImageFormats); probe 0 (dev alone) red too, so it should land on its own proof; commented once on #3826
+- 03:05Z: SS-9 #3826 merged (ca4d6d7, 02:43Z, landed on its own proof while dev was red on FormatListRatchetTests). SS-z is still open: SS-10 waits on SS-8, and SS-8 waits on SH-z (#3449). AH-z (#3444) is also open.
