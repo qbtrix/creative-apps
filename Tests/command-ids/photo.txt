@@ -1,4 +1,5 @@
 # Photo's command ids (adopt-command-catalog AC-p1). Never reuse one; mark a removed id "retired <id>".
+color.sample
 edit.copy
 edit.cut
 edit.delete-selection

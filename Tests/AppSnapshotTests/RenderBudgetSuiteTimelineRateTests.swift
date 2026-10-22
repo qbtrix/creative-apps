@@ -9,8 +9,13 @@
 // The snapshot is the same page at 29.97 with the playhead at 1800
 // (suite-gallery-timeline-2997-{light,dark}.png): the menu's title reads
 // "29.97 fps" and the readout "00:01:00;02"; a snapshot can't hold an open
-// menu, so the journey's `timeline-2997-menu` shot shows it open. Nested in
-// BodyCountSuites: it reads global body counters. macOS only.
+// menu, so the journey's `timeline-2997-menu` shot shows it open; it draws
+// half a point a frame, as a snapshot can't scroll, so 1800 is in view. The
+// layout tests lay the page out at 1280 x 820 and 900 x 612, live and as a
+// snapshot draws it: the log sits below the strip inside the page's margin
+// and no lane name draws over it (#4364), and the live strip opens on the
+// playhead's page, its pill clear of the ruler's trailing edge (#4365).
+// Nested in BodyCountSuites: it reads global body counters. macOS only.
 #if canImport(AppKit)
 import AppKit
 import SuiteKernel
@@ -20,10 +25,11 @@ import Testing
 @testable import SuiteUI
 
 /// `timeline-long` at 29.97 fps, its playhead at `playhead`.
-@MainActor private func ntscFixture(playhead: Int) -> GalleryTimelineFixture {
+@MainActor private func ntscFixture(playhead: Int, frameWidth: CGFloat? = nil) -> GalleryTimelineFixture {
     var fixture = GalleryTimelineFixture.long
     fixture.rate = FrameRate(numerator: 30_000, denominator: 1_001)
     fixture.playhead = playhead
+    if let frameWidth { fixture.frameWidth = frameWidth }
     return fixture
 }
 
@@ -55,6 +61,44 @@ extension BodyCountSuites {
             #expect(w.label("suite.gallery.timeline.timecode") == Timecode.string(frame: frame, rate: rate))
             #expect(w.label("suite.gallery.timeline.timecode")?.contains(";") == true, "29.97 reads non-drop timecode")
         }
+
+        /// #4364: the log keeps its line below the strip, inside the page's margin, live and as a snapshot.
+        @Test(.timeLimit(.minutes(2)), arguments: [CGSize(width: 1_280, height: 820), CGSize(width: 900, height: 612)])
+        func logSitsBelowTheStrip(size: CGSize) async throws {
+            for snapshot in [false, true] {
+                let page = GalleryTimelinePage(fixture: ntscFixture(playhead: 1_800))
+                    .environment(\.suiteSnapshotRendering, snapshot)
+                let w = RenderBudgetWindow(page, size: size)
+                defer { w.close() }
+                try await w.settle(600)
+                let mode = snapshot ? "snapshot" : "live"
+                let strip = try #require(await w.element("suite.gallery.timeline.strip"), "no strip (\(mode))")
+                let log = try #require(await w.element("suite.gallery.log"), "no log (\(mode))")
+                // Window coordinates, y up: below the strip is a smaller y.
+                #expect(log.height > 0, "the log has no height at \(size) (\(mode))")
+                #expect(log.maxY <= strip.minY + 0.5, "the log \(log) runs into the strip \(strip) at \(size) (\(mode))")
+                let content = CGRect(origin: .zero, size: size).insetBy(dx: SuiteSpacing.m, dy: SuiteSpacing.m)
+                #expect(content.insetBy(dx: -0.5, dy: -0.5).contains(log), "the log \(log) leaves the page's margin (\(mode))")
+                for row in 0..<40 {
+                    guard let name = await w.element("suite.timeline.name.lane-\(row)") else { continue }
+                    // The strip clips its lanes: only the part of a name inside it draws.
+                    let drawn = name.intersection(strip)
+                    #expect(drawn.isNull || !drawn.intersects(log), "lane \(row)'s name draws over the log (\(mode))")
+                }
+            }
+        }
+
+        /// #4365: a live strip opens scrolled to the playhead's page, its pill clear of the ruler's end.
+        @Test(.timeLimit(.minutes(2))) func playheadAt1800IsInView() async throws {
+            let w = RenderBudgetWindow(GalleryTimelinePage(fixture: ntscFixture(playhead: 1_800)))
+            defer { w.close() }
+            try await w.settle(800)
+            let ruler = try #require(await w.element("suite.timeline.ruler"), "no ruler (suite.timeline.ruler)")
+            let pill = try #require(await w.element("suite.timeline.playhead"), "no pill (suite.timeline.playhead)")
+            #expect(pill.midX > ruler.minX, "the pill \(pill) is left of the ruler \(ruler)")
+            #expect(pill.midX < ruler.maxX - pill.width / 2, "the pill \(pill) is pinned at the ruler's end \(ruler)")
+            #expect(pill.intersects(ruler), "the pill \(pill) is off the ruler \(ruler)")
+        }
     }
 }
 
@@ -63,7 +107,7 @@ extension BodyCountSuites {
         for scheme in [ColorScheme.light, .dark] {
             let suffix = scheme == .dark ? "dark" : "light"
             try snapshot(
-                GalleryTimelinePage(fixture: ntscFixture(playhead: 1_800)),
+                GalleryTimelinePage(fixture: ntscFixture(playhead: 1_800, frameWidth: 0.5)),
                 name: "suite-gallery-timeline-2997-\(suffix)", scheme: scheme)
         }
     }
