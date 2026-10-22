@@ -1,19 +1,19 @@
 # adopt-suiteui-chrome lead record
 
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
-Run: act-1a160ca3d68-sbnc (#1942; slices AC-tools, AC-export-sheet) · Session: claude/adopt-suiteui-chrome-fhl6sx · Resumed: 2026-10-21T23:30Z
-Stage: 3 build (AC-tools in lane; AC-export-sheet blocked)
-Base: dev be9aa35b (main 0dd23d65 verified)
-Next: #4002 (AC-tools p2) head cbada801 in the lane (Fast-Check pass), then lane merge and a green scoped suiteui or full run; re-read shared-codecs SC-f (SC-13 #4019 merged, SC-14 #4238 open, SC-15 and SC-16 not opened); start AC-e1 once SC-16 merges
+Run: act-1a1646f0a9f-d1ei (#1942; slice AC-export-sheet) · Session: claude/suiteui-feature-lead-v7e2hk · Resumed: 2026-10-22T16:30Z
+Stage: 3 polling (AC-export-sheet blocked on shared-codecs:SC-f)
+Base: dev 7e9f260a (main 0dd23d65 verified)
+Next: re-read shared-codecs SC-f: SC-15 (owns Sources/PhotoApp/PhotoWindow+Export.swift) and SC-16 (replaces Library's ExportFormats) on dev? Start AC-e1 + AC-e2 as one slice PR once both merge
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | AC-zoom | every app clamps through ZoomMath, fits through one fit, maps through CanvasLayout | AC-z1, AC-z2 | MJ-AC-zoom | editor-kernel:EK-a, adopt-kernel-brush:AB-photo | yes | 0 | done | – | – |
 | AC-colour | parse, format and pick colour through HexColor and ColorWell | AC-c1, AC-c2 | MJ-AC-colour | editor-kernel:EK-a, adopt-kernel-brush:AB-photo, AC-zoom | yes | 1 | done | 39604117821 | wanted |
-| AC-tools | tool letters and modifiers through ToolKeys | AC-t1, AC-t2 | MJ-AC-tools | editor-kernel:EK-chrome, AC-colour | yes | 0 | building: p1 #3952 merged, p2 #4002 in lane | – | – |
+| AC-tools | tool letters and modifiers through ToolKeys | AC-t1, AC-t2 | MJ-AC-tools | editor-kernel:EK-chrome, AC-colour | yes | 0 | done | 39719142992 | wanted |
 | AC-guides | Flare's guides draw through CanvasMarks (GuideLineMark) | AC-g1, AC-g2 | MJ-AC-guides | editor-kernel:EK-a | yes | 0 | done | – | – |
-| AC-export-sheet | Photo, Library and Flare export sheets are SuiteUI's ExportSheet | AC-e1, AC-e2 | MJ-AC-export-sheet | editor-kernel:EK-chrome (met), adopt-kernel-export:AX-photo, AX-library, AX-flare (met), shared-codecs:SC-f (open) | yes | 0 | blocked-SC-f | – | – |
+| AC-export-sheet | Photo, Library and Flare export sheets are SuiteUI's ExportSheet | AC-e1, AC-e2 | MJ-AC-export-sheet | editor-kernel:EK-chrome (met), adopt-kernel-export:AX-photo, AX-library, AX-flare (met), shared-codecs:SC-f (SC-15, SC-16 unmerged) | yes | 0 | blocked-SC-f | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -22,8 +22,8 @@ Next: #4002 (AC-tools p2) head cbada801 in the lane (Fast-Check pass), then lane
 | AC-z2 | AC-zoom | – | zoom delete | per packet | same + mutate --validate | – | parked |
 | AC-c1 | AC-colour | – | colour adapter | per packet | HexColorParserTests, DesignStyleTests, DesignInspectorSnapshots | – | parked |
 | AC-c2 | AC-colour | – | colour delete | per packet | same + mutate --validate | – | parked |
-| AC-t1 | AC-tools | 1 | tools adapter | per packet | FlareToolsKeyTests, DesignToolsKeyTests, PhotoToolsKeyTests | #3952, #4002 | p1 merged, p2 in lane |
-| AC-t2 | AC-tools | 1 | tools delete | per packet | same + mutate --validate | #4002 | in lane |
+| AC-t1 | AC-tools | 1 | tools adapter | per packet | FlareToolsKeyTests, DesignToolsKeyTests, PhotoToolsKeyTests | #3952, #4002 | merged |
+| AC-t2 | AC-tools | 1 | tools delete | per packet | same + mutate --validate | #4002 | merged |
 | AC-g1 | AC-guides | – | guides adapter | per packet | FlareStageGuideSnapshots, GuideLineMarkTests | – | parked |
 | AC-g2 | AC-guides | – | guides delete | per packet | same + mutate --validate | – | parked |
 | AC-e1 | AC-export-sheet | – | export sheet adapter | per packet | PhotoExportSheetSnapshots, LibraryExportSnapshots, FlareExportSnapshots | – | parked |
@@ -34,6 +34,7 @@ Next: #4002 (AC-tools p2) head cbada801 in the lane (Fast-Check pass), then lane
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T16:30Z: run act-1a1646f0a9f-d1ei resumed for AC-export-sheet. Waits re-read: shared-codecs posted Belt-Slice-Done: SC-f on run 39710840412 with only SC-13 (#4019) and SC-14 (#4238) merged; SC-15 and SC-16 are not on dev (Library's ExportFormats.swift is still there) and #3718 now waits on suite-imaging:IM-a. The packet waits on the whole slice and SC-f owns PhotoWindow+Export.swift, and the supervisor (2026-10-22T07:43Z on #1942) holds AC-export-sheet for SC-15 and SC-16, so AC-e1 does not start. Noted on #1942.
 - 2026-10-22T00:10Z: #4002 head cbada801 (merge of dev be9aa35b) passed scripts/ci --changed; pushed, Head and Belt-Lead lines moved. The lane batches it with its macOS gate.
 - 2026-10-21T23:30Z: run act-1a160ca3d68-sbnc resumed for AC-tools and AC-export-sheet. AC-tools is not done: no Belt-Slice-Done line exists and #4002 is unmerged, so the earlier record's "done (per Belt brief)" is corrected to building. #4002 was held on a red Linux check that only failed dev's inherited CommandPath baseline (#3856); #4250 fixed that on dev be9aa35b, so origin/dev is merged into slice/ac-tools-2 (no rebase) and the gate rerun.
 - 2026-10-21T23:30Z: SC-f re-read: SC-13 #4019 merged, SC-14 #4238 open and clean, SC-15 and SC-16 not opened. AC-e1 stays unstarted.
@@ -72,5 +73,4 @@ Next: #4002 (AC-tools p2) head cbada801 in the lane (Fast-Check pass), then lane
 - Even once resumed, only AC-guides can start after editor-kernel's EK-a: AC-zoom and AC-colour wait on adopt-kernel-brush AB-photo (itself waiting on EK-stroke and EK-chrome), AC-tools on AC-colour, and AC-export-sheet on adopt-kernel-export's three app slices (waiting on EK-run and other adopt features). None of those features has started.
 
 ## Open
-- AC-tools waits on #4002's merge and a green ci.yml run that contains it.
-- AC-export-sheet waits on shared-codecs:SC-f (#3718; SC-14 #4238, then SC-15, SC-16).
+- AC-export-sheet waits on shared-codecs SC-15 and SC-16 (#3718, itself waiting on suite-imaging:IM-a).
