@@ -83,3 +83,4 @@ utc	stage	event	ref	note
 2026-10-22T01:07Z	01:08Z: #4253 blocked on dev-red #3856 (fix #4258)
 2026-10-22T01:29Z	01:30Z heartbeat: no change; mac runners queued (scoped photo 39700970657 queued)
 2026-10-22T01:51Z	01:51Z heartbeat: #4252 mac build 39700821595 success; dev photo/full runs still queued
+2026-10-22T02:12Z	02:13Z heartbeat: scoped photo 39700970657 (add701fc9, predates both fixes) now running; dev Linux still red
