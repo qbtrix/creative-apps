@@ -61,5 +61,26 @@
     "find": "history.jumpEndingRun(to: index) { old in",
     "replace": "history.jump(to: index) { old in",
     "tests": "FakeHistoryTests"
+  },
+  {
+    "label": "lockedRefusesTurn: setTransform finds the selected rect without the locked check, so a locked rect turns",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "let index = try editableIndex(\"transform\")",
+    "replace": "guard let index = rects.firstIndex(where: { $0.id == selection }) else { return }",
+    "tests": "FakeTransformTests"
+  },
+  {
+    "label": "oldJSONUnchanged: a rect at no turn writes \"degrees\":0, so old JSON changes",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "if degrees != 0 { try c.encode(degrees, forKey: .degrees) }",
+    "replace": "try c.encode(degrees, forKey: .degrees)",
+    "tests": "FakeTransformTests"
+  },
+  {
+    "label": "turnUndoKeyDropped: every rotate sample is its own step, so RJ-X32's drag takes 60 undos",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "key: drag.map { \"transform.\\(name):\\($0)\" }",
+    "replace": "key: nil",
+    "tests": "FakeTransformTests"
   }
 ]

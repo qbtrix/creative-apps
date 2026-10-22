@@ -2,36 +2,45 @@
 // commands the catalog's tests, the gallery page, the afterglow CLI and the MCP server drive before any app adopts;
 // file-flow SF-9 adds the five file-flow commands over fixed readers, so RJ-X43 runs `file.drop` on the CLI;
 // gradient-fill GF-9 gives each rect an optional fill and lists the eight fill commands, so RJ-X30 runs on the CLI;
-// autosave-history AH-9 lists `history.read` and `history.jump` over its one History, so RJ-X31 runs on the CLI.
+// autosave-history AH-9 lists `history.read` and `history.jump` over its one History, so RJ-X31 runs on the CLI;
+// transform-tools TT-8 gives each rect a turn and mirrors and lists the six transform commands, so RJ-X32 runs on the CLI.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
 
-/// One named rect on the fake canvas; a locked one refuses move, remove and a fill.
+/// One named rect on the fake canvas; a locked one refuses move, remove, a fill and a transform.
 public struct FakeRect: Codable, Hashable, Sendable {
     /// The rect's id, its name ("Rect 1"), its frame and whether it is locked.
     public var id: Int, name: String, x, y, w, h: Double, locked: Bool
     /// The rect's fill, its points in the rect's own box (0, 0, w, h); nil reads as solid black and is left out of
     /// the JSON, so a rect with no fill saves what it did before fills.
     public var fill: Fill?
+    /// The rect's clockwise turn in degrees about its centre and its mirrors; at 0 and false they are left out of
+    /// the JSON, so a rect never turned saves what it did before turns.
+    public var degrees = 0.0, flipX = false, flipY = false
     public init(id: Int, name: String, x: Double, y: Double, w: Double, h: Double, locked: Bool = false, fill: Fill? = nil) {
         (self.id, self.name, self.x, self.y, self.w, self.h, self.locked, self.fill) = (id, name, x, y, w, h, locked, fill)
     }
-    private enum CodingKeys: String, CodingKey { case id, name, x, y, w, h, locked, fill }
+    private enum CodingKeys: String, CodingKey { case id, name, x, y, w, h, locked, fill, degrees, flipX, flipY }
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         self.init(id: try c.decode(Int.self, forKey: .id), name: try c.decode(String.self, forKey: .name),
                   x: try c.decode(Double.self, forKey: .x), y: try c.decode(Double.self, forKey: .y),
                   w: try c.decode(Double.self, forKey: .w), h: try c.decode(Double.self, forKey: .h),
                   locked: try c.decode(Bool.self, forKey: .locked), fill: try c.decodeIfPresent(Fill.self, forKey: .fill))
+        degrees = try c.decodeIfPresent(Double.self, forKey: .degrees) ?? 0
+        (flipX, flipY) = (try c.decodeIfPresent(Bool.self, forKey: .flipX) ?? false, try c.decodeIfPresent(Bool.self, forKey: .flipY) ?? false)
     }
     public func encode(to encoder: any Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
         try c.encode(id, forKey: .id); try c.encode(name, forKey: .name); try c.encode(x, forKey: .x); try c.encode(y, forKey: .y)
         try c.encode(w, forKey: .w); try c.encode(h, forKey: .h); try c.encode(locked, forKey: .locked)
         try c.encodeIfPresent(fill, forKey: .fill)
+        if degrees != 0 { try c.encode(degrees, forKey: .degrees) }
+        if flipX { try c.encode(flipX, forKey: .flipX) }
+        if flipY { try c.encode(flipY, forKey: .flipY) }
     }
     /// The box the rect's fill points are in: its own frame from the origin.
     public var fillBox: Rect { Rect(minX: 0, minY: 0, maxX: w, maxY: h) }
@@ -154,11 +163,11 @@ public struct FakeCanvasDocument: HeadlessDocument {
         .object(["rects": .number(Double(rects.count)), "selected": selected.map { .string($0.name) } ?? .null])
     }
 
-    /// The fake's twenty-three ids: its six commands, `edit.undo` and `edit.redo`, the five file-flow commands, the
-    /// eight fill commands and the two history commands. Empty only if an id were refused.
+    /// The fake's twenty-nine ids: its six commands, `edit.undo` and `edit.redo`, the five file-flow commands, the
+    /// eight fill commands, the two history commands and the six transform commands. Empty only if an id were refused.
     public static let catalog = (try? CommandCatalog<FakeCanvasDocument>(
         app: app, specs + FileFlowCommands.specs(FakeCanvasDocument.self) + GradientCommands.specs(FakeCanvasDocument.self)
-            + HistoryCommands.specs(FakeCanvasDocument.self),
+            + HistoryCommands.specs(FakeCanvasDocument.self) + TransformCommands.specs(FakeCanvasDocument.self),
         history: { $0.history })) ?? .empty(app: app)
     /// A rect's result schema.
     static let rectSchema = ParamSchema.object(["id": .integer(), "name": .string(), "x": .number(), "y": .number(),
@@ -249,6 +258,22 @@ extension FakeCanvasDocument: HistoryJumping {
         history.jumpEndingRun(to: index) { old in defer { current = old }; return current }
         rects = current
         if !rects.contains(where: { $0.id == selection }) { selection = nil }
+    }
+}
+
+/// The fake as a transform target: the selected rect's box, turn and mirrors; a locked rect refuses with its reason.
+extension FakeCanvasDocument: TransformTarget {
+    public var transformSelection: TransformBox? {
+        selected.map { TransformBox(box: Rect(minX: $0.x, minY: $0.y, maxX: $0.x + $0.w, maxY: $0.y + $0.h),
+                                    degrees: $0.degrees, flipX: $0.flipX, flipY: $0.flipY) }
+    }
+    public var transformHelp: String? { editable.why }
+    /// Sets the selected rect's frame, turn and mirrors from `t` as the step `name` (one per `drag` token).
+    public mutating func setTransform(_ t: TransformBox, name: String, drag: String?) throws {
+        let index = try editableIndex("transform")
+        history.record(name, rects, key: drag.map { "transform.\(name):\($0)" })
+        (rects[index].x, rects[index].y, rects[index].w, rects[index].h) = (t.box.minX, t.box.minY, t.box.width, t.box.height)
+        (rects[index].degrees, rects[index].flipX, rects[index].flipY) = (t.degrees, t.flipX, t.flipY)
     }
 }
 

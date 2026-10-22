@@ -2,7 +2,7 @@
   "title": "One rotate, scale and flip: the kernel's transform rules and commands, SuiteUI's turned handles and transform rows",
   "wave": 4,
   "order": 40,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "feature map S7 (transform handles: rotate, scale, flip, canvas size; PV-7 re-cut); real job RJ-X32; captain 2026-10-20: everyday tools in the beta, built once",

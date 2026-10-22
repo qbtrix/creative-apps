@@ -11,7 +11,9 @@ import SuiteKernel
     /// commands on Rect 1 (the stop edits while it has three stops, `fill.gradient` last), then an add (which selects the
     /// free new rect), a move of it, undo and redo of that move, and last the remove. `file.drop` places a rect as a
     /// step, which a file command may not do here, so FakeCanvasFileFlowTests walks it instead; `history.jump` to 0
-    /// would take the walk back to the fixture, so FakeHistoryTests walks it.
+    /// would take the walk back to the fixture, so FakeHistoryTests walks it. The transform commands turn Rect 1 (a flip
+    /// records "Flip Horizontal", not its title "Flip"), so FakeTransformTests walks them.
+    static let transforms = TransformCommands.specs(FakeCanvasDocument.self).map(\.id)
     static let fills = ["fill.read", "fill.type", "fill.stop-add", "fill.stop-move", "fill.stop-remove", "fill.stop-color",
                         "fill.angle", "fill.gradient"]
     static let walk = ["rect.list", "history.read", "rect.select", "doc.export-json", "file.recent", "file.open-recent", "file.open-in",
@@ -22,14 +24,14 @@ import SuiteKernel
         try FakeCanvasDocument.open(doc.save(), name: "canvas.fake")
     }
 
-    @Test func listNamesTheFakesTwentyThreeIdsSorted() {
+    @Test func listNamesTheFakesTwentyNineIdsSorted() {
         #expect(catalog.app == "fake")
         #expect(catalog.ids == ["doc.export-json", "edit.redo", "edit.undo", "file.clear-recent", "file.drop", "file.open-in",
                               "file.open-recent", "file.recent", "fill.angle", "fill.gradient", "fill.read", "fill.stop-add",
                               "fill.stop-color", "fill.stop-move", "fill.stop-remove", "fill.type", "history.jump", "history.read",
-                              "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select"])
-        #expect(catalog.ids == catalog.ids.sorted() && Set(catalog.ids) == Set(Self.walk + ["file.drop", "history.jump"])
-                && catalog.ids.count == Self.walk.count + 2)
+                              "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select", "transform.flip", "transform.read", "transform.reset", "transform.rotate", "transform.scale", "transform.set"])
+        #expect(catalog.ids == catalog.ids.sorted() && Set(catalog.ids) == Set(Self.walk + ["file.drop", "history.jump"] + Self.transforms)
+                && catalog.ids.count == Self.walk.count + 2 + Self.transforms.count)
         #expect(catalog.ids.allSatisfy(CommandCatalog<FakeCanvasDocument>.isValidID))
     }
 
