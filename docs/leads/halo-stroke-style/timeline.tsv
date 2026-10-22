@@ -29,3 +29,4 @@ time	kind	step	ref	note
 2026-10-22T10:39Z	2	pr-merged	#4336	HK-a contract slice
 2026-10-22T10:49Z	2	pr-opened	#4394	HK-m1 (HK-5)
 2026-10-22T10:49Z	2	pr-opened	#4395	HK-u1 (HK-3 model)
+2026-10-22T10:53Z	2	heartbeat	HK-m2	dev merged, CI: PASS 678d6d11
