@@ -231,7 +231,7 @@ struct PhotoWindow: View {
         case .blendMode(let id, let mode): model.setBlendMode(id, mode)
         case .moveLayers(let from, let to): model.moveLayers(fromOffsets: Array(from), toOffset: to)
         case .addLayer: model.addLayer()
-        case .deleteLayer: if let id = model.selectedLayerID { model.removeLayer(id) }
+        case .deleteLayer: model.removeSelectedLayers()
         case .renameLayer: beginRename()
         case .bringForward: model.bringSelectedLayerForward()
         case .sendBackward: model.sendSelectedLayerBackward()
