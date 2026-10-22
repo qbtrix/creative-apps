@@ -4,7 +4,7 @@ Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
 Run: act-1a15e10a86f-7bk9 (took over from act-1a15c07caa7-sppq) · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T01:10Z (this run 10:40Z)
 Stage: 3 wave 2
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: (2026-10-22T01:29Z) #4204 (FP-a fix2, ea6b7bec) macOS build run 39699652394 now running (macOS queue is deep). #4203 (PN-3, 7d76d219) macOS build queued; FP-u starts once it merges. FP-6 waits on FL-m (none open).
+Next: (2026-10-22T01:51Z) #4204 (FP-a fix2, ea6b7bec) macOS build green (run 39699652394, 01:33Z); waits on a lane sweep to merge. Then post-round-2 critics. #4203 (PN-3) macOS build queued; FP-u starts once it merges. FP-6 waits on FL-m (none open).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
