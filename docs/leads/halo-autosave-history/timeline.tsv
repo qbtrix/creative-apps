@@ -59,3 +59,5 @@ utc	stage	event	ref	note
 2026-10-22T10:19Z	3	heartbeat	#4342	compiled, waiting on the lane sweep
 2026-10-22T10:28Z	3	pr-merged	#4342	HA-6 history commands and RJ-H33
 2026-10-22T10:53Z	4	heartbeat	#4371	waiting on the lane
+2026-10-22T11:08Z	4	pr-merged	#4371	HA-7b recovery live
+2026-10-22T11:08Z	6	stage-built	HA-8	ddaf38bb, gating
