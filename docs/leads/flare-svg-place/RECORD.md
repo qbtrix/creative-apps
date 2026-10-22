@@ -8,7 +8,7 @@ Next: wave 2 PRs in the lane (#4297 PF-u, #4295 PF-5); then PF-z once both land;
 
 Loop: v3 (the packet has a `## Slices` table).
 
-Last stage: 07:14Z #4297 macOS build 39732985757 on f4d6350e still queued; #4295 in lane; 0 open findings.
+Last stage: 07:15Z record synced to lead/svg-place for Belt; #4297 macOS build 39732985757 on f4d6350e still queued; #4295 in lane (dev-red #3856 open); 0 open findings.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -24,6 +24,6 @@ Last stage: 07:14Z #4297 macOS build 39732985757 on f4d6350e still queued; #4295
 - PF-u waits on key-select-all KS-a (FlareCommands.swift) and PF-m on gradient-fill FG-m, FS-m, FK-m; all Flare-line features still planned except FS-m (this lead).
 - 2026-10-22 resume: KS-a (#3921) and AC-flare are on dev, so PF-u starts. FG-m is merged, so PF-6's gradient wait is met.
 - PF-5 is unchained from shape-tools FS-m and stroke-style FK-m: it owns only FlarePlace+Kernel.swift, its tests and its mutation plan, none of which those slices touch. PF-6 shares FlareCommandCatalog.swift and Tests/command-ids/flare.txt with them, so it keeps waiting on FS-6 and FK-m and ships as its own PR.
-- Belt reads this record at docs/leads/flare-svg-place/RECORD.md on `lead/flare-svg-place`; it is the record of truth (an interim copy went to `lead/svg-place` on 2026-10-22 and is no longer updated).
+- Belt watches `lead/svg-place` (docs/leads/svg-place/RECORD.md) and `lead/flare-svg-place` (docs/leads/flare-svg-place/RECORD.md); from 2026-10-22 07:4xZ both carry the same record and timeline, updated together each stage.
 - The packet wants "Flare places SVG files." for a PNG, but PlaceCommands refuses an off-format file with the generic PlaceRules.formatHelp. PF-5 must produce Flare's sentence on the Flare side (rasterSize / insertPlaced) without editing SuiteKernel.
 - #4297's snapshot `FlarePlaceSnapshots.placed` and `FlarePlaceMenuTests.svgPlaceReportsInStatus` stay disabled until PF-5 (#4295) lands; PF-z turns them on with the journey.
