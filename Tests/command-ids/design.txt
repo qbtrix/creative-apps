@@ -9,6 +9,14 @@ file.new
 file.open
 file.save
 file.save-as
+fill.angle
+fill.gradient
+fill.read
+fill.stop-add
+fill.stop-color
+fill.stop-move
+fill.stop-remove
+fill.type
 history.jump
 history.read
 object.align-bottom
@@ -37,3 +45,9 @@ tool.move
 tool.pen
 tool.rectangle
 tool.text
+transform.flip
+transform.read
+transform.reset
+transform.rotate
+transform.scale
+transform.set

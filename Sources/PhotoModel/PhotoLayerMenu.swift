@@ -11,8 +11,9 @@ extension PhotoWorkspace {
     /// Whether New Layer can run: it needs an open image.
     public var canAddLayer: Bool { canvas != nil }
 
-    /// Whether Delete Layer can run: a layer is selected and it isn't the last.
-    public var canDeleteSelectedLayer: Bool { canRemoveLayer && selectedLayer != nil }
+    /// Whether Delete Layer can run: a layer is selected, it isn't the last,
+    /// and the picked layers aren't every layer (`deleteLayersHelp`).
+    public var canDeleteSelectedLayer: Bool { deleteLayersHelp == nil }
 
     /// Whether Rename Layer… and Show/Hide Layer can run: a layer is selected.
     public var canEditSelectedLayer: Bool { selectedLayer != nil }
