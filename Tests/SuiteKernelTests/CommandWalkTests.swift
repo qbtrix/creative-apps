@@ -8,7 +8,8 @@ import SuiteKernel
 @Suite struct CommandWalkTests {
     let catalog = FakeCanvasDocument.catalog
     /// Every id in an order whose examples all run on one fixture: reads first, the file-flow commands, the fill
-    /// commands on Rect 1 (the stop edits while it has three stops, `fill.gradient` last), then an add (which selects the
+    /// commands on Rect 1 (the stop edits while it has three stops, `fill.gradient` last), the stroke commands on Rect 1
+    /// (`stroke.add` first, `stroke.remove` last, so Rect 1 ends unstroked as the fixture has it), then an add (which selects the
     /// free new rect), a move of it, undo and redo of that move, and last the remove. `file.drop` places a rect as a
     /// step, which a file command may not do here, so FakeCanvasFileFlowTests walks it instead; `history.jump` to 0
     /// would take the walk back to the fixture, so FakeHistoryTests walks it. The transform commands turn Rect 1 (a flip
@@ -16,20 +17,24 @@ import SuiteKernel
     static let transforms = TransformCommands.specs(FakeCanvasDocument.self).map(\.id)
     static let fills = ["fill.read", "fill.type", "fill.stop-add", "fill.stop-move", "fill.stop-remove", "fill.stop-color",
                         "fill.angle", "fill.gradient"]
+    static let strokes = ["stroke.read", "stroke.add", "stroke.color", "stroke.width", "stroke.join", "stroke.cap", "stroke.dash",
+                          "stroke.trim", "stroke.remove"]
     static let walk = ["rect.list", "color.sample", "history.read", "rect.select", "doc.export-json", "file.recent", "file.open-recent", "file.open-in",
-                       "file.clear-recent"] + fills + ["rect.add", "rect.move", "edit.undo", "edit.redo", "rect.remove"]
+                       "file.clear-recent"] + fills + strokes + ["rect.add", "rect.move", "edit.undo", "edit.redo", "rect.remove"]
 
     /// `doc` saved and opened again: a document at its saved state, with a clean history.
     static func reopened(_ doc: FakeCanvasDocument) throws -> FakeCanvasDocument {
         try FakeCanvasDocument.open(doc.save(), name: "canvas.fake")
     }
 
-    @Test func listNamesTheFakesThirtyIdsSorted() {
+    @Test func listNamesTheFakesThirtyNineIdsSorted() {
         #expect(catalog.app == "fake")
         #expect(catalog.ids == ["color.sample", "doc.export-json", "edit.redo", "edit.undo", "file.clear-recent", "file.drop", "file.open-in",
                               "file.open-recent", "file.recent", "fill.angle", "fill.gradient", "fill.read", "fill.stop-add",
                               "fill.stop-color", "fill.stop-move", "fill.stop-remove", "fill.type", "history.jump", "history.read",
-                              "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select", "transform.flip", "transform.read", "transform.reset", "transform.rotate", "transform.scale", "transform.set"])
+                              "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select", "stroke.add", "stroke.cap",
+                              "stroke.color", "stroke.dash", "stroke.join", "stroke.read", "stroke.remove", "stroke.trim", "stroke.width",
+                              "transform.flip", "transform.read", "transform.reset", "transform.rotate", "transform.scale", "transform.set"])
         #expect(catalog.ids == catalog.ids.sorted() && Set(catalog.ids) == Set(Self.walk + ["file.drop", "history.jump"] + Self.transforms)
                 && catalog.ids.count == Self.walk.count + 2 + Self.transforms.count)
         #expect(catalog.ids.allSatisfy(CommandCatalog<FakeCanvasDocument>.isValidID))
@@ -71,14 +76,17 @@ import SuiteKernel
         let fixture = FakeCanvasDocument.fixture.rects
         #expect(doc.rects.map(\.id) == fixture.map(\.id) && doc.rects.dropFirst() == fixture.dropFirst() && doc.selection == nil)
         #expect(doc.rects.first?.fill != fixture.first?.fill && doc.rects.first?.fill?.stops.count == 2)
-        #expect(doc.history.steps == Self.fills.dropFirst().compactMap { catalog.spec($0)?.title }
+        #expect(doc.rects.first?.stroke == nil)
+        #expect(doc.history.steps == (Self.fills.dropFirst() + Self.strokes.dropFirst()).compactMap { catalog.spec($0)?.title }
                 + ["Add Rectangle", "Move Rectangle", "Remove Rectangle"])
-        // Each example also runs alone on a fresh fixture, except undo, redo and the jump, which refuse with no steps.
+        // Each example also runs alone on a fresh fixture, except undo, redo and the jump, which refuse with no steps, and
+        // the stroke edits, which refuse until Rect 1 has a stroke.
         for id in catalog.ids {
             var fresh = FakeCanvasDocument.fixture
             let example = try #require(catalog.spec(id)?.example)
             do { _ = try catalog.run(id, params: example, on: &fresh) } catch {
-                #expect(CatalogConformance.historyIDs.contains(id) || id == "history.jump", "\(id)'s example refused on the fixture: \(error)")
+                #expect(CatalogConformance.historyIDs.contains(id) || id == "history.jump"
+                        || (id.hasPrefix("stroke.") && !["stroke.read", "stroke.add"].contains(id)), "\(id)'s example refused on the fixture: \(error)")
                 guard case .unavailable = error else { Issue.record("\(id) refused with \(error)"); continue }
             }
         }

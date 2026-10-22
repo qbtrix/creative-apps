@@ -1,0 +1,6 @@
+[
+{"label":"the spec is dropped, so a star reopens as a plain box (shape-tools DS-5)","file":"Sources/DesignModel/DesignShape+Kernel.swift","find":"        _ = pages.update(id) { $0.shape = spec }\n","replace":"\n","tests":"specSaved"},
+{"label":"a draw is two steps, the node then its spec (shape-tools DS-5)","file":"Sources/DesignModel/DesignShape+Kernel.swift","find":"        let id = try insertNode(.shape, frame: frame, in: parent)\n","replace":"        let id = try insertNode(.shape, frame: frame, in: parent)\n        record(name, before: before)\n","tests":"drawIsOneStep"},
+{"label":"a spec the kernel refuses is drawn anyway (shape-tools DS-5)","file":"Sources/DesignModel/DesignShape+Kernel.swift","find":"if let help = shapeHelp ?? ShapeRules.help(spec) {","replace":"if let help = shapeHelp {","tests":"theCommandAddsOneSelectedShapeAndItsPathIsTheKernels"},
+{"label":"a shape node has no path (shape-tools DS-5)","file":"Sources/DesignModel/DesignShape+Kernel.swift","find":"return try? ShapeRules.path(shape, in: frame.kernelRect)","replace":"return nil","tests":"theCommandAddsOneSelectedShapeAndItsPathIsTheKernels"}
+]

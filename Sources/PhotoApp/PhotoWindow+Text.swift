@@ -4,6 +4,7 @@
 // Return and losing focus `.commit`, Escape `.cancel`. Until TX-5 builds `text.add` a commit adds
 // nothing and the status line says why. Presentation state only: focus.
 import PhotoModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -15,6 +16,8 @@ enum TypeIntent {
     case commit
     /// Closes the box and drops its words.
     case cancel
+    /// Restyles the selected text layer: one text inspector gesture (PhotoTextInspector).
+    case style(TextIntent)
 }
 
 extension PhotoWindow {
@@ -23,6 +26,7 @@ extension PhotoWindow {
         case .type(let words): model.typeText(words)
         case .commit: model.commitTextBox()
         case .cancel: model.cancelTextBox()
+        case .style(let intent): model.runText(intent)
         }
     }
 }

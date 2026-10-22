@@ -22,6 +22,7 @@ extension PhotoLayer: LayerPayload {
         layer.kind = kind
         layer.hasMask = hasMask
         layer.isMaskEnabled = isMaskEnabled
+        layer.isClipped = isClipped
         return layer
     }
 }
