@@ -4,7 +4,7 @@ Issue: #1971 · Packet: docs/blueprints/halo/features/core-loop.md
 Run: act-1a15f92d2f2-kvrn (from 2026-10-21T18:00Z; before: act-1a15d0eeefb-6z9l from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0) (from 2026-10-20T18:45Z; before: act-1a15728f2a2-zb1o) · Session: claude/halo-feature-lead-run-02scrb · Started: 2026-10-20T02:37Z
 Stage: 3 wave 5
 Base: 6d5f3a4025ffce3bb843003a158f64bf282020e6
-Next: #4287 merged (04:41Z). Round-1 fixers in flight: #4310-#4312 (text redo + H-J12 oracles), #4313-#4314 (inspector width, color label). Waiting on the lane: #4285 #4286 #4290 (macOS build). Then perf fixers #4274-#4277 after #4285+#4286. Blocked on SuiteUI: #4273 (#4283), #4281 (#4282). Open findings >5, no new feature work
+Next: round-1 PRs #4321 (#4310-#4312) and #4322 (#4313-#4314) open with Fast-Check. Waiting on the lane: #4285 #4286 #4290 #4321 #4322. Then perf fixers #4274-#4277 after #4285+#4286; next journeys run re-checks H-J12 screens (inspector now 240 pt). Blocked on SuiteUI: #4273 (#4283), #4281 (#4282). Open findings >5, no new feature work
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -96,6 +96,6 @@ Next: #4287 merged (04:41Z). Round-1 fixers in flight: #4310-#4312 (text redo + 
 | #4310 inspector TEXT field stale after Redo | major | journey | PR #4321 (round 1; Model key re-syncs field on undo/redo) |
 | #4311 H-J12 step 9 never checks Undo removed "Hello" | minor | oracle | PR #4321 |
 | #4312 H-J12 step 7 Space check passes when Space does nothing | minor | oracle | PR #4321 |
-| #4313 inspector width tracks content (5 pt) | minor | layout | round-1 fixer dispatched 05:12Z (#4287 merged) |
-| #4314 text Color row label clipped | minor | layout | with #4313 |
+| #4313 inspector width tracks content (5 pt) | minor | layout | PR #4322 (round 1; fixed 240 pt column; watch conflict with #4210 in HaloWindow.swift) |
+| #4314 text Color row label clipped | minor | layout | PR #4322 |
 | #4315 easing chips lack identifiers (gap, p2) | – | audit | gap; predates core-loop |
