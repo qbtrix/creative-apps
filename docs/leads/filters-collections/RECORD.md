@@ -2,9 +2,9 @@
 
 Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
 Run: act-1a147b718fd-n1ee · Session: unknown · Started: 2026-10-17T02:30Z
-Stage: 5 done (Belt-Contact-Sheet posted)
+Stage: 3 wave 2 (FC-2 part 1 in review)
 Base: 06371387 (origin/dev at setup; the brief's main 37d99630 is an ancestor, CLAUDE.md says dev)
-Next: beta-hardening lane verifies AH-u, AH-m, AH-a, AH-z (journeys HJ1, KJ-history after CI run 39781775747's macOS job, feel gate, Mac-Finish; Mac-Finish-Wanted posted for AH-u, AH-a, AH-z; gap #4174). The lead is done.
+Next: full dev CI 39781775747 (contains 5d28cf9): on a green Linux job post Belt-Slice-Done AH-z + Mac-Finish-Wanted AH-z, then Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
