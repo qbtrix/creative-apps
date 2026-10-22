@@ -83,3 +83,4 @@ utc	stage	event	ref	note
 2026-10-21T23:55Z	3	pr-opened	-	23:5xZ: #4181 (FG-m) merged as de0f324d. FG-z #4257 opened (FG-7 + FG-8, head 767243df, 8 files +89/-14, Mutate 3/3, feature-done). No dev run contains #4181 yet.
 2026-10-22T00:14Z	3	check	-	#4257 merged dev, head 1342653f, relabelled fast-lane
 2026-10-22T00:36Z	3	check	-	full run 39695935370 cancelled; Linux checks red on shell-media FormatListRatchet (not ours); #4257 in lane
+2026-10-22T01:00Z	3	check	-	heartbeat: #4257 awaiting lane macOS build; scoped flare 39690220595 in progress

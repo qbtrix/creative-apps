@@ -4,7 +4,7 @@ Issue: #3419 · Packet: docs/blueprints/flare/features/gradient-fill.md
 Run: act-1a160bffba1-bvv3 (line lead: gradient-fill #3419, export-pack #3481, file-flow #3482; resumed from act-1a1574f6742-pe5i) · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-20T03:17Z · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: 3 wave 4 (FG-z)
 Base: 8c55f0bf9 (origin/dev)
-Next: Slice-Done FG-m when full run 39700185524 (add701fc) is green on Linux
+Next: FG-z macOS build 39699101753 queued; FG-m Slice-Done on green run
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -71,3 +71,4 @@ Next: Slice-Done FG-m when full run 39700185524 (add701fc) is green on Linux
 - 2026-10-21T23:55Z: 23:5xZ: #4181 (FG-m) merged as de0f324d. FG-z #4257 opened (FG-7 + FG-8, head 767243df, 8 files +89/-14, Mutate 3/3, feature-done). No dev run contains #4181 yet.
 - 2026-10-22T00:14Z: #4257 merged dev, head 1342653f, relabelled fast-lane
 - 2026-10-22T00:36Z: full run 39695935370 cancelled; Linux checks red on shell-media FormatListRatchet (not ours); #4257 in lane
+- 2026-10-22T01:00Z: heartbeat: #4257 awaiting lane macOS build; scoped flare 39690220595 in progress
