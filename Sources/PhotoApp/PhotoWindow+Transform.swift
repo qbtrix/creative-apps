@@ -34,6 +34,8 @@ enum TransformIntent {
     case resizeCanvas(CanvasSizeDraft)
     /// The sheet's Cancel, or its dismissal.
     case closeCanvasSize
+    /// A handle drag's release: the live transform goes back to the workspace (`perform` takes it first).
+    case endDrag
 }
 
 extension PhotoWindow {
@@ -56,6 +58,8 @@ extension PhotoWindow {
             resizeCanvas(draft)
         case .closeCanvasSize:
             canvasSizeDraft = nil
+        case .endDrag:
+            break
         }
     }
 
@@ -70,18 +74,26 @@ extension PhotoWindow {
     }
 
     /// Runs one kernel transform through the catalog; a drag's refused sample
-    /// beeps, any other refusal opens the alert.
+    /// beeps, any other refusal opens the alert. A drag's samples run on the
+    /// live transform (LiveTransformCopy+Kernel.swift), which the window takes back once.
     private func runTransform(_ edit: SuiteKernel.TransformIntent) {
         let (id, params) = edit.command
+        if Self.isDragSample(edit) {
+            let shown = liveTransform.run(on: model, done: { takeStroke() }) {
+                if (try? PhotoWorkspace.catalog.run(id, params: params, on: &$0)) == nil { NSSound.beep() }
+            }
+            return renderer.show(shown, quietly: true)
+        }
         do {
             _ = try PhotoWorkspace.catalog.run(id, params: params, on: &model)
         } catch {
-            if Self.isDragSample(edit) {
-                NSSound.beep()
-            } else {
-                problem = PhotoProblem("The layer can't be transformed.", error.description)
-            }
+            problem = PhotoProblem("The layer can't be transformed.", error.description)
         }
+    }
+
+    /// Whether `intent` is one sample of a transform drag, which runs on the live transform.
+    nonisolated static func isTransformSample(_ intent: PhotoIntent) -> Bool {
+        if case .transform(.kernel(let edit)) = intent { isDragSample(edit) } else { false }
     }
 
     /// Whether `edit` is one sample of a drag (it carries a token).
