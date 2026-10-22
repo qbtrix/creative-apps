@@ -50,3 +50,5 @@ Next: #4159, #4187, #4188-fix merge -> Belt-Slice-Done + Mac-Finish-Wanted DT-u 
 - 2026-10-22T00:36Z Gate CI: PASS after the dev merge; pushed #4254→f9c5b8ac,#4255→5d611ef3 and moved Head: lines. Waiting on the lane.
 
 - 2026-10-22T01:03Z Heartbeat: #4254 (macOS build 39700862805) and #4255 (39700883014) queued for runners.
+
+- 2026-10-22T01:29Z #4255 (DT-6) macOS build 39700883014 green; waits on the lane sweep. #4254 build 39700862805 still queued.
