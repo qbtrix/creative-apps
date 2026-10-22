@@ -41,3 +41,4 @@
 2026-10-22T02:36Z	check	no newer Linux run; last 39707946247 red only on SuiteModel FormatListRatchetTests (not mine); full CI 39707795159 pending; TS-m #3844/#3847 open
 2026-10-22T03:00Z	slice-done	TX-m and TX-u: Linux 39710840412 green on dev b5a6e7e0a (contains 8f583b30f, 2ce1c2a36); Belt-Slice-Done posted on #3785. TX-4/TX-5 still wait on TS-m #3844/#3847 (open)
 2026-10-22T03:26Z	check	TS-m #3844/#3847 still open, TX-4/TX-5 blocked; no text-layers finding open (line:photo findings are other features)
+2026-10-22T03:50Z	check	TS-m #3844/#3847 still open, TX-4/TX-5 blocked; no new text-layers finding
