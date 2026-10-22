@@ -4,7 +4,7 @@ Issue: #3482 · Packet: docs/blueprints/flare/features/file-flow.md
 Run: act-1a160bffba1-bvv3 · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih) · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: FL-a
 Base: 8c55f0bf9 (origin/dev)
-Next: unchanged
+Next: FL-a Slice-Done once CI run 39730395919 (b2bde159, has 414b9220) shows a green Linux job; FL-4 after FL-m merges
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -72,3 +72,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T04:24Z: #4259 macOS build still queued
 - 2026-10-22T04:52Z: #4259 macOS build still queued (since 02:48Z)
 - 2026-10-22T05:19Z: #4259 macOS build still queued (since 02:48Z)
+- 2026-10-22T06:06Z: #4259 FL-a merged 05:34Z (414b9220). FL-u opened as #4325 (35a8aa65, tests only). FL-m opened as #4326 (d0f43bbf) after merging dev; a stale shared build had segfaulted AfterGlowCLITests, and a clean rebuild passes the gate.
