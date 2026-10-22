@@ -27,7 +27,7 @@ Last check: 2026-10-22T11:57Z. Runs containing dcfcb6b0: CI 39769927851 (a332b3e
 | DT-6 | DT-m | 3 | SVG turn, specs, RJ-D15 | Sources/DesignModel/Live/DesignSVG.swift, Sources/DesignModel/DesignCommandCatalog.swift, Tests/command-ids/design.txt, Tests/RealJobs/design/rotate-15/ | DesignSVGTests.turnedNode, RJ-D15 | – | waiting |
 | DT-7 | DT-z | 6 | journey on live | UITests/DesignJourneyTests+Transform.swift | DesignTransformJourneyTests | #4323 | merged (dcfcb6b0) |
 | R2 | DT-u | 6 | fix #4223 turned resize + #4224 knob over several | Sources/DesignModel/DesignCanvasEditing.swift, Sources/DesignModel/DesignCanvasHints.swift, their tests and plans | DesignTurnedResizeTests, knob-several test | #4324 | merged (80aba474) |
-| DT-z-r1 | DT-z | 7 | split transform render budget into bodies/timing | Tests/AppSnapshotTests/RenderBudgetDesignTransformTests.swift, docs/blueprints/design/features/transform.md | RenderBudgetDesignTransformTests.bodies | #4401 | open (f3291c20) |
+| DT-z-r1 | DT-z | 7 | split transform render budget into bodies/timing | Tests/AppSnapshotTests/RenderBudgetDesignTransformTests.swift, docs/blueprints/design/features/transform.md | RenderBudgetDesignTransformTests.bodies | #4401 | open (1a24c13d, with the supervisor's perf-suites line) |
 | DT-8 | DT-z | 6 | status built | docs/blueprints/design/features/transform.wave.json | scripts/waves render --dry-run | #4323 | merged (dcfcb6b0, with DT-7) |
 
 ## Reviews
@@ -83,3 +83,4 @@ Last check: 2026-10-22T11:57Z. Runs containing dcfcb6b0: CI 39769927851 (a332b3e
 - Relaunched. #4254 (knob) merged 04:40Z; DT-a/DT-u/DT-m done per the brief. Open findings: #4223, #4224 (DT-u, round 2). Wave 6 started: R2 fix PR + DT-z slice PR, builders in parallel.
 
 - 2026-10-22T11:37Z Scoped design run 39747588205 (2b31ba4c) red: knob-drag p95 21.43 ms, scrub 119 bodies (fixed on dev by #4354), rows turnHelp (fixed by #4379). Round 1: #4401 splits RenderBudgetDesignTransformTests into gating `bodies` and report-only `timing` (RenderBudgetDesignTests' pattern); asked the supervisor on #3436 to list `timing` in Tests/perf-suites.txt. Runs 39769473910 (design) and 39769927851 (full) on a332b3e2 carry #4354/#4379.
+- 2026-10-22T12:02Z The supervisor pushed 1a24c13d2 (the perf-suites.txt timing line) to #4401, so the lane marked it protected and it needs captain review; the supervisor asked that the line stay as it is. Gate CI: PASS on 1a24c13d2, Head moved. Runs 39769473910 (design) and 39769927851 (full) on a332b3e2 still queued.
