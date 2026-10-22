@@ -2,9 +2,9 @@
 
 Issue: #3444 · Packet: docs/blueprints/suiteui/features/autosave-history.md
 Run: act-1a1630f0f74-0l2p (prior: act-1a157ad4600-c6w5) · Started: 2026-10-20T05:01:16Z · Resumed: 2026-10-22T10:03:39Z
-Stage: 3 polling
+Stage: 5 done (Belt-Contact-Sheet posted)
 Base: 02d2e5be85489fdeb62bd479a819456cf13c568e
-Next: full dev CI 39781775747 (contains 5d28cf9): on a green Linux job post Belt-Slice-Done AH-z + Mac-Finish-Wanted AH-z, then Belt-Contact-Sheet.
+Next: beta-hardening lane verifies AH-u, AH-m, AH-a, AH-z (journeys HJ1, KJ-history after CI run 39781775747's macOS job, feel gate, Mac-Finish; Mac-Finish-Wanted posted for AH-u, AH-a, AH-z; gap #4174). The lead is done.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: full dev CI 39781775747 (contains 5d28cf9): on a green Linux job post Belt
 | AH-a | The kernel's schedule and history commands and the recovery folder are declared as stubs, the gallery's history-panel page is in the index, and the checks are written, disabled. | AH-1, AH-2 | SJ0 | gradient-fill:GF-a (AH-1) | true | 0 | done | 39756689216 | wanted |
 | AH-u | On the gallery page the panel lists the states, marks the current one, dims the undone ones and jumps on a click or arrows and Return, every row identified, within the render budget. | AH-3, AH-4 | HJ1 | AH-a (AH-3) | true | 0 | done | 39448853502 | wanted |
 | AH-m | The schedule writes once per edit a delay after it and deletes a write a save overtook, a jump lands on its index without recording a step, and the folder keeps the newest recovery files and drops damaged ones. | AH-5, AH-6, AH-7 | KJ-history | AH-a (AH-5, AH-6, AH-7) | false | 0 | done | 39424989659 | – |
-| AH-z | The modifier autosaves and offers recovery on the live schedule and folder, the gallery jumps on a live history, the fake app jumps so RJ-X31 runs on the CLI, and the feature is built. | AH-8, AH-9, AH-10 | HJ1, KJ-history | AH-u (AH-8); AH-m (AH-8, AH-9); gradient-fill:GF-z (AH-9) | true | 0 | merged, waiting green Linux | – | – |
+| AH-z | The modifier autosaves and offers recovery on the live schedule and folder, the gallery jumps on a live history, the fake app jumps so RJ-X31 runs on the CLI, and the feature is built. | AH-8, AH-9, AH-10 | HJ1, KJ-history | AH-u (AH-8); AH-m (AH-8, AH-9); gradient-fill:GF-z (AH-9) | true | 0 | merged-done | 39781775747 | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
