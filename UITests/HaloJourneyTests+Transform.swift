@@ -6,15 +6,13 @@
 // bottom-right corner scales Ball in proportion (Scale X and Y read the same
 // in the inspector), and at 1 s, with Rotation animated, a Shift-drag of the
 // knob turns it in 15° steps and keys 1 s; Undo takes the turn back in one
-// step. Skipped until HT-7 runs it on the live Model: the handles take no
-// drags before HT-3 and the adapter writes nothing before HT-5. Shots:
-// `halo-transform-*`.
+// step. It runs on the live Model (HT-7): HT-3's drags commit through HT-5's
+// adapter. Shots: `halo-transform-*`.
 import XCTest
 
 extension HaloJourneyTests {
     /// Journey steps 1-4: handles on the selected layer, a proportional scale, a keyed turn, one undo.
     @MainActor func testRotateAndScaleInViewer() throws {
-        throw XCTSkip("waits on HT-7")
         let halo = Journey("Halo", self, arguments: ["-HaloFixture", "keyed", "-HaloWindowSize", "1000x640"])
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         XCTAssert(halo.element("halo.viewer").waitForExistence(timeout: 10), "no viewer (halo.viewer)")
