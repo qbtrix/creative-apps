@@ -37,3 +37,4 @@ utc	stage	event	ref	note
 2026-10-22T01:35Z	3	decision	-	Records now also live on lead/flare-* (the branches Belt watches); every stage pushes there.
 2026-10-22T01:44Z	3	heartbeat	-	Heartbeat: #4259 build 39703409910 still queued (macOS runners busy); #4257, #4035 open; no green-Linux run containing FG-m yet.
 2026-10-22T02:16Z	3	heartbeat	-	No change: #4035 open.
+2026-10-22T03:12Z	3	heartbeat	-	Heartbeat: #4259 (593d9118) and #4257 (d417a35f) wait on lane macOS builds; #4035 too. dev Linux green at 66a84588.
