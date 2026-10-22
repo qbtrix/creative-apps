@@ -59,3 +59,5 @@ utc	stage	event	ref	note
 2026-10-21T10:11Z	3	heartbeat	W4f	#3969 (PT-5) at 9e452e8, needs-rebase dropped; #3968 (PT-3m) and #3969 waiting on lane; #3996 repointed Design anchors (dev-red #3856 fix), Linux check on fe232dc running; scoped photo run 39579629627 still queued
 2026-10-21T10:33Z	3	heartbeat	W4g	dev green again (Linux check fe232dc success after #3996); #3969 (PT-5) clean, in lane; lane batch 20261021102756 forming; scoped photo run 39579629627 still queued
 2026-10-21T10:57Z	3	heartbeat	W4h	#4005 PT-3 open; fixer baselining CanvasSizeSheet buttons (CommandPathTests); dev red from #3976 PhotoPlace not ours; #3969 PT-5 open fast-lane; scoped photo run 39579629627 in progress
+2026-10-22T09:00Z	0	stage-start	act-1a1624626e1-8awa	relaunch for PE-m, PE-z; base dev bdd92b41
+2026-10-22T09:05Z	3	stage-start	W1	PE-6 builder

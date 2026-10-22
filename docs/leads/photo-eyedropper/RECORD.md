@@ -1,57 +1,46 @@
 # eyedropper lead record
 
 Issue: #3439 · Packet: docs/blueprints/photo/features/eyedropper.md
-Run: act-1a15ac118a1-s70v · Session: claude/feature-lead-playbook-j1aygs · Started: 2026-10-20T19:30Z
+Run: act-1a1624626e1-8awa · Session: claude/eyedropper-feature-lead-eton7y · Started: 2026-10-22T09:00Z
 Stage: 3 wave 1
-Base: a48992b7c85ded3959e12683f50bd5fe7531b011
-Next: read wave 1's PRs (PE-a) on the fast lane; then wave 2
+Base: bdd92b41888b013f6ccd4e177874848a88b1a227
+Next: PE-m builder (PE-6) running; then PE-z (PE-7, PE-8) stacked on it
 
-Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transform: one combined wave plan, so the other two records show the same waves.
+Relaunch for the remaining slices PE-m and PE-z (PE-a and PE-u done by run act-1a15ac118a1-s70v).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| PE-a | stubs + tool on the fakes, size chips, palette | PE-1, PE-2 | journey written, skipped | shell-parity (built) | true | 0 | building | – | – |
-| PE-u | loupe, click pick, Option-click with Brush; snapshots, budget | PE-3, PE-4 | – | PE-a | true | 0 | planned | – | – |
-| PE-m | live sampling, adapter bodies, catalog | PE-5, PE-6 | RJ-P36 | PE-a; PH-5 (catalog order) | false | 0 | planned | – | – |
-| PE-z | journey on live, feature-done | PE-7, PE-8 | PhotoJourneyTests+Eyedropper | PE-u, PE-m | true | 0 | planned | – | – |
+| PE-a | stubs + tool on the fakes, size chips, palette | PE-1, PE-2 | MJ-PE | shell-parity (built) | true | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39514893774 | 1b19079c gaps: #4168 |
+| PE-u | loupe, click pick, Option-click with Brush; snapshots, budget | PE-3, PE-4 | PJ-E1 | PE-a | true | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39571804700 | wanted |
+| PE-m | live sampling, adapter bodies, color.sample, RJ-P36 | PE-5, PE-6 | MJ-PE, RJ-P36 | PE-a (done); history-panel:PH-m (built) | false | 0 | building | – | – |
+| PE-z | journey on live, feature-done | PE-7, PE-8 | PJ-E1, RJ-P22 | PE-u (done), PE-m | true | 0 | planned | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| PE-1 | PE-a | 1 | adapter as stubs, SampleSize = kernel's, tests disabled | Sources/PhotoModel/PhotoSample+Kernel.swift, Sources/PhotoModel/Contracts/OutputContracts.swift, Tests/PhotoModelTests/PhotoSampleTests.swift | PhotoSampleTests (disabled) | – | building |
-| PE-2 | PE-a | 1 | tool on stubs: SampleIntent, size chips, palette enabled; journey skipped | Sources/PhotoApp/PhotoWindow+Sample.swift, Sources/PhotoApp/SampleOptions.swift, Sources/PhotoApp/PhotoPaletteTool.swift, UITests/PhotoJourneyTests+Eyedropper.swift | macOS build | – | building |
-| PE-3 | PE-u | 2 | loupe, click picks, Option-click with Brush | Sources/PhotoApp/PhotoWindow+Sample.swift, Sources/PhotoApp/LiveStroke.swift, Tests/AppSnapshotTests/PhotoEyedropperOverlayTests.swift | PhotoEyedropperOverlayTests | – | planned |
-| PE-4 | PE-u | 3 | snapshots + render budget | Tests/AppSnapshotTests/PhotoEyedropperSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoEyedropperTests.swift | snapshots | – | planned |
-| PE-5 | PE-m | 2 | live ColorSampling on SampleRules.mean; NotBuilt stand-in removed | Sources/PhotoModel/Live/LiveSampling.swift, Sources/PhotoModel/Live/NotBuilt.swift, Tests/PhotoModelTests/LiveSamplingTests.swift, Tests/mutations/PhotoModel.LiveSampling.json | LiveSamplingTests; .squareCentred .skipsTransparent | – | planned |
-| PE-6 | PE-m | 4 | adapter bodies, color.sample in catalog, tests on, RJ-P36 | Sources/PhotoModel/PhotoSample+Kernel.swift, Tests/PhotoModelTests/PhotoSampleTests.swift, Tests/mutations/PhotoModel.PhotoSample+Kernel.json, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/RealJobs/photo/sample-mean/ | PhotoSampleTests; .samplesComposite .pickIsToolState | – | planned |
-| PE-7 | PE-z | 5 | journey on live | UITests/PhotoJourneyTests+Eyedropper.swift | journey | – | planned |
-| PE-8 | PE-z | 6 | status built, feature-done | docs/blueprints/photo/features/eyedropper.wave.json | scripts/ci | – | planned |
+| PE-1 | PE-a | – | adapter stubs | Sources/PhotoModel/PhotoSample+Kernel.swift | PhotoSampleTests | #3706 | merged |
+| PE-2 | PE-a | – | tool on stubs, chips | Sources/PhotoApp/SampleOptions.swift | macOS build | #3706 | merged |
+| PE-3 | PE-u | – | loupe, click, Option-click | Sources/PhotoApp/PhotoWindow+Sample.swift | PhotoEyedropperOverlayTests | #3808 | merged |
+| PE-4 | PE-u | – | snapshots + render budget | Tests/AppSnapshotTests/PhotoEyedropperSnapshots.swift | RenderBudgetPhotoEyedropperTests | #3808 | merged |
+| PE-5 | PE-m | – | live ColorSampling on SampleRules.mean | Sources/PhotoModel/Live/LiveSampling.swift | LiveSamplingTests | #3800 | merged |
+| PE-6 | PE-m | 1 | adapter bodies, color.sample in catalog, tests on, RJ-P36 | Sources/PhotoModel/PhotoSample+Kernel.swift, Tests/PhotoModelTests/PhotoSampleTests.swift, Tests/mutations/PhotoModel.PhotoSample+Kernel.json, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/RealJobs/photo/sample-mean/ | PhotoSampleTests; .samplesComposite .pickIsToolState | – | building |
+| PE-7 | PE-z | 2 | journey on live | UITests/PhotoJourneyTests+Eyedropper.swift | testPickSkyColor | – | planned |
+| PE-8 | PE-z | 2 | status built, feature-done | docs/blueprints/photo/features/eyedropper.wave.json | scripts/ci | – | planned |
 
-## Waves (combined plan, all three features)
-- W1 (independent, disjoint files): PT-a (PT-1, then PT-2 stacked), PH-a (PH-1+PH-2), PE-a (PE-1+PE-2).
-- W2: PT-4 (waits on PT-1: FlipAxis), PE-5 (waits on PE-1: SampleSize), PH-6 (waits on PH-1: recovery stubs), PT-3 (waits on PT-2: the transform area), PH-3 (waits on PH-2), PE-3 (waits on PE-2). Each one is stacked on its parent.
-- W3: PT-5 (waits on PT-4: resample), PT-7 (waits on PT-3), PH-4 (waits on PH-3), PE-4 (waits on PE-3).
-- W4: PT-6 (waits on PT-5: canvas-size through the registered command), PH-5 (waits on PT-5: catalog order), then PE-6 (waits on PH-5: catalog order, and on PE-5).
-- W5: PT-8, PH-7, PE-7 (journeys on live, each waits on its feature's last code task).
-- W6: PT-9, PH-8, PE-8 (feature-done).
+## Waves
+- W1: PE-6 alone (slice PE-m), base dev.
+- W2: PE-7 + PE-8 as one slice PR (PE-z, ~60 lines), stacked on PE-m's branch (rule 22); it needs PE-6's live pick for the journey.
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
-| – | – | – | – | – | – |
 
 ## Decisions
-- v3 loop: each packet has a `## Slices` table.
-- Base `dev`, not `main`: CLAUDE.md and the lead contract say branch from and target dev; the fast lane only merges dev PRs. Brief step one checked main at b3011ab; waves start from origin/dev.
-- Status branch and folder carry a `photo-` prefix where `lead/<feature>` already belongs to another live lead (SuiteUI eyedropper #3448 on `lead/eyedropper`, Halo transform #3443 on `lead/transform`). Overwriting them would break those leads. history-panel has no clash and uses `lead/history-panel`.
-- PRs keep `Feature: <packet feature>`, without the prefix.
-- One PR per slice (rule 22), split per task when a slice is over the 400-line cap: PT-a (~470), PT-m (~780) and PH-m (~500). A stacked PR is opened only once its diff against dev fits the cap, so the lane never strips the label for size.
-- Catalog serialization: PhotoCommandCatalog.swift and Tests/command-ids/photo.txt are edited in turn by PT-5, PH-5 and PE-6, each stacked on the one before. The wave.json waits transform:PT-m on PH-5 and history-panel:PH-m on PE-6 exist only for that file ordering.
-- PT-5's waits on gradient-fill:PG-m and multi-layer-select:PM-m are dropped. Both features are `planned` with no feature issue ("file when ready") and nobody is building them, so the waits only ordered edits to the shared catalog. PT-5 goes first in the chain.
-- Cross-line waits met on dev a48992b: SuiteKernel Transform/Sample/History rules and commands (TT-a #3485/#3486, #3524, #3573), SuiteUI SampleLoupe/SampleSizeChips (EY #3525/#3531/#3540/#3541), TransformRows and handles #3512, HistoryPanel #3568/#3596/#3607, RecoveryFolder #3572, AutosaveSchedule #3576. shell-parity (photo) and AC-photo are built.
-- The swift toolchain was missing on this machine; it was installed with scripts/cloud-setup.sh (6.3.3) so `scripts/ci --changed` runs here.
-- PE-6 waits on PH-5 only for the catalog file (wave.json history-panel:PH-m), so it goes last in the chain.
+- Base `dev`, not `main`: main is 419 commits behind dev, CLAUDE.md and the lane target dev. Brief step one verified main at 0dd23d65.
+- Status stays on `lead/photo-eyedropper` / `docs/leads/photo-eyedropper/`, as the previous run announced on #3439: `lead/eyedropper` is the SuiteUI eyedropper lead's (#3448), so it is not rebased or force-pushed here. `lead/photo-eyedropper` was rebased onto dev instead.
+- history-panel is built (PH-m merged), so PE-6's catalog wait is met.
+- No open `finding` issues for the feature at start.
 
 ## Open
-- PE-z waits on PE-u and PE-m.
+- #4168 (gap, PE-a Mac finish): Free Transform render budget, not this feature's code.
