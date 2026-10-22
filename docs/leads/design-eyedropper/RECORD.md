@@ -30,6 +30,7 @@ Next: once #4357 merges, merge dev into lead/design-eyedropper-DY-z and retarget
 | – | – | – | – | – | – |
 
 ## Decisions
+- 10:42Z Belt pointed this run at lead/eyedropper and lead/stroke-style, the SuiteUI records of other runs (#3448, #3450, both waiting-on-prereq). Treated as a branch-name mismatch; I asked the supervisor on #3438 (issuecomment-6338803954) and kept to the Design run.
 - After #4356's squash, dev was merged into DY-m (conflict in the catalog and CLI golden: dev's viewSpecs and file.export kept beside color.*). The repo's JSON merge driver pointed at a removed builder worktree; it is repointed to scripts/merge-json in the main clone.
 - DY-m split in two stacked PRs (20 files > 15 cap): #4356 DY-5 to dev, #4357 DY-6 on lead/design-eyedropper-DY-5. The enabled tool changes design-tool-palette-light/dark.png.
 - Status branch is lead/design-<feature> (record docs/leads/design-<feature>/): lead/<feature> belongs to the SuiteUI lead of the same feature name.
