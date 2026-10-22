@@ -1,0 +1,5 @@
+[
+  {"label": "aPlayheadLeafNeverReadsTheEdit: a playhead leaf shows the scrub's preview first", "file": "Sources/HaloModel/HaloLiveNeed.swift", "find": "        case .playhead: playing() ?? model\n", "replace": "        case .playhead: edit() ?? playing() ?? model\n", "tests": "HaloLiveNeedTests.aPlayheadLeafNeverReadsTheEdit"},
+  {"label": "aPlayheadLeafNeverReadsTheEdit: a playhead leaf ignores the playing frame", "file": "Sources/HaloModel/HaloLiveNeed.swift", "find": "        case .playhead: playing() ?? model\n", "replace": "        case .playhead: model\n", "tests": "HaloLiveNeedTests.aPlayheadLeafNeverReadsTheEdit"},
+  {"label": "drawnLeavesShowTheEditThenThePlayingFrame: the drawn layers put the playing frame over the preview", "file": "Sources/HaloModel/HaloLiveNeed.swift", "find": "        case .drawn: edit() ?? playing() ?? model\n", "replace": "        case .drawn: playing() ?? edit() ?? model\n", "tests": "HaloLiveNeedTests.drawnLeavesShowTheEditThenThePlayingFrame"}
+]

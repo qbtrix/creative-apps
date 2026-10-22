@@ -13,7 +13,8 @@
 // its value in the bar and puts the window's project with it set
 // (`setProperty` on a copy, HaloLiveEdit.show) in the window's HaloLiveEdit,
 // at most once per screen refresh (HaloInspectorScrubLink, #4275), so only the
-// bar and the viewer's layers re-run, once a refresh; once it ends (a drag, a
+// bar and the viewer's layers and handles re-run, once a refresh (the playhead
+// leaves never read it, HaloPlayheadShown, #4589); once it ends (a drag, a
 // key, a typed value) the row sends .setProperty with the stored value and
 // .endPropertyScrub, one step. Hosted without a HaloLiveEdit, each value is
 // sent as it comes. Under `-SuitePerfProbe` every pointer sample of a drag on
@@ -69,7 +70,7 @@ struct HaloLayerInspector: View {
                         HaloPlaceInspector(model: model)
                     }
                     if HaloStrokeInspector.shows(layer.kind) {
-                        HaloStrokeInspector(model: model, runStroke: runStroke)
+                        HaloStrokeInspector(model: model, perform: perform, runStroke: runStroke)
                     }
                 }
                 HaloEasingInspector(model: model, perform: perform)
@@ -116,7 +117,6 @@ struct HaloPropertyRowView: View, Equatable {
     @State private var scrubbed: Double?
     @Environment(\.haloLiveEdit) private var live
     @Environment(\.suiteProbeRecorder) private var recorder
-    @Environment(\.haloRefreshLink) private var makeLink
     /// The scrub's refresh-paced writes; made by the first sample of a scrub.
     @State private var scrubLink: HaloInspectorScrubLink?
 
@@ -178,7 +178,7 @@ struct HaloPropertyRowView: View, Equatable {
         }
         let link = scrubLink ?? HaloInspectorScrubLink()
         if scrubLink == nil { scrubLink = link }
-        link.take(shown, probe: HaloProbe(recorder), makeLink: makeLink) { value in
+        link.take(shown, probe: HaloProbe(recorder), makeLink: live.makeLink) { value in
             live.show { $0.setProperty(p, to: p.stored(fromShown: value)) }
         }
     }
