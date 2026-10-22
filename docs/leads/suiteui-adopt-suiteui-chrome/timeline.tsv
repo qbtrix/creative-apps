@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-22T00:00Z	3	build	#4002	AC-tools p2 in lane at cbada801; AC-export-sheet waits on SC-14..16 (#4238 open)
 2026-10-22T00:04Z	3	build	#4002	lane macOS build queued; SC-f unchanged (blocked poll 2)
 2026-10-22T00:31Z	3	build	#4002	lane macOS build running; SC-f unchanged (poll 3), supervisor asked on #1942
+2026-10-22T01:01Z	3	build	#4002	merged dev for #4215 fix; head 0c0e686b

@@ -34,6 +34,7 @@ Next: #4002 (head cbada801) merges via the lane, then a green ci.yml run (app=su
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T01:01Z: #4002's lane macOS build (run 39695603914) failed only in RenderBudgetPhotoPlaceTests.swift:35, a dev test fixed by #4215. Merged origin/dev 6ccc77ad, scripts/ci --changed PASS, pushed head 0c0e686b, moved the Head line. Waiting on the lane's rebuild. AC-export-sheet still blocked on SC-f (SC-14 #4238 open, SC-15/16 no PRs).
 - 2026-10-22T00:31Z: poll: #4002 lane macOS build 39695603914 in progress (started 00:25Z) on cbada801, not merged, no needs-fix. SC-f unchanged (#4238 open, SC-15/16 not opened): blocked poll 3 of 3, so asked the supervisor on #1942 to hold or release AC-export-sheet
 - 2026-10-22T00:04Z: poll: #4002 lane macOS build 39695603914 queued on cbada801 (apps design,photo), not merged, no needs-fix. SC-f unchanged: #4238 (SC-14) open, SC-15/16 not opened; blocked poll 2 of 3 on AC-export-sheet
 - 2026-10-22T00:00Z: run act-1a160ca3d68-sbnc resumed from this record (Belt: status lives on this branch). AC-tools corrected from "done" to building: #4002 (AC-t1 Design/Photo + AC-t2 deletes) never merged. Merged origin/dev be9aa35b into #4002 (brings #4250's fix for dev's #3856 baseline), scripts/ci --changed PASS, pushed cbada801, Head line moved; mergeable clean, fast-lane. SC-f re-read: #4238 (SC-14) open and clean, SC-15/16 not opened; AC-e1 still waits
