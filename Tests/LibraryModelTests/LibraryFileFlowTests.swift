@@ -140,4 +140,71 @@ import Testing
         #expect(library.selection.count == 3)
         #expect(library.takeFileRequests() == [.handOff(path: folder.appendingPathComponent("input/Intro.halo").path, app: "halo")])
     }
+
+    /// A recents entry for `path`, as the bridge lists it.
+    static func entry(_ path: String, app: String = "library") -> RecentFileEntry {
+        RecentFileEntry(fileID: SuiteDocumentRef.fileID(forPath: path), name: URL(fileURLWithPath: path).lastPathComponent,
+                        path: path, app: app, lastUsed: Date(timeIntervalSince1970: 1))
+    }
+
+    /// LF-4: a loupe open is noted once, however often the window asks; a new photo or a reopen is noted again.
+    @Test func aLoupeOpenIsNotedOncePerOpen() throws {
+        try Self.withShoot { folder in
+            var library = LibraryCatalog(services: .fake())
+            #expect(library.takeLoupeOpen() == nil, "no loupe photo, nothing to note")
+            try library.perform([.place(path: folder + "/IMG_0001.jpg"), .place(path: folder + "/IMG_0002.jpg")])
+            #expect(library.takeLoupeOpen() == nil, "the grid notes nothing")
+            library.open(folder + "/IMG_0001.jpg")
+            let ref = try #require(library.takeLoupeOpen())
+            #expect(ref.path == folder + "/IMG_0001.jpg" && ref.app == .library && ref.displayName == "IMG_0001.jpg")
+            #expect(ref.fileID == SuiteDocumentRef.fileID(forPath: folder + "/IMG_0001.jpg"))
+            #expect(library.takeLoupeOpen() == nil, "the same open was noted twice")
+            library.stepLoupe(by: 1)
+            #expect(library.takeLoupeOpen()?.path == folder + "/IMG_0002.jpg")
+            library.showGrid()
+            #expect(library.takeLoupeOpen() == nil)
+            library.open(folder + "/IMG_0002.jpg")
+            #expect(library.takeLoupeOpen()?.path == folder + "/IMG_0002.jpg", "a reopen after the grid is a new open")
+        }
+    }
+
+    @Test func aSuiteRefOnlyForWhatLibraryReads() {
+        #expect(LibraryCatalog.suiteRef("/w/a.PNG")?.type == SuiteTypeRegistry.standard.type(forExtension: "png")?.id)
+        #expect(LibraryCatalog.suiteRef("/w/a.png")?.app == .library)
+        #expect(LibraryCatalog.suiteRef("/w/Intro.halo") == nil)
+        #expect(LibraryCatalog.suiteRef("/w/noext") == nil)
+    }
+
+    /// LF-4: Library's recent files are the suite list's Library entries; Open Recent opens one in the loupe.
+    @Test func recentFilesFollowTheSuiteListAndOpenInTheLoupe() throws {
+        let catalog = try #require(Self.catalog)
+        try Self.withShoot { folder in
+            var library = LibraryCatalog(services: .fake())
+            try library.perform([.place(path: folder + "/IMG_0003.jpg")])
+            let mine = Self.entry(folder + "/IMG_0003.jpg"), gone = Self.entry(folder + "/IMG_0009.jpg")
+            library.updateFileFlow(recents: [mine, Self.entry("/w/Intro.halo", app: "halo"), gone])
+            #expect(library.recentFiles == [mine, gone], "another app's entry is in Library's list")
+            _ = try catalog.run("file.open-recent", params: .object(["fileID": .string(mine.fileID)]), on: &library)
+            #expect(library.mode == .loupe && library.focusedItemID == folder + "/IMG_0003.jpg")
+            #expect(throws: (any Error).self) { try library.openRecent(gone.fileID) }
+            #expect(throws: (any Error).self) { try library.openRecent("nope") }
+            try library.clearRecent()
+            #expect(library.recentFiles.isEmpty)
+        }
+    }
+
+    /// LF-4: the loupe's photo drags out as its file first, then the PNG the window made; nothing off the loupe.
+    @Test func theLoupeDragsItsFileThenAPNG() throws {
+        try Self.withShoot { folder in
+            var library = LibraryCatalog(services: .fake())
+            let png = Data([0x89, 0x50, 0x4E, 0x47])
+            try library.perform([.place(path: folder + "/IMG_0001.jpg")])
+            #expect(library.loupeDragItems(png: png, size: PixelSize(width: 4, height: 3)).isEmpty, "the grid has no loupe photo")
+            library.showLoupe()
+            let ref = try #require(library.loupeSuiteRef)
+            #expect(library.loupeDragItems(png: png, size: PixelSize(width: 4, height: 3))
+                    == [.files([ref]), .image(png: png, pixelWidth: 4, pixelHeight: 3)])
+            #expect(library.loupeDragItems(png: nil, size: nil) == [.files([ref])], "no PNG: the file alone")
+        }
+    }
 }
