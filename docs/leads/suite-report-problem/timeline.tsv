@@ -85,3 +85,4 @@ utc	stage	event	ref	note
 2026-10-22T16:46:42Z	RP-m	merged	#4459	RP-7 merged 3578eaee2; waiting on feature CI
 2026-10-22T17:48:40Z	RP-m	waiting	-	full CI 39818716525 at a41e7f1f9 contains RP-7, pending
 2026-10-22T18:13:48Z	RP-m	waiting	-	full CI 39818716525 cancelled; next candidate 39829329352 at 8f25082ca
+2026-10-22T18:52:06Z	RP-m	waiting	-	macOS runners idle-queued: full CI 39829329352 pending since 18:12, #4421 build 39823748876 queued since 17:33
