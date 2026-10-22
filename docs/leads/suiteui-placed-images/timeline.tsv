@@ -123,3 +123,4 @@ utc	stage	event	ref	note
 22:44Z	heartbeat	heartbeat: no change. PL-z waits on SH-z, TT-z, EY-z, AH-z, GF-z and SS-d.
 23:07Z	heartbeat	heartbeat: no change. PL-z waits on SH-z, TT-z, EY-z, AH-z, GF-z and SS-d.
 23:35Z	heartbeat	heartbeat: no change. PL-z waits on SH-z, TT-z, EY-z, AH-z, GF-z and SS-d.
+00:03Z	heartbeat	PL-z waits on SH-z, TT-z, EY-z, AH-z, GF-z, SS-d
