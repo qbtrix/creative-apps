@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-22T02:09Z	heartbeat	heartbeat	#4293	dev Linux check 39707946247 red on FormatListRatchetTests only
 2026-10-22T02:31Z	heartbeat	heartbeat	#4293	SC-14 #4238 on dev should clear ratchet red
 2026-10-22T02:45Z	slices-done-posted	Belt-Slice-Done FR-halo FR-flare FR-u + Mac-Finish-Wanted FR-u	run 39710840412	comment 6331425414
+2026-10-22T03:08Z	fr10-dev-merged	FR-10 head 6d3c178ec: dev merged for SC-14 ratchet fix, ci --changed PASS	run 39711831771	scoped suiteui 39709885898 queued; CB-u panel waits

@@ -2,7 +2,7 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a15e33399d-zgll · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: slices-done-posted
+Stage: fr10-dev-merged
 Base: dev
 Next: FR-10b PR after #4293 merges
 
