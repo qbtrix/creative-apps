@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-22T21:47Z	agent-start	FP-z builder (FP-6, FP-7)
 2026-10-22T21:55Z	restart	container restart: FP-z and SR-2 builders relaunched on their worktrees; lane dispatched macOS builds for #4638 and #4644 (queued)
 2026-10-22T22:05Z	pushed	FP-z 499bba3f (PR after FP-u, FP-m merge)
+2026-10-22T22:11Z	pr	FP-c4 #4651
