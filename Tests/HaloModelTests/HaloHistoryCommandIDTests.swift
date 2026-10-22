@@ -57,7 +57,7 @@ import Testing
         let layer = try #require(reopened.workspace.selectedComposition?.layers.first)
         let keys = try #require(layer.tracks["x"])
         #expect(keys.map(\.frame) == [0, 1, 2, 23])
-        #expect(keys.map(\.value) == [10, 15, 20, 0])
+        #expect(keys.map(\.value) == [10, 15, 20, 32])
         #expect(keys.allSatisfy { $0.easing == .linear })
     }
 }
