@@ -10,7 +10,7 @@ Next: PH-a #4426 waits on its macOS build (run 39786508249); PH-u builder runnin
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | PH-a | picture fields, draw item copy, PlacedImageTarget stubs, checks and job folders disabled | PH-1, PH-2 | MJ-PH | HG-a (merged #3516), HS-a (merged #3676), HK-a (merged #4336), PL-a (done) | false | 0 | pr-open #4426 | – | – |
-| PH-u | Place… and viewer drop on the stubs, viewer draws by cover, inspector rows, snapshots, budget, journey | PH-3, PH-4 | HJ-P1 | PH-a; HG-u, CL-probe, HT-a, HS-a, HK-a all merged | true | 0 | building (stacked on PH-a, rule 22) | – | – |
+| PH-u | Place… and viewer drop on the stubs, viewer draws by cover, inspector rows, snapshots, budget, journey | PH-3, PH-4 | HJ-P1 | PH-a; HG-u, CL-probe, HT-a, HS-a, HK-a all merged | true | 0 | draft #4437 (568 lines) being split: u1 PH-3+snapshots+window wiring, u2 PH-4 budget+journey | – | – |
 | PH-m | render draws the picture inside its outline; place commands one undo step | PH-5, PH-6 | MJ-PH | PH-a; HG-m (built), HA-m (built), HS-m (done), HT-m (HT-6 #4415 open, rebased, Fast-Check blocked by dev-red #3856), HK-m (HK-6 #4400 merged) | false | 0 | waiting | – | – |
 | PH-z | live services, journey on live, blueprint, feature-done | PH-7, PH-8 | HJ-P1 | PH-u, PH-m; HG-z (merged #4318) | true | 0 | waiting | – | – |
 
@@ -33,7 +33,8 @@ Next: PH-a #4426 waits on its macOS build (run 39786508249); PH-u builder runnin
 ## Decisions
 - Lead branch is lead/halo-placed-images: lead/placed-images belongs to the suiteui lead.
 - PRs target dev, not main: the brief says main, but CLAUDE.md says never target main and main only takes dev SHAs that passed full CI (main is 487 commits behind dev). Slice-done reads dev runs.
-- PH-1 and PH-2 ship as one PH-a slice PR (rule 22); PH-3+PH-4 and PH-5+PH-6 likewise.
+- PH-1 and PH-2 ship as one PH-a slice PR (rule 22); PH-5+PH-6 likewise.
+- PH-u splits into two stacked PRs (PH-3 with snapshots, PH-4 budget+journey): one PR was 568 lines, over the 400 cap. PH-u also wires HaloWindow's haloPlace so Place isn't a dead control.
 
 ## Open
 - dev Linux red (#3856): HaloStrokeTrimKeysTests from HK-6 #4400, not ours; slice-done needs a green dev Linux run after our last PR, so slice-done waits on the stroke lead's fix.
