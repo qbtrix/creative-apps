@@ -2,7 +2,7 @@
 
 Issue: #3440 · Packet: docs/blueprints/design/features/shape-tools.md
 Run: act-1a162d0f852-70vb · Started: 2026-10-22T08:56Z (prior run act-1a15abb305f-lc8g shipped DS-a)
-Stage: 3 wave 2 (DS-z building)
+Stage: 3 wave 2 (DS-z built at 42951ccde; adding journey steps 3 and 5)
 Base: dev 561ef1c5
 Next: DS-z PR when built; slice-done lines once a ci.yml run (scoped design or full) contains each slice's last merged PR; retarget #4384 to dev when #4357 merges
 
@@ -21,7 +21,7 @@ Next: DS-z PR when built; slice-done lines once a ci.yml run (scoped design or f
 | DS-5 | DS-m | 1 | lead/design-shape-tools-DS-5 (on lead/design-eyedropper-DY-m) | 77a418bd | #4384 | open |
 | DS-6 | DS-m | 1 | lead/design-shape-tools-DS-m (on DS-5) | bdd84f62 | #4385 | open |
 | DS-3/DS-4 | DS-u | 1 | lead/design-shape-tools-DS-u (on DS-m) | 933e7552 | #4386 | open |
-| DS-7/DS-8 | DS-z | 2 | lead/design-shape-tools-DS-z (on DS-u) | – | – | building |
+| DS-7/DS-8 | DS-z | 2 | lead/design-shape-tools-DS-z (on DS-u) | 42951ccde | – | built; stretch and export steps pending |
 
 ## Critic reviews
 | slice | run | commit | lenses | filed | after round |
