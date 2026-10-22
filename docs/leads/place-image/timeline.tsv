@@ -77,3 +77,4 @@ utc	stage	event	ref	note
 2026-10-22T02:12Z	02:13Z heartbeat: scoped photo 39700970657 (add701fc9, predates both fixes) now running; dev Linux still red
 2026-10-22T02:34Z	02:35Z: #4258 closed (superseded by #4238 on dev); #4252 Linux 39708701673 red only on FormatListRatchet
 2026-10-22T02:49Z	02:52Z: builder merged dev into both fixes, scripts/ci --changed PASS on each
+2026-10-22T02:56Z	02:57Z: photo run 39700970657 (add701fc9) red only on RenderBudgetPhotoTransformTests = #4247, fixed by #4252; full 39700185524 red only on FormatListRatchet (fixed by #4238)
