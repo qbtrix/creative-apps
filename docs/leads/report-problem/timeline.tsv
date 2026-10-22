@@ -76,3 +76,4 @@ utc	stage	event	ref	note
 2026-10-22T10:30:20Z	RP-5b	build-green	4226	macOS build 39759380876 green; waits on the lane sweep
 2026-10-22T10:38:24Z	RP-3e	merged	4209	lane merged after green macOS build
 2026-10-22T10:59:06Z	RP-5b	needs-rebase	4226	dev merged in (kept both RP-3e and RP-5b in SuiteHelpCommandsTests and shell-help.json); a Design fuzz test crashed once on Linux, passes on rerun; gate rerunning
+2026-10-22T11:09:39Z	RP-5b	rebased	4226	dev merged in at b2552e9c9; earlier gate crashes were a stale incremental build; clean build CI: PASS; Head moved
