@@ -1,10 +1,10 @@
 # file-flow lead record
 
-Issue: #3474 · Packet: docs/blueprints/halo/features/file-flow.md
-Run: act-1a15b98bcea-wygm · Session: claude/task-xjfhws · Started: 2026-10-20T23:47Z
-Stage: 3 polling (blocked; 2026-10-21T03:29Z: HS-a merged, placed-images not started)
+Issue: #4514 (was #3474) · Packet: docs/blueprints/halo/features/file-flow.md
+Run: act-1a16474bd28-v3ht · Session: claude/halo-feature-lead-3yp4w1 · Started: 2026-10-22T16:00Z (took over from earlier runs)
+Stage: 3 wave 1 (HF-a building, stacked on PH-u)
 Base: 2cc149f57 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: check whether transform:HT-a, shape-tools:HS-a and placed-images:PH-u have merged; if so start HF-1 (stub adapter, HaloFileFlowTests disabled)
+Next: HF-a PR opens when PH-a #4426 and PH-u (#4437/#4438) merge; HF-u then stacks on HF-a; HF-m waits on HT-m #4415 and PH-m
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -37,3 +37,5 @@ Next: check whether transform:HT-a, shape-tools:HS-a and placed-images:PH-u have
 ## Open
 - HF-a blocked (2026-10-21T00:13Z): transform:HT-a likely in (#3702 adapter bodies merged), shape-tools:HS-a in review (#3676), placed-images:PH-u not started (PH-a still waiting).
 - 2026-10-21T13:42:11Z check-in: still blocked; placed-images is at Stage 0, PH-a waits on HS-a (#3676), HK-a (key-editing) and PL-a.
+- 2026-10-22T16:37:55Z: New run act-1a16474bd28-v3ht for #4514. SF-a is on dev 7e9f260 (FileFlowTarget/FileFlowCommands in SuiteKernel/Files, SuiteFileDrop in SuiteShell, SuiteDocumentHost, SuiteDocumentsBridge used by Photo). HT-a and HS-a are merged; PH-u is drafts #4437/#4438 on PH-a #4426.
+- 2026-10-22T16:37:55Z: Decision: HF-a builds stacked on lead/halo-placed-images-PH-u2 (shares HaloViewer.swift and HaloFileMenu.swift, PH-u is A/C first), branch lead/halo-file-flow-HF-a; its PR opens after PH-u merges. Halo already has HaloDocumentHost.swift (A-HA-1) and .suiteApp(.halo, host:); HF-1 builds on that rather than adding a second host.
