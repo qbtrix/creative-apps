@@ -69,3 +69,4 @@ utc	stage	event	ref	note
 2026-10-22T07:59Z	3	heartbeat	#4339,#4343	lane macOS builds still queued (runner wait)
 2026-10-22T08:17Z	3	heartbeat	#4339,#4343	macOS runner queue backed up repo-wide (32 queued); our builds wait in it
 2026-10-22T08:35Z	3	heartbeat	#3439	third blocked poll on queued macOS builds; question posted to supervisor
+2026-10-22T08:40Z	3	stopped	#3439	supervisor ended run; PRs wait in lane on queued macOS builds
