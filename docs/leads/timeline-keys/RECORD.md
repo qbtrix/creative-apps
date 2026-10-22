@@ -2,9 +2,9 @@
 
 Issue: #3780 · Packet: docs/blueprints/suiteui/features/timeline-keys.md
 Run: act-1a1620043af-tzh0 · Started: 2026-10-22T05:00Z (resumed from act-1a15fddd101-68r5)
-Stage: 3 wave 2 (finishing: TK-flare #4328 round 1 fix pushed 6f05c789, waiting on lane; TK-u critics wait on journeys 39734406363; polled 08:44Z)
+Stage: 3 wave 2 (finishing: TK-flare #4328 6f05c789 waits on macOS build 39744207685; TK-u critics wait on full journeys 39751426611 at 71987f72; polled 09:06Z)
 Base: 0dd23d659f4dbd8a0120aa85a321259327518251 (main); dev 8cf02113
-Next: supervisor (06:19Z): stop after TK-flare (#4328) lands; post TK-flare Belt-Slice-Done + Mac-Finish-Wanted, run TK-u critic panel on flare journeys 39734406363 (ui-screens; the scoped suite run 39721019643 passed with no screens), then stop. TK-6, TK-z wait for a relaunch (waiting-on-prereq) once AJ-halo, TS-halo, AN-halo land.
+Next: supervisor (06:19Z): stop after TK-flare (#4328) lands; post TK-flare Belt-Slice-Done + Mac-Finish-Wanted, run TK-u critic panel on full journeys 39751426611 at 71987f72 (flare journeys 39734406363 tested 6e19f406, before TK-u; the scoped suite run 39721019643 passed with no screens), then stop. TK-6, TK-z wait for a relaunch (waiting-on-prereq) once AJ-halo, TS-halo, AN-halo land.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
