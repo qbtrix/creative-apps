@@ -38,8 +38,9 @@ extension HaloProject: HeadlessDocument {
         let history = ["history.read", "history.jump"]  // HA-6: then the History panel's two
         let transforms = TransformCommands.specs(HaloProject.self).map(\.id)  // HT-6: then the six transform commands
         let rates = ["composition.set-frame-rate"]  // FR-8b: the composition's rate
+        let places = ["place.read", "place.image", "place.replace", "place.reset-size", "place.focus"]  // PH-6: the five place commands
         let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
-        let all = ids + shapes + fills + strokes + history + transforms + rates + window
+        let all = ids + shapes + fills + strokes + history + transforms + rates + places + window
         #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
     }
 
@@ -129,6 +130,7 @@ extension HaloProject: HeadlessDocument {
         "strokes are for shape layers; Ball is a solid (HaloStrokeTests run them)": ["stroke.add stroke.cap stroke.color stroke.dash stroke.join stroke.read stroke.remove stroke.trim stroke.width: exampleRuns"],
         "the jump example needs steps; the fixture has none (HA-6)": ["history.jump: exampleRuns"],
         "flipping isn't in Halo yet; the flip refuses with flipHelp (HT-6)": ["transform.flip: exampleRuns"],
+        "the examples need a placed image; Ball shows none (HaloPlaceTests run them, PH-6)": ["place.focus place.read place.replace place.reset-size: exampleRuns"],
     ]
 
     @Test func conformance() {
