@@ -55,6 +55,11 @@ layer.rename
 layer.rename-begin
 layer.select
 layer.send-backward
+place.focus
+place.image
+place.read
+place.replace
+place.reset-size
 render.cancel
 render.choose-folder
 render.close-sheet
