@@ -30,3 +30,11 @@
 
 ## Open
 - Blocked (rule 19, run act-1a15d0eeefb-6z9l): HK-a builds on HG-u, which needs #3401 (SuiteUI probe recorder, open, no PR) and SuiteUI GF-2/GF-3. Said on #3447: https://github.com/qbtrix/creative-apps/issues/3447#issuecomment-6311967268
+
+## Run act-1a162462636-ft6b (2026-10-22T06:25Z)
+
+- Base: origin/dev bdd92b41. Status branch stays lead/halo-stroke-style (lead/stroke-style is the SuiteUI lead's).
+- Waits met: HS-a, HS-m (shape-tools built), HG-u, HG-m (gradient-fill built).
+- Wave 1: HK-a (HK-1 commits 5c7e5ede, 56ea568f cherry-picked from lead/halo-stroke-style-HK-1 onto dev, plus HK-2).
+- Wave 2: HK-m (HK-5 then HK-6, stacked on HK-a) and HK-u (HK-3, HK-4) in parallel (rule 18).
+- Wave 3: HK-z (HK-7, HK-8 feature-done).
