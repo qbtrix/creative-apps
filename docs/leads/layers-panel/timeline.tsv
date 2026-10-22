@@ -308,3 +308,4 @@ utc	stage	event	ref	note
 2026-10-21T23:22Z	3	merged	#4178	LP-b fix round 2 on dev 8c55f0bf9; waiting on a green design/full run for Belt-Slice-Done
 2026-10-21T23:54Z	3	heartbeat	-	scoped design run 39693638859 on be9aa35bc (has DG-m, LP-b) queued; Linux check green there
 2026-10-22T00:35Z	LP-b	wait-run	39693638859	queued
+2026-10-22T01:03Z	LP-b	wait-run	39693638859	queued
