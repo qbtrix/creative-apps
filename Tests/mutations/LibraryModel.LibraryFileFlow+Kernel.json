@@ -28,6 +28,34 @@
     "tests": "LibraryFileFlowTests.swift"
   },
   {
+    "label": "LF-4: a loupe open is noted every time the window asks",
+    "file": "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
+    "find": "        guard ref?.path != fileFlow.notedLoupe else { return nil }\n",
+    "replace": "",
+    "tests": "LibraryFileFlowTests.swift"
+  },
+  {
+    "label": "LF-4: Recent Files keep other apps' entries",
+    "file": "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
+    "find": "fileFlow.recents = recents.filter { $0.app == appID }",
+    "replace": "fileFlow.recents = recents",
+    "tests": "LibraryFileFlowTests.swift"
+  },
+  {
+    "label": "LF-4: the drag offers the PNG before the file",
+    "file": "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
+    "find": "return [.files([ref]), .image(png: png, pixelWidth: size.width, pixelHeight: size.height)]",
+    "replace": "return [.image(png: png, pixelWidth: size.width, pixelHeight: size.height), .files([ref])]",
+    "tests": "LibraryFileFlowTests.swift"
+  },
+  {
+    "label": "LF-4: Open Recent opens nothing",
+    "file": "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
+    "find": "        if let photo = items.first(where: { $0.path == entry.path }) { open(photo.id) }\n",
+    "replace": "",
+    "tests": "LibraryFileFlowTests.swift"
+  },
+  {
     "label": "undoing an import leaves its photos",
     "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
     "find": "        if let removing = applied.removing { removePhotos(Set(removing.map(\\.id))) }\n",

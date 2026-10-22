@@ -4,10 +4,13 @@
 // begins the import on the catalog, runs the importer off the main actor and
 // hands its progress, batches and result back to the catalog in order.
 // `-LibraryImportOnLaunch` imports once, as soon as the catalog has loaded.
+// Below it, the file flow (LF-4): suite recents, a drop's hand-offs and the loupe's drag-out.
 import AppKit
 import Foundation
 import LibraryModel
 import SuiteKernel
+import SuiteModel
+import SuiteShell
 import SwiftUI
 
 final class ImportAreaState {
@@ -106,5 +109,78 @@ extension LibraryWindow {
         panel.prompt = "Import"
         guard panel.runModal() == .OK, let url = panel.url else { return nil }
         return url.path(percentEncoded: false)
+    }
+}
+
+// The file flow (file-flow LF-4): each photo opened in the loupe is noted once in the suite's shared recents
+// through SuiteDocumentsBridge, the way Flare notes its opens, and the catalog's Recent Files read that list back;
+// a drop's hand-offs go to their apps through the bridge; the loupe drags its photo out as the file and a PNG.
+extension LibraryWindow {
+    #if DEBUG
+    /// A test's bridge on fake services; nil uses the app's.
+    @MainActor static var bridgeOverride: SuiteDocumentsBridge?
+    /// The shown window's catalog, drop, loupe open and drag-out, for LibraryFileFlowLiveTests.
+    @MainActor static var shownModel: LibraryCatalog?
+    @MainActor static var shownDrop: (([DropAction]) -> Void)?
+    @MainActor static var shownOpen: ((String) -> Void)?
+    @MainActor static var shownDragItems: (() -> [SuiteClipItem])?
+    #endif
+
+    /// The bridge the window notes in and hands off through.
+    @MainActor static var bridge: SuiteDocumentsBridge {
+        #if DEBUG
+        if let bridgeOverride { return bridgeOverride }
+        #endif
+        return LibraryShell.bridge
+    }
+
+    /// Called from the body: publishes the test hooks (DEBUG only).
+    func fileFlowShown() {
+        #if DEBUG
+        Self.shownModel = model
+        Self.shownDrop = { fileFlowDrop($0) }
+        Self.shownOpen = { model.open($0) }
+        Self.shownDragItems = { [model] in Self.loupeDragItems(model) }
+        #endif
+    }
+
+    /// Called when the loupe's photo or the mode changes: notes a new loupe open once, then reads the list back.
+    func fileFlowLoupeChanged() {
+        guard let ref = model.takeLoupeOpen() else { return }
+        let bridge = Self.bridge
+        Task {
+            await bridge.note(ref, .opened)
+            let recents = bridge.recents(for: .library)
+            if recents != model.recentFiles { model.updateFileFlow(recents: recents) }
+        }
+    }
+
+    /// A drop: the catalog imports what it places; each other app's document goes to that app.
+    func fileFlowDrop(_ actions: [DropAction]) {
+        try? model.perform(actions)
+        let handOffs: [DropAction] = model.takeFileRequests().compactMap {
+            if case .handOff(let path, let app) = $0 { .handOff(path: path, app: app) } else { nil }
+        }
+        guard !handOffs.isEmpty else { return }
+        let bridge = Self.bridge
+        Task { await bridge.handOff(handOffs) }
+    }
+
+    /// What dragging the loupe's photo carries: its file, then a PNG of it at most 2048 px on its long side
+    /// (just the file when it can't be decoded).
+    nonisolated static func loupeDragItems(_ model: LibraryCatalog) -> [SuiteClipItem] {
+        guard let path = model.loupeSuiteRef?.path, let data = FileManager.default.contents(atPath: path),
+              let image = try? SuiteImageIO.uprightImage(data, longestSide: 2048),
+              let png = try? SuiteImageIO.encode(image, as: .png, quality: nil)
+        else { return model.loupeDragItems(png: nil, size: nil) }
+        return model.loupeDragItems(png: png, size: PixelSize(width: image.width, height: image.height))
+    }
+}
+
+extension View {
+    /// The loupe's drag-out, a placeholder on its readout: the canvas's own drag (pan and crop) would swallow one
+    /// on the picture. Dragging a grid cell out waits for SuiteUI's per-cell drag source (#3928).
+    func libraryDragOut(_ model: LibraryCatalog) -> some View {
+        suiteDraggable(SuitePasteboardCoding()) { LibraryWindow.loupeDragItems(model) }
     }
 }

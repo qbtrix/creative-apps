@@ -8,7 +8,7 @@
 // with no animation), or a placeholder until one arrives: the photo's frame
 // in a card tone with its name and size. Its help says why the file can't be
 // read or the render failed. The name, "12 of 60" position and cull summary sit in a glass
-// readout. Left and Right step through the sort; Escape, G or the glass
+// readout, which drags the photo out (file-flow LF-4). Left and Right step through the sort; Escape, G or the glass
 // Grid button at the top leading corner (`library.loupe.grid`) go back to
 // the grid. The canvas pans on the other arrows, scroll and Space-drag, and
 // a click on it gives it the keys. Pinch and its zoom keys go through
@@ -59,6 +59,8 @@ struct LibraryLoupe: View {
                     .font(SuiteFont.monospacedDigits)
                     .accessibilityIdentifier("library.loupe.position")
             }
+            // LF-4: drags the photo out as its file and a PNG (LibraryWindow+Import.swift).
+            .libraryDragOut(model)
             .padding(SuiteSpacing.l)
         }
         .overlay(alignment: .topLeading) {

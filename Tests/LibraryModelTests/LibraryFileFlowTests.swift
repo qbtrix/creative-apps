@@ -151,20 +151,22 @@ import Testing
     @Test func aLoupeOpenIsNotedOncePerOpen() throws {
         try Self.withShoot { folder in
             var library = LibraryCatalog(services: .fake())
-            #expect(library.takeLoupeOpen() == nil, "no loupe photo, nothing to note")
+            var noted: [String?] = [library.takeLoupeOpen()?.path]  // no loupe photo, nothing to note
             try library.perform([.place(path: folder + "/IMG_0001.jpg"), .place(path: folder + "/IMG_0002.jpg")])
-            #expect(library.takeLoupeOpen() == nil, "the grid notes nothing")
+            noted.append(library.takeLoupeOpen()?.path)  // the grid notes nothing
             library.open(folder + "/IMG_0001.jpg")
-            let ref = try #require(library.takeLoupeOpen())
+            let first = library.takeLoupeOpen()
+            let ref = try #require(first)
             #expect(ref.path == folder + "/IMG_0001.jpg" && ref.app == .library && ref.displayName == "IMG_0001.jpg")
             #expect(ref.fileID == SuiteDocumentRef.fileID(forPath: folder + "/IMG_0001.jpg"))
-            #expect(library.takeLoupeOpen() == nil, "the same open was noted twice")
+            noted.append(library.takeLoupeOpen()?.path)  // the same open, asked again
             library.stepLoupe(by: 1)
-            #expect(library.takeLoupeOpen()?.path == folder + "/IMG_0002.jpg")
+            noted.append(library.takeLoupeOpen()?.path)
             library.showGrid()
-            #expect(library.takeLoupeOpen() == nil)
+            noted.append(library.takeLoupeOpen()?.path)
             library.open(folder + "/IMG_0002.jpg")
-            #expect(library.takeLoupeOpen()?.path == folder + "/IMG_0002.jpg", "a reopen after the grid is a new open")
+            noted.append(library.takeLoupeOpen()?.path)  // a reopen after the grid is a new open
+            #expect(noted == [nil, nil, nil, folder + "/IMG_0002.jpg", nil, folder + "/IMG_0002.jpg"])
         }
     }
 

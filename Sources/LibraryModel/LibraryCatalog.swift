@@ -99,6 +99,7 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var showsTestValues = false  // -LibraryTestValues
     public internal(set) var cullError: String?  // a refused cull change
     public internal(set) var fileRequests: [LibraryFileRequest] = []  // file-flow work for the window
+    public internal(set) var fileFlow = LibraryFileFlowState()  // the suite recents and the last loupe open noted
     /// The filter bar's rules outside a smart collection (LibraryFilter.swift).
     public internal(set) var filter = LibraryFilter.all
     /// The collections you made and the smart ones, in sidebar order.
@@ -123,7 +124,7 @@ public struct LibraryCatalog: Sendable, Equatable {
             && lhs.failuresShownFor == rhs.failuresShownFor
             && lhs.thumbnailCache == rhs.thumbnailCache && lhs.autoAdvance == rhs.autoAdvance
             && lhs.cullError == rhs.cullError && lhs.exportRun == rhs.exportRun
-            && lhs.exportState == rhs.exportState && lhs.fileRequests == rhs.fileRequests
+            && lhs.exportState == rhs.exportState && lhs.fileRequests == rhs.fileRequests && lhs.fileFlow == rhs.fileFlow
         let loupe = lhs.loupeZoom == rhs.loupeZoom && lhs.loupeRender == rhs.loupeRender
             && lhs.loupeRenderToken == rhs.loupeRenderToken && lhs.loupeShownToken == rhs.loupeShownToken
             && lhs.loupeError == rhs.loupeError

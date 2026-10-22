@@ -1,11 +1,13 @@
 // LibraryFileFlow+Kernel.swift: Library's file-flow adapter (file-flow LF-1
 // stubs, LF-3 bodies). The catalog is a `SuiteDocumentHost` (hand-offs from
 // other apps) and a `FileFlowTarget` (Open In and drops). Library is one
-// catalog, always open, so it has no recent files of its own. It accepts
+// catalog, always open; its recent files are the photos opened in the loupe,
+// which the window notes in the suite's shared recents (LF-4) and reads back
+// through `updateFileFlow(recents:)`. It accepts
 // open and place hand-offs; a drop imports the photos it places as one
 // "Import" step and selects them, and hands other apps' documents to them
 // as `LibraryFileRequest`s the window runs. Open In hands the loupe's photo
-// to another app that reads it. Linux-safe.
+// to another app that reads it; the loupe drags it out as its file and a PNG. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -18,6 +20,52 @@ import SuiteModel
 public enum LibraryFileRequest: Hashable, Sendable {
     /// Open the file in a window; hand it to another app; show why a dropped file was refused.
     case open(path: String), handOff(path: String, app: String), refused(path: String, reason: String)
+}
+
+/// Library's part of the suite recents (LF-4): the list the window last read and the loupe open it last noted.
+public struct LibraryFileFlowState: Hashable, Sendable {
+    /// Library's entries of the suite's shared recents, newest first.
+    public internal(set) var recents: [RecentFileEntry] = []
+    /// The path of the loupe photo last noted; nil once the loupe closes, so a reopen is noted again.
+    var notedLoupe: String?
+    public init() {}
+}
+
+extension LibraryCatalog {
+    /// A suite ref to the photo at `path` for the recents and a drag, when Library reads its extension.
+    public static func suiteRef(_ path: String) -> SuiteDocumentRef? {
+        let name = LiveImporter.lastComponent(path)
+        guard let dot = name.lastIndex(of: "."), dot != name.startIndex,
+              let type = SuiteTypeRegistry.standard.type(forExtension: String(name[name.index(after: dot)...]).lowercased()),
+              type.readers.contains(.library) else { return nil }
+        return SuiteDocumentRef(path: path, fileID: SuiteDocumentRef.fileID(forPath: path), app: .library,
+                                type: type.id, displayName: name)
+    }
+
+    /// The loupe's photo as a suite ref; nil without one on disk.
+    public var loupeSuiteRef: SuiteDocumentRef? { loupePhoto?.path.flatMap(Self.suiteRef) }
+
+    /// The loupe photo to note as opened, once per open: nil when it was the last one noted or the loupe is
+    /// closed (which forgets it, so the next open is noted again).
+    public mutating func takeLoupeOpen() -> SuiteDocumentRef? {
+        let ref = loupeSuiteRef
+        guard ref?.path != fileFlow.notedLoupe else { return nil }
+        fileFlow.notedLoupe = ref?.path
+        return ref
+    }
+
+    /// The suite recents the window read; Library keeps its own entries.
+    public mutating func updateFileFlow(recents: [RecentFileEntry]) {
+        fileFlow.recents = recents.filter { $0.app == appID }
+    }
+
+    /// What dragging the loupe's photo out carries: its file first (the Finder and other apps take that), then
+    /// `png` at `size` when the window made one. Nothing without a loupe photo.
+    public func loupeDragItems(png: Data?, size: PixelSize?) -> [SuiteClipItem] {
+        guard let ref = loupeSuiteRef else { return [] }
+        guard let png, let size else { return [.files([ref])] }
+        return [.files([ref]), .image(png: png, pixelWidth: size.width, pixelHeight: size.height)]
+    }
 }
 
 extension LibraryCatalog {
@@ -71,8 +119,8 @@ extension LibraryCatalog: SuiteDocumentHost {
 
 extension LibraryCatalog: FileFlowTarget {
     public var appID: String { SuiteApp.library.rawValue }
-    /// Library is one catalog: no recent list of its own.
-    public var recentFiles: [RecentFileEntry] { [] }
+    /// The photos opened in the loupe, from the suite's shared recents.
+    public var recentFiles: [RecentFileEntry] { fileFlow.recents }
     /// The catalog is always open, so a drop always has somewhere to go.
     public var hasDocument: Bool { true }
     /// What the import reads (`PhotoFileKind`); a dropped folder is expanded by the drop plan.
@@ -101,11 +149,19 @@ extension LibraryCatalog: FileFlowTarget {
         SuiteTypeRegistry.standard.type(forExtension: ext)?.readers.map(\.rawValue) ?? []
     }
 
+    /// Opens a recent photo in the loupe; one the catalog no longer shows is refused.
     public mutating func openRecent(_ fileID: String) throws {
-        throw LibraryError.invalid("Library has no recent files.")
+        guard let entry = fileFlow.recents.first(where: { $0.fileID == fileID }) else {
+            throw LibraryError.invalid("\(fileID) is not in Recent Files.")
+        }
+        if let photo = items.first(where: { $0.path == entry.path }) { open(photo.id) }
+        guard mode == .loupe, loupePhoto?.path == entry.path else {
+            throw LibraryError.invalid("\(entry.name) isn't shown in the catalog.")
+        }
     }
 
-    public mutating func clearRecent() throws {}
+    /// Empties the list here; the window clears the suite's part through the bridge.
+    public mutating func clearRecent() throws { fileFlow.recents = [] }
 
     public mutating func openIn(_ app: String) throws {
         guard let path = loupePhoto?.path, openInApps.contains(app) else {

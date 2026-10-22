@@ -59,6 +59,7 @@ struct LibraryWindow: View {
     var body: some View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
+        let _ = fileFlowShown()
         #endif
         let filters = filtersMenu
         SuiteWindow(
@@ -99,8 +100,8 @@ struct LibraryWindow: View {
         .focusedSceneValue(\.libraryMenu, menu)
         .focusedSceneValue(\.libraryCatalog, model)
         .focusedSceneValue(\.libraryFilters, filters)
-        .suiteFileDrop(.library, bridge: LibraryShell.bridge, hasDocument: model.hasDocument,
-                       places: model.placesExtensions, perform: { try? model.perform($0) })
+        .suiteFileDrop(.library, bridge: Self.bridge, hasDocument: model.hasDocument,
+                       places: model.placesExtensions, perform: { fileFlowDrop($0) })
         // The crop frame and the CROP section read these (crop CR-6).
         .environment(\.libraryCrop, cropControls)
         .libraryControlsProbe()
@@ -114,8 +115,8 @@ struct LibraryWindow: View {
             filtersAreaLaunch()
         }
         .onChange(of: model.saveRevision) { _, _ in persistAreaChanged() }
-        .onChange(of: model.focusedItemID) { _, _ in loupeAreaFocusChanged() }
-        .onChange(of: model.mode) { _, _ in loupeAreaFocusChanged() }
+        .onChange(of: model.focusedItemID) { _, _ in loupeAreaFocusChanged(); fileFlowLoupeChanged() }
+        .onChange(of: model.mode) { _, _ in loupeAreaFocusChanged(); fileFlowLoupeChanged() }
         .onChange(of: model.catalogState) { _, _ in importAreaCatalogReady() }
         .onChange(of: model.collectionsRevision) { _, _ in filtersAreaChanged(areas.filters) }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
