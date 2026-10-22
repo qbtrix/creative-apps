@@ -4,7 +4,7 @@ Issue: #1971 · Packet: docs/blueprints/halo/features/core-loop.md
 Run: act-1a15f92d2f2-kvrn (from 2026-10-21T18:00Z; before: act-1a15d0eeefb-6z9l from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0) (from 2026-10-20T18:45Z; before: act-1a15728f2a2-zb1o) · Session: claude/halo-feature-lead-run-02scrb · Started: 2026-10-20T02:37Z
 Stage: 3 wave 5
 Base: 6d5f3a4025ffce3bb843003a158f64bf282020e6
-Next: #4321, #4322, #4331 and #4403 merged. The wiring PR #4423 got needs-rebase at 13:38Z (HaloLiveEdit.swift vs #4411); a fixer is merging dev into it. Halo journeys 39753811755 (1da00fb9) is running, and 39778735669 (06d331b0, has every merged fix) is pending; the first one past the fixes to finish gets the critic panel for H-J12 and H-P, and red there is round 2. Blocked on SuiteUI: #4273 (#4283), #4281 (#4282), #4275 duplicate series (#4330). Open findings >5, no new feature work
+Next: #4321, #4322, #4331 and #4403 merged. The wiring PR #4423 has dev merged in (head 3b97fb6b; HaloLiveEdit keeps #4411's makeLink and #4423's playing/playedAt/shown; ci PASS; 242 lines) and waits on the lane's macOS gate. Halo journeys 39753811755 (1da00fb9) is running, and 39778735669 (06d331b0, has every merged fix) is pending; the first one past the fixes to finish gets the critic panel for H-J12 and H-P, and red there is round 2. Blocked on SuiteUI: #4273 (#4283), #4281 (#4282), #4275 duplicate series (#4330). Open findings >5, no new feature work
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
