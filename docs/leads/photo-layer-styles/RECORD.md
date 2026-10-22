@@ -2,7 +2,7 @@
 
 Issue: #3793 · Packet: docs/blueprints/photo/features/layer-styles.md
 Run: act-1a16155057c-20lg · Session: claude/layer-styles-lead-hdzmvt · Started: 2026-10-22T02:00Z
-Stage: 0 setup, parked as blocked (re-checked 03:13Z after the second Belt stall nudge)
+Stage: 0 setup, ended by the supervisor (#3793 comments at 02:42Z and 03:16Z); the supervisor relaunches by hand once #3937 merges
 Base: 66a8458 (origin/dev)
 Next: re-read suiteui layer-styles (#3937) for LS-a merged (`LayerStyle`, `LayerStyleTarget`, `StyleCommands.specs` on dev); once it is, start wave 1 (PY-1)
 
