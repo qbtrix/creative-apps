@@ -30,3 +30,13 @@ utc	stage	event	ref	note
 2026-10-22T01:46:34Z	3	poll	#4258	fix PR macOS build still running; our PRs hold; cross-line waits still null
 2026-10-22T02:03:05Z	3	poll	#4258	fix PR Linux green, macOS build queued for a runner since 01:29; our PRs hold; cross-line waits null
 2026-10-22T02:33:21Z	3	pr	#4299	DS-u DS-5 sheet opened (split under 400 lines); DS-6 gallery/journey/budget on ds-u-gallery, PR after #4299 merges
+2026-10-22T02:44:03Z	check	Linux green on held heads; #4184 #4185 #4191 #4299 queued for lane macOS build
+2026-10-22T02:55:32Z	check	Head markers moved on #4184 #4185 #4191; #4299 open, awaiting lane macOS build; DS-6 held
+2026-10-22T03:20:02Z	fix	#4299 macOS build failed (LengthUnit ambiguous: SuiteKernel vs SuiteModel); fixed in 04d15d692, gate PASS, Head moved; ds-u-gallery merged it (838757f91). #4184 macOS build green
+2026-10-22T03:41:45Z	check	#4184 #4185 mac green, mergeable clean, lane run 39716412123 in progress; #4191 #4299 macOS builds queued; heads and markers match
+2026-10-22T04:06:29Z	merge	#4184 DS-m merged b7d02d1fe (lane batch 03:53); #4299 macOS build green (39716825688), open; Belt-Slice-Done for DS-m waits on a dev Linux run containing it
+2026-10-22T04:27:11Z	slice-done	#4299 merged 71987f724; DS-6 PR #4309 opened (head b0197b914, gate PASS); Belt-Slice-Done DS-m posted (Linux check 39721023306 green on bd793a5db)
+2026-10-22T04:44:16Z	check	#4309 head b0197b914 unchanged, macOS build 39722964879 queued; no scoped suiteui run with DS-u yet; adopt deps (FR-halo/flare) only test PRs merged
+2026-10-22T05:12:00Z	start	run act-1a1620043af-tzh0 resumed at dev 8cf02113; DS-a, DS-m merged, #4309 DS-6 macOS build queued; adopt waits (CB-*, UP-halo) unmet
+2026-10-22T05:11:17Z	slice-done	Belt-Slice-Done DS-a posted (Linux check 39724795297 green on 4e683e840)
+2026-10-22T06:14:28Z	poll	blocked	#4309 DS-6 open in lane; CB-*, UP-halo still waiting

@@ -1,17 +1,17 @@
 # document-setup lead record
 
 Issue: #3757 · Packet: docs/blueprints/suiteui/features/document-setup.md
-Run: act-1a15fddd101-68r5 · Session: session_01BsyWa1bPrB44D73KoNLtrU · Started: 2026-10-21T19:15Z
-Stage: 3 wave 1
-Base: 58034759f2cdc515d7a44a9ec164509be2b6508b
-Next: #4184 DS-m and #4299 DS-u (DS-5) in the lane; open DS-6 (ds-u-gallery) once #4299 merges. dev passes FormatListRatchetTests at b5a6e7e0a, so dev-red #3856 should clear.
+Run: act-1a1620043af-tzh0 · Started: 2026-10-22T05:00Z (resumed from act-1a15fddd101-68r5)
+Stage: 3 wave 2
+Base: 0dd23d659f4dbd8a0120aa85a321259327518251 (main); dev 8cf02113
+Next: #4309 (DS-6) in the lane, macOS build 39722964879 queued; then Belt-Slice-Done DS-u + Mac-Finish-Wanted. Adopt slices wait on clipboard-interop CB-photo/design/halo/flare (test halves building), UP-halo
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| DS-a | contract stubs + disabled DocumentSetupTests + C4 part | DS-1, DS-2 | – | frame-rates:FR-a (merged) | false | 0 | merged #4182 | – | – |
-| DS-m | DocumentSetup + commands bodies, mutation plans | DS-3, DS-4 | – | DS-a | false | 0 | pr #4184 | – | – |
-| DS-u | shared NewDocumentSheet in the gallery; journey + render budget | DS-5, DS-6 | SuiteJourneyTests+DocumentSetup | DS-a, frame-rates:FR-u, area-selection:AR-u | true | 0 | blocked | – | – |
+| DS-a | contract stubs + disabled DocumentSetupTests + C4 part | DS-1, DS-2 | – | frame-rates:FR-a (merged) | false | 0 | done #4182 | 39724795297 | – |
+| DS-m | DocumentSetup + commands bodies, mutation plans | DS-3, DS-4 | – | DS-a | false | 0 | done #4184 | – | – |
+| DS-u | shared NewDocumentSheet in the gallery; journey + render budget | DS-5, DS-6 | SuiteJourneyTests+DocumentSetup | DS-a, frame-rates:FR-u, area-selection:AR-u | true | 0 | pr #4309 (DS-5 merged #4299) | – | – |
 | DS-photo | Photo new image on the setup | DS-7, DS-8 | PhotoJourneyTests+Documents | DS-u, DS-m, CB-s, AC-zoom, CB-photo | true | 0 | blocked | – | – |
 | DS-design | Design new document on the setup | DS-9, DS-10 | DesignJourneyTests+Page | DS-u, DS-m, CB-design | true | 0 | blocked | – | – |
 | DS-halo | Halo composition settings on the setup | DS-11, DS-12 | HaloJourneyTests+Settings | DS-a (DS-11); DS-u, DS-m, FR-halo, UP-halo, CB-halo (DS-12) | true | 0 | blocked | – | – |
@@ -21,12 +21,12 @@ Next: #4184 DS-m and #4299 DS-u (DS-5) in the lane; open DS-6 (ds-u-gallery) onc
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| DS-1 | DS-a | 1 | contract as stubs | Sources/SuiteKernel/Document/DocumentSetup.swift, Sources/SuiteKernel/Document/DocumentSetupCommands.swift, docs/c4/parts/creative-apps/suite-kernel/kernel-document.json | kernel builds; DocumentSetupTests.specsHaveSchemas | #4182 | pr |
-| DS-2 | DS-a | 1 | DocumentSetupTests, disabled | Tests/SuiteKernelTests/DocumentSetupTests.swift | compiles, disabled by name | #4182 | pr |
-| DS-3 | DS-m | 2 | DocumentSetup bodies | Sources/SuiteKernel/Document/DocumentSetup.swift, Tests/SuiteKernelTests/DocumentSetupTests.swift, Tests/mutations/SuiteKernel.DocumentSetup.json | DocumentSetupTests value half | #4184 | pr |
-| DS-4 | DS-m | 2 | commands run with anchor, one undo step | Sources/SuiteKernel/Document/DocumentSetupCommands.swift, Tests/mutations/SuiteKernel.DocumentSetupCommands.json | DocumentSetupTests command half | #4184 | pr |
-| DS-5 | DS-u | – | NewDocumentSheet in the gallery | Sources/SuiteUI/NewDocumentSheet.swift, Sources/SuiteUI/Gallery/GalleryNewDocument.swift, Sources/SuiteUI/SuiteGallery.swift, Tests/SuiteUITests/NewDocumentSheetTests.swift | NewDocumentSheetTests | – | blocked |
-| DS-6 | DS-u | – | journey + render budget | UITests/SuiteJourneyTests+DocumentSetup.swift, Tests/AppSnapshotTests/RenderBudgetNewDocumentTests.swift | journey; RenderBudgetNewDocumentTests | – | blocked |
+| DS-1 | DS-a | 1 | contract as stubs | Sources/SuiteKernel/Document/DocumentSetup.swift, Sources/SuiteKernel/Document/DocumentSetupCommands.swift, docs/c4/parts/creative-apps/suite-kernel/kernel-document.json | kernel builds; DocumentSetupTests.specsHaveSchemas | #4182 | merged |
+| DS-2 | DS-a | 1 | DocumentSetupTests, disabled | Tests/SuiteKernelTests/DocumentSetupTests.swift | compiles, disabled by name | #4182 | merged |
+| DS-3 | DS-m | 2 | DocumentSetup bodies | Sources/SuiteKernel/Document/DocumentSetup.swift, Tests/SuiteKernelTests/DocumentSetupTests.swift, Tests/mutations/SuiteKernel.DocumentSetup.json | DocumentSetupTests value half | #4184 | merged |
+| DS-4 | DS-m | 2 | commands run with anchor, one undo step | Sources/SuiteKernel/Document/DocumentSetupCommands.swift, Tests/mutations/SuiteKernel.DocumentSetupCommands.json | DocumentSetupTests command half | #4184 | merged |
+| DS-5 | DS-u | – | NewDocumentSheet in the gallery | Sources/SuiteUI/NewDocumentSheet.swift, Sources/SuiteUI/Gallery/GalleryNewDocument.swift, Sources/SuiteUI/SuiteGallery.swift, Tests/SuiteUITests/NewDocumentSheetTests.swift | NewDocumentSheetTests | #4299 | merged |
+| DS-6 | DS-u | – | journey + render budget | UITests/SuiteJourneyTests+DocumentSetup.swift, Tests/AppSnapshotTests/RenderBudgetNewDocumentTests.swift | journey; RenderBudgetNewDocumentTests | #4309 | pr |
 | DS-7..DS-16 | adopt slices, DS-z | – | see packet | see packet | see packet | – | blocked |
 
 ## Reviews
@@ -40,10 +40,11 @@ Next: #4184 DS-m and #4299 DS-u (DS-5) in the lane; open DS-6 (ds-u-gallery) onc
 - DS-11 (test only) is held for the DS-halo slice PR rather than a test-only PR (rule 22).
 
 - Builders build the stacked slices one after another in one worktree; the lead opens the PRs.
-- Status channel moved to `lead/suiteui-document-setup` (`docs/leads/suiteui-document-setup/`), the names Belt watches; `lead/document-setup` is retired.
+- Status channel: Belt watches `lead/suiteui-document-setup`, so the record is mirrored to `docs/leads/suiteui-document-setup/` there and to `lead/document-setup` (from 06:15Z).
 - DS-m (#4184) is stacked with base `ds-a-document-setup-contract` so its diff stays its own (153 lines); against dev it would be 476 lines, over the lane's cap. It is retargeted to dev and merged with dev once #4182 lands.
 - DS-m deviations (builder): frame-rate, resolution and duration problem sentences are ours (packet gives none); any `#RRGGBB00` reads transparent; schema `background` maxLength 11 so `transparent` validates.
 
 ## Open
+- 2026-10-22T05:10Z wait check: CB-photo, CB-design, CB-halo, CB-flare planned (clipboard-interop lead building CB-5/7/9/11 test halves); UP-halo blocked behind UP-photo/UP-flare (unsaved-prompt run released); FR-halo, FR-flare, AC-zoom, CB-s, CB-m, CB-u done.
 - DS-u waits on frame-rates:FR-u (held) and area-selection:AR-u (waiting).
 - Adopt slices wait on other features' app slices (FR-halo/flare, CB-photo/design/halo/flare, UP-halo).
