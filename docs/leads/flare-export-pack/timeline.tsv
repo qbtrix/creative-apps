@@ -52,3 +52,4 @@ utc	stage	event	ref	note
 2026-10-22T08:26Z	3	wait	-	XP-3 still not on dev.
 2026-10-22T12:27Z	3	resume	-	act-1a16391fd49-8138 resumed; SM-a on dev; FV-1 rebased on dev 1c85591f, PR next; FV-m starts
 2026-10-22T12:40Z	3	pr	FV-1	#4414 opened, gate PASS at 63ef6a02; FV-3 builder started
+2026-10-22T13:15Z	3	built	FV-3	builder done at 1ba81c2c after worker restart; gate and mutate next

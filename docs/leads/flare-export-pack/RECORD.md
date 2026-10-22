@@ -4,7 +4,7 @@ Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
 Run: act-1a16391fd49-8138 · Session: claude/export-pack-lead-fl632i · Started: 2026-10-22T12:25Z (resumed from act-1a160bffba1-bvv3; earlier: Started 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih) · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: 3 build
 Base: 1c85591f (origin/dev)
-Next: FV-3 building; FV-4 stacked on it, FV-4 (FV-m) stacked on it; FV-2 once XP-3 is on dev
+Next: FV-3 built at 1ba81c2c, gating now (scripts/ci --changed, mutate); then PR; FV-4 stacked on it; FV-2 once XP-3 is on dev
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -20,7 +20,7 @@ Loop: v3 (the packet has a `## Slices` table).
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | FV-1 | FV-a | 1 | .mp4 and .gif with fps and loop, refused until FV-3 | Sources/FlareModel/FlareExport.swift, Tests/FlareModelTests/FlareVideoExportTests.swift | export tests pass; MP4 refused | #4414 | PR open (fast-lane), head 63ef6a02 |
-| FV-3 | FV-m | 2 | frame plan: every frame, even MP4, GIF alpha; RJ-F07/F08 folders | FlareExport+Kernel.swift, FlareVideoExportTests, mutations, RealJobs | FlareVideoExportTests; Mutate 3+ | – | building on lead/export-pack-fv3 |
+| FV-3 | FV-m | 2 | frame plan: every frame, even MP4, GIF alpha; RJ-F07/F08 folders | FlareExport+Kernel.swift, FlareVideoExportTests, mutations, RealJobs | FlareVideoExportTests; Mutate 3+ | – | built 1ba81c2c (224+/17-, 9 files); gating |
 | FV-4 | FV-m | 2 | live adapter streams to media sinks; cancel deletes | LiveExportAdapter, FakeExport, FlareVideoWriteTests | FlareVideoWriteTests; Mutate 2 | – | next, stacked on FV-3 (consumes its plan) |
 
 ## Decisions
