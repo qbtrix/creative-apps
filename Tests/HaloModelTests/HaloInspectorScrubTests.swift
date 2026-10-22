@@ -35,6 +35,23 @@ import Testing
         #expect(frame.value?.isNaN == true)
     }
 
+    @Test func oneEventSplitByARefreshIsShownOnce() {
+        // #4588: the bar's value and its drag both take the event; a refresh
+        // between them must not let the second call show it again.
+        var scrub = HaloInspectorScrub()
+        _ = scrub.take(1, at: 5, now: 0)
+        let first = scrub.refresh(at: 0.016)
+        _ = scrub.take(nil, at: 5, now: 0.017)
+        let second = scrub.refresh(at: 0.033)
+        #expect(first.events == [5] && first.value == 1)
+        #expect(second.events == [])
+        _ = scrub.take(2, at: 6, now: 0.034)
+        #expect(scrub.refresh(at: 0.05).events == [6])
+        _ = scrub.end()
+        _ = scrub.take(nil, at: 6, now: 1)
+        #expect(scrub.refresh(at: 1.016).events == [6], "a new drag starts with no event taken")
+    }
+
     @Test func anIdleRefreshStopsAskingAndTheNextSampleAsksAgain() {
         var scrub = HaloInspectorScrub()
         _ = scrub.take(1, at: 1, now: 1)

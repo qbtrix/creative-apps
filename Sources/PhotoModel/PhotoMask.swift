@@ -164,3 +164,62 @@ extension PhotoWorkspace {
         editsMask = on
     }
 }
+
+/// What a new mask starts as: white (shows the whole layer), black (hides it) or the selection's coverage.
+public enum MaskStart: String, Codable, CaseIterable, Sendable {
+    case reveal, hide, selection
+}
+
+extension PhotoWorkspace {
+    static let notImageLayer = "Select an image layer first.", noMask = "This layer has no mask."
+    static let hasMaskAlready = "This layer already has a mask.", noSelection = "Make a selection first."
+    /// What the add/delete/apply/enable bodies wait on (masks-clipping PK-5).
+    static let masksNotBuilt = NotBuilt(feature: "PK-5")
+
+    /// Why Delete, Apply, Disable and Edit Mask can't act on the selected layer, or nil when they can.
+    public var maskHelp: String? {
+        guard canvas != nil else { return Self.noImage }
+        guard let layer = selectedLayer, layer.kind == .pixels else { return Self.notImageLayer }
+        guard layer.hasMask else { return Self.noMask }
+        return Self.masksNotBuilt.help
+    }
+
+    /// Why a mask starting as `start` can't be added to the selected layer, or nil when it can.
+    public func addMaskHelp(_ start: MaskStart) -> String? {
+        guard canvas != nil else { return Self.noImage }
+        guard let layer = selectedLayer, layer.kind == .pixels else { return Self.notImageLayer }
+        guard !layer.hasMask else { return Self.hasMaskAlready }
+        if start == .selection, selection == nil, selectionMask == nil { return Self.noSelection }
+        return Self.masksNotBuilt.help
+    }
+
+    /// Adds a mask to the selected layer, starting as `start`, in one undo step.
+    public mutating func addMask(_ start: MaskStart) throws {
+        if let why = addMaskHelp(start) { throw PhotoRefusal(why) }
+        throw Self.masksNotBuilt.refuse()
+    }
+
+    /// Deletes the selected layer's mask in one undo step.
+    public mutating func deleteMask() throws {
+        if let why = maskHelp { throw PhotoRefusal(why) }
+        throw Self.masksNotBuilt.refuse()
+    }
+
+    /// Bakes the selected layer's mask into its pixels and drops the mask, in one undo step.
+    public mutating func applyMask() throws {
+        if let why = maskHelp { throw PhotoRefusal(why) }
+        throw Self.masksNotBuilt.refuse()
+    }
+
+    /// Turns the selected layer's mask on or off, keeping it, in one undo step.
+    public mutating func setMaskEnabled(_ enabled: Bool) throws {
+        if let why = maskHelp { throw PhotoRefusal(why) }
+        throw Self.masksNotBuilt.refuse()
+    }
+
+    /// Points the brush and eraser at the selected layer's mask (`on`) or its pixels. No undo step.
+    public mutating func setEditsMask(_ on: Bool) {
+        guard !on || maskHelp == nil else { return }
+        editsMask = on
+    }
+}
