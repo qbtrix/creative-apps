@@ -139,3 +139,4 @@ utc	stage	event	ref	note
 05:14Z	heartbeat	heartbeat: no open findings; PL-z waits on SH-z, TT-z, EY-z, AH-z, SS-d
 2026-10-22T17:07Z	pr-opened	PL-8 #4578 (base dev)
 2026-10-22T17:50Z	record	relaunch act-1a1647a67aa-dau5; PL-9 next, stacked on lead/eyedropper-EY-z
+18:12Z	heartbeat	PL-8 #4578 awaits lane macOS build; PL-9 builder running
