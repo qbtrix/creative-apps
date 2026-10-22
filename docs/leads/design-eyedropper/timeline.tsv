@@ -70,3 +70,4 @@ utc	stage	event	ref	note
 2026-10-22T01:18Z	DY-u	#4081 clean + macOS green, not merged yet; dev Linux red again (FormatListRatchetTests.realTreePasses, SuiteModel Media.swift; not our line)
 2026-10-22T01:40Z	DY-u	#4081 lane-eligible (5 green, macOS build ok); waits behind batch lane/batch-20261022004326 bisecting dev red (probe 0)
 2026-10-22T02:02Z	heartbeat	#4081 lane-eligible, waits on lane batch (dev red #3856 FormatListRatchetTests); DT-6 #4255 and DT-u fix #4254 in lane; DS-u not started
+2026-10-22T02:23Z	heartbeat	#4081 still lane-eligible, unmerged; dev Linux b5a6e7e0 running; #4255/#4254 unmerged; DS-u not started
