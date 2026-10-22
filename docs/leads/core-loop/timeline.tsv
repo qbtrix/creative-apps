@@ -165,3 +165,5 @@ utc	stage	event	ref	note
 2026-10-22T16:09Z	3	fix-pr	#4473 fixes #4454 #4457	CL-ui, head 4e341914, CI PASS
 2026-10-22T16:26Z	3	fixer	#4448 #4449 launched	after #4423 merged at 7e9f260ae
 2026-10-22T16:42Z	3	fix-pr	#4554 fixes #4449	CL-measure, head 0e8be22a, CI PASS
+2026-10-22T16:46Z	3	fix-pr	#4557 fixes #4448	CL-measure, head 98a52f8c, CI PASS
+2026-10-22T16:46Z	3	needs-ui	#4558 onScrubEnd	TimelineStrip drag end for #4448 write-back
