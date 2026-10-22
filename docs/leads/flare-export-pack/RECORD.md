@@ -35,6 +35,7 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T12:40Z: FV-4 stacks on FV-3 rather than running beside it: the adapter streams FV-3's plan, and a second plan in FV-4 would duplicate it (jscpd, rule 20).
 - 2026-10-22T12:40Z: the container had no Swift; installed the pinned 6.3.3 toolchain as scripts/cloud-setup.sh does (download resumed after the proxy cut it).
 - 2026-10-22T14:40Z: #4436 (FV-4) targets lead/export-pack-fv3 so its diff stays FV-4's 276 lines; it moves to dev with fast-lane once #4435 merges (against dev now it would be ~500 lines, over the cap).
+- 2026-10-22T14:45Z: supervisor 13:18Z on #3481: no Flare-side Size row; XP-3 not scheduled. Ship FV-1, FV-3, FV-4, then end this run; relaunch for FV-2/FV-5/FV-6 after XP-3. So the run ends once #4436 is on dev in the lane.
 
 ## Open
 - shell-media (docs/blueprints/suite/features/shell-media.md) is `planned` with feature_issue "file when ready"; SM-a and SM-w are not on dev. All four slices wait on it. Noted on #3481.
