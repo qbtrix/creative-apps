@@ -68,3 +68,4 @@ utc	stage	event	ref	note
 2026-10-22T07:27:49Z	stage	ST-z	#4349	ST-9 gated (CI: PASS) and opened: #4349 C4 prose (fast-lane), #4350 built (draft, feature-done)
 2026-10-22T08:32:59Z	stage	ST-z	#4349	#4349 (ST-9 C4 prose) merged; #4161 macOS build still queued; RECORD mirrored to lead/suite-shell-text
 2026-10-22T09:09:37Z	stop	ST-z	#4161	supervisor (#3725 08:38Z): run ended; #4161 queued for macOS, #4337 and #4350 drafts stacked; relaunch picks up from Next
+2026-10-22T09:40:58Z	check	ST-live	#4161	macOS build 39736024768 success; #4161 open, waits for the lane sweep; run stays ended per supervisor
