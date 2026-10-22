@@ -53,3 +53,4 @@
 2026-10-22T07:46Z	check	now p0 (blocks layer-styles #3793); TS-m #3844/#3847 still open; no new findings; TX-4/TX-5 waiting
 2026-10-22T08:13Z	check	TS-m #3844/#3847 still open; no new findings; TX-4/TX-5 waiting
 2026-10-22T08:38Z	check	TS-m #3844/#3847 still open (#3844 idle since 07:25Z); no new findings; TX-4/TX-5 waiting
+2026-10-22T09:05Z	check	TS-m #3844/#3847 still open; new finding #4378 (multi-layer shift-click) is multi-layer-select, not text-layers (TX commits never touch layer picking); TX-4/TX-5 waiting
