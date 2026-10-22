@@ -1,0 +1,54 @@
+utc	stage	event	ref	note
+2026-10-20T18:49Z	0	stage-start	#3443	base e382f9d7
+2026-10-20T18:49Z	2	stage-end	#3443	plan: HT-a wave 1, HT-5 stacked
+2026-10-20T18:49Z	3	stage-start	#3443	wave 1 HT-a
+2026-10-20T19:31Z	3	pr-opened	#3682	slice HT-a (HT-1 adapter stubs, HT-2 viewer handles), 278 lines 6 files
+2026-10-20T19:33Z	3	stage-start	wave 2	HT-5 (HT-m) stacked on lead/transform-HT-a; TT-m done
+2026-10-20T19:45Z	3	pr-open	#3702	HT-5 slice HT-m, stacked on #3682; Mutate 3/3; CI: PASS
+2026-10-20T19:56Z	3	heartbeat	#3682 #3702	both open, awaiting the macOS batch gate; HG-m (for HT-6) not done
+2026-10-20T20:18Z	3	heartbeat	#3682 #3702	open; #3682's macOS build (run 39481944279) has been queued since 19:15Z; blocked poll 1
+2026-10-20T20:41Z	3	heartbeat	#3682 #3702	open; run 39481944279 still queued; 35 macOS builds queued repo-wide; blocked poll 2
+2026-10-20T21:02Z	3	heartbeat	#3682 #3702	still queued; blocked poll 3; posted a supervisor question on #3443
+2026-10-20T21:05Z	3	wave-start	HT-u	builder started on lead/transform-HT-u, stacked on HT-a (HT-3 + HT-4); PR opens once #3682 merges
+2026-10-20T21:20Z	3	slice-built	HT-u	lead/transform-HT-u head 71d3bda, 6 files +300/-12, CI: PASS; PR waits for #3682 to merge; p95 budget printed, not checked (perf-suites is supervisor-only); turned snapshot needs HT-5 (#3702)
+2026-10-20T21:27Z	3	heartbeat	#3682 #3702	supervisor answered: PRs are queued for the local Mac gate; once a parent squash-merges, rebase HT-u --onto dev and open its PR
+2026-10-20T21:49Z	3	heartbeat	#3682 #3702	open, in the supervisor's local Mac gate queue; HT-u ready to rebase
+2026-10-20T22:12Z	3	heartbeat	#3682 #3702	open, in the local Mac gate queue; no change
+2026-10-20T22:34Z	3	heartbeat	#3682 #3702	open, in the local Mac gate queue; no change
+2026-10-20T23:54Z	3	merge	#3702 #3682	HT-m (HT-5) squash 2a21273a3 carried HT-a; #3682 closed as superseded
+2026-10-20T23:54Z	3	slice-done	HT-a	Belt-Slice-Done and Mac-Finish-Wanted on #3443, run 39514893774
+2026-10-20T23:54Z	3	rebase	HT-u	rebased onto dev (C4 description merged), gating
+2026-10-21T00:00Z	3	pr	#3811	HT-u opened, fast-lane, head b6cba72, CI PASS
+2026-10-21T00:16Z	3	heartbeat	#3811	queued for lane macOS gate; HT-m waits on HT-6 (HG-m #3417 open)
+2026-10-21T00:37Z	3	heartbeat	#3811	still queued for lane macOS gate, no labels
+2026-10-21T01:00Z	3	heartbeat	#3811	queued for lane macOS gate; dev-red #3386 is Library planWithinBudget timing, not Halo
+2026-10-21T01:22Z	3	heartbeat	#3811	queued; lane sweep in progress; dev-red #3386 open (not Halo)
+2026-10-21T01:44Z	3	heartbeat	#3811	not in batch 20261021005140 (bisecting #3676/#3699/#3767); dev green 7277a83ac, #3386 closed
+2026-10-21T02:06Z	3	heartbeat	#3811	batch 20261021005140 bisect at probe -4 (#3676..#3768); ours outside, waiting
+2026-10-21T02:33Z	3	fix-pushed	#3811	macOS build 39519614459 red on b6cba72 (mutating call in #require); fixed in 6af524c, ci --changed PASS, Head moved
+2026-10-21T02:55Z	3	question	#3811	macOS build 39534515438 for 6af524c cancelled; lane won't redispatch same head; asked supervisor on #3443
+2026-10-21T03:17Z	3	heartbeat	#3811	no new macOS build for 6af524c; supervisor not yet answered on #3443
+2026-10-21T03:43Z	3	fix-pushed	#3811	needs-rebase (C4 part) resolved: merged dev as ad67a02, kept dev description; ci --changed PASS; Head moved; supervisor ask withdrawn
+2026-10-21T04:06:23Z	heartbeat	check: #3811 HT-u head ad67a02 macOS build 39541214739 queued; no needs-fix/needs-rebase
+2026-10-21T04:28:14Z	heartbeat	check: #3811 HT-u macOS build 39541214739 green on ad67a02; lane: eligible next sweep, 26 ready behind a batch
+2026-10-21T04:50:46Z	heartbeat	check: #3811 HT-u eligible (macOS green on ad67a02), waits for a batch
+2026-10-21T05:12:16Z	heartbeat	check: #3811 HT-u eligible, waits for a batch
+2026-10-21T05:38:45Z	heartbeat	fix: #3811 HT-u needs-rebase (HaloWindow+Viewer.swift vs #3693) resolved, both environments kept; da8dfd4 pushed, scripts/ci --changed PASS, Head moved
+2026-10-21T06:00:33Z	heartbeat	check: #3811 needs-rebase dropped; macOS build 39551030965 for da8dfd4 dispatched
+2026-10-21T06:27:04Z	heartbeat	HT-u #3811 head da8dfd4 open, fast-lane, macOS build 39551030965 queued
+2026-10-21T06:49:41Z	heartbeat	HT-u #3811 head da8dfd4 open, macOS build 39551030965 in progress
+2026-10-21T07:13:19Z	heartbeat	HT-u #3811 head da8dfd4 macOS build 39551030965 green; eligible, waits for a lane batch
+2026-10-21T07:35:08Z	heartbeat	HT-u #3811 head da8dfd4 eligible (macOS green), waiting for a lane batch
+2026-10-21T07:56:46Z	heartbeat	HT-u #3811 merged as db7607e70 (batch of 8); dev Linux run 39564222036 at 260f7a874 contains it, in progress
+2026-10-21T08:11Z	heartbeat	HT-u done (dev Linux 39564222036); Belt-Slice-Done posted; HT-6 waits on HG-m #3417
+2026-10-21T08:33Z	heartbeat	HT-u done; HT-6 waits on HG-m #3417 (open)
+2026-10-21T08:54Z	heartbeat	HT-6 waits on HG-m (#3417 shows only HG-a done)
+2026-10-21T09:15Z	heartbeat	HT-6 waits on HG-m (#3417: only HG-a done)
+2026-10-21T09:37Z	heartbeat	HT-6 waits on HG-m (#3417: only HG-a done)
+2026-10-21T10:00Z	heartbeat	HT-6 waits on HG-m (#3417: only HG-a done)
+2026-10-21T10:21Z	heartbeat	HT-6 waits on HG-m; #3417 now held by Belt for core-loop:CL-probe
+2026-10-21T10:43Z	heartbeat	HT-6 waits on HG-m (#3417 held for CL-probe)
+2026-10-22T12:20Z	pr	HT-m #4415 opened (HT-6, gate pass b6f199ee)
+2026-10-22T12:35Z	pr	HT-z #4422 opened stacked on #4415 (HT-7, HT-8; gate pass 42c2cbe4)
+2026-10-22T13:16Z	heartbeat	#4415/#4422 bodies cleaned of footer; macOS builds queued (39783206639, 39783246483)
+2026-10-22T13:58Z	rebase	#4415 f5e08d5, #4422 e153b4b merged with dev; gate blocked only by dev-red #3856 (HaloStrokeTrimKeysTests)

@@ -44,3 +44,5 @@ Wave 3: HT-m as #4415 on dev 30120a8; HT-z (#4422) stacked on it at once, labell
 ## Open
 - HT-5 box under a turned or scaled parent: the parent places the centre only; the box keeps the layer's own size and turn. Check in the critic panel; file a gap if the job needs nested transforms.
 - HG-m and HA-m are on dev (autosave-history built, #4397), so HT-6 is unblocked; HT-m is #4415.
+- 13:58Z: #4415 and #4422 were labelled needs-rebase (dev's HK-6 stroke commands, #4400, conflicted on the catalog line, tests, golden and mutation plan). I merged origin/dev and kept both sides: #4415 head is f5e08d5 (mutate 14/14), #4422 head is e153b4b. The gate's only failure is HaloStrokeTrimKeysTests/aReasonTurnsTheKeyOffAndItsClickSendsNothing, which fails on origin/dev 20deed6 alone (dev-red #3856, from HK-6). Per CLAUDE.md it isn't fixed here, and Fast-Check reads "blocked by dev-red #3856". I asked the supervisor on #3443.
+- Belt reads docs/leads/halo-transform/RECORD.md on lead/halo-transform, so the record is mirrored there; lead/transform keeps the original.
