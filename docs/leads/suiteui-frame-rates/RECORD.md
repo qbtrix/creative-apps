@@ -2,9 +2,10 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a161a658a7-2jql · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: FR-halo 4407 rebase gating
+Stage: FR-8b regate
 Base: dev
-Next: push 4407; FR-u critic round 2 when 39765697963 finishes; FR-z after 4407
+Next: push 8b then FR-z
+
 
 
 
@@ -33,6 +34,7 @@ Next: push 4407; FR-u critic round 2 when 39765697963 finishes; FR-z after 4407
 
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 14:20Z: FR-8b gate red on dev's trim-key test (dev-red 3856); ported fix PR 4431 and re-escaped golden fix; re-gating. FR-11 scan tightened to all-rate literals.
 - 13:54Z: heartbeat. FR-8b re-gate queued on the build lock, FR-11 test restarted after its 30 min limit. Scoped run 39765697963 now in progress.
 - 13:30Z: 4407 got needs-rebase (dev added HK-6 stroke commands to the Halo catalog). Merged dev, kept the stroke order with frameRateSpecs before windowSpecs, golden merged by id, anchors repointed. Re-gating.
 - 12:58Z: 4402 and 4408 (FR-flare) merged. 4407 (FR-halo) waits on its per-PR macOS build. FR-z started in wt-frz: FR-11 FrameRateHomeTests written and building; RJ-X74 turn-on, FJ-FR journey and FR-12 follow once 4407 lands.
