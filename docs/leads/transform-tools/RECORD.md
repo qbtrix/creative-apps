@@ -2,9 +2,9 @@
 
 Issue: #3446 · Packet: docs/blueprints/suiteui/features/transform-tools.md
 Run: act-1a163b2abfe-f182 (relaunch; first run act-1a1579fdd22-6z1j) · Started: 2026-10-22
-Stage: 3 wave 5 (TT-z)
+Stage: 3 wave 5 (TT-z) shipped; polling lane
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: fixer on #3513 (macOS compile error in SuiteTransformSnapshots), restack #3577 on it; builder TT-8+TT-9 stacked on #3577 with feature-done
+Next: lane batches #3513 → #3577 → #4429 (feature-done); then TT-z done from the dev CI run holding #4429; critic panel on TT-z screens from a scoped app=suiteui run
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: fixer on #3513 (macOS compile error in SuiteTransformSnapshots), restack #
 | TT-a | The kernel's transform rules, target, intents and six command specs are declared as stubs, the handles take a turn, the ... | TT-1, TT-2 | SJ0 | editor-kernel | true | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39411363661 | wanted |
 | TT-u | On the gallery page the knob turns the box and its handles together, a side drag grows the turned box in its own frame, ... | TT-3, TT-4 | TJ1 | TT-a | true | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39445745786 | wanted |
 | TT-m | The rules turn, mirror and scale a box about its centre or an anchor and map points both ways, and every transform comma... | TT-5, TT-6 | KJ-transform | TT-a | false | 0 | done | – | – |
-| TT-z | The gallery runs its intents through TransformCommands on a live target, the fake app turns and flips so RJ-X32 runs on ... | TT-7, TT-8, TT-9 | TJ1, KJ-transform | TT-u, TT-m, autosave-history:AH-z (merged #4388) | true | 0 | building | – | – |
+| TT-z | The gallery runs its intents through TransformCommands on a live target, the fake app turns and flips so RJ-X32 runs on ... | TT-7, TT-8, TT-9 | TJ1, KJ-transform | TT-u, TT-m, autosave-history:AH-z (merged #4388) | true | 0 | in lane | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -20,12 +20,12 @@ Next: fixer on #3513 (macOS compile error in SuiteTransformSnapshots), restack #
 | TT-1 | TT-a | 1 | The contract as stubs: `FlipDirection`, `BoxAnchor`, `TransformBox`, `TransformRules`, `TransformTarget`, `... | `Sources/SuiteKernel/Transform/TransformRules.swift`, `Sources/SuiteKernel/Transform/TransformCommands.swift`, `Tests/SuiteKernelTests/TransformRulesTests.swift`, `Tests/SuiteKernelTests/TransformCommandsTests.swift`, `docs/c4/parts/creative-apps/suite-kernel/kernel-transform.json` | see packet Acceptance | #3485 | merged |
 | TT-2 | TT-a | 2 | The placeholder `TransformRows`; `SelectionHandlesEditor`'s `degrees:` initializer (ignored for now); the g... | `Sources/SuiteUI/TransformRows.swift`, `Sources/SuiteUI/CanvasMarks+Vector.swift`, `Sources/SuiteUI/Gallery/GalleryTransform.swift`, `Sources/SuiteUI/Gallery/GalleryCanvas.swift`, `UITests/SuiteJourneyTests+Transform.swift` | see packet Acceptance | #3486 | merged |
 | TT-3 | TT-u | 3 | The rows (X, Y, W, H, Rotation, Flip H and V, identifiers `suite.transform.*`) and the turned box: drawn tu... | `Sources/SuiteUI/TransformRows.swift`, `Sources/SuiteUI/CanvasMarks+Vector.swift`, `Tests/SuiteUITests/TransformRowsTests.swift`, `Tests/SuiteUITests/SelectionHandleTurnTests.swift` | see packet Acceptance | #3512 | merged |
-| TT-4 | TT-u | 4 | Snapshots, the render budget test, the journey turned on | `Tests/AppSnapshotTests/SuiteTransformSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetTransformTests.swift`, `UITests/SuiteJourneyTests+Transform.swift` | see packet Acceptance | #3513 | open |
+| TT-4 | TT-u | 4 | Snapshots, the render budget test, the journey turned on | `Tests/AppSnapshotTests/SuiteTransformSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetTransformTests.swift`, `UITests/SuiteJourneyTests+Transform.swift` | see packet Acceptance | #3513 | open (9b339941, macOS fix) |
 | TT-5 | TT-m | 2 | `TransformRules` bodies; turns on `TransformRulesTests` | `Sources/SuiteKernel/Transform/TransformRules.swift`, `Tests/SuiteKernelTests/TransformRulesTests.swift`, `Tests/mutations/SuiteKernel.TransformRules.json` | see packet Acceptance | #3524 | merged |
 | TT-6 | TT-m | 3 | `TransformCommands` bodies and `TransformIntent.command`; turns on `TransformCommandsTests` on a test target | `Sources/SuiteKernel/Transform/TransformCommands.swift`, `Tests/SuiteKernelTests/TransformCommandsTests.swift`, `Tests/mutations/SuiteKernel.TransformCommands.json` | see packet Acceptance | #3524 | merged |
-| TT-7 | TT-z | 5 | The gallery page runs each intent through `TransformCommands` on a local target with a `History`, so one un... | `Sources/SuiteUI/Gallery/GalleryTransform.swift`, `Tests/SuiteUITests/TransformLiveTests.swift` | see packet Acceptance | #3577 | open |
-| TT-8 | TT-z | 4 | The fake app turns and flips: `FakeRect.degrees`, `flipX`, `flipY` (omitted at their defaults, so old jobs'... | `Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift`, `Tests/SuiteKernelTests/FakeTransformTests.swift`, `Tests/mutations/SuiteKernel.FakeCanvasDocument.json`, `Tests/RealJobs/fake/turn-flip/turn-flip.jobs.json`, `Tests/RealJobs/fake/turn-flip/input/one.fake` | see packet Acceptance | – | planned |
-| TT-9 | TT-z | 6 | The C4 part names the commands and the rows; `status: built`; `feature-done` | `docs/c4/parts/creative-apps/suite-kernel/kernel-transform.json`, `docs/blueprints/suiteui/features/transform-tools.wave.json` | see packet Acceptance | – | planned |
+| TT-7 | TT-z | 5 | The gallery page runs each intent through `TransformCommands` on a local target with a `History`, so one un... | `Sources/SuiteUI/Gallery/GalleryTransform.swift`, `Tests/SuiteUITests/TransformLiveTests.swift` | see packet Acceptance | #3577 | open (00e33bb1) |
+| TT-8 | TT-z | 4 | The fake app turns and flips: `FakeRect.degrees`, `flipX`, `flipY` (omitted at their defaults, so old jobs'... | `Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift`, `Tests/SuiteKernelTests/FakeTransformTests.swift`, `Tests/mutations/SuiteKernel.FakeCanvasDocument.json`, `Tests/RealJobs/fake/turn-flip/turn-flip.jobs.json`, `Tests/RealJobs/fake/turn-flip/input/one.fake` | see packet Acceptance | #4429 | open (93c81453) |
+| TT-9 | TT-z | 6 | The C4 part names the commands and the rows; `status: built`; `feature-done` | `docs/c4/parts/creative-apps/suite-kernel/kernel-transform.json`, `docs/blueprints/suiteui/features/transform-tools.wave.json` | see packet Acceptance | #4429 | open (feature-done) |
 
 (wave = the packet's build wave; the combined slice-PR plan is under Decisions.)
 
@@ -34,6 +34,7 @@ Next: fixer on #3513 (macOS compile error in SuiteTransformSnapshots), restack #
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T14:35Z Wave 5 shipped: #3513 merged dev and inlined the Rects in the @Test arguments (9b339941, CI: PASS); #3577 merged it (00e33bb1, CI: PASS); TT-8+TT-9 opened as #4429 (191+/22-, 15 files, Mutate 12/12, feature-done) stacked on #3577. Attribution footers the PR tool added to #4427-#4430 removed. No needs-fix or needs-rebase.
 - 2026-10-22 Relaunch as run act-1a163b2abfe-f182 for TT-z only. Brief step one verified main HEAD 0dd23d65. Brief rule 2 asks to rebase lead/transform-tools onto main, but main is 487 commits behind dev and the packets live on dev; the lead branch is rebuilt from origin/dev (1a518080) plus docs/leads/transform-tools and force-pushed with lease. Base stays origin/dev.
 - 2026-10-22 AH-z merged (#4388, autosave-history built): TT-8 is unblocked. TT-8 + TT-9 ship as one TT-z slice PR (TT-9 is under 50 lines, rule 11) stacked on #3577, labelled feature-done.
 - 2026-10-22 #3513's macOS build (run 39445647593) fails: the `@Test(arguments:)` list in SuiteTransformSnapshots.swift reads a main-actor `static let box`, so the expansion needs await. Fixer: inline the Rects.
@@ -60,4 +61,4 @@ Next: fixer on #3513 (macOS compile error in SuiteTransformSnapshots), restack #
 - kernel-transform.json is an existing editor-kernel C4 part: TT-1 adds its new paths there, not a new part.
 
 ## Open
-- #3513 compile fix, then #3577 restack; TT-8+TT-9 PR.
+- Lane: #3513, #3577, #4429 (stacked). After merge: Belt-Slice-Done TT-z, Mac-Finish-Wanted TT-z, Belt-Contact-Sheet on #3446.

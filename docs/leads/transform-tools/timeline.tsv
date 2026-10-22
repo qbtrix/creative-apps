@@ -74,3 +74,4 @@ utc	stage	event	ref	note
 2026-10-20T20:12Z	3	heartbeat	-	lead polling PRs 3513 3577 
 2026-10-20T20:42Z	3	heartbeat	-	lead polling PRs 3513 3577 
 2026-10-22T13:04Z	3	relaunch	-	run act-1a163b2abfe-f182: TT-z only; AH-z merged, TT-8 unblocked; fixing #3513 macOS build
+2026-10-22T14:35Z	3	wave	-	TT-z shipped: #3513 9b339941, #3577 00e33bb1, #4429 TT-8+TT-9 feature-done; waiting on the lane
