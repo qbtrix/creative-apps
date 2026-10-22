@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-22T15:20Z	heartbeat		#4010 waits sweep; #4430 mac rebuild queued; AK-6/8/9/11 blocked (poll 2)
 2026-10-22T15:50Z	3	question	-	blocked poll 3 unchanged; supervisor question on #3713
 2026-10-22T16:20Z	3	parked	-	supervisor: park AK; #4010 merged; #4427 retargeted to dev at a1ede4d9
+2026-10-22T16:42Z	3	heartbeat	-	#4427 macOS build queued; #4428 stacked
