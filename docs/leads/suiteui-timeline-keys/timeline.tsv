@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-22T00:56:41Z	3	poll	#4185 #4191	unchanged; #4258 still open; hold
 2026-10-22T01:13:17Z	3	poll	#4185 #4191	#4258 new head f9e7698c1, lane Linux check running; hold
 2026-10-22T01:30:25Z	3	poll	#4258	fix PR macOS build dispatched at 01:29; our PRs hold; cross-line waits still null
+2026-10-22T01:46:34Z	3	poll	#4258	fix PR macOS build still running; our PRs hold; cross-line waits still null
