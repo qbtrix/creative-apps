@@ -1,7 +1,8 @@
 // HaloRenderJob.swift: the pure helpers behind File > Render… (#429): what a
-// render would write and the name it takes. The job's state and its moves
+// render would write, the name it takes and what a finished one wrote. The job's state and its moves
 // are HaloRenderJob+Kernel.swift's, on SuiteKernel's ExportRun (core-loop
 // CL-6, #1971). Linux-safe: no UI imports.
+import SuiteKernel
 import SuiteModel
 
 extension HaloProject {
@@ -31,5 +32,19 @@ extension HaloProject {
         guard let comp = selectedComposition else { return nil }
         let ext = settings.format == .movie ? "mp4" : ""
         return UniqueFileNames.name(comp.name, extension: ext, among: existing)
+    }
+
+    /// What a finished render wrote into `output` (its folder or movie
+    /// file's name), for the sheet's finished line: "48 PNG files into
+    /// "Bounce"" or "Bounce.mp4". Nil unless the run has finished.
+    public func renderWrittenText(into output: String) -> String? {
+        guard case .finished(let settings, let files) = renderRun else { return nil }
+        switch settings.format {
+        case .pngSequence:
+            let count = files.count == 1 ? "1 PNG file" : "\(files.count) PNG files"
+            return "\(count) into \"\(output)\""
+        case .movie:
+            return output
+        }
     }
 }

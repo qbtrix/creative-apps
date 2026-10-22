@@ -172,13 +172,11 @@ struct FlareCommands: Commands {
         item(.assist(.showPopover), key: KeyboardShortcut("a", modifiers: [.command, .option]))
     }
 
-    /// One menu item: `intent`'s title (or `title`), acting through the
-    /// focused window and disabled with its reason while it can't act.
+    /// One menu item: `intent`'s title (or `title`) on its catalog spec (`FlareWorkspace.menuSpec(for:)`, command-state
+    /// CS-12), acting through the focused window and disabled with its reason while it can't act.
     private func item(_ intent: FlareIntent, title: String? = nil, key: KeyboardShortcut? = nil) -> some View {
-        let reason = menu.help(intent)
-        return Button(title ?? intent.title) { menu.perform(intent) }
-            .keyboardShortcut(key)
-            .disabled(reason != nil)
-            .help(reason ?? "")
+        MenuCommand(FlareWorkspace.menuSpec(for: intent), on: menu.help(intent), title: title ?? intent.title, shortcut: key) {
+            menu.perform(intent)
+        }
     }
 }
