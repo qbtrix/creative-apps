@@ -79,3 +79,4 @@ utc	stage	event	ref	note
 2026-10-22T04:40:00Z	triage	scoped: photo 39712698310 (b5a6e7e0a) RED only on RenderBudgetPhotoTransformTests corner drag/rotation scrub bodies 120-121 > 3; not ours: same failure on 037c5c745 (before PM-m #4143) and since PT-u #4127; fixed by #4219 (9d5deb1e8), not in b5a6e7e0a. Waiting on scoped: photo 39722915670 + CI 39722978870 on 71987f724 (has #4219, PM-m, PM-z)
 2026-10-22T05:05:00Z	check-in	CI 39722978870 on 71987f724: Linux green, macOS queued; scoped: photo 39722915670 queued; no findings
 2026-10-22T05:36:00Z	check-in	still queued for macOS: scoped: photo 39722915670, CI 39722978870 (Linux green) on 71987f724; no findings
+2026-10-22T06:08:00Z	check-in	macOS backlog: scoped: photo 39722915670 and CI 39722978870 (71987f724) still queued (~95 min); newer full CIs 39725694977 (b2794c201) queued, 39730395919 (b2bde1590) pending; dev Linux green on 4f11699ee; no findings
