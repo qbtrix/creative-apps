@@ -93,3 +93,4 @@ utc	stage	event	ref	note
 2026-10-22T10:08Z	merge	#4356 DY-5 merged 09:59Z (02d2e5be); DY-m merged dev (bf4d0b8c), ci --changed PASS, #4357 retargeted to dev	#4357	-
 2026-10-22T10:28Z	poll	#4357 lane macOS build 39760889343 queued since 10:08Z	-	-
 2026-10-22T10:45Z	poll	#4357 build 39760889343 still queued; Belt nudge named lead/eyedropper + lead/stroke-style (SuiteUI, other runs); asked supervisor on #3438	#3438	-
+2026-10-22T11:05Z	stage	#4376 merged DY-m in (c27bcab1, gate PASS), retargeted to dev; both PRs in the lane; run ends per supervisor 10:47Z on #3438	#4376	-
