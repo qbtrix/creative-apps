@@ -1,0 +1,10 @@
+{
+  "id": "shell-imageio",
+  "name": "SuiteImageIO",
+  "description": "The suite's one ImageIO adapter: encodes an image as a SuiteImageFormats format and writes animated GIF and APNG files for shell-media's writers. No other source file imports ImageIO.",
+  "technology": "Swift 6, ImageIO and CoreGraphics, macOS 26",
+  "paths": [
+    "Sources/SuiteShell/SuiteImageIO.swift"
+  ],
+  "order": 91
+}
