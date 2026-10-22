@@ -1,0 +1,42 @@
+utc	stage	event	ref	note
+2026-10-21T19:12:04Z	0	setup	58034759	base verified; lead branch created
+2026-10-21T19:12:04Z	2	plan	-	wave 1 = TK-a
+2026-10-21T19:16Z	3	check	hand-offs	FG-a/FK-a/KE-a/CL-probe planned; #4055 #4147 #4166 small overlaps; TK-u proceeds
+2026-10-21T20:20Z	3	pr-opened	#4183	TK-a contract stubs
+2026-10-21T20:20Z	3	pr-opened	#4185	TK-5 rules, stacked on #4183
+2026-10-21T20:20Z	3	build	TK-u	builder started on tk-u-timeline-keys-ui
+2026-10-21T20:20Z	3	channel	lead/suiteui-timeline-keys	status moved to the branch Belt watches
+2026-10-21T20:38Z	3	footer	#4183 #4185	server footer removed from both bodies
+2026-10-21T20:38Z	3	lane-mac	#4183	macOS build https://github.com/qbtrix/creative-apps/actions/runs/39671398584
+2026-10-21T20:38Z	3	poll	-	no findings; TK-u builder running
+2026-10-21T20:42Z	3	pr-opened	#4191	TK-u (TK-3, TK-4), base tk-a-timeline-keys-contract
+2026-10-21T20:54Z	3	poll	#4183	macOS build 39671398584 in progress; #4185 #4191 wait; no findings
+2026-10-21T21:12Z	3	lane-mac	#4183	macOS build 39671398584 success; merge on the next lane sweep; #4185 #4191 wait
+2026-10-21T21:25Z	3	poll	#4183	compiled; waiting on the lane sweep (run 39678641684 pending)
+2026-10-21T21:38Z	3	poll	#4183	compiled; still waiting on the lane sweep (run 39679102627)
+2026-10-21T21:53Z	3	poll	#4183	TK-a compiled on macOS, unmerged, clean; lane sweep 39682222093 pending (blocked poll 2 of 3)
+2026-10-21T22:16Z	3	merged	#4183	TK-a squash-merged; #4185 and #4191 retargeted to dev, dev merged in
+2026-10-21T22:28Z	3	gate	#4191	pass at 0ebd9101; Head: moved
+2026-10-21T22:28Z	3	blocked	#4185	gate red only on dev library command-path baseline (#3967), not ours; commented on #3780
+2026-10-21T22:42Z	3	poll	#4185 #4191	supervisor re-labelled both fast-lane; queued on the local Mac gate after #4215; dev still red on library baseline
+2026-10-21T22:57Z	3	poll	#4191 #4185	TK-u macOS build dispatched by the lane; TK-5 Linux check (red while dev-red holds)
+2026-10-21T23:13Z	3	blocked	#4185 #4191	dev-red #3856: library baseline (TK-5) and dev macOS compile break in RenderBudgetPhotoPlaceTests (TK-u build); question on #3757
+2026-10-21T23:30:51Z	3	poll	#3757	supervisor: hold, #4250 merged, #4215 next, #4185 queued on local Mac gate; #4191 clean, waits on the lane; TK-6 waits on AJ-halo, TS-halo, AN-halo (none started)
+2026-10-21T23:49:32Z	3	check	#4191	lane macOS build 39688704475 red only on dev RenderBudgetPhotoPlaceTests.swift:35 (PhotoPlaceIntent.files, fixed by #4215), not ours; hold
+2026-10-22T00:06:30Z	3	poll	#4185 #4191	#4215 merged; supervisor merged dev into TK-5 (208ff81f9) and TK-u (8cdf61522), lane Linux checks running; hold
+2026-10-22T00:23:42Z	3	check	#4185 #4191	Linux red only on dev-red #3856 FormatListRatchetTests (Media.swift from #4034); fix #4258 on the lane; hold
+2026-10-22T00:40:23Z	3	poll	#4185 #4191	#4258 still waiting on its macOS build; hold; stripped 1 old comment footer on #3780
+2026-10-22T00:56:41Z	3	poll	#4185 #4191	unchanged; #4258 still open; hold
+2026-10-22T01:13:17Z	3	poll	#4185 #4191	#4258 new head f9e7698c1, lane Linux check running; hold
+2026-10-22T01:30:25Z	3	poll	#4258	fix PR macOS build dispatched at 01:29; our PRs hold; cross-line waits still null
+2026-10-22T01:46:34Z	3	poll	#4258	fix PR macOS build still running; our PRs hold; cross-line waits still null
+2026-10-22T02:03:05Z	3	poll	#4258	fix PR Linux green, macOS build queued for a runner since 01:29; our PRs hold; cross-line waits null
+2026-10-22T02:33:21Z	3	poll	#4185 #4191	TK-5 and TK-u held only by dev-red #3856; ratchet passes on dev b5a6e7e0a; TK-6 still waits on AJ/TS/AN-halo
+2026-10-22T02:44:03Z	check	Linux green on held heads; #4184 #4185 #4191 #4299 queued for lane macOS build
+2026-10-22T02:55:32Z	check	Head markers moved on #4184 #4185 #4191; #4299 open, awaiting lane macOS build; DS-6 held
+2026-10-22T03:20:02Z	check	#4185 macOS build green; #4191 head e6567f819 (dev merged) gated PASS, Head moved; its macOS build queued
+2026-10-22T03:41:45Z	check	#4184 #4185 mac green, mergeable clean, lane run 39716412123 in progress; #4191 #4299 macOS builds queued; heads and markers match
+2026-10-22T04:06:29Z	merge	#4185 TK-5 merged f780a7df6 (lane batch 03:53); #4191 head 4dcd002c7 (lane merged dev) gated PASS, Head moved; dev Linux runs so far predate f780a7df6
+2026-10-22T04:27:11Z	merge	#4191 TK-u merged bd793a5db; Linux check 39721023306 green contains TK-5; TK-m done waits on TK-6; TK-u critics wait on a scoped run (suite/flare) containing bd793a5db
+2026-10-22T04:44:16Z	check	scoped: suite 39721019643 on bd793a5db still queued (TK-u critics wait); AJ/TS/AN-halo not merged, TK-6 blocked
+2026-10-22T05:12:00Z	start	run act-1a1620043af-tzh0 resumed at dev 8cf02113; TK-a, TK-5, TK-u merged; TK-7 unchained from TK-6, TK-flare starts
