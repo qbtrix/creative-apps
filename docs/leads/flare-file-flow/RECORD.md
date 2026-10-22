@@ -1,10 +1,10 @@
 # file-flow (Flare) lead record
 
 Issue: #3482 · Packet: docs/blueprints/flare/features/file-flow.md
-Run: act-1a15d4ed024-1wsg · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih)
-Stage: 3 wave 1
-Base: b64cbb8c (origin/dev)
-Next: FL-1 is in the lane as #3843 (eligible, macOS build green). KS-a is open as #3921; FL-2 starts once svg-place PF-u (waits on KS-a) has merged, then FL-u (FL-5, FL-6) stacks on FL-a.
+Run: act-1a160bffba1-bvv3 · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih) · resumed from act-1a15d4ed024-1wsg at 23:2xZ
+Stage: FL-a
+Base: 8c55f0bf9 (origin/dev)
+Next: next heartbeat
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -49,27 +49,14 @@ Loop: v3 (the packet has a `## Slices` table).
 - 12:46Z: No svg-place PF PRs yet; FL-2 still blocked.
 - 13:08Z: No svg-place PF PRs; FL-2 blocked.
 - 13:28Z: No svg-place PF PRs; FL-2 blocked.
-- 14:45Z: Records moved to lead/flare-file-flow. FL-2 still blocked: no svg-place PF PRs yet.
-- 15:06Z: No svg-place PF PRs yet; FL-2 still blocked.
-- 15:26Z: No svg-place PF PRs yet; FL-2 still blocked.
-- 15:46Z: No svg-place PF PRs yet; FL-2 still blocked.
-- 16:09Z: No svg-place PF PRs yet; FL-2 still blocked.
-- 16:28Z: No svg-place PF PRs yet; FL-2 still blocked.
-- 16:48Z: No svg-place PF PRs yet; FL-2 still blocked.
-- 17:11Z: heartbeat: FL-2 blocked, no svg-place PF PRs
-- 17:31Z: heartbeat: FL-2 blocked, no svg-place PF PRs
-- 17:51Z: FL-2 still blocked: no svg-place PF PRs open.
-- 18:12Z: FL-2 still blocked: no svg-place PF PRs open.
-- 18:32Z: FL-2 still blocked: no svg-place PF PRs open.
-- 18:54Z: FL-2 blocked: no svg-place PF PRs yet.
-- 19:14Z: FL-2 blocked: no svg-place PF PRs.
-- 19:36Z: FL-2 blocked: no svg-place PF PRs.
-- 19:59Z: FL-2 blocked: no svg-place PF PRs open.
-- 20:21Z: No change: no svg-place PF PRs; FL-2 blocked.
-- 20:43Z: No change: no svg-place PF PRs; FL-2 blocked.
-- 21:05Z: No change: no svg-place PF PRs; FL-2 blocked.
-- 21:26Z: No change: no svg-place PF PRs; FL-2 blocked.
-- 21:48Z: No change: no svg-place PF PRs; FL-2 blocked.
-- 22:10Z: No change: no svg-place PF PRs; FL-2 blocked.
-- 22:33Z: Heartbeat: no svg-place PF PRs yet; FL-2 stays blocked.
-- 22:57Z: heartbeat: no svg-place PRs yet; FL-2 still blocked.
+- 23:30Z: Resumed as act-1a160bffba1-bvv3. FL-1 #3843 merged. Still no svg-place PF-u PR (open PF PRs: none for Flare; #4165 is Photo's PF-u). FL-2, FL-4 and FL-u blocked on it.
+- 2026-10-21T23:58Z: 23:58Z: FG-m #4181 merged. Still no Flare PF-u PR. Asked the supervisor on #3482 whether FL-2 can go now (rule 23).
+- 2026-10-22T00:14Z: supervisor approved FL-2 (additive FlareCommands edits); builder launched
+- 2026-10-22T00:24Z: #4259 FL-2 opened, head 2d142d9c, 8 files +208/-8, mutate 3/3
+- 2026-10-22T00:25Z: FL-u builder launched; question on #3482 about stroke-style FK-m
+- 2026-10-22T00:35Z: FL-u pushed lead/file-flow-flu b3e28b0d, 3 test files; 448 lines vs dev while stacked, so PR held
+- 2026-10-22T00:36Z: supervisor 00:30Z: FL-3 may skip stroke-style:FK-m wait (FK-m unbuilt, #3452); edits to FlareCommandCatalog/FlareFiles additive. FL-m builder launched
+- 2026-10-22T01:00Z: #4259 macOS build failed (run 39700172204): FlareCommands body 11 top-level commands, 'extra argument in call'. Fixed c9c8bb56 (@CommandsBuilder suiteFileMenu), ci --changed PASS, Head moved; FL-u merged it (ce94a682)
+- 2026-10-22T01:14Z: FL-m builder done (54bebe49, ci PASS, mutate 4/4 FlareFileFlow+Kernel) but 24 files/778 lines vs dev. Split: lead/file-flow-flm3 = FL-3 Model (12 files +257/-104 over fl2, test commit first), lead/file-flow-fl4 = FL-4 window + live test + RJ-F42 jobs (8 files +192/-6 over flm3). fl4 tree identical to the builder's validated head. Both Slice: FL-m
+- 2026-10-22T01:14Z: flm3 head 1b88ac03: ci --changed PASS (1115 tests), mutate 4/4 re-run on the split; PR body drafted. #4259 lane rebuild 39703409910 queued
+- 2026-10-22T01:24Z: heartbeat 01:24Z: #4259 lane rebuild 39703409910 still queued; #4257 not merged yet (build green); #4035 open; full run 39700185524 Linux red on FormatListRatchetTests.realTreePasses (SuiteModel Media.swift, not ours), no slice credit
