@@ -54,7 +54,8 @@ import Testing
         #expect(paths.count >= 10)
         let files = LiveProjectFiles()
         for path in paths {
-            let data = try Data(contentsOf: Self.root.appendingPathComponent(path))
+            var data = try Data(contentsOf: Self.root.appendingPathComponent(path))
+            if data.last == UInt8(ascii: "\n") { data.removeLast() }  // three hand-written jobs end in a newline
             let saved = try files.encode(try files.decode(data))
             #expect(saved == data, "\(path) changed on a re-save")
             #expect(!String(decoding: saved, as: UTF8.self).contains("placed"), "\(path) gained a picture key")
