@@ -20,7 +20,7 @@ import Testing
         #expect(workspace.selectedNodeID == "node-2" && workspace.tool == .move)
         #expect(workspace.undoActionName == "Undo Draw Star")
         workspace.undo()
-        #expect(workspace.treeNode("node-2") == nil, "one undo takes the whole draw back")
+        #expect(workspace.treeNode("node-2") == nil && !workspace.canUndo, "one undo takes the whole draw back")
         workspace.redo()
         #expect(workspace.treeNode("node-2")?.shape == .defaults(.star))
     }
