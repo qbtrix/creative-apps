@@ -234,7 +234,7 @@ import Testing
     func frames(prefix: String) -> [String: CGRect] {
         var result: [String: CGRect] = [:]
         for element in Self.walk(root) {
-            if let id = element.accessibilityIdentifier?() ?? nil, id.hasPrefix(prefix), result[id] == nil,
+            if let id = Self.text(element, "accessibilityIdentifier"), id.hasPrefix(prefix), result[id] == nil,
                 let frame = element.accessibilityFrame?() {
                 result[id] = window.convertFromScreen(frame)
             }
@@ -245,14 +245,24 @@ import Testing
     /// The first element whose label or value `matches`, as text.
     func frame(text matches: (String) -> Bool) -> CGRect? {
         for element in Self.walk(root) {
-            let label = element.accessibilityLabel?() ?? nil
-            let value = (element.accessibilityValue?() ?? nil).map { "\($0)" }
+            let label = Self.text(element, "accessibilityLabel")
+            let value = Self.text(element, "accessibilityValue")
             guard [label, value].contains(where: { $0.map(matches) ?? false }),
                 let frame = element.accessibilityFrame?()
             else { continue }
             return window.convertFromScreen(frame)
         }
         return nil
+    }
+
+    /// The attribute `getter` answers on `element` when it is text; nil for any other type. Read
+    /// untyped, then checked: a toggle answers its value with an NSNumber (the transport's Loop
+    /// checkbox, 1), and reading that through `AnyObject`'s `String?` signature bridges it
+    /// unconditionally and traps the whole test process.
+    private static func text(_ element: AnyObject, _ getter: String) -> String? {
+        let selector = NSSelectorFromString(getter)
+        guard let object = element as? NSObject, object.responds(to: selector) else { return nil }
+        return object.perform(selector)?.takeUnretainedValue() as? String
     }
 
     private static func walk(_ element: Any) -> [AnyObject] {
