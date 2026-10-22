@@ -9,7 +9,10 @@
 // Also LAYER on `parented` at frame 0 with Ball following Rig and blending
 // Multiply (halo-inspector-layer-*), and the `keyed` inspector at the minimum
 // width, each keyframe button under its bar so TRANSFORM's titles read in
-// full, LAYER unclipped (halo-inspector-narrow-*). macOS only.
+// full, LAYER unclipped (halo-inspector-narrow-*). And STROKE (stroke-style
+// HK-2) under FILL for `three-layers`' Badge shape, on the HK-1 stubs: Add
+// Stroke alone, off with `strokeHelp`; text, solids and nulls show none
+// (halo-inspector-stroke-*). macOS only.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -68,6 +71,21 @@ import Testing
         try snapshots(project, name: "halo-inspector-narrow", width: SuiteSize.inspectorWidth.min)
     }
 
+    /// STROKE shows for a shape layer, reading the project's stub, and never for text, solids or nulls.
+    @Test func strokeEditorForShapesOnly() throws {
+        var project = HaloProject(services: .fake, document: try #require(HaloFixtures.project("three-layers")))
+        let layers = try #require(project.selectedComposition?.layers)
+        for layer in layers {
+            #expect(HaloStrokeInspector.shows(layer.kind) == (layer.kind == .shape), "\(layer.name) STROKE")
+        }
+        project.selectLayer(try #require(layers.first { $0.kind == .shape }).id)
+        let section = HaloStrokeInspector(model: project, runStroke: { _ in })
+        #expect(section.help == project.strokeHelp, "the editor carries the project's strokeHelp")
+        #expect(section.help != nil, "the stub says why the editor is off")
+        #expect(section.stroke == nil, "no stroke yet: Add Stroke alone")
+        try snapshots(project, name: "halo-inspector-stroke", height: 1100)
+    }
+
     /// `fixture` (`keyed` by default) with Ball selected and the playhead at frame 12.
     private func ballAt12(_ fixture: String = "keyed") throws -> HaloProject {
         try ball(fixture, at: 12)
@@ -84,11 +102,13 @@ import Testing
     }
 
     /// The inspector in its column on the panel, as `<name>-light.png` and `<name>-dark.png`.
-    private func snapshots(_ model: HaloProject, name: String, width: CGFloat = SuiteSize.inspectorWidth.ideal) throws {
+    private func snapshots(
+        _ model: HaloProject, name: String, width: CGFloat = SuiteSize.inspectorWidth.ideal, height: CGFloat = 900
+    ) throws {
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
                 HaloLayerInspector(model: model)
-                    .frame(width: width, height: 900, alignment: .topLeading)
+                    .frame(width: width, height: height, alignment: .topLeading)
                     .background(SuiteColor.panel)
                     .padding(SuiteSpacing.xxl),
                 name: "\(name)-\(scheme.name)", scheme: scheme)

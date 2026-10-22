@@ -179,8 +179,8 @@ extension PhotoWorkspace {
         case .layers(let list, let selected):
             let inverse = PhotoEdit.layers(layers, selected: selectedLayerID)
             // Only ever recorded over the same ids; a mismatch would orphan
-            // pixels. Only pixel layers have pixels (an adjustment layer none).
-            guard Set(list.filter { $0.kind == .pixels }.map(\.id)) == Set(pixels.keys) else { return edit }
+            // pixels. Pixel and text layers have pixels (an adjustment layer none).
+            guard Set(list.filter { $0.kind == .pixels || $0.kind.textLayer != nil }.map(\.id)) == Set(pixels.keys) else { return edit }
             layers = list
             restoreLayerSelection(primary: selected)
             touch(.all)

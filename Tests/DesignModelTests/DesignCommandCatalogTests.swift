@@ -76,6 +76,8 @@ struct DesignCatalogDoc: HeadlessDocument {
         case "history.jump": .some(w.historyListing.steps.isEmpty ? "There are no steps yet." : nil)
         // The shape tool's two (DS-6): the workspace's own shapeHelp, which needs an open file.
         case "shape.draw", "tool.shape": .some(w.shapeHelp)
+        case "file.export", "view.zoom-in", "view.zoom-out", "view.fit": .some(w.isOpen ? nil : DesignToolbarItem.noFile)
+        case "view.zoom-to-selection": .some(w.zoomToSelectionHelp)
         // The transform rows' and Object items' reason (transform DT-6): the workspace's own transformHelp.
         default: id.hasPrefix("transform.") ? .some(w.transformHelp) : nil
         }
@@ -184,7 +186,7 @@ struct DesignCatalogDoc: HeadlessDocument {
 
     static let golden = [
         "file.new | New File | on", "file.open | Open… | This window holds a file; open it in a new one.",
-        "file.save | Save | on", "file.save-as | Save As… | on",
+        "file.save | Save | on", "file.save-as | Save As… | on", "file.export | Export… | on",
         "edit.undo | Undo | Nothing to undo.", "edit.redo | Redo | Nothing to redo.",
         "edit.select | Select | on", "edit.select-all | Select All | on",
         "edit.duplicate | Duplicate | on", "edit.delete | Delete | on",
@@ -210,5 +212,7 @@ struct DesignCatalogDoc: HeadlessDocument {
         "tool.ellipse | Ellipse | on", "tool.text | Text | on", "tool.pen | Pen | Drawing paths isn't built yet.",
         "tool.eyedropper | Eyedropper | on", "shape.draw | Draw Shape | on", "tool.shape | Shape Tool | on",
         "history.read | Read History | on", "history.jump | Jump in History | There are no steps yet.",
+        "view.zoom-in | Zoom In | on", "view.zoom-out | Zoom Out | on", "view.fit | Fit Page | on",
+        "view.zoom-to-selection | Zoom to Selection | on",
     ]
 }

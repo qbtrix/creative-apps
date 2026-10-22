@@ -15,18 +15,27 @@ public protocol HelpProviding: Sendable {
     func betaNotes() -> JSONValue
 }
 
-/// The Help commands' target: the app whose Help menu runs them and the provider they read.
+/// The Help commands' target: the app whose Help menu runs them, the provider they read and the last answer.
+/// Its file (`.suitehelp`) holds what the provider needs, so only a provider opens one: the CLI's `HelpReports`.
 public struct SuiteHelpDocument: HeadlessDocument {
     /// The app ("launcher", "photo") and the provider.
     public let app: String, provider: any HelpProviding
+    /// The last report or notes a run answered with; null before the first.
+    public fileprivate(set) var answer: JSONValue = .null
     public init(app: String, provider: any HelpProviding) { (self.app, self.provider) = (app, provider) }
 
     public static let app = "suite"
-    public static let openExtensions: [String] = [], exportFormats: [String] = []
+    public static let openExtensions = ["suitehelp"], exportFormats: [String] = []
     public static var catalog: CommandCatalog<SuiteHelpDocument> { SuiteHelpCatalog.catalog }
-    public static func open(_ data: Data, name: String) throws -> Self { throw CatalogError.notBuilt(id: "open", feature: "RP-5") }
-    public static func new(_ options: JSONValue) throws -> Self { throw CatalogError.notBuilt(id: "new", feature: "RP-5") }
-    public func save() throws -> Data { throw CatalogError.notBuilt(id: "save", feature: "RP-5") }
+    static let needsProvider = "A .suitehelp file opens through a Help provider, as the afterglow CLI's suite app does."
+    public static func open(_ data: Data, name: String) throws -> Self { throw CatalogError.unavailable(id: "open", why: needsProvider) }
+    public static func new(_ options: JSONValue) throws -> Self { throw CatalogError.unavailable(id: "new", why: needsProvider) }
+    /// The app and the last answer, as one JSON object with sorted keys.
+    public func save() throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        return try encoder.encode(JSONValue.object(["app": .string(app), "answer": answer]))
+    }
     public func export(_ format: String, options: JSONValue) throws -> [ExportedFile] { [] }
     public func summary() -> JSONValue { .object(["app": .string(app)]) }
 }
@@ -58,19 +67,22 @@ public enum SuiteHelpCatalog {
         .typed("help.report-problem", title: "Report a Problem…",
                summary: "Builds a plain report of the app, its version, macOS, the Mac model and the newest suite crashes, with the note on top. Nothing is sent.",
                kind: .query, params: ReportParams.self, schema: reportParams, result: reportResult,
-               example: .object(["app": .string("photo"), "note": .string("The brush lagged.")])) { (_: inout SuiteHelpDocument, _: ReportParams) throws -> JSONValue in
-            throw CatalogError.notBuilt(id: "help.report-problem", feature: "RP-5")
+               example: .object(["app": .string("photo"), "note": .string("The brush lagged.")])) { (doc: inout SuiteHelpDocument, params: ReportParams) throws -> JSONValue in
+            doc.answer = doc.provider.report(app: params.app ?? doc.app, note: params.note ?? "")
+            return doc.answer
         },
         .typed("help.beta-notes", title: "Beta Notes", summary: "Lists the build's known issues.",
                kind: .query, params: NoParams.self, schema: .none, result: notesResult,
-               example: .object([:])) { (_: inout SuiteHelpDocument, _: NoParams) throws -> JSONValue in
-            throw CatalogError.notBuilt(id: "help.beta-notes", feature: "RP-5")
+               example: .object([:])) { (doc: inout SuiteHelpDocument, _: NoParams) throws -> JSONValue in
+            doc.answer = doc.provider.betaNotes()
+            return doc.answer
         },
         .typed("help.welcome", title: "Welcome to AfterGlow", summary: "Opens the welcome tour.",
                kind: .view, params: NoParams.self, schema: .none, example: .object([:]),
                availability: { $0.app == "launcher" ? .available : .unavailable("The welcome tour opens from the AfterGlow launcher.") }
         ) { (_: inout SuiteHelpDocument, _: NoParams) throws -> JSONValue in
-            throw CatalogError.notBuilt(id: "help.welcome", feature: "RP-5")
+            // The Help group opens the tour's window itself; headless there is no window to open.
+            throw CatalogError.unavailable(id: "help.welcome", why: "The welcome tour opens in the AfterGlow window, not headless.")
         },
     ]
 

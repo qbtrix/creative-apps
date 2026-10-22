@@ -4,7 +4,8 @@
   "description": "What Help > Report a Problem… and Beta Notes show: ProblemReport (the app, its version and build, macOS, the Mac model and the newest three suite crashes at most 7 days old, each a CrashFile trimmed to its header and crashed thread, with the home path, user and host redacted; text puts the person's note on top) and BetaNotes.current, the build's known issues. Built from values the caller reads; nothing here reads a disk or opens a socket (report-problem RP-1 stubs, RP-4 bodies).",
   "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
   "paths": [
-    "Sources/SuiteModel/Help/"
+    "Sources/SuiteModel/Help/",
+    "Sources/AfterGlowCLICore/HelpReports.swift"
   ],
   "order": 215
 }

@@ -1,8 +1,8 @@
 // HistoryPanelTests.swift (autosave-history AH-3): HistoryPanel over the gallery's listing, "Open" and eleven steps,
 // the eighth current. A click on a row jumps to it once; Down, Down, Return from step 4 jumps to 6, the arrows alone
 // jumping nothing; Up on "Open" stays at 0 and Down stops at the last step; rows past the index read "not applied"
-// and the saved one reads saved; a row's look puts a press over the selection over hover. macOS only, like the rest
-// of SuiteUI.
+// and the saved one reads saved; a row's look puts a press over the selection over hover, and only hover and press
+// carry the outline. macOS only, like the rest of SuiteUI.
 @testable import SuiteUI
 import SuiteKernel
 import SwiftUI
@@ -89,6 +89,8 @@ import Testing
         #expect(HistoryRowLook.resolve(selected: true, hovering: true, pressed: false) == .selected)
         #expect(HistoryRowLook.resolve(selected: true, hovering: false, pressed: true) == .pressed)
         #expect(Set([HistoryRowLook.plain, .hovered, .pressed, .selected].map(\.fill)).count == 4)
+        #expect(HistoryRowLook.hovered.outlined && HistoryRowLook.pressed.outlined)
+        #expect(!HistoryRowLook.selected.outlined && !HistoryRowLook.plain.outlined)
     }
 }
 

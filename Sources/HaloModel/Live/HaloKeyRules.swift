@@ -141,7 +141,7 @@ enum HaloKeyRules {
     }
 
     /// `track` with a key at `frame` set to `value` (its easing kept), sorted.
-    private static func keyed(_ track: [HaloKeyframe], frame: Int, value: Double) -> [HaloKeyframe] {
+    static func keyed(_ track: [HaloKeyframe], frame: Int, value: Double) -> [HaloKeyframe] {
         var t = track.filter { $0.frame != frame }
         t.append(HaloKeyframe(frame: frame, value: value, easing: track.first { $0.frame == frame }?.easing ?? .linear))
         return t.sorted { $0.frame < $1.frame }

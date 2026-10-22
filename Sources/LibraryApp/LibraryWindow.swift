@@ -97,6 +97,7 @@ struct LibraryWindow: View {
                 onLabel: { model.setLabel($0) })
         }
         .focusedSceneValue(\.libraryMenu, menu)
+        .focusedSceneValue(\.libraryCatalog, model)
         .focusedSceneValue(\.libraryFilters, filters)
         .suiteFileDrop(.library, bridge: LibraryShell.bridge, hasDocument: model.hasDocument,
                        places: model.placesExtensions, perform: { try? model.perform($0) })
