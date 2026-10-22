@@ -2,7 +2,7 @@
   "title": "Filter by flag and rating, collections you make, smart rules (not v1)",
   "wave": 5,
   "order": 10,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "covers": "#31",
   "waits_on": "cull, persist, thumbnails, import, status-and-layout, export (v1 done); S-L9 (needs-ui, FC-10's drag only)",
