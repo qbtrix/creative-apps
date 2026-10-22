@@ -110,3 +110,4 @@ utc	stage	event	ref	note
 2026-10-22T10:57Z	check	#3477	still waiting-on-prereq	-
 2026-10-22T11:31:09Z	check	#3477	still waiting-on-prereq	-
 2026-10-22T12:06Z	check	#3477	still waiting-on-prereq	-
+2026-10-22T13:01Z	check	parked: #3477 still waiting-on-prereq (XP-3, XP-4)
