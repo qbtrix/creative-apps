@@ -8,7 +8,7 @@ Next: wave 2 PRs in the lane (#4297 PF-u, #4295 PF-5); then PF-z once both land;
 
 Loop: v3 (the packet has a `## Slices` table).
 
-Last stage: 05:18Z both PRs in lane; #4297 macOS build 39721944731 still queued.
+Last stage: 05:40Z #4297 macOS build green on 00feb496; both PRs awaiting lane merge.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
