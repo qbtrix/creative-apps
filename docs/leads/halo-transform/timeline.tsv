@@ -56,3 +56,4 @@ utc	stage	event	ref	note
 2026-10-22T14:53:15Z	heartbeat	dev-red stroke test reported on #3856; HT-m/HT-z blocked
 2026-10-22T15:21:16Z	heartbeat	dev dc87ad2 still red on stroke test; HT-m/HT-z waiting
 2026-10-22T15:51:42Z	stage	dev fixed; HT-m/HT-z re-gated PASS, markers moved to new heads
+2026-10-22T16:29Z	rebase-2	HT-m 300375f, HT-z d5afd56, CI: PASS
