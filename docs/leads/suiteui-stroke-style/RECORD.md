@@ -117,3 +117,4 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 20:08Z: heartbeat: #4607 (SS-8, b3d8735): its lane macOS build (run 39827609617) passed and the PR is clean. Waiting for the lane to merge it.
 - 20:10Z: SS-8 #4607 merged (lane batch run 39843357825). SS-d is done in code; its Belt-Slice-Done waits on a green ci.yml run containing it.
 - 20:37Z: SS-10 (SS-z) is split in two because scripts/check-c4-descriptions refuses a part's prose edit beside other paths. #4630 adds the stroke model, rules, commands and SVG to kernel-fill's C4 description. #4631 sets stroke-style.wave.json to status built and feature_issue #3450, with labels fast-lane and feature-done. scripts/ci --changed passed on both. Next: both merge, then Belt-Slice-Done for SS-d and SS-z, then the contact sheet.
+- 21:01Z: heartbeat: #4630 and #4631 (SS-10) are open and clean, with no needs-fix or needs-rebase. The lane's 20:59Z sweep is in progress.
