@@ -4,7 +4,7 @@ Issue: #3419 · Packet: docs/blueprints/flare/features/gradient-fill.md
 Run: act-1a160bffba1-bvv3 (line lead: gradient-fill #3419, export-pack #3481, file-flow #3482; resumed from act-1a1574f6742-pe5i) · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-20T03:17Z · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: 3 wave 4 (FG-z)
 Base: 8c55f0bf9 (origin/dev)
-Next: push fgz with dev merged, move Head on #4257
+Next: Slice-Done FG-m/FG-z once #4257 merges and a green-Linux run contains it
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -78,3 +78,4 @@ Next: push fgz with dev merged, move Head on #4257
 - 2026-10-22T01:44Z: Heartbeat: #4259 build 39703409910 still queued (macOS runners busy); #4257, #4035 open; no green-Linux run containing FG-m yet.
 - 2026-10-22T02:16Z: No change: #4257 open, no green-Linux run with FG-m yet.
 - 2026-10-22T02:47Z: #4257 held: lane Linux run 39705332201 red on FormatListRatchetTests.realTreePasses (SuiteModel, not ours; dev b5a6e7e0 Linux green). Merging dev into fgz, gate running.
+- 2026-10-22T02:51Z: fgz merged dev b5a6e7e0, ci --changed PASS, pushed d417a35f; #4257 Head moved, footer stripped.
