@@ -1,16 +1,16 @@
 # file-flow lead record
 
-Issue: #3479 · Packet: docs/blueprints/library/features/file-flow.md
-Run: act-1a15f2277a5-6xyv · Session: relaunch of cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z (resumed 2026-10-21T15:49Z)
-Stage: 3 wave 1
-Base: 0865916d47ed5b21be2f827768d2aa92b7d200bb
-Next: (2026-10-21T17:35Z) LF-3 merged #4024 (593cfe6). LF-4 still waits on needs-ui #3928 (open); LF-m slice-done needs LF-4 merged plus a green dev Linux run.
+Issue: #4536 (earlier #3479) · Packet: docs/blueprints/library/features/file-flow.md
+Run: act-1a16474bd12-7ncx · Session: claude/feature-lead-playbook-2mbx2f · Started: 2026-10-22T16:30Z (earlier act-1a15f2277a5-6xyv)
+Stage: 3 wave 2
+Base: origin/dev 7e9f260ae8f69dea63663c1bc7ea945c6b1d2f80
+Next: LF-4 building (lead/library-file-flow-LF-4): opens noted through the bridge, loupe drag-out as placeholder; per-cell grid drag stays on needs-ui #3928 (gap). Then LF-7 (journey live, drag-out step waits on #3928), LF-8 status built.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| LF-a | adapter stubs, .suiteApp, menu and drop on fakes | LF-1, LF-2 | MLF | – | yes | – | merged (#3624) | – | – |
-| LF-u | menu and drop-mark snapshots, render budget, journey written | LF-5, LF-6 | LFJ1 | LF-a (met); SF-3 merged (#3514); SF-4 open (#3827) | yes | 0 | done: Belt-Slice-Done + Mac-Finish-Wanted posted | https://github.com/qbtrix/creative-apps/actions/runs/39623471557 | – |
+| LF-a | adapter stubs, .suiteApp, menu and drop on fakes | LF-1, LF-2 | MLF | – | yes | 0 | done (Belt-Slice-Done on #4536) | https://github.com/qbtrix/creative-apps/actions/runs/39791836264 | – |
+| LF-u | menu and drop-mark snapshots, render budget, journey written | LF-5, LF-6 | LFJ1 | LF-a (met); SF-3 merged (#3514); SF-4 open (#3827) | yes | 0 | done (re-posted on #4536) | https://github.com/qbtrix/creative-apps/actions/runs/39791836264 | – |
 | LF-m | drop imports as one step, hand-offs, recents, drag out | LF-3, LF-4 | MLF | LF-a, SF-5/6/7 (met); LT-m, DR-m (not merged) | yes | 0 | LF-4 blocked (#3928, SF-8); LF-3 blocked | – | – |
 | LF-z | live journey, feature built | LF-7, LF-8 | LFJ1 | LF-u, LF-m | yes | 0 | blocked | – | – |
 
@@ -36,6 +36,9 @@ Next: (2026-10-21T17:35Z) LF-3 merged #4024 (593cfe6). LF-4 still waits on needs
 - LF-4 ships ahead of LF-3 as its own PR (LF-m partial): it waits only on LF-a and SF-7, both merged; LF-3 waits on LT-m and DR-m, neither merged.
 - Status branch is `lead/library-file-flow` (`lead/file-flow` is the suite/Flare lead's), as the earlier run chose.
 - Line lead (rule 19): one build-wave call per wave carries file-flow, folders and catalog-backup tasks; the template takes feature/issue/packet per task.
+
+- Run act-1a16474bd12-7ncx: Belt filed the feature again as #4536. LF-a and LF-u lines re-posted there on scoped library run 39791836264 (dev 721ac8e9, success, contains #3624, #3938, #4024). Suite file-flow is built (SF-8 #3966), so #3928 is LF-4's only blocker. Per CLAUDE.md (missing SuiteUI component: placeholder, keep going), LF-4 ships the bridge note and a loupe drag-out now. The per-cell grid drag stays with #3928, carried as the slice's gap.
+- Record branch stays lead/library-file-flow. The brief's lead/file-flow holds suite lead #3480's record.
 
 ## Open
 - LF-4 blocked (builder, 07:10Z): ThumbnailGrid has no per-cell drag hook (needs-ui #3928); the PNG representation is SF-8's (not merged); no suite type for a catalog open. Reading chosen: note a photo when it opens in the loupe (png/jpeg/heic already list Library), decided when LF-4 restarts.
@@ -137,3 +140,4 @@ Next: (2026-10-21T17:35Z) LF-3 merged #4024 (593cfe6). LF-4 still waits on needs
 - 2026-10-22T06:49Z: Heartbeat: LF-4 still blocked on SuiteUI #3928 (open).
 
 - 2026-10-22T07:04Z: Heartbeat: LF-4 still blocked on SuiteUI #3928 (open).
+- 2026-10-22T16:50Z: rule 23 re-read. #3928 open; SF-8 merged; 0 open findings. LF-a, LF-u done on #4536. LF-4 builder started.
