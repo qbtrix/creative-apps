@@ -110,7 +110,7 @@ extension PhotoWorkspace {
             act("tool.\(tool.rawValue)", tool.rawValue.capitalized, "Picks the \(tool.rawValue) tool for canvas drags.", .view,
                 gate { $0.toolHelp(tool) }) { $0.selectTool(tool) }
         }
-        + HistoryCommands.specs(PhotoWorkspace.self)
+        + HistoryCommands.specs(PhotoWorkspace.self) + textCommands
 
     static let fileCommands: [CommandSpec<PhotoWorkspace>] = [
         .typed("file.new", title: "New Image", summary: "Opens a new white image of the given size.", kind: .file,
