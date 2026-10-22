@@ -29,6 +29,8 @@ public enum DesignPointerHint: Sendable, Equatable {
         case .move: "move"
         case .copy: "copy"
         case .text: "text"
+        case .resize(.rotate):
+            "rotate"
         case .resize(let handle):
             "resize-" + handle.rawValue.map { $0.isUppercase ? "-" + $0.lowercased() : String($0) }.joined()
         }

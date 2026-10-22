@@ -5,7 +5,7 @@
 // DesignCanvasHover, an observed store outside the Model; the answer is written only
 // when it changes, so 120 samples inside one layer re-run the canvas at most once and
 // the editor never. The pointer is the one the answer names: a frame-resize pointer
-// per handle, the open hand over a layer a Move drag would move, the drag-copy pointer
+// per handle, the crosshair over the rotate knob (as SuiteUI's handles editor shows), the open hand over a layer a Move drag would move, the drag-copy pointer
 // with Option, the I-beam for the Text tool, else the tool's own. The hover outline is
 // a 1 pt accent frame round the layer a click would pick, identified
 // `design.canvas.hover` with the pointer's name as its value; it is asked again of the
@@ -135,13 +135,14 @@ struct DesignCanvasFeedback: View {
 enum DesignCanvasPointer: Equatable {
     case tool(DesignTool)
     case resize(FrameResizePosition)
+    case rotate
     case move
     case copy
     case text
 
     init(_ hint: DesignHover?, tool: DesignTool) {
         switch hint?.pointer {
-        case .resize(let handle)?: self = .resize(handle.position)
+        case .resize(let handle)?: self = handle.position.map { .resize($0) } ?? .rotate
         case .move?: self = .move
         case .copy?: self = .copy
         case .text?: self = .text
@@ -153,6 +154,7 @@ enum DesignCanvasPointer: Equatable {
         switch self {
         case .tool(let tool): return tool.pointer
         case .resize(let position): return .frameResize(position: position)
+        case .rotate: return .rectSelection
         case .move: return .grabIdle
         case .text: return .horizontalText
         case .copy:
@@ -168,8 +170,8 @@ enum DesignCanvasPointer: Equatable {
 }
 
 extension DesignHandle {
-    /// The edge or corner of the frame this handle resizes from.
-    var position: FrameResizePosition {
+    /// The edge or corner of the frame this handle resizes from; nil for the rotate knob.
+    var position: FrameResizePosition? {
         switch self {
         case .topLeft: .topLeading
         case .top: .top
@@ -179,6 +181,7 @@ extension DesignHandle {
         case .bottom: .bottom
         case .bottomLeft: .bottomLeading
         case .left: .leading
+        case .rotate: nil
         }
     }
 }
