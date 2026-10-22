@@ -1,8 +1,7 @@
-// FlarePlaceTests.swift: svg-place PF-1 (the conformance) and PF-5 (the bodies). The conformance half runs now:
-// Flare takes SVG only and its workspace is a `PlacedImageTarget`. The place half is written against the PF-5
-// bodies and stays disabled until PF-5 turns it on: an SVG's groups become layers, a wide drawing fits inside the
-// scene, one place is one undo step, a ring keeps its hole, a PNG and a damaged SVG add nothing, and the report
-// names what the import skipped.
+// FlarePlaceTests.swift: svg-place PF-1 (the conformance) and PF-5 (the bodies). Flare takes SVG only and its
+// workspace is a `PlacedImageTarget`: an SVG's groups become layers, a wide drawing fits inside the scene, one
+// place is one undo step, a ring keeps its hole, a PNG and a damaged SVG add nothing, and the report names what
+// the import skipped.
 import Foundation
 import FlareCore
 @testable import FlareModel
@@ -74,18 +73,10 @@ private let blurred = """
         #expect(w.placeHelp == FlareLayerError.noDocument.message)
         #expect(w.placeCanvas.width == 0)
     }
-
-    @Test func stubsRefuseAndLeaveTheDocument() {
-        var w = blank()
-        let before = w.document
-        #expect(throws: (any Error).self) { try w.rasterSize(Data(), format: .png) }
-        #expect(throws: (any Error).self) { try place(logo, on: &w) }
-        #expect(w.document == before)
-    }
 }
 
 @Suite struct FlarePlaceTests {
-    @Test(.disabled("waits on PF-5")) func groupsStayLayers() throws {
+    @Test func groupsStayLayers() throws {
         var w = blank()
         try place(logo, on: &w)
         let added = layers(w)
@@ -102,7 +93,7 @@ private let blurred = """
         #expect(w.placeReport == "Placed logo.svg: 2 layers.")
     }
 
-    @Test(.disabled("waits on PF-5")) func fitsInsideScene() throws {
+    @Test func fitsInsideScene() throws {
         var w = blank()
         try place(wide, as: "wide.svg", on: &w)
         let box = try #require(layers(w).flatMap(\.shapes).compactMap(\.bounds).first)
@@ -110,7 +101,7 @@ private let blurred = """
         #expect(abs(box.minX) < 0.01 && abs(box.minY - 55) < 0.01)
     }
 
-    @Test(.disabled("waits on PF-5")) func oneUndoStep() throws {
+    @Test func oneUndoStep() throws {
         var w = blank()
         let before = w.document
         try place(logo, on: &w)
@@ -120,14 +111,14 @@ private let blurred = """
         #expect(!w.canUndo)
     }
 
-    @Test(.disabled("waits on PF-5")) func ringKeepsItsHole() throws {
+    @Test func ringKeepsItsHole() throws {
         var w = blank()
         try place(logo, on: &w)
         let ring = try #require(layers(w).first { $0.name == "blue" }?.shapes.first)
         #expect(contours(ring) == 2)
     }
 
-    @Test(.disabled("waits on PF-5")) func pngIsRefused() throws {
+    @Test func pngIsRefused() throws {
         var w = blank()
         let before = w.document
         let png = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
@@ -136,7 +127,7 @@ private let blurred = """
         #expect(w.document == before)
     }
 
-    @Test(.disabled("waits on PF-5")) func damagedSVGAddsNothing() throws {
+    @Test func damagedSVGAddsNothing() throws {
         var w = blank()
         let before = w.document
         #expect(throws: (any Error).self) { try place("<svg xmlns=\"http://www.w3.org/2000/svg\"><g><rect", on: &w) }
@@ -144,7 +135,7 @@ private let blurred = """
         #expect(!w.canUndo)
     }
 
-    @Test(.disabled("waits on PF-5")) func reportNamesASkippedFilter() throws {
+    @Test func reportNamesASkippedFilter() throws {
         var w = blank()
         try place(blurred, as: "soft.svg", on: &w)
         let report = try #require(w.placeReport)
