@@ -4,7 +4,7 @@ Issue: #3518 · Packet: docs/blueprints/suiteui/features/pen-paths.md
 Run: act-1a15f92d30e-mfnc · Session: claude/feature-lead-suiteui-srh349 · Started: 2026-10-20T07:09Z (relaunched 2026-10-21)
 Stage: 3 wave 6
 Base: aaa43f918e028249e0525eb468f37795638932d7
-Next: #4203 (PN-3, head 01a576e2) waits on the lane macOS build 39712632560 (queued, runner backlog); then open PN-4 (lead/pen-paths-PN-4 3da37e78), then PN-8 (built, lead/pen-paths-PN-8 b01f7db4). PN-9 waits export-pack:XP-z (#3477 waiting-on-prereq).
+Next: #4203 (PN-3, head 01a576e2) waits on the lane macOS build 39712632560 (queued, runner backlog); then open PN-4 (lead/pen-paths-PN-4 3da37e78), then PN-8 (built, lead/pen-paths-PN-8 eea95546). PN-9 waits export-pack:XP-z (#3477 waiting-on-prereq).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -24,7 +24,7 @@ Next: #4203 (PN-3, head 01a576e2) waits on the lane macOS build 39712632560 (que
 | PN-5 | PN-m | – | PenRules and AnchorEdit bodies | Sources/SuiteKernel/Paths/PenRules.swift, Sources/SuiteKernel/Paths/AnchorEdit.swift, tests, mutation plans | PenRulesTests, AnchorEditTests | #3738 | merged |
 | PN-6 | PN-m | – | AnchorIndex body; Selection keeps a Set | Sources/SuiteKernel/Paths/AnchorIndex.swift, Sources/SuiteKernel/Selection/Selection.swift, tests, mutation plans | AnchorIndexTests, AnchorBudgetTests | #3739 | merged 5684f9dd |
 | PN-7 | PN-m | 5 | PathCommands bodies | Sources/SuiteKernel/Paths/PathCommands.swift, Tests/SuiteKernelTests/PathCommandsTests.swift, Tests/mutations/SuiteKernel.PathCommands.json | PathCommandsTests | #4153 | merged |
-| PN-8 | PN-z | 6 | Gallery runs intents through PathCommands | Sources/SuiteUI/Gallery/GalleryPenPaths.swift, Tests/SuiteUITests/PathEditOverlayLiveTests.swift | live test | – | built on lead/pen-paths-PN-8 b01f7db4 (stacked on PN-4; 2 files +127/-18; CI: PASS); PR after PN-4 merges |
+| PN-8 | PN-z | 6 | Gallery runs intents through PathCommands | Sources/SuiteUI/Gallery/GalleryPenPaths.swift, Tests/SuiteUITests/PathEditOverlayLiveTests.swift | live test | – | built on lead/pen-paths-PN-8 eea95546 (stacked on PN-4; 2 files +127/-18; CI: PASS); PR after PN-4 merges |
 | PN-9 | PN-z | – | Fake app takes paths; RJ-X37 | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeCanvasPathTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/pen-path/ | FakeCanvasPathTests | – | waiting |
 | PN-10 | PN-z | – | C4, status built, feature-done | docs/c4/parts/creative-apps/suite-kernel/kernel-paths.json, docs/blueprints/suiteui/features/pen-paths.wave.json | scripts/ci | – | waiting |
 
@@ -64,3 +64,5 @@ Next: #4203 (PN-3, head 01a576e2) waits on the lane macOS build 39712632560 (que
 - 2026-10-20T21:51:54Z: PN-3 split. #3770 (PN-3a, PathGesture + tests) opened, fast-lane, head 475fb9e7. PN-3 overlay stacked on lead/pen-paths-PN-3 at 9cf53b14; its PR opens after #3770 merges, so its diff against dev stays under the cap.
 - 2026-10-20T21:52:20Z: PN-4 builder dispatched on lead/pen-paths-PN-4, stacked on lead/pen-paths-PN-3 (snapshots, RenderBudgetPenPathsTests, journey on with per-anchor ids).
 - 2026-10-20T22:00Z: PN-4 built on lead/pen-paths-PN-4 at caa97e12 (4 files, +366/-25 over PN-3; scripts/ci --changed PASS; unbuilt on macOS). 12 snapshot PNGs suiteui-pen-paths{,-drawing,-smooth,-close-hover,-selected,-stress}-{light,dark}. Per-anchor ids suite.path.anchor-<c>-<i> (first 200 anchors). Journey runs steps 1-7 where possible and ends in XCTSkip behind penRulesWait (flip after PN-5) and pageWait (flip after PN-8). Asked the supervisor to add RenderBudgetPenPathsTests to Tests/perf-suites.txt.
+
+PN-8 diff check (pre-PR, clarity/mouse/taste/job), fixed at eea95546: journey counted refused lines as passes; log grew per drag sample (now folds a drag to one line, 200 cap); insert click moved to segment 2→3's midpoint; added paths draw as outline only; refused text uses CatalogError.description. Held for the PN-z review: `pageWait`/`penRulesWait` still true (Delete/arrow focus on the live page unproven blind), and the page has no Undo control (gallery pages share that; gap if the job critic asks).
