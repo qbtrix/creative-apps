@@ -1,4 +1,4 @@
-// FlareCommandCatalog.swift (AC-f2): Flare's menu, palette, transport and SCENES (`scenes.*`) actions as catalog commands,
+// FlareCommandCatalog.swift (AC-f2): Flare's menu, palette, transport, SCENES (`scenes.*`) and fill (`fill.*`) actions as catalog commands,
 // each available exactly when the window's control is. An edit's title is its undo step.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -146,5 +146,5 @@ extension FlareWorkspace {
         act("scenes.remove", "Delete Scene", "Removes the selected scene; its undo step is Delete Scene.", .edit,
             { w in w.selectedSceneID.map(w.removeSceneHelp) ?? FlareLayerError.noDocument.message }) { w in w.removeScene(w.selectedSceneID ?? "") },
         setFrameRate,  // frame-rates FR-10, FlareFrameRate+Kernel.swift
-    ]
+    ] + GradientCommands.specs(FlareWorkspace.self)  // the eight fill.* commands (gradient-fill FG-5)
 }

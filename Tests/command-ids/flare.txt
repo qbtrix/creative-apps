@@ -24,6 +24,14 @@ file.open
 file.open-sample
 file.save
 file.save-as
+fill.angle
+fill.gradient
+fill.read
+fill.stop-add
+fill.stop-color
+fill.stop-move
+fill.stop-remove
+fill.type
 guide.add
 guide.move
 guide.remove

@@ -22,6 +22,8 @@ public struct SuiteServices: Sendable {
     public var updates: any UpdateChecking
     public var thumbnails: any ThumbnailPublishing
     public var home: any HomeBuilding
+    /// The one media writer and reader (shell-media): movies, animated images, stills, footage.
+    public var media: any MediaCoding
     /// True only for `.fake(...)` (snapshots, Model tests); `.live` sets false even while
     /// a slot still holds a not-connected fake, whose controls say so themselves.
     public var isPreview: Bool
@@ -34,13 +36,14 @@ public struct SuiteServices: Sendable {
                 roundTrips: any RoundTripEditing, pasteboard: any PasteboardCoding, assets: any AssetLibrary,
                 linking: any AssetLinking, animations: any AnimationSourceReading, preferences: any PreferencesStoring,
                 settings: any SettingsRouting, onboarding: any OnboardingFlowing, updates: any UpdateChecking,
-                thumbnails: any ThumbnailPublishing, home: any HomeBuilding, isPreview: Bool,
+                thumbnails: any ThumbnailPublishing, home: any HomeBuilding, media: any MediaCoding = FakeMedia(),
+                isPreview: Bool,
                 pending: [String: String] = [:]) {
         self.switching = switching; self.recents = recents; self.creating = creating; self.routing = routing
         self.sending = sending; self.receiving = receiving; self.roundTrips = roundTrips; self.pasteboard = pasteboard
         self.assets = assets; self.linking = linking; self.animations = animations; self.preferences = preferences
         self.settings = settings; self.onboarding = onboarding; self.updates = updates; self.thumbnails = thumbnails
-        self.home = home; self.isPreview = isPreview; self.pending = pending
+        self.home = home; self.media = media; self.isPreview = isPreview; self.pending = pending
     }
 
     /// Members a process supplies itself: Halo's animation reader (it links FlareCore)
@@ -52,6 +55,10 @@ public struct SuiteServices: Sendable {
         return s
     }
 
+    /// What `.fake` still lists as pending: the fake media writes no file, so
+    /// export and import controls show why they can't run.
+    static let fakePending: [String: String] = ["media": SuiteIdentity.notConnected("shell-media")]
+
     /// Every member a fake, seeded from a fixture's recents and assets.
     public static func fake(recents: RecentsList = RecentsList(), assets: AssetIndex = AssetIndex(),
                             running: [SuiteApp] = [], missing: Set<SuiteApp> = []) -> SuiteServices {
@@ -62,7 +69,8 @@ public struct SuiteServices: Sendable {
                              roundTrips: FakeRoundTrips(), pasteboard: FakePasteboard(), assets: FakeAssets(assets),
                              linking: FakeLinking(), animations: FakeAnimationSource(), preferences: FakePreferences(),
                              settings: FakeSettingsRoute(), onboarding: FakeOnboarding(), updates: FakeUpdates(),
-                             thumbnails: FakeThumbnails(), home: FakeHome(), isPreview: true)
+                             thumbnails: FakeThumbnails(), home: FakeHome(), media: FakeMedia(), isPreview: true,
+                             pending: fakePending)
     }
 
     /// Each slotted member (all but `animations` and `updates`, which a process
@@ -74,7 +82,7 @@ public struct SuiteServices: Sendable {
         "creating": "home", "home": "home",
         "preferences": "settings", "settings": "settings",
         "pasteboard": "clipboard-drag", "roundTrips": "photo-round-trip", "assets": "shared-assets",
-        "onboarding": "onboarding", "linking": "linked-assets",
+        "onboarding": "onboarding", "linking": "linked-assets", "media": "shell-media",
     ]
 
     /// The not-connected reason of a slotted member: its `slotFeatures` slug in

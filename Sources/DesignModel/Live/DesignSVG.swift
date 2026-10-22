@@ -11,7 +11,11 @@
 // is the SVG default (opacity 1, no stroke, stroke-width 1, rx 0, font-weight
 // 400, text-anchor start) is left out. Text and attribute values are escaped
 // by SuiteModel's XMLText, the suite's one XML escaper.
-// Each element sits on its own line, indented two spaces per depth.
+// Each element sits on its own line, indented two spaces per depth. A gradient
+// (gradient-fill DG-5) is a <linearGradient> or <radialGradient> in a <defs>
+// just before its layer, written by SuiteKernel's GradientSVG with its points in
+// the layer's frame (userSpaceOnUse), and the layer fills with `url(#g-<id>)`.
+import SuiteKernel
 import SuiteModel
 
 /// The SVG text of nodes inside a box. One element per visible layer in paint order; the box is
@@ -40,13 +44,14 @@ enum DesignSVG {
         let f = node.frame
         let (x, y) = (f.x - origin.x, f.y - origin.y)
         let box = "x=\"\(number(x))\" y=\"\(number(y))\" width=\"\(number(f.width))\" height=\"\(number(f.height))\""
+        if node.kind != .group, let defs = gradient(node, x: x, y: y) { lines.append(pad + defs) }
         switch node.kind {
         case .rectangle, .instance, .shape:  // a shape writes its box until DS-6 writes its path
-            lines.append(pad + "<rect \(box)\(corner(node)) fill=\"\(hex(node.fill))\"\(paint(node))\(alpha(node))/>")
+            lines.append(pad + "<rect \(box)\(corner(node))\(fill(node))\(paint(node))\(alpha(node))/>")
         case .ellipse:
             let (rx, ry) = (f.width / 2, f.height / 2)
             let at = "cx=\"\(number(x + rx))\" cy=\"\(number(y + ry))\" rx=\"\(number(rx))\" ry=\"\(number(ry))\""
-            lines.append(pad + "<ellipse \(at) fill=\"\(hex(node.fill))\"\(paint(node))\(alpha(node))/>")
+            lines.append(pad + "<ellipse \(at)\(fill(node))\(paint(node))\(alpha(node))/>")
         case .text:
             lines.append(pad + text(node, x: x, y: y))
         case .group:
@@ -57,7 +62,7 @@ enum DesignSVG {
             let id = XMLText.escaped("clip-" + node.id)
             lines.append(pad + "<clipPath id=\"\(id)\"><rect \(box)\(corner(node))/></clipPath>")
             lines.append(pad + "<g clip-path=\"url(#\(id))\"\(alpha(node))>")
-            lines.append(pad + "  <rect \(box)\(corner(node)) fill=\"\(hex(node.fill))\"\(paint(node))/>")
+            lines.append(pad + "  <rect \(box)\(corner(node))\(fill(node))\(paint(node))/>")
             for child in node.children { write(child, origin: origin, depth: depth + 1, into: &lines) }
             lines.append(pad + "</g>")
         }
@@ -76,9 +81,26 @@ enum DesignSVG {
         out += " font-family=\"\(XMLText.escaped(family))\""
         if style.weight != 400 { out += " font-weight=\"\(style.weight)\"" }
         if let anchor { out += " text-anchor=\"\(anchor)\"" }
-        out += " fill=\"\(hex(node.fill))\"\(alpha(node))>\(XMLText.escaped(node.text))</text>"
+        out += "\(fill(node))\(alpha(node))>\(XMLText.escaped(node.text))</text>"
         return out
     }
+
+    /// The `<defs>` holding `node`'s gradient as SuiteKernel's GradientSVG writes it, its points in the layer's
+    /// frame at `x`, `y` (box-relative, userSpaceOnUse); nil for a solid fill.
+    private static func gradient(_ node: DesignNode, x: Double, y: Double) -> String? {
+        let frame = Rect(minX: x, minY: y, maxX: x + node.frame.width, maxY: y + node.frame.height)
+        let definition = GradientSVG.definition(node.fill(in: frame), id: gradientID(node))
+        return definition.isEmpty ? nil : "<defs>" + definition + "</defs>"
+    }
+
+    /// ` fill="url(#g-…)"` for a layer with a linear or radial gradient, ` fill="#rrggbb"` otherwise.
+    private static func fill(_ node: DesignNode) -> String {
+        guard let gradient = node.gradient, GradientRules.type(of: gradient) != .solid else { return " fill=\"\(hex(node.fill))\"" }
+        return " fill=\"url(#\(gradientID(node)))\""
+    }
+
+    /// The id of a layer's gradient definition: `g-` and its escaped node id.
+    private static func gradientID(_ node: DesignNode) -> String { XMLText.escaped("g-" + node.id) }
 
     /// ` rx="r"` for a rounded rectangle or frame (the radius the canvas draws); empty when square.
     private static func corner(_ node: DesignNode) -> String {
