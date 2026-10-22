@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-22T02:35:12Z	stage	ST-live	ST-live merged into ST-live2 (#4161); gate running
 2026-10-22T02:41:10Z	check	ST-live	#4161 ST-live2 gate PASS on merged ST-live; pushed 01b3ce229; Head updated (draft)
 2026-10-22T02:42:39Z	check	ST-a	#4135 waiting on the lane batch macOS gate for 1f0949ff0; no needs-fix; no open shell-text findings
+2026-10-22T03:04:17Z	check	ST-a	#4135 macOS build run 39711322423 still queued for a runner since 02:25; no needs-fix, no shell-text findings
