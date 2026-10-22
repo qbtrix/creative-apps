@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-22T06:37Z	heartbeat	DY-m waits on DT-m (#3436); DK-u waits on DS-u (#3440)
 2026-10-22T07:00Z	heartbeat	DY-m waits on DT-m (#3436); DK-u waits on DS-u (#3440)
 2026-10-22T07:24Z	resume	run act-1a1627ce3b4-ayhz takes over	-	DT-m met; DY-m building
+2026-10-22T08:15Z	pr-opened	DY-m #4356 (DY-5) #4357 (DY-6 stacked)	215bb4de	lane macOS build 39745527052
