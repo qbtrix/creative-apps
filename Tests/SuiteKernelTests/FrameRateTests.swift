@@ -4,7 +4,7 @@ import Foundation
 import Testing
 import SuiteKernel
 
-@Suite(.disabled("waits on FR-3")) struct FrameRateTests {
+@Suite struct FrameRateTests {
     static let ntsc = FrameRate(numerator: 30000, denominator: 1001)
     static func decode(_ json: String) throws -> FrameRate { try JSONDecoder().decode(FrameRate.self, from: Data(json.utf8)) }
 

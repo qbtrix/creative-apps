@@ -1,0 +1,16 @@
+[
+ {
+  "label": ".refusesWrongByteCount: a frame with extra bytes is accepted",
+  "file": "Sources/SuiteModel/Values/Media.swift",
+  "find": "if rgba.count != bytes.partialValue {",
+  "replace": "if rgba.count < bytes.partialValue {",
+  "tests": "MediaContractTests"
+ },
+ {
+  "label": ".fakeRecordsInOrder: the fake drops its first frame",
+  "file": "Sources/SuiteModel/Fakes/FakeMedia.swift",
+  "find": "owner.record(path, frames: written, settings: movie)",
+  "replace": "owner.record(path, frames: Array(written.dropFirst()), settings: movie)",
+  "tests": "MediaContractTests"
+ }
+]
