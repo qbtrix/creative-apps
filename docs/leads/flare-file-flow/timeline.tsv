@@ -93,3 +93,4 @@ utc	stage	event	ref	note
 22:22Z	check	No journeys run on dev includes 847f507 yet (newest flare run is queued at 401242a). #4636 stays open. No new comments on #3482 and no new file-flow findings.
 22:54Z	check	Still no journeys run on dev includes 847f507 (the flare run at 401242a is still queued). #4636 stays open. Nothing new on #3482 and no new file-flow findings.
 23:26Z	check	No flare or full journeys run includes 847f507 yet (the flare run at 401242a is running and predates the fix; only a queued suiteui run is at 847f507). #4636 stays open. Nothing new on #3482.
+23:58Z	check	No flare or full journeys run includes 847f507 yet (the new full run at a102c34 predates it). #4636 stays open. Nothing new on #3482.

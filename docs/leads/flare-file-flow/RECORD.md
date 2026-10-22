@@ -111,3 +111,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 22:22Z check: no journeys run includes 847f507 yet; #4636 stays open; nothing new on #3482.
 - 22:54Z check: still no journeys run includes 847f507; #4636 stays open; nothing new on #3482.
 - 23:26Z check: no flare or full journeys run includes 847f507 yet; #4636 stays open; nothing new on #3482.
+- 23:58Z check: no flare or full journeys run includes 847f507 yet; #4636 stays open; nothing new on #3482.
