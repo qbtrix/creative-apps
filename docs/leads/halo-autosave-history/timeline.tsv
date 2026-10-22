@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-22T11:08Z	6	stage-built	HA-8	ddaf38bb, gating
 2026-10-22T11:17Z	6	pr-opened	#4397	HA-8 status built
 2026-10-22T11:56Z	6	merged	#4397	HA-8 30120a894
+2026-10-22T12:28Z	6	waiting	-	screens run
