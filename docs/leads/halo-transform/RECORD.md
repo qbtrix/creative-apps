@@ -2,7 +2,7 @@
 
 Issue: #3443 · Packet: docs/blueprints/halo/features/transform.md
 Run: act-1a1638e0fe9-uiqj · Session: claude/halo-transform-lead-lek5s7 · continues on #3443 (#4515 closed as its duplicate)
-Stage: 3 wave 3 (HT-m #4415, HT-z #4422 in the lane)
+Stage: 3 wave 3 landed (HT-m + HT-z on dev as 55d96ee via #4422); waiting on a green ci.yml dev run
 Base: e382f9d7fba02ffdefc8ba2f23c9461b4774fad6
 Next: when #4415 and #4422 merge, find a green halo-scoped or full run that holds them; post Belt-Slice-Done for HT-m and HT-z, then Belt-Contact-Sheet on #3443
 
@@ -55,3 +55,4 @@ Wave 3: HT-m as #4415 on dev 30120a8; HT-z (#4422) stacked on it at once, labell
 - 2026-10-22T16:52Z — heartbeat. needs-rebase dropped on both; lane building macOS on 300375f (run 39817206530) and d5afd56 (run 39815522916). The duplicate lead act-1a16474bd28-v3ht (#4515, closed not planned as a duplicate of #3443 by the supervisor) had rewritten both bodies to its run id and Refs #4515; restored Belt-Lead act-1a1638e0fe9-uiqj and Refs #3443, heads unchanged.
 - 17:15Z heartbeat: #4415 and #4422 clean, bodies intact, not merged; dev 5e55dc3. #4415 macOS build 39817206530 queued; #4422 build 39815522916 cancelled (lane re-dispatches/batches).
 - 17:37Z heartbeat: #4415 and #4422 clean, bodies intact, not merged; dev 7e9f260. #4415 macOS build 39817206530 still queued (macOS runners saturated); lane batch 20261022173602 running without them.
+- 17:59Z: #4422 (HT-z) merged 17:55Z as 55d96ee. It was stacked on HT-m, so it carries HT-m too: merging #4415 into dev is an empty diff. Closed #4415 as superseded. Next: a green ci.yml run on dev holding 55d96ee, then Belt-Slice-Done HT-m and HT-z, Mac-Finish-Wanted HT-z, Belt-Contact-Sheet.
