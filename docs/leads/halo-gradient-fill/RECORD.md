@@ -115,3 +115,15 @@
   - macOS build 39725251450 green.
   - Lane Linux check 39727377659 running.
   - Mergeable state clean.
+
+### 05:56Z: HG-z merged, all slices on dev
+- #4318 (HG-z) merged into dev at 05:35Z as b2bde159 (batch of 6, Linux run 39726578046).
+- HG-u, HG-m and HG-z are all on dev.
+- Runs waiting for macOS runners:
+  - halo-scoped 39720068263: HG-u only.
+  - full 39722978870: HG-u and HG-m; Linux green.
+  - full 39730395919 (b2bde159): all three, pending.
+- Next:
+  - Belt-Slice-Done for each slice, plus Mac-Finish-Wanted for HG-u, once a green run contains it.
+  - Critics on the run's screens.
+  - Belt-Contact-Sheet.

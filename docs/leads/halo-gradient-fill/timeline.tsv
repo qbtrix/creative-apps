@@ -76,3 +76,4 @@ utc	stage	event	ref	note
 2026-10-22T04:14Z	merged	HG-u #4207 merged 82352f0b; halo run 39720068263 queued; HG-m built green, awaits batch
 2026-10-22T04:55Z	opened	HG-m #4216 merged 83eb2e41; HG-z PR #4318 head cbda7a56 (HG-8+HG-9)
 2026-10-22T05:25Z	check-in	macOS queue backed up; HG-z built green, Linux check running
+2026-10-22T05:56Z	merged	HG-z #4318 merged b2bde159; all slices on dev; full CI 39730395919 pending
