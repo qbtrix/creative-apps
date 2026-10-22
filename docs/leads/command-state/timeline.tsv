@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-22T05:21:40Z	lane	heartbeat	#4205 #4214	CS-11 #4205 merged 05:05Z; CS-12 #4214 merged dev, gating
 2026-10-22T05:27:28Z	CS-flare	ready	#4214	CS-12 merged dev at 244d668, CI: PASS, marked ready for the lane
 2026-10-22T05:43:29Z	lane	heartbeat	#4214	CS-12 macOS build 39728577096 queued
+2026-10-22T06:08:50Z	lane	heartbeat	#4214	CS-12 macOS build 39728577096 green, awaiting lane sweep
