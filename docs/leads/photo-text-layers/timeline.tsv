@@ -64,3 +64,4 @@
 2026-10-22T13:01Z	ship	TX-5 #4391 merged 12:44Z; TX-4 merged dev (doc-comment conflict in PhotoTextBox.swift), gate PASS at f1448b1a2, opened #4424 (Slice TX-u); TX-7 moved onto it (ec415151b), PR after #4424; findings open: #4404, #4378 (CI journeys, not text-layers)
 2026-10-22T13:44Z	check-in	#4424 (TX-4) open, clean; lane macOS build 39784859465 queued; TX-7 ready at ec415151b
 2026-10-22T14:18Z	check-in	#4424 (TX-4) macOS build 39784859465 green; waiting on lane sweep to merge; TX-7 ready at ec415151b
+2026-10-22T14:41Z	check-in	#4424 (TX-4) green build, clean, queued for lane; TX-7 ready at ec415151b
