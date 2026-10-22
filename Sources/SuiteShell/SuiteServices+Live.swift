@@ -31,7 +31,7 @@ extension SuiteServices {
             roundTrips: roundTripsSlot(c), pasteboard: pasteboardSlot(c), assets: assetsSlot(c), linking: linkingSlot(c),
             animations: FakeAnimationSource(), preferences: preferencesSlot(c), settings: settingsSlot(c),
             onboarding: onboardingSlot(c), updates: FakeUpdates(), thumbnails: thumbnailsSlot(c), home: homeSlot(c), media: mediaSlot(c),
-            isPreview: false)
+            text: textSlot(c), isPreview: false)
         s.pending = pendingReasons(liveness: slotLiveness)
         return s
     }
@@ -43,7 +43,7 @@ extension SuiteServices {
         "thumbnails": thumbnailsIsLive, "home": homeIsLive,
         "roundTrips": roundTripsIsLive, "pasteboard": pasteboardIsLive, "assets": assetsIsLive,
         "linking": linkingIsLive, "preferences": preferencesIsLive, "settings": settingsIsLive,
-        "onboarding": onboardingIsLive, "media": mediaIsLive,
+        "onboarding": onboardingIsLive, "media": mediaIsLive, "text": textIsLive,
     ]
 
     /// Every slotted member whose slot isn't live, with its not-connected reason.

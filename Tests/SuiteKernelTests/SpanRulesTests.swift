@@ -14,7 +14,7 @@ import SuiteKernel
 
     private func frames(_ tracks: [String: [Keyframe]]) -> [String: [Int]] { tracks.mapValues { $0.map(\.frame) } }
 
-    @Test(.disabled("waits on TK-5")) func slideMovesSpanAndKeys() throws {
+    @Test func slideMovesSpanAndKeys() throws {
         var span = 10...40, keys = tracks
         let delta = try SpanRules.slide(&span, tracks: &keys, by: 6, lastFrame: 47)
         #expect(delta == 6)
@@ -22,7 +22,7 @@ import SuiteKernel
         #expect(frames(keys) == ["x": [16, 26], "opacity": [16, 22]])
     }
 
-    @Test(.disabled("waits on TK-5")) func keysFollowClamp() throws {
+    @Test func keysFollowClamp() throws {
         var span = 10...40, keys = tracks
         let delta = try SpanRules.slide(&span, tracks: &keys, by: 20, lastFrame: 47)
         #expect(delta == 7)
@@ -30,7 +30,7 @@ import SuiteKernel
         #expect(frames(keys) == ["x": [17, 27], "opacity": [17, 23]])
     }
 
-    @Test(.disabled("waits on TK-5")) func staysInComp() throws {
+    @Test func staysInComp() throws {
         var span = 10...40, keys = tracks
         let delta = try SpanRules.slide(&span, tracks: &keys, by: -25, lastFrame: 47)
         #expect(delta == -10)
@@ -38,14 +38,14 @@ import SuiteKernel
         #expect(frames(keys) == ["x": [0, 10], "opacity": [0, 6]])
     }
 
-    @Test(.disabled("waits on TK-5")) func zeroMovesNothing() throws {
+    @Test func zeroMovesNothing() throws {
         var span = 0...47, keys = tracks
         #expect(try SpanRules.slide(&span, tracks: &keys, by: 6, lastFrame: 47) == 0)
         #expect(span == 0...47)
         #expect(keys == tracks)
     }
 
-    @Test(.disabled("waits on TK-5")) func keyPastTheCompRefusesWhole() {
+    @Test func keyPastTheCompRefusesWhole() {
         var span = 10...20, keys = tracks
         keys["x", default: []].append(Keyframe(frame: 45, value: 50))
         let before = keys
@@ -56,7 +56,7 @@ import SuiteKernel
         #expect(keys == before)
     }
 
-    @Test(.disabled("waits on TK-5")) func spanLongerThanTheCompStaysAtZero() throws {
+    @Test func spanLongerThanTheCompStaysAtZero() throws {
         var span = 0...50, keys: [String: [Keyframe]] = [:]
         #expect(try SpanRules.slide(&span, tracks: &keys, by: -6, lastFrame: 47) == 0)
         #expect(span == 0...50)
