@@ -91,3 +91,4 @@ utc	stage	event	ref	note
 2026-10-22T19:59:37Z	RP-m	waiting	-	full CI 39840605751 cancelled before running; still queued: 39836126860 (CI a102c34cc), 39836789801 (scoped: suite 28e2b8521), 39844810755 (CI 0f8414ad2)
 2026-10-22T20:25:40Z	RP-m	waiting	-	full CI 39844810755 cancelled before running (newer run supersedes); waiting on 39836789801 (scoped: suite 28e2b8521) and 39848684933 (CI 847f50721)
 2026-10-22T20:51:46Z	RP-m	waiting	-	full CI 39848684933 cancelled before running; waiting on 39836789801 (scoped: suite), 39836126860 and 39852194708 (CI)
+2026-10-22T21:18:52Z	RP-m	done	-	Belt-Slice-Done posted for RP-a, RP-u, RP-m (run 39836789801); contact sheet waits journeys 39855707652

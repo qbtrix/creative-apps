@@ -2,9 +2,9 @@
 
 Issue: #3772 · Packet: docs/blueprints/suite/features/report-problem.md
 Run: act-1a16391fd34-thw9 · Resumed: 2026-10-22T12:30Z (previous run act-1a1601c3538-r0c9, started 2026-10-21T10:50Z)
-Stage: RP-m: RP-5b #4226 merged 7499611d; RP-6 #4380 ready (Head 7a43418d); RP-7 gating
+Stage: All slices done (run 39836789801); Belt-Slice-Done posted for RP-a, RP-u, RP-m
 Base: dc87ad2b0bcebf2b6bef749328a03ba06687275f
-Next: RP-7 feature-done PR (docs-only), then Belt-Contact-Sheet after the CI its merge triggers
+Next: Belt-Contact-Sheet once journeys run 39855707652 (after CI run 39836789801) completes
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -23,8 +23,8 @@ Next: RP-7 feature-done PR (docs-only), then Belt-Contact-Sheet after the CI its
 | RP-3e | RP-u | 3 | Save… and Email… (ProblemReportOutput) | packet RP-3 (split) | Mutate 4/4 SuiteModel.ProblemReportOutput | #4209 | merged d27c95f2 |
 | RP-5 | RP-m | 3 | help catalog bodies + CLI `suite help.*` (HelpReports); fixes escaped-slash home-path leak in RP-4's encoder | packet RP-5 (split) | HelpReportsTests, SuiteHelpCatalogTests; Mutate 5/5 SuiteKernel.SuiteHelpCatalog | #4218 | merged cc919a54 |
 | RP-5b | RP-m | 4 | CrashFolder (SuiteModel) + CrashFolderReader (SuiteShell), Help journey on with -SuiteCrashDir | packet RP-5 (split) | CrashFolderTests; Mutate 6/6 SuiteModel.CrashFolder; journey first runs in scoped suite run | #4226 | merged 7499611d |
-| RP-6 | RP-m | 5 | C4 prose: suite-help callers; onboarding names SuiteHelpCommands | 2 docs/c4/parts files | scripts/ci --changed (C4 assemble) | #4380 | ready, Head 7a43418d |
-| RP-7 | RP-m | 5 | report-problem.wave.json built, feature_issue #3772; feature-done | 1 file | scripts/ci --changed (waves render) | - | gating |
+| RP-6 | RP-m | 5 | C4 prose: suite-help callers; onboarding names SuiteHelpCommands | 2 docs/c4/parts files | scripts/ci --changed (C4 assemble) | #4380 | merged |
+| RP-7 | RP-m | 5 | report-problem.wave.json built, feature_issue #3772; feature-done | 1 file | scripts/ci --changed (waves render) | - | merged 3578eaee |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
