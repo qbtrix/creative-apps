@@ -1,10 +1,10 @@
 # tone-controls (Library) lead record
 
-Issue: #3475 · Packet: docs/blueprints/library/features/tone-controls.md
-Run: act-1a15df37b73-k199 · Session: claude/library-line-lead-lqhhp8 (earlier act-1a15b98bc49-4lk9 on claude/task-k1zaw1) · Started: 2026-10-20T23:00Z (earlier run act-1a15b10caae-y18c on claude/lead-raw-tone-controls-ca9b2k)
-Stage: 0 setup (blocked at 0.4; re-checked at dev e2b8aa76, 2026-10-21T10:18Z)
-Base: 9781100bc432e119320c1bbbff41849ff4aeebdb (origin/dev; brief named main b3011ab9, see Decisions)
-Next: wait for suiteui tone-controls TC-a (#3476; ToneSettings/ToneRules/ToneRows) to merge, then start LT-1/LT-2
+Issue: #4516 (earlier #3475) · Packet: docs/blueprints/library/features/tone-controls.md
+Run: act-1a16474bd12-7ncx · Session: claude/feature-lead-playbook-2mbx2f · Started: 2026-10-22T16:30Z (earlier act-1a15df37b73-k199)
+Stage: 0 setup (blocked at 0.4, re-checked at dev 7e9f260a, 2026-10-22T16:50Z)
+Base: origin/dev 7e9f260ae8f69dea63663c1bc7ea945c6b1d2f80
+Next: start LT-1/LT-2 when suiteui tone-controls TC-a (#4520: TC-1 building, no PR open yet; TC-2 after) is on dev
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,5 +34,6 @@ Next: wait for suiteui tone-controls TC-a (#3476; ToneSettings/ToneRules/ToneRow
 - Run act-1a15df37b73-k199: the brief says to rebase lead/tone-controls onto origin/main with --force-with-lease. Not done: that branch is the suiteui tone-controls lead's record (#3476), it shares no merge base with main and carries 1,739 non-record commits, so a rebase rewrites another lead's live history. This record stays on lead/library-tone-controls. Raised as a question below.
 
 ## Open
+- 2026-10-22T16:50Z (run act-1a16474bd12-7ncx, #4516): rule 23 re-read. TC-a is still unmerged: #4520 record says TC-1 is building, and no open PR carries Feature: tone-controls. Sources/SuiteImaging/Tone/ is absent on dev. LT-a stays blocked. 0 open findings.
 - Parked by the supervisor (#3475, 11:29Z): LT-a waits on suiteui TC-a (#3476), and TC-a waits on suite-imaging IM-a and autosave-history AH-a. #3475 is labelled waiting-on-prereq; the supervisor removes the label once TC-a is on dev. This run is released from tone-controls and polls it no more.
 - No rebase of lead/tone-controls. The supervisor confirmed it is the suiteui lead's record; this lead's record is on lead/library-tone-controls.
