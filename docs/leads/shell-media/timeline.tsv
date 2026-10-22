@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-22T00:29Z	2026-10-22T00:29Z	check	heartbeat	-	no merges since 00:07Z; all ready PRs clean on the lane (#4258 macOS build dispatched); no open findings for this feature
 2026-10-22T00:53:09Z	2026-10-22T00:53:09Z	check	macos-build-red	dev#4215	our heads predate cb79b076f (RenderBudgetPhotoPlaceTests fix); merging dev into each, gate, push
 2026-10-22T01:15:58Z	2026-10-22T01:15:58Z	check	heartbeat	-	#4258 f9e7698c and #4035 608fdc49 merged dev (gate PASS), Head moved; awaiting macOS build
+2026-10-22T01:38:16Z	2026-10-22T01:38:16Z	check	heartbeat	-	#4258 macOS build 39705921002 queued; nothing merged
