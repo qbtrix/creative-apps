@@ -1,0 +1,4 @@
+[
+{"label": "a differing italic costs nothing", "file": "Sources/SuiteUI/FontPickerRules+Nearest.swift", "find": "? 50 : 0", "replace": "? 0 : 0", "tests": "FontPickerNearestTests.keepsItalic"},
+{"label": "ties go to the heavier face", "file": "Sources/SuiteUI/FontPickerRules+Nearest.swift", "find": "candidate.weight < current.face.weight", "replace": "candidate.weight > current.face.weight", "tests": "FontPickerNearestTests.tiesGoLighter"}
+]

@@ -23,6 +23,7 @@ view.grid
 view.loupe
 view.show-original
 view.sort
+view.thumbnail-size
 view.zoom-in
 view.zoom-out
 view.zoom-to-fit
