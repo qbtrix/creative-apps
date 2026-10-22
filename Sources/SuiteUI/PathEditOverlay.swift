@@ -8,6 +8,7 @@
 // intents the app runs. `PathGesture` holds the mapping, pure and testable:
 // view points in, document-space intents out. The overlay keeps only its
 // gesture, the pointer and focus; the app owns the draft, path and selection.
+// PN-4 adds one hidden accessibility element per anchor and drawn handle.
 import AppKit
 import SuiteKernel
 import SwiftUI
@@ -46,6 +47,14 @@ public struct PathEditOverlay: View {
         self.onIntent = onIntent
     }
 
+    /// The overlay with the pointer resting at `pointer` (view points), as a hover leaves it: the rubber band
+    /// and close ring a snapshot shows without a mouse.
+    init(draft: PenDraft?, path: PathInEdit?, selection: Selection<AnchorRef>, tool: PenTool, zoom: Double, pointer: CGPoint?,
+         onIntent: @escaping (PathIntent) -> Void) {
+        self.init(draft: draft, path: path, selection: selection, tool: tool, zoom: zoom, onIntent: onIntent)
+        _pointer = State(initialValue: pointer)
+    }
+
     public var body: some View {
         let hint = pointer.map { PathGesture.hint(at: $0, hit: hovered, in: context) }
         ZStack(alignment: .topLeading) {
@@ -58,6 +67,9 @@ public struct PathEditOverlay: View {
                 PathMarks(contours: [draft.contour], toView: .identity, selected: [], hovered: nil, zoom: context.zoom)
             }
             guides(hint: hint)
+            if let path = context.path {
+                PathAnchorProbes(path: path, selection: context.selection, zoom: context.zoom).equatable()
+            }
         }
         .contentShape(.rect)
         .allowsHitTesting(interactive)
@@ -147,5 +159,62 @@ public struct PathEditOverlay: View {
 
     private func send(_ intents: [PathIntent]) {
         for intent in intents { onIntent(intent) }
+    }
+}
+
+/// One hidden accessibility element over an anchor or handle: its id, what VoiceOver reads, its box in document points.
+struct PathAnchorProbe: Hashable, Sendable {
+    let id: String, label: String, rect: CGRect
+}
+
+/// The path's anchors and drawn handles as hidden accessibility elements, for VoiceOver and the journeys:
+/// `suite.path.anchor-<c>-<i>` reads "Anchor 2 of 4, smooth", `suite.path.handle-<c>-<i>-out` is its out handle.
+/// Only the first `limit` anchors get one, so a 5,000-anchor path stays cheap. It draws nothing and takes no hits.
+struct PathAnchorProbes: View, Equatable {
+    static let limit = 200
+    let path: PathInEdit, selection: Selection<AnchorRef>, zoom: Double
+
+    nonisolated static func == (a: Self, b: Self) -> Bool {
+        a.path == b.path && a.selection == b.selection && a.zoom == b.zoom
+    }
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            ForEach(Self.probes(path, selection: selection, zoom: zoom), id: \.id) { probe in
+                ProbeElement(probe.id, label: probe.label, rect: probe.rect, zoom: zoom)
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Path anchors")
+        .accessibilityValue("\(path.path.contours.reduce(0) { $0 + $1.anchors.count }) anchors, \(selection.ordered.count) selected")
+        .accessibilityIdentifier("suite.path.anchors")
+    }
+
+    /// Each anchor's probe, then its handles' when it is smooth or selected (the handles the marks draw): a
+    /// `SuiteSize.anchorHit` box on screen around the point.
+    nonisolated static func probes(_ path: PathInEdit, selection: Selection<AnchorRef>, zoom: Double) -> [PathAnchorProbe] {
+        let side = SuiteSize.anchorHit / PathMarks.scale(zoom)
+        func box(_ p: Point) -> CGRect {
+            let v = path.toDocument.apply(p)
+            return CGRect(x: v.x - side / 2, y: v.y - side / 2, width: side, height: side)
+        }
+        var probes: [PathAnchorProbe] = [], named = 0
+        for (c, contour) in path.path.contours.enumerated() {
+            for (i, anchor) in contour.anchors.enumerated() where named < limit {
+                named += 1
+                let picked = selection.contains(AnchorRef(contour: c, index: i))
+                let kind = anchor.kind == .corner ? "corner" : "smooth"
+                probes.append(PathAnchorProbe(id: "suite.path.anchor-\(c)-\(i)", label: "Anchor \(i + 1) of \(contour.anchors.count), "
+                                              + kind + (picked ? ", selected" : ""), rect: box(anchor.point)))
+                guard anchor.kind != .corner || picked else { continue }
+                for (end, handle) in [("in", anchor.handleIn), ("out", anchor.handleOut)] {
+                    guard let handle else { continue }
+                    probes.append(PathAnchorProbe(id: "suite.path.handle-\(c)-\(i)-\(end)",
+                                                  label: (end == "in" ? "In" : "Out") + " handle of anchor \(i + 1)", rect: box(handle)))
+                }
+            }
+        }
+        return probes
     }
 }
