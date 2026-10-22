@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-22T01:23:12Z	check	SS-z	#4129 open; lane batch 20261022004326 running (run 39704640868)
 2026-10-22T01:40:22Z	merge	SS-z	#4129 merged 33e1597c1; Belt-Slice-Done waits on a green dev Linux run containing it (dev red on FormatListRatchet until #4258)
 2026-10-22T01:56:43Z	check	SS-z	dev Linux check 39707946247 on e99331166 (contains 33e1597c1) running; dev still red on ratchet until #4258
+2026-10-22T02:13:02Z	check	SS-z	dev Linux check 39707946247 red (ratchet); #4238 SC-14 now on dev, expected to clear it
