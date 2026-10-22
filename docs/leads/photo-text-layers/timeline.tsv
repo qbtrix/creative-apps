@@ -65,3 +65,4 @@
 2026-10-22T13:44Z	check-in	#4424 (TX-4) open, clean; lane macOS build 39784859465 queued; TX-7 ready at ec415151b
 2026-10-22T14:18Z	check-in	#4424 (TX-4) macOS build 39784859465 green; waiting on lane sweep to merge; TX-7 ready at ec415151b
 2026-10-22T14:41Z	check-in	#4424 (TX-4) green build, clean, queued for lane; TX-7 ready at ec415151b
+2026-10-22T15:14:43Z	task	TX-4 #4424 merged 14:45Z; TX-7 PR #4441 open (clean, fast-lane); TX-8 branch pushed (gate pass), PR held until #4441 merges so built is not claimed early
