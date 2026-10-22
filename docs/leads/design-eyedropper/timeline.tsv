@@ -75,3 +75,4 @@ utc	stage	event	ref	note
 2026-10-22T03:06Z	heartbeat	full CI 39714642994 on 66a84588 (contains #4081) pending; #4255 unmerged; DS-u not started
 2026-10-22T03:33Z	heartbeat	full CI 39714642994 on 66a84588 still pending (macOS runner backlog); Linux 66a84588 green; #4255 unmerged; DS-u not started
 2026-10-22T03:54Z	heartbeat	full CI 39714642994 (66a84588) still pending; scoped design on e9933116 (pre-#4081) running; #4255 unmerged; DS-u not started
+2026-10-22T04:16Z	heartbeat	full CI 39714642994 cancelled (superseded); waiting on scoped design 39720061887 / full CI 39720939785 on 6e19f406 (contains #4081); #4255 unmerged; DS-u not started
