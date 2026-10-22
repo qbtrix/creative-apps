@@ -37,3 +37,4 @@ time	kind	step	ref	note
 2026-10-22T12:35Z	-	merged	#4395	HK-u1
 2026-10-22T12:35Z	-	pr-opened	#4413	HK-u2
 2026-10-22T12:38Z	-	slice-done	-	HK-a run 39774574487
+2026-10-22T13:09Z	-	waiting	#4400 #4413	macOS build of #4400 green (39773336036); lane merge pending
