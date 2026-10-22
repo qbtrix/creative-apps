@@ -110,3 +110,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 21:50Z check-in: no journeys run on dev includes 847f507 yet; all 10 recent journeys.yml runs test older SHAs and most are queued. #4636 stays open for that run. No other file-flow finding and no new comment on #3482.
 - 22:22Z check: no journeys run includes 847f507 yet; #4636 stays open; nothing new on #3482.
 - 22:54Z check: still no journeys run includes 847f507; #4636 stays open; nothing new on #3482.
+- 23:26Z check: no flare or full journeys run includes 847f507 yet; #4636 stays open; nothing new on #3482.
