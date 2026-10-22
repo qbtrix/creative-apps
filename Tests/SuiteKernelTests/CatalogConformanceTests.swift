@@ -94,9 +94,11 @@ enum BadExample: BrokenLaw {
     }
 
     /// The fixture has no steps, so `history.jump`'s example refuses as unavailable, the filter the apps' laws use.
+    /// The kernel's `transform.flip` is titled Flip while its step names the axis, tolerated as in Photo's laws.
     @Test func theFakeConforms() {
         #expect(CatalogConformance.check(FakeCanvasDocument.self, fixture: .fixture)
-            == ["history.jump: exampleRuns: the example refused on the fixture: history.jump is unavailable: There are no steps yet."])
+            == ["history.jump: exampleRuns: the example refused on the fixture: history.jump is unavailable: There are no steps yet.",
+                "transform.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\""])
     }
 
     @Test func anEditThatRecordsNoStepFails() { expectFails(NoStep.self, naming: "item.append") }
