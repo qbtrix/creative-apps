@@ -62,3 +62,4 @@ utc	stage	event	ref	note
 2026-10-22T00:21Z	poll	HG-u,HG-m	builds queued, no action
 2026-10-22T00:52Z	poll	HG-u	macOS build green (39699678508)
 2026-10-22T00:52Z	poll	HG-m	macOS build queued (39699713418)
+2026-10-22T01:24Z	blocked	HG-u	Linux red on dev ratchet break; waits on #4258
