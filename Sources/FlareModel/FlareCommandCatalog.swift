@@ -123,8 +123,6 @@ extension FlareWorkspace {
         act("file.save", "Save", "Marks the animation saved under its file name.", .file, noFile) { w in if let save = w.saveData() { w.didSave(save, named: w.title + ".flare") } },
         take("file.save-as", "Save As", "Marks the animation saved under a new file name.", .file, NameParams.self,
             example: .object(["name": .string("Copy.flare")]), noFile) { w, p in if let save = w.saveData() { w.didSave(save, named: p.name) } },
-        act("file.clear-recent", "Clear Menu", "Empties the Open Recent list.", .view,
-            { $0.recent.isEmpty ? "No recent animations." : nil }) { w in w.clearRecent() },
         act("edit.undo", "Undo", "Undoes the last edit.", .view, { $0.canUndo ? nil : "Nothing to undo." }) { w in w.undo() },
         act("edit.redo", "Redo", "Redoes the last undone edit.", .view, { $0.canRedo ? nil : "Nothing to redo." }) { w in w.redo() },
         clip("edit.cut", "Cut", "Copies the selected layers, then removes them.", .edit, { $0.editHelp(.cut) }) { $0.cut() },
@@ -168,6 +166,7 @@ extension FlareWorkspace {
         act("scenes.remove", "Delete Scene", "Removes the selected scene; its undo step is Delete Scene.", .edit,
             { w in w.selectedSceneID.map(w.removeSceneHelp) ?? FlareLayerError.noDocument.message }) { w in w.removeScene(w.selectedSceneID ?? "") },
     ] + GradientCommands.specs(FlareWorkspace.self)  // the eight fill.* commands (gradient-fill FG-5)
+        + FileFlowCommands.specs(FlareWorkspace.self)  // file.recent, open-recent, clear-recent, open-in, drop (file-flow FL-3)
 }
 
 extension FlareWorkspace {

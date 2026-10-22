@@ -3,7 +3,8 @@
 // items, each built with MenuCommand(spec, on:) and identified: Report a Problem…, Beta Notes and, in the
 // launcher only, Welcome to AfterGlow, which still opens the tour. Since RP-3 Report a Problem… begins the
 // report sheet and Beta Notes opens its window, so no item is disabled; one that wasn't built would say why
-// (no dead controls). The launcher adds the group in place of its Welcome group.
+// (no dead controls). Since RP-3e the sheet's Save… and Email… hand its text to ProblemReportActions, which
+// never touches the network. The launcher adds the group in place of its Welcome group.
 import Foundation
 import Testing
 
@@ -50,6 +51,24 @@ import Testing
         #expect(text.contains("public struct ShellHelpProvider: HelpProviding"))
         #expect(text.contains("ProblemReport.build(") && text.contains("BetaNotes.current"))
         #expect(!text.contains("URLSession") && !text.contains("NSWorkspace"), "the provider reaches the network")
+    }
+
+    /// RP-3e: Save… and Email… are live on the sheet and hand ProblemReportOutput to the AppKit glue, which
+    /// asks the system's compose-mail service (unsent) or writes the sheet's text where the person picks.
+    @Test func saveAndEmailHandTheSheetsTextOnWithoutTheNetwork() throws {
+        let help = try source(Self.help)
+        #expect(help.contains("onSave: { [weak self] text in self?.save(text) }"), "Save… is still disabled")
+        #expect(help.contains("onEmail: { [weak self] text in self?.email(text) }"), "Email… is still disabled")
+        #expect(help.contains("ProblemReportOutput(report: report, text: text)"))
+        let glue = try source("Sources/SuiteShell/ProblemReportActions.swift")
+        #expect(glue.contains("NSSharingService(named: .composeEmail)"))
+        #expect(glue.contains("service.subject = output.subject") && glue.contains("service.recipients = output.recipients"))
+        #expect(glue.contains("service.perform(withItems: [output.text])"), "the mail body isn't the sheet's text")
+        #expect(glue.contains("panel.allowedContentTypes = [.plainText]") && glue.contains("panel.nameFieldStringValue = output.fileName"))
+        #expect(glue.contains("Data(output.text.utf8).write(to: url"), "the saved file isn't the sheet's text")
+        for socket in ["URLSession", "NSWorkspace", "mailto:", "import Network", "CFStream", "NWConnection"] {
+            #expect(!glue.contains(socket) && !help.contains(socket), "\(socket): the app sends the report itself")
+        }
     }
 
     @Test func launcherAddsTheGroupInPlaceOfItsWelcomeGroup() throws {
