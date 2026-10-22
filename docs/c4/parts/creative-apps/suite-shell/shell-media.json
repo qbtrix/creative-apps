@@ -1,7 +1,7 @@
 {
   "id": "shell-media",
   "name": "Media writers and readers",
-  "description": "The suite's one media I/O: AVFoundation and ImageIO behind SuiteModel's MediaEncoding and MediaDecoding. MovieWriter writes H.264, HEVC, HEVC with alpha and ProRes 4444 movies tagged BT.709, the canonical copy of Halo's movie writer.",
+  "description": "The suite's one media I/O: AVFoundation, and ImageIO through SuiteImageIO, behind SuiteModel's MediaEncoding and MediaDecoding, reached through SuiteServices.media. The rule: no app writes or reads media with its own code; new code goes through services.media, and Halo's and Photo's old copies go when their adoption moves them here. LiveMedia is the live MediaCoding and hands each call to one coder: MovieWriter writes H.264, HEVC, HEVC with alpha and ProRes 4444 movies tagged BT.709 (the canonical copy of Halo's movie writer) and deletes the file on cancel; AnimatedImageWriter writes GIF and APNG with FrameClock's delays; StillEncoder writes PNG, JPEG, HEIC and TIFF; StillDecoder decodes stills upright to 8-bit sRGB; FootageReader reads a movie's info and the exact frame at a time. Built by shell-media SM-5 to SM-9.",
   "technology": "Swift 6, AVFoundation, VideoToolbox and CoreGraphics, macOS 26",
   "paths": [
     "Sources/SuiteShell/Media/"
