@@ -2,9 +2,9 @@
 
 Issue: #3536 · Packet: docs/blueprints/halo/features/key-editing.md
 Run: act-1a16208b9ea-cm7q (resumed from act-1a15f807d0b-78hh, act-1a15b98bcea-wygm) · Session: claude/key-editing-lead-ahhor8 · Started: 2026-10-20T23:47Z
-Stage: 3 polling
+Stage: done
 Base: 8cf02113c (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: wait for full CI run 39725694977 on dev (b2794c201, holds #4305 KE-8) to finish with a green Linux job; then Belt-Slice-Done KE-z and Mac-Finish-Wanted KE-z, then Belt-Contact-Sheet naming gap #4284 (KE-7, waits #3499) and #4151 (needs-ui).
+Next: beta-hardening lane verifies KE-a, KE-u, KE-m, KE-z (journeys HJ-K1 and MJ-KE on a halo run that holds #4235; Mac finish of the UI slices). KE-7 follows #3499 as gap #4284.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: wait for full CI run 39725694977 on dev (b2794c201, holds #4305 KE-8) to f
 | KE-a | four key commands, catalog ids, adapter stubs; timeline picks, drags, Select All Keys | KE-1, KE-2 | MJ-KE | AC-halo, TSA-a (met) | yes | 1 | done; finding #4232 fixed by #4235 (merged 04:40Z) | 39632745681 | wanted |
 | KE-u | snapshots, journey (skipped), render budget | KE-5, KE-6, F4150 | HJ-K1 | KE-a | yes | 2 | done (Belt-Slice-Done 05:2xZ 10-22); finding #4150 closed (#4155, #4173) | 39706002219 | wanted |
 | KE-m | cross-layer picks, select all, move as one step or refuse whole | KE-3, KE-4, KE-9 | MJ-KE | KE-a | no | 1 | done; finding #4233 fixed by #4235 (merged 04:40Z) | 39655526241 | - |
-| KE-z | journey live, stress perf; halo.md, built, feature-done | KE-9, KE-7, KE-8 | HJ-K1 | KE-u, KE-m; PR #3499 (KE-7); core-loop:CL-z (KE-8, met) | yes | 0 | merged (#4305 4e683e840, 04:41Z); KE-7 gap #4284 | - | - |
+| KE-z | journey live, stress perf; halo.md, built, feature-done | KE-9, KE-7, KE-8 | HJ-K1 | KE-u, KE-m; PR #3499 (KE-7); core-loop:CL-z (KE-8, met) | yes | 0 | done with gap #4284 (KE-7) | 39725694977 | wanted |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
