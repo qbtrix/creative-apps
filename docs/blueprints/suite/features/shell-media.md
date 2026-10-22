@@ -91,7 +91,7 @@ public struct MediaFrame: Sendable, Equatable { public let width: Int, height: I
 public enum MovieCodec: String, Codable, Sendable, CaseIterable { case h264, hevc, hevcAlpha, prores4444
     public var keepsAlpha: Bool { get }; public var needsEvenSize: Bool { get } }
 public enum AnimatedImageFormat: String, Codable, Sendable, CaseIterable { case gif, apng }
-public enum StillFormat: String, Codable, Sendable, CaseIterable { case png, jpeg, heic, tiff }
+public struct StillFormat: RawRepresentable, Hashable, Codable, Sendable, CaseIterable { /* a writable SuiteImageFormat: png, jpeg, heic, tiff */ }
 public struct MovieSettings: Hashable, Codable, Sendable { public var width: Int, height: Int, fps: Int; public var codec: MovieCodec; public var quality: Double
     public func validated() throws(SuiteError) -> MovieSettings }
 public struct AnimatedImageSettings: Hashable, Codable, Sendable { public var width: Int, height: Int, fps: Int; public var format: AnimatedImageFormat; public var loopCount: Int
