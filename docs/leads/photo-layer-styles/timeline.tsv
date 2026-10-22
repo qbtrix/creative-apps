@@ -4,3 +4,5 @@ utc	stage	event	ref	note
 2026-10-22T02:00Z	0	stopped	#3937	blocked on suiteui layer-styles LS-a
 2026-10-22T02:45Z	0	resume	-	Belt stall nudge; re-checked waits on dev b5a6e7e
 2026-10-22T02:45Z	0	stopped	#3937	still blocked: LS-a waiting-on-prereq, IM-1 #4028 open
+2026-10-22T03:13Z	0	resume	-	second Belt stall nudge; re-checked waits on dev 66a8458
+2026-10-22T03:13Z	0	stopped	#3937	still blocked: LS-a waiting-on-prereq, IM-1 #4028 macOS not run

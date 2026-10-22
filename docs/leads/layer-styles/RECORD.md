@@ -2,8 +2,8 @@
 
 Issue: #3793 · Packet: docs/blueprints/photo/features/layer-styles.md
 Run: act-1a16155057c-20lg · Session: claude/layer-styles-lead-hdzmvt · Started: 2026-10-22T02:00Z
-Stage: 0 setup (re-checked 2026-10-22T02:45Z after Belt stall nudge)
-Base: b5a6e7e0a28066fd18e4f144a8e137b3e2f838be (origin/dev)
+Stage: 0 setup, parked as blocked (re-checked 03:13Z after the second Belt stall nudge)
+Base: 66a8458 (origin/dev)
 Next: re-read suiteui layer-styles (#3937) for LS-a merged (`LayerStyle`, `LayerStyleTarget`, `StyleCommands.specs` on dev); once it is, start wave 1 (PY-1)
 
 ## Slices
@@ -35,5 +35,5 @@ Next: re-read suiteui layer-styles (#3937) for LS-a merged (`LayerStyle`, `Layer
 - No task starts: PY-1 needs SuiteImaging's `LayerStyle`, `LayerStyleTarget` and `StyleCommands`, none of which exist on dev (no SuiteImaging target yet). Rule 20 forbids a Photo copy, and LS-a is the suiteui line's work, so nothing is stubbed here.
 
 ## Open
-- Blocked on suiteui layer-styles LS-a (#3937, still `waiting-on-prereq` at 02:45Z). LS-a waits on suite-imaging:IM-a (IM-1 #4028 still open, mergeable, awaiting the supervisor merge; IM-2 stacked), brush-keys:BK-u, gradient-fill:GF-a, and core types from LE-a. Bump #3825 (7966e5a) merged 2026-10-21 but carries only Flare core PRs. No `SuiteImaging` target or `LayerStyle` types on dev b5a6e7e.
+- Blocked on suiteui layer-styles LS-a (#3937, still `waiting-on-prereq` at 03:13Z). LS-a waits on suite-imaging:IM-a (IM-1 #4028 still open: Linux green at 02:30Z, macOS job skipped, awaiting the supervisor macOS run and merge; IM-2 stacked), brush-keys:BK-u, gradient-fill:GF-a, and core types from LE-a. Bump #3825 (7966e5a) merged 2026-10-21 but carries only Flare core PRs. No `SuiteImaging` target or `LayerStyle` types on dev 66a8458.
 - Belt watches `lead/photo-layer-styles` (with `docs/leads/photo-layer-styles/`). This record is mirrored there; `lead/layer-styles` is the brief's original channel and stays in sync.
