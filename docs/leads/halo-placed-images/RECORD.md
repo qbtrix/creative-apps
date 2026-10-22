@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: PH-a #4426 macOS build green, lane merges next sweep; then retarget #4437 to dev + fast-lane, then #4438; PH-m starts when HT-6 #4415 merges
+Next: fixer on PH-a: FormatListRatchetTests/realTreePasses red on #4426 (lane Linux run 39797325748; HaloPlace+Kernel placeFormats literal), then update #4426 Head and carry into #4437/#4438; PH-m starts when HT-6 #4415 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -39,3 +39,4 @@ Next: PH-a #4426 macOS build green, lane merges next sweep; then retarget #4437 
 ## Open
 - dev Linux red (#3856): HaloStrokeTrimKeysTests from HK-6 #4400, not ours; slice-done needs a green dev Linux run after our last PR, so slice-done waits on the stroke lead's fix, #4431 (open, fast-lane, clean).
 - PH-m: re-read transform HT-m (HT-6) and stroke-style HK-m (HK-6) before starting; they share HaloDrawRules/LiveFrameRendering/HaloCommandCatalog.
+- 15:10Z lesson: `scripts/ci --changed` on a HaloModel-only diff skips SuiteModelTests' repo-wide ratchets (FormatListRatchetTests); fixers and builders also run `swift test --filter SuiteModelTests` before claiming Fast-Check.
