@@ -34,9 +34,11 @@ import Testing
 
     private static let box = Rect(minX: 100, minY: 80, maxX: 300, maxY: 200)
 
+    // The argument list spells its rects out: a static of this main-actor suite read there is an
+    // async access the @Test macro's expansion can't await.
     @Test(arguments: [
-        ("handles", TransformBox(box: box, degrees: 30), false),
-        ("flipped", TransformBox(box: box, degrees: -30, flipX: true), false),
+        ("handles", TransformBox(box: Rect(minX: 100, minY: 80, maxX: 300, maxY: 200), degrees: 30), false),
+        ("flipped", TransformBox(box: Rect(minX: 100, minY: 80, maxX: 300, maxY: 200), degrees: -30, flipX: true), false),
         ("rows", TransformBox(box: Rect(minX: 100, minY: 80, maxX: 340, maxY: 200)), false),
         ("several", TransformBox(box: Rect(minX: 60, minY: 60, maxX: 340, maxY: 240)), true),
     ])
