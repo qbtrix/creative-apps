@@ -23,3 +23,4 @@ time	kind	step	ref	note
 2026-10-22T08:15Z	fix	HK-a	needs-rebase HaloWindow.swift merged dev, head 01699281
 2026-10-22T08:15Z	wave	wave 2 started: HK-m, HK-u
 2026-10-22T09:43Z	3	heartbeat	#4336	wave 2 built: HK-u, HK-m1, HK-m2 branches pushed, PRs held on #4336
+2026-10-22T09:49Z	3	heartbeat	HK-u	split into HK-u1 (Model) and HK-u2 (view), both gated and pushed
