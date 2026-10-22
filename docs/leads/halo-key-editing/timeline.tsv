@@ -86,3 +86,4 @@ utc	stage	event	ref	note
 04:25Z	decision	supervisor: option 3; KE-7 -> gap #4284 (waits #3499)
 04:25Z	pr	KE-8 #4305 a4a76f445 (feature-done)
 04:31Z	poll	#4235 macOS build 39712739074 green, awaiting lane merge; #4305 clean, awaiting lane
+2026-10-22T05:25Z	3	slice-done	KE-u	run 39706002219 (scoped halo 6a06063d7, holds #4067/#4155/#4173); #4235 and #4305 merged 04:40Z/04:41Z; waiting on full CI 39725694977 for KE-z
