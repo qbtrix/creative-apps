@@ -3,8 +3,10 @@
 // way the other apps place theirs. A placed image becomes pixels in Photo: `insertPlaced` adds a pixel
 // layer above the selection, and nothing keeps the picture after it, so `placedSelection` is always nil
 // and `placeFillBox` refuses a fill. The size comes from the file's header (CoreRaster's `PNG.info` and
-// `JPEG.info`), the pixels from CoreRaster's decode, downscaled (lanczos3) when the fitted box is smaller,
-// and the layer goes in through `insertPixelLayer`, the insert Paste uses. Linux-safe.
+// `JPEG.info`), the pixels from the workspace's image codec (`readImages(with:)`; the window's is ImageIO),
+// read straight at the fitted box's longest side when the box is smaller, so a 12 MP file is never decoded
+// whole and resampled on the main actor (#4248). The layer goes in through `insertPixelLayer`, the insert Paste
+// uses. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -67,15 +69,10 @@ extension PhotoWorkspace: PlacedImageTarget {
         }
         let box = image.box
         let width = max(Int(box.width.rounded()), 1), height = max(Int(box.height.rounded()), 1)
-        guard var buffer = try? CoreRasterImageCodec.read(asset.data) else { throw Self.placeFailed }
-        let scaled = width < buffer.width || height < buffer.height
-        if scaled {
-            guard let resized = try? buffer.resized(width: width, height: height, filter: .lanczos3) else {
-                throw Self.placeFailed
-            }
-            buffer = resized
-        }
-        let id = insertPixelLayer(TiledPixels(buffer), named: Self.placedLayerName(asset.name),
+        let scaled = Double(width) < asset.natural.width.rounded() || Double(height) < asset.natural.height.rounded()
+        guard let tiles = try? Self.placedPixels(asset.data, codec: fileFlow.codec, width: width, height: height, scaled: scaled)
+        else { throw Self.placeFailed }
+        let id = insertPixelLayer(tiles, named: Self.placedLayerName(asset.name),
                                   x: Int(box.minX.rounded()), y: Int(box.minY.rounded()), step: name)
         let natural = max(asset.natural.width, 1)
         statusMessage = scaled ? "Placed at \(Int((box.width / natural * 100).rounded()))%." : nil
@@ -85,6 +82,23 @@ extension PhotoWorkspace: PlacedImageTarget {
     /// Photo keeps no picture to change, so this always refuses.
     public mutating func setPlaced(_ image: PlacedImage, asset: PlacedAsset?, name: String, drag: String?) throws {
         throw CatalogError.unavailable(id: "place", why: Self.placedBecomesPixels)
+    }
+
+    /// Reads placed and dropped images through `codec` from now on. The window's is ImageIO, which decodes a large
+    /// file straight at the size it is placed at; the default is CoreRaster's, for the headless workspace and Linux.
+    public mutating func readImages(with codec: some PhotoImageCodec) {
+        fileFlow.codec = codec
+    }
+
+    /// A placed file's pixels, `width` x `height`: read through `codec` straight at the box's longest side when
+    /// the box is smaller than the file (`scaled`), so a 12 MP JPEG is never decoded whole and resampled on the
+    /// main actor, then resampled to the box only if the codec's rounding left it off by a pixel.
+    static func placedPixels(_ data: Data, codec: any PhotoImageCodec, width: Int, height: Int,
+                             scaled: Bool) throws -> TiledPixels {
+        let image = try codec.decode(data, longestSide: scaled ? max(width, height) : nil)
+        guard image.width != width || image.height != height else { return try decoded(image) }
+        let buffer = try PixelBuffer(rgba8: image.rgba8, width: image.width, height: image.height)
+        return TiledPixels(try buffer.resized(width: width, height: height, filter: .lanczos3))
     }
 
     /// A file that claims PNG or JPEG but doesn't read as one.

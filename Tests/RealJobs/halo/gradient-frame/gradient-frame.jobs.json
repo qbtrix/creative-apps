@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "app": "halo",
+  "why": "RJ-H32: selects a full-frame solid, fills it with a radial gradient white at its centre to black at its edge and exports frame 0 as a full-size PNG.",
+  "inputs": ["input/*.halo"],
+  "steps": [
+    {"id": "layer.select", "params": {"id": "comp-1-layer-1"}},
+    {"id": "fill.gradient", "params": {"type": "radial", "stops": [
+      {"offset": 0, "r": 1, "g": 1, "b": 1, "a": 1},
+      {"offset": 1, "r": 0, "g": 0, "b": 0, "a": 1}]}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-0", "format": "png", "options": {}},
+  "expect": {
+    "out/one-solid-0.png": {"pixels": {"tolerance": 2, "reference": "expected/one-solid-0.png"}}
+  },
+  "platforms": ["linux", "macos"]
+}

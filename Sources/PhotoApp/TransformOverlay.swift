@@ -5,7 +5,9 @@
 // draft. A handle drag asks for `.set` with the box it gives (keeping the
 // turn and flips); a knob drag asks for `.set` with the box turned from where
 // the drag began. Every sample of one drag carries one token, so the draft
-// records one step per gesture. Values in, intents out.
+// records one step per gesture. Mid-drag it draws the window's live
+// transform (LiveTransformCopy+Kernel.swift) when there is one, and the release sends
+// `endDrag` so the window takes it back. Values in, intents out.
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -17,21 +19,31 @@ struct TransformOverlay: View {
     var perform: PhotoPerform = { _ in }
     /// The running drag's token and the turn it began from; nil between drags.
     @State private var gesture: (token: String, degrees: Double)?
+    @Environment(\.photoLiveTransform) private var live
 
     /// The transform box's element; nil without a transform draft.
-    var mark: PhotoCanvasMark? { box.map { PhotoCanvasMark.transformBox(Self.rect($0.box)) } }
+    var mark: PhotoCanvasMark? { Self.box(model).map { PhotoCanvasMark.transformBox(Self.rect($0.box)) } }
 
     /// The draft's box as the kernel sees it; nil without a draft.
-    private var box: TransformBox? { model.transformDraft == nil ? nil : model.transformSelection }
+    private nonisolated static func box(_ model: PhotoWorkspace) -> TransformBox? {
+        model.transformDraft == nil ? nil : model.transformSelection
+    }
 
     var body: some View {
-        if let box, let mark {
+        if let box = Self.box(live?.shown ?? model) {
+            let mark = PhotoCanvasMark.transformBox(Self.rect(box.box))
             ZStack(alignment: .topLeading) {
                 mark.probe(zoom: zoom)
                 SelectionHandlesEditor(rect: mark.rect, degrees: box.degrees, zoom: zoom, onResize: { resize(box, to: $0) },
-                                       onRotate: { turn(box, by: $0) }, onEnd: { gesture = nil })
+                                       onRotate: { turn(box, by: $0) }, onEnd: end)
             }
         }
+    }
+
+    /// A drag's release: its token goes, and the window takes the live transform back.
+    private func end() {
+        gesture = nil
+        perform(.transform(.endDrag))
     }
 
     /// A handle drag: the box it gives, with the draft's turn and flips.

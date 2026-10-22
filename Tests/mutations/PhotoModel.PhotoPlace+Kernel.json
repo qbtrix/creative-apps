@@ -9,7 +9,7 @@
   {
     "label": "largeFitsCanvas: the resample is skipped, so a large file keeps its full size past the canvas",
     "file": "Sources/PhotoModel/PhotoPlace+Kernel.swift",
-    "find": "let scaled = width < buffer.width || height < buffer.height",
+    "find": "let scaled = Double(width) < asset.natural.width.rounded() || Double(height) < asset.natural.height.rounded()",
     "replace": "let scaled = false",
     "tests": "PhotoPlaceTests"
   },
@@ -33,5 +33,33 @@
     "find": "canvas == nil ? Self.noPlaceImage : nil",
     "replace": "Self.noPlaceImage",
     "tests": "PhotoPlaceTests"
+  },
+  {
+    "label": "largeIsReadAtTheFittedSize: a large file is decoded whole again, not at the box's longest side",
+    "file": "Sources/PhotoModel/PhotoPlace+Kernel.swift",
+    "find": "longestSide: scaled ? max(width, height) : nil",
+    "replace": "longestSide: nil",
+    "tests": "PhotoPlaceDecodeTests"
+  },
+  {
+    "label": "largeIsReadAtTheFittedSize: the place ignores the workspace's codec and decodes through CoreRaster",
+    "file": "Sources/PhotoModel/PhotoPlace+Kernel.swift",
+    "find": "codec: fileFlow.codec, width: width",
+    "replace": "codec: CoreRasterImageCodec(), width: width",
+    "tests": "PhotoPlaceDecodeTests"
+  },
+  {
+    "label": "aCodecAPixelShortStillFillsTheBox: the codec's rounding is kept, so the layer is a pixel off the box",
+    "file": "Sources/PhotoModel/PhotoPlace+Kernel.swift",
+    "find": "guard image.width != width || image.height != height else",
+    "replace": "guard false else",
+    "tests": "PhotoPlaceDecodeTests"
+  },
+  {
+    "label": "readImagesSetsTheCodec: the window's codec is dropped, so places keep decoding through CoreRaster",
+    "file": "Sources/PhotoModel/PhotoPlace+Kernel.swift",
+    "find": "        fileFlow.codec = codec\n",
+    "replace": "",
+    "tests": "PhotoPlaceDecodeTests"
   }
 ]
