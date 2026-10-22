@@ -1,28 +1,30 @@
 # suite-imaging lead record
 
-Issue: #3715 · Packet: docs/blueprints/suiteui/features/suite-imaging.md
-Run: act-1a15fe5ef7c-rszn (resumes act-1a15e10a9c3-kwzx) · Started: 2026-10-21T10:20Z
-Stage: 3 wave 1
-Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: IM-1 #4028 queued on the supervisor's Mac gate (approved 18:06Z). IM-2 restacked on IM-1 5b40c257 (775148e, 6 files, 360 lines); gate it, push, and open its PR once #4028 merges.
+Issue: #4498 (was #3715) · Packet: docs/blueprints/suiteui/features/suite-imaging.md
+Run: act-1a1647fe637-pfga (resumes act-1a16308fb6c-s1cb, act-1a15fe5ef7c-rszn, act-1a15e10a9c3-kwzx) · Started: 2026-10-21T10:20Z
+Stage: 3 wave 4
+Base: 3578eaee20f317d368feda7ba35e4911285eebc5
+Next: wave 4 PRs #4590 (IM-5), #4593 (IM-6+IM-7), #4591 (IM-9) in the lane; fixer finishing #4390/#4389 (IM-15 over 400 lines, being split). IM-10 starts once #4390 is on dev.
 
+
+Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging, written by run act-1a1647fe637-pfga (feature issue #4498). This file is a copy taken 2026-10-22T17:44Z from 627e5a2; run act-1a16308fb6c-s1cb stands down so two leads don't build the same tasks.
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| IM-a | SuiteImaging target + live dependency rule; adjust values/program/route/live surface as stubs with disabled tests | IM-1, IM-2 | MJ-IM | suite-harness, editor-kernel (built) | no | 0 | building | – | – |
-| IM-m | values clamp/round-trip, one step list for CPU+GPU, wide working space, live surface one write per step | IM-3, IM-4, IM-5, IM-15 | MJ-IM | IM-a | no | 0 | planned | – | – |
-| IM-photo | Photo adjustments are SuiteImaging values; canvas on the shared route; PhotoLiveTone deleted | IM-6, IM-7, IM-8, IM-8d | MJ-IM-photo, PJ-IM | IM-a, IM-m, EP-z (IM-8d), photo #3144 (IM-8) | yes | 0 | planned | – | – |
-| IM-library | Library develop values are SuiteImaging values; loupe on the GPU route | IM-9, IM-10, IM-11 | MJ-IM-library, LJ-IM | IM-a, IM-m, library spine feature-done | yes | 0 | planned | – | – |
+| IM-a | SuiteImaging target + live dependency rule; adjust values/program/route/live surface as stubs with disabled tests | IM-1, IM-2 | MJ-IM | suite-harness, editor-kernel (built) | no | 0 | done | 39811900368 | – |
+| IM-m | values clamp/round-trip, one step list for CPU+GPU, wide working space, live surface one write per step | IM-3, IM-4, IM-5, IM-15 | MJ-IM | IM-a | no | 0 | building | – | – |
+| IM-photo | Photo adjustments are SuiteImaging values; canvas on the shared route; PhotoLiveTone deleted | IM-6, IM-7, IM-8, IM-8d | MJ-IM-photo, PJ-IM | IM-a, IM-m, EP-z (IM-8d), photo #3144 (IM-8) | yes | 0 | building | – | – |
+| IM-library | Library develop values are SuiteImaging values; loupe on the GPU route | IM-9, IM-10, IM-11 | MJ-IM-library, LJ-IM | IM-a, IM-m, library spine feature-done | yes | 0 | building | – | – |
 | IM-z | copies deleted, rule with no baseline, feature built | IM-12, IM-13, IM-14 | MJ-IM, PJ-IM, LJ-IM | IM-photo, IM-library, shared-thumbnails:ST-a | no | 0 | planned | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| IM-1 | IM-a | 1 | SuiteImaging target + Metal boundary rule (supervisor merge) | Package.swift, project.yml, Sources/SuiteImaging/SuiteImaging.swift, Tests/SuiteImagingTests/ImagingBoundaryTests.swift, Tests/metal-boundary-baseline.txt, docs/c4/parts/creative-apps/suite-imaging/container.json, docs/c4/parts/creative-apps/suite-imaging/imaging-adjust.json, docs/c4/parts/creative-apps/suite-imaging/imaging-route.json, Tests/mutations/SuiteImaging.ImagingBoundary.json | ImagingBoundaryTests | #4028 | in review |
+| IM-1 | IM-a | 1 | SuiteImaging target + Metal boundary rule (supervisor merge) | Package.swift, project.yml, Sources/SuiteImaging/SuiteImaging.swift, Tests/SuiteImagingTests/ImagingBoundaryTests.swift, Tests/metal-boundary-baseline.txt, docs/c4/parts/creative-apps/suite-imaging/container.json, docs/c4/parts/creative-apps/suite-imaging/imaging-adjust.json, docs/c4/parts/creative-apps/suite-imaging/imaging-route.json, Tests/mutations/SuiteImaging.ImagingBoundary.json | ImagingBoundaryTests | #4028 | merged 45fc0fb |
 | IM-2 | IM-a | 2 | stubs + disabled tests | Sources/SuiteImaging/Adjust/AdjustSettings.swift, Sources/SuiteImaging/Adjust/ImagingProgram.swift, Sources/SuiteImaging/Route/ImagingRoute.swift, Sources/SuiteImaging/Route/LiveToneSurface.swift, Tests/SuiteImagingTests/AdjustSettingsTests.swift, Tests/SuiteImagingTests/ImagingProgramTests.swift | AdjustSettingsTests, ImagingProgramTests (disabled) | – | building (stacked on IM-1) |
-| IM-3 | IM-m | 3 | AdjustSettings clamp + round-trip | Sources/SuiteImaging/Adjust/AdjustSettings.swift, Tests/SuiteImagingTests/AdjustSettingsTests.swift, Tests/mutations/SuiteImaging.AdjustSettings.json | AdjustSettingsTests | – | planned |
-| IM-4 | IM-m | 3 | ImagingProgram one step list | Sources/SuiteImaging/Adjust/ImagingProgram.swift, Sources/SuiteImaging/Route/ImagingRoute.swift, Tests/SuiteImagingTests/ImagingProgramTests.swift, Tests/mutations/SuiteImaging.ImagingProgram.json | ImagingProgramTests | – | planned |
-| IM-15 | IM-m | 3 | wide working space | Sources/SuiteImaging/Color/ImagingColor.swift, Tests/SuiteImagingTests/WideGamutTests.swift, Tests/mutations/SuiteImaging.ImagingColor.json | WideGamutTests | – | planned |
+| IM-3 | IM-m | 3 | AdjustSettings clamp + round-trip | Sources/SuiteImaging/Adjust/AdjustSettings.swift, Tests/SuiteImagingTests/AdjustSettingsTests.swift, Tests/mutations/SuiteImaging.AdjustSettings.json | AdjustSettingsTests | – | building |
+| IM-4 | IM-m | 3 | ImagingProgram one step list | Sources/SuiteImaging/Adjust/ImagingProgram.swift, Sources/SuiteImaging/Route/ImagingRoute.swift, Tests/SuiteImagingTests/ImagingProgramTests.swift, Tests/mutations/SuiteImaging.ImagingProgram.json | ImagingProgramTests | – | building |
+| IM-15 | IM-m | 3 | wide working space | Sources/SuiteImaging/Color/ImagingColor.swift, Tests/SuiteImagingTests/WideGamutTests.swift, Tests/mutations/SuiteImaging.ImagingColor.json | WideGamutTests | – | building |
 | IM-5 | IM-m | 4 | LiveToneSurface | Sources/SuiteImaging/Route/LiveToneSurface.swift, Tests/SuiteImagingTests/LiveToneSurfaceTests.swift, Tests/mutations/SuiteImaging.LiveToneSurface.json | LiveToneSurfaceTests | – | planned |
 | IM-6 | IM-photo | 3 | Photo imaging tests first | Tests/PhotoModelTests/PhotoImagingTests.swift, Tests/PhotoModelTests/Fixtures/adjust-legacy.ora | PhotoImagingTests | – | planned |
 | IM-7 | IM-photo | 4 | Photo adjustments through SuiteImaging | Sources/PhotoModel/PhotoAdjust+Imaging.swift, Sources/PhotoModel/AdjustmentSettings.swift, Sources/PhotoModel/PhotoRender.swift | PhotoImagingTests | – | planned |
@@ -42,6 +44,9 @@ Waves: combined with shared-codecs (see its RECORD). Wave 1 = IM-1 beside SC-13 
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T17:30Z: wave 4 done (wf_13e8c7bf-e3f). Contract checks: IM-5 clean; IM-7's only miss is the server-appended 'Generated by' footer, which a PATCH can't remove (as on earlier PRs), so I accept it; IM-10's builder shipped IM-9 alone as #4591 because IM-10 needs IM-3's Library key decoding (#4390, not on dev). IM-9 is a valid test-first task, so #4591 stays open as IM-9 and IM-10 waits on #4390.
+- 2026-10-22T16:50Z: relaunch act-1a1647fe637-pfga, feature issue #4498. IM-a is done: Belt-Slice-Done posted (comment 6346186910; dev run 39811900368 at 7e9f260 contains 1c510dce). Wave 4 runs build-wave wf_13e8c7bf-e3f on dev 3578eae: IM-5 (IM-m), IM-6+IM-7 (IM-photo; split into two PRs if over 400 lines), IM-9+IM-10 (IM-library; ships IM-9 only if a library spine PR holds DevelopValues/LiveDevelop). A fixer agent brings #4390/#4389 up to dev and drops needs-split.
+- 2026-10-22T10:00Z: relaunched after #4028 merged (09:53Z). IM-2 restacked as a cherry-pick of 775148e onto dev (IM-1 was squashed).
 - Base is origin/dev (1191940), not main: the packets live on dev.
 - One PR per task (rule 22). IM-2 is built stacked on IM-1 now; its PR opens once IM-1 merges.
 - IM-1 edits Package.swift and project.yml as the packet says; it is a supervisor merge, off the fast lane.
