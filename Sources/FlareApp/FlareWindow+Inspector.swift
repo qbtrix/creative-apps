@@ -29,7 +29,7 @@ extension FlareWindow {
             if let scene = model.selectedScene, let color = NewDocumentSpec.color(hex: hex) {
                 model.setSceneCanvas(width: scene.width, height: scene.height, background: color)
             }
-        case let .setSceneTiming(fps, frames): model.setSceneTiming(fps: fps, durationFrames: frames)
+        case let .setSceneTiming(rate, frames): model.setSceneTiming(rate, durationFrames: frames)
         case .easingPreset(let raw): if let preset = EasingPreset(rawValue: raw) { model.setEasingPreset(preset) }
         case let .easingHandle(index, x, y):
             if let handle = EasingHandle(rawValue: index) { model.moveEasingHandle(handle, to: Point(x: x, y: y)) }

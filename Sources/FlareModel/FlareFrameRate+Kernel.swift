@@ -1,7 +1,9 @@
 // FlareFrameRate+Kernel.swift (frame-rates FR-10): Flare's one adapter between SuiteKernel's `FrameRate` and
 // FlareCore's `SceneRate`, both exact fractions (29.97 is 30000/1001). The scene stores the rate as is, so the Lottie
 // exporter writes `fr` 23.976, never 24. `scene.set-frame-rate` sets the selected scene's rate and, given a length in
-// seconds, its duration in whole frames by the kernel's rounding (10 s at 23.976 is 240 frames). Linux-safe.
+// seconds, its duration in whole frames by the kernel's rounding (10 s at 23.976 is 240 frames). The inspector's
+// `.setSceneTiming(rate:durationFrames:)` routes here with the picked rate as is (FR-10b), never its whole number.
+// Linux-safe.
 import FlareCore
 import SuiteKernel
 
@@ -58,5 +60,17 @@ extension FlareWorkspace {
         applyGroup("Set Frame Rate") {
             try $0.perform(SetSceneTiming(sceneID: scene.id, fps: exact.nominal, durationFrames: frames, rate: exact))
         }
+        // 24 to 23.976 keeps the whole rate, so `step` sees no change: a running play rebases its clock here.
+        if isPlaying, canPlay { playClock = playbackRate.seconds(ofFrame: currentFrame) }
+    }
+
+    /// The Scene inspector's rate and length: a new rate goes through `setSceneFrameRate` exactly, length and all,
+    /// in one undo step; the same rate keeps it and sets only the length.
+    public mutating func setSceneTiming(_ rate: FrameRate, durationFrames: Int) {
+        guard let scene = selectedScene, rate != scene.frameRate else {
+            return setSceneTiming(fps: selectedScene?.fps ?? rate.nominal, durationFrames: durationFrames)
+        }
+        let keepsLength = durationFrames == scene.durationFrames
+        setSceneFrameRate(rate, seconds: keepsLength ? nil : rate.seconds(ofFrame: durationFrames))
     }
 }

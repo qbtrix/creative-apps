@@ -197,7 +197,7 @@ extension FlareWorkspace {
         spec.preset = named
         spec.width = p.width ?? spec.width
         spec.height = p.height ?? spec.height
-        spec.fps = p.fps ?? spec.fps
+        spec.fps = p.fps.map { FrameRate(whole: $0) } ?? spec.fps
         spec.durationFrames = p.durationFrames ?? spec.durationFrames
         guard let background = NewDocumentSpec.color(hex: p.background ?? "#FFFFFF") else {
             throw CatalogError.failed(id: "file.new", message: "Pick a valid background color.")

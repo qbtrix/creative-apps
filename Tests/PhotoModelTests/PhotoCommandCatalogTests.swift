@@ -147,10 +147,10 @@ struct PhotoCommandCatalogTests {
     static let noMenu: Set = ["select.rect", "image.gradient", "layer.pick", "layer.select-all", "layer.set-opacity", "layer.move-by",
                               "color.sample"]
     /// Every non-tool command but the menu-less ones, the shared file-flow ones, the place ones and Free Transform's
-    /// (transform PT-5, ahead of its menu items) and the History panel's (history-panel PH-5), in menu order (the catalog lists them as the menus do).
+    /// (transform PT-5, ahead of its menu items) and the History panel's (history-panel PH-5) and text layers' (the Type tool and inspector run them), in menu order (the catalog lists them as the menus do).
     static let menuIDs = PhotoWorkspace.commands.map(\.id).filter {
         !$0.hasPrefix("tool.") && !$0.hasPrefix("transform.") && !noMenu.contains($0) && !fileFlowIDs.contains($0)
-            && !placeIDs.contains($0) && !$0.hasPrefix("history.")
+            && !placeIDs.contains($0) && !$0.hasPrefix("history.") && !$0.hasPrefix("text.")
     }
     /// The place commands (place-image PP-5): File > Place… runs place.image through PhotoPlace+Menu, not a catalog row.
     static let placeIDs = Set(PlaceCommands.specs(PhotoWorkspace.self).map(\.id))
