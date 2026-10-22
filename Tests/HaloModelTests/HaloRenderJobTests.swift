@@ -1,7 +1,8 @@
 // HaloRenderJobTests.swift: the pure helpers behind File > Render… (RO-3,
 // #429; trimmed to them in core-loop CL-6, #1971) on the `keyed` fixture
 // ("Bounce", 1920 × 1080, 24 fps, 48 frames) with the fake services: the
-// output name and the summary. The job's transitions are HaloRenderRunTests'.
+// output name, the summary and what a finished run wrote. The job's
+// transitions are HaloRenderRunTests'.
 // Runs on Linux and macOS.
 import HaloModel
 import Testing
@@ -52,4 +53,25 @@ private struct RefusingRendering: CompositionRendering {
     #expect(project.renderSummary(pngHalf, existing: ["Bounce"])
         == "48 PNG files, 960 × 540, into a new folder \"Bounce 2\"")
     #expect(project.renderSummary(movieFull, existing: []) == "One movie, 1920 × 1080, 24 fps, \"Bounce.mp4\"")
+}
+
+/// `keyed` with `settings` begun, started and finished at 48 frames.
+private func finished(_ settings: HaloRenderSettings) throws -> HaloProject {
+    var project = try keyed()
+    let begun = project.beginRender(settings), started = project.startRender()
+    #expect(begun && started != nil)
+    project.endRender(.finished(frames: 48))
+    return project
+}
+
+@Test func writtenTextGivesTheCountAndKind() throws {
+    #expect(try finished(pngHalf).renderWrittenText(into: "Bounce") == "48 PNG files into \"Bounce\"")
+    #expect(try finished(movieFull).renderWrittenText(into: "Bounce 2.mp4") == "Bounce 2.mp4")
+}
+
+@Test func writtenTextOnlyOnceFinished() throws {
+    var project = try keyed()
+    #expect(project.renderWrittenText(into: "Bounce") == nil)
+    _ = project.beginRender(pngHalf)
+    #expect(project.renderWrittenText(into: "Bounce") == nil)
 }

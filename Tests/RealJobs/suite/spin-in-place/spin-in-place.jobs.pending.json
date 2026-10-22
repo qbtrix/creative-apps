@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "app": "halo",
+  "why": "RJ-X75, pending AN-8 and AN-10 (suiteui/anchor-parenting): named .jobs.pending.json so the harness skips it, since no catalog has transform.set-anchor until AN-8 (Halo) and AN-10 (Flare) register it, and the folder has no input yet (the harness needs one). It is renamed to spin-in-place.jobs.json when the feature turns it on, with input/blank.halo (one empty 1000 x 800 composition, 24 fps, 25 frames) and expected/blank-12.png, which equals the frame 0 render: a 200 x 200 shape (Halo draws it as an ellipse) turned 180 degrees about its own centre covers the same pixels. The job: Halo's shape command (layer.new with kind shape) draws its 200 x 200 box at the composition's centre, (400, 300) on this input, its anchor set to the centre, rotation keyed 0 at frame 0 and 360 at frame 24, then frame 12 exported as a PNG. The Flare half runs the same steps on a Flare input once AN-10 lands. The trap: the spin orbits the canvas's top-left corner, so frame 12 puts the shape off the canvas. The assertion: frame 12 is within 1 level of frame 0.",
+  "pending": "AN-8",
+  "waits_on": "AN-10",
+  "inputs": ["input/*.halo"],
+  "steps": [
+    {"id": "layer.new", "params": {"kind": "shape"}},
+    {"id": "transform.set-anchor", "params": {"id": "comp-1-layer-1", "at": "center"}},
+    {"id": "timeline.scrub", "params": {"frame": 0}},
+    {"id": "inspector.toggle-animation", "params": {"property": "rotation"}},
+    {"id": "inspector.set-property", "params": {"property": "rotation", "value": 0}},
+    {"id": "timeline.scrub", "params": {"frame": 24}},
+    {"id": "inspector.set-property", "params": {"property": "rotation", "value": 360}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-12", "format": "png", "options": {"frame": 12}},
+  "expect": {
+    "out/blank-12.png": {"pixels": {"tolerance": 1, "reference": "expected/blank-12.png"}}
+  },
+  "platforms": []
+}
