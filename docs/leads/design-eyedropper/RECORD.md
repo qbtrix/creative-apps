@@ -4,7 +4,7 @@ Issue: #3438 · Packet: docs/blueprints/design/features/eyedropper.md
 Run: act-1a1627ce3b4-ayhz · Session: claude/feature-lead-playbook-6guwwp · Started: 2026-10-22T07:24Z (prior runs act-1a1605b0534-rn47, act-1a15e909498-4bkk, act-1a15abb305f-lc8g)
 Stage: DY-m pr-opened: #4356 (DY-5, base dev, head 215bb4de, lane macOS build 39745527052), #4357 (DY-6, stacked on DY-5) (2026-10-22T08:15Z)
 Base: 5bec8089 (origin/dev); main verified at 0dd23d65
-Next: DY-z builder stacked on DY-6; retarget #4357 to dev once #4356 merges; Belt-Slice-Done DY-m on a green design run containing #4357's merge
+Next: DY-z builder running (branch lead/design-eyedropper-DY-z on DY-6); retarget #4357 to dev once #4356 merges; Belt-Slice-Done DY-m on a green design run containing #4357's merge
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: DY-z builder stacked on DY-6; retarget #4357 to dev once #4356 merges; Bel
 | DY-a | Eyedropper tool on the palette; SampleTarget stubs | DY-1, DY-2 | MJ-DY | EY-a (done) | yes | 1 | merged (6f9c8928); round-1 fixes merged 45e8bd4d | – | wanted |
 | DY-u | loupe follows the pointer, click and Option-click picks; snapshots, budget | DY-3, DY-4 | J-DY | DY-a; EY-u (done) | yes | 2 | merged 6d7fcf14 (#3816); round 1 #3998 merged 97713e0d; round 2 #4081 | – | – |
 | DY-m | topmost visible colour; apply as one step; color.sample, color.pick, RJ-D34 | DY-5, DY-6 | MJ-DY | DY-a, transform:DT-m (met); EY-m (done) | no | 0 | pr-opened #4356, #4357 | – | – |
-| DY-z | journey on live; built | DY-7, DY-8 | J-DY | DY-u, DY-m | yes | 0 | waiting | – | – |
+| DY-z | journey on live; built | DY-7, DY-8 | J-DY | DY-u, DY-m (pr-opened, stacked) | yes | 0 | building (stacked on DY-6) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
