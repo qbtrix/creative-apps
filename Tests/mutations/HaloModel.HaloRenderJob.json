@@ -1,0 +1,5 @@
+[
+  {"label": "writtenTextGivesTheCountAndKind: a PNG sequence's finished line drops the count", "file": "Sources/HaloModel/HaloRenderJob.swift", "find": "return \"\\(count) into \\\"\\(output)\\\"\"", "replace": "return output", "tests": "writtenTextGivesTheCountAndKind"},
+  {"label": "writtenTextGivesTheCountAndKind: a movie's finished line reads as PNG files", "file": "Sources/HaloModel/HaloRenderJob.swift", "find": "        case .movie:\n            return output\n        }\n    }\n}", "replace": "        case .movie:\n            return \"\\(files.count) PNG files into \\\"\\(output)\\\"\"\n        }\n    }\n}", "tests": "writtenTextGivesTheCountAndKind"},
+  {"label": "writtenTextOnlyOnceFinished: an editing run reads as finished", "file": "Sources/HaloModel/HaloRenderJob.swift", "find": "guard case .finished(let settings, let files) = renderRun else { return nil }", "replace": "guard case .finished(let settings, let files) = renderRun else { return renderJob.map { _ in output } }", "tests": "writtenTextOnlyOnceFinished"}
+]

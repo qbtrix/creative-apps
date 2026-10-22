@@ -99,7 +99,8 @@ struct FlareWindow: View {
                 perform: { menuPerform($0) }, help: { menuHelp($0) },
                 undoTitle: model.undoActionName ?? "Undo", redoTitle: model.redoActionName ?? "Redo",
                 recent: model.recent, loops: model.loops, editHelps: model.editHelps,
-                selectionHelps: [model.deleteHelp, model.orderHelp(forward: true), model.orderHelp(forward: false)]))
+                selectionHelps: [model.deleteHelp, model.orderHelp(forward: true), model.orderHelp(forward: false)],
+                document: model.suiteDocument))
     }
 
     /// The menu bar's door: File > Open Sample > Keyed Ball opens the keyed

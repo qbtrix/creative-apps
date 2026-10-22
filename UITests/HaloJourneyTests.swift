@@ -377,10 +377,13 @@ final class HaloJourneyTests: XCTestCase {
         let paused = viewerFrame(halo) ?? 0
         XCTAssert((1...47).contains(paused), "Play then pause stopped at frame \(paused), not 1…47")
         steps.focusLane("Solid 1")
+        let beforeSpace = viewerFrame(halo)
         halo.press(.space)
+        expectPlay("Playing", halo)
         Thread.sleep(forTimeInterval: 0.5)
         halo.press(.space)
         expectPlay("Paused", halo)
+        XCTAssertNotEqual(viewerFrame(halo), beforeSpace, "Space twice left the playhead at frame \(String(describing: beforeSpace))")
         halo.shot("loop-paused")
 
         // 8. Layer > New > Text, Hello and Return: the artboard draws it on top.
@@ -395,12 +398,16 @@ final class HaloJourneyTests: XCTestCase {
         expectUndo("Undo Edit Text", halo)
         halo.shot("loop-text")
 
-        // 9. Edit > Undo, then Edit > Redo, by menu: the titles flip and Hello is back.
+        // 9. Edit > Undo, then Edit > Redo, by menu: the titles flip, Hello goes and comes back,
+        // on the artboard and in the TEXT field.
         choose(["Edit", "Undo Edit Text"], halo)
         expectUndo("Undo New Layer", halo)
+        expectSummary(endingWith: "Text 1: Text", halo)
+        expectField(words, reads: "Text")
         choose(["Edit", "Redo Edit Text"], halo)
         expectUndo("Undo Edit Text", halo)
         expectSummary(endingWith: "Text 1: Hello", halo)
+        expectField(words, reads: "Hello")
         halo.shot("loop-undo-redo")
 
         // 10. Render… PNG Sequence at Half: 48 files, Loop_0001.png … Loop_0048.png, each 960 × 540.
@@ -518,6 +525,13 @@ final class HaloJourneyTests: XCTestCase {
         XCTAssert(waitFor(seconds: 5) { summary.label.hasSuffix(tail) }, "the artboard reads \(summary.label), not …\(tail)")
     }
 
+    /// The text field `field` reads `words` within five seconds.
+    @MainActor private func expectField(_ field: XCUIElement, reads words: String) {
+        XCTAssert(
+            waitFor(seconds: 5) { (field.value as? String) == words },
+            "halo.inspector.text.string reads \(String(describing: field.value)), not \(words)")
+    }
+
     /// The frame the artboard summary names ("Frame 12: …" gives 12).
     @MainActor private func viewerFrame(_ halo: Journey) -> Int? {
         let label = halo.element("halo.viewer.summary").label
@@ -592,7 +606,7 @@ final class HaloJourneyTests: XCTestCase {
         ("Layer", ["New", "Duplicate", "Rename…", "Delete", "Bring Forward", "Send Backward"]),
         ("Animation", [
             "Play/Pause", "Loop", "Next Frame", "Previous Frame", "Go to Start", "Go to End", "Set In Point",
-            "Set Out Point", "Keyframe Easing",
+            "Set Out Point", "Keyframe Easing", "Select All Keys", "Move Keyframes Left", "Move Keyframes Right",
         ]),
     ]
 
