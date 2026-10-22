@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-22T21:56:35Z	poll	#4392 open, clean, macOS build green, awaiting lane batch; full CI 39858933900 (066cd28d6) still pending; no slice-done yet
 2026-10-22T22:13:20Z	poll	#4392 open clean, lane Linux check 39862555842 running on DS-z branch; full CI 39858933900 cancelled, new full CI 39861703512 (a7469d78f) pending; no slice-done yet
 2026-10-22T22:29:46Z	stage	#4392 (DS-z) merged 22:25:45Z as fbd763f6d; all slices on dev, slice-done waits on dev CI (39861703512 pending)
+2026-10-22T22:47:33Z	stage	Belt-Slice-Done DS-m posted (run 39836126860, Linux green); DS-u/DS-z wait on Linux job of 39867380103
