@@ -162,7 +162,7 @@ pixel painting to Photo.
 | Area | In v1 | Out of v1 (later, in order) |
 |---|---|---|
 | Project | Compositions: new (with validation), duplicate, rename, delete, select (shipped). One project per window | Several projects in tabs; composition folders |
-| Layers | Solid, shape (ellipse), text, null. New, delete, rename, reorder, duplicate; in and out points; select in the list, timeline or viewer; a solid's or shape's fill is a color or a linear or radial gradient (the inspector's FILL chips and the shared gradient editor: stops, their colors, the angle), drawn by the frame renderer and moving with the layer; a text layer takes a color | Image and footage layers (needs creative-core affine sampling); precomps (H4); Flare scenes as layers (H10); hide, lock and solo |
+| Layers | Solid, shape (ellipse), text, null. New, delete, rename, reorder, duplicate; in and out points; select in the list, timeline or viewer; a solid's or shape's fill is a color or a linear or radial gradient (the inspector's FILL chips and the shared gradient editor: stops, their colors, the angle), drawn by the frame renderer and moving with the layer; a text layer takes a color; a solid holds a picture: File > Place… (⇧⌘P) or a drop on the viewer adds a solid with a PNG, JPEG or SVG at its own size, centred, or with a solid selected and the inspector's Fill on puts it in that solid by cover (⌥-drag pans it inside); the picture moves, scales, turns and fades with the layer's keys and draws in the viewer and the render through the same crop (SVG strokes aren't drawn yet) | Footage layers (S20's video half); pictures in shape and text layers; precomps (H4); Flare scenes as layers (H10); hide, lock and solo |
 | Transform | Position, scale, rotation, opacity, anchor point; parenting to another layer (keeps its place on screen) | Skew; 3D |
 | Keys | Stopwatch and key-here diamond per property; drag in the viewer keys position at the playhead; keys as diamonds on the layer's lane; pick keys on the timeline by click, Shift and ⌘, across layers; Select All Keys (⌘A in the timeline, the Animation menu, a key's context menu), hidden layers' keys too; move the picked keys by dragging, snapped to frames, as one "Move Keyframes" step, refused with a status line when a key would land on another; delete the picked keys as one "Delete Keyframes" step | Per-property sub-lanes; a value graph editor |
 | Easing | Linear, Ease In, Ease Out, Ease In and Out, Hold, from the Animation menu, a key's context menu and the inspector's chips; the custom curve editor (SuiteUI `CurveEditor`, as Flare) | Speed graph; roving keys |
@@ -179,7 +179,7 @@ Calls against the suite plan (`creative-core docs/design/suite.md`, Halo MVP):
 
 | Suite MVP item | Call | Why |
 |---|---|---|
-| Image and precomp layers | Later | No tier-1 journey needs them, and both need engine work (affine sampling, H4 time mapping) that isn't filed |
+| Image and precomp layers | Images in solids built (placed-images: File > Place…, a viewer drop); precomp layers later | Pictures ride SuiteKernel's place commands and CoreRaster's affine composite; precomps need H4 time mapping, which isn't filed |
 | Keyframes with a graph editor | Presets and the curve editor in v1; the graph editor later | Priorities rank presets tier 1 and the graph tier 2; the curve editor already exists in SuiteUI |
 | Masks and track mattes | Later | Tier 3 in `docs/priorities.md` |
 | 3 effects (blur, fill, levels) | Later (#39 stays p2, not v1) | Tier 2; the render path must first match the viewer (HF-1) before effects change pixels |
@@ -335,7 +335,8 @@ or nudge, so the next scrub of the same row is a new step. So:
   Parent", "Keyframe Easing", "Move Keyframes", "Delete Keyframes", "Delete Layer", "Rename Layer", "Move Layer",
   "Duplicate Layer", "Edit Text", "Change Text Size", "Change Color", "Fill Type",
   "Set Gradient", "Add Gradient Stop", "Move Gradient Stop", "Remove Gradient
-  Stop", "Gradient Stop Color", "Gradient Angle".
+  Stop", "Gradient Stop Color", "Gradient Angle", "Place Image", "Replace
+  Image", "Reset Size", "Move Inside".
 
 The history keeps whole `HaloDocumentState` values (#208's call, marked
 `ponytail:` in the code: commands replace it once creative-core has a Halo
@@ -513,7 +514,8 @@ Sources (public, no product opened or run):
 | 2 | Custom easing curve | priorities.md (Flare: curve editor tier 2); SuiteUI `CurveEditor` exists | #428 | yes (cheap) |
 | 2 | Effects stack (blur, fill, levels) | priorities.md | #39 | no |
 | 2 | Precompose | priorities.md; [S4] | – | no |
-| 2 | Image and footage layers | [S4], *inferred* | – | no |
+| 2 | Pictures in solids: File > Place… and a viewer drop (PNG, JPEG, SVG) | [S4], *inferred* (the suite's shared place commands) | #3456 (placed-images) | yes |
+| 2 | Footage layers | [S4], *inferred* | – | no |
 | 2 | Move keys by dragging on the timeline, picked across layers | *inferred* | #3536 (key-editing) | yes |
 | 2 | Per-property lanes | *inferred* | – | no |
 | 2 | Gradient fills on solid and shape layers | *inferred* (the suite's shared gradient editor) | #3417 (gradient-fill) | yes |
@@ -1977,7 +1979,7 @@ view uses the placeholder named until it lands.
 | New Composition sheet | Name, width, height, rate, duration, problems, Create | system `Form`, `TextField`, `Picker` | – (#286 adds `.accessibilityLabel`s in the Halo view) |
 | Render sheet | Format (PNG sequence, Movie), size (Full, Half), destination, Render; progress row "Frame 48 of 240" with Cancel; success with Reveal in Finder; failure with the frame and reason | system `Form`, `Picker(.segmented)`, `ProgressView`, `Button` | – |
 | Alerts | Open and save failures, close with unsaved changes | system `.alert` | – |
-| Menus | File: New Composition…, Open… ⌘O, Open Recent, Save ⌘S, Save As… ⇧⌘S, Render… ⇧⌘R (Halo's File > Export: see D9), Render Frame ⌘R. Edit: Undo <step> ⌘Z, Redo <step> ⇧⌘Z, plus the system items. Composition: New ⌥⌘N, Duplicate ⌘D, Delete ⌘⌫. Layer: New ▸ (Solid, Shape, Text, Null), Duplicate ⇧⌘D, Rename, Delete, Bring Forward ⌘], Send Backward ⌘[. Animation: Play/Pause, Loop, Next Frame, Previous Frame, Go to Start, Go to End, Set In Point, Set Out Point, Keyframe Easing ▸ (the five presets). Space, →, ←, Home, End, I, O and ⌫ (delete the selected layer) act while the viewer or the timeline has focus (`onKeyPress`, as the timeline's I and O do today) and the menu items show them in their help, not as key equivalents, so typing in a field never plays or sets a point. Every item works or is disabled with `unavailableHelp(for:)` | `CommandMenu`, `CommandGroup(replacing: .undoRedo)`, `CommandGroup(replacing: .newItem)` | – |
+| Menus | File: New Composition…, Open… ⌘O, Open Recent, Save ⌘S, Save As… ⇧⌘S, Place… ⇧⌘P, Render… ⇧⌘R (Halo's File > Export: see D9), Render Frame ⌘R. Edit: Undo <step> ⌘Z, Redo <step> ⇧⌘Z, plus the system items. Composition: New ⌥⌘N, Duplicate ⌘D, Delete ⌘⌫. Layer: New ▸ (Solid, Shape, Text, Null), Duplicate ⇧⌘D, Rename, Delete, Bring Forward ⌘], Send Backward ⌘[. Animation: Play/Pause, Loop, Next Frame, Previous Frame, Go to Start, Go to End, Set In Point, Set Out Point, Keyframe Easing ▸ (the five presets). Space, →, ←, Home, End, I, O and ⌫ (delete the selected layer) act while the viewer or the timeline has focus (`onKeyPress`, as the timeline's I and O do today) and the menu items show them in their help, not as key equivalents, so typing in a field never plays or sets a point. Every item works or is disabled with `unavailableHelp(for:)` | `CommandMenu`, `CommandGroup(replacing: .undoRedo)`, `CommandGroup(replacing: .newItem)` | – |
 
 `Duplicate` is ⌘D for compositions today (shipped). Layer > Duplicate takes
 ⇧⌘D so the two don't collide; section 9 asks the captain whether ⌘D should
