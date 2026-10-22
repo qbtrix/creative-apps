@@ -4,7 +4,7 @@ Issue: #3757 · Packet: docs/blueprints/suiteui/features/document-setup.md
 Run: act-1a15fddd101-68r5 · Session: session_01BsyWa1bPrB44D73KoNLtrU · Started: 2026-10-21T19:15Z
 Stage: 3 wave 1
 Base: 58034759f2cdc515d7a44a9ec164509be2b6508b
-Next: #4184 (DS-m) queued by the supervisor on the local Mac gate behind #4215; hold, merge dev only if the gate asks; DS-u waits on frame-rates FR-u (not started)
+Next: #4184 (DS-m) at ba144058d (dev with #4215 merged in by the supervisor), lane Linux check running, then the Mac gate; DS-u waits on frame-rates FR-u (not started)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
