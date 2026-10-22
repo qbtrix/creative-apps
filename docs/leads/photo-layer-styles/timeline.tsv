@@ -1,0 +1,6 @@
+utc	stage	event	ref	note
+2026-10-22T02:00Z	0	stage-start	-	base e9933116 (origin/dev); brief's main 0dd23d65 verified
+2026-10-22T02:00Z	0	stage-end	#3937	waits checked: multi-layer-select built, PF-m done, LS-a not started; no task can start
+2026-10-22T02:00Z	0	stopped	#3937	blocked on suiteui layer-styles LS-a
+2026-10-22T02:45Z	0	resume	-	Belt stall nudge; re-checked waits on dev b5a6e7e
+2026-10-22T02:45Z	0	stopped	#3937	still blocked: LS-a waiting-on-prereq, IM-1 #4028 open
