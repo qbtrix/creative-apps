@@ -65,3 +65,4 @@ utc	stage	event	ref	note
 2026-10-22T01:24Z	blocked	HG-u	Linux red on dev ratchet break; waits on #4258
 2026-10-22T01:55Z	poll	HG-m	macOS build green (39699713418)
 2026-10-22T01:55Z	blocked	HG-u,HG-m	wait on dev fix #4258
+2026-10-22T02:28Z	merge-dev	HG-u,HG-m	dev fix #4238 in; gating
