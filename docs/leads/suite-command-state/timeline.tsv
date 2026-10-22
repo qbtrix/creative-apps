@@ -83,3 +83,4 @@ utc	stage	event	ref	note
 2026-10-22T16:17:19Z	CS-z	waiting	#4382	in lane, ready with feature-done
 2026-10-22T17:48:33Z	CS-z	waiting	#4382	lane macOS build on 188e78954 pending
 2026-10-22T18:17:01Z	CS-z	waiting	#4382	lane macOS build on 188e78954 still pending
+2026-10-22T18:20:48Z	CS-z	merged	#4382	merged as e35435996 (feature-done); waiting on a green dev CI run containing it
