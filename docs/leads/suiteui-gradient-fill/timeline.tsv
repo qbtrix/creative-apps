@@ -31,3 +31,4 @@ utc	stage	event	ref	note
 2026-10-22T00:29Z	4	check	GF-z	dev Linux 39697907658 (cb79b07) red on the same FormatListRatchetTests (Media.swift, #4034), not GF-z; still waiting
 2026-10-22T00:46Z	4	check	GF-z	dev Linux 39699955972 (c4607f1) still red on FormatListRatchetTests Media.swift (#4034), not GF-z; waiting
 2026-10-22T01:07Z	4	check	GF-z	dev Linux 39701991485 (add701f) in progress; waiting
+2026-10-22T01:25Z	4	check	GF-z	dev Linux 39701991485 (add701f) red on FormatListRatchetTests Media.swift (#3856), not GF-z; waiting
