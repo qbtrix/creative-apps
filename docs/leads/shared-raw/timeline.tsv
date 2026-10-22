@@ -3,3 +3,5 @@ utc	stage	event	ref	note
 2026-10-22T16:36Z	3	wave-start	SR-a	wave 1: SR-1
 2026-10-22T21:30Z	3	heartbeat	SR-1	builder relaunched after container restart
 2026-10-22T21:33Z	heartbeat	SR-1 building
+2026-10-22T21:48Z	pr-opened	SR-1 #4645 (head 69e12ed3)
+2026-10-22T21:48Z	agent-start	SR-2 builder

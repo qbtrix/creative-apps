@@ -2,15 +2,15 @@
 
 Issue: #4508 · Packet: docs/blueprints/suiteui/features/shared-raw.md
 Run: act-1a16474bd3a-i9ae · Session: session_01Rid1ErRRerebigzwJKJtpV · Started: 2026-10-22T16:36Z
-Stage: 3 (wave 1)
+Stage: 3 (wave 2)
 Base: 7e9f260ae8f69dea63663c1bc7ea945c6b1d2f80 (origin/dev)
-Next: open the SR-1 PR when its builder pushes lead/shared-raw-SR-1; then SR-2 stacked on it (its first commit adds RawFormatTests, RawDecodePlanTests, RawHeadroomTests, disabled)
+Next: open the SR-2 PR when its builder pushes lead/shared-raw-SR-2 (its dev diff carries SR-1 until #4645 merges, so it may wait for the size cap); then SR-3/SR-4 (SR-m) and SR-5 stacked on SR-2
 
 ## Slices
 
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| SR-a | test DNGs written in-repo; Raw/ module as stubs over a fake decoder; tests disabled | SR-1, SR-2 | MJ-SR | suite-imaging:IM-a (built: #4028) | false | 0 | building | – | – |
+| SR-a | test DNGs written in-repo; Raw/ module as stubs over a fake decoder; tests disabled | SR-1, SR-2 | MJ-SR | suite-imaging:IM-a (built: #4028) | false | 0 | SR-1 PR #4645; SR-2 building | – | – |
 | SR-m | formats parse, plan, refusals, system decoder with headroom | SR-3, SR-4 | MJ-SR, MJ-SR-mac | SR-a; IM-4 (merged #4393) | false | 0 | planned | – | – |
 | SR-photo | Photo opens RAW as a float layer | SR-5, SR-6 | MJ-SR-photo, PJ-SR | SR-a; shared-codecs SC-15, SC-4 (SR-6; not merged) | true | 0 | planned | – | – |
 | SR-z | live, RJ-X50, concept line, built | SR-7, SR-8 | PJ-SR, MJ-SR | SR-m, SR-photo; tone-controls:TC-a, pen-paths:PN-a (SR-8) | true | 0 | planned | – | – |
@@ -19,8 +19,8 @@ Next: open the SR-1 PR when its builder pushes lead/shared-raw-SR-1; then SR-2 s
 
 | id | slice | wave | state | PR |
 |---|---|---|---|---|
-| SR-1 | SR-a | 1 | building | – |
-| SR-2 | SR-a | 2 | planned | – |
+| SR-1 | SR-a | 1 | PR open | #4645 |
+| SR-2 | SR-a | 2 | building (on SR-1) | – |
 | SR-3 | SR-m | 3 | planned | – |
 | SR-4 | SR-m | 3 | planned | – |
 | SR-5 | SR-photo | 3 | planned | – |
@@ -42,3 +42,4 @@ Next: open the SR-1 PR when its builder pushes lead/shared-raw-SR-1; then SR-2 s
 
 ## Open
 - SR-6 waits on shared-codecs SC-15 and SC-4 (no commits on dev); SR-8 waits on tone-controls TC-a.
+- scripts/test-scope maps Tests/SuiteImagingTests/ to no suite, so `scripts/ci --changed` only builds them: each SR builder also runs `swift test --filter SuiteImagingTests` and the PR says so (SR-1: 64 pass). Raised to the supervisor on #4508.
