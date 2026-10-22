@@ -45,3 +45,6 @@ utc	stage	event	ref	note
 2026-10-22T02:13:02Z	stage	ST-a	#4238 SC-14 on dev (Media.swift uses SuiteImageFormats); merged dev into ST-a, gate running
 2026-10-22T02:20:47Z	stage	ST-a	dev (with #4238) merged into ST-a, scripts/ci --changed PASS, pushed 1f0949ff0; #4135 marked ready with Fast-Check/Head
 2026-10-22T02:20:47Z	stage	ST-m,ST-live	merged new ST-a into #4157 and #4156 cleanly; gates running
+2026-10-22T02:35:12Z	check	ST-m	scripts/ci --changed on ST-a PASS; pushed 62773ab45; #4157 Head updated (draft)
+2026-10-22T02:35:12Z	check	ST-live	scripts/ci --changed on ST-a PASS; pushed f1f7a91a8; #4156 Head updated (draft)
+2026-10-22T02:35:12Z	stage	ST-live	ST-live merged into ST-live2 (#4161); gate running
