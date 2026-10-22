@@ -96,3 +96,4 @@ utc	stage	event	ref	note
 2026-10-22T04:02Z	3	heartbeat	-	#4257 (d417a35f) macOS build green, waiting on the lane sweep to merge; no green-Linux run with FG-m yet
 2026-10-22T04:24Z	3	heartbeat	-	FG-z #4257 merged 04:18Z (482dbe85). Full CI 39720939785 at 6e19f406 holds FG-m (pending); FG-z needs a later run
 2026-10-22T04:52Z	3	heartbeat	-	Full CI 39720939785 cancelled; full CI 39722978870 at 71987f72 holds FG-m and FG-z, queued
+2026-10-22T05:19Z	3	done	-	Belt-Slice-Done FG-m, FG-z and Belt-Contact-Sheet posted on #3419 (run 39722978870, Linux green, holds #4181 and #4257); Mac-Finish-Wanted FG-z. FG-a findings #4039 #4041 wait on needs-ui #4047

@@ -2,9 +2,9 @@
 
 Issue: #3419 · Packet: docs/blueprints/flare/features/gradient-fill.md
 Run: act-1a160bffba1-bvv3 (line lead: gradient-fill #3419, export-pack #3481, file-flow #3482; resumed from act-1a1574f6742-pe5i) · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-20T03:17Z · resumed from act-1a15d4ed024-1wsg at 23:2xZ
-Stage: 3 wave 4 (FG-z)
+Stage: 6 done (merged-done, contact sheet posted)
 Base: 8c55f0bf9 (origin/dev)
-Next: unchanged
+Next: Verified level belongs to the finisher; watch findings #4039 #4041
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -84,3 +84,4 @@ Next: unchanged
 - 2026-10-22T04:02Z: #4257 (d417a35f) macOS build green, waiting on the lane sweep to merge; no green-Linux run with FG-m yet
 - 2026-10-22T04:24Z: FG-z #4257 merged 04:18Z (482dbe85). Full CI 39720939785 at 6e19f406 holds FG-m (pending); FG-z needs a later run
 - 2026-10-22T04:52Z: Full CI 39720939785 cancelled; full CI 39722978870 at 71987f72 holds FG-m and FG-z, queued
+- 2026-10-22T05:19Z: Belt-Slice-Done FG-m, FG-z and Belt-Contact-Sheet posted on #3419 (run 39722978870, Linux green, holds #4181 and #4257); Mac-Finish-Wanted FG-z. FG-a findings #4039 #4041 wait on needs-ui #4047
