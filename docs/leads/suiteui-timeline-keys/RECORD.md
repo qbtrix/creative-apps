@@ -4,7 +4,7 @@ Issue: #3780 · Packet: docs/blueprints/suiteui/features/timeline-keys.md
 Run: act-1a15fddd101-68r5 · Session: session_01BsyWa1bPrB44D73KoNLtrU · Started: 2026-10-21T19:15Z
 Stage: 3 wave 1
 Base: 58034759f2cdc515d7a44a9ec164509be2b6508b
-Next: #4185 (TK-5) and #4191 (TK-u) queued on the local Mac gate behind #4215 (hold; #4191 macOS build red only from dev RenderBudgetPhotoPlaceTests, which #4215 fixes); critic panel on TK-u once a scoped run shows its screens; TK-6 waits on AJ-halo, TS-halo, AN-halo
+Next: #4185 (TK-5) at 208ff81f9 and #4191 (TK-u) at 8cdf61522, dev with #4215 merged in by the supervisor, lane Linux checks running, then the Mac gate; critic panel on TK-u once a scoped run shows its screens; TK-6 waits on AJ-halo, TS-halo, AN-halo
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

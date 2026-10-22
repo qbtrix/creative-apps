@@ -23,3 +23,4 @@ utc	stage	event	ref	note
 2026-10-21T23:13Z	3	blocked	#4185 #4191	dev-red #3856: library baseline (TK-5) and dev macOS compile break in RenderBudgetPhotoPlaceTests (TK-u build); question on #3757
 2026-10-21T23:30:51Z	3	poll	#3757	supervisor: hold, #4250 merged, #4215 next, #4185 queued on local Mac gate; #4191 clean, waits on the lane; TK-6 waits on AJ-halo, TS-halo, AN-halo (none started)
 2026-10-21T23:49:32Z	3	check	#4191	lane macOS build 39688704475 red only on dev RenderBudgetPhotoPlaceTests.swift:35 (PhotoPlaceIntent.files, fixed by #4215), not ours; hold
+2026-10-22T00:06:30Z	3	poll	#4185 #4191	#4215 merged; supervisor merged dev into TK-5 (208ff81f9) and TK-u (8cdf61522), lane Linux checks running; hold
