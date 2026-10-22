@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-22T17:25Z	3	heartbeat	-	no change
 17:47Z	AK	heartbeat	-	AK-10a build green
 18:10Z	AK	heartbeat	-	no change
+18:40Z	AK	AK-10 retarget	#4428	f9be9a48 base dev
