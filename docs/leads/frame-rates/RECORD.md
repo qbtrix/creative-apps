@@ -4,7 +4,8 @@ Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a161a658a7-2jql · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
 Stage: 4 finish
 Base: dev
-Next: 4610 merges via the lane, then the FR-u review after round 2; leftovers (4602) become gaps
+Next: 4610 merges via the lane, then the FR-u review after round 2; leftovers (4602) become gaps; supervisor asked
+
 
 
 
@@ -52,6 +53,7 @@ Next: 4610 merges via the lane, then the FR-u review after round 2; leftovers (4
 
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 19:28Z: 4610's macOS build is still queued (3rd identical poll). Posted a Question for the supervisor on 3754.
 - 19:01Z: the lane's macOS build for 4610 (39829271143) is still waiting for a runner (queued since 18:12Z).
 - 18:35Z: the lane's macOS build for 4610 (39829271143) is queued for a runner.
 - 18:12Z: FR-u fix round 2 opened as PR 4610 (head 448b575b, gate PASS), fixing 4597-4601 and 4603. 4602 is not fixed: it needs the shared label format and TimelineNavTests outside this round's files, so it becomes a gap after the follow-up review. Added the Mutate line to 4610 (unscored on Linux).
