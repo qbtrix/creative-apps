@@ -62,3 +62,4 @@ utc	stage	event	ref	note
 2026-10-22T05:23:26Z	check	ST-m	#4157 merged 3303459a5; dev CI 39727624590 contains it, pending. #4156 macOS build 39720731000 still queued. No findings.
 2026-10-22T05:39:59Z	check	ST-m	dev Linux check 39728647575 (contains #4157) in progress; #4156 macOS build 39720731000 in progress. No findings.
 2026-10-22T05:57:17Z	slice-done	ST-m	Belt-Slice-Done ST-m posted (run 39728647575, comment 6333871071). #4156 macOS build 39720731000 green, awaiting lane merge. No findings.
+2026-10-22T06:14:54Z	check	ST-live	#4156 clean, build green, awaiting lane sweep. #4161 draft. No findings.
