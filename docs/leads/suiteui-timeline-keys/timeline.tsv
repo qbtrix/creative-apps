@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-22T03:41:45Z	check	#4184 #4185 mac green, mergeable clean, lane run 39716412123 in progress; #4191 #4299 macOS builds queued; heads and markers match
 2026-10-22T04:06:29Z	merge	#4185 TK-5 merged f780a7df6 (lane batch 03:53); #4191 head 4dcd002c7 (lane merged dev) gated PASS, Head moved; dev Linux runs so far predate f780a7df6
 2026-10-22T04:27:11Z	merge	#4191 TK-u merged bd793a5db; Linux check 39721023306 green contains TK-5; TK-m done waits on TK-6; TK-u critics wait on a scoped run (suite/flare) containing bd793a5db
+2026-10-22T04:44:16Z	check	scoped: suite 39721019643 on bd793a5db still queued (TK-u critics wait); AJ/TS/AN-halo not merged, TK-6 blocked
