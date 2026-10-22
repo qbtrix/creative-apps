@@ -76,3 +76,4 @@ Next: AR-a (AR-1 + AR-2, one PR, tests disabled first commit).
 - 00:03Z: AR-design waits on DP-m (no PRs yet); AR-r/AR-10 wait on IM-a #4028 (open)
 - 00:27Z: AR-design waits on DP-m (no PRs yet); AR-r/AR-10 wait on IM-a #4028 (open)
 - 00:51Z: AR-design waits on DP-m (no PRs yet); AR-r/AR-10 wait on IM-a #4028 (open)
+- 01:14Z: AR-design waits on DP-m (no PRs yet); AR-r/AR-10 wait on IM-a #4028 (open)
