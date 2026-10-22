@@ -92,6 +92,8 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     public internal(set) var saveError: String?
     public internal(set) var loadState = LoadState.idle
     public internal(set) var recent: [String] = []
+    /// The suite's recents as the window last read them, and the requests the file-flow commands leave it.
+    public internal(set) var fileFlow = FlareFileFlowState()
     /// Why the last layer change or undo was refused; nil after one succeeds.
     public internal(set) var layerError: FlareLayerError?
     /// The easing editor's segment, as last picked; `selectedEasingSegment`

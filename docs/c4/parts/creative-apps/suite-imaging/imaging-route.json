@@ -1,0 +1,10 @@
+{
+  "id": "imaging-route",
+  "name": "Route",
+  "description": "Route/: ImagingRoute (CPU or GPU for a list of tone steps, CPU whenever a step is not on Metal yet) and, on macOS, LiveToneSurface, which keeps the base resident on the GPU and folds each step's tone program into the display encode. suite-imaging IM-2 declares them as stubs; IM-4 and IM-5 fill the bodies.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), CoreRender and CoreRaster; CoreRenderMetal and Metal on macOS",
+  "paths": [
+    "Sources/SuiteImaging/Route/"
+  ],
+  "order": 110
+}

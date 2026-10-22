@@ -31,6 +31,8 @@ struct HaloCompositionInspector: View {
     var perform: @MainActor (HaloCommand) -> Void = { _ in }
     /// Runs one fill editor gesture on the window's project (HaloFillInspector).
     var runFill: @MainActor (GradientIntent) -> Void = { _ in }
+    /// Runs one stroke editor gesture on the window's project (HaloStrokeInspector).
+    var runStroke: @MainActor (StrokeIntent) -> Void = { _ in }
     @Environment(\.suiteSnapshotRendering) private var snapshot
 
     var body: some View {
@@ -45,7 +47,7 @@ struct HaloCompositionInspector: View {
     private var content: some View {
         VStack(alignment: .leading, spacing: 0) {
             if model.selectedLayerHeader != nil {
-                HaloLayerInspector(model: model, perform: perform, runFill: runFill)
+                HaloLayerInspector(model: model, perform: perform, runFill: runFill, runStroke: runStroke)
             } else if let comp = model.selectedComposition {
                 InspectorHeader(comp.name, details: comp.headerDetails)
                     .accessibilityIdentifier("halo.inspector.header")
