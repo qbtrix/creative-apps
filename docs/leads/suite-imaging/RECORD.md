@@ -60,3 +60,4 @@ Waves: combined with shared-codecs (see its RECORD). Wave 1 = IM-1 beside SC-13 
 - 2026-10-21T23:12Z: IM-1 #4028 still waits on supervisor merge (Package.swift); IM-2 gated (head 775148e3), PR opens once IM-1 lands.
 - 2026-10-21T23:35Z: IM-1 #4028 still waits on supervisor merge; IM-2 ready (775148e3).
 - 2026-10-22T00:00Z: IM-1 #4028 still waits on supervisor merge; IM-2 ready (775148e3).
+- 2026-10-22T00:22Z: IM-1 #4028 still waits on the supervisor (Package.swift). IM-2 is gated on lead/suite-imaging-IM-2 (775148e3), and its PR opens once #4028 is on dev.
