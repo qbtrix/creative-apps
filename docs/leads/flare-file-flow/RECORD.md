@@ -101,3 +101,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T12:18Z: The supervisor sentinel closed #3482 at 12:17Z (Belt-Contact-Sheet posted, every slice done). The delayed 12:09Z check-in had nothing left to do; nothing was reposted. Waiting for Belt to release the run.
 - 2026-10-22T12:44Z: No new comments on #3482 (closed). No Flare file-flow findings (open file-flow findings #4404 photo, #4000 suite are other lines). Waiting for Belt to release the run.
 - 18:32Z check-in (the previous line says 18:2xZ; that check-in was at about 18:05Z): fix round 1 PR #4611 at head 6243a77 is waiting on the lane's macOS build (run 39829304563, queued). No new file-flow finding: #4605 and #4606 belong to other features. No new comment on #3482.
+- 18:59Z check-in: PR #4611 (head 6243a77) still waits on the lane's macOS build, run 39829304563, queued since 18:12Z for runner capacity. No new file-flow finding and no new comment on #3482.

@@ -83,3 +83,4 @@ utc	stage	event	ref	note
 2026-10-22T17:27Z	check	no findings, no comments; waiting for release
 2026-10-22T18:05:12Z	fix-round-1	PR #4611 for #4604 + menu order
 2026-10-22T18:32Z	check	PR #4611 macOS build queued; no new findings
+2026-10-22T18:59Z	check	PR #4611 macOS build still queued; no new findings
