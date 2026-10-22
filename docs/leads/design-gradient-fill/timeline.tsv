@@ -52,3 +52,4 @@ time	kind	note
 2026-10-21T23:54Z	4	heartbeat	#4197	scoped design run 39693638859 on be9aa35bc (has DG-m, LP-b) queued; Linux check green there
 2026-10-22T00:35Z	DG-z	lane-mac-red	#4197	merged dev, regating
 2026-10-22T00:36Z	push	regated	#4197→b54de0b5	CI: PASS
+2026-10-22T01:03Z	wait	lane-mac	-	#4197 macOS build 39700686875 queued; DG-m waits on scoped design 39693638859 (queued)

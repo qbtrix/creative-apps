@@ -42,3 +42,5 @@ Next: #4189 merges -> Belt-Slice-Done DG-m on a green design run; #4197 merges; 
 - 2026-10-22T00:35Z Lane macOS builds red on dev's RenderBudgetPhotoPlaceTests (PhotoPlaceIntent.files), fixed on dev by #4215; merged origin/dev into #4197 (DG-7); regating. DG-m done line waits on a green design run.
 
 - 2026-10-22T00:36Z Gate CI: PASS after the dev merge; pushed #4197→b54de0b5 and moved Head: lines. Waiting on the lane.
+
+- 2026-10-22T01:03Z Heartbeat: #4197 macOS build 39700686875 queued; DG-m waits on scoped design 39693638859 (queued).
