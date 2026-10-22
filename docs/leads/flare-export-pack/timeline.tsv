@@ -72,3 +72,4 @@ utc	stage	event	ref	note
 2026-10-22T17:37Z	3	check	FV-3	#4435 lane macOS build 39812126183 still queued; #4436 waits on it
 2026-10-22T17:58Z	3	check	FV-3	#4435 lane macOS build 39812126183 still queued (1h45m); #4436 waits on it
 2026-10-22T18:20Z	3	check	FV-3	#4435 lane macOS build 39812126183 green; Linux check 39829961027 running; merge next sweep
+2026-10-22T18:45Z	3	fix	FV-3	#4435 lane Linux 39829961027 red only on HaloStrokeTrimKeysTests (not ours: old base 721ac8e9 lacks #4431); merged origin/dev into lead/export-pack-fv3 (8acab202), regating
