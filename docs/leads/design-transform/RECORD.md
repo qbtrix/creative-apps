@@ -48,3 +48,5 @@ Next: #4159, #4187, #4188-fix merge -> Belt-Slice-Done + Mac-Finish-Wanted DT-u 
 - 2026-10-22T00:35Z Lane macOS builds red on dev's RenderBudgetPhotoPlaceTests (PhotoPlaceIntent.files), fixed on dev by #4215; merged origin/dev into #4254 and #4255; regating.
 
 - 2026-10-22T00:36Z Gate CI: PASS after the dev merge; pushed #4254→f9c5b8ac,#4255→5d611ef3 and moved Head: lines. Waiting on the lane.
+
+- 2026-10-22T01:03Z Heartbeat: #4254 (macOS build 39700862805) and #4255 (39700883014) queued for runners.
