@@ -2,9 +2,9 @@
 
 Issue: #3457 · Packet: docs/blueprints/suiteui/features/placed-images.md
 Run: act-1a1647a67aa-dau5 (relaunch) · Started: 2026-10-22T16:45Z
-Stage: #4583 merged; #4613 (PL-9) retargeted to dev, dev merged in (f1cba0a, 14 files; conflicted files equal the merged EY-z head, PL-9 side kept), gating
+Stage: #4613 (PL-9) on dev, head f1cba0a, gate CI: PASS, pushed, Head moved
 Base: 854a3b52c66aaa12582e9190f404265b84594a05
-Next: Push #4613, move Head; after it merges retarget #4616/#4617 to dev
+Next: Lane merges #4613 (macOS build); then retarget #4616/#4617 to dev, merge merged PL-9 head then dev, gate, push, Head
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -33,6 +33,7 @@ Next: Push #4613, move Head; after it merges retarget #4616/#4617 to dev
 |---|---|---|---|---|---|
 
 ## Decisions
+- -
 - -
 - -
 - Union merge keeps stroke, sample and place commands (44 ids)
