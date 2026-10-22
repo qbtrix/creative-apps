@@ -1,28 +1,28 @@
 # transform lead record
 
 Issue: #3435 · Packet: docs/blueprints/photo/features/transform.md
-Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: all slice PRs on dev; verification runs waiting for macOS runners
+Run: act-1a1624aaf38-uvd0 · Session: claude/feature-lead-playbook-gub3sk · Started: 2026-10-22T06:30Z (takes over from act-1a15eecbafe-u0f9 and the earlier runs below)
+Stage: every slice merged-done; Belt-Slice-Done lines and contact sheet posted
 Base: dev
-Next: scoped photo 39722915670 + full 39722978870 (Linux green) at 71987f724: on green run critics + Belt-Slice-Done
+Next: on the scoped photo run's journeys (journeys.yml after CI run 39722915670): critic panel for PT-u/PT-z, check #4247 #4262 #4263 against #4219
 
 Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transform: one combined wave plan, so the other two records show the same waves.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| PT-a | stubs + Free Transform on the fakes, Edit menu | PT-1, PT-2 | journey written, skipped | – | true | 0 | building | – | – |
-| PT-u | Canvas Size sheet, snapshots, render budget | PT-3, PT-7 | – | PT-a, shell-parity (built) | true | 0 | planned | – | – |
-| PT-m | resample, adapter bodies, canvas size body | PT-4, PT-5, PT-6 | RJ-P17, RJ-P18 | PT-a | false | 0 | planned | – | – |
-| PT-z | journey on live, feature-done | PT-8, PT-9 | PhotoJourneyTests+Transform | PT-u, PT-m | true | 0 | planned | – | – |
+| PT-a | stubs + Free Transform on the fakes, Edit menu | PT-1, PT-2 | journey written, skipped | – | true | 0 | done | 39569221486 | – |
+| PT-u | Canvas Size sheet, snapshots, render budget | PT-3, PT-7 | – | PT-a, shell-parity (built) | true | 1 (#4219) | merged-done | 39722978870 | wanted |
+| PT-m | resample, adapter bodies, canvas size body | PT-4, PT-5, PT-6 | RJ-P17, RJ-P18 | PT-a | false | 0 | merged-done | 39722978870 | – |
+| PT-z | journey on live, feature-done | PT-8, PT-9 | PhotoJourneyTests+Transform | PT-u, PT-m | true | 0 | merged-done | 39722978870 | wanted |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| PT-1 | PT-a | 1 | adapter + four methods as stubs, FlipAxis = FlipDirection, tests disabled | Sources/PhotoModel/PhotoTransform+Kernel.swift, Sources/PhotoModel/Contracts/LayerContracts.swift, Tests/PhotoModelTests/PhotoTransformTests.swift | PhotoTransformTests (disabled) | – | building |
-| PT-2 | PT-a | 1 | Free Transform on stubs: intent, overlay, TransformRows, Edit menu; journey skipped | Sources/PhotoApp/PhotoWindow+Transform.swift, Sources/PhotoApp/TransformOverlay.swift, Sources/PhotoApp/TransformOptions.swift, Sources/PhotoApp/PhotoCommands+Edit.swift, UITests/PhotoJourneyTests+Transform.swift | macOS build | – | building |
+| PT-1 | PT-a | 1 | adapter + four methods as stubs, FlipAxis = FlipDirection, tests disabled | Sources/PhotoModel/PhotoTransform+Kernel.swift, Sources/PhotoModel/Contracts/LayerContracts.swift, Tests/PhotoModelTests/PhotoTransformTests.swift | PhotoTransformTests (disabled) | #3704 | merged |
+| PT-2 | PT-a | 1 | Free Transform on stubs: intent, overlay, TransformRows, Edit menu; journey skipped | Sources/PhotoApp/PhotoWindow+Transform.swift, Sources/PhotoApp/TransformOverlay.swift, Sources/PhotoApp/TransformOptions.swift, Sources/PhotoApp/PhotoCommands+Edit.swift, UITests/PhotoJourneyTests+Transform.swift | macOS build | #3830 | merged |
 | PT-3 | PT-u | 2 | Image > Canvas Size… sheet | Sources/PhotoApp/CanvasSizeSheet.swift, Sources/PhotoApp/PhotoCommands+Image.swift, Sources/PhotoApp/PhotoWindow+Transform.swift, Tests/AppSnapshotTests/PhotoCanvasSizeSheetTests.swift | PhotoCanvasSizeSheetTests | #4005 | merged |
-| PT-4 | PT-m | 2 | applied/flipped on CoreRaster; TransformRules.local and matrix | Sources/PhotoModel/Live/LiveTransform+Kernel.swift, Tests/PhotoModelTests/LiveTransformTests.swift, Tests/mutations/PhotoModel.LiveTransform+Kernel.json | LiveTransformTests; .turn90Size .flipHorizontal | – | planned |
+| PT-4 | PT-m | 2 | applied/flipped on CoreRaster; TransformRules.local and matrix | Sources/PhotoModel/Live/LiveTransform+Kernel.swift, Tests/PhotoModelTests/LiveTransformTests.swift, Tests/mutations/PhotoModel.LiveTransform+Kernel.json | LiveTransformTests; .turn90Size .flipHorizontal | #3831 | merged |
 | PT-5 | PT-m | 3 | adapter bodies, catalog specs, tests on, RJ-P17 | Sources/PhotoModel/PhotoTransform+Kernel.swift, Tests/PhotoModelTests/PhotoTransformTests.swift, Tests/mutations/PhotoModel.PhotoTransform+Kernel.json, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/RealJobs/photo/free-transform/ | PhotoTransformTests; .flipInPlace .identityCommitsNothing .lockedRefuses | #3969 | merged 15:52Z |
 | PT-6 | PT-m | 4 | resizeCanvas and image.canvas-size, RJ-P18 | Sources/PhotoModel/PhotoImageOps.swift, Tests/PhotoModelTests/PhotoCanvasSizeTests.swift, Tests/mutations/PhotoModel.PhotoImageOps.json, Tests/RealJobs/photo/canvas-border/ | PhotoCanvasSizeTests; .canvasSizeCentred .borderIsBackground | #4131 | merged |
 | PT-7 | PT-u | 3 | snapshots + render budget | Tests/AppSnapshotTests/PhotoTransformSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoTransformTests.swift | snapshots | #4127 | merged |
@@ -40,7 +40,8 @@ Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transfor
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
-| – | – | – | – | – | – |
+| PT-u, PT-z | scoped photo 39665905219 | 037c5c745 | critic (render budget) | #4247 (render budget 121 bodies) | fixed by #4219 (merged 03:37Z), awaiting a macOS run |
+| PT-z | journeys 39700022222 | d8b1b21 | CI findings | #4262, #4263 (UI query timeouts) | run predates #4219; recheck on the next journeys run |
 
 ## Decisions
 - v3 loop: each packet has a `## Slices` table.
@@ -56,6 +57,8 @@ Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transfor
 - Run act-1a15eecbafe-u0f9 (2026-10-21T14:20Z) takes over this record. The brief asked for base main and status on lead/transform and lead/tone-controls. It uses base dev and these photo-prefixed status branches instead: the fast lane merges only into dev, and lead/transform and lead/tone-controls belong to the live Halo #3443 and SuiteUI #3476 leads. Force-pushing them would rewrite another lead's history.
 - Red Linux runs on #3969, #4005 and #4003 came from dev at the time, not from the PRs: the PhotoPlace CommandPath failure (fixed by #4008), stale Design mutation anchors (DY-a), and LargeCatalogBudget timing (moved to perf-suites in #4050/#4069). A fixer merges origin/dev into each branch so the lane re-runs Linux on a fresh head.
 - This run owns slices PT-m and PT-z only; PT-a and PT-u are counted as done per the brief.
+- Run act-1a1624aaf38-uvd0 (2026-10-22T06:30Z) takes over. The brief asked for base main; main sits 420 commits behind dev and every slice PR is on dev, so dev stays the integration branch (CLAUDE.md, rule 4). Status stays on lead/photo-transform.
+- Merged-done per dev's lead.md rule 6: the newest full CI run containing every slice's last PR (#4127/#4219 PT-u, #4131 PT-m, #4133/#4136 PT-z) is 39722978870 at 71987f724, whose Linux job passed 04:50Z. The CI run 39733090477 at 9adf318 is newer but has not started a job; the Linux-only check 39732607243 at the same head is green too. No PR merged after 71987f7 carries `Feature: transform`. The macOS jobs belong to the Verified level, which never holds the lead.
 
 ## Open
-- PT-z waits on PT-u and PT-m.
+- #4247, #4262, #4263 (3 open findings, under the cap of 5). #4219 is the likely fix for all three: per-sample editor re-renders made the window too slow for the journey queries. They close when a macOS run on dev contains 9d5deb1 and shows them green; that belongs to the Verified level and does not hold the slice lines.
