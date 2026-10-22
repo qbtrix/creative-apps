@@ -4,7 +4,7 @@ Issue: #4521 · Packet: docs/blueprints/photo/features/psd-effects.md
 Run: act-1a164697363-4fnm · Session: claude/feature-lead-photo-features-kilpzc · Started: 2026-10-22T16:00Z
 Stage: 3 wave 1
 Base: 7e9f260 (origin/dev)
-Next: open PS-a's first PR (PS-1, checks first); then re-read PK-m and PX-m for PS-2
+Next: PS-1 builder running (belt/psd-effects/ps-1, with the opening(_:) stub); then re-read PK-m and PX-m for PS-2
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -30,6 +30,7 @@ Next: open PS-a's first PR (PS-1, checks first); then re-read PK-m and PX-m for 
 ## Decisions
 - Worked from `origin/dev` 7e9f260, not `main` (verified at 0dd23d65): main is far behind and lacks the packets; CLAUDE.md says branch from and target dev.
 - PS-1 has no waits (tests and corpus only), so it ships now as PS-a's first PR. PS-a's waits (PK-m, PX-m) hold only PS-2, whose `PhotoDocumentFile.swift` and `PhotoHeadless.swift` those slices also touch; PS-2 folds into a later PS-a PR once they merge.
+- PS-1 carries the new `PhotoLayered+Imaging.swift` `opening(_:)` stub (a new file, refusing with "Opening PSD files is not built yet (PS-3).") so the disabled PhotoPSDOpenTests compile; the `.psd` routing of PS-2 stays for a later PS-a PR.
 - Wave 1 is combined with masks-clipping PK-1 (disjoint files: tests/corpus vs PhotoModel mask/catalog files).
 
 ## Open
