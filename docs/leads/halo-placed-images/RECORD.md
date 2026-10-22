@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: PH-a merged 19:43Z (b6ca48aa). In lane on dev, needs-split cleared by supervisor 20:18Z: #4437 (PH-u wiring, 9b49023; macOS build 39846187838 running), #4614 (PH-6, a3dceb0; build 39848606346 queued), #4615 (PH-5, 37f6334; build 39848638548 running). Stacked drafts: #4438 on #4437, #4618 on #4615; retarget each after its bases merge. PH-a Belt-Slice-Done waits on CI run 39848684933 (dev 847f5072, contains PH-a) Linux job, pending. PH-z after. Gap candidates: SVG gradient flat, SVG strokes. (check 20:39Z)
+Next: PH-a merged 19:43Z (b6ca48aa). #4615 (PH-5) MERGED; #4614 (PH-6) macOS build green, awaiting lane sweep; then retarget #4618. #4437 macOS build 39846187838 FAILED (HaloPlaceSnapshots.swift:68 raw string #"..."# closed early by "#202840"); fixer running: ##"..."## on PH-u + same bug in PH-u2 UITests/HaloJourneyTests+Place.swift:80, move Head lines. PH-a Belt-Slice-Done: run 39848684933 cancelled; now waits on CI 39852194708 (dev 62fe62aa, contains PH-a) Linux job. PH-z after. Gap candidates: SVG gradient flat, SVG strokes.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
