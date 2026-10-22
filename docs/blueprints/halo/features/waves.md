@@ -19,7 +19,7 @@ its tasks, owned files, acceptance tests, quality tests and done check.
 | W2 | Ease keys | `easing.md` | #428 | layer-keys, history-files | #333; #771 and #63 not blocking (plain diamonds; keys picked from the EASING rows) | #1333 | built |
 | W2 | Render a frame and render to files | `render-out.md` | #451, #429 | viewer-playback | #333 | #1505 | built |
 | W2 | Text layers | `text-layers.md` | #430 | layer-keys, viewer-playback, history-files | #333 | #1509 | built |
-| W3 | The core loop, live, measured: comp, layers, keys, ease, play, text, render to files, save and reopen | `core-loop.md` | the H-J12 `XCTSkip`; H-P1 to H-P5; layout L3 to L5; Halo's kernel-export adoption (lead.md rule 20: Render… runs on SuiteKernel's `ExportRun` and SuiteUI's `ExportSheet`) | every W1 and W2 feature | editor-kernel EK-a, EK-run, EK-chrome (cross-line, prose waits); the probe-recorder needs-ui for H-P1 to H-P5's latency half (report-only from HaloViewerLatencyTests until then); switching A-HA-1 before CL-12 | file when ready | planned |
+| W3 | The core loop, live, measured: comp, layers, keys, ease, play, text, render to files, save and reopen | `core-loop.md` | the H-J12 `XCTSkip`; H-P1 to H-P5; layout L3 to L5; Halo's kernel-export adoption (lead.md rule 20: Render… runs on SuiteKernel's `ExportRun` and SuiteUI's `ExportSheet`) | every W1 and W2 feature | editor-kernel EK-a, EK-run, EK-chrome (cross-line, prose waits); the probe-recorder needs-ui for H-P1 to H-P5's latency half (report-only from HaloViewerLatencyTests until then); switching A-HA-1 before CL-12 | #1971 | built |
 | W4 | Gradient fills on solid and shape layers: the shared editor in the inspector, drawn by the frame renderer | `gradient-fill.md` | halo/gradient-fill (adopter of S24); RJ-H32 | – | – | file when ready | planned |
 | W4 | Autosave, crash recovery and the History panel in Halo, on the shared schedule, folder and panel | `autosave-history.md` | halo/autosave-history (adopter of S12); RJ-H23, RJ-H33 | – | – | file when ready | planned |
 | W4 | Render ProRes 4444 with a transparent background | `export-pack.md` | halo/export-pack (adopter of S11 and E9); RJ-H41 (new) | – | – | file when ready | planned |
@@ -55,7 +55,7 @@ closed, and its `Depends on:` line names the one that closed last.
 | easing | the layer-keys and history-files feature issues; #333 | the last to close |
 | render-out | the viewer-playback feature issue; #333 | the last to close |
 | text-layers | the layer-keys, viewer-playback and history-files feature issues; #333 | the last to close |
-| core-loop (W3, packet to write) | every W1 and W2 feature issue | the last to close |
+| core-loop (W3, built: filed as #1971, packet `features/core-loop.md`) | every W1 and W2 feature issue | the last to close (filed and built; nothing left to file) |
 
 Why #333 gates every W1 and W2 feature: each owns its own
 `UITests/HaloJourneyTests+<Area>.swift`, and today `project.yml` compiles
