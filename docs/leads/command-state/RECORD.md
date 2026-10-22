@@ -2,9 +2,9 @@
 
 Issue: #3771 · Packet: docs/blueprints/suite/features/command-state.md
 Run: act-1a16391fd34-thw9 · Resumed: 2026-10-22T12:30Z (previous run act-1a1601c3538-r0c9, started 2026-10-21T10:50Z)
-Stage: All app slices merged (CS-6 #4234 fd76073f); CS-z #4382 ready with feature-done (Head 188e7895)
+Stage: All slices done (run 39836789801); Belt-Slice-Done posted for all 8 slices
 Base: dc87ad2b0bcebf2b6bef749328a03ba06687275f
-Next: #4382 lands; Belt-Contact-Sheet after the CI its merge triggers
+Next: Belt-Contact-Sheet once journeys run 39855707652 (after CI run 39836789801) completes
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -36,7 +36,7 @@ Next: #4382 lands; Belt-Contact-Sheet after the CI its merge triggers
 | CS-12 | CS-flare | 3 | Flare wiring; baseline 10 to 3 | packet CS-12 | CommandPathTests, CommandPathLimitTests | #4214 | merged b4d0a077 |
 | CS-5 | CS-library-2 | 3 | Library catalog part 2 (+20 ids, CLI list regenerated) | packet CS-5 | Mutate 9/9 LibraryModel.LibraryCommandCatalog | #4225 | merged ed8e67f1 |
 | CS-6 | CS-library-2 | 4 | Library wiring part 2; baseline max 23 to 13 (alert Save waits #4208, loupe Grid waits #4227) | packet CS-6 | CommandPathTests, CommandPathLimitTests | #4234 | merged fd76073f |
-| CS-15 | CS-z | 5 | RJ-X61 job + journey on; CS-16 (wave.json built) folded in | packet CS-15, CS-16 | Mutate 3/3 LibraryModel.LibraryHeadless+Shown | #4382 | ready, feature-done, Head 188e7895 |
+| CS-15 | CS-z | 5 | RJ-X61 job + journey on; CS-16 (wave.json built) folded in | packet CS-15, CS-16 | Mutate 3/3 LibraryModel.LibraryHeadless+Shown | #4382 | merged e3543599 |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
