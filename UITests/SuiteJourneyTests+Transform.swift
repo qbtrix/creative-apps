@@ -5,13 +5,12 @@
 // transform rows beside it. It drags the knob a quarter turn, the right handle
 // 40 pt along the turned edge, clicks Flip Horizontal, then types 15 in the
 // rotation row and Shift-drags the knob. The page's log (`suite.gallery.log`)
-// names each command it ran.
+// names each command it ran. The rows read out spoken ("15 degrees"); the
+// knob's turn is the `suite.handles.turn` read-out. Steps 2 to 4 assert what
+// the page does once TT-5's rules and TT-7's live target land.
 import XCTest
 
 final class SuiteTransformJourneyTests: XCTestCase {
-    /// False until TT-4 turns the journey on: the rows are a placeholder and the page runs no commands yet.
-    private static let built = false
-
     /// The row's value as the rows read it out (`suite.transform.<row>`).
     @MainActor private static func value(_ gallery: Journey, _ row: String) -> String {
         let element = gallery.element("suite.transform.\(row)")
@@ -20,7 +19,6 @@ final class SuiteTransformJourneyTests: XCTestCase {
 
     /// TT-3 and TT-4: the box turns with its knob, grows in its own frame, mirrors in place, and snaps under Shift.
     @MainActor func testTransformHandlesTurnAndFlip() throws {
-        guard Self.built else { throw XCTSkip("waits on TT-4") }
         let gallery = Journey("Library", self, name: "suiteui", arguments: ["-SuiteGallery", "index"])
         XCTAssert(gallery.element("suite.gallery.index").waitForExistence(timeout: 30), "no gallery index")
 
@@ -31,7 +29,7 @@ final class SuiteTransformJourneyTests: XCTestCase {
         for name in ["topLeft", "top", "topRight", "right", "bottomRight", "bottom", "bottomLeft", "left", "rotate"] {
             XCTAssert(gallery.element("suite.handles.\(name)").exists, "no handle \(name)")
         }
-        XCTAssertEqual(["x", "y", "w", "h", "rotation"].map { Self.value(gallery, $0) }, ["100", "80", "200", "120", "0°"])
+        XCTAssertEqual(["x", "y", "w", "h", "rotation"].map { Self.value(gallery, $0) }, ["100", "80", "200", "120", "0 degrees"])
         gallery.shot("transform-open")
 
         // 2. A quarter turn clockwise on the knob: 90°, one transform.rotate per sample under one drag token.
@@ -39,7 +37,7 @@ final class SuiteTransformJourneyTests: XCTestCase {
         let centre = box.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         knob.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             .press(forDuration: 0.1, thenDragTo: centre.withOffset(CGVector(dx: 120, dy: 0)))
-        XCTAssertEqual(Self.value(gallery, "rotation"), "90°")
+        XCTAssertEqual(Self.value(gallery, "rotation"), "90 degrees")
         let log = gallery.element("suite.gallery.log").label
         XCTAssert(log.contains("transform.rotate") && !log.contains("transform.set"), "the knob drag ran \(log)")
         gallery.shot("transform-turned")
@@ -50,24 +48,34 @@ final class SuiteTransformJourneyTests: XCTestCase {
         XCTAssertEqual(Self.value(gallery, "w"), "240")
         gallery.shot("transform-grown")
 
-        // 4. Flip Horizontal: the turn reads -90°; the log names one transform.flip.
+        // 4. Flip Horizontal: the turn reads -90 degrees; the log names one transform.flip.
         gallery.element("suite.transform.flip-horizontal").click()
-        XCTAssertEqual(Self.value(gallery, "rotation"), "-90°")
+        XCTAssertEqual(Self.value(gallery, "rotation"), "-90 degrees")
         XCTAssert(gallery.element("suite.gallery.log").label.contains("transform.flip"), "no transform.flip in the log")
         gallery.shot("transform-flipped")
 
-        // 5. Type 15 in the rotation row, then Shift-drag the knob: it lands on a 15° step.
+        // 5. Click the rotation bar, type 15 and press Return, then Shift-drag the knob: it lands on a 15° step.
         let rotation = gallery.element("suite.transform.rotation")
-        rotation.doubleClick()
-        rotation.typeText("15\r")
-        XCTAssertEqual(Self.value(gallery, "rotation"), "15°")
+        let bar = rotation.frame
+        rotation.click()
+        let fields = gallery.element("suite.gallery.transform-handles").textFields
+        let typing = fields.allElementsBoundByIndex.first { $0.frame.midY >= bar.minY && $0.frame.midY <= bar.maxY }
+            ?? fields.firstMatch
+        XCTAssert(typing.waitForExistence(timeout: 5), "clicking the rotation bar opened no field")
+        gallery.press(character: "a", .command)
+        typing.typeText("15")
+        gallery.press(.return)
+        XCTAssertEqual(Self.value(gallery, "rotation"), "15 degrees")
         XCUIElement.perform(withKeyModifiers: .shift) {
             knob.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
                 .press(forDuration: 0.1, thenDragTo: centre.withOffset(CGVector(dx: 100, dy: 37)))
         }
-        let degrees = Double(Self.value(gallery, "rotation").replacingOccurrences(of: "°", with: "")) ?? 1
+        let spoken = Self.value(gallery, "rotation")
+        let degrees = Double(spoken.replacingOccurrences(of: " degrees", with: "").replacingOccurrences(of: " degree", with: "")) ?? 1
         XCTAssertEqual(degrees.truncatingRemainder(dividingBy: 15), 0, "the Shift-drag didn't snap to 15°")
-        XCTAssertEqual(knob.label, "Rotate, \(Int(degrees)) degrees")
+        let turn = gallery.element("suite.handles.turn")
+        XCTAssertEqual(turn.label, "Rotate")
+        XCTAssertEqual(turn.value as? String, spoken)
         gallery.shot("transform-snapped")
     }
 }

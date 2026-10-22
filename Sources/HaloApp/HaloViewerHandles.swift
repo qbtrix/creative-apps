@@ -36,7 +36,7 @@ struct HaloViewerHandles: View {
     @Environment(\.haloViewerTakesActivationClicks) private var takesActivationClicks
 
     var body: some View {
-        let shown = live?.project ?? model
+        let shown = live?.shown(model) ?? model
         if let comp = shown.selectedComposition, let item = shown.transformSelection {
             let artboard = CGSize(width: max(comp.width, 1), height: max(comp.height, 1))
             GeometryReader { proxy in
