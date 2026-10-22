@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-22T00:14:52Z	done	SS-vector	Belt-Slice-Done run 39693644795
 2026-10-22T00:14:52Z	done	SS-raster	Belt-Slice-Done run 39693644795
 2026-10-22T00:14:52Z	stage	SS-z	#4215 merged; #4129 restacked on dev, head 2e336bb38, CI PASS, Head moved
+2026-10-22T00:32:45Z	check	SS-z	#4129 macOS build in progress on 2e336bb38; waiting on lane batch
