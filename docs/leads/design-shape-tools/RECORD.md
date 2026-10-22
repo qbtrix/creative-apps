@@ -4,7 +4,7 @@ Issue: #3440 · Packet: docs/blueprints/design/features/shape-tools.md
 Run: act-1a162d0f852-70vb · Started: 2026-10-22T08:56Z (prior run act-1a15abb305f-lc8g shipped DS-a)
 Stage: 3 wave 2 done; all slices in PRs, waiting for merges and scoped runs
 Base: dev 561ef1c5
-Next: #4386 (DS-u) merged at 20:36Z as 133ab6ead. #4392 (DS-z) retargeted to dev at head 1bdbdbdf5 (dev merged with --merge-base 828e1b226, its real DS-u parent; 2 files +143/-2; ci --changed PASS); waits on the lane macOS build and merge (feature-done triggers full CI). DS-m slice-done waits on a successful ci.yml run on dev (scoped design or full) containing 62400e4d4; DS-u slice-done (+Mac-Finish-Wanted) on one containing 133ab6ead; DS-z likewise after #4392 merges. Then critic panels and Belt-Contact-Sheet. PR bodies: update with MCP update_pull_request.
+Next: all three slices are on dev. DS-m = 62400e4d4 (#4385), DS-u = 133ab6ead (#4386, 20:36Z), DS-z = fbd763f6d (#4392, 22:25Z, feature-done). Slice-done for each waits on a completed successful ci.yml run on dev ("CI" or "scoped: design") containing its sha; DS-u and DS-z also get Mac-Finish-Wanted. Full CI 39861703512 (a7469d78f) has DS-m+DS-u; a later run has DS-z. Then critic panels (clarity, mouse, taste, job; ui for DS-u/DS-z), findings, gaps, Belt-Contact-Sheet. PR bodies: update with MCP update_pull_request.
 
 ## Slices
 | slice | behavior | tasks | waits on | ui | rounds | state | run | mac finish |
