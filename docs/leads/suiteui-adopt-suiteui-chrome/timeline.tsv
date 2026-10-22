@@ -72,3 +72,4 @@ utc	stage	event	ref	note
 2026-10-22T20:40Z	3	poll	#1942	no supervisor reply; SC-15/16 no PRs
 2026-10-22T21:11Z	3	poll	#1942	no supervisor reply; SC-15/16 no PRs
 2026-10-22T21:42Z	poll	AC-export-sheet	blocked on SC-f (SC-15/16 no PR)
+2026-10-22T22:13Z	poll	AC-export-sheet	blocked on SC-f (SC-15/16 no PR)
