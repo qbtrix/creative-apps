@@ -46,3 +46,4 @@ utc	stage	event	ref	note
 2026-10-22T00:14Z	FR-halo	#4211 #4212 merged	bb7c17800	await covering Linux run
 2026-10-22T00:35Z	waiting	dev Linux red (FormatListRatchetTests, not ours)	39697907658	no action
 2026-10-22T00:57Z	wave-2	heartbeat	run 39701991485	Linux check on add701fc9 running (covers FR-halo/FR-flare); 39699955972 on c4607f1ca red, not ours; #4172 macOS build in progress
+2026-10-22T01:18Z	wave-2	heartbeat	run 39696932076	#4172 macOS build green; lane Linux run 39703602026 in progress. Dev Linux 39701991485 red on FormatListRatchetTests (Media.swift), not ours
