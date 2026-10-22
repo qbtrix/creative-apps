@@ -34,6 +34,7 @@ Next: lane batches #3513 → #3577 → #4429 (feature-done); then TT-z done from
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T15:20Z heartbeat: #3513 macOS build 39786650299 green on 9b339941 (the @Test arguments fix compiles); waits on a lane sweep. #3577, #4429 stacked behind it.
 - 2026-10-22T14:58Z heartbeat: #3513 macOS build 39786650299 queued (9b339941); #3577 and #4429 stacked behind it; no needs-fix or needs-rebase.
 - 2026-10-22T14:35Z Wave 5 shipped: #3513 merged dev and inlined the Rects in the @Test arguments (9b339941, CI: PASS); #3577 merged it (00e33bb1, CI: PASS); TT-8+TT-9 opened as #4429 (191+/22-, 15 files, Mutate 12/12, feature-done) stacked on #3577. Attribution footers the PR tool added to #4427-#4430 removed. No needs-fix or needs-rebase.
 - 2026-10-22 Relaunch as run act-1a163b2abfe-f182 for TT-z only. Brief step one verified main HEAD 0dd23d65. Brief rule 2 asks to rebase lead/transform-tools onto main, but main is 487 commits behind dev and the packets live on dev; the lead branch is rebuilt from origin/dev (1a518080) plus docs/leads/transform-tools and force-pushed with lease. Base stays origin/dev.
