@@ -4,24 +4,24 @@ Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
 Run: act-1a16391fd49-8138 · Session: claude/export-pack-lead-fl632i · Started: 2026-10-22T12:25Z (resumed from act-1a160bffba1-bvv3; earlier: Started 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih) · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: 3 build
 Base: 1c85591f (origin/dev)
-Next: FV-3 mutate + PR (gate PASS at 1ba81c2c); FV-4 built at 66fac008, gate + PR stacked on FV-3; FV-2 waits on XP-3 (question on #3481)
+Next: watch #4435 (FV-3) in the lane; when it merges, rebase FV-4 onto dev, regate, retarget #4436 to dev and add fast-lane; FV-2 waits on XP-3 (question on #3481)
 
 Loop: v3 (the packet has a `## Slices` table).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| FV-a | MP4 and GIF with frame rate and loop on stubs; sheet chips and Size row | FV-1, FV-2 | MJ-FV | XP-a, shell-media SM-a | yes | 0 | building (FV-1 PR; FV-2 waits XP-3) | | |
+| FV-a | MP4 and GIF with frame rate and loop on stubs; sheet chips and Size row | FV-1, FV-2 | MJ-FV | XP-a, shell-media SM-a | yes | 0 | FV-1 merged (#4414); FV-2 waits XP-3 | | |
 | FV-u | snapshots, render budget, journey written | FV-5, FV-6 | FJ-X1 | FV-a; XP-4 | yes | 0 | waiting | | |
-| FV-m | frame plan, alpha, even size; live adapter streams to the writers | FV-3, FV-4 | MJ-FV | FV-a; XP-6 (merged), SM-w (merged) | no | 0 | building (stacked on FV-1) | | |
+| FV-m | frame plan, alpha, even size; live adapter streams to the writers | FV-3, FV-4 | MJ-FV | FV-a; XP-6 (merged), SM-w (merged) | no | 0 | PRs open: #4435 (FV-3, lane), #4436 (FV-4, stacked) | | |
 | FV-z | real files on live, journey passes, blueprint | FV-7, FV-8 | FJ-X1 | FV-u, FV-m; gradient-fill:FG-z; svg-place:PF-z | no | 0 | waiting | | |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| FV-1 | FV-a | 1 | .mp4 and .gif with fps and loop, refused until FV-3 | Sources/FlareModel/FlareExport.swift, Tests/FlareModelTests/FlareVideoExportTests.swift | export tests pass; MP4 refused | #4414 | PR open (fast-lane), head 63ef6a02 |
-| FV-3 | FV-m | 2 | frame plan: every frame, even MP4, GIF alpha; RJ-F07/F08 folders | FlareExport+Kernel.swift, FlareVideoExportTests, mutations, RealJobs | FlareVideoExportTests; Mutate 3+ | – | built 1ba81c2c (224+/17-, 9 files); gating |
-| FV-4 | FV-m | 2 | live adapter streams to media sinks; cancel deletes | LiveExportAdapter, FakeExport, FlareVideoWriteTests | FlareVideoWriteTests; Mutate 2 | – | building on lead/export-pack-fv4 (stacked on FV-3) |
+| FV-1 | FV-a | 1 | .mp4 and .gif with fps and loop, refused until FV-3 | Sources/FlareModel/FlareExport.swift, Tests/FlareModelTests/FlareVideoExportTests.swift | export tests pass; MP4 refused | #4414 | merged |
+| FV-3 | FV-m | 2 | frame plan: every frame, even MP4, GIF alpha; RJ-F07/F08 folders | FlareExport+Kernel.swift, FlareVideoExportTests, mutations, RealJobs | FlareVideoExportTests; Mutate 3+ | #4435 | PR open (fast-lane), head 9b8a50f0, gate PASS, Mutate 9/9 |
+| FV-4 | FV-m | 2 | live adapter streams to media sinks; cancel deletes | LiveExportAdapter, FakeExport, FlareVideoWriteTests | FlareVideoWriteTests; Mutate 2 | #4436 | PR open, base lead/export-pack-fv3, head ea0f7047, gate PASS, Mutate 7/7 |
 
 ## Decisions
 - 2026-10-21T07Z (act-1a15d4ed024-1wsg): resumed. SM-a still not on dev and not filed as a PR; the 02:32Z question on #3481 stands, so no second question until three identical polls.
@@ -34,6 +34,7 @@ Loop: v3 (the packet has a `## Slices` table).
 
 - 2026-10-22T12:40Z: FV-4 stacks on FV-3 rather than running beside it: the adapter streams FV-3's plan, and a second plan in FV-4 would duplicate it (jscpd, rule 20).
 - 2026-10-22T12:40Z: the container had no Swift; installed the pinned 6.3.3 toolchain as scripts/cloud-setup.sh does (download resumed after the proxy cut it).
+- 2026-10-22T14:40Z: #4436 (FV-4) targets lead/export-pack-fv3 so its diff stays FV-4's 276 lines; it moves to dev with fast-lane once #4435 merges (against dev now it would be ~500 lines, over the cap).
 
 ## Open
 - shell-media (docs/blueprints/suite/features/shell-media.md) is `planned` with feature_issue "file when ready"; SM-a and SM-w are not on dev. All four slices wait on it. Noted on #3481.

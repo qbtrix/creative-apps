@@ -58,3 +58,6 @@ utc	stage	event	ref	note
 2026-10-22T13:16Z	3	wait	FV-2	XP-3 still not on dev (ExportPick has no size); question posted on #3481
 2026-10-22T14:01Z	3	check	FV-3	gate CI: PASS at 1ba81c2c; mutate next, then PR
 2026-10-22T14:01Z	3	built	FV-4	builder done at 66fac008 (stacked on FV-3); gate next
+2026-10-22T14:40Z	3	merged	FV-1	#4414 merged to dev
+2026-10-22T14:40Z	3	pr	FV-3	#4435 opened (fast-lane) head 9b8a50f0, gate PASS, Mutate 9/9
+2026-10-22T14:40Z	3	pr	FV-4	#4436 opened on lead/export-pack-fv3 head ea0f7047, gate PASS, Mutate 7/7
