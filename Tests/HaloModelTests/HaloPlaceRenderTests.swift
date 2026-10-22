@@ -20,7 +20,7 @@ import Testing
         BAggAgQQAQKIABEggAgQQAQIIAIEEAECiAARIIAIEEAECCACBBABIkAAESCACBBABAggAkSAACJAABEggAgQQASIHABEgAAiQAARIIAIEEAEiAABRIAAIkAAESCACBABAogAAUSAAKLPDlYGrNa0kF6LAAAAAElFTkSuQmCC
         """
     /// A 64 × 64 blue square with a 32 × 32 hole, even-odd.
-    static let ring = #"<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><path fill="#0000FF" fill-rule="evenodd" d="M0 0 H64 V64 H0 Z M16 16 H48 V48 H16 Z"/></svg>"#
+    static let ring = ##"<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><path fill="#0000FF" fill-rule="evenodd" d="M0 0 H64 V64 H0 Z M16 16 H48 V48 H16 Z"/></svg>"##
     static let logo = PlacedAsset(
         id: "logo", name: "logo.png", format: .png, natural: Size(width: 200, height: 100), data: Data(base64Encoded: logoBase64) ?? Data())
     /// A 2/255 tolerance on each channel.
