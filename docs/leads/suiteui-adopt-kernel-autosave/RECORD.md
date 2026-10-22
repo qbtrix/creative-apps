@@ -4,7 +4,7 @@ Issue: #3713 · Packet: docs/blueprints/suiteui/features/adopt-kernel-autosave.m
 Run: act-1a163b2abfe-f182 (relaunch; first run act-1a15c07cabb-mtlw) · Started: 2026-10-22
 Stage: parked by the supervisor (AK-10 landing via lane)
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: AK side ended (parked by the supervisor): #4428 lands through the lane; relaunch takes AK-6, AK-8, AK-9, AK-11
+Next: AK side ended (parked by the supervisor): #4427 and #4428 on dev; relaunch takes AK-6, AK-8, AK-9, AK-11
 
 ## Slices
 
@@ -39,6 +39,7 @@ Next: AK side ended (parked by the supervisor): #4428 lands through the lane; re
 
 ## Decisions
 
+- 2026-10-22T19:51Z #4428 (AK-10 source) merged by the lane as b653cb7bfd. AK side ended; relaunch takes AK-6, AK-8, AK-9, AK-11.
 - 18:40Z #4427 (AK-10 tests) merged (31da7d22f6). Merged dev into feat/ak-10-flare-delete (f9be9a48): one conflict in FlareWindow.swift, resolved by keeping #4428's rename FlareRecovery.swift -> FlareAutosaveAdapter.swift (same body as AK-4's squash). scripts/ci --changed: CI: PASS. #4428 retargeted to dev, Head moved, no footer. AK side ends here, as the supervisor said; AK-6, AK-8, AK-9 and AK-11 wait for the relaunch.
 - 18:10Z heartbeat: no change; #4427 build green, waiting for its lane batch
 - 17:47Z heartbeat: #4427 macOS build 39813862769 green, waiting for its lane batch; #4428 stacked
