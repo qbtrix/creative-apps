@@ -68,3 +68,5 @@ utc	stage	event	ref	note
 2026-10-22T02:28Z	merge-dev	HG-u,HG-m	dev fix #4238 in; gating
 2026-10-22T02:50Z	push	HG-u	959f433, gate pass
 2026-10-22T02:50Z	push	HG-m	5f0a274, gate pass
+2026-10-22T03:08Z	poll	HG-u	macOS build green (39712662587)
+2026-10-22T03:08Z	poll	HG-m	macOS build queued (39712692785)
