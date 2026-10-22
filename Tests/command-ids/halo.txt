@@ -27,6 +27,14 @@ file.open
 file.open-recent
 file.save
 file.save-as
+fill.angle
+fill.gradient
+fill.read
+fill.stop-add
+fill.stop-color
+fill.stop-move
+fill.stop-remove
+fill.type
 inspector.end-property-scrub
 inspector.set-blend-mode
 inspector.set-parent
