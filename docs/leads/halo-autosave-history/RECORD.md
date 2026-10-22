@@ -60,3 +60,5 @@ Wave 1: HA-a (one slice PR), alongside transform HT-a. Wave 2: HA-5 stacked on H
 - 2026-10-22T11:17Z HA-8 PR #4397 opened (fast-lane, feature-done), head ddaf38bb, full scripts/ci PASS. Once it merges: Belt-Slice-Done for HA-m and HA-z on the next scoped halo run, then the critic panel and Belt-Contact-Sheet.
 - 2026-10-22T11:56Z HA-8 #4397 merged as 30120a894: autosave-history is built. Belt-Slice-Done for HA-u, HA-m and HA-z waits on a CI run with screens at or after 30120a894. Scoped halo run 39754054661 (06d331b06) predates HA-7b, and the macOS queue is backed up. Then the critic panel and Belt-Contact-Sheet.
 - 2026-10-22T12:28Z Stall check. Waiting on a CI run with screens at or after 30120a894 for Belt-Slice-Done; macOS queue still backed up.
+
+- 2026-10-22T12:38:40Z: Belt-Slice-Done HA-m, HA-z and Mac-Finish-Wanted HA-z on run 39774574487 (Linux green at 30120a894, contains HA-8 #4397). Belt-Contact-Sheet posted on #3442; open finding #3925 (J-HA) left for the Verified level. Lead done for this feature.
