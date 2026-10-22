@@ -45,11 +45,3 @@ struct DesignInspectorTransform: View {
         perform(.transform(.set(box, drag: DesignControlID.inspectorRotation)))
     }
 }
-
-extension FlipDirection {
-    /// The Object menu's and the inspector's name for the flip.
-    var title: String { self == .horizontal ? "Flip Horizontal" : "Flip Vertical" }
-
-    /// The arrows along the flip's axis, as SuiteUI's TransformRows draws them.
-    var systemImage: String { self == .horizontal ? "arrow.left.and.right" : "arrow.up.and.down" }
-}

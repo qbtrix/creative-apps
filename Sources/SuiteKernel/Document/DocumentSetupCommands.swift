@@ -90,14 +90,39 @@ public enum DocumentSetupCommands {
 
     /// Where old content's top-left lands, in pixels, when `old` becomes `new` about `anchor`.
     public static func offset(from old: DocumentSetup, to new: DocumentSetup, anchor: BoxAnchor) -> Point {
-        Point(x: 0, y: 0)
+        let (before, after) = (old.pixelSize, new.pixelSize)
+        return TransformRules.anchoredOrigin(old: (Double(before.width), Double(before.height)),
+                                             new: (Double(after.width), Double(after.height)), anchor)
     }
 
-    static func read(_ t: any DocumentSetupTarget) throws -> JSONValue {
-        throw CatalogError.notBuilt(id: "document.read-settings", feature: "document-setup")
+    static func read(_ t: any DocumentSetupTarget) throws -> JSONValue { try reading(t.documentSetup, offset: nil) }
+
+    /// The setup as JSON with its pixel size and, after a set, how far old content moved.
+    static func reading(_ setup: DocumentSetup, offset: Point?) throws -> JSONValue {
+        guard case .object(var fields) = try JSONValue(encoding: setup) else { return .object([:]) }
+        let pixels = setup.pixelSize
+        (fields["pixelWidth"], fields["pixelHeight"]) = (.number(Double(pixels.width)), .number(Double(pixels.height)))
+        if let offset { (fields["offsetX"], fields["offsetY"]) = (.number(offset.x), .number(offset.y)) }
+        return .object(fields)
+    }
+
+    /// The setup `p` asks for: each field given replaces the old one; a rate change keeps the seconds.
+    static func merged(_ old: DocumentSetup, _ p: SetParams) -> DocumentSetup {
+        var next = old
+        (next.width, next.height) = (p.width ?? old.width, p.height ?? old.height)
+        (next.unit, next.resolution) = (p.unit ?? old.unit, p.resolution ?? old.resolution)
+        (next.background, next.frameRate) = (p.background ?? old.background, p.frameRate ?? old.frameRate)
+        next.durationSeconds = p.duration ?? old.durationSeconds
+        return next
     }
 
     static func set(_ t: any DocumentSetupTarget, _ p: SetParams) throws -> JSONValue {
-        throw CatalogError.notBuilt(id: "document.set-settings", feature: "document-setup")
+        let old = t.documentSetup, next = merged(old, p), anchor = p.anchor ?? .center
+        let problems = next.problems(t.documentLimits)
+        guard problems.isEmpty else {
+            throw CatalogError.failed(id: "document.set-settings", message: problems.map(\.text).joined(separator: " "))
+        }
+        try t.apply(next, anchor: anchor)
+        return try reading(next, offset: offset(from: old, to: next, anchor: anchor))
     }
 }
