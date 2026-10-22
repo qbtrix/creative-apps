@@ -59,3 +59,4 @@ utc	stage	event	ref	note
 2026-10-21T23:06Z	3	fix	HG-u	macOS build failed on ambiguous KeyState; fix round 1 pushed 79935fd (SuiteUI.KeyState), gate PASS, Head moved
 2026-10-21T23:39Z	3	poll	HG-u HG-m	HG-m build red on dev-only Photo break (#3856, fix #4215); stand-down comment on #4216; HG-u build 39691720607 queued
 2026-10-22T00:20Z	3	merge-dev	HG-u HG-m	dev merged in after #4215; HG-m ba788c4, HG-u cb8fe6d; gate PASS; Head moved
+2026-10-22T00:21Z	poll	HG-u,HG-m	builds queued, no action
