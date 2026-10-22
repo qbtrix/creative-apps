@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-22T17:00Z	0	stage-start	#3936	setup on dev a41e7f1
 2026-10-22T17:05Z	0	stopped	#3937	blocked on suiteui LS-a, halo placed-images PH-a (#4426), file-flow HF-m
 2026-10-22T17:40Z	0	heartbeat	#3937	re-check 2: LS-a, PH-a #4426, HF-m all still open
+2026-10-22T18:01Z	0	question	#3936	re-check 3 identical: asked the supervisor whether to release until LS-a merges

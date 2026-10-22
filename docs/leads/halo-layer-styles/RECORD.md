@@ -2,7 +2,7 @@
 
 Issue: #3936 · Packet: docs/blueprints/halo/features/layer-styles.md
 Run: act-1a1648ae75a-4dqz · Session: claude/layer-styles-lead-ijqfue · Started: 2026-10-22T17:00Z
-Stage: 0 setup (blocked, re-check 2 of 3)
+Stage: 0 setup (blocked, re-check 3 of 3; supervisor asked on #3936)
 Base: a41e7f1 (origin/dev)
 Next: re-read #3937 for LS-a merged (`LayerStyle`, `LayerStyleTarget`, `StyleCommands` in SuiteImaging on dev), halo placed-images PH-a (#4426) merged and file-flow HF-m (HF-3, HF-4) merged; once all three are, start wave 1 (HY-1)
 
@@ -36,6 +36,7 @@ Next: re-read #3937 for LS-a merged (`LayerStyle`, `LayerStyleTarget`, `StyleCom
 - No task starts: HY-1 needs SuiteImaging's `LayerStyle`, `LayerStyleTarget` and `StyleCommands` (LS-a), none on dev; rule 20 forbids a Halo copy, and LS-a is the suiteui line's work, so nothing is stubbed here.
 
 ## Open
+- 2026-10-22T18:01Z re-check 3 on dev 5b2cafa: #3937 still `waiting-on-prereq`, no `LayerStyle`/`StyleCommands` on dev; PH-a #4426 open (fast-lane, mergeable clean, not merged); no HF-3/HF-4 merge. Third identical poll: `Question for the supervisor:` posted on #3936 (rule 23). Next: act on the answer, else re-read the three waits.
 - 2026-10-22T17:40Z re-check 2 on dev 1632da1: #3937 still `waiting-on-prereq`, no `LayerStyle`/`StyleCommands` on dev; PH-a #4426 open (fast-lane, not merged); no HF-3/HF-4 merge. Nothing starts. A third identical poll posts `Question for the supervisor:` on #3936 (rule 23).
 - 2026-10-22T17:00Z: #3937 (suiteui layer-styles) open, `waiting-on-prereq`; SuiteImaging on dev a41e7f1 has Adjust and Route only.
 - Halo placed-images PH-a #4426 open (PH-u #4437, #4438 stacked); no placed-images slice merged for Halo.
