@@ -4,7 +4,7 @@ Issue: #3536 · Packet: docs/blueprints/halo/features/key-editing.md
 Run: act-1a15f807d0b-78hh (resumed from act-1a15b98bcea-wygm) · Session: claude/key-editing-lead-o3yyj5 · Started: 2026-10-20T23:47Z
 Stage: 3 wave 4
 Base: 1a7e0d866 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: fix round 1 for KE-a (#4232) and KE-m (#4233) in PR #4235; its mac build failed on dev's photo compile break (#3856), so once #4215 lands merge dev into it and move Head:, then re-panel on the next halo journeys run with key-editing-* screens. #4151 (playhead takes a key's click) is SuiteUI's. KE-8's CL-z is met (Belt-Slice-Done CL-z, run 39682861406, 22:42Z on #1971); KE-7, and KE-8 after it, wait on #3499 (captain's PR, clean, unmerged).
+Next: fix round 1 for KE-a (#4232) and KE-m (#4233) in PR #4235 (head d09faab1c, dev merged after #4215 fixed dev's photo compile break; lane macOS build next), then re-panel on the next halo journeys run with key-editing-* screens. #4151 (playhead takes a key's click) is SuiteUI's. KE-8's CL-z is met (Belt-Slice-Done CL-z, run 39682861406, 22:42Z on #1971); KE-7, and KE-8 after it, wait on #3499 (captain's PR, clean, unmerged).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -25,7 +25,7 @@ Next: fix round 1 for KE-a (#4232) and KE-m (#4233) in PR #4235; its mac build f
 | KE-6 | KE-u | 3 | render budget | Tests/AppSnapshotTests/RenderBudgetHaloKeyEditingTests.swift | RenderBudgetHaloKeyEditingTests | #4067 | merged |
 | KE-9 | KE-m, KE-z | 4 | RJ-H13 move-keys real job; journey turned on (KE-7's first half) | Tests/RealJobs/halo/move-keys/move-keys.jobs.json, Tests/RealJobs/halo/move-keys/input/bounce.halo, UITests/HaloJourneyTests+KeyEditing.swift | RealJobsTests, HaloKeyEditingJourneyTests | #4141 | merged 1b3913c07 |
 | KE-7 | KE-z | 5 | stress journey gains ⌘A and move-keys | UITests/HaloJourneyTests+StressPerf.swift | HaloStressPerfJourneyTests | - | waits #3499 |
-| F4232/F4233 | KE-a, KE-m | 5 | menu journey lists the key items; key-editing journey parks the playhead at 30 | UITests/HaloJourneyTests.swift, UITests/HaloJourneyTests+KeyEditing.swift | HaloJourneyTests, HaloKeyEditingJourneyTests | #4235 | open 456cf87a3; mac build red on dev's photo break (#3856), waits #4215 then merge dev |
+| F4232/F4233 | KE-a, KE-m | 5 | menu journey lists the key items; key-editing journey parks the playhead at 30 | UITests/HaloJourneyTests.swift, UITests/HaloJourneyTests+KeyEditing.swift | HaloJourneyTests, HaloKeyEditingJourneyTests | #4235 | open d09faab1c (dev merged after #4215; lane rebuilds on macOS) |
 | KE-8 | KE-z | 6 | halo.md, built, feature-done | docs/blueprints/halo.md, docs/blueprints/halo/features/key-editing.wave.json | waves render --dry-run | - | waits KE-7 (CL-z met 22:42Z) |
 
 ## Reviews
