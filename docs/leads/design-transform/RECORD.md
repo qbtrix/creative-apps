@@ -1,20 +1,20 @@
 # transform lead record
 
 Issue: #3436 · Packet: docs/blueprints/design/features/transform.md
-Run: act-1a16208b93a-24w0 · Session: claude/feature-lead-playbook-wngeeb · Started: 2026-10-21T08:46:56Z (relaunched 2026-10-22T05:40Z; prior runs act-1a15ac70747-ky1f, act-1a15da1b26c-9qo6, act-1a15fcdd869-ck2o)
-Stage: 3 verify, DT-z fix round 1 (#4401 in the lane)
+Run: act-1a1657aa3cf-vhsw · Session: claude/feature-lead-playbook-wngeeb · Started: 2026-10-21T08:46:56Z (relaunched 2026-10-22T05:40Z and 21:00Z; prior runs act-1a16208b93a-24w0, act-1a15ac70747-ky1f, act-1a15da1b26c-9qo6, act-1a15fcdd869-ck2o)
+Stage: done (Belt-Contact-Sheet posted on #3436)
 Base: 80aba474 (origin/dev at 08:10Z)
-Next: #4401 merges; wait for a completed, successful design-scoped or full ci.yml run on dev at or after dcfcb6b0 (and #4401 if timing still gates) -> Belt-Slice-Done DT-z, Mac-Finish-Wanted DT-z, Belt-Contact-Sheet on #3436
+Next: none. Verified level (journey testRotateAndFlip in journeys run 39850438314, Mac-Finish for DT-a/DT-u/DT-z) belongs to the beta-hardening lane.
 
-Last check: 2026-10-22T21:03Z. Runs containing 078e7285: CI 39852194708 (62fe62aa) pending/-; scoped: design 39851521632 (62fe62aa) queued/-; CI 39848684933 (847f5072) completed/cancelled; CI 39844810755 (0f8414ad) completed/cancelled; CI 39840605751 (fbe2a872) completed/cancelled; CI 39836126860 (a102c34c) queued/-; CI 39829329352 (8f25082c) completed/cancelled; CI 39818716525 (a41e7f1f) completed/cancelled; CI 39814071339 (7e9f260a) completed/cancelled; CI 39810338100 (401242a5) completed/cancelled; transform findings: #4629,#4628,#4627,#4626,#4625.
+Last check: 2026-10-22T21:40Z. Linux check 39854353256 (dev be18ab62, contains 078e7285) green; no open finding with Feature: transform.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DT-a | rotation/flip fields on DesignNode, TransformTarget stubs, inspector rows and Object items on the stubs | DT-1, DT-2 | MJ-DT | TT-a (merged #3485/#3486); gradient-fill:DG-a (#3687 open) | yes | 0 | done | 39569221486 | wanted |
-| DT-u | canvas paints turned nodes, handles turn; snapshots and render budget | DT-3, DT-4 | DJ-T1 | DT-a; gradient-fill:DG-u | yes | 2 | done (per Belt brief; round 2 #4223/#4224 in flight) | – | – |
-| DT-m | adapter bodies, turned hit test, SVG turn, catalog specs, RJ-D15 | DT-5, DT-6 | MJ-DT | DT-a; gradient-fill:DG-m; autosave-history:DA-m | no | 0 | done (per Belt brief) | – | – |
-| DT-z | journey on live, status built, feature-done | DT-7, DT-8, DT-z-r1 | DJ-T1 | DT-u, DT-m | yes | 1 | fix round 1, verifying | – | – |
+| DT-u | canvas paints turned nodes, handles turn; snapshots and render budget | DT-3, DT-4 | DJ-T1 | DT-a; gradient-fill:DG-u | yes | 2 | merged-done | 39854353256 | wanted |
+| DT-m | adapter bodies, turned hit test, SVG turn, catalog specs, RJ-D15 | DT-5, DT-6 | MJ-DT | DT-a; gradient-fill:DG-m; autosave-history:DA-m | no | 0 | merged-done | 39854353256 | – |
+| DT-z | journey on live, status built, feature-done | DT-7, DT-8, DT-z-r1 | DJ-T1 | DT-u, DT-m | yes | 1 | merged-done | 39854353256 | wanted |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -24,7 +24,7 @@ Last check: 2026-10-22T21:03Z. Runs containing 078e7285: CI 39852194708 (62fe62a
 | DT-3 | DT-u | 2 | canvas paints turned nodes | Sources/DesignApp/DesignCanvasMarks.swift, Sources/DesignApp/DesignSelectionMarks.swift, Tests/AppSnapshotTests/DesignTransformPaintTests.swift | DesignTransformPaintTests | #3983 | merged (564e6562) |
 | DT-4 | DT-u | 2 | snapshots, render budget | Tests/AppSnapshotTests/DesignTransformSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetDesignTransformTests.swift | RenderBudgetDesignTransformTests | #4159 | merged (9829685e) |
 | DT-5 | DT-m | 2 | adapter bodies, contains | Sources/DesignModel/DesignTransform+Kernel.swift, Tests/DesignModelTests/DesignTransformTests.swift, Tests/mutations/DesignModel.DesignTransform+Kernel.json | DesignTransformTests | #4187 | merged (8684d700) |
-| DT-6 | DT-m | 3 | SVG turn, specs, RJ-D15 | Sources/DesignModel/Live/DesignSVG.swift, Sources/DesignModel/DesignCommandCatalog.swift, Tests/command-ids/design.txt, Tests/RealJobs/design/rotate-15/ | DesignSVGTests.turnedNode, RJ-D15 | – | waiting |
+| DT-6 | DT-m | 3 | SVG turn, specs, RJ-D15 | Sources/DesignModel/Live/DesignSVG.swift, Sources/DesignModel/DesignCommandCatalog.swift, Tests/command-ids/design.txt, Tests/RealJobs/design/rotate-15/ | DesignSVGTests.turnedNode, RJ-D15 | #4255 | merged (aa66f0e7) |
 | DT-7 | DT-z | 6 | journey on live | UITests/DesignJourneyTests+Transform.swift | DesignTransformJourneyTests | #4323 | merged (dcfcb6b0) |
 | R2 | DT-u | 6 | fix #4223 turned resize + #4224 knob over several | Sources/DesignModel/DesignCanvasEditing.swift, Sources/DesignModel/DesignCanvasHints.swift, their tests and plans | DesignTurnedResizeTests, knob-several test | #4324 | merged (80aba474) |
 | DT-z-r1 | DT-z | 7 | split transform render budget into bodies/timing | Tests/AppSnapshotTests/RenderBudgetDesignTransformTests.swift, docs/blueprints/design/features/transform.md | RenderBudgetDesignTransformTests.bodies | #4401 | merged (078e7285d) |
@@ -34,6 +34,7 @@ Last check: 2026-10-22T21:03Z. Runs containing 078e7285: CI 39852194708 (62fe62a
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
 | DT-z | 39747588205 (scoped design) | 2b31ba4c | macOS (design) tests | knob p95 21.43 ms > 8; scrub 119 bodies (fixed by #4354); DesignTransformSnapshots.rows (fixed by #4379) | 0 -> round 1 #4401 |
+| DT-a..DT-z | 39802358033 (scoped design) | 3fcea284 | clarity, mouse, taste, job, design (snapshots) | none | 1 |
 
 ## Decisions
 - PRs target dev (CLAUDE.md, lane retargets main to dev); brief's main HEAD b3011ab9 verified, work branches from origin/dev a48992b7.
@@ -46,8 +47,11 @@ Last check: 2026-10-22T21:03Z. Runs containing 078e7285: CI 39852194708 (62fe62a
 - PR bodies: the tooling appends a generic "Generated by" footer on every body edit and it can't be removed from here; the session link was stripped and the lane strips the footer from the squash commit.
 - #4323 journey step 2 needs #4224/#4223's fix (#4324); #4324 was opened second, so if a journey runs before it merges, step 2 is expected red.
 
+- Run act-1a1657aa3cf-vhsw: DT-u, DT-m and DT-z done lines posted against Linux check 39854353256 (dev be18ab62, contains #4324, #4255, #4401), per the supervisor's 21:17Z answer on #3436.
+
 ## Open
-- Findings open: none (#4223, #4224 closed by #4324).
+- Findings open: none (#4223, #4224 closed by #4324; #4625-#4629 are transform-tools, SuiteUI line).
+- Belt-Slice-Done DT-u, DT-m, DT-z, Mac-Finish-Wanted DT-u, DT-z and Belt-Contact-Sheet posted on #3436 (run 39854353256).
 - DT-a Belt-Slice-Done and Mac-Finish-Wanted posted on #3436 (run 39569221486).
 
 ## Run act-1a15fcdd869-ck2o (2026-10-21T18:55Z)
