@@ -12,6 +12,7 @@ import CoreMedia
 import CoreVideo
 import Foundation
 import HaloModel
+import SuiteKernel
 import Testing
 
 @testable import HaloApp
@@ -75,6 +76,25 @@ import Testing
         }
         try writer.finish(cancelled: true)
         #expect(!FileManager.default.fileExists(atPath: url.path))
+    }
+
+    /// FR-8b: keyed at 29.97 for 30 frames, half size, is 30 x 1001 / 30000 s on a 30000 track, not 1 s.
+    @Test func ntscMovieRunsAtTheExactRate() async throws {
+        var composition = try keyed()
+        composition.frameRate = FrameRate(numerator: 30000, denominator: 1001)
+        composition.durationFrames = 30
+        let rendering = LiveCompositionRendering()
+        let plan = try rendering.plan(composition, settings: HaloRenderSettings(format: .movie, halfSize: true))
+        let dir = try folder()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let url = dir.appendingPathComponent(try #require(plan.fileNames.first))
+        var writer = HaloMovieWriter(url: url)
+        #expect(rendering.run(plan, of: composition, text: nil, into: &writer, isCancelled: { false }) == .finished(frames: 30))
+        let asset = AVURLAsset(url: url)
+        let duration = try await asset.load(.duration)
+        #expect(CMTimeCompare(duration, CMTime(value: 30_030, timescale: 30000)) == 0, "\(duration.seconds) s")
+        let track = try #require(try await asset.loadTracks(withMediaType: .video).first)
+        #expect(try await track.load(.naturalTimeScale) == 30000)
     }
 
     /// LiveFrameRendering's frame 0 as HaloFrameImage's straight-alpha sRGB

@@ -1,8 +1,10 @@
 // HaloMovieWriter.swift: the movie sink of Render Out (render-out RO-7,
 // #1505). A RenderSink that writes one H.264 `.mp4` at the plan's size and
-// frame rate, tagged BT.709 (primaries, transfer function and YCbCr matrix).
-// Frame i of the movie is presented at i / fps and the session ends at
-// frames / fps, so a 48-frame, 24 fps plan is exactly 2 s long. Each frame is
+// exact frame rate, tagged BT.709 (primaries, transfer function and YCbCr
+// matrix). The plan's `HaloMovieClock` times frame i at i x den / num s and
+// ends the session at frames x den / num s, so a 48-frame, 24 fps plan is
+// exactly 2 s long and 300 frames at 29.97 are 10.01 s (frame-rates FR-8b);
+// the track counts in the clock's track timescale. Each frame is
 // HaloFrameImage's sRGB image drawn over opaque black, so transparent areas
 // become black. `finish(cancelled: true)` cancels the writer, which deletes
 // the file it created.
@@ -36,7 +38,7 @@ struct HaloMovieWriter: RenderSink {
     private var receiver: AVAssetWriterInput.PixelBufferReceiver?
     private var width = 0
     private var height = 0
-    private var framesPerSecond = 1
+    private var clock: HaloMovieClock?
     private var written = 0
 
     init(url: URL) {
@@ -44,7 +46,7 @@ struct HaloMovieWriter: RenderSink {
     }
 
     mutating func begin(_ plan: HaloRenderPlan) throws {
-        guard plan.width > 0, plan.height > 0, plan.framesPerSecond > 0 else {
+        guard plan.width > 0, plan.height > 0, plan.framesPerSecond > 0, let clock = plan.movieClock else {
             throw HaloMovieWriterError(description: "The movie needs a size and a frame rate.")
         }
         guard !FileManager.default.fileExists(atPath: url.path) else {
@@ -52,9 +54,8 @@ struct HaloMovieWriter: RenderSink {
         }
         let writer = try AVAssetWriter(outputURL: url, fileType: .mp4)
         let input = AVAssetWriterInput(mediaType: .video, outputSettings: Self.outputSettings(plan))
-        let timeScale = CMTimeScale(plan.framesPerSecond * 100)
-        input.mediaTimeScale = timeScale
-        writer.movieTimeScale = timeScale
+        input.mediaTimeScale = clock.trackTimescale
+        writer.movieTimeScale = clock.trackTimescale
         guard writer.canAdd(input) else {
             throw HaloMovieWriterError(description: "The movie writer refused an H.264 video track.")
         }
@@ -65,7 +66,7 @@ struct HaloMovieWriter: RenderSink {
         self.receiver = receiver
         width = plan.width
         height = plan.height
-        framesPerSecond = plan.framesPerSecond
+        self.clock = clock
         written = 0
     }
 
@@ -74,7 +75,7 @@ struct HaloMovieWriter: RenderSink {
             throw HaloMovieWriterError(description: "The movie was written before it began.")
         }
         let buffer = try pixelBuffer(frame)
-        let time = CMTime(value: CMTimeValue(written), timescale: CMTimeScale(framesPerSecond))
+        let time = try Self.time(ofFrame: written, clock)
         let deadline = Date().addingTimeInterval(frameTimeout)
         while try !receiver.appendImmediately(buffer, with: time) {
             if writer.status == .failed { throw Self.failure(writer) }
@@ -98,11 +99,19 @@ struct HaloMovieWriter: RenderSink {
             return
         }
         receiver.finish()
-        writer.endSession(atSourceTime: CMTime(value: CMTimeValue(written), timescale: CMTimeScale(framesPerSecond)))
+        writer.endSession(atSourceTime: try Self.time(ofFrame: written, clock))
         let done = DispatchSemaphore(value: 0)
         writer.finishWriting { done.signal() }
         done.wait()
         guard writer.status == .completed else { throw Self.failure(writer) }
+    }
+
+    /// Where frame `frame` starts on `clock`, as the writer takes a time.
+    private static func time(ofFrame frame: Int, _ clock: HaloMovieClock?) throws -> CMTime {
+        guard let tick = clock?.time(ofFrame: frame) else {
+            throw HaloMovieWriterError(description: "Frame \(frame) is past the movie's clock.")
+        }
+        return CMTime(value: tick.value, timescale: tick.timescale)
     }
 
     /// H.264 at the plan's size, BT.709 throughout, at a bit rate generous
