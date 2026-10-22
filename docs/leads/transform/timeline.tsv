@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-22T16:37:55Z	takeover	run act-1a16474bd28-v3ht starts
 2026-10-22T16:52Z	heartbeat	macOS builds on both; restored bodies from dup lead #4515
 2026-10-22T17:15Z	heartbeat	both clean, not merged; HT-m build queued, HT-z build cancelled
+2026-10-22T17:37Z	heartbeat	both clean, not merged; macOS queue saturated
