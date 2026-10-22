@@ -73,3 +73,6 @@ utc	stage	event	ref	note
 2026-10-22T09:10Z	3	heartbeat	#4339,#4343	Belt nudge; both still unmerged in lane, macOS builds queued; run stays ended per supervisor 08:38Z (#3439), awaiting relaunch after merge
 2026-10-22T09:40Z	3	heartbeat	#4339,#4343	PE-m macOS build 39738004006 success (awaits lane batch); PE-z build 39738570198 still queued; run stays ended per supervisor 08:38Z
 2026-10-22T10:11Z	3	heartbeat	#4339,#4343	no change: PE-m built, awaits lane batch; PE-z mac build still queued; run stays ended per supervisor 08:38Z
+2026-10-22T10:28Z	3	pr-merged	#4339	PE-m 230aedcd
+2026-10-22T10:41Z	3	pr-merged	#4343	PE-z 741331f8
+2026-10-22T11:15Z	3	ci-run	39766945042	Linux check green at 5da8c329 with both; waiting on full 39766612022 or scoped photo 39765692992

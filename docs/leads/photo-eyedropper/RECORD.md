@@ -2,9 +2,9 @@
 
 Issue: #3439 · Packet: docs/blueprints/photo/features/eyedropper.md
 Run: act-1a1624626e1-8awa · Session: claude/eyedropper-feature-lead-eton7y · Started: 2026-10-22T09:00Z
-Stage: 3 polling (stopped by supervisor 08:38Z)
-Base: bdd92b41888b013f6ccd4e177874848a88b1a227
-Next: on relaunch, check that #4339 (PE-m) and #4343 (PE-z) merged; find a ci.yml run on dev with a green Linux job containing both; post Belt-Slice-Done PE-m and PE-z, Mac-Finish-Wanted PE-z, then Belt-Contact-Sheet on #3439
+Stage: 3 polling
+Base: 21c3e7bc42a1e7dc6a3669e20718c34998de60d4
+Next: wait for ci.yml run 39766612022 (full, Linux job) or 39765692992 (scoped: photo) at 5da8c329, both contain #4339 and #4343; when it completes green post Belt-Slice-Done PE-m and PE-z, Mac-Finish-Wanted PE-z, Belt-Contact-Sheet on #3439
 
 Relaunch for the remaining slices PE-m and PE-z (PE-a and PE-u done by run act-1a15ac118a1-s70v).
 
@@ -13,8 +13,8 @@ Relaunch for the remaining slices PE-m and PE-z (PE-a and PE-u done by run act-1
 |---|---|---|---|---|---|---|---|---|---|
 | PE-a | stubs + tool on the fakes, size chips, palette | PE-1, PE-2 | MJ-PE | shell-parity (built) | true | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39514893774 | 1b19079c gaps: #4168 |
 | PE-u | loupe, click pick, Option-click with Brush; snapshots, budget | PE-3, PE-4 | PJ-E1 | PE-a | true | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39571804700 | wanted |
-| PE-m | live sampling, adapter bodies, color.sample, RJ-P36 | PE-5, PE-6 | MJ-PE, RJ-P36 | PE-a (done); history-panel:PH-m (built) | false | 0 | merging (#4339) | – | – |
-| PE-z | journey on live, feature-done | PE-7, PE-8 | PJ-E1, RJ-P22 | PE-u (done), PE-m | true | 0 | merging (#4343) | – | – |
+| PE-m | live sampling, adapter bodies, color.sample, RJ-P36 | PE-5, PE-6 | MJ-PE, RJ-P36 | PE-a (done); history-panel:PH-m (built) | false | 0 | merged (#4339, 230aedcd) | – | – |
+| PE-z | journey on live, feature-done | PE-7, PE-8 | PJ-E1, RJ-P22 | PE-u (done), PE-m | true | 0 | merged (#4343, 741331f8) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -24,9 +24,9 @@ Relaunch for the remaining slices PE-m and PE-z (PE-a and PE-u done by run act-1
 | PE-3 | PE-u | – | loupe, click, Option-click | Sources/PhotoApp/PhotoWindow+Sample.swift | PhotoEyedropperOverlayTests | #3808 | merged |
 | PE-4 | PE-u | – | snapshots + render budget | Tests/AppSnapshotTests/PhotoEyedropperSnapshots.swift | RenderBudgetPhotoEyedropperTests | #3808 | merged |
 | PE-5 | PE-m | – | live ColorSampling on SampleRules.mean | Sources/PhotoModel/Live/LiveSampling.swift | LiveSamplingTests | #3800 | merged |
-| PE-6 | PE-m | 1 | adapter bodies, color.sample in catalog, tests on, RJ-P36 | Sources/PhotoModel/PhotoSample+Kernel.swift, Tests/PhotoModelTests/PhotoSampleTests.swift, Tests/mutations/PhotoModel.PhotoSample+Kernel.json, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/RealJobs/photo/sample-mean/ | PhotoSampleTests; Mutate 11/11 PhotoModel.PhotoSample+Kernel | #4339 | open |
-| PE-7 | PE-z | 2 | journey on live | UITests/PhotoJourneyTests+Eyedropper.swift | testPickSkyColor | #4343 | open |
-| PE-8 | PE-z | 2 | status built, feature-done | docs/blueprints/photo/features/eyedropper.wave.json | scripts/ci | #4343 | open |
+| PE-6 | PE-m | 1 | adapter bodies, color.sample in catalog, tests on, RJ-P36 | Sources/PhotoModel/PhotoSample+Kernel.swift, Tests/PhotoModelTests/PhotoSampleTests.swift, Tests/mutations/PhotoModel.PhotoSample+Kernel.json, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/RealJobs/photo/sample-mean/ | PhotoSampleTests; Mutate 11/11 PhotoModel.PhotoSample+Kernel | #4339 | merged |
+| PE-7 | PE-z | 2 | journey on live | UITests/PhotoJourneyTests+Eyedropper.swift | testPickSkyColor | #4343 | merged |
+| PE-8 | PE-z | 2 | status built, feature-done | docs/blueprints/photo/features/eyedropper.wave.json | scripts/ci | #4343 | merged |
 
 ## Waves
 - W1: PE-6 alone (slice PE-m), base dev.
