@@ -69,6 +69,8 @@ struct PhotoCommandCatalogTests {
         let needsFiles = Set(["file.clear-recent", "file.drop", "file.open-in", "file.open-recent", "place.image"])
         let problems = CatalogConformance.check(PhotoLawsDocument.self, fixture: fixture).filter { problem in
             let id = String(problem.prefix { $0 != ":" })
+            // A jump moves the image to another step, as Undo does, so its bytes change (history-panel PH-5).
+            if id == "history.jump" && problem.contains("queryOrViewChangesNoBytes") { return false }
             guard problem.hasPrefix("\(id): exampleRuns") else { return true }
             let off = PhotoLawsDocument.catalog.availability(id, on: fixture).why != nil
             return !(off || needsFiles.contains(id))
@@ -144,10 +146,10 @@ struct PhotoCommandCatalogTests {
     /// (Select menu, PM-3) and opacity (multi-layer-select PM-5).
     static let noMenu: Set = ["select.rect", "image.gradient", "layer.pick", "layer.select-all", "layer.set-opacity", "layer.move-by"]
     /// Every non-tool command but the menu-less ones, the shared file-flow ones, the place ones and Free Transform's
-    /// (transform PT-5, ahead of its menu items), in menu order (the catalog lists them as the menus do).
+    /// (transform PT-5, ahead of its menu items) and the History panel's (history-panel PH-5), in menu order (the catalog lists them as the menus do).
     static let menuIDs = PhotoWorkspace.commands.map(\.id).filter {
         !$0.hasPrefix("tool.") && !$0.hasPrefix("transform.") && !noMenu.contains($0) && !fileFlowIDs.contains($0)
-            && !placeIDs.contains($0)
+            && !placeIDs.contains($0) && !$0.hasPrefix("history.")
     }
     /// The place commands (place-image PP-5): File > Place… runs place.image through PhotoPlace+Menu, not a catalog row.
     static let placeIDs = Set(PlaceCommands.specs(PhotoWorkspace.self).map(\.id))

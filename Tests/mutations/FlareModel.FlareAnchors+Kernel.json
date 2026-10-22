@@ -40,5 +40,19 @@
     "find": "            let anchor = grip == nil ? anchorPress(",
     "replace": "            let anchor = grip == nil && grabbed(at: start, stageScale: stageScale).isEmpty ? anchorPress(",
     "tests": "FlareAnchorEditTests"
+  },
+  {
+    "label": ".shiftAddsAnchorsToTheSelection: an extending select replaces the picked anchors",
+    "file": "Sources/FlareModel/FlareAnchors+Kernel.swift",
+    "find": "(extend ? anchorSelection.ordered : []) + (anchors ?? [])",
+    "replace": "[] + (anchors ?? [])",
+    "tests": "FlareAnchorEditTests"
+  },
+  {
+    "label": ".shiftAddsAnchorsToTheSelection: a Shift-press on an anchor replaces the picked anchors",
+    "file": "Sources/FlareModel/FlareAnchors+Kernel.swift",
+    "find": "(modifiers.contains(.shift) ? anchorSelection.ordered : []) + [ref]",
+    "replace": "[ref]",
+    "tests": "FlareAnchorEditTests"
   }
 ]

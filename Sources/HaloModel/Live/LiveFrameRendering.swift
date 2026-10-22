@@ -3,8 +3,8 @@
 // HaloOutlines gives at its matrix: CoreRaster's exact Mask.rectangle /
 // Mask.ellipse when the matrix only translates and scales up, Mask.polygon of
 // the flattened outline otherwise. Its source is the linear premultiplied
-// color times that coverage, composited bottom first with the item's blend
-// mode and opacity. An outline, mask or composite that fails draws nothing
+// color, or its gradient's color at each pixel (HG-6), times that coverage,
+// composited bottom first with the item's blend mode and opacity. An outline, mask or composite that fails draws nothing
 // and isn't counted. A text item (VP-5) is its TextRasterizing raster, top
 // left on bounds.origin (so its baseline sits at height - descent), resized by
 // HaloTextPlacement's scale, turned by its degrees about its center and
@@ -73,12 +73,14 @@ public struct LiveFrameRendering: FrameRendering {
         return Int(v)
     }
 
-    /// A `width` × `height` buffer of `item`'s color times its outline's
-    /// coverage, premultiplied; nil when the outline or its mask is refused.
+    /// A `width` × `height` buffer of `item`'s color, or its gradient's color
+    /// at each pixel (HG-6), times its outline's coverage, premultiplied; nil
+    /// when the outline or its mask is refused.
     static func coverageFill(
         _ item: HaloDrawItem, width: Int, height: Int, scaleX sx: Double, scaleY sy: Double
     ) -> PixelBuffer? {
-        guard let color = item.color.linearPixel(),
+        let shading = HaloGradientShading(item, scaleX: sx, scaleY: sy)
+        guard let solid = item.color.linearPixel(),
               let outline = HaloOutlines.outline(of: item, scale: max(sx, sy)),
               let mask = try? outline.mask(width: width, height: height, scaleX: sx, scaleY: sy),
               var buffer = try? PixelBuffer(width: width, height: height)
@@ -86,6 +88,7 @@ public struct LiveFrameRendering: FrameRendering {
         for y in 0..<height {
             for x in 0..<width {
                 guard let c = try? mask.coverage(x: x, y: y), c > 0 else { continue }
+                let color = shading?.color(x: x, y: y) ?? solid
                 try? buffer.setPixel(x: x, y: y, RGBA(r: color.r * c, g: color.g * c, b: color.b * c, a: color.a * c))
             }
         }

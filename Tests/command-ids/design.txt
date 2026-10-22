@@ -46,6 +46,12 @@ tool.move
 tool.pen
 tool.rectangle
 tool.text
+transform.flip
+transform.read
+transform.reset
+transform.rotate
+transform.scale
+transform.set
 view.fit
 view.zoom-in
 view.zoom-out
