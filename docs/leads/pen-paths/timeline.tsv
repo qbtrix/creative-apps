@@ -136,3 +136,4 @@ utc	stage	event	ref	note
 2026-10-22T02:20Z	3	check	PN-3 #4203	macOS build 39704455661 green; lane merges next sweep. PN-4 merged PN-3+dev, CI: PASS, head 3da37e7, 391 lines/4 files; PR opens after #4203 merges
 2026-10-22T02:39Z	3	check	PN-3 #4203	lane Linux 39710249631 red on dev-red FormatListRatchetTests (not PN-3); dev fixed by #4238; merged dev, CI: PASS, head 01a576e, Head moved, PR comment
 2026-10-22T02:57Z	3	check	PN-3	#4203 head 01a576e, macOS build 39712632560 queued; PN-4 waits; #3477 waiting-on-prereq
+2026-10-22T03:14Z	3	check	PN-3	#4203 macOS build 39712632560 still queued; #3477 waiting-on-prereq
