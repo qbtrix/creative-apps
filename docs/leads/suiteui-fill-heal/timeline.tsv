@@ -5,3 +5,8 @@ utc	stage	event	ref	note
 2026-10-21T04:01Z	3	blocked-poll-2	#3715,#3758	IM-a and BK-m not started; FH-2 #3845 in lane
 2026-10-21T04:20Z	3	supervisor-question	#3778	3 identical blocked polls on IM-a/BK-m
 2026-10-21T04:29Z	3	relaunch	act-1a15cb4e0f5-ipbr	new run carries the state; IM-a/BK-m still not on dev (da68f32); waiting per supervisor
+04:51Z	3	poll	dev 0eca6ab	no SuiteImaging; IM-a #3715 and BK-m #3758 open, no new comments; #3845/#3846 open in fast lane; next poll 05:11Z
+05:13Z	3	poll	dev 229c5ef	no SuiteImaging; IM-a #3715 and BK-m #3758 open, no new comments, no IM-a PR open; #3845/#3846 clean in fast lane; next poll 05:34Z
+05:35Z	3	poll	dev 71ffa4d	no SuiteImaging; IM-a #3715 and BK-m #3758 open, no new comments, no IM-a PR open; #3845/#3846 clean in fast lane; next poll 05:55Z
+05:56Z	3	poll	dev 71ffa4d	dev unchanged; IM-a #3715 and BK-m #3758 open, no new comments, no IM-a PR open; #3845/#3846 clean in fast lane; next poll 06:17Z
+16:40Z	3	relaunch	dev 7e9f260	run act-1a164697376-dv7u on #4513; FH-2 merged; FH-1 unblocked; builder launched for FH-a, FH-r, FH-c stacked
