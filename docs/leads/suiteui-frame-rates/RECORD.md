@@ -2,9 +2,10 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a161a658a7-2jql · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: fr10b-ready
+Stage: fr-u-critics
 Base: dev
-Next: open FR-10b after #4293 merges; reopen FR-8b after #4341
+Next: file FR-u findings; open FR-10b after #4293; reopen FR-8b after #4341
+
 
 
 
@@ -16,6 +17,7 @@ Next: open FR-10b after #4293 merges; reopen FR-8b after #4341
 
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 08:21Z: journeys run 39726187078 green; FR-u critic panel running (workflow wf_c10e4cde-7ad) over suiteui-timeline-2997-menu and suite-gallery-timeline-2997 at e02f36c3. #4293 and #4341 still wait on the lane's macOS gate.
 - 08:07Z: FR-10b gate PASS at 7d5b638c, mutate 7/7 FlareModel.FlareCommandCatalog; PR opens once #4293 merges.
 - 07:59Z: FR-10b merge with dev surfaced a semantic conflict (dev's file.new command passed Int fps to the now-FrameRate spec); fixed, anchor repointed, gate rerunning. AN and CB parked per supervisor; frame-rates continues.
 - 07:56Z: FR-10b branch merged with FR-10 head (d1c5cb529), pushed, gate running; PR opens after #4293 merges (stacked diff vs dev is 19 files).
