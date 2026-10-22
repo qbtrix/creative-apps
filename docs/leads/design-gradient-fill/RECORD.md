@@ -40,3 +40,5 @@ Next: #4189 merges -> Belt-Slice-Done DG-m on a green design run; #4197 merges; 
 - Belt's 00:0xZ nudge names lead/gradient-fill and lead/autosave-history; those hold other runs' records (flare pe5i, suiteui c6w5), left untouched. This run's records are lead/design-*.
 
 - 2026-10-22T00:35Z Lane macOS builds red on dev's RenderBudgetPhotoPlaceTests (PhotoPlaceIntent.files), fixed on dev by #4215; merged origin/dev into #4197 (DG-7); regating. DG-m done line waits on a green design run.
+
+- 2026-10-22T00:36Z Gate CI: PASS after the dev merge; pushed #4197→b54de0b5 and moved Head: lines. Waiting on the lane.
