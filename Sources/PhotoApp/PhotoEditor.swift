@@ -113,7 +113,7 @@ struct PhotoEditor: View {
 
 /// The canvas: the rendered picture (CanvasTiles on SuiteUI's EmbeddedCanvasHost) on the checkerboard with PhotoCanvasOverlay's
 /// marks over it (fed the pointer's document point), or the empty state. Drags go to the active tool;
-/// with the canvas focused, V M B E S J C I pick enabled tools, Delete clears the selection
+/// with the canvas focused, V M B E S J C I G T pick enabled tools, Delete clears the selection
 /// (Shift-Delete fills it), Return sends `confirm` (apply a crop) and Escape `dismiss` (cancel it
 /// or deselect). Drops land on the whole editor (PhotoEditor's `suiteFileDrop`), not here. While the
 /// Straighten sheet is open the picture turns by its angle under StraightenMarks.
@@ -155,6 +155,8 @@ struct PhotoCanvas: View {
                     {
                         StraightenMarks(frame: frame, cropToFit: straighten.cropToFit, zoom: zoom)
                     }
+                    PhotoTextBoxOverlay(model: model, zoom: zoom, perform: perform)
+                        .frame(width: size.width * zoom, height: size.height * zoom, alignment: .topLeading)
                 }
             } else {
                 EmptyStateView(
@@ -176,10 +178,7 @@ struct PhotoCanvas: View {
             perform(.dismiss)
         default:
             // A disabled tool's key does nothing, as its palette button does.
-            guard
-                let tool = PhotoTool.allCases.first(where: { $0.shortcut.map(String.init) == press.characters.lowercased() }),
-                model.toolHelp(tool) == nil
-            else { return .ignored }
+            guard let tool = PhotoTool.picked(byTyped: press.characters, help: model.toolHelp) else { return .ignored }
             perform(.tool(tool))
         }
         return .handled

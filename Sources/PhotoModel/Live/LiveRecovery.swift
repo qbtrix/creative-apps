@@ -1,78 +1,103 @@
 // Live/LiveRecovery.swift: the live recovery store (D-4b of photo-documents,
-// review note 1). One `<window>.ora` per window in a folder, the OpenRaster
-// file PhotoZip writes, with `photo/recovery.json` added inside it for the
-// document's name and the time it was saved (the file's date is set from that
-// time too, but the entry is what leftBehind reads). Every write is atomic, so
-// a crash mid-write leaves the last good file. A file that doesn't open is
-// removed and skipped (review note 3). The window string is percent-encoded
-// into the file name, so no window escapes the folder. Linux-safe.
+// review note 1; history-panel PH-6). Through SuiteModel's RecoveryFolder:
+// per window `Recovery/<window>.ora`, the OpenRaster file PhotoZip writes with
+// `photo/recovery.json` (name, time) inside, and the folder's `<window>.json`.
+// Writes are atomic; a copy that doesn't open is removed and skipped (review
+// note 3); the window is percent-encoded, so none escapes the folder. The
+// folder's times count from the reference date, an entry's from 1970. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteModel
 
 struct LiveRecovery: RecoveryStoring {
     static let infoPath = "photo/recovery.json"
     static let fileExtension = "ora"
 
+    /// The store's folder; the copies are under "Recovery/" in it.
     let directory: URL
 
     var unavailableHelp: String? { nil }
 
-    /// ~/Library/Application Support/Photo/Recovery, from FileManager's
-    /// application-support folder when it has one, else the home folder's.
+    /// The copies, as the window's autosave writes and offers them.
+    var folder: RecoveryFolder { RecoveryFolder(store: FileStore(folder: directory.path), ext: Self.fileExtension) }
+
+    /// ~/Library/Application Support/Photo (the copies in its Recovery
+    /// folder), from FileManager's application-support folder when it has
+    /// one, else the home folder's.
     static var defaultDirectory: URL {
         let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.homeDirectoryForCurrentUser
                 .appendingPathComponent("Library", isDirectory: true)
                 .appendingPathComponent("Application Support", isDirectory: true)
         return support.appendingPathComponent("Photo", isDirectory: true)
-            .appendingPathComponent("Recovery", isDirectory: true)
     }
 
     func write(_ entry: RecoveryEntry, window: String) throws {
-        var files = entry.package.files
-        files[Self.infoPath] = try JSONEncoder().encode(Info(documentName: entry.documentName, savedAt: entry.savedAt))
-        let data = try PhotoZip.container(PhotoPackage(files: files))
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        let url = file(for: window)
-        try data.write(to: url, options: .atomic)
-        try? FileManager.default.setAttributes(
-            [.modificationDate: Date(timeIntervalSince1970: entry.savedAt)], ofItemAtPath: url.path)
+        let data = try Self.container(entry.package, info: Info(documentName: entry.documentName, savedAt: entry.savedAt))
+        try folder.write(data, window: Self.encoded(window), name: entry.documentName,
+                         at: entry.savedAt - Date.timeIntervalBetween1970AndReferenceDate)
     }
 
     func leftBehind() throws -> [RecoveryEntry] {
-        var entries: [(name: String, entry: RecoveryEntry)] = []
-        for name in recoveryFiles() {
-            let url = directory.appendingPathComponent(name)
-            guard let entry = try? Self.entry(at: url) else {
-                try? FileManager.default.removeItem(at: url)
+        var entries: [RecoveryEntry] = []
+        for item in try folder.leftBehind() {
+            guard case let (package, info)? = try? Self.unpack(item.data, archive: LiveArchive()) else {
+                try folder.discard(window: item.window)
                 continue
             }
-            entries.append((name, entry))
+            entries.append(RecoveryEntry(
+                documentName: info?.documentName ?? item.name,
+                savedAt: info?.savedAt ?? item.savedAt + Date.timeIntervalBetween1970AndReferenceDate,
+                package: package))
         }
-        return entries.sorted { $0.entry.savedAt != $1.entry.savedAt ? $0.entry.savedAt > $1.entry.savedAt : $0.name < $1.name }
-            .map(\.entry)
+        return entries
     }
 
     func discard(window: String) throws {
-        let url = file(for: window)
-        guard FileManager.default.fileExists(atPath: url.path) else { return }
-        try FileManager.default.removeItem(at: url)
+        try folder.discard(window: Self.encoded(window))
     }
 
-    func discardAll() throws {
-        for name in recoveryFiles() {
-            try FileManager.default.removeItem(at: directory.appendingPathComponent(name))
-        }
+    func discardAll() throws { try folder.discardAll() }
+
+    // MARK: Bytes
+
+    /// What `photo/recovery.json` holds: the name, and the time when the
+    /// store wrote it (an autosave's bytes leave it to the folder's file).
+    struct Info: Codable {
+        var documentName: String?
+        var savedAt: Double?
+    }
+
+    /// `package` with `info` added inside, as one container through `archive`.
+    static func container(_ package: PhotoPackage, info: Info, archive: any DocumentArchiving = LiveArchive()) throws -> Data {
+        var files = package.files
+        files[infoPath] = try JSONEncoder().encode(info)
+        return try archive.container(PhotoPackage(files: files))
+    }
+
+    /// The package in `data` and the info taken out of it, nil when it has none.
+    static func unpack(_ data: Data, archive: any DocumentArchiving) throws -> (PhotoPackage, Info?) {
+        var package = try archive.package(fromContainer: data)
+        let info = try package.files[infoPath].map { try JSONDecoder().decode(Info.self, from: $0) }
+        package.files[infoPath] = nil
+        return (package, info)
     }
 
     // MARK: Files
 
-    /// The window's file: every byte outside A-Z, a-z, 0-9, "-" and "_" as
-    /// %XX, so "/" and "." never reach the path and two windows never share one.
+    /// The window's raw copy, `<window>.ora` under "Recovery/".
     func file(for window: String) -> URL {
+        directory.appendingPathComponent("Recovery", isDirectory: true)
+            .appendingPathComponent("\(Self.encoded(window)).\(Self.fileExtension)", isDirectory: false)
+    }
+
+    /// The window as a file name: every byte outside A-Z, a-z, 0-9, "-" and
+    /// "_" as %XX, so "/" and "." never reach the path and two windows never
+    /// share one.
+    static func encoded(_ window: String) -> String {
         var name = ""
         for byte in window.utf8 {
             let safe = (byte >= 0x30 && byte <= 0x39) || (byte >= 0x41 && byte <= 0x5A)
@@ -84,34 +109,6 @@ struct LiveRecovery: RecoveryStoring {
                 name += "%" + (hex.count < 2 ? "0" : "") + hex
             }
         }
-        if name.isEmpty { name = "%" }
-        return directory.appendingPathComponent("\(name).\(Self.fileExtension)", isDirectory: false)
-    }
-
-    /// The names of the folder's .ora files; none when the folder can't be
-    /// listed (it is missing, or a file stands in its place), since then no
-    /// window left anything behind. Listing the folder directly, rather than
-    /// asking fileExists(atPath:isDirectory:), keeps this the same on macOS
-    /// (an ObjCBool flag) and Linux (a Bool flag).
-    private func recoveryFiles() -> [String] {
-        guard let names = try? FileManager.default.contentsOfDirectory(atPath: directory.path) else { return [] }
-        return names.filter { $0.hasSuffix(".\(Self.fileExtension)") }
-    }
-
-    /// The entry in the file at `url`; its info entry is taken out of the package.
-    private static func entry(at url: URL) throws -> RecoveryEntry {
-        var package = try PhotoZip.package(fromContainer: try Data(contentsOf: url))
-        let info = try package.files[infoPath].map { try JSONDecoder().decode(Info.self, from: $0) }
-        package.files[infoPath] = nil
-        let savedAt = try info?.savedAt
-            ?? ((FileManager.default.attributesOfItem(atPath: url.path)[.modificationDate] as? Date)?
-                .timeIntervalSince1970 ?? 0)
-        return RecoveryEntry(documentName: info?.documentName, savedAt: savedAt, package: package)
-    }
-
-    /// photo/recovery.json.
-    private struct Info: Codable {
-        var documentName: String?
-        var savedAt: Double
+        return name.isEmpty ? "%" : name
     }
 }
