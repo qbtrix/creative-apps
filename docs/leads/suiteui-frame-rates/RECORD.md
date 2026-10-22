@@ -2,9 +2,10 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a161a658a7-2jql · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: FR-z RJ-X74
+Stage: FR-z gate
 Base: dev
-Next: gate then PR feature-done
+Next: PR feature-done
+
 
 
 
@@ -42,6 +43,7 @@ Next: gate then PR feature-done
 
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 16:35Z: RJ-X74 passes on Linux (render step dropped, CLI refuses render.start; expected layer fixed). FR-z gate running.
 - 16:20Z: 4407 merged (batch 39808695214). FR-z merged dev, RJ-X74 turned on (platforms linux+macos, jobs.json baseline pass); harness test running.
 - 15:47Z: 4407 macOS build 39805230890 green, waiting on lane batch; journeys 39793942579 still queued.
 - 15:25Z: 4407 lane macOS build 39799793394 queued; journeys 39793942579 queued.
