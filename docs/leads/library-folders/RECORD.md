@@ -88,3 +88,5 @@ Next: (2026-10-21T17:09Z) FO-5 #4022 at 7482cc7: lane macOS build 39632234354 qu
 - 2026-10-21T23:58Z: Heartbeat: #4256 still waiting in the lane.
 
 - 2026-10-22T00:13Z: Heartbeat: #4256 queued behind a busy lane. Dev Linux was red at de0f324 on FormatListRatchetTests (SuiteModel Media.swift), not ours.
+
+- 2026-10-22T00:21Z: FO-7 #4256 merged as c4607f1 (feature-done). FO-z waits for a dev CI run containing c4607f1 with a green Linux job.
