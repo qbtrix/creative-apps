@@ -71,3 +71,4 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-22T00:22Z: SC-14 #4238 (SC-f) waits on lane macOS build 39695868336, still queued since 23:49Z (runner backlog); mergeable, no needs-fix.
 - 2026-10-22T00:44Z: SC-14 #4238 still waits on lane macOS build 39695868336, queued since 23:49Z; no needs-fix or refusal.
 - 2026-10-22T00:55Z: dev is red on our ratchet: FormatListRatchetTests.realTreePasses flags Media.swift's StillFormat (SM-1 #4034 landed alongside SC-13 #4019). Shell-media's #4258 fixes it. A trial merge of dev, #4238 and #4258 merges cleanly and passes all 41 tests in the format, plist and media suites, so #4238 stays as it is.
+- 2026-10-22T01:06Z: SC-14 #4238: lane macOS build 39695868336 has been running since 01:01Z. #4258 (dev's ratchet fix) is still open.
