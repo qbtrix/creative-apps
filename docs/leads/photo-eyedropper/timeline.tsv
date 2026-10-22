@@ -76,3 +76,8 @@ utc	stage	event	ref	note
 2026-10-22T10:28Z	3	pr-merged	#4339	PE-m 230aedcd
 2026-10-22T10:41Z	3	pr-merged	#4343	PE-z 741331f8
 2026-10-22T11:15Z	3	ci-run	39766945042	Linux check green at 5da8c329 with both; waiting on full 39766612022 or scoped photo 39765692992
+2026-10-22T11:22Z	slice-done	PE-m https://github.com/qbtrix/creative-apps/actions/runs/39766945042
+2026-10-22T11:22Z	slice-done	PE-z https://github.com/qbtrix/creative-apps/actions/runs/39766945042
+2026-10-22T11:22Z	mac-finish-wanted	PE-z
+2026-10-22T11:22Z	contact-sheet	#3439 issuecomment-6339527486
+2026-10-22T11:22Z	stopped	done
