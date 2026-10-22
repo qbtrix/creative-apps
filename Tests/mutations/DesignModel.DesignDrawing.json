@@ -1,8 +1,10 @@
 [
-{"label":"a draw keeps its start's fraction","file":"Sources/DesignModel/DesignDrawing.swift","find":"let start = gesture.start.wholePoints","replace":"let start = gesture.start","tests":"DesignWholePointsTests"},
-{"label":"a draw keeps the pointer's fraction","file":"Sources/DesignModel/DesignDrawing.swift","find":"to: end.wholePoints, square: square","replace":"to: end, square: square","tests":"DesignWholePointsTests"},
+{"label":"a draw keeps its start's fraction","file":"Sources/DesignModel/DesignDrawing.swift","find":"(gesture.start.wholePoints, end.wholePoints)","replace":"(gesture.start, end.wholePoints)","tests":"DesignWholePointsTests"},
+{"label":"a draw keeps the pointer's fraction","file":"Sources/DesignModel/DesignDrawing.swift","find":"(gesture.start.wholePoints, end.wholePoints)","replace":"(gesture.start.wholePoints, end)","tests":"DesignWholePointsTests"},
 {"label":"a Text drag's width is the default","file":"Sources/DesignModel/DesignDrawing.swift","find":"frame.width = Swift.max(frame.width, Self.minimumTextWidth)","replace":"frame.width = DesignNodeKind.text.defaultSize.width","tests":"DesignTextBoxDrawTests"},
 {"label":"a Text drag doesn't set fixedWidth","file":"Sources/DesignModel/DesignDrawing.swift","find":"_ = pages.update(id) { $0.textStyle.fixedWidth = true }","replace":"_ = id","tests":"DesignTextBoxDrawTests"},
 {"label":"a short Text drag has no minimum width","file":"Sources/DesignModel/DesignDrawing.swift","find":"Swift.max(frame.width, Self.minimumTextWidth)","replace":"Swift.max(frame.width, 1)","tests":"DesignTextBoxDrawTests"},
-{"label":"a Text drag keeps the pointer's fraction","file":"Sources/DesignModel/DesignDrawing.swift","find":"DesignRect(from: gesture.start, to: end).wholePoints","replace":"DesignRect(from: gesture.start, to: end)","tests":"DesignTextBoxDrawTests"}
+{"label":"a Text drag keeps the pointer's fraction","file":"Sources/DesignModel/DesignDrawing.swift","find":"DesignRect(from: gesture.start, to: end).wholePoints","replace":"DesignRect(from: gesture.start, to: end)","tests":"DesignTextBoxDrawTests"},
+{"label":"a draw ignores Shift, so the box isn't square (shape-tools DS-5)","file":"Sources/DesignModel/DesignDrawing.swift","find":"modifiers: modifiers.editModifiers)","replace":"modifiers: modifiers.editModifiers.subtracting(.shift))","tests":"shiftSquares"},
+{"label":"a line takes the tool's ends, not the drag's (shape-tools DS-5)","file":"Sources/DesignModel/DesignDrawing.swift","find":"(spec.start, spec.end) = (drawn.spec.start, drawn.spec.end)","replace":"_ = drawn","tests":"aLineKeepsTheEndsItWasDraggedAlong"}
 ]

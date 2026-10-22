@@ -62,6 +62,15 @@ render.frame
 render.open-sheet
 render.start
 shape.draw
+stroke.add
+stroke.cap
+stroke.color
+stroke.dash
+stroke.join
+stroke.read
+stroke.remove
+stroke.trim
+stroke.width
 text.end-size-scrub
 text.set
 text.set-color

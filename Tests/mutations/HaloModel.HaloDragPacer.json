@@ -1,0 +1,6 @@
+[
+{"label":"every move writes, no coalescing","file":"Sources/HaloModel/HaloDragPacer.swift","find":"        if let at = writtenAt, now - at < interval {\n","replace":"        if let at = writtenAt, now - at < 0 {\n","tests":"HaloDragPacerTests"},
+{"label":"a held move keeps the first point, not the latest","file":"Sources/HaloModel/HaloDragPacer.swift","find":"            pending = point\n","replace":"            pending = pending ?? point\n","tests":"HaloDragPacerTests"},
+{"label":"end hands back the last written point, losing the final position","file":"Sources/HaloModel/HaloDragPacer.swift","find":"        let point = latest\n","replace":"        let point = pending == nil ? latest : nil\n","tests":"HaloDragPacerTests"},
+{"label":"flush writes before its refresh is due","file":"Sources/HaloModel/HaloDragPacer.swift","find":"now >= due else","replace":"now >= due - interval else","tests":"HaloDragPacerTests"}
+]
