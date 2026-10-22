@@ -64,22 +64,22 @@ public enum DesignTool: String, CaseIterable, Sendable {
     /// reason names the tool and its key itself.
     public var unavailableHelp: String? {
         switch self {
-        case .move, .frame, .rectangle, .ellipse, .text, .eyedropper: nil
-        case .shape: "Drawing shapes isn't built yet."
+        case .move, .frame, .rectangle, .ellipse, .shape, .text, .eyedropper: nil
         case .pen: "Drawing paths isn't built yet."
         }
     }
 
     public var isEnabled: Bool { unavailableHelp == nil }
 
-    /// The kind of node this tool draws; nil for Move, Pen and Eyedropper, and for Shape until DS-5.
+    /// The kind of node this tool draws; nil for Move, Pen and Eyedropper.
     public var nodeKind: DesignNodeKind? {
         switch self {
         case .frame: .frame
         case .rectangle: .rectangle
         case .ellipse: .ellipse
         case .text: .text
-        case .move, .shape, .pen, .eyedropper: nil
+        case .shape: .shape
+        case .move, .pen, .eyedropper: nil
         }
     }
 }

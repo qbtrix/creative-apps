@@ -12,5 +12,33 @@
     "find": "rate.frames(forDuration: $0)",
     "replace": "Int($0 * Double(rate.numerator) / Double(rate.denominator))",
     "tests": "FlareFrameRateTests"
+  },
+  {
+    "label": "inspectorExact: the inspector's timing intent sends the picked rate's whole number, so 23.976 lands as 24",
+    "file": "Sources/FlareModel/FlareFrameRate+Kernel.swift",
+    "find": "setSceneFrameRate(rate, seconds: keepsLength ? nil : rate.seconds(ofFrame: durationFrames))",
+    "replace": "setSceneTiming(fps: rate.nominal, durationFrames: durationFrames)",
+    "tests": "FlareNewDocumentTests"
+  },
+  {
+    "label": "playRebases: a running play switched from 24 to 23.976 keeps its 24 fps clock and slips a frame back",
+    "file": "Sources/FlareModel/FlareFrameRate+Kernel.swift",
+    "find": "        if isPlaying, canPlay { playClock = playbackRate.seconds(ofFrame: currentFrame) }\n",
+    "replace": "",
+    "tests": "FlareNewDocumentTests"
+  },
+  {
+    "label": "newSheetExact: a new document from a 23.976 spec gets the whole rate 24",
+    "file": "Sources/FlareModel/FlareNewDocument.swift",
+    "find": "            document.scenes[i].rate = spec.fps.sceneRate\n",
+    "replace": "",
+    "tests": "FlareNewDocumentTests"
+  },
+  {
+    "label": "playbackExact: playback ticks by the whole rate, so a second at 23.976 reaches frame 24",
+    "file": "Sources/FlareModel/FlarePlayback.swift",
+    "find": "rate: rate.sceneRate, durationFrames: frames,",
+    "replace": "rate: SceneRate(whole: rate.nominal), durationFrames: frames,",
+    "tests": "FlareNewDocumentTests"
   }
 ]
