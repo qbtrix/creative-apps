@@ -2,9 +2,9 @@
 
 Issue: #3713 · Packet: docs/blueprints/suiteui/features/adopt-kernel-autosave.md
 Run: act-1a163b2abfe-f182 (relaunch; first run act-1a15c07cabb-mtlw) · Started: 2026-10-22
-Stage: 3 wave 5 shipped; polling lane
+Stage: parked by the supervisor (AK-10 landing via lane)
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: lane batches #4010 → #4427 → #4428 (stacked) and #4430 (Fixes #4015); AK-flare done from the dev CI run holding #4010; AK-6, AK-8, AK-9, AK-11 blocked (re-read waits each poll)
+Next: retarget #4428 to dev once #4427 merges, then end the AK side (parked: AK-6, AK-8, AK-9 and AK-11 wait for the supervisor's relaunch after spine is feature-done and SC-f lands)
 
 ## Slices
 
@@ -39,6 +39,7 @@ Next: lane batches #4010 → #4427 → #4428 (stacked) and #4430 (Fixes #4015); 
 
 ## Decisions
 
+- 2026-10-22T16:20Z Supervisor answer on #3713 (issuecomment-6345079787): park it. Don't reorder the hand-off, don't start AK-6 or AK-8, and end the run once AK-4 and AK-10 are in the lane. The supervisor labels the issue waiting-on-prereq and will relaunch for AK-6, AK-8, AK-9 and AK-11 once spine is feature-done and SC-f lands. AK-4 #4010 merged as a3c4bff9 (held by dev 401242a5; scoped flare run 39810327753 and full CI 39810338100 pending). AK-10: I merged dev into feat/ak-10a-flare-autosave-tests (a1ede4d9, scripts/ci --changed: CI: PASS) and retargeted #4427 to dev with its Head line moved. #4428 stays stacked on #4427 and gets the same retarget once #4427 merges. Then the AK side of this run ends.
 - 2026-10-22T15:50Z blocked poll 3 (rule 23): spine.wave.json is still building, and shared-codecs.wave.json (SC-f) is still planned, the same as polls 1 and 2. Posted a Question for the supervisor on #3713 (issuecomment-6345010241): keep waiting, or reorder the AK-8/SC-f hand-off and build AK-6 against spine's dev state. AK-6, AK-8, AK-9 and AK-11 stay unstarted until it is answered. #4010 is clean at 68b3c4e6 (macOS build green) and waits on a lane sweep; #4427 and #4428 are stacked on it; #4430's macOS rebuild 39803550165 is still queued.
 - 2026-10-22T15:20Z heartbeat: #4010 macOS green, waits on a lane sweep; #4430 first macOS build (39792175488) was cancelled after sitting queued, lane re-dispatched 39803550165 (queued). Waits unchanged (blocked poll 2): spine building (AK-6), shared-codecs SC-f planned (AK-8); AK-9, AK-11 follow.
 - 2026-10-22T14:58Z heartbeat: #4010 macOS build 39790006247 green, waits on a lane sweep; #4430 macOS build 39792175488 queued; #4427/#4428 stacked on #4010. Waits re-read (blocked poll 1 of this run): library/spine building (AK-6); shared-codecs SC-f planned and owns PhotoWindow+File.swift (AK-8); AK-9 on AK-6/AK-8 (DA-z, HA-z built); AK-11 on AK-9, AK-10.
