@@ -1,10 +1,10 @@
 # export-pack lead record
 
-Issue: #3472 · Packet: docs/blueprints/halo/features/export-pack.md
-Run: act-1a15b98bcea-wygm · Session: claude/task-xjfhws · Started: 2026-10-20T23:47Z
-Stage: 3 polling (blocked; 2026-10-21T03:29Z: HS-a merged, placed-images not started)
+Issue: #4509 (was #3472) · Packet: docs/blueprints/halo/features/export-pack.md
+Run: act-1a16474bd28-v3ht · Session: claude/halo-feature-lead-3yp4w1 · Started: 2026-10-22T16:00Z (took over from earlier runs)
+Stage: 3 wave 1 (HX-a building, stacked on PH-a)
 Base: 2cc149f57 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: check whether gradient-fill:HG-a and placed-images:PH-a have merged; if so start HX-1 (codec and alpha settings, ProRes refused, HaloProResTests disabled)
+Next: HX-a PR opens when PH-a #4426 merges; then HX-m and HX-u stacked on HX-a
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -37,3 +37,5 @@ Next: check whether gradient-fill:HG-a and placed-images:PH-a have merged; if so
 ## Open
 - HX-a blocked (2026-10-21T00:13Z): gradient-fill:HG-a done (#3516); placed-images:PH-a waiting (stage 0, waits on HS-a #3676 and suiteui PL-a).
 - 2026-10-21T13:42:11Z check-in: still blocked; placed-images is at Stage 0, PH-a waits on HS-a (#3676), HK-a (key-editing) and PL-a.
+- 2026-10-22T16:37:55Z: New run act-1a16474bd28-v3ht for #4509. Cross-line waits are met on dev 7e9f260: ExportRules/keepsAlpha (SuiteKernel/Export/ExportOptions.swift), MovieCodec/MovieSettings/.prores4444 (SuiteModel/Values/Media.swift), media.movie (MediaEncoding.swift, FakeMedia.swift), SuiteShell/Media/MovieWriter.swift. gradient-fill is built. PH-a #4426 is open (fast-lane, clean, waits on its macOS build).
+- 2026-10-22T16:37:55Z: Decision: HX-a builds stacked on lead/halo-placed-images-PH-a (both touch HaloDocumentValues.swift, PH-a is A/C first); its PR opens after PH-a merges, as branch lead/halo-export-pack-HX-a.
