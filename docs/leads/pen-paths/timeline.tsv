@@ -141,3 +141,4 @@ utc	stage	event	ref	note
 2026-10-22T03:47Z	3	check	PN-3	#4203 macOS build 39712632560 still queued; #3477 waiting-on-prereq
 2026-10-22T04:05Z	3	wave	PN-8	wave 6: PN-8 builder started, stacked on PN-4 (3da37e78); #4203 macOS build still queued
 2026-10-22T04:14Z	3	built	PN-8	b01f7db4, 2 files +127/-18, CI: PASS; PR after PN-4
+2026-10-22T04:23:06Z	3	check	#4203	macOS build 39712632560 still queued; PN-8 diff critic check started
