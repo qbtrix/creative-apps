@@ -3,14 +3,16 @@
 // file-flow SF-9 adds the five file-flow commands over fixed readers, so RJ-X43 runs `file.drop` on the CLI;
 // gradient-fill GF-9 gives each rect an optional fill and lists the eight fill commands, so RJ-X30 runs on the CLI;
 // autosave-history AH-9 lists `history.read` and `history.jump` over its one History, so RJ-X31 runs on the CLI;
-// stroke-style SS-8 gives each rect an optional stroke and lists the nine stroke commands, so RJ-X35 runs on the CLI.
+// transform-tools TT-8 gives each rect a turn and mirrors and lists the six transform commands, so RJ-X32 runs on the CLI;
+// stroke-style SS-8 gives each rect an optional stroke and lists the nine stroke commands, so RJ-X35 runs on the CLI;
+// eyedropper EY-8 reads the topmost rect's fill at a point and lists `color.sample`, so RJ-X33 runs on the CLI.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
 
-/// One named rect on the fake canvas; a locked one refuses move, remove, a fill and a stroke.
+/// One named rect on the fake canvas; a locked one refuses move, remove, a fill, a stroke and a transform.
 public struct FakeRect: Codable, Hashable, Sendable {
     /// The rect's id, its name ("Rect 1"), its frame and whether it is locked.
     public var id: Int, name: String, x, y, w, h: Double, locked: Bool
@@ -19,11 +21,14 @@ public struct FakeRect: Codable, Hashable, Sendable {
     public var fill: Fill?
     /// The rect's outline, dash and trim included; nil draws none and is left out of the JSON, as `fill` is.
     public var stroke: VectorStroke?
+    /// The rect's clockwise turn in degrees about its centre and its mirrors; at 0 and false they are left out of
+    /// the JSON, so a rect never turned saves what it did before turns.
+    public var degrees = 0.0, flipX = false, flipY = false
     public init(id: Int, name: String, x: Double, y: Double, w: Double, h: Double, locked: Bool = false, fill: Fill? = nil,
                 stroke: VectorStroke? = nil) {
         (self.id, self.name, self.x, self.y, self.w, self.h, self.locked, self.fill, self.stroke) = (id, name, x, y, w, h, locked, fill, stroke)
     }
-    private enum CodingKeys: String, CodingKey { case id, name, x, y, w, h, locked, fill, stroke }
+    private enum CodingKeys: String, CodingKey { case id, name, x, y, w, h, locked, fill, stroke, degrees, flipX, flipY }
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         self.init(id: try c.decode(Int.self, forKey: .id), name: try c.decode(String.self, forKey: .name),
@@ -31,6 +36,8 @@ public struct FakeRect: Codable, Hashable, Sendable {
                   w: try c.decode(Double.self, forKey: .w), h: try c.decode(Double.self, forKey: .h),
                   locked: try c.decode(Bool.self, forKey: .locked), fill: try c.decodeIfPresent(Fill.self, forKey: .fill),
                   stroke: try c.decodeIfPresent(VectorStroke.self, forKey: .stroke))
+        degrees = try c.decodeIfPresent(Double.self, forKey: .degrees) ?? 0
+        (flipX, flipY) = (try c.decodeIfPresent(Bool.self, forKey: .flipX) ?? false, try c.decodeIfPresent(Bool.self, forKey: .flipY) ?? false)
     }
     public func encode(to encoder: any Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
@@ -38,6 +45,9 @@ public struct FakeRect: Codable, Hashable, Sendable {
         try c.encode(w, forKey: .w); try c.encode(h, forKey: .h); try c.encode(locked, forKey: .locked)
         try c.encodeIfPresent(fill, forKey: .fill)
         try c.encodeIfPresent(stroke, forKey: .stroke)
+        if degrees != 0 { try c.encode(degrees, forKey: .degrees) }
+        if flipX { try c.encode(flipX, forKey: .flipX) }
+        if flipY { try c.encode(flipY, forKey: .flipY) }
     }
     /// The box the rect's fill points are in: its own frame from the origin.
     public var fillBox: Rect { Rect(minX: 0, minY: 0, maxX: w, maxY: h) }
@@ -160,11 +170,13 @@ public struct FakeCanvasDocument: HeadlessDocument {
         .object(["rects": .number(Double(rects.count)), "selected": selected.map { .string($0.name) } ?? .null])
     }
 
-    /// The fake's thirty-two ids: its six commands, `edit.undo` and `edit.redo`, the five file-flow commands, the
-    /// eight fill commands, the two history commands and the nine stroke commands. Empty only if an id were refused.
+    /// The fake's thirty-nine ids: its six commands, `edit.undo` and `edit.redo`, the five file-flow commands, the
+    /// eight fill commands, the two history commands, the nine stroke commands, the six transform commands and
+    /// `color.sample`. Empty only if an id were refused.
     public static let catalog = (try? CommandCatalog<FakeCanvasDocument>(
         app: app, specs + FileFlowCommands.specs(FakeCanvasDocument.self) + GradientCommands.specs(FakeCanvasDocument.self)
-            + HistoryCommands.specs(FakeCanvasDocument.self) + StrokeCommands.specs(FakeCanvasDocument.self),
+            + HistoryCommands.specs(FakeCanvasDocument.self) + StrokeCommands.specs(FakeCanvasDocument.self)
+            + TransformCommands.specs(FakeCanvasDocument.self) + SampleCommands.specs(FakeCanvasDocument.self),
         history: { $0.history })) ?? .empty(app: app)
     /// A rect's result schema.
     static let rectSchema = ParamSchema.object(["id": .integer(), "name": .string(), "x": .number(), "y": .number(),
@@ -269,6 +281,66 @@ extension FakeCanvasDocument: HistoryJumping {
         history.jumpEndingRun(to: index) { old in defer { current = old }; return current }
         rects = current
         if !rects.contains(where: { $0.id == selection }) { selection = nil }
+    }
+}
+
+/// The fake as a transform target: the selected rect's box, turn and mirrors; a locked rect refuses with its reason.
+extension FakeCanvasDocument: TransformTarget {
+    public var transformSelection: TransformBox? {
+        selected.map { TransformBox(box: Rect(minX: $0.x, minY: $0.y, maxX: $0.x + $0.w, maxY: $0.y + $0.h),
+                                    degrees: $0.degrees, flipX: $0.flipX, flipY: $0.flipY) }
+    }
+    public var transformHelp: String? { editable.why }
+    /// Sets the selected rect's frame, turn and mirrors from `t` as the step `name` (one per `drag` token).
+    public mutating func setTransform(_ t: TransformBox, name: String, drag: String?) throws {
+        let index = try editableIndex("transform")
+        history.record(name, rects, key: drag.map { "transform.\(name):\($0)" })
+        (rects[index].x, rects[index].y, rects[index].w, rects[index].h) = (t.box.minX, t.box.minY, t.box.width, t.box.height)
+        (rects[index].degrees, rects[index].flipX, rects[index].flipY) = (t.degrees, t.flipX, t.flipY)
+    }
+}
+
+/// The fake as an eyedropper target: the topmost rect under the point, its fill read there in the rect's own frame.
+extension FakeCanvasDocument: SampleTarget {
+    /// The fake can always be sampled.
+    public var sampleHelp: String? { nil }
+    /// The fill of the topmost rect (the last in `rects`, whatever is selected) whose turned, mirrored frame holds
+    /// `point`, read at that point in the rect's own box: a gradient's colour there, a solid's colour, black for no
+    /// fill; nil on empty canvas or a point that isn't finite. The fake paints flat rects, so `size` is not read.
+    public func sampledColor(at point: Point, size: SampleSize) -> FillColor? {
+        guard point.x.isFinite, point.y.isFinite else { return nil }
+        func local(_ r: FakeRect) -> Point {
+            let frame = TransformBox(box: Rect(minX: r.x, minY: r.y, maxX: r.x + r.w, maxY: r.y + r.h),
+                                     degrees: r.degrees, flipX: r.flipX, flipY: r.flipY)
+            let p = TransformRules.local(point, in: frame)
+            return Point(x: p.x - r.x, y: p.y - r.y)
+        }
+        func holds(_ r: FakeRect) -> Bool {
+            let p = local(r)
+            return p.x >= 0 && p.x <= r.w && p.y >= 0 && p.y <= r.h
+        }
+        guard let top = rects.last(where: holds) else { return nil }
+        let fill = top.fill ?? .solid(.black)
+        return GradientRules.color(of: fill, at: Self.offset(of: fill, at: local(top)))
+    }
+
+    /// A gradient's offset at `p` in its fill box, clamped to 0...1: along the line for a linear, out from the centre
+    /// for a radial; 0 for a solid, a line of no length, a radial of no radius or a value that isn't finite.
+    static func offset(of fill: Fill, at p: Point) -> Double {
+        let t: Double
+        switch fill {
+        case .solid: return 0
+        case .linear(_, let start, let end):
+            let (dx, dy) = (end.x - start.x, end.y - start.y)
+            let length = dx * dx + dy * dy
+            guard length > 0 else { return 0 }
+            t = ((p.x - start.x) * dx + (p.y - start.y) * dy) / length
+        case .radial(_, let center, let radius):
+            guard radius > 0 else { return 0 }
+            let (dx, dy) = (p.x - center.x, p.y - center.y)
+            t = (dx * dx + dy * dy).squareRoot() / radius
+        }
+        return t.isFinite ? min(max(t, 0), 1) : 0
     }
 }
 

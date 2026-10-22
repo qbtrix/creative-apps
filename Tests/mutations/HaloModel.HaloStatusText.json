@@ -1,0 +1,5 @@
+[
+{"label":"the widest line follows the playhead","file":"Sources/HaloModel/HaloStatusText.swift","find":"public var statusTimecodeWidest: String { \"\\(timecode(lastFrame)) · frame \\(lastFrame)\" }","replace":"public var statusTimecodeWidest: String { \"\\(timecode(lastFrame)) · frame \\(playheadFrame)\" }","tests":"HaloStatusTimecodeWidthTests"},
+{"label":"the widest line takes frame 0's timecode","file":"Sources/HaloModel/HaloStatusText.swift","find":"{ \"\\(timecode(lastFrame)) · frame","replace":"{ \"\\(timecode(0)) · frame","tests":"HaloStatusTimecodeWidthTests"},
+{"label":"the widest line drops the frame number","file":"Sources/HaloModel/HaloStatusText.swift","find":"· frame \\(lastFrame)\" }","replace":"· frame\" }","tests":"HaloStatusTimecodeWidthTests"}
+]

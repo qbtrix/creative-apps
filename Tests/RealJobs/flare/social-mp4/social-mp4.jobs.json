@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "app": "flare",
+  "why": "RJ-F08, pending FV-7: Flare writes MP4 only once FV-4 streams frames into the shared writer and FV-7 runs it live. Exports a 640 x 360 bounce, 2 s at 30 fps, as an H.264 MP4 for social at Pixels 1920 x 1080, 30 fps: the movie is 1920 x 1080 (even, not 1919), 60 frames (not one short), 2.0 s long, and opaque on the scene's light grey background. FlareVideoExportTests runs the plan half on Linux.",
+  "pending": "FV-7",
+  "inputs": ["input/*.flare"],
+  "steps": [
+    {"id": "edit.select-all", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}", "format": "mp4", "options": {"size": {"pixels": [1920, 1080]}, "fps": 30}},
+  "expect": {
+    "out/bounce.mp4": {"pixels": {"tolerance": 2, "size": [1920, 1080], "at": {"x": 2, "y": 2, "rgb": [242, 242, 242]}}}
+  },
+  "platforms": []
+}
