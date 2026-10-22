@@ -195,3 +195,4 @@ utc	stage	event	ref	note
 2026-10-22T19:56Z	3	integrate	#4596	head 5ae9cd2d, CI PASS
 2026-10-22T20:42Z	3	merge	#4554	fixes core-loop finding
 2026-10-22T20:42Z	3	check-in	panel	no journeys run with fixes yet; wait 847f5072
+2026-10-22T21:34Z	3	check-in	panel	no completed journeys run with fixes; 39856259756 pending
