@@ -2,7 +2,7 @@
 // File > New, the toolbar's New and the empty state present: a preset or
 // Custom, size, frame rate, duration and background. It owns only its draft
 // NewDocumentSpec, typed numbers kept as text; `problem` shows under the
-// fields and disables Create, which sends `.file(spec.intent)`. Also holds
+// fields and disables Create, which sends `.file(spec.intent)` on File > New's catalog spec (command-state CS-12). Also holds
 // FlarePresentation, what the window presents over itself.
 import FlareModel
 import SuiteUI
@@ -85,11 +85,10 @@ struct FlareNewAnimationSheet: View {
                 Button("Cancel", role: .cancel) { onCancel() }
                     .keyboardShortcut(.cancelAction)
                     .accessibilityIdentifier("flare.new.cancel")
-                Button("Create") { if spec.problem == nil { onCreate(spec) } }
-                    .keyboardShortcut(.defaultAction)
-                    .disabled(spec.problem != nil)
-                    .help(spec.problem ?? "Create the animation")
-                    .accessibilityIdentifier("flare.new.create")
+                MenuCommand(FlareWorkspace.menuSpec(for: .file(.new)), on: spec.problem, title: "Create", shortcut: .defaultAction) {
+                    if spec.problem == nil { onCreate(spec) }
+                }
+                .accessibilityIdentifier("flare.new.create")
             }
         }
         .padding(SuiteSpacing.xl)
