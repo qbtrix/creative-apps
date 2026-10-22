@@ -64,3 +64,6 @@ utc	stage	event	ref	note
 2026-10-22T05:57:17Z	slice-done	ST-m	Belt-Slice-Done ST-m posted (run 39728647575, comment 6333871071). #4156 macOS build 39720731000 green, awaiting lane merge. No findings.
 2026-10-22T06:14:54Z	check	ST-live	#4156 clean, build green, awaiting lane sweep. #4161 draft. No findings.
 2026-10-22T06:45:04Z	stage	ST-live	#4156 merged 418ad114a; #4161 restacked on dev (3f297e984), ready; ST-z started stacked on ST-live2
+2026-10-22T07:20:48Z	check	resume	#4161	run act-1a16278ef53-kw2i resumed; #4161 macOS build 39736024768 queued; #4337 draft; ST-9 branches prepared; no findings
+2026-10-22T07:27:49Z	stage	ST-z	#4349	ST-9 gated (CI: PASS) and opened: #4349 C4 prose (fast-lane), #4350 built (draft, feature-done)
+2026-10-22T08:32:59Z	stage	ST-z	#4349	#4349 (ST-9 C4 prose) merged; #4161 macOS build still queued; RECORD mirrored to lead/suite-shell-text
