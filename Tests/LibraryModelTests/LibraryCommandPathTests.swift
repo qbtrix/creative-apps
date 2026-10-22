@@ -1,7 +1,9 @@
-// LibraryCommandPathTests.swift (command-state CS-3): the command each of Library's menu controls must run, so the
-// menu, the afterglow CLI and an agent take one path. One row per MenuCommand closure in LibraryCommands.swift (the
-// 25 the slice moves), plus the Develop tab's Show Original (#3652). Fails when a listed id is missing from the
-// catalog, has no params schema, can't run with no window, or a new spec's reason or params go astray. Linux-safe.
+// LibraryCommandPathTests.swift (command-state CS-3, CS-5): the command each of Library's controls must run, so the
+// window, the afterglow CLI and an agent take one path. One row per MenuCommand closure in LibraryCommands.swift (the
+// 25 CS-3 moves), the Develop tab's Show Original (#3652), then CS-5's: the export sheet's controls (its Export runs
+// `file.export` with the sheet's options), the browser's notice controls, Develop's Reset <slider> and the loupe's
+// Grid. Fails when a listed id is missing from the catalog, has no params schema, can't run with no window, or a new
+// spec's reason or params go astray. Linux-safe.
 @testable import LibraryModel
 import SuiteKernel
 import Testing
@@ -26,6 +28,19 @@ import Testing
         ("Metadata > Set Flag > Clear Flag", "metadata.clear-flag"),
         ("Metadata > Set Label > None", "metadata.set-label"), ("Metadata > Set Label > <color>", "metadata.set-label"),
         ("Develop > Show Original", "view.show-original"),
+    ] + sheetControls + DevelopSlider.allCases.map { ("Develop > \($0.rawValue) > Reset \($0.rawValue)", LibraryCatalog.resetSliderID($0)) }
+
+    /// CS-5's export sheet, browser and loupe controls. The sheet's 11 are these 10 and the name alert's Cancel,
+    /// which only dismisses the alert (the lint's dismiss rule); the notice's button is one row per action.
+    static let sheetControls: [(control: String, id: String)] = [
+        ("Export > Choose…", "export.set-folder"), ("Export > Presets > <preset>", "export.apply-preset"),
+        ("Export > Save as Preset…", "export.save-preset"), ("Export > Save as Preset… > Save", "export.save-preset"),
+        ("Export > Cancel", "export.close"), ("Export > Export", "file.export"),
+        ("Export > Exporting > Cancel", "export.cancel"), ("Export > Finished > Try Again", "export.retry"),
+        ("Export > Finished > Show in Finder", "export.show-in-finder"), ("Export > Finished > Done", "export.close"),
+        ("Notice > Show in Finder", "file.show-catalog"), ("Notice > Import Folder…", "file.import-folder"),
+        ("Notice > Close", "notice.close"), ("Import Notice > Show", "notice.show-failures"),
+        ("Import Notice > Close", "notice.close"), ("Loupe > Grid", "view.grid"),
     ]
 
     /// The catalog tests' states, plus the loupe at actual size, where Zoom to Fit can act.
@@ -33,12 +48,28 @@ import Testing
         let shared = LibraryCommandCatalogTests.states
         var zoomed = Dictionary(uniqueKeysWithValues: shared)["loupe"] ?? LibraryCatalog()
         zoomed.zoomLoupe(.actual)
-        return shared + [("loupe at actual size", zoomed)]
+        func with(_ name: String, _ change: (inout LibraryCatalog) -> Void) -> LibraryCatalog {
+            var c = Dictionary(uniqueKeysWithValues: shared)[name] ?? LibraryCatalog(); change(&c); return c
+        }
+        let editing = with("two selected") { _ = $0.beginExport(folder: "/tmp/Exports") }
+        var running = editing
+        _ = running.exportPlan(existingNames: [])
+        var failed = running
+        failed.finishExport(ExportSummary(total: 2, written: ["IMG_0001.jpg"],
+                                          failures: [FileFailure(path: "IMG_0002.jpg", reason: "Disk full.")], failedIDs: ["IMG_0002"]))
+        return shared + [
+            ("loupe at actual size", zoomed), ("export editing", editing), ("exporting", running), ("export failed", failed),
+            ("damaged", with("empty") { $0.catalogState = .damaged }),
+            ("import failures", with("grid") {
+                $0.importNotice = ImportNotice(folder: "/shoot", added: 1, failures: [FileFailure(path: "/shoot/a.jpg", reason: "Not an image.")])
+            }),
+            ("cull error", with("grid") { $0.cullError = "Culling is off." }),
+        ]
     }
     static func state(_ name: String) -> LibraryCatalog { Dictionary(uniqueKeysWithValues: states)[name] ?? LibraryCatalog() }
 
     @Test func everyControlIsListed() {
-        #expect(Self.controls.count == 26, "the 25 menu closures and Show Original")
+        #expect(Self.controls.count == 26 + 16 + DevelopSlider.allCases.count, "CS-3's 26, CS-5's 16 and a reset per slider")
         #expect(Set(Self.controls.map(\.control)).count == Self.controls.count)
     }
 
@@ -76,6 +107,25 @@ import Testing
             ("file.export", Self.state("two selected"), nil),
             ("file.import-folder", running, "An import is already running."),
             ("file.import-folder", Self.state("grid"), nil),
+            ("export.set-folder", Self.state("two selected"), "Choose File > Export… to open the export sheet."),
+            ("export.set-folder", Self.state("exporting"), "The export is running."),
+            ("export.apply-preset", Self.state("export editing"), nil),
+            ("export.close", Self.state("two selected"), "The export sheet isn't open."),
+            ("export.close", Self.state("exporting"), "The export is still running."),
+            ("export.close", Self.state("export failed"), nil),
+            ("export.cancel", Self.state("export editing"), "No export is running."),
+            ("export.cancel", Self.state("exporting"), nil),
+            ("export.retry", Self.state("export editing"), "No photos failed to export."),
+            ("export.retry", Self.state("export failed"), nil),
+            ("export.show-in-finder", Self.state("exporting"), "Nothing has been exported yet."),
+            ("file.show-catalog", Self.state("grid"), "The catalog file isn't damaged."),
+            ("file.show-catalog", Self.state("damaged"), nil),
+            ("notice.close", Self.state("damaged"), "There is no notice to close."),
+            ("notice.close", Self.state("cull error"), nil),
+            ("notice.show-failures", Self.state("cull error"), "No files failed to import."),
+            ("notice.show-failures", Self.state("import failures"), nil),
+            ("photo.reset-contrast", Self.state("grid"), "Develop isn't connected yet."),
+            ("photo.reset-contrast", Self.state("every slider"), nil),
         ]
         for (id, c, why) in cases {
             #expect(Self.catalog.availability(id, on: c).why == why, "\(id)")
@@ -102,6 +152,43 @@ import Testing
         let result = try Self.catalog.run("file.import-folder", params: .object(["folder": .string("/shoot")]), on: &g).result
         #expect(result == .object(["folder": .string("/shoot")]))
         #expect(g.importHelp == "An import is already running.")
+        var e = Self.state("export editing")
+        _ = try Self.catalog.run("export.set-folder", params: .object(["folder": .string("/web")]), on: &e)
+        _ = try Self.catalog.run("export.apply-preset", params: .object([
+            "name": .string("Web"), "quality": .number(70), "format": .string("PNG"), "sidecar": .bool(true),
+        ]), on: &e)
+        #expect(e.exportRun.options == ExportOptions(longEdge: nil, quality: 70, folder: "/web", format: .png, sidecar: true))
+        _ = try Self.catalog.run("export.apply-preset", params: .object(["name": .string("Small")]), on: &e)
+        #expect(e.exportRun.options == ExportOptions(longEdge: 1024, quality: 80, folder: "/web"))
+        let saved = try Self.catalog.run("export.save-preset", params: .object(["name": .string("Mine")]), on: &e).result
+        #expect(saved == (try JSONValue(encoding: ExportPreset(name: "Mine", options: ExportOptions(longEdge: 1024, quality: 80, folder: "/web")))))
+        #expect(throws: CatalogError.self) { try Self.catalog.run("export.apply-preset", params: .object(["name": .string("Nope")]), on: &e) }
+        var f = Self.state("export failed")
+        #expect(try Self.catalog.run("export.retry", params: .object([:]), on: &f).result == .object(["photos": .number(1)]))
+        #expect(f.exportState == .running(done: 0, total: 1))
+        var r = Self.state("every slider")
+        _ = try Self.catalog.run("photo.reset-tint", params: .object([:]), on: &r)
+        #expect(r.items.first { $0.id == "IMG_0001" }?.develop.value(.tint) == 0)
+        #expect(r.items.first { $0.id == "IMG_0001" }?.develop.value(.vibrance) == 1)
+        #expect(r.history.top?.name == "Reset Tint")
+    }
+
+    /// Show Failures lists them, then hides them; Close shuts the notice the row shows.
+    @Test func noticeControls() throws {
+        var c = Self.state("import failures")
+        _ = try Self.catalog.run("notice.show-failures", params: .object([:]), on: &c)
+        #expect(c.showsImportFailures)
+        _ = try Self.catalog.run("notice.show-failures", params: .object([:]), on: &c)
+        #expect(!c.showsImportFailures)
+        _ = try Self.catalog.run("notice.close", params: .object([:]), on: &c)
+        #expect(c.importNotice == nil)
+        var cull = Self.state("cull error")
+        _ = try Self.catalog.run("notice.close", params: .object([:]), on: &cull)
+        #expect(cull.cullError == nil)
+        let listed = Set(Self.controls.map(\.id))
+        for action in [LibraryNoticeContent.Action.showCatalogInFinder, .showFailures, .importFolder] {
+            #expect(listed.contains(action.commandID), "the notice's \(action) runs an unlisted id")
+        }
     }
 
     /// Show Original on, then off: the loupe's photo keeps its develop values and nothing is recorded.

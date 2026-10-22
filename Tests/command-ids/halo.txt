@@ -36,6 +36,8 @@ fill.stop-color
 fill.stop-move
 fill.stop-remove
 fill.type
+history.jump
+history.read
 inspector.end-property-scrub
 inspector.set-blend-mode
 inspector.set-parent

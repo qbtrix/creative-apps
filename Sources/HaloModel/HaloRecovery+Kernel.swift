@@ -8,19 +8,15 @@
 // on the saved step. The recovery bytes are HaloFiles' own encoding, the bytes
 // Save writes, and a recovered project decodes them through the same
 // `ProjectFiles.decode` Open uses (damaged bytes throw its error), then reads
-// edited, with no path and no steps. No history logic lives here.
+// edited, with no path and no steps; `restoreRecovered` does that in the open
+// window's project, keeping its services and recent list (HA-7b). No history
+// logic lives here.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
 import SuiteKernel
-
-/// A part of the recovery adapter not built yet; it says so instead of acting.
-public struct HaloNotBuilt: Error, Sendable, Equatable {
-    public let message: String
-    public init(_ message: String) { self.message = message }
-}
 
 extension HaloHistory {
     /// The kernel's `jumpEndingRun` from `current` to `index` applied steps:
@@ -59,9 +55,19 @@ extension HaloProject {
     /// edited and never saved, named `name`. Damaged bytes throw Open's error.
     public static func recovered(from data: Data, name: String?) throws -> HaloProject {
         var project = HaloProject(services: .live)
-        project.restore(try project.services.files.decode(data))
-        project.file.name = name
-        project.file.unsaved = true
+        try project.restoreRecovered(from: data, name: name)
         return project
+    }
+
+    /// Puts a recovery copy's project in place of this one, as `recovered`
+    /// builds it, on this project's services and keeping its recent list.
+    /// Damaged bytes throw Open's error and leave the project as it was.
+    public mutating func restoreRecovered(from data: Data, name: String?) throws {
+        let state = try services.files.decode(data)
+        restore(state)
+        history = HaloHistory()
+        file.name = name
+        file.path = nil
+        file.unsaved = true
     }
 }

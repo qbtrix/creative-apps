@@ -1,0 +1,5 @@
+[
+{"label":"a pick is dropped: choosing a rate does nothing","file":"Sources/SuiteUI/FrameRateMenu.swift","find":"onChange: { onSelect($0) }","replace":"onChange: { _ in }","tests":"FrameRateMenuTests"},
+{"label":"the check matches by nominal rate: 23.976 also checks 24","file":"Sources/SuiteUI/FrameRateMenu.swift","find":"isChecked: $0 == rate","replace":"isChecked: $0.nominal == rate.nominal","tests":"FrameRateMenuTests"},
+{"label":"the menu titles the first option, not the bound rate","file":"Sources/SuiteUI/FrameRateMenu.swift","find":"title: rate.description, onChange","replace":"title: nil, onChange","tests":"FrameRateMenuTests"}
+]
