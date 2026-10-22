@@ -2,7 +2,7 @@
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
 Run: act-1a1627ce3b4-ayhz · Session: claude/feature-lead-playbook-6guwwp · Started: 2026-10-22T07:24Z (prior runs act-1a1605b0534-rn47, act-1a15e909498-4bkk, act-1a15abb305f-lc8g, act-1a159c9b6b4-va3c)
-Stage: DK-a done; DK-u waits on shape-tools DS-u, DK-m on DS-m (Design shape-tools: only DS-a #3857 merged; #3440 marked prereq-priority 08:16Z) (2026-10-22T08:20Z)
+Stage: blocked: DK-u waits shape-tools:DS-u, DK-m waits DS-m (only DS-a merged); Question for the supervisor posted on #3441 after 3 identical polls (2026-10-22T08:59Z)
 Base: 5bec8089 (origin/dev); main verified at 0dd23d65
 Next: DK-u waits shape-tools:DS-u (DT-u met); DK-m waits shape-tools:DS-m (DT-m met; needs eyedropper DY-m, building this run). Re-read waits every poll
 
@@ -35,6 +35,7 @@ Next: DK-u waits shape-tools:DS-u (DT-u met); DK-m waits shape-tools:DS-m (DT-m 
 - #3865 (Join/Cap chips act on nothing) became gap p2 after round 2: Design cannot disable those rows until #4014 (StrokeEditor styleHelp, needs-ui) lands; DK-5 also closes it.
 
 ## Open
+- 2026-10-22T08:59Z: 3 identical blocked polls (07:24Z, 08:20Z, 08:58Z); asked the supervisor on #3441 (comment 6336857347) whether to wait for a shape-tools lead or take DS-u/DS-m.
 - Run act-1a1627ce3b4-ayhz: brief rule 2 asks to rebase and force-push lead/eyedropper onto main; that branch is the SuiteUI eyedropper lead's record (#3448), so this run does not rewrite it and keeps lead/design-<feature>.
 
 - Run act-1a1605b0534-rn47: the brief's "rebase lead/eyedropper onto origin/main" was not done: lead/eyedropper is the SuiteUI eyedropper lead's branch (#3448); this lead's status stays on lead/design-*.
