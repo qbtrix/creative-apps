@@ -2,9 +2,9 @@
 
 Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: waiting: #4252 mac build green, awaiting lane batch; #4253 blocked on dev-red FormatListRatchet (#4258 open)
+Stage: refresh: builder merging dev (with #4238 ratchet fix) into #4252 and #4253, rerunning scripts/ci --changed
 Base: dev
-Next: on green photo run with #4252/#4253/#4175: critics, Belt-Slice-Done, contact sheets
+Next: new heads -> lane mac builds -> batch; then green photo run -> critics, Belt-Slice-Done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
