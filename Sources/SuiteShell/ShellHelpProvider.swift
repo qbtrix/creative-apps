@@ -1,6 +1,6 @@
 // ShellHelpProvider.swift (report-problem RP-2): SuiteModel's ProblemReport and BetaNotes adapted to the
-// kernel's HelpProviding, so the Help catalog's commands read this Mac's app, version, build, macOS and model.
-// Reads no network; the crash folder reader comes with RP-5, so the report has no crashes yet.
+// kernel's HelpProviding, so the Help catalog's commands read this Mac's app, version, build, macOS and model,
+// and its recent crash files through CrashFolderReader (RP-5b). Reads no network.
 import Foundation
 import SuiteKernel
 import SuiteModel
@@ -16,7 +16,7 @@ public struct ShellHelpProvider: HelpProviding {
             version: info["CFBundleShortVersionString"] as? String ?? "",
             build: info["CFBundleVersion"] as? String ?? "",
             macOS: process.operatingSystemVersionString, model: Self.model(),
-            crashes: [], now: Date(), home: NSHomeDirectory(), user: NSUserName(), host: process.hostName)
+            crashes: CrashFolderReader.read(), now: Date(), home: NSHomeDirectory(), user: NSUserName(), host: process.hostName)
         return .object([
             "app": .string(report.app), "version": .string(report.version), "build": .string(report.build),
             "macOS": .string(report.macOS), "model": .string(report.model),

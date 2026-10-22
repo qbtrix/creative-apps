@@ -5,7 +5,8 @@
 // histogram sits above both tabs, in LibraryInspector): the render error
 // (`library.develop.error`), the TONE and COLOR
 // sections with one bar row per slider ("Mixed" while the targets differ, a
-// Reset context menu per row, the section reset while any row is off 0),
+// Reset context menu per row, its `photo.reset-<slider>` spec's MenuCommand
+// (CS-6), the section reset while any row is off 0),
 // CURVE (SuiteUI's ToneCurveEditor over the targets' curve, its engine
 // samples and the loupe histogram, `library.develop.curve`) and LEVELS (a
 // row per field, 0...255 whole numbers, Midtones 0.10...9.99 with two places,
@@ -62,13 +63,18 @@ struct DevelopInspector: View {
         return { reset(group) }
     }
 
+    /// The row's Reset item's action (its `photo.reset-<slider>` spec's), nil while resets can't run.
+    private func reset(_ slider: DevelopSlider) -> LibraryMenu.Action? {
+        guard let resetSlider = develop.resetSlider else { return nil }
+        return { resetSlider(slider) }
+    }
+
     private func row(_ slider: DevelopSlider) -> some View {
         let value = model.developValue(slider)
         let enabled = develop.set != nil && model.sliderHelp(slider) == nil
         let help = model.sliderHelp(slider) ?? Self.unavailable
         let set = develop.set
         let endEdit = develop.endEdit
-        let resetSlider = develop.resetSlider
         return InspectorSliderRow(
             slider.rawValue, value: value?.shared ?? 0, in: slider.range, step: slider.step,
             unit: slider == .exposure ? "EV" : "", decimals: slider == .exposure ? 2 : 0, mixed: value == .mixed,
@@ -77,8 +83,7 @@ struct DevelopInspector: View {
         .disabled(!enabled)
         .help(enabled ? "" : help)
         .contextMenu {
-            Button("Reset \(slider.rawValue)") { resetSlider?(slider) }
-                .disabled(resetSlider == nil)
+            MenuCommand(LibraryCatalog.resetSliderID(slider), on: model, action: reset(slider), reason: help)
         }
         .libraryControl(id: Self.rowID(slider), enabled: enabled, help: help)
     }
