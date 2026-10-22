@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: PH-a DONE. PH-m: #4618 (f14e9ffb, dev, fast-lane, clean) awaiting lane merge; then Belt-Slice-Done PH-m on green dev Linux. PH-u: #4437 lane Linux check red 22:16Z (run 39862532784): CommandPathTests halo, HaloPlace.swift:134 MenuCommand without spec; fixer merging dev + building it from a catalog spec, then propagating to PH-u2 (#4438). PH-z: #4649 draft on PH-u2; PH-8 after. Gap candidates: SVG gradient flat, SVG strokes, no overshoot ease preset.
+Next: PH-a DONE. PH-m: #4618 (f14e9ffb, dev, fast-lane) awaiting lane; then Belt-Slice-Done PH-m on green dev Linux. PH-u: #4437 fixed (242be347: dev merged, Place menu from catalog spec place.image, CI PASS), awaiting lane build; #4438 now c51d4b2b (PH-u merged in), retarget to dev after #4437 merges. PH-z: #4649 (dca4566b) draft on PH-u2, merge PH-u2 in at retarget; PH-8 after. Gap candidates: SVG gradient flat, SVG strokes, no overshoot ease preset.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
