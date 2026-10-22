@@ -1,5 +1,5 @@
 # AfterGlowApp's menu items and buttons built without a command spec (command-path, command-state CS-2).
-# max: 25
+# max: 24
 Sources/AfterGlowApp/HomeGrid.swift: Button("Locate…") { HomeInspector.locate(ref, model: model) }
 Sources/AfterGlowApp/HomeGrid.swift: Button("Remove from Recents") { Task { await model.removeSelection(now: Date()) } }
 Sources/AfterGlowApp/HomeGrid.swift: Button("Undo") { Task { await model.undoRemove(now: Date()) } }

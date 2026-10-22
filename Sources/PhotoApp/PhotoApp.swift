@@ -18,6 +18,9 @@
 // gets the suite's Open Recent ▸ and Open In ▸ (SuiteFileCommands), and the
 // editor takes drops (`.suiteFileDrop`); all three read PhotoShell's one
 // documents bridge, which starts watching the suite's recents at launch.
+// Finding #4260: the delegate is a SuiteAppDelegate, so a hand-off file
+// (Open Recent ▸, Open In from another app) reaches PhotoShell.host, a
+// PhotoDocumentHost that opens each image through PhotoOpenQueue.
 import AppKit
 import PhotoModel
 import SuiteModel
@@ -36,8 +39,12 @@ import SwiftUI
         return SuiteDocumentsBridge(app: .photo, services: services)
     }()
 
-    /// The hand-off host; Photo's answers to open, new and place don't depend on an open image.
-    static let host = PhotoWorkspace(services: .fake)
+    /// The hand-off host: an open hand-off opens each image in an empty window or a new one.
+    static let host = PhotoDocumentHost { requests in
+        await MainActor.run {
+            for case .open(let path) in requests { PhotoOpenQueue.shared.open(URL(fileURLWithPath: path)) }
+        }
+    }
 }
 
 @main
@@ -60,14 +67,20 @@ struct PhotoApp: App {
     }
 }
 
-/// Finder opens, the suite's recents and Quit's unsaved-changes prompts.
-@MainActor final class PhotoAppDelegate: NSObject, NSApplicationDelegate {
+/// Finder opens, suite hand-offs, the suite's recents and Quit's unsaved-changes prompts.
+@MainActor final class PhotoAppDelegate: SuiteAppDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         Task { await PhotoShell.bridge.watch() }
     }
 
-    func application(_ application: NSApplication, open urls: [URL]) {
-        for url in urls { PhotoOpenQueue.shared.open(url) }
+    override func application(_ application: NSApplication, open urls: [URL]) {
+        for url in urls {
+            if url.pathExtension == "aghandoff" {
+                Task { await self.handle(url) }
+            } else {
+                PhotoOpenQueue.shared.open(url)
+            }
+        }
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {

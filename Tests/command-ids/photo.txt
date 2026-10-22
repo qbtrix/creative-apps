@@ -57,6 +57,7 @@ tool.gradient
 tool.heal
 tool.marquee
 tool.move
+tool.text
 transform.begin
 transform.cancel
 transform.commit
@@ -70,3 +71,5 @@ view.actual-size
 view.fit
 view.zoom-in
 view.zoom-out
+history.jump
+history.read
