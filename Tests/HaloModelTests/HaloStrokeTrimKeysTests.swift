@@ -49,11 +49,8 @@ import Testing
     }
 
     @Test func aReasonTurnsTheKeyOffAndItsClickSendsNothing() throws {
-        let keys = try Self.badge().trimKeys
-        let project = try Self.badge()
-        let reason = HaloProject.trimKeyHelp("trimEnd", strokeHelp: project.strokeHelp) { _ in nil }
-        #expect(keys.allSatisfy { $0.help != nil }, "every key says why it can't act while the stroke isn't built")
-        #expect(project.strokeHelp == nil || reason == project.strokeHelp, "the stroke's reason comes first")
+        #expect(HaloProject.trimKeyHelp("trimEnd", strokeHelp: "no stroke") { _ in "busy" } == "no stroke",
+                "the stroke's reason comes first")
         #expect(HaloProject.trimKeyHelp("nope", strokeHelp: nil) { _ in nil } == HaloProject.trimKeysNotBuiltHelp,
                 "a trim track with no property says keying the trim isn't built")
         #expect(HaloProject.trimKeyHelp("x", strokeHelp: nil) { _ in "busy" } == "busy", "the property's own reason")
@@ -62,10 +59,16 @@ import Testing
         let free = HaloTrimKey(raw: HaloProperty.x.rawValue, title: "X", keyState: .animated, help: nil)
         #expect(HaloProject.trimKeyCommand(free, diamond: true) == .toggleKey(.x))
         #expect(HaloProject.trimKeyCommand(free, diamond: false) == .toggleAnimation(.x))
-        for key in keys {
-            #expect(HaloProject.trimKeyCommand(key, diamond: true) == nil)
-            #expect(HaloProject.trimKeyCommand(key, diamond: false) == nil)
-        }
+    }
+
+    @Test func aBuiltStrokesTrimKeysActOnTheirProperties() throws {
+        let project = try Self.badge()
+        #expect(project.strokeHelp == nil, "a stroked shape layer edits its stroke (HK-6)")
+        let keys = project.trimKeys
+        #expect(keys.allSatisfy { $0.help == nil }, "every trim key acts on a stroked shape")
+        #expect(keys.map { HaloProject.trimKeyCommand($0, diamond: true) } == HaloProperty.trims.map { .toggleKey($0) })
+        #expect(
+            keys.map { HaloProject.trimKeyCommand($0, diamond: false) } == HaloProperty.trims.map { .toggleAnimation($0) })
     }
 
     @Test func withoutAReasonTheDiamondKeysAndTheStopwatchAnimates() throws {
