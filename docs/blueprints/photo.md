@@ -70,7 +70,11 @@ In plain words, v1 does:
   arrow-key pan.
 - **Layers.** New, delete, rename, show and hide, opacity, blend mode (the 16
   W3C modes), reorder by drag and by Command-] / Command-[, select by
-  Option-Command-] / [.
+  Option-Command-] / [. Several layers: Shift-click picks a range,
+  Command-click adds or drops one, Select > All Layers (Option-Command-A)
+  picks every layer; hide, opacity, Move and Delete then act on every picked
+  layer as one undo step, and Delete refuses to take every layer
+  (`photo/multi-layer-select`).
 - **Tools on the rail:** Move V, Marquee M (rectangles only), Brush B, Eraser E
   (each with its own size, hardness, opacity), Clone S, Heal J, Crop C.
 
@@ -208,7 +212,7 @@ or writing any closed layered format.
 | Edit | Cut, Copy, Paste (as a new layer, at its place or centered), Paste from another app's image on the pasteboard, Duplicate Layer, Merge Down, Flatten Image | Paste Into a selection, Copy Merged |
 | Place | File > Place… (Shift-Command-P) brings a PNG or JPEG in as a new pixel layer above the selected one, named after the file, scaled down to fit the canvas when larger (never up) and centred, as one undo step; dropping a PNG or JPEG on an open document places it at the drop point, and a drop with no document open still opens the file; an SVG is refused with "Photo places PNG or JPEG files."; it runs through the shared `place.image` command, so the CLI and an agent place too (`photo/place-image`, beta) | Placing as a layer that keeps its source and rescales without loss, SVG, HEIC and TIFF |
 | Crop | Typed X, Y, W, H for the pending crop; aspect Free, Original, 1:1, 3:2, 4:3, 16:9 with a portrait swap | Crop presets with resolution, perspective crop |
-| Layers | Adjustment layers (Exposure, Levels, Curves, Hue/Saturation) in the stack, each with visibility, opacity, blend mode, reorder and a mask; clipping masks (`photo/masks-clipping`); layer styles, shared with Design and Halo (`photo/layer-styles` on `suiteui/layer-styles`; captain 2026-10-21, beta) | Blur as an adjustment layer (it's a filter), layer groups |
+| Layers | Adjustment layers (Exposure, Levels, Curves, Hue/Saturation) in the stack, each with visibility, opacity, blend mode, reorder and a mask; clipping masks (`photo/masks-clipping`); several layers picked at once, with hide, opacity, Move and Delete on all of them (`photo/multi-layer-select`); layer styles, shared with Design and Halo (`photo/layer-styles` on `suiteui/layer-styles`; captain 2026-10-21, beta) | Blur as an adjustment layer (it's a filter), layer groups |
 | Select | Rectangle, Ellipse and Lasso (freehand, closed on release); Shift adds, Option subtracts; Select > Invert; Feather; brush, eraser, clone, heal, Fill and Delete act inside it | Magic wand, quick selection, refine edge, saved selections |
 | Masks | Add Mask from Selection, Delete Mask, Apply Mask, disable a mask; paint on the mask with brush and eraser | Vector masks, mask density and feather sliders on the layer |
 | Transform | Edit > Free Transform (Command-T): scale with the 8 handles, rotate outside them, Shift keeps ratio, typed W%, H%, angle; Edit > Transform > Flip Horizontal and Flip Vertical (the selected layer); Image > Flip Canvas Horizontal and Vertical | Skew, distort, perspective, warp |
