@@ -661,6 +661,36 @@
             ]
           },
           {
+            "id": "suite-imaging",
+            "name": "SuiteImaging",
+            "description": "The suite's one imaging library (docs/blueprints/suiteui/features/suite-imaging.md): the adjustment values Photo and Library share, the tone program they compile to, the CPU or GPU route and the live GPU tone surface. Linked by the Design, Photo, Library and Halo Models, SuiteUI and the CLI. Linux-safe over CoreRaster, CoreRender and CoreColor; CoreRenderMetal only on macOS. The only module outside SuiteUI's canvas host that may import Metal (ImagingBoundaryTests). Imports no app Model and no SuiteUI.",
+            "technology": "Swift 6, Foundation (FoundationEssentials), CoreRaster, CoreRender, CoreColor; CoreRenderMetal and Metal on macOS",
+            "tags": [
+              "internal"
+            ],
+            "components": [
+              {
+                "id": "imaging-adjust",
+                "name": "Adjust",
+                "description": "Adjust/ and the SuiteImaging namespace: AdjustSettings (exposure, levels, curve, hue and saturation) with its clamps and its one Codable form Photo and Library both read, and ImagingProgram, which compiles settings to CoreRender's tone adjustments (CPU) and tone program (GPU) in one fixed order. suite-imaging IM-2 declares them as stubs; IM-3 and IM-4 fill the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and CoreRender, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Adjust/",
+                  "Sources/SuiteImaging/SuiteImaging.swift"
+                ]
+              },
+              {
+                "id": "imaging-route",
+                "name": "Route",
+                "description": "Route/: ImagingRoute (CPU or GPU for a list of tone steps, CPU whenever a step is not on Metal yet) and, on macOS, LiveToneSurface, which keeps the base resident on the GPU and folds each step's tone program into the display encode. suite-imaging IM-2 declares them as stubs; IM-4 and IM-5 fill the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), CoreRender and CoreRaster; CoreRenderMetal and Metal on macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Route/"
+                ]
+              }
+            ]
+          },
+          {
             "id": "suite-shell",
             "name": "SuiteShell",
             "description": "macOS glue every app process links: live conformances needing AppKit or Launch Services, shared menu commands, the adoption modifier.",
@@ -1253,6 +1283,42 @@
         "source": "suite-kernel",
         "target": "flarecore",
         "description": "uses FlareCore's Point, Rect, Matrix, Keyframe and Easing as they are",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "corerender",
+        "description": "compiles adjustments to CoreRender's tone adjustments and tone program",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "coreraster",
+        "description": "reads and writes tiled pixels",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "corecolor",
+        "description": "converts colours for the hue and saturation step",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "corerendermetal",
+        "description": "runs the tone program on the GPU (macOS only)",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "suite-kernel",
+        "description": "uses the kernel's shared editor values",
+        "style": "sync"
+      },
+      {
+        "source": "suite-imaging",
+        "target": "suite-model",
+        "description": "reads the suite's format registry",
         "style": "sync"
       },
       {
