@@ -2,9 +2,9 @@
 
 Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: 00:45Z: #4252 per-head mac build dispatched (2404bc6fe); #4253 lane Linux check 39700841445 running (d6f244af5); dev Linux red on non-photo tests (SuiteModel format list)
+Stage: 01:08Z: #4252 per-head mac build 39700821595 queued; #4253 lane Linux red on dev's FormatListRatchet (not ours, fix #4258 open, commented)
 Base: dev
-Next: lane batches both; then green photo run -> critics + slice-done
+Next: wait #4258 + lane; then green photo run -> critics + slice-done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
