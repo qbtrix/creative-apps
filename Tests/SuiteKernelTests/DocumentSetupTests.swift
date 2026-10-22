@@ -43,7 +43,7 @@ private func tenSeconds() throws -> (FakeSetupDoc, CommandCatalog<any DocumentSe
     }
 
     /// 4 × 6 in at 300 ppi is 1200 × 1800; 10 cm is 1181; 5 cm rounds up to 591; 72 pt and 25.4 mm are an inch; px ignores ppi.
-    @Test(.disabled("waits on DS-3")) func unitsToPixels() {
+    @Test func unitsToPixels() {
         #expect(Self.print.pixelSize == (1200, 1800))
         #expect(DocumentSetup(width: 10, height: 5, unit: .cm, resolution: 300).pixelSize == (1181, 591))
         #expect(DocumentSetup(width: 72, height: 25.4, unit: .pt, resolution: 300).pixelSize.width == 300)
@@ -53,7 +53,7 @@ private func tenSeconds() throws -> (FakeSetupDoc, CommandCatalog<any DocumentSe
     }
 
     /// A unit change converts the numbers and keeps the pixels.
-    @Test(.disabled("waits on DS-3")) func unitChangeKeepsPixels() {
+    @Test func unitChangeKeepsPixels() {
         let cm = Self.print.converted(to: .cm), px = Self.print.converted(to: .px)
         #expect(cm.unit == .cm && abs(cm.width - 10.16) < 1e-9 && cm.pixelSize == (1200, 1800))
         #expect(px.unit == .px && px.width == 1200 && px.height == 1800)
@@ -61,7 +61,7 @@ private func tenSeconds() throws -> (FakeSetupDoc, CommandCatalog<any DocumentSe
     }
 
     /// Each problem is on its own field with its sentence: 0 width, a height past the limit, 0 ppi, a rate and a duration.
-    @Test(.disabled("waits on DS-3")) func problemsPerField() {
+    @Test func problemsPerField() {
         let still = DocumentLimits()
         #expect(DocumentSetup(width: 0, height: 1080).problems(still) == [SetupProblem(.width, "Width must be 1 to 16384 px.")])
         #expect(DocumentSetup(width: 100, height: 0).problems(still) == [SetupProblem(.height, "Height must be 1 to 16384 px.")])
@@ -81,13 +81,13 @@ private func tenSeconds() throws -> (FakeSetupDoc, CommandCatalog<any DocumentSe
     }
 
     /// Swap turns 1080 × 1920 into 1920 × 1080.
-    @Test(.disabled("waits on DS-3")) func swapTurnsTheSides() {
+    @Test func swapTurnsTheSides() {
         let story = DocumentSetup(width: 1080, height: 1920).swapped()
         #expect(story.width == 1920 && story.height == 1080 && story.pixelSize == (1920, 1080))
     }
 
     /// "#00000000" reads transparent; names and hex parse and code as one string; junk doesn't.
-    @Test(.disabled("waits on DS-3")) func backgroundHex() throws {
+    @Test func backgroundHex() throws {
         #expect(DocumentBackground(parsing: "#00000000") == .transparent && DocumentBackground(parsing: "#1B2A4A00") == .transparent)
         #expect(DocumentBackground(parsing: "white") == .white && DocumentBackground(parsing: "transparent") == .transparent)
         #expect(DocumentBackground(parsing: "#1b2a4a") == .color(hex: "#1B2A4A") && DocumentBackground(parsing: "#1B2A4AFF") == .color(hex: "#1B2A4AFF"))
@@ -100,7 +100,7 @@ private func tenSeconds() throws -> (FakeSetupDoc, CommandCatalog<any DocumentSe
 
     /// Growing 1920 × 1080 to 1920 × 1200 anchored bottom moves content down 120, as one undo step; a rate
     /// change keeps the duration in seconds; a duration change is its own step.
-    @Test(.disabled("waits on DS-4")) func settings() throws {
+    @Test func settings() throws {
         var (doc, catalog) = try tenSeconds()
         var target: any DocumentSetupTarget = doc
         let grow = try catalog.run("document.set-settings", params: .object(["height": .number(1200), "anchor": .string("bottom")]), on: &target)
@@ -120,7 +120,7 @@ private func tenSeconds() throws -> (FakeSetupDoc, CommandCatalog<any DocumentSe
     }
 
     /// Read answers the setup and its pixels; a set with a problem is refused and writes nothing.
-    @Test(.disabled("waits on DS-4")) func readAndRefuse() throws {
+    @Test func readAndRefuse() throws {
         let (doc, catalog) = try tenSeconds()
         var target: any DocumentSetupTarget = doc
         let read = try catalog.run("document.read-settings", params: .object([:]), on: &target)
