@@ -4,7 +4,8 @@
 // a .halo to Halo, refuses an SVG (the host with "Flare can't import SVG
 // yet.") until SVG import (E11), accepts open and new hand-offs, reads its
 // recents from the suite's list, imports its old list once, registers the
-// shared file-flow ids. Runs on Linux and macOS.
+// shared file-flow ids, and runs RJ-F42 (Tests/RealJobs/flare/open-recent)
+// on the catalog. Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -171,7 +172,42 @@ private func clearThroughFileFlow<T: FileFlowTarget>(_ target: inout T) throws {
         #expect(Set(ids).isSubset(of: FlareWorkspace.catalog.ids), "a file-flow id is missing, or a duplicate emptied the catalog")
         #expect(FlareWorkspace.catalog.spec("file.clear-recent")?.title == "Clear Menu")
     }
+
+    /// RJ-F42 on Linux: the CLI keeps file commands window-only, so the walk runs the job's steps here and notes
+    /// the save in a temp suite store the way the window's bridge does.
+    @Test func openRecentRealJobPasses() async throws {
+        let folder = FlareJob.root.appendingPathComponent("open-recent")
+        let script = try JSONDecoder().decode(OpenRecentJob.self, from: Data(contentsOf: folder.appendingPathComponent("open-recent.jobs.json")))
+        let bounce = folder.appendingPathComponent("input/bounce.flare").path
+        var workspace = try openedFile(bounce)
+        let recents = StoreRecents(store: FileStore(folder: try tempFolder().path))
+        var results: [JSONValue] = []
+        for step in script.steps {
+            var params = step.params
+            if case .object(var fields) = params, case .array(let paths)? = fields["paths"] {
+                fields["paths"] = .array(paths.map { if case .string(let p) = $0 { .string(folder.appendingPathComponent(p).path) } else { $0 } })
+                params = .object(fields)
+            }
+            results.append(try FlareWorkspace.catalog.run(step.id, params: params, on: &workspace).result)
+            if step.id == "file.save", let ref = workspace.suiteDocument {
+                try await recents.note(ref, event: .saved, at: Date(timeIntervalSince1970: 0), thumbnail: nil)
+                let items = try await recents.list().items.filter { $0.ref.app == .flare }
+                workspace.updateFileFlow(recents: items.map {
+                    RecentFileEntry(fileID: $0.ref.fileID, name: $0.ref.displayName, path: $0.ref.path, app: "flare", lastUsed: $0.lastUsed)
+                })
+            }
+        }
+        #expect(results.count == 3)
+        guard results.count == 3, case .array(let listed) = results[1], case .array(let dropped) = results[2] else { return }
+        #expect(listed.count == 1 && workspace.recentFiles.map(\.path) == [bounce], "Open Recent isn't the suite's list")
+        #expect(dropped.count == 2)
+        let title = folder.appendingPathComponent("input/title.flare").path
+        #expect(workspace.takeFileRequests() == [.open(path: title)], "the .flare didn't open, or the SVG did")
+    }
 }
+
+/// The parts of open-recent.jobs.json the walk runs.
+private struct OpenRecentJob: Decodable { var steps: [CommandEnvelope] }
 
 extension FlareJob {
     /// RJ-F42's bounce.flare, a one-scene animation.

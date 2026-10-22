@@ -165,6 +165,7 @@ extension FlareWorkspace {
             example: .object(["name": .string("Intro")]), noScene) { w, p in w.renameScene(w.selectedSceneID ?? "", to: p.name) },
         act("scenes.remove", "Delete Scene", "Removes the selected scene; its undo step is Delete Scene.", .edit,
             { w in w.selectedSceneID.map(w.removeSceneHelp) ?? FlareLayerError.noDocument.message }) { w in w.removeScene(w.selectedSceneID ?? "") },
+        setFrameRate,  // frame-rates FR-10, FlareFrameRate+Kernel.swift
     ] + GradientCommands.specs(FlareWorkspace.self)  // the eight fill.* commands (gradient-fill FG-5)
         + FileFlowCommands.specs(FlareWorkspace.self)  // file.recent, open-recent, clear-recent, open-in, drop (file-flow FL-3)
 }

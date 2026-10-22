@@ -20,8 +20,18 @@ public typealias HaloPoint = FlareCore.Point
 /// An animatable layer property. The raw value is the track key in
 /// `HaloLayer.tracks`; x, y, scaleX, scaleY, rotation and opacity are the
 /// names FlareCore's `Layer.sample` uses, anchorX and anchorY are Halo's own.
+/// trimStart, trimEnd and trimOffset (HK-5) are a shape's stroke trim:
+/// fractions of the outline, the offset in turns.
 public enum HaloProperty: String, CaseIterable, Codable, Sendable {
     case x, y, scaleX, scaleY, rotation, opacity, anchorX, anchorY
+    case trimStart, trimEnd, trimOffset
+
+    /// The transform rows the inspector, the timeline and `key.*` list; the
+    /// trims key through the stroke editor (`trims`), so they are left out.
+    public static let allCases: [HaloProperty] = [.x, .y, .scaleX, .scaleY, .rotation, .opacity, .anchorX, .anchorY]
+
+    /// A stroke's trim, keyed like position (HK-5).
+    public static let trims: [HaloProperty] = [.trimStart, .trimEnd, .trimOffset]
 
     /// The inspector row's label.
     public var title: String {
@@ -34,6 +44,9 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
         case .opacity: "Opacity"
         case .anchorX: "Anchor X"
         case .anchorY: "Anchor Y"
+        case .trimStart: "Trim Start"
+        case .trimEnd: "Trim End"
+        case .trimOffset: "Trim Offset"
         }
     }
 
@@ -43,7 +56,8 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
         case .x, .y, .anchorX, .anchorY: -100_000...100_000
         case .scaleX, .scaleY: -100...100
         case .rotation: -36_000...36_000
-        case .opacity: 0...1
+        case .opacity, .trimStart, .trimEnd: 0...1
+        case .trimOffset: -100...100
         }
     }
 
@@ -51,7 +65,8 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
     public var step: Double {
         switch self {
         case .x, .y, .anchorX, .anchorY, .rotation: 1
-        case .scaleX, .scaleY, .opacity: 0.01
+        case .scaleX, .scaleY, .opacity, .trimStart, .trimEnd: 0.01
+        case .trimOffset: 1.0 / 360
         }
     }
 
@@ -59,8 +74,9 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
     /// factors (1 = 100%) and shown in percent.
     public var displayFactor: Double {
         switch self {
-        case .scaleX, .scaleY, .opacity: 100
+        case .scaleX, .scaleY, .opacity, .trimStart, .trimEnd: 100
         case .x, .y, .anchorX, .anchorY, .rotation: 1
+        case .trimOffset: 360
         }
     }
 
@@ -68,8 +84,8 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
     public var unit: String {
         switch self {
         case .x, .y, .anchorX, .anchorY: " px"
-        case .scaleX, .scaleY, .opacity: "%"
-        case .rotation: "°"
+        case .scaleX, .scaleY, .opacity, .trimStart, .trimEnd: "%"
+        case .rotation, .trimOffset: "°"
         }
     }
 
@@ -78,7 +94,7 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
     public var decimals: Int {
         switch self {
         case .x, .y, .anchorX, .anchorY: 1
-        case .scaleX, .scaleY, .opacity, .rotation: 0
+        case .scaleX, .scaleY, .opacity, .rotation, .trimStart, .trimEnd, .trimOffset: 0
         }
     }
 
