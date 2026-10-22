@@ -126,3 +126,4 @@ utc	stage	event	ref	note
 2026-10-21T23:12Z	3	check	PN-3 #4203	macOS build 39679097683 still queued (since 21:28Z)
 2026-10-21T23:35Z	3	check	PN-3	#4203 macOS build failed on FlareApp stand-in; shim pushed 045d7871, merged into PN-4
 2026-10-21T23:53Z	3	check	#4203	macOS build 39694580924 on 045d7871 still queued; PN-4 waits; #3477 waiting-on-prereq
+2026-10-22T00:12Z	3	check	#4203	macOS build 39694580924 still queued (35 min); PN-4 waits; #3477 waiting-on-prereq
