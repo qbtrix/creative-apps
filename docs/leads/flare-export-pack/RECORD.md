@@ -64,3 +64,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T06:06Z: FV-1 still held on lead/export-pack-fva (ed2293cc); XP-3 not on dev yet.
 - 2026-10-22T06:35Z: XP-3 still not on dev.
 - 2026-10-22T07:05Z: XP-3 still not on dev.
+- 2026-10-22T07:31Z: XP-3 still not on dev.
