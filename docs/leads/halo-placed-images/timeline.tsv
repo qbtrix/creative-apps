@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-22T16:26Z	3	check	PH-a	#4426 macOS build 39807037753 cancelled (queued 44 min), lane re-dispatched 39813847288, queued; dev 7e9f260a has neither #4426 nor #4415; blocked poll 2/3
 2026-10-22T16:48Z	3	question	PH-a	rule 23: macOS build 39813847288 still queued (3rd poll); asked the supervisor on #3456 for the runner or a Mac-Check; dev 3578eaee has neither #4426 nor #4415
 2026-10-22T17:11:06Z	3	check	PH-a	supervisor Mac gate holds #4426; lane integrated dev 2d3e024a; #4415 open
+2026-10-22T17:33:03Z	3	check	PH-a	still held by Mac gate; mac build 39821015197 queued; #4415 open; footer stripped from 6341272508
