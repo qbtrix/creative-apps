@@ -4,7 +4,7 @@ Issue: #1971 · Packet: docs/blueprints/halo/features/core-loop.md
 Run: act-1a15f92d2f2-kvrn (from 2026-10-21T18:00Z; before: act-1a15d0eeefb-6z9l from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0) (from 2026-10-20T18:45Z; before: act-1a15728f2a2-zb1o) · Session: claude/halo-feature-lead-run-02scrb · Started: 2026-10-20T02:37Z
 Stage: 3 wave 5
 Base: 6d5f3a4025ffce3bb843003a158f64bf282020e6
-Next: #4321 (06:21Z) and #4322 (07:28Z) merged. #4329 got needs-rebase (HaloWindow.swift vs #4322); a fixer is merging dev into it. #4331 waits on its macOS build. No halo journeys run yet tests a commit with #4285/#4290/#4321 (39734987314 tests 6e19f406, before them); the next one past them gets the critic panel, and red H-J12/H-P results there are round 2. Blocked on SuiteUI: #4273 (#4283), #4281 (#4282), #4275 duplicate series (#4330). Open findings >5, no new feature work
+Next: #4321 (06:21Z) and #4322 (07:28Z) merged. #4329 has dev merged in (head 10285930, CI --changed PASS) and waits on the lane to drop needs-rebase and batch it. #4331 waits on its macOS build. The next halo journeys run whose tested commit includes #4285/#4290/#4321/#4322 gets the critic panel; red H-J12/H-P there is round 2. Blocked on SuiteUI: #4273 (#4283), #4281 (#4282), #4275 duplicate series (#4330). Open findings >5, no new feature work
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -82,7 +82,7 @@ Next: #4321 (06:21Z) and #4322 (07:28Z) merged. #4329 got needs-rebase (HaloWind
 | #4266 | CL-probe | CI | journey | 1 | PR #4286 merged 05:35Z |
 | #4272 | CL-measure | major | mouse | 1 | PR #4287 merged 04:41Z (bare transport left at 440 pt; History drops; tight ~8 pt) |
 | #4273 | CL-measure | major | clarity | - | waits #4283 |
-| #4274 | CL-measure | major | job | 1 | PR #4329 needs-rebase 07:33Z, merging dev (playback ticks redraw viewer only; drag paced to one write per refresh) |
+| #4274 | CL-measure | major | job | 1 | PR #4329 dev merged in at 10285930 (HaloWindow.swift: #4322 column + #4329 takePlayback kept; ci --changed PASS), was needs-rebase 07:33Z (playback ticks redraw viewer only; drag paced to one write per refresh) |
 | #4275 | CL-probe | major | job | 1 | PR #4331 (sample every drag move, refresh-paced writes; duplicate series waits #4330) |
 | #4276 | CL-measure | major | job | 1 | PR #4329 needs-rebase 07:33Z, merging dev (playback ticks redraw viewer only; drag paced to one write per refresh) |
 | #4277 | CL-measure | minor | job | 1 | PR #4331 (scroll bursts, in-burst intervals) |
