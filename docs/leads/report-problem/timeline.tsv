@@ -71,3 +71,4 @@ utc	stage	event	ref	note
 2026-10-22T09:10:26Z	RP-6	pr	#4380	docs-only on dev, draft until RP-5b #4226 merges; gate PASS at c70e72644
 2026-10-22T09:20:06Z	lane	heartbeat	-	waiting on lane sweep
 2026-10-22T09:42:14Z	RP-5	merged	4218	
+2026-10-22T09:50:42Z	RP-5b	ready	4226	dev merged in, gate pass c4582ba39
