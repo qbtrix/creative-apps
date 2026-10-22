@@ -3,8 +3,9 @@
 // for `.photo` with Sunset.png open and in the suite's recents: the file listed, Clear Menu under it, and
 // Open In offering Library. AppKit can't draw an open NSMenu offscreen, so the image lays out what
 // SuiteFileMenu gives the menu under its titles. `menu` also fails when Photo's own Open Recent menu is
-// still in its File menu beside the suite's, so File shows one Open Recent. Nests in BodyCountSuites, as
-// PF-5's drop mark renders the window. macOS only.
+// still in its File menu beside the suite's, so File shows one Open Recent. photo-drop-mark (PF-5): the
+// suite drop mark over the editor with Sunset.png open, saying a dropped Logo.png is placed in it. Nests in
+// BodyCountSuites, as the drop mark renders the editor (PhotoEditor.bodyRuns). macOS only.
 #if os(macOS)
 import AppKit
 import CoreRaster
@@ -46,6 +47,36 @@ extension BodyCountSuites {
             for scheme in [ColorScheme.light, .dark] {
                 try snapshot(PhotoFileMenuPanel(menu: menu), name: "photo-open-recent-\(scheme.name)", scheme: scheme)
             }
+        }
+
+        /// photo-drop-mark: Logo.png hovering over the window with Sunset.png open. Photo's drop rule places
+        /// it, and the mark at the window's bottom names the open image, as SuiteFileDropModifier puts it.
+        @Test func dropMark() throws {
+            var model = PhotoWorkspace()
+            let (w, h) = (640, 400)
+            var bytes = [UInt8](repeating: 255, count: w * h * 4)
+            for y in 0..<h {
+                for x in 0..<w {
+                    bytes[(y * w + x) * 4] = 250
+                    bytes[(y * w + x) * 4 + 1] = UInt8(90 + 140 * y / h)
+                    bytes[(y * w + x) * 4 + 2] = UInt8(60 + 120 * x / w)
+                }
+            }
+            try model.open(rgba8: bytes, width: w, height: h, name: "Sunset.png")
+            let actions = DropPlan.plan(
+                ["/tmp/PhotoFileFlowSnapshots/Logo.png"], into: SuiteApp.photo.rawValue, hasDocument: model.hasDocument,
+                places: model.placesExtensions,
+                readers: { SuiteDocumentsBridge.readers(in: .standard, ofExtension: $0) })
+            #expect(actions == [.place(path: "/tmp/PhotoFileFlowSnapshots/Logo.png")], "Photo doesn't place a dropped PNG")
+            let sentence = try #require(SuiteDropMark.sentence(for: actions, app: .photo, documentName: model.documentName))
+            #expect(sentence == "Place in Sunset.png")
+            let view = PhotoEditor(model: model, tiles: try photoTiles(model), renderMilliseconds: 8, zoom: 1)
+                .overlay(alignment: .bottom) {
+                    SuiteDropMarkView(sentence: sentence, refused: false)
+                        .padding(SuiteSpacing.l)
+                        .allowsHitTesting(false)
+                }
+            try snapshot(view, name: "photo-drop-mark", scheme: .light)
         }
     }
 }
