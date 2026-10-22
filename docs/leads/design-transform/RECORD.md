@@ -58,3 +58,5 @@ Next: #4159, #4187, #4188-fix merge -> Belt-Slice-Done + Mac-Finish-Wanted DT-u 
 - 2026-10-22T02:29Z Merged dev (b5a6e7e0a) into #4255, CI: PASS, pushed f5833163, Head moved. #4254 still open at f9c5b8ac, clean. Scoped design run 39693638859 (be9aa35bc) failed on the old RenderBudgetPhotoPlaceTests break (fixed on dev by #4215), so no done lines yet; next design run is 39709889487. #4258 closed: #4238 (SC-14) fixed dev's ratchet.
 
 - 2026-10-22T02:59Z #4254 Linux check was red on the old ratchet test; merged dev (now green at b5a6e7e0a), CI: PASS, pushed e62d759d, Head moved. #4255 at f5833163 waits on its lane macOS build. Design run 39709889487 still queued.
+
+- 2026-10-22T03:26Z Heartbeat: #4254 (e62d759d) and #4255 (f5833163) lane macOS builds queued. Design run 39709889487 still queued; dev Linux green at 66a845885.
