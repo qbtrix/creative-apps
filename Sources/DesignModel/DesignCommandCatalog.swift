@@ -4,7 +4,8 @@
 // tools through `unavailableHelp` and `selectTool`, the pages through `addPageHelp`/`deletePageHelp`, and the file
 // actions through the toolbar's help. The History panel's history.read and history.jump are SuiteKernel's
 // HistoryCommands on the workspace's HistoryJumping adapter (autosave-history DA-6); the six transform.* are
-// SuiteKernel's TransformCommands on its TransformTarget (transform DT-6). Ids are `<menu>.<action>` in lowercase; Tests/command-ids/design.txt keeps them. Linux-safe.
+// SuiteKernel's TransformCommands on its TransformTarget (transform DT-6); color.sample is SampleCommands on its
+// SampleTarget and color.pick the Eyedropper's click (eyedropper DY-6). Ids are `<menu>.<action>` in lowercase; Tests/command-ids/design.txt keeps them. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -24,11 +25,13 @@ extension DesignWorkspace {
     struct NameParams: Codable, Sendable { var name: String }
     struct TextParams: Codable, Sendable { var text: String }
     struct PathParams: Codable, Sendable { var path: String? }
+    /// color.pick's params: the page point and where the colour goes ("fill" or "stroke").
+    struct PickParams: Codable, Sendable { var x, y: Double; var to: String }
 
     /// Every Design action as a command spec, in menu order, then the History panel's two.
     public static let commands: [CommandSpec<DesignWorkspace>] =
-        fileSpecs + editSpecs + objectSpecs + GradientCommands.specs(DesignWorkspace.self)
-            + TransformCommands.specs(DesignWorkspace.self) + pageSpecs + toolSpecs + HistoryCommands.specs(DesignWorkspace.self)
+        fileSpecs + editSpecs + objectSpecs + GradientCommands.specs(DesignWorkspace.self) + SampleCommands.specs(DesignWorkspace.self)
+            + [pick] + TransformCommands.specs(DesignWorkspace.self) + pageSpecs + toolSpecs + HistoryCommands.specs(DesignWorkspace.self)
 
     /// The specs as a catalog whose history is the workspace's own.
     public static let catalog: CommandCatalog<DesignWorkspace> =
@@ -119,6 +122,20 @@ extension DesignWorkspace {
     ) { w, params in
         guard let direction = DesignDirection.allCases.first(where: { "\($0)" == params.direction }) else { throw DesignRefusal.unchanged }
         try w.run(.nudge(direction, large: params.large ?? false))
+        return JSONValue.object([:])
+    }
+
+    /// color.pick: the Eyedropper's click as a command, the colour at a page point onto the selection's fill or
+    /// stroke as one step (`applySample`, a `sampleSize` square). color.sample is SampleCommands' query.
+    static let pick = CommandSpec<DesignWorkspace>.typed(
+        "color.pick", title: "Pick Colour", summary: "Sets the selection's fill or stroke to the colour at a page point.", kind: .edit,
+        params: PickParams.self,
+        schema: .object(["x": .number("Page x."), "y": .number("Page y."), "to": .string("Fill or stroke.", oneOf: ["fill", "stroke"])],
+                        required: ["x", "y", "to"]),
+        example: .object(["x": .number(10), "y": .number(10), "to": .string("fill")]),
+        availability: { reason($0.sampleHelp ?? $0.fillHelp) }
+    ) { w, p in
+        try w.applySample(at: Point(x: p.x, y: p.y), toStroke: p.to == "stroke", size: w.sampleSize)
         return JSONValue.object([:])
     }
 
