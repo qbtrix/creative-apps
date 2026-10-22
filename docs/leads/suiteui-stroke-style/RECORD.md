@@ -12,8 +12,8 @@ Next: SS-8 building (supervisor on #3450: SS-8 goes before SH-8; its PR flips th
 | SS-a | The kernel's stroke type, rules, target, intents, nine command specs and SVG writer are declared as stubs, the gallery's stroke-editor page is in the index, and the checks are written, disabled. | SS-1, SS-2 | SJ0 | gradient-fill:GF-a (SS-1) | true | 0 | done | 39469631014 | wanted |
 | SS-u | On the gallery page the editor sets colour, width, join and cap, shows the dash presets and trim rows (disabled with their reason until SS-d), and hides trim where an app has none, every control identified, within the render budget. | SS-3, SS-4 | KS1 | SS-a (SS-3) | true | 0 | done | 39512606501 | wanted |
 | SS-m | The rules clamp widths and scale the dash presets, the SVG writer writes colour, width, join and cap, and every stroke command but dash and trim records exactly one undo step (a scrub one). | SS-5, SS-6 | KJ-stroke | SS-a (SS-5, SS-6) | false | 0 | done | 39512606501 | – |
-| SS-d | On the bumped core, dashes and trims paint the trimmed then dashed path, the two commands save fractions and scaled patterns in one step, and the fake app keeps them so RJ-X35 runs on the CLI. | SS-7, SS-8 | KJ-stroke | SS-m (SS-7); SS-8 goes first, SH-8 waits on it (supervisor) | false | 1 | building | – | – |
-| SS-z | The gallery runs its intents through StrokeCommands on a live target, the journey dashes and trims on live, and the feature is built. | SS-9, SS-10 | KS1 | SS-u (SS-9); SS-d (SS-9, SS-10); gradient-fill:GF-z (SS-10) | true | 0 | waiting | – | – |
+| SS-d | On the bumped core, dashes and trims paint the trimmed then dashed path, the two commands save fractions and scaled patterns in one step, and the fake app keeps them so RJ-X35 runs on the CLI. | SS-7, SS-8 | KJ-stroke | SS-m (SS-7); SS-8 goes first, SH-8 waits on it (supervisor) | false | 1 | done | 39866166625 | – |
+| SS-z | The gallery runs its intents through StrokeCommands on a live target, the journey dashes and trims on live, and the feature is built. | SS-9, SS-10 | KS1 | SS-u (SS-9); SS-d (SS-9, SS-10); gradient-fill:GF-z (SS-10) | true | 0 | done | 39866166625 | wanted |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -25,9 +25,9 @@ Next: SS-8 building (supervisor on #3450: SS-8 goes before SH-8; its PR flips th
 | SS-5 | SS-m | – | see packet task table (waits: SS-1) | Sources/SuiteKernel/Fill/StrokeRules.swift, Sources/SuiteKernel/Fill/StrokeSVG.swift, Tests/SuiteKernelTests/StrokeRulesTests.swift, Tests/SuiteKernelTests/StrokeSVGTests.swift, Tests/mutations/SuiteKernel.StrokeRules.json, Tests/mutations/SuiteKernel.StrokeSVG.json | packet acceptance row | #3600 | merged 13:59 (squash 0f0e50c, batch 39433379397) |
 | SS-6 | SS-m | – | see packet task table (waits: SS-5) | Sources/SuiteKernel/Fill/StrokeCommands.swift, Tests/SuiteKernelTests/StrokeCommandsTests.swift, Tests/mutations/SuiteKernel.StrokeCommands.json | packet acceptance row | #3627 | merged (dev ac3e825, 23:01Z) |
 | SS-7 | SS-d | 2 | see packet task table (waits: SS-6) | Sources/SuiteKernel/Fill/StrokeRules.swift, Sources/SuiteKernel/Fill/StrokeCommands.swift, Sources/SuiteKernel/Fill/StrokeSVG.swift, Tests/SuiteKernelTests/StrokeDashTrimTests.swift, Tests/mutations/SuiteKernel.StrokeRules.json, Tests/mutations/SuiteKernel.StrokeCommands.json, Tests/mutations/SuiteKernel.StrokeSVG.json | packet acceptance row | #3823 | merged (779e08d) |
-| SS-8 | SS-d | – | see packet task table (waits: SS-7) | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeStrokeTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/dash-trim/dash-trim.jobs.json, Tests/RealJobs/fake/dash-trim/input/one.fake | packet acceptance row | – | waiting |
+| SS-8 | SS-d | – | see packet task table (waits: SS-7) | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeStrokeTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/dash-trim/dash-trim.jobs.json, Tests/RealJobs/fake/dash-trim/input/one.fake | packet acceptance row | #4607 | merged 20:10Z (batch 39843357825) |
 | SS-9 | SS-z | 2 | see packet task table (waits: SS-4, SS-7) | Sources/SuiteUI/Gallery/GalleryStrokeEditor.swift, Tests/SuiteUITests/StrokeEditorLiveTests.swift, UITests/SuiteJourneyTests+Stroke.swift | packet acceptance row | #3826 | merged (ca4d6d7) |
-| SS-10 | SS-z | – | see packet task table (waits: SS-8, SS-9) | docs/c4/parts/creative-apps/suite-kernel/kernel-fill.json, docs/blueprints/suiteui/features/stroke-style.wave.json | packet acceptance row | – | waiting |
+| SS-10 | SS-z | – | see packet task table (waits: SS-8, SS-9) | docs/c4/parts/creative-apps/suite-kernel/kernel-fill.json, docs/blueprints/suiteui/features/stroke-style.wave.json | packet acceptance row | #4630, #4631 | merged (be18ab6 21:01Z, 066cd28 21:25Z) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -50,7 +50,7 @@ Next: SS-8 building (supervisor on #3450: SS-8 goes before SH-8; its PR flips th
 - SS-6: dash and trim still throw StrokeRules.notBuilt, whose message names "stroke-style SS-6" (StrokeRules.swift, outside SS-6 files); SS-7 fixes the wording.
 
 ## Open
-- SS-7 waits on creative-core path-geometry #430, the core stroke-style fields (not filed yet) and a core bump; SS-8 on shape-tools:SH-z; SS-10 on GF-z.
+- Nothing open for the lead. Every slice is merged-done and the contact sheet is posted. The Verified level (journeys, feel gate, Mac finish for SS-a, SS-u and SS-z) belongs to the beta-hardening lane.
 - SS-a slice-done posted 2026-10-20 18:17 (Linux check 39469631014 on d7f615d, green); Mac-Finish-Wanted posted.
 
 ## Run act-1a15b23f1eb-iz6h
@@ -122,3 +122,4 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 21:49Z: #4631 merged at 21:25Z as 066cd28 (lane batch run 39854318302). All SS-z PRs are on dev. The full CI run 39858933900 on dev at 066cd28 is pending; its Linux check 39857152000 is green. Once that run is green: Belt-Slice-Done for SS-d and SS-z, then the contact sheet.
 - 22:17Z: heartbeat: full CI 39858933900 at 066cd28 was cancelled by a newer run. The full CI run now waiting is 39861703512 at a7469d7, which contains 066cd28; its Linux check 39861121461 is green.
 - 22:44Z: heartbeat: full CI 39861703512 (a7469d7) is still pending, waiting for a runner.
+- 23:20Z: Done (merged-done). The lead never waits on macOS runs, and the newest CI run on dev holding #4631 (066cd28) with a green Linux job is 39866166625 at 59278aa. On #3450 it posted Belt-Slice-Done: SS-d, Belt-Slice-Done: SS-z, Mac-Finish-Wanted: SS-z and Belt-Contact-Sheet, all naming that run. The full CI run on dev (39867380103) is still waiting for a macOS runner; its journeys and audit belong to the Verified level. This session's GitHub access appended its attribution footer to those comments server-side, and an edit can't remove it. Final RECORD; the lead stops here.
