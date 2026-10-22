@@ -71,3 +71,5 @@ utc	stage	event	ref	note
 2026-10-22T10:05:47Z	lane	heartbeat	-	lane sweep in flight
 2026-10-22T10:30:20Z	SM-6	fix	4237	split nested #require that broke the macOS build; gate running
 2026-10-22T10:59:06Z	SM-5	build-green	4125	build 39741013353 green; waits on the lane sweep in progress since 10:33
+2026-10-22T11:21:32Z	SM-5	merged	4125	lane batch
+2026-10-22T11:21:32Z	SM-8	rebuilding	4239	SM-8 commits on dev, gating
