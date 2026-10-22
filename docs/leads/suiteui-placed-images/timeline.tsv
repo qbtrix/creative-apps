@@ -141,3 +141,4 @@ utc	stage	event	ref	note
 2026-10-22T17:50Z	record	relaunch act-1a1647a67aa-dau5; PL-9 next, stacked on lead/eyedropper-EY-z
 18:12Z	heartbeat	PL-8 #4578 awaits lane macOS build; PL-9 builder running
 18:45Z	pr-opened	PL-9 #4613, PL-10 #4616 + #4617 (C4)
+18:40Z	heartbeat	PL-8 #4578 macOS build 39819869147 still queued; #4613/#4616/#4617 wait on the EY-z chain
