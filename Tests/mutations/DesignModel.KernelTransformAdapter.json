@@ -9,8 +9,8 @@
   {
     "label": "the kernel's rotate knob becomes a resize handle",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "case .inside, .rotate: return nil",
-    "replace": "case .inside: return nil\n        case .rotate: self = .bottomRight",
+    "find": "case .rotate: self = .rotate",
+    "replace": "case .rotate: self = .bottomRight",
     "tests": "DesignKernelTransformAdapterTests"
   },
   {
