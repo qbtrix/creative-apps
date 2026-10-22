@@ -61,3 +61,4 @@ time	kind	note
 2026-10-22T01:40Z	DK-u	still waiting DS-u
 2026-10-22T02:02Z	heartbeat	#4081 lane-eligible, waits on lane batch (dev red #3856 FormatListRatchetTests); DT-6 #4255 and DT-u fix #4254 in lane; DS-u not started
 2026-10-22T02:23Z	heartbeat	#4081 still lane-eligible, unmerged; dev Linux b5a6e7e0 running; #4255/#4254 unmerged; DS-u not started
+2026-10-22T02:44Z	heartbeat	DK-u waits on DS-u (not started)
