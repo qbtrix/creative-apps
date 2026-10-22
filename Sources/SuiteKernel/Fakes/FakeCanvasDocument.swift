@@ -4,6 +4,7 @@
 // gradient-fill GF-9 gives each rect an optional fill and lists the eight fill commands, so RJ-X30 runs on the CLI;
 // autosave-history AH-9 lists `history.read` and `history.jump` over its one History, so RJ-X31 runs on the CLI;
 // transform-tools TT-8 gives each rect a turn and mirrors and lists the six transform commands, so RJ-X32 runs on the CLI;
+// stroke-style SS-8 gives each rect an optional stroke and lists the nine stroke commands, so RJ-X35 runs on the CLI;
 // eyedropper EY-8 reads the topmost rect's fill at a point and lists `color.sample`, so RJ-X33 runs on the CLI;
 // placed-images PL-9 lets a rect show a placed picture, saves each file's bytes once and lists the five place
 // commands, so RJ-X36 runs on the CLI.
@@ -13,29 +14,33 @@ import FoundationEssentials
 import Foundation
 #endif
 
-/// One named rect on the fake canvas; a locked one refuses move, remove, a fill, a transform and a picture.
+/// One named rect on the fake canvas; a locked one refuses move, remove, a fill, a stroke, a transform and a picture.
 public struct FakeRect: Codable, Hashable, Sendable {
     /// The rect's id, its name ("Rect 1"), its frame and whether it is locked.
     public var id: Int, name: String, x, y, w, h: Double, locked: Bool
     /// The rect's fill, its points in the rect's own box (0, 0, w, h); nil reads as solid black and is left out of
     /// the JSON, so a rect with no fill saves what it did before fills.
     public var fill: Fill?
+    /// The rect's outline, dash and trim included; nil draws none and is left out of the JSON, as `fill` is.
+    public var stroke: VectorStroke?
     /// The rect's clockwise turn in degrees about its centre and its mirrors; at 0 and false they are left out of
     /// the JSON, so a rect never turned saves what it did before turns.
     public var degrees = 0.0, flipX = false, flipY = false
     /// The picture the rect shows, by cover in its frame; nil is left out of the JSON, so a rect with no picture
     /// saves what it did before pictures.
     public var placed: PlacedImage?
-    public init(id: Int, name: String, x: Double, y: Double, w: Double, h: Double, locked: Bool = false, fill: Fill? = nil) {
-        (self.id, self.name, self.x, self.y, self.w, self.h, self.locked, self.fill) = (id, name, x, y, w, h, locked, fill)
+    public init(id: Int, name: String, x: Double, y: Double, w: Double, h: Double, locked: Bool = false, fill: Fill? = nil,
+                stroke: VectorStroke? = nil) {
+        (self.id, self.name, self.x, self.y, self.w, self.h, self.locked, self.fill, self.stroke) = (id, name, x, y, w, h, locked, fill, stroke)
     }
-    private enum CodingKeys: String, CodingKey { case id, name, x, y, w, h, locked, fill, degrees, flipX, flipY, placed }
+    private enum CodingKeys: String, CodingKey { case id, name, x, y, w, h, locked, fill, stroke, degrees, flipX, flipY, placed }
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         self.init(id: try c.decode(Int.self, forKey: .id), name: try c.decode(String.self, forKey: .name),
                   x: try c.decode(Double.self, forKey: .x), y: try c.decode(Double.self, forKey: .y),
                   w: try c.decode(Double.self, forKey: .w), h: try c.decode(Double.self, forKey: .h),
-                  locked: try c.decode(Bool.self, forKey: .locked), fill: try c.decodeIfPresent(Fill.self, forKey: .fill))
+                  locked: try c.decode(Bool.self, forKey: .locked), fill: try c.decodeIfPresent(Fill.self, forKey: .fill),
+                  stroke: try c.decodeIfPresent(VectorStroke.self, forKey: .stroke))
         degrees = try c.decodeIfPresent(Double.self, forKey: .degrees) ?? 0
         (flipX, flipY) = (try c.decodeIfPresent(Bool.self, forKey: .flipX) ?? false, try c.decodeIfPresent(Bool.self, forKey: .flipY) ?? false)
         placed = try c.decodeIfPresent(PlacedImage.self, forKey: .placed)
@@ -45,6 +50,7 @@ public struct FakeRect: Codable, Hashable, Sendable {
         try c.encode(id, forKey: .id); try c.encode(name, forKey: .name); try c.encode(x, forKey: .x); try c.encode(y, forKey: .y)
         try c.encode(w, forKey: .w); try c.encode(h, forKey: .h); try c.encode(locked, forKey: .locked)
         try c.encodeIfPresent(fill, forKey: .fill)
+        try c.encodeIfPresent(stroke, forKey: .stroke)
         if degrees != 0 { try c.encode(degrees, forKey: .degrees) }
         if flipX { try c.encode(flipX, forKey: .flipX) }
         if flipY { try c.encode(flipY, forKey: .flipY) }
@@ -185,13 +191,14 @@ public struct FakeCanvasDocument: HeadlessDocument {
         .object(["rects": .number(Double(rects.count)), "selected": selected.map { .string($0.name) } ?? .null])
     }
 
-    /// The fake's thirty-five ids: its six commands, `edit.undo` and `edit.redo`, the five file-flow commands, the eight
-    /// fill commands, the two history commands, the six transform commands, `color.sample` and the five place
-    /// commands. Empty only if an id were refused.
+    /// The fake's forty-four ids: its six commands, `edit.undo` and `edit.redo`, the five file-flow commands, the
+    /// eight fill commands, the two history commands, the nine stroke commands, the six transform commands,
+    /// `color.sample` and the five place commands. Empty only if an id were refused.
     public static let catalog = (try? CommandCatalog<FakeCanvasDocument>(
         app: app, specs + FileFlowCommands.specs(FakeCanvasDocument.self) + GradientCommands.specs(FakeCanvasDocument.self)
-            + HistoryCommands.specs(FakeCanvasDocument.self) + TransformCommands.specs(FakeCanvasDocument.self)
-            + SampleCommands.specs(FakeCanvasDocument.self) + PlaceCommands.specs(FakeCanvasDocument.self),
+            + HistoryCommands.specs(FakeCanvasDocument.self) + StrokeCommands.specs(FakeCanvasDocument.self)
+            + TransformCommands.specs(FakeCanvasDocument.self) + SampleCommands.specs(FakeCanvasDocument.self)
+            + PlaceCommands.specs(FakeCanvasDocument.self),
         history: { $0.history })) ?? .empty(app: app)
     /// A rect's result schema.
     static let rectSchema = ParamSchema.object(["id": .integer(), "name": .string(), "x": .number(), "y": .number(),
@@ -266,6 +273,20 @@ extension FakeCanvasDocument: GradientFillTarget {
         let index = try editableIndex("fill")
         history.record(name, rects, key: drag.map { "\(name):\($0)" })
         rects[index].fill = GradientRules.mapped(fill, from: box, to: rects[index].fillBox)
+    }
+}
+
+/// The fake as a stroke target: the selected rect's stroke; a locked rect refuses with its reason, and every rect is
+/// an outline, so trim always runs.
+extension FakeCanvasDocument: StrokeTarget {
+    public var strokeHelp: String? { editable.why }
+    public var trimHelp: String? { nil }
+    public var selectedStroke: VectorStroke? { selected?.stroke }
+    /// Sets (nil removes) the selected rect's stroke as the step `name`; a scrub under one `drag` token is one step.
+    public mutating func setStroke(_ stroke: VectorStroke?, name: String, drag: String?) throws {
+        let index = try editableIndex("stroke")
+        history.record(name, rects, key: drag.map { "stroke:\(name):\($0)" })
+        rects[index].stroke = stroke
     }
 }
 

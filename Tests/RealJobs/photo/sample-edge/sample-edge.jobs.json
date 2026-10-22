@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-X49 (suiteui/adopt-kernel-eyedropper-photo, written by EP-1, its Model check turns on with EP-2): opens a 16 x 16 checkerboard of 4 x 4 cells of pure red and pure blue (red where the cell's column + row is even, so the top-left cell is red), the harness's file.open of the input, picks the Eyedropper with tool.eyedropper, samples a 5 x 5 square at the corner (0, 0) and then at the centre (8, 8) with color.sample, and exports the PNG. The trap: Photo's own square math counts the off-image pixels of the corner square as black, so the corner reads darker than the kernel's mean. The assertion: the corner is the mean of its 9 in-image pixels, #FF0000; the centre is the 25-pixel mean, 13 red and 12 blue, #85007A; both equal SampleRules.mean's hex; the export is the input unchanged.",
+  "inputs": ["input/*.png"],
+  "steps": [
+    {"id": "tool.eyedropper", "params": {}},
+    {"id": "color.sample", "params": {"x": 0, "y": 0, "size": 5}},
+    {"id": "color.sample", "params": {"x": 8, "y": 8, "size": 5}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-sampled", "format": "png", "options": {}},
+  "expect": {
+    "out/checker-red-blue-sampled.png": {"pixels": {"tolerance": 0, "reference": "input/checker-red-blue.png"}}
+  },
+  "samples": [
+    {},
+    {"color": {"hex": "#FF0000", "r": 255, "g": 0, "b": 0, "a": 255}},
+    {"color": {"hex": "#85007A", "r": 133, "g": 0, "b": 122, "a": 255}}
+  ],
+  "platforms": ["linux", "macos"]
+}

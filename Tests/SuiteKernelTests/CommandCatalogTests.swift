@@ -132,7 +132,7 @@ func refusal(_ id: String, _ params: JSONValue, on doc: inout FakeCanvasDocument
         #expect(catalog.describe("rect.list")?.undoable == false && catalog.describe("edit.undo")?.kind == .view)
         let all = try JSONEncoder().encode(catalog.describeAll())
         #expect(try JSONDecoder().decode([CommandDescription].self, from: all) == catalog.describeAll())
-        #expect(all.count <= 24 * 1024, "describeAll is \(all.count) bytes") // 35 ids with the place commands (PL-9)
+        #expect(all.count <= 30 * 1024, "describeAll is \(all.count) bytes") // 44 ids with the stroke (SS-8), transform (TT-8), color.sample (EY-8) and place (PL-9) commands
     }
 
     /// 1,000 seeded mutations of each example (types swapped, keys dropped and added, huge strings) refuse or run.
