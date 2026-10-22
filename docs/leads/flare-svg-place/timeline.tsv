@@ -17,3 +17,5 @@ utc	stage	event	ref	note
 2026-10-21T03:14:49Z	merged	#3768 PF-a merged into dev; waiting on a green dev ci.yml run containing it for Belt-Slice-Done PF-a. PF-u waits on key-select-all KS-a, PF-m on FG-m/FS-m/FK-m (no lead upstream)
 2026-10-21T03:25:24Z	heartbeat: waiting on full dev CI for PF-a
 2026-10-21T04:56:07Z	heartbeat: full CI in progress
+2026-10-22T02:05Z	wave-2	builders launched: PF-u, PF-5 (run act-1a1615504d4-d9p4; PF-a done, run 39540755137)
+2026-10-22T03:00Z	shipped	#4295 PF-5 head a5a9367b; #4297 PF-u head 3fbd080c; both fast-lane
