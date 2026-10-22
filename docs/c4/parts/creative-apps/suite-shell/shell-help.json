@@ -6,7 +6,8 @@
   "paths": [
     "Sources/SuiteShell/SuiteHelpCommands.swift",
     "Sources/SuiteShell/ShellHelpProvider.swift",
-    "Sources/SuiteShell/CrashFolderReader.swift"
+    "Sources/SuiteShell/CrashFolderReader.swift",
+    "Sources/SuiteShell/ProblemReportActions.swift"
   ],
   "order": 90
 }
