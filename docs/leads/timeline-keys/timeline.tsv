@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-22T06:14:28Z	TK-flare	pr	#4328 opened, head ac5a97b3, CI: PASS, Mutate 4/4
 2026-10-22T06:15:11Z	question	blocked	Question for the supervisor posted (rule 23, three identical blocked polls)
 2026-10-22T06:35:40Z	poll	waiting	supervisor: stop after in-lane slice; macOS 39722964879 queued; scoped suite 39721019643 in progress
+2026-10-22T06:58:41Z	poll	waiting	#4328 open, macOS build pending; scoped suite 39721019643 green, no screens; TK-u critics wait on flare journeys 39734406363 (queued)
