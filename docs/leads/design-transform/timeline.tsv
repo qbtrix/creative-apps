@@ -87,3 +87,4 @@ utc	stage	event	ref	note
 2026-10-22T06:52Z	3	heartbeat	-	#4323 #4324 clean; macOS builds 39728806153 / 39730381324 still queued (~80 min, runner backlog)
 2026-10-22T07:17Z	3	heartbeat	-	#4323 macOS build 39728806153 started 07:16Z; #4324 build 39730381324 still queued
 2026-10-22T07:34Z	3	build-green	#4323	macOS build 39728806153 success; #4324 build 39730381324 still queued
+2026-10-22T07:52Z	3	build-green	#4324	macOS build 39730381324 success; both PRs wait on the lane sweep (39742249737 in progress)
