@@ -1,10 +1,11 @@
-// HaloRecoveryStore.swift (autosave-history HA-7b): where a Halo window's autosave keeps its
-// recovery copies, the folder Design's DesignRecoveryStore picks for Design. `-SuiteSupportDir
-// <path>` puts them under `<path>/Halo/Recovery/` as `<window>.halo` (the journeys pass a temp
-// folder). A launch that ignores restored state, by `-ApplePersistenceIgnoreState YES` in argv or
-// the caller's `ignoringState` (the app's user default, which a test host registers), keeps none
-// unless it names a support folder, so no journey or hosted test leaves a copy for the next to be
-// offered. Any other launch writes under the suite root (`SuiteLocations.appFolder`). Linux-safe.
+// HaloRecoveryStore+Kernel.swift (autosave-history HA-7b): an adapter onto SuiteModel's
+// RecoveryFolder and SuiteLocations, where a Halo window's autosave keeps its recovery copies, the
+// folder DesignRecoveryStore picks for Design. `-SuiteSupportDir <path>` puts them under
+// `<path>/Halo/Recovery/` as `<window>.halo` (the journeys pass a temp folder). A launch that
+// ignores restored state, by `-ApplePersistenceIgnoreState YES` in argv or the caller's
+// `ignoringState` (the app's user default, which a test host registers), keeps none unless it
+// names a support folder, so no journey or hosted test leaves a copy for the next to be offered.
+// Any other launch writes under the suite root (`SuiteLocations.appFolder`). Linux-safe.
 import SuiteModel
 
 public enum HaloRecoveryStore {
