@@ -120,6 +120,7 @@ final class HaloPerfJourneyTests: XCTestCase {
         XCTAssert(lanes.waitForExistence(timeout: 10), "no timeline (halo.timeline)")
         scrollEnd(lanes, until: halo.trackName("Solid 1"), by: -120)
         halo.shot("perf-lanes-bottom")
+        expectNoScroller(over: lanes, halo)
         scrollEnd(lanes, until: halo.trackName("Solid 300"), by: 120)
 
         let list = halo.element("halo.layer.list")
@@ -173,6 +174,15 @@ final class HaloPerfJourneyTests: XCTestCase {
             scrolls += 1
         }
         XCTAssert(target.exists && target.isHittable, "\(scrolls) scrolls didn't reach \(target.identifier)")
+    }
+
+    /// Fails when a scroll bar shows over `area`: a legacy scroller's page
+    /// areas are unnamed buttons with no identifier to the app audit (#4264, #4266).
+    @MainActor private func expectNoScroller(over area: XCUIElement, _ halo: Journey) {
+        let frame = area.frame
+        for bar in halo.app.windows.firstMatch.scrollBars.allElementsBoundByIndex where bar.isHittable {
+            XCTAssertFalse(bar.frame.intersects(frame), "a scroll bar \(bar.frame) shows over \(area.identifier) \(frame)")
+        }
     }
 
     /// Fails when the drawn-frame series `series` has fewer than 60 intervals.
