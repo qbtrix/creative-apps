@@ -85,3 +85,4 @@ utc	stage	event	ref	note
 2026-10-22T14:51Z	FR-8b mac fix	MainActor on snapshot suite	-	act-1a161a658a7-2jql
 2026-10-22T14:54Z	FR-8b pushed mac fix	head 6f3729aaf	-	act-1a161a658a7-2jql
 2026-10-22T15:24Z	waiting mac runners	heartbeat	-	act-1a161a658a7-2jql
+2026-10-22T15:46Z	4407 mac green	heartbeat	-	act-1a161a658a7-2jql
