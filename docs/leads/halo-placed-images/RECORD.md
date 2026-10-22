@@ -11,7 +11,7 @@ Next: PH-a #4426 waits on its macOS build (run 39786508249); PH-u builder runnin
 |---|---|---|---|---|---|---|---|---|---|
 | PH-a | picture fields, draw item copy, PlacedImageTarget stubs, checks and job folders disabled | PH-1, PH-2 | MJ-PH | HG-a (merged #3516), HS-a (merged #3676), HK-a (merged #4336), PL-a (done) | false | 0 | pr-open #4426 | – | – |
 | PH-u | Place… and viewer drop on the stubs, viewer draws by cover, inspector rows, snapshots, budget, journey | PH-3, PH-4 | HJ-P1 | PH-a; HG-u, CL-probe, HT-a, HS-a, HK-a all merged | true | 0 | building (stacked on PH-a, rule 22) | – | – |
-| PH-m | render draws the picture inside its outline; place commands one undo step | PH-5, PH-6 | MJ-PH | PH-a; HG-m (built), HA-m (built), HS-m (done), HT-m (HT-6 #4415 open, needs-rebase), HK-m (HK-6 #4400 merged) | false | 0 | waiting | – | – |
+| PH-m | render draws the picture inside its outline; place commands one undo step | PH-5, PH-6 | MJ-PH | PH-a; HG-m (built), HA-m (built), HS-m (done), HT-m (HT-6 #4415 open, rebased, Fast-Check blocked by dev-red #3856), HK-m (HK-6 #4400 merged) | false | 0 | waiting | – | – |
 | PH-z | live services, journey on live, blueprint, feature-done | PH-7, PH-8 | HJ-P1 | PH-u, PH-m; HG-z (merged #4318) | true | 0 | waiting | – | – |
 
 ## Tasks
@@ -36,4 +36,5 @@ Next: PH-a #4426 waits on its macOS build (run 39786508249); PH-u builder runnin
 - PH-1 and PH-2 ship as one PH-a slice PR (rule 22); PH-3+PH-4 and PH-5+PH-6 likewise.
 
 ## Open
+- dev Linux red (#3856): HaloStrokeTrimKeysTests from HK-6 #4400, not ours; slice-done needs a green dev Linux run after our last PR, so slice-done waits on the stroke lead's fix.
 - PH-m: re-read transform HT-m (HT-6) and stroke-style HK-m (HK-6) before starting; they share HaloDrawRules/LiveFrameRendering/HaloCommandCatalog.
