@@ -483,7 +483,7 @@
               {
                 "id": "kernel-history",
                 "name": "History",
-                "description": "History<Payload>, the one undo history: named steps, a run under one key folded into one step, endRun, undo and redo through an apply closure, jump to a step, step ids that never repeat and dirty read as savedStepID against currentStepID; HistoryReading, what menus and title bars read. EK-2 declares it as a stub that answers like an empty history; EK-8 fills the bodies. HistoryCommands.swift: HistoryListing (the base state, every step's name, the applied index and the saved index) read from a History, the HistoryJumping protocol an app's document conforms to, and HistoryCommands.specs, the History panel's history.read query and history.jump view command; autosave-history AH-1 declares them with ids, schemas and availability, AH-6 fills the bodies.",
+                "description": "History<Payload>, the one undo history: named steps, a run under one key folded into one step, endRun, undo and redo through an apply closure, jump to a step, step ids that never repeat and dirty read as savedStepID against currentStepID; HistoryReading, what menus and title bars read. EK-2 declares it as a stub that answers like an empty history; EK-8 fills the bodies. HistoryCommands.swift: HistoryListing (the base state, every step's name, the applied index and the saved index) read from a History, the HistoryJumping protocol an app's document conforms to, and HistoryCommands.specs, the History panel's history.read query and history.jump view command; autosave-history AH-1 declares them with ids, schemas and availability, AH-6 fills the bodies; SuiteUI's History panel lists the steps through history.read and jumps through history.jump, beside the .autosaveRecovery modifier that offers a recovered draft on open, and AH-9 makes the fake app conform so RJ-X31 runs a jump on Linux.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/History/"
@@ -803,12 +803,30 @@
                 ]
               },
               {
+                "id": "shell-media",
+                "name": "Media writers and readers",
+                "description": "The suite's one media I/O: AVFoundation and ImageIO behind SuiteModel's MediaEncoding and MediaDecoding. MovieWriter writes H.264, HEVC, HEVC with alpha and ProRes 4444 movies tagged BT.709, the canonical copy of Halo's movie writer.",
+                "technology": "Swift 6, AVFoundation, VideoToolbox and CoreGraphics, macOS 26",
+                "paths": [
+                  "Sources/SuiteShell/Media/"
+                ]
+              },
+              {
                 "id": "shell-text",
                 "name": "Text on Core Text",
                 "description": "The live half of SuiteModel's text contract, reached as SuiteServices.text through LiveText: measures spans on Core Text into one advance per grapheme (ligatures split evenly, an emoji whole), ascent and descent, and names the fallback family; lists the Mac's font families with their faces; and draws placed glyphs at their origins and angles into an sRGB MediaFrame. It measures and draws only: line breaks, alignment and type on a path are creative-core text-engine's, so an app Model measures here, lays out in core, and draws here.",
                 "technology": "Swift 6, Core Text and AppKit, macOS 26",
                 "paths": [
                   "Sources/SuiteShell/Text/"
+                ]
+              },
+              {
+                "id": "shell-imageio",
+                "name": "SuiteImageIO",
+                "description": "The suite's one ImageIO adapter: encodes an image as a SuiteImageFormats format and writes animated GIF and APNG files for shell-media's writers. No other source file imports ImageIO.",
+                "technology": "Swift 6, ImageIO and CoreGraphics, macOS 26",
+                "paths": [
+                  "Sources/SuiteShell/SuiteImageIO.swift"
                 ]
               }
             ]

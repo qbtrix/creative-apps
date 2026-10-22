@@ -46,15 +46,16 @@ extension MenuCommand {
     }
 
     /// The item for Library catalog command `id`: its spec's title unless `title` names more; disabled while
-    /// `action` is nil (with `reason`, as before) or the spec can't run on `target` (with the spec's why).
+    /// `action` is nil (with `reason`, as before) or the spec can't run on `target` (with the spec's why). A nil
+    /// `target` (a view drawn outside a window, as a snapshot draws it) leaves the spec's availability out.
     init(
-        _ id: String, on target: LibraryCatalog, title: String? = nil, systemImage: String? = nil,
+        _ id: String, on target: LibraryCatalog?, title: String? = nil, systemImage: String? = nil,
         action: LibraryMenu.Action?, reason: String, key: String? = nil, shortcut: KeyboardShortcut? = nil
     ) {
         let spec = LibraryCatalog.catalog.spec(id)
         let name = title ?? spec?.title ?? id
         let named = key.map { "\(name) (\($0))" } ?? name
-        let why = action == nil ? reason : spec?.availability(target).why
+        let why = action == nil ? reason : target.flatMap { spec?.availability($0).why }
         self.init(
             name, systemImage: systemImage, shortcut: shortcut, help: why.map { "\(named): \($0)" } ?? named,
             isEnabled: why == nil) { action?() }

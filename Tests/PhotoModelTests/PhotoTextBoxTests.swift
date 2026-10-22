@@ -1,7 +1,6 @@
-// PhotoTextBoxTests.swift (text-layers TX-3): the Type tool's text box. A click with the Type tool opens a
+// PhotoTextBoxTests.swift (text-layers TX-3, TX-5): the Type tool's text box. A click with the Type tool opens a
 // box at the press; typing changes its draft; Esc cancels it; Return, a click elsewhere or another tool
-// commits it through `text.add`. Until TX-5 builds that command the commit adds nothing and says so in the
-// status line, and an empty box closes without a word. Linux and macOS.
+// commits it through `text.add`, which adds one text layer; an empty box closes without a word. Linux and macOS.
 import CoreRaster
 @testable import PhotoModel
 import Testing
@@ -61,14 +60,14 @@ private func click(_ workspace: inout PhotoWorkspace, _ x: Double, _ y: Double) 
         #expect(workspace.statusMessage == nil && workspace.layers.count == 1)
     }
 
-    @Test func committingOnTheStubsSaysWhyAndAddsNothing() throws {
+    @Test func committingAddsATextLayer() throws {
         var workspace = try typing()
         click(&workspace, 40, 60)
         workspace.typeText("SALE")
         workspace.commitTextBox()
         #expect(workspace.textBox == nil)
-        #expect(workspace.layers.count == 1 && !workspace.canUndo)
-        #expect(workspace.statusMessage == "Text arrives with TX-5.")
+        #expect(workspace.layers.count == 2 && workspace.undoActionName == "Undo Add Text")
+        #expect(workspace.textStyle == .standard && workspace.statusMessage == nil)
     }
 
     @Test func anEmptyBoxClosesSilently() throws {
@@ -84,7 +83,7 @@ private func click(_ workspace: inout PhotoWorkspace, _ x: Double, _ y: Double) 
         workspace.typeText("SALE")
         click(&workspace, 300, 200)
         #expect(workspace.textBox == PhotoTextBox(origin: Mask.Point(x: 300, y: 200), draft: ""))
-        #expect(workspace.statusMessage == "Text arrives with TX-5.")
+        #expect(workspace.layers.count == 2)
     }
 
     @Test func anotherToolCommitsTheBox() throws {
@@ -93,7 +92,7 @@ private func click(_ workspace: inout PhotoWorkspace, _ x: Double, _ y: Double) 
         workspace.typeText("SALE")
         workspace.selectTool(.brush)
         #expect(workspace.textBox == nil)
-        #expect(workspace.statusMessage == "Text arrives with TX-5.")
+        #expect(workspace.layers.count == 2)
     }
 
     @Test func noImageOpensNoBox() {
