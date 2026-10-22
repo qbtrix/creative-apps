@@ -40,3 +40,4 @@ utc	stage	event	ref	note
 2026-10-21T10:00Z	heartbeat	parked; #3536 key-editing still in flight (KE-2/KE-4)
 2026-10-21T10:21Z	heartbeat	parked; #3536 not done
 2026-10-21T10:43Z	heartbeat	parked; #3536 not done
+2026-10-22T13:10Z	3	stage-start	-	resumed: HK-a #4336 merged, PH-a waits met; building PH-a on dev 1a51808
