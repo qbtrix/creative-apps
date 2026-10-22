@@ -1,0 +1,30 @@
+[
+  {
+    "label": "recordingKeys: recording on no longer keys a static fill at the playhead",
+    "file": "Sources/FlareModel/FlareColorKeys+Kernel.swift",
+    "find": "{ autoKey || keyCount > 0 ? currentFrame : nil }",
+    "replace": "{ keyCount > 0 ? currentFrame : nil }",
+    "tests": "recordingOnKeys"
+  },
+  {
+    "label": "animatedNeverFlattens: recording off sets the static value of an animated fill",
+    "file": "Sources/FlareModel/FlareColorKeys+Kernel.swift",
+    "find": "{ autoKey || keyCount > 0 ? currentFrame : nil }",
+    "replace": "{ autoKey ? currentFrame : nil }",
+    "tests": "recordingOffOnAnAnimatedFillKeysInsteadOfFlattening"
+  },
+  {
+    "label": "togglingAtThePlayheadAddsAndRemovesAKey: the last key leaves the old static fill",
+    "file": "Sources/FlareModel/FlareColorKeys+Kernel.swift",
+    "find": "                if key == .fill { fill = .solid(last.value) } else { stroke?.color = last.value }",
+    "replace": "                if key != .fill { stroke?.color = last.value }",
+    "tests": "togglingAtThePlayheadAddsAndRemovesAKey"
+  },
+  {
+    "label": "recordingOnKeysStrokeColourAndWidth: a keyed width also overwrites the static width",
+    "file": "Sources/FlareModel/FlareColorKeys+Kernel.swift",
+    "find": "            (writes, stroke.width) = (writes + [.width(a, shape: i, frame: f, edited.width)], kept.width)",
+    "replace": "            writes += [.width(a, shape: i, frame: f, edited.width)]",
+    "tests": "recordingOnKeysStrokeColourAndWidth"
+  }
+]

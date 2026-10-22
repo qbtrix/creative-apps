@@ -13,8 +13,10 @@ extension FlareWindow {
         case .showTab(let id): if let tab = FlareInspectorTab(rawValue: id) { inspectorTab = tab }
         case let .scrub(property, value, start): model.setProperty(property, to: value, dragStart: start)
         case .endScrub: model.endPropertyScrub()
-        case .toggleAnimated(let property): model.toggleAnimated(property)
-        case .toggleKey(let property): model.toggleKey(property)
+        case .toggleAnimated(let property), .toggleKey(let property):
+            if let paint = FlareWorkspace.PaintKey(rawValue: property) { model.togglePaintKey(paint) }
+            else if case .toggleKey = intent { model.toggleKey(property) }
+            else { model.toggleAnimated(property) }
         case .setFill(let hex): model.setFill(hex: hex)
         case .setStrokeColor(let hex): model.setStrokeColor(hex: hex)
         case .setStrokeWidth(let width): model.setStrokeWidth(width)
@@ -46,7 +48,9 @@ extension FlareWindow {
         switch intent {
         case .showTab, .endScrub, .endEasingHandle, .setSceneSize, .setSceneTiming: return nil
         case .scrub: return model.propertyLayerIDs.isEmpty ? "Select a layer first." : nil
-        case .toggleAnimated, .toggleKey: return model.propertyLayerIDs.count == 1 ? nil : "Select one layer to key it."
+        case .toggleAnimated(let property), .toggleKey(let property):
+            if let paint = FlareWorkspace.PaintKey(rawValue: property) { return model.paintKeyHelp(paint) }
+            return model.propertyLayerIDs.count == 1 ? nil : "Select one layer to key it."
         case .setFill, .setStrokeColor, .setStrokeWidth, .scrubStrokeWidth: return model.paint == nil ? "Select a layer to paint it." : nil
         case .setStrokeCap(let raw):
             return model.paint == nil ? "Select a layer to paint it." : Stroke.Cap(rawValue: raw) == nil ? "No cap named \(raw)." : nil

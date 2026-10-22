@@ -1,5 +1,5 @@
 # LibraryApp's menu items and buttons built without a command spec (command-catalog CC-11).
-# max: 48
+# max: 23
 Sources/LibraryApp/DevelopInspector.swift: Button("Reset \(slider.rawValue)") { resetSlider?(slider) }
 Sources/LibraryApp/LibraryBrowser.swift: Button(action.title, action: action.perform)
 Sources/LibraryApp/LibraryBrowser.swift: Button(expanded ? "Hide" : "Show") { expanded.toggle() }
@@ -12,32 +12,7 @@ Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
 Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
 Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
 Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(title: "Reset Develop", action: photo.resetDevelop, reason: develop)
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(title: photo.cropTitle, systemImage: "crop", action: photo.toggleCrop, reason: crop, key: "R")
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(title: "Reset Crop", action: photo.resetCrop, reason: crop)
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(title: "Pick", action: bind(cull.setFlag, .pick), reason: reason, key: named("P"))
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(title: "Reject", action: bind(cull.setFlag, .reject), reason: reason, key: named("X"))
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(title: "Clear Flag", action: bind(cull.setFlag, PhotoFlag.none), reason: reason, key: named("U"))
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(title: "None", action: bind(cull.setLabel, nil), reason: reason)
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(title: label.rawValue, action: bind(cull.setLabel, label), reason: reason)
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
 Sources/LibraryApp/LibraryCommands.swift: MenuCommand(title: item.title, action: item.action, reason: item.help ?? addWhy)
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
-Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
 Sources/LibraryApp/LibraryExportSheet.swift: Button("Choose…") { actions.chooseFolder?() }.disabled(actions.chooseFolder == nil)
 Sources/LibraryApp/LibraryExportSheet.swift: ForEach(presets) { (preset: ExportPreset) in Button(preset.name) { actions.applyPreset?(preset) } }
 Sources/LibraryApp/LibraryExportSheet.swift: Button("Save as Preset…") { savingPreset = true }.disabled(actions.savePreset == nil)

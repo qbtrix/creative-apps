@@ -1,9 +1,9 @@
 // HaloGradientSnapshots.swift (gradient-fill HG-3): Halo's FILL section (HaloFillInspector) in its states. A radial
 // fill shows the Solid / Linear / Radial switch on Radial and SuiteUI's GradientEditor with the fill's stops and no
-// angle row (halo-fill-radial); a linear fill adds the angle (halo-fill-linear); both from values, white to black,
-// since the Model's fill is a stub until HG-7. A text layer shows no FILL in the whole layer inspector: text keeps
-// its colour row in TEXT (halo-fill-text-layer). Also: on a new solid the section reads the project's stub, the
-// switch off with `fillHelp` as its reason, over the layer's colour row. Light and Dark. macOS only.
+// angle row (halo-fill-radial); a linear fill adds the angle (halo-fill-linear); both from values, white to black.
+// A text layer shows no FILL in the whole layer inspector: text keeps its colour row in TEXT
+// (halo-fill-text-layer). Also: on a new solid the section reads the project's solid fill in its layer's colour,
+// the switch live on Solid over the layer's colour row. Light and Dark. macOS only.
 import HaloModel
 import SuiteKernel
 import SuiteUI
@@ -42,16 +42,19 @@ import Testing
         }
     }
 
-    /// A new solid reads the project: the stub's reason turns the switch off, and its colour row shows.
-    @Test func solidReadsTheStub() throws {
+    /// A new solid reads the project: a live switch on Solid, its fill the layer's colour, and its colour row.
+    @Test func solidReadsItsFill() throws {
         var project = HaloProject(services: .fake, document: try #require(HaloFixtures.project("empty")))
         project.newLayer(.solid)
         #expect(HaloFillInspector.shows(project.selectedLayer?.kind), "a solid shows FILL")
         let section = HaloFillInspector(model: project, perform: { _ in }, runFill: { _ in })
-        #expect(section.help == project.fillHelp, "the switch carries the project's fillHelp")
-        #expect(section.help != nil, "the stub says why the switch is off")
+        #expect(section.help == nil, "a solid's switch is live, with no reason note")
+        let color = try #require(project.selectedLayerColor, "a solid has a colour")
+        #expect(
+            section.selection?.fill == .solid(FillColor(r: color.red, g: color.green, b: color.blue, a: 1)),
+            "the fill is the layer's colour")
         #expect(section.type == .solid, "no gradient reads Solid")
-        #expect(section.color == project.selectedLayerColor, "Solid shows the layer's colour row")
+        #expect(section.color == color, "Solid shows the layer's colour row")
     }
 
     /// The editor's gestures and the switch's picks go out as GradientIntents to `runFill`.
