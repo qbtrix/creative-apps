@@ -1,9 +1,10 @@
 // GalleryGradientEditor.swift: the gallery's `gradient-editor` page (gradient-fill GF-2; GF-8 runs its intents through
 // `GradientCommands` on a local target with a `History`). A preview rect painted with the page's own fill (a two-stop
-// linear fill, blue to white, 0°, in the preview's box) beside GradientEditor. Each intent the editor sends writes one
-// line, `<command id> <intent>`, to `suite.gallery.log`, and the page applies it to its fill through `GradientRules`,
-// so the preview follows with no rule of its own. The preview's value reads "<type>, <n> stops, <angle>°" for the
-// journey. The page is its own area in `SuiteGallery.areas`.
+// linear fill, blue to white, 0°, in the preview's box) beside GradientEditor. Each intent the editor sends runs as its
+// command in `GalleryGradientBoard`'s catalog and writes one line, `<command id> [<step>, <n> in History] <intent>` or
+// `<command id> [refused: <why>] <intent>`, to `suite.gallery.log` (the intent last, so a drag token ends the line), so
+// a stop drag shows as one undo step and the preview follows with no rule of its own. The preview's value reads "<type>, <n> stops, <angle>°" for the journey. The page is its own area
+// in `SuiteGallery.areas`.
 import SuiteKernel
 import SwiftUI
 
@@ -20,7 +21,8 @@ enum GalleryGradientEditor {
         stops: [GradientStop(offset: 0, color: FillColor(r: 0, g: 0, b: 1)), GradientStop(offset: 1, color: .white)],
         start: Point(x: box.minX, y: (box.minY + box.maxY) / 2), end: Point(x: box.maxX, y: (box.minY + box.maxY) / 2))
 
-    /// `fill` after `intent`, through the kernel's rules; an edit the rules refuse leaves it as it is.
+    /// `fill` after `intent`, through the kernel's rules, with no History; an edit the rules refuse leaves it as it
+    /// is. The render budget tests' child pages apply intents with it; the page itself runs them on its board.
     static func applied(_ intent: GradientIntent, to fill: Fill) -> Fill {
         switch intent {
         case .type(let type): GradientRules.converted(fill, to: type, in: box)
@@ -41,18 +43,51 @@ enum GalleryGradientEditor {
     }
 }
 
+/// The page's live target: one fill in the preview's box and the History its steps go in; the fill commands run on it.
+struct GalleryGradientBoard: GradientFillTarget {
+    private(set) var fill = GalleryGradientEditor.start
+    private(set) var history = History<Fill>()
+    var fillSelection: FillSelection? { FillSelection(fill: fill, box: GalleryGradientEditor.box) }
+    var fillHelp: String? { nil }
+
+    mutating func setFill(_ fill: Fill, in box: Rect, name: String, drag: String?) throws {
+        history.record(name, self.fill, key: drag.map { "\(name):\($0)" })
+        self.fill = GradientRules.mapped(fill, from: box, to: GalleryGradientEditor.box)
+    }
+
+    static let catalog = try? CommandCatalog<GalleryGradientBoard>(app: "gallery", GradientCommands.specs(GalleryGradientBoard.self), history: { $0.history })
+
+    /// Runs `intent`'s command; the log line: the step it made, or why it was refused, then the intent.
+    mutating func send(_ intent: GradientIntent) -> String {
+        let command = intent.command
+        guard let catalog = Self.catalog else { return "\(command.id) [no catalog] \(intent)" }
+        do {
+            let outcome = try catalog.run(command.id, params: command.params, on: &self)
+            return "\(command.id) [\(outcome.undoStep ?? "no step"), \(history.steps.count) in History] \(intent)"
+        } catch { return "\(command.id) [refused: \(error)] \(intent)" }
+    }
+
+    /// Takes back the last step; false when there is none.
+    mutating func undo() -> Bool {
+        var current = fill
+        let moved = history.undo { old in defer { current = old }; return current }
+        fill = current
+        return moved
+    }
+}
+
 /// The `gradient-editor` page: the preview, the editor and the log under them.
 struct GalleryGradientEditorPage: View {
-    @State private var fill = GalleryGradientEditor.start
+    @State private var board = GalleryGradientBoard()
     @State private var log: [String] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             HStack(alignment: .top, spacing: SuiteSpacing.m) {
-                GalleryGradientPreview(fill: fill)
+                GalleryGradientPreview(fill: board.fill)
                 ScrollView {
                     InspectorSection("Fill") {
-                        GradientEditor(fill: fill, box: GalleryGradientEditor.box, onIntent: send)
+                        GradientEditor(fill: board.fill, box: GalleryGradientEditor.box, onIntent: send)
                     }
                     .padding(.vertical, SuiteSpacing.m)
                 }
@@ -72,8 +107,7 @@ struct GalleryGradientEditorPage: View {
     }
 
     private func send(_ intent: GradientIntent) {
-        fill = GalleryGradientEditor.applied(intent, to: fill)
-        log.append("\(intent.command.id) \(intent)")
+        log.append(board.send(intent))
         if log.count > 40 { log.removeFirst(log.count - 40) }
     }
 }
