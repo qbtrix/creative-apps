@@ -4,7 +4,7 @@ Issue: #3725 · Packet: docs/blueprints/suite/features/shell-text.md
 Run: act-1a15ef24f0e-t1j1 · Session: cse_01Mv9wxYxE6yTZhCjfP2rdUH · Started: 2026-10-21T14:56Z
 Stage: 3 wave B (stacked)
 Base: 3f96cd10c74f0eb4da8641e8fe511a2e5e42a466
-Next: ST-a, ST-m done (Belt-Slice-Done posted; ST-m run 39728647575). #4156 ST-live (baede8ef5) ready, macOS build green, awaiting lane merge. #4161 ST-live2 (93f711a20) draft on ST-live; retarget to dev when #4156 merges. Wave D (ST-z) after ST-live merges.
+Next: ST-a, ST-m done. #4156 merged (418ad114a). #4161 ST-live2 (3f297e984) ready on dev, awaiting lane batch; then Belt-Slice-Done ST-live. ST-z (ST-8 LiveText + live slot, ST-9 built) building as a draft stacked on ST-live2.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
