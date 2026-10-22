@@ -22,12 +22,15 @@
 // unlabelled button to the app audit's Unnamed check. The column still
 // scrolls by wheel and trackpad.
 import HaloModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
 struct HaloCompositionInspector: View {
     let model: HaloProject
     var perform: @MainActor (HaloCommand) -> Void = { _ in }
+    /// Runs one fill editor gesture on the window's project (HaloFillInspector).
+    var runFill: @MainActor (GradientIntent) -> Void = { _ in }
     @Environment(\.suiteSnapshotRendering) private var snapshot
 
     var body: some View {
@@ -42,7 +45,7 @@ struct HaloCompositionInspector: View {
     private var content: some View {
         VStack(alignment: .leading, spacing: 0) {
             if model.selectedLayerHeader != nil {
-                HaloLayerInspector(model: model, perform: perform)
+                HaloLayerInspector(model: model, perform: perform, runFill: runFill)
             } else if let comp = model.selectedComposition {
                 InspectorHeader(comp.name, details: comp.headerDetails)
                     .accessibilityIdentifier("halo.inspector.header")
