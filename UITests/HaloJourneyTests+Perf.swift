@@ -16,9 +16,11 @@
 // 1000 by 640 window the artboard is narrower than 600 pt, so a leg spans at
 // most 80% of it, with as many legs as make up 4 × 600 pt, and a leg slows
 // below 300 pt a second to last `legTime`, as the Rotation bar's 0.05 to 0.95
-// legs do (#4275); each viewer leg needs 60 samples of its own (#4276). H-P5
-// posts a burst of scroll-wheel events at 120 Hz before each scroll call and
-// counts only intervals inside a burst (#4277).
+// legs do (#4275); each viewer leg needs 60 samples of its own (#4276), and
+// the series 60 × legs in all (#4450), so a viewer leg lasts `viewerLegTime`.
+// H-P5 posts a burst of scroll-wheel events at 120 Hz before each scroll call
+// and counts only intervals inside a burst (#4277); before its layers shot it
+// hovers the viewer until no row's help tag shows (#4458).
 // XCUIGestureVelocity is pixels a second, so 300 pt a second is scaled by the
 // screen's backing scale, as DesignJourneyTests+PerfScrub does.
 import AppKit
@@ -33,6 +35,9 @@ final class HaloPerfJourneyTests: XCTestCase {
     static let legSpan: CGFloat = 600, legCount = 4, speed: CGFloat = 300
     /// The shortest drag leg, in seconds: 72 or more 60 Hz refreshes.
     static let legTime: CGFloat = 1.2
+    /// The shortest viewer drag leg, in seconds: 120 or more 60 Hz refreshes,
+    /// so each leg has room for its own 60 samples (#4450).
+    static let viewerLegTime: CGFloat = 2
     /// Scroll-wheel events per burst, and the pixels each one scrolls.
     static let burstEvents = 24, burstPixels: Int32 = 3
 
@@ -55,7 +60,8 @@ final class HaloPerfJourneyTests: XCTestCase {
         for leg in 0..<legs {
             let (from, to) = leg.isMultiple(of: 2) ? (start, far) : (far, start)
             starts.append(ProcessInfo.processInfo.systemUptime)
-            halo.velocityDrag(on: "halo.viewer.canvas", from: from, to: to, velocity: velocity(lasting: span))
+            halo.velocityDrag(
+                on: "halo.viewer.canvas", from: from, to: to, velocity: velocity(lasting: span, over: Self.viewerLegTime))
         }
         halo.shot("perf-viewer-drag")
         guard let document = halo.perf() else { return }
@@ -151,6 +157,7 @@ final class HaloPerfJourneyTests: XCTestCase {
         let list = halo.element("halo.layer.list")
         XCTAssert(list.waitForExistence(timeout: 10), "no layer list (halo.layer.list)")
         scrollEnd(list, until: halo.element("halo.layer.row.comp-1-layer-1"), by: -120, bursts: &listBursts)
+        restOffList(halo)
         halo.shot("perf-layers-bottom")
         scrollEnd(list, until: halo.element("halo.layer.row.comp-1-layer-300"), by: 120, bursts: &listBursts)
         guard let document = halo.perf() else { return }
@@ -161,9 +168,24 @@ final class HaloPerfJourneyTests: XCTestCase {
     // MARK: - Steps
 
     /// 300 pt a second in the screen's pixels, or slower so a leg of
-    /// `points` lasts at least `legTime`.
-    @MainActor private func velocity(lasting points: CGFloat) -> XCUIGestureVelocity {
-        XCUIGestureVelocity(min(Self.speed, points / Self.legTime) * (NSScreen.main?.backingScaleFactor ?? 1))
+    /// `points` lasts at least `seconds` (`legTime` unless given).
+    @MainActor private func velocity(
+        lasting points: CGFloat, over seconds: CGFloat = HaloPerfJourneyTests.legTime
+    ) -> XCUIGestureVelocity {
+        XCUIGestureVelocity(min(Self.speed, points / seconds) * (NSScreen.main?.backingScaleFactor ?? 1))
+    }
+
+    /// Moves the pointer off the layer list onto the viewer and waits until
+    /// no help tag shows: the scroll leaves it on a row, whose tooltip would
+    /// be in the next shot and count as a contrast hit (#4458).
+    @MainActor private func restOffList(_ halo: Journey) {
+        let viewer = halo.element("halo.viewer")
+        XCTAssert(viewer.waitForExistence(timeout: 5), "no viewer (halo.viewer) to rest the pointer on")
+        viewer.hover()
+        XCTAssert(
+            halo.app.helpTags.firstMatch.waitForNonExistence(timeout: 5),
+            "a help tag still shows with the pointer on the viewer")
+        Thread.sleep(forTimeInterval: 0.3)
     }
 
     /// Halo on sample `name` with the frame probe on, once its window shows a viewer.
