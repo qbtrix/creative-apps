@@ -92,3 +92,4 @@ utc	stage	event	ref	note
 2026-10-22T03:17:09Z	check	-	dev Linux green again (39713604043 @66a84588); scoped photo 39712698310 @b5a6e7e0 queued (Free Transform fix #4252/#4219 still open); #4162/#4267/#4271 clean, waiting on lane macOS builds; no open findings; export-pack planned
 2026-10-22T03:41:28Z	check	PF-a,PF-u	waiting on scoped photo 39712698310 / full 39714642994 (contain add701fc); #4267 at 5d8cb7ef awaiting lane macOS build; PF-8 waits on export-pack PX-z
 2026-10-22T04:15:52Z	check	PF-z	PF-7 #4267 merged 57685d8b; finding #4260 root-caused (hand-offs dropped: plain delegate, no-op host) and fixed in #4307
+2026-10-22T04:38:40Z	check	PF-a,PF-u	scoped photo 39712698310 red only on RenderBudgetPhotoTransformTests (finding #4247, not this feature); next proof: scoped photo 39722915670 / full 39722978870 at 71987f72; #4307 clean, mac build 39721995293 queued; export-pack still planned (PF-8 waits)
