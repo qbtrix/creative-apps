@@ -12,7 +12,8 @@
 // its value in the bar and puts the window's project with it set
 // (`setProperty` on a copy, HaloLiveEdit.show) in the window's HaloLiveEdit,
 // at most once per screen refresh (HaloInspectorScrubLink, #4275), so only the
-// bar and the viewer's layers re-run, once a refresh; once it ends (a drag, a
+// bar and the viewer's layers and handles re-run, once a refresh (the playhead
+// leaves never read it, HaloPlayheadShown, #4589); once it ends (a drag, a
 // key, a typed value) the row sends .setProperty with the stored value and
 // .endPropertyScrub, one step. Hosted without a HaloLiveEdit, each value is
 // sent as it comes. Under `-SuitePerfProbe` every pointer sample of a drag on
