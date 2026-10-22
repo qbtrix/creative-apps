@@ -43,7 +43,7 @@ enum PhotoIntent {
     // One case per v2 area; each area's enum lives in its PhotoWindow+<Area>.swift.
     case file(FileIntent), edit(EditIntent), crop(CropIntent), history(HistoryIntent), select(SelectIntent)
     case adjustmentLayer(AdjustmentLayerIntent), transform(TransformIntent), export(ExportIntent), sample(SampleIntent)
-    case place(PhotoPlaceIntent)
+    case place(PhotoPlaceIntent), text(TypeIntent)
     /// Return: commits a free transform, else applies a pending crop.
     case confirm
     /// Escape: cancels a free transform, else cancels a pending crop or deselects.
@@ -65,6 +65,7 @@ extension PhotoTool: PaletteTool {
         case .crop: "Crop"
         case .eyedropper: "Eyedropper"
         case .gradient: "Gradient"
+        case .text: "Type"
         }
     }
 
@@ -79,6 +80,7 @@ extension PhotoTool: PaletteTool {
         case .crop: "crop"
         case .eyedropper: "eyedropper"
         case .gradient: "square.bottomhalf.filled"
+        case .text: "textformat"
         }
     }
 
@@ -93,6 +95,7 @@ extension PhotoTool: PaletteTool {
         case .crop: "c"
         case .eyedropper: "i"
         case .gradient: "g"
+        case .text: "t"
         }
     }
 

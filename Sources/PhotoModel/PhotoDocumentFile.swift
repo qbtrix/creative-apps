@@ -101,11 +101,9 @@ extension PhotoWorkspace {
     /// The open image as a document keeps it: every layer (top first), each
     /// pixel layer's and mask's pixels as 8-bit straight-alpha sRGB, the
     /// whole-image adjustments and the selected layer. Throws
-    /// `RasterError.invalid` with no image open, and `textNotBuilt` for a
-    /// text layer until TX-6 writes it into the file.
+    /// `RasterError.invalid` with no image open.
     public func snapshot() throws -> PhotoDocumentSnapshot {
         guard let canvas else { throw RasterError.invalid("no image is open") }
-        if layers.contains(where: { if case .text = $0.kind { true } else { false } }) { throw Self.textNotBuilt }
         func image(_ tiles: TiledPixels) throws -> DecodedImage {
             DecodedImage(rgba8: try tiles.rgba8(), width: tiles.width, height: tiles.height)
         }
@@ -161,7 +159,7 @@ extension PhotoWorkspace {
 
     /// The layer stack `document` describes, its pixels in tiles. Throws
     /// `ArchiveError.damaged` for a document with no layers, a repeated id, a
-    /// pixel layer or mask without its image, or an image of the wrong size.
+    /// pixel or text layer or mask without its image, or an image of the wrong size.
     private static func stack(of document: PhotoDocumentSnapshot) throws -> PhotoStack {
         guard !document.layers.isEmpty else { throw ArchiveError.damaged("the document has no layers") }
         guard Set(document.layers.map(\.id)).count == document.layers.count else {
@@ -170,7 +168,7 @@ extension PhotoWorkspace {
         var pixels: [PhotoLayer.ID: TiledPixels] = [:], masks: [PhotoLayer.ID: TiledPixels] = [:]
         var layers = document.layers
         for (i, layer) in layers.enumerated() {
-            if layer.kind == .pixels {
+            if layer.kind == .pixels || layer.kind.textLayer != nil {
                 guard let image = document.pixels[layer.id] else { throw ArchiveError.damaged("\(layer.name) has no pixels") }
                 pixels[layer.id] = try tiles(image, what: layer.name)
             }
