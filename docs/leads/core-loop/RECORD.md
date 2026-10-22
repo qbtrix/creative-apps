@@ -75,7 +75,7 @@ Next: #4285 #4286 #4290 merged (05:35Z, 06:03Z). Round-1 perf fixers in flight: 
 
 | Finding | Slice | Sev | Lens | Round | State |
 |---|---|---|---|---|---|
-| #4264 | CL-probe | CI | journey | 1 | PR #4286 (timeline scroll bar strips; hide indicators) |
+| #4264 | CL-probe | CI | journey | 1 | PR #4286 merged 05:35Z (timeline scroll bar strips; hide indicators) |
 | #4265 | CL-measure | CI | journey | 1 | PR #4285 merged 05:35Z (test pressed the empty label cell, not the ruler) |
 | #4266 | CL-probe | CI | journey | 1 | PR #4286 merged 05:35Z |
 | #4272 | CL-measure | major | mouse | 1 | PR #4287 merged 04:41Z (bare transport left at 440 pt; History drops; tight ~8 pt) |
