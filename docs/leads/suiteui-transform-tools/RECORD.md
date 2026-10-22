@@ -34,6 +34,7 @@ Next: lane batches #3577 → #4429 (feature-done; retarget to dev once #3577 mer
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T16:42Z heartbeat: #3577 is waiting on its macOS build 39813540395, which is queued (the runners are saturated; the lane re-dispatched it after an earlier build was cancelled). #4429 is still stacked on it. On dev 401242a5, scoped suiteui 39810321089 is still queued and full CI 39810338100 was cancelled. No needs-fix or needs-rebase.
 - 2026-10-22T16:20Z heartbeat: #3577 (TT-7) is clean on dev at eca74db6 and waits for a lane batch. #4429 is still stacked on it. Dev 401242a5 holds #3513 (d96c2645); its runs are pending: scoped suiteui 39810321089 (the TT-4 screens for the critic panel) and full CI 39810338100.
 - 2026-10-22T15:50Z heartbeat: #3513 (TT-4) merged into dev at 15:42Z as d96c2645. The lane left #3577 on the TT-4 base, so I merged dev into lead/transform-tools-TT-7 (eca74db6, scripts/ci --changed: CI: PASS), retargeted #3577 to dev, moved its Head line and removed the footer the API added to its body. #4429 is stacked on #3577; no dev CI run holds d96c2645 yet.
 - 2026-10-22T15:20Z heartbeat: #3513 macOS build 39786650299 green on 9b339941 (the @Test arguments fix compiles); waits on a lane sweep. #3577, #4429 stacked behind it.
