@@ -1,17 +1,17 @@
 # adopt-suiteui-chrome lead record
 
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
-Run: act-1a160ca3d68-sbnc (#1942 only; slices AC-tools, AC-export-sheet; earlier runs act-1a15ef870d6-3mm5, act-1a15ce4fb40-9k5r) · Session: claude/adopt-suiteui-chrome-fhl6sx · Resumed: 2026-10-21
-Stage: 3 build (AC-tools p2 #4002 in lane; AC-export-sheet blocked on shared-codecs:SC-f)
-Base: dev be9aa35b
-Next: #4002 (head cbada801) merges via the lane, then a green ci.yml run (app=suiteui or full) containing it gives AC-tools Belt-Slice-Done + Mac-Finish-Wanted; re-read shared-codecs:SC-f (SC-14 #4238 open; SC-15, SC-16 not yet opened) and start AC-e1 once SC-16 merges
+Run: act-1a1646f0a9f-d1ei (#1942; slice AC-export-sheet; earlier runs act-1a160ca3d68-sbnc, act-1a15ef870d6-3mm5, act-1a15ce4fb40-9k5r) · Session: claude/suiteui-feature-lead-v7e2hk · Resumed: 2026-10-22T16:30Z
+Stage: 3 polling (AC-export-sheet blocked on shared-codecs:SC-f; AC-zoom, AC-colour, AC-tools, AC-guides done)
+Base: dev a41e7f1f (main 0dd23d65 verified)
+Next: re-read shared-codecs:SC-f each poll: SC-15 (owns Sources/PhotoApp/PhotoWindow+Export.swift) and SC-16 (replaces Sources/LibraryModel/Contracts/ExportFormats.swift) on dev? Once both merge, AC-e1 + AC-e2 ship as one slice PR to dev with feature-done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | AC-zoom | every app clamps through ZoomMath, fits through one fit, maps through CanvasLayout | AC-z1, AC-z2 | MJ-AC-zoom | editor-kernel:EK-a, adopt-kernel-brush:AB-photo | yes | 0 | done | – | – |
 | AC-colour | parse, format and pick colour through HexColor and ColorWell | AC-c1, AC-c2 | MJ-AC-colour | editor-kernel:EK-a, adopt-kernel-brush:AB-photo, AC-zoom | yes | 1 | done (per Belt brief act-1a15ef870d6-3mm5) | 39604117821 | wanted |
-| AC-tools | tool letters and modifiers through ToolKeys | AC-t1, AC-t2 | MJ-AC-tools | editor-kernel:EK-chrome, AC-colour | yes | 0 | building: p1 #3952 merged, p2 #4002 (head cbada801) in lane | – | – |
+| AC-tools | tool letters and modifiers through ToolKeys | AC-t1, AC-t2 | MJ-AC-tools | editor-kernel:EK-chrome, AC-colour | yes | 0 | done | 39719142992 | wanted |
 | AC-guides | Flare's guides draw through CanvasMarks (GuideLineMark) | AC-g1, AC-g2 | MJ-AC-guides | editor-kernel:EK-a | yes | 0 | done | – | – |
 | AC-export-sheet | Photo, Library and Flare export sheets are SuiteUI's ExportSheet | AC-e1, AC-e2 | MJ-AC-export-sheet | editor-kernel:EK-chrome, adopt-kernel-export:AX-photo, AX-library, AX-flare (met), shared-codecs:SC-f (open) | yes | 0 | blocked-SC-f | – | – |
 
@@ -22,8 +22,8 @@ Next: #4002 (head cbada801) merges via the lane, then a green ci.yml run (app=su
 | AC-z2 | AC-zoom | – | zoom delete | per packet | same + mutate --validate | – | parked |
 | AC-c1 | AC-colour | – | colour adapter | per packet | HexColorParserTests, DesignStyleTests, DesignInspectorSnapshots | – | parked |
 | AC-c2 | AC-colour | – | colour delete | per packet | same + mutate --validate | – | parked |
-| AC-t1 | AC-tools | – | tools adapter | per packet | FlareToolsKeyTests, DesignToolsKeyTests, PhotoToolsKeyTests | #3952, #4002 | #3952 merged; #4002 in lane |
-| AC-t2 | AC-tools | – | tools delete | per packet | same + mutate --validate | #4002 | in lane |
+| AC-t1 | AC-tools | – | tools adapter | per packet | FlareToolsKeyTests, DesignToolsKeyTests, PhotoToolsKeyTests | #3952, #4002 | merged |
+| AC-t2 | AC-tools | – | tools delete | per packet | same + mutate --validate | #4002 | merged |
 | AC-g1 | AC-guides | – | guides adapter | per packet | FlareStageGuideSnapshots, GuideLineMarkTests | – | parked |
 | AC-g2 | AC-guides | – | guides delete | per packet | same + mutate --validate | – | parked |
 | AC-e1 | AC-export-sheet | – | export sheet adapter | per packet | PhotoExportSheetSnapshots, LibraryExportSnapshots, FlareExportSnapshots | – | parked |
@@ -34,6 +34,9 @@ Next: #4002 (head cbada801) merges via the lane, then a green ci.yml run (app=su
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T17:10Z: Belt nudge: status lives on this branch (lead/suiteui-adopt-suiteui-chrome), not lead/adopt-suiteui-chrome where this run first wrote; record moved here. Re-polled on dev a41e7f1f: SC-15 and SC-16 still not on dev (Library's ExportFormats.swift still present; shared-codecs.wave.json status planned). AC-export-sheet stays unstarted; nothing else in the brief can start.
+- 2026-10-22T16:45Z: blocked note on #1942 (issuecomment-6345841148): AC-e1 + AC-e2 ship as one slice PR once SC-15 and SC-16 merge.
+- 2026-10-22T16:30Z: run act-1a1646f0a9f-d1ei resumed for AC-export-sheet (brief: AC-zoom, AC-colour, AC-tools, AC-guides done). Waits re-read: shared-codecs posted Belt-Slice-Done: SC-f on run 39710840412 with only SC-13 (#4019) and SC-14 (#4238) merged; SC-15 and SC-16 are not on dev and #3718 now waits on suite-imaging:IM-a. The packet waits on the whole slice and SC-f owns PhotoWindow+Export.swift, and the supervisor (2026-10-22T07:43Z on #1942) holds AC-export-sheet for SC-15 and SC-16, so AC-e1 does not start. Slice PRs go to dev (CLAUDE.md; the lane retargets main).
 - 2026-10-22T07:07Z: Still awaiting release. No supervisor reply on #1942 since the hand-off. SC-15 and SC-16 still have no PRs, so AC-export-sheet stays unstarted for the next lead.
 - 2026-10-22T06:36Z: Run finished; awaiting release. Hand-off comment posted on #1942 (issuecomment-6333984264) asking the supervisor to release the run. Re-checked: no supervisor reply yet; SC-15/SC-16 still have no PRs, so AC-export-sheet stays unstarted for the next lead. Nothing further for this run to build.
 - 2026-10-22T05:34Z: AC-tools DONE. Scoped suiteui 39719142992 (e02f36c, contains 74b34fc) succeeded; posted Belt-Slice-Done: AC-tools (issuecomment-6333563012) and Mac-Finish-Wanted: AC-tools (issuecomment-6333563320) on #1942, no gaps. Run ends here: SC-15 and SC-16 still have no PRs, so per the supervisor (issuecomment-6329700665) AC-export-sheet is left UNSTARTED for the next lead. No Belt-Contact-Sheet (not all slices done).
@@ -98,4 +101,4 @@ Next: #4002 (head cbada801) merges via the lane, then a green ci.yml run (app=su
 - Even once resumed, only AC-guides can start after editor-kernel's EK-a: AC-zoom and AC-colour wait on adopt-kernel-brush AB-photo (itself waiting on EK-stroke and EK-chrome), AC-tools on AC-colour, and AC-export-sheet on adopt-kernel-export's three app slices (waiting on EK-run and other adopt features). None of those features has started.
 
 ## Open
-- Waits on the captain lifting the beta cut, then on editor-kernel EK-a (every slice) and the adopt-kernel-* slices named above.
+- AC-export-sheet waits on shared-codecs SC-15 and SC-16 merging to dev (owned by the shared-codecs lead; #3718 waits on suite-imaging:IM-a).
