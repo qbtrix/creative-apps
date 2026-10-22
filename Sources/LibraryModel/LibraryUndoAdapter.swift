@@ -4,14 +4,17 @@
 // kernel the photos it replaced, which redo puts back. A collections step
 // ("New Collection") holds your collections before and after it; undo puts
 // the before list back and redo the after list (FC-3), and undoing a delete
-// selects the deleted collection again when it was selected (FC-9). Edits
-// sharing an open coalesce key (one slider drag) stay one step. The 100-step
-// limit is the kernel's. Undo and redo never move the loupe (#426). Linux-safe.
+// selects the deleted collection again when it was selected (FC-9). A drop's
+// "Import" step (LF-3) takes its photos out on undo and adds them back,
+// selected, on redo. Edits sharing an open coalesce key (one slider drag) stay
+// one step. The 100-step limit is the kernel's. Undo and redo never move the
+// loupe (#426). Linux-safe.
 
 import SuiteKernel
 
-/// One step's payload: the photos to put back, and for a collections step
-/// your collections before and after it (nil on a photo step).
+/// One step's payload: the photos to put back, for a collections step
+/// your collections before and after it (nil on a photo step), and for an
+/// import step (LF-3) the photos its move takes out or adds back.
 public struct CatalogChange: Hashable, Sendable {
     public internal(set) var photos: [PhotoItem]
     public internal(set) var collectionsBefore: [UserCollection]?
@@ -19,15 +22,19 @@ public struct CatalogChange: Hashable, Sendable {
     /// The collection selected before a collections step, which undo selects
     /// again when the step removed it (Delete Collection); nil on a photo step.
     public internal(set) var selectedBefore: String?
+    public internal(set) var removing: [PhotoItem]?
+    public internal(set) var adding: [PhotoItem]?
 
     init(
         photos: [PhotoItem], collectionsBefore: [UserCollection]? = nil, collectionsAfter: [UserCollection]? = nil,
-        selectedBefore: String? = nil
+        selectedBefore: String? = nil, removing: [PhotoItem]? = nil, adding: [PhotoItem]? = nil
     ) {
         self.photos = photos
         self.collectionsBefore = collectionsBefore
         self.collectionsAfter = collectionsAfter
         self.selectedBefore = selectedBefore
+        self.removing = removing
+        self.adding = adding
     }
 }
 
@@ -141,6 +148,9 @@ extension LibraryCatalog {
             let ids = Set(change.photos.map(\.id))
             var swapped = change
             swapped.photos = current.filter { ids.contains($0.id) }
+            let out = Set((change.removing ?? []).map(\.id))
+            swapped.adding = change.removing.map { _ in current.filter { out.contains($0.id) } }
+            swapped.removing = change.adding
             return swapped
         }
         guard moved, let applied else { return }
@@ -149,6 +159,21 @@ extension LibraryCatalog {
         if let collections = applied[keyPath: side] { applyCollections(collections) }
         if side == \.collectionsBefore, let selected = applied.selectedBefore { reselect(selected, after: applied) }
         if !applied.photos.isEmpty { restore(applied.photos) }
+        if let removing = applied.removing { removePhotos(Set(removing.map(\.id))) }
+        if let adding = applied.adding {
+            appendImported(adding)
+            select(Set(adding.map(\.id)))
+        }
+    }
+
+    /// Takes the photos with `ids` out (an import's undo); a loupe on one of them goes back to the grid.
+    private mutating func removePhotos(_ ids: Set<String>) {
+        items.removeAll { ids.contains($0.id) }
+        if let focused = focusedItemID, ids.contains(focused) { (focusedItemID, mode) = (nil, .grid) }
+        recount()
+        rebuildOrder()
+        select(selection)
+        saveRevision += 1
     }
 
     /// Puts `collections` in place as your collections and keeps what is shown

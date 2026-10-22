@@ -1,5 +1,6 @@
 // ShellMediaWriteTests.swift: shell-media's movie writer on a Mac (MJ-SM2),
-// written first by SM-2 and disabled until SM-5 fills the `movie` seam. A
+// written first by SM-2; SM-5 fills the `movie` seam with SuiteShell's
+// `MovieWriter` and turns the movie cases on. A
 // 48-frame 24 fps 1280 x 720 H.264 is 2.000 s with BT.709 tags, each codec
 // writes its track codec, the alpha codecs keep a transparent corner, cancel
 // leaves no file, and 1080p throughput is reported. Reads back with
@@ -9,12 +10,13 @@ import CoreGraphics
 import CoreMedia
 import Foundation
 import SuiteModel
+import SuiteShell
 import Testing
 
 @Suite(.timeLimit(.minutes(5))) struct ShellMediaWriteTests {
-    /// SM-5 makes this `try MovieWriter(...)` for `path` and `settings`; it throws until then.
+    /// The movie writer under test: shell-media's `MovieWriter` for `path` and `settings`.
     static func movie(at path: String, _ settings: MovieSettings) throws(SuiteError) -> any FrameSink {
-        throw .notAvailable("waits on SM-5")
+        try MovieWriter(path: path, settings)
     }
 
     // MARK: Helpers, also for SM-6's and SM-8's suites.
@@ -78,7 +80,7 @@ import Testing
 
     // MARK: Movies (SM-5)
 
-    @Test(.disabled("waits on SM-5")) func h264IsTwoSecondsWithBT709Tags() async throws {
+    @Test func h264IsTwoSecondsWithBT709Tags() async throws {
         let url = try Self.scratch("h264.mov")
         defer { Self.discard(url) }
         try await Self.writeMovie(MovieSettings(width: 1280, height: 720, fps: 24, codec: .h264, quality: 0.8),
@@ -95,7 +97,7 @@ import Testing
         }
     }
 
-    @Test(.disabled("waits on SM-5"), arguments: MovieCodec.allCases)
+    @Test(arguments: MovieCodec.allCases)
     func eachCodecWritesItsTrackCodec(_ codec: MovieCodec) async throws {
         let expected: [MovieCodec: CMVideoCodecType] = [
             .h264: kCMVideoCodecType_H264, .hevc: kCMVideoCodecType_HEVC,
@@ -109,7 +111,7 @@ import Testing
         #expect(CMFormatDescriptionGetMediaSubType(format) == expected[codec])
     }
 
-    @Test(.disabled("waits on SM-5"), arguments: [MovieCodec.prores4444, .hevcAlpha])
+    @Test(arguments: [MovieCodec.prores4444, .hevcAlpha])
     func alphaCodecsKeepATransparentCorner(_ codec: MovieCodec) async throws {
         let url = try Self.scratch("\(codec.rawValue).mov")
         defer { Self.discard(url) }
@@ -124,7 +126,7 @@ import Testing
         #expect(pixels[(32 * 64 + 32) * 4 + 3] >= 247, "middle stays opaque")
     }
 
-    @Test(.disabled("waits on SM-5")) func cancelLeavesNoFile() throws {
+    @Test func cancelLeavesNoFile() throws {
         let url = try Self.scratch("cancelled.mov")
         defer { Self.discard(url) }
         let sink = try Self.movie(at: url.path, MovieSettings(width: 64, height: 64, fps: 24, codec: .h264, quality: 0.8))
@@ -134,7 +136,7 @@ import Testing
     }
 
     /// Reported, not asserted: 1080p H.264 frames per second (budget >= 60 on Apple silicon, release).
-    @Test(.disabled("waits on SM-5")) func throughput() async throws {
+    @Test func throughput() async throws {
         let url = try Self.scratch("throughput.mov")
         defer { Self.discard(url) }
         let settings = MovieSettings(width: 1920, height: 1080, fps: 24, codec: .h264, quality: 0.8)

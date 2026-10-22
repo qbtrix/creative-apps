@@ -13,6 +13,9 @@ extension FlareWorkspace: PathEditTarget {
         return PathInEdit(id: "\(address.layerID)/\(index)", path: item.path, toDocument: item.transform)
     }
 
+    /// `pathInEdit` when its points can change (`pathHelp` is nil): what the edit overlay draws. Nil on a locked layer.
+    public var editablePath: PathInEdit? { pathHelp == nil ? pathInEdit : nil }
+
     /// The picked anchors of `pathInEdit`; cleared when the item selection changes.
     public var anchorSelection: Selection<AnchorRef> {
         get { anchorSelectionStore }
