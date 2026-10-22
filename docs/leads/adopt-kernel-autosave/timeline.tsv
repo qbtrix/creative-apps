@@ -43,3 +43,4 @@ utc	stage	event	ref	note
 2026-10-22T14:35Z	wave		wave 5 shipped: #4010 68b3c4e6, AK-10 #4427+#4428, #4015 fix #4430; waiting on the lane
 2026-10-22T14:58Z	heartbeat		#4010 mac green, waits sweep; #4430 mac queued; AK-6/8/9/11 blocked (poll 1)
 2026-10-22T15:20Z	heartbeat		#4010 waits sweep; #4430 mac rebuild queued; AK-6/8/9/11 blocked (poll 2)
+2026-10-22T15:50Z	3	question	-	blocked poll 3 unchanged; supervisor question on #3713
