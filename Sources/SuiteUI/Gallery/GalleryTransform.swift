@@ -5,7 +5,8 @@
 // History: every knob sample, handle sample and row edit runs its
 // TransformCommands command through the catalog, a drag's samples under one
 // token so the drag is one undo step. Each command logs a line. The box is
-// the element `suite.gallery.transform-box`; the log is `suite.gallery.log`.
+// the element `suite.gallery.transform-box`, at the turned box's bounds; the
+// editor draws the one outline, turned (#4625). The log is `suite.gallery.log`.
 import SuiteKernel
 import SwiftUI
 
@@ -83,8 +84,11 @@ struct GalleryTransformBoard: TransformTarget {
 
 /// `transform-handles`: one box, its handles and the transform rows.
 struct GalleryTransformPage: View {
-    @State private var board = GalleryTransformBoard()
+    @State private var board: GalleryTransformBoard
     @State private var log = GalleryCanvasLog()
+
+    /// The page on `board`: a fresh box unless a snapshot hands it a turned one.
+    init(board: GalleryTransformBoard = GalleryTransformBoard()) { _board = State(initialValue: board) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
@@ -92,14 +96,10 @@ struct GalleryTransformPage: View {
                 CanvasViewport(documentSize: GalleryCanvas.document, zoom: 1) {
                     SuiteColor.artboard
                 } overlay: {
-                    ZStack(alignment: .topLeading) {
-                        ProbeElement("suite.gallery.transform-box", label: "Transform box", rect: rect)
-                        SelectionOutline(rect: rect, zoom: 1)
-                        SelectionHandlesEditor(rect: rect, degrees: board.item.degrees, zoom: 1,
-                                               onResize: { log.add(board.resize(to: Self.kernel($0))) },
-                                               onRotate: { log.add(board.knob(turned: $0)) },
-                                               onEnd: { log.add(board.end()) })
-                    }
+                    GalleryTransformMarks(item: board.item,
+                                          onResize: { log.add(board.resize(to: Self.kernel($0))) },
+                                          onRotate: { log.add(board.knob(turned: $0)) },
+                                          onEnd: { log.add(board.end()) })
                 }
                 TransformRows(selection: board.item, help: board.transformHelp, flipHelp: board.flipHelp) {
                     log.add(board.send($0))
@@ -113,13 +113,30 @@ struct GalleryTransformPage: View {
         .background(SuiteColor.panel)
     }
 
-    /// The board's box in document pixels, as the handles take it.
-    private var rect: CGRect {
-        let b = board.item.box
-        return CGRect(x: b.minX, y: b.minY, width: b.width, height: b.height)
-    }
-
     nonisolated private static func kernel(_ r: CGRect) -> Rect {
         Rect(minX: Double(r.minX), minY: Double(r.minY), maxX: Double(r.maxX), maxY: Double(r.maxY))
     }
+}
+
+/// The box over the canvas: its probe at the turned box's bounds, and the handles turned with it,
+/// which draw the box's one outline. Takes the board's item; the gestures go out through the closures.
+struct GalleryTransformMarks: View {
+    let item: TransformBox
+    let onResize: @MainActor (CGRect) -> Void
+    let onRotate: @MainActor (Double) -> Void
+    let onEnd: @MainActor () -> Void
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            ProbeElement("suite.gallery.transform-box", label: "Transform box", rect: Self.probeRect(item))
+            SelectionHandlesEditor(rect: Self.cg(item.box), degrees: item.degrees, zoom: 1,
+                                   onResize: onResize, onRotate: onRotate, onEnd: onEnd)
+        }
+    }
+
+    /// The probe's frame in document pixels: the axis-aligned bounds of `item`'s turned corners.
+    nonisolated static func probeRect(_ item: TransformBox) -> CGRect { cg(TransformRules.bounds(of: item)) }
+
+    /// A kernel rect as a CGRect.
+    nonisolated static func cg(_ r: Rect) -> CGRect { CGRect(x: r.minX, y: r.minY, width: r.width, height: r.height) }
 }
