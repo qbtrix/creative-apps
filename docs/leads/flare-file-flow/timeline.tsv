@@ -69,3 +69,4 @@ utc	stage	event	ref	note
 2026-10-22T11:14Z	3	question	#4387	blocked poll 3; asked supervisor for local Mac gate.
 2026-10-22T11:38Z	3	check	#4387	supervisor local Mac gate; head 1a4cd2b (dev merged in).
 2026-10-22T12:13Z	3	done	#3482	FL-m and FL-z done on https://github.com/qbtrix/creative-apps/actions/runs/39774574487; contact sheet posted.
+2026-10-22T12:18Z	3	check	#3482	closed by the supervisor sentinel; waiting for release.
