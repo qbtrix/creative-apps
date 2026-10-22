@@ -68,3 +68,5 @@
 - 2026-10-22T15:21Z: HK-u2 #4413 merged (dc87ad2b0). HK-z was rebuilt on dev by cherry-picking its HK-7 and HK-8 commits, because the old stacked merge conflicted in 9 files. It opened as #4446 (fast-lane, feature-done, line:halo; head f31241faa; CI: PASS; mutate 9/9). If #4431 lands first, #4446 keeps its own HaloStrokeTrimKeysTests.
 
 - 2026-10-22T15:30Z: #4431 merged (18902a68c). Merged dev into HK-z #4446: kept HK-7's HaloStrokeTrimKeysTests and added #4431's built-stroke test. New head 7c5c60024, CI: PASS (891 tests), mutate 9/9, Head line moved.
+
+- 2026-10-22T15:52Z: HK-m and HK-u are merged-done. The dev CI run 39806111520 at 18902a68c contains #4400 and #4413, and its Linux job is green. Posted Belt-Slice-Done for HK-m and HK-u, and Mac-Finish-Wanted for HK-u. HK-z #4446 is waiting on its macOS build, 39807175605.
