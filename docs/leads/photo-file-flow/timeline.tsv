@@ -91,3 +91,4 @@ utc	stage	event	ref	note
 2026-10-22T02:55:27Z	check	PF-a,PF-u	scoped photo run 39700970657 FAILED only on RenderBudgetPhotoTransformTests (Free Transform bodies 120>3; not file-flow, fix PRs #4252/#4219 open); full run 39700185524 red (dev-red #3856). Slices wait for the next green scoped photo run. #4267@5d8cb7ef waiting on lane macOS build.
 2026-10-22T03:17:09Z	check	-	dev Linux green again (39713604043 @66a84588); scoped photo 39712698310 @b5a6e7e0 queued (Free Transform fix #4252/#4219 still open); #4162/#4267/#4271 clean, waiting on lane macOS builds; no open findings; export-pack planned
 2026-10-22T03:41:28Z	check	PF-a,PF-u	waiting on scoped photo 39712698310 / full 39714642994 (contain add701fc); #4267 at 5d8cb7ef awaiting lane macOS build; PF-8 waits on export-pack PX-z
+2026-10-22T04:15:52Z	check	PF-z	PF-7 #4267 merged 57685d8b; finding #4260 root-caused (hand-offs dropped: plain delegate, no-op host) and fixed in #4307

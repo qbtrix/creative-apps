@@ -5,7 +5,7 @@ Run: act-1a15fc7d29e-gz1t (line lead with #3437 history-panel) · Session: claud
 Earlier run: act-1a15a9f4eba-h30y (PF-1, PF-3, PF-4 merged)
 Stage: 3 wave A
 Base: origin/dev 1b3913c
-Next: #4165 (PF-u) merged add701fc; scoped photo run 39700970657 at add701fc (queued) proves PF-a and PF-u; PF-7 #4267 open (fast-lane, head 5d8cb7ef, ci --changed PASS); PF-8 waits export-pack:PX-z
+Next: PF-a, PF-u wait on a green scoped photo or full ci.yml run containing add701fc (scoped photo 39712698310 at b5a6e7e0 running, full 39720939785 at 6e19f406 pending); PF-7 #4267 merged 57685d8b; finding #4260 (Open Recent opens nothing: hand-offs reached no host) fixed in #4307 (fast-lane, head dfc59ff2); PF-8 waits export-pack:PX-z (planned)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -24,7 +24,8 @@ Next: #4165 (PF-u) merged add701fc; scoped photo run 39700970657 at add701fc (qu
 | PF-4 | PF-m | window notes opens and saves | #3700 | merged 7ec53b5 |
 | PF-5 | PF-u | snapshots, RenderBudgetPhotoFileDropTests.dragHoverInTwoBodies ≤ 2 | #4165 | in lane (fef845ec) |
 | PF-6 | PF-u | UITests/PhotoJourneyTests+FileFlow.swift, XCTSkip("waits on PF-7") | #4165 | in lane (fef845ec) |
-| PF-7 | PF-z | journey on live | #4267 | open at 9583c10a, fast-lane (Journey+FileDrag.swift drop source, drop steps on) |
+| PF-7 | PF-z | journey on live | #4267 | merged 57685d8b |
+| F-4260 | PF-m | PhotoDocumentHost + PhotoAppDelegate as SuiteAppDelegate (finding #4260) | #4307 | open at dfc59ff2, fast-lane, mutate 4/4 |
 | PF-8 | PF-z | photo.md, status built, feature-done | – | waits PX-z |
 
 ## Reviews
