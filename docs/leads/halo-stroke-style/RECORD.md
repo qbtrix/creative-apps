@@ -56,3 +56,5 @@
 - 2026-10-22T12:38:40Z: Belt-Slice-Done and Mac-Finish-Wanted HK-a on run 39774574487. HK-m2 #4400 and HK-u2 #4413 wait in the lane; HK-z opens after both merge.
 
 - 2026-10-22T13:09Z: HK-m2 #4400 macOS build green (run 39773336036), awaiting lane sweep. HK-u2 #4413 macOS build queued. HK-z waits on both.
+
+- 2026-10-22T13:19Z: HK-m2 #4400 merged as 179421f8d. HK-m Belt-Slice-Done waits on a dev run with green Linux containing it. HK-z waits on HK-u2 #4413.
