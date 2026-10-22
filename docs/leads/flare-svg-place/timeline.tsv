@@ -23,3 +23,4 @@ utc	stage	event	ref	note
 2026-10-22T03:44Z	heartbeat	#4295 waiting (Linux red = dev #3856); #4297 macOS build still queued (run 39711599297); 0 findings
 2026-10-22T04:12Z	fix	#4297 needs-rebase (FlareStatusRead.swift comment conflict): merged dev, resolved, scripts/ci --changed PASS, pushed 00feb496, Head moved, label dropped; #4295 waiting (Linux red = dev #3856); 0 findings
 2026-10-22T04:34Z	heartbeat	#4297 head 00feb496 macOS build dispatched by lane 04:21Z, pending; #4295 waiting (Linux red = dev #3856); 0 findings
+2026-10-22T04:56Z	heartbeat	#4297 macOS build 39721944731 on 00feb496 still queued; #4295 waiting (Linux red = dev #3856); 0 findings
