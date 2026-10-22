@@ -69,3 +69,4 @@ Waves: combined with shared-codecs (see its RECORD). Wave 1 = IM-1 beside SC-13 
 - 2026-10-22T01:50Z: IM-1 #4028 still open (supervisor merge); IM-2 ready on 26ba4c888.
 - 2026-10-22T02:10Z: IM-1 #4028 still open (supervisor merge); IM-2 ready on 26ba4c888.
 - 2026-10-22T02:30Z: IM-1 #4028 still open (supervisor merge); IM-2 ready on 26ba4c888.
+- 2026-10-22T02:43Z: IM-1 #4028 is still open (head 4c8262db). It edits a protected path, so it needs a supervisor merge; the lane relabels it on every sweep. IM-2 is ready on 26ba4c888 and opens after IM-1 merges.
