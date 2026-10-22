@@ -60,3 +60,5 @@
 - 2026-10-22T13:19Z: HK-m2 #4400 merged as 179421f8d. HK-m Belt-Slice-Done waits on a dev run with green Linux containing it. HK-z waits on HK-u2 #4413.
 
 - 2026-10-22T13:53Z: Linux check 39787263991 at 5447ea942 red on HaloStrokeTrimKeysTests.aReasonTurnsTheKeyOffAndItsClickSendsNothing: HK-u1 #4395 asserted stub-era reasons, HK-6 #4400 built the adapter. Ours; fix PR #4431 (test-only, +12/-9) opened, CI: PASS. HK-m Belt-Slice-Done waits for a green Linux run containing #4400 and #4431.
+
+- 2026-10-22T14:23Z: Waiting in the lane: HK-u2 #4413 (macOS build 39780188011 queued since 12:39Z) and fix #4431 (39792202422 queued). HK-z opens after #4413 merges.
