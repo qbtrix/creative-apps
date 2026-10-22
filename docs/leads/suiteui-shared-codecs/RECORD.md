@@ -67,3 +67,4 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-21T23:12Z: SC-14 #4238 (SC-f) waits on lane macOS build 39688920608 (queued since 22:46Z); no needs-fix, no refusal.
 - 2026-10-21T23:35Z: SC-14 #4238 macOS build 39688920608 failed: dev's RenderBudgetPhotoPlaceTests uses PhotoPlaceIntent.files, removed by #4164 (not this PR's). Ported fix #4215 as 7b9039c0; re-gating before push.
 - 2026-10-21T23:39Z: SC-14 #4238 pushed 7b9039c0 (CI: PASS; ports #4215's fix for dev's RenderBudgetPhotoPlaceTests break); Head line moved; waits on the lane's new macOS build.
+- 2026-10-22T00:00Z: SC-14 #4238 head 7b9039c0 waits on lane macOS build 39695868336 (queued). #4215 merged on dev, so the port now equals dev.
