@@ -69,3 +69,4 @@ Wave 3: HT-m as #4415 on dev 30120a8; HT-z (#4422) stacked on it at once, labell
 - 2026-10-22T22:04:58Z: heartbeat. Full CI 39836126860 (macOS) and scoped halo 39857142295 are both still queued; no newer eligible run.
 - 2026-10-22T22:27:00Z: heartbeat. Full CI 39836126860 (macOS) and scoped halo 39857142295 are both still queued; no newer eligible run.
 - 2026-10-22T22:49:53Z: heartbeat. Full CI 39836126860 (dev a102c34, holds 55d96ee): Linux green, macOS job 120038247452 running since 22:40Z (scripts/ci step). Scoped halo 39857142295 still queued. Waiting for a green macOS job to post HT-m/HT-z done, Mac-Finish-Wanted and the contact sheet.
+- 2026-10-22T23:12:15Z: heartbeat. Full CI 39836126860 macOS job 120038247452 still in scripts/ci (started 22:40Z). Scoped halo 39857142295 still queued. Waiting.
