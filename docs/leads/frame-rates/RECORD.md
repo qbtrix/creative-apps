@@ -23,8 +23,10 @@ Next: critic round 2 on run 39765697963; FR-10b after 4293; FR-8b after 4341; FR
 
 
 
+
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 11:12Z: no change. #4293 (macOS build) and #4341 waiting in the lane, both clean; scoped suiteui run 39765697963 still queued (23 runs queued repo-wide).
 - 10:49Z: #4373 and #4375 merged at 10:38Z (FR-u findings 4359-4369 closed, 0 FR findings open). Critic round 2 waits for scoped suiteui run 39765697963 at 5da8c3294 (queued). #4293 rebased head f87c2e98 in macOS build 397634319. #4341 in lane, clean.
 - 10:25Z: #4293 needs-rebase resolved (golden list-commands merged by command id, clean), gate PASS + AfterGlowCLITests pass, pushed f87c2e98, Head moved. #4341/#4373/#4375 waiting in lane.
 - 09:55Z: #4293's macOS build passed (09:12Z); it waits for the lane's batch. #4341/#4373/#4375 builds still queued (25 queued repo-wide). Nothing red.
