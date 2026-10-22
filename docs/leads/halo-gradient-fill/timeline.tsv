@@ -72,3 +72,4 @@ utc	stage	event	ref	note
 2026-10-22T03:08Z	poll	HG-m	macOS build queued (39712692785)
 2026-10-22T03:39Z	poll	HG-u	ready, waiting on lane batch
 2026-10-22T03:39Z	poll	HG-m	macOS build still queued
+2026-10-22T03:43Z	check-in	HG-u waits on batch; HG-m macOS build queued
