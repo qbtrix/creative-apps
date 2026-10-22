@@ -106,14 +106,14 @@ import Testing
         try shoot("fill", model)
     }
 
-    /// The Transform section's Rotation bar and Flip buttons over A, off with the Model's reason until
-    /// turning is built (transform DT-5).
+    /// The Transform section's Rotation bar and Flip buttons over A, on now the catalog has the
+    /// transform specs (transform DT-6).
     @Test func transformRows() throws {
         var model = DesignFixtures.cards
         model.useServices(.live)
         model.selectItem("node-2")
         #expect(model.transformSelection?.degrees == 0)
-        #expect(model.turnHelp != nil)
+        #expect(model.turnHelp == nil)
         try shoot("transform", model)
     }
 

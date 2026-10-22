@@ -4,9 +4,9 @@
 // sizes above C's top middle (BoxMath.handles) turned with C, and drags it 120 samples a quarter circle
 // round C's centre;
 // `rotationScrubInThreeBodies` drags the inspector's Rotation bar (`design.inspector.rotation`) 120 samples.
-// Each runs the window body at most 3 times, with p95 within 8 ms. Until DT-5 builds the adapter bodies the
-// gestures change nothing, so these hold the gestures' cost to the budget before their edits preview. The
-// window settles until its bodies stop running before each drag starts. The test process is never the
+// Each runs the window body at most 3 times, with p95 within 8 ms. Both gestures turn C on the window's live
+// copy (DesignLiveDrag) and land once at the end, so the samples redraw the canvas and the inspector, not
+// the window. The window settles until its bodies stop running before each drag starts. The test process is never the
 // active app, so the root opts in to activation clicks. Nested in BodyCountSuites, as every suite that reads
 // a body counter is. macOS debug builds only: the body counters exist only there.
 #if canImport(AppKit) && DEBUG

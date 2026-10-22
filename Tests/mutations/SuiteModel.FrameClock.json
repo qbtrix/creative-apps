@@ -1,0 +1,16 @@
+[
+ {
+  "label": ".thirtyFpsSumsToOneSecond: the carry is dropped, every delay is round(100 / fps)",
+  "file": "Sources/SuiteModel/Values/FrameClock.swift",
+  "find": "let delay = centiseconds(upTo: frame + 1) - centiseconds(upTo: frame)",
+  "replace": "let delay = centiseconds(upTo: 1)",
+  "tests": "FrameClockTests"
+ },
+ {
+  "label": ".firstDelayIsThree: frame n's delay uses frame n - 1",
+  "file": "Sources/SuiteModel/Values/FrameClock.swift",
+  "find": "let delay = centiseconds(upTo: frame + 1) - centiseconds(upTo: frame)",
+  "replace": "let delay = centiseconds(upTo: frame) - centiseconds(upTo: frame - 1)",
+  "tests": "FrameClockTests"
+ }
+]
