@@ -83,3 +83,4 @@ utc	stage	event	ref	note
 2026-10-22T06:16Z	slice-done	DY-u run 39720061887
 2026-10-22T06:37Z	heartbeat	DY-m waits on DT-m (#3436); DK-u waits on DS-u (#3440)
 2026-10-22T07:00Z	heartbeat	DY-m waits on DT-m (#3436); DK-u waits on DS-u (#3440)
+2026-10-22T07:24Z	resume	run act-1a1627ce3b4-ayhz takes over	-	DT-m met; DY-m building
