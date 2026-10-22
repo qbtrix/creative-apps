@@ -2,9 +2,9 @@
 
 Issue: #3415 · Packet: docs/blueprints/design/features/gradient-fill.md
 Run: act-1a1657aa3cf-vhsw · Session: claude/design-feature-lead-run-1k035k · Started: 2026-10-21T08:46:56Z (relaunched 2026-10-22T21:00Z; prior runs act-1a15da1b26c-9qo6, act-1a15ac70747-ky1f)
-Stage: 3 DG-z: DG-7 #4197 merged (20d00ab3); DG-8 #4637 (fast-lane, feature-done, head 5ffc4a1c, CI: PASS) in the lane
+Stage: done. Every slice merged-done; Belt-Contact-Sheet posted on #3415 (https://github.com/qbtrix/creative-apps/issues/3415#issuecomment-6352448592)
 Base: be18ab62 (origin/dev); main verified at 0dd23d65
-Next: #4637 merges -> newest green dev Linux run containing it -> Belt-Slice-Done DG-z + Mac-Finish-Wanted DG-z (ui true) + Belt-Contact-Sheet on #3415
+Next: none. testGradientFillAngle not reported yet (journeys 39850438314 pending)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: #4637 merges -> newest green dev Linux run containing it -> Belt-Slice-Don
 | DG-a | DesignNode.gradient, GradientFillTarget stubs, Fill section on them | DG-1, DG-2 | MJ-DG | GF-a | yes | 0 | merged-done | – | wanted |
 | DG-u | canvas, text, PNG and PDF paint the gradient; snapshots, budget | DG-3, DG-6 | DJ-G1 | DG-a; GF-3 (DG-6) | yes | 0 | merged-done | – | Mac-Finish a78dda7d gaps: #4355 |
 | DG-m | fill commands as one step; SVG gradients | DG-4, DG-5 | MJ-DG | DG-a; GF-6, AC-design (DG-4); GF-7, DE-s (DG-5) | no | 0 | merged-done | 39709889487 | – |
-| DG-z | journey on live; first-cut line; built | DG-7, DG-8 | DJ-G1 | DG-u, DG-m (design-export unchained, see Decisions) | yes | 0 | DG-7 merged; DG-8 gating | – | – |
+| DG-z | journey on live; first-cut line; built | DG-7, DG-8 | DJ-G1 | DG-u, DG-m (design-export unchained, see Decisions) | yes | 0 | merged-done | 39861121461 | wanted |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -57,3 +57,4 @@ Next: #4637 merges -> newest green dev Linux run containing it -> Belt-Slice-Don
 
 - 2026-10-22T03:52Z Heartbeat: #4197 waits for its batch. Design run 39709889487 in progress (holds DG-m).
 - 2026-10-22T04:17Z DG-m done: Belt-Slice-Done on #3415 (https://github.com/qbtrix/creative-apps/actions/runs/39709889487, contains e0fb99190; ui false, no Mac-Finish-Wanted). DG-z: DG-7 (#4197) merged as 20d00ab39; DG-8 waits on design-export.
+- 2026-10-22T22:13Z DG-z done: #4637 merged as c6cc281f; Belt-Slice-Done and Mac-Finish-Wanted DG-z on #3415 (https://github.com/qbtrix/creative-apps/actions/runs/39861121461, dev a7469d78, green Linux). Belt-Contact-Sheet posted. Feature done.
