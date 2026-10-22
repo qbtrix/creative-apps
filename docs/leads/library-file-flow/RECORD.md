@@ -81,3 +81,5 @@ Next: (2026-10-21T17:35Z) LF-3 merged #4024 (593cfe6). LF-4 still waits on needs
 - 2026-10-21T23:42Z: Heartbeat: LF-4 still blocked on #3928.
 
 - 2026-10-21T23:58Z: Heartbeat: LF-4 still blocked on #3928.
+
+- 2026-10-22T00:13Z: Heartbeat: LF-4 still blocked on #3928.
