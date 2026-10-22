@@ -1,4 +1,6 @@
 [
 {"label":"Shift and Command swapped","file":"Sources/SuiteUI/LayerTreeList.swift","find":"shift ? .extend : command ? .toggle : .replace","replace":"shift ? .toggle : command ? .extend : .replace","tests":"LayerTreeListTests/pickModes"},
-{"label":"isSelected reads only the primary id","file":"Sources/SuiteUI/LayerTreeList.swift","find":"selection == id || selected.contains(id)","replace":"selection == id","tests":"LayerTreeListTests/severalSelected"}
+{"label":"isSelected reads only the primary id","file":"Sources/SuiteUI/LayerTreeList.swift","find":"selection == id || selected.contains(id)","replace":"selection == id","tests":"LayerTreeListTests/severalSelected"},
+{"label":"picked neighbours never join","file":"Sources/SuiteUI/LayerTreeList.swift","find":"where picked(upper) && picked(lower)","replace":"where picked(upper) && picked(lower) && false","tests":"LayerTreeListTests/adjacentPicksJoin"},
+{"label":"a join squares only the lower row","file":"Sources/SuiteUI/LayerTreeList.swift","find":"joins[upper, default: LayerRowJoin()].below = true","replace":"_ = upper","tests":"LayerTreeListTests/adjacentPicksJoin"}
 ]

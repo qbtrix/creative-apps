@@ -203,6 +203,17 @@ import Testing
         #expect(!none.isSelected("header"))
     }
 
+    /// Picked rows next to each other join into one block: each joined edge
+    /// is square, so no notch shows between them; a lone picked row joins nothing.
+    @Test func adjacentPicksJoin() {
+        let joins = LayerTreeList.joins(["a", "b", "c", "d", "e"], picked: { ["a", "b", "c", "e"].contains($0) })
+        #expect(joins["a"] == LayerRowJoin(above: false, below: true))
+        #expect(joins["b"] == LayerRowJoin(above: true, below: true))
+        #expect(joins["c"] == LayerRowJoin(above: true, below: false))
+        #expect(joins["d"] == nil && joins["e"] == nil)
+        #expect(LayerTreeList.joins(["a"], picked: { _ in true }).isEmpty)
+    }
+
     /// A flat leaf row of `tree200`, named Sky.
     private func flatRow() -> LayerRow {
         var row = KernelFixtures.tree200.rows(expanded: [])[0]
