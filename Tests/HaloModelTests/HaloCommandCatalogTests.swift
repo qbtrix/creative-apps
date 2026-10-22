@@ -33,7 +33,11 @@ extension HaloProject: HeadlessDocument {
         let ids = HaloCommand.allCases.map(\.commandID)
         #expect(ids.count == 62 && Set(ids).count == ids.count)
         let shapes = ShapeCommands.specs(HaloProject.self).map(\.id)  // HS-6: the kernel's shape commands follow
-        #expect(catalog.ids == (ids + shapes).sorted() && HaloProject.commandSpecs.map(\.id) == ids + shapes)
+        let fills = GradientCommands.specs(HaloProject.self).map(\.id)  // HG-7: then its fill commands
+        let history = ["history.read", "history.jump"]  // HA-6: then the History panel's two
+        let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
+        let all = ids + shapes + fills + history + window
+        #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
     }
 
     @Test func areaHelpMatches() {
@@ -115,6 +119,9 @@ extension HaloProject: HeadlessDocument {
         "the example needs a picked key, text layer, render, recent file or room to move": ["animation.easing animation.go-to-start animation.previous-frame composition.delete easing.delete-keys easing.end-drag easing.move-handle easing.set-custom file.open-recent layer.bring-forward render.cancel render.close-sheet text.end-size-scrub text.set text.set-color text.set-size: exampleRuns"],
         "files and rendering run through HaloHeadless in AC-h2": ["file.open file.save file.save-as render.start: exampleRuns"],
         "key editing's move is a stub until KE-4": ["timeline.move-keys: exampleRuns"],
+        "the window's own steps need an open render or unsaved edits (CS-7)": ["file.answer-unsaved render.choose-folder: exampleRuns"],
+        "the stop and angle examples need a gradient; Ball's fill is solid": ["fill.angle fill.stop-add fill.stop-move fill.stop-remove: exampleRuns"],
+        "the jump example needs steps; the fixture has none (HA-6)": ["history.jump: exampleRuns"],
     ]
 
     @Test func conformance() {

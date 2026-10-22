@@ -71,7 +71,10 @@ struct DesignCatalogDoc: HeadlessDocument {
         case "page.rename": .some(noPage)
         case "history.read": .some(nil)
         case "history.jump": .some(w.historyListing.steps.isEmpty ? "There are no steps yet." : nil)
-        default: nil
+        case "file.export", "view.zoom-in", "view.zoom-out", "view.fit": .some(w.isOpen ? nil : DesignToolbarItem.noFile)
+        case "view.zoom-to-selection": .some(w.zoomToSelectionHelp)
+        // The transform rows' and Object items' reason (transform DT-6): the workspace's own transformHelp.
+        default: id.hasPrefix("transform.") ? .some(w.transformHelp) : nil
         }
     }
 
@@ -127,7 +130,11 @@ struct DesignCatalogDoc: HeadlessDocument {
                 let joined = id == "object.nudge" && state == "edited"
                 // A jump moves the document to an earlier step, as undo does, so its bytes change.
                 let jumped = id == "history.jump" && problem.contains("queryOrViewChangesNoBytes")
-                return !(off && problem.contains("exampleRuns")) && !noChange && !named && !joined && !jumped
+                // The kernel's flip names its step for the axis ("Flip Horizontal"), as in Photo; Reset Rotation on an
+                // upright layer changes nothing, so it records no step.
+                let axis = id == "transform.flip" && problem.contains("stepNamedTitle")
+                let upright = id == "transform.reset" && w.selectedNodes.allSatisfy { $0.rotation == 0 && !$0.flipX && !$0.flipY }
+                return !(off && problem.contains("exampleRuns")) && !noChange && !named && !joined && !jumped && !axis && !upright
             }
             #expect(problems.isEmpty, "\(state): \(problems.joined(separator: "\n"))")
             ran.formUnion(DesignCatalogDoc.catalog.ids.filter { DesignCatalogDoc.catalog.availability($0, on: doc).why == nil })
@@ -169,7 +176,7 @@ struct DesignCatalogDoc: HeadlessDocument {
 
     static let golden = [
         "file.new | New File | on", "file.open | Open… | This window holds a file; open it in a new one.",
-        "file.save | Save | on", "file.save-as | Save As… | on",
+        "file.save | Save | on", "file.save-as | Save As… | on", "file.export | Export… | on",
         "edit.undo | Undo | Nothing to undo.", "edit.redo | Redo | Nothing to redo.",
         "edit.select | Select | on", "edit.select-all | Select All | on",
         "edit.duplicate | Duplicate | on", "edit.delete | Delete | on",
@@ -186,11 +193,15 @@ struct DesignCatalogDoc: HeadlessDocument {
         "fill.stop-move | Move Gradient Stop | Switch the fill to a gradient first.",
         "fill.stop-remove | Remove Gradient Stop | Switch the fill to a gradient first.",
         "fill.stop-color | Gradient Stop Color | on", "fill.angle | Gradient Angle | Angle is for a linear gradient.",
+        "transform.read | Transform | on", "transform.set | Transform | on", "transform.rotate | Rotate | on",
+        "transform.scale | Scale | on", "transform.flip | Flip | on", "transform.reset | Reset Rotation | on",
         "page.add | Add Page | on", "page.rename | Rename Page | on",
         "page.delete | Delete Page | A file keeps at least one page.", "page.select | Select Page | on",
         "tool.move | Move | on", "tool.frame | Frame | on", "tool.rectangle | Rectangle | on",
         "tool.ellipse | Ellipse | on", "tool.text | Text | on", "tool.pen | Pen | Drawing paths isn't built yet.",
-        "tool.eyedropper | Eyedropper | Eyedropper (I): picking a fill or stroke color from the canvas isn't built yet.",
+        "tool.eyedropper | Eyedropper | on",
         "history.read | Read History | on", "history.jump | Jump in History | There are no steps yet.",
+        "view.zoom-in | Zoom In | on", "view.zoom-out | Zoom Out | on", "view.fit | Fit Page | on",
+        "view.zoom-to-selection | Zoom to Selection | on",
     ]
 }
