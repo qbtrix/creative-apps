@@ -2,9 +2,9 @@
 
 Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: PT-m: #4252 closed, superseded by #4219 (merged 03:37Z); PP-m: #4253 mac build green, awaiting lane batch
+Stage: PT-m: #4219 on dev; PP-m: #4253 merged 04:17Z (4cc2def23)
 Base: dev
-Next: await green scoped photo/full run on dev containing #4219, #4253, #4175; then critics + Belt-Slice-Done
+Next: await green scoped photo/full run on dev containing 4cc2def23; full CI 39720939785 (6e19f406d) pending holds #4219 but not #4253
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
