@@ -4,7 +4,8 @@
 // the Model's render run (`beginRender`, core-loop CL-4, #1971), and
 // `renderScene(_:)` presents SuiteUI's SuiteExportSheet over `renderRun`
 // while it isn't idle (HaloRenderSheetHost), with Halo's rows in the options
-// slot (HaloRenderOptionRows): Full and Half chips, the folder
+// slot (HaloRenderOptionRows): the Size label over Full and Half chips (the
+// sheet's own 0.25x-4x Size row is off: Halo renders at those two only), the folder
 // (`-HaloRenderTo`, else Choose…), and one note: "Frame n of N" while
 // running, else the summary, or, with no folder, why (the error color). A
 // format chip or the Size row calls `setRenderSettings`. The sheet's start
@@ -182,7 +183,7 @@ struct HaloRenderExportAdapter: View {
     }
 
     var readout: ExportSheetRows {
-        ExportSheetRows(run, formats: Self.formats) { ExportPick(format: $0.format.rawValue, scale: $0.halfSize ? 0.5 : 1) }
+        ExportSheetRows(run, formats: Self.formats, showsSize: false) { ExportPick(format: $0.format.rawValue, scale: $0.halfSize ? 0.5 : 1) }
     }
 
     var body: some View {
@@ -206,7 +207,7 @@ struct HaloRenderExportAdapter: View {
     }
 }
 
-/// Halo's rows in the export sheet's options slot: size chips, the folder and one note.
+/// Halo's rows in the export sheet's options slot: the Size chips under their label, the folder and one note.
 struct HaloRenderOptionRows: View {
     nonisolated static let noDestination = "Choose a folder to render into."
     nonisolated static let busy = "The render is under way or done."
@@ -221,7 +222,8 @@ struct HaloRenderOptionRows: View {
     }
 
     var body: some View {
-        VStack(spacing: SuiteSpacing.xs) {
+        VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
+            Text("Size").font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.textSecondary)
             ChoiceChips(
                 options: [
                     InspectorOption(id: false, title: "Full", identifier: "halo.render.size.full"),

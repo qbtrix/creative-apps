@@ -1,4 +1,4 @@
-// Transform/AnchorCommands.swift (anchor-parenting AN-1 stubs, AN-4 bodies):
+// Transform/AnchorCommands.swift (anchor-parenting AN-1 shape, AN-4 bodies):
 // the three anchor and parent commands any app with layers registers.
 // `transform.set-anchor` moves a layer's anchor and keeps it in place unless
 // told not to, `layer.set-parent` makes a layer follow another (or nothing)
@@ -88,10 +88,63 @@ public enum AnchorCommands {
     ]
 
     /// Runs command `id` with JSON `params` on the targets; answers the new null's id for
-    /// `layer.new-null`, null otherwise. AN-4 builds the three bodies; the stub changes nothing.
+    /// `layer.new-null`, null otherwise. A refusal is `failed` with a sentence and writes nothing.
     @discardableResult
     public static func run(_ id: String, _ params: JSONValue, anchor: (any AnchorTarget)?, parent: (any ParentTarget)?) throws -> JSONValue {
         guard specs.contains(where: { $0.id == id }) else { throw CatalogError.unknownCommand(id) }
-        return .null
+        func decoded<P: Decodable>(_ type: P.Type) throws -> P {
+            do { return try params.decode(type) } catch { throw CatalogError.malformedParams(id: id, [CommandSpec<Targets>.issue(error)]) }
+        }
+        if id == "transform.set-anchor" {
+            guard let anchor else { throw CatalogError.unavailable(id: id, why: "This document has no layers with anchors.") }
+            try setAnchor(anchor, decoded(SetAnchorParams.self))
+            return .null
+        }
+        guard let parent else { throw CatalogError.unavailable(id: id, why: "This document has no layers to parent.") }
+        if id == "layer.set-parent" {
+            try setParent(parent, decoded(SetParentParams.self))
+            return .null
+        }
+        // layer.new-null: the app adds the empty layer at its canvas centre.
+        return .string(try parent.newNull(named: decoded(NewNullParams.self).name ?? "Null"))
+    }
+
+    /// `transform.set-anchor`: the point from `at` (on the layer's box) or `x` and `y`, then one write.
+    static func setAnchor(_ target: any AnchorTarget, _ p: SetAnchorParams) throws {
+        let id = "transform.set-anchor"
+        guard let placement = target.placement(of: p.id) else { throw CatalogError.failed(id: id, message: "There is no layer \(p.id).") }
+        let point: Point
+        if let at = p.at {
+            guard let box = target.bounds(of: p.id) else { throw CatalogError.failed(id: id, message: "Layer \(p.id) has no bounds.") }
+            point = Placement.anchorPoint(at: at, in: box)
+        } else if let x = p.x, let y = p.y, x.isFinite, y.isFinite {
+            point = Point(x: x, y: y)
+        } else {
+            throw CatalogError.failed(id: id, message: "Give the anchor as x and y, or as one of the box's nine points.")
+        }
+        var loose = placement
+        (loose.anchorX, loose.anchorY) = (point.x, point.y)
+        try target.setPlacement(p.keepPlace ?? true ? placement.movingAnchor(to: point) : loose, of: p.id)
+    }
+
+    /// `layer.set-parent` through `LayerFollow.setFollow`, keeping the layer in place; one tree write.
+    static func setParent<T: ParentTarget>(_ target: T, _ p: SetParentParams) throws {
+        var tree = target.layerTree
+        do {
+            try tree.setFollow(p.id, p.parent, local: { target.local($0) },
+                               keepingPlace: { node, placed in target.keepPlace(&node, world: placed) })
+        } catch {
+            throw CatalogError.failed(id: "layer.set-parent", message: sentence(error, p))
+        }
+        target.layerTree = tree
+    }
+
+    /// A follow refusal in words.
+    static func sentence(_ refusal: TreeRefusal, _ p: SetParentParams) -> String {
+        switch refusal {
+        case .unknown(let id): "There is no layer \(id)."
+        case .cycle: "Layer \(p.parent ?? p.id) already follows \(p.id), so \(p.id) can't follow it."
+        default: "\(refusal)"
+        }
     }
 }

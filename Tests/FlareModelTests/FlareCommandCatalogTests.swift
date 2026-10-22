@@ -64,7 +64,12 @@ struct FlareCommandCatalogTests {
     @Test func conformance() {
         #expect(FlareWorkspace.catalog.ids.count == FlareWorkspace.coreCommands.count + FlareWorkspace.appCommands.count)
         let appIDs = Set(FlareWorkspace.appCommands.map(\.id))
-        let problems = CatalogConformance.check(FlareLawsDocument.self, fixture: FlareLawsDocument(ws: Self.lawsFixture()))
+        var ws = Self.lawsFixture()
+        // The drawn rectangle with a three-stop linear fill, so every fill.* example can run (gradient-fill FG-5).
+        ws.selectLayer("rectangle-1")
+        ws.runFill(.type(.linear))
+        ws.runFill(.add(offset: 0.5))
+        let problems = CatalogConformance.check(FlareLawsDocument.self, fixture: FlareLawsDocument(ws: ws))
         #expect(problems.filter { appIDs.contains(String($0.prefix { $0 != ":" })) } == [])
     }
     @Test func ledger() throws {
