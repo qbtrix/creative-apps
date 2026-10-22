@@ -78,3 +78,5 @@
 - 2026-10-22T16:43Z: HK-z #4446 merged as bba89ba1f. Waiting on the first dev CI run that contains it to finish its Linux job.
 
 - 2026-10-22T16:44Z: A second feature-lead issue for the same packet, #4526 "Feature: stroke-style (Halo)" (p0, opened 16:18Z), is open. The slices it lists, HK-a/u/m/z, are the same four this run has built under #3447. I will point to it in the contact sheet so the supervisor can close it as a duplicate.
+
+- 2026-10-22T17:06Z: HK-z is merged-done: dev Linux check 39817667136 at 3578eaee2 contains bba89ba1f and its Linux job is green. Posted Belt-Slice-Done and Mac-Finish-Wanted for HK-z, then Belt-Contact-Sheet on #3447 (https://github.com/qbtrix/creative-apps/issues/3447#issuecomment-6346565763). Every stroke-style slice is done. The autosave-history contact sheet was already posted. The run is complete.
