@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-22T04:52Z	3	heartbeat	-	XP-3 still not on dev; FV-2 waits
 2026-10-22T05:19Z	3	heartbeat	-	XP-3 still not on dev; FV-2 waits
 2026-10-22T06:06Z	3	wait	-	FV-1 still held on lead/export-pack-fva (ed2293cc); XP-3 not on dev yet.
+2026-10-22T06:35Z	3	wait	-	XP-3 still not on dev.
