@@ -4,7 +4,7 @@ Issue: #3775 · Packet: docs/blueprints/suite/features/sample-files.md
 Run: act-1a15ef24f0e-t1j1 · Session: cse_01Mv9wxYxE6yTZhCjfP2rdUH · Started: 2026-10-21T14:56Z
 Stage: 3 wave 4
 Base: 9951eea7355e5a768f0ce1e1bad25656cf05cd82
-Next: SS-a, SS-vector and SS-raster are Belt-Slice-Done (SS-vector and SS-raster in run 39693644795). #4129 SS-z restacked on dev with #4215 (head 2e336bb38, CI PASS), ready, waiting on the lane batch. Once it merges and a green dev Linux run contains it: Belt-Slice-Done SS-z, then Belt-Contact-Sheet.
+Next: SS-a, SS-vector and SS-raster are Belt-Slice-Done. #4129 SS-z merged 33e1597c1 at 01:30. Once a green dev Linux run contains it (dev red on FormatListRatchet until #4258 lands): Belt-Slice-Done SS-z, then Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
