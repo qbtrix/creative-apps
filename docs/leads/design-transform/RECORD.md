@@ -6,6 +6,8 @@ Stage: 3 verify (DT-z merged; waiting for a design or full ci.yml run containing
 Base: 80aba474 (origin/dev at 08:10Z)
 Next: wait for a completed, successful design-scoped or full ci.yml run on dev at or after dcfcb6b0 -> Belt-Slice-Done DT-z, Mac-Finish-Wanted DT-z, Belt-Contact-Sheet on #3436
 
+Last check: 2026-10-22T10:44Z. Scoped design 39747588205 (2b31ba4c) queued since 08:25Z; full CI 39763986545 (ba8009b0) pending, 39750872878 (cc0a7944) queued; full runs 39746443459/39748952777/39752648221/39755561688/39758044934 cancelled by newer ones. macOS backlog; no new transform findings.
+
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|

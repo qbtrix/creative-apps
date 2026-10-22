@@ -97,3 +97,4 @@ utc	stage	event	ref	note
 2026-10-22T09:51:38Z	poll	scoped design 39747588205 still queued; full CI 39755561688 cancelled (superseded), now 39758044934 (1896483c) pending; 39750872878 (cc0a7944) queued; no new findings
 2026-10-22T10:12:05Z	poll	scoped design 39747588205 still queued; full CI 39758044934 (1896483c) pending; macOS runner backlog; no new findings
 2026-10-22T10:31:49Z	poll	scoped design 39747588205 queued; full CI 39758044934 pending, 39750872878 queued; macOS backlog; no new findings
+2026-10-22T10:43:55Z	poll	Belt nudge; RECORD Last check line; full CI 39763986545 (ba8009b0) pending; design scoped queued
