@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 1
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: build PH-a (PH-1 + PH-2, one slice PR to dev); then PH-u (waits only on PH-a) and PH-m (re-read HT-m, HK-m first)
+Next: PH-a builder running (one slice PR to dev); then PH-u stacked on it; PH-m after HT-6 and HK-6 merge
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
