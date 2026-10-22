@@ -2,7 +2,7 @@
 
 Issue: #3438 · Packet: docs/blueprints/design/features/eyedropper.md
 Run: act-1a1605b0534-rn47 · Session: claude/feature-leads-stroke-eyedropper-e84htn · Started: 2026-10-21T21:05Z (prior runs act-1a15e909498-4bkk, act-1a15abb305f-lc8g)
-Stage: DY-u round 2 #4081: dev merged in (2026-10-22T00:03Z), gate running, then push and move Head; DY-m waits DT-m
+Stage: DY-u round 2 #4081 head f61b2623 gated and pushed (2026-10-22T00:06Z), waiting on the lane's macOS build; DY-m waits DT-m
 Base: 5bec8089 (origin/dev); main verified at 0dd23d65
 Next: #4081 (round 2, #4061; head 1a5a24be with #4215 ported for dev's Photo compile break, Fast-Check pass) merges -> Belt-Slice-Done DY-u gaps #3987 #3990 #3994 on the next green design run. DY-m waits transform:DT-m (#4187 open; DT-6 after DG-m)
 
