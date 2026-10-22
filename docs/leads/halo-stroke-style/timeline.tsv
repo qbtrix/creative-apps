@@ -19,3 +19,6 @@ time	kind	step	ref	note
 2026-10-21T12:52Z	poll	waiting	HK-a	still blocked: #3401 open
 2026-10-22T06:25Z	run-start	act-1a162462636-ft6b base dev bdd92b41; wave 1 HK-a
 2026-10-22T06:27Z	wave	HK-a builder started
+2026-10-22T08:15Z	pr-opened	HK-a	#4336
+2026-10-22T08:15Z	fix	HK-a	needs-rebase HaloWindow.swift merged dev, head 01699281
+2026-10-22T08:15Z	wave	wave 2 started: HK-m, HK-u

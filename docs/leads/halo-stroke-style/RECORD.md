@@ -38,3 +38,6 @@
 - Wave 1: HK-a (HK-1 commits 5c7e5ede, 56ea568f cherry-picked from lead/halo-stroke-style-HK-1 onto dev, plus HK-2).
 - Wave 2: HK-m (HK-5 then HK-6, stacked on HK-a) and HK-u (HK-3, HK-4) in parallel (rule 18).
 - Wave 3: HK-z (HK-7, HK-8 feature-done).
+- 2026-10-22T08:15Z wave 1 PR: HK-a #4336 (branch lead/stroke-style-HK-a; GitHub refuses lead/stroke-style/HK-a next to lead/stroke-style). The lane gave it needs-rebase for HaloWindow.swift; the lead merged origin/dev (kept dev's Group/frame inspector column with runStroke inside), and scripts/ci --changed passed. Head is now 01699281.
+- The attribution footer was removed from the PR body (the lane flagged it).
+- Wave 2 starts now. HK-m (HK-5, HK-6) and HK-u (HK-3, HK-4) stack on lead/stroke-style-HK-a. HK-6's catalog edits go on top of HA-6 #4342, which also edits HaloCommandCatalog.swift and halo.txt.
