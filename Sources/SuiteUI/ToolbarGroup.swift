@@ -12,7 +12,8 @@
 // and the shortcut for every tool. The palette is one accessibility
 // container, `suite.tools`, so the UI journeys in UITests/ can click every
 // tool in it without listing them. An action with an `identifier` carries it
-// as its accessibility identifier and lists itself in `suite.controls`. The
+// as its accessibility identifier and lists itself in `suite.controls`, with
+// its on state as `selected` when it is built as a toggle (`isToggle`). The
 // `.floating` palette asks SuiteToolPicking (UC6) for each tool's tooltip and
 // for the tool a key picks while focus is in it. A click on a tool puts focus
 // in the palette, so its keys reach it with keyboard navigation off too
@@ -35,14 +36,19 @@ public struct ToolbarAction: Identifiable {
     /// The control's accessibility identifier and `suite.controls` id; nil
     /// leaves it unidentified and unlisted.
     public var identifier: String?
+    /// Whether the action is an on/off toggle, so `suite.controls` lists its
+    /// state as `selected`; a plain action (or a palette tool) lists none.
+    public let isToggle: Bool
     public let perform: @MainActor () -> Void
 
     /// `title` is also the id, the tooltip and the accessibility label, so it
     /// must be unique within a group.
     public init(
         _ title: String, systemImage: String, isSelected: Bool = false, unavailableHelp: String? = nil,
-        shortcut: Character? = nil, identifier: String? = nil, perform: @escaping @MainActor () -> Void = {}
+        shortcut: Character? = nil, identifier: String? = nil, isToggle: Bool = false,
+        perform: @escaping @MainActor () -> Void = {}
     ) {
+        self.isToggle = isToggle
         self.id = title
         self.title = title
         self.systemImage = systemImage
@@ -177,7 +183,7 @@ public struct ToolbarGroup: View {
     ) -> ControlEntry? {
         guard style == .floating, let id = action.identifier else { return action.controlEntry() }
         let reason = action.isEnabled ? nil : tooltip(action, style: style, picking: picking)
-        return ControlEntry(id: id, enabled: action.isEnabled, reason: reason)
+        return ControlEntry(id: id, enabled: action.isEnabled, reason: reason).selecting(action.toggleState)
     }
 
     /// The action a key picks on a `.floating` palette: the rule's enabled tool on that one character, with
@@ -291,7 +297,6 @@ enum ToolFade {
 extension View {
     /// Registers `action` under its identifier: a `.floating` tool with the picking rule's tooltip as its reason.
     fileprivate func suiteControl(_ action: ToolbarAction, style: ToolbarGroup.Style) -> some View {
-        let entry = ToolbarGroup.entry(action, style: style)
-        return suiteControl(id: entry?.id, enabled: entry?.enabled ?? action.isEnabled, reason: entry?.reason)
+        suiteControl(entry: ToolbarGroup.entry(action, style: style), identifies: true)
     }
 }
