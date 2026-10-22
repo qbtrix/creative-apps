@@ -1,10 +1,10 @@
 # command-state lead record
 
 Issue: #3771 · Packet: docs/blueprints/suite/features/command-state.md
-Run: act-1a1601c3538-r0c9 · Session: https://claude.ai/code/session_011jo1mtCQ8wVpaGZxRnV16N · Started: 2026-10-21T10:50Z · Resumed: 2026-10-21T20:17Z
-Stage: CS waves 2: eight wiring PRs ready on the lane
-Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: parents merge, then stacked drafts merge dev and come ready
+Run: act-1a16391fd34-thw9 · Resumed: 2026-10-22T12:30Z (previous run act-1a1601c3538-r0c9, started 2026-10-21T10:50Z)
+Stage: All app slices merged except CS-6 #4234 (macOS build queued); CS-z #4382 draft with CS-16 folded in
+Base: d138c7b021dadf6fae7000e8795d687f139f91df
+Next: #4234 merges, then #4382 ready with feature-done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -23,19 +23,19 @@ Next: parents merge, then stacked drafts merge dev and come ready
 |---|---|---|---|---|---|---|---|
 | CS-1 | CS-a | 1 | ControlEntry.selected, reported by InspectorAction, toggles, SegmentedTabs, KeyframeButton | packet CS-1 (7 files) | ControlStateTests | #4021 | merged 29607b5 |
 | CS-2 | CS-a | 1 | baseline `# max: N` caps, dismiss rule, shell + launcher scans | packet CS-2 (10 files) | CommandPathLimitTests, CommandPathTests; Mutate SuiteKernelTests.CommandPathTests | #4023 | merged 2621312 |
-| CS-1b | CS-a | 2 | toolbar toggles report selected (ToolbarGroup.swift, SuiteEnvironment.swift), left out of #4021 | follow-up, stacked on CS-1 | ControlStateTests (toolbar case) | #4130 | ready; gate pass, Head 3d8c6c72; macOS build queued |
-| CS-3 | CS-library-1 | 2 | Library catalog part 1 | packet CS-3 | Mutate 6/6 | #4134 | ready; gate pass, Head 776c0ec5 |
-| CS-9 | CS-photo | 2 | Photo catalog | packet CS-9 | Mutate 4/4 | #4140 | ready; gate pass, Head 0b6012c3 |
-| CS-13 | CS-design | 2 | Design catalog | packet CS-13 | Mutate 6/6 | #4144 | ready; merged dev after #4189, Head 45124d6 |
-| CS-7 | CS-halo | 2 | Halo catalog | packet CS-7 | Mutate 8/8 HaloModel.HaloCommandCatalog | #4196 | ready; gate pass, Head 84921163 |
-| CS-11 | CS-flare | 2 | Flare catalog (+6 commands, file.new params) | packet CS-11 | Mutate 7/7 FlareModel.FlareCommandCatalog | #4205 | ready; needs-rebase resolved (merged dev after FG-5), Head 8e09b2d3 |
-| CS-14 | CS-design | 3 | Design wiring | packet CS-14 | CommandPathTests | #4202 | draft, stacked on #4144; gate pass, Head d902b346 |
-| CS-10 | CS-photo | 3 | Photo wiring (+1 line PhotoWindow+Export) | packet CS-10 | CommandPathTests; photo export/straighten snapshots may show confirm disabled | #4206 | draft, stacked on #4140; gate pass, Head 2aaaa0db |
-| CS-4 | CS-library-1 | 3 | Library wiring, 25 menu items; baseline max 48 to 23 | packet CS-4 | CommandPathTests, CommandPathLimitTests | #4213 | draft, stacked on #4134; gate pass, Head b449feb8 |
-| CS-8 | CS-halo | 3 | Halo wiring: transport, render Choose…, New Composition Create | packet CS-8 | CommandPathTests | #4210 | draft, stacked on #4196; gate pass, Head 8f46d805 |
-| CS-12 | CS-flare | 3 | Flare wiring; baseline 10 to 3 | packet CS-12 | CommandPathTests, CommandPathLimitTests | #4214 | draft, stacked on #4205; gate pass, Head dd40adc6 |
-| CS-5 | CS-library-2 | 3 | Library catalog part 2 (+20 ids, CLI list regenerated) | packet CS-5 | Mutate 9/9 LibraryModel.LibraryCommandCatalog | #4225 | draft, stacked on #4134; gate pass, Head 926fdd96 |
-| CS-6 | CS-library-2 | 4 | Library wiring part 2; baseline max 23 to 13 (alert Save waits #4208, loupe Grid waits #4227) | packet CS-6 | CommandPathTests, CommandPathLimitTests | #4234 | draft, stacked on #4225 + #4213; gate pass, Head 4c1294b6 |
+| CS-1b | CS-a | 2 | toolbar toggles report selected (ToolbarGroup.swift, SuiteEnvironment.swift), left out of #4021 | follow-up, stacked on CS-1 | ControlStateTests (toolbar case) | #4130 | merged 62ffa3e6 |
+| CS-3 | CS-library-1 | 2 | Library catalog part 1 | packet CS-3 | Mutate 6/6 | #4134 | merged 500c01cd |
+| CS-9 | CS-photo | 2 | Photo catalog | packet CS-9 | Mutate 4/4 | #4140 | merged 9ad588ef |
+| CS-13 | CS-design | 2 | Design catalog | packet CS-13 | Mutate 6/6 | #4144 | merged eb8b4711 |
+| CS-7 | CS-halo | 2 | Halo catalog | packet CS-7 | Mutate 8/8 HaloModel.HaloCommandCatalog | #4196 | merged 4f2b89eb |
+| CS-11 | CS-flare | 2 | Flare catalog (+6 commands, file.new params) | packet CS-11 | Mutate 7/7 FlareModel.FlareCommandCatalog | #4205 | merged 8cf02113 |
+| CS-14 | CS-design | 3 | Design wiring | packet CS-14 | CommandPathTests | #4202 | merged d79757db |
+| CS-10 | CS-photo | 3 | Photo wiring (+1 line PhotoWindow+Export) | packet CS-10 | CommandPathTests; photo export/straighten snapshots may show confirm disabled | #4206 | merged d1962cb4 |
+| CS-4 | CS-library-1 | 3 | Library wiring, 25 menu items; baseline max 48 to 23 | packet CS-4 | CommandPathTests, CommandPathLimitTests | #4213 | merged 229c6a04 |
+| CS-8 | CS-halo | 3 | Halo wiring: transport, render Choose…, New Composition Create | packet CS-8 | CommandPathTests | #4210 | merged cc0a7944 |
+| CS-12 | CS-flare | 3 | Flare wiring; baseline 10 to 3 | packet CS-12 | CommandPathTests, CommandPathLimitTests | #4214 | merged b4d0a077 |
+| CS-5 | CS-library-2 | 3 | Library catalog part 2 (+20 ids, CLI list regenerated) | packet CS-5 | Mutate 9/9 LibraryModel.LibraryCommandCatalog | #4225 | merged ed8e67f1 |
+| CS-6 | CS-library-2 | 4 | Library wiring part 2; baseline max 23 to 13 (alert Save waits #4208, loupe Grid waits #4227) | packet CS-6 | CommandPathTests, CommandPathLimitTests | #4234 | ready; macOS build queued, Head b5c1ba85 |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |

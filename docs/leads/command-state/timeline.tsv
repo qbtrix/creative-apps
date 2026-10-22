@@ -78,3 +78,4 @@ utc	stage	event	ref	note
 2026-10-22T10:38:16Z	CS-6	ready	4234	rebuilt on dev, gate PASS, un-drafted
 2026-10-22T10:59:06Z	CS-6	building	4234	lane dispatched the macOS build
 2026-10-22T11:43:11Z	CS-6	building	4234	macOS build 39765003639 still queued
+2026-10-22T12:31:42Z	lead	resumed	-	run act-1a16391fd34-thw9; all wiring merged but CS-6; CS-16 folded into #4382
