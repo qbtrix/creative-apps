@@ -62,3 +62,4 @@ utc	stage	event	ref	note
 2026-10-22T06:08:50Z	lane	heartbeat	#4103 #4209 #4218	RP-3 #4103 merged 06:02Z; RP-3e merged dev at d975059, gates after SM-5; RP-5 unblocked
 2026-10-22T06:32:51Z	lane	heartbeat	4209,4218	RP-3e in lane macOS build; RP-5 gate running
 2026-10-22T06:55:33Z	lane	heartbeat	4209,4218	RP-3e and RP-5 ready in lane
+2026-10-22T07:24:05Z	lane	heartbeat	#4209 #4218	ready, waiting on lane macOS builds
