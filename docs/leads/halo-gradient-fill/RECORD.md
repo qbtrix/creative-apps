@@ -73,3 +73,5 @@
 - 2026-10-22 00:52Z check-in: HG-u (#4207) macOS build of cb8fe6d is green (run 39699678508); the lane's Linux check 39701827550 is running, merge expected on a later sweep. HG-m (#4216) build 39699713418 of ba788c4 queued. KE-z still planned, so HG-9 waits. Next check-in 01:22Z.
 
 - 2026-10-22 01:24Z check-in: HG-u lane Linux check 39701827550 red only on FormatListRatchetTests.realTreePasses (Media.swift, dev break from #4034 vs #4019, dev-red #3856). Fix #4258 on the lane. Stand-down comment 6330406983 on #4207 (footer stripped); not a fix round. HG-m macOS build 39699713418 still queued. Next: once #4258 merges, merge dev into both branches, gate, move Head. Next check-in 01:55Z.
+
+- 2026-10-22 01:55Z (Belt nudge): HG-m (#4216) macOS build of ba788c4 green (run 39699713418). HG-u (#4207) macOS green, Linux red on the dev ratchet break only. Dev fix #4258 still in its lane macOS build (39705921002), not merged. Both slices wait on #4258; then merge dev into both, gate, move Head. KE-z still planned.
