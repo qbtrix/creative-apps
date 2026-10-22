@@ -59,3 +59,4 @@ utc	stage	event	ref	note
 2026-10-22T07:05Z	3	wait	-	FL-u #4325 merged by the lane; FL-m #4326 waiting on its macOS gate; full run 39734272718 still pending.
 2026-10-22T07:31Z	3	question	-	Rule 23: three polls blocked the same way (full runs on dev cancelled before starting); asked the supervisor on #3482 (comment 6335298929).
 2026-10-22T07:59Z	3	slice-done	-	Supervisor answered: cite the dev Linux check run. Posted Belt-Slice-Done and Mac-Finish-Wanted for FL-a with run 39739110094 (green Linux, dev 9f1b3d56 contains 414b9220).
+2026-10-22T08:26Z	3	wait	-	FL-m #4326's macOS build 39733048354 has been queued for a runner since 06:17Z.

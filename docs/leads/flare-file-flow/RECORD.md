@@ -4,7 +4,7 @@ Issue: #3482 · Packet: docs/blueprints/flare/features/file-flow.md
 Run: act-1a160bffba1-bvv3 · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih) · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: FL-a done
 Base: 8c55f0bf9 (origin/dev)
-Next: FL-m after #4326 merges, then FL-4 from lead/file-flow-fl4
+Next: FL-4 from lead/file-flow-fl4 once FL-m #4326 merges
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -77,3 +77,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T07:05Z: FL-u #4325 merged by the lane; FL-m #4326 waiting on its macOS gate; full run 39734272718 still pending.
 - 2026-10-22T07:31Z: Rule 23: three polls blocked the same way (full runs on dev cancelled before starting); asked the supervisor on #3482 (comment 6335298929).
 - 2026-10-22T07:59Z: Supervisor answered: cite the dev Linux check run. Posted Belt-Slice-Done and Mac-Finish-Wanted for FL-a with run 39739110094 (green Linux, dev 9f1b3d56 contains 414b9220).
+- 2026-10-22T08:26Z: FL-m #4326's macOS build 39733048354 has been queued for a runner since 06:17Z.
