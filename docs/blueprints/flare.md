@@ -124,7 +124,7 @@ The suite design's Flare MVP, made concrete.
 | Stage | Draws the scene at the current frame with curves kept as curves; zoom (pinch, menu, fit, 100%); pan (Space-drag, scroll); rulers; guides dragged out of the rulers, moved and removed; Retina-sharp |
 | Tools | Select (V): click, Shift-click, marquee, move, and the eight scale handles and the rotate zone. Direct Select (A): pick a path's anchors and handles and drag them. Rectangle (R) with corner radius, Ellipse (E), Pen (P): click for corners, drag for smooth points, close on the first point |
 | Edit | Delete, Cut, Copy, Paste, Duplicate of layers (Paste lands above the selection, offset by 10 pt), Select All, Deselect, Bring Forward, Send Backward |
-| Inspector | File-name title, info card, TRANSFORM (X, Y, scale X and Y, rotation, opacity) as bar sliders with keyframe buttons, FILL (solid editing; a gradient shows as a read-only gradient swatch), STROKE (color, width, cap, join), INSTANCE (symbol, loop mode, first frame) for an instance, SCENE when nothing is selected. A multi-selection shows "Mixed" for values that differ |
+| Inspector | File-name title, info card, TRANSFORM (X, Y, scale X and Y, rotation, opacity) as bar sliders with keyframe buttons, FILL (a Solid / Linear / Radial switch, solid editing, and the shared gradient editor for a gradient's stops, colours and angle, each edit one fill command and one undo step), STROKE (color, width, cap, join), INSTANCE (symbol, loop mode, first frame) for an instance, SCENE when nothing is selected. A multi-selection shows "Mixed" for values that differ |
 | Timeline | One lane per layer, key diamonds, playhead with a time pill, scrub, retime keys by drag, delete keys, insert and remove frames, frame labels, timecode and frame readout |
 | Animate | Auto-key (record) mode, keyframe buttons per property, motion tweens with easing presets and a custom cubic-bezier curve editor, hold keys |
 | Onion skin | Before and after ghosts with tints, counts and falloff; the motion path as a dotted line with frame ticks |
@@ -146,8 +146,8 @@ variable-width brush; frame-by-frame polish (blank keyframes, exposure
 holds); copy and paste of frames (G47); fps conversion (G53); asset import
 (G51); layer parenting; group and ungroup inside a layer (in v1, a symbol is
 the group); snapping to guides, edges and the pixel grid; an align and
-distribute panel; play range (in and out points); gradient editing with
-stops and on-canvas handles; dashed strokes; blend modes; state machine
+distribute panel; play range (in and out points); on-canvas gradient
+handles (stops, colours and angle are edited in FILL in v1); dashed strokes; blend modes; state machine
 listeners, blend states and runtime export; dragging machine nodes to
 positions you choose; play across scenes; swap symbol; renaming swatches; a
 version browser; the shared suite library.

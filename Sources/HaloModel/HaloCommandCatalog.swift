@@ -7,9 +7,11 @@ import SuiteKernel
 
 extension HaloProject {
     /// One spec per `HaloCommand.allCases` entry, in that order, then the
-    /// kernel's `shape.draw` and `tool.shape` (shape-tools HS-6), then `windowSpecs`.
+    /// kernel's `shape.draw` and `tool.shape` (shape-tools HS-6), its eight `fill.*` commands
+    /// (gradient-fill HG-7), then `windowSpecs`.
     public static let commandSpecs: [CommandSpec<HaloProject>] =
-        HaloCommand.allCases.map(spec(for:)) + ShapeCommands.specs(HaloProject.self) + windowSpecs
+        HaloCommand.allCases.map(spec(for:)) + ShapeCommands.specs(HaloProject.self)
+        + GradientCommands.specs(HaloProject.self) + windowSpecs
 
     /// The render sheet's Choose… and the unsaved alert's Save and Don't Save (CS-7): headless they check
     /// availability and change nothing, since the panel and the held command are the window's.

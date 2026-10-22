@@ -3,7 +3,7 @@
 // is red just inside each corner `TransformRules.corners` gives and above its unturned box, and not where only
 // the unturned box would be. A red-to-blue gradient mirrored across paints blue at its left edge. The
 // selection box of the same turned node draws a handle at the turned top-left corner and none at the
-// unturned one. macOS only.
+// unturned one, and its rotate knob turned with it. macOS only.
 import AppKit
 import SuiteKernel
 import SwiftUI
@@ -80,5 +80,19 @@ import Testing
         }
         #expect(try accentPixels(near: corner.x, corner.y) > 0, "a handle at the turned top-left \(corner)")
         #expect(try accentPixels(near: 100, 100) == 0, "no handle at the unturned top-left")
+    }
+
+    @Test func theKnobTurnsWithTheNode() throws {
+        // Upright the knob sits 2 handles (16) above the top's middle, (200, 84); 90° clockwise about
+        // (200, 150) puts it at (266, 150), right of the turned box (x 150 to 250).
+        let node = turned(90)
+        func accent(_ box: DesignSelectionBox) throws -> Int {
+            let image = try #require(render(box, scheme: .light))
+            var count = 0
+            for py in 144...156 { for px in 260...272 where try rgb(image, px, py).2 - rgb(image, px, py).0 > 0.4 { count += 1 } }
+            return count
+        }
+        #expect(try accent(DesignSelectionBox(rect: node.frame, zoom: 1, degrees: 90, knob: true)) > 0)
+        #expect(try accent(DesignSelectionBox(rect: node.frame, zoom: 1, degrees: 90)) == 0, "no knob without `knob`")
     }
 }

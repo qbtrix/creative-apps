@@ -4,8 +4,9 @@
 // publishes no `selected` key at all, so every existing inventory encodes and
 // compares as before, and a document written before the key existed still
 // decodes. The picked SegmentedTabs segment and a keyed KeyframeButton report
-// theirs too, and a live inventory keeps the state a view places. macOS only,
-// like the rest of SuiteUI.
+// theirs too, and a live inventory keeps the state a view places. A toolbar
+// action built with `isToggle` reports its state the same way on every bar
+// (CS-1b); a plain one reports none. macOS only, like the rest of SuiteUI.
 import Foundation
 @testable import SuiteUI
 import Testing
@@ -47,6 +48,39 @@ import Testing
         let plain = try #require(InspectorAction.entry(Self.original(on: true), isToggle: false))
         #expect(plain.selected == nil)
         #expect(InspectorAction.entry(ToolbarAction("Untracked", systemImage: "eye"), isToggle: true) == nil)
+    }
+
+    private static func grid(on: Bool, help: String? = nil) -> ToolbarAction {
+        ToolbarAction("Grid", systemImage: "grid", isSelected: on, unavailableHelp: help, identifier: "suite.view.grid",
+                      isToggle: true)
+    }
+
+    @Test func aToolbarToggleReportsItsState() throws {
+        // On a window toolbar (controlEntry), on the rail and on the floating palette alike.
+        let entries: [(ToolbarAction) -> ControlEntry?] = [
+            { $0.controlEntry() }, { ToolbarGroup.entry($0, style: .rail) }, { ToolbarGroup.entry($0, style: .floating) },
+        ]
+        for entry in entries {
+            #expect(try #require(entry(Self.grid(on: true))).selected == true)
+            #expect(try #require(entry(Self.grid(on: false))).selected == false)
+            // A toggle that can't act draws off, so it reports off, still saying why.
+            let blocked = try #require(entry(Self.grid(on: true, help: "Open a document.")))
+            #expect(blocked.selected == false && blocked.enabled == false && blocked.reason != nil)
+        }
+        #expect(try Self.json(try #require(Self.grid(on: true).controlEntry())).contains(#""selected":true"#))
+    }
+
+    @Test func aPlainToolbarActionReportsNoSelectedKey() throws {
+        // Built selected but not a toggle (a palette tool, a plain command): no key.
+        let plain = ToolbarAction("Brush", systemImage: "paintbrush", isSelected: true, identifier: "suite.brush")
+        #expect(!plain.isToggle)
+        for entry in [plain.controlEntry(), ToolbarGroup.entry(plain, style: .rail),
+                      ToolbarGroup.entry(plain, style: .floating)] {
+            let found = try #require(entry)
+            #expect(found.selected == nil)
+            #expect(try !Self.json(found).contains("selected"))
+        }
+        #expect(ToolbarAction("Grid", systemImage: "grid", isToggle: true).controlEntry() == nil)
     }
 
     @Test func anOldDocumentWithoutTheKeyDecodes() throws {

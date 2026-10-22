@@ -5,8 +5,10 @@
 // `renderScene(_:)` presents SuiteUI's SuiteExportSheet over `renderRun`
 // while it isn't idle (HaloRenderSheetHost), with Halo's rows in the options
 // slot (HaloRenderOptionRows): the Size label over Full and Half chips (the
-// sheet's own 0.25x-4x Size row is off: Halo renders at those two only), the folder
-// (`-HaloRenderTo`, else Choose…, its `render.choose-folder` spec's MenuCommand), and one note: "Frame n of N" while
+// sheet's own 0.25x-4x Size row is off: Halo renders at those two only), the
+// Folder label over the folder's name (`-HaloRenderTo`, one line, its path the
+// help, dimmed with the sheet) and Choose… (its `render.choose-folder` spec's
+// MenuCommand), and one note: "Frame n of N" while
 // running, else the summary, or, with no folder, why (the error color). A
 // format chip or the Size row calls `setRenderSettings`. The sheet's start
 // button (titled Export until #3402) asks for a folder when there is none
@@ -16,7 +18,8 @@
 // stream that a main-actor task hands to `renderProgressed(done:)` and
 // `endRender(_:)`. Cancel stops a run under way (`cancelRender`, which
 // leaves it idle, so the sheet closes) or closes the editing sheet; Done
-// calls `dismissRender`; Try Again reopens a failed run's settings; Reveal
+// calls `dismissRender`; the finished line is the Model's `renderWrittenText`
+// ("Exported 48 PNG files into "Bounce""); Try Again reopens a failed run's settings; Reveal
 // in Finder selects what the run wrote. Once the run is idle the host
 // cancels its task. `.startRender` from a menu does nothing: only the sheet
 // knows the folder. In DEBUG, `renderDrive` edits the shown window's model
@@ -176,10 +179,12 @@ struct HaloRenderExportAdapter: View {
         }
     }
 
-    /// The Model's run, a finished one read as what it wrote ("Exported Bounce"), not its every file name.
+    /// The Model's run, a finished one read as what it wrote ("Exported 48 PNG
+    /// files into "Bounce""), not its every file name.
     private var run: ExportRun<HaloRenderSettings> {
         guard case .finished(let settings, let files) = model.renderRun else { return model.renderRun }
-        return .finished(settings, [output?.lastPathComponent ?? "\(files.count) files"])
+        let written = output.flatMap { model.renderWrittenText(into: $0.lastPathComponent) }
+        return .finished(settings, [written ?? "\(files.count) files"])
     }
 
     var readout: ExportSheetRows {
@@ -207,7 +212,7 @@ struct HaloRenderExportAdapter: View {
     }
 }
 
-/// Halo's rows in the export sheet's options slot: the Size chips under their label, the folder and one note.
+/// Halo's rows in the export sheet's options slot: the Size chips and the folder, each under its label, and one note.
 struct HaloRenderOptionRows: View {
     nonisolated static let noDestination = "Choose a folder to render into."
     nonisolated static let busy = "The render is under way or done."
@@ -216,6 +221,7 @@ struct HaloRenderOptionRows: View {
     let settings: HaloRenderSettings
     let destination: URL?
     let act: @MainActor (HaloRenderAct) -> Void
+    @Environment(\.isEnabled) private var isEnabled
 
     private var editing: Bool {
         if case .editing = model.renderRun { true } else { false }
@@ -231,13 +237,15 @@ struct HaloRenderOptionRows: View {
                 ],
                 selected: settings.halfSize
             ) { act(.settings(HaloRenderSettings(format: settings.format, halfSize: $0))) }
-            InspectorRow("Folder") {
-                HStack(spacing: SuiteSpacing.s) {
-                    Text(destination?.lastPathComponent ?? "None")
-                        .foregroundStyle(destination == nil ? SuiteColor.secondaryText : SuiteColor.textPrimary)
-                    MenuCommand(HaloMenuState.spec("render.choose-folder"), on: HaloMenuState(project: model)) { act(.choose) }
-                        .haloControl(id: "halo.render.destination", enabled: editing, help: editing ? nil : Self.busy)
-                }
+            Text("Folder").font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.textSecondary)
+            HStack(spacing: SuiteSpacing.s) {
+                Text(destination?.lastPathComponent ?? "None")
+                    .lineLimit(1).truncationMode(.middle)
+                    .foregroundStyle(destination == nil ? SuiteColor.secondaryText : SuiteColor.textPrimary)
+                    .opacity(isEnabled ? 1 : SuiteColor.disabledOpacity)
+                    .help(destination?.path(percentEncoded: false) ?? Self.noDestination)
+                MenuCommand(HaloMenuState.spec("render.choose-folder"), on: HaloMenuState(project: model)) { act(.choose) }
+                    .haloControl(id: "halo.render.destination", enabled: editing, help: editing ? nil : Self.busy)
             }
             if let progress = model.renderProgressText {
                 InspectorNote(progress, identifier: "halo.render.frame")

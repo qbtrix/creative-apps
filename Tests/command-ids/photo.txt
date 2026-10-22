@@ -29,12 +29,16 @@ layer.delete
 layer.duplicate
 layer.flatten
 layer.merge-down
+layer.move-by
 layer.new
 layer.new-adjustment
+layer.pick
 layer.rename
 layer.select-above
+layer.select-all
 layer.select-below
 layer.send-backward
+layer.set-opacity
 layer.toggle-visibility
 place.focus
 place.image
@@ -53,6 +57,7 @@ tool.gradient
 tool.heal
 tool.marquee
 tool.move
+tool.text
 transform.begin
 transform.cancel
 transform.commit
@@ -66,3 +71,5 @@ view.actual-size
 view.fit
 view.zoom-in
 view.zoom-out
+history.jump
+history.read

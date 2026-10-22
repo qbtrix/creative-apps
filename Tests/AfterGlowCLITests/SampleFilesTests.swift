@@ -83,24 +83,24 @@ import Testing
         }
     }
 
-    @Test(.disabled("SS-4: Title.flare lands in the SS-vector follow-up (line cap)")) func testTitle() throws {
+    @Test func testTitle() throws {
         let scenes = Self.items(try Self.open("Title.flare", in: Self.fixtures, app: "flare"), "scenes")
         #expect(scenes.reduce(0) { $0 + Self.number($1, "layers") } >= 1)
     }
 
-    @Test(.disabled("SS-4: Logo.flare lands in the SS-vector follow-up (line cap)")) func testLogoFlare() throws {
+    @Test func testLogoFlare() throws {
         let scenes = Self.items(try Self.open("Logo.flare", in: Self.fixtures, app: "flare"), "scenes")
         #expect(scenes.reduce(0) { $0 + Self.number($1, "layers") } >= 1)
     }
 
-    @Test(.disabled("SS-5: beach.ora is made in SS-photo")) func testBeach() throws {
+    @Test(.disabled("SS-5: beach.ora waits on #4113 (Photo's .ora save is not byte-stable)")) func testBeach() throws {
         let fields = try Self.open("beach.ora", in: Self.samples, app: "photo")
         // The gradient photo, a second pixel layer and the Exposure adjustment.
         #expect(Self.items(fields, "layers").count == 3)
         #expect(Self.number(fields, "width") > 0 && Self.number(fields, "height") > 0)
     }
 
-    @Test(.disabled("SS-5: Sunset.png is made in SS-photo")) func testSunset() throws {
+    @Test func testSunset() throws {
         let fields = try Self.open("Sunset.png", in: Self.samples, app: "photo")
         #expect(Self.number(fields, "width") > 0 && Self.number(fields, "height") > 0)
         // The tour's Library tile imports it into the person's catalog.
@@ -110,7 +110,7 @@ import Testing
         #expect(!(try library.save()).isEmpty)
     }
 
-    @Test(.disabled("SS-6: Intro.halo is made in SS-halo")) func testIntro() throws {
+    @Test func testIntro() throws {
         let comp = try #require(Self.items(try Self.open("Intro.halo", in: Self.samples, app: "halo"), "compositions").first)
         let fps = Self.number(comp, "fps")
         try #require(fps > 0)
