@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-22T04:44Z	check-in	Journeys run 39720835412 (suite) is still pending in the macOS queue. SC-f's critic panel waits on its ui-screens.
 2026-10-22T05:05Z	check-in	Journeys run 39720835412 (suite) is still queued for macOS. SC-f's critic panel waits on its ui-screens.
 2026-10-22T05:25Z	check-in	Journeys run 39720835412 (suite) is still queued for macOS. SC-f's critic panel waits on its ui-screens.
+2026-10-22T05:47Z	check-in	SC-f critic panel still waits on journeys run 39720835412 (queued since 04:10Z).

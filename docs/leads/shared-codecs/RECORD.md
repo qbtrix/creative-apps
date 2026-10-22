@@ -86,3 +86,4 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-22T04:44Z: Journeys run 39720835412 (suite) is still pending in the macOS queue. SC-f's critic panel waits on its ui-screens.
 - 2026-10-22T05:05Z: Journeys run 39720835412 (suite) is still queued for macOS. SC-f's critic panel waits on its ui-screens.
 - 2026-10-22T05:25Z: Journeys run 39720835412 (suite) is still queued for macOS. SC-f's critic panel waits on its ui-screens.
+- 2026-10-22T05:47Z: SC-f critic panel still waits on journeys run 39720835412 (queued since 04:10Z).
