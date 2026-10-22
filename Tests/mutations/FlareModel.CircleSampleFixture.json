@@ -1,0 +1,23 @@
+[
+  {
+    "label": "circleIsAThreeStopLinearLeftToRight: the middle stop dropped",
+    "file": "Sources/FlareModel/Fakes/Fixtures/CircleSampleFixture.swift",
+    "find": "GradientStop(offset: 0.5, color: FlareColor(r: 0, g: 1, b: 0)),",
+    "replace": "",
+    "tests": "FlareGradientFixtureTests"
+  },
+  {
+    "label": "rectangleIsSolid: the rectangle filled with the circle's gradient",
+    "file": "Sources/FlareModel/Fakes/Fixtures/CircleSampleFixture.swift",
+    "find": "                       fill: .solid(FlareColor(r: 0.95, g: 0.36, b: 0.2))),",
+    "replace": "                       fill: .linear(stops: stops, start: Point(x: 120, y: 50), end: Point(x: 180, y: 50))),",
+    "tests": "FlareGradientFixtureTests"
+  },
+  {
+    "label": "theSampleOpensByName: the fixture left out of the list",
+    "file": "Sources/FlareModel/Fakes/FlareFixtures.swift",
+    "find": ", (\"gradient-circle\", gradientCircle)]",
+    "replace": "]",
+    "tests": "FlareGradientFixtureTests"
+  }
+]

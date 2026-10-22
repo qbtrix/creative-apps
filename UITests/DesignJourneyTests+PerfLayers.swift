@@ -15,6 +15,9 @@
 // The numbers go to .build/ui-screens/perf-design-layers.json and attach as
 // "perf-design-layers"; the test asserts only that every row was reached.
 // Frame N's id is node-(50N - 49) and its Text is node-(50N) (DesignFixtures.crowd).
+// The list is found as `suite.sidebar`: Layers is the sidebar's root view, so
+// SuiteWindow's outer identifier replaces its own `design.layers` (#3307), and
+// every other Design journey reaches the rows through `suite.sidebar` too.
 import XCTest
 
 final class DesignPerfLayersJourneyTests: XCTestCase {
@@ -32,8 +35,8 @@ final class DesignPerfLayersJourneyTests: XCTestCase {
         let design = Journey("Design", self, arguments: Self.arguments)
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 10), "crowd showed no page (suite.canvas)")
-        let layers = design.element("design.layers")
-        XCTAssert(layers.waitForExistence(timeout: 10), "no Layers list (design.layers)")
+        let layers = design.element("suite.sidebar")
+        XCTAssert(layers.waitForExistence(timeout: 10), "no Layers list (suite.sidebar)")
         expandEveryFrame(design, layers)
         design.shot("perf-layers-expanded")
 
@@ -72,7 +75,7 @@ final class DesignPerfLayersJourneyTests: XCTestCase {
     }
 
     @MainActor private func row(_ design: Journey, _ identifier: String) -> XCUIElement {
-        design.element("design.layers").descendants(matching: .any)[identifier].firstMatch
+        design.element("suite.sidebar").descendants(matching: .any)[identifier].firstMatch
     }
 
     /// Writes the report-only numbers to .build/ui-screens/perf-design-layers.json and attaches them.

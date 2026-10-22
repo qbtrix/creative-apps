@@ -4,8 +4,10 @@
 // with HaloTransport and the History button beside it, HaloTimelineView and a refusal's caption, or the empty
 // state. The status bar's tooltips (HaloStatusText) say what the timecode's
 // four parts count and that the pills are zoom and pixel size. A narrow
-// column drops the layer count, then the transport, then the timecode, so the
-// content adds no width to SuiteWindow's minimum. Space, ←, →,
+// column drops the layer count, then moves the transport out of its pill to
+// the row's leading edge without History (L5: transport left, pills right),
+// then drops the timecode; the transport never goes, and the content adds no
+// width to SuiteWindow's minimum (#4272). Space, ←, →,
 // Home, End, I and O become HaloCommands sent to `perform`, and ⌫ (the
 // delete command) sends the Model's `deleteCommand`: the picked keys while any
 // are picked, else the selected layer, as in the layer list. Views only read HaloProject; state lives in HaloModel.
@@ -46,12 +48,14 @@ struct HaloViewer: View {
                 }
                 // The widest bar that fits, so the status bar never holds the
                 // content column wider than SuiteWindow's minimum: the layer
-                // count goes first, then the transport, then the timecode.
+                // count goes first, then History and the transport's pill
+                // (at 440 pt the pilled transport and three pills need 446),
+                // then the timecode. The transport always stays.
                 ViewThatFits(in: .horizontal) {
                     statusBar(comp, artboard: artboard, timecode: true, layers: true, transport: true)
                     statusBar(comp, artboard: artboard, timecode: true, layers: false, transport: true)
-                    statusBar(comp, artboard: artboard, timecode: true, layers: false, transport: false)
-                    statusBar(comp, artboard: artboard, timecode: false, layers: false, transport: false)
+                    leadingTransport(comp, artboard: artboard, timecode: true)
+                    leadingTransport(comp, artboard: artboard, timecode: false)
                 }
                 Divider()
                 HaloTimelineView(model: model, perform: perform)
@@ -103,6 +107,17 @@ struct HaloViewer: View {
             }
         }
         .help(HaloComposition.viewerPillsHelp)
+    }
+
+    /// The narrow row: the bare transport at the leading edge, its 24 pt
+    /// squares edge to edge with no pill around them, and the pills right.
+    /// History drops out here; a wider column shows it again.
+    private func leadingTransport(_ comp: HaloComposition, artboard: CGSize, timecode: Bool) -> some View {
+        HStack(spacing: 0) {
+            HaloTransport(model: model, perform: perform)
+            statusBar(comp, artboard: artboard, timecode: timecode, layers: false, transport: false)
+        }
+        .background(SuiteColor.panel)
     }
 
     /// The command a viewer key sends; nil for any other key.

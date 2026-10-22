@@ -2,9 +2,13 @@
 // The SVG of DesignFixtures.cards' Desktop frame equals the reference literal byte for byte;
 // one element per visible layer in paint order; a clipPath on every frame; escaped text;
 // opacity, stroke, stroke-width and rx only when not the SVG default; coordinates relative
-// to the box. Runs on Linux and macOS.
+// to the box. A gradient is a definition in frame space and a `fill="url(#g-…)"` (gradient-fill DG-5).
+// A turned or mirrored layer carries `transform="rotate(d cx cy) …"` about its frame's centre (transform DT-6),
+// and RJ-D15's 60 small turns under one drag token write `rotate(15 60 35)` and undo in one step.
+// Runs on Linux and macOS.
 @testable import DesignModel
 import Foundation
+import SuiteKernel
 import Testing
 
 @Suite struct DesignSVGTests {
@@ -102,5 +106,86 @@ import Testing
         let noStroke = DesignNode(id: "n", name: "N", kind: .ellipse, frame: rect(0, 0, 10, 10),
                                   stroke: DesignStroke(color: .black, width: 0))
         #expect(!svg(noStroke).contains("stroke"))
+    }
+
+    /// Blue to white down the unit box: a 90° line, as `fill.angle` 90 stores it.
+    private let unitDown = Fill.linear(
+        stops: [GradientStop(offset: 0, color: FillColor(r: 0, g: 0, b: 1)), GradientStop(offset: 1, color: .white)],
+        start: Point(x: 0.5, y: 0), end: Point(x: 0.5, y: 1))
+
+    /// A 90° gradient writes its line in the layer's frame, relative to the box: vertical, top to bottom.
+    @Test func gradientInFrameSpace() {
+        let r = DesignNode(id: "r", name: "R", kind: .rectangle, frame: rect(10, 20, 200, 100), gradient: unitDown)
+        let text = DesignSVG.document([r], box: rect(0, 0, 300, 200), clip: false)
+        #expect(text.contains(#"<defs><linearGradient id="g-r" gradientUnits="userSpaceOnUse" x1="110" y1="20" x2="110" y2="120">"#
+            + ##"<stop offset="0" stop-color="#0000ff"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs>"##))
+        #expect(text.contains(#"<rect x="10" y="20" width="200" height="100" fill="url(#g-r)"/>"#))
+        let e = DesignNode(id: "e", name: "E", kind: .ellipse, frame: rect(0, 0, 40, 40), gradient: unitDown)
+        #expect(svg(e).contains(#"fill="url(#g-e)""#))
+        #expect(svg(e).contains(#"x1="20" y1="0" x2="20" y2="40""#))
+    }
+
+    /// A text layer's gradient is defined too, and its letters fill with it.
+    @Test func textGradient() {
+        let t = DesignNode(id: "t", name: "T", kind: .text, frame: rect(0, 0, 100, 20), text: "Hi", gradient: unitDown)
+        let text = svg(t)
+        #expect(text.contains(#"<linearGradient id="g-t" gradientUnits="userSpaceOnUse" x1="50" y1="0" x2="50" y2="20">"#))
+        #expect(text.contains(#"fill="url(#g-t)">Hi</text>"#))
+    }
+
+    /// `node` in a 200 × 100 box from the origin, so its coordinates are its own.
+    private func placed(_ node: DesignNode) -> String {
+        DesignSVG.document([node], box: rect(0, 0, 200, 100), clip: false)
+    }
+
+    /// A turned layer turns about its frame's centre; a mirror is a scale about that centre after the turn,
+    /// the kernel's order; an upright, unmirrored layer writes no transform (transform DT-6).
+    @Test func turnedNode() {
+        var r = DesignNode(id: "r", name: "R", kind: .rectangle, frame: rect(10, 10, 100, 50))
+        #expect(!placed(r).contains("transform"))
+        r.rotation = 15
+        #expect(placed(r).contains(##"<rect x="10" y="10" width="100" height="50" fill="#d9d9d9" transform="rotate(15 60 35)"/>"##))
+        #expect(!placed(r).contains("scale("), "an unmirrored layer writes a scale")
+        r.flipX = true
+        #expect(placed(r).contains(#"transform="rotate(15 60 35) translate(60 35) scale(-1 1) translate(-60 -35)""#))
+        (r.rotation, r.flipX, r.flipY) = (0, false, true)
+        #expect(placed(r).contains(#"transform="translate(60 35) scale(1 -1) translate(-60 -35)""#))
+        var e = DesignNode(id: "e", name: "E", kind: .ellipse, frame: rect(0, 0, 40, 20))
+        e.rotation = -90
+        #expect(placed(e).contains(##"<ellipse cx="20" cy="10" rx="20" ry="10" fill="#d9d9d9" transform="rotate(-90 20 10)"/>"##))
+        var t = DesignNode(id: "t", name: "T", kind: .text, frame: rect(0, 0, 100, 20), text: "Hi")
+        t.rotation = 45
+        #expect(placed(t).contains(#"transform="rotate(45 50 10)">Hi</text>"#))
+    }
+
+    /// A turned frame turns its clip and its own box; its children keep theirs.
+    @Test func turnedFrameKeepsItsChildren() {
+        let child = DesignNode(id: "c", name: "C", kind: .rectangle, frame: rect(15, 25, 10, 10))
+        var frame = DesignNode(id: "f", name: "F", kind: .frame, frame: rect(10, 20, 50, 40), children: [child])
+        frame.rotation = 30
+        let text = placed(frame)
+        #expect(text.contains(#"<clipPath id="clip-f"><rect x="10" y="20" width="50" height="40" transform="rotate(30 35 40)"/></clipPath>"#))
+        #expect(text.contains(##"<rect x="10" y="20" width="50" height="40" fill="#ffffff" transform="rotate(30 35 40)"/>"##))
+        #expect(text.contains(##"<rect x="15" y="25" width="10" height="10" fill="#d9d9d9"/>"##))
+    }
+
+    /// RJ-D15 on the Model: 60 turns of 0.25° under one drag token turn the rect 15° about its centre as one
+    /// step, the export writes `rotate(15 60 35)`, and one undo stands it up again.
+    @Test func rotate15Job() throws {
+        let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .appendingPathComponent("../RealJobs/design/rotate-15/input/one-rect.design")
+        var w = DesignWorkspace()
+        try w.open(Data(contentsOf: url))
+        _ = try DesignWorkspace.catalog.run("edit.select", params: .object(["ids": .array([.string("node-2")])]), on: &w)
+        let turn = JSONValue.object(["degrees": .number(0.25), "drag": .string("knob")])
+        for _ in 0..<60 { _ = try DesignWorkspace.catalog.run("transform.rotate", params: turn, on: &w) }
+        #expect(w.treeNode("node-2")?.rotation == 15)
+        #expect(w.treeNode("node-2")?.frame == rect(10, 10, 100, 50))
+        let files = try DesignHeadless(w).export("svg", options: .object([:]))
+        #expect(files.count == 1)
+        let exported = String(decoding: files.first?.data ?? Data(), as: UTF8.self)
+        #expect(exported.contains(#"transform="rotate(15 60 35)""#))
+        _ = try DesignWorkspace.catalog.run("edit.undo", params: .object([:]), on: &w)
+        #expect(w.treeNode("node-2")?.rotation == 0)
     }
 }

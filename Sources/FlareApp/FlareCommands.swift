@@ -15,6 +15,8 @@
 // timeline strip has focus (its FocusedValues.timelineSelectAll, key-select-all
 // KS-2), else Edit > Select All on the stage's art.
 import FlareModel
+import SuiteModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -32,6 +34,8 @@ struct FlareMenu {
     var editHelps: [FlareEditAction: String] = [:]
     /// The keyframe Delete reason (`deleteHelp`), then Bring Forward's and Send Backward's.
     var selectionHelps: [String?] = []
+    /// The open animation's file, which File > Open In ▸ hands to another app; nil before it has one (file-flow FL-2).
+    var document: SuiteDocumentRef?
 
     /// Open Sample's items: the sample's name for `.openSample(name:)`, and its title.
     static let samples: [(name: String, title: String)] = [
@@ -69,27 +73,19 @@ struct FlareCommands: Commands {
         CommandGroup(replacing: .newItem) {
             item(.file(.new), key: KeyboardShortcut("n"))
             item(.file(.open), key: KeyboardShortcut("o"))
-            Menu("Open Recent") {
-                ForEach(menu.recent, id: \.self) { path in
-                    item(.file(.openRecent(path: path)), title: URL(fileURLWithPath: path).lastPathComponent)
-                }
-                Divider()
-                item(.file(.clearRecent))
-            }
             Menu("Open Sample") {
                 ForEach(FlareMenu.samples, id: \.name) { sample in
                     item(.file(.openSample(name: sample.name)), title: sample.title)
                 }
             }
         }
+        suiteFileMenu
         CommandGroup(replacing: .saveItem) {
             item(.file(.save), key: KeyboardShortcut("s"))
             item(.file(.saveAs), key: KeyboardShortcut("s", modifiers: [.command, .shift]))
             item(.export(.showSheet), key: KeyboardShortcut("e", modifiers: [.command, .shift]))
             item(.file(.close), key: KeyboardShortcut("w"))
         }
-        CommandGroup(replacing: .importExport) {}
-        CommandGroup(replacing: .printItem) {}
         CommandGroup(replacing: .undoRedo) {
             item(.edit(.undo), title: menu.undoTitle, key: KeyboardShortcut("z"))
             item(.edit(.redo), title: menu.redoTitle, key: KeyboardShortcut("z", modifiers: [.command, .shift]))
@@ -137,6 +133,14 @@ struct FlareCommands: Commands {
         }
     }
 
+    /// The suite's Open Recent ▸ and Open In ▸, after Open… (file-flow FL-2), and the File items Flare hides.
+    /// Its own builder keeps `body` within the builder's ten top-level commands.
+    @CommandsBuilder private var suiteFileMenu: some Commands {
+        SuiteFileCommands(app: .flare, bridge: FlareShell.bridge, document: menu.document)
+        CommandGroup(replacing: .importExport) {}
+        CommandGroup(replacing: .printItem) {}
+    }
+
     /// Animate: Play/Pause … Animate with Assist…, section 3.4's order.
     @ViewBuilder private var animate: some View {
         item(.timeline(.togglePlay), key: KeyboardShortcut(.space, modifiers: []))
@@ -168,13 +172,11 @@ struct FlareCommands: Commands {
         item(.assist(.showPopover), key: KeyboardShortcut("a", modifiers: [.command, .option]))
     }
 
-    /// One menu item: `intent`'s title (or `title`), acting through the
-    /// focused window and disabled with its reason while it can't act.
+    /// One menu item: `intent`'s title (or `title`) on its catalog spec (`FlareWorkspace.menuSpec(for:)`, command-state
+    /// CS-12), acting through the focused window and disabled with its reason while it can't act.
     private func item(_ intent: FlareIntent, title: String? = nil, key: KeyboardShortcut? = nil) -> some View {
-        let reason = menu.help(intent)
-        return Button(title ?? intent.title) { menu.perform(intent) }
-            .keyboardShortcut(key)
-            .disabled(reason != nil)
-            .help(reason ?? "")
+        MenuCommand(FlareWorkspace.menuSpec(for: intent), on: menu.help(intent), title: title ?? intent.title, shortcut: key) {
+            menu.perform(intent)
+        }
     }
 }

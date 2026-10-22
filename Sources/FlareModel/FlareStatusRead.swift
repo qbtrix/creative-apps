@@ -5,7 +5,7 @@
 // link's ticks over the last second (`PlaybackDriver.measuredFPS`), capped at the document rate, since a 60 Hz link
 // still shows each of 24 frames once. Under the document rate it is dropping (QB-L4, report-only). A scene with text
 // the stage can't draw says so: "Text not shown (1)", and so does one with masks or mattes: "Masks not shown (1)".
-// Under Direct Select, `pathHelp` says why no points can be edited ("Unlock Layer 1 to draw on it.").
+// Under Direct Select, `pathHelp` says why no points can be edited ("Unlock Layer 1 to edit its points.").
 // Integer math on clamped values, so nothing here can trap.
 import FlareCore
 

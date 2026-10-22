@@ -16,7 +16,8 @@ extension PhotoWorkspace {
     public struct NameParams: Codable, Sendable { public var name: String }
     public struct ImageParams: Codable, Sendable { public var name: String?; public var width, height: Int; public var rgba8: [UInt8] }
     public struct StraightenParams: Codable, Sendable { public var degrees: Double; public var cropToFit: Bool }
-    public struct ExportParams: Codable, Sendable { public var format: String }
+    /// Export's sheet values: the format and, for JPEG, the quality (0.1...1; the last choice when left out).
+    public struct ExportParams: Codable, Sendable { public var format: String; public var quality: Double? }
     /// A rectangle in canvas pixels (select.rect).
     public struct RectParams: Codable, Sendable { public var x, y, width, height: Int }
     /// image.gradient's: "linear" or "radial", stops as sRGB 0...1, and the two points in canvas pixels.
@@ -26,6 +27,11 @@ extension PhotoWorkspace {
         public var type: String; public var stops: [Stop]; public var from, to: XY
     }
     public struct AdjustmentParams: Codable, Sendable { public var kind: String }
+    /// layer.pick's layer and click ("replace", "extend" or "toggle"); layer.set-opacity's percent.
+    public struct PickParams: Codable, Sendable { public var id, mode: String }
+    public struct OpacityParams: Codable, Sendable { public var percent: Double }
+    /// layer.move-by's offset, in canvas pixels.
+    public struct MoveParams: Codable, Sendable { public var dx, dy: Int }
 
     /// The reasons menu items give that the Model has no help property for.
     static let noImage = "Open an image first.", noLayer = "Select a layer first."
@@ -104,6 +110,7 @@ extension PhotoWorkspace {
             act("tool.\(tool.rawValue)", tool.rawValue.capitalized, "Picks the \(tool.rawValue) tool for canvas drags.", .view,
                 gate { $0.toolHelp(tool) }) { $0.selectTool(tool) }
         }
+        + HistoryCommands.specs(PhotoWorkspace.self)
 
     static let fileCommands: [CommandSpec<PhotoWorkspace>] = [
         .typed("file.new", title: "New Image", summary: "Opens a new white image of the given size.", kind: .file,
@@ -119,12 +126,19 @@ extension PhotoWorkspace {
                schema: nameSchema, example: .object(["name": .string("copy.ora")]), availability: menu()) { w, p in
             w.didSave(as: p.name, kind: fileKind(forName: p.name)); return JSONValue.object([:])
         },
-        .typed("file.export", title: "Export", summary: "Flattens the image for export as png or jpeg.", kind: .file, params: ExportParams.self,
-               schema: .object(["format": .string("png or jpeg.", oneOf: ["png", "jpeg"])], required: ["format"]),
-               result: .object(["name": .string(), "width": .integer(), "height": .integer()], required: ["name", "width", "height"]),
+        .typed("file.export", title: "Export", summary: "Flattens the image for export as png or jpeg.",
+               kind: .file, params: ExportParams.self,
+               schema: .object(["format": .string("png or jpeg.", oneOf: ["png", "jpeg"]),
+                                "quality": .optional(.number("JPEG quality.", minimum: 0.1, maximum: 1))], required: ["format", "quality"]),
+               result: .object(["name": .string(), "width": .integer(), "height": .integer(), "quality": .number()],
+                               required: ["name", "width", "height", "quality"]),
                example: .object(["format": .string("png")]), availability: bar(.export)) { w, p in
             let format = ImageFormat(rawValue: p.format) ?? .png, image = try w.exportPixels(as: format)
-            return ["name": JSONValue.string(w.fileName(for: format)), "width": .number(Double(image.width)), "height": .number(Double(image.height))]
+            let o = ExportOptions(format: format, quality: p.quality ?? w.exportOptions.quality, size: w.exportOptions.size)
+            // The sheet's confirm starts its one write on the choice; without the sheet, the choice is kept for next time.
+            if !w.startExport(o) { w.exportOptions = o }
+            return ["name": JSONValue.string(w.fileName(for: format)), "width": .number(Double(image.width)),
+                    "height": .number(Double(image.height)), "quality": .number(o.quality)]
         },
     ]
 
@@ -218,9 +232,7 @@ extension PhotoWorkspace {
             }
             w.addAdjustmentLayer(kind); return JSONValue.object([:])
         },
-        act("layer.delete", "Delete Layer", "Deletes the selected layer.", .edit, menu { w in
-            w.selectedLayer == nil ? noLayer : w.canRemoveLayer ? nil : "The last layer can't be deleted."
-        }) { w in _ = w.removeLayer(try w.selectedID("layer.delete")) },
+        act("layer.delete", "Delete Layer", "Deletes the selected layers.", .edit, menu { $0.deleteLayersHelp }) { w in _ = try w.selectedID("layer.delete"); w.removeSelectedLayers() },
         act("layer.duplicate", "Duplicate Layer", "Duplicates the selected layer.", .edit, gate { $0.duplicateLayerHelp }) { $0.duplicateSelectedLayer() },
         act("layer.merge-down", "Merge Down", "Merges the selected layer into the one below.", .edit, gate { $0.mergeDownHelp }) { $0.mergeDown() },
         act("layer.flatten", "Flatten Image", "Merges every layer into one.", .edit, gate { $0.flattenHelp }) { $0.flattenImage() },
@@ -228,12 +240,35 @@ extension PhotoWorkspace {
                schema: nameSchema, example: .object(["name": .string("Sky")]), availability: menu { $0.canEditSelectedLayer ? nil : noLayer }) { w, p in
             w.renameLayer(try w.selectedID("layer.rename"), to: p.name); return JSONValue.object([:])
         },
-        act("layer.toggle-visibility", "Hide Layer", "Hides or shows the selected layer.", .edit, menu { $0.canEditSelectedLayer ? nil : noLayer }) { w in w.toggleVisibility(try w.selectedID("layer.toggle-visibility")) },
+        act("layer.toggle-visibility", "Hide Layer", "Hides or shows the selected layers.", .edit, menu { $0.canEditSelectedLayer ? nil : noLayer }) { w in w.toggleVisibility(try w.selectedID("layer.toggle-visibility")) },
         act("layer.bring-forward", "Reorder Layers", "Moves the selected layer one place up.", .edit, menu(upHelp)) { $0.bringSelectedLayerForward() },
         act("layer.send-backward", "Reorder Layers", "Moves the selected layer one place down.", .edit, menu(downHelp)) { $0.sendSelectedLayerBackward() },
         act("layer.select-above", "Select Layer Above", "Selects the layer above the selected one.", .view, menu(upHelp)) { $0.selectLayerAbove() },
         act("layer.select-below", "Select Layer Below", "Selects the layer below the selected one.", .view, menu(downHelp)) { $0.selectLayerBelow() },
+        .typed("layer.pick", title: "Select Layer", summary: "Picks a layer: replace, extend (Shift) or toggle (Command).", kind: .view,
+               params: PickParams.self, schema: .object(["id": .string("The layer's id.", maxLength: 255),
+                                                         "mode": .string("The click.", oneOf: pickModes.map(\.name))], required: ["id", "mode"]),
+               example: .object(["id": .string("layer-1"), "mode": .string("replace")]), availability: menu()) { w, p in
+            guard w.index(of: p.id) != nil, let pick = pickModes.first(where: { $0.name == p.mode })?.pick else {
+                throw CatalogError.failed(id: "layer.pick", message: "There is no layer \(p.id) to pick by \(p.mode).")
+            }
+            w.pickLayer(p.id, pick); return JSONValue.object([:])
+        },
+        act("layer.select-all", "Select All Layers", "Picks every layer.", .view, menu()) { $0.selectAllLayers() },
+        .typed("layer.set-opacity", title: "Layer Opacity", summary: "Sets the selected layers' opacity, 0 to 100 percent.", kind: .edit,
+               params: OpacityParams.self, schema: .object(["percent": .number("Opacity in percent.", minimum: 0, maximum: 100)], required: ["percent"]),
+               example: .object(["percent": .number(50)]), availability: menu { $0.canEditSelectedLayer ? nil : noLayer }) { w, p in
+            let id = try w.selectedID("layer.set-opacity")
+            w.endAdjust(); w.setOpacity(id, percent: p.percent); w.endAdjust(); return JSONValue.object([:])
+        },
+        .typed("layer.move-by", title: "Move Layer", summary: "Moves the selected layers by dx, dy pixels.", kind: .edit,
+               params: MoveParams.self, schema: .object(["dx": .integer("Pixels right.", minimum: -10_000_000, maximum: 10_000_000),
+                                                         "dy": .integer("Pixels down.", minimum: -10_000_000, maximum: 10_000_000)], required: ["dx", "dy"]),
+               example: .object(["dx": .number(40), "dy": .number(0)]), availability: menu { $0.canEditSelectedLayer ? nil : noLayer }) { w, p in
+            w.moveSelectedLayers(dx: p.dx, dy: p.dy); return JSONValue.object([:])
+        },
     ]
+    static let pickModes: [(name: String, pick: Pick)] = [("replace", .replace), ("extend", .extend), ("toggle", .toggle)]
     static let upHelp: @Sendable (PhotoWorkspace) -> String? = { $0.selectedLayer == nil ? noLayer : $0.canBringSelectedLayerForward ? nil : atTop }
     static let downHelp: @Sendable (PhotoWorkspace) -> String? = { $0.selectedLayer == nil ? noLayer : $0.canSendSelectedLayerBackward ? nil : atBottom }
 
