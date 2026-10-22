@@ -2,29 +2,29 @@
 
 Issue: #4507 · Packet: docs/blueprints/suiteui/features/font-picker.md
 Run: act-1a16474bd3a-i9ae · Session: session_01Rid1ErRRerebigzwJKJtpV · Started: 2026-10-22T16:36Z
-Stage: 3 (wave 1)
+Stage: 3 wave 2
 Base: 7e9f260ae8f69dea63663c1bc7ea945c6b1d2f80 (origin/dev)
-Next: FP-a (FP-1 + FP-2, one slice PR, test commit first)
+Next: open the FP-u and FP-m PRs (stacked on FP-a, #4638) when their builders push; then FP-z (FP-6 + FP-7) stacked on both
 
 ## Slices
 
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| FP-a | FontPick, FontPickerRules and FontPicker declared as stubs; gallery page; checks written, disabled | FP-1, FP-2 | SJ0 | EK-u (built), CC-u (built), shell-text:ST-a (built: FontFamily/FontFace in SuiteModel) | true | 0 | building | – | – |
-| FP-u | the picker lists, filters and previews families within the render budget | FP-3, FP-4 | testFontPickerPicksAFace | FP-a | true | 0 | planned | – | – |
-| FP-m | rules: filter, face order, nearest face | FP-5, FP-8 | FJ-m | FP-a | false | 0 | planned | – | – |
+| FP-a | FontPick, FontPickerRules and FontPicker declared as stubs; gallery page; checks written, disabled | FP-1, FP-2 | SJ0 | EK-u (built), CC-u (built), shell-text:ST-a (built: FontFamily/FontFace in SuiteModel) | true | 0 | PR open #4638 | – | – |
+| FP-u | the picker lists, filters and previews families within the render budget | FP-3, FP-4 | testFontPickerPicksAFace | FP-a | true | 0 | building | – | – |
+| FP-m | rules: filter, face order, nearest face | FP-5, FP-8 | FJ-m | FP-a | false | 0 | building | – | – |
 | FP-z | live families; feature built | FP-6, FP-7 | testFontPickerPicksAFace | FP-u, FP-m | true | 0 | planned | – | – |
 
 ## Tasks
 
 | id | slice | wave | state | PR |
 |---|---|---|---|---|
-| FP-1 | FP-a | 1 | building | – |
-| FP-2 | FP-a | 1 | building | – |
-| FP-3 | FP-u | 2 | planned | – |
-| FP-4 | FP-u | 2 | planned | – |
-| FP-5 | FP-m | 2 | planned | – |
-| FP-8 | FP-m | 2 | planned | – |
+| FP-1 | FP-a | 1 | PR open | #4638 |
+| FP-2 | FP-a | 1 | PR open | #4638 |
+| FP-3 | FP-u | 2 | building (stacked on FP-a) | – |
+| FP-4 | FP-u | 2 | building (stacked on FP-a) | – |
+| FP-5 | FP-m | 2 | building (stacked on FP-a) | – |
+| FP-8 | FP-m | 2 | building (stacked on FP-a) | – |
 | FP-6 | FP-z | 3 | planned | – |
 | FP-7 | FP-z | 3 | planned | – |
 
@@ -37,6 +37,10 @@ Next: FP-a (FP-1 + FP-2, one slice PR, test commit first)
 - Earlier runs (#3730) parked on shell-text ST-a; FontFamily and FontFace are now in Sources/SuiteModel/Values/Text.swift on dev, so FP-a starts.
 - Slice branches are lead/font-picker-<slice> (lead/font-picker blocks lead/font-picker/<slice>).
 - One combined wave plan across font-picker, shared-raw and clipboard-interop (rule 19).
+
+- FP-u and FP-m stack on FP-a's unmerged branch and run in parallel (disjoint files: FontPicker.swift + tests vs FontPickerRules*.swift + tests), per rule 22.
+- FP-7 won't edit suiteui-sources.json's description (CLAUDE.md: changing an existing part's description fails scripts/ci --changed); it only sets status built in the .wave.json.
+- Belt reads lead/suiteui-font-picker (docs/leads/suiteui-font-picker/); each push mirrors the RECORD and timeline there as well as to lead/font-picker.
 
 ## Open
 - FP-m's tests and mutations live in SuiteUITests (macOS only): its Mutate line needs a Mac pass.
