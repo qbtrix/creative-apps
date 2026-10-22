@@ -4,7 +4,7 @@ Issue: #3536 · Packet: docs/blueprints/halo/features/key-editing.md
 Run: act-1a15f807d0b-78hh (resumed from act-1a15b98bcea-wygm) · Session: claude/key-editing-lead-o3yyj5 · Started: 2026-10-20T23:47Z
 Stage: 3 wave 4
 Base: 1a7e0d866 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: fix round 1 for KE-a (#4232) and KE-m (#4233) in PR #4235 (head d09faab1c, dev merged after #4215 fixed dev's photo compile break; lane macOS build next), then re-panel on the next halo journeys run with key-editing-* screens. #4151 (playhead takes a key's click) is SuiteUI's. KE-8's CL-z is met (Belt-Slice-Done CL-z, run 39682861406, 22:42Z on #1971); KE-7, and KE-8 after it, wait on #3499 (captain's PR, clean, unmerged).
+Next: PR #4235 (fix round 1, #4232/#4233; head bbc7ade7a, lane macOS build 39712739074 queued) and PR #4305 (KE-8, docs, feature-done) land; then re-panel KE-a/KE-m on a halo journeys run with key-editing-* screens (round 2 is the last), Belt-Slice-Done KE-z on a dev ci.yml run holding #4305 with a green Linux job, and Belt-Contact-Sheet naming gap #4284. #4151 (playhead takes a key's click) is SuiteUI's.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -24,9 +24,9 @@ Next: fix round 1 for KE-a (#4232) and KE-m (#4233) in PR #4235 (head d09faab1c,
 | KE-5 | KE-u | 3 | snapshots, journey skipped | Tests/AppSnapshotTests/HaloKeyEditingSnapshots.swift, UITests/HaloJourneyTests+KeyEditing.swift | snapshots | #4070 | merged |
 | KE-6 | KE-u | 3 | render budget | Tests/AppSnapshotTests/RenderBudgetHaloKeyEditingTests.swift | RenderBudgetHaloKeyEditingTests | #4067 | merged |
 | KE-9 | KE-m, KE-z | 4 | RJ-H13 move-keys real job; journey turned on (KE-7's first half) | Tests/RealJobs/halo/move-keys/move-keys.jobs.json, Tests/RealJobs/halo/move-keys/input/bounce.halo, UITests/HaloJourneyTests+KeyEditing.swift | RealJobsTests, HaloKeyEditingJourneyTests | #4141 | merged 1b3913c07 |
-| KE-7 | KE-z | 5 | stress journey gains ⌘A and move-keys | UITests/HaloJourneyTests+StressPerf.swift | HaloStressPerfJourneyTests | - | waits #3499 |
+| KE-7 | KE-z | 5 | stress journey gains ⌘A and move-keys | UITests/HaloJourneyTests+StressPerf.swift | HaloStressPerfJourneyTests | #4284 | gap (waits #3499; supervisor option 3, 03:40Z) |
 | F4232/F4233 | KE-a, KE-m | 5 | menu journey lists the key items; key-editing journey parks the playhead at 30 | UITests/HaloJourneyTests.swift, UITests/HaloJourneyTests+KeyEditing.swift | HaloJourneyTests, HaloKeyEditingJourneyTests | #4235 | open bbc7ade7a (lane macOS build 39712739074 queued) |
-| KE-8 | KE-z | 6 | halo.md, built, feature-done | docs/blueprints/halo.md, docs/blueprints/halo/features/key-editing.wave.json | waves render --dry-run | - | waits KE-7 (CL-z met 22:42Z) |
+| KE-8 | KE-z | 6 | halo.md, built, feature-done | docs/blueprints/halo.md, docs/blueprints/halo/features/key-editing.wave.json | waves render --dry-run | #4305 | open a4a76f445 (CI: PASS) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -43,6 +43,6 @@ Next: fix round 1 for KE-a (#4232) and KE-m (#4233) in PR #4235 (head d09faab1c,
 ## Open
 - Finding #4150: aKeyDragShowsTheTimePill red since #4070; RenderBudgetHaloKeyEditingTests drag 9 bodies and selectAll unrouted (scoped halo 39635764704). Fix round 1 started 18:30Z: PR #4152 (test-only, playhead to 36 before the drag); the real-user bug went to #4151 (needs-ui, TimelineStrip playhead band wins a key's press); select-all is not fixed yet. Closed 21:00Z: #4155 fixed both render-budget tests and #4173 the snapshot; #4152 closed as a duplicate.
 - HaloViewerSnapshots.shapeButton red on macOS too: not this feature's file.
-- PR #3499 (stress journeys) open: KE-7 waits on it.
-- core-loop #1971 CL-z not built: KE-8 waits on it.
+- PR #3499 (stress journeys) open: KE-7 is gap #4284 on it (supervisor, 03:40Z).
+- core-loop #1971 CL-z met (22:42Z): KE-8 unblocked.
 - #4141 body: the session's GitHub proxy re-appends an attribution footer on every body write (tried to strip it 17:59Z; it came back). The lane strips it from the squash commit and holds nothing on it.
