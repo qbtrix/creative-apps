@@ -4,7 +4,8 @@ Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a161a658a7-2jql · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
 Stage: fr8b-wait
 Base: dev
-Next: reopen FR-8b after #4341 merges; FR-10b after #4293
+Next: reopen FR-8b after #4341; open FR-10b after #4293
+
 
 
 
@@ -12,6 +13,8 @@ Next: reopen FR-8b after #4341 merges; FR-10b after #4293
 
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 07:56Z: FR-10b branch merged with FR-10 head (d1c5cb529), pushed, gate running; PR opens after #4293 merges (stacked diff vs dev is 19 files).
+- 07:56Z: FR-10b branch merged with FR-10 head (d1c5cb529), pushed, gate running; PR opens after #4293 merges (stacked diff vs dev is 19 files).
 - FR-a #4063 merged · FR-m #4142 merged · FR-u #4172 merged · FR-7 #4211 merged (disabled) · FR-9 #4212 merged (disabled)
 - FR-10 #4293 open at d1c5cb529 (dev merged in after the CLI golden conflict); the lane's macOS build is in flight
 - FR-8 #4341 open, fast-lane, head e5d562c5 (gate PASS on dev 1da00fb9, mutate 4/4); catalog command, movie writer timing, rate text and HJ-FR journey are the FR-8b follow-up
