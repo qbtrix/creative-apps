@@ -25,3 +25,4 @@ utc	stage	event	ref	note
 2026-10-21T23:49:32Z	3	check	#4191	lane macOS build 39688704475 red only on dev RenderBudgetPhotoPlaceTests.swift:35 (PhotoPlaceIntent.files, fixed by #4215), not ours; hold
 2026-10-22T00:06:30Z	3	poll	#4185 #4191	#4215 merged; supervisor merged dev into TK-5 (208ff81f9) and TK-u (8cdf61522), lane Linux checks running; hold
 2026-10-22T00:23:42Z	3	check	#4185 #4191	Linux red only on dev-red #3856 FormatListRatchetTests (Media.swift from #4034); fix #4258 on the lane; hold
+2026-10-22T00:40:23Z	3	poll	#4185 #4191	#4258 still waiting on its macOS build; hold; stripped 1 old comment footer on #3780
