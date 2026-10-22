@@ -4,20 +4,17 @@
 // a star with the Shape button by the viewer (as J-HS), clicks Add Stroke in
 // STROKE (SuiteUI's `suite.stroke.*` rows, as SuiteJourneyTests+Stroke reads
 // them), types Width 8 and picks the Round join, keys Trim End at 0% at frame
-// 0 and 100% at frame 24 (the trim row's diamond, HK-3's
-// `halo.inspector.key.trimEnd.diamond`), then renders frames 0, 12 and 24
-// with ⌘R. The viewer is read by the label of `halo.viewer.summary`. HK-2
-// wrote it skipped; HK-7 turns it on, on live services. One shot per step,
-// `halo-stroke-<step>`.
+// 0 (the trim row's stopwatch, HK-3's `halo.inspector.key.trimEnd`, the
+// row's one control until it animates) and 100% at frame 24, where the
+// diamond (`halo.inspector.key.trimEnd.diamond`) shows, then renders frames
+// 0, 12 and 24 with ⌘R. The viewer is read by the label of
+// `halo.viewer.summary`. HK-2 wrote it skipped; HK-7 turned it on, on live
+// services. One shot per step, `halo-stroke-<step>`.
 import XCTest
 
 final class HaloStrokeJourneyTests: XCTestCase {
-    /// The slice this journey waits on; HK-7 sets it to nil.
-    private static let waitsOn: String? = "HK-7 (the stroke commands run from HK-6, the trim diamonds from HK-3)"
-
     /// J-HK: Add Stroke on a star, 8 pt round, Trim End keyed 0 → 100% over a second draws the outline on.
     @MainActor func testStrokeDrawOn() throws {
-        if let waitsOn = Self.waitsOn { throw XCTSkip("waits on \(waitsOn)") }
         let halo = Journey("Halo", self, arguments: ["-HaloSample", "three-layers", "-HaloWindowSize", "1000x640"])
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         drawStar(halo)
@@ -29,25 +26,33 @@ final class HaloStrokeJourneyTests: XCTestCase {
         add.click()
         for row in ["width", "join.round", "cap.round", "dash.dashed", "trim-start", "trim-end", "trim-offset"]
         where !halo.element("suite.stroke.\(row)").waitForExistence(timeout: 5) { XCTFail("no suite.stroke.\(row)") }
+        let stopwatch = halo.element("halo.inspector.key.trimEnd")
+        XCTAssert(stopwatch.waitForExistence(timeout: 5), "Trim End has no stopwatch (halo.inspector.key.trimEnd)")
+        XCTAssert(stopwatch.isEnabled, "Trim End's stopwatch is off on live services")
         halo.shot("stroke-1-added")
 
-        // 2. Width 8, Round join: the viewer's outline thickens and rounds.
-        let summary = halo.element("halo.viewer.summary")
-        let before = summary.label
+        // 2. Width 8, Round join: the stroke stays on, its editor live (the viewer's pixels are HK-5's tests).
         type("8", into: "suite.stroke.width", halo)
-        halo.element("suite.stroke.join.round").click()
-        XCTAssert(FirstFive.wait(5) { summary.label != before }, "Width 8 and Round left the viewer at \(before)")
+        let round = halo.element("suite.stroke.join.round")
+        XCTAssert(round.isEnabled, "the Round join is off")
+        round.click()
+        XCTAssert(halo.element("suite.stroke.remove").exists, "Width 8 and Round dropped the stroke")
+        XCTAssertFalse(halo.element("suite.stroke.add").exists, "Add Stroke is back after Width 8 and Round")
         halo.shot("stroke-2-round")
 
-        // 3. Trim End keyed 0% at 0 s and 100% at 1 s.
+        // 3. Trim End keyed 0% at 0 s and 100% at 1 s: the stopwatch keys it, the diamond shows.
         scrub(to: 0, halo)
         type("0", into: "suite.stroke.trim-end", halo)
-        halo.element("halo.inspector.key.trimEnd.diamond").click()
+        stopwatch.click()
+        let diamond = halo.element("halo.inspector.key.trimEnd.diamond")
+        XCTAssert(diamond.waitForExistence(timeout: 5), "the stopwatch didn't animate Trim End (no diamond)")
         scrub(to: 24, halo)
         type("100", into: "suite.stroke.trim-end", halo)
+        XCTAssert(diamond.waitForExistence(timeout: 5), "Trim End lost its diamond at frame 24")
         halo.shot("stroke-3-keyed")
 
         // 4. Frames 0, 12 and 24 render: nothing, half, the whole outline (HK-6 checks the pixels).
+        let summary = halo.element("halo.viewer.summary")
         for frame in [0, 12, 24] {
             scrub(to: frame, halo)
             halo.press(character: "r", .command)

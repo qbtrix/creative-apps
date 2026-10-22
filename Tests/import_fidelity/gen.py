@@ -12,10 +12,18 @@
 # it. An SVG's probes are points with the paint the SVG spec puts there,
 # worked out here from the geometry this script wrote.
 #
+# Layer effects: an lfx2 block is the object-based effects descriptor of the
+# published PSD file format (version 0, descriptor version 16), and the merged
+# image draws them the way the authoring app does: drop shadows under the
+# layer (from its alpha, moved d px along the light angle, -d cos a, +d sin a
+# with y down), then the layer, then an outside stroke over the canvas.
+# Effect edges are anti-aliased, so the test allows 8 levels inside a case's
+# "loose" rect (the effect layer's reach) and 2 elsewhere.
+#
 # Gate rule the tests apply: each feature opens, or the import says it didn't
 # (a thrown reason, or an entry in the SVG report). A file with a known gap
 # names its finding issue in GAPS; its test runs under withKnownIssue.
-import json, os, struct, zlib
+import json, math, os, struct, zlib
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 # Finding issues on qbtrix/creative-apps, by gap key.
@@ -77,9 +85,89 @@ class L:
     """A layer: rect (l, t, r, b), paint(x, y) -> (r, g, b, a) 0...255."""
 
     def __init__(self, name, rect=(0, 0, 0, 0), paint=None, blend="norm", opacity=255, hidden=False,
-                 clip=False, mask=None, extra=(), kind="pixels", effect=None, adjust=None, fill=None):
+                 clip=False, mask=None, extra=(), kind="pixels", fx=None, adjust=None, fill=None):
         self.__dict__.update(locals())
         del self.__dict__["self"]
+
+
+def dkey(k):
+    """A descriptor key or classID: length 0 then the 4-char key, else its length then its bytes."""
+    k = k.encode()
+    return struct.pack(">I", 0 if len(k) == 4 else len(k)) + k
+
+
+def desc(cls, items):
+    """A descriptor: its unicode name (one NUL), classID, item count, then each key and typed value."""
+    return struct.pack(">IH", 1, 0) + dkey(cls) + struct.pack(">I", len(items)) + b"".join(dkey(k) + v for k, v in items)
+
+
+UNIT = lambda unit, v: b"UntF" + unit.encode() + struct.pack(">d", v)
+BOOL = lambda v: b"bool" + bytes([1 if v else 0])
+ENUM = lambda t, e: b"enum" + dkey(t) + dkey(e)
+OBJ = lambda cls, items: b"Objc" + desc(cls, items)
+RGB = lambda c: OBJ("RGBC", [(k, b"doub" + struct.pack(">d", v)) for k, v in zip(("Rd  ", "Grn ", "Bl  "), c)])
+FX_MODE = {"norm": "Nrml", "mul ": "Mltp"}
+
+
+def lfx2(fx):
+    """fx: stroke (px, colour), shadows [{colour, mode, opacity %, angle, distance}], satin (colour, opacity %)."""
+    size, color = fx["stroke"]
+    items = [("Scl ", UNIT("#Prc", 100)), ("masterFXSwitch", BOOL(True)),
+             ("FrFX", OBJ("FrFX", [("enab", BOOL(True)), ("Styl", ENUM("FStl", "OutF")), ("PntT", ENUM("FrFl", "SClr")),
+                                   ("Md  ", ENUM("BlnM", "Nrml")), ("Opct", UNIT("#Prc", 100)),
+                                   ("Sz  ", UNIT("#Pxl", size)), ("Clr ", RGB(color))]))]
+    shadows = [OBJ("DrSh", [("enab", BOOL(True)), ("Md  ", ENUM("BlnM", FX_MODE[s["mode"]])), ("Clr ", RGB(s["color"])),
+                            ("Opct", UNIT("#Prc", s["opacity"])), ("uglg", BOOL(False)), ("lagl", UNIT("#Ang", s["angle"])),
+                            ("Dstn", UNIT("#Pxl", s["distance"])), ("Ckmt", UNIT("#Pxl", 0)), ("blur", UNIT("#Pxl", 0))])
+               for s in fx["shadows"]]
+    if len(shadows) == 1:
+        items.append(("DrSh", shadows[0]))
+    else:
+        items.append(("dropShadowMulti", b"VlLs" + struct.pack(">I", len(shadows)) + b"".join(shadows)))
+    if "satin" in fx:
+        c, o = fx["satin"]
+        items.append(("ChFX", OBJ("ChFX", [("enab", BOOL(True)), ("Md  ", ENUM("BlnM", "Nrml")), ("Clr ", RGB(c)),
+                                           ("Opct", UNIT("#Prc", o)), ("lagl", UNIT("#Ang", 19)), ("Dstn", UNIT("#Pxl", 11)),
+                                           ("blur", UNIT("#Pxl", 14)), ("Invr", BOOL(True))])))
+    return block("lfx2", struct.pack(">II", 0, 16) + desc("null", items))
+
+
+def shadow_offset(s):
+    a = math.radians(s["angle"])
+    return round(-s["distance"] * math.cos(a), 6), round(s["distance"] * math.sin(a), 6)
+
+
+def fx_reach(n):
+    """The rect an fx layer's effects can touch: its rect grown by the stroke, joined with each shadow's."""
+    l, t, r, b = n.rect
+    k = n.fx["stroke"][0] + 1
+    out = [l - k, t - k, r + k, b + k]
+    for dx, dy in map(shadow_offset, n.fx["shadows"]):
+        out = [min(out[0], math.floor(l + dx)), min(out[1], math.floor(t + dy)),
+               max(out[2], math.ceil(r + dx)), max(out[3], math.ceil(b + dy))]
+    return out
+
+
+def draw_fx(n, canvas, w, h, under):
+    """An opaque rect layer's effects: its shadows (under) by area overlap, or its outside stroke (over)."""
+    l, t, r, b = n.rect
+    span = lambda v, lo, hi: max(0.0, min(v + 1, hi) - max(v, lo))
+    paint = []
+    if under:
+        for s in n.fx["shadows"]:
+            dx, dy = shadow_offset(s)
+            paint.append((s["mode"], s["color"], lambda x, y, dx=dx, dy=dy, k=s["opacity"] / 100:
+                          k * span(x, l + dx, r + dx) * span(y, t + dy, b + dy)))
+    else:
+        size, color = n.fx["stroke"]
+        paint.append(("norm", color, lambda x, y: 0.0 if l <= x < r and t <= y < b else max(0.0, min(1.0, size + 0.5 - math.hypot(
+            max(l - x - 0.5, 0, x + 0.5 - r), max(t - y - 0.5, 0, y + 0.5 - b))))))
+    x0, y0, x1, y1 = fx_reach(n)
+    for mode, color, cover in paint:
+        for y in range(max(y0, 0), min(y1, h)):
+            for x in range(max(x0, 0), min(x1, w)):
+                a = cover(x, y)
+                canvas[y][x] = [c + a * (BLEND[mode](c, s / 255) - c) for c, s in zip(canvas[y][x], color)]
 
 
 class G:
@@ -138,6 +226,8 @@ def composite(nodes, canvas, w, h):
                     canvas[y][x] = [c + k * (f / 255 - c) for c, f in zip(canvas[y][x], n.fill)]
             continue
         l, t, r, b = n.rect
+        if n.fx:
+            draw_fx(n, canvas, w, h, under=True)
         for y in range(max(t, 0), min(b, h)):
             for x in range(max(l, 0), min(r, w)):
                 p = n.paint(x, y)
@@ -146,11 +236,8 @@ def composite(nodes, canvas, w, h):
                     a *= base(x, y)
                 cb = canvas[y][x]
                 canvas[y][x] = [c + a * (BLEND[n.blend](c, s / 255) - c) for c, s in zip(cb, p)]
-        if n.effect:  # a 1 px outside stroke in the effect colour
-            for y in range(t - 1, b + 1):
-                for x in range(l - 1, r + 1):
-                    if 0 <= x < w and 0 <= y < h and not (l <= x < r and t <= y < b):
-                        canvas[y][x] = [c / 255 for c in n.effect]
+        if n.fx:
+            draw_fx(n, canvas, w, h, under=False)
         if not n.clip:
             base = (lambda n: lambda x, y: (n.paint(x, y)[3] / 255 * mask_at(n.mask, x, y))
                     if n.rect[0] <= x < n.rect[2] and n.rect[1] <= y < n.rect[3] else 0.0)(n)
@@ -170,7 +257,7 @@ def records(nodes):
     return out
 
 
-def psd(name, w, h, nodes, bits=8, mode=3, version=1, zip_layers=False):
+def psd(name, w, h, nodes, bits=8, mode=3, version=1, zip_layers=False, path=None):
     bp = bits // 8
     color = 1 if mode == 1 else 3 if mode == 3 else 4
 
@@ -201,7 +288,7 @@ def psd(name, w, h, nodes, bits=8, mode=3, version=1, zip_layers=False):
             chans.append((-2, channel(plane, mr - ml, mb - mt, bp)))
             maskdata = struct.pack(">iiiiBBH", mt, ml, mb, mr, n.mask["default"], 2 if n.mask.get("disabled") else 0, 0)
         extra = struct.pack(">I", len(maskdata)) + maskdata + struct.pack(">I", 0) + pascal4(n.name)
-        extra += b"".join(n.extra) + (luni(n.name) if not any(e[4:8] == b"luni" for e in n.extra) else b"")
+        extra += b"".join(n.extra) + (lfx2(n.fx) if n.fx else b"") + (luni(n.name) if not any(e[4:8] == b"luni" for e in n.extra) else b"")
         recs += struct.pack(">iiiiH", t, l, b, r, len(chans))
         recs += b"".join(struct.pack(">hI", cid, len(d)) for cid, d in chans)
         recs += b"8BIM" + n.blend.encode() + bytes([n.opacity, 1 if n.clip else 0, 2 if n.hidden else 0, 0])
@@ -226,7 +313,7 @@ def psd(name, w, h, nodes, bits=8, mode=3, version=1, zip_layers=False):
 
     header = b"8BPS" + struct.pack(">H", version) + b"\0" * 6 + struct.pack(">HIIHH", color, h, w, bits, mode)
     body = header + struct.pack(">I", 0) + struct.pack(">I", 0) + layer_section + merged
-    with open(os.path.join(ROOT, "psd", name), "wb") as f:
+    with open(path or os.path.join(ROOT, "psd", name), "wb") as f:
         f.write(body)
 
 
@@ -238,7 +325,8 @@ def tree(nodes):
                         "blend": None if n.blend == "pass" else SWIFT_BLEND[n.blend], "children": tree(n.children)})
         else:
             out.append({"name": n.name, "kind": n.kind, "hidden": n.hidden, "blend": SWIFT_BLEND[n.blend],
-                        "opacity": n.opacity, "clip": n.clip, "mask": bool(n.mask)})
+                        "opacity": n.opacity, "clip": n.clip, "mask": bool(n.mask),
+                        **({"effects": ["dropShadow", "stroke"]} if n.fx else {})})
     return out
 
 
@@ -246,6 +334,9 @@ def psd_cases():
     W = 64
     bg = lambda: L("Background", (0, 0, W, W), bands(W))
     box = lambda name, rect, c, **k: L(name, rect, solid(c, ((255, 255, 255), rect[0] + 3)), **k)
+    shadow = {"color": (0, 0, 0), "mode": "norm", "opacity": 100, "angle": 90, "distance": 4}
+    badge = box("Badge", (16, 16, 48, 48), (240, 240, 240),
+                fx={"stroke": (3, (220, 20, 60)), "shadows": [shadow, shadow], "satin": ((240, 240, 240), 0)})
     hard = lambda rect, default=0: {"rect": rect, "default": default, "paint": lambda x, y: 255 if (x // 4 + y // 4) % 2 else 0}
     cases = [
         ("flat_background.psd", "one Background layer", [bg()], {}),
@@ -285,9 +376,9 @@ def psd_cases():
         ("smart_object.psd", "a placed smart object (SoLd) with its rendered pixels",
          [bg(), box("Placed logo", (14, 14, 50, 50), (250, 120, 180), kind="smartObject",
                     extra=[block("SoLd", b"soLD" + struct.pack(">II", 4, 16) + b"\0" * 16)])], {"gap": "psd-kinds"}),
-        ("layer_effects.psd", "a layer with a stroke effect (lfx2)",
-         [bg(), box("Badge", (16, 16, 48, 48), (240, 240, 240), effect=(220, 20, 60), extra=[block("lfx2", b"\0" * 24)])],
-         {"gap": "psd-effects"}),
+        ("layer_effects.psd", "a layer with a stroke, two drop shadows and a satin (lfx2)",
+         [bg(), badge], {"gap": "psd-effects", "loose": fx_reach(badge),
+                         "notes": ["Badge: satin (not kept)", "Badge: second drop shadow (not kept)"]}),
         ("rgb16.psd", "16 bits per channel with a group and a mask",
          [bg(), G("Deep", [box("Sixteen", (8, 8, 56, 56), (180, 90, 45), mask=hard((16, 16, 48, 48)))])], {"bits": 16}),
         ("gray8.psd", "grayscale with two layers",
@@ -312,8 +403,19 @@ def psd_cases():
             entry["tree"] = tree(nodes)
         if "gap" in o:
             entry["gap"] = GAPS[o["gap"]]
+        entry.update({k: o[k] for k in ("loose", "notes") if k in o})
         out.append(entry)
     return out
+
+
+def badge_job():
+    """RJ-P46's input (Tests/RealJobs/photo/psd-effects): a badge with a drop shadow and a stroke on white."""
+    out = os.path.join(ROOT, "..", "RealJobs", "photo", "psd-effects", "input")
+    os.makedirs(out, exist_ok=True)
+    fx = {"stroke": (3, (40, 40, 40)), "shadows": [{"color": (0, 0, 0), "mode": "mul ", "opacity": 75, "angle": 120, "distance": 6}]}
+    psd("badge-effects.psd", 128, 128, [L("Background", (0, 0, 128, 128), solid((255, 255, 255))),
+                                        L("Badge", (32, 32, 80, 80), solid((250, 190, 40)), fx=fx)],
+        path=os.path.join(out, "badge-effects.psd"))
 
 # ---------------------------------------------------------------- SVG
 
@@ -462,6 +564,7 @@ if __name__ == "__main__":
     for d in ("psd", "svg"):
         os.makedirs(os.path.join(ROOT, d), exist_ok=True)
     manifest = {"psd": psd_cases(), "svg": svg_cases()}
+    badge_job()
     with open(os.path.join(ROOT, "manifest.json"), "w") as f:
         json.dump(manifest, f, indent=1, ensure_ascii=False)
         f.write("\n")

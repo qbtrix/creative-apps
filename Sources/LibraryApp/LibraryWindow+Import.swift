@@ -7,6 +7,7 @@
 import AppKit
 import Foundation
 import LibraryModel
+import SuiteKernel
 import SwiftUI
 
 final class ImportAreaState {
@@ -30,7 +31,19 @@ extension LibraryWindow {
             importFolder: enabled(model.importHelp == nil) { startImport() },
             importDropped: enabled(model.importHelp == nil) { (folder: String) in importFolder(folder) },
             importHelp: model.importHelp,
+            showImportFailures: enabled(showFailuresWhy == nil) { showImportFailures() },
             dismissImportNotice: act(.dismissImportNotice))
+    }
+
+    /// Why `notice.show-failures` can't run on the window's catalog, nil when it can.
+    private var showFailuresWhy: String? {
+        LibraryCatalog.catalog.availability("notice.show-failures", on: model).why
+    }
+
+    /// The notice's Show or Hide: the catalog's `notice.show-failures`, which flips
+    /// whether the failures are listed. Its refusal is the disabled state's help.
+    private func showImportFailures() {
+        _ = try? LibraryCatalog.catalog.run("notice.show-failures", params: .object([:]), on: &model)
     }
 
     /// Called once from the window's `.task`.
