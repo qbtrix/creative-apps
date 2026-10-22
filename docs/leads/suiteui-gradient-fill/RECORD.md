@@ -4,7 +4,7 @@ Issue: #3418 · Packet: docs/blueprints/suiteui/features/gradient-fill.md
 Run: act-1a15f92d30e-mfnc · Session: claude/feature-lead-suiteui-srh349 · Started: 2026-10-20T03:19Z (relaunched 2026-10-21)
 Stage: 3 wave 5
 Base: aaa43f918e028249e0525eb468f37795638932d7
-Next: scoped suiteui run 39726708852 (dev 8cf02113; journeys run 39718566695 was cancelled) for the critic panel, then Belt-Contact-Sheet.
+Next: journeys run 39745681339 (after scoped suiteui 39726708852, macOS green, dev 8cf02113) for ui-screens, then the critic panel per GF slice, then Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
