@@ -4,7 +4,7 @@ Issue: #3446 · Packet: docs/blueprints/suiteui/features/transform-tools.md
 Run: act-1a163b2abfe-f182 (relaunch; first run act-1a1579fdd22-6z1j) · Started: 2026-10-22
 Stage: 3 wave 5 (TT-z) shipped; polling lane
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: lane merges #4429, then TT-z done from the dev run holding it; fix round 1 builds compile and land
+Next: full CI 39858933900 green, then post TT-z Belt-Slice-Done, Mac-Finish-Wanted and Belt-Contact-Sheet on #3446; fix round 1 PRs land
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -35,6 +35,7 @@ Next: lane merges #4429, then TT-z done from the dev run holding it; fix round 1
 |---|---|---|---|---|---|
 
 ## Decisions
+- 21:41Z #4429 merged at 21:25Z as 434b1d1d (TT-8, TT-9). Full dev CI run 39858933900 at 066cd28d holds it and is pending; TT-z is done when it's green. Fix round: #4632 and #4633 macOS builds passed, #4634 and #4635 builds still queued.
 - 21:18Z poll: #4429's macOS build 39850027667 passed; waiting for a lane sweep to merge it. The lane dispatched macOS builds for #4632-#4635 at about 21:00Z (39853562026, 39853585872, 39853610208, 39853638631), all queued.
 - 20:56Z poll: #4429 waits on its macOS build (run 39850027667, in progress since 20:34Z); #4632-#4635 open, clean, fast-lane, no lane verdict yet.
 - 20:54Z fix round 1 opened: #4632 (#4625, TT-z), #4633 (#4627), #4634 (#4626+#4629), #4635 (#4628), all TT-u; each verified (head = Head line, fast-lane, end lines, no attribution). Tests are macOS-only, so the lane's batch gate is their first build.
