@@ -156,3 +156,4 @@ utc	stage	event	ref	note
 2026-10-22T15:26Z	3	critics	run 39753811755	panel started at 1da00fb9 (H-J12, H-P)
 2026-10-22T15:30Z	3	finding	#4447	H-J12 render wait regressed by #4290; blocker; fixer started
 2026-10-22T15:34Z	3	critics	39753811755	panel done: 11 findings (#4447-#4455,#4457,#4458) + needs-ui #4456; 5 fixers running
+2026-10-22T15:40Z	3	pr	#4460	fixes #4447 (CL-z) at 6ad2f18d; fixer for #4451/#4455 launched (fix/halo-hj12-mouse-route)
