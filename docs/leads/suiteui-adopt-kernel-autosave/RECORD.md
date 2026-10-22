@@ -39,6 +39,7 @@ Next: lane batches #4010 → #4427 → #4428 (stacked) and #4430 (Fixes #4015); 
 
 ## Decisions
 
+- 2026-10-22T14:58Z heartbeat: #4010 macOS build 39790006247 green, waits on a lane sweep; #4430 macOS build 39792175488 queued; #4427/#4428 stacked on #4010. Waits re-read (blocked poll 1 of this run): library/spine building (AK-6); shared-codecs SC-f planned and owns PhotoWindow+File.swift (AK-8); AK-9 on AK-6/AK-8 (DA-z, HA-z built); AK-11 on AK-9, AK-10.
 - 2026-10-22T14:35Z: wave 5 shipped. #4010 merged dev (68b3c4e6, 400 lines, CI: PASS; command-path flare.txt conflict kept both removals). AK-10 came to 477 lines with deletions, so it split: #4427 deletes the two test files (stacked on #4010), #4428 deletes FlareAutosave.swift and renames FlareRecovery.swift to FlareAutosaveAdapter.swift, which holds the live .autosaveRecovery wiring (stacked on #4427). Finding #4015 fixed as #4430 (quit write via AutosaveSchedule.beginQuit, failed restore keeps the copy and shows the error; Mutate 8/8). Attribution footers the PR tool added to #4427-#4430 removed. #4018 (gap) stays for later.
 - 2026-10-22: relaunch as run act-1a163b2abfe-f182. Main HEAD verified 0dd23d65; main is 487 commits behind dev, so base stays origin/dev (1a518080) and the lead branch is rebuilt on dev with this folder.
 - 2026-10-22: AH-z merged (#4388): AK-10 unblocked. SC-f still open (SC-15, SC-16), library spine still building: AK-8 and AK-6 stay blocked, so AK-9 and AK-11 do too.
