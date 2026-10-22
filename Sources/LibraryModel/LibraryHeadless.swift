@@ -76,10 +76,13 @@ public struct LibraryHeadless: HeadlessDocument {
         return try ZipStore.archive(files, first: Self.catalogEntry)
     }
 
-    /// "json": the catalog file. "png": each pick, developed, at `longSide` (its own size when absent).
+    /// "json": the catalog file, or the shown photos with `contents` "shown". "png": each pick, developed, at
+    /// `longSide` (its own size when absent).
     public func export(_ format: String, options: JSONValue) throws -> [ExportedFile] {
         switch format {
-        case "json": return [ExportedFile(suggestedName: stem + ".json", format: format, data: try catalogFile())]
+        case "json":
+            let data = try Self.wantsShown(options) ? shownFile() : catalogFile()
+            return [ExportedFile(suggestedName: stem + ".json", format: format, data: data)]
         case "png": break
         default: throw CatalogError.unavailable(id: "export", why: "Library exports png and json.")
         }

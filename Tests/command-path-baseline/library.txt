@@ -1,10 +1,6 @@
 # LibraryApp's menu items and buttons built without a command spec (command-catalog CC-11).
 # max: 48
 Sources/LibraryApp/DevelopInspector.swift: Button("Reset \(slider.rawValue)") { resetSlider?(slider) }
-Sources/LibraryApp/LibraryBackupSheet.swift: Button("Cancel") { actions.close?() }.keyboardShortcut(.cancelAction)
-Sources/LibraryApp/LibraryBackupSheet.swift: Button("Restore…") { confirming = true }.keyboardShortcut(.defaultAction)
-Sources/LibraryApp/LibraryBackupSheet.swift: Button("Restore", role: .destructive) { if let selected { actions.restore?(selected) } }
-Sources/LibraryApp/LibraryBackupSheet.swift: Button("Cancel", role: .cancel) {}
 Sources/LibraryApp/LibraryBrowser.swift: Button(action.title, action: action.perform)
 Sources/LibraryApp/LibraryBrowser.swift: Button(expanded ? "Hide" : "Show") { expanded.toggle() }
 Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
@@ -52,4 +48,3 @@ Sources/LibraryApp/LibraryExportSheet.swift: Button("Try Again") { actions.retry
 Sources/LibraryApp/LibraryExportSheet.swift: Button("Show in Finder") { actions.showInFinder?() }.disabled(actions.showInFinder == nil)
 Sources/LibraryApp/LibraryWindow+Filters.swift: Button("Clear") { menu.clearFilter?() }
 Sources/LibraryApp/LibraryLoupe.swift: Button(action: onGrid) {
-Sources/LibraryApp/LibraryWindow+Backup.swift: MenuCommand(
