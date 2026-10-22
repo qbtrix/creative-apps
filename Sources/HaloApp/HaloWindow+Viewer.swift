@@ -7,7 +7,9 @@
 // (#37). `viewerScene(_:)` hands the viewer the window's shape tool and points
 // its draw at the Model's `drawShape` (shape-tools HS-3): one call per release.
 // It also hands the handles `haloCommitTransform`: a handle drag's release
-// reaches `setTransform` as one step (transform HT-3).
+// reaches `setTransform` as one step (transform HT-3). It supplies
+// `haloPlace` (placed-images PH-3) as `runPlace`, to the window's views and as
+// the focused value File > Place… reads.
 import HaloModel
 import SuiteKernel
 import SwiftUI
@@ -34,7 +36,16 @@ extension HaloWindow {
         content
             .environment(\.haloShapeDrawing, shapes)
             .environment(\.haloCommitTransform, commitTransform)
+            // The viewer's drops and the inspector read it; File > Place… reads the focused value.
+            .environment(\.haloPlace, { runPlace($0, fill: $1) })
+            .focusedSceneValue(\.haloPlace, { runPlace($0, fill: $1) })
             .onAppear { shapes.draw = { _ = model.drawShape($0) } }
+    }
+
+    /// The window's `haloPlace` (HaloPlace.swift): a place intent through the Model's catalog, Fill riding on a
+    /// `.place`; the Model refuses what it can't do.
+    func runPlace(_ intent: PlaceIntent, fill: Bool) {
+        model.runPlace(intent, fill: fill)
     }
 
     /// A handle drag's release, as one step; the Model refuses what it can't do.

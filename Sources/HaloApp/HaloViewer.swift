@@ -10,7 +10,10 @@
 // width to SuiteWindow's minimum (#4272). Space, ←, →,
 // Home, End, I and O become HaloCommands sent to `perform`, and ⌫ (the
 // delete command) sends the Model's `deleteCommand`: the picked keys while any
-// are picked, else the selected layer, as in the layer list. Views only read HaloProject; state lives in HaloModel.
+// are picked, else the selected layer, as in the layer list. Files dropped on
+// the canvas are placed at the drop point through the window's `haloPlace`
+// (PH-3).
+// Views only read HaloProject; state lives in HaloModel.
 import HaloModel
 import SuiteKernel
 import SuiteUI
@@ -23,6 +26,11 @@ struct HaloViewer: View {
     var onShapeIntent: @MainActor (ShapeIntent) -> Void = { _ in }
     /// The viewer's size, for the zoom CanvasSurface fits the artboard at.
     @State private var viewport = CGSize.zero
+    /// The window's place action (HaloPlace.swift) and the Fill preference a drop reads.
+    @Environment(\.haloPlace) private var place
+    @AppStorage(HaloPlace.fillKey) private var fill = false
+
+    private var placeHelp: String? { HaloPlace.help(model, place) }
 
     var body: some View {
         if let comp = model.selectedComposition {
@@ -30,6 +38,13 @@ struct HaloViewer: View {
             VStack(spacing: 0) {
                 HaloViewerCanvas(model: model, perform: perform)
                     .overlay { HaloViewerHandles(model: model) }
+                    // PH-3: files dropped here are placed at the drop point; no formats while placing is off.
+                    .placeDropTarget(formats: placeHelp == nil ? model.placeFormats : []) { files, point in
+                        guard let place, placeHelp == nil else { return false }
+                        let at = HaloPlace.compositionPoint(point, viewer: viewport, composition: artboard)
+                        for file in files { place(.place(name: file.name, data: file.data, at: at), fill) }
+                        return !files.isEmpty
+                    }
                     .onGeometryChange(for: CGSize.self) { $0.size } action: { viewport = $0 }
                     // Top trailing, clear of the drag journey's top-leading surround.
                     .overlay(alignment: .topTrailing) {
