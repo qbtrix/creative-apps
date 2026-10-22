@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-22T07:59Z	3	slice-done	-	Supervisor answered: cite the dev Linux check run. Posted Belt-Slice-Done and Mac-Finish-Wanted for FL-a with run 39739110094 (green Linux, dev 9f1b3d56 contains 414b9220).
 2026-10-22T08:26Z	3	wait	-	FL-m #4326's macOS build 39733048354 has been queued for a runner since 06:17Z.
 2026-10-22T09:10Z	3	wait	#4326	Resumed as act-1a162daef37-9ub3. FL-7 committed on fl4 (8d5f425), gate waits on the Swift reinstall; #4326 macOS build 39733048354 still queued since 06:17Z.
+2026-10-22T09:15Z	3	question	#4326	fl4 8d5f4257 gate PASS, pushed. Rule 23: #4326 macOS build queued 3 polls; asked supervisor (comment 6337175169), plus FL-8 without FV-z/PF-z.
