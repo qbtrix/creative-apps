@@ -71,3 +71,4 @@ utc	stage	event	ref	note
 2026-10-22T10:25Z	FR-flare, FR-halo, FR-u in lane	4293 rebased onto dev	-	act-1a161a658a7-2jql
 2026-10-22T10:47Z	FR-u fixes merged, critic round 2 queued	4373 and 4375 merged	-	act-1a161a658a7-2jql
 2026-10-22T11:11Z	FR-u fixes merged, critic round 2 queued	heartbeat, lane waiting on macOS	-	act-1a161a658a7-2jql
+2026-10-22T11:39Z	FR-halo and FR-flare follow-ups rebuilt	4293 and 4341 merged	-	act-1a161a658a7-2jql
