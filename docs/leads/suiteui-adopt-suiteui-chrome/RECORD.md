@@ -3,7 +3,7 @@
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
 Run: act-1a1646f0a9f-d1ei (#1942; slice AC-export-sheet; earlier runs act-1a160ca3d68-sbnc, act-1a15ef870d6-3mm5, act-1a15ce4fb40-9k5r) · Session: claude/suiteui-feature-lead-v7e2hk · Resumed: 2026-10-22T16:30Z
 Stage: 3 awaiting supervisor (AC-export-sheet blocked on shared-codecs:SC-f)
-Base: dev 0f8414ad (main 0dd23d65 verified)
+Base: dev 62fe62aa (main 0dd23d65 verified)
 Next: re-read shared-codecs:SC-f each poll: SC-15 (owns Sources/PhotoApp/PhotoWindow+Export.swift) and SC-16 (replaces Sources/LibraryModel/Contracts/ExportFormats.swift) on dev? Once both merge, AC-e1 + AC-e2 ship as one slice PR to dev with feature-done
 
 ## Slices
@@ -34,6 +34,7 @@ Next: re-read shared-codecs:SC-f each poll: SC-15 (owns Sources/PhotoApp/PhotoWi
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T20:40Z: poll on dev 62fe62aa: SC-15, SC-16 still unmerged with no PRs. No supervisor reply; AC-export-sheet stays unstarted.
 - 2026-10-22T20:09Z: poll on dev 0f8414ad: SC-15, SC-16 still unmerged with no PRs. No supervisor reply; AC-export-sheet stays unstarted.
 - 2026-10-22T19:37Z: poll on dev 567d03bb: SC-15, SC-16 still unmerged with no PRs. No supervisor reply; AC-export-sheet stays unstarted.
 - 2026-10-22T19:07Z: poll on dev cf65010a: SC-15, SC-16 still unmerged with no PRs. No supervisor reply to issuecomment-6347075135; AC-export-sheet stays unstarted.
