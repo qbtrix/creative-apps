@@ -4,7 +4,7 @@ Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
 Run: act-1a16391fd49-8138 · Session: claude/export-pack-lead-fl632i · Started: 2026-10-22T12:25Z (resumed from act-1a160bffba1-bvv3; earlier: Started 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih) · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: 3 build
 Base: 1c85591f (origin/dev)
-Next: open FV-1 PR (FV-a part 1); build FV-3, FV-4 (FV-m) stacked on it; FV-2 once XP-3 is on dev
+Next: FV-3 building; FV-4 stacked on it, FV-4 (FV-m) stacked on it; FV-2 once XP-3 is on dev
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -19,7 +19,9 @@ Loop: v3 (the packet has a `## Slices` table).
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| FV-1 | FV-a | 1 | .mp4 and .gif with fps and loop, refused until FV-3 | Sources/FlareModel/FlareExport.swift, Tests/FlareModelTests/FlareVideoExportTests.swift | export tests pass; MP4 refused | – | gate PASS, PR opening |
+| FV-1 | FV-a | 1 | .mp4 and .gif with fps and loop, refused until FV-3 | Sources/FlareModel/FlareExport.swift, Tests/FlareModelTests/FlareVideoExportTests.swift | export tests pass; MP4 refused | #4414 | PR open (fast-lane), head 63ef6a02 |
+| FV-3 | FV-m | 2 | frame plan: every frame, even MP4, GIF alpha; RJ-F07/F08 folders | FlareExport+Kernel.swift, FlareVideoExportTests, mutations, RealJobs | FlareVideoExportTests; Mutate 3+ | – | building on lead/export-pack-fv3 |
+| FV-4 | FV-m | 2 | live adapter streams to media sinks; cancel deletes | LiveExportAdapter, FakeExport, FlareVideoWriteTests | FlareVideoWriteTests; Mutate 2 | – | next, stacked on FV-3 (consumes its plan) |
 
 ## Decisions
 - 2026-10-21T07Z (act-1a15d4ed024-1wsg): resumed. SM-a still not on dev and not filed as a PR; the 02:32Z question on #3481 stands, so no second question until three identical polls.
@@ -29,6 +31,9 @@ Loop: v3 (the packet has a `## Slices` table).
 
 - 2026-10-22T12:27Z (act-1a16391fd49-8138): FV-a ships as two PRs. FV-1 needs only XP-1 (on dev) and SM-a (on dev); FV-2 needs XP-3's shared Size row, which waits on suiteui #3477 (needs-human). FV-1 hides MP4/GIF chips until FV-2, so nothing is a dead control. Slice-done for FV-a waits on FV-2.
 - 2026-10-22T12:27Z: FV-m (Model only) builds now, stacked on FV-1: XP-6 and SM-w are on dev. FV-3 and FV-4 are two PRs (together over 400 lines).
+
+- 2026-10-22T12:40Z: FV-4 stacks on FV-3 rather than running beside it: the adapter streams FV-3's plan, and a second plan in FV-4 would duplicate it (jscpd, rule 20).
+- 2026-10-22T12:40Z: the container had no Swift; installed the pinned 6.3.3 toolchain as scripts/cloud-setup.sh does (download resumed after the proxy cut it).
 
 ## Open
 - shell-media (docs/blueprints/suite/features/shell-media.md) is `planned` with feature_issue "file when ready"; SM-a and SM-w are not on dev. All four slices wait on it. Noted on #3481.
