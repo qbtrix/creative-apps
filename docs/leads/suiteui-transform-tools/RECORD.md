@@ -34,6 +34,7 @@ Next: lane batches #4429 (feature-done); then TT-z done from the dev CI run hold
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T19:51Z heartbeat: #4429 (TT-z) base dev head 1f2ab442, clean, lane macOS build in progress; scoped suiteui 39810321089 in progress.
 - 19:22Z #3577 (TT-7) merged (a1bf680bff). Merged dev into lead/transform-tools-TT-z (1f2ab442): transform-tools.wave.json conflicted because the merge-json driver pointed at a deleted worktree (now repointed); kept "status": "built" and took dev's waits_on and stroke-style:SS-d. scripts/ci --changed: CI: PASS. #4429 retargeted to dev, Head moved, no footer.
 - 18:58Z heartbeat: #3577 build green, still waiting for its lane batch; #4429 stacked; scoped suiteui 39810321089 queued; #4428 (AK) macOS build queued
 - 18:40Z heartbeat: #3577 macOS build 39815190852 green, waiting for its lane batch; #4429 stacked; scoped suiteui 39810321089 still queued
