@@ -34,6 +34,7 @@ Next: #4002 (head cbada801) merges via the lane, then a green ci.yml run (app=su
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T07:07Z: Still awaiting release. No supervisor reply on #1942 since the hand-off. SC-15 and SC-16 still have no PRs, so AC-export-sheet stays unstarted for the next lead.
 - 2026-10-22T06:36Z: Run finished; awaiting release. Hand-off comment posted on #1942 (issuecomment-6333984264) asking the supervisor to release the run. Re-checked: no supervisor reply yet; SC-15/SC-16 still have no PRs, so AC-export-sheet stays unstarted for the next lead. Nothing further for this run to build.
 - 2026-10-22T05:34Z: AC-tools DONE. Scoped suiteui 39719142992 (e02f36c, contains 74b34fc) succeeded; posted Belt-Slice-Done: AC-tools (issuecomment-6333563012) and Mac-Finish-Wanted: AC-tools (issuecomment-6333563320) on #1942, no gaps. Run ends here: SC-15 and SC-16 still have no PRs, so per the supervisor (issuecomment-6329700665) AC-export-sheet is left UNSTARTED for the next lead. No Belt-Contact-Sheet (not all slices done).
 - 2026-10-22T05:02Z: AC-tools proof: scoped suiteui 39719142992 (e02f36c, contains 74b34fc) now in progress on macOS; full CI 39725694977 (b2794c2) queued as a fallback. AC-export-sheet stays unstarted (SC-15/SC-16 have no PRs).

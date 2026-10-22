@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-22T05:02Z	3	wait-proof	#4002	scoped suiteui 39719142992 in progress; full 39725694977 queued
 2026-10-22T05:34Z	3	slice-done	#4002	AC-tools done (run 39719142992); AC-export-sheet left unstarted for next lead (SC-15/SC-16 unmerged)
 2026-10-22T06:36Z	3	await-release	#1942	hand-off posted (issuecomment-6333984264); no reply; SC-15/SC-16 no PRs
+2026-10-22T07:07Z	3	await-release	#1942	no reply; SC-15/16 no PRs
