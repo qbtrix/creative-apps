@@ -2,9 +2,9 @@
 
 Issue: #3711 · Packet: docs/blueprints/suite/features/shell-media.md
 Run: act-1a1601c3538-r0c9 · Session: https://claude.ai/code/session_011jo1mtCQ8wVpaGZxRnV16N · Started: 2026-10-21T10:50Z · Resumed: 2026-10-21T20:17Z
-Stage: build: SM-1..SM-8 all open; SM-1 in lane
+Stage: SM-a wave 1: SM-1 merged; dev red on the format ratchet, fix #4258 open; SM-2 ready
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: #4201 unblocks the lane; then SM-1 #4034, SM-2..SM-8 drafts come up in stack order; SM-9/SM-10 after
+Next: #4258 and #4035 merge, then SM-3, SM-4, SM-5 ready in stack order
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -18,8 +18,9 @@ Next: #4201 unblocks the lane; then SM-1 #4034, SM-2..SM-8 drafts come up in sta
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| SM-1 | SM-a | 1 | contract: values, MediaEncoding/Decoding, FakeMedia, media member, fake slot | packet SM-1 (9 files) | MediaContractTests; Mutate SuiteModel.MediaFrame | #4034 | ready; gate pass, Head 8ca7a2e |
-| SM-2 | SM-a | 1 | checks first: rules/clock (Linux) and write/read (macOS) suites disabled by name, fixtures | packet SM-2 | suites compile | #4035 (draft, stacked on #4034) | waits #4034 |
+| SM-1 | SM-a | 1 | contract: values, MediaEncoding/Decoding, FakeMedia, media member, fake slot | packet SM-1 (9 files) | MediaContractTests; Mutate SuiteModel.MediaFrame | #4034 | merged 3364dd9d |
+| SM-2 | SM-a | 1 | checks first: rules/clock (Linux) and write/read (macOS) suites disabled by name, fixtures | packet SM-2 | suites compile | #4035 | ready; merged dev + #4258, gate pass, Head 70825bfb |
+| SM-1f | SM-a | 1 | fix dev red: StillFormat to baselined SuiteTypes (FormatListRatchetTests) | dev-red #3856 | FormatListRatchetTests | #4258 | ready; gate pass, Head 81b418ec |
 | SM-3 | SM-m | 2 | codec rules | packet SM-3 | rules suite | #4119 (draft) | waits #4035 |
 | SM-4 | SM-m | 2 | FrameClock | packet SM-4 | clock suite | #4123 (draft) | waits #4119 |
 | SM-5 | SM-w | 3 | movie writer, four codecs, cancel deletes | packet SM-5 | write suite (macOS) | #4125 (draft) | waits parent |

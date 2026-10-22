@@ -37,3 +37,5 @@ utc	stage	event	ref	note
 2026-10-21T22:33Z	2026-10-21T22:33Z	build	prs-opened	#4237,#4239	SM-6 (head 1aa2ce0b) and SM-8 (head 8b189243) drafts, gate pass
 2026-10-21T22:46Z	2026-10-21T22:46Z	check	heartbeat	#4201	no merges; batch lane/batch-20261021221623-4 red again; #4201 eligible (clean, marker on head) and waiting on the lane
 2026-10-21T23:16Z	2026-10-21T23:16Z	check	heartbeat	#4201	no merges yet; batch lane/batch-20261021221623 bisecting
+2026-10-22T00:07Z	2026-10-22T00:07Z	SM-a	fix	#4258	dev red on FormatListRatchetTests from SM-1 StillFormat; moved to baselined SuiteTypes.swift; commented on #3856
+2026-10-22T00:07Z	2026-10-22T00:07Z	SM-a	ready	#4035	SM-2 merged dev and #4258, gate pass, out of draft
