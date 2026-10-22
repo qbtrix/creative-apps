@@ -3,7 +3,8 @@
 // file-flow SF-9 adds the five file-flow commands over fixed readers, so RJ-X43 runs `file.drop` on the CLI;
 // gradient-fill GF-9 gives each rect an optional fill and lists the eight fill commands, so RJ-X30 runs on the CLI;
 // autosave-history AH-9 lists `history.read` and `history.jump` over its one History, so RJ-X31 runs on the CLI;
-// transform-tools TT-8 gives each rect a turn and mirrors and lists the six transform commands, so RJ-X32 runs on the CLI.
+// transform-tools TT-8 gives each rect a turn and mirrors and lists the six transform commands, so RJ-X32 runs on the CLI;
+// eyedropper EY-8 reads the topmost rect's fill at a point and lists `color.sample`, so RJ-X33 runs on the CLI.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -163,11 +164,13 @@ public struct FakeCanvasDocument: HeadlessDocument {
         .object(["rects": .number(Double(rects.count)), "selected": selected.map { .string($0.name) } ?? .null])
     }
 
-    /// The fake's twenty-nine ids: its six commands, `edit.undo` and `edit.redo`, the five file-flow commands, the
-    /// eight fill commands, the two history commands and the six transform commands. Empty only if an id were refused.
+    /// The fake's thirty ids: its six commands, `edit.undo` and `edit.redo`, the five file-flow commands, the eight
+    /// fill commands, the two history commands, the six transform commands and `color.sample`. Empty only if an id
+    /// were refused.
     public static let catalog = (try? CommandCatalog<FakeCanvasDocument>(
         app: app, specs + FileFlowCommands.specs(FakeCanvasDocument.self) + GradientCommands.specs(FakeCanvasDocument.self)
-            + HistoryCommands.specs(FakeCanvasDocument.self) + TransformCommands.specs(FakeCanvasDocument.self),
+            + HistoryCommands.specs(FakeCanvasDocument.self) + TransformCommands.specs(FakeCanvasDocument.self)
+            + SampleCommands.specs(FakeCanvasDocument.self),
         history: { $0.history })) ?? .empty(app: app)
     /// A rect's result schema.
     static let rectSchema = ParamSchema.object(["id": .integer(), "name": .string(), "x": .number(), "y": .number(),
@@ -274,6 +277,50 @@ extension FakeCanvasDocument: TransformTarget {
         history.record(name, rects, key: drag.map { "transform.\(name):\($0)" })
         (rects[index].x, rects[index].y, rects[index].w, rects[index].h) = (t.box.minX, t.box.minY, t.box.width, t.box.height)
         (rects[index].degrees, rects[index].flipX, rects[index].flipY) = (t.degrees, t.flipX, t.flipY)
+    }
+}
+
+/// The fake as an eyedropper target: the topmost rect under the point, its fill read there in the rect's own frame.
+extension FakeCanvasDocument: SampleTarget {
+    /// The fake can always be sampled.
+    public var sampleHelp: String? { nil }
+    /// The fill of the topmost rect (the last in `rects`, whatever is selected) whose turned, mirrored frame holds
+    /// `point`, read at that point in the rect's own box: a gradient's colour there, a solid's colour, black for no
+    /// fill; nil on empty canvas or a point that isn't finite. The fake paints flat rects, so `size` is not read.
+    public func sampledColor(at point: Point, size: SampleSize) -> FillColor? {
+        guard point.x.isFinite, point.y.isFinite else { return nil }
+        func local(_ r: FakeRect) -> Point {
+            let frame = TransformBox(box: Rect(minX: r.x, minY: r.y, maxX: r.x + r.w, maxY: r.y + r.h),
+                                     degrees: r.degrees, flipX: r.flipX, flipY: r.flipY)
+            let p = TransformRules.local(point, in: frame)
+            return Point(x: p.x - r.x, y: p.y - r.y)
+        }
+        func holds(_ r: FakeRect) -> Bool {
+            let p = local(r)
+            return p.x >= 0 && p.x <= r.w && p.y >= 0 && p.y <= r.h
+        }
+        guard let top = rects.last(where: holds) else { return nil }
+        let fill = top.fill ?? .solid(.black)
+        return GradientRules.color(of: fill, at: Self.offset(of: fill, at: local(top)))
+    }
+
+    /// A gradient's offset at `p` in its fill box, clamped to 0...1: along the line for a linear, out from the centre
+    /// for a radial; 0 for a solid, a line of no length, a radial of no radius or a value that isn't finite.
+    static func offset(of fill: Fill, at p: Point) -> Double {
+        let t: Double
+        switch fill {
+        case .solid: return 0
+        case .linear(_, let start, let end):
+            let (dx, dy) = (end.x - start.x, end.y - start.y)
+            let length = dx * dx + dy * dy
+            guard length > 0 else { return 0 }
+            t = ((p.x - start.x) * dx + (p.y - start.y) * dy) / length
+        case .radial(_, let center, let radius):
+            guard radius > 0 else { return 0 }
+            let (dx, dy) = (p.x - center.x, p.y - center.y)
+            t = (dx * dx + dy * dy).squareRoot() / radius
+        }
+        return t.isFinite ? min(max(t, 0), 1) : 0
     }
 }
 

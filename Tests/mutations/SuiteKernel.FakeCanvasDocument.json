@@ -82,5 +82,19 @@
     "find": "key: drag.map { \"transform.\\(name):\\($0)\" }",
     "replace": "key: nil",
     "tests": "FakeTransformTests"
+  },
+  {
+    "label": "sampleTopmost: the sample reads the bottom rect under the point first, so RJ-X33's overlap reads the gradient, not red",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "guard let top = rects.last(where: holds) else { return nil }",
+    "replace": "guard let top = rects.first(where: holds) else { return nil }",
+    "tests": "FakeSampleTests"
+  },
+  {
+    "label": "sampleGradientAtPoint: a gradient reads as one solid colour, its first stop, wherever the point is",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "return GradientRules.color(of: fill, at: Self.offset(of: fill, at: local(top)))",
+    "replace": "return GradientRules.color(of: fill, at: 0)",
+    "tests": "FakeSampleTests"
   }
 ]
