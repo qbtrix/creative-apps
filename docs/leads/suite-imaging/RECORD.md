@@ -71,3 +71,4 @@ Waves: combined with shared-codecs (see its RECORD). Wave 1 = IM-1 beside SC-13 
 - 2026-10-22T02:30Z: IM-1 #4028 still open (supervisor merge); IM-2 ready on 26ba4c888.
 - 2026-10-22T02:43Z: IM-1 #4028 is still open (head 4c8262db). It edits a protected path, so it needs a supervisor merge; the lane relabels it on every sweep. IM-2 is ready on 26ba4c888 and opens after IM-1 merges.
 - 2026-10-22T03:04Z: Rule 23: IM-1 #4028 has been unchanged for three polls (mergeable and clean, head 4c8262dbb). I posted a Question for the supervisor on #3715 (comment 6331661077). IM-2 is still ready on 26ba4c888.
+- 2026-10-22T03:24Z: No supervisor reply yet on #3715. IM-1 #4028 is still open (clean, head 4c8262dbb). IM-2 is held.
