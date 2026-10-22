@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-22T06:11:24Z	4	check	GF critics	scoped suiteui 39726708852 still queued
 2026-10-22T06:28:14Z	4	check	GF critics	scoped suiteui 39726708852 still queued
 2026-10-22T06:48:53Z	4	check	GF critics	scoped suiteui 39726708852 still queued
+2026-10-22T07:18:07Z	waiting on scoped suiteui run 39726708852 (queued)
