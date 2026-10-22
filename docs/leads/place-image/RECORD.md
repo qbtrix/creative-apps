@@ -2,9 +2,9 @@
 
 Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: 00:24Z: #4252 mac build failed (stale .files in RenderBudgetPhotoPlaceTests, fixed on dev by #4215); #4253 Linux red on library command-path baseline (not ours); subagent merging dev into both
+Stage: 00:40Z: dev merged into #4252 (2404bc6fe) and #4253 (d6f244af5), CI: PASS on both, Head lines moved
 Base: dev
-Next: re-gate both, move Head lines; then wait for batch + green photo run
+Next: lane rebuilds macOS per head, then batch; then green photo run -> critics + slice-done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
