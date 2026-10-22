@@ -2,17 +2,17 @@
 
 Issue: #3725 · Packet: docs/blueprints/suite/features/shell-text.md
 Run: act-1a1643afacf-vq3h (wrap-up; earlier runs act-1a15ef24f0e-t1j1, act-1a16278ef53-kw2i) · Started: 2026-10-21T14:56Z
-Stage: 3 polling (every task merged; wrap-up)
+Stage: done
 Base: 18902a68c36c4c6ec07cdc171f68881007f22ca8
-Next: wait for Linux check 39805588695 on dev at 18902a6 (contains #4350 817bc5271 and the #4431 Halo test fix); on green post Belt-Slice-Done ST-live and ST-z, then Belt-Contact-Sheet. 39802370482 (3fcea2844) holds every slice PR but is red only on HaloModelTests.HaloStrokeTrimKeysTests (dev-red #3856, line:halo); every text suite passed there.
+Next: none for the lead. Every slice has its Belt-Slice-Done line, and the Belt-Contact-Sheet is posted (#3725, run 39805588695). The slices are non-UI, so no Mac finish applies; the macOS live walks run in the next suite or full run.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | ST-a | the text service contract: values, protocols, FakeText, SuiteServices.text slot | ST-1, ST-2 | MJ-ST0 | shell-media:SM-a (ST-1) | no | 0 | done (#4135, run 39719146044) | 39719146044 | – |
 | ST-m | TextSpan/PlacedSpan validation, font fallback rules, FakeText measures by rule | ST-3, ST-6 | MJ-ST1 | ST-a | no | 0 | done (#4157, run 39728647575) | 39728647575 | – |
-| ST-live | Core Text measuring, font list, glyph rasterizer on the Mac; Halo's rasterizer moves | ST-4, ST-5, ST-7 | MJ-ST2, MJ-ST3 | ST-a (ST-4) | no | 0 | merged: #4156, #4161 (1f58800c4) | – | – |
-| ST-z | slot live, walk on the Mac, shared prose, built | ST-8, ST-9 | MJ-ST4 | ST-m, ST-live | no | 0 | merged: #4337, #4349, #4350 (817bc5271, feature-done) | – | – |
+| ST-live | Core Text measuring, font list, glyph rasterizer on the Mac; Halo's rasterizer moves | ST-4, ST-5, ST-7 | MJ-ST2, MJ-ST3 | ST-a (ST-4) | no | 0 | done (run 39805588695) | 39805588695 | – |
+| ST-z | slot live, walk on the Mac, shared prose, built | ST-8, ST-9 | MJ-ST4 | ST-m, ST-live | no | 0 | done (run 39805588695) | 39805588695 | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
