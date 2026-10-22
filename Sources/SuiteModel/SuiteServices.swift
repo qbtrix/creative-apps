@@ -26,6 +26,8 @@ public struct SuiteServices: Sendable {
     public var media: any MediaCoding
     /// The one text measurer, font list and glyph drawer (shell-text); layout is creative-core's.
     public var text: any TextServices
+    /// Copies a source's metadata onto an exported still, minus a policy's dropped paths (export-pack).
+    public var metadata: any MetadataCarrying
     /// True only for `.fake(...)` (snapshots, Model tests); `.live` sets false even while
     /// a slot still holds a not-connected fake, whose controls say so themselves.
     public var isPreview: Bool
@@ -39,13 +41,14 @@ public struct SuiteServices: Sendable {
                 linking: any AssetLinking, animations: any AnimationSourceReading, preferences: any PreferencesStoring,
                 settings: any SettingsRouting, onboarding: any OnboardingFlowing, updates: any UpdateChecking,
                 thumbnails: any ThumbnailPublishing, home: any HomeBuilding, media: any MediaCoding = FakeMedia(),
-                text: any TextServices = FakeText(), isPreview: Bool,
+                text: any TextServices = FakeText(), metadata: any MetadataCarrying = FakeMetadata(), isPreview: Bool,
                 pending: [String: String] = [:]) {
         self.switching = switching; self.recents = recents; self.creating = creating; self.routing = routing
         self.sending = sending; self.receiving = receiving; self.roundTrips = roundTrips; self.pasteboard = pasteboard
         self.assets = assets; self.linking = linking; self.animations = animations; self.preferences = preferences
         self.settings = settings; self.onboarding = onboarding; self.updates = updates; self.thumbnails = thumbnails
-        self.home = home; self.media = media; self.text = text; self.isPreview = isPreview; self.pending = pending
+        self.home = home; self.media = media; self.text = text; self.metadata = metadata
+        self.isPreview = isPreview; self.pending = pending
     }
 
     /// Members a process supplies itself: Halo's animation reader (it links FlareCore)
