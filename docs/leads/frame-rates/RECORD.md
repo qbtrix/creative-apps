@@ -2,9 +2,10 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a161a658a7-2jql · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: 4552 mac build
+Stage: 4552 mac green
 Base: dev
-Next: critic round 2 when journeys done
+Next: lane batch, critic round 2
+
 
 
 
@@ -45,6 +46,7 @@ Next: critic round 2 when journeys done
 
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 17:15Z: 4552 macOS build 39815728763 green, waiting on lane batch; journeys 39793942579 in progress.
 - 16:49Z: 4552 lane macOS build dispatched; journeys 39793942579 in progress; 3856 still open.
 - 16:45Z: FR-z gate PASS (786 tests); pushed 66ba47400; PR 4552 opened with fast-lane and feature-done.
 - 16:35Z: RJ-X74 passes on Linux (render step dropped, CLI refuses render.start; expected layer fixed). FR-z gate running.
