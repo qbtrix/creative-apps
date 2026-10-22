@@ -246,9 +246,10 @@ placeholder, `enforced: false`).
   leg.
 - **H-P2** `testInspectorScrubLatency`, `reference`: `velocityDrag` across
   `halo.inspector.row.rotation`'s bar; series `inspector-scrub`, HB-U2.
-- **H-P3** `testPlayheadScrubLatency`, `reference`: `velocityDrag` on
-  `halo.timeline` from dx 0.02 to dx 0.98 at dy 0.05; series
-  `playhead-scrub`, HB-U3.
+- **H-P3** `testPlayheadScrubLatency`, `reference`: velocity drags on the
+  Frame Ruler itself (label `Frame Ruler`, not `halo.timeline`, whose dx 0.02
+  is the name column) from dx 0.02 to dx 0.98 and back, legs making up
+  4 × 600 pt at 300 pt/s; series `playhead-scrub`, HB-U3.
 - **H-P4** `testPlaybackHoldsRate`, `reference`: click Play, wait 5 s, click
   Pause; series `playback` (intervals), HB-U4.
 - **H-P5** `testTimelineAndLayerListScroll`, `-HaloSample crowd`: scroll
