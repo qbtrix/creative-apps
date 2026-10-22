@@ -47,6 +47,7 @@ import Testing
         var source = HaloProject(services: .live, document: try #require(HaloFixtures.project("keyed")))
         source.setRecent([HaloRecentFile(name: "a", path: "/a.halo")])
         var window = source
+        window.didSave(name: "w", path: "/w.halo")
         window.newComposition()
         #expect(!window.historyListing.steps.isEmpty)
         try window.restoreRecovered(from: try source.recoveryBytes(), name: "title")
@@ -55,7 +56,7 @@ import Testing
         #expect(window.file.path == nil)
         #expect(window.windowTitle == "title")
         #expect(window.historyListing.steps.isEmpty)
-        #expect(window.recent.map(\.path) == ["/a.halo"])
+        #expect(window.recent.map(\.path) == ["/w.halo", "/a.halo"])
     }
 
     @Test func damagedBytesLeaveTheProjectAsItWas() throws {
