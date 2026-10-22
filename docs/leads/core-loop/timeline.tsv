@@ -162,3 +162,4 @@ utc	stage	event	ref	note
 2026-10-22T16:02Z	3	gate	#4470 gate rerun	earlier FAIL from disk full; audit-lower green on dev
 2026-10-22T16:02Z	3	fix-pr	#4472 fixes #4451 #4455	CL-z, head 01efa66b, CI PASS
 2026-10-22T16:03Z	3	gate	#4470 CI PASS	rerun on aad2723d after disk cleanup; marker valid
+2026-10-22T16:09Z	3	fix-pr	#4473 fixes #4454 #4457	CL-ui, head 4e341914, CI PASS
