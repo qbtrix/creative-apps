@@ -2,9 +2,10 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a161a658a7-2jql · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: fix round 1 PRs in lane; FR-8 rebased
+Stage: FR-flare, FR-halo, FR-u in lane
 Base: dev
-Next: critic round 2 after #4373/#4375; FR-10b/FR-8b after #4293/#4341
+Next: open FR-10b after 4293, FR-8b after 4341; FR-u critic round 2 after 4373 and 4375
+
 
 
 
@@ -23,6 +24,7 @@ Next: critic round 2 after #4373/#4375; FR-10b/FR-8b after #4293/#4341
 
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 10:25Z: #4293 needs-rebase resolved (golden list-commands merged by command id, clean), gate PASS + AfterGlowCLITests pass, pushed f87c2e98, Head moved. #4341/#4373/#4375 waiting in lane.
 - 09:55Z: #4293's macOS build passed (09:12Z); it waits for the lane's batch. #4341/#4373/#4375 builds still queued (25 queued repo-wide). Nothing red.
 - 09:33Z: no change: #4293, #4341, #4373, #4375 all wait on lane macOS builds; 27 runs queued repo-wide for macOS runners. Nothing red, nothing for the lead to build (FR-z held by findings, FR-10b/FR-8b by parents).
 - 09:11Z: #4341 (FR-8) was needs-rebase on NewCompositionSheet.swift (dev's #4210 made Create a MenuCommand): merged origin/dev, kept both (MenuCommand Create hands draft.settings.withFrameRate(frameRate)), gate PASS, pushed d99ea37a, Head moved. #4293 still waits on the lane's macOS build; #4373/#4375 in the lane's macOS gate.
