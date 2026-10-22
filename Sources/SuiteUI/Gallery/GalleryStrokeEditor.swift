@@ -87,6 +87,9 @@ private struct GalleryStrokePreview: View {
         .background(SuiteColor.artboard)
         .clipShape(.rect(cornerRadius: SuiteRadius.medium))
         .accessibilityElement()
+        // Static text, so the value reaches AXValue (what a journey's `.value` reads); a plain element sends it only as
+        // its value description and the journey saw an empty value (#3881).
+        .accessibilityAddTraits(.isStaticText)
         .accessibilityLabel("Stroke preview")
         .accessibilityValue(stroke.map { "\(StrokeEditorText.points($0.width)) \($0.join.rawValue) \($0.cap.rawValue)" } ?? "No stroke")
         .accessibilityIdentifier("suite.gallery.stroke-editor.preview")
