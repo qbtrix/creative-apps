@@ -1,17 +1,17 @@
 # design-eyedropper lead record
 
 Issue: #3438 · Packet: docs/blueprints/design/features/eyedropper.md
-Run: act-1a1605b0534-rn47 · Session: claude/feature-leads-stroke-eyedropper-e84htn · Started: 2026-10-21T21:05Z (prior runs act-1a15e909498-4bkk, act-1a15abb305f-lc8g)
-Stage: DY-u done (Belt-Slice-Done on scoped design run 39720061887, gaps #3987 #3990 #3994); DY-m waits on transform DT-m Belt-Slice-Done on #3436 (2026-10-22T07:00Z)
+Run: act-1a1627ce3b4-ayhz · Session: claude/feature-lead-playbook-6guwwp · Started: 2026-10-22T07:24Z (prior runs act-1a1605b0534-rn47, act-1a15e909498-4bkk, act-1a15abb305f-lc8g)
+Stage: DY-m building (transform DT-m merged: #4187 8684d700, #4255 aa66f0e7) (2026-10-22T07:24Z)
 Base: 5bec8089 (origin/dev); main verified at 0dd23d65
-Next: #4081 (round 2, #4061; head 1a5a24be with #4215 ported for dev's Photo compile break, Fast-Check pass) merges -> Belt-Slice-Done DY-u gaps #3987 #3990 #3994 on the next green design run. DY-m waits transform:DT-m (#4187 open; DT-6 after DG-m)
+Next: DY-m builder (DY-5 + DY-6) as one slice PR off origin/dev; then DY-z once DY-m merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DY-a | Eyedropper tool on the palette; SampleTarget stubs | DY-1, DY-2 | MJ-DY | EY-a (done) | yes | 1 | merged (6f9c8928); round-1 fixes merged 45e8bd4d | – | wanted |
 | DY-u | loupe follows the pointer, click and Option-click picks; snapshots, budget | DY-3, DY-4 | J-DY | DY-a; EY-u (done) | yes | 2 | merged 6d7fcf14 (#3816); round 1 #3998 merged 97713e0d; round 2 #4081 | – | – |
-| DY-m | topmost visible colour; apply as one step; color.sample, color.pick, RJ-D34 | DY-5, DY-6 | MJ-DY | DY-a, transform:DT-m; EY-m (done) | no | 0 | waiting | – | – |
+| DY-m | topmost visible colour; apply as one step; color.sample, color.pick, RJ-D34 | DY-5, DY-6 | MJ-DY | DY-a, transform:DT-m (met); EY-m (done) | no | 0 | building | – | – |
 | DY-z | journey on live; built | DY-7, DY-8 | J-DY | DY-u, DY-m | yes | 0 | waiting | – | – |
 
 ## Tasks
@@ -35,6 +35,7 @@ Next: #4081 (round 2, #4061; head 1a5a24be with #4215 ported for dev's Photo com
 - #3990 and #3994 need shared code: filed #4079 (SampleRules.bytes, line:suite) and #4078 (SampleLoupe size square, needs-ui). The Design halves follow those.
 
 ## Open
+- Run act-1a1627ce3b4-ayhz: brief rule 2 asks to rebase and force-push lead/eyedropper onto main; that branch is the SuiteUI eyedropper lead's record (#3448), so this run does not rewrite it and keeps lead/design-<feature>.
 - #3691 first head 667b9d18 failed DesignNodeTests.onlyThePenIsDisabledAndItSaysWhy and DesignDrawTests.theDrawingToolsAreAllEnabled (found by the DY-u builder); fixed at 344cbd8f and the Head line moved. DY-5 note: keep the eyedropper a no-op in model.drag, since the overlay tap already picks.
 - The session proxy appends a Claude Code footer to PR bodies written via MCP or REST; it cannot be stripped from here. The fast lane strips attribution from the squash commit. Reported for the supervisor.
 - DY-m waits transform:DT-m (Design transform #3436 has no running lead).
