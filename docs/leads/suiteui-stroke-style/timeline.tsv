@@ -161,3 +161,4 @@ utc	stage	event	ref	note
 22:17Z	heartbeat	full CI 39861703512 (a7469d7) pending
 22:44Z	heartbeat	full CI 39861703512 still pending
 23:20Z	done	Belt-Slice-Done SS-d SS-z + Belt-Contact-Sheet on 39866166625
+23:52Z	stop	#3450 closed; #3881 left to beta-hardening

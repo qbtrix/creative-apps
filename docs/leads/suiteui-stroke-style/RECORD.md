@@ -51,6 +51,7 @@ Next: SS-8 building (supervisor on #3450: SS-8 goes before SH-8; its PR flips th
 
 ## Open
 - Nothing open for the lead. Every slice is merged-done and the contact sheet is posted. The Verified level (journeys, feel gate, Mac finish for SS-a, SS-u and SS-z) belongs to the beta-hardening lane.
+- For the beta-hardening lane (Verified level, not the lead's): finding #3881. The stroke journey testStrokeEditorDashAndTrim still fails on dev 401242a (run 39845966752, after SS-9): `suite.gallery.stroke-editor.preview` reads value "" instead of "2 pt miter butt". The preview is a `Canvas` with `.accessibilityElement()` + `.accessibilityValue` (GalleryStrokeEditor.swift, GalleryStrokePreview), and XCTest gets an empty value from it, so the value probably needs to sit on an element macOS exposes it from. It has failed since SS-4; red-triage called it likely flaky. #3264 (RenderBudgetEditorKernelStrokeTests) is the editor-kernel stroke pad, not this feature.
 - SS-a slice-done posted 2026-10-20 18:17 (Linux check 39469631014 on d7f615d, green); Mac-Finish-Wanted posted.
 
 ## Run act-1a15b23f1eb-iz6h
@@ -123,3 +124,4 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 22:17Z: heartbeat: full CI 39858933900 at 066cd28 was cancelled by a newer run. The full CI run now waiting is 39861703512 at a7469d7, which contains 066cd28; its Linux check 39861121461 is green.
 - 22:44Z: heartbeat: full CI 39861703512 (a7469d7) is still pending, waiting for a runner.
 - 23:20Z: Done (merged-done). The lead never waits on macOS runs, and the newest CI run on dev holding #4631 (066cd28) with a green Linux job is 39866166625 at 59278aa. On #3450 it posted Belt-Slice-Done: SS-d, Belt-Slice-Done: SS-z, Mac-Finish-Wanted: SS-z and Belt-Contact-Sheet, all naming that run. The full CI run on dev (39867380103) is still waiting for a macOS runner; its journeys and audit belong to the Verified level. This session's GitHub access appended its attribution footer to those comments server-side, and an edit can't remove it. Final RECORD; the lead stops here.
+- 23:52Z: Belt resumed the run. #3450 was closed by the supervisor sentinel at 23:17Z: Belt-Contact-Sheet posted and every slice done. lead/suiteui-export-pack and lead/suiteui-tone-controls don't exist; the supervisor gave them to run d0s8, so this run doesn't build them. Open finding #3881 (stroke journey) is in Open for the beta-hardening lane. Nothing is left for this lead, which stops here.
