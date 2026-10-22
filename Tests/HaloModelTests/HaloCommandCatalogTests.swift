@@ -37,8 +37,9 @@ extension HaloProject: HeadlessDocument {
         let strokes = StrokeCommands.specs(HaloProject.self).map(\.id)  // HK-6: then its stroke commands
         let history = ["history.read", "history.jump"]  // HA-6: then the History panel's two
         let transforms = TransformCommands.specs(HaloProject.self).map(\.id)  // HT-6: then the six transform commands
+        let rates = ["composition.set-frame-rate"]  // FR-8b: the composition's rate
         let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
-        let all = ids + shapes + fills + strokes + history + transforms + window
+        let all = ids + shapes + fills + strokes + history + transforms + rates + window
         #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
     }
 

@@ -1,7 +1,7 @@
 {
   "id": "onboarding",
   "name": "Onboarding",
-  "description": "The Welcome to AfterGlow window over SuiteModel's OnboardingModel: three first-launch pages (page 1 shows the five apps' marks and names, the body and the Rendering line; page 2 the focus ChoiceChips; page 3 the starter row, one row per app in focus order with its preset chips and Open sample) with Skip, Back, Continue and, on the last page, Start from an empty home. The scene presents itself at launch when OnboardingLaunch says so, is never restored, and closing it is Skip. Help > Welcome to AfterGlow (LauncherCommands+Onboarding, in the launcher scene) reopens it.",
+  "description": "The Welcome to AfterGlow window over SuiteModel's OnboardingModel: three first-launch pages (page 1 shows the five apps' marks and names, the body and the Rendering line; page 2 the focus ChoiceChips; page 3 the starter row, one row per app in focus order with its preset chips and Open sample) with Skip, Back, Continue and, on the last page, Start from an empty home. The scene presents itself at launch when OnboardingLaunch says so, is never restored, and closing it is Skip. Help > Welcome to AfterGlow (SuiteShell's SuiteHelpCommands, in the launcher scene) reopens it.",
   "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
   "paths": [
     "Sources/AfterGlowApp/Onboarding*.swift"
