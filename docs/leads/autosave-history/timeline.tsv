@@ -63,3 +63,6 @@ utc	stage	event	ref	note
 2026-10-20T20:42:51Z	-	poll	-	wave 22: #3629 AH-8 macOS build 39451375868 success, awaiting lane merge; #3627/#3672 builds still queued; #3418 no slice-done; full dev CI 39485502739 pending
 2026-10-22T10:03:39Z	3	stage-start	resume	run act-1a1630f0f74-0l2p, base 02d2e5b
 2026-10-22T10:03:39Z	AH-a	slice-done	39756689216	Belt-Slice-Done + Mac-Finish-Wanted posted
+2026-10-22T11:10:46Z	3	pr-opened	#4388	AH-9 + AH-10 wave.json, feature-done, Mutate 9/9
+2026-10-22T11:10:46Z	3	pr-opened	#4396	AH-10 C4 prose, docs only
+2026-10-22T11:10:46Z	3	heartbeat	-	polling: lane merge of #4388/#4396

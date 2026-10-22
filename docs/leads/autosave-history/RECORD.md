@@ -2,9 +2,9 @@
 
 Issue: #3444 · Packet: docs/blueprints/suiteui/features/autosave-history.md
 Run: act-1a1630f0f74-0l2p (prior: act-1a157ad4600-c6w5) · Started: 2026-10-20T05:01:16Z · Resumed: 2026-10-22T10:03:39Z
-Stage: 3 wave 3
+Stage: 3 polling
 Base: 02d2e5be85489fdeb62bd479a819456cf13c568e
-Next: AH-z slice PR (AH-9 fake HistoryJumping + RJ-X31, AH-10 status built, feature-done); then Belt-Slice-Done AH-z on a green Linux run that contains it, then Belt-Contact-Sheet.
+Next: wait for the lane to merge #4388 (AH-9+AH-10, macOS build 39763938609 queued) and #4396 (AH-10 C4 prose), then a CI run on dev whose Linux job contains both: Belt-Slice-Done AH-z + Mac-Finish-Wanted AH-z, then Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: AH-z slice PR (AH-9 fake HistoryJumping + RJ-X31, AH-10 status built, feat
 | AH-a | The kernel's schedule and history commands and the recovery folder are declared as stubs, the gallery's history-panel page is in the index, and the checks are written, disabled. | AH-1, AH-2 | SJ0 | gradient-fill:GF-a (AH-1) | true | 0 | done | 39756689216 | wanted |
 | AH-u | On the gallery page the panel lists the states, marks the current one, dims the undone ones and jumps on a click or arrows and Return, every row identified, within the render budget. | AH-3, AH-4 | HJ1 | AH-a (AH-3) | true | 0 | done | 39448853502 | wanted |
 | AH-m | The schedule writes once per edit a delay after it and deletes a write a save overtook, a jump lands on its index without recording a step, and the folder keeps the newest recovery files and drops damaged ones. | AH-5, AH-6, AH-7 | KJ-history | AH-a (AH-5, AH-6, AH-7) | false | 0 | done | 39424989659 | – |
-| AH-z | The modifier autosaves and offers recovery on the live schedule and folder, the gallery jumps on a live history, the fake app jumps so RJ-X31 runs on the CLI, and the feature is built. | AH-8, AH-9, AH-10 | HJ1, KJ-history | AH-u (AH-8); AH-m (AH-8, AH-9); gradient-fill:GF-z (AH-9) | true | 0 | building | – | – |
+| AH-z | The modifier autosaves and offers recovery on the live schedule and folder, the gallery jumps on a live history, the fake app jumps so RJ-X31 runs on the CLI, and the feature is built. | AH-8, AH-9, AH-10 | HJ1, KJ-history | AH-u (AH-8); AH-m (AH-8, AH-9); gradient-fill:GF-z (AH-9) | true | 0 | building (PRs open) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -25,14 +25,16 @@ Next: AH-z slice PR (AH-9 fake HistoryJumping + RJ-X31, AH-10 status built, feat
 | AH-6 | AH-m | 2 | see packet task table (waits: AH-1) | Sources/SuiteKernel/History/HistoryCommands.swift, Tests/SuiteKernelTests/HistoryCommandsTests.swift, Tests/mutations/SuiteKernel.HistoryCommands.json | packet acceptance row | #3573 | merged 12:42 (squash 3e010e3; lane batch Linux run 39422459237) |
 | AH-7 | AH-m | 2 | see packet task table (waits: AH-1) | Sources/SuiteModel/Store/RecoveryFolder.swift, Tests/SuiteModelTests/RecoveryFolderTests.swift, Tests/mutations/SuiteModel.RecoveryFolder.json | packet acceptance row | #3572 | merged 10:23 (lane batch, Linux run 39405967473) |
 | AH-8 | AH-z | – | see packet task table (waits: AH-4, AH-5, AH-6, AH-7) | Sources/SuiteUI/AutosaveRecovery.swift, Sources/SuiteUI/Gallery/GalleryHistoryPanel.swift, Tests/SuiteUITests/AutosaveDriverTests.swift | packet acceptance row | #3629 | merged 2026-10-20 21:15, 0506808 |
-| AH-9 | AH-z | – | see packet task table (waits: AH-6) | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeHistoryTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/history-jump/history-jump.jobs.json, Tests/RealJobs/fake/history-jump/input/one.fake | packet acceptance row | – | building (wave 3, with AH-10 folded in) |
-| AH-10 | AH-z | – | see packet task table (waits: AH-8, AH-9) | docs/c4/parts/creative-apps/suite-kernel/kernel-history.json, docs/blueprints/suiteui/features/autosave-history.wave.json | packet acceptance row | – | building (in the AH-9 PR) |
+| AH-9 | AH-z | – | see packet task table (waits: AH-6) | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeHistoryTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/history-jump/history-jump.jobs.json, Tests/RealJobs/fake/history-jump/input/one.fake | packet acceptance row | #4388 | open, head 39f4830, Mutate 9/9, macOS build queued |
+| AH-10 | AH-z | – | see packet task table (waits: AH-8, AH-9) | docs/c4/parts/creative-apps/suite-kernel/kernel-history.json, docs/blueprints/suiteui/features/autosave-history.wave.json | packet acceptance row | #4388, #4396 | open (wave.json in #4388; C4 prose in docs-only #4396) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
 
 ## Decisions
+- AH-10 C4 description split into docs-only #4396: scripts/check-c4-descriptions refuses a description rewrite in a PR that touches code (#4388). Under 50 lines, same slice AH-z.
+- Belt nudged on lead/suiteui-autosave-history; this lead records on lead/autosave-history and mirrors RECORD.md and timeline.tsv to docs/leads/suiteui-autosave-history/ on lead/suiteui-autosave-history.
 - Base and PR target is `dev` (CLAUDE.md, lead.md), not the brief's "base main": main b3011ab is an ancestor of dev, and the packets exist only on dev (#3426, #3432).
 - v3 loop: the packet has a `## Slices` table; fix rounds capped at 2 per slice (contract rule 11).
 - The contract slice waits on gradient-fill:GF-a (#3421 open, GF-2 not opened); a cross-feature wait is met only once its tasks merge (rule 12), so no task starts on an unmerged branch.
