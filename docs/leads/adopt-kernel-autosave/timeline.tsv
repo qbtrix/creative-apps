@@ -47,3 +47,4 @@ utc	stage	event	ref	note
 2026-10-22T16:20Z	3	parked	-	supervisor: park AK; #4010 merged; #4427 retargeted to dev at a1ede4d9
 2026-10-22T16:42Z	3	heartbeat	-	#4427 macOS build queued; #4428 stacked
 2026-10-22T17:04Z	3	heartbeat	-	#4427 macOS build queued
+2026-10-22T17:25Z	3	heartbeat	-	no change

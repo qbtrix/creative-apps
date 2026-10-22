@@ -39,6 +39,7 @@ Next: retarget #4428 to dev once #4427 merges, then end the AK side (parked: AK-
 
 ## Decisions
 
+- 2026-10-22T17:25Z heartbeat (parked): no change. #4427's macOS build 39813862769 is still queued, and #4428 is still stacked.
 - 2026-10-22T17:04Z heartbeat (parked): #4427's macOS build 39813862769 is still queued. #4428 is still stacked on it. Scoped flare 39810327753 is still pending.
 - 2026-10-22T16:42Z heartbeat (parked): #4427 is waiting on its macOS build 39813862769, which is queued. #4428 is still stacked on it. The lane is still rebuilding #4430. On dev 401242a5, scoped flare 39810327753 is still pending.
 - 2026-10-22T16:20Z Supervisor answer on #3713 (issuecomment-6345079787): park it. Don't reorder the hand-off, don't start AK-6 or AK-8, and end the run once AK-4 and AK-10 are in the lane. The supervisor labels the issue waiting-on-prereq and will relaunch for AK-6, AK-8, AK-9 and AK-11 once spine is feature-done and SC-f lands. AK-4 #4010 merged as a3c4bff9 (held by dev 401242a5; scoped flare run 39810327753 and full CI 39810338100 pending). AK-10: I merged dev into feat/ak-10a-flare-autosave-tests (a1ede4d9, scripts/ci --changed: CI: PASS) and retargeted #4427 to dev with its Head line moved. #4428 stays stacked on #4427 and gets the same retarget once #4427 merges. Then the AK side of this run ends.
