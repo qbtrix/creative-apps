@@ -1,0 +1,6 @@
+[
+  {"label": "svgRefusedUntilE11: an SVG placed on Flare is refused with the generic reason, not \"Flare can't import SVG yet.\"", "file": "Sources/FlareModel/FlareFileFlow+Kernel.swift", "find": "handOff.verb == .place && svg ? .notAvailable(Self.svgRefusal) : Self.handOffRefusal", "replace": "Self.handOffRefusal", "tests": "FlareFileFlowTests"},
+  {"label": "importsOnce: the old list is handed over on every call, so the suite's list is noted twice", "file": "Sources/FlareModel/FlareFileFlow+Kernel.swift", "find": "        fileFlow.importedOld = true\n", "replace": "", "tests": "FlareFileFlowTests"},
+  {"label": "dropHandsOff: a dropped .halo is dropped silently instead of going to Halo", "file": "Sources/FlareModel/FlareFileFlow+Kernel.swift", "find": "case .handOff(let path, let app): fileFlow.requests.append(.handOff(path: path, app: app))", "replace": "case .handOff: continue", "tests": "FlareFileFlowTests"},
+  {"label": "openInNeedsASave: Open In offers an unsaved animation", "file": "Sources/FlareModel/FlareFileFlow+Kernel.swift", "find": "return suiteDocument == nil ? \"Save \\(title) first.\" : nil", "replace": "return nil", "tests": "FlareFileFlowTests"}
+]

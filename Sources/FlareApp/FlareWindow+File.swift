@@ -25,7 +25,7 @@ extension FlareWindow {
         case .new: presented = .newAnimation
         case .open: if let url = FlareFileDialogs.chooseFile() { open(url) }
         case .openRecent(let path): open(URL(fileURLWithPath: path))
-        case .clearRecent: model.clearRecent()
+        case .clearRecent: try? model.clearRecent()
         case .save: Task { await save(asking: false) }
         case .saveAs: Task { await save(asking: true) }
         case .close: Task { await close() }
