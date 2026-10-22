@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-22T22:29:46Z	stage	#4392 (DS-z) merged 22:25:45Z as fbd763f6d; all slices on dev, slice-done waits on dev CI (39861703512 pending)
 2026-10-22T22:47:33Z	stage	Belt-Slice-Done DS-m posted (run 39836126860, Linux green); DS-u/DS-z wait on Linux job of 39867380103
 2026-10-22T23:04:21Z	poll	full CI 39867380103 (c67fd3937, has DS-u+DS-z) still pending behind 39836126860 macOS; no shape-tools findings open
+2026-10-22T23:21:12Z	poll	full CI 39867380103 (has DS-u+DS-z) still pending; 39836126860 macOS still running
