@@ -2,9 +2,9 @@
 
 Issue: #3457 · Packet: docs/blueprints/suiteui/features/placed-images.md
 Run: act-1a1647a67aa-dau5 (relaunch) · Started: 2026-10-22T16:45Z
-Stage: #4613 (PL-9) on dev, head f1cba0a, gate CI: PASS, pushed, Head moved
+Stage: PL-9 #4613 clean 14 files, macOS build queued; supervisor comment answered
 Base: 854a3b52c66aaa12582e9190f404265b84594a05
-Next: Lane merges #4613 (macOS build); then retarget #4616/#4617 to dev, merge merged PL-9 head then dev, gate, push, Head
+Next: After #4613 merges: retarget #4616/#4617, merge PL-9 then dev, gate, push
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -33,6 +33,7 @@ Next: Lane merges #4613 (macOS build); then retarget #4616/#4617 to dev, merge m
 |---|---|---|---|---|---|
 
 ## Decisions
+- Wait on lane macOS build
 - -
 - -
 - -
