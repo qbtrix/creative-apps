@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "app": "halo",
+  "why": "RJ-X66 (sample-files SS-7): opens the tour's Halo sample, Bundle/Samples/Intro.halo (the input is a link to it, so the job follows the shipped file), moves the playhead to frame 30 and exports that frame as a full-size PNG.",
+  "inputs": ["input/*.halo"],
+  "steps": [
+    {"id": "timeline.scrub", "params": {"frame": 30}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-30", "format": "png", "options": {}},
+  "expect": {
+    "out/Intro-30.png": {"pixels": {"tolerance": 2, "reference": "expected/Intro-30.png"}}
+  },
+  "platforms": ["linux", "macos"]
+}
