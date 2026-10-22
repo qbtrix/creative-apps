@@ -70,7 +70,11 @@ In plain words, v1 does:
   arrow-key pan.
 - **Layers.** New, delete, rename, show and hide, opacity, blend mode (the 16
   W3C modes), reorder by drag and by Command-] / Command-[, select by
-  Option-Command-] / [.
+  Option-Command-] / [. Several layers: Shift-click picks a range,
+  Command-click adds or drops one, Select > All Layers (Option-Command-A)
+  picks every layer; hide, opacity, Move and Delete then act on every picked
+  layer as one undo step, and Delete refuses to take every layer
+  (`photo/multi-layer-select`).
 - **Tools on the rail:** Move V, Marquee M (rectangles only), Brush B, Eraser E
   (each with its own size, hardness, opacity), Clone S, Heal J, Crop C.
 
@@ -206,8 +210,9 @@ or writing any closed layered format.
 |---|---|---|
 | Files | A layered document format (section 9, question 1) that keeps layers, masks, adjustment layers, blend, opacity, offsets and the global adjustments; Open Recent; an unsaved dot and the close prompt; autosave to a recovery file and a restore offer after a crash | Reading and writing other apps' layered formats; version browser |
 | Edit | Cut, Copy, Paste (as a new layer, at its place or centered), Paste from another app's image on the pasteboard, Duplicate Layer, Merge Down, Flatten Image | Paste Into a selection, Copy Merged |
+| Place | File > Place… (Shift-Command-P) brings a PNG or JPEG in as a new pixel layer above the selected one, named after the file, scaled down to fit the canvas when larger (never up) and centred, as one undo step; dropping a PNG or JPEG on an open document places it at the drop point, and a drop with no document open still opens the file; an SVG is refused with "Photo places PNG or JPEG files."; it runs through the shared `place.image` command, so the CLI and an agent place too (`photo/place-image`, beta) | Placing as a layer that keeps its source and rescales without loss, SVG, HEIC and TIFF |
 | Crop | Typed X, Y, W, H for the pending crop; aspect Free, Original, 1:1, 3:2, 4:3, 16:9 with a portrait swap | Crop presets with resolution, perspective crop |
-| Layers | Adjustment layers (Exposure, Levels, Curves, Hue/Saturation) in the stack, each with visibility, opacity, blend mode, reorder and a mask; clipping masks (`photo/masks-clipping`); layer styles, shared with Design and Halo (`photo/layer-styles` on `suiteui/layer-styles`; captain 2026-10-21, beta) | Blur as an adjustment layer (it's a filter), layer groups |
+| Layers | Adjustment layers (Exposure, Levels, Curves, Hue/Saturation) in the stack, each with visibility, opacity, blend mode, reorder and a mask; clipping masks (`photo/masks-clipping`); several layers picked at once, with hide, opacity, Move and Delete on all of them (`photo/multi-layer-select`); layer styles, shared with Design and Halo (`photo/layer-styles` on `suiteui/layer-styles`; captain 2026-10-21, beta) | Blur as an adjustment layer (it's a filter), layer groups |
 | Select | Rectangle, Ellipse and Lasso (freehand, closed on release); Shift adds, Option subtracts; Select > Invert; Feather; brush, eraser, clone, heal, Fill and Delete act inside it | Magic wand, quick selection, refine edge, saved selections |
 | Masks | Add Mask from Selection, Delete Mask, Apply Mask, disable a mask; paint on the mask with brush and eraser | Vector masks, mask density and feather sliders on the layer |
 | Transform | Edit > Free Transform (Command-T): scale with the 8 handles, rotate outside them, Shift keeps ratio, typed W%, H%, angle; Edit > Transform > Flip Horizontal and Flip Vertical (the selected layer); Image > Flip Canvas Horizontal and Vertical | Skew, distort, perspective, warp |
@@ -651,6 +656,7 @@ can point at them.
 | PJ-14 | `testFreeTransformAndFlip` (`+Transform`, PV-7) | Command-T; drag the bottom-right handle out by half; drag outside a corner a quarter turn with Shift; Return; Edit > Transform > Flip Horizontal; Image > Flip Canvas Vertical | the transform box element; W% reads 150, angle 90; Return gives "Undo Free Transform"; Escape in a second round leaves the layer as it was; flips are exact (`testFlip…` model goldens) | loading: a transform over 12 MP shows "Transforming…" |
 | PJ-15 | `testExportAtSizeAsTIFFAndHEIC` (`+Export`, PV-8) | Export; TIFF; size 50%; Export; HEIC quality 70; longest side 400; Export | files exist with TIFF and HEIC headers; TIFF is 400 × 300; HEIC's longer side 400 | error: a longest side over 16384 disables Export with the reason; loading: "Exporting…" |
 | PJ-16 | `testEyedropperPicksColor` (`+Sample`, PV-9) | Eyedropper (I); click the sun; 5 × 5; click the sky; B | the brush color well's hex reads the sun's color, then the sky's mean; picking is not an undo step | empty: a click on a transparent pixel keeps the color and says "Nothing to sample here." |
+| PJ-PI1 | `PhotoPlaceJourneyTests.testPlaceLogo` (`+Place`, `photo/place-image`) | New Image 800 × 600; File > Place… `logo.png` (200 × 100); place `photo-4000x3000.jpg`; Undo; place `logo.svg` | a layer `logo` above Background, centred, at 100%; the photo layer at 800 × 600 and "Placed at 20%."; one Undo removes only the photo layer; the SVG adds nothing | error: "Photo places PNG or JPEG files."; empty: Place… disabled with "Open or make an image to place into." |
 | PJ-17 | `testLayoutAtWidths` (`+Layout`, PV-10) | relaunch at 880, 960 and 1024 pt (section 7.4) | the layout rules of section 7.4 at each width | none |
 
 ### 4.4 Fixtures

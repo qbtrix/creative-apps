@@ -2,12 +2,12 @@
 // `HistoryListing` (packet docs/blueprints/suiteui/features/autosave-history.md). One row per state, "Open" (the
 // listing's base) at 0, then each step, oldest first. The current state is selected (the selected tint, the
 // headline font); the undone steps after it are secondary text and read "…, not applied"; the saved state carries a
-// small dot. A click on a row jumps to it; Up and Down move the selection without jumping, stopping at "Open" and
-// the last step, and Return jumps to the selected row. Every jump goes out once through `onJump`; the panel mutates
+// small dot. Each row is a button whose surface shows hover, press and selection (`HistoryRowLook`, a value tested
+// without a window). A click on a row jumps to it; Up and Down move the selection without jumping, stopping at "Open"
+// and the last step, and Return jumps to the selected row. Every jump goes out once through `onJump`; the panel mutates
 // nothing, and its selection returns to the listing's index whenever the listing changes. The selection and key rule
-// is `HistoryPanelCursor`, a value tested without a window. Each row is a button (`suite.history.row.<n>`) whose
-// style shows hover, press and selection (`HistoryRowLook`); rows are lazy in the panel's scroll view and their
-// content is `.equatable()` on plain values (swiftui-rules 2, 5, 10); "No changes yet." shows under "Open" alone.
+// is `HistoryPanelCursor`, a value tested without a window. Rows are `suite.history.row.<n>`, lazy in the panel's
+// scroll view, `.equatable()` on plain values (swiftui-rules 2, 5); "No changes yet." shows under "Open" alone.
 import SuiteKernel
 import SwiftUI
 
@@ -119,48 +119,45 @@ public struct HistoryPanel: View {
     }
 
     private func row(_ position: Int) -> some View {
-        Button {
+        HistoryPanelRow(
+            name: Self.name(at: position, in: listing), label: Self.label(at: position, in: listing),
+            isSelected: position == cursor.position, isCurrent: position == listing.index,
+            isApplied: position <= listing.index, isSaved: listing.savedIndex == position
+        ) {
             focused = true
             click(position)
-        } label: {
-            HistoryPanelRow(
-                name: Self.name(at: position, in: listing), isCurrent: position == listing.index,
-                isApplied: position <= listing.index, isSaved: listing.savedIndex == position)
-                .equatable()
         }
-        .buttonStyle(HistoryRowStyle(isSelected: position == cursor.position))
-        // Tab stops on the panel, whose arrows and Return walk the rows, not on each row.
-        .focusable(false)
-        .accessibilityLabel(Self.label(at: position, in: listing))
-        .accessibilityAddTraits(position == cursor.position ? .isSelected : [])
+        .equatable()
         .accessibilityIdentifier("suite.history.row.\(position)")
         .id(position)
     }
 }
 
-/// How a row draws its state: a press wins, then the selection, then the pointer. Hover is a `rowHover` fill with an
-/// `outline` edge, never fill alone (docs/design.md, Surfaces); a press takes the field fill, as HoverButtonLevel's.
-enum HistoryRowLook: Equatable, Sendable {
-    case rest, hover, selected, pressed
+/// What a row shows under the pointer: a press shows at once, even on the selected row; the selected row keeps its
+/// tint under the pointer; hover is only for an idle row (swiftui-rules 10).
+enum HistoryRowLook: Hashable, Sendable {
+    case plain, hovered, pressed, selected
 
-    static func resolve(selected: Bool, hovering: Bool, pressed: Bool) -> Self {
-        pressed ? .pressed : selected ? .selected : hovering ? .hover : .rest
+    static func resolve(selected: Bool, hovering: Bool, pressed: Bool) -> HistoryRowLook {
+        if pressed { return .pressed }
+        if selected { return .selected }
+        return hovering ? .hovered : .plain
     }
 
     var fill: Color {
         switch self {
-        case .rest: Color.clear
-        case .hover: SuiteColor.rowHover
-        case .selected: SuiteColor.selectedTint
+        case .plain: Color.clear
+        case .hovered: SuiteColor.rowHover
         case .pressed: SuiteColor.field
+        case .selected: SuiteColor.selectedTint
         }
     }
 
-    var outlined: Bool { self == .hover }
+    /// Hover and press add an outline, so neither reads by fill alone (docs/design.md, Surfaces).
+    var outlined: Bool { self == .hovered || self == .pressed }
 }
 
-/// A row's button look: HistoryRowLook's fill and edge under the whole row, the hover written on enter and exit only,
-/// never per pointer sample (swiftui-rules 1).
+/// A row's button surface: the fill and outline of its `HistoryRowLook`. Owns presentation state only: hover.
 private struct HistoryRowStyle: ButtonStyle {
     let isSelected: Bool
 
@@ -175,46 +172,61 @@ private struct HistoryRowStyle: ButtonStyle {
         @Environment(\.suiteReduceMotion) private var reduceMotion
 
         var body: some View {
-            let look = HistoryRowLook.resolve(selected: isSelected, hovering: hovering, pressed: configuration.isPressed)
+            let look = HistoryRowLook.resolve(
+                selected: isSelected, hovering: hovering, pressed: configuration.isPressed)
+            let shape = RoundedRectangle(cornerRadius: SuiteRadius.row)
             configuration.label
-                .contentShape(.rect)
-                .background(look.fill, in: RoundedRectangle(cornerRadius: SuiteRadius.row))
+                .background(look.fill, in: shape)
                 .overlay {
-                    if look.outlined {
-                        RoundedRectangle(cornerRadius: SuiteRadius.row)
-                            .strokeBorder(SuiteColor.outline, lineWidth: 1)
-                            .allowsHitTesting(false)
-                    }
+                    if look.outlined { shape.strokeBorder(SuiteColor.outline, lineWidth: 1).allowsHitTesting(false) }
                 }
+                .contentShape(shape)
+                // Written on enter and exit only, never per pointer sample (swiftui-rules 1).
                 .onHover { hovering = $0 }
                 .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: isSelected)
         }
     }
 }
 
-/// One state's row: plain values in, so SwiftUI skips it when they compare equal; its button style draws the state.
+/// One state's row, a button on `HistoryRowStyle`: plain values in, so SwiftUI skips it when they compare equal (the
+/// press action is left out of `==`, swiftui-rules 2). The panel takes keyboard focus, not each row: Tab reaches the
+/// list once, then the arrows move in it.
 private struct HistoryPanelRow: View, Equatable {
     let name: String
+    let label: String
+    let isSelected: Bool
     let isCurrent: Bool
     let isApplied: Bool
     let isSaved: Bool
+    let onPress: @MainActor () -> Void
+
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.name == rhs.name && lhs.label == rhs.label && lhs.isSelected == rhs.isSelected
+            && lhs.isCurrent == rhs.isCurrent && lhs.isApplied == rhs.isApplied && lhs.isSaved == rhs.isSaved
+    }
 
     var body: some View {
-        HStack(spacing: SuiteSpacing.xs) {
-            Text(name)
-                .font(isCurrent ? SuiteFont.headline : SuiteFont.body)
-                .foregroundStyle(isApplied ? SuiteColor.textPrimary : SuiteColor.secondaryText)
-                .lineLimit(1)
-            Spacer(minLength: SuiteSpacing.s)
-            if isSaved {
-                Image(systemName: "circle.fill")
-                    .resizable()
-                    .frame(width: SuiteSize.statusDot, height: SuiteSize.statusDot)
-                    .foregroundStyle(SuiteColor.textSecondary)
-                    .help("Saved")
+        Button(action: onPress) {
+            HStack(spacing: SuiteSpacing.xs) {
+                Text(name)
+                    .font(isCurrent ? SuiteFont.headline : SuiteFont.body)
+                    .foregroundStyle(isApplied ? SuiteColor.textPrimary : SuiteColor.secondaryText)
+                    .lineLimit(1)
+                Spacer(minLength: SuiteSpacing.s)
+                if isSaved {
+                    Image(systemName: "circle.fill")
+                        .resizable()
+                        .frame(width: SuiteSize.statusDot, height: SuiteSize.statusDot)
+                        .foregroundStyle(SuiteColor.textSecondary)
+                        .help("Saved")
+                }
             }
+            .frame(minHeight: SuiteSize.studioRow)
+            .padding(.horizontal, SuiteSpacing.s)
         }
-        .frame(minHeight: SuiteSize.studioRow)
-        .padding(.horizontal, SuiteSpacing.s)
+        .buttonStyle(HistoryRowStyle(isSelected: isSelected))
+        .focusable(false)
+        .accessibilityLabel(label)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

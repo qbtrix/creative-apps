@@ -1,8 +1,8 @@
 // HistoryPanelTests.swift (autosave-history AH-3): HistoryPanel over the gallery's listing, "Open" and eleven steps,
 // the eighth current. A click on a row jumps to it once; Down, Down, Return from step 4 jumps to 6, the arrows alone
 // jumping nothing; Up on "Open" stays at 0 and Down stops at the last step; rows past the index read "not applied"
-// and the saved one reads saved; a pressed row shows its press over the selection and hover. macOS only, like the
-// rest of SuiteUI.
+// and the saved one reads saved; a row's look puts a press over the selection over hover, and only hover and press
+// carry the outline. macOS only, like the rest of SuiteUI.
 @testable import SuiteUI
 import SuiteKernel
 import SwiftUI
@@ -73,20 +73,24 @@ import Testing
         #expect(HistoryPanel.name(at: 11, in: listing) == "Rename")
     }
 
-    @Test func aPressedRowShowsItsPress() {
-        #expect(HistoryRowLook.resolve(selected: false, hovering: false, pressed: false) == .rest)
-        #expect(HistoryRowLook.resolve(selected: false, hovering: true, pressed: false) == .hover)
-        #expect(HistoryRowLook.resolve(selected: true, hovering: true, pressed: false) == .selected)
-        #expect(HistoryRowLook.resolve(selected: false, hovering: true, pressed: true) == .pressed)
-        #expect(HistoryRowLook.resolve(selected: true, hovering: true, pressed: true) == .pressed)
-        #expect(HistoryRowLook.hover.outlined && !HistoryRowLook.selected.outlined && !HistoryRowLook.pressed.outlined)
-    }
-
     @Test func keysMapToTheCursor() {
         #expect(HistoryPanelCursor.key(.upArrow) == .up)
         #expect(HistoryPanelCursor.key(.downArrow) == .down)
         #expect(HistoryPanelCursor.key(.return) == .enter)
         #expect(HistoryPanelCursor.key(.space) == nil)
+    }
+
+    // Every row shows hover, pressed and selected (swiftui-rules 10): a press shows at once, even on the current
+    // row; the current row keeps its tint under the pointer; hover is only for an idle row.
+    @Test func rowLookShowsPressHoverAndSelection() {
+        #expect(HistoryRowLook.resolve(selected: false, hovering: false, pressed: false) == .plain)
+        #expect(HistoryRowLook.resolve(selected: false, hovering: true, pressed: false) == .hovered)
+        #expect(HistoryRowLook.resolve(selected: false, hovering: true, pressed: true) == .pressed)
+        #expect(HistoryRowLook.resolve(selected: true, hovering: true, pressed: false) == .selected)
+        #expect(HistoryRowLook.resolve(selected: true, hovering: false, pressed: true) == .pressed)
+        #expect(Set([HistoryRowLook.plain, .hovered, .pressed, .selected].map(\.fill)).count == 4)
+        #expect(HistoryRowLook.hovered.outlined && HistoryRowLook.pressed.outlined)
+        #expect(!HistoryRowLook.selected.outlined && !HistoryRowLook.plain.outlined)
     }
 }
 
