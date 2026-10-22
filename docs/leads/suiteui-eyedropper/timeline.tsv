@@ -1,0 +1,83 @@
+utc	stage	event	ref	note
+2026-10-20T04:46Z	0	stage-start	#3448	base 18464f26b9
+2026-10-20T04:46Z	0	stage-end	#3448	lead/eyedropper created
+2026-10-20T04:46Z	1	stage-start	#3448	packet read
+2026-10-20T04:46Z	1	stage-end	#3448	slices and tasks copied
+2026-10-20T04:50Z	0	heartbeat	#3418	EY-a still waits on GF-a (PR #3421 open)
+2026-10-20T05:06Z	3	heartbeat	-	GF-a PR #3421: open
+2026-10-20T05:21Z	3	heartbeat	-	GF-a PR #3421: open
+2026-10-20T05:36Z	3	heartbeat	-	GF-a PR #3421: open
+2026-10-20T05:48Z	3	wait-cleared	#3421	GF-a merged
+2026-10-20T05:48Z	3	slice-start	EY-a	builder launched from dev 9a146777
+2026-10-20T05:51Z	3	heartbeat	-	GF-a PR #3421: closed merged
+2026-10-20T06:06Z	3	heartbeat	-	lead polling:
+2026-10-20T06:17Z	3	pr-open	#3525	EY-a part 1 (EY-1)
+2026-10-20T06:17Z	3	pr-open	#3531	EY-a part 2 (EY-2), stacked on #3525
+2026-10-20T06:17Z	3	slice-start	EY-m	stacked on #3525
+2026-10-20T06:17Z	3	slice-start	EY-u	stacked on #3531
+2026-10-20T06:21Z	3	heartbeat	-	lead polling: #3525 open #3531 open
+2026-10-20T06:33Z	3	pr-open	#3540	EY-m (EY-5, EY-6), stacked on #3525
+2026-10-20T06:36Z	3	heartbeat	-	lead polling: #3525 open #3531 open #3540 open
+2026-10-20T06:39Z	3	pr-open	#3541	EY-u, 397 lines, stacked on #3531
+2026-10-20T06:51Z	3	heartbeat	-	lead polling: #3525 open #3531 open #3540 open #3541 open
+2026-10-20T07:06Z	3	heartbeat	-	lead polling: #3525 open #3531 open #3540 open #3541 open
+2026-10-20T07:22Z	3	heartbeat	-	lead polling: #3525 open #3531 open #3540 open #3541 open
+2026-10-20T07:37Z	3	heartbeat	-	lead polling: #3525 open #3531 open #3540 open #3541 open
+2026-10-20T08:06Z	3	heartbeat	-	lead polling: #3525 open #3531 open #3540 open #3541 open
+2026-10-20T08:21Z	3	heartbeat	-	lead polling: #3525 open #3531 open #3540 open #3541 open
+2026-10-20T08:36Z	3	heartbeat	-	lead polling: #3525 open #3531 open #3540 open #3541 open
+2026-10-20T08:51Z	3	heartbeat	-	lead polling: #3525 open #3531 open #3540 open #3541 open
+2026-10-20T09:06Z	3	heartbeat	-	lead polling: #3525 open #3531 open #3540 open #3541 open
+2026-10-20T09:22Z	3	heartbeat	-	lead polling: #3525 open #3531 open #3540 open #3541 open
+2026-10-20T09:37Z	3	heartbeat	-	lead polling: #3525 open #3531 open #3540 open #3541 open
+2026-10-20T09:44Z	3	merged	#3525	EY-1 as d4ed4bde
+2026-10-20T10:03Z	3	restack	#3531,#3540,#3541	retargeted to dev / restacked
+2026-10-20T10:08Z	3	heartbeat	-	lead polling PRs 3531 3540 3541 
+2026-10-20T10:38Z	3	heartbeat	-	lead polling PRs 3531 3540 3541 
+2026-10-20T10:46Z	3	needs-rebase	#3531	C4 suiteui-sources description conflict; fixer merging dev
+2026-10-20T11:02Z	3	merged	#3540	EY-m squash 8d8919ca
+2026-10-20T11:08Z	3	heartbeat	-	lead polling PRs 3531 3541 
+2026-10-20T11:20Z	3	restack	#3531	5a8499cd; #3541 e8e883c6
+2026-10-20T11:21Z	3	builder-start	EY-7	stacked on #3541
+2026-10-20T11:30Z	3	slice-done	EY-m	https://github.com/qbtrix/creative-apps/actions/runs/39413721862
+2026-10-20T11:38Z	3	pr-open	#3597	EY-7
+2026-10-20T11:38Z	3	heartbeat	-	lead polling PRs 3531 3541 3597 
+2026-10-20T12:08Z	3	heartbeat	-	lead polling PRs 3531 3541 3597 
+2026-10-20T12:23Z	3	mac-build-red	#3531	run 39414594798: GalleryCanvasHost .merging Sendable error; fixer moves registration to SuiteGallery.areas
+2026-10-20T12:35Z	3	fix-pushed	#3531	head 362d749b, CI: PASS; awaiting lane macOS build
+2026-10-20T12:38Z	3	heartbeat	-	lead polling PRs 3531 3541 3597 
+2026-10-20T12:47Z	3	needs-rebase	#3531	C4 suiteui-sources conflict after SH-u merge; fixer dispatched
+2026-10-20T13:00Z	3	rebased	#3531	dev merged, head 757eff6a, CI: PASS; C4 clauses kept from both sides
+2026-10-20T13:08Z	3	heartbeat	-	lead polling PRs 3531 3541 3597 
+2026-10-20T13:40Z	3	heartbeat	-	lead polling PRs 3531 3541 3597 
+2026-10-20T13:54Z	3	needs-split	#3597	sentinel saw 1877/42 vs stale base EY-u; own change 263/2; restacking EY-u onto dev, EY-2 untouched
+2026-10-20T14:05Z	3	merged	#3531	EY-2 merged df54ce81; EY-a waits on a Linux run; #3541 retargeted to dev
+2026-10-20T14:10Z	3	heartbeat	-	lead polling PRs 3541 3597 
+2026-10-20T14:12Z	3	restack	#3541 #3597	EY-u b1e03792 on dev, EY-z a0bdb43f (own diff 263/2); fixer removing EY-u's GalleryCanvasHost .merging (the Sendable error EY-2 hit)
+2026-10-20T14:22Z	3	slice-done	EY-a	https://github.com/qbtrix/creative-apps/actions/runs/39436506345 (Belt-Slice-Done + Mac-Finish-Wanted on #3448)
+2026-10-20T14:32:09Z	3	fix-pushed	#3541	EY-u head 16fc3b0a: GalleryCanvasHost back to dev (Sendable .merging removed); gate PASS
+2026-10-20T14:32:09Z	3	restack	#3597	EY-z head 43fef3f5 merges EY-u; own diff 238+/25- in 2 files; gate PASS
+2026-10-20T14:40Z	3	heartbeat	-	lead polling PRs 3541 3597 
+2026-10-20T15:11Z	3	heartbeat	-	lead polling PRs 3541 3597 
+2026-10-20T15:13:27Z	3	merged	#3541	EY-u merged 2d129d50efac05d5c222187f2404682fc99376d4
+2026-10-20T15:13:27Z	3	retarget	#3597	EY-z base -> dev
+2026-10-20T15:22:21Z	3	restack	#3597	EY-z head 4eab16a0 merges dev (holds EY-u); 238+/25- in 2 files; gate PASS
+2026-10-20T15:40:34Z	3	slice-done	EY-u	Linux https://github.com/qbtrix/creative-apps/actions/runs/39448853502 holds 2d129d50; Belt-Slice-Done + Mac-Finish-Wanted on #3448
+2026-10-20T15:41Z	3	heartbeat	-	lead polling PRs 3597 
+2026-10-20T16:11Z	3	heartbeat	-	lead polling PRs 3597 
+2026-10-20T16:41Z	3	heartbeat	-	lead polling PRs 3597 
+2026-10-20T17:11Z	3	heartbeat	-	lead polling PRs 3597 
+2026-10-20T17:41Z	3	heartbeat	-	lead polling PRs 3597 
+2026-10-20T18:11Z	3	heartbeat	-	lead polling PRs 3597 
+2026-10-20T18:41Z	3	heartbeat	-	lead polling PRs 3597 
+2026-10-20T19:11Z	3	heartbeat	-	lead polling PRs 3597 
+2026-10-20T19:41Z	3	heartbeat	-	lead polling PRs 3597 
+2026-10-20T20:12Z	3	heartbeat	-	lead polling PRs 3597 
+2026-10-20T20:28Z	3	mac-build-red	#3597	run 39447943388: EyedropperLiveTests missing import CoreGraphics; fixer dispatched
+2026-10-20T20:35Z	3	fix-pushed	#3597	head 7e809a9c: import CoreGraphics, mutating calls hoisted out of #expect
+2026-10-20T20:42Z	3	heartbeat	-	lead polling PRs 3597 
+2026-10-22T16:45Z	0	relaunch	-	run act-1a1647a67aa-dau5; EY-7 merged; rebased on main 0dd23d65
+2026-10-22T16:45Z	3	builder	EY-8	EY-8+EY-9 builder started, stacked on lead/transform-tools-TT-z
+2026-10-22T17:35Z	pr-opened	EY-8+EY-9 #4583 (base lead/transform-tools-TT-z)
+2026-10-22T17:35Z	pr-opened	EY-9 C4 part #4585 (base lead/eyedropper-EY-z)
+2026-10-22T17:50Z	record	lead dir moved to docs/leads/suiteui-eyedropper
