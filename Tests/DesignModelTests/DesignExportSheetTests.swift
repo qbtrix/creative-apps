@@ -77,4 +77,37 @@ import Testing
         #expect(cards.exportRows(DesignExportOptions(format: .png, scale: 1, scope: .selection)).isEmpty)
         #expect(DesignWorkspace().exportRows(DesignExportOptions()).isEmpty)
     }
+
+    // DE-7: the fake run.
+    @Test func theFakeRunWritesThePlansNamesOrSaysWhyNot() {
+        var cards = DesignFixtures.cards
+        cards.selectItem("node-1")
+        #expect(cards.exportFiles(DesignExportOptions(format: .svg, scale: 1, scope: .frame)) == .success(["Desktop.svg"]))
+        #expect(cards.exportFiles(DesignExportOptions(format: .pdf, scale: 1, scope: .page)) == .success(["Page 1.pdf"]))
+        let refused = DesignWorkspace().exportFiles(DesignExportOptions())
+        #expect(refused == .failure(DesignExportFailure(DesignRefusal.nothingToExport.help)))
+    }
+
+    @Test func aFakeStepFailsOnlyTheNamedFile() throws {
+        try DesignWorkspace.fakeWrite("Desktop.png", failing: nil)
+        try DesignWorkspace.fakeWrite("Desktop.png", failing: "A.png")
+        #expect(throws: DesignExportFailure("Desktop.png couldn't be written.")) {
+            try DesignWorkspace.fakeWrite("Desktop.png", failing: "Desktop.png")
+        }
+        #expect(String(describing: DesignExportFailure.unwritten("A.png")) == "A.png couldn't be written.")
+    }
+
+    @Test func theSummaryCountsTheFiles() {
+        #expect(DesignWorkspace.exportSummary(["Desktop.png"]) == "Exported 1 file: Desktop.png.")
+        #expect(DesignWorkspace.exportSummary(["A.png", "B.png", "C.png"]) == "Exported 3 files.")
+        #expect(DesignWorkspace.exportSummary([]) == "Exported nothing.")
+    }
+
+    @Test func aFinishedRunShowsTheSummary() {
+        let options = DesignExportOptions()
+        #expect(DesignExportRun.finished(options, ["A.png", "B.png"]).summarized == .finished(options, ["2 files."]))
+        #expect(DesignExportRun.finished(options, ["A.png"]).summarized == .finished(options, ["1 file: A.png."]))
+        #expect(DesignExportRun.running(options, done: 1, total: 2).summarized == .running(options, done: 1, total: 2))
+        #expect(DesignExportRun.failed(options, "No.").summarized == .failed(options, "No."))
+    }
 }

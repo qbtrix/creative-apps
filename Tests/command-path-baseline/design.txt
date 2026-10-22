@@ -1,8 +1,4 @@
 # DesignApp's menu items and buttons built without a command spec (command-catalog CC-11).
+# max: 2
 Sources/DesignApp/DesignCommands.swift: Button("Close", systemImage: "xmark") { NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil) }
-Sources/DesignApp/DesignCommands.swift: Button("Export…", systemImage: "square.and.arrow.up") { menu.perform(.export) }
-Sources/DesignApp/DesignCommands.swift: Button("Zoom In", systemImage: DesignToolbarItem.zoomIn.systemImage) { menu.perform(.zoomIn) }
-Sources/DesignApp/DesignCommands.swift: Button("Zoom Out", systemImage: DesignToolbarItem.zoomOut.systemImage) { menu.perform(.zoomOut) }
-Sources/DesignApp/DesignCommands.swift: Button("Fit Page", systemImage: DesignToolbarItem.fit.systemImage) { menu.perform(.fit) }
-Sources/DesignApp/DesignCommands.swift: Button("Zoom to Selection", systemImage: "viewfinder") { menu.perform(.zoomToSelection) }
 Sources/DesignApp/DesignWindow.swift: Button("OK", role: .cancel) {}

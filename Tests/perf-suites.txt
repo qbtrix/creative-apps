@@ -10,8 +10,11 @@
 # One test per line: <app> <id>. app is the scope that measures it (flare,
 # design, photo, library, halo, suite, suiteui). id is Target.Suite (every
 # test in it), Target.Suite/test (one test, when the rest of the suite times
-# nothing) or Target.freeTest. Tests/test_scope checks each id exists. Only
-# the supervisor edits this file.
+# nothing) or Target.freeTest. Tests/test_scope checks each id exists, and
+# that every enabled test asserting a wall-clock bound is listed here
+# (`scripts/test-scope timing` names the ones that aren't). A test that only
+# looks timed (an injected clock, a hang guard) carries a `// not-timing: <why>`
+# comment in its body instead. Only the supervisor edits this file.
 
 photo PhotoModelTests.PhotoBudgetTests
 photo PhotoModelTests.PhotoBrushCopyCostTests
@@ -19,12 +22,16 @@ photo PhotoModelTests.PhotoCompositeCostTests/aLayerCostsAboutOnePictureCopyNotO
 photo PhotoModelTests.PhotoCropBudgetTests
 photo PhotoModelTests.PhotoDocumentsBudgetTests
 photo PhotoModelTests.PhotoEditBudgetTests
+photo PhotoModelTests.PhotoAdjustmentLayerBudgetTests
 photo AppSnapshotTests.PhotoBrushDisplayTests
 photo AppSnapshotTests.PhotoBrushInkLatencyTests
 photo AppSnapshotTests.PhotoBrushLatencyTests
+photo AppSnapshotTests.PhotoAdjustmentLayerLatencyTests
 photo AppSnapshotTests.PhotoStrokePacerTests/theFirstSampleAppliesAtOnceAndQuickOnesWaitTogetherInOrder
 photo AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoTests
 photo AppSnapshotTests.PhotoRenderBudgetTests
+photo AppSnapshotTests.PhotoAdjustSliderLatencyTests
+photo AppSnapshotTests.BodyCountSuites/PhotoWindowLiveEditTests
 photo AppSnapshotTests.PhotoZoomSweepTests
 photo AppSnapshotTests.BodyCountSuites/PhotoZoomBudgetTests
 
@@ -36,7 +43,9 @@ halo HaloModelTests.HaloKeysBudgetTests
 halo HaloModelTests.HaloLayerEditsBudgetTests
 halo HaloModelTests.HaloTimelineCostTests
 halo HaloModelTests.HaloViewerBudgetTests
+halo HaloModelTests.HaloEasingBudgetTests
 halo AppSnapshotTests.BodyCountSuites/RenderBudgetHaloTests/timing
+halo AppSnapshotTests.BodyCountSuites/RenderBudgetHaloKeyEditingTests/timing
 
 flare FlareModelTests.FlareEasingDragCostTests
 flare FlareModelTests.LiveKeysBudgetTests
@@ -48,12 +57,17 @@ flare FlareModelTests.editsAndPreviewStepsStayWithinTheirModelBudgets
 flare FlareModelTests.hitWithinBudget
 flare FlareModelTests.machineEditsAndPreviewTicksStayWithinTheirModelBudgets
 flare FlareModelTests.nestedDrawListWithinBudget
+flare FlareModelTests.fiveSecondsAt60HzTicksShowsEveryFrameWithoutDrift
+flare FlareModelTests.svgFrameLottieAndPNGSequenceStayInsideQBL8
 flare AppSnapshotTests.BodyCountSuites/RenderBudgetFlareTests/timing
 flare AppSnapshotTests.BodyCountSuites/RenderBudgetFlareExportTests/timing
 
 library LibraryModelTests.oneEditOnSixtyPhotosStaysInBudget
 library LibraryModelTests.orderRebuildWithinBudget
 library LibraryModelTests.LibraryDevelopBudgetTests
+library LibraryModelTests.LibraryCollectionsBudgetTests
+library LibraryModelTests.LibraryFilterBudgetTests
+library LibraryModelTests.slowImportShowsProgressBeforeItWaits
 library LibraryModelTests.beginImportWithinBudget
 library LibraryModelTests.finishImportWithinBudget
 library LibraryModelTests.planAgainstKnownWithinBudget
@@ -64,13 +78,38 @@ library LibraryModelTests.focusChangeWithinBudget
 library LibraryModelTests.LibraryCatalogBudgetTests
 library LibraryModelTests.LibraryGridBudgetTests
 library LibraryModelTests.LibraryCropBudgetTests
+library LibraryModelTests.statusRowWithinBudget
+library LibraryModelTests.planWithinBudget
 library AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryTests/timing
+library LibraryModelTests.LibraryFoldersTests/tenThousandPaths
+library LibraryModelTests.LargeCatalogFixtureBudgetTests
+library LibraryModelTests.LibraryCollectionsFileTests/twentyCollectionsOverTenThousandIDsWithinBudget
 
 design DesignModelTests.DesignSnapBudgetTests
+design DesignModelTests.DesignSelectBudgetTests
+design DesignModelTests.DesignBudgetTests
+design DesignModelTests.DesignExportBudgetTests
+design DesignModelTests.DesignLayersBudgetTests/layerRows
+design DesignModelTests.DesignStyleBudgetTests
+design DesignModelTests.addNodePastALongRunMintsAnUnusedIDQuickly
+design DesignModelTests.addPagePastALongRunMintsUnusedIDsQuickly
+design DesignModelTests.repeatedAddsPastARunStayUniqueSequentialAndQuick
+design DesignModelTests.aDrawingStrokePastARunKeepsOneUnusedIDAcrossItsMoves
 design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignTests/timing
+design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignRasterTests/writeTiming
+design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignEyedropperTests/loupeTrackTiming
+design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignTransformTests/timing
 
 suite AppSnapshotTests.BodyCountSuites/RenderBudgetAfterGlowOnboardingTests/timing
 suite SuiteModelTests.StoreBudgetTests
+suite SuiteModelTests.HandOffBudgetTests
+suite SuiteModelTests.HomeBudgetTests
+suite SuiteModelTests.ValuesRecentsTests/noteIntoFullList
+suite AfterGlowCLITests.MCPCallTests/callOverhead
 
 suiteui SuiteUITests.FrameProbeTests/summaryWithinBudget
+suiteui SuiteUITests.ListBudgetTests
+suiteui SuiteUITests.TimelineBudgetTests
+suiteui AppSnapshotTests.BodyCountSuites/RenderBudgetEyedropperTests/loupeTrackTiming
 suiteui AppSnapshotTests.GoldenImageTests/compareWithinBudget
+suiteui SuiteUITests.PlaceDropTests/largeFileOffMain

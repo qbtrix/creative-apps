@@ -36,7 +36,7 @@ struct MCPToolsTests {
     @Test
     func theFakeListsItsSessionToolsThenOneToolPerCommandInIDOrder() {
         let names = MCPTools.list([Apps.fake]).map(\.name)
-        #expect(Self.fakeCommands.map(\.id) == Self.fakeCommands.map(\.id).sorted() && Self.fakeCommands.count == 8)
+        #expect(Self.fakeCommands.map(\.id) == Self.fakeCommands.map(\.id).sorted() && Self.fakeCommands.count == 23)
         #expect(names == ["fake.open", "fake.new"] + Self.session + Self.fakeCommands.map { "fake.\($0.id)" })
     }
 

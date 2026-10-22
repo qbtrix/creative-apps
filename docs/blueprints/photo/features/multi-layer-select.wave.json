@@ -2,8 +2,8 @@
   "title": "Photo selects several layers: Shift range, ⌘ toggle, All Layers, and move, hide, delete and opacity on every selected layer; group last",
   "wave": 3,
   "order": 50,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#3535",
   "beta": true,
   "covers": "photo/multi-layer-select (Photo adopts suiteui/adopt-kernel-selection); RJ-P43; the stress gate's one-layer-at-a-time gap (PR #3499)",
   "waits_on": "gradient-fill's PG-a (PhotoWorkspace, PhotoIntent, PhotoStroke), PG-m (the catalog, PM-5) and PG-z (photo.md, PM-10); adopt-command-catalog AC-photo before PM-5 (hand-off); PR #3499 before PM-9",
@@ -15,8 +15,7 @@
   ],
   "longest_chain": "5 (PM-2 → PM-5 → PM-6 → PM-11 → PM-12; PM-1 → PM-3 → PM-7 → PM-9 → PM-10)",
   "journeys": [
-    "PhotoMultiLayerJourneyTests.testSelectSeveralLayers",
-    "PhotoMultiLayerJourneyTests.testGroupLayers"
+    "PhotoMultiLayerJourneyTests.testSelectSeveralLayers"
   ],
   "owned": [
     "Sources/SuiteUI/LayerTreeList.swift",
@@ -211,6 +210,9 @@
         ],
         "photo-render-adopt": [
           "PM-12"
+        ],
+        "text-layers:TX-m": [
+          "PM-11"
         ]
       },
       "ui": true,

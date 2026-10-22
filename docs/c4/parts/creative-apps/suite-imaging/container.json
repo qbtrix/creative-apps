@@ -1,0 +1,48 @@
+{
+  "id": "suite-imaging",
+  "name": "SuiteImaging",
+  "description": "The suite's one imaging library (docs/blueprints/suiteui/features/suite-imaging.md): the adjustment values Photo and Library share, the tone program they compile to, the CPU or GPU route and the live GPU tone surface. Linked by the Design, Photo, Library and Halo Models, SuiteUI and the CLI. Linux-safe over CoreRaster, CoreRender and CoreColor; CoreRenderMetal only on macOS. The only module outside SuiteUI's canvas host that may import Metal (ImagingBoundaryTests). Imports no app Model and no SuiteUI.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), CoreRaster, CoreRender, CoreColor; CoreRenderMetal and Metal on macOS",
+  "tags": [
+    "internal"
+  ],
+  "order": 127,
+  "relationships": [
+    {
+      "source": "suite-imaging",
+      "target": "corerender",
+      "description": "compiles adjustments to CoreRender's tone adjustments and tone program",
+      "style": "sync"
+    },
+    {
+      "source": "suite-imaging",
+      "target": "coreraster",
+      "description": "reads and writes tiled pixels",
+      "style": "sync"
+    },
+    {
+      "source": "suite-imaging",
+      "target": "corecolor",
+      "description": "converts colours for the hue and saturation step",
+      "style": "sync"
+    },
+    {
+      "source": "suite-imaging",
+      "target": "corerendermetal",
+      "description": "runs the tone program on the GPU (macOS only)",
+      "style": "sync"
+    },
+    {
+      "source": "suite-imaging",
+      "target": "suite-kernel",
+      "description": "uses the kernel's shared editor values",
+      "style": "sync"
+    },
+    {
+      "source": "suite-imaging",
+      "target": "suite-model",
+      "description": "reads the suite's format registry",
+      "style": "sync"
+    }
+  ]
+}

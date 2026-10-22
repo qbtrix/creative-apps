@@ -1,7 +1,9 @@
 // FlarePaint.swift: fill and stroke on the workspace (inspector-timeline IT-2). `paint` reads the shapes the inspector
 // edits: the direct-selected shapes under Direct Select, else every shape of the inspector's layers; a value that
 // differs across them reads nil (Mixed), and a shape with no stroke reads as a zero-width one. Each setter is one undo
-// step through `services.properties` ("Set Fill" / "Set Stroke"); a bad hex or no shape refuses with a reason in
+// step through `services.properties` ("Set Fill" / "Set Stroke"). The Width bar's drag is `scrubStrokeWidth`: every
+// sample lands on the shapes at once, and the samples coalesce into one "Set Stroke" step until `endPropertyScrub()`,
+// the end the TRANSFORM rows' scrub uses too (FlareAnimate.swift). A bad hex or no shape refuses with a reason in
 // `paintError` and changes nothing, and a successful set clears it. Hex parsing is NewDocumentSpec's. `gradient`
 // (gradient-fill FG-1, FG-6) is the first shape's gradient in its bounds when every edited shape has that same
 // gradient, nil (Mixed) when they differ; a hex set turns a gradient solid.
@@ -28,7 +30,7 @@ extension FlareWorkspace {
 
     /// The fill and stroke of the shapes the inspector edits; nil with none.
     public var paint: PaintReadout? {
-        let found = paintShapes.map(\.1)
+        let found = shownPaintShapes
         guard !found.isEmpty else { return nil }
         let strokes = found.map { $0.stroke ?? Self.noStroke }
         let fills = found.map(\.fill)
@@ -46,12 +48,23 @@ extension FlareWorkspace {
         guard let color = NewDocumentSpec.color(hex: hex) else { return paintError = Self.badHex }
         let found = paintShapes
         guard !found.isEmpty else { return paintError = Self.noShape }
-        let properties = services.properties, items = found.map(\.0)
-        paintStep(nil) { try properties.setFill(.solid(color), of: items, in: &$0) }
+        let properties = services.properties, split = found.map { ($0.0, fillKey($0.0, color)) }
+        let items = split.filter { $0.1 == nil }.map(\.0), keys = split.compactMap(\.1)
+        paintStep(keys.isEmpty ? nil : "Set Fill") { engine in
+            try properties.setFill(.solid(color), of: items, in: &engine)
+            try properties.keyPaint(keys, coalesceKey: nil, in: &engine)
+        }
     }
 
-    /// Sets the stroke width, called once on the bar's release.
+    /// Sets the stroke width as one undo step.
     public mutating func setStrokeWidth(_ width: Double) { editStroke { $0.width = width } }
+
+    /// Sets the stroke width during a Width bar drag: shown at once, and every sample until `endPropertyScrub()` shares
+    /// one undo step.
+    public mutating func scrubStrokeWidth(_ width: Double) {
+        let items = paintShapes.map(\.0)
+        editStroke(coalesceKey: "stroke-width-\(items)-\(propertyScrubSerial)") { $0.width = width }
+    }
 
     /// Sets the stroke cap.
     public mutating func setStrokeCap(_ cap: Stroke.Cap) { editStroke { $0.cap = cap } }
@@ -66,7 +79,7 @@ extension FlareWorkspace {
     }
 
     /// A shape with no stroke reads, and is edited, as this one.
-    private static let noStroke = Stroke(width: 0)
+    static let noStroke = Stroke(width: 0)
 
     /// The shape addresses the inspector paints, each with its shape.
     var paintShapes: [(StageAddress, FlareShape)] {
@@ -85,25 +98,31 @@ extension FlareWorkspace {
         }
     }
 
-    /// One "Set Stroke" step: `change` applied to each shape's own stroke, so a field the set doesn't name stays.
-    private mutating func editStroke(_ change: (inout Stroke) -> Void) {
+    /// One "Set Stroke" step: `change` applied to each shape's own stroke, so a field the set doesn't name stays. With
+    /// `coalesceKey` it joins that key's open step; no group then, since a group ends coalescing.
+    private mutating func editStroke(coalesceKey: String? = nil, _ change: (inout Stroke) -> Void) {
         let found = paintShapes
         guard !found.isEmpty else { return paintError = Self.noShape }
-        var batches: [(Stroke, [StageAddress])] = []
+        var batches: [(Stroke, [StageAddress])] = [], keys: [PaintKeyWrite] = []
         for (address, shape) in found {
-            var stroke = shape.stroke ?? Self.noStroke
-            change(&stroke)
+            let (stroke, keyed) = strokeEdit(address, shape, change)
+            keys += keyed
+            if !keyed.isEmpty, stroke == shape.stroke { continue }
             if let i = batches.firstIndex(where: { $0.0 == stroke }) { batches[i].1.append(address) }
             else { batches.append((stroke, [address])) }
         }
         let properties = services.properties
-        paintStep(batches.count > 1 ? "Set Stroke" : nil) { engine in
-            for (stroke, items) in batches { try properties.setStroke(stroke, of: items, in: &engine) }
+        let grouped = coalesceKey == nil && (batches.count > 1 || !keys.isEmpty)
+        paintStep(grouped ? "Set Stroke" : nil) { engine in
+            for (stroke, items) in batches {
+                try properties.setStroke(stroke, of: items, coalesceKey: coalesceKey, in: &engine)
+            }
+            try properties.keyPaint(keys, coalesceKey: coalesceKey, in: &engine)
         }
     }
 
     /// Runs one undo step; a refusal lands in `paintError` too, and a success clears it.
-    private mutating func paintStep(_ label: String?, _ body: (inout CommandEngine) throws -> Void) {
+    mutating func paintStep(_ label: String?, _ body: (inout CommandEngine) throws -> Void) {
         step(label, body)
         paintError = layerError?.message
     }

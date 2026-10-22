@@ -1,5 +1,6 @@
 // LibraryWindow+Import.swift: the import area (import IM-6). File > Import
-// Folder… takes `-LibraryImportFolder` or a folder from the open panel,
+// Folder… takes `-LibraryImportFolder` or a folder from the open panel (a
+// folder dropped on the empty catalog skips the panel),
 // begins the import on the catalog, runs the importer off the main actor and
 // hands its progress, batches and result back to the catalog in order.
 // `-LibraryImportOnLaunch` imports once, as soon as the catalog has loaded.
@@ -27,6 +28,7 @@ extension LibraryWindow {
     var fileMenu: LibraryMenu.File {
         LibraryMenu.File(
             importFolder: enabled(model.importHelp == nil) { startImport() },
+            importDropped: enabled(model.importHelp == nil) { (folder: String) in importFolder(folder) },
             importHelp: model.importHelp,
             dismissImportNotice: act(.dismissImportNotice))
     }

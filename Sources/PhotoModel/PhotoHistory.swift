@@ -33,6 +33,8 @@ enum PhotoEdit: Sendable, Equatable {
     /// Several edits put back as one step (Flatten Image: the stack and the
     /// adjustments); applied in order, their inverses in reverse.
     case group([PhotoEdit])
+    /// Free Transform's draft as it was (nil: none was up), for its own steps.
+    case draft(TransformDraft?)
 }
 
 /// The whole layer stack, for edits that add, remove or resize layers.
@@ -177,10 +179,10 @@ extension PhotoWorkspace {
         case .layers(let list, let selected):
             let inverse = PhotoEdit.layers(layers, selected: selectedLayerID)
             // Only ever recorded over the same ids; a mismatch would orphan
-            // pixels. Only pixel layers have pixels (an adjustment layer none).
-            guard Set(list.filter { $0.kind == .pixels }.map(\.id)) == Set(pixels.keys) else { return edit }
+            // pixels. Pixel and text layers have pixels (an adjustment layer none).
+            guard Set(list.filter { $0.kind == .pixels || $0.kind.textLayer != nil }.map(\.id)) == Set(pixels.keys) else { return edit }
             layers = list
-            selectedLayerID = selected
+            restoreLayerSelection(primary: selected)
             touch(.all)
             return inverse
         case .stack(let stack):
@@ -195,6 +197,11 @@ extension PhotoWorkspace {
             return inverse
         case .group(let edits):
             return .group(edits.map { apply($0) }.reversed())
+        case .draft(let draft):
+            let inverse = PhotoEdit.draft(transformDraft)
+            transformDraft = draft
+            touch(.all)
+            return inverse
         }
     }
 
@@ -222,7 +229,7 @@ extension PhotoWorkspace {
         layers = stack.layers
         pixels = stack.pixels
         masks = stack.masks
-        selectedLayerID = stack.selectedLayerID
+        restoreLayerSelection(primary: stack.selectedLayerID)
         selection = stack.selection
         pendingCrop = nil
     }

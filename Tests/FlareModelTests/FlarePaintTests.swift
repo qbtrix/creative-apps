@@ -1,7 +1,7 @@
 // FlarePaintTests.swift: inspector-timeline IT-2 on `.built`. A fill set on Ball is one "Undo Set Fill" over every
 // shape; a bad hex refuses with a reason and changes nothing; a width set, a cap and a join are one entry each, so one
 // undo restores only the last; a gradient fill reads as one and a hex set turns it solid; a successful set clears the
-// error.
+// error. A Width bar drag shows on the shapes at each sample and is one undo step, even over strokes that differ.
 import FlareCore
 @testable import FlareModel
 import Testing
@@ -117,4 +117,42 @@ private func shapes(_ layerID: String, in w: FlareWorkspace) -> [FlareShape] {
     w.setStrokeWidth(2)
     #expect(w.paintError == "Select a shape first.")
     #expect(!w.canUndo)
+}
+
+@Test func aStrokeWidthScrubSampleShowsOnTheShapesBeforeRelease() {
+    var w = built("ball")
+    w.scrubStrokeWidth(6)
+    #expect(w.paint?.strokeWidth == 6 && w.paintError == nil)
+    #expect(shapes("ball", in: w).allSatisfy { $0.stroke?.width == 6 })
+}
+
+@Test func aWholeStrokeWidthDragIsOneUndoStepAndTheNextDragIsItsOwn() {
+    var w = built("ball")
+    let before = w.document
+    for width in [1.0, 2.5, 4, 7] { w.scrubStrokeWidth(width) }
+    w.endPropertyScrub()
+    #expect(w.paint?.strokeWidth == 7)
+    #expect(w.undoActionName == "Undo Set Stroke")
+    let afterFirst = w.document
+    for width in [8.0, 9] { w.scrubStrokeWidth(width) }
+    w.endPropertyScrub()
+    w.undo()
+    #expect(w.document == afterFirst)
+    w.undo()
+    #expect(w.document == before && !w.canUndo)
+}
+
+@Test func aScrubOverStrokesThatDifferIsStillOneStepAndKeepsEachColor() {
+    var w = built("ball")
+    w.setStrokeColor(hex: "FF0000")
+    w.setSelection([StageAddress(owner: .scene("scene-1"), layerID: "ball", item: .shape(0)),
+                    StageAddress(owner: .scene("scene-1"), layerID: "shadow", item: .shape(0))])
+    #expect(w.paint?.strokeHex == nil)
+    let before = w.document
+    for width in [2.0, 3, 5] { w.scrubStrokeWidth(width) }
+    w.endPropertyScrub()
+    #expect(w.paint?.strokeWidth == 5 && w.paint?.strokeHex == nil)
+    #expect(shapes("ball", in: w).first?.stroke?.color == FlareColor(r: 1, g: 0, b: 0))
+    w.undo()
+    #expect(w.document == before)
 }

@@ -14,23 +14,28 @@
 // histogram as presentation state and counts it off the main actor only when
 // curvesHistogramKey changes (pixels, layers, exposure, levels), never during
 // a curve drag, and not during a canvas drag either: a brush stroke changes
-// the pixels every frame, so the count waits for the drag's end. Values in,
-// intents out.
+// the pixels every frame, so the count waits for the drag's end. A slider
+// drag changes the key every step, so the count waits until the key has held
+// for 150 ms. The count runs in the key's task, so a newer key cancels it and
+// it stops at its next row; on a many-layer image one count is seconds of
+// CPU, and superseded ones left running burned the cores after every toggle
+// or slider step. Values in, intents out.
 import CoreRaster
 import PhotoModel
+import SuiteModel
 import SuiteUI
 import SwiftUI
 
 struct CurvesEditor: View {
     let settings: AdjustmentSettings
-    let histogram: [Double]
+    let histogram: ToneHistogram
     let onEdit: @MainActor (AdjustmentEdit) -> Void
     let onEnd: @MainActor () -> Void
 
     var body: some View {
         ToneCurveEditor(
             points: settings.curvePoints.map(Self.unit), samples: settings.curveSamples().map(Self.unit),
-            histogram: histogram, id: "photo.curves",
+            histogram: histogram.heights, id: "photo.curves",
             onChange: { points in onEdit(.curvePoints(points.map { CurvePoint(x: Float($0.x), y: Float($0.y)) })) },
             onEnd: onEnd)
     }
@@ -41,18 +46,27 @@ struct CurvesEditor: View {
 struct AdjustmentsPanel: View {
     let model: PhotoWorkspace
     let perform: PhotoPerform
-    @State private var histogram: [Double] = []
+    /// Counts the histogram of a workspace; a test passes its own to see which counts finish.
+    var count: @Sendable (PhotoWorkspace) async -> ToneHistogram = AdjustmentsPanel.count
+    @State private var histogram = ToneHistogram.empty
 
     var body: some View {
         inspector
         // Nil while dragging, so a brush stroke never recounts; its end does, once.
         .task(id: model.isDragging ? nil : model.curvesHistogramKey) {
             guard !model.isDragging else { return }
-            let workspace = model
-            let counted = await Task.detached(priority: .userInitiated) { workspace.curvesHistogram() }.value
+            // A slider drag changes the key every step: count once it rests, not once per step (each count
+            // composites 256 rows on the CPU). Not detached: a newer key's cancel must reach the count.
+            try? await Task.sleep(for: .milliseconds(150))
+            guard !Task.isCancelled else { return }
+            let counted = await count(model)
             if !Task.isCancelled { histogram = counted }
         }
     }
+
+    /// The histogram, counted off the main actor (a nonisolated async function runs on the global executor)
+    /// inside the calling task, so cancelling that task stops the count.
+    nonisolated static func count(_ workspace: PhotoWorkspace) async -> ToneHistogram { workspace.curvesHistogram() }
 
     /// An adjustment layer's sections have no enable switch: its row's eye turns it off.
     static func showsEnable(for target: AdjustTarget) -> Bool {

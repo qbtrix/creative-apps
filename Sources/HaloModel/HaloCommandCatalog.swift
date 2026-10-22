@@ -1,12 +1,50 @@
 // HaloCommandCatalog.swift (adopt-command-catalog AC-h1): each `HaloCommand` case as a catalog command over
 // `HaloProject`, available as `unavailableHelp(for:)` says, running what the window's route runs. File commands
-// and starting a render are `notBuilt` until `HaloHeadless` (AC-h2) runs them. Linux-safe: no UI imports.
+// are `notBuilt` until `HaloHeadless` (AC-h2) runs them; Render starts the open sheet's run with the sheet's
+// settings (command-state CS-7). `windowSpecs` are the window's own steps a bare control runs. Linux-safe: no UI imports.
 import CoreRaster
 import SuiteKernel
 
 extension HaloProject {
-    /// One spec per `HaloCommand.allCases` entry, in that order.
-    public static let commandSpecs: [CommandSpec<HaloProject>] = HaloCommand.allCases.map(spec(for:))
+    /// One spec per `HaloCommand.allCases` entry, in that order, then the
+    /// kernel's `shape.draw` and `tool.shape` (shape-tools HS-6), its eight `fill.*` commands
+    /// (gradient-fill HG-7), the History panel's `history.read` and `history.jump` (autosave-history HA-6),
+    /// then `windowSpecs`.
+    public static let commandSpecs: [CommandSpec<HaloProject>] =
+        HaloCommand.allCases.map(spec(for:)) + ShapeCommands.specs(HaloProject.self)
+        + GradientCommands.specs(HaloProject.self) + HistoryCommands.specs(HaloProject.self) + windowSpecs
+
+    /// The render sheet's Choose… and the unsaved alert's Save and Don't Save (CS-7): headless they check
+    /// availability and change nothing, since the panel and the held command are the window's.
+    static let windowSpecs: [CommandSpec<HaloProject>] = [
+        .typed("render.choose-folder", title: "Choose…", summary: "Asks for the folder the open render writes into.", kind: .view,
+               params: Param.None.self, schema: ParamSchema.none, example: .object([:]), availability: available(Param.render)) { p, _ in try p.windowStep("render.choose-folder", p.unavailableHelp(for: Param.render)) },
+        .typed("file.answer-unsaved", title: "Save Changes", summary: "Answers the unsaved-changes alert: save, then go on, or dontSave and go on.",
+               kind: .file, params: Param.Answer.self, schema: obj(["answer": .string(oneOf: Param.answers.map(\.name))]),
+               example: .object(["answer": .string("save")]), availability: { $0.unsavedHelp.map(Availability.unavailable) ?? .available }) { p, o in
+            try p.windowStep("file.answer-unsaved", p.unsavedHelp, ["answer": .string(o.answer)])
+        },
+    ]
+
+    /// A window step headless: refuses with `why`, else returns `result` and changes nothing.
+    func windowStep(_ id: String, _ why: String?, _ result: [String: JSONValue] = [:]) throws -> JSONValue {
+        if let why { throw CatalogError.unavailable(id: id, why: why) }
+        return .object(result)
+    }
+
+    /// Why the unsaved-changes alert has nothing to answer; nil while there are unsaved edits.
+    var unsavedHelp: String? {
+        if file.opening { return "A project is opening." }
+        return file.unsaved ? nil : "There are no unsaved changes."
+    }
+
+    /// New Composition's Create: the sheet's settings over the suggested ones; refused in their problems' words.
+    mutating func runNewComposition(_ o: HaloHeadless.NewOptions) throws -> JSONValue {
+        if let why = unavailableHelp(for: .newComposition) { throw CatalogError.unavailable(id: "composition.new", why: why) }
+        let settings = o.settings(over: suggestedSettings)
+        guard newComposition(settings) else { throw CatalogError.failed(id: "composition.new", message: settings.problems.joined(separator: " ")) }
+        return .object(["id": .string(selectedCompositionID ?? "")])
+    }
 
     /// Halo's catalog over the project; its history reads the project's steps.
     public static let catalog: CommandCatalog<HaloProject> =
@@ -77,8 +115,13 @@ extension HaloProject {
         case .cancelViewerDrag: cancelViewerDrag()
         case .undo: undo()
         case .redo: redo()
-        case .save, .saveAs, .open, .openRecent, .startRender:
+        case .save, .saveAs, .open, .openRecent:
             throw CatalogError.notBuilt(id: id, feature: "adopt-command-catalog AC-h2")
+        case .startRender(let settings):
+            setRenderSettings(settings)
+            guard let started = startRender() else { throw CatalogError.failed(id: id, message: renderOutcomeText ?? "The render can't start.") }
+            let plan = started.plan
+            return .object(["frames": .number(Double(plan.frames.count)), "width": .number(Double(plan.width)), "height": .number(Double(plan.height))])
         case .setEasing(let preset): setEasing(preset)
         case .selectKey(let key, let extending): selectKey(key, extending: extending)
         case .selectLaneKeys(let layer, let frame, let extending): selectLaneKeys(layerID: layer, frame: frame, extending: extending)
@@ -87,10 +130,14 @@ extension HaloProject {
         case .setCustomEasing(let easing): setCustomEasing(easing, coalesceKey: pickedSegment.map { "\($0.key.layerID).easing" })
         case .moveEasingHandle(let index, let x, let y): moveEasingHandle(index == 0 ? .first : .second, to: HaloPoint(x: x, y: y))
         case .endEasingDrag: endCoalescing()
+        case .pickLaneKeys(let layer, let frame, let mode): pickLaneKeys(layerID: layer, frame: frame, mode: mode)
+        case .selectAllKeys: selectAllKeys()
+        case .moveKeys(let frames, let dragStart): moveKeys(by: frames, dragStart: dragStart)
+        case .endKeyDrag: endKeyDrag()
         case .renderFrame: renderCurrentFrame()
-        case .openRenderSheet: openRenderSheet()
+        case .openRenderSheet: beginRender(HaloRenderSettings(format: .pngSequence))
         case .cancelRender: cancelRender()
-        case .closeRenderSheet: closeRenderSheet()
+        case .closeRenderSheet: dismissRender()
         case .setText(let text): setText(text)
         case .setFontSize(let size): setFontSize(size)
         case .endTextSizeScrub: endTextSizeScrub()
@@ -102,7 +149,8 @@ extension HaloProject {
     /// The spec for `c`'s case; `c` is its sample, the example's source.
     static func spec(for c: HaloCommand) -> CommandSpec<HaloProject> {
         switch c {
-        case .newComposition: plain(c, "composition.new", "New Composition", .edit, "Adds a composition with the suggested settings and selects it.")
+        case .newComposition: .typed("composition.new", title: "New Composition", summary: "Adds a composition with the sheet's settings, else the suggested ones, and selects it.",
+                                     kind: .edit, params: HaloHeadless.NewOptions.self, schema: Param.newComposition, example: .object([:]), availability: available(c)) { p, o in try p.runNewComposition(o) }
         case .duplicateComposition: plain(c, "composition.duplicate", "Duplicate Composition", .edit, "Copies the selected composition.")
         case .deleteComposition: plain(c, "composition.delete", "Delete Composition", .edit, "Deletes the selected composition; one always stays.")
         case .selectComposition: typed(c, "composition.select", "Select Composition", .view, "Selects a composition.", Param.ID.self, obj(["id": Param.id]), ["id": .string("comp-1")]) { .selectComposition($0.id) }
@@ -151,9 +199,13 @@ extension HaloProject {
         case .setCustomEasing: typed(c, "easing.set-custom", "Custom Easing", .edit, "Sets the picked keys' easing to a cubic curve.", Param.Bezier.self, obj(["x1": Param.unit, "y1": .number(), "x2": Param.unit, "y2": .number()]), ["x1": .number(0.42), "y1": .number(0), "x2": .number(1), "y2": .number(1)]) { .setCustomEasing(.cubicBezier(x1: $0.x1, y1: $0.y1, x2: $0.x2, y2: $0.y2)) }
         case .moveEasingHandle: typed(c, "easing.move-handle", "Move Easing Handle", .edit, "Moves the first (0) or second (1) easing handle.", Param.Handle.self, obj(["index": .integer(minimum: 0, maximum: 1), "x": Param.unit, "y": .number()]), ["index": .number(0), "x": .number(0.3), "y": .number(0)]) { .moveEasingHandle(index: $0.index, x: $0.x, y: $0.y) }
         case .endEasingDrag: plain(c, "easing.end-drag", "End Easing Change", .view, "Ends an easing drag, so the next change is its own step.")
+        case .pickLaneKeys: typed(c, "timeline.pick-keys", "Select Keys", .view, "Picks a layer's keys at a frame: replace, extend (Shift) or toggle (Command); no frame clears the pick.", Param.PickKeys.self, obj(["layerID": Param.id, "frame": .optional(.integer(minimum: 0)), "mode": .string(oneOf: Param.modes.map(\.name))]), ["layerID": .string("comp-1-layer-2"), "frame": .number(0), "mode": .string("replace")]) { try .pickLaneKeys(layerID: $0.layerID, frame: $0.frame, mode: decoded(Param.pick($0.mode))) }
+        case .selectAllKeys: plain(c, "timeline.select-all-keys", "Select All Keys", .view, "Picks every key of the selected composition, hidden layers included.")
+        case .moveKeys: typed(c, "timeline.move-keys", "Move Keyframes", .edit, "Moves the picked keys by frames since the last move; moves of one drag share its dragStart and are one step.", Param.MoveKeys.self, obj(["by": .integer(), "dragStart": .integer(minimum: 0)]), ["by": .number(6), "dragStart": .number(0)]) { .moveKeys(by: $0.by, dragStart: $0.dragStart) }
+        case .endKeyDrag: plain(c, "timeline.end-key-drag", "End Key Drag", .view, "Ends a key drag, so the next move is its own step.")
         case .renderFrame: plain(c, "render.frame", "Render Frame", .view, "Renders the frame at the playhead for the viewer.")
         case .openRenderSheet: plain(c, "render.open-sheet", "Render…", .view, "Opens the render settings.")
-        case .startRender: typed(c, "render.start", "Render", .file, "Renders the composition to files.", Param.Render.self, obj(["format": .string(oneOf: HaloRenderSettings.Format.allCases.map(\.rawValue)), "halfSize": .optional(.boolean)]), ["format": .string("pngSequence")]) { try .startRender(HaloRenderSettings(format: decoded(.init(rawValue: $0.format)), halfSize: $0.halfSize ?? false)) }
+        case .startRender: typed(c, "render.start", "Render", .file, "Starts the open render with the sheet's format and size.", Param.Render.self, obj(["format": .string(oneOf: HaloRenderSettings.Format.allCases.map(\.rawValue)), "halfSize": .optional(.boolean)]), ["format": .string("pngSequence")]) { try .startRender(HaloRenderSettings(format: decoded(.init(rawValue: $0.format)), halfSize: $0.halfSize ?? false)) }
         case .cancelRender: plain(c, "render.cancel", "Cancel Render", .view, "Cancels the running render, or closes its settings.")
         case .closeRenderSheet: plain(c, "render.close-sheet", "Close Render", .view, "Closes the render settings.")
         case .setText: typed(c, "text.set", "Edit Text", .edit, "Sets the selected text layer's text.", Param.Text.self, obj(["text": .string()]), ["text": .string("Hello")]) { .setText($0.text) }
@@ -221,7 +273,18 @@ private enum Param {
     struct Preset: Decodable, Sendable { var preset: String }
     struct Key: Decodable, Sendable { var layerID: String; var property: HaloProperty; var frame: Int; var extending: Bool }
     struct Lane: Decodable, Sendable { var layerID: String; var frame: Int; var extending: Bool }
+    struct PickKeys: Decodable, Sendable { var layerID: String; var frame: Int?; var mode: String }
+    struct MoveKeys: Decodable, Sendable { var by, dragStart: Int }
+    static let modes: [(name: String, pick: Pick)] = [("replace", .replace), ("extend", .extend), ("toggle", .toggle)]
+    static func pick(_ name: String) -> Pick? { modes.first { $0.name == name }?.pick }
     struct Bezier: Decodable, Sendable { var x1, y1, x2, y2: Double }; struct Handle: Decodable, Sendable { var index: Int; var x, y: Double }
     struct Render: Decodable, Sendable { var format: String; var halfSize: Bool? }
+    static let render = HaloCommand.startRender(HaloRenderSettings(format: .pngSequence))
+    static let newComposition = ParamSchema.object(["name": name, "width": size, "height": size, "seconds": .number(minimum: 0),
+                                                     "fps": .integer(minimum: 1)], required: [])
+    static let size = ParamSchema.integer(minimum: CompositionSettings.sizeRange.lowerBound, maximum: CompositionSettings.sizeRange.upperBound)
+    /// The unsaved alert's answers a control sends: the kernel's, but Cancel, which only closes it.
+    struct Answer: Decodable, Sendable { var answer: String }
+    static let answers: [(name: String, answer: UnsavedPrompt.Answer)] = [("save", .save), ("dontSave", .dontSave)]
     struct Text: Decodable, Sendable { var text: String }; struct Size: Decodable, Sendable { var size: Double }
 }

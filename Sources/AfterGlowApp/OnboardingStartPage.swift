@@ -4,8 +4,9 @@
 // "New Blank Design", or the preset's own "Import Folder…" when it asks for more) and
 // "Open sample". A disabled control's help is the model's reason (#3018).
 // While a hand-off is in flight its row shows a small progress ring and every
-// control is disabled; a refused hand-off's sentence sits under that row,
-// never an alert. "Start from an empty home" is the window's default button
+// control is disabled; a refused hand-off's sentence sits in its own grid
+// row under that row's chips, so the row itself never moves, and is never an
+// alert. "Start from an empty home" is the window's default button
 // on this page (OnboardingWindow.swift). The view reads the model and calls
 // its methods only.
 import Foundation
@@ -21,6 +22,15 @@ struct OnboardingStartPage: View {
             Grid(alignment: .leading, horizontalSpacing: SuiteSpacing.m, verticalSpacing: SuiteSpacing.s) {
                 ForEach(model.starters, id: \.tile.app) { starter in
                     row(starter)
+                    // Its own row under the chips, so a refusal never moves the row above it.
+                    if model.failed == starter.tile.app, let message = model.message {
+                        GridRow {
+                            Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
+                            Text(message.message).font(SuiteFont.caption).foregroundStyle(SuiteColor.stateWarning)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .gridCellColumns(2)
+                        }
+                    }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -31,7 +41,7 @@ struct OnboardingStartPage: View {
         }
     }
 
-    /// One starter: the app's mark and name, its preset chips (and the in-place message), Open sample.
+    /// One starter: the app's mark and name, its preset chips, Open sample.
     private func row(_ starter: OnboardingStarter) -> some View {
         let app = starter.tile.app
         let busy = model.launching != nil
@@ -45,14 +55,8 @@ struct OnboardingStartPage: View {
                 }
             }
             .accessibilityElement(children: .combine)
-            VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
-                presets(starter.tile, busy: busy)
-                if model.failed == app, let message = model.message {
-                    Text(message.message).font(SuiteFont.caption).foregroundStyle(SuiteColor.stateWarning)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            presets(starter.tile, busy: busy)
+                .frame(maxWidth: .infinity, alignment: .leading)
             Button("Open sample") { Task { await model.openSample(app, now: Date()) } }
                 .disabled(sampleReason != nil)
                 .help(model.sampleHelp(starter))

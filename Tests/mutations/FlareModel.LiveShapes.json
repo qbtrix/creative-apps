@@ -23,8 +23,22 @@
   {
     "label": "the position keys are their own undo step",
     "file": "Sources/FlareModel/Live/LiveShapes.swift",
-    "find": "        }\n        return layer.id\n    }\n\n    /// The pen path",
-    "replace": "        }\n        for property in Self.positionKeys { try engine.perform(SetKeyframe(owner: owner, layerID: layer.id, property: property, keyframe: Keyframe(frame: 0, value: 0))) }\n        return layer.id\n    }\n\n    /// The pen path",
+    "find": "        }\n        return layer.id\n    }\n\n    private static func end",
+    "replace": "        }\n        for property in Self.positionKeys { try engine.perform(SetKeyframe(owner: owner, layerID: layer.id, property: property, keyframe: Keyframe(frame: 0, value: 0))) }\n        return layer.id\n    }\n\n    private static func end",
     "tests": "LiveShapesPositionKeyTests.swift"
+  },
+  {
+    "label": "optionFromCentre: Option is ignored, so the box grows from the press",
+    "file": "Sources/FlareModel/Live/LiveShapes.swift",
+    "find": "if modifiers.contains(.option) { keys.insert(.option) }",
+    "replace": "if modifiers.contains(.option) { keys.remove(.option) }",
+    "tests": "LiveShapesKernelTests/optionFromCentre"
+  },
+  {
+    "label": "lineIsOpen: a line is drawn closed",
+    "file": "Sources/FlareModel/Live/LiveShapes.swift",
+    "find": "return FlareShape(points: points, closed: false, fill:",
+    "replace": "return FlareShape(points: points, closed: true, fill:",
+    "tests": "LiveShapesKernelTests/lineIsOpen"
   }
 ]

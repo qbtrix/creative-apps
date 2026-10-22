@@ -4,6 +4,8 @@
 // I and O keys, each one undo step or a refusal under the timeline).
 // Linux-safe: no UI imports. The playhead stays in
 // 0..<durationFrames; a layer stays visible for at least one frame.
+// Timecode is the kernel's at the exact rate: drop-frame at 29.97 (frame-rates FR-8).
+import SuiteKernel
 
 /// One timeline row: a layer's name and the frames it is visible for.
 public struct HaloTimelineRow: Identifiable, Sendable, Hashable {
@@ -23,16 +25,10 @@ extension HaloComposition {
     /// The last frame the playhead can show; 0 for an empty composition.
     public var lastFrame: Int { max(0, durationFrames - 1) }
 
-    /// `frame` as hours:minutes:seconds:frames at this frame rate
-    /// ("00:00:01:12" for frame 36 at 24 fps). A negative frame shows as 0;
-    /// with no positive frame rate every frame counts as frames.
-    public func timecode(_ frame: Int) -> String {
-        let frame = max(0, frame)
-        let fps = max(1, framesPerSecond)
-        let seconds = frame / fps
-        let parts = [seconds / 3600, seconds / 60 % 60, seconds % 60, frame % fps]
-        return parts.map { $0 < 10 ? "0\($0)" : "\($0)" }.joined(separator: ":")
-    }
+    /// `frame` as timecode at this frame rate ("00:00:01:12" for frame 36 at
+    /// 24 fps, "00:01:00;02" for frame 1800 at 29.97). A negative frame shows
+    /// as 0; with no positive frame rate every frame reads "00:00:00:00".
+    public func timecode(_ frame: Int) -> String { Timecode.string(frame: frame, rate: frameRate) }
 
     /// The playhead's timecode, as the viewer's readout shows it.
     public var playheadTimecode: String { timecode(playheadFrame) }

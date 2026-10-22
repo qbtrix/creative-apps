@@ -191,5 +191,7 @@ live. Then `Belt-Contact-Sheet:` with `photo-free-transform-*` and
 
 ## Not in this packet
 
-Skew, distort, perspective and warp; Flip Canvas (the whole image); transform
-of several layers at once; transforming a selection's pixels without a layer.
+Skew, distort, perspective and warp; transform of several layers at once;
+transforming a selection's pixels without a layer. Flip Canvas (the whole
+image) is back in the beta in `suiteui/orientation-crop` (OC-photo-m and
+OC-photo-u), as the blueprint's v2 line had it (captain, 2026-10-21).

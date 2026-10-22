@@ -1,5 +1,8 @@
-# Tests/canonical-concepts.txt: the concepts that live in SuiteModel (the
-# editor kernel), never app-local (docs/factory/lead.md, contract rule 20).
+# Tests/canonical-concepts.txt: the concepts that live in the shared modules,
+# never app-local (docs/factory/lead.md, contract rule 20). Editor logic goes
+# in SuiteKernel (SuiteModel holds the suite services: store, recents,
+# hand-off, home). Imaging concepts (render route, tone, codecs, histogram)
+# need the planned shared imaging target, or creative-core.
 # One line per concept, `Concept: Stem Stem ...`. A stem matches a file name
 # or primary type at a CamelCase boundary with an optional plural s (Snap
 # matches SnapGuides, never Snapshot), so inflected forms are listed. The
@@ -21,4 +24,20 @@ Parent: Parent Parenting
 Bones: Bone
 Gradient: Gradient
 Autosave: Autosave
+Pen: PenDraft PenRules PenTool
 Placed image: PlacedImage PlacedAsset ImageLayer PlaceImage
+Tone settings: AdjustmentSettings DevelopSettings DevelopValues DevelopLevels ToneCurve HueSaturation LiveTone LiveDevelop GammaTrack LevelsFormat
+Render route: RenderRoute Rasterizer Rasterizing TileUpdate CompositeCache
+Recovery: Recovery CatalogStore RecoveryFile
+Image codec: Codec ImageIODecoder JPEGWriter PNGWriter FramePNG
+Playback: Playback PlaybackClock PlaybackTicks
+Thumbnail: Thumbnail
+Zoom: Zoom ViewMath
+Eyedropper: Eyedropper Sampling
+Straighten: Straighten Leveling
+Histogram: Histogram
+Pasteboard: Pasteboard
+Unsaved prompt: UnsavedPrompt ClosePrompt SaveStatus
+Launch flags: FlareLaunch HaloLaunch LibraryLaunch PhotoLaunch ProjectLaunch LaunchFlags LaunchArguments LaunchArgs
+File envelope: FileEnvelope FileFormat Filing
+Layer style: LayerStyle LayerEffect StyleEffect DropShadow InnerShadow OuterGlow InnerGlow Bevel Emboss ColorOverlay GradientOverlay EffectStack

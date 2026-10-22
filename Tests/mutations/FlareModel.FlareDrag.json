@@ -1,0 +1,23 @@
+[
+  {
+    "label": "the Shape draft ignores the picked options",
+    "file": "Sources/FlareModel/FlareDrag.swift",
+    "find": "LiveShapes.shape(shapeTool, from: start, to: end, modifiers: modifiers)",
+    "replace": "LiveShapes.shape(.defaults(.star), from: start, to: end, modifiers: modifiers)",
+    "tests": "FlareShapeToolDraftTests.swift"
+  },
+  {
+    "label": "the Shape draft ignores Shift and Option",
+    "file": "Sources/FlareModel/FlareDrag.swift",
+    "find": "LiveShapes.shape(shapeTool, from: start, to: end, modifiers: modifiers)",
+    "replace": "LiveShapes.shape(shapeTool, from: start, to: end, modifiers: [])",
+    "tests": "FlareShapeToolDraftTests.swift"
+  },
+  {
+    "label": "the Shape draft is a box",
+    "file": "Sources/FlareModel/FlareDrag.swift",
+    "find": "LiveShapes.shape(shapeTool, from: start, to: end, modifiers: modifiers)",
+    "replace": "LiveShapes.shape(.defaults(.rectangle), from: start, to: end, modifiers: modifiers)",
+    "tests": "FlareShapeToolDraftTests.swift"
+  }
+]

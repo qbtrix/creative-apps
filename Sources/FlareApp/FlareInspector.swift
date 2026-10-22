@@ -1,7 +1,8 @@
 // FlareInspector.swift: Flare's inspector, a SegmentedTabs switch between
 // Properties and Library. Properties (IT-4) shows refusals in the error color,
 // the InspectorHeader from `model.inspectorSummary`, then SCENE with nothing
-// selected, else TRANSFORM, FILL and TIMING (holding the `easing` editor);
+// selected, else TRANSFORM, FILL and TIMING (holding the `easing` editor),
+// with the Shape tool's SHAPE section (`shape`) first while that tool is active;
 // with no scene it says what to do. Library is FlareLibraryPanel. A tab click goes
 // out as `.inspector(.showTab)`; the window keeps which tab shows. It only
 // reads `model`. SuiteWindow doesn't scroll its inspector, so this one
@@ -31,6 +32,8 @@ struct FlareInspector<Easing: View>: View {
     let tab: FlareInspectorTab
     let perform: @MainActor (FlareIntent) -> Void
     let easing: Easing
+    /// The Shape tool's options, set by the window while that tool is active.
+    var shape: FlareShapeOptions? = nil
     @Environment(\.suiteSnapshotRendering) private var snapshot
 
     var body: some View {
@@ -64,6 +67,7 @@ struct FlareInspector<Easing: View>: View {
                 .padding(.horizontal, SuiteSpacing.m)
                 .accessibilityIdentifier("flare.inspector.error")
         }
+        if let shape { shape }
         if model.selectedScene != nil {
             let summary = model.inspectorSummary
             InspectorHeader(summary.title, facts: [
@@ -80,7 +84,9 @@ struct FlareInspector<Easing: View>: View {
                     keyHelp: FlareWindow.inspectorHelp(.toggleKey(""), in: model), perform: perform)
                 if let paint = model.paint {
                     FlareInspectorFill(
-                        paint: paint, reasonFor: { FlareWindow.inspectorHelp($0, in: model) }, perform: perform)
+                        paint: paint, reasonFor: { FlareWindow.inspectorHelp($0, in: model) }, perform: perform,
+                        keyState: { FlareGeometryRow.keyState(model.keyState(FlareWorkspace.PaintKey(rawValue: $0) ?? .fill)) },
+                        keyHelp: { FlareWindow.inspectorHelp(.toggleKey($0), in: model) })
                 }
                 FlareInspectorTiming(easing: easing)
             }

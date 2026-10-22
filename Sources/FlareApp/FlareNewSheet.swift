@@ -2,7 +2,7 @@
 // File > New, the toolbar's New and the empty state present: a preset or
 // Custom, size, frame rate, duration and background. It owns only its draft
 // NewDocumentSpec, typed numbers kept as text; `problem` shows under the
-// fields and disables Create, which sends `.file(spec.intent)`. Also holds
+// fields and disables Create, which sends `.file(spec.intent)` on File > New's catalog spec (command-state CS-12). Also holds
 // FlarePresentation, what the window presents over itself.
 import FlareModel
 import SuiteUI
@@ -64,17 +64,16 @@ struct FlareNewAnimationSheet: View {
                 TextField("Height", text: Binding(get: { heightText }, set: { setHeight($0) }))
                     .accessibilityLabel("Height")
                     .accessibilityIdentifier("flare.new.height")
-                Picker("Frame Rate", selection: Binding(get: { spec.fps }, set: { spec.fps = $0 })) {
-                    ForEach(NewDocumentSpec.frameRates, id: \.self) { Text("\($0) fps").tag($0) }
+                LabeledContent("Frame Rate") {
+                    FrameRateMenu(rate: spec.fps) { spec.fps = $0 }
+                        .accessibilityIdentifier("flare.new.fps")
                 }
-                .accessibilityLabel("Frame Rate")
-                .accessibilityIdentifier("flare.new.fps")
                 TextField("Duration (frames)", text: Binding(get: { durationText }, set: { setDuration($0) }))
                     .accessibilityLabel("Duration (frames)")
                     .accessibilityIdentifier("flare.new.duration")
             }
             .formStyle(.columns)
-            InspectorColorWellRow("Background", color: background) { setBackground($0) }
+            InspectorColorWellRow("Background", color: spec.background.hex) { setBackground($0) }
             if let problem = spec.problem {
                 Label(problem, systemImage: "exclamationmark.circle")
                     .font(SuiteFont.caption)
@@ -85,19 +84,14 @@ struct FlareNewAnimationSheet: View {
                 Button("Cancel", role: .cancel) { onCancel() }
                     .keyboardShortcut(.cancelAction)
                     .accessibilityIdentifier("flare.new.cancel")
-                Button("Create") { if spec.problem == nil { onCreate(spec) } }
-                    .keyboardShortcut(.defaultAction)
-                    .disabled(spec.problem != nil)
-                    .help(spec.problem ?? "Create the animation")
-                    .accessibilityIdentifier("flare.new.create")
+                MenuCommand(FlareWorkspace.menuSpec(for: .file(.new)), on: spec.problem, title: "Create", shortcut: .defaultAction) {
+                    if spec.problem == nil { onCreate(spec) }
+                }
+                .accessibilityIdentifier("flare.new.create")
             }
         }
         .padding(SuiteSpacing.xl)
         .frame(width: SuiteSize.contentMinimum.width)
-    }
-
-    private var background: HexColor {
-        HexColor(NewDocumentSpec.hex(spec.background)) ?? HexColor(255, 255, 255)
     }
 
     private func pick(_ name: String) {
@@ -121,7 +115,7 @@ struct FlareNewAnimationSheet: View {
     }
 
     private func setBackground(_ hex: HexColor) {
-        if let color = NewDocumentSpec.color(hex: hex.text) { spec.background = color }
+        if let color = FlareColor(hex: hex) { spec.background = color }
     }
 
     /// A typed number; text that isn't one in range is 0, which `problem` names.

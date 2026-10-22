@@ -67,23 +67,20 @@ public struct DesignRect: Sendable, Hashable, Codable {
     }
 
     /// The handles a selection of this rectangle shows, each with its center, for handles `size`
-    /// points across: all eight on the corners and side midpoints (the centres of the kernel's
-    /// `BoxMath.handles`, without its rotate knob), or for a compact rectangle only the corners,
-    /// each pushed out by half a handle so it sits outside and leaves the inside readable.
+    /// points across, unturned: all eight on the corners and side midpoints and the rotate knob above
+    /// the top (the centres of the kernel's `BoxMath.handles`), or for a compact rectangle the knob
+    /// and only the corners, each pushed out by half a handle so it sits outside and leaves the
+    /// inside readable.
     public func handles(size: Double) -> [DesignHandle: DesignPoint] {
-        guard isCompact(handleSize: size) else {
-            var shown: [DesignHandle: DesignPoint] = [:]
-            for (handle, square) in BoxMath.handles(of: kernelRect, size: size) {
-                guard let handle = DesignHandle(handle) else { continue }
-                shown[handle] = DesignPoint(x: (square.minX + square.maxX) / 2, y: (square.minY + square.maxY) / 2)
-            }
-            return shown
+        var shown: [DesignHandle: DesignPoint] = [:]
+        let compact = isCompact(handleSize: size)
+        for (handle, square) in BoxMath.handles(of: kernelRect, size: size) {
+            guard let handle = DesignHandle(handle), !compact || handle.isCorner || handle == .rotate else { continue }
+            let (h, v) = compact && handle.isCorner ? handle.direction : (0, 0)
+            shown[handle] = DesignPoint(x: (square.minX + square.maxX + Double(h) * size) / 2,
+                                        y: (square.minY + square.maxY + Double(v) * size) / 2)
         }
-        return Dictionary(
-            uniqueKeysWithValues: DesignHandle.allCases.filter(\.isCorner).map { handle in
-                let ((h, v), at) = (handle.direction, point(of: handle))
-                return (handle, DesignPoint(x: at.x + Double(h) * size / 2, y: at.y + Double(v) * size / 2))
-            })
+        return shown
     }
 
     /// This rectangle with `handle` dragged by `delta`: the kernel's `BoxMath.resized`, Shift
@@ -113,11 +110,11 @@ public struct DesignRect: Sendable, Hashable, Codable {
     }
 }
 
-/// A selection handle of a node's frame: the four corners and the four side midpoints.
-/// Each is the kernel's `EditorHandle` of the same name; the kernel's inside and rotate knob
-/// are no Design handle.
+/// A selection handle of a node's frame: the four corners, the four side midpoints and the
+/// rotate knob above the top. Each is the kernel's `EditorHandle` of the same name; the kernel's
+/// inside is no Design handle.
 public enum DesignHandle: String, CaseIterable, Sendable {
-    case topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
+    case topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left, rotate
 
     /// The kernel's handle of this name.
     var editorHandle: EditorHandle {
@@ -130,10 +127,11 @@ public enum DesignHandle: String, CaseIterable, Sendable {
         case .bottom: .bottom
         case .bottomLeft: .bottomLeft
         case .left: .left
+        case .rotate: .rotate
         }
     }
 
-    /// The Design handle of the kernel's `handle`; nil for its inside and rotate knob.
+    /// The Design handle of the kernel's `handle`; nil for its inside.
     init?(_ handle: EditorHandle) {
         switch handle {
         case .topLeft: self = .topLeft
@@ -144,11 +142,13 @@ public enum DesignHandle: String, CaseIterable, Sendable {
         case .bottom: self = .bottom
         case .bottomLeft: self = .bottomLeft
         case .left: self = .left
-        case .inside, .rotate: return nil
+        case .rotate: self = .rotate
+        case .inside: return nil
         }
     }
 
-    /// Which edge the handle moves on each axis: -1 left or top, 0 neither, 1 right or bottom.
+    /// Which edge the handle moves on each axis: -1 left or top, 0 neither, 1 right or bottom; the
+    /// knob moves none.
     var direction: (x: Int, y: Int) {
         switch self {
         case .topLeft: (-1, -1)
@@ -159,6 +159,7 @@ public enum DesignHandle: String, CaseIterable, Sendable {
         case .bottom: (0, 1)
         case .bottomLeft: (-1, 1)
         case .left: (-1, 0)
+        case .rotate: (0, 0)
         }
     }
 
@@ -189,7 +190,7 @@ public struct DesignColor: Sendable, Hashable, Codable {
 }
 
 public enum DesignNodeKind: String, CaseIterable, Sendable, Codable {
-    case frame, group, rectangle, ellipse, text, instance
+    case frame, group, rectangle, ellipse, text, instance, shape
 
     /// The SF Symbol for this kind's sidebar row.
     public var systemImage: String {
@@ -200,6 +201,7 @@ public enum DesignNodeKind: String, CaseIterable, Sendable, Codable {
         case .ellipse: "circle"
         case .text: "textformat"
         case .instance: "square.on.square"
+        case .shape: "star"
         }
     }
 
@@ -213,7 +215,7 @@ public enum DesignNodeKind: String, CaseIterable, Sendable, Codable {
         switch self {
         case .frame: .white
         case .text: .black
-        case .group, .rectangle, .ellipse, .instance: .shape
+        case .group, .rectangle, .ellipse, .instance, .shape: .shape
         }
     }
 
@@ -243,17 +245,29 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
     public var stroke: DesignStroke?
     /// How a text node's text is set; every other kind keeps `.default`.
     public var textStyle: DesignTextStyle
+    /// The kernel's gradient fill, its points in the node's unit box (0...1 across its frame), so a
+    /// resize never touches it; nil paints `fill` (solid). Written only when set (gradient-fill DG-1).
+    public var gradient: Fill?
+    /// The turn, clockwise degrees about the frame's centre, (-180, 180]; `frame` stays the unturned box,
+    /// so snapping, resize and the layer list never see it. Written only when not 0 (transform DT-1).
+    public var rotation: Double = 0
+    /// Mirrored left to right and top to bottom about the frame's centre. Written only when set.
+    public var flipX = false, flipY = false
+    /// A shape node's polygon, star, line or arrow, drawn in `frame` by ShapeRules; nil for every other
+    /// kind. Written only when set (shape-tools DS-1).
+    public var shape: ShapeSpec?
 
     public init(
         id: String, name: String, kind: DesignNodeKind, frame: DesignRect,
         children: [DesignNode] = [], isHidden: Bool = false, isLocked: Bool = false,
         fill: DesignColor? = nil, text: String = "", cornerRadius: Double = 0,
-        opacity: Double = 1, stroke: DesignStroke? = nil, textStyle: DesignTextStyle = .default
+        opacity: Double = 1, stroke: DesignStroke? = nil, textStyle: DesignTextStyle = .default,
+        gradient: Fill? = nil
     ) {
         (self.id, self.name, self.kind, self.frame) = (id, name, kind, frame)
         (self.children, self.isHidden, self.isLocked) = (children, isHidden, isLocked)
         (self.fill, self.text, self.cornerRadius) = (fill ?? kind.defaultFill, text, cornerRadius)
-        (self.opacity, self.stroke, self.textStyle) = (opacity, stroke, textStyle)
+        (self.opacity, self.stroke, self.textStyle, self.gradient) = (opacity, stroke, textStyle, gradient)
     }
 
     /// `node` with every field kept and the id replaced (duplicate, paste). A field added to
@@ -263,10 +277,14 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
             id: id, name: node.name, kind: node.kind, frame: node.frame, children: node.children,
             isHidden: node.isHidden, isLocked: node.isLocked, fill: node.fill, text: node.text,
             cornerRadius: node.cornerRadius, opacity: node.opacity, stroke: node.stroke, textStyle: node.textStyle)
+        gradient = node.gradient
+        rotation = node.rotation
+        (flipX, flipY) = (node.flipX, node.flipY)
+        shape = node.shape
     }
 
     /// Decodes a node; a field a file written before it existed lacks takes its default: square
-    /// corners, fully opaque, no stroke and the default text style.
+    /// corners, fully opaque, no stroke, the default text style, no gradient, upright and unmirrored, no shape spec.
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         try self.init(
@@ -278,7 +296,42 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
             cornerRadius: container.decodeIfPresent(Double.self, forKey: .cornerRadius) ?? 0,
             opacity: container.decodeIfPresent(Double.self, forKey: .opacity) ?? 1,
             stroke: container.decodeIfPresent(DesignStroke.self, forKey: .stroke),
-            textStyle: container.decodeIfPresent(DesignTextStyle.self, forKey: .textStyle) ?? .default)
+            textStyle: container.decodeIfPresent(DesignTextStyle.self, forKey: .textStyle) ?? .default,
+            gradient: container.decodeIfPresent(Fill.self, forKey: .gradient))
+        rotation = try container.decodeIfPresent(Double.self, forKey: .rotation) ?? 0
+        flipX = try container.decodeIfPresent(Bool.self, forKey: .flipX) ?? false
+        flipY = try container.decodeIfPresent(Bool.self, forKey: .flipY) ?? false
+        shape = try container.decodeIfPresent(ShapeSpec.self, forKey: .shape)
+    }
+
+    /// The file's keys, one per stored field.
+    enum CodingKeys: String, CodingKey {
+        case id, name, kind, frame, children, isHidden, isLocked, fill, text, cornerRadius, opacity, stroke, textStyle
+        case gradient, rotation, flipX, flipY, shape
+    }
+
+    /// Encodes a node as before transforms, adding the turn, each mirror and a shape's spec only when set, so a file of
+    /// upright nodes is written byte for byte as an older build wrote it.
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(kind, forKey: .kind)
+        try container.encode(frame, forKey: .frame)
+        try container.encode(children, forKey: .children)
+        try container.encode(isHidden, forKey: .isHidden)
+        try container.encode(isLocked, forKey: .isLocked)
+        try container.encode(fill, forKey: .fill)
+        try container.encode(text, forKey: .text)
+        try container.encode(cornerRadius, forKey: .cornerRadius)
+        try container.encode(opacity, forKey: .opacity)
+        try container.encodeIfPresent(stroke, forKey: .stroke)
+        try container.encode(textStyle, forKey: .textStyle)
+        try container.encodeIfPresent(gradient, forKey: .gradient)
+        if rotation != 0 { try container.encode(rotation, forKey: .rotation) }
+        if flipX { try container.encode(flipX, forKey: .flipX) }
+        if flipY { try container.encode(flipY, forKey: .flipY) }
+        try container.encodeIfPresent(shape, forKey: .shape)
     }
 
     /// Shifts this node and everything under it by `delta`.
@@ -399,7 +452,7 @@ extension [DesignNode] {
     func hit(at point: DesignPoint) -> String? {
         for node in reversed() where !node.isHidden && !node.isLocked {
             if let inner = node.children.hit(at: point) { return inner }
-            if node.frame.contains(point) { return node.id }
+            if node.contains(point) { return node.id }
         }
         return nil
     }

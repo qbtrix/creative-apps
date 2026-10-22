@@ -254,7 +254,7 @@ LibraryCatalog.init(services = .fake()):  every stored property at its default; 
 rebuildOrder():                                            # SP-8
   order = shownItems.sorted(by: sort).map(\.id)            # O(n log n), once per change
   call sites: load, setSort, selectCollection, recount after editSelected/recordEdit
-  (only when sort == .rating or the collection is Favorites, i.e. the change can reorder or hide)
+  (only when sort == .rating or the collection is Picks, i.e. the change can reorder or hide)
 
 recordEdit(name, coalesceKey, ids, edit):                  # SP-14 (SP-11 is only the value type)
   before = items for ids;  apply edit;  after = items for ids
@@ -398,7 +398,7 @@ Chain of 13: `PhotoItem` needs `PixelSize` (SP-1), the protocols take `DevelopSe
 | SP-6 | `LibraryServicesTests`: every member of `.fake(shoot)` answers once (the blueprint's `everyFakeAnswers`); `.live(...)` lists a reason for all eight `Live…` types and `help`-style texts are non-empty; `LiveThumbnails` and `LiveLoupeImaging` draw a sample (no `path`) and throw their reason for a photo with a `path`; `LiveCulling` applies a rating (the #750 inspector keeps working) | a stub throws for a sample, a reason is missing, or a fake isn't called |
 | SP-7 | `LibraryCatalogTests`: two catalogs that differ only in `services` (`.fake()` vs `.fake(mode: .fail)`) are `==`; two that differ in any one other stored property (each tried) are not; `LibraryCatalog()` builds with fake services and `autoAdvance == true`, `catalogState == .ready` | `==` compares services or skips a property |
 | SP-8 | `LibraryOrderTests`: `order` equals the old `sortedItems` ids after load, each sort, each collection, and a rating change under `.rating`; `orderRebuildWithinBudget`: rebuilding `order` for `large` (10,000) has median ≤ 50 ms in debug (5 ms release target, QB-LIB-3 model half), printed as a `LIBRARY-BUDGET` line; every existing grid, cell-size and emptiness test passes unchanged | the cache goes stale after a change, or the rebuild misses its budget |
-| SP-9 | `LibraryCollectionSwitchTests`: the issue's repro (open B, choose Favorites) gives grid, no focused photo, empty selection; a still-shown photo keeps the loupe | the loupe stays on a hidden photo |
+| SP-9 | `LibraryCollectionSwitchTests`: the issue's repro (open B, choose Picks) gives grid, no focused photo, empty selection; a still-shown photo keeps the loupe | the loupe stays on a hidden photo |
 | SP-10 | `LibraryPhotoIDTests`: loading `["a#2", "a", "a"]` keeps `a#2` and renames the second `a` to `a#3`; every existing id test passes | a photo's own id is taken by an earlier duplicate |
 | SP-11 | `LibraryHistoryTests` (the value type): pushing two steps and popping gives them back in reverse; a push clears redo; two pushes with one open `coalesceKey` keep one step whose `after` is the second's; an empty history has no top | the stack order or coalescing is wrong |
 | SP-14 | `LibraryHistoryTests`: a recorded rating edit gives `undoTitle == "Undo Set Rating"`, undo restores the photo exactly and leaves the loupe where it was, redo reapplies; three edits with one `coalesceKey` are one step until `endCoalescing()`; a no-op edit records nothing; a new edit clears redo | a gesture becomes two steps, undo moves the loupe, or a no-op is recorded |

@@ -9,13 +9,16 @@
 # Until beta only compile and Model tests block (captain, 2026-10-16). The
 # proof a head passed the gate is Linux-side: the worker's `Fast-Check: pass`
 # line followed by `Head: <full head sha>` in the body, or a passing CI
-# `Linux` check on the head. CI's `macOS` and `macOS journeys` jobs (each
-# also as `... (<app>)`) prove nothing for a PR, so the lane ignores them
-# (REPORT_ONLY_RE): a red or running one never holds a PR. A PR that changes code (BUILD_RE) also needs a
-# passing build-only CI run on its head (build_gate), which the lane
-# dispatches itself, once per head (workers get 403), scoped to the apps its
-# code touches (build_apps: main's scripts/test-scope build-apps; anything
-# shared, unknown or unreadable builds every app).
+# `Linux` check on the head. CI's `macOS` job and journeys.yml's `macOS
+# journeys` job (each also as `... (<app>)`) prove nothing for a PR, so the lane ignores them
+# (REPORT_ONLY_RE): a red or running one never holds a PR. macOS is gated
+# per batch, not per PR (below): a batch whose PRs change code (BUILD_RE)
+# lands only once its macOS gate is green too. LANE_MAC_PER_PR=1 is the
+# rollback to the per-PR gate: a code PR then also needs a passing build-only
+# CI run on its head (build_gate), which the lane dispatches itself, once per
+# head (workers get 403), scoped to the apps its code touches (build_apps:
+# main's scripts/test-scope build-apps; anything shared, unknown or
+# unreadable builds every app), and batches check Linux only.
 #
 # A crew PR into BASE_BRANCH with a `Belt-Lead:` body line and no `fast-lane`
 # label gets the label from the sweep (belt_label) unless it carries an
@@ -45,26 +48,41 @@
 # MERGEABLE again (checked each sweep, before the PR is evaluated), integrates
 # or merges.
 #
-# Every run sweeps all open fast-lane PRs, oldest first. Eligible PRs don't
-# merge one by one: with one ready PR the lane squash-merges it (land); with two
-# or more it builds a batch (batch_start): BASE_BRANCH plus every ready PR
-# merged in order on a scratch branch `lane/batch-<id>` (BATCH_PREFIX, merge
-# drivers on, one merge commit per PR whose subject names the PR and its head),
-# runs ONE Linux-only CI run on it and, when green, lands every PR in that
-# order (squash, head matched). A red batch is bisected by prefix on the same
-# branch (batch_resume): `lane/batch-<id>-<i>` points at the chain after i PRs
-# and gets its own Linux run, until PR hi is the first that turns the chain
-# red: PRs before it land, PR hi gets NEEDS_FIX_LABEL and one comment naming
-# the run, and the PRs after it wait for the next batch. When the red tip's
-# failed log holds only budget failures (vote_mode), each probe runs up to 3
+# Every run sweeps all open fast-lane PRs. Ready PRs land through batches
+# (batch_start), ordered p0, then beta, then the rest, oldest first within
+# each: BASE_BRANCH plus up to LANE_BATCH_MAX ready PRs merged in order on a
+# scratch branch `lane/batch-<id>` (BATCH_PREFIX, merge drivers on, one merge
+# commit per PR whose subject names the PR and its head). The batch gets one
+# Linux-only CI run and, when it changes code, one macOS gate run (ci.yml's
+# `mac_only`: scripts/ci on macOS scoped to BATCH_APPS, build-apps over the
+# batch's changed code, anything shared meaning every app). Its macOS pass is
+# that run's `macOS` job or a LOCAL_MAC_CONTEXT commit status (the local Mac
+# gate) on the batch head. When both are green every PR lands in order
+# (squash, head matched). A lone ready PR without code lands at once, as does
+# any lone PR with LANE_MAC_PER_PR=1; a lone code PR is a batch of one. A batch
+# that needs macOS forms when a slot frees (a batch resolved in this run),
+# when LANE_BATCH_MAX PRs are ready, or once the oldest ready head is
+# LANE_BATCH_WAIT_MIN minutes old, and never while the lane's own queued and
+# running macOS runs (mac_slots_busy) fill LANE_MAC_SLOTS. One batch runs at a
+# time: a second one off the same base would land untested with the first, so
+# until speculative batches exist the slots are a guard rail on the shared
+# macOS pool, not a second batch.
+# A red batch is bisected by prefix on the same branch (batch_resume):
+# `lane/batch-<id>-<i>` points at the chain after i PRs and gets the same
+# Linux and macOS runs, until PR hi is the first that turns the chain red: PRs
+# before it land, PR hi gets NEEDS_FIX_LABEL and one comment naming the
+# failing job, its run and the open PRs stacked on its branch, and the PRs
+# after it wait for the next batch. When the red tip's failed Linux log holds
+# only budget failures (vote_mode), each probe's Linux check runs up to 3
 # times and is called on 2 of 3, under the same MAX_BATCH probe cap, and a
-# value within BUDGET_NEAR of its budget makes that comment say "likely". The branch is the
-# whole state, so a later sweep resumes a batch a run left behind; while one is
-# in flight nothing else merges (one batch at a time, arrivals wait). A PR
-# whose head moved or that conflicts with an earlier PR in the batch waits for
-# the next sweep. A red base (the chain before any PR) means BASE_BRANCH itself
-# is red: the batch lands on the PRs' own proof, as before batches, so a fix
-# can get through.
+# value within BUDGET_NEAR of its budget makes that comment say "likely". The
+# branch is the whole state, so a later sweep resumes a batch a run left
+# behind; while one is in flight nothing else merges. A PR whose head moved or
+# that conflicts with an earlier PR in the batch waits for the next sweep. A
+# red base (the chain before any PR) means BASE_BRANCH itself is red: when it
+# is red on every job the tip is red on, the batch lands on the PRs' own proof,
+# as before batches, so a fix can get through; a job red only with the batch
+# is still bisected, with the base's red jobs set aside (BATCH_IGNORE).
 #
 # A red BASE_BRANCH gets its culprit found the same way (red_sweep): while a
 # `dev-red` issue for a red Linux job is open, each sweep bisects main..<red sha>
@@ -129,7 +147,7 @@ FEATURE_LABEL="feature-done"  # merging one dispatches full CI on BASE_BRANCH
 CI_WORKFLOWS=("CI")
 # CI job names, so CI runs started by workflow_dispatch (no PR association) still count.
 CI_CHECKS=("Linux")
-# CI's report-only jobs (ci.yml): never red, pending or proof here.
+# Report-only jobs (ci.yml's macOS, journeys.yml's macOS journeys), matched by name: never red, pending or proof here.
 REPORT_ONLY_RE='^macOS( journeys)?( \(.*\))?$'
 CI_FILE="ci.yml"  # the CI workflow file, dispatched on BASE_BRANCH after merges
 SELF_WORKFLOW="Fast Lane"
@@ -220,8 +238,23 @@ NEEDS_REBASE_LABEL="needs-rebase"
 # live at REMOTE; each merge commit's subject names the PR and the head merged.
 BATCH_PREFIX="lane/batch-"
 BATCH_SUBJECT_RE='^fast lane batch: PR #([0-9]+) at ([0-9a-f]{40})$'
-MAX_BATCH=8          # PRs per batch; a bisect then needs at most 4 probes
 NEEDS_FIX_LABEL="needs-fix"
+# The batch macOS gate. fast-lane.yml sets these from the repo variables of the
+# same names; unset or empty means the default here.
+case "${LANE_MAC_PER_PR:-0}" in 0) LANE_MAC_PER_PR=0 ;; *) LANE_MAC_PER_PR=1 ;; esac  # 1: the rollback (per-PR macOS build, Linux-only batches)
+LANE_MAC_SLOTS="${LANE_MAC_SLOTS:-4}"            # lane macOS runs queued or running before no batch forms (5 hosted runners, one kept for dev)
+LANE_BATCH_MAX="${LANE_BATCH_MAX:-12}"           # PRs per batch, and probes per bisect (12 PRs need at most 4)
+LANE_BATCH_WAIT_MIN="${LANE_BATCH_WAIT_MIN:-10}" # with no slot just freed, form once the oldest ready head is this old (minutes)
+[[ "$LANE_MAC_SLOTS" =~ ^[0-9]+$ ]] || LANE_MAC_SLOTS=4
+[[ "$LANE_BATCH_MAX" =~ ^[1-9][0-9]*$ ]] || LANE_BATCH_MAX=12
+[[ "$LANE_BATCH_WAIT_MIN" =~ ^[0-9]+$ ]] || LANE_BATCH_WAIT_MIN=10
+MAX_BATCH="$LANE_BATCH_MAX"
+MAC_GATE_TITLE="macOS gate"         # ci.yml's run-name for a mac_only run ("macOS gate: <apps>" when scoped)
+MAC_GATE_RE='^macOS( \(.*\))?$'     # its job, full or scoped; never "macOS build" or "macOS journeys"
+LOCAL_MAC_CONTEXT="local-ci/macos"  # the local Mac gate's commit status, a macOS pass like the job
+SLOT_FREED=0     # a batch resolved in this run: the next one forms without the timer
+BATCH_APPS=""    # the batch being resumed: its macOS gate scope (apps, all, or empty for no macOS gate)
+BATCH_IGNORE=""  # its jobs red on BASE_BRANCH alone (Linux, macOS), set aside while bisecting
 # After starting a Linux run on a batch, wait this long (seconds, polling
 # every BATCH_POLL) for its verdict in the same run before leaving the rest to
 # the next sweep. Tests set it to 0.
@@ -652,11 +685,14 @@ decide() {
     log "belt review: $review"
   fi
 
-  # A code PR's macOS build check is build_gate's to judge, so it leaves the
-  # red and running lists below.
-  local mac macdrop=""
-  mac=$(build_gate "$pr" "$files" "${6:-}" "${8:-}")
-  [[ -z "$mac" ]] || macdrop="$BUILD_JOB"
+  # With LANE_MAC_PER_PR=1 a code PR's macOS build check is build_gate's to
+  # judge; without it macOS is the batch's gate and a per-PR build proves
+  # nothing. Either way it leaves the red and running lists below.
+  local mac="" macdrop="$BUILD_JOB"
+  if (( LANE_MAC_PER_PR )); then
+    mac=$(build_gate "$pr" "$files" "${6:-}" "${8:-}")
+    [[ -n "$mac" ]] || macdrop=""
+  fi
 
   # Drop our own check, CI's report-only macOS jobs, Belt's review and
   # Copilot review checks, then classify the rest.
@@ -807,30 +843,159 @@ dispatch_linux() {
   write gh workflow run "$CI_FILE" -R "$REPO" -f linux_only=true --ref "$1" || log "could not dispatch the Linux check on $1"
 }
 
-# settle_ready: what the pass found eligible (READY: n|head|branch|proof). One
-# PR lands as before; two or more become a batch; while a batch is in flight
-# they all wait.
+# dispatch_mac <branch> <key>: ci.yml's macOS gate alone (mac_only) on
+# <branch>, scoped to BATCH_APPS, once per key per call like dispatch_linux.
+dispatch_mac() {
+  local app=()
+  case "$DISPATCHED" in *" $2 "*) log "macOS gate on $1 just started; waiting for it to show up"; return 0 ;; esac
+  DISPATCHED+=" $2 "
+  [[ "$BATCH_APPS" == all ]] || app=(-f app="$BATCH_APPS")
+  write gh workflow run "$CI_FILE" -R "$REPO" -f mac_only=true ${app[@]+"${app[@]}"} --ref "$1" || log "could not dispatch the macOS gate on $1"
+}
+
+# mac_verdict <sha>: the macOS gate on <sha>, from the newest MAC_GATE_RE check
+# run and the LOCAL_MAC_CONTEXT commit status; a pass from either counts:
+#   none   running   green|<url>   red|<url>|<job>
+# Any other conclusion (cancelled, timed out) is red, as check_verdict reads
+# Linux. An unreadable API answers running, so a blip never starts a second run.
+mac_verdict() {
+  local runs st
+  runs=$(gh api "repos/$REPO/commits/$1/check-runs?per_page=100" --jq '.check_runs' 2>/dev/null) || { echo running; return; }
+  st=$(gh api "repos/$REPO/commits/$1/status" --jq '.statuses' 2>/dev/null) || { echo running; return; }
+  jq -rn --argjson runs "${runs:-[]}" --argjson st "${st:-[]}" --arg re "$MAC_GATE_RE" --arg ctx "$LOCAL_MAC_CONTEXT" '
+    def lc: (. // "") | ascii_downcase;
+    ([ $runs[] | select((.name // "" | test($re)) and .conclusion != "action_required") ] | sort_by(.started_at // "") | last) as $r
+    | ([ $st[] | select(.context == $ctx) ] | first) as $s
+    | (if $r == null then "none" elif ($r.status | lc) != "completed" then "running"
+       elif ($r.conclusion | lc) == "success" then "green|\($r.details_url // $r.html_url // "")"
+       else "red|\($r.details_url // $r.html_url // "")|\($r.name)" end) as $gh
+    | (if $s == null then "none" elif ($s.state | lc) == "success" then "green|\($s.target_url // "")"
+       elif ($s.state | lc) == "pending" then "running" else "red|\($s.target_url // "")|\($ctx)" end) as $loc
+    | [$gh, $loc] as $v
+    | first(($v[] | select(startswith("green|"))), ($v[] | select(startswith("red|"))),
+            ($v[] | select(. == "running")), "none")' 2>/dev/null || echo running
+}
+
+# batch_verdict <sha> <mode>: a chain commit's verdict from its Linux run(s)
+# (vote mode: probe_votes) and, when the batch has one (BATCH_APPS), its macOS
+# gate, then a tab and the Linux run count. A job in BATCH_IGNORE counts as
+# green. red|<url>|<job> when a job is red (Linux first), else none, more (a
+# vote wants another run) or running when either is, else green|<urls>.
+batch_verdict() {
+  local l n=0 m="green|" v
+  if [[ -n "$2" ]]; then v=$(probe_votes "$1"); l="${v%%$'\t'*}" n="${v##*$'\t'}"; else l=$(check_verdict "$1"); fi
+  [[ "$l" != red* ]] || l="$l|Linux"
+  [[ " $BATCH_IGNORE " != *" Linux "* ]] || l="green|"
+  [[ -z "$BATCH_APPS" || " $BATCH_IGNORE " == *" macOS "* ]] || m=$(mac_verdict "$1")
+  for v in "$l" "$m"; do [[ "$v" != red* ]] || { printf '%s\t%s\n' "$v" "$n"; return; }; done
+  for v in none more running; do
+    [[ "$l" != "$v" && "$m" != "$v" ]] || { printf '%s\t%s\n' "$v" "$n"; return; }
+  done
+  v="${l#green|}"; m="${m#green|}"
+  printf 'green|%s\t%s\n' "$v${v:+${m:+, }}$m" "$n"
+}
+
+# red_jobs <sha>: the jobs red on <sha> (Linux, and macOS when the batch has
+# a macOS gate), space-separated.
+red_jobs() {
+  local j=""
+  [[ "$(check_verdict "$1")" != red* ]] || j="Linux"
+  [[ -z "$BATCH_APPS" || "$(mac_verdict "$1")" != red* ]] || j="${j:+$j }macOS"
+  echo "$j"
+}
+
+# settled <sha>: true when every job the batch runs (Linux, and its macOS gate
+# when it has one) has finished on <sha>, green or red.
+settled() {
+  [[ "$(check_verdict "$1")" =~ ^(green|red) ]] || return 1
+  [[ -z "$BATCH_APPS" ]] || [[ "$(mac_verdict "$1")" =~ ^(green|red) ]]
+}
+
+# batch_dispatch <ref> <sha> <key> [<mode>]: starts what the chain commit
+# <sha> lacks on <ref>: its Linux run (in vote mode, another one while the
+# vote is open) and, when the batch has one, its macOS gate. Jobs in
+# BATCH_IGNORE are not run.
+batch_dispatch() {
+  local v
+  if [[ " $BATCH_IGNORE " != *" Linux "* ]]; then
+    if [[ -n "${4:-}" ]]; then v=$(probe_votes "$2"); v="${v%%$'\t'*}"; else v=$(check_verdict "$2"); fi
+    case "$v" in none|more) dispatch_linux "$1" "$3" ;; esac
+  fi
+  if [[ -n "$BATCH_APPS" && " $BATCH_IGNORE " != *" macOS "* && "$(mac_verdict "$2")" == none ]]; then
+    dispatch_mac "$1" "$1#mac"
+  fi
+}
+
+# batch_apps <base sha> <tip sha>: the batch's macOS gate scope: build-apps
+# over the code (BUILD_RE) it changes, `all` for anything shared or when the
+# diff can't be read, nothing when it changes no code or LANE_MAC_PER_PR=1.
+batch_apps() {
+  local f
+  (( ! LANE_MAC_PER_PR )) || return 0
+  f=$(mktemp)
+  git -C "$SCRATCH" diff --no-renames --name-only "$1" "$2" >"$f" 2>/dev/null || echo Package.swift >"$f"
+  [[ -z "$(build_paths "$f")" ]] || build_apps "$f"
+  rm -f "$f"
+}
+
+# mac_slots_busy: the lane's own queued and running macOS runs on ci.yml
+# (macOS gates, and per-PR builds); LANE_MAC_SLOTS when they can't be listed,
+# so a blind sweep forms no batch that needs macOS.
+mac_slots_busy() {
+  local n
+  n=$(gh run list -R "$REPO" --workflow "$CI_FILE" --limit 100 --json status,displayTitle \
+    --jq "[.[] | select(.status != \"completed\" and ((.displayTitle | startswith(\"$MAC_GATE_TITLE\")) or .displayTitle == \"$BUILD_TITLE\"))] | length" 2>/dev/null) || n=""
+  [[ "$n" =~ ^[0-9]+$ ]] || n="$LANE_MAC_SLOTS"
+  echo "$n"
+}
+
+# settle_ready: what the pass found eligible (READY:
+# rank|n|head|branch|apps|since|proof), ordered p0, beta, the rest, then
+# oldest. While a batch is in flight they all wait. A lone PR that needs no
+# macOS lands as before; anything else becomes a batch, at once when none of
+# it needs macOS, otherwise when a macOS slot is free and one of: a batch
+# resolved in this run, LANE_BATCH_MAX are ready, or the oldest has been
+# ready LANE_BATCH_WAIT_MIN minutes.
 settle_ready() {
-  local items=("${READY[@]+"${READY[@]}"}") n head branch proof
+  local items=() it apps need=0 n head proof busy oldest now
+  while IFS= read -r it; do [[ -z "$it" ]] || items+=("$it"); done \
+    < <(printf '%s\n' ${READY[@]+"${READY[@]}"} | sort -t'|' -k1,1n -k2,2n)
   READY=()
   (( ${#items[@]} )) || return 0
   if (( HOLD )); then log "a batch is in flight: ${#items[@]} ready PR(s) wait for the next sweep"; return 0; fi
-  if (( ${#items[@]} == 1 )); then
-    IFS='|' read -r n head branch proof <<<"${items[0]}"
+  if (( ! LANE_MAC_PER_PR )); then
+    for it in "${items[@]}"; do IFS='|' read -r _ _ _ _ apps _ <<<"$it"; [[ -z "$apps" ]] || need=1; done
+  fi
+  if (( ${#items[@]} == 1 && ! need )); then
+    IFS='|' read -r _ n head _ _ _ proof <<<"${items[0]}"
     land "$n" "$head" "$proof" || true
     return 0
+  fi
+  if (( need )); then
+    busy=$(mac_slots_busy)
+    if (( busy >= LANE_MAC_SLOTS )); then
+      log "batch: the lane's macOS runs fill its slots ($busy of $LANE_MAC_SLOTS queued or running); ${#items[@]} ready PR(s) wait"; return 0
+    fi
+    oldest=$(printf '%s\n' "${items[@]}" | cut -d'|' -f6 | sort -n | head -1); now=$(date -u +%s)
+    if (( ! SLOT_FREED && ${#items[@]} < LANE_BATCH_MAX && now - oldest < LANE_BATCH_WAIT_MIN * 60 )); then
+      log "batch: ${#items[@]} ready PR(s); it forms at $LANE_BATCH_MAX, when a slot frees, or once the oldest is $LANE_BATCH_WAIT_MIN min old ($(( (now - oldest) / 60 )) min now)"
+      return 0
+    fi
   fi
   batch_start "${items[@]}"
 }
 
-# batch_start <n|head|branch|proof>...: BASE_BRANCH plus the ready
-# PRs in order on a scratch branch, pushed as lane/batch-<id> with one Linux run
-# started, then batch_resume on it. A PR whose branch can't be fetched or moved
-# past its head, or that conflicts with an earlier PR in the batch, waits for
-# the next sweep. Fewer than two PRs left makes no batch: one lands as before.
+# batch_start <rank|n|head|branch|apps|since|proof>...: BASE_BRANCH plus the
+# ready PRs in order on a scratch branch, pushed as lane/batch-<id>, then
+# batch_resume on it (which starts its checks). A PR whose branch can't be
+# fetched or moved past its head, or that conflicts with an earlier PR in the
+# batch, waits for the next sweep. If only one PR joins and it needs no macOS
+# gate, it lands as before.
 batch_start() {
-  local items=("$@") it n head branch merged=() d id br
-  if (( DRY_RUN )); then log "dry-run, would batch ${#items[@]} PRs: $(printf '#%s ' "${items[@]%%|*}")"; return 0; fi
+  local items=("$@") it n head branch apps proof merged=() d id br
+  if (( DRY_RUN )); then
+    log "dry-run, would batch ${#items[@]} PRs: $(for it in "${items[@]}"; do IFS='|' read -r _ n _ <<<"$it"; printf '#%s ' "$n"; done)"; return 0
+  fi
   if ! scratch "$BASE_BRANCH"; then log "batch: could not fetch $BASE_BRANCH from $REMOTE; the ready PRs wait for the next sweep"; return 0; fi
   d="$SCRATCH"
   if ! git -C "$d" checkout -q -B batch "origin/$BASE_BRANCH" 2>/dev/null || ! bash "$HERE/install-merge-drivers" "$d" >/dev/null 2>&1; then
@@ -838,7 +1003,7 @@ batch_start() {
   fi
   for it in "${items[@]}"; do
     (( ${#merged[@]} < MAX_BATCH )) || { log "batch: full at $MAX_BATCH PRs; the rest wait"; break; }
-    IFS='|' read -r n head branch _ <<<"$it"
+    IFS='|' read -r _ n head branch _ <<<"$it"
     if ! scratch "$branch"; then log "batch: #$n: could not fetch $branch; it waits"; continue; fi
     if [[ "$(git -C "$d" rev-parse "origin/$branch" 2>/dev/null)" != "$head" ]]; then log "batch: #$n: $branch moved past $head; it waits"; continue; fi
     if git -C "$d" -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
@@ -849,31 +1014,36 @@ batch_start() {
       log "batch: #$n conflicts with an earlier PR in the batch; it waits for the next one"
     fi
   done
-  if (( ${#merged[@]} < 2 )); then
-    log "batch: ${#merged[@]} PR(s) could join; no batch"
-    (( ${#merged[@]} == 0 )) || { READY=("${merged[0]}"); settle_ready; }
+  (( ${#merged[@]} )) || { log "batch: no PR could join; no batch"; return 0; }
+  IFS='|' read -r _ n head _ apps _ proof <<<"${merged[0]}"
+  if (( ${#merged[@]} == 1 )) && { (( LANE_MAC_PER_PR )) || [[ -z "$apps" ]]; }; then
+    log "batch: only #$n could join and it needs no macOS gate; no batch"
+    land "$n" "$head" "$proof" || true
     return 0
   fi
   id=$(date -u +%Y%m%d%H%M%S); br="${BATCH_PREFIX}$id"
   if ! git -C "$d" push -q origin "HEAD:refs/heads/$br" 2>/dev/null; then log "batch: could not push $br; the ready PRs wait"; return 0; fi
-  log "batch $br: ${#merged[@]} PRs ($(printf '#%s ' "${merged[@]%%|*}")), one Linux check"
+  log "batch $br: ${#merged[@]} PRs ($(for it in "${merged[@]}"; do IFS='|' read -r _ n _ <<<"$it"; printf '#%s ' "$n"; done))"
   batch_resume "$br"
   [[ "$BATCH_STATE" != waiting ]] || HOLD=1
 }
 
 # batch_resume <branch>: reads the batch chain (BASE_BRANCH, then one merge
-# commit per PR) and the Linux verdicts on its tip and probes, acts, and sets
-# BATCH_STATE to done (the branch is gone) or waiting (a run is still going;
-# nothing else merges meanwhile). Red tip: a prefix bisect with lo = the
-# longest green prefix, hi = the shortest red one; the probe is their midpoint;
-# hi = lo + 1 names the culprit. Probe 0 is the base alone and is only asked
-# for when PR 1 is the suspect: a red base means BASE_BRANCH is red, and the
-# batch lands on the PRs' own proof so a fix can get through.
+# commit per PR), its macOS scope (batch_apps over the chain) and the verdicts
+# on its tip and probes (batch_verdict), acts, and sets BATCH_STATE to done
+# (the branch is gone) or waiting (a run is still going; nothing else merges
+# meanwhile). Red tip: a prefix bisect with lo = the longest green prefix,
+# hi = the shortest red one; the probe is their midpoint; hi = lo + 1 names
+# the culprit. Probe 0 is the base alone and is only asked for when PR 1 is
+# the suspect: a base red on every job the tip is red on means BASE_BRANCH is
+# red, and the batch lands on the PRs' own proof so a fix can get through; a
+# base red on fewer jobs has those set aside (BATCH_IGNORE) and the bisect
+# goes on with the rest.
 BATCH_STATE=""
 batch_resume() {
-  local br="$1" d k i sha v lo hi mid url waited=0 line probes mode="" moded=0
+  local br="$1" d k i sha v lo hi mid waited=0 line probes mode="" moded=0 bj tj on
   local chain=() verd=() nruns=()
-  DISPATCHED=""; BATCH_STATE=waiting
+  DISPATCHED=""; BATCH_STATE=waiting; BATCH_IGNORE=""; BATCH_APPS=""
   if ! scratch "$BASE_BRANCH" "$br"; then log "batch $br: could not fetch it; the next sweep tries again"; return; fi
   d="$SCRATCH"
   while read -r sha line; do
@@ -883,11 +1053,14 @@ batch_resume() {
   k=${#chain[@]}
   if (( k == 0 )); then log "batch $br: nothing left to land; dropping it"; batch_drop "$br"; BATCH_STATE=done; return; fi
   chain=("$(git -C "$d" rev-parse "origin/$br~$k")||" "${chain[@]}")  # [0] = the base
+  BATCH_APPS=$(batch_apps "${chain[0]%%|*}" "${chain[k]%%|*}")
+  on="Linux${BATCH_APPS:+ and macOS}"
+  log "batch $br: $k PR(s), checked on Linux${BATCH_APPS:+ and macOS ($BATCH_APPS)}"
   while :; do
     for (( i = 0; i <= k; i++ )); do verd[i]=""; nruns[i]=0; done
-    verd[k]=$(check_verdict "${chain[k]%%|*}")
-    # Vote mode is read once per call, from the red tip's failed log.
-    if (( ! moded )) && [[ "${verd[k]}" == red* ]]; then
+    v=$(batch_verdict "${chain[k]%%|*}" ""); verd[k]="${v%%$'\t'*}"
+    # Vote mode is read once per call, from a red tip's failed Linux log.
+    if (( ! moded )) && [[ "${verd[k]}" == red*"|Linux" ]]; then
       moded=1; mode=$(vote_mode "${verd[k]}")
       [[ -z "$mode" ]] || log "batch $br: the tip fails only a budget test (${mode#* }); each probe votes 2 of 3"
     fi
@@ -896,27 +1069,33 @@ batch_resume() {
       [[ -n "$line" ]] || continue
       i="${line##*-}"
       (( i >= 0 && i < k )) && [[ "${chain[i]%%|*}" == "$sha" ]] || continue
-      if [[ -n "$mode" ]]; then
-        v=$(probe_votes "$sha"); verd[i]="${v%%$'\t'*}" nruns[i]="${v##*$'\t'}"
-      else
-        verd[i]=$(check_verdict "$sha")
-      fi
+      v=$(batch_verdict "$sha" "$mode"); verd[i]="${v%%$'\t'*}" nruns[i]="${v##*$'\t'}"
     done <<<"$probes"
     v="${verd[k]}"
     if (( DRY_RUN )); then log "dry-run: batch $br ($k PRs) tip is $v; probes: $(printf '%s ' "${verd[@]}")"; return; fi
     case "$v" in
-      none) log "batch $br: no Linux run on its tip; starting one"; dispatch_linux "$br" ;;
-      running) log "batch $br: Linux check running" ;;
+      none) log "batch $br: its tip lacks a check; starting it"; batch_dispatch "$br" "${chain[k]%%|*}" "$br" ;;
+      running) log "batch $br: checks running" ;;
       green*)
-        batch_land "$br" "$k" "batch of $k PRs checked together on Linux: ${v#green|}" "${chain[@]}"
+        batch_land "$br" "$k" "batch of $k PRs checked together on $on${BATCH_IGNORE:+ ($BATCH_IGNORE red on $BASE_BRANCH alone, set aside)}: ${v#green|}" "${chain[@]}"
         BATCH_STATE=done; return ;;
       red*)
         lo=-1; hi=$k
         case "${verd[0]}" in
           red*)
-            log "batch $br: $BASE_BRANCH itself is red (${verd[0]#red|}); landing on the PRs' own proof"
-            batch_land "$br" "$k" "$BASE_BRANCH was red on its own (${verd[0]#red|}), so this batch landed on each PR's own proof" "${chain[@]}"
-            BATCH_STATE=done; return ;;
+            bj=$(red_jobs "${chain[0]%%|*}"); tj=$(red_jobs "${chain[k]%%|*}"); line="${verd[0]#red|}"; line="${line%%|*}"
+            # Own proof only once every job on the tip has finished: a macOS gate
+            # still running must not land code unproven. Until then the base's
+            # red jobs are set aside below, so the tip waits on the rest.
+            if settled "${chain[k]%%|*}" && [[ -n "$tj" && -z "$(comm -23 <(tr ' ' '\n' <<<"$tj" | sort) <(tr ' ' '\n' <<<"$bj" | sort) | grep . || true)" ]]; then
+              log "batch $br: $BASE_BRANCH itself is red ($bj: $line); landing on the PRs' own proof"
+              batch_land "$br" "$k" "$BASE_BRANCH was red on its own ($line), so this batch landed on each PR's own proof" "${chain[@]}"
+              BATCH_STATE=done; return
+            fi
+            if [[ "$bj" != "$BATCH_IGNORE" ]]; then
+              log "batch $br: $BASE_BRANCH is red on $bj on its own, the tip on $tj; setting $bj aside"
+              BATCH_IGNORE="$bj"; continue
+            fi ;;
           green*) lo=0 ;;
         esac
         for (( i = 1; i < k; i++ )); do
@@ -926,10 +1105,10 @@ batch_resume() {
           batch_culprit "$br" "$lo" "$hi" "${verd[hi]#red|}" "$mode" "${chain[@]}"
           BATCH_STATE=done; return
         elif (( lo == -1 && hi == 1 )); then
-          batch_probe "$br" 0 "${chain[0]%%|*}" "${verd[0]}" "${nruns[0]}"
+          batch_probe "$br" 0 "${chain[0]%%|*}" "${verd[0]}" "${nruns[0]}" "$mode"
         else
           mid=$(( ( (lo < 0 ? 0 : lo) + hi ) / 2 ))
-          batch_probe "$br" "$mid" "${chain[mid]%%|*}" "${verd[mid]}" "${nruns[mid]}"
+          batch_probe "$br" "$mid" "${chain[mid]%%|*}" "${verd[mid]}" "${nruns[mid]}" "$mode"
         fi ;;
     esac
     if (( waited >= BATCH_WAIT )); then return; fi
@@ -937,11 +1116,12 @@ batch_resume() {
   done
 }
 
-# batch_probe <branch> <i> <sha> <verdict> [<runs>]: makes sure the chain after
-# i PRs has a Linux run: pushes lane/batch-<id>-<i> at <sha> and dispatches when
-# there is none, or when a vote (verdict `more`) needs another; says so when one
-# is running. The dispatch key carries the run count, so a vote's next run can
-# start in the same call once the last one is in.
+# batch_probe <branch> <i> <sha> <verdict> [<runs> [<mode>]]: makes sure the
+# chain after i PRs has its checks: pushes lane/batch-<id>-<i> at <sha> and
+# starts them when there is none, or starts what is missing (a vote's next
+# Linux run, verdict `more`); says so when they are running. The Linux
+# dispatch key carries the run count, so a vote's next run can start in the
+# same call once the last one is in.
 batch_probe() {
   local br="$1" i="$2" sha="$3" v="$4" key="$1-$2#${5:-0}"
   case "$v" in
@@ -951,9 +1131,9 @@ batch_probe() {
         log "batch $br: too many probes; dropping the batch, its PRs wait"; batch_drop "$br"; return
       fi
       if git -C "$SCRATCH" push -q origin "$sha:refs/heads/$br-$i" 2>/dev/null; then
-        log "batch $br: probing the chain after $i PR(s)"; dispatch_linux "$br-$i" "$key"
+        log "batch $br: probing the chain after $i PR(s)"; batch_dispatch "$br-$i" "$sha" "$key" "${6:-}"
       else log "batch $br: could not push probe $i; the next sweep tries again"; fi ;;
-    *) log "batch $br: probe $i needs a run (${5:-0} so far)"; dispatch_linux "$br-$i" "$key" ;;
+    *) log "batch $br: probe $i needs a run (${5:-0} Linux so far)"; batch_dispatch "$br-$i" "$sha" "$key" "${6:-}" ;;
   esac
 }
 
@@ -970,21 +1150,28 @@ batch_land() {
   batch_drop "$br"
 }
 
-# batch_culprit <branch> <lo> <hi> <run url> <mode> <chain...>: PRs 1..lo land,
-# PR hi gets NEEDS_FIX_LABEL and one comment (with vote_note's sentences for a
-# vote_mode <mode>), the rest wait for the next batch. The comment's first
-# words are what evaluate looks for to hold the label at that head.
+# batch_culprit <branch> <lo> <hi> <run url>|<job> <mode> <chain...>: PRs
+# 1..lo land, PR hi gets NEEDS_FIX_LABEL and one comment naming the failing
+# job and run (with vote_note's sentences for a vote_mode <mode>) and the open
+# PRs based on its branch, the rest wait for the next batch. The comment's
+# first words are what evaluate looks for to hold the label at that head.
 batch_culprit() {
-  local br="$1" lo="$2" hi="$3" url="$4" mode="$5"; shift 5
-  local chain=("$@") n head after="" i pn
+  local br="$1" lo="$2" hi="$3" url="${4%%|*}" job="Linux" mode="$5"
+  [[ "$4" != *"|"* ]] || job="${4##*|}"
+  shift 5
+  local chain=("$@") n head after="" i pn hbr deps=""
   IFS='|' read -r _ n head <<<"${chain[hi]}"
   for (( i = 1; i <= lo; i++ )); do IFS='|' read -r _ pn _ <<<"${chain[i]}"; after+="${after:+, }#$pn"; done
-  log "batch $br: PR #$n at $head is the culprit ($url${mode:+, $mode})"
+  # Stacked dependents (a lead's next slice is based on this branch) wait with it.
+  hbr=$(gh pr view "$n" -R "$REPO" --json headRefName --jq .headRefName 2>/dev/null || true)
+  [[ -z "$hbr" ]] || deps=$(gh pr list -R "$REPO" --state open --limit 100 --json number,baseRefName 2>/dev/null \
+    | jq -r --arg b "$hbr" '[.[] | select(.baseRefName == $b) | "#\(.number)"] | join(", ")' 2>/dev/null || true)
+  log "batch $br: PR #$n at $head is the culprit ($job: $url${mode:+, $mode}${deps:+; stacked on it: $deps})"
   write gh label create "$NEEDS_FIX_LABEL" -R "$REPO" --color d93f0b --force \
-    --description "The lane's Linux check fails with this PR on dev; push a fix" >/dev/null 2>&1 || true
+    --description "The lane's batch check fails with this PR on dev; push a fix" >/dev/null 2>&1 || true
   write gh pr edit "$n" -R "$REPO" --add-label "$NEEDS_FIX_LABEL" || log "could not add $NEEDS_FIX_LABEL"
-  comment_once "$n" "Fast lane: head $head fails the Linux check once it lands on $BASE_BRANCH${after:+ after $after}: $url.$(vote_note "$mode") ${after:+Those PRs merged; }This one has the $NEEDS_FIX_LABEL label and waits. Fix it, rerun scripts/ci --changed, push, and move the Head: line; the lane drops the label on the new head and checks it again."
-  batch_land "$br" "$lo" "batch of $lo PRs checked together on Linux before #$n broke the chain" "${chain[@]}"
+  comment_once "$n" "Fast lane: head $head fails the $job check once it lands on $BASE_BRANCH${after:+ after $after}: $url.$(vote_note "$mode") ${after:+Those PRs merged; }This one has the $NEEDS_FIX_LABEL label and waits.${deps:+ Stacked on its branch: $deps, which wait for the fix; restack them on it.} Fix it, rerun scripts/ci --changed, push, and move the Head: line; the lane drops the label on the new head and checks it again."
+  batch_land "$br" "$lo" "batch of $lo PRs checked together on Linux${BATCH_APPS:+ and macOS} before #$n broke the chain" "${chain[@]}"
 }
 
 # batch_drop <branch>: deletes the batch branch and its probes at REMOTE.
@@ -1270,7 +1457,7 @@ evaluate() {
   # A batch's culprit (NEEDS_FIX_LABEL) waits at the head the lane named; a new
   # head gets the label dropped and a fresh look.
   if jq -e --arg l "$NEEDS_FIX_LABEL" '[.labels[]?.name] | index($l) != null' "$tmp/pr.json" >/dev/null; then
-    if has_comment "$n" "Fast lane: head $head fails the Linux check"; then
+    if has_comment "$n" "Fast lane: head $head fails the "; then
       log "PR #$n: $NEEDS_FIX_LABEL at head $head; waiting for a fix"; rm -rf "$tmp"; return
     fi
     write gh pr edit "$n" -R "$REPO" --remove-label "$NEEDS_FIX_LABEL" || log "could not remove $NEEDS_FIX_LABEL"
@@ -1312,7 +1499,7 @@ evaluate() {
   # build-only run on the head. A failed run list skips the PR this sweep, so
   # an API hiccup never dispatches a second build for one head.
   local mac=() id fields=workflowName,status,conclusion,headSha,jobs,url
-  if [[ -n "$(build_paths "$tmp/files.txt")" ]]; then
+  if (( LANE_MAC_PER_PR )) && [[ -n "$(build_paths "$tmp/files.txt")" ]]; then
     echo '{}' >"$tmp/mac.json"
     id=$(mac_run_id "$(mac_check_url "$tmp/pr.json")")
     if [[ -n "$id" ]]; then
@@ -1409,7 +1596,7 @@ evaluate() {
       done
       [[ -n "$url" ]] || url="https://github.com/$REPO/actions/workflows/$CI_FILE?query=branch%3A$branch"
       if [[ "$kind" == linux-dispatch ]]; then
-        comment_once "$n" "Fast lane: nothing on head $head proves it yet (no CI check, no Fast-Check marker for it), so the lane started a Linux check on head $head: $url. A later sweep merges this PR once it passes (a code PR gets its macOS build on this head first)."
+        comment_once "$n" "Fast lane: nothing on head $head proves it yet (no CI check, no Fast-Check marker for it), so the lane started a Linux check on head $head: $url. A later sweep merges this PR once it passes ($( (( LANE_MAC_PER_PR )) && echo "a code PR gets its macOS build on this head first" || echo "a code PR's macOS gate runs with its batch" ))."
       else
         comment_once "$n" "Fast lane: this PR changes code ($what), so its head $head must build on macOS first. The lane dispatched a macOS build on $branch ($( [[ "$apps" == all ]] && echo "every app" || echo "apps: $apps" )): $url. A later sweep merges this PR once it compiles; a new push gets a new build."
       fi
@@ -1430,8 +1617,16 @@ evaluate() {
       fi
       ;;
     eligible)
-      # settle_ready lands it, or batches it with the pass's other eligible PRs.
-      READY+=("$n|$head|$(jq -r '.headRefName // ""' "$tmp/pr.json")|${rest#*|*|}")
+      # settle_ready lands it, or batches it with the pass's other eligible PRs:
+      # rank|n|head|branch|apps|ready since|proof. rank orders p0, beta, the
+      # rest; apps is what its code needs on macOS (empty: no code).
+      # ponytail: "ready since" is the head commit's date (no state is kept),
+      # unreadable counts as old: a smaller batch, never a stuck one.
+      local apps="" rank since
+      [[ -z "$(build_paths "$tmp/files.txt")" ]] || apps=$(build_apps "$tmp/files.txt")
+      rank=$(jq -r '[.labels[]?.name] as $l | if ($l | index("p0")) then 0 elif ($l | index("beta")) then 1 else 2 end' "$tmp/pr.json")
+      since=$(jq -r '(.commits // [] | last // {} | .committedDate // "") as $d | if $d == "" then 0 else ($d | try fromdateiso8601 catch 0) end' "$tmp/pr.json" 2>/dev/null || echo 0)
+      READY+=("$rank|$n|$head|$(jq -r '.headRefName // ""' "$tmp/pr.json")|$apps|$since|${rest#*|*|}")
       ;;
   esac
   rm -rf "$tmp"
@@ -1576,7 +1771,7 @@ main() {
   while read -r _ br; do
     [[ "$br" =~ ^${BATCH_PREFIX}[0-9]+$ ]] || continue  # probes (<batch>-<i>) belong to their batch
     batch_resume "$br"
-    [[ "$BATCH_STATE" != waiting ]] || HOLD=1
+    if [[ "$BATCH_STATE" == waiting ]]; then HOLD=1; else SLOT_FREED=1; fi
   done < <(batch_branches)
   local explicit=${#prs[@]}
   if (( explicit == 0 )); then

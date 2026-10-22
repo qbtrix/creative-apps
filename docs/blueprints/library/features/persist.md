@@ -47,7 +47,7 @@ journey's `-LibraryCatalogDir`.
    label the third Red.
 2. Wait for `saved`; `terminate()`; relaunch with no import. Shot
    `relaunched`. Expect 6 cells, the first `4 stars`, the second `Picked`,
-   the third `Red`, Favorites 1.
+   the third `Red`, Picks 1.
 3. Delete `day2/`; relaunch. Shot `missing-files`. Expect those two cells
    `unreadable` with help "The file is missing." (cell values and help
    once #779 has merged; before it, open the photo in the loupe: the
