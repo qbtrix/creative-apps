@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 1792636227	-	watch	FO-z	#4238 (b5a6e7e) fixes the SuiteModel format ratchet; Linux check 39710840412 at b5a6e7e running; FO-z closes on it if Linux and C job RJ-L53 are green
 1792636776	-	done	FO-z	slice done + contact sheet on #3787
 1792637141	-	watch	FO-z	Heartbeat: folders complete; LJ-FO waits on the journeys run after 39706988555/39707795159 (verified level, not gating).
+1792638054	-	watch	FO-z	Heartbeat: folders complete; LJ-FO waits on the next journeys run (verified level, not gating).
