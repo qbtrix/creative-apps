@@ -82,5 +82,19 @@
     "find": "<rect \\(box)\\(corner(node))\\(turned)/></clipPath>",
     "replace": "<rect \\(box)\\(corner(node))/></clipPath>",
     "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": ".shapeWritesPath: a shape writes its box, not its path",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "guard let path = node.path(in: at) else {",
+    "replace": "guard let path = node.path(in: at), false else {",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": ".lineIsOpen: an open line is closed with Z",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "return parts.joined(separator: \" \")",
+    "replace": "return parts.joined(separator: \" \") + (parts.last == \"Z\" ? \"\" : \" Z\")",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
   }
 ]
