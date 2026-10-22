@@ -3,11 +3,7 @@
 // not its centre, which keeps the fill; Trim End keyed 0 to 1 over 24 frames
 // draws nothing at frame 0, the first half of the outline at 12 and all of it
 // at 24; a dash pattern leaves gaps. Linux and macOS.
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
 import Foundation
-#endif
 import CoreRaster
 import FlareCore
 @testable import HaloModel
@@ -67,9 +63,11 @@ import Testing
         let c = Self.comp(Self.blue, tracks: ["trimEnd": [HaloKeyframe(frame: 0, value: 0), HaloKeyframe(frame: 24, value: 1)]])
         let start = try Self.render(c, at: 0), half = try Self.render(c, at: 12), whole = try Self.render(c, at: 24)
         #expect(!Self.isBlue(try Self.onOutline(start, 90)), "frame 0 draws a stroke")
-        #expect(Self.isBlue(try Self.onOutline(half, 45)) && Self.isBlue(try Self.onOutline(half, 90)))
+        #expect(Self.isBlue(try Self.onOutline(half, 45)))
+        #expect(Self.isBlue(try Self.onOutline(half, 90)))
         #expect(Self.isBlue(try Self.onOutline(half, 135)), "frame 12 misses the first half")
-        #expect(!Self.isBlue(try Self.onOutline(half, 225)) && !Self.isBlue(try Self.onOutline(half, 270)))
+        #expect(!Self.isBlue(try Self.onOutline(half, 225)))
+        #expect(!Self.isBlue(try Self.onOutline(half, 270)))
         #expect(!Self.isBlue(try Self.onOutline(half, 315)), "frame 12 draws the second half")
         #expect(Self.isBlue(try Self.onOutline(whole, 270)), "frame 24 misses the top")
     }

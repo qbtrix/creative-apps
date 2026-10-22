@@ -27,14 +27,16 @@ public struct HaloDrawItem: Sendable, Hashable {
     public var gradient: Fill?
     /// HS-5: a shape layer's spec, drawn in `bounds`; nil keeps the ellipse.
     public var shape: ShapeSpec?
+    /// HK-5: a shape layer's stroke, its trim sampled at the frame; nil draws none.
+    public var stroke: VectorStroke?
     public init(
         layerID: String, kind: HaloLayerKind, bounds: HaloLayerRect, matrix: HaloMatrix, opacity: Double,
         color: HaloLayerColor, blendMode: BlendMode, text: HaloTextContent? = nil, gradient: Fill? = nil,
-        shape: ShapeSpec? = nil
+        shape: ShapeSpec? = nil, stroke: VectorStroke? = nil
     ) {
         self.layerID = layerID; self.kind = kind; self.bounds = bounds; self.matrix = matrix
         self.opacity = opacity; self.color = color; self.blendMode = blendMode; self.text = text
-        self.gradient = gradient; self.shape = shape
+        self.gradient = gradient; self.shape = shape; self.stroke = stroke
     }
 }
 
