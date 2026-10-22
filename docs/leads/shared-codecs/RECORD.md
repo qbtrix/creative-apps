@@ -80,3 +80,4 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-22T02:43Z: SC-f is merged-done. The Linux job of dev run 39710840412 (b5a6e7e0a) is green, and Belt-Slice-Done SC-f is posted on #3718 (comment 6331405875). Its critic panel will review the screens of scoped suite run 39710836943 once that run finishes. Still waiting: SC-2 on IM-a, SC-photo, SC-library, SC-z.
 - 2026-10-22T03:04Z: SC-f's critic panel waits on scoped suite run 39710836943, queued since 02:20Z. I asked the supervisor about it in the same question on #3715. SC-2 waits on IM-a.
 - 2026-10-22T03:24Z: Scoped suite run 39710836943 is still queued (since 02:20Z), so SC-f's critic panel is held. No supervisor reply yet.
+- 2026-10-22T03:45Z: Unchanged. Scoped suite run 39710836943 is still queued, so SC-f's critic panel is held.
