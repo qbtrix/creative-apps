@@ -74,7 +74,8 @@ import Testing
             #expect(abs((delay ?? 0) - 1.0 / 12) < 0.001)
         }
         let source = try #require(CGImageSourceCreateWithURL(url as CFURL, nil))
-        let pixels = try #require(Write.rgba(try #require(CGImageSourceCreateImageAtIndex(source, 0, nil))))
+        let image = try #require(CGImageSourceCreateImageAtIndex(source, 0, nil))
+        let pixels = try #require(Write.rgba(image))
         #expect(pixels[3] == 0, "the corner stays transparent")
         #expect(pixels[(20 * 32 + 20) * 4 + 3] == 255, "the middle stays opaque")
     }

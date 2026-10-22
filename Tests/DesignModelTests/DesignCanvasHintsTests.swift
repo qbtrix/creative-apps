@@ -25,7 +25,8 @@ private func withA() -> DesignWorkspace {
 @Test func everyHandleHasItsOwnResizeName() {
     let names = Set(DesignHandle.allCases.map { DesignPointerHint.resize($0).name })
     #expect(names.count == DesignHandle.allCases.count)
-    #expect(names.allSatisfy { $0.hasPrefix("resize-") })
+    #expect(names.subtracting(["rotate"]).allSatisfy { $0.hasPrefix("resize-") })
+    #expect(names.contains("rotate"))
 }
 
 @Test func aMovePressOverALayerPicksIt() {

@@ -19,9 +19,13 @@ edit.redo
 edit.select-all
 edit.undo
 file.clear-recent
+file.drop
 file.new
 file.open
+file.open-in
+file.open-recent
 file.open-sample
+file.recent
 file.save
 file.save-as
 fill.angle
@@ -32,6 +36,7 @@ fill.stop-color
 fill.stop-move
 fill.stop-remove
 fill.type
+frame.label
 guide.add
 guide.move
 guide.remove
@@ -73,11 +78,14 @@ mask.set
 mask.set-matte
 object.bring-forward
 object.send-backward
+recovery.discard
+recovery.restore
 scene.add
 scene.remove
 scene.rename
 scene.reorder
 scene.set-canvas
+scene.set-frame-rate
 scene.timing
 scenes.add
 scenes.remove
@@ -107,6 +115,9 @@ text.set-font
 text.set-on-path
 text.set-paragraph
 text.set-string
+timeline.delete-keys
+timeline.insert-frames
+timeline.remove-frames
 timeline.select-all-keys
 tool.direct-select
 tool.ellipse

@@ -21,6 +21,11 @@
 // the playhead and kept by the trim rule, one onTrim with its last frame and
 // onEndTrim on release; the same pill shows the edge's frame,
 // and the pointer over a clip end is the column-resize pointer.
+// A press on a clip's body, between its ends and not on a key, slides the
+// clip (TK-4; TimelineSlideDrag): it follows the pointer by whole frames,
+// kept inside 0...duration, an edge landing on the playhead when Shift was
+// held at the press; the clip and its keys draw each step, then one onSlide
+// with the frames moved on release (a slide that didn't move is a bed click).
 // A press first takes the strip's focus (TimelineFocusClaim, #1813).
 // It owns the lane's hover, presentation state: which lane the pointer is
 // over and the key under it. A hover sample writes only when that changes,
@@ -148,6 +153,13 @@ enum TimelineLaneHit {
         return best?.end
     }
 
+    /// The clip whose body holds `x`, between its start and end ticks, or nil.
+    /// Keys and clip ends come first: the caller asks only for a bed press.
+    static func clipBody<ID>(atX x: CGFloat, on track: TimelineTrack<ID>, mapping: FrameMapping) -> ClosedRange<Int>? {
+        let local = Double(x) - Double(timelineInset)
+        return track.spans.first { mapping.x(forFrame: $0.lowerBound) < local && local < mapping.x(forFrame: $0.upperBound) }
+    }
+
     /// The nearest key within half the 16 pt token of `x`, or nil.
     static func key<ID>(atX x: CGFloat, on track: TimelineTrack<ID>, mapping: FrameMapping) -> Int? {
         let local = Double(x - timelineInset)
@@ -164,6 +176,8 @@ struct TimelineLaneActions<ID: Hashable & Sendable> {
     var onEndKeyDrag: @MainActor () -> Void = {}
     var onTrim: @MainActor (ID, SpanEdge, Int) -> Void = { _, _, _ in }
     var onEndTrim: @MainActor () -> Void = {}
+    /// A clip's body slid: its track and the frames moved since the last call.
+    var onSlide: @MainActor (ID, Int) -> Void = { _, _ in }
 }
 
 /// One end of one of a lane's clips.
@@ -202,6 +216,7 @@ struct TimelineLanePointerExtras {
     var modifiers: KeyModifiers = []
     var drag: TimelineKeyDrag?
     var trim: TimelineTrimDrag?
+    var slide: TimelineSlideDrag?
     var escapeMonitor: Any?
     private var liveDelta = 0
     private var liveTrim: Int?
@@ -224,13 +239,17 @@ struct TimelineLanePointerExtras {
         drag = TimelineLanePress.begin(
             target, modifiers: held, on: lane.track, playhead: lane.playhead, mapping: lane.mapping, actions: lane.actions)
         trim = TimelineLanePress.beginTrim(target, playhead: lane.playhead, mapping: lane.mapping)
-        if drag != nil || trim != nil { watchEscape() }
+        if target == .bed, let span = TimelineLaneHit.clipBody(atX: point.x, on: lane.track, mapping: lane.mapping) {
+            slide = TimelineSlideDrag(span: span, playhead: lane.playhead, mapping: lane.mapping, snaps: held.contains(.shift))
+        }
+        if drag != nil || trim != nil || slide != nil { watchEscape() }
     }
 
     func dragged(dx: Double) {
         guard active, let lane else { return }
         if var trim, trim.move(dx: dx, id: lane.track.id, actions: live) { self.trim = trim; show(trim.frame) }
         else if var drag, drag.move(dx: dx, actions: live) { self.drag = drag; show(drag.frame) }
+        else if var slide, slide.move(dx: dx, id: lane.track.id, actions: live) { self.slide = slide; show(slide.frame) }
     }
 
     func up(dx: Double) {
@@ -238,12 +257,17 @@ struct TimelineLanePointerExtras {
         var click = true
         if var drag { click = drag.release(atDX: dx, actions: live) }
         if var trim { click = trim.release(atDX: dx, id: lane.track.id, actions: live) }
+        if var slide {
+            click = slide.release(atDX: dx, id: lane.track.id, actions: live)
+            if !click { commit() }
+        }
         if click { TimelineLanePress.press(target, modifiers: modifiers, on: lane.track, actions: lane.actions) }
         reset()
     }
 
     /// Escape: drops the drag or trim under way, sending nothing; true when there was one.
     @discardableResult func cancel() -> Bool {
+        if active, slide != nil { reset(); return true }
         guard active, drag != nil || trim != nil else { return false }
         reset()
         return true
@@ -256,6 +280,7 @@ struct TimelineLanePointerExtras {
         live.onEndKeyDrag = { [weak self] in self?.commit() }
         live.onTrim = { [weak self] _, _, frame in self?.liveTrim = frame }
         live.onEndTrim = { [weak self] in self?.commit() }
+        live.onSlide = { [weak self] _, delta in self?.liveDelta += delta }
         return live
     }
 
@@ -264,6 +289,7 @@ struct TimelineLanePointerExtras {
         guard let lane else { return }
         if let trim, let liveTrim { lane.actions.onTrim(lane.track.id, trim.end.edge, liveTrim); lane.actions.onEndTrim() }
         else if drag != nil, liveDelta != 0 { lane.actions.onMoveKeyframes(liveDelta); lane.actions.onEndKeyDrag() }
+        else if slide != nil, liveDelta != 0 { lane.actions.onSlide(lane.track.id, liveDelta) }
     }
 
     /// Draws the lane as the step leaves it, moves the pill and reports the step.
@@ -278,6 +304,11 @@ struct TimelineLanePointerExtras {
             let old = trim.end.span
             let span = trim.end.edge == .start ? min(new, old.upperBound)...old.upperBound : old.lowerBound...max(new, old.lowerBound)
             spans = spans.map { $0 == old ? span : $0 }
+        } else if let slide {
+            let delta = liveDelta
+            spans = spans.map { $0 == slide.span ? $0.lowerBound + delta...$0.upperBound + delta : $0 }
+            keys = keys.map { slide.span.contains($0.frame) ? TimelineKey(frame: $0.frame + delta, shape: $0.shape) : $0 }
+            picked = Set(picked.map { slide.span.contains($0) ? $0 + delta : $0 })
         }
         let shown = TimelineTrack(
             id: track.id, name: track.name, keys: keys, spans: spans, pickedFrames: picked, isSelected: track.isSelected)
@@ -287,7 +318,7 @@ struct TimelineLanePointerExtras {
     }
 
     func reset() {
-        (active, drag, trim) = (false, nil, nil)
+        (active, drag, trim, slide) = (false, nil, nil, nil)
         if let escapeMonitor { NSEvent.removeMonitor(escapeMonitor) }
         escapeMonitor = nil
         if extras?.pill.wrappedValue != nil { extras?.pill.wrappedValue = nil }
@@ -440,6 +471,57 @@ struct TimelineTrimDrag: Equatable, Sendable {
     @MainActor mutating func release<ID>(atDX dx: Double, id: ID, actions: TimelineLaneActions<ID>) -> Bool {
         _ = move(dx: dx, id: id, actions: actions)
         return release(actions: actions)
+    }
+}
+
+/// A clip-body slide on one lane, with no view (TK-4): the clip follows the
+/// pointer by whole frames, kept inside 0...duration; with `snaps` (Shift at
+/// the press) an edge near the playhead lands on it. The host hears one delta
+/// per frame crossed, and nothing on a release that didn't move.
+struct TimelineSlideDrag: Equatable, Sendable {
+    let span: ClosedRange<Int>
+    let playhead: Int
+    let mapping: FrameMapping
+    let snaps: Bool
+    private(set) var steps = TimelineDragSteps()
+    /// A step went to the host, so the release ends a slide, not a click.
+    private(set) var moved = false
+    /// Released: nothing more is sent.
+    private(set) var ended = false
+
+    /// The clip's start frame now (what the host was last sent).
+    var frame: Int { span.lowerBound + steps.lastSent }
+
+    /// Frames the clip moves for a pointer `dx` points from the press, the
+    /// nearer snapped edge first under `snaps`, clamped inside 0...duration.
+    func total(dx: Double) -> Int {
+        let scale = TimelineScale(lastFrame: mapping.duration, frameWidth: mapping.frameWidth)
+        var delta = SuiteKeyEditing().frameDelta(points: dx, scale: scale)
+        if snaps {
+            let edits = SuiteTimelineEditing(), radius = Double(SuiteSize.timelineKeyframeHit / 2)
+            for edge in [span.lowerBound, span.upperBound] {
+                let snapped = edits.snapped(edge + delta, playhead: playhead, radius: radius, scale: scale)
+                if snapped != edge + delta { delta = snapped - edge; break }
+            }
+        }
+        return min(max(delta, -span.lowerBound), max(mapping.duration - span.upperBound, -span.lowerBound))
+    }
+
+    /// Sends the frames moved since the last send; true when it sent a step.
+    @MainActor mutating func move<ID>(dx: Double, id: ID, actions: TimelineLaneActions<ID>) -> Bool {
+        guard !ended, let delta = steps.step(toTotal: total(dx: dx)) else { return false }
+        moved = true
+        actions.onSlide(id, delta)
+        return true
+    }
+
+    /// The release at pointer `dx`: its own sample first (#1796), then the end.
+    /// True when nothing moved, so it acts as a click.
+    @MainActor mutating func release<ID>(atDX dx: Double, id: ID, actions: TimelineLaneActions<ID>) -> Bool {
+        _ = self.move(dx: dx, id: id, actions: actions)
+        guard !ended else { return false }
+        ended = true
+        return !moved
     }
 }
 

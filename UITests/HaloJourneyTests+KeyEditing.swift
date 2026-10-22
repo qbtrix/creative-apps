@@ -8,7 +8,8 @@
 // 0 alone onto 12 (refused, the status line says why), then ⌘A, ⌫ and ⌘Z.
 // A key is `halo.timeline.key.<layer id>.<frame>`, selected while picked
 // (TimelineLaneAccess). Halo has no eye yet, so step 5 hides Rig only when
-// its row shows one. One shot per step, `key-editing-<step>`. It runs live:
+// its row shows one. The playhead is parked at 30 first (#4151). One shot per
+// step, `key-editing-<step>`. It runs live:
 // KE-7 turned it on once the moves (KE-4) were on dev.
 import XCTest
 
@@ -19,9 +20,11 @@ final class HaloKeyEditingJourneyTests: XCTestCase {
         let halo = Journey("Halo", self, arguments: ["-HaloFixture", "parented", "-HaloWindowSize", "1000x640"])
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
 
-        // 1. Click Ball's key at 0: it draws picked and Ball is selected.
+        // 1. Click Ball's key at 0: it draws picked and Ball is selected. The playhead opens on the
+        // keys at 0 and its grab band takes their press (#4151), so park it at 30, on no key first.
         let ball0 = key(Self.ball, 0, halo), rig0 = key(Self.rig, 0, halo)
         XCTAssert(ball0.waitForExistence(timeout: 10), "no key for Ball at 0")
+        parkPlayhead(halo)
         ball0.click()
         XCTAssert(waitFor { ball0.isSelected }, "a click on Ball's key at 0 didn't pick it")
         XCTAssert(halo.element("halo.layer.row.\(Self.ball)").isSelected, "picking Ball's key didn't select Ball")
@@ -84,6 +87,17 @@ final class HaloKeyEditingJourneyTests: XCTestCase {
     }
 
     // MARK: - Helpers
+
+    /// Focuses Ball's lane, then Home and → 30 times: the playhead sits at 30, off every key and the drags.
+    @MainActor private func parkPlayhead(_ halo: Journey) {
+        let title = halo.trackName("Ball")
+        XCTAssert(title.waitForExistence(timeout: 10), "no Ball track title in the timeline")
+        title.click()
+        halo.press(.home)
+        for _ in 0..<30 { halo.press(.rightArrow) }
+        let ball0 = key(Self.ball, 0, halo)
+        XCTAssert(waitFor { ball0.isHittable }, "Ball's key at 0 is still under the playhead after parking it at 30")
+    }
 
     /// The key of `layer` at `frame` on the timeline.
     @MainActor private func key(_ layer: String, _ frame: Int, _ halo: Journey) -> XCUIElement {

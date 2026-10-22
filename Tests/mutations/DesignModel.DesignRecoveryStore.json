@@ -2,8 +2,8 @@
   {
     "label": "supportDirWinsOverIgnoredState",
     "file": "Sources/DesignModel/DesignRecoveryStore+Kernel.swift",
-    "find": "if !hasSupportDir(arguments), ignoresState(arguments) { return nil }",
-    "replace": "if ignoresState(arguments) { return nil }",
+    "find": "if !hasSupportDir(arguments), ignoringState || ignoresState(arguments) { return nil }",
+    "replace": "if ignoringState || ignoresState(arguments) { return nil }",
     "tests": "DesignRecoveryStoreTests"
   },
   {
@@ -18,6 +18,20 @@
     "file": "Sources/DesignModel/DesignRecoveryStore+Kernel.swift",
     "find": ".map { !$0.isEmpty } ?? false",
     "replace": ".map { _ in true } ?? false",
+    "tests": "DesignRecoveryStoreTests"
+  },
+  {
+    "label": "ignoringStateKeepsNoCopies",
+    "file": "Sources/DesignModel/DesignRecoveryStore+Kernel.swift",
+    "find": "if !hasSupportDir(arguments), ignoringState || ignoresState(arguments) { return nil }",
+    "replace": "if !hasSupportDir(arguments), ignoresState(arguments) { return nil }",
+    "tests": "DesignRecoveryStoreTests"
+  },
+  {
+    "label": "folderPassesIgnoringState",
+    "file": "Sources/DesignModel/DesignRecoveryStore+Kernel.swift",
+    "find": "folderPath(arguments: arguments, home: home, ignoringState: ignoringState)",
+    "replace": "folderPath(arguments: arguments, home: home, ignoringState: false)",
     "tests": "DesignRecoveryStoreTests"
   }
 ]
