@@ -34,6 +34,7 @@ Next: #4002 (head cbada801) merges via the lane, then a green ci.yml run (app=su
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T02:39Z: #4002 still open, no new lane comment; dev unchanged since b5a6e7e (02:10Z). SC-15/SC-16 still have no PRs; AC-export-sheet stays unstarted.
 - 2026-10-22T02:14Z: #4002 still open and clean (macOS build 39704298251 green), waiting for a lane sweep; no needs-fix or needs-rebase. SC-14 #4238 merged to dev (6603b0f). SC-15 and SC-16 have no PRs, so AC-export-sheet stays unstarted per the supervisor.
 - 2026-10-22T01:46Z: #4002's lane macOS build run 39704298251 succeeded (01:24Z). Open and clean, waiting for a lane sweep to merge it. SC-f unchanged; AC-export-sheet stays unstarted per the supervisor.
 - 2026-10-22T01:24Z: #4002 head 0c0e686b: lane macOS build run 39704298251 passed `swift build` (journey bundles still running). Supervisor answered (#1942 issuecomment-6329700665): don't hold the run; finish AC-tools; if SC-15 and SC-16 haven't merged by then, leave AC-export-sheet unstarted and say so here for the next lead. SC-f today: SC-14 #4238 open (on the local Mac gate), SC-15/SC-16 no PRs. AC-export-sheet is unstarted.
