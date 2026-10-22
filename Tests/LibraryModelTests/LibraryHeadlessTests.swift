@@ -64,7 +64,7 @@ import Testing
         #expect(LibraryHeadless.catalog.availability("file.load-samples", on: shoot) == .unavailable(LibraryHeadless.fileCommandHelp))
     }
 
-    @Test(arguments: ["cull-and-save", "import-rate-export", "browse-folders"])
+    @Test(arguments: ["cull-and-save", "import-rate-export", "browse-folders", "show-original"])
     func realJobPasses(job: String) throws {
         #expect(try LibraryJob.check(job) == [], "\(job)")
     }

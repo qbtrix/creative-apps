@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "app": "library",
+  "why": "RJ-X61 (command-state CS-15). A toggle an agent can't see or set gets flipped blind or not at all: view.loupe opens a photo, then view.show-original turns Show Original on by command. The json output with options.contents shown must report original true beside the shown photos, so the toggle's state is readable, not guessed.",
+  "inputs": ["input/*.library"],
+  "steps": [
+    {"id": "view.loupe", "params": {}},
+    {"id": "view.show-original", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-shown", "format": "json", "options": {"contents": "shown"}},
+  "expect": {
+    "out/shoot-shown.json": {"json": {"original": true, "shown": ["beach.png", "dock.png", "fog.png", "pier.png"]}}
+  },
+  "platforms": ["linux", "macos"]
+}
