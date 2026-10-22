@@ -74,3 +74,4 @@ utc	stage	event	ref	note
 2026-10-22T09:50:42Z	RP-5b	ready	4226	dev merged in, gate pass c4582ba39
 2026-10-22T10:05:47Z	lane	heartbeat	-	lane sweep in flight
 2026-10-22T10:30:20Z	RP-5b	build-green	4226	macOS build 39759380876 green; waits on the lane sweep
+2026-10-22T10:38:24Z	RP-3e	merged	4209	lane merged after green macOS build
