@@ -3,7 +3,7 @@
 Issue: #3449 · Packet: docs/blueprints/suiteui/features/shape-tools.md
 Run: act-1a1646f0a9f-d1ei (resumed; first run act-1a1579fdd22-6z1j) · Session: claude/suiteui-feature-lead-v7e2hk · Started: 2026-10-20T04:46Z · Resumed: 2026-10-22T16:30Z
 Stage: 3 awaiting supervisor (SH-z blocked on eyedropper:EY-z)
-Base: dev 1d3f98f9 (main 0dd23d65 verified)
+Base: dev 5b2cafad (main 0dd23d65 verified)
 Next: re-read eyedropper:EY-z each poll (EY-7, EY-8, EY-9 merged on dev?), itself behind transform-tools:TT-z (#4429 open); when EY-z is met, build SH-8 (with the star-drag budget row) then SH-9 with feature-done as one slice PR to dev
 
 ## Slices
@@ -34,6 +34,7 @@ Next: re-read eyedropper:EY-z each poll (EY-7, EY-8, EY-9 merged on dev?), itsel
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T18:05Z: poll on dev 5b2cafad: TT-z #4429 still open, no EY-7/8/9 PR. No supervisor reply yet; SH-8, SH-9 stay unstarted.
 - 2026-10-22T17:35Z: poll on dev 1d3f98f9: TT-z #4429 still open; no EY-7/8/9 PR. No supervisor reply on #3449. Asked the supervisor to hold or release the run (on #1942, issuecomment-6347075135, covering both features); default: leave SH-8, SH-9 unstarted for the next lead.
 - 2026-10-22T17:10Z: Belt nudge: status lives on lead/suiteui-shape-tools, not lead/shape-tools where this run first wrote; record moved here (branch cut from main 0dd23d65 with only docs/leads/suiteui-shape-tools). Re-polled on dev a41e7f1f: TT-z #4429 still open, no EY-7/8/9 on dev (last suiteui eyedropper merge #3597). SH-8 stays unstarted; nothing else in the brief can start.
 - 2026-10-22T16:45Z: blocked note on #3449 (issuecomment-6345842420).
