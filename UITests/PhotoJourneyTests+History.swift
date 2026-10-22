@@ -6,18 +6,13 @@
 // second step and Redo the third, and the step count holds. One more stroke
 // drops the ten undone rows and a new "Paint" row is current. Quitting with
 // unsaved work and relaunching offers "Restore the autosaved changes to
-// “portrait.jpg”?", and Restore shows the 3-step image. Both are skipped until
-// PH-7 turns them on, on the live jump (PH-5) and autosave (PH-6). Shots:
-// `history-*`.
+// “portrait.jpg”?", and Restore shows the 3-step image. Both run on the live
+// jump (PH-5) and autosave (PH-6), turned on by PH-7. Shots: `history-*`.
 import XCTest
 
 final class PhotoHistoryJourneyTests: XCTestCase {
-    /// False until history-panel PH-7 turns the journeys on.
-    static let ready = false
-
     /// RJ-P28: 12 edits, a jump back ten steps, one more edit.
     @MainActor func testJumpBackTenSteps() throws {
-        guard Self.ready else { throw XCTSkip("waits on PH-7") }
         let photo = try openPortrait()
         paint(12, photo)
         historyMenuItem(photo).click()
@@ -43,7 +38,6 @@ final class PhotoHistoryJourneyTests: XCTestCase {
 
     /// Quit with unsaved work, relaunch: the offer names portrait.jpg and Restore shows the 3-step image.
     @MainActor func testRestoreAfterQuit() throws {
-        guard Self.ready else { throw XCTSkip("waits on PH-7") }
         let recovery = FileManager.default.temporaryDirectory.appending(path: "photo-history-recovery-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: recovery, withIntermediateDirectories: true)
         addTeardownBlock { try? FileManager.default.removeItem(at: recovery) }

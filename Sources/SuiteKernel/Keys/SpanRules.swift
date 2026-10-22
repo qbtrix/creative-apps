@@ -18,6 +18,15 @@ public enum SpanRules {
     public static func slide(
         _ span: inout ClosedRange<Int>, tracks: inout [String: [Keyframe]], by: Int, lastFrame: Int
     ) throws(KeyRefusal) -> Int {
-        0
+        guard lastFrame >= 0 else { throw .pastRange(frame: span.upperBound) }
+        let (earliest, under) = 0.subtractingReportingOverflow(span.lowerBound)
+        let (latest, over) = lastFrame.subtractingReportingOverflow(span.upperBound)
+        guard !under, !over else { throw .pastRange(frame: under ? span.lowerBound : span.upperBound) }
+        let delta = max(earliest, min(by, latest))
+        guard delta != 0 else { return 0 }
+        let keyed = Set(tracks.values.flatMap { $0.map(\.frame) })
+        try KeyRules.moveKeys(&tracks, keyed, by: delta, clampedTo: 0...lastFrame)
+        span = (span.lowerBound + delta)...(span.upperBound + delta)
+        return delta
     }
 }

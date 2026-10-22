@@ -1,6 +1,6 @@
 // DesignRecoveryStoreTests.swift (design/autosave-history DA-7): where Design's autosave writes. A
-// temp `-SuiteSupportDir` wins over the journeys' ignore-state flag, that flag alone keeps no
-// copies, and a plain launch writes under the suite root's Design folder. A copy written to the
+// temp `-SuiteSupportDir` wins over the journeys' ignore-state flag, that flag alone (or the
+// caller's `ignoringState`) keeps no copies, and a plain launch writes under the suite root's Design folder. A copy written to the
 // folder comes back as the one left behind. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -22,6 +22,13 @@ import Testing
     @Test func ignoredStateAloneKeepsNoCopies() {
         #expect(DesignRecoveryStore.folderPath(arguments: Self.ignore, home: "/Users/a") == nil)
         #expect(DesignRecoveryStore.folder(arguments: Self.ignore + ["-SuiteSupportDir", ""], home: "/Users/a") == nil)
+    }
+
+    /// The caller's ignore-state (the app's user default, which a test host registers) keeps none, as the flag does.
+    @Test func ignoringStateKeepsNoCopiesUnlessASupportDirIsGiven() {
+        #expect(DesignRecoveryStore.folder(arguments: [], home: "/Users/a", ignoringState: true) == nil)
+        let path = DesignRecoveryStore.folderPath(arguments: ["-SuiteSupportDir", "/tmp/s"], home: "/Users/a", ignoringState: true)
+        #expect(path == "/tmp/s/Design")
     }
 
     @Test func plainLaunchWritesUnderTheSuiteRoot() {

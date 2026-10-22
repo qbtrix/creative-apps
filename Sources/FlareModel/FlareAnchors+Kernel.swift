@@ -27,7 +27,7 @@ extension FlareWorkspace: PathEditTarget {
         guard pathInEdit != nil, let layerID = selection.first?.layerID else {
             return "Select one shape with Direct Select to edit its points."
         }
-        return ownerLayers?.first(where: { $0.id == layerID && $0.isLocked }).map { Self.unlockMessage($0.name) }
+        return ownerLayers?.first(where: { $0.id == layerID && $0.isLocked }).map { "Unlock \($0.name) to edit its points." }
     }
 
     /// Writes `path` to the item in edit as one "Edit Path"; `drag` is the kernel's coalescing key (FP-7 uses it).
