@@ -1,19 +1,19 @@
 # shell-media lead record
 
 Issue: #3711 · Packet: docs/blueprints/suite/features/shell-media.md
-Run: act-1a16391fd34-thw9 · Resumed: 2026-10-22T12:30Z (previous run act-1a1601c3538-r0c9, started 2026-10-21T10:50Z)
-Stage: SM-a, SM-m, SM-w, SM-r done; SM-z merged (de96b149a, f304220a3, 57306b1f8), waits a green suite or full run containing all three
+Run: act-1a1659bd4ae-sr68 · Resumed: 2026-10-22T22:00Z (previous runs act-1a16391fd34-thw9, act-1a1601c3538-r0c9)
+Stage: All slices done (Linux check 39857152000); Belt-Slice-Done for all 5 slices; Belt-Contact-Sheet posted
 Base: dc87ad2b0bcebf2b6bef749328a03ba06687275f
-Next: Belt-Slice-Done SM-z, then Belt-Contact-Sheet
+Next: journeys run 39855707652 fills the journey lines and audit counts; no critic panel (every slice ui:false)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| SM-a | Callers code against MediaEncoding, MediaDecoding, the media values and FakeMedia through SuiteServices.media; Linux checks and macOS live checks written and disabled | SM-1, SM-2 | MJ-SM0 | - | no | 0 | planned | | |
-| SM-m | Settings refuse what each codec can't write; FrameClock gives exact times and drift-free GIF delays | SM-3, SM-4 | MJ-SM1 | SM-a | no | 0 | planned | | |
-| SM-w | On a Mac, movies write in four codecs, GIF/APNG and stills encode, cancel deletes | SM-5, SM-6 | MJ-SM2 | SM-a | no | 0 | done | 39785758185 | |
-| SM-r | On a Mac, stills decode upright to 8-bit sRGB, movie info and frames read back | SM-7, SM-8 | MJ-SM3 | SM-a, SM-w (SM-8) | no | 0 | planned | | |
-| SM-z | Slot live, write/read walk on the Mac, shared prose, feature built | SM-9, SM-10 | MJ-SM4 | SM-m, SM-w, SM-r | no | 0 | planned | | |
+| SM-a | Callers code against MediaEncoding, MediaDecoding, the media values and FakeMedia through SuiteServices.media; Linux checks and macOS live checks written and disabled | SM-1, SM-2 | MJ-SM0 | - | no | 0 | done | 39857152000 | - |
+| SM-m | Settings refuse what each codec can't write; FrameClock gives exact times and drift-free GIF delays | SM-3, SM-4 | MJ-SM1 | SM-a | no | 0 | done | 39857152000 | - |
+| SM-w | On a Mac, movies write in four codecs, GIF/APNG and stills encode, cancel deletes | SM-5, SM-6 | MJ-SM2 | SM-a | no | 0 | done | 39857152000 | - |
+| SM-r | On a Mac, stills decode upright to 8-bit sRGB, movie info and frames read back | SM-7, SM-8 | MJ-SM3 | SM-a, SM-w (SM-8) | no | 0 | done | 39857152000 | - |
+| SM-z | Slot live, write/read walk on the Mac, shared prose, feature built | SM-9, SM-10 | MJ-SM4 | SM-m, SM-w, SM-r | no | 0 | done | 39857152000 | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
