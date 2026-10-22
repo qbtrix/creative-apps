@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "app": "flare",
+  "why": "RJ-F42 (file-flow FL-3): saves bounce.flare, reads Open Recent, then drops title.flare and logo.svg on Flare: Open Recent is the suite's list filtered to Flare, title.flare opens and logo.svg is refused until SVG import (E11). Pending #3741: the CLI keeps file commands window-only, as it does for Photo's drop; FlareFileFlowTests runs these steps on Linux.",
+  "pending": "#3741",
+  "inputs": ["input/bounce.flare"],
+  "steps": [
+    {"id": "file.save", "params": {}},
+    {"id": "file.recent", "params": {}},
+    {"id": "file.drop", "params": {"paths": ["input/title.flare", "input/logo.svg"]}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}", "format": "flare"},
+  "expect": {
+    "out/bounce.flare": {"json": {"format": "flare", "version": 1}}
+  },
+  "platforms": []
+}
