@@ -50,3 +50,4 @@ Next: #4328 TK-flare in the lane (needs-fix first if ejected); TK-u critic panel
 ## Open
 - TK-6 waits on adjust-everywhere:AJ-halo, text-style:TS-halo, anchor-parenting:AN-halo (and adopt-kernel-easing:AE-halo, AE-h2 open #2842 in that RECORD).
 - TK-u: timeline and timeline-select-all are built (#3537 closed); it starts once the TK-a branch is pushed.
+- 2026-10-22T06:15:11Z: rule 23, three identical blocked polls; Question for the supervisor posted on the issue.
