@@ -66,3 +66,4 @@ utc	stage	event	ref	note
 2026-10-22T18:48:25Z	3	pr	PH-m	#4618 jobs RJ-H36/RJ-H02 live on linux+macos, gate pass; pixel compare waits on core#562
 2026-10-22T19:03:16Z	3	check	PH-a	#4426 macOS build 39821015197 success 18:52Z; waiting on lane sweep to merge
 2026-10-22T19:17:21Z	3	check	PH-a	#4426 still open, all proof green; lane sweep in progress since 19:08Z
+2026-10-22T19:33:53Z	3	check	PH-a	lane decision eligible for #4426 (19:28Z); batch in flight, merges next sweep
