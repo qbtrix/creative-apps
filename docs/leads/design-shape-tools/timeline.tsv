@@ -39,3 +39,5 @@ utc	stage	event	ref	note
 2026-10-21T11:00Z	check	scoped-run	39578329384	macOS (design) red on DesignHistoryAreaTests.refusedJumpShowsItsReason (not a DS/DK/DY file); snapshots uploaded; journeys 39588223335 pending, DS-a critics wait on ui-screens
 2026-10-22T08:56Z	start	run	act-1a162d0f852-70vb	lead resumed at stage 3 wave 1
 2026-10-22T10:40Z	built	wave 1	DS-u DS-5 DS-6	all CI: PASS; DS-u restacked on DS-m; lead/shape-tools restored to 8c7713f10
+2026-10-22T10:00Z	pr	wave 1	#4384 #4385 #4386	DS-5 on #4357, DS-6 on DS-5, DS-u on DS-6; fast-lane
+2026-10-22T10:02Z	build	wave 2	DS-z	builder started on DS-u
