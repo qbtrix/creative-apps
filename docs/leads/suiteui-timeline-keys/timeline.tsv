@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-22T11:43Z	poll	journeys full 39751426611 pending, flare 39754262667 queued (macOS backlog); TK-u critics wait.
 2026-10-22T12:11Z	poll	flare journeys 39754262667 (4f2b89eb, contains TK-u) in progress; full 39751426611 pending. TK-u critics run on the flare run when it finishes.
 2026-10-22T12:44Z	critics	flare journeys 39754262667 (4f2b89eb) green; TK-u critic panel started (wf_5c000ac8-570; clarity, journey, design, mouse, taste) on flare-tk-1-paint-keys. Audit flare: identifier 9, overlap 1. HJ-TK (Halo) screens not in this run.
+2026-10-22T12:43:28Z	check	TK-u critic panel done on 39754262667 @4f2b89eb: 8 confirmed, 0 refuted, filed #4416 #4417 #4418 #4419 #4420; fix rounds held (features stopped per supervisor 06:19Z)
