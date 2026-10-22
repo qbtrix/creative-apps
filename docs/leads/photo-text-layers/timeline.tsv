@@ -57,3 +57,4 @@
 2026-10-22T09:31Z	check	TX-4/TX-5 still wait on TS-m #3844 (open, last 07:25Z) and #3847 (open); no new text-layers findings
 2026-10-22T10:00Z	check	TS-5 (#3844) merged 758dc4db0; TX-5 started on photo-text-layers/TX-5; TX-4 waits on TS-6 #3847
 2026-10-22T10:28Z	check	TX-5 PR #4391 opened (fast-lane, head 8e2dbb7b9, mutate 6/6); TX-4 waits on TS-6 #3847 (open); no new text-layers findings
+2026-10-22T10:57Z	check	#4391 needs-rebase (catalog + CLI golden vs SampleCommands); merged dev, resolved, gate rerunning; TX-4 waits on TS-6 #3847 (open); no new text-layers findings
