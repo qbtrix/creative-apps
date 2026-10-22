@@ -54,3 +54,4 @@ utc	stage	event	ref	note
 2026-10-22T04:08:01Z	lane	heartbeat	#4035,#4237,#4128,#4119	SM-2 #4035 merged 03:53Z (74c5e8d); SM-6 #4237 pushed 4bfa46f through SuiteImageIO, CI: PASS; SM-7 stacked on SM-6, decode moved into SuiteImageIO.uprightImage, gating; SM-3 #4119 merged dev (MediaRulesTests add/add, kept SM-3 side), gating
 2026-10-22T04:36:18Z	lane	heartbeat	#4119,#4128,#4237	SM-3 #4119 dev merged, CI: PASS at 3ce1a9a, ready for the lane; SM-7 #4128 stacked on SM-6, CI: PASS at 06d3609 (first run timed out under a parallel gate), draft; scoped suite run 39721019643 (includes SM-2) queued
 2026-10-22T04:57:54Z	lane	heartbeat	#4119,#4205,#4103	no merges: SM-3/CS-11/RP-3 clean, waiting on queued macOS builds; scoped suite run 39721019643 still queued
+2026-10-22T05:21:40Z	lane	heartbeat	#4119	SM-3 waits on macOS build; scoped run 39721019643 queued
