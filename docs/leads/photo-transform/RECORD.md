@@ -2,7 +2,7 @@
 
 Issue: #3435 · Packet: docs/blueprints/photo/features/transform.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: waiting: #4252 macOS build 39700821595 queued; #4253 blocked on dev-red FormatListRatchet (#4258 open)
+Stage: waiting: #4252 macOS build green, awaiting lane batch; #4253 blocked on dev-red FormatListRatchet (#4258 open)
 Base: dev
 Next: on green photo run with #4252/#4253/#4175: critics, Belt-Slice-Done, contact sheets
 
