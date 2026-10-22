@@ -133,3 +133,4 @@ utc	stage	event	ref	note
 2026-10-22T01:25Z	3	check	PN-3 #4203	macOS build 39704455661 for 7d76d21 queued
 2026-10-22T01:41Z	3	check	PN-3 #4203	macOS build 39704455661 still queued (runner backlog)
 2026-10-22T01:59Z	3	check	PN-3 #4203	macOS build 39704455661 in progress
+2026-10-22T02:20Z	3	check	PN-3 #4203	macOS build 39704455661 green; lane merges next sweep. PN-4 merged PN-3+dev, CI: PASS, head 3da37e7, 391 lines/4 files; PR opens after #4203 merges
