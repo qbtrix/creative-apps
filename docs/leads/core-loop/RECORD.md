@@ -4,7 +4,7 @@ Issue: #1971 · Packet: docs/blueprints/halo/features/core-loop.md
 Run: act-1a15f92d2f2-kvrn (from 2026-10-21T18:00Z; before: act-1a15d0eeefb-6z9l from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0) (from 2026-10-20T18:45Z; before: act-1a15728f2a2-zb1o) · Session: claude/halo-feature-lead-run-02scrb · Started: 2026-10-20T02:37Z
 Stage: 3 wave 5
 Base: 6d5f3a4025ffce3bb843003a158f64bf282020e6
-Next: Halo journeys 39753811755 (1da00fb9, has #4285 #4290 #4321) went green, and the critic panel (3 critics, H-J12 and H-P focus) is reviewing it. Leads to check: audit contrast 7 against baseline 2 and identifier 5 against 0; HB-U3 playhead-scrub p95 105/3 with no finding. #4423 at 52cb7114 (macOS build green) waits on a lane batch. 39778735669 (06d331b0) is still queued. Open findings: #4273, #4274, #4276, #4281. Blocked on SuiteUI: #4273 (#4283), #4281 (#4282)
+Next: Halo journeys 39753811755 (1da00fb9): the run reads success but its macOS journeys (halo) job failed. H-J12 stops at step 10, waiting for "Exported Loop", which #4290 retitled. Filed blocker #4447 and a fixer is on it (branch fix/halo-hj12-render-wait). The journey/quality/oracle critic also reports, still to verify and file: HB-U3 playhead scrub major (.scrub writes the window; a fix on top of #4423); H-P1 per-leg sample bound minor; H-J12 step 4 drags the name column, not the ruler, minor; a mutation in renderWrittenText's 1-file branch escapes, minor (oracle). Two critics (clarity/mouse/controls and design/taste/layout/audit) are still running. #4423 at 52cb7114 waits on a lane batch. Open findings: #4273, #4274, #4276, #4281, #4447
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
