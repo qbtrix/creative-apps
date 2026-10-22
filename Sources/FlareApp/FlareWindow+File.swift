@@ -121,11 +121,11 @@ extension FlareWindow {
 
     #if DEBUG
     /// A test's bridge in place of FlareShell's (FlareFileFlowLiveTests).
-    static var bridgeOverride: SuiteDocumentsBridge?
+    @MainActor static var bridgeOverride: SuiteDocumentsBridge?
     #endif
 
     /// The documents bridge the window notes opens and saves in.
-    static var bridge: SuiteDocumentsBridge {
+    @MainActor static var bridge: SuiteDocumentsBridge {
         #if DEBUG
         if let bridgeOverride { return bridgeOverride }
         #endif

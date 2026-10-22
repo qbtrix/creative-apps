@@ -47,7 +47,7 @@ struct FlareWindow: View {
     /// The model the last body ran on, for the hosted-window tests to read back.
     static var shownModel: FlareWorkspace?
     /// The last body's `perform`, for the hosted-window tests to send intents through (FlareFileFlowLiveTests).
-    static var shownPerform: ((FlareIntent) -> Void)?
+    @MainActor static var shownPerform: ((FlareIntent) -> Void)?
     #endif
 
     /// The inspector column: the editor's panel width plus SuiteWindow's
