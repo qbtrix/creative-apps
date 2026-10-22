@@ -2,9 +2,9 @@
 
 Issue: #3772 · Packet: docs/blueprints/suite/features/report-problem.md
 Run: act-1a1601c3538-r0c9 · Session: https://claude.ai/code/session_011jo1mtCQ8wVpaGZxRnV16N · Started: 2026-10-21T10:50Z · Resumed: 2026-10-21T20:17Z
-Stage: 3 build, wave 4
+Stage: RP-m wave 2: RP-4 merged; RP-3 #4103 waits on the lane
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: #4201, #4103, #4110 in lane; drafts #4209, #4218, #4226 after parents; RP-6 (C4-only, from dev) after #4226 merges; RP-7 feature-done
+Next: #4103 merges, then RP-3e, RP-5, RP-5b ready
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -19,7 +19,7 @@ Next: #4201, #4103, #4110 in lane; drafts #4209, #4218, #4226 after parents; RP-
 | RP-1 | RP-a | 1 | checks first + ProblemReport/BetaNotes stubs, SuiteHelpCatalog specs, C4 part | packet RP-1 (8 files) | tests compile, disabled waits on RP-4 | #4048 | merged 6afa46a |
 | RP-2 | RP-a | 1 | Help menu from SuiteHelpCatalog via MenuCommand(spec:); launcher Welcome; journey skipped until RP-5 | packet RP-2 (5 files) | journey written | #4049 | merged dd92b60 |
 | RP-3 | RP-u | 2 | ProblemReportSheet and BetaNotesView on the stubs; Help items open their windows | packet RP-3 | SuiteHelpCommandsTests; carries #4201 baseline fix | #4103 | ready; gate pass, Head 94a89c8e |
-| RP-4 | RP-m | 2 | report bodies: redaction, suite filter, 7 days, newest 3 | packet RP-4 | ProblemReportTests | #4110 | ready; gate pass, Head d6321ab0 |
+| RP-4 | RP-m | 2 | report bodies: redaction, suite filter, 7 days, newest 3 | packet RP-4 | ProblemReportTests | #4110 | merged |
 | RP-3e | RP-u | 3 | Save… and Email… (ProblemReportOutput) | packet RP-3 (split) | Mutate 4/4 SuiteModel.ProblemReportOutput | #4209 | draft, stacked on #4103; Head cfd36f2d |
 | RP-5 | RP-m | 3 | help catalog bodies + CLI `suite help.*` (HelpReports); fixes escaped-slash home-path leak in RP-4's encoder | packet RP-5 (split) | HelpReportsTests, SuiteHelpCatalogTests; Mutate 5/5 SuiteKernel.SuiteHelpCatalog | #4218 | draft, stacked on #4103 + #4110; Head 3b80095f |
 | RP-5b | RP-m | 4 | CrashFolder (SuiteModel) + CrashFolderReader (SuiteShell), Help journey on with -SuiteCrashDir | packet RP-5 (split) | CrashFolderTests; Mutate 6/6 SuiteModel.CrashFolder; journey first runs in scoped suite run | #4226 | draft, stacked on #4218; gate pass, Head 4407777d |
