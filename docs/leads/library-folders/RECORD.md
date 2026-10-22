@@ -86,3 +86,5 @@ Next: (2026-10-21T17:09Z) FO-5 #4022 at 7482cc7: lane macOS build 39632234354 qu
 - 2026-10-21T23:42Z: Heartbeat: #4256 waiting in the lane.
 
 - 2026-10-21T23:58Z: Heartbeat: #4256 still waiting in the lane.
+
+- 2026-10-22T00:13Z: Heartbeat: #4256 queued behind a busy lane. Dev Linux was red at de0f324 on FormatListRatchetTests (SuiteModel Media.swift), not ours.
