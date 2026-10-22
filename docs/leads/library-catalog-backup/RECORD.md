@@ -92,3 +92,5 @@ Next: (2026-10-21T17:09Z) BK-u #3967 at cf07beb: lane macOS build 39632012767 qu
 - 2026-10-22T00:59Z: Heartbeat: BK-5m blocked (LF-m waits on #3928).
 
 - 2026-10-22T01:14Z: heartbeat: BK-5m blocked behind LF-4 (#3928 open)
+
+- 2026-10-22T01:29Z: heartbeat: BK-5m blocked behind LF-4 (#3928 open)
