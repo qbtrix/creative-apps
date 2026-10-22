@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-22T09:15Z	3	question	#4326	fl4 8d5f4257 gate PASS, pushed. Rule 23: #4326 macOS build queued 3 polls; asked supervisor (comment 6337175169), plus FL-8 without FV-z/PF-z.
 2026-10-22T09:41Z	3	check	#4326	Supervisor: local Mac gate for #4326; FL-8 allowed. FL-8 folded into fl4 2f9db9a2 (gate PASS); PR waits on #4326.
 2026-10-22T10:08Z	3	ship	#4387	#4326 merged; fl4 merged dev, gate PASS a363eeb5; opened #4387 (Slice FL-m, FL-z).
+2026-10-22T10:29Z	3	check	#4387	macOS build 39762231867 queued (blocked poll 1); no findings.
