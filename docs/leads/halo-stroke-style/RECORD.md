@@ -49,3 +49,4 @@
 - 2026-10-22T10:49Z HK-m1 PR #4394 (head 5b25e702) and HK-u1 PR #4395 (head 9f4c865a) opened, both fast-lane with CI: PASS after merging dev. Next: merge dev into HK-m2 (HA-6 catalog), and dev plus u1 into HK-u2.
 - 2026-10-22T10:53Z HK-m2 merged HK-m1 (with dev): the catalog now lists strokes then HA-6's history (85 commands); golden is the union, mutation plan has 12 entries. CI: PASS, pushed 678d6d11. HK-u2 merged HK-u1 cleanly (be4c70ed), gating. Both PRs open once their parents merge (they are over 400 lines against dev until then).
 - 2026-10-22T11:30Z #4394 (HK-m1): macOS build 39766569167 green, waiting on the lane sweep. #4395 (HK-u1) waiting on its build. Server-added attribution footers removed from #4394, #4395 and #4397. Re-check each new PR's body after create.
+- 2026-10-22T11:37Z #4394 HK-m1 merged. HK-m2 merged with dev, gate PASS, head 228565cd. PR #4400 opened (fast-lane, line:halo). Next: HK-u2 when #4395 merges, then HK-z.
