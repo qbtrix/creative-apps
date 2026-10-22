@@ -8,7 +8,7 @@ Next: wave 2 PRs in the lane (#4297 PF-u, #4295 PF-5); then PF-z once both land;
 
 Loop: v3 (the packet has a `## Slices` table).
 
-Last stage: wave 2 in lane: #4295 (PF-5) macOS build green, Linux red only on dev's own FormatListRatchet failure (#3856); #4297 (PF-u) macOS build queued; attribution footer removed from #4297 body
+Last stage: 04:10Z #4297 rebased onto dev at 00feb496 (CI --changed PASS); both PRs in lane.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
