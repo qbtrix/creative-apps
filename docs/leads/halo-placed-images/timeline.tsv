@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-22T15:10Z	3	check	PH-a	#4426 lane Linux run 39797325748 red: FormatListRatchetTests/realTreePasses (placeFormats literal, ours); fixer started; #4415 and #4431 still open
 2026-10-22T15:20Z	3	fix	PH-a	fixer: placeFormats = Set(PlacedFormat.allCases); PH-a 4bce186a, PH-u 23c39ff5, PH-u2 8d0c4b94 (merges), CI: PASS + SuiteModelTests 480 pass; Head lines moved on #4426/#4437/#4438
 2026-10-22T15:45Z	3	check	PH-a	#4426 Linux 39803488771 green at 4bce186a, macOS build 39807037753 queued; dev-red fix #4431 merged (18902a68); HT-6 #4415 still open
+2026-10-22T16:03Z	3	check	PH-a	#4426 macOS build 39807037753 still queued (runner); HT-6 #4415 re-gated at 3bee7659 on dev d96c264, Fast-Check pass, waiting on the lane

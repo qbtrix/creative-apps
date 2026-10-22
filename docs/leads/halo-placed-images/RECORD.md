@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: PH-a #4426 Linux run 39803488771 green at 4bce186a; lane macOS build 39807037753 queued, then merge; then retarget #4437 (23c39ff5) to dev + fast-lane, then #4438 (8d0c4b94); PH-m starts when HT-6 #4415 merges (dev-red fix #4431 merged 18902a68)
+Next: PH-a #4426 Linux green at 4bce186a; lane macOS build 39807037753 queued since 15:40Z (runner), then merge; then retarget #4437 (23c39ff5) to dev + fast-lane, then #4438 (8d0c4b94); PH-m starts when HT-6 #4415 merges (now Fast-Check pass at 3bee7659, in the lane)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
