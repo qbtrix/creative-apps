@@ -32,7 +32,7 @@
 //           the engine the press built (DesignSnapIndex, SN-4); a resize (one or several)
 //           snaps only the edges its handle drags (Shift: the nearer line sets the scale;
 //           Option: the far edge mirrors). `.noSnap` snaps nothing.
-//   frame, rectangle, ellipse, text   DesignDrawing; once the pointer has moved, the start and
+//   frame, rectangle, ellipse, shape, text   DesignDrawing; once the pointer has moved, the start and
 //           the end each snap to the lines of the frame drawn into (Shift: the end's nearer
 //           axis only), before whole points (SN-5). A click places the default box unsnapped.
 //   pen     nothing.
@@ -87,6 +87,8 @@ struct DesignGesture: Sendable, Equatable {
         case optionCopy([String], DesignIDMint)
         /// Draw a node of this kind (DesignDrawing).
         case draw(DesignNodeKind)
+        /// Draw the Shape tool's spec, one step through `addShape` (DesignDrawing).
+        case shape
         /// Place a text node and edit it (DesignDrawing).
         case text
         case none
@@ -244,7 +246,11 @@ extension DesignWorkspace {
             applyStep(&current, delta: delta, modifiers: modifiers)
         case .draw(let kind):
             let (from, to) = snapDraw(current, to: end, modifiers: modifiers)
-            draw(kind, from: from, to: to, square: modifiers.contains(.shift))
+            draw(kind, from: from, to: to, modifiers: modifiers)
+            current.guides = landedGuides(on: selectedNode?.frame, modifiers: modifiers, current)
+        case .shape:
+            let (from, to) = snapDraw(current, to: end, modifiers: modifiers)
+            drawShape(from: from, to: to, modifiers: modifiers)
             current.guides = landedGuides(on: selectedNode?.frame, modifiers: modifiers, current)
         case .text:
             let (from, to) = snapDraw(current, to: end, modifiers: modifiers)
@@ -406,7 +412,7 @@ extension DesignWorkspace {
         switch current.route {
         case .move(let id), .resize(let id, _, _): moving = [id]
         case .moveSeveral(let ids), .optionCopy(let ids, _), .resizeSeveral(let ids, _): moving = ids
-        case .draw, .text: parent = selectedPage?.nodes.deepestFrame(containing: current.start)
+        case .draw, .shape, .text: parent = selectedPage?.nodes.deepestFrame(containing: current.start)
         default: return
         }
         var candidates = snapCandidates(moving: moving, drawingInto: parent)
@@ -450,6 +456,8 @@ extension DesignWorkspace {
         case .draw(let kind):
             record("Add \(kind.defaultName)", before: done.before)
             tool = .move
+        case .shape:  // drawShape recorded the step; a refused draw leaves the tool on
+            if pages != done.before.pages { tool = .move }
         case .text:
             if let id = selectedNodeID, findNode(id)?.kind == .text {
                 (editingTextID, textDraft) = (id, "Text")
@@ -503,7 +511,9 @@ extension DesignWorkspace {
             route = .text
         case .eyedropper:  // one pick per click, at the press; the rest of the drag does nothing
             try? pick(at: start, toStroke: sampleToStroke != option)
-        case .shape, .pen:  // Shape draws through ShapeRules.dragged from DS-5
+        case .shape:
+            route = .shape
+        case .pen:
             break
         }
         var gesture = DesignGesture(route: route, start: start, before: snapshot, wasSelected: wasSelected, history: history)

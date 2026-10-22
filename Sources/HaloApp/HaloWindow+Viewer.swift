@@ -39,17 +39,24 @@ extension HaloWindow {
             // The viewer's drops and the inspector read it; File > Place… reads the focused value.
             .environment(\.haloPlace, { runPlace($0, fill: $1) })
             .focusedSceneValue(\.haloPlace, { runPlace($0, fill: $1) })
-            .onAppear { shapes.draw = { _ = model.drawShape($0) } }
+            .onAppear {
+                shapes.draw = {
+                    takePlayback()
+                    _ = model.drawShape($0)
+                }
+            }
     }
 
     /// The window's `haloPlace` (HaloPlace.swift): a place intent through the Model's catalog, Fill riding on a
     /// `.place`; the Model refuses what it can't do.
     func runPlace(_ intent: PlaceIntent, fill: Bool) {
+        takePlayback()
         model.runPlace(intent, fill: fill)
     }
 
     /// A handle drag's release, as one step; the Model refuses what it can't do.
     func commitTransform(_ t: TransformBox, name: String) {
+        takePlayback()
         try? model.setTransform(t, name: name, drag: nil)
     }
 }
