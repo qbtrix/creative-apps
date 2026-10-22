@@ -4,13 +4,13 @@ Issue: #3518 · Packet: docs/blueprints/suiteui/features/pen-paths.md
 Run: act-1a15f92d30e-mfnc · Session: claude/feature-lead-suiteui-srh349 · Started: 2026-10-20T07:09Z (relaunched 2026-10-21)
 Stage: 3 wave 6
 Base: aaa43f918e028249e0525eb468f37795638932d7
-Next: #4319 (PN-4, head fc4982651) on the lane; then PN-8 PR (lead/pen-paths-PN-8 eea95546, merge dev first). PN-9 waits export-pack:XP-z (#3477 waiting-on-prereq).
+Next: #4346 (PN-8, head 9eb23650) on the lane. PN-9 waits export-pack:XP-z (#3477 waiting-on-prereq).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | PN-a | Paths/ module stubs, placeholder overlay and pen on a gallery page, checks disabled | PN-1, PN-2 | SJ0 | core bump >= e09c6c30 (PN-1) | no | 0 | merged-done (Belt-Slice-Done posted) | https://github.com/qbtrix/creative-apps/actions/runs/39500009414 | n/a |
-| PN-u | Path edit overlay view, snapshots, budget, journey | PN-3, PN-4 | pen journey | PN-a | yes | 0 | building (PN-3a #3770, PN-3 #4203 merged; PN-4 #4319 on the lane) | – | – |
+| PN-u | Path edit overlay view, snapshots, budget, journey | PN-3, PN-4 | pen journey | PN-a | yes | 0 | done (PN-3a #3770, PN-3 #4203, PN-4 #4319 merged; Belt-Slice-Done run 39727609546) | – | – |
 | PN-m | PenRules, AnchorEdit, AnchorIndex, PathCommands bodies | PN-5, PN-6, PN-7 | KJ-paths | PN-1 (PN-5, PN-6); command-catalog:CC-run (PN-7, met) | no | 0 | merged-done (Belt-Slice-Done posted) | – | – |
 | PN-z | Gallery live through PathCommands; fake app takes paths (RJ-X37); built | PN-8, PN-9, PN-10 | pen journey, KJ-paths | PN-u, PN-m, export-pack:XP-z (PN-9) | no | 0 | waiting | – | – |
 
@@ -20,11 +20,11 @@ Next: #4319 (PN-4, head fc4982651) on the lane; then PN-8 PR (lead/pen-paths-PN-
 | PN-1 | PN-a | – | Kernel Paths/ stubs, C4 part, fixture, six suites disabled | Sources/SuiteKernel/Paths/*.swift, Tests/SuiteKernelTests/{PenRules,AnchorEdit,AnchorIndex,PathCommands,AnchorBudget,FakeCanvasPath}Tests.swift, Tests/SuiteKernelTests/AnchorStressFixture.swift, docs/c4/parts/creative-apps/suite-kernel/kernel-paths.json | suites compile disabled; KernelShapeTests | #3643 | merged 014da2f1 |
 | PN-2 | PN-a | 1 | Placeholder overlay and pen, gallery page, journey skipped | Sources/SuiteUI/PathEditOverlay.swift, Sources/SuiteUI/CanvasMarks+Path.swift, Sources/SuiteUI/Gallery/GalleryPenPaths.swift, Sources/SuiteUI/SuiteGallery.swift, Tests/canonical-concepts.txt, UITests/SuiteJourneyTests+PenPaths.swift | SJ0 | #3553 | merged 4256c5b8 (2026-10-20 ~21:1xZ) |
 | PN-3 | PN-u | 4 | Overlay view | Sources/SuiteUI/PathEditOverlay.swift, Sources/SuiteUI/CanvasMarks+Path.swift, Tests/SuiteUITests/PathEditOverlayTests.swift | PathEditOverlayTests | #3770 (PN-3a), #4203 | PN-3a merged; #4203 open, head 01a576e2, Fast-Check pass, waits on macOS build 39712632560 |
-| PN-4 | PN-u | – | Snapshots, budgets, journey on | Tests/AppSnapshotTests/SuitePenPathsSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPenPathsTests.swift, UITests/SuiteJourneyTests+PenPaths.swift | journey | – | #4319 (dev merged in, CI: PASS) |
+| PN-4 | PN-u | – | Snapshots, budgets, journey on | Tests/AppSnapshotTests/SuitePenPathsSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPenPathsTests.swift, UITests/SuiteJourneyTests+PenPaths.swift | journey | #4319 | merged 2026-10-22 (head fc4982651, macOS build 39727609546 green) |
 | PN-5 | PN-m | – | PenRules and AnchorEdit bodies | Sources/SuiteKernel/Paths/PenRules.swift, Sources/SuiteKernel/Paths/AnchorEdit.swift, tests, mutation plans | PenRulesTests, AnchorEditTests | #3738 | merged |
 | PN-6 | PN-m | – | AnchorIndex body; Selection keeps a Set | Sources/SuiteKernel/Paths/AnchorIndex.swift, Sources/SuiteKernel/Selection/Selection.swift, tests, mutation plans | AnchorIndexTests, AnchorBudgetTests | #3739 | merged 5684f9dd |
 | PN-7 | PN-m | 5 | PathCommands bodies | Sources/SuiteKernel/Paths/PathCommands.swift, Tests/SuiteKernelTests/PathCommandsTests.swift, Tests/mutations/SuiteKernel.PathCommands.json | PathCommandsTests | #4153 | merged |
-| PN-8 | PN-z | 6 | Gallery runs intents through PathCommands | Sources/SuiteUI/Gallery/GalleryPenPaths.swift, Tests/SuiteUITests/PathEditOverlayLiveTests.swift | live test | – | built on lead/pen-paths-PN-8 eea95546 (stacked on PN-4; 2 files +127/-18; CI: PASS); PR after PN-4 merges |
+| PN-8 | PN-z | 6 | Gallery runs intents through PathCommands | Sources/SuiteUI/Gallery/GalleryPenPaths.swift, Tests/SuiteUITests/PathEditOverlayLiveTests.swift | live test | #4346 | open, head 9eb23650 (dev merged in; 3 files +157/-21; CI: PASS) |
 | PN-9 | PN-z | – | Fake app takes paths; RJ-X37 | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeCanvasPathTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/pen-path/ | FakeCanvasPathTests | – | waiting |
 | PN-10 | PN-z | – | C4, status built, feature-done | docs/c4/parts/creative-apps/suite-kernel/kernel-paths.json, docs/blueprints/suiteui/features/pen-paths.wave.json | scripts/ci | – | waiting |
 
@@ -67,3 +67,4 @@ Next: #4319 (PN-4, head fc4982651) on the lane; then PN-8 PR (lead/pen-paths-PN-
 
 PN-8 diff check (pre-PR, clarity/mouse/taste/job), fixed at eea95546: journey counted refused lines as passes; log grew per drag sample (now folds a drag to one line, 200 cap); insert click moved to segment 2→3's midpoint; added paths draw as outline only; refused text uses CatalogError.description. Held for the PN-z review: `pageWait`/`penRulesWait` still true (Delete/arrow focus on the live page unproven blind), and the page has no Undo control (gallery pages share that; gap if the job critic asks).
 - 2026-10-22T05:18:05Z: #4203 (PN-3) merged 05:05Z. PN-4 merged dev (PathEditOverlay conflict: dev side was the PN-3 squash, kept ours), CI: PASS, PR #4319 opened fast-lane.
+- 2026-10-22T07:2xZ: #4319 (PN-4) merged; Belt-Slice-Done PN-u and Mac-Finish-Wanted PN-u, PN-a (PN-a's was missing) on #3518. PN-8 merged dev (GalleryPenPaths and journey conflicts: dev side identical to PN-8's base, kept ours), CI: PASS, PR #4346 opened fast-lane.
