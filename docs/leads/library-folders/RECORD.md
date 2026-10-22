@@ -132,3 +132,5 @@ Next: (2026-10-21T17:09Z) FO-5 #4022 at 7482cc7: lane macOS build 39632234354 qu
 - 2026-10-22T04:47Z: Heartbeat: folders complete; full CI 39722978870 queued at 71987f7 (its journeys run gives LJ-FO, not gating).
 
 - 2026-10-22T05:02Z: Heartbeat: folders complete; library journeys run 39718286550 still queued (LJ-FO, not gating).
+
+- 2026-10-22T05:18Z: Heartbeat: folders complete; LJ-FO waits on library journeys run 39718286550 (not gating).
