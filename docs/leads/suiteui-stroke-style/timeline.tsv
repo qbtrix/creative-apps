@@ -137,3 +137,4 @@ utc	stage	event	ref	note
 01:14Z	heartbeat	SS-9 #3826 ead55aa: mergeable clean, macOS build green; lane batch 20261022004326 probing, waiting to land
 01:35Z	heartbeat	SS-9 #3826 ead55aa: lane says ready (all checks ok); waits for next batch while batch 20261022004326 bisects
 01:58Z	heartbeat	SS-9 #3826 ead55aa is first in lane batch 20261022013736 (Linux check running)
+02:20Z	heartbeat	SS-9 #3826: batch 20261022013736 bisecting; probe 2 (+#4002) red on FormatListRatchetTests (SuiteModel Media.swift, not this PR); probe 1 (+#3826) running
