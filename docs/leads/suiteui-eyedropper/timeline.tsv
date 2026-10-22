@@ -86,3 +86,4 @@ utc	stage	event	ref	note
 19:20Z	heartbeat	#3577 merged; #4429 still based on lead/transform-tools-TT-7 (transform-tools lead act-1a163b2abfe-f182 to retarget); #4583/#4585 wait
 19:36Z	heartbeat	#4429 on dev, macOS build running
 20:11Z	heartbeat	#4429 build green
+20:33Z	heartbeat	#4429 needs-rebase fixed by its lead, new head cba819f
