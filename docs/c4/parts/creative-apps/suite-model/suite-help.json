@@ -1,7 +1,7 @@
 {
   "id": "suite-help",
   "name": "Help reports",
-  "description": "What Help > Report a Problem… and Beta Notes show: ProblemReport (the app, its version and build, macOS, the Mac model and the newest three suite crashes at most 7 days old, each a CrashFile trimmed to its header and crashed thread, with the home path, user and host redacted; text puts the person's note on top) and BetaNotes.current, the build's known issues. Built from values the caller reads; nothing here reads a disk or opens a socket (report-problem RP-1 stubs, RP-4 bodies).",
+  "description": "What Help > Report a Problem… and Beta Notes show: ProblemReport (the app, its version and build, macOS, the Mac model and the newest three suite crashes at most 7 days old, each a CrashFile trimmed to its header and crashed thread, with the home path, user and host redacted; text puts the person's note on top) and BetaNotes.current, the build's known issues. Built from values the caller reads; nothing here reads a disk or opens a socket. Two callers build it: the Help group (the suite Help catalog's help.report-problem and help.beta-notes, which SuiteHelpCommands puts in every app's Help menu through ShellHelpProvider, with this Mac's values and CrashFolderReader's crash files) and the CLI (HelpReports, which answers afterglow suite help.report-problem --in <file> from a .suitehelp file's values and reads no crash folder). report-problem RP-1 stubs, RP-4 bodies, RP-6 callers.",
   "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
   "paths": [
     "Sources/SuiteModel/Help/"
