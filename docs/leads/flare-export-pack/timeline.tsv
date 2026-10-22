@@ -53,3 +53,6 @@ utc	stage	event	ref	note
 2026-10-22T12:27Z	3	resume	-	act-1a16391fd49-8138 resumed; SM-a on dev; FV-1 rebased on dev 1c85591f, PR next; FV-m starts
 2026-10-22T12:40Z	3	pr	FV-1	#4414 opened, gate PASS at 63ef6a02; FV-3 builder started
 2026-10-22T13:15Z	3	built	FV-3	builder done at 1ba81c2c after worker restart; gate and mutate next
+2026-10-22T13:16Z	3	check	FV-1	#4414 macOS build 39780732823 green; attribution footer removed from body
+2026-10-22T13:16Z	3	build	FV-4	builder started on lead/export-pack-fv4 stacked on FV-3
+2026-10-22T13:16Z	3	wait	FV-2	XP-3 still not on dev (ExportPick has no size); question posted on #3481

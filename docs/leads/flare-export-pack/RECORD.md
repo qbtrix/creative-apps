@@ -21,7 +21,7 @@ Loop: v3 (the packet has a `## Slices` table).
 |---|---|---|---|---|---|---|---|
 | FV-1 | FV-a | 1 | .mp4 and .gif with fps and loop, refused until FV-3 | Sources/FlareModel/FlareExport.swift, Tests/FlareModelTests/FlareVideoExportTests.swift | export tests pass; MP4 refused | #4414 | PR open (fast-lane), head 63ef6a02 |
 | FV-3 | FV-m | 2 | frame plan: every frame, even MP4, GIF alpha; RJ-F07/F08 folders | FlareExport+Kernel.swift, FlareVideoExportTests, mutations, RealJobs | FlareVideoExportTests; Mutate 3+ | – | built 1ba81c2c (224+/17-, 9 files); gating |
-| FV-4 | FV-m | 2 | live adapter streams to media sinks; cancel deletes | LiveExportAdapter, FakeExport, FlareVideoWriteTests | FlareVideoWriteTests; Mutate 2 | – | next, stacked on FV-3 (consumes its plan) |
+| FV-4 | FV-m | 2 | live adapter streams to media sinks; cancel deletes | LiveExportAdapter, FakeExport, FlareVideoWriteTests | FlareVideoWriteTests; Mutate 2 | – | building on lead/export-pack-fv4 (stacked on FV-3) |
 
 ## Decisions
 - 2026-10-21T07Z (act-1a15d4ed024-1wsg): resumed. SM-a still not on dev and not filed as a PR; the 02:32Z question on #3481 stands, so no second question until three identical polls.
