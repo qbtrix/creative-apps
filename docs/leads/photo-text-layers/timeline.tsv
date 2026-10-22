@@ -38,3 +38,4 @@
 2026-10-22T01:21Z	check	TX-m slice-done waits: Linux 39701991485 on add701f red (dev-red, not ours). #4053 open at ce6524fa5. TS-m #3844/#3847 open.
 2026-10-22T01:46Z	check	#4053 TX-u merged as 2ce1c2a36; Linux 39706006390 (6a06063d7) red only on SuiteModel FormatListRatchetTests (not mine); TX-m and TX-u slice-done wait on a green Linux; TS-m #3844/#3847 open
 2026-10-22T02:11Z	check	Linux 39707946247 (e99331166, has TX-m+TX-u) red only on SuiteModel FormatListRatchetTests (not mine); slice-done waits; TS-m #3844/#3847 open
+2026-10-22T02:36Z	check	no newer Linux run; last 39707946247 red only on SuiteModel FormatListRatchetTests (not mine); full CI 39707795159 pending; TS-m #3844/#3847 open
