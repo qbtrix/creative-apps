@@ -1,6 +1,7 @@
 // PhotoTextEdit.swift (text-layers TX-4): editing a text layer's words. A Type tool click on a visible text
 // layer (so a double-click) opens the box over it holding its words and selects it; the box's commit runs
-// `text.set-words`, one "Edit Text" step, and adds nothing when the words didn't change. Linux-safe.
+// `text.set-words`, one "Edit Text" step, and adds nothing when the words didn't change. The text inspector
+// runs each gesture's text command through `runText`. Linux-safe.
 import CoreRaster
 import SuiteKernel
 
@@ -29,6 +30,22 @@ extension PhotoWorkspace {
             _ = try Self.catalog.run("text.set-words", params: .object(["words": .string(words)]), on: &self)
         } catch {
             statusMessage = textHelp ?? (words.isEmpty ? "Type some words first." : "Couldn't edit the text.")
+        }
+    }
+
+    /// The font families the text inspector offers, by name.
+    public var textFamilyNames: [String] { services.text.families().map(\.name) }
+
+    /// Runs the text inspector's `intent` on the selected text layer; a refusal says why in the status line.
+    public mutating func runText(_ intent: TextIntent) {
+        let command = intent.command
+        do {
+            _ = try Self.catalog.run(command.id, params: command.params, on: &self)
+            statusMessage = nil
+        } catch CatalogError.unavailable(_, let why) {
+            statusMessage = textHelp ?? why
+        } catch {
+            statusMessage = textHelp ?? "Couldn't restyle the text."
         }
     }
 }
