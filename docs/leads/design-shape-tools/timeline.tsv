@@ -79,3 +79,4 @@ utc	stage	event	ref	note
 2026-10-22T21:06Z	poll	#4392 lane macOS build dispatched 20:58Z; scoped design 39851521632 (queued) and full CI 39852194708 (pending) on 62fe62aad contain DS-m and DS-u merges
 2026-10-22T21:23Z	poll	#4392 macOS build pending (dispatched 20:58Z); scoped design 39851521632 queued, full CI 39852194708 cancelled, newer 39855608410 (be18ab629) pending; both contain DS-m+DS-u
 2026-10-22T21:40:07Z	poll	#4392 macOS build green (39853383424), awaiting lane batch; full CI 39858933900 (066cd28d6, has DS-m+DS-u) pending; no slice-done yet
+2026-10-22T21:56:35Z	poll	#4392 open, clean, macOS build green, awaiting lane batch; full CI 39858933900 (066cd28d6) still pending; no slice-done yet
