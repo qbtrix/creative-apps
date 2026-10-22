@@ -4,15 +4,15 @@ Issue: #3535 · Packet: docs/blueprints/photo/features/multi-layer-select.md
 Run: act-1a160924292-21x8 (resumed; earlier act-1a15e9d8b78-eu21, act-1a15b1de115-nxto) · Session: claude/multi-layer-select-lead-g8o0jx · Started: 2026-10-20T20:40Z
 Stage: 3 wave 3
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: PM-z #4243 open (head 2e5a915, Fast-Check pass, fast-lane + feature-done), awaiting the lane's macOS build; Belt-Slice-Done PM-z on the first green ci.yml run on dev containing it, then Belt-Contact-Sheet. PM-m Belt-Slice-Done still owed on a green run containing 1a1ac0af1.
+Next: every slice is on dev (PM-z #4243 squashed e99331166 at 01:31Z). Owed: Belt-Slice-Done PM-m and PM-z on the first green ci.yml run on dev containing e99331166 (dev Linux is red on FormatListRatchetTests, SuiteModel Media.swift, not ours), then Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | PM-a | LayerTreeList picks several rows; Photo keeps a kernel Selection of layers; list, Select > All Layers and intents on stubs | PM-1, PM-2, PM-3 | MJ-PM | photo-gradient-fill:PG-a (PM-2); shell-parity (built) | yes | 0 | slice-done | 39655526241 | wanted |
 | PM-u | snapshots of four states, render budget, journey written | PM-7, PM-8 | PJ-M1 | PM-a | yes | 0 | slice-done | 39661533247 | wanted |
-| PM-m | selection bodies; hide, opacity, delete, move on every selected layer as one step; catalog; RJ-P43 | PM-4, PM-5, PM-6 | MJ-PM | PM-a; PG-m (PM-5, PM-6) | no | 0 | merged, awaiting green Linux | – | – |
-| PM-z | journey on live, Delete on every picked layer, photo.md, feature-done | PM-9, PM-10 | PJ-M1 | PM-u, PM-m; PG-z (built) | yes | 0 | PR #4243 open | – | – |
+| PM-m | selection bodies; hide, opacity, delete, move on every selected layer as one step; catalog; RJ-P43 | PM-4, PM-5, PM-6 | MJ-PM | PM-a; PG-m (PM-5, PM-6) | no | 0 | merged, awaiting green dev run | – | – |
+| PM-z | journey on live, Delete on every picked layer, photo.md, feature-done | PM-9, PM-10 | PJ-M1 | PM-u, PM-m; PG-z (built) | yes | 0 | merged e99331166 01:31Z, awaiting green dev run | – | – |
 | PM-g | group layers | PM-11, PM-12, PM-13 | – | PM-m | yes | 0 | out of beta (captain 2026-10-20, v1) | – | – |
 
 ## Tasks
@@ -26,8 +26,8 @@ Next: PM-z #4243 open (head 2e5a915, Fast-Check pass, fast-lane + feature-done),
 | PM-6 | PM-m | 4 | Move moves every selected layer; RJ-P43 | PhotoStroke.swift, PhotoSeveralLayers+Kernel.swift, RealJobs/photo/fade-layers | moveMovesEvery | #4143 | merged 20:44Z |
 | PM-7 | PM-u | 4 | snapshots and render budget | Tests/AppSnapshotTests/PhotoMultiLayerSnapshots.swift, RenderBudgetPhotoMultiLayerTests.swift | snapshots | #4138 | merged |
 | PM-8 | PM-u | 4 | journey written, skipped | UITests/PhotoJourneyTests+MultiSelect.swift | compiles | #4137 | merged 18:25Z |
-| PM-9 | PM-z | 5 | journey on live; Layers Delete and the intent call removeSelectedLayers; deleteLayersHelp | UITests/PhotoJourneyTests+MultiSelect.swift, PhotoLayerList.swift, PhotoWindow.swift, PhotoSeveralLayers+Kernel.swift | PJ-M1; deleteLayersHelpRefusesAllAndTheLastLayer; Mutate 6/6 | #4243 | open; stress-journey steps split to #4242 (waits on #3499) |
-| PM-10 | PM-z | 6 | photo.md, built, feature-done | docs/blueprints/photo.md, multi-layer-select.wave.json | scripts/ci | #4243 | open (in PM-z PR) |
+| PM-9 | PM-z | 5 | journey on live; Layers Delete and the intent call removeSelectedLayers; deleteLayersHelp | UITests/PhotoJourneyTests+MultiSelect.swift, PhotoLayerList.swift, PhotoWindow.swift, PhotoSeveralLayers+Kernel.swift | PJ-M1; deleteLayersHelpRefusesAllAndTheLastLayer; Mutate 6/6 | #4243 | merged 01:31Z; stress-journey steps split to #4242 (waits on #3499) |
+| PM-10 | PM-z | 6 | photo.md, built, feature-done | docs/blueprints/photo.md, multi-layer-select.wave.json | scripts/ci | #4243 | merged 01:31Z (in PM-z PR) |
 
 ## Waves (combined plan, all three features)
 - W1: PM-1 (SuiteUI LayerTreeList multi-select, no waits) and PP-a (PP-1 and PP-2 in one PR; waits met by PL-1 #3578 and PL-m on dev). The files do not overlap.
@@ -59,10 +59,11 @@ Next: PM-z #4243 open (head 2e5a915, Fast-Check pass, fast-lane + feature-done),
 
 ## Open
 - #4242 (gap, p2): the stress journey's ⌥⌘A, eye and Move steps from PM-9, waiting on #3499 (StressPerf.swift is not on dev).
-- Layer-styles (#3793) and masks-clipping (#3859) wait on multi-layer-select; PM-z's merge unblocks them.
+- Layer-styles (#3793) and masks-clipping (#3859) waited on multi-layer-select; PM-z merged 01:31Z.
 - Belt watches lead/photo-multi-layer-select (docs/leads/photo-multi-layer-select/): the record is mirrored there from 14:55Z; lead/multi-layer-select keeps the same files.
 - The PR tooling re-appends a footer line to PR bodies after an edit removes it; the fast lane strips it from the squash commit.
 - The comment tool re-appends the attribution footer to issue comments too; a PATCH cannot remove it. Recorded, not blocking.
 - A stacked PR squash carries its base: PM-6 #4143 landed PM-5 too; #4118 closed as superseded (dev differs only by PM-6 lines).
 - dev's macOS build is broken outside this feature: #4164 replaced PhotoPlaceIntent.files, but RenderBudgetPhotoPlaceTests.swift still calls it. The fix is #4215 (open). #4243's lane build 39688975150 failed on it. Head 0972834 merges dev and ports #4215, with one comment on #4243. Slice-done for PM-m and PM-z waits on a green dev run, which needs #4215 or our port.
 - 00:30Z stage: #4215 merged into dev, so #4243's port is now a no-op against dev. #4243 (head 0972834) waits only on its lane macOS build 39693769769, which has been queued since 23:29Z with no runner. The head is left as is, because a push would restart the build and its place in the queue. Slice-done for PM-m and PM-z waits on #4243's merge and a green dev ci.yml run.
+- 01:31Z: #4243 landed in lane batch 20261022004326 on its own proof (dev was red on its own: FormatListRatchetTests, run 39704640868).
