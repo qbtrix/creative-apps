@@ -4,7 +4,7 @@ Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
 Run: act-1a160bffba1-bvv3 · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih) · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: 3 build
 Base: 8c55f0bf9 (origin/dev)
-Next: FV-2 once XP-3 is on dev, then open the FV-a PR
+Next: unchanged
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -58,3 +58,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T03:39Z: Heartbeat: #4259 macOS build queued, #4257 macOS build running; #4035 macOS+Linux green, awaiting lane merge.
 - 2026-10-22T04:02Z: SM-2 #4035 merged 03:53Z, so SM-a is on dev; XP-1/XP-6 on dev, XP-3 not. FV-1 started on lead/export-pack-fva; the FV-a PR opens with FV-2 once XP-3 is on dev
 - 2026-10-22T04:18Z: FV-1 done on lead/export-pack-fva at ed2293cc (+140/-10, 8 files, gate PASS); the sheet hides unbuilt formats until FV-2. XP-3 not on dev yet.
+- 2026-10-22T04:24Z: XP-3 still not on dev; FV-2 waits
