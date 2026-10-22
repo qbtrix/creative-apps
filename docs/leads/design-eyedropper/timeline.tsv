@@ -68,3 +68,4 @@ utc	stage	event	ref	note
 2026-10-22T00:35Z	DY-u	#4081 macOS build 39698585137 queued; DT-m still waiting (DT-6 PR not open)
 2026-10-22T00:57Z	DY-u	#4081 macOS build 39698585137 green on f61b2623; merge on next lane sweep
 2026-10-22T01:18Z	DY-u	#4081 clean + macOS green, not merged yet; dev Linux red again (FormatListRatchetTests.realTreePasses, SuiteModel Media.swift; not our line)
+2026-10-22T01:40Z	DY-u	#4081 lane-eligible (5 green, macOS build ok); waits behind batch lane/batch-20261022004326 bisecting dev red (probe 0)
