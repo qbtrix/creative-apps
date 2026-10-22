@@ -121,3 +121,4 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 21:26Z: heartbeat: #4630 (C4) merged at 21:01Z as be18ab6 (lane batch run 39850898441). #4631 (status built, feature-done) passed the lane's 21:24Z sweep and is waiting to merge in a batch.
 - 21:49Z: #4631 merged at 21:25Z as 066cd28 (lane batch run 39854318302). All SS-z PRs are on dev. The full CI run 39858933900 on dev at 066cd28 is pending; its Linux check 39857152000 is green. Once that run is green: Belt-Slice-Done for SS-d and SS-z, then the contact sheet.
 - 22:17Z: heartbeat: full CI 39858933900 at 066cd28 was cancelled by a newer run. The full CI run now waiting is 39861703512 at a7469d7, which contains 066cd28; its Linux check 39861121461 is green.
+- 22:44Z: heartbeat: full CI 39861703512 (a7469d7) is still pending, waiting for a runner.
