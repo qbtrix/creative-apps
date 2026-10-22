@@ -1,0 +1,68 @@
+utc	stage	event	ref	note
+2026-10-20T05:01:16Z	0	stage-start	18464f26b93c6826d069e0107545d7aacfac033c	base 18464f26, v3 packet
+2026-10-20T05:01:16Z	0	stage-end	#3444	lead branch and RECORD written
+2026-10-20T05:01:16Z	1	stage-end	autosave-history	packet read: slices and tasks recorded
+2026-10-20T05:01:16Z	3	heartbeat	#3421	blocked: contract slice waits on gradient-fill:GF-a, not merged
+2026-10-20T05:23Z	3 polling	heartbeat	#3421	GF-a not merged: #3421 open at ed1ed79, dev at 6537a1a, Sources/SuiteKernel/Fill absent
+2026-10-20T05:47Z	3 polling	heartbeat	#3421	GF-1 merged on dev 9a14677; GF-a still open: GF-2 has no PR (waits command-catalog CC-u)
+2026-10-20T06:14Z	3	wave-start	wave 1	AH-1 started on 424b4a6 (worktree builder), beside SS-1
+2026-10-20T06:36Z	3 wave 1	heartbeat	-	AH-1 builder running, no PR yet
+2026-10-20T06:42Z	3 wave 1	pr	#3543	AH-1 PR open, head 9bf20a1, 397 lines/11 files, CI: PASS; contract check ok
+2026-10-20T06:42Z	3 wave 1	check	#3543	contract check ok: base dev, fast-lane, Refs #3444, trailer lines, Head matches, tests first commit
+2026-10-20T06:57Z	3 wave 1	heartbeat	-	#3543 open, lane macOS build run 39382192478 dispatched
+2026-10-20T07:21Z	3 wave 2	wave	#3543	AH-1 merged 07:11Z (dev 854a3b5); wave 2 started: AH-2, AH-5, AH-6, AH-7 builders
+2026-10-20T07:42Z	3 wave 2	heartbeat	-	AH-2, AH-5, AH-6, AH-7 builders running, no branch pushed yet
+2026-10-20T08:04Z	3 wave 2	heartbeat	-	AH-5 and AH-7 in their gates, AH-2 and AH-6 building; no branch pushed yet
+2026-10-20T08:19Z	2	check	AH-2	#3568 open, contract ok (footer stripped)
+2026-10-20T08:25Z	2	heartbeat	-	AH-2 #3568 open; AH-5, AH-7 resumed (gate); AH-6 building
+2026-10-20T08:32Z	2	gate	AH-5	CI: FAIL x2 on other lines wall-clock budget tests under load 21-40 (pass isolated); Mutate 3/3; pushing branch, regate when load < 6
+2026-10-20T08:33Z	2	check	AH-7	#3572 open, contract ok except no Fast-Check marker (gate red on load-sensitive budget tests); Mutate 4/4
+2026-10-20T08:35Z	2	check	AH-6	#3573 open, contract ok except no Fast-Check marker (load-sensitive budget tests); Mutate 3/3
+2026-10-20T08:42Z	2	check	AH-5	#3576 open, CI: PASS on regate, contract ok; Mutate 3/3
+2026-10-20T08:49Z	AH-m	heartbeat	-	#3568 #3572 #3573 #3576 open
+2026-10-20T09:12Z	AH-m	heartbeat	-	#3568 #3572 #3573 #3576 open, lane macOS builds dispatched
+2026-10-20T09:34Z	AH-m	needs-rebase	AH-2	#3568 conflict suiteui-sources.json; fixer started
+2026-10-20T09:43Z	AH-m	fixed	AH-2	#3568 dev merged, head bd195b5, CI: PASS
+2026-10-20T09:56Z	AH-m	heartbeat	-	#3568 (bd195b5, needs-rebase dropped) #3572 #3573 #3576 queued for lane macOS build
+2026-10-20T10:17Z	AH-m	heartbeat	-	macOS build green: #3568 #3576 #3572 (await lane merge sweep); #3573 build queued since 08:54
+2026-10-20T10:40Z	AH-m	heartbeat	-	#3576 #3572 merged 10:23; #3568 macOS green awaits sweep; #3573 build queued
+2026-10-20T11:05Z	AH-m	merged	AH-2	#3568 merged 10:41
+2026-10-20T11:05Z	AH-u	start	AH-3	builder started
+2026-10-20T11:05Z	AH-m	heartbeat	-	#3573 macOS build in progress
+2026-10-20T11:17Z	AH-u	pr	AH-3	#3596 opened, head 1e1cb6d, contract ok
+2026-10-20T11:28Z	AH-m	heartbeat	-	#3573 macOS green awaits sweep; #3596 awaits lane macOS build
+2026-10-20T11:50Z	AH-m	heartbeat	-	#3573 and #3596 macOS green, await lane sweep
+2026-10-20T12:19Z	-	heartbeat	-	AH-6 #3573, AH-3 #3596 macOS green, eligible; lane batch-20261020112639 in flight with 8+ older eligible PRs ahead (oldest first); no builder (AH-4 waits #3596)
+2026-10-20T12:43Z	AH-m	merged	AH-6	#3573 merged 12:42 as 3e010e3; AH-m all merged, waiting a dev CI Linux job
+2026-10-20T12:43Z	-	heartbeat	-	AH-3 #3596 macOS green, queued for a lane batch; no builder (AH-4 waits #3596, AH-9 waits GF-z)
+2026-10-20T13:08:33Z	AH-m	slice-done	-	run 39424989659
+2026-10-20T13:08:33Z	AH-u	merged	AH-3	#3596
+2026-10-20T13:08:33Z	AH-u	start	AH-4	builder spawned
+2026-10-20T13:08:33Z	-	heartbeat	-	wave 3 check
+2026-10-20T13:25:10Z	AH-u	pr	AH-4	#3607 head a11ef66 CI: PASS
+2026-10-20T13:30:12Z	-	heartbeat	-	#3607 macOS build dispatched; GF-z not done
+2026-10-20T13:52:44Z	-	heartbeat	-	#3607 macOS build queued (39430589967); GF-z not done
+2026-10-20T14:16:53Z	-	heartbeat	-	#3607 macOS build still queued; GF-z not done
+2026-10-20T14:39:32Z	-	heartbeat	-	#3607 AH-4 macOS build in progress (a11ef66)
+2026-10-20T15:02:03Z	-	heartbeat	-	#3607 AH-4 macOS build green (run 39430589967); waiting on lane merge
+2026-10-20T15:25:48Z	AH-u	merged	AH-4	#3607 merged 15:12 (27b6733); dev CI 39447117246 pending
+2026-10-20T15:25:48Z	AH-z	build	AH-8	builder started
+2026-10-20T15:43:26Z	AH-z	pr-open	AH-8	#3629 head 763e318, footer stripped, contract clean
+2026-10-20T15:49:48Z	AH-u	slice-done	AH-3,AH-4	Belt-Slice-Done + Mac-Finish-Wanted posted (Linux check 39448853502); critic panel waits for a scoped suiteui run with the history screens
+2026-10-20T16:14:13Z	-	heartbeat	-	wave 9: lane macOS builds still queued (oldest 14:28, #3601); no labels/failures; no scoped suiteui run; GF slice-done still absent
+2026-10-20T16:36:00Z	-	heartbeat	-	wave 10: all 4 lane macOS builds still queued (oldest 2h+); every macOS CI/scoped run on the repo queued — runner backlog, nothing for the lead to act on
+2026-10-20T16:58:34Z	-	heartbeat	-	wave 11: unchanged; macOS runner backlog (all lane builds and CI/scoped runs queued)
+2026-10-20T17:20:14Z	-	heartbeat	-	wave 12: unchanged; macOS runner backlog continues (lane builds queued since 14:28-15:45)
+2026-10-20T17:42:01Z	-	heartbeat	-	wave 13: lane builds still queued; runner backlog easing (#3601 build done)
+2026-10-20T17:59:38Z	-	heartbeat	-	wave 14: lane macOS build still queued; no labels/failures
+2026-10-20T19:00:26Z	-	poll	-	wave 17: #3627/#3629/#3672 macOS builds still queued; #3418 no slice-done; no scoped suiteui run yet
+2026-10-20T19:19:46Z	-	poll	-	wave 18: #3627/#3629/#3672 macOS builds still queued (runner backlog); #3418 no slice-done; scoped "suite" = AfterGlow journeys, not SuiteJourneyTests, so no HJ1 screens
+2026-10-20T19:39:09Z	-	poll	-	wave 19: #3627/#3629/#3672 macOS builds still queued; #3418 no slice-done; no scoped suiteui or full dev CI run
+2026-10-20T20:00:34Z	-	poll	-	wave 20: #3627/#3629/#3672 macOS builds still queued; #3418 no slice-done; full dev CI 39485502739 pending (HJ1 screens for AH-u critics when done)
+2026-10-20T20:22:02Z	-	poll	-	wave 21: #3629 AH-8 macOS build 39451375868 in progress; #3627/#3672 builds still queued; #3418 no slice-done; full dev CI 39485502739 pending
+2026-10-20T20:42:51Z	-	poll	-	wave 22: #3629 AH-8 macOS build 39451375868 success, awaiting lane merge; #3627/#3672 builds still queued; #3418 no slice-done; full dev CI 39485502739 pending
+2026-10-22T10:03:39Z	3	stage-start	resume	run act-1a1630f0f74-0l2p, base 02d2e5b
+2026-10-22T10:03:39Z	AH-a	slice-done	39756689216	Belt-Slice-Done + Mac-Finish-Wanted posted
+2026-10-22T11:10:46Z	3	pr-opened	#4388	AH-9 + AH-10 wave.json, feature-done, Mutate 9/9
+2026-10-22T11:10:46Z	3	pr-opened	#4396	AH-10 C4 prose, docs only
+2026-10-22T11:10:46Z	3	heartbeat	-	polling: lane merge of #4388/#4396
