@@ -10,6 +10,7 @@ import Testing
 
 @testable import HaloApp
 
+@MainActor
 @Suite struct HaloNewCompositionRateSnapshots {
     private let ntsc = CompositionSettings(name: "NTSC", frameRate: FrameRate(numerator: 30000, denominator: 1001), durationSeconds: 10)
 
