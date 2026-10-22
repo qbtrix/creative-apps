@@ -13,6 +13,7 @@ Base: 8c55f0bf9 (origin/dev)
 - 16:07Z check-in: no new comments on #3482 (closed); no new Flare findings since 15:37Z. Waiting for `Belt released this run.`
 - 16:33Z check-in: no new comments on #3482 (closed); no new Flare findings since 16:04Z. Waiting for `Belt released this run.`
 - 17:00Z check-in: no new comments on #3482 (closed); no new Flare findings since 16:30Z. Waiting for `Belt released this run.`
+- 17:27Z check-in: no new comments on #3482 (closed); no new Flare findings since 16:57Z. Waiting for `Belt released this run.`
 Next: none; all slices done and the contact sheet is posted. Wait for `Belt released this run.`
 
 Loop: v3 (the packet has a `## Slices` table).
