@@ -89,3 +89,4 @@ utc	stage	event	ref	note
 19:22Z	3	TT-z retarget	#4429	1f2ab442 base dev
 2026-10-22T19:51Z	3	heartbeat	-	#4429 macOS build running
 2026-10-22T20:16Z	3	review	TT-u	panel on run 39810321089
+2026-10-22T20:19Z	3	review	TT-u	filed #4625-#4629; fix round 1 next

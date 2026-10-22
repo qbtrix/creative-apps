@@ -4,11 +4,12 @@ Issue: #3446 · Packet: docs/blueprints/suiteui/features/transform-tools.md
 Run: act-1a163b2abfe-f182 (relaunch; first run act-1a1579fdd22-6z1j) · Started: 2026-10-22
 Stage: 3 wave 5 (TT-z) shipped; polling lane
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: lane batches #4429 (feature-done); then TT-z done from the dev CI run holding it; critic panel on TT-z screens from a scoped app=suiteui run
+Next: fix round 1 on #4625-#4629 (disjoint-file PRs); lane batches #4429; then TT-z done from the dev run holding it
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
+| TT-u | 39810321089 | 401242a5 | clarity, mouse, taste, design, job | #4625-#4629 | 0 |
 | TT-a | The kernel's transform rules, target, intents and six command specs are declared as stubs, the handles take a turn, the ... | TT-1, TT-2 | SJ0 | editor-kernel | true | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39411363661 | wanted |
 | TT-u | On the gallery page the knob turns the box and its handles together, a side drag grows the turned box in its own frame, ... | TT-3, TT-4 | TJ1 | TT-a | true | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39445745786 | wanted |
 | TT-m | The rules turn, mirror and scale a box about its centre or an anchor and map points both ways, and every transform comma... | TT-5, TT-6 | KJ-transform | TT-a | false | 0 | done | – | – |
@@ -34,6 +35,7 @@ Next: lane batches #4429 (feature-done); then TT-z done from the dev CI run hold
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T20:19Z critic panel on scoped suiteui 39810321089 (401242a5): filed #4625 (TT-z) and #4626-#4629 (TT-u), 5 open (cap). Not filed: InspectorAction pressed state equals hover (shared SuiteUI, outside this feature). Refuted: knob sends a total turn (TT-7 sends the difference); mirror in turned resize. Fix round 1 next.
 - 2026-10-22T20:16Z #4429 (TT-z) macOS build green; now dirty against dev (no needs-rebase; the lane integrates it). Scoped suiteui 39810321089 green at 401242a5 (holds TT-a, TT-u, TT-m, not TT-7): critic panel on TT-u's screens started, lenses clarity, mouse, taste, design, job.
 - 2026-10-22T19:51Z heartbeat: #4429 (TT-z) base dev head 1f2ab442, clean, lane macOS build in progress; scoped suiteui 39810321089 in progress.
 - 19:22Z #3577 (TT-7) merged (a1bf680bff). Merged dev into lead/transform-tools-TT-z (1f2ab442): transform-tools.wave.json conflicted because the merge-json driver pointed at a deleted worktree (now repointed); kept "status": "built" and took dev's waits_on and stroke-style:SS-d. scripts/ci --changed: CI: PASS. #4429 retargeted to dev, Head moved, no footer.
