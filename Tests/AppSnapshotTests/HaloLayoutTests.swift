@@ -258,7 +258,8 @@ extension BodyCountSuites {
             let report = "L7 at \(Self.window.width) pt: plain \(columns[0]), keyed and eased \(columns[1])"
             print(report)
             #expect(abs(columns[0].minX - columns[1].minX) <= 0.5, "the inspector moves: \(report)")
-            for column in columns {
+            // suite.inspector's frame is the column's content box: SuiteWindow pads it by SuiteSpacing.m on each side.
+            for column in columns.map({ $0.insetBy(dx: -SuiteSpacing.m, dy: 0) }) {
                 #expect(column.width >= HaloWindow.inspectorWidth - 0.5, "the inspector is under its width: \(report)")
             }
         }

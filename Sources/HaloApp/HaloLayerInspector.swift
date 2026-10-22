@@ -112,7 +112,6 @@ struct HaloPropertyRowView: View, Equatable {
     @State private var scrubbed: Double?
     @Environment(\.haloLiveEdit) private var live
     @Environment(\.suiteProbeRecorder) private var recorder
-    @Environment(\.haloRefreshLink) private var makeLink
     /// The scrub's refresh-paced writes; made by the first sample of a scrub.
     @State private var scrubLink: HaloInspectorScrubLink?
 
@@ -174,7 +173,7 @@ struct HaloPropertyRowView: View, Equatable {
         }
         let link = scrubLink ?? HaloInspectorScrubLink()
         if scrubLink == nil { scrubLink = link }
-        link.take(shown, probe: HaloProbe(recorder), makeLink: makeLink) { value in
+        link.take(shown, probe: HaloProbe(recorder), makeLink: live.makeLink) { value in
             live.show { $0.setProperty(p, to: p.stored(fromShown: value)) }
         }
     }
