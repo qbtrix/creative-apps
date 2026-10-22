@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-22T08:21Z	fr-u-critics	FR-u critic panel started	-	act-1a161a658a7-2jql
 2026-10-22T08:27Z	fix round 1 (FR-u)	FR-u critics: 11 findings; fix round 1 started	-	act-1a161a658a7-2jql
 2026-10-22T08:42Z	fix round 1 (FR-u)	heartbeat: parents queued on macOS runner; fix round 1 running	-	act-1a161a658a7-2jql
+2026-10-22T08:56Z	fix round 1 PRs open (FR-u)	fix round 1: #4373 #4375 open	-	act-1a161a658a7-2jql
