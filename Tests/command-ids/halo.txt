@@ -71,6 +71,12 @@ timeline.pick-keys
 timeline.scrub
 timeline.select-all-keys
 tool.shape
+transform.flip
+transform.read
+transform.reset
+transform.rotate
+transform.scale
+transform.set
 viewer.drag-begin
 viewer.drag-cancel
 viewer.drag-end

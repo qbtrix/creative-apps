@@ -2,8 +2,8 @@
 // kernel's six `transform.*` commands, headless too; Flip is refused with
 // Halo's sentence; and RJ-H34 (`Tests/RealJobs/halo/key-turn/`) animates a
 // shape's Rotation and Scale, turns it 30 degrees and doubles it about its
-// centre at frame 12, saves and reopens to keys at 12 over the base values at
-// 0, the centre where it was. Linux and macOS.
+// centre at frame 12, saves and reopens to keys at 12 between the toggle's
+// base keys at 0 and 47, the centre where it was. Linux and macOS.
 import Foundation
 @testable import HaloModel
 import SuiteKernel
@@ -48,12 +48,13 @@ import Testing
         let reopened = try HaloHeadless.open(try Self.edited().save(), name: "one-shape.halo")
         let layer = try #require(reopened.workspace.selectedComposition?.layers.first)
         let turn = try #require(layer.tracks["rotation"])
-        #expect(turn.map(\.frame) == [0, 12] && turn.map(\.value) == [0, 30])
+        #expect(turn.map(\.frame) == [0, 12, 47] && turn.map(\.value) == [0, 30, 0])
         for p in ["scaleX", "scaleY"] {
             let keys = try #require(layer.tracks[p], "\(p)")
-            #expect(keys.map(\.frame) == [0, 12] && keys.map(\.value) == [1, 2], "\(p)")
+            #expect(keys.map(\.frame) == [0, 12, 47] && keys.map(\.value) == [1, 2, 1], "\(p)")
         }
         let box = try #require(reopened.workspace.transformSelection)
         #expect((box.box.minX + box.box.maxX) / 2 == 130 && (box.box.minY + box.box.maxY) / 2 == 80)
     }
 }
+

@@ -9,10 +9,11 @@ extension HaloProject {
     /// One spec per `HaloCommand.allCases` entry, in that order, then the
     /// kernel's `shape.draw` and `tool.shape` (shape-tools HS-6), its eight `fill.*` commands
     /// (gradient-fill HG-7), the History panel's `history.read` and `history.jump` (autosave-history HA-6),
-    /// then `windowSpecs`.
+    /// the six `transform.*` commands on the selected layer (transform HT-6), then `windowSpecs`.
     public static let commandSpecs: [CommandSpec<HaloProject>] =
         HaloCommand.allCases.map(spec(for:)) + ShapeCommands.specs(HaloProject.self)
-        + GradientCommands.specs(HaloProject.self) + HistoryCommands.specs(HaloProject.self) + windowSpecs
+        + GradientCommands.specs(HaloProject.self) + HistoryCommands.specs(HaloProject.self)
+        + TransformCommands.specs(HaloProject.self) + windowSpecs
 
     /// The render sheet's Choose… and the unsaved alert's Save and Don't Save (CS-7): headless they check
     /// availability and change nothing, since the panel and the held command are the window's.

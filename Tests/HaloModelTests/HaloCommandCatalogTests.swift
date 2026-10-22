@@ -35,8 +35,9 @@ extension HaloProject: HeadlessDocument {
         let shapes = ShapeCommands.specs(HaloProject.self).map(\.id)  // HS-6: the kernel's shape commands follow
         let fills = GradientCommands.specs(HaloProject.self).map(\.id)  // HG-7: then its fill commands
         let history = ["history.read", "history.jump"]  // HA-6: then the History panel's two
+        let transforms = TransformCommands.specs(HaloProject.self).map(\.id)  // HT-6: then the six transform commands
         let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
-        let all = ids + shapes + fills + history + window
+        let all = ids + shapes + fills + history + transforms + window
         #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
     }
 
@@ -112,8 +113,10 @@ extension HaloProject: HeadlessDocument {
     static let exempt: [String: [String]] = [
         "Halo saves the playhead in the file": ["animation.go-to-end animation.next-frame timeline.scrub: queryOrViewChangesNoBytes"],
         "the step names the property or direction": ["inspector.set-property inspector.set-property-text inspector.toggle-animation inspector.toggle-key layer.send-backward: stepNamedTitle"],
-        "a no-op edit stays enabled (in point at frame 0, drag end with no drag)": ["animation.set-in-point viewer.drag-end: stepNamedTitle",
-            "animation.set-in-point viewer.drag-end: editRecordsOneStep", "animation.set-in-point viewer.drag-end: undoRestoresBytes"],
+        "a no-op edit stays enabled (in point at frame 0, drag end with no drag, reset of an unturned layer)": [
+            "animation.set-in-point transform.reset viewer.drag-end: stepNamedTitle",
+            "animation.set-in-point transform.reset viewer.drag-end: editRecordsOneStep",
+            "animation.set-in-point transform.reset viewer.drag-end: undoRestoresBytes"],
         "the kernel's shape.draw names its step for the kind drawn (\"Draw Star\")": ["shape.draw: stepNamedTitle"],
         "undo of a duplicate keeps the bumped id counter": ["layer.duplicate: undoRestoresBytes"],
         "the example needs a picked key, text layer, render, recent file or room to move": ["animation.easing animation.go-to-start animation.previous-frame composition.delete easing.delete-keys easing.end-drag easing.move-handle easing.set-custom file.open-recent layer.bring-forward render.cancel render.close-sheet text.end-size-scrub text.set text.set-size: exampleRuns"],
@@ -122,6 +125,7 @@ extension HaloProject: HeadlessDocument {
         "the window's own steps need an open render or unsaved edits (CS-7)": ["file.answer-unsaved render.choose-folder: exampleRuns"],
         "the stop and angle examples need a gradient; Ball's fill is solid": ["fill.angle fill.stop-add fill.stop-move fill.stop-remove: exampleRuns"],
         "the jump example needs steps; the fixture has none (HA-6)": ["history.jump: exampleRuns"],
+        "flipping isn't in Halo yet; the flip refuses with flipHelp (HT-6)": ["transform.flip: exampleRuns"],
     ]
 
     @Test func conformance() {

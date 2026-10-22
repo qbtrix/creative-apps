@@ -14,7 +14,25 @@
   ],
   "atomic": true,
   "expect": {
-    "out/one-shape.halo": {"json": {}}
+    "out/one-shape.halo": {"json": {"format": "halo", "version": 1, "project": {
+      "compositions": [{"id": "comp-1", "name": "Turn", "width": 320, "height": 180, "framesPerSecond": 24, "durationFrames": 48, "playheadFrame": 12,
+        "layers": [
+          {"id": "comp-1-layer-1", "name": "Box", "kind": "shape", "inFrame": 0, "outFrame": 48, "opacity": 1, "blendMode": "normal",
+           "color": {"red": 0.9, "green": 0.4, "blue": 0.2}, "rect": {"x": 100, "y": 60, "width": 60, "height": 40},
+           "tracks": {
+            "rotation": [
+             {"frame": 0, "value": 0, "easing": {"linear": {}}},
+             {"frame": 12, "value": 30, "easing": {"linear": {}}},
+             {"frame": 47, "value": 0, "easing": {"linear": {}}}],
+            "scaleX": [
+             {"frame": 0, "value": 1, "easing": {"linear": {}}},
+             {"frame": 12, "value": 2, "easing": {"linear": {}}},
+             {"frame": 47, "value": 1, "easing": {"linear": {}}}],
+            "scaleY": [
+             {"frame": 0, "value": 1, "easing": {"linear": {}}},
+             {"frame": 12, "value": 2, "easing": {"linear": {}}},
+             {"frame": 47, "value": 1, "easing": {"linear": {}}}]}}]}],
+      "nextCompositionNumber": 2, "nextLayerNumber": 2, "selectedCompositionID": "comp-1", "selectedLayerID": "comp-1-layer-1"}}}
   },
   "platforms": ["linux", "macos"]
 }
