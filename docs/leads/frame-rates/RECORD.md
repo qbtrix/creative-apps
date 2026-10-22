@@ -2,9 +2,10 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a161a658a7-2jql · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: fix round 1 PRs open (FR-u)
+Stage: fix round 1 PRs in lane; FR-8 rebased
 Base: dev
-Next: critic round 2 after #4373/#4375 merge; FR-10b/FR-8b after #4293/#4341
+Next: critic round 2 after #4373/#4375; FR-10b/FR-8b after #4293/#4341
+
 
 
 
@@ -20,6 +21,7 @@ Next: critic round 2 after #4373/#4375 merge; FR-10b/FR-8b after #4293/#4341
 
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 09:11Z: #4341 (FR-8) was needs-rebase on NewCompositionSheet.swift (dev's #4210 made Create a MenuCommand): merged origin/dev, kept both (MenuCommand Create hands draft.settings.withFrameRate(frameRate)), gate PASS, pushed d99ea37a, Head moved. #4293 still waits on the lane's macOS build; #4373/#4375 in the lane's macOS gate.
 - 08:56Z: fix round 1 PRs open: #4373 (r-b2: #4362 #4366, head c516b940) and #4375 (r-b1: the other 9, head 24daa220). Moved r-b2's TimelineTime mutation entry into #4375 (array plans don't key-merge, so the pair would have conflicted). Both pass the gate; mutation plans can't be scored on Linux (SuiteUI), stated on the Mutate: line. Next: once both merge, critic round 2 on a scoped suiteui run.
 - 08:42Z: #4293 and #4341 still open: their lane macOS builds are queued for a runner (#4293 since 06:35Z). FR-10b and FR-8b stay ready and open after their parents merge. FR-u fix round 1 (wf_c253f90f-05e) running.
 - 08:27Z: FR-u critic panel (run 39726187078, e02f36c3): not clean, 11 findings #4359-#4369; fix round 1 launched via fix-batch.js on dev 2b31ba4c. FR-z held (findings > 5). #4293 and #4341 in the lane's macOS gate.
