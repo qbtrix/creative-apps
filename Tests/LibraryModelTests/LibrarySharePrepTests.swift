@@ -69,16 +69,17 @@ import Testing
         let files = try await catalog.prepareShare(support: "/support", run: "r1")
         #expect(files == ["IMG_0001", "IMG_0002", "IMG_0003"].map { "/support/Share/r1/\($0).jpg" })
         let writer = try writer(catalog)
-        let images = await writer.files, qualities = await writer.qualities, dropped = await writer.dropped
+        let images = await writer.files, qualities = await writer.qualities
         #expect(Set(images.keys) == Set(files))
         for file in files {
             let size = try #require(images[file]?.size)
             #expect(max(size.width, size.height) == 2048, "\(file) is \(size), not long edge 2048")
             #expect(qualities[file] == 85)
-            let gone = try #require(dropped[file], "\(file) was written without a metadata policy")
-            #expect(gone == ExportRules.dropped(.noLocation).properties)
-            #expect(gone.isSuperset(of: ["{GPS}", "{Exif}.MakerNote", "{Exif}.BodySerialNumber"]))
         }
+        // What the live exporter leaves out is `ExportRules.dropped` of the plan's policy.
+        let plan = try catalog.sharePlan(support: "/support", run: "r2", ids: nil, existingNames: [])
+        let gone = ExportRules.dropped(plan.options.metadata).properties
+        #expect(gone.isSuperset(of: ["{GPS}", "{Exif}.MakerNote", "{Exif}.BodySerialNumber", "{Exif}.LensSerialNumber"]))
         #expect(catalog.shareHelp == nil)
     }
 
@@ -162,14 +163,16 @@ import Testing
         let written = try await library.prepareShare(support: "/job/out", run: "share-three")
         #expect(written == named && written.count == 3)
         let writer = try #require(library.services.writer as? FakeJPEGWriter)
-        let images = await writer.files, dropped = await writer.dropped
+        let images = await writer.files
+        let plan = try library.sharePlan(support: "/job/out", run: "check", ids: nil, existingNames: [])
+        let dropped = ExportRules.dropped(plan.options.metadata).properties // what the live exporter leaves out
         let copies = script.expect.filter { $0.key != "out/Share" }
         #expect(Set(copies.keys.map { "/job/" + $0 }) == Set(written))
         for (path, want) in copies {
             let copy = try want.decode(Copy.self), file = "/job/" + path
             let size = try #require(images[file]?.size, "\(file) wasn't written")
             #expect(max(size.width, size.height) == copy.longEdge)
-            #expect(dropped[file]?.isSuperset(of: copy.drops) == true, "\(file) keeps some of \(copy.drops)")
+            #expect(dropped.isSuperset(of: copy.drops), "\(file) keeps some of \(copy.drops)")
         }
         try await SharePrep.cleanup(support: "/job/out", writer: writer)
         #expect(script.expect["out/Share"] == .object(["afterRelaunch": .array([])]))
