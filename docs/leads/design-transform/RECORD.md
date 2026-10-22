@@ -60,3 +60,5 @@ Next: #4159, #4187, #4188-fix merge -> Belt-Slice-Done + Mac-Finish-Wanted DT-u 
 - 2026-10-22T02:59Z #4254 Linux check was red on the old ratchet test; merged dev (now green at b5a6e7e0a), CI: PASS, pushed e62d759d, Head moved. #4255 at f5833163 waits on its lane macOS build. Design run 39709889487 still queued.
 
 - 2026-10-22T03:26Z Heartbeat: #4254 (e62d759d) and #4255 (f5833163) lane macOS builds queued. Design run 39709889487 still queued; dev Linux green at 66a845885.
+
+- 2026-10-22T03:52Z Heartbeat: #4255 macOS build green (waits for batch); #4254 macOS build still queued. Design run 39709889487 in progress.
