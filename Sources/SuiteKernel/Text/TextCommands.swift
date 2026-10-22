@@ -1,5 +1,4 @@
-// TextCommands.swift (text-style TS-1 specs with real ids, schemas and availability, runs throwing
-// `TextStyleRules.notBuilt`; TS-6 bodies): the seven text commands every app registers with one line,
+// TextCommands.swift (text-style TS-1 specs with real ids, schemas and availability; TS-6 bodies): the seven text commands every app registers with one line,
 // `+ TextCommands.specs(<X>Workspace.self)`, and the text inspector's gestures as those commands.
 
 /// A document the text commands run on: it reads the selected text layer's style and sets it back as one undo step.
@@ -48,6 +47,8 @@ public enum TextCommands {
 
     /// Why the text commands can't run with no text layer, and why italic can't on a family without one.
     static let selectHelp = "Select a text layer first.", italicHelp = "This family has no italic."
+    /// Why italic can't turn off on a family with only italic faces.
+    static let uprightHelp = "This family has no upright face."
 
     static let drag = ParamSchema.optional(.string("A drag's token; edits under one token are one undo step.", maxLength: 64))
     static let alignments = ["leading", "center", "trailing", "justified"]
@@ -74,28 +75,36 @@ public enum TextCommands {
         [
             .typed("text.read", title: "Read Text Style", summary: "Reads the selected text layer's style: face, size, colour and paragraph.",
                    kind: .query, params: Empty.self, schema: .none, result: style,
-                   example: .object([:]), availability: { ready($0) }) { _, _ in try stub() },
+                   example: .object([:]), availability: { ready($0) }) { t, _ in t.textStyle },
             .typed("text.set-font", title: "Font", summary: "Sets the font family, keeping the face or taking the nearest one it has.",
                    kind: .edit, params: FontParams.self, schema: .object(font, required: ["family", "weight", "italic"]),
-                   example: .object(["family": .string("System"), "weight": .number(700)]), availability: { ready($0) }) { _, _ in try stub() },
+                   example: .object(["family": .string("System"), "weight": .number(700)]), availability: { ready($0) }) { t, p in try font(&t, p) },
             .typed("text.set-size", title: "Text Size", summary: "Sets the size in points, 1 to 1600; sizes under one drag token are one undo step.",
                    kind: .edit, params: SizeParams.self, schema: .object(["size": number(.size, "Points."), "drag": drag], required: ["size", "drag"]),
-                   example: .object(["size": .number(36)]), availability: { ready($0) }) { _, _ in try stub() },
+                   example: .object(["size": .number(36)]), availability: { ready($0) }) { t, p in
+                       try edit(&t, "text.set-size", "Text Size", drag: p.drag) { TextStyleRules.setting($0, .size, to: p.size) }
+                   },
             .typed("text.set-italic", title: "Italic", summary: "Turns italic on or off in the current family.",
                    kind: .edit, params: ItalicParams.self, schema: .object(["on": .boolean], required: ["on"]),
-                   example: .object(["on": .bool(true)]), availability: { italic($0) }) { _, _ in try stub() },
+                   example: .object(["on": .bool(true)]), availability: { italic($0) }) { t, p in try setItalic(&t, on: p.on) },
             .typed("text.set-alignment", title: "Alignment", summary: "Aligns the paragraph leading, center, trailing or justified.",
                    kind: .edit, params: AlignmentParams.self,
                    schema: .object(["alignment": .string("The paragraph's alignment.", oneOf: alignments)], required: ["alignment"]),
-                   example: .object(["alignment": .string("center")]), availability: { ready($0) }) { _, _ in try stub() },
+                   example: .object(["alignment": .string("center")]), availability: { ready($0) }) { t, p in
+                       try edit(&t, "text.set-alignment", "Alignment") { var s = $0; s.paragraph.alignment = p.alignment; return s }
+                   },
             .typed("text.set-line-height", title: "Line Height", summary: "Sets line height, 0.5 to 4 times ascent + descent; one drag is one undo step.",
                    kind: .edit, params: ValueParams.self,
                    schema: .object(["value": number(.lineHeight, "A multiple of ascent + descent."), "drag": drag], required: ["value", "drag"]),
-                   example: .object(["value": .number(1.5)]), availability: { ready($0) }) { _, _ in try stub() },
+                   example: .object(["value": .number(1.5)]), availability: { ready($0) }) { t, p in
+                       try edit(&t, "text.set-line-height", "Line Height", drag: p.drag) { TextStyleRules.setting($0, .lineHeight, to: p.value) }
+                   },
             .typed("text.set-tracking", title: "Letter Spacing", summary: "Sets letter spacing, -100 to 500 thousandths of an em; one drag is one undo step.",
                    kind: .edit, params: ValueParams.self,
                    schema: .object(["value": number(.tracking, "Thousandths of an em."), "drag": drag], required: ["value", "drag"]),
-                   example: .object(["value": .number(50)]), availability: { ready($0) }) { _, _ in try stub() },
+                   example: .object(["value": .number(50)]), availability: { ready($0) }) { t, p in
+                       try edit(&t, "text.set-tracking", "Letter Spacing", drag: p.drag) { TextStyleRules.setting($0, .tracking, to: p.value) }
+                   },
         ]
     }
 
@@ -109,6 +118,43 @@ public enum TextCommands {
         guard ready(target) == .available, let style = target.textStyle else { return ready(target) }
         return target.faces(of: style.family).contains { $0.italic } ? .available : .unavailable(italicHelp)
     }
-    /// Every run until TS-6: refuses with `TextStyleRules.notBuilt`.
-    static func stub() throws -> JSONValue { throw TextStyleRules.notBuilt }
+    /// The face of `faces` nearest `weight` and `italic`: the italic asked for only if the family has it, then the
+    /// nearest weight, ties going lighter; nil for a family with no faces.
+    static func nearest(_ faces: [(weight: Int, italic: Bool)], weight: Int, italic: Bool) -> (weight: Int, italic: Bool)? {
+        let styled = faces.filter { $0.italic == italic }
+        return (styled.isEmpty ? faces : styled).min { (abs($0.weight - weight), $0.weight) < (abs($1.weight - weight), $1.weight) }
+    }
+    /// `text.set-font`: the family with the asked (or current) weight and italic, else its nearest face; one step "Font".
+    static func font<T: TextStyleTarget>(_ target: inout T, _ p: FontParams) throws -> TextStyle {
+        let faces = target.faces(of: p.family)
+        return try edit(&target, "text.set-font", "Font") { style in
+            guard let face = nearest(faces, weight: p.weight ?? style.weight, italic: p.italic ?? style.italic) else {
+                throw CatalogError.unavailable(id: "text.set-font", why: "There is no font family \(p.family).")
+            }
+            var style = style
+            (style.family, style.weight, style.italic) = (p.family, face.weight, face.italic)
+            return style
+        }
+    }
+    /// `text.set-italic`: the current family's face nearest the weight with italic `on`; one step "Italic".
+    static func setItalic<T: TextStyleTarget>(_ target: inout T, on: Bool) throws -> TextStyle {
+        let faces = target.textStyle.map { target.faces(of: $0.family) } ?? []
+        return try edit(&target, "text.set-italic", "Italic") { style in
+            guard let face = nearest(faces, weight: style.weight, italic: on), face.italic == on else {
+                throw CatalogError.unavailable(id: "text.set-italic", why: on ? italicHelp : uprightHelp)
+            }
+            var style = style
+            (style.weight, style.italic) = (face.weight, face.italic)
+            return style
+        }
+    }
+    /// Reads the selected text style, applies `change` and sets it back once as one undo step named `name`, `drag`
+    /// passed through so a scrub folds into one step; returns the new style as `text.read` reports it.
+    static func edit<T: TextStyleTarget>(_ target: inout T, _ id: String, _ name: String, drag: String? = nil,
+                                         _ change: (TextStyle) throws -> TextStyle) throws -> TextStyle {
+        guard let style = target.textStyle else { throw CatalogError.failed(id: id, message: target.textHelp ?? selectHelp) }
+        let changed = try change(style)
+        try target.setTextStyle(changed, name: name, drag: drag)
+        return changed
+    }
 }

@@ -243,15 +243,12 @@ final class HaloHistoryJourneyTests: XCTestCase {
 /// panel is SuiteUI's (`suite.history`, rows `suite.history.row.<n>`, the
 /// current one selected); a jump shows on the timeline as Ball's keys
 /// (`halo.timeline.key.comp-1-layer-2.<frame>`). Down and Return, then Up and
-/// Return, jump from the keyboard. Step 3 waits on Halo's recovery folder:
-/// HaloHistoryArea passes `folder: nil` and its restore hook throws, so it is
-/// skipped until a Halo window autosaves under `-SuiteSupportDir` as Design's
-/// does (DesignRecoveryStore, `<support>/Design/Recovery/`). Halo names the
-/// file "title", so the offer reads that. Shots `halo-history-panel`,
+/// Return, jump from the keyboard. Step 3: the window autosaves to
+/// `<support>/Halo/Recovery/` (HaloRecoveryStore, HA-7b) as `halo.main.halo`;
+/// the relaunch offers it under the file's name, "title", and Restore puts it
+/// in the window through `HaloProject.restoreRecovered`. Shots `halo-history-panel`,
 /// `-jumped`, `-keyboard`, `halo-recovery-offer`, `-restored`.
 extension HaloHistoryJourneyTests {
-    /// Whether a Halo window autosaves and restores on live services (HaloHistoryArea's folder and restore hook).
-    private static let recoveryIsLive = false
     private static let ball = "comp-1-layer-2"
 
     @MainActor func testJumpAndRecover() throws {
@@ -313,9 +310,6 @@ extension HaloHistoryJourneyTests {
         halo.shot("history-panel-keyboard")
 
         // 3. Quit unsaved once autosaved, relaunch: the offer names title; Restore shows the 4-step project, edited.
-        guard Self.recoveryIsLive else {
-            throw XCTSkip("step 3 waits on Halo's recovery folder: HaloHistoryArea passes folder: nil")
-        }
         let recovery = support.appending(path: "Halo/Recovery")
         let autosaved = waitFor(seconds: 20) {
             ((try? FileManager.default.contentsOfDirectory(atPath: recovery.path)) ?? []).contains { $0.hasSuffix(".halo") }

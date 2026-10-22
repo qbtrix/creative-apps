@@ -1,0 +1,51 @@
+[
+  {
+    "label": "supportDirWinsOverIgnoredState",
+    "file": "Sources/HaloModel/HaloRecoveryStore+Kernel.swift",
+    "find": "return ignored && !named ? nil",
+    "replace": "return ignored ? nil",
+    "tests": "HaloRecoveryStoreTests"
+  },
+  {
+    "label": "ignoredStateAloneKeepsNoCopies",
+    "file": "Sources/HaloModel/HaloRecoveryStore+Kernel.swift",
+    "find": "let ignored = ignoringState || [\"yes\", \"true\", \"1\"].contains(",
+    "replace": "let ignored = ignoringState || [\"YES\"].contains(",
+    "tests": "HaloRecoveryStoreTests"
+  },
+  {
+    "label": "ignoringStateKeepsNoCopies",
+    "file": "Sources/HaloModel/HaloRecoveryStore+Kernel.swift",
+    "find": "folderPath(arguments: arguments, home: home, ignoringState: ignoringState)",
+    "replace": "folderPath(arguments: arguments, home: home, ignoringState: false)",
+    "tests": "HaloRecoveryStoreTests"
+  },
+  {
+    "label": "emptySupportDirIsNone",
+    "file": "Sources/HaloModel/HaloRecoveryStore+Kernel.swift",
+    "find": "let named = !(argument(after: SuiteLocations.supportDirFlag, in: arguments) ?? \"\").isEmpty",
+    "replace": "let named = argument(after: SuiteLocations.supportDirFlag, in: arguments) != nil",
+    "tests": "HaloRecoveryStoreTests"
+  },
+  {
+    "label": "copiesAreHaloFiles",
+    "file": "Sources/HaloModel/HaloRecoveryStore+Kernel.swift",
+    "find": "ext: \"halo\")",
+    "replace": "ext: \"recovery\")",
+    "tests": "HaloRecoveryStoreTests"
+  },
+  {
+    "label": "restoreDropsTheSteps",
+    "file": "Sources/HaloModel/HaloRecovery+Kernel.swift",
+    "find": "history = HaloHistory()",
+    "replace": "_ = HaloHistory()",
+    "tests": "HaloRecoveryStoreTests"
+  },
+  {
+    "label": "restoreForgetsThePath",
+    "file": "Sources/HaloModel/HaloRecovery+Kernel.swift",
+    "find": "file.path = nil",
+    "replace": "_ = file.path",
+    "tests": "HaloRecoveryStoreTests"
+  }
+]

@@ -49,6 +49,9 @@ struct LibraryCatalogDoc: HeadlessDocument {
             ("empty", LibraryCatalog(services: .fake())), ("grid", grid), ("two selected", two), ("culled", culled),
             ("undone", with(culled) { $0.undo() }), ("loupe", loupe),
             ("cropping", with(loupe) { $0.toggleCrop(); $0.setCropAngle(-3) }),
+            ("every slider", with(two) { c in  // CS-5: each Reset <slider> has a value to reset
+                for slider in DevelopSlider.allCases { c.setDevelop(slider, to: 1, coalesceKey: nil); c.endCoalescing() }
+            }),
         ]
     }
 
@@ -73,6 +76,16 @@ struct LibraryCatalogDoc: HeadlessDocument {
         case "photo.reset-crop": .some(menu(c.resetCropHelp == nil, "crop", "Crop isn't connected yet."))
         case "file.import-folder": .some(c.importHelp)  // CS-3: the window's enablement and reasons
         case "file.export": .some(c.exportHelp)
+        case "export.set-folder", "export.apply-preset", "export.save-preset": .some(c.exportEditingHelp)  // CS-5
+        case "export.close": .some(c.exportCloseHelp)
+        case "export.cancel": .some(c.exportState.isRunning ? nil : "No export is running.")
+        case "export.retry": .some(c.exportFinished?.failedIDs.isEmpty == false ? nil : "No photos failed to export.")
+        case "export.show-in-finder": .some(c.exportFinished == nil ? "Nothing has been exported yet." : nil)
+        case "file.show-catalog": .some(c.catalogState == .damaged ? nil : "The catalog file isn't damaged.")
+        case "notice.close": .some(c.notice?.source == .import || c.notice?.source == .cull ? nil : "There is no notice to close.")
+        case "notice.show-failures": .some(c.notice?.source == .import && c.importNotice?.failures.isEmpty == false ? nil : "No files failed to import.")
+        case let id where DevelopSlider.allCases.map(LibraryCatalog.resetSliderID).contains(id):
+            .some(menu(c.canEditDevelop, "develop", "Develop isn't connected yet."))
         case "view.show-original": .some(c.services.unavailable["develop"] ?? c.developHelp
             ?? (c.canShowOriginal ? nil : "Open a photo in the loupe to see its original."))
         case "file.recent", "file.open-recent", "file.drop": .some(nil)
@@ -190,5 +203,14 @@ struct LibraryCatalogDoc: HeadlessDocument {
         "file.open-in | Open In | Open a photo in the loupe first.", "file.drop | Drop Files | on",
         "folders.list | List Folders | Import a folder to see its folders.",
         "view.show-folder | Show Folder | Import a folder to see its folders.",
-    ]
+        "export.set-folder | Choose Export Folder | Choose File > Export… to open the export sheet.",
+        "export.apply-preset | Apply Preset | Choose File > Export… to open the export sheet.",
+        "export.save-preset | Save as Preset | Choose File > Export… to open the export sheet.",
+        "export.cancel | Cancel Export | No export is running.", "export.retry | Try Again | No photos failed to export.",
+        "export.show-in-finder | Show in Finder | Nothing has been exported yet.",
+        "export.close | Close Export | The export sheet isn't open.",
+        "file.show-catalog | Show Catalog in Finder | The catalog file isn't damaged.",
+        "notice.close | Close Notice | There is no notice to close.",
+        "notice.show-failures | Show Failures | No files failed to import.",
+    ] + DevelopSlider.allCases.map { "\(LibraryCatalog.resetSliderID($0)) | Reset \($0.rawValue) | on" }
 }

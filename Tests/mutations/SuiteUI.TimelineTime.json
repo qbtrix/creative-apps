@@ -1,4 +1,7 @@
 [
 {"label":"the frames field is frame % 60, not frame % fps","file":"Sources/SuiteUI/TimelineTime.swift","find":"let ff = f % rate","replace":"let ff = f % 60","tests":"TimelineNavTests"},
-{"label":"the fps guard dropped: fps 0 divides by zero","file":"Sources/SuiteUI/TimelineTime.swift","find":"        guard unit == .timecode, fps > 0 else { return \"\\(frame)\" }\n","replace":"        guard unit == .timecode else { return \"\\(frame)\" }\n","tests":"TimelineNavTests"}
+{"label":"the fps guard dropped: fps 0 divides by zero","file":"Sources/SuiteUI/TimelineTime.swift","find":"        guard unit == .timecode, fps > 0 else { return \"\\(frame)\" }\n","replace":"        guard unit == .timecode else { return \"\\(frame)\" }\n","tests":"TimelineNavTests"},
+{"label":"the ruler and pill ignore the host's rate, so 29.97 reads whole-rate timecode","file":"Sources/SuiteUI/TimelineTime.swift","find":"rate.map { label(frame: frame, rate: $0, unit: unit) } ?? label(frame: frame, fps: fps, unit: unit)","replace":"label(frame: frame, fps: fps, unit: unit)","tests":"FrameRateMenuTests"},
+{"label":"the readout help names drop-frame at every rate","file":"Sources/SuiteUI/TimelineTime.swift","find":"let form = rate.isDropFrame ?","replace":"let form = true ?","tests":"FrameRateMenuTests"},
+{"label":"the rate readout drops drop-frame: 29.97 reads whole-30 timecode","file":"Sources/SuiteUI/TimelineTime.swift","find":"Timecode.string(frame: frame, rate: rate)","replace":"label(frame: frame, fps: rate.nominal, unit: unit)","tests":"FrameRateMenuTests"}
 ]
