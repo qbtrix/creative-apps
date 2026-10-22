@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-22T02:39Z	4	check	GF-z	dev fixed by #4238; Linux 39710840412 (b5a6e7e) in progress
 2026-10-22T02:57Z	4	slice-done	GF-z	Belt-Slice-Done GF-z run 39710840412; Mac-Finish-Wanted posted; critics wait scoped 39709885898
 2026-10-22T03:14Z	4	check	critics	scoped suiteui 39709885898 still queued
+2026-10-22T03:30Z	4	check	critics	scoped suiteui 39709885898 in progress
