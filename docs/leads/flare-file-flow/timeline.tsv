@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-22T01:35Z	3	decision	-	Records now also live on lead/flare-* (the branches Belt watches); every stage pushes there.
 2026-10-22T01:44Z	3	heartbeat	-	Heartbeat: #4259 build 39703409910 still queued (macOS runners busy); #4257, #4035 open; no green-Linux run containing FG-m yet.
 2026-10-22T02:16Z	3	stage	-	#4259 macOS build 39703409910 green; lane sweep will merge. Merged dev (b5a6e7e0) into flm3 (6fc01d59) and flu (8f62b766), pushed; scripts/ci --changed running on both.
+2026-10-22T02:21Z	3	gate	-	scripts/ci --changed PASS on flm3 6fc01d59 and flu 8f62b766 (dev b5a6e7e0 merged in). #4259 still waits for the lane sweep.
