@@ -92,3 +92,4 @@ utc	stage	event	ref	note
 2026-10-22T20:51:46Z	CS-z	waiting	-	full CI 39848684933 cancelled before running; waiting on 39836789801 (scoped: suite), 39836126860 and 39852194708 (CI)
 2026-10-22T21:18:52Z	CS-z	done	-	Belt-Slice-Done posted for all 8 slices (run 39836789801); contact sheet waits journeys 39855707652
 2026-10-22T22:20:00Z	CS-z	done	-	Belt-Contact-Sheet posted (Linux check 39857152000, mac build 39836789801); journeys 39855707652 still queued
+2026-10-22T22:59:30Z	CS-z	waiting	-	journeys 39855707652 still queued (macOS journeys (suite)); critic panel (ui:true) waits its ui-screens
