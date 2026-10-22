@@ -2,7 +2,7 @@
   "title": "One set of shape tools: the kernel's shape spec, path and drag rules and shape.draw, SuiteUI's shape options",
   "wave": 4,
   "order": 60,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "feature map S19 (shape tools: polygon, star, rounded rect, line, arrow); real job RJ-X34; captain 2026-10-20: everyday tools in the beta, built once",
