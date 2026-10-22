@@ -92,3 +92,4 @@ utc	stage	event	ref	note
 2026-10-22T08:08Z	3	merged	#4324	DT-u r2 merged 80aba474; #4223 #4224 closed
 2026-10-22T08:30Z	3	heartbeat	-	runs containing dcfcb6b0 queued: scoped design 39747588205 (2b31ba4c), full CI 39746443459 (80aba474)
 2026-10-22T08:50Z	3	heartbeat	-	scoped design 39747588205 still queued; full CI 39746443459 cancelled (superseded by 39748952777 at 9933cf8e)
+2026-10-22T09:12:08Z	poll	scoped design 39747588205 queued; full CI 39748952777 cancelled; newer full CI 39752648221 (06d331b0) pending, 39750872878 (cc0a7944) queued; no new findings
