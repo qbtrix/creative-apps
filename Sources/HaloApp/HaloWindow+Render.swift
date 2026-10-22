@@ -8,7 +8,8 @@
 // sheet's own 0.25x-4x Size row is off: Halo renders at those two only), the
 // Folder label over the folder's name (`-HaloRenderTo`, one line, its path the
 // help, dimmed with the sheet) and Choose… (its `render.choose-folder` spec's
-// MenuCommand), and one note: "Frame n of N" while
+// MenuCommand, its disabled help the sheet's Export wording), and one note at
+// the labels' inset: "Frame n of N" while
 // running, else the summary, or, with no folder, why (the error color). A
 // format chip or the Size row calls `setRenderSettings`. The sheet's start
 // button (titled Export until #3402) asks for a folder when there is none
@@ -215,7 +216,12 @@ struct HaloRenderExportAdapter: View {
 /// Halo's rows in the export sheet's options slot: the Size chips and the folder, each under its label, and one note.
 struct HaloRenderOptionRows: View {
     nonisolated static let noDestination = "Choose a folder to render into."
-    nonisolated static let busy = "The render is under way or done."
+    /// The export sheet's own words on its disabled Export button, so one state has one name (#4457).
+    nonisolated static let busy = "The export is already under way or done."
+
+    /// The rows' own space; a note's column at its x 0 is the labels' inset, not InspectorNote's m inset in from it (#4454).
+    nonisolated static let rowsSpace = "halo.render.rows"
+    nonisolated static let labelColumn: (x: CGFloat, space: String) = (0, rowsSpace)
 
     let model: HaloProject
     let settings: HaloRenderSettings
@@ -248,13 +254,14 @@ struct HaloRenderOptionRows: View {
                     .haloControl(id: "halo.render.destination", enabled: editing, help: editing ? nil : Self.busy)
             }
             if let progress = model.renderProgressText {
-                InspectorNote(progress, identifier: "halo.render.frame")
+                InspectorNote(progress, identifier: "halo.render.frame", column: Self.labelColumn)
             } else if editing, destination == nil {
-                InspectorNote(Self.noDestination, kind: .error, identifier: "halo.render.problem")
+                InspectorNote(Self.noDestination, kind: .error, identifier: "halo.render.problem", column: Self.labelColumn)
             } else if editing, let summary = model.renderSummary(settings, existing: HaloRenderRun.names(in: destination)) {
-                InspectorNote(summary, identifier: "halo.render.summary")
+                InspectorNote(summary, identifier: "halo.render.summary", column: Self.labelColumn)
             }
         }
+        .coordinateSpace(.named(Self.rowsSpace))
     }
 }
 
