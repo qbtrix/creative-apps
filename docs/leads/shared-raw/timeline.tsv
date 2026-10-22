@@ -5,3 +5,4 @@ utc	stage	event	ref	note
 2026-10-22T21:33Z	heartbeat	SR-1 building
 2026-10-22T21:48Z	pr-opened	SR-1 #4645 (head 69e12ed3)
 2026-10-22T21:48Z	agent-start	SR-2 builder
+2026-10-22T21:55Z	restart	container restart: SR-2 builder relaunched on its worktree
