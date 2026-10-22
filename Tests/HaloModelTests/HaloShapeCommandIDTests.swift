@@ -34,7 +34,7 @@ import Testing
         }
         let fills = GradientCommands.specs(HaloProject.self).count  // HG-7: the eight fill commands
         let history = HistoryCommands.specs(HaloProject.self).count  // HA-6: read and jump
-        #expect(HaloProject.catalog.ids.count == HaloCommand.allCases.count + 2 + fills + history + HaloProject.windowSpecs.count)
+        #expect(HaloProject.catalog.ids.count == HaloCommand.allCases.count + 2 + fills + history + 1 + HaloProject.windowSpecs.count)  // FR-8b: set-frame-rate
     }
 
     @Test func runShapeKeepsThePickedTool() throws {

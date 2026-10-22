@@ -35,8 +35,9 @@ extension HaloProject: HeadlessDocument {
         let shapes = ShapeCommands.specs(HaloProject.self).map(\.id)  // HS-6: the kernel's shape commands follow
         let fills = GradientCommands.specs(HaloProject.self).map(\.id)  // HG-7: then its fill commands
         let history = ["history.read", "history.jump"]  // HA-6: then the History panel's two
+        let rates = ["composition.set-frame-rate"]  // FR-8b: the composition's rate
         let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
-        let all = ids + shapes + fills + history + window
+        let all = ids + shapes + fills + history + rates + window
         #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
     }
 

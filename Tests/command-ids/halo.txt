@@ -14,6 +14,7 @@ composition.duplicate
 composition.new
 composition.rename
 composition.select
+composition.set-frame-rate
 easing.clear-selection
 easing.delete-keys
 easing.end-drag
