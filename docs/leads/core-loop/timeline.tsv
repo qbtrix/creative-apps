@@ -129,3 +129,5 @@ utc	stage	event	ref	note
 2026-10-22T03:41Z	3	watch	lane macOS builds	#4285 #4286 #4287 #4290 new heads in per-PR macOS build (03:01Z); journeys halo 39705462811 in progress
 2026-10-22T04:23Z	3	critic	H-J12 panel	journeys halo 39705462811 (8d08e083) success; 12 halo-loop screens; critic panel dispatched. #4287 macOS build green, #4285 #4286 #4290 macOS queued
 2026-10-22T04:28Z	3	file	H-J12 findings	#4310 major, #4311-#4314 minor (CL-z, 8d08e083), gap #4315 easing chip ids
+2026-10-22T05:11Z	3	merge	#4287	#4272 transport at 880 fixed on dev
+2026-10-22T05:11Z	3	dispatch	round-1 fixers	#4310-#4312 and #4313-#4314 (CL-z)
