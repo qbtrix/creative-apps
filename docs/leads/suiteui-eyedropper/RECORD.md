@@ -2,9 +2,9 @@
 
 Issue: #3448 · Packet: docs/blueprints/suiteui/features/eyedropper.md
 Run: act-1a1647a67aa-dau5 (relaunch) · Started: 2026-10-22T16:45Z
-Stage: #4583 head 76eb19d: macOS build green; lane's Linux check (run 39862523082) in progress since 22:07Z; clean vs dev
+Stage: #4583 (EY-8+9) merged into dev ~22:30Z; #4585 (EY C4) retargeted to dev, merged final EY-z + dev (one docs file), gating
 Base: 18464f26b93c6826d069e0107545d7aacfac033c
-Next: Merge on the lane's next sweep; then retarget #4585 and #4613 to dev and merge dev into them
+Next: Push #4585, move Head; Belt-Slice-Done EY-z on the first green ci.yml run containing its last PR
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: Merge on the lane's next sweep; then retarget #4585 and #4613 to dev and m
 |---|---|---|---|---|---|
 
 ## Decisions
+- Merge the merged EY-z head before dev so the C4 branch skips TT-z's conflicts
 - -
 - -
 - Conflicted files are identical on dev and TT-z, so EY-z's side is exact
