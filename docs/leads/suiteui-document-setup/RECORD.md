@@ -2,7 +2,7 @@
 
 Issue: #3757 · Packet: docs/blueprints/suiteui/features/document-setup.md
 Run: act-1a1620043af-tzh0 · Started: 2026-10-22T05:00Z (resumed from act-1a15fddd101-68r5)
-Stage: 3 wave 2 (finishing: DS-6 #4309 merged c0f2c506, waiting on dev Linux CI for Belt-Slice-Done; polled 08:31Z)
+Stage: stopped per supervisor 06:19Z (DS-u done 08:44Z; DS-halo, DS-flare, DS-z waiting-on-prereq)
 Base: 0dd23d659f4dbd8a0120aa85a321259327518251 (main); dev 8cf02113
 Next: supervisor (06:19Z): stop after DS-u (#4309) lands; post DS-u Belt-Slice-Done + Mac-Finish-Wanted, then stop. Adopt slices and DS-z wait for a relaunch (waiting-on-prereq) once CB adopt slices and UP-halo land.
 

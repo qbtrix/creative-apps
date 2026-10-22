@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-22T07:47Z	poll	DS-6 #4309 open, macOS build 39722964879 in progress.
 2026-10-22T08:11Z	merged	DS-6 #4309 merged 08:08Z as c0f2c506; waiting for a dev ci.yml Linux run containing it before Belt-Slice-Done.
 2026-10-22T08:31Z	check	dev Linux check 39746353013 on 80aba474 (contains c0f2c506) in progress.
+2026-10-22T08:44Z	slice-done	DS-u done: dev Linux 39746353013 green on 80aba474 (contains #4309). Posted Belt-Slice-Done and Mac-Finish-Wanted on #3757. Per supervisor (06:19Z) document-setup stops here; DS-halo and later wait on prereqs.
