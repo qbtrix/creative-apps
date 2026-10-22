@@ -69,3 +69,4 @@ utc	stage	event	ref	note
 2026-10-22T09:20:06Z	lane	heartbeat	-	waiting on lane sweep
 2026-10-22T09:42:14Z	lane	heartbeat	-	
 2026-10-22T10:05:47Z	lane	heartbeat	-	lane sweep in flight
+2026-10-22T10:30:20Z	SM-6	fix	4237	split nested #require that broke the macOS build; gate running
