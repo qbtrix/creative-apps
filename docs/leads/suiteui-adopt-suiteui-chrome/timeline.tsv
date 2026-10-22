@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-22T16:30Z	3	resume	#1942	run act-1a1646f0a9f-d1ei; AC-export-sheet blocked on SC-15/SC-16
 2026-10-22T17:10Z	3	poll	#1942	record moved to this branch; SC-15/16 not on dev a41e7f1f
 2026-10-22T17:35Z	3	ask-supervisor	#1942	supervisor asked hold-or-release on #1942 (issuecomment-6347075135); SC-15/16 no PRs
+2026-10-22T18:05Z	3	poll	#1942	no supervisor reply; SC-15/16 no PRs
