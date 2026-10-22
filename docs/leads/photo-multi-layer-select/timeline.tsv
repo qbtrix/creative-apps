@@ -70,3 +70,4 @@ utc	stage	event	ref	note
 2026-10-22T01:47:00Z	3 wave 3	merge	PM-z	#4243 merged e99331166 01:31Z (batch landed on own proof; dev Linux red on FormatListRatchetTests); slice-done waits on green dev run; no findings
 2026-10-22T02:17:00Z	3 wave 3	check	PM-m,PM-z	dev Linux red at e99331166 on FormatListRatchetTests only, fix #4258 open; full CI 39707795159 pending; no findings
 2026-10-22T02:30:00Z	check-in	#4258 closed unmerged; #4238 (SuiteImageFormats) on dev b5a6e7e0a should clear FormatListRatchet; Linux check 39710840412 running there; full CI 39707795159 on e99331166 still pending; no findings; Belt-Slice-Done PM-m/PM-z + Contact Sheet still owed
+2026-10-22T02:58:00Z	check-in	Linux check 39710840412 on dev b5a6e7e0a (contains e99331166, 1a1ac0af1) GREEN; scoped: photo 39712698310 on b5a6e7e0a queued; full CI 39707795159 queued; no findings; Slice-Done posts wait on the photo run
