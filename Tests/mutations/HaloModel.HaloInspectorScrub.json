@@ -1,0 +1,8 @@
+[
+{"label": "each sample asks for its own refresh", "file": "Sources/HaloModel/HaloInspectorScrub.swift", "find": "        guard awaitsRefresh else {", "replace": "        guard awaitsRefresh && pending == nil else {", "tests": "HaloInspectorScrubTests"},
+{"label": "a refresh keeps the value, so it is written again on every refresh", "file": "Sources/HaloModel/HaloInspectorScrub.swift", "find": "        pending = nil\n        waiting = []\n", "replace": "        waiting = []\n", "tests": "HaloInspectorScrubTests"},
+{"label": "an idle refresh keeps asking, so an idle bar costs a refresh each frame", "file": "Sources/HaloModel/HaloInspectorScrub.swift", "find": "        if frame.isEmpty { awaitsRefresh = false }\n", "replace": "", "tests": "HaloInspectorScrubTests"},
+{"label": "one event seen by the value and the drag is shown twice", "file": "Sources/HaloModel/HaloInspectorScrub.swift", "find": "eventTime.isFinite, waiting.last != eventTime {", "replace": "eventTime.isFinite {", "tests": "HaloInspectorScrubTests"},
+{"label": "a late refresh keeps waiting, so a link that never fires shows nothing until the release", "file": "Sources/HaloModel/HaloInspectorScrub.swift", "find": "now - lastFrame >= Self.longestWait else", "replace": "now - lastFrame >= Self.longestWait * 1000 else", "tests": "HaloInspectorScrubTests"},
+{"label": "a refresh doesn't reset the wait", "file": "Sources/HaloModel/HaloInspectorScrub.swift", "find": "        waiting = []\n        lastFrame = now\n", "replace": "        waiting = []\n", "tests": "HaloInspectorScrubTests"}
+]
