@@ -62,3 +62,4 @@ utc	stage	event	ref	note
 2026-10-22T07:24:05Z	lane	heartbeat	#4125 #4237	SM-5 macOS build failed (NSLock in async finish); fix 2c0843029 gating. SM-6 #4237 ready after clean-build gate PASS
 2026-10-22T07:27:25Z	lane	heartbeat	4125	SM-5 macOS fix pushed (withLock), Head moved to 2c0843029; SM-6 #4237 in lane
 2026-10-22T07:46:59Z	lane	heartbeat	4125	SM-5 and SM-6 macOS builds queued
+2026-10-22T08:09:48Z	lane	heartbeat	4125	SM-5 and SM-6 macOS builds still queued
