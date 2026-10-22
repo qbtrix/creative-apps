@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-22T01:06:03Z	check	ST-a	#4258 still open (head f9e7698c1); dev Linux check 39701991485 red; #4135 held
 2026-10-22T01:23:12Z	check	ST-a	#4258 still open; lane batch running; #4135 held
 2026-10-22T01:40:22Z	check	ST-a	#4258 still open; batch 20261022013736 running; #4135 held
+2026-10-22T01:56:43Z	check	ST-a	#4258 head f9e7698c1 Linux green, macOS build queued; #4135 held
