@@ -32,3 +32,4 @@
 2026-10-21T23:17Z	check	TX-u #4053 waits on #4215 (dev place-test fix, unmerged); TX-m #4059 awaits batch; TS-m #3844/#3847 unchanged
 2026-10-21T23:38Z	merged	TX-m #4059 merged as 8f583b30f; awaiting a green Linux run on dev containing it
 2026-10-21T23:38Z	check	TX-u #4053 waits on #4215 (Linux check running); TS-m #3844/#3847 unchanged
+2026-10-22T00:01Z	check	#4215 merged; TX-3 #4053 merged dev (ce6524fa5), gate running; TX-m Linux check 39695796699 on de0f324d1 in progress; TS-m #3844/#3847 open
