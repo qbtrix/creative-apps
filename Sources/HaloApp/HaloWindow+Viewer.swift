@@ -34,11 +34,17 @@ extension HaloWindow {
         content
             .environment(\.haloShapeDrawing, shapes)
             .environment(\.haloCommitTransform, commitTransform)
-            .onAppear { shapes.draw = { _ = model.drawShape($0) } }
+            .onAppear {
+                shapes.draw = {
+                    takePlayback()
+                    _ = model.drawShape($0)
+                }
+            }
     }
 
     /// A handle drag's release, as one step; the Model refuses what it can't do.
     func commitTransform(_ t: TransformBox, name: String) {
+        takePlayback()
         try? model.setTransform(t, name: name, drag: nil)
     }
 }
