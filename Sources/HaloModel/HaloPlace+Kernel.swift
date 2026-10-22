@@ -32,8 +32,8 @@ extension HaloProject: PlacedImageTarget {
         return layer.fillBox(in: comp)
     }
 
-    /// PNG and JPEG raster, SVG through the kernel's PlacedVector.
-    public var placeFormats: Set<PlacedFormat> { [.png, .jpeg, .svg] }
+    /// Every format the kernel places: PNG and JPEG raster, SVG through its PlacedVector.
+    public var placeFormats: Set<PlacedFormat> { Set(PlacedFormat.allCases) }
 
     /// The selected solid's picture in its box, with its focus; nil when it shows none.
     public var placedSelection: (id: String, image: PlacedImage, asset: PlacedAsset)? {
