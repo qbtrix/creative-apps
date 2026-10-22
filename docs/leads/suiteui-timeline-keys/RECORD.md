@@ -4,7 +4,7 @@ Issue: #3780 · Packet: docs/blueprints/suiteui/features/timeline-keys.md
 Run: act-1a1620043af-tzh0 · Started: 2026-10-22T05:00Z (resumed from act-1a15fddd101-68r5)
 Stage: 3 wave 2
 Base: 0dd23d659f4dbd8a0120aa85a321259327518251 (main); dev 8cf02113
-Next: #4328 TK-flare in the lane (needs-fix first if ejected); TK-u critic panel once scoped suite run 39721019643 shows its screens; TK-6 waits on AJ-halo, TS-halo, AN-halo
+Next: supervisor (06:19Z): stop after TK-flare (#4328) lands; post TK-flare Belt-Slice-Done + Mac-Finish-Wanted, run TK-u critic panel when scoped suite 39721019643 shows screens, then stop. TK-6, TK-z wait for a relaunch (waiting-on-prereq) once AJ-halo, TS-halo, AN-halo land.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -51,3 +51,4 @@ Next: #4328 TK-flare in the lane (needs-fix first if ejected); TK-u critic panel
 - TK-6 waits on adjust-everywhere:AJ-halo, text-style:TS-halo, anchor-parenting:AN-halo (and adopt-kernel-easing:AE-halo, AE-h2 open #2842 in that RECORD).
 - TK-u: timeline and timeline-select-all are built (#3537 closed); it starts once the TK-a branch is pushed.
 - 2026-10-22T06:15:11Z: rule 23, three identical blocked polls; Question for the supervisor posted on the issue.
+- 2026-10-22T06:35:40Z: supervisor answered (06:19Z): finish the in-lane slice, then stop; issue labelled waiting-on-prereq. Note: the API proxy appends an attribution footer to every PR body and comment written from this session and re-adds it after edits; the lane strips it from the squash commit.
