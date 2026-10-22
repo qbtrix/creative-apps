@@ -24,11 +24,16 @@ public struct HeadlessApp: Sendable {
     private let make: @Sendable (JSONValue) throws -> HeadlessSession
 
     /// The app whose document is `type`.
-    public init<D: HeadlessDocument>(_ type: D.Type) {
+    public init<D: HeadlessDocument>(_ type: D.Type) { self.init(type, open: D.open, new: D.new) }
+
+    /// The app whose document is `type`, opened and made by `open` and `new` in place of the type's own: for a
+    /// document that needs a value its type can't make, as the suite's Help document needs its provider.
+    init<D: HeadlessDocument>(_ type: D.Type, open: @escaping @Sendable (Data, String) throws -> D,
+                              new: @escaping @Sendable (JSONValue) throws -> D) {
         (name, openExtensions, exportFormats) = (D.app, D.openExtensions, D.exportFormats)
         describe = { D.catalog.describeAll() }
-        open = { data, name in HeadlessSession(app: D.app, box: TypedSession(document: try D.open(data, name: name))) }
-        make = { options in HeadlessSession(app: D.app, box: TypedSession(document: try D.new(options))) }
+        self.open = { data, name in HeadlessSession(app: D.app, box: TypedSession(document: try open(data, name))) }
+        make = { options in HeadlessSession(app: D.app, box: TypedSession(document: try new(options))) }
     }
 
     /// Every command the app runs, by id.
@@ -90,6 +95,8 @@ public enum Apps {
         HeadlessApp(PhotoHeadless.self), HeadlessApp(DesignHeadless.self), HeadlessApp(FlareHeadless.self),
         HeadlessApp(HaloHeadless.self), HeadlessApp(LibraryHeadless.self),
     ]
+    /// The suite's Help commands ("suite"), over the `.suitehelp` files `HelpReports` reads. Never in `all`.
+    public static let suite = HeadlessApp(SuiteHelpDocument.self, open: { data, _ in try HelpReports.open(data) }, new: HelpReports.new)
     /// The fake app ("fake", SuiteKernel's FakeCanvasDocument). Never in `all`; the tests add it.
     public static let fake = HeadlessApp(FakeCanvasDocument.self)
 

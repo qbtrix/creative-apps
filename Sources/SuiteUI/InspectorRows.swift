@@ -229,42 +229,74 @@ public struct InspectorOption<ID: Hashable & Sendable>: Identifiable, Hashable, 
 /// semibold with a chevron; the menu checks the current one.
 public struct InspectorPickerRow<ID: Hashable & Sendable>: View {
     private let label: String
-    private let options: [InspectorOption<ID>]
-    private let selection: ID
-    private let onChange: @MainActor (ID) -> Void
+    /// The value menu the row draws on its right: FrameRateMenu's too (#4362).
+    let menu: InspectorValueMenu<ID>
 
     public init(
         _ label: String, options: [InspectorOption<ID>], selection: ID,
         onChange: @escaping @MainActor (ID) -> Void
     ) {
         self.label = label
-        self.options = options
-        self.selection = selection
-        self.onChange = onChange
+        self.menu = InspectorValueMenu(label, options: options, selection: selection, onChange: onChange)
     }
 
     public var body: some View {
-        InspectorRow(label) {
-            Menu {
-                Picker(label, selection: Binding(get: { selection }, set: { onChange($0) })) {
-                    ForEach(options) { Text($0.title).tag($0.id) }
-                }
-                .pickerStyle(.inline)
-                .labelsHidden()
-            } label: {
-                // One Text, choice and chevron, so the menu's frame ends where
-                // its chevron does, flush with the other rows' values (#2961).
-                let choice = Text(options.first { $0.id == selection }?.title ?? "").font(SuiteFont.inspectorValue)
-                let chevron = Text(Image(systemName: "chevron.up.chevron.down"))
-                    .font(SuiteFont.inspectorMeta).foregroundStyle(SuiteColor.textSecondary)
-                Text("\(choice) \(chevron)")
-                    .contentShape(.rect)
+        InspectorRow(label) { menu }
+    }
+}
+
+/// The one inspector dropdown: a real Menu whose label is the choice in
+/// semibold with a chevron in secondary text, plain, no menu indicator; an
+/// inline Picker checks the current choice. InspectorPickerRow and
+/// FrameRateMenu both draw it (#4362). `title` overrides the shown choice,
+/// for a selection that is not among the options.
+struct InspectorValueMenu<ID: Hashable & Sendable>: View {
+    let label: String
+    let options: [InspectorOption<ID>]
+    let selection: ID
+    private let title: String?
+    private let onChange: @MainActor (ID) -> Void
+
+    init(
+        _ label: String, options: [InspectorOption<ID>], selection: ID, title: String? = nil,
+        onChange: @escaping @MainActor (ID) -> Void
+    ) {
+        self.label = label
+        self.options = options
+        self.selection = selection
+        self.title = title
+        self.onChange = onChange
+    }
+
+    /// The choice the label shows: `title`, else the selected option's title.
+    var choiceTitle: String { title ?? options.first { $0.id == selection }?.title ?? "" }
+
+    /// The Picker's selection: it reads `selection`, and a pick reports through `onChange`.
+    var pick: Binding<ID> {
+        let current = selection, onChange = onChange
+        return Binding(get: { current }, set: { onChange($0) })
+    }
+
+    var body: some View {
+        Menu {
+            Picker(label, selection: pick) {
+                ForEach(options) { Text($0.title).tag($0.id) }
             }
-            .menuStyle(.button)
-            .buttonStyle(.plain)
-            .menuIndicator(.hidden)
-            .fixedSize()
-            .accessibilityLabel(label)
+            .pickerStyle(.inline)
+            .labelsHidden()
+        } label: {
+            // One Text, choice and chevron, so the menu's frame ends where
+            // its chevron does, flush with the other rows' values (#2961).
+            let choice = Text(choiceTitle).font(SuiteFont.inspectorValue)
+            let chevron = Text(Image(systemName: "chevron.up.chevron.down"))
+                .font(SuiteFont.inspectorMeta).foregroundStyle(SuiteColor.textSecondary)
+            Text("\(choice) \(chevron)")
+                .contentShape(.rect)
         }
+        .menuStyle(.button)
+        .buttonStyle(.plain)
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .accessibilityLabel(label)
     }
 }
