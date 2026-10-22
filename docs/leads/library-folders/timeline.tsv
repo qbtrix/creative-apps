@@ -56,3 +56,4 @@ utc	stage	event	ref	note
 1792632574	-	watch	FO-z	heartbeat: still waiting on a green dev Linux run containing c4607f1 (dev-red #3856, SuiteModel, not ours)
 1792633487	-	watch	FO-z	heartbeat: Linux check 39706006390 at 6a06063 red on the same SuiteModel format ratchet (dev-red #3856, not ours); scoped library run 39706988555 queued for the contact sheet
 1792634400	-	watch	FO-z	heartbeat: Linux check 39707946247 at e993311 red on the same SuiteModel format ratchet (dev-red #3856, not ours); full CI 39707795159 pending
+1792635313	-	watch	FO-z	heartbeat: waiting on a green dev Linux run (dev-red #3856 open, SuiteModel format ratchet, not ours)
