@@ -68,3 +68,4 @@ time	kind	note
 2026-10-22T04:16Z	heartbeat	full CI 39714642994 cancelled (superseded); waiting on scoped design 39720061887 / full CI 39720939785 on 6e19f406 (contains #4081); #4255 unmerged; DS-u not started
 2026-10-22T04:39Z	heartbeat	scoped design 39720061887 (6e19f406, contains #4081) queued; DT-6 #4255 merged 04:17Z, DT-m slice-done not yet on #3436; DS-u not started
 2026-10-22T05:01Z	heartbeat	macOS backlog: scoped design 39720061887 and CI 39722978870 (both contain #4081) still queued; no DT-m slice-done; DS-u not started
+2026-10-22T05:23Z	heartbeat	macOS backlog: scoped design 39720061887 and CI 39722978870 still queued; transform lead relaunched by supervisor 05:14Z (DT-m pending); DS-u not started
