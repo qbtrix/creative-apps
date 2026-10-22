@@ -85,3 +85,4 @@ utc	stage	event	ref	note
 2026-10-22T15:33:01Z	SM-z	ready	#4421	SM-9 merged dev, gate pass, head 18ffebda5, ready
 2026-10-22T15:42:06Z	SM-z	draft	#4461	SM-10 C4 gate pass, draft until #4421 merges
 2026-10-22T15:46:42Z	SM-z	draft	#4462	SM-10b gate pass, draft until #4421 and #4461 merge
+2026-10-22T16:17:14Z	lead	waiting	-	SM-r runs 39800767524/39802350745 still queued; #4421 in lane; #4461/#4462 draft
