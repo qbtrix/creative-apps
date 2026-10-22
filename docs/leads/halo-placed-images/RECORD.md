@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: #4426 (PH-a) merged 19:43Z (lane batch 39839090182). Fixers merging dev into PH-u stack (#4437, #4438) and PH-m stack (#4614, #4615, #4618); then lead retargets each to dev, undrafts, fast-lane, moves Head. Then PH-a Belt-Slice-Done once dev Linux green; PH-z after. Gap candidates: SVG gradient flat, SVG strokes. (check 19:50Z)
+Next: PH-a merged 19:43Z. #4437 (PH-u sources, 9b49023) retargeted to dev, fast-lane, clean; #4438 (PH-u tests, 26aa19d) stays draft on PH-u until #4437 merges (581 lines vs dev otherwise). PH-m fixer merging dev into #4614/#4615/#4618; then retarget #4614, #4615 to dev, #4618 after. Then PH-a Belt-Slice-Done once dev Linux green; PH-z after. Gap candidates: SVG gradient flat, SVG strokes. (check 20:04Z)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
