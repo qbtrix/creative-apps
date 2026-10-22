@@ -74,3 +74,4 @@ utc	stage	event	ref	note
 2026-10-22T11:21:32Z	SM-5	merged	4125	lane batch
 2026-10-22T11:21:32Z	SM-8	rebuilding	4239	SM-8 commits on dev, gating
 2026-10-22T11:27:43Z	SM-8	ready	4239	rebuilt on dev at c34a11120, CI: PASS, un-drafted
+2026-10-22T11:43:11Z	SM-6	build-green	4237	macOS build 39765055940 green; merges on next sweep; SM-8 build dispatched 11:30
