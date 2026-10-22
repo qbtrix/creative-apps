@@ -2,7 +2,8 @@
 // SwiftUI doesn't build on Linux. AfterGlowApp.swift gives the onboarding
 // scene its launch behavior, no restoration and its command group, each once,
 // and keeps every scene and group LauncherMenuStubTests pins. Help > Welcome
-// to AfterGlow is live and opens the window; the window keeps the default
+// to AfterGlow (SuiteShell's Help group since report-problem RP-2) is live
+// and opens the window; the window keeps the default
 // and cancel shortcuts, the body counter and close-means-Skip.
 import Foundation
 import Testing
@@ -34,13 +35,13 @@ private func occurrences(of needle: String, in text: String) -> Int {
         let app = try source("Sources/AfterGlowApp/AfterGlowApp.swift")
         for line in [
             ".defaultLaunchBehavior(OnboardingWindow.launchBehavior)", ".restorationBehavior(.disabled)",
-            "LauncherCommandsOnboarding()",
+            "SuiteHelpCommands(app: .launcher)",
         ] {
             #expect(occurrences(of: line, in: app) == 1, "\(line)")
         }
         // The modifiers sit on the onboarding scene, after the home and Settings scenes.
         let scene = try #require(app.components(separatedBy: "Window(\"Welcome to AfterGlow\", id: \"onboarding\")").last)
-        #expect(scene.contains(".defaultLaunchBehavior(") && scene.contains("LauncherCommandsOnboarding()"))
+        #expect(scene.contains(".defaultLaunchBehavior(") && scene.contains("SuiteHelpCommands(app: .launcher)"))
         // LauncherMenuStubTests' pinned strings stay, once each.
         for pinned in [
             "Window(\"AfterGlow\", id: \"home\")", "Settings {", "Window(\"Welcome to AfterGlow\", id: \"onboarding\")",
@@ -65,11 +66,10 @@ private func occurrences(of needle: String, in text: String) -> Int {
     }
 
     @Test func helpWelcomeIsLiveAndOpensTheWindow() throws {
-        let text = try source("Sources/AfterGlowApp/LauncherCommands+Onboarding.swift")
-        #expect(occurrences(of: "Button(\"Welcome to AfterGlow\")", in: text) == 1)
-        #expect(text.contains("openWindow(id: \"onboarding\")"))
-        #expect(text.contains("CommandGroup(after: .help)"))
-        #expect(!text.contains(".disabled("), "Help > Welcome to AfterGlow is disabled")
+        let text = try source("Sources/SuiteShell/SuiteHelpCommands.swift")
+        #expect(occurrences(of: "openWindow(id: \"onboarding\")", in: text) == 1)
+        #expect(text.contains("CommandGroup(replacing: .help)"))
+        #expect(!text.contains("\"help.welcome\": \""), "Help > Welcome to AfterGlow is disabled")
     }
 
     @Test func windowKeepsShortcutsCounterAndCloseIsSkip() throws {
@@ -107,7 +107,7 @@ private func occurrences(of needle: String, in text: String) -> Int {
     // OB-4: pages 2 and 3.
     static let windowFiles = [
         "Sources/AfterGlowApp/OnboardingWindow.swift", "Sources/AfterGlowApp/OnboardingPages.swift",
-        "Sources/AfterGlowApp/OnboardingStartPage.swift", "Sources/AfterGlowApp/LauncherCommands+Onboarding.swift",
+        "Sources/AfterGlowApp/OnboardingStartPage.swift", "Sources/SuiteShell/SuiteHelpCommands.swift",
     ]
 
     /// Every name OnboardingControls declares (`static let x` or `static func x(`), the prefix aside.
