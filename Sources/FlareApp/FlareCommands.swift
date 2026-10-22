@@ -15,6 +15,8 @@
 // timeline strip has focus (its FocusedValues.timelineSelectAll, key-select-all
 // KS-2), else Edit > Select All on the stage's art.
 import FlareModel
+import SuiteModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -32,6 +34,8 @@ struct FlareMenu {
     var editHelps: [FlareEditAction: String] = [:]
     /// The keyframe Delete reason (`deleteHelp`), then Bring Forward's and Send Backward's.
     var selectionHelps: [String?] = []
+    /// The open animation's file, which File > Open In ▸ hands to another app; nil before it has one (file-flow FL-2).
+    var document: SuiteDocumentRef?
 
     /// Open Sample's items: the sample's name for `.openSample(name:)`, and its title.
     static let samples: [(name: String, title: String)] = [
@@ -69,19 +73,14 @@ struct FlareCommands: Commands {
         CommandGroup(replacing: .newItem) {
             item(.file(.new), key: KeyboardShortcut("n"))
             item(.file(.open), key: KeyboardShortcut("o"))
-            Menu("Open Recent") {
-                ForEach(menu.recent, id: \.self) { path in
-                    item(.file(.openRecent(path: path)), title: URL(fileURLWithPath: path).lastPathComponent)
-                }
-                Divider()
-                item(.file(.clearRecent))
-            }
             Menu("Open Sample") {
                 ForEach(FlareMenu.samples, id: \.name) { sample in
                     item(.file(.openSample(name: sample.name)), title: sample.title)
                 }
             }
         }
+        // The suite's Open Recent ▸ and Open In ▸, after Open… (file-flow FL-2).
+        SuiteFileCommands(app: .flare, bridge: FlareShell.bridge, document: menu.document)
         CommandGroup(replacing: .saveItem) {
             item(.file(.save), key: KeyboardShortcut("s"))
             item(.file(.saveAs), key: KeyboardShortcut("s", modifiers: [.command, .shift]))
