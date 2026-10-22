@@ -49,3 +49,4 @@ utc	stage	event	ref	note
 2026-10-22T11:34Z	poll	-	#4357 #4384-#4386 #4392	all open, no needs-fix/needs-rebase; #4357 lane macOS build 39760889343 now in_progress (picked up ~11:30Z)
 2026-10-22T12:03Z	retarget	DS-m	#4384	#4357 merged 11:55Z (ac5fd813c); merged origin/dev into DS-5 (base e41b04685, clean), scripts/ci --changed PASS, head 68b98ae94, base -> dev, 11 files +191/-108
 2026-10-22T12:25Z	poll	DS-m	#4384 #4385 #4386 #4392	all open, no needs-fix/needs-rebase; #4384 waits on lane macOS build 39776071155 (queued since 12:09Z)
+2026-10-22T12:47Z	poll	DS-m	#4384	lane macOS build 39776071155 success 12:46Z; waiting for the lane sweep to merge; #4385/#4386/#4392 open, clean
