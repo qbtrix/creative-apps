@@ -145,3 +145,4 @@ utc	stage	event	ref	note
 19:20Z	fix	PL-8 macOS build failure (shadowed name in PlaceLiveTests) fixed, d2b2c73
 19:36Z	heartbeat	#4578 build in progress
 20:11Z	merge	#4578 PL-8 merged
+20:33Z	heartbeat	waiting on EY chain

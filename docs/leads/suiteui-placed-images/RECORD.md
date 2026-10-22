@@ -33,6 +33,7 @@ Next: After #4583 merges, retarget #4613, then #4616/#4617
 |---|---|---|---|---|---|
 
 ## Decisions
+- 20:33Z No change; waits on #4429 then #4583.
 - 20:11Z PL-8 #4578 merged (macOS build 39838044012 green after fix round 1).
 - 19:36Z #4578 head d2b2c73 macOS build run 39838044012 in progress; #4613/#4616/#4617 wait on the EY chain.
 - 2026-10-22T19:20Z: PL-8's macOS build (run 39819869147) failed: PlaceLiveTests' local 'let sample = try #require(sample(format))' shadowed the static helper. Renamed to 'picked' via Self.sample, pushed d2b2c73 (fix round 1 of 2), Head moved.
