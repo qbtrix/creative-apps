@@ -4,7 +4,7 @@ Issue: #3757 · Packet: docs/blueprints/suiteui/features/document-setup.md
 Run: act-1a15fddd101-68r5 · Session: session_01BsyWa1bPrB44D73KoNLtrU · Started: 2026-10-21T19:15Z
 Stage: 3 wave 1
 Base: 58034759f2cdc515d7a44a9ec164509be2b6508b
-Next: #4184 (DS-m) at ba144058d holds for #4258 (dev-red FormatListRatchetTests fix), then the lane re-checks and the Mac gate; DS-u waits on frame-rates FR-u (not started)
+Next: #4184 DS-m and #4299 DS-u (DS-5) in the lane; open DS-6 (ds-u-gallery) once #4299 merges. dev passes FormatListRatchetTests at b5a6e7e0a, so dev-red #3856 should clear.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
