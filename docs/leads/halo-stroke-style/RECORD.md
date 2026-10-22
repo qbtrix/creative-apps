@@ -74,3 +74,5 @@
 - 2026-10-22T16:02Z: HK-z #4446 macOS build 39807175605 was cancelled. The workflow started a new one, 39810248847, at 16:01Z, which is queued. #4446 head 7c5c60024 is clean.
 
 - 2026-10-22T16:32Z: HK-z #4446 passed its macOS build, 39810248847. It waits for a lane sweep to merge it.
+
+- 2026-10-22T16:43Z: HK-z #4446 merged as bba89ba1f. Waiting on the first dev CI run that contains it to finish its Linux job.
