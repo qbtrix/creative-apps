@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-22T06:32:51Z	lane	heartbeat	4123,4125	SM-4 SM-5 in lane macOS builds; SM-6 SM-8 wait on them; scoped run 39721019643 queued
 2026-10-22T06:55:33Z	lane	heartbeat	4123,4125,4237	SM-4 merged; SM-a slice done posted; SM-6 merged with dev, gate queued; SM-5 in lane
 2026-10-22T07:24:05Z	lane	heartbeat	#4125 #4237	SM-5 macOS build failed (NSLock in async finish); fix 2c0843029 gating. SM-6 #4237 ready after clean-build gate PASS
+2026-10-22T07:27:25Z	lane	heartbeat	4125	SM-5 macOS fix pushed (withLock), Head moved to 2c0843029; SM-6 #4237 in lane
