@@ -1,0 +1,4 @@
+[
+  {"label": "moveOneStep: each drag call takes a fresh before, so the moves compound", "file": "Sources/PhotoModel/PhotoStroke.swift", "find": "if begun { current.layersBefore = layers }", "replace": "current.layersBefore = layers", "tests": "PhotoSeveralLayersTests"},
+  {"label": "moveMovesEvery: a drag of several layers is named as one", "file": "Sources/PhotoModel/PhotoStroke.swift", "find": "named: moved.count > 1 ? \"Move Layers\"", "replace": "named: moved.count > 99 ? \"Move Layers\"", "tests": "PhotoSeveralLayersTests"}
+]

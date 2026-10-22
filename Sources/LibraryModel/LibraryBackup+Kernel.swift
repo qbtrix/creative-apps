@@ -78,3 +78,20 @@ extension LibraryCatalog {
         ) { _, _ -> JSONValue in throw backupNotBuilt("catalog.restore-backup") },
     ]
 }
+
+/// The Restore controls as they read their state: why restoring can't run now, nil when it can.
+public struct LibraryRestoreControl: Sendable, Equatable {
+    public var help: String?
+    public init(help: String?) { self.help = help }
+}
+
+extension LibraryCatalog {
+    /// File > Restore Catalog Backup…, the sheet's Restore… and its confirmation's Restore (`file.restore-backup`):
+    /// controls over `catalog.restore-backup` that open or confirm the sheet, so the spec stays out of `commands`
+    /// (and the ledger) like `file.share`; it is available while the control's help is nil.
+    public static let restoreControlSpec: CommandSpec<LibraryRestoreControl> =
+        .typed("file.restore-backup", title: "Restore Catalog Backup",
+               summary: "Backs up the current catalog, then replaces it with the chosen backup.", kind: .file,
+               params: NoParams.self, schema: ParamSchema.none, example: .object([:]), availability: { available($0.help) }
+        ) { _, _ -> JSONValue in throw CatalogError.notBuilt(id: "file.restore-backup", feature: "catalog-backup BK-5m") }
+}
