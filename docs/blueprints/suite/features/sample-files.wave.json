@@ -2,8 +2,8 @@
   "title": "The welcome tour's sample files ship in the bundle: Cards.design, Bounce.flare, beach.ora, Sunset.png and Intro.halo, each made by an afterglow script so it can be rebuilt",
   "wave": "BG1",
   "order": 50,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#3775",
   "beta": true,
   "covers": "beta gaps 2026-10-21 suite must-have 5 (suite audit row 9, under-specified 4); #836, #837, #838, #839 (the suite journey fixtures); real job RJ-X66 (new)",
   "waits_on": "onboarding (built; SampleCatalog names the files); afterglow-cli (built; scripts run headless); each app's catalog commands the scripts call (built on dev)",
@@ -15,7 +15,7 @@
   "ui_slice": "none",
   "ui_slice_reason": "no new screen: the onboarding tour's tiles exist; this packet supplies the files they open, and SS-7's journey proves it",
   "journeys": [
-    "AfterGlowOnboardingJourneyTests.testOpenEverySample"
+    "AfterGlowOnboardingJourneys.testOpenEverySample"
   ],
   "owned": [
     "Tests/AfterGlowCLITests/SampleFilesTests.swift",
@@ -43,8 +43,9 @@
     "Bundle/Samples/Intro.halo",
     "UITests/Fixtures/suite/Intro.halo",
     "UITests/AfterGlowJourneyTests+Onboarding.swift",
-    "Tests/RealJobs/suite/open-samples/open-samples.jobs.json",
-    "scripts/ci",
+    "Tests/RealJobs/flare/open-sample/open-sample.jobs.json",
+    "Tests/RealJobs/design/open-sample/open-sample.jobs.json",
+    "Tests/RealJobs/halo/open-sample/open-sample.jobs.json",
     "docs/blueprints/suite/features/sample-files.wave.json"
   ],
   "slices": [
@@ -144,8 +145,9 @@
       ],
       "owned": [
         "UITests/AfterGlowJourneyTests+Onboarding.swift",
-        "Tests/RealJobs/suite/open-samples/open-samples.jobs.json",
-        "scripts/ci",
+        "Tests/RealJobs/flare/open-sample/open-sample.jobs.json",
+        "Tests/RealJobs/design/open-sample/open-sample.jobs.json",
+        "Tests/RealJobs/halo/open-sample/open-sample.jobs.json",
         "docs/blueprints/suite/features/sample-files.wave.json"
       ],
       "waits": {
