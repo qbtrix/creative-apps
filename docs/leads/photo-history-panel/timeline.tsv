@@ -74,3 +74,4 @@ utc	stage	event	ref	note
 2026-10-21T23:50Z	fix	#4162 pushed 4d654c47 (port of #4215, CI --changed PASS), Head moved; lane rebuilds on macOS
 2026-10-21T23:57Z	check	#4162:39694491928-queued macOS build of new head (no findings open; scoped photo run 39687866678 still queued)
 2026-10-22T00:19Z	check	#4162 macOS build 39694491928 still queued; #4215 merged (cb79b076) so dev builds again
+2026-10-22T00:57Z	PH-z	#4271 opened (PH-7+PH-8, feature-done), stacked on #4162, ci --changed PASS at 86489973
