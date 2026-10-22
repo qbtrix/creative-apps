@@ -47,6 +47,7 @@ Next: SM-9 ready once CI: PASS; SM-10 C4 PR and SM-10b feature-done PR; Belt-Sli
 - Full runs 39776226443 and 39779408885 were cancelled by newer dev runs; SM-w and SM-r wait the next successful full or scoped suite run.
 - Full CI 39791265992 at 721ac8e9f failed on Linux and macOS in HaloStrokeTrimKeysTests.aReasonTurnsTheKeyOffAndItsClickSendsNothing (Halo line, not shell-media); SM-r waits on 39800767524 / 39802350745 at 3fcea2844.
 - SM-9 #4421: merged dev (text+media live, 6 pending), gate PASS, pushed 18ffebda5, ready with fast-lane.
+- SM-10 #4461 (C4 description only) opened as draft at 0f8a539c; ready once #4421 merges.
 
 ## Open
 - none
