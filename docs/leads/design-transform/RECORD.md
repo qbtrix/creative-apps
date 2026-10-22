@@ -6,7 +6,7 @@ Stage: 3 verify, DT-z fix round 1 (#4401 in the lane)
 Base: 80aba474 (origin/dev at 08:10Z)
 Next: #4401 merges; wait for a completed, successful design-scoped or full ci.yml run on dev at or after dcfcb6b0 (and #4401 if timing still gates) -> Belt-Slice-Done DT-z, Mac-Finish-Wanted DT-z, Belt-Contact-Sheet on #3436
 
-Last check: 2026-10-22T20:14Z. Runs containing 078e7285: CI 39844810755 (0f8414ad) pending/-; CI 39840605751 (fbe2a872) completed/cancelled; CI 39836126860 (a102c34c) queued/-; CI 39829329352 (8f25082c) completed/cancelled; CI 39818716525 (a41e7f1f) completed/cancelled; CI 39814071339 (7e9f260a) completed/cancelled; CI 39810338100 (401242a5) completed/cancelled; CI 39806111520 (18902a68) in_progress/-; transform findings: none.
+Last check: 2026-10-22T20:30Z. Runs containing 078e7285: CI 39848684933 (847f5072) pending/-; CI 39844810755 (0f8414ad) completed/cancelled; CI 39840605751 (fbe2a872) completed/cancelled; CI 39836126860 (a102c34c) queued/-; CI 39829329352 (8f25082c) completed/cancelled; CI 39818716525 (a41e7f1f) completed/cancelled; CI 39814071339 (7e9f260a) completed/cancelled; CI 39810338100 (401242a5) completed/cancelled; CI 39806111520 (18902a68) completed/failure; transform findings: #4629,#4628,#4627,#4626,#4625.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
