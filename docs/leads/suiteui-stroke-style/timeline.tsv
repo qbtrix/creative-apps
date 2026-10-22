@@ -133,3 +133,4 @@ utc	stage	event	ref	note
 23:35Z	heartbeat	heartbeat: #3826 head ead55aa is clean; its lane macOS build (run 39692915162, dispatched 23:21Z) is queued behind the macOS backlog.
 00:03Z	heartbeat	SS-9 #3826 head ead55aa: lane macOS build 39692915162 queued (runner backlog); #4215 merged so the port no-ops
 00:27Z	heartbeat	SS-9 #3826 head ead55aa: lane macOS build 39692915162 still queued (runner backlog)
+00:51Z	heartbeat	SS-9 #3826 head ead55aa: lane macOS build 39692915162 green; waiting for the lane to merge
