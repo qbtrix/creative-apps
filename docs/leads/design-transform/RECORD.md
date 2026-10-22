@@ -2,9 +2,9 @@
 
 Issue: #3436 · Packet: docs/blueprints/design/features/transform.md
 Run: act-1a16208b93a-24w0 · Session: claude/feature-lead-playbook-wngeeb · Started: 2026-10-21T08:46:56Z (relaunched 2026-10-22T05:40Z; prior runs act-1a15ac70747-ky1f, act-1a15da1b26c-9qo6, act-1a15fcdd869-ck2o)
-Stage: 3 polling (wave 6 PRs in the lane)
-Base: bdd92b41 (origin/dev at 06:22Z)
-Next: wait for the lane to merge #4324 (DT-u r2) and #4323 (DT-z, feature-done); both wait on macOS build-only runs (39728806153 queued, runner backlog 21); then wait for a design or full ci.yml run on dev containing #4323 -> Belt-Slice-Done DT-z, Mac-Finish-Wanted DT-z, Belt-Contact-Sheet
+Stage: 3 verify (DT-z merged; waiting for a design or full ci.yml run containing dcfcb6b0)
+Base: 80aba474 (origin/dev at 08:10Z)
+Next: wait for a completed, successful design-scoped or full ci.yml run on dev at or after dcfcb6b0 -> Belt-Slice-Done DT-z, Mac-Finish-Wanted DT-z, Belt-Contact-Sheet on #3436
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: wait for the lane to merge #4324 (DT-u r2) and #4323 (DT-z, feature-done);
 | DT-a | rotation/flip fields on DesignNode, TransformTarget stubs, inspector rows and Object items on the stubs | DT-1, DT-2 | MJ-DT | TT-a (merged #3485/#3486); gradient-fill:DG-a (#3687 open) | yes | 0 | done | 39569221486 | wanted |
 | DT-u | canvas paints turned nodes, handles turn; snapshots and render budget | DT-3, DT-4 | DJ-T1 | DT-a; gradient-fill:DG-u | yes | 2 | done (per Belt brief; round 2 #4223/#4224 in flight) | – | – |
 | DT-m | adapter bodies, turned hit test, SVG turn, catalog specs, RJ-D15 | DT-5, DT-6 | MJ-DT | DT-a; gradient-fill:DG-m; autosave-history:DA-m | no | 0 | done (per Belt brief) | – | – |
-| DT-z | journey on live, status built, feature-done | DT-7, DT-8 | DJ-T1 | DT-u, DT-m | yes | 0 | building | – | – |
+| DT-z | journey on live, status built, feature-done | DT-7, DT-8 | DJ-T1 | DT-u, DT-m | yes | 0 | merged, verifying | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -23,9 +23,9 @@ Next: wait for the lane to merge #4324 (DT-u r2) and #4323 (DT-z, feature-done);
 | DT-4 | DT-u | 2 | snapshots, render budget | Tests/AppSnapshotTests/DesignTransformSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetDesignTransformTests.swift | RenderBudgetDesignTransformTests | #4159 | merged (9829685e) |
 | DT-5 | DT-m | 2 | adapter bodies, contains | Sources/DesignModel/DesignTransform+Kernel.swift, Tests/DesignModelTests/DesignTransformTests.swift, Tests/mutations/DesignModel.DesignTransform+Kernel.json | DesignTransformTests | #4187 | merged (8684d700) |
 | DT-6 | DT-m | 3 | SVG turn, specs, RJ-D15 | Sources/DesignModel/Live/DesignSVG.swift, Sources/DesignModel/DesignCommandCatalog.swift, Tests/command-ids/design.txt, Tests/RealJobs/design/rotate-15/ | DesignSVGTests.turnedNode, RJ-D15 | – | waiting |
-| DT-7 | DT-z | 6 | journey on live | UITests/DesignJourneyTests+Transform.swift | DesignTransformJourneyTests | #4323 | macOS build green (39728806153), awaiting lane sweep |
-| R2 | DT-u | 6 | fix #4223 turned resize + #4224 knob over several | Sources/DesignModel/DesignCanvasEditing.swift, Sources/DesignModel/DesignCanvasHints.swift, their tests and plans | DesignTurnedResizeTests, knob-several test | #4324 | macOS build green (39730381324), awaiting lane sweep |
-| DT-8 | DT-z | 6 | status built | docs/blueprints/design/features/transform.wave.json | scripts/waves render --dry-run | #4323 | in lane (with DT-7, one slice PR) |
+| DT-7 | DT-z | 6 | journey on live | UITests/DesignJourneyTests+Transform.swift | DesignTransformJourneyTests | #4323 | merged (dcfcb6b0) |
+| R2 | DT-u | 6 | fix #4223 turned resize + #4224 knob over several | Sources/DesignModel/DesignCanvasEditing.swift, Sources/DesignModel/DesignCanvasHints.swift, their tests and plans | DesignTurnedResizeTests, knob-several test | #4324 | merged (80aba474) |
+| DT-8 | DT-z | 6 | status built | docs/blueprints/design/features/transform.wave.json | scripts/waves render --dry-run | #4323 | merged (dcfcb6b0, with DT-7) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -43,7 +43,7 @@ Next: wait for the lane to merge #4324 (DT-u r2) and #4323 (DT-z, feature-done);
 - #4323 journey step 2 needs #4224/#4223's fix (#4324); #4324 was opened second, so if a journey runs before it merges, step 2 is expected red.
 
 ## Open
-- Findings open: #4223, #4224 (fixed by #4324, DT-u round 2 of 2).
+- Findings open: none (#4223, #4224 closed by #4324).
 - DT-a Belt-Slice-Done and Mac-Finish-Wanted posted on #3436 (run 39569221486).
 
 ## Run act-1a15fcdd869-ck2o (2026-10-21T18:55Z)
