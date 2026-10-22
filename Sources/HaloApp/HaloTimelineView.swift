@@ -106,8 +106,9 @@ struct HaloTimelineView: View {
         return VStack(alignment: .leading, spacing: 0) {
             GeometryReader { geometry in
                 let lanes = Self.layout.laneFitWidth(strip: stripWidth, container: Double(geometry.size.width))
-                // The playhead follows the playing frame in this leaf alone (HaloLiveShown).
-                HaloLiveShown(model: model) { shown in TimelineStrip(
+                // The playhead follows the playing frame in this leaf alone; an
+                // inspector scrub's preview never re-runs the strip (HaloPlayheadShown).
+                HaloPlayheadShown(model: model) { shown in TimelineStrip(
                     tracks: tracks, duration: model.selectedComposition?.lastFrame ?? 0,
                     frameWidth: CGFloat(model.selectedComposition?.frameWidth(toFit: lanes) ?? 1),
                     playhead: shown.selectedComposition?.playheadFrame ?? 0,
