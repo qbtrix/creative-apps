@@ -186,3 +186,9 @@ utc	stage	event	ref	note
 2026-10-22T18:58Z	3	merge	#4472	fixes #4451 #4455
 2026-10-22T18:58Z	3	fixer	#4554	needs-rebase merge
 2026-10-22T19:05Z	3	push	#4554	fa25dfd8 dev merged, CI PASS
+2026-10-22T19:50Z	3	merge	#4469	fixes #4453
+2026-10-22T19:50Z	3	merge	#4473	fixes #4454 #4457
+2026-10-22T19:50Z	3	merge	#4594	fixes #4587 #4353
+2026-10-22T19:50Z	3	merge	#4595	fixes #4588
+2026-10-22T19:50Z	3	merge	#4609	fixes #4589
+2026-10-22T19:50Z	3	fixer	#4596	needs-rebase merge
