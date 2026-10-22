@@ -1,10 +1,10 @@
 # placed-images lead record
 
 Issue: #3457 · Packet: docs/blueprints/suiteui/features/placed-images.md
-Run: act-1a157ad4600-c6w5 · Session: 1dda8f22-4f7f-5e83-a997-571c40aa1288 · Started: 2026-10-20T05:01:16Z
-Stage: 3 wave 1
+Run: act-1a1647a67aa-dau5 (relaunch) · Started: 2026-10-22T16:45Z
+Stage: 3 wave 3 (PL-z)
 Base: 854a3b52c66aaa12582e9190f404265b84594a05
-Next: #3942 (PL-4, on dev, head 227f061). PL-u done once #3942 is in a green Linux run (Belt-Slice-Done + Mac-Finish-Wanted). PL-8 after PL-4; PL-9 waits on gradient-fill:GF-z.
+Next: #4578 (PL-8, on dev, head 85af417) waits on its lane macOS build. PL-9 stacks on lead/eyedropper-EY-z (#4583) since EY-8 and PL-9 both edit FakeCanvasDocument.swift; PL-10 (C4 part, wave.json built, feature-done) after. PL-z done on a green ci.yml run holding all three.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -24,7 +24,7 @@ Next: #3942 (PL-4, on dev, head 227f061). PL-u done once #3942 is in a green Lin
 | PL-5 | PL-m | – | see packet task table (waits: PL-1) | Sources/SuiteKernel/Place/PlaceRules.swift, Tests/SuiteKernelTests/PlaceRulesTests.swift, Tests/mutations/SuiteKernel.PlaceRules.json | packet acceptance row | #3598 | merged 13:02 (lane batch 39425106447) |
 | PL-6 | PL-m | – | see packet task table (waits: PL-1) | Sources/SuiteKernel/Place/PlaceVector.swift, Tests/SuiteKernelTests/PlaceVectorTests.swift, Tests/mutations/SuiteKernel.PlaceVector.json, Tests/SuiteKernelTests/Fixtures/place/ | packet acceptance row | #3599 | merged 13:59 (squash c76647d, batch 39433379397) |
 | PL-7 | PL-m | – | see packet task table (waits: PL-5, PL-6, command-catalog:CC-run) | Sources/SuiteKernel/Place/PlaceCommands.swift, Tests/SuiteKernelTests/PlaceCommandsTests.swift, Tests/mutations/SuiteKernel.PlaceCommands.json | packet acceptance row | #3626 | merged 18:18 (squash 299a29c) |
-| PL-8 | PL-z | – | see packet task table (waits: PL-4, PL-7) | Sources/SuiteUI/Gallery/GalleryPlaceImage.swift, Sources/SuiteUI/PlacedImageView.swift, Tests/SuiteUITests/PlaceLiveTests.swift | packet acceptance row | – | waiting |
+| PL-8 | PL-z | – | see packet task table (waits: PL-4, PL-7) | Sources/SuiteUI/Gallery/GalleryPlaceImage.swift, Sources/SuiteUI/PlacedImageView.swift, Tests/SuiteUITests/PlaceLiveTests.swift | packet acceptance row | #4578 | open |
 | PL-9 | PL-z | – | see packet task table (waits: PL-7, gradient-fill:GF-z) | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeCanvasPlaceTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/place-image/ | packet acceptance row | – | waiting |
 | PL-10 | PL-z | – | see packet task table (waits: PL-8, PL-9) | docs/c4/parts/creative-apps/suite-kernel/kernel-place.json, docs/blueprints/suiteui/features/placed-images.wave.json | packet acceptance row | – | waiting |
 
@@ -33,6 +33,7 @@ Next: #3942 (PL-4, on dev, head 227f061). PL-u done once #3942 is in a green Lin
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T17:50Z: Relaunch act-1a1647a67aa-dau5. The upstream slices PL-z waited on are built or have their last PRs open, so PL-8 opened as #4578 on dev. GF-z is done. PL-9 follows EY-8 in the FakeCanvasDocument chain (TT-8 -> EY-8 -> PL-9).
 - Base and PR target is `dev` (CLAUDE.md, lead.md), not the brief's "base main": main b3011ab is an ancestor of dev, and the packets exist only on dev (#3426, #3432).
 - v3 loop: the packet has a `## Slices` table; fix rounds capped at 2 per slice (contract rule 11).
 - The contract slice waits on gradient-fill:GF-a (#3421 open, GF-2 not opened); a cross-feature wait is met only once its tasks merge (rule 12), so no task starts on an unmerged branch.
