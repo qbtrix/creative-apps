@@ -2,9 +2,9 @@
 
 Issue: #3450 · Packet: docs/blueprints/suiteui/features/stroke-style.md
 Run: act-1a157ad4600-c6w5 · Session: 1dda8f22-4f7f-5e83-a997-571c40aa1288 · Started: 2026-10-20T05:01:16Z
-Stage: 3 wave 1
+Stage: 3 wave 3
 Base: 424b4a60f1ea44dbabfd0ce8a0597674f31ecfc3
-Next: SS-9 #3826 merged into dev at 2026-10-22T02:43Z (ca4d6d7). SS-8 waits on shape-tools:SH-z (#3449 open). SS-10 waits on SS-8; gradient-fill is built. SS-z closes once SS-10 lands and a green dev run contains it.
+Next: SS-8 building (supervisor on #3450: SS-8 goes before SH-8; its PR flips the wait so shape-tools SH-8 waits on stroke-style:SS-d, and SH-8 rebases FakeRect.shape onto FakeRect.stroke). Then SS-10 (feature-done). export-pack and tone-controls belong to run d0s8 (supervisor on #3477, #3476); this run builds neither.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: SS-9 #3826 merged into dev at 2026-10-22T02:43Z (ca4d6d7). SS-8 waits on s
 | SS-a | The kernel's stroke type, rules, target, intents, nine command specs and SVG writer are declared as stubs, the gallery's stroke-editor page is in the index, and the checks are written, disabled. | SS-1, SS-2 | SJ0 | gradient-fill:GF-a (SS-1) | true | 0 | done | 39469631014 | wanted |
 | SS-u | On the gallery page the editor sets colour, width, join and cap, shows the dash presets and trim rows (disabled with their reason until SS-d), and hides trim where an app has none, every control identified, within the render budget. | SS-3, SS-4 | KS1 | SS-a (SS-3) | true | 0 | done | 39512606501 | wanted |
 | SS-m | The rules clamp widths and scale the dash presets, the SVG writer writes colour, width, join and cap, and every stroke command but dash and trim records exactly one undo step (a scrub one). | SS-5, SS-6 | KJ-stroke | SS-a (SS-5, SS-6) | false | 0 | done | 39512606501 | – |
-| SS-d | On the bumped core, dashes and trims paint the trimmed then dashed path, the two commands save fractions and scaled patterns in one step, and the fake app keeps them so RJ-X35 runs on the CLI. | SS-7, SS-8 | KJ-stroke | SS-m (SS-7); shape-tools:SH-z (SS-8) | false | 1 | waiting | – | – |
+| SS-d | On the bumped core, dashes and trims paint the trimmed then dashed path, the two commands save fractions and scaled patterns in one step, and the fake app keeps them so RJ-X35 runs on the CLI. | SS-7, SS-8 | KJ-stroke | SS-m (SS-7); SS-8 goes first, SH-8 waits on it (supervisor) | false | 1 | building | – | – |
 | SS-z | The gallery runs its intents through StrokeCommands on a live target, the journey dashes and trims on live, and the feature is built. | SS-9, SS-10 | KS1 | SS-u (SS-9); SS-d (SS-9, SS-10); gradient-fill:GF-z (SS-10) | true | 0 | waiting | – | – |
 
 ## Tasks
@@ -106,3 +106,6 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 04:22Z: heartbeat: no open findings; SH-z (#3449) still planned, SS-8 and SS-10 wait
 - 04:46Z: heartbeat: no open findings; SH-z (#3449) still planned, SS-8 and SS-10 wait
 - 05:14Z: heartbeat: no open findings; SH-z (#3449) still planned, SS-8 and SS-10 wait
+
+## Run act-1a1646f0a8c-etnw
+- Resumed 2026-10-22 from main 0dd23d6. Supervisor: SS-8 before SH-8, flip the wait in the wave files; this run does not build export-pack or tone-controls (run d0s8 holds them).
