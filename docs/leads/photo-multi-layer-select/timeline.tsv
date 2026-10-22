@@ -74,3 +74,4 @@ utc	stage	event	ref	note
 2026-10-22T03:05:00Z	check-in	scoped: photo 39712698310 on b5a6e7e0a still queued (macOS queue behind halo); full CI 39714642994 on 66a845885 pending; no findings; Slice-Done posts still wait on the photo run
 2026-10-22T03:35:00Z	check-in	macOS queue moving (halo green, library/suiteui running); scoped: photo 39712698310 on b5a6e7e0a still queued; Linux check on 66a845885 green, full CI 39714642994 pending; no findings; Slice-Done posts wait on photo or full CI
 2026-10-22T03:41:00Z	check-in	no change: scoped: photo 39712698310 queued, full CI 39714642994 pending; no findings
+2026-10-22T04:12:00Z	check-in	scoped: photo 39712698310 on b5a6e7e0a now running; full CI 39714642994 cancelled (superseded by CI 39720939785 on 6e19f406d, pending); no findings
