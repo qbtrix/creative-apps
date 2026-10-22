@@ -19,3 +19,4 @@ utc	stage	event	ref	note
 2026-10-21T04:56:07Z	heartbeat: full CI in progress
 2026-10-22T02:05Z	wave-2	builders launched: PF-u, PF-5 (run act-1a1615504d4-d9p4; PF-a done, run 39540755137)
 2026-10-22T03:00Z	shipped	#4295 PF-5 head a5a9367b; #4297 PF-u head 3fbd080c; both fast-lane
+2026-10-22T03:22Z	heartbeat	#4295 mac build ok, Linux red = dev #3856 ratchet (not ours); #4297 mac build queued; 0 findings
