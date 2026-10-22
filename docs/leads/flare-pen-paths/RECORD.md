@@ -4,7 +4,7 @@ Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
 Run: act-1a15e10a86f-7bk9 (took over from act-1a15c07caa7-sppq) · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T01:10Z (this run 10:40Z)
 Stage: 3 wave 2
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: (2026-10-22T01:51Z) #4204 (FP-a fix2, ea6b7bec) macOS build green (run 39699652394, 01:33Z); waits on a lane sweep to merge. Then post-round-2 critics. #4203 (PN-3) macOS build queued; FP-u starts once it merges. FP-6 waits on FL-m (none open).
+Next: (2026-10-22T02:20Z) #4204 Linux check red on base-only FormatListRatchet (Media.swift, fixed on dev by #4238); merged dev, new head d34e2417 passes scripts/ci --changed + ratchet; awaits new lane macOS build + sweep. #4203 PN-3 macOS build green 02:00Z, awaits sweep; then FP-u.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
