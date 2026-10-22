@@ -8,6 +8,7 @@
     "Sources/SuiteKernel/Export/ExportRun.swift",
     "Sources/SuiteKernel/Session/AutosaveSchedule.swift",
     "Sources/SuiteKernel/Session/DocumentSession.swift",
+    "Sources/SuiteKernel/Session/RecoveryRestore.swift",
     "Sources/SuiteKernel/Session/VersionedJSON.swift"
   ],
   "order": 70
