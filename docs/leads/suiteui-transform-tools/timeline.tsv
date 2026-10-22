@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-22T17:25Z	3	heartbeat	-	no change; macOS queue saturated
 17:47Z	3	heartbeat	-	TT-7 rebuild pending
 18:10Z	3	heartbeat	-	no change
+18:40Z	3	heartbeat	-	TT-7 build green
