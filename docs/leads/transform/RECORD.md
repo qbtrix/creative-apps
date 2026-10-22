@@ -20,13 +20,15 @@ Next: watch #3682 (HT-a) and #3702 (HT-5, stacked on #3682, 335 lines/7 files vs
 | HT-1 | HT-a | 1 | adapter stubs; HaloTransformTests disabled | Sources/HaloModel/HaloTransform+Kernel.swift, Tests/HaloModelTests/HaloTransformTests.swift | compiles, disabled | #3702 | merged (2a21273a3; #3682 closed as superseded) |
 | HT-2 | HT-a | 1 | HaloViewerHandles on the stubs; journey skipped | Sources/HaloApp/HaloViewerHandles.swift, Sources/HaloApp/HaloViewer.swift, UITests/HaloJourneyTests+Transform.swift | HaloViewerSnapshots handles | #3702 | merged (2a21273a3) |
 | HT-5 | HT-m | 2 | adapter bodies, keyed when animated | Sources/HaloModel/HaloTransform+Kernel.swift, Tests/HaloModelTests/HaloTransformTests.swift, Tests/mutations/HaloModel.HaloTransform+Kernel.json | HaloTransformTests; Mutate | #3702 | merged 22:41Z (2a21273a3, Mutate 3/3) |
-| HT-6 | HT-m | 3 | six specs, id list, RJ-H34 | Sources/HaloModel/HaloCommandCatalog.swift, Tests/command-ids/halo.txt, Tests/HaloModelTests/HaloTransformCommandIDTests.swift, Tests/RealJobs/halo/key-turn/* | HaloTransformCommandIDTests | – | waiting (HA-m, HG-m) |
-| HT-3 | HT-u | 2 | drags preview via HaloLiveEdit, commit once, Escape cancels | Sources/HaloApp/HaloViewerHandles.swift, Tests/AppSnapshotTests/HaloViewerHandlesTests.swift | HaloViewerHandlesTests | #3811 | open |
-| HT-4 | HT-u | 3 | snapshots, render budget | Tests/AppSnapshotTests/HaloTransformSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloTransformTests.swift | knobDragInThreeBodies | #3811 | open |
-| HT-7 | HT-z | 4 | journey on live | UITests/HaloJourneyTests+Transform.swift | testRotateAndScaleInViewer | – | waiting |
-| HT-8 | HT-z | 5 | status built, feature-done | docs/blueprints/halo/features/transform.wave.json | waves render | – | waiting |
+| HT-6 | HT-m | 3 | six specs, id list, RJ-H34 | Sources/HaloModel/HaloCommandCatalog.swift, Tests/command-ids/halo.txt, Tests/HaloModelTests/HaloTransformCommandIDTests.swift, Tests/RealJobs/halo/key-turn/* | HaloTransformCommandIDTests; RJ-H34; Mutate 12/12 | #4415 | open (fast-lane) |
+| HT-3 | HT-u | 2 | drags preview via HaloLiveEdit, commit once, Escape cancels | Sources/HaloApp/HaloViewerHandles.swift, Tests/AppSnapshotTests/HaloViewerHandlesTests.swift | HaloViewerHandlesTests | #3811 | merged |
+| HT-4 | HT-u | 3 | snapshots, render budget | Tests/AppSnapshotTests/HaloTransformSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloTransformTests.swift | knobDragInThreeBodies | #3811 | merged |
+| HT-7 | HT-z | 4 | journey on live | UITests/HaloJourneyTests+Transform.swift | testRotateAndScaleInViewer | #4422 | open (stacked on #4415) |
+| HT-8 | HT-z | 5 | status built, feature-done | docs/blueprints/halo/features/transform.wave.json | waves render | #4422 | open (feature-done) |
 
 Wave 1: HT-a (HT-1+HT-2, one slice PR), alongside autosave-history HA-a. Wave 2: HT-5 stacked on HT-a; HT-3 once HT-a merges.
+
+Wave 3: HT-m as #4415 on dev 30120a8; HT-z (#4422) stacked on it at once, labelled feature-done.
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -41,4 +43,4 @@ Wave 1: HT-a (HT-1+HT-2, one slice PR), alongside autosave-history HA-a. Wave 2:
 
 ## Open
 - HT-5 box under a turned or scaled parent: the parent places the centre only; the box keeps the layer's own size and turn. Check in the critic panel; file a gap if the job needs nested transforms.
-- HG-m (gradient-fill #3417) blocked on GF-6; holds HA-6 and so HT-6.
+- HG-m and HA-m are on dev (autosave-history built, #4397), so HT-6 is unblocked; HT-m is #4415.
