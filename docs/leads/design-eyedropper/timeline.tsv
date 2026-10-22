@@ -66,3 +66,4 @@ utc	stage	event	ref	note
 2026-10-22T00:03Z	DY-u	dev green (be9aa35b Linux 39693644795); merged dev into #4081 branch (diff now 1 file +18; #4215 port is on dev), gate running
 2026-10-22T00:06Z	DY-u	#4081 gate CI: PASS, pushed f61b2623 (dev merged), Head moved; lane macOS build next
 2026-10-22T00:35Z	DY-u	#4081 macOS build 39698585137 queued; DT-m still waiting (DT-6 PR not open)
+2026-10-22T00:57Z	DY-u	#4081 macOS build 39698585137 green on f61b2623; merge on next lane sweep
