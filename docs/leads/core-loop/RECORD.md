@@ -78,7 +78,7 @@ Next: critic panel on journeys 39691305165 (32fcc2c4) filed 10 findings #4272-#4
 | #4264 | CL-probe | CI | journey | 1 | PR #4286 (timeline scroll bar strips; hide indicators) |
 | #4265 | CL-measure | CI | journey | 1 | PR #4285 (test pressed the empty label cell, not the ruler) |
 | #4266 | CL-probe | CI | journey | 1 | PR #4286 |
-| #4272 | CL-measure | major | mouse | 1 | fixer |
+| #4272 | CL-measure | major | mouse | 1 | PR #4287 (bare transport left at 440 pt; History drops; tight ~8 pt) |
 | #4273 | CL-measure | major | clarity | - | waits #4283 |
 | #4274 | CL-measure | major | job | - | held |
 | #4275 | CL-probe | major | job | - | held |
