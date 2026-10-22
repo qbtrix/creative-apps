@@ -31,3 +31,4 @@ utc	stage	event	ref	note
 2026-10-22T21:30Z	3	pr-opened	#4638	FP-a (FP-1, FP-2) contract and disabled checks
 2026-10-22T21:30Z	3	stage-start	wave 2	FP-u, FP-m stacked on FP-a; relaunched after container restart
 2026-10-22T21:33Z	heartbeat	FP-u, FP-m building; #4638 open, clean
+2026-10-22T21:42Z	pr-opened	FP-m #4644 (head 94cdfc3a, stacked on FP-a)
