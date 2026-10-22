@@ -2,9 +2,10 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a161a658a7-2jql · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: FR-u fixes merged, critic round 2 queued
+Stage: FR-halo and FR-flare follow-ups rebuilt
 Base: dev
-Next: critic round 2 on run 39765697963; FR-10b after 4293; FR-8b after 4341; FR-z after both
+Next: open FR-8b and FR-10b and the wave docs PR; critic round 2 on run 39765697963; FR-z after
+
 
 
 
@@ -26,6 +27,7 @@ Next: critic round 2 on run 39765697963; FR-10b after 4293; FR-8b after 4341; FR
 
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 11:50Z: #4293 (FR-10) and #4341 (FR-8) merged. FR-8b and FR-10b rebuilt on dev with only their own commits (squash-merged parents conflicted add-add). FR-8b: History merge resolved, anchors repointed, 14 files. FR-10b: gate PASS, 15 files (scene journey folded into FR-z, wave list to a docs PR). Mutate and gates running; both open next.
 - 11:12Z: no change. #4293 (macOS build) and #4341 waiting in the lane, both clean; scoped suiteui run 39765697963 still queued (23 runs queued repo-wide).
 - 10:49Z: #4373 and #4375 merged at 10:38Z (FR-u findings 4359-4369 closed, 0 FR findings open). Critic round 2 waits for scoped suiteui run 39765697963 at 5da8c3294 (queued). #4293 rebased head f87c2e98 in macOS build 397634319. #4341 in lane, clean.
 - 10:25Z: #4293 needs-rebase resolved (golden list-commands merged by command id, clean), gate PASS + AfterGlowCLITests pass, pushed f87c2e98, Head moved. #4341/#4373/#4375 waiting in lane.
