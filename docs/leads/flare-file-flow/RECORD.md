@@ -85,3 +85,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T10:29Z: #4387 open, labels fast-lane+feature-done, no needs-fix/needs-rebase. Lane's macOS build (flare) run 39762231867 queued since 10:19Z (blocked poll 1). No file-flow findings open (Flare findings #3506/#3502 are svg-import). No new comments on #3482.
 - 2026-10-22T10:52Z: #4387 unchanged; macOS build 39762231867 still queued since 10:19Z (blocked poll 2). No new comments, no file-flow findings.
 - 2026-10-22T11:14Z: #4387 macOS build 39762231867 still queued (blocked poll 3). Rule 23: asked the supervisor on #3482 to send #4387 through the local Mac gate.
+- 2026-10-22T11:38Z: Supervisor (11:18Z): #4387 is on their local Mac gate and merges on pass; post Belt-Slice-Done FL-m/FL-z on the first green dev Linux check containing it; stop polling until then. Branch head moved to 1a4cd2b (merge of dev into fl4, not mine); the lane dispatched a macOS build on it. fl4 fast-forwarded.
