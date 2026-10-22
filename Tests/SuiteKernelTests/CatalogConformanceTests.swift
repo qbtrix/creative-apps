@@ -95,19 +95,21 @@ enum BadExample: BrokenLaw {
 
     /// The fixture has no steps, so `history.jump`'s example refuses as unavailable, the filter the apps' laws use; its
     /// Rect 1 has no stroke, so the stroke edits refuse too, and on a stroked copy only `stroke.add` and the jump do.
+    /// The kernel's `transform.flip` is titled Flip while its step names the axis, tolerated as in Photo's laws.
     @Test func theFakeConforms() {
         let jump = "history.jump: exampleRuns: the example refused on the fixture: history.jump is unavailable: There are no steps yet."
+        let flip = "transform.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\""
         let edits = ["cap", "color", "dash", "join", "remove", "trim", "width"].map {
             "stroke.\($0): exampleRuns: the example refused on the fixture: stroke.\($0) is unavailable: Add a stroke first."
         }
-        #expect(CatalogConformance.check(FakeCanvasDocument.self, fixture: .fixture).sorted() == ([jump] + edits).sorted())
+        #expect(CatalogConformance.check(FakeCanvasDocument.self, fixture: .fixture).sorted() == ([jump, flip] + edits).sorted())
         let fixture = FakeCanvasDocument.fixture
         var rects = fixture.rects
         rects[0].stroke = VectorStroke()
         let stroked = FakeCanvasDocument(rects: rects, selection: 1, recents: fixture.recentFiles)
         let add = "stroke.add: exampleRuns: the example refused on the fixture: stroke.add is unavailable: The layer already has a stroke."
         let problems = CatalogConformance.check(FakeCanvasDocument.self, fixture: stroked)
-        #expect(problems.sorted() == [add, jump].sorted(), "\(problems)")
+        #expect(problems.sorted() == [add, jump, flip].sorted(), "\(problems)")
     }
 
     @Test func anEditThatRecordsNoStepFails() { expectFails(NoStep.self, naming: "item.append") }

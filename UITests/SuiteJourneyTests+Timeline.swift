@@ -102,27 +102,18 @@ extension SuiteJourneyTests {
         XCTAssert(ntsc.waitForExistence(timeout: 5), "the rate menu has no 29.97 fps")
         ntsc.click()
         expectLookLog("rate 29.97 fps", log)
-        // 2. Scrub to frame 1800: a ruler click says where frames sit (2 pt a frame); the wheel brings 1800 into view.
+        // 2. Scrub to frame 1800 through the visible Playhead Frame field: click it, type 1800, Return (#4597).
+        // No wheel: a mouse with a plain wheel can't scroll sideways, and Fit at 2 pt a frame can't show 1800.
         let target = 1_800
-        var sign: CGFloat = -1
-        var gap = Int.max
-        for _ in 0..<16 {
-            if rateFrame(log) == target { break }
-            ruler.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click()
-            guard lookWait({ self.rateFrame(log) != nil }), let mid = rateFrame(log) else { break }
-            let x = ruler.frame.width / 2 + CGFloat(target - mid) * 2
-            if x > 12 && x < ruler.frame.width - 12 {
-                ruler.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: x, dy: ruler.frame.height / 2)).click()
-                continue
-            }
-            // Which way a wheel delta goes is the runner's setting: one that took us no nearer flips it.
-            if abs(target - mid) >= gap { sign = -sign }
-            gap = abs(target - mid)
-            let away = min(abs(x - ruler.frame.width / 2), 4_000)
-            ruler.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 3))
-                .scroll(byDeltaX: sign * (target > mid ? away : -away), deltaY: 0)
-            RunLoop.current.run(until: Date().addingTimeInterval(0.3))
-        }
+        let field = gallery.element("suite.gallery.timeline.frame")
+        XCTAssert(field.waitForExistence(timeout: 5), "no playhead frame field (suite.gallery.timeline.frame)")
+        field.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click()
+        Thread.sleep(forTimeInterval: 0.4)
+        gallery.press(.rightArrow, .command)
+        gallery.press(.leftArrow, [.command, .shift])
+        gallery.app.typeText("\(target)")
+        gallery.press(.return)
+        XCTAssert(lookWait { self.rateFrame(log) == target }, "typing 1800 logged \(lookLastLine(log))")
         XCTAssertEqual(rateFrame(log), target, "the playhead never reached frame 1800")
         expectLookLog("scrub 1800", log)
         // 3. The readout reads drop-frame timecode: minute 1 skips its frames 00 and 01.
@@ -133,6 +124,9 @@ extension SuiteJourneyTests {
         let named = gallery.element("suite.gallery.timeline.readout")
         XCTAssert(named.waitForExistence(timeout: 5), "no readout (suite.gallery.timeline.readout)")
         XCTAssert(named.label.contains("hours:minutes:seconds;frames"), "the readout is labelled \(named.label)")
+        // One label means one thing: only the unit chip is titled "Timecode"; the readout reads "Playhead" (#4599).
+        let titled = gallery.app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Timecode'"))
+        XCTAssertLessThanOrEqual(titled.count, 1, "\(titled.count) elements are titled Timecode, not just the unit chip")
         // 5. Reopen the menu: 29.97 fps carries the check, and the shot shows it (#4369).
         menu.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click()
         let checked = gallery.app.menuItems["29.97 fps"].firstMatch
