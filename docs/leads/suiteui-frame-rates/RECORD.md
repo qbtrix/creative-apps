@@ -2,9 +2,10 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a161a658a7-2jql · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: FR-flare, FR-halo, FR-u in lane
+Stage: FR-u fixes merged, critic round 2 queued
 Base: dev
-Next: open FR-10b after 4293, FR-8b after 4341; FR-u critic round 2 after 4373 and 4375
+Next: critic round 2 on run 39765697963; FR-10b after 4293; FR-8b after 4341; FR-z after both
+
 
 
 
@@ -24,6 +25,7 @@ Next: open FR-10b after 4293, FR-8b after 4341; FR-u critic round 2 after 4373 a
 
 ## Status now
 Run act-1a161a658a7-2jql, status at 2026-10-22T07:00Z; this block supersedes the Task table's PR/state columns.
+- 10:49Z: #4373 and #4375 merged at 10:38Z (FR-u findings 4359-4369 closed, 0 FR findings open). Critic round 2 waits for scoped suiteui run 39765697963 at 5da8c3294 (queued). #4293 rebased head f87c2e98 in macOS build 397634319. #4341 in lane, clean.
 - 10:25Z: #4293 needs-rebase resolved (golden list-commands merged by command id, clean), gate PASS + AfterGlowCLITests pass, pushed f87c2e98, Head moved. #4341/#4373/#4375 waiting in lane.
 - 09:55Z: #4293's macOS build passed (09:12Z); it waits for the lane's batch. #4341/#4373/#4375 builds still queued (25 queued repo-wide). Nothing red.
 - 09:33Z: no change: #4293, #4341, #4373, #4375 all wait on lane macOS builds; 27 runs queued repo-wide for macOS runners. Nothing red, nothing for the lead to build (FR-z held by findings, FR-10b/FR-8b by parents).
