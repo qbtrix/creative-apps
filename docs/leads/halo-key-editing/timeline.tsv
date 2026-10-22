@@ -85,3 +85,4 @@ utc	stage	event	ref	note
 2026-10-22T03:38Z	question	blocked 3/3 (build 39712739074 queued since 02:41Z; #3499 unchanged): asked supervisor on #3536 whether KE-7 waits for #3499, ships standalone, or becomes a gap.
 04:25Z	decision	supervisor: option 3; KE-7 -> gap #4284 (waits #3499)
 04:25Z	pr	KE-8 #4305 a4a76f445 (feature-done)
+04:31Z	poll	#4235 macOS build 39712739074 green, awaiting lane merge; #4305 clean, awaiting lane
