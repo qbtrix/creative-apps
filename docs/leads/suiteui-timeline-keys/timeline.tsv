@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 2026-10-22T02:03:05Z	3	poll	#4258	fix PR Linux green, macOS build queued for a runner since 01:29; our PRs hold; cross-line waits null
 2026-10-22T02:33:21Z	3	poll	#4185 #4191	TK-5 and TK-u held only by dev-red #3856; ratchet passes on dev b5a6e7e0a; TK-6 still waits on AJ/TS/AN-halo
 2026-10-22T02:44:03Z	check	Linux green on held heads; #4184 #4185 #4191 #4299 queued for lane macOS build
+2026-10-22T02:55:32Z	check	Head markers moved on #4184 #4185 #4191; #4299 open, awaiting lane macOS build; DS-6 held
