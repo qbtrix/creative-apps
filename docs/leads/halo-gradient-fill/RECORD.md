@@ -94,3 +94,15 @@
 - Scoped halo run 39720068263 (on dev 6e19f406, which contains 82352f0b) is queued. When it goes green: Belt-Slice-Done HG-u and Mac-Finish-Wanted HG-u.
 - #4216 (HG-m, 5f0a274): macOS build 39712692785 green; waiting for a lane batch.
 - KE-z is still `planned`, so HG-9 waits.
+
+### 04:55Z: HG-m merged, HG-z opened
+- #4216 (HG-m) merged into dev at 04:17Z as 83eb2e41 (batch of 6, Linux run 39719953891).
+- Both HG-u and HG-m are in dev 71987f72. Halo-scoped run 39720068263 (dev 6e19f406, HG-u only) and full CI 39722978870 (71987f72, both) are queued.
+- CL-z and KE-z are built, so HG-9 is unblocked.
+- HG-z is PR #4318 (branch halo-gradient-live, head cbda7a56), labels `fast-lane` and `feature-done`:
+  - HG-8: the journey on live (first commit).
+  - HG-9: halo.md Layers row, undo names, tier-2 row; wave.json `built` and #3417.
+  - `scripts/ci --changed` and waves both passed.
+- Next:
+  - Belt-Slice-Done for HG-u (with Mac-Finish-Wanted) and HG-m, once a green halo or full run contains them.
+  - Critics, then HG-z through the lane, then Belt-Contact-Sheet.

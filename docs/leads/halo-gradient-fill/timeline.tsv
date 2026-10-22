@@ -74,3 +74,4 @@ utc	stage	event	ref	note
 2026-10-22T03:39Z	poll	HG-m	macOS build still queued
 2026-10-22T03:43Z	check-in	HG-u waits on batch; HG-m macOS build queued
 2026-10-22T04:14Z	merged	HG-u #4207 merged 82352f0b; halo run 39720068263 queued; HG-m built green, awaits batch
+2026-10-22T04:55Z	opened	HG-m #4216 merged 83eb2e41; HG-z PR #4318 head cbda7a56 (HG-8+HG-9)
