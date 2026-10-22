@@ -37,13 +37,11 @@ extension PhotoWorkspace {
         }
     }
 
-    /// `mask` of `layer` after `change`; the pixels are the layer's own after
-    /// every change but a crop. A flip or a transform is PV-2's and PV-7's to follow.
+    /// `mask` of `layer` after `change` (a flip or transform is PV-2's and PV-7's), fitted to `pixels` once changed.
     private static func moved(_ mask: PixelBuffer, _ change: LayerGeometryChange, _ layer: PhotoLayer,
                               _ pixels: TiledPixels?) -> PixelBuffer {
         switch change {
         case .cropped(let crop):
-            // Merge Down sends its new bounds after the pixels changed: keep the mask the pixels' size.
             if let pixels, pixels.width != mask.width || pixels.height != mask.height { return fitted(mask, pixels) }
             let rect = PixelRect(x: layer.offsetX, y: layer.offsetY, width: mask.width, height: mask.height)
             guard let kept = rect.intersection(crop),
@@ -147,7 +145,6 @@ extension PhotoWorkspace {
     private mutating func dropMask(_ at: Int) {
         masks[layers[at].id] = nil
         layers[at].hasMask = false
-        layers[at].isMaskEnabled = true
         editsMask = false
         touch(.all)
     }
