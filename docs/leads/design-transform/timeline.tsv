@@ -73,3 +73,4 @@ utc	stage	event	ref	note
 2026-10-22T01:29Z	DT-m	mac-green	#4255	39700883014
 2026-10-22T01:57Z	DT-m	linux-red-dev	#4255	waits #4258
 2026-10-22T01:57Z	DT-u	mac-green	#4254	39700862805
+2026-10-22T02:29Z	DT-m	merge-dev	#4255	f5833163
