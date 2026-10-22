@@ -77,3 +77,4 @@ utc	stage	event	ref	note
 2026-10-22T02:59Z	DT-u	merge-dev	#4254	e62d759d
 2026-10-22T03:26Z	DT-u	heartbeat	#4254	mac build queued
 2026-10-22T03:52Z	DT-m	mac-green	#4255	f5833163
+2026-10-22T04:17Z	DT-u	heartbeat	#4254	waiting batch
