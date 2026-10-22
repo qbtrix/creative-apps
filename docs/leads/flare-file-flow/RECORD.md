@@ -14,6 +14,7 @@ Base: 8c55f0bf9 (origin/dev)
 - 16:33Z check-in: no new comments on #3482 (closed); no new Flare findings since 16:04Z. Waiting for `Belt released this run.`
 - 17:00Z check-in: no new comments on #3482 (closed); no new Flare findings since 16:30Z. Waiting for `Belt released this run.`
 - 17:27Z check-in: no new comments on #3482 (closed); no new Flare findings since 16:57Z. Waiting for `Belt released this run.`
+- 18:2xZ check-in: finding #4604 (FLJ1 Open Recent missed Bounce.flare; Flare never seeded -SuiteFixture into the live store) plus FlareMenuJourneys File order (Open Sample before Open Recent, from FL-2): fix round 1 in PR #4611 (seed via FlareLaunch+Kernel, Open Sample before .saveItem), CI --changed PASS, mutate 3/3. #4605/#4606 belong to other features.
 Next: none; all slices done and the contact sheet is posted. Wait for `Belt released this run.`
 
 Loop: v3 (the packet has a `## Slices` table).
