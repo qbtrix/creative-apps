@@ -59,7 +59,11 @@ final class HaloPerfJourneyTests: XCTestCase {
         }
         halo.shot("perf-viewer-drag")
         guard let document = halo.perf() else { return }
-        halo.expectValid(document, series: "viewer-drag")
+        // The floor is 60 for every leg, not 60 for the whole series (#4450).
+        let total = document.latency["viewer-drag"]?.count ?? 0
+        XCTAssert(
+            total >= Journey.minimumSamples * legs,
+            "viewer-drag has \(total) samples over \(legs) legs, under \(Journey.minimumSamples * legs): its numbers mean nothing")
         // Each sample belongs to the last leg started before its event.
         let times = document.samples.filter { $0.series == "viewer-drag" }.map(\.eventTime)
         let perLeg = starts.indices.map { leg in
