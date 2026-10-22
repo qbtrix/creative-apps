@@ -95,3 +95,4 @@ utc	stage	event	ref	note
 2026-10-22T10:45Z	poll	#4357 build 39760889343 still queued; Belt nudge named lead/eyedropper + lead/stroke-style (SuiteUI, other runs); asked supervisor on #3438	#3438	-
 2026-10-22T11:05Z	stage	#4376 merged DY-m in (c27bcab1, gate PASS), retargeted to dev; both PRs in the lane; run ends per supervisor 10:47Z on #3438	#4376	-
 2026-10-22T11:42Z	poll	Belt nudge after run end. #4357 lane macOS build 39760889343 green 11:35Z (next sweep merges it); #4376 build 39768493260 dispatched 11:09Z. Run stays ended per supervisor 10:47Z on #3438; relaunch owes slice-done, DY-z critics, contact sheet	#4357	-
+2026-10-22T13:00Z	merged	#4357 (DY-m) merged 11:55Z; #4376 (DY-z) merged 12:45Z as 1c85591f7. Full CI 39781775747 on dev 1a518080 (contains both) pending. Run stays ended; relaunch posts slice-done and contact sheet	#4357 #4376	-

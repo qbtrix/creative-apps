@@ -2,7 +2,7 @@
 
 Issue: #3438 · Packet: docs/blueprints/design/features/eyedropper.md
 Run: act-1a1627ce3b4-ayhz · Session: claude/feature-lead-playbook-6guwwp · Started: 2026-10-22T07:24Z (prior runs act-1a1605b0534-rn47, act-1a15e909498-4bkk, act-1a15abb305f-lc8g)
-Stage: DY-5 merged (#4356, 09:59Z, 02d2e5be). #4357 (DY-6) merged dev in (bf4d0b8c, scripts/ci --changed PASS), retargeted to dev and waiting on the lane; #4376 (DY-z) merged DY-m in (c27bcab1, scripts/ci --changed PASS) and was retargeted to dev at 11:05Z. Both PRs are in the lane. Run ended at 11:05Z per the supervisor's 10:47Z answer on #3438 (the lane lands them; a relaunch posts slice-done and the contact sheet)
+Stage: DY-5 merged (#4356, 09:59Z, 02d2e5be). #4357 (DY-6) merged dev in (bf4d0b8c, scripts/ci --changed PASS), retargeted to dev and waiting on the lane; #4376 (DY-z) merged DY-m in (c27bcab1, scripts/ci --changed PASS) and was retargeted to dev at 11:05Z. Both PRs merged: #4357 at 11:55Z, #4376 at 12:45Z as 1c85591f7; full CI https://github.com/qbtrix/creative-apps/actions/runs/39781775747 on dev 1a518080 contains both. Run ended at 11:05Z per the supervisor's 10:47Z answer on #3438 (the lane lands them; a relaunch posts slice-done and the contact sheet)
 Base: 5bec8089 (origin/dev); main verified at 0dd23d65
 Next: next lead (relaunched by the supervisor after #4357 and #4376 merge): Belt-Slice-Done DY-m and DY-z (and Mac-Finish-Wanted DY-z) on a green design or full run containing their merges; run the critic panel for DY-z; post the contact sheet on #3438; end the run
 
@@ -12,7 +12,7 @@ Next: next lead (relaunched by the supervisor after #4357 and #4376 merge): Belt
 | DY-a | Eyedropper tool on the palette; SampleTarget stubs | DY-1, DY-2 | MJ-DY | EY-a (done) | yes | 1 | merged (6f9c8928); round-1 fixes merged 45e8bd4d | – | wanted |
 | DY-u | loupe follows the pointer, click and Option-click picks; snapshots, budget | DY-3, DY-4 | J-DY | DY-a; EY-u (done) | yes | 2 | merged 6d7fcf14 (#3816); round 1 #3998 merged 97713e0d; round 2 #4081 | – | – |
 | DY-m | topmost visible colour; apply as one step; color.sample, color.pick, RJ-D34 | DY-5, DY-6 | MJ-DY | DY-a, transform:DT-m (met); EY-m (done) | no | 0 | #4356 merged; #4357 open | – | – |
-| DY-z | journey on live; built | DY-7, DY-8 | J-DY | DY-u, DY-m (in lane) | yes | 0 | in lane #4376 (dev, c27bcab1) | – | – |
+| DY-z | journey on live; built | DY-7, DY-8 | J-DY | DY-u, DY-m (in lane) | yes | 0 | merged #4376 (1c85591f7) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
