@@ -54,3 +54,4 @@ utc	stage	event	ref	note
 2026-10-22T03:07:35Z	check-in	lane	#4103	macOS builds queued on lane; nothing merged since 02:55Z; pre-gating next stacked slice
 2026-10-22T03:28:53Z	check-in	lane	#4103	all 7 redev PRs pushed + Head moved; SM-3 pre-gated PASS; lane macOS builds queued/in progress
 2026-10-22T03:52:18Z	lane	heartbeat	-	RP-3 #4103 macOS build queued; RP-3e/RP-5/RP-5b drafts wait
+2026-10-22T04:08:01Z	lane	heartbeat	-	CS-11 #4205 / RP-3 #4103 macOS builds queued; children stay draft until parents merge
