@@ -156,3 +156,4 @@ utc	stage	event	ref	note
 20:10Z	merge	#4607 SS-8 merged
 20:37Z	pr	#4630 C4 + #4631 status built (SS-10)
 21:01Z	heartbeat	#4630 #4631 open, lane sweep running
+21:26Z	merge	#4630 merged be18ab6; #4631 eligible
