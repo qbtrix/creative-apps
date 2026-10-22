@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: PH-a DONE. PH-m: #4618 (f14e9ffb, dev, fast-lane) awaiting lane; then Belt-Slice-Done PH-m on green dev Linux. PH-u: #4437 fixed (242be347: dev merged, Place menu from catalog spec place.image, CI PASS), awaiting lane build; #4438 now c51d4b2b (PH-u merged in), retarget to dev after #4437 merges. PH-z: #4649 (dca4566b) draft on PH-u2, merge PH-u2 in at retarget; PH-8 after. Gap candidates: SVG gradient flat, SVG strokes, no overshoot ease preset.
+Next: PH-a DONE. PH-m: all merged (#4618 e6eddf40 22:51Z); Belt-Slice-Done PH-m once a dev CI/Linux check run containing e6eddf40 has green Linux. PH-u: #4437 (242be347) needs-fix dropped, lane macOS build 39867066162 running; then retarget #4438 (c51d4b2b). PH-z: #4649 (dca4566b) draft on PH-u2, dirty, merge PH-u2 in at retarget; PH-8 after. Gap candidates: SVG gradient flat, SVG strokes, no overshoot ease preset.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
