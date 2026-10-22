@@ -1,6 +1,7 @@
 // DesignToolPaletteSnapshots.swift (eyedropper DY-2): Design's window on the `cards` fixture with the floating
 // tool palette showing every tool, the Eyedropper (I) last, disabled with its reason until DY-5 makes its click
-// pick. Writes design-tool-palette-light.png and design-tool-palette-dark.png. macOS only.
+// pick. Writes design-tool-palette-light.png and design-tool-palette-dark.png. The Shape and Eyedropper option
+// shots render the inspector panel alone: the window snapshot leaves its inspector column blank. macOS only.
 #if canImport(AppKit)
 import DesignModel
 import SuiteUI
@@ -40,7 +41,7 @@ import Testing
         #expect(model.tool == .shape)
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                DesignEditor(model: model, zoom: 0.5),
+                OptionsPanel(model: model),
                 name: "design-shape-options-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }
@@ -57,7 +58,7 @@ import Testing
         model.setSampleTarget(toStroke: true)
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                DesignEditor(model: model, zoom: 0.5),
+                OptionsPanel(model: model),
                 name: "design-eyedropper-options-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }
@@ -75,9 +76,21 @@ import Testing
         #expect(model.sampleSize == .point)
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                DesignEditor(model: model, zoom: 0.5),
+                OptionsPanel(model: model),
                 name: "design-eyedropper-point-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
+    }
+}
+
+/// The inspector at the editor's panel width. The window snapshot leaves the split view's inspector column
+/// blank, so a tool's options are shot here, where they draw.
+private struct OptionsPanel: View {
+    let model: DesignWorkspace
+    var body: some View {
+        DesignInspector(model: model, perform: { _ in })
+            .frame(width: SuiteSize.editorPanelWidth)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding(SuiteSpacing.xxl)
     }
 }
 #endif
