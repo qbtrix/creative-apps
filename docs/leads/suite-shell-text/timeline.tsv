@@ -73,3 +73,4 @@ utc	stage	event	ref	note
 2026-10-22T11:24:10Z	check	ST-live	#4161	full CI 39763986545 cancelled by newer run; 39769927851 (a332b3e27) pending; #4337 macOS build 39766466418 dispatched
 2026-10-22T11:55:16Z	check	ST-z	#4337	macOS build 39766466418 success, awaiting lane sweep; full CI 39769927851 still pending
 2026-10-22T12:55:11Z	stage	ST-z	#4350	#4337 merged abca9ff2b; #4350 marked ready; full CI 39781775747 (1a518080d) pending
+2026-10-22T13:26:11Z	check	ST-z	#4350	#4350 open, ready, in lane queue; full CI 39781775747 (1a518080d) and scoped suite 39785758185 (179421f8d) queued for macOS runners
