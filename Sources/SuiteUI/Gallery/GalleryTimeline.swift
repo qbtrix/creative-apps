@@ -24,8 +24,13 @@
 // has focus) share one closure that picks every key and logs `select-all`
 // (TSA-1). A FrameRateMenu (`suite.gallery.timeline.rate`, logs
 // `rate 29.97 fps`) sets the page's rate, 24 fps unless the fixture names
-// one; a caption beside it, and the hidden `suite.gallery.timeline.timecode`
-// readout, show the playhead's timecode at that rate (frame-rates FR-u). The
+// one; a "Timecode" readout beside it (SuiteFont.timecode in primary text on
+// a row capsule, its tooltip and VoiceOver label TimelineTime.readoutHelp),
+// and the hidden `suite.gallery.timeline.timecode` readout, show the
+// playhead's timecode at that rate, whatever the unit chips say; the strip
+// gets the rate too, so its ruler and pill agree (frame-rates FR-u). The
+// strip (`suite.gallery.timeline.strip`) is clipped to its room and the log
+// keeps its line, so neither draws over the other. The
 // playhead and the log live in a GalleryTimelineFeed only their reader views
 // observe, so a scrub never runs the page's body.
 import Observation
@@ -43,7 +48,7 @@ enum GalleryTimeline {
 struct GalleryTimelineFixture {
     let duration: Int
     let fps: Int
-    let frameWidth: CGFloat
+    var frameWidth: CGFloat
     var playhead: Int
     let toolbar: Bool
     let order: [String]
@@ -152,12 +157,7 @@ struct GalleryTimelinePage: View {
                     .suiteControl(id: "gallery.timeline.selectAll", enabled: true, reason: nil)
                 FrameRateMenu(rate: rate) { setRate($0) }
                     .suiteControl(id: "suite.gallery.timeline.rate", enabled: true, reason: nil)
-                GalleryFeedReader(feed: feed) { feed in
-                    Text(TimelineTime.label(frame: feed.playhead, rate: rate, unit: .timecode))
-                        .font(SuiteFont.caption)
-                        .monospacedDigit()
-                        .foregroundStyle(SuiteColor.secondaryText)
-                }
+                GalleryFeedReader(feed: feed) { feed in timecodeReadout(feed.playhead, rate: rate) }
             }
             // No outer ScrollView: the strip is offered the room between the
             // switches and the log, capped below its ideal height on the long
@@ -166,6 +166,9 @@ struct GalleryTimelinePage: View {
             GalleryFeedReader(feed: feed) { feed in
                 strip(tracks: tracks, playhead: feed.playhead, rate: rate, unit: unit, workArea: workArea, toolbar: toolbar)
             }
+            .clipped()
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("suite.gallery.timeline.strip")
             .layoutPriority(1)
             if noTracks {
                 Text("No tracks yet.")
@@ -200,7 +203,7 @@ struct GalleryTimelinePage: View {
     ) -> some View {
         TimelineStrip(
             tracks: tracks, duration: fixture.duration, frameWidth: fixture.frameWidth, playhead: playhead,
-            unit: unit, fps: rate.nominal, workArea: workArea, toolbar: toolbar,
+            unit: unit, rate: rate, workArea: workArea, toolbar: toolbar,
             onScrub: { feed.scrub(to: $0) },
             onSelectKeyframe: { id, _ in selected = id },
             onSelectTrack: { id in
@@ -244,12 +247,36 @@ struct GalleryTimelinePage: View {
         }
     }
 
+    /// The playhead's timecode at `rate`, labelled as timecode so it never reads as the unit chips' value.
+    private func timecodeReadout(_ playhead: Int, rate: FrameRate) -> some View {
+        let timecode = TimelineTime.label(frame: playhead, rate: rate, unit: .timecode)
+        return HStack(spacing: SuiteSpacing.xs) {
+            Text("Timecode")
+                .font(SuiteFont.caption)
+                .foregroundStyle(SuiteColor.textSecondary)
+            Text(verbatim: timecode)
+                .font(SuiteFont.timecode)
+                .foregroundStyle(SuiteColor.textPrimary)
+                .padding(SuiteInset.pill)
+                .background { Capsule().fill(SuiteColor.row) }
+        }
+        .padding(.leading, SuiteSpacing.s)
+        .fixedSize()
+        .help(TimelineTime.readoutHelp(rate: rate))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: TimelineTime.readoutHelp(rate: rate)))
+        .accessibilityValue(Text(verbatim: timecode))
+        .accessibilityIdentifier("suite.gallery.timeline.readout")
+    }
+
     private func logView(_ log: [String]) -> some View {
         let text = log.joined(separator: "\n")
         return Text(log.last ?? "Nothing yet")
             .font(SuiteFont.caption)
             .foregroundStyle(SuiteColor.secondaryText)
             .lineLimit(1)
+            // Its one line always: the strip above never takes it.
+            .fixedSize(horizontal: false, vertical: true)
             .accessibilityLabel(text)
             .accessibilityValue(text)
             .accessibilityIdentifier("suite.gallery.log")

@@ -2,7 +2,7 @@
 // folder (suite-contracts SC-5b, SC-5c). It is not a preview; recents is
 // live and writes recents.json there, creating and home are live (HM-2a),
 // preferences is live over preferences.json (onboarding OB-9), onboarding is
-// SuiteOnboarding (OB-12), pasteboard is SuitePasteboardCoding (clipboard-interop CB-4); each other
+// SuiteOnboarding (OB-12), pasteboard is SuitePasteboardCoding (clipboard-interop CB-4), text is LiveText (shell-text ST-8); each other
 // slotted member is pending with its "<What> isn't available yet."
 // sentence, and each throwing one throws notAvailable with that sentence.
 // `animations` and `updates` are the fakes until `with(animations:updates:)`
@@ -62,11 +62,11 @@ import Testing
         let pending = makeLive().services.pending
         var expected = SuiteServices.slotFeatures.mapValues(SuiteIdentity.notConnected)
         let live = ["recents", "creating", "home", "switching", "sending", "receiving", "preferences", "onboarding",
-                    "pasteboard"]
+                    "pasteboard", "text"]
         for member in live { expected[member] = nil }
         #expect(pending == expected)
-        #expect(pending.count == 8)
-        #expect(pending["text"] == "Text measuring and drawing isn't available yet.")
+        #expect(pending.count == 7)
+        #expect(pending["text"] == nil)
         #expect(pending["media"] == "Movie and image export isn't available yet.")
         #expect(pending["thumbnails"] == "Opening recent work isn't available yet.")
         #expect(pending["home"] == nil)
@@ -87,7 +87,7 @@ import Testing
                                     "onboarding", "thumbnails", "home", "media", "text"]
         #expect(Set(SuiteServices.slotFeatures.keys) == members)
         let live: Set<String> = ["recents", "creating", "home", "switching", "sending", "receiving", "preferences",
-                                  "onboarding", "pasteboard"]
+                                  "onboarding", "pasteboard", "text"]
         #expect(Set(pending.keys).union(live) == members)
     }
 

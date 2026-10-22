@@ -19,9 +19,13 @@ edit.redo
 edit.select-all
 edit.undo
 file.clear-recent
+file.drop
 file.new
 file.open
+file.open-in
+file.open-recent
 file.open-sample
+file.recent
 file.save
 file.save-as
 fill.angle
@@ -81,6 +85,7 @@ scene.remove
 scene.rename
 scene.reorder
 scene.set-canvas
+scene.set-frame-rate
 scene.timing
 scenes.add
 scenes.remove

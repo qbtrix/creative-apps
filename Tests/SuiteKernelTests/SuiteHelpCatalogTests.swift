@@ -1,6 +1,6 @@
 // SuiteHelpCatalogTests.swift (report-problem RP-1, written first; RP-5 turns the runs on): the suite's Help
-// catalog keeps its ledger now; its runs hand the provider's report and notes back, and Welcome runs only in
-// the launcher. Linux-safe.
+// catalog keeps its ledger; its runs hand the provider's report and notes back and keep the answer for save, and
+// Welcome runs only in the launcher. Linux-safe.
 import Foundation
 import SuiteKernel
 import Testing
@@ -33,22 +33,35 @@ struct EchoHelp: HelpProviding {
         #expect(report?.params.validate(.object(["app": .string("word")])).isEmpty == false)
     }
 
-    @Test(.disabled("waits on RP-5")) func reportReturnsTheProvidersReport() throws {
+    @Test func reportReturnsTheProvidersReport() throws {
         var doc = SuiteHelpDocument(app: "launcher", provider: EchoHelp())
         let out = try catalog.run("help.report-problem", params: .object(["app": .string("photo"), "note": .string("hi")]), on: &doc)
         #expect(out.result == .object(["app": .string("photo"), "text": .string("hi")]))
         #expect(out.undoStep == nil)
+        #expect(doc.answer == out.result, "the run keeps its answer for save")
     }
 
-    @Test(.disabled("waits on RP-5")) func reportDefaultsToTheDocumentsApp() throws {
+    @Test func reportDefaultsToTheDocumentsApp() throws {
         var doc = SuiteHelpDocument(app: "halo", provider: EchoHelp())
         let out = try catalog.run("help.report-problem", params: .object([:]), on: &doc)
         #expect(out.result == .object(["app": .string("halo"), "text": .string("")]))
     }
 
-    @Test(.disabled("waits on RP-5")) func betaNotesReturnsTheProvidersNotes() throws {
+    @Test func betaNotesReturnsTheProvidersNotes() throws {
         var doc = SuiteHelpDocument(app: "photo", provider: EchoHelp())
         #expect(try catalog.run("help.beta-notes", params: .object([:]), on: &doc).result == EchoHelp().betaNotes())
+    }
+
+    @Test func saveWritesTheAppAndTheLastAnswer() throws {
+        var doc = SuiteHelpDocument(app: "photo", provider: EchoHelp())
+        _ = try catalog.run("help.report-problem", params: .object(["note": .string("n")]), on: &doc)
+        let saved = try JSONValue(json: try doc.save())
+        #expect(saved == .object(["app": .string("photo"), "answer": .object(["app": .string("photo"), "text": .string("n")])]))
+    }
+
+    @Test func welcomeOpensNothingHeadless() {
+        var doc = SuiteHelpDocument(app: "launcher", provider: EchoHelp())
+        #expect(throws: CatalogError.self) { try catalog.run("help.welcome", params: .object([:]), on: &doc) }
     }
 
     @Test func welcomeRunsOnlyInTheLauncher() {

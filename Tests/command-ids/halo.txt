@@ -36,6 +36,8 @@ fill.stop-color
 fill.stop-move
 fill.stop-remove
 fill.type
+history.jump
+history.read
 inspector.end-property-scrub
 inspector.set-blend-mode
 inspector.set-parent
@@ -59,6 +61,15 @@ render.frame
 render.open-sheet
 render.start
 shape.draw
+stroke.add
+stroke.cap
+stroke.color
+stroke.dash
+stroke.join
+stroke.read
+stroke.remove
+stroke.trim
+stroke.width
 text.end-size-scrub
 text.set
 text.set-color

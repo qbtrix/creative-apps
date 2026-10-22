@@ -1,0 +1,30 @@
+[
+  {
+    "label": "launcherNamedOnce",
+    "file": "Sources/SuiteModel/Help/ProblemReportOutput.swift",
+    "find": "report.app == SuiteApp.launcher.displayName ? \"\" : report.app",
+    "replace": "report.app",
+    "tests": "ProblemReportOutputTests"
+  },
+  {
+    "label": "noGapForMissingParts",
+    "file": "Sources/SuiteModel/Help/ProblemReportOutput.swift",
+    "find": ".filter { !$0.isEmpty }",
+    "replace": ".filter { _ in true }",
+    "tests": "ProblemReportOutputTests"
+  },
+  {
+    "label": "textUnchanged",
+    "file": "Sources/SuiteModel/Help/ProblemReportOutput.swift",
+    "find": "self.text = text",
+    "replace": "self.text = text + \"\\n\"",
+    "tests": "ProblemReportOutputTests"
+  },
+  {
+    "label": "safeFileName",
+    "file": "Sources/SuiteModel/Help/ProblemReportOutput.swift",
+    "find": "$0 == \"/\" || $0 == \":\" ? \"-\" : $0",
+    "replace": "$0",
+    "tests": "ProblemReportOutputTests"
+  }
+]

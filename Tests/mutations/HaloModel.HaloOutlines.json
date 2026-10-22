@@ -1,0 +1,5 @@
+[
+{"label": "trim sampled at frame 0, not the playhead", "file": "Sources/HaloModel/Live/HaloOutlines.swift", "find": "HaloKeyRules.value(p, of: layer, in: c, at: f)", "replace": "HaloKeyRules.value(p, of: layer, in: c, at: 0)", "tests": "HaloStrokeRenderTests"},
+{"label": "trim and dash skipped: the whole outline strokes", "file": "Sources/HaloModel/Live/HaloOutlines.swift", "find": "let painted = try? StrokeRules.paintedPath(shape, stroke)", "replace": "let painted = Optional(shape)", "tests": "HaloStrokeRenderTests"},
+{"label": "rings not bridged: only the first ring counts", "file": "Sources/HaloModel/Live/HaloOutlines.swift", "find": "points += ring + [start, anchor]", "replace": "if points.isEmpty { points += ring + [start, anchor] }", "tests": "HaloStrokeRenderTests"}
+]

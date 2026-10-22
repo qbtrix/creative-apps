@@ -45,7 +45,7 @@ public struct FlareHeadless: HeadlessDocument {
         let o = try options.decode(NewOptions.self)
         var spec = NewDocumentSpec(preset: .web)
         spec.setSize(width: o.width ?? spec.width, height: o.height ?? spec.height)
-        (spec.fps, spec.durationFrames) = (o.fps ?? spec.fps, o.durationFrames ?? spec.durationFrames)
+        (spec.fps, spec.durationFrames) = (o.fps.map(FrameRate.init(whole:)) ?? spec.fps, o.durationFrames ?? spec.durationFrames)
         if let problem = spec.problem { throw CatalogError.failed(id: "new", message: problem) }
         var workspace = FlareWorkspace(services: .built)
         workspace.newDocument(spec)

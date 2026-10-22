@@ -67,7 +67,7 @@ func durationTextAtTheEdges(text: String, valid: Bool) {
     draft.durationText = "long"
     #expect(draft.problems == [
         "Enter a name.", "Width must be a whole number of pixels.", "Height must be a whole number of pixels.",
-        "Frame rate must be 24, 25, 30 or 60 fps.", "Duration must be a number of seconds.",
+        "Frame rate must be 12, 23.976, 24, 25, 29.97, 30, 50, 59.94 or 60 fps.", "Duration must be a number of seconds.",
     ])
 }
 
