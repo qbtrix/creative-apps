@@ -1,6 +1,7 @@
 // FlareTimelineEditTests.swift: inspector-timeline IT-3 acceptance on `.built`. Ball's summary key 24 dragged to 28 in
 // four one-frame steps is one "Undo Move Keyframe"; a drag onto 36 refuses and moves nothing; deleting 12 is one entry;
 // two frames inserted at 10 move 28 to 30 and one removed moves it to 29; a label set at 29 reads back and nil removes it.
+// key-select-all KS-1: Select All Keys picks every key of the edited owner, a hidden layer's too, with no undo step.
 import FlareCore
 @testable import FlareModel
 import Testing
@@ -133,5 +134,60 @@ struct FlareTimelineEditTests {
         #expect(w.timelineError != nil && w.document == nil)
         w.setLabel("hit")
         #expect(w.timelineError != nil && w.timelineLabels.isEmpty)
+    }
+
+    // key-select-all KS-1: Select All Keys picks every summary key of the edited owner, hidden layers too.
+
+    /// Every summary key the timeline shows, row by row in the owner's order, each row's frames in order.
+    private func shownKeys(_ w: FlareWorkspace) -> [KeyRef] {
+        w.timelineRows.flatMap { row in row.keyFrames.map { KeyRef(layerID: row.layerID, property: nil, frame: $0) } }
+    }
+
+    /// Bounce with Shadow and the keyed Ball both hidden: the hidden Ball's keys are still picked.
+    @Test func selectAllTakesHiddenLayers() {
+        var w = bounce()
+        w.toggleLayerFlag("shadow", .visible)
+        w.toggleLayerFlag("ball", .visible)
+        #expect(w.timelineRows.filter { !$0.isVisible }.map(\.layerID).sorted() == ["ball", "shadow"])
+        #expect(w.selectAllKeysHelp == nil)
+        w.selectKey(ballKey(12), extending: false)
+        w.selectAllKeys()
+        #expect(w.selectedKeys == shownKeys(w) && w.timelineError == nil)
+        #expect(Set(w.selectedKeys.map(\.layerID)) == Set(w.timelineRows.filter { !$0.keyFrames.isEmpty }.map(\.layerID)))
+        #expect(w.selectedKeys.filter { $0.layerID == "ball" }.map(\.frame) == [0, 12, 24, 36, 47])
+    }
+
+    @Test func selectAllRecordsNoUndoStepAndDeletesAsOne() {
+        var w = bounce()
+        w.selectAllKeys()
+        #expect(!w.canUndo && w.selectedKeys.count == shownKeys(w).count && !w.selectedKeys.isEmpty)
+        w.deleteSelection()
+        #expect(w.timelineRows.allSatisfy(\.keyFrames.isEmpty) && w.selectedKeys.isEmpty)
+        #expect(w.undoActionName == "Undo Delete Keyframe")
+        w.undo()
+        #expect(ballX(w) == [0, 12, 24, 36, 47] && !w.canUndo)
+    }
+
+    @Test func selectAllInEditedOwner() {
+        var w = FlareWorkspace(services: .built)
+        w.load(FlareFixtures.character)
+        w.editSymbol("wave")
+        w.selectAllKeys()
+        #expect(w.selectedKeys == [0, 12, 23].map { KeyRef(layerID: "hand", property: nil, frame: $0) })
+        // Back in the scene, whose own layers have no keys: the symbol's keys are not the scene's.
+        w.exitSymbol()
+        #expect(w.selectAllKeysHelp == FlareWorkspace.noKeysToSelect)
+    }
+
+    @Test func selectAllWithNoKeysRefusesWithItsHelp() {
+        var none = FlareWorkspace(services: .built)
+        #expect(none.selectAllKeysHelp == FlareLayerError.noDocument.message)
+        none.selectAllKeys()
+        #expect(none.timelineError == FlareLayerError.noDocument.message && none.selectedKeys.isEmpty)
+        var w = FlareWorkspace(services: .built)
+        w.load(FlareFixtures.empty)
+        #expect(w.selectAllKeysHelp == FlareWorkspace.noKeysToSelect)
+        w.selectAllKeys()
+        #expect(w.timelineError == "There are no keys to select." && w.selectedKeys.isEmpty && !w.canUndo)
     }
 }

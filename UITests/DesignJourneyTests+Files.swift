@@ -14,9 +14,9 @@
 // ⌘S reads "Saved" with no save panel, and the file is on disk. (The window's
 // edited dot waits on a SuiteUI modifier, #2861; until then "Edited" is the
 // state shown.) J14 draws on `cards` and presses ⌘W: the close prompt, an
-// NSAlert sheet (DesignClosePrompt), names "Untitled", the fixture's name;
+// NSAlert sheet (SuiteUI's unsaved guard), names "Untitled", the fixture's name;
 // Cancel (`design.close.cancel`) keeps the window; ⌘W again and Don't Save
-// (`design.close.dont-save`) closes it. A fresh, clean `cards` window closes
+// (`design.close.dontSave`) closes it. A fresh, clean `cards` window closes
 // on ⌘W with no alert.
 import XCTest
 
@@ -27,7 +27,7 @@ final class DesignFilesJourneyTests: XCTestCase {
     /// Desktop's row (collapsed when the file opens) and A's inside it (DesignFixtures.cards).
     static let desktopRow = "design.layer.node-1", rowA = "design.layer.node-2"
     static let xBar = "design.inspector.x", saveState = "design.status.save", undoID = "design.bar.undo"
-    static let cancelID = "design.close.cancel", dontSaveID = "design.close.dont-save"
+    static let cancelID = "design.close.cancel", dontSaveID = "design.close.dontSave"
 
     /// J13: ⌘Z in the X field undoes its typing, not the document; a draw reads Edited, ⌘S Saved, no panel.
     @MainActor func testUndoInTextFieldsAndDirtyState() throws {

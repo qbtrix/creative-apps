@@ -7,8 +7,10 @@
 // the CLI and an agent do. A refusal from a drag sample beeps (the drag goes
 // on); one from Begin, Commit, a row, a flip or Reset shows the window's
 // alert with the reason. On PT-1's stubs Begin and Cancel work and every edit
-// refuses until PT-5. PhotoTransformArea is the identity until Canvas Size
-// (PT-3) presents its sheet from it.
+// refuses until PT-5. Image > Canvas Size… (PT-3) opens CanvasSizeSheet from
+// PhotoTransformArea on the window's `canvasSizeDraft`; OK calls
+// `resizeCanvas(width:height:anchor:)`, whose refusal shows the alert (PT-1's
+// stub refuses until PT-6).
 import AppKit
 import PhotoModel
 import SuiteKernel
@@ -24,6 +26,16 @@ enum TransformIntent {
     case cancel
     /// One edit from the handles, the transform rows or a flip, as its catalog command.
     case kernel(SuiteKernel.TransformIntent)
+    /// Image > Canvas Size…: the sheet opens on the image's size, relative.
+    case canvasSize
+    /// A change in the Canvas Size sheet.
+    case canvasSizeDraft(CanvasSizeDraft)
+    /// The sheet's OK: the canvas grows or crops about the draft's anchor.
+    case resizeCanvas(CanvasSizeDraft)
+    /// The sheet's Cancel, or its dismissal.
+    case closeCanvasSize
+    /// A handle drag's release: the live transform goes back to the workspace (`perform` takes it first).
+    case endDrag
 }
 
 extension PhotoWindow {
@@ -37,22 +49,51 @@ extension PhotoWindow {
             model.cancelTransform()
         case .kernel(let edit):
             runTransform(edit)
+        case .canvasSize:
+            canvasSizeDraft = model.canvas.map { CanvasSizeDraft(old: $0, relative: true) }
+        case .canvasSizeDraft(let draft):
+            canvasSizeDraft = draft
+        case .resizeCanvas(let draft):
+            canvasSizeDraft = nil
+            resizeCanvas(draft)
+        case .closeCanvasSize:
+            canvasSizeDraft = nil
+        case .endDrag:
+            break
+        }
+    }
+
+    /// Canvas Size's OK; a refusal opens the alert.
+    private func resizeCanvas(_ draft: CanvasSizeDraft) {
+        let size = draft.newSize
+        do {
+            try model.resizeCanvas(width: size.width, height: size.height, anchor: draft.anchor)
+        } catch {
+            problem = PhotoProblem("The canvas can't be resized to \(size.width) × \(size.height).", Self.refusal(error))
         }
     }
 
     /// Runs one kernel transform through the catalog; a drag's refused sample
-    /// beeps, any other refusal opens the alert.
+    /// beeps, any other refusal opens the alert. A drag's samples run on the
+    /// live transform (LiveTransformCopy+Kernel.swift), which the window takes back once.
     private func runTransform(_ edit: SuiteKernel.TransformIntent) {
         let (id, params) = edit.command
+        if Self.isDragSample(edit) {
+            let shown = liveTransform.run(on: model, done: { takeStroke() }) {
+                if (try? PhotoWorkspace.catalog.run(id, params: params, on: &$0)) == nil { NSSound.beep() }
+            }
+            return renderer.show(shown, quietly: true)
+        }
         do {
             _ = try PhotoWorkspace.catalog.run(id, params: params, on: &model)
         } catch {
-            if Self.isDragSample(edit) {
-                NSSound.beep()
-            } else {
-                problem = PhotoProblem("The layer can't be transformed.", error.description)
-            }
+            problem = PhotoProblem("The layer can't be transformed.", error.description)
         }
+    }
+
+    /// Whether `intent` is one sample of a transform drag, which runs on the live transform.
+    nonisolated static func isTransformSample(_ intent: PhotoIntent) -> Bool {
+        if case .transform(.kernel(let edit)) = intent { isDragSample(edit) } else { false }
     }
 
     /// Whether `edit` is one sample of a drag (it carries a token).
@@ -85,10 +126,24 @@ extension PhotoWindow {
     }
 }
 
-/// The transform area's state, alerts and dialogs over the window.
+/// The transform area's state, alerts and dialogs over the window: the
+/// Canvas Size sheet while `canvasSize` is set.
 struct PhotoTransformArea: ViewModifier {
     let model: PhotoWorkspace
     let perform: PhotoPerform
+    /// The Canvas Size sheet's choices; nil while it is closed.
+    var canvasSize: CanvasSizeDraft?
 
-    func body(content: Content) -> some View { content }
+    func body(content: Content) -> some View {
+        content
+            .sheet(isPresented: Binding(get: { canvasSize != nil }, set: { if !$0 { perform(.transform(.closeCanvasSize)) } })) {
+                if let draft = canvasSize {
+                    CanvasSizeSheet(
+                        draft: draft,
+                        onDraft: { perform(.transform(.canvasSizeDraft($0))) },
+                        onResize: { perform(.transform(.resizeCanvas($0))) },
+                        onCancel: { perform(.transform(.closeCanvasSize)) })
+                }
+            }
+    }
 }

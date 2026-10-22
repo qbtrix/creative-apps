@@ -9,6 +9,8 @@
 // With no selection, or `help`, every control is disabled and says why;
 // `flipHelp` disables the flips alone. Identifiers `suite.transform.<row>`,
 // `suite.transform.flip-horizontal` and `suite.transform.flip-vertical`.
+// `FlipDirection.title` and `systemImage` are the flips' one name and symbol
+// (Apple's mirror symbols), shared by every inspector and menu that flips.
 import Foundation
 import SuiteKernel
 import SwiftUI
@@ -123,10 +125,23 @@ public struct TransformRows: View {
                                  onIntent: @escaping @MainActor (TransformIntent) -> Void) -> [ToolbarAction] {
         let why = reason(selection: selection, help: help) ?? flipHelp
         return [
-            ToolbarAction("Flip Horizontal", systemImage: "arrow.left.and.right", unavailableHelp: why,
-                          identifier: "suite.transform.flip-horizontal") { onIntent(.flip(.horizontal)) },
-            ToolbarAction("Flip Vertical", systemImage: "arrow.up.and.down", unavailableHelp: why,
-                          identifier: "suite.transform.flip-vertical") { onIntent(.flip(.vertical)) },
+            ToolbarAction(FlipDirection.horizontal.title, systemImage: FlipDirection.horizontal.systemImage,
+                          unavailableHelp: why, identifier: "suite.transform.flip-horizontal") { onIntent(.flip(.horizontal)) },
+            ToolbarAction(FlipDirection.vertical.title, systemImage: FlipDirection.vertical.systemImage,
+                          unavailableHelp: why, identifier: "suite.transform.flip-vertical") { onIntent(.flip(.vertical)) },
         ]
+    }
+}
+
+extension FlipDirection {
+    /// The flip's name in every inspector and Object or Image menu.
+    public var title: String { self == .horizontal ? "Flip Horizontal" : "Flip Vertical" }
+
+    /// The flip's SF Symbol in every inspector and menu: Apple's mirror symbol, two triangles facing over
+    /// the axis, not the plain two-way arrows a move or resize draws.
+    public var systemImage: String {
+        self == .horizontal
+            ? "arrow.left.and.right.righttriangle.left.righttriangle.right"
+            : "arrow.up.and.down.righttriangle.up.righttriangle.down"
     }
 }

@@ -13,10 +13,39 @@
 // to an empty window or a new one (PhotoOpenQueue), and on Quit asks each
 // dirty window in turn (PhotoUnsavedFlow.quit); closing a dirty window asks
 // too (PhotoUnsavedFlow.close, from PhotoWindowEditedView's close guard).
+//
+// File-flow (PF-2): the scene takes part in switching (`.suiteApp`), File
+// gets the suite's Open Recent ▸ and Open In ▸ (SuiteFileCommands), and the
+// editor takes drops (`.suiteFileDrop`); all three read PhotoShell's one
+// documents bridge, which starts watching the suite's recents at launch.
+// Finding #4260: the delegate is a SuiteAppDelegate, so a hand-off file
+// (Open Recent ▸, Open In from another app) reaches PhotoShell.host, a
+// PhotoDocumentHost that opens each image through PhotoOpenQueue.
 import AppKit
 import PhotoModel
+import SuiteModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
+
+/// The process's documents bridge: the suite's recents and routing, on fakes for a `-PhotoFixture` launch.
+@MainActor enum PhotoShell {
+    static let bridge: SuiteDocumentsBridge = {
+        let arguments = ProcessInfo.processInfo.arguments
+        let services: SuiteServices = PhotoWindow.launchOptions.fixture == nil
+            ? .live(support: SuiteLocations.supportFolder(arguments: arguments, home: NSHomeDirectory()),
+                    app: .photo, arguments: arguments)
+            : .fake()
+        return SuiteDocumentsBridge(app: .photo, services: services)
+    }()
+
+    /// The hand-off host: an open hand-off opens each image in an empty window or a new one.
+    static let host = PhotoDocumentHost { requests in
+        await MainActor.run {
+            for case .open(let path) in requests { PhotoOpenQueue.shared.open(URL(fileURLWithPath: path)) }
+        }
+    }
+}
 
 @main
 struct PhotoApp: App {
@@ -34,13 +63,24 @@ struct PhotoApp: App {
             PhotoCommands()
             RenderingCommands(model: rendering)
         }
+        .suiteApp(.photo, host: PhotoShell.host)
     }
 }
 
-/// Finder opens and Quit's unsaved-changes prompts.
-@MainActor final class PhotoAppDelegate: NSObject, NSApplicationDelegate {
-    func application(_ application: NSApplication, open urls: [URL]) {
-        for url in urls { PhotoOpenQueue.shared.open(url) }
+/// Finder opens, suite hand-offs, the suite's recents and Quit's unsaved-changes prompts.
+@MainActor final class PhotoAppDelegate: SuiteAppDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        Task { await PhotoShell.bridge.watch() }
+    }
+
+    override func application(_ application: NSApplication, open urls: [URL]) {
+        for url in urls {
+            if url.pathExtension == "aghandoff" {
+                Task { await self.handle(url) }
+            } else {
+                PhotoOpenQueue.shared.open(url)
+            }
+        }
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {

@@ -122,6 +122,20 @@ private func redPNG(_ name: String, in folder: URL, width: Int = 2, height: Int 
         #expect(PhotoWorkspace(services: .fake).openInHelp == "Open an image first.")
     }
 
+    @Test func openInGetsTheOpenImageOnceItHasAPath() throws {
+        var workspace = try openedImage()
+        #expect(workspace.suiteDocument == nil, "an unsaved image went to Open In")
+        workspace.updateFileFlow(recents: [], documentPath: "/w/Sunset.png")
+        let ref = try #require(workspace.suiteDocument)
+        #expect(ref == SuiteDocumentRef(path: "/w/Sunset.png", fileID: SuiteDocumentRef.fileID(forPath: "/w/Sunset.png"),
+                                        app: .photo, type: .png, displayName: "Sunset.png"))
+        workspace.updateFileFlow(recents: [], documentPath: "/w/notes.txt")
+        #expect(workspace.suiteDocument == nil, "a type the suite doesn't know went to Open In")
+        var closed = PhotoWorkspace(services: .fake)
+        closed.updateFileFlow(recents: [], documentPath: "/w/Sunset.png")
+        #expect(closed.suiteDocument == nil, "Open In got a document with no image open")
+    }
+
     @Test func hostAcceptsOpenNewAndPlace() async throws {
         let workspace = try openedImage()
         for verb in [HandOffVerb.open, .new, .place] {

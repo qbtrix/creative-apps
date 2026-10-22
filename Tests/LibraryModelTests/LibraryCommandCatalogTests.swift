@@ -71,6 +71,14 @@ struct LibraryCatalogDoc: HeadlessDocument {
         case "photo.reset-develop": .some(menu(c.canEditDevelop, "develop", "Develop isn't connected yet."))
         case "photo.crop": .some(menu(c.cropHelp == nil, "crop", "Crop isn't connected yet."))
         case "photo.reset-crop": .some(menu(c.resetCropHelp == nil, "crop", "Crop isn't connected yet."))
+        case "file.import-folder": .some(c.importHelp)  // CS-3: the window's enablement and reasons
+        case "file.export": .some(c.exportHelp)
+        case "view.show-original": .some(c.services.unavailable["develop"] ?? c.developHelp
+            ?? (c.canShowOriginal ? nil : "Open a photo in the loupe to see its original."))
+        case "file.recent", "file.open-recent", "file.drop": .some(nil)
+        case "file.clear-recent": .some("No Recent Files")
+        case "file.open-in": .some(c.openInHelp)
+        case "folders.list", "view.show-folder": .some(c.items.contains { $0.path?.hasPrefix("/") == true } ? nil : LibraryCatalog.noFolders)
         default: nil
         }
     }
@@ -135,7 +143,9 @@ struct LibraryCatalogDoc: HeadlessDocument {
                     && (try? ran.save()) == (try? doc.save())
                 let noOpEdit = unchanged && ["stepNamedTitle", "editRecordsOneStep", "undoRestoresBytes", "redoRestoresBytes"]
                     .contains { problem.contains(": \($0):") }
-                return !(off && problem.contains("exampleRuns")) && !noOpEdit
+                // Library has no recent files, so Open Recent's example names one it can't find.
+                let needsFile = id == "file.open-recent" && problem.contains("exampleRuns")
+                return !((off || needsFile) && problem.contains("exampleRuns")) && !noOpEdit
             }
             #expect(problems.isEmpty, "\(state): \(problems.joined(separator: "\n"))")
             for spec in LibraryCatalog.commands where spec.kind == .edit && spec.availability(c).why == nil {
@@ -163,17 +173,22 @@ struct LibraryCatalogDoc: HeadlessDocument {
     }
 
     static let golden = [
-        "file.load-samples | Load Sample Photos | on",
+        "file.import-folder | Import Folder… | on", "file.load-samples | Load Sample Photos | on", "file.export | Export… | on",
         "edit.undo | Undo | There is nothing to undo.", "edit.redo | Redo | There is nothing to redo.",
         "edit.select | Select | on", "edit.select-all | Select All | on", "edit.deselect | Deselect | on",
         "view.grid | Grid | The grid is already showing.", "view.loupe | Loupe | on",
         "view.zoom-in | Zoom In | on", "view.zoom-out | Zoom Out | on",
         "view.zoom-to-fit | Zoom to Fit | Open a photo in the loupe to zoom.",
         "view.actual-size | Actual Size | Open a photo in the loupe to zoom.", "view.sort | Sort By | on",
+        "view.show-original | Show Original | Open a photo in the loupe to see its original.",
         "photo.copy-settings | Copy Settings | Develop isn't connected yet.", "photo.paste-settings | Paste Settings | Develop isn't connected yet.",
         "photo.reset-develop | Reset Develop | on", "photo.crop | Crop | Crop isn't connected yet.",
         "photo.reset-crop | Reset Crop | Crop isn't connected yet.",
         "metadata.set-rating | Set Rating | on", "metadata.pick | Pick | on", "metadata.reject | Reject | on",
         "metadata.clear-flag | Clear Flag | on", "metadata.set-label | Set Label | on", "metadata.auto-advance | Auto Advance | on",
+        "file.recent | Recent Files | on", "file.open-recent | Open Recent | on", "file.clear-recent | Clear Menu | No Recent Files",
+        "file.open-in | Open In | Open a photo in the loupe first.", "file.drop | Drop Files | on",
+        "folders.list | List Folders | Import a folder to see its folders.",
+        "view.show-folder | Show Folder | Import a folder to see its folders.",
     ]
 }

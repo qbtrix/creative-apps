@@ -27,6 +27,14 @@ file.open
 file.open-recent
 file.save
 file.save-as
+fill.angle
+fill.gradient
+fill.read
+fill.stop-add
+fill.stop-color
+fill.stop-move
+fill.stop-remove
+fill.type
 inspector.end-property-scrub
 inspector.set-blend-mode
 inspector.set-parent
@@ -48,6 +56,7 @@ render.close-sheet
 render.frame
 render.open-sheet
 render.start
+shape.draw
 text.end-size-scrub
 text.set
 text.set-color
@@ -57,6 +66,7 @@ timeline.move-keys
 timeline.pick-keys
 timeline.scrub
 timeline.select-all-keys
+tool.shape
 viewer.drag-begin
 viewer.drag-cancel
 viewer.drag-end

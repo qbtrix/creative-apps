@@ -5,8 +5,12 @@ import CoreRaster
 import SuiteKernel
 
 extension HaloProject {
-    /// One spec per `HaloCommand.allCases` entry, in that order.
-    public static let commandSpecs: [CommandSpec<HaloProject>] = HaloCommand.allCases.map(spec(for:))
+    /// One spec per `HaloCommand.allCases` entry, in that order, then the
+    /// kernel's `shape.draw` and `tool.shape` (shape-tools HS-6) and its eight
+    /// `fill.*` commands (gradient-fill HG-7).
+    public static let commandSpecs: [CommandSpec<HaloProject>] =
+        HaloCommand.allCases.map(spec(for:)) + ShapeCommands.specs(HaloProject.self)
+        + GradientCommands.specs(HaloProject.self)
 
     /// Halo's catalog over the project; its history reads the project's steps.
     public static let catalog: CommandCatalog<HaloProject> =

@@ -101,6 +101,29 @@ import Testing
         #expect((anchor.kind == .corner) == breaking)
     }
 
+    @Test func shiftAddsAnchorsToTheSelection() throws {
+        var workspace = Self.picked()
+        let before = Self.anchors(workspace)
+        let refs = (0..<4).map { AnchorRef(contour: 0, index: $0) }
+        workspace.runPath(.select(anchors: [refs[1]], rect: nil, extend: false))
+        workspace.runPath(.select(anchors: [refs[2]], rect: nil, extend: true))
+        #expect(workspace.anchorSelection.ordered == [refs[1], refs[2]])
+        let corner3 = Self.scene(workspace, try #require(before.dropFirst(3).first).point)
+        workspace.drag(from: corner3, to: corner3, modifiers: .shift)
+        #expect(workspace.anchorSelection.ordered == [refs[1], refs[2], refs[3]])
+        workspace.runPath(.move(dx: 30, dy: 0, drag: nil))
+        let after = Self.anchors(workspace)
+        #expect(after.map(\.point) == before.enumerated().map { i, a in (1...3).contains(i) ? Point(x: a.point.x + 30, y: a.point.y) : a.point })
+    }
+
+    @Test func aShiftMarqueeKeepsThePickedAnchors() throws {
+        var workspace = Self.picked()
+        let corner3 = Self.scene(workspace, try #require(Self.anchors(workspace).dropFirst(3).first).point)
+        workspace.runPath(.select(anchors: [AnchorRef(contour: 0, index: 1)], rect: nil, extend: false))
+        workspace.drag(from: Point(x: corner3.x - 5, y: corner3.y - 5), to: Point(x: corner3.x + 5, y: corner3.y + 5), modifiers: .shift)
+        #expect(workspace.anchorSelection.ordered == [AnchorRef(contour: 0, index: 1), AnchorRef(contour: 0, index: 3)])
+    }
+
     @Test func theMarqueePicksAnchorsOnlyOfThePickedItem() {
         var workspace = FlareWorkspace(services: .built)
         workspace.newDocument()
@@ -126,6 +149,36 @@ import Testing
         workspace.runPath(.select(anchors: [AnchorRef(contour: 0, index: 1)], rect: nil, extend: false))
         workspace.runPath(.move(dx: 30, dy: 0, drag: nil))
         #expect(Self.anchors(workspace) == before && workspace.layerError == .refused(help))
+    }
+
+    @Test func aMultiItemPickHasNoPathInEdit() {
+        var workspace = FlareWorkspace(services: .built)
+        workspace.newDocument()
+        workspace.selectTool(.rectangle)
+        workspace.drag(from: Point(x: 10, y: 10), to: Point(x: 50, y: 40))
+        workspace.drag(from: Point(x: 60, y: 10), to: Point(x: 100, y: 40))
+        workspace.selectTool(.directSelect)
+        workspace.selectAll()
+        #expect(workspace.selection.count == 2)
+        #expect(workspace.pathInEdit == nil && workspace.editablePath == nil)
+        #expect(workspace.pathHelp == "Select one shape with Direct Select to edit its points.")
+        #expect(workspace.statusPills(measuredFPS: nil).pathHelp == workspace.pathHelp)
+        workspace.runPath(.selectAll)
+        #expect(workspace.anchorSelection.ordered.isEmpty)
+    }
+
+    @Test func theOnlyShapeOnALockedLayerShowsNoEditMarksAndSaysToUnlock() throws {
+        var workspace = Self.picked()
+        #expect(workspace.editablePath == workspace.pathInEdit && workspace.editablePath != nil)
+        #expect(workspace.statusPills(measuredFPS: nil).pathHelp == nil)
+        let layer = try #require(workspace.selection.first?.layerID)
+        let name = try #require(workspace.ownerLayers?.first { $0.id == layer }?.name)
+        workspace.toggleLayerFlag(layer, .locked)
+        #expect(workspace.pathInEdit != nil && workspace.editablePath == nil)
+        #expect(workspace.pathHelp == "Unlock \(name) to edit its points.")
+        #expect(workspace.statusPills(measuredFPS: nil).pathHelp == "Unlock \(name) to edit its points.")
+        workspace.selectTool(.select)
+        #expect(workspace.statusPills(measuredFPS: nil).pathHelp == nil)
     }
 
     @Test func aDragOnALayerScaledTwiceMapsThroughItsScale() throws {

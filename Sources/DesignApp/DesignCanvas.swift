@@ -89,11 +89,18 @@ struct DesignCanvas: View {
             return .handled
         }
         // The rail shows Pen disabled; its letter must not pick it either.
-        let typed = press.characters.lowercased()
-        guard let tool = DesignTool.allCases.first(where: { $0.isEnabled && $0.shortcut.map(String.init) == typed })
-        else { return .ignored }
+        guard let tool = DesignTool.picked(byTyped: press.characters) else { return .ignored }
         perform(.tool(tool))
         return .handled
+    }
+}
+
+extension DesignTool {
+    /// The tool `characters` pick through SuiteUI's ToolKeys: one letter, either case, of a tool the palette shows
+    /// enabled; nil for any other text (AC-tools).
+    static func picked(byTyped characters: String) -> DesignTool? {
+        guard characters.count == 1, let key = characters.first else { return nil }
+        return ToolKeys.tool(forKey: key, in: allCases)
     }
 }
 

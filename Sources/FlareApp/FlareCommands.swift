@@ -11,8 +11,13 @@
 // then Clear Menu. The focused window publishes a FlareMenu as a focused
 // scene value (FlareWindow.swift); with none focused every item disables. The
 // value carries the selection's Edit reasons too, so a new selection is a new
-// value and the items re-read their reasons.
+// value and the items re-read their reasons. ⌘A is Select All Keys while the
+// timeline strip has focus (its FocusedValues.timelineSelectAll, key-select-all
+// KS-2), else Edit > Select All on the stage's art.
 import FlareModel
+import SuiteModel
+import SuiteShell
+import SuiteUI
 import SwiftUI
 
 /// What the focused Flare window's menus can do now.
@@ -29,6 +34,8 @@ struct FlareMenu {
     var editHelps: [FlareEditAction: String] = [:]
     /// The keyframe Delete reason (`deleteHelp`), then Bring Forward's and Send Backward's.
     var selectionHelps: [String?] = []
+    /// The open animation's file, which File > Open In ▸ hands to another app; nil before it has one (file-flow FL-2).
+    var document: SuiteDocumentRef?
 
     /// Open Sample's items: the sample's name for `.openSample(name:)`, and its title.
     static let samples: [(name: String, title: String)] = [
@@ -54,6 +61,8 @@ struct FlareCommands: Commands {
     @FocusedValue(\.flareMenu) private var focused
     /// Read so a pasteboard change re-runs the body and Paste's reason (FlarePasteboard.swift).
     @FocusedValue(\.flarePasteboardChange) private var pasteboardChange
+    /// The focused timeline strip's Select All Keys; nil unless the strip has focus.
+    @FocusedValue(\.timelineSelectAll) private var timelineSelectAll
 
     private var menu: FlareMenu {
         _ = pasteboardChange
@@ -64,27 +73,19 @@ struct FlareCommands: Commands {
         CommandGroup(replacing: .newItem) {
             item(.file(.new), key: KeyboardShortcut("n"))
             item(.file(.open), key: KeyboardShortcut("o"))
-            Menu("Open Recent") {
-                ForEach(menu.recent, id: \.self) { path in
-                    item(.file(.openRecent(path: path)), title: URL(fileURLWithPath: path).lastPathComponent)
-                }
-                Divider()
-                item(.file(.clearRecent))
-            }
             Menu("Open Sample") {
                 ForEach(FlareMenu.samples, id: \.name) { sample in
                     item(.file(.openSample(name: sample.name)), title: sample.title)
                 }
             }
         }
+        suiteFileMenu
         CommandGroup(replacing: .saveItem) {
             item(.file(.save), key: KeyboardShortcut("s"))
             item(.file(.saveAs), key: KeyboardShortcut("s", modifiers: [.command, .shift]))
             item(.export(.showSheet), key: KeyboardShortcut("e", modifiers: [.command, .shift]))
             item(.file(.close), key: KeyboardShortcut("w"))
         }
-        CommandGroup(replacing: .importExport) {}
-        CommandGroup(replacing: .printItem) {}
         CommandGroup(replacing: .undoRedo) {
             item(.edit(.undo), title: menu.undoTitle, key: KeyboardShortcut("z"))
             item(.edit(.redo), title: menu.redoTitle, key: KeyboardShortcut("z", modifiers: [.command, .shift]))
@@ -95,7 +96,11 @@ struct FlareCommands: Commands {
             item(.edit(.paste), key: KeyboardShortcut("v"))
             item(.edit(.duplicate), key: KeyboardShortcut("d"))
             item(.edit(.delete), key: KeyboardShortcut(.delete, modifiers: []))
-            item(.edit(.selectAll), key: KeyboardShortcut("a"))
+            if let keys = timelineSelectAll, let spec = FlareWorkspace.menuSpec("timeline.select-all-keys") {
+                MenuCommand(spec, on: menu.help(.timeline(.selectAllKeys)), shortcut: KeyboardShortcut("a")) { keys.run() }
+            } else {
+                item(.edit(.selectAll), key: KeyboardShortcut("a"))
+            }
             item(.edit(.deselect), key: KeyboardShortcut("a", modifiers: [.command, .shift]))
         }
         CommandGroup(before: .toolbar) {
@@ -126,6 +131,14 @@ struct FlareCommands: Commands {
             item(.interactions(.toggleEditor), key: KeyboardShortcut("m", modifiers: [.command, .shift]))
             Divider()
         }
+    }
+
+    /// The suite's Open Recent ▸ and Open In ▸, after Open… (file-flow FL-2), and the File items Flare hides.
+    /// Its own builder keeps `body` within the builder's ten top-level commands.
+    @CommandsBuilder private var suiteFileMenu: some Commands {
+        SuiteFileCommands(app: .flare, bridge: FlareShell.bridge, document: menu.document)
+        CommandGroup(replacing: .importExport) {}
+        CommandGroup(replacing: .printItem) {}
     }
 
     /// Animate: Play/Pause … Animate with Assist…, section 3.4's order.

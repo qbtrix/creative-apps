@@ -1,6 +1,6 @@
 // HaloJourneyTests+Layers.swift: H-J9, layer housekeeping (layer-panel,
-// #770; docs/blueprints/halo/features/layer-panel.md, Journey steps). On the
-// `three-layers` fixture (Intro; Title, Badge, Background, Rig, top first) it
+// #770; docs/blueprints/halo/features/layer-panel.md, Journey steps). On
+// `-HaloSample three-layers` (live services; Intro; Title, Badge, Background, Rig, top first) it
 // selects, duplicates, renames on the row, refuses a blank rename from
 // Layer > Rename…, drags a row to the bottom, brings it forward, deletes it,
 // then deletes every layer with ⌫ from the timeline. Rows are found by their
@@ -8,8 +8,8 @@
 // the next unused number, 5), the artboard by its `halo.viewer.summary`
 // label (the Model's viewerSummary; values read empty, #262). Rig's row is
 // below the inspector's fold at 640 pt, so the inspector is scrolled to it
-// before the row drag. Undo stays disabled until history-files lands, so
-// each step reads the Edit menu's first item title and never presses ⌘Z.
+// before the row drag. Each step reads the Edit menu's first item title
+// and never presses ⌘Z.
 // A disabled menu item's reason is its help, read from the window's hidden
 // `halo.menu.reasons` readout (XCUITest reads a help tag as no text). One
 // shot per step, `halo-layers-<step>`, plus the rename prompt
@@ -23,7 +23,7 @@ final class HaloLayersJourneyTests: XCTestCase {
 
     /// H-J9: every layer edit from the list, the Layer menu and the timeline.
     @MainActor func testLayerHousekeeping() {
-        let halo = Journey("Halo", self, arguments: ["-HaloFixture", "three-layers", "-HaloWindowSize", "1000x640"])
+        let halo = Journey("Halo", self, arguments: ["-HaloSample", "three-layers", "-HaloWindowSize", "1000x640"])
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         XCTAssert(halo.element("halo.layer.list").waitForExistence(timeout: 10), "no layer list (halo.layer.list)")
 

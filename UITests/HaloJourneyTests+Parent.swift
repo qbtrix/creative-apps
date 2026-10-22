@@ -1,7 +1,7 @@
 // HaloJourneyTests+Parent.swift: H-J23, parent a layer and set its blend
 // from the LAYER group (layer-keys LK-14, #1036;
 // docs/blueprints/halo/features/layer-keys.md, Journey steps 3). On
-// `-HaloFixture parented` at frame 0 (Bounce: Rig, a null keyed on x at 960
+// `-HaloSample parented` at frame 0 (Bounce: Rig, a null keyed on x at 960
 // and 1160, over Ball at x 160 and Floor) it selects Ball, whose Parent menu
 // lists None, Floor and Rig but not Ball, parents it to Rig (Position X stays
 // 160.0 px: Rig's world matrix is the identity at 0), finds no Ball in Rig's
@@ -24,7 +24,7 @@ import XCTest
 extension HaloJourneyTests {
     /// H-J23: parent Ball to Rig and back, keeping it on screen, and blend it.
     @MainActor func testParentAndBlend() {
-        let halo = Journey("Halo", self, arguments: ["-HaloFixture", "parented", "-HaloWindowSize", "1000x640"])
+        let halo = Journey("Halo", self, arguments: ["-HaloSample", "parented", "-HaloWindowSize", "1000x640"])
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
 
         // 1. Select Ball: its Parent menu lists None, Floor and Rig, not Ball.

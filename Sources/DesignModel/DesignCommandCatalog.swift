@@ -2,7 +2,9 @@
 // DesignWorkspace, so a menu, the afterglow CLI and an agent run one path. Each spec's availability is the help the
 // window shows today and its run is today's method: every DesignCommand through `help(_:)` and `run(_:)`, the palette
 // tools through `unavailableHelp` and `selectTool`, the pages through `addPageHelp`/`deletePageHelp`, and the file
-// actions through the toolbar's help. Ids are `<menu>.<action>` in lowercase; Tests/command-ids/design.txt keeps them. Linux-safe.
+// actions through the toolbar's help. The History panel's history.read and history.jump are SuiteKernel's
+// HistoryCommands on the workspace's HistoryJumping adapter (autosave-history DA-6); the six transform.* are
+// SuiteKernel's TransformCommands on its TransformTarget (transform DT-6). Ids are `<menu>.<action>` in lowercase; Tests/command-ids/design.txt keeps them. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -23,8 +25,10 @@ extension DesignWorkspace {
     struct TextParams: Codable, Sendable { var text: String }
     struct PathParams: Codable, Sendable { var path: String? }
 
-    /// Every Design action as a command spec, in menu order.
-    public static let commands: [CommandSpec<DesignWorkspace>] = fileSpecs + editSpecs + objectSpecs + pageSpecs + toolSpecs
+    /// Every Design action as a command spec, in menu order, then the History panel's two.
+    public static let commands: [CommandSpec<DesignWorkspace>] =
+        fileSpecs + editSpecs + objectSpecs + GradientCommands.specs(DesignWorkspace.self)
+            + TransformCommands.specs(DesignWorkspace.self) + pageSpecs + toolSpecs + HistoryCommands.specs(DesignWorkspace.self)
 
     /// The specs as a catalog whose history is the workspace's own.
     public static let catalog: CommandCatalog<DesignWorkspace> =

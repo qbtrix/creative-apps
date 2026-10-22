@@ -5,7 +5,7 @@
 // DesignCanvasHover, an observed store outside the Model; the answer is written only
 // when it changes, so 120 samples inside one layer re-run the canvas at most once and
 // the editor never. The pointer is the one the answer names: a frame-resize pointer
-// per handle, the open hand over a layer a Move drag would move, the drag-copy pointer
+// per handle, the crosshair over the rotate knob (as SuiteUI's handles editor shows), the open hand over a layer a Move drag would move, the drag-copy pointer
 // with Option, the I-beam for the Text tool, else the tool's own. The hover outline is
 // a 1 pt accent frame round the layer a click would pick, identified
 // `design.canvas.hover` with the pointer's name as its value; it is asked again of the
@@ -89,8 +89,6 @@ struct DesignCanvasFeedback: View {
     @ObservationIgnored private(set) var modifiers: DesignModifiers = []
     /// The Eyedropper's loupe at the pointer (DesignSampleLoupe reads it); nil for any other tool.
     private(set) var loupe: DesignLoupe?
-    /// The square the Eyedropper reads, as the size chips set it.
-    private(set) var sampleSize: SampleSize = .point
     #if DEBUG
     /// How many times a canvas showing this store's page read its pointer: once per canvas body.
     @ObservationIgnored var canvasReads = 0
@@ -110,21 +108,15 @@ struct DesignCanvasFeedback: View {
         if key != place { key = place }
         if placement != asked.placement { placement = asked.placement }
         if answer != asked.steady { answer = asked.steady }
-        updateLoupe(on: model)
-    }
-
-    /// Reads a `size` square from now on, the loupe at the kept pointer asked again of `model`.
-    func setSampleSize(_ size: SampleSize, on model: DesignWorkspace) {
-        if sampleSize != size { sampleSize = size }
-        updateLoupe(on: model)
-    }
-
-    /// The loupe for `model`'s page; nil for another canvas.
-    func loupe(for model: DesignWorkspace) -> DesignLoupe? { belongs(to: model) ? loupe : nil }
-
-    private func updateLoupe(on model: DesignWorkspace) {
-        let shown = model.loupe(at: point, modifiers: modifiers, size: sampleSize)
+        let shown = model.loupe(at: point, modifiers: modifiers)
         if loupe != shown { loupe = shown }
+    }
+
+    /// The loupe for `model`'s page, asked again of `model` at the kept pointer so a change to the inspector's
+    /// sample size or Fill/Stroke choice shows at once; nil for another canvas.
+    func loupe(for model: DesignWorkspace) -> DesignLoupe? {
+        guard belongs(to: model), let seen = loupe else { return nil }
+        return model.loupe(at: seen.point, modifiers: modifiers)
     }
 
     func belongs(to model: DesignWorkspace) -> Bool { key == Key(model) }
@@ -143,13 +135,14 @@ struct DesignCanvasFeedback: View {
 enum DesignCanvasPointer: Equatable {
     case tool(DesignTool)
     case resize(FrameResizePosition)
+    case rotate
     case move
     case copy
     case text
 
     init(_ hint: DesignHover?, tool: DesignTool) {
         switch hint?.pointer {
-        case .resize(let handle)?: self = .resize(handle.position)
+        case .resize(let handle)?: self = handle.position.map { .resize($0) } ?? .rotate
         case .move?: self = .move
         case .copy?: self = .copy
         case .text?: self = .text
@@ -161,6 +154,7 @@ enum DesignCanvasPointer: Equatable {
         switch self {
         case .tool(let tool): return tool.pointer
         case .resize(let position): return .frameResize(position: position)
+        case .rotate: return .rectSelection
         case .move: return .grabIdle
         case .text: return .horizontalText
         case .copy:
@@ -176,8 +170,8 @@ enum DesignCanvasPointer: Equatable {
 }
 
 extension DesignHandle {
-    /// The edge or corner of the frame this handle resizes from.
-    var position: FrameResizePosition {
+    /// The edge or corner of the frame this handle resizes from; nil for the rotate knob.
+    var position: FrameResizePosition? {
         switch self {
         case .topLeft: .topLeading
         case .top: .top
@@ -187,6 +181,7 @@ extension DesignHandle {
         case .bottom: .bottom
         case .bottomLeft: .bottomLeading
         case .left: .leading
+        case .rotate: nil
         }
     }
 }
