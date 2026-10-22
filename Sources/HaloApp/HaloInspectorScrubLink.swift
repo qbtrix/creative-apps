@@ -1,7 +1,7 @@
 // HaloInspectorScrubLink.swift: a TRANSFORM bar's scrub on the screen's
 // refresh (CL-probe, #4275). HaloPropertyRowView hands it every pointer
 // sample of a drag on its bar; HaloInspectorScrub (HaloModel) holds them. The
-// first starts a link from `haloRefreshLink`; each refresh writes the latest
+// first starts a link from the window's `haloRefreshLink` (HaloLiveEdit.makeLink); each refresh writes the latest
 // value once through `write` (the window's HaloLiveEdit) and, under
 // `-SuitePerfProbe`, records one `inspector-scrub` sample per event it shows,
 // stamped shown on the next main-actor turn as HaloProbe's are. An idle
