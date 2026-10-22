@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-22T16:12Z	poll	DS-m	#4385	lane macOS build 39810044205 on 6a270b800 queued; no needs-fix/needs-rebase; #4386/#4392 unchanged
 2026-10-22T16:29Z	poll	DS-m	#4385	lane macOS build 39810044205 still queued (macOS runners busy); nothing else changed
 2026-10-22T16:46Z	poll	DS-m	#4385	lane macOS build 39810044205 still queued; no labels; #4386/#4392 unchanged
+2026-10-22T17:02Z	poll	DS-m	#4385	lane cancelled macOS build 39810044205 and re-dispatched 39818997671; no labels; #4386/#4392 unchanged
