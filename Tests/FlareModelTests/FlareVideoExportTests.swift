@@ -1,10 +1,13 @@
 // FlareVideoExportTests.swift: MJ-FV, the Model walk of Flare's MP4 and GIF export
 // (docs/blueprints/flare/features/export-pack.md). FV-1: the formats are listed with their options (the shared size,
 // the scene's frame rate, loop on) and refused with their reason, while SVG, Lottie and PNG still export. The plan
-// tests are FV-3's and wait on it (rule 20: the frames' times are shell-media's FrameClock, the size ExportRules').
+// tests are FV-3's: every frame of the scene at the rate with FrameClock's times and GIF delays, ExportRules' size
+// (even for MP4), GIF without the background fill and looping, and RJ-F07's and RJ-F08's plan halves.
 import FlareCore
 @testable import FlareModel
+import Foundation
 import SuiteKernel
+import SuiteModel
 import Testing
 
 private func showcase() -> FlareWorkspace {
@@ -33,7 +36,7 @@ struct FlareVideoExportTests {
         #expect(w.exportFrameRate == 15)
     }
 
-    @Test(arguments: [(ExportFormat.mp4, "MP4 lands with FV-3."), (.gif, "GIF lands with FV-3.")])
+    @Test(arguments: [(ExportFormat.mp4, "MP4 lands with FV-4."), (.gif, "GIF lands with FV-4.")])
     func exportingIsRefusedWithItsReason(format: ExportFormat, reason: String) async throws {
         var w = bounce()
         _ = w.openExport(); w.setExportFormat(format)
@@ -63,24 +66,97 @@ struct FlareVideoExportTests {
         #expect(try await adapter.export(document, options: svg, rasterizer: FakeRasterizer()) { _ in }.files.count == 1)
     }
 
-    // FV-3 turns these on: they read the frame plan, which FlareExport+Kernel.swift gains then.
+    // FV-3: the frame plan (rule 20: each frame's time and GIF delay are SuiteModel's FrameClock, the size
+    // ExportRules'). FV-4 streams the planned frames into the shared writers.
 
-    @Test(.disabled("waits on FV-3")) func aTwoSecondSceneAt30FPSPlans60Frames() {
+    @Test(.tags(.everyFrame)) func aTwoSecondSceneAt30FPSPlans60Frames() throws {
         var w = bounce(); _ = w.openExport(); w.setExportFormat(.gif)
-        #expect(w.exportFrameRate == 30 && w.selectedScene?.durationFrames == 60)
-        Issue.record("FV-3: the GIF plan lists 60 frames, 0 to 59, each at FrameClock's time")
+        let plan = try w.exportVideoPlan()
+        #expect(plan.fps == 30 && plan.frames.count == 60)
+        #expect(plan.frames.map(\.index) == Array(0..<60))
+        #expect(plan.frames.map(\.sceneFrame) == (0..<60).map(Double.init))
+        let clock = try FrameClock(fps: 30)
+        #expect(plan.frames.map(\.seconds) == (0..<60).map(clock.seconds(of:)))
+        #expect(plan.frames.last?.seconds == 59.0 / 30)
+        w.setExportFrameRate(15)
+        let half = try w.exportVideoPlan()
+        #expect(half.fps == 15 && half.frames.count == 30 && half.frames.last?.sceneFrame == 58)
     }
 
-    @Test(.disabled("waits on FV-3")) func mp4At1081WidePlans1080() {
+    @Test(.tags(.mp4IsEven)) func mp4At1081WidePlans1080() throws {
         var w = bounce(); _ = w.openExport(); w.setExportFormat(.mp4)
-        w.setExportSize(.pixels(width: 1081, height: 1081, stretch: false))
-        #expect(w.exportingOptions?.size == .pixels(width: 1081, height: 1081, stretch: false))
-        Issue.record("FV-3: the MP4 plan's size is 1080 x 1080 (ExportRules.pixels(evenSize: true))")
+        w.setExportSize(.pixels(width: 1081, height: 1081, stretch: true))
+        let mp4 = try w.exportVideoPlan()
+        #expect(mp4.width == 1080 && mp4.height == 1080)
+        #expect(mp4.movie == MovieSettings(width: 1080, height: 1080, fps: 30, codec: .h264, quality: 0.9))
+        #expect(mp4.animatedImage == nil)
+        w.setExportFormat(.gif)
+        let gif = try w.exportVideoPlan()
+        #expect(gif.width == 1081 && gif.height == 1081, "a GIF has no even rule")
     }
 
-    @Test(.disabled("waits on FV-3")) func gifDelaysSumTo200Centiseconds() {
+    @Test(.tags(.gifKeepsAlpha)) func gifFramesCarryAlphaAndMP4IsOpaque() throws {
         var w = bounce(); _ = w.openExport(); w.setExportFormat(.gif)
-        #expect(w.exportingOptions?.loop == true)
-        Issue.record("FV-3: the GIF plan's frame delays sum to 200 cs, within 1 cs")
+        let scene = try #require(w.selectedScene)
+        let gif = try w.exportVideoPlan()
+        #expect(!gif.fillsBackground && gif.scene(scene).background.a == 0)
+        #expect(gif.scene(scene).layers == scene.layers)
+        w.setExportFormat(.mp4)
+        var clear = scene; clear.background.a = 0
+        let mp4 = try w.exportVideoPlan()
+        #expect(mp4.fillsBackground && mp4.scene(clear).background.a == 1)
+        #expect(mp4.scene(clear).background.r == scene.background.r)
     }
+
+    @Test(.tags(.everyFrame)) func gifDelaysSumTo200CentisecondsAndLoopForever() throws {
+        var w = bounce(); _ = w.openExport(); w.setExportFormat(.gif)
+        let gif = try w.exportVideoPlan()
+        #expect(gif.frames.map(\.delay).reduce(0, +) == 200)
+        #expect(gif.frames.prefix(3).map(\.delay) == [3, 4, 3])
+        #expect(gif.animatedImage == AnimatedImageSettings(width: 550, height: 400, fps: 30, format: .gif, loopCount: 0))
+        #expect(gif.movie == nil)
+        w.setExportLoop(false)
+        #expect(try w.exportVideoPlan().animatedImage?.loopCount == 1)
+    }
+
+    @Test func onlyMP4AndGIFPlanFrames() throws {
+        var w = bounce(); _ = w.openExport()
+        #expect(throws: ExportOptionRefusal.self) { try w.exportVideoPlan() }
+        w.setExportFormat(.gif); w.setExportSize(.longEdge(0))
+        #expect(throws: (any Error).self) { try w.exportVideoPlan() }
+    }
+
+    /// RJ-F07's and RJ-F08's plan halves: each job's own options, read as the run reads them, plan its file.
+    @Test(.tags(.everyFrame, .gifKeepsAlpha, .mp4IsEven), arguments: [
+        ("slack-gif", "spinner.flare", 480, 480, 24, 100),
+        ("social-mp4", "bounce.flare", 1920, 1080, 60, 200),
+    ])
+    func theRealJobsPlanHalf(job: String, input: String, width: Int, height: Int, frames: Int, centiseconds: Int) throws {
+        struct Job: Decodable { var output: Output }
+        struct Output: Decodable { var format: String; var options: JSONValue }
+        let folder = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("RealJobs/flare/\(job)")
+        let script = try JSONDecoder().decode(Job.self, from: Data(contentsOf: folder.appendingPathComponent("\(job).jobs.json")))
+        let o = try SuiteExportOptions(json: script.output.options, defaults: SuiteExportOptions(format: script.output.format))
+        let format = try #require(ExportFormat(rawValue: script.output.format))
+        let data = try Data(contentsOf: folder.appendingPathComponent("input/\(input)"))
+        let w = try FlareHeadless.open(data, name: input).workspace
+        let scene = try #require(w.selectedScene)
+        let options = ExportOptions(format: format, sceneID: scene.id, frames: 0...(scene.durationFrames - 1),
+                                    size: o.size, fps: o.fps, loop: o.loop)
+        let plan = try FlareVideoPlan.plan(scene, options: options)
+        #expect(plan.width == width && plan.height == height && plan.frames.count == frames)
+        #expect(plan.frames.map(\.delay).reduce(0, +) == centiseconds)
+        if format == .gif {
+            #expect(plan.animatedImage?.loopCount == 0 && scene.background.a == 0 && plan.scene(scene).background.a == 0)
+        } else {
+            #expect(plan.movie?.codec == .h264 && plan.scene(scene).background.a == 1 && plan.fps == 30)
+        }
+    }
+}
+
+extension Tag {
+    @Tag static var everyFrame: Self
+    @Tag static var gifKeepsAlpha: Self
+    @Tag static var mp4IsEven: Self
 }
