@@ -4,7 +4,7 @@ Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
 Run: act-1a16391fd49-8138 · Session: claude/export-pack-lead-fl632i · Started: 2026-10-22T12:25Z (resumed from act-1a160bffba1-bvv3; earlier: Started 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih) · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: 3 build
 Base: 1c85591f (origin/dev)
-Next: FV-3 built at 1ba81c2c, gating now (scripts/ci --changed, mutate); then PR; FV-4 stacked on it; FV-2 once XP-3 is on dev
+Next: FV-3 mutate + PR (gate PASS at 1ba81c2c); FV-4 built at 66fac008, gate + PR stacked on FV-3; FV-2 waits on XP-3 (question on #3481)
 
 Loop: v3 (the packet has a `## Slices` table).
 
