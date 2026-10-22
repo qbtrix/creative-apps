@@ -153,3 +153,5 @@ utc	stage	event	ref	note
 19:14Z	heartbeat	#4607 macOS build 39827609617 in progress
 19:41Z	heartbeat	#4607 macOS build 39827609617 in progress
 20:08Z	heartbeat	#4607 macOS build green; waits for lane merge
+20:10Z	merge	#4607 SS-8 merged
+20:37Z	pr	#4630 C4 + #4631 status built (SS-10)
