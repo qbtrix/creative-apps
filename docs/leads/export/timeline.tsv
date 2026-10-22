@@ -1,0 +1,89 @@
+utc	stage	event	ref	note
+2026-10-17T03:07Z	0	stage-start	#1554	resumed; lead/export created from origin/dev
+2026-10-17T03:39Z	2	heartbeat		no reply on base question; origin/dev moved to 1a8eea2a, main to 1af9b4d7; no new code
+2026-10-17T05:43Z	2	heartbeat		still waiting on base answer; origin/dev 0e3c08ea
+2026-10-18T20:41Z	0	stage-start	#1554	resumed as run act-1a150baa34c-jzk9; base settled as dev 507719b3
+2026-10-18T20:41Z	2	heartbeat	-	EX-1 waits on DV-2 (shared FakeRendering.swift); planned after it
+2026-10-18T22:36Z	3	heartbeat	-	resumed after restart; wave 1 PRs read, macOS build failures under investigation
+2026-10-18T22:37Z	2	heartbeat	-	waits on DV-2; stage 1 gaps #2986 #2987 #2988 filed
+2026-10-18T22:50Z	2	heartbeat	-	waits on DV-2
+2026-10-18T23:00Z	2	heartbeat	-	waits on DV-2 (DV-1 #3002 macOS build queued)
+2026-10-18T23:21Z	2	heartbeat	-	waits on DV-2 (DV-1 #3002 green, not merged yet)
+2026-10-18T23:33Z	2	heartbeat	-	DV-1 merged; waits on DV-2 (builder running) before EX-1, EX-4
+2026-10-18T23:50Z	2	heartbeat	-	waits on DV-2 #3039 (macOS build 39177954679 queued) before EX-1, EX-4
+2026-10-19T00:13Z	2	heartbeat	-	waits on DV-2 #3039 (macOS build queued) before EX-1, EX-4
+2026-10-19T00:37Z	2	heartbeat	-	waits on DV-2 #3039 (macOS build queued) before EX-1, EX-4
+00:57Z	-	heartbeat	-	heartbeat: EX-1/EX-4 wait on #3039 (DV-2) merge; feature findings 0
+02:11Z	3 wave 1	start	EX-1,EX-4	DV-2 merged 1f3f72a1; wf_da8ff674-dec on 17dc84c7
+02:33Z	3 wave 1	heartbeat	-	EX-1, EX-4 building (wf_da8ff674-dec); feature findings 0
+02:44Z	3 wave 1	check	#3089	EX-4 contract check ok, head fee80801
+02:44Z	3 wave 1	fix	#3090	EX-1 contract check: +Kernel names used to bypass check-dup-logic; fix round 1 (rename + Allow-Dup); gap #3091
+02:50Z	3 wave 1	fix	#3090	fix round 1 pushed 532291f9: contract names, Allow-Dup: Export, baseline +4; CI PASS; Mutate 3/3
+02:53Z	3 wave 1	fix	#3090	trimmed to 388 lines, head 0373894e; CI PASS; Mutate 3/3; waits on lane macOS build
+02:56Z	3 wave 1	check	-	#3089 (EX-4) and #3090 (EX-1) open, wait on lane macOS build
+03:18Z	check	check-in	dev CI	no lane merges yet (macOS build queue backlogged); dev CI 39188162085 cancelled before any job; merged-done now waits on 39192572958 at cc14022e (contains every merged task; Linux in progress); scoped library 39189402196 in progress
+03:42Z	3	check	918abfc6	EX-1, EX-4 open in lane
+04:06Z	3	check	59305bc1	EX-4 merged
+04:29Z	3	check	f7d88054	EX-1 merged
+04:29Z	3	wave	wave2	EX-2 EX-3 EX-7 EX-9 EX-15
+04:54Z	3	check	bede8342	heartbeat
+2026-10-19T05:01:12Z	heartbeat	check	-	dev bede8342; lane PRs open
+2026-10-19T05:17:25Z	check-in	check	-	dev 047303c1; 0 open findings
+2026-10-19T05:39:53Z	check-in	check	-	dev 047303c1; CI 39203617095 pending; workflows running
+2026-10-19T06:02:59Z	check-in	check	-	dev 6dd055f6; wave 2 wf_a93d8264-8fc still building
+2026-10-19T06:19:32Z	wave2	report	wf_a93d8264-8fc	PRs #3171 #3169 #3170 #3172; EX-9 pending
+2026-10-19T06:19:32Z	wave2	check	#3169 #3170 #3172	footers stripped, Mutate line order fixed
+2026-10-19T06:26:31Z	wave2	check	lane	macOS builds dispatched for #3169-#3172
+2026-10-19T06:27:45Z	wave2	pr	#3174	EX-9 opened 3e76cffa
+06:51Z	check	heartbeat	-	lane waiting on builds
+07:15Z	wave2	merged	#3171	EX-2 merged
+07:15Z	wave2	fixer	#3169	needs-rebase fixer
+07:27Z	wave2	fixer-done	#3169	head 6de27e8c
+07:37Z	check	heartbeat	-	runner backlog
+08:00Z	check	heartbeat	-	#3169 build 39216178366, #3170/#3172/#3174 builds queued (runner backlog)
+08:22Z	check	heartbeat	-	EX-7 #3170 merged 6f9a2b88; #3169 build 39216178366, #3172, #3174 builds queued
+08:45Z	check	heartbeat	-	EX-15 #3172 merged (0b9ec8ab); EX-3 #3169 build 39216178366 queued; EX-9 #3174 build 39210369956 running
+09:09Z	check	heartbeat	-	EX-9 #3174 merged (097b0d52); EX-3 #3169 macOS build green, merges next sweep
+09:31Z	wave	start	EX-5,EX-10,EX-12	wf_2a3993f0-c26 on acbbef13
+09:54Z	check	heartbeat	-	wave 3 (wf_2a3993f0-c26) running; 0 open findings
+09:59Z	wave	wave 3 reported	wf_2a3993f0-c26	EX-5 #3212, EX-12 #3215, EX-10 finishing
+10:11Z	wave	EX-10 PR	#3222	a67c9749
+2026-10-19T10:17Z	check	heartbeat	-	EX-5 #3212, EX-12 #3215, EX-10 #3222 macOS builds queued; EX-6 after EX-5 merges and crop CR-5
+2026-10-19T10:40Z	check	heartbeat	-	EX-12 #3215 macOS build green, awaiting lane; EX-5 #3212 and EX-10 #3222 builds queued
+11:04Z	check	heartbeat	-	EX-12 #3215 merged d80a1b26; EX-5 #3212 and EX-10 #3222 macOS builds queued
+11:26Z	check	heartbeat	-	EX-5 #3212 (39233491145) and EX-10 #3222 (39235878647) macOS builds still queued
+11:50Z	check	heartbeat	-	EX-5 #3212 macOS build green, awaiting lane merge; EX-10 #3222 build 39235878647 queued
+2026-10-19T12:58Z	wave 4 start	EX-6 building; EX-10 in lane
+2026-10-19T14:23Z	EX-6 PR	#3251 opened
+2026-10-19T14:24Z	wave 5 start	EX-13 EX-16 stacked on #3251
+2026-10-19T15:36Z	wave 5 PRs	#3278 #3279 drafts
+2026-10-19T16:07Z	heartbeat	#3251	waiting on lane
+2026-10-19T16:14Z	pr	#3294 #3293	EX-8, EX-11 drafts stacked on #3251
+2026-10-19T16:35Z	heartbeat	-	dev still b3011ab9. EX-6 #3251 clean, waiting on lane sweep. Drafts #3278 #3279 #3293 #3294 wait on it.
+2026-10-19T16:57Z	heartbeat	dev ed4d55fd; waiting on lane sweep (#3221, #3251, #3292); #3292 footer stripped
+2026-10-19T17:27Z	fix	#3251 needs-fix (CommandPathTests): baseline lists export sheet buttons, gate PASS, head acf3ad3e
+2026-10-19T17:52Z	fix	#3251 refused as too big (409 lines): tightened LibraryWindow+Export.swift to 398, gate PASS, head 8541ee9a
+2026-10-19T18:19Z	heartbeat	check-in: #3251 EX-6 is 398 lines, so the size check now passes; pending, the lane is waiting on macOS build 39297804528 for head 8541ee9a; #3278, #3279, #3293 and #3294 drafts wait on it
+2026-10-19T18:41Z	heartbeat	#3251 EX-6 open, clean, head 8541ee9a, 398 lines, waiting on lane macOS build 39297804528; drafts #3278 #3279 #3293 #3294 wait on it
+2026-10-19T19:04Z	heartbeat	#3251 EX-6 still open/clean at 8541ee9a; lane macOS build 39297804528 queued since 17:52Z behind the same macOS backlog
+2026-10-19T19:25Z	heartbeat	#3251 EX-6 open/clean at 8541ee9a; macOS build 39297804528 still queued (macOS runner backlog)
+2026-10-19T19:48Z	heartbeat	#3251 EX-6 open/clean at 8541ee9a; macOS build 39297804528 still queued
+2026-10-19T20:11Z	heartbeat	#3251 EX-6 open/clean at 8541ee9a; macOS build 39297804528 still queued (runners moving again)
+2026-10-19T20:25Z	heartbeat	#3251 EX-6 macOS build 39297804528 still queued
+2026-10-19T20:48Z	heartbeat	#3251 EX-6 macOS build 39297804528 still queued; runner backlog
+2026-10-19T21:28Z	heartbeat	#3251 EX-6 macOS build 39297804528 in progress
+2026-10-19T22:17Z	heartbeat	#3251 (EX-6) merged 21:18Z as d735ced2. #3294 EX-8 9ea00b01, #3293 EX-11 2ffec0fd, #3279 EX-13 a31ba0e0, #3278 EX-16 956d76db: dev merged, gate PASS each, all under 130 lines, marked ready. EX-b done waits on green dev CI 39333170092.
+2026-10-19T22:45Z	heartbeat	EX-8 #3294 and EX-11 #3293 merged; EX-b/EX-c/EX-d tasks all on dev; done comments wait for green dev CI 39336158094. #3279, #3278 open, clean.
+2026-10-19T23:12Z	heartbeat	dev CI 39336158094 still pending; EX-b/c/d done comments wait. #3279, #3278 open, fast-lane, no needs-* label.
+2026-10-19T23:43Z	heartbeat	Rule 23 re-read: CR-b done, EX-14 unblocked. Fixing findings #3276/#3277 first (fixture soft wave, lead/export-F3276, gating); EX-14 drafted on lead/export-EX-14. EX-b..d await green dev CI 39342355180.
+2026-10-19T23:57Z	pr	#3372 findings fix (#3276/#3277 fixture soft wave, Slice EX-b, head 6274f2af); #3373 EX-14 cropped QB-V4 + plan (Slice EX-e, stacked on #3372, head cffa43c9, mutate 5/5)
+2026-10-20T00:13Z	heartbeat	00:10Z check-in: EX-13 #3279 merged 00:12Z. #3278, #3372, #3373 macOS builds queued. Rule 23 question posted on #1554 (no green dev run since cf120143).
+2026-10-20T00:41Z	heartbeat	00:41Z check-in: findings fix #3372 merged 00:40Z (closes #3276, #3277). EX-16 #3278 macOS build green, awaiting lane sweep; EX-14 #3373 macOS build in progress. Waiting for a dev run at or after 2019b521 with a green Linux job for EX-b, EX-c, EX-d. EX-17 after EX-14 and EX-16 merge.
+2026-10-20T01:09Z	heartbeat	EX-14 #3373 needs-rebase fixed: dev merged, gate PASS, head 609e4c33, Head line moved. EX-16 #3278 merged f76b3abf; EX-15 #3172 merged earlier. EX-17 drafted at 0c2c5d7a (library.md prose + section 8); gate running. EX-b/c/d proof waits on the Linux job of dev run 39349878829. 0 open findings.
+2026-10-20T01:16Z	slice-done	EX-b, EX-c, EX-d done: Linux job green on dev run 39349878829 (2019b521). Done and Mac-Finish-Wanted posted on #1554. EX-17 opened as #3387 (docs only, head 0c2c5d7a, gate PASS). EX-e waits on #3373 merging; EX-f on #3387, then a green Linux job after f76b3abf (#3278).
+2026-10-20T01:35Z	heartbeat	check: EX-17 #3387 merged 53630c3b, so EX-f's tasks are all merged; its proof is the Linux job of dev run 39352633488 (53630c3b, pending). EX-14 #3373 macOS build 39351788853 in progress at head 609e4c33. 0 open findings.
+2026-10-20T02:02Z	heartbeat	check: EX-14 #3373 merged 56b7578e (macOS build 39351788853 green). Every export task is merged. EX-a's done comment was missing; posted now on run 39349878829 with gaps: #3091. EX-e (gaps #3213 #3214) and EX-f wait on the Linux job of dev run 39356653273 (15b4e591, contains 56b7578e and 53630c3b; pending), then Belt-Contact-Sheet. 0 open findings.
+2026-10-20T02:29Z	heartbeat	check: dev run 39356653273 (15b4e591) was cancelled before its Linux job ran. Next proof candidate: dev run 39357273491 (13cf5dce, contains 15b4e591), pending. EX-e and EX-f done comments and the contact sheet wait on its Linux job.
+2026-10-20T02:56Z	heartbeat	check (blocked poll 2/3, rule 23): dev run 39357273491 (13cf5dce) was also cancelled before its Linux job ran. Next proof candidates: 39357615737 (13cf5dce, queued) and 39359599960 (25a8d9a2, pending).
+2026-10-20T03:13Z	heartbeat	check: blocked poll 3/3 (rule 23). Full dev run 39359599960 (25a8d9a2) still pending; other queued dev runs are scoped (no Linux). Posted Question for the supervisor on #1554 (comment 6282474084). Stopped polling this wait; will use the first full dev run >= 15b4e591 with a green Linux job.
+2026-10-20T03:36Z	heartbeat	done: supervisor answered (#1554 comment 6282537751): a linux_only run counts and dispatched 39363625797 on dev (233aff5c, contains 15b4e591); Linux green. Posted Belt-Slice-Done EX-e (gaps #3213 #3214), Belt-Slice-Done EX-f and Belt-Contact-Sheet on it. Every export slice is done. Stage: done.
