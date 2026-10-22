@@ -57,6 +57,11 @@ import Testing
         #expect(HaloProject.trimKeyHelp("nope", strokeHelp: nil) { _ in nil } == HaloProject.trimKeysNotBuiltHelp,
                 "a trim track with no property says keying the trim isn't built")
         #expect(HaloProject.trimKeyHelp("x", strokeHelp: nil) { _ in "busy" } == "busy", "the property's own reason")
+        let busy = HaloTrimKey(raw: HaloProperty.x.rawValue, title: "X", keyState: .animated, help: "busy")
+        #expect(HaloProject.trimKeyCommand(busy, diamond: true) == nil, "a reason sends nothing, property or not")
+        let free = HaloTrimKey(raw: HaloProperty.x.rawValue, title: "X", keyState: .animated, help: nil)
+        #expect(HaloProject.trimKeyCommand(free, diamond: true) == .toggleKey(.x))
+        #expect(HaloProject.trimKeyCommand(free, diamond: false) == .toggleAnimation(.x))
         for key in keys {
             #expect(HaloProject.trimKeyCommand(key, diamond: true) == nil)
             #expect(HaloProject.trimKeyCommand(key, diamond: false) == nil)
