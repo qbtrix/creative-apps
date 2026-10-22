@@ -2,7 +2,7 @@
 
 Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: lane: mac builds queued (#4252 39714434724, #4253 39714456379); dev Linux green again
+Stage: lane: mac builds still queued (#4252 39714434724, #4253 39714456379)
 Base: dev
 Next: green photo run with #4252/#4253/#4175 -> critics, Belt-Slice-Done, contact sheets
 
