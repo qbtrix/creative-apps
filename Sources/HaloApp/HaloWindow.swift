@@ -77,10 +77,16 @@ struct HaloWindow: View {
             } inspector: {
                 Group {
                     if model.selectedComposition != nil {
-                        HaloCompositionInspector(model: model, perform: perform, runFill: {
-                            takePlayback()
-                            model.runFill($0)
-                        })
+                        HaloCompositionInspector(
+                            model: model, perform: perform,
+                            runFill: {
+                                takePlayback()
+                                model.runFill($0)
+                            },
+                            runStroke: {
+                                takePlayback()
+                                model.runStroke($0)
+                            })
                     } else {
                         EmptyStateView(
                             "No Selection", systemImage: "rectangle.stack", message: "Select a composition to see its settings.")
@@ -91,7 +97,7 @@ struct HaloWindow: View {
             }
             .sheet(isPresented: $showsNewComposition) {
                 NewCompositionSheet(
-                    settings: model.suggestedSettings,
+                    settings: model.suggestedSettings, state: HaloMenuState(project: model),
                     onCreate: { settings in if model.newComposition(settings) { showsNewComposition = false } },
                     onCancel: { showsNewComposition = false })
             }

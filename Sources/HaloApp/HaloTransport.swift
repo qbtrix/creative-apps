@@ -1,6 +1,6 @@
 // HaloTransport.swift: the status bar's transport (viewer-playback #37,
 // VP-10): five plain SF Symbol buttons and a Loop toggle sending their
-// HaloCommand, disabled with `unavailableHelp(for:)` as the tooltip while the
+// HaloCommand (each button its catalog spec's MenuCommand, command-state CS-8), disabled with `unavailableHelp(for:)` as the tooltip while the
 // Model can't act, and drawn in textTertiary then so they look disabled
 // inside the pill. Play shows pause.fill while playing and reads `playLabel`
 // as its value. Loop is a button-style Toggle that reads `loopLabel` and
@@ -84,7 +84,8 @@ struct HaloTransport: View {
             .toggleStyle(.button)
             .tint(SuiteColor.accent)
         } else {
-            Button(model.title(for: item.command), systemImage: symbol(for: item)) { perform(item.command) }
+            MenuCommand(HaloMenuState.spec(item.command.commandID), on: HaloMenuState(project: model),
+                        title: model.title(for: item.command), systemImage: symbol(for: item)) { perform(item.command) }
         }
     }
 
