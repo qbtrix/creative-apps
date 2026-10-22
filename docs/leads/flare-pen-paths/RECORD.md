@@ -4,7 +4,7 @@ Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
 Run: act-1a15e10a86f-7bk9 (took over from act-1a15c07caa7-sppq) · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T01:10Z (this run 10:40Z)
 Stage: 3 wave 2
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: (2026-10-22T02:20Z) #4204 Linux check red on base-only FormatListRatchet (Media.swift, fixed on dev by #4238); merged dev, new head d34e2417 passes scripts/ci --changed + ratchet; awaits new lane macOS build + sweep. #4203 PN-3 macOS build green 02:00Z, awaits sweep; then FP-u.
+Next: (2026-10-22T02:41Z) #4204 head d34e2417 in lane macOS build 39711403708; #4203 PN-3 new head 01a576e2 in lane macOS build 39712632560; then FP-a post-round-2 panel and FP-u.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
