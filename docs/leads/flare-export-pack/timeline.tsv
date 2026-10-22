@@ -71,3 +71,4 @@ utc	stage	event	ref	note
 2026-10-22T17:16Z	3	check	FV-3	#4435 lane macOS build 39812126183 queued since 16:13Z (28 ci.yml runs queued; 4 earlier builds cancelled by the lane re-dispatching); nothing to fix on our side
 2026-10-22T17:37Z	3	check	FV-3	#4435 lane macOS build 39812126183 still queued; #4436 waits on it
 2026-10-22T17:58Z	3	check	FV-3	#4435 lane macOS build 39812126183 still queued (1h45m); #4436 waits on it
+2026-10-22T18:20Z	3	check	FV-3	#4435 lane macOS build 39812126183 green; Linux check 39829961027 running; merge next sweep
