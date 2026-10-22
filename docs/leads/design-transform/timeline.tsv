@@ -79,3 +79,4 @@ utc	stage	event	ref	note
 2026-10-22T03:52Z	DT-m	mac-green	#4255	f5833163
 2026-10-22T04:17Z	DT-u	heartbeat	#4254	waiting batch
 2026-10-22T04:39Z	DT-m	built	#4255	aa66f0e7e; done line waits on run 39722978870
+2026-10-22T05:40Z	3	stage-start	wave 6	relaunch act-1a16208b93a-24w0; R2 (#4223,#4224) and DT-z (DT-7+DT-8) builders started

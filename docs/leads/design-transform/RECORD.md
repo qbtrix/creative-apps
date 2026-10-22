@@ -1,18 +1,18 @@
 # transform lead record
 
 Issue: #3436 · Packet: docs/blueprints/design/features/transform.md
-Run: act-1a15da1b26c-9qo6 · Session: claude/design-feature-lead-run-1k035k · Started: 2026-10-21T08:46:56Z (prior run act-1a15ac70747-ky1f)
-Stage: 3 DT-u waiting on #4159 (lane macOS build queued, no runner); #4188 fix: #4187 merged, dev merged into fix/design-rotate-knob (875e12aa, 15 files +243/−62), gate running, PR next; round 2: findings #4223 (turned resize) + #4224 (several, no knob) filed, fixes built: fix/design-turned-resize (9ab21935, on rotate-knob, +136/−2, Mutate 33/33 DesignCanvasEditing) and fix/design-knob-several (00e7a2ca, on turned-resize, +137/−10, Mutate 38/38 DesignCanvasEditing + 25/25 DesignCanvasHints; snapshots design-transform-turned-several-light/dark.png); PRs held for their bases; DT-m: #4187 merged (8684d700f); DT-6 rebuilt on dev (cherry-pick, 487ff70e), gate running, PR next; DT-z: DT-7 journey pushed on feat/design-transform-dt7-journey (c36b6b1a, off dev, +162/−6, 1 file; PR after #4188 fix, DT-6 and #4223 fix merge)
-Base: 896cafe3 (origin/dev); main verified at 0dd23d65
-Next: #4159, #4187, #4188-fix merge -> Belt-Slice-Done + Mac-Finish-Wanted DT-u on a green design run; DT-6 after DG-m merges (shares DesignSVG, catalog; must update turnHelp snapshots: DesignInspectorSnapshots.transformRows, objectItemsSayWhyTheyAreOff, DesignSeveralInspectorSnapshots) and DA-m re-read
+Run: act-1a16208b93a-24w0 · Session: claude/feature-lead-playbook-wngeeb · Started: 2026-10-21T08:46:56Z (relaunched 2026-10-22T05:40Z; prior runs act-1a15ac70747-ky1f, act-1a15da1b26c-9qo6, act-1a15fcdd869-ck2o)
+Stage: 3 wave 6 (DT-u fix round 2 + DT-z)
+Base: 8cf02113 (origin/dev); main verified at 0dd23d65
+Next: open the DT-u round-2 fix PR (fix/design-transform-dt-u-r2: #4223 + #4224) and the DT-z PR (feat/design-transform-dt-z: DT-7 + DT-8, feature-done); then wait for a design or full ci.yml run containing the DT-z PR -> Belt-Slice-Done DT-z, Mac-Finish-Wanted DT-z, Belt-Contact-Sheet
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DT-a | rotation/flip fields on DesignNode, TransformTarget stubs, inspector rows and Object items on the stubs | DT-1, DT-2 | MJ-DT | TT-a (merged #3485/#3486); gradient-fill:DG-a (#3687 open) | yes | 0 | done | 39569221486 | wanted |
-| DT-u | canvas paints turned nodes, handles turn; snapshots and render budget | DT-3, DT-4 | DJ-T1 | DT-a; gradient-fill:DG-u | yes | 0 | building | – | – |
-| DT-m | adapter bodies, turned hit test, SVG turn, catalog specs, RJ-D15 | DT-5, DT-6 | MJ-DT | DT-a; gradient-fill:DG-m; autosave-history:DA-m | no | 0 | waiting | – | – |
-| DT-z | journey on live, status built, feature-done | DT-7, DT-8 | DJ-T1 | DT-u, DT-m | yes | 0 | waiting | – | – |
+| DT-u | canvas paints turned nodes, handles turn; snapshots and render budget | DT-3, DT-4 | DJ-T1 | DT-a; gradient-fill:DG-u | yes | 2 | done (per Belt brief; round 2 #4223/#4224 in flight) | – | – |
+| DT-m | adapter bodies, turned hit test, SVG turn, catalog specs, RJ-D15 | DT-5, DT-6 | MJ-DT | DT-a; gradient-fill:DG-m; autosave-history:DA-m | no | 0 | done (per Belt brief) | – | – |
+| DT-z | journey on live, status built, feature-done | DT-7, DT-8 | DJ-T1 | DT-u, DT-m | yes | 0 | building | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -20,11 +20,12 @@ Next: #4159, #4187, #4188-fix merge -> Belt-Slice-Done + Mac-Finish-Wanted DT-u 
 | DT-1 | DT-a | 1 | node fields + adapter stubs, tests disabled | Sources/DesignModel/DesignNode.swift, Sources/DesignModel/DesignTransform+Kernel.swift, Tests/DesignModelTests/DesignTransformTests.swift | DesignTransformTests (disabled), fixtures byte-equal | #3751 | merged (e6430cfa) |
 | DT-2 | DT-a | 1 | inspector transform rows, Object items, journey skipped | Sources/DesignApp/DesignInspectorTransform.swift, Sources/DesignApp/DesignInspector.swift, Sources/DesignApp/DesignObjectMenu.swift, UITests/DesignJourneyTests+Transform.swift | snapshot rows | #3751 | merged (e6430cfa) |
 | DT-3 | DT-u | 2 | canvas paints turned nodes | Sources/DesignApp/DesignCanvasMarks.swift, Sources/DesignApp/DesignSelectionMarks.swift, Tests/AppSnapshotTests/DesignTransformPaintTests.swift | DesignTransformPaintTests | #3983 | merged (564e6562) |
-| DT-4 | DT-u | 2 | snapshots, render budget | Tests/AppSnapshotTests/DesignTransformSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetDesignTransformTests.swift | RenderBudgetDesignTransformTests | – | waiting |
-| DT-5 | DT-m | 2 | adapter bodies, contains | Sources/DesignModel/DesignTransform+Kernel.swift, Tests/DesignModelTests/DesignTransformTests.swift, Tests/mutations/DesignModel.DesignTransform+Kernel.json | DesignTransformTests | – | waiting |
+| DT-4 | DT-u | 2 | snapshots, render budget | Tests/AppSnapshotTests/DesignTransformSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetDesignTransformTests.swift | RenderBudgetDesignTransformTests | #4159 | merged (9829685e) |
+| DT-5 | DT-m | 2 | adapter bodies, contains | Sources/DesignModel/DesignTransform+Kernel.swift, Tests/DesignModelTests/DesignTransformTests.swift, Tests/mutations/DesignModel.DesignTransform+Kernel.json | DesignTransformTests | #4187 | merged (8684d700) |
 | DT-6 | DT-m | 3 | SVG turn, specs, RJ-D15 | Sources/DesignModel/Live/DesignSVG.swift, Sources/DesignModel/DesignCommandCatalog.swift, Tests/command-ids/design.txt, Tests/RealJobs/design/rotate-15/ | DesignSVGTests.turnedNode, RJ-D15 | – | waiting |
-| DT-7 | DT-z | 4 | journey on live | UITests/DesignJourneyTests+Transform.swift | DesignTransformJourneyTests | – | pushed, PR held |
-| DT-8 | DT-z | 5 | design.md, status built | docs/blueprints/design.md, docs/blueprints/design/features/transform.wave.json | scripts/waves render --dry-run | – | waiting |
+| DT-7 | DT-z | 6 | journey on live | UITests/DesignJourneyTests+Transform.swift | DesignTransformJourneyTests | – | building (feat/design-transform-dt-z) |
+| R2 | DT-u | 6 | fix #4223 turned resize + #4224 knob over several | Sources/DesignModel/DesignCanvasEditing.swift, Sources/DesignModel/DesignCanvasHints.swift, their tests and plans | DesignTurnedResizeTests, knob-several test | – | building (fix/design-transform-dt-u-r2) |
+| DT-8 | DT-z | 6 | status built | docs/blueprints/design/features/transform.wave.json | scripts/waves render --dry-run | – | building (with DT-7, one slice PR) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -33,6 +34,10 @@ Next: #4159, #4187, #4188-fix merge -> Belt-Slice-Done + Mac-Finish-Wanted DT-u 
 ## Decisions
 - PRs target dev (CLAUDE.md, lane retargets main to dev); brief's main HEAD b3011ab9 verified, work branches from origin/dev a48992b7.
 - One combined wave plan across transform, placed-images, file-flow (rule 19); DT-a is the first wave for this feature and blocks PD-a.
+
+- Run act-1a16208b93a-24w0: record stays on lead/design-transform (lead/transform is Halo's transform lead, #3443); the brief's lead/transform path would overwrite it.
+- Run act-1a16208b93a-24w0: this run's brief covers #3436 slice DT-z only; gradient-fill #3415 has its own lead and is left alone.
+- Wave 6: R2 and DT-z run in parallel, on disjoint files (Sources/DesignModel vs UITests + wave.json). DT-z is not stacked on R2: it would go over the 400-line cap, and journeys are report-only. R2's PR opens first, so the lane merges it first.
 
 ## Open
 - DT-a Belt-Slice-Done and Mac-Finish-Wanted posted on #3436 (run 39569221486).
@@ -64,3 +69,7 @@ Next: #4159, #4187, #4188-fix merge -> Belt-Slice-Done + Mac-Finish-Wanted DT-u 
 - 2026-10-22T03:52Z Heartbeat: #4255 macOS build green (waits for batch); #4254 macOS build still queued. Design run 39709889487 in progress.
 - 2026-10-22T04:17Z heartbeat: #4254 (knob, e62d759d) and #4255 (DT-6, f5833163) are macOS green, clean, waiting for their batch. #4223/#4224 fixes are held until #4254 merges, then DT-7.
 - 2026-10-22T04:39Z DT-6 (#4255) merged as aa66f0e7e (batch run 39719953891); DT-m built (DT-5, DT-6; ui false). Its done line waits on full CI run 39722978870 (71987f724, contains aa66f0e7e), queued. #4254 (knob) is clean and green, waiting for the next batch; #4223/#4224 stay held behind it.
+
+## Run act-1a16208b93a-24w0 (2026-10-22T05:40Z)
+
+- Relaunched. #4254 (knob) merged 04:40Z; DT-a/DT-u/DT-m done per the brief. Open findings: #4223, #4224 (DT-u, round 2). Wave 6 started: R2 fix PR + DT-z slice PR, builders in parallel.
