@@ -62,3 +62,4 @@
 2026-10-22T12:06Z	check	TX-4 built on photo-text-layers/TX-4 (head e327bd327, gate PASS, mutate 6/6 + 4/4), PR waits on #4391 merging; #4391 clean, waiting on the macOS batch; no new text-layers findings (#4404 is a drop-image journey on dev)
 2026-10-22T12:17Z	build	TX-7 PJ-TX journey built on photo-text-layers/TX-7 (head dc559b4f4, gate PASS), stacked on TX-4; PR waits on TX-5 and TX-4; live text slot and RJ-P02 held for shell-text ST-8 (noted on #3785)
 2026-10-22T13:01Z	ship	TX-5 #4391 merged 12:44Z; TX-4 merged dev (doc-comment conflict in PhotoTextBox.swift), gate PASS at f1448b1a2, opened #4424 (Slice TX-u); TX-7 moved onto it (ec415151b), PR after #4424; findings open: #4404, #4378 (CI journeys, not text-layers)
+2026-10-22T13:44Z	check-in	#4424 (TX-4) open, clean; lane macOS build 39784859465 queued; TX-7 ready at ec415151b
