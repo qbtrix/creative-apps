@@ -78,3 +78,4 @@ utc	stage	event	ref	note
 2026-10-22T10:59:06Z	RP-5b	needs-rebase	4226	dev merged in (kept both RP-3e and RP-5b in SuiteHelpCommandsTests and shell-help.json); a Design fuzz test crashed once on Linux, passes on rerun; gate rerunning
 2026-10-22T11:09:39Z	RP-5b	rebased	4226	dev merged in at b2552e9c9; earlier gate crashes were a stale incremental build; clean build CI: PASS; Head moved
 2026-10-22T11:43:11Z	RP-5b	building	4226	macOS build dispatched 11:19
+2026-10-22T12:31:42Z	lead	resumed	-	run act-1a16391fd34-thw9; RP-3, RP-3e, RP-5 merged; RP-5b waits macOS build
