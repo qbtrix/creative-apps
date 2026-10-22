@@ -2,9 +2,9 @@
 
 Issue: #3435 · Packet: docs/blueprints/photo/features/transform.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: refresh: builder merging dev (with #4238 ratchet fix) into #4252 and #4253, rerunning scripts/ci --changed
+Stage: lane: #4252 at fc99225e8 and #4253 at 47346be72 (dev merged, CI: PASS, Head moved); awaiting lane mac builds + batch
 Base: dev
-Next: new heads -> lane mac builds -> batch; then green photo run -> critics, Belt-Slice-Done
+Next: green photo run with #4252/#4253/#4175 -> critics, Belt-Slice-Done, contact sheets
 
 Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transform: one combined wave plan, so the other two records show the same waves.
 
