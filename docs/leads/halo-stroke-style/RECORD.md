@@ -64,3 +64,5 @@
 - 2026-10-22T14:23Z: Waiting in the lane: HK-u2 #4413 (macOS build 39780188011 queued since 12:39Z) and fix #4431 (39792202422 queued). HK-z opens after #4413 merges.
 
 - 2026-10-22T14:53Z: #4413 and #4431 still open; their macOS builds (39780188011, 39792202422) are still queued.
+
+- 2026-10-22T15:21Z: HK-u2 #4413 merged (dc87ad2b0). HK-z was rebuilt on dev by cherry-picking its HK-7 and HK-8 commits, because the old stacked merge conflicted in 9 files. It opened as #4446 (fast-lane, feature-done, line:halo; head f31241faa; CI: PASS; mutate 9/9). If #4431 lands first, #4446 keeps its own HaloStrokeTrimKeysTests.

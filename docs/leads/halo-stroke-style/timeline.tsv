@@ -43,3 +43,5 @@ time	kind	step	ref	note
 2026-10-22T13:53Z	-	pr-opened	#4431	HK-u fix test
 2026-10-22T14:23Z	-	waiting	#4413 #4431	macOS builds 39780188011, 39792202422 queued
 2026-10-22T14:53Z	-	waiting	#4413 #4431	macOS builds still queued
+2026-10-22T15:21Z	-	merged	#4413	HK-u2 on dev as dc87ad2b0
+2026-10-22T15:21Z	-	pr	#4446	HK-z (HK-7, HK-8) rebuilt on dev, CI: PASS, mutate 9/9
