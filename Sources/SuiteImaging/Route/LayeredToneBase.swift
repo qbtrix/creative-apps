@@ -92,8 +92,9 @@ public final class LayeredToneBase {
                 held.append(.adjustment(try ToneProgram(operations: operations)))
             }
         }
-        for layer in held.indices {
-            for index in 0..<count { _ = try resident(layer, index) }
+        for (layer, kept) in held.enumerated() {
+            guard case .pixels = kept else { continue }
+            for index in 0..<count { try resident(layer, index) }
         }
     }
 
@@ -117,11 +118,13 @@ public final class LayeredToneBase {
     }
 
     /// Tile `index` of pixel layer `layer` on the GPU: the kept surface, else
-    /// uploaded now; nil for an adjustment layer.
+    /// uploaded now. Throws `RenderError.raster` for an adjustment layer.
     @discardableResult
-    private func resident(_ layer: Int, _ index: Int) throws -> RenderSurface? {
+    private func resident(_ layer: Int, _ index: Int) throws -> RenderSurface {
         guard held.indices.contains(layer), case .pixels(let buffer, var tiles) = held[layer],
-              tiles.indices.contains(index) else { return nil }
+              tiles.indices.contains(index) else {
+            throw RenderError.raster("layered base: tile \(index) of layer \(layer) is not a pixel tile")
+        }
         if let kept = tiles[index] { return kept }
         let r = rect(index)
         let made = try backend.surface(try buffer.cropped(x: r.x, y: r.y, width: r.width, height: r.height))
@@ -142,7 +145,7 @@ public final class LayeredToneBase {
                 guard held.indices.contains(position) else { continue }
                 switch held[position] {
                 case .pixels:
-                    guard let tile = try resident(position, index) else { continue }
+                    let tile = try resident(position, index)
                     try backend.composite([CompositeStep(tile, x: 0, y: 0, mode: layer.blendMode, opacity: layer.opacity)],
                                           onto: &picture)
                 case .adjustment(let program):
