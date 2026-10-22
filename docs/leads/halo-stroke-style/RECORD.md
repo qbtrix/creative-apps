@@ -52,3 +52,5 @@
 - 2026-10-22T11:37Z #4394 HK-m1 merged. HK-m2 merged with dev, gate PASS, head 228565cd. PR #4400 opened (fast-lane, line:halo). Next: HK-u2 when #4395 merges, then HK-z.
 - 2026-10-22T12:28Z Stall check. #4395 HK-u1: macOS build 39766593795 green at 12:26, waiting on the lane sweep. #4400 HK-m2: build 39773336036 still queued (macOS runners backed up). HK-u2 opens once #4395 merges; HK-z after both.
 - 2026-10-22T12:35Z #4395 HK-u1 merged. HK-u2 merged dev (with u1) and passed the gate at head 1bb2eb1d. PR #4413 opened (fast-lane, line:halo, 5 files +269/-10), server footer removed. #4400 HK-m2 build 39773336036 still queued. HK-z opens after #4400 and #4413 merge.
+
+- 2026-10-22T12:38:40Z: Belt-Slice-Done and Mac-Finish-Wanted HK-a on run 39774574487. HK-m2 #4400 and HK-u2 #4413 wait in the lane; HK-z opens after both merge.
