@@ -4,7 +4,8 @@
 // read through ShellHelpProvider. An item whose run isn't built yet is disabled and says why (no dead
 // controls). Report a Problem… begins ProblemReportSheet on the front window over ShellHelpProvider's report
 // (RP-3); Copy puts the text on the pasteboard, and Save… and Email… hand it to ProblemReportActions (RP-3e),
-// so the app sends nothing itself. Beta Notes opens a window titled Beta Notes over BetaNotes.current.
+// so the app sends nothing itself. Beta Notes opens a window titled Beta Notes over BetaNotes.current,
+// centred so it stays on a small screen.
 import AppKit
 import SuiteKernel
 import SuiteModel
@@ -99,6 +100,7 @@ public struct SuiteHelpCommands: Commands {
             }))
             window.title = "Beta Notes"
             window.isReleasedWhenClosed = false
+            window.center()
             notes = window
         }
         notes?.makeKeyAndOrderFront(nil)
