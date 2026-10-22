@@ -1,10 +1,10 @@
 # design-stroke-style lead record
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
-Run: act-1a1605b0534-rn47 · Session: claude/feature-leads-stroke-eyedropper-e84htn · Started: 2026-10-21T21:05Z (prior runs act-1a15e909498-4bkk, act-1a15abb305f-lc8g, act-1a159c9b6b4-va3c)
-Stage: DK-a done; DK-u waits on shape-tools DS-u (not started); DK-m on DS-m (2026-10-22T07:00Z)
+Run: act-1a1627ce3b4-ayhz · Session: claude/feature-lead-playbook-6guwwp · Started: 2026-10-22T07:24Z (prior runs act-1a1605b0534-rn47, act-1a15e909498-4bkk, act-1a15abb305f-lc8g, act-1a159c9b6b4-va3c)
+Stage: DK-a done; DK-u waits on shape-tools DS-u, DK-m on DS-m (only DS-a #3857 merged) (2026-10-22T07:24Z)
 Base: 5bec8089 (origin/dev); main verified at 0dd23d65
-Next: DK-u waits shape-tools:DS-u (waits transform DT-u, building: DT-4 behind #4159); DK-m waits shape-tools:DS-m (waits DT-m: #4187 open, DT-6 after DG-m; and eyedropper DY-m). Re-read waits every poll
+Next: DK-u waits shape-tools:DS-u (DT-u met); DK-m waits shape-tools:DS-m (DT-m met; needs eyedropper DY-m, building this run). Re-read waits every poll
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -35,5 +35,6 @@ Next: DK-u waits shape-tools:DS-u (waits transform DT-u, building: DT-4 behind #
 - #3865 (Join/Cap chips act on nothing) became gap p2 after round 2: Design cannot disable those rows until #4014 (StrokeEditor styleHelp, needs-ui) lands; DK-5 also closes it.
 
 ## Open
+- Run act-1a1627ce3b4-ayhz: brief rule 2 asks to rebase and force-push lead/eyedropper onto main; that branch is the SuiteUI eyedropper lead's record (#3448), so this run does not rewrite it and keeps lead/design-<feature>.
 
 - Run act-1a1605b0534-rn47: the brief's "rebase lead/eyedropper onto origin/main" was not done: lead/eyedropper is the SuiteUI eyedropper lead's branch (#3448); this lead's status stays on lead/design-*.
