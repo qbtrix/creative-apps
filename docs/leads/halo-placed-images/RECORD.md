@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: PH-a merged 19:43Z (b6ca48aa). #4615 (PH-5) MERGED; #4614 (PH-6) macOS build green, awaiting lane sweep; then retarget #4618. #4437 fixed: new head cd253444 (##-delimited SVG), lane rebuild pending; #4438 head cd19282f (PH-u merged in + UITests:80 fix), retarget after #4437 merges. PH-a Belt-Slice-Done: run 39848684933 cancelled; now waits on CI 39852194708 (dev 62fe62aa, contains PH-a) Linux job. PH-z after. Gap candidates: SVG gradient flat, SVG strokes.
+Next: PH-a DONE (Belt-Slice-Done posted 21:27Z, run 39854353256). #4615 merged; #4614 (PH-6, a3dceb00) build green, lane Linux check in progress; when merged retarget #4618. #4437 head cd253444, lane macOS rebuild dispatched 21:13Z; when merged retarget #4438 (cd19282f). PH-7 builder starts once #4614 merges (stack on PH-u2: waitsOnPH7=false in UITests/HaloJourneyTests+Place.swift). PH-8 dep gradient-fill already built. Gap candidates: SVG gradient flat, SVG strokes.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

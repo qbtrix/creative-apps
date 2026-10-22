@@ -74,3 +74,4 @@ utc	stage	event	ref	note
 2026-10-22T20:39:20Z	3	check	PH-a,PH-u,PH-m	needs-split cleared by supervisor; 3 macOS lane builds in flight; dev CI 39848684933 pending for PH-a done
 2026-10-22T21:02Z	3	check	PH-u	#4437 mac build failed (raw-string delimiter); fixer started. #4615 merged. #4614 build green. PH-a done waits CI 39852194708
 2026-10-22T21:14Z	3	fix	PH-u	#4437 -> cd253444, #4438 -> cd19282f; scripts/ci --changed PASS both
+2026-10-22T21:24Z	3	done	PH-a	Belt-Slice-Done posted (run 39854353256); dev CI runs 39848684933/39852194708 were cancelled
