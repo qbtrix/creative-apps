@@ -80,3 +80,4 @@ time	kind	note
 2026-10-22T10:45Z	heartbeat	still parked (waiting-on-prereq) per supervisor 09:03Z on #3441; Belt nudge named lead/stroke-style (SuiteUI #3450, another run); asked supervisor on #3438	#3438	-
 2026-10-22T11:05Z	end	run act-1a1627ce3b4-ayhz ends; stroke-style stays parked (waiting-on-prereq) for the supervisor relaunch of DK-u, DK-m, DK-z	#3441	-
 2026-10-22T11:42Z	heartbeat	Belt nudge after run end; still parked (waiting-on-prereq) per supervisor 09:03Z on #3441	#3441	-
+2026-10-22T13:00Z	heartbeat	parked until shape-tools DS-u and DS-m land (supervisor 09:03Z)	-	-
