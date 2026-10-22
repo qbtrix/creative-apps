@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "app": "fake",
+  "why": "Moves one free rect 30 times by commands, jumps back to step 20 with one history.jump, reads the history, moves once more and reads it again: the jump records no step and the new move replaces the 10 undone steps.",
+  "inputs": ["input/*.fake"],
+  "steps": [
+    {"id": "rect.select", "params": {"id": 1}},
+    {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}},
+    {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}},
+    {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}},
+    {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}},
+    {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}},
+    {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}}, {"id": "rect.move", "params": {"dx": 1, "dy": 2}},
+    {"id": "history.jump", "params": {"index": 20}},
+    {"id": "history.read", "params": {}},
+    {"id": "rect.move", "params": {"dx": 1, "dy": 2}},
+    {"id": "history.read", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-jumped", "format": "json", "options": {}},
+  "expect": {
+    "out/one-jumped.json": {"json": [
+      {"h": 60, "id": 1, "locked": false, "name": "Rect 1", "w": 100, "x": 31, "y": 52}
+    ]}
+  },
+  "platforms": ["linux", "macos"]
+}

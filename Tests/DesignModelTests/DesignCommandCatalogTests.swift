@@ -70,6 +70,9 @@ struct DesignCatalogDoc: HeadlessDocument {
         case "page.delete": .some(w.deletePageHelp)
         case "page.rename": .some(noPage)
         case "history.read": .some(nil)
+        // The eyedropper's two (DY-6): the sample needs an open file; the pick also the fill rows' selection.
+        case "color.sample": .some(w.sampleHelp)
+        case "color.pick": .some(w.sampleHelp ?? w.fillHelp)
         case "history.jump": .some(w.historyListing.steps.isEmpty ? "There are no steps yet." : nil)
         case "file.export", "view.zoom-in", "view.zoom-out", "view.fit": .some(w.isOpen ? nil : DesignToolbarItem.noFile)
         case "view.zoom-to-selection": .some(w.zoomToSelectionHelp)
@@ -134,7 +137,10 @@ struct DesignCatalogDoc: HeadlessDocument {
                 // upright layer changes nothing, so it records no step.
                 let axis = id == "transform.flip" && problem.contains("stepNamedTitle")
                 let upright = id == "transform.reset" && w.selectedNodes.allSatisfy { $0.rotation == 0 && !$0.flipX && !$0.flipY }
+                // A pick names its step for what it painted ("Fill" or "Stroke"), as the Eyedropper's click does.
+                let picked = id == "color.pick" && problem.contains("stepNamedTitle")
                 return !(off && problem.contains("exampleRuns")) && !noChange && !named && !joined && !jumped && !axis && !upright
+                    && !picked
             }
             #expect(problems.isEmpty, "\(state): \(problems.joined(separator: "\n"))")
             ran.formUnion(DesignCatalogDoc.catalog.ids.filter { DesignCatalogDoc.catalog.availability($0, on: doc).why == nil })
@@ -193,6 +199,7 @@ struct DesignCatalogDoc: HeadlessDocument {
         "fill.stop-move | Move Gradient Stop | Switch the fill to a gradient first.",
         "fill.stop-remove | Remove Gradient Stop | Switch the fill to a gradient first.",
         "fill.stop-color | Gradient Stop Color | on", "fill.angle | Gradient Angle | Angle is for a linear gradient.",
+        "color.sample | Sample Color | on", "color.pick | Pick Colour | on",
         "transform.read | Transform | on", "transform.set | Transform | on", "transform.rotate | Rotate | on",
         "transform.scale | Scale | on", "transform.flip | Flip | on", "transform.reset | Reset Rotation | on",
         "page.add | Add Page | on", "page.rename | Rename Page | on",
