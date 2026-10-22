@@ -67,3 +67,4 @@ Waves: combined with shared-codecs (see its RECORD). Wave 1 = IM-1 beside SC-13 
 - 2026-10-22T01:28Z: IM-1 #4028 still waits on the supervisor; IM-2 holds at 26ba4c88.
 - 2026-10-22T01:35Z: IM-2 ready on 26ba4c888, waits for IM-1 #4028 (supervisor merge, Package.swift).
 - 2026-10-22T01:50Z: IM-1 #4028 still open (supervisor merge); IM-2 ready on 26ba4c888.
+- 2026-10-22T02:10Z: IM-1 #4028 still open (supervisor merge); IM-2 ready on 26ba4c888.
