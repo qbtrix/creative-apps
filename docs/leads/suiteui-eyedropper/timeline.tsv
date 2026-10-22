@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-22T17:35Z	pr-opened	EY-9 C4 part #4585 (base lead/eyedropper-EY-z)
 2026-10-22T17:50Z	record	lead dir moved to docs/leads/suiteui-eyedropper
 18:12Z	heartbeat	EY-z PRs #4583/#4585 wait on TT chain #4429/#3577
+18:40Z	heartbeat	#3577 macOS build green (39815190852), waits for a lane batch; #4429 -> #4583 -> #4585 follow
