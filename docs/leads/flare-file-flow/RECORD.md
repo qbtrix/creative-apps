@@ -4,7 +4,7 @@ Issue: #3482 · Packet: docs/blueprints/flare/features/file-flow.md
 Run: act-1a160bffba1-bvv3 · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih) · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: FL-a
 Base: 8c55f0bf9 (origin/dev)
-Next: open FL-m/FL-u once #4259 merges
+Next: unchanged
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -68,3 +68,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T02:46Z: fl2 merged dev b5a6e7e0, ci --changed PASS, pushed 593d9118; #4259 Head moved, footer stripped. Lane needs a new macOS build for this head.
 - 2026-10-22T03:12Z: Heartbeat: #4259 (593d9118) and #4257 (d417a35f) wait on lane macOS builds; #4035 too. dev Linux green at 66a84588.
 - 2026-10-22T03:39Z: Heartbeat: #4259 macOS build queued, #4257 macOS build running; #4035 macOS+Linux green, awaiting lane merge.
+- 2026-10-22T04:02Z: #4259 (593d9118) lane macOS build still queued; FL-m/FL-u branches ready behind it
