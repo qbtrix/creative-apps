@@ -29,6 +29,11 @@ layer.bring-forward
 layer.delete
 layer.duplicate
 layer.flatten
+layer.mask-add
+layer.mask-apply
+layer.mask-delete
+layer.mask-edit
+layer.mask-enable
 layer.merge-down
 layer.move-by
 layer.new
