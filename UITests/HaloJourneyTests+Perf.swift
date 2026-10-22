@@ -20,7 +20,11 @@
 // the series 60 × legs in all (#4450), so a viewer leg lasts `viewerLegTime`.
 // H-P5 posts a burst of scroll-wheel events at 120 Hz before each scroll call
 // and counts only intervals inside a burst (#4277); before its layers shot it
-// hovers the viewer until no row's help tag shows (#4458).
+// hovers the viewer until no row's help tag shows (#4458). A runner without
+// event-posting access (`CGPreflightPostEventAccess` false, the hosted one)
+// scrolls through XCUITest's `scroll(byDeltaX:deltaY:)` alone, each call's
+// span its burst, and the floor holds on the whole series, since the lane and
+// list probes record a frame per offset change whatever moved it (#4587).
 // XCUIGestureVelocity is pixels a second, so 300 pt a second is scaled by the
 // screen's backing scale, as DesignJourneyTests+PerfScrub does.
 import AppKit
@@ -145,24 +149,25 @@ final class HaloPerfJourneyTests: XCTestCase {
     @MainActor func testTimelineAndLayerListScroll() {
         let halo = launch("crowd")
         // crowd lists Solid 300 first and Solid 1 last, in the lanes and in the layer list.
-        XCTAssert(CGPreflightPostEventAccess(), "the runner may not post scroll-wheel events, so no scroll burst")
+        // Without posting access the scrolls go through XCUITest alone (#4587).
+        let posts = CGPreflightPostEventAccess()
         let lanes = halo.element("halo.timeline")
         XCTAssert(lanes.waitForExistence(timeout: 10), "no timeline (halo.timeline)")
         var lanesBursts: [ClosedRange<Double>] = [], listBursts: [ClosedRange<Double>] = []
-        scrollEnd(lanes, until: halo.trackName("Solid 1"), by: -120, bursts: &lanesBursts)
+        scrollEnd(lanes, until: halo.trackName("Solid 1"), by: -120, posts: posts, bursts: &lanesBursts)
         halo.shot("perf-lanes-bottom")
         expectNoScroller(over: lanes, halo)
-        scrollEnd(lanes, until: halo.trackName("Solid 300"), by: 120, bursts: &lanesBursts)
+        scrollEnd(lanes, until: halo.trackName("Solid 300"), by: 120, posts: posts, bursts: &lanesBursts)
 
         let list = halo.element("halo.layer.list")
         XCTAssert(list.waitForExistence(timeout: 10), "no layer list (halo.layer.list)")
-        scrollEnd(list, until: halo.element("halo.layer.row.comp-1-layer-1"), by: -120, bursts: &listBursts)
+        scrollEnd(list, until: halo.element("halo.layer.row.comp-1-layer-1"), by: -120, posts: posts, bursts: &listBursts)
         restOffList(halo)
         halo.shot("perf-layers-bottom")
-        scrollEnd(list, until: halo.element("halo.layer.row.comp-1-layer-300"), by: 120, bursts: &listBursts)
+        scrollEnd(list, until: halo.element("halo.layer.row.comp-1-layer-300"), by: 120, posts: posts, bursts: &listBursts)
         guard let document = halo.perf() else { return }
-        expectBurstIntervals(document, series: "lanes-scroll", bursts: lanesBursts)
-        expectBurstIntervals(document, series: "layers-scroll", bursts: listBursts)
+        expectBurstIntervals(document, series: "lanes-scroll", bursts: lanesBursts, posted: posts)
+        expectBurstIntervals(document, series: "layers-scroll", bursts: listBursts, posted: posts)
     }
 
     // MARK: - Steps
@@ -215,38 +220,49 @@ final class HaloPerfJourneyTests: XCTestCase {
     }
 
     /// Scrolls `area` by `delta` until `target` is hittable, at most 300
-    /// times; before each scroll call, a burst of `burstEvents` wheel events
-    /// the same way at 120 Hz over its centre, its uptime span (and 50 ms
-    /// for the last frame) added to `bursts`.
+    /// times. When `posts`, before each scroll call a burst of `burstEvents`
+    /// wheel events the same way at 120 Hz over its centre, its uptime span
+    /// (and 50 ms for the last frame) added to `bursts`; otherwise the
+    /// XCUITest scroll call alone, its own span (and 50 ms) the burst (#4587).
     @MainActor private func scrollEnd(
-        _ area: XCUIElement, until target: XCUIElement, by delta: CGFloat, bursts: inout [ClosedRange<Double>]
+        _ area: XCUIElement, until target: XCUIElement, by delta: CGFloat, posts: Bool,
+        bursts: inout [ClosedRange<Double>]
     ) {
         let centre = area.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).screenPoint
-        CGEvent(mouseEventSource: nil, mouseType: .mouseMoved, mouseCursorPosition: centre, mouseButton: .left)?
-            .post(tap: .cghidEventTap)
+        if posts {
+            CGEvent(mouseEventSource: nil, mouseType: .mouseMoved, mouseCursorPosition: centre, mouseButton: .left)?
+                .post(tap: .cghidEventTap)
+        }
         let pixels = delta < 0 ? -Self.burstPixels : Self.burstPixels
         var scrolls = 0
         while !(target.exists && target.isHittable), scrolls < 300 {
             let begin = ProcessInfo.processInfo.systemUptime
-            for _ in 0..<Self.burstEvents {
-                let wheel = CGEvent(
-                    scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 1, wheel1: pixels, wheel2: 0, wheel3: 0)
-                wheel?.location = centre
-                wheel?.post(tap: .cghidEventTap)
-                Thread.sleep(forTimeInterval: 1.0 / 120)
+            if posts {
+                for _ in 0..<Self.burstEvents {
+                    let wheel = CGEvent(
+                        scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 1, wheel1: pixels, wheel2: 0, wheel3: 0)
+                    wheel?.location = centre
+                    wheel?.post(tap: .cghidEventTap)
+                    Thread.sleep(forTimeInterval: 1.0 / 120)
+                }
+                bursts.append(begin...(ProcessInfo.processInfo.systemUptime + 0.05))
+                area.scroll(byDeltaX: 0, deltaY: delta)
+            } else {
+                area.scroll(byDeltaX: 0, deltaY: delta)
+                bursts.append(begin...(ProcessInfo.processInfo.systemUptime + 0.05))
             }
-            bursts.append(begin...(ProcessInfo.processInfo.systemUptime + 0.05))
-            area.scroll(byDeltaX: 0, deltaY: delta)
             scrolls += 1
         }
         XCTAssert(target.exists && target.isHittable, "\(scrolls) scrolls didn't reach \(target.identifier)")
     }
 
     /// Attaches the intervals of `series` between two frames drawn inside one
-    /// of `bursts`, in refreshes ("scroll-bursts-<series>": count and p95);
-    /// fails when there are fewer than 60.
+    /// of `bursts`, in refreshes ("scroll-bursts-<series>": route, count and
+    /// p95). With `posted` bursts it fails when there are fewer than 60; on the
+    /// XCUITest route one call draws a frame or two, so the floor holds on the
+    /// whole series instead and its p95 times the calls, not frame pacing (#4587).
     @MainActor private func expectBurstIntervals(
-        _ document: ProbeDocument, series: String, bursts: [ClosedRange<Double>]
+        _ document: ProbeDocument, series: String, bursts: [ClosedRange<Double>], posted: Bool
     ) {
         let frames = document.drawn[series] ?? []
         let refresh = document.refreshInterval > 0 ? document.refreshInterval : 1.0 / 60
@@ -254,11 +270,13 @@ final class HaloPerfJourneyTests: XCTestCase {
             .filter { pair in bursts.contains { $0.contains(pair.0) && $0.contains(pair.1) } }
             .map { ($1 - $0) / refresh }.sorted()
         let p95 = gaps.isEmpty ? 0 : gaps[min(gaps.count - 1, Int((Double(gaps.count) * 0.95).rounded(.down)))]
+        let route = posted ? "posted wheel bursts" : "XCUITest scroll calls (no event-posting access)"
         let attachment = XCTAttachment(
-            string: "\(series): \(gaps.count) in-burst intervals over \(bursts.count) bursts, p95 \(p95) refreshes")
+            string: "\(series) via \(route): \(gaps.count) in-burst intervals over \(bursts.count) bursts, p95 \(p95) refreshes")
         attachment.name = "scroll-bursts-\(series)"
         attachment.lifetime = .keepAlways
         add(attachment)
+        guard posted else { return expectIntervals(document, series: series) }
         XCTAssert(
             gaps.count >= Journey.minimumSamples,
             "series \(series) has \(gaps.count) in-burst intervals, under \(Journey.minimumSamples): its numbers mean nothing")
