@@ -297,7 +297,7 @@ extension BodyCountSuites {
     func frames(prefix: String) -> [String: CGRect] {
         var result: [String: CGRect] = [:]
         for element in Self.walk(root) {
-            if let id = element.accessibilityIdentifier?() ?? nil, id.hasPrefix(prefix), result[id] == nil,
+            if let id = Self.text(element, "accessibilityIdentifier"), id.hasPrefix(prefix), result[id] == nil,
                 let frame = element.accessibilityFrame?() {
                 result[id] = window.convertFromScreen(frame)
             }
@@ -311,13 +311,24 @@ extension BodyCountSuites {
     /// Every element whose label or value `matches`, as text, in walk order.
     func frames(text matches: (String) -> Bool) -> [CGRect] {
         Self.walk(root).compactMap { element in
-            let label = element.accessibilityLabel?() ?? nil
-            let value = (element.accessibilityValue?() ?? nil).map { "\($0)" }
+            let label = Self.text(element, "accessibilityLabel")
+            let value = Self.text(element, "accessibilityValue")
             guard [label, value].contains(where: { $0.map(matches) ?? false }),
                 let frame = element.accessibilityFrame?()
             else { return nil }
             return window.convertFromScreen(frame)
         }
+    }
+
+    /// The attribute `getter` answers on `element` as text (a number as its digits); nil otherwise. Read
+    /// untyped, then checked: a toggle answers its value with an NSNumber (the transport's Loop
+    /// checkbox, 1), and reading that through `AnyObject`'s `String?` signature bridges it
+    /// unconditionally and traps the whole test process.
+    private static func text(_ element: AnyObject, _ getter: String) -> String? {
+        let selector = NSSelectorFromString(getter)
+        guard let object = element as? NSObject, object.responds(to: selector) else { return nil }
+        let answer = object.perform(selector)?.takeUnretainedValue()
+        return (answer as? String) ?? (answer as? NSNumber)?.stringValue
     }
 
     private static func walk(_ element: Any) -> [AnyObject] {
