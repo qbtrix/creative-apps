@@ -120,11 +120,13 @@ public final class MovieWriter: FrameSink, @unchecked Sendable {
     }
 
     public func finish() async throws(SuiteError) {
-        lock.lock()
-        let writer = self.writer, receiver = self.receiver, frames = written
-        self.writer = nil
-        self.receiver = nil
-        lock.unlock()
+        // `withLock`, not lock()/unlock(): NSLock's pair is unavailable from async code.
+        let (writer, receiver, frames) = lock.withLock {
+            let taken = (self.writer, self.receiver, written)
+            self.writer = nil
+            self.receiver = nil
+            return taken
+        }
         guard let writer, let receiver else { return }
         receiver.finish()
         writer.endSession(atSourceTime: CMTime(value: CMTimeValue(frames), timescale: CMTimeScale(settings.fps)))
