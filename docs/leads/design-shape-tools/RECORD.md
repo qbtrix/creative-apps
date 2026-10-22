@@ -1,24 +1,27 @@
 # design-shape-tools lead record
 
 Issue: #3440 · Packet: docs/blueprints/design/features/shape-tools.md
-Run: act-1a15abb305f-lc8g · Session: claude/design-feature-lead-run-0oib91 · Started: 2026-10-20T19:16:13Z
-Stage: 3 wave 1 (DS-a #3857 merged 08:34Z as 24202fb1; DT-a merged 03:57Z as e6430cfa, DY-a merged as 6f9c8928)
-Base: a48992b7c85ded3959e12683f50bd5fe7531b011 (origin/dev); main verified at b3011ab9
-Next: Belt-Slice-Done DS-a + Mac-Finish-Wanted DS-a after the first dev CI past #3980 (DY-a anchor fix) with a green Linux job; critics on DS-a once a scoped design run at or after 24202fb1 shows screens; DS-u once transform DT-u merges, DS-m once DT-m and DY-m merge (transform lead active, DT-a done 08:47Z)
+Run: act-1a162d0f852-70vb · Started: 2026-10-22T08:56Z (prior run act-1a15abb305f-lc8g shipped DS-a)
+Stage: 3 wave 1 built; PRs opening
+Base: dev 561ef1c5
+Next: open DS-5 (on #4357 DY-m), DS-6 (on DS-5), DS-u (on DS-6); start DS-z (DS-7+DS-8) stacked on DS-u
 
 ## Slices
-| slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
-|---|---|---|---|---|---|---|---|---|---|
-| DS-a | .shape node and tool, ShapeTarget stubs, Shape tool on the palette | DS-1, DS-2 | MJ-DS | transform:DT-a, eyedropper:DY-a; SH-a (done) | yes | 0 | merged (24202fb1) | – | – |
-| DS-u | canvas paints the path; snapshots, budget | DS-3, DS-4 | J-DS | DS-a, transform:DT-u; SH-u (done) | yes | 0 | waiting | – | – |
-| DS-m | adapter bodies, ShapeRules.dragged; SVG path, catalog, RJ-D35 | DS-5, DS-6 | MJ-DS | DS-a, transform:DT-m, eyedropper:DY-m; SH-m (done) | no | 0 | waiting | – | – |
-| DS-z | journey on live; built | DS-7, DS-8 | J-DS | DS-u, DS-m | yes | 0 | waiting | – | – |
+| slice | behavior | tasks | waits on | ui | rounds | state | run | mac finish |
+|---|---|---|---|---|---|---|---|---|
+| DS-a | .shape node and tool, ShapeTarget stubs, Shape tool on the palette | DS-1, DS-2 | – | yes | 0 | done (24202fb1; slice-done 39582236683) | 39582236683 | posted |
+| DS-u | canvas paints the path, redraws on resize; snapshots, budget | DS-3, DS-4 | DS-a, DS-m | yes | 0 | built | – | – |
+| DS-m | ShapeRules.dragged draw as one step; SVG path, catalog, RJ-D35 | DS-5, DS-6 | DS-a, eyedropper:DY-m (#4357) | no | 0 | built | – | – |
+| DS-z | journey on live; built | DS-7, DS-8 | DS-u, DS-m | yes | 0 | planned | – | – |
 
 ## Tasks
-| id | slice | wave | behavior | files | test | PR | state |
-|---|---|---|---|---|---|---|---|
-| DS-1 | DS-a | – | contract stubs; DesignShapeTests disabled | DesignNode.swift, DesignWorkspace.swift, DesignShape+Kernel.swift, Tests/DesignModelTests/DesignShapeTests.swift | DesignShapeTests | #3857 | merged |
-| DS-2 | DS-a | – | Shape tool (U) and options | DesignIntent.swift, DesignShapeOptions.swift, DesignInspector.swift, UITests/DesignJourneyTests+Shapes.swift | DesignToolPaletteSnapshots | #3857 | merged |
+| id | slice | wave | branch | head | PR | state |
+|---|---|---|---|---|---|---|
+| DS-1/DS-2 | DS-a | – | – | 24202fb1 | #3857 | merged |
+| DS-5 | DS-m | 1 | lead/design-shape-tools-DS-5 (on lead/design-eyedropper-DY-m) | 77a418bd | – | built, CI: PASS |
+| DS-6 | DS-m | 1 | lead/design-shape-tools-DS-m (on DS-5) | bdd84f62 | – | built, CI: PASS |
+| DS-3/DS-4 | DS-u | 1 | lead/design-shape-tools-DS-u (on DS-m) | 933e7552 | – | built, CI: PASS |
+| DS-7/DS-8 | DS-z | 2 | – | – | – | planned |
 
 ## Critic reviews
 | slice | run | commit | lenses | filed | after round |
@@ -31,8 +34,10 @@ Next: Belt-Slice-Done DS-a + Mac-Finish-Wanted DS-a after the first dev CI past 
 - Rule 22: one PR per slice; each slice's PR opens with its failing test commit.
 - One lead (this run) holds stroke-style, shape-tools and eyedropper; one wave plan across the three.
 - (corrected) Design transform (#3436) is led; DT-a #3751 merged 03:57Z. Earlier note: Design transform (#3436) has no lead running (no lead/design-transform branch, wave.json planned); its DT-a needs gradient-fill:DG-a (building in run act-1a15a9a4e8b-kn6a). shape-tools DS-a and eyedropper DY-m wait on it; this lead does not build another feature's tasks.
+- (run act-1a162d0f852-70vb) DS-m split into two PRs (DS-5, DS-6) to stay under 400 lines; both stack on #4357 (DY-m), which shares DesignCanvasEditing.swift, DesignCommandCatalog.swift and design.txt. They retarget to dev when DY-m merges.
+- DS-u stacks on DS-m: its macOS paint tests assert DesignNode.path(in:), which DS-5 fills, so a batch gate without DS-m would mark it needs-fix.
+- DesignDrawing plan 7/8: the surviving mutant is in placeText (Text drag), untouched by DS-5, and survives on the base too.
+- This run first wrote its record to lead/shape-tools by mistake (the SuiteUI lead's branch); restored that branch to its prior head 8c7713f10 at 2026-10-22.
 
 ## Open
-- transform:DT-a/DT-u/DT-m: Design transform #3436 has no running lead; shape-tools cannot start until one builds DT-a.
-
-- 04:35Z DS-a #3857 (220 lines, 15 files): the contract check flagged plan drift, accepted by the lead. Exhaustive-switch `.shape` cases in 7 unplanned files. Options inline in DesignInspector, no DesignShapeOptions.swift (check-dup-views). Shape suite in DesignNodeTests.swift; DS-5 moves it to DesignShapeTests.swift. The journey file is left to DS-7.
+- DS-6 caveat: an exported line has a fill and no stroke in SVG (invisible); possible finding for the DS-m critics.
