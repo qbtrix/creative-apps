@@ -120,8 +120,8 @@ extension ExportFormat {
     /// Why this format can't export yet, the sentence the sheet and a refused run show; nil once it can.
     public var unbuiltReason: String? {
         switch self {
-        case .mp4: "MP4 lands with FV-3."
-        case .gif: "GIF lands with FV-3."
+        case .mp4: "MP4 lands with FV-4."
+        case .gif: "GIF lands with FV-4."
         case .svgFrame, .lottie, .pngSequence: nil
         }
     }
