@@ -42,6 +42,7 @@ Next: RP-7 feature-done PR (docs-only), then Belt-Contact-Sheet after the CI its
 - Status mirrored to lead/suite-<feature> (docs/leads/suite-<feature>/) from 2026-10-22T15:26:41Z, where Belt reads it; lead/<feature> keeps the same files.
 - RP-7 #4459 (wave.json built, feature-done, fast-lane) opened as draft at bb49f6f15; goes ready once #4380 (RP-6) merges so feature CI contains it.
 - #4380 (RP-6) merged; #4459 (RP-7, feature-done) marked ready.
+- #4459 (RP-7, feature-done) merged as 3578eaee2; waiting for a green full CI (or scoped: suite) run on dev containing it, then Belt-Contact-Sheet on #3772.
 
 ## Open
 - none
