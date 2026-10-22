@@ -76,3 +76,4 @@ utc	stage	event	ref	note
 2026-10-22T03:41:00Z	check-in	no change: scoped: photo 39712698310 queued, full CI 39714642994 pending; no findings
 2026-10-22T04:12:00Z	check-in	scoped: photo 39712698310 on b5a6e7e0a now running; full CI 39714642994 cancelled (superseded by CI 39720939785 on 6e19f406d, pending); no findings
 2026-10-22T04:17:00Z	check-in	macOS (photo) job of 39712698310 still running; full CI 39720939785 pending; no findings
+2026-10-22T04:40:00Z	triage	scoped: photo 39712698310 (b5a6e7e0a) RED only on RenderBudgetPhotoTransformTests corner drag/rotation scrub bodies 120-121 > 3; not ours: same failure on 037c5c745 (before PM-m #4143) and since PT-u #4127; fixed by #4219 (9d5deb1e8), not in b5a6e7e0a. Waiting on scoped: photo 39722915670 + CI 39722978870 on 71987f724 (has #4219, PM-m, PM-z)
