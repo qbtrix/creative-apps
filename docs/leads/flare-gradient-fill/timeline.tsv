@@ -89,3 +89,4 @@ utc	stage	event	ref	note
 2026-10-22T01:35Z	3	decision	-	Records now also live on lead/flare-* (the branches Belt watches); every stage pushes there.
 2026-10-22T01:44Z	3	heartbeat	-	Heartbeat: #4259 build 39703409910 still queued (macOS runners busy); #4257, #4035 open; no green-Linux run containing FG-m yet.
 2026-10-22T02:16Z	3	heartbeat	-	No change: #4257 open, no green-Linux run with FG-m yet.
+2026-10-22T02:47Z	3	fix	-	#4257 held: lane Linux run 39705332201 red on FormatListRatchetTests.realTreePasses (SuiteModel, not ours; dev b5a6e7e0 Linux green). Merging dev into fgz, gate running.
