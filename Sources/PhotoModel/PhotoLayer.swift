@@ -25,6 +25,8 @@ public struct PhotoLayer: Identifiable, Sendable, Hashable {
     public internal(set) var hasMask = false
     /// A disabled mask is kept but not applied (Shift-click its badge).
     public internal(set) var isMaskEnabled = true
+    /// Clipped to the layer below: shows only where that layer has pixels (masks-clipping PK-8).
+    public internal(set) var isClipped = false
 
     /// Clamps `opacity` to 0...1; a NaN opacity falls back to 1, the default.
     public init(id: String, name: String, isVisible: Bool = true, opacity: Double = 1, blendMode: BlendMode = .normal) {

@@ -2,7 +2,10 @@
 // file Tests/import_fidelity/gen.py wrote must open through CoreRaster's
 // PSD.read with every layer and group, by name, kind, visibility, blend mode,
 // opacity, clipping and mask, and the layer tree flattened here must match
-// the merged image the authoring app stored (8-bit, within 2). A file the
+// the merged image the authoring app stored (8-bit, within 2; within 8 inside
+// a case's "loose" rect, where layer effects draw anti-aliased edges). A layer
+// with effects opens with its style (manifest "effects") and is flattened
+// through it; what the reader drops it names in the image's notes. A file the
 // reader can't hold must throw a reason naming what it is; content dropped
 // with no reason fails. A file with a known gap runs under withKnownIssue
 // owned by its finding issue (manifest "gap"), so a fix flips it to an error
@@ -13,13 +16,13 @@ import Testing
 
 struct PSDCase: Decodable, Sendable, CustomTestStringConvertible {
     let file: String, what: String, width: Int, height: Int, bits: Int
-    let refuse: String?, tree: [PSDNode]?, gap: Int?
+    let refuse: String?, tree: [PSDNode]?, gap: Int?, loose: [Int]?, notes: [String]?
     var testDescription: String { file }
 }
 
 struct PSDNode: Decodable, Sendable {
     let name: String, kind: String, hidden: Bool, blend: String?
-    let opacity: Int?, clip: Bool?, mask: Bool?, children: [PSDNode]?
+    let opacity: Int?, clip: Bool?, mask: Bool?, children: [PSDNode]?, effects: [String]?
 }
 
 enum PSDCorpus {
@@ -56,10 +59,16 @@ enum PSDCorpus {
         let image = try PSD.read(data)
         #expect(image.width == c.width && image.height == c.height && image.bitsPerChannel == c.bits)
         compare(image.nodes, c.tree ?? [], at: c.file)
+        if let notes = c.notes { #expect(image.notes == notes, "\(c.file): notes \(image.notes), the file drops \(notes)") }
+        let loose = c.loose ?? []
+        let limit = { (x: Int, y: Int) in
+            loose.count == 4 && x >= loose[0] && y >= loose[1] && x < loose[2] && y < loose[3] ? 8 : 2
+        }
         let want = try #require(image.composite, "\(c.file) has no merged image").rgba8()
         let got = try Self.flatten(image).rgba8()
         var bad = 0, first = ""
-        for i in stride(from: 0, to: want.count, by: 4) where (0..<3).contains(where: { abs(Int(want[i + $0]) - Int(got[i + $0])) > 2 }) {
+        for i in stride(from: 0, to: want.count, by: 4)
+        where (0..<3).contains(where: { abs(Int(want[i + $0]) - Int(got[i + $0])) > limit(i / 4 % c.width, i / 4 / c.width) }) {
             if bad == 0 {
                 first = "first at (\(i / 4 % c.width), \(i / 4 / c.width)): \(got[i..<i + 3].map { $0 }) for \(want[i..<i + 3].map { $0 })"
             }
@@ -78,6 +87,8 @@ enum PSDCorpus {
                 #expect("\(l.blendMode)" == e.blend, "\(path)/\(e.name): blend \(e.blend ?? "-") opens as \(l.blendMode)")
                 #expect(Int((l.opacity * 255).rounded()) == e.opacity && l.clipsToBelow == e.clip && (l.mask != nil) == e.mask,
                         "\(path)/\(e.name): opacity, clipping or mask lost")
+                let kept = (l.style?.entries ?? []).map { Self.kind($0.op) }.sorted()
+                #expect(kept == (e.effects ?? []).sorted(), "\(path)/\(e.name): effects \(e.effects ?? []) open as \(kept)")
             case .group(let g):
                 #expect(e.kind == "group" && g.name == e.name && g.isHidden == e.hidden, "\(path)/\(e.name): opened as group \(g.name)")
                 #expect(g.blendMode.map { "\($0)" } == e.blend, "\(path)/\(e.name): group blend lost")
@@ -107,9 +118,30 @@ enum PSDCorpus {
             case .pixels(let l):
                 if !l.clipsToBelow { base = l }
                 guard !l.isHidden else { continue }
-                try canvas.composite(try covered(l, clippedTo: l.clipsToBelow ? base : nil), x: l.x, y: l.y,
-                                     mode: l.blendMode, opacity: l.opacity)
+                let (pixels, reach) = try styled(try covered(l, clippedTo: l.clipsToBelow ? base : nil), l.style)
+                try canvas.composite(pixels, x: l.x - reach, y: l.y - reach, mode: l.blendMode, opacity: l.opacity)
             }
+        }
+    }
+
+    /// The layer's pixels drawn with its style (CoreRaster's `styled`), grown by the
+    /// style's reach on each side so nothing clips, and that reach.
+    private static func styled(_ pixels: PixelBuffer, _ style: LayerStyleStack?) throws -> (PixelBuffer, Int) {
+        guard let style else { return (pixels, 0) }
+        let r = style.reach
+        let grown = try pixels.padded(width: pixels.width + 2 * r, height: pixels.height + 2 * r, anchor: .center)
+        return (try grown.styled(style), r)
+    }
+
+    private static func kind(_ op: StyleOp) -> String {
+        switch op {
+        case .dropShadow: "dropShadow"
+        case .innerShadow: "innerShadow"
+        case .outerGlow: "outerGlow"
+        case .innerGlow: "innerGlow"
+        case .stroke: "stroke"
+        case .overlay: "overlay"
+        case .bevel: "bevel"
         }
     }
 

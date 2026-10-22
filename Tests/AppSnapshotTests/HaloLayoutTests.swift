@@ -11,7 +11,8 @@
 // `halo.inspector.key.<raw>` stopwatch starts within 0.5 pt of the others
 // (one column), and each bar is wide enough for its title, the s gap and its
 // value inside its m padding. L5: HaloViewer hosted at the content minimum;
-// all six `halo.transport.*` controls show, left of the status row's zoom,
+// all six `halo.transport.*` controls and History (`halo.history.show`,
+// #4449) show, left of the status row's zoom (which may drop),
 // size, timecode and layer pills; none overlaps another by more than 0 pt or
 // leaves the row, and the timecode shows at its full width. L7 (#4313): in
 // the hosted window at the journeys' 1000 by 640, the `suite.inspector`
@@ -41,6 +42,8 @@ import Testing
     nonisolated static let barTolerance: CGFloat = 0.5
     /// L5: the status row's transport and pills overlap, at most.
     nonisolated static let statusOverlap: CGFloat = 0
+    /// L5: the History button by the transport (HaloHistoryControl).
+    nonisolated static let historyID = "halo.history.show"
 
     /// `-HaloSample keyed` on fake services: Ball keyed at 0, 12 and 24 over Floor.
     private func keyed() throws -> HaloProject {
@@ -156,10 +159,14 @@ import Testing
         defer { host.close() }
         var items: [(String, CGRect)] = []
         // Every transport control stays at the minimum, so a mouse can still play and step (#4272).
-        for id in ["start", "previous", "play", "next", "end", "loop"].map({ "halo.transport.\($0)" }) {
+        // History stays beside it, so a mouse can still open History (#4449).
+        let leading = ["start", "previous", "play", "next", "end", "loop"].map({ "halo.transport.\($0)" })
+            + [Self.historyID]
+        for id in leading {
             let frame = try #require(host.frames(prefix: id)[id], "\(id) is gone at \(size.width) pt")
             items.append((id, frame))
         }
+        // The zoom pill may drop before History or the timecode do (HaloStatusRow).
         let texts: [(String, (String) -> Bool)] = [
             ("zoom", { $0.hasPrefix("Zoom ") }), ("size", { $0 == comp.sizeText }),
             ("timecode", { $0 == comp.statusTimecode }), ("layers", { $0 == comp.layerSummary }),
@@ -169,7 +176,7 @@ import Testing
         }
         let report = "L5 at \(size.width) pt: \(items.map { "\($0.0) \(Self.span($0.1))" }.joined(separator: ", "))"
         print(report)
-        #expect(items.contains { $0.0 == "zoom" } && items.contains { $0.0 == "size" }, "the pills weren't found: \(report)")
+        #expect(items.contains { $0.0 == "size" }, "the size pill wasn't found: \(report)")
         for (index, (name, frame)) in items.enumerated() {
             #expect(frame.minX >= -Self.barTolerance && frame.maxX <= size.width + Self.barTolerance,
                 "\(name) runs out of the row: \(report)")
@@ -181,10 +188,12 @@ import Testing
                 #expect(!overlap, "\(name) and \(other) overlap by \(across) pt: \(report)")
             }
         }
-        // Transport left, pills right.
-        let transportEnd = items.filter { $0.0.hasPrefix("halo.transport.") }.map(\.1.maxX).max() ?? 0
-        let pillsStart = items.filter { !$0.0.hasPrefix("halo.transport.") }.map(\.1.minX).min() ?? 0
-        #expect(transportEnd <= pillsStart + Self.statusOverlap + 0.001, "the transport isn't left of the pills: \(report)")
+        // Transport and History left, pills right.
+        let isLeading = { (name: String) in leading.contains(name) }
+        let transportEnd = items.filter { isLeading($0.0) }.map(\.1.maxX).max() ?? 0
+        let pillsStart = items.filter { !isLeading($0.0) }.map(\.1.minX).min() ?? 0
+        #expect(transportEnd <= pillsStart + Self.statusOverlap + 0.001,
+            "the transport and History aren't left of the pills: \(report)")
         let timecode = try #require(items.first { $0.0 == "timecode" }?.1, "no timecode at the content minimum: \(report)")
         let full = Self.fittingWidth(Text(verbatim: comp.statusTimecode).font(SuiteFont.pill))
         #expect(timecode.width >= full - Self.barTolerance, "the timecode is \(timecode.width) pt of its \(full): \(report)")
@@ -258,7 +267,8 @@ extension BodyCountSuites {
             let report = "L7 at \(Self.window.width) pt: plain \(columns[0]), keyed and eased \(columns[1])"
             print(report)
             #expect(abs(columns[0].minX - columns[1].minX) <= 0.5, "the inspector moves: \(report)")
-            for column in columns {
+            // suite.inspector's frame is the column's content box: SuiteWindow pads it by SuiteSpacing.m on each side.
+            for column in columns.map({ $0.insetBy(dx: -SuiteSpacing.m, dy: 0) }) {
                 #expect(column.width >= HaloWindow.inspectorWidth - 0.5, "the inspector is under its width: \(report)")
             }
         }
