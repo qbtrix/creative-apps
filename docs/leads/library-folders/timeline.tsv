@@ -49,3 +49,4 @@ utc	stage	event	ref	note
 1792628005	-	watch	FO-z	Heartbeat: #4256 queued behind a busy lane. Dev Linux was red at de0f324 on FormatListRatchetTests (SuiteModel Media.swift), not ours.
 1792628504	-	merged	FO-z	#4256 c4607f1
 1792628918	-	watch	FO-z	Heartbeat: waiting for a dev CI run containing c4607f1 with green Linux (dev red on SuiteModel FormatListRatchetTests, not ours).
+1792629832	-	watch	FO-z	Heartbeat: Linux check 39699955972 on c4607f1 and full CI 39700185524 on add701f pending.

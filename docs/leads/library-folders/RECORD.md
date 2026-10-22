@@ -92,3 +92,5 @@ Next: (2026-10-21T17:09Z) FO-5 #4022 at 7482cc7: lane macOS build 39632234354 qu
 - 2026-10-22T00:21Z: FO-7 #4256 merged as c4607f1 (feature-done). FO-z waits for a dev CI run containing c4607f1 with a green Linux job.
 
 - 2026-10-22T00:28Z: Heartbeat: waiting for a dev CI run containing c4607f1 with green Linux (dev red on SuiteModel FormatListRatchetTests, not ours).
+
+- 2026-10-22T00:43Z: Heartbeat: Linux check 39699955972 on c4607f1 and full CI 39700185524 on add701f pending.
