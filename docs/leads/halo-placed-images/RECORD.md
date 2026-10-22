@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: PH-a #4426 Linux green at 4bce186a; macOS build 39813847288 still queued at 16:47Z (3rd blocked poll), Question for the supervisor posted on #3456 (comment 6346184015); on Mac-Check or a build, lane merges; then retarget #4437 (23c39ff5) to dev + fast-lane, then #4438 (8d0c4b94); PH-m starts when HT-6 #4415 merges
+Next: (17:11Z) supervisor answered 16:54Z: #4426 is in their local Mac gate (lane bug cancels queued mac builds); don't push PH-a. Lane merged dev in (head 2d3e024a), Linux run 39818033389 running. On merge: retarget #4437 to dev, ready, fast-lane; then #4438. PH-m waits on HT-6 #4415 (head 300375f6, open, clean).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
