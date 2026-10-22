@@ -60,3 +60,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-22T04:18Z: FV-1 done on lead/export-pack-fva at ed2293cc (+140/-10, 8 files, gate PASS); the sheet hides unbuilt formats until FV-2. XP-3 not on dev yet.
 - 2026-10-22T04:24Z: XP-3 still not on dev; FV-2 waits
 - 2026-10-22T04:52Z: XP-3 still not on dev; FV-2 waits
+- 2026-10-22T05:19Z: XP-3 still not on dev; FV-2 waits
