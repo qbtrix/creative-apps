@@ -1,0 +1,6 @@
+[
+  {"label": "hiddenEdited: a click on a hidden text layer edits it", "file": "Sources/PhotoModel/PhotoTextEdit.swift", "find": "guard layer.isVisible, case .text", "replace": "guard case .text", "tests": "PhotoTextEditTests"},
+  {"label": "unchangedStep: unchanged words still add an Edit Text step", "file": "Sources/PhotoModel/PhotoTextEdit.swift", "find": "case .text(let text) = layers[at].kind, text.words != words else { return }", "replace": "case .text = layers[at].kind else { return }", "tests": "PhotoTextEditTests"},
+  {"label": "editNeverOpens: a click on a text layer opens a new box", "file": "Sources/PhotoModel/PhotoTextBox.swift", "find": "if let id = textLayer(at: origin) { return editText(id) }", "replace": "", "tests": "PhotoTextEditTests"},
+  {"label": "editAdds: an edit's commit adds a new layer instead", "file": "Sources/PhotoModel/PhotoTextBox.swift", "find": "if let id = box.editing { return commitEdit(of: id, words: box.draft) }", "replace": "", "tests": "PhotoTextEditTests"}
+]
