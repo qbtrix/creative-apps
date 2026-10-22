@@ -1,0 +1,16 @@
+[
+  {
+    "label": "anchorOffset: old content moves the opposite way to its anchor",
+    "file": "Sources/SuiteKernel/Document/DocumentSetupCommands.swift",
+    "find": "let (before, after) = (old.pixelSize, new.pixelSize)",
+    "replace": "let (before, after) = (new.pixelSize, old.pixelSize)",
+    "tests": "DocumentSetupTests"
+  },
+  {
+    "label": "durationKeepsSeconds: a rate change keeps the frame count, so the seconds change",
+    "file": "Sources/SuiteKernel/Document/DocumentSetupCommands.swift",
+    "find": "next.durationSeconds = p.duration ?? old.durationSeconds",
+    "replace": "next.durationSeconds = p.duration ?? old.durationSeconds.map { s in old.frameRate.flatMap { o in next.frameRate.map { n in s * Double(o.numerator * n.denominator) / Double(max(1, o.denominator * n.numerator)) } } ?? s }",
+    "tests": "DocumentSetupTests"
+  }
+]

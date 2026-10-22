@@ -15,6 +15,11 @@
 // (gradient-fill DG-5) is a <linearGradient> or <radialGradient> in a <defs>
 // just before its layer, written by SuiteKernel's GradientSVG with its points in
 // the layer's frame (userSpaceOnUse), and the layer fills with `url(#g-<id>)`.
+// A turned or mirrored layer (transform DT-6) carries SVG 2's `transform`
+// attribute: `rotate(d cx cy)` about its frame's centre, then for a mirror
+// `translate(cx cy) scale(±1 ±1) translate(-cx -cy)`, TransformRules.matrix's
+// order. As on the canvas, a frame's clip and background turn and its children
+// keep their own; a group has no shape of its own.
 import SuiteKernel
 import SuiteModel
 
@@ -44,32 +49,33 @@ enum DesignSVG {
         let f = node.frame
         let (x, y) = (f.x - origin.x, f.y - origin.y)
         let box = "x=\"\(number(x))\" y=\"\(number(y))\" width=\"\(number(f.width))\" height=\"\(number(f.height))\""
+        let turned = turn(node, x: x, y: y)
         if node.kind != .group, let defs = gradient(node, x: x, y: y) { lines.append(pad + defs) }
         switch node.kind {
         case .rectangle, .instance, .shape:  // a shape writes its box until DS-6 writes its path
-            lines.append(pad + "<rect \(box)\(corner(node))\(fill(node))\(paint(node))\(alpha(node))/>")
+            lines.append(pad + "<rect \(box)\(corner(node))\(fill(node))\(paint(node))\(alpha(node))\(turned)/>")
         case .ellipse:
             let (rx, ry) = (f.width / 2, f.height / 2)
             let at = "cx=\"\(number(x + rx))\" cy=\"\(number(y + ry))\" rx=\"\(number(rx))\" ry=\"\(number(ry))\""
-            lines.append(pad + "<ellipse \(at)\(fill(node))\(paint(node))\(alpha(node))/>")
+            lines.append(pad + "<ellipse \(at)\(fill(node))\(paint(node))\(alpha(node))\(turned)/>")
         case .text:
-            lines.append(pad + text(node, x: x, y: y))
+            lines.append(pad + text(node, x: x, y: y, turned: turned))
         case .group:
             lines.append(pad + "<g\(alpha(node))>")
             for child in node.children { write(child, origin: origin, depth: depth + 1, into: &lines) }
             lines.append(pad + "</g>")
         case .frame:
             let id = XMLText.escaped("clip-" + node.id)
-            lines.append(pad + "<clipPath id=\"\(id)\"><rect \(box)\(corner(node))/></clipPath>")
+            lines.append(pad + "<clipPath id=\"\(id)\"><rect \(box)\(corner(node))\(turned)/></clipPath>")
             lines.append(pad + "<g clip-path=\"url(#\(id))\"\(alpha(node))>")
-            lines.append(pad + "  <rect \(box)\(corner(node))\(fill(node))\(paint(node))/>")
+            lines.append(pad + "  <rect \(box)\(corner(node))\(fill(node))\(paint(node))\(turned)/>")
             for child in node.children { write(child, origin: origin, depth: depth + 1, into: &lines) }
             lines.append(pad + "</g>")
         }
     }
 
     /// A text layer: its anchor follows the alignment, its baseline sits one font size below the top.
-    private static func text(_ node: DesignNode, x: Double, y: Double) -> String {
+    private static func text(_ node: DesignNode, x: Double, y: Double, turned: String) -> String {
         let style = node.textStyle
         let (anchorX, anchor): (Double, String?) = switch style.alignment {
         case .leading: (x, nil)
@@ -81,8 +87,22 @@ enum DesignSVG {
         out += " font-family=\"\(XMLText.escaped(family))\""
         if style.weight != 400 { out += " font-weight=\"\(style.weight)\"" }
         if let anchor { out += " text-anchor=\"\(anchor)\"" }
-        out += "\(fill(node))\(alpha(node))>\(XMLText.escaped(node.text))</text>"
+        out += "\(fill(node))\(alpha(node))\(turned)>\(XMLText.escaped(node.text))</text>"
         return out
+    }
+
+    /// ` transform="…"`: turned about the frame's centre at `x`, `y` (box-relative), then mirrored about it
+    /// (TransformRules.matrix's order); empty when upright and unmirrored.
+    private static func turn(_ node: DesignNode, x: Double, y: Double) -> String {
+        let (mx, my) = (x + node.frame.width / 2, y + node.frame.height / 2)
+        let (cx, cy) = (number(mx), number(my))
+        var parts: [String] = []
+        if node.rotation != 0 { parts.append("rotate(\(number(node.rotation)) \(cx) \(cy))") }
+        if node.flipX || node.flipY {
+            let (sx, sy) = (node.flipX ? "-1" : "1", node.flipY ? "-1" : "1")
+            parts.append("translate(\(cx) \(cy)) scale(\(sx) \(sy)) translate(\(number(-mx)) \(number(-my)))")
+        }
+        return parts.isEmpty ? "" : " transform=\"\(parts.joined(separator: " "))\""
     }
 
     /// The `<defs>` holding `node`'s gradient as SuiteKernel's GradientSVG writes it, its points in the layer's

@@ -26,5 +26,12 @@
     "find": "+ HistoryCommands.specs(DesignWorkspace.self)",
     "replace": "+ HistoryCommands.specs(DesignWorkspace.self).filter { $0.id != \"history.jump\" }",
     "tests": "DesignHistoryCommandTests"
+  },
+  {
+    "label": ".transformRegistered: the six transform specs are left out of the catalog",
+    "file": "Sources/DesignModel/DesignCommandCatalog.swift",
+    "find": "+ TransformCommands.specs(DesignWorkspace.self) ",
+    "replace": "",
+    "tests": "DesignCommandCatalogTests"
   }
 ]
