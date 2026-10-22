@@ -146,3 +146,4 @@ utc	stage	event	ref	note
 2026-10-22T10:47Z	3	rebase	#4329	needs-rebase again 10:42Z (HaloWindow.swift vs #4210 #4336), fixer dispatched
 2026-10-22T10:54Z	3	rebase	#4329	dev merged in again, head e2f23e0b, ci --changed PASS
 2026-10-22T11:44Z	3	split	#4329	406 lines over cap, supervisor asked split; fixer dispatched (model PR + wiring branch)
+2026-10-22T11:54Z	3	pr	#4403	model half of #4329 (164 lines); #4329 closed; wiring branch pushed, PR after #4403 merges
