@@ -43,3 +43,4 @@ utc	stage	event	ref	note
 2026-10-21T23:06Z	FR-u/7/9	pushed	c52f71142	FR-halo 53a6be99d, FR-flare c52f71142 pushed with #4215 port; Head lines moved
 2026-10-21T23:27Z	heartbeat	heartbeat	c52f71142	no merges yet; dev Linux check red (39691394890) on other lines; OC-u/AD-halo not on dev
 2026-10-21T23:52Z	FR-u	FR-u reverted #4215 port	9205cfdab	gate PASS on 9205cfdab; Head moved
+2026-10-22T00:14Z	FR-halo	#4211 #4212 merged	bb7c17800	await covering Linux run
