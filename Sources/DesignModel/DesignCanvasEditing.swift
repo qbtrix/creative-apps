@@ -461,7 +461,9 @@ extension DesignWorkspace {
             if let kind = tool.nodeKind { route = .draw(kind) }
         case .text:
             route = .text
-        case .shape, .pen, .eyedropper:  // Shape draws through ShapeRules.dragged from DS-5
+        case .eyedropper:  // one pick per click, at the press; the rest of the drag does nothing
+            try? pick(at: start, toStroke: sampleToStroke != option)
+        case .shape, .pen:  // Shape draws through ShapeRules.dragged from DS-5
             break
         }
         var gesture = DesignGesture(route: route, start: start, before: snapshot, wasSelected: wasSelected, history: history)
