@@ -36,4 +36,4 @@ time	kind	step	ref	note
 2026-10-22T12:28Z	-	mac-build-green	#4395	run 39766593795
 2026-10-22T12:35Z	-	merged	#4395	HK-u1
 2026-10-22T12:35Z	-	pr-opened	#4413	HK-u2
-2026-10-22T12:38:40Z	slice-done	HK-a https://github.com/qbtrix/creative-apps/actions/runs/39774574487
+2026-10-22T12:38Z	-	slice-done	-	HK-a run 39774574487
