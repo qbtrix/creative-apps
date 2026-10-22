@@ -2,9 +2,9 @@
 
 Issue: #3457 · Packet: docs/blueprints/suiteui/features/placed-images.md
 Run: act-1a1647a67aa-dau5 (relaunch) · Started: 2026-10-22T16:45Z
-Stage: PL-9 #4613 merged with new EY-z (1f77491), gate CI: PASS, pushed, Head moved; #4613/#4616/#4617 clean
+Stage: #4613 (PL-9) and #4616/#4617 clean on their stacked bases; waiting for #4583 (EY-z) to merge
 Base: 854a3b52c66aaa12582e9190f404265b84594a05
-Next: Retarget #4613 to dev after #4583 merges; then #4616 and #4617
+Next: After #4583 merges: retarget #4613 to dev, merge dev, gate, push, move Head; then #4616/#4617
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -33,6 +33,7 @@ Next: Retarget #4613 to dev after #4583 merges; then #4616 and #4617
 |---|---|---|---|---|---|
 
 ## Decisions
+- -
 - Union merge keeps stroke, sample and place commands (44 ids)
 - 20:33Z No change; waits on #4429 then #4583.
 - 20:11Z PL-8 #4578 merged (macOS build 39838044012 green after fix round 1).
