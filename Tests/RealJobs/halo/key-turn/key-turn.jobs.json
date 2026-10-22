@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "app": "halo",
+  "why": "RJ-H34: animates a shape's Rotation, scrubs to 12, turns it 30 degrees and doubles it about its centre with the transform commands, and checks the saved project: Rotation keys 30 at 12 over its base 0 at 0, Scale keys 2 at 12, the centre stays put.",
+  "inputs": ["input/*.halo"],
+  "steps": [
+    {"id": "layer.select", "params": {"id": "comp-1-layer-1"}},
+    {"id": "inspector.toggle-animation", "params": {"property": "rotation"}},
+    {"id": "inspector.toggle-animation", "params": {"property": "scaleX"}},
+    {"id": "inspector.toggle-animation", "params": {"property": "scaleY"}},
+    {"id": "timeline.scrub", "params": {"frame": 12}},
+    {"id": "transform.rotate", "params": {"degrees": 30}},
+    {"id": "transform.scale", "params": {"sx": 2, "sy": 2, "anchor": "center"}}
+  ],
+  "atomic": true,
+  "expect": {
+    "out/one-shape.halo": {"json": {}}
+  },
+  "platforms": ["linux", "macos"]
+}
