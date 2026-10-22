@@ -2,7 +2,7 @@
 
 Issue: #3438 · Packet: docs/blueprints/design/features/eyedropper.md
 Run: act-1a1605b0534-rn47 · Session: claude/feature-leads-stroke-eyedropper-e84htn · Started: 2026-10-21T21:05Z (prior runs act-1a15e909498-4bkk, act-1a15abb305f-lc8g)
-Stage: DY-u round 2 #4081 merged (66a84588); waiting on a green scoped design run containing it for Belt-Slice-Done DY-u gaps #3987 #3990 #3994; DY-m waits on DT-m (#4255 in lane) (2026-10-22T05:45Z)
+Stage: DY-u done (Belt-Slice-Done on scoped design run 39720061887, gaps #3987 #3990 #3994); DY-m waits on transform DT-m Belt-Slice-Done on #3436 (2026-10-22T06:16Z)
 Base: 5bec8089 (origin/dev); main verified at 0dd23d65
 Next: #4081 (round 2, #4061; head 1a5a24be with #4215 ported for dev's Photo compile break, Fast-Check pass) merges -> Belt-Slice-Done DY-u gaps #3987 #3990 #3994 on the next green design run. DY-m waits transform:DT-m (#4187 open; DT-6 after DG-m)
 
@@ -42,3 +42,4 @@ Next: #4081 (round 2, #4061; head 1a5a24be with #4215 ported for dev's Photo com
 - Run act-1a1605b0534-rn47: the brief's "rebase lead/eyedropper onto origin/main" was not done: lead/eyedropper is the SuiteUI eyedropper lead's branch (#3448); this lead's status stays on lead/design-eyedropper.
 - #4081 was labelled needs-split at 16 files: its stack still carried #3998's commits. Merging origin/dev into it (no force push) left 1 file, +18 lines.
 - 2026-10-22T02:44Z: #4081 merged into dev as 66a84588 (lane noted dev was red on its own). Next: green design run containing 66a84588, then Belt-Slice-Done DY-u.
+- 2026-10-22T06:16Z: DY-u Belt-Slice-Done posted on #3438 (scoped design run 39720061887, dev 6e19f406, macOS (design) green, contains 66a84588).

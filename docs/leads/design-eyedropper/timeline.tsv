@@ -80,3 +80,4 @@ utc	stage	event	ref	note
 2026-10-22T05:01Z	heartbeat	macOS backlog: scoped design 39720061887 and CI 39722978870 (both contain #4081) still queued; no DT-m slice-done; DS-u not started
 2026-10-22T05:23Z	heartbeat	macOS backlog: scoped design 39720061887 and CI 39722978870 still queued; transform lead relaunched by supervisor 05:14Z (DT-m pending); DS-u not started
 2026-10-22T05:45Z	heartbeat	macOS backlog persists: scoped design 39720061887 and CI 39722978870 queued; no DT-m slice-done; DS-u not started
+2026-10-22T06:16Z	slice-done	DY-u run 39720061887
