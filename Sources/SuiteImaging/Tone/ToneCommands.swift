@@ -1,9 +1,6 @@
-// ToneCommands.swift (tone-controls TC-1 specs, TC-6 bodies): the four tone.*
-// commands every app with a ToneTarget registers, and the intents ToneRows
-// sends them as. Ids, titles, schemas and availability are the contract; TC-1
-// runs throw `notBuilt` and `ToneIntent.command` is TC-6's. Each run reads
-// `toneSettings`, applies one ToneRules rule and calls `setTone` once, the
-// drag token passed through so a drag is one undo step. Linux-safe.
+// ToneCommands.swift (tone-controls TC-1 specs, TC-6 bodies): the four tone.* commands a ToneTarget
+// registers and the intents views send. Ids, schemas and availability are the contract; TC-1 runs
+// throw `notBuilt`. Each run calls `setTone` once, the drag token passed through. Linux-safe.
 import CoreRaster
 import SuiteKernel
 
@@ -26,11 +23,7 @@ public enum ToneIntent: Hashable, Sendable {
 
     /// The command id and its JSON params. Stub: the id with empty params until TC-6.
     public var command: (id: String, params: JSONValue) {
-        switch self {
-        case .set: ("tone.set", .object([:]))
-        case .reset: ("tone.reset", .object([:]))
-        case .auto: ("tone.auto", .object([:]))
-        }
+        switch self { case .set: ("tone.set", .object([:])); case .reset: ("tone.reset", .object([:])); case .auto: ("tone.auto", .object([:])) }
     }
 }
 
