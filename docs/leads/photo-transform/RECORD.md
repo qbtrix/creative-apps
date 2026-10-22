@@ -2,7 +2,7 @@
 
 Issue: #3435 · Packet: docs/blueprints/photo/features/transform.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: lane: #4252 fc99225e8 and #4253 47346be72 awaiting lane mac builds + batch
+Stage: lane: mac builds queued (#4252 39714434724, #4253 39714456379); dev Linux green again
 Base: dev
 Next: green photo run with #4252/#4253/#4175 -> critics, Belt-Slice-Done, contact sheets
 
