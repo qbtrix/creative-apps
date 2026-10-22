@@ -138,3 +138,5 @@ utc	stage	event	ref	note
 2026-10-22T06:28Z	3	pr	#4329	fixes #4274 #4276 (69acb1f, 15 files +361/-39, CI: PASS, mutate 4/4)
 2026-10-22T06:33Z	3	pr	#4331	fixes #4275 #4277, refs #4276 (f3ca8d9, 6 files +355/-30, CI: PASS, mutate 4/4); needs-ui #4330
 2026-10-22T06:56Z	3	merge	#4321	#4310-#4312 fixed on dev
+2026-10-22T07:54Z	3	merge	#4322	#4313-#4314 fixed on dev
+2026-10-22T07:54Z	3	rebase	#4329	needs-rebase (HaloWindow.swift vs #4322); fixer merging dev
