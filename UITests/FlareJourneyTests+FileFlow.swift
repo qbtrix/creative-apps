@@ -5,9 +5,9 @@
 // 3. logo.svg dropped on the stage: the mark reads "Flare can't import SVG yet." and nothing opens.
 // 4. File > Open In ▸ Halo: Halo starts with the scene (flare-in-halo, SJ17's path).
 // The files are dragged from a small floating window the test runner shows, as a person drags from a folder
-// window (the shape of SuiteFileFlowJourneyTests). Every file lives in this test's own temp folder. One shot
-// per step, `flare-file-flow-<step>`. It skips until FL-7, when the drop, Open Recent and Open In run on live
-// services (FL-3, FL-4, SF-8): FL-7 replaces the skip with `try openRecentDropAndOpenIn()`.
+// window (`dragFile`, Journey+FileDrag.swift). Every file lives in this test's own temp folder. One shot per
+// step, `flare-file-flow-<step>`. FL-7 turned it on once the drop, Open Recent and Open In ran on live
+// services (FL-3, FL-4, SF-8).
 import AppKit
 import XCTest
 
@@ -24,7 +24,7 @@ final class FlareFileFlowJourneyTests: XCTestCase {
     private static let others = ["Logo.design", "Cards.design", "Intro.halo", "beach.ora", "Sunset.png"]
 
     @MainActor func testOpenRecentAndOpenInHalo() throws {
-        throw XCTSkip("waits on FL-7")
+        try openRecentDropAndOpenIn()
     }
 
     @MainActor private func openRecentDropAndOpenIn() throws {
@@ -64,7 +64,7 @@ final class FlareFileFlowJourneyTests: XCTestCase {
 
         // 2. Title.flare dropped on the stage: it opens in a new window.
         let windows = flare.app.windows.count
-        drag(folder.appending(path: "Title.flare"), onto: stage)
+        dragFile(folder.appending(path: "Title.flare"), onto: stage)
         XCTAssert(flare.app.windows["Title"].waitForExistence(timeout: 15), "dropping Title.flare opened no Title window")
         XCTAssertEqual(flare.app.windows.count, windows + 1, "Title.flare didn't open in a window of its own")
         flare.shot("file-flow-2-dropped-flare")
@@ -73,7 +73,7 @@ final class FlareFileFlowJourneyTests: XCTestCase {
         let svg = folder.appending(path: "logo.svg")
         try Data("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"8\" height=\"8\"/>".utf8).write(to: svg)
         let front = flare.element("flare.stagePane")
-        drag(svg, onto: front)
+        dragFile(svg, onto: front)
         let mark = flare.app.descendants(matching: .any)[Self.dropMark]
         let refused = NSPredicate(format: "label == %@", "Flare can't import SVG yet.")
         XCTAssertEqual(XCTWaiter.wait(for: [expectation(for: refused, evaluatedWith: mark)], timeout: 5), .completed,
@@ -104,46 +104,4 @@ final class FlareFileFlowJourneyTests: XCTestCase {
         XCTAssert(XCUIApplication(url: bundle).windows.firstMatch.waitForExistence(timeout: 30),
                   "Halo made no composition window for the scene")
     }
-
-    /// Shows `file` in a floating window at the screen's top left and drags it onto `target`'s middle.
-    @MainActor private func drag(_ file: URL, onto target: XCUIElement) {
-        let screen = NSScreen.screens.first?.frame ?? .zero
-        let frame = CGRect(x: screen.minX + 40, y: screen.maxY - 200, width: 120, height: 120)
-        let panel = NSPanel(contentRect: frame, styleMask: [.nonactivatingPanel], backing: .buffered, defer: false)
-        panel.level = .floating
-        panel.isReleasedWhenClosed = false
-        panel.contentView = FlareFileDragSource(file: file)
-        panel.orderFrontRegardless()
-        defer { panel.close() }
-        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
-        // XCUI coordinates are screen points from the top left; AppKit's from the bottom left.
-        let origin = target.frame.origin
-        let from = target.coordinate(withNormalizedOffset: .zero)
-            .withOffset(CGVector(dx: frame.midX - origin.x, dy: screen.maxY - frame.midY - origin.y))
-        from.press(forDuration: 0.3, thenDragTo: target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)))
-        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
-    }
-}
-
-/// A view that starts a file drag of `file` when the pointer drags on it.
-private final class FlareFileDragSource: NSView, NSDraggingSource {
-    private let file: URL
-
-    init(file: URL) {
-        self.file = file
-        super.init(frame: .zero)
-    }
-
-    required init?(coder: NSCoder) { nil }
-
-    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
-
-    override func mouseDragged(with event: NSEvent) {
-        let item = NSDraggingItem(pasteboardWriter: file as NSURL)
-        item.setDraggingFrame(bounds, contents: NSWorkspace.shared.icon(forFile: file.path))
-        beginDraggingSession(with: [item], event: event, source: self)
-    }
-
-    func draggingSession(_ session: NSDraggingSession,
-                         sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation { .copy }
 }

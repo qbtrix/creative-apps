@@ -64,11 +64,10 @@ struct FlareNewAnimationSheet: View {
                 TextField("Height", text: Binding(get: { heightText }, set: { setHeight($0) }))
                     .accessibilityLabel("Height")
                     .accessibilityIdentifier("flare.new.height")
-                Picker("Frame Rate", selection: Binding(get: { spec.fps }, set: { spec.fps = $0 })) {
-                    ForEach(NewDocumentSpec.frameRates, id: \.self) { Text("\($0) fps").tag($0) }
+                LabeledContent("Frame Rate") {
+                    FrameRateMenu(rate: spec.fps) { spec.fps = $0 }
+                        .accessibilityIdentifier("flare.new.fps")
                 }
-                .accessibilityLabel("Frame Rate")
-                .accessibilityIdentifier("flare.new.fps")
                 TextField("Duration (frames)", text: Binding(get: { durationText }, set: { setDuration($0) }))
                     .accessibilityLabel("Duration (frames)")
                     .accessibilityIdentifier("flare.new.duration")

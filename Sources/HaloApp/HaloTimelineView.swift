@@ -106,10 +106,11 @@ struct HaloTimelineView: View {
         return VStack(alignment: .leading, spacing: 0) {
             GeometryReader { geometry in
                 let lanes = Self.layout.laneFitWidth(strip: stripWidth, container: Double(geometry.size.width))
-                TimelineStrip(
+                // The playhead follows the playing frame in this leaf alone (HaloLiveShown).
+                HaloLiveShown(model: model) { shown in TimelineStrip(
                     tracks: tracks, duration: model.selectedComposition?.lastFrame ?? 0,
                     frameWidth: CGFloat(model.selectedComposition?.frameWidth(toFit: lanes) ?? 1),
-                    playhead: model.selectedComposition?.playheadFrame ?? 0,
+                    playhead: shown.selectedComposition?.playheadFrame ?? 0,
                     onScrub: { frame in
                         hasFocus = true
                         perform(.scrub(frame))
@@ -136,7 +137,7 @@ struct HaloTimelineView: View {
                     onSlide: { id, by in
                         if spanHelp == nil { slideLayer(.init(layer: id, by: by)) }
                     },
-                    onSelectAllKeys: { perform(.selectAllKeys) })
+                    onSelectAllKeys: { perform(.selectAllKeys) }) }
                     .accessibilityIdentifier("halo.timeline.track")
                     .environment(\.timelineIdentifierPrefix, "halo.timeline")
                     .contextMenu {

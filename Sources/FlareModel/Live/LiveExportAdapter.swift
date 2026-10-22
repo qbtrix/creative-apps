@@ -30,8 +30,11 @@ public struct LiveExportAdapter: Exporting {
         guard var scene = clean.scenes.first(where: { $0.id == options.sceneID }) else {
             throw CommandError.sceneNotFound(options.sceneID)
         }
+        if let why = options.format.unbuiltReason { throw NotBuilt(reason: why) }
         var files: [ExportFile] = []
         switch options.format {
+        case .mp4, .gif:
+            break
         case .svgFrame:
             if options.transparentBackground { scene.background.a = 0 }
             let svg = try SVGExporter.export(scene: scene, frame: Double(options.frames.lowerBound), symbols: clean.symbols)

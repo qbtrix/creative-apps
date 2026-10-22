@@ -1,6 +1,5 @@
 // ImagingProgramTests.swift: AdjustSettings compiled to tone steps, and the
-// route that runs them (suite-imaging IM-4). Written with IM-2's stubs and
-// disabled until IM-4 fills the bodies. Mutations (IM-4):
+// route that runs them (suite-imaging IM-4). Mutations (IM-4):
 // SuiteImaging.ImagingProgram (`.gammaSameMeaning`, `.cpuListEqualsGpuList`,
 // `.order`).
 import CoreRaster
@@ -8,7 +7,7 @@ import CoreRender
 import Testing
 import SuiteImaging
 
-@Suite(.disabled("waits on IM-4")) struct ImagingProgramTests {
+@Suite struct ImagingProgramTests {
     static let edited = AdjustSettings(
         exposure: 0.5,
         levels: AdjustLevels(inputBlack: 0.05, inputWhite: 0.95, gamma: 1.6, outputBlack: 0, outputWhite: 1),

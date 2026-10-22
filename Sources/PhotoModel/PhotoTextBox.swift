@@ -2,7 +2,7 @@
 // opens one at the press (`endDrag`); the view's field sends what is typed to `typeText`, Esc to
 // `cancelTextBox` and Return or focus loss to `commitTextBox`, which runs `text.add` with the draft. Another
 // click or another tool commits the open box first. The box is the draft only: nothing in the document
-// changes until the commit, and until TX-5 builds `text.add` the commit says so in the status line.
+// changes until the commit; a refused commit says why in the status line.
 // Linux-safe.
 import CoreRaster
 import SuiteKernel
@@ -11,21 +11,21 @@ import SuiteKernel
 public struct PhotoTextBox: Hashable, Sendable {
     public var origin: Mask.Point
     public var draft: String
+    /// The text layer whose words the box edits (TX-4); nil for a box that adds a new one.
+    public var editing: PhotoLayer.ID?
 
-    public init(origin: Mask.Point, draft: String) {
+    public init(origin: Mask.Point, draft: String, editing: PhotoLayer.ID? = nil) {
         self.origin = origin
         self.draft = draft
+        self.editing = editing
     }
 }
 
 extension PhotoWorkspace {
-    /// Photo's text commands, run by the box's commit until TX-5 appends them to `catalog`.
-    static let textCatalog = try? CommandCatalog<PhotoWorkspace>(
-        app: "photo", textCommands, history: { $0.history.kernel })
-
-    /// Opens an empty box at `origin`, committing any open one first.
+    /// Opens an empty box at `origin`, committing any open one first; on a visible text layer, edits its words.
     mutating func openTextBox(at origin: Mask.Point) {
         commitTextBox()
+        if let id = textLayer(at: origin) { return editText(id) }
         textBox = PhotoTextBox(origin: origin, draft: "")
     }
 
@@ -44,12 +44,12 @@ extension PhotoWorkspace {
     public mutating func commitTextBox() {
         guard let box = textBox else { return }
         textBox = nil
+        if let id = box.editing { return commitEdit(of: id, words: box.draft) }
         guard !box.draft.isEmpty, let canvas else { return }
         let x = Self.pixel(box.origin.x, below: canvas.width), y = Self.pixel(box.origin.y, below: canvas.height)
         let params = JSONValue.object(["x": .number(Double(x)), "y": .number(Double(y)), "words": .string(box.draft)])
         do {
-            guard let catalog = Self.textCatalog else { throw Self.textCommandsNotBuilt }
-            _ = try catalog.run("text.add", params: params, on: &self)
+            _ = try Self.catalog.run("text.add", params: params, on: &self)
         } catch {
             statusMessage = textHelp ?? "Couldn't add the text."
         }

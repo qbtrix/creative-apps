@@ -126,8 +126,8 @@ import Testing
         #expect(LibraryImportNoticeRow.identifier == "library.import.notice")
     }
 
-    /// The window's File actions: Import Folder… and the notice's close enabled.
-    private static let importMenu = LibraryMenu(file: LibraryMenu.File(importFolder: {}, dismissImportNotice: {}))
+    /// The window's File actions: Import Folder…, the notice's Show and its close enabled.
+    private static let importMenu = LibraryMenu(file: LibraryMenu.File(importFolder: {}, showImportFailures: {}, dismissImportNotice: {}))
 
     /// The browser with the window's import actions, the progress row at once
     /// (no 100 ms wait) and the rows pinned to the top, as in the window.
