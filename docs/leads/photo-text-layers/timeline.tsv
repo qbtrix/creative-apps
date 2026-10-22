@@ -71,3 +71,4 @@
 2026-10-22T16:45Z	blocked	#4441: third lane macOS build 39808614436 also cancelled; no build since 16:13Z; same cancel pattern on #4472; asked supervisor on #3785; TX-8 PR held
 2026-10-22T17:19Z	status	#4584 TX-8 opened per supervisor (lane bug on #4441 builds; supervisor fixing; not pushing #4441). Photo findings open: 4566 4563 4562 4404 4378 (journey CI findings, not text-layers slices); no new feature task.
 2026-10-22T17:51Z	status	#4441 TX-7 open (no build yet; waiting on supervisor lane fix, not pushing). #4584 TX-8 open, clean, no checks, not yet merged by lane. Photo journey CI findings 4562-4573 filed 16:50Z in one batch (whole-suite journey run, not a text-layers slice); no new feature task.
+2026-10-22T18:22Z	merged	#4584 TX-8 merged by lane 17:55Z. #4441 TX-7 still open, no build; waiting on supervisor lane fix (not pushing). No text-layers journey finding open.
