@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "app": "design",
+  "why": "RJ-D34: a red ellipse sits over part of a white rectangle. Samples the colour at the overlap, selects the rectangle and picks at the same point onto its fill, then saves. Trap: the sample reads the selected rectangle (white) instead of the ellipse on top. The saved rectangle's fill is #FF0000; DesignSampleCommandTests checks color.sample reads #FF0000 there.",
+  "inputs": ["input/*.design"],
+  "steps": [
+    {"id": "color.sample", "params": {"x": 250, "y": 250}},
+    {"id": "edit.select", "params": {"ids": ["node-2"]}},
+    {"id": "color.pick", "params": {"x": 250, "y": 250, "to": "fill"}}
+  ],
+  "atomic": true,
+  "expect": {
+    "out/two-shapes.design": {"json": {"version": 1, "pages": [{"id": "page-1", "name": "Page 1", "frameWidth": 1440, "frameHeight": 1024,
+      "nodes": [
+        {"id": "node-2", "kind": "rectangle", "name": "Card", "frame": {"x": 100, "y": 100, "width": 200, "height": 200},
+         "children": [], "cornerRadius": 0, "fill": {"red": 255, "green": 0, "blue": 0}, "isHidden": false, "isLocked": false,
+         "opacity": 1, "text": "", "textStyle": {"alignment": "leading", "family": "System", "size": 16, "weight": 400}},
+        {"id": "node-3", "kind": "ellipse", "name": "Dot", "frame": {"x": 200, "y": 200, "width": 200, "height": 200},
+         "children": [], "cornerRadius": 0, "fill": {"red": 255, "green": 0, "blue": 0}, "isHidden": false, "isLocked": false,
+         "opacity": 1, "text": "", "textStyle": {"alignment": "leading", "family": "System", "size": 16, "weight": 400}}
+      ]}]}}
+  },
+  "platforms": ["linux", "macos"]
+}

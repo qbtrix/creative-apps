@@ -15,10 +15,10 @@ extension FlareWorkspace {
         guard let scene = selectedScene else { return StatusPills(aspect: "–", size: "–", fps: "–") }
         let width = Self.side(scene.width), height = Self.side(scene.height)
         var pills = StatusPills(
-            aspect: Self.aspectText(width, height), size: Self.sizeText(width, height), fps: "\(scene.fps) fps")
+            aspect: Self.aspectText(width, height), size: Self.sizeText(width, height), fps: scene.frameRate.description)
         if isPlaying, scene.fps > 0, let measuredFPS, measuredFPS.isFinite, measuredFPS > 0 {
             let shown = min(Int(min(measuredFPS, 1_000).rounded()), scene.fps)
-            pills.actualFPS = "\(shown) fps"
+            pills.actualFPS = shown < scene.fps ? "\(shown) fps" : scene.frameRate.description
             pills.isDropping = shown < scene.fps
         }
         if let hidden = stageList?.hiddenTextCount, hidden > 0 { pills.textWarning = "Text not shown (\(hidden))" }
