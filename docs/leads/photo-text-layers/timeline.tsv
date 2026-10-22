@@ -77,3 +77,5 @@
 2026-10-22T19:59Z	wait	#4441 open, head e65dd6760, Linux green; lane's macOS build 39840390641 queued since 19:28Z; no text-journey finding
 2026-10-22T20:30Z	wait	#4441 macOS build 39840390641 green at 20:22Z; Linux green; waits on a lane sweep to merge
 2026-10-22T21:03Z	merged	#4441 TX-7 merged to dev 21:00:38Z (58ccb4af, batch Linux run 39850898441); waiting on a dev ci.yml run containing it for Belt-Slice-Done TX-z
+2026-10-22T21:31Z	slice-done	Belt-Slice-Done TX-z (run 39854353256, dev be18ab629 has #4441 and #4584)
+2026-10-22T21:31Z	contact-sheet	Belt-Contact-Sheet posted on #3785; Next: beta-hardening lane verifies TX-a TX-u TX-m TX-z
