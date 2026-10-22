@@ -114,3 +114,4 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 18:48Z: heartbeat: #4607 (SS-8, b3d8735) is clean, with no needs-fix or needs-rebase. Its lane macOS build (run 39827609617) is still queued for a runner.
 - 19:14Z: heartbeat: #4607 (SS-8, b3d8735) is clean. Its lane macOS build (run 39827609617) has a runner and is in progress.
 - 19:41Z: heartbeat: #4607 (SS-8, b3d8735) has no needs-fix or needs-rebase. Its lane macOS build (run 39827609617) is still in progress.
+- 20:08Z: heartbeat: #4607 (SS-8, b3d8735): its lane macOS build (run 39827609617) passed and the PR is clean. Waiting for the lane to merge it.
