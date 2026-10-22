@@ -56,3 +56,4 @@ utc	stage	event	ref	note
 2026-10-22T14:20Z	stack	DS-u,DS-z	#4386,#4392	#4385 macOS build 39788523248 in progress; pre-merged DS-6 tip into DS-u (head dbabdf810, diff 4 files +206/-4) and DS-u tip into DS-z (head 29f447781, 2 files +143/-2); ci --changed PASS on both; Head: lines moved
 2026-10-22T14:41Z	poll	DS-m	#4385	lane macOS build 39788523248 green 14:15Z; awaiting lane merge; #4386/#4392 open
 2026-10-22T14:58Z	blocked	DS-m	#4385	lane Linux 39794891984 red only on HaloStrokeTrimKeysTests (dev-red #3856, dev Linux 39787263991 same); fix #4431 not ours; stand-down comment posted; waiting on dev
+2026-10-22T15:25Z	poll	DS-m	#4385	still blocked on dev-red Halo test; fix #4431 open (fast-lane); no needs-fix/needs-rebase on #4385/#4386/#4392
