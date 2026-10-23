@@ -1,6 +1,6 @@
 // DesignInspectorImage.swift (placed-images PD-u, PD-4): the inspector's Image section on a frame or rectangle.
 // A layer showing a picture gets SuiteUI's PlacedImageRows (the file, Replace…, Reset Size), each sent as `.place`;
-// then Place… (`.placeFile`, the File menu's command) and Fill, a checkbox kept in user defaults
+// then Place… (`.placeFile`, built from the File menu's catalog spec) and Fill, a checkbox kept in user defaults
 // (DesignPlace.fillKey) that makes Place… and a drop fill the selected frame. Each control is disabled with the
 // Model's reason while its command can't run (`placeActionHelp`), and that reason shows below them.
 import DesignModel
@@ -23,9 +23,8 @@ struct DesignInspectorImage: View {
                     .disabled(rowsHelp != nil)
             }
             InspectorRow("") {
-                Button("Place…") { perform(.placeFile) }
-                    .disabled(help != nil)
-                    .help(help ?? "Choose a picture to place on the page.")
+                MenuCommand(DesignMenuState.spec("place.image"), on: DesignMenuState(workspace: model, hasWindow: true),
+                            title: "Place…", systemImage: "photo.badge.plus") { perform(.placeFile) }
                     .suiteControl(id: "design.inspector.place", enabled: help == nil, reason: help)
             }
             InspectorRow("") {
