@@ -68,6 +68,16 @@ private let logo = """
         #expect(at12.data != at0.data, "the PNG at frame 12 is the frame 0 picture")
         #expect(String(decoding: at12.data, as: UTF8.self).hasPrefix("scale 1.0 "), "the PNG isn't drawn at 1x")
         #expect(copied(at: 12).first { $0.type == .png } == at12, "two copies at frame 12 drew different pictures")
+        // The picture is frame 12's draw list cropped to Ball's box there, not another frame's list in that box.
+        let workspace = bounce(at: 12)
+        let document = try #require(workspace.document)
+        let services = workspace.services
+        let list = services.stage.drawList(document, sceneID: "scene-1", frame: 12, editing: nil)
+        let ball = list.items.map(\.address).filter { workspace.editLayerIDs.contains($0.layerID) }
+        #expect(!ball.isEmpty, "Ball's layer draws nothing at frame 12")
+        let box = try #require(services.hits.bounds(document, sceneID: "scene-1", frame: 12, editing: nil, of: ball))
+        let expected = try Echo().png(FlarePasteboardAdapter.cropped(list, to: box), scale: 1, transparent: true)
+        #expect(at12.data == expected, "the PNG isn't frame 12's picture of Ball")
     }
 
     /// The SVG frame is one document holding the squashed ball at frame 12, unlike frame 0's.
