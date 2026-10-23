@@ -79,3 +79,4 @@ utc	stage	event	ref	note
 2026-10-23T22:19Z	PD-u	heartbeat	#4963 #4964 #5001	no slice PR merged; no needs-fix; 16 PD-u findings fixed in open PRs; PD-z held
 2026-10-23T22:41Z	-	heartbeat	-	no slice PR merged; #4888 needs-rebase dropped; no needs-fix; dev scoped design run at 491ec546 in progress
 2026-10-23T23:03Z	-	heartbeat	-	all 9 PRs clean, none merged, no needs-fix; 32 open findings (z slices held); dev scoped design green at 491ec546 (no slice PR in it)
+2026-10-23T23:24Z	-	heartbeat	-	all 9 PRs clean, none merged; lane sweep running; full CI on dev at 654fb363 in progress (no slice PR in it)
