@@ -10,7 +10,7 @@ Next: wave 1 builders open the contract slice PR(s)
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | NP-a | ratchet test + launcher hides Check for Updates and Assets items | NP-1, NP-2 | MJ-NP, XJ-NP | report-problem:RP-a (met) | yes | 0 | open #4717 | - | - |
-| NP-flare | Flare beta.2 items hidden, Library tab hidden, RJ-X64, built | NP-3, NP-4, NP-5, NP-6 | FJ-NP, XJ-NP, MJ-NP | NP-a; CS-flare (met); flare menu hand-offs | yes | 0 | waiting | - | - |
+| NP-flare | Flare beta.2 items hidden, Library tab hidden, RJ-X64, built | NP-3, NP-4, NP-5, NP-6 | FJ-NP, XJ-NP, MJ-NP | NP-a; CS-flare (met); flare menu hand-offs | yes | 0 | building (stacked on #4717) | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -36,3 +36,4 @@ Next: wave 1 builders open the contract slice PR(s)
 
 ## Open
 - NP-a opened as #4717 (11 files, +380/-17; three existing tests that pinned the stubs changed too). Gap found: the ratchet matches only `Button(`, so the launcher's `MenuCommand` placeholders in LauncherCommands+Home.swift (Clear Menu, Show Sidebar, Show Inspector) slip past it. NP-flare's builder extends the scan to `MenuCommand(` disabled entries and baselines them, so the ratchet covers what NP-1 promised.
+- NP-flare started 03:50Z, stacked on lead/no-placeholders-NP-a. #4297 (PF-u) is still needs-fix and dirty, so it goes ahead; the hand-off note is on #3459 (comment 6356870194). The MenuCommand scan extension rides in NP-flare only if it stays small; otherwise it becomes a gap issue.
