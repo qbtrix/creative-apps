@@ -17,7 +17,7 @@ Next: EP-2 builder on lead/adopt-kernel-eyedropper-photo-EP-m (off dev); then EP
 |---|---|---|---|---|---|---|---|
 | EP-1 | EP-m | 1 | PhotoSampleKernelTests (disabled), RJ-X49 job folder (mutation plan already on dev from PE-a) | Tests/PhotoModelTests/PhotoSampleKernelTests.swift, Tests/RealJobs/photo/sample-edge/*, Tests/mutations/PhotoModel.PhotoSample+Kernel.json | PhotoSampleKernelTests | #4579 | merged |
 | EP-2 | EP-m | 2 | sampleDrag on SampleRules.mean; ColorSampling, SampledColor, FakeSampling, PhotoServices.sampling removed | Sources/PhotoModel/PhotoSample+Kernel.swift, Contracts/OutputContracts.swift, Fakes/FakeOutput.swift, PhotoServices.swift, PhotoStroke.swift, Tests/PhotoModelTests/PhotoSample*Tests.swift | PhotoSampleKernelTests | – | building |
-| EP-3 | EP-z | 3 | delete PhotoEyedropper.swift, LiveSampling.swift and their tests and plan; shrink canonical baseline | Sources/PhotoModel/PhotoEyedropper.swift, Live/LiveSampling.swift, Live/NotBuilt.swift, Tests/PhotoModelTests/LiveSamplingTests.swift, Tests/mutations/PhotoModel.LiveSampling.json, Tests/canonical-baseline.txt | scripts/check-dup-logic | – | planned (stacked on EP-2; Wire UP-z) |
+| EP-3 | EP-z | 3 | delete PhotoEyedropper.swift, LiveSampling.swift and their tests and plan; shrink canonical baseline | Sources/PhotoModel/PhotoEyedropper.swift, Live/LiveSampling.swift, Live/NotBuilt.swift, Tests/PhotoModelTests/LiveSamplingTests.swift, Tests/mutations/PhotoModel.LiveSampling.json, Tests/canonical-baseline.txt | scripts/check-dup-logic | – | #4943 open (stacked on #4837; Wire UP-z) |
 | EP-4 | EP-z | 4 | status built, feature-done | docs/blueprints/suiteui/features/adopt-kernel-eyedropper-photo.wave.json | waves render --dry-run | – | blocked on EP-3 |
 
 ## Reviews
@@ -49,3 +49,4 @@ Next: EP-2 builder on lead/adopt-kernel-eyedropper-photo-EP-m (off dev); then EP
 - 2026-10-22T00:22Z: Released by the supervisor; no further work in this run.
 - 2026-10-23T15:20:44Z: EP-m builder started (EP-2) on lead/adopt-kernel-eyedropper-photo-EP-m; toolchain 6.3.3 ready
 - 2026-10-23T17:32Z: wave 2: EP-m is #4837 (fast-lane, queued). EP-z builder started, stacked on EP-m.
+- 2026-10-23T17:53Z: EP-z opened as #4943 (head 5457514, stacked on #4837, fast-lane + feature-done, CI: PASS, own commits 10 files +9/-107). The UP-z Wire line stays open. Stripped a tool-appended attribution footer from #4943 and from the #4840 comment.
