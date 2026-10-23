@@ -92,6 +92,10 @@ public struct SuiteHelpCommands: Commands {
         host = nil
     }
 
+    /// Connect an AI Assistant…'s sheet; stubs until the next commit begins it.
+    func showConnect(bundle: String, in window: NSWindow? = nil) {}
+    func closeConnect() {}
+
     /// Opens, or brings forward, the Beta Notes window.
     func showBetaNotes() {
         if notes == nil {
