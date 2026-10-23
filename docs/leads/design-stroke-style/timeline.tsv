@@ -102,3 +102,4 @@ time	kind	note
 2026-10-23T18:51Z	DK-m	fix	#4888	#4919/#4920 fixed at 5251a341 but #4888 is 17 files; moving the locked-layer parity into #4916 to get back under 15
 2026-10-23T19:08Z	DK-m	fix	#4888	split done: #4888 at 7710b7cf, 15 files, CI: PASS, Head moved; locked-layer parity f40eb6ef on design/dk-m-locked-parity goes into #4916 after its fixer pushes
 2026-10-23T19:08Z	DK-u	fix	#4864	heartbeat: #4864 and #4916 fixers still building (load 30); #4888 at 7710b7cf; no needs-fix
+2026-10-23T19:26Z	DK-m	fix	#4916	#4940/#4941 fixed at bed28599 (DesignSVG 19/19); merged design/dk-m-locked-parity (10 files vs #4888); gate running before push
