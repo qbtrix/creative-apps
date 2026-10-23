@@ -87,3 +87,4 @@ utc	stage	event	ref	note
 2026-10-22T23:38:09Z	3	stage	PH-z	PH-8 draft #4658 b541b75b on PH-z
 2026-10-22T23:53:56Z	3	stage	PH-u	#4437 merged; #4438 retargeted to dev, fixer merging dev
 2026-10-22T23:59:11Z	3	fix	PH-u	#4438 dev merged in, head e76365be, CI PASS
+2026-10-23T00:16:12Z	3	check	PH-u	#4438 macOS build queued; PH-z fixer started
