@@ -39,3 +39,5 @@ Next: NP-flare #4735 merged dev in, gate rerun, retarget to dev; then scoped run
 - NP-flare started 03:46Z, stacked on lead/no-placeholders-NP-a. #4297 (PF-u) is still needs-fix and dirty, so it goes ahead; the hand-off note is on #3459 (comment 6356870194). The MenuCommand scan extension rides in NP-flare only if it stays small; otherwise it becomes a gap issue.
 - NP-flare opened as #4735 at 04:38Z. RJ-X64 is written but skipped (platforms [], pending FJ-NP): the jobs harness can't click menus. The six hidden ids were added as always-unavailable catalog commands (ledger + flare golden). The MenuCommand scan didn't fit the 15-file cap, so it went to gap #4736.
 - 04:45Z #4717 (NP-a) merged by the lane. NP-flare merged origin/dev (conflicts with pen-paths FP-6 in FlareCommandCatalog, its tests, mutation plan and flare golden: kept both sides); gate rerun before retarget to dev.
+
+- 2026-10-23T07:19:48Z: NP-flare #4735 merged 06:49Z (feature-done). Full CI 39914223799 queued on c2cc0c7c7. Note: dev macOS is broken by FlareStage.swift:81 until #4771 lands.
