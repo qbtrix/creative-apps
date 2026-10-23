@@ -60,11 +60,14 @@ extension FlareWorkspace {
         }
     }
 
+    /// Whether the selection box has handles: only Select on the scene, since the box commit keys scene layers. Off it
+    /// the box draws bare, so no dead handle sits on Direct Select's anchors.
+    var boxHasHandles: Bool { tool == .select && editingSymbolID == nil && !selectKeysSymbol(selection) }
+
     /// The selection box's handle within `hitSlop` stage points of `point`, or nil: a resize handle first
-    /// (`HandleHit`), else the rotate zone. Only Select on the scene has handles, since the box commit keys scene layers.
+    /// (`HandleHit`), else the rotate zone, when `boxHasHandles`.
     func handle(at point: Point, stageScale: Double) -> StageHandle? {
-        guard tool == .select, editingSymbolID == nil, point.isFinite, !selectKeysSymbol(selection),
-              let box = selectionBounds else { return nil }
+        guard boxHasHandles, point.isFinite, let box = selectionBounds else { return nil }
         let tolerance = HandleHit.tolerance(screen: Self.hitSlop, zoom: stageScale)
         let all = handles(of: box, rotation: 0, stageScale: stageScale)
         if let hit = HandleHit.handle(at: point, in: box, tolerance: tolerance), hit != .inside {
