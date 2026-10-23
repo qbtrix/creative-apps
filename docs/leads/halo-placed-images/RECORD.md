@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: PH-u: #4438 MERGED 02:50Z as ac4c7d9a. Linux check 39892571085 (ac4c7d9a) running; on green: Belt-Slice-Done PH-u + Mac-Finish-Wanted PH-u. scoped: halo 39892568309 queued (critics after it shows screens). PH-z: fixer merging dev into #4649 (5c2770b6) so diff is PH-z only; then retarget to dev, draft false, fast-lane, Head = new head. Later #4658 (bc63740a) fast-lane+feature-done. Gap candidates: SVG gradient flat, SVG strokes, no overshoot ease preset, RenderBudgetHaloPlaceTests disabled.
+Next: PH-u: #4438 merged ac4c7d9a; Linux check 39892571085 running; on green Belt-Slice-Done PH-u + Mac-Finish-Wanted PH-u. scoped: halo 39892568309 queued (critics after). PH-z: #4649 retargeted to dev, ready, fast-lane, head 68558fe0 (2 files +9/-11), awaits lane macOS build. After merge: #4658 (bc63740a) to dev, fast-lane+feature-done (fixer merges dev). Gap candidates: SVG gradient flat, SVG strokes, no overshoot ease preset, RenderBudgetHaloPlaceTests disabled.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
