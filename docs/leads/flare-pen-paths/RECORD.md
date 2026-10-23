@@ -4,7 +4,7 @@ Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
 Run: act-1a166b69fab-fd09 (took over from act-1a15e10a86f-7bk9) · Session: claude/pen-paths-lottie-open-a39k6m · Started: 2026-10-21T01:10Z (this run 2026-10-23T03:07Z)
 Stage: 3 wave 3
 Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a
-Next: (2026-10-23T06:40Z) every slice done (FP-z: run 39911065344). Full CI 39910511135 on e68a0162c (contains all) -> its snapshots for the FP-u critic panel and its journeys for Belt-Contact-Sheet on #3519 (gaps: #4012).
+Next: (2026-10-23T07:24Z) Belt-Contact-Sheet posted on #3519 (run 39905307517, gaps: #4012). FP-u panel: findings #4773, #4774 -> fix round 1 (branch lead/pen-paths-FP-u-fix1, PR pending). Round cap 2; then gaps.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

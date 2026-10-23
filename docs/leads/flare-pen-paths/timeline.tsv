@@ -93,3 +93,4 @@ utc	stage	event	ref	note
 2026-10-23T06:40Z	check	FP-z done: Belt-Slice-Done + Mac-Finish-Wanted on #3519 (run 39911065344); contact sheet waits on full CI 39910511135 screens
 2026-10-23T07:00Z	check	heartbeat: FP-u critic panel and contact sheet pending (gaps #4012)
 2026-10-23T07:21Z	check	FP-u critic panel started (clarity, mouse, taste, job; ui:true) on scoped flare run 39905307517 snapshots at 52c430c8 (full CI 39910511135 macOS still queued)
+2026-10-23T07:24Z	check	FP-u panel: 2 findings filed #4773 #4774 (no blocker); fix round 1 started; Belt-Contact-Sheet posted on #3519 (run 39905307517, gaps: #4012)
