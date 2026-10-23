@@ -1,5 +1,6 @@
-// HaloFileMenu.swift: Halo's items in the File menu. In place of the system's
-// New Window: New Composition…, Open… ⌘O and Open Recent ▸ (the project's
+// HaloFileMenu.swift: Halo's items in the File menu. After the system's
+// New Window ⌘N, which stays so closing the last window never leaves Halo
+// without one (#1081): New Composition…, Open… ⌘O and Open Recent ▸ (the project's
 // recent files, newest first; a disabled item with its reason while there
 // are none). After the system's Close: Save ⌘S, Save As…
 // ⇧⌘S, then Place… ⇧⌘P (HaloPlaceMenuAdapter, through the focused window's
@@ -18,7 +19,7 @@ struct HaloFileMenu: Commands {
     private var target: HaloMenuTarget { HaloMenuTarget(model: model, perform: perform) }
 
     var body: some Commands {
-        CommandGroup(replacing: .newItem) {
+        CommandGroup(after: .newItem) {
             target.item(.newComposition, systemImage: "plus")
             target.item(.open, systemImage: "folder", shortcut: KeyboardShortcut("o"))
             HaloOpenRecentMenu(target: target)

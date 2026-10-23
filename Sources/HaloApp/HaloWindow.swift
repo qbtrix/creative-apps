@@ -112,6 +112,7 @@ struct HaloWindow: View {
         .environment(\.haloLiveEdit, live)
         .onAppear { live.current = { model } }
         .modifier(RefreshLinkHandoff(live: live))
+        .modifier(HaloLiveTaking(project: { model }, land: { model.landLive($0) }))
         .focusedSceneValue(\.haloPerform, perform)
         .focusedSceneValue(\.haloProject, model)
         .haloControlsProbe(HaloLaunch.current.controlsProbe)

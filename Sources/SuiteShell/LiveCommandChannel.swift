@@ -101,7 +101,6 @@ public final class LiveCommandChannel {
         case .ask:
             let asked = ContinuousClock.now
             let decision = await ask(AIAccessRequest(client: client, app: app, command: command))
-            if decision == .allowOnce, kind != .file { allowedOnce[connection] = client }
             if decision != .allowOnce, var latest = try? await AIAccessGrants.load(from: grants) {
                 latest.record(decision, client: client, app: app)
                 try? await latest.save(to: grants)
@@ -110,6 +109,8 @@ public final class LiveCommandChannel {
                 audit("refused")
                 return Self.failure(id, -32010, "\(title) has no answer for \(client) yet")
             }
+            // Only an allow once in time holds the connection; a late one (AIAccessCenter.ask with no sheet) doesn't.
+            if decision == .allowOnce, kind != .file { allowedOnce[connection] = client }
         }
         (drivers[connection], connectedClient) = (client, client)
         let (outcome, reply): (String, [UInt8]) = switch perform(command, params) {
