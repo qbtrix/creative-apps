@@ -199,3 +199,4 @@ utc	stage	event	ref	note
 2026-10-22T22:26Z	3	merge	#4596	fixes #4586
 2026-10-22T23:17Z	3	check-in	panel	39834244948 green, pre-fix; 39856259756 queued
 2026-10-23T00:14Z	3	check-in	panel	waiting on 39856259756 / 39873722675
+2026-10-23T01:11Z	3	check-in	panel	held for 39878494002 (066cd28d)
