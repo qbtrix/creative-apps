@@ -46,6 +46,22 @@ import Testing
     #expect(LibraryLaunch(arguments: ["-LibraryFixture"]).fixture == nil)
 }
 
+/// LG-2: `-LibraryLargeFixture <count>` opens the large fixture's photos over fakes, ahead of `-LibraryFixture`.
+@Test func largeFixtureFlagParses() {
+    let launch = LibraryLaunch(arguments: ["-LibraryFixture", "shoot", "-LibraryLargeFixture", "10000"])
+    #expect(launch.largeFixture == 10_000)
+    let photos = launch.initialPhotos
+    #expect(photos.count == 10_000 && Set(photos.map(\.id)).count == 10_000)
+    #expect(photos.first?.name == "IMG_00001" && photos.last?.name == "IMG_10000")
+    #expect(launch.services(decoder: FakeDecoder(photos: []), writer: FakeJPEGWriter(),
+                            store: FakeCatalogStore()).isPreview)
+    for bad in ["0", "-5", "many", ""] {
+        #expect(LibraryLaunch(arguments: ["-LibraryLargeFixture", bad]).largeFixture == nil)
+    }
+    #expect(LibraryLaunch(arguments: ["-LibraryLargeFixture"]).largeFixture == nil)
+    #expect(LibraryLaunch(arguments: []).largeFixture == nil)
+}
+
 @Test func shootFixtureHasItsShapeAndOrder() throws {
     let shoot = LibraryFixtures.photos(named: "shoot")
     #expect(shoot.count == 24)

@@ -44,8 +44,13 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     public internal(set) var tool: FlareTool = .select
     /// The Shape tool's options (FlareShape+Kernel.swift): view state, never an undo step.
     public internal(set) var shapeTool: ShapeSpec = .defaults(.star)
-    /// The stage selection (FlareSelection.swift).
-    public internal(set) var selection: [StageAddress] = []
+    /// The stage selection: SuiteKernel's ordered selection, which `selection` reads (FlareSelectionAdapter.swift);
+    /// a change drops the picked anchors.
+    var picks = Selection<StageAddress>() {
+        didSet { if oldValue.ordered != picks.ordered { anchorSelectionStore = Selection() } }
+    }
+    /// The picked anchors of the path in edit (FlareAnchors+Kernel.swift).
+    var anchorSelectionStore = Selection<AnchorRef>()
     /// The marquee under way, in scene points; nil when none is.
     public internal(set) var marquee: Rect?
     /// The shape the drag under way would add, for the live preview; nil
@@ -87,6 +92,14 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     public internal(set) var saveError: String?
     public internal(set) var loadState = LoadState.idle
     public internal(set) var recent: [String] = []
+    /// The suite's recents as the window last read them, and the requests the file-flow commands leave it.
+    public internal(set) var fileFlow = FlareFileFlowState()
+    /// The note a Lottie open leaves: one sentence per part left out; nil once dismissed or another document
+    /// loads (FlareLottieNote.swift).
+    public internal(set) var importNote: [String]?
+    /// The open document's Lottie open's skipped sentences, after Dismiss too; nil when it didn't come from a
+    /// Lottie (`import.report`, FlareLottieNote.swift).
+    public internal(set) var importReport: [String]?
     /// Why the last layer change or undo was refused; nil after one succeeds.
     public internal(set) var layerError: FlareLayerError?
     /// The easing editor's segment, as last picked; `selectedEasingSegment`
@@ -150,6 +163,8 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
         (machineID, machinePreview, machineError) = (nil, nil, nil)
         (exportState, assist) = (.idle, AssistState())
         (fileName, savedDocument, saveError, loadState) = (nil, document, nil, .idle)
+        importNote = nil
+        importReport = nil
     }
 
     /// Selects a scene by id. An id not in the document is ignored. Selecting
@@ -268,6 +283,7 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
             && lhs.draft == rhs.draft
             && lhs.layerError == rhs.layerError && lhs.selectedEasingSegment == rhs.selectedEasingSegment && lhs.canUndo == rhs.canUndo && lhs.canRedo == rhs.canRedo
             && lhs.services.isPreview == rhs.services.isPreview && lhs.selection == rhs.selection
+            && lhs.anchorSelectionStore == rhs.anchorSelectionStore
             && lhs.marquee == rhs.marquee && lhs.dragPreview == rhs.dragPreview && lhs.gesture == rhs.gesture && lhs.currentFrame == rhs.currentFrame
         let animating = lhs.isPlaying == rhs.isPlaying && lhs.loops == rhs.loops && lhs.playClock == rhs.playClock
             && lhs.autoKey == rhs.autoKey && lhs.onion == rhs.onion && lhs.showsMotionPath == rhs.showsMotionPath
@@ -277,7 +293,7 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
             && lhs.paintError == rhs.paintError && lhs.selectedKeys == rhs.selectedKeys
             && lhs.timelineError == rhs.timelineError
         let files = lhs.fileName == rhs.fileName && lhs.isDirty == rhs.isDirty && lhs.saveError == rhs.saveError
-            && lhs.loadState == rhs.loadState && lhs.recent == rhs.recent
+            && lhs.loadState == rhs.loadState && lhs.recent == rhs.recent && lhs.importNote == rhs.importNote
         return editing && animating && panels && files
     }
 }

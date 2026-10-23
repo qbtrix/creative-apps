@@ -1013,12 +1013,11 @@
     "closes_with": "suiteui/frame-rates",
     "trap": "The composition silently runs at 30, so keys drift a frame on an editor timeline",
     "run": "C",
-    "baseline": "fail",
+    "baseline": "pass",
     "since": "2026-10-21",
     "sources": [
       "captain"
     ],
-    "waits_on": "FR-8",
     "added_by": "suiteui/frame-rates"
   },
   "RJ-X75": {

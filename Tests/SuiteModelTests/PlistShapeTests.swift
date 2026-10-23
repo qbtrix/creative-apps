@@ -139,7 +139,9 @@ import Testing
                 }
             }
         }
-        #expect(seen.count == 11)   // seven document types plus the four declared-only ids
+        // seven document types plus the four declared-only ids, and the eight image types
+        // only Photo's and Library's plists list (shared-codecs SC-14)
+        #expect(seen.count == 19)
     }
 
     /// Every exported and imported declaration, by UTI: (conforms-to, tags).

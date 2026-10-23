@@ -35,14 +35,10 @@ public struct DesignRect: Sendable, Hashable, Codable {
         (self.x, self.y, self.width, self.height) = (x, y, width, height)
     }
 
-    /// The rectangle a drag from `a` to `b` covers, whichever way it goes. With `square`
-    /// both sides are the longer one and the rectangle grows away from `a`.
-    public init(from a: DesignPoint, to b: DesignPoint, square: Bool = false) {
-        var (dx, dy) = (b.x - a.x, b.y - a.y)
-        if square {
-            let side = Swift.max(dx.magnitude, dy.magnitude)
-            (dx, dy) = (dx < 0 ? -side : side, dy < 0 ? -side : side)
-        }
+    /// The rectangle a drag from `a` to `b` covers, whichever way it goes. A drawing tool's
+    /// Shift square comes from the kernel's `ShapeRules.dragged` (DesignDrawing).
+    public init(from a: DesignPoint, to b: DesignPoint) {
+        let (dx, dy) = (b.x - a.x, b.y - a.y)
         self.init(x: Swift.min(a.x, a.x + dx), y: Swift.min(a.y, a.y + dy), width: dx.magnitude, height: dy.magnitude)
     }
 
@@ -67,23 +63,20 @@ public struct DesignRect: Sendable, Hashable, Codable {
     }
 
     /// The handles a selection of this rectangle shows, each with its center, for handles `size`
-    /// points across: all eight on the corners and side midpoints (the centres of the kernel's
-    /// `BoxMath.handles`, without its rotate knob), or for a compact rectangle only the corners,
-    /// each pushed out by half a handle so it sits outside and leaves the inside readable.
+    /// points across, unturned: all eight on the corners and side midpoints and the rotate knob above
+    /// the top (the centres of the kernel's `BoxMath.handles`), or for a compact rectangle the knob
+    /// and only the corners, each pushed out by half a handle so it sits outside and leaves the
+    /// inside readable.
     public func handles(size: Double) -> [DesignHandle: DesignPoint] {
-        guard isCompact(handleSize: size) else {
-            var shown: [DesignHandle: DesignPoint] = [:]
-            for (handle, square) in BoxMath.handles(of: kernelRect, size: size) {
-                guard let handle = DesignHandle(handle) else { continue }
-                shown[handle] = DesignPoint(x: (square.minX + square.maxX) / 2, y: (square.minY + square.maxY) / 2)
-            }
-            return shown
+        var shown: [DesignHandle: DesignPoint] = [:]
+        let compact = isCompact(handleSize: size)
+        for (handle, square) in BoxMath.handles(of: kernelRect, size: size) {
+            guard let handle = DesignHandle(handle), !compact || handle.isCorner || handle == .rotate else { continue }
+            let (h, v) = compact && handle.isCorner ? handle.direction : (0, 0)
+            shown[handle] = DesignPoint(x: (square.minX + square.maxX + Double(h) * size) / 2,
+                                        y: (square.minY + square.maxY + Double(v) * size) / 2)
         }
-        return Dictionary(
-            uniqueKeysWithValues: DesignHandle.allCases.filter(\.isCorner).map { handle in
-                let ((h, v), at) = (handle.direction, point(of: handle))
-                return (handle, DesignPoint(x: at.x + Double(h) * size / 2, y: at.y + Double(v) * size / 2))
-            })
+        return shown
     }
 
     /// This rectangle with `handle` dragged by `delta`: the kernel's `BoxMath.resized`, Shift
@@ -113,11 +106,11 @@ public struct DesignRect: Sendable, Hashable, Codable {
     }
 }
 
-/// A selection handle of a node's frame: the four corners and the four side midpoints.
-/// Each is the kernel's `EditorHandle` of the same name; the kernel's inside and rotate knob
-/// are no Design handle.
+/// A selection handle of a node's frame: the four corners, the four side midpoints and the
+/// rotate knob above the top. Each is the kernel's `EditorHandle` of the same name; the kernel's
+/// inside is no Design handle.
 public enum DesignHandle: String, CaseIterable, Sendable {
-    case topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
+    case topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left, rotate
 
     /// The kernel's handle of this name.
     var editorHandle: EditorHandle {
@@ -130,10 +123,11 @@ public enum DesignHandle: String, CaseIterable, Sendable {
         case .bottom: .bottom
         case .bottomLeft: .bottomLeft
         case .left: .left
+        case .rotate: .rotate
         }
     }
 
-    /// The Design handle of the kernel's `handle`; nil for its inside and rotate knob.
+    /// The Design handle of the kernel's `handle`; nil for its inside.
     init?(_ handle: EditorHandle) {
         switch handle {
         case .topLeft: self = .topLeft
@@ -144,11 +138,13 @@ public enum DesignHandle: String, CaseIterable, Sendable {
         case .bottom: self = .bottom
         case .bottomLeft: self = .bottomLeft
         case .left: self = .left
-        case .inside, .rotate: return nil
+        case .rotate: self = .rotate
+        case .inside: return nil
         }
     }
 
-    /// Which edge the handle moves on each axis: -1 left or top, 0 neither, 1 right or bottom.
+    /// Which edge the handle moves on each axis: -1 left or top, 0 neither, 1 right or bottom; the
+    /// knob moves none.
     var direction: (x: Int, y: Int) {
         switch self {
         case .topLeft: (-1, -1)
@@ -159,6 +155,7 @@ public enum DesignHandle: String, CaseIterable, Sendable {
         case .bottom: (0, 1)
         case .bottomLeft: (-1, 1)
         case .left: (-1, 0)
+        case .rotate: (0, 0)
         }
     }
 
@@ -189,7 +186,7 @@ public struct DesignColor: Sendable, Hashable, Codable {
 }
 
 public enum DesignNodeKind: String, CaseIterable, Sendable, Codable {
-    case frame, group, rectangle, ellipse, text, instance
+    case frame, group, rectangle, ellipse, text, instance, shape
 
     /// The SF Symbol for this kind's sidebar row.
     public var systemImage: String {
@@ -200,6 +197,7 @@ public enum DesignNodeKind: String, CaseIterable, Sendable, Codable {
         case .ellipse: "circle"
         case .text: "textformat"
         case .instance: "square.on.square"
+        case .shape: "star"
         }
     }
 
@@ -213,7 +211,7 @@ public enum DesignNodeKind: String, CaseIterable, Sendable, Codable {
         switch self {
         case .frame: .white
         case .text: .black
-        case .group, .rectangle, .ellipse, .instance: .shape
+        case .group, .rectangle, .ellipse, .instance, .shape: .shape
         }
     }
 
@@ -251,6 +249,9 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
     public var rotation: Double = 0
     /// Mirrored left to right and top to bottom about the frame's centre. Written only when set.
     public var flipX = false, flipY = false
+    /// A shape node's polygon, star, line or arrow, drawn in `frame` by ShapeRules; nil for every other
+    /// kind. Written only when set (shape-tools DS-1).
+    public var shape: ShapeSpec?
 
     public init(
         id: String, name: String, kind: DesignNodeKind, frame: DesignRect,
@@ -275,10 +276,11 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         gradient = node.gradient
         rotation = node.rotation
         (flipX, flipY) = (node.flipX, node.flipY)
+        shape = node.shape
     }
 
     /// Decodes a node; a field a file written before it existed lacks takes its default: square
-    /// corners, fully opaque, no stroke, the default text style, no gradient, upright and unmirrored.
+    /// corners, fully opaque, no stroke, the default text style, no gradient, upright and unmirrored, no shape spec.
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         try self.init(
@@ -295,15 +297,16 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         rotation = try container.decodeIfPresent(Double.self, forKey: .rotation) ?? 0
         flipX = try container.decodeIfPresent(Bool.self, forKey: .flipX) ?? false
         flipY = try container.decodeIfPresent(Bool.self, forKey: .flipY) ?? false
+        shape = try container.decodeIfPresent(ShapeSpec.self, forKey: .shape)
     }
 
     /// The file's keys, one per stored field.
     enum CodingKeys: String, CodingKey {
         case id, name, kind, frame, children, isHidden, isLocked, fill, text, cornerRadius, opacity, stroke, textStyle
-        case gradient, rotation, flipX, flipY
+        case gradient, rotation, flipX, flipY, shape
     }
 
-    /// Encodes a node as before transforms, adding the turn and each mirror only when set, so a file of
+    /// Encodes a node as before transforms, adding the turn, each mirror and a shape's spec only when set, so a file of
     /// upright nodes is written byte for byte as an older build wrote it.
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
@@ -324,6 +327,7 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         if rotation != 0 { try container.encode(rotation, forKey: .rotation) }
         if flipX { try container.encode(flipX, forKey: .flipX) }
         if flipY { try container.encode(flipY, forKey: .flipY) }
+        try container.encodeIfPresent(shape, forKey: .shape)
     }
 
     /// Shifts this node and everything under it by `delta`.

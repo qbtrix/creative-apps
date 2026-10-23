@@ -19,5 +19,19 @@
     "find": "let stale = listed.values.flatMap { $0 }.sorted { $0.row < $1.row }",
     "replace": "let stale = listed.values.flatMap { $0 }.sorted { $0.row < $1.row }.prefix(0)",
     "tests": "CommandPathTests"
+  },
+  {
+    "label": "dismissOnlyDismisses: the dismiss rule matches any button title, so a Delete that dismisses passes",
+    "file": "Tests/SuiteKernelTests/CommandPathTests.swift",
+    "find": "guard dismissTitles.contains(title) else { return false }",
+    "replace": "guard !title.isEmpty else { return false }",
+    "tests": "CommandPathTests"
+  },
+  {
+    "label": "limitCaps: the baseline's max is read as a minimum, so a baseline can grow past it",
+    "file": "Tests/SuiteKernelTests/CommandPathLimitTests.swift",
+    "find": "if entries > max {",
+    "replace": "if entries < max {",
+    "tests": "CommandPathLimitTests"
   }
 ]

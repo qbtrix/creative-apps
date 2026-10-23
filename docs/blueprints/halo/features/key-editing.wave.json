@@ -2,8 +2,8 @@
   "title": "Halo moves keys: picks across lanes, Select All Keys, a snapped group drag as one undo step, each a command",
   "wave": "W4",
   "order": 60,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#3536",
   "beta": true,
   "covers": "halo/key-editing (adopter of suiteui/timeline TL-c, TL-d and suiteui/timeline-select-all); RJ-H13; #2763; the stress gate's Halo move-keys gap (PR #3499)",
   "waits_on": "suiteui/timeline-select-all's TSA-a (cross-line, KE-2 only); adopt-command-catalog AC-halo before KE-1 (hand-off); PR #3499 before KE-7",
@@ -14,6 +14,7 @@
     "viewer-playback"
   ],
   "longest_chain": "5 (KE-1 → KE-2 → KE-5 → KE-7 → KE-8)",
+  "note": "Built with KE-7 left as gap #4284: the stress gate's Halo move-keys gesture waits on PR #3499, the captain's stress-journey PR. The key-editing journey runs live.",
   "journeys": [
     "HaloKeyEditingJourneyTests.testSelectAllAndMoveKeys"
   ],

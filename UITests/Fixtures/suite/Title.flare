@@ -1,0 +1,84 @@
+{
+  "document" : {
+    "scenes" : [
+      {
+        "background" : {
+          "a" : 1,
+          "b" : 1,
+          "g" : 1,
+          "r" : 1
+        },
+        "durationFrames" : 48,
+        "fps" : 24,
+        "guides" : [
+
+        ],
+        "height" : 400,
+        "id" : "scene-1",
+        "labels" : {
+
+        },
+        "layers" : [
+          {
+            "id" : "layer-1",
+            "instances" : [
+
+            ],
+            "isLocked" : false,
+            "isVisible" : true,
+            "name" : "Title",
+            "shapes" : [
+
+            ],
+            "texts" : [
+              {
+                "fill" : {
+                  "a" : 1,
+                  "b" : 0.16,
+                  "g" : 0.12,
+                  "r" : 0.12
+                },
+                "fontFamily" : "Helvetica",
+                "fontSize" : 48,
+                "position" : {
+                  "x" : 140,
+                  "y" : 220
+                },
+                "string" : "Hello, Flare"
+              }
+            ],
+            "tracks" : {
+              "opacity" : [
+                {
+                  "easing" : {
+                    "linear" : {
+
+                    }
+                  },
+                  "frame" : 0,
+                  "value" : 0
+                },
+                {
+                  "easing" : {
+                    "linear" : {
+
+                    }
+                  },
+                  "frame" : 12,
+                  "value" : 1
+                }
+              ]
+            }
+          }
+        ],
+        "name" : "Title",
+        "width" : 550
+      }
+    ],
+    "symbols" : [
+
+    ]
+  },
+  "format" : "flare",
+  "version" : 1
+}

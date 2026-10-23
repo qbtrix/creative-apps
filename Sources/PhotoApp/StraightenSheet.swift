@@ -10,6 +10,7 @@
 // can wait for Return to commit, and Return is Apply (the field submits it
 // itself, since it takes Return first), so "type 3, press Return" turns by 3. Controls carry `photo.straighten.*` identifiers.
 import PhotoModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -23,6 +24,8 @@ struct StraightenSheet: View {
     let draft: StraightenDraft
     /// What Apply would make; nil when the image can't turn that far.
     let frame: StraightenFrame?
+    /// What `image.straighten`'s availability reads.
+    var workspace = PhotoWorkspace()
     var onDraft: @MainActor (StraightenDraft) -> Void = { _ in }
     var onApply: @MainActor () -> Void = {}
     var onCancel: @MainActor () -> Void = {}
@@ -65,8 +68,11 @@ struct StraightenSheet: View {
                 Spacer()
                 Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
                     .accessibilityIdentifier("photo.straighten.cancel")
-                Button("Apply", action: onApply).keyboardShortcut(.defaultAction).disabled(frame == nil)
-                    .accessibilityIdentifier("photo.straighten.apply")
+                if let spec = PhotoWorkspace.catalog.spec("image.straighten") {
+                    MenuCommand(spec, on: workspace, title: "Apply", shortcut: .defaultAction, perform: onApply)
+                        .disabled(frame == nil)
+                        .accessibilityIdentifier("photo.straighten.apply")
+                }
             }
         }
         .padding(SuiteSpacing.l)

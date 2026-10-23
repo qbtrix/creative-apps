@@ -72,7 +72,7 @@ import Testing
     @Test func textNeverReachesTheExporters() async throws {
         let showcase = try #require(FlareFixtures.named("showcase"))
         #expect(showcase.scenes[0].layers.contains { !$0.texts.isEmpty })
-        for format in ExportFormat.allCases {
+        for format in ExportFormat.allCases where format.unbuiltReason == nil {
             let o = options(format, 0...4, step: 2)
             let result = try await export(live, showcase, o)
             #expect(!result.files.isEmpty, "\(format)")

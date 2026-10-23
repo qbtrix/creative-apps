@@ -1,16 +1,19 @@
 // DesignSeveralInspectorSnapshots.swift: Design's inspector at the editor's
 // panel width with A and B of the `cards` fixture selected (D0-5c): "2 Layers",
 // the Align row with Distribute, X, Y and W reading "Mixed" (A is 100, 100,
-// 100 × 80 and B 300, 140, 200 × 80) and H reading 80. On `.fake` and on
+// 100 × 80 and B 300, 140, 200 × 80), H reading 80, and Transform's Rotation
+// and flips. On `.fake` and on
 // `.live`; then Title, a text layer, with its empty Text section after Fill.
 // Writes design-inspector-several-fake-, -several-live- and
 // -text-{light,dark}.png. Every control the inspector and its Align row show
-// lists itself in `suite.controls` with its DesignControlID, enabled exactly
-// when the Model's help for it is nil and with that help as its reason; a
+// (the Fill well's eyedropper too) lists itself in `suite.controls` with its
+// id, enabled exactly when the Model's help for it is nil and with that help
+// as its reason, a disabled Fill row's eyedropper included; a
 // "Mixed" row is text, not a control, so it lists nothing. SwiftUI builds a
 // hosting view's accessibility tree only for an assistive client, so the
 // inventory stands in for the tooltips. macOS only.
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 import Testing
@@ -48,7 +51,14 @@ import Testing
         helps += DesignDistributeAxis.allCases.map { (DesignControlID.distribute($0), model.help(.distribute($0))) }
         // Only H is shared; X, Y and W read "Mixed" and list nothing.
         helps.append((DesignControlID.frameField(.height), model.styleHelp(.frame)))
-        if model.sharedValue(\.fill) != nil { helps.append((DesignControlID.inspectorFill, model.styleHelp(.fill))) }
+        // Transform: Rotation and the two flips, all with the Model's turn help.
+        helps.append((DesignControlID.inspectorRotation, model.turnHelp))
+        helps += FlipDirection.allCases.map { (DesignControlID.inspectorFlip($0.rawValue), model.turnHelp) }
+        // A shared fill is the color well, which carries the eyedropper with the row's help.
+        if model.severalShowFill, model.sharedValue(\.fill) != nil {
+            helps.append((DesignControlID.inspectorFill, model.styleHelp(.fill)))
+            helps.append(("suite.color.eyedropper", model.styleHelp(.fill)))
+        }
         return helps.map { ControlEntry(id: $0.id, enabled: $0.help == nil, reason: $0.help) }.sorted { $0.id < $1.id }
     }
 
@@ -85,6 +95,32 @@ import Testing
             #expect(control.reason?.isEmpty == false, "\(control.id) is disabled without saying why")
         }
         try shoot("several-live", model)
+    }
+
+    /// With style editing not built the Fill row is off, and its eyedropper says so with the row's reason rather
+    /// than listing as enabled.
+    @Test func offFillTurnsItsEyedropperOff() throws {
+        var services = DesignServices.fake
+        services.styling = NotBuilt("Style editing")
+        let model = try twoCards(services)
+        let help = try #require(model.styleHelp(.fill))
+        let controls = try registered(model)
+        #expect(controls == expectedControls(model))
+        let eyedropper = controls.first { $0.id == "suite.color.eyedropper" }
+        #expect(eyedropper == ControlEntry(id: "suite.color.eyedropper", enabled: false, reason: help))
+    }
+
+    /// One locked layer: its Fill row is off, and the eyedropper says so with the lock's reason.
+    @Test func lockedLayersEyedropperSaysWhy() throws {
+        var model = DesignWorkspace()
+        model.useServices(.fake)
+        let opened = model.openFixture("cards")
+        #expect(opened)
+        model.selectItem("node-2")
+        try model.setNodeLocked("node-2", true)
+        let help = try #require(model.lockHelp("node-2"))
+        let eyedropper = try registered(model).first { $0.id == "suite.color.eyedropper" }
+        #expect(eyedropper == ControlEntry(id: "suite.color.eyedropper", enabled: false, reason: help))
     }
 
     /// Align is two rows of three icon buttons, and several layers add one row of two Distribute

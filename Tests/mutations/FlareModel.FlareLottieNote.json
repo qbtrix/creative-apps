@@ -1,0 +1,93 @@
+[
+  {
+    "label": ".namesEverySkip: a landed open drops the skipped list, so the note says nothing was skipped",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "            importNote = skipped\n",
+    "replace": "            importNote = []\n",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".dismissCloses: Dismiss leaves the note up",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "public mutating func dismissImportNote() { importNote = nil }",
+    "replace": "public mutating func dismissImportNote() {}",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".saysNothingSkipped: a clean open shows an empty note",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "if importNote.isEmpty { return [Self.nothingSkipped] }",
+    "replace": "if importNote.isEmpty { return importNote }",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".dropRoutesJSON: a dropped .json goes to the bridge, which refuses it",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "if case .refuse(let path, _) = action, opensAsLottie(path) {",
+    "replace": "if case .refuse(let path, _) = action, opensAsLottie(path), false {",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".loadClearsNote: another document keeps an old Lottie's note",
+    "file": "Sources/FlareModel/FlareWorkspace.swift",
+    "find": "        importNote = nil\n",
+    "replace": "",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".reportKeepsSkips: a landed open leaves no import.report",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "            importReport = skipped\n",
+    "replace": "",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".reportNeedsALottie: import.report runs with nothing opened from a Lottie",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "{ $0.importReport == nil ? .unavailable(noLottieOpened) : .available }",
+    "replace": "{ _ in .available }",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".headlessReport: the CLI's Lottie open leaves no import.report",
+    "file": "Sources/FlareModel/FlareLottieOpen.swift",
+    "find": "defer { importReport = skipped }",
+    "replace": "defer {}",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".loadClearsReport: another document keeps an old Lottie's report",
+    "file": "Sources/FlareModel/FlareWorkspace.swift",
+    "find": "        importReport = nil\n",
+    "replace": "",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".capsLongNote: a long skip list lists every part and pushes the stage down",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "guard importNote.count > max + 1 else { return importNote }",
+    "replace": "guard false else { return importNote }",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".countsTheRest: the last row counts the shown parts too",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "[\"\\(importNote.count - max) more parts were left out.\"]",
+    "replace": "[\"\\(importNote.count) more parts were left out.\"]",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".oneMoreShowsItself: a list one past the cap folds its last part into \"1 more\"",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "guard importNote.count > max + 1 else",
+    "replace": "guard importNote.count > max else",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".dismissRedraws: == ignores the note, so Dismiss never redraws the window",
+    "file": "Sources/FlareModel/FlareWorkspace.swift",
+    "find": " && lhs.importNote == rhs.importNote",
+    "replace": "",
+    "tests": "FlareLottieNoteTests"
+  }
+]

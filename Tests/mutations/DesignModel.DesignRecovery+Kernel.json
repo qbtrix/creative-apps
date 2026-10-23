@@ -1,5 +1,7 @@
 [
 {"label":"a jump lands one step past its index (jumpLandsOnIndex)","file":"Sources/DesignModel/DesignRecovery+Kernel.swift","find":"for _ in index..<max(index, listing.index) { undo() }","replace":"for _ in (index + 1)..<max(index + 1, listing.index) { undo() }","tests":"DesignRecoveryTests"},
 {"label":"a recovered copy is marked saved (recoveredIsDirty)","file":"Sources/DesignModel/DesignRecovery+Kernel.swift","find":"workspace.history.kernel.savedStepID = neverSavedStepID","replace":"workspace.history.kernel.markSaved()","tests":"DesignRecoveryTests"},
-{"label":"a jump past either end is clamped instead of refused","file":"Sources/DesignModel/DesignRecovery+Kernel.swift","find":"guard (0...listing.steps.count).contains(index), gesture == nil","replace":"guard gesture == nil","tests":"DesignRecoveryTests"}
+{"label":"a jump past either end is clamped instead of refused","file":"Sources/DesignModel/DesignRecovery+Kernel.swift","find":"guard (0...listing.steps.count).contains(index), gesture == nil","replace":"guard gesture == nil","tests":"DesignRecoveryTests"},
+{"label":"a never-saved New Design keeps the kernel's saved mark (onlyASavedFileMarksItsSave)","file":"Sources/DesignModel/DesignRecovery+Kernel.swift","find":"listing.savedIndex = nil","replace":"_ = listing.savedIndex","tests":"DesignRecoveryTests"},
+{"label":"a saved file's base reads New Design (onlyASavedFileMarksItsSave)","file":"Sources/DesignModel/DesignRecovery+Kernel.swift","find":"return history.kernel.listing(base: \"Open\")","replace":"return history.kernel.listing(base: \"New Design\")","tests":"DesignRecoveryTests"}
 ]

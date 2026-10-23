@@ -9,7 +9,7 @@ public enum FlareFixtures {
     /// Every fixture by its `-FlareFixture` name, in menu order.
     public static let all: [(name: String, document: Document)] = [("empty", empty), ("bounce", bounce), ("character", character), ("button", button),
                                                                     ("button with states", buttonWithStates), ("button with machine", buttonWithMachine),
-                                                                    ("showcase", showcase)]
+                                                                    ("showcase", showcase), ("gradient-circle", gradientCircle)]
 
     /// The fixture called `name`, or nil.
     public static func named(_ name: String) -> Document? {

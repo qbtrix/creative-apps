@@ -23,29 +23,29 @@
   {
     "label": "namesUniqueAgainstFolder: the folder's names are ignored",
     "file": "Sources/DesignModel/DesignExport+Kernel.swift",
-    "find": "nodes.map(\\.name), extension: format.rawValue, among: existing)",
-    "replace": "nodes.map(\\.name), extension: format.rawValue, among: [])",
+    "find": "nodes.map(\\.name), extension: format.fileExtension, among: existing)",
+    "replace": "nodes.map(\\.name), extension: format.fileExtension, among: [])",
     "tests": "DesignExportPlanTests|DesignExportWalkTests"
   },
   {
     "label": "namesUniqueWithinPlan: a planned name is not taken for the next layer",
     "file": "Sources/DesignModel/DesignExport+Kernel.swift",
-    "find": "let names = UniqueFileNames.names(nodes.map(\\.name), extension: format.rawValue, among: existing)",
-    "replace": "let names = nodes.map { UniqueFileNames.name($0.name, extension: format.rawValue, among: existing) }",
+    "find": "let names = UniqueFileNames.names(nodes.map(\\.name), extension: format.fileExtension, among: existing)",
+    "replace": "let names = nodes.map { UniqueFileNames.name($0.name, extension: format.fileExtension, among: existing) }",
     "tests": "DesignExportPlanTests|DesignExportWalkTests"
   },
   {
     "label": "svgIgnoresScale: SVG and PDF are sized by the scale",
     "file": "Sources/DesignModel/DesignExport+Kernel.swift",
-    "find": "    format == .png ? Swift.min(Swift.max(scale, 1), 3) : 1\n",
+    "find": "    [.png, .jpeg].contains(format) ? Swift.min(Swift.max(scale, 1), 3) : 1\n",
     "replace": "    Swift.min(Swift.max(scale, 1), 3)\n",
     "tests": "DesignExportPlanTests|DesignExportWalkTests"
   },
   {
-    "label": "scaleClamps: the PNG scale is not clamped to 1...3",
+    "label": "scaleClamps: the PNG and JPEG scale is not clamped to 1...3",
     "file": "Sources/DesignModel/DesignExport+Kernel.swift",
-    "find": "    format == .png ? Swift.min(Swift.max(scale, 1), 3) : 1\n",
-    "replace": "    format == .png ? scale : 1\n",
+    "find": "    [.png, .jpeg].contains(format) ? Swift.min(Swift.max(scale, 1), 3) : 1\n",
+    "replace": "    [.png, .jpeg].contains(format) ? scale : 1\n",
     "tests": "DesignExportPlanTests|DesignExportWalkTests"
   },
   {
@@ -82,5 +82,47 @@
     "find": "found.filter { !page.isHiddenInTree($0.id) }",
     "replace": "found.filter { !$0.isHidden }",
     "tests": "DesignExportPlanTests"
+  },
+  {
+    "label": ".exactPixels: a 2x scale is applied after the exact pixels",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "guard let pixels = try? ExportRules.pixels(of: source, size, evenSize: spec.needsEvenSize) else { return item }",
+    "replace": "guard let once = try? ExportRules.pixels(of: source, size, evenSize: spec.needsEvenSize) else { return item }\n        let pixels = (once.width * 2, once.height * 2)",
+    "tests": "DesignExportPackTests|DesignExportOptionsSizeTests"
+  },
+  {
+    "label": ".exactPixels: Pixels and Long edge plan at the scale instead",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "} else { size = options.size }",
+    "replace": "} else { size = .scale(1) }",
+    "tests": "DesignExportPackTests|DesignExportOptionsSizeTests"
+  },
+  {
+    "label": ".jpegFlattens: JPEG keeps alpha (no background to flatten onto)",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "sized.background = spec.keepsAlpha ? nil : exportBackground(item.nodeID, page)",
+    "replace": "sized.background = nil",
+    "tests": "DesignExportPackTests|DesignExportOptionsSizeTests"
+  },
+  {
+    "label": ".jpegFlattens: the flatten color ignores the frame's fill",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "        return frame.fill\n",
+    "replace": "        return .white\n",
+    "tests": "DesignExportPackTests|DesignExportOptionsSizeTests"
+  },
+  {
+    "label": "jpegIsListed: JPEG files are named .jpeg, not .jpg",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "spec?.fileExtension ?? rawValue",
+    "replace": "rawValue",
+    "tests": "DesignExportPackTests|DesignExportOptionsSizeTests"
+  },
+  {
+    "label": "svgRefusesPixels: a vector at Pixels plans at its points",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "            if case .scale = options.size { return item }\n",
+    "replace": "            return item\n",
+    "tests": "DesignExportPackTests|DesignExportOptionsSizeTests"
   }
 ]
