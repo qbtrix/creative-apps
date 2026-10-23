@@ -13,7 +13,7 @@ Next: FP-z gate running; its PR (feature-done) opens once #4704 merges (stacked 
 | FP-a | FontPick, FontPickerRules and FontPicker declared as stubs; gallery page; checks written, disabled | FP-1, FP-2 | SJ0 | EK-u (built), CC-u (built), shell-text:ST-a (built: FontFamily/FontFace in SuiteModel) | true | 0 | merged via #4644 (722a4fe9; #4638 closed as superseded) | – | – |
 | FP-u | the picker lists, filters and previews families within the render budget | FP-3, FP-4 | testFontPickerPicksAFace | FP-a | true | 0 | PR #4704 open (fast-lane, head deb55ebe) | – | – |
 | FP-m | rules: filter, face order, nearest face | FP-5, FP-8 | FJ-m | FP-a | false | 0 | merged #4644 | – | – |
-| FP-z | live families; feature built | FP-6, FP-7 | testFontPickerPicksAFace | FP-u, FP-m | true | 0 | FP-7 C4 merged #4651; FP-6 + status built stacked on FP-u (74 lines), PR after FP-u's | – | – |
+| FP-z | live families; feature built | FP-6, FP-7 | testFontPickerPicksAFace | FP-u, FP-m | true | 0 | FP-7 C4 merged #4651; FP-6 + status built stacked on FP-u (74 lines), pushed d3633a8d, gate CI: PASS; PR once #4704 merges (428 lines vs dev until then) | – | – |
 
 ## Tasks
 
