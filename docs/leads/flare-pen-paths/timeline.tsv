@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-23T04:19Z	check	dev-red #3856: Linux fails on halo command-path baseline from #4703, not FP-u; commented culprit; FP-u done waits; #4714 in lane
 04:45Z	check	FP-z committed (journey on live, flare.md, wave built); gate running; dev Linux check 39901619047 on fef84231b holds FP-u and FP-m
 04:50Z	wave	FP-z PR #4753 opened (fast-lane, feature-done), head 510e4190
+04:51Z	check	dev Linux check 39901619047 red only on Halo command-path baseline (HaloTransport.swift:131, #3856); FP-u/FP-m Belt-Slice-Done keep waiting
