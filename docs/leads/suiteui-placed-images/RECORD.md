@@ -2,9 +2,9 @@
 
 Issue: #3457 · Packet: docs/blueprints/suiteui/features/placed-images.md
 Run: act-1a1647a67aa-dau5 (relaunch) · Started: 2026-10-22T16:45Z
-Stage: PL-9 #4613 clean 14 files, macOS build queued; supervisor comment answered
+Stage: PL-9 #4613 macOS build green; lane Linux check red on expired journey quarantine (dev-wide)
 Base: 854a3b52c66aaa12582e9190f404265b84594a05
-Next: After #4613 merges: retarget #4616/#4617, merge PL-9 then dev, gate, push
+Next: When dev renews UITests/quarantine.json: merge dev into PL-9, gate, push, Head; then PL-10 stack
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -33,6 +33,7 @@ Next: After #4613 merges: retarget #4616/#4617, merge PL-9 then dev, gate, push
 |---|---|---|---|---|---|
 
 ## Decisions
+- Not fixing in PR (protected file); asked supervisor on #3457
 - Wait on lane macOS build
 - -
 - -
