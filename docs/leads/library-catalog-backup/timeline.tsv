@@ -21,54 +21,10 @@ utc	stage	event	ref	note
 2026-10-21T12:21:35Z	3	poll	-	BK-3 merged; BK-u/LF-3/FO-u/FO-5 in lane; slice-done waits on run 39593465885
 2026-10-21T12:43:29Z	3	poll	-	no change; macOS runner backlog holds batch gate and scoped library run
 2026-10-21T13:17:51Z	3	poll	-	no change; macOS backlog; 4 PRs await batch gate
-2026-10-21T15:49:07Z	3	relaunch	-	run act-1a15f2277a5-6xyv resumed; slice-done lines posted on 39623471557; open PRs merging dev for the Photo baseline fix
-2026-10-21T17:09:03Z	3	poll	-	rule 23 re-read; PRs wait on lane macOS builds
-2026-10-21T18:07:04Z	3	wait	BK-u	#3967 macOS build green, batch merge pending
-2026-10-21T18:37:08Z	-	wait	BK-u	#3967 green macOS build, waits on a lane batch
-2026-10-21T18:42:52Z	-	wait	-	lead/catalog-backup now mirrors this record. BK-u #3967 at cf07beb waits on a lane batch (macOS build 39632012767 succeeded).
+2026-10-21T18:41:42Z	-	mirror	-	record mirrored from lead/library-catalog-backup
+2026-10-21T18:42:52Z	-	mirror	-	lead/catalog-backup now mirrors this record. BK-u #3967 at cf07beb waits on a lane batch (macOS build 39632012767 succeeded).
 2026-10-21T19:06:20Z	-	fix	BK-u	BK-u #3967 got needs-fix: the batch's Linux check failed CommandPathTests (library). The five backup sites are now listed in the command-path baseline, as FC-5 and PT-3 did. dev merged in, gate PASS, pushed 780c26c, Head moved. Waiting on the lane's new macOS build and batch.
 2026-10-21T20:08:48Z	-	watch	BK-u	Watch: BK-u #3967 at 780c26c had needs-fix dropped and waits on the lane's macOS build.
 2026-10-21T20:39:41Z	-	watch	BK-u	BK-u #3967: its lane macOS build 39661645674 passed at 780c26c. Waiting for a lane batch; 63 fast-lane PRs are open on dev.
-2026-10-21T20:55:04Z	-	watch	BK-u	BK-u #3967: open merged=false [fast-lane]; still waiting for a lane batch.
-2026-10-21T21:10:24Z	-	watch	BK-u	BK-u #3967: no change; macOS build passed, still waiting for a lane batch.
-2026-10-21T21:26:17Z	-	watch	BK-u	heartbeat: #3967 in the lane at 780c26c (macOS build passed), waiting for a batch; dev Linux check 39676099814 (6dc7778) red on Launcher's CommandPathTests baseline, dev-red #3856, not ours
-2026-10-21T21:41:37Z	-	watch	BK-u	heartbeat: #3967 clean at 780c26c, macOS build passed, waiting on the lane; dev Linux still red on Launcher's CommandPathTests baseline (dev-red #3856, not ours); lane bisecting batch 20261021205717
-2026-10-21T21:56:56Z	-	watch	BK-u	heartbeat: #3967 still waiting on a lane batch at 780c26c; dev-red #3856 still open (Launcher baseline, not ours)
-2026-10-21T22:10:00Z	-	merged	BK-u	#3967 merged 15806ab
-2026-10-21T22:39:54Z	-	fix	BK-u	dev Linux red from our BK-u merge racing CS-2 #4023 (run 39685422711: library baseline stale Cancel lines, 53 over max 48). Fix #4244 opened (head 6b0bec6): LibraryBackupMenuState specs, menu item and sheet Restore buttons built from specs, baseline back at 48; gate PASS, mutate 3/3. Filed #4245 (needs-ui: role on spec MenuCommand).
-2026-10-21T22:55:11Z	-	watch	BK-u	fix #4244 (6b0bec6) waits on its lane-dispatched macOS build (apps: library), then a batch.
-1792623562	-	watch	BK-u	dev-ci 39689070230 at e0fb991: Linux red only on CommandPathTests/CommandPathLimitTests for library.txt (2 stale Cancel lines, 53 > 48), the BK-u/CS-2 race; #4244 removes exactly those lines. #4244 macOS build 39689010451 in progress.
-1792623672	-	watch	BK-u	#4244 macOS build 39689010451 red, but not ours: dev doesn't compile on macOS (RenderBudgetPhotoPlaceTests uses PhotoPlaceIntent.files, which #4164 removed). The fix is #4215 (Photo line, not ported). Commented on #4244; I'll merge dev into the branch and move Head once #4215 lands.
-1792624224	-	watch	BK-u	Heartbeat: #4244 still open, waiting for #4215 (the macOS compile fix) to reach dev; dev at 8d08e08.
-1792625260	-	watch	BK-u	#4244 closed: #4250 (be9aa35) landed the same baseline fix on dev (library.txt at 48). Dev Linux at 8d08e08 was red only on the library CommandPath baseline. BK-u closes on the first green dev Linux run that includes be9aa35.
-1792626175	-	watch	BK-u	Heartbeat: dev Linux check 39693644795 on be9aa35 (has #4250) running.
-1792626451	-	slice-done	BK-u	run 39693644795
-1792627091	-	watch	BK-5m	Heartbeat: BK-5m blocked (LF-m waits on #3928).
-1792628005	-	watch	BK-5m	Heartbeat: BK-5m blocked (LF-m waits on #3928).
-1792628918	-	watch	BK-5m	Heartbeat: BK-5m blocked (LF-m waits on #3928).
-1792629832	-	watch	BK-5m	Heartbeat: BK-5m blocked (LF-m waits on #3928).
-1792630745	-	watch	BK-5m	Heartbeat: BK-5m blocked (LF-m waits on #3928).
-1792631659	-	watch	BK-5m	heartbeat: BK-5m blocked behind LF-4 (#3928 open)
-1792632574	-	watch	BK-5m	heartbeat: BK-5m blocked behind LF-4 (#3928 open)
-1792633487	-	watch	BK-5m	heartbeat: BK-5m blocked behind LF-4 (#3928 open)
-1792634400	-	watch	BK-5m	heartbeat: BK-5m blocked behind LF-4 (#3928 open)
-1792635313	-	watch	BK-5m	heartbeat: BK-5m blocked behind LF-4 (#3928 open)
-1792636227	-	watch	BK-5m	heartbeat: BK-5m blocked behind LF-4 (#3928 open)
-1792637141	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library). File as gap at run end if still blocked.
-1792638054	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library).
-1792638968	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library).
-1792639881	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library).
-1792640795	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library).
-1792641709	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library).
-1792642622	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library).
-1792643536	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library).
-1792644452	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library).
-1792645367	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library).
-1792646282	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library).
-1792647197	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library).
-1792648112	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library).
-1792649027	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library).
-1792649943	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library).
-1792650858	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library).
-1792651773	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library).
-1792652689	-	watch	BK-5m	Heartbeat: BK-5m still blocked (LF-m on SuiteUI #3928, open; AK-library).
+2026-10-23T15:31:04Z	3	relaunch	-	run act-1a1695ec091-ilfv on dev 721168a; BK-m builder starts (contract-first)
+2026-10-23T16:34:40Z	3	pr	#4878	BK-m opened at 8bb1a4a; BK-z builder launched
