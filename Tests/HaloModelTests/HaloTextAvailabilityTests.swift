@@ -1,8 +1,9 @@
 // HaloTextAvailabilityTests.swift: TX-3, QB-F1 for the TEXT area. The text
 // commands (field, size, end of a size scrub, layer color) answer state only
 // on `.fake` and `.live`: no composition, then no layer or a non-text layer,
-// say what they need; a text layer turns every one on; none reads "Not built
-// yet". Linux and macOS.
+// say what they need; a text layer turns every one on; the layer color is
+// also on for a solid or shape (HaloFillColorAvailabilityTests); none reads
+// "Not built yet". Linux and macOS.
 @testable import HaloModel
 import Testing
 
@@ -16,11 +17,16 @@ private func textProject(_ name: String, _ services: HaloServices) throws -> Hal
     return project
 }
 
-private func expectHelp(_ project: HaloProject, _ help: String?, _ label: String = "") {
+/// `help` from every text command; `color` (default `help`) from the color row.
+private func expectHelp(_ project: HaloProject, _ help: String?, color: String?? = .none, _ label: String = "") {
     for command in textCommands {
-        #expect(project.unavailableHelp(for: command) == help, "\(command) \(label)")
+        let want = if case .setLayerColor = command { color ?? help } else { help }
+        #expect(project.unavailableHelp(for: command) == want, "\(command) \(label)")
     }
 }
+
+private let noColorLayer = "Select a text, solid or shape layer first."
+
 
 @Test func theTextAreaHasTheFieldSizeScrubAndColor() {
     #expect(textCommands.count == 4)
@@ -39,14 +45,14 @@ func noCompositionSaysCreateOne(services: HaloServices) {
 func noLayerOrANonTextLayerSaysSelectATextLayer(services: HaloServices) throws {
     var project = try textProject("empty", services)
     #expect(project.selectedLayer == nil)
-    expectHelp(project, "Select a text layer first.", "no layer")
+    expectHelp(project, "Select a text layer first.", color: noColorLayer, "no layer")
     project.newLayer(.solid)
     #expect(project.selectedLayer?.name == "Solid 1")
-    expectHelp(project, "Select a text layer first.", "on Solid 1")
+    expectHelp(project, "Select a text layer first.", color: .some(nil), "on Solid 1")
     for kind in [HaloLayerKind.shape, .null] {
         project.newLayer(kind)
         #expect(project.selectedLayer?.kind == kind)
-        expectHelp(project, "Select a text layer first.", "on \(kind)")
+        expectHelp(project, "Select a text layer first.", color: kind == .null ? noColorLayer : .some(nil), "on \(kind)")
     }
 }
 
@@ -59,7 +65,7 @@ func aTextLayerTurnsEveryTextCommandOn(services: HaloServices) throws {
     expectHelp(project, nil, "on Text 1")
     let solid = try #require(project.selectedComposition?.layers.first { $0.name == "Solid 1" })
     project.selectLayer(solid.id)
-    expectHelp(project, "Select a text layer first.", "back on Solid 1")
+    expectHelp(project, "Select a text layer first.", color: .some(nil), "back on Solid 1")
 }
 
 @Test(arguments: [HaloServices.fake, .live])
@@ -70,7 +76,9 @@ func theFixturesTitleLayerCanBeEdited(services: HaloServices) throws {
     expectHelp(project, nil, "on Title")
     let badge = try #require(project.selectedComposition?.layers.first { $0.name == "Badge" })
     project.selectLayer(badge.id)
-    expectHelp(project, badge.kind == .text ? nil : "Select a text layer first.", "on Badge")
+    expectHelp(
+        project, badge.kind == .text ? nil : "Select a text layer first.",
+        color: badge.kind == .null ? noColorLayer : .some(nil), "on Badge")
 }
 
 @Test(arguments: [HaloServices.fake, .live])

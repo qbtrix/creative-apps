@@ -6,8 +6,10 @@
 // in the backup area's own modifier, not in LibraryWindow, so opening it
 // re-renders at most 2 window bodies (target 0) and never the grid: the grid
 // is built in the window body, so with no window body it can't run, and its
-// cells are the same before and after. Nested in BodyCountSuites, as every
-// suite that reads a body counter is. macOS only.
+// cells are the same before and after. The backup list is a List, whose rows
+// report no accessibility children to a test process, so the row is found by
+// RenderBudgetHistoryPanelTests.node (children, then subviews). Nested in
+// BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
 import LibraryModel
@@ -45,8 +47,8 @@ extension BodyCountSuites {
             }
             #expect(hooked, "the backup area never set its present hook")
             let sheet = try #require(await Self.sheet(of: w.window), "no sheet opened: \(open)")
-            #expect(Self.node("library.backup.row", in: sheet) != nil, "the sheet shows no backup row")
-            #expect(Self.node("library.backup.restore", in: sheet) != nil, "the sheet has no Restore button")
+            #expect(RenderBudgetHistoryPanelTests.node("library.backup.row", in: sheet) != nil, "the sheet shows no backup row")
+            #expect(RenderBudgetHistoryPanelTests.node("library.backup.restore", in: sheet) != nil, "the sheet has no Restore button")
             // Opening a sheet changes no window state. Target: 0.
             expectBodies(open, atMost: 2, target: 0)  // dev: 0
             #expect(cells() == before, "the grid's cells changed while the sheet opened")
@@ -66,16 +68,6 @@ extension BodyCountSuites {
                 try? await Task.sleep(for: .milliseconds(20))
             }
             return nil
-        }
-
-        /// The first node called `identifier` under `element`, in tree order (read as AnyObject: SwiftUI's
-        /// nodes answer the NSAccessibility methods informally).
-        static func node(_ identifier: String, in element: Any, depth: Int = 0) -> AnyObject? {
-            let node = element as AnyObject
-            if (node.accessibilityIdentifier?() ?? nil) == identifier { return node }
-            guard depth < 60 else { return nil }
-            return ((node.accessibilityChildren?() ?? nil) ?? []).lazy
-                .compactMap { Self.node(identifier, in: $0, depth: depth + 1) }.first
         }
     }
 }

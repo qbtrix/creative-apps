@@ -115,13 +115,16 @@ private func properties(_ data: Data) -> [CFString: Any] {
         defer { pasteboard.releaseGlobally() }
         var heard = 0
         let watch = PasteboardChangeWatch(PasteboardBridge(pasteboard)) { heard += 1 }
-        NotificationCenter.default.post(name: NSWindow.didBecomeKeyNotification, object: nil)
+        // Real objects, never nil: AppKit's own observers (NSRemoteView) assert the object is a window and
+        // abort the whole test process once an earlier suite has left a remote view behind.
+        let window = NSWindow(contentRect: .zero, styleMask: [.borderless], backing: .buffered, defer: true)
+        NotificationCenter.default.post(name: NSWindow.didBecomeKeyNotification, object: window)
         #expect(heard == 0)   // nothing changed yet
         PasteboardBridge(pasteboard).write([TypedData(type: .plainText, data: Data("x".utf8))])
         #expect(heard == 0)   // no timer: a write alone is not heard
-        NotificationCenter.default.post(name: NSMenu.didBeginTrackingNotification, object: nil)
+        NotificationCenter.default.post(name: NSMenu.didBeginTrackingNotification, object: NSMenu())
         #expect(heard == 1)
-        withExtendedLifetime(watch) {}
+        withExtendedLifetime((watch, window)) {}
     }
 
     @Test func nothingInSuiteShellPollsOnATimer() throws {

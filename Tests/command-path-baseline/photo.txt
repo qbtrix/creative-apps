@@ -1,10 +1,6 @@
 # PhotoApp's menu items and buttons built without a command spec (command-catalog CC-11).
-# max: 10
+# max: 4
 Sources/PhotoApp/CanvasSizeSheet.swift: Button("OK", action: resize).keyboardShortcut(.defaultAction)
-Sources/PhotoApp/ExportSheet.swift: Button("Export", action: onExport).keyboardShortcut(.defaultAction)
-Sources/PhotoApp/ImageSizeSheet.swift: Button("Resize", action: resize)
 Sources/PhotoApp/PhotoCommands+File.swift: Button("Close") { NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil) }
 Sources/PhotoApp/PhotoCommands+View.swift: MenuCommand("History", help: historyHelp, isEnabled: menu.hasImage) {
-Sources/PhotoApp/PhotoWindow.swift: Button("Rename", action: commitRename)
 Sources/PhotoApp/PhotoWindow.swift: Button("OK", role: .cancel) {}
-Sources/PhotoApp/StraightenSheet.swift: Button("Apply", action: onApply).keyboardShortcut(.defaultAction).disabled(frame == nil)

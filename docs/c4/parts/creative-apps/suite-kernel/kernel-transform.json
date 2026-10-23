@@ -11,5 +11,19 @@
     "Sources/SuiteKernel/Transform/TransformCommands.swift",
     "Sources/SuiteKernel/Transform/TransformRules.swift"
   ],
-  "order": 60
+  "order": 60,
+  "relationships": [
+    {
+      "source": "kernel-transform",
+      "target": "kernel-layers",
+      "description": "runs its six transform.* commands (read, set, rotate, scale, flip, reset) on the fake app's rects, FakeCanvasDocument as a TransformTarget (TT-8, real job RJ-X32)",
+      "style": "sync"
+    },
+    {
+      "source": "kernel-transform",
+      "target": "suiteui-sources",
+      "description": "TransformBox and the six transform.* commands back SuiteUI's TransformRows (X, Y, W, H, angle, flip) and the gallery's live target (TT-3, TT-7)",
+      "style": "sync"
+    }
+  ]
 }

@@ -6,8 +6,9 @@
 // (ChoiceChips of the presets, and for Custom a Dash and a Gap row), Trim Start and End (0...100 %) and Offset
 // (−360...360 °), unless `showsTrim` is false, then Remove Stroke; with no stroke, Add Stroke alone. A scrub or a
 // run of colour picks shares one drag token until its end, so the host folds it into one undo step. A row that can't
-// act is disabled with its reason as its help: `help` for every row, "No stroke." without one, and `dashHelp` for the
-// dash and trim rows (StrokeRules.waitingCore until SS-7), also shown as a note under them. Identifiers are
+// act is disabled with its reason as its help: `help` for every row, "No stroke." without one, `styleHelp` for Join
+// and Cap, and `dashHelp` for the dash and trim rows (StrokeRules.waitingCore until SS-7); those two show once each as
+// a note under the chips. Identifiers are
 // `suite.stroke.<row>` (StrokeEditorRow), with `join.<join>`, `cap.<cap>` and `dash.<preset>` on the chips. The
 // decisions live in StrokeEditorRules, which StrokeEditorTests drive; the view only lays the rows out.
 import Foundation
@@ -21,10 +22,11 @@ public struct StrokeEditor: View {
     /// The open gesture's drag token; nil between gestures.
     @State private var drag: String?
 
-    /// `showsTrim: false` hides the trim rows (Design); `dashHelp` disables the dash and trim rows with it.
-    public init(stroke: VectorStroke?, help: String?, dashHelp: String?, showsTrim: Bool = true,
+    /// `showsTrim: false` hides the trim rows (Design); `dashHelp` disables the dash and trim rows with it, and
+    /// `styleHelp` the Join and Cap chips (an app whose stroke can't hold them yet).
+    public init(stroke: VectorStroke?, help: String?, dashHelp: String?, styleHelp: String? = nil, showsTrim: Bool = true,
                 onIntent: @escaping @MainActor (StrokeIntent) -> Void) {
-        rules = StrokeEditorRules(stroke: stroke, help: help, dashHelp: dashHelp, showsTrim: showsTrim)
+        rules = StrokeEditorRules(stroke: stroke, help: help, dashHelp: dashHelp, styleHelp: styleHelp, showsTrim: showsTrim)
         self.onIntent = onIntent
     }
 
@@ -59,9 +61,7 @@ public struct StrokeEditor: View {
                                    onChange: { v in sample { rules.edit(row, to: v, drag: $0) } }, onEnd: end)
                     .strokeRow(row, rules)
             }
-            if rows.contains(.dash), let dashHelp = rules.dashHelp, rules.stroke != nil, rules.help == nil {
-                InspectorNote(dashHelp)
-            }
+            ForEach(rules.notes, id: \.self) { InspectorNote($0) }
             if rows.contains(.add) { action(.add, "Add Stroke", systemImage: "plus") }
             if rows.contains(.remove) { action(.remove, "Remove Stroke", systemImage: "minus") }
             if let help = rules.help { InspectorNote(help) }
@@ -143,6 +143,8 @@ struct StrokeEditorRules: Sendable {
     let stroke: VectorStroke?
     let help: String?
     let dashHelp: String?
+    /// Why Join and Cap can't act; nil when they can.
+    var styleHelp: String? = nil
     let showsTrim: Bool
 
     nonisolated static let noStroke = "No stroke."
@@ -156,12 +158,21 @@ struct StrokeEditorRules: Sendable {
         return rows + [.remove]
     }
 
-    /// Why `row` can't act: `help`, then "No stroke.", then `dashHelp` for the dash and trim rows; nil when it can.
+    /// Why `row` can't act: `help`, then "No stroke.", then `dashHelp` for the dash and trim rows and `styleHelp`
+    /// for Join and Cap; nil when it can.
     func reason(_ row: StrokeEditorRow) -> String? {
         if let help { return help }
         if row == .add { return stroke == nil ? nil : "The layer already has a stroke." }
         if stroke == nil { return Self.noStroke }
+        if row == .join || row == .cap { return styleHelp }
         return row.isDashOrTrim ? dashHelp : nil
+    }
+
+    /// The note under the chips: `styleHelp`, then `dashHelp`, each distinct reason once; none without a stroke or
+    /// when `help` turns the whole editor off (its own note says why).
+    var notes: [String] {
+        guard stroke != nil, help == nil else { return [] }
+        return [styleHelp, dashHelp].compactMap { $0 }.reduce(into: []) { if !$0.contains($1) { $0.append($1) } }
     }
 
     var preset: DashPreset? { stroke.map(StrokeRules.preset(of:)) }

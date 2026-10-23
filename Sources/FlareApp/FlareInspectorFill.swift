@@ -24,8 +24,7 @@
 // stopwatch (timeline-keys TK-3: `flare.inspector.key.fill`, `.key.stroke`,
 // `.key.stroke-width`) that sends `.toggleAnimated` / `.toggleKey` by the
 // property's name at the playhead. Its state and reason come from `keyState`
-// and `keyHelp`; until TK-7 gives the Model paint keys, each reads Not
-// animated and is off with `paintKeysNotBuilt` as its tooltip.
+// and `keyHelp` (TK-8: the Model's `keyState(_:)` and `paintKeyHelp(_:)`).
 import FlareCore
 import FlareModel
 import SuiteKernel
@@ -40,10 +39,7 @@ struct FlareInspectorFill: View {
     /// A paint property's stopwatch state ("fill", "stroke", "strokeWidth").
     var keyState: @MainActor (String) -> SuiteUI.KeyState = { _ in .idle }
     /// Why a paint property's stopwatch can't act; nil while it can.
-    var keyHelp: @MainActor (String) -> String? = { _ in Self.paintKeysNotBuilt }
-
-    /// Why the paint stopwatches are off until the Model keys paint.
-    static let paintKeysNotBuilt = "Fill and stroke keys arrive with TK-7."
+    var keyHelp: @MainActor (String) -> String? = { _ in nil }
 
     /// The fill type switch's chips, one control each (`flare.inspector.fillType.<type>`).
     static let fillTypes = FillType.allCases.map {

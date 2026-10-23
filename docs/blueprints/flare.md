@@ -120,9 +120,9 @@ The suite design's Flare MVP, made concrete.
 
 | Area | In v1 |
 |---|---|
-| Files | New from a preset (1080p 16:9, square, 9:16, 550x400 web, custom); open and save `.flare`; Open Recent; autosave to a recovery file with a restore offer after a crash; the title shows the file name; an unsaved dot; undo and redo named for the step. One document per window: New and Open act in the front window after the unsaved-changes prompt |
+| Files | New from a preset (1080p 16:9, square, 9:16, 550x400 web, custom); open and save `.flare`; Open Recent from the suite's shared list (this app's files only; Clear Menu clears them there); Open In ▸ another suite app that reads `.flare` (Halo), once the file is saved; a `.flare` dropped on the stage opens in its own window, a `.halo` goes to Halo, and a file Flare can't read is refused with a mark ("Flare can't import SVG yet."); autosave to a recovery file with a restore offer after a crash; the title shows the file name; an unsaved dot; undo and redo named for the step. One document per window: New and Open act in the front window after the unsaved-changes prompt |
 | Stage | Draws the scene at the current frame with curves kept as curves; zoom (pinch, menu, fit, 100%); pan (Space-drag, scroll); rulers; guides dragged out of the rulers, moved and removed; Retina-sharp |
-| Tools | Select (V): click, Shift-click, marquee, move, and the eight scale handles and the rotate zone. Direct Select (A): pick a path's anchors and handles and drag them. Rectangle (R) with corner radius, Ellipse (E), Pen (P): click for corners, drag for smooth points, close on the first point |
+| Tools | Select (V): click, Shift-click, marquee, move, and the eight scale handles and the rotate zone. Direct Select (A): pick a path's points (click, Shift-click, marquee) and drag them and their handles, Option-drag a handle to break it, add, delete and convert points, one undo step per drag. Rectangle (R) with corner radius, Ellipse (E), Pen (P), the suite's shared Pen: click for corners, drag for smooth points, close on the first point |
 | Edit | Delete, Cut, Copy, Paste, Duplicate of layers (Paste lands above the selection, offset by 10 pt), Select All, Deselect, Bring Forward, Send Backward |
 | Inspector | File-name title, info card, TRANSFORM (X, Y, scale X and Y, rotation, opacity) as bar sliders with keyframe buttons, FILL (a Solid / Linear / Radial switch, solid editing, and the shared gradient editor for a gradient's stops, colours and angle, each edit one fill command and one undo step), STROKE (color, width, cap, join), INSTANCE (symbol, loop mode, first frame) for an instance, SCENE when nothing is selected. A multi-selection shows "Mixed" for values that differ |
 | Timeline | One lane per layer, key diamonds, playhead with a time pill, scrub, retime keys by drag, delete keys, insert and remove frames, frame labels, timecode and frame readout |
@@ -316,7 +316,8 @@ belong to layers. So:
   shared box.
 - Direct Select (A) selects items and anchors inside a layer. Dragging an
   item moves its geometry (`TranslateShape`, not animatable); dragging an
-  anchor or handle edits the path (`SetShapePath`). Fill and Stroke act on
+  anchor or handle edits the path (`SetShapePath`, through the suite kernel's
+  `path.*` commands, shared by every app with a Pen). Fill and Stroke act on
   the selected items.
 - To animate one part separately, it goes on its own layer or into a symbol.
   The `character` fixture has each part on its own layer for this reason.
@@ -549,7 +550,7 @@ damaged: <detail>." (`invalid`). The document that was open stays open.
 Every item works or is disabled with a reason, never hidden.
 
 - **Flare**: About, Hide, Quit (no Settings window in v1).
-- **File**: New ⌘N, Open… ⌘O, Open Recent, Open Sample (Bounce, Character, Button), Save ⌘S, Save As… ⇧⌘S, Export… ⇧⌘E, Close ⌘W.
+- **File**: New ⌘N, Open… ⌘O, Open Recent, Open In, Open Sample (Bounce, Character, Button), Save ⌘S, Save As… ⇧⌘S, Export… ⇧⌘E, Close ⌘W.
 - **Edit**: Undo <step> ⌘Z, Redo <step> ⇧⌘Z, Cut ⌘X, Copy ⌘C, Paste ⌘V, Duplicate ⌘D, Delete ⌫, Select All ⌘A, Deselect ⇧⌘A.
 - **View**: Zoom In ⌘+, Zoom Out ⌘−, Fit ⌘0, Actual Size ⌘1, Onion Skin ⌥⌘O, Motion Path, Show Rulers ⌘R, Show Guides ⌘;, Clear Guides.
 - **Object**: Convert to Symbol ⌥⌘K, Edit Symbol (Return on an instance), Exit Symbol (Escape); Bring Forward ⌘], Send Backward ⌘[.
@@ -663,7 +664,7 @@ never cited. QB ids are in `docs/review-rubric.md` section 6.
 |---|---|---|---|---|---|
 | New from preset | New sheet | J2 | `Document`, `Scene` init | exists | QB-F1 |
 | Open, save, title, dirty | File menu, top bar | J26 | `FlareFormat.decode/encode` | exists | QB-F1, byte round trip (LM-1) |
-| Open Recent | File menu | J26 | none (app list) | n/a | QB-F1 |
+| Open Recent, Open In, drop | File menu, stage | J26, FLJ1 | none (the suite's recents and hand-offs) | n/a | QB-F1 |
 | Open errors (not Flare, damaged, newer version, too large) | Alert | J27 | `FormatError` cases | exists | message per case (LM-1 test) |
 | Open a large file off the main thread | Stage progress | P7 | `FlareFormat.decode` | exists | QB-L9, QB-L12 |
 | Save failure | Top bar, alert | J28 | none (file write) | n/a | QB-F2 |
@@ -681,7 +682,7 @@ never cited. QB ids are in `docs/review-rubric.md` section 6.
 | Rectangle, ellipse | Rail, stage | J3 | `AddLayer`, `AddShape`; `Path` builders | partial (LC-4, creative-core#182 open) | QB-L1, QB-V1 |
 | Pen corners | Rail, stage | J3 | `Path` elements, `AddShape` | exists | QB-L1, QB-V1 |
 | Pen smooth points (drag) | Rail, stage | J3 | cubic `PathElement` | exists | QB-V1 (G1 continuity, LM-3) |
-| Direct select: anchors and handles | Rail, stage | J4 | `SetShapePath`, `TranslateShape` | partial (LC-7) | QB-L1 |
+| Direct select: points and handles (drag, break a handle, marquee, add, delete, convert) | Rail, stage | J4, FJ-P1 | `SetShapePath` through the suite kernel's `path.*` commands, `TranslateShape` | exists | QB-L1, RJ-F27 |
 | Delete item | Edit menu, stage menu | J15 | `RemoveLayer`, `RemoveShape` | exists | QB-F3 |
 | Cut, copy, paste, duplicate | Edit menu | J15 | `CommandRegistry` envelopes; `DuplicateLayer` | partial (LC-7) | QB-F3 |
 | Move and key by drag | Stage | J6 | `SetKeyframe`, `group` | exists for scene layers | QB-L1, QB-F3 |

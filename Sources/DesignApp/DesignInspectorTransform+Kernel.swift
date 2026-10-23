@@ -2,8 +2,9 @@
 // an adapter from the workspace onto SuiteKernel's TransformIntent with no Design maths (rule 20).
 // Rotation is a bar in degrees, clockwise about the layer's centre ("Mixed" when the selected layers
 // differ), and Flip Horizontal and Flip Vertical mirror the selection in place. Each sends a kernel
-// TransformIntent (`.transform`, run by `runTransform`); a Rotation scrub is one step under one drag
-// token, ended by `.endEditRun`. On DT-1's stubs every control is off with `turnHelp` as its reason.
+// TransformIntent (`.transform`, run by `runTransform`); a Rotation scrub's values preview on the
+// window's live box (DesignLiveDrag), so the window doesn't run per value, and `.endEditRun` lands the
+// last as one step under its drag token. Hosted without a box, each value goes straight to `.transform`. On DT-1's stubs every control is off with `turnHelp` as its reason.
 // X, Y, W and H stay the Frame section's live scrub fields, so SuiteUI's TransformRows, which carries
 // its own X, Y, W and H, isn't used here yet. Values in, intents out.
 import DesignModel
@@ -15,10 +16,11 @@ import SwiftUI
 struct DesignInspectorTransform: View {
     let model: DesignWorkspace
     let perform: DesignPerform
+    @Environment(\.designLiveDrag) private var live
 
     var body: some View {
         let help = model.turnHelp
-        let rotation = model.sharedValue(\.rotation)
+        let rotation = (live?.workspace ?? model).sharedValue(\.rotation)
         InspectorSection("Transform") {
             InspectorSliderRow(
                 "Rotation", value: rotation ?? 0, in: -180...180, step: 1, unit: "°", decimals: 0, mixed: rotation == nil,
@@ -42,6 +44,9 @@ struct DesignInspectorTransform: View {
     private func turn(to degrees: Double) {
         guard var box = model.transformSelection else { return }
         box.degrees = degrees
-        perform(.transform(.set(box, drag: DesignControlID.inspectorRotation)))
+        let intent = TransformIntent.set(box, drag: DesignControlID.inspectorRotation)
+        guard let live else { return perform(.transform(intent)) }
+        if !live.isLive { live.begin(from: model) }
+        live.preview(intent)
     }
 }

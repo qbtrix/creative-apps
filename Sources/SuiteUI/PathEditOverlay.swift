@@ -8,6 +8,9 @@
 // intents the app runs. `PathGesture` holds the mapping, pure and testable:
 // view points in, document-space intents out. The overlay keeps only its
 // gesture, the pointer and focus; the app owns the draft, path and selection.
+// PN-4 adds one hidden accessibility element per anchor and drawn handle.
+// `pressesPassThrough()` keeps the marks and hover for a host whose own canvas
+// gesture takes the presses.
 import AppKit
 import SuiteKernel
 import SwiftUI
@@ -29,7 +32,8 @@ public enum PenTool: String, CaseIterable, Sendable {
 public struct PathEditOverlay: View {
     private let context: PathContext
     private let onIntent: (PathIntent) -> Void
-    var interactive = true // false: PathEditOverlay+StandIn.swift's marks-only init
+    /// false: marks and hover only (`pressesPassThrough()`, the stand-in init); presses, drags and keys reach the view under it.
+    var takesPresses = true
     @State private var tracker = PathGesture()
     @State private var pointer: CGPoint?
     @State private var hovered: PathHit?
@@ -46,21 +50,31 @@ public struct PathEditOverlay: View {
         self.onIntent = onIntent
     }
 
+    /// The overlay with the pointer resting at `pointer` (view points), as a hover leaves it: the rubber band
+    /// and close ring a snapshot shows without a mouse.
+    init(draft: PenDraft?, path: PathInEdit?, selection: Selection<AnchorRef>, tool: PenTool, zoom: Double, pointer: CGPoint?,
+         onIntent: @escaping (PathIntent) -> Void) {
+        self.init(draft: draft, path: path, selection: selection, tool: tool, zoom: zoom, onIntent: onIntent)
+        _pointer = State(initialValue: pointer)
+    }
+
     public var body: some View {
         let hint = pointer.map { PathGesture.hint(at: $0, hit: hovered, in: context) }
         ZStack(alignment: .topLeading) {
             Color.clear.contentShape(.rect)
             if let path = context.path {
-                PathMarks(contours: path.path.contours, toView: path.toDocument, selected: context.selection.set,
-                          hovered: context.tool == .directSelect ? hovered : nil, zoom: context.zoom)
+                PathEditMarks(path: path, selection: context.selection, hovered: context.tool == .directSelect ? hovered : nil,
+                              zoom: context.zoom).equatable()
             }
             if let draft = context.draft {
                 PathMarks(contours: [draft.contour], toView: .identity, selected: [], hovered: nil, zoom: context.zoom)
             }
             guides(hint: hint)
+            if let path = context.path {
+                PathAnchorProbes(path: path, selection: context.selection, zoom: context.zoom).equatable()
+            }
         }
         .contentShape(.rect)
-        .allowsHitTesting(interactive)
         .onContinuousHover { phase in
             if case .active(let p) = phase { (pointer, hovered) = (p, hitTest(p)) } else { (pointer, hovered) = (nil, nil) }
         }
@@ -75,9 +89,10 @@ public struct PathEditOverlay: View {
                 pointer = value.location
                 send(tracker.drag(to: value.location, modifiers: held))
             }
-            .onEnded { value in send(tracker.release(at: value.location, modifiers: KeyModifiers(flags: NSEvent.modifierFlags))) })
+            .onEnded { value in send(tracker.release(at: value.location, modifiers: KeyModifiers(flags: NSEvent.modifierFlags))) },
+            isEnabled: takesPresses)
         .pointerStyle(hint.map { look($0) })
-        .focusable()
+        .focusable(takesPresses)
         .focused($hasFocus)
         .focusEffectDisabled()
         .onKeyPress(phases: .down) { press in
@@ -91,6 +106,16 @@ public struct PathEditOverlay: View {
         .accessibilityValue(context.draft.map { "Drawing, \($0.contour.anchors.count) points" }
             ?? "\(context.selection.ordered.count) points selected")
         .suiteControl(id: "suite.path.overlay", enabled: true, reason: nil)
+    }
+
+    /// The overlay as marks and hover only, for a host whose own canvas gesture routes every press (Flare's stage):
+    /// its drag gesture, focus and keys are off, so `onIntent` gets nothing, but it stays hit-tested, so hover still
+    /// draws the rubber band, close ring and hovered ring and sets the pointer. Don't wrap it in
+    /// `.allowsHitTesting(false)`: that drops the hover too.
+    public func pressesPassThrough() -> Self {
+        var overlay = self
+        overlay.takesPresses = false
+        return overlay
     }
 
     /// The rubber band, the handle a Pen drag pulls, the marquee and the close ring.
@@ -147,5 +172,72 @@ public struct PathEditOverlay: View {
 
     private func send(_ intents: [PathIntent]) {
         for intent in intents { onIntent(intent) }
+    }
+}
+
+/// The edited path's marks, rebuilt only when the path, selection, hovered mark or zoom changes: a drag sample
+/// that moves only the marquee or the pointer re-runs the overlay, not these (RenderBudgetPenPathsTests).
+struct PathEditMarks: View, Equatable {
+    let path: PathInEdit, selection: Selection<AnchorRef>, hovered: PathHit?, zoom: Double
+
+    var body: some View {
+        PathMarks(contours: path.path.contours, toView: path.toDocument, selected: selection.set, hovered: hovered, zoom: zoom)
+    }
+}
+
+/// One hidden accessibility element over an anchor or handle: its id, what VoiceOver reads, its box in document points.
+struct PathAnchorProbe: Hashable, Sendable {
+    let id: String, label: String, rect: CGRect
+}
+
+/// The path's anchors and drawn handles as hidden accessibility elements, for VoiceOver and the journeys:
+/// `suite.path.anchor-<c>-<i>` reads "Anchor 2 of 4, smooth", `suite.path.handle-<c>-<i>-out` is its out handle.
+/// Only the first `limit` anchors get one, so a 5,000-anchor path stays cheap. It draws nothing and takes no hits.
+struct PathAnchorProbes: View, Equatable {
+    static let limit = 200
+    let path: PathInEdit, selection: Selection<AnchorRef>, zoom: Double
+
+    nonisolated static func == (a: Self, b: Self) -> Bool {
+        a.path == b.path && a.selection == b.selection && a.zoom == b.zoom
+    }
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            ForEach(Self.probes(path, selection: selection, zoom: zoom), id: \.id) { probe in
+                ProbeElement(probe.id, label: probe.label, rect: probe.rect, zoom: zoom)
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Path anchors")
+        .accessibilityValue("\(path.path.contours.reduce(0) { $0 + $1.anchors.count }) anchors, \(selection.ordered.count) selected")
+        .accessibilityIdentifier("suite.path.anchors")
+    }
+
+    /// Each anchor's probe, then its handles' when it is smooth or selected (the handles the marks draw): a
+    /// `SuiteSize.anchorHit` box on screen around the point.
+    nonisolated static func probes(_ path: PathInEdit, selection: Selection<AnchorRef>, zoom: Double) -> [PathAnchorProbe] {
+        let side = SuiteSize.anchorHit / PathMarks.scale(zoom)
+        func box(_ p: Point) -> CGRect {
+            let v = path.toDocument.apply(p)
+            return CGRect(x: v.x - side / 2, y: v.y - side / 2, width: side, height: side)
+        }
+        var probes: [PathAnchorProbe] = [], named = 0
+        for (c, contour) in path.path.contours.enumerated() {
+            for (i, anchor) in contour.anchors.enumerated() where named < limit {
+                named += 1
+                let picked = selection.contains(AnchorRef(contour: c, index: i))
+                let kind = anchor.kind == .corner ? "corner" : "smooth"
+                probes.append(PathAnchorProbe(id: "suite.path.anchor-\(c)-\(i)", label: "Anchor \(i + 1) of \(contour.anchors.count), "
+                                              + kind + (picked ? ", selected" : ""), rect: box(anchor.point)))
+                guard anchor.kind != .corner || picked else { continue }
+                for (end, handle) in [("in", anchor.handleIn), ("out", anchor.handleOut)] {
+                    guard let handle else { continue }
+                    probes.append(PathAnchorProbe(id: "suite.path.handle-\(c)-\(i)-\(end)",
+                                                  label: (end == "in" ? "In" : "Out") + " handle of anchor \(i + 1)", rect: box(handle)))
+                }
+            }
+        }
+        return probes
     }
 }

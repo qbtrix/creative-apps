@@ -39,6 +39,8 @@ public actor FakeJPEGWriter: JPEGWriting {
     /// The dropped properties and the metadata source of each file written with them, by "folder/name".
     public private(set) var dropped: [String: Set<String>] = [:]
     public private(set) var sources: [String: String] = [:]
+    /// The JPEG quality each file was written at, by "folder/name".
+    public private(set) var qualities: [String: Int] = [:]
     public init(mode: FakeMode = .ok) { self.mode = mode }
 
     public func existingNames(in folder: String) async throws -> Set<String> {
@@ -50,6 +52,13 @@ public actor FakeJPEGWriter: JPEGWriting {
         try await FakeBehavior.perform(mode, failing: .writeFailed(path: key, reason: "The folder is read-only."))
         guard files[key] == nil else { throw LibraryError.writeFailed(path: key, reason: "The file already exists.") }
         files[key] = image
+        qualities[key] = quality
+    }
+
+    public func removeAll(in folder: String) async throws {
+        for key in files.keys where key.hasPrefix(folder + "/") {
+            files[key] = nil; qualities[key] = nil; dropped[key] = nil; sources[key] = nil
+        }
     }
 
     public func write(_ image: DisplayImage, quality: Int, folder: String, fileName: String,

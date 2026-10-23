@@ -1,11 +1,12 @@
 {
   "id": "shell-adoption",
   "name": "Adoption modifier",
-  "description": "The .suiteApp(_:host:live:) modifier each app adds to its scene (it starts the app's live command channel when given one), SuiteAppDelegate (receives hand-off files through application(_:open:) and passes them to the app's SuiteDocumentHost), and the settings route to the launcher.",
+  "description": "The .suiteApp(_:host:live:) modifier each app adds to its scene (it starts the app's live command channel when given one), .suiteEditor(_:host:live:) (.suiteApp plus Window > Switch To with AI Access and the suite's Help group), SuiteAppDelegate (receives hand-off files through application(_:open:) and passes them to the app's SuiteDocumentHost, and on a Dock click with no window opens one through ReopenRule and the openWindow a window registers with .suiteReopenWindow(id:)), and the settings route to the launcher.",
   "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
   "paths": [
     "Sources/SuiteShell/SuiteAppModifier.swift",
     "Sources/SuiteShell/SuiteAppDelegate.swift",
+    "Sources/SuiteShell/SuiteEditorScene.swift",
     "Sources/SuiteShell/SettingsRoute.swift"
   ],
   "order": 70

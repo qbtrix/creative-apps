@@ -15,14 +15,16 @@
 // Window hold Halo's; testSwitchToMenu (A-HA-1, #865) reads Window > Switch
 // To. testLayoutAtWidths relaunches at five window sizes with a layer
 // selected from its timeline lane (blueprint 7.3): L1 is the audit on each
-// `halo-layout-<w>` shot, L2
+// `halo-layout-<w>` shot (`layout-<w>-clamped` when a display narrower than
+// w held the window back, so no shot claims a width it doesn't show), L2
 // takes the artboard as the drawn layers' frame (`halo.viewer.canvas`) and
 // checks it is centered within 1 pt (across: the surround on its two sides,
 // measured in the screen's pixels to where each panel starts, as a person
 // sees it, or the viewer's frame when a panel is off the screen) with its
 // 16:9 aspect within 0.5%, L6 that it is
 // at least 160 pt wide at the minimum size; it also checks every halo.*
-// control lies inside the window and the viewer is narrower at 880 than at
+// control lies inside the window, History (halo.history.show) shows, and
+// the viewer is narrower at 880 than at
 // 1024 (the content column follows the window). Every other journey launches
 // pinned at the runner's launch size (`launch`), so a sized launch never
 // carries over. H-J3 (testScrubTheTimeline, viewer-playback VP-11) drags the
@@ -59,10 +61,9 @@ final class HaloJourneyTests: XCTestCase {
         halo.shot("new-composition-invalid")
         enter("1080", into: "Width", in: sheet)
         enter("1920", into: "Height", in: sheet)
-        let rate = sheet.popUpButtons["Frame Rate"]
-        XCTAssert(rate.exists, "no Frame Rate pop-up by its label")
-        rate.click()
-        halo.app.menuItems["24 fps"].click()
+        XCTAssert(frameRateMenu(in: sheet).waitForExistence(timeout: 5),
+                  "no Frame Rate menu (halo.composition.sheet.frameRate) in the sheet")
+        pickFrameRate("24 fps", in: sheet, halo)
         halo.shot("new-composition-filled")
         halo.click("Create", in: .sheet, step: "new-composition")
         // The header is one element reading "Comp 1, 1080 × 1920, 24 fps · 10 s".
@@ -251,7 +252,12 @@ final class HaloJourneyTests: XCTestCase {
             let ball = halo.app.descendants(matching: .any).matching(
                 NSPredicate(format: "identifier == 'halo.inspector.header' AND label CONTAINS %@", "Frames 0–47")).firstMatch
             XCTAssert(ball.waitForExistence(timeout: 5), "clicking Ball's lane selected no layer at \(width)")
-            halo.shot("layout-\(width)")
+            // The runner's display is 1024 pt wide, so from 1280 up the window
+            // clamps: name the shot for the width it shows, not the one asked for.
+            let reached = window.frame.width >= size.width - 2
+            halo.shot(reached ? "layout-\(width)" : "layout-\(width)-clamped")
+            // History keeps its button at every width, the 880 minimum included (#4449).
+            XCTAssert(halo.element("halo.history.show").exists, "no History button (halo.history.show) at \(width)")
             let outside = haloControls(in: halo).compactMap { control -> String? in
                 guard let shown = visibleFrame(of: control, in: window) else { return nil }
                 return window.frame.insetBy(dx: -1, dy: -1).contains(shown) ? nil : "\(control.identifier) \(shown)"
@@ -317,8 +323,7 @@ final class HaloJourneyTests: XCTestCase {
         let sheet = halo.app.sheets.firstMatch
         enter("Loop", into: "Name", in: sheet)
         enter("2", into: "Duration (seconds)", in: sheet)
-        sheet.popUpButtons["Frame Rate"].click()
-        halo.app.menuItems["24 fps"].click()
+        pickFrameRate("24 fps", in: sheet, halo)
         halo.click("Create", in: .sheet)
         XCTAssert(header("1920 × 1080", halo).waitForExistence(timeout: 5), "the header doesn't read 1920 × 1080")
         XCTAssert(header("24 fps · 2 s", halo).exists, "the header doesn't read 24 fps · 2 s")
@@ -339,11 +344,26 @@ final class HaloJourneyTests: XCTestCase {
         steps.expectEditItem("Undo Animate Position X")
         halo.shot("loop-stopwatch")
 
-        // 4. Scrub the ruler, then → or ← from the timeline to frame 24 (00:00:01:00).
-        halo.drag(on: "halo.timeline", from: CGVector(dx: 0.02, dy: 0.05), to: CGVector(dx: 0.5, dy: 0.05))
+        // 4. Drag the Frame Ruler off 0, then click Next / Previous Frame to frame 24 (00:00:01:00);
+        // one → after the assert is the keyboard parity, and Previous Frame brings it back.
+        // (dx 0.02 of halo.timeline is the name column, where a press scrubs nothing, #4451.)
+        let ruler = halo.app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Frame Ruler'")).firstMatch
+        XCTAssert(ruler.waitForExistence(timeout: 5), "no Frame Ruler in the timeline")
+        ruler.coordinate(withNormalizedOffset: CGVector(dx: 0.05, dy: 0.5))
+            .press(forDuration: 0.1, thenDragTo: ruler.coordinate(withNormalizedOffset: CGVector(dx: 0.4, dy: 0.5)))
+        XCTAssert(waitFor(seconds: 5) { (viewerFrame(halo) ?? 0) > 0 },
+                  "the ruler drag left the viewer at frame \(String(describing: viewerFrame(halo)))")
+        let scrubbed = viewerFrame(halo) ?? 0
+        let next = halo.element("halo.transport.next"), previous = halo.element("halo.transport.previous")
+        XCTAssert(next.waitForExistence(timeout: 5), "no Next Frame button (halo.transport.next)")
+        XCTAssert(previous.exists, "no Previous Frame button (halo.transport.previous)")
+        for _ in 0..<abs(24 - scrubbed) { (scrubbed < 24 ? next : previous).click() }
+        steps.expectPlayhead("00:00:01:00")
+        XCTAssert(waitFor(seconds: 5) { viewerFrame(halo) == 24 }, "Next / Previous Frame stopped at \(String(describing: viewerFrame(halo)))")
         steps.focusLane("Solid 1")
-        let frame = viewerFrame(halo) ?? 0
-        for _ in 0..<abs(24 - frame) { halo.press(frame < 24 ? .rightArrow : .leftArrow) }
+        halo.press(.rightArrow)
+        steps.expectPlayhead("00:00:01:01")
+        previous.click()
         steps.expectPlayhead("00:00:01:00")
         halo.shot("loop-frame-24")
 
@@ -360,7 +380,7 @@ final class HaloJourneyTests: XCTestCase {
         let span = halo.element("halo.easing.key.x.0")
         scrollInspector(toShow: span, halo)
         span.click()
-        chip("Ease Out", halo).click()
+        chip("halo.easing.preset.easeOut", halo).click()
         expectRow("halo.easing.key.x.0", reads: "Ease Out", halo)
         expectUndo("Undo Keyframe Easing", halo)
         halo.shot("loop-ease-out")
@@ -377,10 +397,13 @@ final class HaloJourneyTests: XCTestCase {
         let paused = viewerFrame(halo) ?? 0
         XCTAssert((1...47).contains(paused), "Play then pause stopped at frame \(paused), not 1…47")
         steps.focusLane("Solid 1")
+        let beforeSpace = viewerFrame(halo)
         halo.press(.space)
+        expectPlay("Playing", halo)
         Thread.sleep(forTimeInterval: 0.5)
         halo.press(.space)
         expectPlay("Paused", halo)
+        XCTAssertNotEqual(viewerFrame(halo), beforeSpace, "Space twice left the playhead at frame \(String(describing: beforeSpace))")
         halo.shot("loop-paused")
 
         // 8. Layer > New > Text, Hello and Return: the artboard draws it on top.
@@ -395,12 +418,16 @@ final class HaloJourneyTests: XCTestCase {
         expectUndo("Undo Edit Text", halo)
         halo.shot("loop-text")
 
-        // 9. Edit > Undo, then Edit > Redo, by menu: the titles flip and Hello is back.
+        // 9. Edit > Undo, then Edit > Redo, by menu: the titles flip, Hello goes and comes back,
+        // on the artboard and in the TEXT field.
         choose(["Edit", "Undo Edit Text"], halo)
         expectUndo("Undo New Layer", halo)
+        expectSummary(endingWith: "Text 1: Text", halo)
+        expectField(words, reads: "Text")
         choose(["Edit", "Redo Edit Text"], halo)
         expectUndo("Undo Edit Text", halo)
         expectSummary(endingWith: "Text 1: Hello", halo)
+        expectField(words, reads: "Hello")
         halo.shot("loop-undo-redo")
 
         // 10. Render… PNG Sequence at Half: 48 files, Loop_0001.png … Loop_0048.png, each 960 × 540.
@@ -411,8 +438,8 @@ final class HaloJourneyTests: XCTestCase {
         let start = halo.element("halo.render.start")
         XCTAssert(waitFor(seconds: 5) { start.isEnabled }, "the start button is disabled with -HaloRenderTo set")
         start.click()
-        // "Exported Loop" until #3402 retitles the finished line "Rendered 48 frames.".
-        XCTAssert(Self.contains("Exported Loop", in: halo.app).waitForExistence(timeout: 60), "the render never finished")
+        XCTAssert(text("Exported 48 PNG files into \"Loop\"", halo).waitForExistence(timeout: 60),
+                  "the render never read \"Exported 48 PNG files into \"Loop\"\"")
         let pngs = folder.appending(path: "Loop", directoryHint: .isDirectory)
         let names = try FileManager.default.contentsOfDirectory(atPath: pngs.path).sorted()
         XCTAssertEqual(names, (1...48).map { String(format: "Loop_%04d.png", $0) }, "the files in \(pngs.path)")
@@ -433,8 +460,15 @@ final class HaloJourneyTests: XCTestCase {
         XCTAssert(FileManager.default.fileExists(atPath: file), "Save wrote no \(file)")
         halo.shot("loop-saved")
 
-        // 12. Quit and reopen Loop.halo: two layers, Ease Out then Linear, Hello at 0, nothing to undo.
-        halo.press(character: "q", .command)
+        // 12. Halo > Quit Halo by menu, then reopen Loop.halo: two layers, Ease Out then Linear,
+        // Hello at 0, nothing to undo.
+        // Index 0 is the Apple menu; index 1 is the app's own menu.
+        let appMenu = halo.app.menuBars.firstMatch.menuBarItems.element(boundBy: 1)
+        XCTAssert(appMenu.waitForExistence(timeout: 5), "no Halo menu")
+        appMenu.click()
+        let quit = appMenu.menus.firstMatch.children(matching: .menuItem)["Quit Halo"]
+        XCTAssert(quit.waitForExistence(timeout: 3), "no Halo > Quit Halo")
+        quit.click()
         if !halo.app.wait(for: .notRunning, timeout: 15) { halo.app.terminate() }
         halo = launch(["-HaloOpenFile", file])
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened on Loop.halo")
@@ -518,6 +552,13 @@ final class HaloJourneyTests: XCTestCase {
         XCTAssert(waitFor(seconds: 5) { summary.label.hasSuffix(tail) }, "the artboard reads \(summary.label), not …\(tail)")
     }
 
+    /// The text field `field` reads `words` within five seconds.
+    @MainActor private func expectField(_ field: XCUIElement, reads words: String) {
+        XCTAssert(
+            waitFor(seconds: 5) { (field.value as? String) == words },
+            "halo.inspector.text.string reads \(String(describing: field.value)), not \(words)")
+    }
+
     /// The frame the artboard summary names ("Frame 12: …" gives 12).
     @MainActor private func viewerFrame(_ halo: Journey) -> Int? {
         let label = halo.element("halo.viewer.summary").label
@@ -537,15 +578,16 @@ final class HaloJourneyTests: XCTestCase {
         XCTAssertEqual(before != viewerFrame(halo), state == "Playing", "the playhead doesn't look \(state)")
     }
 
-    /// The EASING chip titled `title`, scrolled whole into the inspector (the chips are lazy grids, #1411).
-    @MainActor private func chip(_ title: String, _ halo: Journey) -> XCUIElement {
+    /// The EASING chip `id` (`halo.easing.preset.<case>`), scrolled whole into the inspector. The chips
+    /// are lazy grids (#1411), so it scrolls toward the curve before the chip exists rather than waiting for it.
+    @MainActor private func chip(_ id: String, _ halo: Journey) -> XCUIElement {
         let inspector = halo.element("suite.inspector"), curve = halo.element("halo.easing")
         XCTAssert(curve.waitForExistence(timeout: 5), "no easing curve (halo.easing) with a span picked")
-        let chip = inspector.buttons.matching(NSPredicate(format: "label == %@", title)).firstMatch
+        let chip = halo.element(id)
         for _ in 0..<20 where !(chip.exists && inspector.frame.contains(chip.frame)) {
             inspector.scroll(byDeltaX: 0, deltaY: curve.frame.minY > inspector.frame.midY ? -40 : 40)
         }
-        XCTAssert(chip.exists, "no \(title) chip in EASING")
+        XCTAssert(chip.exists, "no \(id) chip in EASING")
         return chip
     }
 
@@ -690,6 +732,22 @@ final class HaloJourneyTests: XCTestCase {
     }
 
     /// Clicks the sheet's field labelled `label`, selects its text and types `text`.
+    /// The New Composition sheet's Frame Rate menu: SuiteUI's FrameRateMenu, a
+    /// menu button (not a pop-up, #4341) carrying `halo.composition.sheet.frameRate`.
+    @MainActor private func frameRateMenu(in sheet: XCUIElement) -> XCUIElement {
+        sheet.menuButtons["halo.composition.sheet.frameRate"].firstMatch
+    }
+
+    /// Opens the sheet's Frame Rate menu and picks `rate`, titled as FrameRate's description ("24 fps").
+    @MainActor private func pickFrameRate(_ rate: String, in sheet: XCUIElement, _ halo: Journey) {
+        let menu = frameRateMenu(in: sheet)
+        XCTAssert(menu.waitForExistence(timeout: 5), "no Frame Rate menu (halo.composition.sheet.frameRate)")
+        menu.click()
+        let item = halo.app.menuItems[rate]
+        XCTAssert(item.waitForExistence(timeout: 5), "the Frame Rate menu offers no \(rate)")
+        item.click()
+    }
+
     @MainActor private func enter(_ text: String, into label: String, in sheet: XCUIElement) {
         let field = sheet.textFields[label]
         XCTAssert(field.waitForExistence(timeout: 5), "no \(label) field by its label (#286)")
@@ -708,6 +766,14 @@ final class HaloJourneyTests: XCTestCase {
         let predicate = NSPredicate(
             format: "label CONTAINS %@ OR (elementType == %@ AND value CONTAINS %@)", text, staticText, text)
         return root.descendants(matching: .any).matching(predicate).firstMatch
+    }
+
+    /// The first element whose label is `string`, or a static text whose
+    /// value is: SwiftUI's Text reads as either.
+    @MainActor private func text(_ string: String, _ halo: Journey) -> XCUIElement {
+        let staticText = NSNumber(value: XCUIElement.ElementType.staticText.rawValue)
+        let predicate = NSPredicate(format: "label == %@ OR (elementType == %@ AND value == %@)", string, staticText, string)
+        return halo.app.descendants(matching: .any).matching(predicate).firstMatch
     }
 
     /// The ControlDocument in `probe`'s label; nil when it's missing or isn't one.

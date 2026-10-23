@@ -97,6 +97,7 @@ struct LibraryWindow: View {
                 onLabel: { model.setLabel($0) })
         }
         .focusedSceneValue(\.libraryMenu, menu)
+        .focusedSceneValue(\.libraryCatalog, model)
         .focusedSceneValue(\.libraryFilters, filters)
         .suiteFileDrop(.library, bridge: LibraryShell.bridge, hasDocument: model.hasDocument,
                        places: model.placesExtensions, perform: { try? model.perform($0) })
@@ -117,6 +118,15 @@ struct LibraryWindow: View {
         .onChange(of: model.mode) { _, _ in loupeAreaFocusChanged() }
         .onChange(of: model.catalogState) { _, _ in importAreaCatalogReady() }
         .onChange(of: model.collectionsRevision) { _, _ in filtersAreaChanged(areas.filters) }
+        // The live command channel (editor-menus EM-7) reads this window's catalog and lands a result in it.
+        .onAppear {
+            LibraryShell.read = { model }
+            LibraryShell.take = { model.takeLive($0) }
+        }
+        .onDisappear {
+            LibraryShell.read = nil
+            LibraryShell.take = nil
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
             persistAreaFlush()
             filtersAreaFlush(areas.filters)

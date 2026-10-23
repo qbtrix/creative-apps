@@ -4,6 +4,7 @@
 // one undo step, with the copy cleared. On `cards`, A is node-2 at (100, 100, 100 × 80).
 // Runs on Linux and macOS.
 import DesignModel
+import SuiteKernel
 import Testing
 
 /// `cards` on the fake services.
@@ -124,4 +125,100 @@ private func corner(_ i: Int) -> DesignPoint { pt(200 + 2 * Double(i), 180 + Dou
     #expect(model.selectedNode?.frame == shown)
     #expect(model.undoActionName == "Undo Resize")
     #expect(live.workspace == nil)
+}
+
+/// `cards` with A on a three-stop linear gradient (stops at 0, 0.5 and 1), as one step.
+private func gradientCards() -> DesignWorkspace {
+    var model = cards()
+    model.selectItem("node-2")
+    model.runFill(.type(.linear))
+    model.runFill(.add(offset: 0.5))
+    model.endEditRun()
+    return model
+}
+
+@Test func aFillScrubPreviewsOnTheCopyAndLandsOneStep() {
+    let before = gradientCards()
+    var model = before
+    var live = DesignLiveEdit()
+    live.begin(from: model)
+    for degrees in stride(from: 10.0, through: 90, by: 10) { live.preview(.angle(degrees, drag: "scrub")) }
+    #expect(model == before)
+    #expect(live.workspace?.selectedNode?.gradient != before.selectedNode?.gradient)
+
+    #expect(live.end(into: &model) == nil)
+    var direct = before
+    for degrees in stride(from: 10.0, through: 90, by: 10) { direct.runFill(.angle(degrees, drag: "scrub")) }
+    direct.endEditRun()
+    #expect(model == direct)
+    #expect(model.undoActionName == "Undo Gradient Angle")
+    #expect(live.workspace == nil)
+}
+
+@Test func aStopDraggedPastAnotherLandsWhereTheCopyShowedIt() {
+    let before = gradientCards()
+    var model = before
+    var live = DesignLiveEdit()
+    live.begin(from: model)
+    // Stop 0 passes the middle stop at 0.6, so the editor's next intent names it by its new index, 1.
+    let moves: [GradientIntent] = [.move(index: 0, offset: 0.3, drag: "d"), .move(index: 0, offset: 0.6, drag: "d"),
+                                   .move(index: 1, offset: 0.8, drag: "d")]
+    for move in moves { live.preview(move) }
+    let shown = live.workspace?.selectedNode?.gradient
+    #expect(model == before)
+
+    live.end(into: &model)
+    #expect(model.selectedNode?.gradient == shown)
+    #expect(model.selectedNode?.gradient?.stops.map(\.offset) == [0.5, 0.8, 1])
+    #expect(model.undoActionName == "Undo Move Gradient Stop")
+    model.undo()
+    #expect(model.selectedNode?.gradient == before.selectedNode?.gradient)
+    #expect(model.undoActionName == before.undoActionName)
+}
+
+@Test func aFillPreviewBeforeBeginIsDropped() {
+    var model = gradientCards()
+    var live = DesignLiveEdit()
+    live.preview(.angle(45, drag: "scrub"))
+    #expect(live.workspace == nil)
+    live.end(into: &model)
+    #expect(model == gradientCards())
+}
+
+@Test func aRotationScrubPreviewsOnTheCopyAndLandsOneStep() throws {
+    var model = cards()
+    model.selectItem("node-2")
+    let box = try #require(model.transformSelection)
+    func turned(_ degrees: Double) -> TransformIntent {
+        var turned = box
+        turned.degrees = degrees
+        return .set(turned, drag: "rotation")
+    }
+    var live = DesignLiveEdit()
+    live.begin(from: model)
+    for degrees in 1...120 { live.preview(turned(Double(degrees))) }
+    #expect(model.selectedNode?.rotation == 0)
+    #expect(live.workspace?.selectedNode?.rotation == 120)
+
+    #expect(live.end(into: &model) == nil)
+    var direct = cards()
+    direct.selectItem("node-2")
+    for degrees in 1...120 { direct.runTransform(turned(Double(degrees))) }
+    direct.endEditRun()
+    // The history's step counters differ (one landed run against 120), never the document.
+    #expect(model.pages == direct.pages)
+    #expect(model.selectedNode?.rotation == 120)
+    #expect(model.undoActionName == direct.undoActionName)
+    #expect(live.workspace == nil)
+
+    // The run is closed: a second scrub, under the same drag token, is a second step.
+    live.begin(from: model)
+    live.preview(turned(45))
+    live.end(into: &model)
+    #expect(model.selectedNode?.rotation == 45)
+    model.undo()
+    #expect(model.selectedNode?.rotation == 120)
+    model.undo()
+    #expect(model.selectedNode?.rotation == 0)
+    #expect(!model.canUndo)
 }

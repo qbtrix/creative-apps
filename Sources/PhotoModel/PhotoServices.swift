@@ -4,6 +4,8 @@
 // member from its Live file, where a feature that isn't built yet returns
 // its NotBuilt stand-in, whose `unavailableHelp` disables the controls that
 // need it. Linux-safe.
+import SuiteModel
+
 public struct PhotoServices: Sendable {
     public var archive: any DocumentArchiving
     public var recovery: any RecoveryStoring
@@ -16,6 +18,8 @@ public struct PhotoServices: Sendable {
     public var transform: any LayerTransforming
     public var exportSizing: any ExportSizing
     public var sampling: any ColorSampling
+    /// Measures, lists and draws text layers' words; the fake until TX-7 wires the live one.
+    public var text: any TextServices = FakeText()
 
     public init(archive: any DocumentArchiving, recovery: any RecoveryStoring, clipboard: any PixelClipboard,
                 merging: any LayerMerging, crop: any CropSizing, selection: any SelectionShaping,

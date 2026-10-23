@@ -21,6 +21,12 @@
 // Finding #4260: the delegate is a SuiteAppDelegate, so a hand-off file
 // (Open Recent ▸, Open In from another app) reaches PhotoShell.host, a
 // PhotoDocumentHost that opens each image through PhotoOpenQueue.
+//
+// Editor menus (EM-3): `.suiteEditor` adds Window > Switch To, AI Access…
+// and the suite's Help group, and starts PhotoShell.live, a live command
+// channel over the front window's image (`afterglow run --live photo`). A
+// Dock click with no window open opens one (`.suiteReopenWindow`), and the
+// home's New Photo (#3648) starts a new image through PhotoOpenQueue.
 import AppKit
 import PhotoModel
 import SuiteModel
@@ -39,12 +45,25 @@ import SwiftUI
         return SuiteDocumentsBridge(app: .photo, services: services)
     }()
 
-    /// The hand-off host: an open hand-off opens each image in an empty window or a new one.
+    /// The hand-off host: an open hand-off opens each image, and a new one starts an image, in an empty window or a new one.
     static let host = PhotoDocumentHost { requests in
         await MainActor.run {
-            for case .open(let path) in requests { PhotoOpenQueue.shared.open(URL(fileURLWithPath: path)) }
+            for request in requests {
+                switch request {
+                case .open(let path): PhotoOpenQueue.shared.open(URL(fileURLWithPath: path))
+                case .newImage(let width, let height): PhotoOpenQueue.shared.send(.file(.newImage(width: width, height: height)))
+                case .handOff, .forget, .clearRecent: continue
+                }
+            }
         }
     }
+
+    /// Live commands on the front window's image; a client runs only on a grant it already holds.
+    static let live = LiveCommandChannel(
+        app: SuiteApp.photo.displayName,
+        document: { () -> PhotoHeadless? in PhotoWindowEditedView.shown.first?.workspace.map(PhotoHeadless.init(workspace:)) },
+        apply: { (result: PhotoHeadless) in PhotoWindowEditedView.shown.first?.send?(.file(.adoptLive(result.workspace))) },
+        ask: { await AIAccessCenter.shared.ask($0) })
 }
 
 @main
@@ -56,6 +75,7 @@ struct PhotoApp: App {
     var body: some Scene {
         WindowGroup(id: PhotoOpenQueue.windowID) {
             PhotoWindow().environment(\.photoRendering, PhotoRendering.shared)
+                .suiteReopenWindow(id: PhotoOpenQueue.windowID)
         }
         .defaultSize(width: 1000, height: 700)
         .commands {
@@ -63,7 +83,7 @@ struct PhotoApp: App {
             PhotoCommands()
             RenderingCommands(model: rendering)
         }
-        .suiteApp(.photo, host: PhotoShell.host)
+        .suiteEditor(.photo, host: PhotoShell.host, live: PhotoShell.live)
     }
 }
 
@@ -91,32 +111,35 @@ struct PhotoApp: App {
     }
 }
 
-/// Files waiting for a window: an empty window opens one at once, else a
-/// new window is asked for and takes the oldest when it appears.
+/// Files and new images waiting for a window: an empty window takes one at
+/// once, else a new window is asked for and takes the oldest when it appears.
 @MainActor final class PhotoOpenQueue {
     static let shared = PhotoOpenQueue()
     static let windowID = "photo"
-    private var pending: [URL] = []
+    private var pending: [PhotoIntent] = []
     /// The first window's `openWindow` (nil until a window appears).
     private var openWindow: OpenWindowAction?
 
-    func open(_ url: URL) {
+    func open(_ url: URL) { send(.openFile(url)) }
+
+    /// `intent` (an open or a new image) to an empty window, or to a new one.
+    func send(_ intent: PhotoIntent) {
         if let empty = PhotoWindowEditedView.shown.first(where: { $0.isEmpty }) {
-            empty.send?(.openFile(url))
+            empty.send?(intent)
             return
         }
-        pending.append(url)
+        pending.append(intent)
         openWindow?.callAsFunction(id: Self.windowID)
     }
 
-    /// A window appeared: the oldest file waiting for it, or nil. The first
-    /// window also asks for one per file that came before it could.
-    func windowAppeared(_ openWindow: OpenWindowAction) -> URL? {
+    /// A window appeared: the oldest intent waiting for it, or nil. The first
+    /// window also asks for one per intent that came before it could.
+    func windowAppeared(_ openWindow: OpenWindowAction) -> PhotoIntent? {
         let first = self.openWindow == nil
         self.openWindow = openWindow
-        let url = pending.isEmpty ? nil : pending.removeFirst()
+        let intent = pending.isEmpty ? nil : pending.removeFirst()
         if first { for _ in pending { openWindow(id: Self.windowID) } }
-        return url
+        return intent
     }
 }
 

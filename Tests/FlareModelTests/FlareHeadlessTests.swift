@@ -77,7 +77,7 @@ import Testing
         #expect(throws: CatalogError.self) { try doc.export("lottie", options: .object(["scene": .string("scene-9")])) }
         #expect(throws: CatalogError.self) { try doc.export("png", options: .object([:])) }
         #expect(throws: CatalogError.self) { try doc.export("gif", options: .object([:])) }
-        #expect(FlareHeadless.openExtensions == ["flare"] && FlareHeadless.exportFormats == ["svg", "lottie"])
+        #expect(FlareHeadless.openExtensions == ["flare", "json"] && FlareHeadless.exportFormats == ["svg", "lottie"])
     }
 
     @Test(arguments: ["export-svg-frames", "gradient-edit", "key-and-save"])

@@ -1,0 +1,23 @@
+[
+ {
+  "label": ".copyEmptyCommand: Copy stays enabled with no command to copy",
+  "file": "Sources/SuiteModel/Packaging/AssistantConnectPanel.swift",
+  "find": "public var copyCommandUnavailable: String? { command.isEmpty ? Self.nothingToCopy : nil }",
+  "replace": "public var copyCommandUnavailable: String? { nil }",
+  "tests": "AssistantConnectPanelTests"
+ },
+ {
+  "label": ".configCopyReadsCommand: the config's Copy follows the command, not the config",
+  "file": "Sources/SuiteModel/Packaging/AssistantConnectPanel.swift",
+  "find": "public var copyConfigUnavailable: String? { configJSON.isEmpty ? Self.nothingToCopy : nil }",
+  "replace": "public var copyConfigUnavailable: String? { command.isEmpty ? Self.nothingToCopy : nil }",
+  "tests": "AssistantConnectPanelTests"
+ },
+ {
+  "label": ".bundleOutsideApp: a path outside AfterGlow.app names a bundle",
+  "file": "Sources/SuiteModel/Packaging/AssistantConnectPanel.swift",
+  "find": "guard let index = parts.firstIndex(of: \"AfterGlow.app\") else { return nil }",
+  "replace": "guard let index = parts.firstIndex(where: { $0.hasSuffix(\".app\") }) else { return nil }",
+  "tests": "AssistantConnectPanelTests"
+ }
+]

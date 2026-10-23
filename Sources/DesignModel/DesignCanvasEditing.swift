@@ -32,7 +32,7 @@
 //           the engine the press built (DesignSnapIndex, SN-4); a resize (one or several)
 //           snaps only the edges its handle drags (Shift: the nearer line sets the scale;
 //           Option: the far edge mirrors). `.noSnap` snaps nothing.
-//   frame, rectangle, ellipse, text   DesignDrawing; once the pointer has moved, the start and
+//   frame, rectangle, ellipse, shape, text   DesignDrawing; once the pointer has moved, the start and
 //           the end each snap to the lines of the frame drawn into (Shift: the end's nearer
 //           axis only), before whole points (SN-5). A click places the default box unsnapped.
 //   pen     nothing.
@@ -54,9 +54,11 @@
 // a full-size frame finds its handle with the kernel's `HandleHit` (adopt-kernel-transform
 // AT-d1), in the node's own unturned frame (`TransformRules.local`), so each handle hits where the
 // turned node shows it. The rotate knob above the top (`BoxMath.handles`) turns one selected layer
-// about its centre through `runTransform` (DT-5), Shift snapping to the kernel's
+// about its centre through `runTransform` (DT-5); the knob above several layers' box turns each about
+// its own centre by the same angle (#4224), Shift snapping to the kernel's
 // `BoxMath.snappedDegrees`; every sample rewinds as a service step does, so the drag is one step
-// (transform DT-u). The angle comes from libm's atan2 (Glibc/Musl/Darwin). Linux-safe.
+// (transform DT-u). A handle of a turned or mirrored layer resizes it in its own axes, the opposite
+// edge kept where it shows (#4223); an upright one resizes, snaps and rounds as before. The angle comes from libm's atan2 (Glibc/Musl/Darwin). Linux-safe.
 #if canImport(Glibc)
 import Glibc
 #elseif canImport(Musl)
@@ -85,6 +87,8 @@ struct DesignGesture: Sendable, Equatable {
         case optionCopy([String], DesignIDMint)
         /// Draw a node of this kind (DesignDrawing).
         case draw(DesignNodeKind)
+        /// Draw the Shape tool's spec, one step through `addShape` (DesignDrawing).
+        case shape
         /// Place a text node and edit it (DesignDrawing).
         case text
         case none
@@ -124,10 +128,10 @@ extension DesignWorkspace {
     }
 
     /// With several layers selected, the handle of their box (`selectionBounds`) under `point`, as
-    /// `handle(at:)` finds one on a single layer, but never the knob, which turns one layer; nil otherwise.
+    /// `handle(at:)` finds one on a single layer, the knob above the box included (#4224); nil otherwise.
     func boxHandle(at point: DesignPoint) -> DesignHandle? {
         guard hasMultipleSelection, let box = selectionBounds else { return nil }
-        return handle(on: box, at: point).flatMap { $0 == .rotate ? nil : $0 }
+        return handle(on: box, at: point)
     }
 
     /// A full-size frame asks the kernel's `HandleHit` (its inside is no Design handle), then the
@@ -219,6 +223,11 @@ extension DesignWorkspace {
             current.guides = landedGuides(frame, by: moveBy, modifiers: modifiers, current)
         case .resize(let id, let handle, let original):
             restorePages(current.before)
+            current.guides = .empty
+            if let t = selectedPage?.nodes.node(id)?.transformBox, t.degrees != 0 || t.flipX || t.flipY {
+                _ = pages.update(id) { $0.frame = Self.resized(t, handle, from: current.start, to: end, modifiers: modifiers) }
+                break
+            }
             let snapped = snapResize(delta, box: original, handle: handle, modifiers: modifiers, current)
             let raw = original.resized(
                 handle, by: snapped, keepAspect: modifiers.contains(.shift), fromCenter: modifiers.contains(.option))
@@ -237,7 +246,11 @@ extension DesignWorkspace {
             applyStep(&current, delta: delta, modifiers: modifiers)
         case .draw(let kind):
             let (from, to) = snapDraw(current, to: end, modifiers: modifiers)
-            draw(kind, from: from, to: to, square: modifiers.contains(.shift))
+            draw(kind, from: from, to: to, modifiers: modifiers)
+            current.guides = landedGuides(on: selectedNode?.frame, modifiers: modifiers, current)
+        case .shape:
+            let (from, to) = snapDraw(current, to: end, modifiers: modifiers)
+            drawShape(from: from, to: to, modifiers: modifiers)
             current.guides = landedGuides(on: selectedNode?.frame, modifiers: modifiers, current)
         case .text:
             let (from, to) = snapDraw(current, to: end, modifiers: modifiers)
@@ -288,7 +301,9 @@ extension DesignWorkspace {
                 guard turn.isFinite else { return }
                 turn -= 360 * (turn / 360).rounded()
                 let degrees = BoxMath.snappedDegrees(box.degrees + turn, modifiers: modifiers.editModifiers)
-                runTransform(.rotate(by: degrees - box.degrees, drag: "knob"))
+                if hasMultipleSelection { turnEach(by: degrees - box.degrees) } else {
+                    runTransform(.rotate(by: degrees - box.degrees, drag: "knob"))
+                }
             default:
                 break
             }
@@ -296,6 +311,35 @@ extension DesignWorkspace {
             return
         }
         current.guides = landedGuides(on: selectionBounds, modifiers: modifiers, current)
+    }
+
+    /// Turns every selected layer by `degrees` about its own centre as one "Rotate" step (#4224); a layer
+    /// inside another selected one goes with it. A selection `transformHelp` refuses changes nothing.
+    private mutating func turnEach(by degrees: Double) {
+        guard transformHelp == nil else { return }
+        let before = snapshot
+        for root in transformRoots { _ = pages.update(root.id) { $0.place(TransformRules.rotated(root.transformBox, by: degrees)) } }
+        record("Rotate", before: before)
+    }
+
+    /// `t`'s frame with `handle` dragged from `start` to `end` in the node's own axes (#4223): the sweep
+    /// taken into its unturned, unmirrored frame (`TransformRules.local`), the handle's edge moved there
+    /// (Shift keeps the aspect, Option works from the centre), and the new centre put back on the page
+    /// through the turn and mirrors about the old one, so the opposite edge stays where it shows. No
+    /// snap and no whole points: the page's lines and grid don't run along a turned edge.
+    static func resized(_ t: TransformBox, _ handle: DesignHandle, from start: DesignPoint, to end: DesignPoint,
+                        modifiers: DesignModifiers) -> DesignRect {
+        let (a, b) = (TransformRules.local(Point(x: start.x, y: start.y), in: t), TransformRules.local(Point(x: end.x, y: end.y), in: t))
+        let local = DesignRect(t.box).resized(handle, by: DesignPoint(x: b.x - a.x, y: b.y - a.y),
+                                              keepAspect: modifiers.contains(.shift), fromCenter: modifiers.contains(.option))
+        // A unit box about the old centre with the node's turn and mirrors: its matrix takes an offset
+        // from the centre in the node's own axes to the page.
+        let c = Point(x: (t.box.minX + t.box.maxX) / 2, y: (t.box.minY + t.box.maxY) / 2)
+        let unit = TransformBox(box: Rect(minX: c.x - 0.5, minY: c.y - 0.5, maxX: c.x + 0.5, maxY: c.y + 0.5),
+                                degrees: t.degrees, flipX: t.flipX, flipY: t.flipY)
+        let centre = TransformRules.matrix(of: unit).apply(
+            Point(x: local.x + local.width / 2 - c.x + 0.5, y: local.y + local.height / 2 - c.y + 0.5))
+        return DesignRect(x: centre.x - local.width / 2, y: centre.y - local.height / 2, width: local.width, height: local.height)
     }
 
     /// `delta` snapped so `box` moved by it lines up; as is under `.noSnap` or without an engine.
@@ -368,7 +412,7 @@ extension DesignWorkspace {
         switch current.route {
         case .move(let id), .resize(let id, _, _): moving = [id]
         case .moveSeveral(let ids), .optionCopy(let ids, _), .resizeSeveral(let ids, _): moving = ids
-        case .draw, .text: parent = selectedPage?.nodes.deepestFrame(containing: current.start)
+        case .draw, .shape, .text: parent = selectedPage?.nodes.deepestFrame(containing: current.start)
         default: return
         }
         var candidates = snapCandidates(moving: moving, drawingInto: parent)
@@ -412,6 +456,8 @@ extension DesignWorkspace {
         case .draw(let kind):
             record("Add \(kind.defaultName)", before: done.before)
             tool = .move
+        case .shape:  // drawShape recorded the step; a refused draw leaves the tool on
+            if pages != done.before.pages { tool = .move }
         case .text:
             if let id = selectedNodeID, findNode(id)?.kind == .text {
                 (editingTextID, textDraft) = (id, "Text")
@@ -438,6 +484,8 @@ extension DesignWorkspace {
                 route = .turn(node.transformBox)
             } else if let handle = handle(at: start), let node = selectedNode {
                 route = .resize(node.id, handle, node.frame)
+            } else if boxHandle(at: start) == .rotate, let bounds = selectionBounds {
+                route = .turn(TransformBox(box: bounds.kernelRect))
             } else if let handle = boxHandle(at: start) {
                 route = .resizeSeveral(ids, handle)
             } else if let id = hit, shift {
@@ -461,7 +509,11 @@ extension DesignWorkspace {
             if let kind = tool.nodeKind { route = .draw(kind) }
         case .text:
             route = .text
-        case .shape, .pen, .eyedropper:  // Shape draws through ShapeRules.dragged from DS-5
+        case .eyedropper:  // one pick per click, at the press; the rest of the drag does nothing
+            try? pick(at: start, toStroke: sampleToStroke != option)
+        case .shape:
+            route = .shape
+        case .pen:
             break
         }
         var gesture = DesignGesture(route: route, start: start, before: snapshot, wasSelected: wasSelected, history: history)

@@ -3,7 +3,10 @@
 // (shared-assets)." until the Assets page wires it. Edit: Cut, Copy, Paste
 // (titled "Add from Clipboard") and Select All, replacing the system's
 // clipboard group so each appears once (Delete comes from the home stub);
-// Window: Assets ⌥⌘A, after Switch To.
+// Window: Assets ⌥⌘A, after Switch To. Out of the beta: no scene builds it
+// (no-placeholders NP-2), since a menu of items that can't act is dead to a
+// tester; shared-assets adds it back to AfterGlowApp's home scene once it
+// wires the items.
 import SuiteModel
 import SwiftUI
 
