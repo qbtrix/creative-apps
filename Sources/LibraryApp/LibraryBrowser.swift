@@ -167,7 +167,6 @@ struct LibraryBrowser: View {
                 LibraryGrid(model: model, menu: menu, thumbnails: thumbnails, onSelect: onSelect, onOpen: onOpen)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .libraryShare(model)
         }
     }
 }

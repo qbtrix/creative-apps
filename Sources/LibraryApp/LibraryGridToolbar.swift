@@ -1,6 +1,7 @@
 // LibraryGridToolbar.swift: the one row over Library's photo grid (#3632):
 // the collection's name and photo count, the thumbnail Size bar, the Sort
-// menu, then Import Folder… and Export…. Every control is built from its
+// menu, then Import Folder…, Export… and Share (LibraryShareItem, out of
+// the catalog like File > Share…). Every other control is built from its
 // command spec in `LibraryCatalog.catalog` (`commandIDs`), so it is enabled
 // exactly when that command can run, its tooltip says why when it can't, and
 // the CLI and MCP run the same commands; a click calls the window's route
@@ -38,6 +39,7 @@ struct LibraryGridToolbar: View {
             EditorBarDivider()
             EditorBarItem(importAction).libraryControl(importAction)
             EditorBarItem(exportAction).libraryControl(exportAction)
+            LibraryShareItem(model: model).editorBarStyle()
         }
         .padding(.horizontal, SuiteSpacing.m)
         .padding(.vertical, SuiteSpacing.xs)

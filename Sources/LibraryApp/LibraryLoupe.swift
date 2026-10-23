@@ -62,16 +62,12 @@ struct LibraryLoupe: View {
             .padding(SuiteSpacing.l)
         }
         .overlay(alignment: .topLeading) {
-            Button(action: onGrid) {
-                GlassPanel { Label("Grid", systemImage: "chevron.left") }
-                    .frame(minHeight: SuiteSize.toolButton)
-                    .contentShape(.rect)
-            }
-            .buttonStyle(HoverButtonStyle())
-            .help("Back to the grid (Esc or G)")
-            .accessibilityLabel("Grid")
-            .libraryControl(id: "library.loupe.grid", enabled: true, help: nil)
-            .padding(SuiteSpacing.l)
+            Button("Grid", systemImage: "chevron.left", action: onGrid)
+                .buttonStyle(HoverButtonStyle(glass: true))
+                .help("Back to the grid (Esc or G)")
+                .accessibilityLabel("Grid")
+                .libraryControl(id: "library.loupe.grid", enabled: true, help: nil)
+                .padding(SuiteSpacing.l)
         }
         // A photo viewer, not a design canvas: dark in both appearances, so the photo is the brightest thing.
         .environment(\.colorScheme, .dark)
