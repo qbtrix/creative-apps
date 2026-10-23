@@ -8,7 +8,7 @@ import Foundation
 import SuiteKernel
 import Testing
 
-@Suite(.disabled("waits on SC-6")) struct HaloFramePNGCoreTests {
+@Suite struct HaloFramePNGCoreTests {
     /// A headless document whose one selected 40 × 20 composition is a 50% opaque orange solid over nothing.
     static func halfOpaque() -> HaloHeadless {
         let solid = HaloLayer(
