@@ -4,13 +4,13 @@ Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
 Run: act-1a166b69fab-fd09 (took over from act-1a15e10a86f-7bk9) · Session: claude/pen-paths-lottie-open-a39k6m · Started: 2026-10-21T01:10Z (this run 2026-10-23T03:07Z)
 Stage: 3 wave 3
 Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a
-Next: (2026-10-23T03:38Z) FP-u #4706 and FP-m #4714 open, awaiting lane batch + macOS gate; then scoped CI app=flare, critic panels, Belt-Slice-Done; FP-z after both merge.
+Next: (2026-10-23T03:59Z) FP-u #4706 merged 03:53Z (a8ea9487); full CI 39897762608 on it pending -> Belt-Slice-Done FP-u on green Linux, Mac-Finish-Wanted, critic panel on its snapshots. FP-m #4714 in lane macOS build. FP-z after FP-m merges.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | FP-a | adapters as stubs, PathEditTarget conformance, Direct Select anchors via overlay | FP-1, FP-2 | MJ-FP | PN-a (done), shape-tools:FS-a (done) | yes | 1 | done (Belt-Slice-Done 08:56Z; Mac-Finish-Wanted) | #3838 | 08:08Z merged 5a911587 |
-| FP-u | snapshots, render budget, journey (skipped) | FP-3, FP-4 | J-FP | FP-a, PN-3 | yes | 0 | PR #4706 open, in lane | #4706 | – |
+| FP-u | snapshots, render budget, journey (skipped) | FP-3, FP-4 | J-FP | FP-a, PN-3 | yes | 0 | merged #4706 03:53Z; awaiting CI 39897762608 | #4706 | – |
 | FP-m | Pen on PenRules; path specs in catalog | FP-5, FP-6 | MJ-FP | FP-a (done), PN-5 (done), PN-7, shape-tools:FS-m (unchained for FP-5), file-flow:FL-m | no | 0 | FP-5 merged (#4029); FP-6 PR #4714 open, in lane | #4029, #4714 | – |
 | FP-e | Direct Select anchor editing; stress budget | FP-7, FP-8 | MJ-FP, RJ-F27 | FP-a, PN-5 (done), PN-6 (done), stage-edit (closed); FlareSelection.swift avoided (AS-flare hand-off, planned) | no | 0 | done: run 39596004859 (only the Library timing flake; supervisor answer 12:04Z); FP-8 waits on test/stress-perf-journeys | #3958 | – |
 | FP-z | journey on; status built | FP-9, FP-10 | J-FP | FP-u, FP-m, FP-e, file-flow:FL-z | yes | 0 | waiting | – | – |
@@ -20,8 +20,8 @@ Next: (2026-10-23T03:38Z) FP-u #4706 and FP-m #4714 open, awaiting lane batch + 
 |---|---|---|---|---|---|---|---|
 | FP-1 | FP-a | 1 | adapters as stubs forwarding to today's code; ShapeDraft.pen; anchor selection field; 3 suites written | Sources/FlareModel/FlarePen+Kernel.swift, Sources/FlareModel/FlareAnchors+Kernel.swift, Sources/FlareModel/FlareWorkspace.swift, Tests/mutations/FlareModel.FlareWorkspace.json, Tests/FlareModelTests/FlarePenKernelTests.swift, Tests/FlareModelTests/FlareAnchorEditTests.swift, Tests/FlareModelTests/FlarePathCommandTests.swift | oracle suites unedited | – | building |
 | FP-2 | FP-a | 1 | PathEditOverlay on the stage for Direct Select and Pen | Sources/FlareApp/FlareWindow+Stage.swift | FlareAnchorSnapshots.directPicked (FP-u) | – | building |
-| FP-3 | FP-u | 3 | snapshots + render budget; stage on PN-3 overlay init | Tests/AppSnapshotTests/FlareAnchorSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetFlareAnchorTests.swift, Sources/FlareApp/FlareWindow+Stage.swift | #4706 | – | in lane |
-| FP-4 | FP-u | 3 | journey written, skipped | UITests/FlareJourneyTests+Pen.swift | #4706 | – | in lane |
+| FP-3 | FP-u | 3 | snapshots + render budget; stage on PN-3 overlay init | Tests/AppSnapshotTests/FlareAnchorSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetFlareAnchorTests.swift, Sources/FlareApp/FlareWindow+Stage.swift | #4706 | – | merged |
+| FP-4 | FP-u | 3 | journey written, skipped | UITests/FlareJourneyTests+Pen.swift | #4706 | – | merged |
 | FP-5 | FP-m | 2 | Pen on PenRules | Sources/FlareModel/FlarePen+Kernel.swift, Sources/FlareModel/Live/LiveShapes.swift, Sources/FlareModel/Fakes/FakeShapes.swift, Sources/FlareModel/Contracts/ShapeContracts.swift, Sources/FlareModel/FlarePenFinish.swift | FlarePenKernelTests | – | building |
 | FP-6 | FP-m | 3 | twelve path specs in catalog | Sources/FlareModel/FlareCommandCatalog.swift, Tests/command-ids/flare.txt | FlarePathCommandTests | #4714 | in lane |
 | FP-7 | FP-e | 2 | Direct Select anchor editing | Sources/FlareModel/FlareAnchors+Kernel.swift, Sources/FlareModel/FlareDrag.swift, Sources/FlareModel/FlareSelection.swift | FlareAnchorEditTests | #3958 | merged |

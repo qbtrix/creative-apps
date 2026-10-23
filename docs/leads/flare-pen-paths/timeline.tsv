@@ -80,3 +80,4 @@ utc	stage	event	ref	note
 2026-10-23T03:07Z	stage	run act-1a166b69fab-fd09 takes over at base e055e671; FL-m/FL-z met; wave 3 starts FP-u and FP-m (and LO-u on lottie-open).
 2026-10-23T03:31Z	pr	FP-u #4706 opened (head 9cd03fbb, scripts/ci --changed pass); #4012 relabelled gap (waits on #4030).
 2026-10-23T03:38Z	pr	FP-m #4714 opened (head 69884609, scripts/ci --changed pass, Mutate FlareCommandCatalog 10/10); LO-m stacks on it.
+2026-10-23T03:59Z	check	#4706 merged (a8ea9487, macOS gate 39895221472); full CI 39897762608 pending on it; #4714 in lane macOS build; no open pen-paths findings.
