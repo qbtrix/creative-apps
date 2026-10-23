@@ -80,3 +80,4 @@ utc	stage	event	ref	note
 2026-10-23T16:45Z	wave 3	TC-2 #4862, TC-5 #4880, TC-7 #4870 open; TC-6 and TC-u builders launched
 2026-10-23T18:32Z	wave 3	TC-6 #4953 open (CI: PASS, mutate 5/5); TC-u gating
 2026-10-23T18:33Z	wave 3	TC-u gated CI: PASS at 5b351323; PR after #4862 merges
+2026-10-23T19:19Z	check-in	#4862 #4870 #4880 #4953 open in lane, no needs-fix; TC-u waits on #4862
