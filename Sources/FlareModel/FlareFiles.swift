@@ -47,6 +47,9 @@ extension FlareWorkspace {
     /// Shows the open's progress state (QB-L9) before the file is read; the open document stays as it is.
     public mutating func beginOpen() { loadState = .loading }
 
+    /// Whether a file handed to Flare opens in this window rather than a new one: no animation open, none opening.
+    public var takesOpenedFile: Bool { document == nil && loadState != .loading }
+
     /// Decodes a file's bytes; pure, so the app runs it off the main thread (QB-L12).
     public static func decodeFile(_ data: Data) -> Result<Document, FormatError> {
         do {

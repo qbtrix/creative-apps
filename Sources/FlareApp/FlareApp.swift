@@ -5,11 +5,13 @@
 //
 // File-flow (FL-2): the scene takes part in switching (`.suiteApp`), File
 // gets the suite's Open Recent ▸ and Open In ▸ (SuiteFileCommands, in
-// FlareCommands), and the stage takes drops (`.suiteFileDrop`, FlareStage);
-// all three read FlareShell's one documents bridge, which starts watching the
-// suite's recents at launch (FlareAppDelegate). Finding #4636: every
-// hand-off reaches FlareShell.host, a FlareDocumentHost that opens each
-// dropped or reopened animation in a new window through FlareOpenQueue.
+// FlareCommands), and the stage takes drops (`.suiteFileDrop`, FlareStage;
+// the empty state opens a dropped .flare itself, FlareCanvas); all three read
+// FlareShell's one documents bridge, which starts watching the suite's recents at launch
+// (FlareAppDelegate). Every hand-off reaches FlareShell.host, a
+// FlareDocumentHost that hands each dropped or reopened animation to
+// FlareShell.openQueue (SuiteUI's SuiteOpenQueue): an empty window opens it in
+// place, else it opens in a new window.
 // Editor menus (EM-5): `.suiteEditor` adds Window's Switch To ▸ and AI
 // Access… and the suite's Help group; FlareLive's channel answers live
 // `afterglow` commands on the active window's animation. The delegate is a
@@ -19,6 +21,7 @@ import AppKit
 import FlareModel
 import SuiteModel
 import SuiteShell
+import SuiteUI
 import SwiftUI
 
 /// The process's documents bridge: the suite's recents and routing, on fakes for a `-FlareFixture` launch.
@@ -33,11 +36,14 @@ import SwiftUI
         return SuiteDocumentsBridge(app: .flare, services: services)
     }()
 
-    /// The hand-off host: an open hand-off opens each animation in a new window; an SVG place is refused
+    /// The animations waiting for a window: an empty window takes one in place, else a new window opens.
+    static let openQueue = SuiteOpenQueue(windowID: "flare")
+
+    /// The hand-off host: an open hand-off opens each animation through `openQueue`; an SVG place is refused
     /// until SVG import (E11).
     static let host = FlareDocumentHost { requests in
         await MainActor.run {
-            for case .open(let path) in requests { FlareOpenQueue.shared.open(URL(fileURLWithPath: path)) }
+            for case .open(let path) in requests { openQueue.open(URL(fileURLWithPath: path)) }
         }
     }
 }
@@ -47,7 +53,9 @@ struct FlareApp: App {
     @NSApplicationDelegateAdaptor private var delegate: FlareAppDelegate
 
     var body: some Scene {
-        WindowGroup(id: FlareOpenQueue.windowID) { FlareWindow().suiteReopenWindow(id: FlareOpenQueue.windowID) }
+        WindowGroup(id: FlareShell.openQueue.windowID) {
+            FlareWindow().suiteReopenWindow(id: FlareShell.openQueue.windowID)
+        }
             // Fits a 1024 x 768 screen (the CI runner's) with the inspector in full.
             .defaultSize(width: 1000, height: 700)
             .commands {

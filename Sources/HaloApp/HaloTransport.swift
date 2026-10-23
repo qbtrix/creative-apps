@@ -1,6 +1,6 @@
 // HaloTransport.swift: the status bar's transport (viewer-playback #37,
 // VP-10): five plain SF Symbol buttons and a Loop toggle sending their
-// HaloCommand (each button a MenuCommand worded as its catalog spec, command-state CS-8), disabled with `unavailableHelp(for:)` as the tooltip while the
+// HaloCommand (each button its catalog spec's MenuCommand on the frame on screen, command-state CS-8), disabled with `unavailableHelp(for:)` as the tooltip while the
 // Model can't act, and drawn in textTertiary then so they look disabled
 // inside the pill. All of it comes from one HaloTransportState of the frame
 // on screen (HaloPlayheadShown), so a ruler scrub's last frame reaches the
@@ -34,7 +34,8 @@ struct HaloTransport: View {
         // decides every button: its enabled state, tooltip and ink come from
         // one HaloTransportState in this pass (#4352).
         HaloPlayheadShown(model: model) { shown in
-            HaloPlayButtons(state: HaloTransportState(shown), perform: perform).equatable()
+            HaloPlayButtons(state: HaloTransportState(shown), target: HaloMenuState(project: shown), perform: perform)
+                .equatable()
         }
         .onChange(of: model.playback.playing, initial: true) { _, playing in follow(playing: playing) }
         .background {
@@ -85,11 +86,14 @@ struct HaloTransport: View {
     }
 }
 
-/// The transport's buttons for `state`. `perform` is the window's, which
-/// always acts on the window's current project, so it is left out of `==`: a
-/// playing frame that leaves every button as it was skips this body.
+/// The transport's buttons for `state`. `target` is the same frame on screen,
+/// which each button's catalog spec reads; it decides nothing `state` doesn't,
+/// so it and `perform` (the window's, always acting on its current project)
+/// are left out of `==`: a playing frame that leaves every button as it was
+/// skips this body.
 struct HaloPlayButtons: View, Equatable {
     let state: HaloTransportState
+    let target: HaloMenuState
     let perform: @MainActor (HaloCommand) -> Void
 
     nonisolated static func == (a: Self, b: Self) -> Bool { a.state == b.state }
@@ -128,8 +132,8 @@ struct HaloPlayButtons: View, Equatable {
             .toggleStyle(.button)
             .tint(SuiteColor.accent)
         } else {
-            MenuCommand(button.title, systemImage: HaloTransport.symbol(button.command, playing: state.playing),
-                        help: button.menuHelp, isEnabled: button.isEnabled) { perform(button.command) }
+            MenuCommand(HaloMenuState.spec(button.command.commandID), on: target, title: button.title,
+                        systemImage: HaloTransport.symbol(button.command, playing: state.playing)) { perform(button.command) }
         }
     }
 

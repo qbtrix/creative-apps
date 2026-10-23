@@ -6,6 +6,7 @@
 #   scripts/test-scope app APP[,APP...]    those apps' tests (flare, design, photo, library, halo, suite, suiteui)
 #   scripts/test-scope changed [--linux]   the tests for the changed paths on stdin
 #   scripts/test-scope build-apps          the apps a macOS build of the changed code paths on stdin needs
+#   scripts/test-scope scopes              the `app` scopes whose tests cover what `changed` picks for stdin
 #   scripts/test-scope perf [APP]          the perf and timing tests, all or APP's
 #   scripts/test-scope perf-report LOG     a perf run's swift test log as a markdown report
 #   scripts/test-scope heavy [FILTER]      the CPU-heavy correctness tests, all or those FILTER takes
@@ -59,6 +60,15 @@
 # kernel, SuiteModel, the shell, the CLI, shared snapshot or journey files,
 # Package.swift, project.yml, a target the table doesn't know) prints `all`,
 # and so does empty input: when in doubt, build everything.
+#
+# scopes reads changed paths (code or not: a golden PNG, a fixture) and prints
+# the comma list of `app` scopes whose tests cover what `changed` selects for
+# them, so the lane's batch macOS gate runs those tests: a Model's or app's
+# tests are that app's, SuiteUITests and AppAuditTests are suiteui's,
+# SuiteModelTests and SuiteKernelTests are suite's; the CLI's tests are left
+# out, as in build-apps (the lane's Linux check runs them). `all`
+# when changed would say all or a test file fits no app (every snapshot
+# suite); empty when no test covers the paths.
 #
 # Regexes match swift test's ids, Target.Suite/test() or Target.freeTest().
 # Never pass an empty one to --filter or --skip: it matches every test.
@@ -167,6 +177,23 @@ def build_app(path):
             continue
         apps.add(next((a for a, x in APPS.items() if target == x + "ModelTests" or (target == SNAP and suite == SNAPSHOTS[a])), "all"))
     return apps.pop() if len(apps) == 1 else "all"
+
+
+def unit_scope(target, suite):
+    """The `app` scope whose tests include this unit, or "all"."""
+    for a, x in APPS.items():
+        if target == x + "ModelTests" or (target == SNAP and suite == SNAPSHOTS[a]):
+            return a
+    if target in ("SuiteUITests", "AppAuditTests") or (target == SNAP and suite == SNAPSHOTS["suiteui"]):
+        return "suiteui"
+    if target in ("SuiteModelTests", "SuiteKernelTests"):
+        return "suite"
+    return "all"
+
+
+def scopes(paths):
+    found = {unit_scope(*u) for p in paths for u in path_units(p) if u != CLI}
+    return "all" if "all" in found else ",".join(sorted(found))
 
 
 def build_apps(paths):
@@ -360,6 +387,8 @@ def main(argv):
         print(regexes(units, linux=bool(args)))
     elif cmd == "build-apps" and not args:
         print(build_apps([p for p in sys.stdin.read().splitlines() if p]))
+    elif cmd == "scopes" and not args:
+        print(scopes([p for p in sys.stdin.read().splitlines() if p]))
     elif cmd == "perf" and len(args) <= 1:
         print(perf_regex(args[0] if args else None))
     elif cmd == "heavy" and len(args) <= 1:
@@ -370,7 +399,7 @@ def main(argv):
         for test, where, bound in unlisted_timing():
             print(f"{test}  ({where}: {bound})")
     else:
-        sys.exit("usage: scripts/test-scope app APP[,APP...] | changed [--linux] | build-apps | perf [APP] | heavy [FILTER] | perf-report LOG | timing")
+        sys.exit("usage: scripts/test-scope app APP[,APP...] | changed [--linux] | build-apps | scopes | perf [APP] | heavy [FILTER] | perf-report LOG | timing")
 
 
 if __name__ == "__main__":

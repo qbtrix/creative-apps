@@ -19,7 +19,8 @@
 // - A node draws at `DesignPainted.opacity`, its own opacity times its ancestors'.
 // - A turned or mirrored node draws its upright shape through artworkPlacement, the kernel's matrix.
 // - A shape node draws its spec's path in its frame (DesignNode.path(in:), the kernel's ShapeRules), so a
-//   resize redraws it; its box only when the spec can't be drawn. A line or arrow is stroked, never filled.
+//   resize redraws it; its box only when the spec can't be drawn. A line or arrow is stroked, and an arrow's
+//   closed head is filled in the line colour too; nothing else of an open shape fills.
 // - Colors come from SuiteColor, except the document's own fills (DesignColor).
 import DesignModel
 import SuiteKernel
@@ -94,7 +95,7 @@ func artworkPath(_ path: VectorPath, scale: Double) -> Path {
     return drawn
 }
 
-/// Whether `node` is a line or an arrow, which the canvas strokes and never fills.
+/// Whether `node` is a line or an arrow, which the canvas strokes in its line colour (an arrow's head filled too).
 func artworkIsOpen(_ node: DesignNode) -> Bool {
     node.kind == .shape && (node.shape?.kind == .line || node.shape?.kind == .arrow)
 }
@@ -162,10 +163,13 @@ func paintArtwork(
         var faded = context
         faded.opacity = item.opacity * fade
         faded.concatenate(artworkPlacement(node.transformBox, scale: scale))
-        if let shape = artworkPath(for: node, scale: scale), artworkIsOpen(node) {
+        let shape = artworkPath(for: node, scale: scale)
+        if let shape, artworkIsOpen(node) {
+            // The fill covers only an arrow's closed head (a shaft has no area), so the head reads solid.
             let line = artworkLine(for: node, scale: scale)
+            faded.fill(shape, with: .color(line.color))
             faded.stroke(shape, with: .color(line.color), style: line.style)
-        } else if let shape = artworkPath(for: node, scale: scale) {
+        } else if let shape {
             faded.fill(shape, with: artworkShading(for: node, scale: scale))
             if let stroke = node.stroke, let style = artworkStroke(for: node, scale: scale) {
                 faded.stroke(shape, with: .color(stroke.color.color), style: style)

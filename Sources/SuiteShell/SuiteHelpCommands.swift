@@ -5,7 +5,9 @@
 // controls). Report a Problem… begins ProblemReportSheet on the front window over ShellHelpProvider's report
 // (RP-3); Copy puts the text on the pasteboard, and Save… and Email… hand it to ProblemReportActions (RP-3e),
 // so the app sends nothing itself. Beta Notes opens a window titled Beta Notes over BetaNotes.current,
-// centred so it stays on a small screen.
+// centred so it stays on a small screen. Connect an AI Assistant… (cli-bundle CB-5) begins AssistantConnectSheet
+// on the front window over the running AfterGlow.app's AssistantConnectPanel; Copy puts its text on the pasteboard
+// and Open AI Access opens Window > AI Access…'s list. The item is disabled, saying why, outside AfterGlow.app.
 import AppKit
 import SuiteKernel
 import SuiteModel
@@ -20,7 +22,7 @@ public struct SuiteHelpCommands: Commands {
 
     /// The catalog ids the Help menu shows for `app`, in menu order.
     static func ids(for app: SuiteApp) -> [String] {
-        ["help.report-problem", "help.beta-notes"] + (app == .launcher ? ["help.welcome"] : [])
+        ["help.report-problem", "help.beta-notes", "help.connect-assistant"] + (app == .launcher ? ["help.welcome"] : [])
     }
 
     /// Why each item that runs nothing yet is disabled: none since RP-3.
@@ -48,6 +50,7 @@ public struct SuiteHelpCommands: Commands {
         if id == "help.welcome" { openWindow(id: "onboarding") }
         if id == "help.report-problem" { SuiteHelpPresenter.shared.showReport(app: app) }
         if id == "help.beta-notes" { SuiteHelpPresenter.shared.showBetaNotes() }
+        if id == "help.connect-assistant", let bundle = ShellHelpProvider().bundle { SuiteHelpPresenter.shared.showConnect(bundle: bundle) }
     }
 }
 
@@ -58,6 +61,8 @@ public struct SuiteHelpCommands: Commands {
     private var host: NSWindow?
     private var sheet: NSWindow?
     private var notes: NSWindow?
+    private var connect: NSWindow?
+    private var connectHost: NSWindow?
     private var report = ProblemReport(app: "", version: "", build: "", macOS: "", model: "", crashes: [])
 
     /// Begins the report sheet on the front window, or shows it as its own window when none is open.
@@ -90,6 +95,33 @@ public struct SuiteHelpCommands: Commands {
         if let host, sheet.sheetParent != nil { host.endSheet(sheet) } else { sheet.close() }
         self.sheet = nil
         host = nil
+    }
+
+    /// Begins the Connect an AI Assistant sheet for `bundle` on `window` (the front window when nil), or shows it as
+    /// its own window when none is open.
+    func showConnect(bundle: String, in window: NSWindow? = nil) {
+        if let connect, connect.sheetParent != nil || connect.isVisible { connect.makeKeyAndOrderFront(nil); return }
+        let view = AssistantConnectSheet(
+            panel: AssistantConnectPanel(bundle: bundle),
+            onCopy: { text in
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(text, forType: .string)
+            },
+            onOpenAIAccess: { AIAccessCenter.shared.showList() },
+            onClose: { [weak self] in self?.closeConnect() })
+        let panel = NSWindow(contentViewController: NSHostingController(rootView: view))
+        panel.title = "Connect an AI Assistant"
+        panel.isReleasedWhenClosed = false
+        connect = panel
+        connectHost = window ?? NSApp.keyWindow ?? NSApp.mainWindow
+        if let connectHost { connectHost.beginSheet(panel) } else { panel.makeKeyAndOrderFront(nil) }
+    }
+
+    func closeConnect() {
+        guard let connect else { return }
+        if let connectHost, connect.sheetParent != nil { connectHost.endSheet(connect) } else { connect.close() }
+        self.connect = nil
+        connectHost = nil
     }
 
     /// Opens, or brings forward, the Beta Notes window.

@@ -1449,6 +1449,16 @@ expect "union: green on both lands all three in that order" "$(merges)" "pr merg
 fresh; cpr 94 Sources/SuiteUI/GlassPanel.swift; lane_sweep; BR=$(batch_br)
 expect "shared: SuiteUI gets the full macOS gate" \
   "$(grep -c -- "-f mac_only=true --ref $BR\$" "$sw/calls"),$(grep -c -- '-f app=' "$sw/calls")" "1,0"
+# The scope also covers the tests scripts/test-scope changed picks for every
+# changed path, code or not: SuiteUI's tests next to an app's, a fixture a
+# Model test reads, a golden PNG (every snapshot suite, so the full gate).
+fresh; cpr 130 Tests/SuiteUITests/Fixtures/glass.png; cpr 133 Sources/PhotoApp/A.swift; lane_sweep; BR=$(batch_br || true)
+expect "scope: a SuiteUITests fixture adds suiteui to the app's gate" "$(grep -c -- "-f mac_only=true -f app=photo,suiteui --ref $BR\$" "$sw/calls")" 1
+fresh; cpr 131 Tests/PhotoModelTests/Fixtures/png-parity/a.png; lane_sweep; BR=$(batch_br || true)
+expect "scope: a fixture a Model test reads gets a macOS gate, not an instant landing" \
+  "$(merges),$(grep -c -- "-f mac_only=true -f app=photo --ref $BR\$" "$sw/calls")" ",1"
+fresh; cpr 132 Tests/AppSnapshotTests/Golden/canvas/brush.png; lane_sweep; BR=$(batch_br || true)
+expect "scope: a golden PNG gets the full macOS gate" "$(merges),$(grep -c -- "-f mac_only=true --ref $BR\$" "$sw/calls")" ",1"
 
 # A docs-only batch needs no macOS: Linux alone lands it, as before.
 fresh; pr_at 95 h95 "$DOCS"; real_pr 95; pr_at 96 h96 "$DOCS"; real_pr 96; lane_sweep
@@ -1489,6 +1499,19 @@ jq -n '{statuses: [{context: "local-ci/macos", state: "success", target_url: "ht
 lane_sweep
 expect "local: a local-ci/macos pass lands the batch" \
   "$(merges),$(grep -c '^pr comment 99 .*on Linux and macOS: .*https://mac.local/ci/1' "$sw/calls")" "pr merge 99,1"
+# A red on the same head outranks a green: the local gate skips known reds
+# (CI_LOCAL_SKIP), so its pass never covers a GitHub macOS failure, nor the
+# other way round. A GitHub job still running doesn't hold a local pass.
+lstatus() { jq -n --arg s "$2" '{statuses: [{context: "local-ci/macos", state: $s, target_url: "https://mac.local/ci/1"}]}' >"$sw/status.$1.json"; }
+fresh; cpr 120 Sources/PhotoModel/A.swift; lane_sweep; TIP=$(batch_tip)
+gate "$TIP" success failure "macOS (photo)"; lstatus "$TIP" success; lane_sweep
+expect "local: a local pass doesn't land a batch GitHub's macOS job fails" "$(merges),$(grep -c '^pr merge 120' "$sw/calls")" ",0"
+fresh; cpr 121 Sources/PhotoModel/A.swift; lane_sweep; TIP=$(batch_tip)
+gate "$TIP" success success "macOS (photo)"; lstatus "$TIP" failure; lane_sweep
+expect "local: a GitHub pass doesn't land a batch the local gate fails" "$(merges)" ""
+fresh; cpr 122 Sources/PhotoModel/A.swift; lane_sweep; TIP=$(batch_tip)
+gate "$TIP" success in_progress "macOS (photo)"; lstatus "$TIP" success; lane_sweep
+expect "local: a local pass lands while GitHub's macOS job still runs" "$(merges)" "pr merge 122"
 
 # Slots: the lane's queued and running macOS runs (gates and per-PR builds;
 # other runs don't count) at LANE_MAC_SLOTS form no batch.
