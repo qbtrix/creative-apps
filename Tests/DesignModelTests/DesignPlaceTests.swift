@@ -139,7 +139,6 @@ private func node(_ kind: DesignNodeKind = .frame, picture: PlacedAsset? = asset
     func lockedFrameRefuses() throws {
         var workspace = try opened([node()])
         try workspace.setNodeLocked("node-1", true)
-        #expect(workspace.placeFillBox == nil)
         #expect(throws: (any Error).self) {
             try workspace.setPlaced(PlacedImage(assetID: "asset-1", box: box, focus: centre), asset: nil, name: "Focus", drag: nil)
         }
@@ -214,6 +213,60 @@ private func node(_ kind: DesignNodeKind = .frame, picture: PlacedAsset? = asset
         workspace.undo()
         #expect(workspace.selectedPage?.nodes.count == 1)
     }
+
+    @Test func aPlaceLandsInTheFrameItsCentreFallsIn() throws {
+        // A 100 × 100 frame under the box's corner but not its centre: the logo lands on the page, whole.
+        var corner = try opened([DesignNode(id: "node-1", name: "F", kind: .frame, frame: rc(600, 472, 100, 100))])
+        corner.deselect()
+        try placeLogo(&corner)
+        #expect(corner.selectedPage?.nodes.map(\.name) == ["F", "logo"])
+        // Dropped on a 200 × 200 frame's centre, the box's corner outside it: the logo lands in that frame.
+        var dropped = try opened([DesignNode(id: "node-1", name: "F", kind: .frame, frame: rc(500, 500, 200, 200))])
+        dropped.deselect()
+        try placeLogo(&dropped, at: Point(x: 600, y: 600))
+        #expect(dropped.selectedPage?.nodes.first?.children.map(\.name) == ["logo"])
+    }
+
+    @Test func aLockedRectangleRefusesFillWithTheLock() throws {
+        var workspace = try opened([node(.rectangle, picture: nil)])
+        try workspace.setNodeLocked("node-1", true)
+        #expect(throws: CatalogError.unavailable(id: "place", why: "Unlock the layer to edit it.")) { try placeLogo(&workspace, fill: true) }
+        #expect(workspace.treeNode("node-1")?.placedAsset == nil)
+    }
+
+    @Test func aLockedPictureLetsAPlaceLandOnThePage() throws {
+        var workspace = try opened([node(.rectangle)])
+        try workspace.setNodeLocked("node-1", true)
+        #expect(workspace.placeHelp == nil)
+        try placeLogo(&workspace)
+        #expect(workspace.selectedPage?.nodes.map(\.name) == ["Frame", "logo"])
+    }
+
+    @Test func aLockedFrameRefusesAPlaceWithItsLock() throws {
+        var workspace = try opened([node(picture: nil)])
+        try workspace.setNodeLocked("node-1", true)
+        let page = workspace.selectedPage
+        #expect(workspace.placeHelp == "Unlock the layer to edit it.")
+        #expect(throws: CatalogError.unavailable(id: "place.image", why: "Unlock the layer to edit it.")) { try placeLogo(&workspace) }
+        #expect(workspace.selectedPage == page)
+    }
+
+    @Test func aPlaceWaitsForTheTextEdit() throws {
+        let text = DesignNode(id: "node-2", name: "T", kind: .text, frame: rc(0, 0, 100, 20), text: "Hi")
+        var workspace = try opened([node(picture: nil), text])
+        try workspace.beginTextEdit("node-2")
+        let page = workspace.selectedPage
+        #expect(workspace.placeHelp == "Finish editing the text first.")
+        #expect(throws: CatalogError.unavailable(id: "place.image", why: "Finish editing the text first.")) { try placeLogo(&workspace) }
+        #expect(workspace.selectedPage == page)
+    }
+}
+
+/// Runs `place.image` with the 240 × 80 logo through the catalog, with `fill`, its centre at `at` when given.
+private func placeLogo(_ workspace: inout DesignWorkspace, fill: Bool = false, at: Point? = nil) throws {
+    var params: [String: JSONValue] = ["name": .string("logo.svg"), "base64": .string(svgLogo), "fill": .bool(fill)]
+    if let at { (params["x"], params["y"]) = (.number(at.x), .number(at.y)) }
+    _ = try DesignWorkspace.catalog.run("place.image", params: .object(params), on: &workspace)
 }
 
 /// A 240 x 80 SVG, base64.
