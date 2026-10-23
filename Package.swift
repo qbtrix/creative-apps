@@ -32,8 +32,8 @@
 //             Design, Photo, Library and Halo Models, SuiteUI and the CLI.
 //             With SuiteImagingTests, on Linux and macOS.
 //   SuiteShell  macOS glue every app process links: the shared menu commands
-//             (Window > Switch To) and, later, the live suite services.
-//             macOS only.
+//             (Window > Switch To) and, later, the live suite services, with
+//             CoreAsset for the shared thumbnail store. macOS only.
 //   AfterGlowApp  the launcher: the home window that opens the five apps.
 //             macOS only.
 //
@@ -88,7 +88,7 @@ var targets: [Target] =
     model("Flare", ["FlareCore"], imaging: false)
     + model("Design", ["CoreColor"])
     + model("Photo", ["CoreRaster", "CoreColor", "CoreRender"])
-    + model("Library", ["CoreRaster", "CoreColor"])
+    + model("Library", ["CoreAsset", "CoreRaster", "CoreColor"])
     + model("Halo", ["FlareCore", "CoreRaster"])
     + [
         .target(name: "SuiteModel"),
@@ -108,7 +108,7 @@ var targets: [Target] =
 products += (apps + ["AfterGlow"]).map { .executable(name: "\($0)App", targets: ["\($0)App"]) }
 targets += [
     .target(name: "SuiteUI", dependencies: ["SuiteModel", "SuiteKernel", "SuiteImaging"]),
-    .target(name: "SuiteShell", dependencies: ["SuiteUI", "SuiteModel"]),
+    .target(name: "SuiteShell", dependencies: ["SuiteUI", "SuiteModel", .product(name: "CoreAsset", package: core)]),
     .executableTarget(name: "AfterGlowApp", dependencies: ["SuiteUI", "SuiteShell", "SuiteModel"]),
     .testTarget(name: "SuiteUITests", dependencies: ["SuiteUI", "SuiteModel"]),
     .testTarget(
