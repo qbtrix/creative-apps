@@ -14,6 +14,8 @@
 // ScrubField stops selecting its value on open or committing on focus loss.
 // A ScrubField reads its number as its value, spoken with its unit, and a
 // plain Text its words as its value, so both are read by label or value.
+// DJ-DS (document-setup DS-design): File > New opens the suite's New Document
+// sheet on Design's frame presets; Story and Create make one page of 1080 × 1920.
 import XCTest
 
 final class DesignPageJourneyTests: XCTestCase {
@@ -22,6 +24,11 @@ final class DesignPageJourneyTests: XCTestCase {
     /// CB-c: Width and Height in the inspector, one undo step each, Desktop dimmed past the page.
     @MainActor func testPageSizeAndPastThePage() throws {
         try walkPageSize()
+    }
+
+    /// DJ-DS: File > New, the Story preset, Create: the new file's one page is 1080 × 1920.
+    @MainActor func testNewDocumentFromPreset() throws {
+        throw XCTSkip("waits on DS-10: File > New doesn't open the New Document sheet yet")
     }
 
     /// The journey itself.
