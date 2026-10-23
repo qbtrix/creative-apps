@@ -6,7 +6,9 @@
 // SuiteModel's UniqueFileNames stem ("/" and ":" become "-", empty is
 // "Untitled"), and only the "_0001" frame suffix is Halo's; alpha a movie's
 // codec can't keep is refused, and a movie without alpha is planned opaque
-// (export-pack HX-3). `run` is the frame loop: it checks `isCancelled` before
+// (export-pack HX-3). A movie at a whole rate carries the media service's
+// settings; ProRes 4444 and HEVC refuse a fractional rate, which only Halo's
+// own H.264 writer times exactly (HX-4). `run` is the frame loop: it checks `isCancelled` before
 // each frame, renders it with `drawing` and `rendering`, flattens it when the
 // plan is opaque, writes it, and stops at the first error. Linux-safe.
 import SuiteKernel
@@ -29,9 +31,19 @@ enum HaloRenderRules {
         case .movie: ["\(base).\(s.outputExtension)"]
         case .pngSequence: frames.map { "\(base)_\(pad4($0 + 1)).png" }
         }
+        var movie: MovieSettings?
+        if s.format == .movie {
+            if c.frameRate.isWhole {
+                movie = MovieSettings(width: w, height: h, fps: c.framesPerSecond, codec: s.codec, quality: 1)
+            } else if s.codec != .h264 {
+                throw HaloEditError.refused(
+                    "\(HaloRenderSettings.codecTitle(s.codec)) needs a whole-number frame rate. "
+                        + "Choose H.264 for \(c.frameRate).")
+            }
+        }
         return HaloRenderPlan(
             width: w, height: h, framesPerSecond: c.framesPerSecond, frameRate: c.frameRate, frames: frames,
-            fileNames: names, opaque: s.format == .movie && !s.alpha)
+            fileNames: names, opaque: s.format == .movie && !s.alpha, movie: movie)
     }
 
     /// Sends every planned frame to `sink` in order and says how it ended.
@@ -71,9 +83,9 @@ enum HaloRenderRules {
         return plan.fileNames.first ?? ""
     }
 
-    /// An error in words: a HaloEditError's message, else its description.
+    /// An error in words: a HaloEditError's or SuiteError's message, else its description.
     static func words(_ failure: any Error) -> String {
-        (failure as? HaloEditError)?.message ?? String(describing: failure)
+        (failure as? HaloEditError)?.message ?? (failure as? SuiteError)?.message ?? String(describing: failure)
     }
 
     /// `n` with leading zeros to four digits: 1 is "0001", 12345 stays.
