@@ -162,8 +162,8 @@ FEATURE_LABEL="feature-done"  # merging one dispatches full CI on BASE_BRANCH
 CI_WORKFLOWS=("CI")
 # CI job names, so CI runs started by workflow_dispatch (no PR association) still count.
 CI_CHECKS=("Linux")
-# Report-only jobs (ci.yml's macOS, journeys.yml's macOS journeys), matched by name: never red, pending or proof here.
-REPORT_ONLY_RE='^macOS( journeys)?( \(.*\))?$'
+# Report-only jobs (ci.yml's macOS, journeys.yml's macOS journeys and its Journeys wait), matched by name: never red, pending or proof here.
+REPORT_ONLY_RE='^(macOS( journeys)?( \(.*\))?|Journeys wait)$'
 CI_FILE="ci.yml"  # the CI workflow file, dispatched on BASE_BRANCH after merges
 SELF_WORKFLOW="Fast Lane"
 # The lane job's own check run on the head. Check runs read off the commit carry
