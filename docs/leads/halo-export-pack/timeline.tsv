@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-23T20:27:00Z	4	heartbeat	HX-a	no merges; #4841 in batch-20261023192105, still bisecting; no lane comment
 2026-10-23T20:49:00Z	4	heartbeat	HX-a	no merges; batch-20261023192105 resolved without landing #4841 and with no comment on it; waits for next batch
 2026-10-23T21:11:00Z	4	heartbeat	HX-a	#4841 in lane batch-20261023204921 with #4855; no merges, no lane comments
+2026-10-23T21:32:00Z	4	heartbeat	HX-a	#4841 still in lane batch-20261023204921 (running); no merges, no lane comments
