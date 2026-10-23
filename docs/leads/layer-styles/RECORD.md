@@ -26,7 +26,7 @@ Next: LS-1 #4911 and LS-10 #4903 to merge, then open the stacked LS-2, LS-5 (on 
 | LS-5 | LS-m | 2 | StyleRules bodies; LayerStyleRulesTests turned on | Sources/SuiteImaging/Style/StyleRules.swift, its tests, mutation plan | LayerStyleRulesTests | lead/layer-styles-LS-m @c15bf38 | stacked, gate pass, 4/4 mutations |
 | LS-3 | see packet | 3 | LS-2 | per packet | per packet | lead/layer-styles-LS-u | building, stacked on LS-a-2 |
 | LS-6 | see packet | 3 | LS-5 | per packet | per packet | lead/layer-styles-LS-m-6 @b99d9f8 | stacked, gate pass, 4/4 mutations |
-| LS-7 | see packet | 3 | LS-5, GF-m | per packet | per packet | lead/layer-styles-LS-m-7 | building, stacked on LS-m |
+| LS-7 | see packet | 3 | LS-5, GF-m | per packet | per packet | lead/layer-styles-LS-m-7 @d364612 | stacked, gate pass, 4/4 mutations |
 | LS-4, LS-8..LS-9b, LS-12, LS-13 | see packet | 3+ | per the packet's Tasks table | per packet | per packet | – | planned |
 
 ## Reviews
@@ -34,6 +34,7 @@ Next: LS-1 #4911 and LS-10 #4903 to merge, then open the stacked LS-2, LS-5 (on 
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-23: LS-7 built stacked on LS-m (3 files, +291/-3): LayerStyleSVG.filter. Shadow angle follows LS-8 (light direction, 135deg 8px -> 5.66,5.66 down-right). Modes outside SVG 1.1 feBlend write their Filter Effects 1 name plus one warning (no linear dodge/burn in core). Own 2-decimal number writer (StrokeSVG.number is internal and writes 4 decimals). Gradient overlay is an feImage of GradientSVG.definition. Bevel is a lighting approximation with a warning; bevel, inner shadow and inner glow output are untested; critics should look. PR opens from scratchpad ls7-body.md once LS-5 merges.
 - 2026-10-23: LS-6 built stacked on LS-m (3 files, +295/-33): StyleCommands bodies, edits one setStyle step each with drag passed through, refusals throw unavailable with a reason at run time, paste checks each decoded effect. style.panel with no kind toggles; titles follow the packet; param names stay as LS-1 shipped (kind/on, value/drag). PR opens from scratchpad ls6-body.md (drop its title line) once LS-5 merges.
 - 2026-10-23: Wave 3 started: LS-3 (stacked on LS-a-2), LS-6 and LS-7 (stacked on LS-m). GF-m merged (GradientSVG on dev), so LS-7 is unblocked. LS-8/LS-9 still wait the core LE-cpu bump. Stacked tasks get PRs only after their parents merge (rule 22).
 - 2026-10-23: LS-2 built stacked on LS-a (6 files, +335/-1): placeholder LayerStylePanel (eight disabled checkboxes with the reason as tooltip), LayerStylePasteboard no-op until LS-3, LayerStyleRows/LayerStyleText, gallery page layer-style, journey steps 1-7 skipped "waits on LS-4". Wire: brush-keys:BK-u. No snapshot PNGs (LS-4 adds suiteui-layer-style*). Unverified API: View.help(_:), .constant binding on a disabled checkbox. PR opens from scratchpad ls2-body.md (drop its title line) once #4911 merges.
