@@ -19,7 +19,7 @@ final class HaloSuiteMenusJourneyTests: XCTestCase {
         XCTAssert(help.contains("Report a Problem…") && help.contains("Beta Notes"), "Help lacks the suite's items: \(help)")
         openAIAccess(in: halo)
         attempt("Home") { try self.bringHome(from: halo) }
-        attempt("live") { throw XCTSkip("a live afterglow call needs a granted client, and the runner has none: Halo's ask refuses until SuiteShell has an async approval sheet") }
+        attempt("live") { throw XCTSkip("the journey has no afterglow client to call Halo's live socket and answer its approval sheet") }
         attempt("reopen") { try self.reopenFromDock(halo) }
         if !skips.isEmpty { throw XCTSkip(skips.joined(separator: "; ")) }
     }

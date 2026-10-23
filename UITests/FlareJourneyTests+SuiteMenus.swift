@@ -14,7 +14,7 @@ final class FlareSuiteMenusJourneyTests: XCTestCase {
         XCTAssert(flare.app.windows.firstMatch.waitForExistence(timeout: 10), "Flare opened no window")
         aiAccessOpens(flare)
         step("Home") { try self.homeComesForward(flare) }
-        step("live") { throw XCTSkip("a live afterglow call needs a granted client, and the runner has none: Flare's ask refuses until SuiteShell has an async approval sheet") }
+        step("live") { throw XCTSkip("the journey has no afterglow client to call Flare's live socket and answer its approval sheet") }
         step("reopen") { try self.dockReopens(flare) }
         if !skipped.isEmpty { throw XCTSkip(skipped.joined(separator: "; ")) }
     }

@@ -2,8 +2,8 @@
 // runs an `afterglow` command on the frontmost window's workspace (as FlareHeadless) and hands the result back to
 // that window, which takes it through `FlareWorkspace.takeLive`. A window registers when it appears and each
 // time it becomes the active one (FlareLiveRegistration), and lets go when it closes. With no window the
-// channel answers "no document open". `ask` refuses: SuiteShell has no async approval sheet yet, so only
-// a client already granted Always Allow runs, and any other is refused (Revoke in Window > AI Access… clears it).
+// channel answers "no document open". A client without a grant is asked through AIAccessCenter.ask, the
+// approval sheet on the front window.
 import FlareModel
 import SuiteModel
 import SuiteShell
@@ -19,7 +19,7 @@ import SwiftUI
         app: SuiteApp.flare.displayName,
         document: { read().map(FlareHeadless.init(workspace:)) },
         apply: { write($0) },
-        ask: { _ in .deny })
+        ask: { await AIAccessCenter.shared.ask($0) })
 
     /// Makes the window `id` the one live commands reach.
     static func register(_ id: UUID, read: @escaping @MainActor () -> FlareWorkspace?,

@@ -17,6 +17,8 @@ import SwiftUI
     private var sheet: NSWindow?
     private var listWindow: NSWindow?
     private var chip: NSTitlebarAccessoryViewController?
+    /// The live ask waiting on the sheet's answer.
+    private var asking: CheckedContinuation<AIAccessDecision, Never>?
 
     /// Starts the flow for `app` once; a demo client in `arguments` asks as soon as a main window shows.
     public func start(app: SuiteApp, arguments: [String]) {
@@ -41,18 +43,39 @@ import SwiftUI
     private func present(in window: NSWindow?) {
         guard let window = window ?? NSApp.mainWindow ?? NSApp.windows.first(where: \.isVisible) else { return }
         host = window
-        if let pending = access?.pending, sheet == nil {
-            let controller = NSHostingController(rootView: AIAccessSheet(request: pending) { [weak self] in self?.decide($0) })
-            let panel = NSWindow(contentViewController: controller)
-            sheet = panel
-            window.beginSheet(panel)
-        }
+        if let pending = access?.pending, sheet == nil { beginSheet(pending, on: window) }
         showChip()
     }
 
-    /// The sheet's answer: records it, closes the sheet, and shows the chip when the client connected.
+    /// A live client's request (LiveCommandChannel's `ask`): begins AIAccessSheet on the main window (else the
+    /// first visible one) and returns the person's answer. With no window to hold it, or a sheet already up, it
+    /// shows nothing and answers only after the channel's 110 s limit, so the call is refused as "no answer yet"
+    /// and nothing is recorded: never a deny the person didn't choose, never an allow they didn't see.
+    public func ask(_ request: AIAccessRequest) async -> AIAccessDecision {
+        guard sheet == nil, asking == nil, let window = NSApp.mainWindow ?? NSApp.windows.first(where: \.isVisible) else {
+            return await withCheckedContinuation { late in
+                DispatchQueue.main.asyncAfter(deadline: .now() + 111) { late.resume(returning: .allowOnce) }
+            }
+        }
+        host = window
+        beginSheet(request, on: window)
+        return await withCheckedContinuation { asking = $0 }
+    }
+
+    /// Begins AIAccessSheet for `request` on `window`; its answer goes to `decide`.
+    private func beginSheet(_ request: AIAccessRequest, on window: NSWindow) {
+        let controller = NSHostingController(rootView: AIAccessSheet(request: request) { [weak self] in self?.decide($0) })
+        let panel = NSWindow(contentViewController: controller)
+        sheet = panel
+        window.beginSheet(panel)
+    }
+
+    /// The sheet's answer: records it (or hands it to the live ask waiting on it), closes the sheet, and shows
+    /// the chip when the client connected.
     public func decide(_ decision: AIAccessDecision) {
         access?.decide(decision)
+        asking?.resume(returning: decision)
+        asking = nil
         if let sheet { host?.endSheet(sheet) }
         sheet = nil
         showChip()

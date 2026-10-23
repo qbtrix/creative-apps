@@ -2,8 +2,7 @@
 // an `afterglow` command on the active window's project (as HaloHeadless) and hands it back; the window lands it
 // with `HaloProject.landLive`, the command's undo step included. Each window takes the channel when it appears
 // or becomes active (HaloLiveTaking) and gives it up when it closes, so with none the call answers "no
-// document open". `ask` refuses: SuiteShell has no async approval sheet yet, so only a client granted Always
-// Allow runs, and any other is refused (Revoke in Window > AI Access… clears it).
+// document open". `ask` is AIAccessCenter.ask: a client with no grant sees the approval sheet first.
 import HaloModel
 import SuiteModel
 import SuiteShell
@@ -19,7 +18,7 @@ import SwiftUI
         app: SuiteApp.halo.displayName,
         document: { project().map(HaloHeadless.init(workspace:)) },
         apply: { land($0.workspace) },
-        ask: { _ in .deny })
+        ask: { await AIAccessCenter.shared.ask($0) })
 
     /// Live commands now reach the window `id`.
     static func take(_ id: UUID, project: @escaping @MainActor () -> HaloProject?, land: @escaping @MainActor (HaloProject) -> Void) {
