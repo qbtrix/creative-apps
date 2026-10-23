@@ -140,3 +140,4 @@ utc	stage	event	ref	note
 2026-10-23T03:26Z	parked	still parked: #3477 has waiting-on-prereq; fixed finding #4701 (PJ-TX Type pick wait) in PR #4707
 2026-10-23T03:58Z	parked	#3477 still waiting-on-prereq; #4701 fix PR #4707 in macOS build 39895566578 (lane dispatched); no new PJ-TX finding
 2026-10-23T04:29Z	parked	#3477 still waiting-on-prereq; #4707 macOS build 39895566578 green, awaiting lane merge; no new Photo finding
+2026-10-23T05:00Z	parked	#3477 still waiting-on-prereq; #4707 merged into dev 04:34Z as 0546a6049, #4701 closed; awaiting a journeys run containing it
