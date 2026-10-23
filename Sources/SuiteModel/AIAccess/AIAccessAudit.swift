@@ -55,7 +55,10 @@ extension AIAccessGrants {
     /// The window `id` closed: if it was the front one, no window is until another registers.
     public func release(_ id: UUID) {
         guard window == id else { return }
-        (window, read, write) = (nil, { nil }, { _ in })
+        // One assignment each, so every closure takes its property's @MainActor type (a tuple doesn't).
+        window = nil
+        read = { nil }
+        write = { _ in }
     }
 
     /// The front window's document; nil with none.
