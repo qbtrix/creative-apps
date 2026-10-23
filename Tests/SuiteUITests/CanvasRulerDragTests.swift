@@ -31,6 +31,23 @@ private func corner(zoom: Double) -> CanvasLayout {
     #expect(CanvasLayout(document: document, zoom: 1, viewport: CGSize(width: 1000, height: 800)).inset == 0)
 }
 
+/// A viewport that never shows rulers (Library's loupe) holds no band: the host fits to the whole
+/// size and the artboard sits in its middle, not half a ruler right of and below it (#3688).
+@Test func aViewportWithoutARulerBandCentresTheArtboard() {
+    let ruler = SuiteSize.ruler
+    let size = CGSize(width: 1000, height: 800), document = CGSize(width: 400, height: 300)
+    let free = CanvasLayout.inViewport(document: document, zoom: 1, size: size, showsRulers: false, holdsRulerBand: false)
+    #expect(free.fitSize == size)
+    #expect(free.layout.origin == CGPoint(x: 300, y: 250))
+    #expect(free.layout.inset == 0)
+    // Hidden rulers that hold their band keep the artboard where the shown ones put it.
+    let held = CanvasLayout.inViewport(document: document, zoom: 1, size: size, showsRulers: false, holdsRulerBand: true)
+    let shown = CanvasLayout.inViewport(document: document, zoom: 1, size: size, showsRulers: true, holdsRulerBand: true)
+    #expect(held.fitSize == CGSize(width: 1000 - ruler, height: 800 - ruler) && held.fitSize == shown.fitSize)
+    #expect(held.layout.inset == ruler && shown.layout.inset == 0)
+    #expect(held.layout.origin == CGPoint(x: shown.layout.origin.x + ruler, y: shown.layout.origin.y + ruler))
+}
+
 @Test func aDragOutOfTheTopRulerPlacesAHorizontalGuide() {
     let one = corner(zoom: 1)
     #expect(one.rulerDrag(.horizontal, .changed, at: CGPoint(x: 120, y: 300), scrolled: .zero)
