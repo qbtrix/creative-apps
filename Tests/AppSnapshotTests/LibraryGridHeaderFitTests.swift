@@ -17,8 +17,8 @@ import Testing
 @MainActor
 @Suite struct LibraryGridHeaderFitTests {
     static let column = 880 - SuiteSize.sidebarWidth.ideal - SuiteSize.inspectorWidth.ideal
-    /// Taller than one line of controls: a label wrapped onto several lines.
-    static let oneLine: CGFloat = 32
+    /// Taller than one row of controls (the Size bar is 34 pt): a label wrapped onto several lines.
+    static let oneLine: CGFloat = 40
     /// Narrower than any control showing its title or symbol: a chip squeezed to one letter.
     static let sliver: CGFloat = 24
 
