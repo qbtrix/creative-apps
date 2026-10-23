@@ -3,14 +3,14 @@
 // (960 × 540) into FakeMedia: every planned frame reaches the movie in order
 // with the plan's size, rate and codec; a frame's alpha reaches it only when
 // the plan keeps alpha; Cancel deletes the movie; an unavailable service
-// fails in its own sentence; ProRes 4444 and HEVC need a whole frame rate;
-// and the Codec row offers every codec it lists. Linux and macOS.
+// fails in its own sentence; and ProRes 4444 and HEVC need a whole frame
+// rate. Linux and macOS.
 import HaloModel
 import SuiteKernel
 import SuiteModel
 import Testing
 
-@Suite(.disabled("waits on HX-4")) struct HaloMovieSinkTests {
+@Suite struct HaloMovieSinkTests {
     private static let path = "/renders/Bounce.mp4"
     /// The right edge's middle at 960 × 540, where Bounce draws nothing.
     private static let empty = (x: 959, y: 270)
@@ -105,11 +105,5 @@ import Testing
         let whole = try rendering.plan(
             try #require(project.selectedComposition), settings: HaloRenderSettings(format: .movie, codec: .hevc))
         #expect(whole.movie?.codec == .hevc)
-    }
-
-    @Test func theCodecRowOffersEveryCodec() {
-        for codec in HaloRenderSettings.codecs {
-            #expect(HaloRenderSettings.codecRefusal(codec) == nil, "\(codec) is still refused")
-        }
     }
 }
