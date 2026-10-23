@@ -57,3 +57,5 @@ Next: #4738 and C4 #4737 in lane; #4739 retargets to dev after #4738 merges; the
 
 - 2026-10-23T07:19:48Z: #4739 macOS build failed on a dev break (FlareStage.swift:81, FlareOpenQueue from #4708 after #4716). Opened fix #4771. Will merge dev into #4739 once it lands.
 - 2026-10-23T09:06:31Z: #4739 EM-photo-design merged (09:02Z). #4761 merged origin/dev at e42863714 (no conflicts), CI: PASS, retargeted to dev, stacked note dropped, Head moved. It is the last slice (feature-done).
+
+- 09:53Z: #4761 (EM-library, feature-done) merged. All editor-menus slices are on dev. Done markers wait on a green full CI (Linux+macOS) on a dev head that includes it, plus its journeys run.
