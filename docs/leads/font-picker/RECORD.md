@@ -4,7 +4,7 @@ Issue: #3730 (earlier run used duplicate #4507) · Packet: docs/blueprints/suite
 Run: act-1a166b69fbd-mmos · Session: claude/font-picker-lead-5om1cy · Started: 2026-10-22T16:36Z (this run resumed 2026-10-23T03:10Z)
 Stage: done: all slices Belt-Slice-Done; FP-u updated after round 2 (#4800 merged 8021b0f5, run 39970203866); leftovers gap #4801, #4802
 Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a (origin/dev)
-Next: none; run complete unless the supervisor asks for more (scoped suiteui 39970195902 on 8021b0f5 will show the journey with #4800)
+Next: none; run complete. FP-u leftovers are gap #4801, #4802, #4947
 
 ## Slices
 
@@ -54,3 +54,4 @@ Next: none; run complete unless the supervisor asks for more (scoped suiteui 399
 - FP-7 C4 description: C4-only PR #4651 (lead/font-picker-FP-c4, 1ae04da7).
 - FP-u round 2 was the last: leftovers filed as gap #4801 and #4802 (line:suiteui, p2). PR #4800 (lead/font-picker-fix2, 9e617d24) fixes #4790.
 - #4800 merged 8021b0f5 (14:25Z); Belt-Slice-Done FP-u reposted with dev Linux run 39970203866.
+- Journeys suiteui 39985655488 (8021b0f5): #4800 row click works (step 3 passes); step 4 fails, Serif doesn't return after the query is cleared → gap #4947. 19/45 suiteui journeys red in that run overall.
