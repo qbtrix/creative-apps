@@ -8,7 +8,8 @@
 // bottom-right handle out by 120 samples at 120 Hz; `rotationScrubInThreeBodies`
 // steps the Rotation row 120 times, as VoiceOver adjusts it. The draft is a
 // preview, so the window's editor body (a debug-only counter) runs at most 3
-// times either way. The window needs `allowsWindowActivationEvents`: a test
+// times either way; `slowCornerDragInOneBody` pauses the drag past the live
+// copy's quiet time, pointer down, and the body runs once (#4795). The window needs `allowsWindowActivationEvents`: a test
 // process only sends activation clicks, and the handles are a SwiftUI gesture.
 // Each test checks the draft moved: the drag grew its box, the scrub turned it
 // (`setTransform`, PT-5). A scrub's steps run on the window's live copy, which
@@ -52,6 +53,35 @@ extension BodyCountSuites {
             #expect(box.width > draft.before.box.width && box.height > draft.before.box.height,
                     "the corner drag didn't grow the draft: \(draft.before.box) to \(box)")
             expectBodies(step, atMost: 3, target: 3)
+        }
+
+        /// #4795: a handle drag whose samples pause past the live copy's quiet time, pointer still down, keeps
+        /// the copy until mouse-up, so the window's editor body runs once for the whole drag.
+        @Test(.timeLimit(.minutes(2))) func slowCornerDragInOneBody() async throws {
+            let draft = try Self.draft()
+            let w = RenderBudgetWindow(PhotoWindow(model: draft.model).allowsWindowActivationEvents())
+            defer { w.close() }
+            let edited = try await Self.settle(w)
+            let corner = try #require(await w.element("suite.handles.bottomRight"), "no bottom-right handle on the draft")
+            let start = CGPoint(x: corner.midX, y: corner.midY)
+            let legs = 4, perLeg = 10
+            // Window points have y up: out from the bottom-right corner is right and down.
+            func point(_ i: Int) -> CGPoint { CGPoint(x: start.x + Double(3 * i), y: start.y - Double(2 * i)) }
+            let step = try await w.measure("photo transform slow corner drag, \(legs) pauses", bodies: Self.bodies) {
+                w.timed { w.send(.leftMouseDown, at: start) }
+                for leg in 0..<legs {
+                    try await w.ticks(perLeg) { w.send(.leftMouseDragged, at: point(leg * perLeg + $0)) }
+                    try await Task.sleep(for: LiveTransformCopy.quiet * 3)  // the pointer rests, still down
+                }
+                w.timed { w.send(.leftMouseUp, at: point(legs * perLeg)) }
+            }
+            let after = try #require(await Self.landed(edited) {
+                ($0.transformSelection?.box).map { $0 != draft.before.box } ?? true
+            })
+            let box = try #require(after.transformSelection?.box)
+            #expect(box.width > draft.before.box.width && box.height > draft.before.box.height,
+                    "the slow corner drag didn't grow the draft: \(draft.before.box) to \(box)")
+            expectBodies(step, atMost: 1, target: 1)
         }
 
         @Test(.timeLimit(.minutes(2))) func rotationScrubInThreeBodies() async throws {
