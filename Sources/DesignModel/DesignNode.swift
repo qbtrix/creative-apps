@@ -293,13 +293,37 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         shape = node.shape
     }
 
+    /// Decodes a node; a field a file written before it existed lacks takes its default: square
+    /// corners, fully opaque, no stroke, the default text style, no gradient, no picture, upright and unmirrored, no shape spec.
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        try self.init(
+            id: container.decode(String.self, forKey: .id), name: container.decode(String.self, forKey: .name),
+            kind: container.decode(DesignNodeKind.self, forKey: .kind), frame: container.decode(DesignRect.self, forKey: .frame),
+            children: container.decode([DesignNode].self, forKey: .children),
+            isHidden: container.decode(Bool.self, forKey: .isHidden), isLocked: container.decode(Bool.self, forKey: .isLocked),
+            fill: container.decode(DesignColor.self, forKey: .fill), text: container.decode(String.self, forKey: .text),
+            cornerRadius: container.decodeIfPresent(Double.self, forKey: .cornerRadius) ?? 0,
+            opacity: container.decodeIfPresent(Double.self, forKey: .opacity) ?? 1,
+            stroke: container.decodeIfPresent(DesignStroke.self, forKey: .stroke),
+            textStyle: container.decodeIfPresent(DesignTextStyle.self, forKey: .textStyle) ?? .default,
+            gradient: container.decodeIfPresent(Fill.self, forKey: .gradient),
+            placedAsset: container.decodeIfPresent(PlacedAsset.self, forKey: .placedAsset),
+            placedFocus: container.decodeIfPresent(Point.self, forKey: .placedFocus))
+        rotation = try container.decodeIfPresent(Double.self, forKey: .rotation) ?? 0
+        flipX = try container.decodeIfPresent(Bool.self, forKey: .flipX) ?? false
+        flipY = try container.decodeIfPresent(Bool.self, forKey: .flipY) ?? false
+        shape = try container.decodeIfPresent(ShapeSpec.self, forKey: .shape)
+    }
+
+    /// The file's keys, one per stored field.
     enum CodingKeys: String, CodingKey {
         case id, name, kind, frame, children, isHidden, isLocked, fill, text, cornerRadius, opacity, stroke, textStyle
         case gradient, placedAsset, placedFocus, rotation, flipX, flipY, shape
     }
 
-    /// Writes a node; a field at its default that a file before it lacked (no stroke, no gradient, no
-    /// picture, a centred focus, no turn, no mirror, no shape spec) is left out, so a file without them saves the same bytes it opened with.
+    /// Encodes a node as before transforms, adding the turn, each mirror, a shape's spec, a picture and a moved
+    /// focus only when set, so a file of upright nodes is written byte for byte as an older build wrote it.
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id)
@@ -322,29 +346,6 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         if flipX { try container.encode(flipX, forKey: .flipX) }
         if flipY { try container.encode(flipY, forKey: .flipY) }
         try container.encodeIfPresent(shape, forKey: .shape)
-    }
-
-    /// Decodes a node; a field a file written before it existed lacks takes its default: square
-    /// corners, fully opaque, no stroke, the default text style, no gradient, no picture, upright and unmirrored, no shape spec.
-    public init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        try self.init(
-            id: container.decode(String.self, forKey: .id), name: container.decode(String.self, forKey: .name),
-            kind: container.decode(DesignNodeKind.self, forKey: .kind), frame: container.decode(DesignRect.self, forKey: .frame),
-            children: container.decode([DesignNode].self, forKey: .children),
-            isHidden: container.decode(Bool.self, forKey: .isHidden), isLocked: container.decode(Bool.self, forKey: .isLocked),
-            fill: container.decode(DesignColor.self, forKey: .fill), text: container.decode(String.self, forKey: .text),
-            cornerRadius: container.decodeIfPresent(Double.self, forKey: .cornerRadius) ?? 0,
-            opacity: container.decodeIfPresent(Double.self, forKey: .opacity) ?? 1,
-            stroke: container.decodeIfPresent(DesignStroke.self, forKey: .stroke),
-            textStyle: container.decodeIfPresent(DesignTextStyle.self, forKey: .textStyle) ?? .default,
-            gradient: container.decodeIfPresent(Fill.self, forKey: .gradient),
-            placedAsset: container.decodeIfPresent(PlacedAsset.self, forKey: .placedAsset),
-            placedFocus: container.decodeIfPresent(Point.self, forKey: .placedFocus))
-        rotation = try container.decodeIfPresent(Double.self, forKey: .rotation) ?? 0
-        flipX = try container.decodeIfPresent(Bool.self, forKey: .flipX) ?? false
-        flipY = try container.decodeIfPresent(Bool.self, forKey: .flipY) ?? false
-        shape = try container.decodeIfPresent(ShapeSpec.self, forKey: .shape)
     }
 
     /// Shifts this node and everything under it by `delta`.
