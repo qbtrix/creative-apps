@@ -7,9 +7,13 @@
 // `-HaloWindowSize` when given (HaloLaunch), else at the suite's launch size;
 // the flag also sets the frame once the window is up (HaloWindowSizer), since
 // a saved frame from an earlier launch outranks the default size.
-// Switching (A-HA-1, #865): the scene takes part in the suite
-// (`.suiteApp(.halo, host:)` with the suite's app delegate) and Window gets
-// Switch To ▸ and AI Access… (SuiteCommands). A hand-off the host accepts
+// Switching (A-HA-1, #865; editor menus EM-6): the scene is a suite editor
+// (`.suiteEditor(.halo, host:, live:)` with the suite's app delegate): Window
+// gets Switch To ▸ and AI Access… (SuiteCommands), Help is the suite's group
+// in place of the system's empty Halo Help (#1018), and HaloLive's channel
+// answers live `afterglow` commands on the active window's project. The
+// window group has no id, so a Dock click with no window open takes the
+// system's reopen, which opens one. A hand-off the host accepts
 // (`.new`: New Composition; `.open` a .halo: open it) waits in HaloShell's
 // inbox until a window takes it (HaloWindow+File.swift). File keeps Halo's
 // own Open Recent, so the suite's (SuiteFileCommands) isn't added.
@@ -61,8 +65,7 @@ struct HaloApp: App {
                 HaloCompositionCommands()
                 HaloCommands()
                 HaloAnimationMenu()
-                SuiteCommands(app: .halo)
             }
-            .suiteApp(.halo, host: HaloShell.host)
+            .suiteEditor(.halo, host: HaloShell.host, live: HaloLive.channel)
     }
 }

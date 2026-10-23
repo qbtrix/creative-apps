@@ -10,6 +10,11 @@
 // suite's recents at launch (FlareAppDelegate). Finding #4636: every
 // hand-off reaches FlareShell.host, a FlareDocumentHost that opens each
 // dropped or reopened animation in a new window through FlareOpenQueue.
+// Editor menus (EM-5): `.suiteEditor` adds Window's Switch To ▸ and AI
+// Access… and the suite's Help group; FlareLive's channel answers live
+// `afterglow` commands on the active window's animation. The delegate is a
+// SuiteAppDelegate, so a Dock click with no window open opens one through
+// the window group's id (`.suiteReopenWindow`), and opened files reach the host.
 import AppKit
 import FlareModel
 import SuiteModel
@@ -42,19 +47,19 @@ struct FlareApp: App {
     @NSApplicationDelegateAdaptor private var delegate: FlareAppDelegate
 
     var body: some Scene {
-        WindowGroup(id: FlareOpenQueue.windowID) { FlareWindow() }
+        WindowGroup(id: FlareOpenQueue.windowID) { FlareWindow().suiteReopenWindow(id: FlareOpenQueue.windowID) }
             // Fits a 1024 x 768 screen (the CI runner's) with the inspector in full.
             .defaultSize(width: 1000, height: 700)
             .commands {
                 SidebarCommands()
                 FlareCommands()
             }
-            .suiteApp(.flare, host: FlareShell.host)
+            .suiteEditor(.flare, host: FlareShell.host, live: FlareLive.channel)
     }
 }
 
-/// Starts watching the suite's recents once the app has launched.
-@MainActor final class FlareAppDelegate: NSObject, NSApplicationDelegate {
+/// The suite's delegate (hand-offs, Dock reopen) that also starts watching the suite's recents once the app has launched.
+@MainActor final class FlareAppDelegate: SuiteAppDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         Task { await FlareShell.bridge.watch() }
     }
