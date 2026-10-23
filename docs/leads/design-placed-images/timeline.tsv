@@ -55,3 +55,4 @@ utc	stage	event	ref	note
 2026-10-23T18:04Z	PD-a	gate	#3759	load 55 from fixer/critic builds; PD-a gate rerun still queued for load<10; PD-u splitting; PD-m fix round 1; no needs-fix
 2026-10-23T18:25Z	PD-m	fix	#4922	heartbeat: #4922 fixer and PD-u split (pd-u1 gate) running; PD-a gate waits for load <10 (now 15); no needs-fix
 2026-10-23T18:46Z	PD-a	gate	#3759	heartbeat: PD-a gate rerun at load <20 (load stays ~23 with fixers running); #4922 fixer and PD-u split running; no needs-fix
+2026-10-23T18:57Z	PD-m	fix	#4922	round 1 pushed 2412a61a (11 files, 345 lines, CI: PASS); round 2 critic started
