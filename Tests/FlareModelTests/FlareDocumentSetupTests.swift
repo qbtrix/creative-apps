@@ -23,17 +23,17 @@ private func rate(_ reading: JSONValue) -> (Int, Int)? {
 }
 
 @Suite struct FlareDocumentSetupTests {
-    @Test(.disabled("waits on DS-14")) func verticalPreset() throws {
+    @Test func verticalPreset() throws {
         var workspace = FlareWorkspace(services: .built)
         _ = try FlareWorkspace.catalog.run("file.new", params: .object(["preset": .string("Vertical 9:16")]), on: &workspace)
-        let reading = try FlareWorkspace.catalog.run("document.read-settings", params: .object([:]), on: &workspace)
+        let reading = try FlareWorkspace.catalog.run("document.read-settings", params: .object([:]), on: &workspace).result
         guard case .object(let fields) = reading else { Issue.record("read-settings answered \(reading)"); return }
         #expect(fields["pixelWidth"] == .number(1080) && fields["pixelHeight"] == .number(1920))
         #expect(rate(reading).map { $0 == (30, 1) } == true)
         #expect(fields["duration"] == .number(5))
     }
 
-    @Test(.disabled("waits on DS-14")) func settingsKeepKeys() throws {
+    @Test func settingsKeepKeys() throws {
         var workspace = bounce()
         let red = FlareColor(r: 1, g: 0, b: 0)
         workspace.setSceneCanvas(width: 550, height: 400, background: red)
@@ -49,7 +49,7 @@ private func rate(_ reading: JSONValue) -> (Int, Int)? {
         #expect(after.layers == before.layers, "Document Settings moved or dropped keys")
         #expect(after.width == 550 && after.height == 400)
         #expect(after.background == red, "Document Settings dropped the background")
-        #expect(workspace.undoActionName == "Document Settings")
+        #expect(workspace.undoActionName == "Undo Document Settings")
 
         workspace.undo()
         #expect(workspace.selectedScene?.durationFrames == 48)

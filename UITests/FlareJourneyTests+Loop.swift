@@ -117,11 +117,10 @@ final class FlareLoopJourneys: XCTestCase {
         flare.press(character: "n", .command)
         let sheet = flare.app.sheets.firstMatch
         XCTAssert(sheet.waitForExistence(timeout: 10), "⌘N showed no sheet")
-        flare.click("Square", in: .sheet)
-        for side in ["flare.new.width", "flare.new.height"] {
-            let field = sheet.descendants(matching: .any)[side]
-            XCTAssert(waitFor { field.value as? String == "1080" }, "Square left \(side) at \(String(describing: field.value))")
-        }
+        flare.element("suite.newdoc.preset").click()
+        flare.app.menuItems["Square"].firstMatch.click()
+        let pixels = flare.element("suite.newdoc.pixels")
+        XCTAssert(waitFor { pixels.value as? String == "1080 × 1080 px" }, "Square reads \(String(describing: pixels.value))")
         flare.shot("loop-9-new-square")
         flare.click("Create", in: .sheet)
         XCTAssert(sheet.waitForNonExistence(timeout: 5), "Create left the sheet open")
