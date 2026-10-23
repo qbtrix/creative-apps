@@ -1,10 +1,10 @@
 # pen-paths (Flare) lead record
 
 Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
-Run: act-1a15e10a86f-7bk9 (took over from act-1a15c07caa7-sppq) · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T01:10Z (this run 10:40Z)
-Stage: 3 wave 2
-Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: (2026-10-22T02:41Z) #4204 head d34e2417 in lane macOS build 39711403708; #4203 PN-3 new head 01a576e2 in lane macOS build 39712632560; then FP-a post-round-2 panel and FP-u.
+Run: act-1a166b69fab-fd09 (took over from act-1a15e10a86f-7bk9) · Session: claude/pen-paths-lottie-open-a39k6m · Started: 2026-10-21T01:10Z (this run 2026-10-23T03:07Z)
+Stage: 3 wave 3
+Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a
+Next: (2026-10-23T03:07Z) wave 3 building: FP-u (FP-3, FP-4, stage on PN-3 init, Fixes #4200) and FP-m (FP-6; FL-m met, file-flow built) in parallel; FP-z after both merge.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -20,10 +20,10 @@ Next: (2026-10-22T02:41Z) #4204 head d34e2417 in lane macOS build 39711403708; #
 |---|---|---|---|---|---|---|---|
 | FP-1 | FP-a | 1 | adapters as stubs forwarding to today's code; ShapeDraft.pen; anchor selection field; 3 suites written | Sources/FlareModel/FlarePen+Kernel.swift, Sources/FlareModel/FlareAnchors+Kernel.swift, Sources/FlareModel/FlareWorkspace.swift, Tests/mutations/FlareModel.FlareWorkspace.json, Tests/FlareModelTests/FlarePenKernelTests.swift, Tests/FlareModelTests/FlareAnchorEditTests.swift, Tests/FlareModelTests/FlarePathCommandTests.swift | oracle suites unedited | – | building |
 | FP-2 | FP-a | 1 | PathEditOverlay on the stage for Direct Select and Pen | Sources/FlareApp/FlareWindow+Stage.swift | FlareAnchorSnapshots.directPicked (FP-u) | – | building |
-| FP-3 | FP-u | 2 | snapshots + render budget | Tests/AppSnapshotTests/FlareAnchorSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetFlareAnchorTests.swift | – | – | waiting |
-| FP-4 | FP-u | 2 | journey written, skipped | UITests/FlareJourneyTests+Pen.swift | – | – | waiting |
+| FP-3 | FP-u | 3 | snapshots + render budget; stage on PN-3 overlay init | Tests/AppSnapshotTests/FlareAnchorSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetFlareAnchorTests.swift, Sources/FlareApp/FlareWindow+Stage.swift | – | – | building |
+| FP-4 | FP-u | 3 | journey written, skipped | UITests/FlareJourneyTests+Pen.swift | – | – | building |
 | FP-5 | FP-m | 2 | Pen on PenRules | Sources/FlareModel/FlarePen+Kernel.swift, Sources/FlareModel/Live/LiveShapes.swift, Sources/FlareModel/Fakes/FakeShapes.swift, Sources/FlareModel/Contracts/ShapeContracts.swift, Sources/FlareModel/FlarePenFinish.swift | FlarePenKernelTests | – | building |
-| FP-6 | FP-m | 2 | twelve path specs in catalog | Sources/FlareModel/FlareCommandCatalog.swift, Tests/command-ids/flare.txt | FlarePathCommandTests | – | waiting |
+| FP-6 | FP-m | 3 | twelve path specs in catalog | Sources/FlareModel/FlareCommandCatalog.swift, Tests/command-ids/flare.txt | FlarePathCommandTests | – | building |
 | FP-7 | FP-e | 2 | Direct Select anchor editing | Sources/FlareModel/FlareAnchors+Kernel.swift, Sources/FlareModel/FlareDrag.swift, Sources/FlareModel/FlareSelection.swift | FlareAnchorEditTests | #3958 | merged |
 | FP-8 | FP-e | 3 | anchor stress budget | Tests/FlareModelTests/FlareAnchorBudgetTests.swift, UITests/FlareJourneyTests+RealPerfAnchors.swift | FlareAnchorBudgetTests | – | waiting |
 | FP-9 | FP-z | 4 | journey on | UITests/FlareJourneyTests+Pen.swift | J-FP | – | waiting |
@@ -36,6 +36,7 @@ Next: (2026-10-22T02:41Z) #4204 head d34e2417 in lane macOS build 39711403708; #
 | FP-a | 39667367345 | 606e8212 | clarity, design, oracle (code only) | #4198 #4199 #4200 (not clean: 3 confirmed, 2 refuted) | 1 |
 
 ## Decisions
+- 2026-10-23T03:07Z run act-1a166b69fab-fd09: brief names main as integration branch; PRs still base dev (CLAUDE.md; the lane retargets main). FL-m/FL-z met (file-flow built). FP-u PR carries Fixes #4200 (stand-in converter goes with the PN-3 init).
 - FP-a round-2 review runs on code, like round 1, on the first green dev Linux check containing 79e32f25: the overlay has no snapshot before FP-u, so a Flare screens run adds nothing for these lenses, and waiting on one hit 3 identical polls (rule 23: work instead of idling).
 - PRs target `dev`, not `main` as the brief says: CLAUDE.md and lead.md rule 4 say base dev, and the lane retargets fast-lane PRs from main anyway.
 - This record lives at docs/leads/flare-pen-paths/ on lead/pen-paths: docs/leads/pen-paths/ there belongs to the SuiteUI pen-paths lead (#3518), whose record must not be clobbered.
