@@ -4,7 +4,7 @@ Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a1693fbf6d-ap2g · Session: claude/large-catalog-share-sheet-2tdm4i (earlier act-1a15df37b73-k199) · Started: 2026-10-21T10:19Z (resumed 2026-10-23T14:20Z)
 Stage: 3 wave 2 (LG-model done: #4847, afb9cbed, run 40029034328; LG-grid blocked on suiteui ST-m)
 Base: 8021b0f56a45a59540cd4ea0ff99651c5fb8dc2a (origin/dev)
-Next: start LG-grid once shared-thumbnails ST-m (#4951, stacked on ST-a #4840, needs-fix) merges to dev (22:53Z)
+Next: await the supervisor's answer on #3790 (6376659460: LG-6 ahead of LG-5?); LG-5 starts on ST-a fakes (Wire: line) once #4840 merges (23:17Z)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -33,6 +33,7 @@ Next: start LG-grid once shared-thumbnails ST-m (#4951, stacked on ST-a #4840, n
 - LG-7's Tests/perf-suites.txt line is the supervisor's (protected).
 
 ## Open
+- 2026-10-23T23:18Z: LG-grid wait re-read: contract-first (supervisor 15:13Z) makes it met when ST-a #4840 merges; #4840 needs-fix since 19:15Z. Rule 23 question posted on #3790 proposing LG-6 (loupe, no thumbnail store) ahead of LG-5.
 - 2026-10-23T15:53Z: #4847 opened (238 lines, 10 files; CI: PASS on 9f19aa0a; Mutate 17/17). Fixes #3213 #3214; Refs #3110 #1650 #4835.
 - 2026-10-23T15:44Z: LG-model measured. Release, suite run in parallel: plan, load, shift-range, beginExport pass; select all 12.0 ms vs 5 ms on 10,000. Release alone (--no-parallel, best of 10): select all 5.0 ms, of which SuiteKernel Selection.unique is 4.6 ms (Set(order) is 1.4 ms). Kernel is line:suite: filed #4835 (needs-suite) for a fast path when ids are already unique. The timed suite LargeCatalogModelBudgetTests stays disabled until LG-7 lists it in perf-suites, so the gate does not depend on #4835. Debug before/after: plan 191 ms to under 50, beginExport 52.7 ms to under 10, select all 2.14 to 0.885 ms (1,000).
 - Belt reads lead/library-large-catalog; this record is mirrored there at docs/leads/library-large-catalog/ from 2026-10-23T15:44Z on.
