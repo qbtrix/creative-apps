@@ -19,7 +19,7 @@ import Testing
 enum DesignPlaceSeed {
     /// A `width` × `height` JPEG named "photo-<width>x<height>.jpg", red on the left half and blue on the right.
     static func photo(width: Int = 1200, height: Int = 800) throws -> PlacedAsset {
-        PlacedAsset(id: "photo", name: "photo-\(width)x\(height).jpg", format: .jpeg,
+        PlacedAsset(id: "photo-\(width)x\(height)", name: "photo-\(width)x\(height).jpg", format: .jpeg,
                     natural: Size(width: Double(width), height: Double(height)),
                     data: try HaloPlaceSnapshots.jpeg(width: width, height: height))
     }

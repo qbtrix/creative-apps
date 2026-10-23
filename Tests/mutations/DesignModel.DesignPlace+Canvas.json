@@ -1,0 +1,10 @@
+[
+{"label":"a pan moves the picture with the pointer, not against it","file":"Sources/DesignModel/DesignPlace+Canvas.swift","find":"min(max(focus - delta / excess, 0), 1)","replace":"min(max(focus + delta / excess, 0), 1)","tests":"DesignPlaceCanvasTests"},
+{"label":"a pan stops clamping the focus","file":"Sources/DesignModel/DesignPlace+Canvas.swift","find":"min(max(focus - delta / excess, 0), 1)","replace":"focus - delta / excess","tests":"DesignPlaceCanvasTests"},
+{"label":"a pan starts without option","file":"Sources/DesignModel/DesignPlace+Canvas.swift","find":"guard option, let node = selectedNode, node.placedAsset != nil","replace":"guard let node = selectedNode, node.placedAsset != nil","tests":"DesignPlaceCanvasTests"},
+{"label":"a pan starts on a locked picture","file":"Sources/DesignModel/DesignPlace+Canvas.swift","find":"node.frame.contains(point), lockHelp(node.id) == nil\n","replace":"node.frame.contains(point)\n","tests":"DesignPlaceCanvasTests"},
+{"label":"a drop fills with Fill off","file":"Sources/DesignModel/DesignPlace+Canvas.swift","find":"guard fill, let node = selectedNode, node.kind.holdsPicture","replace":"guard let node = selectedNode, node.kind.holdsPicture","tests":"DesignPlaceCanvasTests"},
+{"label":"a drop fills a locked frame","file":"Sources/DesignModel/DesignPlace+Canvas.swift","find":"        return lockHelp(node.id) == nil\n","replace":"        return true\n","tests":"DesignPlaceCanvasTests"},
+{"label":"a drop at zoom 0 divides by it","file":"Sources/DesignModel/DesignPlace+Canvas.swift","find":"guard zoom.isFinite, zoom > 0 else","replace":"guard zoom.isFinite else","tests":"DesignPlaceCanvasTests"},
+{"label":"fill is added to every place command","file":"Sources/DesignModel/DesignPlace+Canvas.swift","find":"guard fill, case .place = intent,","replace":"guard case .place = intent,","tests":"DesignPlaceCanvasTests"}
+]
