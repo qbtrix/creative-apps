@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-23T16:54Z	3 wave 1	pr-opened	#4893	AN-u/AN-5 head 855d46c6; AN-6 stacked lead/anchor-parenting-AN-u-6
 2026-10-23T17:11Z	3 wave 2	blocked	AN-10	AN-10 file wait on DS-flare #4891 (open)
 2026-10-23T17:48Z	3 wave 1	heartbeat	#4893	AN-u #4893 open; AN-6 stacked; AN-10 waits DS-flare #4891
+2026-10-23T17:49Z	3 wave 1	check	#4891	DS-flare #4891 needs captain review; AN-10 still waits

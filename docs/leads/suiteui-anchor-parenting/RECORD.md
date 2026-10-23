@@ -53,6 +53,7 @@ Run act-1a1695ebfeb-d54n, 2026-10-23T15:30Z; supersedes the tables' PR/state col
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-23: DS-flare #4891 (document-setup's lead) was refused by the fast lane at 17:06Z: it adds an app copy of a SuiteUI Sheet (FlareDocumentSheet), so it needs captain review; the Belt-Lead sweep keeps relabelling it. AN-10's file wait holds until it merges; nothing for this lead to change.
 - 2026-10-23: AN-5+AN-6 came to ~540 lines, so AN-u is two PRs: AN-5 (#4893), AN-6 stacked on it (rule 22). AN-6's p95 budget is report-only until the supervisor adds RenderBudgetAnchorTests to Tests/perf-suites.txt. Stripped the server-added attribution footer from #4893's body.
 - 2026-10-23 (act-1a1695ebfeb-d54n): feature issue is #3755 per the brief (#4522 also tracks it); PRs carry `Refs #3755`.
 - 2026-10-23: AN-u joins wave 1: LS-1 is layer-styles' only wave-1 task, so SuiteGallery.swift has one writer (AN-5) this wave; LS-2 follows in wave 2.
