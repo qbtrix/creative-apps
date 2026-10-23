@@ -1499,6 +1499,19 @@ jq -n '{statuses: [{context: "local-ci/macos", state: "success", target_url: "ht
 lane_sweep
 expect "local: a local-ci/macos pass lands the batch" \
   "$(merges),$(grep -c '^pr comment 99 .*on Linux and macOS: .*https://mac.local/ci/1' "$sw/calls")" "pr merge 99,1"
+# A red on the same head outranks a green: the local gate skips known reds
+# (CI_LOCAL_SKIP), so its pass never covers a GitHub macOS failure, nor the
+# other way round. A GitHub job still running doesn't hold a local pass.
+lstatus() { jq -n --arg s "$2" '{statuses: [{context: "local-ci/macos", state: $s, target_url: "https://mac.local/ci/1"}]}' >"$sw/status.$1.json"; }
+fresh; cpr 120 Sources/PhotoModel/A.swift; lane_sweep; TIP=$(batch_tip)
+gate "$TIP" success failure "macOS (photo)"; lstatus "$TIP" success; lane_sweep
+expect "local: a local pass doesn't land a batch GitHub's macOS job fails" "$(merges),$(grep -c '^pr merge 120' "$sw/calls")" ",0"
+fresh; cpr 121 Sources/PhotoModel/A.swift; lane_sweep; TIP=$(batch_tip)
+gate "$TIP" success success "macOS (photo)"; lstatus "$TIP" failure; lane_sweep
+expect "local: a GitHub pass doesn't land a batch the local gate fails" "$(merges)" ""
+fresh; cpr 122 Sources/PhotoModel/A.swift; lane_sweep; TIP=$(batch_tip)
+gate "$TIP" success in_progress "macOS (photo)"; lstatus "$TIP" success; lane_sweep
+expect "local: a local pass lands while GitHub's macOS job still runs" "$(merges)" "pr merge 122"
 
 # Slots: the lane's queued and running macOS runs (gates and per-PR builds;
 # other runs don't count) at LANE_MAC_SLOTS form no batch.

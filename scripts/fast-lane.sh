@@ -59,7 +59,8 @@
 # changed picks, golden PNGs and fixtures included, anything shared meaning
 # every app). Its macOS pass is
 # that run's `macOS` job or a LOCAL_MAC_CONTEXT commit status (the local Mac
-# gate) on the batch head. When both are green every PR lands in order
+# gate) on the batch head, unless the other one is red there: a red outranks a
+# green on the same head. When both are green every PR lands in order
 # (squash, head matched). A lone ready PR without code lands at once, as does
 # any lone PR with LANE_MAC_PER_PR=1; a lone code PR is a batch of one. A batch
 # that needs macOS forms when a slot frees (a batch resolved in this run),
@@ -881,7 +882,10 @@ dispatch_mac() {
 }
 
 # mac_verdict <sha>: the macOS gate on <sha>, from the newest MAC_GATE_RE check
-# run and the LOCAL_MAC_CONTEXT commit status; a pass from either counts:
+# run and the LOCAL_MAC_CONTEXT commit status. A red from either outranks a
+# green from the other (the local gate skips its known reds, CI_LOCAL_SKIP, so
+# its pass never covers a GitHub failure); otherwise a pass from either counts,
+# so a local pass lands while the GitHub job still runs:
 #   none   running   green|<url>   red|<url>|<job>
 # Any other conclusion (cancelled, timed out) is red, as check_verdict reads
 # Linux. An unreadable API answers running, so a blip never starts a second run.
@@ -899,7 +903,7 @@ mac_verdict() {
     | (if $s == null then "none" elif ($s.state | lc) == "success" then "green|\($s.target_url // "")"
        elif ($s.state | lc) == "pending" then "running" else "red|\($s.target_url // "")|\($ctx)" end) as $loc
     | [$gh, $loc] as $v
-    | first(($v[] | select(startswith("green|"))), ($v[] | select(startswith("red|"))),
+    | first(($v[] | select(startswith("red|"))), ($v[] | select(startswith("green|"))),
             ($v[] | select(. == "running")), "none")' 2>/dev/null || echo running
 }
 
