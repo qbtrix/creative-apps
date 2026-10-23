@@ -187,10 +187,13 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssert(preset.waitForExistence(timeout: 5), "the brush's Tool Options show no Preset menu")
         preset.click()
         XCTAssert(photo.chooseShownMenuItem("Soft Round", timeout: 5), "the Preset menu doesn't list Soft Round")
-        // The row's label text carries photo.tool.size too; the number reads the value.
-        let sixty = photo.element("suite.inspector").descendants(matching: .any).matching(
-            NSPredicate(format: "identifier == 'photo.tool.size' AND value CONTAINS '60'")).firstMatch
-        XCTAssert(sixty.waitForExistence(timeout: 5), "Soft Round didn't set the size to 60 px")
+        // The row's label text carries photo.tool.size too, so each of its few elements is read; a
+        // value predicate over the whole inspector timed out evaluating the query.
+        let size = photo.app.descendants(matching: .any).matching(identifier: "photo.tool.size")
+        let sixty = Self.waitUntil {
+            size.allElementsBoundByIndex.contains { ($0.value as? String)?.contains("60") == true || $0.label.contains("60") }
+        }
+        XCTAssert(sixty, "Soft Round didn't set the size to 60 px")
         photo.shot("preset-soft-round")
 
         typeValue("1.5", into: "Exposure", photo)

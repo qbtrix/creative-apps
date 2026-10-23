@@ -136,9 +136,11 @@ extension PhotoJourneyTests {
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.3, dy: 0.6), to: CGVector(dx: 0.7, dy: 0.4))
         let message = photo.element("photo.status.message")
         XCTAssert(message.waitForExistence(timeout: 5), "a brush drag on Curves 1 showed no status message")
+        // A plain Text reads its words as its value on macOS.
+        let said = message.label + " " + (message.value as? String ?? "")
         XCTAssert(
-            message.label.contains("Select an image layer in the sidebar to paint on."),
-            "the status line reads \(message.label), not the paint refusal")
+            said.contains("Select an image layer in the sidebar to paint on."),
+            "the status line reads \(said), not the paint refusal")
         XCTAssert(photo.app.buttons["Undo Reorder Layers"].exists, "the refused brush drag made an undo step")
         adjExpectCanvas(like: before, photo, "the refused brush drag changed the canvas")
         photo.shot("adjlayer-paint-refused")
