@@ -28,7 +28,7 @@ import SuiteImaging
     }
     static func grey(_ v: Float) -> RGBA { RGBA(r: v, g: v, b: v, a: 1) }
 
-    @Test(.disabled("waits on AR-6")) func ellipseMinusLassoMatchesCoreShapes() throws {
+    @Test func ellipseMinusLassoMatchesCoreShapes() throws {
         let notch: [Point] = [Point(x: 32, y: 0), Point(x: 64, y: 0), Point(x: 64, y: 64), Point(x: 32, y: 64)]
         let area = try Self.mask([.shape(.ellipse(Self.rect(8, 8, 48, 48)), .replace), .shape(.lasso(notch), .subtract)])
         var expected = try Mask.ellipse(width: 64, height: 64, centerX: 32, centerY: 32, radiusX: 24, radiusY: 24)
@@ -42,7 +42,7 @@ import SuiteImaging
         #expect(try area.coverage(x: 40, y: 32) == 0)
     }
 
-    @Test(.disabled("waits on AR-6")) func addThenIntersectKeepsTheShared() throws {
+    @Test func addThenIntersectKeepsTheShared() throws {
         let area = try Self.mask([
             .shape(.rect(Self.rect(0, 0, 16, 16)), .replace), .shape(.rect(Self.rect(32, 0, 16, 16)), .add),
             .shape(.rect(Self.rect(8, 0, 32, 16)), .intersect),
@@ -52,17 +52,17 @@ import SuiteImaging
         #expect(try area.coverage(x: 24, y: 4) == 0)
         #expect(try area.coverage(x: 36, y: 4) == 1)
         #expect(try area.coverage(x: 44, y: 4) == 0)
-        #expect(abs(area.area - 128) < 0.5)
+        #expect(abs(area.area - 256) < 0.5)
     }
 
-    @Test(.disabled("waits on AR-6")) func invertSelectsTheRest() throws {
+    @Test func invertSelectsTheRest() throws {
         let area = try Self.mask([.shape(.rect(Self.rect(16, 16, 32, 32)), .replace), .invert])
         #expect(try area.coverage(x: 20, y: 20) == 0)
         #expect(try area.coverage(x: 4, y: 4) == 1)
         #expect(abs(area.area - Double(64 * 64 - 32 * 32)) < 0.5)
     }
 
-    @Test(.disabled("waits on AR-6")) func wandStopsAtATwentyLevelEdge() throws {
+    @Test func wandStopsAtATwentyLevelEdge() throws {
         let p = try Self.picture { x, _ in Self.grey(x < 32 ? 0.2 : 0.2 + 20 / 255) }
         let sources = AreaMask.Sources(layer: p, composite: p)
         let tight = try Self.mask([.shape(.wand(seed: Point(x: 8.5, y: 8.5), tolerance: 10, contiguous: true, allLayers: false), .replace)],
@@ -76,7 +76,7 @@ import SuiteImaging
         #expect(abs(loose.area - 64 * 64) < 0.5)
     }
 
-    @Test(.disabled("waits on AR-6")) func contiguousOffPicksBothIslands() throws {
+    @Test func contiguousOffPicksBothIslands() throws {
         let red = RGBA(r: 1, g: 0, b: 0, a: 1)
         let p = try Self.picture { x, y in (4..<12).contains(y) && ((4..<12).contains(x) || (40..<48).contains(x)) ? red : Self.grey(1) }
         let sources = AreaMask.Sources(layer: p, composite: p)
@@ -90,7 +90,7 @@ import SuiteImaging
         #expect(try both.coverage(x: 24, y: 8) == 0)
     }
 
-    @Test(.disabled("waits on AR-6")) func allLayersSamplesTheComposite() throws {
+    @Test func allLayersSamplesTheComposite() throws {
         let flat = try PixelBuffer(width: 64, height: 64, fill: Self.grey(1))
         let composite = try Self.picture { x, y in x < 16 && y < 16 ? Self.grey(0) : Self.grey(1) }
         let sources = AreaMask.Sources(layer: flat, composite: composite)
@@ -99,13 +99,13 @@ import SuiteImaging
         #expect(try Self.mask([.shape(wand(true), .replace)], sources: sources).coverage(x: 32, y: 32) == 0)
     }
 
-    @Test(.disabled("waits on AR-6")) func wandWithoutSourcesThrows() {
+    @Test func wandWithoutSourcesThrows() {
         #expect(throws: (any Error).self) {
             try Self.mask([.shape(.wand(seed: Point(x: 4, y: 4), tolerance: 10, contiguous: true, allLayers: false), .replace)])
         }
     }
 
-    @Test(.disabled("waits on AR-6")) func featherMakesARampAtLeastSixPixelsWide() throws {
+    @Test func featherMakesARampAtLeastSixPixelsWide() throws {
         let area = try Self.mask([.shape(.rect(Self.rect(16, 16, 32, 32)), .replace), .feather(4)])
         let ramp = try (0..<32).filter { x in
             let c = try area.coverage(x: x, y: 32)
@@ -115,7 +115,7 @@ import SuiteImaging
         #expect(abs(try area.coverage(x: 16, y: 32) - 0.5) < 0.2)
     }
 
-    @Test(.disabled("waits on AR-6")) func featherThenSubtractKeepsTheCutHard() throws {
+    @Test func featherThenSubtractKeepsTheCutHard() throws {
         let area = try Self.mask([
             .shape(.rect(Self.rect(8, 8, 48, 48)), .replace), .feather(4), .shape(.rect(Self.rect(32, 0, 32, 64)), .subtract),
         ])
@@ -123,7 +123,7 @@ import SuiteImaging
         #expect(try area.coverage(x: 32, y: 32) == 0)
     }
 
-    @Test(.disabled("waits on AR-6")) func expandGrowsByTheRadiusAndContractRestores() throws {
+    @Test func expandGrowsByTheRadiusAndContractRestores() throws {
         let square = [AreaRecipe.Step.shape(.rect(Self.rect(20, 20, 24, 24)), .replace)]
         let original = try Self.mask(square)
         let grown = try Self.mask(square + [.expand(2)])
@@ -139,7 +139,7 @@ import SuiteImaging
         #expect(try shrunk.coverage(x: 21, y: 32) == 0)
     }
 
-    @Test(.disabled("waits on AR-6")) func outlineTracesEachRegion() throws {
+    @Test func outlineTracesEachRegion() throws {
         let area = try Self.mask([
             .shape(.rect(Self.rect(4, 4, 16, 16)), .replace), .shape(.ellipse(Self.rect(32, 32, 24, 24)), .add),
         ])
