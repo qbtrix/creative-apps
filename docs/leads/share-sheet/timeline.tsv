@@ -56,3 +56,4 @@ utc	stage	event	ref	note
 2026-10-23T15:31Z	3	wait	SH-z	#4612 open with fast-lane, feature-done; slice-done waits on a library or full run containing it
 2026-10-23T15:44Z	3	wait	SH-z	#4612 in the lane (fast-lane, feature-done, head de155da4)
 2026-10-23T16:16Z	3	heartbeat	SH-z	#4612 clean, fast-lane queue (46); no findings
+2026-10-23T16:39Z	3	heartbeat	SH-z	#4612 clean, queued since 07:19Z (lane slow, no dev-red); no findings
