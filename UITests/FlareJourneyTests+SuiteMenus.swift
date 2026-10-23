@@ -61,23 +61,16 @@ final class FlareSuiteMenusJourneyTests: XCTestCase {
     /// click sends; a new window opens.
     @MainActor private func dockReopens(_ flare: Journey) throws {
         flare.app.activate()
-        var closing = 0
-        while flare.app.windows.count > 0, closing < 5 {
+        for _ in 0..<5 where flare.app.windows.count > 0 {
             flare.press(character: "w", .command)
-            closing += 1
             Thread.sleep(forTimeInterval: 0.5)
         }
         guard flare.app.windows.count == 0 else { throw XCTSkip("Command-W left a window open, so there was no last window to close") }
-        guard let bundle = bundleURL() else { throw XCTSkip("no Flare bundle to send the reopen event to") }
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let bundle = root.appending(path: ".build/apps/FlareApp.app")
+        guard FileManager.default.fileExists(atPath: bundle.path) else { throw XCTSkip("no FlareApp.app to reopen") }
         NSWorkspace.shared.openApplication(at: bundle, configuration: NSWorkspace.OpenConfiguration())
         XCTAssert(flare.app.windows.firstMatch.waitForExistence(timeout: 10), "the Dock reopen opened no window")
         flare.shot("suite-menus-reopened")
-    }
-
-    /// `.build/apps/FlareApp.app`, which Journey launched.
-    private func bundleURL() -> URL? {
-        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
-        let url = root.appending(path: ".build/apps/FlareApp.app")
-        return FileManager.default.fileExists(atPath: url.path) ? url : nil
     }
 }
