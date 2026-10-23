@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-22T16:45Z	3	builder	EP-1	EP-1 builder started on dev
 2026-10-23T15:30Z	0	relaunch	-	run act-1a16953ae34-05a4; contract-first waits; AB-photo done, AX-photo merged
 2026-10-23T15:35Z	3	builder	EP-2	EP-m builder starting on dev 721168a8f
+2026-10-23T15:20:44Z	wave1	build-start	EP-m builder started (EP-2) on lead/adopt-kernel-eyedropper-photo-EP-m; toolchain 6.3.3 ready

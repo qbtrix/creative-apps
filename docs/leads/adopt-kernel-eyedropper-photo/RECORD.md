@@ -47,3 +47,4 @@ Next: EP-2 builder on lead/adopt-kernel-eyedropper-photo-EP-m (off dev); then EP
 - 2026-10-21T20:09Z poll 3: unchanged (PE-m waits PH-m, PE-z not started; AB-photo, UP-z unchanged). Third identical blocked poll: Question for the supervisor posted on #3723 (issuecomment-6325467452). Status channel now also lead/suiteui-adopt-kernel-eyedropper-photo.
 - 2026-10-21T20:48Z: released by the supervisor (every slice waits on PE-z, AB-photo, UP-z). No branch or PR was opened in this run.
 - 2026-10-22T00:22Z: Released by the supervisor; no further work in this run.
+- 2026-10-23T15:20:44Z: EP-m builder started (EP-2) on lead/adopt-kernel-eyedropper-photo-EP-m; toolchain 6.3.3 ready
