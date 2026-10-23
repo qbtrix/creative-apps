@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-23T07:42:45Z	check	cli-bundle	poll	#4771 open clean awaiting lane; CI 39914223799 pending; #4741 awaiting supervisor
 2026-10-23T08:07:56Z	wait	cli-bundle	#4741 still open (no-fast-lane, needs-split), supervisor merge	-
 2026-10-23T08:30:52Z	check	cli-bundle	#4741 still open (no-fast-lane, needs-split); CB-z waits on it	https://github.com/qbtrix/creative-apps/pull/4741
+2026-10-23T08:53:19Z	check	cli-bundle	#4741 still open (no-fast-lane, needs-split), supervisor merge; CB-z waits on it.	https://github.com/qbtrix/creative-apps/pull/4741
