@@ -12,18 +12,18 @@ import CoreRaster
 import SuiteKernel
 import Testing
 
-@Suite(.disabled("waits on DS-12")) struct HaloCompositionSettingsTests {
+@Suite struct HaloCompositionSettingsTests {
     static let set = "document.set-settings"
 
     /// A 1920 x 1080, 30 fps, 10 s composition: a boxed shape keyed on x at frames 30 and 270, and a centred one.
-    static func keyed() -> HaloProject {
+    static func keyed(layers: Bool = true) -> HaloProject {
         var ball = HaloLayer(id: "comp-1-layer-1", name: "Ball", kind: .shape, inFrame: 0, outFrame: 300,
                              color: HaloLayerColor(red: 1, green: 1, blue: 1), rect: HaloLayerRect(x: 860, y: 440, width: 200, height: 200))
         ball.tracks["x"] = [HaloKeyframe(frame: 30, value: 960), HaloKeyframe(frame: 270, value: 1560)]
         let dot = HaloLayer(id: "comp-1-layer-2", name: "Dot", kind: .shape, inFrame: 0, outFrame: 300,
                             color: HaloLayerColor(red: 1, green: 0, blue: 0))
         let comp = HaloComposition(id: "comp-1", name: "Comp 1", width: 1920, height: 1080, framesPerSecond: 30,
-                                   durationFrames: 300, layers: [ball, dot])
+                                   durationFrames: 300, layers: layers ? [ball, dot] : [])
         var project = HaloProject(services: .fake)
         project.restore(HaloDocumentState(compositions: [comp], selectedCompositionID: "comp-1", nextCompositionNumber: 2, nextLayerNumber: 3))
         return project
@@ -65,7 +65,7 @@ import Testing
     }
 
     @Test func navyBackgroundRendersAndSaves() throws {
-        var project = Self.keyed()
+        var project = Self.keyed(layers: false)
         try Self.run(&project, ["background": .string("#1B2A4A"), "width": .number(64), "height": .number(36)])
         let comp = try #require(project.selectedComposition)
         #expect(comp.background == .color(hex: "#1B2A4A"))

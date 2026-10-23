@@ -9,7 +9,6 @@ import XCTest
 final class HaloSettingsJourneyTests: XCTestCase {
     /// HJ-DS: 10 s to 15 s on navy through Composition Settings…, then one Undo restores both.
     @MainActor func testCompositionSettingsLater() throws {
-        try XCTSkipIf(true, "waits on DS-12")
         let halo = Journey("Halo", self, arguments: ["-HaloWindowSize", "1000x640"])
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
 
