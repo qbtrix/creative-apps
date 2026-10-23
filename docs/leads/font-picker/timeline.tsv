@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-23T08:36Z	contact-sheet	Belt-Contact-Sheet posted, run 39921983128	all	FP-u round 1 still in lane
 2026-10-23T09:15Z	merge	#4783 merged (own-face snapshot, fixes #4777)	FP-u	#4781 build pending
 2026-10-23T10:03Z	lane	#4781 macOS build 39925347474 success, mergeable clean; awaiting lane sweep	FP-u	-
+2026-10-23T10:21Z	merge	#4781 merged (Size row whole points + 1...200 bar, fixes #4778 #4779); FP-u round 1 all merged	FP-u	round 2 on next scoped suiteui run
