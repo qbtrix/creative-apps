@@ -30,13 +30,11 @@ extension FlareWorkspace {
         document.map { services.export.warnings($0, options: options) } ?? []
     }
 
-    /// Nil when Export can start; otherwise why not, in the sheet's words: no document, a format not built yet, a
-    /// scene that's gone, frames outside the scene, a step under 1, a scale other than 1x or 2x (in that order). Nil
-    /// while idle with a document.
+    /// Nil when Export can start; otherwise why not, in the sheet's words: no document, a scene that's gone, frames
+    /// outside the scene, a step under 1, a scale other than 1x or 2x (in that order). Nil while idle with a document.
     public var exportProblem: String? {
         guard document != nil else { return "Open or create an animation first." }
         guard let o = exportingOptions else { return nil }
-        if let why = o.format.unbuiltReason { return why }
         guard let scene = scenes.first(where: { $0.id == o.sceneID }) else { return "The scene to export is gone." }
         if o.frames.lowerBound < 0 || o.frames.upperBound >= scene.durationFrames {
             return Self.exportMessage(PNGExportError.frameOutOfRange(o.frames))
@@ -117,11 +115,12 @@ extension FlareWorkspace {
 }
 
 extension ExportFormat {
-    /// Why this format can't export yet, the sentence the sheet and a refused run show; nil once it can.
+    /// Why the Export sheet doesn't list this format yet; nil once it does. The Model exports every format (MP4 and
+    /// GIF through `Exporting.writeVideo`, export-pack FV-4); the window writes them once FV-2 and FV-7 land.
     public var unbuiltReason: String? {
         switch self {
-        case .mp4: "MP4 lands with FV-3."
-        case .gif: "GIF lands with FV-3."
+        case .mp4: "MP4 joins the Export sheet with FV-2."
+        case .gif: "GIF joins the Export sheet with FV-2."
         case .svgFrame, .lottie, .pngSequence: nil
         }
     }

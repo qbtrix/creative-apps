@@ -16,9 +16,16 @@
   {
     "label": "historySpecsListed",
     "file": "Sources/DesignModel/DesignCommandCatalog.swift",
-    "find": "toolSpecs + HistoryCommands.specs(DesignWorkspace.self)",
-    "replace": "toolSpecs",
+    "find": "\n            + HistoryCommands.specs(DesignWorkspace.self)",
+    "replace": "",
     "tests": "DesignHistoryCommandTests"
+  },
+  {
+    "label": "shapeSpecsListed: shape.draw and tool.shape are left out of the catalog",
+    "file": "Sources/DesignModel/DesignCommandCatalog.swift",
+    "find": "toolSpecs + ShapeCommands.specs(DesignWorkspace.self)",
+    "replace": "toolSpecs",
+    "tests": "DesignCommandCatalogTests|DesignSVGTests"
   },
   {
     "label": "historyJumpListed",

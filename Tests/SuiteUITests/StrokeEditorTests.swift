@@ -115,3 +115,33 @@ private func scrub(_ values: [Double], _ intent: (Double, String) -> StrokeInten
     #expect(NumericInput.text(0.5, decimals: StrokeEditorText.decimals(0.5), unit: "pt") == "0.5 pt")
     #expect(StrokeEditorText.points(4) == "4 pt" && StrokeEditorText.points(0.5) == "0.5 pt")
 }
+
+/// #4014: `styleHelp` disables Join and Cap with its reason (tooltip and the chips' help); the other rows still act.
+@Test func styleHelpDisablesJoinAndCapWithItsReason() {
+    let why = "Joins and caps wait on the next update."
+    let editor = StrokeEditorRules(stroke: VectorStroke(width: 2), help: nil, dashHelp: nil, styleHelp: why, showsTrim: false)
+    #expect(editor.reason(.join) == why)
+    #expect(editor.reason(.cap) == why)
+    #expect(editor.chipsHelp(.join) == why)
+    #expect(editor.join(.round) == nil)
+    #expect(editor.cap(.round) == nil)
+    #expect(editor.reason(.width) == nil)
+    #expect(editor.reason(.dash) == nil)
+    #expect(editor.width(3, drag: nil) == .width(3, drag: nil))
+    // Without a stroke the rows say "No stroke." as before.
+    let empty = StrokeEditorRules(stroke: nil, help: nil, dashHelp: nil, styleHelp: why, showsTrim: false)
+    #expect(empty.reason(.join) == StrokeEditorRules.noStroke)
+}
+
+/// The note under the chips: each distinct reason once (an app may give Join, Cap and Dash one reason), none when the
+/// whole editor is off with `help` or there is no stroke.
+@Test func theNoteSaysEachReasonOnce() {
+    let why = "Not yet."
+    let stroked = VectorStroke(width: 2)
+    #expect(StrokeEditorRules(stroke: stroked, help: nil, dashHelp: why, styleHelp: why, showsTrim: false).notes == [why])
+    #expect(StrokeEditorRules(stroke: stroked, help: nil, dashHelp: waiting, styleHelp: why, showsTrim: false).notes == [why, waiting])
+    #expect(rules(dashHelp: waiting).notes == [waiting])
+    #expect(rules().notes.isEmpty)
+    #expect(rules(help: "Locked.", dashHelp: waiting).notes.isEmpty)
+    #expect(rules(nil, dashHelp: waiting).notes.isEmpty)
+}

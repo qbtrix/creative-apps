@@ -58,6 +58,8 @@ enum DesignIntent {
     case pick(DesignPoint, toStroke: Bool)
     /// The inspector's Eyedropper options: the square it reads, and whether a plain click picks the stroke.
     case sampleSize(SampleSize), sampleTarget(toStroke: Bool)
+    /// A live command ran on a copy of the file (EM-4): the window becomes it.
+    case adoptLive(DesignWorkspace)
 }
 
 /// Where a view sends its intents.

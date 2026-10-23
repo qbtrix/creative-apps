@@ -1,5 +1,6 @@
 // BetaNotesView.swift (report-problem RP-3): Help > Beta Notes's window. The build's known issues, each a title
-// over its detail, or a line saying there are none, then Close. It reads the list it is given
+// over its detail in a list at least two thirds of the content minimum tall (a window over the view
+// opens at its minimum size), or a line saying there are none, then Close. It reads the list it is given
 // (`BetaNotes.current` from the Help menu) and changes nothing.
 import SwiftUI
 
@@ -31,6 +32,8 @@ public struct BetaNotesView: View {
                         }
                     }
                 }
+                // A window over this view opens at its minimum size, where a bare ScrollView has none.
+                .frame(minHeight: SuiteSize.contentMinimum.height * 2 / 3)
             }
             HStack {
                 Spacer()

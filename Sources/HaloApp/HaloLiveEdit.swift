@@ -14,8 +14,9 @@
 // writes the window per sample, as it used to. A playing tick lands in
 // `playing` the same way (#4274), so it re-runs only the leaves that read
 // `shown(_:)` (drawn layers, handles, playhead, timecode, HaloLiveShown),
-// never the window, lanes or inspector; the window takes the frame back
-// (`takePlayback`) before any other command. Presentation state only.
+// never the window, lanes or inspector; so does a ruler scrub (#4448). The
+// window takes the frame back (`takePlayback`) before any other command, and
+// a scrub's once the drag rests (`settle`). Presentation state only.
 import HaloModel
 import Observation
 import SwiftUI
@@ -26,11 +27,14 @@ import SwiftUI
     var project: HaloProject?
     /// The window's project now; HaloWindow sets it once it appears.
     @ObservationIgnored var current: @MainActor () -> HaloProject? = { nil }
-    /// The window's project ticked to the frame playing now; nil while paused.
+    /// The window's project ticked to the frame playing now, or scrubbed to
+    /// the ruler's frame; nil with neither live.
     var playing: HaloProject?
-    /// The media time `playing` was ticked at, for the window to take it back.
-    @ObservationIgnored var playedAt: Double?
-    /// The window's `haloRefreshLink`, which HaloWindow sets once it appears;
+    /// The tick or scrub `playing` shows, for the window to take it back.
+    @ObservationIgnored var playhead = HaloLivePlayhead()
+    /// The deferred take-back of a ruler drag that has rested.
+    @ObservationIgnored private var settling: Task<Void, Never>?
+    /// The window's `haloRefreshLink`, which HaloWindow's RefreshLinkHandoff sets once it appears;
     /// an inspector scrub paces its writes on it. A row reading the closure
     /// from the environment would re-run whenever the window does, since
     /// SwiftUI can't compare closures.
@@ -46,6 +50,24 @@ import SwiftUI
         guard var shown = current() else { return }
         change(&shown)
         project = shown
+    }
+
+    /// Runs `take` once nothing has called this for `seconds`: a ruler drag
+    /// that rests (or ends) writes its frame back once.
+    func settle(after seconds: Double, _ take: @escaping @MainActor () -> Void) {
+        settling?.cancel()
+        settling = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(seconds))
+            guard let self, !Task.isCancelled else { return }
+            self.settling = nil
+            take()
+        }
+    }
+
+    /// Drops a pending `settle`.
+    func cancelSettle() {
+        settling?.cancel()
+        settling = nil
     }
 }
 

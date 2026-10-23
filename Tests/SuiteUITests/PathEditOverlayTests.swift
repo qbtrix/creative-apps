@@ -3,7 +3,7 @@
 // turns presses, drags and keys into the kernel's PathIntents: a Pen click adds
 // a point, a press-drag adds one with a handle, a click near the first anchor
 // closes, an anchor drag moves under one token, Option breaks a handle, Delete
-// removes. Pure value tests. macOS only.
+// removes; an overlay can pass its presses through. Pure value tests. macOS only.
 import SuiteKernel
 @testable import SuiteUI
 import SwiftUI
@@ -122,4 +122,13 @@ private let a1 = AnchorRef(contour: 0, index: 1)
         corner(0, 0),
         VectorAnchor(point: Point(x: 10, y: 20), handleIn: Point(x: 5, y: 20), handleOut: Point(x: 15, y: 20), kind: .smooth),
     ], closed: true))
+}
+
+@Test func anOverlayCanPassItsPressesThrough() {
+    let path = PathInEdit(id: "p", path: VectorPath(contours: [contour([0, 50], closed: false)]), toDocument: .identity)
+    let full = PathEditOverlay(draft: nil, path: path, selection: Selection(), tool: .pen, zoom: 1) { _ in }
+    #expect(full.takesPresses)
+    // Flare's stage routes presses itself, but the Pen's rubber band, close ring and pointer need the hover.
+    let passing = full.pressesPassThrough()
+    #expect(!passing.takesPresses)
 }

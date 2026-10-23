@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "app": "fake",
+  "why": "Turns one free rect 15 degrees with 60 quarter-degree transform.rotate samples under one drag token, flips it horizontally and undoes once: the undo takes back only the flip, so the rect saves 15 degrees, unmirrored, at its old x and y.",
+  "inputs": ["input/*.fake"],
+  "steps": [
+    {"id": "rect.select", "params": {"id": 1}},
+    {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}},
+    {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}},
+    {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}},
+    {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}},
+    {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}},
+    {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}},
+    {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}},
+    {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}},
+    {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}},
+    {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}}, {"id": "transform.rotate", "params": {"degrees": 0.25, "drag": "rj-x32"}},
+    {"id": "transform.flip", "params": {"axis": "horizontal"}},
+    {"id": "edit.undo", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-turned", "format": "json", "options": {}},
+  "expect": {
+    "out/one-turned.json": {"json": [
+      {"degrees": 15, "h": 60, "id": 1, "locked": false, "name": "Rect 1", "w": 100, "x": 10, "y": 10}
+    ]}
+  },
+  "platforms": ["linux", "macos"]
+}

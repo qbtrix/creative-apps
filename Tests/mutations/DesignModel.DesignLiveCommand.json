@@ -1,0 +1,4 @@
+[
+  {"label": "a live result is never adopted", "file": "Sources/DesignModel/DesignLiveCommand.swift", "find": "        self = result\n", "replace": "        _ = result\n", "tests": "DesignLiveCommandTests"},
+  {"label": "a copy of another file overwrites the window", "file": "Sources/DesignModel/DesignLiveCommand.swift", "find": "        guard result.documentURL == documentURL else { return }\n", "replace": "", "tests": "DesignLiveCommandTests"}
+]
