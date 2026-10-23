@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-23T07:42:45Z	check	editor-menus	poll	#4771 open clean awaiting lane; CI 39914223799 pending; #4741 awaiting supervisor
 2026-10-23T07:50:02Z	event	editor-menus	#4771	lane: waiting on red = cancelled run 39919265005 jobs; Linux rerun 39920222222 in progress
 2026-10-23T08:07:56Z	wait	editor-menus	#4771 open, Linux check 39920222222 still running; #4739/#4761 wait on it	-
+2026-10-23T08:20:27Z	cascade	editor-menus	#4771 merged; #4739 merged dev -> 4ea37a264 (CI: PASS), #4761 merged #4739 -> bd47702da (CI: PASS); Head lines moved	https://github.com/qbtrix/creative-apps/pull/4739
