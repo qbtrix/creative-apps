@@ -139,10 +139,12 @@ import Testing
     @Test func aLockedLayerIsSkipped() throws {
         var w = DesignFixtures.cards
         w.selectItem("node-2")
-        w.toggleSelection("node-9")
+        w.toggleSelection("node-3")
+        try w.setNodeLocked("node-2", true)
+        #expect(Set(w.selectedNodeIDs) == ["node-2", "node-3"] && w.strokeHelp == nil, "locked A stays selected behind B")
         _ = try DesignWorkspace.catalog.run("stroke.add", params: .object([:]), on: &w)
-        #expect(Self.stroke(w, "node-2") != nil)
-        #expect(Self.stroke(w, "node-9") == nil, "the locked layer took a stroke")
+        #expect(Self.stroke(w, "node-3") != nil)
+        #expect(Self.stroke(w, "node-2") == nil, "the locked layer took a stroke")
     }
 
     @Test func widthClamps() throws {
