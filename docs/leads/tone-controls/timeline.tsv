@@ -1,0 +1,78 @@
+utc	stage	event	ref	note
+2026-10-20T07:09Z	0	stage-start	-	lead set up on base 5a17e0e
+2026-10-20T07:09Z	0	stage-end	-	worktree lead/tone-controls
+2026-10-20T07:09Z	1	stage-start	-	packet read
+2026-10-20T07:09Z	1	stage-end	-	v3 packet with Slices table
+2026-10-20T07:10Z	2	stage-start	-	waits read from source
+2026-10-20T07:12Z	3	polling	-	TC-1 waits #3144, GF-a, AH-a, PL-a
+2026-10-20T07:45Z	3	heartbeat	-	dev af2977c: AH-1 merged (#3543); #3144 open, GF-2 not on dev, AH-2 not started, PL-a not started
+2026-10-20T07:59Z	3	heartbeat	-	dev 8e06057: core pin 0de5687d, #3144 open, GF-2 and PL-a not on dev, AH-2 not started
+2026-10-20T08:12Z	3	heartbeat	-	dev 8375049: core pin 0de5687d, #3144 open, GF-2 and PL-a not on dev, AH-2 not started
+2026-10-20T08:24Z	3	heartbeat	-	dev 8375049: core pin 0de5687d, #3144 open, GF-2 and PL-a not on dev, AH-2 not started
+2026-10-20T08:37Z	3	heartbeat	-	dev be364d1: core pin 0de5687d, #3144 open, GF-2 and PL-a not on dev, AH-2 not started
+08:48Z	3	heartbeat	-	poll: lane macOS builds 39390799799/39391184437 still queued (runner held by 39362977551); no supervisor answer yet; dev be364d1 unchanged, core pin 0de5687d
+08:59Z	3	heartbeat	-	poll: runner free; XP-1 build 39390799799 in progress since 08:53Z, PN-2 build 39391184437 queued next; no supervisor answer needed now
+09:12Z	3	heartbeat	-	poll: PN-2 build 39391184437 still queued (XP-1 build finished 09:03Z); dev be364d1, core pin 0de5687d
+09:24Z	3	heartbeat	-	poll: #3552 build green, waiting for a lane sweep to merge it (lane runs are cycling); PN-2 build 39391184437 still queued
+09:43Z	3	heartbeat	-	poll: TC-1 waits on #3144, GF-a, AH-a, PL-a; none on dev
+09:56Z	3	heartbeat	-	poll: dev at f8b6c4f7; #3144, GF-a, AH-a, PL-a not on dev; TC-1 waits
+10:08Z	3	heartbeat	-	dev at a6cb0127; #3144, GF-2, AH-2, PL-a not on dev; TC-1 waits
+10:19Z	3	heartbeat	-	dev at a6cb0127, unchanged; TC-1 waits
+10:31Z	3	poll	-	macOS builds for #3586 and #3553 still queued; dev a54a892a, core pin 0de5687d unchanged; no SM-a, GF-2, AH-2, PL-a or #3144 on dev
+10:44Z	3	poll	-	no GF-2, AH-2, PL-a or #3144 on dev (dev 575cc800); core pin 0de5687d unchanged
+10:56Z	3	poll	-	no GF-2, AH-2, PL-a or #3144 on dev (dev 575cc800); core pin 0de5687d unchanged
+11:15Z	3	poll	-	dev b538c92c; core pin 0de5687d unchanged; no GF-2, AH-2, PL-a, #3144 or SM-a on dev; #3553 build 39411316143 pending
+11:34Z	3	poll	-	dev 0e1199e9: no core bump, SM-a, PL-a, GF-2, AH-2 or #3144; nothing to start
+11:47Z	3	poll	-	dev still 0e1199e9 (core pin 0de5687d); PN-2 head e65ce2e mergeable, waits on the lane build; no slice unblocked
+12:00Z	3	poll	-	dev still 0e1199e9; no slice unblocked
+12:18Z	3	poll	-	dev still 0e1199e9; no slice unblocked
+12:29Z	3	poll	-	dev 3ebb876f (#3396 #3473 #3489 #3493): no core bump, SM-a, PL-a, GF-2, AH-2 or #3144; nothing to start
+12:41Z	3	poll	-	dev still 3ebb876f; no slice unblocked
+2026-10-20T13:00:54Z	3	poll	dev 897ccbb2: no prerequisites on dev yet
+2026-10-20T13:18:25Z	3	poll	dev f729e906: AH-1 (#3543) and AH-2 (#3568, #3576) and PL-a (#3578, #3598) on dev; GF-2 not on dev, TC-1 waits
+2026-10-20T13:29:45Z	3	poll	dev f729e906 unchanged: GF-2 not on dev, TC-1 waits
+2026-10-20T13:41:11Z	3	poll	dev f729e906 unchanged: GF-2 not on dev, TC-1 waits
+2026-10-20T13:54:40Z	3	poll	dev 4f365bf8 (#3463, #3567): GF-2 not on dev, TC-1 waits
+2026-10-20T14:16:52Z	3	poll	dev 56e73319: GF-2 not on dev, TC-1 waits
+2026-10-20T14:28:43Z	3	poll	dev 9f880c85: GF-2 not on dev, TC-1 waits
+2026-10-20T14:40:10Z	3	poll	dev d40cdad1: GF-2 not on dev, TC-1 waits
+2026-10-20T14:53:00Z	3	poll	dev 0dd23d65: GF-2 not on dev, TC-1 waits
+2026-10-20T15:05:58Z	3	poll	dev 35b6f8a8: GF-2 not on dev, TC-1 waits
+2026-10-20T15:18:30Z	3	poll	dev 27b67332: GF-2 not on dev, TC-1 waits
+15:30Z	3	poll	dev 27b67332: GF-2 not on dev, TC-1 waits
+15:42Z	3	poll	dev 761060e6: GF-2 not on dev, TC-1 waits
+15:55Z	3	poll	dev 5eceabf7: core pin 2258b62 covers #3144's 9ed9ef0; GF-2 not on dev, TC-1 waits
+16:07Z	3	poll	dev 5eceabf7: GF-2 not on dev, TC-1 waits
+16:18Z	3	poll	dev 7b45f176: GF-2 not on dev, TC-1 waits
+2026-10-20T16:30:21Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T16:41:46Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T16:53:14Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T17:05:06Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T17:16:28Z	3	poll	#3144 merged (54fe8470); GF-2 not on dev, TC-1 waits
+2026-10-20T17:27:50Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T17:38:59Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T17:50:52Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T18:03:15Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T18:14:40Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T18:26:23Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T18:37:58Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T18:49:35Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T19:00:29Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T19:11:38Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T19:22:56Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T19:34:33Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T19:46:50Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T19:58:05Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T20:11:31Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T20:42:07Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T20:54:00Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T21:07:59Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T21:20:54Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T21:33:09Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T21:45:07Z	3	poll	GF-2 not on dev; TC-1 waits
+2026-10-20T21:57Z	poll	poll: GF-2 not on dev; TC-1 still blocked
+2026-10-20T22:09Z	poll	poll: GF-2 not on dev; TC-1 blocked
+2026-10-20T22:21Z	poll	poll: GF-2 not on dev; TC-1 blocked
+2026-10-20T22:33Z	poll	poll: GF-2 not on dev; TC-1 blocked
+2026-10-20T22:46Z	poll	poll: GF-2 not on dev; TC-1 blocked
+2026-10-22T16:23Z	4	resume	#4520	new run act-1a16469734c-d0s8; all TC-1 waits met; wave 1 = TC-1
