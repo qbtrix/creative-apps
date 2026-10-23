@@ -25,3 +25,4 @@ utc	stage	event	ref	note
 2026-10-23T06:20:27Z	-	merge	C4	#4755 merged
 2026-10-23T06:20:27Z	-	split	CB-z	code branch lead/cli-bundle-CB-z 0e6a426b1 (13 files; gate fails only #3856); docs branch lead/cli-bundle-CB-z-docs f6a22109b (3 files, CI: PASS). PRs open once #4741 (scripts/bundle-apps, supervisor) merges, so the code PR has no protected path in its diff
 2026-10-23T06:20:27Z	-	gap	CB-z	#4762 bundle runner for RJ-X62; pending set to #4762
+2026-10-23T07:42:45Z	check	cli-bundle	poll	#4771 open clean awaiting lane; CI 39914223799 pending; #4741 awaiting supervisor
