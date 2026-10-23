@@ -8,7 +8,7 @@ import SuiteModel
 import Testing
 
 @Suite struct RawFormatTests {
-    @Test(.disabled("waits on SR-3")) func everyRegistryExtensionParsesInAnyCase() throws {
+    @Test func everyRegistryExtensionParsesInAnyCase() throws {
         #expect(!SuiteImageFormat.cameraRaw.extensions.isEmpty)
         for ext in SuiteImageFormat.cameraRaw.extensions {
             let mixed = ext.prefix(1).uppercased() + ext.dropFirst()
@@ -19,13 +19,13 @@ import Testing
         }
     }
 
-    @Test(.disabled("waits on SR-3")) func otherNamesAreNotRaw() {
+    @Test func otherNamesAreNotRaw() {
         for name in ["DSC_0001.jpg", "a.tif", "b.png", "NEF", ".nef", "nef.", "raw", ""] {
             #expect(RawFormat(fileName: name) == nil, "\(name)")
         }
     }
 
-    @Test(.disabled("waits on SR-3")) func refusalsAreSentences() throws {
+    @Test func refusalsAreSentences() throws {
         let nef = try #require(RawFormat(fileName: "y.NEF"))
         #expect(RawRefusal.unreadable(nef).message == "macOS can't read this raw file (NEF).")
         #expect(RawRefusal.undevelopable(camera: "Unreleased X1").message
@@ -34,7 +34,7 @@ import Testing
         #expect(RawRefusal.tooLarge(pixels: 300_000_000).message == "This raw file is larger than 256 megapixels.")
     }
 
-    @Test(.disabled("waits on SR-3")) func aFormatNamesItsOwnExtension() throws {
+    @Test func aFormatNamesItsOwnExtension() throws {
         let dng = try #require(RawFormat(fileName: "x.dng"))
         let cr3 = try #require(RawFormat(fileName: "IMG_0001.CR3"))
         #expect(RawRefusal.unreadable(dng).message.contains("(DNG)"))
