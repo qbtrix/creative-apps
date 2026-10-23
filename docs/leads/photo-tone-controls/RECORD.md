@@ -17,8 +17,8 @@ Next: PT-1 #4845 in the fast lane (head 39f902f, CI: PASS, mutations 4/4); PT-2 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| PT-1 | PT-a | 2 | tone in AdjustmentSettings; adapter stubs; PhotoToneTests disabled | Sources/PhotoModel/AdjustmentSettings.swift, PhotoTone+Kernel.swift, Tests/PhotoModelTests/PhotoToneTests.swift | PhotoToneTests | #4845 | in lane |
-| PT-2 | PT-a | 3 | Adjust panel ToneRows | Sources/PhotoApp/AdjustmentsInspector.swift | PhotoToneSnapshots.panel | – | waiting (TC-2 ToneRows not on dev) |
+| PT-1 | PT-a | 2 | tone in AdjustmentSettings; adapter stubs; PhotoToneTests disabled | Sources/PhotoModel/AdjustmentSettings.swift, PhotoTone+Kernel.swift, Tests/PhotoModelTests/PhotoToneTests.swift | PhotoToneTests | #4845 | merged |
+| PT-2 | PT-a | 3 | Adjust panel ToneRows | Sources/PhotoApp/AdjustmentsInspector.swift | PhotoToneSnapshots.panel | #5007 | in lane |
 | PT-3 | PT-m | 4 | live route and export | PhotoAdjust+Imaging.swift, PhotoRender.swift | PhotoToneTests | – | waiting |
 | PT-4 | PT-m | 4 | adapter bodies, catalog, jobs | PhotoTone+Kernel.swift, PhotoCommandCatalog.swift, RealJobs | PhotoToneCommandTests | – | waiting |
 | PT-5 | PT-u | 4 | snapshots, budget | Tests/AppSnapshotTests/PhotoToneSnapshots.swift, RenderBudgetPhotoToneTests.swift | snapshots | – | waiting |
@@ -52,7 +52,9 @@ Next: PT-1 #4845 in the fast lane (head 39f902f, CI: PASS, mutations 4/4); PT-2 
 - Run act-1a16958d691-2ax3 (2026-10-23) takes over; same base-dev and status-branch choices as above (brief named main; the lane merges only into dev).
 - Rule 12 on dev: TC-1 (#4555, ToneTarget, ToneSettings, ToneCommands) is the contract and has merged, so PT-1 builds on it now. PT-2 needs TC-2's ToneRows view, which is not on dev; PT-a ships as two PRs (PT-1 now, PT-2 when TC-2 lands), split per task.
 - Tone gets no AdjustmentKind case: one would change the panel sections, the adjustment-layer kinds, the catalog oneOf and the stored `enabled` set. Instead `AdjustmentEdit.kind` is optional with `title`/`section` helpers, which touches PhotoWorkspace.swift and PhotoAdjustmentLayer.swift beyond PT-1's listed files (a few lines each).
+- PT-2 runs a ToneIntent through a new `PhotoIntent.tone` case and `PhotoWindow+Tone.swift` (the per-area pattern), so the PR touches 6 files, not the packet's 1. It is still well inside the caps.
 - No dead controls: until PT-4, `toneHelp` is non-nil with an image open, so the rows and tone.* commands stay off and say why.
 
 ## Open
-- [ ] Wire: tone-controls:TC-a (PT-2 waits on TC-2 ToneRows; PT-4 on TC-6 command bodies; PT-3 on TC-5)
+- [x] Wire: tone-controls:TC-2 (#4862 merged, dev 491ec5461): PT-2 #5007 builds on ToneRows(settings:help:hidden:onIntent:).
+- [ ] Wire: tone-controls:TC-5 (#4880 open) for PT-3; TC-6 (#4953 open) for PT-4; TC-3 (#5006 open) for PT-5.
