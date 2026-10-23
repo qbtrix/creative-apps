@@ -44,6 +44,16 @@ private let skipped = [
         #expect(workspace.importNote == nil, "a new document keeps an old Lottie's note")
     }
 
+    @Test func dismissingTheNoteChangesTheWorkspace() {
+        // The window holds the workspace in @State, which skips a body when the new value is ==, so a Dismiss
+        // that equality can't see leaves the note on screen.
+        var workspace = FlareWorkspace(services: .fake())
+        workspace.finishLottieOpen(.success((FlareFixtures.bounce, skipped)))
+        let noted = workspace
+        workspace.dismissImportNote()
+        #expect(workspace != noted, "Dismiss leaves an equal workspace, so the note stays on screen")
+    }
+
     @Test func aRefusedOpenKeepsTheDocumentAndSaysWhy() {
         var workspace = FlareWorkspace(services: .fake())
         workspace.newDocument()
@@ -86,5 +96,14 @@ private let skipped = [
         let (lottie, rest) = FlareWorkspace.lottieDrops(actions)
         #expect(lottie == ["/tmp/bounce.json"])
         #expect(rest == Array(actions.dropFirst()))
+    }
+
+    @Test func aJSONTheStagePlansToOpenStillRoutesToTheLottieOpen() {
+        // The stage plans a .json as Flare's own open (so its mark says "Open in Flare"), and the documents bridge
+        // drops an open it has no suite type for, so the Lottie open has to take it.
+        let actions: [DropAction] = [.open(path: "/tmp/bounce.JSON"), .open(path: "/tmp/Title.flare")]
+        let (lottie, rest) = FlareWorkspace.lottieDrops(actions)
+        #expect(lottie == ["/tmp/bounce.JSON"])
+        #expect(rest == [.open(path: "/tmp/Title.flare")])
     }
 }
