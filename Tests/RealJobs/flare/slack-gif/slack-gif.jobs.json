@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "app": "flare",
+  "why": "RJ-F07, pending FV-7: Flare writes GIF only once FV-4 streams frames into the shared writer and FV-7 runs it live. Exports a 200 x 200, 24-frame spinner on a transparent background as a GIF for a chat app at Long edge 480, Loop forever: the file is 480 x 480, its loop count is 0 (forever), its top-left corner is transparent (not black), it is at most 2 MB, and its 24 frame delays sum to the scene's 1.0 s (100 cs) within 1 cs. FlareVideoExportTests runs the plan half on Linux.",
+  "pending": "FV-7",
+  "inputs": ["input/*.flare"],
+  "steps": [
+    {"id": "edit.select-all", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}", "format": "gif", "options": {"size": {"longEdge": 480}, "loop": true}},
+  "expect": {
+    "out/spinner.gif": {"pixels": {"tolerance": 2, "size": [480, 480], "at": {"x": 2, "y": 2, "rgba": [0, 0, 0, 0]}}}
+  },
+  "platforms": []
+}

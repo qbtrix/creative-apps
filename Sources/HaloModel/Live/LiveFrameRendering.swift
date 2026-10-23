@@ -4,7 +4,9 @@
 // Mask.ellipse when the matrix only translates and scales up, Mask.polygon of
 // the flattened outline otherwise. Its source is the linear premultiplied
 // color, or its gradient's color at each pixel (HG-6), times that coverage,
-// composited bottom first with the item's blend mode and opacity. A shape's
+// composited bottom first with the item's blend mode and opacity. A solid
+// with a placed picture (PH-5) takes HaloPlacedDrawing's pixels in place of
+// its color, times the same coverage. A shape's
 // stroke (HK-5) is then its outline polygon from HaloOutlines in the stroke's
 // color, with the same blend and opacity. An outline, mask or composite that fails draws nothing
 // and isn't counted. A text item (VP-5) is its TextRasterizing raster, top
@@ -27,7 +29,8 @@ public struct LiveFrameRendering: FrameRendering {
             let source: PixelBuffer?
             switch item.kind {
             case .solid, .shape:
-                source = Self.coverageFill(item, width: width, height: height, scaleX: sx, scaleY: sy)
+                source = Self.placedFill(item, width: width, height: height, scaleX: sx, scaleY: sy)
+                    ?? Self.coverageFill(item, width: width, height: height, scaleX: sx, scaleY: sy)
             case .text:
                 guard let next = Self.drawText(item, onto: out, rasterizer: text, scaleX: sx, scaleY: sy)
                 else { skipped += 1; continue }
@@ -88,6 +91,23 @@ public struct LiveFrameRendering: FrameRendering {
         else { return nil }
         return paint(outline, width: width, height: height, scaleX: sx, scaleY: sy) { x, y in
             shading?.color(x: x, y: y) ?? solid
+        }
+    }
+
+    /// A solid's placed picture (PH-5) from HaloPlacedDrawing's shared cache,
+    /// times its outline's coverage; nil, so the solid draws its color, with
+    /// no picture, a refused outline or bytes that don't decode.
+    static func placedFill(
+        _ item: HaloDrawItem, width: Int, height: Int, scaleX sx: Double, scaleY sy: Double
+    ) -> PixelBuffer? {
+        guard item.kind == .solid, let asset = item.placedAsset, let image = item.placedImage,
+              let outline = HaloOutlines.outline(of: item, scale: max(sx, sy)),
+              let picture = try? HaloPlacedDrawing.shared.withLock({
+                  try $0.source(asset, image, matrix: item.matrix, width: width, height: height, scaleX: sx, scaleY: sy)
+              })
+        else { return nil }
+        return paint(outline, width: width, height: height, scaleX: sx, scaleY: sy) { x, y in
+            (try? picture.pixel(x: x, y: y)) ?? .clear
         }
     }
 

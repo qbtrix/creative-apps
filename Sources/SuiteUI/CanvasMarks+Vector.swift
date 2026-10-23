@@ -8,7 +8,9 @@
 // through an EditRun, so the host makes it one undo step. The box's edges
 // sit on the device pixel grid, so its 1 pt outline is two crisp device
 // pixels at scale 2. SwiftUI has no rotate pointer (PointerStyle), so a
-// rotate zone shows the crosshair, `rectSelection`. Under a probe host each
+// rotate zone and the knob show the crosshair, `rectSelection`; a resize
+// handle shows the frame-resize pointer for where it sits after the turn
+// (HandlePointer), its hit rect over the drawn mark. Under a probe host each
 // drag sample reports on the `handle-drag` series (HandleDragProbe).
 import AppKit
 import SuiteKernel
@@ -187,21 +189,24 @@ public struct SelectionHandlesEditor: View {
         let knob = SelectionHandles.marks(handles: handles, zoom: zoom).first { $0.handle == .rotate }?.frame
         ZStack(alignment: .topLeading) {
             ZStack(alignment: .topLeading) {
+                SelectionHandles(box: kernelBox, handles: handles, zoom: zoom, hovered: hovered)
                 ForEach(HandleKind.allCases, id: \.self) { kind in
                     if let hit = SelectionHandleDrag.hitRects(rect: box, zoom: zoom)[kind] {
                         Color.clear
                             .frame(width: hit.width, height: hit.height)
                             .contentShape(Rectangle())
-                            .pointerStyle(kind.rawValue.hasPrefix("rotate") ? .rectSelection : .default)
+                            .onHover { hover(HandlePointer.mark(kind), $0) }
+                            .pointerStyle(Self.pointer(kind, degrees: degrees))
                             .position(x: hit.midX, y: hit.midY)
                     }
                 }
-                SelectionHandles(box: kernelBox, handles: handles, zoom: zoom, hovered: hovered) { hovered = $0 }
                 if let knob {
                     Color.clear
                         .frame(width: knob.width, height: knob.height)
+                        .contentShape(Circle())
+                        .onHover { hover(.rotate, $0) }
+                        .pointerStyle(Self.pointer(.rotateTopLeft, degrees: degrees))
                         .position(x: knob.midX, y: knob.midY)
-                        .allowsHitTesting(false)
                         .accessibilityElement()
                         .accessibilityLabel("Rotate")
                         .accessibilityValue(Self.knobValue(degrees))
@@ -224,6 +229,28 @@ public struct SelectionHandlesEditor: View {
                     report(eventTime)
                 }
                 .onEnded { _ in if drag.ended() { onEnd() } })
+    }
+
+    /// The hit rects sit over the drawn marks so their pointers show, so they fill the mark under the pointer.
+    private func hover(_ mark: EditorHandle?, _ inside: Bool) {
+        guard let mark else { return }
+        if inside { hovered = mark } else if hovered == mark { hovered = nil }
+    }
+
+    /// A rotate zone or the knob shows the crosshair; a resize handle the frame-resize pointer for where
+    /// it sits once the box is turned (HandlePointer.direction).
+    nonisolated private static func pointer(_ kind: HandleKind, degrees: Double) -> PointerStyle {
+        switch HandlePointer.direction(kind, degrees: degrees) {
+        case .top?: .frameResize(position: .top)
+        case .topRight?: .frameResize(position: .topTrailing)
+        case .right?: .frameResize(position: .trailing)
+        case .bottomRight?: .frameResize(position: .bottomTrailing)
+        case .bottom?: .frameResize(position: .bottom)
+        case .bottomLeft?: .frameResize(position: .bottomLeading)
+        case .left?: .frameResize(position: .leading)
+        case .topLeft?: .frameResize(position: .topLeading)
+        default: .rectSelection
+        }
     }
 
     /// A drag sample, shown by the next main-actor turn after the change.

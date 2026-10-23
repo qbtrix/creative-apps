@@ -6,9 +6,11 @@
 import SuiteKernel
 
 extension DesignWorkspace: ShapeTarget {
-    /// Why the Shape tool can't draw now: no file open, else the tool's own reason (none once it works).
+    /// Why the Shape tool can't draw now: no file open, a text edit open (its history is held), else the tool's
+    /// own reason (none once it works).
     public var shapeHelp: String? {
-        pages.isEmpty ? "Open or create a design first." : DesignTool.shape.unavailableHelp
+        if pages.isEmpty { return "Open or create a design first." }
+        return editingTextID == nil ? DesignTool.shape.unavailableHelp : "Finish editing the text first."
     }
 
     /// Records the Shape tool's options; the next drag draws with them.

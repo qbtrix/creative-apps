@@ -1,0 +1,6 @@
+[
+{"label":"every scrub writes the window, not just the live frame","file":"Sources/HaloModel/HaloLivePlayhead.swift","find":"        return Outcome(write: wrote, shown: next)\n","replace":"        return Outcome(write: next, shown: next)\n","tests":"HaloLivePlayheadTests"},
+{"label":"taking a drag back drops its frame","file":"Sources/HaloModel/HaloLivePlayhead.swift","find":"            next.scrub(to: frame)\n","replace":"","tests":"HaloLivePlayheadTests"},
+{"label":"a step of the other kind leaves the pending one untaken","file":"Sources/HaloModel/HaloLivePlayhead.swift","find":"!pending.isKind(of: step)","replace":"!pending.isKind(of: pending)","tests":"HaloLivePlayheadTests"},
+{"label":"play-once's end stays live instead of writing","file":"Sources/HaloModel/HaloLivePlayhead.swift","find":"if case .tick = step, !next.playback.playing {","replace":"if case .tick = step, next.playback.loops, !next.playback.playing {","tests":"HaloLivePlayheadTests"}
+]

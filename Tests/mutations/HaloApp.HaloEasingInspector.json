@@ -1,0 +1,16 @@
+[
+  {
+    "label": "chipIdDropped: the easing preset chips lose their identifiers",
+    "file": "Sources/HaloApp/HaloEasingInspector.swift",
+    "find": "InspectorOption(id: preset, title: preset.title, identifier: \"halo.easing.preset.\\(preset.rawValue)\")",
+    "replace": "InspectorOption(id: preset, title: preset.title)",
+    "tests": "HaloEasingSnapshots"
+  },
+  {
+    "label": "chipIdByTitle: a chip's identifier uses its title, not its case",
+    "file": "Sources/HaloApp/HaloEasingInspector.swift",
+    "find": "identifier: \"halo.easing.preset.\\(preset.rawValue)\"",
+    "replace": "identifier: \"halo.easing.preset.\\(preset.title)\"",
+    "tests": "HaloEasingSnapshots"
+  }
+]

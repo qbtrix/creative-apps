@@ -12,8 +12,8 @@
 // menu, so the journey's `timeline-2997-menu` shot shows it open; it draws
 // half a point a frame, as a snapshot can't scroll, so 1800 is in view. The
 // layout tests lay the page out at 1280 x 820 and 900 x 612, live and as a
-// snapshot draws it: the log sits below the strip inside the page's margin
-// and no lane name draws over it (#4364), and the live strip opens on the
+// snapshot draws it: the log sits below the strip's room (its probe) inside
+// the page's margin and no lane name draws over it (#4364), and the live strip opens on the
 // playhead's page, its pill clear of the ruler's trailing edge (#4365).
 // Nested in BodyCountSuites: it reads global body counters. macOS only.
 #if canImport(AppKit)
@@ -79,8 +79,9 @@ extension BodyCountSuites {
                 #expect(log.maxY <= strip.minY + 0.5, "the log \(log) runs into the strip \(strip) at \(size) (\(mode))")
                 let content = CGRect(origin: .zero, size: size).insetBy(dx: SuiteSpacing.m, dy: SuiteSpacing.m)
                 #expect(content.insetBy(dx: -0.5, dy: -0.5).contains(log), "the log \(log) leaves the page's margin (\(mode))")
+                // A lane the strip never laid out has no element; once the strip is there, don't wait for one.
                 for row in 0..<40 {
-                    guard let name = await w.element("suite.timeline.name.lane-\(row)") else { continue }
+                    guard let name = w.elementNow("suite.timeline.name.lane-\(row)") else { continue }
                     // The strip clips its lanes: only the part of a name inside it draws.
                     let drawn = name.intersection(strip)
                     #expect(drawn.isNull || !drawn.intersects(log), "lane \(row)'s name draws over the log (\(mode))")

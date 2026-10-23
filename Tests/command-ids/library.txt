@@ -23,6 +23,7 @@ view.grid
 view.loupe
 view.show-original
 view.sort
+view.thumbnail-size
 view.zoom-in
 view.zoom-out
 view.zoom-to-fit
@@ -53,3 +54,4 @@ photo.reset-temperature
 photo.reset-tint
 photo.reset-vibrance
 photo.reset-saturation
+file.share-prepare

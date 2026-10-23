@@ -2,7 +2,9 @@
 // written first by SM-2; SM-5 fills the `movie` seam with SuiteShell's
 // `MovieWriter` and turns the movie cases on. A
 // 48-frame 24 fps 1280 x 720 H.264 is 2.000 s with BT.709 tags, each codec
-// writes its track codec, the alpha codecs keep a transparent corner, cancel
+// writes its track codec (HEVC with alpha is an `hvc1` track flagged as
+// carrying alpha: `muxa` names only its encoder, never a written track),
+// the alpha codecs keep a transparent corner, cancel
 // leaves no file, and 1080p throughput is reported. Reads back with
 // AVFoundation only. macOS only.
 import AVFoundation
@@ -101,7 +103,7 @@ import Testing
     func eachCodecWritesItsTrackCodec(_ codec: MovieCodec) async throws {
         let expected: [MovieCodec: CMVideoCodecType] = [
             .h264: kCMVideoCodecType_H264, .hevc: kCMVideoCodecType_HEVC,
-            .hevcAlpha: kCMVideoCodecType_HEVCWithAlpha, .prores4444: kCMVideoCodecType_AppleProRes4444,
+            .hevcAlpha: kCMVideoCodecType_HEVC, .prores4444: kCMVideoCodecType_AppleProRes4444,
         ]
         let url = try Self.scratch("\(codec.rawValue).mov")
         defer { Self.discard(url) }
@@ -109,6 +111,11 @@ import Testing
                                   frames: 4, to: url)
         let format = try await Self.videoFormat(url)
         #expect(CMFormatDescriptionGetMediaSubType(format) == expected[codec])
+        if codec == .hevc || codec == .hevcAlpha {
+            let alpha = CMFormatDescriptionGetExtension(
+                format, extensionKey: kCMFormatDescriptionExtension_ContainsAlphaChannel) as? Bool == true
+            #expect(alpha == (codec == .hevcAlpha), "\(codec) track flags alpha: \(alpha)")
+        }
     }
 
     @Test(arguments: [MovieCodec.prores4444, .hevcAlpha])

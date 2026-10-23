@@ -46,11 +46,20 @@ import Testing
         #expect(text.contains("isEnabled: false"))
     }
 
+    /// The Beta Notes window opens centred, so its Close button stays on a small screen (#4646).
+    @Test func betaNotesWindowOpensCentred() throws {
+        let text = try source(Self.help)
+        let notes = try #require(text.components(separatedBy: "func showBetaNotes()").last)
+        #expect(notes.contains("window.center()"), "the Beta Notes window opens where AppKit drops it")
+    }
+
     @Test func providerAdaptsSuiteModel() throws {
         let text = try source("Sources/SuiteShell/ShellHelpProvider.swift")
         #expect(text.contains("public struct ShellHelpProvider: HelpProviding"))
         #expect(text.contains("ProblemReport.build(") && text.contains("BetaNotes.current"))
         #expect(!text.contains("URLSession") && !text.contains("NSWorkspace"), "the provider reaches the network")
+        // ProcessInfo.hostName resolves the name over the network and raises macOS's local network prompt.
+        #expect(!text.contains(".hostName"), "the provider asks the network for the host name")
     }
 
     /// RP-5b: the sheet's report holds this Mac's crashes, read from CrashFolder's folder and files only.
