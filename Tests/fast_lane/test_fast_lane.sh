@@ -5,7 +5,8 @@
 # trees), whole sweeps against a stub `gh`, and, against a local bare repo, the
 # lane's integration of a conflicting PR (integrate) and its batches (two or
 # more ready PRs get one Linux check together before they land; a red batch is
-# bisected by prefix), the batch macOS gate (LANE_MAC_PER_PR=0: one macOS gate
+# bisected by prefix; a proof gone stale on a ratchet or baseline change is
+# checked again on today's dev), the batch macOS gate (LANE_MAC_PER_PR=0: one macOS gate
 # per code batch scoped to its apps, priority order, slots, the timer, a red
 # base set aside per job on Linux and judged by failing test on macOS, the culprit's stacked PRs named), and the red-dev
 # bisect, with its 2-of-3 vote mode for a timing budget test. No network,
@@ -592,9 +593,10 @@ dup_decide "suiteui: SuiteUI is the home, and +Suite adapters pass" "eligible|15
 # the merge base is `mb` (`bad` for a head whose compare fails), and the trees
 # and contents for a commit are the files under $sw/refs/<sha>.
 sw="$tmp/sweep"
-# real_pr <n> [<path>]: gives fixture PR <n> a real branch feat/<n> at the
-# test's bare remote $sw/origin.git (one file on top of dev, a docs file
-# unless <path> names another), so the lane can batch it: headRefName,
+# real_pr <n> [<path>] [<branch>]: gives fixture PR <n> a real branch (feat/<n>
+# unless <branch> names another) at the test's bare remote $sw/origin.git (one
+# file on top of dev, a docs file unless <path> names another), so the lane
+# can batch it, or land it alone after comparing it with dev: headRefName,
 # headRefOid and the body's Head: line move to that commit, and an audit tree
 # or build run keyed by the old head follows it.
 real_pr() {
@@ -606,11 +608,11 @@ real_pr() {
     cp "$here/../../.gitattributes" "$w/"; echo base >"$w/base.md"
     git -C "$w" add -A; git -C "$w" commit -qm base; git -C "$w" push -q "$sw/origin.git" dev
   fi
-  local p="${2:-pr$n.md}"
-  git -C "$w" switch -qc "feat/$n" dev; mkdir -p "$w/$(dirname "$p")"; echo "pr $n" >"$w/$p"; git -C "$w" add -A; git -C "$w" commit -qm "pr $n"
-  git -C "$w" push -q "$sw/origin.git" "feat/$n"; git -C "$w" switch -q dev
-  sha=$(git -C "$w" rev-parse "feat/$n"); old=$(jq -r .headRefOid "$f")
-  jq --arg b "feat/$n" --arg h "$sha" '.headRefName = $b | .headRefOid = $h | .body |= sub("Head: [^\n]*"; "Head: \($h)")' "$f" >"$sw/x" && mv "$sw/x" "$f"
+  local p="${2:-pr$n.md}" b="${3:-feat/$n}"
+  git -C "$w" switch -qc "$b" dev; mkdir -p "$w/$(dirname "$p")"; echo "pr $n" >"$w/$p"; git -C "$w" add -A; git -C "$w" commit -qm "pr $n"
+  git -C "$w" push -q "$sw/origin.git" "$b"; git -C "$w" switch -q dev
+  sha=$(git -C "$w" rev-parse "$b"); old=$(jq -r .headRefOid "$f")
+  jq --arg b "$b" --arg h "$sha" '.headRefName = $b | .headRefOid = $h | .body |= sub("Head: [^\n]*"; "Head: \($h)")' "$f" >"$sw/x" && mv "$sw/x" "$f"
   [[ ! -d "$sw/refs/$old" ]] || mv "$sw/refs/$old" "$sw/refs/$sha"
   [[ ! -e "$sw/runs.$old.json" ]] || jq --arg h "$sha" 'map(.headSha = $h)' "$sw/runs.$old.json" >"$sw/runs.$sha.json"
 }
@@ -744,7 +746,7 @@ sweep() {
   for n in "$@"; do jq '.labels += [{"name":"feature-done"}]' "$sw/$n.json" >"$sw/x" && mv "$sw/x" "$sw/$n.json"; done
   # #4 and #7 are ready together, so the first run batches them and the
   # second lands the green batch.
-  real_pr 4; real_pr 7
+  real_pr 4; real_pr 7; real_pr 5
   ( main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }
   batch_green
   ( main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }
@@ -935,13 +937,13 @@ for n in 14 22; do
   pr_at "$n" "h$n" "$SWF"
   jq --arg b "b$n" '.headRefName = $b' "$sw/$n.json" >"$sw/x" && mv "$sw/x" "$sw/$n.json"
 done
-touch "$sw/runlist.fail.h22"
+touch "$sw/runlist.fail.h22"; real_pr 14 pr14.md b14; H14=$(jq -r .headRefOid "$sw/14.json")
 lane_sweep() { ( FAST_LANE_RUN_LOOKUP_RETRIES=0 main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }; }
 lane_sweep
 expect "shell: a SuiteWindow PR gets one build-only run, no full run" \
   "$(grep -c -- '-f build_only=true --ref b14$' "$sw/calls"),$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref b14$' "$sw/calls")" "1,0"
 expect "shell: an unreadable run list writes nothing for the PR" "$(grep -cE '^pr [a-z]+ 22 |--ref b22' "$sw/calls")" 0
-jq 'map(if .displayTitle == "macOS build" then .status = "completed" | .conclusion = "success" else . end)' "$sw/runs.h14.json" >"$sw/x" && mv "$sw/x" "$sw/runs.h14.json"
+jq 'map(if .displayTitle == "macOS build" then .status = "completed" | .conclusion = "success" else . end)' "$sw/runs.$H14.json" >"$sw/x" && mv "$sw/x" "$sw/runs.$H14.json"
 lane_sweep
 expect "shell: once it compiled, a later sweep merges it" "$(grep -c '^pr merge 14' "$sw/calls")" 1
 
@@ -958,6 +960,7 @@ for n in 30 32 34; do
 done
 printf '%s\n' '[{"filename": "Sources/SuiteUI/SuiteWindow.swift", "status": "modified"}, {"filename": "Sources/FlareApp/FlareApp.swift", "status": "modified"}]' >"$sw/files.34.json"
 echo '[{"databaseId": "32", "displayTitle": "macOS build", "status": "completed", "conclusion": "failure", "url": "https://github.com/qbtrix/creative-apps/actions/runs/32", "headSha": "h32"}]' >"$sw/runs.h32.json"
+real_pr 30 pr30.md b30; H30=$(jq -r .headRefOid "$sw/30.json")
 lane_sweep
 expect "build: dispatches one build-only run on the app PR's branch, re-sweep included" \
   "$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps -f build_only=true -f app=library --ref b30$' "$sw/calls")" 1
@@ -973,7 +976,7 @@ expect "build: refused PRs keep the fast-lane label" "$(grep -c -- '--remove-lab
 lane_sweep
 expect "build: a later sweep while it builds dispatches and comments nothing more" \
   "$(grep -c -- '--ref b30$' "$sw/calls"),$(grep -c '^pr comment 30 ' "$sw/calls"),$(grep -c '^pr merge 30' "$sw/calls")" "1,1,0"
-jq 'map(if .displayTitle == "macOS build" then .status = "completed" | .conclusion = "success" else . end)' "$sw/runs.h30.json" >"$sw/x" && mv "$sw/x" "$sw/runs.h30.json"
+jq 'map(if .displayTitle == "macOS build" then .status = "completed" | .conclusion = "success" else . end)' "$sw/runs.$H30.json" >"$sw/x" && mv "$sw/x" "$sw/runs.$H30.json"
 lane_sweep
 expect "build: once it compiled the head, a later sweep merges it" "$(grep -c '^pr merge 30' "$sw/calls")" 1
 expect "build: the merge comment names the build" \
@@ -1019,6 +1022,7 @@ rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
 pr_at 38 h38 '[{"filename": "Sources/PhotoModel/PhotoRecovery.swift", "status": "modified"}]'
 pr_at 39 h39 '[{"filename": "docs/blueprints/photo/features/recovery.md", "status": "modified"}]'
 for n in 38 39; do jq --arg b "b$n" '.headRefName = $b' "$sw/$n.json" >"$sw/x" && mv "$sw/x" "$sw/$n.json"; done
+real_pr 39 pr39.md b39
 lane_sweep
 expect "build: a Model-only PR gets one build, not a merge" \
   "$(grep -c -- '-f build_only=true -f app=photo --ref b38$' "$sw/calls"),$(grep -c '^pr merge 38' "$sw/calls")" "1,0"
@@ -1044,7 +1048,7 @@ for n in 45 46; do
   jq --arg h "h$n" '.body = "Adds keyframes.\n\nFast-Check: pass\nHead: \($h)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\nCo-Authored-By: Claude <noreply@anthropic.com>"' \
     "$sw/$n.json" >"$sw/x" && mv "$sw/x" "$sw/$n.json"
 done
-jq '.isDraft = true' "$sw/46.json" >"$sw/x" && mv "$sw/x" "$sw/46.json"
+jq '.isDraft = true' "$sw/46.json" >"$sw/x" && mv "$sw/x" "$sw/46.json"; real_pr 45
 lane_sweep; lane_sweep
 expect "attribution: the PR still merges" "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 45"
 expect "attribution: the squash message keeps the body and drops the lines" \
@@ -1130,6 +1134,52 @@ expect "batch: the merge comment names the batch and its run" \
   "$(grep -c '^pr comment 50 .*merged into dev (.*batch of 2 PRs checked together on Linux: https://github.com/qbtrix/creative-apps/actions/runs/777)' "$sw/calls")" 1
 expect "batch: the late PR lands on its own proof" "$(grep -c '^pr comment 52 .*merged into dev (.*Fast-Check marker)' "$sw/calls")" 1
 expect "batch: the scratch branch is gone" "$(batch_tip)" ""
+
+# Ratchet race (lesson 244): a proof that ran before dev changed a ratchet,
+# lint or baseline file proves nothing about the PR on today's dev, and a PR
+# that changes one proves nothing about code dev gained since its base. Such a
+# PR is not landed on that proof: it becomes a batch of one, checked on Linux
+# on the current dev, and lands on that. A batch whose base is stale that way
+# is dropped and formed again on the current dev.
+dev_moves() {  # dev_moves <path>: a commit on dev at the bare remote changing <path>
+  git -C "$sw/work" switch -q dev; mkdir -p "$sw/work/$(dirname "$1")"; echo "dev $RANDOM" >>"$sw/work/$1"
+  git -C "$sw/work" add -A; git -C "$sw/work" commit -qm "dev moves $1"; git -C "$sw/work" push -q "$sw/origin.git" dev
+}
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+pr_at 80 h80 "$DOCS"; real_pr 80
+dev_moves Tests/command-path-baseline/halo.txt
+lane_sweep
+expect "ratchet race: dev changed a baseline after the proof: no merge on it" "$(grep -c '^pr merge 80' "$sw/calls")" 0
+expect "ratchet race: one Linux check on the PR merged into today's dev" \
+  "$(grep -c '^workflow run ci.yml .*-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls"),$(git -C "$sw/origin.git" rev-parse "$(batch_tip)~1")" \
+  "1,$(git -C "$sw/origin.git" rev-parse dev)"
+batch_green; lane_sweep
+expect "ratchet race: it lands on that check" "$(grep -c '^pr comment 80 .*merged into dev (.*batch of 1 PRs checked together on Linux' "$sw/calls")" 1
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+pr_at 81 h81 "$DOCS"; real_pr 81
+dev_moves docs/other.md
+lane_sweep
+expect "ratchet race: dev moved, no ratchet changed: lands on its own proof" \
+  "$(grep -c '^pr comment 81 .*merged into dev (.*Fast-Check marker)' "$sw/calls"),$(grep -c '^workflow run' "$sw/calls")" "1,0"
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+pr_at 82 h82 "$DOCS"; real_pr 82 Tests/placeholder-menu-baseline.txt
+dev_moves Sources/HaloApp/HaloTransport.swift
+lane_sweep
+expect "ratchet race: a PR changing a baseline, dev moved under it: no merge on its own proof" \
+  "$(grep -c '^pr merge 82' "$sw/calls"),$(grep -c '^workflow run ci.yml .*-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls")" "0,1"
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for n in 83 84; do pr_at "$n" "h$n" "$DOCS"; real_pr "$n"; done
+lane_sweep
+OLD_TIP=$(batch_tip)
+dev_moves Tests/format-lists-baseline.txt
+verdict "$OLD_TIP" success
+lane_sweep
+expect "ratchet race: a green batch on a dev that since changed a ratchet lands nothing" "$(grep -c '^pr merge' "$sw/calls")" 0
+expect "ratchet race: it forms again on today's dev, with a new Linux check" \
+  "$(git -C "$sw/origin.git" rev-parse "$(batch_tip)~2"),$(grep -c '^workflow run ci.yml .*-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls")" \
+  "$(git -C "$sw/origin.git" rev-parse dev),2"
+batch_green; lane_sweep
+expect "ratchet race: the new batch lands on its check" "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 83,pr merge 84"
 
 # A red batch is bisected by prefix: #60 good, #61 bad, #62 good. The tip is
 # red; the chain after 1 PR is green; after 2 red: #61 is the culprit. #60
@@ -1374,7 +1424,7 @@ done
 jq '.body = "Closes #1\n\nFast-Check: pass\nHead: h31"' "$sw/31.json" >"$sw/x" && mv "$sw/x" "$sw/31.json"
 jq '.author.login = "someone-else"' "$sw/32.json" >"$sw/x" && mv "$sw/x" "$sw/32.json"
 jq '.labels = [{"name":"no-fast-lane"}]' "$sw/33.json" >"$sw/x" && mv "$sw/x" "$sw/33.json"
-jq '.labels = [{"name":"needs-human"}]' "$sw/34.json" >"$sw/x" && mv "$sw/x" "$sw/34.json"
+jq '.labels = [{"name":"needs-human"}]' "$sw/34.json" >"$sw/x" && mv "$sw/x" "$sw/34.json"; real_pr 30
 lane_sweep
 expect "autolabel: a crew PR with a Belt-Lead line gets the label and one comment" \
   "$(grep -c '^pr edit 30 .*--add-label fast-lane$' "$sw/calls"),$(grep -c '^pr comment 30 .*Fast lane: labelled because the PR carries Belt-Lead\.' "$sw/calls")" "1,1"
