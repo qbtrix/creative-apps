@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: #4649 (PH-z) waits on lane macOS build 39894209996; then retarget #4658 to dev (fast-lane, feature-done); critics on scoped run 39892568309; gaps filed #4721 #4722 #4723 #4724
+Next: #4649 (PH-z) waits on lane macOS build 39894209996 (queued since 03:17Z); scoped run 39892568309 in progress, critics when it shows screens; then retarget #4658 to dev; gaps #4721-#4724
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
