@@ -94,8 +94,8 @@ import Testing
 
     @Test func aStrokeWithNoWidthPaintsNothing() {
         let rect = Self.node(.rectangle)
-        #expect(rect.strokedPath(VectorStroke(width: 0)) == nil)
-        #expect(rect.strokedPath(VectorStroke(width: .nan)) == nil)
+        #expect(rect.strokedPath(VectorStroke(width: 0, dash: [8, 4])) == nil)
+        #expect(rect.strokedPath(VectorStroke(width: .nan, dash: [8, 4])) == nil)
         #expect(rect.strokedPath(VectorStroke(width: 0.5, dash: [8, 4])) != nil)
     }
 
