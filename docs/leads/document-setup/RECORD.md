@@ -1,10 +1,10 @@
 # document-setup lead record
 
-Issue: #3757 · Packet: docs/blueprints/suiteui/features/document-setup.md
-Run: act-1a1620043af-tzh0 · Started: 2026-10-22T05:00Z (resumed from act-1a15fddd101-68r5)
-Stage: stopped per supervisor 06:19Z (DS-u done 08:44Z; DS-halo, DS-flare, DS-z waiting-on-prereq)
-Base: 0dd23d659f4dbd8a0120aa85a321259327518251 (main); dev 8cf02113
-Next: supervisor (06:19Z): stop after DS-u (#4309) lands; post DS-u Belt-Slice-Done + Mac-Finish-Wanted, then stop. Adopt slices and DS-z wait for a relaunch (waiting-on-prereq) once CB adopt slices and UP-halo land.
+Issue: #3757 (relaunch) · Packet: docs/blueprints/suiteui/features/document-setup.md
+Run: act-1a16958d72f-a4mg · Session: cloud line lead (line:suiteui; with text-style, brush-keys, document-setup) · Started: 2026-10-23T15:25Z
+Stage: 3 wave 1 (combined waves across the three features)
+Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (dev)
+Next: wave 1 builds DS-photo, DS-design, DS-halo, DS-flare; then DS-z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -29,6 +29,13 @@ Next: supervisor (06:19Z): stop after DS-u (#4309) lands; post DS-u Belt-Slice-D
 | DS-6 | DS-u | – | journey + render budget | UITests/SuiteJourneyTests+DocumentSetup.swift, Tests/AppSnapshotTests/RenderBudgetNewDocumentTests.swift | journey; RenderBudgetNewDocumentTests | #4309 | pr |
 | DS-7..DS-16 | adopt slices, DS-z | – | see packet | see packet | see packet | – | blocked |
 
+## Wire
+- [ ] Wire: clipboard-interop:CB-photo (DS-photo)
+- [ ] Wire: clipboard-interop:CB-design (DS-design)
+- [ ] Wire: clipboard-interop:CB-halo (DS-halo)
+- [ ] Wire: clipboard-interop:CB-flare (DS-flare)
+- [ ] Wire: adopt-kernel-unsaved-prompt:UP-halo (DS-halo)
+
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
@@ -43,6 +50,7 @@ Next: supervisor (06:19Z): stop after DS-u (#4309) lands; post DS-u Belt-Slice-D
 - Status channel: Belt watches `lead/suiteui-document-setup`, so the record is mirrored to `docs/leads/suiteui-document-setup/` there and to `lead/document-setup` (from 06:15Z).
 - DS-m (#4184) is stacked with base `ds-a-document-setup-contract` so its diff stays its own (153 lines); against dev it would be 476 lines, over the lane's cap. It is retargeted to dev and merged with dev once #4182 lands.
 - DS-m deviations (builder): frame-rate, resolution and duration problem sentences are ours (packet gives none); any `#RRGGBB00` reads transparent; schema `background` maxLength 11 so `transparent` validates.
+- 2026-10-23T15:25Z (act-1a16958d72f-a4mg): contract-first waits (lead.md rule 12, #4814): a wait on another feature is met once that feature's first slice merged; each wait built ahead of its slice is listed under Wire. Merged-done = green `Linux` on a dev CI run containing the slice's last PR.
 
 ## Open
 - 2026-10-22T05:10Z wait check: CB-photo, CB-design, CB-halo, CB-flare planned (clipboard-interop lead building CB-5/7/9/11 test halves); UP-halo blocked behind UP-photo/UP-flare (unsaved-prompt run released); FR-halo, FR-flare, AC-zoom, CB-s, CB-m, CB-u done.
