@@ -6,10 +6,12 @@
 // a journey skips the panels; `-HaloWindowSize <w>x<h>` is the window's
 // opening size (HaloApp); `-HaloControlsProbe` publishes the `halo.controls`
 // JSON (HaloControls.swift); `-HaloPerfProbe` is kept for the frame probe
-// (#330). Text layers always draw through HaloTextRasterizer. A switch over
+// (#330). Text layers always draw through HaloTextRasterizer, and movies are
+// always written by the suite's LiveMedia (export-pack HX-4). A switch over
 // strings with no logic beyond HaloFixtures.project(_:): it is app-side, so
 // Linux can't run it; HaloProjectLaunchTests covers the Model half.
 import HaloModel
+import SuiteShell
 import SwiftUI
 
 struct HaloLaunch: Sendable {
@@ -47,10 +49,12 @@ struct HaloLaunch: Sendable {
     }
 
     /// The fixture (fake services) or sample (live services) project, else
-    /// an empty live one; text through HaloTextRasterizer in every case.
+    /// an empty live one; text through HaloTextRasterizer and movies through
+    /// LiveMedia in every case.
     func project() -> HaloProject {
         var services = fixture == nil ? HaloServices.live : HaloServices.fake
         services.text = HaloTextRasterizer()
+        services.media = LiveMedia()
         guard let name = fixture ?? sample, let document = HaloFixtures.project(name) else {
             return HaloProject(services: services)
         }
