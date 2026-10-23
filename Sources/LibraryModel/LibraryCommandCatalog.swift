@@ -34,7 +34,7 @@ extension LibraryCatalog {
     struct RatingParams: Codable, Sendable { var stars: Int }
     struct LabelParams: Codable, Sendable { var label: String? }
     struct SizeParams: Codable, Sendable { var size: Int }
-    /// file.import-folder's folder, the one the window's open panel chose.
+    /// A folder param, such as the one the export sheet writes to.
     struct FolderParams: Codable, Sendable { var folder: String }
 
     /// True while the loupe's photo shows without its adjustments; stepping to another photo or the grid ends it.
@@ -112,10 +112,11 @@ extension LibraryCatalog {
 
     static let fileAndEditSpecs: [CommandSpec<LibraryCatalog>] = [
         .typed("file.import-folder", title: "Import Folder…", summary: "Begins importing the photos in a folder.", kind: .file,
-               params: FolderParams.self, schema: .object(["folder": .string("The folder to import.")], required: ["folder"]),
+               params: ImportOptions.self, schema: importSchema,
                example: .object(["folder": .string("/tmp/Shoot")]), availability: { available($0.importFolderHelp) }
         ) { c, p in
             guard c.beginImport() != nil else { throw CatalogError.unavailable(id: "file.import-folder", why: c.importFolderHelp ?? "") }
+            c.importCopy = p.copy
             return JSONValue.object(["folder": .string(p.folder)])
         },
         plain("file.load-samples", "Load Sample Photos", "Replaces the photos with the 60 sample photos.", .file, .loadSamples),
