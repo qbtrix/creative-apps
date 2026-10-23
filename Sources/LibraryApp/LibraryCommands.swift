@@ -112,8 +112,10 @@ struct LibraryCommands: Commands {
     static func deleteRejectsItem(_ trash: LibraryMenu.Trash?) -> MenuCommand {
         let trash = trash ?? LibraryMenu.Trash(help: noWindow)
         return MenuCommand(
-            title: trash.title, systemImage: "trash", action: trash.help == nil ? trash.deleteRejects : nil,
-            reason: trash.help ?? noWindow, shortcut: KeyboardShortcut(.delete, modifiers: [.command, .option]))
+            LibraryCatalog.deleteRejectsControlSpec,
+            on: LibraryDeleteRejectsControl(help: trash.deleteRejects == nil ? trash.help ?? noWindow : trash.help),
+            title: trash.title, systemImage: "trash", shortcut: KeyboardShortcut(.delete, modifiers: [.command, .option])
+        ) { trash.deleteRejects?() }
     }
 
     var body: some Commands {

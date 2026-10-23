@@ -54,7 +54,9 @@ struct LibraryDeleteRejectsButtons: View {
     let perform: LibraryMenu.Action
 
     var body: some View {
-        Button("Move to Trash", role: .destructive) { perform() }
+        MenuCommand(
+            LibraryCatalog.deleteRejectsControlSpec, on: LibraryDeleteRejectsControl(help: nil), title: "Move to Trash",
+            role: .destructive) { perform() }
             .accessibilityIdentifier("library.trash.confirm")
         Button("Cancel", role: .cancel) {}
             .keyboardShortcut(.defaultAction)
