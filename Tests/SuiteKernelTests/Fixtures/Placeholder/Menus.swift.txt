@@ -21,23 +21,8 @@ struct FixtureCommands: Commands {
         }
     }
 }
-
-struct UnusedCommands: Commands {
-    var body: some Commands {
-        CommandGroup(after: .help) { Button("Unused") {} }
-    }
-}
-
+struct UnusedCommands: Commands { var body: some Commands { CommandGroup(after: .help) { Button("Unused") {} } } }
 struct FixtureView: View {
-    var body: some View {
-        Button("View Button") {}
-            .alert("Done", isPresented: .constant(false)) { Button("OK", role: .cancel) {} }
-    }
+    var body: some View { Button("View Button") {}.alert("Done", isPresented: .constant(false)) { Button("OK") {} } }
 }
-
-struct FixtureScene: Scene {
-    var body: some Scene {
-        WindowGroup { FixtureView() }
-            .commands { FixtureCommands() }
-    }
-}
+struct FixtureScene: Scene { var body: some Scene { WindowGroup { FixtureView() }.commands { FixtureCommands() } } }

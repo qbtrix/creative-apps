@@ -1,7 +1,3 @@
-# Placeholder menu items PlaceholderMenuTests still allows (no-placeholders NP-1).
-# One per line: `<file>: <trimmed line>`. A hit not listed here fails, and so does
-# a listed line that names no hit: this file only shrinks. Make the item act, hide
-# it from the beta's scenes, or disable it with a live reason, then delete its line.
-#
-# captain decision: AfterGlow > Settings… stays (LauncherCommandsSettings holds no
-# placeholder Button; the system item opens the Settings scene).
+# Placeholder menu items PlaceholderMenuTests allows (no-placeholders NP-1), one `<file>: <trimmed line>`
+# each. An unlisted hit fails, and so does a line naming no hit: this file only shrinks.
+# captain decision: AfterGlow > Settings… stays (no placeholder Button; the system item opens Settings).

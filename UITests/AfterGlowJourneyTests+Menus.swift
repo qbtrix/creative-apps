@@ -1,9 +1,6 @@
-// AfterGlowJourneyTests+Menus.swift (no-placeholders NP-2): MJ-NP, the launcher's menu bar holds no
-// placeholder item in the beta. Every menu opens by a mouse click; the app menu has no Check for Updates…
-// (LauncherCommandsUpdate is out of the home scene), no menu has the shared-assets stub's Add from Clipboard or
-// Window > Assets (LauncherCommandsAssets is out), and Edit on the home keeps the system's Cut, Copy and Paste,
-// which the stub had replaced. Items are found by title only: SwiftUI doesn't carry identifiers onto menu items
-// (#4647). The app-menu shot is a screen shot, since an open menu sits outside the window.
+// AfterGlowJourneyTests+Menus.swift (no-placeholders NP-2, MJ-NP): every launcher menu, opened by a click, holds
+// no Check for Updates…, Add from Clipboard or Assets (their stubs are out of the beta's scenes), and Edit keeps
+// the system's Cut, Copy and Paste. Items are found by title only (#4647); the menu shot is a screen shot.
 import XCTest
 
 final class AfterGlowMenusJourneyTests: XCTestCase {

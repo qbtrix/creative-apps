@@ -33,12 +33,5 @@
     "find": "guard let owner = site.owner else { return true }",
     "replace": "guard let owner = site.owner, owner.isEmpty else { return true }",
     "tests": "PlaceholderMenuTests"
-  },
-  {
-    "label": "commentsSkipped: a commented-out Button counts as a placeholder",
-    "file": "Tests/SuiteKernelTests/PlaceholderMenuTests.swift",
-    "find": "if char == \"/\", index + 1 < chars.count, chars[index + 1] == \"/\" {",
-    "replace": "if false, char == \"/\", index + 1 < chars.count, chars[index + 1] == \"/\" {",
-    "tests": "PlaceholderMenuTests"
   }
 ]

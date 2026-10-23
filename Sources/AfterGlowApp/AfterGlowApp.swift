@@ -4,14 +4,12 @@
 // the home at first launch and at OnboardingLayout's fixed size. Both the
 // home and the welcome window present themselves: a presented scene keeps an
 // `.automatic` one closed. The menus are SuiteCommands'
-// Window > Switch To, the home's LauncherCommandsHome, the Settings stub and
-// SuiteHelpCommands' Help menu, whose Welcome to AfterGlow opens the
-// onboarding window. The beta ships no placeholder menu item
-// (no-placeholders NP-2, PlaceholderMenuTests): the assets
-// (LauncherCommandsAssets) and updater (LauncherCommandsUpdate) stubs stay on
-// disk, each item disabled with its reason, but out of the home scene until
-// their feature wires them and adds them back here. LauncherDelegate
-// (LauncherRouter.swift) is the app delegate.
+// Window > Switch To plus one LauncherCommands stub per launcher feature,
+// each holding its blueprint 6.2 items disabled with their reason until that
+// feature wires them, and SuiteHelpCommands' Help menu, whose Welcome to
+// AfterGlow opens the onboarding window. LauncherDelegate (LauncherRouter.swift) is the app
+// delegate. The beta shows no placeholder item (no-placeholders NP-2), so the
+// assets and updater stubs are out of the home scene until they act.
 import SuiteModel
 import SuiteShell
 import SuiteUI
