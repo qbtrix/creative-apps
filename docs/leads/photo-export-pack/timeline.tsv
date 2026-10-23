@@ -137,3 +137,4 @@ utc	stage	event	ref	note
 2026-10-23T01:45Z	parked	still parked: #3477 has waiting-on-prereq
 2026-10-23T02:17Z	parked	still parked: #3477 has waiting-on-prereq
 2026-10-23T02:48Z	parked	still parked: #3477 has waiting-on-prereq
+2026-10-23T03:26Z	parked	still parked: #3477 has waiting-on-prereq; fixed finding #4701 (PJ-TX Type pick wait) in PR #4707
