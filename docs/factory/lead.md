@@ -319,6 +319,9 @@ Next: <the one thing a resumed lead does first>
 ## Decisions
 - <what you chose and why, one line each>
 
+## Wire
+- [ ] Wire: <feature>:<slice> (built on its fakes in <task>; swap in when it merges)
+
 ## Open
 - <blockers, needs-ui/needs-core issues, gap issues filed>
 ```
