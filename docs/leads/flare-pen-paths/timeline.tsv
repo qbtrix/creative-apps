@@ -96,3 +96,4 @@ utc	stage	event	ref	note
 2026-10-23T07:24Z	check	FP-u panel: 2 findings filed #4773 #4774 (no blocker); fix round 1 started; Belt-Contact-Sheet posted on #3519 (run 39905307517, gaps: #4012)
 2026-10-23T07:39Z	pr	FP-u fix round 1: PR #4775 (closes #4773 #4774), head 8ca619985, fast-lane; panel re-run (round 2) after it lands
 2026-10-23T07:41Z	heartbeat	#4775 waiting on lane macOS build
+2026-10-23T08:11Z	blocked	#4775 macOS build 39919379484 failed on dev break FlareOpenQueue (not this PR); fix #4784; merge dev into #4775 once it lands
