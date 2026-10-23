@@ -171,6 +171,10 @@ extension FlareWorkspace {
 }
 
 extension FlareWorkspace {
+    /// Commands whose menu items the beta hides (no-placeholders NP-3); not built yet.
+    public static let menuHidden: Set<String> = []
+    public static func laterReason(_ id: String) -> String { "" }
+
     /// Why Restore and Discard wait: the recovery file holds the open animation's unsaved changes.
     public static let recoveryKeepsEdits = "The open animation has unsaved changes; save them first."
     var recoveryHelp: String? { isDirty ? Self.recoveryKeepsEdits : nil }
