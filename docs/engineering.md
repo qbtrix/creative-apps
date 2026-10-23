@@ -180,7 +180,10 @@ every step.
   uploads the folder as the `ui-screens` artifact of that journeys run
   (`gh run list --workflow journeys.yml`, then `gh run download <id> -n
   ui-screens`). Its own concurrency group means a journeys job waiting for a
-  macOS runner never holds CI's. A failed step fails that job and
+  macOS runner never holds CI's, and its `Journeys wait` job holds the run
+  on ubuntu until no CI run is queued for a macOS runner and fewer than two
+  older journeys runs are alive, so the journeys hold at most two of the
+  pool's five macOS runners and the lane's gate goes first. A failed step fails that job and
   files a `finding` issue on dev; the job is report-only, so it never holds
   `main` or a PR. Gate: none (report-only).
 - **Quarantine is owned and expires.** The supervisor can skip a journey that

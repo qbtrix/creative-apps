@@ -346,10 +346,15 @@ public struct LibraryShareMenu: Sendable, Equatable {
 }
 
 extension LibraryCatalog {
-    /// File > Share… (`file.share`): the window opens the system's share menu for the selection, so the spec stays
-    /// out of `commands` (and the ledger) like Import Folder… and Export…; it is available while the menu's help is nil.
+    /// File > Share… (`file.share`): the window opens the system's share sheet for the copies `prepareShare` makes,
+    /// so the spec stays out of `commands` (and the ledger) like Import Folder… and Export…; it is available while the
+    /// menu's help is nil. Run, it sends the caller to `file.share-prepare`, which names the same copies.
     public static let shareMenuSpec: CommandSpec<LibraryShareMenu> =
         .typed("file.share", title: "Share…", summary: "Shares the selected photos, location off.", kind: .file,
                params: NoParams.self, schema: ParamSchema.none, example: .object([:]), availability: { available($0.help) }
-        ) { _, _ -> JSONValue in throw CatalogError.notBuilt(id: "file.share", feature: "SH-5") }
+        ) { _, _ -> JSONValue in throw CatalogError.unavailable(id: "file.share", why: shareInWindow) }
+
+    /// Why `file.share` doesn't run as a command.
+    static let shareInWindow =
+        "File > Share… opens the system's share sheet in the window; file.share-prepare makes the copies."
 }
