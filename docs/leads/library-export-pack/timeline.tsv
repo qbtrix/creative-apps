@@ -62,3 +62,4 @@ time	event	task	note
 2026-10-23T20:33Z	heartbeat	lane bisect: probe -1 (#4818, not ours) red on Linux; our PRs wait for the next batch; TC-2 not on dev
 2026-10-23T20:44Z	heartbeat	bisect ended on #4818 (not ours); our PRs wait for the next batch; TC-2 not on dev
 2026-10-23T20:57Z	heartbeat	lane batch 20261023204921 (#4841-#4862) in flight, 58 ready PRs queued; #4899 #4948 #4960 #4962 eligible; #4838 awaits its lane Linux run; TC-2 not on dev
+2026-10-23T21:11Z	heartbeat	batch 20261023204921 macOS gate running; our PRs queued, none merged
