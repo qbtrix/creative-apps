@@ -289,7 +289,7 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
             && lhs.paintError == rhs.paintError && lhs.selectedKeys == rhs.selectedKeys
             && lhs.timelineError == rhs.timelineError
         let files = lhs.fileName == rhs.fileName && lhs.isDirty == rhs.isDirty && lhs.saveError == rhs.saveError
-            && lhs.loadState == rhs.loadState && lhs.recent == rhs.recent
+            && lhs.loadState == rhs.loadState && lhs.recent == rhs.recent && lhs.importNote == rhs.importNote
         return editing && animating && panels && files
     }
 }
