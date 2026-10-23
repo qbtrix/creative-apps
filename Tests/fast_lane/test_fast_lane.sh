@@ -7,7 +7,7 @@
 # more ready PRs get one Linux check together before they land; a red batch is
 # bisected by prefix), the batch macOS gate (LANE_MAC_PER_PR=0: one macOS gate
 # per code batch scoped to its apps, priority order, slots, the timer, a red
-# base set aside per job, the culprit's stacked PRs named), and the red-dev
+# base set aside per job on Linux and judged by failing test on macOS, the culprit's stacked PRs named), and the red-dev
 # bisect, with its 2-of-3 vote mode for a timing budget test. No network,
 # needs bash, git and jq.
 #
@@ -1545,6 +1545,36 @@ expect "red base: a tip whose macOS gate still runs lands nothing" "$(merges),$(
 gate "$TIP" failure success "macOS (photo)"; lane_sweep
 expect "red base: once macOS passes, red only where dev is red, it lands on own proof" \
   "$(merges),$(grep -c '^pr comment 108 .*so this batch landed on each PR.s own proof' "$sw/calls")" "pr merge 107,pr merge 108,1"
+# dev red on macOS: the batch is judged by failing tests, not by the job.
+# Each chain commit's macOS gate has its own job (joblog.<id> is its failed
+# log); the base's failing tests are set aside, any other one is the batch's.
+mlog() {  # mlog <job id> <test>...: a macOS job's failed log with those tests failing
+  local t; : >"$sw/joblog.$1"
+  for t in "${@:2}"; do
+    printf 'macOS (photo)\tScoped build and tests\t2026-10-23T04:39:07.2585450Z \xe2\x9c\x98 Test %s recorded an issue at %s:41:22: Expectation failed: (a \xe2\x86\x92 1) == (b \xe2\x86\x92 2)\n' "${t#*/}" "${t%%/*}" >>"$sw/joblog.$1"
+  done
+  printf 'macOS (photo)\tScoped build and tests\t2026-10-23T04:39:07.2588190Z \xe2\x9c\x98 Test run with 9 tests failed after 3.1 seconds with %s issues.\n' "$(( $# - 1 ))" >>"$sw/joblog.$1"
+}
+devred() {  # devred <n>: PRs n and n+1 batched, the tip, probe 1 and the base all red on macOS
+  fresh; cpr "$1" Sources/PhotoApp/A.swift; cpr "$(( $1 + 1 ))" Sources/PhotoModel/B.swift
+  lane_sweep; TIP=$(batch_tip)
+  MAC_URL="$JOB/201" gate "$TIP" success failure "macOS (photo)"; lane_sweep
+  MAC_URL="$JOB/202" gate "$(probe_sha 1)" success failure "macOS (photo)"; lane_sweep
+  MAC_URL="$JOB/203" gate "$(probe_sha 0)" success failure "macOS (photo)"
+}
+JOB="https://github.com/qbtrix/creative-apps/actions/runs/888/job"
+devred 110; mlog 201 Old.swift/a\(\); mlog 202 Old.swift/a\(\); mlog 203 Old.swift/a\(\); lane_sweep
+expect "dev red macOS: a batch failing only dev's tests lands" "$(merges),$(grep -c '^pr edit .*needs-fix' "$sw/calls")" "pr merge 110,pr merge 111,0"
+devred 112; mlog 201 Old.swift/a\(\) New.swift/b\(\); mlog 202 Old.swift/a\(\); mlog 203 Old.swift/a\(\); lane_sweep
+expect "dev red macOS: a new failing test is not set aside" "$(grep -c "own proof" "$sw/calls"),$(grep -c '^pr merge 113' "$sw/calls")" "0,0"
+expect "dev red macOS: the PR that adds it is named with the test" \
+  "$(merges),$(grep -c '^pr edit 113 .*--add-label needs-fix' "$sw/calls"),$(grep -c "^pr comment 113 .*fails the macOS (photo) check once it lands on dev after #112: $JOB/201\. Tests failing with it that pass on dev: New\.swift/b()\." "$sw/calls")" \
+  "pr merge 112,1,1"
+devred 114; mlog 202 Old.swift/a\(\); mlog 203 Old.swift/a\(\); lane_sweep
+expect "dev red macOS: an unreadable log lands nothing and names nothing" "$(merges),$(grep -c 'needs-fix' "$sw/calls")" ",0"
+devred 116; printf 'macOS (photo)\tscripts/ci\t2026-10-23T04:39:07Z TEST PROCESS DIED\n' >"$sw/joblog.201"; mlog 202 Old.swift/a\(\); mlog 203 Old.swift/a\(\); lane_sweep
+expect "dev red macOS: a crash with no test named is red, never dev's" \
+  "$(merges),$(grep -c '^pr edit 117 .*--add-label needs-fix' "$sw/calls"),$(grep -c "own proof" "$sw/calls")" "pr merge 116,1,0"
 LANE_MAC_PER_PR=1
 
 exit "$fail"
