@@ -147,11 +147,46 @@ import Testing
         #expect(Self.stroke(w, "node-2") == nil, "the locked layer took a stroke")
     }
 
+    /// The catalog's schema refuses a width outside 0...1000, so the clamp is the editor's: its over-range width lands
+    /// as the nearest bound on every selected layer (#4920).
     @Test func widthClamps() throws {
         var w = Self.threeSelected
         _ = try DesignWorkspace.catalog.run("stroke.add", params: .object([:]), on: &w)
-        _ = try? DesignWorkspace.catalog.run("stroke.width", params: .object(["width": .number(5000)]), on: &w)
-        #expect((Self.stroke(w, "node-2")?.width ?? 0) <= StrokeRules.widths.upperBound)
+        for (width, landed) in [(5000.0, StrokeRules.widths.upperBound), (-3, StrokeRules.widths.lowerBound)] {
+            let edit = try #require(w.strokeChange(.width(width, drag: nil)), "\(width) is refused, not clamped")
+            try w.setStyle(edit.change)
+            for id in ["node-2", "node-3", "node-4"] {
+                #expect(Self.stroke(w, id)?.width == landed, "\(id) at \(width)")
+            }
+        }
+    }
+
+    /// The inspector's stroke edit skips a locked layer behind the primary, as the catalog does, and keeps it selected
+    /// (#4919).
+    @Test func theInspectorSkipsALockedLayerToo() throws {
+        var w = DesignFixtures.cards
+        w.selectItem("node-2")
+        w.toggleSelection("node-3")
+        try w.setNodeLocked("node-2", true)
+        let add = try #require(w.strokeChange(.add), "the editor is enabled")
+        try w.setStyle(add.change)
+        #expect(Self.stroke(w, "node-3") == .default)
+        #expect(Self.stroke(w, "node-2") == nil, "the locked layer took a stroke")
+        #expect(Set(w.selectedNodeIDs) == ["node-2", "node-3"])
+    }
+
+    /// A hidden layer takes no stroke from either path, and the editor says why (#4919).
+    @Test func aHiddenLayerRefusesWithItsHelp() throws {
+        var w = DesignFixtures.cards
+        w.selectItem("node-2")
+        try w.setNodeHidden("node-2", true)
+        #expect(w.strokeHelp == "Show A to change it.")
+        #expect(DesignWorkspace.catalog.availability("stroke.add", on: w) == .unavailable("Show A to change it."))
+        #expect(throws: (any Error).self) { try DesignWorkspace.catalog.run("stroke.add", params: .object([:]), on: &w) }
+        #expect(throws: DesignRefusal.hidden("A")) { try w.setStyle(.stroke(.default)) }
+        #expect(Self.stroke(w, "node-2") == nil)
+        w.toggleSelection("node-3")
+        #expect(w.strokeHelp == "Show A to change it.", "a hidden layer behind the primary refuses too")
     }
 
     @Test func trimIsUnavailableWithTheTrimHelp() throws {
