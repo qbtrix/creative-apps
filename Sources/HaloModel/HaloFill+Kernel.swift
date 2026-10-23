@@ -3,7 +3,9 @@
 // and the fill editor's gestures run on the selected solid or shape layer.
 // A layer keeps its gradient in a unit box over its bounds; the selection
 // maps it into the layer's box in composition pixels. Text and null layers
-// have no fill. Linux-safe.
+// have no fill, and a solid holding a placed picture draws the picture in
+// place of its fill, so its fill commands are off (`pictureCoversFill`).
+// Linux-safe.
 import SuiteKernel
 
 extension HaloProject: GradientFillTarget {
@@ -21,11 +23,13 @@ extension HaloProject: GradientFillTarget {
         return FillSelection(fill: layer.fill(in: box), box: box)
     }
 
-    /// Why the fill commands can't run on the selection; nil on a solid or shape.
+    /// Why the fill commands can't run on the selection; nil on a shape or on a solid without a picture (a placed
+    /// picture draws in place of the solid's colour).
     public var fillHelp: String? {
         guard selectedComposition != nil, let layer = selectedLayer else { return Self.noFillLayer }
         switch layer.kind {
-        case .solid, .shape: return nil
+        case .solid: return layer.placedAsset == nil ? nil : Self.pictureCoversFill
+        case .shape: return nil
         case .text: return Self.textFillHelp
         case .null: return Self.nullFillHelp
         }

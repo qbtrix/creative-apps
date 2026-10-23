@@ -35,7 +35,7 @@ final class HaloPlaceJourneyTests: XCTestCase {
 
         place(logo, halo) // 2.
         XCTAssert(halo.trackName("logo").waitForExistence(timeout: 10), "the timeline lists no logo")
-        expectText("logo.svg · SVG · 480 × 160", halo)
+        expectFile("logo.svg · SVG · 480 × 160", halo)
         halo.shot("place-logo")
 
         for property in ["scaleX", "scaleY", "opacity"] { // 3.
@@ -59,7 +59,7 @@ final class HaloPlaceJourneyTests: XCTestCase {
         XCTAssert(fill.waitForExistence(timeout: 5), "IMAGE has no Fill checkbox")
         if (fill.value as? Int) != 1 { fill.click() }
         place(photo, halo)
-        expectText("photo-1200x800.jpg · JPEG · 1200 × 800", halo)
+        expectFile("photo-1200x800.jpg · JPEG · 1200 × 800 px", halo)
         let canvas = halo.element("halo.viewer.canvas")
         let before = canvas.screenshot().pngRepresentation
         XCUIElement.perform(withKeyModifiers: .option) {
@@ -100,11 +100,13 @@ final class HaloPlaceJourneyTests: XCTestCase {
         field.typeText(value + "\r")
     }
 
-    /// Some text in the window reads `text` within five seconds.
-    @MainActor private func expectText(_ text: String, _ halo: Journey) {
-        let match = halo.app.descendants(matching: .any).matching(
-            NSPredicate(format: "label == %@ OR value == %@", text, text)).firstMatch
-        XCTAssert(match.waitForExistence(timeout: 5), "nothing reads \(text)")
+    /// IMAGE's File row (`suite.place.file`) names `summary` within five seconds. The row is one element that
+    /// combines its label and the summary ("File, logo.svg · …"), so it is read by containment (#4793).
+    @MainActor private func expectFile(_ summary: String, _ halo: Journey) {
+        let row = halo.element("suite.place.file")
+        XCTAssert(row.waitForExistence(timeout: 5), "IMAGE has no File row (suite.place.file)")
+        XCTAssert(waitFor { row.label.contains(summary) || "\(row.value ?? "")".contains(summary) },
+                  "the File row reads \(row.label), not \(summary)")
     }
 
     /// Polls `condition` for up to five seconds.
