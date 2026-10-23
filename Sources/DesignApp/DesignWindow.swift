@@ -46,12 +46,9 @@
 // run, replays the last one into the workspace as one step (`live.land(into:)`),
 // written before the copy is cleared.
 //
-// Pictures (placed-images PD-u): File > Place… (⇧⌘P) and the Image section's Place… open SuiteUI's
-// PlacePanel and send each file as `.place`, filling the selected frame while Fill is on; a canvas drop
-// sends the same; the Image section's Place in Frame… fills its layer. Fill applies only when an unlocked frame
-// or rectangle is selected (`placeFills`), and only to the first file (`placeSteps`). A Move-tool ⌥-drag inside
-// the selected overflowing picture pans its focus on the live copy, landing one `place.focus` at mouse-up. A
-// refusal goes to the status line.
+// Pictures (placed-images PD-u): File > Place… (⇧⌘P), a drop and Place in Frame… send each file as `.place`; the
+// first fills an unlocked selected frame or rectangle when asked (`placeFills`, `placeSteps`). A Move-tool ⌥-drag in
+// an overflowing selected picture pans it on the live copy, landing one step. A refusal goes to the status line.
 //
 // `.suiteProbes()` sits on the root (D0-7a), so the window's `suite.controls`
 // lists every control the editor registers with its DesignControlID.
@@ -275,8 +272,7 @@ struct DesignWindow: View {
         if let refusal { note = refusal.help }
     }
 
-    /// Place…: the first file the panel reads fills the selected frame when `fill` can (`placeFills`), else
-    /// File > Place…'s Fill setting decides; the rest become new layers. Refused files can't say why until #4985.
+    /// Place…: `fill`, else the checkbox, decides whether the first file fills the selection (refusals: #4985).
     private func placeFile(fill: Bool?) {
         let formats = model.placeFormats
         let fills = model.placeFills(fill: fill ?? UserDefaults.standard.bool(forKey: DesignPlace.fillKey))

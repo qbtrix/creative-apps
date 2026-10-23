@@ -1,7 +1,5 @@
-// DesignPlaceInspectorTests.swift (placed-images PD-u, PD-4): what Place…, a drop and the Picture section decide.
-// Fill fills only a selected unlocked frame or rectangle, and only with the first file; Reset Size has nothing to do
-// on a picture of its own shape; the section's note and the menu's place help are plain reasons, never a command id;
-// a pan's steps show on the live copy and land as one at the end. Runs on Linux and macOS.
+// DesignPlaceInspectorTests.swift (placed-images PD-u, PD-4): what Place…, a drop, the Picture section and a pan
+// decide: fill only a fillable selection, plain reasons never ids, a pan landing once. Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else

@@ -1,8 +1,6 @@
 // DesignPlaceUISnapshots.swift (placed-images PD-u, PD-4): Design's place surfaces around a placed picture.
-// The 400 × 400 frame showing the photo beside the inspector's Picture section (name, size, Place in Frame…), the
-// same frame empty (Place in Frame…, the checkbox and the note in their real states), and the canvas under the drop
-// ring a picture dragged over it shows. Writes design-image-inspector-, design-image-inspector-empty- and
-// design-place-drop-{light,dark}.png from `DesignPlaceSeed`. macOS only.
+// The 400 × 400 frame with the photo beside the Picture section, the same frame empty, and the drop ring. Writes
+// design-image-inspector{,-empty}- and design-place-drop-{light,dark}.png from `DesignPlaceSeed`. macOS only.
 import AppKit
 import SuiteKernel
 import SuiteUI

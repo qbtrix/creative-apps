@@ -6,8 +6,7 @@
 // editor intent on the copy after the ones before it (`preview(_: GradientIntent)`:
 // a dragged stop's index follows the copy's re-sorts), and the workspace is
 // left alone. A transform scrub (the inspector's Rotation bar) previews its
-// kernel intent the same way (`preview(_: TransformIntent)`), and a picture pan its
-// focus step (`preview(_: PlaceIntent)`), landing one `runPlace` then `endEditRun`.
+// kernel intent the same way (`preview(_: TransformIntent)`; a pan's, `preview(_: PlaceIntent)`).
 // `end(into:)` replays the gesture into the workspace through its own methods
 // (the last sample, `drag` then `endDrag`; the last value, `setStyle` or
 // `runTransform` then `endEditRun`; every fill intent, `runFill` then

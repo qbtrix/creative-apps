@@ -1,5 +1,5 @@
 // DesignPlace.swift (placed-images PD-u, PD-4): the window's half of placing pictures. `fillKey` is where the
-// Image section's Fill checkbox keeps its choice for every Design window; `designPlaceDrop` takes files dropped
+// Picture section's "Place into selected frame" checkbox keeps its choice for every Design window; `designPlaceDrop` takes files dropped
 // on the artwork through SuiteUI's placeDropTarget (its accent ring while a drag offers something). The Model
 // turns the drop's point into page points and says whether it fills the selected frame under it; each file then
 // goes to the window as `.place`: the first into that frame, the rest at the drop point (`placeSteps`).

@@ -1,9 +1,6 @@
-// DesignPlace+Inspector.swift (placed-images PD-u, PD-4): what File > Place…, a drop and the inspector's Picture
-// section decide before a picture is placed. `placeFills` is whether a Place… fills the selection: Fill is on and an
-// unlocked frame or rectangle is selected, else the picture is a new layer whatever Fill says. `placeSteps` turns
-// several files into intents, the first filling the frame and the rest added as new layers, so one frame never takes
-// several pictures. `resetSizeHelp` greys Reset Size on a picture that already has its own shape, and `placeNote`
-// is the section's one note: each reason once, named by its control. Linux-safe.
+// DesignPlace+Inspector.swift (placed-images PD-u, PD-4): what File > Place…, a drop and the Picture section decide:
+// whether a place fills the selection or adds a new layer (`placeFills`, `placeSteps`: only the first file fills),
+// Reset Size's own reason (`resetSizeHelp`) and the section's note, each reason once (`placeNote`). Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else

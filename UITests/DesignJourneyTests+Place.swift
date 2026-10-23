@@ -19,7 +19,7 @@ final class DesignPlaceJourneyTests: XCTestCase {
         XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 10), "the cards fixture showed no page")
 
         design.clickDesignLayer(Self.desktopRow) // 1. A frame selected: the Picture section offers Place in Frame….
-        for id in [Self.place, Self.fill] where !design.element(id).exists { XCTFail("the Image section shows no \(id)") }
+        for id in [Self.place, Self.fill] where !design.element(id).exists { XCTFail("the Picture section shows no \(id)") }
         design.element(Self.place).click() // 2. Place in Frame… photo-1200x800.jpg: it fills the frame, no new layer.
         // PD-7 answers the Place… panel with photo-1200x800.jpg here.
         XCTAssert(design.element("suite.place.file").waitForExistence(timeout: 5), "the frame shows no picture")
