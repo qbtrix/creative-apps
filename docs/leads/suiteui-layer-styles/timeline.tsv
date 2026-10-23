@@ -23,3 +23,4 @@ utc	stage	event	ref	note
 2026-10-23T20:34Z	check	heartbeat	-	20:33Z: lane bisecting batch 20261023192105 (#4818..#4842, none ours); ours wait the next batch, no needs-fix
 2026-10-23T20:57Z	check	heartbeat	-	20:56Z: lane batch 20261023204921 (#4841..#4862) running; ours (#4891+) next in line, no needs-fix
 2026-10-23T21:18Z	check	heartbeat	-	21:18Z: lane batch 20261023204921 Linux green, macOS gate running; ours next, no needs-fix
+2026-10-23T21:40Z	check	heartbeat	-	21:4xZ check: #4893 #4902-#4905 #4911 #4891 open, fast-lane, no needs-fix; batch 20261023204921 macOS gate running, ours queue for next batch; stacked tasks wait parents
