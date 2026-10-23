@@ -24,8 +24,6 @@ public enum FlareOpenError: Error, Equatable, Sendable {
     case damaged(String)
     /// The file is over a reader limit; the string names the limit.
     case tooLarge(String)
-    /// Opening this kind of file has not been built yet (the LO-a stub's refusal; no open throws it now).
-    case notYet
 
     public var message: String {
         switch self {
@@ -34,7 +32,6 @@ public enum FlareOpenError: Error, Equatable, Sendable {
             FlareWorkspace.sentence("This file isn't a Lottie file Flare can read", detail)
         case .tooLarge(let detail):
             FlareWorkspace.sentence("This Lottie file is larger than Flare can open", detail)
-        case .notYet: "Opening Lottie arrives with LO-3."
         }
     }
 }
@@ -117,6 +114,7 @@ extension FlareWorkspace {
         switch Self.decodeLottie(data, named: name) {
         case .success(let (document, skipped)):
             restoreRecovery(document)
+            importReport = skipped
             return skipped
         case .failure(let error):
             loadState = .failed(error.message)

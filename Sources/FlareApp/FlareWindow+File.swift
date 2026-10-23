@@ -18,9 +18,10 @@
 // and Clear Menu and the file-flow commands' requests go to the bridge (FL-4).
 // A Lottie JSON (`FlareWorkspace.opensAsLottie`, lottie-open LO-4) opens through
 // FlareLottieOpen off the main actor and lands through `finishLottieOpen`:
-// untitled, with the import note above the stage (FlareImportNoteAdapter.swift); on the
-// LO-1 stub the open alert says "Opening Lottie arrives with LO-3." It isn't
-// noted in the recents yet (LO-5 decides).
+// untitled, with the import note above the stage (FlareImportNoteAdapter.swift); a
+// refusal shows the open alert with the reader's reason. The JSON is never noted
+// in the recents (LO-5): it is the source, not the document, and the suite's
+// recents hold only .flare files; the first Save notes the new .flare.
 import AppKit
 import FlareCore
 import FlareModel

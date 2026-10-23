@@ -97,6 +97,9 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     /// The note a Lottie open leaves: one sentence per part left out; nil once dismissed or another document
     /// loads (FlareLottieNote.swift).
     public internal(set) var importNote: [String]?
+    /// The open document's Lottie open's skipped sentences, after Dismiss too; nil when it didn't come from a
+    /// Lottie (`import.report`, FlareLottieNote.swift).
+    public internal(set) var importReport: [String]?
     /// Why the last layer change or undo was refused; nil after one succeeds.
     public internal(set) var layerError: FlareLayerError?
     /// The easing editor's segment, as last picked; `selectedEasingSegment`
@@ -161,6 +164,7 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
         (exportState, assist) = (.idle, AssistState())
         (fileName, savedDocument, saveError, loadState) = (nil, document, nil, .idle)
         importNote = nil
+        importReport = nil
     }
 
     /// Selects a scene by id. An id not in the document is ignored. Selecting

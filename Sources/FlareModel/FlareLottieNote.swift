@@ -4,7 +4,9 @@
 // reads and opens the file off the main actor and lands the result through `finishLottieOpen`: the document opens
 // untitled, so Save asks for a .flare and never writes the JSON, and `importNote` keeps one sentence per part the
 // reader left out, which the note above the stage lists (`importNoteRows`, "Nothing was skipped." for none) until
-// Dismiss (`dismissImportNote`) or the next load. A refusal keeps the open document and says why in `loadState`.
+// Dismiss (`dismissImportNote`) or the next load. `importReport` keeps the same sentences past Dismiss, for the
+// `import.report` query (lottie-open LO-5), until the next load. A refusal keeps the open document and says why in
+// `loadState`.
 // Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -16,6 +18,20 @@ import SuiteKernel
 extension FlareWorkspace {
     /// The note's one row when the reader left nothing out.
     public static let nothingSkipped = "Nothing was skipped."
+    /// Why `import.report` can't run: the open document didn't come from a Lottie.
+    public static let noLottieOpened = "Nothing was opened from a Lottie file."
+
+    /// `import.report`: the open document's Lottie open's skipped sentences, `{skipped: [sentence]}`.
+    static let importReportCommand: CommandSpec<FlareWorkspace> = .typed(
+        "import.report", title: "Import Report",
+        summary: "Lists what the Lottie open left out, one sentence per skipped part.", kind: .query,
+        params: NoParams.self, schema: ParamSchema.none,
+        result: .object(["skipped": .array(of: .string("One sentence per skipped part."))], required: ["skipped"]),
+        example: .object([:]),
+        availability: { $0.importReport == nil ? .unavailable(noLottieOpened) : .available }
+    ) { w, _ in ImportReport(skipped: w.importReport ?? []) }
+
+    struct ImportReport: Encodable { let skipped: [String] }
 
     /// Whether `path` opens through the Lottie reader (its extension is one of `FlareLottieOpen.fileExtensions`).
     public static func opensAsLottie(_ path: String) -> Bool {
@@ -38,6 +54,7 @@ extension FlareWorkspace {
         case .success(let (document, skipped)):
             load(document)
             importNote = skipped
+            importReport = skipped
         case .failure(let error):
             loadState = .failed(error.message)
         }
