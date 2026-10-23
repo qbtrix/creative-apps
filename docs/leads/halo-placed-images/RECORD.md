@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: PH-u critic panel running on scoped run 39892568309 (inspector red fixed by #4649; LiveDrag + #4454 outside feature); #4649 lane build 39894209996 queued; then #4658 to dev, PH-z done, contact sheet.
+Next: PH-u fix round 1 (wf_fe4b9dac-6fe) on findings #4742 #4744-#4752; #4649 lane build queued; then #4658 to dev, PH-z done, contact sheet. No new feature wave (10 open findings).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

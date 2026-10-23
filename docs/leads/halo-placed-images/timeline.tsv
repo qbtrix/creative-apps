@@ -103,3 +103,5 @@ utc	stage	event	ref	note
 2026-10-23T03:59:07Z	3	gaps	PH-z	filed #4721 #4722 #4723 #4724; #4649 build and scoped run still queued
 2026-10-23T04:20:57Z	3	check	PH-z	#4649 build queued; scoped run in_progress
 2026-10-23T04:45:00Z	3	critic	PH-u	critic panel wf_25b981ed-a09 on run 39892568309 (snapshots; ui-screens pending 39900132121)
+2026-10-23T04:48:20Z	3	critic	PH-u	panel not clean: 12 confirmed, 3 refuted; filed #4742 #4744-#4752
+2026-10-23T04:48:20Z	3	fix	PH-u	fix round 1 started wf_fe4b9dac-6fe base 57f7ca1b
