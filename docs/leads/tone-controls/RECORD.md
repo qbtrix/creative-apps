@@ -4,13 +4,13 @@ Issue: #3476 · Packet: docs/blueprints/suiteui/features/tone-controls.md
 Run: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui) · Started: 2026-10-23T14:52Z (earlier runs act-1a16469734c-d0s8, act-1a15821c836-93pf)
 Stage: 4 wave 2
 Base: origin/dev 8021b0f5
-Next: PRs open on the lane: TC-2 #4862 (TC-a), TC-5 #4880, TC-7 #4870, TC-6 #4953 (TC-m). TC-u (TC-3+TC-4) gated CI: PASS at lead/tone-controls-TC-u 5b351323; its PR opens once #4862 merges (514 lines against dev with TC-2, 396 alone). TC-z waits on TC-u, TC-m and other features' z slices.
+Next: TC-2 #4862 merged 21:42Z (TC-a waits on scoped suiteui run 40029042081 at 491ec546). TC-u PR #5006 open (dev merged in, gated CI: PASS at 9e077af0). On the lane: TC-5 #4880, TC-7 #4870, TC-6 #4953 (TC-m). TC-z waits on TC-u, TC-m and other features' z slices.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| TC-a | Tone module stubs, placeholder ToneRows on a gallery page, checks disabled | TC-1, TC-2 | SJ0 | suite-imaging:IM-a, gradient-fill:GF-a, autosave-history:AH-a, placed-images:PL-a (all met on dev) | no | 0 | building (#4862) | – | – |
-| TC-u | ToneRows view, snapshots, budget, journey | TC-3, TC-4 | tone journey | TC-a | yes | 0 | waiting | – | – |
+| TC-a | Tone module stubs, placeholder ToneRows on a gallery page, checks disabled | TC-1, TC-2 | SJ0 | suite-imaging:IM-a, gradient-fill:GF-a, autosave-history:AH-a, placed-images:PL-a (all met on dev) | no | 0 | merged; run 40029042081 pending | – | – |
+| TC-u | ToneRows view, snapshots, budget, journey | TC-3, TC-4 | tone journey | TC-a | yes | 0 | building (#5006) | – | – |
 | TC-m | ToneRules, ToneCommands, ToneSettings bodies | TC-5, TC-6, TC-7 | KJ-tone | TC-a | no | 0 | waiting | – | – |
 | TC-z | Gallery live through ToneCommands; fake app takes tone (RJ-X41); built | TC-8, TC-9, TC-10 | tone journey, KJ-tone | TC-u, TC-m, GF-z, AH-z, TT-z, EY-z, SH-z, SS-d, PL-z | no | 0 | waiting | – | – |
 
@@ -18,9 +18,9 @@ Next: PRs open on the lane: TC-2 #4862 (TC-a), TC-5 #4880, TC-7 #4870, TC-6 #495
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | TC-1 | TC-a | – | SuiteImaging Tone/ stubs (no Package.swift: IM-1 made the target) | Sources/SuiteImaging/Tone/{ToneSettings,ToneRules,ToneCommands}.swift, Tests/SuiteImagingTests/Tone{Settings,Rules,Commands}Tests.swift, Tests/canonical-concepts.txt, docs/c4/parts/creative-apps/suite-imaging/imaging-tone.json | suites compile disabled | #4555 f5993669 | merged |
-| TC-2 | TC-a | – | Placeholder ToneRows, gallery page, journey skipped | Sources/SuiteUI/ToneRows.swift, Sources/SuiteUI/Gallery/GalleryToneRows.swift, Sources/SuiteUI/SuiteGallery.swift, UITests/SuiteJourneyTests+Tone.swift | SJ0 | #4862 610cb64f | open |
-| TC-3 | TC-u | – | The ToneRows view | Sources/SuiteUI/ToneRows.swift, Tests/SuiteUITests/ToneRowsTests.swift | ToneRowsTests | branch 5b351323 (PR after #4862) | gated |
-| TC-4 | TC-u | – | Snapshots, budget, journey on | Tests/AppSnapshotTests/SuiteToneRowsSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetToneRowsTests.swift, UITests/SuiteJourneyTests+Tone.swift | journey | branch 5b351323 (PR after #4862) | gated |
+| TC-2 | TC-a | – | Placeholder ToneRows, gallery page, journey skipped | Sources/SuiteUI/ToneRows.swift, Sources/SuiteUI/Gallery/GalleryToneRows.swift, Sources/SuiteUI/SuiteGallery.swift, UITests/SuiteJourneyTests+Tone.swift | SJ0 | #4862 610cb64f | merged |
+| TC-3 | TC-u | – | The ToneRows view | Sources/SuiteUI/ToneRows.swift, Tests/SuiteUITests/ToneRowsTests.swift | ToneRowsTests | #5006 9e077af0 | open |
+| TC-4 | TC-u | – | Snapshots, budget, journey on | Tests/AppSnapshotTests/SuiteToneRowsSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetToneRowsTests.swift, UITests/SuiteJourneyTests+Tone.swift | journey | #5006 9e077af0 | open |
 | TC-5 | TC-m | – | ToneRules bodies | Sources/SuiteImaging/Tone/ToneRules.swift, Tests/SuiteImagingTests/ToneRulesTests.swift, Tests/mutations/SuiteImaging.ToneRules.json | ToneRulesTests | #4880 5f34a503 | open |
 | TC-6 | TC-m | – | ToneCommands bodies | Sources/SuiteImaging/Tone/ToneCommands.swift, Tests/SuiteImagingTests/ToneCommandsTests.swift, Tests/mutations/SuiteImaging.ToneCommands.json | ToneCommandsTests | #4953 9e709bc9 | open |
 | TC-7 | TC-m | – | ToneSettings coding and clamping | Sources/SuiteImaging/Tone/ToneSettings.swift, Tests/SuiteImagingTests/ToneSettingsTests.swift, Tests/mutations/SuiteImaging.ToneSettings.json | ToneSettingsTests | #4870 10ccbb47 | open |
@@ -48,3 +48,4 @@ Next: PRs open on the lane: TC-2 #4862 (TC-a), TC-5 #4880, TC-7 #4870, TC-6 #495
 - 2026-10-23T14:52:29Z: run act-1a1693a3ff0-mwrd resumes on #3476 (the record said #4520). TC-1 merged as #4555. TC-m is 5 to 7 (~820 lines): it ships as three PRs under the 400 cap, all `Slice: TC-m`. Base and target are dev (CLAUDE.md, the lane), not main.
 - 2026-10-23T16:45Z: PRs #4862 (TC-2), #4870 (TC-7), #4880 (TC-5) open with fast-lane and current Fast-Check/Head; waiting on the lane. TC-6 and TC-u builders launched.
 - 2026-10-23T18:32Z: no PR merged yet; all seven of this run's PRs wait on the lane (#4873 on the supervisor). Builders share scratchpad gate.lock; a stale holder blocked gates ~30 min and was cleared.
+- 2026-10-23T22:05Z: #4862 merged; merged dev into TC-u (add/add on ToneRows.swift and the tone journey, took TC-u's superset), gated CI: PASS, opened #5006.
