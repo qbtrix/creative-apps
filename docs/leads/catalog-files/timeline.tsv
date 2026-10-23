@@ -1,2 +1,3 @@
 utc	stage	event	ref	note
 2026-10-23T15:31:23Z	3	start	-	run act-1a1695ec091-ilfv on dev 721168a; LC-a builder starts
+2026-10-23T16:34:40Z	3	pr	#4879	LC-a opened at df5c4fa; LC-u, LC-m builders launched
