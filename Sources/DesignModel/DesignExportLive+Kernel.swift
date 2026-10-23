@@ -14,8 +14,9 @@ public struct DesignExportOutcome: Sendable {
 }
 
 public enum DesignExportLive {
-    /// Renders and writes `items` in order on the caller's actor (see the file header).
-    public static func run<Item, Payload>(
+    /// Renders and writes `items` in order on the caller's actor (see the file header). Items and payloads
+    /// are Sendable because the closures may run off that actor.
+    public static func run<Item: Sendable, Payload: Sendable>(
         _ items: [Item], name: (Item) -> String,
         render: (Item) async throws -> Payload,
         write: (Payload, Item) async throws -> Void,
