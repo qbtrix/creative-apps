@@ -52,3 +52,4 @@ utc	stage	event	ref	note
 2026-10-23T17:10Z	3 wave 1	pr-opened	#4902 #4904 #4905	CB-8 CB-6 CB-10 PRs open, footers stripped
 2026-10-23T17:48Z	3 wave 1	heartbeat	#4902	CB-6 #4904, CB-8 #4902, CB-10 #4905 open, awaiting the lane
 2026-10-23T18:40Z	3 wave 1	check	#4902	18:39Z: #4902, #4904, #4905 queued in lane, no lane comments
+2026-10-23T19:05Z	check	heartbeat	-	19:05Z: no lane merge of ours since 18:38Z; PRs queued
