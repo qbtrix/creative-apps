@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 2026-10-23T18:15:01Z	3	check	#4878,#4923	all open+clean, none merged, no needs-fix/needs-rebase; dev 98589662 Linux check 40000080882 running; feature findings 0; posting path re-adds an attribution footer to PR bodies on every PATCH, lane strips it from the squash
 2026-10-23T18:37:22Z	3	check	#4878,#4923	all open+clean, no needs-fix; lane bisecting lane/batch-20261023174522 (12 PRs, probe 3), 60 ready PRs incl. ours wait for next sweep; dev Linux check 40000080882 green at 98589662
 2026-10-23T18:59:21Z	3	needs-rebase	#4878	lane: conflict with dev in LibraryCatalog.swift (DR-6 excludedPaths); merged origin/dev, kept both sides; scripts/ci --changed running
+2026-10-23T19:23:23Z	3	fix	#4878	dev merged in, scripts/ci --changed CI: PASS, pushed b68e09f565d88fa76c7dd107b3e8dc80e4770a4e, Head: moved; clean, lane to drop needs-rebase

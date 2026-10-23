@@ -66,3 +66,4 @@ Next: (2026-10-23T17:29:30Z) #4878 (BK-m) and #4923 (BK-z, stacked, feature-done
 - 2026-10-23T18:15:01Z: heartbeat: #4878,#4923 open, clean, no needs-fix; dev Linux check 40000080882 (98589662) running; findings for this feature 0. PR bodies carry a server-added attribution footer that a PATCH cannot remove; the lane strips it from the squash commit.
 - 2026-10-23T18:37:22Z: heartbeat: #4878,#4923 ready and clean; lane busy bisecting batch 20261023174522 (not ours), 60 ready PRs queued behind it. Nothing to fix.
 - 2026-10-23T18:59:21Z: #4878 got needs-rebase (conflict in LibraryCatalog.swift with cull-finish DR-6). Merged origin/dev, kept both sides; gate running, then push and move Head:.
+- 2026-10-23T19:23:23Z: #4878 integrated with dev at b68e09f565d88fa76c7dd107b3e8dc80e4770a4e (CI: PASS), Head: moved. Stacked children still target the parent branch; retarget to dev once it merges.
