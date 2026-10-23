@@ -53,3 +53,4 @@ time	event	task	note
 2026-10-23T18:54:02Z	stage	wave 2: LX-2 and LX-4 builders started at dev 0d4645bf on the supervisor's ruling (6372282767)
 2026-10-23T19:07:23Z	heartbeat	dev 0d4645bf unchanged; #4838 #4899 #4948 open clean on the lane (macOS runs queued); TC-2 not on dev; LX-2/LX-4 builders running
 2026-10-23T19:12:34Z	pr	LX-2 #4960 opened (head efabeb8d, 4 files +85/-3), on the lane
+2026-10-23T19:19:17Z	heartbeat	dev 0d4645bf; #4838 #4899 #4948 #4960 open on the lane; scoped: library run 40009734956 queued at 0d4645bf (contains none of our open PRs); TC-2 not on dev; LX-4 builder running
