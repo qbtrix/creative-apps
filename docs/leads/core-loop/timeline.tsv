@@ -202,3 +202,4 @@ utc	stage	event	ref	note
 2026-10-23T01:11Z	3	check-in	panel	held for 39878494002 (066cd28d)
 2026-10-23T02:08Z	3	check-in	panel	39878494002 in progress
 2026-10-23T02:46Z	3	panel	39878494002	critics launched (066cd28d)
+2026-10-23T02:52Z	3	panel	39878494002	re-checks 10 fixed, 4 to gap #4697; fixers #4399/#4623 #4352; gaps #4698 #4699 #4440
