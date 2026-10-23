@@ -17,7 +17,7 @@ Next: HF-7 (journey live) waits on HF-u #4868 reaching dev; HF-8 (docs, built, f
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| HF-1 | HF-a | 1 | adapter stubs | Sources/HaloModel/HaloFileFlow+Kernel.swift, Tests/HaloModelTests/HaloFileFlowTests.swift | compiles; tests disabled | #4855 | pr |
+| HF-1 | HF-a | 1 | adapter stubs | Sources/HaloModel/HaloFileFlow+Kernel.swift, Tests/HaloModelTests/HaloFileFlowTests.swift | compiles; tests disabled | #4855 | merged |
 | HF-2 | HF-a | 2 | scene, File menu, drop | Sources/HaloApp/HaloApp.swift, see packet | HaloFileFlowSnapshots.menu | #4855 | merged |
 | HF-3 | HF-m | 2 | adapter bodies, ids, RJ-H42 | see packet | HaloFileFlowTests | #4894 | pr |
 | HF-4 | HF-m | 2 | window notes opens and saves | Sources/HaloApp/HaloWindow+File.swift, Tests/AppSnapshotTests/HaloFileFlowLiveTests.swift | HaloFileFlowLiveTests | #4936 | pr |
@@ -49,3 +49,4 @@ Next: HF-7 (journey live) waits on HF-u #4868 reaching dev; HF-8 (docs, built, f
 - 2026-10-23T22:35Z: HF-a #4855 merged to dev (f2955985, batch-20261023204921). HF-u #4868 merged origin/dev, gate PASS, retargeted to dev (Head c0ef74ef). HF-m #4894 merged origin/dev (add/add conflicts with HF-a's squash resolved to ours, blobs equal); its gate crashed in AfterGlowCLITests SampleOpenTests (LibraryHeadless.init, signal 11), code HF-m doesn't touch; checking whether it reproduces before retargeting. HF-4 #4936 follows HF-m. Belt-Slice-Done for HF-a waits on a green ci.yml run on dev.
 - 2026-10-23T22:50Z: HF-m #4894 pushed (19fa9f3e) and retargeted to dev, with no Fast-Check marker: the gate crashes in dev's AfterGlowCLITests SampleOpenTests (LibraryHeadless.init, signal 11), which reproduces on plain dev. HaloModelTests (804) and the list-commands goldens pass. Supervisor asked on #3474. HF-4 #4936 stays stacked on HF-m.
 - 2026-10-23T23:05Z: Belt-Slice-Done HF-a posted (Linux check run 40029046141 on dev 491ec546) with Mac-Finish-Wanted. The LibraryHeadless crash is local to this container, not dev; corrected on #3474 and #4894. #4894 waits on the lane's Linux run 40035628317.
+- 2026-10-23T23:20Z: lane Linux run 40035628317 passed on #4894's head 19fa9f3e; #4868, #4894 wait on a lane batch's macOS gate. HF-7 waits on HF-4 (#4936), which retargets when HF-m merges. Open line:halo findings #5004 #4693 #4222 #3926 touch no file-flow file: findings 0. No supervisor reply.
