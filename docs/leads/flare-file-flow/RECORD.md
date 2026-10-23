@@ -112,3 +112,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 22:54Z check: still no journeys run includes 847f507; #4636 stays open; nothing new on #3482.
 - 23:26Z check: no flare or full journeys run includes 847f507 yet; #4636 stays open; nothing new on #3482.
 - 23:58Z check: no flare or full journeys run includes 847f507 yet; #4636 stays open; nothing new on #3482.
+- 00:30Z check: a flare journeys run at 62fe62a (includes 847f507) is queued, run 39877876105; #4636 waits on it; nothing new on #3482.
