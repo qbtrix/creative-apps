@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-23T21:33Z	heartbeat	scoped library run 40018964074 green on 61c481df (none of our open PRs in it); lane macOS gate still running
 2026-10-23T21:45Z	heartbeat	batch 20261023204921 merged; #4838 lane Linux check 40028953909 running; TC-2 placeholder on dev
 2026-10-23T21:57Z	heartbeat	batch 20261023215139 (#4818..#4870) running, none of ours; #4838 lane Linux check still running; no supervisor answer on #3475 yet
+2026-10-23T22:10Z	heartbeat	#4838 lane Linux check 40028953909 green on 84be0634; batch 20261023215139 still running; no supervisor answer on #3475
