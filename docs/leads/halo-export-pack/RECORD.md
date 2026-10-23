@@ -2,23 +2,23 @@
 
 Issue: #3472 (runs before used #4509) · Packet: docs/blueprints/halo/features/export-pack.md
 Run: act-1a16958d5fe-8dxu · Started: 2026-10-23T15:26:44Z (took over from act-1a16474bd28-v3ht)
-Stage: 3 wave 1 (HX-a rebuilt on dev, PR opening)
+Stage: 3 wave 2 (HX-a #4841 open; HX-u stacked, gating)
 Base: 721168a8 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: HX-a PR to dev; then HX-u and HX-m stacked on HX-a
+Next: HX-u PR (stacked on HX-a); HX-m (HX-3, HX-4) stacked on HX-a
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| HX-a | codec and alpha settings, ProRes refused; Render sheet Codec row and Transparent checkbox | HX-1, HX-2 | - | gradient-fill:HG-a, placed-images:PH-a | yes | 0 | blocked | - | - |
+| HX-a | codec and alpha settings, ProRes refused; Render sheet Codec row and Transparent checkbox | HX-1, HX-2 | - | gradient-fill:HG-a, placed-images:PH-a | yes | 0 | pr #4841 | - | - |
 | HX-m | codec and alpha plan rules, alpha frames, RJ-H41; live renderer through services.media.movie | HX-3, HX-4 | - | HX-a | no | 0 | blocked | - | - |
-| HX-u | snapshots, budget, journey skipped | HX-5, HX-6 | - | HX-a | yes | 0 | blocked | - | - |
+| HX-u | snapshots, budget, journey skipped | HX-5, HX-6 | - | HX-a | yes | 0 | building | - | - |
 | HX-z | journey live; halo.md, built, feature-done | HX-7, HX-8 | HaloExportPackJourneyTests | HX-m, HX-u; gradient-fill:HG-z | yes | 0 | blocked | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| HX-1 | HX-a | 1 | codec and alpha settings, stub refusal | Sources/HaloModel/Contracts/HaloDocumentValues.swift, Tests/HaloModelTests/HaloProResTests.swift | existing render tests; ProRes refused | - | blocked |
-| HX-2 | HX-a | 2 | Codec row, Transparent checkbox | Sources/HaloApp/HaloRenderSheet.swift | HaloRenderProResSnapshots.sheet | - | blocked |
+| HX-1 | HX-a | 1 | codec and alpha settings, stub refusal | Sources/HaloModel/Contracts/HaloDocumentValues.swift, Tests/HaloModelTests/HaloProResTests.swift | existing render tests; ProRes refused | #4841 | pr |
+| HX-2 | HX-a | 2 | Codec row, Transparent checkbox | Sources/HaloApp/HaloRenderSheet.swift | HaloRenderProResSnapshots.sheet | #4841 | pr |
 | HX-3 | HX-m | 2 | plan rules, alpha frames, RJ-H41 | Sources/HaloModel/HaloRenderJob.swift, see packet | HaloProResTests | - | blocked |
 | HX-4 | HX-m | 2 | live renderer via media.movie; HaloMovieWriter deleted | Sources/HaloModel/Live/LiveCompositionRendering.swift, Sources/HaloApp/HaloMovieWriter.swift | HaloMovieSinkTests | - | blocked |
 | HX-5 | HX-u | 3 | snapshots, budget | Tests/AppSnapshotTests/HaloRenderProResSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloRenderSheetTests.swift | codecSwitchInTwoBodies | - | blocked |
@@ -41,3 +41,4 @@ Next: HX-a PR to dev; then HX-u and HX-m stacked on HX-a
 - 2026-10-22T16:37:55Z: Decision: HX-a builds stacked on lead/halo-placed-images-PH-a (both touch HaloDocumentValues.swift, PH-a is A/C first); its PR opens after PH-a merges, as branch lead/halo-export-pack-HX-a.
 - 2026-10-23T15:26:44Z: run act-1a16958d5fe-8dxu for #3472. The placed-images waits (PH-a, PH-u) are on dev, so HX-a is rebuilt on origin/dev 721168a8 from lead/halo-*-HX-a, its test commit first.
 - Wire: HX-a's `HaloRenderSettings.codec`/`alpha` and `choosing(...)` are what HX-3 (plan rules) and HX-4 (media.movie settings) read.
+- 2026-10-23T16:05Z: HX-a #4841 opened (Head b8579d50, Mutate HaloModel.HaloDocumentValues 2/2). HX-5's snapshots shipped in HX-a (first in the slice), so HX-u is the budget test and the skipped journey.
