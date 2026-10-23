@@ -40,6 +40,7 @@ frame.label
 guide.add
 guide.move
 guide.remove
+import.report
 instance.add
 instance.remove
 instance.set-playback
