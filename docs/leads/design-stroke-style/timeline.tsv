@@ -116,3 +116,4 @@ time	kind	note
 2026-10-23T22:01Z	DK-u	critic-round-2	#4864 #5002	#4864 gate PASS at b17f9002c, body Head moved, needs-split dropped (379 lines/7 files); round-2 critic started on da662ed8
 2026-10-23T22:01Z	DK-m	needs-rebase	#4888	merged dev into design/dk-m-stroke-model (catalog, catalog tests, CLI golden resolved: union of stroke.* and select.*); gate running on d6494151
 2026-10-23T22:19Z	DK-m	heartbeat	#4888	rebase gate building; DK-u round-2 critic running; no slice PR merged
+2026-10-23T22:22Z	DK-m	rebased	#4888	dev merged at d6494151; CI: PASS; pushed; Head moved
