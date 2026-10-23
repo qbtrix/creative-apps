@@ -1,0 +1,28 @@
+utc	stage	event	ref	note
+2026-10-21T06:20:32Z	0	setup	0865916	fresh start, no lead branch
+2026-10-21T06:20:32Z	2	plan	-	wave 1 planned
+2026-10-21T06:21:16Z	3	wave 1 start	0865916	builders launched
+2026-10-21T07:24:21Z	3	heartbeat	-	resumed after restart; wave 1: LF-5 #3938, FO-a #3939 open; LF-4 blocked; BK-a finishing
+2026-10-21T07:26:41Z	3	wave2-launch	-	FO-u, FO-4 builders and BK-a finisher started
+2026-10-21T07:47:52Z	3	heartbeat	-	PRs #3960 BK-a, #3961 FO-4, #3963 FO-u opened; wave 2 BK starts
+2026-10-21T09:07:08Z	3	heartbeat	-	resumed after container restart; #3939 and #3938 merged; restacking stacked PRs
+2026-10-21T09:20:44Z	3	check	-	folders #3961/#3963 restacked on dev (needs-split cleared); gate blocked only by dev-red #3856 Design anchors (fix #3980); LF-u and FO-a merged; BK waits #3960
+2026-10-21T09:54:30Z	3	check	-	BK-a #3960 merged; #3965/#3967 merged with dev, needs-split cleared, gate blocked only by dev-red #3856 (fix #3980 open); no qualifying run yet (full 39573184415 queued); waits LF-3/FO-5/BK-5m/LF-4 unchanged (poll 2)
+2026-10-21T10:17:30Z	3	check	-	poll 10:30: #3996 fixed dev anchors (#3980 superseded); FO-4/BK-3/BK-u merged with dev cleanly, gate running; full CI 39582370849 pending at fe232dc (contains #3939/#3938/#3960); blocked poll 3: Question for the supervisor posted on #3479/#3787/#3788
+2026-10-21T10:32:26Z	3	wave	-	BK-3 #3965 and BK-u #3967 gate PASS on dev+#3996, now fast-lane; FO-4 #3961 timing test moved to Budget median, re-gating
+2026-10-21T10:33:53Z	3	wave	-	FO-4 #3961 gate PASS (tree budget median 10.2 ms), fast-lane at 27c6113; BK-3/BK-u on fast-lane; supervisor questions open
+2026-10-21T10:58:39Z	3	check	-	supervisor answers acted on: LF-3 and FO-5 builders started (append-only rows); BK-5m keeps AK wait; FO-4/BK-3/BK-u awaiting lane macOS builds; CI at 39d90e3 queued
+2026-10-21T11:12:37Z	3	pr	-	FO-5 #4022 opened stacked on #3961 (5/5 mutants)
+2026-10-21T11:17:20Z	3	pr	-	LF-3 #4024 opened on fast-lane (5/5 mutants)
+2026-10-21T11:25:30Z	3	check	-	11:25 poll: lane macOS builds pending for #3961/#3965/#3967; CI 39586209372+39585973891 in progress; #3997 merged, #3928 open
+2026-10-21T11:48:23Z	3	check	-	11:50 poll: dev-red #3856 (photo/flare) holds slice-done; #4024 needs-rebase being resolved
+2026-10-21T11:50:49Z	3	fixes	-	FO-4 #3961 merged; dev merged into FO-u/FO-5 (squash conflicts resolved), BK-u macOS type-check split, LF-3 rebase; 4 gates running
+2026-10-21T12:00:44Z	3	push	-	BK-u #3967 type-check fix pushed (d65a282); LF-3 #4024 rebase pushed (a1574a6); FO-5 #4022 (8437a51) and FO-u #3963 (c11098e) on dev, fast-lane on; all gates PASS
+2026-10-21T12:21:35Z	3	poll	-	BK-3 merged; BK-u/LF-3/FO-u/FO-5 in lane; slice-done waits on run 39593465885
+2026-10-21T12:43:29Z	3	poll	-	no change; macOS runner backlog holds batch gate and scoped library run
+2026-10-21T13:17:51Z	3	poll	-	no change; macOS backlog; 4 PRs await batch gate
+2026-10-21T18:41:42Z	-	mirror	-	record mirrored from lead/library-catalog-backup
+2026-10-21T18:42:52Z	-	mirror	-	lead/catalog-backup now mirrors this record. BK-u #3967 at cf07beb waits on a lane batch (macOS build 39632012767 succeeded).
+2026-10-21T19:06:20Z	-	fix	BK-u	BK-u #3967 got needs-fix: the batch's Linux check failed CommandPathTests (library). The five backup sites are now listed in the command-path baseline, as FC-5 and PT-3 did. dev merged in, gate PASS, pushed 780c26c, Head moved. Waiting on the lane's new macOS build and batch.
+2026-10-21T20:08:48Z	-	watch	BK-u	Watch: BK-u #3967 at 780c26c had needs-fix dropped and waits on the lane's macOS build.
+2026-10-21T20:39:41Z	-	watch	BK-u	BK-u #3967: its lane macOS build 39661645674 passed at 780c26c. Waiting for a lane batch; 63 fast-lane PRs are open on dev.
