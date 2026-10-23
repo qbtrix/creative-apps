@@ -111,6 +111,7 @@ targets:
     type: framework
     platform: macOS
     sources: [Sources/SuiteShell]
+    # CreativeEngines carries CoreRaster for SuiteImageIO (shared-codecs SC-2) and CoreAsset for ThumbnailWriter.
     dependencies: [{ target: SuiteUI }, { target: SuiteModel }, { target: SuiteKernel }, { target: CreativeEngines }]
   FlareModel: { templates: [Model] }
   # Every Model but Flare's links SuiteImaging (appended to the template's).
