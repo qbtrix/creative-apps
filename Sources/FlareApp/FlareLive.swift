@@ -30,7 +30,9 @@ import SwiftUI
     /// The window `id` closed: live commands reach no window until another registers.
     static func release(_ id: UUID) {
         guard owner == id else { return }
-        (owner, read, write) = (nil, { nil }, { _ in })
+        owner = nil
+        read = { nil }
+        write = { _ in }
     }
 }
 
