@@ -46,3 +46,4 @@ utc	stage	event	ref	note
 2026-10-23T17:48Z	3 wave 1	heartbeat	#4893	AN-u #4893 open; AN-6 stacked; AN-10 waits DS-flare #4891
 2026-10-23T17:49Z	3 wave 1	check	#4891	DS-flare #4891 needs captain review; AN-10 still waits
 2026-10-23T18:40Z	3 wave 1	check	#4893	18:39Z: #4893 queued in lane (lane merging older PRs); AN-6 stacked; AN-10 waits #4891
+2026-10-23T19:05Z	check	heartbeat	-	19:05Z: no lane merge of ours since 18:38Z; PRs queued
