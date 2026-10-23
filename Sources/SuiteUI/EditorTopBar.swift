@@ -4,7 +4,8 @@
 // ToolbarActions drawn by EditorBarItem (an action that can't run is disabled, its symbol dimmed,
 // and its tooltip says why) or EditorBarMenu for a command that opens a menu.
 // Both are native buttons and menus in the accessory-bar style: flat until
-// hovered. The bar starts after the window's close, minimize and zoom buttons
+// hovered; `editorBarStyle()` gives a control that draws its own button
+// (ShareButton) the same look. The bar starts after the window's close, minimize and zoom buttons
 // (the shell hides the title bar) and its empty stretches drag the window.
 // Every command here must also be in the menu bar (docs/design.md, Commands).
 import SwiftUI
@@ -134,6 +135,14 @@ public struct EditorBarDivider: View {
 
     public var body: some View {
         Divider().frame(height: SuiteSize.editorBarDivider).padding(.horizontal, SuiteSpacing.xs)
+    }
+}
+
+extension View {
+    /// The bar items' look for a control that builds its own button, such as ShareButton: accessory-bar
+    /// buttons, symbol then title.
+    public func editorBarStyle() -> some View {
+        buttonStyle(.accessoryBar).labelStyle(EditorBarLabelStyle(showsTitle: true))
     }
 }
 
