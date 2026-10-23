@@ -4,7 +4,7 @@ Issue: #3777 · Packet: docs/blueprints/suiteui/features/adjust-everywhere.md
 Run: act-1a1693a4009-hyio (line lead: area-selection, adjust-everywhere, shared-raw) · Session: claude/feature-lead-playbook-fkjibd · Started: 2026-10-23T14:40Z
 Stage: 3 wave 1
 Base: 35a0b5e7e9520a764f3eabf02968a453082a87cc
-Next: check between waves: which of #4834, #4846, #4853, #4863, #4867 merged; restack and drop needs-split on #4846/#4863 as their bases merge; start AJ-6 once tone-controls TC-m is on dev.
+Next: #4834 closed as superseded (its files reached dev in #4853). #4846 restacked on dev (head ceafe80, fast-lane, 2026-10-23T23:01Z). Restack #4863 (AJ-k part 2) once #4846 merges; #4867 (AJ-c) on fast-lane. Waits: AJ-6 on TC-m, AJ-u on OC-photo-u.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

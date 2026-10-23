@@ -23,3 +23,4 @@ utc	stage	event	ref	note
 2026-10-23T21:17Z	3	heartbeat	-	batch 20261023204921 (#4842 #4853 #4860) Linux green, macOS running; #4828 #4834 ride next batch; none merged
 2026-10-23T21:39Z	3	heartbeat	-	batch 20261023204921 macOS gate 40022179889 still running (50m); none merged; no needs-fix/needs-rebase; 0 findings
 2026-10-23T22:25Z	3	heartbeat	-	#4853 (AJ-k part 1) merged 21:41Z; #4863 stays needs-split behind #4846/#4834; #4834 #4867 wait for next batch
+2026-10-23T23:01Z	3	heartbeat	-	#4834 closed superseded; #4846 restacked on dev, fast-lane
