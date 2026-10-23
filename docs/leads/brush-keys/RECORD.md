@@ -1,17 +1,17 @@
 # brush-keys lead record
 
-Issue: #3758 (relaunch #4531) · Packet: docs/blueprints/suiteui/features/brush-keys.md
+Issue: #3758 (#4531 closed as duplicate) · Packet: docs/blueprints/suiteui/features/brush-keys.md
 Run: act-1a16958d72f-a4mg · Session: cloud line lead (line:suiteui; with text-style, brush-keys, document-setup) · Started: 2026-10-23T15:25Z
-Stage: 3 wave 1 (combined waves across the three features)
+Stage: 3 wave 2 (combined waves across the three features)
 Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (dev)
-Next: wave 1 building BK-u (wf_1dce2172-bd9); on return: check PRs, then stack wave 2
+Next: wave 2: BK-photo, BK-design (after DS-design #4887), BK-flare stacked on BK-u #4939; then BK-z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | BK-a | contract: BrushKeys stubs, BrushKeyCommands specs, disabled tests | BK-1, BK-2 | – | – | false | 0 | done (#4057; Linux 39643409752; Belt-Slice-Done posted) | – | – |
 | BK-m | step bands, hardness, opacity digits; mutation plan; C4 part | BK-3, BK-4 | – | BK-a | false | 0 | done (#4058 → 1fe5c4ea; Linux 39661533247; Belt-Slice-Done posted) | – | – |
-| BK-u | ToolKeys routing, readout, gallery, journey, render budget | BK-5, BK-6 | SJ-BK | BK-a; anchor-parenting:AN-u (planned; waits OC-u) | true | 0 | blocked | – | – |
+| BK-u | ToolKeys routing, readout, gallery, journey, render budget | BK-5, BK-6 | SJ-BK | BK-a; anchor-parenting:AN-u (planned; waits OC-u) | true | 0 | pr #4939 (fast-lane, head f646e4da) | – | – |
 | BK-photo | Photo adopts brush keys | BK-7, BK-8 | – | BK-a (BK-7); BK-m, BK-u, adopt-kernel-brush:AB-photo, adopt-suiteui-chrome:AC-colour, area-selection:AR-photo-u (not started), OC-photo-m (BK-8) | true | 0 | blocked | – | – |
 | BK-design | Design adopts brush keys | BK-9, BK-10 | – | BK-m, BK-u, adopt-suiteui-chrome:AC-tools, document-setup:DS-design (not started) (BK-10) | true | 0 | blocked | – | – |
 | BK-flare | Flare adopts brush keys | BK-11, BK-12 | – | BK-m, BK-u, anchor-parenting:AN-flare-u (not started) (BK-12) | true | 0 | blocked | – | – |
