@@ -4,15 +4,15 @@ Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/feat
 Run: act-1a1693a401e-chyn · Started: 2026-10-23T14:10Z (prior: act-1a164697376-dv7u)
 Stage: 3 wave 1
 Base: cb79cbb (dev, verify HEAD)
-Next: FH-r #4574 and FH-c #4577 restacked on dev (gate rerun, retarget to dev); poll lane and dev CI every 20 min; FH-u/FH-photo waits checked each poll
+Next: FH-r slice-done once a green suiteui/full ci.yml run on dev holds a05d7be; FH-c #4577 and FH-u #4889/#4896 in lane; poll lane and dev CI every 20 min; FH-photo waits checked each poll
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | FH-a | rules, commands and dab coverage as stubs, checks disabled | FH-1, FH-2 | MJ-FH | suite-imaging:IM-a, brush-keys:BK-m (FH-1 only) | false | 0 | done (Belt-Slice-Done posted) | 39957675362 | – |
 | FH-u | palette Paint Bucket, Spot Heal, Remove on the stubs | FH-3, FH-4 | PJ-FH1 | FH-a, AB-photo, AL-photo, AX-photo, AU-photo, AC-colour, BK-photo | true | 0 | building (FH-3 #4889 in lane, head ccf9d81; FH-4 next) | – | – |
-| FH-r | bucket and heal bodies over core | FH-5b, FH-5h | MJ-FH | FH-a | false | 0 | lane (#4574 base dev, head 2a2cb8b) | – | – |
-| FH-c | dab coverage body, commands one undo step | FH-5k, FH-6 | MJ-FH | FH-a, FH-r | false | 0 | lane (#4577 head ceb4ebb, base FH-r until #4574 merges) | – | – |
+| FH-r | bucket and heal bodies over core | FH-5b, FH-5h | MJ-FH | FH-a | false | 0 | merged a05d7be (#4574); awaiting green suiteui/full run | – | – |
+| FH-c | dab coverage body, commands one undo step | FH-5k, FH-6 | MJ-FH | FH-a, FH-r | false | 0 | lane (#4577 base dev, head 7d32ede) | – | – |
 | FH-photo | Photo adopts live, old tone-match heal gone, jobs pass | FH-7, FH-8, FH-9, FH-10 | PJ-FH1, PJ-FH2, MJ-FH-photo, MJ-FH | FH-c, FH-u, AJ-photo, BK-photo | true | 0 | waiting | – | – |
 
 ## Tasks

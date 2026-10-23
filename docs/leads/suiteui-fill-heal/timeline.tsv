@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 16:49Z	3	build	dev 35a0b5e	FH-3 PR #4889 opened (head ccf9d81, gate pass); #4890 filed (SuiteUI key cycling); FH-4 next
 16:59Z	3	build	dev 35a0b5e	FH-4 PR #4896 opened on lead/fill-heal-FH-3 (head 57c9396, gate pass); #4895 filed; #4574 still in lane
 17:22Z	3	poll	dev 35a0b5e	no merges; lane bisecting batch 20261023155119 (macOS probe queued); #4574 #4577 #4889 #4896 open; attribution footers stripped from #4889/#4896 bodies; waits unchanged; next poll 17:42Z
+17:55Z	3	poll	dev 8a54f64	#4574 (FH-r) merged as a05d7be; FH-c merged dev, gate pass, pushed 7d32ede, #4577 retargeted to dev + Head moved; no green suiteui/full run on a05d7be yet (full CI at 35a0b5e running); #4889 #4896 open; next poll 18:15Z
