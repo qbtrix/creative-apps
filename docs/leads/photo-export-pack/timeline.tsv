@@ -147,3 +147,4 @@ utc	stage	event	ref	note
 2026-10-23T07:21Z	parked	#3477 still waiting-on-prereq; photo journeys 39910105470 (has #4707) still queued; #4770 triage: PR #4772 fixes Photo finding #4700 (recovery journey stamp)
 2026-10-23T07:53Z	parked	#3477 still waiting-on-prereq; PR #4772 (#4700) awaiting lane macOS build; Photo journeys 39910105470 (PJ-TX fix) in progress; no new Photo findings
 2026-10-23T08:32Z	parked	#3477 still waiting-on-prereq; PJ-TX failed again on fef84231b (finding #4782): T never reached an unfocused canvas; fix round 2 PR #4785 clicks the canvas first; #4772 merged dev (Flare FlareOpenQueue break fixed by #4771), head 1d20cba37
+2026-10-23T09:04Z	parked	#3477 still waiting-on-prereq; PRs #4772 (1d20cba37) and #4785 (5f8269668) waiting on lane macOS builds; no new Photo findings
