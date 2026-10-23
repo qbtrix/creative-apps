@@ -1,5 +1,6 @@
 // LibraryImport.swift: the catalog's import state machine (import IM-1), and `file.import`'s options (catalog-files LC-1).
-// beginImport hands the importer the ids to skip and marks the import
+// beginImport hands the importer the ids to skip (with the paths Delete
+// Rejects trashed, DR-6) and marks the import
 // running; batches arrive through appendImported, which drops ids already
 // in the catalog; finishImport and failImport set the notice and go idle.
 // ImportNotice.alreadyKnownDetail is the nothing-new notice's count of
@@ -22,13 +23,13 @@ extension LibraryCatalog {
         paths.first { (try? FileManager.default.contentsOfDirectory(atPath: $0)) != nil }
     }
 
-    /// The known ids to skip, and state .running(0 of 0); nil while an import runs
+    /// The known ids and trashed paths to skip, and state .running(0 of 0); nil while an import runs
     /// or while the catalog file is still loading (`catalogState == .loading`).
     public mutating func beginImport() -> Set<String>? {
         guard importState == .idle, catalogState != .loading else { return nil }
         importState = .running(ImportProgress(done: 0, total: 0))
         importNotice = nil
-        return knownIDs()
+        return knownIDs().union(excludedPaths)
     }
 
     /// The catalog's ids, the set sized once up front (QB-L9: no intermediate
