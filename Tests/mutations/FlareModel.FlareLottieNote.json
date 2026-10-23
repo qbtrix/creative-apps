@@ -35,6 +35,34 @@
     "tests": "FlareLottieNoteTests"
   },
   {
+    "label": ".reportKeepsSkips: a landed open leaves no import.report",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "            importReport = skipped\n",
+    "replace": "",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".reportNeedsALottie: import.report runs with nothing opened from a Lottie",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "{ $0.importReport == nil ? .unavailable(noLottieOpened) : .available }",
+    "replace": "{ _ in .available }",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".headlessReport: the CLI's Lottie open leaves no import.report",
+    "file": "Sources/FlareModel/FlareLottieOpen.swift",
+    "find": "defer { importReport = skipped }",
+    "replace": "defer {}",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".loadClearsReport: another document keeps an old Lottie's report",
+    "file": "Sources/FlareModel/FlareWorkspace.swift",
+    "find": "        importReport = nil\n",
+    "replace": "",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
     "label": ".capsLongNote: a long skip list lists every part and pushes the stage down",
     "file": "Sources/FlareModel/FlareLottieNote.swift",
     "find": "guard importNote.count > max + 1 else { return importNote }",
