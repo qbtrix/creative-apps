@@ -18,7 +18,8 @@
 // in the floating tool box (`design.tool.*`) and the status line's note,
 // selection count and tool carry their DesignControlID and list themselves in
 // `suite.controls` (.suiteControl), which DesignWindow's `.suiteProbes()`
-// publishes. In debug builds `bodyRuns` counts its body's runs, so
+// publishes. The note keeps to one line, cut in the middle, and shows its
+// whole text as help. In debug builds `bodyRuns` counts its body's runs, so
 // DesignWindowDragTests can prove a canvas drag leaves the editor still.
 import DesignModel
 import SuiteUI
@@ -68,6 +69,9 @@ struct DesignEditor: View {
                 ViewerStatusBar(zoom: model.isOpen ? zoom : 0, size: model.statusSizeText) {
                     if let note {
                         Text(note)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .help(note)
                             .suiteControl(id: DesignControlID.statusNote, enabled: true, reason: nil)
                     }
                     if let count = model.selectionCountText {
