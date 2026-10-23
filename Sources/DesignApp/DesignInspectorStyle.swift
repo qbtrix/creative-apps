@@ -1,8 +1,9 @@
 // DesignInspectorStyle.swift: the style rows of Design's inspector (style-rows
 // SR-a). Opacity (a bar in the Layer section), Corners (the Radius bar, off
-// with its reason on a kind with no corners), and Stroke (SuiteUI's
-// StrokeEditor alone on the Model's `selectedStroke`, no trim rows: its Add
-// Stroke, Width and Remove Stroke are the only ones, #3864; each intent runs
+// with its reason on a kind with no corners, DesignCornersSection), and Stroke
+// (SuiteUI's StrokeEditor alone on the Model's `selectedStroke`, under Fill,
+// no trim rows: its Add Stroke, Width and Remove Stroke are the only ones,
+// #3864; Join, Cap and Dash off with the Model's one reason until DK-5; each intent runs
 // through `strokeChange`, a scrub's samples preview and its run lands as one
 // step at mouse-up, or once the keys rest when no button is down), plus the
 // X, Y, W and H fields the Frame section shows. A scrub never writes the
@@ -94,18 +95,11 @@ struct DesignOpacityRow: View {
     }
 }
 
-/// The Corners and Stroke sections over the selection.
-struct DesignInspectorStyle: View {
+/// The Corners section over the selection: the Radius bar, off with its reason on a kind with no corners.
+struct DesignCornersSection: View {
     let model: DesignWorkspace
     let perform: DesignPerform
     @Environment(\.designLiveDrag) private var live
-    /// A stroke scrub's run is open: its samples preview until it lands.
-    @State private var strokeRun = false
-    /// A mouse button is down in the stroke editor, so a resting scrub is still one gesture.
-    @State private var pressing = false
-    /// Lands the open run once the keys rest (the editor ends each key press but tells no host).
-    @State private var settle: Task<Void, Never>?
-    private static let settleDelay = Duration.milliseconds(400)
 
     var body: some View {
         let send = DesignStyleSend(model: model, live: live, perform: perform)
@@ -122,15 +116,33 @@ struct DesignInspectorStyle: View {
             .help(radiusHelp ?? "")
             .suiteControl(id: DesignControlID.inspectorCornerRadius, enabled: radiusHelp == nil, reason: radiusHelp)
         }
+    }
+}
+
+/// The Stroke section over the selection, after Fill: paint reads fill, then stroke (#3871).
+struct DesignInspectorStyle: View {
+    let model: DesignWorkspace
+    let perform: DesignPerform
+    @Environment(\.designLiveDrag) private var live
+    /// A stroke scrub's run is open: its samples preview until it lands.
+    @State private var strokeRun = false
+    /// A mouse button is down in the stroke editor, so a resting scrub is still one gesture.
+    @State private var pressing = false
+    /// Lands the open run once the keys rest (the editor ends each key press but tells no host).
+    @State private var settle: Task<Void, Never>?
+    private static let settleDelay = Duration.milliseconds(400)
+
+    var body: some View {
         InspectorSection("Stroke") {
-            strokeRows(shown, send: send)
+            strokeRows(live?.workspace ?? model, send: DesignStyleSend(model: model, live: live, perform: perform))
         }
     }
 
     /// SuiteUI's stroke editor on the primary layer's stroke (no trim in Design), its rows the section's only
     /// controls (#3864), each intent sent through the Model.
     private func strokeRows(_ shown: DesignWorkspace, send: DesignStyleSend) -> some View {
-        StrokeEditor(stroke: shown.selectedStroke, help: model.strokeHelp, dashHelp: model.strokeDashHelp, showsTrim: false) {
+        StrokeEditor(stroke: shown.selectedStroke, help: model.strokeHelp, dashHelp: model.strokeDashHelp,
+                     styleHelp: model.strokeStyleHelp, showsTrim: false) {
             stroke($0, shown: shown, send: send)
         }
         .simultaneousGesture(
