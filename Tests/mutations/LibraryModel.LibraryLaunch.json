@@ -1,0 +1,23 @@
+[
+  {
+    "label": "the launch import's copy folder is never read",
+    "file": "Sources/LibraryModel/LibraryLaunch.swift",
+    "find": "let copyTo = values[\"-LibraryImportCopyTo\"]",
+    "replace": "let copyTo: String? = nil",
+    "tests": "LibraryLaunchTests.swift"
+  },
+  {
+    "label": "dated folders ignore their switch",
+    "file": "Sources/LibraryModel/LibraryLaunch.swift",
+    "find": "byDate: copyTo != nil && present.contains(\"-LibraryImportByDate\")",
+    "replace": "byDate: copyTo != nil",
+    "tests": "LibraryLaunchTests.swift"
+  },
+  {
+    "label": "dated folders turn on without a copy folder",
+    "file": "Sources/LibraryModel/LibraryLaunch.swift",
+    "find": "byDate: copyTo != nil && present",
+    "replace": "byDate: copyTo == nil || present",
+    "tests": "LibraryLaunchTests.swift"
+  }
+]
