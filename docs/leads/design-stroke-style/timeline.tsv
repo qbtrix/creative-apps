@@ -104,3 +104,4 @@ time	kind	note
 2026-10-23T19:08Z	DK-u	fix	#4864	heartbeat: #4864 and #4916 fixers still building (load 30); #4888 at 7710b7cf; no needs-fix
 2026-10-23T19:26Z	DK-m	fix	#4916	#4940/#4941 fixed at bed28599 (DesignSVG 19/19); merged design/dk-m-locked-parity (10 files vs #4888); gate running before push
 2026-10-23T19:29Z	DK-m	gate	#4916	heartbeat: locked-parity merged into #4916 locally (9a65ac65), gate running; #4864 fixer running; no needs-fix
+2026-10-23T19:51Z	DK-m	gate	#4916	heartbeat: merge gate on 9a65ac65 in tests (load 28); #4864 fixer running; no needs-fix
