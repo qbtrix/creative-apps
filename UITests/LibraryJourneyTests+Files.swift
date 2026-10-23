@@ -183,25 +183,25 @@ final class LibraryFilesSmokeTests: XCTestCase {
     }
 }
 
-/// LJ-LC1, LJ-LC2 (catalog-files Journey steps; LC-2 written, LC-7 on): copy a card into dated folders; remove, undo,
-/// move the folder, locate one. The control ids are guesses until LC-3 names them.
+/// LJ-LC1, LJ-LC2 (catalog-files Journey steps; LC-7 on): copy a card into dated folders; remove, undo, move the
+/// folder, locate one. The launch flags pick the copy choice, since the open panel's accessory isn't scriptable.
 final class LibraryFilesJourneyTests: XCTestCase {
     /// Step 1: import a two-folder card with Copy to and dated folders on; delete the card; nothing goes missing.
     @MainActor func testCopyOnImport() throws {
-        try XCTSkipIf(true, "waits on LC-7")
         let (card, pictures, catalog) = try (LibraryFiles.freshPhotoFolder(), LibraryFiles.freshPhotoFolder(), LibraryFiles.freshCatalogDir())
         addTeardownBlock { [card, pictures, catalog].forEach { try? FileManager.default.removeItem(at: $0) } }
         for sub in ["100", "101"] { try LibraryFiles.write(24, in: card, subfolder: sub) }  // jpeg-0001.jpg… in each
         let library = Journey("Library", self, arguments: [
-            "-LibraryImportFolder", card.path, "-LibraryImportCopyTo", pictures.path, "-LibraryCatalogDir", catalog.path,
+            "-LibraryImportFolder", card.path, "-LibraryImportCopyTo", pictures.path, "-LibraryImportByDate",
+            "-LibraryCatalogDir", catalog.path,
         ])
         defer { library.app.terminate() }
-        library.click("Import…", in: .window, step: "open the import sheet")
-        library.element("library.import.copy").click()
-        library.element("library.import.dated").click()
-        library.shot("import-copy-sheet", screen: true)
-        library.click("Import", step: "import by copying")
-        let copied = try FileManager.default.contentsOfDirectory(atPath: pictures.appending(path: "2026/2026-05-01").path)
+        library.click("Import Folder…", in: .window, step: "import by copying")
+        let cells = library.app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH %@", "library.grid.cell."))
+        XCTAssert(cells.firstMatch.waitForExistence(timeout: 30), "the import showed no photos")
+        let dated = pictures.appending(path: "2026/2026-05-01").path
+        XCTAssert(FirstFive.wait(30) { cells.count == 48 }, "the grid shows \(cells.count) photos, not 48")
+        let copied = try FileManager.default.contentsOfDirectory(atPath: dated)
         XCTAssertEqual(copied.count, 48, "the dated folder holds \(copied.count) copies")
         XCTAssert(copied.contains("jpeg-0001.jpg") && copied.contains("jpeg-0001 2.jpg"), "a duplicate name collided")
         try FileManager.default.removeItem(at: card)
@@ -211,7 +211,6 @@ final class LibraryFilesJourneyTests: XCTestCase {
 
     /// Step 2: remove three, undo, move the folder, then Locate… one photo: every photo relinks.
     @MainActor func testRemoveAndRelink() throws {
-        try XCTSkipIf(true, "waits on LC-7")
         let (folder, moved, catalog) = try (LibraryFiles.freshPhotoFolder(), LibraryFiles.freshPhotoFolder(), LibraryFiles.freshCatalogDir())
         addTeardownBlock { [folder, moved, catalog].forEach { try? FileManager.default.removeItem(at: $0) } }
         let files = try LibraryFiles.writeShoot(in: folder)
@@ -229,11 +228,21 @@ final class LibraryFilesJourneyTests: XCTestCase {
         XCTAssert(files.allSatisfy { FileManager.default.fileExists(atPath: $0.path) }, "Remove deleted a file")
         library.press(character: "z", .command, step: "undo the remove")
         XCTAssertEqual(cells.count, 24, "undo didn't bring the photos back")
-        try FileManager.default.moveItem(at: folder, to: moved.appending(path: "shoot"))
+        let shoot = moved.appending(path: "shoot")
+        try FileManager.default.moveItem(at: folder, to: shoot)
         let badge = library.element("library.grid.missing")
         XCTAssert(badge.waitForExistence(timeout: 10), "no missing badge after the move")
         library.element("library.missing.locate").click()
+        let panel = library.app.sheets.firstMatch.exists ? library.app.sheets.firstMatch : library.app.dialogs.firstMatch
+        XCTAssert(panel.waitForExistence(timeout: 10), "Locate… opened no panel")
+        library.press(character: "g", [.command, .shift])
+        library.app.typeText(shoot.appending(path: "IMG_0001.jpg").path)
+        library.press(.return)
         library.shot("relink-picker", screen: true)
-        XCTAssertFalse(badge.exists, "Locate… didn't relink every photo")
+        let button = panel.buttons.matching(NSPredicate(format: "label == 'Locate' OR identifier == 'OKButton'")).firstMatch
+        XCTAssert(button.waitForExistence(timeout: 5), "the panel has no Locate button")
+        XCTAssert(FirstFive.wait { button.isEnabled }, "the panel didn't pick IMG_0001.jpg")
+        button.click()
+        XCTAssert(FirstFive.wait { !badge.exists }, "Locate… didn't relink every photo")
     }
 }

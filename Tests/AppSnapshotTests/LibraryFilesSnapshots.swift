@@ -1,5 +1,6 @@
-// LibraryFilesSnapshots.swift (catalog-files LC-3): the import copy choice and the missing badge, disabled on
-// the LC-1 stubs, in Light and Dark. The remove confirm is a system dialog, so its words are checked. macOS only.
+// LibraryFilesSnapshots.swift (catalog-files LC-3, LC-7 live): the import copy choice with Copy and dated folders
+// picked, and the missing badge's Locate…, in Light and Dark. The remove confirm is a system dialog, so its words
+// are checked. macOS only.
 import SwiftUI
 import Testing
 
@@ -28,11 +29,12 @@ import Testing
         #expect(LibraryCatalog.missingBadgeTitle(count: library.missingCount) == "3 photos are missing")
         let files = LibraryFilesActions()
         #expect(files.remove == nil && files.locate == nil)
-        #expect(files.removeWhy == "File management arrives with LC-5." && files.locateWhy == files.removeWhy)
+        #expect(files.removeWhy == LibraryCatalog.removeHelp && files.locateWhy == LibraryCatalog.relinkHelp)
+        let copying = ImportCopyChoice(ImportCopyOptions(copyTo: "/Users/me/Pictures", byDate: true))
         for scheme in [ColorScheme.light, .dark] {
             let name = scheme == .dark ? "dark" : "light"
             try snapshot(
-                LibraryImportOptions().frame(width: 1440, height: 900),
+                LibraryImportOptions(choice: copying).frame(width: 1440, height: 900),
                 name: "library-import-copy-options-\(name)", scheme: scheme)
             try snapshot(
                 LibraryBrowser(model: library).frame(width: 1440, height: 900, alignment: .top),
@@ -44,7 +46,6 @@ import Testing
         var library = Self.missingThree()
         library.select(Set(library.order.prefix(3)))
         #expect(LibraryCatalog.removeConfirmTitle(count: library.removeCount) == "Remove 3 Photos from the Catalog?")
-        #expect(LibraryCatalog.fileCommands.availability("photo.remove-from-catalog", on: library).why
-            == LibraryCatalog.catalogFilesHelp)
+        #expect(LibraryCatalog.fileCommands.availability("photo.remove-from-catalog", on: library).why == nil)
     }
 }
