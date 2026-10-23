@@ -1,1 +1,2 @@
 2026-10-23T17:55:40Z	2	needs-fix-reply	#4840 RenderBudgetWindowLifetimeTests fail: replied that ST-a has no reachable window code (stub writer, disabled tests); asked supervisor to re-gate or isolate under taskpolicy -b
+2026-10-23T18:11:10Z	2	pr-open	ST-u #4950 draft, stacked on #4840, head 78e6fc0, 8 files +379/-6, CI PASS, mutate 4/4 SuiteModel.HomePreviews; needs-ui #4946 filed
