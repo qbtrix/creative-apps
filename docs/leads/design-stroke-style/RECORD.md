@@ -61,3 +61,8 @@ Next: DK-u and DK-m slice PRs; critic panels; then DK-z
 - The critic read #5002 at da662ed8. #4925, #4926 and #4989 are fixed. #4927 is partly fixed: its solid half is done, and the dashed and trimmed half became #5009. #4928 is partly fixed: the corner-radius mutation is still missing.
 - New findings: #5009, where a dashed or trimmed trace on a rounded box uses circular corners while the fill uses continuous ones, and #5010, where the dash phase is scaled by zoom but no test covers it.
 - Next: DK-u fix round 2, the last one, stacked on #5002. It fixes #5009 and #5010 and adds the #4928 mutation. Whatever is still open after that becomes a gap.
+
+## 2026-10-23T22:33Z DK-u fix round 2 (last)
+
+- Opened #5011 (design/dk-u3-stroke-corners, 1110e183), stacked on #5002. Rounded boxes now fill with circular corners, which fixes #5009. It adds a dash-phase test (#5010) and the corner-radius mutation (#4928). Plan DesignModel.DesignStrokeOutline: 10/10 caught. The gate is running.
+- This was DK-u's last round. Anything left open after #5011 becomes a gap.

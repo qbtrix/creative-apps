@@ -118,3 +118,4 @@ time	kind	note
 2026-10-23T22:19Z	DK-m	heartbeat	#4888	rebase gate building; DK-u round-2 critic running; no slice PR merged
 2026-10-23T22:22Z	DK-m	rebased	#4888	dev merged at d6494151; CI: PASS; pushed; Head moved
 2026-10-23T22:23Z	DK-u	critic-round-2	#5002	3 fixed, 2 partial (#4927, #4928); new findings #5009 #5010; footers stripped
+2026-10-23T22:33Z	DK-u	fix-round-2	#5011	circular fill corners (#5009), dash-phase test (#5010), corner mutation (#4928); 10/10 mutations; gate running
