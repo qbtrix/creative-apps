@@ -1,7 +1,9 @@
 // FlareJourneyTests+NewSheet.swift: J2, step 3 of layers-files (LF-3), on live
 // services. ⌘N shows the New Animation sheet, each preset found by its own id;
 // Vertical 9:16, 30 fps, Create: the artboard's height over width is within 0.01 of 1920 / 1080 and the
-// timecode totals 05:00. One shot per step, `flare-new-sheet-<step>`.
+// timecode totals 05:00. One shot per step, `flare-new-sheet-<step>`. FJ-DS (document-setup DS-13/DS-14):
+// `testDocumentSettingsLater` opens `bounce` (550 × 400), File > Document Settings… shows the shared sheet, 1080 ×
+// 1080 and Apply make the stage square.
 import XCTest
 
 final class FlareNewSheetJourneys: XCTestCase {
@@ -39,5 +41,9 @@ final class FlareNewSheetJourneys: XCTestCase {
         XCTAssert(timecode.waitForExistence(timeout: 5), "no timecode (flare.timeline.timecode)")
         XCTAssert(timecode.label.hasSuffix("/ 05:00"), "the timecode reads \(timecode.label), not a 05:00 total")
         flare.shot("new-sheet-3-created")
+    }
+
+    @MainActor func testDocumentSettingsLater() throws {
+        throw XCTSkip("waits on DS-14: File > Document Settings… presents the shared sheet")
     }
 }
