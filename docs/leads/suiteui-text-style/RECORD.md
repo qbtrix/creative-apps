@@ -2,15 +2,15 @@
 
 Issue: #3779 (relaunch #4519) · Packet: docs/blueprints/suiteui/features/text-style.md
 Run: act-1a16958d72f-a4mg · Session: cloud line lead (line:suiteui; with text-style, brush-keys, document-setup) · Started: 2026-10-23T15:25Z
-Stage: 3 wave 1 (combined waves across the three features)
+Stage: 3 wave 2 (combined waves across the three features)
 Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (dev)
-Next: wave 1: TS-a PR #4871 open (TS-2); next TS-u stacked; TS-halo waits adjust-everywhere AJ-a
+Next: wave 2: TS-u stacked on TS-a #4871; then TS-design after BK-design; TS-halo waits AJ-a
 
 ## Slices
 
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| TS-a | TextStyle, rules, commands and rows declared; checks written, disabled | TS-1, TS-2 | – | font-picker:FP-a (TS-2) | true | 0 | TS-1 merged #3836; TS-2 pr #4871 | – | – |
+| TS-a | TextStyle, rules, commands and rows declared; checks written, disabled | TS-1, TS-2 | – | font-picker:FP-a (TS-2) | true | 0 | pr #4871 | – | – |
 | TS-u | the rows read and scrub the style | TS-3, TS-4 | – | TS-a, font-picker:FP-u | true | 0 | planned | – | – |
 | TS-m | ranges clamp, tracking em-relative, layout, one undo step per scrub | TS-5, TS-6 | – | TS-1 | false | 0 | done | 39808732641 | – |
 | TS-design | Design adopts | TS-7, TS-8 | – | TS-m, TS-u, adopt-command-catalog:AC-design (built), brush-keys:BK-design (planned) | true | 0 | planned | – | – |

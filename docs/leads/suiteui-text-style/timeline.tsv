@@ -35,3 +35,4 @@ utc	stage	event	ref	note
 2026-10-23T15:25:45Z	resume	run act-1a16958d72f-a4mg resumed at stage 3 on dev 721168a8; wave 1 planned
 2026-10-23T15:27:34Z	wave	wave 1 launched: TS-a (wf_5e1bd12c-3c2)
 2026-10-23T17:29:06Z	nudge	Belt nudge read; records for run act-1a16958d72f-a4mg mirrored here (Belt reads lead/suiteui-text-style)
+2026-10-23T17:43:33Z	wave	wave 2 launching: TS-u on TS-a #4871
