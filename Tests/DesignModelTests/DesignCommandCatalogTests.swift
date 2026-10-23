@@ -27,7 +27,7 @@ struct DesignCatalogDoc: HeadlessDocument {
 
 @Suite struct DesignCommandCatalogTests {
     /// Design's states: no file, nothing selected, one layer, a locked and a hidden layer, a group, several layers,
-    /// two pages, an edit to undo, an undone edit, mid-drag and mid text edit.
+    /// two pages, an edit to undo, an undone edit, mid-drag, mid text edit, a gradient and a stroke.
     static var states: [(String, DesignWorkspace)] {
         let cards = DesignFixtures.cards
         func with(_ base: DesignWorkspace = cards, _ change: (inout DesignWorkspace) -> Void) -> DesignWorkspace {
@@ -44,6 +44,7 @@ struct DesignCatalogDoc: HeadlessDocument {
             ("mid-drag", with(one) { $0.drag(from: pt(150, 140), to: pt(170, 150)) }),
             ("editing text", with { try? $0.beginTextEdit("node-5") }),
             ("gradient", with(one) { $0.runFill(.type(.linear)); $0.runFill(.add(offset: 0.5)) }),
+            ("stroked", with(one) { try? $0.setStyle(.stroke(.default)) }),
         ]
     }
 
@@ -84,8 +85,9 @@ struct DesignCatalogDoc: HeadlessDocument {
     }
 
     @Test func availabilityMatchesHelp() {
-        // The fill commands had no help before the catalog: their rules are GradientCommands' (DesignGradientTests).
-        for id in DesignWorkspace.catalog.ids where !id.hasPrefix("fill.") {
+        // The fill and stroke commands had no help before the catalog: their rules are GradientCommands' and
+        // StrokeCommands' (DesignGradientTests, DesignStrokeTests).
+        for id in DesignWorkspace.catalog.ids where !id.hasPrefix("fill.") && !id.hasPrefix("stroke.") {
             #expect(Self.oldHelp(id, DesignWorkspace()) != nil, "\(id) has no old help to match")
             for (state, w) in Self.states {
                 let old = Self.oldHelp(id, w) ?? nil
@@ -150,6 +152,7 @@ struct DesignCatalogDoc: HeadlessDocument {
             ran.formUnion(DesignCatalogDoc.catalog.ids.filter { DesignCatalogDoc.catalog.availability($0, on: doc).why == nil })
         }
         let empty = DesignWorkspace()
+        ran.insert("stroke.trim") // Design has no trim paths: its help says they are for animation (stroke-style).
         ran.formUnion(DesignWorkspace.catalog.ids.filter {
             let why = DesignWorkspace.catalog.availability($0, on: empty).why
             return why == nil || why?.hasSuffix("isn't built yet.") == true
@@ -211,6 +214,11 @@ struct DesignCatalogDoc: HeadlessDocument {
         "tool.move | Move | on", "tool.frame | Frame | on", "tool.rectangle | Rectangle | on",
         "tool.ellipse | Ellipse | on", "tool.text | Text | on", "tool.pen | Pen | Drawing paths isn't built yet.",
         "tool.eyedropper | Eyedropper | on", "shape.draw | Draw Shape | on", "tool.shape | Shape Tool | on",
+        "stroke.read | Read Stroke | on", "stroke.add | Add Stroke | on", "stroke.remove | Remove Stroke | Add a stroke first.",
+        "stroke.color | Stroke Color | Add a stroke first.", "stroke.width | Stroke Width | Add a stroke first.",
+        "stroke.join | Stroke Join | Add a stroke first.", "stroke.cap | Stroke Cap | Add a stroke first.",
+        "stroke.dash | Stroke Dash | Add a stroke first.",
+        "stroke.trim | Trim Path | Trim paths are for animation, in Flare and Halo.",
         "history.read | Read History | on", "history.jump | Jump in History | There are no steps yet.",
         "view.zoom-in | Zoom In | on", "view.zoom-out | Zoom Out | on", "view.fit | Fit Page | on",
         "view.zoom-to-selection | Zoom to Selection | on",
