@@ -2,7 +2,7 @@
 
 Issue: #4516 (earlier #3475) · Packet: docs/blueprints/library/features/tone-controls.md
 Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 · Issue for Belt lines: #3475
-Stage: 3 wave 1, LT-1 PR #4948 open (head 04d5f848, fast-lane); LT-2 waits on Wire tone-controls:TC-2. Checked 2026-10-23T18:54:15Z
+Stage: 3 wave 1, LT-1 PR #4948 open (head 04d5f848, fast-lane); LT-2 waits on Wire tone-controls:TC-2. Checked 2026-10-23T19:07:23Z
 Base: origin/dev 8a54f64c
 Next: lane merges #4948 (code: batch macOS gate); then if TC-2 (ToneRows) is still not on dev, release this feature's part of the run per supervisor; else LT-2 (removes the DevelopSlider typealias, wires ToneRows) in the same slice.
 
