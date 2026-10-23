@@ -4,14 +4,14 @@ Issue: #3756 · Packet: docs/blueprints/suiteui/features/orientation-crop.md
 Run: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui: tone-controls, shared-codecs, orientation-crop) · Started: 2026-10-23T14:51Z
 Stage: 3 wave 3
 Base: origin/dev 8021b0f56a45a59540cd4ea0ff99651c5fb8dc2a
-Next: #4582 (OC-u): restart killed the gate; rerunning on 8005f4a3 with dev's renewed quarantine (expires 2026-10-27) copied in uncommitted; on CI: PASS push and move the Head line. Other slices blocked.
+Next: #4582 (OC-u) head 8005f4a3 pushed (CI: PASS, 5360 tests); Head line moved; waits on the lane's macOS batch gate. Other slices blocked.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | OC-a | contract: Orientation, CropAspect, CropRules stubs, CropCommands, C4 part; disabled tests | OC-1, OC-2 | – | – | false | 0 | done (#4082 → f080846e; Linux 39620526621; Belt-Slice-Done posted) | – | – |
 | OC-m | Orientation and CropRules bodies; two mutation plans | OC-3, OC-4 | – | OC-a | false | 0 | done (#4088 → b48e63e3; Linux 39637279724; Belt-Slice-Done posted) | – | – |
-| OC-u | CropAspectPicker, gallery, journey, render budget | OC-5, OC-6 | SJ-OC | OC-a; document-setup:DS-u (merged #4309) | true | 0 | needs-fix (#4582: macOS compile; fix 8005f4a3) | – | – |
+| OC-u | CropAspectPicker, gallery, journey, render budget | OC-5, OC-6 | SJ-OC | OC-a; document-setup:DS-u (merged #4309) | true | 0 | open (#4582 head 8005f4a3, fix pushed) | – | – |
 | OC-library-m | Library adopts orientation | OC-7, OC-8 | – | OC-m, suite-imaging:IM-z, clipboard-interop:CB-library (not started) (OC-8) | false | 0 | blocked | – | – |
 | OC-library-u | Library crop UI | OC-9, OC-10 | – | OC-u, OC-library-m | true | 0 | blocked | – | – |
 | OC-photo-m | Photo adopts orientation and crop | OC-11, OC-12 | – | OC-m, document-setup:DS-photo (not started) (OC-12) | false | 0 | blocked | – | – |
@@ -26,8 +26,8 @@ Next: #4582 (OC-u): restart killed the gate; rerunning on 8005f4a3 with dev's re
 | OC-3 | OC-m | 2 | Orientation bodies + plan SuiteKernel.Orientation | per packet | OrientationTests; mutate | #4088 b929af4a | merged |
 | OC-4 | OC-m | 2 | CropRules bodies + plan SuiteKernel.Crop | per packet | CropRulesTests; mutate | #4088 b929af4a | merged |
 
-| OC-5 | OC-u | 3 | CropAspectChoices (kernel) + CropAspectPicker + gallery Crop page | Sources/SuiteKernel/Crop/CropAspectChoices.swift, Sources/SuiteUI/CropAspectPicker.swift, Sources/SuiteUI/Gallery/GalleryCrop.swift, Sources/SuiteUI/SuiteGallery.swift | CropAspectChoicesTests, CropAspectPickerTests; mutate | #4582 13f82d3e | open |
-| OC-6 | OC-u | 3 | journey + render budget + snapshots | UITests/SuiteJourneyTests+Crop.swift, Tests/AppSnapshotTests/RenderBudgetCropPickerTests.swift | SJ-OC; swapInOneBody | #4582 13f82d3e | open |
+| OC-5 | OC-u | 3 | CropAspectChoices (kernel) + CropAspectPicker + gallery Crop page | Sources/SuiteKernel/Crop/CropAspectChoices.swift, Sources/SuiteUI/CropAspectPicker.swift, Sources/SuiteUI/Gallery/GalleryCrop.swift, Sources/SuiteUI/SuiteGallery.swift | CropAspectChoicesTests, CropAspectPickerTests; mutate | #4582 8005f4a3 | open |
+| OC-6 | OC-u | 3 | journey + render budget + snapshots | UITests/SuiteJourneyTests+Crop.swift, Tests/AppSnapshotTests/RenderBudgetCropPickerTests.swift | SJ-OC; swapInOneBody | #4582 8005f4a3 | open |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
