@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-23T22:56Z	heartbeat	poll: #4838 #4899 #4948 #4960 #4962 open on lane; batch 20261023215139 macOS gate running; no supervisor reply on #3475; no dev-red
 2026-10-23T23:08Z	heartbeat	poll: all five PRs open on lane, batch 20261023215139 macOS gate still running; no reply on #3475; no dev-red
 2026-10-23T23:19Z	heartbeat	poll: all five PRs open on lane, batch 20261023215139 macOS gate still running; no reply on #3475; no dev-red
+2026-10-23T23:31Z	heartbeat	poll: all five PRs open on lane; batch 20261023215139 macOS job running since 22:35Z; no reply on #3475; no dev-red
