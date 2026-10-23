@@ -2,9 +2,9 @@
 
 Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a1693fbf6d-ap2g · Session: claude/large-catalog-share-sheet-2tdm4i (earlier act-1a15df37b73-k199) · Started: 2026-10-21T10:19Z (resumed 2026-10-23T14:20Z)
-Stage: 3 wave 2 (LG-model building on rule-18 stubs)
+Stage: 3 wave 2 (LG-model built on large-catalog/lg-model a07f54e7f; mutations, gate, then PR)
 Base: 8021b0f56a45a59540cd4ea0ff99651c5fb8dc2a (origin/dev)
-Next: LG-model PR (LG-3 load and IndexSet selection, LG-4 one-pass export plan, budgets on, mutations); LG-grid waits on LG-model and suiteui shared-thumbnails ST-m (planned, no slice status)
+Next: LG-model PR once scripts/mutate and scripts/ci --changed pass; LG-grid waits on LG-model and suiteui shared-thumbnails ST-m
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -18,8 +18,8 @@ Next: LG-model PR (LG-3 load and IndexSet selection, LG-4 one-pass export plan, 
 |---|---|---|---|---|---|---|---|
 | LG-1 | LG-a | 1 | LibraryFixtures.large(count:folder:), budget tests disabled | LibraryLargeFixture.swift, LargeCatalogBudgetTests.swift | LargeCatalogBudgetTests | #4006 | merged |
 | LG-2 | LG-a | 1 | large journey (skipped), -LibraryLargeFixture flag, RJ-L56 folder | LibraryJourneyTests+Large.swift, LibraryLaunch.swift, large-catalog.jobs.json | launch flag test, scripts/jobs check | #4006 | merged |
-| LG-3 | LG-model | 2 | id index, IndexSet selection through LibrarySelectionAdapter, load and select budgets on | LibraryCatalog.swift, LibrarySelectionAdapter.swift, LargeCatalogBudgetTests.swift, mutations | LargeCatalogBudgetTests | - | building |
-| LG-4 | LG-model | 2 | one-pass export plan, beginExport on the index set, export budgets on | Live/LiveExporter.swift, LibraryExport.swift, mutations | LargeCatalogBudgetTests | - | building |
+| LG-3 | LG-model | 2 | direct select all, cheap can-export check | LibrarySelectionAdapter.swift, LibraryActions.swift, LibraryExport.swift, LargeCatalogEquivalenceTests.swift, mutations | LargeCatalogEquivalenceTests | - | built, Mutate 2/2 LibrarySelectionAdapter |
+| LG-4 | LG-model | 2 | one-pass export names (stems parsed once, one taken set) | Contracts/ExportNaming+Kernel.swift, Live/LiveExporter.swift, LargeCatalogEquivalenceTests.swift, mutations | LargeCatalogEquivalenceTests | - | built, mutations running |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -33,4 +33,6 @@ Next: LG-model PR (LG-3 load and IndexSet selection, LG-4 one-pass export plan, 
 - LG-7's Tests/perf-suites.txt line is the supervisor's (protected).
 
 ## Open
+- 2026-10-23T15:44Z: LG-model measured. Release, suite run in parallel: plan, load, shift-range, beginExport pass; select all 12.0 ms vs 5 ms on 10,000. Release alone (--no-parallel, best of 10): select all 5.0 ms, of which SuiteKernel Selection.unique is 4.6 ms (Set(order) is 1.4 ms). Kernel is line:suite: filed #4835 (needs-suite) for a fast path when ids are already unique. The timed suite LargeCatalogModelBudgetTests stays disabled until LG-7 lists it in perf-suites, so the gate does not depend on #4835. Debug before/after: plan 191 ms to under 50, beginExport 52.7 ms to under 10, select all 2.14 to 0.885 ms (1,000).
+- Belt reads lead/library-large-catalog; this record is mirrored there at docs/leads/library-large-catalog/ from 2026-10-23T15:44Z on.
 - LG-grid needs suiteui shared-thumbnails ST-m (wave file planned, no slice status on 2026-10-23); re-checked each heartbeat.
