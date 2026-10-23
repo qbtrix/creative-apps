@@ -1,0 +1,52 @@
+utc	stage	event	ref	note
+2026-10-21T02:26Z	0	stage-start	#3481	line lead act-1a15c47678d-i2ih
+2026-10-21T02:45Z	2	blocked	SM-a	shell-media not filed; FV-1 needs its contract
+2026-10-21T03:09Z	0	check	SM-a	SM-a and SF-8 not on dev; blocked; 0 findings
+2026-10-21T03:32Z	0	check	SM-a	SM-a and SF-8 not on dev; blocked; 0 findings
+2026-10-21T03:54Z	0	check	SM-a	SM-a and SF-8 not on dev; blocked; 0 findings
+2026-10-21T04:16Z	0	check	SM-a	SM-a and SF-8 not on dev; blocked; 0 findings
+2026-10-21T04:38Z	0	check	SM-a	SM-a and SF-8 not on dev; blocked; 0 findings
+2026-10-21T05:00Z	0	check	SM-a	SM-a and SF-8 not on dev; blocked; 0 findings
+2026-10-21T05:22Z	0	check	SM-a	not on dev, no PR; 0 findings
+2026-10-21T05:44Z	0	check	SM-a	not on dev, no PR; 0 findings
+2026-10-21T06:12Z	0	check	SM-a	not on dev, no PR; 0 findings
+2026-10-21T07:10Z	2	check	blocked	resumed as act-1a15d4ed024-1wsg; SM-a not on dev (poll 1)
+2026-10-21T07:37Z	2	check	blocked	SM-a not on dev, no PR (poll 2)
+2026-10-21T07:57Z	2	question	blocked	SM-a absent (poll 3); Question for the supervisor on #3481
+2026-10-21T08:17Z	3	parked	-	Parked per supervisor 08:01Z on #3481: SM-a #3711 waits for a Belt slot; not building SM-a.
+2026-10-21T08:38Z	3	parked	-	Still parked: SM-a #3711 has no slice PR yet.
+2026-10-21T08:58Z	3	parked	-	Still parked: SM-a #3711 has no slice PR.
+2026-10-21T09:18Z	3	parked	-	Still parked: SM-a #3711 has no slice PR.
+2026-10-21T09:39Z	3	parked	-	Still parked: SM-a #3711 has no slice PR.
+2026-10-21T10:00Z	3	parked	-	Still parked: SM-a #3711 has no slice PR.
+10:20Z	3	check	-	Heartbeat: still parked; SM-a (#3711) has no slice PR.
+10:40Z	3	check	-	Heartbeat: still parked; SM-a (#3711) has no slice PR.
+11:00Z	3	check	-	Heartbeat: still parked; SM-a (#3711) has no slice PR.
+11:19Z	3	check	-	Heartbeat: still parked; SM-a (#3711) has no slice PR.
+11:40Z	3	check	-	Parked: SM-a #3711 still has no slice PR.
+12:00Z	3	check	-	Parked: SM-a (shell-media #3711) still has no slice PR.
+12:26Z	3	check	-	Parked: SM-a (shell-media #3711) still has no slice PR.
+12:46Z	3	SM-a PRs now open: #4034 (SM-1 media contract), #4035 (SM-2). Export-pack waits until they merge.	-	
+13:08Z	3	heartbeat	-	SM-a #4034 #4035 still open on lane.
+13:28Z	3	heartbeat	-	SM-a #4034 #4035 still open on lane.
+23:30Z	3	heartbeat	-	Resumed as act-1a160bffba1-bvv3. SM-a #4034 #4035 still open; SM-m #4119 #4123, SM-w #4125 #4237, SM-r #4128 #4239 also open. Parked.
+2026-10-21T23:58Z	3	heartbeat	-	23:58Z: SM-1 #4034 merged 23:32Z; SM-2 #4035 still open, so the SM-a slice isn't merged yet.
+2026-10-22T00:36Z	3	check	-	heartbeat: #4035 still open in lane
+2026-10-22T01:00Z	3	check	-	SM-2 #4035 failed lane macOS build (run 39698491954), owned by the shell-media lead
+2026-10-22T01:24Z	3	check	-	heartbeat 01:24Z: #4259 lane rebuild 39703409910 still queued; #4257 not merged yet (build green); #4035 open; full run 39700185524 Linux red on FormatListRatchetTests.realTreePasses (SuiteModel Media.swift, not ours), no slice credit
+2026-10-22T01:35Z	3	decision	-	Records now also live on lead/flare-* (the branches Belt watches); every stage pushes there.
+2026-10-22T01:44Z	3	heartbeat	-	Heartbeat: #4259 build 39703409910 still queued (macOS runners busy); #4257, #4035 open; no green-Linux run containing FG-m yet.
+2026-10-22T02:16Z	3	heartbeat	-	No change: #4035 open.
+2026-10-22T03:12Z	3	heartbeat	-	Heartbeat: #4259 (593d9118) and #4257 (d417a35f) wait on lane macOS builds; #4035 too. dev Linux green at 66a84588.
+2026-10-22T03:39Z	3	heartbeat	-	Heartbeat: #4259 macOS build queued, #4257 macOS build running; #4035 macOS+Linux green, awaiting lane merge.
+2026-10-22T04:02Z	3	build	-	SM-2 #4035 merged 03:53Z, so SM-a is on dev; XP-1/XP-6 on dev, XP-3 not. FV-1 started on lead/export-pack-fva; the FV-a PR opens with FV-2 once XP-3 is on dev
+2026-10-22T04:18Z	3	build	-	FV-1 done on lead/export-pack-fva at ed2293cc (+140/-10, 8 files, gate PASS); the sheet hides unbuilt formats until FV-2. XP-3 not on dev yet.
+2026-10-22T04:24Z	3	heartbeat	-	XP-3 still not on dev; FV-2 waits
+2026-10-22T04:52Z	3	heartbeat	-	XP-3 still not on dev; FV-2 waits
+2026-10-22T05:19Z	3	heartbeat	-	XP-3 still not on dev; FV-2 waits
+2026-10-22T06:06Z	3	wait	-	FV-1 still held on lead/export-pack-fva (ed2293cc); XP-3 not on dev yet.
+2026-10-22T06:35Z	3	wait	-	XP-3 still not on dev.
+2026-10-22T07:05Z	3	wait	-	XP-3 still not on dev.
+2026-10-22T07:31Z	3	wait	-	XP-3 still not on dev.
+2026-10-22T07:59Z	3	wait	-	XP-3 still not on dev.
+2026-10-22T08:26Z	3	wait	-	XP-3 still not on dev.

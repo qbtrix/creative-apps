@@ -1,0 +1,85 @@
+utc	stage	event	ref	note
+2026-10-20T07:09Z	0	stage-start	-	lead set up on base 5a17e0e
+2026-10-20T07:09Z	0	stage-end	-	worktree lead/export-pack
+2026-10-20T07:09Z	1	stage-start	-	packet read
+2026-10-20T07:09Z	1	stage-end	-	v3 packet with Slices table
+2026-10-20T07:10Z	2	stage-start	-	waits read from source
+2026-10-20T07:12Z	2	stage-end	-	XP-1 built now (PR after #3543); XP-6 stacked on XP-1
+2026-10-20T07:12Z	3	stage-start	wave 1	XP-1, XP-6
+2026-10-20T07:45Z	3	task-built	XP-1	lead/export-pack-XP-1 04cd4c0, CI: PASS
+2026-10-20T07:45Z	3	task-built	XP-6	lead/export-pack-XP-6 de396d4, CI: PASS, Mutate 5/5
+2026-10-20T07:45Z	3	wait-met	AH-1	#3543 merged as 854a3b5
+2026-10-20T07:57Z	3	gate	XP-1	scripts/ci --changed CI: PASS on 55611e3 (dev af2977c merged)
+2026-10-20T07:57Z	3	pr-open	#3552	XP-1, Slice XP-a, fast-lane
+2026-10-20T07:59Z	3	heartbeat	-	dev 8e06057: core pin 0de5687d, #3144 open, GF-2 and PL-a not on dev, AH-2 not started
+2026-10-20T07:59Z	3	note	#3552	server-added attribution footer removed from the PR body and from the start comments on #3476 and #3518
+2026-10-20T08:12Z	3	heartbeat	-	dev 8375049: #3552 macOS build queued (run 39390799799); XP-2 waits SM-a, XP-3 waits TC-a
+2026-10-20T08:24Z	3	heartbeat	-	dev 8375049: #3552 macOS build still queued (run 39390799799, 19 min)
+2026-10-20T08:37Z	3	heartbeat	-	dev be364d1: #3552 macOS build queued 31 min (runner held by 39362977551 since 03:11Z); asked supervisor on #3477 (6286926687)
+08:48Z	3	heartbeat	-	poll: lane macOS builds 39390799799/39391184437 still queued (runner held by 39362977551); no supervisor answer yet; dev be364d1 unchanged, core pin 0de5687d
+08:59Z	3	heartbeat	-	poll: runner free; XP-1 build 39390799799 in progress since 08:53Z, PN-2 build 39391184437 queued next; no supervisor answer needed now
+09:12Z	3	check	XP-1	lane macOS build 39390799799 success (09:03Z); #3552 waits for the lane sweep
+09:24Z	3	heartbeat	-	poll: #3552 build green, waiting for a lane sweep to merge it (lane runs are cycling); PN-2 build 39391184437 still queued
+09:28Z	3	merged	XP-1	#3552 squash-merged by the fast lane
+09:42Z	3	pr	XP-6	#3586 opened (dev merged in, add/add conflicts resolved to XP-6 side, CI: PASS, Mutate 5/5), fast-lane
+09:56Z	3	check	XP-6	#3586 lane macOS build 39403374325 dispatched 09:48Z
+10:08Z	3	check	XP-6	lane macOS build 39403374325 still queued (runner backlog)
+10:19Z	3	check	XP-6	build 39403374325 still queued (31 min, runner backlog)
+10:31Z	3	poll	-	macOS builds for #3586 and #3553 still queued; dev a54a892a, core pin 0de5687d unchanged; no SM-a, GF-2, AH-2, PL-a or #3144 on dev
+10:44Z	3	poll	-	#3586 macOS build 39403374325 succeeded 10:43Z; waits on the lane's next sweep to merge; core pin 0de5687d unchanged
+10:56Z	3	poll	-	#3586 build passed, not merged yet; waits on the lane sweep; core pin 0de5687d unchanged
+11:15Z	3	merged	XP-6	#3586 merged as b538c92c
+11:34Z	3	poll	-	dev 0e1199e9: no core bump, SM-a, PL-a, GF-2, AH-2 or #3144; nothing to start
+11:47Z	3	poll	-	dev still 0e1199e9 (core pin 0de5687d); PN-2 head e65ce2e mergeable, waits on the lane build; no slice unblocked
+12:00Z	3	poll	-	dev still 0e1199e9; no slice unblocked
+12:18Z	3	poll	-	dev still 0e1199e9; no slice unblocked
+12:29Z	3	poll	-	dev 3ebb876f (#3396 #3473 #3489 #3493): no core bump, SM-a, PL-a, GF-2, AH-2 or #3144; nothing to start
+12:41Z	3	poll	-	dev still 3ebb876f; no slice unblocked
+2026-10-20T13:00:54Z	3	poll	dev 897ccbb2: no prerequisites on dev yet
+2026-10-20T13:18:25Z	3	poll	dev f729e906: SM-a not on dev, XP-2 and XP-7 wait
+2026-10-20T13:29:45Z	3	poll	dev f729e906 unchanged: SM-a not on dev
+2026-10-20T13:41:11Z	3	poll	dev f729e906 unchanged: SM-a not on dev
+2026-10-20T13:54:40Z	3	poll	dev 4f365bf8: SM-a not on dev
+2026-10-20T14:16:52Z	3	poll	dev 56e73319: SM-a not on dev, XP-2 waits
+2026-10-20T14:28:43Z	3	poll	dev 9f880c85: SM-a not on dev, XP-2 waits
+2026-10-20T14:40:10Z	3	poll	dev d40cdad1: SM-a not on dev, XP-2 waits
+2026-10-20T14:53:00Z	3	poll	dev 0dd23d65: SM-a not on dev, XP-2 waits
+2026-10-20T15:05:58Z	3	poll	dev 35b6f8a8: SM-a not on dev, XP-2 waits
+2026-10-20T15:18:30Z	3	poll	dev 27b67332: SM-a not on dev, XP-2 waits
+15:30Z	3	poll	dev 27b67332: SM-a not on dev, XP-2 waits
+15:42Z	3	poll	dev 761060e6: SM-a not on dev, XP-2 waits
+15:55Z	3	poll	dev 5eceabf7: SM-a not on dev, XP-2 waits
+16:07Z	3	poll	dev 5eceabf7: SM-a not on dev, XP-2 waits
+16:18Z	3	poll	dev 7b45f176: SM-a not on dev, XP-2 waits
+2026-10-20T16:30:21Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T16:41:46Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T16:53:14Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T17:05:06Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T17:16:28Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T17:27:50Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T17:38:59Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T17:50:52Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T18:03:15Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T18:14:40Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T18:26:23Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T18:37:58Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T18:49:35Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T19:00:29Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T19:11:38Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T19:22:56Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T19:34:33Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T19:46:50Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T19:58:05Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T20:11:31Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T20:42:07Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T20:54:00Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T21:07:59Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T21:20:54Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T21:33:09Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T21:45:10Z	3	poll	SM-a not on dev; XP-2 waits
+2026-10-20T21:57Z	poll	poll: SM-a not on dev; XP-2 still blocked
+2026-10-20T22:09Z	poll	poll: SM-a not on dev; XP-2 blocked
+2026-10-20T22:21Z	poll	poll: SM-a not on dev; XP-2 blocked
+2026-10-20T22:33Z	poll	poll: SM-a not on dev; XP-2 blocked
+2026-10-20T22:46Z	poll	poll: SM-a not on dev; XP-2 blocked
+2026-10-22T16:24Z	4	resume	#4523	new run act-1a16469734c-d0s8; wave 1 = XP-2
