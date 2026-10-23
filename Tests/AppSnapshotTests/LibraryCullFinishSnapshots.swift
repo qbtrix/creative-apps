@@ -2,7 +2,7 @@
 // on the shoot with three rejects, in Light and Dark. Dialogs and menus don't render here, so the confirm
 // and items are drawn as columns, help beside each: library-delete-rejects-{confirm,done,none} and
 // library-label-keys. "done" keeps 24 photos until DR-6. macOS only.
-import LibraryModel
+@testable import LibraryModel
 import SuiteUI
 import SwiftUI
 import Testing
