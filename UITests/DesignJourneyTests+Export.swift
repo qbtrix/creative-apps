@@ -10,7 +10,7 @@
 // Done (`design.export.dismiss`) closes the sheet; ⇧⌘E again and Cancel
 // (`design.export.cancel`) leaves no sheet. J17 and J18 (DE-10, DE-11) run on
 // the live services with `-DesignExportTo <tmp folder>`, which stands in for
-// the folder panel: J17 writes Desktop as PNG 2x, SVG and PDF and reads each
+// the folder panel: J17 writes Desktop as PNG 2x (Desktop@2x.png), SVG and PDF and reads each
 // file back; J18 exports PNG 1x twice ("Desktop 2.png" beside an unchanged
 // "Desktop.png"), Escape and Cancel write nothing, and a read-only folder
 // ends the run on the failed line with the system's reason.
@@ -43,16 +43,16 @@ final class DesignExportJourneyTests: XCTestCase {
         design.element("design.export.scale.2x").click()
         XCTAssert(Self.waitUntil { self.reads(items, "2880 × 2048 px") }, "2x left the list without 2880 × 2048 px")
 
-        // 2. Export: the finished line and the status line name the folder; Desktop.png is 2880 × 2048.
+        // 2. Export: the finished line and the status line name the folder; Desktop@2x.png is 2880 × 2048.
         let done = "Exported 1 file to \(folder.lastPathComponent)"
         design.element(Self.startID).click()
         XCTAssert(Self.waitUntil(timeout: 10) { self.reads(sheet, done) }, "the run never read \(done)")
         XCTAssert(Self.waitUntil { Self.text(design.element(Self.noteID)).contains(done) }, "the status line doesn't say \(done)")
         design.shot("export-live-png")
-        let png = try Data(contentsOf: folder.appendingPathComponent("Desktop.png"))
+        let png = try Data(contentsOf: folder.appendingPathComponent("Desktop@2x.png"))
         let image = CGImageSourceCreateWithData(png as CFData, nil).flatMap { CGImageSourceCreateImageAtIndex($0, 0, nil) }
-        XCTAssertEqual(image?.width, 2880, "Desktop.png isn't 2880 px wide")
-        XCTAssertEqual(image?.height, 2048, "Desktop.png isn't 2048 px high")
+        XCTAssertEqual(image?.width, 2880, "Desktop@2x.png isn't 2880 px wide")
+        XCTAssertEqual(image?.height, 2048, "Desktop@2x.png isn't 2048 px high")
         design.element(Self.doneID).click()
 
         // 3. ⇧⌘E, SVG, Export: Desktop.svg's first element is <svg with the frame's viewBox.

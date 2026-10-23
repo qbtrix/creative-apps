@@ -23,15 +23,15 @@
   {
     "label": "namesUniqueAgainstFolder: the folder's names are ignored",
     "file": "Sources/DesignModel/DesignExport+Kernel.swift",
-    "find": "nodes.map(\\.name), extension: format.fileExtension, among: existing)",
-    "replace": "nodes.map(\\.name), extension: format.fileExtension, among: [])",
+    "find": "UniqueFileNames.names(bases, extension: format.fileExtension, among: existing)",
+    "replace": "UniqueFileNames.names(bases, extension: format.fileExtension, among: [])",
     "tests": "DesignExportPlanTests|DesignExportWalkTests"
   },
   {
     "label": "namesUniqueWithinPlan: a planned name is not taken for the next layer",
     "file": "Sources/DesignModel/DesignExport+Kernel.swift",
-    "find": "let names = UniqueFileNames.names(nodes.map(\\.name), extension: format.fileExtension, among: existing)",
-    "replace": "let names = nodes.map { UniqueFileNames.name($0.name, extension: format.fileExtension, among: existing) }",
+    "find": "let names = UniqueFileNames.names(bases, extension: format.fileExtension, among: existing)",
+    "replace": "let names = bases.map { UniqueFileNames.name($0, extension: format.fileExtension, among: existing) }",
     "tests": "DesignExportPlanTests|DesignExportWalkTests"
   },
   {
@@ -124,5 +124,26 @@
     "find": "            if case .scale = options.size { return item }\n",
     "replace": "            return item\n",
     "tests": "DesignExportPackTests|DesignExportOptionsSizeTests"
+  },
+  {
+    "label": "a 2x or 3x still file loses its @<n>x suffix (RJ-D02)",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "return k > 1 ? \"\\(name)@\\(k)x\" : name",
+    "replace": "return name",
+    "tests": "DesignExportPlanTests|DesignExportWalkTests"
+  },
+  {
+    "label": "a vector file takes the scale suffix",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "    let k = exportFactor(format, scale)\n    return k > 1",
+    "replace": "    let k = Swift.min(Swift.max(scale, 1), 3)\n    return k > 1",
+    "tests": "DesignExportPlanTests|DesignExportWalkTests"
+  },
+  {
+    "label": "the page's file loses its scale suffix",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "let base = exportBaseName(page.name, options.format, options.scale)",
+    "replace": "let base = page.name",
+    "tests": "DesignExportPlanTests|DesignExportWalkTests"
   }
 ]

@@ -3,7 +3,8 @@
 // the sheet never runs the window's body; each change of `request` opens it on the Model's
 // `exportSheetDefaults`, after the last run's options (`rememberExport`). Ids hang off
 // `design.export`: Format (no Size row: Scale is the one scale control), then DesignExportRows'
-// Scale (`scale.<n>x`, off with `scaleHelp` for SVG and PDF) and Scope (`scope.<scope>`) chips, the
+// Scale (`scale.<n>x`, off with `scaleHelp` for SVG and PDF) and Scope (`scope.<scope>`) chips (once
+// the run starts, both say why they're off with the run's `optionsHelp`), the
 // file list (`items`) and the plan's refusal (`result`). Export on the fakes (DE-7) runs fake steps
 // that write nothing. Export on the live services (DE-10) writes into `-DesignExportTo`, else the
 // folder an NSOpenPanel picks (its Cancel leaves the sheet editing): the plan is named against the
@@ -201,7 +202,7 @@ struct DesignExportArea: ViewModifier {
             onExport: export,
             onClose: close
         ) {
-            if run.shownOptions != nil { DesignExportRows(model: model, options: options, edit: edit) }
+            if run.shownOptions != nil { DesignExportRows(model: model, options: options, offHelp: run.optionsHelp, edit: edit) }
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(DesignControlID.exportSheet)
@@ -212,6 +213,8 @@ struct DesignExportArea: ViewModifier {
 struct DesignExportRows: View {
     let model: DesignWorkspace
     let options: DesignExportOptions
+    /// Why every chip is off once the run starts; nil while editing.
+    var offHelp: String? = nil
     let edit: @MainActor (DesignExportOptions) -> Void
 
     var body: some View {
@@ -222,7 +225,7 @@ struct DesignExportRows: View {
                     selected: options.scaleHelp == nil ? options.scale : nil
                 ) { edit(options.scaled(Double($0))) }
                     .disabled(options.scaleHelp != nil)
-                    .help(options.scaleHelp ?? "")
+                    .help(offHelp ?? options.scaleHelp ?? "")
                 if let help = options.scaleHelp { InspectorNote(help) }
             }
             labeled("Scope", DesignControlID.exportScope) {
@@ -236,6 +239,7 @@ struct DesignExportRows: View {
                     next.scope = scope
                     edit(next)
                 }
+                .help(offHelp ?? "")
             }
             labeled("Files", DesignControlID.exportItems) {
                 ForEach(model.exportRows(options)) { row in
