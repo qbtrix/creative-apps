@@ -17,7 +17,7 @@
 // A file dropped on the stage follows the suite's drop rule (file-flow FL-2, `suiteFileDrop`): a .flare opens
 // through the app's document host, another app's file goes to that app, and the mark at the bottom says which
 // before the drop. A Lottie .json, which the suite's rule refuses, opens in a new Flare window through
-// FlareOpenQueue instead (`FlareWorkspace.lottieDrops`, lottie-open LO-4).
+// FlareShell.openQueue instead (`FlareWorkspace.lottieDrops`, lottie-open LO-4).
 import AppKit
 import FlareCore
 import FlareModel
@@ -78,7 +78,7 @@ struct FlareStage: View {
                            places: model.placesExtensions, documentName: model.fileName) { actions in
                 let (lottie, rest) = FlareWorkspace.lottieDrops(actions)
                 Task { @MainActor in
-                    for path in lottie { FlareOpenQueue.shared.open(URL(fileURLWithPath: path)) }
+                    for path in lottie { FlareShell.openQueue.open(URL(fileURLWithPath: path)) }
                     if !rest.isEmpty { await FlareShell.bridge.perform(rest, host: FlareShell.host) }
                 }
             }
