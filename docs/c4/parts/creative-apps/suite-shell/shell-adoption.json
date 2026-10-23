@@ -6,6 +6,7 @@
   "paths": [
     "Sources/SuiteShell/SuiteAppModifier.swift",
     "Sources/SuiteShell/SuiteAppDelegate.swift",
+    "Sources/SuiteShell/SuiteEditorScene.swift",
     "Sources/SuiteShell/SettingsRoute.swift"
   ],
   "order": 70

@@ -168,6 +168,7 @@ extension FlareWorkspace {
         setFrameRate,  // frame-rates FR-10, FlareFrameRate+Kernel.swift
     ] + GradientCommands.specs(FlareWorkspace.self)  // the eight fill.* commands (gradient-fill FG-5)
         + FileFlowCommands.specs(FlareWorkspace.self)  // file.recent, open-recent, clear-recent, open-in, drop (file-flow FL-3)
+        + PathCommands.specs(FlareWorkspace.self)  // the twelve path.* commands, the Pen and Direct Select's points (pen-paths FP-6)
 }
 
 extension FlareWorkspace {
