@@ -19,7 +19,7 @@ Next: HX-u PR (stacked on HX-a); HX-m (HX-3, HX-4) stacked on HX-a
 |---|---|---|---|---|---|---|---|
 | HX-1 | HX-a | 1 | codec and alpha settings, stub refusal | Sources/HaloModel/Contracts/HaloDocumentValues.swift, Tests/HaloModelTests/HaloProResTests.swift | existing render tests; ProRes refused | #4841 | pr |
 | HX-2 | HX-a | 2 | Codec row, Transparent checkbox | Sources/HaloApp/HaloRenderSheet.swift | HaloRenderProResSnapshots.sheet | #4841 | pr |
-| HX-3 | HX-m | 2 | plan rules, alpha frames (RJ-H41 moves to HX-4) | Sources/HaloModel/HaloRenderJob.swift, see packet | HaloProResTests, HaloRenderAlphaTests | - | building |
+| HX-3 | HX-m | 2 | plan rules, alpha frames (RJ-H41 moves to HX-4) | Sources/HaloModel/HaloRenderJob.swift, see packet | HaloProResTests, HaloRenderAlphaTests | #4874 | pr |
 | HX-4 | HX-m | 2 | live renderer via media.movie; HaloMovieWriter deleted | Sources/HaloModel/Live/LiveCompositionRendering.swift, Sources/HaloApp/HaloMovieWriter.swift | HaloMovieSinkTests | - | blocked |
 | HX-5 | HX-u | 3 | snapshots, budget | Tests/AppSnapshotTests/HaloRenderProResSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloRenderSheetTests.swift | codecSwitchInTwoBodies | #4858 | pr |
 | HX-6 | HX-u | 3 | journey skipped | UITests/HaloJourneyTests+ExportPack.swift | compiles, skipped | #4858 | pr |
