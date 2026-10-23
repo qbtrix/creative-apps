@@ -89,7 +89,8 @@ final class PhotoTextJourneyTests: XCTestCase {
     @MainActor private func typeTitle(_ words: String, _ photo: Journey) {
         photo.press(character: "t")
         let tool = photo.element("suite.tools").buttons["Type"]
-        XCTAssert(tool.waitForExistence(timeout: 5) && tool.isSelected, "T didn't pick the Type tool")
+        XCTAssert(tool.waitForExistence(timeout: 5), "no Type tool on the palette (suite.tools)")
+        XCTAssert(Self.waitUntil { tool.isSelected }, "T didn't pick the Type tool")
         photo.element("suite.canvas").coordinate(withNormalizedOffset: Self.title).click()
         XCTAssert(photo.element("photo.text.box").waitForExistence(timeout: 5), "the click opened no text box (photo.text.box)")
         photo.app.typeText(words)
