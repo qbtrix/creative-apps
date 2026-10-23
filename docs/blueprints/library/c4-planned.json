@@ -67,7 +67,8 @@
                   "Sources/LibraryApp/LibraryWindow+Export.swift",
                   "Sources/LibraryApp/LibraryWindow+Trash.swift",
                   "Sources/LibraryApp/LibraryWindow+Files.swift",
-                  "Sources/LibraryApp/LibraryWindow+Backup.swift"
+                  "Sources/LibraryApp/LibraryWindow+Backup.swift",
+                  "Sources/LibraryApp/LibraryWindow+Share.swift"
                 ],
                 "status": "planned",
                 "authored": true
