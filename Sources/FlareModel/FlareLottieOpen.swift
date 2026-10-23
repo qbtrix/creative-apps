@@ -113,8 +113,8 @@ extension FlareWorkspace {
     public mutating func openLottie(_ data: Data, named name: String) throws(FlareOpenError) -> [String] {
         switch Self.decodeLottie(data, named: name) {
         case .success(let (document, skipped)):
+            defer { importReport = skipped }  // after restoreRecovery's load, which clears it
             restoreRecovery(document)
-            importReport = skipped
             return skipped
         case .failure(let error):
             loadState = .failed(error.message)

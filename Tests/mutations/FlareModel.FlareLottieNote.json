@@ -51,8 +51,8 @@
   {
     "label": ".headlessReport: the CLI's Lottie open leaves no import.report",
     "file": "Sources/FlareModel/FlareLottieOpen.swift",
-    "find": "            importReport = skipped\n",
-    "replace": "",
+    "find": "defer { importReport = skipped }",
+    "replace": "defer {}",
     "tests": "FlareLottieNoteTests"
   },
   {
