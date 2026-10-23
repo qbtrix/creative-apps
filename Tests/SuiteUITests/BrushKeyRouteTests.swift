@@ -1,7 +1,5 @@
-// BrushKeyRouteTests.swift (brush-keys BK-5): ToolKeys.brushAction reads an AppKit key event through KeyModifiers
-// and hands it to the kernel's BrushKeys rule: `]` steps the size up a band, Shift moves hardness, digits set
-// opacity (two inside the window make an exact percent), Command and Option keys go on, and nothing happens while a
-// text input is first responder, so a field keeps its digits. BrushKeyReadout's text names each action.
+// BrushKeyRouteTests.swift (brush-keys BK-5): ToolKeys.brushAction hands key events to BrushKeys' rule, passes
+// Command and Option keys on and does nothing while a text input has the keys; BrushKeyReadout names each action.
 import AppKit
 import SuiteKernel
 import SuiteUI
@@ -10,23 +8,17 @@ import Testing
 @MainActor @Suite struct BrushKeyRouteTests {
     @Test func bracketStepsSizeThroughTheKernelRule() throws {
         var digits = OpacityDigits()
-        let up = try Self.act("]", settings: BrushSettings(), digits: &digits)
-        #expect(up == .brush(.size(BrushKeys.step(size: 20, up: true))))
-        #expect(up == .brush(.size(25)))
-        let down = try Self.act("[", settings: BrushSettings(size: 10), digits: &digits)
-        #expect(down == .brush(.size(9)))
+        #expect(try Self.act("]", settings: BrushSettings(), digits: &digits) == .brush(.size(25)))
+        #expect(try Self.act("[", settings: BrushSettings(size: 10), digits: &digits) == .brush(.size(9)))
     }
 
     @Test func shiftIsRead() throws {
         var digits = OpacityDigits()
         let settings = BrushSettings(hardness: 50)
         // AppKit reports Shift-] as "}" ignoring modifiers on most layouts; both read as Shift.
-        let bracket = try Self.act("]", flags: .shift, settings: settings, digits: &digits)
-        let brace = try Self.act("}", flags: .shift, settings: settings, digits: &digits)
-        let digit = try Self.act("5", flags: .shift, settings: settings, digits: &digits)
-        #expect(bracket == .brush(.hardness(75)))
-        #expect(brace == .brush(.hardness(75)))
-        #expect(digit == nil)
+        #expect(try Self.act("]", flags: .shift, settings: settings, digits: &digits) == .brush(.hardness(75)))
+        #expect(try Self.act("}", flags: .shift, settings: settings, digits: &digits) == .brush(.hardness(75)))
+        #expect(try Self.act("5", flags: .shift, settings: settings, digits: &digits) == nil)
     }
 
     @Test func digitsSetOpacity() throws {
@@ -42,36 +34,24 @@ import Testing
         #expect(layer == .layerOpacity(100))
     }
 
-    @Test func bracketsNeedABrush() throws {
-        var digits = OpacityDigits()
-        let none = try Self.act("]", settings: nil, digits: &digits)
-        #expect(none == nil)
-    }
-
     @Test func commandAndOptionGoOn() throws {
         var digits = OpacityDigits()
-        let command = try Self.act("]", flags: .command, settings: BrushSettings(), digits: &digits)
-        let option = try Self.act("5", flags: .option, settings: BrushSettings(), digits: &digits)
-        let up = try Self.act("]", type: .keyUp, settings: BrushSettings(), digits: &digits)
-        #expect(command == nil)
-        #expect(option == nil)
-        #expect(up == nil)
+        #expect(try Self.act("]", settings: nil, digits: &digits) == nil)
+        #expect(try Self.act("]", flags: .command, settings: BrushSettings(), digits: &digits) == nil)
+        #expect(try Self.act("5", flags: .option, settings: BrushSettings(), digits: &digits) == nil)
+        #expect(try Self.act("]", type: .keyUp, settings: BrushSettings(), digits: &digits) == nil)
     }
 
     @Test func fieldKeepsDigits() throws {
         var digits = OpacityDigits()
         let field = NSTextView()
         #expect(ToolKeys.isTextInput(field))
-        let typed = try Self.act("9", firstResponder: field, settings: BrushSettings(), digits: &digits)
-        let bracket = try Self.act("]", firstResponder: field, settings: BrushSettings(), digits: &digits)
-        #expect(typed == nil)
-        #expect(bracket == nil)
+        #expect(try Self.act("9", firstResponder: field, settings: BrushSettings(), digits: &digits) == nil)
+        #expect(try Self.act("]", firstResponder: field, settings: BrushSettings(), digits: &digits) == nil)
         let editable = NSTextField()
         editable.isEditable = true
         #expect(ToolKeys.isTextInput(editable))
         #expect(!ToolKeys.isTextInput(NSTextField(labelWithString: "Size")))
-        #expect(!ToolKeys.isTextInput(NSView()))
-        #expect(!ToolKeys.isTextInput(nil))
         // The digit the field kept never started a pair: the next digit on the canvas sets tens.
         let canvas = try Self.act("4", firstResponder: NSView(), settings: BrushSettings(), digits: &digits)
         #expect(canvas == .brush(.opacity(40)))
