@@ -1,0 +1,39 @@
+utc	stage	event	ref	note
+2026-10-21T19:12:04Z	0	setup	58034759	base verified; lead branch created
+2026-10-21T19:12:04Z	2	plan	-	wave 1 = DS-a
+2026-10-21T19:16Z	3	heartbeat	wave 1	DS-a/DS-m builder running
+2026-10-21T20:20Z	3	pr-opened	#4182	DS-a contract stubs
+2026-10-21T20:20Z	3	pr-opened	#4184	DS-m rules, stacked on #4182
+2026-10-21T20:20Z	3	channel	lead/suiteui-document-setup	status moved to the branch Belt watches
+2026-10-21T20:38Z	3	footer	#4182 #4184	server footer removed from both bodies
+2026-10-21T20:38Z	3	lane-mac	#4182	macOS build https://github.com/qbtrix/creative-apps/actions/runs/39671351382
+2026-10-21T20:38Z	3	poll	-	no findings; FR-u held on frame-rates; AR-u merged (#4124)
+2026-10-21T20:54Z	3	poll	#4182	macOS build 39671351382 queued; #4184 waits; no findings
+2026-10-21T21:12Z	3	poll	#4182	macOS build 39671351382 in progress; #4184 waits; no findings
+2026-10-21T21:25Z	3	poll	#4182	macOS build 39671351382 still in progress; no lane labels
+2026-10-21T21:38Z	3	lane-mac	#4182	macOS build 39671351382 success; waiting on the lane sweep (run 39679102627)
+2026-10-21T21:53Z	3	merged	#4182	DS-a squash-merged; #4184 retargeted to dev
+2026-10-21T21:53Z	3	poll	dev-red #3856	dev Linux red on launcher command-path baseline (not ours); AE-h2 #2842 closed
+2026-10-21T22:01Z	3	blocked	#4184	integrated 976774dd; gate fails only on dev-red #3856; commented on #3757
+2026-10-21T22:28Z	3	poll	#4184	dev now red on library baseline (#3967) instead of launcher; DS-m still blocked
+2026-10-21T22:42Z	3	poll	#4184	lane waiting, CI red (Linux) from dev-red #3856 (library baseline); blocked poll 1 of 3
+2026-10-21T22:57Z	3	poll	#4184	dev still red on library baseline (#3856); blocked poll 2 of 3
+2026-10-21T23:13Z	3	question	#3757	blocked poll 3 of 3 on dev-red #3856 (library baseline; dev macOS compile break); asked the supervisor
+2026-10-21T23:30:51Z	3	poll	#3757	supervisor: hold, #4250 (library baseline) merged at be9aa35b, #4215 Mac fix next, #4184 queued on local Mac gate behind it; no rebase until the gate asks; DS-u waits on FR-u (not started)
+2026-10-21T23:49:32Z	3	poll	#4184	no needs-fix/needs-rebase; #4215 still open; FR-u not started
+2026-10-22T00:06:30Z	3	poll	#4184	#4215 merged; supervisor merged dev into DS-m (ba144058d), lane Linux check running; hold
+2026-10-22T00:23:42Z	3	check	#4184	Linux red only on dev-red #3856 FormatListRatchetTests (Media.swift from #4034); fix #4258 on the lane; hold
+2026-10-22T00:40:23Z	3	poll	#4184	#4258 still waiting on its macOS build; hold; stripped 2 old comment footers on #3757
+2026-10-22T00:56:41Z	3	poll	#4184	unchanged; #4258 still open; hold
+2026-10-22T01:13:17Z	3	poll	#4184	#4258 new head f9e7698c1, lane Linux check running; hold
+2026-10-22T01:30:25Z	3	poll	#4258	fix PR macOS build dispatched at 01:29; our PRs hold; cross-line waits still null
+2026-10-22T01:46:34Z	3	poll	#4258	fix PR macOS build still running; our PRs hold; cross-line waits still null
+2026-10-22T02:03:05Z	3	poll	#4258	fix PR Linux green, macOS build queued for a runner since 01:29; our PRs hold; cross-line waits null
+2026-10-22T02:33:21Z	3	pr	#4299	DS-u DS-5 sheet opened (split under 400 lines); DS-6 gallery/journey/budget on ds-u-gallery, PR after #4299 merges
+2026-10-22T02:44:03Z	check	Linux green on held heads; #4184 #4185 #4191 #4299 queued for lane macOS build
+2026-10-22T02:55:32Z	check	Head markers moved on #4184 #4185 #4191; #4299 open, awaiting lane macOS build; DS-6 held
+2026-10-22T03:20:02Z	fix	#4299 macOS build failed (LengthUnit ambiguous: SuiteKernel vs SuiteModel); fixed in 04d15d692, gate PASS, Head moved; ds-u-gallery merged it (838757f91). #4184 macOS build green
+2026-10-22T03:41:45Z	check	#4184 #4185 mac green, mergeable clean, lane run 39716412123 in progress; #4191 #4299 macOS builds queued; heads and markers match
+2026-10-22T04:06:29Z	merge	#4184 DS-m merged b7d02d1fe (lane batch 03:53); #4299 macOS build green (39716825688), open; Belt-Slice-Done for DS-m waits on a dev Linux run containing it
+2026-10-22T04:27:11Z	slice-done	#4299 merged 71987f724; DS-6 PR #4309 opened (head b0197b914, gate PASS); Belt-Slice-Done DS-m posted (Linux check 39721023306 green on bd793a5db)
+2026-10-22T04:44:16Z	check	#4309 head b0197b914 unchanged, macOS build 39722964879 queued; no scoped suiteui run with DS-u yet; adopt deps (FR-halo/flare) only test PRs merged
