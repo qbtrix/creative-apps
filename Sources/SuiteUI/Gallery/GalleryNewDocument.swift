@@ -35,11 +35,11 @@ struct GalleryNewDocumentPage: View {
         let mode = settings ? NewDocumentMode.settings : GalleryNewDocument.new
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             Text("New document").font(SuiteFont.sectionCaps).foregroundStyle(SuiteColor.secondaryText).accessibilityAddTraits(.isHeader)
-            Picker("Mode", selection: $settings) {
-                Text("New").tag(false)
-                Text("Settings").tag(true)
-            }
-            .pickerStyle(.segmented).fixedSize().accessibilityIdentifier("suite.gallery.newdoc-mode")
+            SegmentedTabs(
+                "Mode", tabs: [InspectorOption(id: false, title: "New"), InspectorOption(id: true, title: "Settings")],
+                selection: settings, id: "suite.gallery.newdoc-mode"
+            ) { settings = $0 }
+            .fixedSize()
             NewDocumentSheet(mode, setup: GalleryNewDocument.start, limits: GalleryNewDocument.limits,
                              onDone: { log.append(GalleryNewDocument.line(mode, $0, $1)) }, onCancel: { log.append("cancel") })
                 .id(settings)
