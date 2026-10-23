@@ -21,3 +21,4 @@ utc	stage	event	ref	note
 2026-10-23T20:30Z	3	heartbeat	-	lane bisect named #4818 (another line) needs-fix for CommandPathTests; ours clear, none merged yet, waiting for the next batch
 2026-10-23T20:53Z	3	heartbeat	-	batch 20261023204921 (Linux 40022175153, macOS 40022179889) carries #4842 #4853 #4860; #4828 #4834 not picked up yet, recheck next poll; none merged
 2026-10-23T21:17Z	3	heartbeat	-	batch 20261023204921 (#4842 #4853 #4860) Linux green, macOS running; #4828 #4834 ride next batch; none merged
+2026-10-23T21:39Z	3	heartbeat	-	batch 20261023204921 macOS gate 40022179889 still running (50m); none merged; no needs-fix/needs-rebase; 0 findings
