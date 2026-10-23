@@ -5,3 +5,10 @@
 #
 # captain decision: AfterGlow > Settings… stays (LauncherCommandsSettings holds no
 # placeholder Button; the system item opens the Settings scene).
+
+Sources/AfterGlowApp/LauncherCommands+Assets.swift: Button("Cut") {}.keyboardShortcut("x")
+Sources/AfterGlowApp/LauncherCommands+Assets.swift: Button("Copy") {}.keyboardShortcut("c")
+Sources/AfterGlowApp/LauncherCommands+Assets.swift: Button("Add from Clipboard") {}.keyboardShortcut("v")
+Sources/AfterGlowApp/LauncherCommands+Assets.swift: Button("Select All") {}.keyboardShortcut("a")
+Sources/AfterGlowApp/LauncherCommands+Assets.swift: Button("Assets") {}.keyboardShortcut("a", modifiers: [.option, .command])
+Sources/AfterGlowApp/LauncherCommands+Update.swift: Button("Check for Updates…") {}.disabled(true).help(SuiteIdentity.notConnected("updater"))

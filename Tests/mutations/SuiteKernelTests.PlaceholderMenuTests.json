@@ -1,0 +1,44 @@
+[
+  {
+    "label": "emptyActionFails: the empty-action check is dropped, so a Button with {} passes",
+    "file": "Tests/SuiteKernelTests/PlaceholderMenuTests.swift",
+    "find": "if emptyTrailing || emptyArgument { kinds.insert(.emptyAction) }",
+    "replace": "if false && (emptyTrailing || emptyArgument) { kinds.insert(.emptyAction) }",
+    "tests": "PlaceholderMenuTests"
+  },
+  {
+    "label": "baselineOnlyListed: the baseline is read as allow-all, so an unlisted placeholder passes",
+    "file": "Tests/SuiteKernelTests/PlaceholderMenuTests.swift",
+    "find": "let allowed = listed[siteKey]?.isEmpty == false",
+    "replace": "let allowed = true",
+    "tests": "PlaceholderMenuTests"
+  },
+  {
+    "label": "liveReasonPasses: any .disabled( counts as constant, so a live reason fails",
+    "file": "Tests/SuiteKernelTests/PlaceholderMenuTests.swift",
+    "find": "if modifiers.contains(\".disabled(true)\") { kinds.insert(.constantDisabled) }",
+    "replace": "if modifiers.contains(\".disabled(\") { kinds.insert(.constantDisabled) }",
+    "tests": "PlaceholderMenuTests"
+  },
+  {
+    "label": "staleBaselineFails: a baseline line whose hit is gone is ignored, so the baseline can grow stale",
+    "file": "Tests/SuiteKernelTests/PlaceholderMenuTests.swift",
+    "find": "let stale = listed.values.flatMap { $0 }.sorted { $0.row < $1.row }",
+    "replace": "let stale = listed.values.flatMap { $0 }.sorted { $0.row < $1.row }.prefix(0)",
+    "tests": "PlaceholderMenuTests"
+  },
+  {
+    "label": "unusedCommandsSkipped: a Commands type no scene builds still counts, so a stub left on disk fails",
+    "file": "Tests/SuiteKernelTests/PlaceholderMenuTests.swift",
+    "find": "guard let owner = site.owner else { return true }",
+    "replace": "guard let owner = site.owner, owner.isEmpty else { return true }",
+    "tests": "PlaceholderMenuTests"
+  },
+  {
+    "label": "commentsSkipped: a commented-out Button counts as a placeholder",
+    "file": "Tests/SuiteKernelTests/PlaceholderMenuTests.swift",
+    "find": "if char == \"/\", index + 1 < chars.count, chars[index + 1] == \"/\" {",
+    "replace": "if false, char == \"/\", index + 1 < chars.count, chars[index + 1] == \"/\" {",
+    "tests": "PlaceholderMenuTests"
+  }
+]
