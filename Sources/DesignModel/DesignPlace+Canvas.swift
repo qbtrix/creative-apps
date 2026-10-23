@@ -2,8 +2,9 @@
 // inspector's Image section ask about a picture. `placedImage` is a node's picture in its frame, which the
 // canvas draws by cover. `runPlace` runs a `PlaceIntent` through the catalog and says why it refused, and
 // `placeActionHelp` is why Place…, Replace… or Reset Size is off: until PD-5 registers the place commands,
-// both say so. An ⌥-drag that starts inside the selected unlocked picture pans its focus by the overflow,
-// each step under one token (`beginPicturePan`, `panIntent`); a drop's page point is `dropPoint`, and it
+// both say so. A Move-tool ⌥-drag inside the selected unlocked picture, off its handles, pans its focus
+// by the overflow in the node's own axes, each step under one token (`beginPicturePan`, `panIntent`); a fitted
+// picture doesn't pan, so ⌥ duplicates it; a drop's page point is `dropPoint`, and it
 // fills the selected frame or rectangle under it when Fill is on (`dropFills`). Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -58,22 +59,32 @@ extension DesignWorkspace {
         }
     }
 
-    /// The pan an ⌥-drag from `point` starts: the selected node shows a picture under it and is unlocked.
+    /// The pan an ⌥-drag from `point` starts: the Move tool, off the handles, inside the selected unlocked node's
+    /// turned outline, and its picture overflows the box. Anything else is nil, so ⌥ still duplicates or resizes.
     public func beginPicturePan(at point: DesignPoint, option: Bool, token: String = UUID().uuidString) -> DesignPicturePan? {
-        guard option, let node = selectedNode, node.placedAsset != nil, node.frame.contains(point), lockHelp(node.id) == nil
+        guard option, tool == .move, handle(at: point) == nil, let node = selectedNode, node.contains(point),
+              lockHelp(node.id) == nil, let excess = panExcess, excess.x >= 1 || excess.y >= 1
         else { return nil }
         return DesignPicturePan(start: point, focus: node.placedFocus, token: token)
     }
 
-    /// The focus step dragging `pan` to `point`: the picture follows the pointer on each axis it overflows.
-    public func panIntent(_ pan: DesignPicturePan, to point: DesignPoint) -> PlaceIntent? {
+    /// How far the selected picture's drawn rect overflows its box on each axis; nil with no picture selected.
+    private var panExcess: (x: Double, y: Double)? {
         guard let selection = placedSelection else { return nil }
         let box = selection.image.box, drawn = PlaceRules.drawnRect(selection.image, natural: selection.asset.natural)
+        return (drawn.width - box.width, drawn.height - box.height)
+    }
+
+    /// The focus step dragging `pan` to `point`: the picture follows the pointer on each axis it overflows, the
+    /// delta taken into the node's turned and mirrored axes, where the canvas draws it.
+    public func panIntent(_ pan: DesignPicturePan, to point: DesignPoint) -> PlaceIntent? {
+        guard let excess = panExcess, let box = selectedNode?.transformBox else { return nil }
         func moved(_ focus: Double, _ delta: Double, _ excess: Double) -> Double {
             excess >= 1 ? min(max(focus - delta / excess, 0), 1) : focus
         }
-        let focus = Point(x: moved(pan.focus.x, point.x - pan.start.x, drawn.width - box.width),
-                          y: moved(pan.focus.y, point.y - pan.start.y, drawn.height - box.height))
+        let from = TransformRules.local(Point(x: pan.start.x, y: pan.start.y), in: box)
+        let to = TransformRules.local(Point(x: point.x, y: point.y), in: box)
+        let focus = Point(x: moved(pan.focus.x, to.x - from.x, excess.x), y: moved(pan.focus.y, to.y - from.y, excess.y))
         return .focus(focus, drag: pan.token)
     }
 
