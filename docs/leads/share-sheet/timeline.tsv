@@ -1,0 +1,52 @@
+utc	stage	event	ref	note
+2026-10-20T23:00Z	0	stage-start	#3789	run act-1a15b98bc49-4lk9, base dev 89507de2
+2026-10-20T23:50Z	2	stage-end	#3789	plan: SH-a ready, SH-m blocked on LF-m, BK-m
+2026-10-20T23:50Z	3	wave-start	SH-a	base dev 2cc149f5
+2026-10-21T00:05Z	3	pr	SH-a	#3809 head fcca55bf, scripts/ci --changed pass
+2026-10-21T00:05Z	3	wave-start	SH-u	stacked on share-sheet/sh-a
+2026-10-21T00:05Z	3	pr	SH-u	#3814 head 7637bf75, base share-sheet/sh-a, scripts/ci --changed pass
+2026-10-21T00:33:59Z	3	check	SH-a,SH-u	#3809 needs-rebase (suiteui-sources.json C4 conflict): merged dev, ci --changed PASS, pushed b63c2756, Head moved; #3814 merged sh-a, PASS, pushed ec118b6d, Head moved; LF-m/BK-m still absent (dev 4987f926)
+2026-10-21T00:54:32Z	3	check	SH-a,SH-u	#3809 needs-rebase dropped, clean; macOS build 39522543439 queued; #3814 still on sh-a; LF-m/BK-m absent (dev 4bdf0bbd)
+2026-10-21T01:14:03Z	3	check	SH-a,SH-u	#3809 macOS build 39522543439 green, clean, awaiting lane batch; #3814 still on sh-a; LF-m/BK-m absent (dev 4bdf0bbd)
+2026-10-21T01:33:53Z	3	check	SH-a,SH-u	#3809 green+clean, waits behind lane batch-20261021005140 (bisecting, without #3809); #3814 still on sh-a; LF-m/BK-m absent (dev 7277a83a)
+2026-10-21T01:54:08Z	3	check	SH-a,SH-u	#3809 green+clean, still behind lane batch-20261021005140 (probe -4 running); #3814 on sh-a; LF-m/BK-m absent (dev 7277a83a)
+2026-10-21T02:13:40Z	3	check	SH-a,SH-u	#3809 green+clean, still waiting on lane batch; #3814 on sh-a; LF-m/BK-m absent (dev 2ab0eb96)
+2026-10-21T02:33Z	check	heartbeat	SH-a	#3809 open, clean, fast-lane; lane still bisecting batch-20261021005140 (no #3809); dev 2ab0eb963; no LF-m/BK-m PR
+2026-10-21T02:53Z	check	heartbeat	SH-a	#3809 open, clean, fast-lane; lane at bisect probe batch-20261021005140-5 (no #3809); dev 2ab0eb963; no LF-m/BK-m PR
+2026-10-21T03:14Z	check	heartbeat	SH-a	#3809 open, fast-lane, no needs-fix; lane still on batch-20261021005140 probes (-3..-5), none contain b63c2756; dev 80d986b52; no LF-m/BK-m PRs, SH-m still blocked
+2026-10-21T03:34Z	check	heartbeat	SH-a	#3809 open, clean, macOS build green; old batch resolved, new lane/batch-20261021032004 (8 PRs, #3466..#3808) excludes it, #3809 next by age; dev dccfa541a; no LF-m/BK-m PRs
+2026-10-21T03:54Z	check	heartbeat	SH-a	#3809 open, clean; lane bisecting batch-20261021032004 (probes -2,-4), not containing b63c2756; dev c786c8518; no LF-m/BK-m PRs
+2026-10-21T04:15Z	check	heartbeat	SH-a	#3809 open, fast-lane, head b63c2756 not yet in lane/batch-20261021032004 (bisecting); dev 842e62ec1; SH-m still blocked (no LF-m/BK-m)
+2026-10-21T04:34Z	check	heartbeat	SH-a	#3809 open, clean vs dev da68f32f0; batch 20261021032004 resolved without it; no batch in flight, awaiting next sweep; SH-m still blocked (no LF-m/BK-m)
+2026-10-21T04:55Z	check	heartbeat	SH-a	#3809 open clean, macOS build green; batch 20261021043428 in flight without it; dev 0eca6ab52; SH-m still blocked (no LF-m/BK-m PRs)
+2026-10-21T05:14Z	check	heartbeat	SH-a	#3809 open clean; batch 20261021043428 bisecting (probes -4..-6) without it; dev 229c5eff3; SH-m still blocked (no LF-m/BK-m PRs)
+2026-10-21T05:37Z	check	heartbeat	SH-a	#3809 skipped by batches 043428/053311: conflicts in docs/c4/parts/creative-apps/suiteui/suiteui-sources.json (description line) with earlier batch PRs; will merge dev and resolve once batch 053311 lands
+2026-10-21T05:59Z	check	heartbeat	SH-a	#3809 open/clean, unbatched; batch 053311 still bisecting (probes -4..-6), dev 71ffa4d1c; no LF-m/BK-m PRs
+2026-10-21T06:27Z	check	rebase	SH-a	needs-rebase after batch 053311 landed; merged dev into sh-a, dropped C4 description edits (new dev gate refuses them), scripts/ci --changed PASS, Head b245b2a4d
+2026-10-21T06:27Z	check	rebase	SH-u	merged new sh-a into sh-u, dropped library-app C4 description edit, scripts/ci --changed PASS, Head 257c7a8d7; still based on sh-a
+2026-10-21T06:49Z	check	heartbeat	SH-a	#3809 head b245b2a4 open, fast-lane; macOS build 39555526583 still queued (26 runs queued); #3814 waits on sh-a; no LF-m/BK-m PRs, SH-m blocked
+2026-10-21T07:12Z	check	heartbeat	SH-a	#3809 head b245b2a4 open, fast-lane; macOS build 39555526583 still queued; #3814 waits on sh-a; no LF-m/BK-m PRs, SH-m blocked
+2026-10-21T07:32Z	check	heartbeat	SH-a	#3809 open fast-lane b245b2a4; lane macOS build 39555526583 now in_progress (queued 06:27Z); SH-u #3814 stacked; no LF-m/BK-m PR so SH-m still blocked
+2026-10-21T07:39Z	check	mac-build	SH-a	lane macOS build 39555526583 success on b245b2a4; #3809 awaits lane merge sweep
+2026-10-21T07:54Z	check	heartbeat	SH-a	#3809 clean + mac build green, awaiting lane sweep (run 39565108989 pending); #3814 stacked; no LF-m/BK-m PR
+2026-10-21T08:11Z	merge	merged	SH-a	#3809 merged as 482f03c6 after lane macOS gate; Belt-Slice-Done waits for a dev CI Linux job containing it
+2026-10-21T08:11Z	ship	retarget	SH-u	#3814 retargeted to dev; merged origin/dev clean; scripts/ci --changed PASS; head 016a5da3
+2026-10-21T10:18Z	check	slice-done	SH-a	Belt-Slice-Done posted on #3789 with run 39571804700
+2026-10-21T10:18Z	fix	dispatch	SH-u	fixer on #3814: File > Share via catalog spec, strip footer, Belt-Lead to act-1a15df37b73-k199
+2026-10-21T11:30Z	fix	done	SH-u	#3814 head b0d656d0, Fast-Check pass, macOS build green, waiting on the lane batch
+2026-10-21T11:30Z	check	heartbeat	SH-m	LF-m (#4024) and BK-m (#3965) still open on dev ded2ca57
+2026-10-21T11:45Z	check	heartbeat	SH-u	#3814 open, still waiting on the lane batch (macOS build green); dev ded2ca57
+2026-10-21T11:45Z	check	heartbeat	SH-m	LF-m #4024 needs-rebase, BK-m #3965/#3967 open; still blocked
+2026-10-21T12:12Z	check	heartbeat	SH-u	#3814 still waiting on the lane batch (macOS build green); dev c2aa3391
+2026-10-21T12:12Z	check	heartbeat	SH-m	BK-3 #3965 merged; LF-3 #4024 and BK-u #3967 open; still blocked
+2026-10-21T12:28Z	ship	merged	SH-u	#3814 merged 12:15Z; waiting on dev Linux check 39598650564 (76d0c892)
+2026-10-21T12:28Z	check	heartbeat	SH-m	LF-3 #4024 and BK-u #3967 still open
+2026-10-21T12:45Z	check	ci	SH-u	Linux 39598650564 red only on two timing tests outside SH-u (LG-a fixture, LibraryFoldersTests); waiting on 39601343733
+2026-10-21T13:05Z	done	slice	SH-u	Belt-Slice-Done + Mac-Finish-Wanted (SH-u, SH-a) on 39601343733
+2026-10-21T13:05Z	check	wait	SH-m	#4024 and #3967 open (fast-lane)
+2026-10-21T13:25Z	check	wait	SH-m	#4024 and #3967 open with fast-lane (poll 2)
+2026-10-21T13:39Z	check	blocked	SH-m	#4024 and #3967 open (poll 3); rule-23 question to supervisor, issuecomment-6317522942
+2026-10-22T16:59Z	0	stage-start	#3789	resumed by act-1a1648ae708-bncr; record back on lead/share-sheet
+2026-10-22T16:59Z	3	stage-start	SH-m	LF-3 #4024 and BK-u #3967 merged; builder dispatched for SH-3 + SH-3c
+2026-10-22T17:45Z	3	pr-opened	#4592	SH-m: SH-3 + SH-3c, Mutate 5/5 LibraryModel.LibraryShare+Kernel
+2026-10-22T17:45Z	3	stage-start	wave 4	SH-z (SH-5, SH-6) stacked on share-sheet/sh-m
