@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-22T21:30Z	3	heartbeat	#4512	adopt slices still blocked upstream (poll 1 after restart)
 2026-10-22T21:32Z	heartbeat	clipboard recheck: all adopt slices still blocked upstream
 2026-10-23T15:30Z	3	stage-start	#3753	wave 1: CB-6, CB-8, CB-10 (run act-1a1695ebfeb-d54n)
+2026-10-23T15:36Z	3 wave 1	heartbeat	-	wave-1 builders running
