@@ -4,7 +4,7 @@ Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
 Run: act-1a166b69fab-fd09 (took over from act-1a15e10a86f-7bk9) · Session: claude/pen-paths-lottie-open-a39k6m · Started: 2026-10-21T01:10Z (this run 2026-10-23T03:07Z)
 Stage: 3 wave 3
 Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a
-Next: (2026-10-23T06:00Z) FP-u and FP-m done (Belt-Slice-Done on #3519, run 39905310797). FP-z #4753 in lane (feature-done) -> on merge and a green dev Linux run, Belt-Slice-Done FP-z (+Mac-Finish-Wanted), then Belt-Contact-Sheet. FP-u critic panel on its snapshots.
+Next: (2026-10-23T06:15Z) FP-z #4753 merged 06:04Z (869d9a545) -> on the first green dev Linux run containing it, Belt-Slice-Done FP-z (+Mac-Finish-Wanted), then Belt-Contact-Sheet on #3519. FP-u critic panel on its snapshots.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -13,7 +13,7 @@ Next: (2026-10-23T06:00Z) FP-u and FP-m done (Belt-Slice-Done on #3519, run 3990
 | FP-u | snapshots, render budget, journey (skipped) | FP-3, FP-4 | J-FP | FP-a, PN-3 | yes | 0 | merged #4706 03:53Z; done: Belt-Slice-Done + Mac-Finish-Wanted 05:48Z, run 39905310797 | #4706 | – |
 | FP-m | Pen on PenRules; path specs in catalog | FP-5, FP-6 | MJ-FP | FP-a (done), PN-5 (done), PN-7, shape-tools:FS-m (unchained for FP-5), file-flow:FL-m | no | 0 | FP-5 merged (#4029); FP-6 merged #4714 04:24Z (349fc24ee); done: Belt-Slice-Done 05:48Z, run 39905310797 | #4029, #4714 | – |
 | FP-e | Direct Select anchor editing; stress budget | FP-7, FP-8 | MJ-FP, RJ-F27 | FP-a, PN-5 (done), PN-6 (done), stage-edit (closed); FlareSelection.swift avoided (AS-flare hand-off, planned) | no | 0 | done: run 39596004859 (only the Library timing flake; supervisor answer 12:04Z); FP-8 waits on test/stress-perf-journeys | #3958 | – |
-| FP-z | journey on; status built | FP-9, FP-10 | J-FP | FP-u, FP-m, FP-e, file-flow:FL-z | yes | 0 | PR #4753 open (fast-lane, feature-done), gate PASS on 510e4190 | #4753 | – |
+| FP-z | journey on; status built | FP-9, FP-10 | J-FP | FP-u, FP-m, FP-e, file-flow:FL-z | yes | 0 | merged #4753 06:04Z (869d9a545); Belt-Slice-Done waits for a green dev Linux run containing it | #4753 | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |

@@ -88,3 +88,4 @@ utc	stage	event	ref	note
 05:06Z	check	#4753 in lane (macOS build dispatched); dev Linux check 39903448194 on 673cd767f running; no open pen-paths findings
 05:27Z	check	dev Linux check 39903448194 red (Halo baseline, #3856); next 39905310797 on 52c430c85 running; #4753 in lane
 2026-10-23T06:00Z	check	FP-u, FP-m done (run 39905310797); FP-z #4753 in lane
+2026-10-23T06:15Z	check	FP-z #4753 merged 06:04Z (869d9a545); waiting on a dev Linux run containing it
