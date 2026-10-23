@@ -2,27 +2,27 @@
 
 Issue: #3474 (runs before used #4514) · Packet: docs/blueprints/halo/features/file-flow.md
 Run: act-1a16958d5fe-8dxu · Started: 2026-10-23T15:26:44Z (took over from act-1a16474bd28-v3ht)
-Stage: 3 wave 1 (HF-a rebuilt on dev, PR opening)
-Base: 721168a8 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: HF-a PR to dev; then HF-u and HF-m stacked on HF-a
+Stage: 3 wave 2 (HF-a #4855 open; HF-u stacked, gating)
+Base: 721168a8, PR base 35a0b5e7 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
+Next: HF-u PR stacked on HF-a; HF-m once its packet deps are on dev
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| HF-a | adapter stubs; scene adopts suiteApp, Open Recent via SuiteFileCommands, file drop | HF-1, HF-2 | - | transform:HT-a, shape-tools:HS-a, placed-images:PH-u | yes | 0 | blocked | - | - |
+| HF-a | adapter stubs; scene adopts suiteApp, Open Recent via SuiteFileCommands, file drop | HF-1, HF-2 | - | transform:HT-a, shape-tools:HS-a, placed-images:PH-u | yes | 0 | pr #4855 | - | - |
 | HF-m | adapter bodies, catalog ids, recents imported once, RJ-H42 | HF-3, HF-4 | - | HF-a; gradient-fill:HG-m, autosave-history:HA-m, transform:HT-m, shape-tools:HS-m, stroke-style:HK-m, placed-images:PH-m | no | 0 | blocked | - | - |
-| HF-u | snapshots, render budget, journey skipped | HF-5, HF-6 | - | HF-a | yes | 0 | blocked | - | - |
+| HF-u | snapshots, render budget, journey skipped | HF-5, HF-6 | - | HF-a | yes | 0 | building | - | - |
 | HF-z | journey live; halo.md, built, feature-done | HF-7, HF-8 | HaloFileFlowJourneyTests | HF-m, HF-u; export-pack:HX-z, placed-images:PH-z | yes | 0 | blocked | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| HF-1 | HF-a | 1 | adapter stubs | Sources/HaloModel/HaloFileFlow+Kernel.swift, Tests/HaloModelTests/HaloFileFlowTests.swift | compiles; tests disabled | - | blocked |
-| HF-2 | HF-a | 2 | scene, File menu, drop | Sources/HaloApp/HaloApp.swift, see packet | HaloFileFlowSnapshots.menu | - | blocked |
+| HF-1 | HF-a | 1 | adapter stubs | Sources/HaloModel/HaloFileFlow+Kernel.swift, Tests/HaloModelTests/HaloFileFlowTests.swift | compiles; tests disabled | #4855 | pr |
+| HF-2 | HF-a | 2 | scene, File menu, drop | Sources/HaloApp/HaloApp.swift, see packet | HaloFileFlowSnapshots.menu | #4855 | pr |
 | HF-3 | HF-m | 2 | adapter bodies, ids, RJ-H42 | see packet | HaloFileFlowTests | - | blocked |
 | HF-4 | HF-m | 2 | window notes opens and saves | Sources/HaloApp/HaloWindow+File.swift, Tests/AppSnapshotTests/HaloFileFlowLiveTests.swift | HaloFileFlowLiveTests | - | blocked |
-| HF-5 | HF-u | 3 | snapshots, budget | Tests/AppSnapshotTests/HaloFileFlowSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloFileDropTests.swift | RenderBudgetHaloFileDropTests | - | blocked |
-| HF-6 | HF-u | 3 | journey skipped | UITests/HaloJourneyTests+FileFlow.swift | compiles, skipped | - | blocked |
+| HF-5 | HF-u | 3 | snapshots, budget | Tests/AppSnapshotTests/HaloFileFlowSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloFileDropTests.swift | RenderBudgetHaloFileDropTests | - | building |
+| HF-6 | HF-u | 3 | journey skipped | UITests/HaloJourneyTests+FileFlow.swift | compiles, skipped | - | building |
 | HF-7 | HF-z | 4 | journey live | UITests/HaloJourneyTests+FileFlow.swift | testOpenRecentAndDrop | - | blocked |
 | HF-8 | HF-z | 5 | halo.md, built, feature-done | docs/blueprints/halo.md, docs/blueprints/halo/features/file-flow.wave.json | waves render --dry-run | - | blocked |
 
@@ -32,6 +32,8 @@ Next: HF-a PR to dev; then HF-u and HF-m stacked on HF-a
 
 ## Decisions
 - Record lives on lead/halo-file-flow at docs/leads/halo-file-flow/: lead/file-flow already belongs to the suite file-flow lead (#3480). Other Halo leads use the same lead/halo-<feature> naming.
+- HF-a rebuilt on dev rather than on the placed-images stack: SF-a, HT-a and HS-a are on dev, and HF-a needs none of PH-u's code. The old branch (a5ba7569, no PR) was replaced by force-with-lease.
+- HF-a carries HF-5's snapshots (halo-open-recent, halo-drop-mark) so the menu and drop are seen in the slice that adds them; HF-u adds the budget test and journey.
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
