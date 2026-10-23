@@ -99,3 +99,4 @@ utc	stage	event	ref	note
 01:33Z	check	Flare journeys run 39877876105 (at 62fe62a, includes 847f507) is in progress. #4636 waits on it. Nothing new on #3482.
 2026-10-23T02:10:45Z	fix-round-2	PR #4690 opened for #4636
 2026-10-23T02:40:23Z	check	#4690 merged; awaiting flare journeys after 6acdb2011
+2026-10-23T03:11:46Z	check	waiting on journeys after 6acdb2011
