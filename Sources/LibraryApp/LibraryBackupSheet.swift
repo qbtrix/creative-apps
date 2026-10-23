@@ -4,8 +4,8 @@
 // the newest selected. Restore asks first in a confirmation dialog whose text
 // says what happens to the current catalog: Library backs it up, then replaces
 // it. Values in, closures out, as the export sheet does: a nil action disables
-// its button, and `restoreHelp` is the reason Restore can't run (on the
-// stubs, "Backups arrive with BK-3."). Its frame and button row are a plain
+// its button, and `restoreHelp` is the reason Restore can't run (no backups
+// yet, or an import running). Its frame and button row are a plain
 // SwiftUI placeholder until SuiteUI's SuiteSheet lands (#3964).
 import Foundation
 import LibraryModel
