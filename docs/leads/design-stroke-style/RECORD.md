@@ -41,3 +41,11 @@ Next: DK-u and DK-m slice PRs; critic panels; then DK-z
 - Run act-1a1627ce3b4-ayhz: brief rule 2 asks to rebase and force-push lead/eyedropper onto main; that branch is the SuiteUI eyedropper lead's record (#3448), so this run does not rewrite it and keeps lead/design-<feature>.
 
 - Run act-1a1605b0534-rn47: the brief's "rebase lead/eyedropper onto origin/main" was not done: lead/eyedropper is the SuiteUI eyedropper lead's branch (#3448); this lead's status stays on lead/design-*.
+
+## 2026-10-23T21:57Z DK-u fix round 1
+
+- #4864 reset to b17f9002c: the slice plus the #4928 tests (371 lines). Gate rerun on that head.
+- #5002 (design/dk-u2-stroke-fixes, da662ed8) stacks the canvas fixes for #4925, #4926, #4927 and #4989. Mutation plan DesignModel.DesignStrokeOutline: 8/8.
+- Asked the supervisor on #3441 to file a needs-core issue: `Path.dashed` drops zero-length dashes. Workaround: dotLength 0.001.
+- Footers stripped from the #3759 and #4888 bodies.
+- Next: critic round 2 on #4864 and #5002. DK-z waits until 5 or fewer findings are open.

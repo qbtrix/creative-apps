@@ -112,3 +112,4 @@ time	kind	note
 2026-10-23T20:36Z	DK-u	fix-round-1	#4864	fixer on #4925-#4928 and #4989 (stroke alpha); DK-7 #4916 at 9a65ac65 holds; DK-z held (>5 findings)
 2026-10-23T20:58Z	DK-u	heartbeat	#4864	fixer still on #4925-#4928 #4989 (head 97439dd8); no slice PR merged; DK-z held
 2026-10-23T21:20Z	DK-u	heartbeat	#4864	fixer still running, head 97439dd8; status asked; DK-z held
+2026-10-23T21:57Z	DK-u	fix-round-1	#5002	round-1 fixes for #4925 #4926 #4927 #4989 split into #5002 (stacked on #4864); #4864 reset to b17f9002c (371 lines, #4928 tests); needs-core ask on #3441
