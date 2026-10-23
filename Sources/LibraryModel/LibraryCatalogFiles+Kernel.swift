@@ -15,6 +15,9 @@ extension LibraryCatalog {
     /// Why Relink can't act.
     public static let relinkHelp = "No photo is missing."
 
+    /// The ids an import begun by `file.import-folder` skips: the catalog's, the set sized once up front.
+    public var importKnownIDs: Set<String> { Set(items.lazy.map(\.id)) }
+
     struct RemoveFromCatalogParams: Codable, Sendable { var ids: [String]? }
     struct RelinkParams: Codable, Sendable { var id: String; var file: String }
 
