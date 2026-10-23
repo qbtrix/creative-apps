@@ -78,12 +78,13 @@ struct AdjustmentsPanel: View {
         case .image:
             AdjustmentsInspector(
                 settings: model.adjustments, onEdit: { perform(.adjust($0)) }, histogram: histogram,
-                onEditEnd: { perform(.endAdjust) })
+                onEditEnd: { perform(.endAdjust) }, toneHelp: model.toneHelp, onTone: { perform(.tone($0)) })
         case .layer(let id, let settings):
             AdjustmentsInspector(
                 settings: settings, onEdit: { perform(.adjustmentLayer(.adjust(id, $0))) }, histogram: histogram,
                 onEditEnd: { perform(.adjustmentLayer(.endAdjust)) }, sections: model.adjustSections,
-                showsEnable: Self.showsEnable(for: model.adjustTarget))
+                showsEnable: Self.showsEnable(for: model.adjustTarget), toneHelp: model.toneHelp,
+                onTone: { perform(.tone($0)) })
         }
     }
 }
