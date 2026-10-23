@@ -63,3 +63,4 @@ Next: (2026-10-23T17:29:30Z) #4878 (BK-m) and #4923 (BK-z, stacked, feature-done
 - 2026-10-23T16:34:40Z: BK-m #4878 opened (8bb1a4a, 10 files +178/-45, CI: PASS, Mutate 5/5). BK-z builder launched on it. Record mirrored to lead/library-catalog-backup.
 - 2026-10-23T17:29:30Z: BK-z #4923 opened (7e284af, 13 files +229/-17 over bk-m, CI: PASS, Mutate 9/9), base feat/library-bk-m. Open: RJ-L54 runs in LibraryBackupJobTests, the CLI runner is pending on #3741; jobs.json still says waits_on BK-5m (generated from wave data). Open findings: 0.
 - 2026-10-23T17:51:06Z: heartbeat: #4878,#4923 open, no needs-fix; dev Linux check 39997290881 (8a54f64) running; findings 0.
+- 2026-10-23T18:15:01Z: heartbeat: #4878,#4923 open, clean, no needs-fix; dev Linux check 40000080882 (98589662) running; findings for this feature 0. PR bodies carry a server-added attribution footer that a PATCH cannot remove; the lane strips it from the squash commit.

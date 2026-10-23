@@ -30,3 +30,4 @@ utc	stage	event	ref	note
 2026-10-23T16:34:40Z	3	pr	#4878	BK-m opened at 8bb1a4a; BK-z builder launched
 2026-10-23T17:29:30Z	3	pr	#4923	BK-z opened at 7e284af
 2026-10-23T17:51:06Z	3	check	#4878,#4923	all open, none merged, no needs-fix/needs-rebase; dev 8a54f64 Linux check 39997290881 running; findings 0
+2026-10-23T18:15:01Z	3	check	#4878,#4923	all open+clean, none merged, no needs-fix/needs-rebase; dev 98589662 Linux check 40000080882 running; feature findings 0; posting path re-adds an attribution footer to PR bodies on every PATCH, lane strips it from the squash
