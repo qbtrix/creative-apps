@@ -92,3 +92,4 @@ time	kind	note
 2026-10-23T16:58Z	DK-m	build	design/dk-m-stroke-svg	DK-7 building; critics on #4864 #4888 running
 2026-10-23T17:20Z	DK-m	gate	design/dk-m-stroke-svg	DK-7 in gate; #4864 #4888 queued in lane, critics running, 0 findings so far
 2026-10-23T17:24Z	DK-m	pr	#4916	DK-7 SVG stroke attrs, stacked on #4888, gate PASS, mutations 16/16
+2026-10-23T17:30Z	DK-m	critic	#4888	findings #4919 #4920; fix round 1 started
