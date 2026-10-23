@@ -67,3 +67,4 @@ utc	stage	event	ref	note
 2026-10-23T10:52Z	ci	no scoped suiteui/full macOS run contains 0899b218 yet (scoped suiteui 39932890127 on 89b66fee queued since 09:34; Linux 39939121278 on 28e3a67d green)	FP-u	round 2 waits on screens
 2026-10-23T11:54Z	ci	scoped suiteui 39946282747 on 28e3a67d (contains 0899b218 + 138495f5) dispatched, still queued (runner backlog)	FP-u	round 2 review on its snapshots once complete
 2026-10-23T12:47Z	ci	scoped suiteui 39946282747 (28e3a67d) macOS (suiteui) job in progress since ~12:37	FP-u	round 2 review when it completes
+2026-10-23T13:30Z	review	FP-u round 2 on scoped suiteui 39946282747 (28e3a67d): round 1 fixes verified; #4790 fix PR #4800 (fast-lane); gaps #4801 #4802	FP-u	#4800 through the lane

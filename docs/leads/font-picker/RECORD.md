@@ -2,9 +2,9 @@
 
 Issue: #3730 (earlier run used duplicate #4507) · Packet: docs/blueprints/suiteui/features/font-picker.md
 Run: act-1a166b69fbd-mmos · Session: claude/font-picker-lead-5om1cy · Started: 2026-10-22T16:36Z (this run resumed 2026-10-23T03:10Z)
-Stage: 5 contact sheet posted (run 39921983128); FP-u fix round 1 in lane
+Stage: 5 contact sheet posted; FP-u round 2 review done (run 39946282747); #4790 fix PR #4800 in lane; leftovers gap #4801, #4802
 Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a (origin/dev)
-Next: scoped suiteui run 39946282747 (28e3a67d, contains #4781 and #4783) completes → download snapshots → FP-u round 2 review (last); leftovers become gap
+Next: #4800 through the lane (macOS build-only run) → dev run containing it with green Linux → Belt-Slice-Done FP-u update; nothing else open for this run
 
 ## Slices
 
@@ -31,6 +31,7 @@ Next: scoped suiteui run 39946282747 (28e3a67d, contains #4781 and #4783) comple
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
+| FP-u | 39946282747 | 28e3a67d | first-use, mouse, taste, design, job | round 1 fixes verified (#4777, #4778, #4779); #4790 (journey row click) fixed by PR #4800; leftovers → gap #4801 (size bar scale), gap #4802 (InspectorValueMenu 14pt hit, #2830) | 2 (last) |
 
 ## Decisions
 - Base is origin/dev, PRs target dev: the brief names main, but CLAUDE.md says never branch from or target main (the lane retargets main PRs to dev); main lacks the packets.
@@ -51,3 +52,4 @@ Next: scoped suiteui run 39946282747 (28e3a67d, contains #4781 and #4783) comple
 - FP-z: no host app sets `suiteFontListing`, so "the journey on live" can't be shown in this line. A gap goes to the host's line, with the journey's need for `-SuiteGalleryFakes` or real-font steps. The FP-7 description edit ships as its own C4-only PR (lead/font-picker-FP-c4), which scripts/ci --changed allows.
 - Gap #4650 (line:library, p2): hosts set suiteFontListing; journey keeps fakes.
 - FP-7 C4 description: C4-only PR #4651 (lead/font-picker-FP-c4, 1ae04da7).
+- FP-u round 2 was the last: leftovers filed as gap #4801 and #4802 (line:suiteui, p2). PR #4800 (lead/font-picker-fix2, 9e617d24) fixes #4790.
