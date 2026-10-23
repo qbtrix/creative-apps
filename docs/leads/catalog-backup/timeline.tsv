@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-21T20:39:41Z	-	watch	BK-u	BK-u #3967: its lane macOS build 39661645674 passed at 780c26c. Waiting for a lane batch; 63 fast-lane PRs are open on dev.
 2026-10-23T15:31:04Z	3	relaunch	-	run act-1a1695ec091-ilfv on dev 721168a; BK-m builder starts (contract-first)
 2026-10-23T16:34:40Z	3	pr	#4878	BK-m opened at 8bb1a4a; BK-z builder launched
+2026-10-23T17:29:30Z	3	pr	#4923	BK-z opened at 7e284af

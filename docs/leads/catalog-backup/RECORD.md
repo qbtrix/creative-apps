@@ -2,9 +2,9 @@
 
 Issue: #3788 · Packet: docs/blueprints/library/features/catalog-backup.md
 Run: act-1a1695ec091-ilfv · Started: 2026-10-23T15:31:04Z (relaunch; earlier runs act-1a15f2277a5-6xyv)
-Stage: 3 wave 3
+Stage: 3 wave 4
 Base: 721168a8 (origin/dev)
-Next: (2026-10-23T16:34:40Z) BK-m #4878 open at 8bb1a4a (fast-lane, Mutate 5/5), waits on the lane batch; BK-z builder (BK-5 + BK-6) stacked on feat/library-bk-m.
+Next: (2026-10-23T17:29:30Z) #4878 (BK-m) and #4923 (BK-z, stacked, feature-done) wait on the lane; on merge + green dev Linux: Belt-Slice-Done BK-m, then critics on BK-z screens, Mac-Finish-Wanted BK-z, Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: (2026-10-23T16:34:40Z) BK-m #4878 open at 8bb1a4a (fast-lane, Mutate 5/5),
 | BK-a | rotation and restore commands as stubs, checks disabled | BK-1, BK-2 | MJ-BK | – | no | 0 | done: Belt-Slice-Done posted | https://github.com/qbtrix/creative-apps/actions/runs/39623471557 | – |
 | BK-u | Restore Catalog Backup sheet on stubs | BK-4, BK-4b | LJ-BK | BK-a; spine | yes | 0 | done (merged; sheet and budget on dev) | – | – |
 | BK-m | rotation limits, fallback, restore backs up current | BK-3, BK-5m | MJ-BK | BK-a; LF-m, FO-m, AK-library (contract-first met) | no | 0 | BK-3 merged #3965; BK-5m #4878 open (fast-lane) | – | – |
-| BK-z | live restore, RJ-L54, built | BK-5, BK-6 | LJ-BK, MJ-BK | BK-u, BK-m | yes | 0 | building (wave 4, stacked on #4878) | – | – |
+| BK-z | live restore, RJ-L54, built | BK-5, BK-6 | LJ-BK, MJ-BK | BK-u, BK-m | yes | 0 | #4923 open at 7e284af (stacked on #4878, feature-done) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -23,8 +23,8 @@ Next: (2026-10-23T16:34:40Z) BK-m #4878 open at 8bb1a4a (fast-lane, Mutate 5/5),
 | BK-4b | BK-u | 2 | render budget | RenderBudgetLibraryBackupTests.swift | openSheetInTwoBodies | #3967 | open (same PR) |
 | BK-3 | BK-m | 2 | rotation bodies | BackupRotation.swift, BackupRotationTests.swift, Tests/mutations/SuiteModel.BackupRotation.json | BackupRotationTests | #3965 | open, dev merged in, BackupRotation conflict taken from BK-3 |
 | BK-5m | BK-m | – | Library on the rotation | LibraryBackup+Kernel.swift, LibraryPersistence.swift, ... | LibraryBackupTests | #4878 | open at 8bb1a4a, Mutate 5/5 |
-| BK-5 | BK-z | – | live sheet, journey, RJ-L54 | ... | LJ-BK | – | blocked |
-| BK-6 | BK-z | – | feature-done | catalog-backup.wave.json | – | – | blocked |
+| BK-5 | BK-z | – | live sheet, journey, RJ-L54 | ... | LJ-BK | #4923 | open at 7e284af, Mutate 9/9 |
+| BK-6 | BK-z | – | feature-done | catalog-backup.wave.json | – | #4923 | open (same PR) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -61,3 +61,4 @@ Next: (2026-10-23T16:34:40Z) BK-m #4878 open at 8bb1a4a (fast-lane, Mutate 5/5),
 
 - 2026-10-23T15:31:04Z (run act-1a1695ec091-ilfv): relaunched on dev 721168a. BK-u is on dev. BK-m (BK-5m) starts now under contract-first; open findings for catalog-backup: 0.
 - 2026-10-23T16:34:40Z: BK-m #4878 opened (8bb1a4a, 10 files +178/-45, CI: PASS, Mutate 5/5). BK-z builder launched on it. Record mirrored to lead/library-catalog-backup.
+- 2026-10-23T17:29:30Z: BK-z #4923 opened (7e284af, 13 files +229/-17 over bk-m, CI: PASS, Mutate 9/9), base feat/library-bk-m. Open: RJ-L54 runs in LibraryBackupJobTests, the CLI runner is pending on #3741; jobs.json still says waits_on BK-5m (generated from wave data). Open findings: 0.
