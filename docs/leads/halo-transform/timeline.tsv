@@ -80,3 +80,4 @@ utc	stage	event	ref	note
 2026-10-22T23:33:48Z	heartbeat	full CI 39836126860 macOS still in scripts/ci; scoped 39857142295 queued
 2026-10-22T23:57:37Z	ci-red-triage	full 39836126860 macOS red; live-drag redraw floor from drag pacer #4403/#4423, not transform; note on #3856
 2026-10-23T00:19:11Z	heartbeat	waiting on mac: halo 39857142295, full 39872261116, 39877184360
+2026-10-23T00:41:34Z	heartbeat	scoped 39857142295 red not transform; waiting 39879260661 39877184360 39872261116
