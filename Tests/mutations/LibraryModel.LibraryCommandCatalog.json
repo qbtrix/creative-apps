@@ -61,5 +61,6 @@
     "find": "c.failuresShownFor = c.showsImportFailures ? nil : c.importNotice",
     "replace": "c.failuresShownFor = c.importNotice",
     "tests": "LibraryCommandPathTests"
-  }
+  },
+{"label":"paramsReachRun: Save as Preset takes a blank name","file":"Sources/LibraryModel/LibraryCommandCatalog.swift","find":"guard !p.name.allSatisfy(\\.isWhitespace), let options = c.exportRun.options else {","replace":"guard let options = c.exportRun.options else {","tests":"LibraryCommandPathTests"}
 ]

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "app": "library",
+  "why": "RJ-X61 (command-state CS-15), the off half (#4674). A CLI run starts with Show Original off, since it is view state the catalog file doesn't keep, so off is proven in one run: view.loupe, then view.show-original twice. The json output with options.contents shown must report original false, not leave it out, so an agent can tell off from a build that doesn't report the toggle.",
+  "inputs": ["input/*.library"],
+  "steps": [
+    {"id": "view.loupe", "params": {}},
+    {"id": "view.show-original", "params": {}},
+    {"id": "view.show-original", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-shown", "format": "json", "options": {"contents": "shown"}},
+  "expect": {
+    "out/shoot-shown.json": {"json": {"original": false, "shown": ["beach.png", "dock.png", "fog.png", "pier.png"]}}
+  },
+  "platforms": ["linux", "macos"]
+}
