@@ -1,10 +1,10 @@
 # tone-controls lead record
 
-Issue: #4520 · Packet: docs/blueprints/suiteui/features/tone-controls.md
-Run: act-1a16469734c-d0s8 · Session: claude/feature-lead-playbook-d50vpe · Started: 2026-10-22 (earlier run act-1a15821c836-93pf on #3476)
-Stage: 4 wave 1
-Base: origin/dev 7e9f260a
-Next: TC-1 (SuiteImaging Tone/ stubs) in wave 1; TC-2, TC-5, TC-7 in wave 2 once TC-1 is open
+Issue: #3476 · Packet: docs/blueprints/suiteui/features/tone-controls.md
+Run: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui) · Started: 2026-10-23T14:52Z (earlier runs act-1a16469734c-d0s8, act-1a15821c836-93pf)
+Stage: 4 wave 2
+Base: origin/dev 8021b0f5
+Next: TC-1 merged (#4555 f5993669). Wave 2 building: TC-2 (TC-a, lead/tone-controls-TC-a), TC-5 (TC-m, lead/tone-controls-TC-m-rules), TC-7 (TC-m, lead/tone-controls-TC-m-settings). TC-6 after TC-5; TC-3/TC-4 after TC-2.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -17,13 +17,13 @@ Next: TC-1 (SuiteImaging Tone/ stubs) in wave 1; TC-2, TC-5, TC-7 in wave 2 once
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| TC-1 | TC-a | – | SuiteImaging Tone/ stubs (no Package.swift: IM-1 made the target) | Sources/SuiteImaging/Tone/{ToneSettings,ToneRules,ToneCommands}.swift, Tests/SuiteImagingTests/Tone{Settings,Rules,Commands}Tests.swift, Tests/canonical-concepts.txt, docs/c4/parts/creative-apps/suite-imaging/imaging-tone.json | suites compile disabled | – | building |
-| TC-2 | TC-a | – | Placeholder ToneRows, gallery page, journey skipped | Sources/SuiteUI/ToneRows.swift, Sources/SuiteUI/Gallery/GalleryToneRows.swift, Sources/SuiteUI/SuiteGallery.swift, UITests/SuiteJourneyTests+Tone.swift | SJ0 | – | waiting |
+| TC-1 | TC-a | – | SuiteImaging Tone/ stubs (no Package.swift: IM-1 made the target) | Sources/SuiteImaging/Tone/{ToneSettings,ToneRules,ToneCommands}.swift, Tests/SuiteImagingTests/Tone{Settings,Rules,Commands}Tests.swift, Tests/canonical-concepts.txt, docs/c4/parts/creative-apps/suite-imaging/imaging-tone.json | suites compile disabled | #4555 f5993669 | merged |
+| TC-2 | TC-a | – | Placeholder ToneRows, gallery page, journey skipped | Sources/SuiteUI/ToneRows.swift, Sources/SuiteUI/Gallery/GalleryToneRows.swift, Sources/SuiteUI/SuiteGallery.swift, UITests/SuiteJourneyTests+Tone.swift | SJ0 | – | building |
 | TC-3 | TC-u | – | The ToneRows view | Sources/SuiteUI/ToneRows.swift, Tests/SuiteUITests/ToneRowsTests.swift | ToneRowsTests | – | waiting |
 | TC-4 | TC-u | – | Snapshots, budget, journey on | Tests/AppSnapshotTests/SuiteToneRowsSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetToneRowsTests.swift, UITests/SuiteJourneyTests+Tone.swift | journey | – | waiting |
-| TC-5 | TC-m | – | ToneRules bodies | Sources/SuiteImaging/Tone/ToneRules.swift, Tests/SuiteImagingTests/ToneRulesTests.swift, Tests/mutations/SuiteImaging.ToneRules.json | ToneRulesTests | – | waiting |
+| TC-5 | TC-m | – | ToneRules bodies | Sources/SuiteImaging/Tone/ToneRules.swift, Tests/SuiteImagingTests/ToneRulesTests.swift, Tests/mutations/SuiteImaging.ToneRules.json | ToneRulesTests | – | building |
 | TC-6 | TC-m | – | ToneCommands bodies | Sources/SuiteImaging/Tone/ToneCommands.swift, Tests/SuiteImagingTests/ToneCommandsTests.swift, Tests/mutations/SuiteImaging.ToneCommands.json | ToneCommandsTests | – | waiting |
-| TC-7 | TC-m | – | ToneSettings coding and clamping | Sources/SuiteImaging/Tone/ToneSettings.swift, Tests/SuiteImagingTests/ToneSettingsTests.swift, Tests/mutations/SuiteImaging.ToneSettings.json | ToneSettingsTests | – | waiting |
+| TC-7 | TC-m | – | ToneSettings coding and clamping | Sources/SuiteImaging/Tone/ToneSettings.swift, Tests/SuiteImagingTests/ToneSettingsTests.swift, Tests/mutations/SuiteImaging.ToneSettings.json | ToneSettingsTests | – | building |
 | TC-8 | TC-z | – | Gallery runs intents through ToneCommands | Sources/SuiteUI/Gallery/GalleryToneRows.swift, Tests/SuiteUITests/ToneRowsLiveTests.swift | ToneRowsLiveTests | – | waiting |
 | TC-9 | TC-z | – | Fake app takes tone; RJ-X41 | Sources/SuiteImaging/Fakes/FakeToneDocument.swift, Sources/AfterGlowCLICore/Apps.swift, Tests/SuiteImagingTests/FakeToneTests.swift, Tests/mutations/SuiteImaging.FakeToneDocument.json, Tests/RealJobs/fake/tone-controls/ | FakeToneTests | – | waiting |
 | TC-10 | TC-z | – | C4, status built, feature-done | docs/c4/parts/creative-apps/suite-imaging/imaging-tone.json, docs/blueprints/suiteui/features/tone-controls.wave.json | scripts/ci | – | waiting |
@@ -42,3 +42,4 @@ Next: TC-1 (SuiteImaging Tone/ stubs) in wave 1; TC-2, TC-5, TC-7 in wave 2 once
 - 07:45Z: AH-1 merged (#3543); the rest unchanged.
 - 07:09Z: #3144 open (core pin 9ed9ef0 for the CoreRaster tone programs); gradient-fill GF-a: GF-1 merged (#3421), GF-2 not on dev; autosave-history AH-a: AH-1 in #3543 (open), AH-2 not started; placed-images PL-a: PL-1 waits on AH-1. No TC task can start.
 - 15:55Z: core bump #3549 (47dd9bb8, pin 2258b62) contains 9ed9ef0 and says it takes over #3144's pin move, so TC-a's #3144 dependency is met on dev. TC-1 still waits on gradient-fill GF-2 (not on dev).
+- 2026-10-23T14:52:29Z: run act-1a1693a3ff0-mwrd resumes on #3476 (the record said #4520). TC-1 merged as #4555. TC-m is 5 to 7 (~820 lines): it ships as three PRs under the 400 cap, all `Slice: TC-m`. Base and target are dev (CLAUDE.md, the lane), not main.

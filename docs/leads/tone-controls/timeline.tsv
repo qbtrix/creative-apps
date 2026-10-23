@@ -76,3 +76,4 @@ utc	stage	event	ref	note
 2026-10-20T22:33Z	poll	poll: GF-2 not on dev; TC-1 blocked
 2026-10-20T22:46Z	poll	poll: GF-2 not on dev; TC-1 blocked
 2026-10-22T16:23Z	4	resume	#4520	new run act-1a16469734c-d0s8; all TC-1 waits met; wave 1 = TC-1
+2026-10-23T14:52:29Z	wave 2	TC-2, TC-5, TC-7 builders launched; TC-1 merged #4555
