@@ -82,7 +82,7 @@ struct FlareWindow: View {
             FlareCanvas(
                 model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
                 help: { help(for: $0) }, tick: { model.tick(target: $0, ticker: &$1) }, onKey: toolKey,
-                onFit: { fitted = $0 })
+                onFit: { fitted = $0 }, onDismissNote: { model.dismissImportNote() })
         } inspector: {
             FlareInspector(
                 model: model, tab: inspectorTab, perform: perform,
@@ -141,7 +141,7 @@ struct FlareWindow: View {
 }
 
 /// The window's content: the stage over the timeline while a document is
-/// open, else the empty state whose one action is New Animation (Open is the
+/// open, under the import note after a Lottie open (FlareImportNoteAdapter.swift), else the empty state whose one action is New Animation (Open is the
 /// toolbar's). New Animation is `.file(.new)` like the toolbar's New, so it
 /// takes `emptyNewIdentifier` to keep `suite.controls` free of duplicates.
 struct FlareCanvas: View {
@@ -157,6 +157,8 @@ struct FlareCanvas: View {
     /// The stage's keys it doesn't take itself (Return, Escape): the window's `toolKey`.
     var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
     var onFit: @MainActor (Double) -> Void = { _ in }
+    /// The import note's Dismiss (FlareImportNoteAdapter.swift): the window's `model.dismissImportNote()`.
+    var onDismissNote: @MainActor () -> Void = {}
     /// Ticks the model while playing: started when `model.isPlaying` turns true, stopped when it turns false or
     /// the canvas leaves the screen. Its `measuredFPS` feeds the stage's status pills.
     @State private var driver: PlaybackDriver?
@@ -164,6 +166,7 @@ struct FlareCanvas: View {
     var body: some View {
         if model.document != nil {
             VStack(spacing: 0) {
+                FlareImportNoteAdapter(rows: model.importNoteRows, onDismiss: onDismissNote)
                 FlareStage(
                     model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
                     help: help, onKey: onKey, measuredFPS: driver?.measuredFPS, onFit: onFit)
