@@ -1,0 +1,124 @@
+utc	stage	event	ref	note
+2026-10-21T02:26Z	0	stage-start	#3482	line lead act-1a15c47678d-i2ih
+2026-10-21T02:45Z	2	stage-end	#3482	plan: FL-1 now; FL-2 waits PF-u
+2026-10-21T02:45Z	3	stage-start	wave 1	FL-1
+2026-10-21T02:47Z	3	pr-open	#3843	FL-1 adapter stubs, 172 lines, Slice FL-a
+2026-10-21T03:09Z	1	check	#3843	macOS build green, in lane; attribution footer removed from body; PF-u not on dev; 0 findings
+2026-10-21T03:32Z	1	check	#3768	svg-place PF-a merged; PF-u not started (waits KS-a); #3843 in lane; 0 findings
+2026-10-21T03:54Z	1	check	#3843	clean, macOS build green, awaiting lane batch; PF-u not started; 0 findings
+2026-10-21T04:16Z	1	check	#3843	lane: eligible, queued (27 ready behind a bisecting batch); PF-u not started; 0 findings
+2026-10-21T04:38Z	1	check	#3843	clean, still queued in lane; PF-u not started; 0 findings
+2026-10-21T05:00Z	1	check	#3843	clean, still queued in lane; PF-u not started; 0 findings
+2026-10-21T05:22Z	1	check	#3843	queued in lane, clean; PF-u/KS-a no PR; 0 findings
+2026-10-21T05:44Z	1	check	#3843	queued in lane, clean; PF-u/KS-a no PR; 0 findings
+2026-10-21T06:12Z	1	check	#3843	eligible, waits for next batch (bisect in flight); KS-a open as #3921, PF-u no PR; 0 findings
+2026-10-21T07:10Z	3	check	wave 1	resumed as act-1a15d4ed024-1wsg; FL-1 #3843 in lane; KS-a #3921 open
+2026-10-21T07:37Z	3	check	wave 1	FL-1 #3843 in lane; KS-a #3921 open
+2026-10-21T07:57Z	3	question	wave 1	FL-1 #3843 unchanged (poll 3); Question for the supervisor on #3482
+2026-10-21T08:17Z	3	blocked	-	Supervisor running a Linux check for #3843. No FL task can start: FL-2 waits on svg-place PF-u (no PF PR open; PF-u waits on KS-a #3921); FL-m on FG-m and other m-slices.
+2026-10-21T08:38Z	3	blocked	-	FL-1 #3843 merged 08:33Z. FL-2 (rest of FL-a) still waits on svg-place PF-u (no PF PR open; KS-a #3921 open).
+2026-10-21T08:58Z	3	blocked	-	FL-2 still waits on svg-place PF-u (no PF PR open; KS-a #3921 open).
+2026-10-21T09:18Z	3	blocked	-	FL-2 still waits on svg-place PF-u (no PF PR open; KS-a #3921 open).
+2026-10-21T09:39Z	3	blocked	-	FL-2 still waits on svg-place PF-u (no PF PR open; KS-a #3921 open).
+2026-10-21T10:00Z	3	blocked	-	FL-2 still waits on svg-place PF-u (no PF PR open; KS-a #3921 open).
+10:20Z	3	check	-	Heartbeat: FL-2 still blocked on svg-place PF-u; no PF PRs open.
+10:40Z	3	check	-	Heartbeat: FL-2 still blocked on svg-place PF-u; no PF PRs open.
+11:00Z	3	check	-	Heartbeat: FL-2 still blocked on svg-place PF-u; no PF PRs open.
+11:19Z	3	check	-	Heartbeat: FL-2 still blocked on svg-place PF-u; no PF PRs open.
+11:40Z	3	check	-	FL-2 blocked on svg-place PF-u: no PF PRs open.
+12:00Z	3	check	-	FL-2 blocked on svg-place PF-u: no PF PRs open.
+12:26Z	3	check	-	FL-2 blocked on svg-place PF-u: no PF PRs open.
+12:46Z	3	heartbeat	-	No svg-place PF PRs yet; FL-2 still blocked.
+13:08Z	3	heartbeat	-	No svg-place PF PRs; FL-2 blocked.
+13:28Z	3	heartbeat	-	No svg-place PF PRs; FL-2 blocked.
+23:30Z	3	heartbeat	-	Resumed as act-1a160bffba1-bvv3. FL-1 #3843 merged. Still no svg-place PF-u PR (open PF PRs: none for Flare; #4165 is Photo's PF-u). FL-2, FL-4 and FL-u blocked on it.
+2026-10-21T23:58Z	3	heartbeat	-	23:58Z: FG-m #4181 merged. Still no Flare PF-u PR. Asked the supervisor on #3482 whether FL-2 can go now (rule 23).
+2026-10-22T00:14Z	3	wave	-	supervisor approved FL-2 (additive FlareCommands edits); builder launched
+2026-10-22T00:24Z	3	pr	-	#4259 FL-2 opened, head 2d142d9c, 8 files +208/-8, mutate 3/3
+2026-10-22T00:25Z	3	wave	-	FL-u builder launched; question on #3482 about stroke-style FK-m
+2026-10-22T00:35Z	3	built	-	FL-u pushed lead/file-flow-flu b3e28b0d, 3 test files; 448 lines vs dev while stacked, so PR held
+2026-10-22T00:36Z	3	wave	-	supervisor 00:30Z: FL-3 may skip stroke-style:FK-m wait (FK-m unbuilt, #3452); edits to FlareCommandCatalog/FlareFiles additive. FL-m builder launched
+2026-10-22T01:00Z	3	fix	-	#4259 macOS build failed (run 39700172204): FlareCommands body 11 top-level commands, 'extra argument in call'. Fixed c9c8bb56 (@CommandsBuilder suiteFileMenu), ci --changed PASS, Head moved; FL-u merged it (ce94a682)
+2026-10-22T01:14Z	3	build	-	FL-m builder done (54bebe49, ci PASS, mutate 4/4 FlareFileFlow+Kernel) but 24 files/778 lines vs dev. Split: lead/file-flow-flm3 = FL-3 Model (12 files +257/-104 over fl2, test commit first), lead/file-flow-fl4 = FL-4 window + live test + RJ-F42 jobs (8 files +192/-6 over flm3). fl4 tree identical to the builder's validated head. Both Slice: FL-m
+2026-10-22T01:14Z	3	check	-	flm3 head 1b88ac03: ci --changed PASS (1115 tests), mutate 4/4 re-run on the split; PR body drafted. #4259 lane rebuild 39703409910 queued
+2026-10-22T01:24Z	3	check	-	heartbeat 01:24Z: #4259 lane rebuild 39703409910 still queued; #4257 not merged yet (build green); #4035 open; full run 39700185524 Linux red on FormatListRatchetTests.realTreePasses (SuiteModel Media.swift, not ours), no slice credit
+2026-10-22T01:35Z	3	decision	-	Records now also live on lead/flare-* (the branches Belt watches); every stage pushes there.
+2026-10-22T01:44Z	3	heartbeat	-	Heartbeat: #4259 build 39703409910 still queued (macOS runners busy); #4257, #4035 open; no green-Linux run containing FG-m yet.
+2026-10-22T02:16Z	3	stage	-	#4259 macOS build 39703409910 green; lane sweep will merge. Merged dev (b5a6e7e0) into flm3 (6fc01d59) and flu (8f62b766), pushed; scripts/ci --changed running on both.
+2026-10-22T02:21Z	3	gate	-	scripts/ci --changed PASS on flm3 6fc01d59 and flu 8f62b766 (dev b5a6e7e0 merged in). #4259 still waits for the lane sweep.
+2026-10-22T02:43Z	3	fix	-	#4259 held: lane Linux run 39710240958 red on FormatListRatchetTests.realTreePasses (SuiteModel Media.swift, red on dev e9933116 too; dev b5a6e7e0 Linux green). Merging dev into fl2, gate running.
+2026-10-22T02:46Z	3	fix	-	fl2 merged dev b5a6e7e0, ci --changed PASS, pushed 593d9118; #4259 Head moved, footer stripped. Lane needs a new macOS build for this head.
+2026-10-22T03:12Z	3	heartbeat	-	Heartbeat: #4259 (593d9118) and #4257 (d417a35f) wait on lane macOS builds; #4035 too. dev Linux green at 66a84588.
+2026-10-22T03:39Z	3	heartbeat	-	Heartbeat: #4259 macOS build queued, #4257 macOS build running; #4035 macOS+Linux green, awaiting lane merge.
+2026-10-22T04:02Z	3	heartbeat	-	#4259 (593d9118) lane macOS build still queued; FL-m/FL-u branches ready behind it
+2026-10-22T04:24Z	3	heartbeat	-	#4259 macOS build still queued
+2026-10-22T04:52Z	3	heartbeat	-	#4259 macOS build still queued (since 02:48Z)
+2026-10-22T05:19Z	3	heartbeat	-	#4259 macOS build still queued (since 02:48Z)
+2026-10-22T06:06Z	3	pr	-	#4259 FL-a merged 05:34Z (414b9220). FL-u opened as #4325 (35a8aa65, tests only). FL-m opened as #4326 (d0f43bbf) after merging dev; a stale shared build had segfaulted AfterGlowCLITests, and a clean rebuild passes the gate.
+2026-10-22T06:35Z	3	wait	-	Run 39730395919 was cancelled; #4325 FL-u and #4326 FL-m are open in the lane.
+2026-10-22T07:05Z	3	wait	-	FL-u #4325 merged by the lane; FL-m #4326 waiting on its macOS gate; full run 39734272718 still pending.
+2026-10-22T07:31Z	3	question	-	Rule 23: three polls blocked the same way (full runs on dev cancelled before starting); asked the supervisor on #3482 (comment 6335298929).
+2026-10-22T07:59Z	3	slice-done	-	Supervisor answered: cite the dev Linux check run. Posted Belt-Slice-Done and Mac-Finish-Wanted for FL-a with run 39739110094 (green Linux, dev 9f1b3d56 contains 414b9220).
+2026-10-22T08:26Z	3	wait	-	FL-m #4326's macOS build 39733048354 has been queued for a runner since 06:17Z.
+2026-10-22T09:10Z	3	wait	#4326	Resumed as act-1a162daef37-9ub3. FL-7 committed on fl4 (8d5f425), gate waits on the Swift reinstall; #4326 macOS build 39733048354 still queued since 06:17Z.
+2026-10-22T09:15Z	3	question	#4326	fl4 8d5f4257 gate PASS, pushed. Rule 23: #4326 macOS build queued 3 polls; asked supervisor (comment 6337175169), plus FL-8 without FV-z/PF-z.
+2026-10-22T09:41Z	3	check	#4326	Supervisor: local Mac gate for #4326; FL-8 allowed. FL-8 folded into fl4 2f9db9a2 (gate PASS); PR waits on #4326.
+2026-10-22T10:08Z	3	ship	#4387	#4326 merged; fl4 merged dev, gate PASS a363eeb5; opened #4387 (Slice FL-m, FL-z).
+2026-10-22T10:29Z	3	check	#4387	macOS build 39762231867 queued (blocked poll 1); no findings.
+2026-10-22T10:52Z	3	check	#4387	macOS build still queued (blocked poll 2).
+2026-10-22T11:14Z	3	question	#4387	blocked poll 3; asked supervisor for local Mac gate.
+2026-10-22T11:38Z	3	check	#4387	supervisor local Mac gate; head 1a4cd2b (dev merged in).
+2026-10-22T12:13Z	3	done	#3482	FL-m and FL-z done on https://github.com/qbtrix/creative-apps/actions/runs/39774574487; contact sheet posted.
+2026-10-22T12:18Z	3	check	#3482	closed by the supervisor sentinel; waiting for release.
+2026-10-22T12:44Z	3	check	#3482	quiet; no flare file-flow findings.
+2026-10-22T13:23Z	check	no findings, no comments; waiting for release
+2026-10-22T13:50Z	check	no findings, no comments; waiting for release
+2026-10-22T14:17Z	check	no findings, no comments; waiting for release
+2026-10-22T14:44Z	check	no findings, no comments; waiting for release
+2026-10-22T15:13Z	check	no findings, no comments; waiting for release
+2026-10-22T15:40Z	check	no findings, no comments; waiting for release
+2026-10-22T16:07Z	check	no findings, no comments; waiting for release
+2026-10-22T16:33Z	check	no findings, no comments; waiting for release
+2026-10-22T17:00Z	check	no findings, no comments; waiting for release
+2026-10-22T17:27Z	check	no findings, no comments; waiting for release
+2026-10-22T18:05:16Z	fix-round-1	PR #4611 for #4604 + menu order
+2026-10-22T18:32Z	check	PR #4611 macOS build queued; no new findings
+2026-10-22T18:59Z	check	PR #4611 macOS build still queued; no new findings
+2026-10-22T19:26Z	question	PR #4611 macOS build queued 3 checks; asked the supervisor on #3482
+2026-10-22T19:53Z	check	PR #4611 macOS build green; waiting on the lane
+2026-10-22T20:19Z	merged	PR #4611 merged as 847f507; #4604 closed
+2026-10-22T20:45Z	check	no journeys run on 847f507 yet; no findings
+2026-10-22T21:18Z	check	#4636 stale (721ac8e, before fix 847f507); commented, waiting for a run on the fix
+2026-10-22T21:50Z	check	no journeys run includes 847f507 yet; #4636 waiting
+22:22Z	check	No journeys run on dev includes 847f507 yet (newest flare run is queued at 401242a). #4636 stays open. No new comments on #3482 and no new file-flow findings.
+22:54Z	check	Still no journeys run on dev includes 847f507 (the flare run at 401242a is still queued). #4636 stays open. Nothing new on #3482 and no new file-flow findings.
+23:26Z	check	No flare or full journeys run includes 847f507 yet (the flare run at 401242a is running and predates the fix; only a queued suiteui run is at 847f507). #4636 stays open. Nothing new on #3482.
+23:58Z	check	No flare or full journeys run includes 847f507 yet (the new full run at a102c34 predates it). #4636 stays open. Nothing new on #3482.
+00:30Z	check	A flare journeys run at 62fe62a, which includes 847f507, is queued (run 39877876105). #4636 stays open until it finishes. Nothing new on #3482.
+01:01Z	check	Flare journeys run 39877876105 (at 62fe62a, includes 847f507) is still queued. #4636 stays open. Nothing new on #3482.
+01:33Z	check	Flare journeys run 39877876105 (at 62fe62a, includes 847f507) is in progress. #4636 waits on it. Nothing new on #3482.
+2026-10-23T02:10:48Z	fix-round-2	PR #4690 opened for #4636
+2026-10-23T02:40:26Z	check	#4690 merged; awaiting flare journeys after 6acdb2011
+2026-10-23T03:11:48Z	check	waiting on journeys after 6acdb2011
+2026-10-23T03:43:28Z	check	waiting on journeys after 6acdb2011
+2026-10-23T04:15:20Z	check	flare journeys 39898629239 at 6acdb2011 queued
+2026-10-23T04:47Z	check	journeys 39898629239 (flare, 6acdb2011) still queued; #3482 quiet; no open file-flow findings
+2026-10-23T05:19Z	check	journeys 39898629239 (flare, 6acdb2011) still queued; #3482 quiet; no open file-flow findings
+2026-10-23T05:52Z	check	journeys 39898629239 (flare, 6acdb2011) in progress; #3482 quiet; no open file-flow findings
+2026-10-23T06:21Z	check	journeys 39898629239 (flare, 6acdb2011) failed: FLJ1 step 2 (drop opens no window) and testEveryMenuOpens Menus.swift:52 (Clear Menu); fix rounds used: gap #4764 filed, #1829 updated
+2026-10-23T06:53Z	check	#3482 quiet; no open file-flow findings; gaps #4764, #1829 hold what stays red
+2026-10-23T07:24Z	check	#3482 quiet; no open file-flow findings; gaps #4764, #1829 open
+2026-10-23T07:57Z	check	#3482 quiet; no open file-flow findings; gaps #4764, #1829 open
+2026-10-23T08:29Z	check	#3482 quiet; no open file-flow findings; gaps #4764, #1829 open
+2026-10-23T09:00Z	check	#3482 quiet; no open file-flow findings; gaps #4764, #1829 open
+2026-10-23T09:33Z	check	#3482 quiet; no open file-flow findings; gaps #4764, #1829 open
+2026-10-23T10:05Z	check	#3482 quiet; no open file-flow findings; gaps #4764, #1829 open
+2026-10-23T10:38Z	check	#3482 quiet; no open file-flow findings; gaps #4764, #1829 open
+2026-10-23T11:23Z	check	#3482 quiet; no open file-flow findings; gaps #4764, #1829 open
+2026-10-23T11:55Z	check	#3482 quiet; no open file-flow findings; gaps #4764, #1829 open
+2026-10-23T12:27Z	check	#3482 quiet; no open file-flow findings; gaps #4764, #1829 open
+2026-10-23T12:59Z	check	#3482 quiet; no open file-flow findings; gaps #4764, #1829 open
+2026-10-23T13:31Z	check	#3482 quiet; no open file-flow findings; gaps #4764, #1829 open
+2026-10-23T14:04Z	check	#3482 quiet; no open file-flow findings; gaps #4764, #1829 open
+2026-10-23T14:36Z	check	#3482 quiet; no open file-flow findings; gaps #4764, #1829 open
+2026-10-23T15:10Z	check	#3482 quiet; no open file-flow findings; gaps #4764, #1829 open
