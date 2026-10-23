@@ -11,8 +11,8 @@ Next: FH-r #4574 and FH-c #4577 restacked on dev (gate rerun, retarget to dev); 
 |---|---|---|---|---|---|---|---|---|---|
 | FH-a | rules, commands and dab coverage as stubs, checks disabled | FH-1, FH-2 | MJ-FH | suite-imaging:IM-a, brush-keys:BK-m (FH-1 only) | false | 0 | done (Belt-Slice-Done posted) | 39957675362 | – |
 | FH-u | palette Paint Bucket, Spot Heal, Remove on the stubs | FH-3, FH-4 | PJ-FH1 | FH-a, AB-photo, AL-photo, AX-photo, AU-photo, AC-colour, BK-photo | true | 0 | waiting | – | – |
-| FH-r | bucket and heal bodies over core | FH-5b, FH-5h | MJ-FH | FH-a | false | 0 | lane (#4574, dev merged in) | – | – |
-| FH-c | dab coverage body, commands one undo step | FH-5k, FH-6 | MJ-FH | FH-a, FH-r | false | 0 | lane (#4577, on FH-r) | – | – |
+| FH-r | bucket and heal bodies over core | FH-5b, FH-5h | MJ-FH | FH-a | false | 0 | lane (#4574 base dev, head 2a2cb8b) | – | – |
+| FH-c | dab coverage body, commands one undo step | FH-5k, FH-6 | MJ-FH | FH-a, FH-r | false | 0 | lane (#4577 head ceb4ebb, base FH-r until #4574 merges) | – | – |
 | FH-photo | Photo adopts live, old tone-match heal gone, jobs pass | FH-7, FH-8, FH-9, FH-10 | PJ-FH1, PJ-FH2, MJ-FH-photo, MJ-FH | FH-c, FH-u, AJ-photo, BK-photo | true | 0 | waiting | – | – |
 
 ## Tasks
