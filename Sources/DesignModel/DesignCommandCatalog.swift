@@ -33,7 +33,8 @@ extension DesignWorkspace {
     public static let commands: [CommandSpec<DesignWorkspace>] =
         fileSpecs + editSpecs + objectSpecs + GradientCommands.specs(DesignWorkspace.self) + SampleCommands.specs(DesignWorkspace.self)
             + [pick] + TransformCommands.specs(DesignWorkspace.self) + pageSpecs + toolSpecs + ShapeCommands.specs(DesignWorkspace.self)
-            + StrokeCommands.specs(DesignWorkspace.self) + HistoryCommands.specs(DesignWorkspace.self) + viewSpecs
+            + StrokeCommands.specs(DesignWorkspace.self)
+            + HistoryCommands.specs(DesignWorkspace.self) + viewSpecs
 
     /// The specs as a catalog whose history is the workspace's own.
     public static let catalog: CommandCatalog<DesignWorkspace> =
