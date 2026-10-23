@@ -18,7 +18,7 @@ struct EchoHelp: HelpProviding {
         let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
         let ledger = try String(contentsOf: url.appendingPathComponent("command-ids/suite.txt"), encoding: .utf8)
         #expect(catalog.app == "suite")
-        #expect(catalog.ids == ["help.beta-notes", "help.report-problem", "help.welcome"])
+        #expect(catalog.ids == ["help.beta-notes", "help.connect-assistant", "help.install-cli", "help.report-problem", "help.welcome"])
         #expect(CommandIDLedger.check(catalog.ids, ledger: ledger).isEmpty)
         let listed = Set(ledger.split(whereSeparator: \.isNewline).map(String.init))
         #expect(Set(catalog.ids).subtracting(listed).isEmpty)
@@ -62,6 +62,18 @@ struct EchoHelp: HelpProviding {
     @Test func welcomeOpensNothingHeadless() {
         var doc = SuiteHelpDocument(app: "launcher", provider: EchoHelp())
         #expect(throws: CatalogError.self) { try catalog.run("help.welcome", params: .object([:]), on: &doc) }
+    }
+
+    /// cli-bundle CB-2: the assistant commands need a bundle, which a provider without one doesn't name.
+    @Test func assistantCommandsNeedABundle() {
+        let doc = SuiteHelpDocument(app: "launcher", provider: EchoHelp())
+        #expect(catalog.spec("help.connect-assistant")?.kind == .query)
+        #expect(catalog.availability("help.connect-assistant", on: doc).why?.contains("--bundle") == true)
+        #expect(catalog.availability("help.install-cli", on: doc).why?.contains("--bundle") == true)
+        let install = catalog.spec("help.install-cli")
+        #expect(install?.params.validate(.object(["confirm": .bool(true)])).isEmpty == true)
+        #expect(install?.params.validate(.object([:])).isEmpty == true, "confirm is optional")
+        #expect(install?.params.validate(.object(["confirm": .string("yes")])).isEmpty == false)
     }
 
     @Test func welcomeRunsOnlyInTheLauncher() {

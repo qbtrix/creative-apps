@@ -153,11 +153,12 @@ private func occurrences(of needle: String, in text: String) -> Int {
         for scene in ["Window(\"AfterGlow\", id: \"home\")", "Settings {", "Window(\"Welcome to AfterGlow\", id: \"onboarding\")"] {
             #expect(occurrences(of: scene, in: app) == 1, "\(scene)")
         }
-        for group in [
-            "SuiteCommands(app: .launcher)", "LauncherCommandsHome()", "LauncherCommandsAssets()",
-            "LauncherCommandsUpdate()", "LauncherCommandsSettings()",
-        ] {
+        for group in ["SuiteCommands(app: .launcher)", "LauncherCommandsHome()", "LauncherCommandsSettings()"] {
             #expect(occurrences(of: group, in: app) == 1, "\(group)")
+        }
+        // No placeholder menu item in the beta (NP-2): the assets and updater stubs are out of every scene.
+        for stub in ["LauncherCommandsAssets()", "LauncherCommandsUpdate()"] {
+            #expect(occurrences(of: stub, in: app) == 0, "\(stub) is back in a scene")
         }
         #expect(app.contains("@NSApplicationDelegateAdaptor(LauncherDelegate.self)"))
     }

@@ -94,12 +94,14 @@ private func box(of intent: TransformIntent?) -> TransformBox? {
     return nil
 }
 
-/// #4626: a 200 x 120 box at (100, 80) turned 90 degrees, typed W 240, keeps its visible left side, the
-/// corners at (260, 40) and (260, 240); typed H keeps its top side. A handle drag keeps the same side.
+/// #4626: a 200 x 120 box at (100, 80) turned 90 degrees, typed W 240, keeps its own left side, the
+/// corners at (260, 40) and (140, 40); typed H keeps its top side, (260, 40) and (260, 240). A handle drag
+/// keeps the same side.
 @Test func aTurnedBoxsTypedSizeKeepsItsLeftOrTopSide() throws {
     let turned = TransformBox(box: Rect(minX: 100, minY: 80, maxX: 300, maxY: 200), degrees: 90)
     let before = TransformRules.corners(of: turned)
-    #expect(near([before[0], before[3]], [Point(x: 260, y: 40), Point(x: 260, y: 240)]))
+    #expect(near([before[0], before[3]], [Point(x: 260, y: 40), Point(x: 140, y: 40)]))
+    #expect(near([before[0], before[1]], [Point(x: 260, y: 40), Point(x: 260, y: 240)]))
     let wider = try #require(box(of: TransformRows.intent(.w, to: 240, from: turned, drag: nil)))
     #expect(abs(wider.box.width - 240) < 1e-9 && wider.box.height == 120 && wider.degrees == 90)
     let after = TransformRules.corners(of: wider)

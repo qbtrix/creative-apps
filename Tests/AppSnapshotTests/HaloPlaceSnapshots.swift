@@ -1,10 +1,11 @@
 // HaloPlaceSnapshots.swift (placed-images PH-u): a placed picture in Halo's viewer and inspector, from values (the
-// draw list fills a solid's picture in PH-5, the place commands run in PH-6, so each fixture is built by hand).
+// draw list fills a solid's picture, so each fixture is built by hand rather than placed through the commands).
 // halo-place-logo: a 480 x 160 logo.svg on a solid centred in a 1920 x 1080 composition (an SVG draws SuiteUI's
 // grey placeholder with its name until PL-8). halo-place-fill: a 1200 x 800 JPEG, red left and blue right, filling
 // a full-frame solid. halo-place-inspector: the layer inspector on `three-layers` with Background holding
-// logo.svg: IMAGE reads "logo.svg · SVG · 480 × 160" over the Fill checkbox and the not-built note. Also the pure
-// mappings: the ⌥-drag's focus pan and the drop point. Light and Dark. macOS only.
+// logo.svg: IMAGE reads "logo.svg · SVG · 480 × 160" with live Replace… and Reset Size over the Fill checkbox, no
+// note (the place commands run since PH-6). Also the pure mappings: the ⌥-drag's focus pan and the drop point.
+// Light and Dark. macOS only.
 import CoreGraphics
 import HaloModel
 import ImageIO
@@ -38,7 +39,7 @@ import UniformTypeIdentifiers
         project.selectLayer(document.compositions[0].layers[l].id)
         #expect(HaloPlaceInspector.shows(project.selectedLayer?.kind), "a solid shows IMAGE")
         let section = HaloPlaceInspector(model: project)
-        #expect(section.asset == Self.logoAsset && section.modelHelp != nil, "IMAGE reads the picture, off until PH-6")
+        #expect(section.asset == Self.logoAsset && section.modelHelp == nil, "IMAGE reads the picture, controls live")
         try Self.both(
             HaloLayerInspector(model: project)
                 .environment(\.haloPlace, { _, _ in })

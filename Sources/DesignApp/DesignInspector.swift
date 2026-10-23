@@ -13,7 +13,7 @@
 // Text section when any of them is a text layer. Every
 // control's help comes from the Model, and each carries its DesignControlID and
 // lists itself in `suite.controls`. Values in, intents out; the model clamps and
-// refuses what it must. Opacity, Corners and Stroke, the hint and the frame
+// refuses what it must. Opacity, Corners and Stroke (after Fill), the hint and the frame
 // fields' live scrub are DesignInspectorStyle. The scroll view shows no
 // indicators, so no legacy scroller reads as an unlabelled button. While the Shape
 // tool is active its Shape section (SuiteUI's ShapeToolOptions, shape-tools DS-2) comes first, and while
@@ -155,7 +155,7 @@ private struct DesignNodeProperties: View {
                 }
             }
             DesignInspectorTransform(model: model, perform: perform)
-            DesignInspectorStyle(model: model, perform: perform)
+            DesignCornersSection(model: model, perform: perform)
             if let label = node.kind.fillLabel {
                 InspectorSection("Fill") {
                     DesignInspectorFill(model: model, perform: perform)
@@ -172,6 +172,7 @@ private struct DesignNodeProperties: View {
                     }
                 }
             }
+            DesignInspectorStyle(model: model, perform: perform)
         }
         .coordinateSpace(.named(Self.hintSpace))
     }
