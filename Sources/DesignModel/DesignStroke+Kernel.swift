@@ -88,8 +88,3 @@ private struct StrokeProbe: StrokeTarget {
     static let catalog = (try? CommandCatalog(app: "design-stroke", StrokeCommands.specs(StrokeProbe.self),
                                               history: { _ in History<Int>() })) ?? .empty(app: "design-stroke")
 }
-
-extension DesignSVG {
-    /// A kernel stroke colour as SVG hex, rounded to bytes as `DesignColor` rounds it.
-    static func hex(_ color: FillColor) -> String { hex(DesignColor(kernel: color)) }
-}

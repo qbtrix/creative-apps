@@ -9,8 +9,9 @@
 // referenced by `clip-path="url(#…)"`. One element per visible layer in paint
 // order (a node, then its children); a hidden node drops its whole subtree.
 // Coordinates are page points minus the box's origin. An attribute whose value
-// is the SVG default (opacity 1, no stroke, stroke-width 1, rx 0, font-weight
-// 400, text-anchor start) is left out. Text and attribute values are escaped
+// is the SVG default (opacity 1, no stroke, stroke-width 1, miter join, butt
+// cap, dash offset 0, rx 0, font-weight 400, text-anchor start) is left out.
+// A stroke writes SuiteKernel's StrokeSVG.attributes (stroke-style DK-7). Text and attribute values are escaped
 // by SuiteModel's XMLText, the suite's one XML escaper.
 // Each element sits on its own line, indented two spaces per depth. A gradient
 // (gradient-fill DG-5) is a <linearGradient> or <radialGradient> in a <defs>
@@ -156,11 +157,13 @@ enum DesignSVG {
         return radius > 0 ? " rx=\"\(number(radius))\"" : ""
     }
 
-    /// ` stroke="#rrggbb"`, plus ` stroke-width` when not 1; empty with no stroke or a width that draws nothing.
+    /// The stroke's `StrokeSVG.attributes` (colour, opacity, width, join, cap, dash), each left out at its SVG
+    /// default (width 1, miter join, butt cap, offset 0); empty with no stroke or a width that draws nothing.
     private static func paint(_ node: DesignNode) -> String {
         guard let stroke = node.stroke, stroke.width.isFinite, stroke.width > 0 else { return "" }
-        let width = stroke.width == 1 ? "" : " stroke-width=\"\(number(stroke.width))\""
-        return " stroke=\"\(hex(stroke.color))\"" + width
+        let defaults = ["stroke-width": "1", "stroke-linejoin": "miter", "stroke-linecap": "butt", "stroke-dashoffset": "0"]
+        return StrokeSVG.attributes(stroke).filter { defaults[$0.name] != $0.value }
+            .map { " \($0.name)=\"\(XMLText.escaped($0.value))\"" }.joined()
     }
 
     /// ` opacity="o"` (kept within 0...1) when the layer is not fully opaque; empty otherwise.
