@@ -22,7 +22,7 @@ final class PhotoSuiteMenusJourneyTests: XCTestCase {
         photo.shot("suite-menus-ai-access")
         photo.press(character: "w", .command)
         let skipped = [homeComesForward(photo),
-                       "live: a live afterglow call needs a granted client, and the runner has none: Photo's ask refuses until SuiteShell has an async approval sheet",
+                       "live: a live afterglow call needs a granted client, and the runner has none to approve in AIAccessCenter's sheet",
                        dockReopens(photo)].compactMap { $0 }
         if !skipped.isEmpty { throw XCTSkip(skipped.joined(separator: "; ")) }
     }

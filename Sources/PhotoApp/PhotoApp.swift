@@ -63,7 +63,7 @@ import SwiftUI
         app: SuiteApp.photo.displayName,
         document: { () -> PhotoHeadless? in PhotoWindowEditedView.shown.first?.workspace.map(PhotoHeadless.init(workspace:)) },
         apply: { (result: PhotoHeadless) in PhotoWindowEditedView.shown.first?.send?(.file(.adoptLive(result.workspace))) },
-        ask: { _ in .deny })
+        ask: { await AIAccessCenter.shared.ask($0) })
 }
 
 @main

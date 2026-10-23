@@ -47,7 +47,7 @@ struct DesignLaunch: Codable, Hashable, Sendable {
         app: SuiteApp.design.displayName,
         document: { () -> DesignHeadless? in front.map { DesignHeadless($0.model()) } },
         apply: { (result: DesignHeadless) in front?.perform(.adoptLive(result.workspace)) },
-        ask: { _ in .deny })
+        ask: { await AIAccessCenter.shared.ask($0) })
 }
 
 @main

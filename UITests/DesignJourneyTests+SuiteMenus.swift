@@ -18,7 +18,7 @@ final class DesignSuiteMenusJourneyTests: XCTestCase {
         design.shot("suite-menus-ai-access")
         design.press(character: "w", .command)
         let skipped = [homeComesForward(design),
-                       "live: a live afterglow call needs a granted client, and the runner has none: Design's ask refuses until SuiteShell has an async approval sheet",
+                       "live: a live afterglow call needs a granted client, and the runner has none to approve in AIAccessCenter's sheet",
                        dockReopens(design)].compactMap { $0 }
         if !skipped.isEmpty { throw XCTSkip(skipped.joined(separator: "; ")) }
     }
