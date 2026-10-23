@@ -22,6 +22,7 @@
 import AppKit
 import Foundation
 import LibraryModel
+import SuiteModel
 import SuiteShell
 import SuiteUI
 import SwiftUI
@@ -47,7 +48,7 @@ struct LibraryWindow: View {
     /// `arguments` are the launch arguments (LibraryLaunch); a test passes a fixture's.
     init(arguments: [String] = ProcessInfo.processInfo.arguments) {
         let launch = LibraryLaunch(arguments: arguments)
-        let services = launch.services(decoder: ImageIODecoder(), writer: JPEGWriter(), store: CatalogStore())
+        let services = launch.services(decoder: ImageIODecoder(), writer: JPEGWriter(metadata: LibraryShell.services.metadata), store: CatalogStore())
         _model = State(initialValue: LibraryCatalog(launch: launch, services: services))
     }
 
