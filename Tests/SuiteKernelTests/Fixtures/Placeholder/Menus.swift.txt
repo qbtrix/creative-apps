@@ -1,0 +1,43 @@
+// A fixture for PlaceholderMenuTests (no-placeholders NP-1): each placeholder kind, in Commands the
+// scene uses, and the menu items that are no placeholders. .txt, so it isn't compiled.
+import SwiftUI
+
+struct FixtureCommands: Commands {
+    @FocusedValue(\.model) private var model
+    var body: some Commands {
+        CommandGroup(after: .appInfo) {
+            Button("Empty") {}
+            Button("Disabled") { model?.run() }
+                .keyboardShortcut("d").disabled(true)
+            Button("Not Connected") { model?.run() }.help(SuiteIdentity.notConnected("fixture"))
+            Button("Live") { model?.cut() }
+                .disabled(!(model?.canCut ?? false)).help(model?.cutReason ?? "")
+            // Button("Commented") {}
+            Button("Live \(model?.name ?? "{")") { model?.run() }
+        }
+        CommandMenu("Fixture") {
+            Button("Empty Argument", action: {})
+            Button("Live Argument", action: { model?.run() })
+        }
+    }
+}
+
+struct UnusedCommands: Commands {
+    var body: some Commands {
+        CommandGroup(after: .help) { Button("Unused") {} }
+    }
+}
+
+struct FixtureView: View {
+    var body: some View {
+        Button("View Button") {}
+            .alert("Done", isPresented: .constant(false)) { Button("OK", role: .cancel) {} }
+    }
+}
+
+struct FixtureScene: Scene {
+    var body: some Scene {
+        WindowGroup { FixtureView() }
+            .commands { FixtureCommands() }
+    }
+}
