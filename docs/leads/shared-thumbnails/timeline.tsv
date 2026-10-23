@@ -34,3 +34,4 @@ ts	kind	note
 2026-10-23T19:15:35Z	ST-a	wire-ticked	SC-a ticked; dev merged into #4840 head 07c11358c; CI pass; re-gate asked
 2026-10-23T19:36:47Z	ST-u	restacked	#4950 head 5b8f875 CI pass
 2026-10-23T19:40:02Z	ST-m	restacked	#4951 head 06dfc0e CI pass
+2026-10-23T19:58:03Z	-	check	#4840 awaits supervisor Mac re-gate at 07c11358c; #4950/#4951 drafts restacked, waiting.

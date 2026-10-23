@@ -48,3 +48,4 @@ Next: ST-a builder on lead/shared-thumbnails-ST-a (off dev): test-first commit (
 - 2026-10-23T19:15:35Z: SC-2 merged on dev; merged dev into ST-a (#4840) at 07c11358c, SuiteShell keeps CoreAsset + CoreRaster; scripts/ci --changed PASS (6039). Head line moved; asked supervisor to re-gate. Restacking ST-u/ST-m.
 - 2026-10-23T19:36:47Z: ST-u (#4950) restacked on ST-a 07c11358c -> 5b8f875, CI --changed PASS, Head moved. ST-m gate running. #4840 still needs-fix pending supervisor re-gate.
 - 2026-10-23T19:40:02Z: ST-m (#4951) restacked on ST-a 07c11358c -> 06dfc0e, CI --changed PASS, Head moved. Both drafts wait on #4840.
+- 2026-10-23T19:58:03Z: check: #4840 awaits supervisor Mac re-gate at 07c11358c; #4950/#4951 drafts restacked, waiting.
