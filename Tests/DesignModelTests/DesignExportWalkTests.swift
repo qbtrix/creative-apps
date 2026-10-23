@@ -9,15 +9,15 @@ import Testing
         var workspace = DesignFixtures.cards
         workspace.selectItem("node-2")
         workspace.toggleSelection("node-3")
-        let both = try workspace.exportPlan(DesignExportOptions(scale: 2, scope: .selection), existing: ["A.png"])
+        let both = try workspace.exportPlan(DesignExportOptions(scale: 2, scope: .selection), existing: ["A@2x.png"])
         #expect(both == [
-            DesignExportItem(nodeID: "node-2", fileName: "A 2.png", width: 100, height: 80, pixelWidth: 200, pixelHeight: 160),
-            DesignExportItem(nodeID: "node-3", fileName: "B.png", width: 200, height: 80, pixelWidth: 400, pixelHeight: 160),
+            DesignExportItem(nodeID: "node-2", fileName: "A@2x 2.png", width: 100, height: 80, pixelWidth: 200, pixelHeight: 160),
+            DesignExportItem(nodeID: "node-3", fileName: "B@2x.png", width: 200, height: 80, pixelWidth: 400, pixelHeight: 160),
         ])
 
         workspace.selectItem("node-2")
         let frame = try workspace.exportPlan(DesignExportOptions(scale: 2, scope: .frame), existing: ["A.png"])
-        #expect(frame == [DesignExportItem(nodeID: "node-1", fileName: "Desktop.png", width: 1440, height: 1024,
+        #expect(frame == [DesignExportItem(nodeID: "node-1", fileName: "Desktop@2x.png", width: 1440, height: 1024,
                                            pixelWidth: 2880, pixelHeight: 2048)])
 
         workspace.deselect()

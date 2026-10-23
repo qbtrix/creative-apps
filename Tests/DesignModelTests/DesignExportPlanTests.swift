@@ -204,7 +204,7 @@ import Testing
         _ = try workspace.addNode(.rectangle, frame: rc(1500, 1500, 300, 200), in: nil)
         #expect(workspace.selectedPage?.contentBounds != workspace.selectedPage.map { rc(0, 0, $0.frameWidth, $0.frameHeight) })
         let plan = try workspace.exportPlan(DesignExportOptions(scale: 2, scope: .page), existing: [])
-        #expect(plan == [DesignExportItem(nodeID: "page-1", fileName: "Page 1.png", width: 1440, height: 1024,
+        #expect(plan == [DesignExportItem(nodeID: "page-1", fileName: "Page 1@2x.png", width: 1440, height: 1024,
                                           pixelWidth: 2880, pixelHeight: 2048)])
         var empty = openDesign()
         empty.selectItem("node-1")
@@ -234,4 +234,22 @@ import Testing
         }
         #expect(!page.isHiddenInTree("nope"))
     }
+
+    /// RJ-D02: 1x, 2x and 3x of one frame land side by side as Desktop.png, Desktop@2x.png and
+    /// Desktop@3x.png, never as counter copies; vectors and exact pixel sizes take no suffix (#3905).
+    @Test func aScaledStillFileNamesItsScale() throws {
+        let names = { (options: DesignExportOptions, existing: Set<String>) throws -> [String] in
+            try cards.exportPlan(options, existing: existing).map(\.fileName)
+        }
+        #expect(try names(DesignExportOptions(scale: 1), []) == ["Desktop.png"])
+        #expect(try names(DesignExportOptions(scale: 2), ["Desktop.png"]) == ["Desktop@2x.png"])
+        #expect(try names(DesignExportOptions(format: .jpeg, scale: 3), ["Desktop.png", "Desktop@2x.png"]) == ["Desktop@3x.jpg"])
+        #expect(try names(DesignExportOptions(scale: 2), ["Desktop@2x.png"]) == ["Desktop@2x 2.png"])
+        #expect(try names(DesignExportOptions(format: .pdf, scale: 3), []) == ["Desktop.pdf"])
+        #expect(try names(DesignExportOptions(scale: 2, scope: .page), []) == ["Page 1@2x.png"])
+        var exact = DesignExportOptions(scale: 2)
+        exact.size = .pixels(width: 720, height: 512)
+        #expect(try names(exact, []) == ["Desktop.png"])
+    }
 }
+

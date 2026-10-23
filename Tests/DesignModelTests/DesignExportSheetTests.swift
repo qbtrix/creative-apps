@@ -17,6 +17,24 @@ import Testing
         cards.rememberExport(DesignExportOptions(format: .pdf, scale: 1, scope: .page))
         cards.selectItem("node-1")
         #expect(cards.exportSheetDefaults.scope == .page)
+        // A selection of only a hidden layer has nothing to export, so it opens on Frame (#3916).
+        cards.rememberExport(DesignExportOptions(format: .svg, scale: 2, scope: .selection))
+        cards.selectItem("node-10")
+        #expect(cards.exportSheetDefaults.scope == .frame)
+    }
+
+    /// While a run is under way or done, the Scale and Scope chips are off and say why (#3900).
+    @Test func theOptionsSayWhyTheyAreOffOnceTheRunStarts() {
+        let options = DesignExportOptions(format: .png, scale: 2, scope: .frame)
+        var run = DesignExportRun.idle
+        #expect(run.optionsHelp == nil)
+        _ = run.begin(options)
+        #expect(run.optionsHelp == nil)
+        _ = run.start(total: 1)
+        let why = "The export is under way or done. Close the sheet and export again to change it."
+        #expect(run.optionsHelp == why)
+        run.end(.success(["Desktop@2x.png"]))
+        #expect(run.optionsHelp == why)
     }
 
     @Test func scaleIsWholeOneToThree() {
@@ -51,7 +69,7 @@ import Testing
         let one = cards.exportRows(DesignExportOptions(format: .png, scale: 1, scope: .frame))
         #expect(one == [DesignExportRow(id: "node-1", text: "Desktop.png 1440 × 1024, 1x, 1440 × 1024 px", skipped: nil)])
         let two = cards.exportRows(DesignExportOptions(format: .png, scale: 2, scope: .frame))
-        #expect(two.map(\.text) == ["Desktop.png 1440 × 1024, 2x, 2880 × 2048 px"])
+        #expect(two.map(\.text) == ["Desktop@2x.png 1440 × 1024, 2x, 2880 × 2048 px"])
         let svg = cards.exportRows(DesignExportOptions(format: .svg, scale: 3, scope: .frame))
         #expect(svg.map(\.text) == ["Desktop.svg 1440 × 1024 pt"])
         let page = cards.exportRows(DesignExportOptions(format: .pdf, scale: 1, scope: .page))
