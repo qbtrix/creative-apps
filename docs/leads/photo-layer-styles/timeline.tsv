@@ -9,3 +9,4 @@ utc	stage	event	ref	note
 2026-10-22T04:17Z	0	ended	#3793	supervisor: end the session, no re-checks on stall nudges; relaunch by hand after #3937
 2026-10-23T15:35Z	0 setup	check	PY-a	takeover by act-1a16958d691-2ax3; LS-a not merged (no SuiteImaging/Style on dev 721168a8f); PY-1 waits
 2026-10-23T16:15Z	0 blocked	check-in	PY-1	LS-a (#3937) not on dev 35a0b5e7e (no SuiteImaging/Style); still blocked
+2026-10-23T16:35Z	0 blocked	check-in	PY-1	LS-a (#3937) not on dev 35a0b5e7e
