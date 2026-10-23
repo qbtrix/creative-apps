@@ -1,0 +1,23 @@
+[
+  {
+    "label": "neverOverwrites: the existing-file check skipped",
+    "file": "Sources/LibraryModel/ImportCopyPlan.swift",
+    "find": "while exists(folder + \"/\" + name), tries < maxTries {",
+    "replace": "while false, tries < maxTries {",
+    "tests": "ImportCopyTests/anExistingFileIsNeverOverwritten"
+  },
+  {
+    "label": "shortCopyRefused: the size check skipped",
+    "file": "Sources/LibraryModel/Live/LiveImporter.swift",
+    "find": "guard let length = size(step.source), size(partial) == length else {",
+    "replace": "guard true else {",
+    "tests": "ImportCopyTests/aShortCopyIsRefused"
+  },
+  {
+    "label": "datedByCapture: the file date used before the capture date",
+    "file": "Sources/LibraryModel/ImportCopyPlan.swift",
+    "find": "datedFolder(source.captured ?? source.modified)",
+    "replace": "datedFolder(source.modified)",
+    "tests": "ImportCopyTests/datedFoldersFollowTheCaptureDateElseTheFileDate"
+  }
+]
