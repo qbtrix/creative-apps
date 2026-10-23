@@ -1,43 +1,38 @@
 # large-catalog lead record
 
 Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
-Run: act-1a15df37b73-k199 · Session: claude/library-line-lead-lqhhp8 · Started: 2026-10-21T10:19Z
-Stage: 3 wave 1 done (LG-a done; #4073 at 3b18f2a7 waits on the supervisor's hand merge); LG-model waits on FC-a, MD-e, DR-m
-Base: e2b8aa76 (origin/dev)
-Next: Belt-Slice-Done for LG-a; LG-model waits on FC-a, MD-e, DR-m; LG-grid on LG-model, FC-c, suiteui shared-thumbnails ST-m
+Run: act-1a1693fbf6d-ap2g · Session: claude/large-catalog-share-sheet-2tdm4i (earlier act-1a15df37b73-k199) · Started: 2026-10-21T10:19Z (resumed 2026-10-23T14:20Z)
+Stage: 3 wave 2 (LG-model built on large-catalog/lg-model a07f54e7f; mutations, gate, then PR)
+Base: 8021b0f56a45a59540cd4ea0ff99651c5fb8dc2a (origin/dev)
+Next: LG-model PR once scripts/mutate and scripts/ci --changed pass; LG-grid waits on LG-model and suiteui shared-thumbnails ST-m
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| LG-a | 10,000-photo fixture and every budget test, disabled | LG-1, LG-2 | MJ-LG | metadata-more:MD-a (met: MD-1..MD-4 on dev) | no | 0 | merged | - | - |
-| LG-model | load off main with id index, IndexSet selection, one-pass export plan | LG-3, LG-4 | MJ-LG | LG-a; FC-a, MD-e, DR-m | no | 0 | blocked | - | - |
-| LG-grid | grid and loupe within budget, jobs, built | LG-5..LG-8 | LJ-LG, MJ-LG | LG-a, LG-model; suiteui shared-thumbnails; FC-c | yes | 0 | blocked | - | - |
+| LG-a | 10,000-photo fixture and every budget test, disabled | LG-1, LG-2 | MJ-LG | metadata-more:MD-a (met) | no | 1 | done #4006, fix #4073 (c5801375) | 39601343733 | - |
+| LG-model | load off main with id index, IndexSet selection, one-pass export plan | LG-3, LG-4 | MJ-LG | LG-a; FC-a (met: filters-collections built), MD-e, DR-m (stubs, supervisor's answer b) | no | 0 | building | - | - |
+| LG-grid | grid and loupe within budget, jobs, built | LG-5..LG-8 | LJ-LG, MJ-LG | LG-model; suiteui shared-thumbnails ST-m; FC-c (met) | yes | 0 | blocked | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | LG-1 | LG-a | 1 | LibraryFixtures.large(count:folder:), budget tests disabled | LibraryLargeFixture.swift, LargeCatalogBudgetTests.swift | LargeCatalogBudgetTests | #4006 | merged |
 | LG-2 | LG-a | 1 | large journey (skipped), -LibraryLargeFixture flag, RJ-L56 folder | LibraryJourneyTests+Large.swift, LibraryLaunch.swift, large-catalog.jobs.json | launch flag test, scripts/jobs check | #4006 | merged |
+| LG-3 | LG-model | 2 | direct select all, cheap can-export check | LibrarySelectionAdapter.swift, LibraryActions.swift, LibraryExport.swift, LargeCatalogEquivalenceTests.swift, mutations | LargeCatalogEquivalenceTests | - | built, Mutate 2/2 LibrarySelectionAdapter |
+| LG-4 | LG-model | 2 | one-pass export names (stems parsed once, one taken set) | Contracts/ExportNaming+Kernel.swift, Live/LiveExporter.swift, LargeCatalogEquivalenceTests.swift, mutations | LargeCatalogEquivalenceTests | - | built, mutations running |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
 
 ## Decisions
-- The record moved to lead/library-large-catalog at docs/leads/library-large-catalog/, where Belt reads it. lead/large-catalog is the old copy.
-- Base is dev, not main: the packet's waits are on dev and PRs target dev (CLAUDE.md). The brief named main 0dd23d65.
-- LG-1 and LG-2 ship as one LG-a PR (one PR per slice); the packet's wave split is kept by building LG-1 first in it.
-- MD-a counts as met: MD-1..MD-4's code (CameraDetails, SidecarContracts, cameras fixture, slots) is on dev though the wave file's status is unset.
-- LG-7 edits Tests/perf-suites.txt, a protected path: the supervisor makes that line; LG-7's PR carries only the jobs file.
+- The record is at docs/leads/large-catalog/ on lead/large-catalog, the path this run's brief names; lead/library-large-catalog keeps the earlier run's copy.
+- Base and PR target are dev, not main (CLAUDE.md). The brief named main cb79cbb6.
+- LG-1 and LG-2 shipped as one LG-a PR. LG-3 and LG-4 ship as one LG-model PR (one PR per slice).
+- LG-model starts now on the supervisor's answer (b) on #3790 (2026-10-21 13:44Z): build on what dev has, parts that need FC-a, MD-e, DR-m behind stubs declared in the contract (rule 18). filters-collections is built on dev, so FC-a and FC-c are met.
+- LG-7's Tests/perf-suites.txt line is the supervisor's (protected).
 
 ## Open
-- LG-a #4006 merged at 11:52Z as c2aa3391. dev Linux check 39596004859 on c2aa3391 went red only on LibraryFoldersTests.tenThousandPaths (31.6 ms vs 20 ms; folder tree #3961, a timing budget, not LG-a). Waiting on 39598650564 (76d0c892); Belt-Slice-Done is posted once its Linux job is green. dev-red #3856 is a PhotoApp CommandPath failure whose fix, #4008, is below c2aa3391.
-- LG-model waits on FC-a, MD-e and DR-m; it is re-checked at each heartbeat.
-- dev-red #3856 open (others' merges).
-
-- 12:45Z: dev Linux check 39598650564 (76d0c892) red on our LargeCatalogBudgetTests.fixtureBuildsTenThousandDeterministically (6.45 s vs 5 s wall clock at line 25), plus the not-ours LibraryFoldersTests.tenThousandPaths. Decision: LG-a fix round 1. The fixture test keeps determinism only; the 5 s budget moves to its own disabled suite LargeCatalogFixtureBudgetTests, and the supervisor is asked to list it in Tests/perf-suites.txt (protected).
-
-- 13:05Z: Linux 39601343733 (737541328, contains c2aa3391) red only on LibraryFoldersTests.tenThousandPaths (28.4 ms, #3961, not ours); LG-a tests green. Posted Belt-Slice-Done: LG-a (LG-a is not a UI slice, so no Mac-Finish-Wanted). #4073 (fix round 1) stays open to take the timing assert out of the gate. Asked the supervisor on #3790 to list LibraryFoldersTests/tenThousandPaths in perf-suites, since it has been red in 3 checks in a row.
-
-- 13:25Z: Supervisor answers on #3790. At 12:54Z: keep the split; in #4073, swap #4050's perf-suites line for LargeCatalogFixtureBudgetTests (approved, one line), un-disable the new suite, rebase onto dev; the supervisor merges #4073 by hand. At 13:04Z: #4050 already lists LibraryFoldersTests/tenThousandPaths. Fixer dispatched to update #4073 (same round 1). LG-model waits on FC-a, MD-e, DR-m, all still unset in their wave files (poll 2).
-- 13:39Z: Poll 3, unchanged (dev c9c6d8aab). Asked the supervisor (rule 23, #3790 issuecomment-6317524570): (a) wait for a lead on FC-a, MD-e, DR-m, or (b) build LG-model now with rule-18 stubs. Noted #4073 is ready for the hand merge.
+- 2026-10-23T15:44Z: LG-model measured. Release, suite run in parallel: plan, load, shift-range, beginExport pass; select all 12.0 ms vs 5 ms on 10,000. Release alone (--no-parallel, best of 10): select all 5.0 ms, of which SuiteKernel Selection.unique is 4.6 ms (Set(order) is 1.4 ms). Kernel is line:suite: filed #4835 (needs-suite) for a fast path when ids are already unique. The timed suite LargeCatalogModelBudgetTests stays disabled until LG-7 lists it in perf-suites, so the gate does not depend on #4835. Debug before/after: plan 191 ms to under 50, beginExport 52.7 ms to under 10, select all 2.14 to 0.885 ms (1,000).
+- Belt reads lead/library-large-catalog; this record is mirrored there at docs/leads/library-large-catalog/ from 2026-10-23T15:44Z on.
+- LG-grid needs suiteui shared-thumbnails ST-m (wave file planned, no slice status on 2026-10-23); re-checked each heartbeat.

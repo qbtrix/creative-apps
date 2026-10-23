@@ -13,3 +13,7 @@
 2026-10-21T13:25Z	check	wait	LG-model	FC-a, MD-e, DR-m unset (poll 2)
 2026-10-21T13:32Z	ship	updated	LG-a	#4073 head 3b18f2a7: perf-suites line swapped, budget suite enabled, rebased; CI: PASS; supervisor merges by hand
 2026-10-21T13:39Z	check	blocked	LG-model	FC-a, MD-e, DR-m unset (poll 3); rule-23 question to supervisor, issuecomment-6317524570
+2026-10-23T14:20Z	0	stage-start	#3790	resumed by act-1a1693fbf6d-ap2g; record at docs/leads/large-catalog/
+2026-10-23T14:56Z	3	stage-start	LG-model	supervisor answer (b): build with rule-18 stubs for MD-e, DR-m; FC built
+2026-10-23T15:31Z	3	build	LG-model	one-pass names, cheap hasExportTarget, direct selectAll; debug budgets: plan, beginExport, load, shift pass; select all 0.885 ms (debug 0.5); release run pending; equivalence tests pass
+2026-10-23T15:44Z	3	build	LG-model	built on large-catalog/lg-model a07f54e7f; release select all 5.0 ms alone (kernel unique 4.6 ms, #4835 filed); Mutate 2/2 adapter, exporter plans running
