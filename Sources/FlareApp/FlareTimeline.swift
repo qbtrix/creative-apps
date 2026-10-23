@@ -7,9 +7,9 @@
 // the last frame, and its frames are fitted to the width it is offered less
 // the name column, the divider and the trailing room, so every frame shows and
 // the lanes never scroll sideways. With no rows it shows `timelineEmptyText`.
-// The strip's track name buttons come from SuiteUI with no identifier of their
-// own (`flare.timeline.track` on the strip doesn't reach them), so journeys
-// find a track by its name inside `flare.timeline`.
+// The strip's name buttons, lanes and keys take identifiers under
+// `flare.timeline` (FlareTimelineEdit); journeys still find a track by its
+// name inside `flare.timeline`.
 // The row never asks for more than the narrowest content column: the transport
 // is only its controls (fixed size) and each readout stays on one line, so a
 // squeezed readout can't wrap and push the window past the display (#2101).
