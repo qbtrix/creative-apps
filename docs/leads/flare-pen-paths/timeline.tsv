@@ -81,3 +81,4 @@ utc	stage	event	ref	note
 2026-10-23T03:31Z	pr	FP-u #4706 opened (head 9cd03fbb, scripts/ci --changed pass); #4012 relabelled gap (waits on #4030).
 2026-10-23T03:38Z	pr	FP-m #4714 opened (head 69884609, scripts/ci --changed pass, Mutate FlareCommandCatalog 10/10); LO-m stacks on it.
 2026-10-23T03:59Z	check	#4706 merged (a8ea9487, macOS gate 39895221472); full CI 39897762608 pending on it; #4714 in lane macOS build; no open pen-paths findings.
+2026-10-23T04:19Z	check	dev-red #3856: Linux fails on halo command-path baseline from #4703, not FP-u; commented culprit; FP-u done waits; #4714 in lane
