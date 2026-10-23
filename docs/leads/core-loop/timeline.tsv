@@ -216,3 +216,4 @@ utc	stage	event	ref	note
 2026-10-23T09:30Z	3	panel	round-3 panel triaged	#4732 fixer launched; gap #4787; #4698 noted
 2026-10-23T09:36Z	3	pr	#4788 opened	Fixes #4732 (H-J12 step 6)
 2026-10-23T10:22Z	3	merge	#4788 merged	re-check H-J12 on next run
+2026-10-23T11:20Z	3	wait	H-J12 re-check	no journeys run contains 28e3a67d yet
