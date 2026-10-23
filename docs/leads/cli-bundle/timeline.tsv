@@ -4,3 +4,4 @@ utc	stage	event	ref	note
 2026-10-23T03:08Z	1	stage-end	-	packet and code read; waits met
 2026-10-23T03:08Z	2	stage-end	-	wave plan in Tasks
 2026-10-23T03:08Z	3	stage-start	-	wave 1
+2026-10-23T03:12Z	3	heartbeat	-	wave 1 building
