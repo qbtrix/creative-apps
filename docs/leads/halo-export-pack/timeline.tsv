@@ -52,3 +52,4 @@ utc	stage	event	ref	note
 2026-10-23T18:15:00Z	4	heartbeat	HX-z	all 5 PRs open in the lane, no lane comments, no findings; HX-8 waits on placed-images:PH-z
 2026-10-23T18:40:00Z	4	heartbeat	HX-z	all 5 PRs open, waiting on a lane batch; placed-images still planned, HX-8 waits on PH-z
 2026-10-23T19:00:00Z	4	heartbeat	HX-z	lane still bisecting batch-20261023174522; #4841 queued (relabel loop stopped after 17:20 Allow-Dup-View); placed-images planned
+2026-10-23T19:22:00Z	4	heartbeat	HX-a	#4841 in lane batch-20261023192105 (Linux + macOS gate running); no findings
