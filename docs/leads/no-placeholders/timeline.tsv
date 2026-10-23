@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-23T15:44Z	check	no-placeholders	journeys 39972233358 for full CI 39957675362 still pending; done markers wait on it	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
 2026-10-23T16:09Z	check	no-placeholders	journeys 39972233358 still pending (macOS runner queue); done markers wait	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
 2026-10-23T16:30Z	check	no-placeholders	journeys 39972233358 still pending; done markers wait	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T16:52Z	check	no-placeholders	journeys 39972233358 queued for macOS runner; done markers wait	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
