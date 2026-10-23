@@ -2,9 +2,9 @@
 // `DesignNode.path(in:)`, in its frame, not its box. A red five-point star in (100, 100, 200, 200), drawn
 // alone by DesignArtwork at 100%, is red below its top tip and at its centre and bare in its box's top-left
 // corner. Stretched to 400 wide it redraws: red just inside its new right tip, past where the old box ended,
-// and its corner still bare. A red arrow is stroked only: red on its shaft, bare beside it inside its box. A
-// star whose spec can't be drawn (2 points) paints its box. These pass once DS-5 builds `path(in:)`; until
-// then the stub's nil paints the box. macOS only.
+// and its corner still bare. A red arrow is stroked: red on its shaft, bare beside it inside its box, and
+// its closed head filled in the line colour, so it reads solid. A star whose spec can't be drawn (2 points)
+// paints its box. macOS only.
 #if canImport(AppKit)
 import AppKit
 import SuiteKernel
@@ -59,6 +59,16 @@ import Testing
         let image = try draw(arrow)
         #expect(try isRed(image, 150, 320), "on the shaft")
         #expect(try !isRed(image, 150, 306), "beside the shaft, inside the box: no fill")
+    }
+
+    @Test func anArrowHeadIsSolid() throws {
+        // Head 40 long, 32 wide: tip (400, 320), base at x 360. (375, 320) is inside the head, 10 pt off its edges.
+        let spec = ShapeSpec(kind: .arrow, head: 40, start: Point(x: 0, y: 0.5), end: Point(x: 1, y: 0.5))
+        let arrow = shape(spec, DesignRect(x: 100, y: 300, width: 300, height: 40),
+                          stroke: DesignStroke(color: DesignColor(255, 0, 0), width: 2))
+        let image = try draw(arrow)
+        #expect(try isRed(image, 375, 320), "inside the head: filled, not hollow")
+        #expect(try !isRed(image, 150, 310), "beside the shaft stays bare")
     }
 
     @Test func aSpecThatCantDrawPaintsItsBox() throws {

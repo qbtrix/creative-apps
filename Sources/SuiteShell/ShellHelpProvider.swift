@@ -25,6 +25,16 @@ public struct ShellHelpProvider: HelpProviding {
         ])
     }
 
+    /// The AfterGlow.app this process runs in, a helper app's included; nil outside one (cli-bundle CB-5).
+    public var bundle: String? { AssistantConnectPanel.bundle(containing: Bundle.main.bundlePath) }
+
+    /// `{command, json}` for the running bundle, AssistantConnect's text as the sheet shows it; null outside one.
+    public func connectAssistant() -> JSONValue {
+        guard let bundle else { return .null }
+        let panel = AssistantConnectPanel(bundle: bundle)
+        return .object(["command": .string(panel.command), "json": .string(panel.configJSON)])
+    }
+
     public func betaNotes() -> JSONValue {
         .object(["notes": .array(BetaNotes.current.map { .object(["title": .string($0.title), "detail": .string($0.detail)]) })])
     }

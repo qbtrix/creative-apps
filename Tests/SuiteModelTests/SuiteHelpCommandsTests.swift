@@ -94,6 +94,22 @@ import Testing
         }
     }
 
+    /// cli-bundle CB-5: Connect an AI Assistant… is in every app's group and begins AssistantConnectSheet over the
+    /// running bundle's panel; Copy puts the sheet's text on the pasteboard; the provider names the bundle.
+    @Test func connectAssistantBeginsItsSheet() throws {
+        let help = try source(Self.help)
+        #expect(help.contains("[\"help.report-problem\", \"help.beta-notes\", \"help.connect-assistant\"] + (app"))
+        #expect(help.contains("if id == \"help.connect-assistant\", let bundle = ShellHelpProvider().bundle"))
+        let connect = try #require(help.components(separatedBy: "func showConnect(").last)
+        #expect(connect.contains("AssistantConnectSheet(") && connect.contains("AssistantConnectPanel(bundle: bundle)"))
+        #expect(connect.contains("NSPasteboard.general.setString(text, forType: .string)"), "Copy doesn't copy the text")
+        #expect(connect.contains("AIAccessCenter.shared.showList()") && connect.contains("beginSheet(panel)"))
+        let provider = try source("Sources/SuiteShell/ShellHelpProvider.swift")
+        #expect(provider.contains("AssistantConnectPanel.bundle(containing: Bundle.main.bundlePath)"))
+        let journey = try source("UITests/AfterGlowJourneyTests+Connect.swift")
+        #expect(journey.contains("func testConnectAssistant()") && journey.contains("suite.help.connect.copyCommand"))
+    }
+
     @Test func launcherAddsTheGroupInPlaceOfItsWelcomeGroup() throws {
         let app = try source("Sources/AfterGlowApp/AfterGlowApp.swift")
         #expect(app.components(separatedBy: "SuiteHelpCommands(app: .launcher)").count == 2)
