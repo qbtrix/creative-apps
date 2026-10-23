@@ -75,20 +75,20 @@ struct FlareVideoExportTests {
     @Test(arguments: [ExportFormat.mp4, .gif])
     func aVideoRunCountsItsFrames(format: ExportFormat) throws {
         var w = bounce(); _ = w.openExport(); w.setExportFormat(format)
-        #expect(w.startExport())
+        let started = w.startExport()
         let o = try #require(w.exportingOptions)
-        #expect(w.exportState == .running(o, done: 0, total: 60))
+        #expect(started && w.exportState == .running(o, done: 0, total: 60))
         w.exportProgressed(0.5)
         #expect(w.exportState == .running(o, done: 30, total: 60))
         var half = bounce(); _ = half.openExport(); half.setExportFormat(format); half.setExportFrameRate(15)
-        #expect(half.startExport())
-        #expect(half.exportState == .running(try #require(half.exportingOptions), done: 0, total: 30))
+        let halfStarted = half.startExport()
+        #expect(halfStarted && half.exportState == .running(try #require(half.exportingOptions), done: 0, total: 30))
         var png = bounce(); _ = png.openExport(); png.setExportFormat(.pngSequence); png.setExportStep(2)
-        #expect(png.startExport())
-        #expect(png.exportState == .running(try #require(png.exportingOptions), done: 0, total: 30))
+        let pngStarted = png.startExport()
+        #expect(pngStarted && png.exportState == .running(try #require(png.exportingOptions), done: 0, total: 30))
         var svg = bounce(); _ = svg.openExport()
-        #expect(svg.startExport())
-        #expect(svg.exportState == .running(try #require(svg.exportingOptions), done: 0, total: 1))
+        let svgStarted = svg.startExport()
+        #expect(svgStarted && svg.exportState == .running(try #require(svg.exportingOptions), done: 0, total: 1))
     }
 
     @Test func svgLottieAndPNGStillExport() async throws {
