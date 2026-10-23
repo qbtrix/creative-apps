@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-23T16:56:46Z	3	pr	HF-m	#4894 opened (HF-3), stacked on HF-a, Fast-Check pass at 015f68dc
 2026-10-23T17:52:00Z	3	pr	HF-m	#4936 opened (HF-4), stacked on HF-3, Mutate n/a (macOS window wiring)
 2026-10-23T18:15:00Z	3	heartbeat	HF-z	all 4 PRs open in the lane, no lane comments, no findings; HF-7 waits on #4868
+2026-10-23T18:40:00Z	3	heartbeat	HF-z	all 4 PRs open; #4855 mergeable clean, no checks, waiting on a lane batch; HF-7 waits on #4868
