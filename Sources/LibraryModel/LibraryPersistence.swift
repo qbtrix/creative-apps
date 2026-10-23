@@ -70,7 +70,11 @@ extension LibraryCatalog {
 
     /// The launch found the catalog damaged and `fallback` the newest backup that decodes: its photos open
     /// unsaved (so the next save writes them as the catalog) and its notice stays until dismissed.
-    public mutating func openBackup(_ fallback: LibraryBackupFallback) {}
+    public mutating func openBackup(_ fallback: LibraryBackupFallback) {
+        restore(fallback.photos)
+        backup.notice = fallback.message
+        saveRevision += 1
+    }
 
     /// The window closed the opened-backup notice.
     public mutating func dismissBackupNotice() {
