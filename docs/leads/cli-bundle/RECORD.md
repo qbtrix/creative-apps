@@ -46,3 +46,9 @@ Next: CB-m #4740, CB-u #4743 (base dev, fast lane), CB-m-bundle #4741 (base dev,
 - 04:45Z #4715 (CB-a) merged. CB-m #4740, CB-m-bundle #4741 (no-fast-lane, supervisor), CB-u #4743 (test-first split, Mutate 3/3) merged origin/dev; gate rerun before retarget to dev. C4-only suite-packaging description PR is now due.
 - 2026-10-23T05:22Z CB-u #4743 and CB-m-bundle #4741 merged origin/dev, gate rerun (CB-u: only dev-red #3856 fails; CB-m-bundle: CI: PASS), pushed, retargeted to dev.
 - 2026-10-23T05:24Z #4741 got needs-split (1428/51 counted against the merged CB-a base); replied that on dev it is 3 files ~63 lines. CB-z builder started.
+
+## 2026-10-23T06:20:27Z
+- Merged: #4740 CB-m, #4743 CB-u, #4755 C4 packaging.
+- CB-z split to stay ≤15 files: code on lead/cli-bundle-CB-z (13 files, 0e6a426b1), docs (suite.md, cli-bundle.wave.json built, jobs.json) on lead/cli-bundle-CB-z-docs (f6a22109b), which carries feature-done.
+- Both PRs open after #4741 (supervisor, scripts/bundle-apps) merges; CB-z's diff against dev otherwise holds that protected path.
+- Gap #4762: the bundle runner RJ-X62 waits on.
