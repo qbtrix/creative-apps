@@ -1,0 +1,23 @@
+utc	stage	event	ref	note
+2026-10-21T11:26Z	0	started	-	run act-1a15e33396b-eo15, base ded2ca57
+2026-10-21T11:26Z	3	wave-started	-	wave 1: contract slice PR
+2026-10-21T13:18Z	3	heartbeat	-	OC-a held by dev-red #3856 (fixed); rebasing and opening PR
+2026-10-21T13:20:12Z	check	blockers posted on feature issue; lane PRs open, no needs-fix
+2026-10-21T13:34:01Z	pr-opened	OC-a #4082 ea5ec5d7; OC-m #4088 b929af4a stacked (Mutate 7/7)
+2026-10-21T13:38:10Z	poll	#4082 macOS build 39608833245 queued; #4088 stacked; no needs-fix
+2026-10-21T15:12:24Z	slice-done	OC-a merged f080846e; Linux 39620526621 green; Belt-Slice-Done posted; #4088 retargeted to dev, dev merged in
+2026-10-21T15:26:45Z	OC-m	pushed 0c98d00f (dev merged, gate pass), #4088 Head: moved, fast-lane re-added
+2026-10-21T15:38:58Z	poll	#4088 waiting on lane macOS build of 0c98d00f
+2026-10-21T16:01:00Z	poll	#4088 macOS build 39625776416 queued
+2026-10-21T16:23:20Z	poll	#4088 macOS build 39625776416 green at 0c98d00f; awaiting lane batch
+2026-10-21T16:44:59Z	merge	OC-m #4088 merged b48e63e3; dev Linux 39637279724 running
+2026-10-21T17:02:50Z	done	OC-m Belt-Slice-Done posted (comment 6321755384), Linux 39637279724
+2026-10-21T17:55:57Z	poll	DS-u, DS-photo, CB-library, IM-z, AR-photo-u, CB-z not on dev; blocked poll 1
+2026-10-21T18:18:01Z	poll	blockers unchanged; blocked poll 2
+2026-10-21T18:40:41Z	question	blocked poll 3; Question for the supervisor 6323716332
+2026-10-21T18:41:35Z	nudge	Belt nudge read; state re-read from source: #4058 awaiting batch, no supervisor reply yet, no blocking slice on dev
+2026-10-21T19:02:29Z	released	supervisor answer: release this run; waiting-on-prereq
+2026-10-22T16:54:00Z	stage-start	relaunch as #4528 run act-1a164855f49-5pe1; base 3578eaee
+2026-10-22T16:54:00Z	wave 3	OC-u builder launched (OC-5, OC-6)
+2026-10-22T17:16:20Z	OC-u	PR	#4582 head 13f82d3e; CI: PASS; mutate 2/2; 395 lines 9 files
+2026-10-22T17:43:19Z	poll	#4582 waiting on lane macOS build 39823958943 (queued); IM-a only from suite-imaging; DS-photo, AR-photo-u, CB-library, CB-z not done
