@@ -1,0 +1,10 @@
+utc	stage	event	ref	note
+2026-10-22T02:00Z	0	stage-start	-	base e9933116 (origin/dev); brief's main 0dd23d65 verified
+2026-10-22T02:00Z	0	stage-end	#3937	waits checked: multi-layer-select built, PF-m done, LS-a not started; no task can start
+2026-10-22T02:00Z	0	stopped	#3937	blocked on suiteui layer-styles LS-a
+2026-10-22T02:45Z	0	resume	-	Belt stall nudge; re-checked waits on dev b5a6e7e
+2026-10-22T02:45Z	0	stopped	#3937	still blocked: LS-a waiting-on-prereq, IM-1 #4028 open
+2026-10-22T03:13Z	0	resume	-	second Belt stall nudge; re-checked waits on dev 66a8458
+2026-10-22T03:13Z	0	stopped	#3937	still blocked: LS-a waiting-on-prereq, IM-1 #4028 macOS not run
+2026-10-22T04:17Z	0	ended	#3793	supervisor: end the session, no re-checks on stall nudges; relaunch by hand after #3937
+2026-10-22T16:25Z	0	resume	#4511	run act-1a164697363-4fnm; blocked on LS-a #3937
