@@ -41,3 +41,5 @@ utc	stage	event	ref	note
 2026-10-21T18:10Z	PD-a	wait	#3759	still supervisor-queued
 2026-10-21T18:32Z	PD-a	wait	#3759	still supervisor-queued
 2026-10-23T15:20Z	PD-a	integrate	#3759	dev 721168a8 merged in; Package.swift conflict resolved
+2026-10-23T15:50Z	PD-a	gate	#3759	scripts/ci --changed on the dev merge, building
+2026-10-23T15:50Z	PD-m	build	design/pd-m-place-model	test commit 88d24612 on PD-a

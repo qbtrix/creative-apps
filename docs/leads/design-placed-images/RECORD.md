@@ -2,7 +2,7 @@
 
 Issue: #3454 · Packet: docs/blueprints/design/features/placed-images.md
 Run: act-1a16953aed5-oxsi · Session: claude/lead-placed-images-stroke-style-elhwn1 · Started: 2026-10-23T15:20Z (prior runs act-1a15da1b26c-9qo6, act-1a15ac70747-ky1f)
-Stage: 3 wave 1: PD-a #3759 integrated with dev 721168a8 (Package.swift conflict); PD-u and PD-m build stacked on it
+Stage: 3 wave 1 building (15:50Z): PD-a #3759 dev merge in gate; PD-m on design/pd-m-place-model (tests first, stacked on PD-a); PD-u starts after DK-u (shared DesignCanvasMarks.swift)
 Base: 721168a8 (origin/dev); main verified at cb79cbb6
 Next: supervisor merges #3759; PD-u and PD-m slice PRs stacked on design/pd-a-placed-image-stubs; then PD-z
 
