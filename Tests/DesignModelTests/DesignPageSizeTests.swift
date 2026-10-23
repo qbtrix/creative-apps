@@ -132,8 +132,8 @@ private func liftedCards(_ change: (inout [DesignNode]) -> Void) -> DesignPage {
     workspace.setPageSize(width: 800, height: 1024)
     #expect(cardsPage(workspace)?.pastEdgeNote == "Desktop reaches past the page, so the part outside shows dimmed.")
     let lifted = liftedCards { $0 = $0.map { var node = $0; node.frame.x += 1300; return node } }
-    let count = lifted.nodes.count
-    #expect(count > 1)
+    let count = lifted.nodes.filter { !$0.isHidden }.count
+    #expect(count > 1 && count < lifted.nodes.count, "the hidden layer isn't counted")
     #expect(lifted.pastEdgeNote == "\(count) layers reach past the page, so the parts outside show dimmed.")
     let hidden = liftedCards { nodes in
         nodes = nodes.enumerated().map { index, node in
