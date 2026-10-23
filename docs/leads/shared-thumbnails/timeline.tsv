@@ -36,3 +36,4 @@ ts	kind	note
 2026-10-23T19:40:02Z	ST-m	restacked	#4951 head 06dfc0e CI pass
 2026-10-23T19:58:03Z	-	check	#4840 awaits supervisor Mac re-gate at 07c11358c; #4950/#4951 drafts restacked, waiting.
 2026-10-23T20:20:41Z	wait	check	heartbeat: #4840 ST-a still needs-fix/no-fast-lane at 07c11358c, mergeable clean, waiting on supervisor Mac re-gate; #4950/#4951 stay drafts
+2026-10-23T20:42:21Z	wait	check	heartbeat: #4840 ST-a unchanged at 07c11358c (needs-fix, awaiting supervisor Mac re-gate); #4950/#4951 drafts
