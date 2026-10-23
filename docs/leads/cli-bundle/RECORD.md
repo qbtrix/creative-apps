@@ -12,7 +12,7 @@ Next: CB-m #4740, CB-u #4743 (base dev, fast lane), CB-m-bundle #4741 (base dev,
 | CB-a | BundleLayout.cliPath, AssistantConnect stubs, help catalog stubs, checks disabled | CB-1, CB-2 | MJ-CB | report-problem:RP-m (met) | no | 0 | merged #4715 | - | - |
 | CB-u | Connect an AI Assistant sheet on the stubs; render budget | CB-5, CB-5b | XJ-CB | CB-a; RP-u (met) | yes | 0 | open #4743 (base dev, head 6bc5db5e) | - | - |
 | CB-m | bodies + bundled signed afterglow (CB-3 supervisor merge) | CB-4, CB-3 | MJ-CB, XJ-CB | CB-a | no | 0 | open #4740 (CB-4), #4741 (CB-3, no-fast-lane, base dev, head 184f3f88) | - | - |
-| CB-z | Install Command-Line Tool; RJ-X62 on; built | CB-6, CB-7, CB-8 | XJ-CB, MJ-CB | CB-u, CB-m | yes | 0 | waiting | - | - |
+| CB-z | Install Command-Line Tool; RJ-X62 on; built | CB-6, CB-7, CB-8 | XJ-CB, MJ-CB | CB-u, CB-m | yes | 0 | building (on CB-u + CB-m) | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -45,3 +45,4 @@ Next: CB-m #4740, CB-u #4743 (base dev, fast lane), CB-m-bundle #4741 (base dev,
 - CB-3 goes as its own PR on `lead/cli-bundle-CB-m-bundle` with `no-fast-lane` (protected scripts/bundle-apps; supervisor merges).
 - 04:45Z #4715 (CB-a) merged. CB-m #4740, CB-m-bundle #4741 (no-fast-lane, supervisor), CB-u #4743 (test-first split, Mutate 3/3) merged origin/dev; gate rerun before retarget to dev. C4-only suite-packaging description PR is now due.
 - 2026-10-23T05:22Z CB-u #4743 and CB-m-bundle #4741 merged origin/dev, gate rerun (CB-u: only dev-red #3856 fails; CB-m-bundle: CI: PASS), pushed, retargeted to dev.
+- 2026-10-23T05:24Z #4741 got needs-split (1428/51 counted against the merged CB-a base); replied that on dev it is 3 files ~63 lines. CB-z builder started.
