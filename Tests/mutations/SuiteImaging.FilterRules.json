@@ -2,8 +2,8 @@
   {
     "label": ".outsideUnchanged: coverage ignored, every pixel takes the filter",
     "file": "Sources/SuiteImaging/Adjust/FilterRules.swift",
-    "find": "let cover = coverage\n",
-    "replace": "let cover: Mask? = nil\n",
+    "find": "let cover = coverage",
+    "replace": "let cover: Mask? = nil",
     "tests": "FilterRulesTests"
   },
   {
