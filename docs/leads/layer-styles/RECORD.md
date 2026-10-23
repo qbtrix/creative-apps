@@ -4,7 +4,7 @@ Issue: #3937 · Packet: docs/blueprints/suiteui/features/layer-styles.md
 Run: act-1a1695ebfeb-d54n · Session: claude/feature-lead-playbook-9a8kbw · Started: 2026-10-23T15:30Z
 Stage: 3 wave 1
 Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (origin/dev)
-Next: LS-1 gate (builder running); LS-10 #4903 to merge, then LS-11; wave 2: LS-2 stacked on LS-1, LS-5
+Next: LS-1 #4911 and LS-10 #4903 to merge, then open the stacked LS-2, LS-5 (on LS-a) and LS-11 (on LS-clip) PRs
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -19,17 +19,19 @@ Next: LS-1 gate (builder running); LS-10 #4903 to merge, then LS-11; wave 2: LS-
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| LS-1 | LS-a | 1 | The Style module as stubs, the C4 part, four suites written and disabled | Sources/SuiteImaging/Style/*.swift, Sources/SuiteImaging/Route/StyleRoute.swift, Tests/SuiteImagingTests/{LayerStyleRules,StyleCommands,LayerStyleSVG,StyleProgram}Tests.swift, docs/c4/parts/creative-apps/suite-imaging/imaging-style.json | the suites compile, disabled; ImagingBoundaryTests | – | building |
-| LS-2 | LS-a | 2 | Placeholder panel, rows, pasteboard; gallery layer-style page; journey skipped | Sources/SuiteUI/{LayerStylePanel,LayerStyleRows}.swift, Sources/SuiteUI/Gallery/GalleryLayerStyle.swift, Sources/SuiteUI/SuiteGallery.swift, UITests/SuiteJourneyTests+LayerStyle.swift | SJ0 lists layer-style | – | planned |
+| LS-1 | LS-a | 1 | The Style module as stubs, the C4 part, four suites written and disabled | Sources/SuiteImaging/Style/*.swift, Sources/SuiteImaging/Route/StyleRoute.swift, Tests/SuiteImagingTests/{LayerStyleRules,StyleCommands,LayerStyleSVG,StyleProgram}Tests.swift, docs/c4/parts/creative-apps/suite-imaging/imaging-style.json | the suites compile, disabled; ImagingBoundaryTests | #4911 | pr-open |
+| LS-2 | LS-a | 2 | Placeholder panel, rows, pasteboard; gallery layer-style page; journey skipped | Sources/SuiteUI/{LayerStylePanel,LayerStyleRows}.swift, Sources/SuiteUI/Gallery/GalleryLayerStyle.swift, Sources/SuiteUI/SuiteGallery.swift, UITests/SuiteJourneyTests+LayerStyle.swift | SJ0 lists layer-style | lead/layer-styles-LS-a-2 | stacked (builder running) |
 | LS-10 | LS-clip | 1 | ClipRules with its tests; the C4 part | Sources/SuiteKernel/Layers/ClipRules.swift, Tests/SuiteKernelTests/ClipRulesTests.swift, Tests/mutations/SuiteKernel.ClipRules.json | ClipRulesTests | #4903 | pr-open |
-| LS-11 | LS-clip | 2 | ClipTarget, ClipCommands (layer.clip, layer.unclip) | Sources/SuiteKernel/Layers/ClipCommands.swift, Tests/SuiteKernelTests/ClipCommandsTests.swift | ClipCommandsTests | – | planned |
-| LS-3..LS-9b, LS-12, LS-13 | see packet | 3+ | per the packet's Tasks table | per packet | per packet | – | planned |
+| LS-11 | LS-clip | 2 | ClipTarget, ClipCommands (layer.clip, layer.unclip) | Sources/SuiteKernel/Layers/ClipCommands.swift, Tests/SuiteKernelTests/ClipCommandsTests.swift | ClipCommandsTests | lead/layer-styles-LS-clip-11 | stacked (builder running) |
+| LS-5 | LS-m | 2 | StyleRules bodies; LayerStyleRulesTests turned on | Sources/SuiteImaging/Style/StyleRules.swift, its tests, mutation plan | LayerStyleRulesTests | lead/layer-styles-LS-m | stacked (builder running) |
+| LS-3, LS-4, LS-6..LS-9b, LS-12, LS-13 | see packet | 3+ | per the packet's Tasks table | per packet | per packet | – | planned |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-23: LS-1 #4911 (11 files, 399 lines): LayerStyleStack IS on pin 7966e5a, which corrects the earlier decision that core LE-a isn't on it; StyleProgram's stack signatures are in, no Wire line. BevelShape/BevelTechnique are core's; core BlendMode has no linear dodge/burn. The packet's shadow-angle prose contradicts LS-8's acceptance (down-right); tests follow LS-8 and LS-8 fixes the prose. Cut test cases are named in each suite's header for LS-5..LS-8. Gate passed on the third run after two 60s time-limit failures in untouched suites (Onboarding/Home) under load 20-45.
 - 2026-10-23: LS-10 #4903 (5 files, +157/-1): kernel-layers' paths narrowed to Layers/Layer*.swift and a new part kernel-clip owns Layers/Clip*.swift (covers LS-11's ClipCommands.swift); description untouched. A future Layers/ file named otherwise needs an owner. Footer stripped.
 - 2026-10-23: base is origin/dev and PRs target dev (CLAUDE.md: never target main), as in earlier suiteui records.
 - 2026-10-23: unparked under contract-first waits (supervisor, #3937): IM-a #4028, BK-a #4057 merged; gradient-fill built.
