@@ -109,6 +109,23 @@ func theHandlesAreEightAtTheCornersAndEdgeMiddlesWithTheRotateZone(_ name: Strin
     #expect(readout.handles.count == 9 && rects.count == 9 && rects.values.allSatisfy { near($0.width, 6) && near($0.height, 6) })
 }
 
+/// #4774: Direct Select keeps the outline but shows no scale or rotate handles, since a press there can't hold one;
+/// the readout offers handles exactly when `handle(at:)` can answer (`boxHandlesAct`).
+@Test(arguments: ["fake", "built"])
+func directSelectShowsTheOutlineWithoutDeadHandles(_ name: String) throws {
+    var workspace = bounce(name, clicking: [])
+    workspace.selectTool(.directSelect)
+    workspace.drag(from: ballAt, to: ballAt)
+    let readout = workspace.selectionReadout(stageScale: 1)
+    let box = try #require(readout.box, "Direct Select lost the outline")
+    #expect(readout.count > 0 && !workspace.boxHandlesAct)
+    #expect(readout.handles.isEmpty && readout.handleRects().isEmpty, "Direct Select draws handles it can't drag")
+    #expect(workspace.handle(at: Point(x: box.maxX, y: box.maxY), stageScale: 1) == nil)
+    let select = bounce(name, clicking: [ballAt]), corner = try #require(select.selectionBounds)
+    #expect(select.boxHandlesAct && select.selectionReadout.handles.count == 9)
+    #expect(select.handle(at: Point(x: corner.maxX, y: corner.maxY), stageScale: 1) != nil)
+}
+
 @Test func fixedRoundsToItsPlaces() {
     let cases: [(Double, Int, String)] = [(1.5, 2, "1.50"), (0.125, 2, "0.13"), (1.05, 2, "1.05"), (-0.25, 2, "-0.25"),
                                           (-0.001, 2, "0.00"), (89.6, 0, "90"), (-90, 0, "-90"), (.nan, 2, "mixed")]
