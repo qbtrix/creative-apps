@@ -70,6 +70,11 @@ struct LibraryBrowser: View {
                         onClose: notice.source == .cull ? menu.cull.dismissCullError : nil, catalog: model)
                 }
             }
+            if let message = model.backup.notice {
+                LibraryNoticeRow(
+                    notice: LibraryNoticeContent(message: message, isError: false, action: nil, source: .catalog),
+                    onClose: menu.persist.dismissBackupNotice)
+            }
             if let message = model.collectionsNotice {
                 LibraryNoticeRow(notice: LibraryNoticeContent(message: message, isError: false, action: nil, source: .catalog))
             }
