@@ -1,0 +1,16 @@
+[
+  {
+    "label": ".baselineApplied: baseline step skipped",
+    "file": "Sources/SuiteImaging/Raw/SuiteRaw.swift",
+    "find": "return try developed.exposure(stops: Float(info.baselineStops))",
+    "replace": "return try developed.exposure(stops: 0)",
+    "tests": "RawHeadroomTests"
+  },
+  {
+    "label": ".keepsHeadroom: the developed float clamped to 1, as an 8-bit-first path would",
+    "file": "Sources/SuiteImaging/Raw/SuiteRaw.swift",
+    "find": "                return try developed.exposure(stops: Float(info.baselineStops))\n",
+    "replace": "                var out = try developed.exposure(stops: Float(info.baselineStops))\n                for y in 0..<out.height { for x in 0..<out.width { let p = try out.pixel(x: x, y: y); try out.setPixel(x: x, y: y, RGBA(r: min(p.r, 1), g: min(p.g, 1), b: min(p.b, 1), a: p.a)) } }\n                return out\n",
+    "tests": "RawHeadroomTests"
+  }
+]

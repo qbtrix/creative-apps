@@ -1,9 +1,10 @@
 // RawFormat.swift: the values of the suite's one RAW decode (shared-raw SR-2
-// stubs, SR-3 bodies). Which files are RAW is the format registry's camera RAW
+// contract, SR-3 bodies). Which files are RAW is the format registry's camera RAW
 // row (`SuiteImageFormat.cameraRaw`), never a list of this module's; why a
 // file can't be read is one of `RawRefusal`'s four sentences; and
 // `RawDecodePlan` says how much picture a request decodes: the camera's
 // embedded preview, a draft develop or every pixel. Linux-safe.
+import SuiteModel
 
 /// A camera RAW file's extension, upper case as the refusals name it ("NEF"). Which extensions are RAW is
 /// the registry's: `SuiteImageFormat.cameraRaw.extensions` (shared-codecs SC-14).
@@ -11,9 +12,12 @@ public struct RawFormat: Hashable, Sendable, Codable {
     public let fileExtension: String
 
     /// Non-nil when the registry's format for `fileName` is in the `.cameraRaw` family, any case.
-    /// SR-2 stub: nil; SR-3 reads the registry.
+    /// The registry's `SuiteImageFormat(fileName:)` decides, so a name with no extension, or only one
+    /// (".nef"), is not RAW.
     public init?(fileName: String) {
-        return nil
+        guard let format = SuiteImageFormat(fileName: fileName), format.family == .cameraRaw,
+              let dot = fileName.lastIndex(of: ".") else { return nil }
+        fileExtension = fileName[fileName.index(after: dot)...].uppercased()
     }
 
     /// A format named by `fileExtension` as is, for this module's decoders, which
@@ -30,8 +34,14 @@ public enum RawRefusal: Error, Equatable, Sendable {
     case unavailable                          // "This build can't read raw files. Open it on a Mac."
     case tooLarge(pixels: Int)                // "This raw file is larger than 256 megapixels."
 
-    /// SR-2 stub: empty; SR-3 writes the four sentences.
-    public var message: String { "" }
+    public var message: String {
+        switch self {
+        case .unreadable(let format): return "macOS can't read this raw file (\(format.fileExtension))."
+        case .undevelopable(let camera): return "macOS can't develop raw files from \(camera) yet."
+        case .unavailable: return "This build can't read raw files. Open it on a Mac."
+        case .tooLarge: return "This raw file is larger than 256 megapixels."
+        }
+    }
 }
 
 /// A pixel size, upright (orientation applied).
@@ -78,9 +88,34 @@ public enum RawDecodePlan: Hashable, Sendable {
     case develop(scale: Double, draft: Bool)
     case refuse(RawRefusal)
 
-    /// SR-2 stub: refuses `.unavailable`; SR-3 picks the preview, a draft or every pixel.
+    /// The embedded preview for a thumbnail it covers (or any thumbnail of a file the system can't
+    /// develop), a draft develop at the size a thumbnail or preview needs, every pixel for `.full`.
+    /// A file that can't be developed and has no preview to stand in is refused. Scale is never above 1.
     public static func plan(_ quality: RawQuality, info: RawFileInfo) -> RawDecodePlan {
-        .refuse(.unavailable)
+        let full = info.size.longSide
+        let want: Int
+        switch quality {
+        case .thumbnail(let side), .preview(let side): want = max(1, min(side, full))
+        case .full: want = full
+        }
+        let refused = RawDecodePlan.refuse(.undevelopable(camera: info.camera))
+        switch quality {
+        case .thumbnail:
+            if let preview = info.previewSize, preview.longSide >= want || !info.developable {
+                return .embeddedPreview(longestSide: want)
+            }
+            return info.developable ? .develop(scale: scale(want, of: full), draft: true) : refused
+        case .preview:
+            return info.developable ? .develop(scale: scale(want, of: full), draft: true) : refused
+        case .full:
+            return info.developable ? .develop(scale: 1, draft: false) : refused
+        }
+    }
+
+    /// `want / full`, at most 1; 1 for a file with no size.
+    static func scale(_ want: Int, of full: Int) -> Double {
+        guard full > 0 else { return 1 }
+        return min(1, Double(want) / Double(full))
     }
 }
 
