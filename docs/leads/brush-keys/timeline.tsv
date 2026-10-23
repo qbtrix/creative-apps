@@ -1,0 +1,28 @@
+utc	stage	event	ref	note
+2026-10-21T11:26Z	0	started	-	run act-1a15e33396b-eo15, base ded2ca57
+2026-10-21T11:26Z	3	wave-started	-	wave 1: contract slice PR
+2026-10-21T13:18Z	3	pr-opened	#4057	BK-a contract slice
+2026-10-21T13:18Z	3	pr-opened	#4058	BK-m stacked on BK-a, Mutate 5/5
+2026-10-21T13:18Z	3	pr-opened	#4060	C4 kernel-stroke docs-only
+2026-10-21T13:20:12Z	check	blockers posted on feature issue; lane PRs open, no needs-fix
+2026-10-21T13:38:10Z	poll	#4057 macOS build 39598833420 queued (since 12:20); #4058 #4060 open; no needs-fix
+2026-10-21T15:12:24Z	fix	#4057 Linux red on unrelated timing test; rerun 403; dev merged into BK-a; #4060 merged
+2026-10-21T15:21:44Z	BK-a	pushed 1e2278b8 (dev merged, gate pass), #4057 Head: moved
+2026-10-21T15:38:58Z	poll	#4057 waiting on lane macOS build of 1e2278b8; #4058 stacked
+2026-10-21T16:01:00Z	poll	#4057 macOS build 39625661282 green at 1e2278b8; awaiting lane merge; #4058 stacked
+2026-10-21T16:23:20Z	poll	#4057 macOS green, all checks on 1e2278b8 green; awaiting lane batch; #4058 stacked
+2026-10-21T16:44:59Z	poll	#4057 green at 1e2278b8; awaiting lane batch; #4058 stacked
+2026-10-21T17:02:50Z	poll	#4057 in lane batch-20261021165002 (Linux 39638325928 running); #4058 stacked
+2026-10-21T17:25:49Z	merge	BK-a #4057 merged 8fd982a9; #4058 retargeted to dev, dev merged, gating
+2026-10-21T17:33:04Z	gate	BK-m 17188b30 CI: PASS, pushed, Head moved
+2026-10-21T17:40:37Z	done	BK-a merged-done, Linux 39643409752
+2026-10-21T17:55:57Z	poll	BK-m in lane (macOS build); blockers unchanged
+2026-10-21T18:18:01Z	poll	BK-m macOS build 39645467820 in progress; blockers unchanged
+2026-10-21T18:40:41Z	poll	BK-m macOS build green, awaiting batch
+2026-10-21T18:41:35Z	nudge	Belt nudge read; state re-read from source: #4058 awaiting batch, no supervisor reply yet, no blocking slice on dev
+2026-10-21T19:02:29Z	poll	BK-m awaiting lane batch (no batch branch open)
+2026-10-21T19:24:17Z	BK-m	merged	#4058 -> 1fe5c4ea; blockers unchanged, release question to supervisor
+2026-10-21T19:45:38Z	BK-m	done	Belt-Slice-Done run 39661533247; brush-keys RELEASED by supervisor
+2026-10-22T16:54:00Z	stage-start	relaunch as #4531 run act-1a164855f49-5pe1; base 3578eaee
+2026-10-22T16:54:00Z	poll	BK-u waits AN-u (waits OC-u); BK-photo/design/flare prereqs not on dev; blocked poll 1
+2026-10-22T17:43:19Z	poll	AN-u, AN-flare-u, AR-photo-u, DS-design, AB-photo, OC-photo-m not done (no Slice-Done on #4522/#4506/#3757/#4494); blocked poll 2
