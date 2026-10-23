@@ -13,6 +13,20 @@ public protocol HelpProviding: Sendable {
     func report(app: String, note: String) -> JSONValue
     /// The build's known issues: `{"notes": [{"title", "detail"}]}`.
     func betaNotes() -> JSONValue
+    /// The AfterGlow.app the assistant commands name (cli-bundle CB-2): the running bundle or the CLI's `--bundle`;
+    /// nil outside a bundle.
+    var bundle: String? { get }
+    /// `{command, json}` for `bundle`: SuiteModel's `AssistantConnect` text.
+    func connectAssistant() -> JSONValue
+    /// The plan for the `~/.local/bin/afterglow` link to `bundle`'s CLI; with `confirm`, the link made too.
+    func installCLI(confirm: Bool) -> JSONValue
+}
+
+/// A provider that knows no bundle, as one built before cli-bundle: the assistant commands are unavailable.
+extension HelpProviding {
+    public var bundle: String? { nil }
+    public func connectAssistant() -> JSONValue { .null }
+    public func installCLI(confirm: Bool) -> JSONValue { .null }
 }
 
 /// The Help commands' target: the app whose Help menu runs them, the provider they read and the last answer.
@@ -40,12 +54,15 @@ public struct SuiteHelpDocument: HeadlessDocument {
     public func summary() -> JSONValue { .object(["app": .string(app)]) }
 }
 
-/// The suite's Help catalog: `help.report-problem`, `help.beta-notes` and `help.welcome`.
+/// The suite's Help catalog: `help.report-problem`, `help.beta-notes`, `help.welcome`, and cli-bundle's
+/// `help.connect-assistant` and `help.install-cli` (CB-2 specs; CB-4 fills the provider's answers).
 public enum SuiteHelpCatalog {
     /// `help.report-problem`'s params: the app to report on (the document's when left out) and the person's note.
     public struct ReportParams: Codable, Sendable { public var app: String?; public var note: String? }
     /// No params.
     public struct NoParams: Codable, Sendable {}
+    /// `help.install-cli`'s params: whether to make the link; the plan only when left out or false.
+    public struct InstallParams: Codable, Sendable { public var confirm: Bool? }
 
     /// The apps a report can name.
     static let apps = ["launcher", "flare", "design", "photo", "library", "halo"]
@@ -61,6 +78,19 @@ public enum SuiteHelpCatalog {
     /// The known issues.
     static let notesResult = ParamSchema.object(
         ["notes": .array(of: .object(["title": .string(), "detail": .string()], required: ["title", "detail"]))], required: ["notes"])
+
+    /// The bundled server's command line and the client config block.
+    static let connectResult = ParamSchema.object(["command": .string(), "json": .string()], required: ["command", "json"])
+    /// The install's params, closed.
+    static let installParams = ParamSchema.object(
+        ["confirm": .optional(ParamSchema.boolean)], required: ["confirm"])
+    /// The install plan (`link`, `alreadyLinked` or `refuse`), its paths or reason, and whether the link is in place.
+    static let planResult = ParamSchema.object(
+        ["plan": .string(oneOf: ["link", "alreadyLinked", "refuse"]), "at": .optional(.string()), "to": .optional(.string()),
+         "reason": .optional(.string()), "linked": .boolean], required: ["plan", "at", "to", "reason", "linked"])
+    /// Why the assistant commands can't run: no AfterGlow.app to name.
+    static let needsBundle = "Connecting an assistant needs AfterGlow.app: run the bundled afterglow, or pass --bundle <path to AfterGlow.app>."
+    static func bundled(_ doc: SuiteHelpDocument) -> Availability { doc.provider.bundle == nil ? .unavailable(needsBundle) : .available }
 
     /// The specs, in Help menu order.
     static let specs: [CommandSpec<SuiteHelpDocument>] = [
@@ -83,6 +113,21 @@ public enum SuiteHelpCatalog {
         ) { (_: inout SuiteHelpDocument, _: NoParams) throws -> JSONValue in
             // The Help group opens the tour's window itself; headless there is no window to open.
             throw CatalogError.unavailable(id: "help.welcome", why: "The welcome tour opens in the AfterGlow window, not headless.")
+        },
+        .typed("help.connect-assistant", title: "Connect an AI Assistant…",
+               summary: "Returns the command an MCP client runs to reach the bundled afterglow server, and the JSON block for clients that take one.",
+               kind: .query, params: NoParams.self, schema: .none, result: connectResult, example: .object([:]),
+               availability: bundled) { (doc: inout SuiteHelpDocument, _: NoParams) throws -> JSONValue in
+            doc.answer = doc.provider.connectAssistant()
+            return doc.answer
+        },
+        .typed("help.install-cli", title: "Install Command-Line Tool…",
+               summary: "Returns the plan for a link at ~/.local/bin/afterglow to the bundled CLI; with confirm it makes the link. It never replaces a file that isn't its own link.",
+               kind: .file, params: InstallParams.self, schema: installParams, result: planResult,
+               example: .object(["confirm": .bool(false)]),
+               availability: bundled) { (doc: inout SuiteHelpDocument, params: InstallParams) throws -> JSONValue in
+            doc.answer = doc.provider.installCLI(confirm: params.confirm ?? false)
+            return doc.answer
         },
     ]
 
