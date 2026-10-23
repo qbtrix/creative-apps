@@ -2,9 +2,9 @@
 
 Issue: #3773 · Packet: docs/blueprints/suite/features/cli-bundle.md
 Run: act-1a16a37a3ed-0kyn (relaunch; earlier act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
-Stage: 3 wave 3
+Stage: CB-z: #4999 in lane, #5000 held
 Base: 35a0b5e7e9520a764f3eabf02968a453082a87cc (main; PRs target dev)
-Next: #4999 clean in lane; #5000 held no-fast-lane until #4999 merges
+Next: await #4999 merge, then release #5000
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
