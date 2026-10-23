@@ -2,7 +2,7 @@
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
 Run: act-1a16953aed5-oxsi · Session: claude/lead-placed-images-stroke-style-elhwn1 · Started: 2026-10-23T15:20Z (prior runs act-1a1627ce3b4-ayhz, act-1a1605b0534-rn47, act-1a15e909498-4bkk, act-1a15abb305f-lc8g, act-1a159c9b6b4-va3c)
-Stage: 3 wave 1 building (15:50Z): DK-u on design/dk-u-stroke-canvas (DK-3 committed), DK-m on design/dk-m-stroke-model; PRs open after each gate passes
+Stage: 3 wave 1 (16:25Z): DK-u PR #4864 open (fast-lane, head 97439dd8), critic panel running; DK-m on design/dk-m-stroke-model in gate
 Base: 721168a8 (origin/dev); main verified at cb79cbb6
 Next: DK-u and DK-m slice PRs; critic panels; then DK-z
 
@@ -10,7 +10,7 @@ Next: DK-u and DK-m slice PRs; critic panels; then DK-z
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DK-a | stroke adapter stubs, vectorStroke, Stroke section is StrokeEditor on them | DK-1, DK-2 | MJ-DK | SS-a (done) | yes | 2 | merged (3785460f); rounds spent (#3884, #4001); #3865 #3871 #3873 are gap p2 | 39670298178 | wanted (posted) |
-| DK-u | canvas strokes dashes, joins, caps; snapshots, budget | DK-3, DK-4 | J-DK | DK-a, shape-tools:DS-u | yes | 0 | building | – | – |
+| DK-u | canvas strokes dashes, joins, caps; snapshots, budget | DK-3, DK-4 | J-DK | DK-a, shape-tools:DS-u | yes | 0 | open #4864 | – | – |
 | DK-m | DesignStroke is VectorStroke; commands; SVG | DK-5, DK-6, DK-7 | MJ-DK | DK-a, shape-tools:DS-m; SS-d (DK-7) | no | 0 | building | – | – |
 | DK-z | journey on live; built | DK-8, DK-9 | J-DK | DK-u, DK-m | yes | 0 | waiting | – | – |
 
