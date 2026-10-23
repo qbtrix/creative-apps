@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-23T04:38Z	-	pr	NP-flare	opened #4735 stacked on #4717; gap #4736 filed for MenuCommand scan
 2026-10-23T04:50Z	3	merged	#4717	NP-a merged by the fast lane
 2026-10-23T04:50Z	-	integrate	NP-flare	merged dev into #4735, gate running before retarget
+2026-10-23T04:52Z	-	heartbeat	NP-flare	#4717 merged; #4735 gate on dev-merged head running; #3856 dev-red open
