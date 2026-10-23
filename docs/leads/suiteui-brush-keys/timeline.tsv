@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-23T20:21:07Z	bodies	BK-design #4961 head 0512a230e Mutate 3/3; BK-photo #4965 head f402c0ed5 Mutate 3/3; BK-flare #4982 head a3383a7dd Mutate 2/2; stacked on BK-u #4939, waiting on its merge
 2026-10-23T20:25:13Z	heartbeat	parents #4871 #4939 open; stacked children off fast-lane (size) until parents merge; DS PRs #4887 #4891 #4901 #4918 clean, queued
 2026-10-23T20:48:41Z	heartbeat	all 10 slice PRs open, clean, fast-lane; lane bisecting batch 20261023192105 (no needs-fix on ours)
+2026-10-23T21:12:41Z	heartbeat	queued behind lane batch 20261023204921 (#4841-#4862, Linux green, macOS running); ours not in it; no needs-fix, no dev-red
