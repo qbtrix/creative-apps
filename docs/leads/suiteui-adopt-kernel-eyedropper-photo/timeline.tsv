@@ -1,0 +1,11 @@
+utc	stage	event	ref	note
+2026-10-20T22:15Z	0	stage-start	#3723	lead branch from dev 74844410
+2026-10-20T22:15Z	3	heartbeat	#3439	no task can start: PE-z not merged (PE-a #3706 open); AX-photo, AB-photo, UP-z not merged
+2026-10-20T22:30Z	3	heartbeat	#3439	poll 2 blocked, unchanged: PE-z not merged (no Belt-Slice-Done on #3439, #3706 PE-a open, no PhotoSample+Kernel.swift on dev 52606a3e); AX-photo blocked, AB-photo building, UP-z not started
+2026-10-21T00:05Z	3	stage-start	EP-1	poll 3: PE-a merged (#3706), adapter stubs on dev 0c2c10dd; EP-1 starts, EP-2 waits PE-z/AX-photo/AB-photo
+2026-10-21T10:53Z	0	stage-start	#3723	relaunch act-1a15e10a9c3-kwzx base 1191940; blocked: PE-z (#3439 PE-m in progress), AX-photo, AB-photo, UP-z planned
+2026-10-21T19:24Z	3	heartbeat	#3723	poll 2 blocked: PE-m waits PH-m (#3439), PE-z not started; AX-photo merged #3890
+2026-10-21T20:09Z	status-channel	RECORD also pushed to lead/suiteui-adopt-kernel-eyedropper-photo (the branch Belt reads) from now on
+2026-10-21T20:09Z	poll	poll 3 blocked; supervisor question on #3723
+2026-10-21T20:48Z	released	supervisor released the feature from this run; waiting-on-prereq
+2026-10-22T00:22Z	check-in	Released by the supervisor; no further work in this run.
