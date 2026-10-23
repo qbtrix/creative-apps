@@ -54,3 +54,4 @@ utc	stage	event	ref	note
 2026-10-23T19:43:00Z	3	heartbeat	HF-z	batch-20261023192105 still running; #4855 waits for the next batch; no lane comments
 2026-10-23T20:04:00Z	3	heartbeat	HF-z	batch-20261023192105 red, lane bisecting (probes -3, -6); #4855 waits for the next batch
 2026-10-23T20:27:00Z	3	heartbeat	HF-z	no merges; lane batch-20261023192105 still bisecting (probes -1 -3 -6); HF-7 waits on #4868
+2026-10-23T20:49:00Z	3	heartbeat	HF-z	no merges; batch-20261023192105 branches gone, no dev merge since 19:45Z, no lane comment; #4855 waits for next batch
