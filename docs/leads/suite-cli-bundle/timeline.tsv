@@ -20,3 +20,8 @@ utc	stage	event	ref	note
 2026-10-23T05:22Z	-	retarget	CB-m-bundle	#4741 dev merged, CI: PASS, base dev, head 184f3f888
 2026-10-23T05:24Z	-	wave	CB-z	wave 3 builder started (CB-6..CB-8), on CB-u + CB-m + CB-m-bundle
 2026-10-23T05:24Z	-	check	CB-m-bundle	#4741 needs-split from stale base count; replied: 3 files ~63 lines on dev
+2026-10-23T06:20:27Z	merge	CB-m	#4740 merged
+2026-10-23T06:20:27Z	merge	CB-u	#4743 merged
+2026-10-23T06:20:27Z	merge	C4	#4755 merged
+2026-10-23T06:20:27Z	split	CB-z	code branch lead/cli-bundle-CB-z 0e6a426b1 (13 files; gate fails only #3856); docs branch lead/cli-bundle-CB-z-docs f6a22109b (3 files, CI: PASS). PRs open once #4741 (scripts/bundle-apps, supervisor) merges, so the code PR has no protected path in its diff
+2026-10-23T06:20:27Z	gap	CB-z	#4762 bundle runner for RJ-X62; pending set to #4762
