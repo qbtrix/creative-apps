@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-23T08:33Z	fix-round	#4783 macOS build 39922307100 red on FlareOpenQueue (dev break from #4708, fixed by #4771); merged origin/dev into #4781 (3b9fe2e1) and #4783 (9a072f77), ci --changed PASS	FP-u	new lane builds
 2026-10-23T08:36Z	slice-done	Belt-Slice-Done FP-m and FP-z on run 39921983128 (Linux green on 8fd75123; full run 39921950077 cancelled)	FP-m,FP-z	-
 2026-10-23T08:36Z	contact-sheet	Belt-Contact-Sheet posted, run 39921983128	all	FP-u round 1 still in lane
+2026-10-23T09:15Z	merge	#4783 merged (own-face snapshot, fixes #4777)	FP-u	#4781 build pending
