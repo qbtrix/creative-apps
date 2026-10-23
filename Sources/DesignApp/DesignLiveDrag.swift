@@ -47,6 +47,9 @@ import SwiftUI
     /// One value of a transform scrub, shown on the copy only.
     func preview(_ intent: TransformIntent) { edit.preview(intent) }
 
+    /// One focus step of a picture pan, shown on the copy only.
+    func preview(_ intent: PlaceIntent) { edit.preview(intent) }
+
     /// Replays the last sample or value into `model` as one step; a refused value's reason. The
     /// copy stays shown until `clear()` or `clearAfterLanding()`.
     @discardableResult
