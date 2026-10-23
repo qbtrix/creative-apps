@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-23T18:46Z	PD-a	gate	#3759	heartbeat: PD-a gate rerun at load <20 (load stays ~23 with fixers running); #4922 fixer and PD-u split running; no needs-fix
 2026-10-23T18:57Z	PD-m	fix	#4922	round 1 pushed 2412a61a (11 files, 345 lines, CI: PASS); round 2 critic started
 2026-10-23T19:07Z	PD-a	gate	#3759	gate at 3fc0a384: pass apart from load time limits (Home, Onboarding, AnchorBudget), which pass rerun alone; #3759 Head moved; waiting on the supervisor (Package.swift)
+2026-10-23T19:08Z	PD-u	build	-	heartbeat: pd-u1 pushed (552cc15a), pd-u2 gate running; #4922 round 2 critic filed #4959 so far; no needs-fix
