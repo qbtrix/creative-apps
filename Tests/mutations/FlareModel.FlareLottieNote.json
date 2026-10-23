@@ -44,8 +44,8 @@
   {
     "label": ".reportNeedsALottie: import.report runs with nothing opened from a Lottie",
     "file": "Sources/FlareModel/FlareLottieNote.swift",
-    "find": "$0.importReport == nil ? .unavailable(noLottieOpened) : .available",
-    "replace": ".available",
+    "find": "{ $0.importReport == nil ? .unavailable(noLottieOpened) : .available }",
+    "replace": "{ _ in .available }",
     "tests": "FlareLottieNoteTests"
   },
   {
