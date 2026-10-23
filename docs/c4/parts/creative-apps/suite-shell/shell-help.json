@@ -5,7 +5,9 @@
   "technology": "Swift 6, SwiftUI, macOS 26",
   "paths": [
     "Sources/SuiteShell/SuiteHelpCommands.swift",
-    "Sources/SuiteShell/ShellHelpProvider.swift"
+    "Sources/SuiteShell/ShellHelpProvider.swift",
+    "Sources/SuiteShell/CrashFolderReader.swift",
+    "Sources/SuiteShell/ProblemReportActions.swift"
   ],
   "order": 90
 }

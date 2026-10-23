@@ -3,6 +3,8 @@
 // in the file. Each check is a rule the app already keeps while editing, so
 // it reuses W0's constants (CompositionSettings, NameKey) and rules rather
 // than restating them. FakeProjectFiles skips this on purpose. Linux-safe.
+// A rate is one of SuiteKernel's `FrameRate.common` (frame-rates FR-8).
+import SuiteKernel
 
 /// Checks an opened project's contents and raises its id counters.
 enum HaloFileValidation {
@@ -56,10 +58,10 @@ enum HaloFileValidation {
         guard sizes.contains(comp.width), sizes.contains(comp.height) else {
             throw damaged("the composition \(comp.name) is \(comp.width) by \(comp.height) pixels")
         }
-        guard CompositionSettings.frameRates.contains(comp.framesPerSecond) else {
-            throw damaged("the composition \(comp.name) plays at \(comp.framesPerSecond) fps")
+        guard FrameRate.common.contains(comp.frameRate) else {
+            throw damaged("the composition \(comp.name) plays at \(comp.frameRate)")
         }
-        let longest = Int(CompositionSettings.maxDurationSeconds) * comp.framesPerSecond
+        let longest = comp.frameRate.frames(forDuration: CompositionSettings.maxDurationSeconds)
         guard (1...longest).contains(comp.durationFrames) else {
             throw damaged("the composition \(comp.name) is \(comp.durationFrames) frames long")
         }

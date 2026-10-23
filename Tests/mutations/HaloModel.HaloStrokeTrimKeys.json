@@ -1,0 +1,11 @@
+[
+{"label": "no stroke still lists the trim keys", "file": "Sources/HaloModel/HaloStrokeTrimKeys.swift", "find": "layer.kind == .shape, layer.stroke != nil else", "replace": "layer.kind == .shape else", "tests": "HaloStrokeTrimKeysTests"},
+{"label": "a stroked text or solid layer lists trim keys", "file": "Sources/HaloModel/HaloStrokeTrimKeys.swift", "find": "guard let layer, layer.kind == .shape, ", "replace": "guard let layer, ", "tests": "HaloStrokeTrimKeysTests"},
+{"label": "the keys read frame 0, not the playhead", "file": "Sources/HaloModel/HaloStrokeTrimKeys.swift", "find": "at: selectedComposition?.playheadFrame ?? 0)", "replace": "at: 0)", "tests": "HaloStrokeTrimKeysTests"},
+{"label": "a key with a reason still sends its command", "file": "Sources/HaloModel/HaloStrokeTrimKeys.swift", "find": "guard key.help == nil, let property", "replace": "guard let property", "tests": "HaloStrokeTrimKeysTests"},
+{"label": "the stroke's reason is dropped", "file": "Sources/HaloModel/HaloStrokeTrimKeys.swift", "find": "        if let strokeHelp { return strokeHelp }\n", "replace": "", "tests": "HaloStrokeTrimKeysTests"},
+{"label": "the property's own reason is dropped", "file": "Sources/HaloModel/HaloStrokeTrimKeys.swift", "find": "        return propertyHelp(p)\n", "replace": "        return nil\n", "tests": "HaloStrokeTrimKeysTests"},
+{"label": "a live stroked shape's trim keys still say they can't act", "file": "Sources/HaloModel/HaloStrokeTrimKeys.swift", "find": "Self.trimKeyHelp(p, strokeHelp: stroke)", "replace": "Self.trimKeyHelp(p, strokeHelp: stroke ?? Self.shapeOnlyStrokeHelp)", "tests": "HaloStrokeTrimKeysTests"},
+{"label": "every row reads Trim End's track", "file": "Sources/HaloModel/HaloStrokeTrimKeys.swift", "find": "layer.tracks[p.rawValue] ?? []", "replace": "layer.tracks[\"trimEnd\"] ?? []", "tests": "HaloStrokeTrimKeysTests"},
+{"label": "a row's title is its track key", "file": "Sources/HaloModel/HaloStrokeTrimKeys.swift", "find": "title: p.title,", "replace": "title: p.rawValue,", "tests": "HaloStrokeTrimKeysTests"}
+]

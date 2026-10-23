@@ -14,7 +14,17 @@
 // rows, as H-J5 aims), so the press hits a drawn layer and starts a drag, and
 // each leg starts where the last one left that layer. At the runners'
 // 1000 by 640 window the artboard is narrower than 600 pt, so a leg spans at
-// most 80% of it, with as many legs as make up 4 × 600 pt.
+// most 80% of it, with as many legs as make up 4 × 600 pt, and a leg slows
+// below 300 pt a second to last `legTime`, as the Rotation bar's 0.05 to 0.95
+// legs do (#4275); each viewer leg needs 60 samples of its own (#4276), and
+// the series 60 × legs in all (#4450), so a viewer leg lasts `viewerLegTime`.
+// H-P5 posts a burst of scroll-wheel events at 120 Hz before each scroll call
+// and counts only intervals inside a burst (#4277); before its layers shot it
+// hovers the viewer until no row's help tag shows (#4458). A runner without
+// event-posting access (`CGPreflightPostEventAccess` false, the hosted one)
+// scrolls through XCUITest's `scroll(byDeltaX:deltaY:)` alone, each call's
+// span its burst, and the floor holds on the whole series, since the lane and
+// list probes record a frame per offset change whatever moved it (#4587).
 // XCUIGestureVelocity is pixels a second, so 300 pt a second is scaled by the
 // screen's backing scale, as DesignJourneyTests+PerfScrub does.
 import AppKit
@@ -27,6 +37,13 @@ final class HaloPerfJourneyTests: XCTestCase {
     static let compositionSize = CGSize(width: 1920, height: 1080)
     /// A viewer drag leg and the bar scrub's travel, the leg count, and the speed, in points.
     static let legSpan: CGFloat = 600, legCount = 4, speed: CGFloat = 300
+    /// The shortest drag leg, in seconds: 72 or more 60 Hz refreshes.
+    static let legTime: CGFloat = 1.2
+    /// The shortest viewer drag leg, in seconds: 120 or more 60 Hz refreshes,
+    /// so each leg has room for its own 60 samples (#4450).
+    static let viewerLegTime: CGFloat = 2
+    /// Scroll-wheel events per burst, and the pixels each one scrolls.
+    static let burstEvents = 24, burstPixels: Int32 = 3
 
     /// H-P1, `reference`: four 600 pt viewer drags at 300 pt/s on
     /// `halo.viewer.canvas`; series `viewer-drag` (HB-U1).
@@ -43,13 +60,28 @@ final class HaloPerfJourneyTests: XCTestCase {
             dx: CGFloat(pixels("x", halo) ?? 60) / Self.compositionSize.width,
             dy: CGFloat(pixels("y", halo) ?? 60) / Self.compositionSize.height)
         let far = CGVector(dx: start.dx + span / max(width, 1), dy: start.dy)
+        var starts: [Double] = []
         for leg in 0..<legs {
             let (from, to) = leg.isMultiple(of: 2) ? (start, far) : (far, start)
-            halo.velocityDrag(on: "halo.viewer.canvas", from: from, to: to, velocity: velocity)
+            starts.append(ProcessInfo.processInfo.systemUptime)
+            halo.velocityDrag(
+                on: "halo.viewer.canvas", from: from, to: to, velocity: velocity(lasting: span, over: Self.viewerLegTime))
         }
         halo.shot("perf-viewer-drag")
         guard let document = halo.perf() else { return }
-        halo.expectValid(document, series: "viewer-drag")
+        // The floor is 60 for every leg, not 60 for the whole series (#4450).
+        let total = document.latency["viewer-drag"]?.count ?? 0
+        XCTAssert(
+            total >= Journey.minimumSamples * legs,
+            "viewer-drag has \(total) samples over \(legs) legs, under \(Journey.minimumSamples * legs): its numbers mean nothing")
+        // Each sample belongs to the last leg started before its event.
+        let times = document.samples.filter { $0.series == "viewer-drag" }.map(\.eventTime)
+        let perLeg = starts.indices.map { leg in
+            times.filter { $0 >= starts[leg] && (leg + 1 == starts.count || $0 < starts[leg + 1]) }.count
+        }
+        XCTAssert(
+            perLeg.allSatisfy { $0 >= Journey.minimumSamples },
+            "viewer-drag samples per leg \(perLeg), some under \(Journey.minimumSamples): a leg's numbers mean nothing")
     }
 
     /// H-P2, `reference`: a velocity drag across the rotation row's bar;
@@ -61,25 +93,39 @@ final class HaloPerfJourneyTests: XCTestCase {
         XCTAssert(bar.waitForExistence(timeout: 5), "no Rotation bar (halo.inspector.row.rotation)")
         let width = bar.frame.width
         XCTAssertGreaterThan(width, 20, "the Rotation bar is \(width) pt wide")
-        // H-J6 drags the bar from 0.3 to 0.7; here right and left again until 600 pt.
-        let legs = max(2, Int((Self.legSpan / max(width * 0.4, 1)).rounded(.up)))
-        let left = CGVector(dx: 0.3, dy: 0.5), right = CGVector(dx: 0.7, dy: 0.5)
+        // H-J6 drags the bar from 0.3 to 0.7; here 0.05 to 0.95 and back until 600 pt.
+        let travel = width * 0.9
+        let legs = max(2, Int((Self.legSpan / max(travel, 1)).rounded(.up)))
+        let left = CGVector(dx: 0.05, dy: 0.5), right = CGVector(dx: 0.95, dy: 0.5)
         let stops = (1...legs).map { $0.isMultiple(of: 2) ? left : right }
         halo.velocityDrag(
             on: "halo.inspector.row.rotation", from: left, through: Array(stops.dropLast()), to: stops.last ?? right,
-            velocity: velocity, step: "perf-inspector-scrub")
+            velocity: velocity(lasting: travel), step: "perf-inspector-scrub")
         guard let document = halo.perf() else { return }
         halo.expectValid(document, series: "inspector-scrub")
     }
 
-    /// H-P3, `reference`: a velocity drag on `halo.timeline` from dx 0.02 to
-    /// 0.98 at dy 0.05 (the ruler); series `playhead-scrub` (HB-U3).
+    /// H-P3, `reference`: velocity drags on the Frame Ruler from dx 0.02 to
+    /// 0.98 and back, as many legs as make up 4 × 600 pt; series
+    /// `playhead-scrub` (HB-U3). The drags press on the ruler itself: dx 0.02
+    /// of `halo.timeline` is the empty name-column cell left of the ruler,
+    /// where a press starts no scrub, so no sample was taken (#4265).
     @MainActor func testPlayheadScrubLatency() {
         let halo = launch("reference")
         XCTAssert(halo.element("halo.timeline").waitForExistence(timeout: 10), "no timeline (halo.timeline)")
-        halo.velocityDrag(
-            on: "halo.timeline", from: CGVector(dx: 0.02, dy: 0.05), to: CGVector(dx: 0.98, dy: 0.05),
-            velocity: velocity, step: "perf-playhead-scrub")
+        let ruler = halo.app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Frame Ruler'")).firstMatch
+        XCTAssert(ruler.waitForExistence(timeout: 10), "no Frame Ruler in the timeline")
+        let width = ruler.frame.width
+        XCTAssertGreaterThan(width, 20, "the Frame Ruler is \(width) pt wide")
+        let left = CGVector(dx: 0.02, dy: 0.5), right = CGVector(dx: 0.98, dy: 0.5)
+        let legs = max(Self.legCount, Int((Self.legSpan * CGFloat(Self.legCount) / max(width * 0.96, 1)).rounded(.up)))
+        for leg in 0..<legs {
+            let (from, to) = leg.isMultiple(of: 2) ? (left, right) : (right, left)
+            ruler.coordinate(withNormalizedOffset: from).click(
+                forDuration: 0.05, thenDragTo: ruler.coordinate(withNormalizedOffset: to),
+                withVelocity: velocity(lasting: .infinity), thenHoldForDuration: 0.05)
+        }
+        halo.shot("perf-playhead-scrub")
         guard let document = halo.perf() else { return }
         halo.expectValid(document, series: "playhead-scrub")
     }
@@ -103,27 +149,48 @@ final class HaloPerfJourneyTests: XCTestCase {
     @MainActor func testTimelineAndLayerListScroll() {
         let halo = launch("crowd")
         // crowd lists Solid 300 first and Solid 1 last, in the lanes and in the layer list.
+        // Without posting access the scrolls go through XCUITest alone (#4587).
+        let posts = CGPreflightPostEventAccess()
         let lanes = halo.element("halo.timeline")
         XCTAssert(lanes.waitForExistence(timeout: 10), "no timeline (halo.timeline)")
-        scrollEnd(lanes, until: halo.trackName("Solid 1"), by: -120)
+        var lanesBursts: [ClosedRange<Double>] = [], listBursts: [ClosedRange<Double>] = []
+        scrollEnd(lanes, until: halo.trackName("Solid 1"), by: -120, posts: posts, bursts: &lanesBursts)
         halo.shot("perf-lanes-bottom")
-        scrollEnd(lanes, until: halo.trackName("Solid 300"), by: 120)
+        expectNoScroller(over: lanes, halo)
+        scrollEnd(lanes, until: halo.trackName("Solid 300"), by: 120, posts: posts, bursts: &lanesBursts)
 
         let list = halo.element("halo.layer.list")
         XCTAssert(list.waitForExistence(timeout: 10), "no layer list (halo.layer.list)")
-        scrollEnd(list, until: halo.element("halo.layer.row.comp-1-layer-1"), by: -120)
+        scrollEnd(list, until: halo.element("halo.layer.row.comp-1-layer-1"), by: -120, posts: posts, bursts: &listBursts)
+        restOffList(halo)
         halo.shot("perf-layers-bottom")
-        scrollEnd(list, until: halo.element("halo.layer.row.comp-1-layer-300"), by: 120)
+        scrollEnd(list, until: halo.element("halo.layer.row.comp-1-layer-300"), by: 120, posts: posts, bursts: &listBursts)
         guard let document = halo.perf() else { return }
-        expectIntervals(document, series: "lanes-scroll")
-        expectIntervals(document, series: "layers-scroll")
+        expectBurstIntervals(document, series: "lanes-scroll", bursts: lanesBursts, posted: posts)
+        expectBurstIntervals(document, series: "layers-scroll", bursts: listBursts, posted: posts)
     }
 
     // MARK: - Steps
 
-    /// 300 pt a second in the screen's pixels.
-    @MainActor private var velocity: XCUIGestureVelocity {
-        XCUIGestureVelocity(Self.speed * (NSScreen.main?.backingScaleFactor ?? 1))
+    /// 300 pt a second in the screen's pixels, or slower so a leg of
+    /// `points` lasts at least `seconds` (`legTime` unless given).
+    @MainActor private func velocity(
+        lasting points: CGFloat, over seconds: CGFloat = HaloPerfJourneyTests.legTime
+    ) -> XCUIGestureVelocity {
+        XCUIGestureVelocity(min(Self.speed, points / seconds) * (NSScreen.main?.backingScaleFactor ?? 1))
+    }
+
+    /// Moves the pointer off the layer list onto the viewer and waits until
+    /// no help tag shows: the scroll leaves it on a row, whose tooltip would
+    /// be in the next shot and count as a contrast hit (#4458).
+    @MainActor private func restOffList(_ halo: Journey) {
+        let viewer = halo.element("halo.viewer")
+        XCTAssert(viewer.waitForExistence(timeout: 5), "no viewer (halo.viewer) to rest the pointer on")
+        viewer.hover()
+        XCTAssert(
+            halo.app.helpTags.firstMatch.waitForNonExistence(timeout: 5),
+            "a help tag still shows with the pointer on the viewer")
+        Thread.sleep(forTimeInterval: 0.3)
     }
 
     /// Halo on sample `name` with the frame probe on, once its window shows a viewer.
@@ -152,14 +219,76 @@ final class HaloPerfJourneyTests: XCTestCase {
         return Double(String(text.prefix { $0.isNumber || $0 == "." || $0 == "-" }))
     }
 
-    /// Scrolls `area` by `delta` until `target` is hittable, at most 300 times.
-    @MainActor private func scrollEnd(_ area: XCUIElement, until target: XCUIElement, by delta: CGFloat) {
+    /// Scrolls `area` by `delta` until `target` is hittable, at most 300
+    /// times. When `posts`, before each scroll call a burst of `burstEvents`
+    /// wheel events the same way at 120 Hz over its centre, its uptime span
+    /// (and 50 ms for the last frame) added to `bursts`; otherwise the
+    /// XCUITest scroll call alone, its own span (and 50 ms) the burst (#4587).
+    @MainActor private func scrollEnd(
+        _ area: XCUIElement, until target: XCUIElement, by delta: CGFloat, posts: Bool,
+        bursts: inout [ClosedRange<Double>]
+    ) {
+        let centre = area.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).screenPoint
+        if posts {
+            CGEvent(mouseEventSource: nil, mouseType: .mouseMoved, mouseCursorPosition: centre, mouseButton: .left)?
+                .post(tap: .cghidEventTap)
+        }
+        let pixels = delta < 0 ? -Self.burstPixels : Self.burstPixels
         var scrolls = 0
         while !(target.exists && target.isHittable), scrolls < 300 {
-            area.scroll(byDeltaX: 0, deltaY: delta)
+            let begin = ProcessInfo.processInfo.systemUptime
+            if posts {
+                for _ in 0..<Self.burstEvents {
+                    let wheel = CGEvent(
+                        scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 1, wheel1: pixels, wheel2: 0, wheel3: 0)
+                    wheel?.location = centre
+                    wheel?.post(tap: .cghidEventTap)
+                    Thread.sleep(forTimeInterval: 1.0 / 120)
+                }
+                bursts.append(begin...(ProcessInfo.processInfo.systemUptime + 0.05))
+                area.scroll(byDeltaX: 0, deltaY: delta)
+            } else {
+                area.scroll(byDeltaX: 0, deltaY: delta)
+                bursts.append(begin...(ProcessInfo.processInfo.systemUptime + 0.05))
+            }
             scrolls += 1
         }
         XCTAssert(target.exists && target.isHittable, "\(scrolls) scrolls didn't reach \(target.identifier)")
+    }
+
+    /// Attaches the intervals of `series` between two frames drawn inside one
+    /// of `bursts`, in refreshes ("scroll-bursts-<series>": route, count and
+    /// p95). With `posted` bursts it fails when there are fewer than 60; on the
+    /// XCUITest route one call draws a frame or two, so the floor holds on the
+    /// whole series instead and its p95 times the calls, not frame pacing (#4587).
+    @MainActor private func expectBurstIntervals(
+        _ document: ProbeDocument, series: String, bursts: [ClosedRange<Double>], posted: Bool
+    ) {
+        let frames = document.drawn[series] ?? []
+        let refresh = document.refreshInterval > 0 ? document.refreshInterval : 1.0 / 60
+        let gaps = zip(frames, frames.dropFirst())
+            .filter { pair in bursts.contains { $0.contains(pair.0) && $0.contains(pair.1) } }
+            .map { ($1 - $0) / refresh }.sorted()
+        let p95 = gaps.isEmpty ? 0 : gaps[min(gaps.count - 1, Int((Double(gaps.count) * 0.95).rounded(.down)))]
+        let route = posted ? "posted wheel bursts" : "XCUITest scroll calls (no event-posting access)"
+        let attachment = XCTAttachment(
+            string: "\(series) via \(route): \(gaps.count) in-burst intervals over \(bursts.count) bursts, p95 \(p95) refreshes")
+        attachment.name = "scroll-bursts-\(series)"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        guard posted else { return expectIntervals(document, series: series) }
+        XCTAssert(
+            gaps.count >= Journey.minimumSamples,
+            "series \(series) has \(gaps.count) in-burst intervals, under \(Journey.minimumSamples): its numbers mean nothing")
+    }
+
+    /// Fails when a scroll bar shows over `area`: a legacy scroller's page
+    /// areas are unnamed buttons with no identifier to the app audit (#4264, #4266).
+    @MainActor private func expectNoScroller(over area: XCUIElement, _ halo: Journey) {
+        let frame = area.frame
+        for bar in halo.app.windows.firstMatch.scrollBars.allElementsBoundByIndex where bar.isHittable {
+            XCTAssertFalse(bar.frame.intersects(frame), "a scroll bar \(bar.frame) shows over \(area.identifier) \(frame)")
+        }
     }
 
     /// Fails when the drawn-frame series `series` has fewer than 60 intervals.

@@ -32,7 +32,8 @@
 // So every frame and key shows, the strip never scrolls sideways and
 // no scroller covers the ruler; the height is the lanes, at least the slot
 // minimum, at most 40% of the window's column, and past that the lanes
-// scroll vertically so the canvas keeps its room. Under `-SuitePerfProbe` a
+// scroll vertically, by wheel and trackpad with no scroller (as Halo's
+// inspector), so the canvas keeps its room. Under `-SuitePerfProbe` a
 // ruler scrub records a `playhead-scrub` sample and each lane scroll offset a
 // `lanes-scroll` frame (HaloProbe).
 import HaloModel
@@ -71,7 +72,9 @@ struct HaloTimelineView: View {
                     height: CGFloat(max(layout.contentHeight(rows: rows.count), layout.minimumHeight)), alignment: .top)
             } else {
                 ScrollView(.vertical) { content(rows) }
-                    .scrollIndicators(.never, axes: .horizontal)
+                    // No scroller: with legacy scrollers on crowd's 300 lanes the vertical one's
+                    // page areas were unnamed buttons with no identifier to the app audit (#4264).
+                    .scrollIndicators(.never)
                     .scrollBounceBehavior(.basedOnSize, axes: [.horizontal, .vertical])
                     .containerRelativeFrame(.vertical, alignment: .top) { length, _ in
                         CGFloat(layout.height(rows: rows.count, available: Double(length)))
@@ -103,10 +106,12 @@ struct HaloTimelineView: View {
         return VStack(alignment: .leading, spacing: 0) {
             GeometryReader { geometry in
                 let lanes = Self.layout.laneFitWidth(strip: stripWidth, container: Double(geometry.size.width))
-                TimelineStrip(
+                // The playhead follows the playing frame in this leaf alone; an
+                // inspector scrub's preview never re-runs the strip (HaloPlayheadShown).
+                HaloPlayheadShown(model: model) { shown in TimelineStrip(
                     tracks: tracks, duration: model.selectedComposition?.lastFrame ?? 0,
                     frameWidth: CGFloat(model.selectedComposition?.frameWidth(toFit: lanes) ?? 1),
-                    playhead: model.selectedComposition?.playheadFrame ?? 0,
+                    playhead: shown.selectedComposition?.playheadFrame ?? 0,
                     onScrub: { frame in
                         hasFocus = true
                         perform(.scrub(frame))
@@ -133,7 +138,7 @@ struct HaloTimelineView: View {
                     onSlide: { id, by in
                         if spanHelp == nil { slideLayer(.init(layer: id, by: by)) }
                     },
-                    onSelectAllKeys: { perform(.selectAllKeys) })
+                    onSelectAllKeys: { perform(.selectAllKeys) }) }
                     .accessibilityIdentifier("halo.timeline.track")
                     .environment(\.timelineIdentifierPrefix, "halo.timeline")
                     .contextMenu {

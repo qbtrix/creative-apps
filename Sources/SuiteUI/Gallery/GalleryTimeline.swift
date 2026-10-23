@@ -23,9 +23,21 @@
 // (`gallery.timeline.selectAll`) and the strip's onSelectAllKeys (⌘A while it
 // has focus) share one closure that picks every key and logs `select-all`
 // (TSA-1). A FrameRateMenu (`suite.gallery.timeline.rate`, logs
-// `rate 29.97 fps`) sets the page's rate, 24 fps unless the fixture names
-// one; a caption beside it, and the hidden `suite.gallery.timeline.timecode`
-// readout, show the playhead's timecode at that rate (frame-rates FR-u). The
+// `rate 29.97 fps`), a raised chip set apart from the switches by
+// SuiteSpacing.s (#4601), sets the page's rate, 24 fps unless the fixture
+// names one; a readout beside it captioned TimelineTime.readoutCaption
+// ("Playhead", "(drop-frame)" at a drop rate, #4599, #4600), its value in the
+// shared StatusPillFace at body size with monospaced digits, its tooltip and
+// VoiceOver label TimelineTime.readoutHelp, and the hidden
+// `suite.gallery.timeline.timecode` readout, show the
+// playhead's timecode at that rate, whatever the unit chips say; the strip
+// gets the rate too, so its ruler and pill agree (frame-rates FR-u). A
+// "Playhead Frame" exact field (`suite.gallery.timeline.frame`) scrubs to a
+// typed frame and logs `scrub <n>` like the ruler (#4597). The strip is
+// clipped to its room and the log keeps its line, so neither draws over the
+// other; a probe behind the strip (`suite.gallery.timeline.strip`) marks that
+// room, since a container element reports the union of its lanes, and a
+// snapshot lays out every lane under the clip. The
 // playhead and the log live in a GalleryTimelineFeed only their reader views
 // observe, so a scrub never runs the page's body.
 import Observation
@@ -43,7 +55,7 @@ enum GalleryTimeline {
 struct GalleryTimelineFixture {
     let duration: Int
     let fps: Int
-    let frameWidth: CGFloat
+    var frameWidth: CGFloat
     var playhead: Int
     let toolbar: Bool
     let order: [String]
@@ -150,13 +162,12 @@ struct GalleryTimelinePage: View {
                 Button("Select All Keys") { selectAll() }
                     .help("Select All Keys")
                     .suiteControl(id: "gallery.timeline.selectAll", enabled: true, reason: nil)
-                FrameRateMenu(rate: rate) { setRate($0) }
+                FrameRateMenu(rate: rate, placement: .toolbar) { setRate($0) }
                     .suiteControl(id: "suite.gallery.timeline.rate", enabled: true, reason: nil)
+                    .padding(.leading, SuiteSpacing.s)
                 GalleryFeedReader(feed: feed) { feed in
-                    Text(TimelineTime.label(frame: feed.playhead, rate: rate, unit: .timecode))
-                        .font(SuiteFont.caption)
-                        .monospacedDigit()
-                        .foregroundStyle(SuiteColor.secondaryText)
+                    timecodeReadout(feed.playhead, rate: rate)
+                    frameField(feed.playhead)
                 }
             }
             // No outer ScrollView: the strip is offered the room between the
@@ -166,6 +177,8 @@ struct GalleryTimelinePage: View {
             GalleryFeedReader(feed: feed) { feed in
                 strip(tracks: tracks, playhead: feed.playhead, rate: rate, unit: unit, workArea: workArea, toolbar: toolbar)
             }
+            .clipped()
+            .background { ProbeElement("suite.gallery.timeline.strip", label: "Timeline strip") }
             .layoutPriority(1)
             if noTracks {
                 Text("No tracks yet.")
@@ -200,7 +213,7 @@ struct GalleryTimelinePage: View {
     ) -> some View {
         TimelineStrip(
             tracks: tracks, duration: fixture.duration, frameWidth: fixture.frameWidth, playhead: playhead,
-            unit: unit, fps: rate.nominal, workArea: workArea, toolbar: toolbar,
+            unit: unit, rate: rate, workArea: workArea, toolbar: toolbar,
             onScrub: { feed.scrub(to: $0) },
             onSelectKeyframe: { id, _ in selected = id },
             onSelectTrack: { id in
@@ -244,12 +257,49 @@ struct GalleryTimelinePage: View {
         }
     }
 
+    /// The playhead's timecode at `rate`, captioned "Playhead" (never "Timecode", the unit chip's title, #4599)
+    /// with "(drop-frame)" at a drop rate (#4600), its value in the shared status pill at body size.
+    private func timecodeReadout(_ playhead: Int, rate: FrameRate) -> some View {
+        let timecode = TimelineTime.label(frame: playhead, rate: rate, unit: .timecode)
+        return HStack(spacing: SuiteSpacing.xs) {
+            Text(verbatim: TimelineTime.readoutCaption(rate: rate))
+                .font(SuiteFont.caption)
+                .foregroundStyle(SuiteColor.textSecondary)
+            StatusPillFace(.plain) {
+                Text(verbatim: timecode)
+                    .font(SuiteFont.monospacedDigits)
+                    .foregroundStyle(SuiteColor.textPrimary)
+            }
+        }
+        .fixedSize()
+        .help(TimelineTime.readoutHelp(rate: rate))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: TimelineTime.readoutHelp(rate: rate)))
+        .accessibilityValue(Text(verbatim: timecode))
+        .accessibilityIdentifier("suite.gallery.timeline.readout")
+    }
+
+    /// The playhead's frame as an exact field: type a frame and Return scrubs there, so any frame is reachable
+    /// without finding it on the ruler (#4597). The strip follows the playhead to its page.
+    private func frameField(_ playhead: Int) -> some View {
+        ScrubField(
+            "Playhead Frame", value: Double(playhead), in: 0...Double(max(fixture.duration, 0)), step: 1, decimals: 0,
+            onChange: { new in
+                let frame = Int(new.rounded())
+                if frame != feed.playhead { feed.scrub(to: frame) }
+            })
+            .fixedSize()
+            .suiteControl(id: "suite.gallery.timeline.frame", enabled: true, reason: nil)
+    }
+
     private func logView(_ log: [String]) -> some View {
         let text = log.joined(separator: "\n")
         return Text(log.last ?? "Nothing yet")
             .font(SuiteFont.caption)
             .foregroundStyle(SuiteColor.secondaryText)
             .lineLimit(1)
+            // Its one line always: the strip above never takes it.
+            .fixedSize(horizontal: false, vertical: true)
             .accessibilityLabel(text)
             .accessibilityValue(text)
             .accessibilityIdentifier("suite.gallery.log")

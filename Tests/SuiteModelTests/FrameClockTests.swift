@@ -1,21 +1,21 @@
 // FrameClockTests.swift: shell-media SM-4's frame clock (MJ-SM1), written
-// first by SM-2 and disabled until SM-4 adds `FrameClock`. Frame n shows at
+// first by SM-2 and turned on by SM-4 with `FrameClock`. Frame n shows at
 // n / fps; GIF delays carry their rounding, round(100 (n + 1) / fps) -
 // round(100 n / fps) centiseconds, so n frames always sum to round(100 n / fps):
 // 30 fps runs 3, 4, 3 and 30 frames make exactly 100; 25 fps is all 4.
 import SuiteModel
 import Testing
 
-/// What these tests use of SM-4's `FrameClock`; SM-4 adds
-/// `extension FrameClock: FrameClockUnderTest {}` here.
+/// What these tests use of SM-4's `FrameClock`.
 protocol FrameClockUnderTest {
     func seconds(of frame: Int) -> Double
     mutating func nextGIFDelay() -> Int
 }
 
+extension FrameClock: FrameClockUnderTest {}
+
 @Suite struct FrameClockTests {
-    /// SM-4 makes this `try FrameClock(fps: fps)`; nil until FrameClock exists.
-    static func clock(fps: Int) throws(SuiteError) -> (any FrameClockUnderTest)? { nil }
+    static func clock(fps: Int) throws(SuiteError) -> (any FrameClockUnderTest)? { try FrameClock(fps: fps) }
 
     /// The first `count` GIF delays at `fps`, in centiseconds.
     static func delays(fps: Int, count: Int) throws -> [Int] {
@@ -25,7 +25,7 @@ protocol FrameClockUnderTest {
         return out
     }
 
-    @Test(.disabled("waits on SM-4")) func twentyFourFpsFrameFortyEightIsTwoSeconds() throws {
+    @Test func twentyFourFpsFrameFortyEightIsTwoSeconds() throws {
         let clock = try #require(try Self.clock(fps: 24))
         #expect(clock.seconds(of: 48) == 2.0)
         #expect(clock.seconds(of: 24) == 1.0)
@@ -34,20 +34,20 @@ protocol FrameClockUnderTest {
         #expect(ntsc.seconds(of: 1) == 1.0 / 30)
     }
 
-    @Test(.disabled("waits on SM-4")) func thirtyFpsSumsToOneSecond() throws {
+    @Test func thirtyFpsSumsToOneSecond() throws {
         #expect(try Self.delays(fps: 30, count: 30).reduce(0, +) == 100)
     }
 
-    @Test(.disabled("waits on SM-4")) func firstDelayIsThree() throws {
+    @Test func firstDelayIsThree() throws {
         let delays = try Self.delays(fps: 30, count: 6)
         #expect(delays == [3, 4, 3, 3, 4, 3])
     }
 
-    @Test(.disabled("waits on SM-4")) func twentyFiveFpsIsAllFour() throws {
+    @Test func twentyFiveFpsIsAllFour() throws {
         #expect(try Self.delays(fps: 25, count: 25) == Array(repeating: 4, count: 25))
     }
 
-    @Test(.disabled("waits on SM-4")) func delaysNeverDrift() throws {
+    @Test func delaysNeverDrift() throws {
         for fps in [1, 7, 12, 15, 24, 29, 30, 33, 48, 50] {
             let delays = try Self.delays(fps: fps, count: fps * 3)
             var sum = 0
@@ -59,7 +59,7 @@ protocol FrameClockUnderTest {
         }
     }
 
-    @Test(.disabled("waits on SM-4")) func aRateBelowOneThrows() {
+    @Test func aRateBelowOneThrows() {
         #expect(throws: SuiteError.self) { try Self.clock(fps: 0) }
         #expect(throws: SuiteError.self) { try Self.clock(fps: -24) }
     }

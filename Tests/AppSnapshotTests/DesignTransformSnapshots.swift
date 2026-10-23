@@ -1,9 +1,9 @@
 // DesignTransformSnapshots.swift (transform DT-4): Design's turned and mirrored layers on the canvas and the
 // inspector's Transform rows. `cards` opened with C (node-4) turned 30° and selected, as a file saved with the
-// turn opens (the turning commands are DT-5's): the canvas paints C turned with its handles turned too, and
-// the inspector's Rotation reads 30°. Then A (node-2) with a blue-to-white linear gradient mirrored across
-// and Title (node-5) mirrored across, A selected. Then the Transform section alone at the editor's panel
-// width over the turned C, its rows off with the Model's reason until turning is built. Writes
+// turn opens: the canvas paints C turned with its handles turned too, and the inspector's Rotation reads
+// 30°. Then A (node-2) with a blue-to-white linear gradient mirrored across and Title (node-5) mirrored
+// across, A selected. Then the Transform section alone at the editor's panel width over the turned C, its
+// Rotation reading 30° and its Rotation and Flip controls live (no `turnHelp`). Writes
 // design-transform-turned-, design-transform-flipped- and design-transform-rows-{light,dark}.png.
 // `DesignTransformSeed` is the document RenderBudgetDesignTransformTests drives too. macOS only.
 import AppKit
@@ -76,7 +76,8 @@ enum DesignTransformSeed {
     @Test func rows() throws {
         let model = DesignTransformSeed.turned
         #expect(model.transformSelection?.degrees == 30)
-        #expect(model.turnHelp != nil)
+        #expect(model.sharedValue(\.rotation) == 30, "Rotation reads 30°, not Mixed")
+        #expect(model.turnHelp == nil, "Rotation and both Flips are live on an unlocked layer")
         try shoot(RowsSample(model: model), "design-transform-rows")
     }
 }

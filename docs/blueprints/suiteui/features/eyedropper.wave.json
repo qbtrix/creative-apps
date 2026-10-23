@@ -2,7 +2,7 @@
   "title": "One eyedropper: SuiteUI's screen pick on every colour row and the canvas loupe, the kernel's mean and color.sample",
   "wave": 4,
   "order": 50,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "feature map S13 (eyedropper; PV-9 re-cut); real job RJ-X33; captain 2026-10-20: everyday tools in the beta, built once",

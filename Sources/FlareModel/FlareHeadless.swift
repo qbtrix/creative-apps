@@ -1,5 +1,5 @@
 // FlareHeadless.swift (adopt-command-catalog AC-f3): Flare's document with no window, for the afterglow CLI, MCP and
-// the real jobs. It opens and saves Flare's own file (.flare) through FlareFormat, makes a one-scene document, runs
+// the real jobs. It opens and saves Flare's own file (.flare) through FlareFormat, opens a Lottie .json untitled, makes a one-scene document, runs
 // `FlareWorkspace.catalog` lifted onto itself, and exports a scene as SVG frames or Lottie through FlareCore's
 // exporters, on a copy without text as the window's export does. PNG frames need a rasterizer only macOS has, so
 // they are refused here. Linux-safe: no UI imports.
@@ -13,7 +13,7 @@ import SuiteKernel
 
 /// Flare's headless document: one `FlareWorkspace` on the built services.
 public struct FlareHeadless: HeadlessDocument {
-    public static let app = "flare", openExtensions = ["flare"], exportFormats = ["svg", "lottie"]
+    public static let app = "flare", openExtensions = ["flare", "json"], exportFormats = ["svg", "lottie"]
     /// Why the window's file commands refuse here: the CLI opens, saves and exports instead.
     public static let fileCommandHelp = "The CLI opens, saves and exports the file."
     /// Why PNG frames refuse here.
@@ -29,12 +29,18 @@ public struct FlareHeadless: HeadlessDocument {
     /// A headless document holding `workspace`.
     public init(workspace: FlareWorkspace) { self.workspace = workspace }
 
-    /// The Flare file `data`, named `name`; its title is the name without ".flare".
+    /// The Flare file `data`, named `name`; its title is the name without ".flare". A Lottie `.json` opens through
+    /// FlareLottieOpen as an untitled document, so a save writes a .flare, never the JSON.
     public static func open(_ data: Data, name: String) throws -> FlareHeadless {
-        guard name.lowercased().hasSuffix(".flare") else {
-            throw CatalogError.unavailable(id: "open", why: "Flare opens .flare files.")
-        }
+        let lower = name.lowercased()
         var workspace = FlareWorkspace(services: .built)
+        if FlareLottieOpen.fileExtensions.contains(where: { lower.hasSuffix(".\($0)") }) {
+            do { _ = try workspace.openLottie(data, named: name) } catch { throw CatalogError.failed(id: "open", message: error.message) }
+            return FlareHeadless(workspace: workspace)
+        }
+        guard lower.hasSuffix(".flare") else {
+            throw CatalogError.unavailable(id: "open", why: "Flare opens .flare files and Lottie .json files.")
+        }
         do { try workspace.open(data, named: name) } catch { throw CatalogError.failed(id: "open", message: error.message) }
         return FlareHeadless(workspace: workspace)
     }
@@ -45,7 +51,7 @@ public struct FlareHeadless: HeadlessDocument {
         let o = try options.decode(NewOptions.self)
         var spec = NewDocumentSpec(preset: .web)
         spec.setSize(width: o.width ?? spec.width, height: o.height ?? spec.height)
-        (spec.fps, spec.durationFrames) = (o.fps ?? spec.fps, o.durationFrames ?? spec.durationFrames)
+        (spec.fps, spec.durationFrames) = (o.fps.map(FrameRate.init(whole:)) ?? spec.fps, o.durationFrames ?? spec.durationFrames)
         if let problem = spec.problem { throw CatalogError.failed(id: "new", message: problem) }
         var workspace = FlareWorkspace(services: .built)
         workspace.newDocument(spec)

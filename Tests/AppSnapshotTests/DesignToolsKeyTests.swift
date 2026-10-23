@@ -1,6 +1,6 @@
 // DesignToolsKeyTests.swift: adopt-suiteui-chrome AC-tools. Design's canvas picks a tool from a typed letter
 // through SuiteUI's ToolKeys, keeping Design's bindings: V F R O T in either case; never a tool the palette shows
-// disabled (Shape, Pen, Eyedropper); nothing for an unknown letter or more than one character. macOS only.
+// disabled (Shape, Pen); nothing for an unknown letter or more than one character. macOS only.
 import DesignModel
 import SuiteUI
 import Testing

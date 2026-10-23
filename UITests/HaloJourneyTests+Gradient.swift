@@ -3,15 +3,11 @@
 // Layer > New > Solid, picks Radial in FILL (`halo.inspector.fillType.radial`), sets the first stop white and the
 // last black through the editor's hex field (`suite.gradient.color`, a stop picked by `suite.gradient.stop.<n>`),
 // scrubs Position, renders frame 0 and undoes the last colour change in one step. The viewer is read by the label
-// of `halo.viewer.summary`. Written and skipped: the fill commands are stubs until HG-7, and HG-8 turns it on, on
-// live services. One shot per step, `halo-gradient-<step>`.
+// of `halo.viewer.summary`. On live services since HG-8; each edit's undo step is named for its fill command
+// ("Fill Type", "Gradient Stop Color"). One shot per step, `halo-gradient-<step>`.
 import XCTest
 
 final class HaloGradientJourneyTests: XCTestCase {
-    override func setUpWithError() throws {
-        throw XCTSkip("waits on HG-8")
-    }
-
     /// HJ-G1: a solid takes a radial white-to-black gradient that moves with the layer and undoes in one step.
     @MainActor func testRadialSolid() {
         let halo = Journey("Halo", self, arguments: ["-HaloSample", "empty", "-HaloWindowSize", "1000x640"])
@@ -24,13 +20,13 @@ final class HaloGradientJourneyTests: XCTestCase {
         XCTAssert(radial.isEnabled, "Radial is off: \(radial.label)")
         radial.click()
         XCTAssert(halo.element("suite.gradient.bar").waitForExistence(timeout: 5), "Radial shows no stop bar")
-        expectUndo("Undo Change Fill", halo)
+        expectUndo("Undo Fill Type", halo)
         halo.shot("gradient-1-radial")
 
         // 2. The first stop white, the last black.
         setStop(0, hex: "FFFFFF", halo)
         setStop(1, hex: "000000", halo)
-        expectUndo("Undo Change Fill", halo)
+        expectUndo("Undo Gradient Stop Color", halo)
         halo.shot("gradient-2-white-to-black")
 
         // 3. Scrub Position (X): the gradient moves with the layer.

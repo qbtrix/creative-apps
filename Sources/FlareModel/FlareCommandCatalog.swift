@@ -111,7 +111,12 @@ extension FlareWorkspace {
         .typed("file.new", title: "New", summary: "Opens a new animation with one scene, from the New Animation sheet's values when given.",
                kind: .file, params: NewParams.self, schema: newSchema, example: .object(["preset": .string("Square")]),
                availability: { _ in .available }) { w, p in try w.attemptNew(p) },
-        take("file.open", "Open", "Opens a .flare file's bytes, as text.", .file, OpenParams.self, example: openExample, { _ in nil }) { w, p in
+        take("file.open", "Open", "Opens a .flare file's bytes, or a Lottie .json's as an untitled animation, as text.", .file,
+             OpenParams.self, example: openExample, { _ in nil }) { w, p in
+            if p.name.lowercased().hasSuffix(".json") {
+                do throws(FlareOpenError) { _ = try w.openLottie(Data(p.data.utf8), named: p.name) } catch { throw CatalogError.failed(id: "file.open", message: error.message) }
+                return
+            }
             if case .failure(let error) = decodeFile(Data(p.data.utf8)) { throw CatalogError.failed(id: "file.open", message: error.message) }
             try? w.open(Data(p.data.utf8), named: p.name)
         },
@@ -123,8 +128,6 @@ extension FlareWorkspace {
         act("file.save", "Save", "Marks the animation saved under its file name.", .file, noFile) { w in if let save = w.saveData() { w.didSave(save, named: w.title + ".flare") } },
         take("file.save-as", "Save As", "Marks the animation saved under a new file name.", .file, NameParams.self,
             example: .object(["name": .string("Copy.flare")]), noFile) { w, p in if let save = w.saveData() { w.didSave(save, named: p.name) } },
-        act("file.clear-recent", "Clear Menu", "Empties the Open Recent list.", .view,
-            { $0.recent.isEmpty ? "No recent animations." : nil }) { w in w.clearRecent() },
         act("edit.undo", "Undo", "Undoes the last edit.", .view, { $0.canUndo ? nil : "Nothing to undo." }) { w in w.undo() },
         act("edit.redo", "Redo", "Redoes the last undone edit.", .view, { $0.canRedo ? nil : "Nothing to redo." }) { w in w.redo() },
         clip("edit.cut", "Cut", "Copies the selected layers, then removes them.", .edit, { $0.editHelp(.cut) }) { $0.cut() },
@@ -167,10 +170,31 @@ extension FlareWorkspace {
             example: .object(["name": .string("Intro")]), noScene) { w, p in w.renameScene(w.selectedSceneID ?? "", to: p.name) },
         act("scenes.remove", "Delete Scene", "Removes the selected scene; its undo step is Delete Scene.", .edit,
             { w in w.selectedSceneID.map(w.removeSceneHelp) ?? FlareLayerError.noDocument.message }) { w in w.removeScene(w.selectedSceneID ?? "") },
+        setFrameRate,  // frame-rates FR-10, FlareFrameRate+Kernel.swift
     ] + GradientCommands.specs(FlareWorkspace.self)  // the eight fill.* commands (gradient-fill FG-5)
+        + FileFlowCommands.specs(FlareWorkspace.self)  // file.recent, open-recent, clear-recent, open-in, drop (file-flow FL-3)
+        + hiddenCommands  // the beta.2 items the menus hide (no-placeholders NP-3)
+        + PathCommands.specs(FlareWorkspace.self)  // the twelve path.* commands, the Pen and Direct Select's points (pen-paths FP-6)
+        + [importReportCommand]  // the last Lottie open's skipped parts (lottie-open LO-5, FlareLottieNote.swift)
 }
 
 extension FlareWorkspace {
+    /// The beta.2 commands (no-placeholders NP-3): id, title, and the name `laterReason` gives.
+    static let betaTwo: [(id: String, title: String, name: String)] = [
+        ("view.toggle-onion", "Onion Skin", "Onion skin"), ("view.toggle-motion-path", "Motion Path", "Motion path"),
+        ("window.interactions", "Interactions", "Interactions"), ("window.assist", "Animate with Assist", "Assist"),
+        ("library.convert-to-symbol", "Convert to Symbol", "Convert to Symbol"), ("library.exit-symbol", "Exit Symbol", "Exit Symbol"),
+    ]
+    /// Commands whose menu items the beta hides; each stays in the catalog, unavailable with `laterReason`.
+    public static let menuHidden = Set(betaTwo.map(\.id))
+    /// Why a hidden command can't run: "Onion skin comes in a later beta."
+    public static func laterReason(_ id: String) -> String {
+        "\(betaTwo.first { $0.id == id }?.name ?? "This") comes in a later beta."
+    }
+    static let hiddenCommands = betaTwo.map { command in
+        act(command.id, command.title, "Comes in a later beta; the menu hides it.", .view, { _ in laterReason(command.id) }) { _ in }
+    }
+
     /// Why Restore and Discard wait: the recovery file holds the open animation's unsaved changes.
     public static let recoveryKeepsEdits = "The open animation has unsaved changes; save them first."
     var recoveryHelp: String? { isDirty ? Self.recoveryKeepsEdits : nil }
@@ -197,7 +221,7 @@ extension FlareWorkspace {
         spec.preset = named
         spec.width = p.width ?? spec.width
         spec.height = p.height ?? spec.height
-        spec.fps = p.fps ?? spec.fps
+        spec.fps = p.fps.map { FrameRate(whole: $0) } ?? spec.fps
         spec.durationFrames = p.durationFrames ?? spec.durationFrames
         guard let background = NewDocumentSpec.color(hex: p.background ?? "#FFFFFF") else {
             throw CatalogError.failed(id: "file.new", message: "Pick a valid background color.")

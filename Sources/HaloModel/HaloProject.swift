@@ -23,7 +23,8 @@ public struct HaloComposition: Identifiable, Codable, Sendable, Hashable {
     public var name: String
     public var width: Int
     public var height: Int
-    public var framesPerSecond: Int
+    /// The exact rate, one of `FrameRate.common`; `framesPerSecond` is its whole rate (HaloFrameRate+Kernel.swift).
+    public var frameRate: FrameRate
     public var durationFrames: Int
     /// The composition's layers, top first.
     public var layers: [HaloLayer]
@@ -32,22 +33,20 @@ public struct HaloComposition: Identifiable, Codable, Sendable, Hashable {
     public var playheadFrame: Int = 0
 
     public init(
-        id: String, name: String, width: Int, height: Int, framesPerSecond: Int, durationFrames: Int,
+        id: String, name: String, width: Int, height: Int, frameRate: FrameRate, durationFrames: Int,
         layers: [HaloLayer] = []
     ) {
         self.id = id
         self.name = name
         self.width = width
         self.height = height
-        self.framesPerSecond = framesPerSecond
+        self.frameRate = frameRate
         self.durationFrames = durationFrames
         self.layers = layers
     }
 
-    /// Length in seconds; 0 when the frame rate is not positive.
-    public var durationSeconds: Double {
-        framesPerSecond > 0 ? Double(durationFrames) / Double(framesPerSecond) : 0
-    }
+    /// Length in seconds at the exact rate; 0 when the frame rate is not positive.
+    public var durationSeconds: Double { frameRate.seconds(ofFrame: durationFrames) }
 
     /// The layer count as the viewer's readout shows it ("3 layers").
     public var layerSummary: String {
@@ -148,7 +147,7 @@ public struct HaloProject: Sendable, Equatable {
         return edit("New Composition", control: "halo.composition.new") { doc in
             let comp = HaloComposition(
                 id: doc.takeCompositionID(), name: doc.uniqueName(settings.name.normalizedName), width: settings.width,
-                height: settings.height, framesPerSecond: settings.framesPerSecond, durationFrames: frames)
+                height: settings.height, frameRate: settings.frameRate, durationFrames: frames)
             doc.compositions.append(comp)
             doc.selectedCompositionID = comp.id
             doc.selectedLayerID = nil
@@ -180,7 +179,7 @@ public struct HaloProject: Sendable, Equatable {
             }
             let copy = HaloComposition(
                 id: newID, name: doc.uniqueName("\(original.name) copy"), width: original.width,
-                height: original.height, framesPerSecond: original.framesPerSecond,
+                height: original.height, frameRate: original.frameRate,
                 durationFrames: original.durationFrames, layers: layers)
             doc.compositions.insert(copy, at: index + 1)
             doc.selectedCompositionID = newID

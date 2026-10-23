@@ -119,7 +119,8 @@ enum CrashTrim {
         let frames = index.map { threads[$0].frames ?? [] } ?? []
         let trimmed = Trimmed(procPath: body.procPath, exception: body.exception, crashedThread: index, frames: frames)
         let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        // Slashes stay unescaped, so the home path in procPath and sourceFile still matches its redaction.
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
         let json = (try? encoder.encode(trimmed)).map { String(decoding: $0, as: UTF8.self) } ?? ""
         return String(header) + "\n" + json
     }

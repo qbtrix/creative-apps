@@ -40,5 +40,26 @@
     "find": "originalPhotoID = showsOriginal ? nil : focusedItemID",
     "replace": "originalPhotoID = focusedItemID",
     "tests": "LibraryCommandPathTests"
+  },
+  {
+    "label": "reasonWhenUnavailable: Close Export is always available",
+    "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "find": "help: { $0.exportCloseHelp })",
+    "replace": "help: { _ in nil })",
+    "tests": "LibraryCommandPathTests"
+  },
+  {
+    "label": "paramsReachRun: Apply Preset ignores its quality",
+    "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "find": "quality: quality, folder: \"\",",
+    "replace": "quality: 85, folder: \"\",",
+    "tests": "LibraryCommandPathTests"
+  },
+  {
+    "label": "noticeControls: Show Failures never turns off",
+    "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "find": "c.failuresShownFor = c.showsImportFailures ? nil : c.importNotice",
+    "replace": "c.failuresShownFor = c.importNotice",
+    "tests": "LibraryCommandPathTests"
   }
 ]

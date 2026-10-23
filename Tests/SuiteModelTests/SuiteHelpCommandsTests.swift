@@ -1,8 +1,10 @@
 // SuiteHelpCommandsTests.swift (report-problem RP-2): the Help group, read as text since SwiftUI doesn't
 // build on Linux. SuiteHelpCommands replaces the system's empty help item with the suite Help catalog's
 // items, each built with MenuCommand(spec, on:) and identified: Report a Problem…, Beta Notes and, in the
-// launcher only, Welcome to AfterGlow, which still opens the tour. An item whose run isn't built yet is
-// disabled with its reason (no dead controls). The launcher adds the group in place of its Welcome group.
+// launcher only, Welcome to AfterGlow, which still opens the tour. Since RP-3 Report a Problem… begins the
+// report sheet and Beta Notes opens its window, so no item is disabled; one that wasn't built would say why
+// (no dead controls). Since RP-3e the sheet's Save… and Email… hand its text to ProblemReportActions, which
+// never touches the network. The launcher adds the group in place of its Welcome group.
 import Foundation
 import Testing
 
@@ -33,14 +35,22 @@ import Testing
         #expect(text.contains("id == \"help.welcome\" ? OnboardingControls.help : \"suite.\" + id"))
     }
 
-    @Test func welcomeOpensTheTourAndTheRestSayWhyNot() throws {
+    @Test func everyItemOpensItsWindow() throws {
         let text = try source(Self.help)
         #expect(text.contains("if id == \"help.welcome\" { openWindow(id: \"onboarding\") }"))
-        for id in ["help.report-problem", "help.beta-notes"] {
-            #expect(text.contains("\"\(id)\": \""), "\(id) runs nothing and says nothing")
-        }
-        #expect(!text.contains("\"help.welcome\": \""), "Welcome is disabled")
+        #expect(text.contains("if id == \"help.report-problem\" { SuiteHelpPresenter.shared.showReport(app: app) }"))
+        #expect(text.contains("if id == \"help.beta-notes\" { SuiteHelpPresenter.shared.showBetaNotes() }"))
+        #expect(text.contains("static let notBuilt: [String: String] = [:]"), "an item is still disabled")
+        #expect(text.contains("ProblemReportSheet(") && text.contains("beginSheet(panel)"), "the report isn't a sheet")
+        #expect(text.contains("BetaNotesView(notes: BetaNotes.current)") && text.contains("window.title = \"Beta Notes\""))
         #expect(text.contains("isEnabled: false"))
+    }
+
+    /// The Beta Notes window opens centred, so its Close button stays on a small screen (#4646).
+    @Test func betaNotesWindowOpensCentred() throws {
+        let text = try source(Self.help)
+        let notes = try #require(text.components(separatedBy: "func showBetaNotes()").last)
+        #expect(notes.contains("window.center()"), "the Beta Notes window opens where AppKit drops it")
     }
 
     @Test func providerAdaptsSuiteModel() throws {
@@ -48,6 +58,56 @@ import Testing
         #expect(text.contains("public struct ShellHelpProvider: HelpProviding"))
         #expect(text.contains("ProblemReport.build(") && text.contains("BetaNotes.current"))
         #expect(!text.contains("URLSession") && !text.contains("NSWorkspace"), "the provider reaches the network")
+        // ProcessInfo.hostName resolves the name over the network and raises macOS's local network prompt.
+        #expect(!text.contains(".hostName"), "the provider asks the network for the host name")
+    }
+
+    /// RP-5b: the sheet's report holds this Mac's crashes, read from CrashFolder's folder and files only.
+    @Test func providerReadsTheCrashFolder() throws {
+        let provider = try source("Sources/SuiteShell/ShellHelpProvider.swift")
+        #expect(provider.contains("crashes: CrashFolderReader.read("), "the report has no crashes")
+        #expect(!provider.contains("crashes: [],"))
+        let reader = try source("Sources/SuiteShell/CrashFolderReader.swift")
+        #expect(reader.contains("CrashFolder.path(arguments: arguments, home: home)"))
+        #expect(reader.contains("CrashFolder.toRead(entries, now: now)"), "the reader opens every file in the folder")
+        #expect(!reader.contains("URLSession") && !reader.contains("NSWorkspace"), "the reader reaches the network")
+        let journey = try source("UITests/AfterGlowJourneyTests+Help.swift")
+        #expect(!journey.contains("XCTSkip"), "the Help journey is still skipped")
+        #expect(journey.contains("\"-SuiteCrashDir\""))
+    }
+
+    /// RP-3e: Save… and Email… are live on the sheet and hand ProblemReportOutput to the AppKit glue, which
+    /// asks the system's compose-mail service (unsent) or writes the sheet's text where the person picks.
+    @Test func saveAndEmailHandTheSheetsTextOnWithoutTheNetwork() throws {
+        let help = try source(Self.help)
+        #expect(help.contains("onSave: { [weak self] text in self?.save(text) }"), "Save… is still disabled")
+        #expect(help.contains("onEmail: { [weak self] text in self?.email(text) }"), "Email… is still disabled")
+        #expect(help.contains("ProblemReportOutput(report: report, text: text)"))
+        let glue = try source("Sources/SuiteShell/ProblemReportActions.swift")
+        #expect(glue.contains("NSSharingService(named: .composeEmail)"))
+        #expect(glue.contains("service.subject = output.subject") && glue.contains("service.recipients = output.recipients"))
+        #expect(glue.contains("service.perform(withItems: [output.text])"), "the mail body isn't the sheet's text")
+        #expect(glue.contains("panel.allowedContentTypes = [.plainText]") && glue.contains("panel.nameFieldStringValue = output.fileName"))
+        #expect(glue.contains("Data(output.text.utf8).write(to: url"), "the saved file isn't the sheet's text")
+        for socket in ["URLSession", "NSWorkspace", "mailto:", "import Network", "CFStream", "NWConnection"] {
+            #expect(!glue.contains(socket) && !help.contains(socket), "\(socket): the app sends the report itself")
+        }
+    }
+
+    /// cli-bundle CB-5: Connect an AI Assistant… is in every app's group and begins AssistantConnectSheet over the
+    /// running bundle's panel; Copy puts the sheet's text on the pasteboard; the provider names the bundle.
+    @Test func connectAssistantBeginsItsSheet() throws {
+        let help = try source(Self.help)
+        #expect(help.contains("[\"help.report-problem\", \"help.beta-notes\", \"help.connect-assistant\"] + (app"))
+        #expect(help.contains("if id == \"help.connect-assistant\", let bundle = ShellHelpProvider().bundle"))
+        let connect = try #require(help.components(separatedBy: "func showConnect(").last)
+        #expect(connect.contains("AssistantConnectSheet(") && connect.contains("AssistantConnectPanel(bundle: bundle)"))
+        #expect(connect.contains("NSPasteboard.general.setString(text, forType: .string)"), "Copy doesn't copy the text")
+        #expect(connect.contains("AIAccessCenter.shared.showList()") && connect.contains("beginSheet(panel)"))
+        let provider = try source("Sources/SuiteShell/ShellHelpProvider.swift")
+        #expect(provider.contains("AssistantConnectPanel.bundle(containing: Bundle.main.bundlePath)"))
+        let journey = try source("UITests/AfterGlowJourneyTests+Connect.swift")
+        #expect(journey.contains("func testConnectAssistant()") && journey.contains("suite.help.connect.copyCommand"))
     }
 
     @Test func launcherAddsTheGroupInPlaceOfItsWelcomeGroup() throws {

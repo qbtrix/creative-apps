@@ -1,6 +1,6 @@
 // LibraryShareSnapshots.swift: Library's grid with three sample photos selected
-// and the Share button (share-sheet SH-4) in its top-trailing corner, off with
-// the stubs' reason, in Light and Dark. Writes
+// and the Share button (share-sheet SH-4) in its top-trailing corner, on since
+// SH-3 makes the copies, in Light and Dark. Writes
 // library-grid-share-button-{light,dark}.png. macOS only.
 import LibraryModel
 import SwiftUI
@@ -16,7 +16,7 @@ import Testing
         var selected = samples.answeringThumbnails()
         selected.select(Set(selected.sortedItems.prefix(3).map(\.id)))
         #expect(selected.selection.count == 3)
-        #expect(selected.shareHelp == SharePrep.notBuilt)
+        #expect(selected.shareHelp == nil)
         for scheme in [ColorScheme.light, .dark] {
             let suffix = scheme == .dark ? "dark" : "light"
             try snapshot(

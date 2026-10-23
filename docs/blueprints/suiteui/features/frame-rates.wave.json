@@ -2,7 +2,7 @@
   "title": "One frame-rate list with 23.976, 29.97, 50 and 59.94 and one timecode rule (drop-frame at 29.97 and 59.94) in SuiteKernel; Halo and Flare delete their own lists",
   "wave": "XK4",
   "order": 30,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "beta gaps 2026-10-21 C5 (Halo B2); feature map suiteui/frame-rates (new); real job RJ-X74 (new)",
@@ -56,6 +56,13 @@
     "Sources/FlareModel/FlareCommandCatalog.swift",
     "Tests/command-ids/flare.txt",
     "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json",
+    "Sources/FlareModel/FlareIntent.swift",
+    "Sources/FlareModel/FlarePlayback.swift",
+    "Sources/FlareModel/FlareStatusRead.swift",
+    "Sources/FlareModel/FlareHeadless.swift",
+    "Tests/FlareModelTests/FlareNewDocumentTests.swift",
+    "Tests/AppSnapshotTests/FlareNewSheetSnapshots.swift",
+    "UITests/FlareJourneyTests+SceneInspector.swift",
     "Tests/SuiteKernelTests/FrameRateHomeTests.swift",
     "docs/blueprints/suiteui/features/frame-rates.wave.json"
   ],
@@ -201,7 +208,14 @@
         "Tests/mutations/FlareModel.FlareFrameRate+Kernel.json",
         "Sources/FlareModel/FlareCommandCatalog.swift",
         "Tests/command-ids/flare.txt",
-        "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json"
+        "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json",
+        "Sources/FlareModel/FlareIntent.swift",
+        "Sources/FlareModel/FlarePlayback.swift",
+        "Sources/FlareModel/FlareStatusRead.swift",
+        "Sources/FlareModel/FlareHeadless.swift",
+        "Tests/FlareModelTests/FlareNewDocumentTests.swift",
+        "Tests/AppSnapshotTests/FlareNewSheetSnapshots.swift",
+        "UITests/FlareJourneyTests+SceneInspector.swift"
       ],
       "waits": {
         "FR-m": [

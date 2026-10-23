@@ -35,14 +35,10 @@ public struct DesignRect: Sendable, Hashable, Codable {
         (self.x, self.y, self.width, self.height) = (x, y, width, height)
     }
 
-    /// The rectangle a drag from `a` to `b` covers, whichever way it goes. With `square`
-    /// both sides are the longer one and the rectangle grows away from `a`.
-    public init(from a: DesignPoint, to b: DesignPoint, square: Bool = false) {
-        var (dx, dy) = (b.x - a.x, b.y - a.y)
-        if square {
-            let side = Swift.max(dx.magnitude, dy.magnitude)
-            (dx, dy) = (dx < 0 ? -side : side, dy < 0 ? -side : side)
-        }
+    /// The rectangle a drag from `a` to `b` covers, whichever way it goes. A drawing tool's
+    /// Shift square comes from the kernel's `ShapeRules.dragged` (DesignDrawing).
+    public init(from a: DesignPoint, to b: DesignPoint) {
+        let (dx, dy) = (b.x - a.x, b.y - a.y)
         self.init(x: Swift.min(a.x, a.x + dx), y: Swift.min(a.y, a.y + dy), width: dx.magnitude, height: dy.magnitude)
     }
 
