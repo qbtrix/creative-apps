@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-23T19:18:23Z	heartbeat	slice PRs open and clean; wave 2 building
 2026-10-23T19:31:58Z	pr	TS-u #4958 restacked on TS-a (head a2f7151ee, test commit first, own diff 6 files +272/-3), scripts/ci --changed CI: PASS, Head moved
 2026-10-23T19:40:44Z	heartbeat	slice PRs open and clean
+2026-10-23T20:03:23Z	heartbeat	no slice merged yet; oversize stacked PRs (#4958 #4961 #4965 #4982) off fast-lane until their parents merge; BK restack gates running
