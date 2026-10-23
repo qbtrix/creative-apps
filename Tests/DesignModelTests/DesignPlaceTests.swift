@@ -162,7 +162,7 @@ private func node(_ kind: DesignNodeKind = .frame, picture: PlacedAsset? = asset
         let reset = PlaceRules.resetBox(selection.image, natural: selection.asset.natural)
         try workspace.setPlaced(PlacedImage(assetID: "asset-1", box: reset, focus: left), asset: nil, name: "Reset Size", drag: nil)
         let frame = try #require(workspace.treeNode("node-1")?.frame)
-        #expect(frame.width * 2 == frame.height * 3)
+        #expect(abs(frame.width * 2 - frame.height * 3) < 1e-9)
     }
 
     @Test func aJPEGsSizeComesFromItsHeader() throws {
@@ -187,7 +187,7 @@ private func node(_ kind: DesignNodeKind = .frame, picture: PlacedAsset? = asset
     @Test func placeImageFillsTheSelectedFrameThroughTheCatalog() throws {
         var workspace = try opened([node(picture: nil)])
         let png = try fixture("place-in-frame/input/photo.png").base64EncodedString()
-        let params: JSONValue = .object(["name": .string("photo.png"), "base64": .string(png), "x": .null, "y": .null, "fill": .bool(true)])
+        let params: JSONValue = .object(["name": .string("photo.png"), "base64": .string(png), "fill": .bool(true)])
         _ = try DesignWorkspace.catalog.run("place.image", params: params, on: &workspace)
         #expect(workspace.treeNode("node-1")?.placedAsset?.natural == Size(width: 1200, height: 800))
         #expect(workspace.selectedPage?.nodes.count == 1)
@@ -198,7 +198,7 @@ private func node(_ kind: DesignNodeKind = .frame, picture: PlacedAsset? = asset
     @Test(arguments: [DesignNodeKind.ellipse, .text])
     func fillRefusesOtherKindsWithItsReason(_ kind: DesignNodeKind) throws {
         var workspace = try opened([node(kind, picture: nil)])
-        let params: JSONValue = .object(["name": .string("logo.svg"), "base64": .string(svgLogo), "x": .null, "y": .null, "fill": .bool(true)])
+        let params: JSONValue = .object(["name": .string("logo.svg"), "base64": .string(svgLogo), "fill": .bool(true)])
         #expect(throws: CatalogError.unavailable(id: "place.image", why: "Select a frame to fill.")) {
             try DesignWorkspace.catalog.run("place.image", params: params, on: &workspace)
         }
@@ -207,7 +207,7 @@ private func node(_ kind: DesignNodeKind = .frame, picture: PlacedAsset? = asset
     @Test func aPlaceWithNothingSelectedLandsOnThePageFitted() throws {
         var workspace = try opened([node(picture: nil)])
         workspace.deselect()
-        let params: JSONValue = .object(["name": .string("logo.svg"), "base64": .string(svgLogo), "x": .null, "y": .null, "fill": .null])
+        let params: JSONValue = .object(["name": .string("logo.svg"), "base64": .string(svgLogo), "fill": .bool(false)])
         _ = try DesignWorkspace.catalog.run("place.image", params: params, on: &workspace)
         let placed = try #require(workspace.selectedPage?.nodes.last)
         #expect(placed.kind == .rectangle && placed.name == "logo" && placed.frame == rc(600, 472, 240, 80))
