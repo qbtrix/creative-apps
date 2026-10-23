@@ -39,7 +39,7 @@ import Testing
         let places = PlaceCommands.specs(HaloProject.self).count  // PH-6: the five place commands
         #expect(HaloProject.catalog.ids.count  // FR-8b: + 1 for set-frame-rate
             == HaloCommand.allCases.count + 2 + fills + strokes + history + transforms + 1 + places
-            + HaloProject.windowSpecs.count)
+            + 2 + HaloProject.windowSpecs.count)  // CB-10: + 2 for edit.copy-frame and edit.paste
     }
 
     @Test func runShapeKeepsThePickedTool() throws {

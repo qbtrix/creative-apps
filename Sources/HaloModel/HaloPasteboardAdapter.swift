@@ -113,13 +113,15 @@ extension HaloProject: CopyFrameTarget {
 
     /// `edit.paste`: an image or SVG file's bytes, base64, placed as a layer at the playhead, one undo step.
     struct PasteParams: Codable, Sendable { var name, base64: String }
+    /// `edit.paste`'s example: a 1 x 1 PNG.
+    static let examplePNG = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
 
     static let pasteSpecs: [CommandSpec<HaloProject>] = [
         .typed("edit.paste", title: "Paste", summary: "Pastes a PNG, JPEG or SVG as a placed image layer starting at the playhead.",
                kind: .edit, params: PasteParams.self,
                schema: .object(["name": .string("The file name, \"screenshot.png\".", maxLength: 255),
                                 "base64": .string("The file's bytes, base64: PNG, JPEG or SVG.")], required: ["name", "base64"]),
-               example: .object(["name": .string("pasted.png"), "base64": .string(Data([0x89, 0x50, 0x4E, 0x47]).base64EncodedString())]),
+               example: .object(["name": .string("pasted.png"), "base64": .string(Self.examplePNG)]),
                availability: { $0.placeHelp.map(Availability.unavailable) ?? .available }) { project, p -> JSONValue in
             guard let data = Data(base64Encoded: p.base64) else {
                 throw CatalogError.failed(id: "edit.paste", message: "\(p.name) isn't base64.")

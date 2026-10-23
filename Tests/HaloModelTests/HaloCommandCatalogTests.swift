@@ -39,8 +39,9 @@ extension HaloProject: HeadlessDocument {
         let transforms = TransformCommands.specs(HaloProject.self).map(\.id)  // HT-6: then the six transform commands
         let rates = ["composition.set-frame-rate"]  // FR-8b: the composition's rate
         let places = ["place.read", "place.image", "place.replace", "place.reset-size", "place.focus"]  // PH-6: the five place commands
+        let clip = ["edit.copy-frame", "edit.paste"]  // CB-10: Copy Frame and Paste
         let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
-        let all = ids + shapes + fills + strokes + history + transforms + rates + places + window
+        let all = ids + shapes + fills + strokes + history + transforms + rates + places + clip + window
         #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
     }
 
