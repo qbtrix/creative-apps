@@ -73,3 +73,4 @@ utc	stage	event	ref	note
 2026-10-23T22:16Z	W4	opened	PT-6 #5008	journey PJ-T1 written, XCTSkip until PT-7; stacked on #5007; scripts/ci --changed PASS at f599711de
 2026-10-23T22:33Z	W3	check-in	PT-2 #5007, PT-6 #5008	both in lane, clean, no needs-fix; dev 491ec5461; TC-3 #5006, TC-5 #4880, TC-6 #4953 still open; PT-3..PT-5 waiting
 2026-10-23T22:55Z	W3	check-in	PT-2 #5007, PT-6 #5008	both in lane, clean; dev 654fb3632 (generated only); TC-3 #5006, TC-5 #4880, TC-6 #4953 open; PT-3..PT-5 waiting
+2026-10-23T23:17Z	W3	check-in	PT-2 #5007, PT-6 #5008	both in lane, clean; a CI run is in progress since 23:06Z (likely the batch); dev 654fb3632; TC-3 #5006, TC-5 #4880, TC-6 #4953 open
