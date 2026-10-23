@@ -102,3 +102,4 @@ utc	stage	event	ref	note
 2026-10-23T21:05Z	heartbeat	#4843 in lane batch 20261023204921 (#4841..#4862; Linux + macOS running); #4852/#4854 wait on it; no dev-red open
 2026-10-23T21:27Z	heartbeat	batch 20261023204921 (with #4843): Linux green, macOS gate running; #4852/#4854 unchanged; no dev-red open
 2026-10-23T21:52Z	stage	#4843 (FV-a) merged 21:40 as 93088070; retargeted #4852 to dev (dirty: add/add on the shared test files); merged origin/dev into lead/export-pack-fvu keeping FV-u side (diff vs dev identical to FV-u diff); scripts/ci --changed running; scoped flare run 40029025919 at 491ec546 (has FV-a) queued
+2026-10-23T22:05Z	stage	#4852 (FV-u): dev merged in, scripts/ci --changed PASS, pushed c1835cd6, Head line moved; clean vs dev, 7 files +222/-6
