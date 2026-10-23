@@ -4,7 +4,8 @@
 //
 // The rules come from the W3C SVG 2 recommendation only (clean-room): the
 // outermost <svg> with `viewBox` and `width`/`height`, basic shapes (<rect>,
-// <ellipse>), <path> for a shape layer (shape-tools DS-6: the kernel's path of
+// <ellipse>, or for a dashed ellipse the kernel's path, which starts at 12 o'clock as the canvas dashes it),
+// <path> for a shape layer (shape-tools DS-6: the kernel's path of
 // its spec in its frame, closed with Z only when the path closes), <text> with `text-anchor`, <g> with `opacity`, and <clipPath>
 // referenced by `clip-path="url(#…)"`. One element per visible layer in paint
 // order (a node, then its children); a hidden node drops its whole subtree.
@@ -64,6 +65,12 @@ enum DesignSVG {
             }
             lines.append(pad + "<path d=\"\(data(path))\"\(fill(node))\(paint(node))\(alpha(node))\(turned)/>")
         case .ellipse:
+            // Dashed: the kernel's outline, from 12 o'clock clockwise, so the dashes start where the canvas's do (#4940).
+            let outline = Rect(minX: x, minY: y, maxX: x + f.width, maxY: y + f.height)
+            if node.stroke?.dash.isEmpty == false, let path = try? ShapeRules.path(ShapeSpec(kind: .ellipse), in: outline) {
+                lines.append(pad + "<path d=\"\(data(path))\"\(fill(node))\(paint(node))\(alpha(node))\(turned)/>")
+                return
+            }
             let (rx, ry) = (f.width / 2, f.height / 2)
             let at = "cx=\"\(number(x + rx))\" cy=\"\(number(y + ry))\" rx=\"\(number(rx))\" ry=\"\(number(ry))\""
             lines.append(pad + "<ellipse \(at)\(fill(node))\(paint(node))\(alpha(node))\(turned)/>")
@@ -157,12 +164,18 @@ enum DesignSVG {
         return radius > 0 ? " rx=\"\(number(radius))\"" : ""
     }
 
+    /// The canvas's miter limit, SwiftUI StrokeStyle's default; SVG's own default is 4 (#4941).
+    static let miterLimit = 10.0
+
     /// The stroke's `StrokeSVG.attributes` (colour, opacity, width, join, cap, dash), each left out at its SVG
-    /// default (width 1, miter join, butt cap, offset 0); empty with no stroke or a width that draws nothing.
+    /// default (width 1, miter join, butt cap, offset 0); a miter join writes `stroke-miterlimit`, the canvas's
+    /// limit, in its place. Empty with no stroke or a width that draws nothing.
     private static func paint(_ node: DesignNode) -> String {
         guard let stroke = node.stroke, stroke.width.isFinite, stroke.width > 0 else { return "" }
         let defaults = ["stroke-width": "1", "stroke-linejoin": "miter", "stroke-linecap": "butt", "stroke-dashoffset": "0"]
-        return StrokeSVG.attributes(stroke).filter { defaults[$0.name] != $0.value }
+        let limit = (name: "stroke-miterlimit", value: number(miterLimit))
+        return StrokeSVG.attributes(stroke).map { $0.name == "stroke-linejoin" && $0.value == "miter" ? limit : $0 }
+            .filter { defaults[$0.name] != $0.value }
             .map { " \($0.name)=\"\(XMLText.escaped($0.value))\"" }.joined()
     }
 
