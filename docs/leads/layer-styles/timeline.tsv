@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-23T17:48Z	3 wave 2	pr-opened	#4911	LS-1 PR open; LS-2, LS-5, LS-11 stacked builders running
 2026-10-23T18:01Z	3 wave 2	stacked	lead/layer-styles-LS-clip-11	LS-11 built stacked on #4903, gate pass
 2026-10-23T18:05Z	3 wave 2	stacked	lead/layer-styles-LS-m	LS-5 built stacked on #4911, gate pass
+2026-10-23T18:08Z	3 wave 2	stacked	lead/layer-styles-LS-a-2	LS-2 built stacked on #4911, gate pass; wave 2 built
