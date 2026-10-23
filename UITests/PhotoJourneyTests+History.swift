@@ -5,8 +5,8 @@
 // click on the second step shows the image after two steps: Undo names the
 // second step and Redo the third, and the step count holds. One more stroke
 // drops the ten undone rows and a new "Paint" row is current. Quitting with
-// unsaved work and relaunching offers "Restore the autosaved changes to
-// “portrait.jpg”?", and Restore shows the 3-step image. Both run on the live
+// unsaved work and relaunching offers "Restore portrait.jpg from <time>?",
+// and Restore shows the 3-step image. Both run on the live
 // jump (PH-5) and autosave (PH-6), turned on by PH-7. Shots: `history-*`.
 import XCTest
 
@@ -18,7 +18,8 @@ final class PhotoHistoryJourneyTests: XCTestCase {
         historyMenuItem(photo).click()
         let panel = photo.element("suite.history")
         XCTAssert(panel.waitForExistence(timeout: 5), "Window > History showed no History tab (suite.history)")
-        XCTAssert(panel.staticTexts["Open"].exists, "the History tab doesn't start at Open")
+        // Each row is a button read as "Open, applied" (SuiteUI's HistoryPanel), as Design's journey reads it.
+        XCTAssert(photo.element("suite.history.row.0").label.hasPrefix("Open"), "the History tab doesn't start at Open")
         XCTAssert(photo.element("suite.history.row.12").waitForExistence(timeout: 5), "the History tab lists no 12th step")
         photo.shot("history-tab")
 
@@ -46,9 +47,11 @@ final class PhotoHistoryJourneyTests: XCTestCase {
         sleep(7)
         photo.app.terminate()
         photo = Journey("Photo", self, arguments: photoArguments(recoveryDir: recovery))
-        let offer = "Restore the autosaved changes to “portrait.jpg”?"
-        let title = photo.app.staticTexts.matching(NSPredicate(format: "label == %@ OR value == %@", offer, offer)).firstMatch
-        XCTAssert(title.waitForExistence(timeout: 30), "the relaunch didn't offer \(offer)")
+        // Photo keeps its own words for the offer (PhotoRecovery.swift), as the recovery journey reads them.
+        let offer = "Restore portrait.jpg from "
+        let title = photo.app.staticTexts.matching(
+            NSPredicate(format: "label BEGINSWITH %@ OR value BEGINSWITH %@", offer, offer)).firstMatch
+        XCTAssert(title.waitForExistence(timeout: 30), "the relaunch didn't offer \(offer)<time>?")
         photo.shot("history-recovery-offer")
         photo.app.buttons["photo.recovery.restore"].click()
         XCTAssert(photo.element("suite.canvas").waitForExistence(timeout: 15), "Restore opened no canvas")
