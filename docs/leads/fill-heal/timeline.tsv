@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 22:17Z	3	poll	dev 491ec546	#4577/#4889/#4896 open, clean, no needs-* labels, queued in lane; AJ-a #4834 needs-rebase, #4846 needs-split; BK-photo #4965 open; nothing to act on
 22:39Z	3	poll	dev 491ec546	#4577/#4889/#4896 open, no needs-* labels, lane active (run 40034629743 pending); AJ-a #4834 needs-rebase, #4846 needs-split; BK-photo #4965 open; nothing to act on
 23:00Z	3	poll	dev 654fb363	#4577/#4889/#4896 open, no needs-* labels, queued in lane; AJ-a #4834 closed unmerged, #4846 needs-split, AJ-a not on dev; BK-photo #4965 now fast-lane; nothing to act on
+23:22Z	3	poll	dev 654fb363	#4577/#4889/#4896 open, no needs-* labels, queued; AJ-a #4846 back to fast-lane (needs-split gone), #4834 closed, no replacement found; BK-photo #4965 fast-lane; nothing to act on
