@@ -10,7 +10,7 @@ Next: HF-7 (journey live) waits on HF-u #4868 reaching dev; HF-8 (docs, built, f
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | HF-a | adapter stubs; scene adopts suiteApp, Open Recent via SuiteFileCommands, file drop | HF-1, HF-2 | - | transform:HT-a, shape-tools:HS-a, placed-images:PH-u | yes | 0 | merged #4855 (f2955985) | - | - |
-| HF-m | adapter bodies, catalog ids, recents imported once, RJ-H42 | HF-3, HF-4 | - | HF-a; gradient-fill:HG-m, autosave-history:HA-m, transform:HT-m, shape-tools:HS-m, stroke-style:HK-m, placed-images:PH-m | yes | 0 | pr #4894 (HF-3), #4936 (HF-4) | - | - |
+| HF-m | adapter bodies, catalog ids, recents imported once, RJ-H42 | HF-3, HF-4 | - | HF-a; gradient-fill:HG-m, autosave-history:HA-m, transform:HT-m, shape-tools:HS-m, stroke-style:HK-m, placed-images:PH-m | yes | 0 | pr #4894 (HF-3, on dev), #4936 (HF-4) | - | - |
 | HF-u | snapshots, render budget, journey skipped | HF-5, HF-6 | - | HF-a | yes | 0 | pr #4868 | - | - |
 | HF-z | journey live; halo.md, built, feature-done | HF-7, HF-8 | HaloFileFlowJourneyTests | HF-m, HF-u; export-pack:HX-z, placed-images:PH-z | yes | 0 | blocked | - | - |
 
@@ -47,3 +47,4 @@ Next: HF-7 (journey live) waits on HF-u #4868 reaching dev; HF-8 (docs, built, f
 - 2026-10-23T16:30Z: HF-u #4868 opened, stacked on HF-a (136 lines, below 150 because HF-5's snapshots shipped in HF-a).
 - 2026-10-23T17:12Z: HF-m ships as two PRs, both `Slice: HF-m`. HF-3 (adapter bodies, suite file.* ids replacing file.open-recent, RJ-H42 pending #3741) on lead/halo-file-flow-HF-m; HF-4 takes HaloFiles' recents out and wires the window (takeFileRequests, updateFileFlow, takeOldRecents). Open In is refused: no other app reads a .halo.
 - 2026-10-23T22:35Z: HF-a #4855 merged to dev (f2955985, batch-20261023204921). HF-u #4868 merged origin/dev, gate PASS, retargeted to dev (Head c0ef74ef). HF-m #4894 merged origin/dev (add/add conflicts with HF-a's squash resolved to ours, blobs equal); its gate crashed in AfterGlowCLITests SampleOpenTests (LibraryHeadless.init, signal 11), code HF-m doesn't touch; checking whether it reproduces before retargeting. HF-4 #4936 follows HF-m. Belt-Slice-Done for HF-a waits on a green ci.yml run on dev.
+- 2026-10-23T22:50Z: HF-m #4894 pushed (19fa9f3e) and retargeted to dev, with no Fast-Check marker: the gate crashes in dev's AfterGlowCLITests SampleOpenTests (LibraryHeadless.init, signal 11), which reproduces on plain dev. HaloModelTests (804) and the list-commands goldens pass. Supervisor asked on #3474. HF-4 #4936 stays stacked on HF-m.
