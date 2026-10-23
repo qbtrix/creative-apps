@@ -98,14 +98,14 @@
     "tests": "DesignSVGTests|DesignSVGWalkTests"
   },
   {
-    "label": "strokeWritesDash: the stroke writes only its colour, opacity and width (the old writer)",
+    "label": ".strokeWritesDash: the stroke writes only its colour, opacity and width (the old writer)",
     "file": "Sources/DesignModel/Live/DesignSVG.swift",
     "find": "StrokeSVG.attributes(stroke).filter",
     "replace": "StrokeSVG.attributes(stroke).prefix(3).filter",
     "tests": "DesignSVGTests|DesignSVGWalkTests"
   },
   {
-    "label": "capAttribute: a round cap is taken for the default and left out",
+    "label": ".capAttribute: a round cap is taken for the default and left out",
     "file": "Sources/DesignModel/Live/DesignSVG.swift",
     "find": "\"stroke-linecap\": \"butt\"",
     "replace": "\"stroke-linecap\": \"round\"",
