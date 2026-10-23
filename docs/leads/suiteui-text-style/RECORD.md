@@ -1,16 +1,16 @@
 # text-style lead record
 
-Issue: #4519 (relaunch of #3779) · Packet: docs/blueprints/suiteui/features/text-style.md
-Run: act-1a164697376-dv7u · Started: 2026-10-22T16:40Z
-Stage: 3 wave 2 (blocked)
-Base: 7e9f260ae8f69dea63663c1bc7ea945c6b1d2f80 (dev)
-Next: wait on font-picker FP-a (TS-2) and FP-u (TS-u); poll every 20 min
+Issue: #3779 (relaunch #4519) · Packet: docs/blueprints/suiteui/features/text-style.md
+Run: act-1a16958d72f-a4mg · Session: cloud line lead (line:suiteui; with text-style, brush-keys, document-setup) · Started: 2026-10-23T15:25Z
+Stage: 3 wave 1 (combined waves across the three features)
+Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (dev)
+Next: wave 1: TS-a PR #4871 open (TS-2); next TS-u stacked; TS-halo waits adjust-everywhere AJ-a
 
 ## Slices
 
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| TS-a | TextStyle, rules, commands and rows declared; checks written, disabled | TS-1, TS-2 | – | font-picker:FP-a (TS-2) | true | 0 | TS-1 merged #3836; TS-2 blocked (FP-a) | – | – |
+| TS-a | TextStyle, rules, commands and rows declared; checks written, disabled | TS-1, TS-2 | – | font-picker:FP-a (TS-2) | true | 0 | TS-1 merged #3836; TS-2 pr #4871 | – | – |
 | TS-u | the rows read and scrub the style | TS-3, TS-4 | – | TS-a, font-picker:FP-u | true | 0 | planned | – | – |
 | TS-m | ranges clamp, tracking em-relative, layout, one undo step per scrub | TS-5, TS-6 | – | TS-1 | false | 0 | done | 39808732641 | – |
 | TS-design | Design adopts | TS-7, TS-8 | – | TS-m, TS-u, adopt-command-catalog:AC-design (built), brush-keys:BK-design (planned) | true | 0 | planned | – | – |
@@ -21,12 +21,18 @@ Next: wait on font-picker FP-a (TS-2) and FP-u (TS-u); poll every 20 min
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | TS-1 | TS-a | 1 | contract types, specs that throw NotBuilt, disabled suites | Sources/SuiteKernel/Text/TextStyle.swift, Sources/SuiteKernel/Text/TextStyleRules.swift, Sources/SuiteKernel/Text/TextCommands.swift, Tests/SuiteKernelTests/TextStyleRulesTests.swift, Tests/SuiteKernelTests/TextStyleLayoutTests.swift, Tests/SuiteKernelTests/TextCommandsTests.swift, docs/c4/parts/creative-apps/suite-kernel/kernel-text.json | suites compile disabled; KernelShapeTests unchanged | #3836 | merged |
-| TS-2 | TS-a | – | TextStyleRows | Sources/SuiteUI/TextStyleRows.swift | see packet | – | blocked (FP-a) |
+| TS-2 | TS-a | – | TextStyleRows | Sources/SuiteUI/TextStyleRows.swift | TextStyleRowsTests | #4871 | pr |
 | TS-5 | TS-m | 2 | rule and layout bodies | Sources/SuiteKernel/Text/TextStyleRules.swift, Tests/SuiteKernelTests/TextStyleRulesTests.swift, Tests/SuiteKernelTests/TextStyleLayoutTests.swift, Tests/mutations/SuiteKernel.TextStyleRules.json | .trackingIsEmRelative .lineHeightClamps .lastLineNotJustified | #3844 | merged |
 | TS-6 | TS-m | 2 | command bodies | Sources/SuiteKernel/Text/TextCommands.swift, Tests/SuiteKernelTests/TextCommandsTests.swift, Tests/mutations/SuiteKernel.TextCommands.json | .scrubIsOneStep .familyKeepsWeight | #3847 | merged |
 | TS-3 | TS-u | – | see packet | see packet | see packet | – | blocked |
 | TS-4 | TS-u | – | see packet | see packet | see packet | – | blocked |
 | TS-7..TS-12 | TS-design, TS-halo | – | see packet | see packet | see packet | – | blocked |
+
+## Wire
+- [ ] Wire: anchor-parenting:AN-halo (TS-halo shares a Halo app file)
+- [ ] Wire: brush-keys:BK-design (TS-design shares a Design app file)
+- [ ] Wire: adjust-everywhere:AJ-halo (TS-halo
+- [ ] Wire:  contract not merged)
 
 ## Reviews
 
@@ -91,6 +97,7 @@ Next: wait on font-picker FP-a (TS-2) and FP-u (TS-u); poll every 20 min
 
 - 2026-10-21T12:52Z heartbeat: #3844 TS-5 held while dev red (#3856, photo line); #3847 stacked
 - 2026-10-22T16:40Z: run act-1a164697376-dv7u on new issue #4519. TS-1 #3836, TS-5 #3844, TS-6 #3847 merged and in green dev Linux run 39808732641 (401242a59): Belt-Slice-Done TS-m posted on #4519.
+- 2026-10-23T15:25Z (act-1a16958d72f-a4mg): contract-first waits (lead.md rule 12, #4814): a wait on another feature is met once that feature's first slice merged; each wait built ahead of its slice is listed under Wire. Merged-done = green `Linux` on a dev CI run containing the slice's last PR.
 
 ## Open
 
