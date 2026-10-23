@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: PH-a DONE. PH-m DONE. PH-u: #4438 (e76365be) lane macOS build 39875643496 still queued at 00:38Z (runner backlog), then merge. PH-z: #4649 30471d52 clean draft on PH-u2; #4658 bc63740a clean draft on PH-z. Retarget #4649 to dev after #4438 merges; then #4658 with fast-lane+feature-done. Quarantine renewal: supervisor PR #4660 open. Gap candidates: SVG gradient flat, SVG strokes, no overshoot ease preset.
+Next: PH-a DONE. PH-m DONE. PH-u: #4438 (e76365be) blocked: lane macOS build 39875643496 queued since 00:02Z; Question for the supervisor posted on #3456 (00:59Z). PH-z: #4649 30471d52, #4658 bc63740a clean drafts; retarget after #4438 merges. Quarantine renewal #4660 merged. Gap candidates: SVG gradient flat, SVG strokes, no overshoot ease preset.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
