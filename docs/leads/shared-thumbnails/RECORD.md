@@ -38,9 +38,11 @@ Next: ST-a builder on lead/shared-thumbnails-ST-a (off dev): test-first commit (
 - Earlier runs (act-1a15b69feea-et92) were all blocked on SC-a; their heartbeat log is in RECORD.prev.
 
 ## Wire
-- [ ] Wire: shared-codecs:SC-a (ST-2 built ahead; when SC-2 merges, merge dev into the ST-a branch, keeping both Package.swift/project.yml link changes)
+- [x] Wire: shared-codecs:SC-a (ST-2 built ahead; when SC-2 merges, merge dev into the ST-a branch, keeping both Package.swift/project.yml link changes)
+- [ ] Wire: Library live services build LiveThumbnails with the disk store (folder + budget); then un-pend RealJobs relaunch-grid. Do in ST-z or a follow-up before close.
 
 ## Open
 - –
 - 2026-10-23T15:20:44Z: ST-a builder started (ST-1 test commit, ST-2) on lead/shared-thumbnails-ST-a; pinned core 7966e5a has CoreAsset/ThumbnailStore, so ST-2 links without a bump
 - 2026-10-23T17:32Z: wave 2: ST-a is #4840 (touches Package.swift, so it needs a supervisor merge; no-fast-lane added). ST-u and ST-m builders started, stacked on ST-a, opened as drafts. Decision: ST-6 is built now (two-line call in spine's LiveThumbnails.swift, which spine hasn't edited in 12h; the lane integrates conflicts).
+- 2026-10-23T19:15:35Z: SC-2 merged on dev; merged dev into ST-a (#4840) at 07c11358c, SuiteShell keeps CoreAsset + CoreRaster; scripts/ci --changed PASS (6039). Head line moved; asked supervisor to re-gate. Restacking ST-u/ST-m.
