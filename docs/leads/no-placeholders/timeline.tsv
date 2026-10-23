@@ -16,3 +16,4 @@ utc	stage	event	ref	note
 2026-10-23T04:52Z	-	heartbeat	NP-flare	#4717 merged; #4735 gate on dev-merged head running; #3856 dev-red open
 2026-10-23T05:04Z	-	retarget	NP-flare	#4735 dev merged, CI: PASS, base dev, head 978ebb154
 2026-10-23T05:14Z	-	heartbeat	NP-flare	#4735 on dev base in lane
+2026-10-23T07:19:48Z	-	merge	NP-flare	#4735 merged 06:49 (feature-done); full CI 39914223799 pending on c2cc0c7c7
