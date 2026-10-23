@@ -22,6 +22,7 @@
 // `help` for every section 3.4 item, the Undo and Redo step names, the recent
 // files, Loop and the selection's Edit reasons.
 import FlareModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -98,7 +99,7 @@ struct FlareWindow: View {
         .modifier(FlareOpenStatus(model: model))
         .suiteOpenQueue(FlareShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .modifier(FlareAutosaveAdapter(model: model, restore: { try model.restoreRecovery($0) }))
-        .modifier(FlareLiveRegistration(read: { model }, write: { model.takeLive($0) }))
+        .suiteLiveWindow(FlareLive.front, read: { FlareHeadless(workspace: model) }, write: { model.takeLive($0) })
         .focusedSceneValue(
             \.flareMenu,
             FlareMenu(
