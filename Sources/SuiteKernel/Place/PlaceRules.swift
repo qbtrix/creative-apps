@@ -55,11 +55,13 @@ public enum PlaceRules {
         let x = clamp(fx, box.maxX - width, box.minX), y = clamp(fy, box.maxY - height, box.minY)
         return Rect(minX: x, minY: y, maxX: x + width, maxY: y + height)
     }
-    /// The box at the asset's natural aspect, the same width and centre.
+    /// The box at the asset's natural aspect, the same width and centre; `box` itself when it is already there, so a
+    /// fitted box (whose height rounds differently by a few ulps) reads as reset.
     public static func resetBox(_ image: PlacedImage, natural: Size) -> Rect {
         let box = image.box
         guard natural.width > 0, natural.height > 0 else { return box }
         let height = box.width * natural.height / natural.width, midY = (box.minY + box.maxY) / 2
+        if abs(height - box.height) <= 1e-9 * max(1, height) { return box }
         return Rect(minX: box.minX, minY: midY - height / 2, maxX: box.maxX, maxY: midY + height / 2)
     }
 
