@@ -19,7 +19,7 @@ private struct ListedFonts: FontListing {
 }
 
 @Suite struct FontPickerLiveTests {
-    static let live = ListedFonts(count: 7)
+    private static let live = ListedFonts(count: 7)
     static let fakes = FakeText().families()
 
     @Test func liveServicesListTheLiveFamilies() {
