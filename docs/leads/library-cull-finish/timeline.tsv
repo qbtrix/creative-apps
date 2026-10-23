@@ -46,3 +46,4 @@
 2026-10-23T18:38:55Z	merged	#4844 DR-6 (dev 0d4645bf); #4899 now 9 files/223 lines on the lane
 2026-10-23T18:54:15Z	heartbeat	poll at dev 0d4645bf; #4838 #4899 #4948 on the lane
 2026-10-23T19:07:23Z	heartbeat	dev 0d4645bf unchanged; #4838 #4899 #4948 open clean on the lane (macOS runs queued); TC-2 not on dev; LX-2/LX-4 builders running
+2026-10-23T19:19:17Z	heartbeat	dev 0d4645bf; #4838 #4899 #4948 #4960 open on the lane; scoped: library run 40009734956 queued at 0d4645bf (contains none of our open PRs); TC-2 not on dev; LX-4 builder running
