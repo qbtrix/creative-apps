@@ -2,9 +2,9 @@
 
 Issue: #3730 (earlier run used duplicate #4507) · Packet: docs/blueprints/suiteui/features/font-picker.md
 Run: act-1a166b69fbd-mmos · Session: claude/font-picker-lead-5om1cy · Started: 2026-10-22T16:36Z (this run resumed 2026-10-23T03:10Z)
-Stage: 5 contact sheet posted; FP-u round 2 review done (run 39946282747); #4790 fix PR #4800 in lane; leftovers gap #4801, #4802
+Stage: done: all slices Belt-Slice-Done; FP-u updated after round 2 (#4800 merged 8021b0f5, run 39970203866); leftovers gap #4801, #4802
 Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a (origin/dev)
-Next: #4800 through the lane (macOS build-only run) → dev run containing it with green Linux → Belt-Slice-Done FP-u update; nothing else open for this run
+Next: none; run complete unless the supervisor asks for more (scoped suiteui 39970195902 on 8021b0f5 will show the journey with #4800)
 
 ## Slices
 
@@ -53,3 +53,4 @@ Next: #4800 through the lane (macOS build-only run) → dev run containing it wi
 - Gap #4650 (line:library, p2): hosts set suiteFontListing; journey keeps fakes.
 - FP-7 C4 description: C4-only PR #4651 (lead/font-picker-FP-c4, 1ae04da7).
 - FP-u round 2 was the last: leftovers filed as gap #4801 and #4802 (line:suiteui, p2). PR #4800 (lead/font-picker-fix2, 9e617d24) fixes #4790.
+- #4800 merged 8021b0f5 (14:25Z); Belt-Slice-Done FP-u reposted with dev Linux run 39970203866.
