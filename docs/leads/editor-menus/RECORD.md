@@ -49,3 +49,6 @@ Next: #4738 and C4 #4737 in lane; #4739 retargets to dev after #4738 merges; the
 ## 2026-10-23T06:20:27Z
 - #4761 EM-library opened, stacked on #4739 → #4738; labels fast-lane, feature-done.
 - #4738 conflicted with dev in FlareApp.swift (#4716 renamed FlareOpenQueue to FlareShell.openQueue). Merged dev, resolved, CI: PASS, head 9d59908ec, Head line moved.
+
+## 2026-10-23T06:45:10Z
+- #4738 EM-flare-halo merged (06:40:59Z). #4739 merged dev (FlareApp.swift conflict from the parent squash, resolved to dev, which the slice does not touch); retarget to dev once the gate passes. #4761 follows.
