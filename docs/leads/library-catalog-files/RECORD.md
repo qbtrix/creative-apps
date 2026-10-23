@@ -60,3 +60,4 @@ Next: (2026-10-23T17:39:52Z) #4879 LC-a, #4924 LC-u, #4937 LC-5, #4938 LC-6 wait
 - 2026-10-23T22:19:52Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Lane batch 20261023215139 still in flight; ours wait for the next one. Dev Linux check 40029046141 green at 491ec546.
 - 2026-10-23T22:42:04Z: heartbeat: #4879,#4924,#4937,#4938,#4949 open, no needs-fix/needs-rebase (dev-based heads show mergeable state unknown while GitHub recomputes). Lane batch 20261023215139 still in flight; dev still 491ec546.
 - 2026-10-23T23:04:34Z: heartbeat: #4879,#4924,#4937,#4938,#4949 open, clean, no fix/rebase labels. Dev moved only by the generated-docs commit 654fb363. Lane batch 20261023215139 (#4818..#4870) still in flight; ours wait for the next.
+- 2026-10-23T23:25:42Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Lane batch 20261023215139 still in flight; dev CI 40037716897 running at 654fb363.
