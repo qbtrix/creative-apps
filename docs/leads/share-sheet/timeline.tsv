@@ -66,3 +66,4 @@ utc	stage	event	ref	note
 2026-10-23T19:10Z	3	heartbeat	SH-z	library run 39997279554 macOS (library) still running; full CI 39999410389 Linux green, macOS queued; no findings, no dev-red
 19:28Z	3	red	SH-z	library run 39997279554 red on folder-expand body budget; awaiting 40009734956/39999410389
 19:51Z	3	heartbeat	SH-z	40009734956 (library) and 39999410389 (full) macOS jobs running
+20:13Z	3	heartbeat	SH-z	40009734956 tests green (folder budget passes; 39997279554 red was a slow-runner flake), bundling
