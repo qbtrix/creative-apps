@@ -128,8 +128,9 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
             ("NotZip.ora", Data("not a zip".utf8), "It isn't a Photo Document or an image Photo can open."),
             ("Newer.ora", edited(#""format":1,"#, #""format":2,"#), "It was saved by a newer version of Photo. Update Photo to open it."),
             ("Missing.ora", Self.storedZip(entries.filter { $0.name != "data/layer-2.png" }), "It is damaged and can't be read."),
-            ("Large.ora", edited(#""canvas":{"height":600,"width":800}"#, #""canvas":{"height":4000,"width":5000}"#),
-             "It is larger than Photo can open: up to 16 megapixels."),
+            // 48 MP, past PhotoWorkspace.maxOpenPixels (40 MP since #2969).
+            ("Large.ora", edited(#""canvas":{"height":600,"width":800}"#, #""canvas":{"height":6000,"width":8000}"#),
+             "It is larger than Photo can open: up to 40 megapixels."),
         ]
         for (index, item) in cases.enumerated() {
             let url = folder.appending(path: item.file)
