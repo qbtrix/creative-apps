@@ -2,9 +2,9 @@
 
 Issue: #3472 (runs before used #4509) · Packet: docs/blueprints/halo/features/export-pack.md
 Run: act-1a16958d5fe-8dxu · Started: 2026-10-23T15:26:44Z (took over from act-1a16474bd28-v3ht)
-Stage: 3 wave 2 (HX-a #4841, HX-u #4858, HX-m #4874 + #4917 open)
+Stage: 4 wave 4 (HX-a #4841, HX-u #4858, HX-m #4874 + #4917, HX-z #4942 open)
 Base: 721168a8 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: HX-z first half (HX-7 journey live, RJ-H41 pending #4929) gating, stacked on HX-4; HX-8 waits on placed-images:PH-z
+Next: HX-8 (halo.md, built, feature-done) once placed-images:PH-z is built; Belt-Slice-Done per slice once a green ci.yml run holds it
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: HX-z first half (HX-7 journey live, RJ-H41 pending #4929) gating, stacked 
 | HX-a | codec and alpha settings, ProRes refused; Render sheet Codec row and Transparent checkbox | HX-1, HX-2 | - | gradient-fill:HG-a, placed-images:PH-a | yes | 0 | pr #4841 | - | - |
 | HX-m | codec and alpha plan rules, alpha frames, RJ-H41; live renderer through services.media.movie | HX-3, HX-4 | - | HX-a | no | 0 | pr #4874, #4917 | - | - |
 | HX-u | snapshots, budget, journey skipped | HX-5, HX-6 | - | HX-a | yes | 0 | pr #4858 | - | - |
-| HX-z | journey live; halo.md, built, feature-done | HX-7, HX-8 | HaloExportPackJourneyTests | HX-m, HX-u; gradient-fill:HG-z | yes | 0 | blocked | - | - |
+| HX-z | journey live; halo.md, built, feature-done | HX-7, HX-8 | HaloExportPackJourneyTests | HX-m, HX-u; gradient-fill:HG-z | yes | 0 | pr #4942 (HX-7); HX-8 waits on PH-z | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -23,7 +23,7 @@ Next: HX-z first half (HX-7 journey live, RJ-H41 pending #4929) gating, stacked 
 | HX-4 | HX-m | 2 | live renderer via media.movie; HaloMovieWriter kept for fractional fps | Sources/HaloModel/Live/LiveCompositionRendering.swift, Sources/HaloApp/HaloMovieWriter.swift | HaloMovieSinkTests | #4917 | pr |
 | HX-5 | HX-u | 3 | snapshots, budget | Tests/AppSnapshotTests/HaloRenderProResSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloRenderSheetTests.swift | codecSwitchInTwoBodies | #4858 | pr |
 | HX-6 | HX-u | 3 | journey skipped | UITests/HaloJourneyTests+ExportPack.swift | compiles, skipped | #4858 | pr |
-| HX-7 | HX-z | 4 | journey live; RJ-H41 as a pending job (#4929) | UITests/HaloJourneyTests+ExportPack.swift, Tests/RealJobs/halo/prores-alpha/prores-alpha.jobs.pending.json | testRenderLowerThirdWithAlpha | - | gating |
+| HX-7 | HX-z | 4 | journey live; RJ-H41 as a pending job (#4929) | UITests/HaloJourneyTests+ExportPack.swift, Tests/RealJobs/halo/prores-alpha/prores-alpha.jobs.pending.json | testRenderLowerThirdWithAlpha | #4942 | pr |
 | HX-8 | HX-z | 5 | halo.md, built, feature-done | docs/blueprints/halo.md, docs/blueprints/halo/features/export-pack.wave.json | waves render --dry-run | - | blocked |
 
 ## Reviews
