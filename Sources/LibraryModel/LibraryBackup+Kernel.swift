@@ -29,6 +29,18 @@ public struct LibraryBackupFallback: Sendable, Equatable {
     }
 }
 
+/// The catalog's backups as its state: the attached backups (nil for a fixture, a preview or the CLI without a
+/// folder) and the notice of a damaged catalog opened from a backup. Equal by folder, file and notice.
+public struct LibraryBackupState: Sendable, Equatable {
+    public internal(set) var backups: LibraryBackups?
+    public internal(set) var notice: String?
+    public init() {}
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.notice == rhs.notice && lhs.backups?.rotation.store.folder == rhs.backups?.rotation.store.folder
+            && lhs.backups?.rotation.file == rhs.backups?.rotation.file
+    }
+}
+
 /// The catalog file's backups over the suite store's rotation.
 public struct LibraryBackups: Sendable {
     public let rotation: BackupRotation, coding: any CatalogCoding
@@ -39,6 +51,10 @@ public struct LibraryBackups: Sendable {
 
     /// Why the backup actions are off until BK-5m gives them bodies, in the words the menu shows.
     public static let unavailable = BackupRotation.unavailable
+    /// Why Restore can't run: no backups attached to this catalog, or an import running; a name not listed.
+    public static let noBackups = "Library has no catalog backups yet."
+    public static let importing = "Wait for the import to finish before restoring a backup."
+    public static func unknown(_ name: String) -> String { "There's no catalog backup named \(name)." }
 
     /// Every backup that decodes, newest first, with its photo count. BK-2: none.
     public func rows() -> [LibraryBackupRow] { [] }
