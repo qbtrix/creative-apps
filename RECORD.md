@@ -1,0 +1,1 @@
+- 2026-10-23T17:55:40Z: #4840 needs-fix (RenderBudgetWindowLifetimeTests :34). Analysis posted: likely a timing flake, since ST-a only links CoreAsset. Asked for a re-gate. ST-u/ST-m stay draft.
