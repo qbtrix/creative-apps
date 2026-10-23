@@ -8,7 +8,9 @@
 // following View > Rendering redraws the whole picture on the backend the new
 // choice names, and back. The resident path (layer tiles kept on the GPU,
 // the picture written into a texture) draws the reference within the
-// standard tolerance and uploads no tile for an adjustment. The route a
+// standard tolerance and uploads no tile for an adjustment; with the app's
+// tone-program target, an adjustment layer and Photo's hue/saturation take the
+// live route and still draw the reference. The route a
 // choice gives is plain logic, so it is checked without a GPU too. macOS only.
 import CoreRaster
 import CoreRender
@@ -138,6 +140,63 @@ import Testing
         let reference = PhotoRenderer.premultiplied(try await PhotoRenderer.render(workspace).rgba8)
         let worst = zip(bytes, reference).map { abs(Int($0) - Int($1)) }.max() ?? 0
         #expect(worst <= Int(ParityTolerance.standard.bytes), "the presenter's texture differs from the reference by up to \(worst)")
+    }
+
+    /// A 600 x 400 document on the live services: a red block, a blue block screened at 60 % above it, a
+    /// Levels adjustment layer on top, and the image's levels, curves and hue/saturation on.
+    static func liveDocument() throws -> PhotoWorkspace {
+        var workspace = PhotoWorkspace()
+        try workspace.newCanvas(width: 600, height: 400)
+        for (color, from, to) in [((200, 30, 40), (20.0, 30.0), (380.0, 300.0)), ((20, 90, 230), (200.0, 60.0), (560.0, 380.0))] {
+            if color.0 == 20 { workspace.addLayer() }  // the blue block on a layer of its own
+            workspace.setToolOption(.color(red: UInt8(color.0), green: UInt8(color.1), blue: UInt8(color.2)))
+            workspace.selectTool(.marquee)
+            workspace.drag(from: Mask.Point(x: from.0, y: from.1), to: Mask.Point(x: from.0, y: from.1))
+            workspace.drag(from: Mask.Point(x: from.0, y: from.1), to: Mask.Point(x: to.0, y: to.1))
+            workspace.endDrag()
+            workspace.fillSelection()
+            workspace.deselect()
+        }
+        let top = try #require(workspace.selectedLayerID)
+        workspace.setBlendMode(top, .screen)
+        workspace.setOpacity(top, percent: 60)
+        workspace.addAdjustmentLayer(.levels)
+        workspace.adjustLayer(try #require(workspace.selectedLayerID), .gamma(1.5))
+        for edit: AdjustmentEdit in [.blackPoint(0.05), .hue(20), .saturation(-25), .lightness(10),
+                                     .curvePoints([CurvePoint(x: 0, y: 0), CurvePoint(x: 0.5, y: 0.6), CurvePoint(x: 1, y: 1)])] {
+            workspace.adjust(edit)
+        }
+        return workspace
+    }
+
+    /// The app's own wiring on the live route: CanvasRenderer drawing through TileCanvas's Metal target, whose
+    /// write runs the tone program (Metal's `display_tone`). The presenter's texture holds the CoreRaster
+    /// reference within `standard`'s bytes, an adjustment layer and Photo's hue/saturation included, and still
+    /// does after a slider step, which uploads no layer tile.
+    @MainActor @Test(.enabled(if: device != nil)) func theLiveRouteDrawsAdjustmentsAndLayersAsTheReference() async throws {
+        var workspace = try Self.liveDocument()
+        let canvas = try #require(workspace.canvas)
+        let host = CanvasHostView(frame: CGRect(x: 0, y: 0, width: 400, height: 300))
+        let presenter = CanvasTilePresenter()
+        host.useRendering(.gpu, device: MTLCreateSystemDefaultDevice(), presenter: presenter)
+        let renderer = CanvasRenderer()
+        renderer.tiles.attach(host)
+        renderer.use(PhotoRenderRoute(preferred: try Self.metal()))
+        for step in 0..<2 {
+            if step == 1 { workspace.adjust(.gamma(1.4)) }
+            let uploads = renderer.route.residentTiles?.uploads ?? 0
+            renderer.show(workspace)
+            for _ in 0..<600 where renderer.revision != workspace.revision { try await Task.sleep(for: .milliseconds(20)) }
+            #expect(renderer.revision == workspace.revision, "\(renderer.failure ?? "the picture never landed")")
+            if step == 1 { #expect(renderer.route.residentTiles?.uploads == uploads, "a slider step uploaded layer tiles") }
+            let texture = try #require(presenter.texture)
+            var bytes = [UInt8](repeating: 0, count: canvas.width * canvas.height * 4)
+            texture.getBytes(&bytes, bytesPerRow: canvas.width * 4, from: MTLRegionMake2D(0, 0, canvas.width, canvas.height), mipmapLevel: 0)
+            let reference = PhotoRenderer.premultiplied(try await PhotoRenderer.render(workspace).rgba8)
+            let worst = zip(bytes, reference).map { abs(Int($0) - Int($1)) }.max() ?? 0
+            #expect(worst <= Int(ParityTolerance.standard.bytes), "step \(step): the texture differs from the reference by up to \(worst)")
+        }
+        #expect((renderer.route.residentTiles?.uploads ?? 0) > 0, "the layers stayed resident: the live route")
     }
 
     @MainActor @Test(.enabled(if: device != nil)) func switchingTheChoiceRedrawsOnTheNewBackend() async throws {

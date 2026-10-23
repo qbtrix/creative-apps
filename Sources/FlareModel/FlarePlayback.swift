@@ -3,12 +3,17 @@
 // (LA-2) calls `advance(elapsed:)` with the seconds since its last tick and the frame comes from
 // `Timeline.playbackFrame`, so it never drifts from the clock. The timeline is the edited symbol's while editing in
 // place (`timelineFrames`), played at the scene's rate. Nothing here touches the document, so scrubbing and
-// playback are never undo steps (QB-F3).
+// playback are never undo steps (QB-F3). The clock ticks by the scene's exact rate (FR-10b): 23.976 plays 24000
+// frames per 1001 seconds; the timecode counts in its nominal whole rate.
 import FlareCore
+import SuiteKernel
 
 extension FlareWorkspace {
     /// The rate the timeline plays at: the selected scene's; a symbol has none of its own.
-    public var playbackFPS: Int { selectedScene?.fps ?? 0 }
+    public var playbackFPS: Int { playbackRate.nominal }
+
+    /// The exact rate the clock ticks by: 24000/1001 at 23.976; 0 with no scene.
+    public var playbackRate: FrameRate { selectedScene?.frameRate ?? FrameRate(whole: 0) }
 
     /// The frames the playhead can stand on: the edited symbol's while editing in place, else the scene's.
     public var playbackRange: Range<Int> { 0..<timelineFrames }
@@ -56,7 +61,7 @@ extension FlareWorkspace {
             let (seconds, frames) = frame.quotientAndRemainder(dividingBy: fps)
             return "\(seconds) second\(seconds == 1 ? "" : "s") and \(frames) frame\(frames == 1 ? "" : "s")"
         }
-        return "Seconds:frames at \(fps) fps: \(spoken(currentFrame)) of \(spoken(timelineFrames))."
+        return "Seconds:frames at \(playbackRate): \(spoken(currentFrame)) of \(spoken(timelineFrames))."
     }
 
     /// Moves a playhead past the timeline's end to its last frame (frame 0 with no frames), keeping a running play's
@@ -70,7 +75,7 @@ extension FlareWorkspace {
         let lengthChanged = frames != nil && frames != timelineFrames
         guard currentFrame > last || rateChanged || lengthChanged else { return }
         currentFrame = min(currentFrame, last)
-        if isPlaying { playClock = canPlay ? Double(currentFrame) / Double(playbackFPS) : 0 }
+        if isPlaying { playClock = canPlay ? playbackRate.seconds(ofFrame: currentFrame) : 0 }
     }
 
     /// Starts playing from the playhead. Without loop, playing from the last frame starts over from the first.
@@ -79,7 +84,7 @@ extension FlareWorkspace {
         let last = timelineFrames - 1
         if !loops, currentFrame >= last { currentFrame = 0 }
         currentFrame = min(max(currentFrame, 0), last)
-        playClock = Double(currentFrame) / Double(playbackFPS)
+        playClock = playbackRate.seconds(ofFrame: currentFrame)
         isPlaying = true
     }
 
@@ -101,11 +106,11 @@ extension FlareWorkspace {
     public mutating func setLoops(_ on: Bool) {
         loops = on
         guard isPlaying, canPlay else { return }
-        let fps = Double(playbackFPS)
-        let pass = Double(timelineFrames) / fps
-        let start = Double(currentFrame) / fps
+        let rate = playbackRate
+        let pass = rate.seconds(ofFrame: timelineFrames)
+        let start = rate.seconds(ofFrame: currentFrame)
         let intoFrame = playClock.truncatingRemainder(dividingBy: pass) - start
-        playClock = start + (intoFrame >= 0 && intoFrame < 1 / fps ? intoFrame : 0)
+        playClock = start + (intoFrame >= 0 && intoFrame < rate.seconds(ofFrame: 1) ? intoFrame : 0)
     }
 
     /// Moves the clock by `elapsed` seconds and the playhead with it. Looping wraps to the first frame; without loop
@@ -115,19 +120,20 @@ extension FlareWorkspace {
         guard isPlaying else { return }
         guard canPlay else { isPlaying = false; return }
         guard elapsed.isFinite, elapsed > 0 else { return }
-        let fps = playbackFPS, frames = timelineFrames
+        let rate = playbackRate, frames = timelineFrames
         playClock += elapsed
-        guard let frame = try? Timeline.playbackFrame(elapsed: playClock, fps: fps, durationFrames: frames, loop: loops)
+        guard let frame = try? Timeline.playbackFrame(elapsed: playClock, rate: rate.sceneRate, durationFrames: frames,
+                                                      loop: loops)
         else { isPlaying = false; return }
         currentFrame = frame
-        if !loops, playClock * Double(fps) >= Double(frames) { isPlaying = false }
+        if !loops, playClock * Double(rate.numerator) / Double(rate.denominator) >= Double(frames) { isPlaying = false }
     }
 
     /// Puts the playhead on `frame`, clamped to the timeline; a running play continues from there.
     public mutating func setCurrentFrame(_ frame: Int) {
         guard canPlay else { return }
         currentFrame = min(max(frame, 0), timelineFrames - 1)
-        if isPlaying { playClock = Double(currentFrame) / Double(playbackFPS) }
+        if isPlaying { playClock = playbackRate.seconds(ofFrame: currentFrame) }
     }
 
     /// The step buttons and the arrow keys: pauses, then moves `delta` frames, wrapping with loop on, else clamped.

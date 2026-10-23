@@ -18,6 +18,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
+import SuiteKernel
 
 /// The save status the window shows (its subtitle and status slot).
 public enum PhotoSaveStatus: Hashable, Sendable, CaseIterable {
@@ -70,12 +71,14 @@ extension PhotoWorkspace {
     }
 
     /// Opens a flat file through `open(_:name:codec:longestSide:)` and sets
-    /// `fileKind` from its name, so a just-opened PNG saves in place.
+    /// `fileKind` from its name, so a just-opened PNG saves in place. A file
+    /// opened smaller (`longestSide`, past the pixel cap) is `.readOnly`:
+    /// Save asks where rather than replace the full-size original.
     public mutating func openImage(
         _ data: Data, name: String, codec: some PhotoImageCodec, longestSide: Int? = nil
     ) throws {
         try open(data, name: name, codec: codec, longestSide: longestSide)
-        fileKind = Self.fileKind(forName: name)
+        fileKind = longestSide == nil ? Self.fileKind(forName: name) : .readOnly
     }
 
     /// The name Save as Photo Document offers: the document's name with
@@ -156,7 +159,7 @@ extension PhotoWorkspace {
 
     /// The layer stack `document` describes, its pixels in tiles. Throws
     /// `ArchiveError.damaged` for a document with no layers, a repeated id, a
-    /// pixel layer or mask without its image, or an image of the wrong size.
+    /// pixel or text layer or mask without its image, or an image of the wrong size.
     private static func stack(of document: PhotoDocumentSnapshot) throws -> PhotoStack {
         guard !document.layers.isEmpty else { throw ArchiveError.damaged("the document has no layers") }
         guard Set(document.layers.map(\.id)).count == document.layers.count else {
@@ -165,7 +168,7 @@ extension PhotoWorkspace {
         var pixels: [PhotoLayer.ID: TiledPixels] = [:], masks: [PhotoLayer.ID: TiledPixels] = [:]
         var layers = document.layers
         for (i, layer) in layers.enumerated() {
-            if layer.kind == .pixels {
+            if layer.kind == .pixels || layer.kind.textLayer != nil {
                 guard let image = document.pixels[layer.id] else { throw ArchiveError.damaged("\(layer.name) has no pixels") }
                 pixels[layer.id] = try tiles(image, what: layer.name)
             }

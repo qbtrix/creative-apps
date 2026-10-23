@@ -1,6 +1,6 @@
-// GradientCommandsTests.swift (gradient-fill GF-1 written, GF-6 turns on): the eight fill commands on a test
-// target with a kernel `History`. Each edit run records one step named its title, a drag is one step, and every
-// why-not reads. The spec shape check runs now; the rest are disabled by name until GF-6 builds the bodies.
+// GradientCommandsTests.swift (gradient-fill GF-6): the eight fill commands on a test target with a kernel `History`.
+// Each edit run records one step named its title, a drag is one step, every why-not reads, `fill.read` reports the
+// fill and `fill.gradient` sorts its stops and turns the line. Mutations: Tests/mutations/SuiteKernel.GradientCommands.json.
 import Testing
 import SuiteKernel
 
@@ -42,7 +42,7 @@ struct FillDoc: GradientFillTarget {
             if id != "fill.read" { #expect(spec.title == title, "\(id)") }
         }
     }
-    @Test(.disabled("waits on GF-6")) func oneStepPerRun() throws {
+    @Test func oneStepPerRun() throws {
         let catalog = try #require(Self.catalog)
         var doc = FillDoc(fill: Self.linear())
         let stop: JSONValue = .object(["offset": .number(0), "r": .number(1), "g": .number(0), "b": .number(0), "a": .number(1)])
@@ -59,7 +59,7 @@ struct FillDoc: GradientFillTarget {
             #expect(outcome.undoStep == Self.titles[id] && doc.history.steps.count == count + 1, "\(id)")
         }
     }
-    @Test(.disabled("waits on GF-6")) func dragIsOneStep() throws {
+    @Test func dragIsOneStep() throws {
         let catalog = try #require(Self.catalog)
         var doc = FillDoc(fill: Self.linear())
         for sample in 0..<120 {
@@ -69,18 +69,18 @@ struct FillDoc: GradientFillTarget {
         #expect(doc.history.steps == ["Move Gradient Stop"])
         #expect(doc.undo() && doc.fill.stops.map(\.offset) == [0, 0.5, 1])
     }
-    @Test(.disabled("waits on GF-6")) func angleNeedsLinear() throws {
+    @Test func angleNeedsLinear() throws {
         let catalog = try #require(Self.catalog)
         let radial = FillDoc(fill: .radial(stops: Self.linear().stops, center: Point(x: 50, y: 50), radius: 70))
         #expect(catalog.availability("fill.angle", on: radial) == .unavailable("Angle is for a linear gradient."))
         #expect(catalog.availability("fill.angle", on: FillDoc(fill: Self.linear())) == .available)
     }
-    @Test(.disabled("waits on GF-6")) func stopRemoveNeedsThree() throws {
+    @Test func stopRemoveNeedsThree() throws {
         let catalog = try #require(Self.catalog)
         #expect(catalog.availability("fill.stop-remove", on: FillDoc(fill: Self.linear([0, 1]))) == .unavailable(GradientRules.stopHelp))
         #expect(catalog.availability("fill.stop-remove", on: FillDoc(fill: Self.linear())) == .available)
     }
-    @Test(.disabled("waits on GF-6")) func intentCommandRoundTrips() throws {
+    @Test func intentCommandRoundTrips() throws {
         let catalog = try #require(Self.catalog)
         let intents: [GradientIntent] = [.type(.radial), .add(offset: 0.5), .move(index: 1, offset: 0.25, drag: "d"), .remove(index: 1),
                                          .color(index: 0, FillColor(r: 1, g: 0, b: 0), drag: nil), .angle(45, drag: "d")]
@@ -90,5 +90,42 @@ struct FillDoc: GradientFillTarget {
             let spec = try #require(catalog.spec(intent.command.id))
             #expect(spec.params.validate(intent.command.params).isEmpty, "\(intent)")
         }
+    }
+    @Test func readReportsTheFill() throws {
+        let catalog = try #require(Self.catalog)
+        var doc = FillDoc(fill: Self.linear([0, 1]))
+        let read = try catalog.run("fill.read", params: .object([:]), on: &doc).result
+        let blue: JSONValue = .object(["offset": .number(0), "r": .number(0), "g": .number(0), "b": .number(1), "a": .number(1)])
+        let white: JSONValue = .object(["offset": .number(1), "r": .number(1), "g": .number(1), "b": .number(1), "a": .number(1)])
+        #expect(read == .object(["type": .string("linear"), "stops": .array([blue, white]), "angle": .number(0)]))
+        var radial = FillDoc(fill: .radial(stops: Self.linear().stops, center: Point(x: 50, y: 50), radius: 70))
+        guard case .object(let fields) = try catalog.run("fill.read", params: .object([:]), on: &radial).result else { Issue.record("no object"); return }
+        #expect(fields["angle"] == .null && fields["type"] == .string("radial"))
+    }
+    @Test func gradientSortsItsStopsAndTurnsTheLine() throws {
+        let catalog = try #require(Self.catalog)
+        var doc = FillDoc(fill: .solid(.white))
+        func stop(_ offset: Double, _ r: Double) -> JSONValue {
+            .object(["offset": .number(offset), "r": .number(r), "g": .number(0), "b": .number(0), "a": .number(1)])
+        }
+        let params: JSONValue = .object(["type": .string("linear"), "angle": .number(45), "stops": .array([stop(1, 1), stop(0, 0)])])
+        _ = try catalog.run("fill.gradient", params: params, on: &doc)
+        #expect(doc.fill.stops.map(\.offset) == [0, 1] && doc.fill.stops.last?.color == FillColor(r: 1, g: 0, b: 0))
+        guard case .linear(_, let start, let end) = doc.fill else { Issue.record("not linear"); return }
+        #expect(abs(start.x) < 1e-9 && abs(start.y) < 1e-9 && abs(end.x - 100) < 1e-9 && abs(end.y - 100) < 1e-9)
+    }
+    @Test func aBadStopIndexFails() throws {
+        let catalog = try #require(Self.catalog)
+        var doc = FillDoc(fill: Self.linear())
+        #expect(throws: CatalogError.self) { try catalog.run("fill.stop-move", params: .object(["index": .number(9), "offset": .number(0.5)]), on: &doc) }
+        #expect(doc.history.steps.isEmpty)
+    }
+    @Test func solidColorKeepsItsAlpha() throws {
+        let catalog = try #require(Self.catalog)
+        var doc = FillDoc(fill: .solid(.white))
+        let params: JSONValue = .object(["index": .number(0), "r": .number(1), "g": .number(0), "b": .number(0), "a": .number(0.5)])
+        #expect(catalog.availability("fill.stop-color", on: doc) == .available)
+        _ = try catalog.run("fill.stop-color", params: params, on: &doc)
+        #expect(doc.fill == .solid(FillColor(r: 1, g: 0, b: 0, a: 0.5)) && doc.history.steps == ["Gradient Stop Color"])
     }
 }

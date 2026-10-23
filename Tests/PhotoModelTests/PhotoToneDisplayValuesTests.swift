@@ -40,7 +40,7 @@ import Testing
     }
 
     @Test func displayMidGreyFillsTheHistogramsMiddleBin() throws {
-        let heights = try midGrey().curvesHistogram()
+        let heights = try midGrey().curvesHistogram().heights
         #expect(heights.firstIndex(of: 1) == 128)
     }
 }

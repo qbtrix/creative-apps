@@ -6,24 +6,21 @@
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "library/tone-controls (adopter of S1); RJ-L41 (new)",
-  "waits_on": "suiteui tone-controls's TC-a (cross-line; LT-3 and LT-4 need TC-5, LT-5 TC-6, LT-6 TC-3); develop (the feature: DevelopValues, LiveDevelop, DevelopInspector) and crop (built), slice waits; TC-1's Package.swift edit first (cross-line). raw's RW-a and RW-c now wait on LT-a",
+  "waits_on": "suiteui tone-controls's TC-a (cross-line; LT-3 and LT-4 need TC-5, LT-5 TC-6, LT-6 TC-3); develop (the feature: DevelopValues, LiveDevelop, DevelopInspector) and crop (built), slice waits; suiteui suite-imaging's IM-library before LT-4 (cross-line; re-cut 2026-10-20: the loupe's GPU route and the Package.swift links are suite-imaging's)",
   "longest_chain": "5 (LT-1 → LT-2 → LT-7 → LT-8 → LT-9)",
   "journeys": [
     "LibraryToneJourneyTests.testAutoAndSharpenInDevelop"
   ],
   "owned": [
-    "Package.swift",
     "Sources/LibraryModel/Contracts/DevelopValues.swift",
     "Sources/LibraryModel/LibraryTone+Kernel.swift",
-    "Sources/LibraryModel/Live/LibraryLiveTone.swift",
     "Tests/LibraryModelTests/LibraryToneTests.swift",
     "Sources/LibraryApp/DevelopInspector.swift",
     "Sources/LibraryModel/Live/LiveDevelop.swift",
     "Tests/LibraryModelTests/LiveDevelopToneTests.swift",
     "Tests/mutations/LibraryModel.LiveDevelop.json",
-    "Sources/LibraryApp/LibraryLoupe+Metal.swift",
     "Sources/LibraryApp/LibraryLoupe.swift",
-    "Tests/mutations/LibraryModel.LibraryLiveTone.json",
+    "Tests/mutations/LibraryModel.LibraryDevelop+Imaging.json",
     "Sources/LibraryModel/LibraryCommandCatalog.swift",
     "Tests/command-ids/library.txt",
     "Tests/LibraryModelTests/LibraryToneCommandTests.swift",
@@ -32,7 +29,8 @@
     "Tests/AppSnapshotTests/LibraryToneSnapshots.swift",
     "Tests/AppSnapshotTests/RenderBudgetLibraryToneTests.swift",
     "UITests/LibraryJourneyTests+Tone.swift",
-    "docs/blueprints/library/features/tone-controls.wave.json"
+    "docs/blueprints/library/features/tone-controls.wave.json",
+    "Sources/LibraryModel/LibraryDevelop+Imaging.swift"
   ],
   "slices": [
     {
@@ -57,10 +55,8 @@
       },
       "ui": true,
       "owned": [
-        "Package.swift",
         "Sources/LibraryModel/Contracts/DevelopValues.swift",
         "Sources/LibraryModel/LibraryTone+Kernel.swift",
-        "Sources/LibraryModel/Live/LibraryLiveTone.swift",
         "Tests/LibraryModelTests/LibraryToneTests.swift",
         "Sources/LibraryApp/DevelopInspector.swift"
       ]
@@ -111,14 +107,13 @@
       },
       "ui": true,
       "owned": [
+        "Sources/LibraryModel/LibraryDevelop+Imaging.swift",
         "Sources/LibraryModel/Live/LiveDevelop.swift",
         "Tests/LibraryModelTests/LiveDevelopToneTests.swift",
         "Tests/mutations/LibraryModel.LiveDevelop.json",
-        "Sources/LibraryModel/Live/LibraryLiveTone.swift",
-        "Sources/LibraryApp/LibraryLoupe+Metal.swift",
         "Sources/LibraryApp/LibraryLoupe.swift",
         "Tests/LibraryModelTests/LibraryToneTests.swift",
-        "Tests/mutations/LibraryModel.LibraryLiveTone.json",
+        "Tests/mutations/LibraryModel.LibraryDevelop+Imaging.json",
         "Sources/LibraryModel/LibraryTone+Kernel.swift",
         "Sources/LibraryModel/LibraryCommandCatalog.swift",
         "Tests/command-ids/library.txt",

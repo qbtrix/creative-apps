@@ -12,8 +12,8 @@
 #      revision into Package.swift and lets `swift package resolve` rewrite
 #      Package.resolved (the other pins stay where they are);
 #   3. runs what a core change can break: swift build --build-tests, every
-#      <X>ModelTests target (their Budget tests included), and on macOS the perf
-#      suites in PERF. The repo keeps no perf list; these are the ones core's
+#      <X>ModelTests target (minus Tests/perf-suites.txt, skipped as scripts/ci
+#      does), and on macOS the perf suites in PERF. These are the ones core's
 #      raster code moves (creative-core #321 tripled PhotoBrushDisplayTests'
 #      bytes per event). A filter that matches no test fails the bump;
 #   4. commits, pushes and opens "chore(core): bump creative-core to <short sha>"
@@ -76,10 +76,14 @@ run_tests() {
   (( status == 0 )) || die "$label failed at $short"
   grep -qE 'Test run with [1-9][0-9]* tests?' "$tmp/test.log" || die "$label: the filter matched no tests"
 }
+# The gate's skip regex (as scripts/ci): timed tests are not run for a bump.
+perf_skip=$(python3 scripts/test-scope perf) || die "Tests/perf-suites.txt: scripts/test-scope perf failed"
+skip=()
+[[ -z "$perf_skip" ]] || skip=(--skip "$perf_skip")
 models=$(cd Tests && printf '%s\n' *ModelTests | paste -sd'|' -)
 checked="swift build --build-tests, the Model tests ($models)"
 swift build --build-tests ${flags[@]+"${flags[@]}"} || die "swift build failed at $short"
-run_tests "Model tests" --filter "^($models)\."
+run_tests "Model tests" --filter "^($models)\." ${skip[@]+"${skip[@]}"}
 if [[ "$(uname)" == Darwin ]]; then
   run_tests "perf suites" --filter "^AppSnapshotTests\.($PERF)/" --no-parallel
   checked="$checked and the perf suites ($PERF)"

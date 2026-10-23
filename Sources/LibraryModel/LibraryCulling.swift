@@ -71,13 +71,14 @@ extension LibraryCatalog {
         }
     }
 
-    /// The change a single key makes: 0–5, P, X, U; nil for other keys.
+    /// The change a single key makes: 0–5, P, X, U and the label keys 6–9; nil for other keys.
     public static func cullChange(for key: LibraryKey) -> CullChange? {
         switch key {
         case .rating(let stars): .rating(stars)
         case .pick: .flag(.pick)
         case .reject: .flag(.reject)
         case .unflag: .flag(.none)
+        case .label(let label): .label(label)
         case .crop, .grid, .confirm, .first, .last: nil
         }
     }

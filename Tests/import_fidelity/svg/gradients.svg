@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100">
+<defs>
+  <linearGradient id="lin"><stop offset="0" stop-color="#ff0000"/><stop offset="1" stop-color="#0000ff"/></linearGradient>
+  <linearGradient id="chained" href="#lin" x1="0" y1="0" x2="0" y2="1"/>
+  <radialGradient id="rad" gradientUnits="userSpaceOnUse" cx="75" cy="25" r="20"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#000000"/></radialGradient>
+  <linearGradient id="turned" xlink:href="#lin" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="40" y2="0" gradientTransform="translate(50 50) rotate(90)"/>
+</defs>
+<rect id="horizontal" x="0" y="0" width="40" height="40" fill="url(#lin)"/>
+<rect id="vertical" x="0" y="50" width="40" height="40" fill="url(#chained)"/>
+<rect id="radial" x="55" y="5" width="40" height="40" fill="url(#rad)"/>
+<rect id="transformed" x="50" y="50" width="40" height="40" fill="url(#turned)"/>
+</svg>

@@ -52,6 +52,7 @@ extension FlareWorkspace {
         case .inputNotFound: "That input is no longer in the machine."
         case .inputTypeChange: "An input keeps the type of its default value."
         case .invalidMachine: "That change would break the state machine."
+        case .matteCycle: "A layer can\u{2019}t use itself, or a layer it mattes, as its matte."
         case .invalidDocument, .notExecuted, .nothingToUndo, .nothingToRedo, .groupInProgress, .unknownCommand,
              .malformedCommand, .notBuilt:
             nil

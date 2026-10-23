@@ -23,8 +23,15 @@
   {
     "label": "the undo step keeps \"Undo \", so outcomes name the menu title, not the step",
     "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
-    "find": "        undoName = workspace.undoActionName.map { String($0.dropFirst(\"Undo \".count)) }\n",
-    "replace": "        undoName = workspace.undoActionName\n",
+    "find": "        (undoName, redoName) = (workspace.undoName, workspace.redoName)\n",
+    "replace": "        (undoName, redoName) = (workspace.undoActionName, workspace.redoName)\n",
+    "tests": "FlareCoreCommandCatalogTests"
+  },
+  {
+    "label": "notDrawnOnStage is ignored: mask and matte commands read available though the stage can't draw them",
+    "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
+    "find": "        if notDrawnOnStage.contains(C.id), workspace.document != nil { return .unavailable(masksNotDrawn) }\n",
+    "replace": "",
     "tests": "FlareCoreCommandCatalogTests"
   }
 ]

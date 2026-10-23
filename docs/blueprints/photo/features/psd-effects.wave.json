@@ -1,0 +1,122 @@
+{
+  "title": "Photo opens a layered PSD with its layer effects as editable layer styles, and Linear Dodge and Linear Burn as themselves",
+  "wave": 4,
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "photo/psd-effects (part of E10's Photo adopter); findings #3496 and #3497; RJ-P46",
+  "waits_on": "masks-clipping's PK-m (PhotoDocumentFile and the mask and clip flags); export-pack's PX-m (PhotoHeadless) and file-flow's PF-m (PhotoWindow+File); creative-core layer-style-engine LE-psd through a bump and suiteui layer-styles' LS-m before PS-3 (cross-line)",
+  "longest_chain": "5 (PS-1 → PS-3 → PS-4 → PS-5 → PS-6)",
+  "journeys": [],
+  "journeys_none": "Model walks only: PSD files open through the existing Open panel and warning sheet, which Photo's file journeys already cover",
+  "owned": [
+    "Tests/import_fidelity/gen.py",
+    "Tests/import_fidelity/manifest.json",
+    "Tests/import_fidelity/psd/layer_effects.psd",
+    "Tests/PhotoModelTests/ImportFidelityPSDTests.swift",
+    "Tests/PhotoModelTests/PhotoPSDOpenTests.swift",
+    "Tests/RealJobs/photo/psd-effects/psd-effects.jobs.json",
+    "Tests/RealJobs/photo/psd-effects/input/badge-effects.psd",
+    "Sources/PhotoModel/PhotoLayered+Imaging.swift",
+    "Sources/PhotoModel/PhotoHeadless.swift",
+    "Sources/PhotoModel/PhotoDocumentFile.swift",
+    "Sources/PhotoApp/PhotoWindow+File.swift",
+    "Tests/mutations/PhotoModel.PhotoLayered+Imaging.json",
+    "Tests/PhotoModelTests/PhotoBlendModeTests.swift",
+    "Tests/mutations/PhotoModel.PhotoDocumentFile.json",
+    "Tests/import_fidelity/psd/blend_extended.psd",
+    "docs/blueprints/photo.md",
+    "docs/blueprints/photo/features/psd-effects.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "PS-a",
+      "behavior": "The fidelity corpus writes a real lfx2 descriptor, the PSD-open tests and RJ-P46's job are written and disabled, and Photo's open types list .psd with a stub that refuses with its reason.",
+      "tasks": [
+        "PS-1",
+        "PS-2"
+      ],
+      "journeys": [
+        "MJ-PS"
+      ],
+      "waits": {
+        "masks-clipping:PK-m": [
+          "PS-2"
+        ],
+        "export-pack:PX-m": [
+          "PS-2"
+        ],
+        "file-flow:PF-m": [
+          "PS-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/import_fidelity/gen.py",
+        "Tests/import_fidelity/manifest.json",
+        "Tests/import_fidelity/psd/layer_effects.psd",
+        "Tests/PhotoModelTests/ImportFidelityPSDTests.swift",
+        "Tests/PhotoModelTests/PhotoPSDOpenTests.swift",
+        "Tests/RealJobs/photo/psd-effects/psd-effects.jobs.json",
+        "Tests/RealJobs/photo/psd-effects/input/badge-effects.psd",
+        "Sources/PhotoModel/PhotoLayered+Imaging.swift",
+        "Sources/PhotoModel/PhotoHeadless.swift",
+        "Sources/PhotoModel/PhotoDocumentFile.swift",
+        "Sources/PhotoApp/PhotoWindow+File.swift"
+      ]
+    },
+    {
+      "id": "PS-m",
+      "behavior": "A PSD opens as Photo layers with their masks, clipping and effects as layer styles, Linear Dodge and Linear Burn open as themselves and round-trip the .ora, and every dropped item is named in the open's warning.",
+      "tasks": [
+        "PS-3",
+        "PS-4"
+      ],
+      "journeys": [
+        "MJ-PS"
+      ],
+      "waits": {
+        "PS-a": [
+          "PS-3"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/PhotoModel/PhotoLayered+Imaging.swift",
+        "Tests/PhotoModelTests/PhotoPSDOpenTests.swift",
+        "Tests/mutations/PhotoModel.PhotoLayered+Imaging.json",
+        "Sources/PhotoModel/PhotoDocumentFile.swift",
+        "Tests/PhotoModelTests/PhotoBlendModeTests.swift",
+        "Tests/mutations/PhotoModel.PhotoDocumentFile.json"
+      ]
+    },
+    {
+      "id": "PS-z",
+      "behavior": "The two findings' known issues are gone from the fidelity gate, RJ-P46 passes, and the feature is built.",
+      "tasks": [
+        "PS-5",
+        "PS-6"
+      ],
+      "journeys": [
+        "MJ-PS"
+      ],
+      "waits": {
+        "PS-m": [
+          "PS-5"
+        ],
+        "masks-clipping:PK-z": [
+          "PS-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Tests/import_fidelity/gen.py",
+        "Tests/import_fidelity/manifest.json",
+        "Tests/import_fidelity/psd/blend_extended.psd",
+        "docs/blueprints/photo.md",
+        "docs/blueprints/photo/features/psd-effects.wave.json"
+      ]
+    }
+  ]
+}

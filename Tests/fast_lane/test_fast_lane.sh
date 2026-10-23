@@ -5,8 +5,12 @@
 # trees), whole sweeps against a stub `gh`, and, against a local bare repo, the
 # lane's integration of a conflicting PR (integrate) and its batches (two or
 # more ready PRs get one Linux check together before they land; a red batch is
-# bisected by prefix), and the red-dev bisect, with its 2-of-3 vote mode for
-# a timing budget test. No network, needs bash, git and jq.
+# bisected by prefix; a proof gone stale on a ratchet or baseline change is
+# checked again on today's dev), the batch macOS gate (LANE_MAC_PER_PR=0: one macOS gate
+# per code batch scoped to its apps, priority order, slots, the timer, a red
+# base set aside per job on Linux and judged by failing test on macOS, the culprit's stacked PRs named), and the red-dev
+# bisect, with its 2-of-3 vote mode for a timing budget test. No network,
+# needs bash, git and jq.
 #
 # checks-green.json is a check rollup shaped like a green flare-core PR: the CI
 # workflow's Linux and macOS jobs plus one SKIPPED CI job, a non-CI workflow
@@ -21,6 +25,11 @@ set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FAST_LANE_BATCH_WAIT=0  # a sweep never sleeps for a batch's verdict here
+# Every case up to "Batch macOS gate" runs with the rollback flag on, so they
+# pin that LANE_MAC_PER_PR=1 is the lane from before the batch macOS gate:
+# per-PR macOS builds and Linux-only batches. That section turns it off.
+LANE_MAC_PER_PR=1
+LANE_BATCH_WAIT_MIN=0   # no batch waits for its timer unless a case says so
 # shellcheck source=../../scripts/fast-lane.sh
 source "$here/../../scripts/fast-lane.sh"
 
@@ -278,7 +287,17 @@ build "the build still going: waits, no second dispatch" "pending|waiting for th
 build "the build compiled the head: eligible" "eligible|150|2|Fast-Check marker, macOS build $BUILD_URL" "$MARKED" "$APP" .
 build "the build failed: refused, with what to do" \
   "$BREFUSE (failure). Fix it and push; the lane builds the new head on macOS again" "$MARKED" "$APP" '.conclusion = "failure"'
-build "a cancelled build is refused too" "$BREFUSE (cancelled)" "$MARKED" "$APP" '.conclusion = "cancelled"'
+# A queued or running build waits; a re-dispatch would cancel it (ci.yml's
+# per-branch -build concurrency group). A cancelled one is dispatched again
+# once BUILD_RETRY_SECS after it was cancelled, and waits until then.
+build "a queued build waits, no second dispatch" "pending|waiting for the macOS build $BUILD_URL on head $HEAD_SHA" \
+  "$MARKED" "$APP" '.status = "queued" | .conclusion = ""'
+build "a build pending on its concurrency group waits" "pending|waiting for the macOS build $BUILD_URL on head $HEAD_SHA" \
+  "$MARKED" "$APP" '.status = "pending" | .conclusion = ""'
+build "a build cancelled minutes ago waits" "pending|waiting for the macOS build $BUILD_URL on head $HEAD_SHA" \
+  "$MARKED" "$APP" '.conclusion = "cancelled" | .updatedAt = (now - 300 | todate)'
+build "a build cancelled past the interval is dispatched again" "build-dispatch|Sources/LibraryApp, Sources/LibraryModel|feat/x" \
+  "$MARKED" "$APP" '.conclusion = "cancelled" | .updatedAt = (now - 7200 | todate)'
 build "a red macOS build check is the gate's to name, not just red" "$BREFUSE (failure)" "$MARKED" "$APP" '.conclusion = "failure"' \
   '[{"__typename":"CheckRun","name":"macOS build","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"},
     {"__typename":"CheckRun","name":"Linux","workflowName":"","status":"COMPLETED","conclusion":"SKIPPED"},
@@ -574,10 +593,12 @@ dup_decide "suiteui: SuiteUI is the home, and +Suite adapters pass" "eligible|15
 # the merge base is `mb` (`bad` for a head whose compare fails), and the trees
 # and contents for a commit are the files under $sw/refs/<sha>.
 sw="$tmp/sweep"
-# real_pr <n>: gives fixture PR <n> a real branch feat/<n> at the test's bare
-# remote $sw/origin.git (one docs file on top of dev), so the lane can batch
-# it: headRefName, headRefOid and the body's Head: line move to that commit,
-# and an audit tree or build run keyed by the old head follows it.
+# real_pr <n> [<path>] [<branch>]: gives fixture PR <n> a real branch (feat/<n>
+# unless <branch> names another) at the test's bare remote $sw/origin.git (one
+# file on top of dev, a docs file unless <path> names another), so the lane
+# can batch it, or land it alone after comparing it with dev: headRefName,
+# headRefOid and the body's Head: line move to that commit, and an audit tree
+# or build run keyed by the old head follows it.
 real_pr() {
   local n="$1" f old sha w="$sw/work"
   f="$sw/$n.json"
@@ -587,10 +608,11 @@ real_pr() {
     cp "$here/../../.gitattributes" "$w/"; echo base >"$w/base.md"
     git -C "$w" add -A; git -C "$w" commit -qm base; git -C "$w" push -q "$sw/origin.git" dev
   fi
-  git -C "$w" switch -qc "feat/$n" dev; echo "pr $n" >"$w/pr$n.md"; git -C "$w" add -A; git -C "$w" commit -qm "pr $n"
-  git -C "$w" push -q "$sw/origin.git" "feat/$n"; git -C "$w" switch -q dev
-  sha=$(git -C "$w" rev-parse "feat/$n"); old=$(jq -r .headRefOid "$f")
-  jq --arg b "feat/$n" --arg h "$sha" '.headRefName = $b | .headRefOid = $h | .body |= sub("Head: [^\n]*"; "Head: \($h)")' "$f" >"$sw/x" && mv "$sw/x" "$f"
+  local p="${2:-pr$n.md}" b="${3:-feat/$n}"
+  git -C "$w" switch -qc "$b" dev; mkdir -p "$w/$(dirname "$p")"; echo "pr $n" >"$w/$p"; git -C "$w" add -A; git -C "$w" commit -qm "pr $n"
+  git -C "$w" push -q "$sw/origin.git" "$b"; git -C "$w" switch -q dev
+  sha=$(git -C "$w" rev-parse "$b"); old=$(jq -r .headRefOid "$f")
+  jq --arg b "$b" --arg h "$sha" '.headRefName = $b | .headRefOid = $h | .body |= sub("Head: [^\n]*"; "Head: \($h)")' "$f" >"$sw/x" && mv "$sw/x" "$f"
   [[ ! -d "$sw/refs/$old" ]] || mv "$sw/refs/$old" "$sw/refs/$sha"
   [[ ! -e "$sw/runs.$old.json" ]] || jq --arg h "$sha" 'map(.headSha = $h)' "$sw/runs.$old.json" >"$sw/runs.$sha.json"
 }
@@ -615,11 +637,14 @@ gh() {
       done
       if (( ${#u[@]} )); then jq -s . "${u[@]}"; else echo '[]'; fi ;;
     "pr view "*"--json title "*) echo "title $2" ;;
+    "pr view "*"--json headRefName "*) jq -r .headRefName "$sw/$3.json" ;;
     "pr view "*"--json body "*) jq -r .body "$sw/$3.json" ;;
     "pr view "*"--json closingIssuesReferences "*) cat "$sw/$3.closes" 2>/dev/null || true ;;
     "pr view "*) live_pr "$3" ;;
     "api "*"/check-runs"*) u="${2#*/commits/}"; u="${u%%/*}"; cat "$sw/checks.$u.json" 2>/dev/null || echo '[]' ;;
-    "api "*"/status "*) echo '[]' ;;
+    "api "*"/status "*)  # a commit's statuses: $sw/status.<sha>.json ({statuses: [...]}), none if absent
+      u="${2#*/commits/}"; u="${u%%/*}"
+      jq -r "${!#}" "$sw/status.$u.json" 2>/dev/null || jq -rn '{statuses: []}' | jq -r "${!#}" ;;
     "api "*"/pulls/"*"/files "*)
       n="${2#*/pulls/}"; n="${n%%/*}"
       if [[ -e "$sw/files.$n.json" ]]; then jq -r "${!#}" "$sw/files.$n.json"
@@ -632,7 +657,19 @@ gh() {
     "run list "*"--commit "*)
       u="${a#*--commit }"; u="${u%% *}"
       [[ ! -e "$sw/runlist.fail.$u" ]] || return 1
+      # $sw/headsha.flaky: GitHub's head_sha filter answers an empty list (#4441).
+      [[ ! -e "$sw/headsha.flaky" ]] || { jq -rn '[]' | jq -r "${!#}"; return; }
       jq -r "${!#}" "$sw/runs.$u.json" 2>/dev/null || jq -rn '[]' | jq -r "${!#}" ;;
+    "run list "*"--branch "*"--json databaseId,"*|"run list "*"--branch "*"--json url,displayTitle,headSha "*)
+      # A branch's runs: every runs.<sha>.json of the fixture PRs on that branch.
+      u="${a#*--branch }"; u="${u%% *}"
+      local h=() f
+      for f in "$sw"/[0-9]*.json; do
+        [[ "$(jq -r .headRefName "$f")" == "$u" ]] || continue
+        f=$(jq -r .headRefOid "$f"); [[ ! -e "$sw/runlist.fail.$f" ]] || return 1
+        [[ ! -e "$sw/runs.$f.json" ]] || h+=("$sw/runs.$f.json")
+      done
+      if (( ${#h[@]} )); then jq -s 'add' "${h[@]}" | jq -r "${!#}"; else jq -rn '[]' | jq -r "${!#}"; fi ;;
     "workflow run "*)
       # A dispatch on a PR's head branch starts an in-progress CI run on its head.
       echo "$a" >>"$sw/calls"
@@ -655,6 +692,8 @@ gh() {
         jq -n --arg id "$n" --arg url "https://github.com/qbtrix/creative-apps/actions/runs/$n" \
           '[{databaseId: $id, displayTitle: " ", url: $url}]' >"$sw/runs.$u.json"
       done ;;
+    "run list "*"--json status,displayTitle "*)  # the lane's macOS runs (slots): $sw/macruns.json, none if absent
+      jq -r "${!#}" "$sw/macruns.json" 2>/dev/null || jq -rn '[]' | jq -r "${!#}" ;;
     "run list "*) cat "$sw/ci_head" 2>/dev/null || echo cihead ;;
     "api "*"/compare/cihead...dev"*) cat "$sw/ci_ahead" 2>/dev/null || echo 0 ;;
     "api "*"/compare/"*) [[ "$2" != *bad ]] || return 1; echo mb ;;
@@ -707,7 +746,7 @@ sweep() {
   for n in "$@"; do jq '.labels += [{"name":"feature-done"}]' "$sw/$n.json" >"$sw/x" && mv "$sw/x" "$sw/$n.json"; done
   # #4 and #7 are ready together, so the first run batches them and the
   # second lands the green batch.
-  real_pr 4; real_pr 7
+  real_pr 4; real_pr 7; real_pr 5
   ( main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }
   batch_green
   ( main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }
@@ -898,13 +937,13 @@ for n in 14 22; do
   pr_at "$n" "h$n" "$SWF"
   jq --arg b "b$n" '.headRefName = $b' "$sw/$n.json" >"$sw/x" && mv "$sw/x" "$sw/$n.json"
 done
-touch "$sw/runlist.fail.h22"
+touch "$sw/runlist.fail.h22"; real_pr 14 pr14.md b14; H14=$(jq -r .headRefOid "$sw/14.json")
 lane_sweep() { ( FAST_LANE_RUN_LOOKUP_RETRIES=0 main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }; }
 lane_sweep
 expect "shell: a SuiteWindow PR gets one build-only run, no full run" \
   "$(grep -c -- '-f build_only=true --ref b14$' "$sw/calls"),$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref b14$' "$sw/calls")" "1,0"
 expect "shell: an unreadable run list writes nothing for the PR" "$(grep -cE '^pr [a-z]+ 22 |--ref b22' "$sw/calls")" 0
-jq 'map(if .displayTitle == "macOS build" then .status = "completed" | .conclusion = "success" else . end)' "$sw/runs.h14.json" >"$sw/x" && mv "$sw/x" "$sw/runs.h14.json"
+jq 'map(if .displayTitle == "macOS build" then .status = "completed" | .conclusion = "success" else . end)' "$sw/runs.$H14.json" >"$sw/x" && mv "$sw/x" "$sw/runs.$H14.json"
 lane_sweep
 expect "shell: once it compiled, a later sweep merges it" "$(grep -c '^pr merge 14' "$sw/calls")" 1
 
@@ -921,6 +960,7 @@ for n in 30 32 34; do
 done
 printf '%s\n' '[{"filename": "Sources/SuiteUI/SuiteWindow.swift", "status": "modified"}, {"filename": "Sources/FlareApp/FlareApp.swift", "status": "modified"}]' >"$sw/files.34.json"
 echo '[{"databaseId": "32", "displayTitle": "macOS build", "status": "completed", "conclusion": "failure", "url": "https://github.com/qbtrix/creative-apps/actions/runs/32", "headSha": "h32"}]' >"$sw/runs.h32.json"
+real_pr 30 pr30.md b30; H30=$(jq -r .headRefOid "$sw/30.json")
 lane_sweep
 expect "build: dispatches one build-only run on the app PR's branch, re-sweep included" \
   "$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps -f build_only=true -f app=library --ref b30$' "$sw/calls")" 1
@@ -936,12 +976,37 @@ expect "build: refused PRs keep the fast-lane label" "$(grep -c -- '--remove-lab
 lane_sweep
 expect "build: a later sweep while it builds dispatches and comments nothing more" \
   "$(grep -c -- '--ref b30$' "$sw/calls"),$(grep -c '^pr comment 30 ' "$sw/calls"),$(grep -c '^pr merge 30' "$sw/calls")" "1,1,0"
-jq 'map(if .displayTitle == "macOS build" then .status = "completed" | .conclusion = "success" else . end)' "$sw/runs.h30.json" >"$sw/x" && mv "$sw/x" "$sw/runs.h30.json"
+jq 'map(if .displayTitle == "macOS build" then .status = "completed" | .conclusion = "success" else . end)' "$sw/runs.$H30.json" >"$sw/x" && mv "$sw/x" "$sw/runs.$H30.json"
 lane_sweep
 expect "build: once it compiled the head, a later sweep merges it" "$(grep -c '^pr merge 30' "$sw/calls")" 1
 expect "build: the merge comment names the build" \
   "$(grep -c '^pr comment 30 .*merged into dev.*macOS build https://github.com/qbtrix/creative-apps/actions/runs/830' "$sw/calls")" 1
 expect "build: still one build for its head" "$(grep -c -- '--ref b30$' "$sw/calls")" 1
+# The cancel loop (#4441, #4472): GitHub's head_sha filter sometimes answers
+# an empty list, which read as "no build on the head", so each sweep
+# dispatched again and the new run cancelled the queued one (ci.yml's
+# per-branch -build group); in a full macOS queue nothing ever built. #40's
+# build is queued while head_sha answers empty: no dispatch. #42's build was
+# cancelled 5 minutes ago: it waits. #44's was cancelled 2 hours ago: one
+# dispatch, and the re-sweep waits on it.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"; touch "$sw/headsha.flaky"
+for n in 40 42 44; do
+  pr_at "$n" "h$n" '[{"filename": "Sources/LibraryApp/LibraryInspector.swift", "status": "modified"}]'
+  jq --arg b "b$n" '.headRefName = $b' "$sw/$n.json" >"$sw/x" && mv "$sw/x" "$sw/$n.json"
+done
+for spec in "40 queued null 0" "42 completed cancelled 300" "44 completed cancelled 7200"; do
+  read -r n st c ago <<<"$spec"
+  jq -n --arg n "$n" --arg st "$st" --arg c "$c" --argjson ago "$ago" '[{databaseId: "7\($n)", displayTitle: "macOS build",
+    status: $st, conclusion: (if $c == "null" then "" else $c end), updatedAt: (now - $ago | todate),
+    url: "https://github.com/qbtrix/creative-apps/actions/runs/7\($n)", headSha: "h\($n)"}]' >"$sw/runs.h$n.json"
+done
+lane_sweep
+expect "cancel loop: a queued build is never dispatched over" "$(grep -c -- '--ref b40$' "$sw/calls")" 0
+expect "cancel loop: a build cancelled minutes ago waits" "$(grep -c -- '--ref b42$' "$sw/calls")" 0
+expect "cancel loop: a build cancelled past the interval is dispatched again once" "$(grep -c -- 'build_only=true .*--ref b44$' "$sw/calls")" 1
+lane_sweep
+expect "cancel loop: the re-sweep waits on the new build" "$(grep -c -- '--ref b4[024]$' "$sw/calls")" 1
+expect "cancel loop: nothing merges before it compiles" "$(grep -c '^pr merge 4[024]' "$sw/calls")" 0
 # #36 touches only Tests/AppSnapshotTests (#1097's break): it gets the build too.
 rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
 pr_at 36 h36 '[{"filename": "Tests/AppSnapshotTests/HaloPlaybackDriverTests.swift", "status": "modified"}]'
@@ -957,6 +1022,7 @@ rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
 pr_at 38 h38 '[{"filename": "Sources/PhotoModel/PhotoRecovery.swift", "status": "modified"}]'
 pr_at 39 h39 '[{"filename": "docs/blueprints/photo/features/recovery.md", "status": "modified"}]'
 for n in 38 39; do jq --arg b "b$n" '.headRefName = $b' "$sw/$n.json" >"$sw/x" && mv "$sw/x" "$sw/$n.json"; done
+real_pr 39 pr39.md b39
 lane_sweep
 expect "build: a Model-only PR gets one build, not a merge" \
   "$(grep -c -- '-f build_only=true -f app=photo --ref b38$' "$sw/calls"),$(grep -c '^pr merge 38' "$sw/calls")" "1,0"
@@ -982,7 +1048,7 @@ for n in 45 46; do
   jq --arg h "h$n" '.body = "Adds keyframes.\n\nFast-Check: pass\nHead: \($h)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\nCo-Authored-By: Claude <noreply@anthropic.com>"' \
     "$sw/$n.json" >"$sw/x" && mv "$sw/x" "$sw/$n.json"
 done
-jq '.isDraft = true' "$sw/46.json" >"$sw/x" && mv "$sw/x" "$sw/46.json"
+jq '.isDraft = true' "$sw/46.json" >"$sw/x" && mv "$sw/x" "$sw/46.json"; real_pr 45
 lane_sweep; lane_sweep
 expect "attribution: the PR still merges" "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 45"
 expect "attribution: the squash message keeps the body and drops the lines" \
@@ -1068,6 +1134,52 @@ expect "batch: the merge comment names the batch and its run" \
   "$(grep -c '^pr comment 50 .*merged into dev (.*batch of 2 PRs checked together on Linux: https://github.com/qbtrix/creative-apps/actions/runs/777)' "$sw/calls")" 1
 expect "batch: the late PR lands on its own proof" "$(grep -c '^pr comment 52 .*merged into dev (.*Fast-Check marker)' "$sw/calls")" 1
 expect "batch: the scratch branch is gone" "$(batch_tip)" ""
+
+# Ratchet race (lesson 244): a proof that ran before dev changed a ratchet,
+# lint or baseline file proves nothing about the PR on today's dev, and a PR
+# that changes one proves nothing about code dev gained since its base. Such a
+# PR is not landed on that proof: it becomes a batch of one, checked on Linux
+# on the current dev, and lands on that. A batch whose base is stale that way
+# is dropped and formed again on the current dev.
+dev_moves() {  # dev_moves <path>: a commit on dev at the bare remote changing <path>
+  git -C "$sw/work" switch -q dev; mkdir -p "$sw/work/$(dirname "$1")"; echo "dev $RANDOM" >>"$sw/work/$1"
+  git -C "$sw/work" add -A; git -C "$sw/work" commit -qm "dev moves $1"; git -C "$sw/work" push -q "$sw/origin.git" dev
+}
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+pr_at 80 h80 "$DOCS"; real_pr 80
+dev_moves Tests/command-path-baseline/halo.txt
+lane_sweep
+expect "ratchet race: dev changed a baseline after the proof: no merge on it" "$(grep -c '^pr merge 80' "$sw/calls")" 0
+expect "ratchet race: one Linux check on the PR merged into today's dev" \
+  "$(grep -c '^workflow run ci.yml .*-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls"),$(git -C "$sw/origin.git" rev-parse "$(batch_tip)~1")" \
+  "1,$(git -C "$sw/origin.git" rev-parse dev)"
+batch_green; lane_sweep
+expect "ratchet race: it lands on that check" "$(grep -c '^pr comment 80 .*merged into dev (.*batch of 1 PRs checked together on Linux' "$sw/calls")" 1
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+pr_at 81 h81 "$DOCS"; real_pr 81
+dev_moves docs/other.md
+lane_sweep
+expect "ratchet race: dev moved, no ratchet changed: lands on its own proof" \
+  "$(grep -c '^pr comment 81 .*merged into dev (.*Fast-Check marker)' "$sw/calls"),$(grep -c '^workflow run' "$sw/calls")" "1,0"
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+pr_at 82 h82 "$DOCS"; real_pr 82 Tests/placeholder-menu-baseline.txt
+dev_moves Sources/HaloApp/HaloTransport.swift
+lane_sweep
+expect "ratchet race: a PR changing a baseline, dev moved under it: no merge on its own proof" \
+  "$(grep -c '^pr merge 82' "$sw/calls"),$(grep -c '^workflow run ci.yml .*-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls")" "0,1"
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for n in 83 84; do pr_at "$n" "h$n" "$DOCS"; real_pr "$n"; done
+lane_sweep
+OLD_TIP=$(batch_tip)
+dev_moves Tests/format-lists-baseline.txt
+verdict "$OLD_TIP" success
+lane_sweep
+expect "ratchet race: a green batch on a dev that since changed a ratchet lands nothing" "$(grep -c '^pr merge' "$sw/calls")" 0
+expect "ratchet race: it forms again on today's dev, with a new Linux check" \
+  "$(git -C "$sw/origin.git" rev-parse "$(batch_tip)~2"),$(grep -c '^workflow run ci.yml .*-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls")" \
+  "$(git -C "$sw/origin.git" rev-parse dev),2"
+batch_green; lane_sweep
+expect "ratchet race: the new batch lands on its check" "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 83,pr merge 84"
 
 # A red batch is bisected by prefix: #60 good, #61 bad, #62 good. The tip is
 # red; the chain after 1 PR is green; after 2 red: #61 is the culprit. #60
@@ -1312,7 +1424,7 @@ done
 jq '.body = "Closes #1\n\nFast-Check: pass\nHead: h31"' "$sw/31.json" >"$sw/x" && mv "$sw/x" "$sw/31.json"
 jq '.author.login = "someone-else"' "$sw/32.json" >"$sw/x" && mv "$sw/x" "$sw/32.json"
 jq '.labels = [{"name":"no-fast-lane"}]' "$sw/33.json" >"$sw/x" && mv "$sw/x" "$sw/33.json"
-jq '.labels = [{"name":"needs-human"}]' "$sw/34.json" >"$sw/x" && mv "$sw/x" "$sw/34.json"
+jq '.labels = [{"name":"needs-human"}]' "$sw/34.json" >"$sw/x" && mv "$sw/x" "$sw/34.json"; real_pr 30
 lane_sweep
 expect "autolabel: a crew PR with a Belt-Lead line gets the label and one comment" \
   "$(grep -c '^pr edit 30 .*--add-label fast-lane$' "$sw/calls"),$(grep -c '^pr comment 30 .*Fast lane: labelled because the PR carries Belt-Lead\.' "$sw/calls")" "1,1"
@@ -1320,5 +1432,222 @@ expect "autolabel: the labelled PR is evaluated in the same sweep" "$(grep -c '^
 expect "autolabel: a PR without a Belt-Lead line is left alone" "$(grep -cE '^pr [a-z]+ 31 ' "$sw/calls")" 0
 expect "autolabel: a non-crew author is left alone" "$(grep -cE '^pr [a-z]+ 32 ' "$sw/calls")" 0
 expect "autolabel: no-fast-lane and needs-human PRs are left alone" "$(grep -cE '^pr [a-z]+ (33|34) ' "$sw/calls")" 0
+
+# Batch macOS gate: with LANE_MAC_PER_PR=0 (the default) no code PR gets a
+# macOS build of its own. A batch whose PRs change code runs one macOS gate
+# (ci.yml's mac_only) next to its Linux check, scoped to the union of its apps
+# (scripts/test-scope build-apps over the batch's changed code), and lands
+# only when both are green on its head. Batches order p0, beta, the rest; one
+# forms when a slot frees, at LANE_BATCH_MAX, or on the timer, and never while
+# the lane's macOS runs fill LANE_MAC_SLOTS.
+LANE_MAC_PER_PR=0
+build "flag off: a code PR needs no build of its own" "eligible|150|2|Fast-Check marker" "$MARKED" "$APP" -
+build "flag off: a red per-PR macOS build holds nothing" "eligible|150|2|Fast-Check marker" "$MARKED" "$APP" '.conclusion = "failure"' \
+  '[{"__typename":"CheckRun","name":"macOS build","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"}]'
+LINUX_URL="https://github.com/qbtrix/creative-apps/actions/runs/777"
+MAC_URL="https://github.com/qbtrix/creative-apps/actions/runs/888/job/88"
+gate() {  # gate <sha> <Linux> <macOS> [<macOS job name>]: each success, failure, in_progress or none
+  jq -n --arg l "$2" --arg m "$3" --arg mn "${4:-macOS}" --arg lu "$LINUX_URL" --arg mu "$MAC_URL" '
+    def run(n; c; u): if c == "none" then empty else {name: n, status: (if c == "in_progress" then "in_progress" else "completed" end),
+      conclusion: (if c == "in_progress" then null else c end), started_at: "2026-01-01T00:00:00Z", details_url: u} end;
+    [run("Linux"; $l; $lu), run($mn; $m; $mu)]' >"$sw/checks.$1.json"
+}
+cpr() {  # cpr <n> <path>: fixture PR <n> changing <path>, with a real branch
+  pr_at "$1" "h$1" "$(jq -n --arg p "$2" '[{filename: $p, status: "modified"}]')"; real_pr "$1" "$2"
+}
+label() { jq --arg l "$2" '.labels += [{name: $l}]' "$sw/$1.json" >"$sw/x" && mv "$sw/x" "$sw/$1.json"; }
+dated() { jq --argjson ago "$2" '.commits = [{oid: .headRefOid, messageHeadline: "x", committedDate: (now - $ago | todate)}]' "$sw/$1.json" >"$sw/x" && mv "$sw/x" "$sw/$1.json"; }
+merges() { grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -; }
+fresh() { rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"; }
+
+# Flag on: a lone code PR gets today's per-PR build and no batch.
+fresh; cpr 90 Sources/PhotoModel/PhotoDocument.swift
+LANE_MAC_PER_PR=1 lane_sweep
+expect "flag on: a lone code PR gets one per-PR build, no batch" \
+  "$(grep -c -- '-f build_only=true -f app=photo --ref feat/90$' "$sw/calls"),$(grep -c -- '-f mac_only=true' "$sw/calls"),$(batch_tip)" "1,0,"
+# Flag off: the same PR is a batch of one with a Linux check and a macOS gate.
+fresh; cpr 90 Sources/PhotoModel/PhotoDocument.swift
+lane_sweep
+TIP=$(batch_tip); BR=$(batch_br)
+expect "flag off: a lone code PR is a batch of one, no per-PR build, nothing merged" \
+  "$(grep -c -- '-f build_only=true' "$sw/calls"),$(merges),${BR:+batch}" "0,,batch"
+expect "flag off: the batch gets a Linux check and one macOS gate scoped to its app" \
+  "$(grep -c -- "-f linux_only=true --ref $BR\$" "$sw/calls"),$(grep -c -- "-f mac_only=true -f app=photo --ref $BR\$" "$sw/calls")" "1,1"
+gate "$TIP" success in_progress "macOS (photo)"; lane_sweep
+expect "gate: a green Linux check alone lands nothing and starts nothing more" \
+  "$(merges),$(grep -c -- '-f mac_only=true' "$sw/calls")" ",1"
+gate "$TIP" success success "macOS (photo)"; lane_sweep
+expect "gate: Linux and macOS green: it lands, and its comment names both runs" \
+  "$(merges),$(grep -c "^pr comment 90 .*batch of 1 PRs checked together on Linux and macOS: $LINUX_URL, $MAC_URL" "$sw/calls")" "pr merge 90,1"
+
+# A green batch: a p0 docs PR, a beta Design PR and a plain Photo PR land in
+# priority order, and the macOS gate covers the union of their apps.
+fresh
+cpr 91 Sources/PhotoApp/PhotoCanvas.swift; cpr 92 Sources/DesignModel/DesignDocument.swift
+pr_at 93 h93 "$DOCS"; real_pr 93
+label 93 p0; label 92 beta
+lane_sweep
+TIP=$(batch_tip); BR=$(batch_br)
+expect "order: p0, then beta, then the rest" \
+  "$(git -C "$sw/origin.git" log --first-parent --reverse --format=%s "dev..$TIP" | grep -oE '#[0-9]+' | paste -sd, -)" "#93,#92,#91"
+expect "union: one macOS gate for both apps, no Linux-less landing" \
+  "$(grep -c -- "-f mac_only=true -f app=design,photo --ref $BR\$" "$sw/calls"),$(merges)" "1,"
+gate "$TIP" success success "macOS (design,photo)"; lane_sweep
+expect "union: green on both lands all three in that order" "$(merges)" "pr merge 93,pr merge 92,pr merge 91"
+
+# A shared path builds and tests every app: the gate runs with no app.
+fresh; cpr 94 Sources/SuiteUI/GlassPanel.swift; lane_sweep; BR=$(batch_br)
+expect "shared: SuiteUI gets the full macOS gate" \
+  "$(grep -c -- "-f mac_only=true --ref $BR\$" "$sw/calls"),$(grep -c -- '-f app=' "$sw/calls")" "1,0"
+# The scope also covers the tests scripts/test-scope changed picks for every
+# changed path, code or not: SuiteUI's tests next to an app's, a fixture a
+# Model test reads, a golden PNG (every snapshot suite, so the full gate).
+fresh; cpr 130 Tests/SuiteUITests/Fixtures/glass.png; cpr 133 Sources/PhotoApp/A.swift; lane_sweep; BR=$(batch_br || true)
+expect "scope: a SuiteUITests fixture adds suiteui to the app's gate" "$(grep -c -- "-f mac_only=true -f app=photo,suiteui --ref $BR\$" "$sw/calls")" 1
+fresh; cpr 131 Tests/PhotoModelTests/Fixtures/png-parity/a.png; lane_sweep; BR=$(batch_br || true)
+expect "scope: a fixture a Model test reads gets a macOS gate, not an instant landing" \
+  "$(merges),$(grep -c -- "-f mac_only=true -f app=photo --ref $BR\$" "$sw/calls")" ",1"
+fresh; cpr 132 Tests/AppSnapshotTests/Golden/canvas/brush.png; lane_sweep; BR=$(batch_br || true)
+expect "scope: a golden PNG gets the full macOS gate" "$(merges),$(grep -c -- "-f mac_only=true --ref $BR\$" "$sw/calls")" ",1"
+
+# A docs-only batch needs no macOS: Linux alone lands it, as before.
+fresh; pr_at 95 h95 "$DOCS"; real_pr 95; pr_at 96 h96 "$DOCS"; real_pr 96; lane_sweep
+gate "$(batch_tip)" success none; lane_sweep
+expect "docs: a batch with no code has no macOS gate and lands on Linux" \
+  "$(grep -c -- '-f mac_only=true' "$sw/calls"),$(merges)" "0,pr merge 95,pr merge 96"
+
+# A red batch: #95 and #97 are fine, #96 breaks the macOS gate. The bisect
+# probes each prefix on Linux and macOS, ejects #96 naming the macOS job and
+# #98 (stacked on its branch), lands #95, and at once (a slot just freed)
+# starts the next batch with #97.
+fresh
+cpr 95 Sources/PhotoModel/A.swift; cpr 96 Sources/PhotoApp/B.swift; cpr 97 Sources/PhotoModel/C.swift
+pr_at 98 h98 "$DOCS"; jq '.baseRefName = "feat/96" | .headRefName = "feat/98"' "$sw/98.json" >"$sw/x" && mv "$sw/x" "$sw/98.json"
+H96=$(jq -r .headRefOid "$sw/96.json")
+lane_sweep
+TIP=$(batch_tip); BR=$(batch_br)
+gate "$TIP" success failure "macOS (photo)"; lane_sweep
+expect "red: a macOS-red tip probes the chain after 1 PR on Linux and macOS" \
+  "$(probe_sha 1),$(grep -c -- "-f linux_only=true --ref $BR-1\$" "$sw/calls"),$(grep -c -- "-f mac_only=true -f app=photo --ref $BR-1\$" "$sw/calls")" \
+  "$(git -C "$sw/origin.git" rev-parse "$TIP~2"),1,1"
+gate "$(probe_sha 1)" success in_progress "macOS (photo)"; lane_sweep
+expect "red: a probe waits for its macOS gate too" "$(probe_sha 2),$(merges)" ","
+gate "$(probe_sha 1)" success success "macOS (photo)"; lane_sweep
+gate "$(probe_sha 2)" success failure "macOS (photo)"; lane_sweep
+expect "red: the culprit's PRs before it land" "$(merges)" "pr merge 95"
+expect "red: the culprit gets needs-fix and one comment naming the macOS job, its run and its stacked PR" \
+  "$(grep -c '^pr edit 96 .*--add-label needs-fix' "$sw/calls"),$(grep -c "^pr comment 96 .*head $H96 fails the macOS (photo) check once it lands on dev after #95: $MAC_URL\. Those PRs merged; This one has the needs-fix label and waits\. Stacked on its branch: #98, which wait for the fix" "$sw/calls")" "1,1"
+expect "red: a slot freed, so the next batch (#97) forms in the same run" \
+  "$(git -C "$sw/origin.git" log --first-parent --format=%s "dev..$(batch_tip)" | grep -oE '#[0-9]+' | paste -sd, -)" "#97"
+lane_sweep
+expect "red: the culprit waits at its head" "$(grep -c '^pr merge 96' "$sw/calls")" 0
+
+# The local Mac gate's commit status is a macOS pass like the GitHub job.
+fresh; cpr 99 Sources/PhotoModel/A.swift; lane_sweep; TIP=$(batch_tip)
+gate "$TIP" success none
+jq -n '{statuses: [{context: "local-ci/macos", state: "success", target_url: "https://mac.local/ci/1"}]}' >"$sw/status.$TIP.json"
+lane_sweep
+expect "local: a local-ci/macos pass lands the batch" \
+  "$(merges),$(grep -c '^pr comment 99 .*on Linux and macOS: .*https://mac.local/ci/1' "$sw/calls")" "pr merge 99,1"
+# A red on the same head outranks a green: the local gate skips known reds
+# (CI_LOCAL_SKIP), so its pass never covers a GitHub macOS failure, nor the
+# other way round. A GitHub job still running doesn't hold a local pass.
+lstatus() { jq -n --arg s "$2" '{statuses: [{context: "local-ci/macos", state: $s, target_url: "https://mac.local/ci/1"}]}' >"$sw/status.$1.json"; }
+fresh; cpr 120 Sources/PhotoModel/A.swift; lane_sweep; TIP=$(batch_tip)
+gate "$TIP" success failure "macOS (photo)"; lstatus "$TIP" success; lane_sweep
+expect "local: a local pass doesn't land a batch GitHub's macOS job fails" "$(merges),$(grep -c '^pr merge 120' "$sw/calls")" ",0"
+fresh; cpr 121 Sources/PhotoModel/A.swift; lane_sweep; TIP=$(batch_tip)
+gate "$TIP" success success "macOS (photo)"; lstatus "$TIP" failure; lane_sweep
+expect "local: a GitHub pass doesn't land a batch the local gate fails" "$(merges)" ""
+fresh; cpr 122 Sources/PhotoModel/A.swift; lane_sweep; TIP=$(batch_tip)
+gate "$TIP" success in_progress "macOS (photo)"; lstatus "$TIP" success; lane_sweep
+expect "local: a local pass lands while GitHub's macOS job still runs" "$(merges)" "pr merge 122"
+
+# Slots: the lane's queued and running macOS runs (gates and per-PR builds;
+# other runs don't count) at LANE_MAC_SLOTS form no batch.
+fresh; cpr 100 Sources/PhotoModel/A.swift
+jq -n '[range(4) | {status: "in_progress", displayTitle: "macOS gate: photo"}] + [{status: "in_progress", displayTitle: "scoped: photo"}]' >"$sw/macruns.json"
+lane_sweep
+expect "slots: 4 of 4 busy: no batch, no dispatch" "$(batch_tip),$(grep -c '^workflow run' "$sw/calls")" ",0"
+jq '.[0].status = "completed"' "$sw/macruns.json" >"$sw/x" && mv "$sw/x" "$sw/macruns.json"
+lane_sweep
+expect "slots: one frees: the batch forms" "$( [[ -n "$(batch_tip)" ]] && echo formed)" "formed"
+rm -f "$sw/macruns.json"
+
+# The timer: with no slot just freed, a code batch waits until its oldest
+# ready head is LANE_BATCH_WAIT_MIN old; a batch that resolves frees a slot,
+# and the PRs ready then batch at once.
+LANE_BATCH_WAIT_MIN=10
+fresh; cpr 101 Sources/PhotoModel/A.swift; dated 101 60
+lane_sweep
+expect "timer: a 1-minute-old head waits" "$(batch_tip),$(grep -c '^workflow run' "$sw/calls")" ",0"
+dated 101 1200; lane_sweep; TIP=$(batch_tip)
+expect "timer: at 20 minutes the batch forms" "${TIP:+formed}" "formed"
+cpr 102 Sources/PhotoModel/B.swift; dated 102 60
+gate "$TIP" success success "macOS (photo)"; lane_sweep
+expect "timer: the batch lands, and the fresh PR batches at once" \
+  "$(merges),$(git -C "$sw/origin.git" log --first-parent --format=%s "dev..$(batch_tip)" | grep -oE '#[0-9]+' | paste -sd, -)" "pr merge 101,#102"
+LANE_BATCH_WAIT_MIN=0
+
+# A red base is only "dev is red" for the jobs it is red on: dev red on Linux
+# alone doesn't wave through a batch that also breaks macOS. Linux is set aside
+# and the bisect names the macOS culprit.
+fresh; cpr 103 Sources/PhotoApp/A.swift; cpr 104 Sources/PhotoModel/B.swift
+lane_sweep; TIP=$(batch_tip); BR=$(batch_br)
+gate "$TIP" failure failure "macOS (photo)"; lane_sweep
+gate "$(probe_sha 1)" failure failure "macOS (photo)"; lane_sweep
+expect "red base: a red first PR probes the base alone" "$(probe_sha 0)" "$(git -C "$sw/origin.git" rev-parse dev)"
+gate "$(probe_sha 0)" failure success "macOS (photo)"; lane_sweep
+expect "red base: dev red on Linux only lands nothing on own proof" "$(merges),$(grep -c "own proof" "$sw/calls")" ",0"
+expect "red base: the macOS culprit is named" \
+  "$(grep -c '^pr edit 103 .*--add-label needs-fix' "$sw/calls"),$(grep -c '^pr comment 103 .*fails the macOS (photo) check once it lands on dev:' "$sw/calls")" "1,1"
+fresh; cpr 105 Sources/PhotoApp/A.swift; cpr 106 Sources/PhotoModel/B.swift
+lane_sweep; TIP=$(batch_tip)
+gate "$TIP" failure success "macOS (photo)"; lane_sweep
+gate "$(probe_sha 1)" failure success "macOS (photo)"; lane_sweep
+gate "$(probe_sha 0)" failure failure "macOS (photo)"; lane_sweep
+expect "red base: red on every job the tip is red on lands on own proof, as before" "$(merges)" "pr merge 105,pr merge 106"
+# Never on own proof while the tip's macOS gate still runs: dev red on Linux
+# sets Linux aside, and the tip waits for macOS; green there, it lands.
+fresh; cpr 107 Sources/PhotoApp/A.swift; cpr 108 Sources/PhotoModel/B.swift
+lane_sweep; TIP=$(batch_tip)
+gate "$TIP" failure in_progress "macOS (photo)"; lane_sweep
+gate "$(probe_sha 1)" failure in_progress "macOS (photo)"; lane_sweep
+gate "$(probe_sha 0)" failure success "macOS (photo)"; lane_sweep
+expect "red base: a tip whose macOS gate still runs lands nothing" "$(merges),$(grep -c "own proof" "$sw/calls")" ",0"
+gate "$TIP" failure success "macOS (photo)"; lane_sweep
+expect "red base: once macOS passes, red only where dev is red, it lands on own proof" \
+  "$(merges),$(grep -c '^pr comment 108 .*so this batch landed on each PR.s own proof' "$sw/calls")" "pr merge 107,pr merge 108,1"
+# dev red on macOS: the batch is judged by failing tests, not by the job.
+# Each chain commit's macOS gate has its own job (joblog.<id> is its failed
+# log); the base's failing tests are set aside, any other one is the batch's.
+mlog() {  # mlog <job id> <test>...: a macOS job's failed log with those tests failing
+  local t; : >"$sw/joblog.$1"
+  for t in "${@:2}"; do
+    printf 'macOS (photo)\tScoped build and tests\t2026-10-23T04:39:07.2585450Z \xe2\x9c\x98 Test %s recorded an issue at %s:41:22: Expectation failed: (a \xe2\x86\x92 1) == (b \xe2\x86\x92 2)\n' "${t#*/}" "${t%%/*}" >>"$sw/joblog.$1"
+  done
+  printf 'macOS (photo)\tScoped build and tests\t2026-10-23T04:39:07.2588190Z \xe2\x9c\x98 Test run with 9 tests failed after 3.1 seconds with %s issues.\n' "$(( $# - 1 ))" >>"$sw/joblog.$1"
+}
+devred() {  # devred <n>: PRs n and n+1 batched, the tip, probe 1 and the base all red on macOS
+  fresh; cpr "$1" Sources/PhotoApp/A.swift; cpr "$(( $1 + 1 ))" Sources/PhotoModel/B.swift
+  lane_sweep; TIP=$(batch_tip)
+  MAC_URL="$JOB/201" gate "$TIP" success failure "macOS (photo)"; lane_sweep
+  MAC_URL="$JOB/202" gate "$(probe_sha 1)" success failure "macOS (photo)"; lane_sweep
+  MAC_URL="$JOB/203" gate "$(probe_sha 0)" success failure "macOS (photo)"
+}
+JOB="https://github.com/qbtrix/creative-apps/actions/runs/888/job"
+devred 110; mlog 201 Old.swift/a\(\); mlog 202 Old.swift/a\(\); mlog 203 Old.swift/a\(\); lane_sweep
+expect "dev red macOS: a batch failing only dev's tests lands" "$(merges),$(grep -c '^pr edit .*needs-fix' "$sw/calls")" "pr merge 110,pr merge 111,0"
+devred 112; mlog 201 Old.swift/a\(\) New.swift/b\(\); mlog 202 Old.swift/a\(\); mlog 203 Old.swift/a\(\); lane_sweep
+expect "dev red macOS: a new failing test is not set aside" "$(grep -c "own proof" "$sw/calls"),$(grep -c '^pr merge 113' "$sw/calls")" "0,0"
+expect "dev red macOS: the PR that adds it is named with the test" \
+  "$(merges),$(grep -c '^pr edit 113 .*--add-label needs-fix' "$sw/calls"),$(grep -c "^pr comment 113 .*fails the macOS (photo) check once it lands on dev after #112: $JOB/201\. Tests failing with it that pass on dev: New\.swift/b()\." "$sw/calls")" \
+  "pr merge 112,1,1"
+devred 114; mlog 202 Old.swift/a\(\); mlog 203 Old.swift/a\(\); lane_sweep
+expect "dev red macOS: an unreadable log lands nothing and names nothing" "$(merges),$(grep -c 'needs-fix' "$sw/calls")" ",0"
+devred 116; printf 'macOS (photo)\tscripts/ci\t2026-10-23T04:39:07Z TEST PROCESS DIED\n' >"$sw/joblog.201"; mlog 202 Old.swift/a\(\); mlog 203 Old.swift/a\(\); lane_sweep
+expect "dev red macOS: a crash with no test named is red, never dev's" \
+  "$(merges),$(grep -c '^pr edit 117 .*--add-label needs-fix' "$sw/calls"),$(grep -c "own proof" "$sw/calls")" "pr merge 116,1,0"
+LANE_MAC_PER_PR=1
 
 exit "$fail"

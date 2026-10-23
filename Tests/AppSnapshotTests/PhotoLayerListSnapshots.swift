@@ -2,7 +2,8 @@
 // LayerTreeList (AL-p3), `layered` with Background hidden: the journeys' ids,
 // each row's kind symbol (no thumbnail, so names share a leading edge, #1633)
 // and caption, with no disclosure column (the layers never nest). Writes
-// photo-layer-list-kernel-light/-dark.png. macOS only.
+// photo-layer-list-kernel-light/-dark.png; with two layers both picked
+// (multi-layer-select PM-3), photo-layer-list-multi-light/-dark.png. macOS only.
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -44,7 +45,20 @@ import Testing
     }
 
     @Test func panel() throws {
-        let model = try layered()
+        try snapshots(try layered(), name: "photo-layer-list-kernel")
+    }
+
+    /// Two layers, both picked: the list draws every id `selectedLayerIDs` holds.
+    @Test func severalPicked() throws {
+        var model = try PhotoWorkspace.fixture(.sample)
+        model.addLayer()
+        model.selectAllLayers()
+        #expect(model.layers.count == 2 && model.selectedLayerIDs.count == 2)
+        #expect(PhotoLayerList.selected(model) == Set(model.layers.map(\.id)))
+        try snapshots(model, name: "photo-layer-list-multi")
+    }
+
+    private func snapshots(_ model: PhotoWorkspace, name: String) throws {
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
                 PhotoLayerList(model: model, perform: { _ in })
@@ -52,7 +66,7 @@ import Testing
                     .background(SuiteColor.panel)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .padding(SuiteSpacing.xxl),
-                name: "photo-layer-list-kernel-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+                name: "\(name)-\(scheme.name)", scheme: scheme)
         }
     }
 }

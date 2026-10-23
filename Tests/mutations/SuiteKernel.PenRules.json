@@ -1,0 +1,51 @@
+[
+  {
+    "label": "closeAddsNoPoint: closing appends the first anchor again (a duplicate point)",
+    "file": "Sources/SuiteKernel/Paths/PenRules.swift",
+    "find": "draft.contour.closed = true",
+    "replace": "draft.contour.closed = true; draft.contour.anchors += draft.contour.anchors.prefix(1)",
+    "tests": "PenRulesTests"
+  },
+  {
+    "label": "closeIsInclusive: `<` for `<=` on the close distance",
+    "file": "Sources/SuiteKernel/Paths/PenRules.swift",
+    "find": "near(first, point, scaled(closeDistance, draft.scale), inclusive: true)",
+    "replace": "near(first, point, scaled(closeDistance, draft.scale), inclusive: false)",
+    "tests": "PenRulesTests"
+  },
+  {
+    "label": "toleranceIsOnScreen: the anchor tolerance is not divided by the scale",
+    "file": "Sources/SuiteKernel/Paths/PenRules.swift",
+    "find": "near(last.point, point, scaled(anchorTolerance, scale))",
+    "replace": "near(last.point, point, anchorTolerance)",
+    "tests": "PenRulesTests"
+  },
+  {
+    "label": "finishHelpReadsFlaresReasons: one anchor finishes a path",
+    "file": "Sources/SuiteKernel/Paths/PenRules.swift",
+    "find": "draft.contour.anchors.count >= 2",
+    "replace": "draft.contour.anchors.count >= 1",
+    "tests": "PenRulesTests"
+  },
+  {
+    "label": "pressOnLastAnchorDoesNotClose: closes skips the near-last-anchor check",
+    "file": "Sources/SuiteKernel/Paths/PenRules.swift",
+    "find": "let last = points.last, !near(last, point, tolerance),",
+    "replace": "let last = points.last,",
+    "tests": "PenRulesTests"
+  },
+  {
+    "label": "nonFiniteHandleAddsNothing: a non-finite handleOut still adds a corner anchor",
+    "file": "Sources/SuiteKernel/Paths/PenRules.swift",
+    "find": "guard point.isFinite, handleOut?.isFinite ?? true else { return draft }",
+    "replace": "guard point.isFinite else { return draft }",
+    "tests": "PenRulesTests"
+  },
+  {
+    "label": "scaleGuardMatchesFlare: only a zero scale is degenerate, so a negative one gives a negative tolerance",
+    "file": "Sources/SuiteKernel/Paths/PenRules.swift",
+    "find": "guard scale > 0 else { return .infinity }",
+    "replace": "guard scale != 0 else { return .infinity }",
+    "tests": "PenRulesTests"
+  }
+]

@@ -85,9 +85,3 @@ struct NotBuiltExportSizing: ExportSizing {
     func outputSize(for canvas: CanvasSize, _ size: ExportSize) throws -> CanvasSize { canvas }
     func resized(_ image: DecodedImage, to size: CanvasSize) throws -> DecodedImage { image }
 }
-
-struct NotBuiltSampling: ColorSampling {
-    let not = NotBuilt(feature: "PV-9")
-    var unavailableHelp: String? { not.help }
-    func sample(_ picture: PixelBuffer, center: (x: Int, y: Int), size: SampleSize) -> SampledColor? { nil }
-}

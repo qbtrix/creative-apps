@@ -1,0 +1,23 @@
+[
+  {
+    "label": "trackingIsEmRelative: tracking reaches the layout as points, not thousandths of an em",
+    "file": "Sources/SuiteKernel/Text/TextStyleRules.swift",
+    "find": "paragraph.tracking = style.paragraph.tracking / 1000 * style.size",
+    "replace": "paragraph.tracking = style.paragraph.tracking",
+    "tests": "TextStyleLayoutTests"
+  },
+  {
+    "label": "lineHeightClamps: a line height outside 0.5...4 is kept as given",
+    "file": "Sources/SuiteKernel/Text/TextStyleRules.swift",
+    "find": "case .lineHeight: style.paragraph.lineHeight = kept",
+    "replace": "case .lineHeight: style.paragraph.lineHeight = value",
+    "tests": "TextStyleRulesTests"
+  },
+  {
+    "label": "lastLineNotJustified: the box width is dropped, so a justified paragraph neither wraps nor spans the box",
+    "file": "Sources/SuiteKernel/Text/TextStyleRules.swift",
+    "find": "paragraph: paragraph)",
+    "replace": "paragraph: ParagraphStyle(alignment: paragraph.alignment, lineHeight: paragraph.lineHeight, tracking: paragraph.tracking))",
+    "tests": "TextStyleLayoutTests"
+  }
+]

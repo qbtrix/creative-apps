@@ -39,7 +39,7 @@ all steps F and L)
 2. Press 3. Shot `cull-rated`. Expect "2 of 24"; press Left: the photo's
    value ends `3 stars`; press Right.
 3. Press P on `IMG_0002`, then X on `IMG_0003`. Shot `cull-flagged`. Expect
-   "4 of 24"; Favorites count 1.
+   "4 of 24"; Picks count 1.
 4. Open Edit: the Undo item reads "Undo Reject". Choose it. Shot
    `cull-undo`. Expect the loupe still on "4 of 24" (undo does not move,
    #426); press Left: `IMG_0003`'s value no longer contains `Rejected`.
@@ -197,7 +197,7 @@ Chain of 4: CU-3 adds Auto Advance inside CU-1's `cull` in `LibraryCulling.swift
 
 | quality row | budget (CI gate, debug) | test |
 |---|---|---|
-| QB-LIB-4 model half | `cull` on one photo of `large` (10,000) ≤ 10 ms (1 ms release); it rebuilds `order` only when the sort is by rating or the collection is Favorites | `LibraryCullBudgetTests.cullOneWithinBudget` (under the name sort, where a rebuild would blow the 10 ms gate: rebuilding `order` alone for 10,000 is the spine's 50 ms row), `.orderFollowsARatingUnderRatingSort` (under the rating sort the changed photo moves in `order`) |
+| QB-LIB-4 model half | `cull` on one photo of `large` (10,000) ≤ 10 ms (1 ms release); it rebuilds `order` only when the sort is by rating or the collection is Picks | `LibraryCullBudgetTests.cullOneWithinBudget` (under the name sort, where a rebuild would blow the 10 ms gate: rebuilding `order` alone for 10,000 is the spine's 50 ms row), `.orderFollowsARatingUnderRatingSort` (under the rating sort the changed photo moves in `order`) |
 | QB-LIB-5 model half | `cull` with Auto Advance in the loupe on `large` ≤ 10 ms (1 ms release); `stepLoupe` itself is loupe-viewport's row | `LibraryCullBudgetTests.advanceWithinBudget` |
 | QB-LIB-4, QB-LIB-5 probe | p95 ≤ 2 frames late to the badge or the next photo's preview; report-only | P2 (CU-8) |
 | QB-F3 | each key, menu item and inspector click is one named step | `LibraryRatingTests`, `LibraryMetadataTests`, J4 steps 4 and 7 |

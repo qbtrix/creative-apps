@@ -139,7 +139,7 @@ it; all steps F and L)
    1"). Press U. Shot `filter-empty`. Expect the grid with "No Matching
    Photos" and **Clear Filter**. Edit > Undo twice ("Undo Clear Flag"):
    two cells again.
-7. Click Favorites. Expect the filter still on: "Picked, Rejects hidden; 2
+7. Click Picks. Expect the filter still on: "Picked, Rejects hidden; 2
    of 2".
 8. View > Filter > Clear Filter; All Photos. Expect "All photos; 24 of 24".
    View > Filter > Hide Rejected. Expect "Rejects hidden; 23 of 24".
@@ -363,7 +363,7 @@ so the controls light up when a slice sets its `unavailable` to nil, with no
 further app edit. `Platform/CollectionsStore.swift` is a stub that throws
 "The collections file isn't built yet (filters-collections)." FC-5 mounts
 it all: `LibraryWindow.swift` switches to the `sections:` init (Library:
-All Photos, Favorites, Recently Added; Collections: yours, with New Collection
+All Photos, Picks, Recently Added; Collections: yours, with New Collection
 as the section's `addAction` and `onRename`), puts the bar above
 `LibraryBrowser`, publishes `\.libraryFilters`, the `library.collections`
 element and the hooks; `LibraryCommands.swift` adds the items below;
@@ -542,7 +542,7 @@ with the `swift test --filter` regex of its test.
 | id | test | fails when | mutations |
 |---|---|---|---|
 | FC-1 | `LibraryFilterTests`: `.all` matches every `shoot` photo and its summary is "All photos"; `atLeast(3)` admits 3, 4, 5 and not 2; `exactly(0)` admits only unrated; `[.pick]` keeps picks; `[.pick, .none]` reads "Picked or Unflagged"; `hidesRejected` drops rejects whatever `flags` says; labels `[.red, .blue]` keep only those and read "Red or Blue"; a three-part summary reads "Picked, At least 3 stars, Rejects hidden"; every `RatingRule.title` | a rule admits the wrong photo or a summary's words drift | `>=` → `>` in `atLeast`; `hidesRejected` term dropped; empty `labels` treated as "no label" |
-| FC-2 | `LibraryCollectionsSeamTests` (MJ1): with `.all` and none of yours, `order`, counts and `==` equal today's on `shoot` and `samples`; two catalogs differing only in `filter` or `userCollections` are not equal; a filter applies in All Photos, Favorites and Recently Added; under a filter (name sort) a reject leaves `order`; a `user-1` row appears with its count, shows its photos, and falls back to All Photos when removed; a filter that hides the loupe photo returns to the grid; every stub's help is its `unavailable` text | the bar's filter skips a collection, `order` goes stale under a filter, or counts include filtered-out photos | `editCanReorder` without the filter term; `recount` omits your collections; `==` without `filter` |
+| FC-2 | `LibraryCollectionsSeamTests` (MJ1): with `.all` and none of yours, `order`, counts and `==` equal today's on `shoot` and `samples`; two catalogs differing only in `filter` or `userCollections` are not equal; a filter applies in All Photos, Picks and Recently Added; under a filter (name sort) a reject leaves `order`; a `user-1` row appears with its count, shows its photos, and falls back to All Photos when removed; a filter that hides the loupe photo returns to the grid; every stub's help is its `unavailable` text | the bar's filter skips a collection, `order` goes stale under a filter, or counts include filtered-out photos | `editCanReorder` without the filter term; `recount` omits your collections; `==` without `filter` |
 | FC-3 | `LibraryCollectionsHistoryTests`: a collections edit is one named step and a no-op records none; undo puts the list back and redo the new one; undo of a New Collection that was selected falls back to All Photos; a photo step and a collections step undo in order; undo never moves the loupe; `saveRevision` is untouched by a collections-only step | a collection change can't be undone, or undo restores the wrong list | undo skips `collectionsBefore`; redo applies `before`; no-op guard dropped |
 | FC-4 | builds on the lane's macOS build-only run; every closure is built as `enabled(help == nil)`, so while FC-2's stubs answer their `unavailable` text every one is nil (J11 in FC-5 checks it on screen) | a control is enabled with nothing behind it | – (macOS, no Model code) |
 | FC-5 | J0, J10, J11 pass: every new menu item and bar control is listed in `library.controls`, disabled, with "… isn't built yet (filters-collections)."; the sidebar shows the Library and Collections sections; existing Library snapshots redrawn and listed | a new control is dead or unnamed, or an existing journey breaks | – (macOS, no Model code) |

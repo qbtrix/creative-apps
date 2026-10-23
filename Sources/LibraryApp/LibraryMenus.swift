@@ -22,9 +22,10 @@ struct LibraryMenu {
         var loadSamples: Action?
     }
 
-    /// File (import): Import Folder…, and the import notice's actions.
+    /// File (import): Import Folder…, a folder dropped on the empty catalog, and the import notice's actions.
     struct File {
         var importFolder: Action?
+        var importDropped: (@MainActor (String) -> Void)?
         var importHelp: String?  // why Import Folder… can't act, before the services' reason
         var showImportFailures: Action?
         var dismissImportNotice: Action?
@@ -62,6 +63,7 @@ struct LibraryMenu {
         var actualSize: Action?
         var setSort: (@MainActor (LibrarySort) -> Void)?
         var sort: LibrarySort = .captureDate
+        var setCellSize: (@MainActor (Int) -> Void)?  // the grid toolbar's Size bar
         var first: Action?
         var last: Action?
         var zoomInTitle: String = "Zoom In"
@@ -113,6 +115,7 @@ struct LibraryMenu {
     var view = Viewing()
     var photo = Photo()
     var export = Export()
+    var share = Share()
     /// The services' reasons by member ("importer", "loupe", ...): `LibraryCatalog.help(for:)`.
     var reasons: [String: String] = [:]
 

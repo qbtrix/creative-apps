@@ -1,0 +1,9 @@
+# Tests/render-cpu-ops.txt: the one registry of ops the GPU canvas route can't run yet
+# (docs/render-contract.md). A GPU-route `return nil` or a dispatcher readback is allowed
+# only with `// render-contract: cpu-op <id>` on its line, <id> listed here. Each entry is
+# debt: the line names the issue that gives the op a GPU path in creative-core (with parity
+# tests), and the entry goes when that lands. Line: `<id>  <what runs on the CPU>  <issue>`.
+live-blur                 Blur (it reads neighbours), or adjustment layers that aren't the live ones, run on CoreRaster  #3144
+layer-opacity-range       a layer opacity outside 0...1 composites on CoreRaster  #3144
+masked-adjustment-layer   an adjustment layer with an enabled mask runs on CoreRaster  #3144
+tone-program-op           an adjustment ToneProgram can't express runs on CoreRaster  #3144

@@ -2,7 +2,8 @@
 // Export… ⇧⌘E off and on (design-export-menu); the sheet on `cards` at PNG 1x Frame with
 // Desktop selected (design-export-sheet), and Selection with A and the hidden layer, the hidden
 // one skipped (design-export-sheet-selection), and SVG with Scale off (design-export-sheet-svg).
-// No Size row: Scale is the sheet's one scale control. The run's states come with DE-7. Light and dark.
+// No Size row: Scale is the sheet's one scale control. The run (DE-7) at 2 of 3, finished with the
+// summary, and failed on a file (design-export-running, -finished, -failed). Light and dark.
 import DesignModel
 import SuiteKernel
 import SuiteUI
@@ -78,5 +79,21 @@ import Testing
         #expect(rows.rows == [.format("svg")])
         #expect(options.scaleHelp != nil)
         try shoot(cards(), .editing(options), "design-export-sheet-svg")
+    }
+
+    @Test func running() throws {
+        let options = DesignExportOptions(format: .png, scale: 1, scope: .page)
+        try shoot(cards(), .running(options, done: 2, total: 3), "design-export-running")
+    }
+
+    @Test func finished() throws {
+        let options = DesignExportOptions(format: .png, scale: 1, scope: .frame)
+        #expect(DesignExportRun.finished(options, ["Desktop.png"]).summarized == .finished(options, ["1 file: Desktop.png."]))
+        try shoot(cards(), .finished(options, ["Desktop.png"]), "design-export-finished")
+    }
+
+    @Test func failed() throws {
+        let options = DesignExportOptions(format: .png, scale: 1, scope: .frame)
+        try shoot(cards(), .failed(options, "Desktop.png couldn't be written."), "design-export-failed")
     }
 }

@@ -52,6 +52,8 @@ import UniformTypeIdentifiers
 struct DesignLayersPanel: View {
     let model: DesignWorkspace
     let perform: DesignPerform
+    /// Seeds the insertion line, so a snapshot can show a drag in flight; the app passes none.
+    var seededLine: DesignLayerDropLine? = nil
     /// The layer row being renamed, its draft and the last refusal; the panel's own state.
     @State private var rename = DesignRenameState()
     /// Where a dragged layer would land; nil with no drag, or over a row that refuses it.
@@ -106,7 +108,7 @@ struct DesignLayersPanel: View {
     /// The drop works out its own line rather than reading the last hover's, so a release that
     /// lands before the hover is reported still moves the layer (#3556).
     private var layerDrag: DesignLayerDrag {
-        DesignLayerDrag(line: dropLine, frames: rowFrames, changed: { rowID, y in
+        DesignLayerDrag(line: dropLine ?? seededLine, frames: rowFrames, changed: { rowID, y in
             let line = dropLine(over: rowID, y: y)
             if line != dropLine { dropLine = line }
         }, exited: { rowID in
@@ -247,7 +249,7 @@ private struct DesignPageLabel: View {
             if isCurrent {
                 Image(systemName: "checkmark")
                     .font(SuiteFont.inspectorMeta)
-                    .foregroundStyle(SuiteColor.secondaryText)
+                    .foregroundStyle(HierarchicalShapeStyle.secondary)  // adapts on the selected row
                     .help("Current page")
                     .accessibilityLabel("Current page")
                     .accessibilityIdentifier("design.current-page")

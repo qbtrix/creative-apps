@@ -56,7 +56,7 @@ Blueprint sections: photo.md (Layers panel, Layer menu, Move tool), suite.md
 | PM-u | Several picked rows, the menus and a range click look right and stay inside their render budget, with the journey written. | PM-7, PM-8 | PJ-M1 | PM-a |
 | PM-m | Picks follow the kernel rules, and Move, Hide and Show, Delete and Opacity act on every selected layer as one step each, by panel, menu, tool or command. | PM-4, PM-5, PM-6 | MJ-PM | PM-a; gradient-fill:PG-m (PM-5) |
 | PM-z | The journey and the stress gate's Photo layer gestures pass on live with several layers selected, and the blueprint says Photo selects several layers. | PM-9, PM-10 | PJ-M1 | PM-u, PM-m; gradient-fill:PG-z (PM-10); PR #3499 (PM-9) |
-| PM-g | Group Layers (⌘G) puts the selected layers in one group layer the list nests, the render composites as one, and the file saves; Ungroup takes it apart; one step each. | PM-11, PM-12, PM-13 | PJ-M2 | PM-m; PM-a (PM-13); photo-render-adopt (built, PM-12) |
+| PM-g | Group Layers (⌘G) puts the selected layers in one group layer the list nests, the render composites as one, and the file saves; Ungroup takes it apart; one step each. | PM-11, PM-12, PM-13 | PJ-M2 | PM-m; PM-a (PM-13); photo-render-adopt (built, PM-12); text-layers:TX-m (PM-11: `PhotoLayer.swift` and `PhotoDocumentFile.swift`, re-cut 2026-10-21) |
 
 PM-a carries the first UI task (PM-3: the Layers list and Select > All
 Layers on the stubs), so the feature is reachable with the mouse once the

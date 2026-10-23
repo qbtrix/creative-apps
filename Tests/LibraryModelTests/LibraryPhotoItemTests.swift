@@ -3,6 +3,7 @@
 // Runs on Linux and macOS.
 import CoreColor
 import Foundation
+import SuiteModel
 @testable import LibraryModel
 import Testing
 
@@ -49,9 +50,9 @@ private let epoch = Date(timeIntervalSince1970: 0)
     #expect(CropAspect.original.ratio(for: PixelSize(width: 10, height: 0)) == nil)
 }
 
-@Test func anEmptyHistogramHasZeroHeights() {
-    #expect(HistogramBins.empty.heights.red.allSatisfy { $0 == 0 })
-    #expect(HistogramBins.empty.heights.blue.count == HistogramBins.binCount)
+@Test func anEmptyHistogramDrawsNothing() {
+    #expect(HistogramBins.empty.tone == .empty)
+    #expect(LibraryCatalog().toneHistogram == .empty)
 }
 
 @Test func cullSummarySaysStarsFlagAndLabel() {

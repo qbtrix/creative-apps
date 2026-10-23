@@ -1,6 +1,7 @@
-// PlaceCommands.swift (placed-images PL-1 specs with real ids, schemas and availability, runs throwing
-// `PlaceRules.notBuilt`; PL-7 bodies): the five place commands every app registers with one line,
-// `+ PlaceCommands.specs(<X>Workspace.self)`, and its `<X>Place+Kernel.swift` conformance.
+// PlaceCommands.swift (placed-images PL-1 specs with real ids, schemas and availability; PL-7 bodies): the five
+// place commands every app registers with one line, `+ PlaceCommands.specs(<X>Workspace.self)`, and its
+// `<X>Place+Kernel.swift` conformance. Each edit makes one target call, so it records one undo step; a focus
+// drag passes its token so the target's `History` folds the drag into one.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -75,24 +76,24 @@ public enum PlaceCommands {
         [
             .typed("place.read", title: "Read Placed Image", summary: "Reads the selected placed image: its file, natural size, box, focus and drawn rect.",
                    kind: .query, params: Empty.self, schema: ParamSchema.none, result: read, example: .object([:]),
-                   availability: { $0.placedSelection == nil ? .unavailable(selectHelp) : .available }) { _, _ in try stub() },
+                   availability: { $0.placedSelection == nil ? .unavailable(selectHelp) : .available }) { t, _ in try reading(t) },
             .typed("place.image", title: "Place Image", summary: "Places a PNG, JPEG or SVG fitted inside the canvas at a point, or with fill into the selected layer.",
                    kind: .edit, params: ImageParams.self,
                    schema: .object(["name": name, "base64": base64, "x": .optional(.number("Where the image's centre lands.")),
                                     "y": .optional(.number("Where the image's centre lands.")), "fill": .optional(.boolean)],
                                    required: ["name", "base64", "x", "y", "fill"]),
                    result: .object(["id": .string("The layer that shows the image.")], required: ["id"]), example: file,
-                   availability: { $0.placeHelp.map(Availability.unavailable) ?? .available }) { _, _ in try stub() },
+                   availability: { $0.placeHelp.map(Availability.unavailable) ?? .available }) { t, p in try place(&t, p) },
             .typed("place.replace", title: "Replace Image", summary: "Shows another file in the selected placed image's box.",
                    kind: .edit, params: ReplaceParams.self, schema: .object(["name": name, "base64": base64], required: ["name", "base64"]),
-                   example: file, availability: { selected($0) }) { _, _ in try stub() },
+                   example: file, availability: { selected($0) }) { t, p in try replace(&t, p) },
             .typed("place.reset-size", title: "Reset Size", summary: "Gives the selected image's box its natural aspect, keeping its width and centre.",
                    kind: .edit, params: Empty.self, schema: ParamSchema.none, example: .object([:]),
-                   availability: { selected($0, unless: { PlaceRules.resetBox($0, natural: $1) == $0.box }, naturalHelp) }) { _, _ in try stub() },
+                   availability: { selected($0, unless: { PlaceRules.resetBox($0, natural: $1) == $0.box }, naturalHelp) }) { t, _ in try resetSize(&t) },
             .typed("place.focus", title: "Move Inside", summary: "Pans the picture inside its box to a unit focus; moves under one drag token are one undo step.",
                    kind: .edit, params: FocusParams.self, schema: .object(["x": unit, "y": unit, "drag": drag], required: ["x", "y", "drag"]),
                    example: .object(["x": .number(0.25), "y": .number(0.5)]),
-                   availability: { selected($0, unless: { PlaceRules.drawnRect($0, natural: $1) == $0.box }, fitsHelp) }) { _, _ in try stub() },
+                   availability: { selected($0, unless: { PlaceRules.drawnRect($0, natural: $1) == $0.box }, fitsHelp) }) { t, p in try focus(&t, p) },
         ]
     }
 
@@ -104,6 +105,72 @@ public enum PlaceCommands {
         guard let selection = target.placedSelection else { return .unavailable(selectHelp) }
         return unless(selection.image, selection.asset.natural) ? .unavailable(why) : .available
     }
-    /// Every run until PL-7: refuses with `PlaceRules.notBuilt`.
-    static func stub() throws -> JSONValue { throw PlaceRules.notBuilt }
+
+    /// `place.read`'s result: the file, its natural size, the box, the focus and where the picture draws.
+    struct Reading: Encodable {
+        var name: String; var format: PlacedFormat; var width, height: Double; var box: Rect; var focus: Point; var drawn: Rect
+    }
+    /// `place.image`'s result: the layer that shows the picture.
+    struct Placed: Encodable { var id: String }
+
+    /// The selected placed image as `place.read` reports it.
+    static func reading<T: PlacedImageTarget>(_ target: T) throws -> Reading {
+        let (_, image, asset) = try selection(target, "place.read")
+        return Reading(name: asset.name, format: asset.format, width: asset.natural.width, height: asset.natural.height,
+                       box: image.box, focus: image.focus, drawn: PlaceRules.drawnRect(image, natural: asset.natural))
+    }
+    /// The file fitted inside the canvas at `(x, y)` as a new layer, or with `fill` into the selected layer at its
+    /// box (the cover crop does the rest); either is one step named Place Image.
+    static func place<T: PlacedImageTarget>(_ target: inout T, _ p: ImageParams) throws -> Placed {
+        if p.fill == true, target.placeFillBox == nil { throw CatalogError.unavailable(id: "place.image", why: fillBoxHelp) }
+        let asset = try asset(target, "place.image", name: p.name, base64: p.base64)
+        if p.fill == true, let box = target.placeFillBox {
+            try target.setPlaced(PlacedImage(assetID: asset.id, box: box), asset: asset, name: "Place Image", drag: nil)
+            guard let id = target.placedSelection?.id else {
+                throw CatalogError.failed(id: "place.image", message: "The selected layer took no picture.")
+            }
+            return Placed(id: id)
+        }
+        let at = p.x.flatMap { x in p.y.map { Point(x: x, y: $0) } }
+        let image = PlacedImage(assetID: asset.id, box: PlaceRules.fitted(natural: asset.natural, in: target.placeCanvas, at: at))
+        return Placed(id: try target.insertPlaced(asset, image, name: "Place Image"))
+    }
+    /// The selected image's box showing another file, its focus back at the centre.
+    static func replace<T: PlacedImageTarget>(_ target: inout T, _ p: ReplaceParams) throws -> Empty {
+        let box = try selection(target, "place.replace").image.box
+        let asset = try asset(target, "place.replace", name: p.name, base64: p.base64)
+        try target.setPlaced(PlacedImage(assetID: asset.id, box: box), asset: asset, name: "Replace Image", drag: nil)
+        return Empty()
+    }
+    /// The selected image's box at its natural aspect (same width and centre), its focus back at the centre.
+    static func resetSize<T: PlacedImageTarget>(_ target: inout T) throws -> Empty {
+        let (_, image, asset) = try selection(target, "place.reset-size")
+        let reset = PlacedImage(assetID: image.assetID, box: PlaceRules.resetBox(image, natural: asset.natural))
+        try target.setPlaced(reset, asset: nil, name: "Reset Size", drag: nil)
+        return Empty()
+    }
+    /// The selected image's focus, clamped to the unit square, under the drag's token.
+    static func focus<T: PlacedImageTarget>(_ target: inout T, _ p: FocusParams) throws -> Empty {
+        var image = try selection(target, "place.focus").image
+        image.focus = Point(x: min(max(p.x, 0), 1), y: min(max(p.y, 0), 1))
+        try target.setPlaced(image, asset: nil, name: "Move Inside", drag: p.drag)
+        return Empty()
+    }
+
+    /// The selected placed image, or `selectHelp` as the refusal of `id`.
+    static func selection<T: PlacedImageTarget>(_ target: T, _ id: String) throws -> (id: String, image: PlacedImage, asset: PlacedAsset) {
+        guard let selection = target.placedSelection else { throw CatalogError.unavailable(id: id, why: selectHelp) }
+        return selection
+    }
+    /// The base64 file as an asset `target` takes: the size checked before the sniff, then the format against the
+    /// target's set; its natural size from the SVG's flattening or the target's header read.
+    static func asset<T: PlacedImageTarget>(_ target: T, _ id: String, name: String, base64: String) throws -> PlacedAsset {
+        guard let data = Data(base64Encoded: base64) else { throw CatalogError.failed(id: id, message: "The file's bytes aren't base64.") }
+        guard data.count <= PlaceRules.maxBytes else { throw CatalogError.unavailable(id: id, why: PlaceRules.sizeHelp) }
+        guard let format = PlaceRules.format(of: data), target.placeFormats.contains(format) else {
+            throw CatalogError.unavailable(id: id, why: PlaceRules.formatHelp)
+        }
+        let natural = format == .svg ? try PlaceRules.vector(data, name: name).size : try target.rasterSize(data, format: format)
+        return PlacedAsset(id: PlaceRules.assetID(of: data), name: name, format: format, natural: natural, data: data)
+    }
 }

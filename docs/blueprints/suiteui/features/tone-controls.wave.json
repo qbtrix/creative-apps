@@ -1,28 +1,26 @@
 {
-  "title": "Tone and sharpen controls: the kernel's tone settings, rules and commands, SuiteUI's tone rows",
+  "title": "Tone and sharpen controls: SuiteImaging's tone settings, rules and commands, SuiteUI's tone rows",
   "wave": 4,
   "order": 30,
   "status": "planned",
   "feature_issue": "file when ready",
   "beta": true,
-  "covers": "feature map S1 (tone rows, shared half) and the sharpen half of S2's engine (effects-engine #433); real job RJ-X41; captain 2026-10-20: everyday tone tools in the beta, built once",
-  "waits_on": "photo #3144 (the core pin with creative-core #624's ToneProgram; cross-line); gradient-fill's GF-a and GF-z slices (slice waits: SuiteGallery.swift, canonical-concepts.txt, FakeCanvasDocument.swift); editor-kernel, suite-harness (built)",
+  "covers": "feature map S1 (tone rows, shared half) and the sharpen half of S2's engine (effects-engine #433); real job RJ-X41; Brightness, finding #3527 (re-cut 2026-10-21); captain 2026-10-20: everyday tone tools in the beta, built once",
+  "waits_on": "suite-imaging's contract slice IM-a (TC-1: the SuiteImaging target); gradient-fill's GF-a slice (canonical-concepts.txt, SuiteGallery.swift); editor-kernel, suite-harness (built). Re-cut 2026-10-20: the Tone module lives in SuiteImaging, so SuiteKernel takes no engine and TC-1 no longer waits on photo #3144",
   "longest_chain": "6 (TC-1 → TC-2 → TC-3 → TC-4 → TC-8 → TC-10)",
   "journeys": [
     "SuiteJourneyTests.testGalleryOpensEveryPage",
     "SuiteToneJourneyTests.testToneRowsSetAndReset"
   ],
   "owned": [
-    "Package.swift",
-    "Sources/SuiteKernel/Tone/ToneSettings.swift",
-    "Sources/SuiteKernel/Tone/ToneRules.swift",
-    "Sources/SuiteKernel/Tone/ToneCommands.swift",
-    "Tests/SuiteKernelTests/ToneSettingsTests.swift",
-    "Tests/SuiteKernelTests/ToneRulesTests.swift",
-    "Tests/SuiteKernelTests/ToneCommandsTests.swift",
-    "Tests/SuiteKernelTests/KernelShapeTests.swift",
+    "Sources/SuiteImaging/Tone/ToneSettings.swift",
+    "Sources/SuiteImaging/Tone/ToneRules.swift",
+    "Sources/SuiteImaging/Tone/ToneCommands.swift",
+    "Tests/SuiteImagingTests/ToneSettingsTests.swift",
+    "Tests/SuiteImagingTests/ToneRulesTests.swift",
+    "Tests/SuiteImagingTests/ToneCommandsTests.swift",
     "Tests/canonical-concepts.txt",
-    "docs/c4/parts/creative-apps/suite-kernel/kernel-tone.json",
+    "docs/c4/parts/creative-apps/suite-imaging/imaging-tone.json",
     "Sources/SuiteUI/ToneRows.swift",
     "Sources/SuiteUI/Gallery/GalleryToneRows.swift",
     "Sources/SuiteUI/SuiteGallery.swift",
@@ -30,15 +28,16 @@
     "Tests/SuiteUITests/ToneRowsTests.swift",
     "Tests/AppSnapshotTests/SuiteToneRowsSnapshots.swift",
     "Tests/AppSnapshotTests/RenderBudgetToneRowsTests.swift",
-    "Tests/mutations/SuiteKernel.ToneRules.json",
-    "Tests/mutations/SuiteKernel.ToneCommands.json",
-    "Tests/mutations/SuiteKernel.ToneSettings.json",
+    "Tests/mutations/SuiteImaging.ToneRules.json",
+    "Tests/mutations/SuiteImaging.ToneCommands.json",
+    "Tests/mutations/SuiteImaging.ToneSettings.json",
     "Tests/SuiteUITests/ToneRowsLiveTests.swift",
-    "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
-    "Tests/SuiteKernelTests/FakeCanvasToneTests.swift",
-    "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+    "Sources/SuiteImaging/Fakes/FakeToneDocument.swift",
+    "Sources/AfterGlowCLICore/Apps.swift",
+    "Tests/SuiteImagingTests/FakeToneTests.swift",
+    "Tests/mutations/SuiteImaging.FakeToneDocument.json",
+    "Tests/RealJobs/fake/tone-controls/input/one.fake-tone",
     "Tests/RealJobs/fake/tone-controls/tone-controls.jobs.json",
-    "Tests/RealJobs/fake/tone-controls/input/one.fake",
     "docs/blueprints/suiteui/features/tone-controls.wave.json"
   ],
   "slices": [
@@ -53,6 +52,9 @@
         "SJ0"
       ],
       "waits": {
+        "suite-imaging:IM-a": [
+          "TC-1"
+        ],
         "gradient-fill:GF-a": [
           "TC-1",
           "TC-2"
@@ -66,16 +68,14 @@
       },
       "ui": true,
       "owned": [
-        "Package.swift",
-        "Sources/SuiteKernel/Tone/ToneSettings.swift",
-        "Sources/SuiteKernel/Tone/ToneRules.swift",
-        "Sources/SuiteKernel/Tone/ToneCommands.swift",
-        "Tests/SuiteKernelTests/ToneSettingsTests.swift",
-        "Tests/SuiteKernelTests/ToneRulesTests.swift",
-        "Tests/SuiteKernelTests/ToneCommandsTests.swift",
-        "Tests/SuiteKernelTests/KernelShapeTests.swift",
+        "Sources/SuiteImaging/Tone/ToneSettings.swift",
+        "Sources/SuiteImaging/Tone/ToneRules.swift",
+        "Sources/SuiteImaging/Tone/ToneCommands.swift",
+        "Tests/SuiteImagingTests/ToneSettingsTests.swift",
+        "Tests/SuiteImagingTests/ToneRulesTests.swift",
+        "Tests/SuiteImagingTests/ToneCommandsTests.swift",
         "Tests/canonical-concepts.txt",
-        "docs/c4/parts/creative-apps/suite-kernel/kernel-tone.json",
+        "docs/c4/parts/creative-apps/suite-imaging/imaging-tone.json",
         "Sources/SuiteUI/ToneRows.swift",
         "Sources/SuiteUI/Gallery/GalleryToneRows.swift",
         "Sources/SuiteUI/SuiteGallery.swift",
@@ -126,15 +126,15 @@
       },
       "ui": false,
       "owned": [
-        "Sources/SuiteKernel/Tone/ToneRules.swift",
-        "Tests/SuiteKernelTests/ToneRulesTests.swift",
-        "Tests/mutations/SuiteKernel.ToneRules.json",
-        "Sources/SuiteKernel/Tone/ToneCommands.swift",
-        "Tests/SuiteKernelTests/ToneCommandsTests.swift",
-        "Tests/mutations/SuiteKernel.ToneCommands.json",
-        "Sources/SuiteKernel/Tone/ToneSettings.swift",
-        "Tests/SuiteKernelTests/ToneSettingsTests.swift",
-        "Tests/mutations/SuiteKernel.ToneSettings.json"
+        "Sources/SuiteImaging/Tone/ToneRules.swift",
+        "Tests/SuiteImagingTests/ToneRulesTests.swift",
+        "Tests/mutations/SuiteImaging.ToneRules.json",
+        "Sources/SuiteImaging/Tone/ToneCommands.swift",
+        "Tests/SuiteImagingTests/ToneCommandsTests.swift",
+        "Tests/mutations/SuiteImaging.ToneCommands.json",
+        "Sources/SuiteImaging/Tone/ToneSettings.swift",
+        "Tests/SuiteImagingTests/ToneSettingsTests.swift",
+        "Tests/mutations/SuiteImaging.ToneSettings.json"
       ]
     },
     {
@@ -156,39 +156,19 @@
         "TC-m": [
           "TC-8",
           "TC-9"
-        ],
-        "gradient-fill:GF-z": [
-          "TC-9"
-        ],
-        "autosave-history:AH-z": [
-          "TC-9"
-        ],
-        "transform-tools:TT-z": [
-          "TC-9"
-        ],
-        "eyedropper:EY-z": [
-          "TC-9"
-        ],
-        "shape-tools:SH-z": [
-          "TC-9"
-        ],
-        "stroke-style:SS-d": [
-          "TC-9"
-        ],
-        "placed-images:PL-z": [
-          "TC-9"
         ]
       },
       "ui": true,
       "owned": [
         "Sources/SuiteUI/Gallery/GalleryToneRows.swift",
         "Tests/SuiteUITests/ToneRowsLiveTests.swift",
-        "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
-        "Tests/SuiteKernelTests/FakeCanvasToneTests.swift",
-        "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+        "Sources/SuiteImaging/Fakes/FakeToneDocument.swift",
+        "Sources/AfterGlowCLICore/Apps.swift",
+        "Tests/SuiteImagingTests/FakeToneTests.swift",
+        "Tests/mutations/SuiteImaging.FakeToneDocument.json",
+        "Tests/RealJobs/fake/tone-controls/input/one.fake-tone",
         "Tests/RealJobs/fake/tone-controls/tone-controls.jobs.json",
-        "Tests/RealJobs/fake/tone-controls/input/one.fake",
-        "docs/c4/parts/creative-apps/suite-kernel/kernel-tone.json",
+        "docs/c4/parts/creative-apps/suite-imaging/imaging-tone.json",
         "docs/blueprints/suiteui/features/tone-controls.wave.json"
       ]
     }

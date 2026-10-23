@@ -6,7 +6,7 @@ extension LibraryCollection {
     /// What the empty state says when this collection shows no photos.
     public var emptyMessage: String {
         switch id {
-        case "favorites": "Flagged photos appear here. Flag a photo in All Photos to add it to Favorites."
+        case "favorites": "Picked photos appear here. Pick a photo in All Photos (press P) to add it to Picks."
         case "recent": "The newest photos appear here. Import or load photos to add them."
         case _ where id.hasPrefix("user-"):
             "Select photos in All Photos, then choose Photo > Add to Collection or drag them here."

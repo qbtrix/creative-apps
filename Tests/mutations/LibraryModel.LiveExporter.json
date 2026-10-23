@@ -33,5 +33,12 @@
     "find": "return PixelSize(width: frame.width, height: frame.height)",
     "replace": "return photo.pixelSize.fitting(longSide: max(frame.width, frame.height))",
     "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "the policy is not passed: the writer drops nothing",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "size: size, dropping: dropping))",
+    "replace": "size: size))",
+    "tests": "LibraryExportMetadataTests/writerDrops"
   }
 ]

@@ -1,0 +1,8 @@
+[
+{"label":"the journey's folder ignored","file":"Sources/SuiteModel/Help/CrashFolder.swift","find":"if next < arguments.endIndex, !arguments[next].isEmpty { return arguments[next] }","replace":"if next < arguments.endIndex, !arguments[next].isEmpty { _ = next }","tests":"CrashFolderTests"},
+{"label":"an empty path taken","file":"Sources/SuiteModel/Help/CrashFolder.swift","find":"if next < arguments.endIndex, !arguments[next].isEmpty {","replace":"if next < arguments.endIndex {","tests":"CrashFolderTests"},
+{"label":"age filter dropped","file":"Sources/SuiteModel/Help/CrashFolder.swift","find":"$0.name.hasSuffix(\".ips\") && now.timeIntervalSince($0.modified) <= maxAge","replace":"$0.name.hasSuffix(\".ips\")","tests":"CrashFolderTests"},
+{"label":"every file opened","file":"Sources/SuiteModel/Help/CrashFolder.swift","find":".filter { $0.name.hasSuffix(\".ips\") && now","replace":".filter { true && now","tests":"CrashFolderTests"},
+{"label":"oldest first","file":"Sources/SuiteModel/Help/CrashFolder.swift","find":".sorted { $0.modified > $1.modified }","replace":".sorted { $0.modified < $1.modified }","tests":"CrashFolderTests"},
+{"label":"no limit","file":"Sources/SuiteModel/Help/CrashFolder.swift","find":"            .prefix(limit))","replace":"            .prefix(Int.max))","tests":"CrashFolderTests"}
+]

@@ -1,7 +1,8 @@
 // LibraryLoupeImageTests.swift: the loupe's picture state in LibraryCatalog
 // (loupe-viewport LV-2): the thumbnail preview on a focus change, render
-// requests under a token, latest wins, failures that keep the last picture,
-// and the neighbours to prefetch. Runs on Linux and macOS.
+// requests under a token, a render newer than the shown one lands (a drag's
+// previews show live), failures that keep the last picture, and the
+// neighbours to prefetch. Runs on Linux and macOS.
 @testable import LibraryModel
 import Testing
 
@@ -79,17 +80,49 @@ private func loupeOnThird() -> (catalog: LibraryCatalog, order: [String]) {
     #expect(catalog.loupeRenderToken == before)
 }
 
-@Test func aRenderForAnOlderTokenIsDropped() throws {
+@Test func aRenderOlderThanTheShownOneIsDropped() throws {
     var (catalog, _) = loupeOnThird()
     let old = try fullRequest(&catalog)
     let new = try fullRequest(&catalog)
-    catalog.showLoupeRender(try #require(render(1, .full)), token: old.token)
-    #expect(catalog.loupeRender == nil)
     let latest = try #require(render(2, .full))
     catalog.showLoupeRender(latest, token: new.token)
     #expect(catalog.loupeRender == latest)
     catalog.showLoupeRender(try #require(render(3, .full)), token: old.token)
     #expect(catalog.loupeRender == latest)
+}
+
+@Test func aRenderAskedBeforeTheFocusChangeIsDropped() throws {
+    var (catalog, _) = loupeOnThird()
+    let before = try fullRequest(&catalog)
+    catalog.stepLoupe(by: 1)
+    catalog.loupeFocusChanged()
+    catalog.showLoupeRender(try #require(render(1, .full)), token: before.token)
+    #expect(catalog.loupeRender == nil)
+}
+
+/// A drag's samples each ask for a preview while the full render from opening
+/// is on screen: the preview shows at once, not only the release's full.
+@Test func aDragPreviewReplacesAnOlderFull() throws {
+    var (catalog, _) = loupeOnThird()
+    let opened = try fullRequest(&catalog)
+    catalog.showLoupeRender(try #require(render(1, .full)), token: opened.token)
+    let sampleAsked = catalog.loupeRequest(longSide: 2048, quality: .preview)
+    let sample = try #require(sampleAsked)
+    let preview = try #require(render(2, .preview))
+    catalog.showLoupeRender(preview, token: sample.token)
+    #expect(catalog.loupeRender == preview)
+}
+
+/// A preview still rendering when the next sample asks for another lands: a
+/// continuous drag keeps showing its newest finished render.
+@Test func aPreviewInFlightDuringADragLands() throws {
+    var (catalog, _) = loupeOnThird()
+    let firstAsked = catalog.loupeRequest(longSide: 2048, quality: .preview)
+    let first = try #require(firstAsked)
+    _ = catalog.loupeRequest(longSide: 2048, quality: .preview)
+    let preview = try #require(render(2, .preview))
+    catalog.showLoupeRender(preview, token: first.token)
+    #expect(catalog.loupeRender == preview)
 }
 
 @Test func aPreviewAfterAFullOfTheSameTokenIsDropped() throws {

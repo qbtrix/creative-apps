@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "app": "halo",
+  "why": "RJ-H30: draws a six-point star shape layer by command in an empty 1080p composition, fills it with a linear gradient, gives it an 8 pt stroke and exports frame 0; a pixel on the star's edge is the stroke colour and the centre pixel is the gradient's.",
+  "inputs": ["input/*.halo"],
+  "steps": [
+    {"id": "shape.draw", "params": {"kind": "star", "points": 6, "innerRatio": 0.5, "x": 760, "y": 340, "w": 400, "h": 400}},
+    {"id": "fill.type", "params": {"type": "linear"}},
+    {"id": "stroke.add", "params": {}},
+    {"id": "stroke.width", "params": {"width": 8}},
+    {"id": "render.frame", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-0", "format": "png", "options": {"frame": 0}},
+  "expect": {
+    "out/empty-1080p-0.png": {"pixels": {"tolerance": 2, "reference": "expected/empty-1080p-0.png"}}
+  },
+  "platforms": ["linux", "macos"]
+}

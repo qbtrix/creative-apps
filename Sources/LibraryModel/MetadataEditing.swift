@@ -4,8 +4,9 @@
 // (the loupe photo in the loupe, else the selection) as the same named undo
 // step a key makes, and never moves the loupe. A field whose values differ
 // reads as mixed. A rating outside 0...5 is silently refused. Title and
-// caption read now; `setTitle` and `setCaption` are metadata-more slots that
-// change nothing until MD-11. Keywords are LibraryKeywords.swift. Linux-safe.
+// caption are trimmed and set on the cull targets through `recordEdit`, one
+// named step each, and none when nothing changes (MD-11). Keywords are
+// LibraryKeywords.swift. Linux-safe.
 
 /// A pick, a reject, or neither. The raw value is the menu title.
 public enum PhotoFlag: String, CaseIterable, Sendable, Hashable {
@@ -88,11 +89,18 @@ extension LibraryCatalog {
         cull(.label(label), advance: false)
     }
 
-    /// Sets the targets' title, trimmed, as one "Set Title" step. MD-11;
-    /// changes nothing until then.
-    public mutating func setTitle(_ text: String) {}
+    /// Sets the cull targets' title, trimmed of spaces, newlines and NULs, as
+    /// one "Set Title" step; `recordEdit` records nothing when every target
+    /// already has it. "" clears it.
+    public mutating func setTitle(_ text: String) {
+        let title = CameraDetails.text(text) ?? ""
+        recordEdit("Set Title", ids: cullTargets) { $0.title = title }
+    }
 
-    /// Sets the targets' caption, trimmed, as one "Set Caption" step. MD-11;
-    /// changes nothing until then.
-    public mutating func setCaption(_ text: String) {}
+    /// Sets the cull targets' caption, trimmed like a title, as one
+    /// "Set Caption" step; none when every target already has it.
+    public mutating func setCaption(_ text: String) {
+        let caption = CameraDetails.text(text) ?? ""
+        recordEdit("Set Caption", ids: cullTargets) { $0.caption = caption }
+    }
 }

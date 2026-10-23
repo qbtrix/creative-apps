@@ -18,7 +18,7 @@ import Testing
     }
 
     func packet(_ photo: PhotoItem) throws -> String {
-        let data = try #require(ExportSidecar.xmp(for: photo), "no packet: \(ExportSidecar.unavailable ?? "")")
+        let data = try #require(ExportSidecar.xmp(for: photo, metadata: .all), "no packet: \(ExportSidecar.unavailable ?? "")")
         return try #require(String(data: data, encoding: .utf8), "the packet isn't UTF-8")
     }
 

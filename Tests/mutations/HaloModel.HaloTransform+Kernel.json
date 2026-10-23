@@ -1,0 +1,5 @@
+[
+  {"label": "keysWhenAnimated: an animated row's write lands on frame 0, the base, not the playhead", "file": "Sources/HaloModel/HaloTransform+Kernel.swift", "find": "keying.setValue(value, for: p, of: id, at: f, in: &doc.compositions[i])", "replace": "keying.setValue(value, for: p, of: id, at: 0, in: &doc.compositions[i])", "tests": "HaloTransformTests"},
+  {"label": "scaleAboutCentre: the layer is placed by the box's top-left, not its centre", "file": "Sources/HaloModel/HaloTransform+Kernel.swift", "find": "let centre = HaloPoint(x: (t.box.minX + t.box.maxX) / 2, y: (t.box.minY + t.box.maxY) / 2)", "replace": "let centre = HaloPoint(x: t.box.minX, y: t.box.minY)", "tests": "HaloTransformTests"},
+  {"label": "dragIsOneStep: a drag's writes don't fold into one step", "file": "Sources/HaloModel/HaloTransform+Kernel.swift", "find": "coalesceKey: drag.map { \"\\(id).transform.\\($0)\" }", "replace": "coalesceKey: nil", "tests": "HaloTransformTests"}
+]

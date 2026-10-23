@@ -70,7 +70,7 @@ extension BodyCountSuites {
             }
         }
 
-        @Test(.disabled("quarantine #3256 until 2026-10-22")) func onboardingStates() async {
+        @Test func onboardingStates() async {
             let welcome = await model()
             #expect(welcome.page.id == "apps")
             await shoot("welcome") { await model() }
@@ -95,7 +95,7 @@ extension BodyCountSuites {
             await shoot("start-default") { start(await model(), focus: nil) }
         }
 
-        @Test(.disabled("quarantine #3257 until 2026-10-22")) func startPageStates() async {
+        @Test func startPageStates() async {
             // Halo's sample missing: its Open sample disabled with the model's reason as its help.
             let noHalo: @Sendable (String) -> Bool = { $0.hasPrefix("/fixture/Samples/") && !$0.hasSuffix("/Intro.halo") }
             let missing = start(await model(present: noHalo), focus: nil)
@@ -199,6 +199,26 @@ extension BodyCountSuites {
                     #expect(frame.minX >= content.minX - 0.5, "\(id) starts at \(frame.minX) before \(content.minX) at \(width)")
                 }
             }
+        }
+
+        /// A refusal under a row doesn't move that row: its Open sample stays level with its first chip.
+        @Test func aRefusalLeavesItsRowInPlace() async throws {
+            var refusing = SuiteServices.fake()
+            refusing.sending = FakeHandOffs(unavailable: "Flare can't open documents right now.")
+            let driven = start(await model(refusing), focus: .photos)
+            let flare = try #require(driven.starters.first { $0.tile.app == .flare })
+            let chip = OnboardingControls.preset(try #require(flare.tile.presets.first))
+            let w = RenderBudgetWindow(OnboardingWindow(model: driven), size: size)
+            defer { w.close() }
+            try await w.settle()
+            let before = try #require(await w.element(OnboardingControls.sample(.flare)), "no Flare Open sample")
+            await driven.openSample(.flare, now: now)
+            #expect(driven.failed == .flare)
+            try await w.settle()
+            let sample = try #require(await w.element(OnboardingControls.sample(.flare)), "no Flare Open sample")
+            let first = try #require(await w.element(chip), "no \(chip)")
+            #expect(abs(sample.midY - first.midY) <= 0.5, "Open sample at \(sample.midY), its first chip at \(first.midY)")
+            #expect(abs(sample.midY - before.midY) <= 0.5, "Open sample moved from \(before.midY) to \(sample.midY)")
         }
     }
 }

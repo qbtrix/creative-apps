@@ -59,7 +59,7 @@ final class PhotoJourneyTests: XCTestCase {
     }
 
     /// The window's five regions once an image is open (the palette shows only
-    /// over one); on `.live` the Eyedropper is disabled.
+    /// over one); on `.live` the Eyedropper is enabled.
     @MainActor func testLaunchShowsWindowShell() {
         let photo = Journey("Photo", self, arguments: photoArguments())
         XCTAssert(photo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
@@ -68,9 +68,9 @@ final class PhotoJourneyTests: XCTestCase {
         photo.expectEditorWindow()
         let eyedropper = photo.element("suite.tools").buttons["Eyedropper"]
         XCTAssert(eyedropper.waitForExistence(timeout: 5), "the palette has no Eyedropper")
-        XCTAssertFalse(eyedropper.isEnabled, "the Eyedropper is enabled on .live, where sampling isn't built")
-        // Its help text is proven by AppSnapshotTests' PhotoEditorSnapshots.paletteEyedropperHelp (PhotoPaletteTool
-        // reports "Not built yet (PV-9)." on .live), since XCUITest doesn't read SwiftUI .help reliably.
+        XCTAssert(eyedropper.isEnabled, "the Eyedropper is disabled on .live, where its sampler is built (PE-5)")
+        // That it has no help is proven by AppSnapshotTests' PhotoEditorSnapshots.paletteEyedropperHelp, since
+        // XCUITest doesn't read SwiftUI .help reliably.
     }
 
     /// The sample opened fitted: the canvas (suite.canvas) is no larger than

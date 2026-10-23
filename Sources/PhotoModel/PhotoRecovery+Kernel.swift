@@ -12,6 +12,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import SuiteKernel
+import SuiteModel
 
 extension PhotoWorkspace {
     /// The saved token of an image that was never saved (a restored
@@ -76,4 +77,63 @@ extension LiveArchive {
             }
         }
     }
+}
+
+extension PhotoWorkspace {
+    /// The autosave's bytes (history-panel PH-6): the open image's document
+    /// package as one .ora container, its name inside (`photo/recovery.json`),
+    /// its PNGs through CoreRaster's codec. Throws with no image open.
+    public func recoveryBytes() throws -> Data {
+        try recoveryBytes(codec: CoreRasterImageCodec())
+    }
+
+    /// The autosave's bytes, the layers' images through `codec` and the
+    /// container through `services.archive`.
+    public func recoveryBytes(codec: any PhotoImageCodec) throws -> Data {
+        try LiveRecovery.container(
+            documentPackage(codec: codec), info: LiveRecovery.Info(documentName: documentName), archive: services.archive)
+    }
+
+    /// The autosave's encode for the window: the workspace is copied now,
+    /// on the caller's actor, and the returned closure encodes that copy
+    /// wherever it runs (the autosave runs it detached, off the main actor).
+    public func recoveryEncoder(codec: any PhotoImageCodec) -> @Sendable () throws -> Data {
+        let copy = self
+        return { try copy.recoveryBytes(codec: codec) }
+    }
+
+    /// The workspace an autosave's `data` restores, named `name` (else the
+    /// name inside the bytes), on the live services and CoreRaster's codec.
+    public static func recovered(from data: Data, name: String?) async throws -> PhotoWorkspace {
+        try await recovered(from: data, name: name, services: .live, codec: CoreRasterImageCodec())
+    }
+
+    /// The workspace `data` restores on `services`, decoded off the caller's
+    /// actor: dirty and unsaved, so Save asks where. Throws `ArchiveError` for
+    /// bytes that don't open.
+    public static func recovered(
+        from data: Data, name: String?, services: PhotoServices, codec: any PhotoImageCodec
+    ) async throws -> PhotoWorkspace {
+        try await Task.detached {
+            let (package, info) = try LiveRecovery.unpack(data, archive: services.archive)
+            var workspace = PhotoWorkspace(services: services)
+            try workspace.restore(
+                RecoveryEntry(documentName: name ?? info?.documentName, savedAt: 0, package: package), codec: codec)
+            return workspace
+        }.value
+    }
+
+    /// Takes `restored` (from `recovered`) as the window's image, keeping
+    /// this window's services.
+    public mutating func restoreRecovered(_ restored: PhotoWorkspace) {
+        let services = self.services
+        self = restored
+        self.services = services
+    }
+}
+
+extension PhotoServices {
+    /// The folder the window's autosave writes and offers through; nil when
+    /// the recovery store isn't a folder on disk (the fakes).
+    public var recoveryFolder: RecoveryFolder? { (recovery as? LiveRecovery)?.folder }
 }

@@ -18,7 +18,9 @@
 // Open reads an `.ora` and decodes its PNGs off the main actor, then opens
 // the snapshot; a bad document shows its ArchiveError message and the window
 // keeps what it had. Flat files open through `openImage`, so Save knows
-// their kind. Each successful open and save is noted in Open Recent.
+// their kind. Each successful open and save is noted in Open Recent and,
+// through SuiteDocumentsBridge (file-flow PF-4), in the suite's shared
+// recents: `.opened` or `.saved`, once each, with the file's suite type.
 // `-PhotoOpenFile <path>` opens a file at launch; `-PhotoRecoveryDir
 // <folder>` keeps autosaves there. PhotoFileSession is the file state the
 // window and PhotoFileArea share. PhotoFileArea
@@ -37,6 +39,8 @@ import AppKit
 import CoreRaster
 import Observation
 import PhotoModel
+import SuiteModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -53,6 +57,10 @@ enum FileIntent {
     case restore(RecoveryOffer)
     /// The launch offer: Discard what the crash left behind.
     case discardRecovery
+    /// The home's New Photo (#3648): a new white image of this size.
+    case newImage(width: Int, height: Int)
+    /// A live command ran on a copy of the image (EM-3): the window becomes it.
+    case adoptLive(PhotoWorkspace)
 }
 
 /// Long file work running off the main actor, for the window's notes.
@@ -100,11 +108,27 @@ final class PhotoFileSession {
         recoveryOffer = await startAutosave(model.services.recovery).launch(model: model)
     }
 
-    /// Notes `url` in Open Recent: the system's list, and Photo's own (an app
-    /// with no declared document types may not get the system's).
-    func noteRecent(_ url: URL) {
+    /// The bridge opens and saves are noted through; nil uses the process's (tests inject one).
+    @ObservationIgnored var bridge: SuiteDocumentsBridge?
+
+    /// Photo's bridge on the live suite store (`-SuiteSupportDir` moves it), made on first use.
+    static let suiteBridge: SuiteDocumentsBridge = {
+        let arguments = ProcessInfo.processInfo.arguments
+        let support = SuiteLocations.supportFolder(arguments: arguments, home: NSHomeDirectory())
+        return SuiteDocumentsBridge(app: .photo, services: .live(support: support, app: .photo, arguments: arguments))
+    }()
+
+    /// Notes `url` in Open Recent: the system's list, Photo's own (an app with
+    /// no declared document types may not get the system's), and the suite's
+    /// shared recents as `event`, when the suite knows the file's type.
+    func noteRecent(_ url: URL, _ event: RecentEvent) {
         NSDocumentController.shared.noteNewRecentDocumentURL(url)
         store(Array(([url] + recentFiles.filter { $0 != url }).prefix(10)))
+        let bridge = self.bridge ?? Self.suiteBridge
+        guard let type = bridge.registry.type(forExtension: url.pathExtension)?.id else { return }
+        let path = url.path(percentEncoded: false)
+        bridge.noted(SuiteDocumentRef(path: path, fileID: SuiteDocumentRef.fileID(forPath: path), app: .photo,
+                                      type: type, displayName: url.lastPathComponent), event)
     }
 
     func clearRecent() {
@@ -157,6 +181,10 @@ extension PhotoWindow {
         case .discardRecovery:
             files.recoveryOffer = nil
             files.startAutosave(model.services.recovery).discardLeftBehind()
+        case .newImage(let width, let height):
+            guard (try? model.newCanvas(width: width, height: height)) != nil else { return }
+            documentURL = nil
+        case .adoptLive(let result): model.adoptLiveCommand(result)
         }
     }
 
@@ -201,7 +229,7 @@ extension PhotoWindow {
             }
             try model.openImage(data, name: url.lastPathComponent, codec: ImageIOCodec(), longestSide: side)
             documentURL = url
-            files.noteRecent(url)
+            files.noteRecent(url, .opened)
             note = side.map { "Opened at \($0) px on the longest side (Photo opens up to \(PhotoWorkspace.maxOpenPixels / (1024 * 1024)) MP)" }
         } catch {
             problem = PhotoProblem("\(url.lastPathComponent) can't be opened.", Self.reason(error))
@@ -221,7 +249,7 @@ extension PhotoWindow {
                 }.value
                 try model.openDocument(snapshot, name: name)
                 documentURL = url
-                files.noteRecent(url)
+                files.noteRecent(url, .opened)
                 note = nil
             } catch let error as ArchiveError {
                 problem = PhotoProblem("\(name) can't be opened.", error.message)
@@ -298,10 +326,12 @@ extension PhotoWindow {
                 if saving {
                     didSave(url, kind: .image(format), opened: opened)
                 } else {
+                    model.endExport(.success([url.lastPathComponent]))
                     note = "Exported \(url.lastPathComponent)"
                 }
             } catch {
                 if saving { return didFailSave(error) }
+                model.endExport(.failure(error))
                 note = nil
                 problem = PhotoProblem("\(url.lastPathComponent) couldn't be written.", Self.reason(error))
             }
@@ -318,7 +348,7 @@ extension PhotoWindow {
         }
         files.saveFailed = false
         files.working = nil
-        files.noteRecent(url)
+        files.noteRecent(url, .saved)
         note = nil  // the save status `photo.bar.saved` says "Saved"
     }
 
@@ -388,7 +418,7 @@ struct PhotoFileArea: ViewModifier {
                 guard let offer = files.recoveryOffer, let hook = await PhotoWindowEditedView.hook(for: files) else { return }
                 if let choice = await hook.askToRestore(offer) { perform(.file(choice)) } else { files.recoveryOffer = nil }
             }
-            .task { if let url = PhotoOpenQueue.shared.windowAppeared(openWindow) { perform(.openFile(url)) } }
+            .task { if let intent = PhotoOpenQueue.shared.windowAppeared(openWindow) { perform(intent) } }
             // A clean close leaves nothing to recover; a dirty one asked first (Don't Save discards).
             .onDisappear { if !model.isDirty { files.autosave?.discard() } }
     }

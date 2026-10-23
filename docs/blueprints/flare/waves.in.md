@@ -10,6 +10,13 @@ lists its tasks, owned files and acceptance tests.
 
 <!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
 
+**Wave 8 (beta gaps, 2026-10-21).** Flare's must-haves from
+`paw-workspace/docs/design/drafts/2026-10-21-beta-gaps-combined.md`:
+`lottie-open` (open a Lottie JSON, every skipped item named) and
+`lottie-player-check` (a pinned reference player in CI compared with the
+stage). Keyed fill and stroke are the suiteui `timeline-keys` packet, and the
+stub menu items are suite `no-placeholders`.
+
 Longest chain per feature: mac-platform 3, live-stage 4, live-keys 4,
 live-scenes 3, draw-key-save 7 (the reason is in its Build waves), stage-edit
 3, inspector-timeline 4 (reason in its Build waves), layers-files 3,

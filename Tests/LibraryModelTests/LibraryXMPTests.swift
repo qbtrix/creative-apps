@@ -1,5 +1,5 @@
 // LibraryXMPTests.swift: the XMP sidecar packet, its Library marker and its name (metadata-more
-// MD-15). Written before its code (contract rule 13, MD-14): every test waits on MD-15. Linux and macOS.
+// MD-15). Written before its code (contract rule 13, MD-14). Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -21,7 +21,7 @@ private func packet(
     return String(decoding: XMPSidecar.encode(SidecarFields(photo: photo)), as: UTF8.self)
 }
 
-@Test(.disabled("waits on MD-15")) func encodeWritesEveryFieldEscapedByteForByte() {
+@Test func encodeWritesEveryFieldEscapedByteForByte() {
     let expected = """
         <?xpacket begin="\u{FEFF}" id="W5M0MpCehiHzreSzNTczkc9d"?>
         <x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
@@ -40,7 +40,7 @@ private func packet(
         == expected)
 }
 
-@Test(.disabled("waits on MD-15")) func emptyFieldsWriteNoElementAndARejectRatesMinusOne() {
+@Test func emptyFieldsWriteNoElementAndARejectRatesMinusOne() {
     let text = packet()
     #expect(text.contains("lib:Writer=\"Library\""))
     for element in ["xmp:Rating", "xmp:Label", "dc:subject", "dc:title", "dc:description"] {
@@ -49,13 +49,13 @@ private func packet(
     #expect(packet(rating: 3, flag: .reject).contains("<xmp:Rating>-1</xmp:Rating>"))
 }
 
-@Test(.disabled("waits on MD-15")) func controlCharactersButTabAndNewlineAreDropped() {
+@Test func controlCharactersButTabAndNewlineAreDropped() {
     let text = packet(title: "Har\u{07}bour\u{0}", caption: "Low\ttide\nat dawn")
     #expect(text.contains(">Harbour</rdf:li>"))
     #expect(text.contains(">Low\ttide\nat dawn</rdf:li>"))
 }
 
-@Test(.disabled("waits on MD-15")) func theMarkerIsLibrarysWriterProperty() {
+@Test func theMarkerIsLibrarysWriterProperty() {
     let own = packet(keywords: ["Pier"], rating: 3)
     #expect(XMPSidecar.isWrittenByLibrary(Data(own.utf8)))
     let foreign = own.replacingOccurrences(of: " lib:Writer=\"Library\"", with: "")
@@ -63,7 +63,7 @@ private func packet(
     #expect(!XMPSidecar.isWrittenByLibrary(Data()))
 }
 
-@Test(.disabled("waits on MD-15")) func aSidecarTakesTheStemUnlessASiblingSharesIt() {
+@Test func aSidecarTakesTheStemUnlessASiblingSharesIt() {
     #expect(XMPSidecar.path(for: "/a/IMG_1.jpg", siblings: ["/a/IMG_1.jpg"]) == "/a/IMG_1.xmp")
     #expect(XMPSidecar.path(for: "/a/IMG_1.jpg", siblings: ["/a/IMG_1.jpg", "/a/IMG_1.heic"]) == "/a/IMG_1.jpg.xmp")
     #expect(XMPSidecar.path(for: "/a/IMG_1.heic", siblings: ["/a/IMG_1.jpg", "/a/IMG_1.heic"]) == "/a/IMG_1.heic.xmp")

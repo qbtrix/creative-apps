@@ -1,0 +1,188 @@
+{
+  "title": "Camera RAW once for the suite: SuiteImaging decodes the registry's camera RAW formats (CR2, CR3, NEF, ARW, DNG, RAF and the rest) through Core Image into a linear float buffer with headroom, the embedded preview for thumbnails, and Photo and the CLI open, develop and export it",
+  "wave": "XK4",
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "captain 2026-10-21 (RAW in beta, shared); feature map suiteui/shared-raw (new; adopters photo here, library via library/raw); real job RJ-X50 (new); resolves Library's D11 (float decode) for RAW files",
+  "waits_on": "suite-imaging IM-a (the SuiteImaging target, which IM-1 now also links to SuiteModel) before SR-2 and IM-m (ImagingProgram) before SR-3; shared-codecs SC-f (the format registry with its camera RAW row; PhotoImageFile.swift) before SR-6, and SC-photo (SC-4's SuiteImageIO.decode into the working space; ImageIOCodec.swift) before SR-6; tone-controls TC-a and pen-paths PN-a (canonical-concepts.txt) before SR-8; no creative-core issue, no Package.swift edit; cross-line: photo/tone-controls PT-4 (RJ-X50's tone.set); library/raw adopts after SR-a and SR-m",
+  "depends": [
+    "suite-harness",
+    "editor-kernel"
+  ],
+  "longest_chain": "6 (SR-1 → SR-2 → SR-5 → SR-6 → SR-7 → SR-8)",
+  "journeys": [
+    "PhotoRawJourneyTests.testOpenRawDevelopExport"
+  ],
+  "owned": [
+    "Tests/SuiteImagingTests/TinyDNG.swift",
+    "Tests/SuiteImagingTests/TinyDNGTests.swift",
+    "Tests/SuiteImagingTests/Fixtures/raw/",
+    "Tests/SuiteImagingTests/RawFormatTests.swift",
+    "Tests/SuiteImagingTests/RawDecodePlanTests.swift",
+    "Tests/SuiteImagingTests/RawHeadroomTests.swift",
+    "Sources/SuiteImaging/Raw/RawFormat.swift",
+    "Sources/SuiteImaging/Raw/SuiteRaw.swift",
+    "Sources/SuiteImaging/Raw/RawDecoding.swift",
+    "Sources/SuiteImaging/Raw/FakeRawDecoder.swift",
+    "Sources/SuiteImaging/Raw/SystemRawDecoder.swift",
+    "docs/c4/parts/creative-apps/suite-imaging/imaging-raw.json",
+    "Tests/mutations/SuiteImaging.RawFormat.json",
+    "Tests/mutations/SuiteImaging.SuiteRaw.json",
+    "Tests/SuiteImagingTests/SystemRawDecoderTests.swift",
+    "Tests/mutations/SuiteImaging.SystemRawDecoder.json",
+    "Tests/PhotoModelTests/PhotoRawOpenTests.swift",
+    "UITests/PhotoJourneyTests+Raw.swift",
+    "Tests/RealJobs/photo/raw-develop/raw-develop.jobs.json",
+    "Tests/RealJobs/photo/raw-develop/input/tiny-bayer.dng",
+    "Sources/PhotoModel/PhotoImageFile.swift",
+    "Tests/mutations/PhotoModel.PhotoImageFile.json",
+    "Tests/AppSnapshotTests/PhotoRawSnapshots.swift",
+    "Tests/RealJobs/photo/raw-develop/expected/tiny-bayer-ev-1.png",
+    "Tests/canonical-concepts.txt",
+    "docs/blueprints/suiteui/features/shared-raw.wave.json",
+    "Tests/SuiteImagingTests/TinyPNG.swift",
+    "Sources/PhotoApp/ImageIOCodec.swift",
+    "Tests/SuiteImagingTests/WideGamutRoundTripTests.swift"
+  ],
+  "slices": [
+    {
+      "id": "SR-a",
+      "behavior": "The tiny test DNGs are written in-repo and checked byte for byte, and SuiteImaging's `Raw/` module declares the formats, the refusals, the decode plan and `SuiteRaw` as stubs over a fake decoder, with their tests written, disabled.",
+      "tasks": [
+        "SR-1",
+        "SR-2"
+      ],
+      "journeys": [
+        "MJ-SR"
+      ],
+      "owned": [
+        "Tests/SuiteImagingTests/TinyDNG.swift",
+        "Tests/SuiteImagingTests/TinyDNGTests.swift",
+        "Tests/SuiteImagingTests/Fixtures/raw/",
+        "Tests/SuiteImagingTests/RawFormatTests.swift",
+        "Tests/SuiteImagingTests/RawDecodePlanTests.swift",
+        "Tests/SuiteImagingTests/RawHeadroomTests.swift",
+        "Sources/SuiteImaging/Raw/RawFormat.swift",
+        "Sources/SuiteImaging/Raw/SuiteRaw.swift",
+        "Sources/SuiteImaging/Raw/RawDecoding.swift",
+        "Sources/SuiteImaging/Raw/FakeRawDecoder.swift",
+        "Sources/SuiteImaging/Raw/SystemRawDecoder.swift",
+        "docs/c4/parts/creative-apps/suite-imaging/imaging-raw.json",
+        "Tests/SuiteImagingTests/TinyPNG.swift"
+      ],
+      "waits": {
+        "suite-imaging:IM-a": [
+          "SR-2"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "SR-m",
+      "behavior": "RAW extensions parse, the plan picks the embedded preview only where it covers the size, refusals read as sentences, and the system decoder returns an upright linear float buffer whose highlights survive Exposure −1 through the shared list.",
+      "tasks": [
+        "SR-3",
+        "SR-4"
+      ],
+      "journeys": [
+        "MJ-SR",
+        "MJ-SR-mac"
+      ],
+      "owned": [
+        "Sources/SuiteImaging/Raw/RawFormat.swift",
+        "Sources/SuiteImaging/Raw/SuiteRaw.swift",
+        "Tests/SuiteImagingTests/RawFormatTests.swift",
+        "Tests/SuiteImagingTests/RawDecodePlanTests.swift",
+        "Tests/SuiteImagingTests/RawHeadroomTests.swift",
+        "Tests/mutations/SuiteImaging.RawFormat.json",
+        "Tests/mutations/SuiteImaging.SuiteRaw.json",
+        "Sources/SuiteImaging/Raw/SystemRawDecoder.swift",
+        "Tests/SuiteImagingTests/SystemRawDecoderTests.swift",
+        "Tests/mutations/SuiteImaging.SystemRawDecoder.json"
+      ],
+      "waits": {
+        "SR-a": [
+          "SR-3",
+          "SR-4"
+        ],
+        "suite-imaging:IM-m": [
+          "SR-3"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "SR-photo",
+      "behavior": "Photo opens a RAW file as a new document whose layer keeps the decoder's float pixels, the CLI opens it headless, and a refused file leaves the document as it was with the sentence.",
+      "tasks": [
+        "SR-5",
+        "SR-6"
+      ],
+      "journeys": [
+        "MJ-SR-photo",
+        "PJ-SR"
+      ],
+      "owned": [
+        "Tests/PhotoModelTests/PhotoRawOpenTests.swift",
+        "UITests/PhotoJourneyTests+Raw.swift",
+        "Tests/RealJobs/photo/raw-develop/raw-develop.jobs.json",
+        "Tests/RealJobs/photo/raw-develop/input/tiny-bayer.dng",
+        "Sources/PhotoModel/PhotoImageFile.swift",
+        "Tests/mutations/PhotoModel.PhotoImageFile.json",
+        "Sources/PhotoApp/ImageIOCodec.swift"
+      ],
+      "waits": {
+        "SR-a": [
+          "SR-5",
+          "SR-6"
+        ],
+        "shared-codecs:SC-f": [
+          "SR-6"
+        ],
+        "shared-codecs:SC-photo": [
+          "SR-6"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "SR-z",
+      "behavior": "On live services Photo opens, develops and exports the test DNG at full size, RJ-X50 passes on the macOS job, the concept line guards against a second decoder, and the feature is built.",
+      "tasks": [
+        "SR-7",
+        "SR-8"
+      ],
+      "journeys": [
+        "PJ-SR",
+        "MJ-SR"
+      ],
+      "owned": [
+        "UITests/PhotoJourneyTests+Raw.swift",
+        "Tests/AppSnapshotTests/PhotoRawSnapshots.swift",
+        "Tests/RealJobs/photo/raw-develop/raw-develop.jobs.json",
+        "Tests/RealJobs/photo/raw-develop/expected/tiny-bayer-ev-1.png",
+        "Tests/canonical-concepts.txt",
+        "docs/c4/parts/creative-apps/suite-imaging/imaging-raw.json",
+        "docs/blueprints/suiteui/features/shared-raw.wave.json",
+        "Tests/SuiteImagingTests/WideGamutRoundTripTests.swift"
+      ],
+      "waits": {
+        "SR-m": [
+          "SR-7"
+        ],
+        "SR-photo": [
+          "SR-7"
+        ],
+        "tone-controls:TC-a": [
+          "SR-8"
+        ],
+        "pen-paths:PN-a": [
+          "SR-8"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

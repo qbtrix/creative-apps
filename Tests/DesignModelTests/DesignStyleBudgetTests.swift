@@ -10,7 +10,8 @@
 // A scrub step keeps the page's held ids, since a style edit changes no id, and walks
 // only the path the edit copied (#2303: rebuilding the id set cost about 2 ms in a
 // Linux debug build); the scrub gate still reads the quietest of three batches' medians.
-// P2 is the screen half of both.
+// P2 is the screen half of both. Both tests are timed, so the suite is on the perf list
+// (Tests/perf-suites.txt): the merge gate skips it and perf-nightly runs it.
 @testable import DesignModel
 import Testing
 

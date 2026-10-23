@@ -11,7 +11,7 @@ packet's LF-1 and LF-2 do it, and LF-3 closes it); real job RJ-L42.
 **Depends on:** `suite/file-flow` **SF-a** (cross-line: `DropPlan`,
 `FileFlowTarget`, `SuiteFileCommands`, `.suiteFileDrop`,
 `SuiteDocumentsBridge`); LF-3 needs **SF-5** and **SF-6**, LF-4 **SF-7**,
-LF-7 **SF-8**. Same line: spine (building), import and thumbnails (built) own the app files, so LF-a waits on them; the held p3 features filters-collections (FC-a, FC-c), metadata-more (MD-e) and raw (RW-b) now wait on LF-a for `LibraryCommands.swift` and `LibraryGrid.swift`. `tone-controls`'s LT-m owns `LibraryCommandCatalog.swift` and `Tests/command-ids/library.txt`, so LF-3 waits on it. `LibraryFileFlow+Kernel.swift` is listed in `library/c4-planned.json` (library-import) with this packet.
+LF-7 **SF-8**. Same line: spine (building), import and thumbnails (built) own the app files, so LF-a waits on them; the held p3 features filters-collections (FC-a, FC-c) and metadata-more (MD-e) now wait on LF-a for `LibraryCommands.swift` and `LibraryGrid.swift`. `tone-controls`'s LT-m owns `LibraryCommandCatalog.swift` and `Tests/command-ids/library.txt`, so LF-3 waits on it. `LibraryFileFlow+Kernel.swift` is listed in `library/c4-planned.json` (library-import) with this packet.
 
 **Rule 20.** The drop's import is Library's existing import; the drag-out uses `PasteboardCoding`'s representations. Library's recents are the suite list's (it notes catalog opens there for the home), with no menu of its own.
 

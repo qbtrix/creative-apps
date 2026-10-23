@@ -2,7 +2,7 @@
   "title": "Every app's undo runs on SuiteKernel's History; the four app history engines are deleted",
   "wave": "XK2",
   "order": 10,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "covers": "editor-kernel design (2026-10-17), inventory row 'undo'; captain's canonical-first call on #1552",
   "waits_on": "editor-kernel:EK-undo only (every slice); cross-line hand-offs in the packet's Hand-offs list; AU-library takes CatalogHistory.swift before filters-collections' FC-3 (supervisor, #1934, 2026-10-20)",

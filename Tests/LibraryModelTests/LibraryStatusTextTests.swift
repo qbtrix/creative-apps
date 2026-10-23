@@ -1,7 +1,7 @@
 // LibraryStatusTextTests.swift: what the status row and the inspector header
 // say (status-and-layout SL-2), MJ1 (`testStatusWalk`) on the `shoot`
 // fixture, the row's cost on `large`, and the header's facts (SL-5): dates,
-// kinds and the capture span. Runs on Linux and macOS.
+// kinds, the capture span and the active photo. Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -56,7 +56,7 @@ private func pill(_ id: String, _ row: LibraryStatusRow?) -> LibraryStatusPill? 
     catalog.selectCollection("favorites")
     #expect(catalog.statusRow?.size == "0 photos")
     let header = catalog.inspectorHeader(utcOffset: 0)
-    #expect(header.title == "Favorites")
+    #expect(header.title == "Picks")
     #expect(header.facts == [.init(label: "Photos", value: "0")])
 }
 
@@ -247,7 +247,8 @@ func headerKinds(path: String?, kind: String) {
     var catalog = shoot()
     catalog.select(Set((1...5).map(path)))
     #expect(catalog.inspectorHeader(utcOffset: 0) == LibraryInspectorHeader(
-        title: "5 Photos", facts: [.init(label: "Captured", value: "2026-06-01")]))
+        title: "5 Photos",
+        facts: [.init(label: "Active", value: "IMG_0001"), .init(label: "Captured", value: "2026-06-01")]))
     let day = 86_400.0
     catalog.load([3, 1, 2].map { n in
         PhotoItem(
@@ -255,5 +256,16 @@ func headerKinds(path: String?, kind: String) {
             path: "/d\(n).jpg")
     })
     catalog.select(Set(catalog.order))
-    #expect(catalog.inspectorHeader(utcOffset: 0).facts == [.init(label: "Captured", value: "2026-06-01 – 2026-06-03")])
+    #expect(catalog.inspectorHeader(utcOffset: 0).facts.last == .init(label: "Captured", value: "2026-06-01 – 2026-06-03"))
+}
+
+/// Several selected: the header names the active photo, the one Sync copies
+/// from (#3636); one photo needs no such fact.
+@Test func headerNamesTheActivePhoto() {
+    var catalog = shoot()
+    catalog.select([path(4), path(2), path(7)])
+    #expect(catalog.syncSource?.name == "IMG_0002")
+    #expect(catalog.inspectorHeader(utcOffset: 0).facts.first == .init(label: "Active", value: "IMG_0002"))
+    catalog.select([path(4)])
+    #expect(!catalog.inspectorHeader(utcOffset: 0).facts.contains { $0.label == "Active" })
 }

@@ -1,7 +1,7 @@
 // LibraryOrder.swift: the cached display order (SP-8). `order` holds the
 // selected collection's photo ids in the current sort; it is rebuilt once per
 // change that can reorder or hide a photo (load, sort, collection, and an
-// edit under the rating sort or in Favorites), so the grid, the selection and
+// edit under the rating sort or in Picks), so the grid, the selection and
 // the loupe read it in O(n) instead of sorting on every read. Linux-safe.
 
 extension LibraryCatalog {

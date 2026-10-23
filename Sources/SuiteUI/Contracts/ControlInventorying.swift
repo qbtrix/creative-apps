@@ -1,7 +1,8 @@
 // ControlInventorying.swift: UC18, the suite.controls contract (no dead
 // controls) and FakeControlInventory, which never reports a duplicate id on
 // purpose. Foundation only; verbatim from blueprint section 5.3. The live
-// inventory is SH-5.
+// inventory is SH-5. `selected` is a toggle's on state; the synthesized Codable
+// encodes it only when set and decodes it when absent.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -13,8 +14,18 @@ public struct ControlEntry: Hashable, Sendable, Codable {
     public var enabled: Bool
     public var reason: String?
     public var role: String?              // "primary" for the one prominent action; nil otherwise
-    public init(id: String, enabled: Bool, reason: String? = nil, role: String? = nil) {
-        self.id = id; self.enabled = enabled; self.reason = reason; self.role = role
+    /// Whether a toggle-style control is on; nil, and no key in the JSON, for every other control,
+    /// so a document written before the field existed decodes unchanged (command-state CS-1).
+    public var selected: Bool?
+    public init(id: String, enabled: Bool, reason: String? = nil, role: String? = nil, selected: Bool? = nil) {
+        self.id = id; self.enabled = enabled; self.reason = reason; self.role = role; self.selected = selected
+    }
+
+    /// This entry reporting `selected` as its on state (nil: not a toggle).
+    public func selecting(_ selected: Bool?) -> ControlEntry {
+        var entry = self
+        entry.selected = selected
+        return entry
     }
 }
 

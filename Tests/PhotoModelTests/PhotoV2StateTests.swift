@@ -23,7 +23,8 @@ import Testing
     @Test func eyedropperHelpComesFromSampling() {
         let live = PhotoWorkspace()
         #expect(live.toolHelp(.eyedropper) == live.services.sampling.unavailableHelp)
-        #expect(live.toolHelp(.eyedropper) == "Not built yet (PV-9).")
+        // The live sampler is built (eyedropper PE-5), so the tool is enabled on `.live` too.
+        #expect(live.toolHelp(.eyedropper) == nil)
         #expect(PhotoTool.eyedropper.unavailableHelp == "Not built yet (PV-9).")
         let fake = PhotoWorkspace(services: .fake)
         #expect(fake.toolHelp(.eyedropper) == nil)

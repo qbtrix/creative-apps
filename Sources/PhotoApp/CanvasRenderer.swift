@@ -18,7 +18,10 @@
 // On the GPU route the renderer keeps the layer tiles resident on the backend
 // (ResidentSurfaces) and, while the view draws through its Metal presenter,
 // renders straight into the presenter's texture: no bytes come back, and an
-// update only asks the view to present.
+// update only asks the view to present. The backend is the process's, so a
+// tile set or composite cache the renderer drops (a switch, a closed window)
+// is released there at once, or, while a render still draws from it, as
+// that render ends (`retired`), so an idle renderer holds only its own.
 // Presentation state only: it never changes the workspace.
 import Combine
 import CoreGraphics
@@ -54,15 +57,25 @@ final class CanvasRenderer {
     @ObservationIgnored private var redrawAll = false
     @ObservationIgnored private var following: AnyCancellable?
 
-    /// Layer tiles kept on the GPU route's backend between renders; a new one when the backend changes.
-    @ObservationIgnored private var resident: ResidentSurfaces?
+    /// Layer tiles kept on the GPU route's backend between renders; a new set when the backend changes.
+    @ObservationIgnored private var resident: ResidentTiles?
+    /// What `use` dropped while a render drew from it: released when that render ends.
+    @ObservationIgnored private var retired: [(composites: PhotoCompositeCache, tiles: ResidentTiles?)] = []
+
+    /// No render is running or waiting, so nothing dropped is still held.
+    var isIdle: Bool { !isRendering && waiting == nil }
 
     /// Draws on `route` from now on: the next `show` redraws every tile there. A GPU route gets this
     /// renderer's resident tiles for its backend, so a frame uploads only the layer tiles that changed.
     func use(_ route: PhotoRenderRoute) {
+        let (composites, tiles) = (self.route.composites, resident)
+        defer {
+            let dropped = (composites: composites, tiles: tiles === resident ? nil : tiles)
+            if isRendering { retired.append(dropped) } else { dropped.composites.removeAll() }
+        }
         if let gpu = route.preferred {
-            if resident?.backend.name != gpu.name { resident = ResidentSurfaces(backend: gpu) }
-            self.route = PhotoRenderRoute(preferred: gpu, resident: resident)
+            if resident?.surfaces.backend.name != gpu.name { resident = ResidentTiles(backend: gpu) }
+            self.route = PhotoRenderRoute(preferred: gpu, resident: resident?.surfaces)
         } else {
             (self.route, resident) = (route, nil)
         }
@@ -128,6 +141,9 @@ final class CanvasRenderer {
                 failure = "The picture couldn't be drawn: \(error)"
             }
             isRendering = false
+            // The render that drew from what `use` dropped is done: release it.
+            for dropped in retired { dropped.composites.removeAll() }
+            retired = []
             if let latest = waiting {
                 waiting = nil
                 show(latest, quietly: quiet)
@@ -152,4 +168,16 @@ final class CanvasRenderer {
             bitmapInfo: CGBitmapInfo(rawValue: alpha.rawValue), provider: provider, decode: nil,
             shouldInterpolate: true, intent: .defaultIntent)
     }
+}
+
+/// A renderer's resident layer tiles, released on their backend once nothing holds them: neither the renderer
+/// nor a render still drawing from them. Dropping a ResidentSurfaces alone leaves its surfaces on the backend.
+private final class ResidentTiles: Sendable {
+    let surfaces: ResidentSurfaces
+
+    init(backend: any RenderBackend) {
+        surfaces = ResidentSurfaces(backend: backend)
+    }
+
+    deinit { surfaces.removeAll() }
 }

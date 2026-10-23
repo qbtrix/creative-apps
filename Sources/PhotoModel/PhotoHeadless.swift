@@ -1,6 +1,6 @@
 // PhotoHeadless.swift (adopt-command-catalog AC-p2): Photo's document with no window, for the afterglow CLI, MCP and
 // the real jobs. It opens Photo's own file (OpenRaster .ora), PNG and JPEG through `CoreRasterImageCodec`, saves .ora,
-// exports the flattened image as PNG or JPEG (optionally at a long side), and runs `PhotoWorkspace.catalog` lifted
+// exports the flattened image as PNG or JPEG on the suite's export options (export-pack PX-3), and runs `PhotoWorkspace.catalog` lifted
 // onto itself. Linux-safe: no UI imports.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -54,11 +54,18 @@ public struct PhotoHeadless: HeadlessDocument {
         try workspace.services.archive.container(workspace.documentPackage(codec: Self.codec))
     }
 
-    /// The flattened image as "png" or "jpeg" (`quality` 0...1, 0.9 when absent), resized first so its longer side
-    /// is `longSide` when that is given, through `image.resize` on a copy.
+    /// The flattened image as "png" or "jpeg" on the suite's export options (`SuiteExportOptions(json:)`: `size`,
+    /// `quality`, ...; `format` names the file, whatever the options say), through the sheet's own
+    /// `exportPixels(_:)`. The older `{"longSide": n}` form still resizes a copy with `image.resize`.
     public func export(_ format: String, options: JSONValue) throws -> [ExportedFile] {
         guard let kind = ImageFormat(rawValue: format) else {
             throw CatalogError.unavailable(id: "export", why: "Photo exports png and jpeg.")
+        }
+        guard case .object(let keys) = options, keys["longSide"] != nil else {
+            var o = try SuiteExportOptions(json: options, defaults: workspace.exportOptionsDefault())
+            o.format = format
+            let data = try Self.codec.encode(workspace.exportPixels(o), as: kind, quality: o.quality)
+            return [ExportedFile(suggestedName: workspace.fileName(for: kind), format: format, data: data)]
         }
         let o = try options.decode(ExportOptions.self)
         var copy = workspace

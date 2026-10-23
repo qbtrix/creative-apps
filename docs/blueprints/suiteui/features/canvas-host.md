@@ -30,6 +30,8 @@ creative-core `render-backend` and `metal-backend`, adopted by each app's
 Model later through a bump PR. Every token it reads is on `dev`
 (`SuiteColor.canvasSurround`, `SuiteColor.artboard`, `SuiteSize.canvasInset`).
 
+**Render contract:** what draws on this host and how is `docs/render-contract.md`.
+
 **Clean-room.** Behaviour only; no task reads or copies another product's code.
 
 Blueprint sections: 2.2 (components), 4.4 (perf journeys), 5 (contracts),

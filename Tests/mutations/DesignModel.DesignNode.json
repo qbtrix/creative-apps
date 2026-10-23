@@ -16,8 +16,8 @@
   {
     "label": "the text style is not decoded",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "textStyle: container.decodeIfPresent(DesignTextStyle.self, forKey: .textStyle) ?? .default)",
-    "replace": "textStyle: .default)",
+    "find": "textStyle: container.decodeIfPresent(DesignTextStyle.self, forKey: .textStyle) ?? .default,",
+    "replace": "textStyle: .default,",
     "tests": "DesignStyleSchemaTests.swift"
   },
   {
@@ -44,15 +44,57 @@
   {
     "label": "a full-size handle sits on the kernel square's corner, not its centre",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "shown[handle] = DesignPoint(x: (square.minX + square.maxX) / 2",
-    "replace": "shown[handle] = DesignPoint(x: square.minX",
+    "find": "shown[handle] = DesignPoint(x: (square.minX + square.maxX + Double(h) * size) / 2",
+    "replace": "shown[handle] = DesignPoint(x: square.minX + Double(h) * size / 2",
     "tests": "DesignCompactSelectionTests.swift"
   },
   {
     "label": "a compact rect's corners are pushed inside",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "DesignPoint(x: at.x + Double(h) * size / 2, y: at.y + Double(v) * size / 2)",
-    "replace": "DesignPoint(x: at.x - Double(h) * size / 2, y: at.y - Double(v) * size / 2)",
+    "find": "let (h, v) = compact && handle.isCorner ? handle.direction : (0, 0)",
+    "replace": "let (h, v) = compact && handle.isCorner ? (-handle.direction.x, -handle.direction.y) : (0, 0)",
     "tests": "DesignCompactSelectionTests.swift"
+  },
+  {
+    "label": "a copy drops the gradient",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "        gradient = node.gradient",
+    "replace": "",
+    "tests": "DesignGradientTests.swift"
+  },
+  {
+    "label": "the gradient is not decoded",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "gradient: container.decodeIfPresent(Fill.self, forKey: .gradient))",
+    "replace": "gradient: nil)",
+    "tests": "DesignGradientTests.swift"
+  },
+  {
+    "label": "the turn is not decoded",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "rotation = try container.decodeIfPresent(Double.self, forKey: .rotation) ?? 0",
+    "replace": "rotation = 0",
+    "tests": "DesignTransformTests.swift"
+  },
+  {
+    "label": "a copy drops the mirrors",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "(flipX, flipY) = (node.flipX, node.flipY)",
+    "replace": "(flipX, flipY) = (false, false)",
+    "tests": "DesignTransformTests.swift"
+  },
+  {
+    "label": "an upright node writes its turn",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "if rotation != 0 { try container.encode(rotation, forKey: .rotation) }",
+    "replace": "try container.encode(rotation, forKey: .rotation)",
+    "tests": "DesignTransformTests.swift"
+  },
+  {
+    "label": "flipY is saved under flipX",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "if flipY { try container.encode(flipY, forKey: .flipY) }",
+    "replace": "if flipY { try container.encode(flipY, forKey: .flipX) }",
+    "tests": "DesignTransformTests.swift"
   }
 ]

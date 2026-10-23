@@ -127,10 +127,11 @@
     "outcome": "Stays smooth and the thumbnails are right.",
     "needs": [
       "library/thumbnails",
-      "E12"
+      "E12",
+      "library/large-catalog"
     ],
     "needs_note": "library/thumbnails (beta), E12 preview cache",
-    "closes_with": "library/thumbnails",
+    "closes_with": "library/large-catalog",
     "trap": "Placeholders today; jank once real pixels arrive",
     "run": "J",
     "baseline": "fail",
@@ -388,7 +389,7 @@
     "job": "Import RAW+JPEG pairs and see each pair once.",
     "outcome": "Each RAW+JPEG pair shows as one item, and a rating applies to both files.",
     "needs": [],
-    "needs_note": "raw RW-b",
+    "needs_note": "no packet: RAW+JPEG pairing was cut from library/raw for the beta (re-cut 2026-10-21, open question R1)",
     "closes_with": null,
     "trap": "Pair shows twice; rating applies to one half",
     "run": "C",
@@ -404,16 +405,19 @@
     "weight": "med",
     "job": "Open camera RAW files and see the embedded preview at once.",
     "outcome": "RAW files import and show their embedded preview straight away.",
-    "needs": [],
-    "needs_note": "raw RW-b",
-    "closes_with": null,
+    "needs": [
+      "library/raw",
+      "suiteui/shared-raw"
+    ],
+    "closes_with": "library/raw",
     "trap": "RAW skipped silently on import",
     "run": "Cm",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://home.camerabits.com/tour-photo-mechanic/"
-    ]
+    ],
+    "waits_on": "RW-4"
   },
   "RJ-L23": {
     "id": "RJ-L23",
@@ -663,5 +667,168 @@
     ],
     "waits_on": "LF-3",
     "added_by": "library/file-flow"
+  },
+  "RJ-L70": {
+    "id": "RJ-L70",
+    "app": "library",
+    "weight": "high",
+    "job": "Stand up a sideways 4000x3000 scan with Rotate Right, crop it 4:5 portrait, and export JPEG.",
+    "outcome": "The JPEG is 3000x3750 and its top row matches the scan's left column within 2 levels.",
+    "needs": [
+      "suiteui/orientation-crop"
+    ],
+    "closes_with": "suiteui/orientation-crop",
+    "trap": "4:5 on the landscape original gives 5:4, or export ignores the turn",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "OC-8",
+    "added_by": "suiteui/orientation-crop"
+  },
+  "RJ-L50": {
+    "id": "RJ-L50",
+    "app": "library",
+    "weight": "high",
+    "job": "Import a card with two folders by copying to a chosen folder in dated subfolders, then delete the card.",
+    "outcome": "Every photo still opens after the card is gone; both files named IMG_0001 exist with different bytes under the dated folders.",
+    "needs": [
+      "library/catalog-files",
+      "A7"
+    ],
+    "closes_with": "library/catalog-files",
+    "trap": "A duplicate name overwrites the first copy, or the catalog still points at the card",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "LC-5",
+    "added_by": "library/catalog-files"
+  },
+  "RJ-L51": {
+    "id": "RJ-L51",
+    "app": "library",
+    "weight": "med",
+    "job": "Rate three photos, remove them from the catalog, then undo.",
+    "outcome": "The three files are still on disk after the remove, and after the undo the photos are back with their ratings.",
+    "needs": [
+      "library/catalog-files"
+    ],
+    "closes_with": "library/catalog-files",
+    "trap": "Remove deletes the files, or undo brings the photos back without their ratings",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "LC-6",
+    "added_by": "library/catalog-files"
+  },
+  "RJ-L52": {
+    "id": "RJ-L52",
+    "app": "library",
+    "weight": "high",
+    "job": "Move an imported folder of 40 photos on disk, then locate one of them.",
+    "outcome": "One relink makes all 40 photos open again; a same-named file of another size elsewhere is not linked.",
+    "needs": [
+      "library/catalog-files"
+    ],
+    "closes_with": "library/catalog-files",
+    "trap": "Relink fixes only the photo that was located",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "LC-6",
+    "added_by": "library/catalog-files"
+  },
+  "RJ-L53": {
+    "id": "RJ-L53",
+    "app": "library",
+    "weight": "med",
+    "job": "Import trips (with 2025 and 2026 inside) and family, then show trips/2025, and trips without its subfolders.",
+    "outcome": "Each folder view lists exactly the expected files, and the listed counts match the files on disk.",
+    "needs": [
+      "library/folders",
+      "A6"
+    ],
+    "closes_with": "library/folders",
+    "trap": "A folder named like a prefix of another shows the other's photos, or subfolder counts are added twice",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "FO-5",
+    "added_by": "library/folders"
+  },
+  "RJ-L54": {
+    "id": "RJ-L54",
+    "app": "library",
+    "weight": "high",
+    "job": "Rate 30 photos over three hourly saves, truncate the catalog file, relaunch, then restore the oldest backup.",
+    "outcome": "The relaunch opens the newest good backup with all 30 ratings and says so; after the restore the pre-restore catalog is listed as a backup.",
+    "needs": [
+      "library/catalog-backup"
+    ],
+    "closes_with": "library/catalog-backup",
+    "trap": "A damaged catalog opens empty, or a restore overwrites the only good copy",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "BK-5m",
+    "added_by": "library/catalog-backup"
+  },
+  "RJ-L55": {
+    "id": "RJ-L55",
+    "app": "library",
+    "weight": "med",
+    "job": "Prepare three geotagged photos for the share sheet.",
+    "outcome": "Three JPEGs with a long edge of 2048 and no GPS, serial or MakerNote; after a relaunch the share folder is empty.",
+    "needs": [
+      "library/share-sheet",
+      "library/export-pack"
+    ],
+    "closes_with": "library/share-sheet",
+    "trap": "The shared copies keep the location, are full-size originals, or pile up in a temp folder",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "SH-3",
+    "added_by": "library/share-sheet"
+  },
+  "RJ-L56": {
+    "id": "RJ-L56",
+    "app": "library",
+    "weight": "high",
+    "job": "Open a 10,000-photo catalog headless, select all, rate them 3, and plan an export of 1,000.",
+    "outcome": "Open in 400 ms or less, rate-all as one step in 200 ms or less, the export plan in 50 ms or less (debug).",
+    "needs": [
+      "library/large-catalog"
+    ],
+    "closes_with": "library/large-catalog",
+    "trap": "Fine at 200 photos, stalls at 10,000 (a quadratic scan in select or plan)",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "LG-3",
+    "added_by": "library/large-catalog"
   }
 }

@@ -1,5 +1,5 @@
 // LibraryCaptionTests.swift: title and caption on the selection (metadata-more MD-11).
-// Written before its code (contract rule 13, MD-9): every test waits on MD-11. Linux and macOS.
+// Written before its code (contract rule 13, MD-9); MD-11 turned them on. Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -18,7 +18,7 @@ private func twoSelected(titles: [String] = ["", ""]) -> LibraryCatalog {
     return catalog
 }
 
-@Test(.disabled("waits on MD-11")) func aTitleIsTrimmedAndSetInOneStepOnlyWhenItChanges() {
+@Test func aTitleIsTrimmedAndSetInOneStepOnlyWhenItChanges() {
     var two = twoSelected()
     two.setTitle("  Harbour ")
     #expect(two.items.map(\.title) == ["Harbour", "Harbour"])
@@ -28,12 +28,12 @@ private func twoSelected(titles: [String] = ["", ""]) -> LibraryCatalog {
     #expect(two.history.undo.count == 1)
 }
 
-@Test(.disabled("waits on MD-11")) func differentTitlesReadMixed() throws {
+@Test func differentTitlesReadMixed() throws {
     let metadata = try #require(twoSelected(titles: ["Harbour", ""]).selectedMetadata)
     #expect(metadata.photoTitle == .mixed && metadata.caption == .value(""))
 }
 
-@Test(.disabled("waits on MD-11")) func aCaptionIsItsOwnStepAndUndoes() {
+@Test func aCaptionIsItsOwnStepAndUndoes() {
     var two = twoSelected()
     two.setTitle("Harbour")
     two.setCaption(" Low tide\n")
@@ -45,4 +45,15 @@ private func twoSelected(titles: [String] = ["", ""]) -> LibraryCatalog {
     #expect(two.items.map(\.caption) == ["", ""] && two.undoTitle == "Undo Set Title")
     two.undo()
     #expect(two.items.map(\.title) == ["", ""])
+}
+
+@Test func inTheLoupeOnlyTheLoupePhotoGetsTheTitleAndNothingSelectedRecordsNothing() {
+    var two = twoSelected()
+    two.open("P2")
+    two.setTitle("\0Pier\t")
+    #expect(two.items.map(\.title) == ["", "Pier"] && two.history.undo.count == 1)
+    var none = twoSelected()
+    none.select([])
+    none.setCaption("Pier")
+    #expect(none.items.map(\.caption) == ["", ""] && none.history.undo.isEmpty)
 }

@@ -9,7 +9,9 @@
 // its toggles as SidebarRow does and runs its header action. For the app
 // panel swaps (#3194) it takes app ids, and a drop beside a flat row reorders
 // it among its siblings (before, after, first, last; refused on a locked
-// target or an unknown id), the root as parent at depth 0. macOS only.
+// target or an unknown id), the root as parent at depth 0. Multi-select
+// (multi-layer-select PM-1): Shift extends, Command toggles, a plain click
+// replaces, and every id in `selected` draws selected. macOS only.
 @testable import SuiteUI
 import SuiteKernel
 import SwiftUI
@@ -171,6 +173,45 @@ import Testing
         #expect(!flat.showsEye && !flat.showsLock && flat.reorders && flat.embedded)
         let kind = LayerRowDecoration(symbol: "photo", symbolID: "photo.layer.7.kind", caption: "Pixel · 100%")
         #expect(kind.caption == "Pixel · 100%" && kind.thumbnail == nil && kind.help == nil)
+    }
+
+    /// The click's mode (PM-1): Shift extends, Command toggles, a plain click
+    /// replaces; Shift wins when both are held.
+    @Test func pickModes() {
+        #expect(LayerTreeList.pick(shift: true, command: false) == .extend)
+        #expect(LayerTreeList.pick(shift: false, command: true) == .toggle)
+        #expect(LayerTreeList.pick(shift: false, command: false) == .replace)
+        #expect(LayerTreeList.pick(shift: true, command: true) == .extend)
+    }
+
+    /// With two ids picked both rows read selected and a click goes out
+    /// through `onPick`; the single `selection:` init still draws one row.
+    @Test func severalSelected() {
+        let rows = KernelFixtures.tree200.rows(expanded: [])
+        let calls = PanelCalls()
+        let list = LayerTreeList(
+            rows: rows, childCount: { _ in 0 }, selected: ["header", "footer"],
+            onPick: { id, _ in calls.picked.append(id) }, onAction: { _ in })
+        #expect(list.isSelected("header") && list.isSelected("footer"))
+        #expect(!list.isSelected("background") && !list.isSelected("nosuch"))
+        list.select("background")
+        #expect(calls.picked == ["background"])
+
+        let single = LayerTreeList(rows: rows, childCount: { _ in 0 }, selection: "header", onAction: { _ in })
+        #expect(single.isSelected("header") && !single.isSelected("footer"))
+        let none = LayerTreeList(rows: rows, childCount: { _ in 0 }, selected: [], onPick: { _, _ in }, onAction: { _ in })
+        #expect(!none.isSelected("header"))
+    }
+
+    /// Picked rows side by side join into one band: a row squares the edge it
+    /// shares with a picked neighbour, and a lone picked row keeps every corner.
+    @Test func adjacentPicksJoin() {
+        let joins = LayerTreeList.selectionJoins(["a", "b", "c", "d", "e"], selected: ["a", "b", "c", "e"].contains)
+        #expect(joins["a"] == LayerRowJoin(above: false, below: true))
+        #expect(joins["b"] == LayerRowJoin(above: true, below: true))
+        #expect(joins["c"] == LayerRowJoin(above: true, below: false))
+        #expect(joins["d"] == nil && joins["e"] == nil)
+        #expect(LayerTreeList.selectionJoins(["a", "b"], selected: { $0 == "b" }).isEmpty)
     }
 
     /// A flat leaf row of `tree200`, named Sky.

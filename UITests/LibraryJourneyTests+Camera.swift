@@ -1,6 +1,6 @@
 // LibraryJourneyTests+Camera.swift: MD-J1, the Info tab's Camera section (metadata-more).
 // Steps 1-3 run on the `cameras` fixture; step 4 imports a.jpg (Exif) and b.png (none).
-// Written before its code (contract rule 13, MD-5): each step skips until MD-8.
+// Written before its code (contract rule 13, MD-5); MD-8 turned every step on.
 import CoreGraphics
 import Foundation
 import ImageIO
@@ -32,7 +32,6 @@ final class LibraryCameraJourneyTests: XCTestCase {
 
     /// Step 1: by name, click IMG_0001: the seven rows in `CameraField` order.
     @MainActor private func onePhoto() throws {
-        throw XCTSkip("waits on MD-8")
         let library = Journey("Library", self, arguments: ["-LibraryFixture", "cameras"])
         self.library = library
         sortByName(library)
@@ -50,7 +49,6 @@ final class LibraryCameraJourneyTests: XCTestCase {
 
     /// Step 2: Shift-click IMG_0006: "2 cameras" and "ISO 100–3200".
     @MainActor private func range() throws {
-        throw XCTSkip("waits on MD-8")
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
         let last = cell("IMG_0006", library)
         XCUIElement.perform(withKeyModifiers: .shift) { last.click() }
@@ -62,7 +60,6 @@ final class LibraryCameraJourneyTests: XCTestCase {
 
     /// Step 3: click IMG_0024 (no Exif): "No camera details" and no rows.
     @MainActor private func noDetails() throws {
-        throw XCTSkip("waits on MD-8")
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
         cell("IMG_0024", library).click()
         XCTAssert(library.app.staticTexts["No camera details"].waitForExistence(timeout: 5), "no \"No camera details\"")
@@ -72,7 +69,6 @@ final class LibraryCameraJourneyTests: XCTestCase {
 
     /// Step 4 (L): a.jpg's Exif shows in the rows; b.png reads "No camera details".
     @MainActor private func livePass() throws {
-        throw XCTSkip("waits on MD-8")
         let folder = try LibraryFiles.freshPhotoFolder()
         let catalog = try LibraryFiles.freshCatalogDir()
         addTeardownBlock { [folder, catalog].forEach { try? FileManager.default.removeItem(at: $0) } }

@@ -8,8 +8,12 @@
 // through an EditRun, so the host makes it one undo step. The box's edges
 // sit on the device pixel grid, so its 1 pt outline is two crisp device
 // pixels at scale 2. SwiftUI has no rotate pointer (PointerStyle), so a
-// rotate zone shows the crosshair, `rectSelection`. Under a probe host each
-// drag sample reports on the `handle-drag` series (HandleDragProbe).
+// rotate zone and the knob show the crosshair, `rectSelection`; a resize
+// handle shows the frame-resize pointer for where it sits after the turn
+// (HandlePointer), its hit rect over the drawn mark. A press that activates
+// the window drags too, as the canvases' own first-mouse clicks do. Under a
+// probe host each drag sample reports on the `handle-drag` series
+// (HandleDragProbe).
 import AppKit
 import SuiteKernel
 import SwiftUI
@@ -29,6 +33,7 @@ public struct SelectionHandleDrag: Equatable, Sendable {
 
     private var grab = Grab.none
     private var startRect = CGRect.zero
+    private var startDegrees = 0.0
     private var run = EditRun()
 
     /// Ends reported so far: one per drag that changed the box.
@@ -64,16 +69,21 @@ public struct SelectionHandleDrag: Equatable, Sendable {
     /// `rect` mid-drag never compound; a press on no handle edits nothing for
     /// the whole drag. `knob` is the rotate knob's mark (view points), whose
     /// 12 pt square rotates. Nil when nothing is grabbed.
-    public mutating func changed(rect: CGRect, zoom: Double, from start: CGPoint, to point: CGPoint,
+    /// `degrees` is the box's turn about its centre (transform-tools): the press and every sample are
+    /// mapped back into the box's own frame (TransformRules.local) before the hit and the resize, and
+    /// the resized box keeps its opposite side put in the document (TransformRules.scaled).
+    public mutating func changed(rect: CGRect, degrees: Double = 0, zoom: Double, from start: CGPoint, to point: CGPoint,
                                  shift: Bool, knob: CGRect? = nil) -> SelectionHandleEdit? {
+        if grab == .none { startDegrees = degrees }
         let view = Self.viewRect(grab == .none ? rect : startRect, zoom: zoom)
+        let localStart = local(start, in: view), localPoint = local(point, in: view)
         if grab == .none {
             startRect = rect
             if let knob, knob.insetBy(dx: (knob.width - SuiteSize.selectionHandleHit) / 2,
-                                       dy: (knob.height - SuiteSize.selectionHandleHit) / 2).contains(start) {
+                                       dy: (knob.height - SuiteSize.selectionHandleHit) / 2).contains(localStart) {
                 grab = .knob
             } else {
-                let kind = SuiteHandleGeometry().hit(Self.plane(start), around: Self.plane(view),
+                let kind = SuiteHandleGeometry().hit(Self.plane(localStart), around: Self.plane(view),
                                                      hitSize: Self.hitSize, rotateZone: Self.zoneSize)
                 grab = kind.map(Grab.handle) ?? .missed
             }
@@ -88,12 +98,41 @@ public struct SelectionHandleDrag: Equatable, Sendable {
                                              center: Self.plane(view).mid, snap: shift))
         case let .handle(kind):
             let s = MotionPathMarks.scale(zoom)
-            let delta = PlanePoint(x: Double(point.x - start.x) / s, y: Double(point.y - start.y) / s)
+            let delta = PlanePoint(x: Double(localPoint.x - localStart.x) / s, y: Double(localPoint.y - localStart.y) / s)
             let r = geometry.resized(Self.plane(startRect), handle: kind, by: delta, keepAspect: shift)
-            edit = .resize(CGRect(x: r.minX, y: r.minY, width: r.extent.width, height: r.extent.height))
+            edit = .resize(turned(CGRect(x: r.minX, y: r.minY, width: r.extent.width, height: r.extent.height), kind))
         }
         _ = run.change()
         return edit
+    }
+
+    /// `p` (view points) in the unturned frame of `view`, the box in view points; `p` itself at no turn.
+    private func local(_ p: CGPoint, in view: CGRect) -> CGPoint {
+        guard startDegrees != 0 else { return p }
+        let box = TransformBox(box: Self.kernel(view), degrees: startDegrees)
+        let q = TransformRules.local(Point(x: Double(p.x), y: Double(p.y)), in: box)
+        return CGPoint(x: q.x, y: q.y)
+    }
+
+    /// `r`, the drag's start box resized in its own frame by `handle`, placed so the opposite side stays
+    /// where it was in the document once turned; `r` itself at no turn or from an empty start box.
+    private func turned(_ r: CGRect, _ handle: HandleKind) -> CGRect {
+        guard startDegrees != 0, startRect.width > 0, startRect.height > 0, let anchor = Self.opposite[handle]
+        else { return r }
+        let start = TransformBox(box: Self.kernel(startRect), degrees: startDegrees)
+        let b = TransformRules.scaled(start, sx: Double(r.width / startRect.width), sy: Double(r.height / startRect.height),
+                                      about: anchor).box
+        return CGRect(x: b.minX, y: b.minY, width: b.width, height: b.height)
+    }
+
+    /// The side or corner a handle's resize keeps put.
+    private nonisolated static let opposite: [HandleKind: BoxAnchor] = [
+        .topLeft: .bottomRight, .top: .bottom, .topRight: .bottomLeft, .right: .left,
+        .bottomRight: .topLeft, .bottom: .top, .bottomLeft: .topRight, .left: .right,
+    ]
+
+    private nonisolated static func kernel(_ r: CGRect) -> Rect {
+        Rect(minX: Double(r.minX), minY: Double(r.minY), maxX: Double(r.maxX), maxY: Double(r.maxY))
     }
 
     /// The release: true exactly once per drag that edited, never for a press
@@ -123,6 +162,7 @@ public struct SelectionHandleDrag: Equatable, Sendable {
 /// apart because EK-5's drawing took `SelectionHandles`.
 public struct SelectionHandlesEditor: View {
     private let rect: CGRect
+    private var degrees = 0.0
     private let zoom: Double
     private let onResize: @MainActor (CGRect) -> Void
     private let onRotate: @MainActor (Double) -> Void
@@ -150,24 +190,40 @@ public struct SelectionHandlesEditor: View {
         let handles = BoxMath.handles(of: kernelBox, size: Double(SuiteSize.selectionHandle) / MotionPathMarks.scale(zoom))
         let knob = SelectionHandles.marks(handles: handles, zoom: zoom).first { $0.handle == .rotate }?.frame
         ZStack(alignment: .topLeading) {
-            ForEach(HandleKind.allCases, id: \.self) { kind in
-                if let hit = SelectionHandleDrag.hitRects(rect: box, zoom: zoom)[kind] {
+            ZStack(alignment: .topLeading) {
+                SelectionHandles(box: kernelBox, handles: handles, zoom: zoom, hovered: hovered)
+                ForEach(HandleKind.allCases, id: \.self) { kind in
+                    if let hit = SelectionHandleDrag.hitRects(rect: box, zoom: zoom)[kind] {
+                        Color.clear
+                            .frame(width: hit.width, height: hit.height)
+                            .contentShape(Rectangle())
+                            .onHover { hover(HandlePointer.mark(kind), $0) }
+                            .pointerStyle(Self.pointer(kind, degrees: degrees))
+                            .position(x: hit.midX, y: hit.midY)
+                    }
+                }
+                if let knob {
                     Color.clear
-                        .frame(width: hit.width, height: hit.height)
-                        .contentShape(Rectangle())
-                        .pointerStyle(kind.rawValue.hasPrefix("rotate") ? .rectSelection : .default)
-                        .position(x: hit.midX, y: hit.midY)
+                        .frame(width: knob.width, height: knob.height)
+                        .contentShape(Circle())
+                        .onHover { hover(.rotate, $0) }
+                        .pointerStyle(Self.pointer(.rotateTopLeft, degrees: degrees))
+                        .position(x: knob.midX, y: knob.midY)
+                        .accessibilityElement()
+                        .accessibilityLabel("Rotate")
+                        .accessibilityValue(Self.knobValue(degrees))
+                        .accessibilityIdentifier("suite.handles.turn")
                 }
             }
-            SelectionHandles(box: kernelBox, handles: handles, zoom: zoom, hovered: hovered) { hovered = $0 }
+            .transformEffect(Self.turn(degrees, rect: box, zoom: zoom))
         }
         .gesture(
             DragGesture(minimumDistance: 1, coordinateSpace: .local)
                 .onChanged { value in
                     let shift = NSEvent.modifierFlags.contains(.shift)
                     let eventTime = NSApp.currentEvent?.timestamp ?? ProcessInfo.processInfo.systemUptime
-                    switch drag.changed(rect: box, zoom: zoom, from: value.startLocation, to: value.location,
-                                        shift: shift, knob: knob) {
+                    switch drag.changed(rect: box, degrees: degrees, zoom: zoom, from: value.startLocation,
+                                        to: value.location, shift: shift, knob: knob) {
                     case let .resize(next)?: onResize(next)
                     case let .rotate(degrees)?: onRotate(degrees)
                     case nil: return
@@ -175,6 +231,31 @@ public struct SelectionHandlesEditor: View {
                     report(eventTime)
                 }
                 .onEnded { _ in if drag.ended() { onEnd() } })
+        // A press into an inactive window turns or resizes too, as the canvases' first-mouse clicks do;
+        // without it the first drag on a background window did nothing.
+        .allowsWindowActivationEvents()
+    }
+
+    /// The hit rects sit over the drawn marks so their pointers show, so they fill the mark under the pointer.
+    private func hover(_ mark: EditorHandle?, _ inside: Bool) {
+        guard let mark else { return }
+        if inside { hovered = mark } else if hovered == mark { hovered = nil }
+    }
+
+    /// A rotate zone or the knob shows the crosshair; a resize handle the frame-resize pointer for where
+    /// it sits once the box is turned (HandlePointer.direction).
+    nonisolated private static func pointer(_ kind: HandleKind, degrees: Double) -> PointerStyle {
+        switch HandlePointer.direction(kind, degrees: degrees) {
+        case .top?: .frameResize(position: .top)
+        case .topRight?: .frameResize(position: .topTrailing)
+        case .right?: .frameResize(position: .trailing)
+        case .bottomRight?: .frameResize(position: .bottomTrailing)
+        case .bottom?: .frameResize(position: .bottom)
+        case .bottomLeft?: .frameResize(position: .bottomLeading)
+        case .left?: .frameResize(position: .leading)
+        case .topLeft?: .frameResize(position: .topLeading)
+        default: .rectSelection
+        }
     }
 
     /// A drag sample, shown by the next main-actor turn after the change.
@@ -188,11 +269,28 @@ public struct SelectionHandlesEditor: View {
 }
 
 extension SelectionHandlesEditor {
-    /// The box turned `degrees` clockwise about its centre (transform-tools). TT-2 takes the turn and
-    /// ignores it, so the box draws and drags unturned; TT-3 draws it turned and maps each sample back.
+    /// The box turned `degrees` clockwise about its centre (transform-tools TT-3): it draws turned, and
+    /// each drag sample is mapped back into the box's own frame before it resizes.
     public init(rect: CGRect, degrees: Double, zoom: Double, onResize: @escaping @MainActor (CGRect) -> Void,
                 onRotate: @escaping @MainActor (Double) -> Void, onEnd: @escaping @MainActor () -> Void) {
         self.init(rect: rect, zoom: zoom, onResize: onResize, onRotate: onRotate, onEnd: onEnd)
+        self.degrees = degrees.isFinite ? degrees : 0
+    }
+
+    /// The drawing's turn: `degrees` clockwise about `rect`'s centre (document pixels) in view points at
+    /// `zoom`; the identity at no turn.
+    nonisolated static func turn(_ degrees: Double, rect: CGRect, zoom: Double) -> CGAffineTransform {
+        guard degrees != 0, degrees.isFinite else { return .identity }
+        let s = MotionPathMarks.scale(zoom)
+        let cx = Double(rect.midX) * s, cy = Double(rect.midY) * s
+        return CGAffineTransform(translationX: -cx, y: -cy)
+            .concatenating(CGAffineTransform(rotationAngle: degrees * .pi / 180))
+            .concatenating(CGAffineTransform(translationX: cx, y: cy))
+    }
+
+    /// The knob's read-out: its turn spoken in whole degrees ("15 degrees").
+    nonisolated static func knobValue(_ degrees: Double) -> String {
+        NumericInput.spoken(degrees, decimals: 0, unit: "°")
     }
 }
 

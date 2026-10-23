@@ -1,20 +1,20 @@
 // SuiteJourneyTests+History.swift: the gallery's `history-panel` page (Sources/SuiteUI/Gallery/GalleryHistoryPanel.swift),
 // the Journey steps 1 to 4 of docs/blueprints/suiteui/features/autosave-history.md (numbered below), in Library,
 // shot under `suiteui`. Rows are `suite.history.row.<n>`, 0 for "Open"; the page logs `history.jump {"index": <n>}`
-// to `suite.gallery.log`. AH-2 writes it; it skips until AH-4 turns it on, once AH-3's rows select and jump.
+// to `suite.gallery.log`. AH-2 wrote it skipped; AH-4 turned it on over AH-3's panel: the rows sit in `suite.history`,
+// the current one carries the selected trait, a click jumps, Up and Down move the selection and Return jumps.
 import XCTest
 
 final class SuiteHistoryJourneyTests: XCTestCase {
-    private static let historyWait = true
     /// The page's listing: "Open" and eleven steps, eight applied (GalleryHistoryPanel.listing).
     private static let steps = 11
 
     @MainActor func testHistoryPanelJumps() throws {
-        if Self.historyWait { throw XCTSkip("waits on AH-4") }
         let gallery = Journey("Library", self, name: "suiteui", arguments: ["-SuiteGallery", "index"])
         XCTAssert(gallery.element("suite.gallery.index").waitForExistence(timeout: 30), "no gallery index")
         gallery.element("suite.gallery.index.history-panel").click() // 1. "Open" and eleven steps, the eighth current.
         XCTAssert(gallery.element("suite.gallery.history-panel").waitForExistence(timeout: 10), "no suite.gallery.history-panel")
+        XCTAssert(gallery.element("suite.history").waitForExistence(timeout: 10), "no suite.history panel on the page")
         for n in 0...Self.steps where !gallery.element("suite.history.row.\(n)").exists { XCTFail("no suite.history.row.\(n)") }
         expectCurrent(gallery, 8)
         gallery.shot("history-panel-open")
@@ -27,6 +27,8 @@ final class SuiteHistoryJourneyTests: XCTestCase {
         gallery.app.typeKey(.return, modifierFlags: [])
         expectLog(gallery, "history.jump {\"index\": 6}", "Down, Down, Return logged no jump to 6")
         expectCurrent(gallery, 6)
+        let moveLabel = gallery.element("suite.history.row.6").label
+        XCTAssertEqual(moveLabel, "Step 6 of 11, Move, applied", "VoiceOver reads step 6 as \(moveLabel)")
         for _ in 0..<8 { gallery.app.typeKey(.upArrow, modifierFlags: []) } // Up past "Open" stays on "Open".
         gallery.app.typeKey(.return, modifierFlags: [])
         expectLog(gallery, "history.jump {\"index\": 0}", "Up past Open and Return logged no jump to 0")

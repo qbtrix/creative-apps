@@ -4,7 +4,7 @@
 // concept). The five entities are the predefined ones of XML 1.0 (W3C, 4.6).
 // Stdlib only, Linux-safe.
 
-/// One XML text and attribute escaper, shared by every app's export.
+/// One XML text and attribute escaper, and its inverse, shared by every app's export and import.
 public enum XMLText {
     /// `text` safe inside an element or a single- or double-quoted attribute:
     /// & < > " ' become &amp; &lt; &gt; &quot; &apos;; everything else is unchanged.
@@ -22,5 +22,12 @@ public enum XMLText {
             }
         }
         return out
+    }
+
+    /// The inverse of `escaped`: &quot; &apos; &lt; &gt; then &amp; become " ' < > &. &amp; goes last,
+    /// so "&amp;lt;" reads back as "&lt;", not "<". Other entities are left as written.
+    public static func unescaped(_ text: some StringProtocol) -> String {
+        String(text).replacing("&quot;", with: "\"").replacing("&apos;", with: "'")
+            .replacing("&lt;", with: "<").replacing("&gt;", with: ">").replacing("&amp;", with: "&")
     }
 }

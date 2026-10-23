@@ -1,0 +1,164 @@
+{
+  "title": "Library manages its files: copy on import (into a dated folder), remove from the catalog keeping the files, and relink missing photos by locating their folder",
+  "wave": 7,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 Library must-haves (audit rows 5, 7, 8); feature map A7 (the copy half of card ingest); real jobs RJ-L50, RJ-L51, RJ-L52 (new)",
+  "waits_on": "spine (building: LibraryWindow+ files); cull-finish DR-m (LibraryImport.swift); metadata-more MD-a (LiveImporter.swift); file-flow LF-m (the catalog's last owner); suite command-state CS-library-1 (file.import id, cross-line); blueprint 1.3 and 1.4 non-goals re-cut by the captain's 2026-10-21 call",
+  "depends": [
+    "spine",
+    "import",
+    "persist"
+  ],
+  "longest_chain": "4 (LC-1 → LC-3 → LC-7 → LC-8)",
+  "journeys": [
+    "LibraryFilesJourneyTests.testCopyOnImport",
+    "LibraryFilesJourneyTests.testRemoveAndRelink"
+  ],
+  "owned": [
+    "Sources/LibraryModel/ImportCopyPlan.swift",
+    "Sources/LibraryModel/CatalogFileRules.swift",
+    "Sources/LibraryModel/LibraryCatalogFiles+Kernel.swift",
+    "Sources/LibraryModel/LibraryImport.swift",
+    "Tests/LibraryModelTests/ImportCopyTests.swift",
+    "Tests/LibraryModelTests/CatalogRemoveTests.swift",
+    "Tests/LibraryModelTests/RelinkTests.swift",
+    "UITests/LibraryJourneyTests+Files.swift",
+    "Tests/RealJobs/library/copy-on-import/copy-on-import.jobs.json",
+    "Tests/RealJobs/library/remove-keep-files/remove-keep-files.jobs.json",
+    "Tests/RealJobs/library/relink-folder/relink-folder.jobs.json",
+    "Sources/LibraryApp/LibraryImportOptions.swift",
+    "Sources/LibraryApp/LibraryWindow+Files.swift",
+    "Sources/LibraryApp/LibraryMissingBadge.swift",
+    "Tests/AppSnapshotTests/RenderBudgetLibraryFilesTests.swift",
+    "Sources/LibraryModel/Live/LiveImporter.swift",
+    "Tests/mutations/LibraryModel.ImportCopyPlan.json",
+    "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "Tests/command-ids/library.txt",
+    "Tests/mutations/LibraryModel.CatalogFileRules.json",
+    "docs/blueprints/library/features/catalog-files.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "LC-a",
+      "behavior": "Library declares the copy plan, remove and relink rules and their command specs as stubs, with the Model checks written and disabled.",
+      "tasks": [
+        "LC-1",
+        "LC-2"
+      ],
+      "journeys": [
+        "MJ-LC"
+      ],
+      "owned": [
+        "Sources/LibraryModel/ImportCopyPlan.swift",
+        "Sources/LibraryModel/CatalogFileRules.swift",
+        "Sources/LibraryModel/LibraryCatalogFiles+Kernel.swift",
+        "Sources/LibraryModel/LibraryImport.swift",
+        "Tests/LibraryModelTests/ImportCopyTests.swift",
+        "Tests/LibraryModelTests/CatalogRemoveTests.swift",
+        "Tests/LibraryModelTests/RelinkTests.swift",
+        "UITests/LibraryJourneyTests+Files.swift",
+        "Tests/RealJobs/library/copy-on-import/copy-on-import.jobs.json",
+        "Tests/RealJobs/library/remove-keep-files/remove-keep-files.jobs.json",
+        "Tests/RealJobs/library/relink-folder/relink-folder.jobs.json"
+      ],
+      "waits": {
+        "cull-finish:DR-m": [
+          "LC-1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "LC-u",
+      "behavior": "The import sheet offers Copy to a folder with dated subfolders, the grid offers Remove from Catalog, and a missing photo offers Locate…, on the stubs, every control identified and within the render budget.",
+      "tasks": [
+        "LC-3",
+        "LC-4"
+      ],
+      "journeys": [
+        "LJ-LC1",
+        "LJ-LC2"
+      ],
+      "owned": [
+        "Sources/LibraryApp/LibraryImportOptions.swift",
+        "Sources/LibraryApp/LibraryWindow+Files.swift",
+        "Sources/LibraryApp/LibraryMissingBadge.swift",
+        "Tests/AppSnapshotTests/RenderBudgetLibraryFilesTests.swift"
+      ],
+      "waits": {
+        "LC-a": [
+          "LC-3"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "LC-m",
+      "behavior": "Copy on import copies, verifies and points the catalog at the copies without overwriting, remove keeps files and undoes in one step, and relink maps a moved folder's missing photos to their new files.",
+      "tasks": [
+        "LC-5",
+        "LC-6"
+      ],
+      "journeys": [
+        "MJ-LC"
+      ],
+      "owned": [
+        "Sources/LibraryModel/ImportCopyPlan.swift",
+        "Sources/LibraryModel/Live/LiveImporter.swift",
+        "Tests/LibraryModelTests/ImportCopyTests.swift",
+        "Tests/mutations/LibraryModel.ImportCopyPlan.json",
+        "Sources/LibraryModel/CatalogFileRules.swift",
+        "Sources/LibraryModel/LibraryCatalogFiles+Kernel.swift",
+        "Sources/LibraryModel/LibraryCommandCatalog.swift",
+        "Tests/command-ids/library.txt",
+        "Tests/LibraryModelTests/CatalogRemoveTests.swift",
+        "Tests/LibraryModelTests/RelinkTests.swift",
+        "Tests/mutations/LibraryModel.CatalogFileRules.json"
+      ],
+      "waits": {
+        "LC-a": [
+          "LC-5",
+          "LC-6"
+        ],
+        "metadata-more:MD-a": [
+          "LC-5"
+        ],
+        "file-flow:LF-m": [
+          "LC-6"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "LC-z",
+      "behavior": "The three chores run live end to end, RJ-L50 to RJ-L52 pass, and the feature is built.",
+      "tasks": [
+        "LC-7",
+        "LC-8"
+      ],
+      "journeys": [
+        "LJ-LC1",
+        "LJ-LC2",
+        "MJ-LC"
+      ],
+      "owned": [
+        "Sources/LibraryApp/LibraryWindow+Files.swift",
+        "UITests/LibraryJourneyTests+Files.swift",
+        "Tests/RealJobs/library/copy-on-import/copy-on-import.jobs.json",
+        "docs/blueprints/library/features/catalog-files.wave.json"
+      ],
+      "waits": {
+        "LC-u": [
+          "LC-7"
+        ],
+        "LC-m": [
+          "LC-7"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

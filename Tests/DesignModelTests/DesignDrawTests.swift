@@ -110,7 +110,7 @@ import Testing
     for tool in [DesignTool.frame, .rectangle, .ellipse] {
         #expect(tool.isEnabled && tool.unavailableHelp == nil)
     }
-    #expect(DesignTool.allCases == [.move, .frame, .rectangle, .ellipse, .text, .pen])
+    #expect(DesignTool.allCases == [.move, .frame, .rectangle, .ellipse, .shape, .text, .pen, .eyedropper])
 }
 
 @Test func drawingNeedsAnOpenFile() {

@@ -3,7 +3,8 @@
 // over 10,000 ids costs at most 1 ms, gated at 10 ms for debug builds. QB-S12:
 // SuiteGridSelecting's ⇧-click over 10,000 ids, the same budget (LL-3). The
 // best of several runs is gated, so a busy machine doesn't fail it. No
-// SwiftUI. macOS only.
+// SwiftUI. macOS only. Both tests are timed, so the suite is on the perf list
+// (Tests/perf-suites.txt): the merge gate skips it and perf-nightly runs it.
 import Foundation
 import SuiteUI
 import Testing

@@ -11,17 +11,26 @@
 // display encode made its bytes; `completeUpdate` (snapshots) stays on
 // CoreRaster. A GPU route with resident tiles and a PhotoDisplayTarget writes
 // each damaged region to the target (the app's Metal texture) and returns no
-// bytes. Linux-safe.
+// bytes; when the target also runs a tone program (`writeToned`) and the
+// backend runs one over a surface, a region takes the live route
+// (PhotoLiveTone.swift): adjustments and adjustment layers as GPU passes over
+// a cached composite, so a slider step composites nothing and reads nothing
+// back. Linux-safe.
 import CoreRaster
 import CoreRender
 
 /// Where a GPU route puts the picture instead of returning its bytes: `write` shows `surface`, the canvas's
-/// `rect`, on screen with no readback (the app's writes it into its presenter's texture).
+/// `rect`, on screen with no readback (the app's writes it into its presenter's texture). `writeToned` does the
+/// same with a tone program run on each pixel first, in the same pass (the app's Metal `display_tone`); nil
+/// when the target can't, and every region then takes `write`.
 public struct PhotoDisplayTarget: Sendable {
     public let write: @Sendable (_ surface: RenderSurface, _ rect: PixelRect) throws -> Void
+    public let writeToned: (@Sendable (_ surface: RenderSurface, _ rect: PixelRect, _ tone: ToneProgram) throws -> Void)?
 
-    public init(write: @escaping @Sendable (_ surface: RenderSurface, _ rect: PixelRect) throws -> Void) {
+    public init(write: @escaping @Sendable (_ surface: RenderSurface, _ rect: PixelRect) throws -> Void,
+                writeToned: (@Sendable (_ surface: RenderSurface, _ rect: PixelRect, _ tone: ToneProgram) throws -> Void)? = nil) {
         self.write = write
+        self.writeToned = writeToned
     }
 }
 
@@ -66,8 +75,10 @@ extension PhotoRenderer {
         let resident = route.isGPU ? route.residentTiles : nil
         resident?.prune(keeping: Set(workspace.layers.map(\.id)))
         let written = resident != nil && target != nil
+        // The live route's plan is made once per update (its programs' tables), then every band runs it.
+        let live = written && target?.writeToned != nil && route.preferred is any ToneRendering ? workspace.liveStack() : nil
         let (tiles, backend) = route.isGPU
-            ? try await bandedTiles(workspace, rects, route: route, target: written ? target : nil)
+            ? try await bandedTiles(workspace, rects, route: route, target: written ? target : nil, live: live)
             : try await dispatchedTiles(workspace, rects, route: route)
         let elapsed = clock.now - started
         var update = PhotoTileUpdate(
@@ -105,14 +116,15 @@ extension PhotoRenderer {
     /// for an 8K picture measured 2.6 s against 0.27 s for tiles in parallel and
     /// 4.9 ms against 9.4 ms for a two-tile brush frame.)
     static func bandedTiles(
-        _ workspace: PhotoWorkspace, _ rects: [PixelRect], route: PhotoRenderRoute, target: PhotoDisplayTarget? = nil
+        _ workspace: PhotoWorkspace, _ rects: [PixelRect], route: PhotoRenderRoute, target: PhotoDisplayTarget? = nil,
+        live: PhotoLiveStack? = nil
     ) async throws -> ([(PixelRect, [UInt8])], String) {
         let bands = Dictionary(grouping: rects, by: \.y).values
         let done = try await withThrowingTaskGroup(of: ([(PixelRect, [UInt8])], String).self) { group in
             for band in bands {
                 group.addTask {
                     guard let target else { return try regionTiles(workspace, band, route: route) }
-                    return try targetRegion(workspace, band, route: route, target: target)
+                    return try targetRegion(workspace, band, route: route, target: target, live: live)
                 }
             }
             var done: [([(PixelRect, [UInt8])], String)] = []
@@ -146,9 +158,11 @@ extension PhotoRenderer {
     }
 
     /// `rects` (whole tiles of one rectangle) rendered as one region from the route's resident tiles and
-    /// written to `target`; no tiles come back.
+    /// written to `target`; no tiles come back. With `live` (and the target's `writeToned`), the region takes
+    /// the live route (`PhotoWorkspace.liveRegion`).
     static func targetRegion(
-        _ workspace: PhotoWorkspace, _ rects: [PixelRect], route: PhotoRenderRoute, target: PhotoDisplayTarget
+        _ workspace: PhotoWorkspace, _ rects: [PixelRect], route: PhotoRenderRoute, target: PhotoDisplayTarget,
+        live: PhotoLiveStack? = nil
     ) throws -> ([(PixelRect, [UInt8])], String) {
         let name = route.preferred?.name ?? CPUBackend().name
         guard let minX = rects.map(\.x).min(), let minY = rects.map(\.y).min(),
@@ -156,6 +170,13 @@ extension PhotoRenderer {
         else { return ([], name) }
         let area = PixelRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
         let dispatcher = route.dispatcher()
+        if let live, let toned = target.writeToned, let resident = route.residentTiles,
+            let gpu = route.preferred as? any ToneRendering
+        {
+            try workspace.liveRegion(
+                area, stack: live, on: dispatcher, resident: resident, tone: gpu, cache: route.composites, write: toned)
+            return ([], name)
+        }
         let picture = try workspace.renderedSurface(area, on: dispatcher, resident: route.residentTiles)
         defer { dispatcher.release(picture) }
         try target.write(picture, area)

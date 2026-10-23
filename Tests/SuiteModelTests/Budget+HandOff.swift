@@ -1,5 +1,6 @@
 // Budget+HandOff.swift: QB-SM4, `HandOffCodec` encode and decode of one
-// hand-off (blueprint 7.1): ≤ 0.2 ms on device, ≤ 2 ms in debug (the gate).
+// hand-off (blueprint 7.1): ≤ 0.2 ms on device, ≤ 2 ms in debug. The test is timed, so the
+// suite is on the perf list (Tests/perf-suites.txt): the merge gate skips it and perf-nightly runs it.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else

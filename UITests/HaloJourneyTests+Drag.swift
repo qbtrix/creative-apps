@@ -1,6 +1,6 @@
 // HaloJourneyTests+Drag.swift: H-J5, drag a layer in the viewer to key its
 // position (layer-keys LK-12, #1036; docs/blueprints/halo/features/layer-keys.md,
-// Journey steps). On `-HaloFixture keyed` (Bounce, 1920 by 1080, 24 fps: Ball
+// Journey steps). On `-HaloSample keyed` (Bounce, 1920 by 1080, 24 fps: Ball
 // over Floor) it selects Ball, scrubs to 12 from the keys (Home, then → twelve
 // times, as H-J3 does) and drags Ball 100 px right from its position: Position X
 // reads 660.0 px and `Animate Position X` "Keyed at this frame". At 0 it drags
@@ -23,7 +23,7 @@ import XCTest
 extension HaloJourneyTests {
     /// H-J5: a viewer drag keys an animated position and moves a static one.
     @MainActor func testDragLayerToKeyPosition() {
-        let halo = Journey("Halo", self, arguments: ["-HaloFixture", "keyed", "-HaloWindowSize", "1000x640"])
+        let halo = Journey("Halo", self, arguments: ["-HaloSample", "keyed", "-HaloWindowSize", "1000x640"])
         let steps = ViewerDragSteps(halo: halo)
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         XCTAssert(halo.element("halo.viewer").waitForExistence(timeout: 10), "no viewer (halo.viewer)")
@@ -74,8 +74,8 @@ extension HaloJourneyTests {
     }
 }
 
-/// H-J5's steps over one launched Halo.
-@MainActor private struct ViewerDragSteps {
+/// H-J5's steps over one launched Halo (H-J12 drags with them too).
+@MainActor struct ViewerDragSteps {
     let halo: Journey
 
     /// The fixture's composition width in pixels.

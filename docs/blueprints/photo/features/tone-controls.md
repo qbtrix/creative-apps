@@ -4,7 +4,8 @@
 (temperature, tint), Tone (Contrast, Highlights, Shadows, Whites, Blacks,
 Auto), Presence (Vibrance, Saturation) and Sharpen (amount, radius,
 threshold), on the image and on a selected adjustment layer. Every slider
-step renders through #3144's live GPU route as part of the one tone program
+step renders through the shared live GPU route (suite-imaging's
+`LiveToneSurface`, which took over #3144's) as part of the one tone program
 the display write runs; Sharpen is one GPU unsharp pass on the resident base.
 An agent runs the same thing as the `tone.*` commands.
 **Line:** `line:photo` · **Wave:** 3 (`waves.md`) · **Lead branch:** `lead/tone-controls`
@@ -17,8 +18,10 @@ RJ-P12 (white balance), RJ-P13 (shadows/highlights and contrast), RJ-P14
 **Depends on:** `suiteui/tone-controls` **TC-a** (cross-line: `ToneSettings`,
 `ToneRules`, `ToneTarget`, the `ToneRows` stub); PT-3 needs **TC-5** (the real
 rules), PT-4 **TC-6** (the real commands), PT-5 **TC-3** (the real view).
-photo **#3144** (open): `PhotoLiveTone.swift` and the pin with core #624;
-PT-3 edits it, so it starts once #3144 merges. Same line:
+suiteui **suite-imaging** IM-photo (cross-line): Photo's adjustments and
+canvas on SuiteImaging. PT-3 edits its adapter `PhotoAdjust+Imaging.swift`
+and starts once IM-photo is done (re-cut 2026-10-20: #3144's
+`PhotoLiveTone.swift` is deleted by IM-8d, its route now `LiveToneSurface`). Same line:
 `gradient-fill`'s PG-m owns `PhotoCommandCatalog.swift` and
 `Tests/command-ids/photo.txt`, so PT-4 waits on it.
 
@@ -29,7 +32,8 @@ rows hide the kernel's Exposure (`hidden: [.exposure]`) and the image never
 has two exposure values.
 
 **Render path.** No new route. `AdjustmentSettings.toneOperations`
-(PhotoLiveTone.swift) puts `ToneRules.program(tone)` first, then Photo's
+(`PhotoAdjust+Imaging.swift`, through `ImagingProgram.program(_:tone:)`) puts
+`ToneRules.program(tone)` first, then Photo's
 exposure, levels, curves and hue/saturation, so a tone slider step is the
 same one display write #3144 measured. Sharpen is one
 `unsharpMask` GPU pass over the cached base composite, before that write;
@@ -46,7 +50,7 @@ Blueprint sections: photo.md 6 (Adjust), 8.
 |---|---|---|---|---|
 | PT-a | `AdjustmentSettings` holds a `tone` section, the adapter conforms on stubs, and the Adjust panel shows the tone rows on them. | PT-1, PT-2 | MJ-PT | suiteui/tone-controls TC-a (cross-line) |
 | PT-u | The rows have snapshots and a render budget, and the journey is written. | PT-5, PT-6 | PJ-T1 | PT-a; TC-3 (PT-5, cross-line) |
-| PT-m | Each tone step renders in the live display write and the same on export, Sharpen is one GPU pass, and every tone command is one undo step on the image or the selected adjustment layer. | PT-3, PT-4 | MJ-PT | PT-a; #3144; TC-5, TC-6 (cross-line); gradient-fill:PG-m (PT-4); transform:PT-m (PT-4, A/C first); history-panel:PH-m (PT-4, A/C first); eyedropper:PE-m (PT-4, A/C first); place-image:PP-m (PT-4, A/C first) |
+| PT-m | Each tone step renders in the live display write and the same on export, Sharpen is one GPU pass, and every tone command is one undo step on the image or the selected adjustment layer. | PT-3, PT-4 | MJ-PT | PT-a; suite-imaging:IM-photo (PT-3, cross-line); TC-5, TC-6 (cross-line); gradient-fill:PG-m (PT-4); transform:PT-m (PT-4, A/C first); history-panel:PH-m (PT-4, A/C first); eyedropper:PE-m (PT-4, A/C first); place-image:PP-m (PT-4, A/C first) |
 | PT-z | The rows run on live services, the journey passes on live, and the blueprint has them in. | PT-7, PT-8 | PJ-T1 | PT-u, PT-m; gradient-fill:PG-z (PT-8, photo.md); place-image:PP-z (PT-8, A/C first) |
 
 PT-u waits only on PT-a (rule 18); PT-m never waits on PT-u. MJ-PT is the
@@ -80,7 +84,7 @@ Assertions: the grey card's mean reads neutral (|R−B| ≤ 3/255) in the
 export; RJ-P13 runs on an adjustment layer and the pixel layer under it is
 unchanged; the exported edge contrast rises by at least 20% while a flat
 patch's variance stays within 1/255. Mutations:
-`PhotoModel.PhotoLiveTone.json`, tone appended after hue/saturation →
+`PhotoModel.PhotoAdjust+Imaging.json`, tone appended after hue/saturation →
 `.toneFirst`; `PhotoModel.PhotoRender.json`, unsharp after tone →
 `.exportMatchesCanvas`; `PhotoModel.PhotoTone+Kernel.json`, a layer's tone
 written to the image → `.layerTone`.
@@ -124,7 +128,7 @@ extension PhotoWorkspace: ToneTarget {
 |---|---|---|---|---|---|
 | PT-1 | – | `AdjustmentSettings.tone` and `AdjustmentEdit.tone`; the adapter as stubs; `PhotoToneTests` written, disabled | `Sources/PhotoModel/AdjustmentSettings.swift`, `Sources/PhotoModel/PhotoTone+Kernel.swift`, `Tests/PhotoModelTests/PhotoToneTests.swift` | TC-a | ~160, 3 |
 | PT-2 | – | The Adjust panel shows `ToneRows` (Exposure hidden) under Exposure, intents to the workspace's catalog | `Sources/PhotoApp/AdjustmentsInspector.swift` | PT-1 | ~80, 1 |
-| PT-3 | – | The live route and the export path: tone first in `toneOperations`, the unsharp pass on the base, `applied(to:)` in the same order; turns on `PhotoToneTests` | `Sources/PhotoModel/PhotoLiveTone.swift`, `Sources/PhotoModel/PhotoRender.swift`, `Tests/PhotoModelTests/PhotoToneTests.swift`, `Tests/mutations/PhotoModel.PhotoLiveTone.json`, `Tests/mutations/PhotoModel.PhotoRender.json` | PT-1, #3144, TC-5 | ~300, 5 |
+| PT-3 | – | The live route and the export path: tone first in `toneOperations`, the unsharp pass on the base, `applied(to:)` in the same order; turns on `PhotoToneTests` | `Sources/PhotoModel/PhotoAdjust+Imaging.swift`, `Sources/PhotoModel/PhotoRender.swift`, `Tests/PhotoModelTests/PhotoToneTests.swift`, `Tests/mutations/PhotoModel.PhotoAdjust+Imaging.json`, `Tests/mutations/PhotoModel.PhotoRender.json` | PT-1, suite-imaging IM-8d, TC-5 | ~300, 5 |
 | PT-4 | – | The adapter's bodies (image or adjustment layer, Auto from the composite); `ToneCommands.specs` in the catalog; the ids; the three job folders | `Sources/PhotoModel/PhotoTone+Kernel.swift`, `Sources/PhotoModel/PhotoCommandCatalog.swift`, `Tests/command-ids/photo.txt`, `Tests/PhotoModelTests/PhotoToneCommandTests.swift`, `Tests/mutations/PhotoModel.PhotoTone+Kernel.json`, `Tests/RealJobs/photo/white-balance/`, `Tests/RealJobs/photo/backlit/`, `Tests/RealJobs/photo/sharpen-web/` | PT-1, TC-6, gradient-fill:PG-m | ~300, 8 |
 | PT-5 | – | Snapshots and the render budget test | `Tests/AppSnapshotTests/PhotoToneSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetPhotoToneTests.swift` | PT-2, TC-3 | ~160, 2 |
 | PT-6 | – | The journey written and skipped (`XCTSkip("waits on PT-7")`) | `UITests/PhotoJourneyTests+Tone.swift` | PT-2 | ~120, 1 |
@@ -147,7 +151,7 @@ Longest chain: PT-1 → PT-2 → PT-6 → PT-7 → PT-8 (5). Chain of 5: the pan
 |---|---|---|---|
 | PT-1 | compiles; an old document without `tone` opens neutral; `PhotoToneTests` disabled by name | an old file fails to open | – (stub) |
 | PT-2 | `PhotoToneSnapshots.panel` (PT-5's, first in the slice PR) | the rows are missing or Exposure shows twice | – (UI) |
-| PT-3 | `PhotoToneTests`: temperature −30 on the tungsten fixture reads neutral; a tone step on the live route composites, uploads and reads back nothing (`stepIsOneWrite`); the live picture equals `applied(to:)` within 2 levels with Sharpen on; Blur on still falls back | a step costs a readback, or export differs from the canvas | `PhotoModel.PhotoLiveTone`: tone after hue/saturation → `.toneFirst`; sharpen cache not invalidated on a base change → `.sharpenFollowsBase`; `PhotoModel.PhotoRender`: unsharp after tone → `.exportMatchesCanvas` |
+| PT-3 | `PhotoToneTests`: temperature −30 on the tungsten fixture reads neutral; a tone step on the live route composites, uploads and reads back nothing (`stepIsOneWrite`); the live picture equals `applied(to:)` within 2 levels with Sharpen on; Blur on still falls back | a step costs a readback, or export differs from the canvas | `PhotoModel.PhotoAdjust+Imaging`: tone after hue/saturation → `.toneFirst`; the unsharp parameters not passed to `LiveToneSurface` → `.sharpenOnCanvas`; `PhotoModel.PhotoRender`: unsharp after tone → `.exportMatchesCanvas` |
 | PT-4 | `PhotoToneCommandTests`: `tone.set` on a selected adjustment layer changes the layer only; a drag is one step; Sharpen on a layer is unavailable with its help; the id list matches the catalog; RJ-P12, P13 and P14 pass on Linux | the image changes for a layer edit, or a step is doubled | `PhotoModel.PhotoTone+Kernel`: layer selection ignored → `.layerTone`; drag token dropped → `.dragIsOneStep` |
 | PT-5 | `PhotoToneSnapshots`; `RenderBudgetPhotoToneTests.temperatureDragInThreeBodies` | budget over | – (UI) |
 | PT-6 | compiles, skipped | – | – |

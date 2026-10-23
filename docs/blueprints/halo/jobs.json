@@ -72,10 +72,11 @@
     "job": "Set a title card with a chosen font, weight, tracking and two lines.",
     "outcome": "The title shows two lines in the chosen font, weight and tracking, in the viewer and the render.",
     "needs": [
-      "E8"
+      "E8",
+      "suiteui/text-style"
     ],
     "needs_note": "E8 text engine",
-    "closes_with": "E8",
+    "closes_with": "suiteui/text-style",
     "trap": "One line, no font choice",
     "run": "Cm",
     "baseline": "partial",
@@ -756,5 +757,85 @@
     ],
     "waits_on": "HF-3",
     "added_by": "halo/file-flow"
+  },
+  "RJ-H43": {
+    "id": "RJ-H43",
+    "app": "halo",
+    "weight": "med",
+    "job": "Give a title an outer glow whose size is keyed from 0 to 20 over one second, and render frames 0, 15 and 30.",
+    "outcome": "The glow reaches 0 px past the title at frame 0, 20 px at frame 30 and an eased value between at frame 15.",
+    "needs": [
+      "S2"
+    ],
+    "closes_with": "S2",
+    "trap": "The glow is baked at one size for every frame, or the keys show in the viewer but not in the render",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "HY-6",
+    "added_by": "halo/layer-styles"
+  },
+  "RJ-H70": {
+    "id": "RJ-H70",
+    "app": "halo",
+    "weight": "high",
+    "job": "Change a 10 s composition to 15 s with a navy background, then render frame 400.",
+    "outcome": "Frame 400 renders with a navy corner within 2 levels and the keys stay at frames 30 and 270.",
+    "needs": [
+      "suiteui/document-setup"
+    ],
+    "closes_with": "suiteui/document-setup",
+    "trap": "The comp can't be changed without rebuilding it, or the keys stretch to the new length",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DS-12",
+    "added_by": "suiteui/document-setup"
+  },
+  "RJ-H50": {
+    "id": "RJ-H50",
+    "app": "halo",
+    "weight": "med",
+    "job": "Blur a title layer by 6 px, then change the blur to 2 px later and render a frame.",
+    "outcome": "The frame equals a single radius-2 blur of the title within 1 level; the project holds one filter on the layer.",
+    "needs": [
+      "suiteui/adjust-everywhere"
+    ],
+    "closes_with": "suiteui/adjust-everywhere",
+    "trap": "The second edit adds a second blur instead of changing the first",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "AJ-12",
+    "added_by": "suiteui/adjust-everywhere"
+  },
+  "RJ-H51": {
+    "id": "RJ-H51",
+    "app": "halo",
+    "weight": "high",
+    "job": "Stagger three words by sliding the second layer 6 frames and the third 12 frames later, then trim the third's end by 12 frames.",
+    "outcome": "At frame 18 the second word's opacity equals the original's at frame 12 within 1%; the third word's out point is 12 frames earlier and its keys moved by 12.",
+    "needs": [
+      "suiteui/timeline-keys"
+    ],
+    "closes_with": "suiteui/timeline-keys",
+    "trap": "A slide moves the bar but leaves the keys behind, so the word pops in early",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "TK-9",
+    "added_by": "suiteui/timeline-keys"
   }
 }

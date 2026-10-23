@@ -1,0 +1,30 @@
+[
+  {
+    "label": "focusDragIsOneStep: the drag token is not passed to setPlaced, so a 30-sample focus drag lands as 30 undo steps",
+    "file": "Sources/SuiteKernel/Place/PlaceCommands.swift",
+    "find": "name: \"Move Inside\", drag: p.drag)",
+    "replace": "name: \"Move Inside\", drag: nil)",
+    "tests": "PlaceCommandsTests"
+  },
+  {
+    "label": "fillUsesTheSelectedLayer: fill adds a new layer instead of filling the selected one",
+    "file": "Sources/SuiteKernel/Place/PlaceCommands.swift",
+    "find": "if p.fill == true, let box = target.placeFillBox {",
+    "replace": "if p.fill == false, let box = target.placeFillBox {",
+    "tests": "PlaceCommandsTests"
+  },
+  {
+    "label": "refusesUnlistedFormat: the target's format set is not checked, so an SVG lands on a raster-only target",
+    "file": "Sources/SuiteKernel/Place/PlaceCommands.swift",
+    "find": "guard let format = PlaceRules.format(of: data), target.placeFormats.contains(format) else {",
+    "replace": "guard let format = PlaceRules.format(of: data) else {",
+    "tests": "PlaceCommandsTests"
+  },
+  {
+    "label": "refusesOver32MB: the size check after the decode is skipped, so a file over 32 MB places",
+    "file": "Sources/SuiteKernel/Place/PlaceCommands.swift",
+    "find": "guard data.count <= PlaceRules.maxBytes else {",
+    "replace": "guard data.count <= Int.max else {",
+    "tests": "PlaceCommandsTests"
+  }
+]

@@ -1,6 +1,6 @@
 // LibraryCameraDecodeTests.swift: ImageIODecoder's scan reads each file's camera
 // details (metadata-more MD-7); a PNG without Exif scans to `.none`. Written
-// before its code (contract rule 13, MD-5): every test waits on MD-7. macOS only.
+// before its code (contract rule 13, MD-5), turned on by MD-7. macOS only.
 #if os(macOS)
 import CoreGraphics
 import Foundation
@@ -45,7 +45,7 @@ import UniformTypeIdentifiers
         return [kCGImagePropertyExifDictionary: exif, kCGImagePropertyTIFFDictionary: tiff]
     }
 
-    @Test(.disabled("waits on MD-7")) func aJPEGsExifScansToItsCameraDetails() async throws {
+    @Test func aJPEGsExifScansToItsCameraDetails() async throws {
         let root = try folder()
         defer { try? FileManager.default.removeItem(at: root) }
         try write(to: root.appending(path: "a.jpg"), as: .jpeg, properties: cameraProperties)
@@ -61,7 +61,7 @@ import UniformTypeIdentifiers
         #expect(found.captureDate == captured)
     }
 
-    @Test(.disabled("waits on MD-7")) func aPNGWithoutExifScansToNone() async throws {
+    @Test func aPNGWithoutExifScansToNone() async throws {
         let root = try folder()
         defer { try? FileManager.default.removeItem(at: root) }
         try write(to: root.appending(path: "b.png"), as: .png)
