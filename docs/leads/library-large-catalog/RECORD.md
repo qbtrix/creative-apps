@@ -4,7 +4,7 @@ Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a1693fbf6d-ap2g · Session: claude/large-catalog-share-sheet-2tdm4i (earlier act-1a15df37b73-k199) · Started: 2026-10-21T10:19Z (resumed 2026-10-23T14:20Z)
 Stage: 3 wave 2 (LG-model PR #4847 open, fast-lane, head 9f19aa0a)
 Base: 8021b0f56a45a59540cd4ea0ff99651c5fb8dc2a (origin/dev)
-Next: after #4847 merges and a green library or full run contains it, Belt-Slice-Done LG-model; LG-grid waits on suiteui shared-thumbnails ST-m
+Next: LG-model #4847 waiting in lane; LG-grid waits on ST-m #4951 (stacked on ST-a #4840, needs-fix) (21:33Z)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

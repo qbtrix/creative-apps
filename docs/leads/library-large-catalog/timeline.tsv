@@ -33,3 +33,4 @@
 20:25Z	3	heartbeat	LG-model	#4847 open, clean, fast-lane; ST-a #4840 needs-fix
 20:48Z	3	heartbeat	LG-model	#4847 open, clean, fast-lane; ST-a #4840 needs-fix
 21:10Z	3	heartbeat	LG-model	#4847 open, clean, fast-lane, waiting in lane; ST-a #4840 needs-fix; full CI 39999410389 green
+2026-10-23T21:34:00Z	3	heartbeat	LG-model	#4847 open, clean, fast-lane, waiting in lane; ST-m now open as #4951 (stacked on ST-a #4840, which is still needs-fix); no findings, no dev-red
