@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-23T20:25:13Z	heartbeat	parents #4871 #4939 open; stacked children off fast-lane (size) until parents merge; DS PRs #4887 #4891 #4901 #4918 clean, queued
 2026-10-23T20:48:41Z	heartbeat	all 10 slice PRs open, clean, fast-lane; lane bisecting batch 20261023192105 (no needs-fix on ours)
 2026-10-23T21:12:41Z	heartbeat	queued behind lane batch 20261023204921 (#4841-#4862, Linux green, macOS running); ours not in it; no needs-fix, no dev-red
+2026-10-23T21:35:13Z	heartbeat	still queued: batch 20261023204921 macOS gate running; no needs-fix, no dev-red
