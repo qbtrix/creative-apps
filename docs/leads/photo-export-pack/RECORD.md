@@ -2,9 +2,9 @@
 
 Issue: #3470 · Packet: docs/blueprints/photo/features/export-pack.md
 Run: act-1a15e2da54d-qlg1 (resumed; earlier act-1a15a9f4eba-h30y) · Session: claude/feature-lead-playbook-t69dpt · Started: 2026-10-20T18:40Z
-Stage: 3 blocked (cross-line waits)
+Stage: 3 building (unparked 2026-10-23T15:11Z under contract-first waits)
 Base: e382f9d7fba02ffdefc8ba2f23c9461b4774fad6
-Next: supervisor question 2026-10-21T11:40Z (#3470): XP-3/XP-4 have no PRs and the suiteui lead #3477 is not launched; AX-photo merged (#3890); PX-4 parked; PX-8 waits PT-z, PP-z
+Next: PX-2 on SuiteExportSheet as it is on dev (format chips, Quality; Size row off until the app write resizes), then PX-6; PX-4 still on the supervisor's codec hold; PX-8 waits PT-a to merge
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -18,7 +18,7 @@ Next: supervisor question 2026-10-21T11:40Z (#3470): XP-3/XP-4 have no PRs and t
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | PX-1 | PX-a | 1 | PhotoExport+Kernel stubs; PhotoExportPackTests disabled | Sources/PhotoModel/PhotoExport+Kernel.swift, Tests/PhotoModelTests/PhotoExportPackTests.swift | compiles; existing export tests pass | #3678 | merged 21:15Z (head 061e0972) |
-| PX-2 | PX-a | – | Export… opens SuiteExportSheet; Photo's ExportSheet.swift deleted | Sources/PhotoApp/PhotoWindow+Export.swift, Sources/PhotoApp/ExportSheet.swift | PhotoExportPackSnapshots.sheet | – | waits XP-3, AX-photo |
+| PX-2 | PX-a | – | Export… opens SuiteExportSheet; Photo's ExportSheet.swift deleted | Sources/PhotoApp/PhotoWindow+Export.swift, Sources/PhotoApp/ExportSheet.swift | PhotoExportPackSnapshots.sheet | – | building (XP-3 ahead on fakes; AX-photo merged #3890) |
 | PX-3 | PX-m | 1 (stacked on PX-1) | exportPixels and headless export on ExportOptions; RJ-P01 | Sources/PhotoModel/PhotoExport+Kernel.swift, Sources/PhotoModel/PhotoHeadless.swift, Tests/PhotoModelTests/PhotoExportPackTests.swift, Tests/mutations/PhotoModel.PhotoExport+Kernel.json, Tests/RealJobs/photo/instagram/ | PhotoExportPackTests | #3729 | merged 22:41Z (head e2c55886, Mutate 4/4) |
 | PX-4 | PX-m | – | app writes formats through services.media.still | Sources/PhotoApp/ImageIOCodec.swift, Tests/AppSnapshotTests/PhotoExportFormatsTests.swift | PhotoExportFormatsTests | – | parked (supervisor: no third codec path; waits shared-codecs XK3 + shell-media, no issue yet) |
 | PX-5 | PX-u | – | snapshots, render budget | Tests/AppSnapshotTests/PhotoExportPackSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoExportPackTests.swift | RenderBudgetPhotoExportPackTests.typingWidthInTwoBodies | – | waits PX-2, XP-4 |
@@ -37,7 +37,11 @@ Next: supervisor question 2026-10-21T11:40Z (#3470): XP-3/XP-4 have no PRs and t
 - PX-1 and PX-3 start without AX-photo: they own only new files (PhotoExport+Kernel.swift) and PhotoHeadless.swift, none of AX-p1/AX-p2's (PhotoWorkspace.swift, OutputContracts.swift, PhotoExportTests.swift), and they need only ExportOptions/ExportRules/ExportFormats, merged with XP-1 (#3552) and XP-6 (#3586). PX-2 still waits on AX-photo, since the sheet reads ExportRun.
 - PX-3 stacks on PX-1 in wave 1 (it needs only PX-1 and XP-6).
 
+## Wires
+- [ ] Wire: suiteui/export-pack:XP-a (built on its fakes in PX-2: the sheet's scale-only Size row and no Metadata row; swap in XP-3's Size and Metadata rows when it merges)
+
 ## Open
 - PX-2 waits suiteui export-pack XP-3 (Size row; lead/export-pack: XP-3 waits TC-a, PL-a) and adopt-kernel-export AX-photo (blocked on AL-photo). PX-4 waits shell-media SM-w (planned, no lead). PX-8 waits Photo tone-controls PT-z and place-image PP-z (no lead yet).
 - PX-3 (#3729): RJ-P01 stays pending on gap #3692 (no `image.crop` catalog step; JPEG pixel check waits on image-codecs). `expected/landscape-instagram.png` is missing and must be added before RJ-P01 can go green. `exportPixels` honours a framed but unapplied crop (that is what `.cropThenSize` catches). The 6000 × 4000 long-edge test takes ~107 s in debug.
 - Supervisor (19:54Z, #3470): PX-4 parked, not through ImageIOCodec. XP-3, XP-4 and AX-photo have no open PRs to stack on (polled 20:12Z), so PX-2 and PX-5 keep waiting.
+- 2026-10-23T15:11Z supervisor unparked #3470 under contract-first waits (lead.md rule 12, #4814). XP-1 and XP-2 are on dev, XP-3 is not: PX-2 builds on SuiteExportSheet as dev has it with a Wire line. PX-2 offers only the formats the app writes today (PNG, JPEG) and hides the scale Size row, since the app's write ignores size until PX-4 sends it through exportPixels (no dead controls); HEIC, TIFF and Size come with PX-4. PT-a (tone-controls' contract) has not merged, so PX-8 stays waiting.

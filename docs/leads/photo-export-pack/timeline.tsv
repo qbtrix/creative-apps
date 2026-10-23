@@ -158,3 +158,4 @@ utc	stage	event	ref	note
 2026-10-23T13:31Z	parked	#3477 still waiting-on-prereq; deciding photo journeys 39953728310 (28e3a67de) still queued; #4798 open pending it
 2026-10-23T14:04Z	parked	#3477 still waiting-on-prereq; PJ-TX deciding run 39953728310 (28e3a67de, has 1b8539091) in progress; #4798 open
 2026-10-23T14:38Z	parked	#3477 still waiting-on-prereq; PJ-TX deciding run 39953728310 running scripts/ui-test since 14:03Z; #4798 open
+2026-10-23T15:17Z	resumed	supervisor unparked #3470 (contract-first, rule 12); PJ-TX gap #4798 filed, #3785 closed; PX-2 building on SuiteExportSheet with Wire XP-a
