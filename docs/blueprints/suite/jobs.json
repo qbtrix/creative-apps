@@ -1121,7 +1121,7 @@
     "sources": [
       "captain"
     ],
-    "waits_on": "CB-3",
+    "waits_on": "CB-7",
     "added_by": "suite/cli-bundle"
   },
   "RJ-X63": {
