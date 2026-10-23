@@ -98,6 +98,7 @@ struct FlareWindow: View {
         .modifier(FlareOpenStatus(model: model))
         .suiteOpenQueue(FlareShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .modifier(FlareAutosaveAdapter(model: model, restore: { try model.restoreRecovery($0) }))
+        .modifier(FlareLiveRegistration(read: { model }, write: { model.takeLive($0) }))
         .focusedSceneValue(
             \.flareMenu,
             FlareMenu(

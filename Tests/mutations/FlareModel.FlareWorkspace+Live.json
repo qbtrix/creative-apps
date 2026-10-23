@@ -1,0 +1,16 @@
+[
+  {
+    "label": "theWindowBecomesTheWorkspaceTheCommandRanOn: the live result dropped",
+    "file": "Sources/FlareModel/FlareWorkspace+Live.swift",
+    "find": "        self = ran.workspace\n",
+    "replace": "        _ = ran\n",
+    "tests": "FlareLiveTakeTests"
+  },
+  {
+    "label": "theWindowBecomesTheWorkspaceTheCommandRanOn: the window rewraps its own workspace instead",
+    "file": "Sources/FlareModel/FlareWorkspace+Live.swift",
+    "find": "        self = ran.workspace\n",
+    "replace": "        self = FlareHeadless(workspace: self).workspace\n",
+    "tests": "FlareLiveTakeTests"
+  }
+]
