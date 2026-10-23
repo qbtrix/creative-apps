@@ -52,3 +52,4 @@ time	task	event	note
 2026-10-23T17:31Z	3	pr-opened	#4860	wave 1
 2026-10-23T17:31Z	3	pr-opened	#4861	wave 1
 2026-10-23T17:54Z	3	heartbeat	-	poll: none of the wave 1 PRs merged yet; dev 98589662; waits unchanged
+2026-10-23T18:17Z	3	heartbeat	-	poll: no wave 1 PR merged; no needs-fix/needs-rebase; dev 98589662
