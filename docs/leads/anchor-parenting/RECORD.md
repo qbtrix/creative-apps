@@ -4,7 +4,7 @@ Issue: #4522 · Packet: docs/blueprints/suiteui/features/anchor-parenting.md
 Run: act-1a1695ebfeb-d54n · Session: claude/feature-lead-playbook-9a8kbw · Started: 2026-10-23T15:30Z
 Stage: 3 wave 1
 Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (origin/dev)
-Next: check AN-u's builder (AN-5, AN-6); then AN-10 after CB-8's PR is open
+Next: AN-u's PR #4893 to merge (then AN-6's PR from lead/anchor-parenting-AN-u-6; then AN-halo, AN-flare-u); AN-10 after CB-8's PR is open
 
 
 
@@ -15,7 +15,7 @@ Next: check AN-u's builder (AN-5, AN-6); then AN-10 after CB-8's PR is open
 Run act-1a1695ebfeb-d54n, 2026-10-23T15:30Z; supersedes the tables' PR/state columns.
 - Unparked by the supervisor (2026-10-23, contract-first waits, lead.md rule 12).
 - AN-a #4076, AN-m #4107 merged; test halves AN-7 #4308, AN-9 #4303 merged (disabled).
-- Wave 1: AN-u (AN-5, AN-6) building, on orientation-crop OC-a's fakes (OC-u's Wire line below).
+- Wave 1: AN-u: AN-5 is PR #4893 (head 855d46c6, CI: PASS, 392 lines, 6 files); AN-6 is stacked on lead/anchor-parenting-AN-u-6 (8b151479) and opens once #4893 merges; on orientation-crop OC-a's fakes (OC-u's Wire line below).
 - Wave 2: AN-flare-m (AN-10). Its core needs (layer.setParent, anchor) are on the pin since bump #3825 (7966e5a); it shares FlareCommandCatalog, flare.txt and the flare golden with clipboard-interop CB-8, so it starts after CB-8's PR.
 - AN-halo (AN-8) and AN-flare-u wait AN-u's merge; AN-z last.
 
@@ -37,8 +37,8 @@ Run act-1a1695ebfeb-d54n, 2026-10-23T15:30Z; supersedes the tables' PR/state col
 | AN-2 | AN-a | 2 | `PlacementTests` and `AnchorCommandsTests` written, disabled (`waits on AN-3`, `waits on AN-4`) | `Tests/SuiteKernelTests/PlacementTests.swift`, `Tests/SuiteKernelTests/AnchorCommandsTests.swift` | compile, disabled | – | planned |
 | AN-3 | AN-m | 3 | `Placement` bodies, lifted from `HaloKeyRules.localMatrix` and its keep-in-place step; turns on `PlacementTests` | `Sources/SuiteKernel/Transform/Placement.swift`, `Tests/SuiteKernelTests/PlacementTests.swift`, `Tests/mutations/SuiteKernel.Placement.json` | `PlacementTests`: a 100×100 box with its anchor at the centre, turned 90°, keeps its centre; `movingAnchor` to a corner leaves every corner where it was on screen, also when scaled 2x and turned 30°; `matrix` equals Halo's for 200 random placements | – | building |
 | AN-4 | AN-m | 3 | `AnchorCommands` run: set-anchor through `movingAnchor`, set-parent through `LayerFollow.setFollow(keepingPlace:)`, new-null as an empty layer at the canvas ... | `Sources/SuiteKernel/Transform/AnchorCommands.swift`, `Tests/SuiteKernelTests/AnchorCommandsTests.swift`, `Tests/mutations/SuiteKernel.AnchorCommands.json` | `AnchorCommandsTests` on the fake document: parenting a turned child to a scaled parent leaves its world corners unchanged; clearing the parent too; a cycle is refused with the sentence; `{at: center}` lands on the box centre | – | building |
-| AN-5 | AN-u | 3 | Reachable first: the gallery's Anchor page on the fakes; `CanvasMarks+Anchor` (crosshair in a circle, hover and pressed states, a drag sends one `transform.s... | `Sources/SuiteUI/CanvasMarks+Anchor.swift`, `Sources/SuiteUI/AnchorRows.swift`, `Sources/SuiteUI/Gallery/GalleryAnchor.swift`, `Sources/SuiteUI/SuiteGallery.swift`, `Tests/SuiteUITests/AnchorRowsTests.swift` | `AnchorRowsTests`: the picker sends `{at:}` for each point, the Parent menu lists the other layers and None and never the layer or its descendants; the mark's hit radius is 6 pt at any zoom | – | planned |
-| AN-6 | AN-u | 4 | The gallery journey and the render budget row | `UITests/SuiteJourneyTests+Anchor.swift`, `Tests/AppSnapshotTests/RenderBudgetAnchorTests.swift` | `SuiteAnchorJourneyTests.testDragAnchorAndParentInGallery`; `RenderBudgetAnchorTests.anchorDragInThreeBodies` | – | planned |
+| AN-5 | AN-u | 3 | Reachable first: the gallery's Anchor page on the fakes; `CanvasMarks+Anchor` (crosshair in a circle, hover and pressed states, a drag sends one `transform.s... | `Sources/SuiteUI/CanvasMarks+Anchor.swift`, `Sources/SuiteUI/AnchorRows.swift`, `Sources/SuiteUI/Gallery/GalleryAnchor.swift`, `Sources/SuiteUI/SuiteGallery.swift`, `Tests/SuiteUITests/AnchorRowsTests.swift` | `AnchorRowsTests`: the picker sends `{at:}` for each point, the Parent menu lists the other layers and None and never the layer or its descendants; the mark's hit radius is 6 pt at any zoom | #4893 | pr-open |
+| AN-6 | AN-u | 4 | The gallery journey and the render budget row | `UITests/SuiteJourneyTests+Anchor.swift`, `Tests/AppSnapshotTests/RenderBudgetAnchorTests.swift` | `SuiteAnchorJourneyTests.testDragAnchorAndParentInGallery`; `RenderBudgetAnchorTests.anchorDragInThreeBodies` | lead/anchor-parenting-AN-u-6 | stacked |
 | AN-7 | AN-halo | 3 | Halo, test first. `HaloPlacementTests`, disabled: every fixture renders the same frames within 1 level; a viewer anchor drag keeps the layer in place and is ... | `Tests/HaloModelTests/HaloPlacementTests.swift`, `UITests/HaloJourneyTests+Anchor.swift`, `Tests/RealJobs/suite/spin-in-place/spin-in-place.jobs.json` | compile, disabled; `scripts/jobs check` | – | planned |
 | AN-8 | AN-halo | 5 | `HaloPlacement+Kernel.swift`; `HaloKeyRules.localMatrix` builds a `Placement`; the viewer draws `CanvasMarks+Anchor` and its drag sends `transform.set-anchor... | `Sources/HaloModel/HaloPlacement+Kernel.swift`, `Sources/HaloModel/Live/HaloKeyRules.swift`, `Sources/HaloApp/HaloWindow+Viewer.swift`, `Sources/HaloApp/HaloInspector+Anchor.swift`, `Tests/HaloModelTests/HaloPlacementTests.swift`, `UITests/HaloJourneyTests+Anchor.swift`, `Tests/mutations/HaloModel.HaloPlacement+Kernel.json`, `Sources/HaloModel/HaloCommandCatalog.swift`, `Tests/command-ids/halo.txt`, `Tests/AfterGlowCLITests/Golden/apps/halo.list-commands.json` | `HaloPlacementTests`; `HaloViewerFidelityTests` unchanged; `HaloAnchorJourneyTests.testDragAnchorKeepsPlace` | – | planned |
 | AN-9 | AN-flare-m | 3 | Flare, test first. `FlareAnchorParentTests`, disabled: a rectangle drawn with the tool and keyed 0 to 360° keeps its centre at frame 12 of 24; a hand parente... | `Tests/FlareModelTests/FlareAnchorParentTests.swift` | compiles, disabled | – | planned |
@@ -53,6 +53,7 @@ Run act-1a1695ebfeb-d54n, 2026-10-23T15:30Z; supersedes the tables' PR/state col
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-23: AN-5+AN-6 came to ~540 lines, so AN-u is two PRs: AN-5 (#4893), AN-6 stacked on it (rule 22). AN-6's p95 budget is report-only until the supervisor adds RenderBudgetAnchorTests to Tests/perf-suites.txt. Stripped the server-added attribution footer from #4893's body.
 - 2026-10-23 (act-1a1695ebfeb-d54n): feature issue is #3755 per the brief (#4522 also tracks it); PRs carry `Refs #3755`.
 - 2026-10-23: AN-u joins wave 1: LS-1 is layer-styles' only wave-1 task, so SuiteGallery.swift has one writer (AN-5) this wave; LS-2 follows in wave 2.
 - Base is origin/dev, PRs target dev: the brief names main as the integration branch, but CLAUDE.md and lead.md say never branch from or target main (the lane retargets main PRs to dev).
