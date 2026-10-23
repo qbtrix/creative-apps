@@ -2,8 +2,8 @@
 // `-FlareSample <name>` opens the same document on the real services, `-FlareOpenFile <path>` names a file the window
 // reads (DK-12), and `-FlareSaveTo` / `-FlareExportTo` name the folders saves and exports go to. On fakes,
 // `-FlareExportFrameDelay <ms>` sets the pause after each PNG frame, so a journey can still reach Cancel mid-run
-// (XCUITest waits for the app to go idle before each action). Unknown flags, a flag with no value and an unknown
-// fixture name are ignored, so a bad launch opens an empty window, never a crash.
+// (each XCUITest lookup takes about a second). Unknown flags, a flag with no value and an unknown fixture name are
+// ignored, so a bad launch opens an empty window, never a crash.
 import FlareCore
 
 public struct FlareLaunch: Sendable, Equatable {
@@ -54,9 +54,9 @@ extension FlareWorkspace {
     /// Services by source: `.fake()` for a fixture, `.built` otherwise (DK-3); `.fixture` and `.sample` open their
     /// fixture document. `.file` opens nothing here: the window reads the file off the main thread (DK-12).
     public init(launch: FlareLaunch) {
-        var fakes = FlareServices.fake()
-        if let delay = launch.exportFrameDelay { fakes.export = FakeExport(frameDelay: delay) }
-        self.init(services: launch.usesFakes ? fakes : .built)
+        var services = launch.usesFakes ? FlareServices.fake() : .built
+        if launch.usesFakes, let delay = launch.exportFrameDelay { services.export = FakeExport(frameDelay: delay) }
+        self.init(services: services)
         switch launch.source {
         case .fixture(let name), .sample(let name):
             if let document = FlareFixtures.named(name) { load(document) }
