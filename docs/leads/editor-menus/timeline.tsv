@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 2026-10-23T08:53:19Z	check	editor-menus	#4739 clean at 4ea37a264, waiting on the lane; #4761 stacked. Scoped flare/halo still only on pre-#4771 c2cc0c7 (queued).	https://github.com/qbtrix/creative-apps/pull/4739
 2026-10-23T09:06:28Z	merge	editor-menus	#4739 (EM-photo-design) merged into dev.	https://github.com/qbtrix/creative-apps/pull/4739
 2026-10-23T09:06:28Z	wave	editor-menus	#4761 (EM-library, feature-done) merged origin/dev at e42863714, CI: PASS, retargeted to dev; Head moved, stacked note dropped.	https://github.com/qbtrix/creative-apps/pull/4761
+09:16Z	check	editor-menus	#4761 macOS build 39929804061 queued; scoped flare 39930432485 on post-#4771 dev 04140530e queued for the EM-flare-halo critics	https://github.com/qbtrix/creative-apps/actions/runs/39929804061
