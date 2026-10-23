@@ -115,7 +115,7 @@ private func shootWithRejects(_ trash: FakeTrash = FakeTrash()) -> LibraryCatalo
 }
 
 /// 300 rejects in the 10,000-photo catalog on FakeTrash: ≤ 50 ms debug (packet Quality tests).
-@Test func largeBudget() {
+@Test(.disabled("perf: waits on a Tests/perf-suites.txt line")) func largeBudget() {
     var photos = LibraryFixtures.largePhotos(count: 10_000, folder: "/fixture/large")
     for index in photos.indices { photos[index].flag = index % 33 == 0 && index < 9_900 ? .reject : PhotoFlag.none }
     var services = LibraryServices.fake(photos)
