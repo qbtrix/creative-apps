@@ -123,17 +123,18 @@ struct HaloPlaceFocusDrag: ViewModifier {
     }
 }
 
-/// File > Place… ⇧⌘P: the panel for PNG, JPEG and SVG, then each chosen file placed centred.
+/// File > Place… ⇧⌘P: the panel for PNG, JPEG and SVG, then each chosen file placed centred. The catalog's
+/// `place.image` spec decides whether it is on and what its help says; a window with no place action wired has
+/// nothing to send to, so it reads as no window.
 struct HaloPlaceMenuAdapter: View {
     let model: HaloProject?
     let place: HaloPlaceAction?
     @AppStorage(HaloPlace.fillKey) private var fill = false
 
     var body: some View {
-        let help = HaloPlace.help(model, place)
         MenuCommand(
-            "Place…", systemImage: "photo.badge.plus", shortcut: KeyboardShortcut("p", modifiers: [.command, .shift]),
-            help: help ?? "Place a PNG, JPEG or SVG on the composition", isEnabled: help == nil
+            HaloMenuState.spec("place.image"), on: HaloMenuState(project: place == nil ? nil : model), title: "Place…",
+            systemImage: "photo.badge.plus", shortcut: KeyboardShortcut("p", modifiers: [.command, .shift])
         ) {
             guard let model, let place else { return }
             let (formats, fill) = (model.placeFormats, fill)

@@ -2,8 +2,9 @@
 // 1280 x 820 window (transform-tools TT-4, the packet's budgets). The page is
 // the gallery's `transform-handles` layout under a root with its own body
 // counter: a box with SelectionHandlesEditor and TransformRows beside it, the
-// panel applying each turn, resize and row edit to its local box, so an edit
-// redraws the panel, never the window. A knob drag
+// panel applying each turn (the drag's start turn plus the turn so far),
+// resize and row edit to its local box, so an edit redraws the panel, never
+// the window; `budget.turn` reads the turn in whole degrees. A knob drag
 // (`knobDragInThreeBodies`), a right-handle drag on the box turned 30°
 // (`turnedResizeInThreeBodies`) and 120 rotation-row steps
 // (`rotationScrubInThreeBodies`) each run at most 3 window bodies with a p95
@@ -32,9 +33,11 @@ private struct TransformBudgetPage: View {
     }
 }
 
-/// The `transform-handles` layout; `budget.box` is the unturned box.
+/// The `transform-handles` layout; `budget.box` is the unturned box, `budget.turn` its turn.
 private struct TransformBudgetPanel: View {
     @State var item: TransformBox
+    /// The turn when the open knob drag began; nil between drags.
+    @State private var startTurn: Double?
 
     var body: some View {
         let b = item.box
@@ -45,8 +48,10 @@ private struct TransformBudgetPanel: View {
                 Color.clear.frame(width: rect.width, height: rect.height).position(x: rect.midX, y: rect.midY)
                     .allowsHitTesting(false).accessibilityElement().accessibilityLabel("Box")
                     .accessibilityIdentifier("budget.box")
+                Color.clear.frame(width: 1, height: 1).allowsHitTesting(false).accessibilityElement()
+                    .accessibilityLabel("\(Int(item.degrees.rounded()))").accessibilityIdentifier("budget.turn")
                 SelectionHandlesEditor(rect: rect, degrees: item.degrees, zoom: 1, onResize: resize,
-                                       onRotate: { _ in }, onEnd: {})
+                                       onRotate: rotate, onEnd: { startTurn = nil })
             }
             .frame(width: 400, height: 300, alignment: .topLeading)
             TransformRows(selection: item, help: nil, flipHelp: nil, onIntent: apply)
@@ -59,6 +64,13 @@ private struct TransformBudgetPanel: View {
 
     private func resize(_ next: CGRect) {
         item.box = Rect(minX: Double(next.minX), minY: Double(next.minY), maxX: Double(next.maxX), maxY: Double(next.maxY))
+    }
+
+    /// A knob sample, the turn so far since the press: the start turn plus it.
+    private func rotate(_ turned: Double) {
+        let start = startTurn ?? item.degrees
+        startTurn = start
+        item.degrees = TransformRules.normalized(start + turned)
     }
 
     private func apply(_ intent: TransformIntent) {
@@ -97,6 +109,9 @@ extension BodyCountSuites {
                     return CGPoint(x: centre.x + radius * cos(a), y: centre.y + radius * sin(a))
                 }
             }
+            try await w.settle()
+            let turn = try #require(w.label("budget.turn").flatMap { Double($0) }, "no budget.turn on the page")
+            #expect(abs(turn - 90) <= 3, "the knob drag turned the box to \(turn)°, not about 90°")
             expectBodies(step, atMost: 3, target: 1)
             expectP95(step, atMost: 8, target: 4)
         }
@@ -112,6 +127,10 @@ extension BodyCountSuites {
             let step = try await w.measure("transform turned resize, 120 samples", bodies: Self.bodies) {
                 try await w.drag(from: start, by: CGVector(dx: 40 * cos(a), dy: -40 * sin(a)))
             }
+            try await w.settle()
+            // The press hit the turned right handle: W grew by about the 40 pt drag.
+            let grown = try #require(await w.element("budget.box"), "no box after the drag")
+            #expect(grown.width > frame.width + 20, "W went from \(frame.width) to \(grown.width), not about +40")
             expectBodies(step, atMost: 3, target: 1)
             expectP95(step, atMost: 8, target: 4)
         }

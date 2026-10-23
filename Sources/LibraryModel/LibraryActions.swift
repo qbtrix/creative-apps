@@ -20,6 +20,8 @@ public enum LibraryAction: Hashable, Sendable {
     /// Larger Thumbnails in the grid, a zoom step against the measured fit in the loupe.
     case zoomIn(fitScale: Double), zoomOut(fitScale: Double)
     case zoomToFit, actualSize
+    /// The grid toolbar's size slider: the thumbnail size in points.
+    case setCellSize(Int)
     /// The canvas's pinch: the fit scale itself is Zoom to Fit.
     case zoomTo(Double, fitScale: Double)
 }
@@ -47,7 +49,7 @@ extension LibraryCatalog {
         case .setRating(let stars) where !(0...5).contains(stars): Self.ratingRangeReason
         case .cull, .setRating, .setFlag, .setLabel:
             cullTargets.isEmpty ? reason("culling", "Select photos first.") : nil
-        case .toggleAutoAdvance, .dismissCullError: nil
+        case .toggleAutoAdvance, .dismissCullError, .setCellSize: nil
         case .showGrid: mode == .loupe ? nil : "The grid is already showing."
         case .showLoupe:
             mode == .grid && !isSelectedCollectionEmpty ? nil : "The loupe is already showing, or there are no photos."
@@ -90,6 +92,7 @@ extension LibraryCatalog {
         case .zoomIn(let fit): mode == .grid ? stepCellSize(by: 1) : stepZoom(by: 1, fitScale: fit)
         case .zoomOut(let fit): mode == .grid ? stepCellSize(by: -1) : stepZoom(by: -1, fitScale: fit)
         case .zoomToFit: zoomLoupe(.fit)
+        case .setCellSize(let size): setCellSize(size)
         case .actualSize: zoomLoupe(.actual)
         case .zoomTo(let scale, let fit): zoomLoupe(abs(scale - fit) < 0.0001 ? .fit : .scale(scale))
         }
@@ -119,5 +122,17 @@ extension LibraryCatalog {
         let canStep = step > 0
             ? LoupeZoom.steps.contains { $0 > scale * 1.0001 } : LoupeZoom.steps.contains { $0 < scale / 1.0001 }
         return inLoupe && canStep ? nil : reason("loupe", limit)
+    }
+}
+
+extension LibraryCatalog {
+    /// The sizes the grid's Size bar offers, in points, in `cellSizeStep` steps.
+    public static let cellSizeRange = 80...320
+
+    /// The Size bar: `size` snapped to the nearest step from 80, clamped to `cellSizeRange`.
+    public mutating func setCellSize(_ size: Int) {
+        let range = Self.cellSizeRange, clamped = min(max(size, range.lowerBound), range.upperBound)
+        let steps = (Double(clamped - range.lowerBound) / Double(Self.cellSizeStep)).rounded()
+        cellSize = range.lowerBound + Int(steps) * Self.cellSizeStep
     }
 }
