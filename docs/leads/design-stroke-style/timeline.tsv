@@ -82,3 +82,4 @@ time	kind	note
 2026-10-22T11:42Z	heartbeat	Belt nudge after run end; still parked (waiting-on-prereq) per supervisor 09:03Z on #3441	#3441	-
 2026-10-22T13:00Z	heartbeat	parked until shape-tools DS-u and DS-m land (supervisor 09:03Z)	-	-
 2026-10-22T13:30Z	heartbeat	parked until shape-tools DS-u and DS-m land (supervisor 09:03Z)	-	-
+2026-10-23T15:20Z	-	start	-	run act-1a16953aed5-oxsi took over; wave 1 DK-u, DK-m

@@ -1,17 +1,17 @@
 # design-stroke-style lead record
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
-Run: act-1a1627ce3b4-ayhz · Session: claude/feature-lead-playbook-6guwwp · Started: 2026-10-22T07:24Z (prior runs act-1a1605b0534-rn47, act-1a15e909498-4bkk, act-1a15abb305f-lc8g, act-1a159c9b6b4-va3c)
-Stage: parked (waiting-on-prereq): supervisor answer 09:03Z on #3441 — shape-tools #3440 has its own lead (launched 08:53Z); stroke-style is relaunched for DK-u, DK-m, DK-z once DS-u and DS-m land (2026-10-22T09:21Z)
-Base: 5bec8089 (origin/dev); main verified at 0dd23d65
-Next: none in run act-1a1627ce3b4-ayhz; the next stroke-style lead starts DK-u (after shape-tools:DS-u) and DK-m (after DS-m), then DK-z
+Run: act-1a16953aed5-oxsi · Session: claude/lead-placed-images-stroke-style-elhwn1 · Started: 2026-10-23T15:20Z (prior runs act-1a1627ce3b4-ayhz, act-1a1605b0534-rn47, act-1a15e909498-4bkk, act-1a15abb305f-lc8g, act-1a159c9b6b4-va3c)
+Stage: 3 wave 1 (DK-u, DK-m building from dev); unparked by contract-first waits (supervisor 15:11Z on #3441)
+Base: 721168a8 (origin/dev); main verified at cb79cbb6
+Next: DK-u and DK-m slice PRs; critic panels; then DK-z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DK-a | stroke adapter stubs, vectorStroke, Stroke section is StrokeEditor on them | DK-1, DK-2 | MJ-DK | SS-a (done) | yes | 2 | merged (3785460f); rounds spent (#3884, #4001); #3865 #3871 #3873 are gap p2 | 39670298178 | wanted (posted) |
-| DK-u | canvas strokes dashes, joins, caps; snapshots, budget | DK-3, DK-4 | J-DK | DK-a, shape-tools:DS-u | yes | 0 | waiting | – | – |
-| DK-m | DesignStroke is VectorStroke; commands; SVG | DK-5, DK-6, DK-7 | MJ-DK | DK-a, shape-tools:DS-m; SS-d (DK-7) | no | 0 | waiting | – | – |
+| DK-u | canvas strokes dashes, joins, caps; snapshots, budget | DK-3, DK-4 | J-DK | DK-a, shape-tools:DS-u | yes | 0 | building | – | – |
+| DK-m | DesignStroke is VectorStroke; commands; SVG | DK-5, DK-6, DK-7 | MJ-DK | DK-a, shape-tools:DS-m; SS-d (DK-7) | no | 0 | building | – | – |
 | DK-z | journey on live; built | DK-8, DK-9 | J-DK | DK-u, DK-m | yes | 0 | waiting | – | – |
 
 ## Tasks
@@ -26,6 +26,7 @@ Next: none in run act-1a1627ce3b4-ayhz; the next stroke-style lead starts DK-u (
 | – | – | – | – | – | – |
 
 ## Decisions
+- 2026-10-23 run act-1a16953aed5-oxsi: one lead holds stroke-style and placed-images (#3454, record lead/design-placed-images); one wave plan. Contract-first waits (lead.md rule 12): shape-tools is built, so DK-u and DK-m start now. Brief says integration branch main; PRs still target dev (the lane retargets main). #4014 is closed, so DK-u's StrokeEditor wiring can use styleHelp.
 - 2026-10-22T09:03Z supervisor: don't take DS-u/DS-m into this run; finish the eyedropper slices and end the run; stroke-style relaunches after DS-u and DS-m.
 - Status branch is lead/design-<feature> (record docs/leads/design-<feature>/): lead/<feature> belongs to the SuiteUI lead of the same feature name.
 - PRs target dev, not main (CLAUDE.md, lead.md); main b3011ab9 is an ancestor of dev and only fast-forwards to green dev.
