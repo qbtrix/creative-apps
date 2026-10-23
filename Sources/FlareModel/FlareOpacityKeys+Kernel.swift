@@ -1,6 +1,6 @@
 // FlareOpacityKeys+Kernel.swift (brush-keys BK-12): Flare as the kernel's BrushKeyTarget. Flare has no brush tool, so
 // a digit (BrushKeys' rule) is always layer opacity: `layer.set-opacity` sets every selected layer's opacity as one
-// "Set Keyframe" step, by the inspector's recording rule (auto-key on keys it at the playhead). The stage and
+// "Layer Opacity" step, by the inspector's recording rule (auto-key on keys it at the playhead). The stage and
 // Object > Opacity send it as one inspector opacity edit, `opacityIntents`.
 import FlareCore
 import SuiteKernel
@@ -28,7 +28,7 @@ extension FlareWorkspace: BrushKeyTarget {
             guard !layers.isEmpty else { return w.refuse(.refused("Select a layer first.")) }
             let properties = w.services.properties, frame = w.currentFrame, recording = w.autoKey
             let value = Swift.min(1, Swift.max(0, percent / 100))
-            w.step {
+            w.step("Layer Opacity") {
                 try properties.setValue(value, of: "opacity", owner: owner, layerIDs: layers, frame: frame,
                                         autoKey: recording, coalesceKey: nil, in: &$0)
             }
