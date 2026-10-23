@@ -47,3 +47,4 @@ Next: HX-u PR (stacked on HX-a); HX-m (HX-3, HX-4) stacked on HX-a
 - Wire: HX-a's `HaloRenderSettings.codec`/`alpha` and `choosing(...)` are what HX-3 (plan rules) and HX-4 (media.movie settings) read.
 - 2026-10-23T16:05Z: HX-a #4841 opened (Head b8579d50, Mutate HaloModel.HaloDocumentValues 2/2). HX-5's snapshots shipped in HX-a (first in the slice), so HX-u is the budget test and the skipped journey.
 - 2026-10-23T16:12Z: HX-u #4858 opened, stacked on HX-a. #4857 filed. HX-3 is building on lead/halo-export-pack-HX-m.
+- 2026-10-23T17:10Z: HX-3 #4874 opened, stacked on HX-u (Head 9612572f, Mutate HaloRenderJob 8/8, HaloRenderFrame 3/3, HaloDocumentValues 2/2). HX-4 (writers, codec rows, RJ-H41) is next.
