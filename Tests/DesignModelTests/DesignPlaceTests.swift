@@ -225,6 +225,20 @@ private func node(_ kind: DesignNodeKind = .frame, picture: PlacedAsset? = asset
         dropped.deselect()
         try placeLogo(&dropped, at: Point(x: 600, y: 600))
         #expect(dropped.selectedPage?.nodes.first?.children.map(\.name) == ["logo"])
+        // It is fitted to that frame, not the page, so the frame's clip cuts none of it: 200 × 66.7 at the drop.
+        let logo = try #require(dropped.selectedPage?.nodes.first?.children.first?.frame)
+        #expect(within(logo, rc(500, 500, 200, 200)) && logo.width == 200 && abs(logo.y + logo.height / 2 - 600) < 1e-9)
+    }
+
+    @Test func aPlaceWithNoPointFitsTheFrameUnderThePageCentre() throws {
+        // File > Place with nothing selected: a 400 × 400 frame on the page's centre takes the 1200 × 800 photo whole.
+        var workspace = try opened([DesignNode(id: "node-1", name: "F", kind: .frame, frame: rc(520, 312, 400, 400))])
+        workspace.deselect()
+        let photo = Data(#"<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800"/>"#.utf8).base64EncodedString()
+        let params: [String: JSONValue] = ["name": .string("photo.svg"), "base64": .string(photo), "fill": .bool(false)]
+        _ = try DesignWorkspace.catalog.run("place.image", params: .object(params), on: &workspace)
+        let box = try #require(workspace.selectedPage?.nodes.first?.children.first?.frame)
+        #expect(within(box, rc(520, 312, 400, 400)) && box.width == 400 && abs(box.height - 800.0 / 3) < 1e-9)
     }
 
     @Test func aLockedRectangleRefusesFillWithTheLock() throws {
@@ -267,6 +281,11 @@ private func placeLogo(_ workspace: inout DesignWorkspace, fill: Bool = false, a
     var params: [String: JSONValue] = ["name": .string("logo.svg"), "base64": .string(svgLogo), "fill": .bool(fill)]
     if let at { (params["x"], params["y"]) = (.number(at.x), .number(at.y)) }
     _ = try DesignWorkspace.catalog.run("place.image", params: .object(params), on: &workspace)
+}
+
+/// Whether `inner` lies within `outer`, to a few ulps.
+private func within(_ inner: DesignRect, _ outer: DesignRect) -> Bool {
+    inner.x >= outer.x - 1e-9 && inner.y >= outer.y - 1e-9 && inner.maxX <= outer.maxX + 1e-9 && inner.maxY <= outer.maxY + 1e-9
 }
 
 /// A 240 x 80 SVG, base64.
