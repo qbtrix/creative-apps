@@ -21,6 +21,15 @@
 // `translate(cx cy) scale(±1 ±1) translate(-cx -cy)`, TransformRules.matrix's
 // order. As on the canvas, a frame's clip and background turn and its children
 // keep their own; a group has no shape of its own.
+// A rectangle's or frame's picture (placed-images PD-6) is an <image> after its
+// fill, its file inline as a `data:` URI in `href`, at the kernel's cover crop
+// (PlaceRules.drawnRect), so it keeps its aspect; a frame's clip already holds it,
+// and a rectangle's gets its own <clipPath id="pic-<id>"> of its rounded box.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 import SuiteKernel
 import SuiteModel
 
@@ -54,7 +63,11 @@ enum DesignSVG {
         if node.kind != .group, let defs = gradient(node, x: x, y: y) { lines.append(pad + defs) }
         switch node.kind {
         case .rectangle, .instance:
+            let clip = XMLText.escaped("pic-" + node.id)
+            let image = picture(node, x: x, y: y, then: " clip-path=\"url(#\(clip))\"" + alpha(node) + turned)
+            if image != nil { lines.append(pad + "<clipPath id=\"\(clip)\"><rect \(box)\(corner(node))/></clipPath>") }
             lines.append(pad + "<rect \(box)\(corner(node))\(fill(node))\(paint(node))\(alpha(node))\(turned)/>")
+            if let image { lines.append(pad + image) }
         case .shape:
             let at = DesignRect(x: x, y: y, width: f.width, height: f.height)
             guard let path = node.path(in: at) else {  // a shape with no spec, or one the kernel refuses: its box
@@ -77,9 +90,25 @@ enum DesignSVG {
             lines.append(pad + "<clipPath id=\"\(id)\"><rect \(box)\(corner(node))\(turned)/></clipPath>")
             lines.append(pad + "<g clip-path=\"url(#\(id))\"\(alpha(node))>")
             lines.append(pad + "  <rect \(box)\(corner(node))\(fill(node))\(paint(node))\(turned)/>")
+            if let image = picture(node, x: x, y: y, then: turned) { lines.append(pad + "  " + image) }
             for child in node.children { write(child, origin: origin, depth: depth + 1, into: &lines) }
             lines.append(pad + "</g>")
         }
+    }
+
+    /// `node`'s picture as an `<image>` at the cover crop of its frame at `x`, `y` (box-relative), its file a
+    /// `data:` URI, `then` appended; nil when it shows none.
+    private static func picture(_ node: DesignNode, x: Double, y: Double, then: String) -> String? {
+        guard let asset = node.placedAsset else { return nil }
+        let frame = Rect(minX: x, minY: y, maxX: x + node.frame.width, maxY: y + node.frame.height)
+        let drawn = PlaceRules.drawnRect(PlacedImage(assetID: asset.id, box: frame, focus: node.placedFocus), natural: asset.natural)
+        let at = "x=\"\(number(drawn.minX))\" y=\"\(number(drawn.minY))\" width=\"\(number(drawn.width))\" height=\"\(number(drawn.height))\""
+        let type = switch asset.format {
+        case .png: "image/png"
+        case .jpeg: "image/jpeg"
+        case .svg: "image/svg+xml"
+        }
+        return "<image \(at) href=\"data:\(type);base64,\(asset.data.base64EncodedString())\"\(then)/>"
     }
 
     /// A path's `d`: absolute M, L, Q and C commands, and Z only where the path closes (an open line or arrow
