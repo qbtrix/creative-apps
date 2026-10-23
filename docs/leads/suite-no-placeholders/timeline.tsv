@@ -19,3 +19,4 @@ utc	stage	event	ref	note
 2026-10-23T07:19:48Z	-	merge	NP-flare	#4735 merged 06:49 (feature-done); full CI 39914223799 pending on c2cc0c7c7
 2026-10-23T07:42:45Z	check	no-placeholders	poll	#4771 open clean awaiting lane; CI 39914223799 pending; #4741 awaiting supervisor
 2026-10-23T08:07:56Z	wait	no-placeholders	full CI 39914223799 cancelled (superseded by 39921950077 on 8fd75123); dev macOS broken until #4771 lands	-
+2026-10-23T08:30:52Z	check	no-placeholders	full CI 39921950077 cancelled; waiting on full CI 39924937652 (queued, 090d070, after #4771)	https://github.com/qbtrix/creative-apps/actions/runs/39924937652
