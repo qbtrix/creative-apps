@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 2026-10-23T21:34Z	check-in	PRs open+clean; lane batch 20261023204921 macOS gate still running; no findings
 2026-10-23T22:05Z	check-in	#4582 dirty vs dev (lane integrates); waiting
 2026-10-23T22:28Z	check-in	PRs open+clean (#4582 dirty, lane integrates); TC-a run 40029042081 still queued; no findings
+2026-10-23T22:51Z	check-in	PRs open+clean (#4582 dirty, lane integrates); TC-a run 40029042081 in progress; no findings
