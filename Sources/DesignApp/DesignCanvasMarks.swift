@@ -103,7 +103,7 @@ func artworkIsOpen(_ node: DesignNode) -> Bool {
 /// How a line or arrow `node` strokes at `scale`: its own stroke, else a default-width line in its fill colour,
 /// so an open shape always shows.
 func artworkLine(for node: DesignNode, scale: Double) -> (color: Color, style: StrokeStyle) {
-    if let stroke = node.stroke, let style = artworkStroke(for: node, scale: scale) { return (stroke.color.color, style) }
+    if let stroke = node.stroke, let style = artworkStroke(for: node, scale: scale) { return (DesignColor(kernel: stroke.color).color, style) }
     return (node.fill.color, StrokeStyle(lineWidth: DesignStroke.default.width * usable(scale)))
 }
 
@@ -172,7 +172,7 @@ func paintArtwork(
         } else if let shape {
             faded.fill(shape, with: artworkShading(for: node, scale: scale))
             if let stroke = node.stroke, let style = artworkStroke(for: node, scale: scale) {
-                faded.stroke(shape, with: .color(stroke.color.color), style: style)
+                faded.stroke(shape, with: .color(DesignColor(kernel: stroke.color).color), style: style)
             } else if node.kind == .frame {
                 faded.stroke(shape, with: .color(SuiteColor.overlayInk.opacity(0.15)), lineWidth: 1)
             }
