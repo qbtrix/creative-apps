@@ -2,16 +2,16 @@
 
 Issue: #3472 (runs before used #4509) · Packet: docs/blueprints/halo/features/export-pack.md
 Run: act-1a16958d5fe-8dxu · Started: 2026-10-23T15:26:44Z (took over from act-1a16474bd28-v3ht)
-Stage: 3 wave 2 (HX-a #4841 open; HX-u stacked, gating)
+Stage: 3 wave 2 (HX-a #4841, HX-u #4858, HX-m #4874 + #4917 open)
 Base: 721168a8 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: HX-u PR (stacked on HX-a); HX-m (HX-3, HX-4) stacked on HX-a
+Next: HX-z (HX-7 journey live, RJ-H41, HX-8 docs/built/feature-done) stacked on HX-4
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | HX-a | codec and alpha settings, ProRes refused; Render sheet Codec row and Transparent checkbox | HX-1, HX-2 | - | gradient-fill:HG-a, placed-images:PH-a | yes | 0 | pr #4841 | - | - |
-| HX-m | codec and alpha plan rules, alpha frames, RJ-H41; live renderer through services.media.movie | HX-3, HX-4 | - | HX-a | no | 0 | blocked | - | - |
-| HX-u | snapshots, budget, journey skipped | HX-5, HX-6 | - | HX-a | yes | 0 | building | - | - |
+| HX-m | codec and alpha plan rules, alpha frames, RJ-H41; live renderer through services.media.movie | HX-3, HX-4 | - | HX-a | no | 0 | pr #4874, #4917 | - | - |
+| HX-u | snapshots, budget, journey skipped | HX-5, HX-6 | - | HX-a | yes | 0 | pr #4858 | - | - |
 | HX-z | journey live; halo.md, built, feature-done | HX-7, HX-8 | HaloExportPackJourneyTests | HX-m, HX-u; gradient-fill:HG-z | yes | 0 | blocked | - | - |
 
 ## Tasks
@@ -20,7 +20,7 @@ Next: HX-u PR (stacked on HX-a); HX-m (HX-3, HX-4) stacked on HX-a
 | HX-1 | HX-a | 1 | codec and alpha settings, stub refusal | Sources/HaloModel/Contracts/HaloDocumentValues.swift, Tests/HaloModelTests/HaloProResTests.swift | existing render tests; ProRes refused | #4841 | pr |
 | HX-2 | HX-a | 2 | Codec row, Transparent checkbox | Sources/HaloApp/HaloRenderSheet.swift | HaloRenderProResSnapshots.sheet | #4841 | pr |
 | HX-3 | HX-m | 2 | plan rules, alpha frames (RJ-H41 moves to HX-4) | Sources/HaloModel/HaloRenderJob.swift, see packet | HaloProResTests, HaloRenderAlphaTests | #4874 | pr |
-| HX-4 | HX-m | 2 | live renderer via media.movie; HaloMovieWriter deleted | Sources/HaloModel/Live/LiveCompositionRendering.swift, Sources/HaloApp/HaloMovieWriter.swift | HaloMovieSinkTests | - | blocked |
+| HX-4 | HX-m | 2 | live renderer via media.movie; HaloMovieWriter kept for fractional fps | Sources/HaloModel/Live/LiveCompositionRendering.swift, Sources/HaloApp/HaloMovieWriter.swift | HaloMovieSinkTests | #4917 | pr |
 | HX-5 | HX-u | 3 | snapshots, budget | Tests/AppSnapshotTests/HaloRenderProResSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloRenderSheetTests.swift | codecSwitchInTwoBodies | #4858 | pr |
 | HX-6 | HX-u | 3 | journey skipped | UITests/HaloJourneyTests+ExportPack.swift | compiles, skipped | #4858 | pr |
 | HX-7 | HX-z | 4 | journey live | UITests/HaloJourneyTests+ExportPack.swift | testRenderLowerThirdWithAlpha | - | blocked |
@@ -48,3 +48,4 @@ Next: HX-u PR (stacked on HX-a); HX-m (HX-3, HX-4) stacked on HX-a
 - 2026-10-23T16:05Z: HX-a #4841 opened (Head b8579d50, Mutate HaloModel.HaloDocumentValues 2/2). HX-5's snapshots shipped in HX-a (first in the slice), so HX-u is the budget test and the skipped journey.
 - 2026-10-23T16:12Z: HX-u #4858 opened, stacked on HX-a. #4857 filed. HX-3 is building on lead/halo-export-pack-HX-m.
 - 2026-10-23T17:10Z: HX-3 #4874 opened, stacked on HX-u (Head 9612572f, Mutate HaloRenderJob 8/8, HaloRenderFrame 3/3, HaloDocumentValues 2/2). HX-4 (writers, codec rows, RJ-H41) is next.
+- 2026-10-23T17:24Z: HX-4 #4917 opened, stacked on HX-3 (Head 363a1d9f, Mutate HaloMovieSink 4/4, HaloDocumentValues 2/2, HaloRenderFrame 3/3). HEVC and ProRes 4444 pickable; fractional fps refused for them in words. RJ-H41 is not in HX-4: it moves to HX-z with the live journey.
