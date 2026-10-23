@@ -11,3 +11,4 @@ utc	stage	event	ref	note
 2026-10-23T17:31Z	3	pr-opened	#4853	wave 1
 2026-10-23T17:31Z	3	pr-opened	#4863	wave 1
 2026-10-23T17:31Z	3	pr-opened	#4867	wave 1
+2026-10-23T17:54Z	3	heartbeat	-	poll: none of the wave 1 PRs merged yet; dev 98589662; waits unchanged
