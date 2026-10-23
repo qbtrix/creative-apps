@@ -115,3 +115,5 @@ Loop: v3 (the packet has a `## Slices` table).
 - 00:30Z check: a flare journeys run at 62fe62a (includes 847f507) is queued, run 39877876105; #4636 waits on it; nothing new on #3482.
 - 01:01Z check: flare run 39877876105 (includes 847f507) still queued; #4636 waits on it.
 - 01:33Z check: flare run 39877876105 (includes 847f507) in progress; #4636 waits on it.
+
+- 2026-10-23T02:10:45Z fix round 2: PR #4690 (FlareDocumentHost + FlareOpenQueue for #4636 step 2; Open Sample back in File). Gate PASS, mutate 4/4.

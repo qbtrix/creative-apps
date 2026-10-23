@@ -97,3 +97,4 @@ utc	stage	event	ref	note
 00:30Z	check	A flare journeys run at 62fe62a, which includes 847f507, is queued (run 39877876105). #4636 stays open until it finishes. Nothing new on #3482.
 01:01Z	check	Flare journeys run 39877876105 (at 62fe62a, includes 847f507) is still queued. #4636 stays open. Nothing new on #3482.
 01:33Z	check	Flare journeys run 39877876105 (at 62fe62a, includes 847f507) is in progress. #4636 waits on it. Nothing new on #3482.
+2026-10-23T02:10:45Z	fix-round-2	PR #4690 opened for #4636
