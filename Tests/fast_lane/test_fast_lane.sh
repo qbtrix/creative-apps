@@ -1449,6 +1449,16 @@ expect "union: green on both lands all three in that order" "$(merges)" "pr merg
 fresh; cpr 94 Sources/SuiteUI/GlassPanel.swift; lane_sweep; BR=$(batch_br)
 expect "shared: SuiteUI gets the full macOS gate" \
   "$(grep -c -- "-f mac_only=true --ref $BR\$" "$sw/calls"),$(grep -c -- '-f app=' "$sw/calls")" "1,0"
+# The scope also covers the tests scripts/test-scope changed picks for every
+# changed path, code or not: SuiteUI's tests next to an app's, a fixture a
+# Model test reads, a golden PNG (every snapshot suite, so the full gate).
+fresh; cpr 130 Tests/SuiteUITests/Fixtures/glass.png; cpr 133 Sources/PhotoApp/A.swift; lane_sweep; BR=$(batch_br || true)
+expect "scope: a SuiteUITests fixture adds suiteui to the app's gate" "$(grep -c -- "-f mac_only=true -f app=photo,suiteui --ref $BR\$" "$sw/calls")" 1
+fresh; cpr 131 Tests/PhotoModelTests/Fixtures/png-parity/a.png; lane_sweep; BR=$(batch_br || true)
+expect "scope: a fixture a Model test reads gets a macOS gate, not an instant landing" \
+  "$(merges),$(grep -c -- "-f mac_only=true -f app=photo --ref $BR\$" "$sw/calls")" ",1"
+fresh; cpr 132 Tests/AppSnapshotTests/Golden/canvas/brush.png; lane_sweep; BR=$(batch_br || true)
+expect "scope: a golden PNG gets the full macOS gate" "$(merges),$(grep -c -- "-f mac_only=true --ref $BR\$" "$sw/calls")" ",1"
 
 # A docs-only batch needs no macOS: Linux alone lands it, as before.
 fresh; pr_at 95 h95 "$DOCS"; real_pr 95; pr_at 96 h96 "$DOCS"; real_pr 96; lane_sweep
