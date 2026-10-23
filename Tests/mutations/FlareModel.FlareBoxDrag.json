@@ -33,5 +33,12 @@
     "find": "        return BoxGrip(handle: handle, box: box)\n",
     "replace": "        return nil\n",
     "tests": "FlareBoxDragTests"
+  },
+  {
+    "label": "Direct Select's box gets dead handles over its anchors",
+    "file": "Sources/FlareModel/FlareBoxDrag.swift",
+    "find": "var boxHasHandles: Bool { tool == .select && ",
+    "replace": "var boxHasHandles: Bool { tool != .pen && ",
+    "tests": "FlareAnchorEditTests"
   }
 ]

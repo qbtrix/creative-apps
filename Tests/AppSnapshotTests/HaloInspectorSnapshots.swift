@@ -10,9 +10,9 @@
 // Multiply (halo-inspector-layer-*), and the `keyed` inspector at the minimum
 // width, each keyframe button under its bar so TRANSFORM's titles read in
 // full, LAYER unclipped (halo-inspector-narrow-*). And STROKE (stroke-style
-// HK-2) under FILL for `three-layers`' Badge shape, on the HK-1 stubs: Add
-// Stroke alone, off with `strokeHelp`; text, solids and nulls show none
-// (halo-inspector-stroke-*). macOS only.
+// HK-2) under FILL for `three-layers`' Badge shape, live since HK-6: Add
+// Stroke alone and on, no `strokeHelp`; text, solids and nulls show none and
+// keep the shape-only reason (halo-inspector-stroke-*). macOS only.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -71,17 +71,20 @@ import Testing
         try snapshots(project, name: "halo-inspector-narrow", width: SuiteSize.inspectorWidth.min)
     }
 
-    /// STROKE shows for a shape layer, reading the project's stub, and never for text, solids or nulls.
+    /// STROKE shows for a shape layer, live since HK-6, and never for text, solids or nulls,
+    /// which keep the shape-only reason.
     @Test func strokeEditorForShapesOnly() throws {
         var project = HaloProject(services: .fake, document: try #require(HaloFixtures.project("three-layers")))
         let layers = try #require(project.selectedComposition?.layers)
         for layer in layers {
             #expect(HaloStrokeInspector.shows(layer.kind) == (layer.kind == .shape), "\(layer.name) STROKE")
+            project.selectLayer(layer.id)
+            #expect((project.strokeHelp == nil) == (layer.kind == .shape), "\(layer.name) strokeHelp")
         }
         project.selectLayer(try #require(layers.first { $0.kind == .shape }).id)
         let section = HaloStrokeInspector(model: project, runStroke: { _ in })
         #expect(section.help == project.strokeHelp, "the editor carries the project's strokeHelp")
-        #expect(section.help != nil, "the stub says why the editor is off")
+        #expect(section.help == nil, "HK-6: the editor is live on a shape layer")
         #expect(section.stroke == nil, "no stroke yet: Add Stroke alone")
         try snapshots(project, name: "halo-inspector-stroke", height: 1100)
     }

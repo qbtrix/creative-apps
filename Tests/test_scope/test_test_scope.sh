@@ -4,7 +4,8 @@
 # filters (a Design Model file runs DesignModelTests only), apps map to the
 # filters CI's scoped runs use, every entry of Tests/perf-suites.txt and
 # Tests/heavy-suites.txt names a test that exists, every test asserting a
-# wall-clock bound is in the perf list (scripts/test-scope timing), the perf
+# wall-clock bound is in the perf list or the shrink-only timing baseline
+# (scripts/test-scope timing, with its own fixture cases), the perf
 # and heavy regexes take exactly the listed tests (a suite, one test of a
 # suite, a free test) and nothing beside them, and perf-report
 # flags only a bound missed by more than its multiple. No swift; needs
@@ -102,6 +103,14 @@ for p in Sources/SuiteUI/Tokens.swift Sources/SuiteKernel/Geometry.swift Sources
 done
 check "build-apps: no paths builds all" all "$(printf '' | python3 "$ts" build-apps)"
 
+# Changed paths to the `app` scopes whose tests cover what `changed` picks (scopes).
+scopes() { printf '%s\n' "$@" | python3 "$ts" scopes; }
+check "scopes: a Model and an app's snapshots, not the CLI tests Linux runs" photo "$(scopes Sources/PhotoModel/A.swift Sources/PhotoApp/B.swift)"
+check "scopes: SuiteUI and its tests" suiteui "$(scopes Sources/SuiteUI/A.swift Tests/SuiteUITests/B.swift Tests/AppAuditTests/C.swift)"
+check "scopes: a fixture and the kernel's" design,suite "$(scopes Tests/DesignModelTests/Fixtures/a.svg Tests/SuiteKernelTests/Fixtures/place/a.json)"
+check "scopes: a golden PNG and Package.swift are all" all,all "$(scopes Tests/AppSnapshotTests/Golden/canvas/a.png),$(scopes Package.swift)"
+check "scopes: docs, scripts, journeys and real jobs are none" "" "$(scopes docs/a.md scripts/ci UITests/PhotoJourneyTests.swift Tests/RealJobs/photo/x/input/a.png)"
+
 # Every perf and heavy list entry names a test that exists.
 missing=""
 while read -r app id; do
@@ -135,6 +144,7 @@ import Testing
 let clock = ContinuousClock()
 @Suite struct ListedTests {
     @Test func timed() { #expect(clock.measure {} < .milliseconds(5)) }
+    @Test func helperTimed() { expectP95(step, atMost: 8, target: 4) }
 }
 @Suite(.disabled("waits"))
 struct OffTests {
@@ -150,12 +160,27 @@ struct OffTests {
 @Test func timedMedian() { #expect(cost.median <= 50 * scale) }
 @Test(arguments: [1,
                   2]) func unlisted(n: Int) { #expect(took < .seconds(1)) }
+@Test func helperP95() { expectP95(step, atMost: 8, target: 4) }
+@Test func helperBodies() { expectBodies(step, atMost: 3, target: 3) }
+@Test func framesDrawn() { if let redrawn { #expect(redrawn >= 30, "drew \(redrawn)") } }
+@Test func stepsSent() { #expect(step.steps >= 120) }
+EOF
+# A helper that asserts a timing bound makes every test calling it a timing test.
+cat >"$tmp/tree/PhotoModelTests/Harness.swift" <<'EOF'
+let harnessClock = ContinuousClock()
+func expectP95(_ step: Step, atMost budget: Double, target: Double) { #expect(step.p95 <= budget) }
+func expectBodies(_ step: Step, atMost budget: Int, target: Int) { #expect(step.bodies <= budget) }
 EOF
 printf '%s\n' '@Test func untimedMedian() { #expect(copies.median <= 2) }' >"$tmp/tree/PhotoModelTests/B.swift"
 printf '%s\n' 'photo PhotoModelTests.ListedTests' >"$tmp/listed.txt"
-check "timing names each unlisted bound: a Duration, or a timing name in a file that reads a clock" \
-  'PhotoModelTests.timedMedian;PhotoModelTests.unlisted' \
-  "$(TESTS_DIR="$tmp/tree" PERF_SUITES="$tmp/listed.txt" python3 "$ts" timing | cut -d' ' -f1 | paste -sd';' -)"
+: >"$tmp/no-baseline.txt"
+printf '%s\n' '# grandfathered' 'PhotoModelTests.unlisted' 'PhotoModelTests.gone' >"$tmp/baseline.txt"
+check "timing names each unlisted bound: a Duration, a timing name or a frames-drawn floor in a file that reads a clock, or a call to a helper that asserts one" \
+  'PhotoModelTests.timedMedian;PhotoModelTests.unlisted;PhotoModelTests.helperP95;PhotoModelTests.framesDrawn' \
+  "$(TESTS_DIR="$tmp/tree" PERF_SUITES="$tmp/listed.txt" TIMING_BASELINE="$tmp/no-baseline.txt" python3 "$ts" timing | cut -d' ' -f1 | paste -sd';' -)"
+check "timing passes a baselined test and names a baseline line that no longer times (the baseline only shrinks)" \
+  'PhotoModelTests.timedMedian;PhotoModelTests.helperP95;PhotoModelTests.framesDrawn;PhotoModelTests.gone' \
+  "$(TESTS_DIR="$tmp/tree" PERF_SUITES="$tmp/listed.txt" TIMING_BASELINE="$tmp/baseline.txt" python3 "$ts" timing | cut -d' ' -f1 | paste -sd';' -)"
 
 # The perf regex: exactly the listed tests, by suite, one test or free test.
 perf=$(python3 "$ts" perf)

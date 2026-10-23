@@ -66,6 +66,7 @@ struct LibraryCatalogDoc: HeadlessDocument {
             "view.actual-size": .actualSize, "view.sort": .setSort(.name), "metadata.set-rating": .setRating(3),
             "metadata.pick": .setFlag(.pick), "metadata.reject": .setFlag(.reject), "metadata.clear-flag": .setFlag(.none),
             "metadata.set-label": .setLabel(.red), "metadata.auto-advance": .toggleAutoAdvance,
+            "view.thumbnail-size": .setCellSize(160),
         ]
         if let action = actions[id] { return .some(c.help(action)) }
         return switch id {
@@ -195,6 +196,7 @@ struct LibraryCatalogDoc: HeadlessDocument {
         "view.zoom-to-fit | Zoom to Fit | Open a photo in the loupe to zoom.",
         "view.actual-size | Actual Size | Open a photo in the loupe to zoom.", "view.sort | Sort By | on",
         "view.show-original | Show Original | Open a photo in the loupe to see its original.",
+        "view.thumbnail-size | Thumbnail Size | on",
         "photo.copy-settings | Copy Settings | Develop isn't connected yet.", "photo.paste-settings | Paste Settings | Develop isn't connected yet.",
         "photo.reset-develop | Reset Develop | on", "photo.crop | Crop | Crop isn't connected yet.",
         "photo.reset-crop | Reset Crop | Crop isn't connected yet.",

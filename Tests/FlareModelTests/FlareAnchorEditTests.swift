@@ -1,6 +1,6 @@
 // FlareAnchorEditTests.swift (pen-paths FP-1, FP-7): Direct Select's PathEditTarget. The reads (`pathInEdit`, its help,
-// the anchor selection clearing on a new item selection) and the edits: an anchor or handle drag as one "Edit Path",
-// the anchor marquee, a locked layer, and a scaled layer's space. Runs on Linux and macOS.
+// the anchor selection clearing on a new item selection, the box drawn without handles) and the edits: an anchor or
+// handle drag as one "Edit Path", the anchor marquee, a locked layer, and a scaled layer's space. Runs on Linux and macOS.
 import FlareCore
 @testable import FlareModel
 import SuiteKernel
@@ -38,7 +38,16 @@ import Testing
         #expect(edit.path.contours.first?.anchors.count == 5 && workspace.pathHelp == nil, "\(edit.path.elements)")
         workspace.selectTool(.select)
         #expect(workspace.pathInEdit == nil)
-        #expect(workspace.pathHelp == "Select one shape with Direct Select to edit its points.")
+        #expect(workspace.pathHelp == nil, "off Direct Select only no document or a locked layer stops a path (FP-6)")
+    }
+
+    @Test func directSelectDrawsTheBoxWithoutHandles() {
+        // Only Select's presses take a box handle (`handle(at:)`); under Direct Select they would sit on the anchors.
+        var workspace = Self.picked()
+        let readout = workspace.selectionReadout(stageScale: 1)
+        #expect(readout.box != nil && readout.handles.isEmpty && readout.handleRects().isEmpty)
+        workspace.selectTool(.select)
+        #expect(workspace.selectionReadout(stageScale: 1).handles.count == 9)
     }
 
     @Test func anchorSelectionClearsWhenTheItemSelectionChanges() {

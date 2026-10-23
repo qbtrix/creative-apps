@@ -45,8 +45,8 @@ private func occurrences(of needle: String, in text: String) -> Int {
         // LauncherMenuStubTests' pinned strings stay, once each.
         for pinned in [
             "Window(\"AfterGlow\", id: \"home\")", "Settings {", "Window(\"Welcome to AfterGlow\", id: \"onboarding\")",
-            "SuiteCommands(app: .launcher)", "LauncherCommandsHome()", "LauncherCommandsAssets()",
-            "LauncherCommandsUpdate()", "LauncherCommandsSettings()", "@NSApplicationDelegateAdaptor(LauncherDelegate.self)",
+            "SuiteCommands(app: .launcher)", "LauncherCommandsHome()", "LauncherCommandsSettings()",
+            "@NSApplicationDelegateAdaptor(LauncherDelegate.self)",
         ] {
             #expect(occurrences(of: pinned, in: app) == 1, "\(pinned)")
         }

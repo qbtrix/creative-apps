@@ -5,6 +5,7 @@
 // to the box. A gradient is a definition in frame space and a `fill="url(#g-…)"` (gradient-fill DG-5).
 // A turned or mirrored layer carries `transform="rotate(d cx cy) …"` about its frame's centre (transform DT-6),
 // and RJ-D15's 60 small turns under one drag token write `rotate(15 60 35)` and undo in one step.
+// A shape writes its kernel path as a <path>, closed only where its contour is (shape-tools DS-6, RJ-D35).
 // Runs on Linux and macOS.
 @testable import DesignModel
 import Foundation
@@ -187,5 +188,39 @@ import Testing
         #expect(exported.contains(#"transform="rotate(15 60 35)""#))
         _ = try DesignWorkspace.catalog.run("edit.undo", params: .object([:]), on: &w)
         #expect(w.treeNode("node-2")?.rotation == 0)
+    }
+
+    /// A shape writes its kernel path, not its box (shape-tools DS-6): a star is closed with Z, a line stays open.
+    @Test func shapePath() {
+        var star = DesignNode(id: "s", name: "Star", kind: .shape, frame: rect(10, 0, 100, 100))
+        star.shape = .defaults(.star)
+        let closed = placed(star)
+        #expect(!closed.contains("<rect"), "a shape wrote its box")
+        #expect(closed.contains(##"<path d="M60 0 L"##) && closed.contains(##" Z" fill="#d9d9d9"/>"##))
+        var line = DesignNode(id: "l", name: "Line", kind: .shape, frame: rect(0, 0, 100, 50))
+        line.shape = .defaults(.line)
+        let open = placed(line)
+        #expect(open.contains(#"<path d="M"#) && !open.contains("Z"), "an open line was closed")
+    }
+
+    /// RJ-D35 on the Model: shape.draw puts a five-point star in blank.design's frame; it saves and reopens as a
+    /// shape with the same spec, and the export writes its path: 10 vertices, the first at the top centre (50, 0).
+    @Test func starBadgeJob() throws {
+        let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .appendingPathComponent("../RealJobs/design/star-badge/input/blank.design")
+        var w = DesignWorkspace()
+        try w.open(Data(contentsOf: url))
+        let draw = JSONValue.object(["kind": .string("star"), "points": .number(5), "innerRatio": .number(0.5),
+                                     "x": .number(0), "y": .number(0), "w": .number(100), "h": .number(100)])
+        _ = try DesignWorkspace.catalog.run("shape.draw", params: draw, on: &w)
+        let spec = ShapeIntent.innerRatio(0.5).applied(to: ShapeIntent.points(5).applied(to: .defaults(.star)))
+        var reopened = DesignWorkspace()
+        try reopened.open(try w.fileData())
+        #expect(reopened.treeNode("node-2")?.kind == .shape && reopened.treeNode("node-2")?.shape == spec)
+        let files = try DesignHeadless(reopened).export("svg", options: .object([:]))
+        let exported = String(decoding: files.first?.data ?? Data(), as: UTF8.self)
+        let d = exported.components(separatedBy: "<path d=\"").dropFirst().first?.prefix { $0 != "\"" } ?? ""
+        let vertices = d.split(separator: " ").filter { $0.hasPrefix("M") || $0.hasPrefix("L") }
+        #expect(vertices.count == 10 && d.hasPrefix("M50 0 L") && d.hasSuffix(" Z"), "\(d)")
     }
 }

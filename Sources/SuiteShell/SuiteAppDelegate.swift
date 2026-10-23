@@ -2,7 +2,11 @@
 // 2.6, hand-off transport). A hand-off file Launch Services opens here is
 // decoded, accepted by the app's host, and settled with the state the host
 // ends in. Any other document URL becomes an open hand-off to the host, so a
-// file the app only routes never brings up a window of its own.
+// file the app only routes never brings up a window of its own. A Dock click
+// asks ReopenRule (editor-menus EM-2, #1081): with no window visible it opens
+// one through `openWindow` when a scene registered it, or lets the system's
+// own reopen run; while a hand-off is still being accepted (the app was
+// brought up hidden for it) it opens none.
 import AppKit
 import SuiteModel
 
@@ -21,6 +25,12 @@ open class SuiteAppDelegate: NSObject, NSApplicationDelegate {
     public var receiver: (any HandOffReceiving)?
     /// The app this delegate belongs to; a document URL is addressed to it.
     public var app: SuiteApp = .launcher
+    /// Opens a new window of the app's main scene on a Dock click with none open;
+    /// set from the scene by `.suiteReopenWindow(id:)`. Nil leaves the reopen to the system.
+    public var openWindow: (@MainActor () -> Void)?
+    /// Hand-off files being accepted now. A reopen event that arrives meanwhile
+    /// came with the hand-off, which brought the app up without a window.
+    private var handOffsInFlight = 0
 
     public override init() {
         super.init()
@@ -33,10 +43,22 @@ open class SuiteAppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    /// A Dock click: opens a window when ReopenRule says so, through `openWindow`
+    /// (then handled, so false) or the system's reopen (true); otherwise does nothing new.
+    open func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        let opens = ReopenRule.shouldOpenWindow(visibleWindows: flag ? 1 : 0, launchedHidden: handOffsInFlight > 0)
+        guard opens else { return flag }
+        guard let openWindow else { return true }
+        openWindow()
+        return false
+    }
+
     /// Hands one opened URL to the host. Public so an app's tests can run it without Launch Services.
     public func handle(_ url: URL) async {
         guard let host else { return }
         if url.pathExtension == "aghandoff" {
+            handOffsInFlight += 1
+            defer { handOffsInFlight -= 1 }
             await receiveHandOff(url, host: host)
         } else if let document = Self.document(for: url) {
             _ = try? await host.accept(HandOff(id: HandOff.newID(), from: .launcher, to: app, verb: .open,

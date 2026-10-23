@@ -2,11 +2,11 @@
   "title": "One stroke: colour, width, join, cap, dashes and trim paths as the kernel's stroke commands, SuiteUI's stroke editor beside the gradient editor",
   "wave": 4,
   "order": 70,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#3450",
   "beta": true,
   "covers": "feature map S17 (strokes, dashes and trim paths); real job RJ-X35; captain 2026-10-20: everyday tools in the beta, built once, sharing the gradient editor's build",
-  "waits_on": "gradient-fill's GF-a (the Fill module) and GF-z (kernel-fill.json), shape-tools' SH-z (the fake document); creative-core path-geometry #430 and a core bump, and creative-core stroke-style (to file) before SS-7",
+  "waits_on": "gradient-fill's GF-a (the Fill module) and GF-z (kernel-fill.json), autosave-history's AH-z before SS-8 (the fake document; SS-8 then goes before transform-tools' TT-8 and shape-tools' SH-8, supervisor on #3450); creative-core path-geometry #430 and a core bump, and creative-core stroke-style (to file) before SS-7",
   "depends": [
     "inspector-controls"
   ],
@@ -141,7 +141,7 @@
         "SS-m": [
           "SS-7"
         ],
-        "shape-tools:SH-z": [
+        "autosave-history:AH-z": [
           "SS-8"
         ]
       },

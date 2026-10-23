@@ -1,0 +1,5 @@
+[
+{"label":"the probe keeps the unturned box","file":"Sources/SuiteUI/Gallery/GalleryTransform.swift","find":"cg(TransformRules.bounds(of: item))","replace":"cg(item.box)","tests":"SuiteGalleryTransformSnapshots"},
+{"label":"the unturned outline draws under the turned handles again","file":"Sources/SuiteUI/Gallery/GalleryTransform.swift","find":"            SelectionHandlesEditor(rect: Self.cg(item.box), degrees: item.degrees, zoom: 1,\n","replace":"            SelectionOutline(rect: Self.cg(item.box), zoom: 1)\n            SelectionHandlesEditor(rect: Self.cg(item.box), degrees: item.degrees, zoom: 1,\n","tests":"SuiteGalleryTransformSnapshots"},
+{"label":"the handles stop turning with the box","file":"Sources/SuiteUI/Gallery/GalleryTransform.swift","find":"degrees: item.degrees, zoom: 1,","replace":"degrees: 0, zoom: 1,","tests":"SuiteGalleryTransformSnapshots"}
+]

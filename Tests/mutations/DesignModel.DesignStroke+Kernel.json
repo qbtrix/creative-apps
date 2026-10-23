@@ -4,5 +4,7 @@
 {"label":"colorClamps: the shared converter drops the clamp","file":"Sources/DesignModel/DesignStroke+Kernel.swift","find":"UInt8(clamping: SampleRules.byte(part))","replace":"UInt8(truncatingIfNeeded: Int((part.isNaN ? 0 : part) * 255))","tests":"DesignStrokeTests"},
 {"label":"kernelColor scales by the wrong range","file":"Sources/DesignModel/DesignStroke+Kernel.swift","find":"FillColor(r: Double(red) / 255","replace":"FillColor(r: Double(red) / 256","tests":"DesignStrokeTests"},
 {"label":"joinCapDead: Join and Cap lose their reason on a stroked layer","file":"Sources/DesignModel/DesignStroke+Kernel.swift","find":"selectedStroke == nil ? nil : Self.joinCapHelp","replace":"nil","tests":"DesignStrokeTests"},
-{"label":"joinCapHelpUnstroked: the reason shows with no stroke","file":"Sources/DesignModel/DesignStroke+Kernel.swift","find":"selectedStroke == nil ? nil : Self.joinCapHelp","replace":"Self.joinCapHelp","tests":"DesignStrokeTests"}
+{"label":"joinCapHelpUnstroked: the reason shows with no stroke","file":"Sources/DesignModel/DesignStroke+Kernel.swift","find":"selectedStroke == nil ? nil : Self.joinCapHelp","replace":"Self.joinCapHelp","tests":"DesignStrokeTests"},
+{"label":"dashHelpCore: the dash rows show core's field note again, a second note","file":"Sources/DesignModel/DesignStroke+Kernel.swift","find":"strokeDashHelp: String? { Self.joinCapHelp }","replace":"strokeDashHelp: String? { StrokeRules.waitingCore }","tests":"DesignStrokeTests"},
+{"label":"dashHelpGone: the dash chips look live and do nothing","file":"Sources/DesignModel/DesignStroke+Kernel.swift","find":"strokeDashHelp: String? { Self.joinCapHelp }","replace":"strokeDashHelp: String? { nil }","tests":"DesignStrokeTests"}
 ]

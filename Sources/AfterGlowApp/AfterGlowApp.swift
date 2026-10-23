@@ -8,8 +8,8 @@
 // each holding its blueprint 6.2 items disabled with their reason until that
 // feature wires them, and SuiteHelpCommands' Help menu, whose Welcome to
 // AfterGlow opens the onboarding window. LauncherDelegate (LauncherRouter.swift) is the app
-// delegate. No later feature edits this file: features fill their own
-// stubs, views and LauncherRouter+<Area>.swift extensions.
+// delegate. The beta shows no placeholder item (no-placeholders NP-2), so the
+// assets and updater stubs are out of the home scene until they act.
 import SuiteModel
 import SuiteShell
 import SuiteUI
@@ -28,8 +28,6 @@ struct AfterGlowApp: App {
             .commands {
                 SuiteCommands(app: .launcher)
                 LauncherCommandsHome()
-                LauncherCommandsAssets()
-                LauncherCommandsUpdate()
             }
         Settings { SettingsView() }
             .commands { LauncherCommandsSettings() }

@@ -6,6 +6,7 @@
 // async importer and export runner do the rest. Show Original (CS-3) is state the loupe's render reads.
 // CS-5: the export sheet's controls (`export.*`), the notice row's (`notice.*`, `file.show-catalog`) and Develop's
 // per-slider resets (`photo.reset-<slider>`) as specs too; the window still opens panels and reveals files.
+// The grid toolbar's controls (#3632) are view.thumbnail-size, view.sort, file.import-folder and file.export.
 // Ids are `<menu>.<action>` in lowercase; Tests/command-ids/library.txt keeps them. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -32,6 +33,7 @@ extension LibraryCatalog {
     struct SortParams: Codable, Sendable { var sort: String }
     struct RatingParams: Codable, Sendable { var stars: Int }
     struct LabelParams: Codable, Sendable { var label: String? }
+    struct SizeParams: Codable, Sendable { var size: Int }
     /// file.import-folder's folder, the one the window's open panel chose.
     struct FolderParams: Codable, Sendable { var folder: String }
 
@@ -152,6 +154,10 @@ extension LibraryCatalog {
                kind: .view, params: NoParams.self, schema: ParamSchema.none, example: .object([:]),
                availability: { available($0.showOriginalHelp) }
         ) { c, _ in c.toggleShowOriginal(); return JSONValue.object(["on": .bool(c.showsOriginal)]) },
+        action("view.thumbnail-size", "Thumbnail Size", "Sets the grid's thumbnail size, 80 to 320 points in steps of 40.", .view,
+               SizeParams.self, probe: .setCellSize(160),
+               schema: .object(["size": .integer("Points, 80 to 320.", minimum: 80, maximum: 320)], required: ["size"]),
+               example: .object(["size": .number(200)])) { .setCellSize($1.size) },
     ]
 
     static let photoSpecs: [CommandSpec<LibraryCatalog>] = [
