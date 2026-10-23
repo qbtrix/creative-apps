@@ -80,6 +80,8 @@ struct FlareCommandCatalogTests {
     /// not: FlarePathCommandTests runs them in Flare and SuiteKernelTests' PathCommandsTests runs each rule.
     static func exempt(_ problem: String) -> Bool {
         let id = String(problem.prefix { $0 != ":" })
+        // The beta.2 commands never run (FlareMenuVisibilityTests).
+        if FlareWorkspace.menuHidden.contains(id) { return problem.contains("exampleRuns") }
         if id.hasPrefix("path.") { return problem.contains("exampleRuns") }
         if ["file.clear-recent", "file.open-in", "file.open-recent"].contains(id) { return problem.contains("exampleRuns") }
         if ["recovery.restore", "recovery.discard", "timeline.delete-keys"].contains(id) { return problem.contains("exampleRuns") }

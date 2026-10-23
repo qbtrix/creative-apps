@@ -1,5 +1,6 @@
 // FlareInspector.swift: Flare's inspector, a SegmentedTabs switch between
-// Properties and Library. Properties (IT-4) shows refusals in the error color,
+// Properties and Library; the beta hides Library with its symbol commands
+// (no-placeholders NP-4), and a lone tab draws no switch. Properties (IT-4) shows refusals in the error color,
 // the InspectorHeader from `model.inspectorSummary`, then SCENE with nothing
 // selected, else TRANSFORM, FILL and TIMING (holding the `easing` editor),
 // with the Shape tool's SHAPE section (`shape`) first while that tool is active;
@@ -18,6 +19,11 @@ import SwiftUI
 /// The inspector's tabs; the raw value is `.inspector(.showTab)`'s payload.
 enum FlareInspectorTab: String, CaseIterable, Sendable {
     case properties, library
+
+    /// The tabs the inspector offers: Library waits with Convert to Symbol (`FlareWorkspace.menuHidden`).
+    static var shown: [FlareInspectorTab] {
+        allCases.filter { $0 != .library || !FlareWorkspace.menuHidden.contains("library.convert-to-symbol") }
+    }
 
     var title: String {
         switch self {
@@ -47,10 +53,12 @@ struct FlareInspector<Easing: View>: View {
 
     private var content: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
-            SegmentedTabs(
-                "Inspector", tabs: FlareInspectorTab.allCases.map { InspectorOption(id: $0, title: $0.title) },
-                selection: tab
-            ) { perform(.inspector(.showTab($0.rawValue))) }
+            if FlareInspectorTab.shown.count > 1 {
+                SegmentedTabs(
+                    "Inspector", tabs: FlareInspectorTab.shown.map { InspectorOption(id: $0, title: $0.title) },
+                    selection: tab
+                ) { perform(.inspector(.showTab($0.rawValue))) }
+            }
             switch tab {
             case .properties: properties
             case .library: FlareLibraryPanel(model: model, perform: perform)

@@ -1,7 +1,8 @@
 // FlareCommands.swift: Flare's menu bar, docs/blueprints/flare.md section
 // 3.4. Every item is one FlareIntent: it acts through the focused window's
-// `perform` and is disabled, never hidden, while that window's `help` gives a
-// reason (shown as the item's help). The keys of section 3.4 (Space, the
+// `perform` and is disabled while that window's `help` gives a reason (shown as
+// the item's help). The beta hides the items of FlareWorkspace.menuHidden
+// (onion skin, motion path, the symbol edits, Interactions, Assist), keys and all. The keys of section 3.4 (Space, the
 // arrows, Home, End, K, ⌥K and the ⌘ keys) live only here; no view binds them
 // again. Return and Escape stay the stage's (toolKey); Object > Finish Path is
 // Return's item for the mouse, with no key of its own. Undo and Redo are
@@ -109,18 +110,21 @@ struct FlareCommands: Commands {
             item(.view(.zoomOut), key: KeyboardShortcut("-"))
             item(.view(.fit), key: KeyboardShortcut("0"))
             item(.view(.actualSize), key: KeyboardShortcut("1"))
-            item(.view(.toggleOnion), key: KeyboardShortcut("o", modifiers: [.command, .option]))
-            item(.view(.toggleMotionPath))
+            if shown(.view(.toggleOnion)) { item(.view(.toggleOnion)) }
+            if shown(.view(.toggleMotionPath)) { item(.view(.toggleMotionPath)) }
             item(.view(.toggleRulers), key: KeyboardShortcut("r"))
             item(.view(.toggleGuides), key: KeyboardShortcut(";"))
             item(.view(.clearGuides))
             Divider()
         }
         CommandMenu("Object") {
-            item(.library(.convertToSymbol(name: "")), key: KeyboardShortcut("k", modifiers: [.command, .option]))
-            item(.library(.edit(id: "")))
-            item(.library(.exitSymbol))
-            Divider()
+            if shown(.library(.convertToSymbol(name: ""))) { item(.library(.convertToSymbol(name: ""))) }
+            // Edit Symbol pairs with Exit Symbol: the beta hides both.
+            if shown(.library(.exitSymbol)) {
+                item(.library(.edit(id: "")))
+                item(.library(.exitSymbol))
+            }
+            if shown(.library(.convertToSymbol(name: ""))) || shown(.library(.exitSymbol)) { Divider() }
             item(.edit(.bringForward), key: KeyboardShortcut("]"))
             item(.edit(.sendBackward), key: KeyboardShortcut("["))
             Divider()
@@ -129,8 +133,10 @@ struct FlareCommands: Commands {
         }
         CommandMenu("Animate") { animate }
         CommandGroup(before: .windowSize) {
-            item(.interactions(.toggleEditor), key: KeyboardShortcut("m", modifiers: [.command, .shift]))
-            Divider()
+            if shown(.interactions(.toggleEditor)) {
+                item(.interactions(.toggleEditor))
+                Divider()
+            }
         }
     }
 
@@ -170,8 +176,15 @@ struct FlareCommands: Commands {
                 item(.inspector(.easingPreset(preset.rawValue)), title: preset.title)
             }
         }
-        Divider()
-        item(.assist(.showPopover), key: KeyboardShortcut("a", modifiers: [.command, .option]))
+        if shown(.assist(.showPopover)) {
+            Divider()
+            item(.assist(.showPopover))
+        }
+    }
+
+    /// False for an item the beta hides: its command is in `FlareWorkspace.menuHidden` (no-placeholders NP-4).
+    private func shown(_ intent: FlareIntent) -> Bool {
+        !(intent.commandID.map(FlareWorkspace.menuHidden.contains) ?? false)
     }
 
     /// One menu item: `intent`'s title (or `title`) on its catalog spec (`FlareWorkspace.menuSpec(for:)`, command-state
