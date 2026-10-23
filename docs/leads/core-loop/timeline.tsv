@@ -204,3 +204,4 @@ utc	stage	event	ref	note
 2026-10-23T02:46Z	3	panel	39878494002	critics launched (066cd28d)
 2026-10-23T02:52Z	3	panel	39878494002	re-checks 10 fixed, 4 to gap #4697; fixers #4399/#4623 #4352; gaps #4698 #4699 #4440
 2026-10-23T03:02Z	3	pr	#4702	H-J12 frame-rate menu, fixes #4399 #4623
+2026-10-23T03:09Z	3	pr	#4703	transport ink from shown frame, fixes #4352
