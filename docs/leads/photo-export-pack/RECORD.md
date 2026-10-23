@@ -4,7 +4,7 @@ Issue: #3470 · Packet: docs/blueprints/photo/features/export-pack.md
 Run: act-1a15e2da54d-qlg1 (resumed; earlier act-1a15a9f4eba-h30y) · Session: claude/feature-lead-playbook-t69dpt · Started: 2026-10-20T18:40Z
 Stage: 3 building (unparked 2026-10-23T15:11Z under contract-first waits)
 Base: e382f9d7fba02ffdefc8ba2f23c9461b4774fad6
-Next: PX-6 (journey written, skipped) while #4832 (PX-2) lands; PX-4 still on the supervisor's codec hold; PX-8 waits PT-a to merge
+Next: #4832 (PX-2) and #4836 (PX-6) land; PX-5 waits XP-4; PX-4 still on the supervisor's codec hold; PX-8 waits PT-a to merge
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -22,7 +22,7 @@ Next: PX-6 (journey written, skipped) while #4832 (PX-2) lands; PX-4 still on th
 | PX-3 | PX-m | 1 (stacked on PX-1) | exportPixels and headless export on ExportOptions; RJ-P01 | Sources/PhotoModel/PhotoExport+Kernel.swift, Sources/PhotoModel/PhotoHeadless.swift, Tests/PhotoModelTests/PhotoExportPackTests.swift, Tests/mutations/PhotoModel.PhotoExport+Kernel.json, Tests/RealJobs/photo/instagram/ | PhotoExportPackTests | #3729 | merged 22:41Z (head e2c55886, Mutate 4/4) |
 | PX-4 | PX-m | – | app writes formats through services.media.still | Sources/PhotoApp/ImageIOCodec.swift, Tests/AppSnapshotTests/PhotoExportFormatsTests.swift | PhotoExportFormatsTests | – | parked (supervisor: no third codec path; waits shared-codecs XK3 + shell-media, no issue yet) |
 | PX-5 | PX-u | – | snapshots, render budget | Tests/AppSnapshotTests/PhotoExportPackSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoExportPackTests.swift | RenderBudgetPhotoExportPackTests.typingWidthInTwoBodies | – | waits PX-2, XP-4 |
-| PX-6 | PX-u | – | journey written, skipped | UITests/PhotoJourneyTests+ExportPack.swift | compiles, skipped | – | waits PX-2 |
+| PX-6 | PX-u | – | journey written, skipped | UITests/PhotoJourneyTests+ExportPack.swift | compiles, skipped | – | PR #4836 (skipped until PX-7) |
 | PX-7 | PX-z | – | journey on live | UITests/PhotoJourneyTests+ExportPack.swift | PhotoExportPackJourneyTests.testExportForInstagram | – | waits PX-6, PX-3, PX-4 |
 | PX-8 | PX-z | – | photo.md, status built, feature-done | docs/blueprints/photo.md, docs/blueprints/photo/features/export-pack.wave.json | scripts/waves render --dry-run | – | waits PX-7, PX-5, PT-z, PP-z |
 
