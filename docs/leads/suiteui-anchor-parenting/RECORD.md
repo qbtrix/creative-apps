@@ -4,7 +4,7 @@ Issue: #4522 · Packet: docs/blueprints/suiteui/features/anchor-parenting.md
 Run: act-1a1695ebfeb-d54n · Session: claude/feature-lead-playbook-9a8kbw · Started: 2026-10-23T15:30Z
 Stage: 3 wave 1
 Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (origin/dev)
-Next: AN-u's PR #4893 to merge (then AN-6's PR from lead/anchor-parenting-AN-u-6; then AN-halo, AN-flare-u); AN-10 after CB-8's PR is open
+Next: AN-u's PR #4893 to merge (then AN-6's PR from lead/anchor-parenting-AN-u-6; then AN-halo, AN-flare-u); AN-10 waits document-setup:DS-flare (#4891, file wait) to merge; CB-8 #4902 open
 
 
 
