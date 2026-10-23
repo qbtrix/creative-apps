@@ -35,6 +35,7 @@ Next: FH-r #4574 and FH-c #4577 restacked on dev (gate rerun, retarget to dev); 
 - 2026-10-22T16:40Z: FH-a, FH-r and FH-c go to one builder, stacked (lead/fill-heal-FH-a -> -FH-r -> -FH-c); each child PR bases on its parent branch and retargets to dev when the parent merges.
 
 ## Open
+- 2026-10-23T16:08Z: FH-u/FH-photo waits unchanged 3 polls; question for the supervisor on #3778 (comment 6369264328).
 - 2026-10-23T14:10Z: waits: AB-photo building (adopt-kernel-brush lead record, last push 10-19), BK-photo blocked (#4531), AJ-photo waiting (#3777); AL, AX, AU, AC done. FH-u and FH-photo stay blocked.
 - suite-imaging #3715: no lead branch, no slice done, Sources/SuiteImaging absent on dev (2026-10-21T02:36Z). Blocks FH-1, so every later slice.
 - brush-keys #3758: BK-m not done. Blocks FH-1.
