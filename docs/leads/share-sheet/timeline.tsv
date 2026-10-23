@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-23T18:09Z	3	heartbeat	SH-z	library run 39997279554 still queued (macOS runner); full CI 39999410389 on 98589662 pending also contains 55017fac; no findings
 2026-10-23T18:31Z	3	heartbeat	SH-z	library run 39997279554 and full CI 39999410389 both still queued for macOS; no findings, no dev-red
 2026-10-23T18:53Z	3	heartbeat	SH-z	library run 39997279554 macOS (library) in progress; full CI 39999410389 Linux running, macOS queued; no findings, no dev-red
+2026-10-23T19:10Z	3	heartbeat	SH-z	library run 39997279554 macOS (library) still running; full CI 39999410389 Linux green, macOS queued; no findings, no dev-red
