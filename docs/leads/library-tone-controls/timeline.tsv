@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-23T22:21Z	heartbeat	batch 20261023215139 macOS gate queued (none of ours); our PRs ready, waiting for next batch
 2026-10-23T22:32Z	heartbeat	batch 20261023215139 macOS gate still queued; our PRs ready for next batch; no supervisor answer on #3475
 2026-10-23T22:44Z	heartbeat	batch 20261023215139 macOS gate running (none of ours); scoped library 40029034328 green on 491ec546 (none of our open PRs)
+2026-10-23T22:56Z	heartbeat	poll: #4838 #4899 #4948 #4960 #4962 open on lane; batch 20261023215139 macOS gate running; no supervisor reply on #3475; no dev-red
