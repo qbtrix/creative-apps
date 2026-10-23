@@ -27,8 +27,13 @@ public enum RawSource: Sendable {
 
 public enum SuiteRaw {
     /// The decoder the apps use: `SystemRawDecoder` on macOS, nil on Linux (every call refuses `.unavailable`).
-    /// SR-2 stub: nil everywhere; SR-4 returns `SystemRawDecoder` on macOS.
-    public static var decoder: (any RawDecoding)? { nil }
+    public static var decoder: (any RawDecoding)? {
+        #if canImport(CoreImage)
+        SystemRawDecoder()
+        #else
+        nil
+        #endif
+    }
 
     /// What `decoder` says about the file; `.unavailable` without one.
     public static func info(_ source: RawSource, decoder: (any RawDecoding)? = SuiteRaw.decoder) throws(RawRefusal) -> RawFileInfo {
