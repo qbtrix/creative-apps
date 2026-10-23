@@ -25,3 +25,4 @@ utc	stage	event	ref	note
 09:38Z	check	no-placeholders	Full CI 39929490747 (04140530e) queued; newer 39931493361 on dev 138495f55 pending: NP done waits on a green one	https://github.com/qbtrix/creative-apps/actions/runs/39931493361
 09:54Z	check	no-placeholders	dev CI: full 39931493361 (138495f55) pending, 39929490747 queued; scoped flare 39930432485 / halo 39931655256 queued; #4741 open (no-fast-lane, needs-split, clean)	https://github.com/qbtrix/creative-apps/actions/runs/39931493361
 09:59Z	check	no-placeholders	heartbeat: full CI 39931493361 (138495f55, has #4771 but not #4761) still pending; scoped flare/halo queued; #4741 open	https://github.com/qbtrix/creative-apps/actions/runs/39931493361
+10:19Z	check	no-placeholders	full CI 39931493361 cancelled (superseded); new full CI 39937843350 on 622f200f9 (has #4771 and #4761) pending, decides NP and EM done; scoped flare/halo still queued; #4741 open	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
