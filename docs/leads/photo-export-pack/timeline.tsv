@@ -155,3 +155,4 @@ utc	stage	event	ref	note
 2026-10-23T11:55Z	parked	#3477 still waiting-on-prereq; no new photo findings; no journeys run yet on a sha containing 1b8539091 (TX-z unproven)
 2026-10-23T12:27Z	parked	#3477 still waiting-on-prereq; no new photo findings; no photo/full journeys run yet on a sha containing 1b8539091 (TX-z unproven)
 2026-10-23T12:59Z	parked	#3477 still waiting-on-prereq; finding #4798 (PJ-TX) is from pre-fix 04140530e, commented; photo journeys 39953728310 at 28e3a67de contains 1b8539091 and decides TX-z
+2026-10-23T13:31Z	parked	#3477 still waiting-on-prereq; deciding photo journeys 39953728310 (28e3a67de) still queued; #4798 open pending it
