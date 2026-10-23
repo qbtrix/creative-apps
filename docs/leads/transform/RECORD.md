@@ -77,3 +77,4 @@ Wave 3: HT-m as #4415 on dev 30120a8; HT-z (#4422) stacked on it at once, labell
 - 2026-10-23T01:03:37Z: heartbeat. Full CI 39877184360 (e854550) cancelled (superseded). Waiting on halo-scoped 39879260661 (e854550, queued) and full CI 39880044035 / 39879964235 (02c38d3, queued/pending); all hold 55d96ee.
 - 2026-10-23T01:24:37Z: heartbeat. No change: halo-scoped 39879260661 (e854550) queued; full CI 39880044035 queued, 39879964235 pending (02c38d3). Waiting on a macOS runner.
 - 2026-10-23T01:45:55Z: heartbeat. No change: halo-scoped 39879260661 (e854550) and full CI 39880044035 / 39879964235 (02c38d3) still queued for a macOS runner. Linux check 39880260798 (02c38d3) green.
+- 2026-10-23T02:07:30Z: heartbeat. No change: halo-scoped 39879260661 (e854550), full CI 39880044035 / 39879964235 (02c38d3) still queued. New full CI 39886331557 (d1256e2, holds 55d96ee) pending.
