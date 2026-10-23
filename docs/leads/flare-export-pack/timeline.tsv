@@ -52,3 +52,4 @@ utc	stage	event	ref	note
 2026-10-22T08:26Z	3	wait	-	XP-3 still not on dev.
 2026-10-23T15:46Z	3	slice-done	FV-m	Belt-Slice-Done posted, run 39957675362
 2026-10-23T15:46Z	3	pr	FV-a	#4843 opened (FV-2), gate PASS
+2026-10-23T15:59Z	3	pr	FV-u	#4852 opened (FV-5, FV-6) stacked on #4843, gate PASS

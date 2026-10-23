@@ -4,7 +4,7 @@ Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
 Run: act-1a1695ebf10-z0v8 (resumed 2026-10-23; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih) · resumed from act-1a15d4ed024-1wsg at 23:2xZ
 Stage: 3 build
 Base: 721168a (origin/dev)
-Next: FV-u (FV-5 running snapshot and render budget, FV-6 journey skipped) stacked on #4843
+Next: FV-z (FV-7 journey live, FV-8 docs) once #4843 and #4852 are on dev; critics on FV-a/FV-u after the scoped flare run
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -12,7 +12,7 @@ Loop: v3 (the packet has a `## Slices` table).
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | FV-a | MP4 and GIF with frame rate and loop on stubs; sheet chips and Size row | FV-1, FV-2 | MJ-FV | XP-a, shell-media SM-a | yes | 0 | PR #4843 (FV-1 #4414 merged) | | |
-| FV-u | snapshots, render budget, journey written | FV-5, FV-6 | FJ-X1 | FV-a; XP-4 | yes | 0 | waiting | | |
+| FV-u | snapshots, render budget, journey written | FV-5, FV-6 | FJ-X1 | FV-a; XP-4 | yes | 0 | PR #4852 (stacked on #4843) | | |
 | FV-m | frame plan, alpha, even size; live adapter streams to the writers | FV-3, FV-4 | MJ-FV | FV-a; XP-6 (merged), SM-w | no | 0 | done (Belt-Slice-Done posted) | https://github.com/qbtrix/creative-apps/actions/runs/39957675362 | n/a |
 | FV-z | real files on live, journey passes, blueprint | FV-7, FV-8 | FJ-X1 | FV-u, FV-m; gradient-fill:FG-z; svg-place:PF-z | no | 0 | waiting | | |
 
@@ -23,9 +23,12 @@ Loop: v3 (the packet has a `## Slices` table).
 | FV-3 | FV-m | 2 | frame plan for MP4 and GIF | FlareExport+Kernel.swift, RealJobs | FlareVideoExportTests | #4435 | merged 465c2794 |
 | FV-4 | FV-m | 2 | live adapter streams frames into the media writers | LiveExportAdapter.swift, FakeExport.swift | FlareVideoWriteTests | #4436 | merged dbc4b87e |
 | FV-2 | FV-a | 2 | sheet: MP4/GIF, Frame rate, Loop forever, shared Size row; window writes through writeVideo | FlareExportSheetAdapter.swift, FlareWindow+Export.swift, FlareIntent*.swift | FlareExportPackSnapshots.gif, FlareVideoExportTests | #4843 | open, fast-lane, gate PASS a46aee36 |
+| FV-5 | FV-u | 2 | a video run counts its planned frames; running snapshot; progress render budget | FlareExport+Kernel.swift | FlareVideoExportTests.aVideoRunCountsItsFrames, FlareExportPackSnapshots.running, RenderBudgetFlareExportPackTests | #4852 | open, fast-lane, gate PASS 232b7c0d, mutate 11/11 |
+| FV-6 | FV-u | 2 | FJ-X1 journey written, skipped behind live=false until FV-7 | UITests/FlareJourneyTests+ExportPack.swift | FlareExportPackJourneyTests | #4852 | open |
 
 ## Decisions
 - 2026-10-23T15:46Z: Wire: suiteui/export-pack:XP-a (pixel and long-edge Size modes, XP-3/XP-4). FV-2 uses the shared scale row; the Model already takes .pixels and .longEdge.
+- 2026-10-23T15:59Z: FV-u's run total is the plan's frame count for MP4/GIF (first-use clarity: the bar sat at 0 of 1). FV-u's PR is based on lead/export-pack-fv2 because a dev-based diff would be 418 lines, over the cap; it retargets to dev when #4843 merges.
 - 2026-10-23T15:46Z: FV-5's snapshot file lands in the FV-a PR as FV-2's acceptance test; FV-u adds the running state and the render budget.
 - 2026-10-21T07Z (act-1a15d4ed024-1wsg): resumed. SM-a still not on dev and not filed as a PR; the 02:32Z question on #3481 stands, so no second question until three identical polls.
 - Belt watches lead/export-pack, which the suiteui export-pack lead (#3477) also uses for docs/leads/export-pack. This record lives at docs/leads/flare-export-pack/ so neither lead overwrites the other.
