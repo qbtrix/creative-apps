@@ -1,5 +1,5 @@
 // LibraryTrashStubTests.swift: cull-finish DR-1's contract. FakeTrash moves
-// and puts back in memory, the live stub refuses with its reason, and Delete
+// and puts back in memory, the live Trash is on only on macOS, and Delete
 // Rejects names its targets, on since DR-6. Runs on Linux and macOS.
 @testable import LibraryModel
 import Testing
@@ -21,9 +21,13 @@ import Testing
     #expect(trash.moved.isEmpty)
 }
 
-@Test func liveTrashStubRefusesWithItsReason() {
+@Test func liveTrashIsOnWhereThereIsATrash() {
+    #if canImport(Darwin)
+    #expect(LiveTrash.unavailable == nil)  // DR-8: LiveTrashTests moves real files
+    #else
     #expect(LiveTrash.unavailable != nil)
-    #expect(throws: LibraryError.self) { try LiveTrash().moveToTrash("/a.jpg") }
+    #endif
+    #expect(throws: LibraryError.self) { try LiveTrash().moveToTrash("/no-such-folder/a.jpg") }
     let services = LibraryServices.live(decoder: FakeDecoder(photos: []), writer: FakeJPEGWriter(),
                                         store: FakeCatalogStore())
     #expect(services.unavailable["trash"] == LiveTrash.unavailable)
