@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-23T18:35:01Z	heartbeat	wave 2 builders still running; slice PRs open on fast-lane, clean, none merged yet
 2026-10-23T18:56:56Z	heartbeat	wave 2 builders running; slice PRs clean on fast-lane, lane active (dev at 0d4645bfb), none merged yet
 2026-10-23T19:18:23Z	heartbeat	slice PRs open and clean; wave 2 building
+2026-10-23T19:40:44Z	pr	wave 2 opened BK-design #4961, BK-photo #4965, BK-flare #4982; all carried rebased copies of BK-u (638-767 lines); restacking each on lead/brush-keys-BK-u (own 242-380 lines), gates running
