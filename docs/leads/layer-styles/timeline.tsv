@@ -6,3 +6,4 @@ utc	stage	event	ref	note
 2026-10-23T16:49Z	3 wave 1	heartbeat	-	wave-1 builders gating; LS-1 on post-rebase gate
 2026-10-23T17:10Z	3 wave 1	pr-opened	#4903	LS-10 PR open; LS-1 gate running
 2026-10-23T17:11Z	3 wave 2	started	LS-11	LS-11 builder, stacked on LS-clip (lead/layer-styles-LS-clip-11)
+2026-10-23T17:12Z	3 wave 2	pr-opened	#4911	LS-1 PR open; LS-2, LS-5 builders stacked on LS-a
