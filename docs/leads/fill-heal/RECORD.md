@@ -27,12 +27,16 @@ Next: FH-r #4574 and FH-c #4577 restacked on dev (gate rerun, retarget to dev); 
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-23T16:29Z: supervisor (#3778, 6369319918): AB-photo done; AJ-photo unmet (AJ-a not merged); start FH-u now on brush-keys' fakes; keep the slot while FH-r, FH-c, FH-u move; if only FH-photo is left and AJ-a is not on dev, release the run.
 - 2026-10-23T14:10Z: run act-1a1693a401e-chyn takes over on #3778 (supervisor: #4513 duplicate, #4574 counts under #3778). #4574/#4577 sat on branch bases the lane does not take; dev merged in (FH-a's squash, ours kept), gate rerun, retargeted to dev.
 - Base dev, not main: CLAUDE.md and the lane retarget main to dev.
 - Status mirrored to lead/suiteui-fill-heal (docs/leads/suiteui-fill-heal/), the branch name Belt's nudge read; lead/fill-heal kept, per the brief.
 - FH-2 has no wait of its own (the slice waits list FH-1 only), so it ships in wave 1 while FH-1 waits on IM-a and BK-m.
 - 2026-10-22T16:40Z: run act-1a164697376-dv7u takes over from act-1a15cb4e0f5-ipbr on new issue #4513. FH-1 is unblocked: IM-a's SuiteImaging target is on dev (IM-1 #4028, IM-4 #4393) and BK-m is Belt-Slice-Done on #3758 (run 39661533247); #4513 carries no waiting label.
 - 2026-10-22T16:40Z: FH-a, FH-r and FH-c go to one builder, stacked (lead/fill-heal-FH-a -> -FH-r -> -FH-c); each child PR bases on its parent branch and retargets to dev when the parent merges.
+
+## Wire
+- [ ] Wire: brush-keys:BK-photo (built on its fakes in FH-3/FH-4; swap in when it merges)
 
 ## Open
 - 2026-10-23T16:08Z: FH-u/FH-photo waits unchanged 3 polls; question for the supervisor on #3778 (comment 6369264328).
