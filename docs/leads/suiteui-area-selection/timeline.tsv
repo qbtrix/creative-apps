@@ -54,3 +54,4 @@ time	task	event	note
 2026-10-23T17:54Z	3	heartbeat	-	poll: none of the wave 1 PRs merged yet; dev 98589662; waits unchanged
 2026-10-23T18:17Z	3	heartbeat	-	poll: no wave 1 PR merged; no needs-fix/needs-rebase; dev 98589662
 2026-10-23T18:40Z	3	heartbeat	-	poll: no wave 1 PR merged yet (lane batching); no needs-fix/needs-rebase; dev 0d4645bf
+2026-10-23T19:02Z	3	heartbeat	-	poll: no wave 1 PR merged yet (lane busy); no needs-fix/needs-rebase; dev 0d4645bfb
