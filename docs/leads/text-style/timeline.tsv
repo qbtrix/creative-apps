@@ -1,0 +1,34 @@
+utc	stage	event	ref	note
+2026-10-21T01:21:08Z	0	stage-start	7277a83ac040f759d8bdefc150a72e7cdf2900d6	base 7277a83a, v3 packet
+2026-10-21T01:21:08Z	0	stage-end	#3779	lead branch and RECORD written
+2026-10-21T01:21:08Z	1	stage-end	text-style	packet read: slices and tasks recorded
+2026-10-21T01:21:08Z	3	stage-start	wave 1	TS-1 builder
+2026-10-21T02:19Z	3	heartbeat	-	wave 1 PR open; wave 2 starting
+2026-10-21T02:19Z	3	pr-opened	#3836	TS-1 text style contract
+2026-10-21T02:19Z	3	stage-start	wave 2	TS-m
+2026-10-21T02:44Z	3	heartbeat	-	#3836 open clean; TS-m building
+2026-10-21T02:53Z	3	pr-opened	#3844	TS-5 rules and layout bodies
+2026-10-21T02:53Z	3	pr-opened	#3847	TS-6 command bodies
+2026-10-21T03:41Z	3	mac-cancelled	#3836	merging dev for a fresh head
+2026-10-21T03:49Z	3	head-moved	#3836	dev merged in; head b51250b1
+2026-10-21T04:08Z	heartbeat	check	-	beat: #3836 TS-1 macOS build 39541314123 queued on b51250b1. #3844 and #3847 sta
+2026-10-21T04:36Z	heartbeat	check	-	beat: #3836 TS-1 macOS build 39541314123 green and clean; waits on the lane batc
+2026-10-21T05:04Z	heartbeat	check	-	beat: #3836 still green and clean. Lane batch 20261021043428 (PRs #3466..#3703, 
+2026-10-21T05:30Z	heartbeat	check	-	beat: #3836 unchanged, green and queued behind the lane backlog.
+2026-10-21T06:03Z	heartbeat	check	-	beat: #3836 green and clean on b51250b1. Lane batch 20261021053311 (up to #3813)
+2026-10-21T06:30Z	heartbeat	check	-	beat: #3836 green and clean on b51250b1. The lane landed batch 20261021053311 at
+2026-10-21T06:58Z	heartbeat	check	-	#3836 TS-1 green, waiting for the next lane batch; #3844 #3847 stacked.
+2026-10-21T07:24Z	heartbeat	check	-	#3836 TS-1 still waiting for a batch; #3844 #3847 stacked.
+2026-10-21T07:53Z	heartbeat	check	-	lane merged dev into #3836 TS-1 (new head 58daec0e); gating to move Head:.
+2026-10-21T08:06Z	heartbeat	gate	-	#3836 gated CI: PASS on lane head 58daec0e, Head: moved; waits for macOS build and a batch.
+2026-10-21T08:33Z	heartbeat	check	-	#3836 macOS build 39565969626 success on 58daec0e; waits for a batch.
+2026-10-21T09:01Z	heartbeat	check	-	#3836 TS-1 waits lane batch; #3844/#3847 stay stacked.
+2026-10-21T09:29Z	heartbeat	check	-	dev red #3856 (Design anchors, not ours). #3836 TS-1 macOS green, waits lane batch; #3844/#3847 stay stacked.
+2026-10-21T10:02Z	heartbeat	check	-	#3836 TS-1 merged. #3844 TS-5: dev merged in (25912c56, TS-5 side kept), base dev; gate blocked by dev red #3856, SuiteKernelTests pass, Head: held. #3847 stays on TS-5.
+2026-10-21T10:36Z	heartbeat	check	-	#3844 merged dev at b14ab8cb; the anchors pass now. The gate fails only on CommandPathTests photo (PhotoPlace.swift:36, #3976), which fails the same way on dev alone (#3856). Head held at a880a6f9; noted on #3779 and #3856. TS-a still needs TS-2 (FP-a). #3847 stacked on TS-5.
+2026-10-21T11:03Z	heartbeat	check	-	#3844 Head: held at a880a6f9, dev still red (#3856, CommandPathTests photo); #3847 stacked
+2026-10-21T11:30Z	heartbeat		Heartbeat: dev still red (#3856, CommandPathTests photo; red-triage names #3976, photo line). #3844 Head: held at a880a6f9, #3847 stacked on it.
+2026-10-21T11:57Z	heartbeat		Heartbeat: dev still red (#3856); #3844 held at a880a6f9, #3847 stacked.
+2026-10-21T12:25Z	heartbeat		Heartbeat: dev still red (#3856); #3844 held at a880a6f9, #3847 stacked.
+2026-10-21T12:52Z	heartbeat	heartbeat: #3844 TS-5 held while dev red (#3856, photo line); #3847 stacked
+2026-10-22T16:40Z	relaunch		run act-1a164697376-dv7u on #4519; TS-m done (run 39808732641); rest blocked on FP-a
