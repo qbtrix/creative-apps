@@ -4,7 +4,7 @@ Issue: #3752 · Packet: docs/blueprints/suiteui/features/area-selection.md
 Run: act-1a1693a4009-hyio (line lead: area-selection, adjust-everywhere, shared-raw) · Session: claude/feature-lead-playbook-fkjibd · Started: 2026-10-23T14:40Z
 Stage: 3 wave 1
 Base: 35a0b5e7e9520a764f3eabf02968a453082a87cc
-Next: #4842 (AR-r) and #4860 merged 21:40Z; #4876 restacked on dev (head 230ce4d, fast-lane) and #4861 retargeted to dev (head 10670461, fast-lane). Post Belt-Slice-Done AR-r when scoped suiteui run 40029042081 (dev 491ec54) is green; AR-design after #4861 lands; restack #4877 once #4876 merges.
+Next: AR-r done (2026-10-23T23:24Z, Belt-Slice-Done on #3752, run 40029042081). #4876 (AR-photo-m tests) and #4861 (AR-design view) on fast-lane, unmerged. AR-design done after #4861 lands and a green run contains it; restack #4877 once #4876 merges. Waits: AR-photo-u on AC-colour, AR-z on IM-z.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: #4842 (AR-r) and #4860 merged 21:40Z; #4876 restacked on dev (head 230ce4d
 | AR-a | kernel recipe, group pick, select.* stubs | AR-1, AR-2 | MJ-AR | – | false | 0 | done | 39632745681 | – |
 | AR-m | join modes, lasso, outermost-group pick | AR-3, AR-4 | MJ-AR | AR-a | false | 0 | done | – | – |
 | AR-u | SuiteUI ants and area tool options | AR-7, AR-8 | SJ-AR | AR-a | true | 0 | done | – | – |
-| AR-r | recipe to CoreRaster mask in SuiteImaging | AR-5, AR-6 | MJ-AR-raster | AR-a, IM-a (met) | false | 0 | building (#4842) | – | – |
+| AR-r | recipe to CoreRaster mask in SuiteImaging | AR-5, AR-6 | MJ-AR-raster | AR-a, IM-a (met) | false | 0 | done (Belt-Slice-Done run 40029042081) | – | – |
 | AR-photo-m | Photo selection on the kernel recipe | AR-9, AR-10 | MJ-AR-photo | AR-r | false | 0 | building (#4876, #4877) | – | – |
 | AR-photo-u | Photo tools, Select menu, SuiteUI ants | AR-11, AR-12 | PJ-AR | AR-photo-m; adopt-suiteui-chrome:AC-colour | true | 0 | waiting (AC-colour) | – | – |
 | AR-design | group click, enter, exit, deep pick | AR-13, AR-14 | DJ-AR | AR-m, AT-design (met) | true | 0 | building (#4860, #4861) | – | – |
