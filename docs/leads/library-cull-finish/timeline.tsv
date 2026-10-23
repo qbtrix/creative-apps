@@ -41,3 +41,4 @@
 2026-10-23T17:49:02Z	fix	#4844 52603087 largeBudget in perf-suites; #4899 f1071bc8 restacked
 2026-10-23T17:49:02Z	question	supervisor lands #4844 (protected path); shortcut catalog gap?
 2026-10-23T17:58:33Z	decision	supervisor lands #4844; shortcut catalog gap #4945
+2026-10-23T18:14:47Z	fix	#4838 needs-fix (internal LibraryFixtures.shoot) fixed at 110671fc
