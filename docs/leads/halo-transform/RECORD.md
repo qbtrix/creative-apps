@@ -83,3 +83,4 @@ Wave 3: HT-m as #4415 on dev 30120a8; HT-z (#4422) stacked on it at once, labell
 - 2026-10-23T03:14:20Z: heartbeat. Full 39886331557 (d1256e2) never got jobs (superseded). Now watching halo-scoped 39892568309 (ac4c7d9, queued) and full 39893803031 (9538eb8, pending); both hold 55d96ee.
 - 2026-10-23T03:36:02Z: heartbeat. Halo-scoped 39892568309 (ac4c7d9): macOS (halo) still queued for a runner. Full 39893803031 (9538eb8): pending, no jobs yet. Waiting.
 - 2026-10-23T03:58:04Z: heartbeat. Halo-scoped 39892568309 (ac4c7d9): macOS (halo) still queued (1 h). Full 39893803031 (9538eb8): pending, no jobs. Waiting on the macOS runner queue.
+- 2026-10-23T04:19:41Z: heartbeat. Halo-scoped 39892568309 (ac4c7d9): macOS (halo) running since 04:07Z (Scoped build and tests). Full 39893803031 (9538eb8): pending, no jobs.
