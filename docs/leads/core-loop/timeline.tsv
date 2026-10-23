@@ -206,3 +206,4 @@ utc	stage	event	ref	note
 2026-10-23T03:02Z	3	pr	#4702	H-J12 frame-rate menu, fixes #4399 #4623
 2026-10-23T03:09Z	3	pr	#4703	transport ink from shown frame, fixes #4352
 2026-10-23T03:39Z	3	merge	#4702	H-J12 frame-rate menu on dev; #4703 in macOS build
+2026-10-23T04:26Z	3	merge	#4703	transport ink on dev; panel waits for a halo run containing 5394474d and 8392f462
