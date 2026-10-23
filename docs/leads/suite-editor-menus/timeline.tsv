@@ -70,3 +70,4 @@ utc	stage	event	ref	note
 2026-10-23T19:03Z	check	editor-menus	heartbeat: journeys 39972233358 still in_progress (macOS journeys since 17:49Z); #4817 #4818 clean in lane (lane run active); #4741 open	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
 2026-10-23T19:28Z	check	editor-menus	EM-a, EM-photo-design, EM-library done on 39983291011; EM-flare-halo waits on #4817 #4818 #4830	https://github.com/qbtrix/creative-apps/actions/runs/39983291011
 2026-10-23T20:44Z	check	editor-menus	#4988 open for #4830 (shared TextFieldEditRouting, Mutate 4/4); EM-a, EM-photo-design, EM-library done on 39983291011	https://github.com/qbtrix/creative-apps/pull/4988
+2026-10-23T21:09Z	check	editor-menus	check: EM-flare-halo PRs in lane	https://github.com/qbtrix/creative-apps/pull/4988
