@@ -20,3 +20,5 @@ utc	stage	event	ref	note
 2026-10-23T06:20:27Z	-	fix	EM-flare-halo	#4738 needs-rebase: merged dev (FlareOpenQueue -> FlareShell.openQueue), CI: PASS, head 9d59908ec
 2026-10-23T06:40:59Z	-	merge	EM-flare-halo	#4738 merged into dev at 06:40:59Z
 2026-10-23T06:45:10Z	-	fix	EM-photo-design	#4739: merged dev after parent squash (FlareApp.swift taken from dev); diff vs dev is the slice only, 15 files +364/-28; gate running
+2026-10-23T06:51:45Z	-	pr	EM-photo-design	#4739 CI: PASS on b78892b7a, pushed, base retargeted to dev, Head line moved
+2026-10-23T06:51:45Z	-	check	EM-flare-halo	scoped flare/halo runs wanted after 42845c6d2; dispatch is 403, waiting on verify-dispatch (queue backed up)
