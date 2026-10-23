@@ -70,3 +70,4 @@ utc	stage	event	ref	note
 2026-10-23T13:30Z	review	FP-u round 2 on scoped suiteui 39946282747 (28e3a67d): round 1 fixes verified; #4790 fix PR #4800 (fast-lane); gaps #4801 #4802	FP-u	#4800 through the lane
 2026-10-23T14:20Z	lane	PR #4800 eligible (Fast-Check marker, no code build gate); waiting behind in-flight batch lane/batch-20261023132608 (Linux+macOS checks)	FP-u	merge on a later sweep, then Belt-Slice-Done FP-u update
 2026-10-23T15:15Z	slice-done	#4800 merged 8021b0f5; Belt-Slice-Done FP-u reposted with dev Linux run 39970203866 (green)	FP-u	none; scoped suiteui 39970195902 queued
+2026-10-23T16:47Z	ci	scoped suiteui 39970195902 (8021b0f5) macOS green; journeys suiteui 39985655488 queued since 16:18	FP-u	check testFontPickerPicksAFace when journeys complete
