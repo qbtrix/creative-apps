@@ -2,9 +2,9 @@
 
 Issue: #3789 · Packet: docs/blueprints/library/features/share-sheet.md
 Run: act-1a1693fbf6d-ap2g · Session: claude/large-catalog-share-sheet-2tdm4i (earlier act-1a1648ae708-bncr, act-1a15df37b73-k199, act-1a15b98bc49-4lk9) · Started: 2026-10-20T23:00Z (resumed 2026-10-22T16:55Z)
-Stage: 3 wave 4 (SH-z #4612 merged 17:35Z as 55017fac; library-scoped run 39997279554 on 8a54f64c contains it, queued)
+Stage: 3 wave 4 (SH-z #4612 merged as 55017fac; library run 39997279554 on 8a54f64c red: RenderBudgetLibraryFoldersTests.expandFolderInTwoBodies, window bodies 2 vs 0 before, content 10 vs 8; SH-z is the only Library change in 35a0b5e7..8a54f64c but adds no new observed read, runner ~5x slow; 40009734956 (library, 0d4645bf) and 39999410389 (full, 98589662) queued to confirm)
 Base: 8021b0f56a45a59540cd4ea0ff99651c5fb8dc2a (origin/dev)
-Next: when run 39997279554 (or a later library or full run containing 55017fac) is green: Belt-Slice-Done SH-z, Mac-Finish-Wanted SH-z, Belt-Contact-Sheet
+Next: if 40009734956 or 39999410389 is green, Belt-Slice-Done SH-z, Mac-Finish-Wanted SH-z, Belt-Contact-Sheet; if the folder budget is red again, SH-z fix round 1 (LibraryWindow menu: keep File > Share's closure from re-running the window on folder expand)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
