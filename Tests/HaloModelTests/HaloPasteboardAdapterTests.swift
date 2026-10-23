@@ -77,9 +77,13 @@ private let png160x100 = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0
         #expect(project.selectedLayer?.inFrame == 30)
     }
 
-    /// Plain text on the pasteboard: Halo's Paste is off and says why in the coder's sentence.
-    @Test func textAloneIsRefused() {
+    /// Plain text on the pasteboard: Halo's Paste is off and says why in the coder's sentence. The coder hands Halo
+    /// text as an item, so the adapter is what refuses it; a paste of it changes nothing.
+    @Test func textAloneIsRefused() throws {
         let text = [TypedData(type: .plainText, data: Data("hello".utf8))]
-        #expect(SuitePasteboardCoding().pasteRefusal(for: text, in: .halo) != nil)
+        #expect(HaloPasteboardAdapter().pasteRefusal(for: text)?.message == "Halo can't paste text yet.")
+        var project = try compAtFrame30()
+        #expect(throws: (any Error).self) { try HaloPasteboardAdapter().paste(text, into: &project) }
+        #expect(project.selectedComposition?.layers.isEmpty == true, "a refused paste added a layer")
     }
 }
