@@ -135,7 +135,7 @@ is checked once as the keyboard twin of the menu item.
    "2880 × 2048 px". Click Export (`design.export.run`): the progress bar
    fills, the sheet's finished line reads "Exported 1 file to <folder>"
    (DE-7, DE-10) and the status line says the same; the folder holds
-   `Desktop.png`, 2880 × 2048 pixels (the test reads it with ImageIO; DE-8).
+   `Desktop@2x.png`, 2880 × 2048 pixels (the test reads it with ImageIO; DE-8).
    Press ⇧⌘E: the sheet opens again; click SVG (`design.export.format`);
    click Export: `Desktop.svg` exists and its first element is `<svg` with
    `viewBox="0 0 1440 1024"` (DE-5). Press ⇧⌘E; click PDF; click Export:
@@ -154,8 +154,9 @@ is checked once as the keyboard twin of the menu item.
    document, Cancel closes the sheet (DE-11).
 3. **MJ13** `DesignExportWalkTests.testPlanWalk` (DE-1 writes it, DE-3 turns
    it on; Linux): on `cards`, plan the selection A, B at PNG 2x into a folder
-   holding "A.png" → items "A 2.png" 200 × 160 px and "B.png" 400 × 160 px;
-   plan the frame around A → "Desktop.png" 2880 × 2048; nothing selected,
+   holding "A@2x.png" → items "A@2x 2.png" 200 × 160 px and "B@2x.png" 400 × 160 px
+   (a still file at 2x or 3x names its scale, RJ-D02); plan the frame around A →
+   "Desktop@2x.png" 2880 × 2048; nothing selected,
    scope selection → `.nothingSelected`; an empty page, scope frame →
    `.nothingToExport`; the page at SVG → one item "Page 1.svg" 1440 × 1024,
    pixel size equal to points.
