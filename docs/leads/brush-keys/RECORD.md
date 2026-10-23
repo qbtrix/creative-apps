@@ -1,10 +1,10 @@
 # brush-keys lead record
 
-Issue: #4531 (was #3758) · Packet: docs/blueprints/suiteui/features/brush-keys.md
-Run: act-1a164855f49-5pe1 · Session: cloud line lead (line:suiteui, with #4528) · Started: 2026-10-22T16:52Z
-Stage: 3 wave 3 (blocked)
-Base: 3578eaee20f317d368feda7ba35e4911285eebc5
-Next: polling. BK-u waits anchor-parenting:AN-u (which waits orientation-crop OC-u, building now in this run); BK-photo waits AB-photo, AR-photo-u, OC-photo-m; BK-design waits DS-design; BK-flare waits AN-flare-u.
+Issue: #3758 (relaunch #4531) · Packet: docs/blueprints/suiteui/features/brush-keys.md
+Run: act-1a16958d72f-a4mg · Session: cloud line lead (line:suiteui; with text-style, brush-keys, document-setup) · Started: 2026-10-23T15:25Z
+Stage: 3 wave 1 (combined waves across the three features)
+Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (dev)
+Next: wave 1 builds BK-u; wave 2 BK-photo, BK-design, BK-flare stacked; then BK-z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -25,6 +25,13 @@ Next: polling. BK-u waits anchor-parenting:AN-u (which waits orientation-crop OC
 | BK-3 | BK-m | 2 | bodies + plan SuiteKernel.BrushKeys | Sources/SuiteKernel/Stroke/BrushKeys.swift, Tests/SuiteKernelTests/BrushKeysTests.swift, Tests/mutations/SuiteKernel.BrushKeys.json | BrushKeysTests; mutate (5/5) | #4058 4987a228 | merged |
 | BK-4 | BK-m | 2 | C4 part kernel-stroke | docs/c4/parts/creative-apps/suite-kernel/kernel-stroke.json | scripts/ci C4 | #4060 merged fb6f4b83 (docs-only; existing part description can only change in a docs-only PR) | merged |
 
+## Wire
+- [ ] Wire: anchor-parenting:AN-u (BK-u shares SuiteUI files)
+- [ ] Wire: anchor-parenting:AN-flare-u (BK-flare)
+- [ ] Wire: area-selection:AR-photo-u (BK-photo)
+- [ ] Wire: orientation-crop:OC-photo-m (BK-photo)
+- [ ] Wire: document-setup:DS-design (BK-design)
+
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
@@ -33,6 +40,7 @@ Next: polling. BK-u waits anchor-parenting:AN-u (which waits orientation-crop OC
 - 2026-10-21T11:26Z: one PR per slice (brief rule 8): BK-1+BK-2 ship as the BK-a PR; BK-3+BK-4 as BK-m stacked on it.
 - 2026-10-21T11:26Z: app slices start only when their external waits clear; their test-first tasks (BK-7, BK-9, BK-11) ride in the slice PR, not alone.
 - 2026-10-21T11:26Z: anchor-parenting, document-setup and area-selection have no lead branch or issue: BK-u and every app slice are blocked on them.
+- 2026-10-23T15:25Z (act-1a16958d72f-a4mg): contract-first waits (lead.md rule 12, #4814): a wait on another feature is met once that feature's first slice merged; each wait built ahead of its slice is listed under Wire. Merged-done = green `Linux` on a dev CI run containing the slice's last PR.
 
 ## Open
 - BK-u blocked: anchor-parenting:AN-u (feature not started).
