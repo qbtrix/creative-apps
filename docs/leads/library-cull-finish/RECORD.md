@@ -21,9 +21,9 @@ Next: DR-7 + DR-8 as one PR stacked on feat/cull-finish-dr6; then a scoped run a
 | DR-2 | DR-a | 1 | disabled tests for DR-5/DR-6, never-deletes scan, delete-rejects real job (pending DR-8) | #3625 | open, stacked on #3623; CI: PASS on e0752118 |
 | DR-5 | DR-m | 1 | keys 6-9 set Red/Yellow/Green/Blue as one step, never advance (40 lines, folded into DR-2's PR) | #3625 | merged daee0e736; Mutate 2/2 LibraryModel.LibraryCulling |
 | DR-6 | DR-m | 2 | deleteRejects body, trashed undo step, excludedPaths fed to import; turns on LibraryDeleteRejectsTests | #4844 | open, fast-lane; head 22bef36a; Mutate 4/4 LibraryModel.LibraryDeleteRejects |
-| DR-7 | DR-m | 3 | excludedPaths in the catalog file (omitted when empty); photo.delete-rejects command | - | next, one PR with DR-8, stacked on #4844 |
+| DR-7 | DR-m | 3 | excludedPaths in the catalog file (omitted when empty); photo.delete-rejects command | - | building (feat/cull-finish-dr7-8, one PR with DR-8) |
 | DR-8 | DR-m | 4 | LiveTrash on FileManager.trashItem; RJ-L06 on | - | next, one PR with DR-7 |
-| DR-3 | DR-u | 2 | Photo > Delete Rejected Photos… ⌥⌘⌫, confirmationDialog, Set Label names 6-9 | #4838 | open, fast-lane (one PR with DR-4) |
+| DR-3 | DR-u | 2 | Photo > Delete Rejected Photos… ⌥⌘⌫, confirmationDialog, Set Label names 6-9 | #4838 | open, fast-lane, head 1be77364 (⌥⌘⌫ fix) (one PR with DR-4) |
 | DR-4 | DR-u | 2 | snapshots, render budget, journey skipped (waits on DR-9) | #4838 | open, fast-lane (one PR with DR-3) |
 
 ## Wires
@@ -49,3 +49,4 @@ Next: DR-7 + DR-8 as one PR stacked on feat/cull-finish-dr6; then a scoped run a
 - 2026-10-23T16:33:18Z: Delete Rejected Photos takes ⌥⌘⌫, not the packet's ⌘⌫. Remove from Collection already holds ⌘⌫ in the Photo menu, and with both enabled one key would do two things. ⌥⌘⌫ is the platform's delete-from-library chord next to ⌘⌫ remove. DR-10 updates the packet text.
 - 2026-10-23T16:33:18Z: DR-6's large budget test (300 rejects in 10,000) ships disabled: the gate fails any timing test not in Tests/perf-suites.txt, which only the supervisor edits. Ask: add LibraryModelTests.largeBudget there.
 - 2026-10-23T16:33:18Z: testEveryMenuOpens (UITests/LibraryJourneyTests.swift) lists the Photo menu exactly; DR-9 adds the new item to it when it turns the journey on.
+- 2026-10-23T16:35:10Z: 27 open line:library findings, none against this feature; asked the supervisor on #3458 whether they gate new waves. Counting only this feature's (0) until answered.
