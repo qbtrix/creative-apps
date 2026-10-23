@@ -148,9 +148,11 @@ final class HaloEasingJourneyTests: XCTestCase {
         root.descendants(matching: .any).matching(NSPredicate(format: "label == %@ OR value == %@", title, title)).firstMatch
     }
 
-    /// The EASING chip titled `title`.
+    /// The EASING chip titled `title`. Only EASING's (`halo.easing.preset.<case>`): a solid's FILL has a Linear
+    /// chip of its own higher in the inspector (#1574).
     @MainActor private func chip(_ title: String, _ halo: Journey) -> XCUIElement {
-        halo.element("suite.inspector").buttons.matching(NSPredicate(format: "label == %@", title)).firstMatch
+        halo.element("suite.inspector").buttons.matching(NSPredicate(
+            format: "label == %@ AND identifier BEGINSWITH %@", title, "halo.easing.preset.")).firstMatch
     }
 
     /// Scrolls the inspector until the Linear and Ease In and Out chips lie
