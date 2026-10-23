@@ -5,30 +5,39 @@
 //
 // Foundation (#777): H-J0 checks the empty viewer and inspector; H-J1 fills
 // the New Composition sheet by its field labels (#286); H-J13 reads the
-// `halo.controls` JSON on the `keyed` fixture, clicks every enabled control
-// (then Escape and Command-Z) and checks it changed the window, and that every
-// disabled one says why (QB-F1). `halo.controls` travels by preference, which
+// `halo.controls` JSON on `-HaloSample keyed` (live services, CL-12), clicks
+// every enabled control (then Escape and Command-Z) and checks it changed the
+// window, and that every disabled one says why (QB-F1). `halo.controls` travels by preference, which
 // may not leave the inspector or toolbar, so H-J13 also launches with
 // `-SuitePerfProbe` and adds the `halo.*` entries of `suite.controls`, which
 // `.haloControl` registers too. testEveryMenuOpens checks the Composition,
-// Layer and Animation menus hold exactly their items and File and Edit hold
-// Halo's. testLayoutAtWidths relaunches at five window sizes with a layer
+// Layer and Animation menus hold exactly their items and File, Edit and
+// Window hold Halo's; testSwitchToMenu (A-HA-1, #865) reads Window > Switch
+// To. testLayoutAtWidths relaunches at five window sizes with a layer
 // selected from its timeline lane (blueprint 7.3): L1 is the audit on each
-// `halo-layout-<w>` shot, L2
+// `halo-layout-<w>` shot (`layout-<w>-clamped` when a display narrower than
+// w held the window back, so no shot claims a width it doesn't show), L2
 // takes the artboard as the drawn layers' frame (`halo.viewer.canvas`) and
 // checks it is centered within 1 pt (across: the surround on its two sides,
 // measured in the screen's pixels to where each panel starts, as a person
 // sees it, or the viewer's frame when a panel is off the screen) with its
 // 16:9 aspect within 0.5%, L6 that it is
 // at least 160 pt wide at the minimum size; it also checks every halo.*
-// control lies inside the window and the viewer is narrower at 880 than at
+// control lies inside the window, History (halo.history.show) shows, and
+// the viewer is narrower at 880 than at
 // 1024 (the content column follows the window). Every other journey launches
 // pinned at the runner's launch size (`launch`), so a sized launch never
 // carries over. H-J3 (testScrubTheTimeline, viewer-playback VP-11) drags the
 // ruler on `-HaloSample three-layers`, then sets Badge's span to 20–50 from
 // the keys and reads the timecode, header and artboard. Run order is by name, so
-// testScrubTheTimeline runs last and attaches the audit counts.
+// testScrubTheTimeline runs last and attaches the audit counts. H-J12
+// (testKeyLayerAndSave, core-loop CL-13) makes a 2 s, 24 fps Loop on a plain
+// launch, keys a solid's Position X at 0 and 24 (stopwatch, then a viewer
+// drag through H-J5's ViewerDragSteps), eases 0–24 Out, plays and pauses,
+// adds a Hello text layer, undoes and redoes it by menu, renders 48 PNGs at
+// Half, saves through -HaloSaveTo and reopens Loop.halo with -HaloOpenFile.
 import AppKit
+import ImageIO
 import XCTest
 
 final class HaloJourneyTests: XCTestCase {
@@ -52,10 +61,9 @@ final class HaloJourneyTests: XCTestCase {
         halo.shot("new-composition-invalid")
         enter("1080", into: "Width", in: sheet)
         enter("1920", into: "Height", in: sheet)
-        let rate = sheet.popUpButtons["Frame Rate"]
-        XCTAssert(rate.exists, "no Frame Rate pop-up by its label")
-        rate.click()
-        halo.app.menuItems["24 fps"].click()
+        XCTAssert(frameRateMenu(in: sheet).waitForExistence(timeout: 5),
+                  "no Frame Rate menu (halo.composition.sheet.frameRate) in the sheet")
+        pickFrameRate("24 fps", in: sheet, halo)
         halo.shot("new-composition-filled")
         halo.click("Create", in: .sheet, step: "new-composition")
         // The header is one element reading "Comp 1, 1080 × 1920, 24 fps · 10 s".
@@ -167,9 +175,17 @@ final class HaloJourneyTests: XCTestCase {
             ["Linear", "Ease In", "Ease Out", "Ease In and Out", "Hold"])
     }
 
+    /// A-HA-1 (#865): Window > Switch To lists the suite's other apps, then Halo's own window.
+    @MainActor func testSwitchToMenu() {
+        let halo = launch()
+        XCTAssertEqual(
+            submenuTitles("Switch To", of: "Window", in: halo),
+            ["Home", "Flare", "Design", "Photo", "Library", "Show Halo Window"])
+    }
+
     /// H-J13 (QB-F1): every enabled control acts, every disabled one says why.
     @MainActor func testEveryControlActsOrSaysWhy() {
-        let halo = launch(["-HaloFixture", "keyed", "-HaloControlsProbe", "-SuitePerfProbe"])
+        let halo = launch(["-HaloSample", "keyed", "-HaloControlsProbe", "-SuitePerfProbe"])
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         halo.shot("controls")
         let listed = Self.decode(halo.element("halo.controls"))
@@ -220,7 +236,7 @@ final class HaloJourneyTests: XCTestCase {
         var viewerWidths: [Int: CGFloat] = [:]
         for size in sizes {
             let width = Int(size.width)
-            let halo = Journey("Halo", self, arguments: ["-HaloFixture", "keyed", "-HaloWindowSize", "\(width)x\(Int(size.height))"])
+            let halo = Journey("Halo", self, arguments: ["-HaloSample", "keyed", "-HaloWindowSize", "\(width)x\(Int(size.height))"])
             let window = halo.app.windows.firstMatch
             XCTAssert(window.waitForExistence(timeout: 30), "no window opened at \(width)")
             if size.width <= screen.width {
@@ -236,7 +252,12 @@ final class HaloJourneyTests: XCTestCase {
             let ball = halo.app.descendants(matching: .any).matching(
                 NSPredicate(format: "identifier == 'halo.inspector.header' AND label CONTAINS %@", "Frames 0–47")).firstMatch
             XCTAssert(ball.waitForExistence(timeout: 5), "clicking Ball's lane selected no layer at \(width)")
-            halo.shot("layout-\(width)")
+            // The runner's display is 1024 pt wide, so from 1280 up the window
+            // clamps: name the shot for the width it shows, not the one asked for.
+            let reached = window.frame.width >= size.width - 2
+            halo.shot(reached ? "layout-\(width)" : "layout-\(width)-clamped")
+            // History keeps its button at every width, the 880 minimum included (#4449).
+            XCTAssert(halo.element("halo.history.show").exists, "no History button (halo.history.show) at \(width)")
             let outside = haloControls(in: halo).compactMap { control -> String? in
                 guard let shown = visibleFrame(of: control, in: window) else { return nil }
                 return window.frame.insetBy(dx: -1, dy: -1).contains(shown) ? nil : "\(control.identifier) \(shown)"
@@ -286,8 +307,323 @@ final class HaloJourneyTests: XCTestCase {
         XCTAssertLessThan(narrow, wide, "the viewer is \(narrow) pt at 880 and \(wide) pt at 1024: the content column is rigid")
     }
 
+    /// H-J12 (core-loop CL-13): make, key, ease, play, title, undo, render,
+    /// save and reopen a 2 s loop on live services, one shot per step.
     @MainActor func testKeyLayerAndSave() throws {
-        throw XCTSkip("journey arrives with #207 (key), #208 (undo) and #209 (save)")
+        let folder = FileManager.default.temporaryDirectory.appending(path: "halo-loop-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        addTeardownBlock { try? FileManager.default.removeItem(at: folder) }
+        let file = folder.appending(path: "Loop.halo").path
+        var halo = launch(["-HaloSaveTo", file, "-HaloRenderTo", folder.path])
+        XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        var steps = ViewerDragSteps(halo: halo)
+
+        // 1. New Composition… Loop, 24 fps, 2 s: the header and the sidebar read it.
+        halo.click("New Composition…")
+        let sheet = halo.app.sheets.firstMatch
+        enter("Loop", into: "Name", in: sheet)
+        enter("2", into: "Duration (seconds)", in: sheet)
+        pickFrameRate("24 fps", in: sheet, halo)
+        halo.click("Create", in: .sheet)
+        XCTAssert(header("1920 × 1080", halo).waitForExistence(timeout: 5), "the header doesn't read 1920 × 1080")
+        XCTAssert(header("24 fps · 2 s", halo).exists, "the header doesn't read 24 fps · 2 s")
+        XCTAssert(Self.contains("Loop", in: halo.element("suite.sidebar")).exists, "the sidebar has no Loop row")
+        halo.shot("loop-new")
+
+        // 2. Layer > New > Solid: the first row is Solid 1, drawn on the canvas.
+        choose(["Layer", "New", "Solid"], halo)
+        XCTAssert(layerRow("Solid 1", halo).waitForExistence(timeout: 5), "no Solid 1 row in the layer list")
+        expectLabel("halo.viewer.drawn", "1 layer drawn", halo)
+        halo.shot("loop-solid")
+
+        // 3. The Position X stopwatch keys frame 0.
+        let stopwatch = halo.element("halo.inspector.key.x")
+        scrollInspector(toShow: stopwatch, halo)
+        stopwatch.click()
+        steps.expectKeyState("Position X", "Keyed at this frame")
+        steps.expectEditItem("Undo Animate Position X")
+        halo.shot("loop-stopwatch")
+
+        // 4. Drag the Frame Ruler off 0, then click Next / Previous Frame to frame 24 (00:00:01:00);
+        // one → after the assert is the keyboard parity, and Previous Frame brings it back.
+        // (dx 0.02 of halo.timeline is the name column, where a press scrubs nothing, #4451.)
+        let ruler = halo.app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Frame Ruler'")).firstMatch
+        XCTAssert(ruler.waitForExistence(timeout: 5), "no Frame Ruler in the timeline")
+        ruler.coordinate(withNormalizedOffset: CGVector(dx: 0.05, dy: 0.5))
+            .press(forDuration: 0.1, thenDragTo: ruler.coordinate(withNormalizedOffset: CGVector(dx: 0.4, dy: 0.5)))
+        XCTAssert(waitFor(seconds: 5) { (viewerFrame(halo) ?? 0) > 0 },
+                  "the ruler drag left the viewer at frame \(String(describing: viewerFrame(halo)))")
+        let scrubbed = viewerFrame(halo) ?? 0
+        let next = halo.element("halo.transport.next"), previous = halo.element("halo.transport.previous")
+        XCTAssert(next.waitForExistence(timeout: 5), "no Next Frame button (halo.transport.next)")
+        XCTAssert(previous.exists, "no Previous Frame button (halo.transport.previous)")
+        for _ in 0..<abs(24 - scrubbed) { (scrubbed < 24 ? next : previous).click() }
+        steps.expectPlayhead("00:00:01:00")
+        XCTAssert(waitFor(seconds: 5) { viewerFrame(halo) == 24 }, "Next / Previous Frame stopped at \(String(describing: viewerFrame(halo)))")
+        steps.focusLane("Solid 1")
+        halo.press(.rightArrow)
+        steps.expectPlayhead("00:00:01:01")
+        previous.click()
+        steps.expectPlayhead("00:00:01:00")
+        halo.shot("loop-frame-24")
+
+        // 5. Drag the solid 300 px right from its centre: a key at 24.
+        let (x, y) = (steps.pixels("x"), steps.pixels("y"))
+        steps.drag(from: (x, y), by: (300, 0))
+        let tolerance = steps.tolerance()
+        XCTAssertEqual(steps.pixels("x"), x + 300, accuracy: tolerance, "Position X after a 300 px drag (±\(tolerance) px)")
+        steps.expectKeyState("Position X", "Keyed at this frame")
+        steps.expectEditItem("Undo Move")
+        halo.shot("loop-dragged")
+
+        // 6. Pick the 0–24 span in EASING and give it Ease Out.
+        let span = halo.element("halo.easing.key.x.0")
+        scrollInspector(toShow: span, halo)
+        span.click()
+        chip("halo.easing.preset.easeOut", halo).click()
+        expectRow("halo.easing.key.x.0", reads: "Ease Out", halo)
+        expectUndo("Undo Keyframe Easing", halo)
+        halo.shot("loop-ease-out")
+
+        // 7. From the start, Play for a second and pause: the playhead stops inside the loop; Space twice too.
+        choose(["Animation", "Go to Start"], halo)
+        let play = halo.element("halo.transport.play")
+        XCTAssert(play.waitForExistence(timeout: 5), "no Play button (halo.transport.play)")
+        play.click()
+        expectPlay("Playing", halo)
+        Thread.sleep(forTimeInterval: 1)
+        play.click()
+        expectPlay("Paused", halo)
+        let paused = viewerFrame(halo) ?? 0
+        XCTAssert((1...47).contains(paused), "Play then pause stopped at frame \(paused), not 1…47")
+        steps.focusLane("Solid 1")
+        let beforeSpace = viewerFrame(halo)
+        halo.press(.space)
+        expectPlay("Playing", halo)
+        Thread.sleep(forTimeInterval: 0.5)
+        halo.press(.space)
+        expectPlay("Paused", halo)
+        XCTAssertNotEqual(viewerFrame(halo), beforeSpace, "Space twice left the playhead at frame \(String(describing: beforeSpace))")
+        halo.shot("loop-paused")
+
+        // 8. Layer > New > Text, Hello and Return: the artboard draws it on top.
+        choose(["Layer", "New", "Text"], halo)
+        let words = halo.element("halo.inspector.text.string")
+        scrollInspector(toShow: words, halo)
+        words.click()
+        halo.press(character: "a", .command)
+        words.typeText("Hello")
+        halo.press(.return)
+        expectSummary(endingWith: "Solid 1, Text 1: Hello", halo)
+        expectUndo("Undo Edit Text", halo)
+        halo.shot("loop-text")
+
+        // 9. Edit > Undo, then Edit > Redo, by menu: the titles flip, Hello goes and comes back,
+        // on the artboard and in the TEXT field.
+        choose(["Edit", "Undo Edit Text"], halo)
+        expectUndo("Undo New Layer", halo)
+        expectSummary(endingWith: "Text 1: Text", halo)
+        expectField(words, reads: "Text")
+        choose(["Edit", "Redo Edit Text"], halo)
+        expectUndo("Undo Edit Text", halo)
+        expectSummary(endingWith: "Text 1: Hello", halo)
+        expectField(words, reads: "Hello")
+        halo.shot("loop-undo-redo")
+
+        // 10. Render… PNG Sequence at Half: 48 files, Loop_0001.png … Loop_0048.png, each 960 × 540.
+        choose(["File", "Render…"], halo)
+        tap("halo.render.format.pngSequence", halo)
+        tap("halo.render.size.half", halo)
+        expectLabel("halo.render.summary", "48 PNG files, 960 × 540, into a new folder \"Loop\"", halo)
+        let start = halo.element("halo.render.start")
+        XCTAssert(waitFor(seconds: 5) { start.isEnabled }, "the start button is disabled with -HaloRenderTo set")
+        start.click()
+        XCTAssert(text("Exported 48 PNG files into \"Loop\"", halo).waitForExistence(timeout: 60),
+                  "the render never read \"Exported 48 PNG files into \"Loop\"\"")
+        let pngs = folder.appending(path: "Loop", directoryHint: .isDirectory)
+        let names = try FileManager.default.contentsOfDirectory(atPath: pngs.path).sorted()
+        XCTAssertEqual(names, (1...48).map { String(format: "Loop_%04d.png", $0) }, "the files in \(pngs.path)")
+        for name in names {
+            let size = pixelSize(of: pngs.appending(path: name))
+            XCTAssert(size?.width == 960 && size?.height == 540, "\(name) is \(String(describing: size)), not 960 × 540")
+        }
+        tap("halo.render.dismiss", halo)
+        XCTAssert(waitFor(seconds: 5) { !start.exists }, "the Render sheet stayed open after Done")
+        halo.shot("loop-rendered")
+
+        // 11. File > Save by menu, ⌘S as parity: titled Loop, Saved, on disk.
+        choose(["File", "Save"], halo)
+        XCTAssert(waitFor(seconds: 5) { halo.app.windows.firstMatch.title == "Loop" }, "the window isn't titled Loop")
+        expectLabel("halo.file", "Saved", halo)
+        halo.press(character: "s", .command)
+        expectLabel("halo.file", "Saved", halo)
+        XCTAssert(FileManager.default.fileExists(atPath: file), "Save wrote no \(file)")
+        halo.shot("loop-saved")
+
+        // 12. Halo > Quit Halo by menu, then reopen Loop.halo: two layers, Ease Out then Linear,
+        // Hello at 0, nothing to undo.
+        // Index 0 is the Apple menu; index 1 is the app's own menu.
+        let appMenu = halo.app.menuBars.firstMatch.menuBarItems.element(boundBy: 1)
+        XCTAssert(appMenu.waitForExistence(timeout: 5), "no Halo menu")
+        appMenu.click()
+        let quit = appMenu.menus.firstMatch.children(matching: .menuItem)["Quit Halo"]
+        XCTAssert(quit.waitForExistence(timeout: 3), "no Halo > Quit Halo")
+        quit.click()
+        if !halo.app.wait(for: .notRunning, timeout: 15) { halo.app.terminate() }
+        halo = launch(["-HaloOpenFile", file])
+        XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened on Loop.halo")
+        steps = ViewerDragSteps(halo: halo)
+        let rows = halo.element("halo.layer.list").descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier BEGINSWITH %@", "halo.layer.row."))
+        XCTAssert(waitFor(seconds: 10) { Set(rows.allElementsBoundByIndex.map(\.identifier)).count == 2 }, "Loop reopened without two layers")
+        let solid = layerRow("Solid 1", halo)
+        scrollInspector(toShow: solid, halo)
+        solid.click()
+        let first = halo.element("halo.easing.key.x.0")
+        scrollInspector(toShow: first, halo)
+        XCTAssertEqual(first.label, "Position X, frames 0–24", "the first EASING row's title")
+        expectRow("halo.easing.key.x.0", reads: "Ease Out", halo)
+        // The stopwatch also keyed the last frame, so the second span is 24–47.
+        XCTAssertEqual(halo.element("halo.easing.key.x.24").label, "Position X, frames 24–47", "the second EASING row's title")
+        expectRow("halo.easing.key.x.24", reads: "Linear", halo)
+        choose(["Animation", "Go to Start"], halo)
+        expectLabel("halo.viewer.summary", "Frame 0: Solid 1, Text 1: Hello", halo)
+        let undo = menuItem(["Edit", "Undo"], halo)
+        XCTAssertFalse(undo.isEnabled, "Edit > Undo is enabled after an open")
+        halo.press(.escape)
+        XCTAssert(halo.menusClosed(), "the Edit menu stayed open")
+        halo.shot("loop-reopened")
+    }
+
+    // MARK: - H-J12 helpers (copied from H-J7, H-J10, H-J11 and H-J21)
+
+    /// Opens the menu bar item `path[0]`, hovers each submenu on the way and
+    /// returns the last item (the menu stays open).
+    @MainActor private func menuItem(_ path: [String], _ halo: Journey) -> XCUIElement {
+        var item = halo.app.menuBars.firstMatch.menuBarItems[path.first ?? ""]
+        XCTAssert(item.waitForExistence(timeout: 5), "no \(path.first ?? "") menu")
+        item.click()
+        for (depth, title) in path.dropFirst().enumerated() {
+            if depth > 0 { item.hover() }
+            item = item.menus.firstMatch.children(matching: .menuItem)[title]
+            XCTAssert(item.waitForExistence(timeout: 3), "no \(path.joined(separator: " > "))")
+        }
+        return item
+    }
+
+    /// Clicks the enabled menu item at `path`.
+    @MainActor private func choose(_ path: [String], _ halo: Journey) {
+        let item = menuItem(path, halo)
+        XCTAssert(item.isEnabled, "\(path.joined(separator: " > ")) is disabled")
+        item.click()
+    }
+
+    /// The Edit menu's first item reads `title`; the menu is closed again.
+    @MainActor private func expectUndo(_ title: String, _ halo: Journey) {
+        let first = menuItem(["Edit"], halo).menus.firstMatch.children(matching: .menuItem).firstMatch
+        XCTAssert(first.waitForExistence(timeout: 3), "the Edit menu shows no items")
+        XCTAssertEqual(first.title, title, "the Edit menu's first item")
+        halo.press(.escape)
+        XCTAssert(halo.menusClosed(), "a menu stayed open after Escape")
+    }
+
+    /// Clicks the element `id` once it shows.
+    @MainActor private func tap(_ id: String, _ halo: Journey) {
+        let element = halo.element(id)
+        XCTAssert(element.waitForExistence(timeout: 5), "no \(id)")
+        element.click()
+    }
+
+    /// The layer list's row labelled `name` (`halo.layer.row.<id>`).
+    @MainActor private func layerRow(_ name: String, _ halo: Journey) -> XCUIElement {
+        halo.element("halo.layer.list").descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH 'halo.layer.row.' AND label == %@", name)).firstMatch
+    }
+
+    /// The element `id`'s label reads `label` within five seconds (values read empty, #262).
+    @MainActor private func expectLabel(_ id: String, _ label: String, _ halo: Journey) {
+        let element = halo.element(id)
+        XCTAssert(waitFor(seconds: 5) { element.label == label }, "\(id) reads \(element.label), not \(label)")
+    }
+
+    /// The artboard summary ("Frame f: Solid 1, Text 1: Hello") ends with `tail`.
+    @MainActor private func expectSummary(endingWith tail: String, _ halo: Journey) {
+        let summary = halo.element("halo.viewer.summary")
+        XCTAssert(waitFor(seconds: 5) { summary.label.hasSuffix(tail) }, "the artboard reads \(summary.label), not …\(tail)")
+    }
+
+    /// The text field `field` reads `words` within five seconds.
+    @MainActor private func expectField(_ field: XCUIElement, reads words: String) {
+        XCTAssert(
+            waitFor(seconds: 5) { (field.value as? String) == words },
+            "halo.inspector.text.string reads \(String(describing: field.value)), not \(words)")
+    }
+
+    /// The frame the artboard summary names ("Frame 12: …" gives 12).
+    @MainActor private func viewerFrame(_ halo: Journey) -> Int? {
+        let label = halo.element("halo.viewer.summary").label
+        guard label.hasPrefix("Frame ") else { return nil }
+        return Int(label.dropFirst("Frame ".count).prefix { $0.isNumber })
+    }
+
+    /// `halo.transport.play` reads `state`; a value read empty (#262) passes
+    /// when the playhead moves (Playing) or holds (Paused) over 0.3 s.
+    @MainActor private func expectPlay(_ state: String, _ halo: Journey) {
+        let play = halo.element("halo.transport.play")
+        if waitFor(seconds: 3, { (play.value as? String) == state }) { return }
+        let value = play.value as? String ?? ""
+        XCTAssert(value.isEmpty, "halo.transport.play reads \(value), not \(state)")
+        let before = viewerFrame(halo)
+        Thread.sleep(forTimeInterval: 0.3)
+        XCTAssertEqual(before != viewerFrame(halo), state == "Playing", "the playhead doesn't look \(state)")
+    }
+
+    /// The EASING chip `id` (`halo.easing.preset.<case>`), scrolled whole into the inspector. The chips
+    /// are lazy grids (#1411), so it scrolls toward the curve before the chip exists rather than waiting for it.
+    @MainActor private func chip(_ id: String, _ halo: Journey) -> XCUIElement {
+        let inspector = halo.element("suite.inspector"), curve = halo.element("halo.easing")
+        XCTAssert(curve.waitForExistence(timeout: 5), "no easing curve (halo.easing) with a span picked")
+        let chip = halo.element(id)
+        for _ in 0..<20 where !(chip.exists && inspector.frame.contains(chip.frame)) {
+            inspector.scroll(byDeltaX: 0, deltaY: curve.frame.minY > inspector.frame.midY ? -40 : 40)
+        }
+        XCTAssert(chip.exists, "no \(id) chip in EASING")
+        return chip
+    }
+
+    /// The EASING row `id` reads `easing` as its value, or holds a text reading it (#262).
+    @MainActor private func expectRow(_ id: String, reads easing: String, _ halo: Journey) {
+        let row = halo.element(id)
+        XCTAssert(
+            waitFor(seconds: 5) { (row.value as? String) == easing || Self.contains(easing, in: row).exists },
+            "\(id) reads \(String(describing: row.value)), not \(easing)")
+    }
+
+    /// Scrolls the inspector (`suite.inspector`) until `element` lies whole inside it.
+    @MainActor private func scrollInspector(toShow element: XCUIElement, _ halo: Journey) {
+        let inspector = halo.element("suite.inspector")
+        XCTAssert(element.waitForExistence(timeout: 5), "nothing to scroll to in the inspector")
+        for _ in 0..<20 where !inspector.frame.contains(element.frame) {
+            inspector.scroll(byDeltaX: 0, deltaY: element.frame.minY < inspector.frame.minY ? 40 : -40)
+        }
+        XCTAssert(inspector.frame.contains(element.frame), "\(element.frame) didn't scroll into \(inspector.frame)")
+    }
+
+    /// The pixel size of the PNG at `url`, decoded with ImageIO; nil when it doesn't decode.
+    private func pixelSize(of url: URL) -> (width: Int, height: Int)? {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+            let image = CGImageSourceCreateImageAtIndex(source, 0, nil)
+        else { return nil }
+        return (image.width, image.height)
+    }
+
+    /// Whether `condition` holds within `seconds`.
+    @MainActor private func waitFor(seconds: Int = 3, _ condition: () -> Bool) -> Bool {
+        for _ in 0..<(seconds * 5) {
+            if condition() { return true }
+            Thread.sleep(forTimeInterval: 0.2)
+        }
+        return condition()
     }
 
     // MARK: - Menus
@@ -298,7 +634,7 @@ final class HaloJourneyTests: XCTestCase {
         ("Layer", ["New", "Duplicate", "Rename…", "Delete", "Bring Forward", "Send Backward"]),
         ("Animation", [
             "Play/Pause", "Loop", "Next Frame", "Previous Frame", "Go to Start", "Go to End", "Set In Point",
-            "Set Out Point", "Keyframe Easing",
+            "Set Out Point", "Keyframe Easing", "Select All Keys", "Move Keyframes Left", "Move Keyframes Right",
         ]),
     ]
 
@@ -306,6 +642,7 @@ final class HaloJourneyTests: XCTestCase {
     private static let menusHolding: [(String, [String])] = [
         ("File", ["New Composition…", "Open…", "Open Recent", "Save", "Save As…", "Render…", "Render Frame"]),
         ("Edit", ["Undo", "Redo"]),
+        ("Window", ["Switch To", "AI Access…"]),
     ]
 
     /// The titles of `menu`'s top-level items, read with the menu open.
@@ -395,6 +732,22 @@ final class HaloJourneyTests: XCTestCase {
     }
 
     /// Clicks the sheet's field labelled `label`, selects its text and types `text`.
+    /// The New Composition sheet's Frame Rate menu: SuiteUI's FrameRateMenu, a
+    /// menu button (not a pop-up, #4341) carrying `halo.composition.sheet.frameRate`.
+    @MainActor private func frameRateMenu(in sheet: XCUIElement) -> XCUIElement {
+        sheet.menuButtons["halo.composition.sheet.frameRate"].firstMatch
+    }
+
+    /// Opens the sheet's Frame Rate menu and picks `rate`, titled as FrameRate's description ("24 fps").
+    @MainActor private func pickFrameRate(_ rate: String, in sheet: XCUIElement, _ halo: Journey) {
+        let menu = frameRateMenu(in: sheet)
+        XCTAssert(menu.waitForExistence(timeout: 5), "no Frame Rate menu (halo.composition.sheet.frameRate)")
+        menu.click()
+        let item = halo.app.menuItems[rate]
+        XCTAssert(item.waitForExistence(timeout: 5), "the Frame Rate menu offers no \(rate)")
+        item.click()
+    }
+
     @MainActor private func enter(_ text: String, into label: String, in sheet: XCUIElement) {
         let field = sheet.textFields[label]
         XCTAssert(field.waitForExistence(timeout: 5), "no \(label) field by its label (#286)")
@@ -413,6 +766,14 @@ final class HaloJourneyTests: XCTestCase {
         let predicate = NSPredicate(
             format: "label CONTAINS %@ OR (elementType == %@ AND value CONTAINS %@)", text, staticText, text)
         return root.descendants(matching: .any).matching(predicate).firstMatch
+    }
+
+    /// The first element whose label is `string`, or a static text whose
+    /// value is: SwiftUI's Text reads as either.
+    @MainActor private func text(_ string: String, _ halo: Journey) -> XCUIElement {
+        let staticText = NSNumber(value: XCUIElement.ElementType.staticText.rawValue)
+        let predicate = NSPredicate(format: "label == %@ OR (elementType == %@ AND value == %@)", string, staticText, string)
+        return halo.app.descendants(matching: .any).matching(predicate).firstMatch
     }
 
     /// The ControlDocument in `probe`'s label; nil when it's missing or isn't one.

@@ -1,6 +1,7 @@
 // PhotoWorkspace.swift: the state behind Photo's window (raster editing): the
 // open image's size and name, its layer stack (top first) with each layer's
-// pixels, the selected layer, the active tool, the brush's and the eraser's
+// pixels, the picked layers (a kernel Selection whose primary is the selected
+// layer), the active tool, the brush's and the eraser's
 // options (each tool keeps its own), the image
 // adjustments, the marquee selection and a pending crop, the clone source, and
 // the undo history.
@@ -25,7 +26,7 @@ import SuiteKernel
 
 /// The tools on Photo's floating tool palette.
 public enum PhotoTool: String, CaseIterable, Sendable {
-    case move, marquee, brush, eraser, clone, heal, crop, eyedropper, gradient
+    case move, marquee, brush, eraser, clone, heal, crop, eyedropper, gradient, text
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every other tool works: the canvas sends its drags to
@@ -63,7 +64,17 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var layers: [PhotoLayer] = []
     /// Each layer's pixels, by layer id, in tiles (TiledPixels).
     public internal(set) var pixels: [PhotoLayer.ID: TiledPixels] = [:]
-    public internal(set) var selectedLayerID: PhotoLayer.ID?
+    /// The picked layers, primary last, on the kernel's Selection (PhotoLayerSelection+Kernel.swift).
+    var layerSelection = Selection<PhotoLayer.ID>()
+    /// The layer the inspector, the brush and the Move tool act on: the
+    /// selection's primary. Setting it makes that layer the whole selection;
+    /// nil clears it.
+    public internal(set) var selectedLayerID: PhotoLayer.ID? {
+        get { layerSelection.primary }
+        set {
+            if let newValue { layerSelection.replace([newValue]) } else { layerSelection.clear() }
+        }
+    }
     public private(set) var tool: PhotoTool = .move
     /// The brush's options; its color is also the marquee's Fill color.
     public private(set) var brushOptions = ToolOptions()
@@ -119,6 +130,8 @@ public struct PhotoWorkspace: Sendable {
     /// A one-line refusal or note for the status line ("Nothing to paste.");
     /// `clearStatus()` drops it (the window calls it 4 s later).
     public internal(set) var statusMessage: String?
+    /// The Type tool's open box on the canvas, nil when none is (PhotoTextBox).
+    public internal(set) var textBox: PhotoTextBox?
     /// "Merging…" while Merge Down or Flatten Image works off the main actor (PhotoLayerOps.swift).
     public internal(set) var progress: String?
     /// The file flow's recents, open path and requests for the window (PhotoFileFlow+Kernel.swift).
@@ -199,6 +212,7 @@ public struct PhotoWorkspace: Sendable {
     /// Picks a tool, dropping any pending crop when it isn't the crop tool.
     public mutating func selectTool(_ tool: PhotoTool) {
         endDrag()
+        if tool != .text { commitTextBox() }
         self.tool = tool
         if tool != .crop, pendingCrop != nil { pendingCrop = nil }
     }
@@ -260,7 +274,7 @@ public struct PhotoWorkspace: Sendable {
         layers.remove(at: at)
         pixels[id] = nil
         layerGeometryChanged(id, .removed)
-        if selectedLayerID == id { selectedLayerID = layers[min(at, layers.count - 1)].id }
+        pruneLayerSelection(near: at)
         touch(.all)
         return true
     }
@@ -273,24 +287,8 @@ public struct PhotoWorkspace: Sendable {
         layers[at].name = trimmed
     }
 
-    /// Shows a hidden layer or hides a shown one.
-    public mutating func toggleVisibility(_ id: PhotoLayer.ID) {
-        guard let at = index(of: id) else { return }
-        commitKernelLayers(
-            Self.kernelEdited(layers) { tree in _ = tree.update(id) { $0.isHidden.toggle() } },
-            named: layers[at].isVisible ? "Hide Layer" : "Show Layer")
-    }
-
-    /// Sets opacity from a percentage, clamped to 0...100. NaN is ignored. A
-    /// run of opacity changes to one layer is one undo step.
-    public mutating func setOpacity(_ id: PhotoLayer.ID, percent: Double) {
-        guard !percent.isNaN, let at = index(of: id) else { return }
-        let opacity = min(max(percent, 0), 100) / 100
-        guard opacity != layers[at].opacity else { return }
-        recordLayers(named: "Layer Opacity", coalescing: "opacity-\(id)")
-        layers[at].opacity = opacity
-        touch(.all)
-    }
+    // Hide and Show, and Opacity, act on every picked layer when the row is
+    // picked: toggleVisibility and setOpacity are in PhotoSeveralLayers+Kernel.
 
     public mutating func setBlendMode(_ id: PhotoLayer.ID, _ mode: BlendMode) {
         guard let at = index(of: id), layers[at].blendMode != mode else { return }
@@ -380,7 +378,7 @@ extension PhotoWorkspace: Equatable {
     /// `services` isn't compared: it isn't Equatable and isn't what shows.
     public static func == (lhs: PhotoWorkspace, rhs: PhotoWorkspace) -> Bool {
         lhs.revision == rhs.revision && lhs.canvas == rhs.canvas && lhs.documentName == rhs.documentName
-            && lhs.layers == rhs.layers && lhs.selectedLayerID == rhs.selectedLayerID && lhs.tool == rhs.tool
+            && lhs.layers == rhs.layers && lhs.layerSelection == rhs.layerSelection && lhs.tool == rhs.tool
             && lhs.brushOptions == rhs.brushOptions
             && lhs.eraserOptions == rhs.eraserOptions && lhs.adjustments == rhs.adjustments
             && lhs.selection == rhs.selection && lhs.pendingCrop == rhs.pendingCrop
@@ -391,7 +389,7 @@ extension PhotoWorkspace: Equatable {
             && lhs.sampleSize == rhs.sampleSize && lhs.exportOptions == rhs.exportOptions
             && lhs.exportRun == rhs.exportRun
             && lhs.fileKind == rhs.fileKind && lhs.savedStepID == rhs.savedStepID
-            && lhs.statusMessage == rhs.statusMessage && lhs.progress == rhs.progress && lhs.masks == rhs.masks && lhs.pixels == rhs.pixels
+            && lhs.statusMessage == rhs.statusMessage && lhs.textBox == rhs.textBox && lhs.progress == rhs.progress && lhs.masks == rhs.masks && lhs.pixels == rhs.pixels
     }
 }
 

@@ -1,0 +1,8 @@
+[
+{"label":"a non-finite pointer shows a loupe (#3992)","file":"Sources/DesignModel/DesignLoupe.swift","find":"let point, point.isFinite else { return nil }","replace":"let point else { return nil }","tests":"DesignLoupeTests"},
+{"label":"any tool shows the loupe (#3992)","file":"Sources/DesignModel/DesignLoupe.swift","find":"guard tool == .eyedropper, isOpen,","replace":"guard isOpen,","tests":"DesignLoupeTests"},
+{"label":"the Stroke option no longer turns a plain click onto the stroke (#3993)","file":"Sources/DesignModel/DesignLoupe.swift","find":"toStroke: sampleToStroke != modifiers.contains(.option))","replace":"toStroke: modifiers.contains(.option))","tests":"DesignLoupeTests"},
+{"label":"Option no longer picks the stroke (#3992)","file":"Sources/DesignModel/DesignLoupe.swift","find":"toStroke: sampleToStroke != modifiers.contains(.option))","replace":"toStroke: sampleToStroke)","tests":"DesignLoupeTests"},
+{"label":"the size chips no longer set the Model's sample size (#3989)","file":"Sources/DesignModel/DesignLoupe.swift","find":"        sampleSize = size\n","replace":"        _ = size\n","tests":"DesignLoupeTests"},
+{"label":"the Fill/Stroke choice no longer sets the Model's target (#3993)","file":"Sources/DesignModel/DesignLoupe.swift","find":"        sampleToStroke = toStroke\n","replace":"        _ = toStroke\n","tests":"DesignLoupeTests"}
+]

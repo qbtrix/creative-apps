@@ -1,0 +1,4 @@
+[
+{"label": "adjustmentLayersRun: adjustment layers are skipped in the region composite", "file": "Sources/SuiteImaging/Route/LayeredToneBase.swift", "find": "let adjusted = try backend.adjusted(picture, tone: program)", "replace": "let adjusted = try backend.adjusted(picture, tone: ToneProgram([]))", "tests": "LayeredToneBaseTests/adjustmentLayersRun"},
+{"label": "cacheFollowsEdits: the region composite is kept after a tile edit", "file": "Sources/SuiteImaging/Route/LayeredToneBase.swift", "find": "if composited.indices.contains(index), let kept = composited[index] {", "replace": "if composited.indices.contains(index), let kept = composited[index], false {", "tests": "LayeredToneBaseTests/cacheFollowsEdits"}
+]

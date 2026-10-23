@@ -37,7 +37,7 @@ import Testing
         return catalog
     }
 
-    @Test(.disabled("waits on FC-12")) func newSmartCollectionKeepsTheFilterUnderItsSummary() throws {
+    @Test func newSmartCollectionKeepsTheFilterUnderItsSummary() throws {
         var catalog = try rated()
         let steps = catalog.history.undo.count
         #expect(catalog.newSmartCollectionHelp == nil)
@@ -61,7 +61,7 @@ import Testing
         #expect(catalog.filterCaption == nil)
     }
 
-    @Test(.disabled("waits on FC-12")) func withNoFilterOnASmartCollectionIsRefused() {
+    @Test func withNoFilterOnASmartCollectionIsRefused() {
         var catalog = LibraryCatalog()
         catalog.load(LibraryFixtures.photos(named: "shoot"))
         #expect(catalog.filter == .all)
@@ -73,7 +73,7 @@ import Testing
         #expect(catalog.collectionsRevision == 0)
     }
 
-    @Test(.disabled("waits on FC-12")) func whileASmartCollectionIsSelectedAnotherIsRefused() throws {
+    @Test func whileASmartCollectionIsSelectedAnotherIsRefused() throws {
         var catalog = try withSmart()
         let steps = catalog.history.undo.count
         #expect(catalog.newSmartCollectionHelp != nil)
@@ -84,7 +84,7 @@ import Testing
         #expect(catalog.newSmartCollectionHelp == nil, "All Photos under a filter can make one")
     }
 
-    @Test(.disabled("waits on FC-12")) func ratingAPhotoChangesTheCount() throws {
+    @Test func ratingAPhotoChangesTheCount() throws {
         var catalog = try withSmart()
         catalog.selectCollection("all")
         catalog.clearFilter()
@@ -100,7 +100,7 @@ import Testing
         #expect(catalog.order == [id(2), id(3)])
     }
 
-    @Test(.disabled("waits on FC-12")) func theBarEditsTheSelectedRulesAsOneStep() throws {
+    @Test func theBarEditsTheSelectedRulesAsOneStep() throws {
         var catalog = try withSmart()
         catalog.selectCollection("all")
         catalog.clearFilter()
@@ -131,7 +131,7 @@ import Testing
         #expect(catalog.selectedCollectionID == "smart-1")
     }
 
-    @Test(.disabled("waits on FC-12")) func rulesThatMatchNothingShowTheSmartEmptyState() throws {
+    @Test func rulesThatMatchNothingShowTheSmartEmptyState() throws {
         var catalog = try withSmart()
         catalog.setFilter(rules(.exactly(1)))
         #expect(catalog.order.isEmpty)

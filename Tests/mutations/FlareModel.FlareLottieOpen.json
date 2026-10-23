@@ -1,0 +1,44 @@
+[
+  {
+    "label": ".namesEverySkip: the open drops the skipped parts' sentences",
+    "file": "Sources/FlareModel/FlareLottieOpen.swift",
+    "find": "return (document, read.1.skipped.map(sentence))",
+    "replace": "return (document, [])",
+    "tests": "FlareLottieOpenTests"
+  },
+  {
+    "label": ".opensUntitled: the workspace opens the JSON under its own name, so Save would write over it",
+    "file": "Sources/FlareModel/FlareLottieOpen.swift",
+    "find": "            restoreRecovery(document)\n            return skipped\n",
+    "replace": "            finishOpen(.success(document), named: name)\n            return skipped\n",
+    "tests": "FlareLottieOpenTests"
+  },
+  {
+    "label": ".refusedBeforeReading: a file of exactly the limit is refused",
+    "file": "Sources/FlareModel/FlareLottieOpen.swift",
+    "find": "byteCount > LottieImport.maxBytes ?",
+    "replace": "byteCount >= LottieImport.maxBytes ?",
+    "tests": "FlareLottieOpenTests"
+  },
+  {
+    "label": ".titledByStem: the document's title keeps the .json extension",
+    "file": "Sources/FlareModel/FlareLottieOpen.swift",
+    "find": "document.metadata.title = stem(name)",
+    "replace": "document.metadata.title = name",
+    "tests": "FlareLottieOpenTests"
+  },
+  {
+    "label": ".notLottieSentence: a file that isn't Lottie is called damaged",
+    "file": "Sources/FlareModel/FlareLottieOpen.swift",
+    "find": "case .notLottie: \"This file isn't a Lottie file.\"",
+    "replace": "case .notLottie: \"This file is damaged.\"",
+    "tests": "FlareLottieOpenTests"
+  },
+  {
+    "label": ".damagedDetail: a damaged file's refusal drops the detail",
+    "file": "Sources/FlareModel/FlareLottieOpen.swift",
+    "find": "FlareWorkspace.sentence(\"This file isn't a Lottie file Flare can read\", detail)",
+    "replace": "FlareWorkspace.sentence(\"This file isn't a Lottie file Flare can read\", \"\")",
+    "tests": "FlareLottieOpenTests"
+  }
+]

@@ -1,5 +1,9 @@
 // AfterGlowJourneyTests+Onboarding.swift: OJ1 `testFirstLaunchShowsAndSkips`
-// and OJ2 `testFocusOrdersStarters` (onboarding packet, Journey steps; OB-6).
+// and OJ2 `testFocusOrdersStarters` (onboarding packet, Journey steps; OB-6),
+// and XJ-SS `testOpenEverySample` (sample-files packet, SS-7): each app's
+// Open sample opens its sample (shot `onboarding-sample-<app>`, audited once
+// the app has Switch To), a sample not in the bundle is disabled with its
+// reason, and RECENT lists the opened samples (shot `onboarding-samples-home`).
 // Both launch AfterGlow on `firstLaunch` without `-SuiteSkipOnboarding`, so
 // the "Welcome to AfterGlow" window presents itself over the home. Every
 // click is a mouse click on a titled button (`Journey.click`) or a menu item
@@ -116,7 +120,81 @@ final class AfterGlowOnboardingJourneys: XCTestCase {
         XCTAssert(Self.waitForPage(launcher, "focus"), "Return led to \(Self.page(launcher)), not focus")
     }
 
+    /// XJ-SS (sample-files SS-7): every tour tile's Open sample opens its app on its sample; Home's recents list them.
+    @MainActor func testOpenEverySample() throws {
+        let suite = SuiteHarness(self)
+        let launcher = Self.launch(suite)
+        let welcome = Self.welcome(launcher)
+        var missing: [String] = [], listed: [String] = []
+        for (index, app) in SuiteApp.apps.enumerated() {
+            // 1. Continue, Continue: the start page; after the first sample, Help > Welcome to AfterGlow first.
+            if index > 0 {
+                launcher.app.activate()
+                Self.reopen(launcher)
+                XCTAssert(Self.waitForPage(launcher, "apps"), "the reopened window reads \(Self.page(launcher)), not apps")
+            }
+            launcher.click("Continue", in: .window)
+            XCTAssert(Self.waitForPage(launcher, "focus"), "Continue led to \(Self.page(launcher)), not focus")
+            launcher.click("Continue", in: .window)
+            XCTAssert(Self.waitForPage(launcher, "start"), "Continue led to \(Self.page(launcher)), not start")
+            if index == 0 { launcher.shot("onboarding-samples-all-present") }
+
+            // 2. The tile: enabled when its sample is bundled; otherwise disabled with its reason, and Escape leaves.
+            let file = Self.sampleFiles[app] ?? ""
+            let id = Self.prefix + "sample." + app.rawValue
+            let tile = welcome.descendants(matching: .any)[id]
+            XCTAssert(tile.waitForExistence(timeout: 5), "\(app.displayName)'s row has no Open sample")
+            let bundled = SuiteHarness.bundle.appending(path: "Contents/Resources/Samples/" + file)
+            guard FileManager.default.fileExists(atPath: bundled.path) else {
+                XCTAssertFalse(tile.isEnabled, "Open sample is enabled with no \(file) in the bundle")
+                let entry = Self.controls(in: welcome)?.controls.first { $0.id == id }
+                XCTAssertEqual(entry?.reason, "The \(app.displayName) sample isn't in this build.", "\(file)'s reason")
+                missing.append(file)
+                launcher.press(.escape)
+                XCTAssert(welcome.waitForNonExistence(timeout: 10), "Escape didn't close the welcome window")
+                continue
+            }
+
+            // 3. Open sample: the window closes, the copy lands in Documents/Samples, the app comes forward on it.
+            XCTAssert(tile.isEnabled, "\(app.displayName)'s Open sample is disabled though \(file) is bundled")
+            tile.click()
+            XCTAssert(welcome.waitForNonExistence(timeout: 10), "\(app.displayName)'s Open sample didn't close the window")
+            let copy = suite.support.appending(path: "Documents/Samples/" + file)
+            XCTAssert(Self.waitFor { FileManager.default.fileExists(atPath: copy.path) }, "no copy at \(copy.path)")
+            XCTAssert(XCUIApplication(bundleIdentifier: app.bundleID).wait(for: .runningForeground, timeout: 30),
+                      "Open sample didn't bring \(app.displayName) forward")
+            XCTAssertNotEqual(launcher.app.state, .notRunning, "AfterGlow quit when \(app.displayName) opened")
+            let opened = suite.attach(app)
+            let adopted = AfterGlowOnboardingStartJourneys.hasSwitchTo(opened)
+            // Library imports Sunset.png into its catalog, so its window keeps the catalog's title.
+            let stem = String(file.prefix { $0 != "." })
+            let window = app == .library ? opened.app.windows.firstMatch
+                : opened.app.windows.matching(NSPredicate(format: "title BEGINSWITH %@", stem)).firstMatch
+            if adopted {
+                XCTAssert(window.waitForExistence(timeout: 10), "\(app.displayName)'s window isn't \(stem)")
+                listed.append(file)
+            }
+            opened.shot("onboarding-sample-" + app.rawValue, element: adopted ? window : opened.app.windows.firstMatch, audit: adopted)
+        }
+
+        // 4. Home: RECENT lists each sample an adopted app opened.
+        launcher.app.activate()
+        XCTAssert(launcher.app.wait(for: .runningForeground, timeout: 10), "the home didn't come forward")
+        XCTAssert(Self.waitFor { Self.frontTitle(launcher) == "AfterGlow" }, "the home isn't the front window")
+        for file in listed {
+            XCTAssert(Self.waitFor { AfterGlowJourneyTests.cardNames(launcher).contains(file) },
+                      "RECENT reads \(AfterGlowJourneyTests.cardNames(launcher)), without \(file)")
+        }
+        launcher.shot("onboarding-samples-home")
+        if !missing.isEmpty { throw XCTSkip("waits on #4113: \(missing.joined(separator: ", ")) isn't in Bundle/Samples") }
+    }
+
     // MARK: - Helpers
+
+    /// The file each app's Open sample opens: SampleCatalog.samples, as literals (the bundle compiles only Values).
+    static let sampleFiles: [SuiteApp: String] = [
+        .flare: "Bounce.flare", .design: "Cards.design", .photo: "beach.ora", .library: "Sunset.png", .halo: "Intro.halo",
+    ]
 
     /// Launches on `firstLaunch` with the welcome window allowed and the probes on; waits for it in front.
     @MainActor static func launch(_ suite: SuiteHarness) -> Journey {

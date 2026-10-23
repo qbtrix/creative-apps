@@ -4,7 +4,8 @@
 // close reaches the guard's delegate. One measured interaction: a close puts the sheet up and Cancel takes it down.
 // The sheet is its own window, so the document's body runs at most twice (the key change the sheet makes and its
 // end; target 0), and the window stays open and dirty. Nested in BodyCountSuites: it reads a global body
-// counter. macOS only.
+// counter. The close and Cancel go through UnsavedSheetFixture's `close` and `press`, never performClose or
+// performClick, whose nested event loops end the test run. macOS only.
 #if canImport(AppKit)
 import AppKit
 import SwiftUI
@@ -27,13 +28,15 @@ extension BodyCountSuites {
                 #endif
             }
             try await w.settle(untilStable: bodies)
+            let guarded = await UnsavedSheetFixture.eventually { w.window.delegate is UnsavedGuardDelegate }
+            try #require(guarded, "the guard never took the window's delegate")
             let step = try await w.measure("unsaved guard: close, the sheet, Cancel", bodies: bodies) {
-                try await w.ticks(1) { _ in w.window.performClose(nil) }
+                try await w.ticks(1) { _ in UnsavedSheetFixture.close(w.window) }
                 let up = await UnsavedSheetFixture.eventually { w.window.attachedSheet != nil }
                 #expect(up, "a close of the dirty document put no sheet up")
                 let cancel = UnsavedSheetFixture.button(.cancel, in: w.window)
                 #expect(cancel != nil, "the sheet has no Cancel button")
-                try await w.ticks(1) { _ in cancel?.performClick(nil) }
+                try await w.ticks(1) { _ in UnsavedSheetFixture.press(.cancel, in: w.window) }
                 let down = await UnsavedSheetFixture.eventually { w.window.attachedSheet == nil }
                 #expect(down, "Cancel left the sheet up")
             }

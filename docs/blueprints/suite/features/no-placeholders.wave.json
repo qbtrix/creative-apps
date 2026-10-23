@@ -2,7 +2,7 @@
   "title": "No placeholder menu items in the beta: the launcher's Check for Updates and Assets items and Flare's beta.2 items are hidden, and a ratchet keeps new ones out (Settings stays for the captain's call)",
   "wave": "BG1",
   "order": 60,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "beta gaps 2026-10-21 suite must-have 6 (suite audit row 4) and Flare's stub menu items (Flare audit B7); real job RJ-X64 (new)",

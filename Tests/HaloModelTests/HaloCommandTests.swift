@@ -21,7 +21,7 @@ let stubIssues: [HaloCommandArea: Set<String>] = [
 ]
 
 /// The stubs a feature packet's contract slice ships, named by task (key-editing KE-1).
-let stubTasks: [HaloCommandArea: Set<String>] = [.easing: ["Not built yet (KE-4)."]]
+let stubTasks: [HaloCommandArea: Set<String>] = [:]
 
 /// Commands that work today and answer from state only.
 let shippedCommands: [HaloCommand] = [
@@ -101,10 +101,11 @@ func everyCommandActsOrSaysWhy(services: HaloServices) {
     var project = commandProject("keyed", .fake)
     #expect(project.unavailableHelp(for: .pickLaneKeys(layerID: ball, frame: nil, mode: .toggle)) == nil)
     #expect(project.unavailableHelp(for: .selectAllKeys) == nil)
-    #expect(project.unavailableHelp(for: .moveKeys(by: 6, dragStart: 0)) == "Not built yet (KE-4).")
+    #expect(project.unavailableHelp(for: .moveKeys(by: 6, dragStart: 0)) == "Select keyframes to move.")
     #expect(project.selectAllKeysHelp == nil)
-    #expect(project.moveKeysHelp == "Not built yet (KE-4).")
+    #expect(project.moveKeysHelp == "Select keyframes to move.")
     project.pickLaneKeys(layerID: ball, frame: 0, mode: .replace)
+    #expect(project.unavailableHelp(for: .moveKeys(by: 6, dragStart: 0)) == nil)
     #expect(project.selectedLayerID == ball)
     #expect(project.pickedFrames(of: ball) == [0])
     project.pickLaneKeys(layerID: ball, frame: 24, mode: .extend)

@@ -61,5 +61,19 @@
     "find": "            selectedCollectionID = \"all\"\n",
     "replace": "",
     "tests": "LibraryCollectionsHistoryTests"
+  },
+  {
+    "label": "undoing a delete leaves All Photos selected",
+    "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "find": "        if side == \\.collectionsBefore, let selected = applied.selectedBefore { reselect(selected, after: applied) }\n",
+    "replace": "",
+    "tests": "LibraryCollectionsTests"
+  },
+  {
+    "label": "undo jumps back to the collection selected before any collections step",
+    "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "find": "let removed = !(change.collectionsAfter ?? []).contains { $0.id == id }",
+    "replace": "let removed = true",
+    "tests": "LibraryCollectionsTests"
   }
 ]

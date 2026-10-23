@@ -4,7 +4,7 @@
 // with Save, Don't Save and Cancel (`<app>.close.save|dontSave|cancel`, from UnsavedPrompt.answers); Escape
 // cancels and the window stays, still dirty; ⌘W again and ⌘D (Don't Save) closes it. Then a fresh launch, an
 // edit and File > New ask the same; Save on the untitled document opens the Save panel, and cancelling the
-// panel keeps the document. Each app's leg skips by name until its slice turns it on (UP-6 Design, UP-8 Photo,
+// panel (a sheet, or the app-modal dialog Design's runs) keeps the document. Each app's leg skips by name until its slice turns it on (UP-6 Design, UP-8 Photo,
 // UP-10 Flare, UP-12 Halo); the test runs every leg and skips at the end naming the legs still waiting.
 // The bundle doesn't link SuiteKernel, so the words below mirror UnsavedPrompt (Sources/SuiteKernel/Session/
 // DocumentSession.swift) and must change with it.
@@ -17,11 +17,13 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
         let prefix: String
         let name: String
         let arguments: [String]
+        /// File's item that replaces the document ("New File" in Design, "New" elsewhere).
+        var newItem = "New"
         let edit: @MainActor (Journey) -> Void
     }
 
     /// The editors whose leg runs; each slice adds its app here and deletes its skip.
-    private static let live: Set<String> = []
+    private static let live: Set<String> = ["Design"]
 
     /// UnsavedPrompt.message(for:).
     private static func message(for name: String) -> String {
@@ -56,10 +58,10 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
     }
 
     @MainActor private func designLeg() throws {
-        guard Self.live.contains("Design") else { throw XCTSkip("waits on UP-6") }
         askBeforeClosing(Editor(
             app: "Design", prefix: "design", name: "Untitled",
             arguments: ["-DesignServices", "live", "-DesignFixture", "cards", "-SuiteWindowSize", "1024x768"],
+            newItem: "New File",
             edit: { design in
                 design.element("suite.tools").buttons["Rectangle"].click()
                 design.drag(on: "suite.canvas", from: CGVector(dx: 0.56, dy: 0.61), to: CGVector(dx: 0.70, dy: 0.75))
@@ -126,12 +128,12 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
         journey = launch(editor)
         editor.edit(journey)
         journey.app.menuBars.menuBarItems["File"].click()
-        journey.app.menuBars.menuItems["New"].firstMatch.click()
+        journey.app.menuBars.menuItems[editor.newItem].firstMatch.click()
         expectPrompt(editor, journey)
         let saveButton = sheet(journey).buttons["\(editor.prefix).close.save"]
         saveButton.click()
         XCTAssert(saveButton.waitForNonExistence(timeout: 5), "\(editor.app): Save left the unsaved sheet up")
-        XCTAssert(sheet(journey).waitForExistence(timeout: 10), "\(editor.app): Save on Untitled opened no Save panel")
+        XCTAssert(savePanel(journey).exists, "\(editor.app): Save on Untitled opened no Save panel")
         journey.shot("unsaved-save-panel")
         journey.press(.escape)
         XCTAssert(journey.app.windows.firstMatch.waitForExistence(timeout: 5), "\(editor.app): cancelling the panel closed the document")
@@ -149,6 +151,15 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
 
     /// The window's sheet.
     @MainActor private func sheet(_ journey: Journey) -> XCUIElement { journey.app.sheets.firstMatch }
+
+    /// The Save panel: a sheet on the window, else an app-modal dialog.
+    @MainActor private func savePanel(_ journey: Journey) -> XCUIElement {
+        let sheet = sheet(journey)
+        if sheet.waitForExistence(timeout: 10) { return sheet }
+        let dialog = journey.app.dialogs.firstMatch
+        _ = dialog.waitForExistence(timeout: 2)
+        return dialog
+    }
 
     /// The sheet is up and matches UnsavedPrompt: its message for `editor.name`, then each answer's button by id and title.
     @MainActor private func expectPrompt(_ editor: Editor, _ journey: Journey) {

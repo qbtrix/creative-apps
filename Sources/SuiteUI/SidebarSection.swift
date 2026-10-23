@@ -151,15 +151,19 @@ struct SidebarContextMenu: ViewModifier {
         actions.isEmpty ? nil : actions.map(SidebarMenuItem.init)
     }
 
+    /// The menu's system buttons, one per item.
+    // view-static: main-actor
+    static func buttons(_ items: [SidebarMenuItem]) -> some View {
+        ForEach(items) { item in
+            Button(item.title, systemImage: item.systemImage, action: item.perform)
+                .disabled(item.isDisabled)
+                .help(item.help ?? item.title)
+        }
+    }
+
     @ViewBuilder func body(content: Content) -> some View {
         if let items {
-            content.contextMenu {
-                ForEach(items) { item in
-                    Button(item.title, systemImage: item.systemImage, action: item.perform)
-                        .disabled(item.isDisabled)
-                        .help(item.help ?? item.title)
-                }
-            }
+            content.contextMenu { Self.buttons(items) }
         } else {
             content
         }

@@ -2,7 +2,7 @@
 // (DesignSample+Kernel). On a new file (node-1, the white Desktop frame) a grey rectangle node-2 (100 100 200 200)
 // sits under a red ellipse node-3 (200 200 200 200). The sample reads the topmost visible painted layer, never the
 // selection; a hidden layer is skipped; empty canvas reads nil; an apply is one step and a locked selection
-// refuses. The DY-5 cases wait on the adapter's bodies; the tool's existence is checked now. Linux and macOS.
+// refuses; a gradient reads its colour at the point; the Eyedropper is enabled and a click picks once. Linux and macOS.
 import DesignModel
 import SuiteKernel
 import Testing
@@ -32,13 +32,43 @@ import Testing
         #expect(openDesign().sampleHelp == nil)
     }
 
-    /// Until DY-5 the pick refuses and changes nothing.
-    @Test func theStubPickRefusesAndChangesNothing() throws {
+    /// #3987: the palette's Eyedropper is enabled, and with nothing selected the pick refuses and changes nothing.
+    @Test func theEyedropperIsEnabledAndNeedsASelection() throws {
+        #expect(DesignTool.eyedropper.isEnabled)
         var w = try Self.shapes()
+        w.deselect()
         let before = w
-        #expect(throws: DesignRefusal.self) { try w.applySample(at: Point(x: 350, y: 350), toStroke: false) }
-        #expect(throws: DesignRefusal.self) { try w.applySample(at: Point(x: 350, y: 350), toStroke: true) }
+        #expect(throws: DesignRefusal.nothingSelected) { try w.applySample(at: Point(x: 350, y: 350), toStroke: false) }
         #expect(w == before, "a refused pick changes nothing")
+    }
+
+    /// A gradient reads its colour at the point (`GradientRules.color(of:at:)` on the line's projection), not its
+    /// first stop: red to blue, left to right across node-2, above the ellipse.
+    @Test func gradientAtPoint() throws {
+        var w = try Self.shapes()
+        let box = try #require(w.fillSelection?.box)
+        let red = FillColor(r: 1, g: 0, b: 0), blue = FillColor(r: 0, g: 0, b: 1)
+        let redToBlue = Fill.linear(
+            stops: [GradientStop(offset: 0, color: red), GradientStop(offset: 1, color: blue)],
+            start: Point(x: box.minX, y: box.minY), end: Point(x: box.maxX, y: box.minY))
+        try w.setFill(redToBlue, in: box, name: "Fill", drag: nil)
+        #expect(Self.hex(w.sampledColor(at: Point(x: 200, y: 150), size: .point)) == "#800080")
+        #expect(Self.hex(w.sampledColor(at: Point(x: 120, y: 150), size: .point)) == "#E6001A")
+    }
+
+    /// A click with the Eyedropper is one step however far the pointer wanders before release, and it lands on
+    /// the selection only: the ellipse it read keeps its red, the rectangle stays selected, the tool stays.
+    @Test func aClickPicksOnce() throws {
+        var w = try Self.shapes()
+        w.selectTool(.eyedropper)
+        let steps = w.historyListing.steps.count
+        w.drag(from: pt(350, 350), to: pt(360, 360))
+        w.drag(from: pt(360, 360), to: pt(370, 370))
+        w.endDrag()
+        #expect(w.historyListing.steps.count == steps + 1, "one click, one step")
+        #expect(w.treeNode("node-2")?.fill == DesignColor(255, 0, 0))
+        #expect(w.treeNode("node-3")?.fill == DesignColor(255, 0, 0))
+        #expect(w.selectedNodeID == "node-2" && w.tool == .eyedropper)
     }
 
     /// Journey steps 1 and 4: the Eyedropper keeps the selection, and back to Move keeps it too.
@@ -53,7 +83,7 @@ import Testing
     }
 
     /// Journey steps 2 and 3 through the tool's click on the canvas, not applySample.
-    @Test(.disabled("waits on DY-5")) func pickJourneyWalkClicks() throws {
+    @Test func pickJourneyWalkClicks() throws {
         var w = try Self.shapes()
         w.selectTool(.eyedropper)
         w.drag(from: pt(350, 350), to: pt(350, 350))
@@ -68,26 +98,26 @@ import Testing
         #expect(w.selectedNodeID == "node-2")
     }
 
-    @Test(.disabled("waits on DY-5")) func samplesTopmost() throws {
+    @Test func samplesTopmost() throws {
         let w = try Self.shapes()
         #expect(Self.hex(w.sampledColor(at: Point(x: 250, y: 250), size: .point)) == "#FF0000", "the ellipse on top, not the selection")
         #expect(Self.hex(w.sampledColor(at: Point(x: 120, y: 120), size: .point)) == "#D9D9D9")
         #expect(Self.hex(w.sampledColor(at: Point(x: 1000, y: 900), size: .point)) == "#FFFFFF")
     }
 
-    @Test(.disabled("waits on DY-5")) func skipsHidden() throws {
+    @Test func skipsHidden() throws {
         var w = try Self.shapes()
         try w.toggleNodeFlag("node-3", .hidden)
         #expect(Self.hex(w.sampledColor(at: Point(x: 250, y: 250), size: .point)) == "#D9D9D9")
     }
 
-    @Test(.disabled("waits on DY-5")) func emptyCanvasIsNil() throws {
+    @Test func emptyCanvasIsNil() throws {
         let w = try Self.shapes()
         #expect(w.sampledColor(at: Point(x: 2000, y: 2000), size: .point) == nil)
         #expect(DesignWorkspace().sampledColor(at: Point(x: 10, y: 10), size: .point) == nil)
     }
 
-    @Test(.disabled("waits on DY-5")) func applyIsOneStep() throws {
+    @Test func applyIsOneStep() throws {
         var w = try Self.shapes()
         try w.applySample(at: Point(x: 350, y: 350), toStroke: false)
         #expect(w.treeNode("node-2")?.fill == DesignColor(255, 0, 0))
@@ -98,7 +128,22 @@ import Testing
         #expect(w.treeNode("node-2")?.fill == DesignColor.shape, "Option-click leaves the fill")
     }
 
-    @Test(.disabled("waits on DY-5")) func lockedSelectionRefuses() throws {
+    /// #3991: the sample size reaches the pick, not only the loupe. Just outside the red ellipse's right edge a
+    /// point reads the white frame, a 5 × 5 square reads some red too, and the pick applies what the loupe showed.
+    @Test func sizeChangesThePick() throws {
+        var w = try Self.shapes()
+        w.selectTool(.eyedropper)
+        let edge = pt(401, 300)
+        let point = w.loupe(at: edge, modifiers: [])?.color
+        w.setSampleSize(.fiveByFive)
+        let square = w.loupe(at: edge, modifiers: [])?.color
+        #expect(square != nil)
+        #expect(square != point, "a 5 × 5 square across the edge reads another colour than the point")
+        try w.pick(at: edge, toStroke: false)
+        #expect(w.treeNode("node-2")?.fill == square, "the pick applies the square the loupe showed")
+    }
+
+    @Test func lockedSelectionRefuses() throws {
         var w = try Self.shapes()
         try w.toggleNodeFlag("node-2", .locked)
         let before = w

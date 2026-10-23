@@ -3,8 +3,11 @@
 // `history.read` and `history.jump` read and move Photo's history. The listing
 // is the kernel's, based on PhotoHistory's "Open" or "New Image", with the
 // saved step Photo keeps (`savedStepID`, nil for a restored autosave never
-// saved) in place of the kernel's own, which Photo never sets. The jump is a
-// stub until PH-5 writes its body. Linux-safe.
+// saved) in place of the kernel's own, which Photo never sets. The jump
+// (PH-5) ends the open run (a slider drag in progress), then moves through
+// the kernel's History.jump, applying each step's PhotoEdit in order: a jump
+// of ten swaps ten steps' tiles or stacks, never a replay from "Open", and
+// records no step. Mid-stroke it is ignored, as Undo is. Linux-safe.
 import SuiteKernel
 
 extension PhotoWorkspace: HistoryJumping {
@@ -17,6 +20,9 @@ extension PhotoWorkspace: HistoryJumping {
     }
 
     /// Undoes or redoes until `index` steps are applied, recording no step and
-    /// ending the open run. A stub: history-panel PH-5 writes the body.
-    public mutating func jumpHistory(to index: Int) throws {}
+    /// ending the open run, even when the image is already there.
+    public mutating func jumpHistory(to index: Int) throws {
+        endAdjust()
+        jumpToHistoryStep(index)
+    }
 }

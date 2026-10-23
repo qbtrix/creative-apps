@@ -1,11 +1,11 @@
-// PlacedImageRows.swift: the inspector rows for a selected placed image (placed-images PL-2 placeholder: the file
-// row only; PL-3 adds Replace… and Reset Size, sending `PlaceIntent`s through `onIntent`). `PlacedImageText` holds
-// the words the rows, the view and the gallery read out.
+// PlacedImageRows.swift: the inspector rows for a selected placed image (placed-images PL-3): the file row, then
+// Replace… (the Place… panel; the first file it reads becomes `.replace`) and Reset Size (`.resetSize`), each sent
+// through `onIntent`. `PlacedImageText` holds the words the rows, the view and the gallery read out.
 import Foundation
 import SuiteKernel
 import SwiftUI
 
-/// The rows for a placed image: "wide.png · PNG · 1200 × 400 px".
+/// The rows for a placed image: "wide.png · PNG · 1200 × 400 px", then Replace… and Reset Size.
 public struct PlacedImageRows: View {
     private let asset: PlacedAsset
     private let formats: Set<PlacedFormat>
@@ -21,6 +21,24 @@ public struct PlacedImageRows: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("suite.place.file")
+        InspectorRow("") {
+            HStack(spacing: SuiteSpacing.s) {
+                Button("Replace…", action: replace)
+                    .help("Choose another file for this image; its box stays.")
+                    .suiteControl(id: "suite.place.replace", enabled: true, reason: nil)
+                Button("Reset Size") { onIntent(.resetSize) }
+                    .help("Size the box to the file's own proportions.")
+                    .suiteControl(id: "suite.place.reset-size", enabled: true, reason: nil)
+            }
+        }
+    }
+
+    private func replace() {
+        let (formats, onIntent) = (formats, onIntent)
+        Task { @MainActor in
+            guard let file = await PlacePanel.choose(formats: formats).first else { return }
+            onIntent(.replace(name: file.name, data: file.data))
+        }
     }
 }
 
