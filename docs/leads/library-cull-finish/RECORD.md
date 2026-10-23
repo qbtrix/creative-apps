@@ -2,16 +2,16 @@
 
 Issue: #3458 · Packet: docs/blueprints/library/features/cull-finish.md
 Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 · earlier run act-1a15995d319-aamb
-Stage: build, wave 2 PRs open (DR-6 #4844, DR-u #4838); next wave 3 (DR-7 + DR-8 stacked on #4844). Checked 2026-10-23T16:33:18Z
+Stage: build, wave 3 PRs open (DR-u #4838, DR-6 #4844, DR-7+8 #4899 stacked on #4844); fixer adding largeBudget to perf-suites in #4844 and restacking #4899. Checked 2026-10-23T17:32:30Z
 Base: origin/dev 35a0b5e7
-Next: DR-7 + DR-8 as one PR stacked on feat/cull-finish-dr6; then a scoped run app=library once #4838 and the DR-m PRs land
+Next: lane merges #4838, #4844, #4899 (#4899 fits 400/15 once #4844 lands); then a scoped run app=library for Belt-Slice-Done DR-u (+Mac-Finish-Wanted) and DR-m; then DR-z (DR-9 journey, DR-10 docs incl. the ⌥⌘⌫ packet wording and excludedPaths wiring gap)
 
 ## Slices
 | slice | behavior | tasks | waits on | ui | rounds | state | run |
 |---|---|---|---|---|---|---|---|
 | DR-a | contract: Trash service, label keys 6-9, Delete Rejects stubs, tests written disabled | DR-1, DR-2 | FC-a (on dev), MD-a (on dev) | no | 0 | done | 39507806909 |
 | DR-u | confirm dialog, ⌥⌘⌫, Set Label 6-9; snapshots; journey skipped | DR-3, DR-4 | DR-a, FC-a, MD-d/e (met: MD-a merged) | yes | 0 | PR #4838 open | - |
-| DR-m | label cull, deleteRejects body + undo, excludedPaths coding, LiveTrash | DR-5..DR-8 | DR-a; MD-c, MD-e (met: MD-a merged) | no | 0 | DR-6 #4844 open; DR-7/8 next | - |
+| DR-m | label cull, deleteRejects body + undo, excludedPaths coding, LiveTrash | DR-5..DR-8 | DR-a; MD-c, MD-e (met: MD-a merged) | no | 0 | DR-6 #4844, DR-7+8 #4899 open | - |
 | DR-z | journey on, docs, C4, feature-done | DR-9, DR-10 | DR-u, DR-m | no | 0 | waiting | - |
 
 ## Tasks
@@ -21,8 +21,8 @@ Next: DR-7 + DR-8 as one PR stacked on feat/cull-finish-dr6; then a scoped run a
 | DR-2 | DR-a | 1 | disabled tests for DR-5/DR-6, never-deletes scan, delete-rejects real job (pending DR-8) | #3625 | open, stacked on #3623; CI: PASS on e0752118 |
 | DR-5 | DR-m | 1 | keys 6-9 set Red/Yellow/Green/Blue as one step, never advance (40 lines, folded into DR-2's PR) | #3625 | merged daee0e736; Mutate 2/2 LibraryModel.LibraryCulling |
 | DR-6 | DR-m | 2 | deleteRejects body, trashed undo step, excludedPaths fed to import; turns on LibraryDeleteRejectsTests | #4844 | open, fast-lane; head 22bef36a; Mutate 4/4 LibraryModel.LibraryDeleteRejects |
-| DR-7 | DR-m | 3 | excludedPaths in the catalog file (omitted when empty); photo.delete-rejects command | - | building (feat/cull-finish-dr7-8, one PR with DR-8) |
-| DR-8 | DR-m | 4 | LiveTrash on FileManager.trashItem; RJ-L06 on | - | next, one PR with DR-7 |
+| DR-7 | DR-m | 3 | excludedPaths in the catalog file (omitted when empty); photo.delete-rejects command | #4899 | open, fast-lane, stacked on #4844; head 3b0ca387; Mutate 6/6 LibraryModel.LiveCatalogCoding |
+| DR-8 | DR-m | 4 | LiveTrash on FileManager.trashItem; RJ-L06 on | #4899 | open with DR-7; RJ-L06 stays pending: LibraryHeadless and LibraryWindow+Persist do not pass excludedPaths yet (folded into DR-z or a gap) |
 | DR-3 | DR-u | 2 | Photo > Delete Rejected Photos… ⌥⌘⌫, confirmationDialog, Set Label names 6-9 | #4838 | open, fast-lane, head 1be77364 (⌥⌘⌫ fix) (one PR with DR-4) |
 | DR-4 | DR-u | 2 | snapshots, render budget, journey skipped (waits on DR-9) | #4838 | open, fast-lane (one PR with DR-3) |
 
@@ -50,3 +50,4 @@ Next: DR-7 + DR-8 as one PR stacked on feat/cull-finish-dr6; then a scoped run a
 - 2026-10-23T16:33:18Z: DR-6's large budget test (300 rejects in 10,000) ships disabled: the gate fails any timing test not in Tests/perf-suites.txt, which only the supervisor edits. Ask: add LibraryModelTests.largeBudget there.
 - 2026-10-23T16:33:18Z: testEveryMenuOpens (UITests/LibraryJourneyTests.swift) lists the Photo menu exactly; DR-9 adds the new item to it when it turns the journey on.
 - 2026-10-23T16:35:10Z: 27 open line:library findings, none against this feature; asked the supervisor on #3458 whether they gate new waves. Counting only this feature's (0) until answered.
+- 2026-10-23T17:32:30Z: supervisor answered on #3458 (6369907319): count only this run's findings; go on with wave 3; add `library LibraryModelTests.largeBudget` to Tests/perf-suites.txt inside #4844; ⌥⌘⌫ is fine, keep it in the shortcut catalog. Checked: Library has no shortcut catalog or conflict test (LibraryCommandCatalog's CommandSpec has no key field); by hand, ⌥⌘⌫ Delete Rejected Photos and ⌘⌫ Remove from Collection are the only delete keys, no clash. #4838 is 398/400 lines, so no catalog there; DR-10 fixes the packet's ⌘⌫ wording to ⌥⌘⌫.
