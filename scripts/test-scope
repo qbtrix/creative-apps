@@ -35,14 +35,19 @@
 # test missed by more than FLAG times; it never fails on a number.
 #
 # timing prints one line per enabled test in Tests/ (TESTS_DIR) that asserts a
-# wall-clock bound but isn't in the perf list, so CI would gate a number a busy
-# runner can miss; Tests/test_scope fails unless it prints nothing. A test
-# asserts one when an #expect or #require line in its body has an upper bound
-# (a spaced `<` or `<=`) against a Duration literal (`.milliseconds(`, ...), or
-# one with a timing name before it (median, p95, elapsed, percentile, took...)
-# in a file that reads a clock (ContinuousClock, `measure(`). Line-based on
-# purpose: a lower bound, a count budget (bodies, copies) or a bound named any
-# other way passes. A `not-timing:` comment in the test's body exempts it.
+# wall-clock bound but is in neither the perf list nor Tests/timing-baseline.txt
+# (TIMING_BASELINE), so CI would gate a number a busy runner can miss, plus one
+# per baseline line whose test no longer times (the baseline only shrinks);
+# Tests/test_scope fails unless it prints nothing. A test asserts one when an
+# #expect or #require line in its body has an upper bound (a spaced `<` or
+# `<=`) against a Duration literal (`.milliseconds(`, ...), or, in a file that
+# reads a clock (ContinuousClock, `measure(`), an upper bound with a timing name
+# before it (median, p95, elapsed, percentile, took...) or a lower bound on
+# frames drawn (frames, fps, drawn, redraws), or when it calls an assertion
+# helper (a func anywhere in Tests/ named expect*, require*, assert*, such as
+# expectP95) whose own body asserts one. Line-based on purpose: a count budget
+# (bodies, copies), a lower bound on anything else or a helper named any other
+# way passes. A `not-timing:` comment in the test's body exempts it.
 #
 # heavy prints one regex, empty when there is none. Tests/heavy-suites.txt
 # (same format as the perf list) lists correctness tests that cost seconds of
@@ -99,6 +104,7 @@ CLI = ("AfterGlowCLITests", None)  # the CLI drives every Model and the kernel h
 ALL = [("all", None)]
 FLAG = 3  # a perf test is flagged when it measured over FLAG times a bound it asserts
 PERF_LIST = os.environ.get("PERF_SUITES") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Tests", "perf-suites.txt")
+TIMING_BASELINE = os.environ.get("TIMING_BASELINE") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Tests", "timing-baseline.txt")
 HEAVY_LIST = os.environ.get("HEAVY_SUITES") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Tests", "heavy-suites.txt")
 
 
@@ -235,6 +241,9 @@ TEST_FUNC = re.compile(r"\bfunc\s+(\w+)")
 UPPER = re.compile(r"#(expect|require)\(.*\s<=?\s")
 DURATION = re.compile(r"\s<=?\s*[^,]*\.(milli|micro|nano)?seconds\(")
 TIMED_NAME = re.compile(r"(?i)(elapsed|median|p50|p95|p99|percentile|latency|took)[^<]*\s<=?\s")
+# a lower bound on frames drawn (frames, fps, drawn, redraws): how many land in a wall-clock window.
+HELPER = re.compile(r"(expect|require|assert)[A-Z0-9]")  # an assertion helper's name: expectP95, not check
+FRAMES_FLOOR = re.compile(r"(?i)#(expect|require)\(.*\b\w*(frame|fps|drawn|draws|redraw)\w*\s>=?\s")
 CLOCK = re.compile(r"ContinuousClock|SuspendingClock|DispatchTime\.now|CFAbsoluteTimeGetCurrent|\bmeasure\(")
 
 
@@ -244,9 +253,10 @@ def swift_code(line):
     return re.sub(r'"(?:\\.|[^"\\])*"', '""', line).split("//", 1)[0]
 
 
-def swift_tests(path):
-    """(suite path, test name, disabled, body lines) for each @Test func in a Swift file. Tracks braces line
-    by line; a suite (struct, enum, extension) is disabled when its attributes are, and so is each test in it."""
+def swift_tests(path, helpers=False):
+    """(suite path, test name, disabled, body lines) for each @Test func in a Swift file (each other func
+    with helpers). Tracks braces line by line; a suite (struct, enum, extension) is disabled when its
+    attributes are, and so is each test in it."""
     with open(path, errors="replace") as f:
         lines = f.read().splitlines()
     # attrs: the code since the last line ending in { or } outside brackets, so a multi-line
@@ -258,7 +268,7 @@ def swift_tests(path):
             head = "\n".join(attrs + [code])
             disabled = any(d for _, _, d in suites) or ".disabled(" in head
             name, decl = TEST_FUNC.search(code), DECL.search(code)
-            if name and "@Test" in head:
+            if name and ("@Test" in head) != helpers:
                 test = ([n for n, _, _ in suites], name.group(1), disabled, [], depth)
             elif decl:
                 suites.append((decl.group(2), depth, disabled))
@@ -276,30 +286,49 @@ def swift_tests(path):
     return out
 
 
+def times(code, clock):
+    """Whether a line of Swift code asserts a wall-clock bound (the header's detector)."""
+    return bool(
+        (UPPER.search(code) and (DURATION.search(code) or (clock and TIMED_NAME.search(code))))
+        or (clock and FRAMES_FLOOR.search(code)))
+
+
 def timing_tests(root=TESTS_DIR):
-    """(id, where, bound) for each enabled test in Tests/<Target>/ that asserts a wall-clock bound, unless
-    a `not-timing:` comment in its body marks it a deliberate exception."""
-    found = []
+    """(id, where, bound) for each enabled test in Tests/<Target>/ that asserts a wall-clock bound, itself
+    or through a helper func (anywhere in Tests/) that does, unless a `not-timing:` comment in its body
+    marks it a deliberate exception."""
+    files = []
     for target in sorted(os.listdir(root)):
-        for dirpath, _, files in sorted(os.walk(os.path.join(root, target))):
-            for name in sorted(f for f in files if f.endswith(".swift")):
+        for dirpath, _, names in sorted(os.walk(os.path.join(root, target))):
+            for name in sorted(f for f in names if f.endswith(".swift")):
                 path = os.path.join(dirpath, name)
                 with open(path, errors="replace") as f:
-                    clock = bool(CLOCK.search(f.read()))
-                for suites, test, disabled, body in swift_tests(path):
-                    if disabled or any("not-timing:" in b for b in body):
-                        continue
-                    for line in body:
-                        code = swift_code(line)
-                        if UPPER.search(code) and (DURATION.search(code) or (clock and TIMED_NAME.search(code))):
-                            found.append((f"{target}.{'/'.join(suites + [test])}", name, line.strip()))
-                            break
+                    files.append((target, name, path, bool(CLOCK.search(f.read()))))
+    timed = {helper for _, _, path, clock in files for _, helper, _, body in swift_tests(path, helpers=True)
+             if HELPER.match(helper) and any(times(swift_code(b), clock) for b in body)}
+    call = re.compile(r"(?<!func )\b(%s)\(" % "|".join(sorted(timed))) if timed else None
+    found = []
+    for target, name, path, clock in files:
+        for suites, test, disabled, body in swift_tests(path):
+            if disabled or any("not-timing:" in b for b in body):
+                continue
+            for line in body:
+                code = swift_code(line)
+                if times(code, clock) or (call and call.search(code)):
+                    found.append((f"{target}.{'/'.join(suites + [test])}", name, line.strip()))
+                    break
     return found
 
 
 def unlisted_timing(root=TESTS_DIR):
+    """The timing tests neither the perf list nor the baseline holds, and a line per baseline id that no
+    longer times (the baseline only shrinks)."""
     perf = perf_regex()
-    return [t for t in timing_tests(root) if not (perf and re.search(perf, t[0] + "("))]
+    with open(TIMING_BASELINE) as f:
+        baseline = {l.split("#", 1)[0].strip() for l in f} - {""}
+    found = [t for t in timing_tests(root) if not (perf and re.search(perf, t[0] + "("))]
+    stale = sorted(baseline - {t[0] for t in found})
+    return [t for t in found if t[0] not in baseline] + [(i, "timing-baseline.txt", "no longer times: drop its line") for i in stale]
 
 
 NUMBER = r"([-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?)"

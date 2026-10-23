@@ -11,10 +11,12 @@
 # design, photo, library, halo, suite, suiteui). id is Target.Suite (every
 # test in it), Target.Suite/test (one test, when the rest of the suite times
 # nothing) or Target.freeTest. Tests/test_scope checks each id exists, and
-# that every enabled test asserting a wall-clock bound is listed here
-# (`scripts/test-scope timing` names the ones that aren't). A test that only
-# looks timed (an injected clock, a hang guard) carries a `// not-timing: <why>`
-# comment in its body instead. Only the supervisor edits this file.
+# that every enabled test asserting a wall-clock bound, itself or through a
+# helper like expectP95, is listed here or grandfathered in
+# Tests/timing-baseline.txt (`scripts/test-scope timing` names the ones that
+# aren't). A test that only looks timed (an injected clock, a hang guard)
+# carries a `// not-timing: <why>` comment in its body instead. Only the
+# supervisor edits this file.
 
 photo PhotoModelTests.PhotoBudgetTests
 photo PhotoModelTests.PhotoBrushCopyCostTests
@@ -46,6 +48,7 @@ halo HaloModelTests.HaloViewerBudgetTests
 halo HaloModelTests.HaloEasingBudgetTests
 halo AppSnapshotTests.BodyCountSuites/RenderBudgetHaloTests/timing
 halo AppSnapshotTests.BodyCountSuites/RenderBudgetHaloKeyEditingTests/timing
+halo AppSnapshotTests.BodyCountSuites/RenderBudgetHaloShapeTests/starDragTiming
 
 flare FlareModelTests.FlareEasingDragCostTests
 flare FlareModelTests.LiveKeysBudgetTests
@@ -102,6 +105,7 @@ design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignTransformTests/timing
 design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignShapeTests/timing
 
 suite AppSnapshotTests.BodyCountSuites/RenderBudgetAfterGlowOnboardingTests/timing
+suite AppSnapshotTests.BodyCountSuites/RenderBudgetTransformTests/timing
 suite SuiteModelTests.StoreBudgetTests
 suite SuiteModelTests.HandOffBudgetTests
 suite SuiteModelTests.HomeBudgetTests

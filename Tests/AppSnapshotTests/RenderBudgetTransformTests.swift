@@ -7,9 +7,9 @@
 // the window; `budget.turn` reads the turn in whole degrees. A knob drag
 // (`knobDragInThreeBodies`), a right-handle drag on the box turned 30°
 // (`turnedResizeInThreeBodies`) and 120 rotation-row steps
-// (`rotationScrubInThreeBodies`) each run at most 3 window bodies with a p95
-// step at most 8 ms. Nested in BodyCountSuites: it reads a global body
-// counter. macOS only.
+// (`rotationScrubInThreeBodies`) each run at most 3 window bodies; `timing`
+// (Tests/perf-suites.txt, report-only) judges each one's p95 step within 8 ms.
+// Nested in BodyCountSuites: it reads a global body counter. macOS only.
 #if canImport(AppKit)
 import AppKit
 import SuiteKernel
@@ -95,6 +95,24 @@ extension BodyCountSuites {
         }
 
         @Test(.timeLimit(.minutes(2))) func knobDragInThreeBodies() async throws {
+            expectBodies(try await Self.knobDrag(), atMost: 3, target: 1)
+        }
+
+        @Test(.timeLimit(.minutes(2))) func turnedResizeInThreeBodies() async throws {
+            expectBodies(try await Self.turnedResize(), atMost: 3, target: 1)
+        }
+
+        @Test(.timeLimit(.minutes(2))) func rotationScrubInThreeBodies() async throws {
+            expectBodies(try await Self.rotationScrub(), atMost: 3, target: 1)
+        }
+
+        @Test(.timeLimit(.minutes(4))) func timing() async throws {
+            expectP95(try await Self.knobDrag(), atMost: 8, target: 4)
+            expectP95(try await Self.turnedResize(), atMost: 8, target: 4)
+            expectP95(try await Self.rotationScrub(), atMost: 8, target: 4)
+        }
+
+        static func knobDrag() async throws -> RenderStep {
             let w = RenderBudgetWindow(TransformBudgetPage(item: TransformBox(box: Self.box)))
             defer { w.close() }
             try await w.settle(untilStable: Self.bodies)
@@ -112,11 +130,10 @@ extension BodyCountSuites {
             try await w.settle()
             let turn = try #require(w.label("budget.turn").flatMap { Double($0) }, "no budget.turn on the page")
             #expect(abs(turn - 90) <= 3, "the knob drag turned the box to \(turn)°, not about 90°")
-            expectBodies(step, atMost: 3, target: 1)
-            expectP95(step, atMost: 8, target: 4)
+            return step
         }
 
-        @Test(.timeLimit(.minutes(2))) func turnedResizeInThreeBodies() async throws {
+        static func turnedResize() async throws -> RenderStep {
             let w = RenderBudgetWindow(TransformBudgetPage(item: TransformBox(box: Self.box, degrees: 30)))
             defer { w.close() }
             try await w.settle(untilStable: Self.bodies)
@@ -131,11 +148,10 @@ extension BodyCountSuites {
             // The press hit the turned right handle: W grew by about the 40 pt drag.
             let grown = try #require(await w.element("budget.box"), "no box after the drag")
             #expect(grown.width > frame.width + 20, "W went from \(frame.width) to \(grown.width), not about +40")
-            expectBodies(step, atMost: 3, target: 1)
-            expectP95(step, atMost: 8, target: 4)
+            return step
         }
 
-        @Test(.timeLimit(.minutes(2))) func rotationScrubInThreeBodies() async throws {
+        static func rotationScrub() async throws -> RenderStep {
             let w = RenderBudgetWindow(TransformBudgetPage(item: TransformBox(box: Self.box)))
             defer { w.close() }
             try await w.settle(untilStable: Self.bodies)
@@ -144,8 +160,7 @@ extension BodyCountSuites {
                 found = try await w.adjust("suite.transform.rotation", steps: 120)
             }
             #expect(found, "no rotation row (suite.transform.rotation) on the page")
-            expectBodies(step, atMost: 3, target: 1)
-            expectP95(step, atMost: 8, target: 4)
+            return step
         }
     }
 }
