@@ -3,8 +3,11 @@
 // back with open(), shown in the editor with its file name in the top bar and
 // "Saved sample.design" on the status line. Writes design-opened-file-light.png
 // and design-opened-file-dark.png; the editor is dark in both on purpose.
-// macOS only.
+// The save state: a saved file then one edit, its subtitle and status line
+// reading "Edited" (design-file-edited-*.png), then saved again, reading
+// "Saved" (design-file-saved-*.png). macOS only.
 import DesignModel
+import Foundation
 import SuiteUI
 import SwiftUI
 import Testing
@@ -37,6 +40,29 @@ import Testing
             try snapshot(
                 DesignEditor(model: opened, documentName: "sample.design", note: "Saved sample.design", zoom: 0.5),
                 name: "design-opened-file-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        }
+    }
+
+    @Test func saveState() throws {
+        var file = DesignWorkspace()
+        file.newFile()
+        let url = URL(fileURLWithPath: "/tmp/Poster.design")
+        file.didSave(to: url)
+        try file.addNode(.rectangle, frame: DesignRect(x: 80, y: 80, width: 360, height: 220), in: "node-1")
+        #expect(file.isDirty && DesignSaveStatus.subtitle(file) == "Edited")
+        try snapshots(file, name: "design-file-edited")
+
+        file.didSave(to: url)
+        #expect(!file.isDirty && DesignSaveStatus.subtitle(file) == "Saved")
+        try snapshots(file, name: "design-file-saved")
+        #expect(DesignSaveStatus.subtitle(DesignWorkspace()) == "")
+    }
+
+    private func snapshots(_ file: DesignWorkspace, name: String) throws {
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(
+                DesignEditor(model: file, documentName: "Poster.design", zoom: 0.5),
+                name: "\(name)-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }
 }

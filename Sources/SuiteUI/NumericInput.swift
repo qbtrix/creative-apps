@@ -13,9 +13,31 @@ public enum NumericInput {
     /// The value `text` names, clamped to `range`. Text that isn't a number,
     /// and NaN, give back `old`. Surrounding whitespace is ignored.
     public static func parse(_ text: String, in range: ClosedRange<Double>, keeping old: Double) -> Double {
-        let trimmed = String(text.drop(while: \.isWhitespace).reversed().drop(while: \.isWhitespace).reversed())
-        guard let value = Double(trimmed), !value.isNaN else { return old }
+        guard let value = number(text) else { return old }
         return clamp(value, to: range)
+    }
+
+    /// Whether `text` names a number `parse` takes (one out of range still
+    /// counts: it clamps). A typing field marks text that doesn't (#2952).
+    public static func accepts(_ text: String) -> Bool {
+        number(text) != nil
+    }
+
+    /// The help a typing field shows while its text isn't a number: the
+    /// range it takes, with the unit ("Type a number from -180° to 180°").
+    public static func rangeHelp(_ range: ClosedRange<Double>, decimals: Int = 2, unit: String = "") -> String {
+        let places = min(max(decimals, 0), 6)
+        let low = format(range.lowerBound, decimals: places), high = format(range.upperBound, decimals: places)
+        guard let first = unit.first else { return "Type a number from \(low) to \(high)" }
+        let suffix = first.isLetter ? " " + unit : unit
+        return "Type a number from \(low)\(suffix) to \(high)\(suffix)"
+    }
+
+    /// The number `text` spells, surrounding whitespace ignored; nil for NaN.
+    private static func number(_ text: String) -> Double? {
+        let trimmed = String(text.drop(while: \.isWhitespace).reversed().drop(while: \.isWhitespace).reversed())
+        guard let value = Double(trimmed), !value.isNaN else { return nil }
+        return value
     }
 
     /// What a typing field commits when it closes on `text`, having opened on

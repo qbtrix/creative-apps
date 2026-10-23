@@ -1,0 +1,51 @@
+[
+  {
+    "label": "widthDragIsOneStep: the width scrub's drag token isn't passed, so 120 samples are 120 undo steps",
+    "file": "Sources/SuiteKernel/Fill/StrokeCommands.swift",
+    "find": "\"Stroke Width\", drag: p.drag",
+    "replace": "\"Stroke Width\", drag: nil",
+    "tests": "StrokeCommandsTests"
+  },
+  {
+    "label": "addNeedsNoStroke: stroke.add is allowed on a layer that already has a stroke",
+    "file": "Sources/SuiteKernel/Fill/StrokeCommands.swift",
+    "find": "return target.selectedStroke == nil ? .available : .unavailable(strokedHelp)",
+    "replace": "return .available",
+    "tests": "StrokeCommandsTests"
+  },
+  {
+    "label": "trimHonoursHelp: the target's trimHelp isn't checked, so an app without trim reads the core's reason",
+    "file": "Sources/SuiteKernel/Fill/StrokeCommands.swift",
+    "find": "if let why = target.trimHelp { return .unavailable(why) }",
+    "replace": "",
+    "tests": "StrokeCommandsTests"
+  },
+  {
+    "label": "trimIsFraction: the trim's end is kept as a percent, so 0.5 saves 50 and the whole outline paints",
+    "file": "Sources/SuiteKernel/Fill/StrokeCommands.swift",
+    "find": "StrokeTrim(start: p.start, end: p.end,",
+    "replace": "StrokeTrim(start: p.start, end: p.end * 100,",
+    "tests": "StrokeDashTrimTests"
+  },
+  {
+    "label": "dottedRoundsCap: a dotted preset keeps the butt cap, so its zero-length dashes draw nothing",
+    "file": "Sources/SuiteKernel/Fill/StrokeCommands.swift",
+    "find": "if p.pattern == nil, preset == .dotted { stroke.cap = .round }",
+    "replace": "",
+    "tests": "StrokeDashTrimTests"
+  },
+  {
+    "label": "trimDragIsOneStep: the trim scrub's drag token isn't passed, so 61 samples are 61 undo steps",
+    "file": "Sources/SuiteKernel/Fill/StrokeCommands.swift",
+    "find": "\"Trim Path\", drag: p.drag",
+    "replace": "\"Trim Path\", drag: nil",
+    "tests": "StrokeDashTrimTests"
+  },
+  {
+    "label": "dashScalesWithWidth: the preset is scaled by 1 pt, not the stroke's width, so a 4 pt line saves [4, 2]",
+    "file": "Sources/SuiteKernel/Fill/StrokeCommands.swift",
+    "find": "StrokeRules.pattern(preset, width: stroke.width)",
+    "replace": "StrokeRules.pattern(preset, width: 1)",
+    "tests": "StrokeDashTrimTests"
+  }
+]

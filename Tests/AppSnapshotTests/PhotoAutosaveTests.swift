@@ -53,6 +53,28 @@ private final class MainProbeCodec: PhotoImageCodec {
     }
 }
 
+/// A store whose every write fails (a full disk, a folder it can't write).
+private struct FailingStore: RecoveryStoring {
+    struct Refused: Error {}
+    var unavailableHelp: String? { nil }
+    func write(_ entry: RecoveryEntry, window: String) throws { throw Refused() }
+    func leftBehind() throws -> [RecoveryEntry] { [] }
+    func discard(window: String) throws {}
+    func discardAll() throws {}
+}
+
+/// ImageIOCodec that counts its encodes.
+private final class CountingCodec: PhotoImageCodec {
+    let encodes = Mutex(0)
+    func decode(_ data: Data, longestSide: Int?) throws -> DecodedImage {
+        try ImageIOCodec().decode(data, longestSide: longestSide)
+    }
+    func encode(_ image: DecodedImage, as format: ImageFormat, quality: Double) throws -> Data {
+        encodes.withLock { $0 += 1 }
+        return try ImageIOCodec().encode(image, as: format, quality: quality)
+    }
+}
+
 /// Blocks the calling thread until `semaphore` is signalled (sync, so it can run in a detached task).
 private func block(on semaphore: DispatchSemaphore) {
     semaphore.wait()
@@ -60,14 +82,14 @@ private func block(on semaphore: DispatchSemaphore) {
 
 @MainActor
 @Suite struct PhotoAutosaveTests {
-    private let folder = FileManager.default.temporaryDirectory
-        .appending(path: "PhotoAutosaveTests-\(UUID().uuidString)").appending(path: "Recovery")
+    private let folder = FileManager.default.temporaryDirectory.appending(path: "PhotoAutosaveTests-\(UUID().uuidString)")
 
     private var store: any RecoveryStoring { PhotoServices.live.recovering(in: folder).recovery }
 
-    /// The names in the recovery folder; none when it is missing.
+    /// The .ora copies in the store's Recovery folder (a .json sits beside each); none when it is missing.
     private func names() -> [String] {
-        (try? FileManager.default.contentsOfDirectory(atPath: folder.path(percentEncoded: false))) ?? []
+        let recovery = folder.appending(path: "Recovery").path(percentEncoded: false)
+        return ((try? FileManager.default.contentsOfDirectory(atPath: recovery)) ?? []).filter { $0.hasSuffix(".ora") }
     }
 
     /// beach.png, a 4 x 3 white image, opened clean on the live archive.
@@ -120,6 +142,39 @@ private func block(on semaphore: DispatchSemaphore) {
         #expect(!autosave.autosaved)
         await autosave.tick(model: model, now: 105, codec: ImageIOCodec())
         #expect(names() == ["w1.ora"])
+    }
+
+    /// A write that fails is not retried every tick: each retry encodes the whole document again, which
+    /// on an 8K image kept Photo at about one core while idle, for as long as the write kept failing.
+    /// The next edit tries again.
+    @Test func aFailedWriteWaitsForTheNextEdit() async throws {
+        let model = try edited()
+        let autosave = makeAutosave(FailingStore())
+        let codec = CountingCodec()
+        autosave.noteEdit(at: 0)
+        await autosave.tick(model: model, now: 5, codec: codec)
+        let once = codec.encodes.withLock { $0 }
+        #expect(once > 0)
+        for now in 6...20 { await autosave.tick(model: model, now: Double(now), codec: codec) }
+        #expect(codec.encodes.withLock { $0 } == once, "an unchanged document was encoded again")
+        #expect(!autosave.autosaved)
+        autosave.noteEdit(at: 30)
+        await autosave.tick(model: model, now: 35, codec: codec)
+        #expect(codec.encodes.withLock { $0 } == 2 * once, "the next edit didn't try again")
+    }
+
+    /// The 8K budget fixture's window autosaves while the zoom budget runs; that must land in a temp
+    /// folder, or the user's next Photo launch offers to restore a test image.
+    @Test func budgetFixtureAutosavesOutsideTheUsersRecoveryFolder() async throws {
+        let id = "budget-\(UUID().uuidString)"
+        let store = PhotoRenderBudgetTests.services.recovery
+        let autosave = makeAutosave(store, window: id)
+        autosave.noteEdit(at: 0)
+        await autosave.tick(model: try edited(), now: 5, codec: ImageIOCodec())
+        defer { try? store.discard(window: id) }
+        #expect(autosave.autosaved)
+        let users = LiveRecovery.defaultDirectory.appending(path: "Recovery/\(id).ora")
+        #expect(!FileManager.default.fileExists(atPath: users.path(percentEncoded: false)))
     }
 
     @Test func cleanModelWritesNothing() async throws {
@@ -184,8 +239,9 @@ private func block(on semaphore: DispatchSemaphore) {
 
     @Test func noOrDamagedFileGivesNoOfferAndIsGone() async throws {
         #expect(await makeAutosave().launch(model: PhotoWorkspace(services: .live)) == nil)
-        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        try Data("not a zip".utf8).write(to: folder.appending(path: "crashed.ora"))
+        let recovery = folder.appending(path: "Recovery")
+        try FileManager.default.createDirectory(at: recovery, withIntermediateDirectories: true)
+        try Data("not a zip".utf8).write(to: recovery.appending(path: "crashed.ora"))
         #expect(await makeAutosave().launch(model: PhotoWorkspace(services: .live)) == nil)
         #expect(names().isEmpty)
     }

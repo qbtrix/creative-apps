@@ -1,7 +1,8 @@
 // SuiteToneCurveSnapshots.swift: SuiteUI's ToneCurveEditor at the inspector's
 // content width: an S curve (three points between the ends) over a histogram,
 // the same with its middle point focused (`focusedPoint`; the offscreen window
-// never holds focus), and the identity with no histogram. The curve is
+// never holds focus), and the identity with no histogram, each with its
+// Input / Output caption row under the well (#2953). The curve is
 // CoreRaster's `curves` run over a ramp, so it is the engine's. Increase
 // Contrast is partial: NSAppearance(named:) gives plain Aqua or Dark Aqua for
 // the high-contrast names unless the system setting is on, so the tokens'

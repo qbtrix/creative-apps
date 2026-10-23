@@ -85,7 +85,8 @@ private func grouped() throws -> DesignWorkspace {
 
 @Test func aMoveToolDragSelectsAndMovesTheNodeUnderThePointer() throws {
     var workspace = try overlapping()
-    workspace.gesture(.move, pt(110, 110), pt(130, 125))
+    // ⌘ held: the raw move, not a snap of y 115 onto the ellipse's top at 120 (snapping SN-4).
+    workspace.gesture(.move, pt(110, 110), pt(130, 125), .noSnap)
     #expect(workspace.selectedNodeID == "node-2")
     #expect(workspace.frame("node-2") == rc(120, 115, 200, 100))
     #expect(workspace.frame("node-3") == rc(150, 120, 200, 100))

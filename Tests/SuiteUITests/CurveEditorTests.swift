@@ -1,6 +1,7 @@
 // CurveEditorTests.swift: the math behind SuiteUI's CurveEditor: the curve is
 // one vector path, the plot range widens for overshoot, the preview dot never
-// leaves the samples, arrow-key nudges step by 0.01 (0.1 with Shift), and a
+// leaves the samples, arrow-key nudges step by 0.01 (0.1 with Shift, kept on
+// the 0.01 grid, not the 0.1 one), and a
 // handle looks different at rest, under the pointer and pressed or focused.
 // IC-8: a handle's x clamps to 0...1, SuiteEasingHandleNudging (UC15b) nudges
 // ↑ 0.01 and ⇧↑ 0.1 and speaks the handle, one end per drag or nudge
@@ -64,7 +65,26 @@ import Testing
     var q = p
     for _ in 0..<5 { q = CurveEditor.nudged(q, dx: 1, dy: 0, coarse: false) }
     #expect(q.x == 0.47)
+    // ⇧↑ adds 0.1 to a handle off the 0.1 grid; it doesn't snap to it (#2923).
+    #expect(CurveEditor.nudged(CGPoint(x: 0.58, y: 1.01), dx: 0, dy: 1, coarse: true) == CGPoint(x: 0.58, y: 1.11))
+    #expect(CurveEditor.nudged(CGPoint(x: 0.43, y: 0), dx: -1, dy: 0, coarse: true) == CGPoint(x: 0.33, y: 0))
     #expect(CurveEditor.describe(CGPoint(x: 0.42, y: 0)) == "x 0.42, y 0.00")
+}
+
+@Test func aHandleReadsItsValueInItsTooltipAndLabel() {
+    // #2953, #2960: a handle's tooltip and label carry the nudging's spoken value, not only "Handle 1".
+    let spoken = SuiteEasingHandleNudging().describe(PlanePoint(x: 0.42, y: 0.1))
+    let reading = CurveEditor.handleReading(.first, spoken: spoken)
+    #expect(reading == "Handle 1: x 0.42, y 0.10")
+    #expect(CurveEditor.handleReading(.second, spoken: "x 0.58, y 1.00") == "Handle 2: x 0.58, y 1.00")
+    // The journey reads the numbers after the colon back (#262: XCUITest reads SwiftUI values as "").
+    let tail = reading.split(separator: ":").last.map(String.init) ?? ""
+    #expect(tail.split { $0 == "," || $0 == " " }.compactMap { Double($0) } == [0.42, 0.1])
+}
+
+@Test func theEasingAxesAreCaptionedTimeAndProgress() {
+    // #2953: the well says which axis is which.
+    #expect(CurveEditor.axisCaptions == CurveAxisCaptions(x: "Time", y: "Progress"))
 }
 
 @Test func handleShowsHoverPressedAndFocus() {

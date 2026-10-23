@@ -1,0 +1,30 @@
+[
+  {
+    "label": "unknownRecentOpens: a file id that isn't in Recent Files is opened anyway",
+    "file": "Sources/SuiteKernel/Files/FileFlowCommands.swift",
+    "find": "guard target.recentFiles.contains(where: { $0.fileID == params.fileID }) else {",
+    "replace": "guard true else {",
+    "tests": "FileFlowCommandsTests"
+  },
+  {
+    "label": "dropNotPerformed: file.drop plans the actions but never performs them",
+    "file": "Sources/SuiteKernel/Files/FileFlowCommands.swift",
+    "find": "try target.perform(actions)",
+    "replace": "_ = actions",
+    "tests": "FileFlowCommandsTests"
+  },
+  {
+    "label": "clearKeeps: Clear Menu leaves the recent list as it was",
+    "file": "Sources/SuiteKernel/Files/FileFlowCommands.swift",
+    "find": "try target.clearRecent()",
+    "replace": "_ = target",
+    "tests": "FileFlowCommandsTests"
+  },
+  {
+    "label": "openInSkipped: Open In never hands the document over",
+    "file": "Sources/SuiteKernel/Files/FileFlowCommands.swift",
+    "find": "try target.openIn(params.app)",
+    "replace": "_ = params",
+    "tests": "FileFlowCommandsTests"
+  }
+]

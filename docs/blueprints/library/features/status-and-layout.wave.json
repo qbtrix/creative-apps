@@ -2,8 +2,8 @@
   "title": "Status pills, inspector header (#185), the remaining identifiers (#291), layout tests",
   "wave": 3,
   "order": 20,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1528",
   "covers": "#185, #291",
   "waits_on": "spine, thumbnails, loupe-viewport; SuiteUI #1184 (S-L7); two gaps filed at stage 1 (the spine's preview-only status bar, MetadataInspector's own header)",
   "issues": [

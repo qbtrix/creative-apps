@@ -2,7 +2,7 @@
 // container identified `design.properties` inside the scroll view. A selected
 // layer shows its header (name, then kind unless the name says it, then size),
 // then Align (DesignAlignBar), then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
-// fields) and Fill (the color well; a text layer's is its text color, a group
+// fields), Transform (Rotation and the flips, DesignInspectorTransform, on one layer or several) and Fill (the type switch, then the color well, or the gradient editor in its place on a gradient layer; a text layer's is its text color, a group
 // has none), then Text (DesignInspectorText, disabled on a layer that isn't text). A
 // locked layer, or one inside a locked group, can't be edited, so Frame and
 // Fill are disabled and a line says why. With only a page selected it shows
@@ -13,10 +13,13 @@
 // Text section when any of them is a text layer. Every
 // control's help comes from the Model, and each carries its DesignControlID and
 // lists itself in `suite.controls`. Values in, intents out; the model clamps and
-// refuses what it must. Opacity, Corners and Stroke, the hint and the frame
+// refuses what it must. Opacity, Corners and Stroke (after Fill), the hint and the frame
 // fields' live scrub are DesignInspectorStyle. The scroll view shows no
-// indicators, so no legacy scroller reads as an unlabelled button.
+// indicators, so no legacy scroller reads as an unlabelled button. While the Shape
+// tool is active its Shape section (SuiteUI's ShapeToolOptions, shape-tools DS-2) comes first, and while
+// the Eyedropper is, its Eyedropper section (DesignSampleOptions: sample size, Fill or Stroke).
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -27,6 +30,16 @@ struct DesignInspector: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
+                if model.tool == .shape {
+                    // The Shape tool's options over the Model's `shapeTool`; each change runs as `.shape`.
+                    InspectorSection("Shape") {
+                        ShapeToolOptions(spec: model.shapeTool, help: ShapeRules.help(model.shapeTool)) { perform(.shape($0)) }
+                    }
+                }
+                if model.tool == .eyedropper {
+                    // The Eyedropper's options (DesignSampleOptions), in the inspector, never on the artboard.
+                    InspectorSection("Eyedropper") { DesignSampleOptions(model: model, perform: perform) }
+                }
                 if model.hasMultipleSelection {
                     DesignSeveralProperties(model: model, perform: perform)
                 } else if let node = model.selectedNode {
@@ -37,7 +50,7 @@ struct DesignInspector: View {
                     // Every layer shows the Text rows; on one that isn't text they are disabled and say why.
                     DesignInspectorText(model: model, perform: perform).id(node.id)
                 } else if let page = model.selectedPage {
-                    DesignPageProperties(page: page).id(page.id)
+                    DesignPageProperties(page: page, perform: perform).id(page.id)
                 }
             }
             // The id sits on a container inside the ScrollView, not on the ScrollView: SuiteWindow's
@@ -82,16 +95,21 @@ private struct FrameRow: Identifiable {
     }
 
     /// This row's scrub field over the selection (DesignFrameScrub): a drag previews on the live box
-    /// and lands as one step (#536). Disabled with `help` as its tooltip when it can't edit.
-    @MainActor func scrubField(_ model: DesignWorkspace, help: String?, perform: @escaping DesignPerform) -> some View {
+    /// and lands as one step (#536). Disabled with `help` as its tooltip when it can't edit. An open
+    /// text edit's box reads at its `draft` extent, as its commit will fit it (#3335).
+    @MainActor func scrubField(
+        _ model: DesignWorkspace, help: String?, draft: DesignTextExtent? = nil, perform: @escaping DesignPerform
+    ) -> some View {
         DesignFrameScrub(
-            model: model, name: name, field: field, range: range, read: { value(in: $0.frame) }, help: help,
-            perform: perform)
+            model: model, name: name, field: field, range: range,
+            read: { value(in: model.liveFrame(of: $0, draft: draft)) }, help: help, perform: perform)
     }
 }
 
 /// The selected layer's header and sections.
 private struct DesignNodeProperties: View {
+    /// The coordinate space where the X field's leading x (`valueColumn`) and the style hint are measured.
+    nonisolated static let hintSpace = "design.properties.column"
     let model: DesignWorkspace
     let node: DesignNode
     /// Why the layer can't be edited (it or a group around it is locked), or nil.
@@ -105,8 +123,10 @@ private struct DesignNodeProperties: View {
     var body: some View {
         // Why the rows are off, named for the layer ("Unlock A to change it."), or nil.
         let hint = model.styleHelp(.opacity) == nil ? nil : model.styleHint(.opacity)
+        // An open text edit's draft, measured, so the header and W/H follow the typing (#3335).
+        let draft = DesignTextOverlay.draftExtent(model)
         VStack(alignment: .leading, spacing: 0) {
-            InspectorHeader(node.name, details: node.inspectorDetails)
+            InspectorHeader(node.name, details: model.inspectorDetails(of: node, draft: draft))
             DesignAlignBar(help: alignHelp, perform: perform)
             InspectorSection("Layer") {
                 InspectorRow("") {
@@ -118,36 +138,49 @@ private struct DesignNodeProperties: View {
                         .toggleStyle(.checkbox)
                 }
                 DesignOpacityRow(model: model, perform: perform)
-                if let hint { DesignStyleHint(text: hint, column: valueColumn) }
+                if let hint {
+                    InspectorNote(hint, identifier: "design.inspector.hint", column: (valueColumn, Self.hintSpace))
+                }
             }
             InspectorSection("Frame") {
                 VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
                     ForEach(FrameRow.all) { row in
                         InspectorRow(row.label) {
-                            row.scrubField(model, help: lockHelp, perform: perform)
+                            row.scrubField(model, help: lockHelp, draft: draft, perform: perform)
                                 .onGeometryChange(for: CGFloat.self) {
-                                    $0.frame(in: .named(DesignStyleHint.space)).minX
+                                    $0.frame(in: .named(Self.hintSpace)).minX
                                 } action: { if row.field == .x { valueColumn = $0 } }
                         }
                     }
                 }
             }
-            DesignInspectorStyle(model: model, perform: perform)
+            DesignInspectorTransform(model: model, perform: perform)
+            DesignCornersSection(model: model, perform: perform)
             if let label = node.kind.fillLabel {
                 InspectorSection("Fill") {
-                    InspectorColorWellRow(label, color: HexColor(node.fill.red, node.fill.green, node.fill.blue)) {
-                        perform(.setFill(node.id, DesignColor($0.red, $0.green, $0.blue)))
+                    DesignInspectorFill(model: model, perform: perform)
+                    // A gradient's colours are the editor's stop row; the solid well would edit one it doesn't paint.
+                    if node.gradient == nil {
+                        InspectorColorWellRow(label, color: node.fill.hex, sampleHelp: lockHelp) {
+                            perform(.setFill(node.id, DesignColor(hex: $0)))
+                        }
+                        .accessibilityIdentifier("design.fill")
+                        .disabled(lockHelp != nil)
+                        .help(lockHelp ?? "")
+                        .suiteControl(
+                            id: DesignControlID.inspectorFill, enabled: lockHelp == nil, reason: lockHelp, identifies: false)
                     }
-                    .accessibilityIdentifier("design.fill")
-                    .disabled(lockHelp != nil)
-                    .help(lockHelp ?? "")
-                    .suiteControl(
-                        id: DesignControlID.inspectorFill, enabled: lockHelp == nil, reason: lockHelp, identifies: false)
                 }
             }
+            DesignInspectorStyle(model: model, perform: perform)
         }
-        .coordinateSpace(.named(DesignStyleHint.space))
+        .coordinateSpace(.named(Self.hintSpace))
     }
+}
+
+extension DesignWorkspace {
+    /// Whether the several-layer inspector shows Fill: a group has no fill, so only when every selected layer has one.
+    var severalShowFill: Bool { selectedNodes.allSatisfy { $0.kind.fillLabel != nil } }
 }
 
 /// Several selected layers: "<n> Layers", Align with Distribute, then Frame and Fill over them all.
@@ -173,13 +206,13 @@ private struct DesignSeveralProperties: View {
                     }
                 }
             }
-            // A group has no fill, so the row shows only when every selected layer has one.
-            if model.selectedNodes.allSatisfy({ $0.kind.fillLabel != nil }) {
+            DesignInspectorTransform(model: model, perform: perform)
+            if model.severalShowFill {
                 let fillHelp = model.styleHelp(.fill)
                 InspectorSection("Fill") {
                     if let fill = model.sharedValue(\.fill) {
-                        InspectorColorWellRow("Fill", color: HexColor(fill.red, fill.green, fill.blue)) {
-                            perform(.setStyle(.fill(DesignColor($0.red, $0.green, $0.blue))))
+                        InspectorColorWellRow("Fill", color: fill.hex, sampleHelp: fillHelp) {
+                            perform(.setStyle(.fill(DesignColor(hex: $0))))
                         }
                         .accessibilityIdentifier("design.fill")
                         .disabled(fillHelp != nil)

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "app": "fake",
+  "why": "add-rect with a wrong expected sha256: the right digest with its last hex digit changed, so a check on a prefix passes it.",
+  "inputs": ["input/*.fake"],
+  "steps": [
+    {"id": "rect.add", "params": {"x": 1, "y": 2, "w": 3, "h": 4}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-added", "format": "json", "options": {}},
+  "expect": {
+    "out/one-added.json": {"sha256": "faf26b81220634005a3cc3234512980138ff4a1a98af507e53369afca010afc3"}
+  },
+  "platforms": ["linux", "macos"]
+}

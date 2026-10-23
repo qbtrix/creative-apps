@@ -6,10 +6,12 @@
 // or a failed open's `loadState` message in a system alert each time the
 // Model sets it again, and opens `-FlareOpenFile`'s file once, in the first
 // window, the way Open Recent does. FlareFileDialogs are the AppKit panels:
-// open and save for .flare files, and the close prompt's Save, Don't Save
-// and Cancel. The window title is SuiteWindow's (`model.title`).
+// open for .flare and Lottie JSON files, save for .flare files, the export's folder, and the close prompt's
+// Save, Don't Save and Cancel, in the kernel's shared words (UnsavedPrompt).
+// The window title is SuiteWindow's (`model.title`).
 import AppKit
 import FlareModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -76,10 +78,10 @@ final class FlareEditedView: NSView {
     /// The `.flare` extension as the system types a file on disk.
     static let fileType = UTType(filenameExtension: "flare") ?? .data
 
-    /// The open panel, for one .flare file; nil when cancelled.
+    /// The open panel, for one .flare or Lottie JSON file (`FlareLottieOpen.fileExtensions`); nil when cancelled.
     static func chooseFile() -> URL? {
         let panel = NSOpenPanel()
-        panel.allowedContentTypes = [fileType]
+        panel.allowedContentTypes = [fileType] + FlareLottieOpen.fileExtensions.compactMap { UTType(filenameExtension: $0) }
         panel.allowsMultipleSelection = false
         return panel.runModal() == .OK ? panel.url : nil
     }
@@ -92,21 +94,36 @@ final class FlareEditedView: NSView {
         return panel.runModal() == .OK ? panel.url : nil
     }
 
+    /// The folder panel for an export; nil when cancelled.
+    static func chooseFolder() -> URL? {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.canCreateDirectories = true
+        panel.prompt = "Export"
+        return panel.runModal() == .OK ? panel.url : nil
+    }
+
     /// Asks whether to save `title`'s changes before it closes: a sheet on
     /// `window`, or a dialog without one.
     static func askToSave(_ title: String, in window: NSWindow?) async -> Choice {
         let alert = NSAlert()
         alert.alertStyle = .warning
-        alert.messageText = "Do you want to save the changes made to \u{201C}\(title)\u{201D}?"
-        alert.informativeText = "Your changes will be lost if you don't save them."
-        alert.addButton(withTitle: "Save").setAccessibilityIdentifier("flare.close.save")
-        alert.addButton(withTitle: "Don't Save").setAccessibilityIdentifier("flare.close.discard")
-        alert.addButton(withTitle: "Cancel").setAccessibilityIdentifier("flare.close.cancel")
+        alert.messageText = UnsavedPrompt.message(for: title)
+        alert.informativeText = UnsavedPrompt.informativeText
+        let identifiers: [UnsavedPrompt.Answer: String] =
+            [.save: "flare.close.save", .dontSave: "flare.close.discard", .cancel: "flare.close.cancel"]
+        for answer in UnsavedPrompt.answers {
+            alert.addButton(withTitle: UnsavedPrompt.title(of: answer))
+                .setAccessibilityIdentifier(identifiers[answer, default: "flare.close.cancel"])
+        }
         let response = if let window { await alert.beginSheetModal(for: window) } else { alert.runModal() }
-        switch response {
-        case .alertFirstButtonReturn: return .save
-        case .alertSecondButtonReturn: return .discard
-        default: return .cancel
+        let index = response.rawValue - NSApplication.ModalResponse.alertFirstButtonReturn.rawValue
+        switch UnsavedPrompt.answer(forButton: index) {
+        case .save: return .save
+        case .dontSave: return .discard
+        case .cancel: return .cancel
         }
     }
 }

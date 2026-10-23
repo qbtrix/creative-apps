@@ -1,12 +1,14 @@
 {
   "id": "shell-documents",
   "name": "Documents bridge",
-  "description": "Records opens and saves in recents, writes thumbnails, builds the Open In submenu.",
+  "description": "Records opens and saves in recents and drops files gone from disk, writes thumbnails, reads Open In targets from the routing slot, builds the Open Recent and Open In submenus, takes file drops through the kernel's drop rule with a mark saying what the drop will do that stays a moment after the release, and makes suite items draggable.",
   "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
   "paths": [
     "Sources/SuiteShell/SuiteDocumentsBridge.swift",
     "Sources/SuiteShell/ThumbnailWriter.swift",
-    "Sources/SuiteShell/OpenInMenu.swift"
+    "Sources/SuiteShell/OpenInMenu.swift",
+    "Sources/SuiteShell/SuiteFileDrop.swift",
+    "Sources/SuiteShell/SuiteDragSource.swift"
   ],
   "order": 60
 }

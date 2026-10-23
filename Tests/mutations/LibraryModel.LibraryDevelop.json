@@ -1,0 +1,79 @@
+[
+  {
+    "label": "a drag's samples don't coalesce, so one drag is many steps",
+    "file": "Sources/LibraryModel/LibraryDevelop.swift",
+    "find": "recordEdit(slider.rawValue, coalesceKey: coalesceKey, ids: ids)",
+    "replace": "recordEdit(slider.rawValue, coalesceKey: nil, ids: ids)",
+    "tests": "LibraryDevelopTests"
+  },
+  {
+    "label": "a section reset resets every slider",
+    "file": "Sources/LibraryModel/LibraryDevelop.swift",
+    "find": "let sliders = group?.sliders ?? DevelopSlider.allCases",
+    "replace": "let sliders = DevelopSlider.allCases",
+    "tests": "LibraryDevelopTests"
+  },
+  {
+    "label": "a levels edit starts from neutral levels, so the black point ignores the white point",
+    "file": "Sources/LibraryModel/LibraryDevelop.swift",
+    "find": "$0.develop.setting(levels: $0.develop.levels.setting(field, to: value))",
+    "replace": "$0.develop.setting(levels: DevelopLevels.neutral.setting(field, to: value))",
+    "tests": "LibraryDevelopTests"
+  },
+  {
+    "label": "thumbnails drop on every drag sample, not on release",
+    "file": "Sources/LibraryModel/LibraryDevelop.swift",
+    "find": "{ $0.develop = $0.develop.setting(slider, to: value) }\n    }",
+    "replace": "{ $0.develop = $0.develop.setting(slider, to: value) }\n        for id in ids { invalidateThumbnail(id) }\n    }",
+    "tests": "LibraryDevelopTests"
+  },
+  {
+    "label": "the live services never say why a slider waits",
+    "file": "Sources/LibraryModel/LibraryDevelop.swift",
+    "find": "services.develop is LiveDevelop ? LiveDevelop.waiting[slider] : nil",
+    "replace": "nil",
+    "tests": "LibraryDevelopTests"
+  },
+  {
+    "label": "the loupe edits the selection instead of the loupe photo",
+    "file": "Sources/LibraryModel/LibraryDevelop.swift",
+    "find": "if mode == .loupe { return loupeItem.map { [$0.id] } ?? [] }",
+    "replace": "if mode == .loupe, selection.isEmpty { return loupeItem.map { [$0.id] } ?? [] }",
+    "tests": "LibraryDevelopTests"
+  },
+  {
+    "label": "a reset leaves its own step open, so the next drag joins it",
+    "file": "Sources/LibraryModel/LibraryDevelop.swift",
+    "find": "return history.undo.count > steps ? endDevelopDrag() : []",
+    "replace": "return history.undo.count > steps ? Set(history.top?.payload.map(\\.id) ?? []) : []",
+    "tests": "LibraryDevelopTests"
+  },
+  {
+    "label": "paste records one step per photo instead of one for the set",
+    "file": "Sources/LibraryModel/LibraryDevelop.swift",
+    "find": "return developStep(\"Paste Settings\", ids: ids) { $0.pastingAdjustments(from: copied) }",
+    "replace": "return ids.reduce(into: Set<String>()) { all, id in all.formUnion(developStep(\"Paste Settings\", ids: [id]) { $0.pastingAdjustments(from: copied) }) }",
+    "tests": "LibraryDevelopTests"
+  },
+  {
+    "label": "paste assigns the copied settings whole, so the source's crop is pasted",
+    "file": "Sources/LibraryModel/LibraryDevelop.swift",
+    "find": "{ $0.pastingAdjustments(from: copied) }",
+    "replace": "{ _ in copied }",
+    "tests": "LibraryDevelopTests"
+  },
+  {
+    "label": "sync takes the last selected photo in the shown order as its source",
+    "file": "Sources/LibraryModel/LibraryDevelop.swift",
+    "find": "let id = order.first(where: selection.contains)",
+    "replace": "let id = order.last(where: selection.contains)",
+    "tests": "LibraryDevelopTests"
+  },
+  {
+    "label": "a mixed develop value reads only the first photo",
+    "file": "Sources/LibraryModel/LibraryDevelop.swift",
+    "find": "return MetadataValue.of(values)",
+    "replace": "return .value(values[0])",
+    "tests": "LibraryDevelopTests"
+  }
+]

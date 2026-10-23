@@ -1,7 +1,8 @@
 // MetadataInspector.swift: the inspector for the selected photos, in the
-// suite's inspector pattern (docs/design.md, Pro density): an InspectorHeader
-// with the selection's name, then Metadata: rating stars, flag and color
-// label dots. A field the photos differ in shows "Mixed". Values in, closures
+// suite's inspector pattern (docs/design.md, Pro density): Metadata: rating
+// stars, the flag as three ChoiceChips (one click each, none on while the
+// photos differ) and color label dots. Its title is LibraryInspector's one
+// header above the tabs (#2982). A field the photos differ in shows "Mixed". Values in, closures
 // out; LibraryCatalog applies each edit to every selected photo. Each control
 // carries its MetadataInspectorID. Each star and dot gets a 20 pt square hit
 // frame (SuiteSize.iconButtonHit, docs/design.md's floor), edge to edge, and
@@ -21,13 +22,15 @@ struct MetadataInspector: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            InspectorHeader(metadata.title)
             InspectorSection("Metadata") {
                 InspectorRow("Rating") { stars }
-                InspectorPickerRow("Flag", options: flagOptions, selection: metadata.flag.shared) {
-                    if let flag = $0 { onFlag(flag) }
+                InspectorRow("Flag") {
+                    ChoiceChips(options: Self.flagOptions, selected: metadata.flag.shared, onSelect: onFlag)
+                        .accessibilityElement(children: .contain)
+                        .accessibilityLabel("Flag")
+                        .accessibilityValue(metadata.flag == .mixed ? PhotoMetadata.mixedText : "")
+                        .accessibilityIdentifier(MetadataInspectorID.flag)
                 }
-                .accessibilityIdentifier(MetadataInspectorID.flag)
                 InspectorRow("Label") { labelDots }
             }
         }
@@ -109,10 +112,9 @@ struct MetadataInspector: View {
             .accessibilityIdentifier(id)
     }
 
-    /// The flags, plus a Mixed entry only while the photos differ, so the menu shows it.
-    private var flagOptions: [InspectorOption<PhotoFlag?>] {
-        PhotoFlag.allCases.map { InspectorOption<PhotoFlag?>(id: $0, title: $0.rawValue) }
-            + (metadata.flag == .mixed ? [InspectorOption(id: nil, title: PhotoMetadata.mixedText)] : [])
+    /// One chip per flag, each with its own identifier.
+    nonisolated static let flagOptions = PhotoFlag.allCases.map {
+        InspectorOption(id: $0, title: $0.rawValue, identifier: MetadataInspectorID.flag($0))
     }
 }
 

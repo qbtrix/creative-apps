@@ -1,0 +1,37 @@
+[
+  {
+    "label": "the duplicate-id alert goes back to naming the raw id first",
+    "file": "Sources/DesignModel/DesignFile.swift",
+    "find": "case .duplicateID(let id): \"It is damaged: two of its layers share the id \\(id).\"",
+    "replace": "case .duplicateID(let id): \"It uses the id \\(id) more than once.\"",
+    "tests": "DesignModelTests.a(Damaged|Newer)"
+  },
+  {
+    "label": "the newer-version alert drops the next step",
+    "file": "Sources/DesignModel/DesignFile.swift",
+    "find": "\\(LiveFiling.fileVersion)). Update Design to open it.\"",
+    "replace": "\\(LiveFiling.fileVersion)).\"",
+    "tests": "DesignModelTests.a(Damaged|Newer)"
+  },
+  {
+    "label": "the newer-version alert stops naming the version this Design opens",
+    "file": "Sources/DesignModel/DesignFile.swift",
+    "find": "+ \"\\(LiveFiling.fileVersion)). Update",
+    "replace": "+ \"\\(LiveFiling.fileVersion + 1)). Update",
+    "tests": "DesignModelTests.a(Damaged|Newer)"
+  },
+  {
+    "label": "the open alert folds the reason back into its title",
+    "file": "Sources/DesignModel/DesignFile.swift",
+    "find": "DesignFileProblem(title: \"\\(file) can't be opened.\", message: reason)",
+    "replace": "DesignFileProblem(title: \"\\(file) can't be opened. \\(reason)\", message: \"\")",
+    "tests": "DesignModelTests.aFileProblem"
+  },
+  {
+    "label": "the save alert's title says opened",
+    "file": "Sources/DesignModel/DesignFile.swift",
+    "find": "DesignFileProblem(title: \"\\(file) can't be saved.\", message: reason)",
+    "replace": "DesignFileProblem(title: \"\\(file) can't be opened.\", message: reason)",
+    "tests": "DesignModelTests.aFileProblem"
+  }
+]

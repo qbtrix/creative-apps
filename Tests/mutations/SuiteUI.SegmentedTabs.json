@@ -1,0 +1,4 @@
+[
+{"label":"a disabled segment loses its reason","file":"Sources/SuiteUI/SegmentedTabs.swift","find":"ControlEntry(id: $0, enabled: enabled, reason: enabled ? nil : reason)","replace":"ControlEntry(id: $0, enabled: enabled, reason: nil)","tests":"SegmentedTabsTests"},
+{"label":"the segments are listed without the switch's id","file":"Sources/SuiteUI/SegmentedTabs.swift","find":"segmentID(option, in: id).map {","replace":"option.identifier.map {","tests":"SegmentedTabsTests"}
+]

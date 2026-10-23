@@ -23,23 +23,43 @@
 // group's row, its disclosure's label, reads as one checkbox. That checkbox takes
 // its identifier from the label's elements (its toggles' ids, joined), so the
 // label combines into one element first and the identifier is the row's (#2410).
+// A `.contain` label loses that identifier (#3195's journeys, #3300 to #3304), so the
+// group's eye stays a plain click at the toggle column, which every row shares (#53).
 // A page row is a container identified `design.page.row.<id>` with its checkmark inside: a page name's words sit in its text's value, not
 // its label, so journeys count pages by identifier (#1451). The section headers use SuiteColor.textSecondary; the
 // sidebar style's own header gray is under 4.5:1. While the list has focus, Edit >
 // Cut, Copy and Paste send `.cut`, `.copy` and `.paste` (designPasteboardCommands).
-// The rename state (DesignRenameState: the row in rename, the draft, the refusal
-// shown as `design.layers.rename-refusal`) is the panel's own. The list shows no
+// A double-click on a layer's name renames it in place (SidebarRow's rename
+// field), sent as `.renameLayer`, one "Rename Layer" step; SidebarRow drops an
+// empty or unchanged name. Dragging a layer row draws an insertion line above or
+// below the row under the pointer, or tints a frame or group the layer would
+// go into (`layerDropLine`, which shows nothing for a drop the Model refuses).
+// The drag is the system's (`onDrag` on each row, a `DropDelegate` on each row):
+// a gesture of the row's own inside the List never saw the pointer move once the
+// list's table took the press (#3427). The line is the panel's own state, written
+// only when it moves, and the dragged id and the rows' heights sit in a box
+// nothing observes, so a drag never runs the editor's body; the drop sends one
+// `.moveLayer` (`layerDrop`), one "Move Layer" step. A page
+// with no layers says so and points at the Frame tool. The rename refusal state
+// (DesignRenameState, `design.layers.rename-refusal`) is the panel's own. The list shows no
 // scroll indicators, as the inspector doesn't, so on a long layer tree no legacy
 // scroller reads as an unlabelled button (#2552). Values in, intents out.
 import DesignModel
 import SuiteUI
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct DesignLayersPanel: View {
     let model: DesignWorkspace
     let perform: DesignPerform
+    /// Seeds the insertion line, so a snapshot can show a drag in flight; the app passes none.
+    var seededLine: DesignLayerDropLine? = nil
     /// The layer row being renamed, its draft and the last refusal; the panel's own state.
     @State private var rename = DesignRenameState()
+    /// Where a dragged layer would land; nil with no drag, or over a row that refuses it.
+    @State private var dropLine: DesignLayerDropLine?
+    /// The dragged layer and the rows' frames; a box SwiftUI doesn't watch.
+    @State private var rowFrames = DesignLayerRowFrames()
 
     var body: some View {
         List(selection: selection) {
@@ -57,12 +77,15 @@ struct DesignLayersPanel: View {
             }
             Section {
                 if let nodes = model.selectedPage?.nodes, !nodes.isEmpty {
-                    DesignLayerTree(nodes: nodes, model: model, perform: perform)
+                    DesignLayerTree(nodes: nodes, model: model, perform: perform, drag: layerDrag)
                 } else {
-                    DesignPanelHint(model.isOpen ? "Nothing on this page yet." : "No file open.")
+                    let notes = Self.emptyNotes(isOpen: model.isOpen)
+                    ForEach(notes.indices, id: \.self) { line in
+                        InspectorNote(notes[line], identifier: line == 0 ? "design.layers.empty" : "design.layers.empty.\(line)")
+                    }
                 }
                 if let refusal = rename.refusal {
-                    DesignPanelHint(refusal).accessibilityIdentifier(DesignRenameState.refusalID)
+                    InspectorNote(refusal, identifier: DesignRenameState.refusalID)
                 }
             } header: {
                 header("Layers")
@@ -78,6 +101,37 @@ struct DesignLayersPanel: View {
         .font(SuiteFont.inspectorLabel)
         .accessibilityIdentifier("design.layers")
         .designPasteboardCommands(model, perform)
+    }
+
+    /// The rows' drag: the pointer `y` points down row `rowID` moves the line only when it changes,
+    /// leaving a row clears its line, and the drop at `y` sends the one move the line there shows.
+    /// The drop works out its own line rather than reading the last hover's, so a release that
+    /// lands before the hover is reported still moves the layer (#3556).
+    private var layerDrag: DesignLayerDrag {
+        DesignLayerDrag(line: dropLine ?? seededLine, frames: rowFrames, changed: { rowID, y in
+            let line = dropLine(over: rowID, y: y)
+            if line != dropLine { dropLine = line }
+        }, exited: { rowID in
+            if dropLine?.rowID == rowID { dropLine = nil }
+        }, dropped: { rowID, y in
+            defer {
+                rowFrames.dragged = nil
+                if dropLine != nil { dropLine = nil }
+            }
+            guard let id = rowFrames.dragged, let line = dropLine(over: rowID, y: y),
+                  let target = model.layerDrop(id, onto: rowID, line.position) else { return false }
+            perform(.moveLayer(id, parent: target.parentID, index: target.index))
+            return true
+        })
+    }
+
+    /// The line the dragged layer shows `y` points down row `rowID`, or nil when the Model refuses that drop.
+    private func dropLine(over rowID: String, y: CGFloat) -> DesignLayerDropLine? {
+        rowFrames.dragged.flatMap { id in
+            rowFrames.frames[rowID].flatMap { frame in
+                model.layerDropLine(id, over: rowID, y: Double(y), height: Double(frame.height))
+            }
+        }.map { DesignLayerDropLine(rowID: rowID, position: $0) }
     }
 
     private func header(_ title: String) -> some View {
@@ -107,6 +161,12 @@ struct DesignLayersPanel: View {
             })
     }
 
+    /// The Layers section's lines when the page has no layers, one note each: a list row doesn't
+    /// grow to wrap a note, so each line is short enough to fit the panel on its own.
+    nonisolated static func emptyNotes(isOpen: Bool) -> [String] {
+        isOpen ? ["No layers on this page.", "Draw a frame with the Frame tool (F)."] : ["No file open."]
+    }
+
     /// Add Page and Delete Page (the checked page), each disabled with the Model's reason while it
     /// can't run: no file open, or the file's last page. Untagged, so not selectable.
     static func pageCommands(_ model: DesignWorkspace, _ perform: @escaping DesignPerform) -> [ToolbarAction] {
@@ -124,7 +184,7 @@ struct DesignLayersPanel: View {
 
 /// The Layers rename's presentation state: the row in rename (nil: none), the name being typed,
 /// and the reason the last rename was refused, shown under the layers until the next one. The
-/// panel owns it; the rename itself goes to the Model as an intent once rows rename (layers-panel L-4).
+/// panel owns it; the row's own field (SidebarRow) holds the draft, and the rename goes out as `.renameLayer`.
 struct DesignRenameState: Equatable {
     /// The identifier of the row's name field while it is in rename.
     static let fieldID = "design.layer.rename"
@@ -134,6 +194,44 @@ struct DesignRenameState: Equatable {
     var rowID: String?
     var draft = ""
     var refusal: String?
+}
+
+/// The insertion line: the row it is drawn on and where on it.
+struct DesignLayerDropLine: Equatable {
+    let rowID: String
+    let position: DesignDropPosition
+}
+
+/// The layer being dragged, set when its row's drag starts, and each visible layer row's frame,
+/// written as rows lay out. A plain box, so a drag starting, a row moving or scrolling re-renders nothing.
+@MainActor final class DesignLayerRowFrames {
+    var dragged: String?
+    var frames: [String: CGRect] = [:]
+}
+
+/// What a layer row's drag reads and calls: the current line, the box, and the panel's handlers
+/// for the pointer `y` points down a row, the pointer leaving a row, and a drop on one.
+struct DesignLayerDrag {
+    let line: DesignLayerDropLine?
+    let frames: DesignLayerRowFrames
+    let changed: @MainActor (String, CGFloat) -> Void
+    let exited: @MainActor (String) -> Void
+    let dropped: @MainActor (String, CGFloat) -> Bool
+}
+
+/// A layer row as a drop target: it reports where over the row the drag is, and the drop.
+private struct DesignLayerDropTarget: DropDelegate {
+    let rowID: String
+    let drag: DesignLayerDrag
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        drag.changed(rowID, info.location.y)
+        return DropProposal(operation: drag.frames.dragged == nil ? .forbidden : .move)
+    }
+
+    func dropExited(info: DropInfo) { drag.exited(rowID) }
+
+    func performDrop(info: DropInfo) -> Bool { drag.dropped(rowID, info.location.y) }
 }
 
 /// One page: its symbol and name, with a checkmark on the current page.
@@ -151,7 +249,7 @@ private struct DesignPageLabel: View {
             if isCurrent {
                 Image(systemName: "checkmark")
                     .font(SuiteFont.inspectorMeta)
-                    .foregroundStyle(SuiteColor.secondaryText)
+                    .foregroundStyle(HierarchicalShapeStyle.secondary)  // adapts on the selected row
                     .help("Current page")
                     .accessibilityLabel("Current page")
                     .accessibilityIdentifier("design.current-page")
@@ -167,19 +265,21 @@ private struct DesignLayerTree: View {
     let nodes: [DesignNode]
     let model: DesignWorkspace
     let perform: DesignPerform
+    let drag: DesignLayerDrag
 
     var body: some View {
         ForEach(nodes.frontToBack) { node in
             if node.children.isEmpty {
-                DesignLayerRow(node: node, model: model, perform: perform).tag(node.id)
+                DesignLayerRow(node: node, model: model, perform: perform, drag: drag).tag(node.id)
             } else {
                 DisclosureGroup(
                     isExpanded: Binding(
                         get: { model.isExpanded(node.id) }, set: { perform(.setExpanded(node.id, $0)) })
                 ) {
-                    DesignLayerTree(nodes: node.children, model: model, perform: perform)
+                    DesignLayerTree(nodes: node.children, model: model, perform: perform, drag: drag)
                 } label: {
-                    DesignLayerRow(node: node, model: model, perform: perform, isDisclosureLabel: true).tag(node.id)
+                    DesignLayerRow(node: node, model: model, perform: perform, drag: drag, isDisclosureLabel: true)
+                        .tag(node.id)
                 }
                 .tag(node.id)
             }
@@ -187,33 +287,50 @@ private struct DesignLayerTree: View {
     }
 }
 
-/// One layer: SuiteUI's sidebar row with the kind's symbol, the name, and the eye and lock toggles.
+/// One layer: SuiteUI's sidebar row with the kind's symbol, the name (double-click renames it), and
+/// the eye and lock toggles; it drags to reorder and draws the insertion line when it is the target.
 private struct DesignLayerRow: View {
     let node: DesignNode
     let model: DesignWorkspace
     let perform: DesignPerform
+    let drag: DesignLayerDrag
     /// A group's row: its disclosure flattens the label into one checkbox, so the row combines.
     var isDisclosureLabel = false
 
     var body: some View {
         let id = node.id
         let toggles = model.layerToggles(id)
+        let line = drag.line?.rowID == id ? drag.line?.position : nil
         SidebarRow(
             SidebarItem(
                 id: id, title: node.name, systemImage: node.kind.systemImage,
                 toggles: toggles.map {
                     SidebarToggle(
                         id: $0.flag.rawValue, title: $0.title, onSymbol: $0.onSymbol, offSymbol: $0.offSymbol,
-                        isOn: $0.isOn)
+                        isOn: $0.isOn, reserving: $0.symbols)
                 }),
             onToggle: { flag in
                 if let flag = DesignLayerFlag(rawValue: flag) { perform(.toggleFlag(id, flag)) }
-            }
+            },
+            onRename: { name in perform(.renameLayer(id, name)) }
         )
         .lineLimit(1)
         .truncationMode(.middle)
         .foregroundStyle(model.isHiddenInTree(id) ? SuiteColor.textSecondary : Color.primary)
         .simultaneousGesture(TapGesture().modifiers(.shift).onEnded { perform(.toggleSelect(id)) })
+        .background { if line == .into { RoundedRectangle(cornerRadius: SuiteRadius.row).fill(SuiteColor.dragFill) } }
+        .overlay(alignment: line == .above ? .top : .bottom) {
+            if line == .above || line == .below {
+                Rectangle().fill(SuiteColor.accent).frame(height: SuiteSize.insertionLine).accessibilityHidden(true)
+            }
+        }
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { drag.frames.frames[id] = $0 }
+        .onDisappear { drag.frames.frames[id] = nil }
+        .onDrag {
+            drag.frames.dragged = id
+            return NSItemProvider(object: id as NSString)
+        }
+        .onDrop(of: [.plainText], delegate: DesignLayerDropTarget(rowID: id, drag: drag))
         .accessibilityElement(children: isDisclosureLabel ? .combine : .contain)
         .accessibilityIdentifier("design.layer.\(id)")
     }

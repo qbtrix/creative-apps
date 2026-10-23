@@ -19,14 +19,14 @@
 // the last 100 steps. An edit that changed nothing records nothing; New File
 // over a file with a location changes that location, so it always records (#492).
 //
-// Saved state (#270, files-history FH-2): every step carries a serial from a
-// counter that only increases, and a merge into the top step re-stamps it, so a
-// state is never mistaken for another. The current state's serial is the top
-// undo step's (or, once the cap dropped steps, the last dropped one's; 0 for a
-// fresh history). didSave marks it as saved and ends the edit run; a New File
-// swap marks its own step, as an untouched new file is clean. isDirty compares
-// the two. The marker is a plain Int so the editor kernel's history can take
-// it over. undoTarget routes Edit > Undo to a focused text field's own undo.
+// The steps, their runs, the cap and the saved marker are the editor kernel's
+// (SuiteKernel History, #2938): Design keeps no step ids of its own. Saved state
+// (#270, files-history FH-2): didSave records the save on documentSession, the
+// kernel DocumentSession on those step ids (DesignSession+Kernel.swift), and ends
+// the edit run; a New File swap marks its own step, as an untouched new file is
+// clean. isDirty, the save state's word and the close prompt read it
+// (DocumentSession.stateText, UnsavedPrompt), shared with the other apps.
+// undoTarget routes Edit > Undo to a focused text field's own undo.
 // ponytail: one whole-document snapshot per step (copy-on-write, so edits share
 // the nodes they didn't touch); switch to per-node diffs if files get large.
 // Linux-safe.
@@ -35,6 +35,7 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteKernel
 
 /// The document as an undo step restores it.
 struct DesignSnapshot: Sendable, Equatable {
@@ -49,36 +50,22 @@ struct DesignSnapshot: Sendable, Equatable {
 }
 
 struct DesignHistory: Sendable, Equatable {
-    struct Step: Sendable, Equatable {
-        var name: String
+    /// What one kernel step puts back: the document, and for a swap its file location.
+    struct Revert: Sendable, Equatable {
         var snapshot: DesignSnapshot
-        var coalescing: String?
         /// Undoing or redoing it replaces the whole document (New File over an open file).
         var swapsDocument = false
         /// The file the snapshot's document was at; a swap step restores it.
         var documentURL: URL?
-        /// The state this step leads to; unique, from `nextSerial`.
-        var serial = 0
     }
 
     static let limit = 100
-    var undo: [Step] = []
-    var redo: [Step] = []
-    /// The last serial handed out; only ever increases.
-    var nextSerial = 0
-    /// The serial of the state under the bottom undo step: 0, or the last step the cap dropped.
-    var baseSerial = 0
-    /// The serial of the state last saved or opened (a fresh history is 0, clean).
-    var savedSerial: Int? = 0
-
-    /// The serial of the document as it is now.
-    var currentSerial: Int { undo.last?.serial ?? baseSerial }
-
-    /// A serial no step has had before.
-    mutating func newSerial() -> Int {
-        nextSerial += 1
-        return nextSerial
-    }
+    /// The kernel history: names, runs, the cap, step ids and the saved marker.
+    var kernel = History<Revert>(limit: DesignHistory.limit)
+    /// The steps Undo reverts, the next one last.
+    var undo: [History<Revert>.Step] { kernel.undoSteps }
+    /// The steps Redo reapplies, the next one last.
+    var redo: [History<Revert>.Step] { kernel.redoSteps }
 }
 
 /// Where Edit > Undo and Redo go.
@@ -91,41 +78,46 @@ public enum DesignUndoTarget: Sendable, Equatable {
 
 extension DesignWorkspace {
     /// Undo would run: there is a step, no drag is open and no text is being edited (#442).
-    public var canUndo: Bool { historyIsLive && !history.undo.isEmpty }
+    public var canUndo: Bool { historyIsLive && history.kernel.canUndo }
     /// Redo would run: there is a step, no drag is open and no text is being edited (#442).
-    public var canRedo: Bool { historyIsLive && !history.redo.isEmpty }
+    public var canRedo: Bool { historyIsLive && history.kernel.canRedo }
     /// "Undo Add Rectangle", or plain "Undo" with nothing to undo.
-    public var undoActionName: String { history.undo.last.map { "Undo \($0.name)" } ?? "Undo" }
+    public var undoActionName: String { history.kernel.undoName.map { "Undo \($0)" } ?? "Undo" }
     /// "Redo Add Rectangle", or plain "Redo" with nothing to redo.
-    public var redoActionName: String { history.redo.last.map { "Redo \($0.name)" } ?? "Redo" }
+    public var redoActionName: String { history.kernel.redoName.map { "Redo \($0)" } ?? "Redo" }
     /// The next Undo replaces the whole document, and with it `documentURL`.
     /// False mid-drag and while editing text, where Undo is ignored.
-    public var undoSwapsDocument: Bool { historyIsLive && history.undo.last?.swapsDocument == true }
+    public var undoSwapsDocument: Bool { historyIsLive && history.undo.last?.payload.swapsDocument == true }
     /// The next Redo replaces the whole document, and with it `documentURL`.
     /// False mid-drag and while editing text, where Redo is ignored.
-    public var redoSwapsDocument: Bool { historyIsLive && history.redo.last?.swapsDocument == true }
+    public var redoSwapsDocument: Bool { historyIsLive && history.redo.last?.payload.swapsDocument == true }
 
     /// Undo and Redo run: no drag is open and no text is being edited.
     private var historyIsLive: Bool { gesture == nil && editingTextID == nil }
 
     /// Puts back the last edit. Ignored with nothing to undo, mid-drag and while editing text.
     public mutating func undo() {
-        guard historyIsLive, let step = history.undo.popLast() else { return }
-        history.redo.append(DesignHistory.Step(
-            name: step.name, snapshot: snapshot, swapsDocument: step.swapsDocument, documentURL: documentURL,
-            serial: step.serial))
-        restore(step)
-        endRun()
+        guard historyIsLive else { return }
+        var steps = history.kernel
+        var applied: DesignHistory.Revert?
+        guard steps.undo({ step in applied = step; return reverse(of: step) }), let applied else { return }
+        history.kernel = steps
+        restore(applied)
     }
 
     /// Makes the last undone edit again. Ignored with nothing to redo, mid-drag and while editing text.
     public mutating func redo() {
-        guard historyIsLive, let step = history.redo.popLast() else { return }
-        history.undo.append(DesignHistory.Step(
-            name: step.name, snapshot: snapshot, swapsDocument: step.swapsDocument, documentURL: documentURL,
-            serial: step.serial))
-        restore(step)
-        endRun()
+        guard historyIsLive else { return }
+        var steps = history.kernel
+        var applied: DesignHistory.Revert?
+        guard steps.redo({ step in applied = step; return reverse(of: step) }), let applied else { return }
+        history.kernel = steps
+        restore(applied)
+    }
+
+    /// The step that takes the document from `step`'s state back to the one on screen now.
+    private func reverse(of step: DesignHistory.Revert) -> DesignHistory.Revert {
+        DesignHistory.Revert(snapshot: snapshot, swapsDocument: step.swapsDocument, documentURL: documentURL)
     }
 
     var snapshot: DesignSnapshot {
@@ -145,34 +137,26 @@ extension DesignWorkspace {
         guard pages != before.pages || selectedPageID != before.selectedPageID || selectedNodeIDs != before.selectedNodeIDs
             || (swapsDocument && documentURL != nil)
         else { return }
-        history.redo.removeAll()
-        if let coalescing, let top = history.undo.indices.last, history.undo[top].coalescing == coalescing {
-            history.undo[top].serial = history.newSerial()
-            return
-        }
-        let serial = history.newSerial()
-        history.undo.append(DesignHistory.Step(
-            name: name, snapshot: before, coalescing: coalescing, swapsDocument: swapsDocument,
-            documentURL: documentURL, serial: serial))
-        if swapsDocument { history.savedSerial = serial }
-        let dropped = history.undo.count - DesignHistory.limit
-        if dropped > 0 {
-            history.baseSerial = history.undo[dropped - 1].serial
-            history.undo.removeFirst(dropped)
-        }
+        history.kernel.record(
+            name, DesignHistory.Revert(snapshot: before, swapsDocument: swapsDocument, documentURL: documentURL),
+            key: coalescing)
+        if swapsDocument { history.kernel.markSaved() }
     }
 
     /// True when the document differs from the last save or open (undoing back to it clears it).
-    public var isDirty: Bool { isOpen && history.currentSerial != history.savedSerial }
+    public var isDirty: Bool { isOpen && documentSession.isDirty }
 
     /// "Saved" after a save, "Edited" with unsaved changes, nil with no file open.
-    public var saveStateText: String? { isOpen ? (isDirty ? "Edited" : "Saved") : nil }
+    public var saveStateText: String? {
+        guard isOpen else { return nil }
+        return documentSession.stateText
+    }
 
     /// The close prompt's message, or nil when the window may close at once.
     public var closePrompt: String? {
         guard isDirty else { return nil }
         let name = documentURL?.lastPathComponent ?? "Untitled"
-        return "Do you want to save the changes you made to “\(name)”?"
+        return UnsavedPrompt.message(for: name)
     }
 
     /// Where Edit > Undo and Redo go: the focused text field's own undo, or the document's.
@@ -180,16 +164,9 @@ extension DesignWorkspace {
         textFieldFocused ? .field : .document
     }
 
-    /// Marks the document as it is now as saved and ends the edit run, so the next nudge
-    /// starts a new step (`didSave(to:)` calls it).
-    mutating func markSaved() {
-        history.savedSerial = history.currentSerial
-        endRun()
-    }
-
     /// Undo and redo: the document goes back to the step's snapshot, the counters never go back.
     /// A swap step also puts back the file location that document had.
-    private mutating func restore(_ step: DesignHistory.Step) {
+    private mutating func restore(_ step: DesignHistory.Revert) {
         let snapshot = step.snapshot
         if step.swapsDocument { documentURL = step.documentURL }
         pages = snapshot.pages
@@ -214,7 +191,6 @@ extension DesignWorkspace {
 
     /// Stops the last step from absorbing the next edit.
     private mutating func endRun() {
-        guard let last = history.undo.indices.last else { return }
-        history.undo[last].coalescing = nil
+        history.kernel.endRun()
     }
 }

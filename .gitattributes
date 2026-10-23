@@ -5,7 +5,7 @@
 # and the lane's integration of a conflicting PR, not the squash itself.
 #
 # json: three-way merge by object key (scripts/merge-json). C4 parts, .wave.json
-# feature data, mutation plans and the audit baseline are objects whose keys
+# feature data, real-jobs lists (jobs.json), mutation plans and the audit baseline are objects whose keys
 # different PRs add or change; two PRs touching different keys no longer
 # conflict. Arrays stay atomic.
 *.json merge=json

@@ -20,8 +20,9 @@
 // data is in TimelineTrack.swift. The unit and fps reach the ruler and the
 // toolbar's unit chips; the work area reaches the toolbar's Work Area chip and
 // the bar on the ruler (TimelineWorkAreaBar, over the playhead), which call
-// onUnit and onWorkArea (TL-18). Each lane's input (TimelineLaneInput) calls
-// the move closures for a key drag and the trim closures for a clip end. The strip owns its zoom (TL-17), a factor over the
+// onUnit and onWorkArea (TL-18). ⌘A while the strip has focus calls
+// onSelectAllKeys when the host passes one (TSA-1, TimelineStrip+Keys). Each lane's input (TimelineLaneInput) calls
+// the move closures for a key drag, the trim closures for a clip end and onSlide for a clip's body (TK-4). The strip owns its zoom (TL-17), a factor over the
 // host's frameWidth kept in TimelineZoom's range (1 = fit): Command-plus,
 // Command-minus and Command-0 while it has focus (anchored on the playhead),
 // a pinch on the lanes (anchored under the pointer) and the toolbar row
@@ -33,7 +34,11 @@
 // hidden shortcuts (TimelineZoomShortcuts): SwiftUI looks for a shortcut in the
 // key window before the menu bar, so a host's Zoom In ⌘+ item, enabled or not,
 // no longer takes the key first (#2142). The key press handler stays for a
-// host with no such item.
+// host with no such item. A host that knows its document's FrameRate passes
+// `rate`: the ruler and the pill then read its timecode (";" at drop-frame
+// rates), as the host's own readout does, and fps is its nominal rate (FR-u).
+// The lanes open scrolled so the playhead is in view (TimelineZoom.followed).
+import SuiteKernel
 import SwiftUI
 
 public struct TimelineStrip<ID: Hashable & Sendable>: View {
@@ -46,6 +51,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     private let onSelectTrack: @MainActor (ID) -> Void
     private let unit: TimeUnit
     private let fps: Int
+    private let rate: FrameRate?
     private let workArea: ClosedRange<Int>?
     private let toolbar: Bool
     private let onPickKeyframe: @MainActor (ID, Int?, PickMode) -> Void
@@ -53,8 +59,10 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     private let onEndKeyDrag: @MainActor () -> Void
     private let onTrim: @MainActor (ID, SpanEdge, Int) -> Void
     private let onEndTrim: @MainActor () -> Void
+    private let onSlide: @MainActor (ID, Int) -> Void
     private let onUnit: @MainActor (TimeUnit) -> Void
     private let onWorkArea: @MainActor (ClosedRange<Int>?) -> Void
+    private let onSelectAllKeys: (@MainActor () -> Void)?
     @Environment(\.suiteSnapshotRendering) private var snapshot
     /// The host's prefix for the name buttons' identifiers; nil puts none.
     @Environment(\.timelineIdentifierPrefix) private var idPrefix
@@ -86,10 +94,11 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     /// `playhead` is the current frame. `unit` and `fps` say how time reads,
     /// `workArea` is the host's work area and `toolbar` shows the strip's own
     /// toolbar. `onPickKeyframe` gets a nil frame when the bed is clicked;
-    /// `onMoveKeyframes` gets the frames moved since its last call.
+    /// `onMoveKeyframes` gets the frames moved since its last call, and
+    /// `onSlide` a clip body's track and the frames it moved since its last call.
     public init(
         tracks: [TimelineTrack<ID>], duration: Int, frameWidth: CGFloat, playhead: Int,
-        unit: TimeUnit = .frames, fps: Int = 0, workArea: ClosedRange<Int>? = nil, toolbar: Bool = false,
+        unit: TimeUnit = .frames, fps: Int = 0, rate: FrameRate? = nil, workArea: ClosedRange<Int>? = nil, toolbar: Bool = false,
         onScrub: @escaping @MainActor (Int) -> Void = { _ in },
         onSelectKeyframe: @escaping @MainActor (ID, Int) -> Void = { _, _ in },
         onSelectTrack: @escaping @MainActor (ID) -> Void = { _ in },
@@ -98,8 +107,10 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         onEndKeyDrag: @escaping @MainActor () -> Void = {},
         onTrim: @escaping @MainActor (ID, SpanEdge, Int) -> Void = { _, _, _ in },
         onEndTrim: @escaping @MainActor () -> Void = {},
+        onSlide: @escaping @MainActor (ID, Int) -> Void = { _, _ in },
         onUnit: @escaping @MainActor (TimeUnit) -> Void = { _ in },
-        onWorkArea: @escaping @MainActor (ClosedRange<Int>?) -> Void = { _ in }
+        onWorkArea: @escaping @MainActor (ClosedRange<Int>?) -> Void = { _ in },
+        onSelectAllKeys: (@MainActor () -> Void)? = nil
     ) {
         self.tracks = tracks
         self.fitMapping = FrameMapping(duration: duration, frameWidth: Double(frameWidth))
@@ -108,7 +119,8 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         self.onSelectKeyframe = onSelectKeyframe
         self.onSelectTrack = onSelectTrack
         self.unit = unit
-        self.fps = fps
+        self.fps = rate?.nominal ?? fps
+        self.rate = rate
         self.workArea = workArea
         self.toolbar = toolbar
         self.onPickKeyframe = onPickKeyframe
@@ -116,8 +128,10 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         self.onEndKeyDrag = onEndKeyDrag
         self.onTrim = onTrim
         self.onEndTrim = onEndTrim
+        self.onSlide = onSlide
         self.onUnit = onUnit
         self.onWorkArea = onWorkArea
+        self.onSelectAllKeys = onSelectAllKeys
     }
 
     public var body: some View {
@@ -136,7 +150,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             HStack(spacing: 0) {
                 Color.clear.frame(width: SuiteSize.timelineLabelColumn, height: SuiteSize.timelineRuler)
                 Divider()
-                TimelineRuler(mapping: mapping, visibleX: visibleX, playhead: playhead, unit: unit, fps: fps, onScrub: onScrub)
+                TimelineRuler(mapping: mapping, visibleX: visibleX, playhead: playhead, unit: unit, fps: fps, rate: rate, onScrub: onScrub)
             }
             .frame(height: SuiteSize.timelineRuler)
             // ImageRenderer can't draw a ScrollView, so snapshots show the
@@ -167,7 +181,10 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                             let low = Double(rect.minX - timelineInset)
                             return low...max(low, Double(rect.maxX - timelineInset))
                         } action: { _, visible in
+                            let first = visibleX.map { $0.upperBound <= $0.lowerBound } ?? true
                             visibleX = visible
+                            // The first report with a width: open on the playhead's page, not frame 0.
+                            if first { follow(playhead, in: (visible.lowerBound, visible.upperBound - visible.lowerBound)) }
                         }
                         .scrollPosition($position)
                         // A zoom's scroll waits for the lanes' new width, or it would be clamped to the old one.
@@ -196,7 +213,9 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             maxHeight: layout.idealHeight, alignment: .top
         )
         .focusable(!snapshot, interactions: .edit)
-        .modifier(TimelineStripKeys(tracks: tracks, mapping: mapping, onPickKeyframe: onPickKeyframe))
+        .modifier(
+            TimelineStripKeys(
+                tracks: tracks, mapping: mapping, onPickKeyframe: onPickKeyframe, onSelectAllKeys: onSelectAllKeys))
         .focused($focused)
         .background {
             if focused && !snapshot {
@@ -248,8 +267,8 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     }
 
     /// The follow rule: a playhead that leaves the view moves it a page.
-    private func follow(_ frame: Int) {
-        guard let scroll, pendingScrollX == nil else { return }
+    private func follow(_ frame: Int, in reported: (offset: Double, width: Double)? = nil) {
+        guard let scroll = reported ?? scroll, pendingScrollX == nil else { return }
         let offset = TimelineZoom.followed(
             scroll.offset, playhead: frame, frameWidth: fitMapping.frameWidth, zoom: zoom, viewport: scroll.width)
         if offset != scroll.offset { position.scrollTo(x: max(offset + Double(timelineInset), 0)) }
@@ -276,7 +295,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             mapping: mapping, playhead: playhead, unit: unit, fps: fps,
             scroll: CGPoint(x: scrollX, y: snapshot ? 0 : visibleY?.lowerBound ?? 0),
             keys: TimelinePlayhead.keys(at: mapping.clamp(playhead), in: tracks, rows: rows), workArea: workArea,
-            onScrub: onScrub
+            rate: rate, onScrub: onScrub
         ).equatable()
             .padding(.top, layout.toolbarHeight)
             .padding(.leading, SuiteSize.timelineLabelColumn + TimelinePlayheadGrab.divider)
@@ -317,7 +336,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                 // The strip owns the tap so no closure sits in what `.equatable()` compares.
                 TimelineLane(track: track, mapping: mapping).equatable()
                     .contentShape(Rectangle())
-                    .modifier(TimelineLaneInput(track: track, mapping: mapping, playhead: playhead, actions: TimelineLaneActions(onSelectKeyframe: onSelectKeyframe, onSelectTrack: onSelectTrack, onPickKeyframe: onPickKeyframe, onMoveKeyframes: onMoveKeyframes, onEndKeyDrag: onEndKeyDrag, onTrim: onTrim, onEndTrim: onEndTrim)))
+                    .modifier(TimelineLaneInput(track: track, mapping: mapping, playhead: playhead, actions: TimelineLaneActions(onSelectKeyframe: onSelectKeyframe, onSelectTrack: onSelectTrack, onPickKeyframe: onPickKeyframe, onMoveKeyframes: onMoveKeyframes, onEndKeyDrag: onEndKeyDrag, onTrim: onTrim, onEndTrim: onEndTrim, onSlide: onSlide)))
             }
         }
         .frame(width: width, alignment: .leading)

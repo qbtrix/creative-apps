@@ -4,7 +4,8 @@
 // Cut takes Shadow away and Paste brings it back as "Shadow copy"; Delete removes "Ball copy 2". With the
 // pasteboard cleared, Edit > Paste is disabled and its help tag shows (`edit-paste-disabled`). A right click
 // on Ball on the stage opens the context menu: Cut, Copy, Duplicate, Delete, Bring Forward and Send Backward
-// (`stage-context-menu`). A scene point is the artboard's top-left corner plus the point at its fit scale.
+// (`stage-context-menu`). A scene point is the artboard's top-left corner plus the point at its fit scale. Rows are
+// picked off their names and read selected before the menu opens (Journey.pickSidebarRow, #2496, #2730).
 import AppKit
 import XCTest
 
@@ -21,7 +22,7 @@ final class FlareEditJourneys: XCTestCase {
 
         // 1. Ball, Edit > Copy: the pasteboard holds Flare layers.
         _ = NSPasteboard.general.clearContents()
-        sidebar.staticTexts["Ball"].click()
+        flare.pickSidebarRow("Ball")
         choose("Copy", flare)
         XCTAssert(waitFor { NSPasteboard.general.data(forType: Self.layersType) != nil },
                   "Copy put no Flare layers on the pasteboard")
@@ -40,7 +41,7 @@ final class FlareEditJourneys: XCTestCase {
         flare.shot("edit-3-duplicated")
 
         // 4. Shadow, Cut: it goes; Paste brings it back renamed.
-        sidebar.staticTexts["Shadow"].click()
+        flare.pickSidebarRow("Shadow")
         choose("Cut", flare)
         XCTAssert(sidebar.staticTexts["Shadow"].waitForNonExistence(timeout: 5), "Cut left Shadow in LAYERS")
         expectUndo("Undo Cut", flare)
@@ -49,7 +50,7 @@ final class FlareEditJourneys: XCTestCase {
         flare.shot("edit-4-cut-pasted")
 
         // 5. "Ball copy 2", Delete: it goes.
-        sidebar.staticTexts["Ball copy 2"].click()
+        flare.pickSidebarRow("Ball copy 2")
         choose("Delete", flare)
         XCTAssert(sidebar.staticTexts["Ball copy 2"].waitForNonExistence(timeout: 5), "Delete left Ball copy 2")
         expectUndo("Undo Delete", flare)
@@ -60,7 +61,7 @@ final class FlareEditJourneys: XCTestCase {
         expectDisabledWithHelp("Paste", flare)
 
         // 7. Right click Ball on the stage (at (80, 100) on frame 0): the stage's context menu.
-        sidebar.staticTexts["Ball"].click()
+        flare.pickSidebarRow("Ball")
         let canvas = flare.element("suite.canvas")
         XCTAssert(canvas.waitForExistence(timeout: 10), "no stage (suite.canvas)")
         point(80, 100, on: canvas).rightClick()
@@ -69,6 +70,57 @@ final class FlareEditJourneys: XCTestCase {
         }
         flare.shot("stage-context-menu", screen: true)
         flare.press(.escape)
+    }
+
+    /// The slice FJ-CB waits on; CB-8 sets it to nil.
+    private static let copyOutWaitsOn: String? = "CB-8"
+    private static let svgType = NSPasteboard.PasteboardType("public.svg-image")
+    /// Two groups, red and blue: svg-place makes a layer of each, named after the group.
+    private static let logo = """
+    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="100" viewBox="0 0 200 100">
+    <g id="red"><rect x="10" y="10" width="80" height="80" fill="#E53935"/></g>
+    <g id="blue"><rect x="110" y="10" width="80" height="80" fill="#1E88E5"/></g>
+    </svg>
+    """
+
+    /// FJ-CB (clipboard-interop CB-7 writes it skipped, CB-8 turns it on): at frame 12, Ball, Edit > Copy writes
+    /// Flare's layers, an SVG and a PNG (`edit-copy-types`); an SVG logo written to the pasteboard, then Edit > Paste:
+    /// its red and blue groups appear in LAYERS as one "Paste" step (`edit-paste-svg`).
+    @MainActor func testCopyOutPasteImageIn() throws {
+        if let waitsOn = Self.copyOutWaitsOn { throw XCTSkip("waits on \(waitsOn)") }
+        let flare = Journey("Flare", self, arguments: ["-FlareSample", "bounce"])
+        XCTAssert(flare.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        let sidebar = flare.element("suite.sidebar")
+        XCTAssert(sidebar.staticTexts["Ball"].waitForExistence(timeout: 10), "LAYERS shows no Ball")
+
+        // 1. The playhead on frame 12: Go to Start, then Next Frame twelve times.
+        flare.element("flare.timeline.goToStart").click()
+        let forward = flare.element("flare.timeline.step.forward")
+        XCTAssert(forward.waitForExistence(timeout: 5), "no Next Frame button (flare.timeline.step.forward)")
+        for _ in 0..<12 { forward.click() }
+        let readout = flare.element("flare.timeline.frame")
+        XCTAssert(waitFor { Int(readout.label.prefix { $0.isNumber }) == 12 }, "the playhead isn't on frame 12")
+
+        // 2. Ball, Edit > Copy: own layers, SVG and PNG on the pasteboard.
+        let pasteboard = NSPasteboard.general
+        _ = pasteboard.clearContents()
+        flare.pickSidebarRow("Ball")
+        choose("Copy", flare)
+        XCTAssert(waitFor { pasteboard.data(forType: .png) != nil }, "Copy put no PNG on the pasteboard")
+        let types = pasteboard.types ?? []
+        for type in [Self.layersType, Self.svgType, .png] {
+            XCTAssert(types.contains(type), "Copy left \(type.rawValue) off the pasteboard (it holds \(types.map(\.rawValue)))")
+        }
+        flare.shot("edit-copy-types")
+
+        // 3. An SVG logo on the pasteboard, Edit > Paste: its two groups are layers, one step.
+        _ = pasteboard.clearContents()
+        XCTAssert(pasteboard.setData(Data(Self.logo.utf8), forType: Self.svgType), "could not put an SVG on the pasteboard")
+        choose("Paste", flare)
+        XCTAssert(sidebar.staticTexts["red"].waitForExistence(timeout: 5), "Paste of the SVG added no red layer")
+        XCTAssert(sidebar.staticTexts["blue"].exists, "Paste of the SVG added no blue layer")
+        expectUndo("Undo Paste", flare)
+        flare.shot("edit-paste-svg")
     }
 
     /// Picks Edit > `item`, which must be enabled.

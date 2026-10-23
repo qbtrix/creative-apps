@@ -1,0 +1,37 @@
+[
+  {
+    "label": "minimumInclusive: a number equal to its minimum is refused",
+    "file": "Sources/SuiteKernel/Commands/ParamSchema.swift",
+    "find": "x < minimum {",
+    "replace": "x <= minimum {",
+    "tests": "ParamSchemaTests"
+  },
+  {
+    "label": "maximumInclusive: a number equal to its maximum is refused",
+    "file": "Sources/SuiteKernel/Commands/ParamSchema.swift",
+    "find": "x > maximum {",
+    "replace": "x >= maximum {",
+    "tests": "ParamSchemaTests"
+  },
+  {
+    "label": "nestedPath: a nested issue's pointer drops its parents",
+    "file": "Sources/SuiteKernel/Commands/ParamSchema.swift",
+    "find": "return path + \"/\" + escaped",
+    "replace": "return \"/\" + escaped",
+    "tests": "ParamSchemaTests"
+  },
+  {
+    "label": "closedObject: an extra key is accepted",
+    "file": "Sources/SuiteKernel/Commands/ParamSchema.swift",
+    "find": "let closed = keywords[\"additionalProperties\"] == .bool(false)",
+    "replace": "let closed = false",
+    "tests": "ParamSchemaTests"
+  },
+  {
+    "label": "requiredIgnored: a missing required key passes",
+    "file": "Sources/SuiteKernel/Commands/ParamSchema.swift",
+    "find": "where members[key] == nil {",
+    "replace": "where members[key] == nil && key.isEmpty {",
+    "tests": "ParamSchemaTests"
+  }
+]

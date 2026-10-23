@@ -122,9 +122,8 @@ final class HaloPlaybackJourneyTests: XCTestCase {
     /// Clicks Badge's lane: it selects Badge and focuses the timeline, so
     /// HaloViewer's keys (Space, ←) reach the Model.
     @MainActor private func focusTimeline(_ halo: Journey) {
-        let lane = halo.app.descendants(matching: .any).matching(
-            NSPredicate(format: "identifier == 'halo.timeline.track' AND label == 'Badge'")).firstMatch
-        XCTAssert(lane.waitForExistence(timeout: 10), "no Badge lane in the timeline")
+        let lane = halo.trackName("Badge")
+        XCTAssert(lane.waitForExistence(timeout: 10), "no Badge track (halo.timeline.name.*) in the timeline")
         lane.click()
     }
 

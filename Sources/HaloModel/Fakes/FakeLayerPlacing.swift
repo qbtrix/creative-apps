@@ -14,10 +14,4 @@ public struct FakeLayerPlacing: LayerPlacing {
     public func parentCandidates(for layerID: String, in composition: HaloComposition) -> [String] {
         live.parentCandidates(for: layerID, in: composition)
     }
-
-    /// Whether `layerID` follows `ancestorID` through its chain of parents
-    /// (HaloKeyRules.follows; kept for the callers that name it here).
-    static func follows(_ layerID: String, _ ancestorID: String, in composition: HaloComposition) -> Bool {
-        HaloKeyRules.follows(layerID, ancestorID, in: composition)
-    }
 }

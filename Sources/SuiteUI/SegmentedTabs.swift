@@ -5,13 +5,18 @@
 // selected one on the `stateSelected` tint, the capsule on `rowHover` under
 // the pointer and at 40% while disabled. It stays a `Picker` underneath, so
 // the system draws the segments, Tab reaches it and VoiceOver reads it as one.
+// A click on a segment also puts focus in it, so ← and → then step to the
+// previous or next tab (`step`) with keyboard navigation off too, and each
+// segment carries its option's identifier, or `<id>.<option id>`, and is
+// listed in `suite.controls` under it (`segmentEntries`), the picked one
+// `selected: true` and the rest `false`.
 // A selection change fades over 0.14 s (at once under `suiteReduceMotion`)
 // and reports a `fade-start`/`fade-end` pair on series `tabs` (QB-S9;
 // TabsProbe, which a probe host sets). Given an `id` it lists itself in
 // `suite.controls`, its reason while unavailable being its tooltip
 // (`entry`). Value in, `onChange` out: the host keeps which tab is showing
-// as its own presentation state. Owns presentation state only: hover and the
-// selection drawn while it fades.
+// as its own presentation state. Owns presentation state only: hover, focus
+// and the selection drawn while it fades.
 import SwiftUI
 
 public struct SegmentedTabs<ID: Hashable & Sendable>: View {
@@ -24,6 +29,8 @@ public struct SegmentedTabs<ID: Hashable & Sendable>: View {
     /// The selection drawn; it follows `selection` through TabsProbe.fade, so the fade reports its marks.
     @State private var shown: ID
     @State private var hovering = false
+    /// Whether focus is in the switch, so ← and → reach it.
+    @FocusState private var focused: Bool
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.suiteReduceMotion) private var reduceMotion
     @Environment(\.tabsProbe) private var probe
@@ -57,11 +64,44 @@ public struct SegmentedTabs<ID: Hashable & Sendable>: View {
         ControlEntry(id: id, enabled: enabled, reason: enabled ? nil : help(label, unavailable: unavailable))
     }
 
+    /// The tab `offset` places from `current` (-1 for ←, 1 for →), or nil past either end.
+    nonisolated public static func step(_ tabs: [ID], from current: ID, by offset: Int) -> ID? {
+        guard let index = tabs.firstIndex(of: current) else { return nil }
+        let next = index + offset
+        return tabs.indices.contains(next) ? tabs[next] : nil
+    }
+
+    /// The accessibility identifier of `option`'s segment: its own, else `<id>.<option id>`; nil without an `id`.
+    nonisolated static func segmentID(_ option: InspectorOption<ID>, in id: String?) -> String? {
+        option.identifier ?? id.map { "\($0).\(String(describing: option.id))" }
+    }
+
+    /// The `suite.controls` entries of the identified segments, which share the switch's state and reason.
+    nonisolated static func segmentEntries(
+        _ tabs: [InspectorOption<ID>], in id: String?, enabled: Bool, reason: String?, selection: ID? = nil
+    ) -> [ControlEntry] {
+        tabs.compactMap { option in
+            segmentID(option, in: id).map {
+                ControlEntry(id: $0, enabled: enabled, reason: enabled ? nil : reason)
+                    .selecting(selection.map { picked in option.id == picked })
+            }
+        }
+    }
+
     /// The system control underneath: a segmented Picker over the drawn selection.
     var picker: some View {
-        Picker(label, selection: Binding(get: { shown }, set: { onChange($0) })) {
-            ForEach(tabs) { Text($0.title).tag($0.id) }
+        Picker(label, selection: Binding(get: { shown }, set: { focused = true; onChange($0) })) {
+            ForEach(tabs) { option in
+                Text(option.title).tag(option.id).accessibilityIdentifier(Self.segmentID(option, in: id) ?? "")
+            }
         }
+    }
+
+    /// Steps to the neighbouring tab on ← or →; other keys pass on.
+    private func stepKey(_ offset: Int) -> KeyPress.Result {
+        guard let next = Self.step(tabs.map(\.id), from: shown, by: offset) else { return .ignored }
+        onChange(next)
+        return .handled
     }
 
     public var body: some View {
@@ -80,10 +120,23 @@ public struct SegmentedTabs<ID: Hashable & Sendable>: View {
                 .background(lit ? SuiteColor.rowHover : SuiteColor.row, in: Capsule())
                 .contentShape(Capsule())
                 .disabled(unavailableHelp != nil)
+                // Focusable on a click, not only under keyboard navigation (focusable(_:interactions:)).
+                .focusable(enabled)
+                .focused($focused)
+                .focusEffectDisabled()
+                .onKeyPress(.leftArrow) { stepKey(-1) }
+                .onKeyPress(.rightArrow) { stepKey(1) }
                 .opacity(enabled ? 1 : SuiteColor.disabledOpacity)
                 .onHover { hovering = $0 }
                 .help(help)
                 .suiteControl(id: id, enabled: enabled, reason: enabled ? nil : help)
+                .background {
+                    // The segments keep the identifiers the picker set; these only list them.
+                    let entries = Self.segmentEntries(tabs, in: id, enabled: enabled, reason: help, selection: selection)
+                    ForEach(entries, id: \.id) { entry in
+                        Color.clear.suiteControl(entry: entry, identifies: false)
+                    }
+                }
                 .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: lit)
                 .padding(SuiteSpacing.s)
             Divider()
@@ -98,14 +151,28 @@ public struct SegmentedTabs<ID: Hashable & Sendable>: View {
 /// records nothing): a `fade-start`/`fade-end` mark pair on series `tabs`.
 struct TabsProbe: Sendable {
     static let fadeSeries = "tabs"
+    /// How long `SuiteMotion.state` runs: 0.14 s.
+    static let fadeLength: TimeInterval = 0.14
     let record: @MainActor @Sendable (ProbeMark) -> Void
 
     /// Runs `change` under the state fade (none under Reduce Motion), marking its start and its end.
     @MainActor static func fade(reduceMotion: Bool, probe: TabsProbe?, _ change: () -> Void) {
         probe?.record(ProbeMark(name: "fade-start", series: fadeSeries, time: ProcessInfo.processInfo.systemUptime))
-        // The completion runs exactly once: after the fade, or at once when nothing animates.
-        withAnimation(SuiteMotion.state(reduceMotion: reduceMotion), change) {
-            probe?.record(ProbeMark(name: "fade-end", series: fadeSeries, time: ProcessInfo.processInfo.systemUptime))
+        withAnimation(SuiteMotion.state(reduceMotion: reduceMotion), change)
+        // The drawn selection is a system segmented control, so the change creates no SwiftUI animation, and a
+        // completion run from onChange waited for the next transaction (start, start, end on scoped run
+        // 39133362138, #2805). The pair closes on its own instead: at once under Reduce Motion, else after the
+        // fade, on a main-run-loop timer. A main-actor Task never ran while the caller spun the run loop holding
+        // the main actor (start, start on scoped run 39137893783).
+        guard let probe else { return }
+        if reduceMotion {
+            probe.record(ProbeMark(name: "fade-end", series: fadeSeries, time: ProcessInfo.processInfo.systemUptime))
+            return
+        }
+        Timer.scheduledTimer(withTimeInterval: fadeLength, repeats: false) { _ in
+            MainActor.assumeIsolated {
+                probe.record(ProbeMark(name: "fade-end", series: fadeSeries, time: ProcessInfo.processInfo.systemUptime))
+            }
         }
     }
 }

@@ -22,9 +22,10 @@ struct LibraryMenu {
         var loadSamples: Action?
     }
 
-    /// File (import): Import Folder…, and the import notice's actions.
+    /// File (import): Import Folder…, a folder dropped on the empty catalog, and the import notice's actions.
     struct File {
         var importFolder: Action?
+        var importDropped: (@MainActor (String) -> Void)?
         var importHelp: String?  // why Import Folder… can't act, before the services' reason
         var showImportFailures: Action?
         var dismissImportNotice: Action?
@@ -62,6 +63,7 @@ struct LibraryMenu {
         var actualSize: Action?
         var setSort: (@MainActor (LibrarySort) -> Void)?
         var sort: LibrarySort = .captureDate
+        var setCellSize: (@MainActor (Int) -> Void)?  // the grid toolbar's Size bar
         var first: Action?
         var last: Action?
         var zoomInTitle: String = "Zoom In"
@@ -70,11 +72,29 @@ struct LibraryMenu {
         var fitMeasured: (@MainActor (Double) -> Void)?  // the fit scale the loupe view measured
     }
 
+    /// The Develop tab's actions (develop): no menu items of their own; the
+    /// tab's rows, curve, levels, resets, Sync and Show Original call them.
+    struct Develop {
+        var set: (@MainActor (DevelopSlider, Double) -> Void)?
+        var setCurve: (@MainActor ([DevelopCurvePoint]) -> Void)?
+        var setLevels: (@MainActor (DevelopLevels.Field, Double) -> Void)?
+        var endEdit: Action?  // a row's or the curve's onEnd
+        var reset: (@MainActor (DevelopGroup?) -> Void)?
+        var resetSlider: (@MainActor (DevelopSlider) -> Void)?
+        var resetCurve: Action?
+        var resetLevels: Action?
+        var sync: Action?
+        var syncTitle: String?
+        var toggleOriginal: Action?
+        var showsOriginal = false
+    }
+
     /// Photo: the develop half (develop) and the crop half (crop).
     struct Photo {
         var copySettings: Action?
         var pasteSettings: Action?
         var resetDevelop: Action?
+        var develop = Develop()
         var toggleCrop: Action?
         var cropTitle: String = "Crop"
         var applyCrop: Action?
@@ -95,6 +115,7 @@ struct LibraryMenu {
     var view = Viewing()
     var photo = Photo()
     var export = Export()
+    var share = Share()
     /// The services' reasons by member ("importer", "loupe", ...): `LibraryCatalog.help(for:)`.
     var reasons: [String: String] = [:]
 

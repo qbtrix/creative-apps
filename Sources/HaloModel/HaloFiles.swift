@@ -3,8 +3,10 @@
 // clears history, or leaves the project as it was), what a save or a failed
 // save leaves, the recent list (newest first, 10 at most, no repeated path),
 // the window title, subtitle and save status, and where Save writes (`saveTarget`,
-// HF-9). The only writer of `file`, besides
-// `edit` marking it unsaved.
+// HF-9). The only writer of `file`, besides `edit`, undo and redo marking it
+// unsaved. The status and subtitle read through the kernel's session and the
+// version through its probe (HaloFiles+Kernel.swift); a save or open puts its
+// file first through `setRecent`, the list's one dedupe and cap.
 // W0's `HaloFileState.opening` is a Bool, so the file being opened rides at
 // the head of `file.recent` until `finishOpen`; `recent` hides it.
 // Linux-safe: no UI imports.
@@ -53,7 +55,7 @@ extension HaloProject {
             file.path = pending.path
             file.unsaved = false
             file.error = nil
-            pushRecent(pending)
+            setRecent([pending] + recent)
         case .failure(let error):
             file.error = error.message
         }
@@ -65,7 +67,8 @@ extension HaloProject {
         file.path = path
         file.unsaved = false
         file.error = nil
-        pushRecent(HaloRecentFile(name: name, path: path))
+        sessionDidSave()
+        setRecent([HaloRecentFile(name: name, path: path)] + recent)
     }
 
     /// The save failed with `message`: the project reads "Not saved" until a
@@ -96,14 +99,13 @@ extension HaloProject {
 
     /// "Untitled", "Saved", "Edited", or "Not saved" after a failed save.
     public var saveStatus: String {
-        if file.unsaved { return file.error != nil ? "Not saved" : "Edited" }
-        return file.path == nil ? "Untitled" : "Saved"
+        Self.words(for: session)
     }
 
     /// The title bar's subtitle: "Edited" or "Not saved" while the work
     /// isn't on disk; nil when there is nothing to warn about.
     public var windowSubtitle: String? {
-        file.unsaved ? saveStatus : nil
+        session.isDirty ? saveStatus : nil
     }
 
     /// A launch path (`-HaloSaveTo`) always wins; Save As… asks; Save writes
@@ -120,12 +122,5 @@ extension HaloProject {
         let suffix = ".halo"
         guard last.count > suffix.count, last.lowercased().hasSuffix(suffix) else { return last }
         return String(last.dropLast(suffix.count))
-    }
-
-    /// Puts `entry` first, drops its path from further down, keeps 10.
-    private mutating func pushRecent(_ entry: HaloRecentFile) {
-        let rest = recent.filter { $0.path != entry.path }
-        let list = Array(([entry] + rest).prefix(Self.recentLimit))
-        file.recent = file.opening ? Array(file.recent.prefix(1)) + list : list
     }
 }

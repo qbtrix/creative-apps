@@ -2,8 +2,8 @@
   "title": "Select, transform, zoom and edit on the stage",
   "wave": 4,
   "order": 10,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1514",
   "covers": "#204, #375, #384; IN-1 #397 (stage half)",
   "waits_on": "`draw-key-save`; tasks SE-1, SE-2 on #273 and #995",
   "depends": [

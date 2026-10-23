@@ -1,0 +1,44 @@
+[
+  {
+    "label": "the long edge is ignored: every photo plans at its full size",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "let size = options.longEdge.map { full.fitting(longSide: $0) } ?? full",
+    "replace": "let size = full",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "a photo smaller than the long edge is enlarged to it (fitting becomes a fixed size)",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "let size = options.longEdge.map { full.fitting(longSide: $0) } ?? full",
+    "replace": "let size = options.longEdge.map { PixelSize(width: $0 * full.width / max(full.longSide, 1), height: $0 * full.height / max(full.longSide, 1)) } ?? full",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "develop is skipped: render returns the decoded buffer",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "            buffer = try develop.render(buffer, settings: photo.develop)\n",
+    "replace": "",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "the plan ignores the crop: photo.develop.crop is read as nil",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "guard let crop = photo.develop.crop,",
+    "replace": "guard let crop = CropSettings?.none,",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "the cropped size takes the photo's aspect at the crop's long side",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "return PixelSize(width: frame.width, height: frame.height)",
+    "replace": "return photo.pixelSize.fitting(longSide: max(frame.width, frame.height))",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "the policy is not passed: the writer drops nothing",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "size: size, dropping: dropping))",
+    "replace": "size: size))",
+    "tests": "LibraryExportMetadataTests/writerDrops"
+  }
+]

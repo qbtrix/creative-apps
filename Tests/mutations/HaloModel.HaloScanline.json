@@ -1,0 +1,5 @@
+[
+{"label": "sample rows off their quarter-pixel centres", "file": "Sources/HaloModel/Live/HaloScanline.swift", "find": "let sy = Double(py) + (Double(j) + 0.5) * step", "replace": "let sy = Double(py) + Double(j) * step", "tests": "HaloScanlineTests"},
+{"label": "crossings not paired: holes fill in", "file": "Sources/HaloModel/Live/HaloScanline.swift", "find": "stride(from: 0, to: crossings.count - 1, by: 2)", "replace": "stride(from: 0, to: crossings.count - 1, by: 1)", "tests": "HaloScanlineTests"},
+{"label": "hits not averaged over the 16 samples", "file": "Sources/HaloModel/Live/HaloScanline.swift", "find": "Float($0) / Float(n * n)", "replace": "Float($0) / Float(n)", "tests": "HaloScanlineTests"}
+]

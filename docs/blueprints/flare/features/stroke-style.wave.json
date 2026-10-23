@@ -1,0 +1,147 @@
+{
+  "title": "The shared stroke editor in STROKE: joins, caps, dashes and keyed trim paths for draw-ons",
+  "wave": 6,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "flare/stroke-style (adopter of S17); RJ-F02",
+  "waits_on": "suiteui stroke-style's contract slice SS-a and SS-d (cross-line) and the creative-core bump; gradient-fill's FG-a and FG-m and shape-tools' FS-m slices",
+  "depends": [
+    "live-stage",
+    "draw-key-save",
+    "inspector-timeline",
+    "mac-platform",
+    "flare-export"
+  ],
+  "longest_chain": "6 (FK-1 → FK-2 → FK-3 → FK-4 → FK-7 → FK-8)",
+  "journeys": [
+    "FlareStrokeJourneyTests.testTrimDrawOn"
+  ],
+  "owned": [
+    "Sources/FlareModel/FlareStroke+Kernel.swift",
+    "Tests/FlareModelTests/FlareStrokeTests.swift",
+    "Sources/FlareApp/FlareInspectorFill.swift",
+    "UITests/FlareJourneyTests+Stroke.swift",
+    "Sources/FlareApp/StagePath.swift",
+    "Sources/FlareApp/StageRasterizer.swift",
+    "Tests/AppSnapshotTests/FlareStrokePaintTests.swift",
+    "Tests/AppSnapshotTests/FlareStrokeSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetFlareStrokeTests.swift",
+    "Tests/mutations/FlareModel.FlareStroke+Kernel.json",
+    "Sources/FlareModel/FlareCommandCatalog.swift",
+    "Tests/command-ids/flare.txt",
+    "Tests/FlareModelTests/FlareStrokeCommandIDTests.swift",
+    "Tests/RealJobs/flare/trim-draw-on/trim-draw-on.jobs.json",
+    "Tests/RealJobs/flare/trim-draw-on/input/logo-path.flare",
+    "docs/blueprints/flare/features/stroke-style.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "FK-a",
+      "behavior": "The adapter is declared as stubs and STROKE is the shared editor with keyable trim rows.",
+      "tasks": [
+        "FK-1",
+        "FK-2"
+      ],
+      "journeys": [
+        "MJ-FK"
+      ],
+      "waits": {
+        "gradient-fill:FG-a": [
+          "FK-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/FlareModel/FlareStroke+Kernel.swift",
+        "Tests/FlareModelTests/FlareStrokeTests.swift",
+        "Sources/FlareApp/FlareInspectorFill.swift",
+        "UITests/FlareJourneyTests+Stroke.swift"
+      ]
+    },
+    {
+      "id": "FK-u",
+      "behavior": "The stage and PNG stroke the painted path with joins, caps and dashes, and the snapshots and render budget hold.",
+      "tasks": [
+        "FK-3",
+        "FK-4"
+      ],
+      "journeys": [
+        "J-FK"
+      ],
+      "waits": {
+        "FK-a": [
+          "FK-3",
+          "FK-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/FlareApp/StagePath.swift",
+        "Sources/FlareApp/StageRasterizer.swift",
+        "Tests/AppSnapshotTests/FlareStrokePaintTests.swift",
+        "Tests/AppSnapshotTests/FlareStrokeSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetFlareStrokeTests.swift"
+      ]
+    },
+    {
+      "id": "FK-m",
+      "behavior": "Every stroke command is one step for the selection, trim keys at the playhead when animated, and the commands run from the catalog.",
+      "tasks": [
+        "FK-5",
+        "FK-6"
+      ],
+      "journeys": [
+        "MJ-FK"
+      ],
+      "waits": {
+        "FK-a": [
+          "FK-5",
+          "FK-6"
+        ],
+        "gradient-fill:FG-m": [
+          "FK-6"
+        ],
+        "shape-tools:FS-m": [
+          "FK-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/FlareModel/FlareStroke+Kernel.swift",
+        "Tests/FlareModelTests/FlareStrokeTests.swift",
+        "Tests/mutations/FlareModel.FlareStroke+Kernel.json",
+        "Sources/FlareModel/FlareCommandCatalog.swift",
+        "Tests/command-ids/flare.txt",
+        "Tests/FlareModelTests/FlareStrokeCommandIDTests.swift",
+        "Tests/RealJobs/flare/trim-draw-on/trim-draw-on.jobs.json",
+        "Tests/RealJobs/flare/trim-draw-on/input/logo-path.flare"
+      ]
+    },
+    {
+      "id": "FK-z",
+      "behavior": "The journey draws a logo on with trim keys on live services, and the feature is built.",
+      "tasks": [
+        "FK-7",
+        "FK-8"
+      ],
+      "journeys": [
+        "J-FK"
+      ],
+      "waits": {
+        "FK-u": [
+          "FK-7"
+        ],
+        "FK-m": [
+          "FK-7"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/FlareJourneyTests+Stroke.swift",
+        "docs/blueprints/flare/features/stroke-style.wave.json"
+      ]
+    }
+  ]
+}

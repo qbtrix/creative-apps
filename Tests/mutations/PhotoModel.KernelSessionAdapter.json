@@ -1,0 +1,30 @@
+[
+  {
+    "label": "forwardDropped: the session no longer forwards the current step id, so an edit never reads dirty and no autosave comes due (Photo's endRun forward is KernelUndoAdapter's endRunDropped)",
+    "file": "Sources/PhotoModel/PhotoRecovery+Kernel.swift",
+    "find": "        session.currentToken = currentStepID\n",
+    "replace": "",
+    "tests": "PhotoRecoveryTests|PhotoSessionKernelTests"
+  },
+  {
+    "label": "refusalIsSuccess: the kernel's refusal of a newer format is read as that version, so a newer document opens",
+    "file": "Sources/PhotoModel/PhotoRecovery+Kernel.swift",
+    "find": "case .newer(let found, _): throw .newerVersion(found)",
+    "replace": "case .newer(let found, _): return found",
+    "tests": "PhotoDocumentRoundTripTests|PhotoSessionKernelTests"
+  },
+  {
+    "label": "neverSavedIsSaved: a restored autosave's missing saved step maps to the current one, so it reads clean",
+    "file": "Sources/PhotoModel/PhotoRecovery+Kernel.swift",
+    "find": "DocumentSession(token: savedStepID ?? Self.neverSavedToken)",
+    "replace": "DocumentSession(token: savedStepID ?? currentStepID)",
+    "tests": "PhotoSessionKernelTests"
+  },
+  {
+    "label": "failedIsUnsaved: a failed save maps to the kernel's unsaved, so its help no longer points to Save As",
+    "file": "Sources/PhotoModel/PhotoRecovery+Kernel.swift",
+    "find": "case .notSaved: .failed(Self.failedWords)",
+    "replace": "case .notSaved: .unsaved",
+    "tests": "PhotoSaveStatusHelpTests|PhotoSessionKernelTests"
+  }
+]

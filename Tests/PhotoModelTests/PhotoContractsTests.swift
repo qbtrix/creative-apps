@@ -10,7 +10,7 @@ import Testing
         #expect(ArchiveError.newerVersion(2).message
             == "It was saved by a newer version of Photo. Update Photo to open it.")
         #expect(ArchiveError.damaged("data/layer-2.png is missing").message == "It is damaged and can't be read.")
-        #expect(ArchiveError.tooLarge.message == "It is larger than Photo can open: up to 16 megapixels.")
+        #expect(ArchiveError.tooLarge.message == "It is larger than Photo can open: up to 40 megapixels.")
     }
 
     @Test func archiveErrorsSpeakPlainWords() {

@@ -1,30 +1,79 @@
 #!/usr/bin/env python3
 # scripts/test-scope: which swift tests run where, in one place, so the gate
-# (scripts/ci and its --changed mode), CI's scoped runs and CI's Perf step
-# agree on every test. Stdlib Python 3 only.
+# (scripts/ci and its --changed mode), CI's scoped runs and the nightly perf
+# run (perf-nightly) agree on every test. Stdlib Python 3 only.
 #
-#   scripts/test-scope app APP             APP's tests (flare, design, photo, library, halo, suite, suiteui)
+#   scripts/test-scope app APP[,APP...]    those apps' tests (flare, design, photo, library, halo, suite, suiteui)
 #   scripts/test-scope changed [--linux]   the tests for the changed paths on stdin
+#   scripts/test-scope build-apps          the apps a macOS build of the changed code paths on stdin needs
+#   scripts/test-scope scopes              the `app` scopes whose tests cover what `changed` picks for stdin
 #   scripts/test-scope perf [APP]          the perf and timing tests, all or APP's
 #   scripts/test-scope perf-report LOG     a perf run's swift test log as a markdown report
+#   scripts/test-scope heavy [FILTER]      the CPU-heavy correctness tests, all or those FILTER takes
+#   scripts/test-scope timing              the tests that assert a wall-clock bound and aren't in the perf list
 #
-# app and changed print two lines: the regex for the tests outside
+# app and changed print two lines (app with a comma list: the union, as the
+# lane's batch macOS gate asks for): the regex for the tests outside
 # AppSnapshotTests, then the one for AppSnapshotTests (they run one at a
 # time). An empty line means none. changed prints `all` instead when a path
 # can change any test (Package.swift, Package.resolved, a new Sources/ dir).
 # A Model maps to its Model tests, an App to its snapshot suites, SuiteUI to
 # SuiteUITests and its snapshot suites, SuiteModel to every Model's tests,
 # SuiteKernel (the editor kernel every Model and SuiteUI link) to
-# SuiteKernelTests plus every Model's tests; docs, scripts, UITests and the
+# SuiteKernelTests plus every Model's tests; the afterglow CLI
+# (Sources/AfterGlowCLI*) and the real jobs (Tests/RealJobs/) to
+# AfterGlowCLITests, which every Model and SuiteKernel also map to, so an
+# adopt PR runs its app's real jobs; docs, scripts, UITests and the
 # like map to none. The suite and suiteui scopes include SuiteKernelTests.
 # --linux drops SuiteUITests and AppSnapshotTests, which Linux doesn't build;
 # SuiteKernelTests is Linux-safe and stays.
 #
 # perf prints one regex, empty when there is none. Tests/perf-suites.txt lists
-# the perf and timing tests: the gate and scoped runs skip them, and CI's Perf
-# step runs exactly them, so each test runs in one place. perf-report prints
+# the perf and timing tests: the gate and scoped runs skip them, and
+# perf-nightly runs exactly them, so each test runs in one place. perf-report prints
 # what they measured and flags (a ::warning:: on stderr) each failed bound a
 # test missed by more than FLAG times; it never fails on a number.
+#
+# timing prints one line per enabled test in Tests/ (TESTS_DIR) that asserts a
+# wall-clock bound but is in neither the perf list nor Tests/timing-baseline.txt
+# (TIMING_BASELINE), so CI would gate a number a busy runner can miss, plus one
+# per baseline line whose test no longer times (the baseline only shrinks);
+# Tests/test_scope fails unless it prints nothing. A test asserts one when an
+# #expect or #require line in its body has an upper bound (a spaced `<` or
+# `<=`) against a Duration literal (`.milliseconds(`, ...), or, in a file that
+# reads a clock (ContinuousClock, `measure(`), an upper bound with a timing name
+# before it (median, p95, elapsed, percentile, took...) or a lower bound on
+# frames drawn (frames, fps, drawn, redraws), or when it calls an assertion
+# helper (a func anywhere in Tests/ named expect*, require*, assert*, such as
+# expectP95) whose own body asserts one. Line-based on purpose: a count budget
+# (bodies, copies), a lower bound on anything else or a helper named any other
+# way passes. A `not-timing:` comment in the test's body exempts it.
+#
+# heavy prints one regex, empty when there is none. Tests/heavy-suites.txt
+# (same format as the perf list) lists correctness tests that cost seconds of
+# CPU each in a debug build. scripts/ci runs them in a pass of their own, so
+# they never crowd the time-limited suites off the cores in the shared parallel
+# pass. With FILTER (a --changed run's test regex) it keeps only the listed
+# tests FILTER would run.
+#
+# build-apps reads code paths (the fast lane's BUILD_RE files) and prints the
+# apps whose macOS build-only run covers them, comma-separated (photo,design),
+# or `all`. It derives each path's app from path_units: a path whose tests are
+# one app's Model tests or snapshot suites is that app's (the CLI's tests,
+# which every Model maps to, are left out: Linux builds the CLI), and
+# UITests/<X>JourneyTests*.swift is X's. Every other path (SuiteUI, the
+# kernel, SuiteModel, the shell, the CLI, shared snapshot or journey files,
+# Package.swift, project.yml, a target the table doesn't know) prints `all`,
+# and so does empty input: when in doubt, build everything.
+#
+# scopes reads changed paths (code or not: a golden PNG, a fixture) and prints
+# the comma list of `app` scopes whose tests cover what `changed` selects for
+# them, so the lane's batch macOS gate runs those tests: a Model's or app's
+# tests are that app's, SuiteUITests and AppAuditTests are suiteui's,
+# SuiteModelTests and SuiteKernelTests are suite's; the CLI's tests are left
+# out, as in build-apps (the lane's Linux check runs them). `all`
+# when changed would say all or a test file fits no app (every snapshot
+# suite); empty when no test covers the paths.
 #
 # Regexes match swift test's ids, Target.Suite/test() or Target.freeTest().
 # Never pass an empty one to --filter or --skip: it matches every test.
@@ -51,17 +100,20 @@ SNAPSHOTS = {
     r"|theCapsuleDrawsOnlyBehindTheCurrentItem|aDisabledBarCommandDrawsDimmerThanAnEnabledOne)\(|AppSnapshotTests/suiteGallery\(",
 }
 MAC_ONLY = {"SuiteUITests", SNAP}
+CLI = ("AfterGlowCLITests", None)  # the CLI drives every Model and the kernel headless
 ALL = [("all", None)]
 FLAG = 3  # a perf test is flagged when it measured over FLAG times a bound it asserts
 PERF_LIST = os.environ.get("PERF_SUITES") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Tests", "perf-suites.txt")
+TIMING_BASELINE = os.environ.get("TIMING_BASELINE") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Tests", "timing-baseline.txt")
+HEAVY_LIST = os.environ.get("HEAVY_SUITES") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Tests", "heavy-suites.txt")
 
 
 def app_units(app):
     """(target, suite regex or None for the whole target) for a scope."""
     if app in APPS:
         return [(APPS[app] + "ModelTests", None), (SNAP, SNAPSHOTS[app])]
-    if app == "suite":  # SuiteModel, SuiteKernel and AfterGlow: no snapshots yet
-        return [("SuiteModelTests", None), ("SuiteKernelTests", None)]
+    if app == "suite":  # SuiteModel, SuiteKernel, AfterGlow and the afterglow CLI: no snapshots yet
+        return [("SuiteModelTests", None), ("SuiteKernelTests", None), CLI]
     if app == "suiteui":  # SuiteUI links the kernel, so its scoped run tests it too
         return [("SuiteUITests", None), ("AppAuditTests", None), ("SuiteKernelTests", None), (SNAP, SNAPSHOTS["suiteui"])]
     sys.exit(f"test-scope: unknown app {app!r}; one of {', '.join(SCOPES)}")
@@ -78,14 +130,16 @@ def path_units(path):
         if top == "SuiteModel":  # every Model links it
             return [("SuiteModelTests", None)] + [(x + "ModelTests", None) for x in APPS.values()]
         if top == "SuiteKernel":  # every Model links it too
-            return [("SuiteKernelTests", None)] + [(x + "ModelTests", None) for x in APPS.values()]
+            return [("SuiteKernelTests", None), CLI] + [(x + "ModelTests", None) for x in APPS.values()]
+        if top in ("AfterGlowCLI", "AfterGlowCLICore"):
+            return [CLI]
         if top in ("AfterGlowApp", "SuiteShell"):
             return app_units("suite")
         if top == "SuiteUI":
             return [("SuiteUITests", None), (SNAP, SNAPSHOTS["suiteui"])]
         for app, x in APPS.items():
             if top == x + "Model":
-                return [(x + "ModelTests", None)]
+                return [(x + "ModelTests", None), CLI]
             if top == x + "App":
                 return [(SNAP, SNAPSHOTS[app])]
         return ALL  # a target this table doesn't know yet
@@ -94,8 +148,10 @@ def path_units(path):
             name = parts[2].removeprefix("RenderBudget")
             app = next((a for a, x in APPS.items() if name.startswith(x)), None)
             return [(SNAP, SNAPSHOTS[app] if app else None)]
-        if top.endswith("ModelTests") or top in ("SuiteUITests", "AppAuditTests", "SuiteKernelTests"):
+        if top.endswith("ModelTests") or top in ("SuiteUITests", "AppAuditTests", "SuiteKernelTests", "AfterGlowCLITests"):
             return [(top, None)]
+        if top == "RealJobs":
+            return [CLI]
     return []
 
 
@@ -116,16 +172,51 @@ def regexes(units, linux=False):
     return first + "\n" + second
 
 
-def perf_entries():
-    """(app, id) per line of the perf list; # starts a comment."""
+def build_app(path):
+    """The one app whose macOS build covers a code path, or "all"."""
+    if path.startswith("UITests/"):
+        name = path.rsplit("/", 1)[-1]
+        return next((a for a, x in APPS.items() if name.startswith(x + "JourneyTests")), "all")
+    apps = set()
+    for target, suite in path_units(path):
+        if (target, suite) == CLI:
+            continue
+        apps.add(next((a for a, x in APPS.items() if target == x + "ModelTests" or (target == SNAP and suite == SNAPSHOTS[a])), "all"))
+    return apps.pop() if len(apps) == 1 else "all"
+
+
+def unit_scope(target, suite):
+    """The `app` scope whose tests include this unit, or "all"."""
+    for a, x in APPS.items():
+        if target == x + "ModelTests" or (target == SNAP and suite == SNAPSHOTS[a]):
+            return a
+    if target in ("SuiteUITests", "AppAuditTests") or (target == SNAP and suite == SNAPSHOTS["suiteui"]):
+        return "suiteui"
+    if target in ("SuiteModelTests", "SuiteKernelTests"):
+        return "suite"
+    return "all"
+
+
+def scopes(paths):
+    found = {unit_scope(*u) for p in paths for u in path_units(p) if u != CLI}
+    return "all" if "all" in found else ",".join(sorted(found))
+
+
+def build_apps(paths):
+    apps = {build_app(p) for p in paths}
+    return "all" if not apps or "all" in apps else ",".join(sorted(apps))
+
+
+def perf_entries(path=PERF_LIST):
+    """(app, id) per line of the perf (or heavy) list; # starts a comment."""
     entries = []
-    with open(PERF_LIST) as f:
+    with open(path) as f:
         for n, line in enumerate(f, 1):
             fields = line.split("#", 1)[0].split()
             if not fields:
                 continue
             if len(fields) != 2 or fields[0] not in SCOPES or not re.fullmatch(r"\w+\.\w+(/\w+){0,2}", fields[1]):
-                sys.exit(f"test-scope: {PERF_LIST}:{n}: want '<app> <Target>.<Suite>[/<test>]' (a nested suite: <Target>.<Parent>/<Suite>[/<test>]) or '<app> <Target>.<freeTest>', got {line.strip()!r}")
+                sys.exit(f"test-scope: {path}:{n}: want '<app> <Target>.<Suite>[/<test>]' (a nested suite: <Target>.<Parent>/<Suite>[/<test>]) or '<app> <Target>.<freeTest>', got {line.strip()!r}")
             entries.append((fields[0], fields[1]))
     return entries
 
@@ -135,6 +226,109 @@ def perf_regex(app=None):
         sys.exit(f"test-scope: unknown app {app!r}; one of {', '.join(SCOPES)}")
     ids = [i.replace(".", r"\.") for a, i in perf_entries() if app in (None, a)]
     return "^(%s)(/|\\()" % "|".join(ids) if ids else ""
+
+
+def heavy_regex(within=None):
+    ids = [i for _, i in perf_entries(HEAVY_LIST) if within is None or re.search(within, i + "/")]
+    return "^(%s)(/|\\()" % "|".join(i.replace(".", r"\.") for i in ids) if ids else ""
+
+
+TESTS_DIR = os.environ.get("TESTS_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Tests")
+DECL = re.compile(r"\b(struct|enum|class|actor|extension)\s+(\w+)[^{]*\{")
+TEST_FUNC = re.compile(r"\bfunc\s+(\w+)")
+# timing's detector (header): an upper bound in an #expect or #require that is a Duration literal, or that
+# has a timing name before it in a file that reads a clock.
+UPPER = re.compile(r"#(expect|require)\(.*\s<=?\s")
+DURATION = re.compile(r"\s<=?\s*[^,]*\.(milli|micro|nano)?seconds\(")
+TIMED_NAME = re.compile(r"(?i)(elapsed|median|p50|p95|p99|percentile|latency|took)[^<]*\s<=?\s")
+# a lower bound on frames drawn (frames, fps, drawn, redraws): how many land in a wall-clock window.
+HELPER = re.compile(r"(expect|require|assert)[A-Z0-9]")  # an assertion helper's name: expectP95, not check
+FRAMES_FLOOR = re.compile(r"(?i)#(expect|require)\(.*\b\w*(frame|fps|drawn|draws|redraw)\w*\s>=?\s")
+CLOCK = re.compile(r"ContinuousClock|SuspendingClock|DispatchTime\.now|CFAbsoluteTimeGetCurrent|\bmeasure\(")
+
+
+def swift_code(line):
+    """A line with its string literals emptied and its // comment cut, for brace counting and matching."""
+    line = re.sub(r'#".*?"#', '""', line)  # a raw string, #"..."#
+    return re.sub(r'"(?:\\.|[^"\\])*"', '""', line).split("//", 1)[0]
+
+
+def swift_tests(path, helpers=False):
+    """(suite path, test name, disabled, body lines) for each @Test func in a Swift file (each other func
+    with helpers). Tracks braces line by line; a suite (struct, enum, extension) is disabled when its
+    attributes are, and so is each test in it."""
+    with open(path, errors="replace") as f:
+        lines = f.read().splitlines()
+    # attrs: the code since the last line ending in { or } outside brackets, so a multi-line
+    # @Test(arguments: [...]) or @Suite(.disabled(...)) above a declaration counts as its attributes.
+    depth, suites, attrs, test, out = 0, [], [], None, []  # suites: (name, depth, disabled)
+    for raw in lines:
+        code = swift_code(raw)
+        if test is None:
+            head = "\n".join(attrs + [code])
+            disabled = any(d for _, _, d in suites) or ".disabled(" in head
+            name, decl = TEST_FUNC.search(code), DECL.search(code)
+            if name and ("@Test" in head) != helpers:
+                test = ([n for n, _, _ in suites], name.group(1), disabled, [], depth)
+            elif decl:
+                suites.append((decl.group(2), depth, disabled))
+        if test:
+            test[3].append(raw)
+        attrs = attrs + [code]
+        if code.rstrip().endswith(("{", "}")) and sum(map("".join(attrs).count, "([")) == sum(map("".join(attrs).count, ")]")):
+            attrs = []
+        depth += code.count("{") - code.count("}")
+        if test and depth <= test[4] and any("{" in swift_code(b) for b in test[3]):
+            out.append(test[:4])
+            test = None
+        while suites and depth <= suites[-1][1]:
+            suites.pop()
+    return out
+
+
+def times(code, clock):
+    """Whether a line of Swift code asserts a wall-clock bound (the header's detector)."""
+    return bool(
+        (UPPER.search(code) and (DURATION.search(code) or (clock and TIMED_NAME.search(code))))
+        or (clock and FRAMES_FLOOR.search(code)))
+
+
+def timing_tests(root=TESTS_DIR):
+    """(id, where, bound) for each enabled test in Tests/<Target>/ that asserts a wall-clock bound, itself
+    or through a helper func (anywhere in Tests/) that does, unless a `not-timing:` comment in its body
+    marks it a deliberate exception."""
+    files = []
+    for target in sorted(os.listdir(root)):
+        for dirpath, _, names in sorted(os.walk(os.path.join(root, target))):
+            for name in sorted(f for f in names if f.endswith(".swift")):
+                path = os.path.join(dirpath, name)
+                with open(path, errors="replace") as f:
+                    files.append((target, name, path, bool(CLOCK.search(f.read()))))
+    timed = {helper for _, _, path, clock in files for _, helper, _, body in swift_tests(path, helpers=True)
+             if HELPER.match(helper) and any(times(swift_code(b), clock) for b in body)}
+    call = re.compile(r"(?<!func )\b(%s)\(" % "|".join(sorted(timed))) if timed else None
+    found = []
+    for target, name, path, clock in files:
+        for suites, test, disabled, body in swift_tests(path):
+            if disabled or any("not-timing:" in b for b in body):
+                continue
+            for line in body:
+                code = swift_code(line)
+                if times(code, clock) or (call and call.search(code)):
+                    found.append((f"{target}.{'/'.join(suites + [test])}", name, line.strip()))
+                    break
+    return found
+
+
+def unlisted_timing(root=TESTS_DIR):
+    """The timing tests neither the perf list nor the baseline holds, and a line per baseline id that no
+    longer times (the baseline only shrinks)."""
+    perf = perf_regex()
+    with open(TIMING_BASELINE) as f:
+        baseline = {l.split("#", 1)[0].strip() for l in f} - {""}
+    found = [t for t in timing_tests(root) if not (perf and re.search(perf, t[0] + "("))]
+    stale = sorted(baseline - {t[0] for t in found})
+    return [t for t in found if t[0] not in baseline] + [(i, "timing-baseline.txt", "no longer times: drop its line") for i in stale]
 
 
 NUMBER = r"([-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?)"
@@ -216,16 +410,25 @@ def perf_report(log):
 def main(argv):
     cmd, args = (argv[0], argv[1:]) if argv else ("", [])
     if cmd == "app" and len(args) == 1:
-        print(regexes(app_units(args[0])))
+        print(regexes([u for a in args[0].split(",") for u in app_units(a)]))
     elif cmd == "changed" and args in ([], ["--linux"]):
         units = [u for p in sys.stdin.read().splitlines() if p for u in path_units(p)]
         print(regexes(units, linux=bool(args)))
+    elif cmd == "build-apps" and not args:
+        print(build_apps([p for p in sys.stdin.read().splitlines() if p]))
+    elif cmd == "scopes" and not args:
+        print(scopes([p for p in sys.stdin.read().splitlines() if p]))
     elif cmd == "perf" and len(args) <= 1:
         print(perf_regex(args[0] if args else None))
+    elif cmd == "heavy" and len(args) <= 1:
+        print(heavy_regex(args[0] if args else None))
     elif cmd == "perf-report" and len(args) == 1:
         perf_report(args[0])
+    elif cmd == "timing" and not args:
+        for test, where, bound in unlisted_timing():
+            print(f"{test}  ({where}: {bound})")
     else:
-        sys.exit("usage: scripts/test-scope app APP | changed [--linux] | perf [APP] | perf-report LOG")
+        sys.exit("usage: scripts/test-scope app APP[,APP...] | changed [--linux] | build-apps | scopes | perf [APP] | heavy [FILTER] | perf-report LOG | timing")
 
 
 if __name__ == "__main__":

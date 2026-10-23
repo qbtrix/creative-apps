@@ -1,0 +1,7 @@
+[
+{"label":"the focus page sends users to Settings again","file":"Sources/SuiteModel/Fakes/FakeOnboarding.swift","find":"Change it any time from Help > Welcome to AfterGlow.","replace":"You can change this in Settings.","tests":"OnboardingCopyTests"},
+{"label":"the start page loses the packet's title","file":"Sources/SuiteModel/Fakes/FakeOnboarding.swift","find":"title: \"Start with a sample or a new document\"","replace":"title: \"Start with a sample\"","tests":"OnboardingCopyTests"},
+{"label":"the start page says a chip starts a document at once again","file":"Sources/SuiteModel/Fakes/FakeOnboarding.swift","find":"or click a chip to start a new document. A chip ending in … asks for details first.","replace":"or click a New chip to start a document at once.","tests":"OnboardingCopyTests"},
+{"label":"the focus page points at apps it doesn't name","file":"Sources/SuiteModel/Fakes/FakeOnboarding.swift","find":"Each choice puts the apps it names first, here and on the home.","replace":"AfterGlow puts those apps first.","tests":"OnboardingCopyTests"},
+{"label":"Motion puts Flare first, as Animation does","file":"Sources/SuiteModel/Fakes/FakeOnboarding.swift","find":"case .motion: [.halo, .flare]","replace":"case .motion: [.flare, .halo]","tests":"OnboardingCopyTests"}
+]

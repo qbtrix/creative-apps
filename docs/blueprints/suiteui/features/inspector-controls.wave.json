@@ -2,8 +2,8 @@
   "title": "Inspector controls end once and work from the keyboard",
   "wave": 2,
   "order": 20,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1508",
   "covers": "#718, #591, #88, #622, #285, #262, #343",
   "waits_on": "#778 (suite-harness)",
   "owned": [

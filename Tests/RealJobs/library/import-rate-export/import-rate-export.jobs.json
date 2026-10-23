@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "app": "library",
+  "why": "Pending #3273: afterglow run writes one file per input and the picks export writes one per pick. Its PNG export also waits on image-codecs (qbtrix/creative-core#562). LibraryHeadlessTests runs it: opening a folder of four PNGs imports them, two get 5 stars and a pick, and only those two export at a 1024 px long side.",
+  "pending": "#3273",
+  "inputs": ["input/*.library"],
+  "steps": [
+    {"id": "edit.select", "params": {"ids": ["harbor", "tower"]}},
+    {"id": "metadata.set-rating", "params": {"stars": 5}},
+    {"id": "metadata.pick", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-1024", "format": "png", "options": {"longSide": 1024}},
+  "expect": {
+    "out/shoot-1024/harbor.png": {"pixels": {"tolerance": 2, "reference": "expected/harbor.png"}},
+    "out/shoot-1024/tower.png": {"pixels": {"tolerance": 2, "reference": "expected/tower.png"}}
+  },
+  "platforms": []
+}

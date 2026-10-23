@@ -11,7 +11,11 @@
 // color panel's picks stream through `onChange` and end once when the panel
 // closes (SwiftUI's ColorPicker reports no end of interaction) or the row goes
 // away. The row owns presentation state only: the hex text being typed and
-// the gesture's run.
+// the gesture's run. A `sampleable` row (the default) shows an
+// EyedropperButton after the hex code; its pick is one change and one end,
+// after ending an open run of panel picks, and Escape changes nothing. A host
+// that disables the row passes its reason as `sampleHelp`, so the button lists
+// itself in `suite.controls` as disabled with that reason, not as enabled.
 import AppKit
 import SwiftUI
 
@@ -119,32 +123,41 @@ public struct InspectorColorRow: View {
     private let label: String
     private let color: Color
     private let supportsOpacity: Bool
+    private let sampleable: Bool
+    private let sampleHelp: String?
     private let onPick: @MainActor (Color.Resolved) -> Void
     private let onEnd: @MainActor () -> Void
+    /// The hex field's accessibility identifier, when a host names it (InspectorColorWellRow.hexIdentifier).
+    var hexID: String?
     @State private var draft: String?
     @State private var ends = HexEnds()
     @FocusState private var isTyping: Bool
     @Environment(\.self) private var environment
 
     public init(
-        _ label: String, color: Color, supportsOpacity: Bool = true, onChange: @escaping @MainActor (Color) -> Void,
+        _ label: String, color: Color, supportsOpacity: Bool = true, sampleable: Bool = true,
+        sampleHelp: String? = nil, onChange: @escaping @MainActor (Color) -> Void,
         onEnd: @escaping @MainActor () -> Void = {}
     ) {
         self.label = label
         self.color = color
         self.supportsOpacity = supportsOpacity
+        self.sampleable = sampleable
+        self.sampleHelp = sampleHelp
         self.onPick = { onChange(Color($0)) }
         self.onEnd = onEnd
     }
 
     /// An 8-bit sRGB color; `onChange` hears only a different one.
     public init(
-        _ label: String, hex: HexColor, onChange: @escaping @MainActor (HexColor) -> Void,
-        onEnd: @escaping @MainActor () -> Void = {}
+        _ label: String, hex: HexColor, sampleable: Bool = true, sampleHelp: String? = nil,
+        onChange: @escaping @MainActor (HexColor) -> Void, onEnd: @escaping @MainActor () -> Void = {}
     ) {
         self.label = label
         self.color = hex.color
         self.supportsOpacity = false
+        self.sampleable = sampleable
+        self.sampleHelp = sampleHelp
         self.onPick = { picked in
             let next = HexColor(picked)
             if next != hex { onChange(next) }
@@ -179,6 +192,8 @@ public struct InspectorColorRow: View {
                     if isTyping { RoundedRectangle(cornerRadius: SuiteRadius.field).fill(SuiteColor.fieldActive).padding(-SuiteSpacing.xs) }
                 }
                 .help("\(label) as a hex code, like #1877F2")
+                .accessibilityIdentifier(hexID ?? "", isEnabled: hexID != nil)
+                if sampleable { EyedropperButton(help: sampleHelp) { sample($0, ends: &ends) } }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification)) { note in
@@ -191,6 +206,15 @@ public struct InspectorColorRow: View {
     private func pick(_ resolved: Color.Resolved) {
         if !ends.isOpen { _ = ends.picked() }
         onPick(resolved)
+    }
+
+    /// An eyedropper pick: one change and one end, a gesture of its own, after ending an open run of panel picks.
+    /// Nil (Escape) calls neither. EyedropperTests drive it.
+    func sample(_ hex: HexColor?, ends: inout HexEnds) {
+        guard let hex else { return }
+        if ends.isOpen, ends.closed() { onEnd() }
+        onPick(hex.resolved)
+        onEnd()
     }
 
     /// Ends an open run of panel picks, once.
@@ -211,14 +235,22 @@ public struct InspectorColorRow: View {
 
 /// The color row for a HexColor: InspectorColorRow's hex init.
 public struct InspectorColorWellRow: View {
-    private let row: InspectorColorRow
+    private var row: InspectorColorRow
+
+    /// This row with its hex field identified as `id`, for a page's UI tests.
+    func hexIdentifier(_ id: String) -> InspectorColorWellRow {
+        var named = self
+        named.row.hexID = id
+        return named
+    }
 
     /// `onEnd` runs once per gesture, as on InspectorColorRow.
     public init(
-        _ label: String, color: HexColor, onChange: @escaping @MainActor (HexColor) -> Void,
-        onEnd: @escaping @MainActor () -> Void = {}
+        _ label: String, color: HexColor, sampleable: Bool = true, sampleHelp: String? = nil,
+        onChange: @escaping @MainActor (HexColor) -> Void, onEnd: @escaping @MainActor () -> Void = {}
     ) {
-        row = InspectorColorRow(label, hex: color, onChange: onChange, onEnd: onEnd)
+        row = InspectorColorRow(
+            label, hex: color, sampleable: sampleable, sampleHelp: sampleHelp, onChange: onChange, onEnd: onEnd)
     }
 
     public var body: some View { row }

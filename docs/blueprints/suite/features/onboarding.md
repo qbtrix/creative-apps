@@ -37,7 +37,7 @@ home (the harness HM-0 and `AfterGlowJourneyTests.swift` HM-3a, `HomeModel`
 reading `homeOrder`, the `afterglow` audit key), switching (hand-off
 transport to a cold app, Window > Switch To). Cross-line, in the Hand-offs
 list: the fixture exports #836 (Design), #837 (Flare), #838 (Photo), #839
-(Halo), which are the sample files; SuiteUI `needs-ui` for
+(Halo), which are the sample files; SuiteUI `needs-ui` #2867 for
 `SuiteSize.onboardingWindow` (blueprint 6.3) and #803 `AppTile`. **No
 settings wait:** settings is out of the beta (captain, 2026-10-17), so this
 packet makes the preferences slot live itself (OB-9, see What changed).
@@ -73,7 +73,7 @@ slice starts):
 - **`Tests/perf-suites.txt`** gains
   `suite AppSnapshotTests.BodyCountSuites/RenderBudgetAfterGlowOnboardingTests/timing`:
   supervisor-only, asked for in OB-5's PR body.
-- **`needs-ui`:** `SuiteSize.onboardingWindow` (720 × 520, blueprint 6.3);
+- **`needs-ui`:** #2867 `SuiteSize.onboardingWindow` (720 × 520, blueprint 6.3);
   until it merges the window's size and margins come from `OnboardingLayout`
   in SuiteModel (as `HomeLayout` holds the home's numbers), so the design
   lint sees no literal in app code. `AppTile` #803: the starter tile and the
@@ -219,10 +219,10 @@ focus → starter → finished, preferences saved, one hand-off recorded), MJ-OB
 | screen state | what shows | snapshot (`Golden/afterglow-onboarding/`) |
 |---|---|---|
 | Page 1, welcome | title "Five apps, one AfterGlow", the five symbols (`HomeSidebarRows.symbol`) with names in a row, the body, the Rendering line in `SuiteFont.caption` / `textSecondary`, Continue (prominent, default), Skip | `afterglow-onboarding-welcome-{light,dark,light-ic,dark-ic}` |
-| Page 2, focus | "What do you make most?", `ChoiceChips` Animation, Design, Photos, Motion, Everything, none selected; Back, Continue, Skip | `-focus-*`, `-focus-selected-*` (Photos) |
-| Page 3, start | "Start with a sample or a new document", five tiles in focus order, preset chips, "Open sample"; "Start from an empty home"; Back, Skip | `-start-*` (Photos order), `-start-default-*` (no focus) |
+| Page 2, focus | "What do you make most?", `ChoiceChips` naming the apps each puts first (`SuiteOnboarding.focusTitle`: "Animation: Flare, Halo", "Design", "Photos: Library, Photo", "Motion graphics: Halo, Flare", "Everything"), none selected; Back, Continue, Skip | `-focus-*`, `-focus-selected-*` (Photos) |
+| Page 3, start | "Start with a sample or a new document", five tiles in focus order, preset chips ("New Blank Design"; a preset that asks for more keeps its "…", as "Import Folder…"), "Open sample"; "Start from an empty home"; Back, Skip | `-start-*` (Photos order), `-start-default-*` (no focus) |
 | Page 3, a sample missing | that tile's "Open sample" disabled, help "The Halo sample isn't in this build." | `-start-missing-*` |
-| Finishing | after a chip or Open sample: the tile's progress ring (`launching`), controls disabled while the hand-off sends | `-start-launching-*` |
+| Finishing | after a chip or Open sample: the tile's progress ring (`launching`), controls disabled while the hand-off sends, each with help "A document is opening." | `-start-launching-*` |
 | Error in place | a hand-off refused: the sentence under the tile (`SuiteError.message`), nothing modal | `-start-error-*` |
 
 Layout check (blueprint 7.3 item 2): Continue, Back and Skip sit inside the
@@ -251,7 +251,7 @@ public struct OnboardingStarter: Equatable, Sendable {
     public var sample: SampleFile?
     public var sampleReason: String?     // nil when the sample can be opened
 }
-/// The window's numbers until SuiteSize.onboardingWindow lands (needs-ui): 720 × 520, 24 pt margins.
+/// The window's numbers until SuiteSize.onboardingWindow lands (needs-ui #2867): 720 × 520, 24 pt margins.
 public enum OnboardingLayout { public static let width = 720.0, height = 520.0, margin = 24.0 }
 /// Identifiers (blueprint 4.1): afterglow.onboarding.<name>.
 public enum OnboardingControls {

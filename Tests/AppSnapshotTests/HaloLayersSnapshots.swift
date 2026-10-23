@@ -3,9 +3,10 @@
 // three-layers fixture with Title selected: its header (Text, Frames 24–71),
 // the "Properties arrive…" line and the Layers list still shown: no separators,
 // rows on the panel inset, only Title's kind icon in accent. Then the layer
-// list alone (HaloLayerList, layer-panel #770) on three-layers as
+// list alone (HaloLayerList, layer-panel #770, drawn by SuiteUI's
+// LayerTreeList since AL-h3) on three-layers as
 // `-HaloFixture` builds it (fake services): four rows with Badge selected;
-// "Enter a name." under Badge after a blank rename; and the empty text once
+// "Enter a name." under the list after a blank rename; and the empty text once
 // every layer is deleted. Light and Dark. Writes halo-layers-*.png,
 // halo-inspector-layer-selected-*.png, halo-layer-list-*.png,
 // halo-layer-list-refused-*.png and halo-layer-list-empty-*.png. macOS only.
@@ -66,8 +67,18 @@ import Testing
     }
 
     @Test func layerList() throws {
-        let project = try threeLayers().project
+        let (project, badge) = try threeLayers()
         #expect(project.selectedComposition?.layers.map(\.name) == ["Title", "Badge", "Background", "Rig"])
+        // LayerTreeList's rows: Halo's ids, no eye or lock, flat reorder in the inspector's scroll view, no disclosure column.
+        #expect(project.layerRows.map(\.id) == project.selectedComposition?.layers.map(\.id))
+        #expect(HaloLayerList.naming.row(badge) == "halo.layer.row.\(badge)")
+        #expect(HaloLayerList.naming.container == "halo.layer.list")
+        #expect(HaloLayerList.options == LayerTreeOptions(showsEye: false, showsLock: false, reorders: true, embedded: true, nests: false))
+        // Badge's row: the shape symbol, its tooltip and its VoiceOver value.
+        let decoration = try #require(HaloLayerList.decorations(project.selectedComposition?.layers ?? [])[badge])
+        #expect(decoration.symbol == HaloLayerKind.shape.systemImage)
+        #expect(decoration.help == HaloLayerKind.shape.rowHelp)
+        #expect(decoration.value == "Shape layer")
         try snapshotList(project, name: "halo-layer-list")
     }
 

@@ -45,6 +45,12 @@ struct HaloEasingInspector: View {
     /// Out" alone, so every title fits at the inspector's minimum width.
     static let chipRows: [[HaloEasingPreset]] = [[.linear, .hold], [.easeIn, .easeOut], [.easeInOut]]
 
+    /// One preset's chip: its title, and `halo.easing.preset.<case>` on its
+    /// own button (PresetGrid sets an option's identifier), #4453.
+    nonisolated static func chipOption(_ preset: HaloEasingPreset) -> InspectorOption<HaloEasingPreset> {
+        InspectorOption(id: preset, title: preset.title, identifier: "halo.easing.preset.\(preset.rawValue)")
+    }
+
     /// The X1 to Y2 rows' tooltips: which handle, and what its number means.
     static func handleHelp(_ label: String) -> String {
         let handle = label.hasSuffix("1") ? "first" : "second"
@@ -84,7 +90,7 @@ struct HaloEasingInspector: View {
                 .onExitCommand { perform(.clearKeySelection) }
             }
             if let refusal = model.refusal, refusal.control == "halo.easing" {
-                HaloRefusalCaption(refusal: refusal)
+                InspectorNote(refusal.message, kind: .error, identifier: "halo.refusal")
             }
         }
     }
@@ -133,7 +139,7 @@ struct HaloEasingInspector: View {
             VStack(spacing: 0) {
                 ForEach(Self.chipRows, id: \.self) { row in
                     PresetGrid(
-                        options: row.map { InspectorOption(id: $0, title: $0.title) },
+                        options: row.map(Self.chipOption),
                         selected: model.pickedPreset, columns: row.count, onSelect: { perform(.setEasing($0)) })
                 }
             }

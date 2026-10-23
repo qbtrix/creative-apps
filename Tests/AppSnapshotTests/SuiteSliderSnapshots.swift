@@ -1,5 +1,6 @@
 // SuiteSliderSnapshots.swift: the bar slider's contact sheet, one row per
-// state (rest, hover, focus, dragging, editing, disabled, keyed, mixed, an
+// state (rest, hover, focus, dragging, editing, typed text that isn't a
+// number, disabled, keyed, mixed, an
 // empty and a full fill, a non-linear track) and the exact-number ScrubField
 // at rest and focused, on the editor panel, in Light and Dark. Writes
 // suiteui-slider-light.png and suiteui-slider-dark.png. Live states are
@@ -60,7 +61,7 @@ private struct SliderSheet: View {
                 ("Rest", Bar()), ("Hover", Bar(preview: .hover)), ("Focus", Bar(preview: .focus)),
                 ("Dragging", Bar(preview: .dragging)), ("Editing", Bar(preview: .editing)),
             ])
-            column([("Keyed", Bar(keyed: true)), ("Mixed", Bar(mixed: true))]) {
+            column([("Keyed", Bar(keyed: true)), ("Mixed", Bar(mixed: true)), ("Invalid", Bar(preview: .invalid))]) {
                 InspectorSliderRow("Disabled", value: 45, in: -180...180, unit: "°", decimals: 0) { _ in }.disabled(true)
                 InspectorSliderRow("Opacity", value: 0, in: 0...100, unit: "%", decimals: 0) { _ in }
                 InspectorSliderRow("Scale", value: 4, in: 0.25...4, unit: "×") { _ in }

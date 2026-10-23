@@ -3,8 +3,10 @@
 // layer's keys list by property (HaloProperty.allCases) then frame; setting
 // an easing is all or nothing: an empty set, a non-finite curve or a key that
 // doesn't exist throws and leaves the composition as it was. A custom curve's
-// handle x values are clamped to 0...1 (FlareCore's cubic needs them there),
-// its y values are kept. Internal; Linux-safe.
+// handle x values are clamped to 0...1 by SuiteKernel's `EaseCurve.moving`
+// (FlareCore's cubic needs them there), its y values are kept. Internal;
+// Linux-safe.
+import SuiteKernel
 
 enum HaloEasingRules {
     /// Every key of the layer, by property then frame; empty for an unknown layer.
@@ -28,9 +30,9 @@ enum HaloEasingRules {
         let ordered = keys.sorted(by: inOrder)
         guard let first = ordered.first else { throw HaloEditError.noKeySelected }
         var easing = e
-        if case let .cubicBezier(x1, y1, x2, y2) = e {
-            guard [x1, y1, x2, y2].allSatisfy(\.isFinite) else { throw HaloEditError.notANumber(first.property) }
-            easing = .cubicBezier(x1: min(max(x1, 0), 1), y1: y1, x2: min(max(x2, 0), 1), y2: y2)
+        for (i, handle) in (EaseCurve.handles(of: e) ?? []).enumerated() {
+            guard handle.x.isFinite, handle.y.isFinite else { throw HaloEditError.notANumber(first.property) }
+            easing = EaseCurve.moving(i, to: handle, in: easing)
         }
         var copy = c
         for key in ordered {

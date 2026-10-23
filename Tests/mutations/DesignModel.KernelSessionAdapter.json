@@ -1,0 +1,30 @@
+[
+  {
+    "label": "endRunDropped: the adapter drops its forward to endRun, so a nudge after a save merges into the saved step (a run spans two gestures) and undo skips past the saved document",
+    "file": "Sources/DesignModel/DesignSession+Kernel.swift",
+    "find": "        history.kernel.savedStepID = session.savedToken\n        endEditRun()\n",
+    "replace": "        history.kernel.savedStepID = session.savedToken\n",
+    "tests": "DesignSessionKernelTests|DesignDirtyTests"
+  },
+  {
+    "label": "refusalIsSuccess: the adapter maps the kernel's refusal of a file with no version to success, so it opens as version 1",
+    "file": "Sources/DesignModel/DesignSession+Kernel.swift",
+    "find": "case .damaged, .missing: throw .unreadable",
+    "replace": "case .damaged, .missing: return LiveFiling.fileVersion",
+    "tests": "DesignSessionKernelTests"
+  },
+  {
+    "label": "savedTokenDropped: a save never sets the saved token, so the saved document still reads dirty",
+    "file": "Sources/DesignModel/DesignSession+Kernel.swift",
+    "find": "history.kernel.savedStepID = session.savedToken",
+    "replace": "_ = session.savedToken",
+    "tests": "DesignSessionKernelTests|DesignDirtyTests"
+  },
+  {
+    "label": "forwardDropped: the session no longer forwards the current step, so an edit never reads dirty on the session",
+    "file": "Sources/DesignModel/DesignSession+Kernel.swift",
+    "find": "        session.currentToken = history.kernel.currentStepID\n",
+    "replace": "",
+    "tests": "DesignSessionKernelTests"
+  }
+]

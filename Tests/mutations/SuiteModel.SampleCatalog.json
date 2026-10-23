@@ -1,0 +1,72 @@
+[
+  {
+    "label": "neverOverwrites",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "guard exists(folder + name) else { return folder + name }",
+    "replace": "return folder + name",
+    "tests": "SampleCatalogTests"
+  },
+  {
+    "label": "nameFromUniqueFileNames",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "UniqueFileNames.name(stem, extension: ext, among: taken)",
+    "replace": "UniqueFileNames.name(stem + \".\" + ext, extension: \"\", among: taken)",
+    "tests": "SampleCatalogTests"
+  },
+  {
+    "label": "reasonWhenMissing",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "if present(folder + \"/\" + s.fileName) { return nil }",
+    "replace": "if true { return nil }",
+    "tests": "SampleCatalogTests"
+  },
+  {
+    "label": "reasonNamesTheApp",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "\\(s.app.displayName) sample",
+    "replace": "\\(s.title) sample",
+    "tests": "SampleCatalogTests"
+  },
+  {
+    "label": "extensionDropsItsDot",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "String(name[name.index(after: dot)...])",
+    "replace": "String(name[dot...])",
+    "tests": "SampleCatalogTests"
+  },
+  {
+    "label": "leadingDotIsNotAnExtension",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "guard let dot = name.lastIndex(of: \".\"), dot != name.startIndex else",
+    "replace": "guard let dot = name.lastIndex(of: \".\") else",
+    "tests": "SampleCatalogTests"
+  },
+  {
+    "label": "photoTitleCapitalised",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "type: .photoOpenRaster, title: \"Beach\")",
+    "replace": "type: .photoOpenRaster, title: \"beach\")",
+    "tests": "SampleCatalogTests"
+  },
+  {
+    "label": "titleIsDisplayName",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "type: .flareAnimation, title: \"Bounce\")",
+    "replace": "type: .flareAnimation, title: \"Bounce.flare\")",
+    "tests": "SampleCatalogTests"
+  },
+  {
+    "label": "destinationAsksOnce",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "for _ in 0..<maxTries {",
+    "replace": "for _ in 0..<1 {",
+    "tests": "SampleCatalogTests"
+  },
+  {
+    "label": "destinationOverwritesWhenFull",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "        return nil\n    }\n    /// How many names",
+    "replace": "        return folder + s.fileName\n    }\n    /// How many names",
+    "tests": "SampleCatalogTests"
+  }
+]

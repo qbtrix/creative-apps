@@ -1,6 +1,7 @@
 // PhotoWorkspace.swift: the state behind Photo's window (raster editing): the
 // open image's size and name, its layer stack (top first) with each layer's
-// pixels, the selected layer, the active tool, the brush's and the eraser's
+// pixels, the picked layers (a kernel Selection whose primary is the selected
+// layer), the active tool, the brush's and the eraser's
 // options (each tool keeps its own), the image
 // adjustments, the marquee selection and a pending crop, the clone source, and
 // the undo history.
@@ -21,16 +22,22 @@
 // `drag(from:to:)`; a tool that does nothing there stays disabled with
 // `unavailableHelp` (PhotoToolsTests checks this).
 import CoreRaster
+import SuiteKernel
 
 /// The tools on Photo's floating tool palette.
 public enum PhotoTool: String, CaseIterable, Sendable {
-    case move, marquee, brush, eraser, clone, heal, crop, eyedropper
+    case move, marquee, brush, eraser, clone, heal, crop, eyedropper, gradient, text
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every other tool works: the canvas sends its drags to
     /// `drag`. The eyedropper's text is the fallback; the workspace's
     /// `toolHelp` asks its sampling service instead.
-    public var unavailableHelp: String? { self == .eyedropper ? "Not built yet (PV-9)." : nil }
+    public var unavailableHelp: String? {
+        switch self {
+        case .eyedropper: "Not built yet (PV-9)."
+        default: nil
+        }
+    }
 
     public var isEnabled: Bool { unavailableHelp == nil }
 }
@@ -57,7 +64,17 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var layers: [PhotoLayer] = []
     /// Each layer's pixels, by layer id, in tiles (TiledPixels).
     public internal(set) var pixels: [PhotoLayer.ID: TiledPixels] = [:]
-    public internal(set) var selectedLayerID: PhotoLayer.ID?
+    /// The picked layers, primary last, on the kernel's Selection (PhotoLayerSelection+Kernel.swift).
+    var layerSelection = Selection<PhotoLayer.ID>()
+    /// The layer the inspector, the brush and the Move tool act on: the
+    /// selection's primary. Setting it makes that layer the whole selection;
+    /// nil clears it.
+    public internal(set) var selectedLayerID: PhotoLayer.ID? {
+        get { layerSelection.primary }
+        set {
+            if let newValue { layerSelection.replace([newValue]) } else { layerSelection.clear() }
+        }
+    }
     public private(set) var tool: PhotoTool = .move
     /// The brush's options; its color is also the marquee's Fill color.
     public private(set) var brushOptions = ToolOptions()
@@ -103,6 +120,8 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var sampleSize = SampleSize.point
     /// The Export sheet's last choices (PhotoExportOptions.swift).
     public internal(set) var exportOptions = ExportOptions()
+    /// The Export sheet and its write, on the kernel's run (PhotoExportRun+Kernel.swift).
+    public internal(set) var exportRun = ExportRun<ExportOptions>.idle
     /// What the open file is, for Save (PhotoDocumentFile.swift).
     public internal(set) var fileKind: PhotoFileKind?
     /// The history step last saved, opened or created (`currentStepID`), so a
@@ -111,8 +130,12 @@ public struct PhotoWorkspace: Sendable {
     /// A one-line refusal or note for the status line ("Nothing to paste.");
     /// `clearStatus()` drops it (the window calls it 4 s later).
     public internal(set) var statusMessage: String?
+    /// The Type tool's open box on the canvas, nil when none is (PhotoTextBox).
+    public internal(set) var textBox: PhotoTextBox?
     /// "Merging…" while Merge Down or Flatten Image works off the main actor (PhotoLayerOps.swift).
     public internal(set) var progress: String?
+    /// The file flow's recents, open path and requests for the window (PhotoFileFlow+Kernel.swift).
+    public internal(set) var fileFlow = PhotoFileFlowState()
     /// Test hook: how many times `layerGeometryChanged` ran, and its last call
     /// (PhotoMask.swift). Not part of `==`.
     var geometryChangeCount = 0
@@ -189,6 +212,7 @@ public struct PhotoWorkspace: Sendable {
     /// Picks a tool, dropping any pending crop when it isn't the crop tool.
     public mutating func selectTool(_ tool: PhotoTool) {
         endDrag()
+        if tool != .text { commitTextBox() }
         self.tool = tool
         if tool != .crop, pendingCrop != nil { pendingCrop = nil }
     }
@@ -250,7 +274,7 @@ public struct PhotoWorkspace: Sendable {
         layers.remove(at: at)
         pixels[id] = nil
         layerGeometryChanged(id, .removed)
-        if selectedLayerID == id { selectedLayerID = layers[min(at, layers.count - 1)].id }
+        pruneLayerSelection(near: at)
         touch(.all)
         return true
     }
@@ -263,24 +287,8 @@ public struct PhotoWorkspace: Sendable {
         layers[at].name = trimmed
     }
 
-    /// Shows a hidden layer or hides a shown one.
-    public mutating func toggleVisibility(_ id: PhotoLayer.ID) {
-        guard let at = index(of: id) else { return }
-        recordLayers(named: layers[at].isVisible ? "Hide Layer" : "Show Layer")
-        layers[at].isVisible.toggle()
-        touch(.all)
-    }
-
-    /// Sets opacity from a percentage, clamped to 0...100. NaN is ignored. A
-    /// run of opacity changes to one layer is one undo step.
-    public mutating func setOpacity(_ id: PhotoLayer.ID, percent: Double) {
-        guard !percent.isNaN, let at = index(of: id) else { return }
-        let opacity = min(max(percent, 0), 100) / 100
-        guard opacity != layers[at].opacity else { return }
-        recordLayers(named: "Layer Opacity", coalescing: "opacity-\(id)")
-        layers[at].opacity = opacity
-        touch(.all)
-    }
+    // Hide and Show, and Opacity, act on every picked layer when the row is
+    // picked: toggleVisibility and setOpacity are in PhotoSeveralLayers+Kernel.
 
     public mutating func setBlendMode(_ id: PhotoLayer.ID, _ mode: BlendMode) {
         guard let at = index(of: id), layers[at].blendMode != mode else { return }
@@ -291,17 +299,14 @@ public struct PhotoWorkspace: Sendable {
 
     /// Moves the layers at `offsets` (top-first positions) to sit before the
     /// layer now at `destination`, as a list drag reports it; `layers.count`
-    /// moves them to the bottom. Out-of-range offsets are ignored.
+    /// moves them to the bottom. Out-of-range offsets are ignored. Runs on
+    /// LayerTree.move (PhotoLayers+Kernel), and a move that changes nothing
+    /// records no step there.
     public mutating func moveLayers(fromOffsets offsets: [Int], toOffset destination: Int) {
+        guard (0...layers.count).contains(destination) else { return }
         let sources = Set(offsets.filter { layers.indices.contains($0) })
-        guard !sources.isEmpty, (0...layers.count).contains(destination) else { return }
-        let moving = layers.indices.filter { sources.contains($0) }.map { layers[$0] }
-        var staying = layers.indices.filter { !sources.contains($0) }.map { layers[$0] }
-        staying.insert(contentsOf: moving, at: destination - sources.filter { $0 < destination }.count)
-        guard staying != layers else { return }
-        recordLayers(named: "Reorder Layers")
-        layers = staying
-        touch(.all)
+        commitKernelLayers(
+            Self.kernelMoved(layers, fromOffsets: sources, toOffset: destination), named: "Reorder Layers")
     }
 
     // MARK: Damage
@@ -373,7 +378,7 @@ extension PhotoWorkspace: Equatable {
     /// `services` isn't compared: it isn't Equatable and isn't what shows.
     public static func == (lhs: PhotoWorkspace, rhs: PhotoWorkspace) -> Bool {
         lhs.revision == rhs.revision && lhs.canvas == rhs.canvas && lhs.documentName == rhs.documentName
-            && lhs.layers == rhs.layers && lhs.selectedLayerID == rhs.selectedLayerID && lhs.tool == rhs.tool
+            && lhs.layers == rhs.layers && lhs.layerSelection == rhs.layerSelection && lhs.tool == rhs.tool
             && lhs.brushOptions == rhs.brushOptions
             && lhs.eraserOptions == rhs.eraserOptions && lhs.adjustments == rhs.adjustments
             && lhs.selection == rhs.selection && lhs.pendingCrop == rhs.pendingCrop
@@ -382,8 +387,9 @@ extension PhotoWorkspace: Equatable {
             && lhs.selectionOptions == rhs.selectionOptions && lhs.editsMask == rhs.editsMask
             && lhs.cropAspect == rhs.cropAspect && lhs.transformDraft == rhs.transformDraft
             && lhs.sampleSize == rhs.sampleSize && lhs.exportOptions == rhs.exportOptions
+            && lhs.exportRun == rhs.exportRun
             && lhs.fileKind == rhs.fileKind && lhs.savedStepID == rhs.savedStepID
-            && lhs.statusMessage == rhs.statusMessage && lhs.progress == rhs.progress && lhs.masks == rhs.masks && lhs.pixels == rhs.pixels
+            && lhs.statusMessage == rhs.statusMessage && lhs.textBox == rhs.textBox && lhs.progress == rhs.progress && lhs.masks == rhs.masks && lhs.pixels == rhs.pixels
     }
 }
 

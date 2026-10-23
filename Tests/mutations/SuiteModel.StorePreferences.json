@@ -1,0 +1,7 @@
+[
+{"label":"a stale save wins: the stored-revision guard dropped","file":"Sources/SuiteModel/Preferences/StorePreferences.swift","find":"guard p.revision == current else { throw .staleRevision }","replace":"","tests":"StorePreferencesTests"},
+{"label":"save keeps the stored revision (no bump)","file":"Sources/SuiteModel/Preferences/StorePreferences.swift","find":"next.revision = current + 1","replace":"next.revision = current","tests":"StorePreferencesTests"},
+{"label":"externalChange repeats a revision it already yielded","file":"Sources/SuiteModel/Preferences/StorePreferences.swift","find":"revision > seen else { return }","replace":"revision >= seen else { return }","tests":"StorePreferencesTests"},
+{"label":"save does not mark its own revision seen, so externalChange yields it again","file":"Sources/SuiteModel/Preferences/StorePreferences.swift","find":"seen = next.revision\n        feed.send(seen)","replace":"feed.send(next.revision)","tests":"StorePreferencesTests"},
+{"label":"externalChange does not mark the revision it yields as seen","file":"Sources/SuiteModel/Preferences/StorePreferences.swift","find":"seen = revision\n        feed.send(revision)","replace":"feed.send(revision)","tests":"StorePreferencesTests"}
+]

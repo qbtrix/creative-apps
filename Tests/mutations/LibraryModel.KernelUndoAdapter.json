@@ -1,0 +1,79 @@
+[
+  {
+    "label": "endCoalescing leaves the kernel's run open, so the next drag joins the last",
+    "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "find": "        history.kernel.endRun()\n",
+    "replace": "",
+    "tests": "LibraryHistoryTests"
+  },
+  {
+    "label": "undo and redo restore even when the kernel had no step to move",
+    "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "find": "guard moved, let applied else { return }",
+    "replace": "_ = moved; guard let applied = applied ?? Optional(CatalogChange(photos: current)) else { return }",
+    "tests": "LibraryHistoryTests"
+  },
+  {
+    "label": "edits record without their coalesce key, so a drag is many steps",
+    "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "find": "history.kernel.record(name, CatalogChange(photos: before), key: coalesceKey)",
+    "replace": "history.kernel.record(name, CatalogChange(photos: before))",
+    "tests": "LibraryHistoryTests"
+  },
+  {
+    "label": "the kernel gets back the photos it handed over, so redo reapplies nothing",
+    "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "find": "            swapped.photos = current.filter { ids.contains($0.id) }\n",
+    "replace": "            swapped.photos = change.photos.filter { ids.contains($0.id) }\n",
+    "tests": "LibraryHistoryTests"
+  },
+  {
+    "label": "undo skips collectionsBefore, so a collections step can't be undone",
+    "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "find": "step(\\.collectionsBefore) { $0.undo($1) }",
+    "replace": "step(\\.collectionsAfter) { $0.undo($1) }",
+    "tests": "LibraryCollectionsHistoryTests"
+  },
+  {
+    "label": "redo applies the before list, so a redone collections step stays undone",
+    "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "find": "step(\\.collectionsAfter) { $0.redo($1) }",
+    "replace": "step(\\.collectionsBefore) { $0.redo($1) }",
+    "tests": "LibraryCollectionsHistoryTests"
+  },
+  {
+    "label": "the no-op guard is dropped, so an edit that changes nothing records a step",
+    "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "find": "        guard edited != userCollections else { return }\n",
+    "replace": "",
+    "tests": "LibraryCollectionsHistoryTests"
+  },
+  {
+    "label": "a collections-only step bumps saveRevision through an empty photo restore",
+    "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "find": "if !applied.photos.isEmpty { restore(applied.photos) }",
+    "replace": "restore(applied.photos)",
+    "tests": "LibraryCollectionsHistoryTests"
+  },
+  {
+    "label": "a gone selected collection stays selected after undo",
+    "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "find": "            selectedCollectionID = \"all\"\n",
+    "replace": "",
+    "tests": "LibraryCollectionsHistoryTests"
+  },
+  {
+    "label": "undoing a delete leaves All Photos selected",
+    "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "find": "        if side == \\.collectionsBefore, let selected = applied.selectedBefore { reselect(selected, after: applied) }\n",
+    "replace": "",
+    "tests": "LibraryCollectionsTests"
+  },
+  {
+    "label": "undo jumps back to the collection selected before any collections step",
+    "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "find": "let removed = !(change.collectionsAfter ?? []).contains { $0.id == id }",
+    "replace": "let removed = true",
+    "tests": "LibraryCollectionsTests"
+  }
+]

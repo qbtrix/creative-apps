@@ -44,6 +44,8 @@ extension LibraryWindow {
                 await Self.readCatalog(store: store, coding: coding)
             }.value
             model.applyLaunch(result)
+            // The file's photos replaced the catalog: drop the old photos' thumbnails too.
+            if case .restored(.some, _) = result { areas.thumbnails.store.clear() }
         }
     }
 

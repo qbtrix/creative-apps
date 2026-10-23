@@ -1,0 +1,16 @@
+{
+  "id": "cli-runner",
+  "name": "CLI runner",
+  "description": "The `afterglow` executable (AfterGlowCLI/main.swift: hands the arguments and LiveIO, the real disk with stdout and stderr, to CLI.run and exits with its code; CLIBinaryTests spawns it to check it agrees with CLI.run in process) and the router in AfterGlowCLICore: CLI.run, CLI.version and the sysexits codes (CLI.Exit), with the parser, output, file system and app registry files the single-shot forms use. CLIIO is everything the CLI touches outside itself (files, globs, stdout, stderr), with FakeIO, the tests' in-memory file system, and LiveIO, the real one (regular files only, a 2 GiB read cap, writes that make missing folders, then land a temp file by rename or by a hard link that refuses an existing target, globs walked without a shell); Apps is the registry, each app's HeadlessDocument erased to a HeadlessApp (photo, design, flare, halo, library, plus the fake for tests) whose HeadlessSession runs, saves and exports one open document. CL-1 makes `--version` live (one JSON object, sorted keys, exit 0); every other form exits 69 naming the slice that builds it until CL-4 fills them.",
+  "technology": "Swift 6, Foundation, Linux and macOS",
+  "paths": [
+    "Sources/AfterGlowCLI/",
+    "Sources/AfterGlowCLICore/CLI.swift",
+    "Sources/AfterGlowCLICore/CLIIO.swift",
+    "Sources/AfterGlowCLICore/LiveIO.swift",
+    "Sources/AfterGlowCLICore/Apps.swift",
+    "Sources/AfterGlowCLICore/Arguments.swift",
+    "Sources/AfterGlowCLICore/Output.swift"
+  ],
+  "order": 10
+}

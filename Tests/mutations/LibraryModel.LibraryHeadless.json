@@ -1,0 +1,37 @@
+[
+  {
+    "label": "realJobPasses(import-rate-export): export writes every photo, not the picks",
+    "file": "Sources/LibraryModel/LibraryHeadless.swift",
+    "find": "library.items.first { $0.id == id && $0.flag == .pick }",
+    "replace": "library.items.first { $0.id == id }",
+    "tests": "LibraryHeadlessTests"
+  },
+  {
+    "label": "exportIsOfThePicksOnly, realJobPasses(import-rate-export): export ignores the longSide option",
+    "file": "Sources/LibraryModel/LibraryHeadless.swift",
+    "find": "ExportOptions(longEdge: longSide, folder: \"\", format: .png)",
+    "replace": "ExportOptions(longEdge: nil, folder: \"\", format: .png)",
+    "tests": "LibraryHeadlessTests"
+  },
+  {
+    "label": "openSaveReopenIsTheSameDocument: save leaves the images out",
+    "file": "Sources/LibraryModel/LibraryHeadless.swift",
+    "find": "var files = images",
+    "replace": "var files: [String: Data] = [:]",
+    "tests": "LibraryHeadlessTests"
+  },
+  {
+    "label": "openImportsTheImagesTheCatalogDoesNotList: open skips the unlisted images",
+    "file": "Sources/LibraryModel/LibraryHeadless.swift",
+    "find": "photos.append(try photo(bytes, path: path))",
+    "replace": "_ = bytes",
+    "tests": "LibraryHeadlessTests"
+  },
+  {
+    "label": "exportIsOfThePicksOnly, realJobPasses(cull-and-save): a command runs on a copy, so the catalog file is the photos as opened, not as culled",
+    "file": "Sources/LibraryModel/LibraryHeadless.swift",
+    "find": "try LibraryCatalog.catalog.run(id, params: json, on: &doc.library).result",
+    "replace": "try { var copy = doc.library; return try LibraryCatalog.catalog.run(id, params: json, on: &copy).result }()",
+    "tests": "LibraryHeadlessTests"
+  }
+]

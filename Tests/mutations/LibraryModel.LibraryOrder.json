@@ -1,0 +1,4 @@
+[
+{"label":"an edit under a filter leaves the order as it was","file":"Sources/LibraryModel/LibraryOrder.swift","find":"selectedCollectionID == \"favorites\" || activeFilter.isActive","replace":"selectedCollectionID == \"favorites\"","tests":"LibraryCollectionsSeamTests"},
+{"label":"an edit reads the bar's filter, not a smart collection's rules","file":"Sources/LibraryModel/LibraryOrder.swift","find":"activeFilter.isActive\n            || UserCollection.isUserID(selectedCollectionID)","replace":"filter.isActive","tests":"LibraryCollectionsSeamTests"}
+]

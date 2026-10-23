@@ -1,0 +1,6 @@
+[
+{"label":"a degenerate width gets 0 columns","file":"Sources/LibraryModel/LibraryLayout.swift","find":"Int(min(max(fit, 1), 10_000))","replace":"Int(min(fit, 10_000))","tests":"LibraryLayoutTests"},
+{"label":"the exact-fit width loses its last column","file":"Sources/LibraryModel/LibraryLayout.swift","find":"(contentWidth - 2 * gridPadding + gridSpacing) / pitch","replace":"(contentWidth - 2 * gridPadding) / pitch","tests":"LibraryLayoutTests"},
+{"label":"the loupe leaves one canvas inset instead of two","file":"Sources/LibraryModel/LibraryLayout.swift","find":"let margin = 2 * canvasInset","replace":"let margin = canvasInset","tests":"LibraryLayoutTests"},
+{"label":"the loupe fits the looser axis","file":"Sources/LibraryModel/LibraryLayout.swift","find":"let scale = min(","replace":"let scale = max(","tests":"LibraryLayoutTests"}
+]

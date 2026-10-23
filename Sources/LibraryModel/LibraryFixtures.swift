@@ -9,11 +9,13 @@ import CoreColor
 
 public enum LibraryFixtures {
     /// The photos of fixture `name`; an unknown name or nil gives none.
-    /// `shoot-unimported` gives the shoot (its fakes "find" those files).
+    /// `shoot-unimported` and `cameras-unimported` give their fixture (its
+    /// fakes "find" those files).
     public static func photos(named name: String?) -> [PhotoItem] {
         switch name {
         case "samples": LibrarySample.items()
         case "shoot", "shoot-unimported": shoot()
+        case "cameras", "cameras-unimported": cameras()
         case "large": large()
         default: []
         }
@@ -34,6 +36,43 @@ public enum LibraryFixtures {
                 color: Color3(0.25 + 0.5 * fraction, 0.45, 0.75 - 0.5 * fraction), path: path,
                 pixelSize: n % 3 == 0 ? PixelSize(width: 4000, height: 6000) : PixelSize(width: 6000, height: 4000))
         }
+    }
+
+    /// The shoot's 24 photos under `/fixture/cameras/`, with invented camera
+    /// details and keywords (metadata-more). `IMG_n` is shot on `Fixture
+    /// Optics` `FX-1` (odd n) or `FX-2` (even); n mod 3 picks the lens: 1 the
+    /// 24-70mm F2.8 at f/2.8 and 24, 35, 50, 70 mm in turn, 2 the 50mm F1.8 at
+    /// f/1.8 and 50 mm, 0 the 100mm F2.8 Macro at f/8 and 100 mm; the shutter
+    /// cycles 1/2000, 1/500, 1/125, 1/30 s and the ISO doubles from 100 to
+    /// 6400. `IMG_0024` has no details (a file without Exif). Keywords: Beach
+    /// on 1–4, 13 and 14; Sunset on 3–6; Summer on 20.
+    static func cameras() -> [PhotoItem] {
+        shoot().enumerated().map { index, photo in
+            let n = index + 1
+            let path = "/fixture/cameras/" + photo.name + ".jpg"
+            var keywords: [String] = []
+            if [1, 2, 3, 4, 13, 14].contains(n) { keywords.append("Beach") }
+            if (3...6).contains(n) { keywords.append("Sunset") }
+            if n == 20 { keywords.append("Summer") }
+            return PhotoItem(
+                id: path, name: photo.name, captureDate: photo.captureDate, color: photo.color, path: path,
+                pixelSize: photo.pixelSize, keywords: keywords, camera: n == 24 ? .none : camera(n))
+        }
+    }
+
+    /// The `cameras` fixture's details for `IMG_n`; none below 1.
+    static func camera(_ n: Int) -> CameraDetails {
+        guard n >= 1 else { return .none }
+        let zoomFocals: [Double] = [24, 35, 50, 70]
+        let shutters = [1.0 / 2000, 1.0 / 500, 1.0 / 125, 1.0 / 30]
+        let (lens, fNumber, focal): (String, Double, Double) = switch n % 3 {
+        case 1: ("24-70mm F2.8", 2.8, zoomFocals[((n - 1) / 3) % zoomFocals.count])
+        case 2: ("50mm F1.8", 1.8, 50)
+        default: ("100mm F2.8 Macro", 8, 100)
+        }
+        return CameraDetails(
+            make: "Fixture Optics", model: n % 2 == 1 ? "FX-1" : "FX-2", lens: lens, iso: 100 << ((n - 1) % 7),
+            exposureTime: shutters[(n - 1) % shutters.count], fNumber: fNumber, focalLength: focal)
     }
 
     /// 10,000 records `IMG_00001` ... spread evenly over 365 days from

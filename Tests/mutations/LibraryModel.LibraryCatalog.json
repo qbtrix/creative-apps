@@ -1,0 +1,8 @@
+[
+{"label":"recount leaves out your collections","file":"Sources/LibraryModel/LibraryCatalog.swift","find":"        rows += userCollections.map { LibraryCollection(id: $0.id, name: $0.name, count: photos(of: $0).count) }\n","replace":"","tests":"LibraryCollectionsSeamTests"},
+{"label":"a gone collection stays selected","file":"Sources/LibraryModel/LibraryCatalog.swift","find":"if !collections.contains(where: { $0.id == selectedCollectionID }) { selectCollection(\"all\") }","replace":"","tests":"LibraryCollectionsSeamTests"},
+{"label":"== ignores the filter","file":"Sources/LibraryModel/LibraryCatalog.swift","find":"&& lhs.filter == rhs.filter && lhs.userCollections","replace":"&& lhs.userCollections","tests":"LibraryCollectionsSeamTests"},
+{"label":"shownItems ignores the filter","file":"Sources/LibraryModel/LibraryCatalog.swift","find":"return filter.isActive ? base.filter(filter.matches) : base","replace":"return base","tests":"LibraryCollectionsSeamTests"},
+{"label":"an edit leaves smart counts as they were","file":"Sources/LibraryModel/LibraryCatalog.swift","find":"collections[index].count += after.count(where: rules.matches) - before.count(where: rules.matches)","replace":"_ = index","tests":"LibraryCollectionsSeamTests"},
+{"label":"a collection of yours shows every photo","file":"Sources/LibraryModel/LibraryCatalog.swift","find":"                items.filter { ids.contains($0.id) }\n","replace":"                items\n","tests":"LibraryCollectionsSeamTests"}
+]

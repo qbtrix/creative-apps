@@ -1,0 +1,6 @@
+[
+{"label":"a key picks a disabled tool","file":"Sources/SuiteUI/SuiteToolPicking.swift","find":"$0.unavailableHelp == nil && $0.shortcut?.lowercased() == wanted","replace":"$0.shortcut?.lowercased() == wanted","tests":"ToolPickingTests"},
+{"label":"a shortcut used twice passes","file":"Sources/SuiteUI/SuiteToolPicking.swift","find":"(onKey[$0.lowercased()] ?? 0) > 1","replace":"(onKey[$0.lowercased()] ?? 0) > 2","tests":"ToolPickingTests"},
+{"label":"shortcuts compare case-sensitively","file":"Sources/SuiteUI/SuiteToolPicking.swift","find":"onKey[$0.lowercased()]","replace":"onKey[String($0)]","tests":"ToolPickingTests"},
+{"label":"violations come out unsorted","file":"Sources/SuiteUI/SuiteToolPicking.swift","find":"Array(Set(broken.map(\\.id))).sorted()","replace":"broken.map(\\.id)","tests":"ToolPickingTests"}
+]

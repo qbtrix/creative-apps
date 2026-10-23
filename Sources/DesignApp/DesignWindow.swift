@@ -3,7 +3,9 @@
 // viewport, the status note and the alert; the open file's URL lives in the
 // workspace), turns every DesignIntent into a workspace method or a file panel, and
 // publishes a DesignMenu to the menu bar. Only this file calls the workspace's
-// methods. The zoom keeps the handle tolerance a constant size on screen, and
+// methods. An open text edit is committed, its box fitted to the measured draft,
+// before any intent but a draft or a cancel acts (canvas-basics CB-6). The zoom
+// keeps the handle tolerance a constant size on screen, and
 // the page is fitted whenever the selected page changes or a file opens, and
 // refitted as the canvas resizes until the user zooms, through
 // EditorDetailLayout so the fitted page and its handles stay clear of the
@@ -23,21 +25,32 @@
 // unknown name leaves it empty and says so on the status line) and
 // `-DesignWindowSize WxH` (the first window's content size).
 //
+// File > Export… (⇧⌘E) bumps `exportRequest`; DesignExportArea opens its sheet
+// on each change and hands its notes to the status line. DesignHistoryArea holds the
+// History panel (View > Show History) and the autosave hooks; a jump and a restore come
+// back here as workspace methods.
+//
 // Cut, Copy and Paste: the Model makes and reads the bytes and the window moves
 // them through DesignPasteboardBridge under the Model's `pasteboardType`; a
 // refusal (nothing selected, nothing of Design's to paste) goes to the status
-// line. DesignClosePrompt sits on the root, letting every close through until
-// files-history asks about unsaved changes.
+// line.
+//
+// Unsaved changes: SuiteUI's `.unsavedChangesGuard` sits on the root with Design's hooks
+// (`unsavedHooks`, buttons `design.close.*`): a close of an edited window, and File > New File
+// over one, asks Save, Don't Save or Cancel first. Save runs File > Save and lands only when
+// the workspace then reads clean, so a cancelled Save panel keeps the document.
 //
 // Canvas drags and inspector scrubs (D0-8a): the press goes to the workspace,
 // then each later sample goes to DesignLiveDrag's copy, which only DesignCanvas
 // draws, so the window doesn't run per sample. Mouse-up, or the scrub's end
-// run, replays the last one into the workspace as one step (`live.end(into:)`).
+// run, replays the last one into the workspace as one step (`live.land(into:)`),
+// written before the copy is cleared.
 //
 // `.suiteProbes()` sits on the root (D0-7a), so the window's `suite.controls`
 // lists every control the editor registers with its DesignControlID.
 import AppKit
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -58,11 +71,16 @@ struct DesignWindow: View {
     @State private var fitting = false
     /// The status line's message ("Saved sample.design"); it goes at the next edit.
     @State private var note: String?
-    @State private var problem: String?
+    @State private var problem: DesignFileProblem?
     @State private var started = false
+    /// Bumped by File > Export…; DesignExportArea opens its sheet on each change.
+    @State private var exportRequest = 0
     /// The rect Zoom to Selection asked to show; the canvas takes it once it has that input (D0-5b).
     @State private var show: DesignRect?
     @Environment(\.openWindow) private var openWindow
+    /// Whether this is the key window, which live commands act on (EM-4).
+    @Environment(\.appearsActive) private var appearsActive
+    @State private var liveID = UUID()
     /// Cut, Copy and Paste carry Design's bytes on the general pasteboard.
     private let bridge = DesignPasteboardBridge()
 
@@ -80,6 +98,9 @@ struct DesignWindow: View {
     static var bodyRuns = 0
     /// The workspace after the last intent; DesignLiveDragTests reads it.
     static var lastWorkspace: DesignWorkspace?
+    /// Opens the last started window's export sheet; RenderBudgetDesignExportTests calls it (no menu bar there).
+    // view-static: main-actor
+    static var openExport: (@MainActor () -> Void)?
     #endif
 
     /// A window for `launch`; `seed` (tests) starts it on that workspace instead, and `live` is its drag box.
@@ -104,11 +125,23 @@ struct DesignWindow: View {
             fit()
         }
         .onChange(of: model.pages) { note = nil }
-        .alert(problem ?? "", isPresented: Binding(get: { problem != nil }, set: { if !$0 { problem = nil } })) {
+        .alert(
+            problem?.title ?? "",
+            isPresented: Binding(get: { problem != nil }, set: { if !$0 { problem = nil } }),
+            presenting: problem
+        ) { _ in
             Button("OK", role: .cancel) {}
+        } message: { shown in
+            Text(shown.message)
         }
         .task { start() }
-        .modifier(DesignClosePrompt(model: model))
+        .onChange(of: appearsActive, initial: true) {
+            if appearsActive { DesignShell.front = (liveID, { model }, perform) }
+        }
+        .onDisappear { if DesignShell.front?.id == liveID { DesignShell.front = nil } }
+        .unsavedChangesGuard(Self.unsavedHooks(model: { model }, perform: perform))
+        .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }))
+        .modifier(DesignHistoryArea(model: model, jump: { try model.jumpHistory(to: $0) }, restore: { try model.restoreRecovered(from: $0, name: $1) }, onNote: { note = $0 }))
         .environment(\.designLiveDrag, live)
         // The outermost call publishes `suite.perf` and `suite.controls` under -SuitePerfProbe;
         // SuiteWindow's inner one then adds nothing, so the menus' and alert's hosts share one inventory.
@@ -119,17 +152,23 @@ struct DesignWindow: View {
         #if DEBUG
         defer { Self.lastWorkspace = model }
         #endif
+        // An open text edit ends, fitted to its text, before anything else acts (canvas-basics CB-6).
         switch intent {
-        case .newFile: model.newFile()
+        case .textDraft, .cancelText: break
+        default: commitText()
+        }
+        switch intent {
+        case .newFile: newFile()
         case .open: chooseFile()
         case .save: save()
         case .saveAs: saveAs()
+        case .export: exportRequest += 1
         case .undo: model.undo()
         case .redo: model.redo()
         case .tool(let tool): model.selectTool(tool)
         case .drag(let from, let to, let modifiers):
             let start = DesignPoint(from)
-            if live.workspace == nil {
+            if !live.isLive {
                 // The press goes to the workspace, so the selection shows at once.
                 model.drag(from: start, to: start, modifiers: modifiers)
                 live.begin(from: model)
@@ -148,6 +187,9 @@ struct DesignWindow: View {
         case .setFrame(let id, let x, let y, let width, let height):
             try? model.setNodeFrame(id, x: x, y: y, width: width, height: height)
         case .setFill(let id, let color): try? model.setFill(id, color)
+        case .fill(let intent): model.runFill(intent)
+        case .transform(let intent): model.runTransform(intent)
+        case .shape(let intent): model.runShape(intent)
         case .align(let edge): model.alignLayer(edge)
         case .endEditRun: endLive { model.endEditRun() }
         case .setHidden(let id, let hidden): try? model.setNodeHidden(id, hidden)
@@ -155,10 +197,10 @@ struct DesignWindow: View {
         case .toggleFlag(let id, let flag): try? model.toggleNodeFlag(id, flag)
         case .editText(let id): try? model.beginTextEdit(id)
         case .textDraft(let text): model.setTextDraft(text)
-        case .commitText: model.commitTextEdit()
+        case .commitText: break  // committed above
         case .cancelText: model.cancelTextEdit()
-        case .zoomIn: userZoom(ViewerZoom.zoomedIn(from: zoom))
-        case .zoomOut: userZoom(ViewerZoom.zoomedOut(from: zoom))
+        case .zoomIn: userZoom(ZoomMath.zoomedIn(from: zoom))
+        case .zoomOut: userZoom(ZoomMath.zoomedOut(from: zoom))
         case .fit:
             fitting = true
             fit()
@@ -182,13 +224,35 @@ struct DesignWindow: View {
                 if error == .emptyName { note = DesignRefusal.emptyName.help }
                 if case .alreadyExists = error { note = DesignRefusal.nameTaken(name).help }
             }
+        case .renameLayer(let id, let name):
+            // The row ids come from the model's own rows; only the name can be refused.
+            do { try model.renameNode(id, to: name) } catch { if error == .emptyName { note = DesignRefusal.emptyName.help } }
+        case .setPageSize(let width, let height): model.setPageSize(width: width, height: height)
+        case .pick(let point, let toStroke):
+            do { try model.pick(at: point, toStroke: toStroke) } catch { note = error.help }
+        case .sampleSize(let size): model.setSampleSize(size)
+        case .sampleTarget(let toStroke): model.setSampleTarget(toStroke: toStroke)
+        case .adoptLive(let result): model.adoptLiveCommand(result)
         }
+    }
+
+    /// Ends an open text edit with the draft's measured extent, so the box fits its text in the
+    /// commit's step: an auto-width box takes both sides, a fixed-width one wraps at its width and
+    /// takes the height. The edited node is always the selected one (DesignTextOverlay).
+    private func commitText() {
+        guard let id = model.editingTextID else { return }
+        let extent = model.selectedNode.flatMap { node in
+            node.id == id ? DesignTextFont.measure(model.textDraft, in: node) : nil
+        }
+        model.commitTextEdit(extent: extent)
     }
 
     /// Lands a live drag or scrub in the workspace as one step; with none live, `otherwise`.
     private func endLive(otherwise: () -> Void) {
-        guard live.workspace != nil else { return otherwise() }
-        if let refusal = live.end(into: &model) { note = refusal.help }
+        guard live.isLive else { return otherwise() }
+        let refusal = live.land(into: &model)
+        live.clearAfterLanding()
+        if let refusal { note = refusal.help }
     }
 
     /// Pastes Design's bytes from the pasteboard; with none (or another type), the Model's reason.
@@ -203,10 +267,9 @@ struct DesignWindow: View {
 
     // MARK: Zoom
 
-    /// Sets the zoom within the Zoom In and Zoom Out stops, and resizes the handle grab area to match.
+    /// Sets the zoom within ZoomMath's range (10% to 3200%), and resizes the handle grab area to match.
     private func setZoom(_ scale: Double) {
-        let (lowest, highest) = (ViewerZoom.stops.first ?? 1, ViewerZoom.stops.last ?? 1)
-        zoom = scale.isFinite ? Swift.min(Swift.max(scale, lowest), highest) : 1
+        zoom = ZoomMath.clamped(scale.isFinite ? scale : 1)
         model.setHandleTolerance(Double(SuiteSpacing.s) / zoom)
     }
 
@@ -221,9 +284,16 @@ struct DesignWindow: View {
     private func fit() {
         guard let page = model.selectedPage, viewport != .zero else { return }
         let size = CGSize(width: page.frameWidth, height: page.frameHeight)
-        let layout = EditorDetailLayout(viewport: viewport, toolCount: DesignTool.allCases.count)
-        let scale = layout.fitScale(artboard: size)
-        setZoom(scale > 0 ? scale : 1)
+        setZoom(ZoomMath.fit(document: size, in: viewport, using: paletteFit))
+    }
+
+    /// The fit EditorDetail hands Command-0: clear of the floating palette, which shows every tool
+    /// while a page is open.
+    private var paletteFit: @Sendable (CGSize, CGSize) -> Double {
+        let toolCount = DesignTool.allCases.count
+        return { viewport, artboard in
+            EditorDetailLayout(viewport: viewport, toolCount: toolCount).fitScale(artboard: artboard)
+        }
     }
 
     /// Zooms to fit the selection clear of the palette and keeps its rect for the canvas to
@@ -233,9 +303,7 @@ struct DesignWindow: View {
             note = model.zoomToSelectionHelp
             return
         }
-        let layout = EditorDetailLayout(viewport: viewport, toolCount: DesignTool.allCases.count)
-        let scale = layout.fitScale(artboard: CGSize(width: rect.width, height: rect.height))
-        userZoom(scale > 0 ? scale : 1)
+        userZoom(ZoomMath.fit(document: CGSize(width: rect.width, height: rect.height), in: viewport, using: paletteFit))
         show = rect
     }
 
@@ -246,11 +314,41 @@ struct DesignWindow: View {
 
     // MARK: Files
 
+    /// The unsaved guard's hooks for a window (`design.close.*`): the name is the open file's ("Untitled"
+    /// before its first save, nil with nothing open), the dirty state the workspace's DocumentSession, and
+    /// Save runs File > Save, landing only when the workspace then reads clean.
+    // view-static: main-actor
+    static func unsavedHooks(model: @escaping @MainActor () -> DesignWorkspace, perform: @escaping DesignPerform) -> UnsavedHooks {
+        UnsavedHooks(
+            idPrefix: "design",
+            documentName: {
+                let workspace = model()
+                return workspace.isOpen ? workspace.documentURL?.lastPathComponent ?? "Untitled" : nil
+            },
+            isDirty: { model().isDirty },
+            save: {
+                perform(.save)
+                return !model().isDirty
+            })
+    }
+
+    /// File > New File, after the unsaved guard's sheet on the key window lets it go on.
+    private func newFile() {
+        let hooks = Self.unsavedHooks(model: { model }, perform: perform)
+        guard hooks.isDirty() else { return model.newFile() }
+        Task { @MainActor in
+            if await UnsavedGuard.proceed(hooks, in: NSApp.keyWindow) { model.newFile() }
+        }
+    }
+
     /// A window opened by File > New File with no window focused starts with a new file, one
     /// opened for a file opens it, and the first window opens the launch file when there is one.
     private func start() {
         guard !started else { return }
         started = true
+        #if DEBUG
+        Self.openExport = { perform(.export) }
+        #endif
         if seeded {
             fitting = true
             return fit()
@@ -315,7 +413,7 @@ struct DesignWindow: View {
             fitting = true
             fit()
         } catch {
-            problem = "\(url.lastPathComponent) can't be opened. \(Self.reason(error))"
+            problem = .opening(url.lastPathComponent, Self.reason(error))
         }
     }
 
@@ -338,13 +436,13 @@ struct DesignWindow: View {
 
     /// ponytail: written on the main thread; a design file is small JSON. Move it off if files grow large.
     private func write(to url: URL) {
-        model.commitTextEdit()
+        commitText()
         do {
             try model.fileData().write(to: url, options: .atomic)
             model.didSave(to: url)
             note = "Saved \(url.lastPathComponent)"
         } catch {
-            problem = "\(url.lastPathComponent) can't be saved. \(Self.reason(error))"
+            problem = .saving(url.lastPathComponent, Self.reason(error))
         }
     }
 

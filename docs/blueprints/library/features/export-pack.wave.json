@@ -1,0 +1,132 @@
+{
+  "title": "Export without location: a Metadata row that keeps camera details and drops GPS, serials and maker notes, in the file and the sidecar",
+  "wave": 5,
+  "order": 5,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "library/export-pack (adopter of S11); RJ-L16, RJ-X03",
+  "waits_on": "suiteui export-pack's XP-a (cross-line; LX-3 needs XP-6, LX-4 XP-7); export (the feature: it owns every export file here). raw's RW-2 and RW-3 now wait on LX-a and LX-m",
+  "longest_chain": "5 (LX-1 → LX-2 → LX-6 → LX-7 → LX-8)",
+  "journeys": [
+    "LibraryExportPackJourneyTests.testExportWithoutLocation"
+  ],
+  "owned": [
+    "Sources/LibraryModel/Contracts/LibraryContracts.swift",
+    "Sources/LibraryModel/Contracts/ExportSidecar.swift",
+    "Tests/LibraryModelTests/LibraryExportMetadataTests.swift",
+    "Sources/LibraryApp/LibraryExportSheet.swift",
+    "Sources/LibraryModel/Live/LiveExporter.swift",
+    "Tests/mutations/LibraryModel.ExportSidecar.json",
+    "Tests/mutations/LibraryModel.LiveExporter.json",
+    "Tests/RealJobs/library/no-location/",
+    "Sources/LibraryApp/Platform/JPEGWriter.swift",
+    "Tests/AppSnapshotTests/LibraryExportMetadataWriteTests.swift",
+    "Tests/AppSnapshotTests/LibraryExportPackSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetLibraryExportPackTests.swift",
+    "UITests/LibraryJourneyTests+ExportPack.swift",
+    "docs/blueprints/library/features/export-pack.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "LX-a",
+      "behavior": "Library's export options hold a metadata policy (default All but location) on stubs, and the sheet shows the shared Metadata row.",
+      "tasks": [
+        "LX-1",
+        "LX-2"
+      ],
+      "journeys": [
+        "MX-LX"
+      ],
+      "waits": {
+        "export": [
+          "LX-1",
+          "LX-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/LibraryModel/Contracts/LibraryContracts.swift",
+        "Sources/LibraryModel/Contracts/ExportSidecar.swift",
+        "Tests/LibraryModelTests/LibraryExportMetadataTests.swift",
+        "Sources/LibraryApp/LibraryExportSheet.swift"
+      ]
+    },
+    {
+      "id": "LX-u",
+      "behavior": "The sheet has snapshots and a render budget, and the journey is written.",
+      "tasks": [
+        "LX-5",
+        "LX-6"
+      ],
+      "journeys": [
+        "LJ-X1"
+      ],
+      "waits": {
+        "LX-a": [
+          "LX-5",
+          "LX-6"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/LibraryExportPackSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetLibraryExportPackTests.swift",
+        "UITests/LibraryJourneyTests+ExportPack.swift"
+      ]
+    },
+    {
+      "id": "LX-m",
+      "behavior": "The sidecar leaves out what the policy drops, and the writer carries the original's metadata minus the dropped tags into JPEG and HEIC.",
+      "tasks": [
+        "LX-3",
+        "LX-4"
+      ],
+      "journeys": [
+        "MX-LX"
+      ],
+      "waits": {
+        "LX-a": [
+          "LX-3",
+          "LX-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/LibraryModel/Contracts/ExportSidecar.swift",
+        "Sources/LibraryModel/Live/LiveExporter.swift",
+        "Tests/LibraryModelTests/LibraryExportMetadataTests.swift",
+        "Tests/mutations/LibraryModel.ExportSidecar.json",
+        "Tests/mutations/LibraryModel.LiveExporter.json",
+        "Tests/RealJobs/library/no-location/",
+        "Sources/LibraryApp/Platform/JPEGWriter.swift",
+        "Tests/AppSnapshotTests/LibraryExportMetadataWriteTests.swift"
+      ]
+    },
+    {
+      "id": "LX-z",
+      "behavior": "Export without location runs on live services, the journey passes, and the feature is built.",
+      "tasks": [
+        "LX-7",
+        "LX-8"
+      ],
+      "journeys": [
+        "LJ-X1"
+      ],
+      "waits": {
+        "LX-u": [
+          "LX-7",
+          "LX-8"
+        ],
+        "LX-m": [
+          "LX-7"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/LibraryJourneyTests+ExportPack.swift",
+        "docs/blueprints/library/features/export-pack.wave.json"
+      ]
+    }
+  ]
+}

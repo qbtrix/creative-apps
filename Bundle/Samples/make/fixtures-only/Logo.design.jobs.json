@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "app": "design",
+  "inputs": ["seed.design"],
+  "steps": [
+    {"id": "page.rename", "params": {"name": "Logo"}}
+  ],
+  "atomic": true,
+  "why": "One Logo page holding its frame. Headless Design has no shape or text command yet (#4092)."
+}

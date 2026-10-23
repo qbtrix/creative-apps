@@ -19,9 +19,9 @@ extension LiveKeyframes {
         var shifts: [ShiftKeyframes] = []
         var length = 0  // the scene length the shifted keys and labels need
         for layer in edit.layers {
-            guard let last = Self.lastKey(of: layer), last >= frame else { continue }
-            let (to, overflow) = last.addingReportingOverflow(count)
-            guard !overflow, to < Int.max else { throw CommandError.invalidFrame(count) }
+            guard let last = KernelKeys.lastKey(of: layer), last >= frame,
+                  let to = KernelKeys.lastKey(afterInserting: count, at: frame, in: layer) else { continue }
+            guard to < Int.max else { throw CommandError.invalidFrame(count) }
             // FlareCore has no command that grows a symbol, so a key pushed past its last frame refuses.
             if edit.scene == nil, to >= edit.length { throw CommandError.invalidDocument(Self.insertPastSymbolEnd) }
             shifts.append(ShiftKeyframes(owner: owner, layerID: layer.id, fromFrame: frame, toFrame: last, delta: count))
@@ -51,15 +51,7 @@ extension LiveKeyframes {
         let end = overflow ? Int.max : sum  // the first frame after the removed run
         let run = frame..<end
         try engine.group("Remove Frame") { engine in
-            for layer in edit.layers {
-                for property in layer.tracks.keys.sorted() {
-                    for key in layer.tracks[property] ?? [] where run.contains(key.frame) {
-                        try engine.perform(RemoveKeyframe(owner: owner, layerID: layer.id, property: property, frame: key.frame))
-                    }
-                }
-                guard let last = Self.lastKey(of: layer), last >= end else { continue }
-                try engine.perform(ShiftKeyframes(owner: owner, layerID: layer.id, fromFrame: end, toFrame: last, delta: -count))
-            }
+            for layer in edit.layers { try KernelKeys.removeFrames(count, at: frame, from: layer, owner: owner, in: &engine) }
             if let scene = edit.scene {
                 for (name, at) in edit.labels.sorted(by: { $0.key < $1.key }) where run.contains(at) {
                     try engine.perform(RemoveFrameLabel(sceneID: scene.id, name: name))
@@ -114,9 +106,5 @@ extension LiveKeyframes {
         for (name, frame) in labels.sorted(by: { $0.key < $1.key }) {
             try engine.perform(SetFrameLabel(sceneID: scene.id, name: name, frame: frame))
         }
-    }
-
-    private static func lastKey(of layer: Layer) -> Int? {
-        layer.tracks.values.compactMap { $0.map(\.frame).max() }.max()
     }
 }

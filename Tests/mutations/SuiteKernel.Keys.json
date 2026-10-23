@@ -1,0 +1,23 @@
+[
+  {
+    "label": "oneSampleIsOnePoint: samples(count: 1) returns no point",
+    "file": "Sources/SuiteKernel/Keys/Keys.swift",
+    "find": "return n == 1 ? [Point(x: 0, y: e.value(at: 0))] : []",
+    "replace": "return []",
+    "tests": "EaseCurveTests"
+  },
+  {
+    "label": "capAt4096: the sample cap is 4095",
+    "file": "Sources/SuiteKernel/Keys/Keys.swift",
+    "find": "public static let maxSamples = 4096",
+    "replace": "public static let maxSamples = 4095",
+    "tests": "EaseCurveTests"
+  },
+  {
+    "label": "movingHandleZero: moving swaps x1 and y1",
+    "file": "Sources/SuiteKernel/Keys/Keys.swift",
+    "find": "return .cubicBezier(x1: first.x, y1: first.y, x2: second.x, y2: second.y)",
+    "replace": "return .cubicBezier(x1: first.y, y1: first.x, x2: second.x, y2: second.y)",
+    "tests": "EaseCurveTests"
+  }
+]

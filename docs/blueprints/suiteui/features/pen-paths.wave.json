@@ -1,0 +1,193 @@
+{
+  "title": "One Pen and point editor: the kernel's pen and anchor rules and path commands, SuiteUI's path edit overlay",
+  "wave": 4,
+  "order": 80,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "feature map S25 (the Pen and point editing, shared half; S18 keeps booleans); real job RJ-X37; captain 2026-10-20: the Pen in the beta for Design, shared from Flare",
+  "waits_on": "a creative-core bump to >= e09c6c30 (path-geometry #430 PathOps; the pin 0de5687d lacks them) before PN-1; command-catalog's CC-run (PN-7); export-pack's XP-a (PN-2) and XP-z (PN-9), the last owners of the gallery index and the fake document; editor-kernel and canvas-marks (built)",
+  "longest_chain": "6 (PN-1 → PN-2 → PN-3 → PN-4 → PN-8 → PN-10)",
+  "journeys": [
+    "SuiteJourneyTests.testGalleryOpensEveryPage",
+    "SuitePenPathsJourneyTests.testPenDrawsAndEditsAPath"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Paths/Paths.swift",
+    "Sources/SuiteKernel/Paths/PenRules.swift",
+    "Sources/SuiteKernel/Paths/AnchorEdit.swift",
+    "Sources/SuiteKernel/Paths/AnchorIndex.swift",
+    "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "Tests/SuiteKernelTests/PenRulesTests.swift",
+    "Tests/SuiteKernelTests/AnchorEditTests.swift",
+    "Tests/SuiteKernelTests/AnchorIndexTests.swift",
+    "Tests/SuiteKernelTests/PathCommandsTests.swift",
+    "Tests/SuiteKernelTests/AnchorStressFixture.swift",
+    "Tests/SuiteKernelTests/AnchorBudgetTests.swift",
+    "Tests/SuiteKernelTests/FakeCanvasPathTests.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-paths.json",
+    "Sources/SuiteUI/PathEditOverlay.swift",
+    "Sources/SuiteUI/CanvasMarks+Path.swift",
+    "Sources/SuiteUI/Gallery/GalleryPenPaths.swift",
+    "Sources/SuiteUI/SuiteGallery.swift",
+    "Tests/canonical-concepts.txt",
+    "UITests/SuiteJourneyTests+PenPaths.swift",
+    "Tests/SuiteUITests/PathEditOverlayTests.swift",
+    "Tests/AppSnapshotTests/SuitePenPathsSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetPenPathsTests.swift",
+    "Tests/mutations/SuiteKernel.PenRules.json",
+    "Tests/mutations/SuiteKernel.AnchorEdit.json",
+    "Sources/SuiteKernel/Selection/Selection.swift",
+    "Tests/mutations/SuiteKernel.AnchorIndex.json",
+    "Tests/mutations/SuiteKernel.Selection.json",
+    "Tests/mutations/SuiteKernel.PathCommands.json",
+    "Tests/SuiteUITests/PathEditOverlayLiveTests.swift",
+    "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+    "Tests/RealJobs/fake/pen-path/pen-path.jobs.json",
+    "Tests/RealJobs/fake/pen-path/input/blank.fake",
+    "docs/blueprints/suiteui/features/pen-paths.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "PN-a",
+      "behavior": "The kernel's Paths module declares every type, rule, intent and command spec as stubs, the gallery's pen-paths page is in the index, and the checks are written, disabled.",
+      "tasks": [
+        "PN-1",
+        "PN-2"
+      ],
+      "journeys": [
+        "SJ0"
+      ],
+      "waits": {
+        "export-pack:XP-a": [
+          "PN-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteKernel/Paths/Paths.swift",
+        "Sources/SuiteKernel/Paths/PenRules.swift",
+        "Sources/SuiteKernel/Paths/AnchorEdit.swift",
+        "Sources/SuiteKernel/Paths/AnchorIndex.swift",
+        "Sources/SuiteKernel/Paths/PathCommands.swift",
+        "Tests/SuiteKernelTests/PenRulesTests.swift",
+        "Tests/SuiteKernelTests/AnchorEditTests.swift",
+        "Tests/SuiteKernelTests/AnchorIndexTests.swift",
+        "Tests/SuiteKernelTests/PathCommandsTests.swift",
+        "Tests/SuiteKernelTests/AnchorStressFixture.swift",
+        "Tests/SuiteKernelTests/AnchorBudgetTests.swift",
+        "Tests/SuiteKernelTests/FakeCanvasPathTests.swift",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-paths.json",
+        "Sources/SuiteUI/PathEditOverlay.swift",
+        "Sources/SuiteUI/CanvasMarks+Path.swift",
+        "Sources/SuiteUI/Gallery/GalleryPenPaths.swift",
+        "Sources/SuiteUI/SuiteGallery.swift",
+        "Tests/canonical-concepts.txt",
+        "UITests/SuiteJourneyTests+PenPaths.swift"
+      ]
+    },
+    {
+      "id": "PN-u",
+      "behavior": "On the gallery page the Pen draws corners and smooth points with a rubber band and closes on the first anchor, and a selected path shows its anchors and handles with hover and selected states, every control identified, within the render budget.",
+      "tasks": [
+        "PN-3",
+        "PN-4"
+      ],
+      "journeys": [
+        "PJ1"
+      ],
+      "waits": {
+        "PN-a": [
+          "PN-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/PathEditOverlay.swift",
+        "Sources/SuiteUI/CanvasMarks+Path.swift",
+        "Tests/SuiteUITests/PathEditOverlayTests.swift",
+        "Tests/AppSnapshotTests/SuitePenPathsSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetPenPathsTests.swift",
+        "UITests/SuiteJourneyTests+PenPaths.swift"
+      ]
+    },
+    {
+      "id": "PN-m",
+      "behavior": "The pen rules match Flare's today, anchor edits keep handles with their points and smooth handles collinear, selecting and moving 5,000 anchors stays inside its budget, and every path command records exactly one undo step (a drag one).",
+      "tasks": [
+        "PN-5",
+        "PN-6",
+        "PN-7"
+      ],
+      "journeys": [
+        "KJ-paths"
+      ],
+      "waits": {
+        "PN-a": [
+          "PN-5",
+          "PN-6",
+          "PN-7"
+        ],
+        "command-catalog:CC-run": [
+          "PN-7"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteKernel/Paths/PenRules.swift",
+        "Sources/SuiteKernel/Paths/AnchorEdit.swift",
+        "Tests/SuiteKernelTests/PenRulesTests.swift",
+        "Tests/SuiteKernelTests/AnchorEditTests.swift",
+        "Tests/mutations/SuiteKernel.PenRules.json",
+        "Tests/mutations/SuiteKernel.AnchorEdit.json",
+        "Sources/SuiteKernel/Paths/AnchorIndex.swift",
+        "Sources/SuiteKernel/Selection/Selection.swift",
+        "Tests/SuiteKernelTests/AnchorIndexTests.swift",
+        "Tests/SuiteKernelTests/AnchorBudgetTests.swift",
+        "Tests/mutations/SuiteKernel.AnchorIndex.json",
+        "Tests/mutations/SuiteKernel.Selection.json",
+        "Sources/SuiteKernel/Paths/PathCommands.swift",
+        "Tests/SuiteKernelTests/PathCommandsTests.swift",
+        "Tests/mutations/SuiteKernel.PathCommands.json"
+      ]
+    },
+    {
+      "id": "PN-z",
+      "behavior": "The gallery runs its intents through PathCommands on a live target, the fake app takes paths so RJ-X37 runs on the CLI, and the feature is built.",
+      "tasks": [
+        "PN-8",
+        "PN-9",
+        "PN-10"
+      ],
+      "journeys": [
+        "PJ1",
+        "KJ-paths"
+      ],
+      "waits": {
+        "PN-u": [
+          "PN-8"
+        ],
+        "PN-m": [
+          "PN-8",
+          "PN-9"
+        ],
+        "export-pack:XP-z": [
+          "PN-9"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/Gallery/GalleryPenPaths.swift",
+        "Tests/SuiteUITests/PathEditOverlayLiveTests.swift",
+        "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+        "Tests/SuiteKernelTests/FakeCanvasPathTests.swift",
+        "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+        "Tests/RealJobs/fake/pen-path/pen-path.jobs.json",
+        "Tests/RealJobs/fake/pen-path/input/blank.fake",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-paths.json",
+        "docs/blueprints/suiteui/features/pen-paths.wave.json"
+      ]
+    }
+  ]
+}

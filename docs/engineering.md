@@ -33,7 +33,51 @@ Each app has three layers. Each depends only on the ones below it.
 3. **`<X>App`**: SwiftUI views and the `App` scene, built from **SuiteUI**.
    Views read the Model and call its methods. Nothing else.
 
-SuiteUI sits beside the apps: it knows nothing about any Model or engine.
+A canvas draws by `docs/render-contract.md`: one GPU route to the screen, no
+CPU pixel work or readback per step, no canvas-sized SwiftUI offscreen pass.
+
+Every Model also links the **kernel tier**, `SuiteKernel`
+(`Sources/SuiteKernel/`, packet
+`docs/blueprints/suiteui/features/editor-kernel.md`): one Linux-safe library
+with one module per editor concept the apps used to build on their own.
+It imports Foundation and FlareCore only, never an app Model, SuiteModel or
+SuiteUI, and `SuiteKernelTests` covers it on Linux.
+
+| Folder | What it holds |
+|---|---|
+| `History/` | `History<Payload>`: named undo steps, coalescing runs, a drag as one step, step ids that never repeat, dirty as saved-vs-current |
+| `Selection/` | `Selection<ID>` with a primary and an anchor, one `Pick`; the `Nudge` and `Marquee` rules |
+| `Layers/` | `LayerTree<Payload>`: nesting, order, hide and lock cascades, moves into a parent; `LayerFollow`'s follow link (parenting) |
+| `Keys/` | `KeyRules` on sorted key tracks of FlareCore's `Keyframe`; `EasePreset` and `EaseCurve` |
+| `Transform/` | `BoxMath` (resize by a handle, several boxes as one) and `HandleHit` |
+| `Snap/` | `Snapping`: the candidates and the order of offsets. The `SnapLines` and `SnapGaps` engines are stubs that the snapping feature fills |
+| `Export/` | `ExportRun<Options>`: idle, editing, running, finished or failed |
+| `Session/` | `DocumentSession` (dirty, save status, autosave, recovery) and `VersionedJSON` |
+| `Stroke/` | `StrokeSmoother`, `DabSpacer`, `BrushSettings`, `BrushPreset`, `LiveCopy` |
+| `Commands/` | `CommandSpec`, `CommandCatalog` (list, describe, run, batch), `ParamSchema`, `JSONValue` and `HeadlessDocument`: the command layer below |
+
+**The command layer.** Every action an app offers is a command in its
+catalog (packet `docs/blueprints/suiteui/features/command-catalog.md`). A
+`CommandSpec` has a stable id (`edit.copy`), typed params with a
+JSON schema, a kind (query, view, edit, file), a description written for
+people and for models, and an availability that says why not when it can't
+run. An `edit` run records exactly one undo step. Each Model's
+`<X>Headless.swift` conforms its document to `HeadlessDocument` and lists its
+catalog, so the `afterglow` CLI, the MCP server and the crews' tests open,
+edit, undo, save and export a document with no window. Menus and buttons run
+the same specs: SuiteUI's `MenuCommand(spec, on:)` takes its title from the
+spec, is enabled when the spec is available, and shows the spec's summary as
+help, or "Title: why" when disabled. Gate: `CommandPathTests` fails when an
+app builds a menu item or toolbar button without a spec and the site isn't in
+that app's baseline in `Tests/command-path-baseline/`, which only shrinks.
+
+SuiteUI sits beside the apps. It knows nothing about any app Model, and it
+links SuiteKernel only to draw the kernel's values: `LayerTreeList` (the one
+layers panel), `SelectionHandles`, `SnapGuideMarks`, `SuiteExportSheet`,
+`SuiteStrokePacer`, `SuitePointerPressure`, `BrushCursorMark` and `ToolKeys`,
+all shown on the gallery's `editor-kernel` page, and `MenuCommand(spec, on:)`,
+which builds a menu item from a command spec (the gallery's `command-catalog`
+page).
 
 - **State lives in the Model; views are dumb.** A view holds its Model in one
   `@State private var model` at the window root and passes values and closures
@@ -52,6 +96,18 @@ SuiteUI sits beside the apps: it knows nothing about any Model or engine.
   the merged core feature arrives with the next bump PR.
   Document edits go through the engine's commands (FlareCore's `Command` and
   `CommandEngine`), so undo works. Review-only.
+- **Models adapt onto the kernel; they don't copy it.** A Model that needs
+  undo, selection, a layer tree, keys and easing, box math, snapping, an
+  export run, a document session or a stroke uses SuiteKernel's module and
+  converts its own types in an adapter file named `<X>+Kernel.swift` (or
+  `<X>Adapter.swift`), such as `FlareLayers+Kernel.swift` or
+  `DesignSession+Kernel.swift`. It never keeps its own copy. A missing kernel
+  behaviour is a `gap` issue on `line:suiteui`. The `adopt-kernel-*` features
+  (undo, selection, layers, easing, transform, export, session, brush) move
+  the apps' remaining copies onto the kernel and delete them. Gate:
+  `scripts/check-dup-logic` in `scripts/ci` fails on a new app file whose
+  name or first type names a kernel concept, unless it is an adapter
+  (docs/factory/lead.md rule 20).
 - **Models are Linux-safe.** Foundation only, through the FoundationEssentials
   import pattern; value types, `Sendable`, Swift 6 mode. Gate: the Linux CI
   job builds every Model.
@@ -117,10 +173,16 @@ every step.
   `scripts/bundle-apps` writes to `.build/apps`.
 - **How they run.** `scripts/ui-test` builds the bundles, generates the
   project, runs the `Journeys` scheme and exports every screenshot to
-  `.build/ui-screens/<app>-<step>.png`. The `macOS` CI job runs it after the
-  bundles are built and uploads the folder as the `ui-screens` artifact
-  (`gh run download <id> -n ui-screens`). A failed step fails the job. Gate:
-  the `macOS` job.
+  `.build/ui-screens/<app>-<step>.png`. The `macOS journeys` job runs it
+  in its own workflow, `.github/workflows/journeys.yml`, which every full or
+  scoped CI run on `dev` dispatches from its last job (scoped to the CI run's
+  app, if any), and
+  uploads the folder as the `ui-screens` artifact of that journeys run
+  (`gh run list --workflow journeys.yml`, then `gh run download <id> -n
+  ui-screens`). Its own concurrency group means a journeys job waiting for a
+  macOS runner never holds CI's. A failed step fails that job and
+  files a `finding` issue on dev; the job is report-only, so it never holds
+  `main` or a PR. Gate: none (report-only).
 - **Quarantine is owned and expires.** The supervisor can skip a journey that
   keeps failing on `dev` by adding it to `UITests/quarantine.json` with an
   open owner issue, a reason and an expiry at most 7 days out. An entry with
@@ -146,7 +208,7 @@ every step.
   Step names are unique within an app, because they become the PNG names.
 - **Look at the shots.** Name the `<app>-*.png` files your change touches in
   the PR body. The reviewer opens them from the `ui-screens` artifact of the
-  next feature CI run on `dev`, the same way as snapshots. Review-only.
+  journeys.yml run that follows the next feature CI run on `dev`. Review-only.
 - **The app audit checks every shot.** Each window shot runs the audit's
   checks (disabled controls look dimmer, no overlapping controls, text
   contrast, identifiers, nothing off the window, every control named) and
@@ -154,9 +216,10 @@ every step.
   A count may only go down: a rise fails the journeys and raising the
   baseline needs the captain's review; a fall is written back by CI, which
   pushes the lower baseline to `dev`. New checks come from faults
-  (docs/blueprints/app-audit.md, Growing the audit). Gate: the `macOS` job.
-- **One page per run: the contact sheet.** After the journeys, the `macOS`
-  job runs `scripts/contact-sheet`, which writes `contact-sheet.html` into
+  (docs/blueprints/app-audit.md, Growing the audit). Gate: the `macOS
+  journeys` job (report-only).
+- **One page per run: the contact sheet.** After the journeys, the `macOS
+  journeys` job runs `scripts/contact-sheet`, which writes `contact-sheet.html` into
   `ui-screens`: the commit, each app's audit counts against the baseline,
   every journey's steps in order with each screen's violations, and the perf
   reports (`BRUSH-LATENCY` and the like) from `.build/snapshots`. Download
@@ -183,9 +246,15 @@ every step.
 - **Timing is reported, not gated.** A test that asserts a wall-clock or
   allocation budget can fail on a busy machine while the code is fine, so it
   goes in `Tests/perf-suites.txt` (the supervisor edits it). The gate and
-  scoped runs skip it; the `macOS` job's Perf step runs it alone, reports its
-  numbers in the job summary and warns when a bound is missed by more than
-  3x. Gate: none, by design; read the warnings on `dev` runs.
+  scoped runs skip it; it runs alone nightly on the captain's Mac (perf-nightly),
+  which reports its numbers and warns when a bound is missed by more than 3x.
+  `scripts/ci` fails when an enabled test asserts a wall-clock bound and isn't
+  listed (`scripts/test-scope timing` names it): land a new one `.disabled` and
+  ask for its line in the PR body. A `// not-timing: <why>` comment in the
+  test's body is only for a look-alike (an injected clock, a hang guard).
+  Gate: none, by design. A local gate on a different toolchain than CI can set
+  `CI_LOCAL_SKIP='<swift-testing --skip regex>'` to skip tests that only differ
+  there (rendering tint); CI never sets it and stays canonical.
 
 ## Reading cost
 

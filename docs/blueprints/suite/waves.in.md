@@ -12,6 +12,30 @@ acceptance tests.
 
 <!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
 
+**Wave BG1 (beta gaps, 2026-10-21).** The suite must-haves from
+`paw-workspace/docs/design/drafts/2026-10-21-beta-gaps-combined.md`:
+`command-state` (every action a command, toggles report state, the bare
+controls burned down under a ratchet), `report-problem` (Help > Report a
+Problem and Beta Notes, nothing sent by the app), `cli-bundle` (the `afterglow`
+CLI in the bundle, Help > Connect an AI Assistant), `editor-menus` (Switch To,
+AI Access, Help and the live channel in every editor, a window after the last
+one closes), `sample-files` (#836 to #839) and `no-placeholders` (Settings
+left for the captain). `report-problem`'s Help group comes first: the other
+Help items and the editors' menus build on it. The label sorts after the
+numbered waves and AI1, which every one of them depends on.
+
+**Wave AI1 (beta-80 W0, `p0`, 2026-10-19): AI-accessible first.** Every
+action is a command; the UI, the `afterglow` CLI and MCP drive one command
+catalog, and crews and CI test through it (suite.md 1.5). The catalog
+itself is SuiteKernel work on the SuiteUI line (`suiteui/command-catalog`,
+XK1) and each app adopts it there (`suiteui/adopt-command-catalog`, XK2).
+This line builds the two drivers: `afterglow-cli`, whose CL-a waits on the
+catalog's contract slice CC-a (cross-line, so in prose) and whose CL-1 is a
+supervisor merge (`Package.swift`, `scripts/test-scope`); and
+`afterglow-mcp`, whose slices wait on CL-a. The `AI` prefix is the track's
+own numbering; it sorts after the numbered waves but runs first, beside
+wave 5, because the real-jobs acceptance suites run through the CLI.
+
 **Wave 5 (beta-80 W1, 2026-10-18).** `shell-media` and `shell-text` are the
 suite's half of the captain-approved beta-80 plan's W1 engines (rows E9 and
 E8): macOS-only media and text services in SuiteShell with Linux-safe

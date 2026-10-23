@@ -1,11 +1,13 @@
-// PreferencesSlot.swift: the `preferences` member of SuiteServices.live. Not
-// live until the settings feature swaps in its store; until then every call
-// throws "Not connected yet (settings).".
+// PreferencesSlot.swift: the `preferences` member of SuiteServices.live. Live:
+// the suite preferences in the support folder's preferences.json
+// (StorePreferences). The launcher is the only writer in the beta, so no
+// StoreWatcher is attached yet; switching attaches `externalChange()` when
+// a second process writes.
 import SuiteModel
 
 /// Whether this slot holds the live conformance; `live` builds `pending` from it.
-let preferencesIsLive = false
+let preferencesIsLive = true
 
 func preferencesSlot(_ c: SlotContext) -> any PreferencesStoring {
-    FakePreferences(unavailable: SuiteServices.notConnected("preferences"))
+    StorePreferences(store: c.store)
 }

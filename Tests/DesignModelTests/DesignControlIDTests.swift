@@ -3,7 +3,8 @@
 // dot-separated, three parts or more), and the list holds the ids the window
 // and its views register: the canvas, its selection, every toolbar item (Undo
 // is `design.bar.undo`), every palette tool, the status line, and each Align
-// and Distribute button. Linux.
+// and Distribute button, and the Style section's Add and Remove Stroke
+// buttons. Linux.
 import DesignModel
 import Testing
 
@@ -46,12 +47,21 @@ import Testing
         #expect(all.contains(DesignControlID.statusTool))
         #expect(all.contains(DesignControlID.statusSelection))
         #expect(all.contains(DesignControlID.statusNote))
+        #expect(all.contains("design.inspector.stroke-add"), "Add Stroke is unlisted")
+        #expect(all.contains("design.inspector.stroke-remove"), "Remove Stroke is unlisted")
         for item in DesignToolbarItem.allCases {
             #expect(all.contains(item.identifier), "toolbar \(item) is unlisted")
         }
         for tool in DesignTool.allCases {
             #expect(all.contains(DesignControlID.tool(tool)), "tool \(tool) is unlisted")
         }
+    }
+
+    /// File > Export…'s sheet (design-export DE-6), its buttons under SuiteExportSheet's prefix.
+    @Test func theListHoldsTheExportSheet() {
+        let ids = ["sheet", "format", "scale", "scope", "items", "start", "cancel", "dismiss", "result"]
+        #expect(Set(ids.map { "design.export.\($0)" }).isSubset(of: Set(DesignControlID.all)))
+        #expect(DesignControlID.exportRun == "design.export.start" && DesignControlID.exportDone == "design.export.dismiss")
     }
 
     @Test func theListHoldsEachAlignAndDistributeButton() {

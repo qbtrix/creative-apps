@@ -1,52 +1,129 @@
-// TileCanvas.swift: the canvas picture as one Core Animation layer per
-// 256 px tile, so a brush event replaces only the tiles it dirtied.
-// CanvasTiles keeps each tile's image (premultiplied sRGB, what Core Animation
-// draws without converting) and hands a PhotoTileUpdate's tiles to the view
-// showing them, without going through SwiftUI. TileCanvasView lays the tile
-// layers in a container scaled by the zoom and turned by the Straighten
-// preview's angle; tile edges have no antialiasing, so abutting tiles leave no
-// seam. AppKit's `cacheDisplay` (the snapshots) draws through `draw(_:)`,
-// not the layers, so that draws the same tiles the same way. Mouse input stays
-// with CanvasViewport, which owns focus and Space-pan: the view never takes a
-// click (`hitTest` is nil). Presentation state only.
+// TileCanvas.swift: the canvas picture, one 256 px tile at a time, so a brush
+// event replaces only the tiles it dirtied. CanvasTiles keeps each tile's
+// image (premultiplied sRGB) and the same pixels as an IOSurface, both made
+// off the main thread (`prepare`): a tile layer shows the surface, which Core
+// Animation draws as it is, where an sRGB image is colour-converted on the
+// main thread at every commit. It
+// hands a PhotoTileUpdate's tiles straight to the SuiteUI CanvasHostView
+// showing them, without going through SwiftUI. That view (EmbeddedCanvasHost,
+// inside the CanvasViewport) draws them as tile layers on the CPU path or
+// through its CAMetalLayer on the GPU path, as View > Rendering says, turned
+// by the Straighten preview's angle. On the resident GPU path
+// (`residentTarget`) the renderer writes the picture into the view's Metal
+// presenter's texture instead, and an update brings no tiles, only the
+// present; its target also runs a tone program in that write (Metal's
+// `display_tone`), the live route's one pass per slider step. Mouse input stays with CanvasViewport,
+// which owns focus and Space-pan: the embedded view never takes a click.
+// Presentation state only.
 import AppKit
+import CoreRenderMetal
+import IOSurface
+import Metal
 import PhotoModel
+import SuiteUI
 import SwiftUI
 
 @MainActor final class CanvasTiles {
     private(set) var width = 0, height = 0
+    /// The presenter texture the last resident target wrote into; a different one starts empty.
+    private var targetTexture: ObjectIdentifier?
     private(set) var images: [PixelRect: CGImage] = [:]
+    /// The tiles' IOSurfaces, which the view's tile layers show.
+    private var surfaces: [PixelRect: IOSurface] = [:]
     /// Bytes of the images the last update handed to the view.
     private(set) var handedBytes = 0
-    private weak var view: TileCanvasView?
+    private weak var view: CanvasHostView?
 
     /// Keeps `update`'s tiles, dropping every older one when it is complete
     /// or the canvas changed size, and shows them in the attached view.
-    func apply(_ update: PhotoTileUpdate) {
+    /// `prepared` holds the tiles' images and surfaces made off the main
+    /// thread (`prepare`); without it they are made here.
+    func apply(_ update: PhotoTileUpdate, prepared: [PixelRect: Prepared]? = nil) {
         let restart = update.isComplete || update.width != width || update.height != height
-        if restart { (width, height, images) = (update.width, update.height, [:]) }
+        if restart { (width, height, images, surfaces) = (update.width, update.height, [:], [:]) }
+        let made = prepared ?? Self.prepare(update)
         handedBytes = 0
         var changed: [PixelRect: CGImage] = [:]
-        for tile in update.tiles {
-            guard let image = Self.image(tile) else { continue }
-            changed[tile.rect] = image
-            handedBytes += image.bytesPerRow * image.height
+        for (rect, tile) in made {
+            changed[rect] = tile.image
+            surfaces[rect] = tile.surface
+            handedBytes += tile.image.bytesPerRow * tile.image.height
         }
         images.merge(changed) { $1 }
-        view?.show(changed, restart: restart, width: width, height: height)
+        view?.show(Shown(width: width, height: height, images: changed, surfaces: surfaces))
+    }
+
+    /// A tile ready for the view: its image, and the same pixels as an IOSurface for its layer.
+    struct Prepared: @unchecked Sendable {
+        let image: CGImage
+        let surface: IOSurface?
+    }
+
+    /// `update`'s tiles as images and IOSurfaces, made in parallel on the calling thread. The renderer calls
+    /// it off the main thread: a surface is what keeps a commit from colour-converting every tile there.
+    nonisolated static func prepare(_ update: PhotoTileUpdate) -> [PixelRect: Prepared] {
+        let tiles = update.tiles
+        let made = UnsafeMutableBufferPointer<Prepared?>.allocate(capacity: tiles.count)
+        made.initialize(repeating: nil)
+        defer { made.deallocate() }
+        DispatchQueue.concurrentPerform(iterations: tiles.count) { i in
+            let tile = tiles[i]
+            guard let image = image(tile) else { return }
+            made[i] = Prepared(image: image, surface: CanvasTile.surface(
+                premultipliedRGBA: tile.rgba8, width: tile.rect.width, height: tile.rect.height))
+        }
+        var out: [PixelRect: Prepared] = [:]
+        for (tile, prepared) in zip(tiles, made) { out[tile.rect] = prepared }
+        return out
+    }
+
+    /// Where a resident GPU render writes a `width` x `height` picture: the attached view's Metal presenter's
+    /// document texture, through `metal`'s display encode (premultiplied sRGB, no readback). `isNew` when the
+    /// texture holds none of the picture yet, so the render must draw every tile. Nil off the Metal path.
+    func residentTarget(width: Int, height: Int, on metal: MetalBackend) -> (target: PhotoDisplayTarget, isNew: Bool)? {
+        guard let presenter = view?.metalPresenter as? CanvasTilePresenter,
+            let texture = presenter.residentTexture(on: metal.device, width: width, height: height)
+        else { return nil }
+        let id = ObjectIdentifier(texture)
+        defer { targetTexture = id }
+        let held = TextureBox(texture: texture)
+        let target = PhotoDisplayTarget(
+            write: { surface, rect in
+                try metal.display(surface, into: held.texture, x: rect.x, y: rect.y, colorSpace: .sRGB, premultiplied: true)
+            },
+            writeToned: { surface, rect, tone in
+                try metal.display(
+                    surface, into: held.texture, x: rect.x, y: rect.y, colorSpace: .sRGB, premultiplied: true, tone: tone)
+            })
+        return (target, targetTexture != id)
     }
 
     /// Clears the picture (no image open).
     func clear() {
-        (width, height, images, handedBytes) = (0, 0, [:], 0)
-        view?.show([:], restart: true, width: 0, height: 0)
+        (width, height, images, surfaces, handedBytes) = (0, 0, [:], [:], 0)
+        view?.show(Shown(width: 0, height: 0, images: [:], surfaces: [:]))
     }
 
     /// Shows the picture in `view` from now on; a view already attached keeps its layers.
-    func attach(_ view: TileCanvasView) {
+    func attach(_ view: CanvasHostView) {
         guard self.view !== view else { return }
         self.view = view
-        view.show(images, restart: true, width: width, height: height)
+        view.show(Shown(width: width, height: height, images: images, surfaces: surfaces))
+    }
+
+    /// Tiles for the host: on a new size it shows them as the whole picture, else replaces just them.
+    struct Shown: CanvasContentProviding, @unchecked Sendable {
+        let width: Int, height: Int
+        let images: [PixelRect: CGImage]
+        let surfaces: [PixelRect: IOSurface]
+        var documentSize: CGSize { CGSize(width: width, height: height) }
+        func tiles(dirtyOnly: Bool) -> [CanvasTile] {
+            images.map {
+                CanvasTile(
+                    rect: CanvasTileRect(x: $0.x, y: $0.y, width: $0.width, height: $0.height), image: $1,
+                    surface: surfaces[$0])
+            }
+        }
     }
 
     /// A tile's bytes as an image; nil only if CoreGraphics refuses them.
@@ -63,123 +140,7 @@ import SwiftUI
     }
 }
 
-/// The tile layers in a container that the zoom scales and the Straighten
-/// preview turns about the picture's centre. Unflipped, like its layers, so a
-/// tile at canvas row y sits at height - maxY.
-final class TileCanvasView: NSView {
-    private let container = CALayer()
-    private var layers: [PixelRect: CALayer] = [:]
-    private var images: [PixelRect: CGImage] = [:]
-    private var size = CGSize.zero
-    private var degrees = 0.0
-    private var zoom = 1.0
-
-    override init(frame: NSRect) {
-        super.init(frame: frame)
-        wantsLayer = true
-        layerContentsRedrawPolicy = .never
-        container.anchorPoint = .zero
-        container.actions = ["sublayers": NSNull(), "transform": NSNull(), "bounds": NSNull(), "position": NSNull()]
-        layer?.addSublayer(container)
-    }
-
-    required init?(coder: NSCoder) { nil }
-
-    override var wantsUpdateLayer: Bool { true }
-    override func updateLayer() {}
-    override func hitTest(_ point: NSPoint) -> NSView? { nil }
-
-    func configure(zoom: Double, degrees: Double) {
-        guard zoom != self.zoom || degrees != self.degrees else { return }
-        (self.zoom, self.degrees) = (zoom, degrees)
-        let filter: CALayerContentsFilter = zoom >= 2 ? .nearest : .linear
-        for layer in layers.values { layer.magnificationFilter = filter }
-        needsLayout = true
-    }
-
-    /// Replaces the contents of the `changed` tiles' layers, or every layer
-    /// with `restart`, in one transaction with no animation.
-    func show(_ changed: [PixelRect: CGImage], restart: Bool, width: Int, height: Int) {
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        if restart {
-            for layer in layers.values { layer.removeFromSuperlayer() }
-            (layers, images) = ([:], [:])
-            size = CGSize(width: width, height: height)
-            container.bounds = CGRect(origin: .zero, size: size)
-        }
-        for (rect, image) in changed {
-            let layer = layers[rect] ?? newLayer(rect)
-            layer.contents = image
-            images[rect] = image
-        }
-        CATransaction.commit()
-        if restart { needsLayout = true }
-    }
-
-    private func newLayer(_ rect: PixelRect) -> CALayer {
-        let layer = CALayer()
-        layer.frame = CGRect(x: rect.x, y: Int(size.height) - rect.maxY, width: rect.width, height: rect.height)
-        layer.edgeAntialiasingMask = []
-        layer.magnificationFilter = zoom >= 2 ? .nearest : .linear
-        layer.minificationFilter = .trilinear
-        container.addSublayer(layer)
-        layers[rect] = layer
-        return layer
-    }
-
-    override func setFrameSize(_ newSize: NSSize) {
-        super.setFrameSize(newSize)
-        needsLayout = true
-    }
-
-    override func layout() {
-        super.layout()
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        container.position = .zero
-        container.setAffineTransform(placement)
-        CATransaction.commit()
-    }
-
-    /// Canvas pixels to view points: scaled to the bounds, turned about the centre.
-    private var placement: CGAffineTransform {
-        guard size.width > 0, size.height > 0 else { return .identity }
-        let (w, h) = (bounds.width, bounds.height)
-        // Clockwise on screen, as SwiftUI's rotationEffect; unflipped y goes up.
-        return CGAffineTransform(scaleX: w / size.width, y: h / size.height)
-            .concatenating(CGAffineTransform(translationX: -w / 2, y: -h / 2))
-            .concatenating(CGAffineTransform(rotationAngle: -degrees * .pi / 180))
-            .concatenating(CGAffineTransform(translationX: w / 2, y: h / 2))
-    }
-
-    /// The same tiles through Core Graphics, for `cacheDisplay`.
-    override func draw(_ dirtyRect: NSRect) {
-        guard let context = NSGraphicsContext.current?.cgContext else { return }
-        context.concatenate(placement)
-        context.interpolationQuality = zoom >= 2 ? .none : .high
-        for (rect, image) in images {
-            context.draw(
-                image, in: CGRect(x: rect.x, y: Int(size.height) - rect.maxY, width: rect.width, height: rect.height))
-        }
-    }
-}
-
-/// The tile canvas in SwiftUI: CanvasTiles' picture at the size SwiftUI gives it.
-struct TileCanvas: NSViewRepresentable {
-    let tiles: CanvasTiles
-    var zoom: Double
-    var degrees: Double
-
-    func makeNSView(context: Context) -> TileCanvasView {
-        let view = TileCanvasView()
-        view.configure(zoom: zoom, degrees: degrees)
-        tiles.attach(view)
-        return view
-    }
-
-    func updateNSView(_ view: TileCanvasView, context: Context) {
-        view.configure(zoom: zoom, degrees: degrees)
-        tiles.attach(view)
-    }
+/// A texture handed to the render task: Metal textures are safe to use from any thread, the type just isn't Sendable.
+private struct TextureBox: @unchecked Sendable {
+    let texture: any MTLTexture
 }

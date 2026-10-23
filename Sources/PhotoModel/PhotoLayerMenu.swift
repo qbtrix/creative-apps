@@ -11,8 +11,9 @@ extension PhotoWorkspace {
     /// Whether New Layer can run: it needs an open image.
     public var canAddLayer: Bool { canvas != nil }
 
-    /// Whether Delete Layer can run: a layer is selected and it isn't the last.
-    public var canDeleteSelectedLayer: Bool { canRemoveLayer && selectedLayer != nil }
+    /// Whether Delete Layer can run: a layer is selected, it isn't the last,
+    /// and the picked layers aren't every layer (`deleteLayersHelp`).
+    public var canDeleteSelectedLayer: Bool { deleteLayersHelp == nil }
 
     /// Whether Rename Layer… and Show/Hide Layer can run: a layer is selected.
     public var canEditSelectedLayer: Bool { selectedLayer != nil }
@@ -28,17 +29,18 @@ extension PhotoWorkspace {
     /// Whether Send Backward can run: the selected layer isn't the bottom one.
     public var canSendSelectedLayerBackward: Bool { selectedIndex.map { $0 < layers.count - 1 } ?? false }
 
-    /// Moves the selected layer one place toward the top. Ignored at the top.
+    /// Moves the selected layer one place toward the top. Ignored at the top,
+    /// where LayerTree.arrange leaves it and no step is recorded.
     public mutating func bringSelectedLayerForward() {
-        guard canBringSelectedLayerForward, let at = selectedIndex else { return }
-        moveLayers(fromOffsets: [at], toOffset: at - 1)
+        guard let id = selectedLayerID else { return }
+        arrangeLayer(id, .bringForward)
     }
 
-    /// Moves the selected layer one place toward the bottom. Ignored at the bottom.
+    /// Moves the selected layer one place toward the bottom. Ignored at the
+    /// bottom, where LayerTree.arrange leaves it and no step is recorded.
     public mutating func sendSelectedLayerBackward() {
-        guard canSendSelectedLayerBackward, let at = selectedIndex else { return }
-        // A list drag's destination: before the layer two below, once this one is out.
-        moveLayers(fromOffsets: [at], toOffset: at + 2)
+        guard let id = selectedLayerID else { return }
+        arrangeLayer(id, .sendBackward)
     }
 
     /// Selects the layer above the selected one. Ignored at the top.

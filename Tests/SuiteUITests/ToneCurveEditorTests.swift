@@ -117,6 +117,26 @@ private func view(_ p: CGPoint) -> CGPoint { CurveEditor.viewPoint(p, in: plot, 
     #expect(ended && gesture.run.ends == 1)
 }
 
+/// A drag cancelled outside the window has no `onEnded`; the view's reset releases it, and that
+/// release and the late `onEnded` together end the run once, so the next click picks afresh (#2930).
+@Test func aCancelledDragEndsOnceAndTheNextPressPicksAgain() throws {
+    var gesture = ToneCurveGesture()
+    _ = gesture.pressed(at: view(s[2]), points: s, in: plot)
+    let outStep = gesture.dragged(
+        to: CGPoint(x: view(s[2]).x, y: well.height + 200), by: CGSize(width: 0, height: 200), in: plot, well: well)
+    let out = try #require(outStep)
+    #expect(out.count == 3)
+    let reset = gesture.released()
+    let late = gesture.released()
+    #expect(reset && !late && gesture.run.ends == 1)
+    let picked = gesture.pressed(at: view(out[1]), points: out, in: plot)
+    #expect(picked == nil && gesture.drag?.index == 1)
+    let clickReleased = gesture.released()
+    #expect(!clickReleased)
+    let keyed = gesture.keyed()
+    #expect(keyed && ToneCurveEditor.removed(1, from: out)?.count == 2)
+}
+
 @Test func aDragPastTheMarginRemovesAMiddlePointButNeverAnEnd() throws {
     var gesture = ToneCurveGesture()
     _ = gesture.pressed(at: view(s[2]), points: s, in: plot)
@@ -191,4 +211,26 @@ private func view(_ p: CGPoint) -> CGPoint { CurveEditor.viewPoint(p, in: plot, 
     #expect(bins == [CGPoint(x: 0.125, y: 0.25), CGPoint(x: 0.375, y: 1), CGPoint(x: 0.625, y: 0), CGPoint(x: 0.875, y: 0)])
     #expect(ToneCurveEditor.histogramPoints([]).isEmpty)
     #expect(ToneCurveEditor.histogramPoints([0, 0, .infinity]).isEmpty)
+}
+
+/// The numbers after the reading's last colon, as the journeys parse a point's label (#262: XCUITest
+/// reads SwiftUI values as "", so the label carries them).
+private func readBack(_ reading: String) -> [Double] {
+    let tail = reading.split(separator: ":").last.map(String.init) ?? reading
+    return tail.split { $0 == "," || $0 == " " }.compactMap { Double($0) }
+}
+
+@Test func aPointReadsItsValueInItsTooltipAndLabel() {
+    // #2953, #2959: point 2's tooltip and label carry describe's value, not only "Point 2".
+    let point = CGPoint(x: 0.25, y: 0.75)
+    let reading = ToneCurveEditor.pointReading(1, point)
+    #expect(reading == "Point 2: \(CurveEditor.describe(point))")
+    #expect(reading == "Point 2: x 0.25, y 0.75")
+    #expect(readBack(reading) == [0.25, 0.75])
+    #expect(ToneCurveEditor.pointReading(0, .zero) == "Point 1: x 0.00, y 0.00")
+}
+
+@Test func theToneAxesAreCaptionedInputAndOutput() {
+    // #2953: the well says which axis is which.
+    #expect(ToneCurveEditor.axisCaptions == CurveAxisCaptions(x: "Input", y: "Output"))
 }

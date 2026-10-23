@@ -2,7 +2,7 @@
   "title": "Real grid thumbnails",
   "wave": 2,
   "order": 20,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "covers": "#33",
   "waits_on": "spine, #779 (S-L2), #333",

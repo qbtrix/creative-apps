@@ -122,13 +122,76 @@ private struct ThrowingKeying: PropertyKeying {
     #expect(names(project) == ["Badge", "Title", "Background", "Rig"])
 }
 
-@Test func moveTargetTurnsADropOffsetIntoTheFinalIndex() {
-    #expect(HaloProject.moveTarget(from: 1, toOffset: 4, count: 4) == 3)
-    #expect(HaloProject.moveTarget(from: 2, toOffset: 0, count: 4) == 0)
-    #expect(HaloProject.moveTarget(from: 0, toOffset: 2, count: 4) == 1)
-    #expect(HaloProject.moveTarget(from: 7, toOffset: 0, count: 4) == nil)
-    #expect(HaloProject.moveTarget(from: -1, toOffset: 0, count: 4) == nil)
-    #expect(HaloProject.moveTarget(from: 0, toOffset: 0, count: 0) == nil)
+/// The layer list's drops (HaloLayerList draws SuiteUI's LayerTreeList). Each
+/// drop is the LayerDrop `LayerTreeList.reorder` makes on three-layers' rows,
+/// top first Title, Badge, Background, Rig: its index counts from the back
+/// among the other layers, its parent is nil among the roots.
+@Suite struct HaloLayerDropTests {
+    /// The names and undo names after `id`'s drop runs, or nil when it makes no move.
+    private func dropped(_ id: String, into parent: String?, at index: Int) throws -> (names: [String], undo: [String])? {
+        var project = try layerProject()
+        guard case .moveLayer(let layer, let to)? = project.layerDropCommand(id, into: parent, at: index) else {
+            return nil
+        }
+        project.moveLayer(layer, to: to)
+        return (names(project), project.history.undo.map(\.name))
+    }
+
+    @Test func theListRowsAreTheLayersTopFirstOnOneLevel() throws {
+        let project = try layerProject()
+        #expect(project.layerRows.map(\.name) == ["Title", "Badge", "Background", "Rig"])
+        #expect(project.layerRows.map(\.id) == project.selectedComposition?.layers.map(\.id))
+        #expect(project.layerRows.allSatisfy { $0.depth == 0 && !$0.holdsChildren })
+        #expect(HaloProject().layerRows.isEmpty)
+    }
+
+    @Test func aDropBelowTheBottomRowMovesTheLayerToTheBottom() throws {
+        let project = try layerProject()
+        let badge = try layerID("Badge", in: project)
+        // reorder(Badge, beside: Rig, below: true): siblings Title, Background, Rig; index 3 - 3 = 0.
+        #expect(project.layerDropCommand(badge, into: nil, at: 0) == .moveLayer(badge, to: 3))
+        let after = try #require(try dropped(badge, into: nil, at: 0))
+        #expect(after.names == ["Title", "Background", "Rig", "Badge"])
+        #expect(after.undo == ["Move Layer"])
+    }
+
+    @Test func aDropAboveTheTopRowMovesTheLayerToTheTop() throws {
+        let project = try layerProject()
+        let rig = try layerID("Rig", in: project)
+        // reorder(Rig, beside: Title, below: false): siblings Title, Badge, Background; index 3 - 0 = 3.
+        #expect(project.layerDropCommand(rig, into: nil, at: 3) == .moveLayer(rig, to: 0))
+        let after = try #require(try dropped(rig, into: nil, at: 3))
+        #expect(after.names == ["Rig", "Title", "Badge", "Background"])
+    }
+
+    @Test func aDropBetweenRowsLandsBesideTheTarget() throws {
+        let project = try layerProject()
+        // reorder(Title, beside: Background, below: true): siblings Badge, Background, Rig; index 3 - 2 = 1.
+        let title = try layerID("Title", in: project)
+        #expect(project.layerDropCommand(title, into: nil, at: 1) == .moveLayer(title, to: 2))
+        let down = try #require(try dropped(title, into: nil, at: 1))
+        #expect(down.names == ["Badge", "Background", "Title", "Rig"])
+        // reorder(Rig, beside: Badge, below: false): siblings Title, Badge, Background; index 3 - 1 = 2.
+        let up = try #require(try dropped(try layerID("Rig", in: project), into: nil, at: 2))
+        #expect(up.names == ["Title", "Rig", "Badge", "Background"])
+    }
+
+    @Test func aNestedDropOrAnUnknownLayerMakesNoMove() throws {
+        let project = try layerProject()
+        let badge = try layerID("Badge", in: project)
+        // Halo's layers hold no children, so a drop into one (a nested LayerDrop) moves nothing.
+        #expect(project.layerDropCommand(badge, into: try layerID("Rig", in: project), at: 0) == nil)
+        #expect(try dropped(badge, into: try layerID("Title", in: project), at: 0) == nil)
+        #expect(project.layerDropCommand("comp-1-layer-99", into: nil, at: 0) == nil)
+        #expect(HaloProject().layerDropCommand(badge, into: nil, at: 0) == nil)
+    }
+
+    @Test func anIndexOutsideTheListIsClamped() throws {
+        let project = try layerProject()
+        let badge = try layerID("Badge", in: project)
+        #expect(project.layerDropCommand(badge, into: nil, at: 99) == .moveLayer(badge, to: 0))
+        #expect(project.layerDropCommand(badge, into: nil, at: -4) == .moveLayer(badge, to: 3))
+    }
 }
 
 @Test func forwardAndBackwardMoveOnePlaceAndDoNothingAtTheEnds() throws {

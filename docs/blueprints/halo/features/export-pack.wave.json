@@ -1,0 +1,150 @@
+{
+  "title": "Render ProRes 4444 with a transparent background",
+  "wave": "W4",
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "halo/export-pack (adopter of S11 and E9); RJ-H41 (new)",
+  "waits_on": "suiteui export-pack's XP-a (cross-line; HX-3 needs XP-6); suite shell-media's SM-a and SM-w (cross-line: MovieCodec.prores4444 and the writer HaloMovieWriter moves into); gradient-fill's HG-a (HaloDocumentValues.swift) and HG-z (halo.md), slice waits",
+  "depends": [
+    "foundation",
+    "render-out",
+    "core-loop"
+  ],
+  "longest_chain": "5 (HX-1 → HX-2 → HX-6 → HX-7 → HX-8)",
+  "journeys": [
+    "HaloExportPackJourneyTests.testRenderLowerThirdWithAlpha"
+  ],
+  "owned": [
+    "Sources/HaloModel/Contracts/HaloDocumentValues.swift",
+    "Tests/HaloModelTests/HaloProResTests.swift",
+    "Sources/HaloApp/HaloRenderSheet.swift",
+    "Sources/HaloModel/HaloRenderJob.swift",
+    "Sources/HaloModel/HaloRenderFrame.swift",
+    "Tests/mutations/HaloModel.HaloRenderJob.json",
+    "Tests/RealJobs/halo/prores-alpha/",
+    "Tests/mutations/HaloModel.HaloRenderFrame.json",
+    "Sources/HaloModel/Live/LiveCompositionRendering.swift",
+    "Sources/HaloApp/HaloMovieWriter.swift",
+    "Tests/HaloModelTests/HaloMovieSinkTests.swift",
+    "Tests/mutations/HaloModel.LiveCompositionRendering.json",
+    "Tests/AppSnapshotTests/HaloRenderProResSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetHaloRenderSheetTests.swift",
+    "UITests/HaloJourneyTests+ExportPack.swift",
+    "docs/blueprints/halo.md",
+    "docs/blueprints/halo/features/export-pack.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "HX-a",
+      "behavior": "The render settings hold a codec and an alpha flag on stubs, and the Render sheet shows the Codec row and the checkbox.",
+      "tasks": [
+        "HX-1",
+        "HX-2"
+      ],
+      "journeys": [
+        "MJ-HX"
+      ],
+      "waits": {
+        "gradient-fill:HG-a": [
+          "HX-1"
+        ],
+        "placed-images:PH-a": [
+          "HX-1"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/HaloModel/Contracts/HaloDocumentValues.swift",
+        "Tests/HaloModelTests/HaloProResTests.swift",
+        "Sources/HaloApp/HaloRenderSheet.swift"
+      ]
+    },
+    {
+      "id": "HX-u",
+      "behavior": "The sheet has snapshots and a render budget, and the journey is written.",
+      "tasks": [
+        "HX-5",
+        "HX-6"
+      ],
+      "journeys": [
+        "HJ-X1"
+      ],
+      "waits": {
+        "HX-a": [
+          "HX-5",
+          "HX-6"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/HaloRenderProResSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetHaloRenderSheetTests.swift",
+        "UITests/HaloJourneyTests+ExportPack.swift"
+      ]
+    },
+    {
+      "id": "HX-m",
+      "behavior": "The plan refuses alpha where the codec can't keep it, frames render without the background when asked, and the live renderer writes through the shared movie writer.",
+      "tasks": [
+        "HX-3",
+        "HX-4"
+      ],
+      "journeys": [
+        "MJ-HX"
+      ],
+      "waits": {
+        "HX-a": [
+          "HX-3",
+          "HX-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/HaloModel/HaloRenderJob.swift",
+        "Sources/HaloModel/HaloRenderFrame.swift",
+        "Tests/HaloModelTests/HaloProResTests.swift",
+        "Tests/mutations/HaloModel.HaloRenderJob.json",
+        "Tests/RealJobs/halo/prores-alpha/",
+        "Tests/mutations/HaloModel.HaloRenderFrame.json",
+        "Sources/HaloModel/Live/LiveCompositionRendering.swift",
+        "Sources/HaloApp/HaloMovieWriter.swift",
+        "Tests/HaloModelTests/HaloMovieSinkTests.swift",
+        "Tests/mutations/HaloModel.LiveCompositionRendering.json"
+      ]
+    },
+    {
+      "id": "HX-z",
+      "behavior": "ProRes 4444 with alpha writes a real file on live services, the journey passes, and the blueprint has it in.",
+      "tasks": [
+        "HX-7",
+        "HX-8"
+      ],
+      "journeys": [
+        "HJ-X1"
+      ],
+      "waits": {
+        "HX-u": [
+          "HX-7",
+          "HX-8"
+        ],
+        "HX-m": [
+          "HX-7"
+        ],
+        "gradient-fill:HG-z": [
+          "HX-8"
+        ],
+        "placed-images:PH-z": [
+          "HX-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/HaloJourneyTests+ExportPack.swift",
+        "docs/blueprints/halo.md",
+        "docs/blueprints/halo/features/export-pack.wave.json"
+      ]
+    }
+  ]
+}

@@ -39,7 +39,7 @@ end and a journey proves it.
 | Tools | Move (V), Frame (F), Rectangle (R), Ellipse (O), Text (T) work; Pen (P) is disabled with "Drawing paths isn't built yet."; a drawing tool returns to Move after one shape | `DesignWorkspace.swift` (`DesignTool`), `DesignDrawing.swift`, `DesignCanvasEditing.swift` |
 | Canvas | Click select, Shift-click add or remove (#725), move with subtree, 8 resize handles (Shift keeps aspect, Option from center; corners only, outside, on a small box), arrow nudge (Shift 10), Delete; locked and hidden subtrees never hit; zoom in, zoom out, fit page (window state), Space-drag pan (CanvasViewport) | `DesignCanvasEditing.swift`, `DesignCanvas.swift`, `DesignCanvasMarks.swift` |
 | Text | Text click places "Text" and opens an inline editor; commit is one step; empty or cancelled placement leaves nothing | `DesignText.swift`, `DesignTextEditor.swift` |
-| Inspector | Header (name, kind, size), Align row (one layer to its frame or page, #716), Layer (Hidden, Locked), Frame (X, Y, W, H scrub fields, one step per run), Fill (color well and hex; text color for text); "Multiple layers selected" with several; locked layers disabled with a reason | `DesignInspector.swift`, `DesignAlignBar.swift`, `DesignInspectorContent.swift`, `DesignLocking.swift` |
+| Inspector | Header (name, kind, size), Align row (one layer to its frame or page, #716), Layer (Hidden, Locked), Frame (X, Y, W, H scrub fields, one step per run), Fill (color well and hex; text color for text; Solid, Linear or Radial with the stop bar and the angle row, `DesignInspectorFill.swift`); "Multiple layers selected" with several; locked layers disabled with a reason | `DesignInspector.swift`, `DesignAlignBar.swift`, `DesignInspectorContent.swift`, `DesignLocking.swift` |
 | Layers | Pages list with Add Page and Delete Page, then the tree front to back, disclosure follows the Model's expanded set, eye and lock toggles (one step each), current page checkmark | `DesignLayersPanel.swift`, `DesignLayerToggles.swift` |
 | Undo | Model-owned history, 100 steps, one named step per edit, coalescing runs (frame edits, nudges), New File undoable with its file URL (#436), refused or no-op edits record nothing | `DesignHistory.swift` |
 | Menus | File (New File, Open…, Save, Save As…), Edit (Undo/Redo named, Delete Layer), Page (Add, Delete), Object (Align submenu), View (Zoom In, Zoom Out, Fit Page) | `DesignCommands.swift`, `DesignObjectMenu.swift` |
@@ -111,7 +111,7 @@ code generation, and reading or writing any closed file format.
 | Zoom, pan, fit page, zoom to selection | Rulers in other units (#264 is SuiteUI's) |
 | Click, Shift-click and marquee select; move, resize, nudge and delete one or several layers | Rotation, skew, flip |
 | Draw frames, rectangles, ellipses; place and edit text | Polygon, star, line and arrow tools |
-| Inspector: X, Y, W, H, corner radius, fill, layer opacity, stroke color and width, text family, size, weight and alignment | Gradients, images as fills, shadows and blurs, blend modes, per-corner radius, dashed strokes |
+| Inspector: X, Y, W, H, corner radius, fill (a color, or a linear or radial gradient: gradient-fill, captain 2026-10-20), layer opacity, stroke color and width, text family, size, weight and alignment | Gradient strokes, on-canvas gradient handles, images as fills, shadows and blurs, blend modes, per-corner radius, dashed strokes |
 | Layers: select, rename, reorder and nest by drag, hide, lock; Arrange menu | Auto Layout values and the layout math (#752's last bullet: section 9, Q2) |
 | Duplicate and Option-drag, group and ungroup, cut, copy and paste (also between windows) | Boolean operations, masks, constraints |
 | Align (one layer to its frame, several to each other) and distribute; snapping to layers, the frame and the page, with smart guides (snapping in v1, captain, 2026-10-16) | – |
@@ -340,15 +340,17 @@ from disk; frames in page points, children listed back to front):
 | J13 | `testUndoInTextFieldsAndDirtyState` (`+Files`, F5) | cards with `-DesignSaveTo <tmp>` | type in the X field and press ⌘Z inside the field; Escape; draw a rectangle; check the dot; ⌘S | ⌘Z in the field undid the typing, not a document step (#275); the top bar shows the unsaved dot after the draw and "Saved" after ⌘S, with no panel (#270) | unsaved state |
 | J14 | `testCloseWithUnsavedChanges` (`+Files`, F5) | cards | draw; ⌘W; Cancel; ⌘W; Don't Save | the alert names the file; Cancel keeps the window; Don't Save closes it | – |
 | J15 | `testEveryControlActsOrSaysWhy` (`+EveryControl`, D0-7) | cards | read `suite.controls` (published by D0-5a's `DesignControls`: every `design.*` control's id, enabled state and reason), click each enabled `design.*` control, Escape, ⌘Z | every enabled control changed the shot or a value; every disabled one has a reason. A sweep, never cited by the matrix | – |
-| J16 | `testOpenBadFiles` (`+Files`, F5) | bad files | launch with `-DesignOpenFile` on each | the alert reads "It is not a Design file.", "It was made by a newer version of Design (file version 99).", "It has no pages.", "It uses the id node-2 more than once."; the window stays empty | error |
+| J16 | `testOpenBadFiles` (`+BadFiles`, F5) | bad files | launch with `-DesignOpenFile` on each | the alert is titled "<file> can't be opened." and its message is the reason alone: "It is not a Design file.", "It was made by a newer version of Design (file version 99; this version opens up to 1). Update Design to open it.", "It has no pages.", "It is damaged: two of its layers share the id node-2."; no empty text in the alert, design contrast at baseline 0 (#3052); the window stays empty | error |
 | P1 | `testCanvasDragLatency` (`+PerfCanvas`, F1) | crowd | four velocity drags of 600 pt at 300 pt/s: move a layer, draw a rectangle, resize, marquee; one Space-pan; ⌘+ and ⌘− ten times each | at least 60 samples per drag series; QB-L1 and QD-S1 to QD-S5 (section 7) | – |
 | P2 | `testScrubLatency` (`+PerfScrub`, F3) | crowd | velocity drag on the Opacity bar and the X scrub field; type 30 characters into the inline text editor | at least 60 samples per series; QB-L2 and QD-S6 | – |
 | P3 | `testLayerListScroll` (`+PerfLayers`, F4) | crowd | scroll Layers end to end, all frames expanded | QD-S10 | – |
 | P4 | `testOpenLargeFile` (`+PerfFiles`, F5) | crowd with `-DesignSaveTo <tmp>`, then `-DesignOpenFile <tmp>` | ⌘S; relaunch on the saved file | progress within QB-L9; no stall over QB-L12 | loading |
 
-Tier-2 journeys, written with their packets: `testExportPNGSVGPDF`
-(`+Export`; from #418 (c), plus Cancel and a read-only folder),
-`testPenCornersAndCurves` (`+Pen`), `testComponentsCreateAndInsert`
+Tier-2 journeys, written with their packets: `testExportPNGSVGPDF`,
+`testExportNeverOverwritesAndCancels` and `testExportSheetOnFakes`
+(`+Export`; from #418 (c): PNG 2x, SVG and PDF read back; a second export
+never overwrites; Escape, Cancel and a read-only folder; the sheet on the
+fakes), `testPenCornersAndCurves` (`+Pen`), `testComponentsCreateAndInsert`
 (`+Components`) and `testVariablesLightAndDark` (`+Variables`).
 
 ---
@@ -1661,7 +1663,7 @@ public struct FakeVariables: VariableEditing {
 | `StyleEditing` | J10, J11, P2 | F3 |
 | `LayerOrdering` | J12, P3 | F4 |
 | `DocumentFiling` | J3, J13, J14, J16, P4 | F5 |
-| `ExportPlanning` | `testExportPNGSVGPDF` | F6 |
+| `ExportPlanning` | `testExportPNGSVGPDF`, `testExportNeverOverwritesAndCancels` | F6 |
 | `PathDrawing` | `testPenCornersAndCurves` | F7 |
 | `ComponentLibrary` | `testComponentsCreateAndInsert` | F8 |
 | `VariableEditing` | `testVariablesLightAndDark` | F9 |
@@ -1743,7 +1745,7 @@ CLAUDE.md asks for.
 | Main window | Tool rail: Move V, Frame F, Rectangle R, Ellipse O, Text T, Pen P (disabled with its reason until wave 3) | `ToolbarGroup(style: .rail)` | – |
 | Main window | Canvas: page, artwork, frame names, selection marks, marquee, inline text editor, pen draft (wave 3); empty state with New File | `CanvasViewport`, `SelectionOutline`, `CanvasMarks`, `EmptyStateView`, `DesignArtwork`, `DesignSelectionMarks`, `DesignFrameLabels`, `DesignTextOverlay`, `DesignPenMarks` | a new SuiteUI issue: `CanvasViewport` scrolls to show a document rect the host gives (Zoom to Selection, F1); #273 (handles into SuiteUI; not blocking); #706 (anchor mark, wave 3); #264 (ruler unit reads px) |
 | Main window | Status line: zoom, page size, selection count, last message, tool | `ViewerStatusBar` | #340 (pills; name and API kept) |
-| Properties tab | One layer: header, Align row, Layer (Hidden, Locked, Opacity), Frame (X, Y, W, H), Corner radius, Fill (color), Stroke (color, width, add and remove), Text (family, size, weight, alignment) | `InspectorHeader`, `InspectorSection`, `InspectorAction`, `ScrubField`, `InspectorSliderRow`, `InspectorColorWellRow`, `ChoiceChips`, `Picker`, `Toggle(.checkbox)` | #745 / #718 (public `onEnd` on `ScrubField` and the color row; Design has a local end today) |
+| Properties tab | One layer: header, Align row, Layer (Hidden, Locked, Opacity), Frame (X, Y, W, H), Corner radius, Fill (Solid / Linear / Radial; a color, or a gradient's stops and angle), Stroke (color, width, add and remove), Text (family, size, weight, alignment) | `InspectorHeader`, `InspectorSection`, `InspectorAction`, `ScrubField`, `InspectorSliderRow`, `InspectorColorWellRow`, `GradientEditor`, `ChoiceChips`, `Picker`, `Toggle(.checkbox)` | #745 / #718 (public `onEnd` on `ScrubField` and the color row; Design has a local end today) |
 | Properties tab | Several layers: "<n> Layers", Align row with Distribute, rows reading "Mixed" | as above, plus `InspectorAction` for Distribute | a new `needs-ui` issue: a `mixed` state on `ScrubField` |
 | Properties tab | Page only: page name, size (read only) | `InspectorHeader`, `InspectorRow` | – |
 | Properties tab | Nothing open: "No Selection" with how to start | `EmptyStateView` | – |
@@ -1803,7 +1805,7 @@ with the issue numbers, and the model half gates alone (section 9, Q3).
 | QD-S9 | Any command that changes the document (`apply` plus one history record) | ≤ 1 ms / ≤ 10 ms | – | `DesignBudgetTests.applyStep` |
 | QD-S10 | Layers list with every row expanded (2,000 rows) | row build ≤ 5 ms / ≤ 50 ms | scroll p95 frame interval ≤ 1.5 refreshes (QB-L10) | `DesignLayersBudgetTests.layerRows`; P3 |
 | QD-S11 | Open and save the `crowd` file | decode and encode ≤ 50 ms / ≤ 500 ms | progress within 100 ms (QB-L9); no main-thread stall over 2 refreshes (QB-L12) | `DesignBudgetTests.fileRoundTrip`; P4 |
-| QD-S12 | Export (wave 3): SVG of the Desktop frame of `crowd`; PNG at 2x | SVG ≤ 100 ms / ≤ 1 s | PNG progress within 100 ms (needs #330's progress mark); 2x PNG of 1440 × 1024 written ≤ 1 s (the journey's wall time) | `DesignExportBudgetTests.svgExport`; `testExportPNGSVGPDF` |
+| QD-S12 | Export (wave 3): SVG of the Desktop frame of `crowd`; PNG at 2x | SVG ≤ 100 ms / ≤ 1 s | PNG progress within 100 ms (needs #330's progress mark); 2x PNG of 1440 × 1024 written ≤ 1 s (the journey's wall time) | `DesignExportBudgetTests.svgExport`; `RenderBudgetDesignExportTests.liveRun` (at most 4 DesignEditor bodies for a 3-file run); `testExportPNGSVGPDF` |
 
 ### 7.2 App-audit checks that apply
 
@@ -1974,7 +1976,7 @@ Waits on: wave 2 merged.
 
 | Feature | Covers | Owned files | Engine work it waits on |
 |---|---|---|---|
-| F6 `export` | #418: PNG 1x/2x/3x, SVG, PDF; progress, Cancel, per-file errors | `Live/LiveExport.swift`, `Live/DesignSVG.swift`, `DesignExportSheet.swift`, `DesignRasterizer.swift`; tests `DesignExportTests.swift`, `DesignSVGTests.swift`, `DesignExportBudgetTests.swift`; snapshots `DesignExportSnapshots.swift`; journey `+Export` | none (the SVG writer is DesignModel's, per #418; PNG and PDF render the artwork view) |
+| F6 `export` | #418: PNG 1x/2x/3x, SVG, PDF; progress, Cancel, per-file errors | `Live/LiveExport.swift`, `Live/DesignSVG.swift`, `DesignExport+Kernel.swift` (DesignModel: the plan, SVG and remembered options), `DesignExportSheet+Kernel.swift`, `DesignRaster.swift`, `DesignApp/DesignExport+Kernel.swift` (the sheet and the live run: folder, `.withoutOverwriting` writes, failures, Cancel), `DesignRasterizer.swift`; tests `DesignExportPlanTests.swift`, `DesignExportSheetTests.swift`, `DesignExportWalkTests.swift`, `DesignRasterTests.swift`, `DesignSVGTests.swift`, `DesignSVGWalkTests.swift`, `DesignExportBudgetTests.swift`, `RenderBudgetDesignExportTests.swift`; snapshots `DesignExportSnapshots.swift`; journeys `+Export` (`testExportPNGSVGPDF`, `testExportNeverOverwritesAndCancels`, `testExportSheetOnFakes`) | none (the SVG writer is DesignModel's, per #418; PNG and PDF render the artwork view) |
 | F7 `pen` | Pen tool: corners, smooth points, close, Return and Escape finish; enable the tool | `Live/LivePen.swift`, `DesignPenMarks.swift`, `DesignCanvas.swift`, `DesignWorkspace.swift` (the tool's help); tests `DesignPenTests.swift`; snapshots `DesignPenSnapshots.swift`; journey `+Pen` | **Needs a new core issue:** "Shared path geometry: a Linux-safe path (move, line, cubic, close) with exact cubic bounds, a hit test within a tolerance and SVG path data, for Flare and Design." Also SuiteUI #706 (anchor mark) |
 | F8 `components` | #19: create from a frame, Assets section, insert, instances draw the component | `Live/LiveComponents.swift`, `DesignPanel.swift`, `DesignAssetsPanel.swift`; tests `DesignComponentsTests.swift`; snapshots `DesignComponentsSnapshots.swift`; journey `+Components` | none |
 | F9 `variables` | #20: Variables sheet, light and dark values, fills bound to a variable (drawn through D2-3's `displayFill`), preview mode | `Live/LiveVariables.swift`, `DesignVariablesSheet.swift`, `DesignInspector.swift`; tests `DesignVariablesTests.swift`; snapshots `DesignVariablesSnapshots.swift`; journey `+Variables` | none (CoreColor wide gamut is #21, not v1) |

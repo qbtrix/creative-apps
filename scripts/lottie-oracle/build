@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+# scripts/lottie-oracle/build: the reference Lottie player LottiePlayerParityTests
+# compares Flare's stage against (docs/blueprints/flare/features/lottie-player-check.md).
+#
+#   scripts/lottie-oracle/build                               fetch, check and build (cached)
+#   scripts/lottie-oracle/build render <file.json> <frame> <w> <h>
+#                                                             raw RGBA of one frame on stdout
+#
+# Install first:  macOS: brew install meson ninja   Linux: pip install meson ninja
+# Also needs git, a C and a C++ compiler (cc, c++).
+#
+# The player is ThorVG (MIT), built from the release tag pinned in VERSION
+# (tag=, commit=, date=). `build`:
+#   1. fetches that tag from github.com/thorvg/thorvg with git (depth 1) and
+#      refuses it unless it resolves to VERSION's commit=;
+#   2. refuses a tag less than 7 days old (the supply-chain rule), measured
+#      from the newer of the commit date and the tag date, not VERSION's date=;
+#   3. builds ThorVG with meson as a static library, CPU engine, Lottie loader
+#      and C API only, into .build/lottie-oracle/;
+#   4. compiles render.c against it into .build/lottie-oracle/render.
+# A second run is a no-op while VERSION and render.c are unchanged (the stamp
+# file), so CI can cache .build/lottie-oracle by VERSION. The binary
+# .build/lottie-oracle/render takes the same arguments as `build render`.
+# LOTTIE_ORACLE_NOW (epoch seconds) stands in for the clock in the age check.
+# The oracle is a test tool: no target links it. bash 3.2 compatible.
+set -euo pipefail
+
+usage() { echo "usage: scripts/lottie-oracle/build [render <file.json> <frame> <w> <h>]" >&2; exit 2; }
+die() { echo "lottie-oracle: $*" >&2; exit 1; }
+
+here=$(cd "$(dirname "$0")" && pwd)
+root=$(cd "$here/../.." && pwd)
+out="$root/.build/lottie-oracle"
+bin="$out/render"
+repo=https://github.com/thorvg/thorvg.git
+min_age_days=7
+
+case "${1:-}" in
+  "") ;;
+  render)
+    shift
+    [[ $# -eq 4 ]] || usage
+    [[ -x "$bin" ]] || die "not built: run scripts/lottie-oracle/build first"
+    exec "$bin" "$@" ;;
+  -h|--help) usage ;;
+  *) usage ;;
+esac
+
+field() { sed -n "s/^$1=//p" "$here/VERSION"; }
+tag=$(field tag)
+commit=$(field commit)
+[[ -n "$tag" && "$commit" =~ ^[0-9a-f]{40}$ ]] || die "VERSION needs tag= and a 40-hex commit="
+
+for tool in git meson ninja cc c++; do
+  command -v "$tool" >/dev/null 2>&1 || die "missing $tool (install: brew install meson ninja, or pip install meson ninja)"
+done
+
+hash_of() { if command -v shasum >/dev/null 2>&1; then shasum -a 256 "$1"; else sha256sum "$1"; fi | cut -d' ' -f1; }
+stamp="$tag $commit $(hash_of "$here/render.c")"
+if [[ -x "$bin" && -f "$out/stamp" && "$(cat "$out/stamp")" == "$stamp" ]]; then
+  echo "lottie-oracle: ThorVG $tag already built at $bin"
+  exit 0
+fi
+
+src="$out/src"
+rm -rf "$src" "$out/meson" "$out/install" "$out/stamp" "$bin"
+mkdir -p "$src"
+git -C "$src" init -q
+git -C "$src" fetch -q --depth 1 "$repo" "refs/tags/$tag:refs/tags/$tag" || die "could not fetch $tag from $repo"
+got=$(git -C "$src" rev-parse "refs/tags/$tag^{commit}")
+[[ "$got" == "$commit" ]] || die "$tag is $got, not VERSION's $commit: refusing a moved tag"
+
+committed=$(git -C "$src" log -1 --format=%ct "$got")
+tagged=$(git -C "$src" for-each-ref --format='%(taggerdate:unix)' "refs/tags/$tag")
+released=$committed
+if [[ -n "$tagged" && "$tagged" -gt "$released" ]]; then released=$tagged; fi
+now=${LOTTIE_ORACLE_NOW:-$(date +%s)}
+age_days=$(( (now - released) / 86400 ))
+if (( now - released < min_age_days * 86400 )); then
+  die "$tag is $age_days days old; the supply-chain rule needs $min_age_days. Pin an older tag in VERSION."
+fi
+git -C "$src" -c advice.detachedHead=false checkout -q "$got"
+echo "lottie-oracle: ThorVG $tag ($got, $age_days days old)"
+
+meson setup "$out/meson" "$src" --prefix "$out/install" --libdir lib --buildtype release \
+  -Ddefault_library=static -Dstatic=true -Dengines=cpu -Dloaders=lottie -Dsavers= \
+  -Dbindings=capi -Dtools= -Dtests=false -Dextra= -Dlog=false >"$out/meson-setup.log" \
+  || { cat "$out/meson-setup.log" >&2; die "meson setup failed"; }
+meson compile -C "$out/meson" >"$out/meson-compile.log" \
+  || { tail -40 "$out/meson-compile.log" >&2; die "meson compile failed"; }
+meson install -C "$out/meson" >"$out/meson-install.log" \
+  || { tail -20 "$out/meson-install.log" >&2; die "meson install failed"; }
+
+header=$(find "$out/install" -name thorvg_capi.h | head -n 1)
+lib=$(find "$out/install" -name 'libthorvg*.a' | head -n 1)
+[[ -n "$header" && -n "$lib" ]] || die "meson install left no thorvg_capi.h or static libthorvg"
+
+cc -O2 -std=c11 -D_DEFAULT_SOURCE -DTVG_STATIC -I"$(dirname "$header")" -c "$here/render.c" -o "$out/render.o"
+c++ "$out/render.o" "$lib" -lpthread -lm -o "$bin"
+echo "$stamp" >"$out/stamp"
+echo "lottie-oracle: built $bin"

@@ -1,0 +1,11 @@
+[
+{"label":"layerDrop forgets the dragged layer's removal in the same parent","file":"Sources/DesignModel/DesignLayerToggles.swift","find":"draggedIndex < index { index -= 1 }","replace":"draggedIndex < index { index -= 0 }","tests":"DesignLayerDropTests"},
+{"label":"layerDrop swaps above and below","file":"Sources/DesignModel/DesignLayerToggles.swift","find":"index = position == .above ? rowIndex + 1 : rowIndex","replace":"index = position == .above ? rowIndex : rowIndex + 1","tests":"DesignLayerDropTests"},
+{"label":"layerDrop drops into a row that is not a frame or group","file":"Sources/DesignModel/DesignLayerToggles.swift","find":"            guard row.kind.holdsChildren else { return nil }\n","replace":"","tests":"DesignLayerDropTests"},
+{"label":"layerDrop takes a drop onto the dragged row itself","file":"Sources/DesignModel/DesignLayerToggles.swift","find":"guard draggedID != rowID, nodes.node(draggedID) != nil","replace":"guard nodes.node(draggedID) != nil","tests":"DesignLayerDropTests"},
+{"label":"layerDrop adjusts for a dragged layer already at the target index","file":"Sources/DesignModel/DesignLayerToggles.swift","find":"draggedIndex < index {","replace":"draggedIndex <= index {","tests":"DesignLayerDropTests"},
+{"label":"a drop position takes the middle of a leaf row as into","file":"Sources/DesignModel/DesignLayerToggles.swift","find":"if holdsChildren, y >= height / 4, y <= height * 3 / 4 {","replace":"if y >= height / 4, y <= height * 3 / 4 {","tests":"DesignLayerDropLineTests"},
+{"label":"a drop position swaps above and below","file":"Sources/DesignModel/DesignLayerToggles.swift","find":"self = y < height / 2 ? .above : .below","replace":"self = y < height / 2 ? .below : .above","tests":"DesignLayerDropLineTests"},
+{"label":"a drop position takes a pointer off the row","file":"Sources/DesignModel/DesignLayerToggles.swift","find":"guard height > 0, y.isFinite, y >= 0, y <= height else { return nil }","replace":"guard height > 0, y.isFinite else { return nil }","tests":"DesignLayerDropLineTests"},
+{"label":"the drop line ignores moveLayerHelp's refusals","file":"Sources/DesignModel/DesignLayerToggles.swift","find":"moveLayerHelp(draggedID, into: target.parentID, at: target.index) == nil else { return nil }","replace":"true else { return nil }","tests":"DesignLayerDropLineTests"}
+]

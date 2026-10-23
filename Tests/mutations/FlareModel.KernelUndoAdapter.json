@@ -1,0 +1,37 @@
+[
+  {
+    "label": "droppedEndRun: ending a guide drag no longer ends its run, so one Move Guide step spans two gestures",
+    "file": "Sources/FlareModel/FlareGuides.swift",
+    "find": "    public mutating func endGuideDrag() { guideDragSerial &+= 1 }\n",
+    "replace": "    public mutating func endGuideDrag() {}\n",
+    "tests": "FlareKernelUndoAdapterTests"
+  },
+  {
+    "label": "refusalIsSuccess: canUndo reads true with no engine, so Undo reads enabled with nothing to undo",
+    "file": "Sources/FlareModel/FlareWorkspace.swift",
+    "find": "    public var canUndo: Bool { engine?.canUndo ?? false }\n",
+    "replace": "    public var canUndo: Bool { engine?.canUndo ?? true }\n",
+    "tests": "FlareKernelUndoAdapterTests"
+  },
+  {
+    "label": "refusalIsSuccess: canRedo reads true with no engine, so Redo reads enabled with nothing to redo",
+    "file": "Sources/FlareModel/FlareWorkspace.swift",
+    "find": "    public var canRedo: Bool { engine?.canRedo ?? false }\n",
+    "replace": "    public var canRedo: Bool { engine?.canRedo ?? true }\n",
+    "tests": "FlareKernelUndoAdapterTests"
+  },
+  {
+    "label": "lostPrefix: undoName keeps the menu's \"Undo \", so the protocol names the title, not the step",
+    "file": "Sources/FlareModel/FlareWorkspace.swift",
+    "find": "engine?.undoActionName.map { String($0.dropFirst(\"Undo \".count)) }",
+    "replace": "engine?.undoActionName",
+    "tests": "FlareKernelUndoAdapterTests"
+  },
+  {
+    "label": "lostName: redoName drops the engine's step, so Redo reads unnamed",
+    "file": "Sources/FlareModel/FlareWorkspace.swift",
+    "find": "engine?.redoActionName.map { String($0.dropFirst(\"Redo \".count)) }",
+    "replace": "engine?.redoActionName.map { _ in \"\" }",
+    "tests": "FlareKernelUndoAdapterTests"
+  }
+]

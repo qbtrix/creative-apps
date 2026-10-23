@@ -294,10 +294,8 @@ final class PhotoEditJourneyTests: XCTestCase {
 
     /// The Layers list's row holding `name` is the selected one.
     @MainActor private func expectSelectedRow(_ name: String, _ photo: Journey) {
-        let rowTypes = [XCUIElement.ElementType.tableRow, .outlineRow].map { NSNumber(value: $0.rawValue) }
         let row = photo.element("photo.layers").descendants(matching: .any)
-            .matching(NSPredicate(format: "elementType == %@ OR elementType == %@", rowTypes[0], rowTypes[1]))
-            .containing(NSPredicate(format: "label == %@ OR value == %@", name, name)).firstMatch
+            .matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label == %@", "photo.layer.row.", name)).firstMatch
         XCTAssert(row.waitForExistence(timeout: 5), "the Layers list has no row for \(name)")
         XCTAssert(waitFor { row.isSelected }, "\(name) isn't the selected layer")
     }

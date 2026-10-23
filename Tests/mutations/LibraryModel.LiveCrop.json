@@ -1,0 +1,23 @@
+[
+  {
+    "label": "initial compares the ratio the wrong way: a square on a landscape spills past the top and bottom",
+    "file": "Sources/LibraryModel/Live/LiveCrop.swift",
+    "find": "rect = r < 1 ? UnitRect(",
+    "replace": "rect = r > 1 ? UnitRect(",
+    "tests": "LibraryLiveCropTests"
+  },
+  {
+    "label": "the 16 px floor is dropped: a drag can close a side to nothing",
+    "file": "Sources/LibraryModel/Live/LiveCrop.swift",
+    "find": "static let minimumSide = 16.0",
+    "replace": "static let minimumSide = 0.0",
+    "tests": "LibraryLiveCropTests"
+  },
+  {
+    "label": "frame drops the straightenCrop offset: a turned crop sits at the turned photo's corner",
+    "file": "Sources/LibraryModel/Live/LiveCrop.swift",
+    "find": "return PixelRect(x: sc.x + x, y: sc.y + y, width: w, height: h)",
+    "replace": "return PixelRect(x: x, y: y, width: w, height: h)",
+    "tests": "LibraryLiveCropTests"
+  }
+]

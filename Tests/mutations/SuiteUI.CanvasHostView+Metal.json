@@ -1,4 +1,9 @@
 [
-{"label":"a nil device still installs the Metal layer","file":"Sources/SuiteUI/CanvasHostView+Metal.swift","find":"guard choice == .gpu, device != nil else { return false }","replace":"guard choice == .gpu else { return false }","tests":"CanvasHostMetalTests"},
-{"label":"the Metal layer's colour space is left nil","file":"Sources/SuiteUI/CanvasHostView+Metal.swift","find":"metal.colorspace = CGColorSpace(name: CGColorSpace.sRGB)","replace":"metal.colorspace = nil","tests":"CanvasHostMetalTests"}
+{"label": "a nil device still installs the Metal layer", "file": "Sources/SuiteUI/CanvasHostView+Metal.swift", "find": "choice != .cpu && device != nil", "replace": "choice != .cpu", "tests": "CanvasHostMetalTests"},
+{"label": "the Metal layer's colour space is left nil", "file": "Sources/SuiteUI/CanvasHostView+Metal.swift", "find": "metal.colorspace = CGColorSpace(name: CGColorSpace.sRGB)", "replace": "metal.colorspace = nil", "tests": "CanvasHostMetalTests"},
+{"label": "automatic draws on the tile layers again", "file": "Sources/SuiteUI/CanvasHostView+Metal.swift", "find": "choice != .cpu && device != nil", "replace": "choice == .gpu && device != nil", "tests": "CanvasHostMetalTests"},
+{"label": "the presenter never hears the tiles shown", "file": "Sources/SuiteUI/CanvasHostView.swift", "find": "presenter?.show(tiles, documentSize: documentSize)", "replace": "_ = tiles", "tests": "CanvasHostMetalTests"},
+{"label": "the Metal path puts images on the hidden tile layers again", "file": "Sources/SuiteUI/CanvasHostView.swift", "find": "guard metalLayer == nil else {", "replace": "guard true else {", "tests": "CanvasHostMetalTests"},
+{"label": "every layout presents a new drawable", "file": "Sources/SuiteUI/CanvasHostView+Metal.swift", "find": "guard pictureChanged || presentedSize != size else { return }", "replace": "_ = size", "tests": "CanvasHostMetalTests"},
+{"label": "a tile layer shows the image instead of its surface", "file": "Sources/SuiteUI/CanvasHostView.swift", "find": "layer.contents = tile.surface ?? tile.image", "replace": "layer.contents = tile.image", "tests": "CanvasTileSurfaceTests"}
 ]

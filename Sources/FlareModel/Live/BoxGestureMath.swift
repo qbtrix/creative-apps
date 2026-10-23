@@ -1,8 +1,10 @@
 // BoxGestureMath.swift: the box-gesture math behind `ShapeBuilding.boxResult` (docs/blueprints/flare.md, 6.3), shared
 // by the fake and live shapes so the two can't drift. Move adds to x, y; Scale stretches about the handle opposite
 // the grip in the layer's own axes, or works on the world box for a layer turned off a multiple of 90° (#560, #625);
-// Rotate turns about the box center. The layers' drawn items come from the `StageDrawList` the caller passes.
+// Rotate turns about the box center. The layers' drawn items come from the `StageDrawList` the caller passes. The
+// handles are the kernel's `EditorHandle` ring (BoxGestureMath+Kernel.swift).
 import FlareCore
+import SuiteKernel
 
 public enum BoxGestureMath {
     /// What each picked layer's x, y, scaleX, scaleY and rotation become for `gesture` on `box`; a layer the gesture
@@ -20,16 +22,16 @@ public enum BoxGestureMath {
                     values = oblique
                     break
                 }
-                let handle = ((h % 8) + 8) % 8, grip = Self.handle(handle, on: box), fixed = Self.handle(handle + 4, on: box)
+                let handle = editorHandle(h), grip = spot(handle, on: box), fixed = spot(opposite(handle), on: box)
                 // An edge handle drags one world axis; drop the other part of the pointer.
-                let pointer = Point(x: handle % 4 == 1 ? grip.x : to.x, y: handle % 4 == 3 ? grip.y : to.y)
+                let pointer = Point(x: movesOnlyY(handle) ? grip.x : to.x, y: movesOnlyX(handle) ? grip.y : to.y)
                 // Work in the layer's own axes, so a rotated layer stretches along its sides about the fixed handle.
                 let (turn, back) = (Matrix.rotation(degrees: t.rotation), Matrix.rotation(degrees: -t.rotation))
                 let from = back.apply(Point(x: grip.x - fixed.x, y: grip.y - fixed.y))
                 let onto = back.apply(Point(x: pointer.x - fixed.x, y: pointer.y - fixed.y))
                 // An edge stretches only the local axis nearest its world axis.
-                let alongX = abs(turn.a) >= abs(turn.b), edge = handle % 2 == 1
-                let keepX = edge && (handle % 4 == 1) == alongX, keepY = edge && (handle % 4 == 3) == alongX
+                let alongX = abs(turn.a) >= abs(turn.b), edge = !handle.isCorner
+                let keepX = edge && movesOnlyY(handle) == alongX, keepY = edge && movesOnlyX(handle) == alongX
                 let sx = keepX ? 1 : ratio(onto.x, from.x), sy = keepY ? 1 : ratio(onto.y, from.y)
                 // Square to the world, a zero axis leaves the box 0 wide (or tall), and every later drag reads that
                 // side as 0 and can't grow it: leave the layer as it was, as for 0 x 0 below (#688). A drop within
@@ -77,11 +79,11 @@ public enum BoxGestureMath {
             points += corners(r).map { (back * item.transform).apply($0) }
         }
         guard let local = Rect(enclosing: points), let own = Rect(enclosing: points.map(t.matrix.apply)) else { return nil }
-        let handle = ((h % 8) + 8) % 8, grip = Self.handle(handle, on: box), fixed = Self.handle(handle + 4, on: box)
+        let handle = editorHandle(h), grip = spot(handle, on: box), fixed = spot(opposite(handle), on: box)
         // The signed world stretch the pointer asks of the box about its fixed handle; an edge leaves its other axis
         // at 1. Below 0 the grip has crossed the fixed handle and the box mirrors on that axis (#655).
-        let wx = handle % 4 == 1 ? 1 : ratio(to.x - fixed.x, grip.x - fixed.x)
-        let wy = handle % 4 == 3 ? 1 : ratio(to.y - fixed.y, grip.y - fixed.y)
+        let wx = movesOnlyY(handle) ? 1 : ratio(to.x - fixed.x, grip.x - fixed.x)
+        let wy = movesOnlyX(handle) ? 1 : ratio(to.y - fixed.y, grip.y - fixed.y)
         let (kx, ky) = (abs(wx), abs(wy))
         // The world box's size from the local stretch f: width = a·f, height = b·f.
         let turn = Matrix.rotation(degrees: t.rotation), (c, s) = (abs(turn.a), abs(turn.b))
@@ -89,12 +91,12 @@ public enum BoxGestureMath {
         let a = (c * u, s * v), b = (s * u, c * v)
         // The local axis nearest world x; the other is nearest world y.
         let alongX = c >= s
-        var f = handle % 2 == 1 ? (x: handle % 4 == 1 ? ky : kx, y: handle % 4 == 1 ? ky : kx)
+        var f = !handle.isCorner ? (x: movesOnlyY(handle) ? ky : kx, y: movesOnlyY(handle) ? ky : kx)
             : fit(a, b, to: (kx * (a.0 + a.1), ky * (b.0 + b.1)), within: (min(kx, ky), max(kx, ky)))
         // An edge dropped on the opposite edge zeroes only the local axis nearest its world axis, as at 0°, so the
         // layer keeps a size a later drag can grow (#655).
-        if handle % 2 == 1, f.x == 0, f.y == 0 {
-            f = (handle % 4 == 3) == alongX ? (0, 1) : (1, 0)
+        if !handle.isCorner, f.x == 0, f.y == 0 {
+            f = movesOnlyX(handle) == alongX ? (0, 1) : (1, 0)
         }
         // A world axis that crossed its fixed handle mirrors the local axis nearest it; both crossing is a half turn.
         let flipX = (wx < 0 && alongX) || (wy < 0 && !alongX), flipY = (wy < 0 && alongX) || (wx < 0 && !alongX)
@@ -102,8 +104,8 @@ public enum BoxGestureMath {
         guard let moved = Rect(enclosing: points.map((turn * Matrix.scale(x: sx, y: sy)).apply)) else { return nil }
         // The layer's own fixed handle goes where the box's stretch takes it: for a lone layer, it stays put. On a
         // mirrored axis the moved box meets it with its grip side.
-        let from = Self.handle(handle + 4, on: own), stay = Self.handle(handle + 4, on: moved)
-        let swap = Self.handle(handle, on: moved)
+        let from = spot(opposite(handle), on: own), stay = spot(opposite(handle), on: moved)
+        let swap = spot(handle, on: moved)
         let anchor = Point(x: wx < 0 ? swap.x : stay.x, y: wy < 0 ? swap.y : stay.y)
         let target = Point(x: fixed.x + wx * (from.x - fixed.x), y: fixed.y + wy * (from.y - fixed.y))
         return ["x": target.x - anchor.x, "y": target.y - anchor.y, "scaleX": sx, "scaleY": sy]
@@ -136,14 +138,9 @@ public enum BoxGestureMath {
     private static let lineTolerance = 1e-6
     /// `a / b`, or 1 when that is not a finite number.
     private static func ratio(_ a: Double, _ b: Double) -> Double { b != 0 && (a / b).isFinite ? a / b : 1 }
-    /// Handle `h` (0...7 clockwise from top-left, taken mod 8) on `box`, where the stage draws it.
-    public static func handle(_ h: Int, on box: Rect) -> Point {
-        let midX = box.minX + box.width / 2, midY = box.minY + box.height / 2
-        let spots = [(box.minX, box.minY), (midX, box.minY), (box.maxX, box.minY), (box.maxX, midY),
-                     (box.maxX, box.maxY), (midX, box.maxY), (box.minX, box.maxY), (box.minX, midY)]
-        let (x, y) = spots[((h % 8) + 8) % 8]  // never out of range
-        return Point(x: x, y: y)
-    }
+    /// Handle `h` (0...7 clockwise from top-left, taken mod 8) on `box`, where the stage draws it: the kernel's
+    /// `EditorHandle` of that number.
+    public static func handle(_ h: Int, on box: Rect) -> Point { spot(editorHandle(h), on: box) }
     /// The four corners of `r`, clockwise from top-left.
     static func corners(_ r: Rect) -> [Point] {
         [Point(x: r.minX, y: r.minY), Point(x: r.maxX, y: r.minY), Point(x: r.maxX, y: r.maxY), Point(x: r.minX, y: r.maxY)]

@@ -1,0 +1,4 @@
+# DesignApp's menu items and buttons built without a command spec (command-catalog CC-11).
+# max: 2
+Sources/DesignApp/DesignCommands.swift: Button("Close", systemImage: "xmark") { NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil) }
+Sources/DesignApp/DesignWindow.swift: Button("OK", role: .cancel) {}

@@ -1,0 +1,23 @@
+[
+  {
+    "label": "euclidean: the hit measures Euclidean distance instead of Chebyshev",
+    "file": "Sources/SuiteKernel/Transform/HandleHit.swift",
+    "find": "let distance = max(abs(p.x - c.x), abs(p.y - c.y))",
+    "replace": "let distance = ((p.x - c.x) * (p.x - c.x) + (p.y - c.y) * (p.y - c.y)).squareRoot()",
+    "tests": "HandleHitTests"
+  },
+  {
+    "label": "edgesWinTies: a later edge handle at the same distance replaces the corner",
+    "file": "Sources/SuiteKernel/Transform/HandleHit.swift",
+    "find": "distance < $0.distance",
+    "replace": "distance <= $0.distance",
+    "tests": "HandleHitTests"
+  },
+  {
+    "label": "toleranceTimesZoom: the document tolerance multiplies by zoom",
+    "file": "Sources/SuiteKernel/Transform/HandleHit.swift",
+    "find": "return screen / zoom",
+    "replace": "return screen * zoom",
+    "tests": "HandleHitTests"
+  }
+]

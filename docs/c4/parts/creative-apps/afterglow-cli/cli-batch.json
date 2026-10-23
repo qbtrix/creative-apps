@@ -1,0 +1,11 @@
+{
+  "id": "cli-batch",
+  "name": "CLI batch runner",
+  "description": "`afterglow run <script.jobs.json>`: ScriptRunner, which runs a versioned list of command steps over a set of input files and writes each output by name template, and Script, the format's Codable shape and validation. CL-7 fills it over the catalog's runBatch: validate the whole script (version 1, a known app, every step id and the output format), expand the inputs in sorted order, plan every output and refuse collisions (73) before anything is written, run each input all or none when atomic, and print one report; files are reached only through CLIIO.",
+  "technology": "Swift 6, Foundation, Linux and macOS",
+  "paths": [
+    "Sources/AfterGlowCLICore/ScriptRunner.swift",
+    "Sources/AfterGlowCLICore/Script.swift"
+  ],
+  "order": 20
+}

@@ -178,6 +178,7 @@ private func file(_ pages: [DesignPage]) throws -> Data {
     let before = workspace
     for (from, to, id) in [
         ("\"width\":10", "\"width\":0", "a"), ("\"height\":10", "\"height\":0.5", "a"), ("\"width\":10", "\"width\":-3", "a"),
+        ("\"width\":10", "\"width\":0.5", "a"),
         ("\"frameWidth\":800", "\"frameWidth\":0", "page-1"), ("\"frameHeight\":600", "\"frameHeight\":-1", "page-1"),
     ] {
         let bad = text(good).replacing(from, with: to)
@@ -186,6 +187,11 @@ private func file(_ pages: [DesignPage]) throws -> Data {
         #expect(throws: DesignFileError.invalidNumber(id), "\(to)") { try other.open(bytes(bad)) }
         #expect(other == before)
     }
+    // Exactly 1 point is the smallest size that opens.
+    let onePoint = try file([page("page-1", [node("a", .rectangle, rc(5, 5, 1, 1))])])
+    var smallest = DesignWorkspace()
+    try smallest.open(onePoint)
+    #expect(smallest.pages[0].nodes.first?.frame == rc(5, 5, 1, 1))
 }
 
 @Test func aDocumentThatCouldNotBeOpenedAgainIsNotWritten() {
@@ -206,4 +212,33 @@ private func file(_ pages: [DesignPage]) throws -> Data {
     let reasons = errors.map(\.reason)
     #expect(Set(reasons).count == errors.count && reasons.allSatisfy { $0.hasSuffix(".") })
     #expect(reasons[2].contains("3") && reasons[4].contains("node-4") && reasons[5].contains("node-5"))
+}
+
+/// #2936: a damaged file says what is wrong in plain words first; the raw id is only a detail.
+@Test func aDamagedFileSaysSoBeforeNamingTheID() {
+    #expect(DesignFileError.duplicateID("node-2").reason == "It is damaged: two of its layers share the id node-2.")
+    #expect(DesignFileError.notAContainer("node-5").reason.hasPrefix("It is damaged: a layer that isn't a frame"))
+    #expect(DesignFileError.invalidNumber("page-2").reason.hasPrefix("One of its layers has a size or position"))
+    for error: DesignFileError in [.duplicateID("node-2"), .notAContainer("node-2"), .invalidNumber("node-2")] {
+        #expect(error.reason.hasSuffix(" node-2.") || error.reason.hasSuffix("(node-2)."), "\(error)")
+    }
+}
+
+/// #2937: a newer file says which version this Design opens and what to do next.
+@Test func aNewerFileSaysWhichVersionOpensAndWhatToDo() {
+    let reason = DesignFileError.unsupportedVersion(99).reason
+    #expect(reason.contains("(file version 99; this version opens up to \(LiveFiling.fileVersion))."))
+    #expect(reason.hasSuffix(" Update Design to open it."))
+}
+
+/// #3052: the bad-file alert splits into a title naming the file and a message holding the reason,
+/// so the system alert never lays out an empty text field.
+@Test func aFileProblemSplitsIntoATitleAndTheReason() {
+    let opening = DesignFileProblem.opening("NoPages.design", DesignFileError.noPages.reason)
+    #expect(opening == DesignFileProblem(title: "NoPages.design can't be opened.", message: "It has no pages."))
+    let saving = DesignFileProblem.saving("Saved.design", DesignFileError.noFile.reason)
+    #expect(saving == DesignFileProblem(title: "Saved.design can't be saved.", message: "There is no file open to save."))
+    for problem in [opening, saving] {
+        #expect(!problem.message.isEmpty && !problem.title.contains(problem.message))
+    }
 }

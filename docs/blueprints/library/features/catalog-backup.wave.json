@@ -1,0 +1,143 @@
+{
+  "title": "Catalog backups: rolling copies of Library's catalog in the suite store, and File > Restore Catalog Backup",
+  "wave": 7,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 Library must-haves (audit row 9); real job RJ-L54 (new)",
+  "waits_on": "suiteui adopt-kernel-autosave AK-library (CatalogStore.swift moves under the suite support root, cross-line); spine (building); file-flow LF-m (catalog and ledger)",
+  "depends": [
+    "spine",
+    "persist"
+  ],
+  "longest_chain": "5 (BK-1 → BK-2 → BK-4 → BK-5 → BK-6)",
+  "journeys": [
+    "LibraryBackupJourneyTests.testRestoreBackup"
+  ],
+  "owned": [
+    "Sources/SuiteModel/Store/BackupRotation.swift",
+    "Tests/SuiteModelTests/BackupRotationTests.swift",
+    "docs/c4/parts/creative-apps/suite-model/suite-store.json",
+    "Sources/LibraryModel/LibraryBackup+Kernel.swift",
+    "Tests/LibraryModelTests/LibraryBackupTests.swift",
+    "UITests/LibraryJourneyTests+Backup.swift",
+    "Sources/LibraryApp/LibraryBackupSheet.swift",
+    "Sources/LibraryApp/LibraryWindow+Backup.swift",
+    "Tests/AppSnapshotTests/RenderBudgetLibraryBackupTests.swift",
+    "Tests/mutations/SuiteModel.BackupRotation.json",
+    "Sources/LibraryModel/LibraryPersistence.swift",
+    "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "Tests/command-ids/library.txt",
+    "Tests/mutations/LibraryModel.LibraryBackup+Kernel.json",
+    "Tests/RealJobs/library/restore-backup/restore-backup.jobs.json",
+    "docs/blueprints/library/features/catalog-backup.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "BK-a",
+      "behavior": "SuiteModel declares the backup rotation and Library the restore commands as stubs, with the checks written and disabled.",
+      "tasks": [
+        "BK-1",
+        "BK-2"
+      ],
+      "journeys": [
+        "MJ-BK"
+      ],
+      "owned": [
+        "Sources/SuiteModel/Store/BackupRotation.swift",
+        "Tests/SuiteModelTests/BackupRotationTests.swift",
+        "docs/c4/parts/creative-apps/suite-model/suite-store.json",
+        "Sources/LibraryModel/LibraryBackup+Kernel.swift",
+        "Tests/LibraryModelTests/LibraryBackupTests.swift",
+        "UITests/LibraryJourneyTests+Backup.swift"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "BK-u",
+      "behavior": "File > Restore Catalog Backup lists backups with date and count and restores one after a confirm, on the stubs, within the render budget.",
+      "tasks": [
+        "BK-4",
+        "BK-4b"
+      ],
+      "journeys": [
+        "LJ-BK"
+      ],
+      "owned": [
+        "Sources/LibraryApp/LibraryBackupSheet.swift",
+        "Sources/LibraryApp/LibraryWindow+Backup.swift",
+        "Tests/AppSnapshotTests/RenderBudgetLibraryBackupTests.swift"
+      ],
+      "waits": {
+        "BK-a": [
+          "BK-4"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "BK-m",
+      "behavior": "Saves keep hourly and quit backups with the rotation's limits, an unreadable catalog falls back to the newest good backup, and a restore backs up the current catalog first, one command each.",
+      "tasks": [
+        "BK-3",
+        "BK-5m"
+      ],
+      "journeys": [
+        "MJ-BK"
+      ],
+      "owned": [
+        "Sources/SuiteModel/Store/BackupRotation.swift",
+        "Tests/SuiteModelTests/BackupRotationTests.swift",
+        "Tests/mutations/SuiteModel.BackupRotation.json",
+        "Sources/LibraryModel/LibraryBackup+Kernel.swift",
+        "Sources/LibraryModel/LibraryPersistence.swift",
+        "Sources/LibraryModel/LibraryCommandCatalog.swift",
+        "Tests/command-ids/library.txt",
+        "Tests/LibraryModelTests/LibraryBackupTests.swift",
+        "Tests/mutations/LibraryModel.LibraryBackup+Kernel.json"
+      ],
+      "waits": {
+        "BK-a": [
+          "BK-3",
+          "BK-5m"
+        ],
+        "file-flow:LF-m": [
+          "BK-5m"
+        ],
+        "folders:FO-m": [
+          "BK-5m"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "BK-z",
+      "behavior": "Restore runs live end to end, RJ-L54 passes, and the feature is built.",
+      "tasks": [
+        "BK-5",
+        "BK-6"
+      ],
+      "journeys": [
+        "LJ-BK",
+        "MJ-BK"
+      ],
+      "owned": [
+        "Sources/LibraryApp/LibraryWindow+Backup.swift",
+        "UITests/LibraryJourneyTests+Backup.swift",
+        "Tests/RealJobs/library/restore-backup/restore-backup.jobs.json",
+        "docs/blueprints/library/features/catalog-backup.wave.json"
+      ],
+      "waits": {
+        "BK-u": [
+          "BK-5"
+        ],
+        "BK-m": [
+          "BK-5"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

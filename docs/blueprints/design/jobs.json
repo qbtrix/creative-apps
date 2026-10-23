@@ -1,0 +1,784 @@
+{
+  "$comment": "Real jobs: tasks a person does with this app, each with an outcome a check can observe. Keyed by job id so scripts/merge-json merges two PRs that add different jobs. scripts/jobs check validates every field; jobs.md beside this file is generated from it on dev (scripts/jobs render), never edited. The fields and the done rule: docs/factory/packets.md, Jobs.",
+  "RJ-D01": {
+    "id": "RJ-D01",
+    "app": "design",
+    "weight": "high",
+    "job": "Make an Instagram post: a 1080×1350 frame from a preset, a placed photo, a title, then export PNG.",
+    "outcome": "Output is exactly 1080×1350 and the photo is not squashed.",
+    "needs": [
+      "S10",
+      "S20",
+      "S11"
+    ],
+    "needs_note": "S10 frame presets, S20 placed images, S11",
+    "closes_with": "S10",
+    "trap": "Export at 2x gives 2160 px; image stretched to the frame",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.nobledesktop.com/classes/figma-bootcamp/syllabus",
+      "https://help.figma.com/hc/en-us/articles/360040028114-Guide-to-exporting-from-Figma",
+      "https://imagen-ai.com/tools/resize-for-instagram-portrait-45.md"
+    ]
+  },
+  "RJ-D02": {
+    "id": "RJ-D02",
+    "app": "design",
+    "weight": "med",
+    "job": "Export an app icon frame at 1x, 2x and 3x PNG with suffixes.",
+    "outcome": "Three files, right sizes, crisp edges, nothing overwritten.",
+    "needs": [
+      "design/design-export"
+    ],
+    "needs_note": "design/design-export (beta)",
+    "closes_with": "design/design-export",
+    "trap": "Half-pixel blur; @2x overwrites @1x",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.figma.com/hc/en-us/articles/360040028114-Guide-to-exporting-from-Figma",
+      "https://evolvingweb.com/blog/troubleshooting-blurry-svg-icons-sketch-illustrator"
+    ]
+  },
+  "RJ-D03": {
+    "id": "RJ-D03",
+    "app": "design",
+    "weight": "med",
+    "job": "Make a button component with an instance in three places; change the master colour.",
+    "outcome": "Every instance updates; overrides stay.",
+    "needs": [],
+    "needs_note": "F8 components (design-seams-2)",
+    "closes_with": null,
+    "trap": "Override text reset by the master edit",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.nobledesktop.com/classes/figma-bootcamp/syllabus",
+      "https://www.sketch.com/docs/symbols-and-styles/"
+    ]
+  },
+  "RJ-D04": {
+    "id": "RJ-D04",
+    "app": "design",
+    "weight": "high",
+    "job": "Align five icons to a row and distribute them evenly.",
+    "outcome": "Gaps are equal to the point.",
+    "needs": [],
+    "needs_note": "built (#2217, #2461)",
+    "closes_with": null,
+    "trap": "Gaps off by 0.5 pt",
+    "run": "C",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.nobledesktop.com/classes/figma-bootcamp/syllabus"
+    ]
+  },
+  "RJ-D05": {
+    "id": "RJ-D05",
+    "app": "design",
+    "weight": "high",
+    "job": "Drag a card to the frame centre.",
+    "outcome": "It snaps and a guide shows the distance.",
+    "needs": [
+      "design/snapping"
+    ],
+    "needs_note": "design/snapping (beta)",
+    "closes_with": "design/snapping",
+    "trap": "Snaps to a hidden layer",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.figma.com/hc/en-us/articles/360040028114-Guide-to-exporting-from-Figma"
+    ]
+  },
+  "RJ-D06": {
+    "id": "RJ-D06",
+    "app": "design",
+    "weight": "med",
+    "job": "Draw a logo with the pen (curves, close the path), then move one point.",
+    "outcome": "The saved path has one closed contour of exactly four anchors; the moved anchor and its handles moved by the same offset and the others are unchanged.",
+    "needs": [
+      "S25"
+    ],
+    "needs_note": "the Pen and point editing (S25)",
+    "closes_with": "S25",
+    "trap": "Closing the path adds a duplicate point",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.figma.com/hc/en-us/articles/360039957534-Boolean-operations",
+      "https://affinity.serif.com/en-gb/designer/full-feature-list/"
+    ],
+    "waits_on": "DP-6"
+  },
+  "RJ-D07": {
+    "id": "RJ-D07",
+    "app": "design",
+    "weight": "low",
+    "job": "Subtract a circle from a square to make a crescent icon; move the circle later.",
+    "outcome": "Result updates (still editable).",
+    "needs": [
+      "S18"
+    ],
+    "needs_note": "S18 booleans",
+    "closes_with": "S18",
+    "trap": "Boolean bakes to a flat path",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.figma.com/hc/en-us/articles/360039957534-Boolean-operations"
+    ]
+  },
+  "RJ-D08": {
+    "id": "RJ-D08",
+    "app": "design",
+    "weight": "med",
+    "job": "Export an icon as SVG.",
+    "outcome": "It opens identically in a browser and in other tools: viewBox set, no raster, text as outlines when asked.",
+    "needs": [
+      "design/design-export"
+    ],
+    "needs_note": "design-export + flarecore SVGExporter",
+    "closes_with": "design/design-export",
+    "trap": "Width/height 100%, no viewBox, live text with a missing font",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://forum.figma.com/t/solved-bug-when-exporting-text-as-svg/33413",
+      "https://forum.figma.com/archive-21/copy-and-paste-svg-from-affinity-designer-29535",
+      "https://forum.sketch.com/t/alternative-tools-for-complex-svg-exports/1891"
+    ]
+  },
+  "RJ-D09": {
+    "id": "RJ-D09",
+    "app": "design",
+    "weight": "low",
+    "job": "Export a page as a print PDF.",
+    "outcome": "Text stays selectable and fonts are embedded.",
+    "needs": [
+      "design/design-export"
+    ],
+    "needs_note": "design-export (beta)",
+    "closes_with": "design/design-export",
+    "trap": "Fonts not embedded; PDF fails in other apps",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://forum.figma.com/ask-the-community-7/figma-exports-corrupt-pdf-s-indesign-import-error-10857"
+    ]
+  },
+  "RJ-D10": {
+    "id": "RJ-D10",
+    "app": "design",
+    "weight": "med",
+    "job": "Copy a shape as SVG and paste it into a code editor.",
+    "outcome": "Valid SVG with the same colours.",
+    "needs": [
+      "A1",
+      "suiteui/clipboard-interop"
+    ],
+    "needs_note": "A1 copy as SVG or CSS",
+    "closes_with": "suiteui/clipboard-interop",
+    "trap": "Pastes a PNG instead",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.figma.com/hc/en-us/articles/360040028114-Guide-to-exporting-from-Figma"
+    ]
+  },
+  "RJ-D11": {
+    "id": "RJ-D11",
+    "app": "design",
+    "weight": "med",
+    "job": "Type a heading into a fixed-width box.",
+    "outcome": "It wraps, the box grows to fit, line height can be set.",
+    "needs": [
+      "design/canvas-basics",
+      "E8"
+    ],
+    "needs_note": "canvas-basics CB-b (beta), E8 line height",
+    "closes_with": "design/canvas-basics",
+    "trap": "Text overflows the box with no sign",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.nobledesktop.com/classes/figma-bootcamp/syllabus"
+    ]
+  },
+  "RJ-D12": {
+    "id": "RJ-D12",
+    "app": "design",
+    "weight": "high",
+    "job": "Place a photo inside a rounded frame and move it inside the crop.",
+    "outcome": "The photo keeps its aspect.",
+    "needs": [
+      "S20",
+      "design/placed-images"
+    ],
+    "needs_note": "S20 placed images; design/placed-images wires them into Design (pictures in frames by cover)",
+    "closes_with": "design/placed-images",
+    "trap": "Image stretched to the frame",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.nobledesktop.com/classes/figma-bootcamp/syllabus"
+    ],
+    "waits_on": "PD-6"
+  },
+  "RJ-D13": {
+    "id": "RJ-D13",
+    "app": "design",
+    "weight": "med",
+    "job": "Give a background a two-stop linear gradient and rotate its angle.",
+    "outcome": "Smooth, matches the export.",
+    "needs": [
+      "S24",
+      "design/gradient-fill"
+    ],
+    "needs_note": "S24 gradient fills; design/gradient-fill wires them into Design",
+    "closes_with": "design/gradient-fill",
+    "trap": "Export ignores the gradient angle",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/designer/full-feature-list/"
+    ],
+    "waits_on": "DG-5"
+  },
+  "RJ-D14": {
+    "id": "RJ-D14",
+    "app": "design",
+    "weight": "med",
+    "job": "Add a drop shadow to a card; change it later.",
+    "outcome": "The SVG export holds the shadow as a filter with the edited values, referenced by the card; the PNG and PDF half is RJ-D43 (macOS).",
+    "needs": [
+      "S2"
+    ],
+    "needs_note": "S2 effects",
+    "closes_with": "S2",
+    "trap": "SVG export drops the shadow silently",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://forum.sketch.com/t/i-cannot-export-svg-with-blur/5474"
+    ],
+    "waits_on": "DL-6"
+  },
+  "RJ-D15": {
+    "id": "RJ-D15",
+    "app": "design",
+    "weight": "med",
+    "job": "Rotate a layer 15° with the handles.",
+    "outcome": "Bounds and the inspector agree.",
+    "needs": [
+      "S7",
+      "design/transform"
+    ],
+    "closes_with": "design/transform",
+    "trap": "Inspector shows the unrotated box",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/designer/full-feature-list/"
+    ],
+    "waits_on": "DT-6"
+  },
+  "RJ-D16": {
+    "id": "RJ-D16",
+    "app": "design",
+    "weight": "high",
+    "job": "Option-drag to copy a card three times into a grid.",
+    "outcome": "One undo step each.",
+    "needs": [],
+    "needs_note": "built (#2230)",
+    "closes_with": null,
+    "trap": "Copy lands one pixel off",
+    "run": "J",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.nobledesktop.com/classes/figma-bootcamp/syllabus"
+    ]
+  },
+  "RJ-D17": {
+    "id": "RJ-D17",
+    "app": "design",
+    "weight": "high",
+    "job": "Group three layers, rename the group, drag it above another in the Layers panel.",
+    "outcome": "The group holds the three layers under its new name and sits above the other layer in the Layers panel and on the canvas.",
+    "needs": [
+      "design/copy-group",
+      "design/layers-panel"
+    ],
+    "needs_note": "copy-group (built), layers-panel drag (beta)",
+    "closes_with": "design/layers-panel",
+    "trap": "Drag reorder not built yet",
+    "run": "J",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.nobledesktop.com/classes/figma-bootcamp/syllabus"
+    ]
+  },
+  "RJ-D18": {
+    "id": "RJ-D18",
+    "app": "design",
+    "weight": "high",
+    "job": "Copy layers from one file and paste into another.",
+    "outcome": "Styles and text survive.",
+    "needs": [],
+    "needs_note": "built (#2255)",
+    "closes_with": null,
+    "trap": "Fonts or radius dropped in paste",
+    "run": "C",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.figma.com/hc/en-us/articles/360040028114-Guide-to-exporting-from-Figma"
+    ]
+  },
+  "RJ-D19": {
+    "id": "RJ-D19",
+    "app": "design",
+    "weight": "high",
+    "job": "Make 30 edits, save, reopen, undo.",
+    "outcome": "Content is identical after reopen; undo works in the session.",
+    "needs": [],
+    "needs_note": "built (DesignHistory)",
+    "closes_with": null,
+    "trap": "Reopened file differs by a rounding step",
+    "run": "C",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.sketch.com/docs/symbols-and-styles/"
+    ]
+  },
+  "RJ-D20": {
+    "id": "RJ-D20",
+    "app": "design",
+    "weight": "high",
+    "job": "Force-quit with unsaved work, relaunch.",
+    "outcome": "Design offers to restore it.",
+    "needs": [
+      "S12",
+      "design/autosave-history"
+    ],
+    "closes_with": "design/autosave-history",
+    "trap": "Work lost (only saved files survive today)",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://community.adobe.com/t5/after-effects-discussions/recover-unsaved-after-effects-project/m-p/8492557"
+    ],
+    "waits_on": "DA-7"
+  },
+  "RJ-D21": {
+    "id": "RJ-D21",
+    "app": "design",
+    "weight": "high",
+    "job": "Edit a saved file and try to close.",
+    "outcome": "A dot shows unsaved changes and close asks first.",
+    "needs": [
+      "design/files-history"
+    ],
+    "needs_note": "files-history (beta)",
+    "closes_with": "design/files-history",
+    "trap": "Closes without asking",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.sketch.com/docs/symbols-and-styles/"
+    ]
+  },
+  "RJ-D22": {
+    "id": "RJ-D22",
+    "app": "design",
+    "weight": "med",
+    "job": "Make three pages and export each as PNG.",
+    "outcome": "One file per page, right sizes.",
+    "needs": [
+      "design/design-export"
+    ],
+    "needs_note": "pages (built), design-export (beta)",
+    "closes_with": "design/design-export",
+    "trap": "Export not built yet",
+    "run": "Cm",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.figma.com/hc/en-us/articles/360040028114-Guide-to-exporting-from-Figma"
+    ]
+  },
+  "RJ-D23": {
+    "id": "RJ-D23",
+    "app": "design",
+    "weight": "med",
+    "job": "Pick a colour from a placed photo with the eyedropper.",
+    "outcome": "The picked swatch equals the document pixel under the cursor, not the screen-scaled colour.",
+    "needs": [
+      "S13",
+      "design/eyedropper",
+      "S20"
+    ],
+    "needs_note": "S13 and design/eyedropper pick the colour; S20 adds the placed photo it is picked from",
+    "closes_with": "S20",
+    "trap": "Picks the screen-scaled colour",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/designer/full-feature-list/"
+    ]
+  },
+  "RJ-D24": {
+    "id": "RJ-D24",
+    "app": "design",
+    "weight": "high",
+    "job": "Set stroke, radius and opacity on five selected layers that differ.",
+    "outcome": "Inspector shows Mixed and one edit applies to all.",
+    "needs": [
+      "design/style-rows"
+    ],
+    "needs_note": "style-rows (built)",
+    "closes_with": "design/style-rows",
+    "trap": "Edit applies only to the first layer",
+    "run": "C",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.nobledesktop.com/classes/figma-bootcamp/syllabus"
+    ]
+  },
+  "RJ-D25": {
+    "id": "RJ-D25",
+    "app": "design",
+    "weight": "med",
+    "job": "Open a file whose font this Mac lacks.",
+    "outcome": "A notice names the font and the substitute; layout is unchanged until the person chooses.",
+    "needs": [],
+    "needs_note": "none (not in the beta-80 plan)",
+    "closes_with": null,
+    "trap": "Silent fallback reflows every text box",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://forum.figma.com/t/solved-bug-when-exporting-text-as-svg/33413",
+      "https://forum.sketch.com/t/alternative-tools-for-complex-svg-exports/1891"
+    ]
+  },
+  "RJ-D26": {
+    "id": "RJ-D26",
+    "app": "design",
+    "weight": "med",
+    "job": "Paste or open an SVG from another design app.",
+    "outcome": "It arrives as editable vectors with colours kept.",
+    "needs": [
+      "E11"
+    ],
+    "needs_note": "E11 SVG reader",
+    "closes_with": "E11",
+    "trap": "Black fills; objects collapse to 1 px (100% sizes)",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://forum.figma.com/archive-21/copy-and-paste-svg-from-affinity-designer-29535",
+      "https://rive.app/community/forums/support/fsnLLkXUaA62/svg-import-from-illustrator-is-it-bugged/ftRngpXaBEvH"
+    ]
+  },
+  "RJ-D27": {
+    "id": "RJ-D27",
+    "app": "design",
+    "weight": "med",
+    "job": "Define colour variables with light and dark modes and switch the mode.",
+    "outcome": "Every use updates.",
+    "needs": [],
+    "needs_note": "F9 variables",
+    "closes_with": null,
+    "trap": "Hard-coded copies don't update",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.sketch.com/docs/symbols-and-styles/"
+    ]
+  },
+  "RJ-D28": {
+    "id": "RJ-D28",
+    "app": "design",
+    "weight": "med",
+    "job": "Resize a phone frame to tablet width.",
+    "outcome": "Pinned elements stay pinned, stretched ones stretch.",
+    "needs": [],
+    "needs_note": "none: constraints are v1 Out and not in the beta-80 plan",
+    "closes_with": null,
+    "trap": "Everything scales or nothing moves",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.figma.com/hc/en-us/articles/360040451373-Guide-to-auto-layout"
+    ]
+  },
+  "RJ-D29": {
+    "id": "RJ-D29",
+    "app": "design",
+    "weight": "med",
+    "job": "Export a 1 px hairline icon at 1x.",
+    "outcome": "Lines are crisp, not two grey pixels.",
+    "needs": [
+      "design/canvas-basics"
+    ],
+    "needs_note": "canvas-basics CB-a whole points (beta)",
+    "closes_with": "design/canvas-basics",
+    "trap": "Half-point positions blur 1 px lines",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://evolvingweb.com/blog/troubleshooting-blurry-svg-icons-sketch-illustrator"
+    ]
+  },
+  "RJ-D30": {
+    "id": "RJ-D30",
+    "app": "design",
+    "weight": "med",
+    "job": "Open a 20-artboard, 500-layer file.",
+    "outcome": "Opens in under 2 s, zoom and pan stay smooth.",
+    "needs": [
+      "G1"
+    ],
+    "needs_note": "G1 gate (Design adopter)",
+    "closes_with": "G1",
+    "trap": "Untested at this size",
+    "run": "Cm",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/designer/full-feature-list/"
+    ]
+  },
+  "RJ-D31": {
+    "id": "RJ-D31",
+    "app": "design",
+    "weight": "high",
+    "job": "Zoom to the selection, fit the page, read positions on the rulers.",
+    "outcome": "The view frames the selection's rotated bounds, the page fits the window, and the ruler positions match the inspector.",
+    "needs": [],
+    "needs_note": "built (#2213, #1601)",
+    "closes_with": null,
+    "trap": "Zoom to selection ignores rotated layers",
+    "run": "J",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.nobledesktop.com/classes/figma-bootcamp/syllabus"
+    ]
+  },
+  "RJ-D32": {
+    "id": "RJ-D32",
+    "app": "design",
+    "weight": "med",
+    "job": "Resize the page to a new device size, then find a layer that now sits off it.",
+    "outcome": "Width and Height each change in one undo step; layers off the page stay visible, dimmed.",
+    "needs": [
+      "design/canvas-basics"
+    ],
+    "needs_note": "canvas-basics CB-c (page size in the inspector, layers past the edge)",
+    "closes_with": "design/canvas-basics",
+    "trap": "Page size fixed at creation; off-page layers vanish",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "captain"
+    ]
+  },
+  "RJ-D33": {
+    "id": "RJ-D33",
+    "app": "design",
+    "weight": "high",
+    "job": "Nudge a card 30 times, jump back 10 steps in History, save and reopen.",
+    "outcome": "The reopened card sits where the 20th nudge left it (20 points right).",
+    "needs": [
+      "S12",
+      "design/autosave-history"
+    ],
+    "closes_with": "design/autosave-history",
+    "trap": "The jump records a step, or the save writes the state before the jump",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DA-6",
+    "added_by": "design/autosave-history"
+  },
+  "RJ-D34": {
+    "id": "RJ-D34",
+    "app": "design",
+    "weight": "med",
+    "job": "Pick a red ellipse's colour with the eyedropper onto a white rectangle under it, and save.",
+    "outcome": "The point over both reads red, and the saved rectangle's fill is #FF0000.",
+    "needs": [
+      "S13",
+      "design/eyedropper"
+    ],
+    "closes_with": "design/eyedropper",
+    "trap": "The sample reads the selected rectangle instead of the ellipse on top",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DY-6",
+    "added_by": "design/eyedropper"
+  },
+  "RJ-D35": {
+    "id": "RJ-D35",
+    "app": "design",
+    "weight": "med",
+    "job": "Draw a five-point star badge with the Shape tool, save, reopen and export SVG.",
+    "outcome": "The reopened layer is still a star with its points and ratio, and the SVG path has ten vertices with the first at the top centre.",
+    "needs": [
+      "S19",
+      "design/shape-tools"
+    ],
+    "closes_with": "design/shape-tools",
+    "trap": "The star reopens as a rectangle, or the SVG writes its box",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DS-6",
+    "added_by": "design/shape-tools"
+  },
+  "RJ-D36": {
+    "id": "RJ-D36",
+    "app": "design",
+    "weight": "med",
+    "job": "Give a rectangle a 2 pt dashed border with round caps and export SVG.",
+    "outcome": "The SVG rect has stroke-dasharray \"8 4\" and stroke-linecap \"round\".",
+    "needs": [
+      "S17",
+      "design/stroke-style"
+    ],
+    "closes_with": "design/stroke-style",
+    "trap": "The SVG drops the dash or writes it unscaled",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DK-7",
+    "added_by": "design/stroke-style"
+  },
+  "RJ-D41": {
+    "id": "RJ-D41",
+    "app": "design",
+    "weight": "high",
+    "job": "Export a 540x675 pt frame as JPEG at exactly 1080x1350, and as PNG at a 512 px long edge.",
+    "outcome": "The JPEG is exactly 1080x1350 with its transparent corner on the frame's fill; the PNG is 410x512 with alpha.",
+    "needs": [
+      "S11",
+      "design/export-pack"
+    ],
+    "closes_with": "design/export-pack",
+    "trap": "2x applied on top (2160x2700), or the JPEG's transparent corner comes out black",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DX-3",
+    "added_by": "design/export-pack"
+  },
+  "RJ-D42": {
+    "id": "RJ-D42",
+    "app": "design",
+    "weight": "high",
+    "job": "Save two Design files, then reopen one from File > Open Recent; drop a Halo project on Design.",
+    "outcome": "Open Recent lists only the two Design files, newest first; the Halo project is handed to Halo and the Design document is unchanged.",
+    "needs": [
+      "suite/file-flow",
+      "design/file-flow"
+    ],
+    "closes_with": "design/file-flow",
+    "trap": "Design has no Open Recent, or it lists every app's files",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DF-3",
+    "added_by": "design/file-flow"
+  },
+  "RJ-D43": {
+    "id": "RJ-D43",
+    "app": "design",
+    "weight": "med",
+    "job": "Export a card with a drop shadow as a 2x PNG and as a PDF.",
+    "outcome": "The PNG has shadow pixels past the card's edge by the style's reach at 2x; the PDF holds the card as a vector path with the shadow as one image under it.",
+    "needs": [
+      "S2"
+    ],
+    "closes_with": "S2",
+    "trap": "The shadow is cut at the card's bounds, or the PDF rasterizes the card itself",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "https://forum.sketch.com/t/i-cannot-export-svg-with-blur/5474"
+    ],
+    "waits_on": "DL-7",
+    "added_by": "design/layer-styles"
+  },
+  "RJ-D50": {
+    "id": "RJ-D50",
+    "app": "design",
+    "weight": "med",
+    "job": "Set a three-line justified paragraph in Design with line height 1.5, letter spacing 20 and italic, then export a PNG.",
+    "outcome": "The first two lines' ink spans the box width within 2 px and the last line doesn't; the baseline gap is 1.5 times ascent plus descent within 1 px.",
+    "needs": [
+      "suiteui/text-style",
+      "E8"
+    ],
+    "closes_with": "suiteui/text-style",
+    "trap": "Line height or justify is set in the inspector but the export ignores it",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "TS-8",
+    "added_by": "suiteui/text-style"
+  }
+}

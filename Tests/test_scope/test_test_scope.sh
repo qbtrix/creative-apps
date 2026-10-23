@@ -2,9 +2,12 @@
 # Tests/test_scope/test_test_scope.sh: tests for scripts/test-scope, the one
 # table of which swift tests run where. Changed paths map to the right test
 # filters (a Design Model file runs DesignModelTests only), apps map to the
-# filters CI's scoped runs use, every entry of Tests/perf-suites.txt names a
-# test that exists, the perf regex takes exactly the listed tests (a suite,
-# one test of a suite, a free test) and nothing beside them, and perf-report
+# filters CI's scoped runs use, every entry of Tests/perf-suites.txt and
+# Tests/heavy-suites.txt names a test that exists, every test asserting a
+# wall-clock bound is in the perf list or the shrink-only timing baseline
+# (scripts/test-scope timing, with its own fixture cases), the perf
+# and heavy regexes take exactly the listed tests (a suite, one test of a
+# suite, a free test) and nothing beside them, and perf-report
 # flags only a bound missed by more than its multiple. No swift; needs
 # python3. bash 3.2 compatible.
 #
@@ -33,25 +36,29 @@ photo_snaps='^AppSnapshotTests\.(BodyCountSuites/)?((RenderBudget)?Photo[A-Za-z]
 suiteui_snaps='^AppSnapshotTests\.(BodyCountSuites/)?((Suite[A-Za-z]*|GoldenImageTests|SnapshotHostTests)/|(suite[A-Za-z]*|snapshotsDrawRealSlidersNotPlaceholders|theCapsuleDrawsOnlyBehindTheCurrentItem|aDisabledBarCommandDrawsDimmerThanAnEnabledOne)\(|AppSnapshotTests/suiteGallery\()'
 
 # Changed paths to tests.
-check "a Design Model file runs DesignModelTests only" \
-  '^(DesignModelTests)\.;' "$(changed Sources/DesignModel/DesignNode.swift)"
+check "a Design Model file runs DesignModelTests and the CLI's tests" \
+  '^(AfterGlowCLITests|DesignModelTests)\.;' "$(changed Sources/DesignModel/DesignNode.swift)"
 check "a Design App file runs Design's snapshot suites only" \
   ";$design_snaps" "$(changed Sources/DesignApp/DesignWindow.swift)"
 check "a Model file, another app's view and a doc" \
-  "^(DesignModelTests)\\.;$photo_snaps" "$(changed Sources/DesignModel/A.swift Sources/PhotoApp/B.swift docs/engineering.md)"
+  "^(AfterGlowCLITests|DesignModelTests)\\.;$photo_snaps" "$(changed Sources/DesignModel/A.swift Sources/PhotoApp/B.swift docs/engineering.md)"
 check "SuiteModel runs every Model's tests" \
   '^(DesignModelTests|FlareModelTests|HaloModelTests|LibraryModelTests|PhotoModelTests|SuiteModelTests)\.;' \
   "$(changed Sources/SuiteModel/Values/SuiteApp.swift)"
 check "SuiteKernel runs SuiteKernelTests and every Model's tests" \
-  '^(DesignModelTests|FlareModelTests|HaloModelTests|LibraryModelTests|PhotoModelTests|SuiteKernelTests)\.;' \
+  '^(AfterGlowCLITests|DesignModelTests|FlareModelTests|HaloModelTests|LibraryModelTests|PhotoModelTests|SuiteKernelTests)\.;' \
   "$(changed Sources/SuiteKernel/Geometry.swift)"
 check "a kernel module file runs the same" \
-  '^(DesignModelTests|FlareModelTests|HaloModelTests|LibraryModelTests|PhotoModelTests|SuiteKernelTests)\.;' \
+  '^(AfterGlowCLITests|DesignModelTests|FlareModelTests|HaloModelTests|LibraryModelTests|PhotoModelTests|SuiteKernelTests)\.;' \
   "$(changed Sources/SuiteKernel/History/History.swift)"
 check "SuiteUI runs SuiteUITests and its snapshot suites" \
   "^(SuiteUITests)\\.;$suiteui_snaps" "$(changed Sources/SuiteUI/Tokens.swift)"
 check "AfterGlow and SuiteShell run the suite scope" \
-  '^(SuiteKernelTests|SuiteModelTests)\.;' "$(changed Sources/AfterGlowApp/HomeWindow.swift Sources/SuiteShell/SuiteCommands.swift)"
+  '^(AfterGlowCLITests|SuiteKernelTests|SuiteModelTests)\.;' "$(changed Sources/AfterGlowApp/HomeWindow.swift Sources/SuiteShell/SuiteCommands.swift)"
+check "the CLI and its entry run AfterGlowCLITests only" '^(AfterGlowCLITests)\.;' \
+  "$(changed Sources/AfterGlowCLI/main.swift Sources/AfterGlowCLICore/CLI.swift)"
+check "a CLI test file or a real job runs AfterGlowCLITests only" '^(AfterGlowCLITests)\.;' \
+  "$(changed Tests/AfterGlowCLITests/CLIShapeTests.swift Tests/RealJobs/fake/grow/grow.jobs.json)"
 check "a Model test file runs its target" '^(HaloModelTests)\.;' "$(changed Tests/HaloModelTests/HaloEditTests.swift)"
 check "a kernel test file runs SuiteKernelTests only" '^(SuiteKernelTests)\.;' \
   "$(changed Tests/SuiteKernelTests/KernelShapeTests.swift)"
@@ -68,16 +75,43 @@ check "docs, scripts, journeys, CI and the perf list run no tests" ';' \
 check "Package.swift runs everything" all "$(changed Sources/DesignModel/A.swift Package.swift)"
 check "a Sources folder the table doesn't know runs everything" all "$(changed Sources/NewModel/A.swift)"
 check "--linux drops what Linux doesn't build" \
-  '^(DesignModelTests)\.;' "$(changed --linux Sources/DesignModel/A.swift Sources/DesignApp/B.swift Sources/SuiteUI/C.swift)"
+  '^(AfterGlowCLITests|DesignModelTests)\.;' "$(changed --linux Sources/DesignModel/A.swift Sources/DesignApp/B.swift Sources/SuiteUI/C.swift)"
 
 # Apps to tests, as CI's scoped runs use them.
 check "app photo" "^(PhotoModelTests)\\.;$photo_snaps" "$(python3 "$ts" app photo | paste -sd';' -)"
-check "app suite" '^(SuiteKernelTests|SuiteModelTests)\.;' "$(python3 "$ts" app suite | paste -sd';' -)"
+check "app suite" '^(AfterGlowCLITests|SuiteKernelTests|SuiteModelTests)\.;' "$(python3 "$ts" app suite | paste -sd';' -)"
 check "app suiteui" "^(AppAuditTests|SuiteKernelTests|SuiteUITests)\\.;$suiteui_snaps" "$(python3 "$ts" app suiteui | paste -sd';' -)"
+check "app design,photo: the union, as a lane batch scopes its macOS gate" \
+  "^(DesignModelTests|PhotoModelTests)\\.;" "$(python3 "$ts" app design,photo | paste -sd';' - | cut -d';' -f1);"
+python3 "$ts" app photo,nope >/dev/null 2>&1
+check "an unknown app in a list is refused" 1 "$?"
 python3 "$ts" app nope >/dev/null 2>&1
 check "an unknown app is refused" 1 "$?"
 
-# Every perf list entry names a test that exists.
+# Code paths to the apps the lane's macOS build-only run compiles (build-apps).
+apps() { printf '%s\n' "$@" | python3 "$ts" build-apps; }
+check "build-apps: one app's Model, tests, app, snapshots and journeys" photo \
+  "$(apps Sources/PhotoModel/A.swift Tests/PhotoModelTests/B.swift Sources/PhotoApp/C.swift \
+    Tests/AppSnapshotTests/PhotoBrushSnapshots.swift Tests/AppSnapshotTests/RenderBudgetPhotoTests.swift UITests/PhotoJourneyTests+Layers.swift)"
+check "build-apps: two apps give both" design,photo "$(apps Sources/PhotoApp/C.swift Sources/DesignModel/X.swift)"
+for p in Sources/SuiteUI/Tokens.swift Sources/SuiteKernel/Geometry.swift Sources/SuiteModel/Values/SuiteApp.swift \
+    Sources/SuiteShell/SuiteCommands.swift Sources/AfterGlowApp/HomeWindow.swift Sources/AfterGlowCLI/main.swift \
+    Tests/AfterGlowCLITests/CLIShapeTests.swift Tests/SuiteUITests/TokensTests.swift Tests/AppAuditTests/Checks/Overlap.swift \
+    Tests/AppSnapshotTests/GoldenImage.swift UITests/Journey.swift UITests/Audit.swift UITests/SuiteJourneyTests.swift \
+    Package.swift project.yml Sources/NewModel/A.swift; do
+  check "build-apps: shared $p builds all" all "$(apps Sources/PhotoApp/C.swift "$p")"
+done
+check "build-apps: no paths builds all" all "$(printf '' | python3 "$ts" build-apps)"
+
+# Changed paths to the `app` scopes whose tests cover what `changed` picks (scopes).
+scopes() { printf '%s\n' "$@" | python3 "$ts" scopes; }
+check "scopes: a Model and an app's snapshots, not the CLI tests Linux runs" photo "$(scopes Sources/PhotoModel/A.swift Sources/PhotoApp/B.swift)"
+check "scopes: SuiteUI and its tests" suiteui "$(scopes Sources/SuiteUI/A.swift Tests/SuiteUITests/B.swift Tests/AppAuditTests/C.swift)"
+check "scopes: a fixture and the kernel's" design,suite "$(scopes Tests/DesignModelTests/Fixtures/a.svg Tests/SuiteKernelTests/Fixtures/place/a.json)"
+check "scopes: a golden PNG and Package.swift are all" all,all "$(scopes Tests/AppSnapshotTests/Golden/canvas/a.png),$(scopes Package.swift)"
+check "scopes: docs, scripts, journeys and real jobs are none" "" "$(scopes docs/a.md scripts/ci UITests/PhotoJourneyTests.swift Tests/RealJobs/photo/x/input/a.png)"
+
+# Every perf and heavy list entry names a test that exists.
 missing=""
 while read -r app id; do
   case "$app" in ''|'#'*) continue ;; esac
@@ -97,8 +131,56 @@ while read -r app id; do
   suite=${parts[$((n - 2))]}
   file=$(grep -rlE "struct $suite[[:space:]:{]" "$root/Tests/$target" | head -1)
   [[ -n "$file" ]] && grep -qE "func $last\\(" "$file" || missing="$missing $id"
-done <"$root/Tests/perf-suites.txt"
-check "every Tests/perf-suites.txt entry names a test in Tests/" "" "$missing"
+done < <(cat "$root/Tests/perf-suites.txt" "$root/Tests/heavy-suites.txt")
+check "every Tests/perf-suites.txt and Tests/heavy-suites.txt entry names a test in Tests/" "" "$missing"
+
+# Every test that asserts a wall-clock bound is in the perf list.
+check "every wall-clock test in Tests/ is in Tests/perf-suites.txt (land a new one .disabled and ask the supervisor for its line; // not-timing: only for a look-alike)" "" "$(python3 "$ts" timing)"
+
+# What timing takes: a fixture tree whose perf list holds one suite.
+mkdir -p "$tmp/tree/PhotoModelTests"
+cat >"$tmp/tree/PhotoModelTests/A.swift" <<'EOF'
+import Testing
+let clock = ContinuousClock()
+@Suite struct ListedTests {
+    @Test func timed() { #expect(clock.measure {} < .milliseconds(5)) }
+    @Test func helperTimed() { expectP95(step, atMost: 8, target: 4) }
+}
+@Suite(.disabled("waits"))
+struct OffTests {
+    @Test func timed() { #expect(elapsed < .seconds(1)) }
+}
+@Test(.disabled("waits")) func offTest() { #expect(elapsed < .seconds(1)) }
+@Test func marked() {
+    // not-timing: an injected clock
+    #expect(now < .seconds(1))
+}
+@Test func bodies() { #expect(bodies <= 3, "median \(bodies)") }
+@Test func lowerBound() { #expect(elapsed >= .milliseconds(3)) }
+@Test func timedMedian() { #expect(cost.median <= 50 * scale) }
+@Test(arguments: [1,
+                  2]) func unlisted(n: Int) { #expect(took < .seconds(1)) }
+@Test func helperP95() { expectP95(step, atMost: 8, target: 4) }
+@Test func helperBodies() { expectBodies(step, atMost: 3, target: 3) }
+@Test func framesDrawn() { if let redrawn { #expect(redrawn >= 30, "drew \(redrawn)") } }
+@Test func stepsSent() { #expect(step.steps >= 120) }
+EOF
+# A helper that asserts a timing bound makes every test calling it a timing test.
+cat >"$tmp/tree/PhotoModelTests/Harness.swift" <<'EOF'
+let harnessClock = ContinuousClock()
+func expectP95(_ step: Step, atMost budget: Double, target: Double) { #expect(step.p95 <= budget) }
+func expectBodies(_ step: Step, atMost budget: Int, target: Int) { #expect(step.bodies <= budget) }
+EOF
+printf '%s\n' '@Test func untimedMedian() { #expect(copies.median <= 2) }' >"$tmp/tree/PhotoModelTests/B.swift"
+printf '%s\n' 'photo PhotoModelTests.ListedTests' >"$tmp/listed.txt"
+: >"$tmp/no-baseline.txt"
+printf '%s\n' '# grandfathered' 'PhotoModelTests.unlisted' 'PhotoModelTests.gone' >"$tmp/baseline.txt"
+check "timing names each unlisted bound: a Duration, a timing name or a frames-drawn floor in a file that reads a clock, or a call to a helper that asserts one" \
+  'PhotoModelTests.timedMedian;PhotoModelTests.unlisted;PhotoModelTests.helperP95;PhotoModelTests.framesDrawn' \
+  "$(TESTS_DIR="$tmp/tree" PERF_SUITES="$tmp/listed.txt" TIMING_BASELINE="$tmp/no-baseline.txt" python3 "$ts" timing | cut -d' ' -f1 | paste -sd';' -)"
+check "timing passes a baselined test and names a baseline line that no longer times (the baseline only shrinks)" \
+  'PhotoModelTests.timedMedian;PhotoModelTests.helperP95;PhotoModelTests.framesDrawn;PhotoModelTests.gone' \
+  "$(TESTS_DIR="$tmp/tree" PERF_SUITES="$tmp/listed.txt" TIMING_BASELINE="$tmp/baseline.txt" python3 "$ts" timing | cut -d' ' -f1 | paste -sd';' -)"
 
 # The perf regex: exactly the listed tests, by suite, one test or free test.
 perf=$(python3 "$ts" perf)
@@ -123,7 +205,8 @@ check "leaves another target's suite of the same name" no "$(takes 'DesignModelT
 photo=$(python3 "$ts" perf photo)
 check "perf photo takes Photo's" yes "$(grep -qE "$photo" <<<'AppSnapshotTests.PhotoBrushLatencyTests/x()' && echo yes || echo no)"
 check "perf photo leaves Halo's" no "$(grep -qE "$photo" <<<'HaloModelTests.HaloViewerBudgetTests/x()' && echo yes || echo no)"
-check "perf for an app with none is empty, never a match-all regex" "" "$(python3 "$ts" perf suite)"
+printf '%s\n' 'photo PhotoModelTests.PhotoBudgetTests' >"$tmp/photo-only.txt"
+check "perf for an app with none is empty, never a match-all regex" "" "$(PERF_SUITES="$tmp/photo-only.txt" python3 "$ts" perf halo)"
 printf '%s\n' '# nothing yet' >"$tmp/empty.txt"
 check "an empty list gives no regex" "" "$(PERF_SUITES="$tmp/empty.txt" python3 "$ts" perf)"
 printf '%s\n' 'photo PhotoModelTests' >"$tmp/bad.txt"
@@ -132,6 +215,19 @@ check "a malformed entry is refused" 1 "$?"
 printf '%s\n' 'paint PhotoModelTests.PhotoBudgetTests' >"$tmp/bad.txt"
 PERF_SUITES="$tmp/bad.txt" python3 "$ts" perf >/dev/null 2>&1
 check "an unknown app in the list is refused" 1 "$?"
+
+# The heavy regex: the listed tests, all or those a --changed filter takes.
+printf '%s\n' '# heavy' 'photo PhotoModelTests.PhotoRenderRouteTests' 'library LibraryModelTests.matchesFullPipeline' >"$tmp/heavy.txt"
+heavy=$(HEAVY_SUITES="$tmp/heavy.txt" python3 "$ts" heavy)
+takes_heavy() { grep -qE "$heavy" <<<"$1" && echo yes || echo no; }
+check "heavy takes a listed suite's test" yes "$(takes_heavy 'PhotoModelTests.PhotoRenderRouteTests/aRegionsSurfaceIsTheRenderedRegion()')"
+check "heavy takes a listed free test" yes "$(takes_heavy 'LibraryModelTests.matchesFullPipeline()')"
+check "heavy leaves the rest of the target" no "$(takes_heavy 'PhotoModelTests.PhotoRendererTests/aFrameIsTheCompositeInDisplayBytes()')"
+check "heavy within a changed filter keeps that target's" '^(PhotoModelTests\.PhotoRenderRouteTests)(/|\()' \
+  "$(HEAVY_SUITES="$tmp/heavy.txt" python3 "$ts" heavy '^(DesignModelTests|PhotoModelTests)\.')"
+check "heavy within a filter that takes none is empty, never a match-all regex" "" \
+  "$(HEAVY_SUITES="$tmp/heavy.txt" python3 "$ts" heavy '^(SuiteModelTests)\.')"
+check "an empty heavy list gives no regex" "" "$(HEAVY_SUITES="$tmp/empty.txt" python3 "$ts" heavy)"
 
 # perf-report: what Swift Testing prints for a missed bound, both ways it
 # shows the values, and a test that only says "failed".

@@ -1,7 +1,10 @@
 // SuiteLiveServicesTests.swift: SuiteServices.live over a temp support
 // folder (suite-contracts SC-5b, SC-5c). It is not a preview; recents is
-// live and writes recents.json there, creating and home are live (HM-2a); each of
-// the other 12 slotted members is pending with its "<What> isn't available yet."
+// live and writes recents.json there, creating and home are live (HM-2a),
+// preferences is live over preferences.json (onboarding OB-9), onboarding is
+// SuiteOnboarding (OB-12), pasteboard is SuitePasteboardCoding (clipboard-interop CB-4), text is LiveText (shell-text ST-8),
+// media is LiveMedia (shell-media SM-9); each other
+// slotted member is pending with its "<What> isn't available yet."
 // sentence, and each throwing one throws notAvailable with that sentence.
 // `animations` and `updates` are the fakes until `with(animations:updates:)`
 // swaps them. macOS only (SuiteShell).
@@ -45,21 +48,36 @@ import Testing
         #expect(s.pending["recents"] == nil)
     }
 
+    @Test func preferencesLoadDefaultsAndSaveThroughTheSupportFolder() async throws {
+        let (s, support) = makeLive()
+        #expect(s.pending["preferences"] == nil)
+        var p = try await s.preferences.load()
+        #expect(p == SuitePreferences())
+        p.onboardingDoneVersion = 1
+        #expect(try await s.preferences.save(p).revision == 1)
+        let onDisk = try FileStore(folder: support).read("preferences.json", as: SuitePreferences.self)
+        #expect(onDisk.value?.onboardingDoneVersion == 1 && onDisk.revision == 1)
+    }
+
     @Test func everyOtherSlottedMemberIsPendingWithItsFeature() {
         let pending = makeLive().services.pending
         var expected = SuiteServices.slotFeatures.mapValues(SuiteIdentity.notConnected)
-        for live in ["recents", "creating", "home", "switching", "sending", "receiving"] { expected[live] = nil }
+        let live = ["recents", "creating", "home", "switching", "sending", "receiving", "preferences", "onboarding",
+                    "pasteboard", "text", "media"]
+        for member in live { expected[member] = nil }
         #expect(pending == expected)
-        #expect(pending.count == 9)
+        #expect(pending.count == 6)
+        #expect(pending["text"] == nil)
+        #expect(pending["media"] == nil)
         #expect(pending["thumbnails"] == "Opening recent work isn't available yet.")
         #expect(pending["home"] == nil)
         #expect(pending["creating"] == nil)
-        #expect(pending["onboarding"] == "The welcome tour isn't available yet.")
+        #expect(pending["onboarding"] == nil)
         #expect(pending["roundTrips"] == "Editing in Photo and back isn't available yet.")
-        #expect(pending["pasteboard"] == "Copy and paste between apps isn't available yet.")
+        #expect(pending["pasteboard"] == nil)
         #expect(pending["assets"] == "The shared asset library isn't available yet.")
         #expect(pending["linking"] == "Linking assets between apps isn't available yet.")
-        #expect(pending["preferences"] == "The Settings window isn't available yet.")
+        #expect(pending["preferences"] == nil)
         #expect(pending["settings"] == "The Settings window isn't available yet.")
     }
 
@@ -67,9 +85,11 @@ import Testing
         let pending = makeLive().services.pending
         let members: Set<String> = ["switching", "recents", "creating", "routing", "sending", "receiving",
                                     "roundTrips", "pasteboard", "assets", "linking", "preferences", "settings",
-                                    "onboarding", "thumbnails", "home"]
+                                    "onboarding", "thumbnails", "home", "media", "text"]
         #expect(Set(SuiteServices.slotFeatures.keys) == members)
-        #expect(Set(pending.keys).union(["recents", "creating", "home", "switching", "sending", "receiving"]) == members)
+        let live: Set<String> = ["recents", "creating", "home", "switching", "sending", "receiving", "preferences",
+                                  "onboarding", "pasteboard", "text", "media"]
+        #expect(Set(pending.keys).union(live) == members)
     }
 
     @Test func throwingMembersNotLiveThrowTheirReason() async throws {
@@ -78,7 +98,6 @@ import Testing
         await #expect(throws: reason("thumbnails")) { _ = try await s.thumbnails.publish(png: Data(), for: logo) }
         await #expect(throws: reason("roundTrips")) { try await s.roundTrips.cancel(session: "r1") }
         await #expect(throws: reason("assets")) { _ = try await s.assets.index() }
-        await #expect(throws: reason("preferences")) { _ = try await s.preferences.load() }
         await #expect(throws: reason("settings")) { try await s.settings.open(.general, from: .launcher) }
     }
 
@@ -87,9 +106,18 @@ import Testing
         #expect(try s.routing.route(fileName: "Logo.design") == .design)
         #expect(s.creating.tiles(missing: []).allSatisfy { $0.disabledReason == nil })
         #expect(s.onboarding.pages.count == 3)
-        #expect(s.pasteboard is FakePasteboard)
+        #expect(s.pasteboard is SuitePasteboardCoding)
         #expect(s.linking is FakeLinking)
-        #expect(s.onboarding is FakeOnboarding)
+    }
+
+    @Test func onboardingIsTheLiveTourAndShowsUntilDone() {
+        let s = makeLive().services
+        #expect(s.pending["onboarding"] == nil)
+        #expect(s.onboarding is SuiteOnboarding)
+        #expect(s.onboarding.shouldShow(SuitePreferences(), version: 1))
+        var done = SuitePreferences()
+        done.onboardingDoneVersion = 1
+        #expect(!s.onboarding.shouldShow(done, version: 1))
     }
 
     @Test func animationsAndUpdatesAreFakesUntilSwapped() async throws {

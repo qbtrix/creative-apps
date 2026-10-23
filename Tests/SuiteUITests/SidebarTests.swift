@@ -82,3 +82,10 @@ import Testing
     let parent = SidebarItem(id: "p", title: "Root", systemImage: "folder", children: [child])
     #expect(parent.secondLevelRows.map(\.isDimmed) == [false, true])
 }
+
+@Test func aToggleReservesOnlyTheSymbolsItIsGiven() {
+    let toggle = SidebarToggle(
+        id: "l", title: "Lock", onSymbol: "lock.fill", offSymbol: "lock", isOn: false, reserving: ["lock.open"])
+    #expect(toggle.reserved == ["lock.open"])
+    #expect(SidebarToggle(id: "l", title: "Lock", onSymbol: "lock", offSymbol: "lock.open", isOn: true).reserved.isEmpty)
+}

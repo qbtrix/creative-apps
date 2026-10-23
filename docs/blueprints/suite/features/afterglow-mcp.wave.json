@@ -1,0 +1,250 @@
+{
+  "title": "afterglow mcp: an MCP server that publishes every app's command catalog as tools, headless first (stdio, Linux and macOS), then a running app's live document over a local, user-approved channel (macOS)",
+  "wave": "AI1",
+  "order": 20,
+  "status": "built",
+  "feature_issue": "#3000",
+  "covers": "captain's AI-accessible-first call (MCP half); beta-80 plan W0 (p0; live slices W2); suite.md 1.5; the AI-via-Paw-OS module's connection point",
+  "waits_on": "afterglow-cli CL-a (slice waits; MC-15 on CL-z for docs/cli.md); suiteui command-catalog CC-a (cross-line); the live slices also wait on one adopt-command-catalog app slice merged-done (cross-line hand-off) and suite-contracts (built)",
+  "longest_chain": "7 (MC-1 → MC-2 → MC-3 → MC-4 → MC-8 → MC-11 → MC-15)",
+  "owned": [
+    "Sources/AfterGlowCLICore/MCP/MCPVersions.swift",
+    "Sources/AfterGlowCLICore/MCP/JSONRPC.swift",
+    "Sources/AfterGlowCLICore/MCP/MCPServer.swift",
+    "Sources/AfterGlowCLICore/MCP/MCPTools.swift",
+    "Sources/AfterGlowCLICore/MCP/MCPSessions.swift",
+    "Tests/AfterGlowCLITests/MCPShapeTests.swift",
+    "docs/c4/parts/creative-apps/afterglow-cli/cli-mcp.json",
+    "Sources/SuiteModel/AIAccess/AIAccessGrants.swift",
+    "Tests/AfterGlowCLITests/MCPTestClient.swift",
+    "Tests/AfterGlowCLITests/MCPClientTests.swift",
+    "Sources/SuiteModel/AIAccess/FakeAIAccess.swift",
+    "Tests/AfterGlowCLITests/MCPProtocolTests.swift",
+    "Tests/mutations/AfterGlowCLICore.MCPServer.json",
+    "Tests/AfterGlowCLITests/MCPToolsTests.swift",
+    "Tests/mutations/AfterGlowCLICore.MCPTools.json",
+    "Tests/AfterGlowCLITests/MCPCallTests.swift",
+    "Tests/mutations/AfterGlowCLICore.MCPSessions.json",
+    "Tests/SuiteModelTests/AIAccessGrantsTests.swift",
+    "Tests/mutations/SuiteModel.AIAccessGrants.json",
+    "docs/c4/parts/creative-apps/suite-model/suite-ai-access.json",
+    "Sources/SuiteShell/LiveCommandChannel.swift",
+    "Sources/SuiteShell/SuiteAppModifier.swift",
+    "docs/c4/parts/creative-apps/suite-shell/shell-live-commands.json",
+    "Sources/AfterGlowCLICore/MCP/LiveBridge.swift",
+    "Tests/AfterGlowCLITests/LiveBridgeTests.swift",
+    "Sources/SuiteUI/AIAccessSheet.swift",
+    "Sources/SuiteUI/AIAccessChip.swift",
+    "Sources/SuiteShell/AIAccessCommands.swift",
+    "Tests/AppSnapshotTests/SuiteAIAccessSnapshots.swift",
+    "UITests/AfterGlowJourneyTests+AIAccess.swift",
+    "Tests/AppSnapshotTests/RenderBudgetAIAccessTests.swift",
+    "Tests/AfterGlowCLITests/MCPBinaryTests.swift",
+    "docs/cli.md",
+    "docs/blueprints/suite/features/afterglow-mcp.wave.json"
+  ],
+  "journeys": [
+    "AfterGlowJourneyTests.testAIAccessApproval"
+  ],
+  "slices": [
+    {
+      "id": "MC-a",
+      "behavior": "The MCP types, version table, tool and session stubs exist in `AfterGlowCLICore/MCP/` with an in-process test client that speaks both protocol eras, so the protocol, tools and call slices build at once.",
+      "tasks": [
+        "MC-1",
+        "MC-2"
+      ],
+      "journeys": [
+        "MJ0"
+      ],
+      "owned": [
+        "Sources/AfterGlowCLICore/MCP/MCPVersions.swift",
+        "Sources/AfterGlowCLICore/MCP/JSONRPC.swift",
+        "Sources/AfterGlowCLICore/MCP/MCPServer.swift",
+        "Sources/AfterGlowCLICore/MCP/MCPTools.swift",
+        "Sources/AfterGlowCLICore/MCP/MCPSessions.swift",
+        "Tests/AfterGlowCLITests/MCPShapeTests.swift",
+        "docs/c4/parts/creative-apps/afterglow-cli/cli-mcp.json",
+        "Sources/SuiteModel/AIAccess/AIAccessGrants.swift",
+        "Tests/AfterGlowCLITests/MCPTestClient.swift",
+        "Tests/AfterGlowCLITests/MCPClientTests.swift",
+        "Sources/SuiteModel/AIAccess/FakeAIAccess.swift"
+      ],
+      "waits": {
+        "afterglow-cli:CL-a": [
+          "MC-1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "MC-proto",
+      "behavior": "The server reads one JSON-RPC message per line, answers `server/discover` and per-request versions (2026-07-28) and `initialize` (handshake era), maps malformed input to the right JSON-RPC errors, never answers a notification, and writes nothing but protocol to stdout.",
+      "tasks": [
+        "MC-3",
+        "MC-4"
+      ],
+      "journeys": [
+        "MJ1"
+      ],
+      "owned": [
+        "Tests/AfterGlowCLITests/MCPProtocolTests.swift",
+        "Sources/AfterGlowCLICore/MCP/JSONRPC.swift",
+        "Sources/AfterGlowCLICore/MCP/MCPServer.swift",
+        "Tests/mutations/AfterGlowCLICore.MCPServer.json"
+      ],
+      "waits": {
+        "MC-a": [
+          "MC-3"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "MC-tools",
+      "behavior": "`tools/list` publishes one tool per catalog command (`<app>.<command>`) plus the session tools, each with its title, description, input schema `{doc, params}` from the command's schema, output schema and kind-based annotations, in a stable order, filterable by app.",
+      "tasks": [
+        "MC-5",
+        "MC-6"
+      ],
+      "journeys": [
+        "MJ2"
+      ],
+      "owned": [
+        "Tests/AfterGlowCLITests/MCPToolsTests.swift",
+        "Sources/AfterGlowCLICore/MCP/MCPTools.swift",
+        "Tests/mutations/AfterGlowCLICore.MCPTools.json"
+      ],
+      "waits": {
+        "MC-a": [
+          "MC-5"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "MC-call",
+      "behavior": "`tools/call` opens documents under the allowed roots into expiring handles, runs any command on a handle through the catalog, saves and exports only under the roots, and reports refusals, schema issues and why-nots as tool errors the model can act on.",
+      "tasks": [
+        "MC-7",
+        "MC-8"
+      ],
+      "journeys": [
+        "MJ3"
+      ],
+      "owned": [
+        "Tests/AfterGlowCLITests/MCPCallTests.swift",
+        "Sources/AfterGlowCLICore/MCP/MCPSessions.swift",
+        "Tests/mutations/AfterGlowCLICore.MCPSessions.json"
+      ],
+      "waits": {
+        "MC-a": [
+          "MC-7"
+        ],
+        "MC-proto": [
+          "MC-8"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "MC-live-wire",
+      "behavior": "(macOS-only) A running app listens on a same-user Unix socket, refuses any client without a grant, and runs granted commands on its window's document through the catalog on the main actor; `afterglow mcp --live` bridges those as `live.<app>.<command>` tools.",
+      "tasks": [
+        "MC-9",
+        "MC-10",
+        "MC-11"
+      ],
+      "journeys": [
+        "MJ4"
+      ],
+      "owned": [
+        "Sources/SuiteModel/AIAccess/AIAccessGrants.swift",
+        "Tests/SuiteModelTests/AIAccessGrantsTests.swift",
+        "Tests/mutations/SuiteModel.AIAccessGrants.json",
+        "docs/c4/parts/creative-apps/suite-model/suite-ai-access.json",
+        "Sources/SuiteShell/LiveCommandChannel.swift",
+        "Sources/SuiteShell/SuiteAppModifier.swift",
+        "docs/c4/parts/creative-apps/suite-shell/shell-live-commands.json",
+        "Sources/AfterGlowCLICore/MCP/LiveBridge.swift",
+        "Tests/AfterGlowCLITests/LiveBridgeTests.swift"
+      ],
+      "waits": {
+        "MC-call": [
+          "MC-10",
+          "MC-11"
+        ],
+        "switching": [
+          "MC-10"
+        ]
+      },
+      "ui": false,
+      "platform": "macos",
+      "beta80_wave": "W2"
+    },
+    {
+      "id": "MC-live-ui",
+      "behavior": "(macOS-only) The first request from a new client shows an approval sheet (allow once, always for this client, deny); a \"Controlled by <client>\" chip shows while connected with a Stop button; Window > AI Access… lists and revokes grants.",
+      "tasks": [
+        "MC-12",
+        "MC-13"
+      ],
+      "journeys": [
+        "AfterGlowJourneyTests.testAIAccessApproval"
+      ],
+      "owned": [
+        "Sources/SuiteUI/AIAccessSheet.swift",
+        "Sources/SuiteUI/AIAccessChip.swift",
+        "Sources/SuiteShell/AIAccessCommands.swift",
+        "Tests/AppSnapshotTests/SuiteAIAccessSnapshots.swift",
+        "UITests/AfterGlowJourneyTests+AIAccess.swift",
+        "Tests/AppSnapshotTests/RenderBudgetAIAccessTests.swift"
+      ],
+      "waits": {
+        "MC-a": [
+          "MC-12"
+        ]
+      },
+      "ui": true,
+      "platform": "macos",
+      "beta80_wave": "W2"
+    },
+    {
+      "id": "MC-z",
+      "behavior": "A scripted session runs every tool on the fake in both protocol eras through the spawned binary, the reference and the client set-up are written, and the feature is built.",
+      "tasks": [
+        "MC-14",
+        "MC-15"
+      ],
+      "journeys": [
+        "MJ5"
+      ],
+      "owned": [
+        "Tests/AfterGlowCLITests/MCPBinaryTests.swift",
+        "docs/cli.md",
+        "docs/blueprints/suite/features/afterglow-mcp.wave.json"
+      ],
+      "waits": {
+        "MC-proto": [
+          "MC-14"
+        ],
+        "MC-tools": [
+          "MC-14"
+        ],
+        "MC-call": [
+          "MC-14"
+        ],
+        "MC-live-wire": [
+          "MC-15"
+        ],
+        "MC-live-ui": [
+          "MC-15"
+        ],
+        "afterglow-cli:CL-z": [
+          "MC-15"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

@@ -1,0 +1,656 @@
+{
+  "$comment": "Real jobs: tasks a person does with this app, each with an outcome a check can observe. Keyed by job id so scripts/merge-json merges two PRs that add different jobs. scripts/jobs check validates every field; jobs.md beside this file is generated from it on dev (scripts/jobs render), never edited. The fields and the done rule: docs/factory/packets.md, Jobs.",
+  "RJ-F01": {
+    "id": "RJ-F01",
+    "app": "flare",
+    "weight": "high",
+    "job": "Make a loading spinner (an arc rotating 360° in 1 s, linear, looping) and export Lottie.",
+    "outcome": "It loops with no hitch in a standard Lottie player.",
+    "needs": [
+      "flare/flare-export"
+    ],
+    "needs_note": "built keys + flare/flare-export (beta)",
+    "closes_with": "flare/flare-export",
+    "trap": "First and last frame duplicate, so the loop stutters",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://prod.schoolofmotion.com/blog/rive-tutorial-interactive-spinner",
+      "https://help.lottiefiles.com/hc/en-us/articles/30718780265369-Lottie-Creator-Key-Features"
+    ]
+  },
+  "RJ-F02": {
+    "id": "RJ-F02",
+    "app": "flare",
+    "weight": "high",
+    "job": "Draw a logo stroke on with trim paths (0→100% over 1.5 s) and export Lottie.",
+    "outcome": "The Lottie carries a trim-path property animating 0 to 100% over 1.5 s, and a player draws the stroke on.",
+    "needs": [
+      "S17",
+      "flare/stroke-style"
+    ],
+    "needs_note": "S17 trim paths; flare/stroke-style keys them",
+    "closes_with": "flare/stroke-style",
+    "trap": "Trim exported as a shape morph or dropped",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.udemy.com/course/after-effects-for-beginners-4-projects-to-get-you-started/",
+      "https://blog.motionarray.com/learn/software/animatedshapes/",
+      "https://docs.lottiefiles.com/en/integrations/after-effects/09_lottie-compatibility"
+    ],
+    "waits_on": "FK-6"
+  },
+  "RJ-F03": {
+    "id": "RJ-F03",
+    "app": "flare",
+    "weight": "med",
+    "job": "Build a button with idle, hover and press states and preview it.",
+    "outcome": "Hover and press respond in the preview within 0.3 s.",
+    "needs": [],
+    "needs_note": "F13/F14 state machine (planned)",
+    "closes_with": null,
+    "trap": "States don't return to idle",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://aiindigo.com/tutorials/getting-started-with-rive-creating-interactive-animations-for-apps",
+      "https://rive.app/community/files/18611-34988-basic-hover-animation",
+      "https://lottiefiles.com/blog/state-machines/state-machines-are-finally-in-lottie-creator"
+    ]
+  },
+  "RJ-F04": {
+    "id": "RJ-F04",
+    "app": "flare",
+    "weight": "med",
+    "job": "Morph a hamburger icon into an X.",
+    "outcome": "Points tween without twisting.",
+    "needs": [
+      "E14"
+    ],
+    "needs_note": "E14 shape morph",
+    "closes_with": "E14",
+    "trap": "Point order mismatch twists the shape",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://blog.motionarray.com/learn/software/animatedshapes/"
+    ]
+  },
+  "RJ-F05": {
+    "id": "RJ-F05",
+    "app": "flare",
+    "weight": "high",
+    "job": "Animate a bouncing ball with ease in and out and a squash on landing, looping.",
+    "outcome": "The ball eases in and out, squashes on landing and loops, and the export plays with the same easing as the stage.",
+    "needs": [],
+    "needs_note": "built (keys, easing, scale)",
+    "closes_with": null,
+    "trap": "Easing changes when exported",
+    "run": "C",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://rive.app/docs/editor/animate-mode/timeline"
+    ]
+  },
+  "RJ-F06": {
+    "id": "RJ-F06",
+    "app": "flare",
+    "weight": "high",
+    "job": "Import an SVG logo from a design tool and animate its parts.",
+    "outcome": "Colours and groups arrive intact.",
+    "needs": [
+      "E11",
+      "flare/svg-place"
+    ],
+    "needs_note": "E11 SVG reader (on the pinned core); flare/svg-place adds Place",
+    "closes_with": "flare/svg-place",
+    "trap": "Black fills; groups flattened to one path",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://rive.app/community/forums/support/fsnLLkXUaA62/svg-import-from-illustrator-is-it-bugged/ftRngpXaBEvH",
+      "https://rive.app/docs/editor/assets/svg"
+    ],
+    "waits_on": "PF-6"
+  },
+  "RJ-F07": {
+    "id": "RJ-F07",
+    "app": "flare",
+    "weight": "high",
+    "job": "Export a GIF for Slack: loops forever, transparent background, under 2 MB.",
+    "outcome": "The GIF loops forever, has a transparent background with no matte fringe, and is under 2 MB.",
+    "needs": [
+      "E9",
+      "flare/export-pack"
+    ],
+    "needs_note": "E9 media I/O (GIF)",
+    "closes_with": "flare/export-pack",
+    "trap": "Matte fringe on transparent edges; no size readout",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://rive.app/changelog/gif-matte-option",
+      "https://help.lottiefiles.com/hc/en-us/articles/30718780265369-Lottie-Creator-Key-Features"
+    ],
+    "waits_on": "FV-3"
+  },
+  "RJ-F08": {
+    "id": "RJ-F08",
+    "app": "flare",
+    "weight": "high",
+    "job": "Export an MP4 at 1080p for social.",
+    "outcome": "Plays in QuickTime, right length and frame rate.",
+    "needs": [
+      "E9",
+      "flare/export-pack"
+    ],
+    "needs_note": "E9 media I/O",
+    "closes_with": "flare/export-pack",
+    "trap": "Export stuck at 'initialising'",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://rive.app/community/forums/support/fsnLLkXUaA62/render-queue-went-crazy/ftBmI9Gh5Vqg"
+    ],
+    "waits_on": "FV-3"
+  },
+  "RJ-F09": {
+    "id": "RJ-F09",
+    "app": "flare",
+    "weight": "med",
+    "job": "Export a PNG sequence with alpha at 2x.",
+    "outcome": "Every frame is there, numbered, transparent.",
+    "needs": [
+      "flare/flare-export"
+    ],
+    "needs_note": "flare-export (beta), StageRasterizer on dev",
+    "closes_with": "flare/flare-export",
+    "trap": "Premultiplied edges darken",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.lottiefiles.com/hc/en-us/articles/30718780265369-Lottie-Creator-Key-Features"
+    ]
+  },
+  "RJ-F10": {
+    "id": "RJ-F10",
+    "app": "flare",
+    "weight": "med",
+    "job": "Export a 3 s icon animation as Lottie under 50 KB.",
+    "outcome": "The exported Lottie is under 50 KB with no embedded images.",
+    "needs": [
+      "flare/flare-export"
+    ],
+    "needs_note": "flare-export (beta)",
+    "closes_with": "flare/flare-export",
+    "trap": "JSON bloated by baked keys or embedded images",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.elpassion.com/blog/lottie-who-common-mistakes-in-after-effects-animation-for-lottie",
+      "https://docs.lottiefiles.com/en/integrations/after-effects/09_lottie-compatibility"
+    ]
+  },
+  "RJ-F11": {
+    "id": "RJ-F11",
+    "app": "flare",
+    "weight": "high",
+    "job": "Play the exported Lottie in a standard player.",
+    "outcome": "Sampled frames match the stage within 2% pixel difference.",
+    "needs": [
+      "flare/flare-export",
+      "flare/lottie-player-check"
+    ],
+    "needs_note": "flare-export + a player oracle (not in the beta-80 plan)",
+    "closes_with": "flare/lottie-player-check",
+    "trap": "Unsupported features dropped silently; easing differs in the player",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://docs.lottiefiles.com/en/integrations/after-effects/09_lottie-compatibility",
+      "https://www.elpassion.com/blog/lottie-who-common-mistakes-in-after-effects-animation-for-lottie",
+      "https://docs.lottiefiles.com/en/integrations/figma/06_feature-checking/reading-export-warnings"
+    ]
+  },
+  "RJ-F12": {
+    "id": "RJ-F12",
+    "app": "flare",
+    "weight": "med",
+    "job": "Open a Lottie downloaded from a library site and recolour it.",
+    "outcome": "It plays as before, with the new colour.",
+    "needs": [
+      "A2",
+      "flare/lottie-open"
+    ],
+    "needs_note": "A2 Lottie round trip",
+    "closes_with": "flare/lottie-open",
+    "trap": "Opens as a still or loses easing",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.lottiefiles.com/hc/en-us/articles/30718780265369-Lottie-Creator-Key-Features"
+    ],
+    "waits_on": "LO-5"
+  },
+  "RJ-F13": {
+    "id": "RJ-F13",
+    "app": "flare",
+    "weight": "med",
+    "job": "Animate a fill colour from blue to orange over 1 s.",
+    "outcome": "The fill colour reads blue at 0 s and orange at 1 s, in the preview and in the export.",
+    "needs": [
+      "E14",
+      "suiteui/timeline-keys"
+    ],
+    "needs_note": "E14 colour keys",
+    "closes_with": "suiteui/timeline-keys",
+    "trap": "Only transform and opacity tracks exist",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.lottiefiles.com/hc/en-us/articles/30718780265369-Lottie-Creator-Key-Features"
+    ]
+  },
+  "RJ-F14": {
+    "id": "RJ-F14",
+    "app": "flare",
+    "weight": "med",
+    "job": "Parent a hand to an arm so it follows the arm's rotation.",
+    "outcome": "The hand keeps its on-screen position when parented and then follows the arm's rotation.",
+    "needs": [
+      "S8",
+      "suiteui/anchor-parenting"
+    ],
+    "needs_note": "S8 parenting",
+    "closes_with": "suiteui/anchor-parenting",
+    "trap": "Child jumps when parented",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://blog.motionarray.com/learn/software/animatedshapes/"
+    ]
+  },
+  "RJ-F15": {
+    "id": "RJ-F15",
+    "app": "flare",
+    "weight": "med",
+    "job": "Reveal text through a moving rectangle mask.",
+    "outcome": "The text shows only inside the moving rectangle, in the preview and in the Lottie export.",
+    "needs": [
+      "S4"
+    ],
+    "needs_note": "S4 masks",
+    "closes_with": "S4",
+    "trap": "Mask exported to Lottie wrong or dropped",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://docs.lottiefiles.com/en/integrations/after-effects/09_lottie-compatibility"
+    ]
+  },
+  "RJ-F16": {
+    "id": "RJ-F16",
+    "app": "flare",
+    "weight": "med",
+    "job": "Copy keys from one layer and paste them onto another at the playhead.",
+    "outcome": "The pasted keys land on the target layer starting at the playhead, with their spacing kept.",
+    "needs": [
+      "S16"
+    ],
+    "needs_note": "S16 timeline pro",
+    "closes_with": "S16",
+    "trap": "Pasted keys land at time 0",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://rive.app/docs/editor/animate-mode/timeline"
+    ]
+  },
+  "RJ-F17": {
+    "id": "RJ-F17",
+    "app": "flare",
+    "weight": "med",
+    "job": "Shape an overshoot with the curve editor.",
+    "outcome": "Preview and export match the curve.",
+    "needs": [
+      "S16"
+    ],
+    "needs_note": "SuiteUI CurveEditor (built), S16 graph editor",
+    "closes_with": "S16",
+    "trap": "Per-segment curve only, no value graph",
+    "run": "J",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://rive.app/docs/editor/animate-mode/timeline"
+    ]
+  },
+  "RJ-F18": {
+    "id": "RJ-F18",
+    "app": "flare",
+    "weight": "high",
+    "job": "Scale and rotate a shape with handles on the stage.",
+    "outcome": "Dragging the handles scales and rotates the shape, and the inspector shows the new scale and angle.",
+    "needs": [
+      "flare/stage-edit"
+    ],
+    "needs_note": "flare/stage-edit (beta)",
+    "closes_with": "flare/stage-edit",
+    "trap": "Handles are a stub today",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.lottiefiles.com/hc/en-us/articles/30718780265369-Lottie-Creator-Key-Features"
+    ]
+  },
+  "RJ-F19": {
+    "id": "RJ-F19",
+    "app": "flare",
+    "weight": "high",
+    "job": "Zoom in to 400% to align a detail and pan around.",
+    "outcome": "The stage shows 400% and pans with the detail staying under the pointer.",
+    "needs": [
+      "flare/stage-edit"
+    ],
+    "needs_note": "flare/stage-edit (beta)",
+    "closes_with": "flare/stage-edit",
+    "trap": "View intents are stubs on dev",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.lottiefiles.com/hc/en-us/articles/30718780265369-Lottie-Creator-Key-Features"
+    ]
+  },
+  "RJ-F20": {
+    "id": "RJ-F20",
+    "app": "flare",
+    "weight": "high",
+    "job": "Cut, copy, paste and duplicate layers with their keys.",
+    "outcome": "Each command produces a layer that carries its keys, and the Edit menu items are enabled.",
+    "needs": [
+      "flare/stage-edit"
+    ],
+    "needs_note": "flare/stage-edit (beta)",
+    "closes_with": "flare/stage-edit",
+    "trap": "Edit menu says 'Not built yet'",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.lottiefiles.com/hc/en-us/articles/30718780265369-Lottie-Creator-Key-Features"
+    ]
+  },
+  "RJ-F21": {
+    "id": "RJ-F21",
+    "app": "flare",
+    "weight": "med",
+    "job": "Animate a 'Loading…' text label with three typing dots.",
+    "outcome": "A new text layer reads 'Loading' with three dots that appear one after another in a loop.",
+    "needs": [
+      "E8"
+    ],
+    "needs_note": "E8 text engine",
+    "closes_with": "E8",
+    "trap": "Text in opened files survives but can't be made",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.lottiefiles.com/hc/en-us/articles/30718780265369-Lottie-Creator-Key-Features"
+    ]
+  },
+  "RJ-F22": {
+    "id": "RJ-F22",
+    "app": "flare",
+    "weight": "high",
+    "job": "Make 40 edits (draw, key, retime), save, reopen, undo.",
+    "outcome": "Everything matches.",
+    "needs": [],
+    "needs_note": "built",
+    "closes_with": null,
+    "trap": "Retime undo restores the wrong key",
+    "run": "C",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://rive.app/docs/editor/animate-mode/timeline"
+    ]
+  },
+  "RJ-F23": {
+    "id": "RJ-F23",
+    "app": "flare",
+    "weight": "high",
+    "job": "Force-quit mid-edit, relaunch.",
+    "outcome": "Flare restores the animation.",
+    "needs": [
+      "flare/mac-platform"
+    ],
+    "needs_note": "flare/mac-platform (built)",
+    "closes_with": "flare/mac-platform",
+    "trap": "Restored file loses its last scene",
+    "run": "J",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://rive.app/community/forums/support/fsnLLkXUaA62/render-queue-went-crazy/ftBmI9Gh5Vqg"
+    ]
+  },
+  "RJ-F24": {
+    "id": "RJ-F24",
+    "app": "flare",
+    "weight": "med",
+    "job": "Make light and dark versions as two scenes and export both.",
+    "outcome": "Two scenes export as two files, each with its own colours.",
+    "needs": [
+      "flare/flare-export"
+    ],
+    "needs_note": "scenes (built), flare-export (beta)",
+    "closes_with": "flare/flare-export",
+    "trap": "Export not built yet",
+    "run": "C",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.lottiefiles.com/hc/en-us/articles/30718780265369-Lottie-Creator-Key-Features"
+    ]
+  },
+  "RJ-F25": {
+    "id": "RJ-F25",
+    "app": "flare",
+    "weight": "med",
+    "job": "Draw a five-point star with the star tool for a rating animation.",
+    "outcome": "The star tool draws a five-point star that can be keyed like any shape.",
+    "needs": [
+      "S19",
+      "flare/shape-tools"
+    ],
+    "closes_with": "flare/shape-tools",
+    "trap": "Only rectangle, ellipse and pen",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.lottiefiles.com/hc/en-us/articles/30718780265369-Lottie-Creator-Key-Features"
+    ],
+    "waits_on": "FS-6"
+  },
+  "RJ-F26": {
+    "id": "RJ-F26",
+    "app": "flare",
+    "weight": "med",
+    "job": "Centre three shapes on the stage and snap them to a guide.",
+    "outcome": "The three shapes share one centre line and sit on the guide.",
+    "needs": [
+      "S9",
+      "S10"
+    ],
+    "needs_note": "S9 align, S10 snapping",
+    "closes_with": "S9",
+    "trap": "No snap; align missing",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://help.lottiefiles.com/hc/en-us/articles/30718780265369-Lottie-Creator-Key-Features"
+    ]
+  },
+  "RJ-F27": {
+    "id": "RJ-F27",
+    "app": "flare",
+    "weight": "high",
+    "job": "Draw a path with the pen, then drag one anchor and its handles.",
+    "outcome": "Only the dragged anchor and its handles move; the rest of the path stays put.",
+    "needs": [
+      "S25"
+    ],
+    "needs_note": "pen (built), Direct Select anchor editing (S25)",
+    "closes_with": "S25",
+    "trap": "Direct Select acts like Select today",
+    "run": "C",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://blog.motionarray.com/learn/software/animatedshapes/"
+    ],
+    "waits_on": "FP-7"
+  },
+  "RJ-F28": {
+    "id": "RJ-F28",
+    "app": "flare",
+    "weight": "med",
+    "job": "See the motion path of a moving layer on the stage and edit it.",
+    "outcome": "The motion path is drawn on the stage, and dragging a point on it changes the layer's position keys.",
+    "needs": [
+      "S16"
+    ],
+    "needs_note": "S16 motion path",
+    "closes_with": "S16",
+    "trap": "Path shown but not editable",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://blog.motionarray.com/learn/software/animatedshapes/"
+    ]
+  },
+  "RJ-F29": {
+    "id": "RJ-F29",
+    "app": "flare",
+    "weight": "high",
+    "job": "Loop playback over a 1 s range while tweaking a key.",
+    "outcome": "Playback loops over the same 1 s range before and after the key edit.",
+    "needs": [],
+    "needs_note": "built (transport, loop)",
+    "closes_with": null,
+    "trap": "Range resets after an edit",
+    "run": "J",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://rive.app/docs/editor/animate-mode/timeline"
+    ]
+  },
+  "RJ-F30": {
+    "id": "RJ-F30",
+    "app": "flare",
+    "weight": "med",
+    "job": "Export the first frame as a static SVG fallback for the web.",
+    "outcome": "The SVG matches the first frame, gradients included.",
+    "needs": [
+      "flare/flare-export"
+    ],
+    "needs_note": "flare-export (beta)",
+    "closes_with": "flare/flare-export",
+    "trap": "Gradients missing in the SVG",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://rive.app/community/forums/feature-requests/fsyCzA4A9Yar/ability-to-export-animated-svg-smil/ftn0m8jxL51j"
+    ]
+  },
+  "RJ-F31": {
+    "id": "RJ-F31",
+    "app": "flare",
+    "weight": "med",
+    "job": "Recolour the middle stop of a shape's imported gradient, turn the gradient to 90 degrees and export SVG.",
+    "outcome": "The SVG's linearGradient carries the new stop colour and runs top to bottom (x1 equals x2, y1 below y2), and the saved file holds the same stops.",
+    "needs": [
+      "S24",
+      "flare/gradient-fill"
+    ],
+    "closes_with": "flare/gradient-fill",
+    "trap": "The stage shows the change but the saved Fill keeps its old endpoints, so the export still runs left to right",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "FG-5",
+    "added_by": "flare/gradient-fill"
+  },
+  "RJ-F42": {
+    "id": "RJ-F42",
+    "app": "flare",
+    "weight": "med",
+    "job": "Reopen a scene from Open Recent and drop a .flare and an SVG on Flare.",
+    "outcome": "Open Recent equals the suite list filtered to Flare; the .flare opens and the SVG is refused with its sentence.",
+    "needs": [
+      "suite/file-flow",
+      "flare/file-flow"
+    ],
+    "closes_with": "flare/file-flow",
+    "trap": "Two Open Recent truths (Flare's old list and the suite's), or an SVG half-imports",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "FL-3",
+    "added_by": "flare/file-flow"
+  },
+  "RJ-F43": {
+    "id": "RJ-F43",
+    "app": "flare",
+    "weight": "med",
+    "job": "Select every key in the timeline and delete them in one go.",
+    "outcome": "No layer has a key left, hidden layers included, and one undo brings them all back.",
+    "needs": [
+      "S16",
+      "suiteui/timeline-select-all",
+      "flare/key-select-all"
+    ],
+    "needs_note": "suiteui/timeline-select-all routes ⌘A; flare/key-select-all picks every key on the kernel Selection",
+    "closes_with": "flare/key-select-all",
+    "trap": "Select All picks the stage's art or one layer's keys, so keys stay behind",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "KS-1",
+    "test": "Tests/RealJobs/flare/select-all-keys/select-all-keys.jobs.json"
+  }
+}

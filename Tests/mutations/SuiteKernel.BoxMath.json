@@ -1,0 +1,23 @@
+[
+  {
+    "label": "minZero: a resize clamps width and height at 0 instead of 1",
+    "file": "Sources/SuiteKernel/Transform/BoxMath.swift",
+    "find": "(newWidth, newHeight) = (max(newWidth, 1), max(newHeight, 1))",
+    "replace": "(newWidth, newHeight) = (max(newWidth, 0), max(newHeight, 0))",
+    "tests": "BoxMathTests"
+  },
+  {
+    "label": "shiftIgnoresSmallerAxis: Shift always follows the x change, whichever axis changed more",
+    "file": "Sources/SuiteKernel/Transform/BoxMath.swift",
+    "find": "let larger = abs(scaleX - 1) >= abs(scaleY - 1) ? scaleX : scaleY",
+    "replace": "let larger = scaleX",
+    "tests": "BoxMathTests"
+  },
+  {
+    "label": "optionMovesOneEdge: Option grows the box by twice the move but only from the dragged edge",
+    "file": "Sources/SuiteKernel/Transform/BoxMath.swift",
+    "find": "let fromCentre = modifiers.contains(.option)",
+    "replace": "let fromCentre = false",
+    "tests": "BoxMathTests"
+  }
+]

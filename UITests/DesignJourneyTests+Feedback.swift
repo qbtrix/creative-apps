@@ -5,36 +5,40 @@
 // The canvas publishes what the pointer would show as the hover mark's
 // accessibility value (`design.canvas.hover`: "move", "resize-bottom-right",
 // "copy", "text"), and the size badge reads `design.canvas.badge`.
-// The page of `cards` is 1440 × 1024 points, and the canvas's fractions map to
-// the page as TextBox's journey does (dx 0.05, dy 0.85 is (72, 870) on the page).
+// The page of `cards` is 1440 × 1024 points. Every pointer goes through the
+// artboard (`suite.canvas.artboard`, the page's rectangle at the current zoom,
+// #2349), whose fractions are page points over the page's size (dx 0.05, dy 0.85
+// is (72, 870)). Never `suite.canvas`: its frame takes in the frame labels above
+// the page and the size badge below it, so its fractions drift off the page as
+// the selection changes (#3043: the press meant for A landed above it on Desktop).
 // The one zoom-dependent check reads its scale from A's selection frame, so it
 // holds at any zoom. Holding Option while hovering has no XCUI API, so that
 // step posts CGEvents, as FlareJourneyTests+Draw does for its drags.
-// Written before its code (lead.md, contract rule 13): D0-9a writes the walk
-// skipped by name, and D0-9d deletes the skip line once the hover, badge and
-// text-preview views exist.
+// Written before its code (lead.md, contract rule 13): D0-9a wrote the walk
+// skipped by name, and D0-9d turned it on with the badge and text preview.
 import XCTest
 
 final class DesignFeedbackJourneyTests: XCTestCase {
     static let arguments = ["-DesignFixture", "cards", "-SuiteWindowSize", "1024x768"]
     /// The page of `cards` is 1440 × 1024 points.
     static let pageWidth = 1440.0, pageHeight = 1024.0
+    /// The page's rectangle on screen; its fractions are page points over the page's size.
+    static let artboard = "suite.canvas.artboard"
     /// The Option key's virtual key code (kVK_Option).
     static let optionKeyCode: CGKeyCode = 58
 
     /// The five feedback steps: the hover outline, the move and resize pointers,
     /// the copy pointer, the size badge, and the Text tool's preview and click-drag.
-    @MainActor func testCanvasFeedback() throws {
-        throw XCTSkip("waits on D0-9d")
+    @MainActor func testCanvasFeedback() {
         walkCanvasFeedback()
     }
 
-    /// The journey itself, which D0-9d runs once it drops the skip above.
+    /// The journey itself.
     @MainActor private func walkCanvasFeedback() {
         let design = Journey("Design", self, arguments: Self.arguments)
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
-        let canvas = design.element("suite.canvas")
-        XCTAssert(canvas.waitForExistence(timeout: 10), "the cards fixture showed no page (suite.canvas)")
+        let canvas = design.element(Self.artboard)
+        XCTAssert(canvas.waitForExistence(timeout: 10), "the cards fixture showed no page (\(Self.artboard))")
         let tools = design.element("suite.tools").buttons
         let hover = design.element("design.canvas.hover")
         let badge = design.element("design.canvas.badge")
@@ -60,8 +64,8 @@ final class DesignFeedbackJourneyTests: XCTestCase {
                   "the hover mark over Desktop's blank area isn't Desktop's outline")
         design.shot("feedback-hover-desktop")
 
-        // The canvas surround, past the page's edge, has no hover mark.
-        canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.99)).hover()
+        // The canvas surround, past the page's bottom-left corner, has no hover mark.
+        canvas.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 1)).withOffset(CGVector(dx: -20, dy: 20)).hover()
         XCTAssert(Self.waitForGone(hover), "the hover mark stays on the canvas surround")
         design.shot("feedback-hover-gone")
 
@@ -86,11 +90,11 @@ final class DesignFeedbackJourneyTests: XCTestCase {
         // 4. Size badge: A's size, then after dragging its handle by (20, 10), then a new 120 × 80 box.
         XCTAssert(Self.waitForText(badge, "100 × 80"), "the badge doesn't read A's size 100 × 80 (design.canvas.badge reads \(Self.text(badge)))")
         design.shot("feedback-badge-a")
-        design.drag(on: "suite.canvas", from: Self.frac(200, 180), to: Self.frac(220, 190))
+        design.drag(on: Self.artboard, from: Self.frac(200, 180), to: Self.frac(220, 190))
         XCTAssert(Self.waitForText(badge, "120 × 90"), "the badge doesn't read 120 × 90 after the resize (reads \(Self.text(badge)))")
         design.shot("feedback-badge-resized")
         tools["Rectangle"].click()
-        design.drag(on: "suite.canvas", from: Self.frac(800, 620), to: Self.frac(920, 700), step: "feedback-badge-drawn")
+        design.drag(on: Self.artboard, from: Self.frac(800, 620), to: Self.frac(920, 700), step: "feedback-badge-drawn")
         XCTAssert(Self.waitForText(badge, "120 × 80"), "the badge doesn't read 120 × 80 for the new box (reads \(Self.text(badge)))")
 
         // 5. Text preview: the Text tool's 120 × 24 box at the pointer, then a 300 pt click-drag.
@@ -104,7 +108,7 @@ final class DesignFeedbackJourneyTests: XCTestCase {
                   "the Text tool's box isn't at the pointer")
         design.shot("feedback-text-hover")
 
-        design.drag(on: "suite.canvas", from: Self.frac(72, 870), to: Self.frac(372, 900))
+        design.drag(on: Self.artboard, from: Self.frac(72, 870), to: Self.frac(372, 900))
         let editor = design.element("design.text")
         XCTAssert(editor.waitForExistence(timeout: 5), "the click-drag opened no text editor (design.text)")
         Self.expectSize(editor.frame, width: 300 * scale, height: nil, "the text editor")
@@ -115,7 +119,7 @@ final class DesignFeedbackJourneyTests: XCTestCase {
         design.shot("feedback-text-committed")
     }
 
-    /// A page point (x, y) as a canvas fraction, the way the other Design journeys map the page.
+    /// A page point (x, y) as a fraction of the artboard, which is exactly the page at the current zoom.
     private static func frac(_ x: Double, _ y: Double) -> CGVector {
         CGVector(dx: x / pageWidth, dy: y / pageHeight)
     }

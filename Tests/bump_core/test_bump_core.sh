@@ -72,7 +72,8 @@ EOF
 # two Model test targets and the script under test.
 seed="$tmp/seed"
 mkdir -p "$seed/scripts" "$seed/Tests/AModelTests" "$seed/Tests/BModelTests" "$seed/Tests/AppSnapshotTests"
-cp "$here/../../scripts/bump-core" "$seed/scripts/"
+cp "$here/../../scripts/bump-core" "$here/../../scripts/test-scope" "$seed/scripts/"
+printf 'photo AModelTests.SlowBudgetTests\n' >"$seed/Tests/perf-suites.txt"
 for t in AModelTests BModelTests AppSnapshotTests; do : >"$seed/Tests/$t/T.swift"; done
 printf '    .package(url: "https://github.com/qbtrix/creative-core", revision: "%s"),\n' "$OLD" >"$seed/Package.swift"
 (
@@ -118,7 +119,9 @@ expect "bump: one link per core PR, subject without its (#N)" \
   "- [creative-core#300](https://github.com/qbtrix/creative-core/pull/300) feat(color): a new space|- [creative-core#321](https://github.com/qbtrix/creative-core/pull/321) perf(raster): rgba8 through display tables"
 expect "bump: a commit without a PR is listed by sha" "$(grep -c '^- bbbbbbb chore: a direct push$' "$FAKE/body")" 1
 expect "bump: resolve, build with tests, then every Model test target" \
-  "$(calls '^swift package resolve$'),$(calls '^swift build --build-tests'),$(calls 'swift test --skip-build.* --filter ^(AModelTests|BModelTests)\\.$')" "1,1,1"
+  "$(calls '^swift package resolve$'),$(calls '^swift build --build-tests'),$(calls 'swift test --skip-build.* --filter ^(AModelTests|BModelTests)\\. ')" "1,1,1"
+expect "bump: the Model run skips the perf list, as scripts/ci" \
+  "$(calls 'filter ^(AModelTests|BModelTests)\\. --skip ^(AModelTests\\.SlowBudgetTests)(/|\\()$')" 1
 if [[ "$(uname)" == Darwin ]]; then perf=1; else perf=0; fi
 expect "bump: the perf suites run on macOS only" \
   "$(calls 'filter ^AppSnapshotTests\\.(PhotoBrushDisplayTests|PhotoBrushLatencyTests|PhotoBrushInkLatencyTests)/ --no-parallel$')" "$perf"

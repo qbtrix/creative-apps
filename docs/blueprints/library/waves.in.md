@@ -11,6 +11,15 @@ tests written before their code, and mutation plans for Model behaviour.
 
 <!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
 
+**Wave 7 (beta gaps, 2026-10-21).** The Library must-haves from
+`paw-workspace/docs/design/drafts/2026-10-21-beta-gaps-combined.md`:
+`catalog-files` (copy on import, remove from catalog, relink), `folders`,
+`catalog-backup`, `share-sheet` and `large-catalog` (10,000 photos within
+budget). The captain's 2026-10-21 call re-cuts blueprint 1.3 and 1.4 for the
+file chores and the system share sheet; local adjustments stay out. The four
+packets that add catalog commands take `LibraryCommandCatalog.swift` in that
+order (the waits data).
+
 ## File when ready
 
 Belt launches a lead the moment a feature issue exists, so no feature issue

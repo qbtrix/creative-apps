@@ -1,12 +1,12 @@
 // PhotoRecovery.swift: the Model side of autosave recovery (PV-1, PJ-3).
-// When an autosave is due (`autosaveDue`: the image is dirty, `delay`
-// seconds have passed since the last edit, and that edit isn't autosaved
-// yet), the entry an autosave writes (`recoveryEntry`: the document package
-// with the image's name and the time), restoring one (`restore`: the image
-// comes back dirty and unsaved, so Save asks where; `restore(_:decoded:)`
-// takes a package the window decoded off the main actor) and the launch offer's
-// text (`RecoveryOffer`). Times are seconds passed in by the caller, so none
-// of this reads a clock. Linux-safe.
+// When an autosave is due (`autosaveDue`, the kernel's DocumentSession rule
+// behind Photo's signature: PhotoRecovery+Kernel.swift), the entry an
+// autosave writes (`recoveryEntry`: the document package with the image's
+// name and the time), restoring one (`restore`: the image comes back dirty
+// and unsaved, so Save asks where; `restore(_:decoded:)` takes a package the
+// window decoded off the main actor) and the launch offer's Photo words
+// (`RecoveryOffer`; `kernelOffer` is the kernel's). Times are seconds passed
+// in by the caller, so none of this reads a clock. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -34,16 +34,16 @@ extension PhotoWorkspace {
     /// Seconds after the last edit before the image autosaves (PJ-3).
     public static let autosaveDelay: Double = 5
 
-    /// Whether to autosave now: the image is dirty, at least `delay` seconds
-    /// have passed since `lastEdit`, and the last autosave came before that
-    /// edit. False when any time is NaN or infinite.
+    /// Whether to autosave now, by the kernel's rule: the image is dirty, at
+    /// least `delay` seconds have passed since `lastEdit`, and the last
+    /// autosave came before that edit. False when any time is NaN or infinite
+    /// (only the times are checked here; the kernel refuses a bad `delay`).
     public func autosaveDue(
         lastEdit: Double, lastAutosave: Double?, now: Double, delay: Double = PhotoWorkspace.autosaveDelay
     ) -> Bool {
-        guard isDirty, lastEdit.isFinite, now.isFinite, delay.isFinite, lastAutosave?.isFinite ?? true else {
-            return false
-        }
-        return now - lastEdit >= delay && (lastAutosave ?? -.infinity) < lastEdit
+        guard lastEdit.isFinite, now.isFinite, lastAutosave?.isFinite ?? true else { return false }
+        return autosaveSession(lastEdit: lastEdit, lastAutosave: lastAutosave)
+            .autosaveDue(now: Date(timeIntervalSinceReferenceDate: now), delay: delay)
     }
 
     /// What an autosave at `now` writes: the document package of the open

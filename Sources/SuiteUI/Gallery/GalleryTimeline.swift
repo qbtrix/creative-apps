@@ -19,7 +19,29 @@
 // `suite.timeline.key.<id>.<frame>`, names `suite.timeline.name.<id>`), and
 // publishes Badge's lane value as the label of a hidden 1 x 1 pt element,
 // `suite.gallery.timeline.value.badge`, since XCUITest reads SwiftUI values
-// as "" (#262; the HaloReadout pattern).
+// as "" (#262; the HaloReadout pattern). A Select All Keys button
+// (`gallery.timeline.selectAll`) and the strip's onSelectAllKeys (⌘A while it
+// has focus) share one closure that picks every key and logs `select-all`
+// (TSA-1). A FrameRateMenu (`suite.gallery.timeline.rate`, logs
+// `rate 29.97 fps`), a raised chip set apart from the switches by
+// SuiteSpacing.s (#4601), sets the page's rate, 24 fps unless the fixture
+// names one; a readout beside it captioned TimelineTime.readoutCaption
+// ("Playhead", "(drop-frame)" at a drop rate, #4599, #4600), its value in the
+// shared StatusPillFace at body size with monospaced digits, its tooltip and
+// VoiceOver label TimelineTime.readoutHelp, and the hidden
+// `suite.gallery.timeline.timecode` readout, show the
+// playhead's timecode at that rate, whatever the unit chips say; the strip
+// gets the rate too, so its ruler and pill agree (frame-rates FR-u). A
+// "Playhead Frame" exact field (`suite.gallery.timeline.frame`) scrubs to a
+// typed frame and logs `scrub <n>` like the ruler (#4597). The strip is
+// clipped to its room and the log keeps its line, so neither draws over the
+// other; a probe behind the strip (`suite.gallery.timeline.strip`) marks that
+// room, since a container element reports the union of its lanes, and a
+// snapshot lays out every lane under the clip. The
+// playhead and the log live in a GalleryTimelineFeed only their reader views
+// observe, so a scrub never runs the page's body.
+import Observation
+import SuiteKernel
 import SwiftUI
 
 enum GalleryTimeline {
@@ -33,8 +55,8 @@ enum GalleryTimeline {
 struct GalleryTimelineFixture {
     let duration: Int
     let fps: Int
-    let frameWidth: CGFloat
-    let playhead: Int
+    var frameWidth: CGFloat
+    var playhead: Int
     let toolbar: Bool
     let order: [String]
     let names: [String: String]
@@ -42,6 +64,8 @@ struct GalleryTimelineFixture {
     let spans: [String: [ClosedRange<Int>]]
     let picked: Set<LaneKey>
     let selected: String?
+    /// The document's rate; nil reads `fps` as a whole rate.
+    var rate: FrameRate?
 
     /// The packet's Screens row for `timeline`.
     static let short = GalleryTimelineFixture(
@@ -78,20 +102,24 @@ struct GalleryTimelineFixture {
 }
 
 /// One timeline page: the switches, the strip over the page's state, the log.
-private struct GalleryTimelinePage: View {
+struct GalleryTimelinePage: View {
+    #if DEBUG
+    // view-static: main-actor
+    static var bodyRuns = 0
+    #endif
     let fixture: GalleryTimelineFixture
     @Environment(\.galleryRequest) private var request
     @State private var keys: [String: [TimelineKey]]
     @State private var spans: [String: [ClosedRange<Int>]]
     @State private var picked: Set<LaneKey>
     @State private var selected: String?
-    @State private var playhead: Int
+    @State private var feed: GalleryTimelineFeed
+    @State private var rate: FrameRate
     @State private var unit: TimeUnit = .frames
     @State private var workArea: ClosedRange<Int>?
     @State private var noTracks = false
     @State private var nothingPicked = false
     @State private var toolbar: Bool
-    @State private var log: [String] = []
 
     init(fixture: GalleryTimelineFixture) {
         self.fixture = fixture
@@ -99,7 +127,8 @@ private struct GalleryTimelinePage: View {
         _spans = State(initialValue: fixture.spans)
         _picked = State(initialValue: fixture.picked)
         _selected = State(initialValue: fixture.selected)
-        _playhead = State(initialValue: fixture.playhead)
+        _feed = State(initialValue: GalleryTimelineFeed(playhead: fixture.playhead))
+        _rate = State(initialValue: fixture.rate ?? FrameRate(whole: fixture.fps))
         _toolbar = State(initialValue: fixture.toolbar)
     }
 
@@ -120,18 +149,37 @@ private struct GalleryTimelinePage: View {
     }
 
     var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        #endif
+        // Read here, so a change to any of them runs this body; the playhead is read only by the readers.
+        let tracks = tracks, rate = rate, unit = unit, workArea = workArea, toolbar = toolbar
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             HStack(spacing: SuiteSpacing.xs) {
                 pageSwitch("No tracks", id: "no-tracks", isOn: noTracks) { noTracks.toggle() }
                 pageSwitch("Nothing picked", id: "nothing-picked", isOn: nothingPicked) { nothingPicked.toggle() }
-                pageSwitch("Toolbar", id: "toolbar", isOn: toolbar) { toolbar.toggle() }
+                pageSwitch("Toolbar", id: "toolbar", isOn: toolbar) { self.toolbar.toggle() }
+                Button("Select All Keys") { selectAll() }
+                    .help("Select All Keys")
+                    .suiteControl(id: "gallery.timeline.selectAll", enabled: true, reason: nil)
+                FrameRateMenu(rate: rate, placement: .toolbar) { setRate($0) }
+                    .suiteControl(id: "suite.gallery.timeline.rate", enabled: true, reason: nil)
+                    .padding(.leading, SuiteSpacing.s)
+                GalleryFeedReader(feed: feed) { feed in
+                    timecodeReadout(feed.playhead, rate: rate)
+                    frameField(feed.playhead)
+                }
             }
             // No outer ScrollView: the strip is offered the room between the
             // switches and the log, capped below its ideal height on the long
             // page, so its lanes scroll lazily under the pinned ruler (TL-7).
             // The priority hands it that room ahead of the Spacer.
-            strip
-                .layoutPriority(1)
+            GalleryFeedReader(feed: feed) { feed in
+                strip(tracks: tracks, playhead: feed.playhead, rate: rate, unit: unit, workArea: workArea, toolbar: toolbar)
+            }
+            .clipped()
+            .background { ProbeElement("suite.gallery.timeline.strip", label: "Timeline strip") }
+            .layoutPriority(1)
             if noTracks {
                 Text("No tracks yet.")
                     .font(SuiteFont.caption)
@@ -139,26 +187,34 @@ private struct GalleryTimelinePage: View {
                     .frame(maxWidth: .infinity, minHeight: SuiteSize.timelineLane)
             }
             Spacer(minLength: 0)
-            logView
+            GalleryFeedReader(feed: feed) { logView($0.log) }
         }
         .padding(SuiteSpacing.m)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .overlay(alignment: .topLeading) {
-            if let badge = tracks.first(where: { $0.id == "badge" }) {
-                GalleryTimelineReadout(
-                    identifier: "suite.gallery.timeline.value.badge", text: TimelineLaneSpeech.value(of: badge))
+            HStack(spacing: 0) {
+                if let badge = tracks.first(where: { $0.id == "badge" }) {
+                    GalleryTimelineReadout(
+                        identifier: "suite.gallery.timeline.value.badge", text: TimelineLaneSpeech.value(of: badge))
+                }
+                GalleryFeedReader(feed: feed) { feed in
+                    GalleryTimelineReadout(
+                        identifier: "suite.gallery.timeline.timecode",
+                        text: TimelineTime.label(frame: feed.playhead, rate: rate, unit: .timecode))
+                }
             }
         }
     }
 
-    private var strip: some View {
+    /// The strip over the page's state, built inside a feed reader so only that reader reads the playhead.
+    private func strip(
+        tracks: [TimelineTrack<String>], playhead: Int, rate: FrameRate, unit: TimeUnit, workArea: ClosedRange<Int>?,
+        toolbar: Bool
+    ) -> some View {
         TimelineStrip(
             tracks: tracks, duration: fixture.duration, frameWidth: fixture.frameWidth, playhead: playhead,
-            unit: unit, fps: fixture.fps, workArea: workArea, toolbar: toolbar,
-            onScrub: { frame in
-                playhead = frame
-                write("scrub \(frame)")
-            },
+            unit: unit, rate: rate, workArea: workArea, toolbar: toolbar,
+            onScrub: { feed.scrub(to: $0) },
             onSelectKeyframe: { id, _ in selected = id },
             onSelectTrack: { id in
                 selected = id
@@ -170,13 +226,14 @@ private struct GalleryTimelinePage: View {
             onTrim: { trim($0, $1, $2) },
             onEndTrim: { write("trim end") },
             onUnit: { new in
-                unit = new
+                self.unit = new
                 write("unit \(new.rawValue)")
             },
             onWorkArea: { range in
-                workArea = range
+                self.workArea = range
                 write(range.map { "work \($0.lowerBound)…\($0.upperBound)" } ?? "work off")
-            })
+            },
+            onSelectAllKeys: { selectAll() })
             .contextMenu { easingItems }
             .environment(\.timelineIdentifierPrefix, "suite.timeline")
     }
@@ -200,20 +257,60 @@ private struct GalleryTimelinePage: View {
         }
     }
 
-    private var logView: some View {
+    /// The playhead's timecode at `rate`, captioned "Playhead" (never "Timecode", the unit chip's title, #4599)
+    /// with "(drop-frame)" at a drop rate (#4600), its value in the shared status pill at body size.
+    private func timecodeReadout(_ playhead: Int, rate: FrameRate) -> some View {
+        let timecode = TimelineTime.label(frame: playhead, rate: rate, unit: .timecode)
+        return HStack(spacing: SuiteSpacing.xs) {
+            Text(verbatim: TimelineTime.readoutCaption(rate: rate))
+                .font(SuiteFont.caption)
+                .foregroundStyle(SuiteColor.textSecondary)
+            StatusPillFace(.plain) {
+                Text(verbatim: timecode)
+                    .font(SuiteFont.monospacedDigits)
+                    .foregroundStyle(SuiteColor.textPrimary)
+            }
+        }
+        .fixedSize()
+        .help(TimelineTime.readoutHelp(rate: rate))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: TimelineTime.readoutHelp(rate: rate)))
+        .accessibilityValue(Text(verbatim: timecode))
+        .accessibilityIdentifier("suite.gallery.timeline.readout")
+    }
+
+    /// The playhead's frame as an exact field: type a frame and Return scrubs there, so any frame is reachable
+    /// without finding it on the ruler (#4597). The strip follows the playhead to its page.
+    private func frameField(_ playhead: Int) -> some View {
+        ScrubField(
+            "Playhead Frame", value: Double(playhead), in: 0...Double(max(fixture.duration, 0)), step: 1, decimals: 0,
+            onChange: { new in
+                let frame = Int(new.rounded())
+                if frame != feed.playhead { feed.scrub(to: frame) }
+            })
+            .fixedSize()
+            .suiteControl(id: "suite.gallery.timeline.frame", enabled: true, reason: nil)
+    }
+
+    private func logView(_ log: [String]) -> some View {
         let text = log.joined(separator: "\n")
         return Text(log.last ?? "Nothing yet")
             .font(SuiteFont.caption)
             .foregroundStyle(SuiteColor.secondaryText)
             .lineLimit(1)
+            // Its one line always: the strip above never takes it.
+            .fixedSize(horizontal: false, vertical: true)
             .accessibilityLabel(text)
             .accessibilityValue(text)
             .accessibilityIdentifier("suite.gallery.log")
     }
 
-    private func write(_ line: String) {
-        log.append(line)
-        if log.count > 40 { log.removeFirst(log.count - 40) }
+    private func write(_ line: String) { feed.write(line) }
+
+    /// The rate menu's pick: the page's rate, logged by its title (`rate 29.97 fps`).
+    private func setRate(_ new: FrameRate) {
+        rate = new
+        write("rate \(new.description)")
     }
 
     private func pick(_ id: String, _ frame: Int?, _ mode: PickMode) {
@@ -231,6 +328,13 @@ private struct GalleryTimelinePage: View {
         }
         nothingPicked = false
         write("pick \(id) \(frame) \(mode.rawValue)")
+    }
+
+    /// Picks every key on every track: the button and ⌘A on the strip (TSA-1).
+    private func selectAll() {
+        picked = Set(fixture.order.flatMap { id in (keys[id] ?? []).map { LaneKey(track: id, frame: $0.frame) } })
+        nothingPicked = false
+        write("select-all")
     }
 
     /// Moves every picked key by `delta` frames through the key rules; a moved
@@ -274,9 +378,37 @@ private struct GalleryTimelinePage: View {
     }
 }
 
+/// The timeline page's playhead and log, observed only by its readers, so a scrub never runs the page's body.
+@MainActor @Observable final class GalleryTimelineFeed {
+    private(set) var playhead: Int
+    private(set) var log: [String] = []
+
+    init(playhead: Int) { self.playhead = playhead }
+
+    func scrub(to frame: Int) {
+        playhead = frame
+        write("scrub \(frame)")
+    }
+
+    /// One line for the journeys, the last 40 kept.
+    func write(_ line: String) {
+        log.append(line)
+        if log.count > 40 { log.removeFirst(log.count - 40) }
+    }
+}
+
+/// Builds `content` from the feed in a body of its own, so what it reads is this view's dependency, not the page's.
+private struct GalleryFeedReader<Content: View>: View {
+    let feed: GalleryTimelineFeed
+    @ViewBuilder let content: (GalleryTimelineFeed) -> Content
+
+    var body: some View { content(feed) }
+}
+
 /// A value a journey reads, as the label of a hidden element: 1 x 1 pt, no
 /// hits, drawing nothing, so the app audit finds no control or text in it.
-private struct GalleryTimelineReadout: View {
+/// The `editor` page (GalleryChrome) shows its timecode's tooltip in one.
+struct GalleryTimelineReadout: View {
     /// Its side: not a design size, since it draws nothing.
     private static let side: CGFloat = 1
     let identifier: String

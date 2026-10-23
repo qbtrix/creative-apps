@@ -12,7 +12,8 @@
 // window's actions into the overflow (run 38897404951); SuiteWindow instead
 // passes `toolbarFit(windowWidth:…)`, worked out from each toolbar item's real
 // width (`toolbarRoom`: a tool button, or wider when its title shows), the
-// window's own controls and a safety margin. When even the compact row would
+// window's own controls, the shown inspector's column and an open search
+// field (#3356, #3357), and a safety margin. When even the compact row would
 // crowd the actions (the editor gallery at 900 pt, Flare at 1000 pt, run
 // 38981651490), the row gives way further and shows the current app's item
 // alone (`AppSwitcherState.shownItems`): `suite.switcher` stays, with the
@@ -153,10 +154,22 @@ public struct AppSwitcher: View {
             + documentActions.reduce(0) { $0 + toolbarRoom($1) } + titleRoom
     }
 
-    /// The room the trailing end takes: `actions`, the window's inspector
-    /// toggle, their clearance and the safety margin.
-    nonisolated public static func toolbarTrailing(actions: [SwitcherToolbarItem]) -> CGFloat {
-        actions.reduce(0) { $0 + toolbarRoom($1) } + toolbarButtonRoom + trailingClearance + safetyMargin
+    /// The width the toolbar's search field takes once it opens: it filled the
+    /// inspector's toolbar section, 240 pt, in run 39292755765 (#3357).
+    nonisolated public static let searchFieldRoom: CGFloat = SuiteSize.inspectorWidth.ideal
+
+    /// The room the trailing end takes: `actions` and the window's inspector
+    /// toggle, or the shown inspector's column (`inspectorWidth`) when that is
+    /// wider, since the toolbar puts them over it and the row never crosses
+    /// into it (#3356); while `searching`, the open search field fills that
+    /// section and the buttons move beside it (#3357). Then their clearance
+    /// and the safety margin.
+    nonisolated public static func toolbarTrailing(
+        actions: [SwitcherToolbarItem], inspectorWidth: CGFloat = 0, searching: Bool = false
+    ) -> CGFloat {
+        let buttons = actions.reduce(0) { $0 + toolbarRoom($1) } + toolbarButtonRoom
+        let section = searching ? max(inspectorWidth, searchFieldRoom) + buttons : max(inspectorWidth, buttons)
+        return section + trailingClearance + safetyMargin
     }
 
     /// Where the row of `itemCount` items at `spacing` ends in a window
@@ -177,11 +190,13 @@ public struct AppSwitcher: View {
     /// gives way and no toolbar action goes into the overflow (the editor
     /// gallery at 900 pt, run 38981651490). Before the window is measured
     /// (width 0) nothing fits, so it is the current item alone too.
+    /// `inspectorWidth` and `searching` pass to `toolbarTrailing`.
     nonisolated public static func toolbarFit(
-        windowWidth: CGFloat, itemCount: Int, documentActions: [SwitcherToolbarItem], actions: [SwitcherToolbarItem]
+        windowWidth: CGFloat, itemCount: Int, documentActions: [SwitcherToolbarItem], actions: [SwitcherToolbarItem],
+        inspectorWidth: CGFloat = 0, searching: Bool = false
     ) -> SwitcherToolbarFit {
         let leading = toolbarLeading(documentActions: documentActions)
-        let limit = windowWidth - toolbarTrailing(actions: actions)
+        let limit = windowWidth - toolbarTrailing(actions: actions, inspectorWidth: inspectorWidth, searching: searching)
         let fits = { (spacing: CGFloat) in
             rowEnd(windowWidth: windowWidth, spacing: spacing, itemCount: itemCount, leading: leading) <= limit
         }

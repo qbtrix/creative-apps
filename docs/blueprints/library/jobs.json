@@ -1,0 +1,834 @@
+{
+  "$comment": "Real jobs: tasks a person does with this app, each with an outcome a check can observe. Keyed by job id so scripts/merge-json merges two PRs that add different jobs. scripts/jobs check validates every field; jobs.md beside this file is generated from it on dev (scripts/jobs render), never edited. The fields and the done rule: docs/factory/packets.md, Jobs.",
+  "RJ-L01": {
+    "id": "RJ-L01",
+    "app": "library",
+    "weight": "med",
+    "job": "Import 2,000 photos from a card: copy to a dated folder, rename by date, make a second backup copy.",
+    "outcome": "2,000 files in a dated folder, renamed by date the same way in the catalog and on disk, and a second complete copy.",
+    "needs": [
+      "A7"
+    ],
+    "needs_note": "A7 card ingest",
+    "closes_with": "A7",
+    "trap": "Rename differs between card and copy; second copy skipped silently",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://helpx.adobe.com/ie/lightroom/help/photo-video-import-options.html",
+      "https://community.adobe.com/t5/lightroom-classic-discussions/photo-rename-hard-drive-loss-originals-on-sd-cards-have-different-names-from-catalog-lr-classic/m-p/12184579/highlight/true"
+    ]
+  },
+  "RJ-L02": {
+    "id": "RJ-L02",
+    "app": "library",
+    "weight": "high",
+    "job": "Add a folder in place, then add it again.",
+    "outcome": "Nothing is duplicated and nothing moves.",
+    "needs": [
+      "library/import"
+    ],
+    "needs_note": "library/import (built)",
+    "closes_with": "library/import",
+    "trap": "Same file under a new path imported twice",
+    "run": "Cm",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://helpx.adobe.com/ie/lightroom/help/photo-video-import-options.html"
+    ]
+  },
+  "RJ-L03": {
+    "id": "RJ-L03",
+    "app": "library",
+    "weight": "high",
+    "job": "Cull 500 shots with P, X and stars, Auto Advance on.",
+    "outcome": "Each step lands in under 50 ms.",
+    "needs": [
+      "library/cull"
+    ],
+    "needs_note": "library/cull (built)",
+    "closes_with": "library/cull",
+    "trap": "Auto Advance skips a photo after an undo",
+    "run": "J",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://home.camerabits.com/tour-photo-mechanic/",
+      "https://helpx.adobe.com/lightroom-classic/help/library-module-basic-workflow.html"
+    ]
+  },
+  "RJ-L04": {
+    "id": "RJ-L04",
+    "app": "library",
+    "weight": "high",
+    "job": "Zoom to 100% on an eye to check focus, then step to the next shot at the same spot.",
+    "outcome": "The next shot opens at 100% on the same spot.",
+    "needs": [
+      "library/loupe-viewport"
+    ],
+    "needs_note": "loupe-viewport (beta)",
+    "closes_with": "library/loupe-viewport",
+    "trap": "Zoom resets on every step",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://home.camerabits.com/tour-photo-mechanic/",
+      "https://helpx.adobe.com/lightroom-classic/help/library-module-basic-workflow.html"
+    ]
+  },
+  "RJ-L05": {
+    "id": "RJ-L05",
+    "app": "library",
+    "weight": "med",
+    "job": "Compare two frames of a burst side by side with synced zoom.",
+    "outcome": "The two frames show side by side, and zoom and pan move both together.",
+    "needs": [
+      "S22"
+    ],
+    "needs_note": "S22 compare viewer",
+    "closes_with": "S22",
+    "trap": "Zoom not synced",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://helpx.adobe.com/lightroom-classic/help/library-module-basic-workflow.html"
+    ]
+  },
+  "RJ-L06": {
+    "id": "RJ-L06",
+    "app": "library",
+    "weight": "high",
+    "job": "Delete rejects.",
+    "outcome": "They go to the Trash (recoverable), the catalog updates, and a later import doesn't bring them back.",
+    "needs": [
+      "A5"
+    ],
+    "needs_note": "A5 Delete Rejects",
+    "closes_with": "A5",
+    "trap": "Removed from the catalog but not from disk, or re-imported from the card",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://community.adobe.com/t5/lightroom-classic-discussions/prevent-re-import-of-images-previously-deleted-from-lightroom-classic/td-p/13988083",
+      "https://community.adobe.com/t5/lightroom-classic-discussions/lightroom-classic-continues-to-break-workflows-especially-when-deleting/m-p/12517273"
+    ],
+    "waits_on": "DR-8"
+  },
+  "RJ-L07": {
+    "id": "RJ-L07",
+    "app": "library",
+    "weight": "high",
+    "job": "Scroll a 10,000-photo grid of real thumbnails.",
+    "outcome": "Stays smooth and the thumbnails are right.",
+    "needs": [
+      "library/thumbnails",
+      "E12",
+      "library/large-catalog"
+    ],
+    "needs_note": "library/thumbnails (beta), E12 preview cache",
+    "closes_with": "library/large-catalog",
+    "trap": "Placeholders today; jank once real pixels arrive",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://community.adobe.com/t5/lightroom-classic-discussions/creation-of-new-catalogue-takes-weeks-how-speed-up/m-p/13187327/highlight/true"
+    ]
+  },
+  "RJ-L08": {
+    "id": "RJ-L08",
+    "app": "library",
+    "weight": "high",
+    "job": "Quit and relaunch.",
+    "outcome": "Every rating, flag and edit is there; a damaged catalog is set aside, not lost.",
+    "needs": [
+      "library/persist"
+    ],
+    "needs_note": "library/persist (beta)",
+    "closes_with": "library/persist",
+    "trap": "Catalog reverts to an older state after a forced quit",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.lightroomqueen.com/community/threads/lightroom-catalog-corrupt-cant-be-repaired.569/",
+      "https://community.adobe.com/questions-675/lightroom-edits-gone-961452"
+    ]
+  },
+  "RJ-L09": {
+    "id": "RJ-L09",
+    "app": "library",
+    "weight": "med",
+    "job": "Show only picked photos with three stars or more.",
+    "outcome": "The grid shows only picked photos with three or more stars, and the filter is still set after a relaunch.",
+    "needs": [],
+    "needs_note": "filters-collections FC-b",
+    "closes_with": null,
+    "trap": "Filter forgets on relaunch",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://helpx.adobe.com/lightroom-classic/help/library-module-basic-workflow.html"
+    ]
+  },
+  "RJ-L10": {
+    "id": "RJ-L10",
+    "app": "library",
+    "weight": "med",
+    "job": "Make an album from a selection and add more later.",
+    "outcome": "The album lists the photos by reference, with no copies on disk, and later additions show in it.",
+    "needs": [],
+    "needs_note": "filters-collections FC-c",
+    "closes_with": null,
+    "trap": "Album holds copies, not references",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://support.apple.com/guide/photos/welcome/mac"
+    ]
+  },
+  "RJ-L11": {
+    "id": "RJ-L11",
+    "app": "library",
+    "weight": "med",
+    "job": "Tag 40 photos with a keyword and find them by search.",
+    "outcome": "A search for the keyword in any letter case finds all 40 photos.",
+    "needs": [],
+    "needs_note": "metadata-more MD-c, MD-e",
+    "closes_with": null,
+    "trap": "Search misses mixed-case keywords",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.capterra.com/p/184384/Eagle/reviews/1831706/"
+    ]
+  },
+  "RJ-L12": {
+    "id": "RJ-L12",
+    "app": "library",
+    "weight": "med",
+    "job": "Read a photo's camera, lens, ISO and shutter in the inspector.",
+    "outcome": "The inspector shows camera, lens, ISO and shutter, and a rotated photo's size the right way round.",
+    "needs": [],
+    "needs_note": "metadata-more MD-b",
+    "closes_with": null,
+    "trap": "Rotated phone photo shows swapped size",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://home.camerabits.com/tour-photo-mechanic/"
+    ]
+  },
+  "RJ-L13": {
+    "id": "RJ-L13",
+    "app": "library",
+    "weight": "high",
+    "job": "Fix exposure, white balance and shadows on one photo and sync to 40 others.",
+    "outcome": "The 40 photos get the same exposure, white balance and shadows, and keep their own crops.",
+    "needs": [
+      "library/develop"
+    ],
+    "needs_note": "library/develop (beta)",
+    "closes_with": "library/develop",
+    "trap": "Sync copies the crop too",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://helpx.adobe.com/lightroom-classic/help/library-module-basic-workflow.html"
+    ]
+  },
+  "RJ-L14": {
+    "id": "RJ-L14",
+    "app": "library",
+    "weight": "high",
+    "job": "Crop to 4:5 with a preset and straighten.",
+    "outcome": "The photo is cropped to 4:5 and level in the loupe, the thumbnail and the export.",
+    "needs": [
+      "library/crop"
+    ],
+    "needs_note": "library/crop (beta)",
+    "closes_with": "library/crop",
+    "trap": "Export ignores the crop",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://helpx.adobe.com/lightroom-classic/help/library-module-basic-workflow.html",
+      "https://imagen-ai.com/tools/resize-for-instagram-portrait-45.md"
+    ]
+  },
+  "RJ-L15": {
+    "id": "RJ-L15",
+    "app": "library",
+    "weight": "high",
+    "job": "Export 40 photos as JPEG at a 2048 px long edge, quality 85, into a folder.",
+    "outcome": "Nothing is overwritten.",
+    "needs": [
+      "library/export"
+    ],
+    "needs_note": "library/export (beta)",
+    "closes_with": "library/export",
+    "trap": "JPEGWriter throws 'not built yet' today",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://helpx.adobe.com/lightroom-classic/help/library-module-basic-workflow.html"
+    ]
+  },
+  "RJ-L16": {
+    "id": "RJ-L16",
+    "app": "library",
+    "weight": "high",
+    "job": "Export for sharing without location.",
+    "outcome": "No GPS, serial or MakerNote in the JPEG or in any sidecar; copyright kept if asked.",
+    "needs": [
+      "S11",
+      "library/export-pack"
+    ],
+    "needs_note": "S11 (the metadata option); library/export-pack adds the row",
+    "closes_with": "library/export-pack",
+    "trap": "The EX-f XMP sidecar or a property copy carries GPS and CreateDate beside a 'clean' JPEG",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://community.adobe.com/t5/lightroom-classic-bugs/p-save-metadata-to-file-doesn-t-clear-gps-exif-fields-for-dngs/idc-p/13864003",
+      "https://community.adobe.com/questions-675/lr-classic-mac-location-data-problems-on-export-983562",
+      "https://robservatory.com/retain-location-metadata-on-photos-sourced-from-photos/",
+      "https://www.intego.com/mac-security-blog/how-to-remove-gps-location-data-from-photos-on-iphone-or-mac"
+    ],
+    "waits_on": "LX-3"
+  },
+  "RJ-L17": {
+    "id": "RJ-L17",
+    "app": "library",
+    "weight": "low",
+    "job": "Export with a text or logo watermark in a corner.",
+    "outcome": "The exported files carry the watermark in the chosen corner at the same size relative to the long edge, portrait or landscape.",
+    "needs": [],
+    "needs_note": "none (v1 Out)",
+    "closes_with": null,
+    "trap": "Watermark size varies with orientation",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://community.adobe.com/t5/photoshop-ecosystem-discussions/batch-image-resizing-and-adding-watermark/m-p/8116452"
+    ]
+  },
+  "RJ-L18": {
+    "id": "RJ-L18",
+    "app": "library",
+    "weight": "med",
+    "job": "Edit in Photo and come back.",
+    "outcome": "The thumbnail updates and the original is untouched.",
+    "needs": [],
+    "needs_note": "Library round trip (wave 3)",
+    "closes_with": null,
+    "trap": "Original overwritten by the edit",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://helpx.adobe.com/lightroom-classic/help/library-module-basic-workflow.html"
+    ]
+  },
+  "RJ-L19": {
+    "id": "RJ-L19",
+    "app": "library",
+    "weight": "med",
+    "job": "Find duplicates across two imported folders.",
+    "outcome": "The finder lists the same photo across the two folders as a duplicate, even at two sizes.",
+    "needs": [
+      "E12"
+    ],
+    "needs_note": "E12 duplicate hash",
+    "closes_with": "E12",
+    "trap": "Same photo at two sizes not matched",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://fstoppers.com/education/lightroom-classic-154-adds-duplicate-finder-and-smarter-group-culling-903364"
+    ]
+  },
+  "RJ-L20": {
+    "id": "RJ-L20",
+    "app": "library",
+    "weight": "med",
+    "job": "Browse by year and month.",
+    "outcome": "Photos sit under their year and month, and photos with no date sit in their own group, not 1970.",
+    "needs": [
+      "A6"
+    ],
+    "needs_note": "A6 browse by date",
+    "closes_with": "A6",
+    "trap": "Photos with no Exif date bunch at 1970",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://support.apple.com/guide/photos/welcome/mac"
+    ]
+  },
+  "RJ-L21": {
+    "id": "RJ-L21",
+    "app": "library",
+    "weight": "low",
+    "job": "Import RAW+JPEG pairs and see each pair once.",
+    "outcome": "Each RAW+JPEG pair shows as one item, and a rating applies to both files.",
+    "needs": [],
+    "needs_note": "no packet: RAW+JPEG pairing was cut from library/raw for the beta (re-cut 2026-10-21, open question R1)",
+    "closes_with": null,
+    "trap": "Pair shows twice; rating applies to one half",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://home.camerabits.com/tour-photo-mechanic/"
+    ]
+  },
+  "RJ-L22": {
+    "id": "RJ-L22",
+    "app": "library",
+    "weight": "med",
+    "job": "Open camera RAW files and see the embedded preview at once.",
+    "outcome": "RAW files import and show their embedded preview straight away.",
+    "needs": [
+      "library/raw",
+      "suiteui/shared-raw"
+    ],
+    "closes_with": "library/raw",
+    "trap": "RAW skipped silently on import",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://home.camerabits.com/tour-photo-mechanic/"
+    ],
+    "waits_on": "RW-4"
+  },
+  "RJ-L23": {
+    "id": "RJ-L23",
+    "app": "library",
+    "weight": "med",
+    "job": "Open a 50,000-photo catalog.",
+    "outcome": "Launch under 3 s, search under 200 ms.",
+    "needs": [
+      "E12",
+      "G1"
+    ],
+    "needs_note": "E12 + a Library large-catalog gate (G1 doesn't list Library)",
+    "closes_with": "E12",
+    "trap": "Catalog JSON parsed whole on every launch",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://community.adobe.com/t5/lightroom-classic-discussions/creation-of-new-catalogue-takes-weeks-how-speed-up/m-p/13187327/highlight/true"
+    ]
+  },
+  "RJ-L24": {
+    "id": "RJ-L24",
+    "app": "library",
+    "weight": "low",
+    "job": "Browse previews of photos on an unplugged drive; they show as offline.",
+    "outcome": "Photos on the unplugged drive stay in the grid with their previews and an offline mark.",
+    "needs": [
+      "E12"
+    ],
+    "needs_note": "E12 offline drives",
+    "closes_with": "E12",
+    "trap": "Offline photos vanish from the grid",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://home.camerabits.com/tour-photo-mechanic/"
+    ]
+  },
+  "RJ-L25": {
+    "id": "RJ-L25",
+    "app": "library",
+    "weight": "high",
+    "job": "Undo a rating change made on 300 photos in one step.",
+    "outcome": "One undo restores the rating of all 300 photos.",
+    "needs": [
+      "library/spine"
+    ],
+    "needs_note": "spine CatalogHistory (built)",
+    "closes_with": "library/spine",
+    "trap": "Undo restores only the first photo",
+    "run": "C",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://helpx.adobe.com/lightroom-classic/help/library-module-basic-workflow.html"
+    ]
+  },
+  "RJ-L26": {
+    "id": "RJ-L26",
+    "app": "library",
+    "weight": "high",
+    "job": "Edit a mixed selection; the inspector shows Mixed and one edit applies to all.",
+    "outcome": "The inspector shows Mixed for differing values, and one edit applies to every selected photo.",
+    "needs": [],
+    "needs_note": "built (#750, #1541)",
+    "closes_with": null,
+    "trap": "Mixed shows a value",
+    "run": "C",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://helpx.adobe.com/lightroom-classic/help/library-module-basic-workflow.html"
+    ]
+  },
+  "RJ-L27": {
+    "id": "RJ-L27",
+    "app": "library",
+    "weight": "med",
+    "job": "Set colour labels from keys 6 to 9.",
+    "outcome": "Keys 6 to 9 set the matching colour label on the selected photos.",
+    "needs": [
+      "A5"
+    ],
+    "needs_note": "A5 label keys",
+    "closes_with": "A5",
+    "trap": "Inspector only today",
+    "run": "J",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://home.camerabits.com/tour-photo-mechanic/"
+    ]
+  },
+  "RJ-L28": {
+    "id": "RJ-L28",
+    "app": "library",
+    "weight": "med",
+    "job": "Copy develop settings and paste them on another photo.",
+    "outcome": "The other photo gets the develop settings and keeps its own crop.",
+    "needs": [
+      "library/develop"
+    ],
+    "needs_note": "library/develop (beta)",
+    "closes_with": "library/develop",
+    "trap": "Paste includes crop",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://helpx.adobe.com/lightroom-classic/help/library-module-basic-workflow.html"
+    ]
+  },
+  "RJ-L29": {
+    "id": "RJ-L29",
+    "app": "library",
+    "weight": "med",
+    "job": "See video files in the grid with their duration.",
+    "outcome": "Video files show in the grid with their duration.",
+    "needs": [
+      "E9"
+    ],
+    "needs_note": "E9 decode (open call 1)",
+    "closes_with": "E9",
+    "trap": "Videos skipped silently",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://docs-en.eagle.cool/article/184-what-file-formats-does-eagle-support"
+    ]
+  },
+  "RJ-L30": {
+    "id": "RJ-L30",
+    "app": "library",
+    "weight": "med",
+    "job": "Flag closed-eye and out-of-focus frames in a burst automatically.",
+    "outcome": "Closed-eye and out-of-focus frames are flagged, with no network use.",
+    "needs": [],
+    "needs_note": "none (open call 1 only names AI culling)",
+    "closes_with": null,
+    "trap": "Runs off-device",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://support.captureone.com/hc/es/community/posts/10705908543773-AI-Culling",
+      "https://fstoppers.com/education/lightroom-classic-154-adds-duplicate-finder-and-smarter-group-culling-903364"
+    ]
+  },
+  "RJ-L31": {
+    "id": "RJ-L31",
+    "app": "library",
+    "weight": "low",
+    "job": "Full-screen preview with the space bar, and back.",
+    "outcome": "The space bar opens a full-screen preview, and the space bar, Escape or a visible control closes it.",
+    "needs": [
+      "A5"
+    ],
+    "needs_note": "A5 full screen",
+    "closes_with": "A5",
+    "trap": "No way back with the mouse",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://helpx.adobe.com/lightroom-classic/help/library-module-basic-workflow.html"
+    ]
+  },
+  "RJ-L32": {
+    "id": "RJ-L32",
+    "app": "library",
+    "weight": "med",
+    "job": "Stack a burst under its best frame.",
+    "outcome": "The burst shows as one stack topped by the best frame, and rating the stack rates every frame.",
+    "needs": [
+      "A8"
+    ],
+    "needs_note": "A8 stacks",
+    "closes_with": "A8",
+    "trap": "Rating the stack rates only the top",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://helpx.adobe.com/lightroom-classic/help/library-module-basic-workflow.html"
+    ]
+  },
+  "RJ-L33": {
+    "id": "RJ-L33",
+    "app": "library",
+    "weight": "low",
+    "job": "Export with an XMP sidecar; another photo app reads the 3-star rating.",
+    "outcome": "The sidecar holds xmp:Rating 3, and a standard XMP reader reports 3 stars.",
+    "needs": [
+      "library/export"
+    ],
+    "needs_note": "export EX-f",
+    "closes_with": "library/export",
+    "trap": "Sidecar written but not readable by others",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://home.camerabits.com/tour-photo-mechanic/"
+    ]
+  },
+  "RJ-L41": {
+    "id": "RJ-L41",
+    "app": "library",
+    "weight": "med",
+    "job": "Auto tone and sharpen a dim, flat photo in Develop, then export it for the web.",
+    "outcome": "The export's luma spans 0.05 to 0.95, its grey patch reads neutral, and its edges are sharper than an unsharpened export.",
+    "needs": [
+      "S1",
+      "library/tone-controls"
+    ],
+    "closes_with": "library/tone-controls",
+    "trap": "Auto stretches levels but leaves a cast, or the export drops Sharpen",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "LT-5",
+    "added_by": "library/tone-controls"
+  },
+  "RJ-L42": {
+    "id": "RJ-L42",
+    "app": "library",
+    "weight": "high",
+    "job": "Drop a folder of three photos and a Halo project on Library, then undo.",
+    "outcome": "Three photos import in one step and are selected; one undo removes them; the Halo project is handed to Halo.",
+    "needs": [
+      "suite/file-flow",
+      "library/file-flow"
+    ],
+    "closes_with": "library/file-flow",
+    "trap": "Folders aren't expanded, each file is its own undo step, or the Halo project imports as a broken photo",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "LF-3",
+    "added_by": "library/file-flow"
+  },
+  "RJ-L70": {
+    "id": "RJ-L70",
+    "app": "library",
+    "weight": "high",
+    "job": "Stand up a sideways 4000x3000 scan with Rotate Right, crop it 4:5 portrait, and export JPEG.",
+    "outcome": "The JPEG is 3000x3750 and its top row matches the scan's left column within 2 levels.",
+    "needs": [
+      "suiteui/orientation-crop"
+    ],
+    "closes_with": "suiteui/orientation-crop",
+    "trap": "4:5 on the landscape original gives 5:4, or export ignores the turn",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "OC-8",
+    "added_by": "suiteui/orientation-crop"
+  },
+  "RJ-L50": {
+    "id": "RJ-L50",
+    "app": "library",
+    "weight": "high",
+    "job": "Import a card with two folders by copying to a chosen folder in dated subfolders, then delete the card.",
+    "outcome": "Every photo still opens after the card is gone; both files named IMG_0001 exist with different bytes under the dated folders.",
+    "needs": [
+      "library/catalog-files",
+      "A7"
+    ],
+    "closes_with": "library/catalog-files",
+    "trap": "A duplicate name overwrites the first copy, or the catalog still points at the card",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "LC-5",
+    "added_by": "library/catalog-files"
+  },
+  "RJ-L51": {
+    "id": "RJ-L51",
+    "app": "library",
+    "weight": "med",
+    "job": "Rate three photos, remove them from the catalog, then undo.",
+    "outcome": "The three files are still on disk after the remove, and after the undo the photos are back with their ratings.",
+    "needs": [
+      "library/catalog-files"
+    ],
+    "closes_with": "library/catalog-files",
+    "trap": "Remove deletes the files, or undo brings the photos back without their ratings",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "LC-6",
+    "added_by": "library/catalog-files"
+  },
+  "RJ-L52": {
+    "id": "RJ-L52",
+    "app": "library",
+    "weight": "high",
+    "job": "Move an imported folder of 40 photos on disk, then locate one of them.",
+    "outcome": "One relink makes all 40 photos open again; a same-named file of another size elsewhere is not linked.",
+    "needs": [
+      "library/catalog-files"
+    ],
+    "closes_with": "library/catalog-files",
+    "trap": "Relink fixes only the photo that was located",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "LC-6",
+    "added_by": "library/catalog-files"
+  },
+  "RJ-L53": {
+    "id": "RJ-L53",
+    "app": "library",
+    "weight": "med",
+    "job": "Import trips (with 2025 and 2026 inside) and family, then show trips/2025, and trips without its subfolders.",
+    "outcome": "Each folder view lists exactly the expected files, and the listed counts match the files on disk.",
+    "needs": [
+      "library/folders",
+      "A6"
+    ],
+    "closes_with": "library/folders",
+    "trap": "A folder named like a prefix of another shows the other's photos, or subfolder counts are added twice",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "FO-5",
+    "added_by": "library/folders"
+  },
+  "RJ-L54": {
+    "id": "RJ-L54",
+    "app": "library",
+    "weight": "high",
+    "job": "Rate 30 photos over three hourly saves, truncate the catalog file, relaunch, then restore the oldest backup.",
+    "outcome": "The relaunch opens the newest good backup with all 30 ratings and says so; after the restore the pre-restore catalog is listed as a backup.",
+    "needs": [
+      "library/catalog-backup"
+    ],
+    "closes_with": "library/catalog-backup",
+    "trap": "A damaged catalog opens empty, or a restore overwrites the only good copy",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "BK-5m",
+    "added_by": "library/catalog-backup"
+  },
+  "RJ-L55": {
+    "id": "RJ-L55",
+    "app": "library",
+    "weight": "med",
+    "job": "Prepare three geotagged photos for the share sheet.",
+    "outcome": "Three JPEGs with a long edge of 2048 and no GPS, serial or MakerNote; after a relaunch the share folder is empty.",
+    "needs": [
+      "library/share-sheet",
+      "library/export-pack"
+    ],
+    "closes_with": "library/share-sheet",
+    "trap": "The shared copies keep the location, are full-size originals, or pile up in a temp folder",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "SH-3",
+    "added_by": "library/share-sheet"
+  },
+  "RJ-L56": {
+    "id": "RJ-L56",
+    "app": "library",
+    "weight": "high",
+    "job": "Open a 10,000-photo catalog headless, select all, rate them 3, and plan an export of 1,000.",
+    "outcome": "Open in 400 ms or less, rate-all as one step in 200 ms or less, the export plan in 50 ms or less (debug).",
+    "needs": [
+      "library/large-catalog"
+    ],
+    "closes_with": "library/large-catalog",
+    "trap": "Fine at 200 photos, stalls at 10,000 (a quadratic scan in select or plan)",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "LG-3",
+    "added_by": "library/large-catalog"
+  }
+}

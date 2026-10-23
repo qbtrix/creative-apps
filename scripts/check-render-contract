@@ -1,0 +1,217 @@
+#!/usr/bin/env python3
+# scripts/check-render-contract: the mechanical half of docs/render-contract.md, the
+# rules every canvas app (Photo, Design, Flare, Halo, Library) draws by. Three rules:
+#   offscreen  `.drawingGroup(`, `.compositingGroup(`, `ImagePaint(`, `Canvas {` / `Canvas(`
+#              in a canvas or overlay view: a file under Sources/{Photo,Design,Flare,Halo,
+#              Library}App or Sources/SuiteUI whose name holds Canvas, Stage, Viewer, Overlay,
+#              Viewport, Artboard, Artwork, Loupe, SelectionMarks, SelectionHandles or
+#              SnapGuide, or any Sources file with a `// render-contract:
+#              canvas-view` line. Escape: `// render-contract: allow <reason>` on that line.
+#   gpu-nil    `return nil` inside a GPU-route func: one whose return type holds
+#              `RenderSurface?`, or with `// render-contract: gpu-route` on the line above it
+#              (attributes skipped): the GPU route giving up on the whole canvas. Escape:
+#              `// render-contract: cpu-op <id>` on that line, <id> listed in
+#              Tests/render-cpu-ops.txt, the one known-CPU-op registry.
+#   readback   `<x>dispatcher.read(` anywhere in Sources: a GPU picture read back to the CPU.
+#              Escape: `cpu-op <id>` (registered) or `allow <reason>` (export, eyedropper).
+# Comments and string contents are blanked before matching; escapes are read from the raw
+# line. A hit's key is `path::Scope.rule`, Scope being the innermost func (gpu-nil, readback)
+# or type (offscreen), so moving lines never moves the baseline.
+#
+# Tests/render-contract-baseline.txt lists today's hits, one line each (a repeated key
+# repeats):
+#   scripts/check-render-contract                    fail on a hit the baseline doesn't
+#                                                    list, and on a listed one that is gone
+#   scripts/check-render-contract --update-baseline  rewrite it; refuses to add a line
+#                                                    unless --allow-increase (it only shrinks)
+# --root DIR runs against another tree (the tests). Exit 0 clean, 1 on a hit, 2 on bad
+# input. Python 3 stdlib only.
+import argparse
+import collections
+import pathlib
+import re
+import sys
+
+HERE = pathlib.Path(__file__).resolve().parent.parent
+CANVAS_DIR = re.compile(r"^Sources/(?:(?:Photo|Design|Flare|Halo|Library)App|SuiteUI)/")
+CANVAS_NAME = re.compile(
+    r"Canvas|Stage|Viewer|Overlay|Viewport|Artboard|Artwork|Loupe|SelectionMarks|SelectionHandles|SnapGuide")
+CANVAS_MARK = "// render-contract: canvas-view"
+ROUTE_MARK = "// render-contract: gpu-route"
+OFFSCREEN = [
+    ("drawingGroup", re.compile(r"\.drawingGroup\(")),
+    ("compositingGroup", re.compile(r"\.compositingGroup\(")),
+    ("ImagePaint", re.compile(r"\bImagePaint\(")),
+    ("Canvas", re.compile(r"(?<![\w.])(?:SwiftUI\.)?Canvas\s*[({]")),
+]
+RETURN_NIL = re.compile(r"\breturn\s+nil\b")
+READBACK = re.compile(r"\b\w*[dD]ispatcher\.read\(")
+ALLOW = re.compile(r"//\s*render-contract:\s*allow\s+\S")
+CPU_OP = re.compile(r"//\s*render-contract:\s*cpu-op\s+([\w-]+)")
+LEX = re.compile(r'"""[\s\S]*?"""|"(?:\\.|[^"\\\n])*"|//[^\n]*|/\*[\s\S]*?\*/')
+TYPE = re.compile(r"\b(?:struct|class|enum|actor|extension|protocol)\s+([A-Za-z_][\w.]*)")
+FUNC = re.compile(r"\bfunc\s+([A-Za-z_]\w*|[^\s\w(<]+)")
+DECL = re.compile(r"\b(?:func|var|let|init|case|struct|class|enum|actor|extension|protocol)\b")
+BASELINE = "Tests/render-contract-baseline.txt"
+REGISTRY = "Tests/render-cpu-ops.txt"
+HEADER = """# Tests/render-contract-baseline.txt: render-contract hits that predate the lint,
+# grandfathered (docs/render-contract.md). Written by scripts/check-render-contract
+# --update-baseline, never by hand. It only shrinks: fix the hit (or register a real
+# CPU op in Tests/render-cpu-ops.txt and mark it) and drop its line in the same PR.
+# Line: `path::Scope.rule`, rule one of drawingGroup, compositingGroup, ImagePaint,
+# Canvas, gpu-nil, readback.
+"""
+
+
+def blank(text):
+    """Comments and string contents become spaces; offsets and newlines are kept."""
+    keep = lambda s: re.sub(r"[^\n]", " ", s)
+    def sub(m):
+        t = m.group()
+        if t.startswith("/"):
+            return keep(t)
+        q = 3 if t.startswith('"""') else 1
+        return t[:q] + keep(t[q:-q]) + t[-q:]
+    return LEX.sub(sub, text)
+
+
+def openers(code, raw):
+    """{brace offset: (kind, name, is a GPU route)} for each type or func body opened in `code`."""
+    out = {}
+    for m in TYPE.finditer(code):
+        brace = code.find("{", m.end())
+        if brace >= 0 and not DECL.search(code, m.end(), brace):
+            out[brace] = ("type", m.group(1).rsplit(".", 1)[-1], False)
+    for m in FUNC.finditer(code):
+        brace = code.find("{", m.end())
+        # A protocol requirement has no body: the next brace belongs to a later declaration.
+        if brace >= 0 and not DECL.search(code, m.end(), brace):
+            out[brace] = ("func", m.group(1), "RenderSurface?" in code[m.end():brace] or marked(raw, code, m.start()))
+    return out
+
+
+def marked(raw, code, at):
+    """True when the line above the func at `at` (attributes skipped) is the gpu-route marker."""
+    j = code.count("\n", 0, at) - 1
+    while j >= 0 and raw[j].strip().startswith("@"):
+        j -= 1
+    return j >= 0 and raw[j].strip() == ROUTE_MARK
+
+
+def registry(root):
+    path = root / REGISTRY
+    if not path.exists():
+        return set()
+    return {l.split()[0] for l in path.read_text().splitlines() if l.strip() and not l.startswith("#")}
+
+
+def hits_in(rel, text, ops):
+    """[(key, line number, message)] for each unescaped hit in one file."""
+    code, raw = blank(text), text.splitlines()
+    name = rel.rsplit("/", 1)[-1]
+    canvas = (CANVAS_DIR.match(rel) and CANVAS_NAME.search(name)) or CANVAS_MARK in text
+    at = collections.defaultdict(list)  # offset -> [rule]
+    for rule, rx in OFFSCREEN if canvas else []:
+        for m in rx.finditer(code):
+            at[m.start()].append(rule)
+    for m in RETURN_NIL.finditer(code):
+        at[m.start()].append("gpu-nil")
+    for m in READBACK.finditer(code):
+        at[m.start()].append("readback")
+    if not at:
+        return []
+    opens, stack, out = openers(code, raw), [], []
+    for i, ch in enumerate(code):
+        if ch == "{":
+            stack.append(opens.get(i, ("block", None, False)))
+        elif ch == "}" and stack:
+            stack.pop()
+        for rule in at.get(i, ()):
+            funcs = [s for s in stack if s[0] == "func"]
+            types = [s[1] for s in stack if s[0] == "type"] or ["file"]
+            if rule == "gpu-nil" and not (funcs and funcs[-1][2]):
+                continue
+            scope = funcs[-1][1] if rule in ("gpu-nil", "readback") and funcs else types[-1]
+            n = code.count("\n", 0, i)
+            line, key = raw[n] if n < len(raw) else "", f"{rel}::{scope}.{rule}"
+            op = CPU_OP.search(line)
+            if rule in ("gpu-nil", "readback") and op:
+                if op.group(1) not in ops:
+                    out.append((key, n + 1, f"cpu-op `{op.group(1)}` is not in {REGISTRY}"))
+            elif rule == "gpu-nil" or not ALLOW.search(line):
+                out.append((key, n + 1, MESSAGES[rule]))
+    return out
+
+
+MESSAGES = {
+    "drawingGroup": "canvas-sized offscreen render (.drawingGroup); draw it in the CALayer/Metal canvas",
+    "compositingGroup": "canvas-sized offscreen render (.compositingGroup); draw it in the CALayer/Metal canvas",
+    "ImagePaint": "ImagePaint rasterizes on the CPU each frame; use a pattern layer",
+    "Canvas": "SwiftUI Canvas over the canvas rasterizes on the CPU; draw it in the CALayer/Metal canvas",
+    "gpu-nil": "the GPU route gives up on the whole canvas; give the op a GPU path or register it",
+    "readback": "GPU picture read back to the CPU; readback is for export, eyedropper and parity tests",
+}
+
+
+def scan(root):
+    ops, hits = registry(root), []
+    for f in sorted((root / "Sources").rglob("*.swift")):
+        rel = f.relative_to(root).as_posix()
+        hits += hits_in(rel, f.read_text(errors="replace"), ops)
+    return hits
+
+
+def read_baseline(path):
+    if not path.exists():
+        return None
+    return collections.Counter(
+        l.strip() for l in path.read_text().splitlines() if l.strip() and not l.startswith("#"))
+
+
+def main():
+    ap = argparse.ArgumentParser(description="the render contract (docs/render-contract.md)")
+    ap.add_argument("--root", type=pathlib.Path, default=HERE)
+    ap.add_argument("--update-baseline", action="store_true")
+    ap.add_argument("--allow-increase", action="store_true")
+    a = ap.parse_args()
+    hits = scan(a.root)
+    current = collections.Counter(k for k, _, _ in hits)
+    path = a.root / BASELINE
+    base = read_baseline(path)
+
+    if a.update_baseline:
+        grew = sorted((current - base).elements()) if base is not None else []
+        if grew and not a.allow_increase:
+            print("check-render-contract: refusing to grow the baseline (it only shrinks):", file=sys.stderr)
+            for k in grew:
+                print(f"  {k}", file=sys.stderr)
+            print("Fix the hit (docs/render-contract.md). A reviewed exception reruns with --allow-increase.",
+                  file=sys.stderr)
+            return 1
+        path.write_text(HEADER + "".join(k + "\n" for k in sorted(current.elements())))
+        print(f"check-render-contract: baseline written, {sum(current.values())} grandfathered hits.")
+        return 0
+
+    if base is None:
+        print(f"check-render-contract: {BASELINE} is missing; run --update-baseline", file=sys.stderr)
+        return 2
+    new, gone = current - base, base - current
+    for k, line, msg in hits:
+        if new[k] > 0:
+            print(f"{k.split('::')[0]}:{line}: {k.split('::')[1]}: {msg} (new)")
+    for k in sorted(gone.elements()):
+        print(f"{k}: listed in {BASELINE} but no longer hits")
+    if new:
+        print("Render contract (docs/render-contract.md): fix the hit. An offscreen pass that is truly bounded to\n"
+              "the viewport gets `// render-contract: allow <reason>`; a GPU-route bail or readback for an op\n"
+              f"with no GPU path yet gets `// render-contract: cpu-op <id>`, <id> listed in {REGISTRY}.")
+    if gone:
+        print("Ratchet down: scripts/check-render-contract --update-baseline")
+    if new or gone:
+        return 1
+    print(f"ok ({sum(current.values())} grandfathered render-contract hits, none new)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

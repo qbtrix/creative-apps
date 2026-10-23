@@ -4,8 +4,64 @@
 // either kind of row by id, New Scene and New Layer. Remove takes a scene or a
 // layer; a scene's Remove is refused with the Model's removeSceneHelp, which
 // is also the remove control's tooltip. Duplicate waits for the row context
-// menus (LF-2) and says so.
+// menus (LF-2) and says so. SCENES is a SuiteSidebarList section; LAYERS is
+// SuiteUI's LayerTreeList (adopt-kernel-layers AL-f3) over the kernel's
+// `layerRows`, top first, named `.sidebar`: rows `suite.sidebar.row.<id>`,
+// eye and lock `suite.sidebar.<id>.visible` / `.locked` (FlareLayerFlag's raw
+// values), New Layer in its header. A reorder drop goes through the Model's
+// `layerMove` onto the same `.move` intent the list drag sent before.
 import FlareModel
+import SuiteUI
+import SwiftUI
+
+extension SidebarSection {
+    /// The SCENES section. New Scene shows while an animation is open and sends `.addScene` through `perform`.
+    static func flareScenes(_ model: FlareWorkspace, perform: @escaping @MainActor (FlareIntent.Layers) -> Void) -> SidebarSection {
+        SidebarSection(
+            id: "scenes", title: "Scenes",
+            items: model.scenes.map { SidebarItem(id: $0.id, title: $0.name, systemImage: "film") },
+            addAction: model.document == nil
+                ? nil : ToolbarAction("New Scene", systemImage: "plus") { perform(.addScene) })
+    }
+}
+
+/// The LAYERS panel: the shared list over the edited owner's layers, with eye, lock, rename and drag to reorder.
+/// New Layer shows while a scene is selected. Every gesture leaves as a `.layers` intent through `perform`.
+struct FlareLayersList: View {
+    let model: FlareWorkspace
+    /// Whether the rows sit in the host's scroll view (a snapshot) rather than the list's own.
+    var embedded = false
+    let perform: @MainActor (FlareIntent.Layers) -> Void
+
+    var body: some View {
+        LayerTreeList(
+            rows: model.layerRows, childCount: { _ in 0 }, selection: model.selectedLayerID, naming: .sidebar,
+            header: LayerTreeHeader(
+                title: "Layers",
+                action: model.selectedScene == nil
+                    ? nil : ToolbarAction("New Layer", systemImage: "plus") { perform(.addLayer) }),
+            options: LayerTreeOptions(reorders: true, embedded: embedded),
+            onSelect: { perform(.select(id: $0)) },
+            onRename: { id, name in
+                perform(.rename(id: id, name: name))
+                return nil
+            },
+            onAction: act)
+    }
+
+    private func act(_ action: LayerTreeAction) {
+        switch action {
+        case .toggleHidden(let id): perform(.toggle(id: id, flag: FlareLayerFlag.visible.rawValue))
+        case .toggleLocked(let id): perform(.toggle(id: id, flag: FlareLayerFlag.locked.rawValue))
+        case .move(let drop):
+            if let move = model.layerMove(drop.id, parent: drop.parentID, index: drop.index) {
+                perform(.move(section: "layers", from: move.from, to: move.to))
+            }
+        // Flare's layers are flat: no row discloses.
+        case .disclose: break
+        }
+    }
+}
 
 extension FlareWindow {
     /// Acts on a layers intent.

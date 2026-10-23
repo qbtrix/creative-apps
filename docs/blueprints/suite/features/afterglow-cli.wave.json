@@ -1,0 +1,190 @@
+{
+  "title": "afterglow: a headless CLI over every app's command catalog (single commands, open, export, describe, and JSON scripts), on Linux, and the real-jobs suites that run through it",
+  "wave": "AI1",
+  "order": 10,
+  "status": "built",
+  "feature_issue": "#2998",
+  "covers": "captain's AI-accessible-first call (CLI half); beta-80 plan W0 (p0); suite.md 1.5; defines the real-jobs suite format",
+  "waits_on": "suiteui command-catalog CC-a (cross-line: the Commands stubs, the fake document, the five <X>Headless stubs); targets (#873, built). Pixel expectations wait on creative-core image-codecs IC-png and its bump. CL-1 is a supervisor merge (Package.swift, scripts/test-scope)",
+  "depends": [
+    "targets"
+  ],
+  "ui_slice": "none",
+  "ui_slice_reason": "a command line tool: no screen; the apps' menus reach the same catalog through adopt-command-catalog",
+  "longest_chain": "6 (CL-1 → CL-2 → CL-3 → CL-4 → CL-10 → CL-11)",
+  "owned": [
+    "Package.swift",
+    "scripts/test-scope",
+    "Sources/AfterGlowCLI/main.swift",
+    "Sources/AfterGlowCLICore/CLI.swift",
+    "Tests/AfterGlowCLITests/CLIShapeTests.swift",
+    "docs/c4/parts/creative-apps/afterglow-cli/container.json",
+    "docs/c4/parts/creative-apps/afterglow-cli/cli-runner.json",
+    "Sources/AfterGlowCLICore/CLIIO.swift",
+    "Sources/AfterGlowCLICore/Apps.swift",
+    "Sources/AfterGlowCLICore/ScriptRunner.swift",
+    "Sources/AfterGlowCLICore/RealJobs.swift",
+    "Sources/AfterGlowCLICore/MCP/MCPServer.swift",
+    "Tests/AfterGlowCLITests/CLIStubTests.swift",
+    "Tests/AfterGlowCLITests/CLIArgsTests.swift",
+    "Tests/AfterGlowCLITests/CLIFileSafetyTests.swift",
+    "Tests/AfterGlowCLITests/Golden/",
+    "Sources/AfterGlowCLICore/Arguments.swift",
+    "Sources/AfterGlowCLICore/Output.swift",
+    "Tests/mutations/AfterGlowCLICore.Arguments.json",
+    "Sources/AfterGlowCLICore/LiveIO.swift",
+    "Tests/mutations/AfterGlowCLICore.LiveIO.json",
+    "Tests/AfterGlowCLITests/BatchTests.swift",
+    "Tests/AfterGlowCLITests/Fixtures/Batch/",
+    "Sources/AfterGlowCLICore/Script.swift",
+    "Tests/mutations/AfterGlowCLICore.ScriptRunner.json",
+    "docs/c4/parts/creative-apps/afterglow-cli/cli-batch.json",
+    "Tests/AfterGlowCLITests/RealJobsTests.swift",
+    "Tests/RealJobs/fake/",
+    "Tests/AfterGlowCLITests/Fixtures/RealJobsBroken/",
+    "Tests/mutations/AfterGlowCLICore.RealJobs.json",
+    "docs/c4/parts/creative-apps/afterglow-cli/cli-jobs.json",
+    "Tests/AfterGlowCLITests/CLIBinaryTests.swift",
+    "docs/cli.md",
+    "docs/blueprints/suite/features/afterglow-cli.wave.json"
+  ],
+  "journeys": [],
+  "journeys_none": "headless: proven by Linux walks LJ0 to LJ4 in AfterGlowCLITests, no XCUITest",
+  "slices": [
+    {
+      "id": "CL-a",
+      "behavior": "The `AfterGlowCLICore` library, the `afterglow` executable and their tests exist on Linux and macOS with every entry point as a documented stub, an in-memory file system and the app registry over the five `<X>Headless` types plus the fake.",
+      "tasks": [
+        "CL-1",
+        "CL-2"
+      ],
+      "journeys": [
+        "LJ0"
+      ],
+      "owned": [
+        "Package.swift",
+        "scripts/test-scope",
+        "Sources/AfterGlowCLI/main.swift",
+        "Sources/AfterGlowCLICore/CLI.swift",
+        "Tests/AfterGlowCLITests/CLIShapeTests.swift",
+        "docs/c4/parts/creative-apps/afterglow-cli/container.json",
+        "docs/c4/parts/creative-apps/afterglow-cli/cli-runner.json",
+        "Sources/AfterGlowCLICore/CLIIO.swift",
+        "Sources/AfterGlowCLICore/Apps.swift",
+        "Sources/AfterGlowCLICore/ScriptRunner.swift",
+        "Sources/AfterGlowCLICore/RealJobs.swift",
+        "Sources/AfterGlowCLICore/MCP/MCPServer.swift",
+        "Tests/AfterGlowCLITests/CLIStubTests.swift"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "CL-args",
+      "behavior": "Every single-shot form parses strictly (an unknown flag, app or command is a usage error that names it), prints one JSON object on stdout, exits with a sysexits code, and never overwrites a file unless told to.",
+      "tasks": [
+        "CL-3",
+        "CL-4",
+        "CL-5"
+      ],
+      "journeys": [
+        "LJ1"
+      ],
+      "owned": [
+        "Tests/AfterGlowCLITests/CLIArgsTests.swift",
+        "Tests/AfterGlowCLITests/CLIFileSafetyTests.swift",
+        "Tests/AfterGlowCLITests/Golden/",
+        "Sources/AfterGlowCLICore/CLI.swift",
+        "Sources/AfterGlowCLICore/Arguments.swift",
+        "Sources/AfterGlowCLICore/Output.swift",
+        "Tests/mutations/AfterGlowCLICore.Arguments.json",
+        "Sources/AfterGlowCLICore/LiveIO.swift",
+        "Tests/mutations/AfterGlowCLICore.LiveIO.json"
+      ],
+      "waits": {
+        "CL-a": [
+          "CL-3"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "CL-batch",
+      "behavior": "`afterglow run` reads a versioned `*.jobs.json`, expands its inputs relative to the script, runs its steps on each input (all or none per input when atomic), writes outputs by name template, refuses collisions, and reports every step.",
+      "tasks": [
+        "CL-6",
+        "CL-7"
+      ],
+      "journeys": [
+        "LJ2"
+      ],
+      "owned": [
+        "Tests/AfterGlowCLITests/BatchTests.swift",
+        "Tests/AfterGlowCLITests/Fixtures/Batch/",
+        "Sources/AfterGlowCLICore/Script.swift",
+        "Sources/AfterGlowCLICore/ScriptRunner.swift",
+        "Tests/mutations/AfterGlowCLICore.ScriptRunner.json",
+        "docs/c4/parts/creative-apps/afterglow-cli/cli-batch.json"
+      ],
+      "waits": {
+        "CL-a": [
+          "CL-6"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "CL-jobs",
+      "behavior": "The real-jobs harness runs every `Tests/RealJobs/<app>/<job>/` through the CLI on Linux CI and fails on any output that differs from its expectation (sha256, JSON equal, or pixels within a tolerance), skipping a macOS-only job with its reason.",
+      "tasks": [
+        "CL-8",
+        "CL-9"
+      ],
+      "journeys": [
+        "LJ3"
+      ],
+      "owned": [
+        "Tests/AfterGlowCLITests/RealJobsTests.swift",
+        "Tests/RealJobs/fake/",
+        "Tests/AfterGlowCLITests/Fixtures/RealJobsBroken/",
+        "Sources/AfterGlowCLICore/RealJobs.swift",
+        "Tests/mutations/AfterGlowCLICore.RealJobs.json",
+        "docs/c4/parts/creative-apps/afterglow-cli/cli-jobs.json"
+      ],
+      "waits": {
+        "CL-a": [
+          "CL-8"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "CL-z",
+      "behavior": "The built binary runs a whole session on the fake from a real shell, the CLI reference is written, and the feature is built.",
+      "tasks": [
+        "CL-10",
+        "CL-11"
+      ],
+      "journeys": [
+        "LJ4"
+      ],
+      "owned": [
+        "Tests/AfterGlowCLITests/CLIBinaryTests.swift",
+        "docs/cli.md",
+        "docs/blueprints/suite/features/afterglow-cli.wave.json"
+      ],
+      "waits": {
+        "CL-args": [
+          "CL-10"
+        ],
+        "CL-batch": [
+          "CL-10"
+        ],
+        "CL-jobs": [
+          "CL-11"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

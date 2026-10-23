@@ -75,7 +75,7 @@ extension LibraryJourneyTests {
         expectPosition("IMG_0003", "3 of 24", library)
         library.press(character: "x", step: "cull-flagged\(suffix)")
         expectPosition("IMG_0004", "4 of 24", library)
-        expectSidebarCount("Favorites", 1, library)
+        expectSidebarCount("Picks", 1, library)
 
         // Step 4: Edit > Undo Reject; the loupe stays put (#426).
         clickUndo(named: "Undo Reject", library)

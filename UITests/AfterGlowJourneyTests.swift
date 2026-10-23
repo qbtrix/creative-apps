@@ -30,12 +30,10 @@ final class AfterGlowJourneyTests: XCTestCase {
     /// HomeMenu, SuiteCommands); Help defines none.
     static let menuItems: [String: [String]] = [
         "File": ["New", "Open…", "Open Recent"],
-        "Edit": ["Undo Remove from Recents", "Remove from Recents", "Cut", "Copy", "Add from Clipboard", "Select All"],
+        "Edit": ["Undo Remove from Recents", "Remove from Recents", "Cut", "Copy", "Paste", "Select All"],
         "View": ["Show Sidebar", "Show Inspector", "Larger Thumbnails", "Smaller Thumbnails"],
-        "Window": ["Switch To", "Assets"],
+        "Window": ["Switch To", "AI Access…"],
     ]
-    /// The app menu's own item (LauncherCommandsUpdate).
-    static let appMenuItems = ["Check for Updates…"]
 
     static var cardPredicate: NSPredicate { NSPredicate(format: "identifier BEGINSWITH 'afterglow.home.card.'") }
 
@@ -61,8 +59,6 @@ final class AfterGlowJourneyTests: XCTestCase {
 
         // 2. Every menu opens; each holds its app-defined items.
         home.openEachMenu(expecting: ["File": "New", "View": "Larger Thumbnails", "Window": "Switch To"])
-        let appMenu = home.app.menuBars.firstMatch.menuBarItems.element(boundBy: 1)
-        XCTAssertEqual(Self.missingItems(Self.appMenuItems, in: appMenu, home), [], "the app menu lacks items")
         for (title, items) in Self.menuItems.sorted(by: { $0.key < $1.key }) {
             let menu = home.app.menuBars.firstMatch.menuBarItems[title]
             XCTAssertEqual(Self.missingItems(items, in: menu, home), [], "the \(title) menu lacks items")

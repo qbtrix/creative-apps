@@ -19,5 +19,33 @@
     "find": "loupePlace.map { $0.index < order.count - 1 } ?? false",
     "replace": "loupePlace.map { $0.index < order.count } ?? false",
     "tests": "LibraryLoupePlaceTests.swift"
+  },
+  {
+    "label": "the loupe draws a portrait photo on its side",
+    "file": "Sources/LibraryModel/LoupeState.swift",
+    "find": "PixelSize(width: max($0.pixelSize.width, 1), height: max($0.pixelSize.height, 1))",
+    "replace": "PixelSize(width: max($0.pixelSize.height, 1), height: max($0.pixelSize.width, 1))",
+    "tests": "LibraryLoupeTests.swift"
+  },
+  {
+    "label": "a photo with no pixels gets an empty document",
+    "file": "Sources/LibraryModel/LoupeState.swift",
+    "find": "PixelSize(width: max($0.pixelSize.width, 1), height: max($0.pixelSize.height, 1))",
+    "replace": "$0.pixelSize",
+    "tests": "LibraryLoupeTests.swift"
+  },
+  {
+    "label": "a render failure hides why the file can't be read",
+    "file": "Sources/LibraryModel/LoupeState.swift",
+    "find": "return photo.availability.help ?? loupeError",
+    "replace": "return loupeError ?? photo.availability.help",
+    "tests": "LibraryLoupeTests.swift"
+  },
+  {
+    "label": "the placeholder drops the photo's name",
+    "file": "Sources/LibraryModel/LoupeState.swift",
+    "find": "return \"\\(photo.name)  ·  \\(size.width) × \\(size.height)\"",
+    "replace": "return \"\\(size.width) × \\(size.height)\"",
+    "tests": "LibraryLoupeTests.swift"
   }
 ]

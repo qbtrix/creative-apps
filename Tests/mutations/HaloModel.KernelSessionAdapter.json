@@ -1,0 +1,30 @@
+[
+  {
+    "label": "the adapter drops its forward to endRun: a scrub keeps coalescing across a save, so undo skips past the saved document",
+    "file": "Sources/HaloModel/HaloFiles+Kernel.swift",
+    "find": "    mutating func sessionDidSave() {\n        endCoalescing()\n",
+    "replace": "    mutating func sessionDidSave() {\n",
+    "tests": "HaloFilesKernelTests"
+  },
+  {
+    "label": "the adapter maps the kernel's newer-version refusal to success: a newer file opens",
+    "file": "Sources/HaloModel/HaloFiles+Kernel.swift",
+    "find": "case .newer(let found, _): throw .newerVersion(found)",
+    "replace": "case .newer(let found, _): return found",
+    "tests": "HaloFilesKernelTests|ProjectFilesContractTests"
+  },
+  {
+    "label": "the adapter maps a missing version to success: a file with no version opens",
+    "file": "Sources/HaloModel/HaloFiles+Kernel.swift",
+    "find": "case .damaged, .missing: throw .notAHaloFile",
+    "replace": "case .damaged, .missing: return version",
+    "tests": "HaloFilesKernelTests|ProjectFilesContractTests"
+  },
+  {
+    "label": "a failed save reads Edited instead of Not saved",
+    "file": "Sources/HaloModel/HaloFiles+Kernel.swift",
+    "find": "if file.unsaved, let error = file.error { return .failed(error) }",
+    "replace": "if false, file.unsaved, let error = file.error { return .failed(error) }",
+    "tests": "HaloFileTests|HaloSaveTargetTests|HaloFilesKernelTests"
+  }
+]

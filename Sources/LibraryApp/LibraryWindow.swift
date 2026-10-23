@@ -1,20 +1,28 @@
 // LibraryWindow.swift: the Library window. It is SuiteWindow with the
-// collections in the sidebar, LibraryBrowser as content (with its status bar
-// under it on preview data), LibraryInspector in the inspector, and
+// collections in the sidebar, LibraryBrowser as content (with LibraryStatusBar
+// under it in the loupe and on preview data), LibraryInspector in the inspector, and
 // LibraryExportSheet while an export is under way. It owns the LibraryCatalog, hands its values and methods
 // to the views, publishes the menu bar's LibraryMenu as a focused value, and
 // publishes the `library.controls` JSON (LibraryControls.swift).
 // The catalog starts from the launch arguments: a fixture's fakes and photos,
 // or the live services over the Platform adapters.
 //
+// The sidebar has two sections: Library (All Photos, Picks, Recently
+// Added) and Collections (yours, with New Collection as its add button and a
+// double-click rename while those can act), then FOLDERS when the catalog's photos sit in any
+// (LibraryFoldersSection.swift). LibraryFilterBar sits above
+// LibraryBrowser; the hidden `library.collections` element carries the
+// collections file's state for the journeys.
+//
 // The area hooks: each area (edit, import, thumbnails, cull, persist, loupe,
-// develop, crop, export) fills its own `LibraryWindow+<Area>.swift` with the
+// develop, crop, export, filters) fills its own `LibraryWindow+<Area>.swift` with the
 // LibraryMenu sub-struct it owns, its `<Area>AreaState` in `areas`, and the
 // lifecycle hooks this body calls. The window's single keys go to the area
 // that owns them through the menu; a nil action ignores the key.
 import AppKit
 import Foundation
 import LibraryModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -29,19 +37,10 @@ final class LibraryAreas {
     let develop = DevelopAreaState()
     let crop = CropAreaState()
     let export = ExportAreaState()
+    let filters = FiltersAreaState()
 }
 
 struct LibraryWindow: View {
-    /// What the "Preview data" pill means, as its tooltip and accessibility hint.
-    static let previewHelp = "This window shows built-in sample data, not photos on disk."
-
-    /// The status bar under the browser: the photo count, then the "Preview data" pill on the fakes.
-    static func statusBar(_ model: LibraryCatalog) -> some View {
-        ViewerStatusBar(
-            zoom: 1, size: LibraryCatalog.photoCountText(model.items.count),
-            preview: model.services.isPreview ? (previewHelp, "library.status.preview") : nil)
-    }
-
     @State var model: LibraryCatalog
     @State var areas = LibraryAreas()
 
@@ -61,46 +60,76 @@ struct LibraryWindow: View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
         #endif
+        let filters = filtersMenu
         SuiteWindow(
             title: "Library",
-            sidebarTitle: "Collections",
-            items: model.collections.map {
-                SidebarItem(id: $0.id, title: $0.name, systemImage: Self.symbol(for: $0.id), count: $0.count)
-            },
-            selection: model.selectedCollectionID,
-            onSelect: { model.selectCollection($0) }
+            sections: sidebarSections(filters),
+            selection: model.sidebarSelection,
+            // A FOLDERS row's click shows its folder (view.show-folder); any other row's selects its collection.
+            onSelect: { model.selectSidebarRow($0) },
+            onRename: filters.renameCollection,
+            contextActions: { id in
+                guard LibraryFolders.isRowID(id) else { return [] }
+                return LibraryFoldersSection.actions(
+                    help: model.showFolderHelp, show: { model.selectSidebarRow(id) },
+                    toggleSubfolders: { model.toggleFolderSubfolders(row: id) })
+            }
         ) {
             VStack(spacing: 0) {
+                LibraryFilterBar(
+                    filter: model.activeFilter, value: model.filterValue, caption: model.filterCaption, menu: filters)
+                    .fixedSize(horizontal: false, vertical: true)
                 LibraryBrowser(
-                    model: model, menu: menu, onSelect: { model.select($0) }, onOpen: { model.open($0) },
-                    onStep: { model.stepLoupe(by: $0) }, onGrid: { model.showGrid() })
+                    // The store goes down unread, so a thumbnail pass reruns the grid, not this body.
+                    model: model, menu: menu, thumbnails: areas.thumbnails.store, onSelect: { model.select($0) }, onOpen: { model.open($0) },
+                    onStep: { model.stepLoupe(by: $0) }, onGrid: { model.showGrid() }, filters: filters)
                     // On the content, so it hears keys only while the grid or the loupe has focus.
                     .onKeyPress(phases: .down) { press in route(press) }
-                if model.services.isPreview {
+                if model.showsStatusBar {
                     // Keeps its height; the content above shrinks to fit.
-                    Self.statusBar(model).fixedSize(horizontal: false, vertical: true)
+                    LibraryStatusBar(model: model, fitScale: areas.loupe.fitScale)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         } inspector: {
             LibraryInspector(
-                model: model, onStar: { model.clickStar($0) }, onFlag: { model.setFlag($0) },
+                model: model, menu: menu, onStar: { model.clickStar($0) }, onFlag: { model.setFlag($0) },
                 onLabel: { model.setLabel($0) })
         }
         .focusedSceneValue(\.libraryMenu, menu)
+        .focusedSceneValue(\.libraryCatalog, model)
+        .focusedSceneValue(\.libraryFilters, filters)
+        .suiteFileDrop(.library, bridge: LibraryShell.bridge, hasDocument: model.hasDocument,
+                       places: model.placesExtensions, perform: { try? model.perform($0) })
+        // The crop frame and the CROP section read these (crop CR-6).
+        .environment(\.libraryCrop, cropControls)
         .libraryControlsProbe()
-        // The export area moves `exportState` off `.idle`; nothing does in wave 1.
-        .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) {
-            LibraryExportSheet()
-        }
+        .background { ProbeElement("library.collections", label: model.collectionsFileValue) }
+        // The export area (LibraryWindow+Export.swift) moves `exportState` off `.idle`.
+        .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) { exportSheet }
+        .modifier(backupArea)  // File > Restore Catalog Backup… (LibraryWindow+Backup.swift)
         .task {
             importAreaLaunch()
             persistAreaLaunch()
+            filtersAreaLaunch()
         }
         .onChange(of: model.saveRevision) { _, _ in persistAreaChanged() }
         .onChange(of: model.focusedItemID) { _, _ in loupeAreaFocusChanged() }
+        .onChange(of: model.mode) { _, _ in loupeAreaFocusChanged() }
         .onChange(of: model.catalogState) { _, _ in importAreaCatalogReady() }
+        .onChange(of: model.collectionsRevision) { _, _ in filtersAreaChanged(areas.filters) }
+        // The live command channel (editor-menus EM-7) reads this window's catalog and lands a result in it.
+        .onAppear {
+            LibraryShell.read = { model }
+            LibraryShell.take = { model.takeLive($0) }
+        }
+        .onDisappear {
+            LibraryShell.read = nil
+            LibraryShell.take = nil
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
             persistAreaFlush()
+            filtersAreaFlush(areas.filters)
         }
     }
 
@@ -114,7 +143,8 @@ struct LibraryWindow: View {
         photo.resetCrop = crop.resetCrop
         return LibraryMenu(
             edit: editMenu, file: fileMenu, thumbnails: thumbnailsMenu, cull: cullMenu, persist: persistMenu,
-            view: viewMenu, photo: photo, export: exportMenu, reasons: model.services.unavailable)
+            view: viewMenu, photo: photo, export: exportMenu, share: shareMenu,
+            reasons: model.services.unavailable)
     }
 
     /// A single key to the area that owns it; ignored (so the grid or the
@@ -125,7 +155,7 @@ struct LibraryWindow: View {
         let current = self.menu
         let action: LibraryMenu.Action?
         switch key {
-        case .rating, .pick, .reject, .unflag:
+        case .rating, .pick, .reject, .unflag, .label:
             guard let cull = current.cull.key else { return .ignored }
             cull(key)
             return .handled
@@ -162,10 +192,34 @@ struct LibraryWindow: View {
         allowed ? perform : nil
     }
 
+    /// A two-argument menu action, nil (so the item disables) when it can't run.
+    func enabled<First, Second>(
+        _ allowed: Bool, _ perform: @escaping @MainActor (First, Second) -> Void
+    ) -> (@MainActor (First, Second) -> Void)? {
+        allowed ? perform : nil
+    }
+
+    /// Library: the built-in collections; Collections: yours, its add button
+    /// New Collection, left off while it can't act (the header has no disabled state).
+    func sidebarSections(_ filters: LibraryFiltersMenu) -> [SidebarSection] {
+        let rows = model.collections.map {
+            SidebarItem(id: $0.id, title: $0.name, systemImage: Self.symbol(for: $0.id), count: $0.count)
+        }
+        let add = filters.newCollection.map { ToolbarAction("New Collection", systemImage: "plus", perform: $0) }
+        return [
+            SidebarSection(id: "library", title: "Library", items: rows.filter { !UserCollection.isUserID($0.id) }),
+            SidebarSection(
+                id: "collections", title: "Collections", items: rows.filter { UserCollection.isUserID($0.id) },
+                addAction: add),
+        ] + [LibraryFoldersSection.section(LibraryFoldersSection.tree(model))].compactMap { $0 }
+    }
+
     static func symbol(for collectionID: String) -> String {
         switch collectionID {
-        case "favorites": "heart"
+        case "favorites": "flag"
         case "recent": "clock"
+        case let id where id.hasPrefix("smart-"): "gearshape"
+        case let id where UserCollection.isUserID(id): "rectangle.stack"
         default: "photo.on.rectangle.angled"
         }
     }

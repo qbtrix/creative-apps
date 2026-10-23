@@ -5,9 +5,23 @@
 // ImportNotice.alreadyKnownDetail is the nothing-new notice's count of
 // photos the catalog already had.
 // An import is never an undo step (D4), but it does dirty the catalog file.
+// `droppedFolder` picks the folder a drop on the empty catalog imports.
 // Linux-safe.
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
 extension LibraryCatalog {
+    /// The first of `paths` that is a folder, which a drop on the empty catalog
+    /// imports; nil when none is. A path whose contents can be listed is a
+    /// folder (DropPlan's Linux-safe test).
+    public static func droppedFolder(_ paths: [String]) -> String? {
+        paths.first { (try? FileManager.default.contentsOfDirectory(atPath: $0)) != nil }
+    }
+
     /// The known ids to skip, and state .running(0 of 0); nil while an import runs
     /// or while the catalog file is still loading (`catalogState == .loading`).
     public mutating func beginImport() -> Set<String>? {

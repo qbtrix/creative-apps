@@ -1,26 +1,30 @@
 // PhotoCommands+Image.swift: Photo's Image menu in the menu bar (Image Size…,
-// the three rotations and Straighten…), off with no image.
+// Canvas Size…, the three rotations and Straighten…), each from its catalog
+// spec: off with no image, and Canvas Size… also while Free Transform is open.
 import PhotoModel
+import SuiteKernel
+import SuiteUI
 import SwiftUI
 
 extension PhotoCommands {
     var imageMenu: some Commands {
         CommandMenu("Image") {
-            PhotoImageMenu(perform: menu.perform).disabled(!menu.hasImage)
+            PhotoImageMenu(menu: menu)
         }
     }
 }
 
 /// The Image menu's items.
 struct PhotoImageMenu: View {
-    let perform: PhotoPerform
+    let menu: PhotoMenu
 
     var body: some View {
-        Button("Image Size…") { perform(.imageSize) }
+        menu.item("image.resize") { menu.perform(.imageSize) }
+        menu.item("image.canvas-size") { menu.perform(.transform(.canvasSize)) }
         Divider()
-        Button("Rotate 90° Clockwise") { perform(.rotate(.degrees90)) }
-        Button("Rotate 90° Counterclockwise") { perform(.rotate(.degrees270)) }
-        Button("Rotate 180°") { perform(.rotate(.degrees180)) }
-        Button("Straighten…") { perform(.straighten) }
+        menu.item("image.rotate-cw") { menu.perform(.rotate(.degrees90)) }
+        menu.item("image.rotate-ccw") { menu.perform(.rotate(.degrees270)) }
+        menu.item("image.rotate-180") { menu.perform(.rotate(.degrees180)) }
+        menu.item("image.straighten") { menu.perform(.straighten) }
     }
 }

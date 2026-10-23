@@ -2,7 +2,8 @@
 // route R1 of docs/blueprints/suite.md 2.5). Package.swift is the Linux and
 // test graph; project.yml holds the Release graph the bundle is built from.
 // Every non-test target the macOS manifest declares must be a target of
-// project.yml too. Both files are read by path from #filePath and scanned by
+// project.yml too, except the headless `afterglow` CLI's targets, which no
+// bundle ships (afterglow-cli CL-1). Both files are read by path from #filePath and scanned by
 // line, so no YAML library is needed: project.yml's target names sit at a
 // two-space indent under its top-level `targets:` key.
 #if canImport(FoundationEssentials)
@@ -42,10 +43,15 @@ enum BuildGraph {
         return names
     }
 
+    /// The command line tool's targets: built and tested by SwiftPM on Linux
+    /// and macOS, never part of the Release graph.
+    static let headless: Set<String> = ["AfterGlowCLICore", "AfterGlowCLI"]
+
     /// One message per drift: a name of `expected` the manifest lacks, a
     /// manifest name not in `expected`, or a manifest name project.yml lacks.
+    /// The headless targets are left out.
     static func drift(package: String, project: String, expected: Set<String>) -> [String] {
-        let pkg = packageTargets(package)
+        let pkg = packageTargets(package).subtracting(headless)
         let yml = projectTargets(project)
         return expected.subtracting(pkg).sorted().map { "\($0) missing from Package.swift" }
             + pkg.subtracting(expected).sorted().map { "\($0) unexpected in Package.swift" }
@@ -88,11 +94,11 @@ enum BuildGraph {
         try String(contentsOf: root.appendingPathComponent(path), encoding: .utf8)
     }
 
-    static let expected = Set(["SuiteUI", "SuiteModel", "SuiteKernel", "SuiteShell", "AfterGlowApp"])
+    static let expected = Set(["SuiteUI", "SuiteModel", "SuiteKernel", "SuiteImaging", "SuiteShell", "AfterGlowApp"])
         .union(["Flare", "Design", "Photo", "Library", "Halo"].flatMap { ["\($0)Model", "\($0)App"] })
 
     @Test func packageScanFindsTheMacOSTargets() throws {
-        #expect(BuildGraph.packageTargets(try Self.read("Package.swift")) == Self.expected)
+        #expect(BuildGraph.packageTargets(try Self.read("Package.swift")) == Self.expected.union(BuildGraph.headless))
     }
 
     @Test func everyPackageTargetIsInTheReleaseGraph() throws {
@@ -117,6 +123,27 @@ enum BuildGraph {
         #expect(without != package)
         #expect(BuildGraph.drift(package: without, project: project, expected: Self.expected)
             == ["HaloApp missing from Package.swift"])
+    }
+
+    /// SuiteUI and SuiteKernel use FlareCore's Rect and Point, and a framework
+    /// doesn't re-export what it links, so each links CreativeEngines itself (#2801).
+    @Test func theFrameworksThatUseEngineGeometryLinkTheEngines() throws {
+        let project = try Self.read("project.yml")
+        for name in ["SuiteUI", "SuiteKernel"] {
+            let block = BuildGraph.block(name, in: project)
+            #expect(block.contains { $0.contains("dependencies") && $0.contains("{ target: CreativeEngines }") },
+                    "\(name) doesn't link CreativeEngines")
+        }
+    }
+
+    /// xcodegen's bundle build must use the engines the Models were tested
+    /// against: a stale pin fails every macOS bundle and journeys build (#3856).
+    @Test func projectYmlPinsCreativeCoreAtPackageSwiftsRevision() throws {
+        let sha = #"([0-9a-f]{40})"#
+        let package = BuildGraph.captures(#"creative-core", revision: ""# + sha, in: try Self.read("Package.swift"))
+        let project = BuildGraph.captures(#"(?m)^    revision: "# + sha, in: try Self.read("project.yml"))
+        #expect(package.count == 1)
+        #expect(project == package)
     }
 
     @Test func afterGlowJourneyBundleCompilesTheSuiteValues() throws {

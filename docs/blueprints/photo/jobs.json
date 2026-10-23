@@ -1,0 +1,933 @@
+{
+  "$comment": "Real jobs: tasks a person does with this app, each with an outcome a check can observe. Keyed by job id so scripts/merge-json merges two PRs that add different jobs. scripts/jobs check validates every field; jobs.md beside this file is generated from it on dev (scripts/jobs render), never edited. The fields and the done rule: docs/factory/packets.md, Jobs.",
+  "RJ-P01": {
+    "id": "RJ-P01",
+    "app": "photo",
+    "weight": "high",
+    "job": "Crop a 6000×4000 JPEG to 1080×1350 for Instagram and export JPEG.",
+    "outcome": "Output is exactly 1080×1350, the subject stays where it was framed, nothing is squashed.",
+    "needs": [
+      "photo/photo-crop",
+      "S11",
+      "photo/export-pack"
+    ],
+    "needs_note": "photo/photo-crop (built), S11 export at a size",
+    "closes_with": "photo/export-pack",
+    "trap": "No 4:5 chip (chips are Free, Original, 1:1, 3:2, 4:3, 16:9), so it takes a typed ratio, then Image Size, then Export: two resamples and an easy 1349 px or squash",
+    "run": "Cm",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "captain",
+      "https://photoshopcafe.com/how-to-resize-and-prepare-pictures-for-posting-on-instagram-in-photoshop-2022/",
+      "https://imagen-ai.com/tools/resize-for-instagram-portrait-45.md"
+    ],
+    "waits_on": "PX-3"
+  },
+  "RJ-P02": {
+    "id": "RJ-P02",
+    "app": "photo",
+    "weight": "high",
+    "job": "Add a bold title (\"SUMMER SALE\", heavy weight, 120 pt, centred) over a photo and export.",
+    "outcome": "Text is crisp, centred, and still editable after save and reopen.",
+    "needs": [
+      "E8",
+      "photo/text-layers",
+      "suiteui/text-style"
+    ],
+    "needs_note": "E8 text engine (Photo adopter)",
+    "closes_with": "photo/text-layers",
+    "trap": "Text rasterised on save, or the font silently swapped on reopen",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "captain",
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/",
+      "https://www.apple.com/pixelmator-pro/"
+    ]
+  },
+  "RJ-P03": {
+    "id": "RJ-P03",
+    "app": "photo",
+    "weight": "high",
+    "job": "Add a Curves adjustment layer (S-curve), hide and show it, save, reopen.",
+    "outcome": "The curve is still a live layer and the pixels underneath are untouched.",
+    "needs": [
+      "photo/photo-adjustment-layers"
+    ],
+    "needs_note": "photo/photo-adjustment-layers (built)",
+    "closes_with": "photo/photo-adjustment-layers",
+    "trap": "Adjustment baked into pixels on save; one curve drag making 40 undo steps",
+    "run": "C",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "captain",
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/"
+    ]
+  },
+  "RJ-P04": {
+    "id": "RJ-P04",
+    "app": "photo",
+    "weight": "high",
+    "job": "Remove 20 sensor dust spots from a sky, one click each.",
+    "outcome": "No halo, no tone shift, no repeated texture.",
+    "needs": [
+      "E7",
+      "suiteui/fill-heal"
+    ],
+    "needs_note": "E7 retouch (spot heal)",
+    "closes_with": "suiteui/fill-heal",
+    "trap": "Today's Heal is a per-dab tone match: grain and gradient smear show at 100%",
+    "run": "C",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "captain",
+      "https://fstoppers.com/photoshop/best-updates-hidden-inside-photoshop-2026-715565"
+    ]
+  },
+  "RJ-P05": {
+    "id": "RJ-P05",
+    "app": "photo",
+    "weight": "high",
+    "job": "Blend two photos with a soft-brush layer mask.",
+    "outcome": "The seam is invisible, the mask stays editable, and it survives save and reopen.",
+    "needs": [
+      "S4"
+    ],
+    "needs_note": "S4 masks (re-cut PV-5)",
+    "closes_with": "S4",
+    "trap": "Mask flattened on save; brush on mask paints colour instead of grey",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "captain",
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/",
+      "https://shotkit.com/pixelmator-pro-vs-photoshop/"
+    ],
+    "waits_on": "PK-7"
+  },
+  "RJ-P06": {
+    "id": "RJ-P06",
+    "app": "photo",
+    "weight": "high",
+    "job": "Select Subject on a portrait, then copy the person to a new layer.",
+    "outcome": "Hair edges are clean and it works offline.",
+    "needs": [
+      "S6"
+    ],
+    "needs_note": "S6 Select Subject (shell-vision)",
+    "closes_with": "S6",
+    "trap": "Halo around hair; a silent network call for the model",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "captain",
+      "https://www.adobe.com/products/photoshop/quick-selection-tool.html",
+      "https://www.apple.com/pixelmator-pro/"
+    ]
+  },
+  "RJ-P07": {
+    "id": "RJ-P07",
+    "app": "photo",
+    "weight": "high",
+    "job": "Remove a passer-by from a beach photo (lasso, then Remove).",
+    "outcome": "The fill matches sand and sea with no cloned copies.",
+    "needs": [
+      "E7",
+      "suiteui/fill-heal",
+      "S5"
+    ],
+    "needs_note": "E7 retouch (fill from surroundings)",
+    "closes_with": "suiteui/fill-heal",
+    "trap": "Repeated-pattern fill; works on a 50 px spot but not a person-sized area",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "captain",
+      "https://fstoppers.com/photoshop/best-updates-hidden-inside-photoshop-2026-715565",
+      "https://www.digitalcameraworld.com/tech/software/pixelmator-pro-4-review"
+    ]
+  },
+  "RJ-P08": {
+    "id": "RJ-P08",
+    "app": "photo",
+    "weight": "med",
+    "job": "Resize a folder of 50 JPEGs to a 2048 px long edge and stamp a PNG logo bottom-right.",
+    "outcome": "Originals untouched, logo the same relative size on portrait and landscape.",
+    "needs": [],
+    "needs_note": "none: batch is a Photo non-goal; Library export has no watermark",
+    "closes_with": null,
+    "trap": "Originals overwritten; watermark scaled by pixels, not by long edge; metadata kept",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "captain",
+      "https://community.adobe.com/t5/photoshop-ecosystem-discussions/batch-image-resizing-and-adding-watermark/m-p/8116452",
+      "https://www.batchphoto.com/forum/viewtopic.php?p=37887"
+    ]
+  },
+  "RJ-P09": {
+    "id": "RJ-P09",
+    "app": "photo",
+    "weight": "high",
+    "job": "Open a 20-layer PSD (groups, masks, a text layer, adjustment layers), edit, save as PSD, reopen in another editor.",
+    "outcome": "Layers, groups, masks and blend modes are intact; anything dropped is named before saving.",
+    "needs": [
+      "E10"
+    ],
+    "needs_note": "E10 PSD codec (read, then write)",
+    "closes_with": "E10",
+    "trap": "Groups flattened or text rasterised without a warning",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "captain",
+      "https://www.en-zdv.uni-mainz.de/adobe-to-affinity/",
+      "https://www.photopea.com/tuts/convert-pdf-to-layered-psd/",
+      "https://alternativeto.net/software/photocraft/about/",
+      "https://www.omgubuntu.co.uk/2026/10/artcraft-free-photoshop-ai-clone"
+    ]
+  },
+  "RJ-P10": {
+    "id": "RJ-P10",
+    "app": "photo",
+    "weight": "med",
+    "job": "Extend the canvas 20% and fill the new area from a prompt.",
+    "outcome": "The fill matches the scene; nothing is sent anywhere without asking.",
+    "needs": [],
+    "needs_note": "AI via Paw OS (not in the beta-80 plan by design)",
+    "closes_with": null,
+    "trap": "The image leaves the Mac without a consent step",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "captain",
+      "https://fstoppers.com/photoshop/best-updates-hidden-inside-photoshop-2026-715565"
+    ]
+  },
+  "RJ-P11": {
+    "id": "RJ-P11",
+    "app": "photo",
+    "weight": "high",
+    "job": "Export a GPS-tagged phone photo as JPEG with no metadata.",
+    "outcome": "The file has no GPS, no camera serial, no MakerNote, and it is still upright.",
+    "needs": [
+      "S11"
+    ],
+    "needs_note": "S11 export + RJ-X privacy set",
+    "closes_with": "S11",
+    "trap": "Pass today by construction (ImageIOCodec writes pixels and quality only) but no test holds it; a later 'keep metadata' option that copies source properties would bring GPS back",
+    "run": "Cm",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "captain",
+      "https://community.adobe.com/t5/photoshop-ecosystem-ideas/align-the-various-metadata-and-icc-profile-options-in-export-as-and-quick-export/idi-p/14490536",
+      "https://support.apple.com/guide/pixelmator-pro/pixdae75632d/mac"
+    ]
+  },
+  "RJ-P12": {
+    "id": "RJ-P12",
+    "app": "photo",
+    "weight": "high",
+    "job": "Fix a tungsten-orange photo with White Balance (temperature and tint).",
+    "outcome": "Greys read neutral.",
+    "needs": [
+      "S1",
+      "E3",
+      "photo/tone-controls"
+    ],
+    "needs_note": "S1 tone rows (E3)",
+    "closes_with": "photo/tone-controls",
+    "trap": "Only the whole image, not as an adjustment layer",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/",
+      "https://www.apple.com/pixelmator-pro/"
+    ],
+    "waits_on": "PT-4"
+  },
+  "RJ-P13": {
+    "id": "RJ-P13",
+    "app": "photo",
+    "weight": "high",
+    "job": "Rescue a backlit portrait with Shadows/Highlights and Contrast.",
+    "outcome": "The face lifts, the sky keeps detail.",
+    "needs": [
+      "S1",
+      "photo/tone-controls"
+    ],
+    "needs_note": "S1 tone rows",
+    "closes_with": "photo/tone-controls",
+    "trap": "Clipped highlights with no warning",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/",
+      "https://www.apple.com/pixelmator-pro/"
+    ],
+    "waits_on": "PT-4"
+  },
+  "RJ-P14": {
+    "id": "RJ-P14",
+    "app": "photo",
+    "weight": "high",
+    "job": "Sharpen a photo for web after downsizing (Unsharp Mask).",
+    "outcome": "Edges are crisp with no bright halos at the default amount.",
+    "needs": [
+      "S1",
+      "E4",
+      "photo/tone-controls"
+    ],
+    "needs_note": "S1 / E4 (engine has unsharp)",
+    "closes_with": "photo/tone-controls",
+    "trap": "Halos; sharpen runs before resize",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/"
+    ],
+    "waits_on": "PT-4"
+  },
+  "RJ-P15": {
+    "id": "RJ-P15",
+    "app": "photo",
+    "weight": "high",
+    "job": "Straighten a tilted horizon by drawing along it.",
+    "outcome": "The horizon is level and there are no transparent corner wedges.",
+    "needs": [],
+    "needs_note": "v1 Straighten (built)",
+    "closes_with": null,
+    "trap": "Transparent wedges in the corners",
+    "run": "C",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/",
+      "https://www.apple.com/pixelmator-pro/"
+    ]
+  },
+  "RJ-P16": {
+    "id": "RJ-P16",
+    "app": "photo",
+    "weight": "med",
+    "job": "Cut out a product and put it on pure white with Remove Background.",
+    "outcome": "The edge has no fringe of the old colour.",
+    "needs": [
+      "S6"
+    ],
+    "needs_note": "S6",
+    "closes_with": "S6",
+    "trap": "Colour fringe on the edge",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.apple.com/pixelmator-pro/",
+      "https://fstoppers.com/photoshop/best-updates-hidden-inside-photoshop-2026-715565"
+    ]
+  },
+  "RJ-P17": {
+    "id": "RJ-P17",
+    "app": "photo",
+    "weight": "med",
+    "job": "Paste a logo and scale it from a corner, rotate it 15°, flip it.",
+    "outcome": "It keeps its aspect and stays sharp.",
+    "needs": [
+      "S7",
+      "photo/transform"
+    ],
+    "needs_note": "S7 transform; photo/transform wires it into Photo",
+    "closes_with": "photo/transform",
+    "trap": "Aspect squash on a corner drag; repeated scaling blurs it",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/"
+    ],
+    "waits_on": "PT-5"
+  },
+  "RJ-P18": {
+    "id": "RJ-P18",
+    "app": "photo",
+    "weight": "med",
+    "job": "Add a 200 px white border with Canvas Size.",
+    "outcome": "The image is centred and the new area is white.",
+    "needs": [
+      "S7",
+      "E5",
+      "photo/transform"
+    ],
+    "needs_note": "S7 Canvas Size on E5's pad (done); photo/transform wires it",
+    "closes_with": "photo/transform",
+    "trap": "New area transparent, or the image shifted by a pixel",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/"
+    ],
+    "waits_on": "PT-6"
+  },
+  "RJ-P19": {
+    "id": "RJ-P19",
+    "app": "photo",
+    "weight": "med",
+    "job": "Fill a selection with a sky gradient.",
+    "outcome": "Smooth, no banding, stays inside the selection.",
+    "needs": [
+      "E6",
+      "S24",
+      "photo/gradient-fill"
+    ],
+    "needs_note": "E6's raster gradient (on the pinned core); photo/gradient-fill adds the Gradient tool",
+    "closes_with": "photo/gradient-fill",
+    "trap": "Solid fill works; no gradient tool; banding in 8-bit",
+    "run": "C",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/"
+    ],
+    "waits_on": "PG-3"
+  },
+  "RJ-P20": {
+    "id": "RJ-P20",
+    "app": "photo",
+    "weight": "high",
+    "job": "Clone a power line out of a sky.",
+    "outcome": "No visible repeat, one undo step per stroke.",
+    "needs": [],
+    "needs_note": "v1 Clone (built)",
+    "closes_with": null,
+    "trap": "One stroke recorded as many undo steps",
+    "run": "C",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/"
+    ]
+  },
+  "RJ-P21": {
+    "id": "RJ-P21",
+    "app": "photo",
+    "weight": "high",
+    "job": "Paint with a pen tablet at 16 px.",
+    "outcome": "Pressure changes width and the brush circle shows where it will paint.",
+    "needs": [
+      "suiteui/adopt-kernel-brush"
+    ],
+    "needs_note": "v1 Brush (built); brush cursor via adopt-kernel-brush",
+    "closes_with": "suiteui/adopt-kernel-brush",
+    "trap": "No brush circle yet (PV-4)",
+    "run": "J",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/",
+      "https://www.apple.com/pixelmator-pro/"
+    ]
+  },
+  "RJ-P22": {
+    "id": "RJ-P22",
+    "app": "photo",
+    "weight": "med",
+    "job": "Pick a colour from the photo with the eyedropper for a title.",
+    "outcome": "The swatch matches the pixel.",
+    "needs": [
+      "S13",
+      "photo/eyedropper"
+    ],
+    "closes_with": "photo/eyedropper",
+    "trap": "Picks the screen colour, not the document's",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/"
+    ],
+    "waits_on": "PE-7"
+  },
+  "RJ-P23": {
+    "id": "RJ-P23",
+    "app": "photo",
+    "weight": "high",
+    "job": "Duplicate, rename, reorder, merge down and flatten layers.",
+    "outcome": "The composite looks the same after each step.",
+    "needs": [
+      "photo/photo-edit"
+    ],
+    "needs_note": "photo/photo-edit (built)",
+    "closes_with": "photo/photo-edit",
+    "trap": "Merge down changes the look of a blended layer",
+    "run": "C",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/"
+    ]
+  },
+  "RJ-P24": {
+    "id": "RJ-P24",
+    "app": "photo",
+    "weight": "med",
+    "job": "Put a paper texture on Multiply at 60% opacity.",
+    "outcome": "Matches the blend preview after export.",
+    "needs": [],
+    "needs_note": "v1 blend modes (built)",
+    "closes_with": null,
+    "trap": "Export composites differently from the canvas",
+    "run": "C",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/"
+    ]
+  },
+  "RJ-P25": {
+    "id": "RJ-P25",
+    "app": "photo",
+    "weight": "med",
+    "job": "Open a 100 MP image (12000×8000), zoom to 100%, pan, paint a stroke.",
+    "outcome": "No stall over 100 ms; memory stays under the gate's budget.",
+    "needs": [
+      "G1"
+    ],
+    "needs_note": "G1 large-image gate",
+    "closes_with": "G1",
+    "trap": "Untested at 100 MP; undo of a big stroke may copy the whole layer",
+    "run": "Cm",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://pixelmator.com/community/viewtopic.php?p=52899"
+    ]
+  },
+  "RJ-P26": {
+    "id": "RJ-P26",
+    "app": "photo",
+    "weight": "high",
+    "job": "Force-quit mid-edit, relaunch.",
+    "outcome": "Photo offers to restore with every layer.",
+    "needs": [
+      "photo/photo-documents"
+    ],
+    "needs_note": "photo/photo-documents (built)",
+    "closes_with": "photo/photo-documents",
+    "trap": "Restore loses the mask or the adjustment layer",
+    "run": "J",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://pixelmator.com/community/viewtopic.php?p=52899"
+    ]
+  },
+  "RJ-P27": {
+    "id": "RJ-P27",
+    "app": "photo",
+    "weight": "high",
+    "job": "Do 50 mixed steps (crop, curves, brush, merge), then undo all.",
+    "outcome": "Pixels and canvas size match the original exactly.",
+    "needs": [],
+    "needs_note": "kernel History (built)",
+    "closes_with": null,
+    "trap": "Undo Crop restores the wrong canvas size",
+    "run": "C",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/"
+    ]
+  },
+  "RJ-P28": {
+    "id": "RJ-P28",
+    "app": "photo",
+    "weight": "med",
+    "job": "Jump back 10 steps by clicking the History panel.",
+    "outcome": "One click goes back 10 steps, and the canvas, the History panel and the Edit menu's Undo item agree.",
+    "needs": [
+      "S12",
+      "photo/history-panel"
+    ],
+    "closes_with": "photo/history-panel",
+    "trap": "Panel and Edit menu disagree",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://shotkit.com/pixelmator-pro-vs-photoshop/"
+    ],
+    "waits_on": "PH-7"
+  },
+  "RJ-P29": {
+    "id": "RJ-P29",
+    "app": "photo",
+    "weight": "med",
+    "job": "Export a cut-out as PNG and as JPEG.",
+    "outcome": "The PNG keeps transparency; the JPEG puts it on white, not black.",
+    "needs": [],
+    "needs_note": "v1 Export (built)",
+    "closes_with": null,
+    "trap": "JPEG encode uses noneSkipLast on straight RGBA, so clear pixels may come out black: verify",
+    "run": "Cm",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://community.adobe.com/t5/photoshop-ecosystem-ideas/align-the-various-metadata-and-icc-profile-options-in-export-as-and-quick-export/idi-p/14490536"
+    ]
+  },
+  "RJ-P30": {
+    "id": "RJ-P30",
+    "app": "photo",
+    "weight": "med",
+    "job": "Export WebP, HEIC and TIFF for a client.",
+    "outcome": "Each opens in Preview at the right size.",
+    "needs": [
+      "S11"
+    ],
+    "needs_note": "S11 formats",
+    "closes_with": "S11",
+    "trap": "Format offered but writes PNG bytes",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/"
+    ]
+  },
+  "RJ-P31": {
+    "id": "RJ-P31",
+    "app": "photo",
+    "weight": "med",
+    "job": "Open a Display P3 iPhone photo, edit, export.",
+    "outcome": "Colours match on a P3 screen and an sRGB profile is embedded.",
+    "needs": [
+      "E13"
+    ],
+    "needs_note": "E13 colour profiles",
+    "closes_with": "E13",
+    "trap": "Decode draws into 8-bit sRGB: P3 reds clip",
+    "run": "Cm",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/"
+    ]
+  },
+  "RJ-P32": {
+    "id": "RJ-P32",
+    "app": "photo",
+    "weight": "low",
+    "job": "Apply strong Curves to a 16-bit TIFF sky.",
+    "outcome": "No banding in the gradient.",
+    "needs": [
+      "E13"
+    ],
+    "needs_note": "E13 16-bit",
+    "closes_with": "E13",
+    "trap": "Float32 inside, but 8-bit on disk",
+    "run": "C",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/"
+    ]
+  },
+  "RJ-P33": {
+    "id": "RJ-P33",
+    "app": "photo",
+    "weight": "low",
+    "job": "Drag guides to the thirds and snap a layer to them.",
+    "outcome": "The guides sit at one third and two thirds, and the layer's edge snaps onto them.",
+    "needs": [
+      "S10"
+    ],
+    "needs_note": "S10 guides",
+    "closes_with": "S10",
+    "trap": "Guides drawn but no snap",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/"
+    ]
+  },
+  "RJ-P34": {
+    "id": "RJ-P34",
+    "app": "photo",
+    "weight": "med",
+    "job": "Slim a shape with Liquify (push).",
+    "outcome": "Smooth result, undoable.",
+    "needs": [],
+    "needs_note": "none (not in the beta-80 plan)",
+    "closes_with": null,
+    "trap": "Tearing at the brush edge",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://affinity.serif.com/en-gb/photo/full-feature-list/"
+    ]
+  },
+  "RJ-P35": {
+    "id": "RJ-P35",
+    "app": "photo",
+    "weight": "high",
+    "job": "Paste a screenshot from the clipboard as a layer, then copy the result into Messages.",
+    "outcome": "Both arrive at full size.",
+    "needs": [
+      "photo/photo-edit"
+    ],
+    "needs_note": "photo/photo-edit (built)",
+    "closes_with": "photo/photo-edit",
+    "trap": "Pasteboard copy carries the source's metadata",
+    "run": "Cm",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.apple.com/pixelmator-pro/"
+    ]
+  },
+  "RJ-P36": {
+    "id": "RJ-P36",
+    "app": "photo",
+    "weight": "med",
+    "job": "Sample a 5 x 5 mean by command on a red and blue checkerboard, and a point outside the image.",
+    "outcome": "The centred 5 x 5 square reads the 13-red, 12-blue mix within 1 per channel, and the outside point reads null.",
+    "needs": [
+      "S13",
+      "photo/eyedropper"
+    ],
+    "closes_with": "photo/eyedropper",
+    "trap": "The sample reads the active layer, or the square is anchored at its corner",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PE-6",
+    "added_by": "photo/eyedropper"
+  },
+  "RJ-P37": {
+    "id": "RJ-P37",
+    "app": "photo",
+    "weight": "high",
+    "job": "Place a PNG logo onto an open 800 x 600 image and save the flattened result.",
+    "outcome": "The output is 800 x 600 with the 200 x 100 logo centred (its red half at x 350, its blue half at x 450) on a new layer, and the canvas around it unchanged.",
+    "needs": [
+      "S20",
+      "photo/place-image"
+    ],
+    "closes_with": "photo/place-image",
+    "trap": "The place opens the logo as a new document, or lands it at the top-left corner",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PP-6",
+    "added_by": "photo/place-image"
+  },
+  "RJ-P42": {
+    "id": "RJ-P42",
+    "app": "photo",
+    "weight": "med",
+    "job": "Drop a PNG from Finder onto an open image.",
+    "outcome": "It becomes one centred layer named after the file in one undo step; undo removes it.",
+    "needs": [
+      "suite/file-flow",
+      "photo/file-flow"
+    ],
+    "closes_with": "photo/file-flow",
+    "trap": "The drop replaces the document or opens a second window, or takes two undo steps",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PF-3",
+    "added_by": "photo/file-flow"
+  },
+  "RJ-P43": {
+    "id": "RJ-P43",
+    "app": "photo",
+    "weight": "high",
+    "job": "Select three layers, fade them to 50% opacity and nudge them 40 px right together.",
+    "outcome": "All three layers are at 50% and 40 px right in the export; the fourth layer is unchanged.",
+    "needs": [
+      "suiteui/adopt-kernel-selection",
+      "photo/multi-layer-select"
+    ],
+    "needs_note": "photo/multi-layer-select puts Photo's layer selection on the kernel Selection and applies layer actions to every selected layer",
+    "closes_with": "photo/multi-layer-select",
+    "trap": "Only the last-clicked layer changes",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PM-6",
+    "test": "Tests/RealJobs/photo/fade-layers/fade-layers.jobs.json"
+  },
+  "RJ-P44": {
+    "id": "RJ-P44",
+    "app": "photo",
+    "weight": "high",
+    "job": "Outline a cut-out with a 4 px white stroke and a soft drop shadow, save, reopen and fade the shadow.",
+    "outcome": "After reopening, the layer's style still lists the stroke and the shadow; the exported PNG has a white ring 4 px outside the shape and the shadow at the new opacity, with the shape's own pixels unchanged.",
+    "needs": [
+      "S2"
+    ],
+    "closes_with": "S2",
+    "trap": "The style is flattened into the pixels on save, or the stroke lands inside the shape",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PY-6",
+    "added_by": "photo/layer-styles"
+  },
+  "RJ-P45": {
+    "id": "RJ-P45",
+    "app": "photo",
+    "weight": "med",
+    "job": "Clip a texture layer to the shape below it, then try to clip the bottom layer.",
+    "outcome": "The texture shows only inside the shape's alpha; clipping the bottom layer is refused with a reason.",
+    "needs": [
+      "S8"
+    ],
+    "closes_with": "S8",
+    "trap": "The clip uses the base's bounding box instead of its alpha, or a clip with nothing below succeeds silently",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PK-7",
+    "added_by": "photo/masks-clipping"
+  },
+  "RJ-P46": {
+    "id": "RJ-P46",
+    "app": "photo",
+    "weight": "med",
+    "job": "Open a PSD whose badge has a drop shadow and a stroke effect, change the shadow's distance, and export a PNG.",
+    "outcome": "The badge opens with an editable style holding exactly the drop shadow and the stroke; after the edit the shadow sits at the new distance along the PSD's angle within 1 px.",
+    "needs": [
+      "E10",
+      "S2",
+      "photo/psd-effects"
+    ],
+    "closes_with": "photo/psd-effects",
+    "trap": "The effects open flattened into pixels, or vanish with no warning",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "https://github.com/qbtrix/creative-apps/issues/3496"
+    ],
+    "waits_on": "PS-3",
+    "added_by": "photo/psd-effects"
+  },
+  "RJ-P70": {
+    "id": "RJ-P70",
+    "app": "photo",
+    "weight": "med",
+    "job": "Flip a two-layer image horizontally with Flip Canvas and export PNG.",
+    "outcome": "The PNG equals the original mirrored, pixel for pixel.",
+    "needs": [
+      "suiteui/orientation-crop"
+    ],
+    "closes_with": "suiteui/orientation-crop",
+    "trap": "Only the selected layer flips, or the top layer keeps its old offset",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "OC-12",
+    "added_by": "suiteui/orientation-crop"
+  },
+  "RJ-P71": {
+    "id": "RJ-P71",
+    "app": "photo",
+    "weight": "high",
+    "job": "Make a new 4x6 in image at 300 ppi with a transparent background, draw a red square, and export PNG.",
+    "outcome": "The PNG is 1200x1800, its corner alpha is 0, and its pHYs says 300 ppi.",
+    "needs": [
+      "suiteui/document-setup"
+    ],
+    "closes_with": "suiteui/document-setup",
+    "trap": "The image comes out 1920x1080 white, or 4x6 px",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DS-8",
+    "added_by": "suiteui/document-setup"
+  },
+  "RJ-P50": {
+    "id": "RJ-P50",
+    "app": "photo",
+    "weight": "high",
+    "job": "Blur only the top half of a portrait: select it and run Gaussian Blur at radius 8.",
+    "outcome": "Every pixel of the bottom half equals the input byte for byte; the top half's local variance drops by more than half.",
+    "needs": [
+      "suiteui/adjust-everywhere"
+    ],
+    "closes_with": "suiteui/adjust-everywhere",
+    "trap": "The blur leaks past the selection edge or runs on the whole image",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "AJ-8",
+    "added_by": "suiteui/adjust-everywhere"
+  },
+  "RJ-P51": {
+    "id": "RJ-P51",
+    "app": "photo",
+    "weight": "high",
+    "job": "Fill a logo's white background with red using the paint bucket (tolerance 32, contiguous) and export.",
+    "outcome": "Every background pixel is red; every logo pixel, edges included, is unchanged.",
+    "needs": [
+      "suiteui/fill-heal",
+      "E6"
+    ],
+    "closes_with": "suiteui/fill-heal",
+    "trap": "The fill bleeds into the anti-aliased logo edge or misses the corners",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "FH-6",
+    "added_by": "suiteui/fill-heal"
+  }
+}

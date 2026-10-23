@@ -36,10 +36,23 @@ extension LibraryCatalog {
     /// photo's `cullSummary` ("ready 256×171 3 stars, Picked, Red label"). Empty for an unknown id.
     public func cellValue(for id: String) -> String {
         guard let photo = items.first(where: { $0.id == id }) else { return "" }
+        return cellValue(photo: photo)
+    }
+
+    /// `cellValue(for:)` for a photo already in hand, in O(1), so the grid
+    /// building every cell's value stays O(n) on a 10,000-photo catalog.
+    public func cellValue(photo: PhotoItem) -> String {
+        let id = photo.id
+        return Self.cellValue(photo: photo, thumbnail: thumbnails[id])
+    }
+
+    /// `cellValue(photo:)` with the cell's held image passed in, for a grid
+    /// whose thumbnails live outside the catalog (LibraryThumbnailCache).
+    public static func cellValue(photo: PhotoItem, thumbnail: DisplayImage?) -> String {
         let state: String
         if photo.availability != .available {
             state = "unreadable"
-        } else if let thumbnail = thumbnails[id] {
+        } else if let thumbnail {
             state = "ready " + Self.sizeText(thumbnail.size)
         } else {
             state = "loading"
@@ -91,6 +104,12 @@ extension LibraryCatalog {
         Self.histogramValue(of: loupeRender?.histogram ?? .empty)
     }
 
+    /// What the histogram says while it has no bins: why, or that the loupe's render is on its way.
+    public var histogramEmptyMessage: String {
+        loupeItem == nil ? "Open a photo in the loupe to see its histogram."
+            : loupeError == nil ? "Rendering the photo…" : "The photo didn't render, so there's no histogram."
+    }
+
     /// `mean 0.4213`: the mean of the three channels' bin means over 0...255,
     /// divided by 255, to four decimals. An empty channel's mean is 0, never NaN.
     public static func histogramValue(of bins: HistogramBins) -> String {
@@ -109,9 +128,10 @@ extension LibraryCatalog {
         return "mean \(tenThousandths / 10_000)." + String(repeating: "0", count: 4 - fraction.count) + fraction
     }
 
-    /// `saved` when every change is on disk, else `dirty` (the `library.catalog` value).
+    /// `saved` when every change is on disk, else `dirty` (the `library.catalog`
+    /// value), read from the kernel's session (LibrarySession+Kernel.swift).
     public var catalogValue: String {
-        saveRevision == savedRevision ? "saved" : "dirty"
+        catalogSession.isDirty ? "dirty" : "saved"
     }
 
     /// The notice slot's content, first match wins: the catalog file's
@@ -165,7 +185,7 @@ extension LibraryCatalog {
         case .loading, .ready:
             return LibraryEmptyState(
                 title: "No Photos",
-                message: hint ?? "Photos you import appear here, sorted by the date they were taken.",
+                message: hint ?? "Import a folder or drop one here. Photos appear sorted by the date they were taken.",
                 offersImport: true)
         }
     }
@@ -180,6 +200,19 @@ extension LibraryCatalog {
     /// "1 photo", "26 photos": the status bar's count.
     public static func photoCountText(_ count: Int) -> String {
         count == 1 ? "1 photo" : "\(count) photos"
+    }
+
+    /// The status bar shows in the loupe (its zoom and the photo's size) and,
+    /// on preview data, in the grid too (the "Preview data" pill).
+    public var showsStatusBar: Bool {
+        services.isPreview || loupeItem != nil
+    }
+
+    /// The status bar's size pill: the loupe photo's "4000 × 6000 px", else
+    /// the photo count.
+    public var statusSizeText: String {
+        guard let size = loupePhotoSize else { return Self.photoCountText(items.count) }
+        return "\(size.width) × \(size.height) px"
     }
 
     /// Why the services member `member` ("importer", "loupe", ...) can't act

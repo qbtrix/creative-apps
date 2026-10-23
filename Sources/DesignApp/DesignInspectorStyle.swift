@@ -1,16 +1,22 @@
 // DesignInspectorStyle.swift: the style rows of Design's inspector (style-rows
 // SR-a). Opacity (a bar in the Layer section), Corners (the Radius bar, off
-// with its reason on a kind with no corners), and Stroke (Add Stroke on a layer
-// with none; else its Color well, its Width bar and Remove Stroke), plus the
+// with its reason on a kind with no corners, DesignCornersSection), and Stroke
+// (SuiteUI's StrokeEditor alone on the Model's `selectedStroke`, under Fill,
+// no trim rows: its Add Stroke, Width and Remove Stroke are the only ones,
+// #3864; Join, Cap and Dash off with the Model's one reason until DK-5; each intent runs
+// through `strokeChange`, a scrub's samples preview and its run lands as one
+// step at mouse-up, or once the keys rest when no button is down), plus the
 // X, Y, W and H fields the Frame section shows. A scrub never writes the
 // workspace per value: each value previews on the window's live box
 // (DesignLiveDrag), which only these rows and the canvas read, and the end of
 // the drag, key or typed value lands the last one as one step (`.endEditRun`).
 // Hosted without a box, each value goes straight to `.setStyle`. The hint
 // says why the rows are off ("Unlock A to change it.", #276) and starts at the
-// value column: the X field's leading edge, measured in DesignStyleHint.space.
+// value column: the X field's leading edge, measured in
+// DesignNodeProperties.hintSpace (SuiteUI's InspectorNote draws it).
 // Every control's help comes from the Model. Values in, intents out.
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -23,7 +29,7 @@ import SwiftUI
     /// One value of a scrub, shown on the live box's copy; straight to the workspace without a box.
     func preview(_ change: DesignStyleChange) {
         guard let live else { return perform(.setStyle(change)) }
-        if live.workspace == nil { live.begin(from: model) }
+        if !live.isLive { live.begin(from: model) }
         live.preview(change)
     }
 
@@ -89,8 +95,8 @@ struct DesignOpacityRow: View {
     }
 }
 
-/// The Corners and Stroke sections over the selection.
-struct DesignInspectorStyle: View {
+/// The Corners section over the selection: the Radius bar, off with its reason on a kind with no corners.
+struct DesignCornersSection: View {
     let model: DesignWorkspace
     let perform: DesignPerform
     @Environment(\.designLiveDrag) private var live
@@ -110,66 +116,68 @@ struct DesignInspectorStyle: View {
             .help(radiusHelp ?? "")
             .suiteControl(id: DesignControlID.inspectorCornerRadius, enabled: radiusHelp == nil, reason: radiusHelp)
         }
-        InspectorSection("Stroke") {
-            strokeRows(shown, send: send, help: model.styleHelp(.stroke))
-        }
-    }
-
-    /// Add Stroke while no selected layer has one; else Color, Width and Remove Stroke.
-    @ViewBuilder
-    private func strokeRows(_ shown: DesignWorkspace, send: DesignStyleSend, help: String?) -> some View {
-        if let first = shown.selectedNodes.lazy.compactMap(\.stroke).first {
-            // nil when the layers differ (a layer with no stroke differs from one with a stroke).
-            let color: DesignColor? = shown.sharedValue { $0.stroke?.color } ?? nil
-            let width: Double? = shown.sharedValue { $0.stroke?.width } ?? nil
-            if let color {
-                InspectorColorWellRow("Color", color: HexColor(color.red, color.green, color.blue)) {
-                    perform(.setStyle(.stroke(DesignStroke(color: DesignColor($0.red, $0.green, $0.blue), width: width ?? first.width))))
-                }
-                .disabled(help != nil)
-                .help(help ?? "")
-                .suiteControl(id: DesignControlID.inspectorStrokeColor, enabled: help == nil, reason: help, identifies: false)
-            } else {
-                InspectorRow("Color") {
-                    Text("Mixed").font(SuiteFont.inspectorValue).foregroundStyle(SuiteColor.secondaryText)
-                }
-            }
-            InspectorSliderRow(
-                "Width", value: width ?? first.width, in: 0...1000, step: 1, unit: "pt", decimals: 1, mixed: width == nil,
-                onChange: { send.preview(.stroke(DesignStroke(color: color ?? first.color, width: $0))) }, onEnd: send.end
-            )
-            .disabled(help != nil)
-            .help(help ?? "")
-            .suiteControl(id: DesignControlID.inspectorStrokeWidth, enabled: help == nil, reason: help)
-            InspectorAction(ToolbarAction(
-                "Remove Stroke", systemImage: "minus", unavailableHelp: help, identifier: "design.inspector.stroke-remove"
-            ) { send.commit(.stroke(nil)) })
-        } else {
-            InspectorAction(ToolbarAction(
-                "Add Stroke", systemImage: "plus", unavailableHelp: help, identifier: "design.inspector.stroke-add"
-            ) { send.commit(.stroke(.default)) })
-        }
     }
 }
 
-/// Why the selection's rows are off, starting at the value column (`column`, the X field's leading
-/// x in `space`) rather than the gutter, so it reads as the rows' value (#276).
-struct DesignStyleHint: View {
-    /// The coordinate space DesignNodeProperties names, where `column` and this hint are measured.
-    nonisolated static let space = "design.properties.column"
-    let text: String
-    let column: CGFloat
-    @State private var origin: CGFloat = 0
+/// The Stroke section over the selection, after Fill: paint reads fill, then stroke (#3871).
+struct DesignInspectorStyle: View {
+    let model: DesignWorkspace
+    let perform: DesignPerform
+    @Environment(\.designLiveDrag) private var live
+    /// A stroke scrub's run is open: its samples preview until it lands.
+    @State private var strokeRun = false
+    /// A mouse button is down in the stroke editor, so a resting scrub is still one gesture.
+    @State private var pressing = false
+    /// Lands the open run once the keys rest (the editor ends each key press but tells no host).
+    @State private var settle: Task<Void, Never>?
+    private static let settleDelay = Duration.milliseconds(400)
 
     var body: some View {
-        Text(text)
-            .font(SuiteFont.inspectorMeta)
-            .foregroundStyle(SuiteColor.secondaryText)
-            .accessibilityIdentifier("design.inspector.hint")
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.leading, Swift.max(column - origin, .zero))
-            .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named(Self.space)).minX } action: { origin = $0 }
-            .padding(.vertical, SuiteSpacing.xs)
+        InspectorSection("Stroke") {
+            strokeRows(live?.workspace ?? model, send: DesignStyleSend(model: model, live: live, perform: perform))
+        }
+    }
+
+    /// SuiteUI's stroke editor on the primary layer's stroke (no trim in Design), its rows the section's only
+    /// controls (#3864), each intent sent through the Model.
+    private func strokeRows(_ shown: DesignWorkspace, send: DesignStyleSend) -> some View {
+        StrokeEditor(stroke: shown.selectedStroke, help: model.strokeHelp, dashHelp: model.strokeDashHelp,
+                     styleHelp: model.strokeStyleHelp, showsTrim: false) {
+            stroke($0, shown: shown, send: send)
+        }
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in pressing = true }
+                .onEnded { _ in
+                    pressing = false
+                    endStrokeRun(send)
+                })
+    }
+
+    /// One editor intent as the Model's style change on the shown copy (so a colour pick keeps a previewed
+    /// width): a scrub's sample previews and keeps its run open, a whole edit lands the run, then is one step.
+    private func stroke(_ intent: StrokeIntent, shown: DesignWorkspace, send: DesignStyleSend) {
+        guard let edit = shown.strokeChange(intent) else { return }
+        guard edit.scrub else {
+            endStrokeRun(send)
+            return send.commit(edit.change)
+        }
+        send.preview(edit.change)
+        strokeRun = true
+        settle?.cancel()
+        settle = Task { @MainActor in
+            try? await Task.sleep(for: Self.settleDelay)
+            if !Task.isCancelled, !pressing { endStrokeRun(send) }
+        }
+    }
+
+    /// Lands the open stroke run as one step; nothing without one.
+    private func endStrokeRun(_ send: DesignStyleSend) {
+        settle?.cancel()
+        settle = nil
+        guard strokeRun else { return }
+        strokeRun = false
+        send.end()
     }
 }
+

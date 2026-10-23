@@ -45,6 +45,17 @@ import Testing
         #expect(pill.minY >= 0 && pill.maxY <= SuiteSize.timelineRuler)
     }
 
+    /// SJ19d finds the pill in timecode by this pattern on its text (#2503).
+    @Test func thePillInTimecodeReadsTheJourneysPattern() {
+        let long = FrameMapping(duration: 9_999, frameWidth: 2)
+        let playhead = TimelinePlayhead(
+            mapping: long, playhead: 360, unit: .timecode, fps: 24, scroll: .zero, keys: [], onScrub: { _ in })
+        #expect(playhead.label == "00:15:00")
+        let pattern = NSPredicate(format: "SELF MATCHES %@", #"\d\d:\d\d:\d\d"#)
+        #expect(pattern.evaluate(with: playhead.label))
+        #expect(!pattern.evaluate(with: "360"))
+    }
+
     @Test func onlyKeysAtThePlayheadOnRowsInViewAreDrawnKeyed() {
         let tracks = [
             TimelineTrack(id: 0, name: "A", keys: [TimelineKey(frame: 30, shape: .eased)], pickedFrames: [30]),

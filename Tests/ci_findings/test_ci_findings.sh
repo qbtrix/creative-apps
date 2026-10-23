@@ -7,7 +7,11 @@
 # finding is filed with its line label; a passing test with an open finding is
 # commented on and closed; a test that did not run in the log stays open; a
 # test that failed and passed (a retry) stays open; an unreadable body is
-# never overwritten; a passing test on a branch run (not dev) stays open. Needs bash and jq.
+# never overwritten; a passing test on a branch run (not dev) stays open. A
+# red test whose open issue a lead relabelled `gap` (found by its title, or by
+# the body's Test: line under a new title) gets a comment, never a second
+# issue or a body rewrite, and a gap issue whose test passes on dev closes. A
+# failed issue list files nothing. Needs bash and jq.
 #
 # Run: bash Tests/ci_findings/test_ci_findings.sh   (exit 0 = all pass)
 set -uo pipefail
@@ -20,9 +24,12 @@ check() { if eval "$2"; then echo "ok   $1"; else echo "FAIL $1"; fail=1; fi; }
 mkdir "$tmp/bin"
 cat >"$tmp/bin/gh" <<'GH'
 #!/usr/bin/env bash
-# Stub gh: $FX holds list.json and body.<n> fixtures; writes append to $FX/calls.
+# Stub gh: $FX holds list.json (label finding), gap.json (label gap) and
+# body.<n> fixtures; list.fail makes `issue list` fail; writes append to $FX/calls.
 case "$1 $2" in
-  "issue list") cat "$FX/list.json" ;;
+  "issue list")
+    [[ ! -e "$FX/list.fail" ]] || exit 1
+    case "$*" in *"--label gap"*) cat "$FX/gap.json" 2>/dev/null || echo '[]' ;; *) cat "$FX/list.json" ;; esac ;;
   "issue view") [[ -e "$FX/body.$3" ]] && cat "$FX/body.$3" || exit 1 ;;
   "issue edit") echo "edit $3" >>"$FX/calls"; cp "${5:?}" "$FX/edited.$3" ;;
   "issue create") echo "create $*" >>"$FX/calls" ;;
@@ -86,5 +93,35 @@ GITHUB_REF_NAME=fix/proof "$root/scripts/ci-findings" "$tmp/ui.log" >/dev/null 2
 calls=$(cat "$FX/calls")
 check "a passing test on a branch run stays open" '[[ "$calls" != *"close 12"* && "$calls" != *"comment 12"* ]]'
 check "a branch run still updates and files" '[[ "$calls" == *"edit 11"* && "$calls" == *"create issue create"* ]]'
+
+# A lead relabelled two findings `gap`: #21 kept its title, #22 was renamed
+# and is found by the body's Test: line. #23 is a gap whose test passes.
+rm "$FX/calls"
+cat >"$FX/gap.json" <<'JSON'
+[
+ {"number":21,"title":"CI finding: LibraryJourneyTests/ShelfJourney/testShelf","body":"Lead notes.","labels":[{"name":"gap"}]},
+ {"number":22,"title":"Halo open needs a real document","body":"Plan.\n\nTest: `HaloJourneyTests/OpenJourney/testOpen`\n","labels":[{"name":"gap"}]},
+ {"number":23,"title":"Suite home grid","body":"Test: `SuiteUIJourneyTests/HomeJourney/testHome`","labels":[{"name":"gap"}]}
+]
+JSON
+# #12 names its test twice (title and Test: line): it must still close once.
+jq 'map(select(.number != 15)) | map(if .number == 12 then .body = "Test: `FlareJourneyTests/ExportJourney/testBrush`" else . end)' "$FX/list.json" >"$FX/x" && mv "$FX/x" "$FX/list.json"
+out=$("$root/scripts/ci-findings" "$tmp/ui.log" 2>&1)
+calls=$(cat "$FX/calls")
+check "a red test with a gap issue (same title) files no second issue" '[[ "$calls" != *"ShelfJourney/testShelf --label"* ]]'
+check "and gets a comment with the new error and run" \
+  'grep -q "^comment 21 issue comment 21 --body Still failing on run https://example.test/runs/9 (branch dev, commit abc123)" "$FX/calls"'
+check "a gap issue's body is never rewritten" '! grep -Eq "^edit 2[12]( |\$)" "$FX/calls"'
+check "a renamed gap issue is found by its Test: line" \
+  '[[ "$calls" != *"OpenJourney/testOpen --label"* ]] && grep -q "^comment 22 issue comment 22 --body Still failing" "$FX/calls"'
+check "a gap issue whose test passes on dev is closed" '[[ "$calls" == *"comment 23 issue comment 23 --body Passes on run"* && "$calls" == *"close 23"* ]]'
+check "a finding issue is still updated in place" '[[ "$calls" == *"edit 11"* ]]'
+check "each issue is closed once" '[[ $(grep -c "^close 12\$" "$FX/calls") -eq 1 ]]'
+
+# A failed issue list must not look like "no open issues": nothing is filed.
+rm "$FX/calls"; touch "$FX/list.fail"; : >"$FX/calls"
+out=$("$root/scripts/ci-findings" "$tmp/ui.log" 2>&1); status=$?
+check "a failed issue list files nothing and exits 0" '[[ $status -eq 0 && ! -s "$FX/calls" && "$out" == *"could not list"* ]]'
+rm "$FX/list.fail"
 
 exit $fail

@@ -1,0 +1,6 @@
+[
+{"label":"a floating tool keeps its own help","file":"Sources/SuiteUI/ToolbarGroup.swift","find":"style == .rail ? action.help : picking.help(for: face(action))","replace":"action.help","tests":"ToolbarPickingTests"},
+{"label":"a key with Command held picks a tool","file":"Sources/SuiteUI/ToolbarGroup.swift","find":"modifiers.isDisjoint(with: [.command, .control, .option])","replace":"true","tests":"ToolbarPickingTests"},
+{"label":"the rail registers through the picking rule","file":"Sources/SuiteUI/ToolbarGroup.swift","find":"guard style == .floating, let id = action.identifier else","replace":"guard let id = action.identifier else","tests":"ToolbarPickingTests"},
+{"label":"the rail picks tools by key","file":"Sources/SuiteUI/ToolbarGroup.swift","find":"guard style == .floating, characters.count == 1","replace":"guard characters.count == 1","tests":"ToolbarPickingTests"}
+]

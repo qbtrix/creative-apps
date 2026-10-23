@@ -1,0 +1,10 @@
+{
+  "id": "corerender",
+  "name": "CoreRender library",
+  "description": "The RenderBackend contract, the CPU backend over CoreRaster (the pixel reference) and RenderDispatcher, which sends each op to a preferred GPU backend when it supports the op and is healthy, else to the CPU.",
+  "technology": "Swift 6, SwiftPM",
+  "tags": [
+    "external"
+  ],
+  "order": 50
+}

@@ -1,0 +1,37 @@
+[
+  {
+    "label": "dirtyIsAFlag: isDirty reads an edit flag instead of saved vs current tokens",
+    "file": "Sources/SuiteKernel/Session/DocumentSession.swift",
+    "find": "public var isDirty: Bool { currentToken != savedToken }",
+    "replace": "public var isDirty: Bool { lastEdit != nil }",
+    "tests": "DocumentSessionTests"
+  },
+  {
+    "label": "dueFromAutosave: autosaveDue measures the delay from the last autosave, not the last edit",
+    "file": "Sources/SuiteKernel/Session/DocumentSession.swift",
+    "find": "return now.timeIntervalSince(edit) >= delay",
+    "replace": "return now.timeIntervalSince(lastAutosave ?? edit) >= delay",
+    "tests": "DocumentSessionTests"
+  },
+  {
+    "label": "promptWording: the shared close prompt drops \"the document\"",
+    "file": "Sources/SuiteKernel/Session/DocumentSession.swift",
+    "find": "\"Do you want to save the changes made to the document \\u{201C}\\(name)\\u{201D}?\"",
+    "replace": "\"Do you want to save the changes made to \\u{201C}\\(name)\\u{201D}?\"",
+    "tests": "UnsavedPromptTests"
+  },
+  {
+    "label": "stateIgnoresDirty: the save word reads Saved while edited",
+    "file": "Sources/SuiteKernel/Session/DocumentSession.swift",
+    "find": "return isDirty ? \"Edited\" : \"Saved\"",
+    "replace": "return \"Saved\"",
+    "tests": "UnsavedPromptTests"
+  },
+  {
+    "label": "buttonPastEnd: an out-of-range button reads Save",
+    "file": "Sources/SuiteKernel/Session/DocumentSession.swift",
+    "find": "answers.indices.contains(index) ? answers[index] : .cancel",
+    "replace": "answers.indices.contains(index) ? answers[index] : .save",
+    "tests": "UnsavedPromptTests"
+  }
+]

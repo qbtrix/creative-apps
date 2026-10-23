@@ -1,0 +1,11 @@
+{
+  "id": "corerendermetal",
+  "name": "CoreRenderMetal library",
+  "description": "The Metal RenderBackend: tiled rgba16Float surfaces on one GPU, with display, composite and blends, transform, resample, blur, adjust and retouch. macOS only; empty on Linux.",
+  "technology": "Swift 6, Metal",
+  "tags": [
+    "external",
+    "macos-only"
+  ],
+  "order": 51
+}

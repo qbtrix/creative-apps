@@ -1,0 +1,44 @@
+[
+  {
+    "label": "unavailableChangesNothing: availability is checked on the copy after the run",
+    "file": "Sources/SuiteKernel/Commands/CommandCatalog.swift",
+    "find": "        if let why = spec.availability(target).why { throw .unavailable(id: id, why: why) }\n        var copy = target\n        let result = try Self.perform(spec, params, on: &copy)\n",
+    "replace": "        var copy = target\n        let result = try Self.perform(spec, params, on: &copy)\n        if let why = spec.availability(copy).why { throw .unavailable(id: id, why: why) }\n",
+    "tests": "CommandCatalogTests"
+  },
+  {
+    "label": "failedRollsBack: the run edits the target before it returns",
+    "file": "Sources/SuiteKernel/Commands/CommandCatalog.swift",
+    "find": "        let result = try Self.perform(spec, params, on: &copy)\n        target = copy\n",
+    "replace": "        let result = try Self.perform(spec, params, on: &target)\n",
+    "tests": "CommandCatalogTests"
+  },
+  {
+    "label": "atomicBatch: an atomic batch keeps the steps before the refusal",
+    "file": "Sources/SuiteKernel/Commands/CommandCatalog.swift",
+    "find": "if atomic { target = start; report.rolledBack = true }",
+    "replace": "if atomic { report.rolledBack = true }",
+    "tests": "CommandBatchTests"
+  },
+  {
+    "label": "undoStepOnlyForEdits: a query or view run reports the history's last step",
+    "file": "Sources/SuiteKernel/Commands/CommandCatalog.swift",
+    "find": "undoStep: spec.undoable ? history(target).undoName : nil)",
+    "replace": "undoStep: history(target).undoName)",
+    "tests": "CommandCatalogTests"
+  },
+  {
+    "label": "duplicateIDs: an id registered twice is accepted",
+    "file": "Sources/SuiteKernel/Commands/CommandCatalog.swift",
+    "find": "guard seen.insert(spec.id).inserted else",
+    "replace": "guard seen.insert(spec.id).inserted || true else",
+    "tests": "CommandCatalogTests"
+  },
+  {
+    "label": "nonAtomicStops: a refused step doesn't stop the batch",
+    "file": "Sources/SuiteKernel/Commands/CommandCatalog.swift",
+    "find": "                break\n",
+    "replace": "",
+    "tests": "CommandBatchTests"
+  }
+]

@@ -1,0 +1,15 @@
+# LibraryApp's menu items and buttons built without a command spec (command-catalog CC-11).
+# max: 13
+Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
+Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
+Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
+Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
+Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
+Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
+Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
+Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
+Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
+Sources/LibraryApp/LibraryCommands.swift: MenuCommand(title: item.title, action: item.action, reason: item.help ?? addWhy)
+Sources/LibraryApp/LibraryExportSheet.swift: Button("Save") { savePreset() }
+Sources/LibraryApp/LibraryWindow+Filters.swift: Button("Clear") { menu.clearFilter?() }
+Sources/LibraryApp/LibraryLoupe.swift: Button(action: onGrid) {

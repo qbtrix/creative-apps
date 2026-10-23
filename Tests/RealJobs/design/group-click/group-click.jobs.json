@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "app": "design",
+  "why": "RJ-X71, pending AR-14 (suiteui/area-selection): Design's catalog has no select.pick, select.enter-group or transform.set until AR-14 and AT-design, so platforms is [] and the harness skips the job on both. Groups card.design's rectangle and Title text into a card by commands, picks at Title (150, 56), sets x to 140, enters the card, picks at Title (190, 56) and sets x to 150, then saves. The trap: the first pick lands on Title, so the first move pulls Title out of its card. The assertion: after the first move both layers moved 40 with the card, after the second only Title moved 10 more. The turn-on sets platforms to linux and macos.",
+  "pending": "AR-14",
+  "waits_on": "AR-14",
+  "inputs": ["input/*.design"],
+  "steps": [
+    {"id": "edit.select", "params": {"ids": ["node-2", "node-3"]}},
+    {"id": "object.group", "params": {}},
+    {"id": "select.pick", "params": {"x": 150, "y": 56}},
+    {"id": "transform.set", "params": {"x": 140}},
+    {"id": "select.enter-group", "params": {}},
+    {"id": "select.pick", "params": {"x": 190, "y": 56}},
+    {"id": "transform.set", "params": {"x": 150}}
+  ],
+  "atomic": true,
+  "expect": {
+    "out/card.design": {"json": {"version": 1, "pages": [{"id": "page-1", "name": "Page 1", "frameWidth": 1440, "frameHeight": 1024,
+      "nodes": [
+        {"id": "node-1", "kind": "frame", "name": "Desktop", "frame": {"x": 0, "y": 0, "width": 1440, "height": 1024},
+         "cornerRadius": 0, "fill": {"red": 255, "green": 255, "blue": 255}, "isHidden": false, "isLocked": false,
+         "opacity": 1, "text": "", "textStyle": {"alignment": "leading", "family": "System", "size": 16, "weight": 400},
+         "children": [
+          {"id": "node-4", "kind": "group", "name": "Group 1", "frame": {"x": 140, "y": 40, "width": 200, "height": 140},
+           "cornerRadius": 0, "fill": {"red": 217, "green": 217, "blue": 217}, "isHidden": false, "isLocked": false,
+           "opacity": 1, "text": "", "textStyle": {"alignment": "leading", "family": "System", "size": 16, "weight": 400},
+           "children": [
+            {"id": "node-2", "kind": "rectangle", "name": "Rectangle", "frame": {"x": 140, "y": 100, "width": 100, "height": 80},
+             "children": [], "cornerRadius": 0, "fill": {"red": 217, "green": 217, "blue": 217}, "isHidden": false, "isLocked": false,
+             "opacity": 1, "text": "", "textStyle": {"alignment": "leading", "family": "System", "size": 16, "weight": 400}},
+            {"id": "node-3", "kind": "text", "name": "Title", "frame": {"x": 150, "y": 40, "width": 200, "height": 32},
+             "children": [], "cornerRadius": 0, "fill": {"red": 0, "green": 0, "blue": 0}, "isHidden": false, "isLocked": false,
+             "opacity": 1, "text": "Title", "textStyle": {"alignment": "leading", "family": "System", "size": 16, "weight": 400}}
+           ]}
+         ]}
+      ]}]}}
+  },
+  "platforms": []
+}

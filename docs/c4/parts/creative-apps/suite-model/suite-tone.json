@@ -1,0 +1,10 @@
+{
+  "id": "suite-tone",
+  "name": "Tone",
+  "description": "ToneHistogram, the one display shape every histogram view draws (channel counts summed per bin, the tallest at 1, shadow and highlight clipping flags; the engine does the counting), and LevelsMidtone, where the Levels midtone handle sits for the engine's levels curve and the gamma a handle position means. Used by SuiteUI's HistogramView, Library's develop panel and Photo's Levels.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Tone/"
+  ],
+  "order": 205
+}

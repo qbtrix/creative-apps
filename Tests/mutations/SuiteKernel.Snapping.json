@@ -1,0 +1,30 @@
+[
+  {
+    "label": "hiddenKept: an effectively hidden layer stays a candidate",
+    "file": "Sources/SuiteKernel/Snap/Snapping.swift",
+    "find": "guard !seen.contains(node.id), !tree.isEffectivelyHidden(node.id) else { return }",
+    "replace": "guard !seen.contains(node.id) else { return }",
+    "tests": "SnapCandidateTests/skipsHidden"
+  },
+  {
+    "label": "lockedSkipped: an effectively locked layer is left out",
+    "file": "Sources/SuiteKernel/Snap/Snapping.swift",
+    "find": "guard !seen.contains(node.id), !tree.isEffectivelyHidden(node.id) else { return }",
+    "replace": "guard !seen.contains(node.id), !tree.isEffectivelyHidden(node.id), !tree.isEffectivelyLocked(node.id) else { return }",
+    "tests": "SnapCandidateTests/keepsLocked"
+  },
+  {
+    "label": "parentFrameMissing: a moving child's parent frame is not listed",
+    "file": "Sources/SuiteKernel/Snap/Snapping.swift",
+    "find": "            container.children.forEach(consider)\n            consider(container)",
+    "replace": "            container.children.forEach(consider)",
+    "tests": "SnapCandidateTests/listsParentFrame"
+  },
+  {
+    "label": "gapsFirst: offset prefers the gaps' offset over the lines'",
+    "file": "Sources/SuiteKernel/Snap/Snapping.swift",
+    "find": "lines ?? gaps ?? wholePoints",
+    "replace": "gaps ?? lines ?? wholePoints",
+    "tests": "SnapCandidateTests/linesBeforeGaps"
+  }
+]

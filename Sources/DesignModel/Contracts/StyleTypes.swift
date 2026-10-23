@@ -27,9 +27,29 @@ public struct DesignTextStyle: Sendable, Hashable, Codable {
     /// 100...900 in steps of 100, as CSS and OpenType name weights.
     public var weight: Int
     public var alignment: DesignTextAlignment
+    /// nil or false: the box fits its text (a Text click); true: it keeps its width and the
+    /// text wraps (a Text drag, canvas-basics CB-3). Left out of the file when nil, so a file
+    /// written before it opens as auto width and keeps its bytes.
+    public var fixedWidth: Bool?
 
-    public init(family: String, size: Double, weight: Int, alignment: DesignTextAlignment) {
+    public init(
+        family: String, size: Double, weight: Int, alignment: DesignTextAlignment, fixedWidth: Bool? = nil
+    ) {
         (self.family, self.size, self.weight, self.alignment) = (family, size, weight, alignment)
+        self.fixedWidth = fixedWidth
+    }
+
+    private enum CodingKeys: String, CodingKey { case family, size, weight, alignment, fixedWidth }
+
+    /// Decodes a style; a file without `fixedWidth` is auto width (nil). The synthesized
+    /// encoder leaves a nil `fixedWidth` out.
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        try self.init(
+            family: container.decode(String.self, forKey: .family), size: container.decode(Double.self, forKey: .size),
+            weight: container.decode(Int.self, forKey: .weight),
+            alignment: container.decode(DesignTextAlignment.self, forKey: .alignment),
+            fixedWidth: container.decodeIfPresent(Bool.self, forKey: .fixedWidth))
     }
 
     public static let `default` = DesignTextStyle(family: "System", size: 16, weight: 400, alignment: .leading)
@@ -96,22 +116,26 @@ public struct DesignVariable: Sendable, Hashable, Codable, Identifiable {
     public func value(in mode: DesignMode) -> DesignVariableValue { mode == .light ? light : dark }
 }
 
-public enum DesignExportFormat: String, CaseIterable, Sendable { case png, svg, pdf }
+/// What an export writes. Its file extension and rules are the kernel's (`fileExtension`, DesignExport+Kernel).
+public enum DesignExportFormat: String, CaseIterable, Sendable { case png, jpeg, svg, pdf }
 
 /// One file an export writes.
 public struct DesignExportItem: Sendable, Equatable {
     public var nodeID: String
     /// "Card.png", "Card 2.png": unique in the folder.
     public var fileName: String
-    /// The item's size in points, and in pixels at the export scale (equal for SVG and PDF).
+    /// The item's size in points, and the exact pixels the file is (equal for SVG and PDF).
     public var width: Double
     public var height: Double
     public var pixelWidth: Int
     public var pixelHeight: Int
+    /// The color a format without alpha (JPEG) flattens onto; nil keeps transparency.
+    public var background: DesignColor?
 
-    public init(nodeID: String, fileName: String, width: Double, height: Double, pixelWidth: Int, pixelHeight: Int) {
+    public init(nodeID: String, fileName: String, width: Double, height: Double, pixelWidth: Int, pixelHeight: Int,
+                background: DesignColor? = nil) {
         (self.nodeID, self.fileName, self.width, self.height) = (nodeID, fileName, width, height)
-        (self.pixelWidth, self.pixelHeight) = (pixelWidth, pixelHeight)
+        (self.pixelWidth, self.pixelHeight, self.background) = (pixelWidth, pixelHeight, background)
     }
 }
 

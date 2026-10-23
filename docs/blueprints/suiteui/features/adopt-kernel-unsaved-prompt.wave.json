@@ -1,0 +1,255 @@
+{
+  "title": "One unsaved-changes guard and save status in every editor: the kernel's DocumentSession and UnsavedPrompt words, one SuiteUI guard, SuiteUI's EditorSaveStatus",
+  "wave": "XK3",
+  "order": 50,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "canonical duplicates audit 2026-10-20, top-15 #15 (unsaved-changes guard and save status); feature map suiteui/adopt-kernel-unsaved-prompt; real job RJ-X48; Halo's missing close guard",
+  "waits_on": "adopt-kernel-autosave AK-flare (FlareWindow.swift) before UP-10; shared-thumbnails ST-z (PhotoWindow+File.swift) before UP-8; shared-codecs SC-z (canonical-baseline.txt) before UP-13; cross-line hand-offs: design/files-history and design-window, photo/history-panel and file-flow, halo/file-flow and autosave-history",
+  "depends": [
+    "suite-harness",
+    "editor-kernel",
+    "adopt-kernel-session",
+    "adopt-command-catalog"
+  ],
+  "longest_chain": "7 (UP-1 → UP-5 → UP-6 → UP-8 → UP-10 → UP-12 → UP-14)",
+  "journeys": [
+    "SuiteUnsavedJourneyTests.testEveryEditorAsksBeforeClosing",
+    "DesignFilesJourneyTests.testCloseWithUnsavedChanges",
+    "PhotoDocumentsJourneyTests.testUnsavedPromptAndOpenRecent"
+  ],
+  "owned": [
+    "Sources/SuiteUI/UnsavedGuard.swift",
+    "Tests/SuiteUITests/UnsavedGuardTests.swift",
+    "UITests/SuiteJourneyTests+Unsaved.swift",
+    "Tests/AppSnapshotTests/SuiteUnsavedSheetSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetUnsavedGuardTests.swift",
+    "Tests/mutations/SuiteUI.UnsavedGuard.json",
+    "Tests/AppSnapshotTests/DesignUnsavedGuardTests.swift",
+    "Sources/DesignApp/DesignWindow.swift",
+    "Sources/DesignApp/DesignCommands.swift",
+    "Sources/DesignApp/DesignSaveStatus.swift",
+    "Tests/AppSnapshotTests/PhotoUnsavedGuardTests.swift",
+    "Sources/PhotoApp/PhotoWindow+File.swift",
+    "Sources/PhotoApp/PhotoApp.swift",
+    "Tests/AppSnapshotTests/FlareUnsavedGuardTests.swift",
+    "Sources/FlareApp/FlareFilePanels.swift",
+    "Sources/FlareApp/FlareWindow.swift",
+    "Tests/AppSnapshotTests/HaloUnsavedGuardTests.swift",
+    "Sources/HaloApp/HaloWindow+File.swift",
+    "Sources/HaloApp/HaloWindow.swift",
+    "Sources/DesignApp/DesignClosePrompt.swift",
+    "Sources/PhotoModel/PhotoUnsavedPrompt.swift",
+    "Tests/PhotoModelTests/PhotoUnsavedPromptTextTests.swift",
+    "Tests/canonical-baseline.txt",
+    "docs/blueprints/suiteui/features/adopt-kernel-unsaved-prompt.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "UP-a",
+      "behavior": "`UnsavedGuard` and `.unsavedChangesGuard` are declared as stubs, and the guard's tests and the four-editor journey are written, disabled or skipped.",
+      "tasks": [
+        "UP-1",
+        "UP-2"
+      ],
+      "journeys": [
+        "SJ-UP"
+      ],
+      "owned": [
+        "Sources/SuiteUI/UnsavedGuard.swift",
+        "Tests/SuiteUITests/UnsavedGuardTests.swift",
+        "UITests/SuiteJourneyTests+Unsaved.swift"
+      ],
+      "waits": {},
+      "ui": true
+    },
+    {
+      "id": "UP-u",
+      "behavior": "The guard asks Save, Don't Save or Cancel as a sheet with the kernel's words before a dirty window closes, a document is replaced or the app quits, closes only after a save succeeds, and stays within the render budget.",
+      "tasks": [
+        "UP-3",
+        "UP-4"
+      ],
+      "journeys": [
+        "SJ-UP"
+      ],
+      "owned": [
+        "Sources/SuiteUI/UnsavedGuard.swift",
+        "Tests/SuiteUITests/UnsavedGuardTests.swift",
+        "Tests/AppSnapshotTests/SuiteUnsavedSheetSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetUnsavedGuardTests.swift",
+        "Tests/mutations/SuiteUI.UnsavedGuard.json"
+      ],
+      "waits": {
+        "UP-a": [
+          "UP-3",
+          "UP-4"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "UP-design",
+      "behavior": "Design's window asks through the guard with its `design.close.*` ids and shows `EditorSaveStatus`.",
+      "tasks": [
+        "UP-5",
+        "UP-6"
+      ],
+      "journeys": [
+        "DJ-UP"
+      ],
+      "owned": [
+        "Tests/AppSnapshotTests/DesignUnsavedGuardTests.swift",
+        "Sources/DesignApp/DesignWindow.swift",
+        "Sources/DesignApp/DesignCommands.swift",
+        "Sources/DesignApp/DesignSaveStatus.swift",
+        "UITests/SuiteJourneyTests+Unsaved.swift"
+      ],
+      "waits": {
+        "UP-u": [
+          "UP-6"
+        ],
+        "UP-a": [
+          "UP-5"
+        ],
+        "adopt-suiteui-chrome:AC-zoom": [
+          "UP-6"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "UP-photo",
+      "behavior": "Photo's close and Quit ask through the guard with its `photo.close.*` ids, and its own interposer and alert are gone.",
+      "tasks": [
+        "UP-7",
+        "UP-8"
+      ],
+      "journeys": [
+        "PJ-UP"
+      ],
+      "owned": [
+        "Tests/AppSnapshotTests/PhotoUnsavedGuardTests.swift",
+        "Sources/PhotoApp/PhotoWindow+File.swift",
+        "Sources/PhotoApp/PhotoApp.swift",
+        "UITests/SuiteJourneyTests+Unsaved.swift"
+      ],
+      "waits": {
+        "UP-u": [
+          "UP-8"
+        ],
+        "UP-a": [
+          "UP-7"
+        ],
+        "UP-design": [
+          "UP-8"
+        ],
+        "shared-thumbnails:ST-z": [
+          "UP-8"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "UP-flare",
+      "behavior": "Flare asks through the guard before close, Open and New, and shows a failed save with `EditorSaveStatus`.",
+      "tasks": [
+        "UP-9",
+        "UP-10"
+      ],
+      "journeys": [
+        "FJ-UP"
+      ],
+      "owned": [
+        "Tests/AppSnapshotTests/FlareUnsavedGuardTests.swift",
+        "Sources/FlareApp/FlareFilePanels.swift",
+        "Sources/FlareApp/FlareWindow.swift",
+        "UITests/SuiteJourneyTests+Unsaved.swift"
+      ],
+      "waits": {
+        "UP-u": [
+          "UP-10"
+        ],
+        "UP-a": [
+          "UP-9"
+        ],
+        "UP-photo": [
+          "UP-10"
+        ],
+        "adopt-kernel-autosave:AK-flare": [
+          "UP-10"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "UP-halo",
+      "behavior": "A dirty Halo project asks before its window closes, as well as before Open and New, and shows `EditorSaveStatus`.",
+      "tasks": [
+        "UP-11",
+        "UP-12"
+      ],
+      "journeys": [
+        "HJ-UP"
+      ],
+      "owned": [
+        "Tests/AppSnapshotTests/HaloUnsavedGuardTests.swift",
+        "Sources/HaloApp/HaloWindow+File.swift",
+        "Sources/HaloApp/HaloWindow.swift",
+        "UITests/SuiteJourneyTests+Unsaved.swift"
+      ],
+      "waits": {
+        "UP-u": [
+          "UP-12"
+        ],
+        "UP-a": [
+          "UP-11"
+        ],
+        "UP-flare": [
+          "UP-12"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "UP-z",
+      "behavior": "Design's and Photo's prompt files are deleted with the baseline shrunk, the four-editor journey passes on live, and the feature is built.",
+      "tasks": [
+        "UP-13",
+        "UP-14"
+      ],
+      "journeys": [
+        "SJ-UP"
+      ],
+      "owned": [
+        "Sources/DesignApp/DesignClosePrompt.swift",
+        "Sources/PhotoModel/PhotoUnsavedPrompt.swift",
+        "Tests/PhotoModelTests/PhotoUnsavedPromptTextTests.swift",
+        "Tests/canonical-baseline.txt",
+        "UITests/SuiteJourneyTests+Unsaved.swift",
+        "docs/blueprints/suiteui/features/adopt-kernel-unsaved-prompt.wave.json"
+      ],
+      "waits": {
+        "UP-design": [
+          "UP-13",
+          "UP-14"
+        ],
+        "UP-photo": [
+          "UP-13",
+          "UP-14"
+        ],
+        "UP-flare": [
+          "UP-14"
+        ],
+        "UP-halo": [
+          "UP-14"
+        ],
+        "shared-codecs:SC-z": [
+          "UP-13"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

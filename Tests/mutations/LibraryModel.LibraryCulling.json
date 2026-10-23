@@ -1,0 +1,16 @@
+[
+  {
+    "label": "sixIsRed",
+    "file": "Sources/LibraryModel/LibraryCulling.swift",
+    "find": "        case .label(let label): .label(label)\n        case .crop, .grid, .confirm, .first, .last: nil",
+    "replace": "        case .crop, .grid, .confirm, .first, .last, .label: nil",
+    "tests": "LibraryLabelKeysTests.swift"
+  },
+  {
+    "label": "labelNeverAdvances",
+    "file": "Sources/LibraryModel/LibraryCulling.swift",
+    "find": "        case .label: false",
+    "replace": "        case .label: true",
+    "tests": "LibraryLabelKeysTests.swift"
+  }
+]

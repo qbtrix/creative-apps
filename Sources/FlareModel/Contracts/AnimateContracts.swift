@@ -42,8 +42,17 @@ public protocol PropertyAnimating: Sendable {
     /// Grouped "Set Fill". Applies to every shape of the selected layers, or to the
     /// direct-selected items.
     func setFill(_ fill: Fill, of items: [StageAddress], in engine: inout CommandEngine) throws
-    /// Grouped "Set Stroke".
-    func setStroke(_ stroke: Stroke?, of items: [StageAddress], in engine: inout CommandEngine) throws
+    /// Grouped "Set Stroke"; with a `coalesceKey`, each write is top-level under that key instead, so the samples of
+    /// one drag share one undo step.
+    func setStroke(_ stroke: Stroke?, of items: [StageAddress], coalesceKey: String?,
+                   in engine: inout CommandEngine) throws
+}
+
+extension PropertyAnimating {
+    /// One grouped "Set Stroke" step.
+    public func setStroke(_ stroke: Stroke?, of items: [StageAddress], in engine: inout CommandEngine) throws {
+        try setStroke(stroke, of: items, coalesceKey: nil, in: &engine)
+    }
 }
 
 public struct KeyRef: Hashable, Sendable {

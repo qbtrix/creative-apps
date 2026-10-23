@@ -1,0 +1,44 @@
+[
+  {
+    "label": "capAttribute: the join is written for the cap",
+    "file": "Sources/SuiteKernel/Fill/StrokeSVG.swift",
+    "find": "value: stroke.cap.rawValue",
+    "replace": "value: stroke.join.rawValue",
+    "tests": "StrokeSVGTests"
+  },
+  {
+    "label": "colorAndWidth: stroke-opacity is written for an opaque colour too",
+    "file": "Sources/SuiteKernel/Fill/StrokeSVG.swift",
+    "find": "if alpha < 1 {",
+    "replace": "if alpha <= 1 {",
+    "tests": "StrokeSVGTests"
+  },
+  {
+    "label": "colorAndWidth: the colour is written in upper-case hex, unlike FlareCore's SVG export",
+    "file": "Sources/SuiteKernel/Fill/StrokeSVG.swift",
+    "find": "SampleRules.hex(stroke.color).lowercased()",
+    "replace": "SampleRules.hex(stroke.color)",
+    "tests": "StrokeSVGTests"
+  },
+  {
+    "label": "dashOffset: the phase is written as the dash array, so stroke-dashoffset reads \"16 8\"",
+    "file": "Sources/SuiteKernel/Fill/StrokeSVG.swift",
+    "find": "(name: \"stroke-dashoffset\", value: number(stroke.dashPhase))",
+    "replace": "(name: \"stroke-dashoffset\", value: stroke.dash.map(number).joined(separator: \" \"))",
+    "tests": "StrokeDashTrimTests"
+  },
+  {
+    "label": "plainStrokeHasNoDash: a solid stroke writes an empty stroke-dasharray",
+    "file": "Sources/SuiteKernel/Fill/StrokeSVG.swift",
+    "find": "if !stroke.dash.isEmpty {",
+    "replace": "if true {",
+    "tests": "StrokeSVGTests|StrokeDashTrimTests"
+  },
+  {
+    "label": "dashArraySeparator: the pattern is comma-joined, unlike FlareCore's SVG export",
+    "file": "Sources/SuiteKernel/Fill/StrokeSVG.swift",
+    "find": "stroke.dash.map(number).joined(separator: \" \")",
+    "replace": "stroke.dash.map(number).joined(separator: \",\")",
+    "tests": "StrokeDashTrimTests"
+  }
+]

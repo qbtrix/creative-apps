@@ -109,7 +109,7 @@ run beside each other on them; CL-measure needs the probe; CL-z integrates.
 | CL-a | The loop's checks exist before its code: the Linux walk of the whole loop on live services, the kernel-run tests, the five perf journeys and the L3 to L5 layout tests (disabled until their tasks), plus the `HaloRenderJob+Kernel` stubs the sheet compiles against. | CL-1, CL-2, CL-3 | MJ-CL1 | editor-kernel EK-a (CL-1, CL-2; cross-line) |
 | CL-ui (`"ui": true`) | File > Render… (⇧⌘R) opens SuiteUI's `ExportSheet` over the kernel run's readouts on the stubs, with Halo's format and size rows, the destination and Reveal in Finder, and progress, done and failed states; render-out's `HaloRenderSheet` is gone and H-J21 drives the new sheet. | CL-4, CL-5 | H-J21 | CL-a (CL-4, CL-5); editor-kernel EK-chrome (CL-4; cross-line) |
 | CL-run | Halo's render job runs on `ExportRun<HaloRenderSettings>`: every transition goes through the kernel (progress never back, clamped to the plan, cancel to idle), availability reads the run, and render-out's app-local state machine and its tests are deleted. | CL-6, CL-7 | MJ-CL2 | CL-a (CL-6, CL-7); editor-kernel EK-run (CL-6; cross-line) |
-| CL-probe (`"ui": true`) | Under `-SuitePerfProbe` the viewer drag, inspector bar scrub, playhead drag, playback ticks and the lane and layer-list scroll record their input samples and drawn frames into the window's probe, so `suite.perf` carries HB-U1 to HB-U5's series, and recording adds no window body. | CL-8, CL-9 | H-P1, H-P4 | CL-a (CL-8, CL-9); the SuiteUI probe recorder `needs-ui` (CL-8; cross-line) |
+| CL-probe (`"ui": true`) | Under `-SuitePerfProbe` the viewer drag, inspector bar scrub, playhead drag, playback ticks and the lane and layer-list scroll record their input samples and drawn frames into the window's probe, so `suite.perf` carries HB-U1 to HB-U5's series, and recording adds no window body. | CL-8, CL-9 | H-P1, H-P4 | CL-a (CL-8, CL-9); key-editing:KE-a (`HaloTimelineView.swift`, CL-8, CL-9); the SuiteUI probe recorder `needs-ui` (CL-8; cross-line) |
 | CL-measure | H-P1 to H-P5 run on `reference` and `crowd` with the probe and attach their series against HB-U1 to HB-U5, L3 to L5 hold in the hosted views, `HaloViewerLatencyTests` writes its `HALO-LATENCY` line, and every Halo journey launches on live services. | CL-10, CL-11, CL-12 | H-P1 to H-P5 | CL-a (all three); CL-probe (CL-10); switching A-HA-1 (CL-12; cross-line) |
 | CL-z | H-J12 walks the whole loop live with the mouse, from New Composition… through layers, keys, ease, play, text, undo, Render… to PNG files, save and relaunch, and the feature is built. | CL-13, CL-14 | H-J12 | CL-ui, CL-run, CL-probe, CL-measure (CL-13) |
 
@@ -201,10 +201,12 @@ services, the empty state) and `-HaloSaveTo <tmp>/Loop.halo -HaloRenderTo
 3. Click the Position X stopwatch (`halo.inspector.key.x`). Shot
    `loop-stopwatch`. Expect its value "Keyed at this frame" and Edit >
    "Undo Animate Position X".
-4. Scrub to 24: drag on `halo.timeline` from dx 0.02 to dx 0.5 at dy 0.05
-   (the ruler), then → or ← until the timecode reads `00:00:01:00`
-   (keyboard parity for the exact frame; the drag is the mouse step). Shot
-   `loop-frame-24`.
+4. Scrub to 24: drag on the Frame Ruler (`suite.timeline.ruler`) from dx
+   0.05 to dx 0.4 and expect the viewer's frame off 0, then click Next Frame
+   (`halo.transport.next`) or Previous Frame (`halo.transport.previous`)
+   until the timecode reads `00:00:01:00`; the mouse reaches the exact frame.
+   After that assert, one → is the keyboard parity (`00:00:01:01`) and
+   Previous Frame brings it back to 24. Shot `loop-frame-24`.
 5. Drag the solid 300 px right from its centre in the artboard
    (`ViewerDragSteps.drag`, +Drag.swift's helper). Shot `loop-dragged`.
    Expect Position X = 960 + 300 within `ViewerDragSteps.tolerance()`, key
@@ -222,14 +224,14 @@ services, the empty state) and `-HaloSaveTo <tmp>/Loop.halo -HaloRenderTo
 9. Edit > Undo (menu, mouse): the summary loses "Hello"; Edit > Redo: it is
    back. Shot `loop-undo-redo`. Expect the Edit menu titles flip to "Redo
    Edit Text" and back.
-10. File > Render…: click PNG sequence, Half, Render; wait for "Rendered 48
-    frames."; click Close. Shot `loop-rendered`. Expect `<tmp>/Loop/` holds
+10. File > Render…: click PNG sequence, Half, Render; wait for "Exported 48
+    PNG files into "Loop""; click Close. Shot `loop-rendered`. Expect `<tmp>/Loop/` holds
     `Loop_0001.png` … `Loop_0048.png` at 960 × 540.
 11. ⌘S (File > Save by menu is the mouse step; ⌘S the parity). Shot
     `loop-saved`. Expect the window title "Loop" with no unsaved dot and
     `<tmp>/Loop.halo` on disk.
-12. Quit; relaunch with `-HaloOpenFile <tmp>/Loop.halo`. Shot
-    `loop-reopened`. Expect two layers, Solid 1's x keys at 0, 24 and 47
+12. Halo > Quit Halo (menu, mouse); relaunch with `-HaloOpenFile
+    <tmp>/Loop.halo`. Shot `loop-reopened`. Expect two layers, Solid 1's x keys at 0, 24 and 47
     (the EASING list's rows "Position X 0 → 24" reading "Ease Out" and
     "Position X 24 → 47" reading "Linear"), the text layer "Hello" drawn at
     0, and Undo disabled with "Nothing to undo.".
@@ -246,9 +248,10 @@ placeholder, `enforced: false`).
   leg.
 - **H-P2** `testInspectorScrubLatency`, `reference`: `velocityDrag` across
   `halo.inspector.row.rotation`'s bar; series `inspector-scrub`, HB-U2.
-- **H-P3** `testPlayheadScrubLatency`, `reference`: `velocityDrag` on
-  `halo.timeline` from dx 0.02 to dx 0.98 at dy 0.05; series
-  `playhead-scrub`, HB-U3.
+- **H-P3** `testPlayheadScrubLatency`, `reference`: velocity drags on the
+  Frame Ruler itself (label `Frame Ruler`, not `halo.timeline`, whose dx 0.02
+  is the name column) from dx 0.02 to dx 0.98 and back, legs making up
+  4 × 600 pt at 300 pt/s; series `playhead-scrub`, HB-U3.
 - **H-P4** `testPlaybackHoldsRate`, `reference`: click Play, wait 5 s, click
   Pause; series `playback` (intervals), HB-U4.
 - **H-P5** `testTimelineAndLayerListScroll`, `-HaloSample crowd`: scroll

@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "app": "fake",
+  "inputs": ["mixed/*.fake"],
+  "steps": [
+    {"id": "rect.select", "params": {"id": 1}},
+    {"id": "rect.move", "params": {"dx": 5, "dy": 5}},
+    {"id": "rect.add", "params": {"x": 0, "y": 0, "w": 8, "h": 8, "name": "Badge"}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-small", "format": "fake", "options": {}}
+}

@@ -11,10 +11,8 @@
 // and B: Distribute is disabled in the inspector and the Object menu.
 // Page points map to the screen through the artboard (`suite.canvas.artboard`,
 // the page's rectangle at the current zoom, #2349): its corner plus the point
-// times its width over 1440. Until #2463 routes the canvas keys to the
-// several-layer nudge and delete, ⇧→ and ⌫ change nothing on a multi-selection;
-// J5 then checks the empty marquee and skips naming #2463, and any other wrong
-// step name fails. J4 (S-7b): the zoom pill's fitted percent f; C selected;
+// times its width over 1440. ⇧→ arrives flagged as a numeric-pad key, which the
+// canvas ignores (DesignCanvasKeys, #2706). J4 (S-7b): the zoom pill's fitted percent f; C selected;
 // ⌘= twice steps two ViewerZoom stops up; Space-drag 200 pt left pans
 // `design.canvas.selection` about 200 pt left; ⌘0 reads f again; View > Zoom
 // to Selection zooms past both stops; Escape, then the item is disabled.
@@ -22,6 +20,9 @@
 // as CGEvents, and a runner without post-event access skips that step by name.
 // C's center within 2 pt of the canvas center skips naming #2147 (CanvasViewport
 // can't scroll to a rect yet). Every other step still asserts first.
+// DJ-AR (area-selection AR-13, turned on by AR-14): A and Title grouped into a card;
+// a click on Title picks the card (its box is the card's 140 pt height), a drag moves
+// it whole; a double-click on Title picks Title; Escape picks the card again.
 import CoreGraphics
 import XCTest
 
@@ -37,7 +38,7 @@ final class DesignSelectJourneyTests: XCTestCase {
     static let distributeTitle = "Distribute Horizontally"
 
     /// J5: a marquee picks A and B, which then move, resize, nudge and delete as one step each.
-    @MainActor func testMarqueeMoveResizeSeveral() throws {
+    @MainActor func testMarqueeMoveResizeSeveral() {
         let design = open()
         let undo = design.element("design.bar.undo")
 
@@ -60,18 +61,12 @@ final class DesignSelectJourneyTests: XCTestCase {
 
         // 4. ⇧→ nudges both 10 right: one Nudge step.
         design.press(.rightArrow, .shift)
-        if !Self.waitForLabel(undo, "Undo Nudge"), undo.label == "Undo Resize" {
-            try skipOnKeys(design, "⇧→ made no step on two layers")
-        }
-        XCTAssertEqual(undo.label, "Undo Nudge", "⇧→ made the wrong step")
+        XCTAssert(Self.waitForLabel(undo, "Undo Nudge"), "⇧→ made no Nudge step on two layers (Undo reads \(undo.label))")
         design.shot("select-nudged")
 
         // 5. ⌫ deletes both: one Delete step, and A's and B's rows go.
         design.press(.delete)
-        if !Self.waitForLabel(undo, "Undo Delete"), undo.label == "Undo Nudge" {
-            try skipOnKeys(design, "⌫ made no step on two layers")
-        }
-        XCTAssertEqual(undo.label, "Undo Delete", "⌫ made the wrong step")
+        XCTAssert(Self.waitForLabel(undo, "Undo Delete"), "⌫ made no Delete step on two layers (Undo reads \(undo.label))")
         XCTAssert(Self.waitUntil { !row(design, Self.rowA).exists && !row(design, Self.rowB).exists },
                   "⌫ left A's or B's row in Layers")
         design.shot("select-deleted")
@@ -124,6 +119,55 @@ final class DesignSelectJourneyTests: XCTestCase {
         // Close the menu first: an open menu covers the toolbar in the shot and fails contrast (#2516).
         design.press(.escape)
         design.shot("select-distribute-off")
+    }
+
+    /// The card's and Title's heights on the page: the selection box tells which one is picked.
+    static let cardHeight = 140.0, titleHeight = 32.0
+    /// False until AR-14 makes Design's click group-aware; AR-14 deletes it with the skip.
+    static let groupPickBuilt = false
+
+    /// DJ-AR: a click on a grouped layer picks its group, a double-click enters it, Escape steps out.
+    @MainActor func testClickGroupThenEnter() throws {
+        guard Self.groupPickBuilt else { throw XCTSkip("waits on AR-14") }
+        let design = open()
+        let undo = design.element("design.bar.undo"), selection = design.element("design.canvas.selection")
+        let artboard = design.element(Self.artboard)
+
+        // 1. A pressed, Title Shift-pressed, ⌘G: the card, A and Title in one group.
+        point((150, 140), on: artboard).click()
+        XCUIElement.perform(withKeyModifiers: .shift) { point((150, 56), on: artboard).click() }
+        expectCount(design, "2 Layers", after: "Shift-pressing Title")
+        design.press(character: "g", .command)
+        XCTAssert(Self.waitForLabel(undo, "Undo Group"), "⌘G made no Group step (Undo reads \(undo.label))")
+        design.press(.escape)
+
+        // 2. A click on Title picks the card: the box is the card's height, not Title's.
+        point((150, 56), on: artboard).click()
+        XCTAssert(Self.waitUntil { selection.exists && Self.pageHeight(selection, on: artboard) == Self.cardHeight },
+                  "a click on Title picked a box \(Self.pageHeight(selection, on: artboard)) high, not the card's \(Self.cardHeight)")
+        design.shot("select-group-picked")
+
+        // 3. A drag on Title 40 right moves the card whole: one Move step, the box still the card's.
+        drag(design, from: (150, 56), to: (190, 56))
+        XCTAssert(Self.waitForLabel(undo, "Undo Move"), "dragging the card made no Move step (Undo reads \(undo.label))")
+        XCTAssertEqual(Self.pageHeight(selection, on: artboard), Self.cardHeight, "the drag pulled Title out of its card")
+
+        // 4. A double-click on Title enters the card and picks Title.
+        point((190, 56), on: artboard).doubleClick()
+        XCTAssert(Self.waitUntil { Self.pageHeight(selection, on: artboard) == Self.titleHeight },
+                  "a double-click on Title picked a box \(Self.pageHeight(selection, on: artboard)) high, not Title's")
+        design.shot("select-group-entered")
+
+        // 5. Escape steps out one level: the card is picked again.
+        design.press(.escape)
+        XCTAssert(Self.waitUntil { selection.exists && Self.pageHeight(selection, on: artboard) == Self.cardHeight },
+                  "Escape picked a box \(Self.pageHeight(selection, on: artboard)) high, not the card")
+        design.shot("select-group-exited")
+    }
+
+    /// The selection box's height in page points, rounded.
+    @MainActor private static func pageHeight(_ selection: XCUIElement, on artboard: XCUIElement) -> Double {
+        (selection.frame.height * Self.pageWidth / max(artboard.frame.width, 1)).rounded()
     }
 
     /// The percents of ViewerZoom.stops, the stops ⌘= steps through (UITests can't import SuiteUI).
@@ -232,13 +276,6 @@ final class DesignSelectJourneyTests: XCTestCase {
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         XCTAssert(design.element(Self.artboard).waitForExistence(timeout: 10), "cards showed no page (\(Self.artboard))")
         return design
-    }
-
-    /// The trailing empty-marquee check, then a skip naming #2463 (the canvas keys miss several layers).
-    @MainActor private func skipOnKeys(_ design: Journey, _ what: String) throws {
-        design.shot("select-keys-missing")
-        expectEmptyMarquee(design)
-        throw XCTSkip("#2463: \(what); the canvas keys still send the one-layer nudge and delete")
     }
 
     /// Marquee (380, 580)-(720, 720) on Desktop touches only Locked and Hidden: the selection is empty.

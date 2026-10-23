@@ -79,15 +79,15 @@
   {
     "label": "the badge reads one layer, not the bounds of several",
     "file": "Sources/DesignModel/DesignCanvasHints.swift",
-    "find": "guard let bounds = selectionBounds else { return nil }",
-    "replace": "guard let bounds = selectedNodes.last?.frame else { return nil }",
+    "find": "return selectionBounds",
+    "replace": "return selectedNodes.last?.frame",
     "tests": "DesignCanvasHintsTests.swift"
   },
   {
     "label": "the badge shows a zero size with nothing selected",
     "file": "Sources/DesignModel/DesignCanvasHints.swift",
-    "find": "guard let bounds = selectionBounds else { return nil }",
-    "replace": "guard let bounds = Optional(selectionBounds ?? DesignRect(x: 0, y: 0, width: 0, height: 0)) else { return nil }",
+    "find": "return selectionBounds",
+    "replace": "return selectionBounds ?? DesignRect(x: 0, y: 0, width: 0, height: 0)",
     "tests": "DesignCanvasHintsTests.swift"
   },
   {
@@ -103,5 +103,75 @@
     "find": "if case .move? = gesture?.route {",
     "replace": "if case .resize? = gesture?.route {",
     "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the hover mark never draws the Text tool's box",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "public var mark: DesignRect? { nodeID != nil || pointer == .text ? outline : nil }",
+    "replace": "public var mark: DesignRect? { nodeID != nil ? outline : nil }",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "any outline without a layer counts as the Text box",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "public var placement: DesignRect? { nodeID == nil && pointer == .text ? outline : nil }",
+    "replace": "public var placement: DesignRect? { nodeID == nil ? outline : nil }",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the steady answer keeps the Text box, so it changes per sample",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "guard placement != nil else { return self }",
+    "replace": "guard placement == nil else { return self }",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the badge hangs under the left edge, not the middle",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "return DesignPoint(x: bounds.x + bounds.width / 2, y: bounds.maxY)",
+    "replace": "return DesignPoint(x: bounds.x, y: bounds.maxY)",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the badge hangs from the top edge",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "DesignPoint(x: bounds.x + bounds.width / 2, y: bounds.maxY)",
+    "replace": "DesignPoint(x: bounds.x + bounds.width / 2, y: bounds.y)",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the live frame ignores the draft, so the badge stays at the placed size while typing (#3335)",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "node.id == editingTextID ? Self.fitted(node.frame, node.textStyle, extent) : node.frame",
+    "replace": "node.frame",
+    "tests": "DesignTextLiveFitTests"
+  },
+  {
+    "label": "the badge reads the stored bounds during an edit (#3335)",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "return liveFrame(of: node, draft: extent)",
+    "replace": "return selectionBounds",
+    "tests": "DesignTextLiveFitTests"
+  },
+  {
+    "label": "text at exactly the legible size still asks for a zoom-in (#3336)",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "onScreen < Self.legibleTextSize",
+    "replace": "onScreen <= Self.legibleTextSize",
+    "tests": "DesignTextLiveFitTests"
+  },
+  {
+    "label": "the knob above several layers hovers as the top handle (#4224)",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "if boxHandle(at: point) == .rotate, let box = selectionBounds {",
+    "replace": "if boxHandle(at: point) == .top, let box = selectionBounds {",
+    "tests": "DesignKnobSeveralTests"
+  },
+  {
+    "label": "the knob above several layers shows the move pointer (#4224)",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "DesignHover(nodeID: nil, outline: box, pointer: .resize(.rotate))",
+    "replace": "DesignHover(nodeID: nil, outline: box, pointer: .move)",
+    "tests": "DesignKnobSeveralTests"
   }
 ]

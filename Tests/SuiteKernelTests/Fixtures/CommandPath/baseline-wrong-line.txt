@@ -1,0 +1,3 @@
+# The right files, other lines: a baseline excuses a line, not a whole file.
+Sources/FixtureApp/Menus/BareMenu.swift.txt: MenuCommand("Y", help: "", perform: {})
+Sources/FixtureApp/Toolbar.swift.txt: Button("Zoom Out", systemImage: "minus.magnifyingglass") { zoom(on: 0.5) }

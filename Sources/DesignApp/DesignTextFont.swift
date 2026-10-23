@@ -1,7 +1,8 @@
 // DesignTextFont.swift: the one mapping from a text layer's DesignTextStyle to the font
-// and alignment it draws in (style-rows ST-5t). The canvas artwork (DesignTextArtwork)
-// and the inline editor (DesignTextOverlay) both read it, so the text being typed and
-// the text committed can't drift apart. Family is a name from the system's font list;
+// and alignment it draws in (style-rows ST-5t), and the size text takes in it
+// (`measure`, canvas-basics CB-6). The canvas artwork (DesignTextArtwork), the inline
+// editor (DesignTextOverlay) and the window's fitted commit all read it, so the text
+// being typed, the box it commits into and the text drawn can't drift apart. Family is a name from the system's font list;
 // the Model's default family ("System") is the system font. Weight is CSS's 100...900,
 // rounded to the nearest hundred. A family the Mac doesn't have falls back to the
 // system font at the same size and weight. These are document fonts, the user's
@@ -32,6 +33,24 @@ enum DesignTextFont {
     /// The point size `style` draws at, `scale` × its size; a scale that isn't a positive finite number counts as 1.
     static func pointSize(_ style: DesignTextStyle, scale: Double = 1) -> Double {
         style.size * (scale.isFinite && scale > 0 ? scale : 1)
+    }
+
+    /// The size `text` takes in `style` (page points), each side rounded up to a whole point: one
+    /// line per paragraph with no `wrapWidth`, wrapped at `wrapWidth` with one. The window commits
+    /// an edit with it (canvas-basics CB-6) and the inline editor sizes its field by it.
+    static func measure(_ text: String, _ style: DesignTextStyle, wrapWidth: Double?) -> DesignTextExtent {
+        let wrap = wrapWidth.flatMap { $0.isFinite && $0 > 0 ? $0 : nil } ?? .greatestFiniteMagnitude
+        let string = NSAttributedString(string: text, attributes: [.font: nsFont(style)])
+        let bounds = string.boundingRect(
+            with: CGSize(width: wrap, height: .greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin], context: nil)
+        return DesignTextExtent(width: ceil(bounds.width), height: ceil(bounds.height))
+    }
+
+    /// The size `draft` takes in `node`'s box: one line per paragraph for an auto-width box,
+    /// wrapped at the frame's width for a fixed-width one.
+    static func measure(_ draft: String, in node: DesignNode) -> DesignTextExtent {
+        measure(draft, node.textStyle, wrapWidth: node.textStyle.fixedWidth == true ? node.frame.width : nil)
     }
 
     /// How the lines of `style` align inside their box.

@@ -433,11 +433,12 @@ public enum SuiteColor {
     public static let stateSuccess = SuitePalette.stateSuccess.color()
     public static let onionBefore = SuitePalette.onionBefore.color()
     public static let onionAfter = SuitePalette.onionAfter.color()
-    /// The tints behind a selected chip or preset, a key at the playhead and a
-    /// warning pill.
+    /// The tints behind a selected chip or preset, a key at the playhead, a
+    /// warning pill and an error pill.
     public static let selectedTint = tint(SuitePalette.stateSelected)
     public static let keyedTint = tint(SuitePalette.stateKeyed)
     public static let warningTint = tint(SuitePalette.stateWarning)
+    public static let errorTint = tint(SuitePalette.stateError)
     /// A disabled control draws at this opacity, and its tooltip says why.
     public static let disabledOpacity: Double = 0.4
 

@@ -17,12 +17,22 @@ public enum LibraryKey: Hashable, Sendable {
     case crop, grid
     case confirm  // Return
     case first, last  // Home, End
+    case label(PhotoLabel)  // 6 red, 7 yellow, 8 green, 9 blue; purple has no key
 
-    /// "0"..."5" rate; P pick, X reject, U unflag, R crop, G grid, in
-    /// either case. Anything else is nil (the key is ignored).
+    /// The label each of 6–9 sets, in key order.
+    public static let labelKeys: [(key: Character, label: PhotoLabel)] = [
+        ("6", .red), ("7", .yellow), ("8", .green), ("9", .blue),
+    ]
+
+    /// "0"..."5" rate; "6"..."9" label; P pick, X reject, U unflag, R crop,
+    /// G grid, in either case. Anything else is nil (the key is ignored).
     public init?(character: Character) {
         if let digit = character.wholeNumberValue, character.isASCII, (0...5).contains(digit) {
             self = .rating(digit)
+            return
+        }
+        if let label = Self.labelKeys.first(where: { $0.key == character })?.label {
+            self = .label(label)
             return
         }
         switch character.lowercased() {

@@ -81,12 +81,19 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
 
 @Test func renameStartsFromOneCallSiteOnly() throws {
     let source = try sidebarRowSource()
-    #expect(occurrences(of: "beginRename", in: source) == 2, "beginRename is declared once and used once, by the title label")
+    // Besides the title label's double-click, `requestRename` (Return on the
+    // focused row and the "Rename" accessibility action, LL-7) calls it; it
+    // checks `keyRenames` and never reads which part was clicked.
+    #expect(
+        occurrences(of: "beginRename", in: source) == 3,
+        "beginRename is declared once and used by the title label and requestRename only")
+    let request = try #require(region(of: source, from: "private func requestRename", to: "\n}"))
+    #expect(squeezed(request).contains("guardSelf.keyRenames(renamable:onRename!=nil,renaming:field.isOpen)"))
     let flat = squeezed(source)
-    #expect(occurrences(of: "draft=item.title", in: flat) == 1)
+    #expect(occurrences(of: "field.open(item.title)", in: flat) == 1)
     #expect(occurrences(of: "editing=true", in: flat) == 1)
     let begin = try #require(region(of: source, from: "private func beginRename", to: "private func commitRename"))
-    #expect(squeezed(begin).contains("draft=item.title"), "only beginRename opens the rename field")
+    #expect(squeezed(begin).contains("field.open(item.title)"), "only beginRename opens the rename field")
 }
 
 @Test func rowBodyAndItsTogglesCarryNoDoubleClickGesture() throws {
@@ -102,13 +109,17 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
     // neither attaches a gesture or changes a hit area.
     // `selectionDisabled` reads `SidebarRowLook` (lists-and-layers LL-4): it
     // only says whether the row can be selected and attaches no gesture.
+    // `onKeyPress` and `accessibilityActions` (LL-7) start a rename from Return
+    // on the focused row or the "Rename" action through `requestRename`, the
+    // `Button` being the action itself and `nil` its `if onRename != nil`: no
+    // pointer, so no toggle or blank space.
     let modifiers: Set = [
         "toggleStyle", "buttonStyle", "labelStyle", "foregroundStyle", "disabled", "help", "accessibilityLabel",
-        "accessibilityIdentifier", "identifier", "badge", "selectionDisabled",
+        "accessibilityIdentifier", "identifier", "badge", "selectionDisabled", "onKeyPress", "accessibilityActions",
     ]
     let calls: Set = [
         "View", "HStack", "Spacer", "ForEach", "Toggle", "Binding", "Label", "Text", "SidebarToggleIcon",
-        "SidebarRowLook",
+        "SidebarRowLook", "requestRename", "Button", "nil",
     ]
     #expect(names.modifiers.subtracting(modifiers).isEmpty, "new modifier in body: can it rename from a toggle? (#54)")
     #expect(names.calls.subtracting(calls).isEmpty, "new view or call in body: can it rename from a toggle? (#54)")
@@ -129,13 +140,18 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
     let names = callNames(in: title)
     // `modifier(SidebarRowDimming(...))` only colors a dimmed row's title
     // (LL-4); `dimmingOnlyColorsTheTitle` keeps it free of gestures.
+    // The open field's refusal (LL-6) sits under the field in a VStack, not
+    // in the label's chain: `isOpen`, `type`, `cancel` and `message` read or
+    // change the rename field, `font`, `foregroundStyle` and
+    // `accessibilityIdentifier` style and name the field and its message, and
+    // `loseFocus` commits or drops the draft. None can start a rename.
     let modifiers: Set = [
         "focused", "onSubmit", "onExitCommand", "onChange", "contentShape", "simultaneousGesture", "onEnded",
-        "modifier",
+        "modifier", "isOpen", "type", "cancel", "message", "font", "foregroundStyle", "accessibilityIdentifier",
     ]
     let calls: Set = [
         "View", "nil", "else", "focused", "TextField", "Binding", "commitRename", "Label", "Rectangle", "TapGesture",
-        "beginRename", "Text", "SidebarRowIcon", "SidebarRowDimming", "SidebarRowLook",
+        "beginRename", "Text", "SidebarRowIcon", "SidebarRowDimming", "SidebarRowLook", "VStack", "loseFocus",
     ]
     #expect(
         names.modifiers.subtracting(modifiers).isEmpty,
@@ -166,4 +182,20 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
     let flat = squeezed(icon)
     #expect(flat.contains("Image(systemName:toggle.onSymbol)") && flat.contains("Image(systemName:toggle.offSymbol)"))
     #expect(!flat.contains(".frame("), "no hand-sized frame: both symbols set the width")
+}
+
+/// A toggle whose symbols change with more than its own state lays out every
+/// symbol it reserves, so its width, and the x of the toggles before it, never moves.
+@Test func toggleIconLaysOutItsReservedSymbols() throws {
+    let source = try sidebarRowSource()
+    let icon = try #require(region(of: source, from: "private struct SidebarToggleIcon", to: ".accessibilityHidden"))
+    #expect(squeezed(icon).contains("ForEach(toggle.reserved"), "the reserved symbols take no part in layout")
+}
+
+@Test func renameFieldKeepsTheRowIconInFrontOfIt() throws {
+    let source = try sidebarRowSource()
+    let open = try #require(region(of: source, from: "if field.isOpen {", to: "} else {"))
+    let field = squeezed(open)
+    #expect(field.contains("Label{"), "the open field drops the title's Label, so the name jumps left")
+    #expect(field.contains("icon:{SidebarRowIcon(item:item)}"), "the open field drops the row icon")
 }

@@ -236,10 +236,10 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         XCTAssert(photo.app.buttons[title].waitForExistence(timeout: 5), "no \(title) button")
     }
 
-    /// The Layers list shows `name` with `meta` (blend and opacity) on its row.
+    /// The Layers list shows `name` with `meta` (blend and opacity) under it.
     @MainActor private func expectRow(_ name: String, meta: String, _ photo: Journey) {
         let row = photo.app.staticTexts[name], detail = photo.app.staticTexts[meta]
-        XCTAssert(row.waitForExistence(timeout: 5) && detail.waitForExistence(timeout: 5) && abs(row.frame.midY - detail.frame.midY) < 4,
+        XCTAssert(row.waitForExistence(timeout: 5) && detail.waitForExistence(timeout: 5) && abs(detail.frame.minY - row.frame.maxY) < 4,
                   "no \(name) row reading \(meta)")
     }
 

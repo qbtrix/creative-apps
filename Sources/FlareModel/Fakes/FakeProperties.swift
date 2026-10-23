@@ -116,21 +116,22 @@ public struct FakeProperties: PropertyAnimating {
         }
     }
 
-    public func setStroke(_ stroke: Stroke?, of items: [StageAddress], in engine: inout CommandEngine) throws {
+    public func setStroke(_ stroke: Stroke?, of items: [StageAddress], coalesceKey: String?,
+                          in engine: inout CommandEngine) throws {
         try available()
         let shapes = items.filter { if case .shape = $0.item { true } else { false } }
         guard !shapes.isEmpty else { return }
-        try engine.group(stroke == nil ? "Remove Stroke" : "Set Stroke") { engine in
-            try engine.perform(FixtureEdit("Set Stroke", from: engine.document) { doc in
-                for a in shapes {
-                    guard case .shape(let i) = a.item else { continue }
-                    let layer = try Self.layers([a.layerID], owner: a.owner, in: doc).first
-                    guard var layer, layer.shapes.indices.contains(i) else { throw CommandError.shapeNotFound(i) }
-                    layer.shapes[i].stroke = stroke
-                    try Self.replace(layer, owner: a.owner, in: &doc)
-                }
-            })
+        let edit = try FixtureEdit("Set Stroke", from: engine.document) { doc in
+            for a in shapes {
+                guard case .shape(let i) = a.item else { continue }
+                let layer = try Self.layers([a.layerID], owner: a.owner, in: doc).first
+                guard var layer, layer.shapes.indices.contains(i) else { throw CommandError.shapeNotFound(i) }
+                layer.shapes[i].stroke = stroke
+                try Self.replace(layer, owner: a.owner, in: &doc)
+            }
         }
+        if let coalesceKey { return try engine.perform(edit, coalesceKey: coalesceKey) }
+        try engine.group(stroke == nil ? "Remove Stroke" : "Set Stroke") { try $0.perform(edit) }
     }
 
     /// The row title for `property`, or the name itself for a property with no row.

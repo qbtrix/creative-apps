@@ -1,8 +1,12 @@
 // StorePreferences.swift: the live PreferencesStoring (UC-11) over FileStore's
-// `preferences.json`, StoreRecents' shape. OB-1 stub: keeps the value in
-// memory like FakePreferences (stale check, revision + 1, `changes()`);
-// OB-9 reads and writes the store and makes `externalChange()` re-read.
-// Linux-safe.
+// `preferences.json`, StoreRecents' shape. `load` returns the stored value
+// with the store's revision (defaults at 0 when there is none). `save` takes
+// only the stored revision: it writes revision + 1 under the store's lock
+// (`write(expecting:)`, so a writer that slips in between still loses with
+// `staleRevision`), yields it on `changes()` and calls
+// `onWrite("preferences.json")`. `externalChange()` is what a watcher calls
+// when another process wrote: it re-reads and yields a revision this
+// instance has not yielded yet, once. Linux-safe.
 
 /// The live PreferencesStoring (UC-11) over FileStore's preferences.json.
 public actor StorePreferences: PreferencesStoring {
@@ -10,7 +14,6 @@ public actor StorePreferences: PreferencesStoring {
     let store: FileStore
     let onWrite: @Sendable (String) -> Void
     var feed = ChangeFeed()
-    var stored = SuitePreferences()
     /// The newest revision this instance wrote or yielded.
     var seen = 0
 
@@ -20,14 +23,20 @@ public actor StorePreferences: PreferencesStoring {
     }
 
     /// The stored value with the store's revision; defaults when none.
-    public func load() throws(SuiteError) -> SuitePreferences { stored }
+    public func load() throws(SuiteError) -> SuitePreferences {
+        let (value, revision) = try store.read(Self.file, as: SuitePreferences.self)
+        var p = value ?? SuitePreferences()
+        p.revision = revision
+        return p
+    }
 
     /// `.staleRevision` unless `p.revision` is the stored one; writes revision + 1, yields it, calls onWrite(file).
     public func save(_ p: SuitePreferences) throws(SuiteError) -> SuitePreferences {
-        guard p.revision == stored.revision else { throw .staleRevision }
+        let current = try store.read(Self.file, as: SuitePreferences.self).revision
+        guard p.revision == current else { throw .staleRevision }
         var next = p
-        next.revision = next.revision < Int.max ? next.revision + 1 : 0
-        stored = next
+        next.revision = current + 1
+        try store.write(Self.file, next, expecting: current)
         seen = next.revision
         feed.send(seen)
         onWrite(Self.file)
@@ -36,6 +45,11 @@ public actor StorePreferences: PreferencesStoring {
 
     public func changes() -> AsyncStream<Int> { feed.stream() }
 
-    /// Another process wrote preferences.json: re-read and yield an unseen revision (OB-9).
-    public func externalChange() {}
+    /// Another process wrote preferences.json: re-read it and yield its
+    /// revision when this instance has not yielded it yet.
+    public func externalChange() {
+        guard let revision = try? store.read(Self.file, as: SuitePreferences.self).revision, revision > seen else { return }
+        seen = revision
+        feed.send(revision)
+    }
 }

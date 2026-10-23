@@ -1,0 +1,16 @@
+[
+  {
+    "label": "the fake loupe ignores the curve",
+    "file": "Sources/LibraryModel/Fakes/FakeRendering.swift",
+    "find": "let curveSteps = settings.curve.points.filter { $0.x != $0.y }.count",
+    "replace": "let curveSteps = 0",
+    "tests": "LibraryDevelopValuesTests"
+  },
+  {
+    "label": "the fake loupe ignores levels",
+    "file": "Sources/LibraryModel/Fakes/FakeRendering.swift",
+    "find": "let steps = sliderSteps + Double(curveSteps + levelSteps)",
+    "replace": "let steps = sliderSteps + Double(curveSteps + 0 * levelSteps)",
+    "tests": "LibraryDevelopValuesTests"
+  }
+]

@@ -12,5 +12,19 @@
     "find": "        if finishPathHelp == nil { finishPath() }\n        self.tool = tool\n        cancelDrag()\n",
     "replace": "        if finishPathHelp == nil { finishPath() }\n        self.tool = tool\n",
     "tests": "FlareToolSwitchTests"
+  },
+  {
+    "label": "a new item selection keeps the old picked anchors",
+    "file": "Sources/FlareModel/FlareWorkspace.swift",
+    "find": "        didSet { if oldValue.ordered != picks.ordered { anchorSelectionStore = Selection() } }",
+    "replace": "        didSet {}",
+    "tests": "FlareAnchorEditTests"
+  },
+  {
+    "label": "a path is in edit under any tool",
+    "file": "Sources/FlareModel/FlareAnchors+Kernel.swift",
+    "find": "        guard tool == .directSelect, selection.count == 1,",
+    "replace": "        guard selection.count == 1,",
+    "tests": "FlareAnchorEditTests"
   }
 ]

@@ -120,11 +120,11 @@ The suite design's Flare MVP, made concrete.
 
 | Area | In v1 |
 |---|---|
-| Files | New from a preset (1080p 16:9, square, 9:16, 550x400 web, custom); open and save `.flare`; Open Recent; autosave to a recovery file with a restore offer after a crash; the title shows the file name; an unsaved dot; undo and redo named for the step. One document per window: New and Open act in the front window after the unsaved-changes prompt |
+| Files | New from a preset (1080p 16:9, square, 9:16, 550x400 web, custom); open and save `.flare`; Open Recent from the suite's shared list (this app's files only; Clear Menu clears them there); Open In ▸ another suite app that reads `.flare` (Halo), once the file is saved; a `.flare` dropped on the stage opens in its own window, a `.halo` goes to Halo, and a file Flare can't read is refused with a mark ("Flare can't import SVG yet."); autosave to a recovery file with a restore offer after a crash; the title shows the file name; an unsaved dot; undo and redo named for the step. One document per window: New and Open act in the front window after the unsaved-changes prompt |
 | Stage | Draws the scene at the current frame with curves kept as curves; zoom (pinch, menu, fit, 100%); pan (Space-drag, scroll); rulers; guides dragged out of the rulers, moved and removed; Retina-sharp |
-| Tools | Select (V): click, Shift-click, marquee, move, and the eight scale handles and the rotate zone. Direct Select (A): pick a path's anchors and handles and drag them. Rectangle (R) with corner radius, Ellipse (E), Pen (P): click for corners, drag for smooth points, close on the first point |
+| Tools | Select (V): click, Shift-click, marquee, move, and the eight scale handles and the rotate zone. Direct Select (A): pick a path's points (click, Shift-click, marquee) and drag them and their handles, Option-drag a handle to break it, add, delete and convert points, one undo step per drag. Rectangle (R) with corner radius, Ellipse (E), Pen (P), the suite's shared Pen: click for corners, drag for smooth points, close on the first point |
 | Edit | Delete, Cut, Copy, Paste, Duplicate of layers (Paste lands above the selection, offset by 10 pt), Select All, Deselect, Bring Forward, Send Backward |
-| Inspector | File-name title, info card, TRANSFORM (X, Y, scale X and Y, rotation, opacity) as bar sliders with keyframe buttons, FILL (solid editing; a gradient shows as a read-only gradient swatch), STROKE (color, width, cap, join), INSTANCE (symbol, loop mode, first frame) for an instance, SCENE when nothing is selected. A multi-selection shows "Mixed" for values that differ |
+| Inspector | File-name title, info card, TRANSFORM (X, Y, scale X and Y, rotation, opacity) as bar sliders with keyframe buttons, FILL (a Solid / Linear / Radial switch, solid editing, and the shared gradient editor for a gradient's stops, colours and angle, each edit one fill command and one undo step), STROKE (color, width, cap, join), INSTANCE (symbol, loop mode, first frame) for an instance, SCENE when nothing is selected. A multi-selection shows "Mixed" for values that differ |
 | Timeline | One lane per layer, key diamonds, playhead with a time pill, scrub, retime keys by drag, delete keys, insert and remove frames, frame labels, timecode and frame readout |
 | Animate | Auto-key (record) mode, keyframe buttons per property, motion tweens with easing presets and a custom cubic-bezier curve editor, hold keys |
 | Onion skin | Before and after ghosts with tints, counts and falloff; the motion path as a dotted line with frame ticks |
@@ -146,8 +146,8 @@ variable-width brush; frame-by-frame polish (blank keyframes, exposure
 holds); copy and paste of frames (G47); fps conversion (G53); asset import
 (G51); layer parenting; group and ungroup inside a layer (in v1, a symbol is
 the group); snapping to guides, edges and the pixel grid; an align and
-distribute panel; play range (in and out points); gradient editing with
-stops and on-canvas handles; dashed strokes; blend modes; state machine
+distribute panel; play range (in and out points); on-canvas gradient
+handles (stops, colours and angle are edited in FILL in v1); dashed strokes; blend modes; state machine
 listeners, blend states and runtime export; dragging machine nodes to
 positions you choose; play across scenes; swap symbol; renaming swatches; a
 version browser; the shared suite library.
@@ -316,7 +316,8 @@ belong to layers. So:
   shared box.
 - Direct Select (A) selects items and anchors inside a layer. Dragging an
   item moves its geometry (`TranslateShape`, not animatable); dragging an
-  anchor or handle edits the path (`SetShapePath`). Fill and Stroke act on
+  anchor or handle edits the path (`SetShapePath`, through the suite kernel's
+  `path.*` commands, shared by every app with a Pen). Fill and Stroke act on
   the selected items.
 - To animate one part separately, it goes on its own layer or into a symbol.
   The `character` fixture has each part on its own layer for this reason.
@@ -530,7 +531,7 @@ window, because a second window could not share the window's one model.
 | Screen | Opened from | Contents |
 |---|---|---|
 | New Animation sheet | File > New ⌘N, empty state | Presets grid (1080p 16:9, Square 1080, Vertical 9:16, Web 550x400, Custom), width, height, fps (12, 24, 25, 30, 60), duration, background; Create (primary) |
-| Export sheet | File > Export… ⇧⌘E, top bar Export | Format tabs (SVG frame, Lottie, PNG sequence); options (frame or range, step, scale 1x or 2x, transparent background); warnings list (warning color, triangle); progress with Cancel; "Replace existing files?" confirm when the folder already holds them; on success a success row with Reveal in Finder; on failure an error row with the reason and Try Again |
+| Export sheet | File > Export… ⇧⌘E, top bar Export | Format tabs (SVG frame, Lottie, PNG sequence); options (frame or range, step, scale 1x or 2x, transparent background); warnings list (warning color, triangle); progress with Cancel; never overwrites: when the folder already holds a file the run refuses with "<name> is already in <folder>. Choose another folder." and Try Again, leaving that file untouched; on success a success row with Reveal in Finder; on failure an error row with the reason and Try Again |
 | Easing popover | Timeline segment, inspector TIMING row | Presets grid (Linear, Ease, Ease In, Ease Out, Ease In Out, Hold), the curve editor with two handles and a playing dot, four numbers |
 | Onion skin popover | Timeline chip, View menu | On, before count, after count, falloff, tint chips before and after |
 | Assist popover | Top bar Animate…, Animate menu | Prompt field, Generate, progress, proposal list (each command as a row in the AI color), Preview, Accept (one undo), Reject. Errors in place: "Assist didn't answer in 20 s. Try again.", "Assist had no suggestion for this.", the provider's message on failure, and the reason when a proposal is refused (unknown command, or text) |
@@ -549,7 +550,7 @@ damaged: <detail>." (`invalid`). The document that was open stays open.
 Every item works or is disabled with a reason, never hidden.
 
 - **Flare**: About, Hide, Quit (no Settings window in v1).
-- **File**: New ⌘N, Open… ⌘O, Open Recent, Open Sample (Bounce, Character, Button), Save ⌘S, Save As… ⇧⌘S, Export… ⇧⌘E, Close ⌘W.
+- **File**: New ⌘N, Open… ⌘O, Open Recent, Open In, Open Sample (Bounce, Character, Button), Save ⌘S, Save As… ⇧⌘S, Export… ⇧⌘E, Close ⌘W.
 - **Edit**: Undo <step> ⌘Z, Redo <step> ⇧⌘Z, Cut ⌘X, Copy ⌘C, Paste ⌘V, Duplicate ⌘D, Delete ⌫, Select All ⌘A, Deselect ⇧⌘A.
 - **View**: Zoom In ⌘+, Zoom Out ⌘−, Fit ⌘0, Actual Size ⌘1, Onion Skin ⌥⌘O, Motion Path, Show Rulers ⌘R, Show Guides ⌘;, Clear Guides.
 - **Object**: Convert to Symbol ⌥⌘K, Edit Symbol (Return on an instance), Exit Symbol (Escape); Bring Forward ⌘], Send Backward ⌘[.
@@ -622,7 +623,7 @@ State changes are awaited with `waitForExistence` or a value predicate
 | J20 | `testTransitionsInputsAndRefusals` (`+Transitions`, F13b) | button with states | add bool input hover (default false); set its default true, then false; wire idle → hover on trigger "pointer" with hover == true; change the condition to hover == false, then back; remove state hover; add a number input "speed"; remove it; wire hover → pressed on trigger "click" | input row default reads true then false; arrow idle → hover with chip "hover == true"; removing hover is refused inline: "hover is used by the transition idle → hover"; the graph is unchanged; speed row appears then goes; issues list empty |
 | J21 | `testMachinePreview` (`+Preview`, F14) | button with machine | Preview on; toggle hover on; toggle hover off | active state value "idle", then "hover", then "idle"; the probe reports the state switch on the next frame tick |
 | J22 | `testExportSVGLottieAndPNGSequence` (`+Export`, F15a) | showcase | ⇧⌘E SVG; Lottie; PNG 0–12 step 2 to `-FlareExportTo` | files exist; SVG starts `<svg`; Lottie parses with `fr` 24; 7 PNGs with the PNG header; the warnings list shows "Text isn't exported yet (1 layer).", "Symbol animation exports as its first frame (1 instance)." and "Interactions aren't exported (1 machine).", plus "Background color isn't part of Lottie." for Lottie (each ends with a period, as `ExportResult.warnings` documents) |
-| J23 | `testExportFailuresCancelAndReplace` (`+ExportErrors`, F15b) | bounce | export PNG to the same folder twice; Replace; export to a read-only folder; start a 2x PNG export of 0–47 and Cancel | "Replace existing files?" shown, then success; error row with the reason and Try Again; after Cancel no PNG is left in the folder |
+| J23 | `testExportNeverOverwritesCancelAndFailure`, live steps 1–3 in `testExportNeverOverwritesAndFailsLive` (`+ExportErrors`, F15b) | bounce | export SVG to the same folder twice; Try Again; export to a read-only folder; start a 2x PNG export of 0–47 and Cancel | "scene-1.svg is already in <folder>. Choose another folder." with Try Again, the first file unchanged; "Flare can't write to <folder>." with Try Again; after Cancel no PNG is left in the folder |
 | J24 | `testAssistProposalAcceptAndReject` (`+Assist`, F16a) | bounce | ⌥⌘A; "pop in and settle"; Generate; Preview; Reject; Generate; Accept | progress, then proposal rows in the AI color; suggested diamonds during preview; after Reject the Edit menu's Undo title is unchanged; after Accept it reads "Undo Assist" and one ⌘Z removes every proposed key |
 | J25 | `testAssistFailures` (`+AssistErrors`, F16b) | bounce with `-FlareAssistMode fail`, `timeout`, `empty`, `text` | Generate in each launch | the matching message from section 3.3; Accept disabled; the document unchanged |
 | J26 | `testDrawKeyAndSave` (`+Files`, F17a) | empty | ⌘N; draw a rectangle; key X at 0 and 24; play; ⌘Z; ⇧⌘Z; ⌘S to `-FlareSaveTo`; File > Open Recent; open it | title shows the file name and no dot; Open Recent lists it; the reopened file shows keys at 0 and 24 |
@@ -663,7 +664,7 @@ never cited. QB ids are in `docs/review-rubric.md` section 6.
 |---|---|---|---|---|---|
 | New from preset | New sheet | J2 | `Document`, `Scene` init | exists | QB-F1 |
 | Open, save, title, dirty | File menu, top bar | J26 | `FlareFormat.decode/encode` | exists | QB-F1, byte round trip (LM-1) |
-| Open Recent | File menu | J26 | none (app list) | n/a | QB-F1 |
+| Open Recent, Open In, drop | File menu, stage | J26, FLJ1 | none (the suite's recents and hand-offs) | n/a | QB-F1 |
 | Open errors (not Flare, damaged, newer version, too large) | Alert | J27 | `FormatError` cases | exists | message per case (LM-1 test) |
 | Open a large file off the main thread | Stage progress | P7 | `FlareFormat.decode` | exists | QB-L9, QB-L12 |
 | Save failure | Top bar, alert | J28 | none (file write) | n/a | QB-F2 |
@@ -681,7 +682,7 @@ never cited. QB ids are in `docs/review-rubric.md` section 6.
 | Rectangle, ellipse | Rail, stage | J3 | `AddLayer`, `AddShape`; `Path` builders | partial (LC-4, creative-core#182 open) | QB-L1, QB-V1 |
 | Pen corners | Rail, stage | J3 | `Path` elements, `AddShape` | exists | QB-L1, QB-V1 |
 | Pen smooth points (drag) | Rail, stage | J3 | cubic `PathElement` | exists | QB-V1 (G1 continuity, LM-3) |
-| Direct select: anchors and handles | Rail, stage | J4 | `SetShapePath`, `TranslateShape` | partial (LC-7) | QB-L1 |
+| Direct select: points and handles (drag, break a handle, marquee, add, delete, convert) | Rail, stage | J4, FJ-P1 | `SetShapePath` through the suite kernel's `path.*` commands, `TranslateShape` | exists | QB-L1, RJ-F27 |
 | Delete item | Edit menu, stage menu | J15 | `RemoveLayer`, `RemoveShape` | exists | QB-F3 |
 | Cut, copy, paste, duplicate | Edit menu | J15 | `CommandRegistry` envelopes; `DuplicateLayer` | partial (LC-7) | QB-F3 |
 | Move and key by drag | Stage | J6 | `SetKeyframe`, `group` | exists for scene layers | QB-L1, QB-F3 |

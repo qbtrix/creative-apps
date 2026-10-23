@@ -1,0 +1,114 @@
+[
+  {
+    "label": "the selection pill shows with nothing selected (0 selected)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "let chosen = selection.isEmpty ? [] : [picked]",
+    "replace": "let chosen = [picked]",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the grid's count reads the whole catalog, not the shown collection",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "size: Self.photoCountText(order.count)",
+    "replace": "size: Self.photoCountText(items.count)",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the grid shows the fit scale as a zoom pill (#3129)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "zoom ?? (fits ? fitScale : nil)",
+    "replace": "zoom ?? fitScale",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the loupe at Fit reads 100% (#3135)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "zoom ?? (fits ? fitScale : nil)",
+    "replace": "zoom ?? (fits ? 1 : nil)",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the cell-size pill reads a bare \"160 pt\" (#3130)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "text: \"Thumbnails \\(cellSize) pt\"",
+    "replace": "text: \"\\(cellSize) pt\"",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the cell-size help doesn't say where to change it (#3130)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "\"Thumbnail width; change it with View > Larger Thumbnails or View > Smaller Thumbnails.\"",
+    "replace": "\"The thumbnails' width.\"",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the loupe at Fit shows no zoom (#3133)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "fits: zoom == nil, size: size",
+    "replace": "fits: false, size: size",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "a failed save draws as a warning, not an error (#3132)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "text: \"Not saved\", help: saveError, style: .error",
+    "replace": "text: \"Not saved\", help: saveError, style: .warning",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "a failed render draws as a warning, not an error (#3132)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "text: \"Render failed\", help: loupeError, style: .error",
+    "replace": "text: \"Render failed\", help: loupeError, style: .warning",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the selection pill draws flat (#3136)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "help: \"Photos selected in the grid.\", style: .selected",
+    "replace": "help: \"Photos selected in the grid.\", style: .plain",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "a full render still shows the Preview pill",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "} else if loupeRender?.quality == .preview {",
+    "replace": "} else if loupeRender != nil {",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "an empty live catalog shows a status row",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "return services.isPreview ? empty : nil",
+    "replace": "return empty",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the header ignores the local offset (Captured stays in UTC)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "let local = Int(seconds) + utcOffset",
+    "replace": "let local = Int(seconds)",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the civil conversion's month is one short",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "let month = mp < 10 ? mp + 3 : mp - 9",
+    "replace": "let month = mp < 10 ? mp + 2 : mp - 9",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "truncating division puts a pre-1970 time on the wrong day",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "let days = floorDiv(local, 86_400)",
+    "replace": "let days = local / 86_400",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the capture span runs from the latest day to the earliest",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "let (low, high) = (dates.min() ?? first.captureDate, dates.max() ?? first.captureDate)",
+    "replace": "let (low, high) = (dates.max() ?? first.captureDate, dates.min() ?? first.captureDate)",
+    "tests": "LibraryStatusTextTests.swift"
+  }
+]

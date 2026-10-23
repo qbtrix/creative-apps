@@ -1,0 +1,23 @@
+[
+  {
+    "label": "endRunDropped: Halo's endCoalescing clears its own key but never ends the kernel's run, so the next scrub folds into the old step",
+    "file": "Sources/HaloModel/HaloHistory+Kernel.swift",
+    "find": "        kernel.endRun()\n        runKey = nil",
+    "replace": "        runKey = nil",
+    "tests": "HaloModelTests\\.(fakeHistoryCoalescesEndsAndClearsRedo|threeCoalescedRecordsAreOneStepKeepingTheFirstBefore)"
+  },
+  {
+    "label": "refusalAsSuccess: the kernel's refused undo or redo is taken as a step to the current document",
+    "file": "Sources/HaloModel/HaloHistory+Kernel.swift",
+    "find": "return moved ? target : nil",
+    "replace": "return target ?? current",
+    "tests": "HaloModelTests\\.undoAndRedoWalkTheSteps"
+  },
+  {
+    "label": "redoKeepsThePast: undo hands the kernel the state it goes back to instead of the current one, so redo goes nowhere",
+    "file": "Sources/HaloModel/HaloHistory+Kernel.swift",
+    "find": "? kernel.undo { target = $0; return current }",
+    "replace": "? kernel.undo { target = $0; return $0 }",
+    "tests": "HaloModelTests\\.undoAndRedoWalkTheSteps"
+  }
+]

@@ -2,8 +2,8 @@
   "title": "Export an SVG frame, a Lottie or a PNG sequence on the kernel's export run, never overwriting, with an exact round trip",
   "wave": 5,
   "order": 10,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1973",
   "beta": true,
   "covers": "#354, #355, #374; LA-1 (StageRasterizer); #366 (the SVG Design's import reads)",
   "waits_on": "`draw-key-save`; cross-line: FX-2 on editor-kernel:EK-a, FX-4 on editor-kernel:EK-run, FX-3 on editor-kernel:EK-chrome (in `waits_cross_line`); in the app, FX-5 on `inspector-timeline`",
@@ -64,7 +64,8 @@
   ],
   "journeys": [
     "FlareExportJourneys.testExportSVGLottieAndPNGSequence",
-    "FlareExportErrorJourneys.testExportNeverOverwritesCancelAndFailure"
+    "FlareExportErrorJourneys.testExportNeverOverwritesCancelAndFailure",
+    "FlareExportErrorJourneys.testExportNeverOverwritesAndFailsLive"
   ],
   "slices": [
     {

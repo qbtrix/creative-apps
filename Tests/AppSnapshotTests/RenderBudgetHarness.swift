@@ -5,7 +5,9 @@
 // off every screen: never shown, but it gets AppKit's display cycle and mouse
 // events. Accessibility is turned on first, so elements are found by
 // identifier and every run builds the same tree (the cost an accessibility
-// client adds is part of what it measures).
+// client adds is part of what it measures). The search walks each element's
+// accessibility children and then a view's subviews, since a List's rows
+// hide what they hold from a test process's accessibility walk.
 //
 // It drives scripted steps, each paced at 120 Hz and timed on its own clock as
 // the event's work plus the layout and display it forced: a mouse drag of N
@@ -21,7 +23,14 @@
 // is a window-activation click, which a SwiftUI gesture ignores unless it opts
 // in (`allowsWindowActivationEvents`); SwiftUI's own canvases and AppKit
 // controls take them, inspector scrub rows and Halo's viewer don't yet. Keys
-// need a key window, which it can't have either. macOS only.
+// need a key window, which it can't have either. A `keyCapable` window refuses
+// key while each scripted mouse event goes through, or AppKit would eat every
+// press as the click that makes it key, which it never becomes (so a click
+// could never focus a panel in another hosting view, such as an inspector's).
+// Nor can it run a system
+// drag: a real session waits for a window-server mouse-up forever (#2971), so
+// once a harness window opens, DragSessions hands every `.draggable` drag an
+// idle session that never starts. macOS only.
 import AppKit
 import SwiftUI
 import Testing
@@ -49,6 +58,14 @@ struct RenderStep: CustomStringConvertible {
     }
 }
 
+/// The harness's borderless window, allowed to be key so a test's key presses reach it. It refuses key while a
+/// scripted mouse event goes through, so AppKit delivers that event as it does to a plain window instead of
+/// eating it as an activation click for a window the inactive test process never makes key.
+private final class KeyCapableWindow: NSWindow {
+    var sendingMouse = false
+    override var canBecomeKey: Bool { !sendingMouse }
+}
+
 /// An app's real window hosted off screen, driven by scripted events.
 @MainActor final class RenderBudgetWindow<Content: View> {
     let host: CountingHostingView<Content>
@@ -56,7 +73,12 @@ struct RenderStep: CustomStringConvertible {
     /// Wall milliseconds of each step in the interaction being measured.
     private var stepTimes: [Double] = []
 
-    init(_ view: Content, size: CGSize = CGSize(width: 1280, height: 820)) {
+    /// `keyCapable` builds a window that may become key, for a test that sends keys. Never isa-swizzle the window
+    /// instead: it is KVO-observed from the start, and a swapped class makes its dealloc throw (NSRangeException
+    /// on "_windowLayerContext") in whichever test is running when it is freed.
+    init(_ view: Content, size: CGSize = CGSize(width: 1280, height: 820), keyCapable: Bool = false) {
+        _ = DragSessions.faked
+        _ = TestDefaults.registered
         // The accessibility tree, which `element` and `label` read, is built only for a client that asks;
         // turned on before the window exists so every run builds it the same way.
         for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
@@ -65,7 +87,8 @@ struct RenderStep: CustomStringConvertible {
         host = CountingHostingView(rootView: view)
         let frame = CGRect(origin: .zero, size: size)
         host.frame = frame
-        window = NSWindow(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
+        let kind = keyCapable ? KeyCapableWindow.self : NSWindow.self
+        window = kind.init(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         window.contentView = host
         window.setFrameOrigin(NSPoint(x: -20_000, y: -20_000))
@@ -156,12 +179,11 @@ struct RenderStep: CustomStringConvertible {
         return (before, clip.bounds.origin.y)
     }
 
-    /// Runs the accessibility action called `name` on the element called `identifier` (a custom action
-    /// such as a grid cell's "Open"); false when there is no such element or action.
+    /// Runs the accessibility action called `name` on the element called `identifier`, or on the first
+    /// element inside it that has it (a custom action such as a grid cell's "Open"); false when there is
+    /// no such element or action.
     @discardableResult func perform(_ name: String, on identifier: String) -> Bool {
-        guard let node = Self.node(identifier, in: host),
-            let action = ((node.accessibilityCustomActions?() ?? nil) ?? []).first(where: { $0.name == name })
-        else { return false }
+        guard let node = Self.node(identifier, in: host), let action = Self.action(name, in: node) else { return false }
         if let handler = action.handler { return handler() }
         guard let target = action.target as? NSObject, let selector = action.selector else { return false }
         target.perform(selector, with: action)
@@ -185,6 +207,9 @@ struct RenderStep: CustomStringConvertible {
             with: kind, location: point, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
             windowNumber: window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)
         else { Issue.record("no \(kind) event"); return }
+        let keyCapable = window as? KeyCapableWindow
+        keyCapable?.sendingMouse = true
+        defer { keyCapable?.sendingMouse = false }
         window.sendEvent(event)
     }
 
@@ -207,12 +232,38 @@ struct RenderStep: CustomStringConvertible {
     /// The window-coordinate frame of the accessibility element called `identifier`, waiting up to two seconds.
     func element(_ identifier: String) async -> CGRect? {
         for _ in 0..<100 {
-            if let screen = Self.frame(of: identifier, in: host) {
-                return window.convertFromScreen(screen)
-            }
+            if let frame = elementNow(identifier) { return frame }
             try? await Task.sleep(for: .milliseconds(20))
         }
         return nil
+    }
+
+    /// The window-coordinate frame of the accessibility element called `identifier` now; nil, without
+    /// waiting, when there is none (a lazy list's row it never laid out).
+    func elementNow(_ identifier: String) -> CGRect? {
+        Self.frame(of: identifier, in: host).map { window.convertFromScreen($0) }
+    }
+
+    /// The window frame of the first element with `role` inside the element called `identifier` (a
+    /// row's title text, which has no identifier of its own); nil when there is none.
+    func element(_ role: NSAccessibility.Role, in identifier: String) -> CGRect? {
+        func find(_ element: Any, _ depth: Int) -> AnyObject? {
+            let node = element as AnyObject
+            if depth > 0, (node.accessibilityRole?() ?? nil) == role { return node }
+            guard depth < 8 else { return nil }
+            for child in Self.children(of: node) {
+                if let found = find(child, depth + 1) { return found }
+            }
+            return nil
+        }
+        guard let row = Self.node(identifier, in: host), let screen = find(row, 0)?.accessibilityFrame?() else { return nil }
+        return window.convertFromScreen(screen)
+    }
+
+    /// The accessibility label of the element called `identifier`, the field a journey reads a probe by
+    /// (XCUITest reads SwiftUI values as empty, #262); nil when there is no such element.
+    func label(_ identifier: String) -> String? {
+        Self.node(identifier, in: host)?.accessibilityLabel?() ?? nil
     }
 
     /// The window point of `point` on an artboard `size` big drawn in `box` (window coordinates, so y up),
@@ -224,11 +275,13 @@ struct RenderStep: CustomStringConvertible {
     /// Every accessibility identifier in the window now, in tree order (for writing a scenario).
     func identifiers() -> [String] {
         var ids: [String] = []
+        var seen = Set<ObjectIdentifier>()
         func walk(_ element: Any, _ depth: Int) {
             let node = element as AnyObject
+            guard seen.insert(ObjectIdentifier(node)).inserted else { return }
             if let id = node.accessibilityIdentifier?() ?? nil, !id.isEmpty { ids.append(id) }
             guard depth < 60 else { return }
-            for child in (node.accessibilityChildren?() ?? nil) ?? [] { walk(child, depth + 1) }
+            for child in Self.children(of: node) { walk(child, depth + 1) }
         }
         walk(host, 0)
         return ids
@@ -248,14 +301,37 @@ struct RenderStep: CustomStringConvertible {
 
     /// The first node called `identifier` under `element` in the accessibility tree, in tree order.
     /// SwiftUI's nodes answer the NSAccessibility methods informally, so they are read as AnyObject.
-    private static func node(_ identifier: String, in element: Any, depth: Int = 0) -> AnyObject? {
-        let node = element as AnyObject
-        if (node.accessibilityIdentifier?() ?? nil) == identifier { return node }
-        guard depth < 60 else { return nil }
-        for child in (node.accessibilityChildren?() ?? nil) ?? [] {
-            if let found = Self.node(identifier, in: child, depth: depth + 1) { return found }
+    private static func node(_ identifier: String, in element: Any) -> AnyObject? {
+        var seen = Set<ObjectIdentifier>()
+        func find(_ element: Any, _ depth: Int) -> AnyObject? {
+            let node = element as AnyObject
+            guard seen.insert(ObjectIdentifier(node)).inserted else { return nil }
+            if (node.accessibilityIdentifier?() ?? nil) == identifier { return node }
+            guard depth < 60 else { return nil }
+            for child in children(of: node) {
+                if let found = find(child, depth + 1) { return found }
+            }
+            return nil
+        }
+        return find(element, 0)
+    }
+
+    /// The custom action called `name` on `node`, else on the first element inside it that has it: a
+    /// row made a container (`accessibilityElement(children: .contain)`) hands its actions to its children.
+    private static func action(_ name: String, in node: AnyObject, depth: Int = 0) -> NSAccessibilityCustomAction? {
+        if let own = ((node.accessibilityCustomActions?() ?? nil) ?? []).first(where: { $0.name == name }) { return own }
+        guard depth < 8 else { return nil }
+        for child in children(of: node) {
+            if let found = action(name, in: child as AnyObject, depth: depth + 1) { return found }
         }
         return nil
+    }
+
+    /// An element's accessibility children, then, for a view, its subviews. A List's outline rows
+    /// report no children to a test process (#3259, #3260), so what a row holds is reached through
+    /// the row's views instead; a node met both ways is walked once.
+    private static func children(of node: AnyObject) -> [Any] {
+        ((node.accessibilityChildren?() ?? nil) ?? []) + ((node as? NSView)?.subviews ?? [])
     }
 
     /// The split views SwiftUI's columns use, outermost first: the sidebar's, then the inspector's.
@@ -320,5 +396,38 @@ final class CountingHostingView<Content: View>: NSHostingView<Content> {
         let began = clock.now
         super.layout()
         layoutTime += Double((clock.now - began) / .microseconds(1)) / 1000
+    }
+}
+
+/// The harness never starts a system drag. A drag over a `.draggable` view makes SwiftUI call
+/// `NSView.beginDraggingSession`, whose real session starts on the next run-loop turn and then blocks the main
+/// thread until a mouse-up comes from the window server, which a test process never gets: it froze the next test
+/// that turned the run loop, past every time limit (#2971). And ending one with a posted mouse-up left the test
+/// process's main run loop to return, so it exited 0 mid-run. So, once the first harness window opens, the method
+/// is swapped for one that counts the call in `begun` and hands back an idle session that never starts. A step's
+/// cost is measured up to the drag's start; whether a drop lands is a journey's to prove.
+@MainActor enum DragSessions {
+    static var begun = 0
+    static let faked: Void = {
+        let begin = #selector(NSView.beginDraggingSession(with:event:source:))
+        let fake = #selector(NSView.harnessBeginDraggingSession(with:event:source:))
+        guard let original = class_getInstanceMethod(NSView.self, begin),
+            let replacement = class_getInstanceMethod(NSView.self, fake)
+        else {
+            Issue.record("NSView has no beginDraggingSession to replace")
+            return
+        }
+        method_exchangeImplementations(original, replacement)
+    }()
+}
+
+extension NSView {
+    /// Swapped in for `beginDraggingSession(with:event:source:)` by `DragSessions.faked`: counts the call and
+    /// returns a session that was never begun.
+    @objc fileprivate func harnessBeginDraggingSession(
+        with items: [NSDraggingItem], event: NSEvent, source: any NSDraggingSource
+    ) -> NSDraggingSession {
+        DragSessions.begun += 1
+        return NSDraggingSession()
     }
 }

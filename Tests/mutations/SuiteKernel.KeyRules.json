@@ -1,0 +1,30 @@
+[
+  {
+    "label": "moveClampsPerKey: moveKeys clamps each key into the range instead of refusing the whole move",
+    "file": "Sources/SuiteKernel/Keys/KeyRules.swift",
+    "find": "                guard range.contains(to) else { throw .pastRange(frame: to) }\n",
+    "replace": "",
+    "tests": "KeyRulesTests"
+  },
+  {
+    "label": "staticLeavesOne: removeKeys with propertyGoesStatic keeps a single remaining key",
+    "file": "Sources/SuiteKernel/Keys/KeyRules.swift",
+    "find": "if leaving == .propertyGoesStatic, track.count < 2 { track = [] }",
+    "replace": "if leaving == .propertyGoesStatic, track.count < 1 { track = [] }",
+    "tests": "KeyRulesTests"
+  },
+  {
+    "label": "insertShiftsKeyAtFrame: insertFrames moves the key at the frame too (>= instead of >)",
+    "file": "Sources/SuiteKernel/Keys/KeyRules.swift",
+    "find": "for i in track.indices where track[i].frame > frame {",
+    "replace": "for i in track.indices where track[i].frame >= frame {",
+    "tests": "KeyRulesTests"
+  },
+  {
+    "label": "oneKeyAnimated: state names a one-key track animated",
+    "file": "Sources/SuiteKernel/Keys/KeyRules.swift",
+    "find": "guard track.count >= 2 else { return .notAnimated }",
+    "replace": "guard track.count >= 1 else { return .notAnimated }",
+    "tests": "KeyRulesTests"
+  }
+]

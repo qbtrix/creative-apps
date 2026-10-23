@@ -5,8 +5,8 @@
 // the workspace as `.drag` with the modifier keys held, and the release as
 // `.endDrag`; the workspace decides what a press hits and which tool acts. The
 // pointer and the pointer handler come from DesignCanvasFeedback. The overlay
-// (not clipped to the page) is, bottom to top: the frame names
-// (DesignFrameLabels), the selection's marks (DesignSelectionMarks), the marquee
+// (not clipped to the page) is, bottom to top: the layers past the page's edge,
+// dimmed (DesignPastEdge), the frame names (DesignFrameLabels), the selection's marks (DesignSelectionMarks), the marquee
 // under way (DesignMarqueeMark), DesignTextOverlay, the inline text editor, and
 // DesignCanvasFeedback's marks. `show` is the rect View > Zoom to Selection asks
 // for, kept until CanvasViewport can scroll to a rect. Keys reach the
@@ -52,15 +52,17 @@ struct DesignCanvas: View {
     /// `page` of `shown`, the live copy while a drag or scrub lasts and `model` otherwise.
     private func canvas(_ page: DesignPage, shown: DesignWorkspace) -> some View {
         let painted = page.painted
-        let feedback = DesignCanvasFeedback(model: shown, zoom: zoom)
+        let feedback = DesignCanvasFeedback(model: shown, zoom: zoom, perform: perform)
         return CanvasViewport(
             documentSize: CGSize(width: page.frameWidth, height: page.frameHeight), zoom: zoom,
             pointer: feedback.pointer, unit: "pt", onSize: onViewport, onZoom: onZoom,
-            onDrag: { perform(.drag($0, $1, .current)) }, onDragEnd: { perform(.endDrag) },
+            // The Eyedropper picks through DesignSampleLoupe's tap alone, so a click picks once, not twice.
+            onDrag: model.tool == .eyedropper ? nil : { perform(.drag($0, $1, .current)) }, onDragEnd: { perform(.endDrag) },
             onKey: model.editingTextID == nil ? { key($0) } : nil, onPointer: feedback.onPointer
         ) {
             DesignArtwork(painted: painted, zoom: zoom, editingTextID: model.editingTextID)
         } overlay: {
+            DesignPastEdge(page: page, painted: painted, zoom: zoom, editingTextID: model.editingTextID)
             DesignFrameLabels(painted: painted, zoom: zoom)
             DesignSelectionMarks(model: shown, painted: painted, zoom: zoom)
             if let marquee = shown.marquee { DesignMarqueeMark(rect: marquee, zoom: zoom) }
@@ -72,29 +74,60 @@ struct DesignCanvas: View {
         .suiteControl(id: DesignControlID.canvas, enabled: true, reason: nil, identifies: false)
     }
 
-    /// Arrows nudge the selection (Shift: ten points), Delete removes it, Escape deselects, Return
-    /// edits a selected text node, and a tool's letter picks that tool. Anything else is left to the system.
+    /// The Model decides the arrows, Delete, Escape and Return (canvasKeyAction: every selected
+    /// layer nudges or deletes); a tool's letter picks that tool. Anything else is left to the system.
     private func key(_ press: KeyPress) -> KeyPress.Result {
-        guard press.modifiers.subtracting(.shift).isEmpty else { return .ignored }
-        let shift = press.modifiers.contains(.shift)
-        let selection = model.selectedNode
-        switch press.key {
-        case .upArrow where selection != nil: perform(.nudge(.up, shift: shift))
-        case .downArrow where selection != nil: perform(.nudge(.down, shift: shift))
-        case .leftArrow where selection != nil: perform(.nudge(.left, shift: shift))
-        case .rightArrow where selection != nil: perform(.nudge(.right, shift: shift))
-        case .delete where selection != nil, .deleteForward where selection != nil: perform(.deleteSelection)
-        case .escape: perform(.deselect)
-        case .return:
-            guard let selection, selection.kind == .text else { return .ignored }
-            perform(.editText(selection.id))
-        default:
-            // The rail shows Pen disabled; its letter must not pick it either.
-            let typed = press.characters.lowercased()
-            guard let tool = DesignTool.allCases.first(where: { $0.isEnabled && $0.shortcut.map(String.init) == typed })
-            else { return .ignored }
-            perform(.tool(tool))
+        let modifiers = DesignKeyModifiers(press.modifiers)
+        guard modifiers.reachesCanvas else { return .ignored }
+        if let key = DesignCanvasKey(press.key) {
+            switch model.canvasKeyAction(key, modifiers: modifiers) {
+            case .nudge(let direction, let shift)?: perform(.nudge(direction, shift: shift))
+            case .deleteSelection?: perform(.deleteSelection)
+            case .deselect?: perform(.deselect)
+            case .editText(let id)?: perform(.editText(id))
+            case nil: return .ignored
+            }
+            return .handled
         }
+        // The rail shows Pen disabled; its letter must not pick it either.
+        guard let tool = DesignTool.picked(byTyped: press.characters) else { return .ignored }
+        perform(.tool(tool))
         return .handled
+    }
+}
+
+extension DesignTool {
+    /// The tool `characters` pick through SuiteUI's ToolKeys: one letter, either case, of a tool the palette shows
+    /// enabled; nil for any other text (AC-tools).
+    static func picked(byTyped characters: String) -> DesignTool? {
+        guard characters.count == 1, let key = characters.first else { return nil }
+        return ToolKeys.tool(forKey: key, in: allCases)
+    }
+}
+
+extension DesignCanvasKey {
+    /// The canvas key `key` is, or nil for any other key.
+    init?(_ key: KeyEquivalent) {
+        switch key {
+        case .upArrow: self = .arrow(.up)
+        case .downArrow: self = .arrow(.down)
+        case .leftArrow: self = .arrow(.left)
+        case .rightArrow: self = .arrow(.right)
+        case .delete, .deleteForward: self = .delete
+        case .escape: self = .escape
+        case .return: self = .enter
+        default: return nil
+        }
+    }
+}
+
+extension DesignKeyModifiers {
+    /// Every flag of `modifiers`: an arrow press carries `.numericPad`, which the Model ignores.
+    init(_ modifiers: EventModifiers) {
+        let pairs: [(EventModifiers, DesignKeyModifiers)] = [
+            (.shift, .shift), (.command, .command), (.option, .option), (.control, .control),
+            (.numericPad, .numericPad), (.capsLock, .capsLock),
+        ]
+        self = pairs.reduce(into: []) { held, pair in if modifiers.contains(pair.0) { held.insert(pair.1) } }
     }
 }

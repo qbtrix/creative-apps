@@ -44,8 +44,8 @@ Linux gate).
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| S2-a | A file with a path, a component and a bound variable saves as version 2 and reopens, version 1 still opens, a newer version is refused, and undo restores the library. | D2-1a, D2-1b, D2-2 | MJ6 | design-contracts (the feature); style-rows SR-m, SR-b (D2-1a); files-history FH-a, layers-panel LP-b (D2-1b) |
-| S2-b | Export, Create Component, Variables and Light or Dark preview sit in the menus, each saying it isn't built yet, while the Model drafts pen paths, components and variables on the fakes. | D2-3a, D2-3b, D2-4a, D2-4b | J1, MJ7 | S2-a (D2-3a, D2-4a); layers-panel LP-b (D2-3a); design-seams, select-several SS-b (D2-3b); design-window (D2-4a, D2-4b); style-rows SR-b (D2-4a); files-history FH-b (D2-4b); canvas-basics (D2-3b, D2-4a, D2-4b); snapping SN-b (D2-3b), SN-c (D2-4b) |
+| S2-a | A file with a path, a component and a bound variable saves as version 2 and reopens, version 1 still opens, a newer version is refused, and undo restores the library. | D2-1a, D2-1b, D2-2 | MJ6 | design-contracts (the feature); style-rows SR-m, SR-b (D2-1a); files-history FH-a, layers-panel LP-b (D2-1b); gradient-fill and placed-images (D2-1a, which shares `DesignNode.swift` and `DesignCanvasMarks.swift`) |
+| S2-b | Export, Create Component, Variables and Light or Dark preview sit in the menus, each saying it isn't built yet, while the Model drafts pen paths, components and variables on the fakes. | D2-3a, D2-3b, D2-4a, D2-4b | J1, MJ7 | S2-a (D2-3a, D2-4a); layers-panel LP-b (D2-3a); design-seams, select-several SS-b (D2-3b); design-window (D2-4a, D2-4b); style-rows SR-b (D2-4a); files-history FH-b (D2-4b); canvas-basics (D2-3b, D2-4a, D2-4b); snapping SN-b (D2-3b), SN-c (D2-4b); file-flow DF-a (all four, beta first) |
 
 S2-b is the UI slice (`"ui": true` in the `.wave.json`: the feel gate, rule
 15, and the Mac finish, rule 17); S2-a is the contract (schema, tier-2 fakes

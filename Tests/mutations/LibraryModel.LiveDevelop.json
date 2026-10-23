@@ -1,0 +1,44 @@
+[
+  {
+    "label": "the neutral guard is dropped: a zero contrast still runs a contrast pass",
+    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "find": "if s.contrast != 0 { p.append(.contrast(Float(s.contrast))) }",
+    "replace": "p.append(.contrast(Float(s.contrast)))",
+    "tests": "LibraryDevelopRenderTests"
+  },
+  {
+    "label": "contrast runs before exposure",
+    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "find": "        if s.exposure != 0 { p.append(.exposure(Float(s.exposure))) }\n        if s.contrast != 0 { p.append(.contrast(Float(s.contrast))) }",
+    "replace": "        if s.contrast != 0 { p.append(.contrast(Float(s.contrast))) }\n        if s.exposure != 0 { p.append(.exposure(Float(s.exposure))) }",
+    "tests": "LibraryDevelopRenderTests"
+  },
+  {
+    "label": "the histogram counts linear values, not the sRGB values of the buffer it is given",
+    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "find": "let h = try Histogram(of: buffer, bins: HistogramBins.binCount, encoding: .sRGB)",
+    "replace": "let h = try Histogram(of: buffer, bins: HistogramBins.binCount, encoding: .linear)",
+    "tests": "LibraryDevelopRenderTests"
+  },
+  {
+    "label": "Whites raises the white point instead of lowering it",
+    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "find": "let inWhite = s.whites > 0 ? 1 - 0.25 * s.whites / 100 : 1",
+    "replace": "let inWhite = s.whites > 0 ? 1 + 0.25 * s.whites / 100 : 1",
+    "tests": "LibraryDevelopRenderTests"
+  },
+  {
+    "label": "the turn is skipped: a straightened crop cuts the upright pixels",
+    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "find": "let turned = crop.angle == 0 ? b : try b.rotated(degrees: crop.angle, filter: .lanczos3)",
+    "replace": "let turned = true ? b : try b.rotated(degrees: crop.angle, filter: .lanczos3)",
+    "tests": "LibraryCropRenderTests"
+  },
+  {
+    "label": "the frame is taken from the buffer's sides swapped",
+    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "find": "photo: PixelSize(width: buffer.width, height: buffer.height))",
+    "replace": "photo: PixelSize(width: buffer.height, height: buffer.width))",
+    "tests": "LibraryCropRenderTests"
+  }
+]

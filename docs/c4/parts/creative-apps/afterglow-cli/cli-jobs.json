@@ -1,0 +1,10 @@
+{
+  "id": "cli-jobs",
+  "name": "Real-jobs harness",
+  "description": "RealJobs: runs a `Tests/RealJobs/<app>/<job>/` script through the batch runner (ScriptRunner, its report captured) and compares each expected output: sha256 on the whole digest (a pure-Swift SHA-256, FIPS 180-4), JSON parsed and compared equal, or pixels within a tolerance in 255ths. A job whose platforms leave this one out is skipped before it runs with \"macOS-only: <why>\"; a pixel expectation is skipped \"waits on image-codecs\" until creative-core can decode PNG, never passed. Prints one JSON report: ok, or the failing paths and why, or skipped and its reason.",
+  "technology": "Swift 6, Foundation, Linux and macOS",
+  "paths": [
+    "Sources/AfterGlowCLICore/RealJobs.swift"
+  ],
+  "order": 30
+}

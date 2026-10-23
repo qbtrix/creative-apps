@@ -59,7 +59,7 @@ final class PhotoJourneyTests: XCTestCase {
     }
 
     /// The window's five regions once an image is open (the palette shows only
-    /// over one); on `.live` the Eyedropper is disabled.
+    /// over one); on `.live` the Eyedropper is enabled.
     @MainActor func testLaunchShowsWindowShell() {
         let photo = Journey("Photo", self, arguments: photoArguments())
         XCTAssert(photo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
@@ -68,9 +68,9 @@ final class PhotoJourneyTests: XCTestCase {
         photo.expectEditorWindow()
         let eyedropper = photo.element("suite.tools").buttons["Eyedropper"]
         XCTAssert(eyedropper.waitForExistence(timeout: 5), "the palette has no Eyedropper")
-        XCTAssertFalse(eyedropper.isEnabled, "the Eyedropper is enabled on .live, where sampling isn't built")
-        // Its help text is proven by AppSnapshotTests' PhotoEditorSnapshots.paletteEyedropperHelp (PhotoPaletteTool
-        // reports "Not built yet (PV-9)." on .live), since XCUITest doesn't read SwiftUI .help reliably.
+        XCTAssert(eyedropper.isEnabled, "the Eyedropper is disabled on .live, where its sampler is built (PE-5)")
+        // That it has no help is proven by AppSnapshotTests' PhotoEditorSnapshots.paletteEyedropperHelp, since
+        // XCUITest doesn't read SwiftUI .help reliably.
     }
 
     /// The sample opened fitted: the canvas (suite.canvas) is no larger than
@@ -179,6 +179,18 @@ final class PhotoJourneyTests: XCTestCase {
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.2, dy: 0.3), to: CGVector(dx: 0.8, dy: 0.7), step: "painted")
         photo.click("Undo Paint", in: .window, step: "undone")
         XCTAssert(photo.app.buttons["Redo Paint"].waitForExistence(timeout: 5), "Undo didn't undo the stroke")
+
+        // The Preset menu (AB-p2) sets every brush setting at once: Soft Round is 60 px.
+        let preset = photo.element("photo.tool.preset")
+        XCTAssert(preset.waitForExistence(timeout: 5), "the brush's Tool Options show no Preset menu")
+        preset.click()
+        let soft = photo.app.menuItems["Soft Round"]
+        XCTAssert(soft.waitForExistence(timeout: 5), "the Preset menu doesn't list Soft Round")
+        soft.click()
+        let size = photo.element("photo.tool.size")
+        let sixty = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value CONTAINS '60'"), object: size)
+        XCTAssertEqual(XCTWaiter().wait(for: [sixty], timeout: 5), .completed, "Soft Round didn't set the size to 60 px")
+        photo.shot("preset-soft-round")
 
         typeValue("1.5", into: "Exposure", photo)
         expect("Undo Exposure", photo, "typing 1.5 into Exposure made no Exposure step")

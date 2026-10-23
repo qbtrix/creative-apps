@@ -1,0 +1,134 @@
+{
+  "title": "Export a frame as JPEG or PNG at an exact pixel size",
+  "wave": 3,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "design/export-pack (adopter of S11); RJ-D41 (new)",
+  "waits_on": "suiteui export-pack's XP-a (cross-line; DX-3 needs XP-6, DX-5 XP-4); shell-media SM-w for JPEG bytes (cross-line); design-export (the feature: it owns every export file here) and gradient-fill's DG-z (design.md), slice waits",
+  "longest_chain": "5 (DX-1 → DX-2 → DX-6 → DX-7 → DX-8)",
+  "journeys": [
+    "DesignExportPackJourneyTests.testExportPostAtExactSize"
+  ],
+  "owned": [
+    "Sources/DesignModel/DesignExport+Kernel.swift",
+    "Tests/DesignModelTests/DesignExportPackTests.swift",
+    "Sources/DesignApp/DesignExport+Kernel.swift",
+    "Tests/mutations/DesignModel.DesignExport+Kernel.json",
+    "Tests/RealJobs/design/exact-jpeg/",
+    "Sources/DesignApp/DesignRasterizer.swift",
+    "Tests/AppSnapshotTests/DesignRasterizerSizeTests.swift",
+    "Tests/AppSnapshotTests/DesignExportPackSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetDesignExportPackTests.swift",
+    "UITests/DesignJourneyTests+ExportPack.swift",
+    "docs/blueprints/design.md",
+    "docs/blueprints/design/features/export-pack.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "DX-a",
+      "behavior": "The export options hold an `ExportSize` and list JPEG, the plan takes them on stubs, and the sheet shows the shared Size row and a JPEG chip.",
+      "tasks": [
+        "DX-1",
+        "DX-2"
+      ],
+      "journeys": [
+        "MJ-DX"
+      ],
+      "waits": {
+        "design-export": [
+          "DX-1",
+          "DX-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignModel/DesignExport+Kernel.swift",
+        "Tests/DesignModelTests/DesignExportPackTests.swift",
+        "Sources/DesignApp/DesignExport+Kernel.swift"
+      ]
+    },
+    {
+      "id": "DX-u",
+      "behavior": "The sheet has snapshots and a render budget, and the journey is written.",
+      "tasks": [
+        "DX-5",
+        "DX-6"
+      ],
+      "journeys": [
+        "DJ-X1"
+      ],
+      "waits": {
+        "DX-a": [
+          "DX-5",
+          "DX-6"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/DesignExportPackSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetDesignExportPackTests.swift",
+        "UITests/DesignJourneyTests+ExportPack.swift"
+      ]
+    },
+    {
+      "id": "DX-m",
+      "behavior": "The plan gives each file exact pixels, JPEG flattens onto the frame's fill, and the rasterizer draws at that size.",
+      "tasks": [
+        "DX-3",
+        "DX-4"
+      ],
+      "journeys": [
+        "MJ-DX"
+      ],
+      "waits": {
+        "DX-a": [
+          "DX-3",
+          "DX-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignModel/DesignExport+Kernel.swift",
+        "Tests/DesignModelTests/DesignExportPackTests.swift",
+        "Tests/mutations/DesignModel.DesignExport+Kernel.json",
+        "Tests/RealJobs/design/exact-jpeg/",
+        "Sources/DesignApp/DesignRasterizer.swift",
+        "Tests/AppSnapshotTests/DesignRasterizerSizeTests.swift"
+      ]
+    },
+    {
+      "id": "DX-z",
+      "behavior": "Export writes real JPEG and PNG files at the exact size on live services, the journey passes, and the blueprint has it in.",
+      "tasks": [
+        "DX-7",
+        "DX-8"
+      ],
+      "journeys": [
+        "DJ-X1"
+      ],
+      "waits": {
+        "DX-u": [
+          "DX-7",
+          "DX-8"
+        ],
+        "DX-m": [
+          "DX-7"
+        ],
+        "gradient-fill:DG-z": [
+          "DX-8"
+        ],
+        "placed-images:PD-z": [
+          "DX-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/DesignJourneyTests+ExportPack.swift",
+        "docs/blueprints/design.md",
+        "docs/blueprints/design/features/export-pack.wave.json"
+      ]
+    }
+  ]
+}

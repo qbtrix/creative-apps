@@ -3,8 +3,9 @@
 // share a parent in a new group whose frame is the union of theirs, named
 // "Group N" with the lowest N no layer on the page uses, placed where the
 // topmost member was. Ungroup puts each selected group's children back in its
-// place, in order. Built on the tree helpers the other Live types share
-// (FakeSupport); the layer tree itself is DesignNode's.
+// place, in order. An adapter over SuiteKernel's LayerTree (DesignNode+Kernel):
+// the kernel groups and ungroups; this file checks the shared parent, names the
+// group and gives it the members' union as its frame.
 //
 // Invariants:
 // - Nothing moves: every leaf keeps its frame through Group and Ungroup.
@@ -13,6 +14,8 @@
 // - Ungroup with no group selected throws `.notAGroup(<last selected name>)`.
 // - Each help is nil exactly when its write succeeds (the help law).
 // Linux-safe.
+
+import SuiteKernel
 
 public struct LiveGrouping: LayerGrouping {
     public init() {}
@@ -26,18 +29,17 @@ public struct LiveGrouping: LayerGrouping {
 
     /// One "Group" step: the new group selected, at the topmost member's place, its frame the union.
     public func group(_ ids: [String], on page: DesignPage, mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit {
-        let wanted = Set(ids)
-        guard let box = fakeUnion(fakeFind(Array(wanted), page).map(\.frame)) else { throw .nothingSelected }
-        let parent = try fakeSharedParent(ids.filter { page.nodes.node($0) != nil }, page)
-        var made = DesignNode(id: mint.nextNodeID(), name: "Group \(freeGroupNumber(page.nodes))", kind: .group, frame: box)
-        let nodes = fakeSiblings(parent, page.nodes) { siblings in
-            made.children = siblings.filter { wanted.contains($0.id) }
-            let top = siblings.lastIndex { wanted.contains($0.id) } ?? siblings.count
-            let at = siblings[..<top].filter { !wanted.contains($0.id) }.count  // non-members under the topmost
-            siblings.removeAll { wanted.contains($0.id) }
-            siblings.insert(made, at: at)
+        guard let box = fakeUnion(fakeFind(Array(Set(ids)), page).map(\.frame)) else { throw .nothingSelected }
+        let present = ids.filter { page.nodes.node($0) != nil }
+        _ = try fakeSharedParent(present, page)
+        let made = DesignNode(id: mint.nextNodeID(), name: "Group \(freeGroupNumber(page.nodes))", kind: .group, frame: box)
+        var tree = page.nodes.layerTree
+        do throws(TreeRefusal) {
+            _ = try tree.group(present, name: made.name, payload: DesignNodePayload(node: made), mint: { made.id })
+        } catch {
+            throw .notSameParent
         }
-        return DesignEdit(name: "Group", nodes: nodes, selection: [made.id])
+        return DesignEdit(name: "Group", nodes: tree.designNodes, selection: [made.id])
     }
 
     public func ungroupHelp(_ ids: [String], on page: DesignPage) -> String? {
@@ -55,18 +57,19 @@ public struct LiveGrouping: LayerGrouping {
         guard let last = found.last else { throw .nothingSelected }
         let groups = found.filter { $0.kind == .group }
         guard !groups.isEmpty else { throw .notAGroup(last.name) }
-        var nodes = page.nodes
+        var tree = page.nodes.layerTree
         var selection: [String] = []
         for group in groups {
-            guard let current = nodes.node(group.id), let path = nodes.ancestors(of: group.id) else { continue }
-            nodes = fakeSiblings(path.last, nodes) { siblings in
-                guard let at = siblings.firstIndex(where: { $0.id == group.id }) else { return }
-                siblings.replaceSubrange(at...at, with: current.children)
+            guard let children = tree.node(group.id)?.children.map(\.id) else { continue }
+            do throws(TreeRefusal) {
+                try tree.ungroup(group.id)
+            } catch {
+                continue
             }
             selection.removeAll { $0 == group.id }
-            selection += current.children.map(\.id)
+            selection += children
         }
-        return DesignEdit(name: "Ungroup", nodes: nodes, selection: selection)
+        return DesignEdit(name: "Ungroup", nodes: tree.designNodes, selection: selection)
     }
 
     /// The lowest N ≥ 1 that no layer anywhere in `nodes` uses as "Group N".

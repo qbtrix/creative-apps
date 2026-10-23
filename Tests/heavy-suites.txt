@@ -1,0 +1,26 @@
+# Tests/heavy-suites.txt: correctness tests that burn seconds of CPU each in a
+# debug build (pixel-for-pixel renders of big fixtures). scripts/ci runs them
+# in a swift test pass of their own, after the main parallel pass, so they
+# never share the cores with it. On CI's 3-core macOS runner every target runs
+# in one process; with these in it the cooperative pool filled with
+# seconds-long tile jobs and the time-limited model suites (HomeModelTests,
+# OnboardingModelTests) hit their 60 s limit together (#2971).
+#
+# A test belongs here when it is a correctness check (it never asserts a
+# wall-clock bound; those go in Tests/perf-suites.txt) and it costs about 5 s
+# or more run alone in debug: swift test --filter <id> --no-parallel. Prefer
+# shrinking its fixture first; list it when the size is the point.
+#
+# Same format as Tests/perf-suites.txt: <app> <id>, id is Target.Suite,
+# Target.Suite/test or Target.freeTest. Tests/test_scope checks each id exists.
+
+photo PhotoModelTests.PhotoRenderRouteTests
+photo PhotoModelTests.PhotoResidentRouteTests
+photo PhotoModelTests.PhotoClipboardTests/oversizedPasteIsScaledToFit
+photo PhotoModelTests.PhotoExportPackTests/rjP01sPlanHalfCropsToFourByFiveAndKeepsTheSubjectFramed
+photo AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoPlaceTests
+
+library LibraryModelTests.matchesFullPipeline
+library LibraryModelTests.loupePreviewIsCappedAndFullKeepsTheLongSide
+
+halo HaloModelTests.theLargestCompositionRendersAtPreviewSize

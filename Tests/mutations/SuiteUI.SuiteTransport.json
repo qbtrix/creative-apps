@@ -1,0 +1,6 @@
+[
+{"label":"a looping step clamps instead of wrapping","file":"Sources/SuiteUI/SuiteTransport.swift","find":"        if state.loops {\n","replace":"        if state.loops && false {\n","tests":"TransportTests"},
+{"label":"the overflow guard dropped: Int.max steps trap","file":"Sources/SuiteUI/SuiteTransport.swift","find":"overflow ? (frames > 0 ? Int.max : Int.min) : sum","replace":"state.frame + frames","tests":"TransportTests"},
+{"label":"the rate guard dropped: fps 0 divides by zero","file":"Sources/SuiteUI/SuiteTransport.swift","find":"        if s.fps <= 0 { return \"No frame rate to play at.\" }\n","replace":"","tests":"TransportTests"},
+{"label":"a step no longer pauses","file":"Sources/SuiteUI/SuiteTransport.swift","find":"        next.isPlaying = false\n","replace":"","tests":"TransportTests"}
+]

@@ -2,7 +2,7 @@
 // Flatten Image (PV-2), each one named undo step, each with its reason when it
 // can't run. Duplicate copies the selected layer, its tiles (copy-on-write, so
 // painting one leaves the other alone) and its mask as "<name> copy" above it,
-// and selects the copy. Merge Down hands the selected layer and the one below
+// through LayerTree.duplicate (PhotoLayers+Kernel), and selects the copy. Merge Down hands the selected layer and the one below
 // to `services.merging`; the lower layer keeps its id, name, blend, opacity and
 // mask and takes the merged pixels and place, and the upper layer goes. Flatten
 // Image makes one "Background" layer of `services.merging.flatten` and resets
@@ -32,18 +32,11 @@ extension PhotoWorkspace {
             statusMessage = help
             return
         }
-        guard let source = selectedLayer, let at = index(of: source.id) else { return }
-        record(.stack(stackState), named: "Duplicate Layer")
-        let id = insertLayer(named: "\(source.name) copy", pixels: pixels[source.id], kind: source.kind, at: at)
-        if let copy = index(of: id) {
-            layers[copy].isVisible = source.isVisible
-            layers[copy].opacity = source.opacity
-            layers[copy].blendMode = source.blendMode
-            layers[copy].offsetX = source.offsetX
-            layers[copy].offsetY = source.offsetY
-            layers[copy].hasMask = source.hasMask
-            layers[copy].isMaskEnabled = source.isMaskEnabled
-        }
+        guard let source = selectedLayer else { return }
+        let before = stackState
+        guard let id = kernelDuplicate(source.id, named: "\(source.name) copy") else { return }
+        record(.stack(before), named: "Duplicate Layer")
+        pixels[id] = pixels[source.id]
         masks[id] = masks[source.id]
         selectedLayerID = id
         layerGeometryChanged(id, .duplicated(from: source.id))

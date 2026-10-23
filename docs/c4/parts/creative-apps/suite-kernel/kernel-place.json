@@ -1,0 +1,10 @@
+{
+  "id": "kernel-place",
+  "name": "Place",
+  "description": "Place/: the suite's one picture model. Size, PlacedFormat (png, jpeg, svg), PlacedAsset (a file's bytes, embedded once per document), PlacedImage (an asset shown in a layer's box with a cover focus), PlacedAssets (one copy per id, pruned on save), PlacedVector (an SVG flattened into paint items) and the PlacedImageTarget protocol an app's workspace conforms to; PlaceRules (the format sniff, the content id, the 32 MB cap, the contain fit, the cover crop and the reset box) and PlaceRules.vector (an SVG as a PlacedVector); PlaceIntent (the place gestures as commands) and PlaceCommands (the five place.* command specs every app registers). placed-images PL-1 declares them as stubs (specs with real ids, schemas and availability); PL-5, PL-6 and PL-7 fill the bodies.",
+  "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+  "paths": [
+    "Sources/SuiteKernel/Place/"
+  ],
+  "order": 105
+}

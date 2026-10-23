@@ -1,0 +1,25 @@
+[
+  {
+    "label": "a focus change shows the held thumbnail outside the loupe",
+    "file": "Sources/LibraryModel/LibraryLoupeImage.swift",
+    "find": "let held = mode == .loupe ? focusedItemID.flatMap { thumbnails[$0] } : nil",
+    "replace": "let held = focusedItemID.flatMap { thumbnails[$0] }",
+    "tests": "LibraryLoupeImageTests.swift"
+  },
+  {
+    "label": "a focus change drops the held thumbnail",
+    "file": "Sources/LibraryModel/LibraryLoupeImage.swift",
+    "find": "loupeRender = held.map { RenderedPhoto(image: $0, histogram: .empty, quality: .preview) }",
+    "replace": "loupeRender = nil",
+    "tests": "LibraryLoupeImageTests.swift"
+  },
+  {
+    "label": "the preview ignores the window's thumbnail cache",
+    "file": "Sources/LibraryModel/LibraryLoupeImage.swift",
+    "find": "let thumbnails = cache?.thumbnails ?? self.thumbnails",
+    "replace": "let thumbnails = self.thumbnails",
+    "tests": "LibraryThumbnailCacheTests"
+  },
+  {"label": "the loupe renders the stored crop while cropping", "file": "Sources/LibraryModel/LibraryLoupeImage.swift", "find": "settings: cropLoupeSettings ?? photo.develop,", "replace": "settings: photo.develop,", "tests": "LibraryCropTests"},
+  {"label": "leaving the photo keeps its crop draft", "file": "Sources/LibraryModel/LibraryLoupeImage.swift", "find": "        cropDraft = nil\n        let thumbnails", "replace": "        let thumbnails", "tests": "LibraryCropTests"}
+]

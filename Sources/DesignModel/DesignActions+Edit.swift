@@ -4,7 +4,8 @@
 // when one is selected, else where the copies came from, else the top level (#415). With exactly
 // one layer selected, the frame, fill and corner radius rows keep today's methods (`setNodeFrame`,
 // `setFill`, `setCornerRadius`) and Cut deletes through today's `deleteSelection`, so they work on
-// `.live` while its styling and transforming slots are NotBuilt. A refusal records nothing.
+// `.live` while its styling and transforming slots are NotBuilt. A refusal records nothing, and
+// while a canvas gesture is live every edit here refuses with `.unchanged` (#542).
 // Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -54,6 +55,7 @@ extension DesignWorkspace {
 
     /// Copy, then delete as one step named "Cut". One layer deletes through today's method.
     public mutating func cutSelection() throws(DesignRefusal) -> Data {
+        guard gesture == nil else { throw .unchanged }
         let data = try copySelection()
         guard let page = selectedPage, let node = selectedNode else { throw .nothingSelected }
         var edit: DesignEdit
@@ -79,7 +81,7 @@ extension DesignWorkspace {
 
     /// Into the selected frame, else where the copies came from, else the top level (#415).
     public mutating func paste(_ data: Data) throws(DesignRefusal) {
-        guard let page = selectedPage, editingTextID == nil else { throw .unchanged }
+        guard let page = selectedPage, editingTextID == nil, gesture == nil else { throw .unchanged }
         let frame = selectedNode.flatMap { $0.kind == .frame && !isLockedInTree($0.id) ? $0.id : nil }
         var mint = mint()
         let edit = try services.clipboard.paste(data, into: frame, on: page, mint: &mint)
@@ -95,7 +97,7 @@ extension DesignWorkspace {
 
     /// Moves layer `id` into `parentID` (nil: the top level) at `index`, as one "Move Layer" step.
     public mutating func moveLayer(_ id: String, into parentID: String?, at index: Int) throws(DesignRefusal) {
-        guard let page = selectedPage, editingTextID == nil else { throw .unchanged }
+        guard let page = selectedPage, editingTextID == nil, gesture == nil else { throw .unchanged }
         apply(try services.ordering.move(id, into: parentID, at: index, on: page))
     }
 
@@ -112,7 +114,7 @@ extension DesignWorkspace {
     public mutating func setStyle(_ change: DesignStyleChange) throws(DesignRefusal) {
         let ids = selectedNodeIDs
         guard let page = selectedPage, !ids.isEmpty else { throw .nothingSelected }
-        guard editingTextID == nil else { throw .unchanged }
+        guard editingTextID == nil, gesture == nil else { throw .unchanged }
         if ids.count == 1, change.property.hasOneLayerMethod, let node = selectedNode {
             return try setOneLayerStyle(change, on: node)
         }

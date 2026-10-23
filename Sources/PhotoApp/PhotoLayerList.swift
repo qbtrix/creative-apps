@@ -1,11 +1,13 @@
-// PhotoLayerList.swift: Photo's layer list: the stack, top first, each row
-// with its show/hide eye, kind symbol (photo for pixels, slider.horizontal.3
-// for an adjustment layer) and info line (PhotoLayerRow), drag to reorder, and under it a
+// PhotoLayerList.swift: Photo's layer list on SuiteUI's LayerTreeList (AL-p3):
+// the stack top first, each row with its eye, kind symbol and caption (info
+// line, blend summary), a drop reordering through `layerListMove`; under it a
 // SuiteUI SidebarActionRow of New Layer, Delete Layer and Rename Layer…
 // (`photo.layer.new`, `.delete`, `.rename`). Delete is disabled on the last
-// layer and says why. Values in, intents out.
-import CoreRaster
+// layer and says why. Every picked layer draws selected, and a row click
+// leaves as `pickLayer` with its mode (multi-layer-select PM-3). Values in,
+// intents out.
 import PhotoModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -16,34 +18,49 @@ struct PhotoLayerList: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            List(selection: Binding(get: { model.selectedLayerID }, set: { if let id = $0 { perform(.selectLayer(id)) } })) {
-                ForEach(model.layers) { layer in
-                    PhotoLayerRow(
-                        layer: layer, isSelected: layer.id == model.selectedLayerID, info: model.layerInfo(layer.id),
-                        blend: model.layerBlendSummary(layer.id), perform: perform
-                    )
-                    .tag(layer.id)
+            LayerTreeList(
+                rows: model.layerRows, childCount: { _ in 0 }, selected: Self.selected(model),
+                naming: PhotoLayerRow.naming, options: PhotoLayerRow.options,
+                decorations: Self.decorations(model), onPick: { perform(.pickLayer($0, $1)) }
+            ) { action in
+                switch action {
+                case .toggleHidden(let id): perform(.toggleVisibility(id))
+                case .move(let drop):
+                    if let move = model.layerListMove(drop.id, parent: drop.parentID, index: drop.index) {
+                        perform(.moveLayers(IndexSet(integer: move.offset), move.destination))
+                    }
+                case .disclose, .toggleLocked: break
                 }
-                .onMove { perform(.moveLayers($0, $1)) }
             }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
-            // The focused selection fills with the tint under white text. Brand blue
-            // reads 4.23:1 there; accentFill, the suite's fill for white text, 5.05:1.
-            .tint(SuiteColor.accentFill)
-            .accessibilityIdentifier("photo.layers")
             SidebarActionRow(Self.commands(model, perform))
                 .padding(.horizontal, SuiteSpacing.xs)
         }
     }
 
-    /// New Layer, Delete Layer (disabled on the last layer) and Rename Layer….
+    /// The rows drawn picked: every selected layer's id.
+    nonisolated static func selected(_ model: PhotoWorkspace) -> Set<String> {
+        Set(model.selectedLayerIDs)
+    }
+
+    /// Each layer's kind symbol and caption by id; help names blend and opacity.
+    nonisolated static func decorations(_ model: PhotoWorkspace) -> [String: LayerRowDecoration] {
+        Dictionary(model.layers.map { layer -> (String, LayerRowDecoration) in
+            let blend = model.layerBlendSummary(layer.id)
+            return (layer.id, LayerRowDecoration(
+                symbol: PhotoLayerRow.kindSymbol(layer.kind), symbolLabel: PhotoLayerRow.kindLabel(layer.kind),
+                symbolID: PhotoLayerRow.kindIdentifier(layer.id), caption: model.layerCaption(layer.id),
+                help: blend?.help, value: blend?.help))
+        }) { first, _ in first }
+    }
+
+    /// New Layer, Delete Layer (every picked layer; disabled on the last
+    /// layer or when every layer is picked) and Rename Layer….
     static func commands(_ model: PhotoWorkspace, _ perform: @escaping PhotoPerform) -> [ToolbarAction] {
         [
             ToolbarAction("New Layer", systemImage: "plus", identifier: "photo.layer.new") { perform(.addLayer) },
             ToolbarAction(
                 "Delete Layer", systemImage: "trash",
-                unavailableHelp: model.canDeleteSelectedLayer ? nil : "The last layer can't be deleted.",
+                unavailableHelp: model.deleteLayersHelp,
                 identifier: "photo.layer.delete"
             ) { perform(.deleteLayer) },
             ToolbarAction("Rename Layer…", systemImage: "pencil", identifier: "photo.layer.rename") { perform(.renameLayer) },
@@ -51,21 +68,12 @@ struct PhotoLayerList: View {
     }
 }
 
-/// One Layers row: the show/hide eye, the kind symbol, the name with the
-/// Model's info line under it (`layerInfo`), and the blend mode and opacity
-/// when either is not the default (`layerBlendSummary`, whose tooltip names
-/// both). The kind symbol's label names the adjustment (`PhotoLayerKind.label`). The eye and the kind symbol carry
-/// `photo.layer.<id>.eye` and `photo.layer.<id>.kind`, each with a label. Both
-/// symbols sit in a fixed `symbolColumn`, so every row's name starts at the
-/// same x whatever its kind or visibility (#1633). Hierarchical styles, so on the focused
-/// selection's fill the row turns white with the system's own selected text;
-/// a selected row draws everything primary, since secondary is too faint there.
-struct PhotoLayerRow: View {
-    let layer: PhotoLayer
-    let isSelected: Bool
-    var info: String? = nil
-    var blend: PhotoBlendSummary? = nil
-    let perform: PhotoPerform
+/// A Layers row's ids (`photo.layers`, `photo.layer.row.<id>`,
+/// `photo.layer.<id>.<part>`), eye, no lock, reordering, no nesting, and kind symbol.
+enum PhotoLayerRow {
+    static let naming = LayerTreeNaming.app(
+        LayerTreeIDs(container: "photo.layers", row: "photo.layer.row.", control: "photo.layer."))
+    static let options = LayerTreeOptions(showsEye: true, showsLock: false, reorders: true, nests: false)
 
     static func kindSymbol(_ kind: PhotoLayerKind) -> String {
         if case .adjustment = kind { return "slider.horizontal.3" }
@@ -74,51 +82,6 @@ struct PhotoLayerRow: View {
 
     static func kindLabel(_ kind: PhotoLayerKind) -> String { kind.label }
 
-    /// The width of the eye's and the kind symbol's column: eye and
-    /// eye.slash, photo and slider.horizontal.3 draw at different widths.
-    static let symbolColumn: CGFloat = SuiteSize.iconButtonHit
-
     static func eyeIdentifier(_ id: PhotoLayer.ID) -> String { "photo.layer.\(id).eye" }
     static func kindIdentifier(_ id: PhotoLayer.ID) -> String { "photo.layer.\(id).kind" }
-
-    var body: some View {
-        HStack(spacing: SuiteSpacing.s) {
-            Button {
-                perform(.toggleVisibility(layer.id))
-            } label: {
-                Image(systemName: layer.isVisible ? "eye" : "eye.slash")
-                    .frame(width: Self.symbolColumn)
-                    .foregroundStyle(isSelected || layer.isVisible ? HierarchicalShapeStyle.primary : .secondary)
-            }
-            .buttonStyle(.borderless)
-            .help(layer.isVisible ? "Hide Layer" : "Show Layer")
-            .accessibilityLabel("\(layer.isVisible ? "Hide" : "Show") \(layer.name)")
-            .accessibilityIdentifier(Self.eyeIdentifier(layer.id))
-            Image(systemName: Self.kindSymbol(layer.kind))
-                .frame(width: Self.symbolColumn)
-                .foregroundStyle(isSelected ? HierarchicalShapeStyle.primary : .secondary)
-                .help(Self.kindLabel(layer.kind))
-                .accessibilityLabel(Self.kindLabel(layer.kind))
-                .accessibilityIdentifier(Self.kindIdentifier(layer.id))
-            VStack(alignment: .leading, spacing: 0) {
-                Text(layer.name).lineLimit(1).truncationMode(.middle)
-                if let info {
-                    Text(info)
-                        .font(SuiteFont.inspectorMeta)
-                        .lineLimit(1)
-                        .foregroundStyle(isSelected ? HierarchicalShapeStyle.primary : .secondary)
-                }
-            }
-            Spacer(minLength: 0)
-            if let blend {
-                Text(blend.text)
-                    .font(SuiteFont.inspectorMeta)
-                    .help(blend.help)
-                    .accessibilityLabel(blend.help)
-                    // The secondary grey reads 3:1 on the selection highlight; WCAG wants 4.5:1.
-                    .foregroundStyle(isSelected ? HierarchicalShapeStyle.primary : .secondary)
-            }
-        }
-        .font(SuiteFont.inspectorLabel)
-    }
 }

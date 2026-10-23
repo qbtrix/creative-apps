@@ -1,0 +1,354 @@
+{
+  "title": "Adjustments everywhere: Black & White, Invert, filters (blur, sharpen, noise) and looks (built-in and saved), built once in SuiteImaging and SuiteModel; Photo, Library and Halo adopt",
+  "wave": "XK4",
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 cluster C8 (Photo audit rows 9 and 10, Library row 3); feature map S15 (preset store, looks) and the B&W and filter half of E3/E4 wiring; real jobs RJ-X60, RJ-P50, RJ-H50 (new); Brightness #3527 is tone-controls' (re-cut in this PR)",
+  "waits_on": "suite-imaging IM-a (target), IM-m (one step list), IM-photo and IM-z (AdjustmentSettings.swift, DevelopValues.swift); shared-thumbnails ST-m (LibraryCommandCatalog.swift); layer-styles' IM-1 widening that links SuiteImaging into HaloModel (AJ-halo); photo and library catalog hand-offs",
+  "depends": [],
+  "longest_chain": "6 (AJ-1 → AJ-5 → AJ-6 → AJ-8 → AJ-14 → AJ-15)",
+  "journeys": [
+    "PhotoFilterJourneyTests.testGaussianBlurInsideSelection",
+    "PhotoFilterJourneyTests.testApplyAndSaveLook",
+    "LibraryLooksJourneyTests.testBlackAndWhiteLook",
+    "HaloFilterJourneyTests.testBlurTitleLayer"
+  ],
+  "owned": [
+    "Sources/SuiteImaging/Adjust/AdjustKinds.swift",
+    "Sources/SuiteImaging/Adjust/FilterRules.swift",
+    "Sources/SuiteImaging/Adjust/AdjustCommands.swift",
+    "Tests/SuiteImagingTests/AdjustKindsTests.swift",
+    "Tests/SuiteImagingTests/FilterRulesTests.swift",
+    "Tests/SuiteImagingTests/AdjustCommandsTests.swift",
+    "docs/c4/parts/creative-apps/suite-imaging/imaging-adjust-kinds.json",
+    "Sources/SuiteImaging/Adjust/LookPresets.swift",
+    "Sources/SuiteModel/Presets/PresetStore.swift",
+    "Sources/SuiteModel/Fakes/FakePresetStore.swift",
+    "Tests/SuiteModelTests/PresetStoreTests.swift",
+    "docs/c4/parts/creative-apps/suite-model/suite-presets.json",
+    "Sources/SuiteUI/FilterSheet.swift",
+    "Sources/PhotoApp/PhotoCommands+Filter.swift",
+    "Sources/PhotoApp/PhotoCommands.swift",
+    "UITests/PhotoJourneyTests+Filter.swift",
+    "Tests/SuiteUITests/FilterSheetTests.swift",
+    "Sources/SuiteUI/LookGrid.swift",
+    "Sources/PhotoApp/PhotoAdjustTab.swift",
+    "Tests/SuiteUITests/LookGridTests.swift",
+    "Tests/AppSnapshotTests/RenderBudgetAdjustTests.swift",
+    "Tests/mutations/SuiteImaging.AdjustKinds.json",
+    "Tests/mutations/SuiteImaging.FilterRules.json",
+    "Tests/mutations/SuiteImaging.AdjustCommands.json",
+    "Tests/mutations/SuiteModel.PresetStore.json",
+    "Tests/PhotoModelTests/PhotoAdjustTests.swift",
+    "Sources/PhotoModel/PhotoAdjust+Kernel.swift",
+    "Sources/PhotoModel/AdjustmentSettings.swift",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/command-ids/photo.txt",
+    "Tests/mutations/PhotoModel.PhotoAdjust+Kernel.json",
+    "Tests/RealJobs/photo/blur-background/blur-background.jobs.json",
+    "Tests/RealJobs/photo/blur-background/input/portrait.png",
+    "Sources/PhotoApp/PhotoWindow+Filter.swift",
+    "Tests/LibraryModelTests/LibraryLooksTests.swift",
+    "Sources/LibraryModel/LibraryLooks+Kernel.swift",
+    "Sources/LibraryModel/Contracts/DevelopValues.swift",
+    "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "Tests/command-ids/library.txt",
+    "Tests/mutations/LibraryModel.LibraryLooks+Kernel.json",
+    "Sources/LibraryApp/DevelopInspector.swift",
+    "Sources/LibraryApp/LibraryDevelopLooks.swift",
+    "UITests/LibraryJourneyTests+Looks.swift",
+    "Tests/HaloModelTests/HaloFiltersTests.swift",
+    "Sources/HaloModel/HaloFilters+Kernel.swift",
+    "Sources/HaloModel/HaloLayer.swift",
+    "Sources/HaloModel/Live/LiveFrameRendering.swift",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/command-ids/halo.txt",
+    "Tests/mutations/HaloModel.HaloFilters+Kernel.json",
+    "Tests/RealJobs/halo/blur-title/blur-title.jobs.json",
+    "Tests/RealJobs/halo/blur-title/input/title.halo",
+    "Sources/HaloApp/HaloLayerInspector.swift",
+    "Sources/HaloApp/HaloFilterSection.swift",
+    "UITests/HaloJourneyTests+Filter.swift",
+    "Tests/RealJobs/photo/same-look-two-apps/same-look-two-apps.jobs.json",
+    "Tests/RealJobs/photo/same-look-two-apps/input/street.png",
+    "docs/blueprints/suiteui/features/adjust-everywhere.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "AJ-a",
+      "behavior": "SuiteImaging declares the kinds, filters, looks and their commands and SuiteModel the preset store, as stubs, with every Model check written and disabled.",
+      "tasks": [
+        "AJ-1",
+        "AJ-2"
+      ],
+      "journeys": [
+        "MJ-AJ"
+      ],
+      "owned": [
+        "Sources/SuiteImaging/Adjust/AdjustKinds.swift",
+        "Sources/SuiteImaging/Adjust/FilterRules.swift",
+        "Sources/SuiteImaging/Adjust/AdjustCommands.swift",
+        "Tests/SuiteImagingTests/AdjustKindsTests.swift",
+        "Tests/SuiteImagingTests/FilterRulesTests.swift",
+        "Tests/SuiteImagingTests/AdjustCommandsTests.swift",
+        "docs/c4/parts/creative-apps/suite-imaging/imaging-adjust-kinds.json",
+        "Sources/SuiteImaging/Adjust/LookPresets.swift",
+        "Sources/SuiteModel/Presets/PresetStore.swift",
+        "Sources/SuiteModel/Fakes/FakePresetStore.swift",
+        "Tests/SuiteModelTests/PresetStoreTests.swift",
+        "docs/c4/parts/creative-apps/suite-model/suite-presets.json"
+      ],
+      "waits": {
+        "suite-imaging:IM-a": [
+          "AJ-1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AJ-u",
+      "behavior": "Photo's Filter menu and Image > Adjustments open the shared FilterSheet on the stubs, and its Adjust tab shows the LookGrid, every control identified and within the render budget.",
+      "tasks": [
+        "AJ-3",
+        "AJ-4"
+      ],
+      "journeys": [
+        "PJ-AJ1"
+      ],
+      "owned": [
+        "Sources/SuiteUI/FilterSheet.swift",
+        "Sources/PhotoApp/PhotoCommands+Filter.swift",
+        "Sources/PhotoApp/PhotoCommands.swift",
+        "UITests/PhotoJourneyTests+Filter.swift",
+        "Tests/SuiteUITests/FilterSheetTests.swift",
+        "Sources/SuiteUI/LookGrid.swift",
+        "Sources/PhotoApp/PhotoAdjustTab.swift",
+        "Tests/SuiteUITests/LookGridTests.swift",
+        "Tests/AppSnapshotTests/RenderBudgetAdjustTests.swift"
+      ],
+      "waits": {
+        "AJ-a": [
+          "AJ-3"
+        ],
+        "orientation-crop:OC-photo-u": [
+          "AJ-3"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AJ-k",
+      "behavior": "B&W and Invert render on the GPU and the CPU alike, and the five filters run over core inside a selection's coverage, outside pixels unchanged.",
+      "tasks": [
+        "AJ-5",
+        "AJ-5f"
+      ],
+      "journeys": [
+        "MJ-AJ"
+      ],
+      "owned": [
+        "Sources/SuiteImaging/Adjust/AdjustKinds.swift",
+        "Tests/SuiteImagingTests/AdjustKindsTests.swift",
+        "Tests/mutations/SuiteImaging.AdjustKinds.json",
+        "Sources/SuiteImaging/Adjust/FilterRules.swift",
+        "Tests/SuiteImagingTests/FilterRulesTests.swift",
+        "Tests/mutations/SuiteImaging.FilterRules.json"
+      ],
+      "waits": {
+        "AJ-a": [
+          "AJ-5",
+          "AJ-5f"
+        ],
+        "suite-imaging:IM-m": [
+          "AJ-5"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AJ-c",
+      "behavior": "Looks apply and round-trip through the suite's preset store, and every adjust, filter and look command is one undo step with its reason when it can't run.",
+      "tasks": [
+        "AJ-6",
+        "AJ-7"
+      ],
+      "journeys": [
+        "MJ-AJ"
+      ],
+      "owned": [
+        "Sources/SuiteImaging/Adjust/AdjustCommands.swift",
+        "Sources/SuiteImaging/Adjust/LookPresets.swift",
+        "Tests/SuiteImagingTests/AdjustCommandsTests.swift",
+        "Tests/mutations/SuiteImaging.AdjustCommands.json",
+        "Sources/SuiteModel/Presets/PresetStore.swift",
+        "Tests/SuiteModelTests/PresetStoreTests.swift",
+        "Tests/mutations/SuiteModel.PresetStore.json"
+      ],
+      "waits": {
+        "AJ-a": [
+          "AJ-7"
+        ],
+        "AJ-k": [
+          "AJ-6"
+        ],
+        "tone-controls:TC-m": [
+          "AJ-6"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AJ-photo",
+      "behavior": "In Photo the filters run on the selected pixel layer inside the selection as one undo step, B&W and Invert are adjustments and adjustment-layer kinds, and looks apply and save, all through the catalog.",
+      "tasks": [
+        "AJ-8",
+        "AJ-9"
+      ],
+      "journeys": [
+        "PJ-AJ1",
+        "PJ-AJ2",
+        "MJ-AJ-photo"
+      ],
+      "owned": [
+        "Tests/PhotoModelTests/PhotoAdjustTests.swift",
+        "Sources/PhotoModel/PhotoAdjust+Kernel.swift",
+        "Sources/PhotoModel/AdjustmentSettings.swift",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/mutations/PhotoModel.PhotoAdjust+Kernel.json",
+        "Tests/RealJobs/photo/blur-background/blur-background.jobs.json",
+        "Tests/RealJobs/photo/blur-background/input/portrait.png",
+        "Sources/PhotoApp/PhotoWindow+Filter.swift",
+        "UITests/PhotoJourneyTests+Filter.swift"
+      ],
+      "waits": {
+        "AJ-c": [
+          "AJ-8"
+        ],
+        "AJ-u": [
+          "AJ-9"
+        ],
+        "suite-imaging:IM-photo": [
+          "AJ-8"
+        ],
+        "brush-keys:BK-photo": [
+          "AJ-8"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AJ-library",
+      "behavior": "In Library the Develop panel gets Black & White with its weights and the look grid, whole photo only, kept in the catalog under new keys and run on the GPU route.",
+      "tasks": [
+        "AJ-10",
+        "AJ-11"
+      ],
+      "journeys": [
+        "LJ-AJ",
+        "MJ-AJ-library"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibraryLooksTests.swift",
+        "Sources/LibraryModel/LibraryLooks+Kernel.swift",
+        "Sources/LibraryModel/Contracts/DevelopValues.swift",
+        "Sources/LibraryModel/LibraryCommandCatalog.swift",
+        "Tests/command-ids/library.txt",
+        "Tests/mutations/LibraryModel.LibraryLooks+Kernel.json",
+        "Sources/LibraryApp/DevelopInspector.swift",
+        "Sources/LibraryApp/LibraryDevelopLooks.swift",
+        "UITests/LibraryJourneyTests+Looks.swift"
+      ],
+      "waits": {
+        "AJ-c": [
+          "AJ-10"
+        ],
+        "AJ-u": [
+          "AJ-11"
+        ],
+        "suite-imaging:IM-z": [
+          "AJ-10"
+        ],
+        "shared-thumbnails:ST-m": [
+          "AJ-10"
+        ],
+        "orientation-crop:OC-library-m": [
+          "AJ-10"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AJ-halo",
+      "behavior": "In Halo any layer carries an editable list of filters and kinds, drawn live in the viewer and the render, each change one undo step through the catalog.",
+      "tasks": [
+        "AJ-12",
+        "AJ-13"
+      ],
+      "journeys": [
+        "HJ-AJ",
+        "MJ-AJ-halo"
+      ],
+      "owned": [
+        "Tests/HaloModelTests/HaloFiltersTests.swift",
+        "Sources/HaloModel/HaloFilters+Kernel.swift",
+        "Sources/HaloModel/HaloLayer.swift",
+        "Sources/HaloModel/Live/LiveFrameRendering.swift",
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/command-ids/halo.txt",
+        "Tests/mutations/HaloModel.HaloFilters+Kernel.json",
+        "Tests/RealJobs/halo/blur-title/blur-title.jobs.json",
+        "Tests/RealJobs/halo/blur-title/input/title.halo",
+        "Sources/HaloApp/HaloLayerInspector.swift",
+        "Sources/HaloApp/HaloFilterSection.swift",
+        "UITests/HaloJourneyTests+Filter.swift"
+      ],
+      "waits": {
+        "AJ-c": [
+          "AJ-12"
+        ],
+        "AJ-u": [
+          "AJ-13"
+        ],
+        "anchor-parenting:AN-halo": [
+          "AJ-12"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AJ-z",
+      "behavior": "RJ-X60 runs the same look in Photo and Library by command and both exports match, the C4 parts name the adopters, and the feature is built.",
+      "tasks": [
+        "AJ-14",
+        "AJ-15"
+      ],
+      "journeys": [
+        "MJ-AJ",
+        "PJ-AJ2",
+        "LJ-AJ",
+        "HJ-AJ"
+      ],
+      "owned": [
+        "Tests/RealJobs/photo/same-look-two-apps/same-look-two-apps.jobs.json",
+        "Tests/RealJobs/photo/same-look-two-apps/input/street.png",
+        "docs/c4/parts/creative-apps/suite-imaging/imaging-adjust-kinds.json",
+        "docs/blueprints/suiteui/features/adjust-everywhere.wave.json"
+      ],
+      "waits": {
+        "AJ-photo": [
+          "AJ-14"
+        ],
+        "AJ-library": [
+          "AJ-14"
+        ],
+        "AJ-halo": [
+          "AJ-14"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

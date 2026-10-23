@@ -1,0 +1,51 @@
+[
+  {
+    "label": "the loupe is ignored in exportTargets",
+    "file": "Sources/LibraryModel/LibraryExport.swift",
+    "find": "let ids = mode == .loupe ? loupe : order.filter(selection.contains)",
+    "replace": "let ids = order.filter(selection.contains)",
+    "tests": "LibraryExportFlowTests"
+  },
+  {
+    "label": "a failure stops the run",
+    "file": "Sources/LibraryModel/LibraryExport.swift",
+    "find": "fail(item, error)\n",
+    "replace": "fail(item, error); break\n",
+    "tests": "LibraryExportFlowTests"
+  },
+  {
+    "label": "beginExport is allowed while running",
+    "file": "Sources/LibraryModel/LibraryExport.swift",
+    "find": "if case .running = exportState { return \"An export is already running.\" }",
+    "replace": "_ = exportState",
+    "tests": "LibraryExportFlowTests"
+  },
+  {
+    "label": "the cancel check before each photo is dropped",
+    "file": "Sources/LibraryModel/LibraryExport.swift",
+    "find": "if Task.isCancelled { cancelled = true; break } // before each photo",
+    "replace": "_ = cancelled",
+    "tests": "LibraryExportBatchTests"
+  },
+  {
+    "label": "the cancel check between render and write is dropped",
+    "file": "Sources/LibraryModel/LibraryExport.swift",
+    "find": "guard !Task.isCancelled else { cancelled = true; break } // between render and write",
+    "replace": "_ = cancelled",
+    "tests": "LibraryExportBatchTests"
+  },
+  {
+    "label": "retry plans every id",
+    "file": "Sources/LibraryModel/LibraryExport.swift",
+    "find": "let failed = summary.failedIDs.compactMap { byID[$0] }",
+    "replace": "let failed = items",
+    "tests": "LibraryExportBatchTests"
+  },
+  {
+    "label": "cancelExport is true when not running",
+    "file": "Sources/LibraryModel/LibraryExport.swift",
+    "find": "if case .running = exportState { return true }\n        return false",
+    "replace": "return true",
+    "tests": "LibraryExportBatchTests"
+  }
+]

@@ -57,7 +57,7 @@ final class PhotoLayerOpsJourneyTests: XCTestCase {
         let meta = photo.app.staticTexts["Screen 60%"]
         XCTAssert(meta.waitForExistence(timeout: 5), "Screen and 60 didn't show as Screen 60% on a row")
         XCTAssert(
-            abs(meta.frame.midY - copy.frame.midY) < 4,
+            abs(meta.frame.minY - copy.frame.maxY) < 4,  // the caption line under the name (AL-p3)
             "Screen 60% isn't on Background copy's row (\(meta.frame), \(copy.frame)): the copy wasn't selected")
         photo.shot("layerops-screen-60")
 

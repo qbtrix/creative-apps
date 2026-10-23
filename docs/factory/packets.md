@@ -20,7 +20,8 @@ chain or conflict through them:
   `scripts/c4-assemble` from one file per component in `docs/c4/parts/`
   (`<system>/<container>/<component>.json`, with the container's own
   `container.json`). A task that changes what a component covers edits only
-  that component's part; **a new component is a new part file in the same
+  that component's part, and only its `paths`, never an existing
+  `description` (rule (a)); **a new component is a new part file in the same
   task that adds its code**, with an `order` that places it among its
   siblings.
 - **Waves.** Each app's `features/waves.md` is printed by `scripts/waves`
@@ -47,13 +48,21 @@ chain or conflict through them:
     (`J12`, `MJ5`), not class names.
   - A task that adds or renames an owned file or a journey updates the
     `.wave.json` in the same PR, like its C4 part.
+- **Real jobs.** Each app's jobs, the tasks a person does with it and the
+  outcome a check observes (section 3b), live in
+  `docs/blueprints/<app>/jobs.json`, one object keyed by job id; the
+  cross-cutting set (privacy, install, fidelity, access) is
+  `docs/blueprints/suite/jobs.json`. A packet adds or edits only its own
+  jobs' keys, so two packets of one wave don't conflict (`scripts/merge-json`
+  merges by key). Each app's `jobs.md` is printed from it by `scripts/jobs`.
 
-No task ever edits `docs/c4/model.json` or a `waves.md`: the lane refuses
-them, and on `dev` the Generated workflow rewrites both from their parts.
+No task ever edits `docs/c4/model.json`, a `waves.md` or a `jobs.md`: the lane
+refuses them, and on `dev` the Generated workflow rewrites them from their parts.
 `scripts/ci` fails when the parts don't assemble or a feature's data breaks
 the wave checks (no `owned` or `journeys`, two features of one wave or two
 slices that can run at once owning a file, a dependency in the same or a
-later wave, an owned generated file).
+later wave, an owned generated file), or a job misses a field or names a
+`needs` id that isn't a row in the suite feature map (`scripts/jobs check`).
 
 ## The shape
 
@@ -105,6 +114,30 @@ for them by name.
      isn't built has neither (an error once the open packets are re-sliced).
 3. **Journey steps.** The numbered steps a user takes, each naming the task
    and the journey test (`<X>-J<n>`) that proves it.
+
+   **3b. Jobs.** `| job | closes or adds | run | check | fixture |`, one row
+   per real job the feature closes or adds. Journeys prove a control is
+   there; a job proves a person finishes the task with the result they
+   wanted.
+   - **Close or add.** Every packet closes at least one job from its app's
+     `jobs.json`, or adds new ones (each with a source URL, or `"captain"`),
+     and in the same PR sets each job's `closes_with` to its feature's
+     feature-map id (also listed in `needs`).
+   - **Trap and assertion.** Each job names its trap, what a reviewer hits
+     first, and the assertion that catches it (the anti-squash check under
+     "output is exactly 1080×1350").
+   - **Run.** The lowest group that proves the outcome on the path that
+     ships: `C`, the CLI on Linux, for Model and engine outcomes; `Cm`, the
+     CLI headless on macOS, for anything that crosses a macOS framework
+     (ImageIO, AVFoundation, Vision, CoreText, sockets, Gatekeeper); `J`, a
+     UI journey, only for how an interaction feels (a snap on drag,
+     pressure, hover, VoiceOver).
+   - **Check first.** A job's check (`.agjob`) belongs to the slice's first
+     code task, or one before it (build the check first, `lead.md` rule
+     13), and stays disabled with `"waits_on": "<task id>"` until then.
+   - **Ids.** `RJ-<P|D|F|H|L|X><nn>` (X is the suite set), never reused. A
+     dropped job keeps its row with `"retired": "<reason>"`. The fields are
+     in `scripts/jobs`'s header.
 4. **Screens and states.** Each screen state the feature adds and the
    snapshot PNG that shows it.
 5. **Contract slice.** The types, protocols and methods the feature adds or
@@ -153,7 +186,8 @@ for them by name.
     journeys green on a scoped run (`ci.yml` with `app=<app>`) that contains
     its last merged PR, every app built, no open `finding` issue, for a UI
     slice the feel gate and its `Mac-Finish:` line, then the contact sheet
-    once every slice is done (`lead.md`, contract rules 6, 15 and 17).
+    once every slice is done (`lead.md`, contract rules 6, 15 and 17). In
+    both, its jobs pass at the level `lead.md` rule 21 names.
 12. **Review notes folded in** (optional). What a review changed.
 
 ## The suite feature map
@@ -189,7 +223,9 @@ app's `waves.in.md` all go in the feature's last task, the one that carries
 pass 400 lines or 15 files). No build task owns shared prose, so no two
 build tasks chain through it. A C4 part and the feature's `.wave.json` are
 fragments, not shared docs: the task that adds a component adds its part,
-a task that changes what its component covers edits that part, and the
+a task that changes what its component covers edits only that part's
+`paths` (never an existing `description`: it is one string, so two tasks
+appending to it conflict, and `scripts/ci --changed` fails it), and the
 `feature-done` task sets the feature's `status` to `built`. Two tasks that
 edit the same part are owned-file overlap (rule (c)), so give a new area its
 own component part rather than chain. A new file inside a target's folder
@@ -274,3 +310,9 @@ with the task ids. It refutes; it doesn't rewrite.
     into SuiteModel first and both apps use it (`lead.md`, contract rule
     20). An adapter onto the shared module (`<X>+Kernel.swift`,
     `<X>Adapter.swift`) isn't a copy.
+15. **No job.** A packet with no Jobs section, a job with no trap
+    assertion, or a job placed in `J` whose outcome is a file or a pixel (it
+    belongs in `C` or `Cm`).
+16. **A job that can't fail.** A `C` job whose trap has no entry in the
+    mutation plan of the file that makes it pass (`Tests/mutations/`,
+    `lead.md` rule 14).

@@ -69,8 +69,9 @@ In `UITests/DesignJourneyTests+Files.swift`, class
    `DesignBadFilesJourneyTests`): the test writes the four bad files into its
    temp folder and launches with `-DesignOpenFile` on each: the alert reads
    "It is not a Design file.", "It was made by a newer version of Design
-   (file version 99).", "It has no pages.", "It uses the id node-2 more
-   than once."; the window stays empty. (Live-only: `FakeFiling` has no
+   (file version 99; this version opens up to 1). Update Design to open
+   it.", "It has no pages.", "It is damaged: two of its layers share the
+   id node-2."; the window stays empty. (Live-only: `FakeFiling` has no
    version check; a fake-mode run skips it with a message naming the
    fake.)
 4. **P4** `testOpenLargeFile` (`+PerfFiles`, class

@@ -25,7 +25,8 @@ private func withA() -> DesignWorkspace {
 @Test func everyHandleHasItsOwnResizeName() {
     let names = Set(DesignHandle.allCases.map { DesignPointerHint.resize($0).name })
     #expect(names.count == DesignHandle.allCases.count)
-    #expect(names.allSatisfy { $0.hasPrefix("resize-") })
+    #expect(names.subtracting(["rotate"]).allSatisfy { $0.hasPrefix("resize-") })
+    #expect(names.contains("rotate"))
 }
 
 @Test func aMovePressOverALayerPicksIt() {
@@ -202,4 +203,54 @@ private func withA() -> DesignWorkspace {
     workspace.drag(from: pt(150, 140), to: pt(190, 140))
     workspace.endDrag()
     #expect(workspace.selectionBadge == "100 × 80")
+}
+
+@Test func theHoverMarkIsTheLayerOrTheTextBoxOnly() {
+    let layer = DesignFixtures.cards.hover(at: pt(150, 140), modifiers: [])
+    #expect(layer.mark == rc(100, 100, 100, 80))
+    #expect(layer.placement == nil)
+    var text = DesignFixtures.cards
+    text.selectTool(.text)
+    let box = text.hover(at: pt(300, 400), modifiers: [])
+    #expect(box.mark == rc(300, 400, 120, 24))
+    #expect(box.placement == rc(300, 400, 120, 24))
+    // An outline that names no layer and isn't the Text tool's is never drawn.
+    let stray = DesignHover(nodeID: nil, outline: rc(1, 2, 3, 4), pointer: .move)
+    #expect(stray.mark == nil)
+    #expect(stray.placement == nil)
+}
+
+@Test func theSteadyAnswerDropsOnlyTheTextBox() {
+    var text = DesignFixtures.cards
+    text.selectTool(.text)
+    let here = text.hover(at: pt(300, 400), modifiers: []).steady
+    let there = text.hover(at: pt(310, 420), modifiers: []).steady
+    #expect(here == DesignHover(nodeID: nil, outline: nil, pointer: .text))
+    #expect(here == there)
+    let layer = DesignFixtures.cards.hover(at: pt(150, 140), modifiers: [])
+    #expect(layer.steady == layer)
+    #expect(DesignFixtures.cards.hover(at: pt(5000, 5000), modifiers: []).steady == nil)
+}
+
+@Test func theBadgeHangsUnderTheMiddleOfTheSelection() {
+    #expect(DesignFixtures.cards.selectionBadgeAnchor == nil)
+    #expect(withA().selectionBadgeAnchor == pt(150, 180))
+    var both = withA()
+    both.toggleSelection("node-3")
+    // A and B span 100...500 by 100...220.
+    #expect(both.selectionBadgeAnchor == pt(300, 220))
+}
+
+@Test func theLiveCopysBadgeReadsTheDragWhileTheWorkspaceKeepsItsSize() {
+    var workspace = withA()
+    let handle = pt(200, 180)
+    workspace.drag(from: handle, to: handle)
+    var live = DesignLiveEdit()
+    live.begin(from: workspace)
+    live.sample(from: handle, to: pt(230, 195))
+    #expect(live.workspace?.selectionBadge == "130 × 95")
+    #expect(live.workspace?.selectionBadgeAnchor == pt(165, 195))
+    #expect(workspace.selectionBadge == "100 × 80")
+    live.end(into: &workspace)
+    #expect(workspace.selectionBadge == "130 × 95")
 }

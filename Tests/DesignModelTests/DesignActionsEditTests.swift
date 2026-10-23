@@ -1,7 +1,8 @@
 // DesignActionsEditTests.swift: the clipboard, Move Layer and style actions of
 // DesignActions+Edit.swift on DesignFixtures.cards. Each is one named step and a refusal records
 // none; Paste lands in the selected frame (#415); on `.live` one-layer frame, fill and corner
-// radius rows keep today's methods while several layers go through LiveStyling (DesignStyleTests);
+// radius rows keep today's methods, without asking the styling slot, while several layers go
+// through LiveStyling (DesignStyleTests);
 // a run of one row is one step. Ends with walk MJ4. Runs on Linux and macOS.
 @testable import DesignModel
 import Testing
@@ -93,6 +94,24 @@ private func stepNames(_ workspace: DesignWorkspace) -> [String] { workspace.his
             #expect(workspace.styleHelp(property) == nil, "\(property)")
         }
         #expect(workspace.styleHelp(.opacity) == nil)
+        try workspace.setStyle(.frame(.x, 300))
+        try workspace.setStyle(.fill(.black))
+        try workspace.setStyle(.cornerRadius(12))
+        let a = try #require(node(workspace, ID.a))
+        #expect(a.frame.x == 300 && a.fill == .black && a.cornerRadius == 12)
+        #expect(stepNames(workspace) == ["Change Frame", "Change Fill", "Change Corner Radius"])
+    }
+
+    /// The fast path never asks the styling slot: with it NotBuilt, one layer's frame, fill and
+    /// corner radius rows still say nothing and still act, while opacity says why it is off.
+    @Test func oneLayerRowsBypassTheStylingSlot() throws {
+        var services = DesignServices.live
+        services.styling = NotBuilt("Styling")
+        var workspace = open(services, selecting: [ID.a])
+        for property in [DesignStyleProperty.frame, .fill, .cornerRadius] {
+            #expect(workspace.styleHelp(property) == nil, "\(property)")
+        }
+        #expect(workspace.styleHelp(.opacity) == DesignRefusal.notBuilt("Styling").help)
         try workspace.setStyle(.frame(.x, 300))
         try workspace.setStyle(.fill(.black))
         try workspace.setStyle(.cornerRadius(12))

@@ -19,7 +19,10 @@ import Foundation
     #expect(LibraryKey(character: "u") == .unflag && LibraryKey(character: "U") == .unflag)
     #expect(LibraryKey(character: "r") == .crop && LibraryKey(character: "R") == .crop)
     #expect(LibraryKey(character: "g") == .grid && LibraryKey(character: "G") == .grid)
-    #expect(LibraryKey(character: "7") == nil)
+    #expect(LibraryKey(character: "6") == .label(.red))
+    #expect(LibraryKey(character: "7") == .label(.yellow))
+    #expect(LibraryKey(character: "8") == .label(.green))
+    #expect(LibraryKey(character: "9") == .label(.blue))
     #expect(LibraryKey(character: "q") == nil)
     #expect(LibraryKey(character: " ") == nil)
 }

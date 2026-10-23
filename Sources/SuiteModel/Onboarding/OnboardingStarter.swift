@@ -24,13 +24,13 @@ public struct OnboardingStarter: Equatable, Sendable {
     }
 }
 
-/// The window's numbers until SuiteSize.onboardingWindow lands (needs-ui): 720 × 520, 24 pt margins.
+/// The window's numbers until SuiteSize.onboardingWindow lands (needs-ui #2867): 720 × 520, 24 pt margins.
 public enum OnboardingLayout { public static let width = 720.0, height = 520.0, margin = 24.0 }
 
 /// Identifiers (blueprint 4.1): afterglow.onboarding.<name>.
 public enum OnboardingControls {
     static let prefix = "afterglow.onboarding."
-    public static let page = prefix + "page"          // value: the page id
+    public static let page = prefix + "page"          // label and value: the page id
     public static let `continue` = prefix + "continue"
     public static let back = prefix + "back"
     public static let skip = prefix + "skip"

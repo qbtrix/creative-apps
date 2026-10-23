@@ -1,9 +1,10 @@
-// FlareExport.swift: the export sheet's state (docs/blueprints/flare.md, sections 2 and 3.3): default options and the
-// scan's warnings before Export, then one run: `beginExport`, `exportProgressed`, and `endExport` (a result finishes,
-// a cancel goes back to idle, any other error fails with a sentence). `export` does all three without live progress.
-// FX-2a (docs/blueprints/flare/features/flare-export.md, Contract slice) declares the sheet's readouts and option
-// setters as stubs that report nothing and change nothing; FX-11 fills them without changing a signature.
+// FlareExport.swift: the export sheet's options and readouts (docs/blueprints/flare.md, sections 2 and 3.3): default
+// options and the scan's warnings before Export, the option setters, and the sentences a failed run carries. The run
+// itself is the kernel's `ExportRun` (FlareExport+Kernel.swift); the window runs the exporter and reports to it.
+// The setters change only an editing run, through the kernel's `begin` (rule 20: the run is the kernel's, never
+// app-local state); options are stored as given and `exportProblem` judges them, so Export is disabled with a reason.
 import FlareCore
+import SuiteKernel
 
 /// What the app's writer refused; the Model turns each into the sheet's sentence.
 public enum ExportWriteRefusal: Error, Equatable, Sendable {
@@ -29,80 +30,98 @@ extension FlareWorkspace {
         document.map { services.export.warnings($0, options: options) } ?? []
     }
 
-    /// Starts a run at 0 progress. False, changing nothing, with no document or while a run is under way.
-    @discardableResult
-    public mutating func beginExport() -> Bool {
-        guard document != nil else { return false }
-        if case .running = exportState { return false }
-        exportState = .running(progress: 0)
-        return true
+    /// Nil when Export can start; otherwise why not, in the sheet's words: no document, a scene that's gone, frames
+    /// outside the scene, a step under 1, a scale other than 1x or 2x (in that order). Nil while idle with a document.
+    public var exportProblem: String? {
+        guard document != nil else { return "Open or create an animation first." }
+        guard let o = exportingOptions else { return nil }
+        guard let scene = scenes.first(where: { $0.id == o.sceneID }) else { return "The scene to export is gone." }
+        if o.frames.lowerBound < 0 || o.frames.upperBound >= scene.durationFrames {
+            return Self.exportMessage(PNGExportError.frameOutOfRange(o.frames))
+        }
+        if o.step < 1 { return Self.exportMessage(PNGExportError.invalidStep(o.step)) }
+        if o.scale != 1, o.scale != 2 { return "Scale must be 1x or 2x." }
+        return nil
     }
 
-    /// Moves the running bar to `fraction`, clamped to 0...1; never backwards, and ignored when nothing runs.
-    public mutating func exportProgressed(_ fraction: Double) {
-        guard case .running(let done) = exportState, !fraction.isNaN else { return }
-        exportState = .running(progress: max(done, min(max(fraction, 0), 1)))
-    }
-
-    /// Ends the run: finished with the result, idle after a cancel, or failed with the reason. Ignored when nothing runs.
-    public mutating func endExport(_ outcome: Result<ExportResult, any Error>) {
-        guard case .running = exportState else { return }
-        switch outcome {
-        case .success(let result): exportState = .finished(result)
-        case .failure(is CancellationError): exportState = .idle
-        case .failure(let error): exportState = .failed(Self.exportMessage(error))
+    /// How many files Export writes: 1 for SVG and Lottie, the plan's count for PNG, 0 while idle or with a problem.
+    public var exportFileCount: Int {
+        guard exportProblem == nil, let o = exportingOptions else { return 0 }
+        switch o.format {
+        case .svgFrame, .lottie, .mp4, .gif: return 1
+        case .pngSequence:
+            guard let scene = scenes.first(where: { $0.id == o.sceneID }) else { return 0 }
+            return (try? PNGExportPlan.plan(scene: scene, frames: o.frames, scale: o.scale, step: o.step))?.count ?? 0
         }
     }
 
-    /// Closes a finished or failed run; a running one stays until it ends.
-    public mutating func dismissExport() {
-        if case .running = exportState { return }
-        exportState = .idle
+    /// The run's frame rate for MP4 and GIF: the options' own, else the scene's; nil while idle or with the scene gone.
+    public var exportFrameRate: Int? {
+        guard let o = exportingOptions else { return nil }
+        return o.fps ?? scenes.first { $0.id == o.sceneID }?.fps
     }
 
-    /// One whole run through `services.export`, without live progress.
-    public mutating func export(_ options: ExportOptions, rasterizer: any FrameRasterizing) async {
-        guard let document, beginExport() else { return }
-        do {
-            endExport(.success(try await services.export.export(document, options: options, rasterizer: rasterizer) { _ in }))
-        } catch {
-            endExport(.failure(error))
-        }
+    /// The finished run's line ("Exported scene-1.svg." or "Exported 7 files."); nil otherwise.
+    public var exportSummary: String? {
+        guard case .finished(_, let names) = exportState else { return nil }
+        if names.count == 1, let only = names.first { return "Exported \(only)." }
+        return "Exported \(names.count) files."
     }
 
-    /// Nil when Export can start; otherwise why not, in the sheet's words. Stub (FX-11): nil.
-    public var exportProblem: String? { nil }
+    /// The editing run's format, keeping the other options.
+    public mutating func setExportFormat(_ format: ExportFormat) { editExport { $0.format = format } }
 
-    /// How many files Export writes: 1 for SVG and Lottie, the plan's count for PNG, 0 with a problem. Stub (FX-11): 0.
-    public var exportFileCount: Int { 0 }
+    /// The editing run's frames, stored as given and judged by `exportProblem`.
+    public mutating func setExportFrames(_ frames: ClosedRange<Int>) { editExport { $0.frames = frames } }
 
-    /// The finished run's line ("Exported scene-1.svg." or "Exported 7 files."); nil otherwise. Stub (FX-11): nil.
-    public var exportSummary: String? { nil }
+    /// The editing run's PNG frame step, stored as given and judged by `exportProblem`.
+    public mutating func setExportStep(_ step: Int) { editExport { $0.step = step } }
 
-    /// The editing run's format, keeping the other options. Stub (FX-11): changes nothing.
-    public mutating func setExportFormat(_ format: ExportFormat) {}
+    /// The editing run's scale, stored as given; `exportProblem` accepts 1x or 2x.
+    public mutating func setExportScale(_ scale: Double) { editExport { $0.scale = scale } }
 
-    /// The editing run's frames, stored as given and judged by `exportProblem`. Stub (FX-11): changes nothing.
-    public mutating func setExportFrames(_ frames: ClosedRange<Int>) {}
+    /// Whether the editing run drops the background.
+    public mutating func setExportTransparent(_ on: Bool) { editExport { $0.transparentBackground = on } }
 
-    /// The editing run's PNG frame step. Stub (FX-11): changes nothing.
-    public mutating func setExportStep(_ step: Int) {}
+    /// The editing run's MP4 and GIF size, from the shared Size row.
+    public mutating func setExportSize(_ size: SuiteExportSize) { editExport { $0.size = size } }
 
-    /// The editing run's scale, 1x or 2x. Stub (FX-11): changes nothing.
-    public mutating func setExportScale(_ scale: Double) {}
+    /// The editing run's MP4 and GIF frame rate.
+    public mutating func setExportFrameRate(_ fps: Int) { editExport { $0.fps = fps } }
 
-    /// Whether the editing run drops the background. Stub (FX-11): changes nothing.
-    public mutating func setExportTransparent(_ on: Bool) {}
+    /// Whether the editing run's GIF loops forever.
+    public mutating func setExportLoop(_ on: Bool) { editExport { $0.loop = on } }
+
+    /// Changes the editing run's options through the kernel's `begin`; every other state stays.
+    private mutating func editExport(_ change: (inout ExportOptions) -> Void) {
+        guard case .editing(var o) = exportState else { return }
+        change(&o)
+        _ = exportState.begin(o)
+    }
 
     /// A failed export as a sentence for the sheet's error row.
     static func exportMessage(_ error: any Error) -> String {
         switch error {
         case let e as NotBuilt: e.reason
+        case ExportWriteRefusal.alreadyThere(let name, let folder): "\(name) is already in \(folder). Choose another folder."
+        case ExportWriteRefusal.cantWrite(let folder): "Flare can't write to \(folder)."
         case CommandError.sceneNotFound: "The scene to export is gone."
         case PNGExportError.frameOutOfRange(let r): "Frames \(r.lowerBound)–\(r.upperBound) aren't all in the scene."
         case PNGExportError.invalidStep: "The frame step must be 1 or more."
         case PNGExportError.invalidScale, PNGExportError.invalidSize: "That scale makes frames too small or too large to write."
         default: "The export couldn't be written."
+        }
+    }
+}
+
+extension ExportFormat {
+    /// Why the Export sheet doesn't list this format yet; nil once it does. The Model exports every format (MP4 and
+    /// GIF through `Exporting.writeVideo`, export-pack FV-4); the window writes them once FV-2 and FV-7 land.
+    public var unbuiltReason: String? {
+        switch self {
+        case .mp4: "MP4 joins the Export sheet with FV-2."
+        case .gif: "GIF joins the Export sheet with FV-2."
+        case .svgFrame, .lottie, .pngSequence: nil
         }
     }
 }

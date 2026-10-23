@@ -1,0 +1,7 @@
+// A fixture app source for CommandPathTests (CC-11): one toolbar button built
+// without a spec. The `on:` in its closure is not one of its arguments.
+struct FixtureToolbar: View {
+    var body: some View {
+        Button("Zoom In", systemImage: "plus.magnifyingglass") { zoom(on: 2) }
+    }
+}

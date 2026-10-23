@@ -47,8 +47,14 @@ extension FlareWorkspace {
         case .emptySwatchName: "Type a name for the swatch."
         case .invalidColor: "Each color channel must be between 0 and 1."
         case .invalidIndex: "That item is no longer there."
+        case .stateMachineNotFound: "That state machine is no longer in the document."
+        case .stateNotFound: "That state is no longer in the machine."
+        case .inputNotFound: "That input is no longer in the machine."
+        case .inputTypeChange: "An input keeps the type of its default value."
+        case .invalidMachine: "That change would break the state machine."
+        case .matteCycle: "A layer can\u{2019}t use itself, or a layer it mattes, as its matte."
         case .invalidDocument, .notExecuted, .nothingToUndo, .nothingToRedo, .groupInProgress, .unknownCommand,
-             .malformedCommand:
+             .malformedCommand, .notBuilt:
             nil
         }
     }

@@ -63,10 +63,15 @@
               {
                 "id": "halo-layers",
                 "name": "Layers",
-                "description": "HaloLayer (kind, span, color, opacity, CoreRaster blend mode, solid rectangle, and from W0 keyframe tracks keyed by HaloProperty, parent id and text content; Codable) and each kind's own box and default property values.",
+                "description": "HaloLayer (kind, span, color, opacity, CoreRaster blend mode, solid rectangle, and from W0 keyframe tracks keyed by HaloProperty, parent id and text content; Codable) and each kind's own box and default property values. A solid or shape layer's gradient fill (the kernel's Fill in the layer's unit box) and its GradientFillTarget conformance (HaloFill+Kernel). A shape layer's ShapeSpec and stroke and their kernel adapters (HaloShape+Kernel, HaloStroke+Kernel). A solid's placed picture (the kernel's PlacedAsset and focus) and its PlacedImageTarget conformance (HaloPlace+Kernel). A layer's style (SuiteImaging's LayerStyle) and its LayerStyleTarget conformance (HaloStyle+Kernel).",
                 "paths": [
                   "Sources/HaloModel/HaloLayer.swift",
-                  "Sources/HaloModel/HaloLayerDefaults.swift"
+                  "Sources/HaloModel/HaloLayerDefaults.swift",
+                  "Sources/HaloModel/HaloFill+Kernel.swift",
+                  "Sources/HaloModel/HaloPlace+Kernel.swift",
+                  "Sources/HaloModel/HaloShape+Kernel.swift",
+                  "Sources/HaloModel/HaloStroke+Kernel.swift",
+                  "Sources/HaloModel/HaloStyle+Kernel.swift"
                 ],
                 "status": "existing",
                 "authored": true,
@@ -104,10 +109,11 @@
               {
                 "id": "halo-commands",
                 "name": "Commands and availability",
-                "description": "HaloCommand: every menu, toolbar and key command of v1, by area, with its title, and HaloProject.unavailableHelp(for:): nil when it can act now, else the reason the control shows. It dispatches to one file per area under Availability/; W0 writes them as stubs and each feature replaces its own area's file when its action works.",
+                "description": "HaloCommand: every menu, toolbar and key command of v1, by area, with its title, and HaloProject.unavailableHelp(for:): nil when it can act now, else the reason the control shows. It dispatches to one file per area under Availability/; W0 writes them as stubs and each feature replaces its own area's file when its action works. HaloCommandCatalog: the same actions as SuiteKernel command specs, the fill commands included.",
                 "paths": [
                   "Sources/HaloModel/HaloCommand.swift",
-                  "Sources/HaloModel/Availability/"
+                  "Sources/HaloModel/Availability/",
+                  "Sources/HaloModel/HaloCommandCatalog.swift"
                 ],
                 "status": "planned",
                 "authored": true,
@@ -190,10 +196,11 @@
               {
                 "id": "halo-viewer-model",
                 "name": "Viewer state",
-                "description": "The viewer's draw list at the playhead (FrameDrawing plus the live drag offset), the viewer hit and drag: begin on the topmost layer under the pointer, move as a preview that never records undo, commit on mouse-up as one 'Move' step through ViewerDragging.",
+                "description": "The viewer's draw list at the playhead (FrameDrawing plus the live drag offset), the viewer hit and drag: begin on the topmost layer under the pointer, move as a preview that never records undo, commit on mouse-up as one 'Move' step through ViewerDragging. The rotate and scale handles' adapter onto the kernel transform commands, keyed at the playhead (HaloTransform+Kernel).",
                 "paths": [
                   "Sources/HaloModel/HaloViewerState.swift",
-                  "Sources/HaloModel/HaloViewerDrag.swift"
+                  "Sources/HaloModel/HaloViewerDrag.swift",
+                  "Sources/HaloModel/HaloTransform+Kernel.swift"
                 ],
                 "status": "planned",
                 "authored": true,
@@ -213,10 +220,12 @@
               {
                 "id": "halo-keying",
                 "name": "Keys and easing",
-                "description": "The inspector's property rows for the selected layer at the playhead; set value, stopwatch, key-here diamond and parent, each one named step (scrubs coalesce); selected keys on the timeline and setting their easing as one 'Keyframe Easing' step.",
+                "description": "The inspector's property rows for the selected layer at the playhead; set value, stopwatch, key-here diamond and parent, each one named step (scrubs coalesce); selected keys on the timeline (picked across lanes, Select All Keys) and setting their easing as one 'Keyframe Easing' step; a key drag moves every picked key as one 'Move Keyframes' step through KeyRules.moveKeys (HaloKeyPick+Kernel.swift, HaloKeyMove+Kernel.swift).",
                 "paths": [
                   "Sources/HaloModel/HaloKeying.swift",
-                  "Sources/HaloModel/HaloKeySelection.swift"
+                  "Sources/HaloModel/HaloKeySelection.swift",
+                  "Sources/HaloModel/HaloKeyPick+Kernel.swift",
+                  "Sources/HaloModel/HaloKeyMove+Kernel.swift"
                 ],
                 "status": "planned",
                 "authored": true,
@@ -253,9 +262,10 @@
               {
                 "id": "halo-history",
                 "name": "Undo and redo",
-                "description": "undo() and redo() of whole-document steps through ProjectHistory, their menu titles, and the rule that selection, scrubbing and playback are not steps.",
+                "description": "undo() and redo() of whole-document steps through ProjectHistory, their menu titles, and the rule that selection, scrubbing and playback are not steps. The jump and recovery adapter onto the shared History panel and autosave (HaloRecovery+Kernel).",
                 "paths": [
-                  "Sources/HaloModel/HaloHistory.swift"
+                  "Sources/HaloModel/HaloHistory.swift",
+                  "Sources/HaloModel/HaloRecovery+Kernel.swift"
                 ],
                 "status": "planned",
                 "authored": true,
@@ -272,7 +282,8 @@
                 "name": "Project files",
                 "description": "fileData() through ProjectFiles; beginOpen and finishOpen around a decode the app runs off the main actor; the file name and path, unsaved flag, the last save or open error, and the Open Recent list (name and path; HaloApp persists it). Opening clears history.",
                 "paths": [
-                  "Sources/HaloModel/HaloFiles.swift"
+                  "Sources/HaloModel/HaloFiles.swift",
+                  "Sources/HaloModel/HaloFileFlow+Kernel.swift"
                 ],
                 "status": "planned",
                 "authored": true,
@@ -379,7 +390,7 @@
               {
                 "id": "halo-window",
                 "name": "Window and command router",
-                "description": "HaloWindow (today inside HaloApp.swift; W0 moves it to its own file): the one @State model, every presentation flag v1 needs, and perform(_ command: HaloCommand), which routes each command to its area file (HaloWindow+Viewer, +Playback, +Keys, +Layers, +Edit, +File, +Easing, +Render, +Text). W0 writes the router and stub area files; each feature owns one area file. HaloControls gathers every halo.* control's id, enabled state and help into the halo.controls JSON (under -HaloControlsProbe) for the every-control journey.",
+                "description": "HaloWindow (today inside HaloApp.swift; W0 moves it to its own file): the one @State model, every presentation flag v1 needs, and perform(_ command: HaloCommand), which routes each command to its area file (HaloWindow+Viewer, +Playback, +Keys, +Layers, +Edit, +File, +Easing, +Render, +Text, +Styling: the layer style sheet). W0 writes the router and stub area files; each feature owns one area file. HaloControls gathers every halo.* control's id, enabled state and help into the halo.controls JSON (under -HaloControlsProbe) for the every-control journey. The History panel and the autosave modifier on the window (HaloHistoryArea).",
                 "paths": [
                   "Sources/HaloApp/HaloWindow.swift",
                   "Sources/HaloApp/HaloControls.swift",
@@ -391,7 +402,9 @@
                   "Sources/HaloApp/HaloWindow+File.swift",
                   "Sources/HaloApp/HaloWindow+Easing.swift",
                   "Sources/HaloApp/HaloWindow+Render.swift",
-                  "Sources/HaloApp/HaloWindow+Text.swift"
+                  "Sources/HaloApp/HaloWindow+Text.swift",
+                  "Sources/HaloApp/HaloWindow+Styling.swift",
+                  "Sources/HaloApp/HaloHistoryArea.swift"
                 ],
                 "status": "planned",
                 "authored": true,
@@ -437,7 +450,7 @@
               {
                 "id": "halo-viewer",
                 "name": "Viewer",
-                "description": "The viewer (HaloViewer, today inside HaloApp.swift; W0 moves it to HaloViewer.swift): the artboard (CanvasSurface) with the draw list painted in a SwiftUI Canvas, the selection outline, the drag gesture, the rendered-frame image (HaloRenderedFrameView), the status bar and the transport; the display-link playback driver. HaloProbe.swift records the viewer drag, playhead, playback and scroll series into the window's frame probe under -SuitePerfProbe (core-loop).",
+                "description": "The viewer (HaloViewer, today inside HaloApp.swift; W0 moves it to HaloViewer.swift): the artboard (CanvasSurface) with the draw list painted in a SwiftUI Canvas, the selection outline, the drag gesture, the rendered-frame image (HaloRenderedFrameView), the status bar and the transport; the display-link playback driver. HaloProbe.swift records the viewer drag, playhead, playback and scroll series into the window's frame probe under -SuitePerfProbe (core-loop). The rotate and scale handles over the selected layer (HaloViewerHandles) and the Shape button that draws shape layers by drag (HaloShapeTool). HaloPlace: File > Place… and the viewer's drop target, both running SuiteKernel's place.image.",
                 "paths": [
                   "Sources/HaloApp/HaloViewer.swift",
                   "Sources/HaloApp/HaloViewerCanvas.swift",
@@ -445,7 +458,10 @@
                   "Sources/HaloApp/HaloRenderedFrameView.swift",
                   "Sources/HaloApp/HaloTransport.swift",
                   "Sources/HaloApp/HaloPlaybackDriver.swift",
-                  "Sources/HaloApp/HaloProbe.swift"
+                  "Sources/HaloApp/HaloProbe.swift",
+                  "Sources/HaloApp/HaloPlace.swift",
+                  "Sources/HaloApp/HaloViewerHandles.swift",
+                  "Sources/HaloApp/HaloShapeTool.swift"
                 ],
                 "status": "planned",
                 "authored": true,
@@ -487,13 +503,16 @@
               {
                 "id": "halo-inspector",
                 "name": "Inspector",
-                "description": "The inspector: the composition header and rows, the layer list (select, rename, reorder, delete), the selected layer's TRANSFORM rows with keyframe buttons, parent and blend pickers, the EASING group (chips and curve) and the TEXT section.",
+                "description": "The inspector: the composition header and rows, the layer list (select, rename, reorder, delete), the selected layer's TRANSFORM rows with keyframe buttons, parent and blend pickers, the EASING group (chips and curve) and the TEXT section. HaloFillInspector: the shared GradientEditor under the colour row for solid and shape layers. The shared stroke editor for shape layers (HaloStrokeInspector). HaloPlaceInspector: SuiteUI's PlacedImageRows and the Fill toggle for a solid with a picture.",
                 "paths": [
                   "Sources/HaloApp/HaloCompositionInspector.swift",
                   "Sources/HaloApp/HaloLayerList.swift",
                   "Sources/HaloApp/HaloLayerInspector.swift",
                   "Sources/HaloApp/HaloEasingInspector.swift",
-                  "Sources/HaloApp/HaloTextInspector.swift"
+                  "Sources/HaloApp/HaloTextInspector.swift",
+                  "Sources/HaloApp/HaloFillInspector.swift",
+                  "Sources/HaloApp/HaloPlaceInspector.swift",
+                  "Sources/HaloApp/HaloStrokeInspector.swift"
                 ],
                 "status": "existing",
                 "authored": true,

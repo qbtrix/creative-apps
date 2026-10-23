@@ -1,12 +1,16 @@
 // PhotoTileCanvasTests.swift: the tile layers show the reference picture.
-// TileCanvasView's layers, rendered by Core Animation, equal the CPU
+// The embedded CanvasHostView's tile layers (the CPU path), rendered by Core Animation, equal the CPU
 // reference (PhotoRenderer.render, premultiplied) at zoom 1, the right way up;
 // at zooms that put tile edges between pixels an opaque image stays opaque
 // everywhere, so abutting tiles leave no seam; and `cacheDisplay`, which the
-// snapshots use, draws what the layers show. macOS only.
+// snapshots use, draws what the layers show; on the GPU path the Metal
+// presenter's texture holds the reference picture. macOS only.
 import AppKit
 import CoreRaster
+import Metal
+import QuartzCore
 import PhotoModel
+import SuiteUI
 import Testing
 
 @testable import PhotoApp
@@ -25,10 +29,10 @@ import Testing
     }
 
     /// The view at `zoom` showing `workspace`'s tiles.
-    func view(_ workspace: PhotoWorkspace, zoom: Double) throws -> TileCanvasView {
+    func view(_ workspace: PhotoWorkspace, zoom: Double) throws -> CanvasHostView {
         let tiles = try #require(try CanvasTiles.complete(workspace))
-        let view = TileCanvasView(frame: CGRect(x: 0, y: 0, width: 600 * zoom, height: 520 * zoom))
-        view.configure(zoom: zoom, degrees: 0)
+        let view = CanvasHostView(frame: CGRect(x: 0, y: 0, width: 600 * zoom, height: 520 * zoom))
+        view.isEmbedded = true
         tiles.attach(view)
         view.layoutSubtreeIfNeeded()
         return view
@@ -72,12 +76,38 @@ import Testing
         let view = try view(try workspace(), zoom: 1)
         let layer = try #require(view.layer)
         let shown = try pixels(view.bounds.size) { layer.render(in: $0) }
-        let rep = try #require(view.bitmapImageRepForCachingDisplay(in: view.bounds))
+        // One pixel per point, as the snapshots size their rep: bitmapImageRepForCachingDisplay
+        // follows the screen's scale, so on a Retina Mac it drew at 2x and resampling the
+        // stroke's edges down to the layers' size failed the check (#1625).
+        let rep = try #require(NSBitmapImageRep(
+            bitmapDataPlanes: nil, pixelsWide: Int(view.bounds.width), pixelsHigh: Int(view.bounds.height),
+            bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB,
+            bytesPerRow: 0, bitsPerPixel: 0))
+        rep.size = view.bounds.size
         view.cacheDisplay(in: view.bounds, to: rep)
         let cached = try #require(rep.cgImage)
         let drawn = try pixels(view.bounds.size) { $0.draw(cached, in: CGRect(origin: .zero, size: view.bounds.size)) }
         let worst = zip(shown, drawn).map { abs(Int($0) - Int($1)) }.max() ?? 0
         #expect(worst <= 2, "cacheDisplay differs from the layers by up to \(worst)")
         #expect(drawn.count == shown.count && stride(from: 3, to: drawn.count, by: 4).allSatisfy { drawn[$0] == 255 })
+    }
+
+    /// The GPU path: the same tiles reach the Metal presenter's document texture as the reference bytes.
+    @Test(.enabled(if: MTLCreateSystemDefaultDevice() != nil)) func theMetalPathShowsTheReferencePicture() async throws {
+        // A CI VM's Metal layer may hand out no drawable off screen; the presenter writes its texture on a present.
+        let probe = CAMetalLayer()
+        probe.device = MTLCreateSystemDefaultDevice()
+        probe.drawableSize = CGSize(width: 8, height: 8)
+        guard probe.nextDrawable() != nil else { return }
+        let workspace = try workspace()
+        let view = try view(workspace, zoom: 1)
+        let presenter = CanvasTilePresenter()
+        view.useRendering(.gpu, device: MTLCreateSystemDefaultDevice(), presenter: presenter)
+        let texture = try #require(presenter.texture)
+        var shown = [UInt8](repeating: 0, count: 600 * 520 * 4)
+        texture.getBytes(&shown, bytesPerRow: 600 * 4, from: MTLRegionMake2D(0, 0, 600, 520), mipmapLevel: 0)
+        let reference = PhotoRenderer.premultiplied(try await PhotoRenderer.render(workspace).rgba8)
+        #expect(presenter.presented >= 1 && view.metalLayer != nil)
+        #expect(shown == reference, "the Metal path's texture differs from the reference picture")
     }
 }

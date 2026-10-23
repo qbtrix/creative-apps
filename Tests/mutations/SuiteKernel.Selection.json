@@ -1,0 +1,37 @@
+[
+  {
+    "label": "extendAppendsOnAStage: Shift-click without an order replaces the selection",
+    "file": "Sources/SuiteKernel/Selection/Selection.swift",
+    "find": "                append(id)\n                if anchor == nil",
+    "replace": "                ordered = [id]\n                if anchor == nil",
+    "tests": "SelectionTests"
+  },
+  {
+    "label": "extendRangeIsClosed: the range runs anchor..<id and drops the clicked end",
+    "file": "Sources/SuiteKernel/Selection/Selection.swift",
+    "find": "Array(order[a...b])",
+    "replace": "Array(order[a..<b])",
+    "tests": "SelectionTests"
+  },
+  {
+    "label": "toggleRefusesLocked: toggle adds without asking canAdd",
+    "file": "Sources/SuiteKernel/Selection/Selection.swift",
+    "find": "} else if canAdd(id) {",
+    "replace": "} else if true {",
+    "tests": "SelectionTests"
+  },
+  {
+    "label": "selectionIsLinear: contains scans the ordered list again, so a 5,000-anchor selection turns quadratic",
+    "file": "Sources/SuiteKernel/Selection/Selection.swift",
+    "find": "public func contains(_ id: ID) -> Bool { members.contains(id) }",
+    "replace": "public func contains(_ id: ID) -> Bool { ordered.contains(id) }",
+    "tests": "AnchorBudgetTests/selectionIsLinear"
+  },
+  {
+    "label": "toggle: toggling a picked id off leaves it in the membership set",
+    "file": "Sources/SuiteKernel/Selection/Selection.swift",
+    "find": "if members.remove(id) != nil {",
+    "replace": "if members.contains(id) {",
+    "tests": "SelectionTests"
+  }
+]

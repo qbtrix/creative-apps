@@ -1,0 +1,51 @@
+[
+  {
+    "label": "outermostGroup: the deepest hit is returned at every scope",
+    "file": "Sources/SuiteKernel/Selection/GroupPick.swift",
+    "find": "return deep ? hit : chain.dropFirst(depth).first",
+    "replace": "return hit",
+    "tests": "GroupPickTests"
+  },
+  {
+    "label": "commandPicksDeepest: Command is ignored",
+    "file": "Sources/SuiteKernel/Selection/GroupPick.swift",
+    "find": "return deep ? hit : chain.dropFirst(depth).first",
+    "replace": "return chain.dropFirst(depth).first",
+    "tests": "GroupPickTests"
+  },
+  {
+    "label": "exitOneLevel: exit goes to the root instead of one level",
+    "file": "Sources/SuiteKernel/Selection/GroupPick.swift",
+    "find": "GroupScope(path: Array(scope.path.dropLast()))",
+    "replace": "GroupScope.root",
+    "tests": "GroupPickTests"
+  },
+  {
+    "label": "lockedPicksNothing: a layer under a locked group is picked",
+    "file": "Sources/SuiteKernel/Selection/GroupPick.swift",
+    "find": "guard let ancestors = tree.ancestors(of: hit), !tree.isEffectivelyLocked(hit) else { return nil }",
+    "replace": "guard let ancestors = tree.ancestors(of: hit) else { return nil }",
+    "tests": "GroupPickTests"
+  },
+  {
+    "label": "outsideScopePicksNothing: the scope's ancestry is not checked",
+    "file": "Sources/SuiteKernel/Selection/GroupPick.swift",
+    "find": "guard chain.count > depth, Array(chain.prefix(depth)) == scope.path else { return nil }",
+    "replace": "guard chain.count > depth else { return nil }",
+    "tests": "GroupPickTests"
+  },
+  {
+    "label": "enterNeedsChildren: an empty group can be entered",
+    "file": "Sources/SuiteKernel/Selection/GroupPick.swift",
+    "find": "guard let node = tree.node(id), !node.children.isEmpty, !tree.isEffectivelyLocked(id),",
+    "replace": "guard let node = tree.node(id), !tree.isEffectivelyLocked(id),",
+    "tests": "GroupPickTests"
+  },
+  {
+    "label": "enterDirectChild: a group deeper than the scope is entered",
+    "file": "Sources/SuiteKernel/Selection/GroupPick.swift",
+    "find": "              tree.ancestors(of: id) == scope.path else { return nil }",
+    "replace": "              tree.ancestors(of: id) != nil else { return nil }",
+    "tests": "GroupPickTests"
+  }
+]

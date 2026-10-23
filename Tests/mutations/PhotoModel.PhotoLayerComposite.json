@@ -1,0 +1,4 @@
+[
+{"label": "the painted scan starts at the tile's top, not the window's", "file": "Sources/PhotoModel/PhotoLayerComposite.swift", "find": "        var top = area.y\n", "replace": "        var top = 0\n", "tests": "PhotoCompositeShortcutTests"},
+{"label": "the window isn't clipped to the tile", "file": "Sources/PhotoModel/PhotoLayerComposite.swift", "find": "            guard let inside = window.intersection(area) else { return nil }\n            area = inside", "replace": "            area = window", "tests": "PhotoCompositeShortcutTests"}
+]

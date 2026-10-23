@@ -1,0 +1,58 @@
+[
+  {
+    "label": "oneLayerHelpKept",
+    "file": "Sources/DesignModel/DesignCommandCatalog.swift",
+    "find": "{ reason($0.help(command)) }, { w in try w.run(command) }",
+    "replace": "{ reason($0.selectedNodeIDs.count == 1 ? nil : $0.help(command)) }, { w in try w.run(command) }",
+    "tests": "DesignCommandCatalogTests"
+  },
+  {
+    "label": "nudgeLarge",
+    "file": "Sources/DesignModel/DesignCommandCatalog.swift",
+    "find": "large: params.large ?? false",
+    "replace": "large: false",
+    "tests": "DesignCommandCatalogTests"
+  },
+  {
+    "label": "historySpecsListed",
+    "file": "Sources/DesignModel/DesignCommandCatalog.swift",
+    "find": "\n            + HistoryCommands.specs(DesignWorkspace.self)",
+    "replace": "",
+    "tests": "DesignHistoryCommandTests"
+  },
+  {
+    "label": "shapeSpecsListed: shape.draw and tool.shape are left out of the catalog",
+    "file": "Sources/DesignModel/DesignCommandCatalog.swift",
+    "find": "toolSpecs + ShapeCommands.specs(DesignWorkspace.self)",
+    "replace": "toolSpecs",
+    "tests": "DesignCommandCatalogTests|DesignSVGTests"
+  },
+  {
+    "label": "historyJumpListed",
+    "file": "Sources/DesignModel/DesignCommandCatalog.swift",
+    "find": "+ HistoryCommands.specs(DesignWorkspace.self)",
+    "replace": "+ HistoryCommands.specs(DesignWorkspace.self).filter { $0.id != \"history.jump\" }",
+    "tests": "DesignHistoryCommandTests"
+  },
+  {
+    "label": "reasonWhenUnavailable: Zoom In is always available",
+    "file": "Sources/DesignModel/DesignCommandCatalog.swift",
+    "find": "plain(\"view.zoom-in\", \"Zoom In\", \"Zooms the window in.\", .view, openHelp)",
+    "replace": "plain(\"view.zoom-in\", \"Zoom In\", \"Zooms the window in.\", .view, { _ in .available })",
+    "tests": "DesignCommandPathTests"
+  },
+  {
+    "label": "paramsReachRun: Export ignores its scale",
+    "file": "Sources/DesignModel/DesignCommandCatalog.swift",
+    "find": "DesignExportOptions(format: format, scale: p.scale, scope: scope)",
+    "replace": "DesignExportOptions(format: format, scale: 1, scope: scope)",
+    "tests": "DesignCommandPathTests"
+  },
+  {
+    "label": ".transformRegistered: the six transform specs are left out of the catalog",
+    "file": "Sources/DesignModel/DesignCommandCatalog.swift",
+    "find": "+ TransformCommands.specs(DesignWorkspace.self) ",
+    "replace": "",
+    "tests": "DesignCommandCatalogTests"
+  }
+]

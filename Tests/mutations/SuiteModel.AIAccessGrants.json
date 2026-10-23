@@ -1,0 +1,72 @@
+[
+ {
+  "label": ".fileAlwaysAsks: a file command follows the client grant",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessGrants.swift",
+  "find": "        guard kind != Self.fileKind else { return nil }\n",
+  "replace": "",
+  "tests": "AIAccessGrantsTests"
+ },
+ {
+  "label": ".revokeScoped: revoking one app clears the client's grants in every app",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessGrants.swift",
+  "find": "(app == nil || $0.app == app)",
+  "replace": "true",
+  "tests": "AIAccessGrantsTests"
+ },
+ {
+  "label": ".denyRefuses: a remembered deny allows",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessGrants.swift",
+  "find": "case .deny: return false",
+  "replace": "case .deny: return true",
+  "tests": "AIAccessGrantsTests"
+ },
+ {
+  "label": ".grantPerApp: an always in one app allows the client in every app",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessGrants.swift",
+  "find": "$0.client == client && $0.app == app })?.decision",
+  "replace": "$0.client == client })?.decision",
+  "tests": "AIAccessGrantsTests"
+ },
+ {
+  "label": ".grantPerClient: an always for one client allows every client in that app",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessGrants.swift",
+  "find": "entries.first(where: { $0.client == client && $0.app == app })",
+  "replace": "entries.first(where: { $0.app == app })",
+  "tests": "AIAccessGrantsTests"
+ },
+ {
+  "label": ".allowOnceForgotten: allow once is remembered",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessGrants.swift",
+  "find": "        guard decision != .allowOnce else { return }\n",
+  "replace": "",
+  "tests": "AIAccessGrantsTests"
+ },
+ {
+  "label": ".recordReplaces: a new decision is added beside the old one",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessGrants.swift",
+  "find": "        entries.removeAll { $0.client == client && $0.app == app }\n",
+  "replace": "",
+  "tests": "AIAccessGrantsTests"
+ },
+ {
+  "label": ".storeDropsOldGrants: a revoked grant stays in preferences.json",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessGrants.swift",
+  "find": "        p.perApp = p.perApp.mapValues { $0.filter { !$0.key.hasPrefix(Self.keyPrefix) } }\n",
+  "replace": "",
+  "tests": "AIAccessGrantsTests"
+ },
+ {
+  "label": ".storeKeepsAppKeys: storing grants drops the app's own keys",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessGrants.swift",
+  "find": "{ $0.filter { !$0.key.hasPrefix(Self.keyPrefix) } }",
+  "replace": "{ $0.filter { _ in false } }",
+  "tests": "AIAccessGrantsTests"
+ },
+ {
+  "label": ".loadStripsPrefix: a loaded grant keeps the key prefix in its client",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessGrants.swift",
+  "find": "String(key.dropFirst(Self.keyPrefix.count))",
+  "replace": "key",
+  "tests": "AIAccessGrantsTests"
+ }
+]

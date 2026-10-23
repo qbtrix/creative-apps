@@ -1,5 +1,6 @@
 // CanvasGridTests.swift: CanvasGrid's lines (CM-8, #530): a grid of n cells
-// draws n - 1 lines each way at the zoom, and 0 or fewer cells draw none.
+// draws n - 1 lines each way at the zoom, and 0 or fewer cells, or a zoom
+// that isn't a finite positive number, draw none.
 // macOS only.
 import CoreGraphics
 import SuiteUI
@@ -29,4 +30,19 @@ import Testing
     #expect(CanvasGrid.lines(rect: rect, cells: 3, zoom: .nan).vertical.isEmpty)
     let endless = CGRect(x: 0, y: 0, width: Double.infinity, height: 1)
     #expect(CanvasGrid.lines(rect: endless, cells: 3, zoom: 1).horizontal.isEmpty)
+}
+
+@Test func nCellsDrawNMinusOneLines() {
+    for cells in 1...12 {
+        let lines = CanvasGrid.lines(rect: CGRect(x: 0, y: 0, width: 90, height: 90), cells: cells, zoom: 1)
+        #expect(lines.vertical.count == cells - 1 && lines.horizontal.count == cells - 1)
+    }
+}
+
+@Test func aZoomThatIsNotPositiveDrawsNoGrid() {
+    let rect = CGRect(x: 0, y: 0, width: 300, height: 150)
+    for zoom: Double in [0, -2] {
+        let lines = CanvasGrid.lines(rect: rect, cells: 3, zoom: zoom)
+        #expect(lines.vertical.isEmpty && lines.horizontal.isEmpty)
+    }
 }

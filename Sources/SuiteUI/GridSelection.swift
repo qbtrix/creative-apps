@@ -92,3 +92,46 @@ public enum GridSelection {
         return Int(min(max(fit, 1), 10_000))
     }
 }
+
+/// The live UC9 rule (lists-and-layers LL-3): `GridSelecting` over
+/// `GridSelection`, whose click, move and column math it calls unchanged. An
+/// arrow with Shift held extends: the selection gains every item from the old
+/// anchor to the one the arrow lands on, and that item becomes the anchor, so
+/// repeated ⇧-arrows keep growing the selection.
+public struct SuiteGridSelecting: GridSelecting {
+    public init() {}
+
+    public func click<ID: Hashable & Sendable>(
+        _ id: ID, _ kind: ClickKind, current: GridPick<ID>, order: [ID]
+    ) -> GridPick<ID> {
+        let click: GridSelection.Click = switch kind {
+        case .plain: .plain
+        case .extend: .extend
+        case .toggle: .toggle
+        }
+        let result = GridSelection.click(id, click, order: order, selection: current.selection, anchor: current.anchor)
+        return GridPick(selection: result.selection, anchor: result.anchor)
+    }
+
+    public func move<ID: Hashable & Sendable>(
+        _ arrow: GridArrow, extend: Bool, current: GridPick<ID>, order: [ID], columns: Int
+    ) -> GridPick<ID> {
+        let direction: GridSelection.Direction = switch arrow {
+        case .left: .left
+        case .right: .right
+        case .up: .up
+        case .down: .down
+        }
+        let moved = GridSelection.move(direction, order: order, columns: columns, anchor: current.anchor)
+        guard extend, let landed = moved.anchor, let anchor = current.anchor,
+              let from = order.firstIndex(of: anchor), let to = order.firstIndex(of: landed) else {
+            return GridPick(selection: moved.selection, anchor: moved.anchor)
+        }
+        let span = order[min(from, to)...max(from, to)]
+        return GridPick(selection: current.selection.intersection(order).union(span), anchor: landed)
+    }
+
+    public func columns(width: Double, minimum: Double, spacing: Double) -> Int {
+        GridSelection.columns(width: width, minimum: minimum, spacing: spacing)
+    }
+}

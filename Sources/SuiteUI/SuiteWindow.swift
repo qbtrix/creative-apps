@@ -4,7 +4,13 @@
 // The window chrome (toolbar, sidebar, inspector) is system Liquid Glass; the
 // content stays flat. Apps pass state in and get selection out through
 // `onSelect`, `onToggle`, `onMove` and `onRename`; a nil closure turns that
-// gesture off. Toolbar actions with `unavailableHelp` show disabled, with the
+// gesture off. An overload's `onRename` can refuse: it returns the message
+// the row shows under the field it keeps open (LL-6). `contextActions` gives
+// each sidebar row its right-click menu of ToolbarActions, through the
+// environment to SidebarNode; nil, or no actions for a row, gives no menu
+// (LL-8a). `expanded` and `onExpand` make a nested group's expansion the
+// app's, through the environment too: the disclosure shows the set and a click
+// calls onExpand; without onExpand each group keeps its own (LL-9). Toolbar actions with `unavailableHelp` show disabled, with the
 // reason as their tooltip. The shell owns only presentation state (inspector
 // visibility) and tints the content and inspector with the suite's one accent
 // (SuiteColor.accent); the sidebar keeps the system's selection style, which
@@ -33,7 +39,9 @@
 // (AppSwitcher.swift) with no shared toolbar glass behind it: the environment's
 // `suiteSwitcher`, or AppSwitcherState.placeholder for this process's name.
 // The window measures its width (onGeometryChange) and gives the row
-// AppSwitcher.toolbarFit for it and its actions' titles (drawn icon only), so
+// AppSwitcher.toolbarFit for it and its actions' titles (drawn icon only), the
+// shown inspector's column and whether a `.searchable` field on the window is
+// open (the environment's `isSearching`), so
 // the row leaves the sidebar toggle, document actions, title, actions and
 // inspector toggle their room and none of them goes into the toolbar's
 // overflow; in a crowded toolbar the row narrows to its compact step, and
@@ -49,6 +57,12 @@ public struct SuiteWindow<Sidebar: View, Content: View, Inspector: View>: View {
     private let sidebar: Sidebar
     private let content: Content
     private let inspector: Inspector
+    /// Each sidebar row's context menu actions; nil gives no row a menu (LL-8a).
+    private let contextActions: (@MainActor (SidebarItem.ID) -> [ToolbarAction])?
+    /// The groups the app shows open; nil, or no `onExpand`, leaves each group its own (LL-9).
+    private let expanded: Set<SidebarItem.ID>?
+    /// Gets a group's id and whether a click opens it (LL-9).
+    private let onExpand: (@MainActor (SidebarItem.ID, Bool) -> Void)?
     /// The gallery this window shows instead of the app; nil shows the app.
     let galleryRequest: GalleryRequest?
     /// The `-SuiteWindowSize` frame size; nil keeps the window's own size.
@@ -59,27 +73,55 @@ public struct SuiteWindow<Sidebar: View, Content: View, Inspector: View>: View {
     @State private var windowWidth: CGFloat = 0
     /// The app switcher to show; nil shows the placeholder.
     @Environment(\.suiteSwitcher) private var switcher
+    /// True while a `.searchable` field applied to this window is open (#3357).
+    @Environment(\.isSearching) private var isSearching
 }
 
 extension SuiteWindow where Sidebar == SuiteSidebarList {
     /// `title` names the open document (or the app when none is open).
     /// `actions` become the window's trailing toolbar items. `onToggle` gets a
     /// row toggle click, `onMove` a drag reorder within a section's top-level
-    /// rows, `onRename` a double-click rename.
+    /// rows, `onRename` a double-click rename. `contextActions` gives a row's
+    /// right-click menu; a row it gives no actions has none (LL-8a).
+    /// `expanded` with `onExpand` makes the groups' expansion the app's (LL-9).
     public init(
         title: String, subtitle: String? = nil, sections: [SidebarSection], selection: SidebarItem.ID?,
         onSelect: @escaping @MainActor (SidebarItem.ID) -> Void,
         onToggle: (@MainActor (SidebarItem.ID, SidebarToggle.ID) -> Void)? = nil,
         onMove: (@MainActor (SidebarSection.ID, IndexSet, Int) -> Void)? = nil,
         onRename: (@MainActor (SidebarItem.ID, String) -> Void)? = nil,
+        contextActions: (@MainActor (SidebarItem.ID) -> [ToolbarAction])? = nil,
+        expanded: Set<SidebarItem.ID>? = nil, onExpand: (@MainActor (SidebarItem.ID, Bool) -> Void)? = nil,
         documentActions: [ToolbarAction] = [], actions: [ToolbarAction] = [],
         @ViewBuilder content: () -> Content, @ViewBuilder inspector: () -> Inspector
     ) {
         self.init(
             galleryPage: SuiteGallery.request(from: ProcessInfo.processInfo.arguments), title: title,
             subtitle: subtitle, sections: sections, selection: selection, onSelect: onSelect, onToggle: onToggle,
-            onMove: onMove, onRename: onRename, documentActions: documentActions, actions: actions,
+            onMove: onMove, onRename: SidebarNode.refusable(onRename), contextActions: contextActions,
+            expanded: expanded, onExpand: onExpand, documentActions: documentActions, actions: actions,
             content: content, inspector: inspector)
+    }
+
+    /// The same window with a rename the app can refuse: `onRename` returns
+    /// nil to accept, or the message the row shows under its open field (LL-6).
+    public init(
+        title: String, subtitle: String? = nil, sections: [SidebarSection], selection: SidebarItem.ID?,
+        onSelect: @escaping @MainActor (SidebarItem.ID) -> Void,
+        onToggle: (@MainActor (SidebarItem.ID, SidebarToggle.ID) -> Void)? = nil,
+        onMove: (@MainActor (SidebarSection.ID, IndexSet, Int) -> Void)? = nil,
+        onRename: @escaping @MainActor (SidebarItem.ID, String) -> String?,
+        contextActions: (@MainActor (SidebarItem.ID) -> [ToolbarAction])? = nil,
+        expanded: Set<SidebarItem.ID>? = nil, onExpand: (@MainActor (SidebarItem.ID, Bool) -> Void)? = nil,
+        documentActions: [ToolbarAction] = [], actions: [ToolbarAction] = [],
+        @ViewBuilder content: () -> Content, @ViewBuilder inspector: () -> Inspector
+    ) {
+        self.init(
+            galleryPage: SuiteGallery.request(from: ProcessInfo.processInfo.arguments), title: title,
+            subtitle: subtitle, sections: sections, selection: selection, onSelect: onSelect, onToggle: onToggle,
+            onMove: onMove, onRename: onRename, contextActions: contextActions, expanded: expanded,
+            onExpand: onExpand, documentActions: documentActions, actions: actions, content: content,
+            inspector: inspector)
     }
 
     /// The window without the launch-argument check: it shows `galleryPage`
@@ -89,16 +131,19 @@ extension SuiteWindow where Sidebar == SuiteSidebarList {
         selection: SidebarItem.ID?, onSelect: @escaping @MainActor (SidebarItem.ID) -> Void,
         onToggle: (@MainActor (SidebarItem.ID, SidebarToggle.ID) -> Void)? = nil,
         onMove: (@MainActor (SidebarSection.ID, IndexSet, Int) -> Void)? = nil,
-        onRename: (@MainActor (SidebarItem.ID, String) -> Void)? = nil,
+        onRename: (@MainActor (SidebarItem.ID, String) -> String?)? = nil,
+        contextActions: (@MainActor (SidebarItem.ID) -> [ToolbarAction])? = nil,
+        expanded: Set<SidebarItem.ID>? = nil, onExpand: (@MainActor (SidebarItem.ID, Bool) -> Void)? = nil,
         documentActions: [ToolbarAction] = [], actions: [ToolbarAction] = [],
         @ViewBuilder content: () -> Content, @ViewBuilder inspector: () -> Inspector
     ) {
         self.init(
             gallery: galleryPage, title: title, subtitle: subtitle, documentActions: documentActions,
-            actions: actions, inspectorWidth: nil,
+            actions: actions, inspectorWidth: nil, contextActions: contextActions, expanded: expanded,
+            onExpand: onExpand,
             sidebar: SuiteSidebarList(
                 sections: sections, selection: selection, onSelect: onSelect, onToggle: onToggle, onMove: onMove,
-                onRename: onRename),
+                refusableRename: onRename),
             content: content(), inspector: inspector())
     }
 
@@ -132,9 +177,15 @@ extension SuiteWindow {
 
     private init(
         gallery: GalleryRequest?, title: String, subtitle: String?, documentActions: [ToolbarAction],
-        actions: [ToolbarAction], inspectorWidth: CGFloat?, sidebar: Sidebar, content: Content, inspector: Inspector
+        actions: [ToolbarAction], inspectorWidth: CGFloat?,
+        contextActions: (@MainActor (SidebarItem.ID) -> [ToolbarAction])? = nil,
+        expanded: Set<SidebarItem.ID>? = nil, onExpand: (@MainActor (SidebarItem.ID, Bool) -> Void)? = nil,
+        sidebar: Sidebar, content: Content, inspector: Inspector
     ) {
         self.galleryRequest = gallery
+        self.contextActions = contextActions
+        self.expanded = expanded
+        self.onExpand = onExpand
         self.title = title
         self.subtitle = subtitle
         self.documentActions = documentActions
@@ -168,6 +219,11 @@ extension SuiteWindow {
             minHeight: SuiteSize.windowMinimum.height, idealHeight: SuiteSize.windowLaunch.height)
     }
 
+    /// The app's expansion for the sidebar's groups; nil when the window was given neither part (LL-9).
+    private var sidebarExpansion: SidebarExpansion? {
+        expanded == nil && onExpand == nil ? nil : SidebarExpansion(expanded: expanded, onExpand: onExpand)
+    }
+
     /// The inspector column's widths: `inspectorWidth` as minimum and ideal, else the token.
     private var inspectorColumn: (min: CGFloat, ideal: CGFloat, max: CGFloat) {
         guard let width = inspectorWidth, width > 0 else { return SuiteSize.inspectorWidth }
@@ -177,6 +233,8 @@ extension SuiteWindow {
     private var splitView: some View {
         NavigationSplitView(columnVisibility: $columns) {
             sidebar
+                .environment(\.sidebarContextActions, contextActions.map { SidebarContextActions($0) })
+                .environment(\.sidebarExpansion, sidebarExpansion)
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("suite.sidebar")
                 // The system's sidebar toggle has no accessibility identifier and can't be given one
@@ -231,7 +289,8 @@ extension SuiteWindow {
                 // the actions, the current app's item alone.
                 let fit = AppSwitcher.toolbarFit(
                     windowWidth: windowWidth, itemCount: state.items.count,
-                    documentActions: documentActions.map { toolbarItem($0) }, actions: actions.map { toolbarItem($0) })
+                    documentActions: documentActions.map { toolbarItem($0) }, actions: actions.map { toolbarItem($0) },
+                    inspectorWidth: showsInspector ? inspectorColumn.ideal : 0, searching: isSearching)
                 AppSwitcher(
                     items: state.shownItems(everyItem: fit.showsEveryItem), current: state.current,
                     spacing: fit.spacing, onSelect: state.onSelect)

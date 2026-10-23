@@ -1,5 +1,6 @@
 // DesignInspectorContent.swift: the words Design's inspector shows about the
-// selection: the header lines for a node and for a page, whether a kind has a
+// selection: the header lines for a node (an open text edit's box at its live,
+// draft-fitted size) and for a page, whether a kind has a
 // fill row to edit, the value a row shows over one or several selected layers
 // (the value they all share, or nil, which the view draws as "Mixed"; for the
 // Text rows, the style the selected text layers share), the
@@ -11,8 +12,11 @@
 extension DesignNode {
     /// The header lines under the name: the kind ("Rectangle"), left out when
     /// the name already says it, and the size in whole points ("160 × 120 pt").
-    public var inspectorDetails: [String] {
-        (name == kind.defaultName ? [] : [kind.defaultName]) + ["\(wholePoints(frame.width)) × \(wholePoints(frame.height)) pt"]
+    public var inspectorDetails: [String] { inspectorDetails(frame) }
+
+    /// The header lines with `box` as the size.
+    func inspectorDetails(_ box: DesignRect) -> [String] {
+        (name == kind.defaultName ? [] : [kind.defaultName]) + ["\(wholePoints(box.width)) × \(wholePoints(box.height)) pt"]
     }
 }
 
@@ -29,12 +33,18 @@ extension DesignNodeKind {
         switch self {
         case .group: nil
         case .text: "Text Color"
-        case .frame, .rectangle, .ellipse, .instance: "Fill"
+        case .frame, .rectangle, .ellipse, .instance, .shape: "Fill"
         }
     }
 }
 
 extension DesignWorkspace {
+    /// `node`'s header lines with its live frame: an open text edit's box sized to the draft's
+    /// measured `extent`, as the commit will fit it (#3335).
+    public func inspectorDetails(of node: DesignNode, draft extent: DesignTextExtent?) -> [String] {
+        node.inspectorDetails(liveFrame(of: node, draft: extent))
+    }
+
     /// The inspector's value for a row over the selection: `read` of every selected layer when
     /// they all agree, or nil ("Mixed") when any differs or nothing is selected.
     public func sharedValue<T: Equatable>(_ read: (DesignNode) -> T) -> T? {

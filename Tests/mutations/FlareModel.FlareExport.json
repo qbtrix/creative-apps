@@ -1,0 +1,37 @@
+[
+  {
+    "label": "exportFileCount for PNG ignores the step",
+    "file": "Sources/FlareModel/FlareExport.swift",
+    "find": "scale: o.scale, step: o.step))?.count ?? 0",
+    "replace": "scale: o.scale, step: 1))?.count ?? 0",
+    "tests": "FlareExportOptionsTests"
+  },
+  {
+    "label": "exportProblem lets upperBound == durationFrames through",
+    "file": "Sources/FlareModel/FlareExport.swift",
+    "find": "o.frames.upperBound >= scene.durationFrames",
+    "replace": "o.frames.upperBound > scene.durationFrames",
+    "tests": "FlareExportOptionsTests"
+  },
+  {
+    "label": "exportSummary says \"1 files\"",
+    "file": "Sources/FlareModel/FlareExport.swift",
+    "find": "        if names.count == 1, let only = names.first { return \"Exported \\(only).\" }\n",
+    "replace": "",
+    "tests": "FlareExportOptionsTests"
+  },
+  {
+    "label": "setExportFormat resets the frames and the other options",
+    "file": "Sources/FlareModel/FlareExport.swift",
+    "find": "editExport { $0.format = format }",
+    "replace": "editExport { $0 = ExportOptions(format: format, sceneID: $0.sceneID, frames: 0...$0.frames.upperBound) }",
+    "tests": "FlareExportOptionsTests"
+  },
+  {
+    "label": "a scale other than 1x or 2x passes",
+    "file": "Sources/FlareModel/FlareExport.swift",
+    "find": "        if o.scale != 1, o.scale != 2 { return \"Scale must be 1x or 2x.\" }\n",
+    "replace": "",
+    "tests": "FlareExportOptionsTests"
+  }
+]

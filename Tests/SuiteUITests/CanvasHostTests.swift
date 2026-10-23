@@ -14,7 +14,9 @@ import Testing
         defer { window.close() }
         let canvas = try #require(canvasView(in: window.contentView))
         let board = canvas.artboard
+        #if DEBUG
         let bodiesBefore = CanvasHostPage.bodyRuns
+        #endif
         canvas.press(at: CGPoint(x: board.minX + 10, y: board.midY))
         for step in 1...120 {
             canvas.move(to: CGPoint(x: board.minX + 10 + CGFloat(step) * 2, y: board.midY))
@@ -25,7 +27,9 @@ import Testing
         canvas.release()
         settle()
         #expect(log.drags == 120 && log.endDrags == 1)
+        #if DEBUG  // the body counter exists only in debug builds
         #expect(CanvasHostPage.bodyRuns - bodiesBefore <= 1, "a drag ran \(CanvasHostPage.bodyRuns - bodiesBefore) bodies")
+        #endif
         #expect(canvas.live.isEmpty)
         #expect(pathPoints(canvas.overlay.path) == 0)
         #expect(log.lines.last == "endDrag after 120 samples")

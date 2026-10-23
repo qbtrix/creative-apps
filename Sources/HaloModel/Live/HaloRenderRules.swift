@@ -7,6 +7,7 @@
 // "Untitled"), and only the "_0001" frame suffix is Halo's. `run` is the frame
 // loop: it checks `isCancelled` before each frame, renders it with `drawing`
 // and `rendering`, writes it, and stops at the first error. Linux-safe.
+import SuiteKernel
 import SuiteModel
 
 enum HaloRenderRules {
@@ -25,7 +26,7 @@ enum HaloRenderRules {
         case .movie: ["\(base).mp4"]
         case .pngSequence: frames.map { "\(base)_\(pad4($0 + 1)).png" }
         }
-        return HaloRenderPlan(width: w, height: h, framesPerSecond: c.framesPerSecond, frames: frames, fileNames: names)
+        return HaloRenderPlan(width: w, height: h, framesPerSecond: c.framesPerSecond, frameRate: c.frameRate, frames: frames, fileNames: names)
     }
 
     /// Sends every planned frame to `sink` in order and says how it ended.

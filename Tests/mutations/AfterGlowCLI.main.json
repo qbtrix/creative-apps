@@ -1,0 +1,5 @@
+[
+{"label":"the binary runs on FakeIO, never the disk","file":"Sources/AfterGlowCLI/main.swift","find":"io: LiveIO())","replace":"io: FakeIO())","tests":"CLIBinaryTests"},
+{"label":"the binary always exits 0","file":"Sources/AfterGlowCLI/main.swift","find":"exit(code)","replace":"_ = code\nexit(0)","tests":"CLIBinaryTests"},
+{"label":"the program name is passed as an argument","file":"Sources/AfterGlowCLI/main.swift","find":"CommandLine.arguments.dropFirst()","replace":"CommandLine.arguments.dropFirst(0)","tests":"CLIBinaryTests"}
+]

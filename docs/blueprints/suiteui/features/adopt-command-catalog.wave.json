@@ -1,0 +1,344 @@
+{
+  "title": "Every app's actions are catalog commands, its document runs headless (Linux included) with its first real jobs, and its menus are built from the catalog",
+  "wave": "XK2",
+  "order": 5,
+  "status": "built",
+  "feature_issue": "#2999",
+  "covers": "captain's AI-accessible-first call, per app; beta-80 plan W0 adopt slices (W2, p0); the real-jobs suites' first jobs per app",
+  "waits_on": "command-catalog CC-run (every slice), CC-u and CC-lint (each menu task), CC-z (AC-z2); cross-line hand-offs in the packet: afterglow-cli CL-jobs, creative-core image-codecs IC-png (and IC-jpeg for JPEG jobs) through a bump, each app's menu-file owners",
+  "depends": [
+    "command-catalog"
+  ],
+  "ui_slice": "none",
+  "ui_slice_reason": "behaviour-preserving adoption: no new screen; menu goldens and the apps' existing journeys verify it",
+  "longest_chain": "5 (AC-f1 → AC-f2 → AC-f3 → AC-z1 → AC-z2)",
+  "owned": [
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/PhotoModelTests/PhotoCommandCatalogTests.swift",
+    "Tests/command-ids/photo.txt",
+    "Tests/mutations/PhotoModel.PhotoCommandCatalog.json",
+    "Sources/PhotoModel/PhotoHeadless.swift",
+    "Sources/PhotoModel/CoreRasterImageCodec.swift",
+    "Tests/PhotoModelTests/PhotoHeadlessTests.swift",
+    "Tests/RealJobs/photo/",
+    "Tests/mutations/PhotoModel.PhotoHeadless.json",
+    "Sources/PhotoApp/PhotoCommands.swift",
+    "Sources/PhotoApp/PhotoCommands+File.swift",
+    "Sources/PhotoApp/PhotoCommands+Edit.swift",
+    "Sources/PhotoApp/PhotoCommands+Image.swift",
+    "Sources/PhotoApp/PhotoCommands+Layer.swift",
+    "Sources/PhotoApp/PhotoCommands+Select.swift",
+    "Sources/PhotoApp/PhotoCommands+View.swift",
+    "Tests/command-path-baseline/photo.txt",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Tests/DesignModelTests/DesignCommandCatalogTests.swift",
+    "Tests/command-ids/design.txt",
+    "Tests/mutations/DesignModel.DesignCommandCatalog.json",
+    "Sources/DesignModel/DesignHeadless.swift",
+    "Tests/DesignModelTests/DesignHeadlessTests.swift",
+    "Tests/RealJobs/design/",
+    "Tests/mutations/DesignModel.DesignHeadless.json",
+    "Sources/DesignApp/DesignCommands.swift",
+    "Sources/DesignApp/DesignEditMenu.swift",
+    "Sources/DesignApp/DesignObjectMenu.swift",
+    "Tests/command-path-baseline/design.txt",
+    "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
+    "Tests/FlareModelTests/FlareCoreCommandCatalogTests.swift",
+    "Tests/mutations/FlareModel.FlareDocumentCommands+Catalog.json",
+    "Sources/FlareModel/FlareCommandCatalog.swift",
+    "Tests/FlareModelTests/FlareCommandCatalogTests.swift",
+    "Tests/command-ids/flare.txt",
+    "Tests/mutations/FlareModel.FlareCommandCatalog.json",
+    "Sources/FlareModel/FlareHeadless.swift",
+    "Tests/FlareModelTests/FlareHeadlessTests.swift",
+    "Tests/RealJobs/flare/",
+    "Tests/mutations/FlareModel.FlareHeadless.json",
+    "Sources/FlareApp/FlareCommands.swift",
+    "Sources/FlareApp/FlareStageContextMenu.swift",
+    "Tests/command-path-baseline/flare.txt",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/HaloModelTests/HaloCommandCatalogTests.swift",
+    "Tests/command-ids/halo.txt",
+    "Tests/mutations/HaloModel.HaloCommandCatalog.json",
+    "Sources/HaloModel/HaloHeadless.swift",
+    "Tests/HaloModelTests/HaloHeadlessTests.swift",
+    "Tests/RealJobs/halo/",
+    "Tests/mutations/HaloModel.HaloHeadless.json",
+    "Sources/HaloApp/HaloCommands.swift",
+    "Sources/HaloApp/HaloCompositionCommands.swift",
+    "Sources/HaloApp/HaloEditMenu.swift",
+    "Sources/HaloApp/HaloFileMenu.swift",
+    "Sources/HaloApp/HaloAnimationMenu.swift",
+    "Tests/command-path-baseline/halo.txt",
+    "Sources/LibraryModel/LibraryActions.swift",
+    "Tests/LibraryModelTests/LibraryActionTests.swift",
+    "Tests/mutations/LibraryModel.LibraryActions.json",
+    "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "Tests/LibraryModelTests/LibraryCommandCatalogTests.swift",
+    "Tests/command-ids/library.txt",
+    "Tests/mutations/LibraryModel.LibraryCommandCatalog.json",
+    "Sources/LibraryModel/LibraryHeadless.swift",
+    "Tests/LibraryModelTests/LibraryHeadlessTests.swift",
+    "Tests/RealJobs/library/",
+    "Tests/mutations/LibraryModel.LibraryHeadless.json",
+    "Sources/LibraryApp/LibraryMenus.swift",
+    "Sources/LibraryApp/LibraryCommands.swift",
+    "Tests/command-path-baseline/library.txt",
+    "Tests/AfterGlowCLITests/AllAppsCatalogTests.swift",
+    "Tests/AfterGlowCLITests/Golden/apps/",
+    "docs/blueprints/suiteui.md",
+    "docs/blueprints/suiteui/features/adopt-command-catalog.wave.json"
+  ],
+  "journeys": [
+    "PhotoEditJourneyTests.testCopyPasteAsNewLayer",
+    "DesignArrangeJourneyTests.testGroupAndUngroup",
+    "FlareMenuJourneys.testEveryMenuOpens",
+    "HaloJourneyTests.testEveryMenuOpens",
+    "HaloHistoryJourneyTests.testUndoRedoEveryEdit",
+    "LibraryJourneyTests.testEveryMenuOpens",
+    "LibraryJourneyTests.testRateASelectedPhoto"
+  ],
+  "slices": [
+    {
+      "id": "AC-photo",
+      "behavior": "Photo's menu, toolbar and palette actions are catalog commands whose availability is the app's existing help, `PhotoHeadless` opens, saves and exports on Linux, the batch-resize and watermark jobs pass, and every menu item is built from its spec.",
+      "tasks": [
+        "AC-p1",
+        "AC-p2",
+        "AC-p3"
+      ],
+      "journeys": [
+        "MJ-AC-photo"
+      ],
+      "owned": [
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/PhotoModelTests/PhotoCommandCatalogTests.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/mutations/PhotoModel.PhotoCommandCatalog.json",
+        "Sources/PhotoModel/PhotoHeadless.swift",
+        "Sources/PhotoModel/CoreRasterImageCodec.swift",
+        "Tests/PhotoModelTests/PhotoHeadlessTests.swift",
+        "Tests/RealJobs/photo/",
+        "Tests/mutations/PhotoModel.PhotoHeadless.json",
+        "Sources/PhotoApp/PhotoCommands.swift",
+        "Sources/PhotoApp/PhotoCommands+File.swift",
+        "Sources/PhotoApp/PhotoCommands+Edit.swift",
+        "Sources/PhotoApp/PhotoCommands+Image.swift",
+        "Sources/PhotoApp/PhotoCommands+Layer.swift",
+        "Sources/PhotoApp/PhotoCommands+Select.swift",
+        "Sources/PhotoApp/PhotoCommands+View.swift",
+        "Tests/command-path-baseline/photo.txt"
+      ],
+      "waits": {
+        "command-catalog:CC-run": [
+          "AC-p1"
+        ],
+        "command-catalog:CC-u": [
+          "AC-p3"
+        ],
+        "command-catalog:CC-lint": [
+          "AC-p3"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AC-design",
+      "behavior": "Design's `DesignCommand`s, tools and file actions are catalog commands over `help(_:)` and `run`, `DesignHeadless` works on Linux, the export-frames and align jobs pass, and its menus are built from specs.",
+      "tasks": [
+        "AC-d1",
+        "AC-d2",
+        "AC-d3"
+      ],
+      "journeys": [
+        "MJ-AC-design"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Tests/DesignModelTests/DesignCommandCatalogTests.swift",
+        "Tests/command-ids/design.txt",
+        "Tests/mutations/DesignModel.DesignCommandCatalog.json",
+        "Sources/DesignModel/DesignHeadless.swift",
+        "Tests/DesignModelTests/DesignHeadlessTests.swift",
+        "Tests/RealJobs/design/",
+        "Tests/mutations/DesignModel.DesignHeadless.json",
+        "Sources/DesignApp/DesignCommands.swift",
+        "Sources/DesignApp/DesignEditMenu.swift",
+        "Sources/DesignApp/DesignObjectMenu.swift",
+        "Tests/command-path-baseline/design.txt"
+      ],
+      "waits": {
+        "command-catalog:CC-run": [
+          "AC-d1"
+        ],
+        "command-catalog:CC-u": [
+          "AC-d3"
+        ],
+        "command-catalog:CC-lint": [
+          "AC-d3"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AC-flare",
+      "behavior": "FlareCore's 63 document commands (through `CommandRegistry.builtIn` and `CommandEngine`) and Flare's own actions are catalog commands, `FlareHeadless` works on Linux, the SVG-frames and key-and-save jobs pass, and its menus are built from specs.",
+      "tasks": [
+        "AC-f1",
+        "AC-f2",
+        "AC-f3",
+        "AC-f4"
+      ],
+      "journeys": [
+        "MJ-AC-flare"
+      ],
+      "owned": [
+        "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
+        "Tests/FlareModelTests/FlareCoreCommandCatalogTests.swift",
+        "Tests/mutations/FlareModel.FlareDocumentCommands+Catalog.json",
+        "Sources/FlareModel/FlareCommandCatalog.swift",
+        "Tests/FlareModelTests/FlareCommandCatalogTests.swift",
+        "Tests/command-ids/flare.txt",
+        "Tests/mutations/FlareModel.FlareCommandCatalog.json",
+        "Sources/FlareModel/FlareHeadless.swift",
+        "Tests/FlareModelTests/FlareHeadlessTests.swift",
+        "Tests/RealJobs/flare/",
+        "Tests/mutations/FlareModel.FlareHeadless.json",
+        "Sources/FlareApp/FlareCommands.swift",
+        "Sources/FlareApp/FlareStageContextMenu.swift",
+        "Tests/command-path-baseline/flare.txt"
+      ],
+      "waits": {
+        "command-catalog:CC-run": [
+          "AC-f1"
+        ],
+        "command-catalog:CC-u": [
+          "AC-f4"
+        ],
+        "command-catalog:CC-lint": [
+          "AC-f4"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AC-halo",
+      "behavior": "Every `HaloCommand` case is a catalog command whose availability is `unavailableHelp(for:)`, `HaloHeadless` works on Linux, the retitle and render-frame jobs pass, and its menus are built from specs.",
+      "tasks": [
+        "AC-h1",
+        "AC-h2",
+        "AC-h3"
+      ],
+      "journeys": [
+        "MJ-AC-halo"
+      ],
+      "owned": [
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/HaloModelTests/HaloCommandCatalogTests.swift",
+        "Tests/command-ids/halo.txt",
+        "Tests/mutations/HaloModel.HaloCommandCatalog.json",
+        "Sources/HaloModel/HaloHeadless.swift",
+        "Tests/HaloModelTests/HaloHeadlessTests.swift",
+        "Tests/RealJobs/halo/",
+        "Tests/mutations/HaloModel.HaloHeadless.json",
+        "Sources/HaloApp/HaloCommands.swift",
+        "Sources/HaloApp/HaloCompositionCommands.swift",
+        "Sources/HaloApp/HaloEditMenu.swift",
+        "Sources/HaloApp/HaloFileMenu.swift",
+        "Sources/HaloApp/HaloAnimationMenu.swift",
+        "Tests/command-path-baseline/halo.txt"
+      ],
+      "waits": {
+        "command-catalog:CC-run": [
+          "AC-h1"
+        ],
+        "command-catalog:CC-u": [
+          "AC-h3"
+        ],
+        "command-catalog:CC-lint": [
+          "AC-h3"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AC-library",
+      "behavior": "Library's menu actions move into Model methods and become catalog commands, `LibraryHeadless` imports, culls and exports on Linux, the import-rate-export and cull jobs pass, and its menus are built from specs.",
+      "tasks": [
+        "AC-l1",
+        "AC-l2",
+        "AC-l3",
+        "AC-l4"
+      ],
+      "journeys": [
+        "MJ-AC-library"
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryActions.swift",
+        "Tests/LibraryModelTests/LibraryActionTests.swift",
+        "Tests/mutations/LibraryModel.LibraryActions.json",
+        "Sources/LibraryModel/LibraryCommandCatalog.swift",
+        "Tests/LibraryModelTests/LibraryCommandCatalogTests.swift",
+        "Tests/command-ids/library.txt",
+        "Tests/mutations/LibraryModel.LibraryCommandCatalog.json",
+        "Sources/LibraryModel/LibraryHeadless.swift",
+        "Tests/LibraryModelTests/LibraryHeadlessTests.swift",
+        "Tests/RealJobs/library/",
+        "Tests/mutations/LibraryModel.LibraryHeadless.json",
+        "Sources/LibraryApp/LibraryMenus.swift",
+        "Sources/LibraryApp/LibraryCommands.swift",
+        "Tests/command-path-baseline/library.txt"
+      ],
+      "waits": {
+        "command-catalog:CC-run": [
+          "AC-l1"
+        ],
+        "command-catalog:CC-u": [
+          "AC-l4"
+        ],
+        "command-catalog:CC-lint": [
+          "AC-l4"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AC-z",
+      "behavior": "`afterglow list-apps` and every app's `list-commands` match their goldens, every catalog passes the conformance suite in one walk, every real job is green, and the feature is built.",
+      "tasks": [
+        "AC-z1",
+        "AC-z2"
+      ],
+      "journeys": [
+        "MJ-AC-all"
+      ],
+      "owned": [
+        "Tests/AfterGlowCLITests/AllAppsCatalogTests.swift",
+        "Tests/AfterGlowCLITests/Golden/apps/",
+        "docs/blueprints/suiteui.md",
+        "docs/blueprints/suiteui/features/adopt-command-catalog.wave.json"
+      ],
+      "waits": {
+        "AC-photo": [
+          "AC-z1"
+        ],
+        "AC-design": [
+          "AC-z1"
+        ],
+        "AC-flare": [
+          "AC-z1"
+        ],
+        "AC-halo": [
+          "AC-z1"
+        ],
+        "AC-library": [
+          "AC-z1"
+        ],
+        "command-catalog:CC-z": [
+          "AC-z2"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

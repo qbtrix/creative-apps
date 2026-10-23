@@ -1,11 +1,13 @@
 // LibraryWindow+Import.swift: the import area (import IM-6). File > Import
-// Folder… takes `-LibraryImportFolder` or a folder from the open panel,
+// Folder… takes `-LibraryImportFolder` or a folder from the open panel (a
+// folder dropped on the empty catalog skips the panel),
 // begins the import on the catalog, runs the importer off the main actor and
 // hands its progress, batches and result back to the catalog in order.
 // `-LibraryImportOnLaunch` imports once, as soon as the catalog has loaded.
 import AppKit
 import Foundation
 import LibraryModel
+import SuiteKernel
 import SwiftUI
 
 final class ImportAreaState {
@@ -27,8 +29,21 @@ extension LibraryWindow {
     var fileMenu: LibraryMenu.File {
         LibraryMenu.File(
             importFolder: enabled(model.importHelp == nil) { startImport() },
+            importDropped: enabled(model.importHelp == nil) { (folder: String) in importFolder(folder) },
             importHelp: model.importHelp,
-            dismissImportNotice: enabled(model.importNotice != nil) { model.dismissImportNotice() })
+            showImportFailures: enabled(showFailuresWhy == nil) { showImportFailures() },
+            dismissImportNotice: act(.dismissImportNotice))
+    }
+
+    /// Why `notice.show-failures` can't run on the window's catalog, nil when it can.
+    private var showFailuresWhy: String? {
+        LibraryCatalog.catalog.availability("notice.show-failures", on: model).why
+    }
+
+    /// The notice's Show or Hide: the catalog's `notice.show-failures`, which flips
+    /// whether the failures are listed. Its refusal is the disabled state's help.
+    private func showImportFailures() {
+        _ = try? LibraryCatalog.catalog.run("notice.show-failures", params: .object([:]), on: &model)
     }
 
     /// Called once from the window's `.task`.

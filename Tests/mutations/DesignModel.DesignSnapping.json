@@ -1,0 +1,72 @@
+[
+  {
+    "label": "snapCandidates: the hidden check dropped, so Hidden is a candidate",
+    "file": "Sources/SuiteKernel/Snap/Snapping.swift",
+    "find": "guard !seen.contains(node.id), !tree.isEffectivelyHidden(node.id) else { return }",
+    "replace": "guard !seen.contains(node.id) else { return }",
+    "tests": "DesignSnapCandidateTests"
+  },
+  {
+    "label": "snapCandidates: the moving subtree kept (only the moving ids skipped)",
+    "file": "Sources/SuiteKernel/Snap/Snapping.swift",
+    "find": "!(tree.ancestors(of: node.id) ?? []).contains(where: movingIDs.contains) else { return }",
+    "replace": "true else { return }",
+    "tests": "DesignSnapCandidateTests"
+  },
+  {
+    "label": "snapCandidates: a locked layer is dropped",
+    "file": "Sources/SuiteKernel/Snap/Snapping.swift",
+    "find": "guard !seen.contains(node.id), !tree.isEffectivelyHidden(node.id) else { return }",
+    "replace": "guard !seen.contains(node.id), !tree.isEffectivelyHidden(node.id), !tree.isEffectivelyLocked(node.id) else { return }",
+    "tests": "DesignSnapCandidateTests"
+  },
+  {
+    "label": "init(shift:option:command:snapToLayers:): || becomes &&",
+    "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
+    "find": "if command || !snapToLayers { insert(.noSnap) }",
+    "replace": "if command && !snapToLayers { insert(.noSnap) }",
+    "tests": "DesignSnapCandidateTests"
+  },
+  {
+    "label": "the bridge ignores the frame a draw goes into",
+    "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
+    "find": "moving: moving, drawingInto: parent, page: bounds",
+    "replace": "moving: moving, drawingInto: nil, page: bounds",
+    "tests": "DesignSnapCandidateTests"
+  },
+  {
+    "label": "the bridge frames a layer by its origin and size, not its far corner",
+    "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
+    "find": "Rect(minX: x, minY: y, maxX: maxX, maxY: maxY)",
+    "replace": "Rect(minX: x, minY: y, maxX: width, maxY: height)",
+    "tests": "DesignSnapCandidateTests"
+  },
+  {
+    "label": "snapGuides keeps the last guides after endDrag (SN-4)",
+    "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
+    "find": "        gesture?.guides\n",
+    "replace": "        gesture?.guides ?? .empty\n",
+    "tests": "DesignSnapMoveTests"
+  },
+  {
+    "label": "a step snaps to lines only, never to an equal gap (SN-4)",
+    "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
+    "find": "gaps: gaps.spacingOffset(axis, for: rect, tolerance: tolerance)",
+    "replace": "gaps: nil",
+    "tests": "DesignSnapMoveTests"
+  },
+  {
+    "label": "a step snaps only a box's top edge, not its centre or bottom (SN-4)",
+    "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
+    "find": "let dy = offset(.y, [rect.minY, (rect.minY + rect.maxY) / 2, rect.maxY])",
+    "replace": "let dy = offset(.y, [rect.minY])",
+    "tests": "DesignSnapMoveTests"
+  },
+  {
+    "label": "the guides leave out the gaps (SN-4)",
+    "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
+    "find": "gaps: gaps.gaps(around: box.snapRect)",
+    "replace": "gaps: []",
+    "tests": "DesignSnapMoveTests"
+  }
+]

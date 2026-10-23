@@ -1,0 +1,30 @@
+[
+  {
+    "label": "ratingRange",
+    "file": "Sources/LibraryModel/LibraryActions.swift",
+    "find": "case .setRating(let stars) where !(0...5).contains(stars)",
+    "replace": "case .setRating(let stars) where !(0...4).contains(stars)",
+    "tests": "LibraryActionTests"
+  },
+  {
+    "label": "sampleRefusalHint",
+    "file": "Sources/LibraryModel/LibraryActions.swift",
+    "find": "if let refused = cullError { throw LibraryRefusal(refused) }",
+    "replace": "if cullError != nil { throw LibraryRefusal(\"Couldn't change the photo.\") }",
+    "tests": "LibraryActionTests"
+  },
+  {
+    "label": "refusalChangesNothing",
+    "file": "Sources/LibraryModel/LibraryActions.swift",
+    "find": "if let why = help(action) { throw LibraryRefusal(why) }",
+    "replace": "if let why = help(action), case .setRating = action { throw LibraryRefusal(why) }",
+    "tests": "LibraryActionTests"
+  },
+  {
+    "label": "pinchAtFitIsFit",
+    "file": "Sources/LibraryModel/LibraryActions.swift",
+    "find": "zoomLoupe(abs(scale - fit) < 0.0001 ? .fit : .scale(scale))",
+    "replace": "zoomLoupe(.scale(scale))",
+    "tests": "LibraryActionTests"
+  }
+]

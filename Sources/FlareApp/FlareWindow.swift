@@ -1,10 +1,12 @@
 // FlareWindow.swift: Flare's window on SuiteWindow. The model comes from the
 // launch flags (FlareLaunch: -FlareFixture, -FlareSample, -FlareOpenFile).
-// The sidebar is a SuiteSidebarList of SCENES and LAYERS, and the
+// The sidebar is a SuiteSidebarList of SCENES over the shared LayerTreeList
+// of LAYERS (FlareLayersList, FlareWindow+Layers.swift), and the
 // inspector column is `inspectorWidth` wide in every state; the toolbar is New, Open, Save, Undo,
 // Redo, Auto-key, Animate… and Export…, each disabled with its area's reason
 // while it can't act. The content is the stage over the timeline (FlareCanvas)
-// while a document is open, else the empty state with New Animation; the
+// while a document is open, else the empty state with New Animation, which
+// opens a .flare dropped on it in this window (FlareShell.openQueue); the
 // inspector is FlareInspector (Properties and Library tabs). Every control
 // goes through one FlareIntent: `perform` and `help(for:)` in
 // FlareWindow+Router.swift hand it to its area's file, and a control's
@@ -12,10 +14,13 @@
 // (FlareTimeline, FlareRecording and the four modifiers) are filled by later
 // tasks without touching their call sites here. The
 // window owns presentation state only: zoom, rulers, guides, the inspector
-// tab and what is presented (FlarePresentation, in FlareNewSheet.swift).
+// tab and what is presented (FlarePresentation, in FlareNewSheet.swift),
+// plus the export task and the file it last wrote (FlareWindow+Export.swift);
+// the export sheet is FlareExportSheetAdapter's, shown while the Model's run
+// isn't idle.
 // It publishes the menu bar's FlareMenu (FlareCommands.swift): `perform` and
 // `help` for every section 3.4 item, the Undo and Redo step names, the recent
-// files and Loop.
+// files, Loop and the selection's Edit reasons.
 import FlareModel
 import SuiteUI
 import SwiftUI
@@ -24,11 +29,17 @@ struct FlareWindow: View {
     @State var model = FlareWorkspace(launch: FlareLaunch(arguments: ProcessInfo.processInfo.arguments))
     /// nil fits the stage; set once the user zooms.
     @State var zoom: Double? = nil
+    /// The stage's fit, which Zoom In and Zoom Out step from while `zoom` is nil.
+    @State var fitted = 1.0
     @State var showsRulers = true
     @State var showsGuides = true
     @State var inspectorTab: FlareInspectorTab = .properties
     /// The new sheet, alerts and the recovery offer.
     @State var presented: FlarePresentation? = nil
+    /// The export under way, so Cancel can stop it.
+    @State var exportTask: Task<Void, Never>? = nil
+    /// The first file the last export wrote, for Reveal in Finder.
+    @State var exportedFile: URL? = nil
     let launch = FlareLaunch(arguments: ProcessInfo.processInfo.arguments)
 
     #if DEBUG
@@ -36,6 +47,8 @@ struct FlareWindow: View {
     static var bodyRuns = 0
     /// The model the last body ran on, for the hosted-window tests to read back.
     static var shownModel: FlareWorkspace?
+    /// The last body's `perform`, for the hosted-window tests to send intents through (FlareFileFlowLiveTests).
+    @MainActor static var shownPerform: ((FlareIntent) -> Void)?
     #endif
 
     /// The inspector column: the editor's panel width plus SuiteWindow's
@@ -48,42 +61,52 @@ struct FlareWindow: View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
         let _ = Self.shownModel = model
+        let _ = Self.shownPerform = { perform($0) }
         #endif
         SuiteWindow(
             title: model.document == nil ? "Flare" : model.title, actions: toolbar,
             inspectorWidth: Self.inspectorWidth
         ) {
-            SuiteSidebarList(
-                sections: SidebarSection.flare(model, perform: { perform(.layers($0)) }),
-                selection: model.selectedLayerID ?? model.selectedSceneID,
-                onSelect: { perform(.layers(.select(id: $0))) },
-                onToggle: { perform(.layers(.toggle(id: $0, flag: $1))) },
-                onMove: { section, rows, destination in
-                    if let row = rows.first { perform(.layers(.move(section: section, from: row, to: destination))) }
-                },
-                onRename: { perform(.layers(.rename(id: $0, name: $1))) })
+            VStack(spacing: 0) {
+                SuiteSidebarList(
+                    sections: [SidebarSection.flareScenes(model, perform: { perform(.layers($0)) })],
+                    selection: model.selectedLayerID == nil ? model.selectedSceneID : nil,
+                    onSelect: { perform(.layers(.select(id: $0))) },
+                    onMove: { section, rows, destination in
+                        if let row = rows.first { perform(.layers(.move(section: section, from: row, to: destination))) }
+                    },
+                    onRename: { perform(.layers(.rename(id: $0, name: $1))) })
+                FlareLayersList(model: model, perform: { perform(.layers($0)) })
+            }
         } content: {
             FlareCanvas(
                 model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
-                help: { help(for: $0) }, tick: { model.tick(target: $0, ticker: &$1) }, onKey: toolKey)
+                help: { help(for: $0) }, tick: { model.tick(target: $0, ticker: &$1) }, onKey: toolKey,
+                onFit: { fitted = $0 }, onDismissNote: { model.dismissImportNote() })
         } inspector: {
             FlareInspector(
                 model: model, tab: inspectorTab, perform: perform,
                 easing: FlareTimingRow(
                     editor: model, onSelect: { model.selectEasingSegment($0) },
                     onPreset: { model.setEasingPreset($0) }, onMoveHandle: { model.moveEasingHandle($0, to: $1) },
-                    onEndDrag: { model.endEasingHandleDrag() }))
+                    onEndDrag: { model.endEasingHandleDrag() }),
+                shape: shapeOptions)
         }
         .modifier(FlareFilePanels(model: model, launch: launch, perform: perform))
         .modifier(FlareNewSheet(presented: $presented, perform: perform))
+        .modifier(FlareExportSheetAdapter(model: model, perform: perform))
         .modifier(FlareOpenStatus(model: model))
-        .modifier(FlareRecovery(model: model, restore: { model.restoreRecovery($0) }))
+        .suiteOpenQueue(FlareShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
+        .modifier(FlareAutosaveAdapter(model: model, restore: { try model.restoreRecovery($0) }))
+        .modifier(FlareLiveRegistration(read: { model }, write: { model.takeLive($0) }))
         .focusedSceneValue(
             \.flareMenu,
             FlareMenu(
                 perform: { menuPerform($0) }, help: { menuHelp($0) },
                 undoTitle: model.undoActionName ?? "Undo", redoTitle: model.redoActionName ?? "Redo",
-                recent: model.recent, loops: model.loops))
+                recent: model.recent, loops: model.loops, editHelps: model.editHelps,
+                selectionHelps: [model.deleteHelp, model.orderHelp(forward: true), model.orderHelp(forward: false)],
+                document: model.suiteDocument))
     }
 
     /// The menu bar's door: File > Open Sample > Keyed Ball opens the keyed
@@ -118,7 +141,7 @@ struct FlareWindow: View {
 }
 
 /// The window's content: the stage over the timeline while a document is
-/// open, else the empty state whose one action is New Animation (Open is the
+/// open, under the import note after a Lottie open (FlareImportNoteAdapter.swift), else the empty state whose one action is New Animation (Open is the
 /// toolbar's). New Animation is `.file(.new)` like the toolbar's New, so it
 /// takes `emptyNewIdentifier` to keep `suite.controls` free of duplicates.
 struct FlareCanvas: View {
@@ -133,6 +156,9 @@ struct FlareCanvas: View {
     var tick: @MainActor (Double, inout PlaybackTicker) -> Bool = { _, _ in false }
     /// The stage's keys it doesn't take itself (Return, Escape): the window's `toolKey`.
     var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
+    var onFit: @MainActor (Double) -> Void = { _ in }
+    /// The import note's Dismiss (FlareImportNoteAdapter.swift): the window's `model.dismissImportNote()`.
+    var onDismissNote: @MainActor () -> Void = {}
     /// Ticks the model while playing: started when `model.isPlaying` turns true, stopped when it turns false or
     /// the canvas leaves the screen. Its `measuredFPS` feeds the stage's status pills.
     @State private var driver: PlaybackDriver?
@@ -140,9 +166,10 @@ struct FlareCanvas: View {
     var body: some View {
         if model.document != nil {
             VStack(spacing: 0) {
+                FlareImportNoteAdapter(rows: model.importNoteRows, onDismiss: onDismissNote)
                 FlareStage(
                     model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
-                    help: help, onKey: onKey, measuredFPS: driver?.measuredFPS)
+                    help: help, onKey: onKey, measuredFPS: driver?.measuredFPS, onFit: onFit)
                 FlareTimeline(model: model, perform: perform)
             }
             .overlay { FlareRecording(model: model) }
@@ -154,6 +181,12 @@ struct FlareCanvas: View {
                 message: "Create an animation to start drawing scenes and keyframes.",
                 action: ToolbarAction("New Animation", systemImage: "plus", identifier: Self.emptyNewIdentifier) {
                     perform(.file(.new))
+                },
+                onDrop: { urls in
+                    // A .flare dropped here opens in this window (FlareShell.openQueue), any more in new ones.
+                    let files = urls.filter { FlareHeadless.openExtensions.contains($0.pathExtension.lowercased()) }
+                    files.forEach(FlareShell.openQueue.open)
+                    return !files.isEmpty
                 })
         }
     }

@@ -33,6 +33,7 @@ public struct SuiteCommands: Commands {
                 }
             }
         }
+        AIAccessCommands(app: app)
     }
 
     /// Brings `app` forward, or opens it, as a Switch To click asks.

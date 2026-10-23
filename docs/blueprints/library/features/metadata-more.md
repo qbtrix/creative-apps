@@ -89,11 +89,11 @@ files, line up one after another.
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| MD-a | Every photo carries keywords, a title, a caption and camera details, the sidecar contract has a fake and a live default that says it isn't connected, the `cameras` fixture opens with camera details, and every later slot exists. | MD-1, MD-2, MD-3, MD-4 | MD-MJ1 | cull (MD-4: `MetadataEditing.swift`) |
-| MD-b | Selecting a photo shows its camera, lens, aperture, shutter, ISO, focal length and date taken in the Info tab, read from its Exif at import; several photos show ranges and counts. | MD-5, MD-6, MD-7, MD-8 | MD-J1 | MD-a (MD-5); status-and-layout (MD-8) |
+| MD-a | Every photo carries keywords, a title, a caption and camera details, the sidecar contract has a fake and a live default that says it isn't connected, the `cameras` fixture opens with camera details, and every later slot exists. | MD-1, MD-2, MD-3, MD-4 | MD-MJ1 | cull (MD-4: `MetadataEditing.swift`); raw:RW-a (MD-3: `FakePlatform.swift`, re-cut 2026-10-21) |
+| MD-b | Selecting a photo shows its camera, lens, aperture, shutter, ISO, focal length and date taken in the Info tab, read from its Exif at import; several photos show ranges and counts. | MD-5, MD-6, MD-7, MD-8 | MD-J1 | MD-a (MD-5); status-and-layout (MD-8); raw:RW-m (MD-7: `ImageIODecoder.swift`, re-cut 2026-10-21) |
 | MD-c | Adding or removing keywords on a selection, or setting its title or caption, is one named undo step with suggestions from the catalog's keywords, and the catalog keeps them across relaunch. | MD-9, MD-10, MD-11, MD-12, MD-13 | MD-J2 | MD-a (MD-9); cull (MD-10, MD-11, MD-13); persist (MD-12); MD-b (MD-13); filters-collections (MD-13); crop and export (MD-13: they edit `LibraryWindow.swift` in wave 4) |
 | MD-d | Each keyword, title, caption, rating or label change on a photo with a file is written to an XMP sidecar beside it, the original never changes, and a sidecar another app wrote is left alone with a reason. | MD-14, MD-15, MD-16, MD-17, MD-18 | MD-J3 | MD-a (MD-14); MD-c (MD-18); cull (MD-18); filters-collections (MD-18) |
-| MD-e | Typing in the window's search field shows only the photos whose keywords, title, caption or camera details match, `field:value` narrows to one field, and a camera value in the Info tab searches for itself. | MD-19, MD-20, MD-21, MD-22 | MD-J4 | MD-a (MD-19); filters-collections (MD-21, MD-22); MD-d (MD-22) |
+| MD-e | Typing in the window's search field shows only the photos whose keywords, title, caption or camera details match, `field:value` narrows to one field, and a camera value in the Info tab searches for itself. | MD-19, MD-20, MD-21, MD-22 | MD-J4 | MD-a (MD-19); filters-collections (MD-21, MD-22); MD-d (MD-22); file-flow:LF-a (all, beta first) |
 
 Screen early: MD-b to MD-e own `Sources/LibraryApp/` files, so they are UI
 slices (`"ui": true`). Their views (MD-8, MD-13, MD-18, MD-22) still close

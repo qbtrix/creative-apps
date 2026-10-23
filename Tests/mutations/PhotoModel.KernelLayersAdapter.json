@@ -1,0 +1,51 @@
+[
+  {
+    "label": "refusalIsSuccess: a refused kernel edit still hands back the tree's layers, so a refusal can land as a step",
+    "file": "Sources/PhotoModel/PhotoLayers+Kernel.swift",
+    "find": "        } catch {\n            return nil\n        }\n        return layers(of: tree)",
+    "replace": "        } catch {\n            return layers(of: tree)\n        }\n        return layers(of: tree)",
+    "tests": "PhotoKernelLayersTests"
+  },
+  {
+    "label": "orderFlipped: the tree's roots are built top first, so the kernel moves and arranges the wrong way",
+    "file": "Sources/PhotoModel/PhotoLayers+Kernel.swift",
+    "find": "LayerTree(topFirst.reversed().map {",
+    "replace": "LayerTree(topFirst.map {",
+    "tests": "PhotoKernelLayersTests"
+  },
+  {
+    "label": "anchorShiftDropped: a drag up past layers forgets that taking the layer out shifts the anchor",
+    "file": "Sources/PhotoModel/PhotoLayers+Kernel.swift",
+    "find": "at = below + 1 - (from < below ? 1 : 0)",
+    "replace": "at = below + 1",
+    "tests": "PhotoKernelLayersTests"
+  },
+  {
+    "label": "copyKeepsSourceID: a duplicate's payload id wins over the node's, so the copy repeats its source's id",
+    "file": "Sources/PhotoModel/PhotoLayers+Kernel.swift",
+    "find": "$0.payload.relabeled($0.id, name: $0.name, isVisible: !$0.isHidden)",
+    "replace": "$0.payload.relabeled($0.payload.id, name: $0.name, isVisible: !$0.isHidden)",
+    "tests": "PhotoKernelLayersTests"
+  },
+  {
+    "label": "noOpIsAStep: an edit that leaves the order as it was still records an undo step",
+    "file": "Sources/PhotoModel/PhotoLayers+Kernel.swift",
+    "find": "guard let next, next != layers else { return }",
+    "replace": "guard let next else { return }",
+    "tests": "PhotoKernelLayersTests"
+  },
+  {
+    "label": "bringForwardSendsBack: Bring Forward hands the kernel the wrong arrange step, now that the kernel alone decides the edge",
+    "file": "Sources/PhotoModel/PhotoLayerMenu.swift",
+    "find": "arrangeLayer(id, .bringForward)",
+    "replace": "arrangeLayer(id, .sendBackward)",
+    "tests": "PhotoLayerMenuTests"
+  },
+  {
+    "label": "destinationUnchecked: a list drag to an out-of-range destination reaches the kernel, which drops the layer at the bottom",
+    "file": "Sources/PhotoModel/PhotoWorkspace.swift",
+    "find": "guard (0...layers.count).contains(destination) else { return }",
+    "replace": "",
+    "tests": "PhotoLayersEdgeTests"
+  }
+]

@@ -1,0 +1,58 @@
+[
+  {
+    "label": "droppedEndRun: adopt no longer ends the edit run, so a Shift-click that adds a layer keeps nudging into the old run",
+    "file": "Sources/DesignModel/DesignSelection.swift",
+    "find": "        selection.anchor = selection.primary\n        endEditRun()\n",
+    "replace": "        selection.anchor = selection.primary\n",
+    "tests": "DesignKernelSelectionAdapterTests|DesignSelectionRunTests.swift"
+  },
+  {
+    "label": "refusalIsSuccess: a Shift-click the kernel refuses is adopted anyway and ends the run",
+    "file": "Sources/DesignModel/DesignSelection.swift",
+    "find": "guard next.pick(id, .toggle, canAdd: canAddToSelection) else { return }",
+    "replace": "_ = next.pick(id, .toggle, canAdd: canAddToSelection)",
+    "tests": "DesignKernelSelectionAdapterTests|DesignSelectionRunTests.swift"
+  },
+  {
+    "label": "canAddIgnored: Shift-click adds a locked or hidden layer",
+    "file": "Sources/DesignModel/DesignSelection.swift",
+    "find": "id, .toggle, canAdd: canAddToSelection)",
+    "replace": "id, .toggle, canAdd: { _ in true })",
+    "tests": "DesignKernelSelectionAdapterTests|DesignMultiSelectTests.swift"
+  },
+  {
+    "label": "anchorDrifts: the anchor stays on a layer Shift-click took out",
+    "file": "Sources/DesignModel/DesignSelection.swift",
+    "find": "        selection.anchor = selection.primary\n",
+    "replace": "",
+    "tests": "DesignKernelSelectionAdapterTests"
+  },
+  {
+    "label": "selectAllIgnoresCanAdd: Select All takes locked and hidden layers",
+    "file": "Sources/DesignModel/DesignActions.swift",
+    "find": "next.selectAll(level.map(\\.id), canAdd: canAddToSelection)",
+    "replace": "next.selectAll(level.map(\\.id))",
+    "tests": "DesignKernelSelectionAdapterTests|DesignActionsTests"
+  },
+  {
+    "label": "smallStepAlways: Shift-nudge moves 1 point, not the kernel's large step",
+    "file": "Sources/DesignModel/DesignCanvasEditing.swift",
+    "find": "Nudge.delta(direction.kernel, large: shift)",
+    "replace": "Nudge.delta(direction.kernel, large: false)",
+    "tests": "DesignKernelSelectionAdapterTests"
+  },
+  {
+    "label": "directionFlipped: up maps to the kernel's down",
+    "file": "Sources/DesignModel/DesignCanvasEditing.swift",
+    "find": "        case .up: .up\n",
+    "replace": "        case .up: .down\n",
+    "tests": "DesignKernelSelectionAdapterTests"
+  },
+  {
+    "label": "marqueeExtends: a marquee keeps the selection it started from",
+    "file": "Sources/DesignModel/DesignCanvasEditing.swift",
+    "find": "Marquee.union(selectedNodeIDs, found, extending: false)",
+    "replace": "Marquee.union(selectedNodeIDs, found, extending: true)",
+    "tests": "DesignKernelSelectionAdapterTests"
+  }
+]

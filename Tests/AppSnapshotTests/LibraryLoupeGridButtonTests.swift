@@ -16,8 +16,9 @@ import Testing
         var catalog = LibraryCatalog()
         catalog.loadSamples()
         let photo = try #require(catalog.sortedItems.first)
+        catalog.open(photo.id)
         let pressed = Pressed()
-        let window = host(LibraryLoupe(photo: photo, position: "1 of 60", onGrid: { pressed.count += 1 }))
+        let window = host(LibraryLoupe(model: catalog, onGrid: { pressed.count += 1 }))
         defer { window.orderOut(nil) }
         let button = axNodes(in: window).first { ($0.accessibilityIdentifier?() ?? nil) == "library.loupe.grid" }
         let found = try #require(button, "the loupe has no library.loupe.grid button")

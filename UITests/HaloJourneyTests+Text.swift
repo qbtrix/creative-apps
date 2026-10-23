@@ -18,9 +18,10 @@
 // H-J22" note); a refusal records no step. The artboard is read by the label
 // of `halo.viewer.summary` (the Model's viewerSummary; values read empty,
 // #262), not the `halo.viewer.artboard` the packet names: that id is only the
-// viewer drag's refusal control. TEXT sits below TRANSFORM, under the
-// inspector's fold at 640 pt, so the inspector is scrolled to each control
-// before it is used. The Model half of every step is HaloModelTests'
+// viewer drag's refusal control. TEXT sits below TRANSFORM and LAYERS below
+// TEXT, under the inspector's fold at 640 pt, so the inspector is scrolled to
+// each control and row before it is used (XCUITest's own scroll-to-visible
+// overshoots near the bottom and clicks the row above). The Model half of every step is HaloModelTests'
 // HaloTextLayerTests. One shot per step, `halo-text-<step>`.
 import XCTest
 
@@ -105,6 +106,7 @@ final class HaloTextJourneyTests: XCTestCase {
         field.typeText("Stale")
         let first = layerRow(at: 1, halo)
         XCTAssert(first.waitForExistence(timeout: 5), "the layer list shows no second row")
+        scrollInspector(toShow: first, halo)
         first.click()
         expectField(reads: "Hello", halo)
         scrollInspector(toShow: field, halo)

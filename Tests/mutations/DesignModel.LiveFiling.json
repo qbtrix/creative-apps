@@ -1,23 +1,51 @@
 [
   {
-    "label": "decode skips the codec's check and opens anything",
+    "label": "a newer file version opens as if it were version 1",
     "file": "Sources/DesignModel/Live/LiveFiling.swift",
-    "find": "try workspace.open(data)",
-    "replace": "_ = data",
-    "tests": "DesignLiveStubTests"
+    "find": "guard version == Self.fileVersion else",
+    "replace": "guard version >= 0 else",
+    "tests": "DesignFilingTests"
   },
   {
-    "label": "encode writes an empty workspace",
+    "label": "encode writes its keys unsorted",
     "file": "Sources/DesignModel/Live/LiveFiling.swift",
-    "find": "workspace.load(document.pages)",
-    "replace": "workspace.load([])",
-    "tests": "DesignLiveStubTests"
+    "find": "encoder.outputFormatting = .sortedKeys",
+    "replace": "encoder.outputFormatting = .prettyPrinted",
+    "tests": "DesignFilingTests"
   },
   {
-    "label": "decode drops the file's pages",
+    "label": "decode skips the check and opens a file with no pages",
     "file": "Sources/DesignModel/Live/LiveFiling.swift",
-    "find": "return DesignDocument(pages: workspace.pages)",
-    "replace": "return DesignDocument(pages: Array(workspace.pages.prefix(0)))",
-    "tests": "DesignLiveStubTests"
+    "find": "try Self.check(content.pages)",
+    "replace": "_ = content.pages",
+    "tests": "DesignFilingTests"
+  },
+  {
+    "label": "a repeated id is let through",
+    "file": "Sources/DesignModel/Live/LiveFiling.swift",
+    "find": "guard seen.insert(id).inserted else { throw .duplicateID(id) }",
+    "replace": "seen.insert(id)",
+    "tests": "DesignFilingTests"
+  },
+  {
+    "label": "open replaces the pages without asking the filing",
+    "file": "Sources/DesignModel/DesignFile.swift",
+    "find": "let document = try services.filing.decode(data)",
+    "replace": "let document = (try? services.filing.decode(data)) ?? DesignDocument(pages: [])",
+    "tests": "DesignFilingTests"
+  },
+  {
+    "label": "a node or page under 1 point wide opens",
+    "file": "Sources/DesignModel/Live/LiveFiling.swift",
+    "find": "rect.width >= 1 && rect.height >= 1",
+    "replace": "rect.width > 0 && rect.height >= 1",
+    "tests": "DesignFileTests"
+  },
+  {
+    "label": "a node exactly 1 point wide is refused",
+    "file": "Sources/DesignModel/Live/LiveFiling.swift",
+    "find": "rect.width >= 1 && rect.height >= 1",
+    "replace": "rect.width > 1 && rect.height >= 1",
+    "tests": "DesignFileTests"
   }
 ]

@@ -1,9 +1,11 @@
 // Contracts/HaloDocumentValues.swift: the document values every Halo contract
 // speaks: what a frame draws, the document undo restores and a file holds,
-// the undo stacks, a playback tick and the render settings, plan and outcome.
-// The key values and the refusal types sit in HaloValues.swift. Linux-safe.
+// an undo entry, a playback tick and the render settings, plan and outcome.
+// The key values and the refusal types sit in HaloValues.swift; the undo
+// stacks, on the kernel's History, in HaloHistory+Kernel.swift. Linux-safe.
 import CoreRaster
 import FlareCore
+import SuiteKernel
 
 /// One layer as the viewer and the renderer draw it at a frame.
 public struct HaloDrawItem: Sendable, Hashable {
@@ -20,12 +22,25 @@ public struct HaloDrawItem: Sendable, Hashable {
     public var blendMode: BlendMode
     /// The words of a text layer; nil otherwise.
     public var text: HaloTextContent?
+    /// HG-1: the layer's gradient in a unit box over `bounds`; nil fills
+    /// `color`. HaloDrawRules carries it from the layer (HG-6).
+    public var gradient: Fill?
+    /// HS-5: a shape layer's spec, drawn in `bounds`; nil keeps the ellipse.
+    public var shape: ShapeSpec?
+    /// HK-5: a shape layer's stroke, its trim sampled at the frame; nil draws none.
+    public var stroke: VectorStroke?
+    /// PH-1: a solid's picture and its box and focus; nil draws `color`. HaloDrawRules fills them in PH-5.
+    public var placedAsset: PlacedAsset?
+    public var placedImage: PlacedImage?
     public init(
         layerID: String, kind: HaloLayerKind, bounds: HaloLayerRect, matrix: HaloMatrix, opacity: Double,
-        color: HaloLayerColor, blendMode: BlendMode, text: HaloTextContent? = nil
+        color: HaloLayerColor, blendMode: BlendMode, text: HaloTextContent? = nil, gradient: Fill? = nil,
+        shape: ShapeSpec? = nil, stroke: VectorStroke? = nil, placedAsset: PlacedAsset? = nil, placedImage: PlacedImage? = nil
     ) {
         self.layerID = layerID; self.kind = kind; self.bounds = bounds; self.matrix = matrix
         self.opacity = opacity; self.color = color; self.blendMode = blendMode; self.text = text
+        self.gradient = gradient; self.shape = shape; self.stroke = stroke
+        self.placedAsset = placedAsset; self.placedImage = placedImage
     }
 }
 
@@ -84,19 +99,6 @@ public struct HaloHistoryEntry: Sendable, Hashable {
     }
 }
 
-/// Undo and redo stacks, newest last. Only a `ProjectHistory` changes them.
-public struct HaloHistory: Sendable, Hashable {
-    public var undo: [HaloHistoryEntry]
-    public var redo: [HaloHistoryEntry]
-    public init(undo: [HaloHistoryEntry] = [], redo: [HaloHistoryEntry] = []) {
-        self.undo = undo; self.redo = redo
-    }
-    /// "Undo New Layer"; nil when there is nothing to undo.
-    public var undoTitle: String? { undo.last.map { "Undo \($0.name)" } }
-    /// "Redo New Layer"; nil when there is nothing to redo.
-    public var redoTitle: String? { redo.last.map { "Redo \($0.name)" } }
-}
-
 /// Where playback is after a tick.
 public struct HaloPlaybackTick: Sendable, Hashable {
     public var frame: Int
@@ -120,12 +122,15 @@ public struct HaloRenderPlan: Sendable, Hashable {
     public var width: Int
     public var height: Int
     public var framesPerSecond: Int
+    /// The exact rate each frame is timed by (`seconds(ofFrame:)`); `framesPerSecond` is its whole rate.
+    public var frameRate: FrameRate
     /// Composition frames in order, 0 through the last.
     public var frames: [Int]
     /// "Intro_0001.png" for each frame of a PNG sequence; one "Intro.mp4" for a movie.
     public var fileNames: [String]
-    public init(width: Int, height: Int, framesPerSecond: Int, frames: [Int], fileNames: [String]) {
+    public init(width: Int, height: Int, framesPerSecond: Int, frameRate: FrameRate? = nil, frames: [Int], fileNames: [String]) {
         self.width = width; self.height = height; self.framesPerSecond = framesPerSecond
+        self.frameRate = frameRate ?? FrameRate(whole: framesPerSecond)
         self.frames = frames; self.fileNames = fileNames
     }
 }

@@ -1,0 +1,10 @@
+[
+{"label":"the tour shows again after it was done","file":"Sources/SuiteModel/Onboarding/SuiteOnboarding.swift","find":"(p.onboardingDoneVersion ?? 0) < version","replace":"(p.onboardingDoneVersion ?? 0) <= version","tests":"SuiteOnboardingTests"},
+{"label":"finishing never records the version","file":"Sources/SuiteModel/Onboarding/SuiteOnboarding.swift","find":"FakeOnboarding().finishing(p, focus: focus, version: version)","replace":"p","tests":"SuiteOnboardingTests"},
+{"label":"a preset that asks for more loses its ellipsis","file":"Sources/SuiteModel/Onboarding/SuiteOnboarding.swift","find":"if asksForMore(preset) || preset.title.hasPrefix(\"New \")","replace":"if preset.title.hasPrefix(\"New \")","tests":"OnboardingCopyTests"},
+{"label":"no preset asks for more","file":"Sources/SuiteModel/Onboarding/SuiteOnboarding.swift","find":"{ preset.title.hasSuffix(\"…\") }","replace":"{ false }","tests":"OnboardingCopyTests"},
+{"label":"a one-step chip reads New Blank again","file":"Sources/SuiteModel/Onboarding/SuiteOnboarding.swift","find":"return \"New \" + preset.title + \" \" + noun","replace":"return \"New \" + preset.title","tests":"OnboardingCopyTests"},
+{"label":"a chip that asks for more says it creates the document","file":"Sources/SuiteModel/Onboarding/SuiteOnboarding.swift","find":"if !shown.isEmpty, shown.allSatisfy(asksForMore) {","replace":"if shown.count > 1, shown.allSatisfy(asksForMore) {","tests":"OnboardingCopyTests"},
+{"label":"a mixed row never says a chip asks first","file":"Sources/SuiteModel/Onboarding/SuiteOnboarding.swift","find":"if shown.contains(where: asksForMore) { return","replace":"if false { return","tests":"OnboardingCopyTests"},
+{"label":"a focus chip names no apps","file":"Sources/SuiteModel/Onboarding/SuiteOnboarding.swift","find":"return apps.isEmpty || apps == [name] ? name : name + \": \" + apps.joined(separator: \", \")","replace":"return name","tests":"OnboardingCopyTests"}
+]

@@ -1,0 +1,178 @@
+{
+  "title": "Layer masks on image layers and clipping groups in Photo: add, paint, disable and apply a mask; clip a layer to the one below",
+  "wave": 4,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "photo/masks-clipping (adopter of S4 and S8; photo.md PV-5's layer-mask half, PJ-13); RJ-P05; RJ-P45; multi-layer-select's clipping follow-up pulled into the beta (captain 2026-10-21)",
+  "waits_on": "layer-styles' PY-a and PY-m (shared Photo files: PhotoLayer, the catalog, the menu, the composite, the document file); multi-layer-select (PhotoStroke, PhotoLayerList); suiteui layer-styles' LS-clip before PK-8 (cross-line); creative-core masks-mattes (built, on the pinned core)",
+  "longest_chain": "5 (PK-1 → PK-5 → PK-7 → PK-9 → PK-10)",
+  "journeys": [
+    "PhotoMaskJourneyTests.testLayerMaskFromSelection",
+    "PhotoMaskJourneyTests.testClipTextureToShape"
+  ],
+  "owned": [
+    "Sources/PhotoModel/PhotoLayer.swift",
+    "Sources/PhotoModel/PhotoMask.swift",
+    "Sources/PhotoModel/PhotoClip+Kernel.swift",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/command-ids/photo.txt",
+    "Tests/PhotoModelTests/PhotoLayerMaskTests.swift",
+    "Tests/PhotoModelTests/PhotoClipTests.swift",
+    "Sources/PhotoApp/PhotoCommands+Layer.swift",
+    "Sources/PhotoApp/PhotoLayerList.swift",
+    "Tests/AppSnapshotTests/PhotoMaskSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetPhotoMaskTests.swift",
+    "UITests/PhotoJourneyTests+Mask.swift",
+    "Tests/mutations/PhotoModel.PhotoMask.json",
+    "Sources/PhotoModel/PhotoStroke.swift",
+    "Tests/PhotoModelTests/PhotoMaskPaintTests.swift",
+    "Tests/mutations/PhotoModel.PhotoStroke.json",
+    "Sources/PhotoModel/PhotoLayerComposite.swift",
+    "Tests/PhotoModelTests/PhotoMaskCompositeTests.swift",
+    "Tests/mutations/PhotoModel.PhotoLayerComposite.json",
+    "Tests/RealJobs/photo/soft-mask-blend/soft-mask-blend.jobs.json",
+    "Tests/RealJobs/photo/soft-mask-blend/input/two-photos.ora",
+    "Tests/RealJobs/photo/clip-texture/clip-texture.jobs.json",
+    "Tests/RealJobs/photo/clip-texture/input/disc-texture.ora",
+    "Sources/PhotoModel/PhotoDocumentFile.swift",
+    "Tests/mutations/PhotoModel.PhotoClip+Kernel.json",
+    "Tests/mutations/PhotoModel.PhotoDocumentFile.json",
+    "docs/blueprints/photo.md",
+    "docs/blueprints/photo/features/masks-clipping.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "PK-a",
+      "behavior": "The mask and clip commands are in Photo's catalog on stubs with their reasons, image layers carry a clip flag, and the Layer menu and layer rows show them.",
+      "tasks": [
+        "PK-1",
+        "PK-2"
+      ],
+      "journeys": [
+        "MJ-PK"
+      ],
+      "waits": {
+        "layer-styles:PY-a": [
+          "PK-1",
+          "PK-2"
+        ],
+        "multi-layer-select": [
+          "PK-1",
+          "PK-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/PhotoModel/PhotoLayer.swift",
+        "Sources/PhotoModel/PhotoMask.swift",
+        "Sources/PhotoModel/PhotoClip+Kernel.swift",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/PhotoModelTests/PhotoLayerMaskTests.swift",
+        "Tests/PhotoModelTests/PhotoClipTests.swift",
+        "Sources/PhotoApp/PhotoCommands+Layer.swift",
+        "Sources/PhotoApp/PhotoLayerList.swift"
+      ]
+    },
+    {
+      "id": "PK-u",
+      "behavior": "The mask badge, clip indent and Edit Mask state have snapshots and a render budget, and both journeys are written.",
+      "tasks": [
+        "PK-3",
+        "PK-4"
+      ],
+      "journeys": [
+        "PJ-13",
+        "PJ-K2"
+      ],
+      "waits": {
+        "PK-a": [
+          "PK-3",
+          "PK-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/PhotoMaskSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetPhotoMaskTests.swift",
+        "UITests/PhotoJourneyTests+Mask.swift"
+      ]
+    },
+    {
+      "id": "PK-m",
+      "behavior": "Add, delete, apply, enable and paint a mask, and clip and release, each one undo step; masked and clipped layers composite through core's masked composite; the .ora keeps both.",
+      "tasks": [
+        "PK-5",
+        "PK-6",
+        "PK-7",
+        "PK-8"
+      ],
+      "journeys": [
+        "MJ-PK"
+      ],
+      "waits": {
+        "PK-a": [
+          "PK-5",
+          "PK-8"
+        ],
+        "layer-styles:PY-m": [
+          "PK-7",
+          "PK-8"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/PhotoModel/PhotoMask.swift",
+        "Tests/PhotoModelTests/PhotoLayerMaskTests.swift",
+        "Tests/mutations/PhotoModel.PhotoMask.json",
+        "Sources/PhotoModel/PhotoStroke.swift",
+        "Tests/PhotoModelTests/PhotoMaskPaintTests.swift",
+        "Tests/mutations/PhotoModel.PhotoStroke.json",
+        "Sources/PhotoModel/PhotoLayerComposite.swift",
+        "Tests/PhotoModelTests/PhotoMaskCompositeTests.swift",
+        "Tests/mutations/PhotoModel.PhotoLayerComposite.json",
+        "Tests/RealJobs/photo/soft-mask-blend/soft-mask-blend.jobs.json",
+        "Tests/RealJobs/photo/soft-mask-blend/input/two-photos.ora",
+        "Tests/RealJobs/photo/clip-texture/clip-texture.jobs.json",
+        "Tests/RealJobs/photo/clip-texture/input/disc-texture.ora",
+        "Sources/PhotoModel/PhotoClip+Kernel.swift",
+        "Sources/PhotoModel/PhotoDocumentFile.swift",
+        "Tests/PhotoModelTests/PhotoClipTests.swift",
+        "Tests/mutations/PhotoModel.PhotoClip+Kernel.json",
+        "Tests/mutations/PhotoModel.PhotoDocumentFile.json"
+      ]
+    },
+    {
+      "id": "PK-z",
+      "behavior": "Both journeys pass on live services and photo.md lists masks and clipping as built.",
+      "tasks": [
+        "PK-9",
+        "PK-10"
+      ],
+      "journeys": [
+        "PJ-13",
+        "PJ-K2"
+      ],
+      "waits": {
+        "PK-u": [
+          "PK-9",
+          "PK-10"
+        ],
+        "PK-m": [
+          "PK-9"
+        ],
+        "layer-styles:PY-z": [
+          "PK-10"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/PhotoJourneyTests+Mask.swift",
+        "docs/blueprints/photo.md",
+        "docs/blueprints/photo/features/masks-clipping.wave.json"
+      ]
+    }
+  ]
+}

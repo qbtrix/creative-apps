@@ -31,6 +31,15 @@ private func image(_ width: Int, _ height: Int) -> DisplayImage? {
     #expect(catalog.cellValue(for: "b") == "ready 256×171 3 stars, Picked, Red label")
 }
 
+@Test func cellValueOfAPhotoInHandMatchesTheLookupByID() {
+    var catalog = LibraryCatalog()
+    catalog.load([photo("a"), photo("b", rating: 3, picked: true, label: .red), photo("gone", availability: .missing)])
+    catalog.thumbnails["b"] = image(256, 171)
+    let values = catalog.sortedItems.map { catalog.cellValue(photo: $0) }
+    #expect(values == catalog.sortedItems.map { catalog.cellValue(for: $0.id) })
+    #expect(Set(values) == ["loading No stars", "ready 256×171 3 stars, Picked, Red label", "unreadable No stars"])
+}
+
 @Test func cellValueAndHelpSayAMissingFileIsUnreadable() {
     var catalog = LibraryCatalog()
     catalog.load([photo("gone", availability: .missing), photo("bad", availability: .unreadable("bad header"))])
@@ -64,6 +73,10 @@ private func image(_ width: Int, _ height: Int) -> DisplayImage? {
     catalog.load([photo("gone", availability: .missing)])
     catalog.open("gone")
     #expect(catalog.loupeValue == "unreadable fit No stars")
+}
+
+@Test func anEmptyHistogramSaysWhy() {
+    #expect(LibraryCatalog().histogramEmptyMessage == "Open a photo in the loupe to see its histogram.")
 }
 
 @Test func histogramValueIsTheChannelMeanAndNeverNaN() {
@@ -120,7 +133,7 @@ private func image(_ width: Int, _ height: Int) -> DisplayImage? {
     let catalog = LibraryCatalog()
     let live = catalog.emptyState(importReason: nil)
     #expect(live == LibraryEmptyState(
-        title: "No Photos", message: "Photos you import appear here, sorted by the date they were taken.",
+        title: "No Photos", message: "Import a folder or drop one here. Photos appear sorted by the date they were taken.",
         offersImport: true))
     let off = catalog.emptyState(importReason: "Import isn't connected yet (import).")
     #expect(off.title == "No Photos" && off.offersImport)

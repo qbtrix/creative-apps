@@ -14,7 +14,9 @@
 // SuiteCurvePointEditing is its CurvePointEditing conformance (UC15); mapping,
 // the curve path and nudge steps are CurveEditor's statics. Under Increase
 // Contrast the well gets an outline. Every point is listed in `suite.controls`.
-// Owns presentation state only: focus and the gesture.
+// Under the well CurveEditor's caption row names the axes (Input →, ↑ Output);
+// each point's tooltip and accessibility label read "Point 2: x 0.25, y 0.75"
+// (`pointReading`). Owns presentation state only: focus and the gesture.
 import SwiftUI
 
 public struct ToneCurveEditor: View {
@@ -26,6 +28,9 @@ public struct ToneCurveEditor: View {
     private let onEnd: @MainActor () -> Void
     @State private var focused: Int?
     @State private var gesture = ToneCurveGesture()
+    /// True while the pointer gesture is live. SwiftUI resets it when the gesture ends or is
+    /// cancelled (a release outside the window gives no `onEnded`), and the reset ends the run.
+    @GestureState private var pressing = false
     @FocusState private var hasFocus: Bool
     @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.scrubProbe) private var probe
@@ -48,6 +53,13 @@ public struct ToneCurveEditor: View {
     }
 
     public var body: some View {
+        VStack(spacing: SuiteSpacing.xs) {
+            well
+            CurveAxisCaptionRow(captions: Self.axisCaptions)
+        }
+    }
+
+    private var well: some View {
         GeometryReader { geo in
             let plot = Self.plot(in: geo.size)
             ZStack {
@@ -58,11 +70,11 @@ public struct ToneCurveEditor: View {
             .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
+                    .updating($pressing) { _, live, _ in live = true }
                     .onChanged { dragged($0, plot: plot, size: geo.size) }
-                    .onEnded { _ in
-                        if gesture.released() { onEnd() }
-                    }
+                    .onEnded { _ in release() }
             )
+            .onChange(of: pressing) { _, live in if !live { release() } }
         }
         .frame(height: SuiteSize.curveEditor)
         .background(SuiteColor.field)
@@ -114,11 +126,12 @@ public struct ToneCurveEditor: View {
             .padding(SuiteSpacing.xs)
             .overlay { if active { Circle().strokeBorder(SuiteColor.accent, lineWidth: 2) } }
             .frame(width: SuiteSize.curveHandleHit, height: SuiteSize.curveHandleHit)
+            // The hit, not the drawn dot, is the point's frame to accessibility, as in CurveEditor.
+            .contentShape(Circle())
             .position(CurveEditor.viewPoint(unit, in: plot, range: 0...1))
-            .help("Point \(index + 1)")
+            .help(Self.pointReading(index, unit))
             .accessibilityElement()
-            .accessibilityLabel("Point \(index + 1)")
-            .accessibilityValue(CurveEditor.describe(unit))
+            .accessibilityLabel(Text(verbatim: Self.pointReading(index, unit)))
             .suiteControl(id: Self.pointID(id, index), enabled: true, reason: nil)
     }
 
@@ -143,6 +156,11 @@ public struct ToneCurveEditor: View {
         Task { @MainActor in
             probe.record(Self.sample(eventTime: eventTime, shownAt: ProcessInfo.processInfo.systemUptime))
         }
+    }
+
+    /// Ends the gesture, from `onEnded` or a cancel's reset of `pressing`; the run ends once.
+    private func release() {
+        if gesture.released() { onEnd() }
     }
 
     /// Tab moves to the next point and Shift-Tab back; past either end focus leaves the well.
@@ -182,6 +200,15 @@ extension ToneCurveEditor {
 
     /// The `suite.controls` and accessibility identifier of point `index`: `<id>.point1`, ...
     nonisolated public static func pointID(_ id: String, _ index: Int) -> String { "\(id).point\(index + 1)" }
+
+    /// "Point 2: x 0.25, y 0.75": point `index`'s tooltip and accessibility label, CurveEditor's
+    /// `describe` after the colon. The label carries the value because XCUITest reads SwiftUI values as "" (#262).
+    nonisolated public static func pointReading(_ index: Int, _ unit: CGPoint) -> String {
+        "Point \(index + 1): \(CurveEditor.describe(unit))"
+    }
+
+    /// The well's axis captions: x is the input level, y the output.
+    nonisolated public static let axisCaptions = CurveAxisCaptions(x: "Input", y: "Output")
 
     nonisolated static func sample(eventTime: Double, shownAt: Double) -> ProbeSample {
         ProbeSample(series: dragSeries, eventTime: eventTime, shownAt: shownAt)

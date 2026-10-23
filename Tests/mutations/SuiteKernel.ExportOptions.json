@@ -1,0 +1,37 @@
+[
+  {
+    "label": "longEdgeFloors: the long edge's short side is floored instead of rounded",
+    "file": "Sources/SuiteKernel/Export/ExportOptions.swift",
+    "find": "let short = whole(Double(n) * min(sw, sh) / max(sw, sh))",
+    "replace": "let short = Int(Double(n) * min(sw, sh) / max(sw, sh))",
+    "tests": "ExportOptionsTests"
+  },
+  {
+    "label": "shapeUnchecked: exact pixels that don't keep the artwork's shape are let through",
+    "file": "Sources/SuiteKernel/Export/ExportOptions.swift",
+    "find": "if !stretch, !keepsShape(pw, ph, sw, sh) {",
+    "replace": "if !stretch, false {",
+    "tests": "ExportOptionsTests"
+  },
+  {
+    "label": "gpsKept: All but location keeps the GPS dictionary",
+    "file": "Sources/SuiteKernel/Export/ExportOptions.swift",
+    "find": "static let location: Set<String> = [\"{GPS}\", ",
+    "replace": "static let location: Set<String> = [",
+    "tests": "ExportOptionsTests"
+  },
+  {
+    "label": "evenRoundsUp: an even-size format rounds an odd side up instead of down",
+    "file": "Sources/SuiteKernel/Export/ExportOptions.swift",
+    "find": "(max(w - w % 2, 2), max(h - h % 2, 2))",
+    "replace": "(max(w + w % 2, 2), max(h + h % 2, 2))",
+    "tests": "ExportOptionsTests"
+  },
+  {
+    "label": "alphaIgnored: a format that can't keep transparency takes alpha without a word",
+    "file": "Sources/SuiteKernel/Export/ExportOptions.swift",
+    "find": "if o.alpha, !spec.keepsAlpha {",
+    "replace": "if o.alpha, false {",
+    "tests": "ExportOptionsTests"
+  }
+]

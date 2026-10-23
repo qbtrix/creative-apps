@@ -1,0 +1,54 @@
+{
+  "title": "Select All Keys on the shared timeline: ⌘A while the strip has focus asks the host to pick every key",
+  "wave": 4,
+  "order": 80,
+  "status": "built",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "suiteui/timeline-select-all (part of S16); the stress gate's Select All Keys gap (PR #3499); adopters halo/key-editing and flare/key-select-all",
+  "waits_on": "nothing open (suiteui/timeline is built)",
+  "depends": [
+    "timeline"
+  ],
+  "longest_chain": "2 (TSA-1 → TSA-2)",
+  "journeys": [
+    "SuiteJourneyTests.testTimelineSelectsAllKeys"
+  ],
+  "owned": [
+    "Sources/SuiteUI/TimelineStrip.swift",
+    "Sources/SuiteUI/TimelineStrip+Keys.swift",
+    "Sources/SuiteUI/Gallery/GalleryTimeline.swift",
+    "Tests/SuiteUITests/TimelineSelectAllTests.swift",
+    "Tests/mutations/SuiteUI.TimelineStrip+Keys.json",
+    "UITests/SuiteJourneyTests+TimelineSelectAll.swift",
+    "Tests/AppSnapshotTests/SuiteTimelineSelectAllSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetSuiteTimelineSelectAllTests.swift",
+    "docs/blueprints/suiteui/features/timeline-select-all.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "TSA-a",
+      "behavior": "TimelineStrip(onSelectAllKeys:) exists; while the strip has focus ⌘A and the responder chain's Select All call it; the gallery page picks every key from ⌘A or its Select All Keys button, and the render budget holds.",
+      "tasks": [
+        "TSA-1",
+        "TSA-2"
+      ],
+      "journeys": [
+        "SJ19f"
+      ],
+      "waits": {},
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/TimelineStrip.swift",
+        "Sources/SuiteUI/TimelineStrip+Keys.swift",
+        "Sources/SuiteUI/Gallery/GalleryTimeline.swift",
+        "Tests/SuiteUITests/TimelineSelectAllTests.swift",
+        "Tests/mutations/SuiteUI.TimelineStrip+Keys.json",
+        "UITests/SuiteJourneyTests+TimelineSelectAll.swift",
+        "Tests/AppSnapshotTests/SuiteTimelineSelectAllSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetSuiteTimelineSelectAllTests.swift",
+        "docs/blueprints/suiteui/features/timeline-select-all.wave.json"
+      ]
+    }
+  ]
+}

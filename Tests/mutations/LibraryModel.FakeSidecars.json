@@ -1,0 +1,16 @@
+[
+  {
+    "label": "fail mode writes",
+    "file": "Sources/LibraryModel/Fakes/FakeSidecars.swift",
+    "find": "try await FakeBehavior.perform(mode, failing: .writeFailed(path: path, reason: \"The folder is read-only.\"))",
+    "replace": "try await FakeBehavior.perform(.ok, failing: .writeFailed(path: path, reason: \"The folder is read-only.\"))",
+    "tests": "LibrarySidecarContractTests.swift"
+  },
+  {
+    "label": "a foreign sidecar is replaced",
+    "file": "Sources/LibraryModel/Fakes/FakeSidecars.swift",
+    "find": "guard !foreign.contains(path) else {",
+    "replace": "guard foreign.isEmpty || !foreign.isEmpty else {",
+    "tests": "LibrarySidecarContractTests.swift"
+  }
+]

@@ -40,5 +40,19 @@
     "find": "frame.maxX > frameWidth || ",
     "replace": "",
     "tests": "DesignPageSizeTests.swift"
+  },
+  {
+    "label": "the union's left edge takes a max for a min",
+    "file": "Sources/DesignModel/Live/LiveTransforming.swift",
+    "find": "guard let minX = frames.map(\\.x).min()",
+    "replace": "guard let minX = frames.map(\\.x).max()",
+    "tests": "DesignPageSizeTests.swift"
+  },
+  {
+    "label": "contentBounds drops the frames it collected",
+    "file": "Sources/DesignModel/DesignPageSize.swift",
+    "find": "                frames.append(node.frame)\n",
+    "replace": "",
+    "tests": "DesignPageSizeTests.swift"
   }
 ]

@@ -1,0 +1,100 @@
+[
+  {
+    "label": "the display scale is truncated, not rounded",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "return Int(min(max(scale.rounded(), 1), 8))",
+    "replace": "return Int(min(max(scale, 1), 8))",
+    "tests": "LibraryThumbnailScaleTests.swift"
+  },
+  {
+    "label": "a scale under one is reported as is",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "return Int(min(max(scale.rounded(), 1), 8))",
+    "replace": "return Int(min(scale.rounded(), 8))",
+    "tests": "LibraryThumbnailScaleTests.swift"
+  },
+  {
+    "label": "a non-finite scale is not caught",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "guard scale.isFinite else { return 1 }",
+    "replace": "guard scale.isFinite else { return 8 }",
+    "tests": "LibraryThumbnailScaleTests.swift"
+  },
+  {
+    "label": "a pass's images are dropped",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "case .success(let image): setThumbnail(image, for: request, in: catalog)",
+    "replace": "case .success: break",
+    "tests": "LibraryThumbnailResultTests.swift"
+  },
+  {
+    "label": "a pass's failures are dropped",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "case .failure(let error): failures[request.id] = failThumbnail(request, error, in: catalog) ?? failures[request.id]",
+    "replace": "case .failure: break",
+    "tests": "LibraryThumbnailResultTests.swift"
+  },
+  {
+    "label": "a missing file is reported unreadable",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "if case .missingFile = error { return .missing }",
+    "replace": "if case .missingFile = error { return .unreadable(error.message) }",
+    "tests": "LibraryThumbnailCacheTests"
+  },
+  {
+    "label": "a pass's failures never reach the catalog's photos",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "if let availability = failures[items[index].id] { items[index].availability = availability }",
+    "replace": "if let availability = failures[items[index].id] { _ = availability }",
+    "tests": "LibraryThumbnailCacheTests"
+  },
+  {
+    "label": "a catalog forward loses the cache it moved out",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "defer { thumbnailCache = cache }",
+    "replace": "defer { _ = cache }",
+    "tests": "LibraryThumbnailCacheTests"
+  },
+  {
+    "label": "a cached position is trusted without checking its slot still holds the id",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "index < ids.endIndex, ids[index] == id { return index }",
+    "replace": "index < ids.endIndex { return index }",
+    "tests": "LibraryThumbnailPositionTests"
+  },
+  {
+    "label": "a miss never rebuilds the position map",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "        guard !rebuilt else { return nil }\n",
+    "replace": "        guard rebuilt else { return nil }\n",
+    "tests": "LibraryThumbnailPositionTests"
+  },
+  {
+    "label": "the visible span ignores the visible ids' positions",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "low = min(low, index); high = max(high, index)",
+    "replace": "low = min(low, 0); high = max(high, 0)",
+    "tests": "LibraryThumbnailPositionTests"
+  },
+  {
+    "label": "a held image whose photo left the order is kept",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "else { thumbnails[id] = nil; continue }",
+    "replace": "else { continue }",
+    "tests": "LibraryThumbnailPositionTests"
+  },
+  {
+    "label": "the token goes back to field by field and misses levels",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "hash.add(word: develop.fingerprint)",
+    "replace": "for slider in DevelopSlider.allCases { hash.add(word: develop.value(slider).bitPattern) }; for p in develop.curve.points { hash.add(word: p.x.bitPattern); hash.add(word: p.y.bitPattern) }",
+    "tests": "LibraryDevelopValuesTests"
+  },
+  {
+    "label": "the token hashes only the sliders and misses the curve and levels",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "hash.add(word: develop.fingerprint)",
+    "replace": "for slider in DevelopSlider.allCases { hash.add(word: develop.value(slider).bitPattern) }",
+    "tests": "LibraryDevelopValuesTests"
+  }
+]

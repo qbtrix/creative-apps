@@ -1,7 +1,8 @@
 // Fakes/FakeRendering.swift: fakes of the loupe, develop, crop and export
 // contracts. The loupe is the photo's gradient lifted one byte level per
-// slider step, develop changes nothing, crop centers the aspect, and export
-// plans by the same naming rule in a few lines. The loupe and exporter obey
+// slider step, curve point off the diagonal and levels field off neutral;
+// develop changes nothing, crop centers the aspect, and export plans on the
+// shared naming rule (`ExportNames.unique`). The loupe and exporter obey
 // `-LibraryFakeMode`, so the UI track can show every state.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -28,9 +29,15 @@ public struct FakeLoupe: LoupeImaging {
             throw LibraryError.renderFailed("empty photo")
         }
         // Not the develop math: a visible stand-in so the UI track sees every
-        // slider move. Each step of any slider (0.01 EV, or 1) lifts by one
-        // byte level, clamped to the byte range.
-        let steps = DevelopSlider.allCases.map { settings.value($0) / $0.step }.reduce(0, +)
+        // slider move. Each step of any slider (0.01 EV, or 1), each curve
+        // point off the diagonal and each levels field off neutral lifts by
+        // one byte level, clamped to the byte range.
+        let sliderSteps = DevelopSlider.allCases.map { settings.value($0) / $0.step }.reduce(0, +)
+        let curveSteps = settings.curve.points.filter { $0.x != $0.y }.count
+        let levelSteps = DevelopLevels.Field.allCases.filter {
+            settings.levels.value($0) != DevelopLevels.neutral.value($0)
+        }.count
+        let steps = sliderSteps + Double(curveSteps + levelSteps)
         let lift = Int(min(max(steps, -255), 255).rounded())
         var bytes = base.rgba8
         var red = [Int](repeating: 0, count: HistogramBins.binCount), green = red, blue = red
@@ -111,11 +118,10 @@ public struct FakeExporter: PhotoExporting {
     let mode: FakeMode
     public init(mode: FakeMode = .ok) { self.mode = mode }
     public func plan(_ photos: [PhotoItem], options: ExportOptions, existingNames: Set<String>) -> ExportPlan {
-        var taken = existingNames
-        let items = photos.map { photo -> ExportPlan.Item in
-            var name = photo.name + ".jpg", n = 2
-            while taken.contains(name) { name = photo.name + " \(n).jpg"; n += 1 }
-            taken.insert(name)
+        let stems = photos.enumerated().map { options.naming.stem(for: $1, index: $0, count: photos.count) }
+        let names = ExportNames.unique(stems: stems, format: options.format, sidecar: options.sidecar,
+                                       existing: existingNames)
+        let items = zip(photos, names).map { photo, name -> ExportPlan.Item in
             let size = options.longEdge.map { photo.pixelSize.fitting(longSide: $0) } ?? photo.pixelSize
             return ExportPlan.Item(photoID: photo.id, fileName: name, size: size)
         }

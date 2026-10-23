@@ -1,0 +1,10 @@
+{
+  "id": "kernel-sample",
+  "name": "Sample",
+  "description": "Sample/: the suite's one colour sampler. SampleSize (point, 3 × 3, 5 × 5) and SampleRGBA (one 8-bit straight-alpha pixel); SampleRules (mean, the alpha-weighted mean of a square over a reader closure that skips transparent pixels, and hex); the SampleTarget protocol an app's workspace conforms to and SampleCommands (the color.sample query every app registers). The color.sample command is how an agent reads a colour the way a person does with the eyedropper: SuiteUI's EyedropperButton on every colour row picks from the screen, its SampleLoupe rings the pointer of a canvas tool with the colour under it, and the gallery page and the fake canvas (FakeCanvasDocument, its topmost rect) sample through color.sample, so RJ-X33 runs on the CLI. eyedropper EY-1 declares them as stubs (the spec with its real id, schema and availability); EY-5 and EY-6 fill the bodies; EY-8 makes the fake a target.",
+  "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+  "paths": [
+    "Sources/SuiteKernel/Sample/"
+  ],
+  "order": 105
+}

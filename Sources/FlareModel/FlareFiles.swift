@@ -2,11 +2,12 @@
 // state first (`beginOpen`), decodes off the main thread (`decodeFile` is pure), then lands through `load`
 // (`finishOpen`); a bad file leaves the open document as it was and says why in `loadState`, with section 3.3's
 // text for each FormatError. A save hands the app the file's bytes (`saveData`), and the app reports the write
-// back (`didSave`, `saveFailed`). `isDirty` compares the document with the one last opened or saved, so undoing
-// back to the save is clean again. The Open Recent list keeps file paths, most recent first (`noteRecent`,
-// `clearRecent`). Autosave is due `autosaveDelay` seconds after the last edit while the document is dirty
+// back (`didSave`, `saveFailed`). `isDirty` is the kernel session's: dirty while the document differs from the one
+// last opened or saved, so undoing back to the save is clean again. The Open Recent list keeps file paths, most recent first (`noteRecent`;
+// the menu and Clear Menu are the suite's, FlareFileFlow+Kernel.swift). Autosave is due `autosaveDelay` seconds after the last edit while the document is dirty
 // (`autosaveDue`), and `recoveryData()` is the dirty document's file bytes; `restoreRecovery` lands a recovered
-// document again as unsaved, untitled work. The app does the file panels and the disk.
+// document again as unsaved, untitled work. The app does the file panels and the disk. Dirty, due and the launch
+// offer are the kernel session's, and a save ends the open run (FlareFiles+Kernel.swift); Flare keeps no copy.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -35,7 +36,7 @@ public struct FlareSave: Sendable, Equatable {
 
 extension FlareWorkspace {
     /// Unsaved changes: the document differs from the one last opened or saved.
-    public var isDirty: Bool { document != savedDocument }
+    public var isDirty: Bool { documentSession.isDirty }
 
     /// The window title: the file's name without `.flare`, or "Untitled" before the first save.
     public var title: String {
@@ -45,6 +46,9 @@ extension FlareWorkspace {
 
     /// Shows the open's progress state (QB-L9) before the file is read; the open document stays as it is.
     public mutating func beginOpen() { loadState = .loading }
+
+    /// Whether a file handed to Flare opens in this window rather than a new one: no animation open, none opening.
+    public var takesOpenedFile: Bool { document == nil && loadState != .loading }
 
     /// Decodes a file's bytes; pure, so the app runs it off the main thread (QB-L12).
     public static func decodeFile(_ data: Data) -> Result<Document, FormatError> {
@@ -102,6 +106,7 @@ extension FlareWorkspace {
         savedDocument = save.document
         fileName = name
         saveError = nil
+        sessionDidSave()
     }
 
     /// The write failed for `reason`; the document and its changes stay.
@@ -120,17 +125,14 @@ extension FlareWorkspace {
         recent = Array(recent.prefix(Self.recentLimit))
     }
 
-    /// Empties the Open Recent list (File > Open Recent > Clear Menu).
-    public mutating func clearRecent() { recent = [] }
-
     /// Seconds after the last edit before the app writes the recovery file.
     public static let autosaveDelay: Double = 30
 
     /// The app keeps the time of the last edit; due only while the document is dirty, once `autosaveDelay`
     /// seconds have passed. Never due for a missing or non-finite time.
     public func autosaveDue(lastEdit: Double?, now: Double) -> Bool {
-        guard isDirty, let lastEdit, now.isFinite, lastEdit.isFinite else { return false }
-        return now - lastEdit >= Self.autosaveDelay
+        guard let lastEdit, now.isFinite, lastEdit.isFinite else { return false }
+        return kernelAutosaveDue(lastEdit: lastEdit, now: now)
     }
 
     /// The encoded document while dirty, with the save path's encoder; nil when clean, when there is no

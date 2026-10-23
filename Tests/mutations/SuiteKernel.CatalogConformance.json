@@ -1,0 +1,44 @@
+[
+  {
+    "label": "retired id allowed back: the ledger never reports a retired id the catalog uses again (.retiredNeverReused)",
+    "file": "Sources/SuiteKernel/Commands/CommandIDLedger.swift",
+    "find": "let back = current.intersection(retired)",
+    "replace": "let back = current.intersection(Set<String>())",
+    "tests": "SuiteKernelTests.CommandIDLedgerTests"
+  },
+  {
+    "label": "an id dropped from the catalog reads as kept, so removing one without retiring it passes (.removedIsRetired)",
+    "file": "Sources/SuiteKernel/Commands/CommandIDLedger.swift",
+    "find": "live.subtracting(retired).subtracting(current)",
+    "replace": "live.subtracting(retired).subtracting(live)",
+    "tests": "SuiteKernelTests.CommandIDLedgerTests"
+  },
+  {
+    "label": "the undo law compares history only, not bytes, so an undo that keeps the change passes (.undoRestoresBytes)",
+    "file": "Sources/SuiteKernel/Commands/CatalogConformance.swift",
+    "find": "if (try? undone.save()) != before {",
+    "replace": "if catalog.history(undone).undoName != catalog.history(fixture).undoName {",
+    "tests": "SuiteKernelTests.CatalogConformanceTests"
+  },
+  {
+    "label": "the step-name law reads the title, not the history, so a misnamed step passes (.stepNamedTitle)",
+    "file": "Sources/SuiteKernel/Commands/CatalogConformance.swift",
+    "find": "let name = catalog.history(doc).undoName",
+    "replace": "let name: String? = spec.title",
+    "tests": "SuiteKernelTests.CatalogConformanceTests"
+  },
+  {
+    "label": "the history exemption covers every view and query, so a view or query that writes bytes passes (.queryOrViewChangesNoBytes)",
+    "file": "Sources/SuiteKernel/Commands/CatalogConformance.swift",
+    "find": "case .query, .view where !historyIDs.contains(id):",
+    "replace": "case .query, .view where historyIDs.contains(id):",
+    "tests": "SuiteKernelTests.CatalogConformanceTests"
+  },
+  {
+    "label": "an example that fails its schema still counts as conforming when its run is skipped (.exampleValidates)",
+    "file": "Sources/SuiteKernel/Commands/CatalogConformance.swift",
+    "find": "return problems + [CatalogLaw.exampleValidates.problem(id, \"the example fails its params schema: \\(why)\")]",
+    "replace": "return problems",
+    "tests": "SuiteKernelTests.CatalogConformanceTests"
+  }
+]

@@ -5,7 +5,7 @@
 // loop timer (a fast hand on a 120 Hz mouse or trackpad), go through
 // StrokePacer to the workspace on State's copy (StateBox) and on to
 // CanvasRenderer, which renders the damaged tiles and hands them to the tile
-// layers (CanvasTiles, a TileCanvasView), exactly as PhotoWindow wires them.
+// layers (CanvasTiles, a CanvasHostView), exactly as PhotoWindow wires them.
 // The stroke is 120 samples, 16 px apart, of a 64 px brush on a 4000 x 3000
 // image (about 1,900 px a second).
 //
@@ -23,6 +23,7 @@ import AppKit
 import CoreRaster
 import Foundation
 import PhotoModel
+import SuiteUI
 import Testing
 
 @testable import PhotoApp
@@ -56,7 +57,7 @@ import Testing
         open.setToolOption(.size(64))
         let state = StateBox(open)
         let renderer = CanvasRenderer()
-        renderer.tiles.attach(TileCanvasView(frame: CGRect(x: 0, y: 0, width: 1000, height: 750)))
+        renderer.tiles.attach(CanvasHostView(frame: CGRect(x: 0, y: 0, width: 1000, height: 750)))
         renderer.show(state.value)
         try await shown(state.value.revision, renderer)
 

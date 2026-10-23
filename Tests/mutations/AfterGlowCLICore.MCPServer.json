@@ -1,0 +1,6 @@
+[
+  {"label": "parse errors answered with -32600", "file": "Sources/AfterGlowCLICore/MCP/JSONRPC.swift", "find": "return .failure(RPCError(code: RPCError.parseError, message: \"Parse error: the line is not one JSON value\"))", "replace": "return .failure(invalid(\"the line is not one JSON value\"))", "tests": "MCPProtocolTests"},
+  {"label": "notifications answered", "file": "Sources/AfterGlowCLICore/MCP/MCPServer.swift", "find": "guard let id = request.id else { return nil }", "replace": "let id = request.id ?? .number(0)", "tests": "MCPProtocolTests"},
+  {"label": "an older version accepted unnegotiated", "file": "Sources/AfterGlowCLICore/MCP/MCPServer.swift", "find": "if case .string(let text) = named, let agreed = MCPVersions.negotiate(text) { return .success(agreed) }", "replace": "if case .string(let text) = named { return .success(MCPVersions.negotiate(text) ?? text) }", "tests": "MCPProtocolTests"},
+  {"label": "the rate window keeps calls older than a second", "file": "Sources/AfterGlowCLICore/MCP/MCPServer.swift", "find": "times.removeAll { now - $0 >= 1 }", "replace": "times.removeAll { now - $0 > 1 }", "tests": "MCPProtocolTests"}
+]

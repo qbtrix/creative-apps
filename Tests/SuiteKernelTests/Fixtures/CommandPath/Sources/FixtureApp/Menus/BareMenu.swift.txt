@@ -1,0 +1,7 @@
+// A fixture app source for CommandPathTests (CC-11, CJ3), one folder down: a
+// bare menu item built without a spec.
+struct BareMenu: View {
+    var body: some View {
+        MenuCommand("X", help: "", perform: {})
+    }
+}

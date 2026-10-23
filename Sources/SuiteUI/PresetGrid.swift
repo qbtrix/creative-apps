@@ -4,9 +4,10 @@
 // `selected` may be nil (no preset matches, as after a handle drag). Arrow
 // keys move focus within the grid through a PresetNavigating rule (UC4; the
 // live SuitePresetNavigating stops at the edges, a gallery page may pass
-// FakePresetNavigating), and Space presses the focused preset. Each press
-// reports a `press` sample to the chip probe (ChipProbe). Owns presentation
-// state only: which preset has focus.
+// FakePresetNavigating), and Space presses the focused preset. A click
+// focuses the preset it presses, so arrows then start there, not at whatever
+// control had focus before (#2927). Each press reports a `press` sample to the
+// chip probe (ChipProbe). Owns presentation state only: which preset has focus.
 import SwiftUI
 
 /// The live preset-grid rule: an arrow moves one cell and stops at the grid's edges (no wrap).
@@ -57,6 +58,25 @@ public struct PresetGrid<ID: Hashable & Sendable>: View {
         }
     }
 
+    /// The preset an arrow key moves focus to from `focused`; nil when nothing in the grid has focus or the arrow
+    /// leaves the grid, so the key passes on.
+    public nonisolated static func target(
+        of arrow: GridArrow, from focused: ID?, in options: [InspectorOption<ID>], columns: Int,
+        navigation: any PresetNavigating
+    ) -> ID? {
+        guard let current = options.firstIndex(where: { $0.id == focused }),
+            let next = navigation.neighbor(of: current, arrow, count: options.count, columns: columns),
+            options.indices.contains(next)
+        else { return nil }
+        return options[next].id
+    }
+
+    /// Presses `id`: it takes focus, then the grid reports the choice.
+    private func press(_ id: ID) {
+        focused = id
+        ChipProbe.press(probe) { onSelect(id) }
+    }
+
     public var body: some View {
         // The 28 pt hit rows overlap the 4 pt between their 24 pt drawings.
         LazyVGrid(
@@ -64,20 +84,26 @@ public struct PresetGrid<ID: Hashable & Sendable>: View {
             spacing: SuiteSpacing.xs - (SuiteSize.presetHit - SuiteSize.preset)
         ) {
             ForEach(options) { option in
-                Button(option.title) { ChipProbe.press(probe) { onSelect(option.id) } }
+                Button(option.title) { press(option.id) }
                     .buttonStyle(SuiteChipStyle(kind: .preset, isOn: option.id == selected))
+                    // Focusable on a click, not only under keyboard navigation (focusable(_:interactions:)).
+                    .focusable()
                     .focused($focused, equals: option.id)
                     .accessibilityAddTraits(option.id == selected ? .isSelected : [])
                     .accessibilityIdentifier(option.identifier ?? "")
             }
         }
-        .onKeyPress(keys: [.leftArrow, .rightArrow, .upArrow, .downArrow]) { press in
-            guard let current = options.firstIndex(where: { $0.id == focused }),
-                let arrow = Self.arrow(press.key),
-                let next = navigation.neighbor(of: current, arrow, count: options.count, columns: columns),
-                options.indices.contains(next)
+        .onKeyPress(keys: [.leftArrow, .rightArrow, .upArrow, .downArrow]) { key in
+            guard let arrow = Self.arrow(key.key),
+                let next = Self.target(of: arrow, from: focused, in: options, columns: columns, navigation: navigation)
             else { return .ignored }
-            focused = options[next].id
+            focused = next
+            return .handled
+        }
+        // A focusable wrapper may hold focus instead of the system button, so Space presses the focused preset here.
+        .onKeyPress(.space) {
+            guard let id = focused else { return .ignored }
+            press(id)
             return .handled
         }
     }

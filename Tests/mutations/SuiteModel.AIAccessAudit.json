@@ -1,0 +1,23 @@
+[
+ {
+  "label": ".allowOnceSkipsFile: allow once covers a file command",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessAudit.swift",
+  "find": "allowedOnce && kind != Self.fileKind ? .run : .ask",
+  "replace": "allowedOnce ? .run : .ask",
+  "tests": "AIAccessAuditTests"
+ },
+ {
+  "label": ".denyBeatsAllowOnce: a remembered deny runs on this connection's allow once",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessAudit.swift",
+  "find": "        case false?: .refuse\n",
+  "replace": "        case false?: allowedOnce ? .run : .refuse\n",
+  "tests": "AIAccessAuditTests"
+ },
+ {
+  "label": ".auditSortedKeys: the audit line's keys are unsorted",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessAudit.swift",
+  "find": "[.sortedKeys, .withoutEscapingSlashes]",
+  "replace": "[.withoutEscapingSlashes]",
+  "tests": "AIAccessAuditTests"
+ }
+]

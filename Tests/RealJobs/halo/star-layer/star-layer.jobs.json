@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "app": "halo",
+  "why": "RJ-H35: draws a six-point star shape layer by command in an empty 1080p composition and exports frame 0; the top point is the layer colour and the rim between two outer points is not.",
+  "inputs": ["input/*.halo"],
+  "steps": [
+    {"id": "shape.draw", "params": {"kind": "star", "points": 6, "innerRatio": 0.5, "x": 760, "y": 340, "w": 400, "h": 400}},
+    {"id": "render.frame", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-0", "format": "png", "options": {"frame": 0}},
+  "expect": {
+    "out/empty-1080p-0.png": {"pixels": {"tolerance": 2, "reference": "expected/empty-1080p-0.png"}}
+  },
+  "platforms": ["linux", "macos"]
+}

@@ -1,0 +1,37 @@
+[
+  {
+    "label": "scansSubfolders: the scan reads only the top of Sources/<X>App/, skipping its subfolders",
+    "file": "Tests/SuiteKernelTests/CommandPathTests.swift",
+    "find": "if path.hasSuffix(suffix) { files.append(path) }",
+    "replace": "if !path.contains(\"/\") && path.hasSuffix(suffix) { files.append(path) }",
+    "tests": "CommandPathTests"
+  },
+  {
+    "label": "baselineMatchesLine: a baseline line matches its file only, not the line's text",
+    "file": "Tests/SuiteKernelTests/CommandPathTests.swift",
+    "find": "static func key(file: String, text: String) -> String { file + \": \" + text }",
+    "replace": "static func key(file: String, text: String) -> String { file }",
+    "tests": "CommandPathTests"
+  },
+  {
+    "label": "staleBaselineFails: a baseline line whose site is gone is ignored, so the baseline can grow stale",
+    "file": "Tests/SuiteKernelTests/CommandPathTests.swift",
+    "find": "let stale = listed.values.flatMap { $0 }.sorted { $0.row < $1.row }",
+    "replace": "let stale = listed.values.flatMap { $0 }.sorted { $0.row < $1.row }.prefix(0)",
+    "tests": "CommandPathTests"
+  },
+  {
+    "label": "dismissOnlyDismisses: the dismiss rule matches any button title, so a Delete that dismisses passes",
+    "file": "Tests/SuiteKernelTests/CommandPathTests.swift",
+    "find": "guard dismissTitles.contains(title) else { return false }",
+    "replace": "guard !title.isEmpty else { return false }",
+    "tests": "CommandPathTests"
+  },
+  {
+    "label": "limitCaps: the baseline's max is read as a minimum, so a baseline can grow past it",
+    "file": "Tests/SuiteKernelTests/CommandPathLimitTests.swift",
+    "find": "if entries > max {",
+    "replace": "if entries < max {",
+    "tests": "CommandPathLimitTests"
+  }
+]

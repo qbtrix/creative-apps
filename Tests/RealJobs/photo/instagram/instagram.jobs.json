@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-P01, pending #3692: the catalog has no image.crop yet, and the JPEG's pixel check waits on image-codecs (qbtrix/creative-core#562). PhotoExportPackTests runs the plan half on Linux: it crops the 3:2 landscape to 4:5 off-centre, exports at Pixels 1080 x 1350 and finds the red marker at the file's centre within 2 px.",
+  "pending": "#3692",
+  "inputs": ["input/*.png"],
+  "steps": [
+    {"id": "image.crop", "params": {"x": 20, "y": 0, "width": 160, "height": 200}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-instagram", "format": "jpeg", "options": {"size": {"pixels": [1080, 1350]}, "quality": 0.85}},
+  "expect": {
+    "out/landscape-instagram.jpeg": {"pixels": {"tolerance": 8, "reference": "expected/landscape-instagram.png"}}
+  },
+  "platforms": []
+}

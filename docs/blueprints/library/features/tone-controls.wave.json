@@ -1,0 +1,151 @@
+{
+  "title": "Tone and sharpen in Library: Develop's rows from SuiteUI, Auto and Sharpen, and the loupe drawn on the GPU",
+  "wave": 4,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "library/tone-controls (adopter of S1); RJ-L41 (new)",
+  "waits_on": "suiteui tone-controls's TC-a (cross-line; LT-3 and LT-4 need TC-5, LT-5 TC-6, LT-6 TC-3); develop (the feature: DevelopValues, LiveDevelop, DevelopInspector) and crop (built), slice waits; suiteui suite-imaging's IM-library before LT-4 (cross-line; re-cut 2026-10-20: the loupe's GPU route and the Package.swift links are suite-imaging's)",
+  "longest_chain": "5 (LT-1 → LT-2 → LT-7 → LT-8 → LT-9)",
+  "journeys": [
+    "LibraryToneJourneyTests.testAutoAndSharpenInDevelop"
+  ],
+  "owned": [
+    "Sources/LibraryModel/Contracts/DevelopValues.swift",
+    "Sources/LibraryModel/LibraryTone+Kernel.swift",
+    "Tests/LibraryModelTests/LibraryToneTests.swift",
+    "Sources/LibraryApp/DevelopInspector.swift",
+    "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "Tests/LibraryModelTests/LiveDevelopToneTests.swift",
+    "Tests/mutations/LibraryModel.LiveDevelop.json",
+    "Sources/LibraryApp/LibraryLoupe.swift",
+    "Tests/mutations/LibraryModel.LibraryDevelop+Imaging.json",
+    "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "Tests/command-ids/library.txt",
+    "Tests/LibraryModelTests/LibraryToneCommandTests.swift",
+    "Tests/mutations/LibraryModel.LibraryTone+Kernel.json",
+    "Tests/RealJobs/library/auto-sharpen/",
+    "Tests/AppSnapshotTests/LibraryToneSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetLibraryToneTests.swift",
+    "UITests/LibraryJourneyTests+Tone.swift",
+    "docs/blueprints/library/features/tone-controls.wave.json",
+    "Sources/LibraryModel/LibraryDevelop+Imaging.swift"
+  ],
+  "slices": [
+    {
+      "id": "LT-a",
+      "behavior": "`DevelopSettings` holds `ToneSettings` with the same keys, Library links CoreRender, the adapter conforms on stubs, and Develop shows `ToneRows` on them.",
+      "tasks": [
+        "LT-1",
+        "LT-2"
+      ],
+      "journeys": [
+        "MJ-LT"
+      ],
+      "waits": {
+        "develop": [
+          "LT-1",
+          "LT-2"
+        ],
+        "crop": [
+          "LT-1",
+          "LT-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/LibraryModel/Contracts/DevelopValues.swift",
+        "Sources/LibraryModel/LibraryTone+Kernel.swift",
+        "Tests/LibraryModelTests/LibraryToneTests.swift",
+        "Sources/LibraryApp/DevelopInspector.swift"
+      ]
+    },
+    {
+      "id": "LT-u",
+      "behavior": "The Develop rows have snapshots and a render budget, and the journey is written.",
+      "tasks": [
+        "LT-6",
+        "LT-7"
+      ],
+      "journeys": [
+        "LJ-T1"
+      ],
+      "waits": {
+        "LT-a": [
+          "LT-6",
+          "LT-7"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/LibraryToneSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetLibraryToneTests.swift",
+        "UITests/LibraryJourneyTests+Tone.swift"
+      ]
+    },
+    {
+      "id": "LT-m",
+      "behavior": "Export runs the shared list, the loupe draws each step on the GPU in one write, and every tone command is one undo step over the selected photos.",
+      "tasks": [
+        "LT-3",
+        "LT-4",
+        "LT-5"
+      ],
+      "journeys": [
+        "MJ-LT"
+      ],
+      "waits": {
+        "LT-a": [
+          "LT-3",
+          "LT-4",
+          "LT-5"
+        ],
+        "cull-finish:DR-m": [
+          "LT-5"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/LibraryModel/LibraryDevelop+Imaging.swift",
+        "Sources/LibraryModel/Live/LiveDevelop.swift",
+        "Tests/LibraryModelTests/LiveDevelopToneTests.swift",
+        "Tests/mutations/LibraryModel.LiveDevelop.json",
+        "Sources/LibraryApp/LibraryLoupe.swift",
+        "Tests/LibraryModelTests/LibraryToneTests.swift",
+        "Tests/mutations/LibraryModel.LibraryDevelop+Imaging.json",
+        "Sources/LibraryModel/LibraryTone+Kernel.swift",
+        "Sources/LibraryModel/LibraryCommandCatalog.swift",
+        "Tests/command-ids/library.txt",
+        "Tests/LibraryModelTests/LibraryToneCommandTests.swift",
+        "Tests/mutations/LibraryModel.LibraryTone+Kernel.json",
+        "Tests/RealJobs/library/auto-sharpen/"
+      ]
+    },
+    {
+      "id": "LT-z",
+      "behavior": "Develop runs on live services, the journey passes on live, and the feature is built.",
+      "tasks": [
+        "LT-8",
+        "LT-9"
+      ],
+      "journeys": [
+        "LJ-T1"
+      ],
+      "waits": {
+        "LT-u": [
+          "LT-8",
+          "LT-9"
+        ],
+        "LT-m": [
+          "LT-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/LibraryJourneyTests+Tone.swift",
+        "docs/blueprints/library/features/tone-controls.wave.json"
+      ]
+    }
+  ]
+}

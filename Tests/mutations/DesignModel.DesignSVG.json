@@ -1,0 +1,100 @@
+[
+  {
+    "label": "hiddenLeftOut: a hidden layer is emitted",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "        guard !node.isHidden else { return }\n",
+    "replace": "",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": "textEscaped: text content is written raw",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": ">\\(XMLText.escaped(node.text))</text>",
+    "replace": ">\\(node.text)</text>",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": "framesClip: the frame's clip-path is dropped",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "lines.append(pad + \"<g clip-path=\\\"url(#\\(id))\\\"\\(alpha(node))>\")",
+    "replace": "lines.append(pad + \"<g\\(alpha(node))>\")",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": "defaultsOmitted: opacity=\"1\" is always written",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "return value < 1 ? \" opacity=\\\"\\(number(value))\\\"\" : \"\"",
+    "replace": "return \" opacity=\\\"\\(number(value))\\\"\"",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": "strokeWritten: stroke-width is dropped",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "let width = stroke.width == 1 ? \"\" : \" stroke-width=\\\"\\(number(stroke.width))\\\"\"",
+    "replace": "let width = \"\"",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": "coordinatesRelative: the box origin is not subtracted",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "let (x, y) = (f.x - origin.x, f.y - origin.y)",
+    "replace": "let (x, y) = (f.x, f.y)",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": "cornerRadiusWritten: rx is dropped",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "return radius > 0 ? \" rx=\\\"\\(number(radius))\\\"\" : \"\"",
+    "replace": "return \"\"",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": "gradientInFrameSpace: the gradient is written with its unit-box points",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "GradientSVG.definition(node.fill(in: frame), id: gradientID(node))",
+    "replace": "GradientSVG.definition(node.gradient ?? .solid(.white), id: gradientID(node))",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": "textGradient: a text layer's gradient definition is dropped",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "if node.kind != .group, let defs = gradient(node, x: x, y: y)",
+    "replace": "if node.kind != .group, node.kind != .text, let defs = gradient(node, x: x, y: y)",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": ".rotateAboutCentre: a turn is written about the box's origin, not the layer's centre",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "parts.append(\"rotate(\\(number(node.rotation)) \\(cx) \\(cy))\")",
+    "replace": "parts.append(\"rotate(\\(number(node.rotation)))\")",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": ".flipWritesScale: a mirrored layer writes no scale",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "if node.flipX || node.flipY {",
+    "replace": "if false {",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": ".frameTurnsItsClip: a turned frame's clip stays upright",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "<rect \\(box)\\(corner(node))\\(turned)/></clipPath>",
+    "replace": "<rect \\(box)\\(corner(node))/></clipPath>",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": ".shapeWritesPath: a shape writes its box, not its path",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "guard let path = node.path(in: at) else {",
+    "replace": "guard let path = node.path(in: at), false else {",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": ".lineIsOpen: an open line is closed with Z",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "return parts.joined(separator: \" \")",
+    "replace": "return parts.joined(separator: \" \") + (parts.last == \"Z\" ? \"\" : \" Z\")",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  }
+]

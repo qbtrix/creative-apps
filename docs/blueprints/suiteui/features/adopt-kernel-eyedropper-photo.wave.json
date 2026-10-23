@@ -1,0 +1,104 @@
+{
+  "title": "Photo's eyedropper samples through the kernel alone: its own sampling contract, colour type and square math are deleted once photo/eyedropper lands",
+  "wave": "XK3",
+  "order": 60,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "canonical duplicates audit 2026-10-20, top-15 #14 (eyedropper and colour sampling), the part photo/eyedropper leaves; feature map suiteui/adopt-kernel-eyedropper-photo; real job RJ-X49",
+  "waits_on": "photo/eyedropper PE-z (cross-line: the live sampler on SampleRules.mean, the tool's UI and SuiteUI's loupe); adopt-kernel-export AX-photo (OutputContracts.swift); adopt-kernel-unsaved-prompt UP-z (canonical-baseline.txt) before EP-3",
+  "depends": [
+    "editor-kernel",
+    "adopt-command-catalog"
+  ],
+  "longest_chain": "4 (EP-1 → EP-2 → EP-3 → EP-4)",
+  "ui_slice": "none",
+  "ui_slice_reason": "photo/eyedropper (beta, wave 3) builds the tool's screen, its loupe and its journey; this packet only removes Photo's second sampling path behind it, Model code only",
+  "journeys": [
+    "PhotoEyedropperJourneyTests.testPickSkyColor"
+  ],
+  "owned": [
+    "Tests/PhotoModelTests/PhotoSampleKernelTests.swift",
+    "Tests/RealJobs/photo/sample-edge/sample-edge.jobs.json",
+    "Tests/RealJobs/photo/sample-edge/input/checker-red-blue.png",
+    "Tests/mutations/PhotoModel.PhotoSample+Kernel.json",
+    "Sources/PhotoModel/PhotoSample+Kernel.swift",
+    "Sources/PhotoModel/Contracts/OutputContracts.swift",
+    "Sources/PhotoModel/Fakes/FakeOutput.swift",
+    "Sources/PhotoModel/PhotoServices.swift",
+    "Sources/PhotoModel/PhotoStroke.swift",
+    "Tests/PhotoModelTests/PhotoSampleTests.swift",
+    "Sources/PhotoModel/PhotoEyedropper.swift",
+    "Sources/PhotoModel/Live/LiveSampling.swift",
+    "Sources/PhotoModel/Live/NotBuilt.swift",
+    "Tests/PhotoModelTests/LiveSamplingTests.swift",
+    "Tests/mutations/PhotoModel.LiveSampling.json",
+    "Tests/canonical-baseline.txt",
+    "docs/blueprints/suiteui/features/adopt-kernel-eyedropper-photo.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "EP-m",
+      "behavior": "A click and `color.sample` both read `SampleRules.mean` through Photo's kernel adapter, at the image edge too, and Photo's own sampling contract, colour type and fake are gone.",
+      "tasks": [
+        "EP-1",
+        "EP-2"
+      ],
+      "journeys": [
+        "MJ-EP"
+      ],
+      "owned": [
+        "Tests/PhotoModelTests/PhotoSampleKernelTests.swift",
+        "Tests/RealJobs/photo/sample-edge/sample-edge.jobs.json",
+        "Tests/RealJobs/photo/sample-edge/input/checker-red-blue.png",
+        "Tests/mutations/PhotoModel.PhotoSample+Kernel.json",
+        "Sources/PhotoModel/PhotoSample+Kernel.swift",
+        "Sources/PhotoModel/Contracts/OutputContracts.swift",
+        "Sources/PhotoModel/Fakes/FakeOutput.swift",
+        "Sources/PhotoModel/PhotoServices.swift",
+        "Sources/PhotoModel/PhotoStroke.swift",
+        "Tests/PhotoModelTests/PhotoSampleTests.swift"
+      ],
+      "waits": {
+        "adopt-kernel-export:AX-photo": [
+          "EP-2"
+        ],
+        "adopt-kernel-brush:AB-photo": [
+          "EP-2"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EP-z",
+      "behavior": "`PhotoEyedropper.swift` and `LiveSampling.swift` are deleted with the baseline shrunk, the Eyedropper journey stays green, and the feature is built.",
+      "tasks": [
+        "EP-3",
+        "EP-4"
+      ],
+      "journeys": [
+        "MJ-EP",
+        "PJ-EP"
+      ],
+      "owned": [
+        "Sources/PhotoModel/PhotoEyedropper.swift",
+        "Sources/PhotoModel/Live/LiveSampling.swift",
+        "Sources/PhotoModel/Live/NotBuilt.swift",
+        "Tests/PhotoModelTests/LiveSamplingTests.swift",
+        "Tests/mutations/PhotoModel.LiveSampling.json",
+        "Tests/canonical-baseline.txt",
+        "docs/blueprints/suiteui/features/adopt-kernel-eyedropper-photo.wave.json"
+      ],
+      "waits": {
+        "EP-m": [
+          "EP-3",
+          "EP-4"
+        ],
+        "adopt-kernel-unsaved-prompt:UP-z": [
+          "EP-3"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

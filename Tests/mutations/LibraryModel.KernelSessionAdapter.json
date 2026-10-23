@@ -1,0 +1,51 @@
+[
+  {
+    "label": "endRunDropped: the forward to the kernel's endRun is dropped, so a drag after a save folds into the saved drag (a run spans two gestures) and undo skips past the saved catalog (Library's only endRun forward is endCoalescing; a save ends no run, since the window saves mid-drag)",
+    "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "find": "    public mutating func endCoalescing() {\n        history.kernel.endRun()\n",
+    "replace": "    public mutating func endCoalescing() {\n",
+    "tests": "LibrarySessionKernelTests|LibraryHistoryTests"
+  },
+  {
+    "label": "refusalIsSuccess: the adapter maps the kernel's refusal of a newer catalog to success, so the newer file reads as damaged and is set aside",
+    "file": "Sources/LibraryModel/LibrarySession+Kernel.swift",
+    "find": "case .newer(let found, _): throw .newerCatalog(version: found)",
+    "replace": "case .newer(let found, _): return found",
+    "tests": "LibrarySessionKernelTests|LibraryCatalogCodingTests"
+  },
+  {
+    "label": "forwardDropped: the session no longer forwards the current revision, so a change never reads dirty",
+    "file": "Sources/LibraryModel/LibrarySession+Kernel.swift",
+    "find": "        session.currentToken = saveRevision\n",
+    "replace": "",
+    "tests": "LibrarySessionKernelTests|LibraryReadoutsTests|LibraryPersistTests"
+  },
+  {
+    "label": "failedIsSaved: a failed save maps to the kernel's saved status",
+    "file": "Sources/LibraryModel/LibrarySession+Kernel.swift",
+    "find": "if let saveError { return .failed(saveError) }",
+    "replace": "if saveError != nil { return .saved }",
+    "tests": "LibrarySessionKernelTests"
+  },
+  {
+    "label": "readOnlyDropped: a catalog that can't be saved over (loading, newer) reads as an ordinary saved one",
+    "file": "Sources/LibraryModel/LibrarySession+Kernel.swift",
+    "find": "guard catalogState.canSave else { return .readOnly }",
+    "replace": "_ = catalogState.canSave",
+    "tests": "LibrarySessionKernelTests"
+  },
+  {
+    "label": "probeUnbounded: the probe drops the supported version, so a newer catalog reads as damaged",
+    "file": "Sources/LibraryModel/LibrarySession+Kernel.swift",
+    "find": "try VersionedJSON.probe(data, supported: version)",
+    "replace": "try VersionedJSON.probe(data)",
+    "tests": "LibrarySessionKernelTests|LibraryCatalogCodingTests"
+  },
+  {
+    "label": "dirtyIsSaved: the status stops reading the session's dirty flag, so an unwritten change reads saved",
+    "file": "Sources/LibraryModel/LibrarySession+Kernel.swift",
+    "find": "return dirty ? .unsaved : .saved",
+    "replace": "return .saved",
+    "tests": "LibrarySessionKernelTests"
+  }
+]

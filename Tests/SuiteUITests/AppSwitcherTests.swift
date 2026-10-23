@@ -151,6 +151,46 @@ import Testing
         #expect(fit("design", 1600) == every(80))
     }
 
+    /// The home's toolbar (Open, then the inspector toggle) with its inspector shown.
+    private func homeFit(_ width: CGFloat, searching: Bool = false) -> SwitcherToolbarFit {
+        AppSwitcher.toolbarFit(
+            windowWidth: width, itemCount: 6, documentActions: [], actions: [SwitcherToolbarItem("Open")],
+            inspectorWidth: SuiteSize.inspectorWidth.ideal, searching: searching)
+    }
+
+    @Test func theRowStaysOutOfTheInspectorsColumn() {
+        // Run 39292755765: at 1000 pt the row at 64 put Halo past the divider at 760 pt, and at 880 pt
+        // the inspector's edge cut Library (#3356). 240 + 48 + 8 = 296 pt is the trailing room now.
+        let inspector = SuiteSize.inspectorWidth.ideal
+        #expect(Self.same(AppSwitcher.toolbarTrailing(actions: [SwitcherToolbarItem("Open")], inspectorWidth: inspector), 296))
+        #expect(homeFit(1000) == SwitcherToolbarFit(spacing: 40, showsEveryItem: true))
+        #expect(homeFit(SuiteSize.windowMinimum.width) == SwitcherToolbarFit(spacing: 32, showsEveryItem: false))
+        // Hidden, the inspector leaves the toolbar as it was.
+        #expect(
+            AppSwitcher.toolbarTrailing(actions: [], inspectorWidth: 0)
+                == AppSwitcher.toolbarTrailing(actions: []))
+        let leading = AppSwitcher.toolbarLeading(documentActions: [])
+        for width in stride(from: SuiteSize.windowMinimum.width, through: 1600, by: SuiteSpacing.s) {
+            let chosen = homeFit(width)
+            guard chosen.showsEveryItem else { continue }
+            let end = AppSwitcher.rowEnd(windowWidth: width, spacing: chosen.spacing, itemCount: 6, leading: leading)
+            #expect(end <= width - inspector - AppSwitcher.trailingClearance, "at \(width) pt the row ends at \(end)")
+        }
+    }
+
+    @Test func anOpenSearchFieldNarrowsTheRow() {
+        // Run 39292755765: with "logo" typed the open field filled the inspector's section, and the
+        // switcher and the sidebar toggle went into the overflow (#3357). The buttons now sit beside it.
+        #expect(homeFit(1000, searching: true) == SwitcherToolbarFit(spacing: 32, showsEveryItem: true))
+        #expect(homeFit(SuiteSize.windowMinimum.width, searching: true) == SwitcherToolbarFit(spacing: 32, showsEveryItem: false))
+        // With no inspector, the field takes its own room.
+        let open = AppSwitcher.toolbarTrailing(actions: [], searching: true)
+        #expect(Self.same(open, AppSwitcher.searchFieldRoom + AppSwitcher.toolbarTrailing(actions: [])))
+        for width in stride(from: SuiteSize.windowMinimum.width, through: 1600, by: SuiteSpacing.s) {
+            #expect(homeFit(width, searching: true).spacing <= homeFit(width).spacing)
+        }
+    }
+
     @Test func beforeTheWindowIsMeasuredOnlyTheCurrentItemShows() {
         #expect(fit("library", 0) == SwitcherToolbarFit(spacing: 32, showsEveryItem: false))
         #expect(

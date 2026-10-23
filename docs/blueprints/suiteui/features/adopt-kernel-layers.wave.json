@@ -5,7 +5,7 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "editor-kernel design (2026-10-17), inventory row 'layers'; captain's canonical-first call on #1552",
-  "waits_on": "editor-kernel:EK-tree only (every slice); cross-line hand-offs in the packet's Hand-offs list",
+  "waits_on": "editor-kernel:EK-tree only (every slice); cross-line hand-offs in the packet's Hand-offs list; AL-design (AL-d1, AL-d2) takes DesignNode.swift before design-seams-2 (supervisor, #1936, 2026-10-20)",
   "ui_slice": "none",
   "ui_slice_reason": "behaviour-preserving migration: no new screen; the apps' existing journeys and snapshots verify it (its UI slices swap an app view for the SuiteUI component the kernel's EK-chrome page already shows)",
   "owned": [
@@ -58,11 +58,10 @@
   "slices": [
     {
       "id": "AL-design",
-      "behavior": "Design runs its layers on `LayerTree<Payload>`, `LayerNode`, `LayerRow` and the follow link behind its existing API, its tests and journeys green, and its copy is deleted, and its layers panel is `LayerTreeList`.",
+      "behavior": "Design runs its layers on `LayerTree<Payload>`, `LayerNode`, `LayerRow` and the follow link behind its existing API, its tests and journeys green, and its copy is deleted (its layers panel stays its own list: AL-d3 moved to layer-tree-list-parity, #3628).",
       "tasks": [
         "AL-d1",
-        "AL-d2",
-        "AL-d3"
+        "AL-d2"
       ],
       "journeys": [
         "MJ-AL-design"
@@ -87,9 +86,6 @@
       "waits": {
         "editor-kernel:EK-tree": [
           "AL-d1"
-        ],
-        "editor-kernel:EK-u": [
-          "AL-d3"
         ]
       },
       "ui": true

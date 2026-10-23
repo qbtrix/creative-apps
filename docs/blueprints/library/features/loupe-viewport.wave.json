@@ -2,7 +2,7 @@
   "title": "The loupe on CanvasViewport",
   "wave": 2,
   "order": 50,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "covers": "#724 (zoom, real size)",
   "waits_on": "spine, #333",

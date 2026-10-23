@@ -14,6 +14,20 @@
     "tests": "LibraryRatingTests.swift"
   },
   {
+    "label": "the id lookup stops delegating to the photo-in-hand value",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "return cellValue(photo: photo)",
+    "replace": "return \"\"",
+    "tests": "LibraryReadoutsTests.swift"
+  },
+  {
+    "label": "the photo-in-hand value looks up the wrong thumbnail",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "let id = photo.id",
+    "replace": "let id = \"\"",
+    "tests": "LibraryReadoutsTests.swift"
+  },
+  {
     "label": "No Photos flashes while the launch read runs",
     "file": "Sources/LibraryModel/LibraryReadouts.swift",
     "find": "isEmpty && catalogState != .loading",
@@ -26,5 +40,40 @@
     "find": "isEmpty && catalogState != .loading",
     "replace": "isEmpty && catalogState == .loading",
     "tests": "LibraryLoadingEmptyStateTests.swift"
+  },
+  {
+    "label": "the loupe hides the status bar on live data",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "services.isPreview || loupeItem != nil",
+    "replace": "services.isPreview",
+    "tests": "LibraryStatusTests.swift"
+  },
+  {
+    "label": "the grid shows the status bar on live data",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "services.isPreview || loupeItem != nil",
+    "replace": "true",
+    "tests": "LibraryStatusTests.swift"
+  },
+  {
+    "label": "the loupe size pill shows the photo count",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "return \"\\(size.width) × \\(size.height) px\"",
+    "replace": "_ = size; return Self.photoCountText(items.count)",
+    "tests": "LibraryStatusTests.swift"
+  },
+  {
+    "label": "catalogValueStuckSaved: the library.catalog value stops reading the kernel session, so a change still reads saved",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "catalogSession.isDirty ? \"dirty\" : \"saved\"",
+    "replace": "\"saved\"",
+    "tests": "LibraryReadoutsTests|LibraryPersistTests"
+  },
+  {
+    "label": "saveRequestIgnoresSession: saveRequest stops asking the session whether it is dirty, so a saved catalog is written again",
+    "file": "Sources/LibraryModel/LibraryPersistence.swift",
+    "find": "guard catalogState.canSave, catalogSession.isDirty else { return nil }",
+    "replace": "guard catalogState.canSave else { return nil }",
+    "tests": "LibraryPersistTests|LibrarySessionKernelTests"
   }
 ]

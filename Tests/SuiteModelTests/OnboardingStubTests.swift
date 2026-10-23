@@ -66,7 +66,7 @@ import Testing
         let sample: (SuiteApp) -> SampleFile? = SampleCatalog.sample(for:)
         let folder: (String) -> String = SampleCatalog.folder(resources:)
         let reason: (SampleFile, String, (String) -> Bool) -> String? = SampleCatalog.reason(for:folder:present:)
-        let destination: (SampleFile, String, (String) -> Bool) -> String = SampleCatalog.destination(for:documents:exists:)
+        let destination: (SampleFile, String, (String) -> Bool) -> String? = SampleCatalog.destination(for:documents:exists:)
         let ref: (SampleFile, String) -> SuiteDocumentRef = SampleCatalog.ref(for:path:)
         let ids: [(OnboardingFocus) -> String] = [OnboardingControls.focus(_:)]
         let presetID: (NewDocumentPreset) -> String = OnboardingControls.preset(_:)

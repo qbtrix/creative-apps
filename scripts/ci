@@ -1,22 +1,26 @@
 #!/usr/bin/env bash
-# scripts/ci [--changed [BASE]]: the one gate. Runs the no-crash lint, the
-# app-state rule, the design lint, the C4 ownership check, the duplicate-code
-# check, the canonical-first check, the SuiteUI-first view check, the app-marks check, the CI scripts' fixture tests, the journey quarantine check, the
-# mutation anchors, swift build of every target with its tests, and swift
+# scripts/ci [--changed [BASE]]: the one gate. Runs the no-crash lint, the isa-swizzle lint, the
+# app-state rule, the design lint, the C4 ownership and descriptions checks, the duplicate-code
+# check, the canonical-first check, the SuiteUI-first view check, the render contract, the app-marks check, the CI scripts' fixture tests, the journey quarantine check, the
+# real-jobs check, the mutation anchors, swift build of every target with its tests, and swift
 # test, then prints PASS or FAIL and exits with the real status. swift build takes its dependencies only
 # from the committed Package.resolved (--force-resolved-versions): a
 # Package.swift whose creative-core revision doesn't match it fails here
 # instead of re-resolving (scripts/bump-core moves both). A swift test that
 # dies without its "Test run with" summary prints TEST PROCESS DIED and the
-# tests it left unfinished (scripts/test-died). CI runs plain scripts/ci on
-# Linux and macOS. On Linux, Package.swift declares only the Model targets, so
-# build and test cover those; on macOS they cover everything.
+# tests it left unfinished (scripts/test-died); one that prints nothing for
+# CI_TEST_STALL seconds (default 600) is stuck, so it is sampled (macOS),
+# killed and named the same way. CI_LOCAL_SKIP='<regex>' (unset in CI) skips
+# the named tests in every pass, for a local gate whose toolchain renders
+# differently. CI runs plain scripts/ci on Linux and macOS. On Linux,
+# Package.swift declares only the Model targets, so build and test cover those; on macOS they cover everything.
 #
 # --changed is what builders run before a PR: every lint and the same build,
 # then only the tests of the targets the branch touched since its merge base
 # with BASE (default origin/dev), uncommitted and untracked files included
 # (scripts/test-scope changed maps paths to tests). Neither mode runs the
-# perf and timing tests in Tests/perf-suites.txt; CI's Perf step does.
+# perf and timing tests in Tests/perf-suites.txt; perf-nightly does. Both
+# run the CPU-heavy tests in Tests/heavy-suites.txt in a pass of their own.
 #
 # The no-crash lint fails on crash-prone constructs in Sources/ (tests exempt):
 #   try!  as!  fatalError(  preconditionFailure(  precondition(  unowned  .first!  .last!
@@ -55,13 +59,24 @@
 # don't assemble. It needs jq and python3 and runs a self-test on a scratch
 # tree first.
 #
+# The C4 descriptions check runs Tests/c4_descriptions, then, with --changed
+# only (plain mode has no base), scripts/check-c4-descriptions on the merge
+# base: a PR may not rewrite an existing part's top-level description unless it
+# adds a part or changes nothing outside docs/c4/parts/. Each description is
+# one JSON string, so two PRs appending to it always conflicted.
+#
 # The waves check runs scripts/waves: every app's feature data
 # (docs/blueprints/*/features/*.wave.json) passes its checks and prints its
 # waves.md without writing it (the generated files are written only on dev),
 # and Tests/generated tests scripts/c4-assemble and scripts/waves on fixtures.
 #
+# The jobs check runs Tests/jobs, then scripts/jobs: every app's real jobs
+# (docs/blueprints/*/jobs.json) have every field, each needs id is a row in
+# docs/blueprints/suite/feature-map.json, and each jobs.md renders without
+# being written (the Generated workflow writes them on dev).
+#
 # The fixture tests: Tests/contact_sheet, audit_lower, test_died, ci_findings, jetsam,
-# test_scope and bump_core test the scripts of the same names (some need jq).
+# sample_surfaces, test_scope and bump_core test the scripts of the same names (some need jq).
 #
 # The journey quarantine check runs Tests/quarantine, then scripts/quarantine
 # check on UITests/quarantine.json: every entry names a journey that exists in
@@ -92,6 +107,19 @@
 # piece or another app's view, by name (Tests/canonical-ui-concepts.txt), by body
 # signature (Tests/canonical-ui-signatures.txt) or by shape, must be listed in
 # Tests/canonical-ui-baseline.txt. That baseline only shrinks (lead.md rules 16, 20).
+#
+# The view-statics check runs Tests/canonical/test_check_view_statics.sh, then
+# scripts/check-view-statics: a `static func` or `static var` on a View type is
+# @MainActor, so a worker-thread @Test that calls it traps on macOS while Linux
+# stays green. It must be `nonisolated` (or opt out with `// view-static:
+# main-actor`) unless Tests/view-statics-baseline.txt lists it; that only shrinks.
+#
+# The render-contract check runs Tests/canonical/test_check_render_contract.sh, then
+# scripts/check-render-contract (docs/render-contract.md): no canvas-sized SwiftUI
+# offscreen pass (.drawingGroup, .compositingGroup, ImagePaint, Canvas) in a canvas or
+# overlay view, no `return nil` from the GPU composite route and no dispatcher readback
+# unless marked with an op registered in Tests/render-cpu-ops.txt. Hits in
+# Tests/render-contract-baseline.txt are grandfathered; it only shrinks.
 #
 # The app-marks check runs Tests/app_marks, then scripts/check-app-marks (an
 # app's mark is drawn only by SuiteUI's AppMark: no [SuiteApp: String] symbol
@@ -124,6 +152,15 @@ echo "== no-crash lint (Sources/)"
 pattern='try!|as!|fatalError\(|preconditionFailure\(|precondition\(|unowned |\.first!|\.last!'
 if grep -rnE "$pattern" Sources/; then
   fail "no-crash lint: replace the lines above with throwing code"
+fi
+echo "ok"
+
+# Swapping a live object's class breaks KVO on it: an NSWindow is KVO-observed from birth, and a swapped one throws
+# NSRangeException ("_windowLayerContext") when freed, killing the test process mid-run. Subclass instead
+# (RenderBudgetWindow's keyCapable). A use that must stay carries `isa-swizzle-ok` on its line.
+echo "== isa-swizzle lint (Sources/, Tests/, UITests/)"
+if grep -rnE 'object_setClass\(|class_setSuperclass\(' Sources/ Tests/ UITests/ | grep -v 'isa-swizzle-ok'; then
+  fail "isa-swizzle lint: create the object as the subclass you need instead of swapping its class"
 fi
 echo "ok"
 
@@ -299,11 +336,24 @@ if [[ -n "$found" ]]; then
 fi
 echo "ok"
 
+echo "== C4 descriptions (docs/c4/parts/)"
+bash Tests/c4_descriptions/test_c4_descriptions.sh >/dev/null || fail "C4 descriptions: scripts/check-c4-descriptions broke its fixture test"
+if (( changed_mode )); then
+  python3 scripts/check-c4-descriptions "$fork" \
+    || fail "C4 descriptions: drop the description edits above; a new file is already owned through the part's paths (CLAUDE.md, Every source file has a C4 owner)"
+  echo "ok"
+else
+  echo "skipped (no base; scripts/ci --changed runs it)"
+fi
+
 echo "== waves (docs/blueprints/*/features/*.wave.json)"
 # --dry-run prints nothing to disk: the generated waves.md files are written only on dev.
 python3 scripts/waves render --dry-run || fail "waves: fix the feature data above (scripts/waves)"
 echo "== generated files (Tests/generated)"
 bash Tests/generated/test_generated.sh || fail "generated files: scripts/c4-assemble or scripts/waves broke their tests"
+echo "== real jobs (docs/blueprints/*/jobs.json)"
+bash Tests/jobs/test_jobs.sh || fail "real jobs: scripts/jobs broke its fixture tests"
+python3 scripts/jobs render --dry-run || fail "real jobs: fix the job data above (scripts/jobs; docs/factory/packets.md, Jobs)"
 
 echo "== duplicate code (jscpd, Sources/)"
 JSCPD_VERSION=5.3.2
@@ -326,6 +376,14 @@ echo "== SuiteUI first (Tests/canonical, Tests/canonical-ui-baseline.txt)"
 bash Tests/canonical/test_check_dup_views.sh || fail "SuiteUI first: scripts/check-dup-views broke its tests"
 python3 scripts/check-dup-views || fail "SuiteUI first: use the SuiteUI component, or move the app copy into SuiteUI first (docs/factory/lead.md rules 16 and 20)"
 
+echo "== statics on Views (Tests/view-statics-baseline.txt)"
+bash Tests/canonical/test_check_view_statics.sh || fail "statics on Views: scripts/check-view-statics broke its tests"
+python3 scripts/check-view-statics || fail "statics on Views: mark the pure helper nonisolated (docs/engineering/swiftui-rules.md rule 13)"
+
+echo "== render contract (Tests/render-contract-baseline.txt)"
+bash Tests/canonical/test_check_render_contract.sh || fail "render contract: scripts/check-render-contract broke its tests"
+python3 scripts/check-render-contract || fail "render contract: keep the canvas on the GPU route (docs/render-contract.md)"
+
 echo "== app marks (Tests/app_marks, Bundle/Marks)"
 bash Tests/app_marks/test_app_marks.sh || fail "app marks: scripts/check-app-marks or scripts/render-marks broke their tests"
 python3 scripts/check-app-marks || fail "app marks: draw an app's mark with AppMark (Sources/SuiteUI/AppMark.swift), never an SF Symbol"
@@ -341,6 +399,8 @@ echo "== ci findings (Tests/ci_findings)"
 bash Tests/ci_findings/test_ci_findings.sh || fail "ci findings: scripts/ci-findings broke its stub-gh tests"
 echo "== jetsam summary (Tests/jetsam)"
 bash Tests/jetsam/test_jetsam_summary.sh || fail "jetsam summary: scripts/jetsam-summary broke its fixture test"
+echo "== sample surfaces (Tests/sample_surfaces)"
+bash Tests/sample_surfaces/test_sample_surfaces.sh || fail "sample surfaces: scripts/sample-surfaces broke its fixture test"
 echo "== test scope (Tests/test_scope)"
 bash Tests/test_scope/test_test_scope.sh || fail "test scope: scripts/test-scope or Tests/perf-suites.txt broke its tests"
 echo "== journey quarantine (UITests/quarantine.json)"
@@ -369,30 +429,94 @@ swift build --build-tests --force-resolved-versions ${flags[@]+"${flags[@]}"} \
 
 # run_tests LABEL ARGS...: one `swift test` run on the build above, its wall
 # time, and on a failure its cause: a dead test process (no "Test run with"
-# summary) names the tests it left running (scripts/test-died).
+# summary, even at exit 0) names the tests it left running (scripts/test-died).
+# On macOS the run gets a pty (script -q), so each line reaches the log when printed:
+# through a pipe the output was block-buffered, and a hung run's log ended
+# suites before the stuck test. A watchdog stops a run that prints nothing
+# for $stall seconds: a test waiting at 0% CPU (#2971, a leaked drag session)
+# outlives every .timeLimit, so without it the job's 90-minute cap cancelled
+# the step with no name. It prints the stuck process's call graph (macOS
+# `sample`), kills the run it started, and test-died names the test.
 logs=()
 trap 'rm -f ${logs[@]+"${logs[@]}"}' EXIT
+stall=${CI_TEST_STALL:-600}
+
+# descendants PID: every process under PID, children before their own.
+descendants() { local c; for c in $(pgrep -P "$1"); do echo "$c"; descendants "$c"; done; }
+
 run_tests() {
-  local label=$1 log start status
+  local label=$1 log start status pid tailer size last=-1 idle=0 stuck=0 p
   shift
   log="$(mktemp)"
   logs+=("$log")
   echo "== swift test: $label"
   start=$SECONDS
-  swift test ${flags[@]+"${flags[@]}"} --skip-build "$@" 2>&1 | tee "$log"
-  status=${PIPESTATUS[0]}
+  local cmd=(swift test ${flags[@]+"${flags[@]}"} --skip-build "$@")
+  [[ "$(uname)" != Darwin ]] || cmd=(script -q /dev/null "${cmd[@]}")
+  NO_COLOR=1 "${cmd[@]}" </dev/null >"$log" 2>&1 &
+  pid=$!
+  tail -n +1 -f "$log" &
+  tailer=$!
+  while kill -0 "$pid" 2>/dev/null; do
+    sleep 5
+    size=$(wc -c <"$log")
+    if (( size != last )); then last=$size idle=0; else idle=$((idle + 5)); fi
+    (( idle < stall )) || { stuck=1; break; }
+  done
+  if (( stuck )); then
+    sleep 1
+    echo "== swift test: $label printed nothing for $stall s; stopping it"
+    for p in $(descendants "$pid"); do
+      [[ "$(uname)" == Darwin && "$(ps -o comm= -p "$p")" == *testing-helper* ]] || continue
+      echo "== where the test process waits (sample $p):"
+      sample "$p" 3 -file /dev/stdout 2>/dev/null | sed -n '/^Call graph:/,/^Total number in stack/p' | head -150
+    done
+    kill $(descendants "$pid") "$pid" 2>/dev/null
+  fi
+  wait "$pid"
+  status=$?
+  sleep 1
+  kill "$tailer" 2>/dev/null
+  wait "$tailer" 2>/dev/null
   echo "== swift test: $label took $((SECONDS - start)) s"
+  if (( stuck )); then
+    python3 scripts/test-died "$log"
+    fail "swift test ($label) hung: no output for $stall s; the unfinished test above is stuck"
+  fi
   if (( status != 0 )); then
     python3 scripts/test-died "$log" || fail "swift test ($label) process died (exit $status) with the tests above unfinished"
     fail "swift test ($label) exited $status"
   fi
+  # A test process whose main run loop is stopped exits 0 mid-run, with no summary.
+  if grep -q "Test run started" "$log"; then
+    python3 scripts/test-died "$log" || fail "swift test ($label) ended early (exit 0) with the tests above unfinished"
+  fi
 }
 
-# The perf and timing tests run in CI's Perf step, never here. An empty
+# The perf and timing tests run nightly (perf-nightly), never here. An empty
 # regex would skip every test, so the flag goes in only when there is one.
 perf=$(python3 scripts/test-scope perf) || fail "Tests/perf-suites.txt: fix the line above"
+# CI_LOCAL_SKIP: an opt-in swift-testing --skip regex for a local gate whose
+# toolchain differs from CI's. It rides with the perf regex into every pass.
+if [[ -n "${CI_LOCAL_SKIP:-}" ]]; then
+  echo "CI: skipping local-only tests: $CI_LOCAL_SKIP"
+  perf="$perf${perf:+|}$CI_LOCAL_SKIP"
+fi
 skip_perf=()
 [[ -z "$perf" ]] || skip_perf=(--skip "$perf")
+
+# The CPU-heavy correctness tests in Tests/heavy-suites.txt run in a pass of
+# their own after the rest. In the shared parallel pass they filled CI's
+# 3-core cooperative pool with seconds-long render jobs, and the time-limited
+# model suites timed out together (#2971).
+heavy=$(python3 scripts/test-scope heavy) || fail "Tests/heavy-suites.txt: fix the line above"
+
+# run_heavy [FILTER]: the heavy tests, all or those FILTER takes; nothing when none.
+run_heavy() {
+  local tests
+  tests=$(python3 scripts/test-scope heavy ${1:+"$1"}) || fail "Tests/heavy-suites.txt: fix the line above"
+  [[ -z "$tests" ]] || run_tests "the heavy tests (Tests/heavy-suites.txt)" --filter "$tests" ${skip_perf[@]+"${skip_perf[@]}"}
+}
 
 # run_all: every test but the perf ones.
 run_all() {
@@ -403,10 +527,13 @@ run_all() {
     # memory; ci.yml samples memory to confirm it. So it runs on its own, one
     # test at a time (--no-parallel serializes Swift Testing), and the rest stay
     # parallel. Each run prints its wall time.
-    run_tests "all but AppSnapshotTests" --skip "^AppSnapshotTests\.${perf:+|$perf}"
+    run_tests "all but AppSnapshotTests and the heavy tests" --skip "^AppSnapshotTests\.${perf:+|$perf}${heavy:+|$heavy}"
+    run_heavy
     run_tests "AppSnapshotTests, one at a time" --filter '^AppSnapshotTests\.' ${skip_perf[@]+"${skip_perf[@]}"} --no-parallel
   else
-    run_tests "all" ${skip_perf[@]+"${skip_perf[@]}"}
+    local skip="$perf${perf:+${heavy:+|}}$heavy"
+    run_tests "all but the heavy tests" ${skip:+--skip "$skip"}
+    run_heavy
   fi
 }
 
@@ -424,7 +551,11 @@ else
     run_all
   else
     tests=$(sed -n 1p <<<"$scope") snaps=$(sed -n 2p <<<"$scope")
-    [[ -z "$tests" ]] || run_tests "changed: $tests" --filter "$tests" ${skip_perf[@]+"${skip_perf[@]}"}
+    if [[ -n "$tests" ]]; then
+      skip="$perf${perf:+${heavy:+|}}$heavy"
+      run_tests "changed: $tests" --filter "$tests" ${skip:+--skip "$skip"}
+      run_heavy "$tests"
+    fi
     [[ -z "$snaps" ]] || run_tests "changed snapshots, one at a time: $snaps" --filter "$snaps" ${skip_perf[@]+"${skip_perf[@]}"} --no-parallel
     [[ -n "$tests$snaps" ]] || echo "== swift test: no test target covers the changed files; the build above is the check"
   fi

@@ -1,0 +1,30 @@
+[
+  {
+    "label": "exportsAtSize: the export ignores the size and writes the scope's own pixels",
+    "file": "Sources/PhotoModel/PhotoExport+Kernel.swift",
+    "find": "var image = try sized(rendered(scope), o)",
+    "replace": "var image = try rendered(scope)",
+    "tests": "PhotoExportPackTests"
+  },
+  {
+    "label": "cropThenSize: the whole image is resampled first and the crop cut afterwards",
+    "file": "Sources/PhotoModel/PhotoExport+Kernel.swift",
+    "find": "var image = try sized(rendered(scope), o)",
+    "replace": "var image = try sized(rendered(whole), o).cropped(x: scope.x, y: scope.y, width: scope.width, height: scope.height)",
+    "tests": "PhotoExportPackTests"
+  },
+  {
+    "label": "aFramedCropIsCutBeforeTheResample: the export drops the framed crop",
+    "file": "Sources/PhotoModel/PhotoExport+Kernel.swift",
+    "find": "let scope = pendingCrop.flatMap { whole.intersection($0) } ?? whole",
+    "replace": "let scope = whole",
+    "tests": "PhotoExportPackTests"
+  },
+  {
+    "label": "theAgentsJSONOptionsGiveTheSheetsPixels: the headless export ignores the agent's options",
+    "file": "Sources/PhotoModel/PhotoHeadless.swift",
+    "find": "var o = try SuiteExportOptions(json: options, defaults: workspace.exportOptionsDefault())",
+    "replace": "var o = workspace.exportOptionsDefault()",
+    "tests": "PhotoExportPackTests"
+  }
+]

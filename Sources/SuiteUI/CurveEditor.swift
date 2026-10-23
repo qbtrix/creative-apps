@@ -16,7 +16,10 @@
 // clamp) is static and tested in CurveEditorTests. A handle shows a grab
 // pointer and an accent rim under the pointer, and fills accent with a ring
 // while focused or dragged. Owns presentation state only: focus, the hovered
-// handle, the drag's range and the gesture's run.
+// handle, the drag's range and the gesture's run. Under the well a caption row
+// names the axes (Time →, ↑ Progress); each handle's tooltip and accessibility
+// label read "Handle 1: x 0.42, y 0.10" (`handleReading`), the label carrying
+// the value since XCUITest reads SwiftUI values as "" (#262).
 import SwiftUI
 
 /// One of the two handles of a cubic Bezier easing.
@@ -62,6 +65,13 @@ public struct CurveEditor: View {
     }
 
     public var body: some View {
+        VStack(spacing: SuiteSpacing.xs) {
+            well
+            CurveAxisCaptionRow(captions: Self.axisCaptions)
+        }
+    }
+
+    private var well: some View {
         GeometryReader { geo in
             let plot = CGRect(origin: .zero, size: geo.size).insetBy(dx: SuiteSpacing.m, dy: SuiteSpacing.m)
             let range = dragging?.range ?? Self.plotRange(including: handles.map { [$0.0, $0.1] } ?? [])
@@ -133,6 +143,7 @@ public struct CurveEditor: View {
         _ index: EasingHandleIndex, at point: CGPoint, plot: CGRect, range: ClosedRange<CGFloat>
     ) -> some View {
         let look = Self.handleLook(active: focused == index || dragging?.handle == index, hovered: hovered == index)
+        let reading = Self.handleReading(index, spoken: nudging.describe(PlanePoint(x: Double(point.x), y: Double(point.y))))
         return Circle()
             .fill(look.fill)
             .overlay(Circle().strokeBorder(look.stroke, lineWidth: 1.5))
@@ -163,10 +174,9 @@ public struct CurveEditor: View {
                         if ends.released() { onEnd() }
                     }
             )
-            .help("Handle \(index.rawValue)")
+            .help(reading)
             .accessibilityElement()
-            .accessibilityLabel("Handle \(index.rawValue)")
-            .accessibilityValue(nudging.describe(PlanePoint(x: Double(point.x), y: Double(point.y))))
+            .accessibilityLabel(Text(verbatim: reading))
             .suiteControl(id: "\(id).handle\(index.rawValue)", enabled: true, reason: nil)
     }
 
@@ -287,14 +297,15 @@ extension CurveEditor {
     }
 
     /// `point` nudged `dx` and `dy` steps of 0.01 (0.1 when `coarse`), the
-    /// moved axis snapped to that step; x stays in 0...1 either way.
+    /// moved axis snapped to 0.01 so ⇧↑ from 1.01 reads 1.11, not 1.1 (SJ20,
+    /// #2923); x stays in 0...1 either way.
     nonisolated public static func nudged(_ point: CGPoint, dx: Int, dy: Int, coarse: Bool) -> CGPoint {
         let step = coarse ? 0.1 : 0.01
         let clamped = handlePoint(point)
         var x = Double(clamped.x)
         var y = Double(clamped.y)
-        if dx != 0 { x = ScrubValue.snapped(x + Double(dx) * step, to: step, in: 0...1) }
-        if dy != 0 { y = ScrubValue.snapped(y + Double(dy) * step, to: step, in: -.greatestFiniteMagnitude...(.greatestFiniteMagnitude)) }
+        if dx != 0 { x = ScrubValue.snapped(x + Double(dx) * step, to: 0.01, in: 0...1) }
+        if dy != 0 { y = ScrubValue.snapped(y + Double(dy) * step, to: 0.01, in: -.greatestFiniteMagnitude...(.greatestFiniteMagnitude)) }
         return CGPoint(x: x, y: y)
     }
 
@@ -302,6 +313,39 @@ extension CurveEditor {
     nonisolated public static func describe(_ point: CGPoint) -> String {
         let two = FloatingPointFormatStyle<Double>.number.precision(.fractionLength(2))
         return "x \(Double(point.x).formatted(two)), y \(Double(point.y).formatted(two))"
+    }
+
+    /// "Handle 1: x 0.42, y 0.10": a handle's tooltip and accessibility label, its spoken value after
+    /// the colon. The label carries the value because XCUITest reads SwiftUI values as "" (#262).
+    nonisolated public static func handleReading(_ index: EasingHandleIndex, spoken: String) -> String {
+        "Handle \(index.rawValue): \(spoken)"
+    }
+
+    /// The well's axis captions: x is time, y is progress.
+    nonisolated public static let axisCaptions = CurveAxisCaptions(x: "Time", y: "Progress")
+}
+
+/// A curve well's axis names, drawn under it in secondary text: "Time →" leading, "↑ Progress" trailing.
+public struct CurveAxisCaptions: Equatable, Sendable {
+    public let x: String
+    public let y: String
+}
+
+/// The caption row under a curve well; one element that reads "Time across, Progress up".
+struct CurveAxisCaptionRow: View {
+    let captions: CurveAxisCaptions
+
+    var body: some View {
+        HStack(spacing: SuiteSpacing.s) {
+            Text(verbatim: "\(captions.x) →")
+            Spacer(minLength: 0)
+            Text(verbatim: "↑ \(captions.y)")
+        }
+        .font(SuiteFont.caption)
+        .foregroundStyle(SuiteColor.secondaryText)
+        .lineLimit(1)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: "\(captions.x) across, \(captions.y) up"))
     }
 }
 

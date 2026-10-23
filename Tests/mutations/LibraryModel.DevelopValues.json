@@ -1,0 +1,30 @@
+[
+  {
+    "label": "an old catalog without whites fails to decode",
+    "file": "Sources/LibraryModel/Contracts/DevelopValues.swift",
+    "find": "whites = try c.decodeIfPresent(Double.self, forKey: .whites) ?? 0",
+    "replace": "whites = try c.decode(Double.self, forKey: .whites)",
+    "tests": "LibraryDevelopValuesTests"
+  },
+  {
+    "label": "a neutral whites adds a key to every encoded settings",
+    "file": "Sources/LibraryModel/Contracts/DevelopValues.swift",
+    "find": "if whites != 0 { try c.encode(whites, forKey: .whites) }",
+    "replace": "try c.encode(whites, forKey: .whites)",
+    "tests": "LibraryDevelopValuesTests"
+  },
+  {
+    "label": "a curve point exactly the minimum gap from its neighbour is dropped",
+    "file": "Sources/LibraryModel/Contracts/DevelopValues.swift",
+    "find": "if point.x - previous.x < Self.minGap ||",
+    "replace": "if point.x - previous.x <= Self.minGap ||",
+    "tests": "LibraryDevelopValuesTests"
+  },
+  {
+    "label": "the fingerprint hashes only the six old sliders",
+    "file": "Sources/LibraryModel/Contracts/DevelopValues.swift",
+    "find": "let bytes = (try? encoder.encode(self)) ?? Data()",
+    "replace": "let bytes = (try? encoder.encode([exposure, contrast, highlights, shadows, temperature, tint])) ?? Data()",
+    "tests": "LibraryDevelopValuesTests"
+  }
+]

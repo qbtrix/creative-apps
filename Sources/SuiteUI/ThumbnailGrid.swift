@@ -2,13 +2,19 @@
 // thumbnails with adaptive columns for Library and any asset browser. Content,
 // so flat: no glass. The app owns the selection and gets every change through
 // `onSelectionChange`; the grid keeps only presentation state (click anchor,
-// focus, width, the cells on screen). The selection rules live in
-// GridSelection, where they are tested. Each cell is one accessibility
-// element carrying the app's value, help and `<prefix><id>` identifier (ids go
-// on that leaf, never on the grid), and `onVisibleChange` reports the cells on
+// focus, width, the cells on screen). Every click and arrow move goes through
+// a `GridSelecting` rule (UC9), `SuiteGridSelecting` over GridSelection unless
+// the caller passes another (lists-and-layers LL-12). Each cell is one
+// accessibility element carrying the app's value, help and `<prefix><id>`
+// identifier, registered in `suite.controls` (ids go on that leaf, never on
+// the grid; the gallery uses `suite.grid.`). While it scrolls the grid reports
+// a drawn frame on series `grid-scroll` (SP4) to the GridProbe a probe host
+// sets in the environment. `onVisibleChange` reports the cells on
 // screen so the app can load only those thumbnails. Images aspect-fit inside
 // the cell; a reject is dimmed with a badge and an unreadable file shows a
-// warning mark. Snapshots drop the ScrollView, which ImageRenderer does not draw.
+// warning mark. With several selected, `active` names the one the app acts
+// from (Library's Sync source): its ring is heavier and its accessibility value
+// ends in "active". Snapshots drop the ScrollView, which ImageRenderer does not draw.
 // Its indicators are `.never`, as in Halo's and Photo's inspectors: a legacy
 // scroller is an unlabelled, unidentified button to the app audit (#1368).
 // The grid still scrolls by wheel, trackpad and arrow keys.
@@ -18,7 +24,7 @@ import SwiftUI
 /// Small symbols over a thumbnail. `rating` is clamped to 0...5 stars. The
 /// color label's `name` is its accessibility label, so color never carries
 /// the meaning alone. `dimmed` (a reject) draws the image at 40% with an
-/// `xmark.circle` badge labelled "Rejected".
+/// `xmark.circle.fill` badge labelled "Rejected", solid like the stars.
 public struct ThumbnailBadges: Sendable {
     public let rating: Int
     public let isFlagged: Bool
@@ -62,7 +68,7 @@ public struct ThumbnailItem<ID: Hashable>: Identifiable {
     }
 }
 
-public struct ThumbnailGrid<ID: Hashable>: View {
+public struct ThumbnailGrid<ID: Hashable & Sendable>: View {
     private let items: [ThumbnailItem<ID>]
     private let cellSize: CGSize
     private let selection: Set<ID>
@@ -70,24 +76,30 @@ public struct ThumbnailGrid<ID: Hashable>: View {
     private let onOpen: @MainActor (ID) -> Void
     private let cellIdentifierPrefix: String?
     private let onVisibleChange: @MainActor ([ID]) -> Void
+    private let selecting: any GridSelecting
+    private let active: ID?
     @State private var anchor: ID?
     @State private var visible = Set<ID>()
     @State private var width: CGFloat = 0
     @FocusState private var focused: Bool
     @Environment(\.suiteSnapshotRendering) private var snapshot
+    @Environment(\.gridProbe) private var probe
 
     /// Click selects, Command-click toggles, Shift-click selects a range in
     /// display order, arrow keys move; each reports the new set through
     /// `onSelectionChange`. Double-click or Return calls `onOpen`. With
     /// `cellIdentifierPrefix` each cell's identifier is `<prefix><id>`.
     /// `onVisibleChange` gets the ids of the cells on screen, in display
-    /// order, as cells appear and disappear.
+    /// order, as cells appear and disappear. `selecting` is the selection
+    /// rule every click and arrow move goes through. `active`, when selected,
+    /// draws the heavier ring of the item the app acts from.
     public init(
         _ items: [ThumbnailItem<ID>], cellSize: CGSize, selection: Set<ID>,
         onSelectionChange: @escaping @MainActor (Set<ID>) -> Void,
         onOpen: @escaping @MainActor (ID) -> Void = { _ in },
         cellIdentifierPrefix: String? = nil,
-        onVisibleChange: @escaping @MainActor ([ID]) -> Void = { _ in }
+        onVisibleChange: @escaping @MainActor ([ID]) -> Void = { _ in },
+        selecting: any GridSelecting = SuiteGridSelecting(), active: ID? = nil
     ) {
         self.items = items
         self.cellSize = cellSize
@@ -96,6 +108,8 @@ public struct ThumbnailGrid<ID: Hashable>: View {
         self.onOpen = onOpen
         self.cellIdentifierPrefix = cellIdentifierPrefix
         self.onVisibleChange = onVisibleChange
+        self.selecting = selecting
+        self.active = active
     }
 
     public var body: some View {
@@ -105,6 +119,9 @@ public struct ThumbnailGrid<ID: Hashable>: View {
             ScrollViewReader { proxy in
                 ScrollView { grid }
                     .scrollIndicators(.never)
+                    .onScrollGeometryChange(for: Double.self) { Double($0.contentOffset.y) } action: { _, _ in
+                        probe?.drew(GridProbe.scrollSeries, ProcessInfo.processInfo.systemUptime)
+                    }
                     .onChange(of: anchor) { _, id in if let id { proxy.scrollTo(id) } }
             }
         }
@@ -116,8 +133,10 @@ public struct ThumbnailGrid<ID: Hashable>: View {
     private var grid: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: columnWidth), spacing: SuiteSpacing.m)], spacing: SuiteSpacing.m) {
             ForEach(items) { item in
-                ThumbnailCell(item: item, size: cellSize, isSelected: selection.contains(item.id))
-                    .accessibilityIdentifier(cellIdentifierPrefix.map { "\($0)\(item.id)" } ?? "")
+                ThumbnailCell(
+                    item: item, size: cellSize, isSelected: selection.contains(item.id),
+                    isActive: item.id == active && selection.contains(item.id))
+                    .suiteControl(id: cellIdentifierPrefix.map { "\($0)\(item.id)" }, enabled: true, reason: nil)
                     .id(item.id)
                     .onAppear { setVisible(item.id, true) }
                     .onDisappear { setVisible(item.id, false) }
@@ -160,40 +179,73 @@ public struct ThumbnailGrid<ID: Hashable>: View {
         return order.first(where: selection.contains)
     }
 
-    private static func clickKind() -> GridSelection.Click {
+    private static func clickKind() -> ClickKind {
         let flags = NSEvent.modifierFlags
         if flags.contains(.shift) { return .extend }
         return flags.contains(.command) ? .toggle : .plain
     }
 
-    private func click(_ id: ID, kind: GridSelection.Click) {
-        focused = true
-        apply(GridSelection.click(id, kind, order: order, selection: selection, anchor: currentAnchor))
+    /// The pick after clicking `id`: what `rule` gives for the selection and
+    /// anchor the grid holds. The grid's only click path (LL-12).
+    nonisolated public static func picked(
+        _ id: ID, _ kind: ClickKind, selection: Set<ID>, anchor: ID?, order: [ID], rule: any GridSelecting
+    ) -> GridPick<ID> {
+        rule.click(id, kind, current: GridPick(selection: selection, anchor: anchor), order: order)
     }
 
-    private func move(_ direction: GridSelection.Direction) -> KeyPress.Result {
-        let columns = GridSelection.columns(
+    private func click(_ id: ID, kind: ClickKind) {
+        focused = true
+        apply(Self.picked(id, kind, selection: selection, anchor: currentAnchor, order: order, rule: selecting))
+    }
+
+    private func move(_ arrow: GridArrow) -> KeyPress.Result {
+        let columns = selecting.columns(
             width: Double(width - SuiteSpacing.m * 2), minimum: Double(columnWidth), spacing: Double(SuiteSpacing.m))
-        apply(GridSelection.move(direction, order: order, columns: columns, anchor: currentAnchor))
+        let current = GridPick(selection: selection, anchor: currentAnchor)
+        apply(selecting.move(arrow, extend: false, current: current, order: order, columns: columns))
         return .handled
     }
 
-    private func apply(_ result: GridSelection.Result<ID>) {
-        anchor = result.anchor
-        if result.selection != selection { onSelectionChange(result.selection) }
+    private func apply(_ pick: GridPick<ID>) {
+        anchor = pick.anchor
+        if pick.selection != selection { onSelectionChange(pick.selection) }
     }
+}
+
+/// Where scrolling lists report their frames (`.suiteProbes()` sets it; nil
+/// records nothing): one drawn frame per scroll offset change, on series
+/// `grid-scroll` from ThumbnailGrid and `layers-scroll` from LayerTreeList,
+/// for SP4's frame-interval p95 (QB-S7).
+struct GridProbe: Sendable {
+    static let scrollSeries = "grid-scroll"
+    static let layersScrollSeries = "layers-scroll"
+    let drew: @MainActor @Sendable (String, Double) -> Void
+}
+
+extension EnvironmentValues {
+    /// Where thumbnail grids and layer lists report their scroll frames; nil records nothing.
+    var gridProbe: GridProbe? {
+        get { self[GridProbeKey.self] }
+        set { self[GridProbeKey.self] = newValue }
+    }
+}
+
+private struct GridProbeKey: EnvironmentKey {
+    static let defaultValue: GridProbe? = nil
 }
 
 /// One thumbnail: the image (or a flat placeholder) with its badges clipped
 /// to it, and the caption under it. Selection is an accent ring and a light
 /// accent fill, and a `stateSelected` hairline just outside the ring, so the
 /// selection still reads on a blue or teal photo where the ring blends in.
+/// The active cell's ring is half again as heavy, and its value says "active".
 /// Hover on an unselected cell takes the row-hover fill and a primary caption
 /// (two signals, so it never reads by fill alone).
 private struct ThumbnailCell<ID: Hashable>: View {
     let item: ThumbnailItem<ID>
     let size: CGSize
     let isSelected: Bool
+    var isActive = false
     @State private var hovering = false
 
     var body: some View {
@@ -206,7 +258,9 @@ private struct ThumbnailCell<ID: Hashable>: View {
                 .clipShape(RoundedRectangle(cornerRadius: SuiteRadius.small))
                 .overlay(
                     RoundedRectangle(cornerRadius: SuiteRadius.small)
-                        .strokeBorder(isSelected ? SuiteColor.accent : SuiteColor.separator, lineWidth: isSelected ? 2 : 1))
+                        .strokeBorder(
+                            isSelected ? SuiteColor.accent : SuiteColor.separator,
+                            lineWidth: isActive ? 3 : isSelected ? 2 : 1))
                 .overlay { if isSelected { selectionHairline } }
             Text(item.caption)
                 .font(SuiteFont.caption)
@@ -224,7 +278,8 @@ private struct ThumbnailCell<ID: Hashable>: View {
         .accessibilityElement(children: .combine)
         // After the combine, so a cell with badges reads its help once, not once per element.
         .help(item.help ?? item.caption)
-        .accessibilityValue(Text(verbatim: item.accessibilityValue ?? ""))
+        .accessibilityValue(Text(verbatim: [item.accessibilityValue ?? "", isActive ? "active" : ""]
+                .filter { !$0.isEmpty }.joined(separator: ", ")))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
@@ -268,7 +323,7 @@ private struct ThumbnailCell<ID: Hashable>: View {
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(Text(verbatim: marks.rating == 1 ? "1 star" : "\(marks.rating) stars"))
                 }
-                if marks.dimmed { Image(systemName: "xmark.circle").accessibilityLabel("Rejected") }
+                if marks.dimmed { Image(systemName: "xmark.circle.fill").accessibilityLabel("Rejected") }
                 if marks.isFlagged { Image(systemName: "flag.fill").accessibilityLabel("Flagged") }
                 if let label = marks.colorLabel {
                     Image(systemName: "circle.fill").foregroundStyle(label.color).accessibilityLabel(label.name)

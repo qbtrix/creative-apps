@@ -1,5 +1,6 @@
 // ExportScanTests.swift: LM-0c3 (docs/blueprints/flare.md, 7.1): one test per warning, `bounce` 0–12 step 2 gives 7
-// PNGs, a cancelled export returns no files, export state, `showcase`, never a silent drop, and QB-L8 on the fake.
+// PNGs, a cancelled export returns no files, the run on the kernel's ExportRun (FX-4), `showcase`, never a silent
+// drop, and QB-L8 on the fake.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -71,7 +72,7 @@ private func workspace(_ document: Document) -> FlareWorkspace {
 
 @Test func everyFormatExportsShowcaseCarryingTheScansWarnings() async throws {
     let showcase = FlareFixtures.showcase
-    for format in ExportFormat.allCases {
+    for format in ExportFormat.allCases where format.unbuiltReason == nil {
         let o = options(format, 0...2)
         let result = try await run(showcase, o)
         #expect(!result.files.isEmpty)
@@ -108,42 +109,56 @@ private func workspace(_ document: Document) -> FlareWorkspace {
     }
 }
 
-@Test func aWorkspaceExportRunsThenFinishesWithTheResult() async {
-    var w = workspace(FlareFixtures.showcase)
+@Test func aWorkspaceKeepsTheSheetsDefaultsAndWarnings() {
+    let w = workspace(FlareFixtures.showcase)
     #expect(w.exportOptions(.pngSequence) == options(.pngSequence, 0...47))
     #expect(w.exportOptions(.lottie).map(w.exportWarnings) == [text, symbol, machine, background])
-    await w.export(options(.pngSequence, 0...4, step: 2), rasterizer: FakeRasterizer())
-    guard case .finished(let result) = w.exportState else { Issue.record("not finished"); return }
-    #expect(result.files.count == 3 && result.warnings == [text, symbol, machine])
+    let none = FlareWorkspace(services: .fake())
+    #expect(none.exportOptions(.svgFrame) == nil && none.exportWarnings(options(.lottie)).isEmpty)
+}
+
+// The run tests below are the kernel-shaped rewrite of the old app-local run (FX-2), on since FX-4; the progress one
+// reads the run's total, which is `exportFileCount`, on since FX-11.
+@Test func aWorkspaceExportRunsThenFinishesWithTheWrittenNames() async throws {
+    var w = workspace(FlareFixtures.showcase)
+    let document = try #require(w.document)
+    #expect(w.openExport() && w.startExport())
+    let o = try #require(w.exportingOptions)
+    #expect(o == options(.svgFrame, 0...47))
+    let result = try await run(document, o)
+    #expect(result.warnings == [text, symbol, machine])
+    w.endExport(.success(result.files.map(\.name)))
+    #expect(w.exportState == .finished(o, ["scene-1.svg"]))
     w.dismissExport()
     #expect(w.exportState == .idle)
     var none = FlareWorkspace(services: .fake())
-    #expect(none.exportOptions(.svgFrame) == nil && none.exportWarnings(options(.lottie)).isEmpty)
-    await none.export(options(.svgFrame), rasterizer: FakeRasterizer())
-    #expect(none.exportState == .idle && !none.beginExport())
+    #expect(!none.openExport() && !none.startExport() && none.exportState == .idle)
 }
 
-@Test func progressOnlyMovesForwardWhileRunning() {
+@Test func progressOnlyMovesForwardWhileRunning() throws {
     var w = workspace(FlareFixtures.bounce)
     w.exportProgressed(0.5)
-    #expect(w.exportState == .idle && w.beginExport() && !w.beginExport())
+    #expect(w.exportState == .idle && w.openExport() && !w.openExport() && w.startExport() && !w.startExport())
+    let o = try #require(w.exportingOptions)
     for p in [0.25, 0.1, .nan, 0.75, 4] { w.exportProgressed(p) }
-    #expect(w.exportState == .running(progress: 1))
+    #expect(w.exportState == .running(o, done: 1, total: 1))
     w.dismissExport()
-    #expect(w.exportState == .running(progress: 1))
+    #expect(w.exportState == .running(o, done: 1, total: 1))
 }
 
-@Test func cancelGoesBackToIdleAndAFailureSaysWhy() {
+@Test func cancelGoesBackToIdleAndAFailureSaysWhy() throws {
     var w = workspace(FlareFixtures.bounce)
-    _ = w.beginExport()
+    _ = w.openExport(); _ = w.startExport()
+    let o = try #require(w.exportingOptions)
     w.endExport(.failure(CancellationError()))
-    #expect(w.exportState == .idle && w.beginExport())
+    #expect(w.exportState == .idle && w.openExport() && w.startExport())
     w.endExport(.failure(PNGExportError.frameOutOfRange(0...90)))
-    #expect(w.exportState == .failed("Frames 0–90 aren't all in the scene.") && w.beginExport())
+    #expect(w.exportState == .failed(o, "Frames 0–90 aren't all in the scene."))
+    w.retryExport(); _ = w.startExport()
     w.endExport(.failure(NotBuilt(reason: "Not connected yet (IN-7).")))
-    #expect(w.exportState == .failed("Not connected yet (IN-7)."))
-    w.endExport(.success(ExportResult(files: [], warnings: [])))
-    #expect(w.exportState == .failed("Not connected yet (IN-7)."))
+    #expect(w.exportState == .failed(o, "Not connected yet (IN-7)."))
+    w.endExport(.success(["scene-1.svg"]))
+    #expect(w.exportState == .failed(o, "Not connected yet (IN-7)."))
 }
 
 // QB-L8's Linux gate: SVG frame < 1 s, Lottie of 300 frames < 10 s, 48 PNG frames at 1080p < 10 s. The fake's
@@ -160,4 +175,16 @@ private func workspace(_ document: Document) -> FlareWorkspace {
     var files = 0
     let png = try await clock.measure { files = try await run(hd(48), options(.pngSequence, 0...47), using: straight).files.count }
     #expect(svg < .seconds(1) && lottie < .seconds(10) && png < .seconds(10) && files == 48)
+}
+
+/// The PNG frames draw the stage's picture, which has no masks or mattes yet; SVG and Lottie write them.
+@Test func aMaskOrMatteIsNamedForPNGOnly() {
+    var document = FlareFixtures.bounce
+    let square = [Point(x: 0, y: 0), Point(x: 10, y: 0), Point(x: 10, y: 10)]
+    document.scenes[0].layers[0].masks = [LayerMask(path: FlarePath(polyline: square, closed: true))]
+    #expect(ExportScan.warnings(document, options: options(.pngSequence)) == ["Masks and mattes aren't drawn in PNG yet (1 layer)."])
+    #expect(ExportScan.warnings(document, options: options(.svgFrame)).isEmpty)
+    #expect(ExportScan.warnings(document, options: options(.lottie, transparent: true)).isEmpty)
+    document.scenes[0].layers.append(Layer(id: "m", name: "M", matte: TrackMatte(sourceLayerID: document.scenes[0].layers[0].id)))
+    #expect(ExportScan.warnings(document, options: options(.pngSequence)) == ["Masks and mattes aren't drawn in PNG yet (2 layers)."])
 }

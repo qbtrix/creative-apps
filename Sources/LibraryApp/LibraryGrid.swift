@@ -4,13 +4,17 @@
 // grid; the placeholder fill while it loads), file name, and rating, flag
 // and label badges. A reject is dimmed under SuiteUI's "Rejected" badge; a
 // file that can't be read shows SuiteUI's unreadable mark. A cell's value is
-// the catalog's `cellValue(for:)` ("ready 256×171 3 stars"), and its tooltip
+// the catalog's `cellValue(photo:)` ("ready 256×171 3 stars"), and its tooltip
 // names the photo and its cull state ("IMG_0040: 1 star, Picked"), or why its
 // file can't be read, so the flag glyph never stands alone. Each cell is
 // identified `library.grid.cell.<photo id>` on the cell itself, never on the
 // grid, so journeys and the app audit can find it. The cells on screen go to
-// `menu.thumbnails.visibleChanged`, which requests their thumbnails. Values
-// in, closures out; LibraryCatalog holds the state.
+// `menu.thumbnails.visibleChanged`, which requests their thumbnails. With
+// several selected, the Sync source is the grid's active cell (heavier ring). On
+// appear and whenever the cell size or the display scale changes, the grid
+// reports both to `menu.thumbnails.cellSizeChanged` (the scale a whole number
+// ≥ 1, `LibraryCatalog.thumbnailScale`), which picks the thumbnail bucket.
+// Values in, closures out; LibraryCatalog holds the state.
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -19,8 +23,11 @@ struct LibraryGrid: View {
     let model: LibraryCatalog
     /// The window's menu; the cells on screen go to `menu.thumbnails.visibleChanged`.
     var menu = LibraryMenu()
+    /// The window's held thumbnails; nil shows the catalog's own (snapshots).
+    var thumbnails: LibraryThumbnailStore? = nil
     var onSelect: @MainActor (Set<String>) -> Void = { _ in }
     var onOpen: @MainActor (String) -> Void = { _ in }
+    @Environment(\.displayScale) private var displayScale
 
     /// Each cell's identifier is this plus the photo's id.
     static let cellIdentifierPrefix = "library.grid.cell."
@@ -28,15 +35,27 @@ struct LibraryGrid: View {
     var body: some View {
         let side = CGFloat(model.cellSize)
         let visibleChanged = menu.thumbnails.visibleChanged
+        let cellSizeChanged = menu.thumbnails.cellSizeChanged
+        let cell = [model.cellSize, LibraryCatalog.thumbnailScale(forDisplayScale: Double(displayScale))]
+        // Read here, so a thumbnail pass reruns this body and not the window's.
+        let held = thumbnails?.thumbnails ?? model.thumbnails
         ThumbnailGrid(
             model.sortedItems.map {
                 ThumbnailItem<String>(
-                    photo: $0, thumbnail: model.thumbnails[$0.id], value: model.cellValue(for: $0.id))
+                    photo: $0, thumbnail: held[$0.id],
+                    value: LibraryCatalog.cellValue(photo: $0, thumbnail: held[$0.id]))
             },
             cellSize: CGSize(width: side, height: side * 3 / 4),
             selection: model.selection, onSelectionChange: onSelect, onOpen: onOpen,
             cellIdentifierPrefix: Self.cellIdentifierPrefix,
-            onVisibleChange: { visibleChanged?($0) })
+            onVisibleChange: { visibleChanged?($0) },
+            // The photo Sync copies from gets the heavier ring.
+            active: model.syncSource?.id
+        )
+        .onChange(of: cell, initial: true) { _, cell in
+            guard cell.count == 2 else { return }
+            cellSizeChanged?(cell[0], cell[1])
+        }
     }
 }
 

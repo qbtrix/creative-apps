@@ -1,0 +1,30 @@
+[
+  {
+    "label": "nestedDropMoves: a drop into a layer is taken as a move among the layers, though Halo's layers hold none",
+    "file": "Sources/HaloModel/HaloLayerEdits.swift",
+    "find": "guard parent == nil, let layers = selectedComposition?.layers,",
+    "replace": "guard let layers = selectedComposition?.layers,",
+    "tests": "HaloLayerDropTests"
+  },
+  {
+    "label": "dropIndexUnflipped: the list's back-to-front drop index goes to moveLayer as a top-first one",
+    "file": "Sources/HaloModel/HaloLayerEdits.swift",
+    "find": "return .moveLayer(id, to: last - min(max(index, 0), last))",
+    "replace": "return .moveLayer(id, to: min(max(index, 0), last))",
+    "tests": "HaloLayerDropTests"
+  },
+  {
+    "label": "dropIndexUnclamped: a drop index past the list goes to moveLayer unclamped",
+    "file": "Sources/HaloModel/HaloLayerEdits.swift",
+    "find": "return .moveLayer(id, to: last - min(max(index, 0), last))",
+    "replace": "return .moveLayer(id, to: last - index)",
+    "tests": "HaloLayerDropTests"
+  },
+  {
+    "label": "rowsTopFirstFlipped: the list's rows come bottom first, so the panel lists the layers upside down",
+    "file": "Sources/HaloModel/HaloLayerEdits.swift",
+    "find": "public var layerRows: [LayerRow] { selectedComposition?.layerTree.rows(expanded: []) ?? [] }",
+    "replace": "public var layerRows: [LayerRow] { (selectedComposition?.layerTree.rows(expanded: []) ?? []).reversed() }",
+    "tests": "HaloLayerDropTests"
+  }
+]

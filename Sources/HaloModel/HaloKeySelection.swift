@@ -3,14 +3,19 @@
 // keys on a track, named after the first. A row picks its segment's first key;
 // a timeline diamond picks every key of that lane at its frame, so every
 // diamond picks something: a picked key marks the segment it starts, and a
-// track's last key the segment it ends. Only this file writes `selectedKeys`.
+// track's last key the segment it ends. The picked keys are a SuiteKernel
+// `Selection` (`keySelection`, AS-h1) used as a set; only this file writes it,
+// and its `prune(alive:)` drops stale keys, not set algebra here (AS-h2).
 // A pick is never an edit: no history step, no dirty file. ⌫ from the viewer
 // or timeline deletes the picked keys as one "Delete Keyframes" step while
-// any are picked (`deleteCommand`), else the layer.
+// any are picked (`deleteCommand`), else the layer. Key editing (KE-3): the
+// timeline's picks span layers (HaloKeyPick+Kernel.swift), so ⌫ takes every
+// layer's picked keys; the EASING list still reads the selected layer's.
 // EZ-3: easing the picked keys. A preset is one "Keyframe Easing" step; a
 // handle drag is one step until `endCoalescing()` (coalesced per layer); the
 // curve and handles the inspector draws come from the first picked segment.
 // Linux-safe: no UI imports.
+import SuiteKernel
 
 /// One row of the EASING list: a key and the next key on its track.
 public struct HaloKeySegment: Identifiable, Sendable, Hashable {
@@ -82,7 +87,20 @@ extension HaloProject {
     /// segment (a track's last key, another layer's) changes nothing.
     public mutating func selectKey(_ key: HaloKeyRef, extending: Bool) {
         guard keySegments.contains(where: { $0.key == key }) else { return }
-        selectedKeys = extending ? pickedKeys.symmetricDifference([key]) : [key]
+        guard extending else { return keySelection.replace([key]) }
+        narrowToPickedKeys()
+        keySelection.pick(key, .toggle)
+    }
+
+    /// Narrows the pick to `pickedKeys` before a toggle: stale and
+    /// other-layer keys drop out, and a picked last key of a track gives way
+    /// to the first key of the segment it ends (read before the prune, #2763).
+    private mutating func narrowToPickedKeys() {
+        let alive = pickedKeys
+        keySelection.prune { alive.contains($0) }
+        for segment in keySegments where alive.contains(segment.key) && !keySelection.contains(segment.key) {
+            keySelection.pick(segment.key, .extend)
+        }
     }
 
     /// Picks every key of `layerID`'s animated tracks at `frame`, as a
@@ -94,21 +112,33 @@ extension HaloProject {
             selectLayer(layerID)
             extending = false
         }
-        let clicked = segmentKeys.filter { $0.frame == frame }
-        selectedKeys = extending ? pickedKeyframes.union(clicked) : clicked
+        let clicked = segmentKeyList.filter { $0.frame == frame }
+        guard extending else { return keySelection.replace(clicked) }
+        keySelection = liveKeySelection
+        for key in clicked { keySelection.pick(key, .extend) }
     }
 
-    /// Every key of the selected layer's segments, first and last alike.
-    private var segmentKeys: Set<HaloKeyRef> {
-        Set(keySegments.flatMap { segment in
+    /// Every key of the selected layer's segments, first and last alike, in
+    /// segment order.
+    private var segmentKeyList: [HaloKeyRef] {
+        keySegments.flatMap { segment in
             [segment.key, HaloKeyRef(layerID: segment.key.layerID, property: segment.key.property, frame: segment.endFrame)]
-        })
+        }
     }
 
-    /// The picked keys still on the selected layer's animated tracks: what ⌫ deletes.
-    public var pickedKeyframes: Set<HaloKeyRef> {
-        selectedKeys.intersection(segmentKeys)
+    /// The pick pruned to the selected layer's segment keys: stale and
+    /// other-layer keys drop out.
+    private var liveKeySelection: Selection<HaloKeyRef> {
+        let alive = Set(segmentKeyList)
+        var live = keySelection
+        live.prune { alive.contains($0) }
+        return live
     }
+
+    /// The picked keys still on an animated track of the selected
+    /// composition, on every layer (key-editing KE-3): what ⌫ deletes and
+    /// the lanes draw picked.
+    public var pickedKeyframes: Set<HaloKeyRef> { keySelection.set.intersection(compositionKeys) }
 
     /// What ⌫ sends from the viewer and timeline: Delete Keyframes while any
     /// key is picked, else Delete (the selected layer).
@@ -138,12 +168,12 @@ extension HaloProject {
                 try keying.toggleKey(key.property, of: key.layerID, at: key.frame, in: &doc.compositions[c])
             }
         }
-        if deleted { selectedKeys = [] }
+        if deleted { keySelection.clear() }
     }
 
     /// Picks nothing.
     public mutating func clearKeySelection() {
-        selectedKeys = []
+        keySelection.clear()
     }
 
     // MARK: Easing the picked keys (EZ-3)
@@ -154,15 +184,10 @@ extension HaloProject {
         pickedSegment?.easing.handles
     }
 
-    /// `count` points along the picked segment's curve, x from 0 to 1, y from
-    /// FlareCore's `Easing.value(at:)`. Empty with nothing picked.
+    /// `count` points along the picked segment's curve, x from 0 to 1
+    /// (SuiteKernel's `EaseCurve.samples`, at most 4096). Empty with nothing picked.
     public func easingCurve(count: Int) -> [HaloPoint] {
-        guard let easing = pickedSegment?.easing, count > 0 else { return [] }
-        let last = Double(max(count - 1, 1))
-        return (0..<count).map { i in
-            let x = Double(i) / last
-            return HaloPoint(x: x, y: easing.value(at: x))
-        }
+        pickedSegment.map { EaseCurve.samples(of: $0.easing, count: count) } ?? []
     }
 
     /// Gives every picked key `preset`, as one "Keyframe Easing" step. The
@@ -200,22 +225,18 @@ extension HaloProject {
 }
 
 extension HaloEasing {
-    /// The curve's two handles; linear and hold read as (0, 0) and (1, 1).
+    /// The curve's two handles (SuiteKernel's `EaseCurve.handles`); linear
+    /// and hold read as (0, 0) and (1, 1).
     var handles: (first: HaloPoint, second: HaloPoint) {
-        switch self {
-        case let .cubicBezier(x1, y1, x2, y2): (HaloPoint(x: x1, y: y1), HaloPoint(x: x2, y: y2))
-        case .linear, .hold: (HaloPoint(x: 0, y: 0), HaloPoint(x: 1, y: 1))
-        }
+        guard let points = EaseCurve.handles(of: self), points.count == 2,
+            let first = points.first, let second = points.last
+        else { return (HaloPoint(x: 0, y: 0), HaloPoint(x: 1, y: 1)) }
+        return (first, second)
     }
 
-    /// This curve with `handle` at `point`: x clamped to 0...1, y kept.
+    /// This curve with `handle` at `point` (SuiteKernel's `EaseCurve.moving`):
+    /// x clamped to 0...1, y kept.
     func movingHandle(_ handle: HaloEasingHandle, to point: HaloPoint) -> HaloEasing {
-        var (first, second) = handles
-        let moved = HaloPoint(x: min(max(point.x, 0), 1), y: point.y)
-        switch handle {
-        case .first: first = moved
-        case .second: second = moved
-        }
-        return .cubicBezier(x1: first.x, y1: first.y, x2: second.x, y2: second.y)
+        EaseCurve.moving(handle == .first ? 0 : 1, to: point, in: self)
     }
 }

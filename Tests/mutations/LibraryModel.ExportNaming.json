@@ -1,0 +1,44 @@
+[
+  {
+    "label": "the first suffix is 1, not 2",
+    "file": "Sources/SuiteModel/Values/UniqueFileNames.swift",
+    "find": "var number = 2",
+    "replace": "var number = 1",
+    "tests": "LibraryExportContractTests"
+  },
+  {
+    "label": "names earlier in the list are not reserved",
+    "file": "Sources/LibraryModel/Contracts/ExportNaming+Kernel.swift",
+    "find": "taken.insert(picked)",
+    "replace": "_ = picked",
+    "tests": "LibraryExportContractTests"
+  },
+  {
+    "label": "the sidecar's name is not checked",
+    "file": "Sources/LibraryModel/Contracts/ExportNaming+Kernel.swift",
+    "find": "let suffixes = sidecar ? [image, \".xmp\"] : [image]",
+    "replace": "let suffixes = [image]",
+    "tests": "LibraryExportContractTests"
+  },
+  {
+    "label": "{seq} is 0-based",
+    "file": "Sources/LibraryModel/Contracts/ExportNaming+Kernel.swift",
+    "find": "padded(index + 1,",
+    "replace": "padded(index,",
+    "tests": "LibraryExportNamingTests"
+  },
+  {
+    "label": "a / in the template is kept",
+    "file": "Sources/LibraryModel/Contracts/ExportNaming+Kernel.swift",
+    "find": "String(UniqueFileNames.name(filled, extension: \"\", among: []).drop",
+    "replace": "String(filled.drop",
+    "tests": "LibraryExportNamingTests"
+  },
+  {
+    "label": "{seq} padding ignores the count",
+    "file": "Sources/LibraryModel/Contracts/ExportNaming+Kernel.swift",
+    "find": "to: String(max(count, 1)).count)",
+    "replace": "to: 1)",
+    "tests": "LibraryExportNamingTests"
+  }
+]

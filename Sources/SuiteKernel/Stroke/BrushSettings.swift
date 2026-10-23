@@ -32,9 +32,24 @@ public struct BrushSettings: Hashable, Codable, Sendable {
         (self.size, self.hardness, self.opacity, self.flow, self.spacing) = (size, hardness, opacity, flow, spacing)
     }
 
-    /// Applies one edit; true when a value changed. EK-28 clamps to `ranges`
-    /// and ignores NaN. Stub: changes nothing, returns false.
-    public mutating func apply(_ edit: BrushEdit) -> Bool { false }
+    /// Applies one edit; true when a value changed. The value is clamped to
+    /// `ranges`; NaN changes nothing.
+    public mutating func apply(_ edit: BrushEdit) -> Bool {
+        let target: (WritableKeyPath<BrushSettings, Double>, Double, ClosedRange<Double>)
+        switch edit {
+        case .size(let v): target = (\.size, v, Self.ranges.size)
+        case .hardness(let v): target = (\.hardness, v, Self.ranges.percent)
+        case .opacity(let v): target = (\.opacity, v, Self.ranges.percent)
+        case .flow(let v): target = (\.flow, v, Self.ranges.percent)
+        case .spacing(let v): target = (\.spacing, v, Self.ranges.percent)
+        }
+        let (key, value, range) = target
+        guard !value.isNaN else { return false }
+        let clamped = Swift.min(range.upperBound, Swift.max(range.lowerBound, value))
+        guard self[keyPath: key] != clamped else { return false }
+        self[keyPath: key] = clamped
+        return true
+    }
 }
 
 /// A named, saved set of brush settings.

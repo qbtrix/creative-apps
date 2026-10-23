@@ -1,0 +1,23 @@
+[
+  {
+    "label": "optionalNotRequired: decodeIfPresent records its key as required",
+    "file": "Sources/SuiteKernel/Commands/SchemaProbe.swift",
+    "find": "try? node.field(key.stringValue, optional: true).value(type)",
+    "replace": "try? node.field(key.stringValue, optional: false).value(type)",
+    "tests": "SuiteKernelTests.SchemaProbeTests"
+  },
+  {
+    "label": "nestedObject: a nested type's object is recorded as a string",
+    "file": "Sources/SuiteKernel/Commands/SchemaProbe.swift",
+    "find": "Self.mark(field.node.schema(), optional: field.optional)",
+    "replace": "Self.mark(field.node.fields.isEmpty ? field.node.schema() : .string(), optional: field.optional)",
+    "tests": "SuiteKernelTests.SchemaProbeTests"
+  },
+  {
+    "label": "depthCap: the cap is off by one, so the probe stops one typed level early",
+    "file": "Sources/SuiteKernel/Commands/SchemaProbe.swift",
+    "find": "guard depth <= maxDepth else {",
+    "replace": "guard depth < maxDepth else {",
+    "tests": "SuiteKernelTests.SchemaProbeTests"
+  }
+]

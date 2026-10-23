@@ -14,6 +14,7 @@
 import AppKit
 import ObjectiveC
 import PhotoModel
+import SuiteUI
 import SwiftUI
 import Testing
 
@@ -53,7 +54,7 @@ extension BodyCountSuites {
             defer { w.close() }
 
             // The first picture: every tile layer has its image (seconds in debug).
-            let canvas = try #require(await w.first(TileCanvasView.self))
+            let canvas = try #require(await w.first(CanvasHostView.self))
             for _ in 0..<600 where tileImages(canvas).isEmpty { try await Task.sleep(for: .milliseconds(50)) }
             let shown = tileImages(canvas)
             try #require(!shown.isEmpty, "the canvas never showed its first picture")
@@ -122,7 +123,7 @@ extension BodyCountSuites {
         }
 
         /// The images the tile layers show now.
-        private static func tileImages(_ canvas: TileCanvasView) -> [ObjectIdentifier] {
+        private static func tileImages(_ canvas: CanvasHostView) -> [ObjectIdentifier] {
             (canvas.layer?.sublayers?.first?.sublayers ?? []).compactMap {
                 ($0.contents as AnyObject?).map(ObjectIdentifier.init)
             }

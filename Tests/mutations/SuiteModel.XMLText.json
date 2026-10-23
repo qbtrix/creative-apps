@@ -1,0 +1,37 @@
+[
+  {
+    "label": "ampEscaped: & is written raw",
+    "file": "Sources/SuiteModel/Values/XMLText.swift",
+    "find": "case \"&\": out += \"&amp;\"",
+    "replace": "case \"&\": out += \"&\"",
+    "tests": "XMLTextTests"
+  },
+  {
+    "label": "aposEscaped: ' is written raw",
+    "file": "Sources/SuiteModel/Values/XMLText.swift",
+    "find": "case \"'\": out += \"&apos;\"",
+    "replace": "case \"'\": out += \"'\"",
+    "tests": "XMLTextTests"
+  },
+  {
+    "label": "ltEscaped: < is written raw",
+    "file": "Sources/SuiteModel/Values/XMLText.swift",
+    "find": "case \"<\": out += \"&lt;\"",
+    "replace": "case \"<\": out += \"<\"",
+    "tests": "XMLTextTests"
+  },
+  {
+    "label": "unescapedAmpFirst: &amp; is read before &lt;",
+    "file": "Sources/SuiteModel/Values/XMLText.swift",
+    "find": "String(text).replacing(\"&quot;\", with: \"\\\"\")",
+    "replace": "String(text).replacing(\"&amp;\", with: \"&\").replacing(\"&quot;\", with: \"\\\"\")",
+    "tests": "XMLTextTests"
+  },
+  {
+    "label": "unescapedApos: &apos; is left as written",
+    "file": "Sources/SuiteModel/Values/XMLText.swift",
+    "find": ".replacing(\"&apos;\", with: \"'\")",
+    "replace": "",
+    "tests": "XMLTextTests"
+  }
+]

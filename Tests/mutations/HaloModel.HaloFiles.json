@@ -1,0 +1,23 @@
+[
+  {
+    "label": "a save no longer puts its file first: Open Recent keeps the old order",
+    "file": "Sources/HaloModel/HaloFiles.swift",
+    "find": "        setRecent([HaloRecentFile(name: name, path: path)] + recent)\n",
+    "replace": "        setRecent(recent + [HaloRecentFile(name: name, path: path)])\n",
+    "tests": "HaloFileTests"
+  },
+  {
+    "label": "the recent list keeps repeated paths: a file saved twice shows twice",
+    "file": "Sources/HaloModel/HaloFiles.swift",
+    "find": "files.filter { seen.insert($0.path).inserted }",
+    "replace": "files.filter { _ in seen.isEmpty || true }",
+    "tests": "HaloFileTests"
+  },
+  {
+    "label": "an open no longer lists its file: Open Recent misses the project just opened",
+    "file": "Sources/HaloModel/HaloFiles.swift",
+    "find": "            setRecent([pending] + recent)\n",
+    "replace": "            setRecent(recent)\n",
+    "tests": "HaloFileTests"
+  }
+]

@@ -1,7 +1,8 @@
 // RenderBudgetLibraryTests.swift: Library's render budget
 // (Tests/render-budgets.md) on the real window, through the harness
 // (RenderBudgetHarness.swift). On the `samples` fixture (60 photos) it scrolls
-// the grid 120 steps of 12 points, back to the top, then clicks 10 cells one
+// the grid 120 steps of 12 points once the window body is still
+// (`settle(untilStable:)`), back to the top, then clicks 10 cells one
 // after another. `bodies` gates the window-body counts; `timing`
 // (Tests/perf-suites.txt, report-only) judges the step times. The loupe's step
 // isn't driven: the loupe takes its arrow keys through SwiftUI focus, which
@@ -43,6 +44,9 @@ extension BodyCountSuites {
                 return nil
                 #endif
             }
+            // The launch restore can land after the first thumbnails, which keep the
+            // pool busy; a late launch change isn't the scroll's cost (#2878 counted 1).
+            try await w.settle(untilStable: bodies, turns: 8)
             let cells = w.identifiers().filter { $0.hasPrefix(LibraryGrid.cellIdentifierPrefix) }
             let first = try #require(cells.first, "no grid cells")
             let cell = try #require(await w.element(first))

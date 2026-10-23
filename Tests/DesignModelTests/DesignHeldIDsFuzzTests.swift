@@ -2,7 +2,9 @@
 // index (#433). After every step the index must equal a fresh scan of the pages
 // and no id may appear twice, whatever order adds, deletes, undo, redo, New
 // File, reopen, reparenting, Move strokes and drawing strokes (also interrupted
-// mid-stroke by other edits, Move strokes included since #443) come in.
+// mid-stroke by other edits, Move strokes included since #443) come in. A
+// delete, nudge, align or inspector edit mid-stroke leaves `history.undo` as
+// it was (#542).
 // Runs on Linux and macOS.
 @testable import DesignModel
 import Testing
@@ -85,11 +87,24 @@ private func step(_ workspace: inout DesignWorkspace, _ random: inout SeededGene
             workspace.drag(from: start, to: point())
             expectExact(workspace, "mid-stroke")
             // An edit that lands while a stroke is still going, Move included (#443).
-            switch Int.random(in: 0..<8, using: &random) {
+            // A canvas edit mid-stroke takes no step (#542): `history.undo` stays as it was.
+            let undo = workspace.history.undo
+            switch Int.random(in: 0..<11, using: &random) {
             case 0: workspace.addPage()
-            case 1: workspace.deleteSelection()
+            case 1:
+                workspace.deleteSelection()
+                #expect(workspace.history.undo == undo, "Delete mid-stroke")
             case 2: workspace.undo()
             case 3: _ = try? workspace.addNode(.rectangle, frame: rc(0, 0, 5, 5))
+            case 4:
+                workspace.nudge(.left, shift: Bool.random(using: &random))
+                #expect(workspace.history.undo == undo, "nudge mid-stroke")
+            case 5:
+                try? workspace.run(.align(.right))
+                #expect(workspace.history.undo == undo, "align mid-stroke")
+            case 6:
+                try? workspace.setStyle(.frame(.y, Double.random(in: -50...500, using: &random)))
+                #expect(workspace.history.undo == undo, "setStyle mid-stroke")
             default: break
             }
         }

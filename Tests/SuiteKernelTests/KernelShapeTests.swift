@@ -3,8 +3,7 @@
 // cases with the four corners marked, and nothing under Sources/SuiteKernel
 // imports an app Model, SuiteUI, SuiteModel or a Darwin-only framework, so the
 // kernel stays Linux-safe and below every app. KJ0, the kernel shape walk,
-// is here disabled by name: EK-2 and EK-3 extend it with each module's stubs
-// and EK-3 turns it on (docs/factory/lead.md rule 13).
+// checks the geometry's shape; KJ9 (KernelWalkTests) walks every module.
 import Foundation
 import Testing
 import SuiteKernel
@@ -65,21 +64,25 @@ import SuiteKernel
     /// without trapping, and the fixtures have the packet's shape.
     @Test func stubsReturnFakes() throws {
         var history = History<Int>()
-        history.record("Move", 1, key: "drag")
-        history.endRun()
         #expect(!history.undo { $0 } && !history.redo { $0 })
         history.jump(to: 0) { $0 }
         let reading: any HistoryReading = history
         #expect(!reading.isDirty && !reading.canUndo && !reading.canRedo && reading.undoName == nil)
         #expect(history.steps.isEmpty && history.index == 0 && history.currentStepID == history.savedStepID)
+        // EK-8 built the body: a recorded step is now undoable (HistoryTests covers the rest).
+        history.record("Move", 1, key: "drag")
+        history.endRun()
+        #expect(history.steps == ["Move"] && history.canUndo && history.isDirty)
 
         var selection = Selection(["a", "b"])
         #expect(selection.primary == "b" && selection.set == ["a", "b"] && selection.contains("a"))
+        // EK-10 built the body: with no anchor, extend appends (SelectionTests covers the rest).
         let picked = selection.pick("c", .extend, order: ["a", "b", "c"])
-        #expect(!picked)
+        #expect(picked && selection.ordered == ["a", "b", "c"] && selection.primary == "c")
         selection.move(.right, order: ["a", "b", "c"], columns: 3)
-        selection.prune { _ in true }
-        #expect(selection == Selection(["a", "b"]))
+        #expect(selection.ordered == ["c"])
+        selection.prune { $0 != "c" }
+        #expect(selection.ordered.isEmpty && selection.primary == nil)
 
         var tree = KernelFixtures.tree200
         #expect(tree.rows(expanded: []).count == 7)
@@ -94,11 +97,11 @@ import SuiteKernel
         try tree.arrange(.bringToFront, ["hero"])
         #expect(try tree.group(["hero"], name: "G", payload: KernelFixtures.cards.roots[0].payload) { "g1" } == "g1")
         try tree.ungroup("g1")
-        try tree.setFollow("hero", "header", local: { _ in .identity }, keepingPlace: { _, _ in })
-        #expect(tree == KernelFixtures.tree200 && tree.node("hero") == nil && tree.ancestors(of: "hero") == nil)
+        // The tree has its body (EK-12): the edits land and the cascades read ancestors.
+        #expect(tree.node("header")?.children.count == 4 && tree.roots.last?.id == "hero" && tree.ancestors(of: "hero") == [])
         let updated = tree.update("hero") { node in node.name = "X" }
-        #expect(tree.duplicate(["hero"]) { "copy" }.isEmpty && !updated)
-        #expect(tree.frontToBack.isEmpty && !tree.isEffectivelyHidden("archive") && !tree.follows("hero", "header"))
+        #expect(tree.duplicate(["nowhere"]) { "copy" }.isEmpty && updated)
+        #expect(tree.frontToBack.count == 200 && tree.isEffectivelyHidden("archive-1"))
         #expect(tree.worldPlacement(of: "hero") { _ in .identity } == .identity)
 
         let desktop = KernelFixtures.cards.rows(expanded: ["desktop"])
@@ -106,10 +109,10 @@ import SuiteKernel
         #expect(KernelFixtures.cards.roots.first?.payload.frame.width == 1440)
     }
 
-    /// KJ0, the kernel shape walk: every module's declared shape in one pass.
-    /// EK-1 walks the geometry; EK-2 adds history, selection and the tree,
-    /// EK-3 keys, transform, export and session, and turns it on.
-    @Test(.disabled("waits on EK-3")) func kernelShapeWalk() {
+    /// KJ0, the kernel shape walk: the geometry's shape (handles, modifiers,
+    /// the identity matrix). The modules' walk on one document is KJ9 in
+    /// KernelWalkTests.
+    @Test func kernelShapeWalk() {
         let box = Rect(minX: 10, minY: 20, maxX: 110, maxY: 70)
         let handles = EditorHandle.allCases
         #expect(handles.filter(\.isCorner).count == 4)

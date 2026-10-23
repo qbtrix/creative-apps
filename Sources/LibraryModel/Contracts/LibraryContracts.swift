@@ -10,6 +10,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
+import SuiteKernel
 
 // MARK: Platform (conformed to in LibraryApp/Platform, ImageIO and the file system)
 
@@ -32,6 +33,21 @@ public protocol JPEGWriting: Sendable {
     /// Writes `image` as an sRGB JPEG at `quality` (0...100) to `folder`/`fileName`.
     /// Never overwrites: throws `writeFailed` when the file exists or can't be written.
     func write(_ image: DisplayImage, quality: Int, folder: String, fileName: String) async throws
+    /// The same write, carrying the metadata of the file at `source` minus the
+    /// `dropping` properties (`ExportRules.dropped(policy).properties`) into the
+    /// export. The default writes no metadata at all (export-pack, LX-1).
+    func write(_ image: DisplayImage, quality: Int, folder: String, fileName: String,
+               metadataFrom source: String?, dropping: Set<String>) async throws
+    /// Removes everything inside `folder`, keeping the folder; a missing folder is already empty. The default
+    /// empties it on disk (`SharePrep.empty`).
+    func removeAll(in folder: String) async throws
+}
+
+extension JPEGWriting {
+    public func write(_ image: DisplayImage, quality: Int, folder: String, fileName: String,
+                      metadataFrom source: String?, dropping: Set<String>) async throws {
+        try await write(image, quality: quality, folder: folder, fileName: fileName)
+    }
 }
 
 /// Where the catalog file lives. Live: `CatalogStore` (Application Support,
@@ -168,18 +184,41 @@ public enum CullChange: Hashable, Sendable {
     }
 }
 
-public struct ExportOptions: Hashable, Sendable {
+/// Codable for `ExportPresetFile.last`: decoding clamps, and a missing field takes its default.
+public struct ExportOptions: Hashable, Sendable, Codable {
     public static let defaultLongEdge = 2048
     public static let longEdgeRange = 16...16384
     /// Nil: original size.
     public var longEdge: Int?
     public var quality: Int
     public var folder: String
+    public var format: ExportFormat = .jpeg
+    public var naming: ExportNaming = .original
+    /// Writes an XMP file beside each export (EX-16).
+    public var sidecar: Bool = false
+    /// What the export keeps of the original's metadata; files without it read All but location.
+    public var metadata: ExportMetadata = .noLocation
     /// `longEdge` and `quality` clamped to their ranges.
-    public init(longEdge: Int? = defaultLongEdge, quality: Int = 85, folder: String) {
+    public init(longEdge: Int? = defaultLongEdge, quality: Int = 85, folder: String,
+                format: ExportFormat = .jpeg, naming: ExportNaming = .original, sidecar: Bool = false,
+                metadata: ExportMetadata = .noLocation) {
         self.longEdge = longEdge.map { min(max($0, Self.longEdgeRange.lowerBound), Self.longEdgeRange.upperBound) }
         self.quality = min(max(quality, 0), 100)
         self.folder = folder
+        self.format = format; self.naming = naming; self.sidecar = sidecar; self.metadata = metadata
+    }
+
+    private enum CodingKeys: String, CodingKey { case longEdge, quality, folder, format, naming, sidecar, metadata }
+
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(longEdge: try c.decodeIfPresent(Int.self, forKey: .longEdge),
+                  quality: try c.decodeIfPresent(Int.self, forKey: .quality) ?? 85,
+                  folder: try c.decode(String.self, forKey: .folder),
+                  format: try c.decodeIfPresent(ExportFormat.self, forKey: .format) ?? .jpeg,
+                  naming: try c.decodeIfPresent(ExportNaming.self, forKey: .naming) ?? .original,
+                  sidecar: try c.decodeIfPresent(Bool.self, forKey: .sidecar) ?? false,
+                  metadata: try c.decodeIfPresent(ExportMetadata.self, forKey: .metadata) ?? .noLocation)
     }
 }
 
@@ -188,8 +227,10 @@ public struct ExportPlan: Hashable, Sendable {
         public var photoID: String
         public var fileName: String
         public var size: PixelSize
-        public init(photoID: String, fileName: String, size: PixelSize) {
-            self.photoID = photoID; self.fileName = fileName; self.size = size
+        /// The metadata properties the writer leaves out (`ExportRules.dropped(policy).properties`).
+        public var dropping: Set<String>
+        public init(photoID: String, fileName: String, size: PixelSize, dropping: Set<String> = []) {
+            self.photoID = photoID; self.fileName = fileName; self.size = size; self.dropping = dropping
         }
     }
     public var items: [Item]

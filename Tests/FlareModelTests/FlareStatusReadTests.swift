@@ -67,3 +67,10 @@ private let hd = Document(scenes: [Scene(id: "scene-1", name: "Scene 1", width: 
     let pills = opened(flat).statusPills(measuredFPS: nil)
     #expect(pills.aspect == "–" && pills.size == "0 × 0")
 }
+
+@Test func aMaskedLayerWarnsTheStageDoesNotDrawIt() {
+    var document = FlareFixtures.bounce
+    #expect(opened(document).statusPills(measuredFPS: nil).maskWarning == nil)
+    document.scenes[0].layers[0].masks = [LayerMask(path: FlarePath(polyline: [Point(x: 0, y: 0), Point(x: 9, y: 9)], closed: true))]
+    #expect(opened(document).statusPills(measuredFPS: nil).maskWarning == "Masks not shown (1)")
+}

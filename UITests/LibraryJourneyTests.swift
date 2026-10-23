@@ -126,15 +126,22 @@ final class LibraryJourneyTests: XCTestCase {
     /// Library's items in each menu (blueprint 6.2), top level, each by the
     /// title prefixes it may show: Undo and Redo carry a step name, Zoom In
     /// and Zoom Out read Larger and Smaller Thumbnails in the grid, and Crop
-    /// reads Done Cropping while cropping. Close is the system's.
+    /// reads Done Cropping while cropping. Close is the system's. The
+    /// filters-collections items (FC-5) are disabled with their reasons.
     private static let menus: [(String, [[String]])] = [
-        ("File", [["Import Folder…"], ["Load Sample Photos"], ["Export…"]]),
+        ("File", [
+            ["New Collection"], ["New Smart Collection from Filter"], ["Delete Collection"], ["Import Folder…"],
+            ["Load Sample Photos"], ["Export…"],
+        ]),
         ("Edit", [["Undo"], ["Redo"], ["Select All"], ["Deselect"]]),
         ("View", [
             ["Grid"], ["Loupe"], ["Zoom In", "Larger Thumbnails"], ["Zoom Out", "Smaller Thumbnails"],
-            ["Zoom to Fit"], ["Actual Size"], ["Sort By"], ["Show Inspector", "Hide Inspector"],
+            ["Zoom to Fit"], ["Actual Size"], ["Sort By"], ["Filter"], ["Show Inspector", "Hide Inspector"],
         ]),
-        ("Photo", [["Copy Settings"], ["Paste Settings"], ["Reset Develop"], ["Crop", "Done Cropping"], ["Reset Crop"]]),
+        ("Photo", [
+            ["Copy Settings"], ["Paste Settings"], ["Reset Develop"], ["Crop", "Done Cropping"], ["Reset Crop"],
+            ["Add to Collection"], ["Remove from Collection"],
+        ]),
         ("Metadata", [["Set Rating"], ["Set Flag"], ["Set Label"], ["Auto Advance"]]),
     ]
 

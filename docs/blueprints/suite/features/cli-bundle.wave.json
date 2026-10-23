@@ -1,0 +1,155 @@
+{
+  "title": "The afterglow CLI ships inside AfterGlow.app, and Help > Connect an AI Assistant shows and copies the MCP command for it, with an Install Command-Line Tool that asks first",
+  "wave": "BG1",
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 suite must-have 2 (suite audit row 6, under-specified 7); real job RJ-X62 (new)",
+  "waits_on": "report-problem RP-u (the Help group file) and RP-m (SuiteHelpCatalog.swift); bundle (built; scripts/bundle-apps is a supervisor merge); signing stays ad hoc until the captain's Developer ID",
+  "depends": [
+    "bundle",
+    "afterglow-mcp",
+    "onboarding"
+  ],
+  "longest_chain": "6 (CB-1 → CB-2 → CB-4 → CB-6 → CB-7 → CB-8)",
+  "journeys": [
+    "AfterGlowHelpJourneyTests.testConnectAssistant"
+  ],
+  "owned": [
+    "Sources/SuiteModel/Packaging/BundleLayout.swift",
+    "Sources/SuiteModel/Packaging/AssistantConnect.swift",
+    "Tests/SuiteModelTests/AssistantConnectTests.swift",
+    "docs/c4/parts/creative-apps/suite-model/suite-packaging.json",
+    "Sources/SuiteKernel/Commands/SuiteHelpCatalog.swift",
+    "Tests/command-ids/suite.txt",
+    "Sources/AfterGlowCLICore/MCPConfig.swift",
+    "Tests/AfterGlowCLITests/MCPConfigTests.swift",
+    "Sources/SuiteShell/SuiteHelpCommands.swift",
+    "Sources/SuiteUI/AssistantConnectSheet.swift",
+    "UITests/AfterGlowJourneyTests+Connect.swift",
+    "Tests/AppSnapshotTests/RenderBudgetConnectTests.swift",
+    "Tests/mutations/SuiteModel.AssistantConnect.json",
+    "scripts/bundle-apps",
+    "docs/c4/parts/creative-apps/afterglow-bundle/container.json",
+    "Tests/RealJobs/suite/connect-assistant/connect-assistant.jobs.json",
+    "Sources/SuiteShell/InstallCommandLineTool.swift",
+    "docs/blueprints/suite.md",
+    "docs/blueprints/suite/features/cli-bundle.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "CB-a",
+      "behavior": "SuiteModel knows where the bundled CLI lives and builds the assistant's command and config text and the install plan, as stubs, with the checks written and disabled.",
+      "tasks": [
+        "CB-1",
+        "CB-2"
+      ],
+      "journeys": [
+        "MJ-CB"
+      ],
+      "owned": [
+        "Sources/SuiteModel/Packaging/BundleLayout.swift",
+        "Sources/SuiteModel/Packaging/AssistantConnect.swift",
+        "Tests/SuiteModelTests/AssistantConnectTests.swift",
+        "docs/c4/parts/creative-apps/suite-model/suite-packaging.json",
+        "Sources/SuiteKernel/Commands/SuiteHelpCatalog.swift",
+        "Tests/command-ids/suite.txt",
+        "Sources/AfterGlowCLICore/MCPConfig.swift",
+        "Tests/AfterGlowCLITests/MCPConfigTests.swift"
+      ],
+      "waits": {
+        "report-problem:RP-m": [
+          "CB-2"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "CB-u",
+      "behavior": "Help > Connect an AI Assistant shows the bundled command and config with Copy buttons and an Install Command-Line Tool button, on the stubs, in the launcher and every editor, within the render budget.",
+      "tasks": [
+        "CB-5",
+        "CB-5b"
+      ],
+      "journeys": [
+        "XJ-CB"
+      ],
+      "owned": [
+        "Sources/SuiteShell/SuiteHelpCommands.swift",
+        "Sources/SuiteUI/AssistantConnectSheet.swift",
+        "UITests/AfterGlowJourneyTests+Connect.swift",
+        "Tests/AppSnapshotTests/RenderBudgetConnectTests.swift"
+      ],
+      "waits": {
+        "CB-a": [
+          "CB-5"
+        ],
+        "report-problem:RP-u": [
+          "CB-5"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CB-m",
+      "behavior": "The bundle carries a signed afterglow that answers --version and an MCP handshake from inside the app, and the command text names that exact path.",
+      "tasks": [
+        "CB-4",
+        "CB-3"
+      ],
+      "journeys": [
+        "MJ-CB",
+        "XJ-CB"
+      ],
+      "owned": [
+        "Sources/SuiteModel/Packaging/AssistantConnect.swift",
+        "Tests/SuiteModelTests/AssistantConnectTests.swift",
+        "Sources/AfterGlowCLICore/MCPConfig.swift",
+        "Tests/AfterGlowCLITests/MCPConfigTests.swift",
+        "Tests/mutations/SuiteModel.AssistantConnect.json",
+        "scripts/bundle-apps",
+        "docs/c4/parts/creative-apps/afterglow-bundle/container.json",
+        "Tests/RealJobs/suite/connect-assistant/connect-assistant.jobs.json"
+      ],
+      "waits": {
+        "CB-a": [
+          "CB-4",
+          "CB-3"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "CB-z",
+      "behavior": "Install Command-Line Tool asks before it writes and runs live, RJ-X62 connects to the bundled server from the copied command, and the feature is built.",
+      "tasks": [
+        "CB-6",
+        "CB-7",
+        "CB-8"
+      ],
+      "journeys": [
+        "XJ-CB",
+        "MJ-CB"
+      ],
+      "owned": [
+        "Sources/SuiteShell/InstallCommandLineTool.swift",
+        "UITests/AfterGlowJourneyTests+Connect.swift",
+        "Tests/RealJobs/suite/connect-assistant/connect-assistant.jobs.json",
+        "docs/blueprints/suite.md",
+        "docs/blueprints/suite/features/cli-bundle.wave.json"
+      ],
+      "waits": {
+        "CB-u": [
+          "CB-6",
+          "CB-7"
+        ],
+        "CB-m": [
+          "CB-6",
+          "CB-7"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

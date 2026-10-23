@@ -2,7 +2,7 @@
   "title": "One font picker: searchable families in their own faces, a face menu, a size row, nearest face on switch",
   "wave": 4,
   "order": 10,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "beta-80 plan row E8, its SuiteUI piece (the suiteui font picker); the guard that no app grows its own font menu",
@@ -44,6 +44,9 @@
       ],
       "waits": {
         "editor-kernel:EK-u": [
+          "FP-1"
+        ],
+        "command-catalog:CC-u": [
           "FP-1"
         ]
       },

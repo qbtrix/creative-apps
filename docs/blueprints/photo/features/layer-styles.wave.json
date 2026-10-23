@@ -1,0 +1,158 @@
+{
+  "title": "Layer styles on Photo's image layers: Layer Style… opens the shared panel, styles draw live and export, copy and paste style",
+  "wave": 4,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "photo/layer-styles (adopter of S2); RJ-P44; RJ-X51's check; photo.md's Tier 3 layer styles moved into the beta (captain 2026-10-21)",
+  "waits_on": "suiteui layer-styles' contract slice LS-a (cross-line; tasks start once it merges), LS-m before PY-5 and PY-6, LS-gpu and suite-imaging's IM-photo before PY-7; multi-layer-select (PM-g owns the layer, composite, menu and document files first) and file-flow's PF-m (the catalog and the id list)",
+  "longest_chain": "5 (PY-1 → PY-2 → PY-4 → PY-7 → PY-8)",
+  "journeys": [
+    "PhotoLayerStyleJourneyTests.testDropShadowAndStroke"
+  ],
+  "owned": [
+    "Sources/PhotoModel/PhotoLayer.swift",
+    "Sources/PhotoModel/PhotoStyle+Kernel.swift",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/command-ids/photo.txt",
+    "Tests/PhotoModelTests/PhotoLayerStyleTests.swift",
+    "Sources/PhotoApp/PhotoCommands+Layer.swift",
+    "Sources/PhotoApp/PhotoWindow+Styling.swift",
+    "Sources/PhotoApp/PhotoWindow.swift",
+    "Tests/AppSnapshotTests/PhotoLayerStyleSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetPhotoLayerStyleTests.swift",
+    "UITests/PhotoJourneyTests+LayerStyle.swift",
+    "Tests/mutations/PhotoModel.PhotoStyle+Kernel.json",
+    "Sources/PhotoModel/PhotoLayerComposite.swift",
+    "Sources/PhotoModel/PhotoDocumentFile.swift",
+    "Tests/PhotoModelTests/PhotoStyleRenderTests.swift",
+    "Tests/mutations/PhotoModel.PhotoLayerComposite.json",
+    "Tests/mutations/PhotoModel.PhotoDocumentFile.json",
+    "Tests/RealJobs/photo/outline-cutout/outline-cutout.jobs.json",
+    "Tests/RealJobs/photo/outline-cutout/input/cutout.ora",
+    "Tests/RealJobs/photo/style-drop-shadow/style-drop-shadow.jobs.json",
+    "Tests/RealJobs/photo/style-drop-shadow/input/cutout.ora",
+    "Sources/PhotoModel/PhotoRenderRoute.swift",
+    "docs/blueprints/photo.md",
+    "docs/blueprints/photo/features/layer-styles.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "PY-a",
+      "behavior": "Image layers hold a LayerStyle, the style commands are in Photo's catalog on stubs, and Layer > Layer Style… opens the panel on the selected layer.",
+      "tasks": [
+        "PY-1",
+        "PY-2"
+      ],
+      "journeys": [
+        "MJ-PY"
+      ],
+      "waits": {
+        "multi-layer-select": [
+          "PY-1",
+          "PY-2"
+        ],
+        "file-flow:PF-m": [
+          "PY-1"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/PhotoModel/PhotoLayer.swift",
+        "Sources/PhotoModel/PhotoStyle+Kernel.swift",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/PhotoModelTests/PhotoLayerStyleTests.swift",
+        "Sources/PhotoApp/PhotoCommands+Layer.swift",
+        "Sources/PhotoApp/PhotoWindow+Styling.swift",
+        "Sources/PhotoApp/PhotoWindow.swift"
+      ]
+    },
+    {
+      "id": "PY-u",
+      "behavior": "The panel over the canvas has snapshots, a render budget and its journey written.",
+      "tasks": [
+        "PY-3",
+        "PY-4"
+      ],
+      "journeys": [
+        "PJ-Y1"
+      ],
+      "waits": {
+        "PY-a": [
+          "PY-3",
+          "PY-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/PhotoLayerStyleSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetPhotoLayerStyleTests.swift",
+        "UITests/PhotoJourneyTests+LayerStyle.swift"
+      ]
+    },
+    {
+      "id": "PY-m",
+      "behavior": "Every style command sets each selected image layer's style as one undo step and refuses adjustment layers, the composite draws styles padded on the CPU, and the .ora keeps them.",
+      "tasks": [
+        "PY-5",
+        "PY-6"
+      ],
+      "journeys": [
+        "MJ-PY"
+      ],
+      "waits": {
+        "PY-a": [
+          "PY-5",
+          "PY-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/PhotoModel/PhotoStyle+Kernel.swift",
+        "Tests/PhotoModelTests/PhotoLayerStyleTests.swift",
+        "Tests/mutations/PhotoModel.PhotoStyle+Kernel.json",
+        "Sources/PhotoModel/PhotoLayerComposite.swift",
+        "Sources/PhotoModel/PhotoDocumentFile.swift",
+        "Tests/PhotoModelTests/PhotoStyleRenderTests.swift",
+        "Tests/mutations/PhotoModel.PhotoLayerComposite.json",
+        "Tests/mutations/PhotoModel.PhotoDocumentFile.json",
+        "Tests/RealJobs/photo/outline-cutout/outline-cutout.jobs.json",
+        "Tests/RealJobs/photo/outline-cutout/input/cutout.ora",
+        "Tests/RealJobs/photo/style-drop-shadow/style-drop-shadow.jobs.json",
+        "Tests/RealJobs/photo/style-drop-shadow/input/cutout.ora"
+      ]
+    },
+    {
+      "id": "PY-z",
+      "behavior": "The canvas draws styles live through the shared route, the journey passes on live, and photo.md lists the feature as built.",
+      "tasks": [
+        "PY-7",
+        "PY-8"
+      ],
+      "journeys": [
+        "PJ-Y1"
+      ],
+      "waits": {
+        "PY-u": [
+          "PY-7",
+          "PY-8"
+        ],
+        "PY-m": [
+          "PY-7"
+        ],
+        "text-layers:TX-z": [
+          "PY-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/PhotoModel/PhotoRenderRoute.swift",
+        "UITests/PhotoJourneyTests+LayerStyle.swift",
+        "docs/blueprints/photo.md",
+        "docs/blueprints/photo/features/layer-styles.wave.json"
+      ]
+    }
+  ]
+}

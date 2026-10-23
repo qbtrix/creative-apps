@@ -12,5 +12,33 @@
     "find": "zoom.isFinite && zoom > 0 ? zoom : 1",
     "replace": "zoom > 0 ? zoom : 1",
     "tests": "DesignTextScaleModelTests.swift"
+  },
+  {
+    "label": "auto width keeps the old width, so a clicked box doesn't hug its text",
+    "file": "Sources/DesignModel/DesignText.swift",
+    "find": "fit.width = fixed ? frame.width : Swift.max(1, extent.width.rounded(.up))",
+    "replace": "fit.width = frame.width",
+    "tests": "DesignTextFitTests"
+  },
+  {
+    "label": "the height rounds down, so the box is a fraction short",
+    "file": "Sources/DesignModel/DesignText.swift",
+    "find": "fit.height = Swift.max(1, extent.height.rounded(.up))",
+    "replace": "fit.height = Swift.max(1, extent.height.rounded(.down))",
+    "tests": "DesignTextFitTests"
+  },
+  {
+    "label": "the width rounds down, so the box is a fraction narrow",
+    "file": "Sources/DesignModel/DesignText.swift",
+    "find": "extent.width.rounded(.up)",
+    "replace": "extent.width.rounded(.down)",
+    "tests": "DesignTextFitTests"
+  },
+  {
+    "label": "the finite check is dropped, so an infinite extent reaches the frame",
+    "file": "Sources/DesignModel/DesignText.swift",
+    "find": "guard let extent, extent.width.isFinite, extent.height.isFinite else",
+    "replace": "guard let extent else",
+    "tests": "DesignTextFitTests"
   }
 ]

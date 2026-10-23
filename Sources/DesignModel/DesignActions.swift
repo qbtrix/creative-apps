@@ -12,6 +12,8 @@
 //   the same coalescing key); a refusal records nothing and leaves the workspace as it was.
 // - With nothing selected every help is "Select a layer first."; while text is being edited it is
 //   "Finish editing the text first.", and `run` refuses.
+// - While a canvas gesture is live `run` refuses with `.unchanged` and records nothing (#542); the
+//   gesture's own steps go through `apply`, which stays open to them.
 // - `apply` keeps the held-id index exact for the edited page and takes the mint's counter, so a
 //   minted id is never handed out again, undo included.
 // Linux-safe.
@@ -20,6 +22,7 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteKernel
 
 /// A command on the selection that a menu item, a top bar item or a key runs.
 public enum DesignCommand: Hashable, Sendable {
@@ -56,11 +59,28 @@ extension DesignWorkspace {
         }
     }
 
+    /// Why Object > Arrange is off as a whole: the first step's reason when no step can run; nil when one can.
+    /// The menu bar draws a plain disabled item then, since AppKit keeps a submenu's own item on (#2465).
+    public var arrangeMenuHelp: String? {
+        Self.submenuHelp(DesignArrangeStep.allCases.map { help(.arrange($0)) })
+    }
+
+    /// Why Object > Align is off as a whole: the first edge's reason when no edge can run; nil when one can.
+    public var alignMenuHelp: String? {
+        let helps = alignHelps
+        return Self.submenuHelp(DesignAlignEdge.allCases.map { helps[$0] })
+    }
+
+    /// A submenu's reason: its first item's when every item is off; nil when any item can run (or it has none).
+    static func submenuHelp(_ helps: [String?]) -> String? {
+        helps.contains { $0 == nil } ? nil : helps.lazy.compactMap { $0 }.first
+    }
+
     /// Runs `command` on the selection as one named undo step, or throws and records nothing.
     public mutating func run(_ command: DesignCommand) throws(DesignRefusal) {
         let ids = selectedNodeIDs
         guard let page = selectedPage, !ids.isEmpty else { throw .nothingSelected }
-        guard editingTextID == nil else { throw .unchanged }
+        guard editingTextID == nil, gesture == nil else { throw .unchanged }
         if ids.count == 1, command.hasOneLayerMethod { return try runOneLayer(command) }
         var mint = mint()
         let edit: DesignEdit
@@ -101,17 +121,18 @@ extension DesignWorkspace {
     }
 
     /// Edit > Select All: every visible, unlocked layer at the primary selection's level (the page's
-    /// top level when nothing is selected), back to front. Not an edit; it ends the edit run.
+    /// top level when nothing is selected), back to front, through the kernel's `selectAll`. Not an
+    /// edit; it ends the edit run.
     public mutating func selectAll() {
         guard let page = selectedPage else { return }
         let parent = selectedNodeID.flatMap { page.nodes.ancestors(of: $0)?.last }
         let level = parent.flatMap { page.nodes.node($0)?.children } ?? page.nodes
-        let ids = level.map(\.id).filter { canAddToSelection($0) }
-        guard !ids.isEmpty else { return }
+        var next = selection
+        next.selectAll(level.map(\.id), canAdd: canAddToSelection)
+        guard !next.ordered.isEmpty else { return }
         commitTextEdit()
-        endEditRun()
-        selectedNodeIDs = ids
-        for id in ids { expandAncestors(of: id, in: page.nodes) }
+        adopt(next)
+        for id in next.ordered { expandAncestors(of: id, in: page.nodes) }
     }
 
     /// A mint over the file's ids, for a use case that adds nodes.
@@ -138,10 +159,14 @@ extension DesignWorkspace {
 
     // MARK: One layer
 
-    /// Today's help for delete, nudge or align on the one selected layer.
+    /// Today's help for delete, nudge or align on the one selected layer. A layer hidden in the
+    /// tree doesn't nudge (#607).
     private func oneLayerHelp(_ command: DesignCommand) -> String? {
-        guard case .align(let edge) = command else { return selectedNodeID.flatMap(lockHelp) }
-        return alignHelp(edge)
+        if case .align(let edge) = command { return alignHelp(edge) }
+        guard let node = selectedNode else { return nil }
+        if let help = lockHelp(node.id) { return help }
+        if case .nudge = command, isHiddenInTree(node.id) { return DesignRefusal.hidden(node.name).help }
+        return nil
     }
 
     /// Delete, nudge or align on the one selected layer through today's methods, which record their

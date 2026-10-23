@@ -1,7 +1,8 @@
 // CanvasPanTests.swift: the pan math behind CanvasViewport's Space-drag and
 // arrow keys (CanvasLayout's clamped and panned): the content follows the
 // pointer, an arrow steps a tenth of the viewport (Shift a whole one), and
-// no pan scrolls past the scrollable area. No SwiftUI rendering. macOS only.
+// no pan scrolls past the scrollable area; and SuiteCanvasNavigating's
+// panStep, the same step as a vector. No SwiftUI rendering. macOS only.
 import CoreGraphics
 import SuiteUI
 import SwiftUI
@@ -48,4 +49,30 @@ private let zoomedIn = CanvasLayout(
     #expect(fits.panned(from: .zero, by: CGSize(width: -300, height: -300)) == .zero)
     #expect(fits.panned(from: .zero, key: .downArrow, page: true) == .zero)
     #expect(fits.clamped(CGPoint(x: 40, y: -40)) == .zero)
+}
+
+@Test func suiteCanvasArrowPansATenthOfTheViewport() {
+    let n = SuiteCanvasNavigating()
+    let v = PlaneExtent(width: 800, height: 600)
+    #expect(n.panStep(.right, viewport: v, modifiers: []) == PlanePoint(x: 80, y: 0))
+    #expect(n.panStep(.left, viewport: v, modifiers: []) == PlanePoint(x: -80, y: 0))
+    #expect(n.panStep(.down, viewport: v, modifiers: []) == PlanePoint(x: 0, y: 60))
+    #expect(n.panStep(.up, viewport: v, modifiers: [.option, .command]) == PlanePoint(x: 0, y: -60))
+}
+
+@Test func suiteCanvasShiftArrowPansAWholeViewport() {
+    let n = SuiteCanvasNavigating()
+    let v = PlaneExtent(width: 800, height: 600)
+    #expect(n.panStep(.right, viewport: v, modifiers: .shift) == PlanePoint(x: 800, y: 0))
+    #expect(n.panStep(.left, viewport: v, modifiers: .shift) == PlanePoint(x: -800, y: 0))
+    #expect(n.panStep(.up, viewport: v, modifiers: .shift) == PlanePoint(x: 0, y: -600))
+    #expect(n.panStep(.down, viewport: v, modifiers: [.shift, .option]) == PlanePoint(x: 0, y: 600))
+}
+
+@Test func suiteCanvasPanStepMatchesTheViewportsArrowScroll() {
+    // The vector panStep gives is the move CanvasLayout's panned(from:key:page:) makes, away from the edges.
+    let n = SuiteCanvasNavigating()
+    let step = n.panStep(.right, viewport: PlaneExtent(width: 800, height: 600), modifiers: [])
+    let moved = zoomedIn.panned(from: CGPoint(x: 500, y: 500), key: .rightArrow, page: false)
+    #expect(moved == CGPoint(x: 500 + step.x, y: 500 + step.y))
 }

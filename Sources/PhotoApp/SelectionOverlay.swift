@@ -16,7 +16,7 @@ struct SelectionOverlay: View {
         if let selection = model.selection, let mark = mark {
             ZStack(alignment: .topLeading) {
                 SelectionOutline(rect: selection.cgRect, zoom: zoom)
-                PhotoCanvasMarkElement(mark: mark, zoom: zoom)
+                mark.probe(zoom: zoom)
             }
         }
     }

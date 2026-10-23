@@ -1,0 +1,247 @@
+{
+  "title": "One typed command catalog in SuiteKernel that every app registers its actions in: menus, the afterglow CLI, MCP and the crews' tests drive the same path (AI-accessible first)",
+  "wave": "XK1",
+  "order": 5,
+  "status": "built",
+  "feature_issue": "#2996",
+  "covers": "captain's AI-accessible-first call (every action is a command; UI, CLI and MCP drive one channel); beta-80 plan W0 (p0); suite.md 1.5; re-cut: S14 command palette lists catalog entries",
+  "waits_on": "editor-kernel's EK-a and EK-undo (both on dev); CC-9 waits on EK-u and font-picker's FP-a for SuiteGallery.swift, CC-14 on EK-z for the shared prose; suite afterglow-cli and afterglow-mcp, and adopt-command-catalog, wait on CC-a",
+  "longest_chain": "6 (CC-1 → CC-3 → CC-4 → CC-7 → CC-13 → CC-14)",
+  "owned": [
+    "Sources/SuiteKernel/Commands/JSONValue.swift",
+    "Sources/SuiteKernel/Commands/ParamSchema.swift",
+    "Sources/SuiteKernel/Commands/SchemaProbe.swift",
+    "Sources/SuiteKernel/Commands/CommandSpec.swift",
+    "Sources/SuiteKernel/Commands/CommandCatalog.swift",
+    "Sources/SuiteKernel/Commands/HeadlessDocument.swift",
+    "Sources/SuiteKernel/Commands/CommandIDLedger.swift",
+    "Sources/SuiteKernel/Commands/CatalogConformance.swift",
+    "Tests/SuiteKernelTests/CommandShapeTests.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-commands.json",
+    "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "Sources/PhotoModel/PhotoHeadless.swift",
+    "Sources/DesignModel/DesignHeadless.swift",
+    "Sources/FlareModel/FlareHeadless.swift",
+    "Sources/HaloModel/HaloHeadless.swift",
+    "Sources/LibraryModel/LibraryHeadless.swift",
+    "Tests/SuiteKernelTests/CommandFakeTests.swift",
+    "Tests/SuiteKernelTests/ParamSchemaTests.swift",
+    "Tests/SuiteKernelTests/SchemaProbeTests.swift",
+    "Tests/mutations/SuiteKernel.ParamSchema.json",
+    "Tests/mutations/SuiteKernel.SchemaProbe.json",
+    "Tests/SuiteKernelTests/CommandCatalogTests.swift",
+    "Tests/SuiteKernelTests/CommandBatchTests.swift",
+    "Tests/SuiteKernelTests/CommandIDLedgerTests.swift",
+    "Tests/SuiteKernelTests/CatalogConformanceTests.swift",
+    "Tests/mutations/SuiteKernel.CommandCatalog.json",
+    "Tests/mutations/SuiteKernel.CatalogConformance.json",
+    "Sources/SuiteUI/MenuCommand+Catalog.swift",
+    "Sources/SuiteUI/Gallery/GalleryCommandCatalog.swift",
+    "Sources/SuiteUI/SuiteGallery.swift",
+    "Tests/SuiteUITests/MenuCommandCatalogTests.swift",
+    "Tests/AppSnapshotTests/SuiteCommandCatalogSnapshots.swift",
+    "UITests/SuiteJourneyTests+CommandCatalog.swift",
+    "Tests/AppSnapshotTests/RenderBudgetCommandCatalogTests.swift",
+    "Tests/SuiteKernelTests/CommandPathTests.swift",
+    "Tests/SuiteKernelTests/Fixtures/CommandPath/",
+    "Tests/command-path-baseline/photo.txt",
+    "Tests/command-path-baseline/design.txt",
+    "Tests/command-path-baseline/flare.txt",
+    "Tests/command-path-baseline/halo.txt",
+    "Tests/command-path-baseline/library.txt",
+    "docs/factory/lead.md",
+    "Tests/SuiteKernelTests/CommandWalkTests.swift",
+    "docs/blueprints/suiteui.md",
+    "docs/engineering.md",
+    "Sources/SuiteKernel/SuiteKernel.swift",
+    "docs/blueprints/suiteui/features/command-catalog.wave.json"
+  ],
+  "journeys": [
+    "SuiteJourneyTests.testCommandCatalogGallery"
+  ],
+  "slices": [
+    {
+      "id": "CC-a",
+      "behavior": "`SuiteKernel/Commands` exists with every public type and signature as a documented stub, a fake headless document with six commands, and one `<X>Headless` stub in each app Model, so the CLI, the MCP server, the UI page and the adopt slices build against it at once.",
+      "tasks": [
+        "CC-1",
+        "CC-2"
+      ],
+      "journeys": [
+        "CJ0"
+      ],
+      "owned": [
+        "Sources/SuiteKernel/Commands/JSONValue.swift",
+        "Sources/SuiteKernel/Commands/ParamSchema.swift",
+        "Sources/SuiteKernel/Commands/SchemaProbe.swift",
+        "Sources/SuiteKernel/Commands/CommandSpec.swift",
+        "Sources/SuiteKernel/Commands/CommandCatalog.swift",
+        "Sources/SuiteKernel/Commands/HeadlessDocument.swift",
+        "Sources/SuiteKernel/Commands/CommandIDLedger.swift",
+        "Sources/SuiteKernel/Commands/CatalogConformance.swift",
+        "Tests/SuiteKernelTests/CommandShapeTests.swift",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-commands.json",
+        "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+        "Sources/PhotoModel/PhotoHeadless.swift",
+        "Sources/DesignModel/DesignHeadless.swift",
+        "Sources/FlareModel/FlareHeadless.swift",
+        "Sources/HaloModel/HaloHeadless.swift",
+        "Sources/LibraryModel/LibraryHeadless.swift",
+        "Tests/SuiteKernelTests/CommandFakeTests.swift"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "CC-schema",
+      "behavior": "`ParamSchema` writes JSON Schema 2020-12 for the subset the suite uses and validates a JSON value with a path per issue, and `SchemaProbe` derives a schema from any `Decodable` type by running its init on a recording decoder.",
+      "tasks": [
+        "CC-3",
+        "CC-4",
+        "CC-5"
+      ],
+      "journeys": [
+        "CJ1"
+      ],
+      "owned": [
+        "Tests/SuiteKernelTests/ParamSchemaTests.swift",
+        "Tests/SuiteKernelTests/SchemaProbeTests.swift",
+        "Sources/SuiteKernel/Commands/ParamSchema.swift",
+        "Tests/mutations/SuiteKernel.ParamSchema.json",
+        "Sources/SuiteKernel/Commands/SchemaProbe.swift",
+        "Tests/mutations/SuiteKernel.SchemaProbe.json"
+      ],
+      "waits": {
+        "CC-a": [
+          "CC-3"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "CC-run",
+      "behavior": "`CommandCatalog` runs a command by id or envelope: unknown, malformed, unavailable and failed runs each name their cause and change nothing, an `edit` run records exactly one undo step, a batch runs atomic or stops at the first refusal, and the id ledger and the conformance suite check any app's catalog.",
+      "tasks": [
+        "CC-6",
+        "CC-7",
+        "CC-8"
+      ],
+      "journeys": [
+        "CJ2"
+      ],
+      "owned": [
+        "Tests/SuiteKernelTests/CommandCatalogTests.swift",
+        "Tests/SuiteKernelTests/CommandBatchTests.swift",
+        "Tests/SuiteKernelTests/CommandIDLedgerTests.swift",
+        "Tests/SuiteKernelTests/CatalogConformanceTests.swift",
+        "Sources/SuiteKernel/Commands/CommandCatalog.swift",
+        "Sources/SuiteKernel/Commands/CommandSpec.swift",
+        "Tests/mutations/SuiteKernel.CommandCatalog.json",
+        "Sources/SuiteKernel/Commands/CommandIDLedger.swift",
+        "Sources/SuiteKernel/Commands/CatalogConformance.swift",
+        "Tests/mutations/SuiteKernel.CatalogConformance.json"
+      ],
+      "waits": {
+        "CC-a": [
+          "CC-6"
+        ],
+        "CC-schema": [
+          "CC-7"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "CC-u",
+      "behavior": "The gallery's `command-catalog` page lists the fake catalog as menu items built from specs: enabled ones run on the fake document, disabled ones show their why-not as help, within the render budget.",
+      "tasks": [
+        "CC-9",
+        "CC-10"
+      ],
+      "journeys": [
+        "SuiteJourneyTests.testCommandCatalogGallery"
+      ],
+      "owned": [
+        "Sources/SuiteUI/MenuCommand+Catalog.swift",
+        "Sources/SuiteUI/Gallery/GalleryCommandCatalog.swift",
+        "Sources/SuiteUI/SuiteGallery.swift",
+        "Tests/SuiteUITests/MenuCommandCatalogTests.swift",
+        "Tests/AppSnapshotTests/SuiteCommandCatalogSnapshots.swift",
+        "UITests/SuiteJourneyTests+CommandCatalog.swift",
+        "Tests/AppSnapshotTests/RenderBudgetCommandCatalogTests.swift"
+      ],
+      "waits": {
+        "CC-a": [
+          "CC-9"
+        ],
+        "editor-kernel:EK-u": [
+          "CC-9"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CC-lint",
+      "behavior": "A Linux test fails when an app's menu item or toolbar button is built without a command spec and isn't in that app's shrinking baseline, so the one path is enforced, not remembered.",
+      "tasks": [
+        "CC-11",
+        "CC-12"
+      ],
+      "journeys": [
+        "CJ3"
+      ],
+      "owned": [
+        "Tests/SuiteKernelTests/CommandPathTests.swift",
+        "Tests/SuiteKernelTests/Fixtures/CommandPath/",
+        "Tests/command-path-baseline/photo.txt",
+        "Tests/command-path-baseline/design.txt",
+        "Tests/command-path-baseline/flare.txt",
+        "Tests/command-path-baseline/halo.txt",
+        "Tests/command-path-baseline/library.txt",
+        "docs/factory/lead.md"
+      ],
+      "waits": {
+        "CC-a": [
+          "CC-11"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "CC-z",
+      "behavior": "The full Linux walk runs the fake document through list, describe, every example, a batch, undo and save, the blueprints name the command layer, and the feature is built.",
+      "tasks": [
+        "CC-13",
+        "CC-14"
+      ],
+      "journeys": [
+        "CJ4"
+      ],
+      "owned": [
+        "Tests/SuiteKernelTests/CommandWalkTests.swift",
+        "docs/blueprints/suiteui.md",
+        "docs/engineering.md",
+        "Sources/SuiteKernel/SuiteKernel.swift",
+        "docs/blueprints/suiteui/features/command-catalog.wave.json"
+      ],
+      "waits": {
+        "CC-schema": [
+          "CC-13"
+        ],
+        "CC-run": [
+          "CC-13"
+        ],
+        "CC-u": [
+          "CC-14"
+        ],
+        "CC-lint": [
+          "CC-14"
+        ],
+        "editor-kernel:EK-z": [
+          "CC-14"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

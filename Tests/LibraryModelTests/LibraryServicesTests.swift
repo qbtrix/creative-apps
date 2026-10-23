@@ -63,18 +63,16 @@ private func liveServices() -> LibraryServices {
 @Test func liveListsAReasonForEveryStub() {
     let services = liveServices()
     #expect(!services.isPreview)
-    let members = ["develop", "crop", "exporter"]
-    #expect(Set(services.unavailable.keys) == Set(members))
-    #expect(services.unavailable.values.allSatisfy { !$0.isEmpty })
-    let reasons: [String?] = [
-        LiveDevelop.unavailable, LiveCrop.unavailable, LiveExporter.unavailable,
-    ]
-    #expect(reasons.allSatisfy { ($0?.isEmpty ?? true) == false })
+    // Sidecars wait (the window passes no writer until MD-18), and the Trash until cull-finish DR-8.
+    #expect(services.unavailable == ["sidecars": UnconnectedSidecars.unavailable, "trash": LiveTrash.unavailable ?? ""])
+    #expect(LiveCrop.unavailable == nil)
     #expect(LiveImporter.unavailable == nil)
     #expect(LiveThumbnails.unavailable == nil)
     #expect(LiveCulling.unavailable == nil)
     #expect(LiveCatalogCoding.unavailable == nil)
     #expect(LiveLoupeImaging.unavailable == nil)
+    #expect(LiveDevelop.unavailable == nil)
+    #expect(LiveExporter.unavailable == nil)
 }
 
 @Test func liveStubsDrawSamplesAndRefuseFiles() async throws {
@@ -112,7 +110,7 @@ private func liveServices() -> LibraryServices {
     #expect(abs(crop.rect.width - 4000.0 / 6000.0) < 1e-9)
     #expect(DevelopSettings.neutral.setting(.exposure, to: .nan).isNeutral)
     #expect(DevelopSettings.neutral.setting(.contrast, to: 500).value(.contrast) == 100)
-    #expect(HistogramBins.empty.heights.red.allSatisfy { $0 == 0 })
+    #expect(HistogramBins.empty.tone.heights.isEmpty)
     let loupe = try await services.loupe.render(photo, settings: .neutral, longSide: 2048, quality: .full)
     #expect(loupe.image.size.longSide == 2048)
     #expect(PhotoFileKind.kind(forFileName: "a.JPG") == .jpeg && PhotoFileKind.kind(forFileName: ".heic") == nil)
@@ -123,10 +121,12 @@ private func liveServices() -> LibraryServices {
     #expect(services.unavailable["importer"] == nil && services.unavailable["culling"] == nil)
     #expect(services.unavailable["coding"] == nil && services.unavailable["loupe"] == nil)
     #expect(services.unavailable["thumbnails"] == nil)
-    #expect(services.unavailable.count == 3)
+    #expect(services.unavailable["develop"] == nil && services.unavailable["exporter"] == nil)
+    #expect(services.unavailable.keys.sorted() == ["sidecars", "trash"])
     // The importer is live: the fake decoder's empty folder has no photos.
     await #expect(throws: LibraryError.noPhotos("f")) {
         try await services.importer.importFolder("/f", known: [], progress: { _ in }, added: { _ in })
     }
-    #expect(try services.develop.histogram(of: PixelBuffer(rgba8: [0, 0, 0, 255], width: 1, height: 1)) == .empty)
+    // Develop is live: one black pixel is one shadow-clipped count in bin 0.
+    #expect(try services.develop.histogram(of: PixelBuffer(rgba8: [0, 0, 0, 255], width: 1, height: 1)).red.first == 1)
 }

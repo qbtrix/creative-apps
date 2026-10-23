@@ -40,4 +40,10 @@ import Testing
         #expect(UniqueFileNames.name("Card", extension: "", among: []) == "Card")
         #expect(UniqueFileNames.name("Card", extension: "", among: ["card"]) == "Card 2")
     }
+
+    @Test func batchNamesAreUniqueAgainstTheFolderAndEachOther() {
+        #expect(UniqueFileNames.names(["Card", "Card"], extension: "png", among: ["Card.png"]) == ["Card 2.png", "Card 3.png"])
+        #expect(UniqueFileNames.names(["Card", "card", "Card 2"], extension: "png", among: []) == ["Card.png", "card 2.png", "Card 2 2.png"])
+        #expect(UniqueFileNames.names([], extension: "png", among: ["Card.png"]) == [])
+    }
 }

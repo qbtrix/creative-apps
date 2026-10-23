@@ -107,10 +107,14 @@ never a shortcut. Live services, `-DesignFixture cards`.
 4. **CB-c** `testPageSizeAndPastThePage` (`+Page`, class
    `DesignPageJourneyTests`; CB-7 writes it, CB-9 turns it on): click the
    page's row in Pages: the inspector shows Width 1440 and Height 1024;
-   click Width, type 800, Return: the status line reads "800 × 1024 pt" and
+   click Width, type 800 (the click selected the value), click away on the
+   page's row: the status line reads "800 × 1024 pt" and
    the top bar's Undo reads "Undo Change Page Size"; Desktop's part past
    800 still shows, dimmed (the canvas shot is attached; the pixels are
-   CB-9's snapshot); click Undo: Width reads 1440.
+   CB-9's snapshot); click Height, type 768, click away: the status line
+   reads "800 × 768 pt" and Undo reads "Undo Change Page Size"; click Undo:
+   Height reads 1024; click Undo: Width reads 1440. No Command-A, no Return
+   (job RJ-D32).
 
 ## Screens and states
 

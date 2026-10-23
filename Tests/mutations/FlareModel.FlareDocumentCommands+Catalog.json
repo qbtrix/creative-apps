@@ -1,0 +1,37 @@
+[
+  {
+    "label": ".lockedLayerUnavailable: the dry run is skipped, so every command reads available",
+    "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
+    "find": "        return copy.layerError.map { .unavailable($0.message) } ?? .available\n",
+    "replace": "        return .available\n",
+    "tests": "FlareCoreCommandCatalogTests"
+  },
+  {
+    "label": ".overrideWins: the probe's schema is used where an override exists",
+    "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
+    "find": "params: C.self, schema: coreSchemaOverrides[C.id],",
+    "replace": "params: C.self, schema: nil,",
+    "tests": "FlareCoreCommandCatalogTests"
+  },
+  {
+    "label": "an enum payload loses its cases: Easing's probe sample no longer decodes",
+    "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
+    "find": "    if case .object(let fields)? = cases.first?.json, let properties = fields[\"properties\"] { first = properties }\n",
+    "replace": "",
+    "tests": "FlareCoreCommandCatalogTests"
+  },
+  {
+    "label": "the undo step keeps \"Undo \", so outcomes name the menu title, not the step",
+    "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
+    "find": "        (undoName, redoName) = (workspace.undoName, workspace.redoName)\n",
+    "replace": "        (undoName, redoName) = (workspace.undoActionName, workspace.redoName)\n",
+    "tests": "FlareCoreCommandCatalogTests"
+  },
+  {
+    "label": "notDrawnOnStage is ignored: mask and matte commands read available though the stage can't draw them",
+    "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
+    "find": "        if notDrawnOnStage.contains(C.id), workspace.document != nil { return .unavailable(masksNotDrawn) }\n",
+    "replace": "",
+    "tests": "FlareCoreCommandCatalogTests"
+  }
+]
