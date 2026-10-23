@@ -219,3 +219,4 @@ utc	stage	event	ref	note
 2026-10-23T11:20Z	3	wait	H-J12 re-check	no journeys run contains 28e3a67d yet
 2026-10-23T12:22Z	3	wait	H-J12 re-check	no halo/full journeys run contains 28e3a67d yet
 2026-10-23T13:24Z	3	wait	H-J12 re-check	no halo/full journeys run contains 28e3a67d yet
+2026-10-23T14:27Z	3	wait	H-J12 re-check	halo run 39962308580 (54297676) has the fix, pending
