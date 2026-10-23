@@ -33,5 +33,19 @@
     "find": "        if o.scale != 1, o.scale != 2 { return \"Scale must be 1x or 2x.\" }\n",
     "replace": "",
     "tests": "FlareExportOptionsTests"
+  },
+  {
+    "label": "exportOutputLine swaps width and height",
+    "file": "Sources/FlareModel/FlareExport.swift",
+    "find": "return \"\\(plan.width) × \\(plan.height) px",
+    "replace": "return \"\\(plan.height) × \\(plan.width) px",
+    "tests": "FlareVideoExportTests"
+  },
+  {
+    "label": "exportOutputLine counts the scene's frames, not the plan's",
+    "file": "Sources/FlareModel/FlareExport.swift",
+    "find": "px, \\(plan.frames.count) frames\"",
+    "replace": "px, \\(selectedScene?.durationFrames ?? 0) frames\"",
+    "tests": "FlareVideoExportTests"
   }
 ]

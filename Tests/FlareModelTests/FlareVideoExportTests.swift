@@ -70,6 +70,21 @@ struct FlareVideoExportTests {
         #expect(w.exportProblem == nil && w.exportFrameRate == 12)
     }
 
+    /// Mac finish: the sheet says what an MP4 or GIF will write (pixels and frames), the way PNG shows its file
+    /// count; nil for the other formats and while Export is refused.
+    @Test func theSheetNamesTheVideosPixelsAndFrames() {
+        var w = bounce(); _ = w.openExport()
+        #expect(w.exportOutputLine == nil)
+        w.setExportFormat(.gif)
+        #expect(w.exportOutputLine == "550 × 400 px, 60 frames")
+        w.setExportFormat(.mp4); w.setExportFrameRate(15)
+        #expect(w.exportOutputLine == "550 × 400 px, 30 frames")
+        w.setExportSize(.scale(2))
+        #expect(w.exportOutputLine == "1100 × 800 px, 30 frames")
+        w.setExportFrameRate(0)
+        #expect(w.exportOutputLine == nil)
+    }
+
     @Test func svgLottieAndPNGStillExport() async throws {
         #expect(ExportFormat.svgFrame.unbuiltReason == nil && ExportFormat.lottie.unbuiltReason == nil)
         #expect(ExportFormat.pngSequence.unbuiltReason == nil)

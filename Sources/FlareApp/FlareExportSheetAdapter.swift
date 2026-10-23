@@ -5,7 +5,8 @@
 // Its ids hang off `flare.export`. The options slot holds FlareExportOptionRows:
 // the Frame row (SVG), From, To and Step (PNG sequence), or Frame rate and, for
 // GIF, Loop forever (MP4 and GIF); 1x and 2x scale chips and the Transparent
-// background checkbox (SVG and PNG), the scan's warnings, the PNG file count and, in
+// background checkbox (SVG and PNG), the scan's warnings, the PNG file count or the MP4 and GIF
+// output line (`exportOutputLine`: pixels and frames) and, in
 // the error color, `exportProblem`, which Export is refused on. A finished run
 // reads `exportSummary`. Every control sends a FlareIntent.Export: a format
 // pick `setFormat`, Size or a chip `setScale`, a frame row `setFrames` (moving
@@ -137,6 +138,8 @@ struct FlareExportOptionRows: View {
             } else if editing, options.format == .pngSequence {
                 let count = model.exportFileCount
                 InspectorNote(count == 1 ? "1 file" : "\(count) files", identifier: "flare.export.count")
+            } else if editing, let output = model.exportOutputLine {
+                InspectorNote(output, identifier: "flare.export.output")
             }
         }
     }
