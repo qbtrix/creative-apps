@@ -55,3 +55,9 @@ Next: DK-u and DK-m slice PRs; critic panels; then DK-z
 - #4864: the gate passed at b17f9002c. The body now carries Head b17f9002c and Fixes #4928. needs-split was dropped after a reply to the sentinel (379 lines, 7 files).
 - The DK-u round-2 critic is running on #5002 (da662ed8).
 - #4888 needs-rebase: dev merged in at d6494151, resolving DesignCommandCatalog, its tests and the CLI golden (the stroke.* and select.* ids kept). Its gate is running; push after CI: PASS.
+
+## 2026-10-23T22:23Z DK-u critic round 2
+
+- The critic read #5002 at da662ed8. #4925, #4926 and #4989 are fixed. #4927 is partly fixed: its solid half is done, and the dashed and trimmed half became #5009. #4928 is partly fixed: the corner-radius mutation is still missing.
+- New findings: #5009, where a dashed or trimmed trace on a rounded box uses circular corners while the fill uses continuous ones, and #5010, where the dash phase is scaled by zoom but no test covers it.
+- Next: DK-u fix round 2, the last one, stacked on #5002. It fixes #5009 and #5010 and adds the #4928 mutation. Whatever is still open after that becomes a gap.
