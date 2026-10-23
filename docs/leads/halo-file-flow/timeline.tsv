@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-23T20:49:00Z	3	heartbeat	HF-z	no merges; batch-20261023192105 branches gone, no dev merge since 19:45Z, no lane comment; #4855 waits for next batch
 2026-10-23T21:11:00Z	3	heartbeat	HF-z	#4855 in lane batch-20261023204921 (12 PRs, #4862..#4841); no merges, no lane comments
 2026-10-23T21:32:00Z	3	heartbeat	HF-z	#4855 still in lane batch-20261023204921 (running, no probes); no merges, no lane comments
+2026-10-23T21:58:00Z	3	merged	HF-a	#4855 on dev as f2955985 (batch-20261023204921); merging dev into HF-u #4868 and HF-m #4894 (add/add conflicts resolved to HF-m side, dev==HF-a blobs), gate running, then retarget to dev
