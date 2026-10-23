@@ -22,3 +22,4 @@ utc	stage	event	ref	note
 2026-10-22T17:16:20Z	OC-u	PR	#4582 head 13f82d3e; CI: PASS; mutate 2/2; 395 lines 9 files
 2026-10-22T17:43:19Z	poll	#4582 waiting on lane macOS build 39823958943 (queued); IM-a only from suite-imaging; DS-photo, AR-photo-u, CB-library, CB-z not done
 2026-10-23T14:51:14Z	stage 3	run act-1a1693a3ff0-mwrd resumed; #4582 macOS compile error found, fix 8005f4a3; dev gate red at quarantine (supervisor)
+2026-10-23T16:45Z	stage 3	#4582 gate rerun after restart; other slices blocked

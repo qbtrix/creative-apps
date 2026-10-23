@@ -4,7 +4,7 @@ Issue: #3756 · Packet: docs/blueprints/suiteui/features/orientation-crop.md
 Run: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui: tone-controls, shared-codecs, orientation-crop) · Started: 2026-10-23T14:51Z
 Stage: 3 wave 3
 Base: origin/dev 8021b0f56a45a59540cd4ea0ff99651c5fb8dc2a
-Next: #4582 (OC-u) fix: the lane macOS build 39823958943 failed on two-variable @State lines in CropAspectPicker.swift and GalleryCrop.swift; fix 8005f4a3, gate rerunning, then move the Head line. Other slices blocked (rechecking waits).
+Next: #4582 (OC-u): restart killed the gate; rerunning on 8005f4a3 with dev's renewed quarantine (expires 2026-10-27) copied in uncommitted; on CI: PASS push and move the Head line. Other slices blocked.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -43,3 +43,4 @@ Next: #4582 (OC-u) fix: the lane macOS build 39823958943 failed on two-variable 
 ## Open
 - OC-library-m: suite-imaging:IM-z, clipboard-interop:CB-library. OC-photo-m: DS-photo. OC-photo-u: AR-photo-u. OC-z: CB-z.
 - 2026-10-23T14:51:14Z: run act-1a1693a3ff0-mwrd takes over (issue #3756). Base and PR target stay dev (CLAUDE.md, the lane), not main as the brief says. #4582 macOS error: "property wrapper can only apply to a single variable" (2 files), fixed by one @State per line. scripts/ci fails on dev itself at the journey quarantine stage (6 Halo/Photo entries expired 2026-10-23, supervisor-owned): the gate is verified past it with an uncommitted renewal.
+- 2026-10-23T16:45Z: dev now has the six quarantine entries renewed to 2026-10-27 (supervisor), so dev's gate passes that stage. The OC-u gate reruns on 8005f4a3. Waits unchanged: IM-z, CB-library, DS-photo, AR-photo-u, CB-z not on dev. Status now also pushed to lead/suiteui-orientation-crop (the branch Belt reads).
