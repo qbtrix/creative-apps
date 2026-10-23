@@ -9,6 +9,8 @@
 // view points in, document-space intents out. The overlay keeps only its
 // gesture, the pointer and focus; the app owns the draft, path and selection.
 // PN-4 adds one hidden accessibility element per anchor and drawn handle.
+// `pressesPassThrough()` keeps the marks and hover for a host whose own canvas
+// gesture takes the presses.
 import AppKit
 import SuiteKernel
 import SwiftUI
@@ -30,7 +32,8 @@ public enum PenTool: String, CaseIterable, Sendable {
 public struct PathEditOverlay: View {
     private let context: PathContext
     private let onIntent: (PathIntent) -> Void
-    var interactive = true // false: PathEditOverlay+StandIn.swift's marks-only init
+    /// false: marks and hover only (`pressesPassThrough()`, the stand-in init); presses, drags and keys reach the view under it.
+    var takesPresses = true
     @State private var tracker = PathGesture()
     @State private var pointer: CGPoint?
     @State private var hovered: PathHit?
@@ -72,7 +75,6 @@ public struct PathEditOverlay: View {
             }
         }
         .contentShape(.rect)
-        .allowsHitTesting(interactive)
         .onContinuousHover { phase in
             if case .active(let p) = phase { (pointer, hovered) = (p, hitTest(p)) } else { (pointer, hovered) = (nil, nil) }
         }
@@ -87,9 +89,10 @@ public struct PathEditOverlay: View {
                 pointer = value.location
                 send(tracker.drag(to: value.location, modifiers: held))
             }
-            .onEnded { value in send(tracker.release(at: value.location, modifiers: KeyModifiers(flags: NSEvent.modifierFlags))) })
+            .onEnded { value in send(tracker.release(at: value.location, modifiers: KeyModifiers(flags: NSEvent.modifierFlags))) },
+            isEnabled: takesPresses)
         .pointerStyle(hint.map { look($0) })
-        .focusable()
+        .focusable(takesPresses)
         .focused($hasFocus)
         .focusEffectDisabled()
         .onKeyPress(phases: .down) { press in
@@ -103,6 +106,16 @@ public struct PathEditOverlay: View {
         .accessibilityValue(context.draft.map { "Drawing, \($0.contour.anchors.count) points" }
             ?? "\(context.selection.ordered.count) points selected")
         .suiteControl(id: "suite.path.overlay", enabled: true, reason: nil)
+    }
+
+    /// The overlay as marks and hover only, for a host whose own canvas gesture routes every press (Flare's stage):
+    /// its drag gesture, focus and keys are off, so `onIntent` gets nothing, but it stays hit-tested, so hover still
+    /// draws the rubber band, close ring and hovered ring and sets the pointer. Don't wrap it in
+    /// `.allowsHitTesting(false)`: that drops the hover too.
+    public func pressesPassThrough() -> Self {
+        var overlay = self
+        overlay.takesPresses = false
+        return overlay
     }
 
     /// The rubber band, the handle a Pen drag pulls, the marquee and the close ring.
