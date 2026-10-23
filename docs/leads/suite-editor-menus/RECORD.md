@@ -11,7 +11,7 @@ Next: #4738 and C4 #4737 in lane; #4739 retargets to dev after #4738 merges; the
 |---|---|---|---|---|---|---|---|---|---|
 | EM-a | .suiteEditor + ReopenRule + delegate reopen | EM-1, EM-2 | XJ-EM | report-problem:RP-a (met) | yes | 0 | merged #4710 | - | - |
 | EM-photo-design | Photo and Design adopt .suiteEditor (#3648) | EM-3, EM-4 | PJ-EM, DJ-EM | EM-a; file-flow adopts (on dev) | yes | 0 | open #4739 (stacked on EM-flare-halo) | - | - |
-| EM-flare-halo | Flare and Halo adopt .suiteEditor (#1018, #1081) | EM-5, EM-6 | FJ-EM, HJ-EM | EM-a; file-flow adopts (on dev) | yes | 0 | building | - | - |
+| EM-flare-halo | Flare and Halo adopt .suiteEditor (#1018, #1081) | EM-5, EM-6 | FJ-EM, HJ-EM | EM-a; file-flow adopts (on dev) | yes | 0 | open #4738 | - | - |
 | EM-library | Library adopts; RJ-X63; built | EM-7, EM-8, EM-9, EM-10 | LJ-EM + all | EM-a, every app slice | yes | 0 | waiting | - | - |
 
 ## Tasks
