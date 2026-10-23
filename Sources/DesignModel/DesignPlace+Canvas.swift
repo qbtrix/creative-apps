@@ -59,12 +59,12 @@ extension DesignWorkspace {
         }
     }
 
-    /// The pan an ⌥-drag from `point` starts: the Move tool, off the handles, one unlocked node selected and the
-    /// topmost layer under the pointer, and its picture overflows the box. Anything else is nil, so ⌥ still
-    /// duplicates (every selected layer) or resizes, or acts on the layer on top.
+    /// The pan an ⌥-drag from `point` starts: the Move tool, off the handles, one node selected, it the topmost
+    /// unlocked layer under the pointer (`hitTest` passes over locked ones), and its picture overflows the box.
+    /// Anything else is nil, so ⌥ still duplicates every selected layer, resizes, or acts on the layer on top.
     public func beginPicturePan(at point: DesignPoint, option: Bool, token: String = UUID().uuidString) -> DesignPicturePan? {
         guard option, tool == .move, !hasMultipleSelection, handle(at: point) == nil, let node = selectedNode,
-              hitTest(point) == node.id, lockHelp(node.id) == nil, let excess = panExcess, excess.x >= 1 || excess.y >= 1
+              hitTest(point) == node.id, let excess = panExcess, excess.x >= 1 || excess.y >= 1
         else { return nil }
         return DesignPicturePan(start: point, focus: node.placedFocus, token: token)
     }
