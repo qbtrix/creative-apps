@@ -19,5 +19,19 @@
     "find": "guard wrote else { return .retryOnNextEdit }",
     "replace": "guard wrote else { writtenEdit = nil; return .retryOnNextEdit }",
     "tests": "AutosaveScheduleTests"
+  },
+  {
+    "label": "quitIgnoresDirty: a clean window's quit writes a copy",
+    "file": "Sources/SuiteKernel/Session/AutosaveSchedule.swift",
+    "find": "guard dirty, !isWritten else { return nil }",
+    "replace": "guard !isWritten else { return nil }",
+    "tests": "AutosaveQuitTests"
+  },
+  {
+    "label": "quitRewritesCurrentCopy: a quit writes again when the newest edit is already on disk",
+    "file": "Sources/SuiteKernel/Session/AutosaveSchedule.swift",
+    "find": "guard dirty, !isWritten else { return nil }",
+    "replace": "guard dirty else { return nil }",
+    "tests": "AutosaveQuitTests"
   }
 ]

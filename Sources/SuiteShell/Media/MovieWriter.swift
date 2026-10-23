@@ -8,9 +8,12 @@
 // rate in one of four codecs (H.264, HEVC, HEVC with alpha, ProRes 4444),
 // tagged BT.709 (primaries, transfer function and YCbCr matrix). Frame i is
 // presented at i / fps and the session ends at frames / fps, so 48 frames at
-// 24 fps are exactly 2 s. The alpha codecs keep each frame's alpha; H.264 and
-// HEVC draw the frame over opaque black, Halo's rule. `cancel()` cancels the
-// writer and deletes the partial file.
+// 24 fps are exactly 2 s. Each frame's sRGB pixels are drawn into the colour
+// space those tags name (the one a reader decodes into), so a frame reads
+// back as the colours it was given rather than 709-tagged sRGB values, which
+// read about 12/255 bright in the mid-tones. The alpha codecs keep each
+// frame's alpha; H.264 and HEVC draw the frame over opaque black, Halo's
+// rule. `cancel()` cancels the writer and deletes the partial file.
 //
 // It uses the macOS 26 receiver API (`inputPixelBufferReceiver(for:)`,
 // `start()`, `appendImmediately(_:with:)`); the pixel buffer adaptor and
@@ -43,6 +46,8 @@ public final class MovieWriter: FrameSink, @unchecked Sendable {
 
     private let url: URL
     private let settings: MovieSettings
+    /// The colour space the BT.709 tags name, made once: each frame is drawn into it.
+    private let space: CGColorSpace
     // Every access to the four below holds `lock`; that is what makes the
     // unchecked Sendable conformance sound.
     private let lock = NSLock()
@@ -62,6 +67,9 @@ public final class MovieWriter: FrameSink, @unchecked Sendable {
         }
         guard !FileManager.default.fileExists(atPath: url.path) else {
             throw .notAvailable("A file named \(url.lastPathComponent) already exists.")
+        }
+        guard let space = CVImageBufferCreateColorSpaceFromAttachments(Self.tags as CFDictionary)?.takeRetainedValue() else {
+            throw .notAvailable("The movie's BT.709 colour space couldn't be made.")
         }
         let output = Self.outputSettings(settings)
         let writer: AVAssetWriter
@@ -89,6 +97,7 @@ public final class MovieWriter: FrameSink, @unchecked Sendable {
             throw .ioFailed("The movie couldn't start: \(error.localizedDescription).")
         }
         writer.startSession(atSourceTime: .zero)
+        self.space = space
         self.url = url
         self.settings = settings
         self.writer = writer
@@ -198,8 +207,16 @@ public final class MovieWriter: FrameSink, @unchecked Sendable {
 
     // MARK: Frames
 
-    /// `frame` as a BGRA buffer: cleared (alpha codecs) or opaque black, then
-    /// the frame's sRGB pixels over it, tagged BT.709 like the track.
+    /// The frames' BT.709 tags: primaries, transfer function and YCbCr matrix.
+    private static let tags: [String: String] = [
+        kCVImageBufferColorPrimariesKey as String: kCVImageBufferColorPrimaries_ITU_R_709_2 as String,
+        kCVImageBufferTransferFunctionKey as String: kCVImageBufferTransferFunction_ITU_R_709_2 as String,
+        kCVImageBufferYCbCrMatrixKey as String: kCVImageBufferYCbCrMatrix_ITU_R_709_2 as String,
+    ]
+
+    /// `frame` as a BGRA buffer tagged BT.709 like the track: cleared (alpha
+    /// codecs) or opaque black, then the frame's sRGB pixels drawn over it in
+    /// the colour space the tags name.
     private func pixelBuffer(_ frame: MediaFrame) throws(SuiteError) -> CVReadOnlyPixelBuffer {
         guard let image = Self.image(frame) else {
             throw .notAvailable("The frame's pixels couldn't be read.")
@@ -215,15 +232,10 @@ public final class MovieWriter: FrameSink, @unchecked Sendable {
         guard status == kCVReturnSuccess, let buffer = created else {
             throw .notAvailable("No memory for a \(frame.width) by \(frame.height) movie frame.")
         }
-        guard Self.draw(image, into: buffer, keepAlpha: settings.codec.keepsAlpha) else {
+        guard Self.draw(image, into: buffer, space: space, keepAlpha: settings.codec.keepsAlpha) else {
             throw .notAvailable("The frame couldn't be drawn.")
         }
-        CVBufferSetAttachment(
-            buffer, kCVImageBufferColorPrimariesKey, kCVImageBufferColorPrimaries_ITU_R_709_2, .shouldPropagate)
-        CVBufferSetAttachment(
-            buffer, kCVImageBufferTransferFunctionKey, kCVImageBufferTransferFunction_ITU_R_709_2, .shouldPropagate)
-        CVBufferSetAttachment(
-            buffer, kCVImageBufferYCbCrMatrixKey, kCVImageBufferYCbCrMatrix_ITU_R_709_2, .shouldPropagate)
+        CVBufferSetAttachments(buffer, Self.tags as CFDictionary, .shouldPropagate)
         // The buffer is never touched again: the read-only wrapper owns it.
         return CVReadOnlyPixelBuffer(unsafeBuffer: buffer)
     }
@@ -241,13 +253,12 @@ public final class MovieWriter: FrameSink, @unchecked Sendable {
     }
 
     /// Clears `buffer` (or fills it with opaque black) and draws `image` over
-    /// it; false when its memory can't be drawn into. Unlocked again before returning.
-    private static func draw(_ image: CGImage, into buffer: CVPixelBuffer, keepAlpha: Bool) -> Bool {
+    /// it in `space`; false when its memory can't be drawn into. Unlocked again before returning.
+    private static func draw(_ image: CGImage, into buffer: CVPixelBuffer, space: CGColorSpace, keepAlpha: Bool) -> Bool {
         CVPixelBufferLockBaseAddress(buffer, [])
         defer { CVPixelBufferUnlockBaseAddress(buffer, []) }
         let width = CVPixelBufferGetWidth(buffer), height = CVPixelBufferGetHeight(buffer)
         guard let base = CVPixelBufferGetBaseAddress(buffer),
-              let space = CGColorSpace(name: CGColorSpace.sRGB),
               let context = CGContext(
                   data: base, width: width, height: height, bitsPerComponent: 8,
                   bytesPerRow: CVPixelBufferGetBytesPerRow(buffer), space: space,

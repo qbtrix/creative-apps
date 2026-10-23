@@ -1,5 +1,6 @@
-// FlareRecovery.swift: autosave, the recovery offer and the failed-save status on the window
-// (docs/blueprints/flare/features/layers-files.md, LF-5; adopt-kernel-autosave AK-4). Autosave and the launch
+// FlareAutosaveAdapter.swift: autosave, the recovery offer and the failed-save status on the window
+// (docs/blueprints/flare/features/layers-files.md, LF-5; adopt-kernel-autosave AK-4, here since AK-10 deleted
+// Flare's own writer, recovery file and offer, so this file adapts the window to the kernel's). Autosave and the launch
 // offer are the suite's `.autosaveRecovery` with the hooks FlareWorkspace gives (FlareRecovery+Kernel.swift): the
 // window id, the file name, the unsaved mark, the dirty document's encoder and a restore that lands the bytes as one
 // undo step. Quitting while dirty writes the same pair once more, at once, before the app exits
@@ -15,7 +16,7 @@ import SuiteModel
 import SuiteUI
 import SwiftUI
 
-struct FlareRecovery: ViewModifier {
+struct FlareAutosaveAdapter: ViewModifier {
     let model: FlareWorkspace
     /// Opens a recovered copy's bytes through the window's Model.
     let restore: @MainActor (Data) throws -> Void

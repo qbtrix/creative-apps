@@ -5,12 +5,13 @@
 // in linear light as LiveFrameRendering composites (the Canvas's colorMode
 // and its drawing group both .linear): each item at its matrix times the fit
 // (a CanvasLayout of the composition filling that frame),
-// at its opacity and blend mode; a solid fills its box, a shape the ellipse in it, a text layer
+// at its opacity and blend mode; a solid fills its box (or draws its placed
+// picture, SuiteUI's drawPlaced without strokes, PH-3), a shape the ellipse in it, a text layer
 // is a resolved Text on the pinned baseline rule (its line box's top-left at
 // bounds.origin, its first baseline at bounds.y + ascent). The selected
 // layer's world box gets SuiteUI's SelectionOutline. The frame Render Frame
-// shows (HaloRenderedFrameView) and the viewer's gestures (HaloViewerGestures)
-// sit over it. The artboard's value is `viewerSummary` ("Frame 30:
+// shows (HaloRenderedFrameView) and the viewer's gestures (HaloViewerGestures,
+// with ⌥-drag panning a placed picture, HaloPlaceFocusDrag) sit over it. The artboard's value is `viewerSummary` ("Frame 30:
 // Background, Badge, Title: Hello Halo"); its child `halo.viewer.canvas` reads
 // `drawnSummary` ("2 layers drawn"). XCUITest reads values empty (#262), so
 // two hidden, hitless leaves carry the same text as labels:
@@ -20,6 +21,7 @@
 import CoreRaster
 import CoreText
 import HaloModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -35,10 +37,11 @@ struct HaloViewerCanvas: View {
             // frame, laid out the same way.
             .overlay { HaloLiveLayers(model: model, artboard: artboard) }
             .overlay { HaloRenderedFrameView(model: model, perform: perform) }
-            .overlay { HaloViewerGestures(model: model, perform: perform) }
-            // The playing frame's, as the drawn layers show it (HaloLiveShown).
+            .overlay { HaloViewerGestures(model: model, perform: perform).modifier(HaloPlaceFocusDrag(model: model)) }
+            // The playing frame's; a drag or scrub moves layers, never which
+            // show, so its preview never re-runs these (HaloPlayheadShown).
             .overlay {
-                HaloLiveShown(model: model) { shown in
+                HaloPlayheadShown(model: model) { shown in
                     ProbeElement("halo.viewer.summary", label: shown.viewerSummary)
                     if let list = shown.viewerDrawList {
                         ProbeElement("halo.viewer.drawn", label: list.drawnSummary)
@@ -81,7 +84,7 @@ struct HaloLiveLayers: View {
 
 /// One frame's draw list over the artboard's fitted frame, and the selected
 /// layer's outline. Composition pixels times `size / list size` is the fit.
-private struct HaloDrawnLayers: View {
+struct HaloDrawnLayers: View {
     let list: HaloDrawList
     let selectedLayerID: String?
 
@@ -125,7 +128,12 @@ private func drawItem(_ item: HaloDrawItem, in context: GraphicsContext, fit: CG
     let rect = CGRect(x: b.x, y: b.y, width: b.width, height: b.height)
     let color = Color(cgColor: HaloCanvasFit.cgColor(item.color))
     switch item.kind {
-    case .solid: g.fill(Path(rect), with: .color(color))
+    case .solid:
+        if let asset = item.placedAsset, let image = item.placedImage {
+            g.drawPlaced(asset, image, strokes: false)
+        } else {
+            g.fill(Path(rect), with: .color(color))
+        }
     case .shape: g.fill(Path(ellipseIn: rect), with: .color(color))
     case .text:
         guard let content = item.text else { return }

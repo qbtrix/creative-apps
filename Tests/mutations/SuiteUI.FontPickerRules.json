@@ -1,0 +1,5 @@
+[
+{"label": "substring matches come before prefix matches", "file": "Sources/SuiteUI/FontPickerRules.swift", "find": "return inNameOrder(prefix) + inNameOrder(contains)", "replace": "return inNameOrder(contains) + inNameOrder(prefix)", "tests": "FontPickerRulesTests.prefixFirst"},
+{"label": "search keeps diacritics", "file": "Sources/SuiteUI/FontPickerRules.swift", "find": "[.caseInsensitive, .diacriticInsensitive]", "replace": "[.caseInsensitive]", "tests": "FontPickerRulesTests.foldsDiacritics"},
+{"label": "italic sorts before roman of the same weight", "file": "Sources/SuiteUI/FontPickerRules.swift", "find": "return !a.element.italic && b.element.italic", "replace": "return a.element.italic && !b.element.italic", "tests": "FontPickerRulesTests.romanBeforeItalic"}
+]
