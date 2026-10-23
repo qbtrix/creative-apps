@@ -21,3 +21,4 @@ utc	stage	event	ref	note
 17:55Z	3	poll	dev 8a54f64	#4574 (FH-r) merged as a05d7be; FH-c merged dev, gate pass, pushed 7d32ede, #4577 retargeted to dev + Head moved; no green suiteui/full run on a05d7be yet (full CI at 35a0b5e running); #4889 #4896 open; next poll 18:15Z
 18:15Z	3	poll	dev 9858966	no fill-heal merges since a05d7be; #4577 #4889 #4896 open, no needs-fix/needs-rebase; no green suiteui/full run on a05d7be yet (full CI at 9858966 pending, macOS runners saturated); AJ-a (#4834, #4846 needs-split) and brush-keys (#4939) still open; next poll 18:35Z
 18:36Z	3	poll	dev 2f94f450	no change: #4577/#4889/#4896 open fast-lane, no needs-fix; no suiteui/full green run on dev yet (full on 9858966 pending); AJ-a #4834 open, BK-u #4939 open
+18:58Z	3	poll	dev 0d4645bf	no change: #4577/#4889/#4896 open, no needs-fix; scoped suiteui run 40005632479 queued on 0d4645b (holds a05d7be) -> FH-r done when green; AJ-a/BK-u not on dev
