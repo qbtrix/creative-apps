@@ -1,41 +1,45 @@
 # layer-styles lead record
 
-Issue: #4511 (was #3793) · Packet: docs/blueprints/photo/features/layer-styles.md
-Run: act-1a164697363-4fnm · Session: claude/feature-lead-photo-features-kilpzc · Started: 2026-10-22T16:00Z (resumed from act-1a16155057c-20lg)
-Stage: 0 setup (blocked; line lead works psd-effects and masks-clipping meanwhile)
-Base: 7e9f260 (origin/dev)
-Next: re-read suiteui layer-styles (#3937) for LS-a merged (`LayerStyle`, `LayerStyleTarget`, `StyleCommands.specs` on dev); once it is, start wave 1 (PY-1)
+Issue: #3937 · Packet: docs/blueprints/suiteui/features/layer-styles.md
+Run: act-1a1695ebfeb-d54n · Session: claude/feature-lead-playbook-9a8kbw · Started: 2026-10-23T15:30Z
+Stage: 3 wave 1
+Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (origin/dev)
+Next: check wave-1 builders (LS-1, LS-10); then wave 2: LS-2 stacked on LS-1, LS-5, LS-11
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| PY-a | `PhotoLayer.style`, `style.*` in the catalog on stubs, Layer > Layer Style… opens the panel | PY-1, PY-2 | MJ-PY | multi-layer-select (built #3535); file-flow:PF-m (done); suiteui layer-styles LS-a (not started) | yes | 0 | blocked (LS-a) | – | – |
-| PY-u | panel snapshots, render budget, journey written | PY-3, PY-4 | PJ-Y1 | PY-a | yes | 0 | waiting | – | – |
-| PY-m | style commands as one undo step, composite draws styles padded, `.ora` keeps them | PY-5, PY-6 | MJ-PY | PY-a; LS-m | no | 0 | waiting | – | – |
-| PY-z | live canvas through `StyleRoute`, journey on live, photo.md built | PY-7, PY-8 | PJ-Y1 | PY-u, PY-m; text-layers:TX-z (PY-8); LS-gpu, IM-photo (PY-7) | yes | 0 | waiting | – | – |
+| LS-a | SuiteImaging's Style module declares the model, rules, presets, intents, the style command specs with ids and availability, the SVG writer and the program as stubs, the gallery has a layer-style page, and every check is written, disabled. | LS-1, LS-2 | SJ0, MJ-LS | brush-keys:BK-u; gradient-fill:GF-a; suite-imaging:IM-a | yes | 0 | building | – | – |
+| LS-u | On the gallery page the panel lists the eight styles with their switches, shows the selected style's rows, applies a preset, and is reachable from the Layers panel's fx button and row menu where that work has landed, within the render budget. | LS-3, LS-4 | LJ1 | LS-a | yes | 0 | planned | – | – |
+| LS-m | The rules clamp and default every parameter and keep one effect per kind, every style command records one undo step (a drag one), copy and paste round-trip as JSON, the SVG writer emits a filter for each style it can express and a warning for the rest, and StyleProgram maps a style to the core stack and back. | LS-5, LS-6, LS-7, LS-8 | MJ-LS | LS-a; gradient-fill:GF-m | no | 0 | planned | – | – |
+| LS-gpu | The live route draws a styled layer on the GPU in one pass per step and matches the CPU within the core's parity tolerance, within 16 ms p95 for a 2,000 x 2,000 layer. | LS-9, LS-9b | MJ-LS-gpu | LS-m; suite-imaging:IM-m | no | 0 | planned | – | – |
+| LS-clip | SuiteKernel finds a clipped layer's base, refuses a clip with no base, and layer.clip and layer.unclip record one step each. | LS-10, LS-11 | KJ-clip |  | no | 0 | building | – | – |
+| LS-z | The gallery runs its intents through StyleCommands on a live target with a History, the panel draws its preview through the route, and the feature is built. | LS-12, LS-13 | LJ1, MJ-LS | LS-clip; LS-gpu; LS-m; LS-u | yes | 0 | planned | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| PY-1 | PY-a | 1 | `PhotoLayer.style`; adapter stubs (`showStylePanel` real); catalog specs and ids; tests disabled | Sources/PhotoModel/PhotoLayer.swift, Sources/PhotoModel/PhotoStyle+Kernel.swift, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/PhotoModelTests/PhotoLayerStyleTests.swift | PhotoLayerStyleTests (disabled), command-id list | – | blocked (LS-a) |
-| PY-2 | PY-a | 2 | Layer menu items by id; panel sheet while `stylePanel` is set; pasteboard via `LayerStylePasteboard` | Sources/PhotoApp/PhotoCommands+Layer.swift, Sources/PhotoApp/PhotoWindow+Styling.swift, Sources/PhotoApp/PhotoWindow.swift | PhotoLayerStyleSnapshots.panel | – | waiting (PY-1) |
-| PY-5 | PY-m | 2 | adapter bodies; tests on | Sources/PhotoModel/PhotoStyle+Kernel.swift, Tests/PhotoModelTests/PhotoLayerStyleTests.swift, Tests/mutations/PhotoModel.PhotoStyle+Kernel.json | PhotoLayerStyleTests | – | waiting (PY-1, LS-m) |
-| PY-6 | PY-m | 2 | styles in composite and `.ora`; RJ-P44, RJ-X51 | Sources/PhotoModel/PhotoLayerComposite.swift, Sources/PhotoModel/PhotoDocumentFile.swift, Tests/PhotoModelTests/PhotoStyleRenderTests.swift, Tests/mutations/PhotoModel.PhotoLayerComposite.json, Tests/mutations/PhotoModel.PhotoDocumentFile.json, Tests/RealJobs/photo/outline-cutout/, Tests/RealJobs/photo/style-drop-shadow/ | PhotoStyleRenderTests | – | waiting (PY-1, LS-m) |
-| PY-3 | PY-u | 3 | snapshots, render budget | Tests/AppSnapshotTests/PhotoLayerStyleSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoLayerStyleTests.swift | RenderBudgetPhotoLayerStyleTests.distanceScrubInThreeBodies | – | waiting (PY-2) |
-| PY-4 | PY-u | 3 | journey written, skipped | UITests/PhotoJourneyTests+LayerStyle.swift | compiles, skipped | – | waiting (PY-2) |
-| PY-7 | PY-z | 4 | live canvas via `StyleRoute`; journey on | Sources/PhotoModel/PhotoRenderRoute.swift, UITests/PhotoJourneyTests+LayerStyle.swift | PhotoLayerStyleJourneyTests.testDropShadowAndStroke | – | waiting (PY-4..6, LS-gpu, IM-photo) |
-| PY-8 | PY-z | 5 | photo.md row; `status: built`; `feature-done` | docs/blueprints/photo.md, docs/blueprints/photo/features/layer-styles.wave.json | scripts/waves render --dry-run | – | waiting (PY-7, PY-3, TX-z) |
+| LS-1 | LS-a | 1 | The Style module as stubs, the C4 part, four suites written and disabled | Sources/SuiteImaging/Style/*.swift, Sources/SuiteImaging/Route/StyleRoute.swift, Tests/SuiteImagingTests/{LayerStyleRules,StyleCommands,LayerStyleSVG,StyleProgram}Tests.swift, docs/c4/parts/creative-apps/suite-imaging/imaging-style.json | the suites compile, disabled; ImagingBoundaryTests | – | building |
+| LS-2 | LS-a | 2 | Placeholder panel, rows, pasteboard; gallery layer-style page; journey skipped | Sources/SuiteUI/{LayerStylePanel,LayerStyleRows}.swift, Sources/SuiteUI/Gallery/GalleryLayerStyle.swift, Sources/SuiteUI/SuiteGallery.swift, UITests/SuiteJourneyTests+LayerStyle.swift | SJ0 lists layer-style | – | planned |
+| LS-10 | LS-clip | 1 | ClipRules with its tests; the C4 part | Sources/SuiteKernel/Layers/ClipRules.swift, Tests/SuiteKernelTests/ClipRulesTests.swift, Tests/mutations/SuiteKernel.ClipRules.json | ClipRulesTests | – | building |
+| LS-11 | LS-clip | 2 | ClipTarget, ClipCommands (layer.clip, layer.unclip) | Sources/SuiteKernel/Layers/ClipCommands.swift, Tests/SuiteKernelTests/ClipCommandsTests.swift | ClipCommandsTests | – | planned |
+| LS-3..LS-9b, LS-12, LS-13 | see packet | 3+ | per the packet's Tasks table | per packet | per packet | – | planned |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
 
 ## Decisions
-- 2026-10-22 run act-1a164697363-4fnm (line lead with psd-effects #4521 and masks-clipping #4517): still blocked on LS-a; masks-clipping PK-1 is unchained from PY-1 (only file ordering), so PY-1 will meet an `isClipped` line in PhotoLayer.swift and mask specs in the catalog.
-- Worked from `origin/dev`, not `main`: the brief named `main` (verified at 0dd23d65), but the packet exists only on dev (main is 365 commits behind) and CLAUDE.md says branch from and target dev.
-- No task starts: PY-1 needs SuiteImaging's `LayerStyle`, `LayerStyleTarget` and `StyleCommands`, none of which exist on dev (no SuiteImaging target yet). Rule 20 forbids a Photo copy, and LS-a is the suiteui line's work, so nothing is stubbed here.
+- 2026-10-23: base is origin/dev and PRs target dev (CLAUDE.md: never target main), as in earlier suiteui records.
+- 2026-10-23: unparked under contract-first waits (supervisor, #3937): IM-a #4028, BK-a #4057 merged; gradient-fill built.
+- 2026-10-23: this file replaces the photo line's record that sat at docs/leads/layer-styles/ (feature names collide); photo's record lives at docs/leads/photo-layer-styles/ on this branch and on lead/photo-layer-styles, which Belt reads for photo. Mirrored to lead/suiteui-layer-styles.
+- 2026-10-23: LS-a is two PRs (LS-1 ~380 lines, LS-2 ~220): together they pass the 400-line cap. LS-2 stacks on LS-1 and opens once LS-1 merges.
+- 2026-10-23: core LE-a (LayerStyleStack) isn't on the pin (7966e5a, bump #3825). LS-1 declares every type but leaves StyleProgram's two LayerStyleStack signatures out; LS-8 adds them once the LE bump lands. No core type is copied.
+
+## Wire
+- [ ] Wire: core layer-style-engine:LE-a (StyleProgram.stack and style(_ stack:) declared once the bump PR carries LayerStyleStack; LS-8)
+- [ ] Wire: brush-keys:BK-u (LS-2 builds on BK-a; SuiteGallery.swift's last owner; swap in when it merges)
+- [ ] Wire: gradient-fill:GF-m (LS-7 uses GradientSVG; built)
 
 ## Open
-- 2026-10-22T16:25Z re-read: #3937 open, `waiting-on-prereq` (IM-a, BK-u). SuiteImaging on dev 7e9f260 has Adjust and Route only, no `LayerStyle`. Nothing starts.
-- Blocked on suiteui layer-styles LS-a (#3937, still `waiting-on-prereq` at 03:13Z). LS-a waits on suite-imaging:IM-a (IM-1 #4028 still open: Linux green at 02:30Z, macOS job skipped, awaiting the supervisor macOS run and merge; IM-2 stacked), brush-keys:BK-u, gradient-fill:GF-a, and core types from LE-a. Bump #3825 (7966e5a) merged 2026-10-21 but carries only Flare core PRs. No `SuiteImaging` target or `LayerStyle` types on dev 66a8458.
-- Belt watches `lead/photo-layer-styles` (with `docs/leads/photo-layer-styles/`). This record is mirrored there; `lead/layer-styles` is the brief's original channel and stays in sync.
+- LS-gpu (LS-9) waits core LE-metal and suite-imaging IM-m; LS-8 waits core LE-cpu.
