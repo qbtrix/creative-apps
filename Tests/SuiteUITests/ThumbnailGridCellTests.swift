@@ -36,6 +36,18 @@ import Testing
     #expect(cells.last?.label.contains("Unreadable") == true)
 }
 
+/// A pick's mark reads "Picked", the menus' and the filter's word, never "Flagged" (#3688).
+@MainActor @Test func aPickedCellsMarkReadsPicked() {
+    let window = host(ThumbnailGrid(
+        [ThumbnailItem(id: "1", caption: "a.heic", badges: ThumbnailBadges(isFlagged: true))],
+        cellSize: CGSize(width: 120, height: 90), selection: [], onSelectionChange: { _ in },
+        cellIdentifierPrefix: "t.cell."), size: CGSize(width: 300, height: 200))
+    defer { window.orderOut(nil) }
+    let cell = axElements(in: window).first { $0.id == "t.cell.1" }
+    #expect(cell?.label.contains("Picked") == true)
+    #expect(cell?.label.contains("Flagged") == false)
+}
+
 /// Without a prefix no cell carries an id; the caption stays the tooltip.
 @MainActor @Test func cellsHaveNoIdWithoutAPrefix() {
     let window = host(ThumbnailGrid(
