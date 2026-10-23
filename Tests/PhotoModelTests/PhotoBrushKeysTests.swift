@@ -82,6 +82,17 @@ import Testing
         #expect(workspace.layers == before)
     }
 
+    @Test func twoDigitsInARowAreTwoSteps() throws {
+        var workspace = try fourLayers()
+        workspace.selectTool(.move)
+        let steps = workspace.historySteps.count
+        _ = try catalog.run("layer.set-opacity", params: .object(["percent": .number(50)]), on: &workspace)
+        _ = try catalog.run("layer.set-opacity", params: .object(["percent": .number(30)]), on: &workspace)
+        #expect(workspace.historySteps.count == steps + 2)
+        workspace.undo()
+        #expect(workspace.layers.first { $0.id == workspace.selectedLayerID }?.opacity == 0.5)
+    }
+
     @Test func layerOpacityNeedsAnImage() {
         #expect(PhotoWorkspace().layerOpacityHelp == PhotoWorkspace.noImage)
         #expect(catalog.availability("layer.set-opacity", on: PhotoWorkspace()).why == PhotoWorkspace.noImage)

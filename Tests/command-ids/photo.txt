@@ -88,3 +88,8 @@ view.zoom-in
 view.zoom-out
 history.jump
 history.read
+brush.hardness-down
+brush.hardness-up
+brush.set-opacity
+brush.size-down
+brush.size-up
