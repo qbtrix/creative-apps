@@ -92,3 +92,4 @@ utc	stage	event	ref	note
 2026-10-23T00:38:00Z	3	check	PH-u	#4438 macOS build 39875643496 still queued
 2026-10-23T00:59:58Z	3	question	PH-u	3rd identical poll: macOS build queued; asked supervisor on #3456
 2026-10-23T01:22:10Z	3	check	PH-u	supervisor gating #4438 on local Mac; head 1d9bbab4
+2026-10-23T01:43:45Z	3	check	PH-u	#4438 1d9bbab4 lane macOS build 39883924730

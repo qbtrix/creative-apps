@@ -4,7 +4,7 @@ Issue: #3456 · Packet: docs/blueprints/halo/features/placed-images.md
 Run: act-1a163ac7196-3crm (resumed; was act-1a15a9f4eda-rqhh) · Session: cloud · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: PH-a DONE. PH-m DONE. PH-u: #4438 now head 1d9bbab4 (pushed by supervisor's gate), supervisor sent it through local Mac gate (answer 01:03Z); don't push to it. When merged: retarget #4649 (30471d52) to dev + fast-lane (fixer merges dev if needed), then #4658 (bc63740a) with fast-lane+feature-done. Gap candidates: SVG gradient flat, SVG strokes, no overshoot ease preset.
+Next: PH-a DONE. PH-m DONE. PH-u: #4438 head 1d9bbab4 in supervisor's local Mac gate; lane macOS build 39883924730 dispatched 01:25Z; don't push. When merged: retarget #4649 (30471d52) to dev + fast-lane (fixer merges dev if needed), then #4658 (bc63740a) with fast-lane+feature-done. Gap candidates: SVG gradient flat, SVG strokes, no overshoot ease preset.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
