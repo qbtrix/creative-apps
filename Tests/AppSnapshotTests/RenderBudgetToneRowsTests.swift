@@ -1,11 +1,6 @@
-// RenderBudgetToneRowsTests.swift (tone-controls TC-4, quality rows "render: slider drag" and "render: Auto click"):
-// what dragging a tone slider and clicking Auto cost in a real 1280 x 820 window. The window hosts ToneRows the way
-// the gallery's `tone-rows` page does, its settings in a child page that applies each intent
-// (GalleryToneRows.applied) and logs it, and counts the window's own bodies: 120 increments of
-// `suite.tone.temperature` (the way VoiceOver and XCUI adjust it) send 120 `tone.set` intents and run at most 3
-// window bodies; one Auto click sends one `tone.auto` and runs at most 2 (target 0 for both: only the page and the
-// rows redraw). The p95 (packet: ≤ 8 ms) is printed, not gated: a step-time budget belongs in a
-// Tests/perf-suites.txt test. Nested in BodyCountSuites: it reads a global body counter. macOS only.
+// RenderBudgetToneRowsTests.swift (tone-controls TC-4): ToneRows in a real window, hosted like the gallery page.
+// 120 Temperature steps send 120 `tone.set` in at most 3 window bodies; one Auto click one `tone.auto` in at most 2
+// (target 0: only the page redraws). The p95 (packet: ≤ 8 ms) is printed, not gated. macOS only.
 #if canImport(AppKit)
 import AppKit
 import SuiteImaging
@@ -56,7 +51,7 @@ extension BodyCountSuites {
     }
 }
 
-/// The counted window: a header over the page, which owns the settings.
+/// The counted window around the page, which owns the settings.
 private struct ToneRowsBudgetWindow: View {
     #if DEBUG
     // view-static: main-actor
@@ -67,12 +62,9 @@ private struct ToneRowsBudgetWindow: View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
         #endif
-        VStack(alignment: .leading, spacing: SuiteSpacing.s) {
-            Text("Tone").font(SuiteFont.sectionCaps).foregroundStyle(SuiteColor.secondaryText)
-            ToneRowsBudgetPage()
-        }
-        .padding(SuiteSpacing.m)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        ToneRowsBudgetPage()
+            .padding(SuiteSpacing.m)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 
@@ -83,17 +75,16 @@ private struct ToneRowsBudgetPage: View {
     // view-static: main-actor
     static var autos = 0
     @State private var settings = ToneSettings.neutral
-    @State private var log: [String] = []
+    @State private var last = "Nothing yet"
 
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             ToneRows(settings: settings, help: nil) { intent in
-                if case .set = intent { Self.sets += 1 }
-                if case .auto = intent { Self.autos += 1 }
+                if case .set = intent { Self.sets += 1 } else if case .auto = intent { Self.autos += 1 }
                 settings = GalleryToneRows.applied(intent, to: settings)
-                log.append(GalleryToneRows.line(intent))
+                last = GalleryToneRows.line(intent)
             }
-            Text(log.last ?? "Nothing yet").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText)
+            Text(last).font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText)
         }
         .frame(width: SuiteSize.inspectorWidth.ideal)
         .background(SuiteColor.panel)

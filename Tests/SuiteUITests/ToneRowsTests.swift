@@ -1,8 +1,5 @@
-// ToneRowsTests.swift: SuiteUI's ToneRows (tone-controls TC-3) through ToneRowsRules, the decisions its rows make.
-// A drag asks for `.set`s under one drag token, and the next drag for a new one; a typed value asks for one `.set`;
-// Auto asks for `.auto`; a section's Reset asks for `.reset(group)` and shows only off neutral; Vibrance is disabled
-// with ToneRules.waiting's reason; Radius and Threshold are off at Amount 0 with "Sharpen is off at Amount 0."; `help`
-// and no settings disable every control. No rendering. macOS only.
+// ToneRowsTests.swift: ToneRows (tone-controls TC-3) through ToneRowsRules, the decisions its rows make: drag tokens,
+// typed values, Auto, section Resets, and why a row is off. No rendering. macOS only.
 import SuiteImaging
 import Testing
 
@@ -47,14 +44,6 @@ private func tokens(_ intents: [ToneIntent]) -> Set<String> {
     #expect(rules().set(.shadows, to: .nan, drag: nil) == nil)
 }
 
-@Test func autoAsksForAuto() {
-    #expect(rules().auto == .auto)
-    #expect(rules().autoReason == nil)
-    #expect(rules(nil).auto == nil)
-    #expect(rules(nil).autoReason == ToneRowsRules.nothing)
-    #expect(rules(help: "Open a picture.").auto == nil)
-}
-
 @Test func aSectionResetShowsOnlyOffNeutral() {
     #expect(ToneGroup.allCases.allSatisfy { rules().reset($0) == nil })
     let edited = ToneSettings.neutral.setting(.shadows, to: 35)
@@ -81,7 +70,9 @@ private func tokens(_ intents: [ToneIntent]) -> Set<String> {
     #expect(rules().reason(.sharpenAmount) == nil)
 }
 
-@Test func helpAndNoSettingsDisableEveryRow() {
+@Test func autoAndHelpAndNoSettings() {
+    #expect(rules().auto == .auto && rules().autoReason == nil)
+    #expect(rules(nil).auto == nil && rules(help: "Busy.").auto == nil)
     #expect(ToneSlider.allCases.allSatisfy { rules(help: "Busy.").reason($0) == "Busy." })
     #expect(ToneSlider.allCases.allSatisfy { rules(nil).reason($0) == ToneRowsRules.nothing })
     #expect(rules(nil).notes(.presence).isEmpty) // the one reason shows once, above the sections

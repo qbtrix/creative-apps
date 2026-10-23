@@ -1,18 +1,13 @@
 // ToneRows.swift: SuiteUI's one set of tone and sharpen rows (packet
-// docs/blueprints/suiteui/features/tone-controls.md, TC-3). It takes one
-// picture's ToneSettings in and reports every change out through `onIntent`
-// as a ToneIntent, which the app runs as a tone command; it never edits a
-// document or reads a Model. Each group is an InspectorSection (WHITE
-// BALANCE, TONE with Auto, PRESENCE, SHARPEN) whose Reset shows only while
-// the group is off neutral; each slider an InspectorSliderRow identified
-// `suite.tone.<slider>`, Auto an InspectorAction `suite.tone.auto`. A drag
-// sends one `.set` per sample under one drag token until it ends, so the
-// host folds it into one undo step. A row that can't act is disabled with
-// its reason as help: `help` (or "No picture to adjust.") for every control,
-// shown once above the sections; ToneRules.waiting's reason for Vibrance;
-// "Sharpen is off at Amount 0." for Radius and Threshold; the last two show
-// once as a note under their section. The decisions live in ToneRowsRules,
-// which ToneRowsTests drive; the view only lays the rows out.
+// docs/blueprints/suiteui/features/tone-controls.md). It takes one picture's
+// ToneSettings in and reports every change out through `onIntent` as a
+// ToneIntent, which the app runs as a tone command; it never edits a document
+// or reads a Model. TC-3: an InspectorSection per group, its Reset only off
+// neutral; an InspectorSliderRow per slider (`suite.tone.<slider>`) whose drag
+// sends one `.set` per sample under one drag token; Auto (`suite.tone.auto`).
+// A row that can't act is disabled with its reason as help (ToneRowsRules,
+// which ToneRowsTests drive; the shared reason shows once above, the others
+// once under their section).
 import Foundation
 import SuiteImaging
 import SwiftUI

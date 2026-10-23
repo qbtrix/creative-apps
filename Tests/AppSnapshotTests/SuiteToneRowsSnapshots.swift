@@ -1,10 +1,5 @@
-// SuiteToneRowsSnapshots.swift (tone-controls TC-4): ToneRows (TC-3) at the ideal inspector width on the panel
-// colour, as an app's inspector hosts it, in Light and Dark. Writes suiteui-tone-rows-{light,dark}.png (every slider
-// neutral: four sections, no Reset, Vibrance and Sharpen's Radius and Threshold off with their notes),
-// suiteui-tone-rows-edited-{light,dark}.png (White Balance, Tone and Sharpen set: their Resets show, Radius and
-// Threshold on), suiteui-tone-rows-vibrance-waiting-{light,dark}.png (PRESENCE alone: Vibrance off with
-// ToneRules.waiting's reason under it) and suiteui-tone-rows-sharpen-off-{light,dark}.png (SHARPEN alone at Amount 0:
-// Radius and Threshold off, "Sharpen is off at Amount 0." under them). macOS only.
+// SuiteToneRowsSnapshots.swift (tone-controls TC-4): ToneRows in an inspector, Light and Dark: suiteui-tone-rows
+// (neutral), -edited (three Resets show), -vibrance-waiting (PRESENCE alone) and -sharpen-off (SHARPEN at Amount 0).
 import SuiteImaging
 import SwiftUI
 import Testing
