@@ -4,3 +4,4 @@
 - 2026-10-23T18:18:14Z: ST-m is draft #4951 (stacked on #4840). The disk tier is not wired into Library live services yet.
 - [ ] Wire: Library live services build LiveThumbnails with the disk store (folder + budget); then un-pend RealJobs relaunch-grid. Do this in ST-z or a follow-up before close.
 - 2026-10-23T18:39:54Z: heartbeat, no change.
+- 2026-10-23T19:02:43Z: SC-2 is on dev and #4840 conflicted with it on the SuiteShell dependencies. Merged dev into ST-a, keeping both products. Gate running; then push, re-gate, and tick the SC-a Wire line.
