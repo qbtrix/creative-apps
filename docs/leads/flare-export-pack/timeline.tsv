@@ -95,3 +95,4 @@ utc	stage	event	ref	note
 2026-10-23T18:30Z	5	wait	-	lane still bisecting batch 20261023174522 (probes -3, -6); dev at 98589662; #4843/#4852/#4854 clean, no needs-fix
 2026-10-23T18:52Z	5	wait	-	lane bisecting batch 20261023174522 down to probes -0/-1 (dev itself checked); dev at 0d4645bf; #4843/#4852/#4854 clean, no needs-fix
 2026-10-23T19:14Z	5	wait	-	lane batch 20261023174522: probe -3 red, probe -1 macOS gate running; no dev-red; #4843/#4852/#4854 clean, no needs-fix
+2026-10-23T19:36Z	5	wait	-	old batch resolved; new batch 20261023192105 (#4818..#4842, 12 PRs) running, #4843 is next in line; #4843/#4852/#4854 clean, no needs-fix
