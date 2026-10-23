@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-23T07:49Z	critic	FP-a/FP-u screens reviewed (first-use, mouse, taste, design, job): findings #4777 own-face rows, #4778 12.00 pt, #4779 coarse size scrub	FP-u	fix round 1 next wave
 2026-10-23T08:01Z	fix-round	FP-u round 1: #4781 size row whole points + 1...200 track (fixes #4778 #4779), #4783 own-face snapshot on installed families (fixes #4777)	FP-u	both fast-lane, scripts/ci --changed PASS
 2026-10-23T08:01Z	merge	#4759 merged as 8fd75123 (feature-done); build 39909689835 success	FP-z	awaiting full dev run
+2026-10-23T08:07Z	ci	full CI 39921950077 queued on 8fd75123 (and Linux check 39921983128)	FP-z	waiting on Linux job, not blocking
