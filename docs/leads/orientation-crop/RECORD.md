@@ -1,17 +1,17 @@
 # orientation-crop lead record
 
-Issue: #4528 (was #3756) · Packet: docs/blueprints/suiteui/features/orientation-crop.md
-Run: act-1a164855f49-5pe1 · Session: cloud line lead (line:suiteui, with #4531) · Started: 2026-10-22T16:52Z
+Issue: #3756 · Packet: docs/blueprints/suiteui/features/orientation-crop.md
+Run: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui: tone-controls, shared-codecs, orientation-crop) · Started: 2026-10-23T14:51Z
 Stage: 3 wave 3
-Base: 3578eaee20f317d368feda7ba35e4911285eebc5
-Next: #4582 (OC-u, 395 lines, mutate 2/2) in the fast lane; on merge post Belt-Slice-Done on a green dev Linux run, Mac-Finish-Wanted, then critic panel on a scoped suiteui run. Other slices blocked on IM-z, CB-library, DS-photo, AR-photo-u, CB-z.
+Base: origin/dev 8021b0f56a45a59540cd4ea0ff99651c5fb8dc2a
+Next: #4582 (OC-u) fix: the lane macOS build 39823958943 failed on two-variable @State lines in CropAspectPicker.swift and GalleryCrop.swift; fix 8005f4a3, gate rerunning, then move the Head line. Other slices blocked (rechecking waits).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | OC-a | contract: Orientation, CropAspect, CropRules stubs, CropCommands, C4 part; disabled tests | OC-1, OC-2 | – | – | false | 0 | done (#4082 → f080846e; Linux 39620526621; Belt-Slice-Done posted) | – | – |
 | OC-m | Orientation and CropRules bodies; two mutation plans | OC-3, OC-4 | – | OC-a | false | 0 | done (#4088 → b48e63e3; Linux 39637279724; Belt-Slice-Done posted) | – | – |
-| OC-u | CropAspectPicker, gallery, journey, render budget | OC-5, OC-6 | SJ-OC | OC-a; document-setup:DS-u (merged #4309) | true | 0 | in lane (#4582 13f82d3e) | – | – |
+| OC-u | CropAspectPicker, gallery, journey, render budget | OC-5, OC-6 | SJ-OC | OC-a; document-setup:DS-u (merged #4309) | true | 0 | needs-fix (#4582: macOS compile; fix 8005f4a3) | – | – |
 | OC-library-m | Library adopts orientation | OC-7, OC-8 | – | OC-m, suite-imaging:IM-z, clipboard-interop:CB-library (not started) (OC-8) | false | 0 | blocked | – | – |
 | OC-library-u | Library crop UI | OC-9, OC-10 | – | OC-u, OC-library-m | true | 0 | blocked | – | – |
 | OC-photo-m | Photo adopts orientation and crop | OC-11, OC-12 | – | OC-m, document-setup:DS-photo (not started) (OC-12) | false | 0 | blocked | – | – |
@@ -42,3 +42,4 @@ Next: #4582 (OC-u, 395 lines, mutate 2/2) in the fast lane; on merge post Belt-S
 
 ## Open
 - OC-library-m: suite-imaging:IM-z, clipboard-interop:CB-library. OC-photo-m: DS-photo. OC-photo-u: AR-photo-u. OC-z: CB-z.
+- 2026-10-23T14:51:14Z: run act-1a1693a3ff0-mwrd takes over (issue #3756). Base and PR target stay dev (CLAUDE.md, the lane), not main as the brief says. #4582 macOS error: "property wrapper can only apply to a single variable" (2 files), fixed by one @State per line. scripts/ci fails on dev itself at the journey quarantine stage (6 Halo/Photo entries expired 2026-10-23, supervisor-owned): the gate is verified past it with an uncommitted renewal.
