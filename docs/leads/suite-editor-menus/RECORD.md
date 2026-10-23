@@ -9,7 +9,7 @@ Next: wave 1 builders open the contract slice PR(s)
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| EM-a | .suiteEditor + ReopenRule + delegate reopen | EM-1, EM-2 | XJ-EM | report-problem:RP-a (met) | yes | 0 | open #4710 | - | - |
+| EM-a | .suiteEditor + ReopenRule + delegate reopen | EM-1, EM-2 | XJ-EM | report-problem:RP-a (met) | yes | 0 | merged #4710 | - | - |
 | EM-photo-design | Photo and Design adopt .suiteEditor (#3648) | EM-3, EM-4 | PJ-EM, DJ-EM | EM-a; file-flow adopts (on dev) | yes | 0 | building | - | - |
 | EM-flare-halo | Flare and Halo adopt .suiteEditor (#1018, #1081) | EM-5, EM-6 | FJ-EM, HJ-EM | EM-a; file-flow adopts (on dev) | yes | 0 | building | - | - |
 | EM-library | Library adopts; RJ-X63; built | EM-7, EM-8, EM-9, EM-10 | LJ-EM + all | EM-a, every app slice | yes | 0 | waiting | - | - |
@@ -17,8 +17,8 @@ Next: wave 1 builders open the contract slice PR(s)
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| EM-1 | EM-a | 1 | SuiteEditorScene, ReopenRule stub, reopen tests, C4 part | packet EM-1 (4 files) | compiles | - | open #4710 |
-| EM-2 | EM-a | 1 | delegate applicationShouldHandleReopen + openWindow; ReopenRule body; tests on | packet EM-2 (4 files) | SuiteEditorReopenTests; Mutate SuiteModel.ReopenRule | - | open #4710 |
+| EM-1 | EM-a | 1 | SuiteEditorScene, ReopenRule stub, reopen tests, C4 part | packet EM-1 (4 files) | compiles | - | merged #4710 |
+| EM-2 | EM-a | 1 | delegate applicationShouldHandleReopen + openWindow; ReopenRule body; tests on | packet EM-2 (4 files) | SuiteEditorReopenTests; Mutate SuiteModel.ReopenRule | - | merged #4710 |
 | EM-3 | EM-photo-design | 2 | Photo adopts | PhotoApp.swift, journey | PJ-EM | - | building |
 | EM-4 | EM-photo-design | 2 | Design adopts | DesignApp.swift, journey | DJ-EM | - | building |
 | EM-5 | EM-flare-halo | 2 | Flare adopts | FlareApp.swift, journey | FJ-EM | - | building |
