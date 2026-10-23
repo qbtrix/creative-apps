@@ -45,3 +45,9 @@ time	task	event	note
 04:22Z	heartbeat	heartbeat: no open findings; DP-m has no PRs; IM-a #4028 open
 04:46Z	heartbeat	heartbeat: no open findings; DP-m has no PRs; IM-a #4028 open
 05:14Z	heartbeat	heartbeat: no open findings; DP-m has no PRs; IM-a #4028 open
+2026-10-23T17:31Z	3	heartbeat	-	resume after Belt nudge; wave 1 PRs recorded (run act-1a1693a4009-hyio)
+2026-10-23T17:31Z	3	pr-opened	#4842	wave 1
+2026-10-23T17:31Z	3	pr-opened	#4876	wave 1
+2026-10-23T17:31Z	3	pr-opened	#4877	wave 1
+2026-10-23T17:31Z	3	pr-opened	#4860	wave 1
+2026-10-23T17:31Z	3	pr-opened	#4861	wave 1
