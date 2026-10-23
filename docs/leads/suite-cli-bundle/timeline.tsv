@@ -14,3 +14,5 @@ utc	stage	event	ref	note
 2026-10-23T04:50Z	-	pr	CB-u	opened #4743
 2026-10-23T04:52Z	-	heartbeat	CB-m	#4715 merged; #4740/#4741/#4743 gates on dev-merged heads running; suite-packaging C4 gate running
 2026-10-23T05:04Z	-	pr	C4	opened #4755 suite-packaging description
+2026-10-23T05:14Z	-	retarget	CB-m	#4740 dev merged, CI: PASS, base dev, head 84c323cff
+2026-10-23T05:14Z	-	heartbeat	CB-u	CB-u gate on dev-merged head running; then CB-m-bundle
