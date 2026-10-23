@@ -60,4 +60,32 @@ private func svg() -> String { DesignSVG.document([framed], box: rc(0, 0, 400, 4
         let plain = DesignNode(id: "node-1", name: "Frame", kind: .frame, frame: rc(0, 0, 400, 400))
         #expect(!DesignSVG.document([plain], box: rc(0, 0, 400, 400), clip: false).contains("<image"))
     }
+
+    @Test func aRectanglesOpacityIsWrittenOnce() {
+        let rect = DesignNode(id: "node-2", name: "Photo", kind: .rectangle, frame: rc(0, 0, 400, 400), opacity: 0.5, placedAsset: picture)
+        let text = DesignSVG.document([rect], box: rc(0, 0, 400, 400), clip: false)
+        #expect(text.components(separatedBy: "opacity=").count == 2)
+        #expect(text.contains("<g opacity=\"0.5\">"))
+    }
+
+    @Test(arguments: [DesignNodeKind.frame, .rectangle])
+    func theStrokeIsWrittenAfterThePictureAtFullWidth(_ kind: DesignNodeKind) {
+        let stroked = DesignNode(id: "node-1", name: "Photo", kind: kind, frame: rc(0, 0, 400, 400),
+                                 stroke: DesignStroke(color: .black, width: 8), placedAsset: picture)
+        let lines = DesignSVG.document([stroked], box: rc(0, 0, 400, 400), clip: false).split(separator: "\n")
+        let image = lines.firstIndex { $0.contains("<image") } ?? lines.endIndex
+        let strokes = lines.indices.filter { lines[$0].contains("stroke=") }
+        #expect(strokes.count == 1 && strokes.allSatisfy { $0 > image })
+        // Outside every clip: the line before it closes the picture's group, not a clip still open.
+        #expect(strokes.allSatisfy { $0 > image && lines[$0].contains("fill=\"none\"") && !lines[$0].contains("clip-path") && lines[$0 - 1] == lines[image] })
+    }
+
+    @Test func aJPEGsAndAnSVGsHrefsNameTheirMediaTypes() {
+        let jpeg = PlacedAsset(id: "a", name: "p.jpg", format: .jpeg, natural: Size(width: 2, height: 2), data: Data([1]))
+        let vector = PlacedAsset(id: "b", name: "l.svg", format: .svg, natural: Size(width: 2, height: 2), data: Data([2]))
+        let nodes = [jpeg, vector].map { DesignNode(id: $0.id, name: $0.name, kind: .rectangle, frame: rc(0, 0, 2, 2), placedAsset: $0) }
+        let text = DesignSVG.document(nodes, box: rc(0, 0, 2, 2), clip: false)
+        #expect(text.contains("href=\"data:image/jpeg;base64,AQ==\""))
+        #expect(text.contains("href=\"data:image/svg+xml;base64,Ag==\""))
+    }
 }
