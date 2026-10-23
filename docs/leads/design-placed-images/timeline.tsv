@@ -75,3 +75,4 @@ utc	stage	event	ref	note
 2026-10-23T20:59Z	PD-u	critic-round-2	#4963 #4964	12 of 16 fixes hold, 4 partial; new findings #4992 #4993 #4994 go to fix round 2 (new PR stacked on #4964); gaps #4996 (#4971 UI) #4997 (#4975 kernel wording) #4998 (#4973 ring); #4970 and #4972 continue in needs-ui #4985
 2026-10-23T21:20Z	PD-u	heartbeat	#4963 #4964	fix round 2 builder running (new PR stacked on #4964); no slice PR merged; PD-z held (findings above 5)
 2026-10-23T21:40Z	PD-u	fix-round-2	#5001	head 3ecf2a5e, 7 files, 113 lines; CI: PASS; Canvas 14/14, Inspector 11/11; fixes #4992 #4993 #4994; stacked on #4964; PD-u done with fix rounds
+2026-10-23T21:57Z	PD-a	heartbeat	#3759	body footer stripped; PD-z held (findings >5)
