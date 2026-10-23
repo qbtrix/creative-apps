@@ -4,7 +4,7 @@ Issue: #3730 (earlier run used duplicate #4507) · Packet: docs/blueprints/suite
 Run: act-1a166b69fbd-mmos · Session: claude/font-picker-lead-5om1cy · Started: 2026-10-22T16:36Z (this run resumed 2026-10-23T03:10Z)
 Stage: 4 slices done FP-a FP-u; FP-z in lane
 Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a (origin/dev)
-Next: #4759 (FP-z) build 39909689835 → lane merge → full dev run → Belt-Slice-Done FP-z; FP-u fix round 1: #4781 (fixes #4778 #4779) and #4783 (fixes #4777) in lane; after they merge, scoped suiteui run → re-review FP-u screens; then Belt-Contact-Sheet
+Next: full CI run on dev containing 8fd75123 (#4759, feature-done) → Belt-Slice-Done FP-z; FP-u fix round 1 #4781 #4783 in lane → scoped suiteui → re-review FP-u; then Belt-Contact-Sheet
 
 ## Slices
 
