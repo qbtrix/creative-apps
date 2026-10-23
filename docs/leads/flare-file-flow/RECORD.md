@@ -121,3 +121,5 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-23T02:40:23Z #4690 merged into dev as 6acdb2011 (macOS build 39888365589 green); #4636 closed. Waiting on a Flare journeys run at or after 6acdb2011 (queued flare run 39888722995 is at older e85455060). Note: this session's GitHub proxy appends an attribution footer to PR bodies and comments; a PATCH re-adds it, so it cannot be removed from here.
 
 - 2026-10-23T03:11:45Z check: no journeys run on dev includes 6acdb2011 yet (newest: full 39891052821 at 02c38d3b, suiteui 39893216444 at cb9306a0, both older; the macOS queue holds 8 runs). No new #3482 comments, no open file-flow findings.
+
+- 2026-10-23T03:43:25Z check: still no journeys run on dev includes 6acdb2011 (all 10 newest are behind it). No new #3482 comments, no open file-flow findings.
