@@ -62,7 +62,12 @@
 # gate) on the batch head, unless the other one is red there: a red outranks a
 # green on the same head. When both are green every PR lands in order
 # (squash, head matched). A lone ready PR without code lands at once, as does
-# any lone PR with LANE_MAC_PER_PR=1; a lone code PR is a batch of one. A batch
+# any lone PR with LANE_MAC_PER_PR=1; a lone code PR is a batch of one. No
+# proof is trusted once it is stale (proof_stale, lesson 244): dev changed a
+# ratchet, lint or baseline path (RATCHET_RE) since the proof's base, or the
+# PR changes one and dev moved at all. A lone PR with a stale proof is checked
+# as a batch of one on today's dev, and a batch whose base went stale that way
+# is dropped before it lands and forms again on today's dev. A batch
 # that needs macOS forms when a slot frees (a batch resolved in this run),
 # when LANE_BATCH_MAX PRs are ready, or once the oldest ready head is
 # LANE_BATCH_WAIT_MIN minutes old, and never while the lane's own queued and
@@ -200,6 +205,11 @@ AUDIT_DIRS='(Tests/PhotoModelTests/AppAudit|Tests/AppAuditTests)'
 AUDIT_RE="^(UITests/audit-baseline\\.json\$|$AUDIT_DIRS/)"
 AUDIT_REGISTRY_RE="^$AUDIT_DIRS/AuditCore\\.swift\$"
 AUDIT_REASON="loosens the app audit: needs the captain's review"
+# What a Linux proof is judged against besides the code (proof_stale): the
+# gate scripts and ci.yml, every ratchet baseline (Tests/*-baseline*, the
+# command-path baselines), the ratchet tests themselves, the canonical concept
+# lists and the app audit. Matched ignoring case.
+RATCHET_RE="(^scripts/|^\\.github/workflows/ci\\.yml\$|baseline|ratchet|commandpath|placeholdermenu|^tests/canonical-|${AUDIT_RE})"
 # Canonical first (docs/factory/lead.md rule 20): a PR that adds a Swift file
 # under Sources/<X>Model or Sources/<X>App named for a canonical concept
 # (Tests/canonical-concepts.txt) needs an `Allow-Dup: <concept> <reason>` body
@@ -849,6 +859,23 @@ scratch() {
   git -C "$SCRATCH" fetch -q --filter=blob:none origin "$@" 2>/dev/null || git -C "$SCRATCH" fetch -q origin "$@" 2>/dev/null
 }
 
+# proof_stale <base> <tip>: why a Linux proof of <tip>, run on top of <base>,
+# no longer holds on origin/BASE_BRANCH in the scratch clone (lesson 244);
+# nothing when it still does. Stale: dev changed a RATCHET_RE path since
+# <base>, or <base>..<tip> changes one and dev moved at all. A comparison that
+# fails counts as stale. Trees only (--no-renames), so blob:none is enough.
+proof_stale() {
+  local mine dev hit
+  if [[ -z "$1" ]] || ! mine=$(git -C "$SCRATCH" diff --name-only --no-renames "$1" "$2" 2>/dev/null) \
+      || ! dev=$(git -C "$SCRATCH" diff --name-only --no-renames "$1" "origin/$BASE_BRANCH" 2>/dev/null); then
+    echo "could not compare it with $BASE_BRANCH"; return
+  fi
+  hit=$(grep -iE -- "$RATCHET_RE" <<<"$dev" | paste -sd, - | sed 's/,/, /g' || true)
+  if [[ -n "$hit" ]]; then echo "$BASE_BRANCH changed $hit since"; return; fi
+  hit=$(grep -iE -- "$RATCHET_RE" <<<"$mine" | paste -sd, - | sed 's/,/, /g' || true)
+  if [[ -n "$hit" && -n "$dev" ]]; then echo "it changes $hit and $BASE_BRANCH moved since"; fi
+}
+
 # batch_branches: every batch branch at REMOTE, `<sha> <name>` per line.
 batch_branches() {
   git ls-remote --heads "$REMOTE" "refs/heads/${BATCH_PREFIX}*" 2>/dev/null | sed 's:[[:space:]]*refs/heads/: :' | sort -k2 || true
@@ -1026,12 +1053,13 @@ mac_slots_busy() {
 # settle_ready: what the pass found eligible (READY:
 # rank|n|head|branch|apps|since|proof), ordered p0, beta, the rest, then
 # oldest. While a batch is in flight they all wait. A lone PR that needs no
-# macOS lands as before; anything else becomes a batch, at once when none of
+# macOS goes to batch_start, which lands it on its own proof unless that is
+# stale (proof_stale); anything else becomes a batch, at once when none of
 # it needs macOS, otherwise when a macOS slot is free and one of: a batch
 # resolved in this run, LANE_BATCH_MAX are ready, or the oldest has been
 # ready LANE_BATCH_WAIT_MIN minutes.
 settle_ready() {
-  local items=() it apps need=0 n head proof busy oldest now
+  local items=() it apps need=0 busy oldest now
   while IFS= read -r it; do [[ -z "$it" ]] || items+=("$it"); done \
     < <(printf '%s\n' ${READY[@]+"${READY[@]}"} | sort -t'|' -k1,1n -k2,2n)
   READY=()
@@ -1039,11 +1067,6 @@ settle_ready() {
   if (( HOLD )); then log "a batch is in flight: ${#items[@]} ready PR(s) wait for the next sweep"; return 0; fi
   if (( ! LANE_MAC_PER_PR )); then
     for it in "${items[@]}"; do IFS='|' read -r _ _ _ _ apps _ <<<"$it"; [[ -z "$apps" ]] || need=1; done
-  fi
-  if (( ${#items[@]} == 1 && ! need )); then
-    IFS='|' read -r _ n head _ _ _ proof <<<"${items[0]}"
-    land "$n" "$head" "$proof" || true
-    return 0
   fi
   if (( need )); then
     busy=$(mac_slots_busy)
@@ -1064,9 +1087,10 @@ settle_ready() {
 # batch_resume on it (which starts its checks). A PR whose branch can't be
 # fetched or moved past its head, or that conflicts with an earlier PR in the
 # batch, waits for the next sweep. If only one PR joins and it needs no macOS
-# gate, it lands as before.
+# gate, it lands on its own proof, unless that is stale (proof_stale against
+# its merge base): then it is a batch of one, checked on today's dev.
 batch_start() {
-  local items=("$@") it n head branch apps proof merged=() d id br
+  local items=("$@") it n head branch apps proof merged=() d id br stale
   if (( DRY_RUN )); then
     log "dry-run, would batch ${#items[@]} PRs: $(for it in "${items[@]}"; do IFS='|' read -r _ n _ <<<"$it"; printf '#%s ' "$n"; done)"; return 0
   fi
@@ -1091,9 +1115,13 @@ batch_start() {
   (( ${#merged[@]} )) || { log "batch: no PR could join; no batch"; return 0; }
   IFS='|' read -r _ n head _ apps _ proof <<<"${merged[0]}"
   if (( ${#merged[@]} == 1 )) && { (( LANE_MAC_PER_PR )) || [[ -z "$apps" ]]; }; then
-    log "batch: only #$n could join and it needs no macOS gate; no batch"
-    land "$n" "$head" "$proof" || true
-    return 0
+    stale=$(proof_stale "$(git -C "$d" merge-base "$head" "origin/$BASE_BRANCH" 2>/dev/null || true)" "$head")
+    if [[ -z "$stale" ]]; then
+      log "batch: only #$n could join and it needs no macOS gate; no batch"
+      land "$n" "$head" "$proof" || true
+      return 0
+    fi
+    log "batch: #$n's own proof is stale ($stale); checking it on $BASE_BRANCH as a batch of one"
   fi
   id=$(date -u +%Y%m%d%H%M%S); br="${BATCH_PREFIX}$id"
   if ! git -C "$d" push -q origin "HEAD:refs/heads/$br" 2>/dev/null; then log "batch: could not push $br; the ready PRs wait"; return 0; fi
@@ -1226,10 +1254,17 @@ batch_probe() {
 
 # batch_land <branch> <upto> <proof> <chain...>: lands PRs 1..upto in order,
 # stopping at the first that won't (its head moved: the rest were proven on
-# top of it and wait), then drops the branch.
+# top of it and wait), then drops the branch. A check gone stale since the
+# batch formed (proof_stale on a fresh BASE_BRANCH) lands nothing: the branch
+# is dropped and its PRs batch again on today's dev.
 batch_land() {
   local br="$1" upto="$2" proof="$3"; shift 3
-  local chain=("$@") i n head
+  local chain=("$@") i n head stale="could not fetch $BASE_BRANCH"
+  scratch "$BASE_BRANCH" && stale=$(proof_stale "${chain[0]%%|*}" "${chain[upto]%%|*}")
+  if [[ -n "$stale" ]]; then
+    log "batch $br: its check is stale ($stale); dropping it, its PRs batch again on $BASE_BRANCH"
+    batch_drop "$br"; return
+  fi
   for (( i = 1; i <= upto; i++ )); do
     IFS='|' read -r _ n head <<<"${chain[i]}"
     if ! land "$n" "$head" "$proof"; then log "batch $br: #$n did not land; the PRs after it wait for the next batch"; break; fi
