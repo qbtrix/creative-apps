@@ -1,7 +1,7 @@
 // FlareImportNoteAdapter.swift: the note above the stage after a Lottie open (feature lottie-open LO-4,
 // docs/blueprints/flare/features/lottie-open.md), an adapter onto SuiteUI's InspectorNote. One InspectorNote row per part the reader left out, in export's
 // ExportScan row shape (rule 20; FlareExportOptionRows' warnings), or "Nothing was skipped." for none, beside a
-// system Dismiss button. It only reads `rows` (`model.importNoteRows`); Dismiss calls `onDismiss`, the window's
+// system Close button (a dismiss-only control, the command path's CS-2). It only reads `rows` (`model.importNoteRows`); Close calls `onDismiss`, the window's
 // `model.dismissImportNote()`. With no rows it draws nothing. Journeys read `flare.import.note` and press
 // `flare.import.dismiss`.
 import SuiteUI
@@ -22,7 +22,7 @@ struct FlareImportNoteAdapter: View {
                     }
                     .accessibilityElement(children: .contain)
                     .accessibilityIdentifier(Self.identifier)
-                    Button("Dismiss") { onDismiss() }
+                    Button("Close") { onDismiss() }
                         .accessibilityIdentifier(Self.dismissIdentifier)
                 }
                 .padding(.vertical, SuiteSpacing.xs)
