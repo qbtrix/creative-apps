@@ -2,9 +2,9 @@
 
 Issue: #3757 (relaunch) · Packet: docs/blueprints/suiteui/features/document-setup.md
 Run: act-1a16958d72f-a4mg · Session: cloud line lead (line:suiteui; with text-style, brush-keys, document-setup) · Started: 2026-10-23T15:25Z
-Stage: 3 wave 1 (combined waves across the three features)
+Stage: 3 wave 2 (combined waves across the three features)
 Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (dev)
-Next: wave 1 building DS-photo, DS-design, DS-halo, DS-flare (wf_074719dc-c43); then DS-z
+Next: wave 1 PRs open (DS-photo #4901, DS-design #4887, DS-halo #4918, DS-flare #4891); then DS-z after all four merge
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,10 +12,10 @@ Next: wave 1 building DS-photo, DS-design, DS-halo, DS-flare (wf_074719dc-c43); 
 | DS-a | contract stubs + disabled DocumentSetupTests + C4 part | DS-1, DS-2 | – | frame-rates:FR-a (merged) | false | 0 | done #4182 | 39724795297 | – |
 | DS-m | DocumentSetup + commands bodies, mutation plans | DS-3, DS-4 | – | DS-a | false | 0 | done #4184 | – | – |
 | DS-u | shared NewDocumentSheet in the gallery; journey + render budget | DS-5, DS-6 | SuiteJourneyTests+DocumentSetup | DS-a, frame-rates:FR-u, area-selection:AR-u | true | 0 | pr #4309 (DS-5 merged #4299) | – | – |
-| DS-photo | Photo new image on the setup | DS-7, DS-8 | PhotoJourneyTests+Documents | DS-u, DS-m, CB-s, AC-zoom, CB-photo | true | 0 | blocked | – | – |
-| DS-design | Design new document on the setup | DS-9, DS-10 | DesignJourneyTests+Page | DS-u, DS-m, CB-design | true | 0 | blocked | – | – |
-| DS-halo | Halo composition settings on the setup | DS-11, DS-12 | HaloJourneyTests+Settings | DS-a (DS-11); DS-u, DS-m, FR-halo, UP-halo, CB-halo (DS-12) | true | 0 | blocked | – | – |
-| DS-flare | Flare document setup on the setup | DS-13, DS-14 | FlareJourneyTests+NewSheet | DS-u, DS-m, FR-flare, CB-flare | true | 0 | blocked | – | – |
+| DS-photo | Photo new image on the setup | DS-7, DS-8 | PhotoJourneyTests+Documents | DS-u, DS-m, CB-s, AC-zoom, CB-photo | true | 0 | pr #4901 | – | – |
+| DS-design | Design new document on the setup | DS-9, DS-10 | DesignJourneyTests+Page | DS-u, DS-m, CB-design | true | 0 | pr #4887 | – | – |
+| DS-halo | Halo composition settings on the setup | DS-11, DS-12 | HaloJourneyTests+Settings | DS-a (DS-11); DS-u, DS-m, FR-halo, UP-halo, CB-halo (DS-12) | true | 0 | pr #4918 | – | – |
+| DS-flare | Flare document setup on the setup | DS-13, DS-14 | FlareJourneyTests+NewSheet | DS-u, DS-m, FR-flare, CB-flare | true | 0 | pr #4891 | – | – |
 | DS-z | delete old sheets; status built; feature-done | DS-15, DS-16 | – | DS-halo, DS-flare, DS-photo, DS-design | true | 0 | blocked | – | – |
 
 ## Tasks
