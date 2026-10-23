@@ -2,7 +2,7 @@
 
 Issue: #4516 (earlier #3475) · Packet: docs/blueprints/library/features/tone-controls.md
 Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 · Issue for Belt lines: #3475
-Stage: blocked on TC-a (TC-2 ToneRows not on dev 35a0b5e7, 2026-10-23T16:33:31Z; blocked poll 2 of 3)
+Stage: blocked on TC-a (TC-2 ToneRows not on dev 35a0b5e7, 2026-10-23T16:33:31Z; blocked poll 3 of 3 at dev 35a0b5e7, 2026-10-23T17:32:35Z; Question for the supervisor posted on #3475 comment 6370840828)
 Base: origin/dev 721168a8
 Next: start LT-1/LT-2 once tone-controls TC-a (#3476) merges: TC-1 #4555 is on dev; TC-2 (ToneRows placeholder) is not, and no Belt-Slice-Done for TC-a is posted
 
@@ -38,3 +38,4 @@ Next: start LT-1/LT-2 once tone-controls TC-a (#3476) merges: TC-1 #4555 is on d
 - Parked by the supervisor (#3475, 11:29Z): LT-a waits on suiteui TC-a (#3476), and TC-a waits on suite-imaging IM-a and autosave-history AH-a. #3475 is labelled waiting-on-prereq; the supervisor removes the label once TC-a is on dev. This run is released from tone-controls and polls it no more.
 - No rebase of lead/tone-controls. The supervisor confirmed it is the suiteui lead's record; this lead's record is on lead/library-tone-controls.
 - 2026-10-23T15:20:48Z: resumed by line lead act-1a16953af22-wvhu. Under contract-first waits (#4814), a cross-feature wait is met once that feature's first slice merges. TC-a is TC-1 plus TC-2, and only TC-1 is on dev, so LT-a still waits. LT-2 needs ToneRows in SuiteUI, which this line can't stub. Polling every 10 min.
+- 2026-10-23T17:32:35Z: poll 3 of 3 identical (TC-a not on dev 35a0b5e7). Per rule 23 asked the supervisor (#3475 comment 6370840828) whether to build on a stub with a Wire line or park.
