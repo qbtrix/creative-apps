@@ -1,10 +1,10 @@
 # text-style lead record
 
-Issue: #4519 (relaunch of #3779) · Packet: docs/blueprints/suiteui/features/text-style.md
-Run: act-1a164697376-dv7u · Started: 2026-10-22T16:40Z
-Stage: 3 wave 2 (blocked)
-Base: 7e9f260ae8f69dea63663c1bc7ea945c6b1d2f80 (dev)
-Next: wait on font-picker FP-a (TS-2) and FP-u (TS-u); poll every 20 min
+Issue: #3779 (relaunch #4519) · Packet: docs/blueprints/suiteui/features/text-style.md
+Run: act-1a16958d72f-a4mg · Session: cloud line lead (line:suiteui; with text-style, brush-keys, document-setup) · Started: 2026-10-23T15:25Z
+Stage: 3 wave 1 (combined waves across the three features)
+Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (dev)
+Next: wave 1 builds TS-a (TS-2) beside BK-u and the DS adopt slices; then TS-u, TS-design; TS-halo waits on adjust-everywhere AJ-a (no contract merged)
 
 ## Slices
 
@@ -27,6 +27,12 @@ Next: wait on font-picker FP-a (TS-2) and FP-u (TS-u); poll every 20 min
 | TS-3 | TS-u | – | see packet | see packet | see packet | – | blocked |
 | TS-4 | TS-u | – | see packet | see packet | see packet | – | blocked |
 | TS-7..TS-12 | TS-design, TS-halo | – | see packet | see packet | see packet | – | blocked |
+
+## Wire
+- [ ] Wire: anchor-parenting:AN-halo (TS-halo shares a Halo app file)
+- [ ] Wire: brush-keys:BK-design (TS-design shares a Design app file)
+- [ ] Wire: adjust-everywhere:AJ-halo (TS-halo
+- [ ] Wire:  contract not merged)
 
 ## Reviews
 
@@ -91,6 +97,7 @@ Next: wait on font-picker FP-a (TS-2) and FP-u (TS-u); poll every 20 min
 
 - 2026-10-21T12:52Z heartbeat: #3844 TS-5 held while dev red (#3856, photo line); #3847 stacked
 - 2026-10-22T16:40Z: run act-1a164697376-dv7u on new issue #4519. TS-1 #3836, TS-5 #3844, TS-6 #3847 merged and in green dev Linux run 39808732641 (401242a59): Belt-Slice-Done TS-m posted on #4519.
+- 2026-10-23T15:25Z (act-1a16958d72f-a4mg): contract-first waits (lead.md rule 12, #4814): a wait on another feature is met once that feature's first slice merged; each wait built ahead of its slice is listed under Wire. Merged-done = green `Linux` on a dev CI run containing the slice's last PR.
 
 ## Open
 

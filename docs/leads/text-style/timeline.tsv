@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-21T12:25Z	heartbeat		Heartbeat: dev still red (#3856); #3844 held at a880a6f9, #3847 stacked.
 2026-10-21T12:52Z	heartbeat	heartbeat: #3844 TS-5 held while dev red (#3856, photo line); #3847 stacked
 2026-10-22T16:40Z	relaunch		run act-1a164697376-dv7u on #4519; TS-m done (run 39808732641); rest blocked on FP-a
+2026-10-23T15:25:45Z	resume	run act-1a16958d72f-a4mg resumed at stage 3 on dev 721168a8; wave 1 planned
