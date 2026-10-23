@@ -62,8 +62,9 @@ struct FlareCommandCatalogTests {
     }
 
     @Test func conformance() {
-        #expect(FlareWorkspace.catalog.ids.count == FlareWorkspace.coreCommands.count + FlareWorkspace.appCommands.count)
-        let appIDs = Set(FlareWorkspace.appCommands.map(\.id))
+        let own = FlareWorkspace.appCommands + FlareWorkspace.clipboardCommands
+        #expect(FlareWorkspace.catalog.ids.count == FlareWorkspace.coreCommands.count + own.count)
+        let appIDs = Set(own.map(\.id))
         var ws = Self.lawsFixture()
         // The drawn rectangle with a three-stop linear fill, so every fill.* example can run (gradient-fill FG-5).
         ws.selectLayer("rectangle-1")
@@ -86,6 +87,9 @@ struct FlareCommandCatalogTests {
         if id.hasPrefix("path.") { return problem.contains("exampleRuns") }
         if ["file.clear-recent", "file.open-in", "file.open-recent", "import.report"].contains(id) { return problem.contains("exampleRuns") }
         if ["recovery.restore", "recovery.discard", "timeline.delete-keys"].contains(id) { return problem.contains("exampleRuns") }
+        // Copy As's shared example asks for PNG, which needs the window's rasterizer: FlarePasteboardAdapterTests runs
+        // its SVG and own-layers forms and the PNG refusal.
+        if id == "edit.copy-as" { return problem.contains("exampleRuns") && problem.contains("rasterizer") }
         return ["timeline.insert-frames", "timeline.remove-frames"].contains(id)
             && ["stepNamedTitle", "editRecordsOneStep", "undoRestoresBytes"].contains { problem.contains($0) }
     }

@@ -4,9 +4,9 @@
 // playhead at 1x, in the coder's order; the own bytes are Edit > Copy's. Paste of an SVG adds its groups as
 // layers through svg-place's place path, as one undo step, and the coder hands Flare that SVG as vectors.
 //
-// Disabled until CB-8: `FlarePasteboardAdapter` doesn't exist yet, so its two calls go through `Seam`, which
-// CB-8 points at the adapter (and deletes) when it turns these on. The PNG is made by `Echo`, a rasterizer
-// whose bytes spell out the draw list and scale it was given, so the frame drawn can be read on Linux.
+// The SVG-to-layers test waits on svg-place PF-5 (Flare's place path); until then `pastedSvgRunsThePlacePath`
+// proves the SVG reaches it as vectors. The PNG is made by `Echo`, a rasterizer whose bytes spell out the draw
+// list and scale it was given, so the frame drawn can be read on Linux.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -17,14 +17,6 @@ import FlareCore
 import SuiteKernel
 import SuiteModel
 import Testing
-
-/// The adapter's two calls as CB-8 builds them. Until then a copy offers nothing and a paste does nothing.
-private enum Seam {
-    /// CB-8: `FlarePasteboardAdapter(rasterizer: rasterizer).copy(&workspace)`, richest first.
-    static func copy(_ workspace: inout FlareWorkspace, rasterizer: any FrameRasterizing) -> [TypedData] { [] }
-    /// CB-8: `FlarePasteboardAdapter(rasterizer: rasterizer).paste(item, into: &workspace)`.
-    static func paste(_ item: SuiteClipItem, into workspace: inout FlareWorkspace) {}
-}
 
 /// A rasterizer whose "PNG" is the list's description and the scale, so a test can tell which frame it drew.
 private struct Echo: FrameRasterizing {
@@ -43,7 +35,7 @@ private func bounce(at frame: Int) -> FlareWorkspace {
 
 private func copied(at frame: Int) -> [TypedData] {
     var workspace = bounce(at: frame)
-    return Seam.copy(&workspace, rasterizer: Echo())
+    return FlarePasteboardAdapter(rasterizer: Echo()).copy(&workspace)
 }
 
 private func layerNames(_ workspace: FlareWorkspace) -> [String] {
@@ -106,7 +98,7 @@ private let logo = """
     @Test(.disabled("waits on svg-place PF-5")) func pastedSvgAddsItsGroupsAsLayers() {
         var workspace = bounce(at: 12)
         let before = layerNames(workspace)
-        Seam.paste(.vector(svg: logo, name: "logo"), into: &workspace)
+        FlarePasteboardAdapter(rasterizer: Echo()).paste(.vector(svg: logo, name: "logo"), into: &workspace)
         let after = layerNames(workspace)
         #expect(after.count == before.count + 2, "the paste added \(after.count - before.count) layers, not 2")
         #expect(workspace.layerError == nil, "the paste refused: \(String(describing: workspace.layerError))")
@@ -120,7 +112,7 @@ private let logo = """
     @Test func pastedSvgRunsThePlacePath() {
         var workspace = bounce(at: 12)
         let before = layerNames(workspace)
-        Seam.paste(.vector(svg: logo, name: "logo"), into: &workspace)
+        FlarePasteboardAdapter(rasterizer: Echo()).paste(.vector(svg: logo, name: "logo"), into: &workspace)
         let added = layerNames(workspace).count - before.count
         let refusal = workspace.layerError?.message
         #expect(refusal != PlaceRules.formatHelp, "the SVG reached place.image as a picture")
@@ -133,9 +125,21 @@ private let logo = """
         var workspace = bounce(at: 12)
         let before = layerNames(workspace)
         let png = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
-        Seam.paste(.image(png: png, pixelWidth: 1, pixelHeight: 1), into: &workspace)
+        FlarePasteboardAdapter(rasterizer: Echo()).paste(.image(png: png, pixelWidth: 1, pixelHeight: 1), into: &workspace)
         #expect(layerNames(workspace) == before)
         #expect(workspace.layerError?.message == PlaceRules.formatHelp)
+    }
+
+    /// Copy As in the catalog: SVG is the playhead's frame, own is Edit > Copy's bytes, PNG refuses without a window.
+    @Test func copyAsGivesSvgAndOwnAndRefusesPngHeadless() throws {
+        let workspace = bounce(at: 12)
+        let svg = try workspace.copyAs(.svg)
+        #expect(svg.type == SuiteTypeID.svg.rawValue)
+        #expect(svg.data == copied(at: 12).first { $0.type == .svg }?.data)
+        var plain = bounce(at: 12)
+        let own = try workspace.copyAs(.own)
+        #expect(own.type == SuiteTypeID.flareLayers.rawValue && own.data == plain.copy())
+        #expect(throws: CatalogError.self) { try workspace.copyAs(.png) }
     }
 
     /// Flare's own layers pasted back are Edit > Paste's: "Ball copy", one step.
@@ -143,7 +147,7 @@ private let logo = """
         var workspace = bounce(at: 12)
         let copy = workspace.copy()
         let own = try #require(copy)
-        Seam.paste(.appLayers(.flareLayers, own), into: &workspace)
+        FlarePasteboardAdapter(rasterizer: Echo()).paste(.appLayers(.flareLayers, own), into: &workspace)
         #expect(layerNames(workspace).contains("Ball copy"), "the paste added no Ball copy")
         #expect(workspace.undoName == "Paste")
     }
