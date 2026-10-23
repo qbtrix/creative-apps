@@ -221,3 +221,4 @@ utc	stage	event	ref	note
 2026-10-23T13:24Z	3	wait	H-J12 re-check	no halo/full journeys run contains 28e3a67d yet
 2026-10-23T14:27Z	3	wait	H-J12 re-check	halo run 39962308580 (54297676) has the fix, pending
 2026-10-23T15:28Z	3	wait	H-J12 re-check	halo run 39962308580 in progress
+2026-10-23T16:21Z	3	verify	H-J12	passed in run 39962308580; #4732 verified; re-check critic launched
