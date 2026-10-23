@@ -105,7 +105,6 @@ design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignTransformTests/timing
 design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignShapeTests/timing
 
 suite AppSnapshotTests.BodyCountSuites/RenderBudgetAfterGlowOnboardingTests/timing
-suite AppSnapshotTests.BodyCountSuites/RenderBudgetTransformTests/timing
 suite SuiteModelTests.StoreBudgetTests
 suite SuiteModelTests.HandOffBudgetTests
 suite SuiteModelTests.HomeBudgetTests
