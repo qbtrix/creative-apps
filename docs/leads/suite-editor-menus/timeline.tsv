@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-23T16:09Z	check	editor-menus	journeys 39972233358 pending; #4816 #4817 #4818 clean in fast lane, unmerged (lane batches waiting on macOS slots)	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
 2026-10-23T16:30Z	check	editor-menus	journeys 39972233358 pending; #4816 #4817 #4818 clean in fast lane, unmerged; flare journeys 39987109228 (pre-fix head) pending	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
 2026-10-23T16:52Z	check	editor-menus	#4816 #4817 #4818 ready (fast-lane check success); lane bisecting batch 20261023155119, macOS gate probes queued; journeys 39972233358 queued	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T17:14Z	check	editor-menus	heartbeat: journeys 39972233358 still queued (macOS runners); #4816/#4817/#4818 clean in lane batch; #4741 open (supervisor, needs-split)	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
