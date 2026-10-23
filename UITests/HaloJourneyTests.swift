@@ -61,10 +61,9 @@ final class HaloJourneyTests: XCTestCase {
         halo.shot("new-composition-invalid")
         enter("1080", into: "Width", in: sheet)
         enter("1920", into: "Height", in: sheet)
-        let rate = sheet.popUpButtons["Frame Rate"]
-        XCTAssert(rate.exists, "no Frame Rate pop-up by its label")
-        rate.click()
-        halo.app.menuItems["24 fps"].click()
+        XCTAssert(frameRateMenu(in: sheet).waitForExistence(timeout: 5),
+                  "no Frame Rate menu (halo.composition.sheet.frameRate) in the sheet")
+        pickFrameRate("24 fps", in: sheet, halo)
         halo.shot("new-composition-filled")
         halo.click("Create", in: .sheet, step: "new-composition")
         // The header is one element reading "Comp 1, 1080 × 1920, 24 fps · 10 s".
@@ -324,8 +323,7 @@ final class HaloJourneyTests: XCTestCase {
         let sheet = halo.app.sheets.firstMatch
         enter("Loop", into: "Name", in: sheet)
         enter("2", into: "Duration (seconds)", in: sheet)
-        sheet.popUpButtons["Frame Rate"].click()
-        halo.app.menuItems["24 fps"].click()
+        pickFrameRate("24 fps", in: sheet, halo)
         halo.click("Create", in: .sheet)
         XCTAssert(header("1920 × 1080", halo).waitForExistence(timeout: 5), "the header doesn't read 1920 × 1080")
         XCTAssert(header("24 fps · 2 s", halo).exists, "the header doesn't read 24 fps · 2 s")
@@ -735,6 +733,22 @@ final class HaloJourneyTests: XCTestCase {
     }
 
     /// Clicks the sheet's field labelled `label`, selects its text and types `text`.
+    /// The New Composition sheet's Frame Rate menu: SuiteUI's FrameRateMenu, a
+    /// menu button (not a pop-up, #4341) carrying `halo.composition.sheet.frameRate`.
+    @MainActor private func frameRateMenu(in sheet: XCUIElement) -> XCUIElement {
+        sheet.menuButtons["halo.composition.sheet.frameRate"].firstMatch
+    }
+
+    /// Opens the sheet's Frame Rate menu and picks `rate`, titled as FrameRate's description ("24 fps").
+    @MainActor private func pickFrameRate(_ rate: String, in sheet: XCUIElement, _ halo: Journey) {
+        let menu = frameRateMenu(in: sheet)
+        XCTAssert(menu.waitForExistence(timeout: 5), "no Frame Rate menu (halo.composition.sheet.frameRate)")
+        menu.click()
+        let item = halo.app.menuItems[rate]
+        XCTAssert(item.waitForExistence(timeout: 5), "the Frame Rate menu offers no \(rate)")
+        item.click()
+    }
+
     @MainActor private func enter(_ text: String, into label: String, in sheet: XCUIElement) {
         let field = sheet.textFields[label]
         XCTAssert(field.waitForExistence(timeout: 5), "no \(label) field by its label (#286)")
