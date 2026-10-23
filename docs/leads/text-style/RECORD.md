@@ -4,7 +4,7 @@ Issue: #3779 (relaunch #4519) · Packet: docs/blueprints/suiteui/features/text-s
 Run: act-1a16958d72f-a4mg · Session: cloud line lead (line:suiteui; with text-style, brush-keys, document-setup) · Started: 2026-10-23T15:25Z
 Stage: 3 wave 1 (combined waves across the three features)
 Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (dev)
-Next: wave 1 builds TS-a (TS-2) beside BK-u and the DS adopt slices; then TS-u, TS-design; TS-halo waits on adjust-everywhere AJ-a (no contract merged)
+Next: wave 1 building TS-a (wf_5e1bd12c-3c2); on return: check PRs, then stack wave 2
 
 ## Slices
 
