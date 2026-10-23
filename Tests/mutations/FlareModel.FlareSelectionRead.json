@@ -19,5 +19,12 @@
     "find": "? grip.box : BoxMath.resized(grip.box, grip.handle.editorHandle, by: delta, modifiers: keys)",
     "replace": "? grip.box : grip.box",
     "tests": "FlareSelectionReadTests"
+  },
+  {
+    "label": "the readout lists handles the box doesn't take",
+    "file": "Sources/FlareModel/FlareSelectionRead.swift",
+    "find": "handles: boxHasHandles ? ",
+    "replace": "handles: true ? ",
+    "tests": "FlareAnchorEditTests"
   }
 ]
