@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-23T18:14:47Z	heartbeat	#4948 LT-1 on the lane (head 04d5f848); ToneRows not on dev 98589662
 2026-10-23T18:27:21Z	heartbeat	#4948 LT-1 on the lane (head 04d5f848); ToneRows not on dev 98589662
 2026-10-23T18:38:55Z	heartbeat	#4948 LT-1 on the lane (head 04d5f848); ToneRows not on dev 0d4645bf
+2026-10-23T18:54:15Z	heartbeat	poll at dev 0d4645bf; #4838 #4899 #4948 on the lane
