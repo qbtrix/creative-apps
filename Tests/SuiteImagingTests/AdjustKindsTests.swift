@@ -9,7 +9,7 @@ import CoreRender
 import Testing
 import SuiteImaging
 
-@Suite(.disabled("waits on AJ-5")) struct AdjustKindsTests {
+@Suite struct AdjustKindsTests {
     static let level: Float = 1.0 / 255
 
     /// 24 opaque hues round the wheel at full saturation, then a grey ramp of 8.

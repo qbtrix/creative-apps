@@ -80,7 +80,7 @@ struct LibraryCommands: Commands {
     }
 
     /// Why File > Share… is off: no window, else the window's reason.
-    private var shareWhy: String { why(nil, menu.share.help ?? LibraryMenu.Share.menuNotBuilt) }
+    private var shareWhy: String { why(nil, menu.share.help ?? "Share isn't available right now.") }
 
     /// `perform` applied to `value`, nil (disabled) while `perform` is nil.
     private func bind<Value>(_ perform: (@MainActor (Value) -> Void)?, _ value: Value) -> LibraryMenu.Action? {

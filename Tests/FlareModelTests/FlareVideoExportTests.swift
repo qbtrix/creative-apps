@@ -36,12 +36,12 @@ struct FlareVideoExportTests {
         #expect(w.exportFrameRate == 15)
     }
 
-    /// FV-4: no longer refused; the sheet leaves them out until FV-2, and they write through `writeVideo`, not `export`.
-    @Test(arguments: [(ExportFormat.mp4, "MP4 joins the Export sheet with FV-2."), (.gif, "GIF joins the Export sheet with FV-2.")])
-    func exportingStartsAndWritesThroughWriteVideo(format: ExportFormat, reason: String) async throws {
+    /// FV-2: the sheet lists them, and they write through `writeVideo`, not `export`.
+    @Test(arguments: [ExportFormat.mp4, .gif])
+    func exportingStartsAndWritesThroughWriteVideo(format: ExportFormat) async throws {
         var w = bounce()
         _ = w.openExport(); w.setExportFormat(format)
-        #expect(format.unbuiltReason == reason)
+        #expect(format.unbuiltReason == nil && format.writesVideo)
         #expect(w.exportProblem == nil && w.exportFileCount == 1)
         let o = try #require(w.exportingOptions), document = try #require(w.document)
         let started = w.startExport()
@@ -49,6 +49,25 @@ struct FlareVideoExportTests {
         await #expect(throws: ExportOptionRefusal.self) {
             try await LiveExportAdapter(stage: FakeStage()).export(document, options: o, rasterizer: FakeRasterizer()) { _ in }
         }
+    }
+
+    /// FV-2: the sheet's Size row reads the shared size's scale for MP4 and GIF and the run's scale otherwise, and a
+    /// frame rate under 1 refuses Export with its reason.
+    @Test func theSheetReadsTheSharedSizeAndRefusesARateUnder1() throws {
+        var w = bounce(); _ = w.openExport()
+        #expect(!ExportFormat.svgFrame.writesVideo && !ExportFormat.lottie.writesVideo && !ExportFormat.pngSequence.writesVideo)
+        w.setExportScale(2)
+        #expect(w.exportingOptions?.sheetScale == 2)
+        w.setExportFormat(.gif)
+        #expect(w.exportingOptions?.sheetScale == 1)
+        w.setExportSize(.scale(0.5))
+        #expect(w.exportingOptions?.sheetScale == 0.5 && w.exportProblem == nil)
+        w.setExportSize(.longEdge(480))
+        #expect(w.exportingOptions?.sheetScale == 1)
+        w.setExportFrameRate(0)
+        #expect(w.exportProblem == "The frame rate must be 1 or more." && w.exportFileCount == 0)
+        w.setExportFrameRate(12)
+        #expect(w.exportProblem == nil && w.exportFrameRate == 12)
     }
 
     @Test func svgLottieAndPNGStillExport() async throws {
