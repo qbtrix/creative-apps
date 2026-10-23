@@ -103,11 +103,8 @@ enum DesignSVG {
         let frame = Rect(minX: x, minY: y, maxX: x + node.frame.width, maxY: y + node.frame.height)
         let drawn = PlaceRules.drawnRect(PlacedImage(assetID: asset.id, box: frame, focus: node.placedFocus), natural: asset.natural)
         let at = "x=\"\(number(drawn.minX))\" y=\"\(number(drawn.minY))\" width=\"\(number(drawn.width))\" height=\"\(number(drawn.height))\""
-        let type = switch asset.format {
-        case .png: "image/png"
-        case .jpeg: "image/jpeg"
-        case .svg: "image/svg+xml"
-        }
+        // A raster's media type is image/<its id> (image/png, image/jpeg); an SVG's is image/svg+xml.
+        let type = asset.format == .svg ? "image/svg+xml" : "image/" + asset.format.rawValue
         return "<image \(at) href=\"data:\(type);base64,\(asset.data.base64EncodedString())\"\(then)/>"
     }
 
