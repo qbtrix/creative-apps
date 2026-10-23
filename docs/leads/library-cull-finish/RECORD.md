@@ -11,7 +11,7 @@ Next: lane merges #4838, #4844, #4899 (#4899 fits 400/15 once #4844 lands); then
 |---|---|---|---|---|---|---|---|
 | DR-a | contract: Trash service, label keys 6-9, Delete Rejects stubs, tests written disabled | DR-1, DR-2 | FC-a (on dev), MD-a (on dev) | no | 0 | done | 39507806909 |
 | DR-u | confirm dialog, ⌥⌘⌫, Set Label 6-9; snapshots; journey skipped | DR-3, DR-4 | DR-a, FC-a, MD-d/e (met: MD-a merged) | yes | 0 | PR #4838 open | - |
-| DR-m | label cull, deleteRejects body + undo, excludedPaths coding, LiveTrash | DR-5..DR-8 | DR-a; MD-c, MD-e (met: MD-a merged) | no | 0 | DR-6 #4844, DR-7+8 #4899 open | - |
+| DR-m | label cull, deleteRejects body + undo, excludedPaths coding, LiveTrash | DR-5..DR-8 | DR-a; MD-c, MD-e (met: MD-a merged) | no | 0 | DR-6 #4844 merged, DR-7+8 #4899 open | - |
 | DR-z | journey on, docs, C4, feature-done | DR-9, DR-10 | DR-u, DR-m | no | 0 | waiting | - |
 
 ## Tasks
@@ -20,7 +20,7 @@ Next: lane merges #4838, #4844, #4899 (#4899 fits 400/15 once #4844 lands); then
 | DR-1 | DR-a | 1 | PhotoTrashing, FakeTrash, LiveTrash stub, services.trash, LibraryKey.label 6-9, deleteRejects stubs (Mutate 4/4) | #3623 | open, fast-lane |
 | DR-2 | DR-a | 1 | disabled tests for DR-5/DR-6, never-deletes scan, delete-rejects real job (pending DR-8) | #3625 | open, stacked on #3623; CI: PASS on e0752118 |
 | DR-5 | DR-m | 1 | keys 6-9 set Red/Yellow/Green/Blue as one step, never advance (40 lines, folded into DR-2's PR) | #3625 | merged daee0e736; Mutate 2/2 LibraryModel.LibraryCulling |
-| DR-6 | DR-m | 2 | deleteRejects body, trashed undo step, excludedPaths fed to import; turns on LibraryDeleteRejectsTests | #4844 | open, head 52603087 (largeBudget enabled, listed in Tests/perf-suites.txt per supervisor); Mutate 4/4 LibraryModel.LibraryDeleteRejects; protected path, supervisor lands |
+| DR-6 | DR-m | 2 | deleteRejects body, trashed undo step, excludedPaths fed to import; turns on LibraryDeleteRejectsTests | #4844 | merged 0d4645bf (largeBudget enabled, listed in Tests/perf-suites.txt per supervisor); Mutate 4/4 LibraryModel.LibraryDeleteRejects; protected path, supervisor lands |
 | DR-7 | DR-m | 3 | excludedPaths in the catalog file (omitted when empty); photo.delete-rejects command | #4899 | open, fast-lane, stacked on #4844 (dr6 merged in); head f1071bc8; Mutate 6/6 LibraryModel.LiveCatalogCoding |
 | DR-8 | DR-m | 4 | LiveTrash on FileManager.trashItem; RJ-L06 on | #4899 | open with DR-7; RJ-L06 stays pending: LibraryHeadless and LibraryWindow+Persist do not pass excludedPaths yet (folded into DR-z or a gap) |
 | DR-3 | DR-u | 2 | Photo > Delete Rejected Photos… ⌥⌘⌫, confirmationDialog, Set Label names 6-9 | #4838 | open, fast-lane, head 110671fc (needs-fix fixed) (one PR with DR-4) |
