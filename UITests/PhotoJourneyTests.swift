@@ -190,10 +190,9 @@ final class PhotoJourneyTests: XCTestCase {
         // The row's label text carries photo.tool.size too, so each of its few elements is read; a
         // value predicate over the whole inspector timed out evaluating the query.
         let size = photo.app.descendants(matching: .any).matching(identifier: "photo.tool.size")
-        let sixty = Self.waitUntil {
-            size.allElementsBoundByIndex.contains { ($0.value as? String)?.contains("60") == true || $0.label.contains("60") }
-        }
-        XCTAssert(sixty, "Soft Round didn't set the size to 60 px")
+        // A slider's value is a number, a field's a string: read both as text.
+        let reads = { size.allElementsBoundByIndex.map { "\($0.label) \($0.value.map { "\($0)" } ?? "")" } }
+        XCTAssert(Self.waitUntil { reads().contains { $0.contains("60") } }, "Soft Round didn't set the size to 60 px (it reads \(reads()))")
         photo.shot("preset-soft-round")
 
         typeValue("1.5", into: "Exposure", photo)
