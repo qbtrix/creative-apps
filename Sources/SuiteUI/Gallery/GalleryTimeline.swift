@@ -33,9 +33,11 @@
 // playhead's timecode at that rate, whatever the unit chips say; the strip
 // gets the rate too, so its ruler and pill agree (frame-rates FR-u). A
 // "Playhead Frame" exact field (`suite.gallery.timeline.frame`) scrubs to a
-// typed frame and logs `scrub <n>` like the ruler (#4597). The
-// strip (`suite.gallery.timeline.strip`) is clipped to its room and the log
-// keeps its line, so neither draws over the other. The
+// typed frame and logs `scrub <n>` like the ruler (#4597). The strip is
+// clipped to its room and the log keeps its line, so neither draws over the
+// other; a probe behind the strip (`suite.gallery.timeline.strip`) marks that
+// room, since a container element reports the union of its lanes, and a
+// snapshot lays out every lane under the clip. The
 // playhead and the log live in a GalleryTimelineFeed only their reader views
 // observe, so a scrub never runs the page's body.
 import Observation
@@ -176,8 +178,7 @@ struct GalleryTimelinePage: View {
                 strip(tracks: tracks, playhead: feed.playhead, rate: rate, unit: unit, workArea: workArea, toolbar: toolbar)
             }
             .clipped()
-            .accessibilityElement(children: .contain)
-            .accessibilityIdentifier("suite.gallery.timeline.strip")
+            .background { ProbeElement("suite.gallery.timeline.strip", label: "Timeline strip") }
             .layoutPriority(1)
             if noTracks {
                 Text("No tracks yet.")
