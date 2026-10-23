@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 20:25Z	3	poll	dev 61c481df	no change: #4577 #4889 #4896 open in lane, no needs-fix/needs-rebase; dev unmoved; AJ-a and BK-photo not on dev
 20:46Z	3	poll	dev 61c481df	no change: #4577 #4889 #4896 open in lane, no needs-fix/needs-rebase; dev unmoved, lane sweeping (run 40021284339); BK-photo is #4965, open; AJ-a not on dev
 21:11Z	3	poll	dev 61c481df	no change: #4577 #4889 #4896 open, no needs-fix/needs-rebase; lane batch 20261023204921 (#4862) on macOS gate 40022179889; full CI 40024093736 queued on dev; AJ-a, BK-photo #4965 not on dev
+21:32Z	3	poll	dev 61c481df	no change: #4577 #4889 #4896 open, no needs-fix/needs-rebase; lane batch (#4862) still on macOS gate 40022179889; full CI 40024093736 running on dev; AJ-a, BK-photo #4965 not on dev
