@@ -83,3 +83,4 @@ utc	stage	event	ref	note
 2026-10-23T03:59Z	check	#4706 merged (a8ea9487, macOS gate 39895221472); full CI 39897762608 pending on it; #4714 in lane macOS build; no open pen-paths findings.
 2026-10-23T04:19Z	check	dev-red #3856: Linux fails on halo command-path baseline from #4703, not FP-u; commented culprit; FP-u done waits; #4714 in lane
 04:45Z	check	FP-z committed (journey on live, flare.md, wave built); gate running; dev Linux check 39901619047 on fef84231b holds FP-u and FP-m
+04:50Z	wave	FP-z PR #4753 opened (fast-lane, feature-done), head 510e4190

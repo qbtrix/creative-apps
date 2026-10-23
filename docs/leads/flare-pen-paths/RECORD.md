@@ -13,7 +13,7 @@ Next: (2026-10-23T03:59Z) FP-u #4706 merged 03:53Z (a8ea9487); full CI 398977626
 | FP-u | snapshots, render budget, journey (skipped) | FP-3, FP-4 | J-FP | FP-a, PN-3 | yes | 0 | merged #4706 03:53Z; dev red on Halo #4703 command-path baseline (not FP-u, noted on #3856); Belt-Slice-Done waits for a green Linux run containing a8ea9487 | #4706 | – |
 | FP-m | Pen on PenRules; path specs in catalog | FP-5, FP-6 | MJ-FP | FP-a (done), PN-5 (done), PN-7, shape-tools:FS-m (unchained for FP-5), file-flow:FL-m | no | 0 | FP-5 merged (#4029); FP-6 PR #4714 open, in lane | #4029, #4714 | – |
 | FP-e | Direct Select anchor editing; stress budget | FP-7, FP-8 | MJ-FP, RJ-F27 | FP-a, PN-5 (done), PN-6 (done), stage-edit (closed); FlareSelection.swift avoided (AS-flare hand-off, planned) | no | 0 | done: run 39596004859 (only the Library timing flake; supervisor answer 12:04Z); FP-8 waits on test/stress-perf-journeys | #3958 | – |
-| FP-z | journey on; status built | FP-9, FP-10 | J-FP | FP-u, FP-m, FP-e, file-flow:FL-z | yes | 0 | waiting | – | – |
+| FP-z | PR #4753 open, gate PASS | FP-9, FP-10 | J-FP | FP-u, FP-m, FP-e, file-flow:FL-z | yes | 0 | waiting | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
