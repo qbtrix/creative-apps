@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-21T16:31Z	3	heartbeat	#3476	TC-a still not slice-done; rechecked
 2026-10-21T16:34Z	rule 23: Question for the supervisor posted on #3468 after repeated identical TC-a blocked polls
 2026-10-21T16:56Z	released by supervisor answer (c) on #3468; TC-a is SuiteUI's canonical contract
+2026-10-23T15:30Z	1 build W1	start	PT-1	takeover by act-1a16958d691-2ax3; TC-1 #4555 on dev; PT-1 built on lead/photo-tone-PT-a; PT-2 waits TC-2

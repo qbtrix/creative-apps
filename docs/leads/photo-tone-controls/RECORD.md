@@ -1,15 +1,15 @@
 # tone-controls lead record
 
 Issue: #3468 · Packet: docs/blueprints/photo/features/tone-controls.md
-Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: released (supervisor answer (c) on #3468, 16:37Z)
-Base: 4d4ebb24788bbaf169ff2818f71f52df3753ac51
-Next: none in this run: #3468 waiting-on-prereq; Belt relaunches tone-controls once TC-a (#3476) lands
+Run: act-1a16958d691-2ax3 · Session: claude/feature-lead-photo-cl2258 · Started: 2026-10-23T15:00Z (takes over from the released run act-1a15eecbafe-u0f9)
+Stage: build W1 (PT-1)
+Base: 721168a8f
+Next: PT-1 PR to dev (lead/photo-tone-PT-a); PT-2 once SuiteUI TC-2 (ToneRows) is on dev
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| PT-a | AdjustmentSettings.tone and the ToneTarget adapter as stubs; Adjust panel shows ToneRows | PT-1, PT-2 | MJ-PT | suiteui tone-controls TC-a | yes | 0 | blocked | – | – |
+| PT-a | AdjustmentSettings.tone and the ToneTarget adapter as stubs; Adjust panel shows ToneRows | PT-1, PT-2 | MJ-PT | suiteui tone-controls TC-a (TC-1 #4555 merged; TC-2 building) | yes | 0 | building | – | – |
 | PT-u | snapshots, render budget, journey written | PT-5, PT-6 | PJ-T1 | PT-a; TC-3 (PT-5) | yes | 0 | waiting | – | – |
 | PT-m | live route and export path; adapter bodies; catalog; RJ-P12–14 | PT-3, PT-4 | MJ-PT | PT-a; IM-photo, TC-5, TC-6; catalog chain | no | 0 | waiting | – | – |
 | PT-z | journey on live, feature-done | PT-7, PT-8 | PJ-T1 | PT-u, PT-m; PG-z (PT-8) | yes | 0 | waiting | – | – |
@@ -17,8 +17,8 @@ Next: none in this run: #3468 waiting-on-prereq; Belt relaunches tone-controls o
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| PT-1 | PT-a | 2 | tone in AdjustmentSettings; adapter stubs; PhotoToneTests disabled | Sources/PhotoModel/AdjustmentSettings.swift, PhotoTone+Kernel.swift, Tests/PhotoModelTests/PhotoToneTests.swift | compiles; old doc opens neutral | – | blocked (TC-a) |
-| PT-2 | PT-a | 3 | Adjust panel ToneRows | Sources/PhotoApp/AdjustmentsInspector.swift | PhotoToneSnapshots.panel | – | waiting |
+| PT-1 | PT-a | 2 | tone in AdjustmentSettings; adapter stubs; PhotoToneTests disabled | Sources/PhotoModel/AdjustmentSettings.swift, PhotoTone+Kernel.swift, Tests/PhotoModelTests/PhotoToneTests.swift | PhotoToneTests | – | building |
+| PT-2 | PT-a | 3 | Adjust panel ToneRows | Sources/PhotoApp/AdjustmentsInspector.swift | PhotoToneSnapshots.panel | – | waiting (TC-2 ToneRows not on dev) |
 | PT-3 | PT-m | 4 | live route and export | PhotoAdjust+Imaging.swift, PhotoRender.swift | PhotoToneTests | – | waiting |
 | PT-4 | PT-m | 4 | adapter bodies, catalog, jobs | PhotoTone+Kernel.swift, PhotoCommandCatalog.swift, RealJobs | PhotoToneCommandTests | – | waiting |
 | PT-5 | PT-u | 4 | snapshots, budget | Tests/AppSnapshotTests/PhotoToneSnapshots.swift, RenderBudgetPhotoToneTests.swift | snapshots | – | waiting |
@@ -49,5 +49,10 @@ Next: none in this run: #3468 waiting-on-prereq; Belt relaunches tone-controls o
 - Run act-1a15eecbafe-u0f9 (2026-10-21T14:20Z) takes over this record. The brief asked for base main and status on lead/transform and lead/tone-controls. It uses base dev and these photo-prefixed status branches instead: the fast lane merges only into dev, and lead/transform and lead/tone-controls belong to the live Halo #3443 and SuiteUI #3476 leads. Force-pushing them would rewrite another lead's history.
 - Red Linux runs on #3969, #4005 and #4003 came from dev at the time, not from the PRs: the PhotoPlace CommandPath failure (fixed by #4008), stale Design mutation anchors (DY-a), and LargeCatalogBudget timing (moved to perf-suites in #4050/#4069). A fixer merges origin/dev into each branch so the lane re-runs Linux on a fresh head.
 - All four slices (PT-a, PT-u, PT-m, PT-z) remain for this run.
+- Run act-1a16958d691-2ax3 (2026-10-23) takes over; same base-dev and status-branch choices as above (brief named main; the lane merges only into dev).
+- Rule 12 on dev: TC-1 (#4555, ToneTarget, ToneSettings, ToneCommands) is the contract and has merged, so PT-1 builds on it now. PT-2 needs TC-2's ToneRows view, which is not on dev; PT-a ships as two PRs (PT-1 now, PT-2 when TC-2 lands), split per task.
+- Tone gets no AdjustmentKind case: one would change the panel sections, the adjustment-layer kinds, the catalog oneOf and the stored `enabled` set. Instead `AdjustmentEdit.kind` is optional with `title`/`section` helpers, which touches PhotoWorkspace.swift and PhotoAdjustmentLayer.swift beyond PT-1's listed files (a few lines each).
+- No dead controls: until PT-4, `toneHelp` is non-nil with an image open, so the rows and tone.* commands stay off and say why.
 
 ## Open
+- [ ] Wire: tone-controls:TC-a (PT-2 waits on TC-2 ToneRows; PT-4 on TC-6 command bodies; PT-3 on TC-5)
