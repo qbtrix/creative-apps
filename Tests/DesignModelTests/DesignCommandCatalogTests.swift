@@ -80,6 +80,8 @@ struct DesignCatalogDoc: HeadlessDocument {
         case "shape.draw", "tool.shape": .some(w.shapeHelp)
         case "file.export", "view.zoom-in", "view.zoom-out", "view.fit": .some(w.isOpen ? nil : DesignToolbarItem.noFile)
         case "view.zoom-to-selection": .some(w.zoomToSelectionHelp)
+        // The digit keys' command (brush-keys BK-10): the inspector opacity row's reason.
+        case "layer.set-opacity": .some(w.styleHelp(.opacity))
         // The transform rows' and Object items' reason (transform DT-6): the workspace's own transformHelp.
         default: id.hasPrefix("transform.") ? .some(w.transformHelp) : nil
         }
@@ -202,7 +204,7 @@ struct DesignCatalogDoc: HeadlessDocument {
         "object.align-top | Align Top | on", "object.align-middle | Align Middle | on", "object.align-bottom | Align Bottom | on",
         "object.distribute-horizontally | Distribute Horizontally | Select three or more layers to distribute.",
         "object.distribute-vertically | Distribute Vertically | Select three or more layers to distribute.",
-        "object.nudge | Nudge | on",
+        "object.nudge | Nudge | on", "layer.set-opacity | Layer Opacity | on",
         "fill.read | Read Fill | on", "fill.type | Fill Type | on", "fill.gradient | Set Gradient | on",
         "fill.stop-add | Add Gradient Stop | Switch the fill to a gradient first.",
         "fill.stop-move | Move Gradient Stop | Switch the fill to a gradient first.",

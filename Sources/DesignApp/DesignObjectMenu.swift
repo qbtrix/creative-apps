@@ -4,7 +4,8 @@
 // commands for the selection, each sent as DesignIntent.align; then Distribute
 // Horizontally and Vertically at the top level; then Flip Horizontal, Flip
 // Vertical, Rotate 90° Left and Right, each a kernel TransformIntent (transform
-// DT-2; off with `turnHelp` until the catalog has transform.*). A command that can't run (no
+// DT-2; off with `turnHelp` until the catalog has transform.*); then the Opacity submenu, 10% to 100% on every
+// selected layer through `layer.set-opacity`'s availability, as the digit keys set it (brush-keys BK-10). A command that can't run (no
 // layer, a locked layer or group, a hidden group, already there, not built
 // yet) is disabled and its tooltip says why, from its catalog spec (AC-d3). A
 // submenu whose every item is off is drawn as one off item instead, with its
@@ -15,7 +16,7 @@ import SuiteKernel
 import SuiteUI
 import SwiftUI
 
-/// Object: Group, Ungroup, Arrange, Align and Distribute.
+/// Object: Group, Ungroup, Arrange, Align, Distribute, the transforms and Opacity.
 struct DesignObjectMenu: View {
     let menu: DesignMenu
 
@@ -63,7 +64,23 @@ struct DesignObjectMenu: View {
         menu.item("transform.rotate", title: "Rotate 90° Right", systemImage: "rotate.right") {
             menu.perform(.transform(.rotate(by: 90, drag: nil)))
         }
+        Divider()
+        if menu.workspace.layerOpacityHelp != nil {
+            menu.item("layer.set-opacity", title: "Opacity", systemImage: "circle.lefthalf.filled") {}
+        } else {
+            Menu("Opacity", systemImage: "circle.lefthalf.filled") {
+                ForEach(Self.percents, id: \.self) { percent in
+                    menu.item("layer.set-opacity", title: "\(percent)%", systemImage: "circle.lefthalf.filled") {
+                        menu.perform(.endEditRun)
+                        menu.perform(.setStyle(.opacity(DesignWorkspace.keyOpacity(Double(percent)))))
+                    }
+                }
+            }
+        }
     }
+
+    /// The Opacity submenu's percents, the ones the digit keys 1 to 9 and 0 set.
+    static let percents = Array(stride(from: 10, through: 100, by: 10))
 }
 
 extension DesignArrangeStep {

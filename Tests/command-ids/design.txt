@@ -22,6 +22,7 @@ fill.stop-remove
 fill.type
 history.jump
 history.read
+layer.set-opacity
 object.align-bottom
 object.align-center
 object.align-left

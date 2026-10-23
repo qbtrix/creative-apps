@@ -1,0 +1,23 @@
+[
+  {
+    "label": ".everySelected: only the primary layer takes the opacity",
+    "file": "Sources/DesignModel/DesignOpacityKeys+Kernel.swift",
+    "find": "let ids = selectedNodeIDs",
+    "replace": "let ids = Array(selectedNodeIDs.suffix(1))",
+    "tests": "DesignOpacityKeysTests"
+  },
+  {
+    "label": ".zeroIsHundred: the 0 key's 100% lands as 0%",
+    "file": "Sources/DesignModel/DesignOpacityKeys+Kernel.swift",
+    "find": "min(max(percent, 0), 100) / 100",
+    "replace": "min(max(percent, 0), 100).truncatingRemainder(dividingBy: 100) / 100",
+    "tests": "DesignOpacityKeysTests"
+  },
+  {
+    "label": ".pairJoins: every digit starts its own step, so a fast pair is two",
+    "file": "Sources/DesignModel/DesignOpacityKeys+Kernel.swift",
+    "find": "startsStep: probe.type(0, at: now) != 100",
+    "replace": "startsStep: probe.type(0, at: now) >= 0",
+    "tests": "DesignOpacityKeysTests"
+  }
+]
