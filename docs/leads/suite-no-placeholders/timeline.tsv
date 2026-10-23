@@ -11,3 +11,5 @@ utc	stage	event	ref	note
 2026-10-23T04:03Z	-	heartbeat	NP-a	#4717 lane macOS build-only run 39897023050 in progress; NP-flare building
 2026-10-23T04:28Z	-	heartbeat	NP-a	#4717 lane macOS build 39897023050 in progress; NP-flare building
 2026-10-23T04:38Z	-	pr	NP-flare	opened #4735 stacked on #4717; gap #4736 filed for MenuCommand scan
+2026-10-23T04:50Z	3	merged	#4717	NP-a merged by the fast lane
+2026-10-23T04:50Z	-	integrate	NP-flare	merged dev into #4735, gate running before retarget
