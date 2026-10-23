@@ -200,7 +200,10 @@ final class PhotoShellJourneyTests: XCTestCase {
         XCTAssert(frame.maxX <= trailing, "the switcher ends at \(frame.maxX), past Undo's start (\(trailing))")
         XCTAssert(window.contains(frame), "the switcher \(frame) isn't inside the window \(window)")
         XCTAssert(switcher.buttons["Photo"].isSelected, "Photo isn't the switcher's current item")
-        photo.expectShellGeometry(minimums: ["suite.switcher": (width: 1, height: 1)], regions: ["suite.switcher": switcher])
+        // The empty window has no palette, which the shell geometry requires; J1 checks its regions one by one.
+        if photo.element("suite.tools").exists {
+            photo.expectShellGeometry(minimums: ["suite.switcher": (width: 1, height: 1)], regions: ["suite.switcher": switcher])
+        }
     }
 
     // MARK: Reading

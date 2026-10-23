@@ -29,7 +29,8 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         chooseBlend("Multiply", photo)
         typeValue("50", into: "photo.layer.opacity", photo)
         expectRow("Layer 1", meta: "Multiply 50%", photo)
-        expectStatus("Edited", photo)
+        // The autosave, 5 s after the last edit, may already read "Edited, autosaved": still edited.
+        expectStatus("Edited", photo, prefix: true)
         let edited = steadyCanvas(photo)
         photo.shot("documents-1-edited")
 
@@ -153,7 +154,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         let original = try Data(contentsOf: beach)
         var photo = launch(photoArguments(open: beach), window: "beach.png")
         paint(photo)
-        expectStatus("Edited", photo)
+        expectStatus("Edited", photo, prefix: true)
         photo.shot("documents-2-painted")
 
         // 2. Command-W asks; Cancel keeps the window, still Edited.
