@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-23T18:33Z	wave 3	TC-u gated CI: PASS at 5b351323; PR after #4862 merges
 2026-10-23T19:19Z	check-in	#4862 #4870 #4880 #4953 open in lane, no needs-fix; TC-u waits on #4862
 2026-10-23T19:41Z	check-in	PRs still open in lane, no needs-fix
+2026-10-23T20:05Z	check-in	PRs open+clean in lane (batch 20261023192105 bisecting); no needs-fix, no findings
