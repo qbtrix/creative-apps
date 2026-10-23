@@ -1,0 +1,10 @@
+{
+  "editors": [
+    {"app": "photo", "journey": "PhotoSuiteMenusJourneyTests/testSuiteMenus"},
+    {"app": "design", "journey": "DesignSuiteMenusJourneyTests/testSuiteMenus"},
+    {"app": "flare", "journey": "FlareSuiteMenusJourneyTests/testSuiteMenus"},
+    {"app": "halo", "journey": "HaloSuiteMenusJourneyTests/testSuiteMenus"},
+    {"app": "library", "journey": "LibrarySuiteMenusJourneyTests/testSuiteMenus"}
+  ],
+  "checks": ["Control-Command-0", "Window > AI Access…", "afterglow run --live", "Dock reopen"]
+}

@@ -1,4 +1,4 @@
-// HaloJourneyTests+Place.swift (placed-images PH-u written; PH-7 turns it on): HJ-P1, placing a logo in Halo
+// HaloJourneyTests+Place.swift (placed-images PH-u written; PH-7 turned it on): HJ-P1, placing a logo in Halo
 // as a person does (docs/blueprints/halo/features/placed-images.md, Journey steps):
 // 1. New Composition…, 1920 × 1080.
 // 2. File > Place… (Shift-Command-P), choose `logo.svg` (480 × 160) in the panel: a solid `logo` centred, and
@@ -7,8 +7,9 @@
 // 4. Render Frame (⌘R) at frame 30.
 // 5. Layer > New > Solid (full frame) selected, Fill on, Place… `photo-1200x800.jpg`: the photo fills it;
 //    ⌥-drag on the viewer pans its focus, and one Undo puts the focus back in one step.
-// Off until PH-7: the place commands run in PH-6 and the window wires `haloPlace` then. The panel is the
-// system's open panel, driven as PhotoPlaceJourneyTests drives it. One shot per step, "place-".
+// On live services since PH-7 (no fixture: HaloLaunch picks `.live`): the place commands are PH-6's catalog
+// bodies through the window's `haloPlace`. The panel is the system's open panel, driven as
+// PhotoPlaceJourneyTests drives it. One shot per step, "place-".
 import AppKit
 import CoreGraphics
 import ImageIO
@@ -16,11 +17,7 @@ import UniformTypeIdentifiers
 import XCTest
 
 final class HaloPlaceJourneyTests: XCTestCase {
-    /// PH-7 sets this false once Place runs end to end.
-    private static let waitsOnPH7 = true
-
     @MainActor func testPlaceLogo() throws {
-        if Self.waitsOnPH7 { throw XCTSkip("waits on PH-7") }
         let folder = FileManager.default.temporaryDirectory.appending(path: "halo-place-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         addTeardownBlock { try? FileManager.default.removeItem(at: folder) }

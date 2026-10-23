@@ -19,6 +19,8 @@ import SuiteModel
 public enum PhotoFileRequest: Hashable, Sendable {
     /// Open the file in a window; hand it to another app; drop a missing file from the shared recents; empty them.
     case open(path: String), handOff(path: String, app: String), forget(fileID: String), clearRecent
+    /// Start a new white image of this size in an empty window or a new one (the home's New Photo, #3648).
+    case newImage(width: Int, height: Int)
 }
 
 /// The file flow's state on the workspace: the window's view of the shared recents and the open file's path.

@@ -31,8 +31,9 @@ final class PhotoRecoveryJourneyTests: XCTestCase {
         expect("Undo New Layer", photo, "Layer > New Layer made no New Layer step")
         photo.element("suite.tools").buttons["Brush"].click()
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.2, dy: 0.3), to: CGVector(dx: 0.8, dy: 0.7))
-        expect("Undo Paint", photo, "the brush stroke on Layer 1 didn't paint")
+        // Stamped when the stroke ends, where the 5 s delay starts; after the Undo wait it cut the gap short.
         let painted = Date()
+        expect("Undo Paint", photo, "the brush stroke on Layer 1 didn't paint")
         expectStatus("Edited", photo, timeout: 3)
         photo.shot("recovery-edited")
         expectStatus("Edited, autosaved", photo, timeout: 20)

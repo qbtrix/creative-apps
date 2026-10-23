@@ -18,6 +18,13 @@ extension FlareIntent {
         case .edit(let intent): intent.commandID
         case .tools(.choose(let tool)): FlareWorkspace.toolID(tool)
         case .timeline(let intent): intent.commandID
+        // The beta.2 items the menus hide (FlareWorkspace.menuHidden, no-placeholders NP-3).
+        case .view(.toggleOnion): "view.toggle-onion"
+        case .view(.toggleMotionPath): "view.toggle-motion-path"
+        case .interactions(.toggleEditor): "window.interactions"
+        case .assist(.showPopover): "window.assist"
+        case .library(.convertToSymbol): "library.convert-to-symbol"
+        case .library(.exitSymbol): "library.exit-symbol"
         default: nil
         }
     }

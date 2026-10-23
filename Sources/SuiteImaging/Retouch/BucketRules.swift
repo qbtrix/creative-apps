@@ -2,7 +2,8 @@
 // The region is creative-core's flood mask from the seed in the sampled
 // picture (the target layer, or the merged picture with All Layers), times
 // the selection's coverage when there is one; the fill mixes the colour into
-// the target by that region. Linux-safe.
+// the target by that region. Core's anti-alias gives the one-pixel soft edge.
+// Linux-safe.
 import CoreRaster
 import SuiteKernel
 
@@ -26,20 +27,30 @@ public struct BucketOptions: Hashable, Codable, Sendable {
 
 /// The bucket's region and fill.
 public enum BucketRules {
-    /// What a run throws until FH-5b.
-    public static let notBuilt = CatalogError.notBuilt(id: "fill.bucket", feature: "fill-heal FH-5b")
-
     /// The region to fill: the seed's flood mask in `sample`, times the
-    /// selection's coverage when there is one. Buffer-sized. Throws for a
-    /// seed off the buffer or a selection of another size.
+    /// selection's coverage when there is one. Buffer-sized. Tolerance t
+    /// reads as core's OKLab distance t / 255. Throws for a seed off the
+    /// buffer or a selection of another size.
     public static func region(seed: (x: Int, y: Int), in sample: PixelBuffer, options: BucketOptions,
                               selection: Mask?) throws -> Mask {
-        throw notBuilt
+        let tolerance = Float(min(255, max(0, options.tolerance))) / 255
+        var m = try sample.floodMask(from: seed, tolerance: .within(tolerance), contiguous: options.contiguous,
+                                     antiAlias: options.antiAlias)
+        if let selection { try m.intersect(selection) }
+        return m
     }
 
     /// `pixels` with `color` (straight, not premultiplied) mixed in by
-    /// `region`'s coverage; pixels the region misses are unchanged.
+    /// `region`'s coverage; pixels the region misses are unchanged. Throws
+    /// when the region's size differs from the pixels'.
     public static func fill(_ pixels: PixelBuffer, region: Mask, color: RGBA) throws -> PixelBuffer {
-        throw notBuilt
+        guard region.width == pixels.width, region.height == pixels.height else {
+            throw RasterError.invalid("bucket region \(region.width)x\(region.height) differs from layer \(pixels.width)x\(pixels.height)")
+        }
+        guard let box = region.coveredBounds else { return pixels }
+        let solid = try PixelBuffer(width: box.width, height: box.height, fill: color.premultiplied())
+        var out = pixels
+        try out.composite(solid, x: box.x, y: box.y, mode: .normal, opacity: 1, mask: region, maskX: 0, maskY: 0)
+        return out
     }
 }
