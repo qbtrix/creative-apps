@@ -14,7 +14,7 @@ import SuiteKernel
 
 extension DesignWorkspace: PlacedImageTarget {
     /// Why nothing can be placed: no page open, or the stub's not-built reason.
-    static let noPlacePage = "Open a file to place a picture.", placeNotBuilt = "Placing pictures isn't built yet."
+    static let noPlacePage = "Open or create a file to place a picture.", placeNotBuilt = "Placing pictures isn't built yet."
 
     /// Why nothing can be placed now; nil when it can. Stub: with a page open it says placing isn't built;
     /// PD-5 drops that line and adds the locked-parent check.
