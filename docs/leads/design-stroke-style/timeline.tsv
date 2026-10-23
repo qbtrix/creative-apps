@@ -99,3 +99,4 @@ time	kind	note
 2026-10-23T18:16Z	DK-m	fix	#4916	critic filed #4940 (dashed ellipse phase) and #4941 (miter limit); fix round 1 on #4916 started
 2026-10-23T18:25Z	DK-m	fix	#4888	heartbeat: fixers on #4864, #4888, #4916 building; no new heads; no needs-fix
 2026-10-23T18:46Z	DK-m	fix	#4888	heartbeat: fixers on #4864, #4888, #4916 still building; no new heads; no needs-fix
+2026-10-23T18:51Z	DK-m	fix	#4888	#4919/#4920 fixed at 5251a341 but #4888 is 17 files; moving the locked-layer parity into #4916 to get back under 15
