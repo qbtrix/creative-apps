@@ -23,6 +23,14 @@ import Testing
         #expect(Self.node(.ellipse).strokeOutline == (try ShapeRules.path(ShapeSpec(kind: .ellipse), in: Self.box.kernelRect)))
     }
 
+    @Test func aRoundedBoxTracesItsCorners() throws {
+        let path = { (r: Double) in try ShapeRules.path(ShapeSpec(kind: .rectangle, cornerRadius: r), in: Self.box.kernelRect) }
+        for kind in [DesignNodeKind.rectangle, .frame, .instance] {
+            let node = DesignNode(id: "n", name: "N", kind: kind, frame: Self.box, cornerRadius: 20)
+            #expect(node.strokeOutline == (try path(kind == .instance ? 0 : 20)), "\(kind): an instance has no corners")
+        }
+    }
+
     @Test func aShapeTracesItsSpec() throws {
         var star = Self.node(.shape)
         star.shape = ShapeSpec(kind: .star)

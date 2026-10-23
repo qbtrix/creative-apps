@@ -60,6 +60,17 @@ import Testing
         #expect(try isRed(draw(node, round), 406, 400), "a round cap reaches half the width past the end")
         #expect(try !isRed(draw(node, round), 408, 409), "but rounds off at the corner")
         #expect(try !isRed(draw(node), 406, 400), "a butt cap stops at the end")
+        round.cap = .square
+        #expect(try isRed(draw(node, round), 408, 409), "a square cap fills the corner")
+    }
+
+    @Test func aMiterJoinSharpensTheCorner() throws {
+        var miter = try #require(rect.vectorStroke)
+        (miter.width, miter.join) = (20, .miter)
+        var bevel = miter
+        bevel.join = .bevel
+        #expect(try isRed(draw(rect, miter), 508, 308), "the miter tip past the bottom-right corner")
+        #expect(try !isRed(draw(rect, bevel), 508, 308), "a bevel cuts it off")
     }
 
     @Test func aRoundCapRoundsEachDash() throws {
