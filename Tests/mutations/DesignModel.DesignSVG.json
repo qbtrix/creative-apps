@@ -131,5 +131,19 @@
     "find": "static let miterLimit = 10.0",
     "replace": "static let miterLimit = 4.0",
     "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": "imageKeepsAspect: the picture is stretched to the node's box",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "let drawn = PlaceRules.drawnRect(PlacedImage(assetID: asset.id, box: frame, focus: node.placedFocus), natural: asset.natural)",
+    "replace": "let drawn = frame",
+    "tests": "DesignPlaceSVGTests|DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": "imageClipsToBox: a rectangle's picture is not clipped to its box",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "then: \" clip-path=\\\"url(#\\(clip))\\\"\" + alpha(node) + turned)",
+    "replace": "then: alpha(node) + turned)",
+    "tests": "DesignPlaceSVGTests|DesignSVGTests|DesignSVGWalkTests"
   }
 ]
