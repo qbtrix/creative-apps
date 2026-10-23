@@ -30,3 +30,4 @@ utc	stage	event	ref	note
 2026-10-23T08:07:56Z	wait	editor-menus	#4771 open, Linux check 39920222222 still running; #4739/#4761 wait on it	-
 2026-10-23T08:20:27Z	cascade	editor-menus	#4771 merged; #4739 merged dev -> 4ea37a264 (CI: PASS), #4761 merged #4739 -> bd47702da (CI: PASS); Head lines moved	https://github.com/qbtrix/creative-apps/pull/4739
 2026-10-23T08:30:52Z	check	editor-menus	#4739 (4ea37a264) clean, waiting on lane; #4761 stacked; scoped flare/halo 39916329868/39916334144 still queued on pre-#4771 c2cc0c7	https://github.com/qbtrix/creative-apps/pull/4739
+2026-10-23T08:53:19Z	check	editor-menus	#4739 clean at 4ea37a264, waiting on the lane; #4761 stacked. Scoped flare/halo still only on pre-#4771 c2cc0c7 (queued).	https://github.com/qbtrix/creative-apps/pull/4739
