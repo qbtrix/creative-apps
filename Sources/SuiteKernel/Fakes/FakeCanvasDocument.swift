@@ -5,7 +5,9 @@
 // autosave-history AH-9 lists `history.read` and `history.jump` over its one History, so RJ-X31 runs on the CLI;
 // transform-tools TT-8 gives each rect a turn and mirrors and lists the six transform commands, so RJ-X32 runs on the CLI;
 // stroke-style SS-8 gives each rect an optional stroke and lists the nine stroke commands, so RJ-X35 runs on the CLI;
-// eyedropper EY-8 reads the topmost rect's fill at a point and lists `color.sample`, so RJ-X33 runs on the CLI.
+// eyedropper EY-8 reads the topmost rect's fill at a point and lists `color.sample`, so RJ-X33 runs on the CLI;
+// shape-tools SH-8 gives each rect an optional shape spec and lists `shape.draw` and `tool.shape`, so RJ-X34 runs on
+// the CLI.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -24,18 +26,21 @@ public struct FakeRect: Codable, Hashable, Sendable {
     /// The rect's clockwise turn in degrees about its centre and its mirrors; at 0 and false they are left out of
     /// the JSON, so a rect never turned saves what it did before turns.
     public var degrees = 0.0, flipX = false, flipY = false
+    /// The shape `shape.draw` drew in the rect's box; nil is a plain rect and is left out of the JSON, as `fill` is.
+    public var shape: ShapeSpec?
     public init(id: Int, name: String, x: Double, y: Double, w: Double, h: Double, locked: Bool = false, fill: Fill? = nil,
-                stroke: VectorStroke? = nil) {
+                stroke: VectorStroke? = nil, shape: ShapeSpec? = nil) {
         (self.id, self.name, self.x, self.y, self.w, self.h, self.locked, self.fill, self.stroke) = (id, name, x, y, w, h, locked, fill, stroke)
+        self.shape = shape
     }
-    private enum CodingKeys: String, CodingKey { case id, name, x, y, w, h, locked, fill, stroke, degrees, flipX, flipY }
+    private enum CodingKeys: String, CodingKey { case id, name, x, y, w, h, locked, fill, stroke, degrees, flipX, flipY, shape }
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         self.init(id: try c.decode(Int.self, forKey: .id), name: try c.decode(String.self, forKey: .name),
                   x: try c.decode(Double.self, forKey: .x), y: try c.decode(Double.self, forKey: .y),
                   w: try c.decode(Double.self, forKey: .w), h: try c.decode(Double.self, forKey: .h),
                   locked: try c.decode(Bool.self, forKey: .locked), fill: try c.decodeIfPresent(Fill.self, forKey: .fill),
-                  stroke: try c.decodeIfPresent(VectorStroke.self, forKey: .stroke))
+                  stroke: try c.decodeIfPresent(VectorStroke.self, forKey: .stroke), shape: try c.decodeIfPresent(ShapeSpec.self, forKey: .shape))
         degrees = try c.decodeIfPresent(Double.self, forKey: .degrees) ?? 0
         (flipX, flipY) = (try c.decodeIfPresent(Bool.self, forKey: .flipX) ?? false, try c.decodeIfPresent(Bool.self, forKey: .flipY) ?? false)
     }
@@ -48,6 +53,7 @@ public struct FakeRect: Codable, Hashable, Sendable {
         if degrees != 0 { try c.encode(degrees, forKey: .degrees) }
         if flipX { try c.encode(flipX, forKey: .flipX) }
         if flipY { try c.encode(flipY, forKey: .flipY) }
+        try c.encodeIfPresent(shape, forKey: .shape)
     }
     /// The box the rect's fill points are in: its own frame from the origin.
     public var fillBox: Rect { Rect(minX: 0, minY: 0, maxX: w, maxY: h) }
@@ -86,6 +92,8 @@ public struct FakeCanvasDocument: HeadlessDocument {
     public private(set) var rects: [FakeRect], selection: Int?, history = History<[FakeRect]>()
     /// The fake's recent files, newest first; Clear Menu empties them.
     public private(set) var recents: [RecentFileEntry]
+    /// The shape tool's options, which `tool.shape` sets and `shape.draw` never reads; a view setting, never a step.
+    public private(set) var shapeTool = ShapeSpec.defaults(.rectangle)
     public init(rects: [FakeRect] = [], selection: Int? = nil, recents: [RecentFileEntry] = []) {
         (self.rects, self.selection, self.recents) = (rects, selection, recents)
     }
@@ -170,13 +178,14 @@ public struct FakeCanvasDocument: HeadlessDocument {
         .object(["rects": .number(Double(rects.count)), "selected": selected.map { .string($0.name) } ?? .null])
     }
 
-    /// The fake's thirty-nine ids: its six commands, `edit.undo` and `edit.redo`, the five file-flow commands, the
-    /// eight fill commands, the two history commands, the nine stroke commands, the six transform commands and
-    /// `color.sample`. Empty only if an id were refused.
+    /// The fake's forty-one ids: its six commands, `edit.undo` and `edit.redo`, the five file-flow commands, the
+    /// eight fill commands, the two history commands, the nine stroke commands, the six transform commands,
+    /// `color.sample`, `shape.draw` and `tool.shape`. Empty only if an id were refused.
     public static let catalog = (try? CommandCatalog<FakeCanvasDocument>(
         app: app, specs + FileFlowCommands.specs(FakeCanvasDocument.self) + GradientCommands.specs(FakeCanvasDocument.self)
             + HistoryCommands.specs(FakeCanvasDocument.self) + StrokeCommands.specs(FakeCanvasDocument.self)
-            + TransformCommands.specs(FakeCanvasDocument.self) + SampleCommands.specs(FakeCanvasDocument.self),
+            + TransformCommands.specs(FakeCanvasDocument.self) + SampleCommands.specs(FakeCanvasDocument.self)
+            + ShapeCommands.specs(FakeCanvasDocument.self),
         history: { $0.history })) ?? .empty(app: app)
     /// A rect's result schema.
     static let rectSchema = ParamSchema.object(["id": .integer(), "name": .string(), "x": .number(), "y": .number(),
@@ -265,6 +274,22 @@ extension FakeCanvasDocument: StrokeTarget {
         let index = try editableIndex("stroke")
         history.record(name, rects, key: drag.map { "stroke:\(name):\($0)" })
         rects[index].stroke = stroke
+    }
+}
+
+/// The fake as a shape target: a drawn shape is a new rect over its box carrying its spec, selected, one step.
+extension FakeCanvasDocument: ShapeTarget {
+    public var shapeHelp: String? { nil }
+    public mutating func pickShapeTool(_ spec: ShapeSpec) { shapeTool = spec; history.endRun() }
+    /// Adds a rect named after the shape's kind ("Star 3") over `box` with `spec`, records the step `name` and
+    /// selects it; returns its id.
+    public mutating func addShape(_ spec: ShapeSpec, in box: Rect, name: String) throws -> String {
+        let id = (rects.map(\.id).max() ?? 0) + 1
+        history.record(name, rects)
+        rects.append(FakeRect(id: id, name: "\(spec.kind.rawValue.capitalized) \(id)", x: box.minX, y: box.minY, w: box.width,
+                              h: box.height, shape: spec))
+        selection = id
+        return String(id)
     }
 }
 
