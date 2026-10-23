@@ -57,3 +57,4 @@ time	task	event	note
 2026-10-23T19:02Z	3	heartbeat	-	poll: no wave 1 PR merged yet (lane busy); no needs-fix/needs-rebase; dev 0d4645bfb
 2026-10-23T19:24Z	3	heartbeat	-	poll: 0 of 15 wave 1 PRs merged; 7 fast-lane queued, 8 stacked needs-split; 0 findings; waits unchanged
 2026-10-23T19:46Z	3	heartbeat	-	lane batch 20261023192105 red on CommandPathTests; bisecting; culprit is in another line's app-menu PRs (#4818/#4832/#4838/#4841), ours touch no app menus; wave 1 PRs waiting on the lane
+2026-10-23T20:09Z	3	heartbeat	-	no wave 1 PR merged yet; none labelled needs-fix or needs-rebase; lane still resolving batch 20261023192105 (CommandPathTests red, not ours)
