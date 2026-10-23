@@ -4,7 +4,7 @@ Issue: #3730 (earlier run used duplicate #4507) · Packet: docs/blueprints/suite
 Run: act-1a166b69fbd-mmos · Session: claude/font-picker-lead-5om1cy · Started: 2026-10-22T16:36Z (this run resumed 2026-10-23T03:10Z)
 Stage: 5 contact sheet posted (run 39921983128); FP-u fix round 1 in lane
 Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a (origin/dev)
-Next: #4781 (build 39925347474) and #4783 (build 39925372189) merge → scoped suiteui run → FP-u round 2 review; leftovers become gap
+Next: #4781 (build 39925347474 green, clean) merges on a lane sweep → scoped suiteui run with 138495f5 + #4781 → FP-u round 2 review (last); leftovers become gap
 
 ## Slices
 
