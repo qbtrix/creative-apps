@@ -15,8 +15,10 @@ import SuiteKernel
     /// would take the walk back to the fixture, so FakeHistoryTests walks it. The transform commands turn Rect 1 (a flip
     /// records "Flip Horizontal", not its title "Flip"), so FakeTransformTests walks them. The place commands but
     /// `place.image` need a placed picture, which the fixture has none of, so FakeCanvasPlaceTests walks them.
+    /// `shape.draw` records "Draw Star", not its title "Draw Shape", so FakeShapeTests walks it with `tool.shape`.
     static let transforms = TransformCommands.specs(FakeCanvasDocument.self).map(\.id)
     static let places = PlaceCommands.specs(FakeCanvasDocument.self).map(\.id)
+    static let shapes = ShapeCommands.specs(FakeCanvasDocument.self).map(\.id)
     static let fills = ["fill.read", "fill.type", "fill.stop-add", "fill.stop-move", "fill.stop-remove", "fill.stop-color",
                         "fill.angle", "fill.gradient"]
     static let strokes = ["stroke.read", "stroke.add", "stroke.color", "stroke.width", "stroke.join", "stroke.cap", "stroke.dash",
@@ -29,17 +31,17 @@ import SuiteKernel
         try FakeCanvasDocument.open(doc.save(), name: "canvas.fake")
     }
 
-    @Test func listNamesTheFakesFortyFourIdsSorted() {
+    @Test func listNamesTheFakesFortySixIdsSorted() {
         #expect(catalog.app == "fake")
         #expect(catalog.ids == ["color.sample", "doc.export-json", "edit.redo", "edit.undo", "file.clear-recent", "file.drop", "file.open-in",
                               "file.open-recent", "file.recent", "fill.angle", "fill.gradient", "fill.read", "fill.stop-add",
                               "fill.stop-color", "fill.stop-move", "fill.stop-remove", "fill.type", "history.jump", "history.read",
                               "place.focus", "place.image", "place.read", "place.replace", "place.reset-size",
-                              "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select", "stroke.add", "stroke.cap",
+                              "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select", "shape.draw", "stroke.add", "stroke.cap",
                               "stroke.color", "stroke.dash", "stroke.join", "stroke.read", "stroke.remove", "stroke.trim", "stroke.width",
-                              "transform.flip", "transform.read", "transform.reset", "transform.rotate", "transform.scale", "transform.set"])
-        #expect(catalog.ids == catalog.ids.sorted() && Set(catalog.ids) == Set(Self.walk + ["file.drop", "history.jump"] + Self.transforms + Self.places)
-                && catalog.ids.count == Self.walk.count + 2 + Self.transforms.count + Self.places.count)
+                              "tool.shape", "transform.flip", "transform.read", "transform.reset", "transform.rotate", "transform.scale", "transform.set"])
+        #expect(catalog.ids == catalog.ids.sorted() && Set(catalog.ids) == Set(Self.walk + ["file.drop", "history.jump"] + Self.transforms + Self.places + Self.shapes)
+                && catalog.ids.count == Self.walk.count + 2 + Self.transforms.count + Self.places.count + Self.shapes.count)
         #expect(catalog.ids.allSatisfy(CommandCatalog<FakeCanvasDocument>.isValidID))
     }
 

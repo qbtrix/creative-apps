@@ -1,7 +1,8 @@
 // HaloLayerInspector.swift: the selected layer in Halo's inspector: its
 // header (`selectedLayerHeader`), the TRANSFORM group, a refusal's caption,
 // the LAYER group, FILL for a solid or shape (HaloFillInspector, its
-// gestures to `runFill`), STROKE for a shape (HaloStrokeInspector, its
+// gestures to `runFill`), IMAGE for a solid (HaloPlaceInspector, its picture
+// and the Fill checkbox, PH-3), STROKE for a shape (HaloStrokeInspector, its
 // gestures to `runStroke`), then the EASING and TEXT slots. TRANSFORM has one InspectorSliderRow per
 // `propertyRows` row (shown value, range, step, unit, decimals; keyed while
 // a key sits at the playhead) with a KeyframeButton beside it, or under it
@@ -64,6 +65,9 @@ struct HaloLayerInspector: View {
                     HaloLayerGroup(layer: layer, model: model, perform: perform)
                     if HaloFillInspector.shows(layer.kind) {
                         HaloFillInspector(model: model, perform: perform, runFill: runFill)
+                    }
+                    if HaloPlaceInspector.shows(layer.kind) {
+                        HaloPlaceInspector(model: model)
                     }
                     if HaloStrokeInspector.shows(layer.kind) {
                         HaloStrokeInspector(model: model, perform: perform, runStroke: runStroke)
