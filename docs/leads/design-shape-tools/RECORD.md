@@ -2,17 +2,17 @@
 
 Issue: #3440 · Packet: docs/blueprints/design/features/shape-tools.md
 Run: act-1a162d0f852-70vb · Started: 2026-10-22T08:56Z (prior run act-1a15abb305f-lc8g shipped DS-a)
-Stage: 3 wave 2 done; all slices in PRs, waiting for merges and scoped runs
-Base: dev 561ef1c5
-Next: DS-m Belt-Slice-Done posted 22:48Z on full CI 39836126860 (a102c34cc, Linux green; lead.md rule 6: merged-done needs the Linux job only). DS-u = 133ab6ead (#4386) and DS-z = fbd763f6d (#4392) wait on the Linux job of full CI 39872261116 (be1ee9c22, pending behind 39836126860's macOS job in ci-dev) or a later run containing them; each then gets Belt-Slice-Done + Mac-Finish-Wanted. Then critic panels (clarity, mouse, taste, job; ui for DS-u/DS-z), findings, gaps, Belt-Contact-Sheet. PR bodies: update with MCP update_pull_request.
+Stage: 4 finish done; every slice has Belt-Slice-Done, Belt-Contact-Sheet posted 00:16Z on full CI 39872261116
+Base: dev 8e0c19c73
+Next: beta-hardening lane verifies DS-a, DS-u, DS-m, DS-z (J-DS journeys, feel gate, Mac finish; Mac-Finish-Wanted posted for DS-a, DS-u, DS-z). No critic panel ran on DS-u/DS-m/DS-z: no journeys run on a head containing them yet (lead.md stage 3: never wait on a review). Lead stopped.
 
 ## Slices
 | slice | behavior | tasks | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|
 | DS-a | .shape node and tool, ShapeTarget stubs, Shape tool on the palette | DS-1, DS-2 | – | yes | 0 | done (24202fb1; slice-done 39582236683) | 39582236683 | posted |
-| DS-u | canvas paints the path, redraws on resize; snapshots, budget | DS-3, DS-4 | DS-a, DS-m | yes | 0 | open (#4386) | – | – |
-| DS-m | ShapeRules.dragged draw as one step; SVG path, catalog, RJ-D35 | DS-5, DS-6 | DS-a, eyedropper:DY-m (#4357) | no | 0 | open (#4384, #4385) | – | – |
-| DS-z | journey on live; built | DS-7, DS-8 | DS-u, DS-m | yes | 0 | open | – | – |
+| DS-u | canvas paints the path, redraws on resize; snapshots, budget | DS-3, DS-4 | DS-a, DS-m | yes | 0 | done (133ab6ead; slice-done 39872261116) | 39872261116 | wanted |
+| DS-m | ShapeRules.dragged draw as one step; SVG path, catalog, RJ-D35 | DS-5, DS-6 | DS-a, eyedropper:DY-m (#4357) | no | 0 | done (62400e4d4; slice-done 39836126860) | 39836126860 | – |
+| DS-z | journey on live; built | DS-7, DS-8 | DS-u, DS-m | yes | 0 | done (fbd763f6d #4392 feature-done; slice-done 39872261116) | 39872261116 | wanted |
 
 ## Tasks
 | id | slice | wave | branch | head | PR | state |
