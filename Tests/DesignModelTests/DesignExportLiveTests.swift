@@ -46,12 +46,17 @@ private struct DiskFull: Error, CustomStringConvertible {
         #expect(outcome.written.isEmpty && outcome.failed?.file == "a.png")
     }
 
-    @Test func aCancelBeforeAFileWritesNothingMore() async {
-        var wrote: [String] = []
+    @Test func aCancelBeforeAFileRendersAndWritesNothingMore() async {
+        var wrote: [String] = [], rendered: [String] = []
         let outcome = await DesignExportLive.run(
-            ["a", "b", "c"], name: { "\($0).png" }, render: { $0 },
+            ["a", "b", "c"], name: { "\($0).png" },
+            render: { item in
+                rendered.append(item)
+                return item
+            },
             write: { _, item in wrote.append(item) },
             isCancelled: { wrote.count == 1 }, progressed: { _ in })
+        #expect(rendered == ["a"], "a file after Cancel was rendered")
         #expect(wrote == ["a"])
         #expect(outcome.written == ["a.png"] && outcome.cancelled && outcome.failed == nil)
     }
