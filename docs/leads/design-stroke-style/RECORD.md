@@ -49,3 +49,9 @@ Next: DK-u and DK-m slice PRs; critic panels; then DK-z
 - Asked the supervisor on #3441 to file a needs-core issue: `Path.dashed` drops zero-length dashes. Workaround: dotLength 0.001.
 - Footers stripped from the #3759 and #4888 bodies.
 - Next: critic round 2 on #4864 and #5002. DK-z waits until 5 or fewer findings are open.
+
+## 2026-10-23T22:01Z DK-u gate, DK-m rebase
+
+- #4864: the gate passed at b17f9002c. The body now carries Head b17f9002c and Fixes #4928. needs-split was dropped after a reply to the sentinel (379 lines, 7 files).
+- The DK-u round-2 critic is running on #5002 (da662ed8).
+- #4888 needs-rebase: dev merged in at d6494151, resolving DesignCommandCatalog, its tests and the CLI golden (the stroke.* and select.* ids kept). Its gate is running; push after CI: PASS.
