@@ -2,7 +2,7 @@
 
 Issue: #3458 · Packet: docs/blueprints/library/features/cull-finish.md
 Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 · earlier run act-1a15995d319-aamb
-Stage: build, wave 3 PRs open (DR-u #4838 1be77364, DR-6 #4844 52603087, DR-7+8 #4899 f1071bc8 stacked); #4844 carries the approved perf-suites line, so the supervisor lands it (asked on #3458 comment 6371186942). Checked 2026-10-23T17:49:02Z
+Stage: build, wave 3 PRs open; supervisor lands #4844 (merge commit; head f6984b0f, dev merged in by the supervisor); #4838 and #4899 on the lane. Checked 2026-10-23T17:58:33Z
 Base: origin/dev 35a0b5e7
 Next: lane merges #4838, #4844, #4899 (#4899 fits 400/15 once #4844 lands); then a scoped run app=library for Belt-Slice-Done DR-u (+Mac-Finish-Wanted) and DR-m; then DR-z (DR-9 journey, DR-10 docs incl. the ⌥⌘⌫ packet wording and excludedPaths wiring gap)
 
@@ -52,3 +52,4 @@ Next: lane merges #4838, #4844, #4899 (#4899 fits 400/15 once #4844 lands); then
 - 2026-10-23T16:35:10Z: 27 open line:library findings, none against this feature; asked the supervisor on #3458 whether they gate new waves. Counting only this feature's (0) until answered.
 - 2026-10-23T17:32:30Z: supervisor answered on #3458 (6369907319): count only this run's findings; go on with wave 3; add `library LibraryModelTests.largeBudget` to Tests/perf-suites.txt inside #4844; ⌥⌘⌫ is fine, keep it in the shortcut catalog. Checked: Library has no shortcut catalog or conflict test (LibraryCommandCatalog's CommandSpec has no key field); by hand, ⌥⌘⌫ Delete Rejected Photos and ⌘⌫ Remove from Collection are the only delete keys, no clash. #4838 is 398/400 lines, so no catalog there; DR-10 fixes the packet's ⌘⌫ wording to ⌥⌘⌫.
 - 2026-10-23T17:49:02Z: fixer A: #4844 head 52603087 adds `library LibraryModelTests.largeBudget` to Tests/perf-suites.txt (free-test form) and enables it, CI: PASS, Mutate 4/4. #4899 merged dr6 in, head f1071bc8, CI: PASS; shows 16 files/404 lines vs dev until #4844 lands. Asked the supervisor to land #4844 and whether a Library shortcut catalog should be a gap (#3458 6371186942).
+- 2026-10-23T17:58:33Z: supervisor answer (#3458 6371335630, 6371346311): the supervisor lands #4844 as a merge commit after the Linux check and the local Mac gate; #4899 then rides the lane (its base is already dev, no retarget needed). Shortcut catalog is a suite-wide gap, #4945 (off this line). Decision ticked.

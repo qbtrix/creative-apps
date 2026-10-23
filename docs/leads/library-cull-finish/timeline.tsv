@@ -40,3 +40,4 @@
 2026-10-23T17:44:50Z	heartbeat	#4844 head 52603087 (fixer A: largeBudget in perf-suites), restacking #4899; #4838 1be77364 unchanged; none merged
 2026-10-23T17:49:02Z	fix	#4844 52603087 largeBudget in perf-suites; #4899 f1071bc8 restacked
 2026-10-23T17:49:02Z	question	supervisor lands #4844 (protected path); shortcut catalog gap?
+2026-10-23T17:58:33Z	decision	supervisor lands #4844; shortcut catalog gap #4945
