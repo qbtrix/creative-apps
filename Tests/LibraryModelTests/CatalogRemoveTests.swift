@@ -26,7 +26,7 @@ import Testing
         }
     }
 
-    @Test(.disabled("waits on LC-6")) func removeKeepsFilesAndIsOneUndoStep() throws {
+    @Test func removeKeepsFilesAndIsOneUndoStep() throws {
         let photos = try Self.shoot()
         var library = LibraryCatalog()
         library.load(photos)
@@ -39,30 +39,42 @@ import Testing
         #expect(library.items == photos)
     }
 
-    @Test(.disabled("waits on LC-6")) func removingKeepsTheRestInOrder() {
+    @Test func removingKeepsTheRestInOrder() {
         let photos = LibraryFixtures.shoot()
         let kept = CatalogFileRules.removing([photos[0].id, photos[5].id], from: photos)
         #expect(kept.map(\.id) == photos.enumerated().filter { $0.offset != 0 && $0.offset != 5 }.map(\.element.id))
     }
 
-    /// On now: both commands are declared, off with the reason, refuse to run, and are not yet in the catalog.
-    @Test func specsAreStubs() throws {
+    /// Both commands are in the catalog and the ledger, each off with its reason until it can act.
+    @Test func specsAreLiveWithTheirReasons() throws {
         #expect(LibraryCatalog.catalogFileSpecs.map(\.id) == ["photo.remove-from-catalog", "photo.relink"])
-        let commands = try CommandCatalog(app: "library", LibraryCatalog.catalogFileSpecs,
-                                          history: { LibraryCatalogSteps(catalog: $0) })
+        #expect(LibraryCatalog.catalog.ids.contains("photo.remove-from-catalog"))
+        #expect(LibraryCatalog.catalog.ids.contains("photo.relink"))
         var library = LibraryCatalog()
-        let why = LibraryCatalog.catalogFilesHelp
-        #expect(throws: CatalogError.unavailable(id: "photo.remove-from-catalog", why: why)) {
-            try commands.run("photo.remove-from-catalog", params: .object([:]), on: &library)
+        library.load(LibraryFixtures.shoot())
+        library.select([])
+        #expect(throws: CatalogError.unavailable(id: "photo.remove-from-catalog", why: LibraryCatalog.removeHelp)) {
+            try LibraryCatalog.catalog.run("photo.remove-from-catalog", params: .object([:]), on: &library)
         }
-        #expect(throws: CatalogError.unavailable(id: "photo.relink", why: why)) {
-            try commands.run("photo.relink", params: .object(["id": .string("a"), "file": .string("/b.jpg")]), on: &library)
+        #expect(throws: CatalogError.unavailable(id: "photo.relink", why: LibraryCatalog.relinkHelp)) {
+            try LibraryCatalog.catalog.run("photo.relink", params: .object(["id": .string("a"), "file": .string("/b.jpg")]),
+                                           on: &library)
         }
-        #expect(!LibraryCatalog.catalog.ids.contains("photo.remove-from-catalog"))
-        #expect(!LibraryCatalog.catalog.ids.contains("photo.relink"))
+    }
+
+    @Test func removeByIdsLeavesTheSelectionAlone() throws {
         let photos = LibraryFixtures.shoot()
-        #expect(CatalogFileRules.removing(Set(photos.map(\.id)), from: photos) == photos)
-        #expect(CatalogFileRules.relinks(missing: photos, located: (id: "IMG_0001", file: "/moved/IMG_0001.jpg"),
-                                         size: { _ in 1 }).isEmpty)
+        var library = LibraryCatalog()
+        library.load(photos)
+        library.select([photos[0].id])
+        let ids = [photos[1].id, photos[4].id]
+        _ = try LibraryCatalog.catalog.run("photo.remove-from-catalog", params: .object(["ids": .array(ids.map(JSONValue.string))]),
+                                           on: &library)
+        #expect(library.items.map(\.id) == CatalogFileRules.removing(Set(ids), from: photos).map(\.id))
+        #expect(library.selection == [photos[0].id])
+        library.undo()
+        #expect(library.items == photos)
+        library.redo()
+        #expect(library.items.count == photos.count - 2)
     }
 }
