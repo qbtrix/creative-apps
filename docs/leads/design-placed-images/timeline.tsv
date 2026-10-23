@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-23T17:30Z	PD-m	pr	#4922	place + SVG image, stacked on #3759, gate PASS, mutations 3/3 + 16/16; PD-a pushed 3fc0a384
 2026-10-23T17:38Z	PD-m	critic	#4922	findings #4930-#4935; fix round 1 started; 6 open findings > 5: PD-z held
 2026-10-23T17:42Z	PD-a	gate	#3759	load 59; PD-a gate rerun still waiting for load<10; PD-u gate rerun; PD-m fix round 1; no needs-fix labels
+2026-10-23T17:55Z	PD-u	build	design/pd-u-place-canvas	gate PASS at a4096dbe, but 14 files +518 > 400 cap and stacked on #3759 + #4864; builder splitting into pd-u1 (model+canvas) and pd-u2 (UI) on PD-a only
