@@ -89,6 +89,7 @@ library LibraryModelTests.LargeCatalogFixtureBudgetTests
 library LibraryModelTests.LibraryCollectionsFileTests/twentyCollectionsOverTenThousandIDsWithinBudget
 library LibraryModelTests.addToThousandWithinBudget
 library LibraryModelTests.suggestWithinBudget
+library LibraryModelTests.largeBudget
 
 design DesignModelTests.DesignSnapBudgetTests
 design DesignModelTests.DesignSelectBudgetTests
