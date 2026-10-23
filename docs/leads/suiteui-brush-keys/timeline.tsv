@@ -28,3 +28,6 @@ utc	stage	event	ref	note
 2026-10-22T17:43:19Z	poll	AN-u, AN-flare-u, AR-photo-u, DS-design, AB-photo, OC-photo-m not done (no Slice-Done on #4522/#4506/#3757/#4494); blocked poll 2
 2026-10-22T18:06:39Z	nudge	Belt nudge read; records moved from lead/brush-keys to this branch (Belt reads lead/suiteui-brush-keys)
 2026-10-22T18:15:42Z	stopped	#4531 closed as duplicate of #3758; work recorded on #3758; run ends
+2026-10-23T15:25:45Z	resume	run act-1a16958d72f-a4mg resumed at stage 3 on dev 721168a8; wave 1 planned
+2026-10-23T15:27:34Z	wave	wave 1 launched: BK-u (wf_1dce2172-bd9)
+2026-10-23T17:29:06Z	nudge	Belt nudge read; records for run act-1a16958d72f-a4mg mirrored here (Belt reads lead/suiteui-brush-keys)
