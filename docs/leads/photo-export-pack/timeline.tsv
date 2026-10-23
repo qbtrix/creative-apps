@@ -153,3 +153,4 @@ utc	stage	event	ref	note
 2026-10-23T10:41Z	parked	#3477 still waiting-on-prereq; #4772 merged 10:12Z as 622f200f9 (closes #4700); TX-z still awaits first Photo journeys run containing 1b8539091
 2026-10-23T11:23Z	parked	#3477 still waiting-on-prereq; no new photo findings; queued photo/full journeys (04140530e, 090d07037) predate 1b8539091, TX-z still unproven
 2026-10-23T11:55Z	parked	#3477 still waiting-on-prereq; no new photo findings; no journeys run yet on a sha containing 1b8539091 (TX-z unproven)
+2026-10-23T12:27Z	parked	#3477 still waiting-on-prereq; no new photo findings; no photo/full journeys run yet on a sha containing 1b8539091 (TX-z unproven)
