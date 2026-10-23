@@ -150,3 +150,4 @@ utc	stage	event	ref	note
 2026-10-23T09:04Z	parked	#3477 still waiting-on-prereq; PRs #4772 (1d20cba37) and #4785 (5f8269668) waiting on lane macOS builds; no new Photo findings
 2026-10-23T09:36Z	parked	#3477 still waiting-on-prereq; #4785 macOS build 39926319417 green, awaiting lane merge; #4772 macOS build 39926660853 queued; no new photo findings
 2026-10-23T10:10Z	parked	#3477 still waiting-on-prereq; #4785 merged 09:53Z as 1b8539091 (closes #4782), TX-z awaits first Photo journeys run containing it; #4772 macOS build green, awaiting lane merge
+2026-10-23T10:41Z	parked	#3477 still waiting-on-prereq; #4772 merged 10:12Z as 622f200f9 (closes #4700); TX-z still awaits first Photo journeys run containing 1b8539091
