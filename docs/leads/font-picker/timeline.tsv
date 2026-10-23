@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-23T04:35:27Z	check-in	Belt nudge; FP-u build 39894260475 queued since 03:17 (75+ min); full run 39897762608 on a8ea948 still pending; Linux check on a8ea948 red from #4706 (not ours)	FP-u	waiting; supervisor told
 2026-10-23T05:02:16Z	check-in	FP-u build 39894260475 started 04:54 (in progress); scoped suiteui 39900719671 on 349fc24e (holds FP-a 722a4fe9) in progress	FP-u	waiting
 2026-10-23T05:03:58Z	ci	FP-u macOS build 39894260475 success on deb55ebe; lane merges on next sweep	FP-u	waiting merge
+2026-10-23T05:23:40Z	check-in	#4704 not merged yet; lane Linux run 39903845974 on deb55ebe in progress since 05:05; scoped suiteui 39900719671 still in progress	FP-u	waiting merge
