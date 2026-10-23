@@ -115,7 +115,7 @@ private func node(_ kind: DesignNodeKind = .frame, picture: PlacedAsset? = asset
     @Test
     func landsInSelectedFrame() throws {
         var workspace = try opened([node(picture: nil)])
-        let id = try workspace.insertPlaced(asset, PlacedImage(assetID: "asset-1", box: Rect(minX: 0, minY: 0, maxX: 300, maxY: 200)), name: "Place")
+        let id = try workspace.insertPlaced(asset, PlacedImage(assetID: "asset-1", box: Rect(minX: 0, minY: 0, maxX: 90, maxY: 60)), name: "Place")
         #expect(workspace.selectedPage?.nodes.first?.children.map(\.id) == [id])
         #expect(workspace.treeNode(id)?.name == "photo")
     }
