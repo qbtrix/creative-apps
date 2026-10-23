@@ -1,7 +1,8 @@
 // DesignPlaceUISnapshots.swift (placed-images PD-u, PD-4): Design's place surfaces around a placed picture.
-// The 400 × 400 frame showing the photo beside the inspector's Image section (name, size, Place…), and the
-// canvas under the drop ring a picture dragged over it shows. Writes design-image-inspector- and
-// design-place-drop-{light,dark}.png from `DesignPlaceSeed.framed()`. macOS only.
+// The 400 × 400 frame showing the photo beside the inspector's Picture section (name, size, Place in Frame…), the
+// same frame empty (Place in Frame…, the checkbox and the note in their real states), and the canvas under the drop
+// ring a picture dragged over it shows. Writes design-image-inspector-, design-image-inspector-empty- and
+// design-place-drop-{light,dark}.png from `DesignPlaceSeed`. macOS only.
 import AppKit
 import SuiteKernel
 import SuiteUI
@@ -17,6 +18,14 @@ import Testing
         let model = try DesignPlaceSeed.framed()
         #expect(model.placedSelection?.asset.name == "photo-1200x800.jpg")
         try shoot(PlaceSample(model: model), "design-image-inspector")
+    }
+
+    @Test func inspectorEmpty() throws {
+        let model = DesignPlaceSeed.page(DesignNode(id: "node-1", name: "Frame", kind: .frame,
+                                                    frame: DesignRect(x: 100, y: 100, width: 400, height: 400), cornerRadius: 24))
+        #expect(model.selectedNode?.kind == .frame && model.placedSelection == nil)
+        #expect(model.placeNote == DesignWorkspace.placeNotBuilt)
+        try shoot(PlaceSample(model: model), "design-image-inspector-empty")
     }
 
     @Test func drop() throws {

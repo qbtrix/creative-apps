@@ -48,8 +48,10 @@
 //
 // Pictures (placed-images PD-u): File > Place… (⇧⌘P) and the Image section's Place… open SuiteUI's
 // PlacePanel and send each file as `.place`, filling the selected frame while Fill is on; a canvas drop
-// sends the same. An ⌥-drag that starts inside the selected picture pans its focus instead, each sample a
-// `place.focus` under the pan's one token, ending with `endEditRun`. A refusal goes to the status line.
+// sends the same; the Image section's Place in Frame… fills its layer. Fill applies only when an unlocked frame
+// or rectangle is selected (`placeFills`), and only to the first file (`placeSteps`). A Move-tool ⌥-drag inside
+// the selected overflowing picture pans its focus on the live copy, landing one `place.focus` at mouse-up. A
+// refusal goes to the status line.
 //
 // `.suiteProbes()` sits on the root (D0-7a), so the window's `suite.controls`
 // lists every control the editor registers with its DesignControlID.
@@ -175,10 +177,12 @@ struct DesignWindow: View {
         case .tool(let tool): model.selectTool(tool)
         case .drag(let from, let to, let modifiers):
             let start = DesignPoint(from)
-            // An ⌥-drag that starts inside the selected picture pans it, each step under the pan's one token.
+            // A Move-tool ⌥-drag inside the selected picture pans it on the live copy; mouse-up lands one step.
             if !live.isLive, pan == nil { pan = model.beginPicturePan(at: start, option: modifiers.contains(.option)) }
             if let pan {
-                if let step = model.panIntent(pan, to: DesignPoint(to)), let help = model.runPlace(step) { note = help }
+                guard let step = model.panIntent(pan, to: DesignPoint(to)) else { return }
+                if !live.isLive { live.begin(from: model) }
+                live.preview(step)
                 return
             }
             if !live.isLive {
@@ -188,7 +192,7 @@ struct DesignWindow: View {
             }
             live.sample(from: start, to: DesignPoint(to), modifiers: modifiers)
         case .endDrag:
-            if pan != nil { pan = nil; model.endEditRun() } else { endLive { model.endDrag() } }
+            if pan != nil { pan = nil; endLive { model.endEditRun() } } else { endLive { model.endDrag() } }
         case .nudge(let direction, let shift): model.nudge(direction, shift: shift)
         case .deleteSelection: model.deleteSelection()
         case .deselect: model.deselect()
@@ -247,7 +251,7 @@ struct DesignWindow: View {
         case .sampleSize(let size): model.setSampleSize(size)
         case .sampleTarget(let toStroke): model.setSampleTarget(toStroke: toStroke)
         case .adoptLive(let result): model.adoptLiveCommand(result)
-        case .placeFile: placeFile()
+        case .placeFile(let fill): placeFile(fill: fill)
         case .place(let intent, let fill): if let help = model.runPlace(intent, fill: fill) { note = help }
         }
     }
@@ -271,13 +275,14 @@ struct DesignWindow: View {
         if let refusal { note = refusal.help }
     }
 
-    /// Place…: each file the panel reads becomes a picture, filling the selected frame while Fill is on.
-    private func placeFile() {
-        let (formats, fill) = (model.placeFormats, UserDefaults.standard.bool(forKey: DesignPlace.fillKey))
+    /// Place…: the first file the panel reads fills the selected frame when `fill` can (`placeFills`), else
+    /// File > Place…'s Fill setting decides; the rest become new layers. Refused files can't say why until #4985.
+    private func placeFile(fill: Bool?) {
+        let formats = model.placeFormats
+        let fills = model.placeFills(fill: fill ?? UserDefaults.standard.bool(forKey: DesignPlace.fillKey))
         Task { @MainActor in
-            for file in await PlacePanel.choose(formats: formats) {
-                perform(.place(.place(name: file.name, data: file.data, at: nil), fill: fill))
-            }
+            let files = await PlacePanel.choose(formats: formats)
+            for step in DesignWorkspace.placeSteps(files, fills: fills, at: nil) { perform(.place(step.intent, fill: step.fill)) }
         }
     }
 

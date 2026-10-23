@@ -1,15 +1,15 @@
 // DesignJourneyTests+Place.swift: DJ-P1 of docs/blueprints/design/features/placed-images.md on `cards` at
-// 1024 × 768, the numbered steps below. Select Desktop (a frame), turn Fill on in the inspector's Image section and
-// Place… photo-1200x800.jpg: the frame shows it cropped by cover, with no new layer; ⌥-drag inside it pans, one
+// 1024 × 768, the numbered steps below. Select Desktop (a frame), and the inspector's Picture section's Place in
+// Frame… photo-1200x800.jpg: the frame shows it cropped by cover, with no new layer; ⌥-drag inside it pans, one
 // undo step; widen it and the picture still covers; the Image rows read the file; Reset Size gives 3:2; two undos;
-// Place… with nothing selected adds a rectangle `photo-1200x800`; Export SVG. PD-u writes it; it skips until PD-7
+// with "Place into selected frame" on, File > Place… with nothing selected still adds a rectangle `photo-1200x800`; Export SVG. PD-u writes it; it skips until PD-7
 // turns it on, once PD-5 runs the place commands and the journey can answer the Place… panel.
 import XCTest
 
 final class DesignPlaceJourneyTests: XCTestCase {
     private static let wait = true
     static let arguments = ["-DesignFixture", "cards", "-SuiteWindowSize", "1024x768"]
-    /// Desktop's row in Layers (DesignFixtures.cards), and the Image section's Place… and Fill.
+    /// Desktop's row in Layers (DesignFixtures.cards), and the Picture section's Place in Frame… and its checkbox.
     static let desktopRow = "design.layer.node-1", place = "design.inspector.place", fill = "design.inspector.place-fill"
 
     @MainActor func testPlacePhotoInFrame() throws {
@@ -18,10 +18,9 @@ final class DesignPlaceJourneyTests: XCTestCase {
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 10), "the cards fixture showed no page")
 
-        design.clickDesignLayer(Self.desktopRow) // 1. A frame selected: the Image section offers Place… and Fill.
+        design.clickDesignLayer(Self.desktopRow) // 1. A frame selected: the Picture section offers Place in Frame….
         for id in [Self.place, Self.fill] where !design.element(id).exists { XCTFail("the Image section shows no \(id)") }
-        design.element(Self.fill).click() // 2. Fill on, Place… photo-1200x800.jpg: it fills the frame, no new layer.
-        design.element(Self.place).click()
+        design.element(Self.place).click() // 2. Place in Frame… photo-1200x800.jpg: it fills the frame, no new layer.
         // PD-7 answers the Place… panel with photo-1200x800.jpg here.
         XCTAssert(design.element("suite.place.file").waitForExistence(timeout: 5), "the frame shows no picture")
         design.shot("image-in-frame")
@@ -33,7 +32,8 @@ final class DesignPlaceJourneyTests: XCTestCase {
         }
         // 4. Drag the right edge to 600: the picture still covers; the File row reads
         //    "photo-1200x800.jpg · JPEG · 1200 × 800 px".
-        design.element("suite.place.reset-size").click() // 5. Reset Size: 3:2. Two undos, then Place… unselected.
+        design.element("suite.place.reset-size").click() // 5. Reset Size: 3:2. Two undos.
+        design.element(Self.fill).click() // The checkbox on, then File > Place… unselected: a new rectangle, no refusal.
         design.shot("image-reset")
         // 6. Export SVG: the picture as a clipped <image> (PD-6).
     }

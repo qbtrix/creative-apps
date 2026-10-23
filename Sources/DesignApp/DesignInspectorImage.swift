@@ -1,8 +1,9 @@
-// DesignInspectorImage.swift (placed-images PD-u, PD-4): the inspector's Image section on a frame or rectangle.
+// DesignInspectorImage.swift (placed-images PD-u, PD-4): the inspector's Picture section on a frame or rectangle.
 // A layer showing a picture gets SuiteUI's PlacedImageRows (the file, Replace…, Reset Size), each sent as `.place`;
-// then Place… (`.placeFile`, built from the File menu's catalog spec) and Fill, a checkbox kept in user defaults
-// (DesignPlace.fillKey) that makes Place… and a drop fill the selected frame. Each control is disabled with the
-// Model's reason while its command can't run (`placeActionHelp`), and that reason shows below them.
+// then Place in Frame… (`.placeFile(fill: true)`: the picture fills this layer; built from the catalog's place.image
+// spec, whose help is `placeActionHelp`) and the "Place into selected frame" checkbox, kept in user defaults
+// (DesignPlace.fillKey), which makes File > Place… and a drop fill the selected frame. The rows go grey together on
+// Replace…'s reason until SuiteUI takes one reason per row (#4985); the note names every reason (`placeNote`).
 import DesignModel
 import SuiteKernel
 import SuiteUI
@@ -16,24 +17,23 @@ struct DesignInspectorImage: View {
 
     var body: some View {
         let help = model.placeActionHelp()
-        InspectorSection("Image") {
+        InspectorSection("Picture") {
             if let asset = node.placedAsset {
-                let rowsHelp = model.placeActionHelp("place.replace")
                 PlacedImageRows(asset: asset, formats: model.placeFormats) { perform(.place($0, fill: false)) }
-                    .disabled(rowsHelp != nil)
+                    .disabled(model.placeActionHelp("place.replace") != nil)
             }
             InspectorRow("") {
                 MenuCommand(DesignMenuState.spec("place.image"), on: DesignMenuState(workspace: model, hasWindow: true),
-                            title: "Place…", systemImage: "photo.badge.plus") { perform(.placeFile) }
+                            title: "Place in Frame…", systemImage: "photo.badge.plus") { perform(.placeFile(fill: true)) }
                     .suiteControl(id: "design.inspector.place", enabled: help == nil, reason: help)
             }
             InspectorRow("") {
-                Toggle("Fill", isOn: $fill)
+                Toggle("Place into selected frame", isOn: $fill)
                     .toggleStyle(.checkbox)
-                    .help("Place a picture into the selected frame instead of beside it.")
+                    .help("On: File > Place… and a drop fill the selected frame, cropped to cover it. Off: they add the picture as a new layer on the page.")
                     .suiteControl(id: "design.inspector.place-fill", enabled: true, reason: nil)
             }
-            if let help { InspectorNote(help, identifier: "design.inspector.place-help") }
+            if let note = model.placeNote { InspectorNote(note, identifier: "design.inspector.place-help") }
         }
     }
 }

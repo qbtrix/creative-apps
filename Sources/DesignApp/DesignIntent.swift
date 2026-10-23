@@ -60,8 +60,9 @@ enum DesignIntent {
     case sampleSize(SampleSize), sampleTarget(toStroke: Bool)
     /// A live command ran on a copy of the file (EM-4): the window becomes it.
     case adoptLive(DesignWorkspace)
-    /// Place…: the panel, then each file it reads as `.place` (placed-images PD-u).
-    case placeFile
+    /// Place…: the panel, then each file it reads as `.place` (placed-images PD-u); `fill` true fills the
+    /// selected frame (the Image section's Place in Frame…), nil follows File > Place…'s Fill setting.
+    case placeFile(fill: Bool?)
     /// A picture command, a place with `fill` into the selected frame; a refusal's help goes to the status line.
     case place(PlaceIntent, fill: Bool)
 }

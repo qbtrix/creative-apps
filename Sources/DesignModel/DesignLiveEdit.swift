@@ -6,7 +6,8 @@
 // editor intent on the copy after the ones before it (`preview(_: GradientIntent)`:
 // a dragged stop's index follows the copy's re-sorts), and the workspace is
 // left alone. A transform scrub (the inspector's Rotation bar) previews its
-// kernel intent the same way (`preview(_: TransformIntent)`).
+// kernel intent the same way (`preview(_: TransformIntent)`), and a picture pan its
+// focus step (`preview(_: PlaceIntent)`), landing one `runPlace` then `endEditRun`.
 // `end(into:)` replays the gesture into the workspace through its own methods
 // (the last sample, `drag` then `endDrag`; the last value, `setStyle` or
 // `runTransform` then `endEditRun`; every fill intent, `runFill` then
@@ -23,6 +24,7 @@ public struct DesignLiveEdit: Sendable, Equatable {
         case style(DesignStyleChange)
         case fill([GradientIntent])
         case transform(TransformIntent)
+        case place(PlaceIntent)
     }
 
     /// The copy the canvas draws while a gesture lasts; nil with none live.
@@ -71,6 +73,14 @@ public struct DesignLiveEdit: Sendable, Equatable {
         last = .transform(intent)
     }
 
+    /// One focus step of a picture pan, run on the copy `begin` took. Nothing before `begin`.
+    public mutating func preview(_ intent: PlaceIntent) {
+        guard var shown = base else { return }
+        shown.runPlace(intent)
+        workspace = shown
+        last = .place(intent)
+    }
+
     /// Replays the last sample or value into `model` and ends it there as one step, then clears
     /// the copy. A drag with no sample after the press only ends. Returns a refused value's reason.
     @discardableResult
@@ -89,6 +99,10 @@ public struct DesignLiveEdit: Sendable, Equatable {
         case .transform(let intent):
             model.runTransform(intent)
             model.endEditRun()
+        case .place(let intent):
+            let help = model.runPlace(intent)
+            model.endEditRun()
+            if let help { return .notYet(help) }
         case nil:
             model.endDrag()
         }

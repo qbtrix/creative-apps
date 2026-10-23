@@ -186,7 +186,7 @@ struct DesignFileMenu: View {
             menu.perform(.export)
         }
         menu.item("place.image", title: "Place…", systemImage: "photo.badge.plus", shortcut: KeyboardShortcut("p", modifiers: [.command, .shift])) {
-            menu.perform(.placeFile)
+            menu.perform(.placeFile(fill: nil))
         }
     }
 }

@@ -2,7 +2,8 @@
 // Image section's Fill checkbox keeps its choice for every Design window; `designPlaceDrop` takes files dropped
 // on the artwork through SuiteUI's placeDropTarget (its accent ring while a drag offers something). The Model
 // turns the drop's point into page points and says whether it fills the selected frame under it; each file then
-// goes to the window as `.place`, at the drop point or into that frame.
+// goes to the window as `.place`: the first into that frame, the rest at the drop point (`placeSteps`).
+// A file the drop refuses can't say why until SuiteUI hands the reason back (#4985).
 import DesignModel
 import SuiteKernel
 import SuiteUI
@@ -23,10 +24,8 @@ private struct DesignPlaceDrop: ViewModifier {
     func body(content: Content) -> some View {
         content.contentShape(.rect).placeDropTarget(formats: model.placeFormats) { files, point in
             guard let at = DesignWorkspace.dropPoint(x: point.x, y: point.y, zoom: zoom) else { return false }
-            let fills = model.dropFills(at: at, fill: fill)
-            for file in files {
-                perform(.place(.place(name: file.name, data: file.data, at: fills ? nil : Point(x: at.x, y: at.y)), fill: fills))
-            }
+            let steps = DesignWorkspace.placeSteps(files, fills: model.dropFills(at: at, fill: fill), at: Point(x: at.x, y: at.y))
+            for step in steps { perform(.place(step.intent, fill: step.fill)) }
             return !files.isEmpty
         }
     }
