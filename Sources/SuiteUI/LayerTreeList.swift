@@ -22,9 +22,12 @@
 // identifiers and labels (`naming: .sidebar`) and a header with an action
 // (LayerTreeList+Rows.swift). Each defaults to off, so older callers are unchanged.
 // App panels (#3194) add ids, options and decorations; `reorder` is the flat drop's pure rule.
+// `contextActions` gives a row its context menu: the app's spec-built layer
+// commands for that row's id (LayerActionBar.swift), none when it returns none.
 // Multi-select (multi-layer-select PM-1): the `selected:` init draws every
 // picked id selected and sends a click out through `onPick` with its mode,
 // `pick(shift:command:)` of the modifiers read once when the click lands.
+// Picked rows side by side draw as one band (`selectionJoins`), not stacked pills.
 // It shows no scroller (wheel, trackpad and keys still scroll), so the
 // audit finds no unnamed page-area button beside a long tree. While it
 // scrolls it reports a drawn frame on series `layers-scroll` (SP4) to the
@@ -74,6 +77,7 @@ public struct LayerTreeList: View {
     private let decorations: [String: LayerRowDecoration]
     private let onSelect: (@MainActor (String) -> Void)?
     private let onRename: (@MainActor (String, String) -> String?)?
+    private let contextActions: (@MainActor (String) -> [ToolbarAction])?
     /// The row that starts with its rename field in this state: a snapshot's refused rename.
     private let renaming: (id: String, field: SidebarRenameField)?
     @State private var target: String?
@@ -81,12 +85,13 @@ public struct LayerTreeList: View {
 
     /// The list with several rows picked: every id in `selected` draws
     /// selected, and a click on a row calls `onPick` with its id and the
-    /// click's mode (`pick(shift:command:)`). The rest is as the `selection:` init.
+    /// click's mode (`pick(shift:command:)`). The rest, `contextActions` too, is as the `selection:` init.
     public init(
         rows: [LayerRow], childCount: @escaping @MainActor (String) -> Int, selected: Set<String>,
         naming: LayerTreeNaming = .layers, header: LayerTreeHeader? = nil, options: LayerTreeOptions = .init(),
         decorations: [String: LayerRowDecoration] = [:],
         onPick: @escaping @MainActor (String, Pick) -> Void, onRename: (@MainActor (String, String) -> String?)? = nil,
+        contextActions: (@MainActor (String) -> [ToolbarAction])? = nil,
         onAction: @escaping @MainActor (LayerTreeAction) -> Void
     ) {
         self.init(rows: rows, childCount: childCount, selection: nil, selected: selected, naming: naming,
@@ -95,7 +100,7 @@ public struct LayerTreeList: View {
                       let flags = NSEvent.modifierFlags
                       onPick(id, Self.pick(shift: flags.contains(.shift), command: flags.contains(.command)))
                   },
-                  onRename: onRename, renaming: nil, onAction: onAction)
+                  onRename: onRename, renaming: nil, contextActions: contextActions, onAction: onAction)
     }
 
     /// `rows` from `LayerTree.rows(expanded:)`; `childCount` names how many
@@ -105,16 +110,18 @@ public struct LayerTreeList: View {
     /// accept it or the refusal shown under the field it keeps open. Nil
     /// turns that gesture off; `naming`, `header` and `options` are described
     /// on their types, and `decorations` holds each decorated row's by its id.
+    /// `contextActions` names a row's context menu items by its id.
     public init(
         rows: [LayerRow], childCount: @escaping @MainActor (String) -> Int, selection: String? = nil,
         naming: LayerTreeNaming = .layers, header: LayerTreeHeader? = nil, options: LayerTreeOptions = .init(),
         decorations: [String: LayerRowDecoration] = [:],
         onSelect: (@MainActor (String) -> Void)? = nil, onRename: (@MainActor (String, String) -> String?)? = nil,
+        contextActions: (@MainActor (String) -> [ToolbarAction])? = nil,
         onAction: @escaping @MainActor (LayerTreeAction) -> Void
     ) {
         self.init(rows: rows, childCount: childCount, selection: selection, naming: naming, header: header,
-                  options: options, decorations: decorations,
-                  onSelect: onSelect, onRename: onRename, renaming: nil, onAction: onAction)
+                  options: options, decorations: decorations, onSelect: onSelect, onRename: onRename,
+                  renaming: nil, contextActions: contextActions, onAction: onAction)
     }
 
     init(
@@ -123,6 +130,7 @@ public struct LayerTreeList: View {
         naming: LayerTreeNaming, header: LayerTreeHeader?, options: LayerTreeOptions = .init(),
         decorations: [String: LayerRowDecoration] = [:], onSelect: (@MainActor (String) -> Void)?,
         onRename: (@MainActor (String, String) -> String?)?, renaming: (id: String, field: SidebarRenameField)?,
+        contextActions: (@MainActor (String) -> [ToolbarAction])? = nil,
         onAction: @escaping @MainActor (LayerTreeAction) -> Void
     ) {
         self.rows = rows
@@ -137,6 +145,7 @@ public struct LayerTreeList: View {
         self.onSelect = onSelect
         self.onRename = onRename
         self.renaming = renaming
+        self.contextActions = contextActions
     }
 
     /// Whether row `id` draws selected: the single selection or any picked id.
@@ -148,6 +157,19 @@ public struct LayerTreeList: View {
         shift ? .extend : command ? .toggle : .replace
     }
 
+    /// The rows that share an edge with a selected neighbour, by id: each
+    /// squares those corners, so a run of picked rows draws as one band.
+    /// A row with no selected neighbour, or not selected itself, is left out.
+    nonisolated static func selectionJoins(_ ids: [String], selected: (String) -> Bool) -> [String: LayerRowJoin] {
+        let picked = ids.map(selected)
+        var joins: [String: LayerRowJoin] = [:]
+        for (i, id) in ids.enumerated() where picked[i] {
+            let join = LayerRowJoin(above: i > 0 && picked[i - 1], below: i + 1 < ids.count && picked[i + 1])
+            if join.above || join.below { joins[id] = join }
+        }
+        return joins
+    }
+
     /// A click on row `id`: tells the app, when it takes selection.
     func select(_ id: String) { onSelect?(id) }
 
@@ -155,6 +177,11 @@ public struct LayerTreeList: View {
     func rename(_ id: String) -> (@MainActor (String) -> String?)? {
         guard let onRename else { return nil }
         return { onRename(id, $0) }
+    }
+
+    /// Row `id`'s context menu: nil when the app gives it no actions.
+    func contextMenu(for id: String) -> [SidebarMenuItem]? {
+        contextActions.flatMap { SidebarContextMenu.items(for: $0(id)) }
     }
 
     /// The move a drop of `id` onto `target` makes, or nil when the list
@@ -234,13 +261,19 @@ public struct LayerTreeList: View {
     }
 
     private var rowViews: some View {
-        ForEach(rows, id: \.id) { row in
+        let joins = Self.selectionJoins(rows.map(\.id), selected: isSelected)
+        return ForEach(rows, id: \.id) { row in
             LayerTreeRow(
-                row: row, lit: target == row.id, selected: isSelected(row.id), naming: naming,
+                row: row, lit: target == row.id, selected: isSelected(row.id), join: joins[row.id] ?? .none,
+                naming: naming,
                 options: options, decoration: decorations[row.id],
                 field: renaming?.id == row.id ? renaming?.field : nil,
                 onAction: onAction, onSelect: onSelect, onRename: rename(row.id))
                 .equatable()
+                // Outside the equatable row, whose == leaves closures out, so the menu is never stale.
+                // ponytail: built per shown row on each list update (the modifier takes no lazy builder);
+                // fine at panel sizes, move to a menu built on open if a long list shows it in a trace.
+                .modifier(SidebarContextMenu(items: contextMenu(for: row.id)))
                 .draggable(row.id)
                 .dropDestination(for: String.self) { items, _ in
                     accept(items, onto: row.id)
@@ -297,6 +330,7 @@ struct LayerTreeRow: View, Equatable {
     let row: LayerRow
     let lit: Bool
     let selected: Bool
+    let join: LayerRowJoin
     let naming: LayerTreeNaming
     let options: LayerTreeOptions
     let decoration: LayerRowDecoration?
@@ -317,7 +351,8 @@ struct LayerTreeRow: View, Equatable {
     }
 
     init(
-        row: LayerRow, lit: Bool, selected: Bool, naming: LayerTreeNaming, options: LayerTreeOptions,
+        row: LayerRow, lit: Bool, selected: Bool, join: LayerRowJoin = .none, naming: LayerTreeNaming,
+        options: LayerTreeOptions,
         decoration: LayerRowDecoration?, field: SidebarRenameField?,
         onAction: @escaping @MainActor (LayerTreeAction) -> Void, onSelect: (@MainActor (String) -> Void)?,
         onRename: (@MainActor (String) -> String?)?
@@ -325,6 +360,7 @@ struct LayerTreeRow: View, Equatable {
         self.row = row
         self.lit = lit
         self.selected = selected
+        self.join = join
         self.naming = naming
         self.options = options
         self.decoration = decoration
@@ -335,13 +371,21 @@ struct LayerTreeRow: View, Equatable {
     }
 
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.row == rhs.row && lhs.lit == rhs.lit && lhs.selected == rhs.selected && lhs.naming == rhs.naming
+        lhs.row == rhs.row && lhs.lit == rhs.lit && lhs.selected == rhs.selected && lhs.join == rhs.join
+            && lhs.naming == rhs.naming
             && lhs.options == rhs.options && lhs.decoration == rhs.decoration
             && (lhs.onRename == nil) == (rhs.onRename == nil) && (lhs.onSelect == nil) == (rhs.onSelect == nil)
     }
 
     var body: some View {
         decorated(content)
+    }
+
+    /// The fill's shape: square on an edge a picked neighbour shares, round elsewhere.
+    private var fillShape: UnevenRoundedRectangle {
+        let r = SuiteRadius.row, top = join.above ? 0 : r, bottom = join.below ? 0 : r
+        return UnevenRoundedRectangle(topLeadingRadius: top, bottomLeadingRadius: bottom,
+                                      bottomTrailingRadius: bottom, topTrailingRadius: top, style: .circular)
     }
 
     private var content: some View {
@@ -363,7 +407,7 @@ struct LayerTreeRow: View, Equatable {
         // One pointer-sized height, so a caption under the name doesn't make its row jump.
         .frame(minHeight: SuiteSize.studioRow)
         .padding(.horizontal, SuiteSpacing.s)
-        .background(fill, in: RoundedRectangle(cornerRadius: SuiteRadius.row))
+        .background(fill, in: fillShape)
         .overlay {
             switch look {
             case .dropTarget:

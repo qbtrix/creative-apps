@@ -1,8 +1,10 @@
 // DesignNodeTests.swift: the plain value types: a node's defaults per kind,
 // the tool-to-kind map, page size text, a color's light or dark side and the
-// Codable round trip the file format builds on. Runs on Linux and macOS.
+// Codable round trip the file format builds on, and shape nodes
+// (DesignShapeNodeTests, below). Runs on Linux and macOS.
 import DesignModel
 import Foundation
+import SuiteKernel
 import Testing
 
 @Test func aColorIsDarkUnderTheBrightnessMidpoint() {
@@ -35,13 +37,11 @@ import Testing
     #expect(DesignTool.move.nodeKind == nil && DesignTool.pen.nodeKind == nil)
 }
 
-@Test func onlyThePenAndTheEyedropperAreDisabledAndSayWhy() {
-    for tool in DesignTool.allCases where tool != .pen && tool != .eyedropper {
+@Test func onlyThePenIsDisabledAndSaysWhy() {
+    for tool in DesignTool.allCases where tool != .pen {
         #expect(tool.isEnabled && tool.unavailableHelp == nil)
     }
     #expect(!DesignTool.pen.isEnabled && DesignTool.pen.unavailableHelp == "Drawing paths isn't built yet.")
-    // Until DY-5 makes its drag act.
-    #expect(!DesignTool.eyedropper.isEnabled && DesignTool.eyedropper.unavailableHelp != nil)
 }
 
 @Test func pageSizeTextShowsWholePoints() throws {
@@ -69,4 +69,52 @@ import Testing
     let text = String(decoding: data, as: UTF8.self)
     #expect(text.contains(#""fill":{"blue":30,"green":20,"red":10}"#))
     #expect(text.contains(#""kind":"frame""#) && text.contains("Héllo"))
+}
+
+// Shape nodes (shape-tools DS-1, MJ-DS): old files still open with no spec, a node's spec is written only
+// when set, and the tool's options are view state. Drawing and a node's path are in DesignShapeTests.
+struct DesignShapeNodeTests {
+    @Test func aFileWithoutShapesStillOpensWithNoSpec() throws {
+        let old = #"""
+            {"pages":[{"frameHeight":100,"frameWidth":100,"id":"page-1","name":"Page 1","nodes":[
+            {"children":[],"fill":{"blue":0,"green":0,"red":0},"frame":{"height":10,"width":10,"x":0,"y":0},
+            "id":"node-1","isHidden":false,"isLocked":false,"kind":"rectangle","name":"R","text":""}]}],"version":1}
+            """#
+        var workspace = DesignWorkspace()
+        try workspace.open(Data(old.utf8))
+        #expect(workspace.treeNode("node-1")?.kind == .rectangle)
+        #expect(workspace.treeNode("node-1")?.shape == nil)
+    }
+
+    @Test func aSpecIsWrittenOnlyWhenSetAndReadBack() throws {
+        var node = DesignNode(id: "node-9", name: "Star", kind: .shape, frame: rc(0, 0, 100, 100))
+        let plain = String(decoding: try JSONEncoder().encode(node), as: UTF8.self)
+        #expect(!plain.contains("\"shape\":"), "no spec, no key")
+        node.shape = ShapeIntent.points(7).applied(to: .defaults(.star))
+        let back = try JSONDecoder().decode(DesignNode.self, from: try JSONEncoder().encode(node))
+        #expect(back.kind == .shape && back.shape == node.shape)
+        #expect(DesignNode(id: "node-10", copying: node).shape == node.shape)
+    }
+
+    @Test func theToolStartsOnAFivePointStar() {
+        let workspace = DesignWorkspace()
+        #expect(workspace.shapeTool == .defaults(.star) && workspace.shapeTool.points == 5)
+    }
+
+    @Test func pickingOptionsIsViewState() {
+        var workspace = openDesign()
+        workspace.pickShapeTool(.defaults(.arrow))
+        #expect(workspace.shapeTool.kind == .arrow)
+        workspace.runShape(.kind(.polygon))
+        workspace.runShape(.sides(8))
+        #expect(workspace.shapeTool.kind == .polygon && workspace.shapeTool.sides == 8)
+        #expect(!workspace.canUndo, "picking options is view state, not an undo step")
+    }
+
+    @Test func aNodeWithNoSpecHasNoPath() {
+        var node = DesignNode(id: "node-9", name: "Star", kind: .shape, frame: rc(0, 0, 100, 100))
+        #expect(node.path(in: node.frame) == nil, "no spec, no path")
+        node.shape = .defaults(.star)
+        #expect(node.path(in: node.frame) != nil)
+    }
 }

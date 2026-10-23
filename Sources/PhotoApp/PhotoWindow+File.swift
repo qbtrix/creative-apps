@@ -57,6 +57,10 @@ enum FileIntent {
     case restore(RecoveryOffer)
     /// The launch offer: Discard what the crash left behind.
     case discardRecovery
+    /// The home's New Photo (#3648): a new white image of this size.
+    case newImage(width: Int, height: Int)
+    /// A live command ran on a copy of the image (EM-3): the window becomes it.
+    case adoptLive(PhotoWorkspace)
 }
 
 /// Long file work running off the main actor, for the window's notes.
@@ -177,6 +181,10 @@ extension PhotoWindow {
         case .discardRecovery:
             files.recoveryOffer = nil
             files.startAutosave(model.services.recovery).discardLeftBehind()
+        case .newImage(let width, let height):
+            guard (try? model.newCanvas(width: width, height: height)) != nil else { return }
+            documentURL = nil
+        case .adoptLive(let result): model.adoptLiveCommand(result)
         }
     }
 
@@ -318,10 +326,12 @@ extension PhotoWindow {
                 if saving {
                     didSave(url, kind: .image(format), opened: opened)
                 } else {
+                    model.endExport(.success([url.lastPathComponent]))
                     note = "Exported \(url.lastPathComponent)"
                 }
             } catch {
                 if saving { return didFailSave(error) }
+                model.endExport(.failure(error))
                 note = nil
                 problem = PhotoProblem("\(url.lastPathComponent) couldn't be written.", Self.reason(error))
             }
@@ -408,7 +418,7 @@ struct PhotoFileArea: ViewModifier {
                 guard let offer = files.recoveryOffer, let hook = await PhotoWindowEditedView.hook(for: files) else { return }
                 if let choice = await hook.askToRestore(offer) { perform(.file(choice)) } else { files.recoveryOffer = nil }
             }
-            .task { if let url = PhotoOpenQueue.shared.windowAppeared(openWindow) { perform(.openFile(url)) } }
+            .task { if let intent = PhotoOpenQueue.shared.windowAppeared(openWindow) { perform(intent) } }
             // A clean close leaves nothing to recover; a dirty one asked first (Don't Save discards).
             .onDisappear { if !model.isDirty { files.autosave?.discard() } }
     }

@@ -1,0 +1,30 @@
+[
+  {
+    "label": "openDropsTheFile: an open hand-off is accepted but asks for no window, so a dropped .flare opens nothing",
+    "file": "Sources/FlareModel/FlareDocumentHost.swift",
+    "find": "return .success(handOff.documents.map { .open(path: $0.path) })",
+    "replace": "return .success([])",
+    "tests": "FlareDocumentHostTests"
+  },
+  {
+    "label": "openKeepsOnlyTheFirst: of several animations handed over, only the first opens",
+    "file": "Sources/FlareModel/FlareDocumentHost.swift",
+    "find": "handOff.documents.map { .open(path: $0.path) }",
+    "replace": "handOff.documents.prefix(1).map { .open(path: $0.path) }",
+    "tests": "FlareDocumentHostTests"
+  },
+  {
+    "label": "emptyOpenAccepted: an open with no animation is accepted instead of refused",
+    "file": "Sources/FlareModel/FlareDocumentHost.swift",
+    "find": "guard !handOff.documents.isEmpty else { return .failure(openNeedsAnimation) }",
+    "replace": "guard !handOff.documents.isEmpty else { return .success([]) }",
+    "tests": "FlareDocumentHostTests"
+  },
+  {
+    "label": "svgGetsTheGenericRefusal: a placed SVG is refused without saying Flare can't import SVG yet",
+    "file": "Sources/FlareModel/FlareDocumentHost.swift",
+    "find": "return .failure(svg ? .notAvailable(FlareWorkspace.svgRefusal) : FlareWorkspace.handOffRefusal)",
+    "replace": "return .failure(FlareWorkspace.handOffRefusal)",
+    "tests": "FlareDocumentHostTests"
+  }
+]

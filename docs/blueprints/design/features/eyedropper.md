@@ -43,11 +43,14 @@ Model walk in `DesignSampleTests` (Linux).
 
 ## Journey steps
 
-1. Select a white rectangle, press I (DY-2, `DesignEyedropperJourneyTests.testPickFillFromShape`):
-   the Eyedropper is active; the loupe follows the pointer.
+1. Select a white rectangle, click the palette's Eyedropper (`design.tool.eyedropper`; DY-2,
+   `DesignEyedropperJourneyTests.testPickFillFromShape`): it is selected, the status line reads
+   Eyedropper; the loupe follows the pointer.
 2. Click a red ellipse: the rectangle's fill turns red (one "Fill" step).
 3. Option-click a blue text: the rectangle's stroke turns blue.
-4. Press V: the Move tool is back, the rectangle still selected.
+4. Click the palette's Move (`design.tool.move`): it is selected, the status line reads Move, the
+   rectangle still selected.
+5. Keyboard parity: press I, the Eyedropper is selected; press V, Move is back.
 
 ## Jobs
 
@@ -83,9 +86,9 @@ extension DesignWorkspace: SampleTarget {
 |---|---|---|---|---|---|
 | DY-1 | – | `DesignTool.eyedropper`; the adapter as stubs; `DesignSampleTests` written, disabled | `Sources/DesignModel/DesignSample+Kernel.swift`, `Sources/DesignModel/DesignWorkspace.swift`, `Tests/DesignModelTests/DesignSampleTests.swift` | – | ~120, 3 |
 | DY-2 | – | The Eyedropper on the palette (I) on the stubs; the journey written, skipped | `Sources/DesignApp/DesignIntent.swift`, `UITests/DesignJourneyTests+Eyedropper.swift` | DY-1 | ~100, 2 |
-| DY-3 | – | The loupe over the canvas while the tool is active; click and Option-click intents | `Sources/DesignApp/DesignEyedropperLoupe.swift`, `Sources/DesignApp/DesignCanvasFeedback.swift`, `Tests/AppSnapshotTests/DesignEyedropperOverlayTests.swift` | DY-2 | ~180, 3 |
+| DY-3 | – | The loupe over the canvas while the tool is active; click and Option-click intents; the tool's options (sample size, Fill or Stroke) in the inspector's Eyedropper section, held by the Model (`DesignLoupe`), never on the artboard | `Sources/DesignApp/DesignSampleLoupe.swift`, `Sources/DesignApp/DesignCanvasFeedback.swift`, `Sources/DesignModel/DesignLoupe.swift`, `Tests/AppSnapshotTests/DesignEyedropperOverlayTests.swift` | DY-2 | ~180, 3 |
 | DY-4 | – | Snapshots and the render budget test | `Tests/AppSnapshotTests/DesignEyedropperSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetDesignEyedropperTests.swift` | DY-3 | ~160, 2 |
-| DY-5 | – | Adapter bodies (topmost visible painted node, gradient colour at the point, the apply step) and the tool's dispatch; turns on `DesignSampleTests` | `Sources/DesignModel/DesignSample+Kernel.swift`, `Sources/DesignModel/DesignCanvasEditing.swift`, `Tests/DesignModelTests/DesignSampleTests.swift`, `Tests/mutations/DesignModel.DesignSample+Kernel.json` | DY-1 | ~220, 4 |
+| DY-5 | – | Adapter bodies (topmost visible painted node, gradient colour at the point, the apply step) and the tool's dispatch; turns on `DesignSampleTests` | `Sources/DesignModel/DesignSample+Kernel.swift`, `Sources/DesignModel/DesignCanvasEditing.swift`, `Sources/DesignModel/DesignWorkspace.swift` (the Eyedropper's `unavailableHelp` set to nil, #3987), `Tests/DesignModelTests/DesignSampleTests.swift`, `Tests/mutations/DesignModel.DesignSample+Kernel.json` | DY-1 | ~220, 5 |
 | DY-6 | – | `color.sample` and `color.pick` in the catalog and id list; RJ-D34's job folder | `Sources/DesignModel/DesignCommandCatalog.swift`, `Tests/command-ids/design.txt`, `Tests/DesignModelTests/DesignSampleCommandTests.swift`, `Tests/RealJobs/design/pick-fill/pick-fill.jobs.json`, `Tests/RealJobs/design/pick-fill/input/two-shapes.design` | DY-5 | ~120, 5 |
 | DY-7 | – | The journey turned on, on live services | `UITests/DesignJourneyTests+Eyedropper.swift` | DY-4, DY-6 | ~50, 1 |
 | DY-8 | – | `status: built`; `feature-done` | `docs/blueprints/design/features/eyedropper.wave.json` | DY-7 | ~10, 1 |
@@ -107,11 +110,11 @@ Longest chain: DY-1 → DY-2 → DY-3 → DY-4 → DY-7 → DY-8 (6). Chain of 6
 |---|---|---|---|
 | DY-1 | `DesignSampleTests` compiles, disabled; the tool enum has `.eyedropper` | – | – (stub) |
 | DY-2 | `DesignToolPaletteSnapshots`: the Eyedropper shows on the palette with I, enabled | the tool is missing | – (UI) |
-| DY-3 | `DesignEyedropperOverlayTests`: the loupe tracks the pointer; a click emits one apply, an Option-click one stroke apply | a pick is doubled | – (UI) |
+| DY-3 | `DesignEyedropperOverlayTests`: the loupe tracks the pointer; a click emits one apply, an Option-click one stroke apply; with Stroke chosen the two swap; the options sit in the inspector, inside the window, clear of the artboard. `DesignLoupeTests`: no loupe for a non-finite pointer; the size and the target are the Model's | a pick is doubled, or the options cover the canvas | `DesignModel.DesignLoupe`: finite guard, tool guard, the target and Option, the two setters |
 | DY-4 | `DesignEyedropperSnapshots`; `RenderBudgetDesignEyedropperTests.loupeTrackInThreeBodies` | budget over | – (UI) |
-| DY-5 | `DesignSampleTests`: the topmost visible node wins; a hidden one is skipped; a gradient reads its colour at the point; empty canvas is nil; an apply is one step and a locked selection refuses | a layer, a colour or a step is wrong | `DesignModel.DesignSample+Kernel`: selection read → `.samplesTopmost`; hidden nodes counted → `.skipsHidden`; first stop used → `.gradientAtPoint` |
+| DY-5 | `DesignSampleTests`: the topmost visible node wins; a hidden one is skipped; a gradient reads its colour at the point; empty canvas is nil; an apply is one step and a locked selection refuses; the chosen sample size reaches the pick (`sizeChangesThePick`); the Eyedropper is enabled on the palette | a layer, a colour or a step is wrong | `DesignModel.DesignSample+Kernel`: selection read → `.samplesTopmost`; hidden nodes counted → `.skipsHidden`; first stop used → `.gradientAtPoint` |
 | DY-6 | `color.sample` and `color.pick` listed and run; RJ-D34 passes on Linux | the id is missing | – (registration) |
-| DY-7 | `testPickFillFromShape` steps 1 to 4 on live | a step fails | – |
+| DY-7 | `testPickFillFromShape` steps 1 to 5 on live | a step fails | – |
 | DY-8 | `scripts/waves render --dry-run` | status not built | – |
 
 ## Quality tests
@@ -120,7 +123,7 @@ Longest chain: DY-1 → DY-2 → DY-3 → DY-4 → DY-7 → DY-8 (6). Chain of 6
 |---|---|---|
 | render: 120-sample loupe track over the canvas | ≤ 3 window bodies; p95 ≤ 8 ms | `RenderBudgetDesignEyedropperTests.loupeTrackInThreeBodies` |
 | One gesture, one step | a pick is one step | `DesignSampleTests.applyIsOneStep` |
-| No dead controls; keyboard parity | I picks the tool, V leaves it | `testPickFillFromShape` |
+| No dead controls; keyboard parity | a palette click picks the tool and Move leaves it (steps 1, 4); I and V do the same (step 5) | `testPickFillFromShape` |
 | Audit | zero new over Design's baseline | `audit-design-*.json` |
 
 ## Done check

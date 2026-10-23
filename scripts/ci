@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# scripts/ci [--changed [BASE]]: the one gate. Runs the no-crash lint, the
+# scripts/ci [--changed [BASE]]: the one gate. Runs the no-crash lint, the isa-swizzle lint, the
 # app-state rule, the design lint, the C4 ownership and descriptions checks, the duplicate-code
 # check, the canonical-first check, the SuiteUI-first view check, the render contract, the app-marks check, the CI scripts' fixture tests, the journey quarantine check, the
 # real-jobs check, the mutation anchors, swift build of every target with its tests, and swift
@@ -152,6 +152,15 @@ echo "== no-crash lint (Sources/)"
 pattern='try!|as!|fatalError\(|preconditionFailure\(|precondition\(|unowned |\.first!|\.last!'
 if grep -rnE "$pattern" Sources/; then
   fail "no-crash lint: replace the lines above with throwing code"
+fi
+echo "ok"
+
+# Swapping a live object's class breaks KVO on it: an NSWindow is KVO-observed from birth, and a swapped one throws
+# NSRangeException ("_windowLayerContext") when freed, killing the test process mid-run. Subclass instead
+# (RenderBudgetWindow's keyCapable). A use that must stay carries `isa-swizzle-ok` on its line.
+echo "== isa-swizzle lint (Sources/, Tests/, UITests/)"
+if grep -rnE 'object_setClass\(|class_setSuperclass\(' Sources/ Tests/ UITests/ | grep -v 'isa-swizzle-ok'; then
+  fail "isa-swizzle lint: create the object as the subclass you need instead of swapping its class"
 fi
 echo "ok"
 

@@ -38,11 +38,7 @@ public struct HaloHeadless: HeadlessDocument {
     public static func new(_ options: JSONValue) throws -> HaloHeadless {
         let o = try options.decode(NewOptions.self)
         var project = HaloProject(services: .live)
-        var settings = project.suggestedSettings
-        settings.name = o.name ?? settings.name
-        (settings.width, settings.height) = (o.width ?? settings.width, o.height ?? settings.height)
-        settings.framesPerSecond = o.fps ?? settings.framesPerSecond
-        settings.durationSeconds = o.seconds ?? settings.durationSeconds
+        let settings = o.settings(over: project.suggestedSettings)
         guard project.newComposition(settings) else {
             throw CatalogError.failed(id: "new", message: settings.problems.joined(separator: " "))
         }
@@ -103,6 +99,13 @@ public struct HaloHeadless: HeadlessDocument {
         }
     }
 
-    struct NewOptions: Decodable { var name: String?; var width, height, fps: Int?; var seconds: Double? }
+    /// `new`'s options and New Composition's sheet values; each one given replaces the suggested setting.
+    struct NewOptions: Decodable, Sendable {
+        var name: String?; var width, height, fps: Int?; var seconds: Double?
+        func settings(over base: CompositionSettings) -> CompositionSettings {
+            CompositionSettings(name: name ?? base.name, width: width ?? base.width, height: height ?? base.height,
+                                framesPerSecond: fps ?? base.framesPerSecond, durationSeconds: seconds ?? base.durationSeconds)
+        }
+    }
     struct RenderOptions: Decodable { var frame, scale: Int? }
 }

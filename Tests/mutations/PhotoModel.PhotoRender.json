@@ -1,4 +1,3 @@
 [
-{"label": "a cancelled histogram count keeps counting", "file": "Sources/PhotoModel/PhotoRender.swift", "find": "            guard !Task.isCancelled else { return [] }\n", "replace": "", "tests": "PhotoCurvesTests"},
-{"label": "a cancelled histogram count stops with a full answer", "file": "Sources/PhotoModel/PhotoRender.swift", "find": "            guard !Task.isCancelled else { return [] }\n", "replace": "            guard !Task.isCancelled else { break }\n", "tests": "PhotoCurvesTests"}
+{"label": "a cancelled histogram count keeps counting", "file": "Sources/PhotoModel/PhotoRender.swift", "find": "            guard !Task.isCancelled else { return .empty }\n", "replace": "", "tests": "PhotoCurvesTests"}
 ]

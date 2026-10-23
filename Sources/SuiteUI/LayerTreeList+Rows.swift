@@ -11,6 +11,7 @@
 // double-click on the title, Return on the focused row and the "Rename"
 // accessibility action. App panels (#3194): `.app` naming, LayerTreeOptions, LayerRowDecoration.
 // LayerRowLook picks a row's state fill: drop target, selected, hover, rest.
+// LayerRowJoin names the edges a selected row shares with a selected neighbour.
 import SuiteKernel
 import SwiftUI
 
@@ -244,4 +245,12 @@ extension LayerTreeRow {
         openRename(on: .title)
         return .handled
     }
+}
+
+/// Which edges of a selected row meet a selected neighbour (LayerTreeList.selectionJoins).
+struct LayerRowJoin: Equatable, Sendable {
+    var above = false
+    var below = false
+
+    static let none = LayerRowJoin()
 }

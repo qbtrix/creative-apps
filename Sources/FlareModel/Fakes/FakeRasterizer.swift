@@ -1,11 +1,13 @@
 // FakeRasterizer.swift: FrameRasterizing without CoreGraphics (docs/blueprints/flare.md, 6.3). Every frame is the same
 // valid 1 × 1 transparent PNG, whatever the list, scale or background, so export runs on Linux and in the fake app.
+// A movie frame is the list's background, flat at the asked size (clear when transparent).
 // FlareApp's `StageRasterizer` (LA-1) draws the real pixels.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteModel
 
 public struct FakeRasterizer: FrameRasterizing {
     /// The PNG every call returns: signature, IHDR (1 × 1, 8-bit RGBA), one IDAT row of zeros, IEND.
@@ -18,4 +20,12 @@ public struct FakeRasterizer: FrameRasterizing {
     public init() {}
 
     public func png(_: StageDrawList, scale _: Double, transparent _: Bool) throws -> Data { Self.png }
+
+    public func frame(_ list: StageDrawList, width: Int, height: Int, transparent: Bool) throws -> MediaFrame {
+        let c = list.background
+        let pixel = [c.r, c.g, c.b, transparent ? 0 : c.a].map { UInt8((min(max($0, 0), 1) * 255).rounded()) }
+        let (count, overflow) = width.multipliedReportingOverflow(by: height)
+        return try MediaFrame(width: width, height: height,
+                              rgba: overflow || count < 1 ? [] : Array([[UInt8]](repeating: pixel, count: count).joined()))
+    }
 }

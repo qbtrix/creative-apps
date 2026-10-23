@@ -28,3 +28,13 @@ extension PhotoPaletteTool {
         PhotoTool.allCases.map { PhotoPaletteTool($0, in: model) }
     }
 }
+
+extension PhotoTool {
+    /// The tool `characters` pick through SuiteUI's ToolKeys over the palette's faces: one letter, either case, of a
+    /// tool `help` leaves enabled; nil for any other text (AC-tools).
+    static func picked(byTyped characters: String, help: (PhotoTool) -> String?) -> PhotoTool? {
+        guard characters.count == 1, let key = characters.first else { return nil }
+        let tools = allCases.map { PhotoPaletteTool(tool: $0, help: help($0)) }
+        return ToolKeys.tool(forKey: key, in: tools)?.tool
+    }
+}

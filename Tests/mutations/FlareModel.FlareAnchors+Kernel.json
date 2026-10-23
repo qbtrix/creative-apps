@@ -1,0 +1,58 @@
+[
+  {
+    "label": ".onlyPickedAnchorsMove: a move takes every anchor, not the picked ones",
+    "file": "Sources/FlareModel/FlareAnchors+Kernel.swift",
+    "find": "AnchorEdit.moved(edit.path, anchorSelection.set, dx:",
+    "replace": "AnchorEdit.moved(edit.path, Set(Self.anchorRefs(edit.path)), dx:",
+    "tests": "FlareAnchorEditTests"
+  },
+  {
+    "label": ".scaledLayerDrag: a move skips the layer's scale and lands twice as far",
+    "file": "Sources/FlareModel/FlareAnchors+Kernel.swift",
+    "find": "            let local = back.apply(Point(x: dx, y: dy))\n",
+    "replace": "            let local = Point(x: dx, y: dy)\n",
+    "tests": "FlareAnchorEditTests"
+  },
+  {
+    "label": "a multi-item pick puts the first item's path in edit",
+    "file": "Sources/FlareModel/FlareAnchors+Kernel.swift",
+    "find": "guard tool == .directSelect, selection.count == 1,",
+    "replace": "guard tool == .directSelect, !selection.isEmpty,",
+    "tests": "FlareAnchorEditTests"
+  },
+  {
+    "label": "a locked layer's path still draws its edit marks",
+    "file": "Sources/FlareModel/FlareAnchors+Kernel.swift",
+    "find": "pathHelp == nil ? pathInEdit : nil",
+    "replace": "pathInEdit",
+    "tests": "FlareAnchorEditTests"
+  },
+  {
+    "label": "the status bar never says why Direct Select can't edit points",
+    "file": "Sources/FlareModel/FlareStatusRead.swift",
+    "find": "        if tool == .directSelect { pills.pathHelp = pathHelp }\n",
+    "replace": "",
+    "tests": "FlareAnchorEditTests"
+  },
+  {
+    "label": ".anchorWinsOverItem: a press on an anchor of the picked item grabs the item instead",
+    "file": "Sources/FlareModel/FlareDrag.swift",
+    "find": "            let anchor = grip == nil ? anchorPress(",
+    "replace": "            let anchor = grip == nil && grabbed(at: start, stageScale: stageScale).isEmpty ? anchorPress(",
+    "tests": "FlareAnchorEditTests"
+  },
+  {
+    "label": ".shiftAddsAnchorsToTheSelection: an extending select replaces the picked anchors",
+    "file": "Sources/FlareModel/FlareAnchors+Kernel.swift",
+    "find": "(extend ? anchorSelection.ordered : []) + (anchors ?? [])",
+    "replace": "[] + (anchors ?? [])",
+    "tests": "FlareAnchorEditTests"
+  },
+  {
+    "label": ".shiftAddsAnchorsToTheSelection: a Shift-press on an anchor replaces the picked anchors",
+    "file": "Sources/FlareModel/FlareAnchors+Kernel.swift",
+    "find": "(modifiers.contains(.shift) ? anchorSelection.ordered : []) + [ref]",
+    "replace": "[ref]",
+    "tests": "FlareAnchorEditTests"
+  }
+]

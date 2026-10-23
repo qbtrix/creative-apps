@@ -86,7 +86,7 @@ disabled (`waits_on: FR-8`).
 
 ## Screens and states
 
-- `suite-gallery-timeline-2997-{light,dark}.png` (FR-5): the rate menu open, the drop-frame readout.
+- `suite-gallery-timeline-2997-{light,dark}.png` (FR-5): the rate chip closed at 29.97 fps and the drop-frame readout (captioned "Playhead (drop-frame)", its value in the status pill). The menu open with 29.97 fps checked is the journey's `suiteui-timeline-2997-menu.png` (`SuiteJourneyTests.testTimecodeAtNTSCRates` step 5), and `suiteui-timeline-2997-readout.png` shows `00:01:00;02` at frame 1800 (#4598).
 - `halo-new-composition-rates-{light,dark}.png` (FR-8): the nine rates.
 - `flare-scene-inspector-2398-{light,dark}.png` (FR-10).
 

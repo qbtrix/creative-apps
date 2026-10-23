@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "app": "library",
+  "why": "RJ-L42 (file-flow LF-3): drops a shoot/ folder of three JPEGs and Intro.halo on the catalog. The three photos import as one Import step and are selected, Intro.halo is handed to Halo and never imported; Undo takes all three out at once and Redo puts them back selected. Pending #3741: the CLI keeps file commands window-only, as it does for Photo's drop; LibraryFileFlowTests runs these steps on Linux.",
+  "pending": "#3741",
+  "inputs": ["input/shoot/IMG_0001.jpg", "input/shoot/IMG_0002.jpg", "input/shoot/IMG_0003.jpg", "input/Intro.halo"],
+  "steps": [
+    {"id": "file.drop", "params": {"paths": ["input/shoot", "input/Intro.halo"]}},
+    {"id": "edit.undo", "params": {}},
+    {"id": "edit.redo", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "drop-import", "format": "json", "options": {"contents": "shown"}},
+  "expect": {
+    "out/drop-import.json": {"json": {"shown": ["IMG_0001.jpg", "IMG_0002.jpg", "IMG_0003.jpg"], "selected": 3, "handOffs": [{"path": "input/Intro.halo", "app": "halo"}]}}
+  },
+  "platforms": []
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "label": "toolIsNeverSolid: the solid guard dropped, so the Gradient tool's options turn into a solid fill",
+    "file": "Sources/PhotoModel/ToolOptions.swift",
+    "find": "            guard type != .solid else { return }\n",
+    "replace": "",
+    "tests": "PhotoGradientOptionsTests"
+  },
+  {
+    "label": "keepsTwoStops: a refused removal drops the first stop anyway, so a two-stop gradient keeps one",
+    "file": "Sources/PhotoModel/ToolOptions.swift",
+    "find": "setGradient(GradientRules.removingStop(gradient, index: index) ?? gradient)",
+    "replace": "setGradient(GradientRules.removingStop(gradient, index: index) ?? .linear(stops: Array(gradient.stops.dropFirst()), start: Point(x: 0, y: 0), end: Point(x: 1, y: 0)))",
+    "tests": "PhotoGradientOptionsTests"
+  },
+  {
+    "label": "angleIsIgnored: the angle turns the tool's line, though a drag gives it",
+    "file": "Sources/PhotoModel/ToolOptions.swift",
+    "find": "        case .angle:\n            break",
+    "replace": "        case .angle(let degrees, _):\n            setGradient(GradientRules.rotated(gradient, to: degrees, in: Self.unitBox))",
+    "tests": "PhotoGradientOptionsTests"
+  },
+  {
+    "label": "gradientReachesTheBrush: a gradient edit never reaches the options, so every gesture is lost",
+    "file": "Sources/PhotoModel/ToolOptions.swift",
+    "find": "        if case .gradient(let intent) = edit { runGradient(intent) }\n",
+    "replace": "",
+    "tests": "PhotoGradientOptionsTests"
+  }
+]

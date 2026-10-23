@@ -7,6 +7,12 @@
 // File-flow (LF-2): the scene takes part in switching (`.suiteApp`), File
 // gets the suite's Open Recent ▸ and Open In ▸ (SuiteFileCommands), and the
 // window takes drops; all three read the process's one documents bridge.
+// Editor menus (EM-7): the delegate is a SuiteAppDelegate and `.suiteEditor`
+// adds Window > Switch To, AI Access… and the suite's Help group, and starts
+// LibraryShell.live, a live command channel over the window's catalog
+// (`afterglow run --live library`). Closing the window quits (D2), so a Dock
+// click relaunches; `.suiteReopenWindow` opens the window if the app is still
+// running with none.
 import Foundation
 import LibraryModel
 import SuiteModel
@@ -27,17 +33,31 @@ import SwiftUI
 
     /// The hand-off host; the catalog's file-flow answers don't depend on its photos until LF-3.
     static let host = LibraryCatalog(services: .fake())
+
+    /// How to read the window's catalog, and land a live result in it (LibraryWindow keeps both current).
+    static var read: (@MainActor () -> LibraryCatalog)?
+    static var take: (@MainActor (LibraryHeadless) -> Void)?
+
+    /// Live commands on the window's catalog; a client runs only on a grant it already holds.
+    static let live = LiveCommandChannel(
+        app: SuiteApp.library.displayName,
+        document: { () -> LibraryHeadless? in read.map { LibraryHeadless(catalog: $0()) } },
+        apply: { (result: LibraryHeadless) in take?(result) },
+        ask: { await AIAccessCenter.shared.ask($0) })
 }
 
 @main
 struct LibraryApp: App {
+    @NSApplicationDelegateAdaptor private var delegate: SuiteAppDelegate
+
     var body: some Scene {
-        Window("Library", id: "library") { LibraryWindow() }
+        Window("Library", id: "library") { LibraryWindow().suiteReopenWindow(id: "library") }
             .commands {
                 LibraryCommands()
+                LibraryBackupCommands()
                 SuiteFileCommands(app: .library, bridge: LibraryShell.bridge)
                 InspectorCommands()
             }
-            .suiteApp(.library, host: LibraryShell.host)
+            .suiteEditor(.library, host: LibraryShell.host, live: LibraryShell.live)
     }
 }
