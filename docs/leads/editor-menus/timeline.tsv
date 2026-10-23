@@ -23,3 +23,5 @@ utc	stage	event	ref	note
 2026-10-23T06:51:45Z	-	pr	EM-photo-design	#4739 CI: PASS on b78892b7a, pushed, base retargeted to dev, Head line moved
 2026-10-23T06:51:45Z	-	check	EM-flare-halo	scoped flare/halo runs wanted after 42845c6d2; dispatch is 403, waiting on verify-dispatch (queue backed up)
 2026-10-23T06:56:28Z	-	pr	EM-library	#4761 merged #4739 new head, CI: PASS on 721213065, pushed, Head line moved (base stays EM-photo-design until #4739 merges)
+2026-10-23T07:19:48Z	-	check	EM-photo-design	#4739 macOS build 39914195694 red on dev break FlareStage.swift:81 (FlareOpenQueue, #4708 vs #4716); fix PR #4771 opened (f2840adf, CI: PASS); #4739 at 15-file cap so not ported
+2026-10-23T07:19:48Z	-	merge	NP-flare	#4735 merged 06:49 (feature-done); full CI 39914223799 pending on c2cc0c7c7

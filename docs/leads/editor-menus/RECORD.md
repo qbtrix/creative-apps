@@ -54,3 +54,5 @@ Next: #4738 and C4 #4737 in lane; #4739 retargets to dev after #4738 merges; the
 - #4738 EM-flare-halo merged (06:40:59Z). #4739 merged dev (FlareApp.swift conflict from the parent squash, resolved to dev, which the slice does not touch); retarget to dev once the gate passes. #4761 follows.
 - 2026-10-23T06:51:45Z: #4739 on dev base, head b78892b7a, CI: PASS. #4761 merging the new head, gate running. Scoped runs for EM-flare-halo come from verify-dispatch (our dispatch is 403).
 - 2026-10-23T06:56:28Z: #4761 head 721213065, CI: PASS; retarget to dev when #4739 merges.
+
+- 2026-10-23T07:19:48Z: #4739 macOS build failed on a dev break (FlareStage.swift:81, FlareOpenQueue from #4708 after #4716). Opened fix #4771. Will merge dev into #4739 once it lands.
