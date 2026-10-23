@@ -49,3 +49,4 @@ Next: (2026-10-23T17:39:52Z) #4879 LC-a, #4924 LC-u, #4937 LC-5, #4938 LC-6 wait
 - 2026-10-23T18:15:01Z: heartbeat: #4879,#4924,#4937,#4938,#4949 open, clean, no needs-fix; dev Linux check 40000080882 (98589662) running; findings for this feature 0. PR bodies carry a server-added attribution footer that a PATCH cannot remove; the lane strips it from the squash commit.
 - 2026-10-23T18:37:22Z: heartbeat: #4879,#4924,#4937,#4938,#4949 ready and clean; lane busy bisecting batch 20261023174522 (not ours), 60 ready PRs queued behind it. Nothing to fix.
 - 2026-10-23T18:59:21Z: #4879 got needs-rebase (conflict in LibraryImport.swift with cull-finish DR-6). Merged origin/dev, kept both sides; gate running, then push and move Head:.
+- 2026-10-23T19:23:23Z: #4879 integrated with dev at c131cf6383805ea79efebc2c743792d8be48e1b5 (CI: PASS), Head: moved. Stacked children still target the parent branch; retarget to dev once it merges.
