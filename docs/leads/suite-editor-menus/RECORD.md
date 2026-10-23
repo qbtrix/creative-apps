@@ -45,3 +45,7 @@ Next: #4738 and C4 #4737 in lane; #4739 retargets to dev after #4738 merges; the
 - XJ-EM launcher-side journey skips: fold into EM-library.
 - Design hand-off: told #3469's lead (comment 6356814669) that DesignApp.swift's scene line is EM-4's; DF-2 keeps File menu + drop.
 - C4-only shell-adoption description PR #4737 opened (text from #4710). EM-flare-halo #4738 on dev; EM-photo-design #4739 stacked on it.
+
+## 2026-10-23T06:20:27Z
+- #4761 EM-library opened, stacked on #4739 → #4738; labels fast-lane, feature-done.
+- #4738 conflicted with dev in FlareApp.swift (#4716 renamed FlareOpenQueue to FlareShell.openQueue). Merged dev, resolved, CI: PASS, head 9d59908ec, Head line moved.
