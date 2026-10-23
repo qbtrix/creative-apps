@@ -2,7 +2,7 @@
 
 Issue: #3478 · Packet: docs/blueprints/library/features/export-pack.md
 Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 (earlier act-1a15e4969c2-pa6e)
-Stage: 3 wave 1 (blocked on XP-a, re-checked at dev 35a0b5e7, 2026-10-23T16:33:31Z; blocked poll 2 of 3)
+Stage: 3 wave 1 (blocked on XP-a, re-checked at dev 35a0b5e7, 2026-10-23T16:33:31Z; blocked poll 3 of 3 at dev 35a0b5e7, 2026-10-23T17:32:35Z; Question for the supervisor posted on #3478 comment 6370841659)
 Base: origin/dev 35a0b5e7
 Next: LX-1 and LX-3 are merged. LX-2 waits on XP-a (XP-3 ExportPick.metadata not on dev); LX-4 waits on XP-a, then builds on FakeMetadata (Wire: export-pack:XP-7)
 
@@ -44,3 +44,4 @@ Next: LX-1 and LX-3 are merged. LX-2 waits on XP-a (XP-3 ExportPick.metadata not
 - 2026-10-21T11:50:25Z (act-1a15e4969c2-pa6e): re-read dev ded2ca5. No MetadataCarrying (XP-2), no ExportPick.metadata (XP-3), no StillMetadata (XP-7). SuiteUI lead's last poll says SM-a is not on dev. LX-2, LX-4, LX-5/6 and LX-7/8 cannot start. No open findings carry Feature: export-pack.
 - 2026-10-23T15:20:48Z: resumed by line lead act-1a16953af22-wvhu. Under contract-first waits (#4814), the XP-a waits are met once XP-a merges. XP-1 and XP-2 are on dev (MetadataCarrying, FakeMetadata), but XP-3 isn't, and no Belt-Slice-Done for XP-a is posted. So LX-2 waits, and LX-4 then builds on FakeMetadata with a Wire line for XP-7. Polling every 10 min.
 - 2026-10-23T16:33:31Z: records moved to lead/library-export-pack (docs/leads/library-export-pack/), the branch Belt watches; lead/export-pack-library is retired.
+- 2026-10-23T17:32:35Z: poll 3 of 3 identical (XP-a not on dev 35a0b5e7). Per rule 23 asked the supervisor (#3478 comment 6370841659) whether to build on a stub with a Wire line or park.
