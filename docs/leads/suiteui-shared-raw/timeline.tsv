@@ -21,3 +21,4 @@ utc	stage	event	ref	note
 2026-10-23T18:17Z	3	heartbeat	-	poll: no wave 1 PR merged; no needs-fix/needs-rebase; dev 98589662
 2026-10-23T18:40Z	3	heartbeat	-	poll: no wave 1 PR merged yet (lane batching); no needs-fix/needs-rebase; dev 0d4645bf
 2026-10-23T19:02Z	3	heartbeat	-	poll: no wave 1 PR merged yet (lane busy); no needs-fix/needs-rebase; dev 0d4645bfb
+2026-10-23T19:24Z	3	heartbeat	-	poll: 0 of 15 wave 1 PRs merged; 7 fast-lane queued, 8 stacked needs-split; 0 findings; waits unchanged
