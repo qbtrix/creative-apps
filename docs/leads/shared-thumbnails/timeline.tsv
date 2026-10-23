@@ -1,0 +1,29 @@
+ts	kind	note
+2026-10-20T22:27Z	stage	stage 1-2: packet read, waves planned; every slice blocked: ST-a waits on shared-codecs SC-a (planned, unfiled), the rest chain on ST-a
+2026-10-21T00:19Z	poll	worker restarted; still blocked on shared-codecs SC-a (ST-2 edits protected Package.swift/project.yml); rechecking
+2026-10-21T00:41Z	poll	still blocked: no shared-codecs PR exists
+2026-10-21T01:03Z	poll	still blocked: no shared-codecs PR
+2026-10-21T01:24Z	poll	still blocked: no shared-codecs PR
+2026-10-21T01:47Z	blocked	hb6: no shared-codecs PR yet; SC-a still first
+2026-10-21T02:09Z	blocked	hb7: no shared-codecs PR yet
+2026-10-21T02:31Z	blocked	hb8: no shared-codecs PR yet
+2026-10-21T02:55Z	blocked	hb9: no shared-codecs PR yet
+2026-10-21T03:17Z	blocked	hb10: no shared-codecs PR yet
+2026-10-21T03:39Z	blocked	hb11: no shared-codecs PR yet
+2026-10-21T04:01Z	blocked	hb12: no shared-codecs PR yet
+2026-10-21T04:24Z	poll	No shared-codecs SC-a PR yet; shared-thumbnails stays blocked on it.
+2026-10-21T04:46Z	poll	#3718 shared-codecs open, no PR; supervisor queued it for the next shift. ST-a stays blocked.
+2026-10-21T05:08Z	poll	#3718 shared-codecs open, no PR; ST-a blocked (supervisor queued #3718 for next shift).
+2026-10-21T05:30Z	poll	#3718 shared-codecs open, no PR; ST-a blocked.
+2026-10-21T05:52Z	poll	#3718 shared-codecs open, no PR; ST-a blocked.
+2026-10-21T06:26Z	blocked	Still blocked on shared-codecs #3718 (open, no PR; supervisor queued it for the next shift).
+2026-10-21T06:49Z	blocked	hb19: still blocked on shared-codecs #3718 (open).
+2026-10-21T07:13Z	blocked	hb20: still blocked on shared-codecs #3718 (open).
+2026-10-21T07:35Z	blocked	hb21: still blocked on shared-codecs #3718 (open).
+2026-10-21T07:57Z	blocked	hb22: still blocked on shared-codecs #3718 (open).
+2026-10-21T08:19Z	blocked	hb23: still blocked on shared-codecs #3718 (open).
+2026-10-21T08:41Z	blocked	hb24: still blocked on shared-codecs #3718 (open).
+2026-10-21T09:04Z	blocked	hb25: #3718 shared-codecs still open, no SC PR; no findings
+2026-10-21T09:26Z	blocked	hb26: #3718 still open, no SC PR; no findings
+2026-10-21T09:48Z	blocked	hb27: #3718 still open, no SC PR; no findings
+2026-10-21T10:12Z	released	Released per supervisor answer on #3721 (09:53Z) for this run. Resume state: no slice started; waits on shared-codecs #3718 SC-a (open, no PR). No open findings, no open PRs.
