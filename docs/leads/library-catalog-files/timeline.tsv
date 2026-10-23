@@ -3,3 +3,4 @@ utc	stage	event	ref	note
 2026-10-23T16:34:40Z	3	pr	#4879	LC-a opened at df5c4fa; LC-u, LC-m builders launched
 2026-10-23T17:29:30Z	3	pr	#4924	LC-u opened at 006a476
 2026-10-23T17:39:52Z	3	pr	#4937,#4938	LC-m opened (LC-5, LC-6); LC-z builder launched
+2026-10-23T17:51:06Z	3	check	#4879,#4924,#4937,#4938	all open, none merged, no needs-fix/needs-rebase; dev 8a54f64 Linux check 39997290881 running; findings 0

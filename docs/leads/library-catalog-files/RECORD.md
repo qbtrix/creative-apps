@@ -44,3 +44,4 @@ Next: (2026-10-23T17:39:52Z) #4879 LC-a, #4924 LC-u, #4937 LC-5, #4938 LC-6 wait
 - 2026-10-23T16:34:40Z: LC-a #4879 opened (df5c4fa, 14 files +399/-1, CI: PASS). LC-u and LC-m builders launched on it. Record mirrored to lead/library-catalog-files.
 - 2026-10-23T17:29:30Z: LC-u #4924 opened (006a476, 12 files +390, CI: PASS), base feat/library-lc-a. SuiteUI ask #4914 (grid cell badge + context menu). Open findings: 0.
 - 2026-10-23T17:39:52Z: LC-m split over the 15-file cap: #4937 LC-5 (5376128, 9 files +188/-21) on lc-a, #4938 LC-6 (58cadbb, 11 files +178/-44) on lc-m5; both CI: PASS. LC-z builder launched. Open: relinked id keeps the old path; re-importing a folder with copy makes new copies (candidate gaps after LC-z).
+- 2026-10-23T17:51:06Z: heartbeat: #4879,#4924,#4937,#4938 open, no needs-fix; dev Linux check 39997290881 (8a54f64) running; findings 0.
