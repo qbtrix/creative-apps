@@ -31,3 +31,5 @@ utc	stage	event	ref	note
 2026-10-23T15:25:45Z	resume	run act-1a16958d72f-a4mg resumed at stage 3 on dev 721168a8; wave 1 planned
 2026-10-23T15:27:34Z	wave	wave 1 launched: BK-u (wf_1dce2172-bd9)
 2026-10-23T17:29:06Z	nudge	Belt nudge read; records for run act-1a16958d72f-a4mg mirrored here (Belt reads lead/suiteui-brush-keys)
+2026-10-23T17:43:33Z	pr	BK-u PR #4939 opened (fast-lane, 399 lines, CI: PASS)
+2026-10-23T17:43:33Z	wave	wave 2 launching: BK-photo, BK-design, BK-flare
