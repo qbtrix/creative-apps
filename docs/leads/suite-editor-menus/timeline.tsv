@@ -22,3 +22,4 @@ utc	stage	event	ref	note
 2026-10-23T06:45:10Z	-	fix	EM-photo-design	#4739: merged dev after parent squash (FlareApp.swift taken from dev); diff vs dev is the slice only, 15 files +364/-28; gate running
 2026-10-23T06:51:45Z	-	pr	EM-photo-design	#4739 CI: PASS on b78892b7a, pushed, base retargeted to dev, Head line moved
 2026-10-23T06:51:45Z	-	check	EM-flare-halo	scoped flare/halo runs wanted after 42845c6d2; dispatch is 403, waiting on verify-dispatch (queue backed up)
+2026-10-23T06:56:28Z	-	pr	EM-library	#4761 merged #4739 new head, CI: PASS on 721213065, pushed, Head line moved (base stays EM-photo-design until #4739 merges)
