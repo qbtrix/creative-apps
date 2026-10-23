@@ -107,3 +107,4 @@ utc	stage	event	ref	note
 2026-10-23T22:40Z	stage	scoped flare 40029025919 green at 491ec546 (has #4843): Belt-Slice-Done FV-a and Mac-Finish-Wanted FV-a posted on #3481; FV-a critic panel (ui: true) queued for journeys run 40032678706 ui-screens; #4852 clean on dev, not yet batched
 2026-10-23T22:58	heartbeat	#4852 clean, awaiting batch; journeys 40032678706 in progress
 2026-10-23T23:20	heartbeat	#4852 clean, awaiting batch; journeys flare job started 23:07
+2026-10-23T23:42	heartbeat	#4852 clean, awaiting batch; journeys flare job still running
