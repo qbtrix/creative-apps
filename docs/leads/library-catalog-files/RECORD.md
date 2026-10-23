@@ -52,3 +52,4 @@ Next: (2026-10-23T17:39:52Z) #4879 LC-a, #4924 LC-u, #4937 LC-5, #4938 LC-6 wait
 - 2026-10-23T19:23:23Z: #4879 integrated with dev at c131cf6383805ea79efebc2c743792d8be48e1b5 (CI: PASS), Head: moved. Stacked children still target the parent branch; retarget to dev once it merges.
 - 2026-10-23T19:45:33Z: heartbeat: lane dropped needs-rebase; #4879,#4924,#4937,#4938,#4949 ready, waiting for a batch. No needs-fix, findings 0.
 - 2026-10-23T20:07:26Z: heartbeat: #4879,#4924,#4937,#4938,#4949 ready and clean, waiting for a lane batch.
+- 2026-10-23T20:29:20Z: heartbeat: #4879,#4924,#4937,#4938,#4949 ready and clean; lane bisecting another batch without them. Waiting.
