@@ -1,6 +1,6 @@
 // LibraryWindow+Files.swift (catalog-files LC-3): Remove from Catalog… confirms with the count, then runs
 // `photo.remove-from-catalog`; Locate… asks for the new file, then runs `photo.relink`, both through
-// `LibraryCatalog.fileCommands` (disabled with its reason on the LC-1 stubs). The dialog's state is the
+// `LibraryCatalog.fileCommands`, each disabled with its own command's reason (LC-7). The dialog's state is the
 // modifier's own @State, so asking re-renders no window body.
 import AppKit
 import LibraryModel
@@ -11,9 +11,9 @@ import SwiftUI
 /// The file actions the menus and the badge read: each nil while its why says why it can't run.
 struct LibraryFilesActions {
     var remove: LibraryMenu.Action?
-    var removeWhy = LibraryCatalog.catalogFilesHelp
+    var removeWhy = LibraryCatalog.removeHelp
     var locate: LibraryMenu.Action?
-    var locateWhy = LibraryCatalog.catalogFilesHelp
+    var locateWhy = LibraryCatalog.relinkHelp
 }
 
 extension FocusedValues {
@@ -56,9 +56,9 @@ struct LibraryFilesArea: ViewModifier {
 
     private var why: (remove: String?, relink: String?) {
         (LibraryCatalog.fileCommands.availability("photo.remove-from-catalog", on: catalog).why
-            ?? (catalog.removeCount == 0 ? "Select the photos to remove." : nil),
+            ?? (catalog.removeCount == 0 ? LibraryCatalog.removeHelp : nil),
          LibraryCatalog.fileCommands.availability("photo.relink", on: catalog).why
-            ?? (catalog.locateTarget == nil ? "No photo is missing its file." : nil))
+            ?? (catalog.locateTarget == nil ? LibraryCatalog.relinkHelp : nil))
     }
 
     private var actions: LibraryFilesActions {

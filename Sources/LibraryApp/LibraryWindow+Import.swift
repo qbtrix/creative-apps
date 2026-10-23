@@ -1,7 +1,9 @@
 // LibraryWindow+Import.swift: the import area (import IM-6). File > Import
 // Folder… takes `-LibraryImportFolder` or a folder from the open panel (a
-// folder dropped on the empty catalog skips the panel),
-// begins the import on the catalog, runs the importer off the main actor and
+// folder dropped on the empty catalog skips the panel), with the copy choice
+// from `-LibraryImportCopyTo` or the panel's accessory and a second panel for
+// the copy folder (catalog-files LC-7), runs `file.import-folder` on the
+// catalog, runs the importer off the main actor and
 // hands its progress, batches and result back to the catalog in order.
 // `-LibraryImportOnLaunch` imports once, as soon as the catalog has loaded.
 import AppKit
@@ -29,7 +31,9 @@ extension LibraryWindow {
     var fileMenu: LibraryMenu.File {
         LibraryMenu.File(
             importFolder: enabled(model.importHelp == nil) { startImport() },
-            importDropped: enabled(model.importHelp == nil) { (folder: String) in importFolder(folder) },
+            importDropped: enabled(model.importHelp == nil) { (folder: String) in
+                importFolder(folder, copy: ImportCopyOptions())
+            },
             importHelp: model.importHelp,
             showImportFailures: enabled(showFailuresWhy == nil) { showImportFailures() },
             dismissImportNotice: act(.dismissImportNotice))
@@ -60,17 +64,23 @@ extension LibraryWindow {
         startImport()
     }
 
-    /// The launch folder, else the one the open panel picks; nothing when it is cancelled.
+    /// The launch folder and copy choice, else the ones the open panels pick; nothing when one is cancelled.
     func startImport() {
-        guard let folder = areas.imports.launch.importFolder ?? Self.chooseImportFolder() else { return }
-        importFolder(folder)
+        let launch = areas.imports.launch
+        if let folder = launch.importFolder { return importFolder(folder, copy: launch.importCopy) }
+        guard let picked = Self.chooseImportFolder() else { return }
+        importFolder(picked.folder, copy: picked.copy)
     }
 
-    /// `beginImport`, the importer off the main actor, then `finishImport` or `failImport`.
-    private func importFolder(_ folder: String) {
-        guard let known = model.beginImport() else { return }
+    /// `file.import-folder`, the importer (copying when `copy` says so) off the main actor, then
+    /// `finishImport` or `failImport`.
+    private func importFolder(_ folder: String, copy: ImportCopyOptions) {
+        let options = ImportOptions(folder: folder, copyTo: copy.copyTo, byDate: copy.byDate)
+        guard let params = try? JSONValue(encoding: options),
+              (try? LibraryCatalog.catalog.run("file.import-folder", params: params, on: &model)) != nil else { return }
+        let known = model.knownIDs()
         let name = URL(fileURLWithPath: folder).lastPathComponent
-        let importer = model.services.importer
+        let importer = model.services.importer.copying(model.importCopy)
         let (events, sink) = AsyncStream<ImportEvent>.makeStream()
         Task.detached(priority: .userInitiated) {
             do {
@@ -97,17 +107,33 @@ extension LibraryWindow {
         }
     }
 
-    /// The open panel, folders only; nil when cancelled.
-    private static func chooseImportFolder() -> String? {
+    /// The open panel, folders only, with the copy choice; then, when copying, a panel for the copy folder.
+    /// Nil when either is cancelled.
+    private static func chooseImportFolder() -> (folder: String, copy: ImportCopyOptions)? {
+        let choice = ImportCopyChoice()
+        let panel = folderPanel(prompt: "Import")
+        // Add in place or copy to a folder (catalog-files LC-3, LibraryImportOptions.swift).
+        panel.accessoryView = NSHostingView(rootView: LibraryImportOptions(choice: choice))
+        panel.isAccessoryViewDisclosed = true
+        guard panel.runModal() == .OK, let url = panel.url else { return nil }
+        var copy = choice.options
+        if let start = copy.copyTo {
+            let destination = folderPanel(prompt: "Copy Here")
+            destination.message = "Choose the folder to copy the photos into."
+            destination.canCreateDirectories = true
+            destination.directoryURL = URL(fileURLWithPath: start, isDirectory: true)
+            guard destination.runModal() == .OK, let target = destination.url else { return nil }
+            copy.copyTo = target.path(percentEncoded: false)
+        }
+        return (url.path(percentEncoded: false), copy)
+    }
+
+    private static func folderPanel(prompt: String) -> NSOpenPanel {
         let panel = NSOpenPanel()
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
-        panel.prompt = "Import"
-        // Add in place or copy to a folder (catalog-files LC-3, LibraryImportOptions.swift).
-        panel.accessoryView = NSHostingView(rootView: LibraryImportOptions())
-        panel.isAccessoryViewDisclosed = true
-        guard panel.runModal() == .OK, let url = panel.url else { return nil }
-        return url.path(percentEncoded: false)
+        panel.prompt = prompt
+        return panel
     }
 }

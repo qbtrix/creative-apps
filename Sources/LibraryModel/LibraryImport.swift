@@ -32,8 +32,8 @@ extension LibraryCatalog {
     }
 
     /// The catalog's ids, the set sized once up front (QB-L9: no intermediate
-    /// array, no rehash while it grows).
-    private func knownIDs() -> Set<String> {
+    /// array, no rehash while it grows): the ids an import begun by `file.import-folder` skips.
+    public func knownIDs() -> Set<String> {
         var known = Set<String>(minimumCapacity: items.count)
         for item in items { known.insert(item.id) }
         return known

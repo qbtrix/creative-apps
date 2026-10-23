@@ -10,8 +10,6 @@ import Foundation
 import SuiteKernel
 
 extension LibraryCatalog {
-    /// Kept for the controls that read it; no command is off for it any longer.
-    public static let catalogFilesHelp = "File management arrives with LC-5."
     /// Why Remove from Catalog can't act.
     public static let removeHelp = "Select the photos to remove."
     /// Why Relink can't act.
