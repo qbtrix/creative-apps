@@ -38,13 +38,13 @@ struct PixelSink: RenderSink {
         return try #require(sink.seen.first)
     }
 
-    @Test(.disabled("waits on HX-3")) func alphaLeavesTheBackgroundClear() throws {
+    @Test func alphaLeavesTheBackgroundClear() throws {
         let pixels = try Self.firstFrame(HaloRenderSettings(format: .movie, codec: .prores4444, alpha: true))
         #expect(pixels.first == .clear, "the background was drawn with Transparent background on")
         #expect(pixels.last?.a == 1, "Floor isn't opaque")
     }
 
-    @Test(.disabled("waits on HX-3")) func aMovieWithoutAlphaIsOpaqueBlackThere() throws {
+    @Test func aMovieWithoutAlphaIsOpaqueBlackThere() throws {
         for codec in [MovieCodec.h264, .prores4444] {
             let pixels = try Self.firstFrame(HaloRenderSettings(format: .movie, codec: codec))
             #expect(pixels.first == RGBA(r: 0, g: 0, b: 0, a: 1), "\(codec): the background isn't opaque black")
@@ -52,7 +52,7 @@ struct PixelSink: RenderSink {
         }
     }
 
-    @Test(.disabled("waits on HX-3")) func aPNGSequenceKeepsItsFrames() throws {
+    @Test func aPNGSequenceKeepsItsFrames() throws {
         for alpha in [false, true] {
             let pixels = try Self.firstFrame(HaloRenderSettings(format: .pngSequence, alpha: alpha))
             #expect(pixels.first == .clear, "alpha \(alpha): a PNG frame changed where nothing draws")
