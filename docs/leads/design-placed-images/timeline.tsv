@@ -40,3 +40,4 @@ utc	stage	event	ref	note
 2026-10-21T17:48Z	PD-a	wait	#3759	still supervisor-queued
 2026-10-21T18:10Z	PD-a	wait	#3759	still supervisor-queued
 2026-10-21T18:32Z	PD-a	wait	#3759	still supervisor-queued
+2026-10-23T15:20Z	PD-a	integrate	#3759	dev 721168a8 merged in; Package.swift conflict resolved

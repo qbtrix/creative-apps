@@ -1,15 +1,15 @@
 # placed-images lead record
 
 Issue: #3454 · Packet: docs/blueprints/design/features/placed-images.md
-Run: act-1a15da1b26c-9qo6 · Session: claude/design-feature-lead-run-1k035k · Started: 2026-10-21T08:46:56Z (prior run act-1a15ac70747-ky1f)
-Stage: 3 PD-a #3759 open (supervisor-queued, Package.swift); integrated with dev at b97947e2, CI PASS
-Base: 896cafe3 (origin/dev); main verified at 0dd23d65
-Next: PD-a merge by supervisor; PD-u and PD-m build additively from dev after it (supervisor)
+Run: act-1a16953aed5-oxsi · Session: claude/lead-placed-images-stroke-style-elhwn1 · Started: 2026-10-23T15:20Z (prior runs act-1a15da1b26c-9qo6, act-1a15ac70747-ky1f)
+Stage: 3 wave 1: PD-a #3759 integrated with dev 721168a8 (Package.swift conflict); PD-u and PD-m build stacked on it
+Base: 721168a8 (origin/dev); main verified at cb79cbb6
+Next: supervisor merges #3759; PD-u and PD-m slice PRs stacked on design/pd-a-placed-image-stubs; then PD-z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| PD-a | picture fields and PlacedImageTarget stubs, CoreRaster linked, checks and RJ-D12 written disabled | PD-1, PD-2 | MJ-PD | PL-a; gradient-fill:DG-a; transform:DT-a; shape-tools:DS-a; stroke-style:DK-m | no | 0 | waiting | – | – |
+| PD-a | picture fields and PlacedImageTarget stubs, CoreRaster linked, checks and RJ-D12 written disabled | PD-1, PD-2 | MJ-PD | PL-a; gradient-fill:DG-a; transform:DT-a; shape-tools:DS-a; stroke-style:DK-m | no | 0 | open #3759 (supervisor-queued) | – | – |
 | PD-u | Place… and drop on the stubs, canvas draws by cover, inspector rows | PD-3, PD-4 | DJ-P1 | PD-a; DG-u; DE-u; PL-3; DA-a; DT-a; DT-u; DS-a; DS-u; DK-u | yes | 0 | waiting | – | – |
 | PD-m | fill into frame, focus as one step, SVG crop | PD-5, PD-6 | MJ-PD | PD-a; DG-m; DE-s; PL-7; DA-m; DT-m; DY-m; DS-m; DK-m | no | 0 | waiting | – | – |
 | PD-z | live journey, blueprint, feature-done | PD-7, PD-8 | DJ-P1 | PD-u, PD-m; DG-z | yes | 0 | waiting | – | – |
@@ -31,8 +31,11 @@ Next: PD-a merge by supervisor; PD-u and PD-m build additively from dev after it
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-23 run act-1a16953aed5-oxsi: contract-first waits (lead.md rule 12, supervisor 15:11Z): every other feature's contract slice has merged (stroke-style DK-a, design-export, gradient/transform/shape-tools/eyedropper built), so PD-u and PD-m start now, stacked on PD-a #3759 since PD-a is this feature's own contract. One lead holds placed-images and stroke-style.
 - PRs target dev (CLAUDE.md); brief's main HEAD b3011ab9 verified, work branches from origin/dev a48992b7.
 - PD-1 touches Package.swift (protected): the packet says the supervisor merges it after the macOS build; the PR will say so.
 
 ## Open
+- [ ] Wire: stroke-style:DK-m (PD-a/PD-m built before DesignStroke = VectorStroke; recheck DesignNode.swift when DK-m merges)
+- [ ] Wire: stroke-style:DK-u (PD-u built before the canvas strokes paintedPath; recheck DesignCanvasMarks.swift when DK-u merges)
 - PD-a blocked: suiteui placed-images PL-a not merged (kernel Place stubs #3578 and bodies #3626 merged; SuiteUI slice not yet), gradient-fill DG-a (#3687 open), transform DT-a (this run, waits on DG-a), shape-tools DS-a and stroke-style DK-m (no PR found).
