@@ -98,3 +98,4 @@ utc	stage	event	ref	note
 2026-10-23T19:36Z	5	wait	-	old batch resolved; new batch 20261023192105 (#4818..#4842, 12 PRs) running, #4843 is next in line; #4843/#4852/#4854 clean, no needs-fix
 2026-10-23T19:57Z	5	wait	-	batch 20261023192105 red, bisecting (probe -6); #4843 still next in line; #4843/#4852/#4854 clean, no needs-fix
 2026-10-23T20:20Z	heartbeat	#4843/#4852/#4854 open, clean, unchanged; lane batch 20261023192105 still bisecting (probes -1, -3 running); waiting on lane
+2026-10-23T20:42Z	heartbeat	#4843/#4852/#4854 open, clean, unchanged; batch 20261023192105 probe -1 Linux red on SuiteShell CommandPathTests/LauncherMenuStubTests (not Flare, not ours); no dev-red issue open; waiting on lane
