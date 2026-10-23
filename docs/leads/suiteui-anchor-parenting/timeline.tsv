@@ -1,0 +1,39 @@
+utc	stage	event	ref	note
+2026-10-21T11:25Z	0	stage-start	0	lead started, waits checked
+2026-10-21T11:27Z	3	wave-start	AN-a	wave 1 launched (AN-a contract slice)
+2026-10-21T12:15Z	3	resume	AN-a	resumed after restart; AN-a built on lead/anchor-parenting-AN-a, gate blocked by dev-red #3856, now fixed on dev
+2026-10-21T12:17Z	3	heartbeat	-	gates running on wave-1 slices after merging dev (#4008 fixed dev-red)
+2026-10-21T12:19Z	3	wave-start	wf_8d28fdb1-88d	AN-m building stacked on lead/anchor-parenting-AN-a
+2026-10-21T12:36Z	3	check	ed1efa599	AN-a gate failed only a LibraryModel timing budget under CPU load; re-gating
+2026-10-21T12:57Z	3	check	ed1efa599	AN-a re-gate failed only Library timing budgets under load (5 gates running); queued for an idle-machine gate. AN-m at 29ba5ba6a
+2026-10-21T13:04Z	3	wave	AN	wave 2 builders returned; dev's perf list now skips the Library timing tests; merged dev into the slice branches and re-gating one at a time
+2026-10-21T13:08Z	build	pr-opened	#4076	AN-a gate PASS on 516c4d7e3, PR #4076 opened with fast-lane
+2026-10-21T13:22Z	build	heartbeat	#4076	heartbeat: #4076 open, waiting on the lane
+2026-10-21T13:43Z	build	heartbeat	-	contract PR open; macOS build pending
+2026-10-21T15:29Z	wave-2	merged	#4076	AN-a merged as 2494ab415; restacking AN-m on dev
+2026-10-21T15:30Z	wave-2	gate	ANm	dev (with #4076) merged into AN-m at 29cb5980b; serial gate running
+2026-10-21T15:50Z	wave-2	check	fe3faa1d1	AN-m re-gate running after conflict-marker fix
+2026-10-21T15:54Z	wave-2	pr-open	#4107	AN-m opened (fast-lane, Fast-Check pass on fe3faa1d1)
+2026-10-21T16:12Z	build	heartbeat	#4107	AN-a merged; AN-m PR open, gate PASS fe3faa1d1
+2026-10-21T16:33Z	build	heartbeat	#4107	no change since 16:12
+2026-10-21T16:53Z	wave2	heartbeat	#4107	no change; macOS queue backed up
+2026-10-21T17:14Z	build	merge	#4107	AN-m merged as 0f44e804e
+2026-10-21T17:45Z	build	check	39643409752	AN-m Belt-Slice-Done posted
+2026-10-21T18:07Z	blocked	heartbeat	AN-u	AN-u blocked on orientation-crop; AN-m done
+2026-10-21T18:29Z	blocked	heartbeat	AN-u	AN-u blocked on orientation-crop; AN-m done
+2026-10-21T18:43Z	blocked	heartbeat	AN-u	AN-m done; AN-u blocked on orientation-crop:OC-u
+2026-10-21T18:43Z	blocked	heartbeat	AN-u	mirror to lead/anchor-parenting
+2026-10-21T19:12Z	blocked	heartbeat	AN-u	still blocked on OC-u
+2026-10-21T19:38Z	blocked	heartbeat	AN-u	still blocked on OC-u
+2026-10-21T20:01Z	blocked	heartbeat	AN-u	OC-u not on dev at 606e8212a
+2026-10-21T20:25Z	build	heartbeat	AN-u	OC-u still not on dev
+2026-10-21T20:48Z	build	heartbeat	AN-u	OC-u not on dev
+2026-10-21T21:11Z	wait-dep	heartbeat	AN-u	OC-u not on dev yet
+2026-10-22T03:31Z	resume	resume, new run id	-	act-1a161a658a7-2jql
+2026-10-22T06:55Z	wait-upstream	heartbeat: AN-7 #4308, AN-9 #4303 merged	-	act-1a161a658a7-2jql
+2026-10-22T07:23Z	wait-upstream	heartbeat: waits unchanged	-	act-1a161a658a7-2jql
+2026-10-22T07:56Z	wait-upstream	asked supervisor (3rd blocked poll)	-	act-1a161a658a7-2jql
+2026-10-22T07:57Z	wait-upstream	asked supervisor (3rd blocked poll)	-	act-1a161a658a7-2jql
+2026-10-22T07:58Z	parked	parked per supervisor	-	act-1a161a658a7-2jql
+2026-10-22T16:24Z	3	resume	#4522	new run act-1a16469734c-d0s8; all open tasks wait on upstream
+2026-10-23T15:30Z	3	stage-start	#3755	wave 1: AN-u (run act-1a1695ebfeb-d54n)
