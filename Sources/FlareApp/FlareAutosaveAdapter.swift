@@ -8,8 +8,8 @@
 // in Flare's folder under the suite root (`-SuiteSupportDir` moves it), none for a launch that ignores restored
 // state (the journeys' `-ApplePersistenceIgnoreState`) unless it names its own store (the recovery journey's); only
 // a launch that keeps state moves an earlier build's `Recovery.flare` into it, once. After a failed save the
-// window's subtitle reads `model.saveStatus`, and the same "Not saved" shows in the error color at the window's
-// bottom trailing corner (`flare.saveStatus`), its tooltip the failure.
+// window's subtitle reads `model.saveStatus`; the same "Not saved" in the error color (`flare.saveStatus`) is the
+// stage's status bar's (FlareStage.swift).
 import AppKit
 import FlareModel
 import SuiteModel
@@ -24,13 +24,6 @@ struct FlareAutosaveAdapter: ViewModifier {
     func body(content: Content) -> some View {
         content
             .navigationSubtitle(model.saveStatus ?? "")
-            .overlay(alignment: .bottomTrailing) {
-                if let status = model.saveStatus {
-                    // Its tooltip is why the save failed.
-                    EditorSaveStatus(.notSaved, title: status, help: model.saveError ?? "", identifier: "flare.saveStatus")
-                        .padding(SuiteSpacing.s)
-                }
-            }
             .autosaveRecovery(
                 hooks, folder: Self.folder, delay: FlareWorkspace.autosaveDelay, edits: model.document.hashValue)
             .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in

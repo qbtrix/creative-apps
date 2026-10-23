@@ -1,12 +1,12 @@
 // DesignInspectorSnapshots.swift: Design's inspector (Properties) at the
 // editor's panel width: a page with no layer selected, a rectangle selected
-// (Layer, Frame, Corners, Stroke and Fill), a locked rectangle (its rows
+// (Layer, Frame, Corners, Fill, then Stroke, checked by strokeSitsUnderFill), a locked rectangle (its rows
 // disabled, with the hint saying why in the value column, whose x is checked
 // against the X field's on the hosted view), a rectangle inside a locked group
 // (disabled the same way), and A on `cards` styled: radius 12, opacity 50% and
 // a 4 pt stroke, A's Fill section with its type switch, and A's Transform
-// section. The styled A's Corners and Stroke sections also get a shot of their
-// own, framing the whole stroke editor (Color, Width, Join, Cap, Dash, the dash
+// section. The styled A's Stroke section also gets a shot of its
+// own, framing the whole stroke editor (Color, Width, Join, Cap, Dash, the one
 // note and Remove Stroke) that the full panel pushes below the fold (#3866),
 // with a test that every stroke row sits inside the window. Writes
 // design-inspector-page-, -node-, -locked-, -locked-group-, -style-, -stroke-,
@@ -94,6 +94,18 @@ import Testing
         }
     }
 
+    /// Paint reads fill, then stroke (#3871): the stroke editor's first row sits under the Fill section's well.
+    @Test(.timeLimit(.minutes(1))) func strokeSitsUnderFill() async throws {
+        let model = try styledModel()
+        let w = RenderBudgetWindow(PanelSample(model: model), size: CGSize(width: 1440, height: 1600))
+        defer { w.close() }
+        try await w.settle(500)
+        let fill = try #require(await w.element("design.fill"), "no Fill well")
+        let stroke = try #require(await w.element("suite.stroke.color"), "no stroke Color row")
+        // Window coordinates run up from the bottom: under means a smaller y.
+        #expect(stroke.maxY <= fill.minY, "Stroke's top \(stroke.maxY) is above Fill's bottom \(fill.minY)")
+    }
+
     /// The Fill section's Solid/Linear/Radial switch over a solid rectangle, on now that gradient fills are
     /// built (gradient-fill DG-4).
     @Test func fillTypeSwitch() throws {
@@ -133,7 +145,7 @@ import Testing
     }
 }
 
-/// The Corners and Stroke sections alone at the panel's width, as the inspector lays them out.
+/// The Stroke section alone at the panel's width, as the inspector lays it out.
 private struct StrokeSample: View {
     let model: DesignWorkspace
     var body: some View {

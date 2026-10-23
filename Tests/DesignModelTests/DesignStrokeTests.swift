@@ -79,6 +79,17 @@ import Testing
         #expect(w.strokeChange(.dash(.dashed, pattern: nil)) != nil || w.strokeDashHelp != nil)
     }
 
+    /// The Dash chips wait on DK-5 too, and say so in the user's words with the same reason as Join and Cap, so the
+    /// editor shows one note, not a second one about core's fields and trim, which Design never shows.
+    @Test func dashWaitsWithJoinAndCapsReason() throws {
+        var w = DesignFixtures.cards
+        w.selectItem("node-2")
+        try w.setStyle(.stroke(DesignStroke(color: DesignColor(255, 0, 0), width: 2)))
+        #expect(w.strokeDashHelp == w.strokeStyleHelp)
+        #expect(w.strokeDashHelp != StrokeRules.waitingCore)
+        #expect(!DesignWorkspace.joinCapHelp.contains("creative-core"))
+    }
+
     @Test func designColorClampsOutOfRangeAndNaN() {
         #expect(DesignColor(kernel: FillColor(r: 1.5, g: -0.2, b: .nan)) == DesignColor(255, 0, 0))
         for part in [Double.nan, -0.1, 1.2, 0.5, 0, 1] {

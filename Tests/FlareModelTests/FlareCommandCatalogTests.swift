@@ -76,10 +76,13 @@ struct FlareCommandCatalogTests {
     /// its unsaved edits, Delete Keyframe has no key selected, and a frame inserted or removed at frame 5 moves no key
     /// or label, so it changes nothing and records no step (FlareCommandPathTests runs each where it acts).
     /// The file-flow examples need a recent file or a saved animation on disk: FlareFileFlowTests runs them.
+    /// The path.* examples (pen-paths FP-6) need a Pen draft or a shape picked with Direct Select, which the fixture has
+    /// not: FlarePathCommandTests runs them in Flare and SuiteKernelTests' PathCommandsTests runs each rule.
     static func exempt(_ problem: String) -> Bool {
         let id = String(problem.prefix { $0 != ":" })
         // The beta.2 commands never run (FlareMenuVisibilityTests).
         if FlareWorkspace.menuHidden.contains(id) { return problem.contains("exampleRuns") }
+        if id.hasPrefix("path.") { return problem.contains("exampleRuns") }
         if ["file.clear-recent", "file.open-in", "file.open-recent"].contains(id) { return problem.contains("exampleRuns") }
         if ["recovery.restore", "recovery.discard", "timeline.delete-keys"].contains(id) { return problem.contains("exampleRuns") }
         return ["timeline.insert-frames", "timeline.remove-frames"].contains(id)

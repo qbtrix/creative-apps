@@ -169,6 +169,7 @@ extension FlareWorkspace {
     ] + GradientCommands.specs(FlareWorkspace.self)  // the eight fill.* commands (gradient-fill FG-5)
         + FileFlowCommands.specs(FlareWorkspace.self)  // file.recent, open-recent, clear-recent, open-in, drop (file-flow FL-3)
         + hiddenCommands  // the beta.2 items the menus hide (no-placeholders NP-3)
+        + PathCommands.specs(FlareWorkspace.self)  // the twelve path.* commands, the Pen and Direct Select's points (pen-paths FP-6)
 }
 
 extension FlareWorkspace {
