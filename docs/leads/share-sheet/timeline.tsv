@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-23T17:23Z	3	heartbeat	SH-z	#4612 clean, queued since 07:19Z (lane active, no dev-red); no findings
 2026-10-23T17:45Z	3	merged	SH-z	#4612 merged 17:35:56Z (55017fac); library-scoped run 39997279554 on 8a54f64c contains it, queued
 2026-10-23T18:09Z	3	heartbeat	SH-z	library run 39997279554 still queued (macOS runner); full CI 39999410389 on 98589662 pending also contains 55017fac; no findings
+2026-10-23T18:31Z	3	heartbeat	SH-z	library run 39997279554 and full CI 39999410389 both still queued for macOS; no findings, no dev-red
