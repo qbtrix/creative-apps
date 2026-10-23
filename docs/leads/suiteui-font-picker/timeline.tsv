@@ -49,3 +49,4 @@ utc	stage	event	ref	note
 2026-10-23T05:31Z	ship	FP-z PR opened	FP-z	#4759 head 9a074fae, labels fast-lane+feature-done
 2026-10-23T05:35Z	ship	lane dispatched macOS build	FP-z	run 39906624931 on 9a074fae
 2026-10-23T05:45Z	check-in	FP-a scoped run still running; #4759 build queued	-	39900719671 in_progress, 39906624931 queued
+2026-10-23T06:06Z	fix	macOS build red: private type in FontPickerLiveTests; fixed	FP-z	run 39906624931 failed; pushed 2ea1cac4, Head moved
