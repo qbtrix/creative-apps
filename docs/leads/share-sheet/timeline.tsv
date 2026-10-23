@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-23T14:20Z	0	stage-start	#3789	resumed by act-1a1693fbf6d-ap2g
 2026-10-23T14:35Z	3	slice-done	SH-m	Belt-Slice-Done on full run 39957675362 (contains #4592)
 2026-10-23T14:56Z	3	fix	SH-z	#4612 merged with dev: 113 lines / 11 files, split moot; gate rerun
+2026-10-23T15:31Z	3	wait	SH-z	#4612 open with fast-lane, feature-done; slice-done waits on a library or full run containing it
