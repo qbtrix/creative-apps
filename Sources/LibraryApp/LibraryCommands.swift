@@ -6,8 +6,10 @@
 // Loupe, Zoom In ⌘+ and Zoom Out ⌘- (Larger and Smaller Thumbnails in the
 // grid), Zoom to Fit ⌘0, Actual Size ⌘1, Sort By. Photo: Copy Settings ⇧⌘C,
 // Paste Settings ⇧⌘V, Reset Develop, Crop, Reset Crop. Metadata: Set Rating,
-// Set Flag, Set Label, Auto Advance (its help says it moves the loupe to the
-// next photo after a rating or a flag). An item whose action is nil is disabled,
+// Set Flag, Set Label (6-9 name Red, Yellow, Green and Blue; Purple has no
+// key), Auto Advance (its help says it moves the loupe to the next photo after
+// a rating or a flag). Photo: Delete Rejected Photos… ⌘⌫ (cull-finish), fed by
+// the trash area's LibraryMenu.Trash: the Model's title, disabled with its help. An item whose action is nil is disabled,
 // never hidden, and its help says why. Single keys (R, G, and 0-5, P, X and U
 // once the cull area routes them) act only while the grid or loupe has focus,
 // so their items take no key equivalent and name the key in their help
@@ -66,6 +68,7 @@ struct LibraryCommands: Commands {
     @FocusedValue(\.libraryMenu) private var focused
     @FocusedValue(\.libraryFilters) private var focusedFilters
     @FocusedValue(\.libraryCatalog) private var focusedCatalog
+    @FocusedValue(\.libraryTrash) private var focusedTrash
 
     private var menu: LibraryMenu { focused ?? .disabled }
     private var filters: LibraryFiltersMenu { focusedFilters ?? LibraryFiltersMenu() }
@@ -84,8 +87,33 @@ struct LibraryCommands: Commands {
 
     /// `perform` applied to `value`, nil (disabled) while `perform` is nil.
     private func bind<Value>(_ perform: (@MainActor (Value) -> Void)?, _ value: Value) -> LibraryMenu.Action? {
+        Self.bound(perform, value)
+    }
+
+    /// `perform` applied to `value`, nil (disabled) while `perform` is nil.
+    static func bound<Value>(_ perform: (@MainActor (Value) -> Void)?, _ value: Value) -> LibraryMenu.Action? {
         guard let perform else { return nil }
         return { perform(value) }
+    }
+
+    /// Set Label's items: None, then each label, 6-9 named in their help while the cull area routes keys.
+    static func labelItems(_ cull: LibraryMenu.Cull, on catalog: LibraryCatalog?, reason: String) -> [MenuCommand] {
+        let none = MenuCommand(
+            "metadata.set-label", on: catalog, title: "None", action: bound(cull.setLabel, nil), reason: reason)
+        return [none] + PhotoLabel.allCases.map { (label: PhotoLabel) -> MenuCommand in
+            let key = LibraryKey.labelKeys.first { $0.label == label }.map { String($0.key) }
+            return MenuCommand(
+                "metadata.set-label", on: catalog, title: label.rawValue, action: bound(cull.setLabel, label),
+                reason: reason, key: cull.key == nil ? nil : key)
+        }
+    }
+
+    /// Photo > Delete Rejected Photos… ⌘⌫: the Model's title, disabled with its help (no window says so).
+    static func deleteRejectsItem(_ trash: LibraryMenu.Trash?) -> MenuCommand {
+        let trash = trash ?? LibraryMenu.Trash(help: noWindow)
+        return MenuCommand(
+            title: trash.title, systemImage: "trash", action: trash.help == nil ? trash.deleteRejects : nil,
+            reason: trash.help ?? noWindow, shortcut: KeyboardShortcut(.delete))
     }
 
     var body: some Commands {
@@ -198,6 +226,8 @@ struct LibraryCommands: Commands {
         MenuCommand("photo.reset-crop", on: catalog, title: "Reset Crop", action: photo.resetCrop, reason: crop)
         Divider()
         collectionPhotoItems
+        Divider()
+        Self.deleteRejectsItem(focusedTrash)
     }
 
     @ViewBuilder private var metadataItems: some View {
@@ -222,11 +252,8 @@ struct LibraryCommands: Commands {
                 action: bind(cull.setFlag, PhotoFlag.none), reason: reason, key: named("U"))
         }
         Menu("Set Label") {
-            MenuCommand("metadata.set-label", on: catalog, title: "None", action: bind(cull.setLabel, nil), reason: reason)
-            ForEach(PhotoLabel.allCases, id: \.self) { label in
-                MenuCommand("metadata.set-label", on: catalog, title: label.rawValue,
-                    action: bind(cull.setLabel, label), reason: reason)
-            }
+            let items = Self.labelItems(cull, on: catalog, reason: reason)
+            ForEach(Array(items.enumerated()), id: \.offset) { $0.element }
         }
         Divider()
         let advance = why("culling", "Auto Advance isn't available yet.")
