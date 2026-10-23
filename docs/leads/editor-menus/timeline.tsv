@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-23T15:21Z	check	editor-menus	fix PRs #4816 #4817 #4818 open in fast lane (unmerged)	https://github.com/qbtrix/creative-apps/pull/4817
 2026-10-23T15:44Z	check	editor-menus	journeys 39972233358 pending; fix round 1 #4816 #4817 #4818 clean in fast lane, unmerged	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
 2026-10-23T16:09Z	check	editor-menus	journeys 39972233358 pending; #4816 #4817 #4818 clean in fast lane, unmerged (lane batches waiting on macOS slots)	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T16:30Z	check	editor-menus	journeys 39972233358 pending; #4816 #4817 #4818 clean in fast lane, unmerged; flare journeys 39987109228 (pre-fix head) pending	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
