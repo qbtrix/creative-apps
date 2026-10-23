@@ -1,18 +1,18 @@
 # editor-menus lead record
 
 Issue: #3774 · Packet: docs/blueprints/suite/features/editor-menus.md
-Run: act-1a166b69fd0-x9m8 · Session: session_012bybPMvARipEyKrs5oNQwY · Started: 2026-10-23T03:08Z
-Stage: 3 wave 2
-Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a
-Next: #4738 and C4 #4737 in lane; #4739 retargets to dev after #4738 merges; then scoped runs and critics; EM-library
+Run: act-1a16a37a3ed-0kyn (relaunch; earlier act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
+Stage: 4 fixes
+Base: 35a0b5e7e9520a764f3eabf02968a453082a87cc (main; PRs target dev)
+Next: EM-flare-halo waits on #4817, #4818 (in lane) and #4988 (fixes #4830, fast-lane) to merge, then a green suite or full run on main holding them; then Belt-Slice-Done EM-flare-halo and the contact sheet
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| EM-a | .suiteEditor + ReopenRule + delegate reopen | EM-1, EM-2 | XJ-EM | report-problem:RP-a (met) | yes | 0 | merged #4710 | - | - |
-| EM-photo-design | Photo and Design adopt .suiteEditor (#3648) | EM-3, EM-4 | PJ-EM, DJ-EM | EM-a; file-flow adopts (on dev) | yes | 0 | open #4739 (stacked on EM-flare-halo) | - | - |
+| EM-a | .suiteEditor + ReopenRule + delegate reopen | EM-1, EM-2 | XJ-EM | report-problem:RP-a (met) | yes | 0 | done | 39983291011 | - |
+| EM-photo-design | Photo and Design adopt .suiteEditor (#3648) | EM-3, EM-4 | PJ-EM, DJ-EM | EM-a; file-flow adopts (on dev) | yes | 0 | done | 39983291011 | - |
 | EM-flare-halo | Flare and Halo adopt .suiteEditor (#1018, #1081) | EM-5, EM-6 | FJ-EM, HJ-EM | EM-a; file-flow adopts (on dev) | yes | 0 | open #4738 | - | - |
-| EM-library | Library adopts; RJ-X63; built | EM-7, EM-8, EM-9, EM-10 | LJ-EM + all | EM-a, every app slice | yes | 0 | building (stacked on EM-photo-design) | - | - |
+| EM-library | Library adopts; RJ-X63; built | EM-7, EM-8, EM-9, EM-10 | LJ-EM + all | EM-a, every app slice | yes | 0 | done | 39983291011 | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -59,3 +59,4 @@ Next: #4738 and C4 #4737 in lane; #4739 retargets to dev after #4738 merges; the
 - 2026-10-23T09:06:31Z: #4739 EM-photo-design merged (09:02Z). #4761 merged origin/dev at e42863714 (no conflicts), CI: PASS, retargeted to dev, stacked note dropped, Head moved. It is the last slice (feature-done).
 
 - 09:53Z: #4761 (EM-library, feature-done) merged. All editor-menus slices are on dev. Done markers wait on a green full CI (Linux+macOS) on a dev head that includes it, plus its journeys run.
+- 2026-10-23T19:28Z Relaunch act-1a16a37a3ed-0kyn: rebased on main 35a0b5e7e. Full CI https://github.com/qbtrix/creative-apps/actions/runs/39983291011 (green, main) holds the newest PRs for EM-a (#4737), EM-photo-design (#4771) and EM-library (#4761); done markers posted. EM-flare-halo is open: #4816 merged after main; #4817 and #4818 are in the lane. The supervisor added #4830 (focused text fields keep edit keys, shared layer); builder started on lead/editor-menus-4830.
