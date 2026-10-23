@@ -61,3 +61,6 @@ utc	stage	event	ref	note
 2026-10-23T19:28Z	PD-m	critic	#4922	critic round 2 on #4922: filed #4959 (place sizes to page but parents into a smaller frame); other fixes hold
 2026-10-23T19:28Z	PD-m	fix	#4922	fix round 2 started for #4959 (last round)
 2026-10-23T19:29Z	PD-u	build	-	heartbeat: pd-u1 pushed (552cc15a), pd-u2 gate running; #4959 fix round 2 running; no needs-fix
+2026-10-23T19:32Z	PD-u	pr	#4963	PD-u part 1 opened (canvas, 6 files +329, base #3759), CI: PASS at 552cc15a
+2026-10-23T19:32Z	PD-u	pr	#4964	PD-u part 2 opened (UI, 9 files +208/-4, base #4963), CI: PASS at 5be4d22c; conflicts with #4864 in DesignCanvasMarks.swift, second to land merges dev
+2026-10-23T19:32Z	PD-u	critic	#4963 #4964	critics started: correctness, first-use clarity
