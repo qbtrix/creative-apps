@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-23T20:07:26Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged, no needs-fix/needs-rebase; dev at 61c481df; findings 0
 2026-10-23T20:29:20Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; lane bisecting lane/batch-20261023192105 (ours not in it); scoped library 40018964074 queued at 61c481df
 2026-10-23T20:52:18Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; lane batch 20261023204921 holds none of ours; 27 open library findings (no new feature task; all slices already in PRs)
+2026-10-23T21:13:50Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; lane batch 20261023204921 still in flight (none of ours); scoped library run 40018964074 still running
