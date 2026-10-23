@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-23T20:20:47Z	wait	check	heartbeat: #4837 EP-m fast-lane at 5d5b637, no checks yet (lane backlog); #4943 EP-z waits on EP-m
 2026-10-23T20:42:27Z	wait	check	heartbeat: #4837 EP-m still queued in lane, no checks/status on 5d5b637; #4943 EP-z waits on EP-m
 2026-10-23T21:04:34Z	wait	check	heartbeat: #4837 EP-m still queued, no checks on 5d5b637; dev idle 70 min (lane quiet); #4943 waits on EP-m
+2026-10-23T21:26:16Z	wait	check	heartbeat: #4837 EP-m no checks on 5d5b637; dev idle since 19:45Z; #4943 waits on EP-m
