@@ -30,3 +30,6 @@
 2026-10-20T22:35:23Z	heartbeat	waiting	DR-2 #3625 still open, macOS green; lane active (run 39508948550); DR-3/6/7 still blocked on MD-c/MD-e
 2026-10-20T22:41:48Z	DR-a	done	#3625 merged (daee0e736); Belt-Slice-Done posted, proof run 39507806909; DR-3/6/7 wait on MD-c (MD-10,13) and MD-e (MD-20..22)
 2026-10-23T15:20:01Z	resume	building	run act-1a16953af22-wvhu; contract-first unpark; wave 2: DR-6 (DR-m), DR-3+DR-4 (DR-u)
+2026-10-23T16:33:18Z	DR-6	pr-opened	#4844 head 22bef36a, Mutate 4/4
+2026-10-23T16:33:18Z	DR-u	pr-opened	#4838 (DR-3+DR-4); lead fix: Delete Rejects ⌥⌘⌫
+2026-10-23T16:33:18Z	record	moved	lead/library-cull-finish is the record branch

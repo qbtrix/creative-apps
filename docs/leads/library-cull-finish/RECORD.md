@@ -2,16 +2,16 @@
 
 Issue: #3458 · Packet: docs/blueprints/library/features/cull-finish.md
 Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 · earlier run act-1a15995d319-aamb
-Stage: build, wave 2 (DR-6 for DR-m; DR-3 + DR-4 for DR-u), contract-first waits (lead.md rule 12, #4814)
-Base: 721168a8 (origin/dev)
-Next: DR-6 PR, then DR-7 and DR-8 stacked on it; DR-u PR in parallel. Scoped run app=library once each slice's last PR lands
+Stage: build, wave 2 PRs open (DR-6 #4844, DR-u #4838); next wave 3 (DR-7 + DR-8 stacked on #4844). Checked 2026-10-23T16:33:18Z
+Base: origin/dev 35a0b5e7
+Next: DR-7 + DR-8 as one PR stacked on feat/cull-finish-dr6; then a scoped run app=library once #4838 and the DR-m PRs land
 
 ## Slices
 | slice | behavior | tasks | waits on | ui | rounds | state | run |
 |---|---|---|---|---|---|---|---|
 | DR-a | contract: Trash service, label keys 6-9, Delete Rejects stubs, tests written disabled | DR-1, DR-2 | FC-a (on dev), MD-a (on dev) | no | 0 | done | 39507806909 |
-| DR-u | confirm dialog, ⌘⌫, Set Label 6-9; snapshots; journey skipped | DR-3, DR-4 | DR-a, FC-a, MD-d/e (met: MD-a merged) | yes | 0 | building | - |
-| DR-m | label cull, deleteRejects body + undo, excludedPaths coding, LiveTrash | DR-5..DR-8 | DR-a; MD-c, MD-e (met: MD-a merged) | no | 0 | building | - |
+| DR-u | confirm dialog, ⌥⌘⌫, Set Label 6-9; snapshots; journey skipped | DR-3, DR-4 | DR-a, FC-a, MD-d/e (met: MD-a merged) | yes | 0 | PR #4838 open | - |
+| DR-m | label cull, deleteRejects body + undo, excludedPaths coding, LiveTrash | DR-5..DR-8 | DR-a; MD-c, MD-e (met: MD-a merged) | no | 0 | DR-6 #4844 open; DR-7/8 next | - |
 | DR-z | journey on, docs, C4, feature-done | DR-9, DR-10 | DR-u, DR-m | no | 0 | waiting | - |
 
 ## Tasks
@@ -20,11 +20,11 @@ Next: DR-6 PR, then DR-7 and DR-8 stacked on it; DR-u PR in parallel. Scoped run
 | DR-1 | DR-a | 1 | PhotoTrashing, FakeTrash, LiveTrash stub, services.trash, LibraryKey.label 6-9, deleteRejects stubs (Mutate 4/4) | #3623 | open, fast-lane |
 | DR-2 | DR-a | 1 | disabled tests for DR-5/DR-6, never-deletes scan, delete-rejects real job (pending DR-8) | #3625 | open, stacked on #3623; CI: PASS on e0752118 |
 | DR-5 | DR-m | 1 | keys 6-9 set Red/Yellow/Green/Blue as one step, never advance (40 lines, folded into DR-2's PR) | #3625 | merged daee0e736; Mutate 2/2 LibraryModel.LibraryCulling |
-| DR-6 | DR-m | 2 | deleteRejects body, trashed undo step, excludedPaths fed to import; turns on LibraryDeleteRejectsTests | - | building |
-| DR-7 | DR-m | 3 | excludedPaths in the catalog file (omitted when empty); photo.delete-rejects command | - | next, stacked on DR-6 |
-| DR-8 | DR-m | 4 | LiveTrash on FileManager.trashItem; RJ-L06 on | - | next, stacked on DR-7 |
-| DR-3 | DR-u | 2 | Photo > Delete Rejected Photos… ⌘⌫, confirmationDialog, Set Label names 6-9 | - | building (one PR with DR-4) |
-| DR-4 | DR-u | 2 | snapshots, render budget, journey skipped (waits on DR-9) | - | building (one PR with DR-3) |
+| DR-6 | DR-m | 2 | deleteRejects body, trashed undo step, excludedPaths fed to import; turns on LibraryDeleteRejectsTests | #4844 | open, fast-lane; head 22bef36a; Mutate 4/4 LibraryModel.LibraryDeleteRejects |
+| DR-7 | DR-m | 3 | excludedPaths in the catalog file (omitted when empty); photo.delete-rejects command | - | next, one PR with DR-8, stacked on #4844 |
+| DR-8 | DR-m | 4 | LiveTrash on FileManager.trashItem; RJ-L06 on | - | next, one PR with DR-7 |
+| DR-3 | DR-u | 2 | Photo > Delete Rejected Photos… ⌥⌘⌫, confirmationDialog, Set Label names 6-9 | #4838 | open, fast-lane (one PR with DR-4) |
+| DR-4 | DR-u | 2 | snapshots, render budget, journey skipped (waits on DR-9) | #4838 | open, fast-lane (one PR with DR-3) |
 
 ## Wires
 - [ ] Wire: metadata-more:MD-c (DR-7 built on dev's catalog coding; swap in when MD-c merges)
@@ -45,3 +45,7 @@ Next: DR-6 PR, then DR-7 and DR-8 stacked on it; DR-u PR in parallel. Scoped run
 
 - 2026-10-20T16:44Z: macOS build-only runs for this feature have been queued since ~14:25Z (runner backlog); lead keeps waiting, no action needed from the supervisor unless the queue is stuck.
 - 2026-10-23: resumed by line lead act-1a16953af22-wvhu. The supervisor unparked this feature under contract-first waits (#4814): MD-a, metadata-more's contract slice, merged (run 39479914225), so the MD-c, MD-d and MD-e waits are met and get Wire lines. DR-6 and DR-u start now.
+- 2026-10-23T16:33:18Z: the records moved to lead/library-cull-finish (docs/leads/library-cull-finish/), the branch Belt watches; lead/cull-finish is retired.
+- 2026-10-23T16:33:18Z: Delete Rejected Photos takes ⌥⌘⌫, not the packet's ⌘⌫. Remove from Collection already holds ⌘⌫ in the Photo menu, and with both enabled one key would do two things. ⌥⌘⌫ is the platform's delete-from-library chord next to ⌘⌫ remove. DR-10 updates the packet text.
+- 2026-10-23T16:33:18Z: DR-6's large budget test (300 rejects in 10,000) ships disabled: the gate fails any timing test not in Tests/perf-suites.txt, which only the supervisor edits. Ask: add LibraryModelTests.largeBudget there.
+- 2026-10-23T16:33:18Z: testEveryMenuOpens (UITests/LibraryJourneyTests.swift) lists the Photo menu exactly; DR-9 adds the new item to it when it turns the journey on.
