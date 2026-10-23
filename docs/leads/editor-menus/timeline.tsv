@@ -37,3 +37,4 @@ utc	stage	event	ref	note
 09:38Z	check	editor-menus	#4761 macOS build 39929804061 in progress; scoped flare 39930432485 (04140530e) and scoped halo 39931655256 (138495f55) queued for the EM-flare-halo critics	https://github.com/qbtrix/creative-apps/actions/runs/39929804061
 09:39Z	lane	editor-menus	#4761 macOS build 39929804061 green on e42863714; waits on the lane's merge sweep	https://github.com/qbtrix/creative-apps/actions/runs/39929804061
 09:53Z	merge	editor-menus	#4761 (EM-library, feature-done) merged by the lane: every EM slice is on dev; EM done waits on a green full CI on a dev head with it	https://github.com/qbtrix/creative-apps/pull/4761
+09:54Z	check	editor-menus	dev CI: full 39931493361 (138495f55) pending, 39929490747 queued; scoped flare 39930432485 / halo 39931655256 queued; #4741 open (no-fast-lane, needs-split, clean)	https://github.com/qbtrix/creative-apps/actions/runs/39931493361
