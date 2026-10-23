@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 15:45Z	3	poll	dev 721168a	#4574 clean in lane, awaiting batch; #4577 on FH-r; waits unchanged (AB building, BK blocked, AJ waiting) poll 2/3; next poll 16:05Z
 16:08Z	3	poll	dev 35a0b5e	#4574 still in lane; waits unchanged 3/3; supervisor question posted on #3778 (6369264328); next poll 16:28Z
 16:32Z	3	poll	dev 35a0b5e	supervisor answered: FH-u starts on brush-keys fakes (Wire: brush-keys:BK-photo); FH-3 building; #4574 in lane; next poll 16:52Z
+16:49Z	3	build	dev 35a0b5e	FH-3 PR #4889 opened (head ccf9d81, gate pass); #4890 filed (SuiteUI key cycling); FH-4 next
