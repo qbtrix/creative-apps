@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-23T18:56:56Z	heartbeat	wave 2 builders running; slice PRs clean on fast-lane, lane active (dev at 0d4645bfb), none merged yet
 2026-10-23T18:59:08Z	pr	TS-u PR #4958 opened (head c7790823e, CI: PASS), stacked on TS-a #4871: own diff ~271 lines over TS-a; PR reads 579 vs dev until TS-a merges, then merge origin/dev into it and move Head:
 2026-10-23T19:18:23Z	heartbeat	slice PRs open and clean; wave 2 building
+2026-10-23T19:31:58Z	pr	TS-u #4958 restacked on TS-a (head a2f7151ee, test commit first, own diff 6 files +272/-3), scripts/ci --changed CI: PASS, Head moved
