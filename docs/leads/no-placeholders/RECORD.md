@@ -2,21 +2,21 @@
 
 Issue: #3776 · Packet: docs/blueprints/suite/features/no-placeholders.md
 Run: act-1a166b69fd0-x9m8 · Session: session_012bybPMvARipEyKrs5oNQwY · Started: 2026-10-23T03:08Z
-Stage: 3 wave 1
+Stage: 3 wave 2
 Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a
-Next: wave 1 builders open the contract slice PR(s)
+Next: NP-flare #4735 merged dev in, gate rerun, retarget to dev; then scoped run app=flare and critics
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| NP-a | ratchet test + launcher hides Check for Updates and Assets items | NP-1, NP-2 | MJ-NP, XJ-NP | report-problem:RP-a (met) | yes | 0 | open #4717 | - | - |
+| NP-a | ratchet test + launcher hides Check for Updates and Assets items | NP-1, NP-2 | MJ-NP, XJ-NP | report-problem:RP-a (met) | yes | 0 | merged #4717 | - | - |
 | NP-flare | Flare beta.2 items hidden, Library tab hidden, RJ-X64, built | NP-3, NP-4, NP-5, NP-6 | FJ-NP, XJ-NP, MJ-NP | NP-a; CS-flare (met); flare menu hand-offs | yes | 0 | opened #4735 (base lead/no-placeholders-NP-a; 15 files +187/-31; head fb77b276) | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| NP-1 | NP-a | 1 | PlaceholderMenuTests + baseline + fixture + mutations | packet NP-1 (4 files) | PlaceholderMenuTests; Mutate | - | building |
-| NP-2 | NP-a | 1 | launcher drops LauncherCommandsUpdate/Assets; baseline shrinks; AfterGlow menus journey | packet NP-2 (3 files) | XJ-NP | - | building |
+| NP-1 | NP-a | 1 | PlaceholderMenuTests + baseline + fixture + mutations | packet NP-1 (4 files) | PlaceholderMenuTests; Mutate | - | merged #4717 |
+| NP-2 | NP-a | 1 | launcher drops LauncherCommandsUpdate/Assets; baseline shrinks; AfterGlow menus journey | packet NP-2 (3 files) | XJ-NP | - | merged #4717 |
 | NP-3 | NP-flare | 2 | FlareWorkspace.menuHidden + laterReason; FlareMenuVisibilityTests | packet NP-3 (3 files) | Mutate FlareModel.FlareCommandCatalog | - | #4735 |
 | NP-4 | NP-flare | 2 | Flare menus skip hidden ids; Library tab hidden; journey | packet NP-4 (5 files) | FJ-NP | - | #4735 |
 | NP-5 | NP-flare | 3 | RJ-X64 job | packet NP-5 | jobs check | - | #4735 |
@@ -38,3 +38,4 @@ Next: wave 1 builders open the contract slice PR(s)
 - NP-a opened as #4717 (11 files, +380/-17; three existing tests that pinned the stubs changed too). Gap found: the ratchet matches only `Button(`, so the launcher's `MenuCommand` placeholders in LauncherCommands+Home.swift (Clear Menu, Show Sidebar, Show Inspector) slip past it. NP-flare's builder extends the scan to `MenuCommand(` disabled entries and baselines them, so the ratchet covers what NP-1 promised.
 - NP-flare started 03:46Z, stacked on lead/no-placeholders-NP-a. #4297 (PF-u) is still needs-fix and dirty, so it goes ahead; the hand-off note is on #3459 (comment 6356870194). The MenuCommand scan extension rides in NP-flare only if it stays small; otherwise it becomes a gap issue.
 - NP-flare opened as #4735 at 04:38Z. RJ-X64 is written but skipped (platforms [], pending FJ-NP): the jobs harness can't click menus. The six hidden ids were added as always-unavailable catalog commands (ledger + flare golden). The MenuCommand scan didn't fit the 15-file cap, so it went to gap #4736.
+- 04:45Z #4717 (NP-a) merged by the lane. NP-flare merged origin/dev (conflicts with pen-paths FP-6 in FlareCommandCatalog, its tests, mutation plan and flare golden: kept both sides); gate rerun before retarget to dev.
