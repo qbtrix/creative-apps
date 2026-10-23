@@ -37,8 +37,9 @@ import Testing
         let history = HistoryCommands.specs(HaloProject.self).count  // HA-6: read and jump
         let transforms = TransformCommands.specs(HaloProject.self).count  // HT-6: the six transform commands
         let places = PlaceCommands.specs(HaloProject.self).count  // PH-6: the five place commands
+        let files = FileFlowCommands.specs(HaloProject.self).count - 1  // HF-3: the file flow, whose file.open-recent replaces Halo's
         #expect(HaloProject.catalog.ids.count  // FR-8b: + 1 for set-frame-rate
-            == HaloCommand.allCases.count + 2 + fills + strokes + history + transforms + 1 + places
+            == HaloCommand.allCases.count + 2 + fills + strokes + history + transforms + 1 + places + files
             + HaloProject.windowSpecs.count)
     }
 

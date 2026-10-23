@@ -46,10 +46,10 @@ private actor Delivered {
         #expect(project.readers(ofExtension: "nope").isEmpty)
     }
 
-    @Test func openInWaitsForASave() throws {
+    @Test func openInSaysNoOtherAppReadsAHalo() throws {
         var project = try opened()
         #expect(project.suiteDocument == nil, "an unsaved project hands Open In a document")
-        #expect(project.openInHelp == "Save Untitled Project first.")
+        #expect(project.openInApps.isEmpty && project.openInHelp == "No other app opens Halo Project files.")
         #expect(throws: CatalogError.self) { try project.openIn("flare") }
         project.didSave(name: "Intro.halo", path: "/w/Intro.halo")
         let document = try #require(project.suiteDocument)
