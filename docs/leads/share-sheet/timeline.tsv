@@ -67,3 +67,4 @@ utc	stage	event	ref	note
 19:28Z	3	red	SH-z	library run 39997279554 red on folder-expand body budget; awaiting 40009734956/39999410389
 19:51Z	3	heartbeat	SH-z	40009734956 (library) and 39999410389 (full) macOS jobs running
 20:13Z	3	heartbeat	SH-z	40009734956 tests green (folder budget passes; 39997279554 red was a slow-runner flake), bundling
+20:25Z	3	done	SH-z	Belt-Slice-Done on run 40009734956; Mac-Finish-Wanted; Belt-Contact-Sheet; all slices done
