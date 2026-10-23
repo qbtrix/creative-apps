@@ -3,10 +3,10 @@
 // where the suite's drop rule refuses it, opens through FlareLottieOpen (`opensAsLottie`, `lottieDrops`). The app
 // reads and opens the file off the main actor and lands the result through `finishLottieOpen`: the document opens
 // untitled, so Save asks for a .flare and never writes the JSON, and `importNote` keeps one sentence per part the
-// reader left out, which the note above the stage lists (`importNoteRows`, "Nothing was skipped." for none) until
-// Dismiss (`dismissImportNote`) or the next load. `importReport` keeps the same sentences past Dismiss, for the
-// `import.report` query (lottie-open LO-5), until the next load. A refusal keeps the open document and says why in
-// `loadState`.
+// reader left out, which the note above the stage lists (`importNoteRows`, "Nothing was skipped." for none, the first
+// few and a count past `importNoteMaxRows`) until Dismiss (`dismissImportNote`) or the next load. `importReport` keeps
+// the same sentences past Dismiss, for the `import.report` query (lottie-open LO-5), until the next load. A refusal
+// keeps the open document and says why in `loadState`.
 // Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -32,6 +32,10 @@ extension FlareWorkspace {
     ) { w, _ in ImportReport(skipped: w.importReport ?? []) }
 
     struct ImportReport: Encodable { let skipped: [String] }
+
+    /// The most skipped parts the note names; past that its last row counts the rest, so the note stays a strip
+    /// above the stage however many parts a file skips.
+    public static let importNoteMaxRows = 3
 
     /// Whether `path` opens through the Lottie reader (its extension is one of `FlareLottieOpen.fileExtensions`).
     public static func opensAsLottie(_ path: String) -> Bool {
@@ -60,10 +64,14 @@ extension FlareWorkspace {
         }
     }
 
-    /// The note's rows: each skipped part's sentence, `nothingSkipped` for none; empty while no note shows.
+    /// The note's rows: each skipped part's sentence, `nothingSkipped` for none; empty while no note shows. Past
+    /// `importNoteMaxRows + 1` parts it names the first `importNoteMaxRows` and counts the rest in a last row.
     public var importNoteRows: [String] {
         guard let importNote else { return [] }
-        return importNote.isEmpty ? [Self.nothingSkipped] : importNote
+        if importNote.isEmpty { return [Self.nothingSkipped] }
+        let max = Self.importNoteMaxRows
+        guard importNote.count > max + 1 else { return importNote }
+        return Array(importNote.prefix(max)) + ["\(importNote.count - max) more parts were left out."]
     }
 
     /// Dismiss: the note closes; the document stays.

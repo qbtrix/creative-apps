@@ -2,7 +2,7 @@
   "title": "Every editor takes part in the suite: Window > Switch To, AI Access, the Help group and the live command channel in Photo, Design, Flare, Halo and Library, and a window comes back after the last one closes",
   "wave": "BG1",
   "order": 40,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "beta gaps 2026-10-21 suite must-have 4 (suite audit row 5, under-specified 1); #3648 (New Photo on the home does nothing); Halo #1081 (no window after closing the last) and #1018 (Help with no help); real job RJ-X63 (new)",

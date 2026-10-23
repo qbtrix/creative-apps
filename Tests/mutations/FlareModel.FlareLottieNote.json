@@ -16,8 +16,8 @@
   {
     "label": ".saysNothingSkipped: a clean open shows an empty note",
     "file": "Sources/FlareModel/FlareLottieNote.swift",
-    "find": "importNote.isEmpty ? [Self.nothingSkipped] : importNote",
-    "replace": "importNote",
+    "find": "if importNote.isEmpty { return [Self.nothingSkipped] }",
+    "replace": "if importNote.isEmpty { return importNote }",
     "tests": "FlareLottieNoteTests"
   },
   {
@@ -60,6 +60,27 @@
     "file": "Sources/FlareModel/FlareWorkspace.swift",
     "find": "        importReport = nil\n",
     "replace": "",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".capsLongNote: a long skip list lists every part and pushes the stage down",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "guard importNote.count > max + 1 else { return importNote }",
+    "replace": "guard false else { return importNote }",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".countsTheRest: the last row counts the shown parts too",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "[\"\\(importNote.count - max) more parts were left out.\"]",
+    "replace": "[\"\\(importNote.count) more parts were left out.\"]",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".oneMoreShowsItself: a list one past the cap folds its last part into \"1 more\"",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "guard importNote.count > max + 1 else",
+    "replace": "guard importNote.count > max else",
     "tests": "FlareLottieNoteTests"
   }
 ]
