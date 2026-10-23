@@ -1,0 +1,17 @@
+2026-10-21T10:19Z	stage	start	-	record opened on lead/large-catalog from dev e2b8aa76
+2026-10-21T10:19Z	build	dispatch	LG-a	builder on large-catalog/lg-a (LG-1, LG-2)
+2026-10-21T11:30Z	ship	pr-opened	LG-a	#4006 head 95d4c1b8, Fast-Check pass, macOS build green, waiting on the lane batch
+2026-10-21T11:45Z	check	heartbeat	LG-a	#4006 open, still waiting on the lane batch (macOS build green); dev ded2ca57
+2026-10-21T12:12Z	ship	merged	LG-a	#4006 merged as c2aa3391; dev Linux check 39596004859 running
+2026-10-21T12:28Z	check	ci	LG-a	Linux 39596004859 red on LibraryFoldersTests.tenThousandPaths timing (not LG-a); next check 39598650564 on 76d0c892
+2026-10-21T12:45Z	check	ci	LG-a	Linux 39598650564 red on LargeCatalogBudgetTests fixture timing (ours) + LibraryFoldersTests (not ours)
+2026-10-21T12:45Z	fix	round1	LG-a	fixer dispatched on large-catalog/lg-a-fix: timing out of the gate
+2026-10-21T12:55Z	ship	opened	LG-a	fix round 1 PR #4073 head 3deedf28, CI: PASS; asked supervisor on #3790 to list LargeCatalogFixtureBudgetTests in perf-suites
+2026-10-21T13:05Z	done	slice	LG-a	Belt-Slice-Done on 39601343733; only red LibraryFoldersTests (#3961)
+2026-10-21T13:05Z	check	question	-	supervisor asked on #3790 to list LibraryFoldersTests/tenThousandPaths in perf-suites (3 reds)
+2026-10-21T13:25Z	fix	round1	LG-a	#4073 updated per supervisor 12:54Z: perf-suites line swap, un-disable, rebase
+2026-10-21T13:25Z	check	wait	LG-model	FC-a, MD-e, DR-m unset (poll 2)
+2026-10-21T13:32Z	ship	updated	LG-a	#4073 head 3b18f2a7: perf-suites line swapped, budget suite enabled, rebased; CI: PASS; supervisor merges by hand
+2026-10-21T13:39Z	check	blocked	LG-model	FC-a, MD-e, DR-m unset (poll 3); rule-23 question to supervisor, issuecomment-6317524570
+2026-10-23T14:20Z	0	stage-start	#3790	resumed by act-1a1693fbf6d-ap2g; record at docs/leads/large-catalog/
+2026-10-23T14:56Z	3	stage-start	LG-model	supervisor answer (b): build with rule-18 stubs for MD-e, DR-m; FC built
