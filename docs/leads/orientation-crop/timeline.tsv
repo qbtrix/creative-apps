@@ -26,3 +26,4 @@ utc	stage	event	ref	note
 2026-10-23T17:05Z	OC-u	fix	#4582 head 8005f4a3; CI: PASS; Head line moved
 2026-10-23T19:19Z	check-in	#4582 open in lane, no needs-fix; rest blocked
 2026-10-23T19:41Z	check-in	PRs still open in lane, no needs-fix
+2026-10-23T20:05Z	check-in	PRs open+clean in lane (batch 20261023192105 bisecting); no needs-fix, no findings
