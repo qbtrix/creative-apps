@@ -84,6 +84,8 @@ struct PhotoStroke: Sendable, Equatable {
     var modifiers: DragModifiers = []
     /// Gradient: where the pointer is now; the gradient runs from `start` to here on release.
     var end: Mask.Point?
+    /// Remove: the points the stroke passed, from `start`, a quarter of the brush apart.
+    var path: [Mask.Point] = []
 }
 
 extension PhotoWorkspace {
@@ -165,8 +167,10 @@ extension PhotoWorkspace {
         case .move:
             if begun { current.layersBefore = layers }
             moveSelectedLayers(current, to: end)
-        case .eyedropper, .bucket, .spotHeal, .remove:
+        case .eyedropper, .bucket, .spotHeal:
             break
+        case .remove:
+            trace(&current, to: end)
         case .gradient:
             current.end = end
         case .text:
@@ -205,9 +209,9 @@ extension PhotoWorkspace {
     }
 
     /// Whether the drag under way only moves a line over the canvas until its
-    /// release draws (the Gradient tool's), so the window can keep its later
+    /// release draws (the Gradient tool's, and Remove's outline), so the window can keep its later
     /// samples off the workspace the panels read.
-    public var dragShowsLineOnly: Bool { stroke?.tool == .gradient }
+    public var dragShowsLineOnly: Bool { stroke?.tool == .gradient || stroke?.tool == .remove }
 
     /// Becomes `live`: a copy of this workspace a stroke drew on
     /// (`dragPaintsOnly`). Ignored when `live` is another image (another
