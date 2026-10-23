@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-23T03:12Z	3	heartbeat	-	wave 1 building (NP-a); hand-off check: #4297 overlaps FlareCommands.swift
 2026-10-23T03:42Z	3	heartbeat	-	NP-a builder finishing (mutate + gate)
 2026-10-23T03:45Z	3	pr-opened	NP-a	#4717 fast-lane, head 75c15e8
+2026-10-23T03:50Z	4	stage-start	NP-flare	wave 2 building, stacked on #4717
