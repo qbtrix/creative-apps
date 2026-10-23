@@ -10,12 +10,13 @@ import Foundation
 import SuiteKernel
 
 extension LibraryCatalog {
-    /// Kept for the controls that read it; no command is off for it any longer.
-    public static let catalogFilesHelp = "File management arrives with LC-5."
     /// Why Remove from Catalog can't act.
     public static let removeHelp = "Select the photos to remove."
     /// Why Relink can't act.
     public static let relinkHelp = "No photo is missing."
+
+    /// The ids an import begun by `file.import-folder` skips: the catalog's, the set sized once up front.
+    public var importKnownIDs: Set<String> { Set(items.lazy.map(\.id)) }
 
     struct RemoveFromCatalogParams: Codable, Sendable { var ids: [String]? }
     struct RelinkParams: Codable, Sendable { var id: String; var file: String }
