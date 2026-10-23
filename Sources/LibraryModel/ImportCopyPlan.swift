@@ -1,9 +1,6 @@
-// ImportCopyPlan.swift (catalog-files LC-1 stub, LC-5 body): where Copy on import puts each photo (packet
-// docs/blueprints/library/features/catalog-files.md). Pure: the plan names one destination per source under
-// `copyTo` (in `yyyy/yyyy-MM-dd` folders by the capture date, else the file date, when `byDate`), unique by
-// SuiteModel's `UniqueFileNames` against the files already there and the plan's own, so nothing is overwritten.
-// The live importer copies, checks sizes and renames into place. LC-1: the shape only; the plan is empty.
-// Linux-safe.
+// ImportCopyPlan.swift (catalog-files LC-1 stub, LC-5 body): where Copy on import puts each photo, under `copyTo`
+// (in `yyyy/yyyy-MM-dd` by the capture date, else the file date, when `byDate`), unique by SuiteModel's
+// `UniqueFileNames`, so nothing is overwritten. LC-1: the plan is empty. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else

@@ -1,9 +1,6 @@
-// CatalogFileRules.swift (catalog-files LC-1 stubs, LC-6 bodies): the pure rules behind Remove from Catalog and
-// Relink (packet docs/blueprints/library/features/catalog-files.md). Remove drops photos from the catalog only;
-// no file is touched. Relink maps a moved folder: the located photo's old parent is the old folder, the picked
-// file's parent the new one, and each missing photo whose path starts with the old folder plus "/" maps to the
-// same relative path under the new folder when a file is there with the same size. LC-1: the inputs unchanged.
-// Linux-safe.
+// CatalogFileRules.swift (catalog-files LC-1 stubs, LC-6 bodies): Remove drops photos from the catalog, no file
+// touched. Relink maps the located photo's old folder to the picked file's: each missing photo under the old folder
+// plus "/" maps to the same relative path in the new one when that file has the same size. Linux-safe.
 
 /// Remove from Catalog's and Relink's rules over the catalog's photos.
 public enum CatalogFileRules {

@@ -94,8 +94,7 @@ extension ImportNotice {
     }
 }
 
-/// `file.import`'s params (catalog-files LC-1): the folder, and Copy on import's choice. `copyTo` nil and `byDate`
-/// false, the defaults and what JSON that leaves them out decodes to, import in place as before.
+/// `file.import`'s params (catalog-files LC-1); left out, `copyTo` nil and `byDate` false import in place as before.
 public struct ImportOptions: Hashable, Codable, Sendable {
     public var folder: String
     public var copyTo: String?
@@ -108,6 +107,5 @@ public struct ImportOptions: Hashable, Codable, Sendable {
         try self.init(folder: c.decode(String.self, forKey: .folder), copyTo: c.decodeIfPresent(String.self, forKey: .copyTo),
                       byDate: c.decodeIfPresent(Bool.self, forKey: .byDate) ?? false)
     }
-    /// The copy plan's options.
     public var copy: ImportCopyOptions { ImportCopyOptions(copyTo: copyTo, byDate: byDate) }
 }

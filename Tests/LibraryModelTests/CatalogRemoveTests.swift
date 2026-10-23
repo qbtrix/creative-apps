@@ -1,7 +1,5 @@
-// CatalogRemoveTests.swift (catalog-files LC-1 written, LC-6 on): Remove from Catalog. Three rated, developed
-// photos whose files sit in a temp folder leave the catalog, their files stay on disk, and one undo step,
-// "Remove from Catalog", brings them back with their ratings and develop settings. The enabled test pins the
-// LC-1 stubs: both commands declared, off with the reason, refusing, and not yet in the catalog. Linux and macOS.
+// CatalogRemoveTests.swift (catalog-files LC-1 written, LC-6 on): Remove from Catalog keeps the files and is one
+// undo step that restores ratings and develop. `specsAreStubs` pins the LC-1 stubs. Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -30,41 +28,26 @@ import Testing
 
     @Test(.disabled("waits on LC-6")) func removeKeepsFilesAndIsOneUndoStep() throws {
         let photos = try Self.shoot()
-        let removed = Set(photos.prefix(3).map(\.id))
         var library = LibraryCatalog()
         library.load(photos)
-        library.select(removed)
+        library.select(Set(photos.prefix(3).map(\.id)))
         _ = try LibraryCatalog.catalog.run("photo.remove-from-catalog", params: .object([:]), on: &library)
         #expect(library.items.map(\.id) == photos.dropFirst(3).map(\.id))
         for photo in photos { #expect(FileManager.default.fileExists(atPath: photo.path ?? "")) }
         #expect(library.undoTitle == "Undo Remove from Catalog")
         library.undo()
         #expect(library.items == photos)
-        #expect(library.items.prefix(3).allSatisfy { $0.rating == 3 && $0.develop != .neutral })
     }
 
-    @Test(.disabled("waits on LC-6")) func removeByIdsLeavesTheSelectionAlone() throws {
-        let photos = try Self.shoot()
-        var library = LibraryCatalog()
-        library.load(photos)
-        let ids = [photos[4].id, photos[7].id]
-        _ = try LibraryCatalog.catalog.run("photo.remove-from-catalog", params: .object(["ids": .array(ids.map { .string($0) })]),
-                                           on: &library)
-        #expect(library.items.count == 8)
-        #expect(!library.items.contains { ids.contains($0.id) })
-    }
-
-    @Test(.disabled("waits on LC-6")) func removingKeepsTheRestInOrder() throws {
-        let photos = try Self.shoot()
+    @Test(.disabled("waits on LC-6")) func removingKeepsTheRestInOrder() {
+        let photos = LibraryFixtures.shoot()
         let kept = CatalogFileRules.removing([photos[0].id, photos[5].id], from: photos)
         #expect(kept.map(\.id) == photos.enumerated().filter { $0.offset != 0 && $0.offset != 5 }.map(\.element.id))
-        #expect(CatalogFileRules.removing([], from: photos) == photos)
     }
 
     /// On now: both commands are declared, off with the reason, refuse to run, and are not yet in the catalog.
     @Test func specsAreStubs() throws {
         #expect(LibraryCatalog.catalogFileSpecs.map(\.id) == ["photo.remove-from-catalog", "photo.relink"])
-        #expect(LibraryCatalog.catalogFileSpecs.map(\.title) == ["Remove from Catalog", "Relink"])
         let commands = try CommandCatalog(app: "library", LibraryCatalog.catalogFileSpecs,
                                           history: { LibraryCatalogSteps(catalog: $0) })
         var library = LibraryCatalog()

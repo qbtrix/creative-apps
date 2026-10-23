@@ -1,9 +1,6 @@
 // LibraryCatalogFiles+Kernel.swift (catalog-files LC-1 stubs, LC-6 bodies): Remove from Catalog and Relink as
-// kernel command specs (packet docs/blueprints/library/features/catalog-files.md, Contract slice). Each is one
-// undo step, "Remove from Catalog" and "Relink", through `LibraryUndoAdapter`; neither deletes a file. The
-// `file.import` id CS-library-1 adds takes `importSchema`, `ImportOptions` as JSON. LC-6 appends the specs to
-// `commands` and the ledger. LC-1: both are unavailable with the reason and every run throws the kernel's
-// `CatalogError.notBuilt`. Linux-safe.
+// kernel specs, one undo step each, neither deleting a file; `file.import` takes `importSchema`. LC-1: both are
+// unavailable with the reason and every run throws `CatalogError.notBuilt`. Linux-safe.
 import SuiteKernel
 
 extension LibraryCatalog {
