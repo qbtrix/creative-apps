@@ -59,6 +59,7 @@ extension PhotoJourneyTests {
         photo.shot("adjlayer-adjust-tab")
 
         // 2. The curve's midpoint up: the canvas differs, one Curves step.
+        photo.reveal(photo.element("photo.curves"))
         photo.drag(on: "photo.curves", from: CGVector(dx: 0.5, dy: 0.5), to: CGVector(dx: 0.5, dy: 0.25))
         adjExpect("Undo Curves", photo, "the curve drag made no Curves step")
         XCTAssert(adjWaitUntil { Self.adjShare(opened, self.adjCanvas(photo)) > 0.05 }, "the curve didn't change the canvas")
