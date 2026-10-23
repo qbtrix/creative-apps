@@ -4,10 +4,12 @@
 // steps it →, →, Shift-→ (+1, +1, +10), then Select All: X reads Mixed and
 // its stopwatch Not animated. A stopwatch is found by label ("Animate
 // Rotation"); its value is the key state. Shots are `flare-j7-<step>`.
+// FJ-BK (brush-keys BK-12): with Auto-key on at 12, a click on Shadow, then 3:
+// Opacity reads 30% and Shadow's lane has a key at 12. Shots `flare-bk-<step>`.
 import XCTest
 
 final class FlareInspectorJourneys: XCTestCase {
-    private static let lastFrame = 47.0
+    private static let lastFrame = 47.0, sceneWidth = 550.0
 
     /// J7: animate, scrub, drag and step Rotation on Ball; Ball and Shadow read X as Mixed.
     @MainActor func testInspectorKeysTransform() {
@@ -69,6 +71,41 @@ final class FlareInspectorJourneys: XCTestCase {
                   "X reads \(String(describing: x.value)) with Ball and Shadow selected, not Mixed")
         expectState("X", "Not animated", flare)
         flare.shot("j7-6-mixed")
+    }
+
+    /// FJ-BK: a digit sets the selected layer's opacity, keyed at the playhead while recording.
+    @MainActor func testDigitsSetOpacity() {
+        let flare = Journey("Flare", self, arguments: ["-FlareSample", "bounce"])
+        XCTAssert(flare.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        let canvas = flare.element("suite.canvas")
+        XCTAssert(canvas.waitForExistence(timeout: 10), "no stage (suite.canvas)")
+
+        // 1. Auto-key on, frame 12.
+        let autoKey = flare.app.toolbars.buttons["flare.timeline.toggleAutoKey"]
+        XCTAssert(autoKey.waitForExistence(timeout: 5), "no Auto-key in the toolbar")
+        autoKey.click()
+        XCTAssert(flare.element("flare.recording").waitForExistence(timeout: 5), "no recording ring with Auto-key on")
+        scrub(to: 12, flare)
+        flare.shot("bk-1-recording-12")
+
+        // 2. Select, then a click on Shadow (an ellipse about (275, 352), never animated): the stage has the keys.
+        let select = flare.element("suite.tools").buttons["Select"]
+        XCTAssert(select.waitForExistence(timeout: 5), "no Select in the palette")
+        select.click()
+        let scale = canvas.frame.width / Self.sceneWidth
+        canvas.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: 275 * scale, dy: 352 * scale)).click()
+        let bar = flare.element("flare.inspector.opacity")
+        XCTAssert(bar.waitForExistence(timeout: 5), "selecting Shadow showed no Opacity row")
+        flare.shot("bk-2-shadow")
+
+        // 3. 3: Opacity reads 30% and Shadow's lane has a key at 12.
+        flare.press(character: "3")
+        let set = waitFor { self.number(bar) == 30 }
+        if !set { flare.attachTree(as: "bk-opacity-tree") }
+        XCTAssert(set, "Opacity reads \(String(describing: bar.value)) after 3, not 30%")
+        XCTAssert(waitFor { self.keys("Shadow", flare).contains(12) },
+                  "Shadow's lane reads \(keys("Shadow", flare).sorted()), with no key at 12")
+        flare.shot("bk-3-opacity-30")
     }
 
     /// The stopwatch of the TRANSFORM row titled `title`.

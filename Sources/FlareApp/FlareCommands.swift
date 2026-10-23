@@ -127,6 +127,7 @@ struct FlareCommands: Commands {
             if shown(.library(.convertToSymbol(name: ""))) || shown(.library(.exitSymbol)) { Divider() }
             item(.edit(.bringForward), key: KeyboardShortcut("]"))
             item(.edit(.sendBackward), key: KeyboardShortcut("["))
+            opacity
             Divider()
             // No key: Return stays the stage's (toolKey), so a text field's Return is never taken.
             item(.tools(.finishPath))
@@ -185,6 +186,21 @@ struct FlareCommands: Commands {
     /// False for an item the beta hides: its command is in `FlareWorkspace.menuHidden` (no-placeholders NP-4).
     private func shown(_ intent: FlareIntent) -> Bool {
         !(intent.commandID.map(FlareWorkspace.menuHidden.contains) ?? false)
+    }
+
+    /// Object > Opacity (brush-keys BK-12): 10% to 100% on the selected layers, as the digits set it; the keys stay the
+    /// stage's, so a text field's digits are never taken.
+    private var opacity: some View {
+        Menu("Opacity") {
+            ForEach(FlareWorkspace.opacityMenuPercents, id: \.self) { percent in
+                if let spec = FlareWorkspace.menuSpec("layer.set-opacity") {
+                    MenuCommand(spec, on: menu.help(.inspector(.scrub(property: "opacity", value: 0, dragStart: 0))),
+                                title: "\(Int(percent))%") {
+                        FlareWorkspace.opacityIntents(percent).forEach(menu.perform)
+                    }
+                }
+            }
+        }
     }
 
     /// One menu item: `intent`'s title (or `title`) on its catalog spec (`FlareWorkspace.menuSpec(for:)`, command-state
