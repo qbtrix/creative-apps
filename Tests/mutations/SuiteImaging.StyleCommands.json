@@ -1,0 +1,30 @@
+[
+  {
+    "label": ".dragIsOneStep: style.set's drag token not passed to setStyle, so a scrub records a step per sample",
+    "file": "Sources/SuiteImaging/Style/StyleCommands.swift",
+    "find": "try edit(&t, \"Change Layer Style\", drag: p.drag)",
+    "replace": "try edit(&t, \"Change Layer Style\", drag: nil)",
+    "tests": "StyleCommandsTests"
+  },
+  {
+    "label": ".panelIsNotAnEdit: style.panel records an undo step as well as showing the panel",
+    "file": "Sources/SuiteImaging/Style/StyleCommands.swift",
+    "find": "t.showStylePanel(p.kind ?? (t.stylePanel == nil ? defaultSection(t.styleSelection) : nil))",
+    "replace": "t.showStylePanel(p.kind ?? (t.stylePanel == nil ? defaultSection(t.styleSelection) : nil)); _ = try edit(&t, \"Layer Style…\") { $0 }",
+    "tests": "StyleCommandsTests"
+  },
+  {
+    "label": ".pasteRefusesMalformed: style.paste skips check, so a style with two shadows pastes with the second dropped",
+    "file": "Sources/SuiteImaging/Style/StyleCommands.swift",
+    "find": "if let why = StyleRules.check(LayerStyle(effects: every, fillOpacity: style.fillOpacity)) {",
+    "replace": "if let why = Optional<String>.none, every.isEmpty {",
+    "tests": "StyleCommandsTests"
+  },
+  {
+    "label": ".addRefusesPresentKind: style.add of a kind already on resets it instead of refusing",
+    "file": "Sources/SuiteImaging/Style/StyleCommands.swift",
+    "find": "guard style.effect(p.kind) == nil else {",
+    "replace": "guard style.effect(p.kind) == nil || true else {",
+    "tests": "StyleCommandsTests"
+  }
+]
