@@ -1,10 +1,10 @@
 # anchor-parenting lead record
 
 Issue: #4522 · Packet: docs/blueprints/suiteui/features/anchor-parenting.md
-Run: act-1a16469734c-d0s8 · Session: claude/feature-lead-playbook-d50vpe · Started: 2026-10-22 (earlier run act-1a161a658a7-2jql on #3755)
-Stage: 3 polling
-Base: origin/dev 7e9f260a
-Next: poll orientation-crop OC-u (AN-5), AE-halo/AL-halo/DS-halo (AN-8), AL-flare/DS-flare (AN-10); all planned on dev, none merged
+Run: act-1a1695ebfeb-d54n · Session: claude/feature-lead-playbook-9a8kbw · Started: 2026-10-23T15:30Z
+Stage: 3 wave 1
+Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (origin/dev)
+Next: check AN-u's builder (AN-5, AN-6); then AN-10 after CB-8's PR is open
 
 
 
@@ -12,22 +12,19 @@ Next: poll orientation-crop OC-u (AN-5), AE-halo/AL-halo/DS-halo (AN-8), AL-flar
 
 
 ## Status now
-Run act-1a161a658a7-2jql, status at 2026-10-22T07:24Z; this block supersedes the Task table's PR/state columns.
-- 07:58Z: supervisor answered: park. Run ended for this feature; the remaining slices stay on the feature issue (waiting-on-prereq), no gap issues; the supervisor relaunches it once the upstream adopt slices land.
-- 07:56Z: asked the supervisor whether to park the slices blocked on planned upstream features.
-- 07:56Z: asked the supervisor whether to park the slices blocked on planned upstream features.
-- AN-a #4076 merged · AN-m #4107 merged · AN-7 #4308 merged (disabled) · AN-9 #4303 merged (disabled)
-- AN-u waits orientation-crop:OC-u for AN-5; AN-6 after AN-5
-- AN-8 waits AE-halo, AL-halo, DS-halo (all still planned at 07:00Z)
-- AN-10 waits AL-flare, DS-flare (still planned)
-- AN-flare-u, AN-z wait upstream
+Run act-1a1695ebfeb-d54n, 2026-10-23T15:30Z; supersedes the tables' PR/state columns.
+- Unparked by the supervisor (2026-10-23, contract-first waits, lead.md rule 12).
+- AN-a #4076, AN-m #4107 merged; test halves AN-7 #4308, AN-9 #4303 merged (disabled).
+- Wave 1: AN-u (AN-5, AN-6) building, on orientation-crop OC-a's fakes (OC-u's Wire line below).
+- Wave 2: AN-flare-m (AN-10). Its core needs (layer.setParent, anchor) are on the pin since bump #3825 (7966e5a); it shares FlareCommandCatalog, flare.txt and the flare golden with clipboard-interop CB-8, so it starts after CB-8's PR.
+- AN-halo (AN-8) and AN-flare-u wait AN-u's merge; AN-z last.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | AN-a | The kernel declares Placement with its anchor, set-anchor that keeps place, and the three anchor and parent command specs as stubs, with their tests written and disabled. | AN-1, AN-2 | MJ-AN | editor-kernel, command-catalog (built, `depends`) | no | 0 | merged | – | – |
 | AN-m | A layer turns and scales about its anchor, moving the anchor keeps the layer where it is on screen, and parenting or clearing a parent keeps the child in place through LayerFollow. | AN-3, AN-4 | MJ-AN | AN-a | no | 0 | merged | – | – |
-| AN-u | SuiteUI draws the anchor mark on the canvas and drags it as one command, and the inspector shows anchor rows with a nine-point picker and a Parent menu, reachable from the gallery on the fakes. | AN-5, AN-6 | SJ-AN | AN-a; shared files, after orientation-crop:OC-u (AN-5) | yes | 0 | planned | – | – |
+| AN-u | SuiteUI draws the anchor mark on the canvas and drags it as one command, and the inspector shows anchor rows with a nine-point picker and a Parent menu, reachable from the gallery on the fakes. | AN-5, AN-6 | SJ-AN | AN-a; shared files, after orientation-crop:OC-u (AN-5) | yes | 0 | building | – | – |
 | AN-halo | Halo's layers place through the kernel's Placement with its files and renders unchanged, the anchor can be dragged in the viewer and set from the nine-point picker without the layer moving, and Halo's parent command is the kernel's. | AN-7, AN-8 | MJ-AN-halo, HJ-AN | AN-a (AN-7); AN-m, AN-u, adopt-kernel-easing:AE-halo and adopt-kernel-layers:AL-halo (AN-8, `HaloKeyRules.swift`); shared files, after document-setup:DS-halo (AN-8) | yes | 0 | planned | – | – |
 | AN-flare-m | A Flare layer carries an anchor and a parent from the bumped core, new shapes get their anchor at the shape's centre, set-anchor and set-parent keep layers in place, and Lottie writes and reads a and parent. | AN-9, AN-10 | MJ-AN-flare | AN-a (AN-9); AN-m and adopt-kernel-layers:AL-flare (AN-10); the creative-core bump and the Flare stopgap (cross-line); shared files, after document-setup:DS-flare (AN-10) | no | 0 | planned | – | – |
 | AN-flare-u | Flare's stage shows and drags the anchor, its inspector has the anchor rows and Parent menu, and Layer > New Null adds a null to parent to. | AN-11, AN-12 | FJ-AN | AN-u, AN-flare-m; shared files, after adopt-kernel-autosave:AK-z (AN-11) | yes | 0 | planned | – | – |
@@ -56,6 +53,8 @@ Run act-1a161a658a7-2jql, status at 2026-10-22T07:24Z; this block supersedes the
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-23 (act-1a1695ebfeb-d54n): feature issue is #3755 per the brief (#4522 also tracks it); PRs carry `Refs #3755`.
+- 2026-10-23: AN-u joins wave 1: LS-1 is layer-styles' only wave-1 task, so SuiteGallery.swift has one writer (AN-5) this wave; LS-2 follows in wave 2.
 - Base is origin/dev, PRs target dev: the brief names main as the integration branch, but CLAUDE.md and lead.md say never branch from or target main (the lane retargets main PRs to dev).
 - One combined wave plan across anchor-parenting, frame-rates and clipboard-interop (rule 19); one PR per slice (rule 22), test commit first.
 - Wave 1 is the three contract slices FR-a, AN-a, CB-a: kernel/model stubs plus disabled tests, disjoint files.
@@ -63,6 +62,9 @@ Run act-1a161a658a7-2jql, status at 2026-10-22T07:24Z; this block supersedes the
 - Slice branches are named lead/<feature>-<slice> because lead/<feature> blocks lead/<feature>/<slice>.
 - AN-a: Placement is a typealias for core FlareCore.Transform (same seven fields, identity and T·R·S·T(-anchor) matrix), so no second copy; only movingAnchor(to:) and anchorPoint(at:in:) are kernel extensions (rule 20).
 - Wave 2 slices (AN-m) build stacked on their wave-1 slice branch and push without a PR; the lead opens each PR once its parent has merged, so the stacked PR never carries the parent's diff past the size cap.
+
+## Wire
+- [ ] Wire: orientation-crop:OC-u (built on OC-a's fakes in AN-5; swap in when it merges)
 
 ## Open
 - 2026-10-22: AN-a and AN-m merged earlier; every remaining task waits on an upstream slice that has not started (orientation-crop, adopt-kernel-easing, adopt-kernel-layers, document-setup all `planned`). Polling with the other two features.

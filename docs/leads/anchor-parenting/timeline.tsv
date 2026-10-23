@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-22T07:57Z	wait-upstream	asked supervisor (3rd blocked poll)	-	act-1a161a658a7-2jql
 2026-10-22T07:58Z	parked	parked per supervisor	-	act-1a161a658a7-2jql
 2026-10-22T16:24Z	3	resume	#4522	new run act-1a16469734c-d0s8; all open tasks wait on upstream
+2026-10-23T15:30Z	3	stage-start	#3755	wave 1: AN-u (run act-1a1695ebfeb-d54n)
