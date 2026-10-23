@@ -11,7 +11,7 @@ Next: HF-u PR stacked on HF-a; HF-m once its packet deps are on dev
 |---|---|---|---|---|---|---|---|---|---|
 | HF-a | adapter stubs; scene adopts suiteApp, Open Recent via SuiteFileCommands, file drop | HF-1, HF-2 | - | transform:HT-a, shape-tools:HS-a, placed-images:PH-u | yes | 0 | pr #4855 | - | - |
 | HF-m | adapter bodies, catalog ids, recents imported once, RJ-H42 | HF-3, HF-4 | - | HF-a; gradient-fill:HG-m, autosave-history:HA-m, transform:HT-m, shape-tools:HS-m, stroke-style:HK-m, placed-images:PH-m | no | 0 | blocked | - | - |
-| HF-u | snapshots, render budget, journey skipped | HF-5, HF-6 | - | HF-a | yes | 0 | building | - | - |
+| HF-u | snapshots, render budget, journey skipped | HF-5, HF-6 | - | HF-a | yes | 0 | pr #4868 | - | - |
 | HF-z | journey live; halo.md, built, feature-done | HF-7, HF-8 | HaloFileFlowJourneyTests | HF-m, HF-u; export-pack:HX-z, placed-images:PH-z | yes | 0 | blocked | - | - |
 
 ## Tasks
@@ -21,8 +21,8 @@ Next: HF-u PR stacked on HF-a; HF-m once its packet deps are on dev
 | HF-2 | HF-a | 2 | scene, File menu, drop | Sources/HaloApp/HaloApp.swift, see packet | HaloFileFlowSnapshots.menu | #4855 | pr |
 | HF-3 | HF-m | 2 | adapter bodies, ids, RJ-H42 | see packet | HaloFileFlowTests | - | blocked |
 | HF-4 | HF-m | 2 | window notes opens and saves | Sources/HaloApp/HaloWindow+File.swift, Tests/AppSnapshotTests/HaloFileFlowLiveTests.swift | HaloFileFlowLiveTests | - | blocked |
-| HF-5 | HF-u | 3 | snapshots, budget | Tests/AppSnapshotTests/HaloFileFlowSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloFileDropTests.swift | RenderBudgetHaloFileDropTests | - | building |
-| HF-6 | HF-u | 3 | journey skipped | UITests/HaloJourneyTests+FileFlow.swift | compiles, skipped | - | building |
+| HF-5 | HF-u | 3 | snapshots, budget | Tests/AppSnapshotTests/HaloFileFlowSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloFileDropTests.swift | RenderBudgetHaloFileDropTests | #4868 | pr |
+| HF-6 | HF-u | 3 | journey skipped | UITests/HaloJourneyTests+FileFlow.swift | compiles, skipped | #4868 | pr |
 | HF-7 | HF-z | 4 | journey live | UITests/HaloJourneyTests+FileFlow.swift | testOpenRecentAndDrop | - | blocked |
 | HF-8 | HF-z | 5 | halo.md, built, feature-done | docs/blueprints/halo.md, docs/blueprints/halo/features/file-flow.wave.json | waves render --dry-run | - | blocked |
 
@@ -44,3 +44,4 @@ Next: HF-u PR stacked on HF-a; HF-m once its packet deps are on dev
 - 2026-10-23T15:26:44Z: run act-1a16958d5fe-8dxu for #3474. The placed-images waits (PH-a, PH-u) are on dev, so HF-a is rebuilt on origin/dev 721168a8 from lead/halo-*-HF-a, its test commit first.
 - Wire: HF-3 sets `placesExtensions` from `placeFormats` (HaloPlace+Kernel.swift) once placed-images PH-m is on dev, and drops "Halo can't place images yet." then; HF-a keeps the packet's stub.
 - Wire: HF-1 SuiteFileCommands sits after New Window (dev kept New Window, #1081), not in place of it.
+- 2026-10-23T16:30Z: HF-u #4868 opened, stacked on HF-a (136 lines, below 150 because HF-5's snapshots shipped in HF-a).
