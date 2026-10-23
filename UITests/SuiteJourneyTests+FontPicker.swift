@@ -31,7 +31,7 @@ extension SuiteJourneyTests {
         gallery.shot("font-picker-search")
 
         // 3. Pick System UI's Bold face, then set the size to 36: the log names the pick.
-        gallery.element("suite.fontpicker.family.System UI").click()
+        clickFontPickerRow(gallery, "System UI")
         fontPickerFaceMenu(gallery).click()
         gallery.app.menuItems["Bold"].firstMatch.click()
         gallery.element("suite.fontpicker.size").coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).doubleClick()
@@ -44,7 +44,7 @@ extension SuiteJourneyTests {
         gallery.element("suite.fontpicker.search").click()
         gallery.app.typeKey("a", modifierFlags: .command)
         gallery.app.typeKey(.delete, modifierFlags: [])
-        gallery.element("suite.fontpicker.family.Serif").click()
+        clickFontPickerRow(gallery, "Serif")
         expectFontPickerLog(gallery, "pick(Serif, Regular, 36)")
 
         // 5. Rows read their family name; Escape closes the open Face menu, and the arrow keys move the
@@ -54,7 +54,7 @@ extension SuiteJourneyTests {
         XCTAssert(gallery.app.menus.firstMatch.waitForExistence(timeout: 3), "clicking Face opened no menu")
         gallery.app.typeKey(.escape, modifierFlags: [])
         XCTAssert(fontPickerWait { !gallery.app.menus.firstMatch.exists }, "Escape didn't close the Face menu")
-        gallery.element("suite.fontpicker.family.Serif").click()
+        clickFontPickerRow(gallery, "Serif")
         gallery.press(.downArrow, step: "font-picker-keyboard")
         expectFontPickerLog(gallery, "pick(System UI, Regular, 36)")
         XCTAssert(fontPickerWait { gallery.element("suite.fontpicker.family.System UI").isSelected },
@@ -62,6 +62,15 @@ extension SuiteJourneyTests {
         gallery.shot("font-picker-keyboard")
         gallery.press(.upArrow, step: "font-picker-keyboard-up")
         expectFontPickerLog(gallery, "pick(Serif, Regular, 36)")
+    }
+
+    /// Clicks a family row at its centre: the List's ScrollView has no hit point
+    /// for the row's text element on the macOS runner (#4790), so the click goes
+    /// to the row's coordinate rather than through XCUIElement.click().
+    @MainActor private func clickFontPickerRow(_ gallery: Journey, _ name: String) {
+        let row = gallery.element("suite.fontpicker.family.\(name)")
+        XCTAssert(row.waitForExistence(timeout: 5), "no row for \(name)")
+        row.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click()
     }
 
     /// The Face row's menu control; the row's identifier can also land on its group, so match the control types.
