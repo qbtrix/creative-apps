@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-21T11:45Z	stage	parked	LT-a	supervisor answer on #3475: park until TC-a (#3476) is on dev; no rebase; run released from tone-controls
 1792687110	7e9f260a	check	LT-a	blocked: suiteui TC-a (#4520) not merged
 2026-10-23T15:20:48Z	heartbeat	waiting	resumed by act-1a16953af22-wvhu; contract slice of the cross-line wait not merged
+2026-10-23T16:33:31Z	poll	blocked	TC-a not done (TC-2 ToneRows not on dev 35a0b5e7); poll 2/3

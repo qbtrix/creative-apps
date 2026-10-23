@@ -2,7 +2,7 @@
 
 Issue: #4516 (earlier #3475) · Packet: docs/blueprints/library/features/tone-controls.md
 Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 · Issue for Belt lines: #3475
-Stage: 0 setup (blocked at 0.4, re-checked at dev 721168a8, 2026-10-23T15:20:48Z)
+Stage: blocked on TC-a (TC-2 ToneRows not on dev 35a0b5e7, 2026-10-23T16:33:31Z; blocked poll 2 of 3)
 Base: origin/dev 721168a8
 Next: start LT-1/LT-2 once tone-controls TC-a (#3476) merges: TC-1 #4555 is on dev; TC-2 (ToneRows placeholder) is not, and no Belt-Slice-Done for TC-a is posted
 
