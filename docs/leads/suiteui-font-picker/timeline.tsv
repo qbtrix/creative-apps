@@ -53,3 +53,5 @@ utc	stage	event	ref	note
 2026-10-23T06:25Z	check-in	FP-a scoped run failed (Halo command-path baseline, not ours; fixed by #4754)	FP-a	39900719671 failure; next: scoped suiteui 39908121795 on 13345620 holds FP-a+FP-u+#4754, queued; #4759 build 39909689835 queued
 2026-10-23T06:56Z	wait	macOS runners queued: #4759 build 39909689835 and scoped suiteui 39908121795 both still queued	-	nothing to act on; next check-in 07:12Z
 2026-10-23T07:17Z	check-in	scoped suiteui 39908121795 now running; #4759 build 39909689835 still queued	-	next check-in ~07:55Z
+2026-10-23T07:49Z	slice-done	Belt-Slice-Done FP-a and FP-u posted (scoped suiteui 39908121795 success on 13345620)	FP-a,FP-u	comments 6360132643, 6360132913
+2026-10-23T07:49Z	critic	FP-a/FP-u screens reviewed (first-use, mouse, taste, design, job): findings #4777 own-face rows, #4778 12.00 pt, #4779 coarse size scrub	FP-u	fix round 1 next wave

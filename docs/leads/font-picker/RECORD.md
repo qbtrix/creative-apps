@@ -2,9 +2,9 @@
 
 Issue: #3730 (earlier run used duplicate #4507) · Packet: docs/blueprints/suiteui/features/font-picker.md
 Run: act-1a166b69fbd-mmos · Session: claude/font-picker-lead-5om1cy · Started: 2026-10-22T16:36Z (this run resumed 2026-10-23T03:10Z)
-Stage: 3 wave 2
+Stage: 4 slices done FP-a FP-u; FP-z in lane
 Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a (origin/dev)
-Next: #4759 build 39909689835 (2ea1cac4) then lane merge; scoped suiteui 39908121795 on 13345620 holds FP-a and FP-u: on success post Belt-Slice-Done FP-a and FP-u; FP-z needs the full run after #4759 merges; then Belt-Contact-Sheet
+Next: #4759 build 39909689835 (2ea1cac4) → lane merge → full dev run containing it → Belt-Slice-Done FP-z → Belt-Contact-Sheet; findings #4777-#4779 (FP-u) wait for a fix round
 
 ## Slices
 
