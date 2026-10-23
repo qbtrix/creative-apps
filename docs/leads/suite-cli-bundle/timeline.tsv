@@ -16,3 +16,5 @@ utc	stage	event	ref	note
 2026-10-23T05:04Z	-	pr	C4	opened #4755 suite-packaging description
 2026-10-23T05:14Z	-	retarget	CB-m	#4740 dev merged, CI: PASS, base dev, head 84c323cff
 2026-10-23T05:14Z	-	heartbeat	CB-u	CB-u gate on dev-merged head running; then CB-m-bundle
+2026-10-23T05:22Z	-	retarget	CB-u	#4743 dev merged, only #3856 red, base dev, head 6bc5db5ed
+2026-10-23T05:22Z	-	retarget	CB-m-bundle	#4741 dev merged, CI: PASS, base dev, head 184f3f888

@@ -4,14 +4,14 @@ Issue: #3773 · Packet: docs/blueprints/suite/features/cli-bundle.md
 Run: act-1a166b69fd0-x9m8 · Session: session_012bybPMvARipEyKrs5oNQwY · Started: 2026-10-23T03:08Z
 Stage: 3 wave 2
 Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a
-Next: CB-m #4740, CB-m-bundle #4741 (supervisor), CB-u #4743 merged dev in, gate rerun, retarget to dev; then CB-z
+Next: CB-m #4740, CB-u #4743 (base dev, fast lane), CB-m-bundle #4741 (base dev, supervisor), C4 #4755; then scoped run app=suite, critics, CB-z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | CB-a | BundleLayout.cliPath, AssistantConnect stubs, help catalog stubs, checks disabled | CB-1, CB-2 | MJ-CB | report-problem:RP-m (met) | no | 0 | merged #4715 | - | - |
-| CB-u | Connect an AI Assistant sheet on the stubs; render budget | CB-5, CB-5b | XJ-CB | CB-a; RP-u (met) | yes | 0 | open #4743 | - | - |
-| CB-m | bodies + bundled signed afterglow (CB-3 supervisor merge) | CB-4, CB-3 | MJ-CB, XJ-CB | CB-a | no | 0 | open #4740 (CB-4), #4741 (CB-3, no-fast-lane) | - | - |
+| CB-u | Connect an AI Assistant sheet on the stubs; render budget | CB-5, CB-5b | XJ-CB | CB-a; RP-u (met) | yes | 0 | open #4743 (base dev, head 6bc5db5e) | - | - |
+| CB-m | bodies + bundled signed afterglow (CB-3 supervisor merge) | CB-4, CB-3 | MJ-CB, XJ-CB | CB-a | no | 0 | open #4740 (CB-4), #4741 (CB-3, no-fast-lane, base dev, head 184f3f88) | - | - |
 | CB-z | Install Command-Line Tool; RJ-X62 on; built | CB-6, CB-7, CB-8 | XJ-CB, MJ-CB | CB-u, CB-m | yes | 0 | waiting | - | - |
 
 ## Tasks
@@ -44,3 +44,4 @@ Next: CB-m #4740, CB-m-bundle #4741 (supervisor), CB-u #4743 merged dev in, gate
 - `--bundle` flag in Arguments.swift: wire in CB-m (MCPConfig.bundle(flag:) already takes it).
 - CB-3 goes as its own PR on `lead/cli-bundle-CB-m-bundle` with `no-fast-lane` (protected scripts/bundle-apps; supervisor merges).
 - 04:45Z #4715 (CB-a) merged. CB-m #4740, CB-m-bundle #4741 (no-fast-lane, supervisor), CB-u #4743 (test-first split, Mutate 3/3) merged origin/dev; gate rerun before retarget to dev. C4-only suite-packaging description PR is now due.
+- 2026-10-23T05:22Z CB-u #4743 and CB-m-bundle #4741 merged origin/dev, gate rerun (CB-u: only dev-red #3856 fails; CB-m-bundle: CI: PASS), pushed, retargeted to dev.
