@@ -106,6 +106,8 @@ struct LibraryCatalogDoc: HeadlessDocument {
         case "adjust.black-and-white", "adjust.invert", "look.apply", "photo.set-develop": .some(c.services.unavailable["develop"] ?? c.developHelp)
         case let id where id.hasPrefix("filter."): .some(c.services.unavailable["develop"] ?? c.developHelp ?? LibraryCatalog.filtersInPhoto)
         case "look.list", "look.save", "look.delete": .some(nil)
+        case "photo.remove-from-catalog": .some(c.selection.isEmpty ? LibraryCatalog.removeHelp : nil)  // catalog-files LC-6
+        case "photo.relink": .some(c.items.contains { $0.availability == .missing } ? nil : LibraryCatalog.relinkHelp)
         case "folders.list", "view.show-folder": .some(c.items.contains { $0.path?.hasPrefix("/") == true } ? nil : LibraryCatalog.noFolders)
         default: nil
         }
@@ -213,8 +215,10 @@ struct LibraryCatalogDoc: HeadlessDocument {
                     || (spec.id == "photo.set-develop" && step == "Vibrance") { stepped.insert(spec.id) }
             }
         }
+        // Relink needs a missing photo and a real file on disk; RelinkTests proves its "Relink" step.
         // AJ-10: Library runs no filter, so no filter.<id> ever records a step.
         let edits = Set(LibraryCatalog.commands.filter { $0.kind == .edit && !$0.id.hasPrefix("filter.") }.map(\.id))
+            .subtracting(["photo.relink"])
         #expect(edits.subtracting(stepped).isEmpty, "never recorded its step: \(edits.subtracting(stepped))")
     }
 
@@ -274,4 +278,5 @@ struct LibraryCatalogDoc: HeadlessDocument {
             "filter.\(title.lowercased().replacingOccurrences(of: " ", with: "-")) | \(title) | Filters are in Photo."
         }
         + ["look.list | Looks | on", "look.apply | Apply Look | on", "look.save | Save Look | on", "look.delete | Delete Look | on"]
+        + ["photo.remove-from-catalog | Remove from Catalog | on", "photo.relink | Relink | No photo is missing."]
 }

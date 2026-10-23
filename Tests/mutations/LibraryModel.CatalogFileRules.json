@@ -1,0 +1,16 @@
+[
+  {
+    "label": "relinkChecksSize: the size match skipped",
+    "file": "Sources/LibraryModel/CatalogFileRules.swift",
+    "find": "            if let recorded = size(path), recorded != found { continue }\n",
+    "replace": "",
+    "tests": "RelinkTests/aSameNameFileOfAnotherSizeIsNotLinked"
+  },
+  {
+    "label": "relinkSameFolderOnly: the folder prefix compared without a trailing slash",
+    "file": "Sources/LibraryModel/CatalogFileRules.swift",
+    "find": "let prefix = oldFolder + \"/\"",
+    "replace": "let prefix = oldFolder",
+    "tests": "RelinkTests/aFolderThatOnlySharesAPrefixIsNotMatched"
+  }
+]
