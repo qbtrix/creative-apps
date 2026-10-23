@@ -54,3 +54,4 @@ Next: ST-a builder on lead/shared-thumbnails-ST-a (off dev): test-first commit (
 - 2026-10-23T21:04:27Z: heartbeat: #4840 ST-a unchanged at 07c11358c (needs-fix, awaiting supervisor Mac re-gate); #4950/#4951 drafts; dev idle 70 min
 - 2026-10-23T21:26:10Z: heartbeat: #4840 ST-a no status on 07c11358c yet (awaiting supervisor Mac re-gate); #4950/#4951 drafts; dev idle since 19:45Z
 - 2026-10-23T21:50:21Z: dev batch at 21:40Z merged 12 PRs (#4841-#4862) and skipped #4837 (EP-m). The cause is the lane's open_list --limit 100: 144 PRs are open and #4837 was past the cutoff. Raised with the supervisor on #4837. #4840 (ST-a) is still waiting on the Mac re-gate. #4950/#4951 are drafts, #4943 waits on EP-m.
+- 2026-10-23T22:13:33Z: No dev merges since 21:40Z. #4840 (ST-a) still waits on the supervisor's Mac re-gate. #4837 (EP-m) is 97th of the newest open PRs, just inside the lane's 100-PR window. Supervisor not yet answered. #4943/#4950/#4951 unchanged.
