@@ -47,3 +47,4 @@ utc	stage	event	ref	note
 2026-10-23T16:25Z	PD-u	build	design/pd-u-place-canvas	started, stacked on PD-a (9e785245) + DK-u #4864
 2026-10-23T16:36Z	PD-a	gate	#3759	remote had dev merge + db8ca0f0 refactor; merged into local (no rebase), gate rerun on merged head
 2026-10-23T16:58Z	PD-a	gate	#3759	AnchorBudgetTests.marqueeScales load timeout (passes alone 0.9s); gate rerun; PD-m, PD-u building
+2026-10-23T17:20Z	PD-a	gate	#3759	27 load timeouts (HomeModelTests etc., no real failure); gate rerun queued for load<10; PD-m, PD-u gating
