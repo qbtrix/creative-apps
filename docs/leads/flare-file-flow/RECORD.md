@@ -123,3 +123,5 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-23T03:11:45Z check: no journeys run on dev includes 6acdb2011 yet (newest: full 39891052821 at 02c38d3b, suiteui 39893216444 at cb9306a0, both older; the macOS queue holds 8 runs). No new #3482 comments, no open file-flow findings.
 
 - 2026-10-23T03:43:25Z check: still no journeys run on dev includes 6acdb2011 (all 10 newest are behind it). No new #3482 comments, no open file-flow findings.
+
+- 2026-10-23T04:15:17Z check: Flare journeys run 39898629239 at 6acdb2011 (the #4690 merge) is queued; it will show FLJ1 step 2 and testEveryMenuOpens. No new #3482 comments, no open file-flow findings.
