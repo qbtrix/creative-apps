@@ -31,3 +31,4 @@ utc	stage	event	ref	note
 21:32Z	3	poll	dev 61c481df	no change: #4577 #4889 #4896 open, no needs-fix/needs-rebase; lane batch (#4862) still on macOS gate 40022179889; full CI 40024093736 running on dev; AJ-a, BK-photo #4965 not on dev
 21:54Z	3	poll	dev 491ec546	lane batch landed 12 PRs (#4841..#4862), none ours; #4577 #4889 #4896 open, no needs-fix/needs-rebase; AJ-a, BK-photo #4965 not on dev
 22:17Z	3	poll	dev 491ec546	#4577/#4889/#4896 open, clean, no needs-* labels, queued in lane; AJ-a #4834 needs-rebase, #4846 needs-split; BK-photo #4965 open; nothing to act on
+22:39Z	3	poll	dev 491ec546	#4577/#4889/#4896 open, no needs-* labels, lane active (run 40034629743 pending); AJ-a #4834 needs-rebase, #4846 needs-split; BK-photo #4965 open; nothing to act on
