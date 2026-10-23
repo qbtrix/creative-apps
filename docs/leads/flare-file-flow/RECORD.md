@@ -131,3 +131,5 @@ Loop: v3 (the packet has a `## Slices` table).
 - 05:19Z check-in: journeys run 39898629239 still queued (macOS runner). #3482 quiet, no open file-flow findings.
 
 - 05:52Z check-in: journeys run 39898629239 now in progress (job 120234783799). #3482 quiet, no open file-flow findings.
+
+- 06:21Z check-in: journeys run 39898629239 failed after fix round 2. FLJ1 step 1 (Open Recent) passes. Step 2 (a .flare dropped on the stage opens a window) is still red; filed gap #4764 (p2, line:flare). testEveryMenuOpens now passes Open Sample and fails at Menus.swift:52 (expects Clear Menu with no recents); added to the existing gap #1829. Both fix rounds are used, so nothing more is fixed in this run. #3482 quiet.
