@@ -17,3 +17,4 @@ utc	stage	event	ref	note
 2026-10-23T17:32Z	2	stage	wave 2: EP-m is #4837 (fast-lane, queued). EP-z builder started, stacked on EP-m.
 2026-10-23T17:53Z	2	pr	EP-z opened as #4943 (head 5457514, stacked on #4837, fast-lane + feature-done, CI: PASS, own commits 10 files +9/-107). The UP-z Wire line stays open. Stripped a tool-appended attribution footer from #4943 and from the #4840 comment.
 2026-10-23T19:58:03Z	-	check	#4837 EP-m fast-lane queued (no checks/comments yet, lane backlog); #4943 waits (stacked size).
+2026-10-23T20:20:47Z	wait	check	heartbeat: #4837 EP-m fast-lane at 5d5b637, no checks yet (lane backlog); #4943 EP-z waits on EP-m
