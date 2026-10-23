@@ -5,7 +5,8 @@
 // inspector column is `inspectorWidth` wide in every state; the toolbar is New, Open, Save, Undo,
 // Redo, Auto-key, Animate… and Export…, each disabled with its area's reason
 // while it can't act. The content is the stage over the timeline (FlareCanvas)
-// while a document is open, else the empty state with New Animation; the
+// while a document is open, else the empty state with New Animation, which
+// opens a .flare dropped on it in this window (FlareShell.openQueue); the
 // inspector is FlareInspector (Properties and Library tabs). Every control
 // goes through one FlareIntent: `perform` and `help(for:)` in
 // FlareWindow+Router.swift hand it to its area's file, and a control's
@@ -95,7 +96,7 @@ struct FlareWindow: View {
         .modifier(FlareNewSheet(presented: $presented, perform: perform))
         .modifier(FlareExportSheetAdapter(model: model, perform: perform))
         .modifier(FlareOpenStatus(model: model))
-        .modifier(FlareOpenQueueTaker(open: { open($0) }))
+        .suiteOpenQueue(FlareShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .modifier(FlareAutosaveAdapter(model: model, restore: { try model.restoreRecovery($0) }))
         .focusedSceneValue(
             \.flareMenu,
@@ -176,6 +177,12 @@ struct FlareCanvas: View {
                 message: "Create an animation to start drawing scenes and keyframes.",
                 action: ToolbarAction("New Animation", systemImage: "plus", identifier: Self.emptyNewIdentifier) {
                     perform(.file(.new))
+                },
+                onDrop: { urls in
+                    // A .flare dropped here opens in this window (FlareShell.openQueue), any more in new ones.
+                    let files = urls.filter { FlareHeadless.openExtensions.contains($0.pathExtension.lowercased()) }
+                    files.forEach(FlareShell.openQueue.open)
+                    return !files.isEmpty
                 })
         }
     }
