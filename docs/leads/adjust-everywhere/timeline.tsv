@@ -1,0 +1,11 @@
+utc	stage	event	ref	note
+2026-10-21T02:36Z	0	stage-start	-	setup, base 2ab0eb963
+2026-10-21T02:36Z	3	stage-start	wave1	FH-2 / AJ-2s; IM-a and BK-m not merged
+2026-10-21T03:28Z	3	pr-opened	#3846	AJ-2s preset store stubs; IM-a still open (re-read 03:3xZ)
+2026-10-21T04:01Z	3	blocked-poll-2	#3715	IM-a not started; AJ-2s #3846 in lane
+2026-10-21T04:20Z	3	supervisor-question	#3777	3 identical blocked polls on IM-a
+2026-10-21T04:29Z	3	relaunch	act-1a15cb4e0f5-ipbr	new run carries the state; IM-a/BK-m still not on dev (da68f32); waiting per supervisor
+04:51Z	3	poll	dev 0eca6ab	no SuiteImaging; IM-a #3715 and BK-m #3758 open, no new comments; #3845/#3846 open in fast lane; next poll 05:11Z
+05:13Z	3	poll	dev 229c5ef	no SuiteImaging; IM-a #3715 and BK-m #3758 open, no new comments, no IM-a PR open; #3845/#3846 clean in fast lane; next poll 05:34Z
+05:35Z	3	poll	dev 71ffa4d	no SuiteImaging; IM-a #3715 and BK-m #3758 open, no new comments, no IM-a PR open; #3845/#3846 clean in fast lane; next poll 05:55Z
+05:56Z	3	poll	dev 71ffa4d	dev unchanged; IM-a #3715 and BK-m #3758 open, no new comments, no IM-a PR open; #3845/#3846 clean in fast lane; next poll 06:17Z
