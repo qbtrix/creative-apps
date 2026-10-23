@@ -5,13 +5,14 @@ import Testing
 import SuiteKernel
 
 @Suite struct CommandFakeTests {
-    /// The six commands, undo and redo, the five file-flow commands, the eight fill commands, the two history commands, the nine stroke commands, the six transform commands, `color.sample` and the two shape commands, sorted, each with its kind and an example on the fixture.
+    /// The six commands, undo and redo, the five file-flow commands, the eight fill commands, the two history commands, the nine stroke commands, the six transform commands, `color.sample`, the five place commands and the two shape commands, sorted, each with its kind and an example on the fixture.
     @Test func fakeListsItsCommands() throws {
         let catalog = FakeCanvasDocument.catalog
         #expect(catalog.app == "fake")
         #expect(catalog.ids == ["color.sample", "doc.export-json", "edit.redo", "edit.undo", "file.clear-recent", "file.drop", "file.open-in",
                               "file.open-recent", "file.recent", "fill.angle", "fill.gradient", "fill.read", "fill.stop-add",
-                              "fill.stop-color", "fill.stop-move", "fill.stop-remove", "fill.type", "history.jump", "history.read", "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select",
+                              "fill.stop-color", "fill.stop-move", "fill.stop-remove", "fill.type", "history.jump", "history.read",
+                              "place.focus", "place.image", "place.read", "place.replace", "place.reset-size", "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select",
                               "shape.draw", "stroke.add", "stroke.cap", "stroke.color", "stroke.dash", "stroke.join", "stroke.read", "stroke.remove", "stroke.trim", "stroke.width",
                               "tool.shape", "transform.flip", "transform.read", "transform.reset", "transform.rotate", "transform.scale", "transform.set"])
         let kinds = Dictionary(uniqueKeysWithValues: catalog.describeAll().map { ($0.id, $0.kind) })
@@ -21,7 +22,8 @@ import SuiteKernel
                           "history.read": .query, "history.jump": .view, "stroke.read": .query, "color.sample": .query, "shape.draw": .edit, "tool.shape": .view]
                           .merging(GradientCommands.specs(FakeCanvasDocument.self).filter { $0.id != "fill.read" }.map { ($0.id, .edit) }) { $1 }
                           .merging(StrokeCommands.specs(FakeCanvasDocument.self).filter { $0.id != "stroke.read" }.map { ($0.id, .edit) }) { $1 }
-                          .merging(TransformCommands.specs(FakeCanvasDocument.self).map { ($0.id, $0.id == "transform.read" ? .query : .edit) }) { $1 })
+                          .merging(TransformCommands.specs(FakeCanvasDocument.self).map { ($0.id, $0.id == "transform.read" ? .query : .edit) }) { $1 }
+                          .merging(PlaceCommands.specs(FakeCanvasDocument.self).map { ($0.id, $0.id == "place.read" ? .query : .edit) }) { $1 })
         #expect(catalog.describe("rect.add")?.title == "Add Rectangle" && catalog.spec("rect.add")?.params == FakeCanvasDocument.AddRect.paramSchema)
         #expect(try catalog.describe("rect.add")?.example.decode(FakeCanvasDocument.AddRect.self).w == 30)
         #expect(CommandCatalog<FakeCanvasDocument>.empty(app: "x").ids.isEmpty)

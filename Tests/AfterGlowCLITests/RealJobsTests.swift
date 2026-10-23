@@ -75,6 +75,7 @@ struct RealJobsLayoutTests {
             == ["Tests/RealJobs/fake/add-rect", "Tests/RealJobs/fake/dash-trim", "Tests/RealJobs/fake/draw-star",
                "Tests/RealJobs/fake/file-flow",
                "Tests/RealJobs/fake/gradient-fill", "Tests/RealJobs/fake/history-jump", "Tests/RealJobs/fake/move-each",
+               "Tests/RealJobs/fake/place-image",
                "Tests/RealJobs/fake/sample-color",
                "Tests/RealJobs/fake/turn-flip"])
         #expect(RealJobsHarness.jobs(in: RealJobsHarness.brokenTree)
