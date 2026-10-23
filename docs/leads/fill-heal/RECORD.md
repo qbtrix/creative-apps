@@ -41,6 +41,7 @@ Next: FH-r #4574 and FH-c #4577 restacked on dev (gate rerun, retarget to dev); 
 - [ ] Wire: brush-keys:BK-photo (built on its fakes in FH-3/FH-4; swap in when it merges)
 
 ## Open
+- 2026-10-23T16:59Z: FH-4 PR #4896 (stacked on #4889, head 57c9396, gate pass); #4895 filed (needs-ui stroke-trail mark; MotionPathMarks placeholder).
 - 2026-10-23T16:08Z: FH-u/FH-photo waits unchanged 3 polls; question for the supervisor on #3778 (comment 6369264328).
 - 2026-10-23T14:10Z: waits: AB-photo building (adopt-kernel-brush lead record, last push 10-19), BK-photo blocked (#4531), AJ-photo waiting (#3777); AL, AX, AU, AC done. FH-u and FH-photo stay blocked.
 - suite-imaging #3715: no lead branch, no slice done, Sources/SuiteImaging absent on dev (2026-10-21T02:36Z). Blocks FH-1, so every later slice.
