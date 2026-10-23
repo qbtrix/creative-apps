@@ -1,0 +1,46 @@
+utc	stage	event	ref	note
+2026-10-21T11:25Z	0	stage-start	0	lead started, waits checked
+2026-10-21T11:27Z	3	wave-start	CB-a	wave 1 launched (CB-a contract slice)
+2026-10-21T12:16Z	3	resume	CB-a	resumed after restart; CB-a built on lead/clipboard-interop-CB-a, gate blocked by dev-red #3856, now fixed on dev
+2026-10-21T12:17Z	3	heartbeat	-	gates running on wave-1 slices after merging dev (#4008 fixed dev-red)
+2026-10-21T12:19Z	3	wave-start	wf_8d28fdb1-88d	CB-m and CB-u building stacked on lead/clipboard-interop-CB-a
+2026-10-21T12:37Z	3	heartbeat	353b92ef5	CB-a gate compiling; CB-m and CB-u building
+2026-10-21T12:45Z	3	check	353b92ef5	CB-a gate failed only a LibraryModel timing budget under load; re-gating when idle
+2026-10-21T13:04Z	3	wave	CB	wave 2 builders returned; dev's perf list now skips the Library timing tests; merged dev into the slice branches and re-gating one at a time
+2026-10-21T13:06Z	build	wave	wf_5261e84a-ce6	CB-s builder started, stacked on CB-a
+2026-10-21T13:12Z	build	pr-opened	#4080	CB-a gate PASS on 96562f1fa, PR #4080 opened with fast-lane
+2026-10-21T13:20Z	build	check	a542848b2	CB-m gate PASS on a542848b2 (pushed)
+2026-10-21T13:24Z	build	slice-built	CB-s	CB-s built at 6e63ae07a, gate PASS, stacked on CB-a
+2026-10-21T13:25Z	build	slice-built	CB-u	CB-u gate PASS at 11bd54011, branch pushed
+2026-10-21T13:43Z	build	heartbeat	-	contract PR open; macOS build pending
+2026-10-21T15:29Z	wave-2	merged	#4080	CB-a merged as 08b378bc8; restacking CB-m/CB-s/CB-u on dev
+2026-10-21T15:30Z	wave-2	gate	CBm,CBs,CBu	dev (with #4080) merged into CB-m c89dee718, CB-s a329f3e52, CB-u c3a3eca7f; serial gate running
+2026-10-21T15:49Z	wave-2	pr-open	#4104,#4105,#4106	CB-m, CB-s, CB-u opened (fast-lane, Fast-Check pass)
+2026-10-21T16:13Z	build	heartbeat	#4104	CB-a merged; three slice PRs open, gates PASS
+2026-10-21T16:33Z	build	heartbeat	#4104	no change since 16:12
+2026-10-21T16:53Z	wave2	merged	#4105	CB-s merged a803ef0; dev Linux run 39637279724 in progress
+2026-10-21T17:14Z	build	check	#3753	CB-s Belt-Slice-Done posted (Linux run 39637279724 green)
+2026-10-21T17:45Z	build	fix	#4106	CB-u macOS build failed: #expect keypath allSatisfy; fixed 2bf43e16e, gating
+2026-10-21T17:46Z	build	pr	#4106	CB-u fix pushed 2bf43e16e, Head moved
+2026-10-21T17:56Z	build	merge	e80f6aca3	CB-m merged #4104
+2026-10-21T18:07Z	build	heartbeat	CB-u	CB-u #4106 macOS build in progress on 2bf43e16e; CB-m slice-done waits on Linux check 39649402773
+2026-10-21T18:29Z	build	slice-done	CB-m	Belt-Slice-Done CB-m posted (run 39649402773); CB-u #4106 macOS build green, awaiting lane merge
+2026-10-21T18:43Z	build	heartbeat	CB-u	CB-u #4106 macOS build green; awaiting lane merge
+2026-10-21T18:43Z	build	heartbeat	CB-u	mirror to lead/clipboard-interop
+2026-10-21T19:11Z	build	heartbeat	CB-u	in lane batch 20261021190945
+2026-10-21T19:38Z	build	merged	CB-u	merged via lane batch
+2026-10-21T20:01Z	build	heartbeat	CB-u	waiting on dev Linux check
+2026-10-21T20:25Z	critic	heartbeat	CB-u	CB-u Belt-Slice-Done + Mac-Finish-Wanted posted
+2026-10-21T20:47Z	critic	heartbeat	CB-u	full CI still queued
+2026-10-21T21:11Z	wait-screens	heartbeat	CB-u	full CI 39665258026 still queued
+2026-10-22T03:31Z	resume	resume, new run id	-	act-1a161a658a7-2jql
+2026-10-22T06:55Z	wait-upstream	heartbeat: CB-5/7/9/11 merged	-	act-1a161a658a7-2jql
+2026-10-22T07:23Z	wait-upstream	heartbeat: waits unchanged	-	act-1a161a658a7-2jql
+2026-10-22T07:57Z	wait-upstream	asked supervisor (3rd blocked poll)	-	act-1a161a658a7-2jql
+2026-10-22T07:57Z	wait-upstream	asked supervisor (3rd blocked poll)	-	act-1a161a658a7-2jql
+2026-10-22T07:58Z	parked	parked per supervisor	-	act-1a161a658a7-2jql
+2026-10-22T16:36Z	0	stage-start	0	act-1a16474bd3a-i9ae relaunch, issue #4512
+2026-10-22T16:36Z	wait-upstream	waits rechecked	-	all adopt slices still blocked
+2026-10-22T21:30Z	3	heartbeat	#4512	adopt slices still blocked upstream (poll 1 after restart)
+2026-10-22T21:32Z	heartbeat	clipboard recheck: all adopt slices still blocked upstream
+2026-10-23T15:30Z	3	stage-start	#3753	wave 1: CB-6, CB-8, CB-10 (run act-1a1695ebfeb-d54n)
