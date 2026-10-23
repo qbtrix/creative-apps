@@ -26,3 +26,4 @@ utc	stage	event	ref	note
 2026-10-23T07:19:48Z	-	check	EM-photo-design	#4739 macOS build 39914195694 red on dev break FlareStage.swift:81 (FlareOpenQueue, #4708 vs #4716); fix PR #4771 opened (f2840adf, CI: PASS); #4739 at 15-file cap so not ported
 2026-10-23T07:19:48Z	-	merge	NP-flare	#4735 merged 06:49 (feature-done); full CI 39914223799 pending on c2cc0c7c7
 2026-10-23T07:42:45Z	check	editor-menus	poll	#4771 open clean awaiting lane; CI 39914223799 pending; #4741 awaiting supervisor
+2026-10-23T07:50:02Z	event	editor-menus	#4771	lane: waiting on red = cancelled run 39919265005 jobs; Linux rerun 39920222222 in progress
