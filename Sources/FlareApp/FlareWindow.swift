@@ -139,7 +139,7 @@ struct FlareWindow: View {
 }
 
 /// The window's content: the stage over the timeline while a document is
-/// open, under the import note after a Lottie open (FlareImportNote.swift), else the empty state whose one action is New Animation (Open is the
+/// open, under the import note after a Lottie open (FlareImportNoteAdapter.swift), else the empty state whose one action is New Animation (Open is the
 /// toolbar's). New Animation is `.file(.new)` like the toolbar's New, so it
 /// takes `emptyNewIdentifier` to keep `suite.controls` free of duplicates.
 struct FlareCanvas: View {
@@ -155,7 +155,7 @@ struct FlareCanvas: View {
     /// The stage's keys it doesn't take itself (Return, Escape): the window's `toolKey`.
     var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
     var onFit: @MainActor (Double) -> Void = { _ in }
-    /// The import note's Dismiss (FlareImportNote.swift): the window's `model.dismissImportNote()`.
+    /// The import note's Dismiss (FlareImportNoteAdapter.swift): the window's `model.dismissImportNote()`.
     var onDismissNote: @MainActor () -> Void = {}
     /// Ticks the model while playing: started when `model.isPlaying` turns true, stopped when it turns false or
     /// the canvas leaves the screen. Its `measuredFPS` feeds the stage's status pills.

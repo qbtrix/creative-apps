@@ -18,7 +18,7 @@
 // and Clear Menu and the file-flow commands' requests go to the bridge (FL-4).
 // A Lottie JSON (`FlareWorkspace.opensAsLottie`, lottie-open LO-4) opens through
 // FlareLottieOpen off the main actor and lands through `finishLottieOpen`:
-// untitled, with the import note above the stage (FlareImportNote.swift); on the
+// untitled, with the import note above the stage (FlareImportNoteAdapter.swift); on the
 // LO-1 stub the open alert says "Opening Lottie arrives with LO-3." It isn't
 // noted in the recents yet (LO-5 decides).
 import AppKit
