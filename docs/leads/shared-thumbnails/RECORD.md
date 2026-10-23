@@ -42,3 +42,4 @@ Next: ST-a builder on lead/shared-thumbnails-ST-a (off dev): test-first commit (
 
 ## Open
 - –
+- 2026-10-23T15:20:44Z: ST-a builder started (ST-1 test commit, ST-2) on lead/shared-thumbnails-ST-a; pinned core 7966e5a has CoreAsset/ThumbnailStore, so ST-2 links without a bump
