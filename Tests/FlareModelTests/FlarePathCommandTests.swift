@@ -28,8 +28,8 @@ import Testing
     @Test func anchorMoveIsOneMovePointsStep() throws {
         var workspace = FlareAnchorEditTests.picked()
         workspace.runPath(.selectAll)
-        workspace.runPath(.move(dx: 5, dy: 0, drag: nil))
-        #expect(workspace.undoActionName == "Undo Move Points")
+        let outcome = try FlareWorkspace.catalog.run("path.anchor-move", params: .object(["dx": .number(5), "dy": .number(0)]), on: &workspace)
+        #expect(outcome.undoStep == "Move Points" && workspace.undoActionName == "Undo Move Points")
     }
 
     /// A closed four-corner contour as `path.draw` and `path.read` write it.

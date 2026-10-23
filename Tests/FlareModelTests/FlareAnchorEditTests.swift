@@ -38,7 +38,7 @@ import Testing
         #expect(edit.path.contours.first?.anchors.count == 5 && workspace.pathHelp == nil, "\(edit.path.elements)")
         workspace.selectTool(.select)
         #expect(workspace.pathInEdit == nil)
-        #expect(workspace.pathHelp == "Select one shape with Direct Select to edit its points.")
+        #expect(workspace.pathHelp == nil, "off Direct Select only no document or a locked layer stops a path (FP-6)")
     }
 
     @Test func anchorSelectionClearsWhenTheItemSelectionChanges() {
