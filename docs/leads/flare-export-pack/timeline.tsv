@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-23T15:46Z	3	slice-done	FV-m	Belt-Slice-Done posted, run 39957675362
 2026-10-23T15:46Z	3	pr	FV-a	#4843 opened (FV-2), gate PASS
 2026-10-23T15:59Z	3	pr	FV-u	#4852 opened (FV-5, FV-6) stacked on #4843, gate PASS
+2026-10-23T16:03Z	4	pr	FV-z	#4854 opened (FV-7, FV-8) stacked on #4852, gate PASS, feature-done
