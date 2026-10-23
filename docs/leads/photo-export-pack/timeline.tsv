@@ -168,3 +168,4 @@ utc	stage	event	ref	note
 2026-10-23T18:00Z	check-in	no supervisor notes; #4832 #4836 clean, still queued (lane merged a batch at 17:35); no export findings; XP-3/XP-4/PT-a not on dev
 2026-10-23T18:32Z	check-in	no supervisor notes; #4832 #4836 clean, still queued; no export findings; no dev merges since 17:58; waits unchanged
 2026-10-23T19:04Z	check-in	no supervisor notes; #4832 #4836 clean, still queued; no export findings; dev took #4873 #4844 (not ours); XP-3/XP-4/PT-a not on dev
+2026-10-23T19:36Z	check-in	no supervisor notes; #4832 #4836 clean, still queued (lane landing older PRs #3581 #4741); no export findings; XP-3/XP-4/PT-a not on dev
