@@ -2,15 +2,15 @@
 
 Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a1693fbf6d-ap2g · Session: claude/large-catalog-share-sheet-2tdm4i (earlier act-1a15df37b73-k199) · Started: 2026-10-21T10:19Z (resumed 2026-10-23T14:20Z)
-Stage: 3 wave 2 (LG-model built on large-catalog/lg-model a07f54e7f; mutations, gate, then PR)
+Stage: 3 wave 2 (LG-model PR #4847 open, fast-lane, head 9f19aa0a)
 Base: 8021b0f56a45a59540cd4ea0ff99651c5fb8dc2a (origin/dev)
-Next: LG-model PR once scripts/mutate and scripts/ci --changed pass; LG-grid waits on LG-model and suiteui shared-thumbnails ST-m
+Next: after #4847 merges and a green library or full run contains it, Belt-Slice-Done LG-model; LG-grid waits on suiteui shared-thumbnails ST-m
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | LG-a | 10,000-photo fixture and every budget test, disabled | LG-1, LG-2 | MJ-LG | metadata-more:MD-a (met) | no | 1 | done #4006, fix #4073 (c5801375) | 39601343733 | - |
-| LG-model | load off main with id index, IndexSet selection, one-pass export plan | LG-3, LG-4 | MJ-LG | LG-a; FC-a (met: filters-collections built), MD-e, DR-m (stubs, supervisor's answer b) | no | 0 | building | - | - |
+| LG-model | load off main with id index, IndexSet selection, one-pass export plan | LG-3, LG-4 | MJ-LG | LG-a; FC-a (met: filters-collections built), MD-e, DR-m (stubs, supervisor's answer b) | no | 0 | in lane (#4847) | - | - |
 | LG-grid | grid and loupe within budget, jobs, built | LG-5..LG-8 | LJ-LG, MJ-LG | LG-model; suiteui shared-thumbnails ST-m; FC-c (met) | yes | 0 | blocked | - | - |
 
 ## Tasks
@@ -18,8 +18,8 @@ Next: LG-model PR once scripts/mutate and scripts/ci --changed pass; LG-grid wai
 |---|---|---|---|---|---|---|---|
 | LG-1 | LG-a | 1 | LibraryFixtures.large(count:folder:), budget tests disabled | LibraryLargeFixture.swift, LargeCatalogBudgetTests.swift | LargeCatalogBudgetTests | #4006 | merged |
 | LG-2 | LG-a | 1 | large journey (skipped), -LibraryLargeFixture flag, RJ-L56 folder | LibraryJourneyTests+Large.swift, LibraryLaunch.swift, large-catalog.jobs.json | launch flag test, scripts/jobs check | #4006 | merged |
-| LG-3 | LG-model | 2 | direct select all, cheap can-export check | LibrarySelectionAdapter.swift, LibraryActions.swift, LibraryExport.swift, LargeCatalogEquivalenceTests.swift, mutations | LargeCatalogEquivalenceTests | - | built, Mutate 2/2 LibrarySelectionAdapter |
-| LG-4 | LG-model | 2 | one-pass export names (stems parsed once, one taken set) | Contracts/ExportNaming+Kernel.swift, Live/LiveExporter.swift, LargeCatalogEquivalenceTests.swift, mutations | LargeCatalogEquivalenceTests | - | built, mutations running |
+| LG-3 | LG-model | 2 | direct select all, cheap can-export check | LibrarySelectionAdapter.swift, LibraryActions.swift, LibraryExport.swift, LargeCatalogEquivalenceTests.swift, mutations | LargeCatalogEquivalenceTests | #4847 | open |
+| LG-4 | LG-model | 2 | one-pass export names (stems parsed once, one taken set) | Contracts/ExportNaming+Kernel.swift, Live/LiveExporter.swift, LargeCatalogEquivalenceTests.swift, mutations | LargeCatalogEquivalenceTests | #4847 | open |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -33,6 +33,7 @@ Next: LG-model PR once scripts/mutate and scripts/ci --changed pass; LG-grid wai
 - LG-7's Tests/perf-suites.txt line is the supervisor's (protected).
 
 ## Open
+- 2026-10-23T15:53Z: #4847 opened (238 lines, 10 files; CI: PASS on 9f19aa0a; Mutate 17/17). Fixes #3213 #3214; Refs #3110 #1650 #4835.
 - 2026-10-23T15:44Z: LG-model measured. Release, suite run in parallel: plan, load, shift-range, beginExport pass; select all 12.0 ms vs 5 ms on 10,000. Release alone (--no-parallel, best of 10): select all 5.0 ms, of which SuiteKernel Selection.unique is 4.6 ms (Set(order) is 1.4 ms). Kernel is line:suite: filed #4835 (needs-suite) for a fast path when ids are already unique. The timed suite LargeCatalogModelBudgetTests stays disabled until LG-7 lists it in perf-suites, so the gate does not depend on #4835. Debug before/after: plan 191 ms to under 50, beginExport 52.7 ms to under 10, select all 2.14 to 0.885 ms (1,000).
 - Belt reads lead/library-large-catalog; this record is mirrored there at docs/leads/library-large-catalog/ from 2026-10-23T15:44Z on.
 - LG-grid needs suiteui shared-thumbnails ST-m (wave file planned, no slice status on 2026-10-23); re-checked each heartbeat.
