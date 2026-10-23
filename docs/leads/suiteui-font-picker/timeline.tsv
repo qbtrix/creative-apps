@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-22T22:05Z	pushed	FP-z 499bba3f (PR after FP-u, FP-m merge)
 2026-10-22T22:11Z	pr	FP-c4 #4651
 2026-10-23T03:25Z	3	stage-start	wave 2	relaunch act-1a166b69fbd-mmos: FP-a landed via #4644; FP-u merged with dev
+2026-10-23T03:14:06Z	FP-u	pr	#4704 opened, gate CI: PASS on deb55ebe

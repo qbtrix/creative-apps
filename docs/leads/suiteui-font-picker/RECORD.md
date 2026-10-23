@@ -4,14 +4,14 @@ Issue: #3730 (earlier run used duplicate #4507) · Packet: docs/blueprints/suite
 Run: act-1a166b69fbd-mmos · Session: claude/font-picker-lead-5om1cy · Started: 2026-10-22T16:36Z (this run resumed 2026-10-23T03:10Z)
 Stage: 3 wave 2
 Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a (origin/dev)
-Next: open FP-u's PR (dev merged in, gate running), then FP-z's (feature-done) stacked on it; post Belt-Slice-Done for FP-a on a green Linux run holding #4644
+Next: FP-z gate running; its PR (feature-done) opens once #4704 merges (stacked diff is over the cap); Belt-Slice-Done for FP-a on a green scoped suiteui or full run holding #4644
 
 ## Slices
 
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | FP-a | FontPick, FontPickerRules and FontPicker declared as stubs; gallery page; checks written, disabled | FP-1, FP-2 | SJ0 | EK-u (built), CC-u (built), shell-text:ST-a (built: FontFamily/FontFace in SuiteModel) | true | 0 | merged via #4644 (722a4fe9; #4638 closed as superseded) | – | – |
-| FP-u | the picker lists, filters and previews families within the render budget | FP-3, FP-4 | testFontPickerPicksAFace | FP-a | true | 0 | dev merged in (354 lines); PR opening | – | – |
+| FP-u | the picker lists, filters and previews families within the render budget | FP-3, FP-4 | testFontPickerPicksAFace | FP-a | true | 0 | PR #4704 open (fast-lane, head deb55ebe) | – | – |
 | FP-m | rules: filter, face order, nearest face | FP-5, FP-8 | FJ-m | FP-a | false | 0 | merged #4644 | – | – |
 | FP-z | live families; feature built | FP-6, FP-7 | testFontPickerPicksAFace | FP-u, FP-m | true | 0 | FP-7 C4 merged #4651; FP-6 + status built stacked on FP-u (74 lines), PR after FP-u's | – | – |
 
@@ -21,8 +21,8 @@ Next: open FP-u's PR (dev merged in, gate running), then FP-z's (feature-done) s
 |---|---|---|---|---|
 | FP-1 | FP-a | 1 | merged | #4644 |
 | FP-2 | FP-a | 1 | merged | #4644 |
-| FP-3 | FP-u | 2 | pushed (FP-u) | – |
-| FP-4 | FP-u | 2 | pushed (FP-u) | – |
+| FP-3 | FP-u | 2 | PR #4704 | – |
+| FP-4 | FP-u | 2 | PR #4704 | – |
 | FP-5 | FP-m | 2 | merged | #4644 |
 | FP-8 | FP-m | 2 | merged | #4644 |
 | FP-6 | FP-z | 3 | pushed (FP-z) | – |
