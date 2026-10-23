@@ -4,7 +4,7 @@ Issue: #3472 (runs before used #4509) · Packet: docs/blueprints/halo/features/e
 Run: act-1a16958d5fe-8dxu · Started: 2026-10-23T15:26:44Z (took over from act-1a16474bd28-v3ht)
 Stage: 3 wave 2 (HX-a #4841, HX-u #4858, HX-m #4874 + #4917 open)
 Base: 721168a8 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: HX-z (HX-7 journey live, RJ-H41, HX-8 docs/built/feature-done) stacked on HX-4
+Next: HX-z first half (HX-7 journey live, RJ-H41 pending #4929) gating, stacked on HX-4; HX-8 waits on placed-images:PH-z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -23,7 +23,7 @@ Next: HX-z (HX-7 journey live, RJ-H41, HX-8 docs/built/feature-done) stacked on 
 | HX-4 | HX-m | 2 | live renderer via media.movie; HaloMovieWriter kept for fractional fps | Sources/HaloModel/Live/LiveCompositionRendering.swift, Sources/HaloApp/HaloMovieWriter.swift | HaloMovieSinkTests | #4917 | pr |
 | HX-5 | HX-u | 3 | snapshots, budget | Tests/AppSnapshotTests/HaloRenderProResSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloRenderSheetTests.swift | codecSwitchInTwoBodies | #4858 | pr |
 | HX-6 | HX-u | 3 | journey skipped | UITests/HaloJourneyTests+ExportPack.swift | compiles, skipped | #4858 | pr |
-| HX-7 | HX-z | 4 | journey live | UITests/HaloJourneyTests+ExportPack.swift | testRenderLowerThirdWithAlpha | - | blocked |
+| HX-7 | HX-z | 4 | journey live; RJ-H41 as a pending job (#4929) | UITests/HaloJourneyTests+ExportPack.swift, Tests/RealJobs/halo/prores-alpha/prores-alpha.jobs.pending.json | testRenderLowerThirdWithAlpha | - | gating |
 | HX-8 | HX-z | 5 | halo.md, built, feature-done | docs/blueprints/halo.md, docs/blueprints/halo/features/export-pack.wave.json | waves render --dry-run | - | blocked |
 
 ## Reviews
@@ -36,6 +36,7 @@ Next: HX-z (HX-7 journey live, RJ-H41, HX-8 docs/built/feature-done) stacked on 
 - HX-m ships as two PRs, both `Slice: HX-m`. HX-3 holds the plan rules, the alpha refusal, .mov naming and flattening movie frames without alpha over opaque black (a composition has no background fill, so PNG frames stay as they were). HX-4 holds the media service and writer. Together they are over the 400-line cap.
 - ProRes 4444 stays refused in the Codec row until HX-4 ("ProRes 4444 lands with HX-4."): HX-3 has no writer that can make one.
 - RJ-H41 moves to the HX-4 PR. The CLI refuses render.start on Linux, and its catalog step takes no codec or alpha yet, so a real ProRes job is checkable only once the writer and those params exist.
+- RJ-H41 ships with HX-7 as `prores-alpha.jobs.pending.json`: the headless CLI writes png only, so gap #4929 asks for a movie render on macOS; the job is renamed when that lands.
 - HX-4's shared MovieWriter takes whole-number fps only. #4857 (needs-ui, line:suiteui) asks for a rational rate; HaloMovieWriter stays for fractional rates until then.
 
 ## Open
