@@ -1,0 +1,23 @@
+[
+  {
+    "label": ".linearOutput: boostAmount left at its default, 1",
+    "file": "Sources/SuiteImaging/Raw/SystemRawDecoder.swift",
+    "find": "filter.boostAmount = 0",
+    "replace": "filter.boostAmount = 1",
+    "tests": "SystemRawDecoderTests"
+  },
+  {
+    "label": ".floatOutput: rendered as 8-bit RGBA",
+    "file": "Sources/SuiteImaging/Raw/SystemRawDecoder.swift",
+    "find": "format: .RGBAf, colorSpace: space",
+    "replace": "format: .RGBA8, colorSpace: space",
+    "tests": "SystemRawDecoderTests"
+  },
+  {
+    "label": ".upright: the file's orientation not applied",
+    "file": "Sources/SuiteImaging/Raw/SystemRawDecoder.swift",
+    "find": "image.oriented(orientation)",
+    "replace": "image",
+    "tests": "SystemRawDecoderTests"
+  }
+]
