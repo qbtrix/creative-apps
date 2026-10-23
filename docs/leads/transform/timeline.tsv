@@ -89,3 +89,4 @@ utc	stage	event	ref	note
 2026-10-23T02:52:28Z	heartbeat	triage: 39879260661 + 39880044035 red, not transform; waiting on 39886331557
 2026-10-23T03:14:20Z	heartbeat	watching 39892568309 (halo) + 39893803031 (full)
 2026-10-23T03:36:02Z	heartbeat	waiting on 39892568309 (queued) + 39893803031 (pending)
+2026-10-23T03:58:04Z	heartbeat	still waiting on 39892568309 + 39893803031
