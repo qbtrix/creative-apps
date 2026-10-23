@@ -19,7 +19,7 @@ Next: HF-u PR stacked on HF-a; HF-m once its packet deps are on dev
 |---|---|---|---|---|---|---|---|
 | HF-1 | HF-a | 1 | adapter stubs | Sources/HaloModel/HaloFileFlow+Kernel.swift, Tests/HaloModelTests/HaloFileFlowTests.swift | compiles; tests disabled | #4855 | pr |
 | HF-2 | HF-a | 2 | scene, File menu, drop | Sources/HaloApp/HaloApp.swift, see packet | HaloFileFlowSnapshots.menu | #4855 | pr |
-| HF-3 | HF-m | 2 | adapter bodies, ids, RJ-H42 | see packet | HaloFileFlowTests | - | blocked |
+| HF-3 | HF-m | 2 | adapter bodies, ids, RJ-H42 | see packet | HaloFileFlowTests | - | building |
 | HF-4 | HF-m | 2 | window notes opens and saves | Sources/HaloApp/HaloWindow+File.swift, Tests/AppSnapshotTests/HaloFileFlowLiveTests.swift | HaloFileFlowLiveTests | - | blocked |
 | HF-5 | HF-u | 3 | snapshots, budget | Tests/AppSnapshotTests/HaloFileFlowSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloFileDropTests.swift | RenderBudgetHaloFileDropTests | #4868 | pr |
 | HF-6 | HF-u | 3 | journey skipped | UITests/HaloJourneyTests+FileFlow.swift | compiles, skipped | #4868 | pr |
@@ -45,3 +45,4 @@ Next: HF-u PR stacked on HF-a; HF-m once its packet deps are on dev
 - Wire: HF-3 sets `placesExtensions` from `placeFormats` (HaloPlace+Kernel.swift) once placed-images PH-m is on dev, and drops "Halo can't place images yet." then; HF-a keeps the packet's stub.
 - Wire: HF-1 SuiteFileCommands sits after New Window (dev kept New Window, #1081), not in place of it.
 - 2026-10-23T16:30Z: HF-u #4868 opened, stacked on HF-a (136 lines, below 150 because HF-5's snapshots shipped in HF-a).
+- 2026-10-23T17:12Z: HF-m ships as two PRs, both `Slice: HF-m`. HF-3 (adapter bodies, suite file.* ids replacing file.open-recent, RJ-H42 pending #3741) on lead/halo-file-flow-HF-m; HF-4 takes HaloFiles' recents out and wires the window (takeFileRequests, updateFileFlow, takeOldRecents). Open In is refused: no other app reads a .halo.

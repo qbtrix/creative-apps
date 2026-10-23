@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-23T15:26:44Z	3	takeover	-	run act-1a16958d5fe-8dxu starts; HF-a rebuilt on dev
 2026-10-23T16:03:12Z	3	pr	HF-a	#4855 opened, Fast-Check pass at db25024f
 2026-10-23T16:30:00Z	3	pr	HF-u	#4868 opened, stacked on HF-a
+2026-10-23T17:12:00Z	3	heartbeat	HF-m	HF-3 code, tests, RJ-H42 committed; Mutate 5/5; gate running
