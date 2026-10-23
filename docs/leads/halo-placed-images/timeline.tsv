@@ -89,3 +89,4 @@ utc	stage	event	ref	note
 2026-10-22T23:59:11Z	3	fix	PH-u	#4438 dev merged in, head e76365be, CI PASS
 2026-10-23T00:16:12Z	3	check	PH-u	#4438 macOS build queued; PH-z fixer started
 2026-10-23T00:24:21Z	3	fix	PH-z	#4649 30471d52, #4658 bc63740a, clean; quarantine expiry on dev (#4660)
+2026-10-23T00:38:00Z	3	check	PH-u	#4438 macOS build 39875643496 still queued
