@@ -1,9 +1,5 @@
-// AnchorRowsTests.swift (anchor-parenting AN-5): the anchor rows and mark.
-// The nine-point picker sends `transform.set-anchor` with `{at:}` for each of
-// BoxAnchor's points; the Parent menu lists None and the other layers, never
-// the layer itself or one that follows it at any depth (a cycle the kernel
-// would refuse); the mark's hit radius is 6 pt at any zoom, and a Shift drop
-// snaps to the nearest of the nine points. No rendering. macOS only.
+// AnchorRowsTests.swift (anchor-parenting AN-5): the anchor rows' commands, the
+// Parent menu (never the layer or its followers), the mark's hit radius and Shift snap.
 import AppKit
 import Foundation
 import SuiteKernel
