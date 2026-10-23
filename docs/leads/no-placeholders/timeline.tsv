@@ -8,3 +8,4 @@ utc	stage	event	ref	note
 2026-10-23T03:42Z	3	heartbeat	-	NP-a builder finishing (mutate + gate)
 2026-10-23T03:45Z	3	pr-opened	NP-a	#4717 fast-lane, head 75c15e8
 2026-10-23T03:46Z	4	stage-start	NP-flare	wave 2 building, stacked on #4717
+2026-10-23T04:03Z	-	heartbeat	NP-a	#4717 lane macOS build-only run 39897023050 in progress; NP-flare building
