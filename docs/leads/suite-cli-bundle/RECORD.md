@@ -1,17 +1,17 @@
 # cli-bundle lead record
 
 Issue: #3773 · Packet: docs/blueprints/suite/features/cli-bundle.md
-Run: act-1a166b69fd0-x9m8 · Session: session_012bybPMvARipEyKrs5oNQwY · Started: 2026-10-23T03:08Z
-Stage: 3 wave 2
-Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a
-Next: CB-m #4740, CB-u #4743 (base dev, fast lane), CB-m-bundle #4741 (base dev, supervisor), C4 #4755; then scoped run app=suite, critics, CB-z
+Run: act-1a16a37a3ed-0kyn (relaunch; earlier act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
+Stage: 3 wave 3
+Base: 35a0b5e7e9520a764f3eabf02968a453082a87cc (main; PRs target dev)
+Next: #4741 merged to dev; CB-z merged with dev and gating (scripts/ci --changed), then open CB-z and CB-z-docs (feature-done) PRs
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| CB-a | BundleLayout.cliPath, AssistantConnect stubs, help catalog stubs, checks disabled | CB-1, CB-2 | MJ-CB | report-problem:RP-m (met) | no | 0 | merged #4715 | - | - |
-| CB-u | Connect an AI Assistant sheet on the stubs; render budget | CB-5, CB-5b | XJ-CB | CB-a; RP-u (met) | yes | 0 | open #4743 (base dev, head 6bc5db5e) | - | - |
-| CB-m | bodies + bundled signed afterglow (CB-3 supervisor merge) | CB-4, CB-3 | MJ-CB, XJ-CB | CB-a | no | 0 | open #4740 (CB-4), #4741 (CB-3, no-fast-lane, base dev, head 184f3f88) | - | - |
+| CB-a | BundleLayout.cliPath, AssistantConnect stubs, help catalog stubs, checks disabled | CB-1, CB-2 | MJ-CB | report-problem:RP-m (met) | no | 0 | done | 39983291011 | - |
+| CB-u | Connect an AI Assistant sheet on the stubs; render budget | CB-5, CB-5b | XJ-CB | CB-a; RP-u (met) | yes | 0 | done | 39983291011 | - |
+| CB-m | bodies + bundled signed afterglow (CB-3 supervisor merge) | CB-4, CB-3 | MJ-CB, XJ-CB | CB-a | no | 0 | done | 39983291011 | - |
 | CB-z | Install Command-Line Tool; RJ-X62 on; built | CB-6, CB-7, CB-8 | XJ-CB, MJ-CB | CB-u, CB-m | yes | 0 | building (on CB-u + CB-m) | - | - |
 
 ## Tasks
@@ -52,3 +52,4 @@ Next: CB-m #4740, CB-u #4743 (base dev, fast lane), CB-m-bundle #4741 (base dev,
 - CB-z split to stay ≤15 files: code on lead/cli-bundle-CB-z (13 files, 0e6a426b1), docs (suite.md, cli-bundle.wave.json built, jobs.json) on lead/cli-bundle-CB-z-docs (f6a22109b), which carries feature-done.
 - Both PRs open after #4741 (supervisor, scripts/bundle-apps) merges; CB-z's diff against dev otherwise holds that protected path.
 - Gap #4762: the bundle runner RJ-X62 waits on.
+- 2026-10-23T19:28Z Relaunch act-1a16a37a3ed-0kyn: rebased on main 35a0b5e7e. Full CI https://github.com/qbtrix/creative-apps/actions/runs/39983291011 (green, main) holds CB-a (#4755), CB-u (#4743) and CB-m (#4740); done markers posted. #4741 (CB-m bundle script) is still open with the supervisor; CB-z waits on it.
