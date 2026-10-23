@@ -110,15 +110,23 @@ extension LibraryWindow {
     /// The open panel, folders only, with the copy choice; then, when copying, a panel for the copy folder.
     /// Nil when either is cancelled.
     private static func chooseImportFolder() -> (folder: String, copy: ImportCopyOptions)? {
+        let folderPanel = { (prompt: String) -> NSOpenPanel in
+            let panel = NSOpenPanel()
+            panel.canChooseFiles = false
+            panel.canChooseDirectories = true
+            panel.allowsMultipleSelection = false
+            panel.prompt = prompt
+            return panel
+        }
         let choice = ImportCopyChoice()
-        let panel = folderPanel(prompt: "Import")
+        let panel = folderPanel("Import")
         // Add in place or copy to a folder (catalog-files LC-3, LibraryImportOptions.swift).
         panel.accessoryView = NSHostingView(rootView: LibraryImportOptions(choice: choice))
         panel.isAccessoryViewDisclosed = true
         guard panel.runModal() == .OK, let url = panel.url else { return nil }
         var copy = choice.options
         if let start = copy.copyTo {
-            let destination = folderPanel(prompt: "Copy Here")
+            let destination = folderPanel("Copy Here")
             destination.message = "Choose the folder to copy the photos into."
             destination.canCreateDirectories = true
             destination.directoryURL = URL(fileURLWithPath: start, isDirectory: true)
@@ -126,14 +134,5 @@ extension LibraryWindow {
             copy.copyTo = target.path(percentEncoded: false)
         }
         return (url.path(percentEncoded: false), copy)
-    }
-
-    private static func folderPanel(prompt: String) -> NSOpenPanel {
-        let panel = NSOpenPanel()
-        panel.canChooseFiles = false
-        panel.canChooseDirectories = true
-        panel.allowsMultipleSelection = false
-        panel.prompt = prompt
-        return panel
     }
 }
