@@ -91,11 +91,15 @@ final class HaloPlaceJourneyTests: XCTestCase {
         XCTAssert(waitFor { !panel.exists }, "the panel didn't close on Place")
     }
 
-    /// Types `value` into the inspector's field for `property` and commits it.
+    /// Types `value` into the inspector's field for `property` and commits it. A TRANSFORM bar holds its typing
+    /// field only while it is open, so the bar is clicked first, as a person does.
     @MainActor private func set(_ property: String, to value: String, _ halo: Journey) {
-        let field = halo.element("halo.inspector.row.\(property)").textFields.firstMatch
-        XCTAssert(field.waitForExistence(timeout: 5), "no \(property) field in the inspector")
-        field.click()
+        let bar = halo.element("halo.inspector.row.\(property)")
+        XCTAssert(bar.waitForExistence(timeout: 5), "no \(property) row in the inspector")
+        halo.reveal(bar)
+        bar.click()
+        let field = bar.textFields.firstMatch
+        XCTAssert(field.waitForExistence(timeout: 5), "clicking \(property) opened no field")
         field.typeKey("a", modifierFlags: .command)
         field.typeText(value + "\r")
     }
