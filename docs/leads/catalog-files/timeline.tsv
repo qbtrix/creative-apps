@@ -5,3 +5,4 @@ utc	stage	event	ref	note
 2026-10-23T17:39:52Z	3	pr	#4937,#4938	LC-m opened (LC-5, LC-6); LC-z builder launched
 2026-10-23T17:51:06Z	3	check	#4879,#4924,#4937,#4938	all open, none merged, no needs-fix/needs-rebase; dev 8a54f64 Linux check 39997290881 running; findings 0
 2026-10-23T18:07:23Z	3	pr	#4949	LC-z (LC-7+LC-8) opened, head 5c9a3767, base feat/library-lc-mu (lc-m6+lc-u merge), 15 files +300/-92, Mutate 3/3 LibraryLaunch; retarget to dev once #4924 and #4938 merge
+2026-10-23T18:15:01Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged, no needs-fix/needs-rebase; dev 98589662 Linux check 40000080882 running; feature findings 0; posting path re-adds an attribution footer to PR bodies on every PATCH, lane strips it from the squash
