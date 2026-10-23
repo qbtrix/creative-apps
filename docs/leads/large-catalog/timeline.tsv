@@ -35,3 +35,4 @@
 21:10Z	3	heartbeat	LG-model	#4847 open, clean, fast-lane, waiting in lane; ST-a #4840 needs-fix; full CI 39999410389 green
 2026-10-23T21:33:54Z	3	heartbeat	LG-model	#4847 open, clean, fast-lane, waiting in lane; ST-m now open as #4951 (stacked on ST-a #4840, which is still needs-fix); no findings, no dev-red
 2026-10-23T21:56:47Z	3	merged	LG-model	#4847 merged 21:40Z as afb9cbed; scoped library run 40029034328 on 491ec546 (contains it) queued; ST-m #4951 open, stacked on ST-a #4840 (needs-fix); no findings, no dev-red
+2026-10-23T22:19:00Z	3	heartbeat	LG-model	library run 40029034328 (contains afb9cbed) macOS (library) in progress; ST-a #4840 needs-fix, ST-m #4951 open; no findings, no dev-red
