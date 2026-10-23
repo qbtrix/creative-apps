@@ -2,9 +2,9 @@
 
 Issue: #3468 · Packet: docs/blueprints/photo/features/tone-controls.md
 Run: act-1a16958d691-2ax3 · Session: claude/feature-lead-photo-cl2258 · Started: 2026-10-23T15:00Z (takes over from the released run act-1a15eecbafe-u0f9)
-Stage: build W1 (PT-1)
+Stage: build W1 (PT-1 in the lane, #4845)
 Base: 721168a8f
-Next: PT-1 PR to dev (lead/photo-tone-PT-a); PT-2 once SuiteUI TC-2 (ToneRows) is on dev
+Next: PT-1 #4845 in the fast lane (head 39f902f, CI: PASS, mutations 4/4); PT-2 once SuiteUI TC-2 (ToneRows) is on dev; re-check TC-2, TC-5, TC-6 and LS-a (#3937) each wave
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -17,7 +17,7 @@ Next: PT-1 PR to dev (lead/photo-tone-PT-a); PT-2 once SuiteUI TC-2 (ToneRows) i
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| PT-1 | PT-a | 2 | tone in AdjustmentSettings; adapter stubs; PhotoToneTests disabled | Sources/PhotoModel/AdjustmentSettings.swift, PhotoTone+Kernel.swift, Tests/PhotoModelTests/PhotoToneTests.swift | PhotoToneTests | – | building |
+| PT-1 | PT-a | 2 | tone in AdjustmentSettings; adapter stubs; PhotoToneTests disabled | Sources/PhotoModel/AdjustmentSettings.swift, PhotoTone+Kernel.swift, Tests/PhotoModelTests/PhotoToneTests.swift | PhotoToneTests | #4845 | in lane |
 | PT-2 | PT-a | 3 | Adjust panel ToneRows | Sources/PhotoApp/AdjustmentsInspector.swift | PhotoToneSnapshots.panel | – | waiting (TC-2 ToneRows not on dev) |
 | PT-3 | PT-m | 4 | live route and export | PhotoAdjust+Imaging.swift, PhotoRender.swift | PhotoToneTests | – | waiting |
 | PT-4 | PT-m | 4 | adapter bodies, catalog, jobs | PhotoTone+Kernel.swift, PhotoCommandCatalog.swift, RealJobs | PhotoToneCommandTests | – | waiting |
