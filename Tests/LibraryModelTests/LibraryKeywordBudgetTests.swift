@@ -10,7 +10,7 @@ private let scale = 1.0
 private let scale = 0.1
 #endif
 
-@Test(.disabled("timing: waits on its Tests/perf-suites.txt line")) func addToThousandWithinBudget() {
+@Test func addToThousandWithinBudget() {
     var catalog = LibraryCatalog()
     catalog.load(LibraryFixtures.photos(named: "large"))
     catalog.select(Set(catalog.order.prefix(1_000)))
@@ -24,7 +24,7 @@ private let scale = 0.1
     #expect(cost.median <= 20 * scale)
 }
 
-@Test(.disabled("timing: waits on its Tests/perf-suites.txt line")) func suggestWithinBudget() {
+@Test func suggestWithinBudget() {
     let pool = (0..<500).map { $0.isMultiple(of: 2) ? "Subject \($0)" : "Place \($0)" }
     var photos = LibraryFixtures.photos(named: "large")
     for index in photos.indices {
