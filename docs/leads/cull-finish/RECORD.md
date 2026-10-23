@@ -1,17 +1,17 @@
 # cull-finish lead record
 
 Issue: #3458 · Packet: docs/blueprints/library/features/cull-finish.md
-Run: act-1a15995d319-aamb · started 2026-10-20
-Stage: build, wave 1 (DR-1 PR #3623 open; DR-2 + DR-5 PR #3625 open, stacked on #3623)
-Base: 4f365bf8 (origin/dev)
-Next: once #3623 merges, retarget #3625 to dev, merge dev into it, regate, move Head, add fast-lane. DR-3, DR-6, DR-7 wait on other features (below)
+Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 · earlier run act-1a15995d319-aamb
+Stage: build, wave 2 (DR-6 for DR-m; DR-3 + DR-4 for DR-u), contract-first waits (lead.md rule 12, #4814)
+Base: 721168a8 (origin/dev)
+Next: DR-6 PR, then DR-7 and DR-8 stacked on it; DR-u PR in parallel. Scoped run app=library once each slice's last PR lands
 
 ## Slices
 | slice | behavior | tasks | waits on | ui | rounds | state | run |
 |---|---|---|---|---|---|---|---|
-| DR-a | contract: Trash service, label keys 6-9, Delete Rejects stubs, tests written disabled | DR-1, DR-2 | FC-a (on dev), MD-a (on dev) | no | 0 | building | - |
-| DR-u | confirm dialog, ⌘⌫, Set Label 6-9; snapshots; journey skipped | DR-3, DR-4 | DR-a, FC-a, MD-d/e | yes | 0 | waiting | - |
-| DR-m | label cull, deleteRejects body + undo, excludedPaths coding, LiveTrash | DR-5..DR-8 | DR-a; MD-c (DR-7); AC-library (command id) | no | 0 | waiting | - |
+| DR-a | contract: Trash service, label keys 6-9, Delete Rejects stubs, tests written disabled | DR-1, DR-2 | FC-a (on dev), MD-a (on dev) | no | 0 | done | 39507806909 |
+| DR-u | confirm dialog, ⌘⌫, Set Label 6-9; snapshots; journey skipped | DR-3, DR-4 | DR-a, FC-a, MD-d/e (met: MD-a merged) | yes | 0 | building | - |
+| DR-m | label cull, deleteRejects body + undo, excludedPaths coding, LiveTrash | DR-5..DR-8 | DR-a; MD-c, MD-e (met: MD-a merged) | no | 0 | building | - |
 | DR-z | journey on, docs, C4, feature-done | DR-9, DR-10 | DR-u, DR-m | no | 0 | waiting | - |
 
 ## Tasks
@@ -19,7 +19,17 @@ Next: once #3623 merges, retarget #3625 to dev, merge dev into it, regate, move 
 |---|---|---|---|---|---|
 | DR-1 | DR-a | 1 | PhotoTrashing, FakeTrash, LiveTrash stub, services.trash, LibraryKey.label 6-9, deleteRejects stubs (Mutate 4/4) | #3623 | open, fast-lane |
 | DR-2 | DR-a | 1 | disabled tests for DR-5/DR-6, never-deletes scan, delete-rejects real job (pending DR-8) | #3625 | open, stacked on #3623; CI: PASS on e0752118 |
-| DR-5 | DR-m | 1 | keys 6-9 set Red/Yellow/Green/Blue as one step, never advance (40 lines, folded into DR-2's PR) | #3625 | open, folded into DR-2; Mutate 2/2 LibraryModel.LibraryCulling |
+| DR-5 | DR-m | 1 | keys 6-9 set Red/Yellow/Green/Blue as one step, never advance (40 lines, folded into DR-2's PR) | #3625 | merged daee0e736; Mutate 2/2 LibraryModel.LibraryCulling |
+| DR-6 | DR-m | 2 | deleteRejects body, trashed undo step, excludedPaths fed to import; turns on LibraryDeleteRejectsTests | - | building |
+| DR-7 | DR-m | 3 | excludedPaths in the catalog file (omitted when empty); photo.delete-rejects command | - | next, stacked on DR-6 |
+| DR-8 | DR-m | 4 | LiveTrash on FileManager.trashItem; RJ-L06 on | - | next, stacked on DR-7 |
+| DR-3 | DR-u | 2 | Photo > Delete Rejected Photos… ⌘⌫, confirmationDialog, Set Label names 6-9 | - | building (one PR with DR-4) |
+| DR-4 | DR-u | 2 | snapshots, render budget, journey skipped (waits on DR-9) | - | building (one PR with DR-3) |
+
+## Wires
+- [ ] Wire: metadata-more:MD-c (DR-7 built on dev's catalog coding; swap in when MD-c merges)
+- [ ] Wire: metadata-more:MD-d (DR-3 built on dev's menus; swap in when MD-d merges)
+- [ ] Wire: metadata-more:MD-e (DR-3, DR-6 built on dev's metadata fakes; swap in when MD-e merges)
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -34,3 +44,4 @@ Next: once #3623 merges, retarget #3625 to dev, merge dev into it, regate, move 
 - Waits outside this feature: DR-3 and DR-7 on AC-library's Belt-Slice-Done on #2999 (AC-l4 still waits on CC-u); DR-3 on metadata-more MD-d and MD-e, DR-6 on MD-e, DR-7 on MD-c (MD PRs #3545, #3569-#3582 open). DR-4 waits on DR-3; DR-8 on DR-7. Until those land, DR-5 is the only buildable DR task after DR-a.
 
 - 2026-10-20T16:44Z: macOS build-only runs for this feature have been queued since ~14:25Z (runner backlog); lead keeps waiting, no action needed from the supervisor unless the queue is stuck.
+- 2026-10-23: resumed by line lead act-1a16953af22-wvhu. The supervisor unparked this feature under contract-first waits (#4814): MD-a, metadata-more's contract slice, merged (run 39479914225), so the MD-c, MD-d and MD-e waits are met and get Wire lines. DR-6 and DR-u start now.
