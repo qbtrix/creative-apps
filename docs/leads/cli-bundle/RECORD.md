@@ -10,8 +10,8 @@ Next: wave 1 builders open the contract slice PR(s)
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | CB-a | BundleLayout.cliPath, AssistantConnect stubs, help catalog stubs, checks disabled | CB-1, CB-2 | MJ-CB | report-problem:RP-m (met) | no | 0 | open #4715 | - | - |
-| CB-u | Connect an AI Assistant sheet on the stubs; render budget | CB-5, CB-5b | XJ-CB | CB-a; RP-u (met) | yes | 0 | waiting | - | - |
-| CB-m | bodies + bundled signed afterglow (CB-3 supervisor merge) | CB-4, CB-3 | MJ-CB, XJ-CB | CB-a | no | 0 | waiting | - | - |
+| CB-u | Connect an AI Assistant sheet on the stubs; render budget | CB-5, CB-5b | XJ-CB | CB-a; RP-u (met) | yes | 0 | building | - | - |
+| CB-m | bodies + bundled signed afterglow (CB-3 supervisor merge) | CB-4, CB-3 | MJ-CB, XJ-CB | CB-a | no | 0 | building | - | - |
 | CB-z | Install Command-Line Tool; RJ-X62 on; built | CB-6, CB-7, CB-8 | XJ-CB, MJ-CB | CB-u, CB-m | yes | 0 | waiting | - | - |
 
 ## Tasks
@@ -19,10 +19,10 @@ Next: wave 1 builders open the contract slice PR(s)
 |---|---|---|---|---|---|---|---|
 | CB-1 | CB-a | 1 | cliPath, AssistantConnect stubs, disabled tests, C4 part | packet CB-1 (4 files) | compiles, disabled by name | - | open #4715 |
 | CB-2 | CB-a | 1 | help.connect-assistant + help.install-cli stubs, ids, MCPConfig provider | packet CB-2 (4 files) | specs list | - | open #4715 |
-| CB-5 | CB-u | 2 | Help item + AssistantConnectSheet; journey skipped | packet CB-5 (3 files) | XJ-CB | - | waiting |
-| CB-5b | CB-u | 2 | RenderBudgetConnectTests | 1 file | openSheetInTwoBodies | - | waiting |
-| CB-4 | CB-m | 2 | AssistantConnect + help bodies; tests on | packet CB-4 (5 files) | Mutate SuiteModel.AssistantConnect | - | waiting |
-| CB-3 | CB-m | 2 | bundle-apps copies and signs afterglow (supervisor merge) | scripts/bundle-apps, C4, job | macOS bundle | - | waiting |
+| CB-5 | CB-u | 2 | Help item + AssistantConnectSheet; journey skipped | packet CB-5 (3 files) | XJ-CB | - | building |
+| CB-5b | CB-u | 2 | RenderBudgetConnectTests | 1 file | openSheetInTwoBodies | - | building |
+| CB-4 | CB-m | 2 | AssistantConnect + help bodies; tests on | packet CB-4 (5 files) | Mutate SuiteModel.AssistantConnect | - | building |
+| CB-3 | CB-m | 2 | bundle-apps copies and signs afterglow (supervisor merge) | scripts/bundle-apps, C4, job | macOS bundle | - | building |
 | CB-6 | CB-z | 3 | Install Command-Line Tool | InstallCommandLineTool.swift, journey | XJ-CB | - | waiting |
 | CB-7 | CB-z | 4 | RJ-X62 on; suite.md 1.4 | 2 files | RJ-X62 | - | waiting |
 | CB-8 | CB-z | 4 | status built; feature-done | wave.json | waves render | - | waiting |
@@ -42,3 +42,4 @@ Next: wave 1 builders open the contract slice PR(s)
 
 - C4-only PR: suite-packaging description gains the CLI path and AssistantConnect, once #4715 merges.
 - `--bundle` flag in Arguments.swift: wire in CB-m (MCPConfig.bundle(flag:) already takes it).
+- CB-3 goes as its own PR on `lead/cli-bundle-CB-m-bundle` with `no-fast-lane` (protected scripts/bundle-apps; supervisor merges).
