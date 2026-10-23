@@ -25,3 +25,4 @@ utc	stage	event	ref	note
 2026-10-23T22:25Z	3	heartbeat	-	#4853 (AJ-k part 1) merged 21:41Z; #4863 stays needs-split behind #4846/#4834; #4834 #4867 wait for next batch
 2026-10-23T23:01Z	3	heartbeat	-	#4834 closed superseded; #4846 restacked on dev, fast-lane
 2026-10-23T23:24Z	3	heartbeat	-	no merges; #4846 #4867 fast-lane
+2026-10-23T23:47Z	3	heartbeat	-	no merges since 654fb36; lane batch 20261023215139 macOS red (bisecting, #4870 not ours); our wave 1 PRs wait on fast-lane, none needs-fix/needs-rebase; CI run 40037716897 on dev in progress
