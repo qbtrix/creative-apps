@@ -95,3 +95,4 @@ utc	stage	event	ref	note
 2026-10-23T07:21Z	check	FP-u critic panel started (clarity, mouse, taste, job; ui:true) on scoped flare run 39905307517 snapshots at 52c430c8 (full CI 39910511135 macOS still queued)
 2026-10-23T07:24Z	check	FP-u panel: 2 findings filed #4773 #4774 (no blocker); fix round 1 started; Belt-Contact-Sheet posted on #3519 (run 39905307517, gaps: #4012)
 2026-10-23T07:39Z	pr	FP-u fix round 1: PR #4775 (closes #4773 #4774), head 8ca619985, fast-lane; panel re-run (round 2) after it lands
+2026-10-23T07:41Z	heartbeat	#4775 waiting on lane macOS build
