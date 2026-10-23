@@ -2,9 +2,9 @@
 
 Issue: #3789 · Packet: docs/blueprints/library/features/share-sheet.md
 Run: act-1a1693fbf6d-ap2g · Session: claude/large-catalog-share-sheet-2tdm4i (earlier act-1a1648ae708-bncr, act-1a15df37b73-k199, act-1a15b98bc49-4lk9) · Started: 2026-10-20T23:00Z (resumed 2026-10-22T16:55Z)
-Stage: 3 wave 4 (SH-m done; SH-z #4612 merged with dev, re-gating)
+Stage: 3 wave 4 (SH-z #4612 open with fast-lane and feature-done, head de155da4, in the lane)
 Base: 8021b0f56a45a59540cd4ea0ff99651c5fb8dc2a (origin/dev)
-Next: #4612 passes scripts/ci --changed, gets its Head line and fast-lane back; after it merges and a green library or full run contains it, Belt-Slice-Done SH-z, Mac-Finish-Wanted SH-z, Belt-Contact-Sheet
+Next: after #4612 merges and a green library or full run contains it: Belt-Slice-Done SH-z, Mac-Finish-Wanted SH-z, Belt-Contact-Sheet
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: #4612 passes scripts/ci --changed, gets its Head line and fast-lane back; 
 | SH-a | sharing preset, share folder, ShareButton: the contract | SH-1, SH-2 | MJ-SH | - | yes | 0 | done #3809 (482f03c6) | 39571804700 | wanted |
 | SH-u | Share in the toolbar and File menu, journey | SH-4, SH-4b | LJ-SH | SH-a | yes | 1 | done #3814 | 39601343733 | wanted; finisher PR #4432 open |
 | SH-m | prepare writes the files, launch cleanup, command, RJ-L55 | SH-3, SH-3c | MJ-SH | SH-a, file-flow:LF-m, catalog-backup:BK-m | no | 0 | done #4592 (567d03bb) | 39957675362 | - |
-| SH-z | live wiring, journey on, built | SH-5, SH-6 | LJ-SH, MJ-SH | SH-u, SH-m | yes | 0 | building (#4612, dev merged in, 11 files) | - | - |
+| SH-z | live wiring, journey on, built | SH-5, SH-6 | LJ-SH, MJ-SH | SH-u, SH-m | yes | 0 | in lane (#4612, 113 lines, 11 files) | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -41,6 +41,8 @@ Next: #4612 passes scripts/ci --changed, gets its Head line and fast-lane back; 
 - Belt's nudges name lead/library-share-sheet, so the record is mirrored there at docs/leads/library-share-sheet/ as well.
 
 ## Open
+- 2026-10-23T15:44Z: #4612 open, labels fast-lane and feature-done, head de155da4; waits on its batch's macOS gate.
+- Belt reads lead/library-share-sheet; this record is mirrored there at docs/leads/library-share-sheet/ from 2026-10-23T15:44Z on.
 - 2026-10-23: #4612 had grown to 427 lines / 25 files because it was stacked on #4592; the lane dropped fast-lane and the sentinel asked for needs-split. After merging origin/dev (conflicts in LibraryApp.swift, kept both sides, and the CLI golden list, took dev's) the diff is 113 lines / 11 files, so no split: the label goes and fast-lane comes back once the gate passes.
 - Mac finish PR #4432 (SH-u, label mac-finish) edits Sources/LibraryApp/LibraryShareItems.swift, which SH-5 also owns; SH-5 starts after it merges or merges dev over it.
 - dev-red #3856 was open on 2026-10-21 (others' merges); not ours.
