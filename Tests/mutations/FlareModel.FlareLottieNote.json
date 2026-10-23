@@ -54,5 +54,12 @@
     "find": "guard importNote.count > max + 1 else",
     "replace": "guard importNote.count > max else",
     "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".dismissRedraws: == ignores the note, so Dismiss never redraws the window",
+    "file": "Sources/FlareModel/FlareWorkspace.swift",
+    "find": " && lhs.importNote == rhs.importNote",
+    "replace": "",
+    "tests": "FlareLottieNoteTests"
   }
 ]

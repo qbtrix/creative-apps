@@ -35,8 +35,10 @@ private let skipped = [
     @Test func dismissAndTheNextLoadClearTheNote() throws {
         var workspace = FlareWorkspace(services: .fake())
         workspace.finishLottieOpen(.success((FlareFixtures.bounce, skipped)))
+        let noted = workspace
         workspace.dismissImportNote()
         #expect(workspace.importNote == nil)
+        #expect(workspace != noted, "== must see the note go, or the window's @State skips the redraw and it stays up")
         #expect(workspace.importNoteRows.isEmpty)
         #expect(workspace.document == FlareFixtures.bounce, "Dismiss closes the note, not the document")
         workspace.finishLottieOpen(.success((FlareFixtures.bounce, skipped)))
