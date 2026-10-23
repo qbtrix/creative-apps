@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-23T03:12Z	3	heartbeat	-	wave 1 building
 2026-10-23T03:35Z	3	pr-opened	#4710	EM-a fast-lane, head 4d4a259
 2026-10-23T03:41Z	4	stage-start	-	wave 2: EM-flare-halo, EM-photo-design building
+2026-10-23T04:03Z	-	heartbeat	EM-a	#4710 lane macOS build-only run 39896014966 in progress; EM-flare-halo, EM-photo-design building
