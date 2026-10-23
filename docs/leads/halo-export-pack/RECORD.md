@@ -1,10 +1,10 @@
 # export-pack lead record
 
-Issue: #4509 (was #3472) · Packet: docs/blueprints/halo/features/export-pack.md
-Run: act-1a16474bd28-v3ht · Session: claude/halo-feature-lead-3yp4w1 · Started: 2026-10-22T16:00Z (took over from earlier runs)
-Stage: 3 wave 1 (HX-a building, stacked on PH-a)
-Base: 2cc149f57 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: HX-a PR opens when PH-a #4426 merges; then HX-m and HX-u stacked on HX-a
+Issue: #3472 (runs before used #4509) · Packet: docs/blueprints/halo/features/export-pack.md
+Run: act-1a16958d5fe-8dxu · Started: 2026-10-23T15:26:44Z (took over from act-1a16474bd28-v3ht)
+Stage: 3 wave 1 (HX-a rebuilt on dev, PR opening)
+Base: 721168a8 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
+Next: HX-a PR to dev; then HX-u and HX-m stacked on HX-a
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -39,3 +39,5 @@ Next: HX-a PR opens when PH-a #4426 merges; then HX-m and HX-u stacked on HX-a
 - 2026-10-21T13:42:11Z check-in: still blocked; placed-images is at Stage 0, PH-a waits on HS-a (#3676), HK-a (key-editing) and PL-a.
 - 2026-10-22T16:37:55Z: New run act-1a16474bd28-v3ht for #4509. Cross-line waits are met on dev 7e9f260: ExportRules/keepsAlpha (SuiteKernel/Export/ExportOptions.swift), MovieCodec/MovieSettings/.prores4444 (SuiteModel/Values/Media.swift), media.movie (MediaEncoding.swift, FakeMedia.swift), SuiteShell/Media/MovieWriter.swift. gradient-fill is built. PH-a #4426 is open (fast-lane, clean, waits on its macOS build).
 - 2026-10-22T16:37:55Z: Decision: HX-a builds stacked on lead/halo-placed-images-PH-a (both touch HaloDocumentValues.swift, PH-a is A/C first); its PR opens after PH-a merges, as branch lead/halo-export-pack-HX-a.
+- 2026-10-23T15:26:44Z: run act-1a16958d5fe-8dxu for #3472. The placed-images waits (PH-a, PH-u) are on dev, so HX-a is rebuilt on origin/dev 721168a8 from lead/halo-*-HX-a, its test commit first.
+- Wire: HX-a's `HaloRenderSettings.codec`/`alpha` and `choosing(...)` are what HX-3 (plan rules) and HX-4 (media.movie settings) read.
