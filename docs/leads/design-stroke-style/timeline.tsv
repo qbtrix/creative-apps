@@ -111,3 +111,4 @@ time	kind	note
 2026-10-23T20:26Z	DK-m	critic	#4888 #4916	critic round 2: #4919 #4920 #4940 #4941 fixes hold at 9a65ac65 (59 tests pass); new #4989 (canvas drops stroke alpha, SVG writes stroke-opacity), sent to the #4864 fixer since the canvas code is DK-u
 2026-10-23T20:36Z	DK-u	fix-round-1	#4864	fixer on #4925-#4928 and #4989 (stroke alpha); DK-7 #4916 at 9a65ac65 holds; DK-z held (>5 findings)
 2026-10-23T20:58Z	DK-u	heartbeat	#4864	fixer still on #4925-#4928 #4989 (head 97439dd8); no slice PR merged; DK-z held
+2026-10-23T21:20Z	DK-u	heartbeat	#4864	fixer still running, head 97439dd8; status asked; DK-z held
