@@ -14,11 +14,13 @@ struct GalleryCropPage: View {
     // view-static: main-actor
     static var bodyRuns = 0
     #endif
-    @State private var aspect: CropAspect, orientation: CropOrientation
+    @State private var aspect: CropAspect
+    @State private var orientation: CropOrientation
     @State private var log: [String] = []
 
     init(aspect: CropAspect = .free, orientation: CropOrientation = .landscape) {
-        (_aspect, _orientation) = (State(initialValue: aspect), State(initialValue: orientation))
+        _aspect = State(initialValue: aspect)
+        _orientation = State(initialValue: orientation)
     }
 
     var body: some View {

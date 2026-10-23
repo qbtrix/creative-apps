@@ -14,7 +14,8 @@ public struct CropAspectPicker: View {
 
     private let aspect: CropAspect, orientation: CropOrientation, onPick: @MainActor (CropPick) -> Void
     @State private var editingCustom = false
-    @State private var width = "", height = ""
+    @State private var width = ""
+    @State private var height = ""
 
     public init(aspect: CropAspect, orientation: CropOrientation, onPick: @escaping @MainActor (CropPick) -> Void) {
         (self.aspect, self.orientation, self.onPick) = (aspect, orientation, onPick)
