@@ -59,3 +59,5 @@ utc	stage	event	ref	note
 2026-10-23T08:01Z	merge	#4759 merged as 8fd75123 (feature-done); build 39909689835 success	FP-z	awaiting full dev run
 2026-10-23T08:07Z	ci	full CI 39921950077 queued on 8fd75123 (and Linux check 39921983128)	FP-z	waiting on Linux job, not blocking
 2026-10-23T08:33Z	fix-round	#4783 macOS build 39922307100 red on FlareOpenQueue (dev break from #4708, fixed by #4771); merged origin/dev into #4781 (3b9fe2e1) and #4783 (9a072f77), ci --changed PASS	FP-u	new lane builds
+2026-10-23T08:36Z	slice-done	Belt-Slice-Done FP-m and FP-z on run 39921983128 (Linux green on 8fd75123; full run 39921950077 cancelled)	FP-m,FP-z	-
+2026-10-23T08:36Z	contact-sheet	Belt-Contact-Sheet posted, run 39921983128	all	FP-u round 1 still in lane
