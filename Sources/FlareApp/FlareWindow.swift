@@ -95,6 +95,7 @@ struct FlareWindow: View {
         .modifier(FlareNewSheet(presented: $presented, perform: perform))
         .modifier(FlareExportSheetAdapter(model: model, perform: perform))
         .modifier(FlareOpenStatus(model: model))
+        .modifier(FlareOpenQueueTaker(open: { open($0) }))
         .modifier(FlareAutosaveAdapter(model: model, restore: { try model.restoreRecovery($0) }))
         .focusedSceneValue(
             \.flareMenu,
