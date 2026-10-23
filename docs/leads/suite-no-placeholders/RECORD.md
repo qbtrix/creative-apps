@@ -9,7 +9,7 @@ Next: wave 1 builders open the contract slice PR(s)
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| NP-a | ratchet test + launcher hides Check for Updates and Assets items | NP-1, NP-2 | MJ-NP, XJ-NP | report-problem:RP-a (met) | yes | 0 | building | - | - |
+| NP-a | ratchet test + launcher hides Check for Updates and Assets items | NP-1, NP-2 | MJ-NP, XJ-NP | report-problem:RP-a (met) | yes | 0 | open #4717 | - | - |
 | NP-flare | Flare beta.2 items hidden, Library tab hidden, RJ-X64, built | NP-3, NP-4, NP-5, NP-6 | FJ-NP, XJ-NP, MJ-NP | NP-a; CS-flare (met); flare menu hand-offs | yes | 0 | waiting | - | - |
 
 ## Tasks
@@ -35,3 +35,4 @@ Next: wave 1 builders open the contract slice PR(s)
 - NP-flare waits on svg-place PF-u (#4297, needs-fix): it edits `FlareCommands.swift` (the importExport group) and `FlareWindow.swift`; NP-flare edits `FlareCommands.swift` and `FlareWindow+View.swift`. PF-m (#4295) touches only FlareModel place files, no overlap. If #4297 is still open when NP-a merges, NP-flare goes ahead and its PR names #4297 so its lead knows.
 
 ## Open
+- NP-a opened as #4717 (11 files, +380/-17; three existing tests that pinned the stubs changed too). Gap found: the ratchet matches only `Button(`, so the launcher's `MenuCommand` placeholders in LauncherCommands+Home.swift (Clear Menu, Show Sidebar, Show Inspector) slip past it. NP-flare's builder extends the scan to `MenuCommand(` disabled entries and baselines them, so the ratchet covers what NP-1 promised.
