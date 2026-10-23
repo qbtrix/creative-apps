@@ -50,4 +50,17 @@ import Testing
         #expect(AIAccessPrompt.status(.deny) == "Denied")
         #expect(AIAccessPrompt.menuTitle == "AI Access…")
     }
+
+    /// The empty list says what an AI assistant is doing on the list and how it gets there (#4805).
+    @Test func emptyMessageExplainsHowClientsAppear() {
+        #expect(AIAccessPrompt.emptyTitle == "No AI Assistants")
+        #expect(AIAccessPrompt.emptyMessage.contains("AI assistant"))
+        #expect(AIAccessPrompt.emptyMessage.contains(AIAccessPrompt.alwaysAllow))
+        #expect(AIAccessPrompt.emptyMessage.contains(AIAccessPrompt.revoke.lowercased()))
+    }
+
+    /// Window > AI Access… carries a symbol like the system items around it (#4813).
+    @Test func menuItemHasASymbol() {
+        #expect(AIAccessPrompt.menuSymbol == "sparkles")
+    }
 }

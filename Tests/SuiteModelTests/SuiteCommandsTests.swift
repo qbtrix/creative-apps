@@ -14,6 +14,12 @@ import Testing
         #expect(!text.contains("notConnected("))
     }
 
+    /// Switch To and AI Access… carry their symbols, so their titles line up with the system's items (#4813).
+    @Test func windowItemsCarryTheirSymbols() throws {
+        #expect(try source("Sources/SuiteShell/SuiteCommands.swift").contains("Menu(\"Switch To\", systemImage: SwitchMenu.menuSymbol)"))
+        #expect(try source("Sources/SuiteShell/AIAccessCommands.swift").contains("systemImage: AIAccessPrompt.menuSymbol"))
+    }
+
     @Test func noOtherFileClaimsAControlCommandShortcut() throws {
         let root = try #require(packageRoot())
         let fm = FileManager.default

@@ -39,4 +39,9 @@ import Testing
         #expect(design?.title == "Design")
         #expect(design?.enabled == true)
     }
+
+    /// Window > Switch To carries a symbol like the system items around it (#4813).
+    @Test func menuHasASymbol() {
+        #expect(SwitchMenu.menuSymbol == "square.grid.2x2")
+    }
 }
