@@ -119,8 +119,14 @@ struct LibraryWindow: View {
         .onChange(of: model.catalogState) { _, _ in importAreaCatalogReady() }
         .onChange(of: model.collectionsRevision) { _, _ in filtersAreaChanged(areas.filters) }
         // The live command channel (editor-menus EM-7) reads this window's catalog and lands a result in it.
-        .onAppear { LibraryShell.window = ({ model }, { model.takeLive($0) }) }
-        .onDisappear { LibraryShell.window = nil }
+        .onAppear {
+            LibraryShell.read = { model }
+            LibraryShell.take = { model.takeLive($0) }
+        }
+        .onDisappear {
+            LibraryShell.read = nil
+            LibraryShell.take = nil
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
             persistAreaFlush()
             filtersAreaFlush(areas.filters)

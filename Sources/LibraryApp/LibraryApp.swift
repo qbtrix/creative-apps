@@ -34,14 +34,15 @@ import SwiftUI
     /// The hand-off host; the catalog's file-flow answers don't depend on its photos until LF-3.
     static let host = LibraryCatalog(services: .fake())
 
-    /// How to read the window's catalog and land a live result in it (LibraryWindow keeps it current).
-    static var window: (read: @MainActor () -> LibraryCatalog, take: @MainActor (LibraryHeadless) -> Void)?
+    /// How to read the window's catalog, and land a live result in it (LibraryWindow keeps both current).
+    static var read: (@MainActor () -> LibraryCatalog)?
+    static var take: (@MainActor (LibraryHeadless) -> Void)?
 
     /// Live commands on the window's catalog; a client runs only on a grant it already holds.
     static let live = LiveCommandChannel(
         app: SuiteApp.library.displayName,
-        document: { () -> LibraryHeadless? in window.map { LibraryHeadless(catalog: $0.read()) } },
-        apply: { (result: LibraryHeadless) in window?.take(result) },
+        document: { () -> LibraryHeadless? in read.map { LibraryHeadless(catalog: $0()) } },
+        apply: { (result: LibraryHeadless) in take?(result) },
         ask: { await AIAccessCenter.shared.ask($0) })
 }
 
