@@ -4,7 +4,7 @@ Issue: #3758 (relaunch #4531) · Packet: docs/blueprints/suiteui/features/brush-
 Run: act-1a16958d72f-a4mg · Session: cloud line lead (line:suiteui; with text-style, brush-keys, document-setup) · Started: 2026-10-23T15:25Z
 Stage: 3 wave 1 (combined waves across the three features)
 Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (dev)
-Next: wave 1 builds BK-u; wave 2 BK-photo, BK-design, BK-flare stacked; then BK-z
+Next: wave 1 building BK-u (wf_1dce2172-bd9); on return: check PRs, then stack wave 2
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
