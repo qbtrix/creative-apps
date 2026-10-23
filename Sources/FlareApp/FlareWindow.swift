@@ -139,7 +139,7 @@ struct FlareWindow: View {
 }
 
 /// The window's content: the stage over the timeline while a document is
-/// open, under the import note after a Lottie open (FlareImportNote), else the empty state whose one action is New Animation (Open is the
+/// open, under the import note after a Lottie open (FlareImportNote.swift), else the empty state whose one action is New Animation (Open is the
 /// toolbar's). New Animation is `.file(.new)` like the toolbar's New, so it
 /// takes `emptyNewIdentifier` to keep `suite.controls` free of duplicates.
 struct FlareCanvas: View {
@@ -164,7 +164,7 @@ struct FlareCanvas: View {
     var body: some View {
         if model.document != nil {
             VStack(spacing: 0) {
-                FlareImportNote(rows: model.importNoteRows, onDismiss: onDismissNote)
+                FlareImportNoteAdapter(rows: model.importNoteRows, onDismiss: onDismissNote)
                 FlareStage(
                     model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
                     help: help, onKey: onKey, measuredFPS: driver?.measuredFPS, onFit: onFit)
