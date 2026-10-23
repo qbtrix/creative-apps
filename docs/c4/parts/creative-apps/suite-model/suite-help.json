@@ -5,7 +5,8 @@
   "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
   "paths": [
     "Sources/SuiteModel/Help/",
-    "Sources/AfterGlowCLICore/HelpReports.swift"
+    "Sources/AfterGlowCLICore/HelpReports.swift",
+    "Sources/AfterGlowCLICore/MCPConfig.swift"
   ],
   "order": 215
 }
