@@ -86,3 +86,4 @@ utc	stage	event	ref	note
 04:50Z	wave	FP-z PR #4753 opened (fast-lane, feature-done), head 510e4190
 04:51Z	check	dev Linux check 39901619047 red only on Halo command-path baseline (HaloTransport.swift:131, #3856); FP-u/FP-m Belt-Slice-Done keep waiting
 05:06Z	check	#4753 in lane (macOS build dispatched); dev Linux check 39903448194 on 673cd767f running; no open pen-paths findings
+05:27Z	check	dev Linux check 39903448194 red (Halo baseline, #3856); next 39905310797 on 52c430c85 running; #4753 in lane
