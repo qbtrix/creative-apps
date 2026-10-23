@@ -1,4 +1,4 @@
-// FlarePlace+Menu.swift (svg-place PF-3): File > Place… is on when `place.image` can run, else off with its reason.
+// FlarePlace+Menu.swift (svg-place PF-3): File > Place… (built on `placeMenuSpec`) is on when `place.image` can run.
 // A place (menu or drop) runs each file centred; the status line shows its report (PF-5) or refusal. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -15,6 +15,14 @@ extension FlareWorkspace {
 
     /// Why File > Place… can't run now: `place.image`'s reason; nil when it can.
     public var placeMenuHelp: String? { Self.placeCatalog.availability("place.image", on: self).why }
+
+    /// File > Place…'s spec over the window's `placeMenuHelp`: on exactly while it is nil; the window does the place.
+    public static let placeMenuSpec: CommandSpec<String?> = .typed(
+        "place.image", title: "Place…", summary: placeMenuSummary, kind: .edit, params: JSONValue.self,
+        example: .object([:]), availability: { $0.map(Availability.unavailable) ?? .available }
+    ) { (_: inout String?, _: JSONValue) throws -> JSONValue in
+        throw CatalogError.unavailable(id: "place.image", why: "Run Place… from its window.")
+    }
 
     /// Runs `place.image` on each file, centred in the scene. The status line then reads the place's report, or
     /// the first refusal, and the files after a refusal aren't placed.

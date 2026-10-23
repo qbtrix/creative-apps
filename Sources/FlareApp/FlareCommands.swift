@@ -150,11 +150,8 @@ struct FlareCommands: Commands {
     @CommandsBuilder private var suiteFileMenu: some Commands {
         SuiteFileCommands(app: .flare, bridge: FlareShell.bridge, document: menu.document)
         CommandGroup(replacing: .importExport) {
-            MenuCommand(
-                "Place…", shortcut: KeyboardShortcut("p", modifiers: [.command, .shift]),
-                help: menu.placeHelp.map { "Place…: \($0)" } ?? FlareWorkspace.placeMenuSummary,
-                isEnabled: menu.placeHelp == nil
-            ) { menu.place() }
+            MenuCommand(FlareWorkspace.placeMenuSpec, on: menu.placeHelp,
+                        shortcut: KeyboardShortcut("p", modifiers: [.command, .shift])) { menu.place() }
         }
         CommandGroup(replacing: .printItem) {}
     }

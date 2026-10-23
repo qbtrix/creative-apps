@@ -27,6 +27,13 @@ import Testing
         #expect(blank().placeMenuHelp == nil)
     }
 
+    @Test func placeMenuSpecIsOnExactlyWithoutAReason() {
+        let spec = FlareWorkspace.placeMenuSpec
+        #expect(spec.id == "place.image" && spec.title == "Place…" && spec.summary == FlareWorkspace.placeMenuSummary)
+        #expect(spec.availability(nil).why == nil)
+        #expect(spec.availability(FlareLayerError.noDocument.message).why == FlareLayerError.noDocument.message)
+    }
+
     @Test func noAnimationRefusesWithItsReason() {
         var w = FlareWorkspace(services: .built)
         w.place([(name: "two-groups.svg", data: twoGroups)])
