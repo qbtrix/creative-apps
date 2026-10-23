@@ -144,3 +144,4 @@ utc	stage	event	ref	note
 2026-10-23T05:32Z	parked	#3477 still waiting-on-prereq; no journeys run yet contains #4707 (0546a6049); no new Photo finding
 2026-10-23T06:07Z	parked	#3477 still waiting-on-prereq; no Photo/full journeys run past 0546a6049 yet; no new Photo finding
 2026-10-23T06:38Z	parked	#3477 still waiting-on-prereq; photo journeys 39910105470 (fef84231b) queued; no new Photo finding
+2026-10-23T07:21Z	parked	#3477 still waiting-on-prereq; photo journeys 39910105470 (has #4707) still queued; #4770 triage: PR #4772 fixes Photo finding #4700 (recovery journey stamp)
