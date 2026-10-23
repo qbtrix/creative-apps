@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-23T20:57Z	heartbeat	lane batch 20261023204921 (#4841-#4862) in flight, 58 ready PRs queued; #4899 #4948 #4960 #4962 eligible; #4838 awaits its lane Linux run; TC-2 not on dev
 2026-10-23T21:11Z	heartbeat	batch 20261023204921 macOS gate running; our PRs queued, none merged
 2026-10-23T21:22Z	heartbeat	lane batch 20261023204921 macOS gate still running; our PRs queued
+2026-10-23T21:33Z	heartbeat	scoped library run 40018964074 green on 61c481df (none of our open PRs in it); lane macOS gate still running
