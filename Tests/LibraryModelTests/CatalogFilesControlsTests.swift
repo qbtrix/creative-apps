@@ -1,6 +1,4 @@
-// CatalogFilesControlsTests.swift (catalog-files LC-3): what the import options, the remove confirm and the
-// missing badge read from the Model on the LC-1 stubs: the counts, the confirm's words, Locate…'s photo and the
-// file commands' reason. Linux and macOS.
+// CatalogFilesControlsTests.swift (catalog-files LC-3): what the file controls read from the Model.
 @testable import LibraryModel
 import SuiteKernel
 import Testing
