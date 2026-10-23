@@ -46,3 +46,4 @@ time	event	task	note
 2026-10-23T16:33:31Z	poll	blocked	XP-a not done (XP-3 ExportPick.metadata not on dev 35a0b5e7); poll 2/3
 2026-10-23T17:32:35Z	question	supervisor: build on stub or park (#3478 comment 6370841659)
 2026-10-23T17:44:50Z	heartbeat	XP-3 ExportPick.metadata not on dev 8a54f64c; supervisor answer pending on #3478
+2026-10-23T17:58:33Z	heartbeat	XP-3 not on dev 98589662; no supervisor answer on #3478 yet
