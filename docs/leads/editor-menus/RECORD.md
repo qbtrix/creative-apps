@@ -4,7 +4,7 @@ Issue: #3774 · Packet: docs/blueprints/suite/features/editor-menus.md
 Run: act-1a16a37a3ed-0kyn (relaunch; earlier act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
 Stage: 4 fixes
 Base: 35a0b5e7e9520a764f3eabf02968a453082a87cc (main; PRs target dev)
-Next: EM-flare-halo waits on #4817, #4818 and the #4830 fix (lead/editor-menus-4830, builder running) to merge, then a green suite run
+Next: EM-flare-halo waits on #4817, #4818 (in lane) and #4988 (fixes #4830, fast-lane) to merge, then a green suite or full run on main holding them; then Belt-Slice-Done EM-flare-halo and the contact sheet
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
