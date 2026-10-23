@@ -1,7 +1,7 @@
 // FlareLottieNoteTests.swift: the import note a Lottie open leaves above the stage (FlareLottieNote.swift), feature
 // lottie-open LO-4 (docs/blueprints/flare/features/lottie-open.md): a landed open shows one row per skipped part (or
 // that nothing was skipped), opens untitled, Dismiss and the next load clear it, a refused open keeps the open
-// document and says why; a .json path routes to the Lottie open, from the panel or a drop. Runs on Linux and macOS.
+// document and says why; a long list shows its first few and counts the rest; a .json path routes to the Lottie open, from the panel or a drop. Runs on Linux and macOS.
 import FlareCore
 @testable import FlareModel
 import SuiteKernel
@@ -60,6 +60,20 @@ private let skipped = [
         #expect(FlareWorkspace.opensAsLottie("/tmp/Bounce.JSON"))
         #expect(!FlareWorkspace.opensAsLottie("/tmp/bounce.flare"))
         #expect(!FlareWorkspace.opensAsLottie("/tmp/json"))
+    }
+
+    @Test func aLongSkipListShowsTheFirstFewAndCountsTheRest() {
+        var workspace = FlareWorkspace(services: .fake())
+        let many = (1...12).map { "The image \"Photo \($0)\" isn't supported yet and was left out." }
+        workspace.finishLottieOpen(.success((FlareFixtures.bounce, many)))
+        let shown = FlareWorkspace.importNoteMaxRows
+        #expect(workspace.importNote == many, "the Model keeps every skipped part")
+        #expect(workspace.importNoteRows.count == shown + 1, "the note grows with the file and pushes the stage down")
+        #expect(Array(workspace.importNoteRows.prefix(shown)) == Array(many.prefix(shown)))
+        #expect(workspace.importNoteRows.last == "\(many.count - shown) more parts were left out.")
+        let exact = Array(many.prefix(shown + 1))
+        workspace.finishLottieOpen(.success((FlareFixtures.bounce, exact)))
+        #expect(workspace.importNoteRows == exact, "one extra part shows as itself, not as \"1 more\"")
     }
 
     @Test func aDroppedJSONRoutesToTheLottieOpenAndTheRestToTheBridge() {
