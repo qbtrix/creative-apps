@@ -22,3 +22,4 @@
 2026-10-23T16:39Z	3	heartbeat	LG-model	#4847 clean, queued (lane last merged #4796 15:47Z, no dev-red); no findings; LG-grid blocked: shared-thumbnails at ST-a (#4840 open), ST-m not started
 2026-10-23T17:01Z	3	heartbeat	LG-model	#4847 clean, Head marker current, queued (no lane merge since 15:47Z, no dev-red); no findings; ST-a #4840 open, ST-m not started
 2026-10-23T17:23Z	3	heartbeat	LG-model	#4847 clean, queued (lane active: Linux checks on other PRs; last merge 15:47Z; no dev-red); no findings; ST-a #4840 open, ST-m not started
+2026-10-23T17:45Z	3	heartbeat	LG-model	#4847 clean, queued (lane merged #4612, #4816 at 17:36Z); no findings; ST-a #4840 needs-fix, ST-m not started
