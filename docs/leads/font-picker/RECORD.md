@@ -4,7 +4,7 @@ Issue: #3730 (earlier run used duplicate #4507) · Packet: docs/blueprints/suite
 Run: act-1a166b69fbd-mmos · Session: claude/font-picker-lead-5om1cy · Started: 2026-10-22T16:36Z (this run resumed 2026-10-23T03:10Z)
 Stage: 5 contact sheet posted (run 39921983128); FP-u fix round 1 in lane
 Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a (origin/dev)
-Next: scoped suiteui run on a dev SHA containing #4781 → FP-u round 2 review (last); leftovers become gap
+Next: scoped suiteui run 39946282747 (28e3a67d, contains #4781 and #4783) completes → download snapshots → FP-u round 2 review (last); leftovers become gap
 
 ## Slices
 

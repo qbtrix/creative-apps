@@ -65,3 +65,4 @@ utc	stage	event	ref	note
 2026-10-23T10:03Z	lane	#4781 macOS build 39925347474 success, mergeable clean; awaiting lane sweep	FP-u	-
 2026-10-23T10:21Z	merge	#4781 merged (Size row whole points + 1...200 bar, fixes #4778 #4779); FP-u round 1 all merged	FP-u	round 2 on next scoped suiteui run
 2026-10-23T10:52Z	ci	no scoped suiteui/full macOS run contains 0899b218 yet (scoped suiteui 39932890127 on 89b66fee queued since 09:34; Linux 39939121278 on 28e3a67d green)	FP-u	round 2 waits on screens
+2026-10-23T11:54Z	ci	scoped suiteui 39946282747 on 28e3a67d (contains 0899b218 + 138495f5) dispatched, still queued (runner backlog)	FP-u	round 2 review on its snapshots once complete
