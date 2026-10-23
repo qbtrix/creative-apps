@@ -67,3 +67,4 @@ utc	stage	event	ref	note
 2026-10-23T18:10Z	check	editor-menus	heartbeat: journeys 39972233358 in_progress; #4817 head now 7f787765a (needs-fix pending lane re-check); #4818 in lane; #4741 open (supervisor)	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
 2026-10-23T18:26Z	check	editor-menus	heartbeat: journeys 39972233358 in_progress; #4817 needs-fix dropped at 7f787765a, #4818 in lane; #4741 open (supervisor)	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
 2026-10-23T18:43Z	check	editor-menus	heartbeat: journeys 39972233358 in_progress; #4817 #4818 clean in lane; #4741 open (no-fast-lane,needs-split)	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T19:03Z	check	editor-menus	heartbeat: journeys 39972233358 still in_progress (macOS journeys since 17:49Z); #4817 #4818 clean in lane (lane run active); #4741 open	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
