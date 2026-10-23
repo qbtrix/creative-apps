@@ -46,3 +46,4 @@ utc	stage	event	ref	note
 2026-10-23T20:09Z	heartbeat	waiting on lane
 2026-10-23T20:21Z	heartbeat	lane bisecting batch 20261023192105; no PR merged yet; TC-2 not on dev
 2026-10-23T20:33Z	heartbeat	lane bisect: probe -1 (#4818, not ours) red on Linux; our PRs wait for the next batch; TC-2 not on dev
+2026-10-23T20:44Z	heartbeat	bisect ended on #4818 (not ours); our PRs wait for the next batch; TC-2 not on dev
