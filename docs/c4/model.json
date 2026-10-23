@@ -28,7 +28,7 @@
               {
                 "id": "suiteui-sources",
                 "name": "SuiteUI sources",
-                "description": "The shared design system (Sources/SuiteUI, linking SuiteModel for SuiteApp): spacing, radius, size, type and color tokens; Liquid Glass applied in one snapshot-aware place (Glass) and GlassPanel; the SuiteWindow shell (sidebar, content, inspector) with SidebarSection and SidebarRow; ToolbarGroup palette actions; the content layer (CanvasSurface, SurfaceCard, EmptyStateView, ViewerStatusBar, BusyNote for open, save and import progress, and TransportCapsule, the shared transport over TransportStepping); the editor-kernel chrome (SuiteExportSheet, SuiteStrokePacer, SuitePointerPressure, BrushCursorMark, and ToolKeys, the one tool-letter lookup and the one map from AppKit modifier flags to KeyModifiers); the editor shell after the Ripple editor (EditorShell, EditorTopBar and its bar items, the docked ToolbarGroup rail, CanvasViewport with its Ruler, optional checkerboard, ZoomMath clamped zoom and fit with SuiteCanvasNavigating, the live CanvasNavigating over it, SuiteHandleGeometry, the live HandleGeometryProviding over the kernel's BoxMath and HandleHit, and CanvasMarks with SelectionHandlesEditor, the selection box whose handles resize and rotate it, SegmentedTabs and the ColorWell hex row, with the eyedropper's EyedropperButton, SampleLoupe and SampleSizeChips); pro inspector parts (InspectorHeader, InspectorRows, ScrubField and NumericInput number entry); the Studio easing parts (CurveEditor, StudioScrubRow, ChoiceChips); ShapeToolOptions, the shape tool's kind chips and per-kind rows with their range help; AppMark, the one view that draws an app's mark (icon, glyph or line style) from AppMarkArt, path data scripts/render-marks generates from Bundle/Marks; ThumbnailGrid with its selection math; HistoryPanel, the one History panel over the kernel's HistoryListing, and the autosaveRecovery modifier over SuiteModel's RecoveryFolder (autosave-history); StrokeEditor, the one stroke editor, which sends the kernel's StrokeIntents and never edits a document (stroke-style); and TimelineStrip with its frame mapping, shared by Flare and Halo, with TimelineLaneLayers, the rules of its AppKit lanes renderer (which lanes redraw from an Equatable diff, a layer frame per lane, a press routed to the lane classification); MenuCommand, the one menu item, built from a SuiteKernel CommandSpec (MenuCommand+Catalog) so its title, enabled state and why-not help come from the app's command catalog; SuiteGallery, the component gallery the journeys drive, with a command-catalog page over the kernel's FakeCanvasDocument; and PathEditOverlay with PenTool, the Pen and point editor's overlay (a placeholder drawing the path only, on a local contour stand-in until the kernel's path types land). HistogramView (a ToneHistogram's bins in the field well with shadow and highlight clipping markers), shared by Library's develop panel and Photo's Levels. UnsavedGuard is the one unsaved-changes asker: the unsavedChangesGuard modifier and UnsavedGuard.proceed show the kernel's UnsavedPrompt as a Save, Don't Save or Cancel sheet before a dirty window closes, its document is replaced or the app quits (adopt-kernel-unsaved-prompt).",
+                "description": "The shared design system (Sources/SuiteUI, linking SuiteModel for SuiteApp): spacing, radius, size, type and color tokens; Liquid Glass applied in one snapshot-aware place (Glass) and GlassPanel; the SuiteWindow shell (sidebar, content, inspector) with SidebarSection and SidebarRow; ToolbarGroup palette actions; the content layer (CanvasSurface, SurfaceCard, EmptyStateView, ViewerStatusBar, BusyNote for open, save and import progress, and TransportCapsule, the shared transport over TransportStepping); the editor-kernel chrome (SuiteExportSheet, SuiteStrokePacer, SuitePointerPressure, BrushCursorMark, and ToolKeys, the one tool-letter lookup and the one map from AppKit modifier flags to KeyModifiers); the editor shell after the Ripple editor (EditorShell, EditorTopBar and its bar items, the docked ToolbarGroup rail, CanvasViewport with its Ruler, optional checkerboard, ZoomMath clamped zoom and fit with SuiteCanvasNavigating, the live CanvasNavigating over it, SuiteHandleGeometry, the live HandleGeometryProviding over the kernel's BoxMath and HandleHit, and CanvasMarks with SelectionHandlesEditor, the selection box whose handles resize and rotate it, SegmentedTabs and the ColorWell hex row, with the eyedropper's EyedropperButton, SampleLoupe and SampleSizeChips); pro inspector parts (InspectorHeader, InspectorRows, ScrubField and NumericInput number entry); the Studio easing parts (CurveEditor, StudioScrubRow, ChoiceChips); ShapeToolOptions, the shape tool's kind chips and per-kind rows with their range help; AppMark, the one view that draws an app's mark (icon, glyph or line style) from AppMarkArt, path data scripts/render-marks generates from Bundle/Marks; ThumbnailGrid with its selection math; HistoryPanel, the one History panel over the kernel's HistoryListing, and the autosaveRecovery modifier over SuiteModel's RecoveryFolder (autosave-history); StrokeEditor, the one stroke editor, which sends the kernel's StrokeIntents and never edits a document (stroke-style); and TimelineStrip with its frame mapping, shared by Flare and Halo, with TimelineLaneLayers, the rules of its AppKit lanes renderer (which lanes redraw from an Equatable diff, a layer frame per lane, a press routed to the lane classification); MenuCommand, the one menu item, built from a SuiteKernel CommandSpec (MenuCommand+Catalog) so its title, enabled state and why-not help come from the app's command catalog; SuiteGallery, the component gallery the journeys drive, with a command-catalog page over the kernel's FakeCanvasDocument; and PathEditOverlay with PenTool, the Pen and point editor's overlay (a placeholder drawing the path only, on a local contour stand-in until the kernel's path types land). HistogramView (a ToneHistogram's bins in the field well with shadow and highlight clipping markers), shared by Library's develop panel and Photo's Levels. UnsavedGuard is the one unsaved-changes asker: the unsavedChangesGuard modifier and UnsavedGuard.proceed show the kernel's UnsavedPrompt as a Save, Don't Save or Cancel sheet before a dirty window closes, its document is replaced or the app quits (adopt-kernel-unsaved-prompt). FontPicker is the one font picker (font-picker): a search that ignores case and accents, the family list drawn in each family's own face, the Face menu and the Size row, over FontPickerRules (filter, face order, nearest face) and the FontPicking contract; the gallery page runs on FakeText's families or a host's live list.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/SuiteUI/"
@@ -452,7 +452,7 @@
               {
                 "id": "suite-help",
                 "name": "Help reports",
-                "description": "What Help > Report a Problem… and Beta Notes show: ProblemReport (the app, its version and build, macOS, the Mac model and the newest three suite crashes at most 7 days old, each a CrashFile trimmed to its header and crashed thread, with the home path, user and host redacted; text puts the person's note on top) and BetaNotes.current, the build's known issues. Built from values the caller reads; nothing here reads a disk or opens a socket (report-problem RP-1 stubs, RP-4 bodies).",
+                "description": "What Help > Report a Problem… and Beta Notes show: ProblemReport (the app, its version and build, macOS, the Mac model and the newest three suite crashes at most 7 days old, each a CrashFile trimmed to its header and crashed thread, with the home path, user and host redacted; text puts the person's note on top) and BetaNotes.current, the build's known issues. Built from values the caller reads; nothing here reads a disk or opens a socket. Two callers build it: the Help group (the suite Help catalog's help.report-problem and help.beta-notes, which SuiteHelpCommands puts in every app's Help menu through ShellHelpProvider, with this Mac's values and CrashFolderReader's crash files) and the CLI (HelpReports, which answers afterglow suite help.report-problem --in <file> from a .suitehelp file's values and reads no crash folder). report-problem RP-1 stubs, RP-4 bodies, RP-6 callers.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
                   "Sources/SuiteModel/Help/",
@@ -516,7 +516,7 @@
               {
                 "id": "kernel-layers",
                 "name": "Layer tree and fixtures",
-                "description": "LayerTree<Payload>, the one layer tree: LayerPayload, LayerNode (nesting, hide, lock, a follow link), LayerRow (the layers panel's flat rows from rows(expanded:)), ArrangeStep and TreeRefusal; move, arrange, group, ungroup, duplicate and the follow link are stubs for EK-12 and EK-13. Fakes/KernelFixtures.swift holds the shared fixtures: tree200 (200 nodes, seven roots, groups three deep, one hidden, one locked) and cards (the snapping packet's page in Desktop). Fakes/FakeCanvasDocument.swift is the command catalog's fake app: a headless document of named rects with its six commands plus undo and redo, the file-flow commands and the eight fill commands (each rect an optional fill in its own box, left out of the JSON when nil), its fixture, and CommandCatalog.empty for an app that has adopted no command yet.",
+                "description": "LayerTree<Payload>, the one layer tree: LayerPayload, LayerNode (nesting, hide, lock, a follow link), LayerRow (the layers panel's flat rows from rows(expanded:)), ArrangeStep and TreeRefusal; move, arrange, group, ungroup, duplicate and the follow link are stubs for EK-12 and EK-13. Fakes/KernelFixtures.swift holds the shared fixtures: tree200 (200 nodes, seven roots, groups three deep, one hidden, one locked) and cards (the snapping packet's page in Desktop). Fakes/FakeCanvasDocument.swift is the command catalog's fake app: a headless document of named rects with its six commands plus undo and redo, the file-flow commands and the eight fill commands (each rect an optional fill in its own box, left out of the JSON when nil, and an optional ShapeSpec from shape.draw, the same way), its fixture, and CommandCatalog.empty for an app that has adopted no command yet.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Layers/",
@@ -556,6 +556,7 @@
                   "Sources/SuiteKernel/Export/ExportRun.swift",
                   "Sources/SuiteKernel/Session/AutosaveSchedule.swift",
                   "Sources/SuiteKernel/Session/DocumentSession.swift",
+                  "Sources/SuiteKernel/Session/RecoveryRestore.swift",
                   "Sources/SuiteKernel/Session/VersionedJSON.swift"
                 ]
               },
@@ -571,7 +572,7 @@
               {
                 "id": "kernel-stroke",
                 "name": "Stroke",
-                "description": "Stroke/: StrokeSample (point, pressure, time) and the strokeSamples fixture (40 samples), StrokeSegment (a cubic with a pressure range), StrokeSmoother (samples to segments one late, flattening), DabSpacer (dab centres between two points), BrushSettings with BrushEdit (size, hardness, opacity, flow, spacing, clamped), BrushPreset, and LiveCopy, the working copy a drag draws on until take(). EK-29 declares them as stubs; EK-28 fills the bodies. BrushKeys holds the brush keys' rule ([ and ] step size in bands of 1, 5, 25 and 50; Shift-brackets move hardness by 25; digits set opacity in tens, or an exact percent through OpacityDigits' 0.6 s window), and BrushKeyCommands its six commands on a BrushKeyTarget: brush.size-up, brush.size-down, brush.hardness-up, brush.hardness-down, brush.set-opacity and layer.set-opacity.",
+                "description": "Stroke/: StrokeSample (point, pressure, time) and the strokeSamples fixture (40 samples), StrokeSegment (a cubic with a pressure range), StrokeSmoother (samples to segments one late, flattening), DabSpacer (dab centres between two points), BrushSettings with BrushEdit (size, hardness, opacity, flow, spacing, clamped), BrushPreset, LiveCopy, the working copy a drag draws on until take(), and DabCoverage with CoverageGrid (a stroke's dabs as discs of the brush's size and hardness, max-combined into one coverage grid; fill-heal FH-1 stub, FH-5k body). EK-29 declares them as stubs; EK-28 fills the bodies. BrushKeys holds the brush keys' rule ([ and ] step size in bands of 1, 5, 25 and 50; Shift-brackets move hardness by 25; digits set opacity in tens, or an exact percent through OpacityDigits' 0.6 s window), and BrushKeyCommands its six commands on a BrushKeyTarget: brush.size-up, brush.size-down, brush.hardness-up, brush.hardness-down, brush.set-opacity and layer.set-opacity.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Stroke/"
@@ -580,7 +581,7 @@
               {
                 "id": "kernel-shapes",
                 "name": "Shapes",
-                "description": "The shape tools every app's shape layer shares: ShapeKind and ShapeSpec (a drawn shape's recipe, Codable, with each kind's defaults; line and arrow ends in the box's unit space); ShapeRules, a spec's path in a box through FlareCore's PathBuilders, the box a drag draws (Shift squares it or snaps a line to 45 degrees, Option grows it from the centre) and why a spec can't be drawn; ShapeTarget, the document an app adopts; ShapeIntent, one option change from the tool's panel; ShapeCommands, shape.draw (one undo step) and tool.shape (view state). SH-1 declares the rules and commands as stubs; SH-5 and SH-6 fill the bodies.",
+                "description": "The shape tools every app's shape layer shares: ShapeKind and ShapeSpec (a drawn shape's recipe, Codable, with each kind's defaults; line and arrow ends in the box's unit space); ShapeRules, a spec's path in a box through FlareCore's PathBuilders, the box a drag draws (Shift squares it or snaps a line to 45 degrees, Option grows it from the centre) and why a spec can't be drawn; ShapeTarget, the document an app adopts; ShapeIntent, one option change from the tool's panel; ShapeCommands, shape.draw (one undo step, refusing a spec ShapeRules can't draw) and tool.shape (view state). SuiteUI's ShapeToolOptions panel sends ShapeIntents, which run as tool.shape; the gallery's shape-tools page and the fake app (each drawn rect keeps its ShapeSpec, so RJ-X34 runs on the CLI) adopt ShapeTarget.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Shapes/"
@@ -589,7 +590,7 @@
               {
                 "id": "kernel-fill",
                 "name": "Fill",
-                "description": "Fill/: the suite's one gradient model. Fill, GradientStop and FillColor as FlareCore's Fill, GradientStop and Color under kernel names, FillType (solid, linear, radial), FillSelection (a fill and its box) and the GradientFillTarget protocol an app's workspace conforms to; GradientRules (the stop, angle and box rules: maxStops, stopHelp, converted, angle, rotated, color, adding, moving, removing and recolouring stops, mapped); GradientIntent (the gradient editor's gestures, each one fill.* command and its params) and GradientCommands (the eight fill.* command specs every app registers: fill.read, fill.type, fill.gradient, fill.stop-add, fill.stop-move, fill.stop-remove, fill.stop-color and fill.angle, each edit one undo step named for its command, a stop or angle drag folded into one step by its drag token); GradientSVG (a fill as an SVG gradient definition). The commands run on the fake canvas (FakeCanvasDocument) and behind SuiteUI's GradientEditor, whose gallery page sends each intent through them on a live local target with a History. gradient-fill GF-1 declared them; GF-5 to GF-10 built them.",
+                "description": "Fill/: the suite's one gradient model. Fill, GradientStop and FillColor as FlareCore's Fill, GradientStop and Color under kernel names, FillType (solid, linear, radial), FillSelection (a fill and its box) and the GradientFillTarget protocol an app's workspace conforms to; GradientRules (the stop, angle and box rules: maxStops, stopHelp, converted, angle, rotated, color, adding, moving, removing and recolouring stops, mapped); GradientIntent (the gradient editor's gestures, each one fill.* command and its params) and GradientCommands (the eight fill.* command specs every app registers: fill.read, fill.type, fill.gradient, fill.stop-add, fill.stop-move, fill.stop-remove, fill.stop-color and fill.angle, each edit one undo step named for its command, a stop or angle drag folded into one step by its drag token); GradientSVG (a fill as an SVG gradient definition). The commands run on the fake canvas (FakeCanvasDocument) and behind SuiteUI's GradientEditor, whose gallery page sends each intent through them on a live local target with a History. gradient-fill GF-1 declared them; GF-5 to GF-10 built them. The suite's one stroke model sits beside it: VectorStroke, StrokeJoin and StrokeCap as FlareCore's Stroke under kernel names, and DashPreset (solid, dashed, dotted, custom); StrokeRules (the width limits, the dash presets scaled by width, and paintedPath, the path a stroke paints, trimmed then dashed with FlareCore's path ops); the StrokeTarget protocol, StrokeIntent (the stroke editor's gestures) and StrokeCommands (the nine stroke.* command specs every app registers: stroke.read, stroke.add, stroke.color, stroke.width, stroke.join, stroke.cap, stroke.dash, stroke.trim and stroke.remove, each edit one undo step, a width or trim drag folded into one); StrokeSVG (a stroke as SVG presentation attributes). They run on the fake canvas and behind SuiteUI's StrokeEditor, whose gallery page sends each intent through them on a live local target. stroke-style SS-1 declared them; SS-5 to SS-10 built them.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Fill/"
@@ -607,7 +608,7 @@
               {
                 "id": "kernel-sample",
                 "name": "Sample",
-                "description": "Sample/: the suite's one colour sampler. SampleSize (point, 3 × 3, 5 × 5) and SampleRGBA (one 8-bit straight-alpha pixel); SampleRules (mean, the alpha-weighted mean of a square over a reader closure that skips transparent pixels, and hex); the SampleTarget protocol an app's workspace conforms to and SampleCommands (the color.sample query every app registers). eyedropper EY-1 declares them as stubs (the spec with its real id, schema and availability); EY-5 and EY-6 fill the bodies.",
+                "description": "Sample/: the suite's one colour sampler. SampleSize (point, 3 × 3, 5 × 5) and SampleRGBA (one 8-bit straight-alpha pixel); SampleRules (mean, the alpha-weighted mean of a square over a reader closure that skips transparent pixels, and hex); the SampleTarget protocol an app's workspace conforms to and SampleCommands (the color.sample query every app registers). The color.sample command is how an agent reads a colour the way a person does with the eyedropper: SuiteUI's EyedropperButton on every colour row picks from the screen, its SampleLoupe rings the pointer of a canvas tool with the colour under it, and the gallery page and the fake canvas (FakeCanvasDocument, its topmost rect) sample through color.sample, so RJ-X33 runs on the CLI. eyedropper EY-1 declares them as stubs (the spec with its real id, schema and availability); EY-5 and EY-6 fill the bodies; EY-8 makes the fake a target.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Sample/"
@@ -673,9 +674,10 @@
                 "id": "imaging-adjust",
                 "name": "Adjust",
                 "description": "Adjust/ and the SuiteImaging namespace: AdjustSettings (exposure, levels, curve, hue and saturation) with its clamps and its one Codable form Photo and Library both read, and ImagingProgram, which compiles settings to CoreRender's tone adjustments (CPU) and tone program (GPU) in one fixed order. suite-imaging IM-2 declares them as stubs; IM-3 and IM-4 fill the bodies.",
-                "technology": "Swift 6, Foundation (FoundationEssentials) and CoreRender, Linux and macOS",
+                "technology": "Swift 6, Foundation (FoundationEssentials), CoreColor, CoreRaster and CoreRender, Linux and macOS",
                 "paths": [
                   "Sources/SuiteImaging/Adjust/",
+                  "Sources/SuiteImaging/Color/",
                   "Sources/SuiteImaging/SuiteImaging.swift"
                 ]
               },
@@ -686,6 +688,24 @@
                 "technology": "Swift 6, Foundation (FoundationEssentials), CoreRender and CoreRaster; CoreRenderMetal and Metal on macOS",
                 "paths": [
                   "Sources/SuiteImaging/Route/"
+                ]
+              },
+              {
+                "id": "imaging-retouch",
+                "name": "Retouch",
+                "description": "Retouch/: the paint bucket and the heal tools over creative-core. BucketOptions (tolerance 0 to 255, contiguous, all layers, anti-alias) and BucketRules (the seed's flood mask times the selection's coverage, the colour mixed in by it), HealRules (spot heal and remove through filledFromSurroundings, heal through healed from a source offset, and a stroke's DabCoverage grid placed into a buffer-sized mask), and RetouchCommands, the four edits a raster app adds on a RetouchTarget: fill.bucket, retouch.spot-heal, retouch.heal and retouch.remove, one undo step each. fill-heal FH-1 declares them as stubs; FH-5b, FH-5h and FH-6 fill the bodies.",
+                "technology": "Swift 6, CoreRaster and SuiteKernel, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Retouch/"
+                ]
+              },
+              {
+                "id": "imaging-tone",
+                "name": "Tone",
+                "description": "Tone/ (docs/blueprints/suiteui/features/tone-controls.md): the suite's one tone and sharpen adjustment. ToneSlider and ToneGroup (White Balance, Tone, Presence, Sharpen), ToneSettings with Library's Develop keys, ToneRules (the settings as one CoreRender tone program, the same CPU steps, one unsharp pass and Auto from CoreRaster's AutoTone, with the sliders still waiting on the engine), and ToneCommands: the ToneTarget protocol, the ToneIntents the SuiteUI tone rows send and the tone.read, tone.set, tone.reset and tone.auto specs every adopting app registers. tone-controls TC-1 declares them as stubs; TC-5 to TC-7 fill the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), SuiteKernel's command catalog, CoreRender and CoreRaster, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Tone/"
                 ]
               }
             ]
@@ -806,7 +826,7 @@
               {
                 "id": "shell-media",
                 "name": "Media writers and readers",
-                "description": "The suite's one media I/O: AVFoundation and ImageIO behind SuiteModel's MediaEncoding and MediaDecoding. MovieWriter writes H.264, HEVC, HEVC with alpha and ProRes 4444 movies tagged BT.709, the canonical copy of Halo's movie writer.",
+                "description": "The suite's one media I/O: AVFoundation, and ImageIO through SuiteImageIO, behind SuiteModel's MediaEncoding and MediaDecoding, reached through SuiteServices.media. The rule: no app writes or reads media with its own code; new code goes through services.media, and Halo's and Photo's old copies go when their adoption moves them here. LiveMedia is the live MediaCoding and hands each call to one coder: MovieWriter writes H.264, HEVC, HEVC with alpha and ProRes 4444 movies tagged BT.709 (the canonical copy of Halo's movie writer) and deletes the file on cancel; AnimatedImageWriter writes GIF and APNG with FrameClock's delays; StillEncoder writes PNG, JPEG, HEIC and TIFF; StillDecoder decodes stills upright to 8-bit sRGB; FootageReader reads a movie's info and the exact frame at a time. Built by shell-media SM-5 to SM-9.",
                 "technology": "Swift 6, AVFoundation, VideoToolbox and CoreGraphics, macOS 26",
                 "paths": [
                   "Sources/SuiteShell/Media/"
@@ -884,7 +904,7 @@
               {
                 "id": "onboarding",
                 "name": "Onboarding",
-                "description": "The Welcome to AfterGlow window over SuiteModel's OnboardingModel: three first-launch pages (page 1 shows the five apps' marks and names, the body and the Rendering line; page 2 the focus ChoiceChips; page 3 the starter row, one row per app in focus order with its preset chips and Open sample) with Skip, Back, Continue and, on the last page, Start from an empty home. The scene presents itself at launch when OnboardingLaunch says so, is never restored, and closing it is Skip. Help > Welcome to AfterGlow (LauncherCommands+Onboarding, in the launcher scene) reopens it.",
+                "description": "The Welcome to AfterGlow window over SuiteModel's OnboardingModel: three first-launch pages (page 1 shows the five apps' marks and names, the body and the Rendering line; page 2 the focus ChoiceChips; page 3 the starter row, one row per app in focus order with its preset chips and Open sample) with Skip, Back, Continue and, on the last page, Start from an empty home. The scene presents itself at launch when OnboardingLaunch says so, is never restored, and closing it is Skip. Help > Welcome to AfterGlow (SuiteShell's SuiteHelpCommands, in the launcher scene) reopens it.",
                 "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
                 "paths": [
                   "Sources/AfterGlowApp/Onboarding*.swift"
@@ -1303,6 +1323,18 @@
         "source": "suite-kernel",
         "target": "flarecore",
         "description": "uses FlareCore's Point, Rect, Matrix, Keyframe and Easing as they are",
+        "style": "sync"
+      },
+      {
+        "source": "kernel-transform",
+        "target": "kernel-layers",
+        "description": "runs its six transform.* commands (read, set, rotate, scale, flip, reset) on the fake app's rects, FakeCanvasDocument as a TransformTarget (TT-8, real job RJ-X32)",
+        "style": "sync"
+      },
+      {
+        "source": "kernel-transform",
+        "target": "suiteui-sources",
+        "description": "TransformBox and the six transform.* commands back SuiteUI's TransformRows (X, Y, W, H, angle, flip) and the gallery's live target (TT-3, TT-7)",
         "style": "sync"
       },
       {

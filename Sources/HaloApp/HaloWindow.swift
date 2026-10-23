@@ -16,7 +16,10 @@
 // availability from it), opens on HaloLaunch's project and, under
 // `-HaloControlsProbe`, publishes the `halo.controls` JSON
 // (HaloControls.swift). A viewer drag or inspector scrub shows through its
-// `live` HaloLiveEdit and reaches `perform` once, at its end. The toolbar's New Composition… is `halo.composition.new`. Views only read HaloProject and call its methods; all
+// `live` HaloLiveEdit and reaches `perform` once, at its end; RefreshLinkHandoff
+// hands `live` the `haloRefreshLink` its scrubs pace on, so this body never
+// reads that closure (SwiftUI can't compare closures, so every environment
+// change, such as a sheet opening, would re-run the window). The toolbar's New Composition… is `halo.composition.new`. Views only read HaloProject and call its methods; all
 // state lives in HaloModel (scripts/ci checks this).
 import HaloModel
 import SuiteUI
@@ -34,8 +37,6 @@ struct HaloWindow: View {
     @State var request: HaloWindowRequest?
     /// The drag in progress, which the viewer draws without re-running this body (HaloLiveEdit.swift).
     @State var live = HaloLiveEdit()
-    /// The refresh link the window's scrubs pace on, handed to `live`.
-    @Environment(\.haloRefreshLink) private var makeLink
     /// The viewer's shape tool: on, its drag's draft, and its draw (HaloShapeTool.swift).
     @State var shapes = HaloShapeDrawing()
 
@@ -109,10 +110,8 @@ struct HaloWindow: View {
                 onRename: { perform(.renameComposition($0.id, $1)) },
                 onDismiss: { model.dismissRefusedRename() })))
         .environment(\.haloLiveEdit, live)
-        .onAppear {
-            live.current = { model }
-            live.makeLink = makeLink
-        }
+        .onAppear { live.current = { model } }
+        .modifier(RefreshLinkHandoff(live: live))
         .focusedSceneValue(\.haloPerform, perform)
         .focusedSceneValue(\.haloProject, model)
         .haloControlsProbe(HaloLaunch.current.controlsProbe)
@@ -122,7 +121,10 @@ struct HaloWindow: View {
     /// built does nothing there; menus and controls disable it with
     /// `model.unavailableHelp(for:)` as help.
     func perform(_ command: HaloCommand) {
-        if case .tick = command {} else { takePlayback() }
+        switch command {
+        case .tick, .scrub: break
+        default: takePlayback()
+        }
         switch command.area {
         case .composition: viewerPerform(command)
         case .playback: playbackPerform(command)
@@ -139,5 +141,17 @@ struct HaloWindow: View {
     /// Every area's hook over `content`, in a fixed order.
     private func scenes(_ content: some View) -> some View {
         historyScene(textScene(renderScene(easingScene(fileScene(editScene(layersScene(keysScene(playbackScene(viewerScene(content))))))))))
+    }
+}
+
+/// Hands the window's `haloRefreshLink` to `live` once it appears. Only this
+/// modifier's body reads the closure, so an environment change re-runs it, not
+/// HaloWindow's body (RenderBudgetHaloRenderTests' open Render… budget).
+private struct RefreshLinkHandoff: ViewModifier {
+    let live: HaloLiveEdit
+    @Environment(\.haloRefreshLink) private var makeLink
+
+    func body(content: Content) -> some View {
+        content.onAppear { live.makeLink = makeLink }
     }
 }

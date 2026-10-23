@@ -7,7 +7,9 @@
 // gets the suite's Open Recent ▸ and Open In ▸ (SuiteFileCommands, in
 // FlareCommands), and the stage takes drops (`.suiteFileDrop`, FlareStage);
 // all three read FlareShell's one documents bridge, which starts watching the
-// suite's recents at launch (FlareAppDelegate).
+// suite's recents at launch (FlareAppDelegate). Finding #4636: every
+// hand-off reaches FlareShell.host, a FlareDocumentHost that opens each
+// dropped or reopened animation in a new window through FlareOpenQueue.
 import AppKit
 import FlareModel
 import SuiteModel
@@ -18,15 +20,21 @@ import SwiftUI
 @MainActor enum FlareShell {
     static let bridge: SuiteDocumentsBridge = {
         let arguments = ProcessInfo.processInfo.arguments
-        let services: SuiteServices = FlareLaunch(arguments: arguments).usesFakes
-            ? .fake()
-            : .live(support: SuiteLocations.supportFolder(arguments: arguments, home: NSHomeDirectory()),
-                    app: .flare, arguments: arguments)
+        let support = SuiteLocations.supportFolder(arguments: arguments, home: NSHomeDirectory())
+        let fakes = FlareLaunch(arguments: arguments).usesFakes
+        // A journey's `-SuiteFixture` goes into the store before the bridge's first read (#4604).
+        if !fakes { FlareLaunch.seedSuiteFixture(arguments: arguments, support: support) }
+        let services: SuiteServices = fakes ? .fake() : .live(support: support, app: .flare, arguments: arguments)
         return SuiteDocumentsBridge(app: .flare, services: services)
     }()
 
-    /// The hand-off host: it accepts open and new, and refuses an SVG place until SVG import (E11).
-    static let host = FlareWorkspace(services: .fake())
+    /// The hand-off host: an open hand-off opens each animation in a new window; an SVG place is refused
+    /// until SVG import (E11).
+    static let host = FlareDocumentHost { requests in
+        await MainActor.run {
+            for case .open(let path) in requests { FlareOpenQueue.shared.open(URL(fileURLWithPath: path)) }
+        }
+    }
 }
 
 @main
@@ -34,7 +42,7 @@ struct FlareApp: App {
     @NSApplicationDelegateAdaptor private var delegate: FlareAppDelegate
 
     var body: some Scene {
-        WindowGroup { FlareWindow() }
+        WindowGroup(id: FlareOpenQueue.windowID) { FlareWindow() }
             // Fits a 1024 x 768 screen (the CI runner's) with the inspector in full.
             .defaultSize(width: 1000, height: 700)
             .commands {

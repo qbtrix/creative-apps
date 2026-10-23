@@ -73,14 +73,15 @@ struct FlareCommands: Commands {
         CommandGroup(replacing: .newItem) {
             item(.file(.new), key: KeyboardShortcut("n"))
             item(.file(.open), key: KeyboardShortcut("o"))
+        }
+        suiteFileMenu
+        CommandGroup(replacing: .saveItem) {
+            // Open Sample ▸ heads this group: a `before: .saveItem` group is dropped once Save is replaced.
             Menu("Open Sample") {
                 ForEach(FlareMenu.samples, id: \.name) { sample in
                     item(.file(.openSample(name: sample.name)), title: sample.title)
                 }
             }
-        }
-        suiteFileMenu
-        CommandGroup(replacing: .saveItem) {
             item(.file(.save), key: KeyboardShortcut("s"))
             item(.file(.saveAs), key: KeyboardShortcut("s", modifiers: [.command, .shift]))
             item(.export(.showSheet), key: KeyboardShortcut("e", modifiers: [.command, .shift]))
@@ -133,7 +134,8 @@ struct FlareCommands: Commands {
         }
     }
 
-    /// The suite's Open Recent ▸ and Open In ▸, after Open… (file-flow FL-2), and the File items Flare hides.
+    /// The suite's Open Recent ▸ and Open In ▸, after Open… (file-flow FL-2), and the File items Flare hides;
+    /// Open Sample ▸ opens the Save group in `body`, as section 3.4 orders File (#4604).
     /// Its own builder keeps `body` within the builder's ten top-level commands.
     @CommandsBuilder private var suiteFileMenu: some Commands {
         SuiteFileCommands(app: .flare, bridge: FlareShell.bridge, document: menu.document)

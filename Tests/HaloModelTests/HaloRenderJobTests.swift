@@ -69,6 +69,17 @@ private func finished(_ settings: HaloRenderSettings) throws -> HaloProject {
     #expect(try finished(movieFull).renderWrittenText(into: "Bounce 2.mp4") == "Bounce 2.mp4")
 }
 
+/// A one-frame `keyed` writes one file, and the finished line says so.
+@Test func writtenTextGivesOneFileInTheSingular() throws {
+    var document = try #require(HaloFixtures.project("keyed"))
+    document.compositions[0].durationFrames = 1
+    var project = HaloProject(services: .fake, document: document)
+    let begun = project.beginRender(pngHalf), started = project.startRender()
+    #expect(begun && started != nil)
+    project.endRender(.finished(frames: 1))
+    #expect(project.renderWrittenText(into: "Bounce") == "1 PNG file into \"Bounce\"")
+}
+
 @Test func writtenTextOnlyOnceFinished() throws {
     var project = try keyed()
     #expect(project.renderWrittenText(into: "Bounce") == nil)

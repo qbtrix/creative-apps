@@ -32,7 +32,7 @@ import Testing
     /// Writes design-shape-options-light.png and design-shape-options-dark.png.
     @Test func theShapeToolShowsItsOptions() throws {
         #expect(DesignTool.shape.title == "Shape" && DesignTool.shape.shortcut == "u")
-        #expect(DesignTool.shape.unavailableHelp?.isEmpty == false, "a disabled tool says why")
+        #expect(DesignTool.shape.unavailableHelp == nil, "DS-5: the Shape tool draws, so it is enabled")
         var model = DesignWorkspace()
         model.useServices(.fake)
         let opened = model.openFixture("cards")

@@ -34,6 +34,12 @@ public enum TimelineTime {
         return "Playhead time at \(rate.description) (\(form))"
     }
 
+    /// The visible caption of a timecode readout at `rate`: "Playhead", with
+    /// "(drop-frame)" at a drop-frame rate, so ";02" never reads as a bug (#4600).
+    public static func readoutCaption(rate: FrameRate) -> String {
+        rate.isDropFrame ? "Playhead (drop-frame)" : "Playhead"
+    }
+
     /// `frame` as the ruler, the playhead pill and a host's readout show it.
     public static func label(frame: Int, fps: Int, unit: TimeUnit) -> String {
         guard unit == .timecode, fps > 0 else { return "\(frame)" }
