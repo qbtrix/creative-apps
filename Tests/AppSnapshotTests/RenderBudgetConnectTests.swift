@@ -1,6 +1,7 @@
 // RenderBudgetConnectTests.swift (cli-bundle CB-5b): what Help > Connect an AI Assistant… costs a real app window
 // (Tests/render-budgets.md). On Flare's titled harness window SuiteHelpPresenter begins the sheet, its own window,
-// so the app window's body runs at most for the key change; Close ends it. Every control carries its id. Nested in
+// so the app window's body runs at most for the key change; Close ends it. Install Command-Line Tool… (CB-6) begins
+// its question on the sheet within the same budget, and Cancel writes nothing. Every control carries its id. Nested in
 // BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -31,6 +32,33 @@ extension BodyCountSuites {
             presenter.closeConnect()
             try await w.settle(300)
             #expect(w.window.attachedSheet == nil, "Close left the sheet on the window")
+        }
+
+        @Test(.timeLimit(.minutes(2))) func installAsksOnTheSheetInTwoBodies() async throws {
+            let presenter = SuiteHelpPresenter()
+            let home = FileManager.default.temporaryDirectory.appendingPathComponent("suite-home-\(UUID().uuidString)").path
+            let w = try await Self.window()
+            defer { w.close() }
+            presenter.showConnect(bundle: Self.bundle, in: w.window)
+            try await w.settle(300)
+            let connect = try #require(presenter.connect, "Connect an AI Assistant… made no sheet")
+            var install: Task<Void, Never>?
+            let ask = try await w.measure("install prompt appear", bodies: Self.bodies) {
+                try await w.ticks(1) { _ in
+                    install = Task { @MainActor in
+                        await InstallCommandLineTool.run(bundle: Self.bundle, on: connect, arguments: ["-SuiteHomeDir", home])
+                    }
+                }
+                try await w.settle(300)
+            }
+            let prompt = try #require(connect.attachedSheet, "Install Command-Line Tool… asked nothing on the sheet")
+            // Target: 0, the question is the connect sheet's own sheet.
+            expectBodies(ask, atMost: 2, target: 0)
+            connect.endSheet(prompt, returnCode: .alertSecondButtonReturn)
+            await install?.value
+            #expect(!FileManager.default.fileExists(atPath: home + "/.local"), "Cancel wrote into the home")
+            presenter.closeConnect()
+            try await w.settle(300)
         }
 
         @Test(.timeLimit(.minutes(2))) func everyControlCarriesItsId() async throws {
