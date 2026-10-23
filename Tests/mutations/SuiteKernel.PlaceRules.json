@@ -26,5 +26,12 @@
     "find": "if head.starts(with: [0xEF, 0xBB, 0xBF]) { head = head.dropFirst(3) }",
     "replace": "if false { head = head.dropFirst(3) }",
     "tests": "PlaceRulesTests"
+  },
+  {
+    "label": "coverKeepsAspectEdgesAndReset: resetBox drops its already-reset guard, so a fitted box rounds to a new one and Reset Size runs as a no-op step",
+    "file": "Sources/SuiteKernel/Place/PlaceRules.swift",
+    "find": "if abs(height - box.height) <= 1e-9 * max(1, height) { return box }",
+    "replace": "if height == box.height { return box }",
+    "tests": "PlaceRulesTests"
   }
 ]
