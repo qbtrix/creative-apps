@@ -1,0 +1,30 @@
+[
+  {
+    "label": "clipNeedsBase: layer.clip's availability ignores hasBase",
+    "file": "Sources/SuiteKernel/Layers/ClipCommands.swift",
+    "find": "guard s.hasBase else { return .unavailable(ClipRules.noBaseHelp) }",
+    "replace": "guard s.hasBase || true else { return .unavailable(ClipRules.noBaseHelp) }",
+    "tests": "ClipCommandsTests"
+  },
+  {
+    "label": "oneStepPerRun: setClipped is called once per layer, not once per run",
+    "file": "Sources/SuiteKernel/Layers/ClipCommands.swift",
+    "find": "try t.setClipped(clipped, name: name)",
+    "replace": "try t.setClipped(clipped, name: name); try t.setClipped(clipped, name: name)",
+    "tests": "ClipCommandsTests"
+  },
+  {
+    "label": "unclipNeedsClipped: layer.unclip runs on an unclipped layer",
+    "file": "Sources/SuiteKernel/Layers/ClipCommands.swift",
+    "find": "return s.isClipped ? .available : .unavailable(notClippedHelp)",
+    "replace": "return .available",
+    "tests": "ClipCommandsTests"
+  },
+  {
+    "label": "baseInGroup: the selection walks the roots, not its own siblings",
+    "file": "Sources/SuiteKernel/Layers/ClipCommands.swift",
+    "find": "let siblings = ancestors.last.flatMap { tree.node($0)?.children } ?? tree.roots",
+    "replace": "let siblings = ancestors.isEmpty ? tree.roots : tree.roots",
+    "tests": "ClipCommandsTests"
+  }
+]
