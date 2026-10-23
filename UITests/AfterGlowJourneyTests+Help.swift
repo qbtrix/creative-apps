@@ -2,27 +2,24 @@
 // launcher. Help lists Report a Problem…, Beta Notes and Welcome to AfterGlow; Welcome opens the tour; Report a
 // Problem… opens the sheet with a crash from a fixture folder (`-SuiteCrashDir`), the home path shown as `~`;
 // Beta Notes opens the known-issues window. Every click is a mouse click on a
-// menu item found by title. The bundle compiles only SuiteModel's Values, so the item ids are literals here:
-// `suite.<catalog id>`, and Welcome's `afterglow.onboarding.help`.
+// menu item found by title, and only by title: SwiftUI doesn't carry `.accessibilityIdentifier` onto a menu
+// item, so a live item reads AppKit's "menuAction:" (#4647). The menu shot is a screen shot, since an open menu
+// sits outside the window.
 import XCTest
 
 final class AfterGlowHelpJourneyTests: XCTestCase {
-    static let items = [
-        ("Report a Problem…", "suite.help.report-problem"), ("Beta Notes", "suite.help.beta-notes"),
-        ("Welcome to AfterGlow", "afterglow.onboarding.help"),
-    ]
+    static let items = ["Report a Problem…", "Beta Notes", "Welcome to AfterGlow"]
 
     /// Help lists the three items, each enabled, and Welcome opens the tour.
     @MainActor func testHelpMenuListsItsItems() {
         let launcher = SuiteHarness(self).launch(fixture: "firstLaunch", arguments: [], skipOnboarding: true)
         let help = Self.openHelp(launcher)
-        for (title, id) in Self.items {
+        for title in Self.items {
             let item = help.menuItems[title]
             XCTAssert(item.waitForExistence(timeout: 5), "the Help menu has no \(title)")
-            XCTAssertEqual(item.identifier, id, "\(title) has id \(item.identifier)")
             XCTAssert(item.isEnabled, "\(title) is disabled")
         }
-        launcher.shot("help-menu")
+        launcher.shot("help-menu", screen: true)
         help.menuItems["Welcome to AfterGlow"].click()
         let welcome = launcher.app.windows.matching(NSPredicate(format: "title == 'Welcome to AfterGlow'")).firstMatch
         XCTAssert(welcome.waitForExistence(timeout: 10), "Help > Welcome to AfterGlow opened no window")
