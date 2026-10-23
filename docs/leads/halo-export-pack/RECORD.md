@@ -17,8 +17,8 @@ Next: HX-8 (halo.md, built, feature-done) once placed-images:PH-z is built; Belt
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| HX-1 | HX-a | 1 | codec and alpha settings, stub refusal | Sources/HaloModel/Contracts/HaloDocumentValues.swift, Tests/HaloModelTests/HaloProResTests.swift | existing render tests; ProRes refused | #4841 | pr |
-| HX-2 | HX-a | 2 | Codec row, Transparent checkbox | Sources/HaloApp/HaloRenderSheet.swift | HaloRenderProResSnapshots.sheet | #4841 | pr |
+| HX-1 | HX-a | 1 | codec and alpha settings, stub refusal | Sources/HaloModel/Contracts/HaloDocumentValues.swift, Tests/HaloModelTests/HaloProResTests.swift | existing render tests; ProRes refused | #4841 | merged |
+| HX-2 | HX-a | 2 | Codec row, Transparent checkbox | Sources/HaloApp/HaloRenderSheet.swift | HaloRenderProResSnapshots.sheet | #4841 | merged |
 | HX-3 | HX-m | 2 | plan rules, alpha frames (RJ-H41 moves to HX-4) | Sources/HaloModel/HaloRenderJob.swift, see packet | HaloProResTests, HaloRenderAlphaTests | #4874 | pr |
 | HX-4 | HX-m | 2 | live renderer via media.movie; HaloMovieWriter kept for fractional fps | Sources/HaloModel/Live/LiveCompositionRendering.swift, Sources/HaloApp/HaloMovieWriter.swift | HaloMovieSinkTests | #4917 | pr |
 | HX-5 | HX-u | 3 | snapshots, budget | Tests/AppSnapshotTests/HaloRenderProResSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloRenderSheetTests.swift | codecSwitchInTwoBodies | #4858 | pr |
@@ -52,3 +52,4 @@ Next: HX-8 (halo.md, built, feature-done) once placed-images:PH-z is built; Belt
 - 2026-10-23T17:24Z: HX-4 #4917 opened, stacked on HX-3 (Head 363a1d9f, Mutate HaloMovieSink 4/4, HaloDocumentValues 2/2, HaloRenderFrame 3/3). HEVC and ProRes 4444 pickable; fractional fps refused for them in words. RJ-H41 is not in HX-4: it moves to HX-z with the live journey.
 - 2026-10-23T22:35Z: HX-a #4841 merged to dev (a8e0e252, batch-20261023204921). HX-u #4858 merged origin/dev, gate PASS, retargeted to dev (Head dfda2847). HX-3 #4874, HX-4 #4917, HX-z #4942 stay stacked on HX-u. Belt-Slice-Done for HX-a waits on a green ci.yml run on dev.
 - 2026-10-23T23:05Z: Belt-Slice-Done HX-a posted (Linux check run 40029046141 on dev 491ec546) with Mac-Finish-Wanted. HX-u #4858 waits on the lane batch.
+- 2026-10-23T23:20Z: #4858 (HX-u) waits on a lane batch; HX-3 #4874 retargets when it merges. Open line:halo findings #5004 #4693 #4222 #3926 touch no export-pack file: findings 0.
