@@ -37,3 +37,9 @@ Next: wait on IM-a (#3715) per the supervisor's 04:24Z answer on #3777; poll eve
 ## Open
 - suite-imaging #3715: no lead branch, no slice done, Sources/SuiteImaging absent on dev (2026-10-21T02:36Z). Blocks AJ-1, AJ-2l, so every later slice.
 - 2026-10-21T04:29Z: run act-1a15c4e2e3b-zh3u was released by Belt at 04:25Z; act-1a15cb4e0f5-ipbr carries its state (lead branches, open slice PRs) rather than redoing it. The supervisor (04:24Z, #3777): wait, do not build IM-a or BK-m; the p0 issues start next shift; release at 06:30Z if nothing has landed.
+
+## Run act-1a1693a4009-hyio (line lead: area-selection, adjust-everywhere, shared-raw)
+- 2026-10-23T14:53Z: IM-a and IM-m are on dev (SuiteImaging target, IM-3 #4390, IM-4 #4393, IM-15 #4389); AJ-1 and AJ-2l are unblocked.
+- Wave 1 (base dev 8021b0f5): builder B AJ-a (AJ-1 + LookPresets.swift), then stacked AJ-k (AJ-5, AJ-5f), AJ-7, and AJ-6 if TC-m is on dev.
+- Blocked: AJ-u on OC-photo-u; AJ-photo on IM-photo (#4619 needs-split); AJ-library on IM-z, ST-m, OC-library-m; AJ-halo on AN-halo.
+- Open findings for this feature: 0, so no wave gate.
