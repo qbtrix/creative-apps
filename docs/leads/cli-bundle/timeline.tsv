@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-23T03:12Z	3	heartbeat	-	wave 1 building
 2026-10-23T03:38Z	3	pr-opened	#4715	CB-a fast-lane, head 9c61d71
 2026-10-23T03:41Z	4	stage-start	-	wave 2: CB-u, CB-m building
+2026-10-23T04:03Z	-	heartbeat	CB-a	#4715 open in lane; CB-u gate running; CB-m building
