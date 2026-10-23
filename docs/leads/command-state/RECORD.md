@@ -2,9 +2,9 @@
 
 Issue: #3771 · Packet: docs/blueprints/suite/features/command-state.md
 Run: act-1a1659bd4ae-sr68 · Resumed: 2026-10-22T22:00Z (previous runs act-1a16391fd34-thw9, act-1a1601c3538-r0c9)
-Stage: All slices done (Linux check 39857152000); Mac-Finish-Wanted for the ui slices (39836789801); Belt-Contact-Sheet posted
+Stage: All slices done (Linux check 39857152000); Belt-Contact-Sheet posted with journeys, audit and review
 Base: dc87ad2b0bcebf2b6bef749328a03ba06687275f
-Next: beta-hardening lane verifies the ui slices; critic panel (ui:true) on journeys run 39855707652 screens
+Next: beta-hardening lane takes round 1: findings #4670-#4674 and CI finding #4659
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -41,6 +41,7 @@ Next: beta-hardening lane verifies the ui slices; critic panel (ui:true) on jour
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
+| CS-a, CS-library-1, CS-library-2, CS-halo, CS-photo, CS-flare, CS-design | 39855707652 | 28e2b852 | clarity, journey, design, layout, controls, oracle, mouse, taste, jobs | #4670 #4671 #4672 #4673 #4674 | 0 |
 
 ## Decisions
 - #4023 (CS-2) had baselined dev-red's PhotoPlace site in photo.txt; the ratchet fails stale lines, so that would turn dev red again when #4004/#4008 land. A fixer removes the line and holds the gate for #3856.
@@ -53,4 +54,4 @@ Next: beta-hardening lane verifies the ui slices; critic panel (ui:true) on jour
 - Status mirrored to lead/suite-<feature> (docs/leads/suite-<feature>/) from 2026-10-22T15:26:41Z, where Belt reads it; lead/<feature> keeps the same files.
 
 ## Open
-- none
+- findings #4670 #4671 #4672 #4673 #4674 (critic panel, round 0); CI finding #4659 (red journey in 39855707652)

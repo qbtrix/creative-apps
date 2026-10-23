@@ -93,3 +93,4 @@ utc	stage	event	ref	note
 2026-10-22T21:18:52Z	CS-z	done	-	Belt-Slice-Done posted for all 8 slices (run 39836789801); contact sheet waits journeys 39855707652
 2026-10-22T22:20:00Z	CS-z	done	-	Belt-Contact-Sheet posted (Linux check 39857152000, mac build 39836789801); journeys 39855707652 still queued
 2026-10-22T22:59:30Z	CS-z	waiting	-	journeys 39855707652 still queued (macOS journeys (suite)); critic panel (ui:true) waits its ui-screens
+2026-10-23T00:38:16Z	CS-a	reviewed	-	critic panel (ui:true) on journeys 39855707652 @28e2b852: 5 confirmed, filed #4670-#4674; testTogglesReportState red (#4659); contact sheet updated
