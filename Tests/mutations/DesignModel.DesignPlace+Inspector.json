@@ -1,4 +1,5 @@
 [
+  {"label": "the Place in Frame… button turns on on a lock", "file": "Sources/DesignModel/DesignPlace+Inspector.swift", "find": "DesignWorkspace.reason($0.workspace.placeInFrameHelp)", "replace": "DesignWorkspace.reason($0.workspace.placeActionHelp())", "tests": "DesignPlaceInspectorTests"},
   {"label": "Place in Frame… ignores the lock", "file": "Sources/DesignModel/DesignPlace+Inspector.swift", "find": "selectedNode.flatMap { lockHelp($0.id) } ?? placeActionHelp()", "replace": "placeActionHelp()", "tests": "DesignPlaceInspectorTests"},
   {"label": "the note leaves out the lock", "file": "Sources/DesignModel/DesignPlace+Inspector.swift", "find": "        let place = placeInFrameHelp\n", "replace": "        let place = placeActionHelp()\n", "tests": "DesignPlaceInspectorTests"},
   {"label": "Fill fills with nothing fillable selected", "file": "Sources/DesignModel/DesignPlace+Inspector.swift", "find": "guard fill, let node = selectedNode, node.kind.holdsPicture else { return false }", "replace": "guard fill else { return false }\n        guard let node = selectedNode else { return true }", "tests": "DesignPlaceInspectorTests"},

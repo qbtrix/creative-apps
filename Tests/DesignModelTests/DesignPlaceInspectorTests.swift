@@ -42,6 +42,9 @@ private func page(_ kind: DesignNodeKind = .frame, picture: Bool = false, size: 
         #expect(locked.placeInFrameHelp == locked.lockHelp("node-1"))
         #expect(locked.placeInFrameHelp == "Unlock the layer to edit it.")
         #expect(locked.placeNote?.hasPrefix("Unlock the layer to edit it.") == true)
+        let spec = DesignMenuState.placeInFrameSpec
+        #expect(spec.availability(DesignMenuState(workspace: locked, hasWindow: true)).why == "Unlock the layer to edit it.")
+        #expect(spec.title == "Place in Frame…" && spec.id == "place.image")
         #expect(try page().placeInFrameHelp == DesignWorkspace.placeNotBuilt)
         #expect(try page(select: false).placeInFrameHelp == (try page()).placeActionHelp())
     }

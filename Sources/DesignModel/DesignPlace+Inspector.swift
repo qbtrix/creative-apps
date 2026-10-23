@@ -1,6 +1,6 @@
 // DesignPlace+Inspector.swift (placed-images PD-u, PD-4): what File > Place…, a drop and the Picture section decide:
 // whether a place fills the selection or adds a new layer (`placeFills`, `placeSteps`: only the first file fills),
-// Place in Frame…'s reason, a lock first (`placeInFrameHelp`), Reset Size's own reason (`resetSizeHelp`) and the
+// Place in Frame…'s reason, a lock first (`placeInFrameHelp`, its button's `placeInFrameSpec`), Reset Size's own reason (`resetSizeHelp`) and the
 // section's note, each reason once (`placeNote`). Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -55,5 +55,17 @@ extension DesignWorkspace {
             }
         }
         return notes.isEmpty ? nil : notes.joined(separator: " ")
+    }
+}
+
+extension DesignMenuState {
+    /// The Picture section's Place in Frame…: place.image under that title, off on `placeInFrameHelp`.
+    public static var placeInFrameSpec: CommandSpec<DesignMenuState> {
+        let image = spec("place.image")
+        return .typed(image.id, title: "Place in Frame…", summary: image.summary, kind: image.kind, params: JSONValue.self,
+                      schema: image.params, example: image.example,
+                      availability: { DesignWorkspace.reason($0.workspace.placeInFrameHelp) }) { state, params in
+            try DesignWorkspace.catalog.run(image.id, params: params, on: &state.workspace).result
+        }
     }
 }
