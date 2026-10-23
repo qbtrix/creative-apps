@@ -128,13 +128,11 @@ Sources/PhotoModel/Live/LiveAdjustmentLayers.swift
 Sources/PhotoModel/Live/LiveCrop.swift
 Sources/PhotoModel/Live/LiveExportSizing.swift
 Sources/PhotoModel/Live/LiveRecovery.swift
-Sources/PhotoModel/Live/LiveSampling.swift
 Sources/PhotoModel/Live/LiveSelection.swift
 Sources/PhotoModel/Live/LiveTransform.swift
 Sources/PhotoModel/PhotoClipboard.swift
 Sources/PhotoModel/PhotoCropSize.swift
 Sources/PhotoModel/PhotoDocumentFile.swift
-Sources/PhotoModel/PhotoEyedropper.swift
 Sources/PhotoModel/PhotoHistory.swift
 Sources/PhotoModel/PhotoKeepLayers.swift
 Sources/PhotoModel/PhotoLevelsFormat.swift

@@ -29,8 +29,8 @@ import XCTest
 
 final class PhotoJourneyTests: XCTestCase {
     /// `-PhotoFixture sample` opens the sample picture on the fakes: the status
-    /// line shows "Preview data" and the Eyedropper (enabled by the fake
-    /// sampling service, disabled on `.live`) is on. An unknown name says so.
+    /// line shows "Preview data" and the Eyedropper (it reads the kernel's
+    /// mean, so it is enabled on any services) is on. An unknown name says so.
     @MainActor func testFixtureLaunch() {
         let photo = Journey("Photo", self, arguments: photoArguments(fixture: "sample"))
         XCTAssert(photo.element("suite.tools").waitForExistence(timeout: 30), "no tool palette (suite.tools)")
