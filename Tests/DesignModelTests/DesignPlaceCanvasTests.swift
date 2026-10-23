@@ -1,7 +1,6 @@
-// DesignPlaceCanvasTests.swift (placed-images PD-u, PD-3 and PD-4): what the canvas, the File menu and the
-// Image section ask the Model. A node's picture is its frame's box; a place refusal says why and leaves the
-// file alone, before PD-5 registers the commands and after; an ⌥-drag inside the selected picture pans its
-// focus by the overflow; a drop's page point and whether it fills the selected frame. Runs on Linux and macOS.
+// DesignPlaceCanvasTests.swift (placed-images PD-u, PD-3 and PD-4): what the canvas, the File menu and the Picture
+// section ask the Model: a node's picture is its frame's box; a place refusal says why and changes nothing, before
+// and after PD-5; a Move-tool ⌥-drag pans an overflowing picture; a drop's page point and fill. Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
