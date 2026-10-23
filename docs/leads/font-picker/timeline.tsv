@@ -47,3 +47,4 @@ utc	stage	event	ref	note
 2026-10-23T05:03:58Z	ci	FP-u macOS build 39894260475 success on deb55ebe; lane merges on next sweep	FP-u	waiting merge
 2026-10-23T05:23:40Z	check-in	#4704 not merged yet; lane Linux run 39903845974 on deb55ebe in progress since 05:05; scoped suiteui 39900719671 still in progress	FP-u	waiting merge
 2026-10-23T05:31Z	ship	FP-z PR opened	FP-z	#4759 head 9a074fae, labels fast-lane+feature-done
+2026-10-23T05:35Z	ship	lane dispatched macOS build	FP-z	run 39906624931 on 9a074fae
