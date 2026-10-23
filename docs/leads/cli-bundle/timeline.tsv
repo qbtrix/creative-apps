@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-23T04:50Z	-	pr	CB-m	opened #4740, #4741 (CB-3 supervisor)
 2026-10-23T04:50Z	-	pr	CB-u	opened #4743
 2026-10-23T04:52Z	-	heartbeat	CB-m	#4715 merged; #4740/#4741/#4743 gates on dev-merged heads running; suite-packaging C4 gate running
+2026-10-23T05:04Z	-	pr	C4	opened #4755 suite-packaging description

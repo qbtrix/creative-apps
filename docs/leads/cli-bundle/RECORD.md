@@ -40,7 +40,7 @@ Next: CB-m #4740, CB-m-bundle #4741 (supervisor), CB-u #4743 merged dev in, gate
 
 ## Open
 
-- C4-only PR: suite-packaging description gains the CLI path and AssistantConnect, once #4715 merges.
+- C4-only PR: suite-packaging description gains the CLI path and AssistantConnect: opened #4755.
 - `--bundle` flag in Arguments.swift: wire in CB-m (MCPConfig.bundle(flag:) already takes it).
 - CB-3 goes as its own PR on `lead/cli-bundle-CB-m-bundle` with `no-fast-lane` (protected scripts/bundle-apps; supervisor merges).
 - 04:45Z #4715 (CB-a) merged. CB-m #4740, CB-m-bundle #4741 (no-fast-lane, supervisor), CB-u #4743 (test-first split, Mutate 3/3) merged origin/dev; gate rerun before retarget to dev. C4-only suite-packaging description PR is now due.
