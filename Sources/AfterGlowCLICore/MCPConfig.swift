@@ -1,4 +1,4 @@
-// MCPConfig.swift (cli-bundle CB-2, CB-4 fills AssistantConnect's bodies): the CLI's answers to the suite's
+// MCPConfig.swift (cli-bundle CB-2; CB-4 fills AssistantConnect's bodies and makes the link): the CLI's answers to the suite's
 // help.connect-assistant and help.install-cli. It finds AfterGlow.app from `--bundle` or from the CLI's own path at
 // BundleLayout.cliPath, and answers through SuiteModel's AssistantConnect, so the sheet and the CLI read one text.
 #if canImport(FoundationEssentials)
@@ -31,10 +31,25 @@ public struct MCPConfig: Sendable, Hashable {
     }
 
     /// The install plan for the bundle's CLI, `existing(path)` being what sits at the link's path; null outside a
-    /// bundle. `confirm` makes the link in CB-4; until then nothing is written and `linked` says whether it is there.
-    public func installCLI(confirm: Bool, existing: (String) -> String?) -> JSONValue {
+    /// bundle. Without `confirm` it writes nothing. With it, a `link` plan calls `link(at, to)`, which makes the
+    /// folder and the symlink; `alreadyLinked` and `refuse` write nothing, and a failed write is a refusal.
+    public func installCLI(confirm: Bool, existing: (String) -> String?,
+                           link: (String, String) throws -> Void = MCPConfig.makeLink) -> JSONValue {
         guard let bundle else { return .null }
-        return Self.json(AssistantConnect.installPlan(home: home, bundle: bundle, existing: existing))
+        let plan = AssistantConnect.installPlan(home: home, bundle: bundle, existing: existing)
+        guard confirm, case .link(let at, let to) = plan else { return Self.json(plan) }
+        do { try link(at, to) } catch {
+            return Self.json(.refuse(reason: "Couldn't make the link at \(at): \(error)"))
+        }
+        return .object(["plan": .string("link"), "at": .string(at), "to": .string(to), "linked": .bool(true)])
+    }
+
+    /// Makes `at`'s folder if needed, then a symlink at `at` to `to`. Throws when either fails, as when a file
+    /// appeared at `at` since the plan was read.
+    public static func makeLink(at: String, to: String) throws {
+        let folder = URL(fileURLWithPath: at).deletingLastPathComponent().path
+        try FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
+        try FileManager.default.createSymbolicLink(atPath: at, withDestinationPath: to)
     }
 
     /// A plan as the command's result: `plan`, its paths or reason, and whether the link is in place.
