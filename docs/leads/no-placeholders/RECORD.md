@@ -32,5 +32,6 @@ Next: wave 1 builders open the contract slice PR(s)
 - PR bodies carry no attribution footer; any footer the tooling adds is removed with update_pull_request after the PR opens.
 - One combined wave plan across #3776, #3774 and #3773 (same session); builders are worktree subagents, at most 4 at once.
 - NP-a is one PR (NP-1 + NP-2, about 240 lines, 7 files). NP-flare is one PR for NP-3 + NP-4 + NP-5; NP-6 folds into it as the feature-done PR if under the cap, else a separate last PR.
+- NP-flare waits on svg-place PF-u (#4297, needs-fix): it edits `FlareCommands.swift` (the importExport group) and `FlareWindow.swift`; NP-flare edits `FlareCommands.swift` and `FlareWindow+View.swift`. PF-m (#4295) touches only FlareModel place files, no overlap. If #4297 is still open when NP-a merges, NP-flare goes ahead and its PR names #4297 so its lead knows.
 
 ## Open
