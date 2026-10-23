@@ -37,6 +37,8 @@ enum PhotoEdit: Sendable, Equatable {
     case draft(TransformDraft?)
     /// The path list and the path whose points showed (PhotoPaths+Kernel.swift).
     case paths([PhotoPath], editing: String?)
+    /// The selection's recipe and Reselect's, as they were (AR-10).
+    case area(PhotoArea)
 }
 
 /// The whole layer stack, for edits that add, remove or resize layers.
@@ -206,6 +208,10 @@ extension PhotoWorkspace {
             return inverse
         case .paths(let list, let editing):
             return applyPaths(list, editing: editing)
+        case .area(let saved):
+            let inverse = PhotoEdit.area(area)
+            area = saved
+            return inverse
         }
     }
 
