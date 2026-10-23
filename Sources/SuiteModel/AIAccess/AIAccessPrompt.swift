@@ -13,7 +13,11 @@ public enum AIAccessPrompt {
     /// The Window menu item and its window; the sheet's, chip's and rows' buttons; the empty list.
     public static let menuTitle = "AI Access…", windowTitle = "AI Access"
     public static let allowOnce = "Allow Once", alwaysAllow = "Always Allow", deny = "Deny", stop = "Stop", revoke = "Revoke"
-    public static let emptyTitle = "No AI Clients", emptyMessage = "Clients you always allow or deny show up here."
+    public static let emptyTitle = "No AI Assistants"
+    public static let emptyMessage = "When an AI assistant asks to work in this app's open document, choose \(alwaysAllow) or \(deny). "
+        + "Your choice is listed here, where you can revoke it."
+    /// The symbol of the Window menu item, the empty list and the chip.
+    public static let menuSymbol = "sparkles"
 
     /// The client named after `demoArgument`, or nil when the flag is absent or has no name after it.
     public static func demoClient(in arguments: [String]) -> String? {

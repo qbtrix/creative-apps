@@ -19,6 +19,7 @@ the lead checks each before its slice starts):
 - **AX-flare:** `FlareWorkspaceState.swift` is owned by Flare's stage-edit and export packets: start after their slices on it.
 - **AX-photo:** `PhotoWorkspace.swift` is owned by photo-seams and shared with adopt-kernel-undo's and adopt-kernel-layers' Photo slices: the three chain in that order.
 - **AX-library:** `LibraryCatalog.swift` is owned by Library's export and spine packets and shared with adopt-kernel-selection's Library slice (that one first). `every_source_file_owned` holds for Library.
+- **Halo (no slice here):** Halo adopts `ExportRun` and `SuiteExportSheet` in its core-loop packet (`docs/blueprints/halo/features/core-loop.md`, CL-4 and CL-6), so this packet plans no Halo adoption.
 
 **Clean-room.** Behaviour only; the rules come from the apps' own tests.
 

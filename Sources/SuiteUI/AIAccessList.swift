@@ -16,7 +16,7 @@ public struct AIAccessList: View {
     public var body: some View {
         Group {
             if entries.isEmpty {
-                EmptyStateView(AIAccessPrompt.emptyTitle, systemImage: "sparkles", message: AIAccessPrompt.emptyMessage)
+                EmptyStateView(AIAccessPrompt.emptyTitle, systemImage: AIAccessPrompt.menuSymbol, message: AIAccessPrompt.emptyMessage)
             } else {
                 List(entries, id: \.self) { entry in
                     HStack(spacing: SuiteSpacing.m) {
