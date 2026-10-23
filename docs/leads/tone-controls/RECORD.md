@@ -4,7 +4,7 @@ Issue: #3476 · Packet: docs/blueprints/suiteui/features/tone-controls.md
 Run: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui) · Started: 2026-10-23T14:52Z (earlier runs act-1a16469734c-d0s8, act-1a15821c836-93pf)
 Stage: 4 wave 2
 Base: origin/dev 8021b0f5
-Next: Wave 2 PRs open: TC-2 #4862 (TC-a), TC-5 #4880 + TC-7 #4870 (TC-m). Wave 3 building: TC-6 (lead/tone-controls-TC-m-commands, stacked on #4880), TC-u TC-3+TC-4 (lead/tone-controls-TC-u, stacked on #4862). PRs over the cap wait for their parent to merge.
+Next: PRs open on the lane: TC-2 #4862 (TC-a), TC-5 #4880, TC-7 #4870, TC-6 #4953 (TC-m; #4953 stacked on #4880). TC-u (TC-3+TC-4, lead/tone-controls-TC-u, stacked on #4862) gating. TC-z waits on TC-u, TC-m and other features' z slices.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -22,7 +22,7 @@ Next: Wave 2 PRs open: TC-2 #4862 (TC-a), TC-5 #4880 + TC-7 #4870 (TC-m). Wave 3
 | TC-3 | TC-u | – | The ToneRows view | Sources/SuiteUI/ToneRows.swift, Tests/SuiteUITests/ToneRowsTests.swift | ToneRowsTests | – | building |
 | TC-4 | TC-u | – | Snapshots, budget, journey on | Tests/AppSnapshotTests/SuiteToneRowsSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetToneRowsTests.swift, UITests/SuiteJourneyTests+Tone.swift | journey | – | building |
 | TC-5 | TC-m | – | ToneRules bodies | Sources/SuiteImaging/Tone/ToneRules.swift, Tests/SuiteImagingTests/ToneRulesTests.swift, Tests/mutations/SuiteImaging.ToneRules.json | ToneRulesTests | #4880 5f34a503 | open |
-| TC-6 | TC-m | – | ToneCommands bodies | Sources/SuiteImaging/Tone/ToneCommands.swift, Tests/SuiteImagingTests/ToneCommandsTests.swift, Tests/mutations/SuiteImaging.ToneCommands.json | ToneCommandsTests | – | building |
+| TC-6 | TC-m | – | ToneCommands bodies | Sources/SuiteImaging/Tone/ToneCommands.swift, Tests/SuiteImagingTests/ToneCommandsTests.swift, Tests/mutations/SuiteImaging.ToneCommands.json | ToneCommandsTests | #4953 9e709bc9 | open |
 | TC-7 | TC-m | – | ToneSettings coding and clamping | Sources/SuiteImaging/Tone/ToneSettings.swift, Tests/SuiteImagingTests/ToneSettingsTests.swift, Tests/mutations/SuiteImaging.ToneSettings.json | ToneSettingsTests | #4870 10ccbb47 | open |
 | TC-8 | TC-z | – | Gallery runs intents through ToneCommands | Sources/SuiteUI/Gallery/GalleryToneRows.swift, Tests/SuiteUITests/ToneRowsLiveTests.swift | ToneRowsLiveTests | – | waiting |
 | TC-9 | TC-z | – | Fake app takes tone; RJ-X41 | Sources/SuiteImaging/Fakes/FakeToneDocument.swift, Sources/AfterGlowCLICore/Apps.swift, Tests/SuiteImagingTests/FakeToneTests.swift, Tests/mutations/SuiteImaging.FakeToneDocument.json, Tests/RealJobs/fake/tone-controls/ | FakeToneTests | – | waiting |
@@ -37,6 +37,7 @@ Next: Wave 2 PRs open: TC-2 #4862 (TC-a), TC-5 #4880 + TC-7 #4870 (TC-m). Wave 3
 - Branch from and target dev, not main: the fast lane only merges into dev and retargets main PRs; main fast-forwards from green dev. "Done" = feature-done merged and the green dev run that promotes main.
 - lead/tone-controls rebased onto origin/main 0dd23d65 (71 lead commits replayed; old history was rewritten) per the brief.
 - 2026-10-23T16:45Z: TC-5 auto rounds each value to the hundredth before clamping (sRGB white of 1.0 came back as ~4e-14 Whites). TC-u (TC-3+TC-4) is one PR stacked on TC-2; TC-6 stacks on TC-5. Status now also pushed to lead/suiteui-tone-controls (the branch Belt reads).
+- 2026-10-23T18:32Z: TC-6 (#4953, 303 lines with TC-5's commits, mutate 5/5): Radius/Threshold refusal reads "Sharpen is off at Amount 0." (the packet's help text); `tone.reset` with no group is the undo step "Reset Tone" (same name as a Tone-group reset, per contract); a target with no toneSettings and no toneHelp is refused with "There is no picture to adjust." (packet silent). TC-6 needs nothing from TC-7.
 
 ## Open
 - 2026-10-22: IM-a on dev (IM-1 #4028; IM-2 stubs present on dev, IM-4 #4393 built on them); GF-a, AH-a, PL-a done. TC-1 ready.
@@ -45,3 +46,4 @@ Next: Wave 2 PRs open: TC-2 #4862 (TC-a), TC-5 #4880 + TC-7 #4870 (TC-m). Wave 3
 - 15:55Z: core bump #3549 (47dd9bb8, pin 2258b62) contains 9ed9ef0 and says it takes over #3144's pin move, so TC-a's #3144 dependency is met on dev. TC-1 still waits on gradient-fill GF-2 (not on dev).
 - 2026-10-23T14:52:29Z: run act-1a1693a3ff0-mwrd resumes on #3476 (the record said #4520). TC-1 merged as #4555. TC-m is 5 to 7 (~820 lines): it ships as three PRs under the 400 cap, all `Slice: TC-m`. Base and target are dev (CLAUDE.md, the lane), not main.
 - 2026-10-23T16:45Z: PRs #4862 (TC-2), #4870 (TC-7), #4880 (TC-5) open with fast-lane and current Fast-Check/Head; waiting on the lane. TC-6 and TC-u builders launched.
+- 2026-10-23T18:32Z: no PR merged yet; all seven of this run's PRs wait on the lane (#4873 on the supervisor). Builders share scratchpad gate.lock; a stale holder blocked gates ~30 min and was cleared.
