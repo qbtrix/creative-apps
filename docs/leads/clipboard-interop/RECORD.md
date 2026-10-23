@@ -1,10 +1,10 @@
 # clipboard-interop lead record
 
 Issue: #4512 (was #3753) · Packet: docs/blueprints/suiteui/features/clipboard-interop.md
-Run: act-1a16474bd3a-i9ae · Session: session_01Rid1ErRRerebigzwJKJtpV · Started: 2026-10-22T16:36Z (earlier run act-1a161a658a7-2jql)
-Stage: wait-upstream (every adopt slice blocked on an upstream slice; rechecked each wave)
-Base: 7e9f260ae8f69dea63663c1bc7ea945c6b1d2f80 (origin/dev)
-Next: the first adopt slice whose waits clear (CB-6/8/10/12/13); recheck each wave
+Run: act-1a1695ebfeb-d54n · Session: claude/feature-lead-playbook-9a8kbw · Started: 2026-10-23T15:30Z
+Stage: 3 wave 1
+Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (origin/dev)
+Next: check wave-1 builders (CB-6, CB-8, CB-10); then wave 2 (CB-13 if SC-photo met, CB-12 when ST-a merges)
 
 
 
@@ -12,15 +12,11 @@ Next: the first adopt slice whose waits clear (CB-6/8/10/12/13); recheck each wa
 
 
 ## Status now
-Run act-1a161a658a7-2jql, status at 2026-10-22T07:24Z; this block supersedes the Task table's PR/state columns.
-- 07:58Z: supervisor answered: park. Run ended for this feature; the remaining slices stay on the feature issue (waiting-on-prereq), no gap issues; the supervisor relaunches it once the upstream adopt slices land.
-- 07:56Z: asked the supervisor whether to park the slices blocked on planned upstream features.
-- 07:56Z: asked the supervisor whether to park the slices blocked on planned upstream features.
-- CB-a #4080 · CB-m #4104 · CB-s #4105 · CB-u #4106 merged; CB-u critic panel waits a run with ui-screens
-- Test-first halves merged (disabled): CB-5 #4302 · CB-7 #4306 · CB-9 #4317 · CB-11 #4316
-- CB-6 waits UP-design, AR-design (planned) and cross-line PD-m, DP-m
-- CB-8 waits FR-flare (FR-10 #4293 in flight); CB-10 waits FR-halo (FR-8 building) and PH-m, HF-m
-- CB-12 waits shared-thumbnails:ST-m (planned), #3160 (open), LF-m; CB-13 waits SC-photo; CB-14 waits AR-photo-m
+Run act-1a1695ebfeb-d54n, 2026-10-23T15:30Z; supersedes the tables' PR/state columns.
+- Unparked by the supervisor (2026-10-23, contract-first waits, lead.md rule 12): a wait is met once the other feature's contract slice merged; build on its fakes with a Wire line.
+- Wave 1 (this run): CB-6 (CB-design), CB-8 (CB-flare), CB-10 (CB-halo) building, one PR each, on placed-images PL-a's fakes where PL-m's bodies aren't there.
+- CB-12 (CB-library) blocked: shared-thumbnails ST-a not merged (no contract to build on). CB-13/14 (CB-photo): shared-codecs SC-photo checked next wave.
+- CB-a, CB-m, CB-s, CB-u merged; test halves CB-5 #4302, CB-7 #4306, CB-9 #4317, CB-11 #4316 merged.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -29,9 +25,9 @@ Run act-1a161a658a7-2jql, status at 2026-10-22T07:24Z; this block supersedes the
 | CB-m | The coder orders representations richest first (own type, SVG, PNG, TIFF, text), picks the best item a target app can take and says why Paste is off, and the CLI's pasteboard folder round-trips every item. | CB-3, CB-4 | MJ-CB | CB-a | no | 0 | merged | – | – |
 | CB-s | One SuiteShell bridge writes and reads the coder's items on the system pasteboard with no source metadata and no polling timer. | CB-4b, CB-4c | MJ-CB | CB-a | no | 0 | merged | – | – |
 | CB-u | SuiteUI has one Copy As submenu (PNG, SVG, the app's own type) and Paste as Image built from the catalog's specs, each item off with the coder's reason as its help, reachable from the gallery's menus page on the fakes. | CB-u1, CB-u2 | SJ-CB | CB-a | yes | 0 | merged | – | – |
-| CB-design | Design's Copy writes its layers, a PNG of the selection at 2x and an SVG beside them, and Paste of a plain image or SVG places it as a picture at the view's centre. | CB-5, CB-6 | DJ-CB | CB-a (CB-5); CB-m, CB-s, CB-u and placed-images:PL-m (CB-6); design/placed-images PD-m and design/pen-paths DP-m (cross-line); shared files, after adopt-kernel-unsaved-prompt:UP-design (CB-6), area-selection:AR-design (CB-6) | yes | 0 | planned | – | – |
-| CB-flare | Flare's Copy writes its layers, a PNG of the selection at the playhead and an SVG frame beside them, Paste of an image or SVG places it, and its 4 Hz pasteboard poll is gone. | CB-7, CB-8 | FJ-CB | CB-a (CB-7); CB-m, CB-s, CB-u and placed-images:PL-m (CB-8); flare/svg-place PF-m and flare/pen-paths FP-m (cross-line); shared files, after frame-rates:FR-flare (CB-8) | yes | 0 | planned | – | – |
-| CB-halo | Halo's Edit > Copy Frame writes the viewer's frame as PNG, and Paste of an image or SVG adds a placed image layer at the playhead. | CB-9, CB-10 | HJ-CB | CB-a (CB-9); CB-m, CB-s, CB-u and placed-images:PL-m (CB-10); halo/placed-images PH-m and halo/file-flow HF-m (cross-line); shared files, after frame-rates:FR-halo (CB-10) | yes | 0 | planned | – | – |
+| CB-design | Design's Copy writes its layers, a PNG of the selection at 2x and an SVG beside them, and Paste of a plain image or SVG places it as a picture at the view's centre. | CB-5, CB-6 | DJ-CB | CB-a (CB-5); CB-m, CB-s, CB-u and placed-images:PL-m (CB-6); design/placed-images PD-m and design/pen-paths DP-m (cross-line); shared files, after adopt-kernel-unsaved-prompt:UP-design (CB-6), area-selection:AR-design (CB-6) | yes | 0 | building | – | – |
+| CB-flare | Flare's Copy writes its layers, a PNG of the selection at the playhead and an SVG frame beside them, Paste of an image or SVG places it, and its 4 Hz pasteboard poll is gone. | CB-7, CB-8 | FJ-CB | CB-a (CB-7); CB-m, CB-s, CB-u and placed-images:PL-m (CB-8); flare/svg-place PF-m and flare/pen-paths FP-m (cross-line); shared files, after frame-rates:FR-flare (CB-8) | yes | 0 | building | – | – |
+| CB-halo | Halo's Edit > Copy Frame writes the viewer's frame as PNG, and Paste of an image or SVG adds a placed image layer at the playhead. | CB-9, CB-10 | HJ-CB | CB-a (CB-9); CB-m, CB-s, CB-u and placed-images:PL-m (CB-10); halo/placed-images PH-m and halo/file-flow HF-m (cross-line); shared files, after frame-rates:FR-halo (CB-10) | yes | 0 | building | – | – |
 | CB-library | Library's Copy writes the selected photo as a full-size PNG with its develop settings applied and as a file URL, with no location data. | CB-11, CB-12 | LJ-CB | CB-a (CB-11); CB-m, CB-s (CB-12); #3160 and library/file-flow LF-m (cross-line); shared files, after shared-thumbnails:ST-m (CB-12) | yes | 0 | planned | – | – |
 | CB-photo | Photo's Copy and Paste run through the shared bridge with the same bytes it writes today, and Paste of an SVG places it rasterized at the canvas centre. | CB-13, CB-14 | PJ-CB | CB-m, CB-s, CB-u; shared-codecs:SC-photo (`PhotoPasteboard.swift`); photo/file-flow PF-m (cross-line); shared files, after area-selection:AR-photo-m (CB-14) | yes | 0 | planned | – | – |
 | CB-z | Design's, Flare's and Photo's own pasteboard files are deleted with the baseline shrunk by three lines, RJ-X72 and RJ-X73 pass, and the feature is built. | CB-15, CB-16 | MJ-CB, DJ-CB, FJ-CB, PJ-CB | every adopt slice; area-selection:AR-z (CB-15, `canonical-baseline.txt`) | yes | 0 | planned | – | – |
@@ -65,12 +61,19 @@ Run act-1a161a658a7-2jql, status at 2026-10-22T07:24Z; this block supersedes the
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-23 (act-1a1695ebfeb-d54n): feature issue is #3753 per the brief (#4512 also tracks it); PRs carry `Refs #3753`.
+- 2026-10-23: wave 1 = CB-6, CB-8, CB-10 with LS-1 (layer-styles); owned files are disjoint. AN-flare-m waits a wave because it shares FlareCommandCatalog, flare.txt and the flare golden with CB-8.
 - Base is origin/dev, PRs target dev: the brief names main as the integration branch, but CLAUDE.md and lead.md say never branch from or target main (the lane retargets main PRs to dev).
 - One combined wave plan across anchor-parenting, frame-rates and clipboard-interop (rule 19); one PR per slice (rule 22), test commit first.
 - Wave 1 is the three contract slices FR-a, AN-a, CB-a: kernel/model stubs plus disabled tests, disjoint files.
 - Status channel is lead/suiteui-<feature> with docs/leads/suiteui-<feature>/ (the names Belt reads); the earlier lead/<feature> branches are superseded.
 - Slice branches are named lead/<feature>-<slice> because lead/<feature> blocks lead/<feature>/<slice>.
 - Wave 2 slices (CB-m, CB-u) build stacked on their wave-1 slice branch and push without a PR; the lead opens each PR once its parent has merged, so the stacked PR never carries the parent's diff past the size cap.
+
+## Wire
+- [ ] Wire: placed-images:PL-m (CB-6, CB-8, CB-10 build on PL-a's place fakes where a body is missing; swap in when it merges)
+- [ ] Wire: area-selection:AR-design (built on AR-a's fakes in CB-6; swap in when it merges)
+- [ ] Wire: adopt-kernel-unsaved-prompt:UP-design (built on UP-a in CB-6; swap in when it merges)
 
 ## Open
 - Adopt slices wait on placed-images:PL-m, shared-codecs:SC-photo, shared-thumbnails:ST-m, area-selection AR-design/AR-photo-m/AR-z, adopt-kernel-unsaved-prompt:UP-design, frame-rates FR-flare/FR-halo, plus cross-line app slices. Rechecked before each starts.
