@@ -101,3 +101,5 @@ utc	stage	event	ref	note
 2026-10-22T20:51:46Z	SM-r	waiting	-	full CI 39848684933 cancelled before running; waiting on 39836789801 (scoped: suite), 39836126860 and 39852194708 (CI)
 2026-10-22T21:01:15Z	SM-z	merged	#4462	SM-10b merged as 57306b1f8 (feature-done); SM-z waits on a green dev run containing de96b149a f304220a3 57306b1f8
 2026-10-22T21:18:52Z	SM-r	done	-	Belt-Slice-Done SM-r (run 39836789801); SM-z waits a green run containing de96b149a f304220a3 57306b1f8
+2026-10-22T22:20:00Z	SM-z	done	-	Belt-Contact-Sheet posted (Linux check 39857152000, mac build 39836789801); journeys 39855707652 still queued
+2026-10-23T00:38:16Z	SM-z	done	-	journeys 39855707652 has no shell-media journey (MJ-SM are live macOS tests); contact sheet updated

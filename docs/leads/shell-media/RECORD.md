@@ -2,9 +2,9 @@
 
 Issue: #3711 · Packet: docs/blueprints/suite/features/shell-media.md
 Run: act-1a1659bd4ae-sr68 · Resumed: 2026-10-22T22:00Z (previous runs act-1a16391fd34-thw9, act-1a1601c3538-r0c9)
-Stage: All slices done (Linux check 39857152000); Belt-Slice-Done for all 5 slices; Belt-Contact-Sheet posted
+Stage: All slices done (Linux check 39857152000); Belt-Contact-Sheet posted (no UI journeys; MJ-SM are live macOS tests)
 Base: dc87ad2b0bcebf2b6bef749328a03ba06687275f
-Next: journeys run 39855707652 fills the journey lines and audit counts; no critic panel (every slice ui:false)
+Next: none for the lead; MJ-SM live tests run in the next full or scoped macOS run
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: journeys run 39855707652 fills the journey lines and audit counts; no crit
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
+| - | 39855707652 | 28e2b852 | none (every slice ui:false) | - | - |
 
 ## Decisions
 - Dev was red (#3856) while wave 1 opened; it has cleared, so Fast-Check markers return on every head.
