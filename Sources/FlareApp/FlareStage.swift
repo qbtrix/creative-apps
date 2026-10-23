@@ -8,7 +8,9 @@
 // through its KeyModifiers (AC-tools); every other key goes to `onKey` (the window's `toolKey`). The floating
 // glass palette lists FlareTool.allCases, each with `model.toolHelp` as its reason when it can't act, then Finish
 // Path with `model.finishPathHelp`; it sits inside the vertical ruler. Under the stage the window's one
-// ViewerStatusBar shows the zoom percent, the scene size, on the fakes a "Preview data" warning pill, then
+// ViewerStatusBar shows the zoom percent, the scene size, after a failed save "Not saved" in the error color
+// (`flare.saveStatus`, its tooltip the failure, as Design's and Photo's status lines carry theirs), on the fakes a
+// "Preview data" warning pill, then
 // `model.statusPills` from the canvas's `measuredFPS` (IT-9): aspect and rate, the rate shown while playing (a warning
 // while frames drop), "Text not shown (n)" and, under Direct Select, why no points can be edited (`pathHelp`). A drag out of a ruler pulls a guide (FlareStageGuides, SE-2); the hidden
 // `flare.stage.zoom` reads the zoom for journeys. It only reads `model`; every change goes through `perform`.
@@ -53,6 +55,10 @@ struct FlareStage: View {
             VStack(spacing: 0) {
                 stage(size: size, scale: scale)
                 ViewerStatusBar(zoom: scale, size: Self.sizeText(size)) {
+                    if let status = model.saveStatus {
+                        // Its tooltip is why the save failed.
+                        EditorSaveStatus(.notSaved, title: status, help: model.saveError ?? "", identifier: "flare.saveStatus")
+                    }
                     if model.services.isPreview {
                         Text("Preview data").accessibilityIdentifier("flare.status.preview").statusPill(.warning)
                             .help(Self.previewHelp)
