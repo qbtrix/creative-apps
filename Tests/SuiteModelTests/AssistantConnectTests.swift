@@ -14,11 +14,11 @@ import Testing
         #expect(BundleLayout.cliPath == "Contents/Helpers/afterglow")
     }
 
-    @Test(.disabled("waits on CB-4")) func pathWithSpaceIsQuoted() {
+    @Test func pathWithSpaceIsQuoted() {
         #expect(AssistantConnect.command(bundle: Self.bundle) == "\"\(Self.cli)\" mcp")
     }
 
-    @Test(.disabled("waits on CB-4")) func configParsesAndNamesTheServer() throws {
+    @Test func configParsesAndNamesTheServer() throws {
         let data = Data(AssistantConnect.configJSON(bundle: Self.bundle).utf8)
         let root = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
         let servers = try #require(root["mcpServers"] as? [String: Any])
@@ -27,21 +27,35 @@ import Testing
         #expect(server["args"] as? [String] == ["mcp"])
     }
 
-    @Test(.disabled("waits on CB-4")) func nothingThereIsLinked() {
+    @Test func nothingThereIsLinked() {
         let plan = AssistantConnect.installPlan(home: Self.home, bundle: Self.bundle) { _ in nil }
         #expect(plan == .link(at: Self.home + "/.local/bin/afterglow", to: Self.cli))
     }
 
-    @Test(.disabled("waits on CB-4")) func ourLinkIsAlreadyLinked() {
+    @Test func ourLinkIsAlreadyLinked() {
         let plan = AssistantConnect.installPlan(home: Self.home, bundle: Self.bundle) { _ in Self.cli }
         #expect(plan == .alreadyLinked(Self.home + "/.local/bin/afterglow"))
     }
 
-    @Test(.disabled("waits on CB-4")) func anyOtherFileIsRefusedWithAReason() {
+    @Test func neverOverwritesForeignFile() {
         for other in ["/opt/homebrew/bin/afterglow", "", "/Users/tester/old/AfterGlow.app/Contents/Helpers/afterglow"] {
             let plan = AssistantConnect.installPlan(home: Self.home, bundle: Self.bundle) { _ in other }
             guard case .refuse(let reason) = plan else { Issue.record("\(other) is replaced: \(plan)"); continue }
             #expect(!reason.isEmpty)
         }
+    }
+
+    @Test func quotesAndBackslashesAreEscaped() throws {
+        let bundle = #"/Users/tester/a "b" \c/AfterGlow.app"#
+        #expect(AssistantConnect.command(bundle: bundle) == #""/Users/tester/a \"b\" \\c/AfterGlow.app/Contents/Helpers/afterglow" mcp"#)
+        let data = Data(AssistantConnect.configJSON(bundle: bundle).utf8)
+        let root = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let server = try #require((root["mcpServers"] as? [String: Any])?["afterglow"] as? [String: Any])
+        #expect(server["command"] as? String == bundle + "/Contents/Helpers/afterglow")
+    }
+
+    @Test func aTrailingSlashOnHomeMakesOnePath() {
+        let plan = AssistantConnect.installPlan(home: Self.home + "/", bundle: Self.bundle) { _ in nil }
+        #expect(plan == .link(at: Self.home + "/.local/bin/afterglow", to: Self.cli))
     }
 }

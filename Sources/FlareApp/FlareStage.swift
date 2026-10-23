@@ -16,7 +16,8 @@
 // `flare.stage.zoom` reads the zoom for journeys. It only reads `model`; every change goes through `perform`.
 // A file dropped on the stage follows the suite's drop rule (file-flow FL-2, `suiteFileDrop`): a .flare opens
 // through the app's document host, another app's file goes to that app, and the mark at the bottom says which
-// before the drop.
+// before the drop. A Lottie .json, which no suite type names, is planned as Flare's own open (`opens`), so the
+// mark says "Open in Flare", and opens through FlareShell.openQueue (`FlareWorkspace.lottieDrops`, lottie-open LO-4).
 import AppKit
 import FlareCore
 import FlareModel
@@ -73,11 +74,19 @@ struct FlareStage: View {
             .onChange(of: fit, initial: true) { _, fit in onFit(fit) }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier(Self.identifier)
-            .suiteFileDrop(.flare, bridge: FlareShell.bridge, host: FlareShell.host, hasDocument: model.hasDocument,
-                           places: model.placesExtensions, documentName: model.fileName)
+            .suiteFileDrop(.flare, bridge: FlareShell.bridge, hasDocument: model.hasDocument,
+                           places: model.placesExtensions, opens: Self.opens, documentName: model.fileName) { actions in
+                let (lottie, rest) = FlareWorkspace.lottieDrops(actions)
+                Task { @MainActor in
+                    for path in lottie { FlareShell.openQueue.open(URL(fileURLWithPath: path)) }
+                    if !rest.isEmpty { await FlareShell.bridge.perform(rest, host: FlareShell.host) }
+                }
+            }
         }
     }
 
+    /// The extensions the stage opens itself though no suite type names them: Lottie's .json.
+    static let opens = Set(FlareLottieOpen.fileExtensions)
     /// The stage and its status bar; the journeys measure the palette against its leading ruler.
     static let identifier = "flare.stagePane"
     /// The zoom readout journeys read ("Fit", "200%"): the status bar's pill text doesn't reach XCUITest (#1452).

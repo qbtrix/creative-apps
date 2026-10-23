@@ -2,7 +2,7 @@
 // help.connect-assistant and help.install-cli with their schemas, finds AfterGlow.app from `--bundle` or its own
 // path inside the bundle, and answers the two commands with AssistantConnect's text and plan. Linux-safe; files
 // live in a FakeIO.
-import AfterGlowCLICore
+@testable import AfterGlowCLICore
 import Foundation
 import SuiteModel
 import Testing
@@ -16,6 +16,11 @@ import Testing
         let code = CLI.run(arguments, io: io)
         guard case .object(let fields) = try JSONValue(json: Data((io.stdout.last ?? "").utf8)) else { return (code, [:]) }
         return (code, fields)
+    }
+
+    /// One field of an object answer.
+    static func field(_ value: JSONValue, _ key: String) -> JSONValue? {
+        if case .object(let fields) = value { fields[key] } else { nil }
     }
 
     @Test func specsListWithTheirSchemas() throws {
@@ -68,13 +73,13 @@ import Testing
         #expect(config.installCLI(confirm: false) { _ in nil } == .null)
     }
 
-    @Test(.disabled("waits on CB-4")) func connectAnswersAssistantConnectsText() {
+    @Test func connectAnswersAssistantConnectsText() {
         let config = MCPConfig(bundle: Self.bundle, home: "/Users/tester")
         #expect(config.connectAssistant() == .object(["command": .string("\"\(Self.cli)\" mcp"),
                                                       "json": .string(AssistantConnect.configJSON(bundle: Self.bundle))]))
     }
 
-    @Test(.disabled("waits on CB-4")) func installWithoutConfirmReturnsThePlanOnly() {
+    @Test func installWithoutConfirmReturnsThePlanOnly() {
         let config = MCPConfig(bundle: Self.bundle, home: "/Users/tester")
         var asked = [String]()
         let plan = config.installCLI(confirm: false) { asked.append($0); return nil }
@@ -83,7 +88,7 @@ import Testing
         #expect(asked == ["/Users/tester/.local/bin/afterglow"])
     }
 
-    @Test(.disabled("waits on CB-4")) func aForeignFileIsRefusedWithItsReason() {
+    @Test func aForeignFileIsRefusedWithItsReason() {
         let config = MCPConfig(bundle: Self.bundle, home: "/Users/tester")
         guard case .object(let plan) = config.installCLI(confirm: true, existing: { _ in "/opt/homebrew/bin/afterglow" }) else {
             Issue.record("no plan"); return
@@ -91,5 +96,41 @@ import Testing
         #expect(plan["plan"] == .string("refuse"))
         #expect(plan["linked"] == .bool(false), "confirm never writes over a foreign file")
         if case .string(let reason)? = plan["reason"] { #expect(!reason.isEmpty) } else { Issue.record("no reason") }
+    }
+
+    @Test func confirmMakesTheLinkOnlyForALinkPlan() {
+        let config = MCPConfig(bundle: Self.bundle, home: "/Users/tester")
+        var made = [String]()
+        let record: (String, String) throws -> Void = { made.append($0 + " -> " + $1) }
+        _ = config.installCLI(confirm: false, existing: { _ in nil }, link: record)
+        #expect(made.isEmpty, "without confirm nothing is written")
+        _ = config.installCLI(confirm: true, existing: { _ in "/opt/homebrew/bin/afterglow" }, link: record)
+        _ = config.installCLI(confirm: true, existing: { _ in Self.cli }, link: record)
+        #expect(made.isEmpty, "a foreign file or our own link is left as it is")
+        let plan = config.installCLI(confirm: true, existing: { _ in nil }, link: record)
+        #expect(made == ["/Users/tester/.local/bin/afterglow -> \(Self.cli)"])
+        #expect(plan == .object(["plan": .string("link"), "at": .string("/Users/tester/.local/bin/afterglow"),
+                                 "to": .string(Self.cli), "linked": .bool(true)]))
+    }
+
+    @Test func aFailedWriteIsARefusal() {
+        struct Denied: Error {}
+        let config = MCPConfig(bundle: Self.bundle, home: "/Users/tester")
+        guard case .object(let plan) = config.installCLI(confirm: true, existing: { _ in nil }, link: { _, _ in throw Denied() }) else {
+            Issue.record("no plan"); return
+        }
+        #expect(plan["plan"] == .string("refuse") && plan["linked"] == .bool(false))
+    }
+
+    @Test func installMakesARealLinkOnceInATempHome() throws {
+        let home = FileManager.default.temporaryDirectory.appendingPathComponent("afterglow-home-\(UUID().uuidString)").path
+        defer { try? FileManager.default.removeItem(atPath: home) }
+        let config = MCPConfig(bundle: Self.bundle, home: home)
+        let at = home + "/.local/bin/afterglow"
+        #expect(Self.field(config.installCLI(confirm: false, existing: MCPConfig.linkTarget), "plan") == .string("link"))
+        #expect(MCPConfig.linkTarget(at) == nil, "the plan alone writes nothing")
+        #expect(Self.field(config.installCLI(confirm: true, existing: MCPConfig.linkTarget), "linked") == .bool(true))
+        #expect(try FileManager.default.destinationOfSymbolicLink(atPath: at) == Self.cli)
+        #expect(Self.field(config.installCLI(confirm: true, existing: MCPConfig.linkTarget), "plan") == .string("alreadyLinked"))
     }
 }
