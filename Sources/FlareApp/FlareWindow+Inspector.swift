@@ -10,7 +10,7 @@ extension FlareWindow {
     /// Acts on an inspector intent.
     func performInspector(_ intent: FlareIntent.Inspector) {
         switch intent {
-        case .showTab(let id): if let tab = FlareInspectorTab(rawValue: id) { inspectorTab = tab }
+        case .showTab(let id): if let tab = FlareInspectorTab(rawValue: id), FlareInspectorTab.shown.contains(tab) { inspectorTab = tab }
         case let .scrub(property, value, start): model.setProperty(property, to: value, dragStart: start)
         case .endScrub: model.endPropertyScrub()
         case .toggleAnimated(let property), .toggleKey(let property):

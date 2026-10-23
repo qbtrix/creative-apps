@@ -1,15 +1,19 @@
 // HaloTransport.swift: the status bar's transport (viewer-playback #37,
 // VP-10): five plain SF Symbol buttons and a Loop toggle sending their
-// HaloCommand (each button its catalog spec's MenuCommand, command-state CS-8), disabled with `unavailableHelp(for:)` as the tooltip while the
+// HaloCommand (each button its catalog spec's MenuCommand on the frame on screen, command-state CS-8), disabled with `unavailableHelp(for:)` as the tooltip while the
 // Model can't act, and drawn in textTertiary then so they look disabled
-// inside the pill. Play shows pause.fill while playing and reads `playLabel`
+// inside the pill. All of it comes from one HaloTransportState of the frame
+// on screen (HaloPlayheadShown), so a ruler scrub's last frame reaches the
+// buttons before the window takes it back and a button's ink never
+// disagrees with its disabled state (#4352). Play shows pause.fill while playing and reads `playLabel`
 // as its value. Loop is a button-style Toggle that reads `loopLabel` and
 // draws its on state (system highlight, accent ink) so a person can see
 // whether looping is on. It owns the HaloPlaybackDriver: running while
 // `model.playback.playing`, stopped otherwise or once the transport leaves
 // the screen, on the `haloRefreshLink` the environment gives; each refresh
 // sends `.tick(now)` through `perform`, and a playhead that moved while
-// playing is a `playback` frame in the probe (HaloProbe). Each
+// playing (the live edit's playing frame, HaloPlayheadShown) is a `playback`
+// frame in the probe (HaloProbe). Each
 // control takes at least a SuiteSize.pillHit square (24 pt) to click, not
 // just its 10 pt glyph, the squares edge to edge so the row stays narrow
 // enough for the status bar, until TransportCapsule (#340) replaces it.
@@ -25,82 +29,46 @@ struct HaloTransport: View {
     @Environment(\.haloRefreshLink) private var makeLink
     @Environment(\.suiteProbeRecorder) private var recorder
 
-    /// One transport button: its command, SF Symbol and control id.
-    private struct Item: Identifiable, Sendable {
-        let command: HaloCommand
-        let symbol: String
-        let id: String
-    }
-
-    private static let items = [
-        Item(command: .goToStart, symbol: "backward.end.fill", id: "halo.transport.start"),
-        Item(command: .previousFrame, symbol: "backward.frame.fill", id: "halo.transport.previous"),
-        Item(command: .playPause, symbol: "play.fill", id: "halo.transport.play"),
-        Item(command: .nextFrame, symbol: "forward.frame.fill", id: "halo.transport.next"),
-        Item(command: .goToEnd, symbol: "forward.end.fill", id: "halo.transport.end"),
-        Item(command: .toggleLoop, symbol: "repeat", id: "halo.transport.loop"),
-    ]
-
     var body: some View {
-        HStack(spacing: 0) {
-            ForEach(Self.items) { item in
-                let help = model.unavailableHelp(for: item.command)
-                control(for: item)
-                    .labelStyle(.iconOnly)
-                    .buttonStyle(.borderless)
-                    // A pill control's hit target: at least pillHit square
-                    // (design.md, Symbols and controls), clickable across it.
-                    .frame(minWidth: SuiteSize.pillHit, minHeight: SuiteSize.pillHit)
-                    .contentShape(Rectangle())
-                    .disabled(help != nil)
-                    // Its own ink, so the status bar pill's textSecondary can't
-                    // draw a disabled button as live: tertiary while disabled,
-                    // accent for Loop while it is on.
-                    .foregroundStyle(ink(for: item.command, enabled: help == nil))
-                    .help(help ?? model.title(for: item.command))
-                    .accessibilityValue(Text(verbatim: value(for: item.command)))
-                    .haloControl(id: item.id, enabled: help == nil, help: help)
-            }
+        // The frame on screen (a live scrub or playing frame, else `model`)
+        // decides every button: its enabled state, tooltip and ink come from
+        // one HaloTransportState in this pass (#4352).
+        HaloPlayheadShown(model: model) { shown in
+            HaloPlayButtons(state: HaloTransportState(shown), target: HaloMenuState(project: shown), perform: perform)
+                .equatable()
         }
         .onChange(of: model.playback.playing, initial: true) { _, playing in follow(playing: playing) }
-        .onChange(of: model.selectedComposition?.playheadFrame) {
-            if model.playback.playing { driver?.frameShown() }
+        .background {
+            HaloPlayheadShown(model: model) { shown in
+                Color.clear.onChange(of: shown.selectedComposition?.playheadFrame) {
+                    if shown.playback.playing { driver?.frameShown() }
+                }
+            }
         }
         .onDisappear { driver?.stop() }
     }
 
-    /// Loop is a button-style Toggle, so the system draws its on state;
-    /// the rest are plain buttons sending their command.
-    @ViewBuilder private func control(for item: Item) -> some View {
-        if item.command == .toggleLoop {
-            Toggle(isOn: Binding(get: { model.playback.loops }, set: { _ in perform(.toggleLoop) })) {
-                Label(model.title(for: item.command), systemImage: item.symbol)
-            }
-            .toggleStyle(.button)
-            .tint(SuiteColor.accent)
-        } else {
-            MenuCommand(HaloMenuState.spec(item.command.commandID), on: HaloMenuState(project: model),
-                        title: model.title(for: item.command), systemImage: symbol(for: item)) { perform(item.command) }
+    /// Each button's SF Symbol; Play's turns to pause while playing.
+    nonisolated static func symbol(_ command: HaloCommand, playing: Bool) -> String {
+        switch command {
+        case .goToStart: "backward.end.fill"
+        case .previousFrame: "backward.frame.fill"
+        case .playPause: playing ? "pause.fill" : "play.fill"
+        case .nextFrame: "forward.frame.fill"
+        case .goToEnd: "forward.end.fill"
+        default: "repeat"
         }
     }
 
-    /// Tertiary while disabled, accent for Loop while on, else secondary.
-    private func ink(for command: HaloCommand, enabled: Bool) -> Color {
-        guard enabled else { return SuiteColor.textTertiary }
-        return command == .toggleLoop && model.playback.loops ? SuiteColor.accent : SuiteColor.textSecondary
-    }
-
-    /// Play's symbol turns to pause while playing; the rest keep theirs.
-    private func symbol(for item: Item) -> String {
-        item.command == .playPause && model.playback.playing ? "pause.fill" : item.symbol
-    }
-
-    /// Play reads "Playing"/"Paused", Loop "On"/"Off"; the others no value.
-    private func value(for command: HaloCommand) -> String {
+    /// Each button's control id.
+    nonisolated static func id(_ command: HaloCommand) -> String {
         switch command {
-        case .playPause: model.playLabel
-        case .toggleLoop: model.loopLabel
-        default: ""
+        case .goToStart: "halo.transport.start"
+        case .previousFrame: "halo.transport.previous"
+        case .playPause: "halo.transport.play"
+        case .nextFrame: "halo.transport.next"
+        case .goToEnd: "halo.transport.end"
+        default: "halo.transport.loop"
         }
     }
 
@@ -115,5 +83,72 @@ struct HaloTransport: View {
         running.probe = HaloProbe(recorder)
         driver = running
         running.start()
+    }
+}
+
+/// The transport's buttons for `state`. `target` is the same frame on screen,
+/// which each button's catalog spec reads; it decides nothing `state` doesn't,
+/// so it and `perform` (the window's, always acting on its current project)
+/// are left out of `==`: a playing frame that leaves every button as it was
+/// skips this body.
+struct HaloPlayButtons: View, Equatable {
+    let state: HaloTransportState
+    let target: HaloMenuState
+    let perform: @MainActor (HaloCommand) -> Void
+
+    nonisolated static func == (a: Self, b: Self) -> Bool { a.state == b.state }
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(state.buttons) { button in
+                let help = button.unavailableHelp
+                control(for: button)
+                    .labelStyle(.iconOnly)
+                    .buttonStyle(.borderless)
+                    // A pill control's hit target: at least pillHit square
+                    // (design.md, Symbols and controls), clickable across it.
+                    .frame(minWidth: SuiteSize.pillHit, minHeight: SuiteSize.pillHit)
+                    .contentShape(Rectangle())
+                    .disabled(!button.isEnabled)
+                    // Its own ink, so the status bar pill's textSecondary can't
+                    // draw a disabled button as live: tertiary while disabled,
+                    // accent for Loop while it is on.
+                    .foregroundStyle(ink(for: button))
+                    .help(help ?? button.title)
+                    .accessibilityValue(Text(verbatim: value(for: button.command)))
+                    .haloControl(id: HaloTransport.id(button.command), enabled: button.isEnabled, help: help)
+            }
+        }
+    }
+
+    /// Loop is a button-style Toggle, so the system draws its on state;
+    /// the rest are plain buttons sending their command, enabled and helped
+    /// as their catalog spec says (command-state CS-8).
+    @ViewBuilder private func control(for button: HaloTransportState.Button) -> some View {
+        if button.command == .toggleLoop {
+            Toggle(isOn: Binding(get: { state.loops }, set: { _ in perform(.toggleLoop) })) {
+                Label(button.title, systemImage: HaloTransport.symbol(button.command, playing: false))
+            }
+            .toggleStyle(.button)
+            .tint(SuiteColor.accent)
+        } else {
+            MenuCommand(HaloMenuState.spec(button.command.commandID), on: target, title: button.title,
+                        systemImage: HaloTransport.symbol(button.command, playing: state.playing)) { perform(button.command) }
+        }
+    }
+
+    /// Tertiary while disabled, accent for Loop while on, else secondary.
+    private func ink(for button: HaloTransportState.Button) -> Color {
+        guard button.isEnabled else { return SuiteColor.textTertiary }
+        return button.command == .toggleLoop && state.loops ? SuiteColor.accent : SuiteColor.textSecondary
+    }
+
+    /// Play reads "Playing"/"Paused", Loop "On"/"Off"; the others no value.
+    private func value(for command: HaloCommand) -> String {
+        switch command {
+        case .playPause: state.playLabel
+        case .toggleLoop: state.loopLabel
+        default: ""
+        }
     }
 }

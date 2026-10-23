@@ -23,3 +23,8 @@ public enum BundleLayout {
         name == nil ? "@executable_path/../Frameworks" : "@executable_path/../../../../Frameworks"
     }
 }
+
+extension BundleLayout {
+    /// The `afterglow` CLI and MCP server inside AfterGlow.app (cli-bundle CB-1): the one place that knows it.
+    public static let cliPath = "Contents/Helpers/afterglow"
+}

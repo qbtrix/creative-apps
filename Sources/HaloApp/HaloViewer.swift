@@ -4,13 +4,17 @@
 // with HaloTransport and the History button beside it, HaloTimelineView and a refusal's caption, or the empty
 // state. The status bar's tooltips (HaloStatusText) say what the timecode's
 // four parts count and that the pills are zoom and pixel size. A narrow
-// column drops the layer count, then moves the transport out of its pill to
-// the row's leading edge without History (L5: transport left, pills right),
-// then drops the timecode; the transport never goes, and the content adds no
-// width to SuiteWindow's minimum (#4272). Space, ←, →,
+// column takes HaloStatusRow's shapes in turn: it drops the layer count,
+// then moves the transport and History out of their pills to the row's
+// leading edge (L5: transport left, pills right), then drops the zoom pill,
+// then the timecode; the transport and History never go (#4272, #4449),
+// and the content adds no width to SuiteWindow's minimum. Space, ←, →,
 // Home, End, I and O become HaloCommands sent to `perform`, and ⌫ (the
 // delete command) sends the Model's `deleteCommand`: the picked keys while any
-// are picked, else the selected layer, as in the layer list. Views only read HaloProject; state lives in HaloModel.
+// are picked, else the selected layer, as in the layer list. Files dropped on
+// the canvas are placed at the drop point through the window's `haloPlace`
+// (PH-3).
+// Views only read HaloProject; state lives in HaloModel.
 import HaloModel
 import SuiteKernel
 import SuiteUI
@@ -23,6 +27,11 @@ struct HaloViewer: View {
     var onShapeIntent: @MainActor (ShapeIntent) -> Void = { _ in }
     /// The viewer's size, for the zoom CanvasSurface fits the artboard at.
     @State private var viewport = CGSize.zero
+    /// The window's place action (HaloPlace.swift) and the Fill preference a drop reads.
+    @Environment(\.haloPlace) private var place
+    @AppStorage(HaloPlace.fillKey) private var fill = false
+
+    private var placeHelp: String? { HaloPlace.help(model, place) }
 
     var body: some View {
         if let comp = model.selectedComposition {
@@ -30,6 +39,13 @@ struct HaloViewer: View {
             VStack(spacing: 0) {
                 HaloViewerCanvas(model: model, perform: perform)
                     .overlay { HaloViewerHandles(model: model) }
+                    // PH-3: files dropped here are placed at the drop point; no formats while placing is off.
+                    .placeDropTarget(formats: placeHelp == nil ? model.placeFormats : []) { files, point in
+                        guard let place, placeHelp == nil else { return false }
+                        let at = HaloPlace.compositionPoint(point, viewer: viewport, composition: artboard)
+                        for file in files { place(.place(name: file.name, data: file.data, at: at), fill) }
+                        return !files.isEmpty
+                    }
                     .onGeometryChange(for: CGSize.self) { $0.size } action: { viewport = $0 }
                     // Top trailing, clear of the drag journey's top-leading surround.
                     .overlay(alignment: .topTrailing) {
@@ -46,16 +62,17 @@ struct HaloViewer: View {
                         .background(SuiteColor.panel)
                         .accessibilityIdentifier("halo.viewer.notice")
                 }
-                // The widest bar that fits, so the status bar never holds the
-                // content column wider than SuiteWindow's minimum: the layer
-                // count goes first, then History and the transport's pill
-                // (at 440 pt the pilled transport and three pills need 446),
-                // then the timecode. The transport always stays.
+                // The widest row that fits (HaloStatusRow.fallbacks, in its
+                // order), so the status bar never holds the content column
+                // wider than SuiteWindow's minimum. At 440 pt the bare
+                // transport, History and three pills need about 456, so the
+                // zoom pill goes there (#4449).
                 ViewThatFits(in: .horizontal) {
-                    statusBar(comp, artboard: artboard, timecode: true, layers: true, transport: true)
-                    statusBar(comp, artboard: artboard, timecode: true, layers: false, transport: true)
-                    leadingTransport(comp, artboard: artboard, timecode: true)
-                    leadingTransport(comp, artboard: artboard, timecode: false)
+                    statusRow(comp, artboard: artboard, .wide)
+                    statusRow(comp, artboard: artboard, .noLayers)
+                    statusRow(comp, artboard: artboard, .leading)
+                    statusRow(comp, artboard: artboard, .leadingNoZoom)
+                    statusRow(comp, artboard: artboard, .bare)
                 }
                 Divider()
                 HaloTimelineView(model: model, perform: perform)
@@ -86,38 +103,52 @@ struct HaloViewer: View {
         }
     }
 
-    /// The status bar with the trailing pills asked for. ViewerStatusBar's
+    /// One shape of the status row: the bar alone, or the bare transport
+    /// and History at the leading edge, their 24 pt squares edge to edge
+    /// with no pill around them, and the bar's pills right.
+    @ViewBuilder
+    private func statusRow(_ comp: HaloComposition, artboard: CGSize, _ row: HaloStatusRow) -> some View {
+        if row.transportInBar {
+            statusBar(comp, artboard: artboard, row)
+        } else {
+            HStack(spacing: 0) {
+                HaloTransport(model: model, perform: perform)
+                if row.history { HaloHistoryControl() }
+                statusBar(comp, artboard: artboard, row)
+            }
+            .background(SuiteColor.panel)
+        }
+    }
+
+    /// The status bar with the pills `row` asks for. ViewerStatusBar's
     /// zoom and size pills take no help of their own; the bar's tooltip names
     /// them, and each trailing pill keeps its own.
-    private func statusBar(
-        _ comp: HaloComposition, artboard: CGSize, timecode: Bool, layers: Bool, transport: Bool
-    ) -> some View {
-        ViewerStatusBar(zoom: ViewerZoom.fitScale(artboard: artboard, in: viewport), size: comp.sizeText) {
-            if timecode {
+    private func statusBar(_ comp: HaloComposition, artboard: CGSize, _ row: HaloStatusRow) -> some View {
+        let zoom: Double? = row.zoom ? ViewerZoom.fitScale(artboard: artboard, in: viewport) : nil
+        return ViewerStatusBar(zoom: zoom, size: comp.sizeText) {
+            if row.timecode {
                 // The current time in primary ink, in the pill type so the
                 // bar fits the content column; the length is in the tooltip.
-                Text(comp.statusTimecode)
+                // The playing frame's time, re-run alone per frame (HaloPlayheadShown).
+                // Sized to the composition's widest line, drawn hidden under
+                // it, with fixed-width digits: a playing timecode never
+                // changes the row's width, so ViewThatFits keeps one shape and
+                // never swaps the transport out from under a click (#4586).
+                Text(comp.statusTimecodeWidest).hidden().accessibilityHidden(true)
+                    .overlay(alignment: .leading) {
+                        HaloPlayheadShown(model: model) { Text(($0.selectedComposition ?? comp).statusTimecode) }
+                    }
+                    .monospacedDigit()
                     .foregroundStyle(SuiteColor.textPrimary)
                     .help(comp.statusTimecodeHelp)
             }
-            if layers { Text(comp.layerSummary).help("Layers in this composition.") }
-            if transport {
+            if row.layers { Text(comp.layerSummary).help("Layers in this composition.") }
+            if row.transportInBar {
                 HaloTransport(model: model, perform: perform)
-                HaloHistoryControl()
+                if row.history { HaloHistoryControl() }
             }
         }
-        .help(HaloComposition.viewerPillsHelp)
-    }
-
-    /// The narrow row: the bare transport at the leading edge, its 24 pt
-    /// squares edge to edge with no pill around them, and the pills right.
-    /// History drops out here; a wider column shows it again.
-    private func leadingTransport(_ comp: HaloComposition, artboard: CGSize, timecode: Bool) -> some View {
-        HStack(spacing: 0) {
-            HaloTransport(model: model, perform: perform)
-            statusBar(comp, artboard: artboard, timecode: timecode, layers: false, transport: false)
-        }
-        .background(SuiteColor.panel)
+        .help(row.pillsHelp)
     }
 
     /// The command a viewer key sends; nil for any other key.
