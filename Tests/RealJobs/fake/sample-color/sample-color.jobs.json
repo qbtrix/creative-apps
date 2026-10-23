@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "app": "fake",
+  "why": "RJ-X33: reads the colour under three points with color.sample on two rects, a blue-to-white gradient (Rect 1, selected) under a solid red (Rect 2): where they overlap, in the gradient's middle and on empty canvas, then saves. The trap: the sample reads the selected or lower rect, a gradient's first stop instead of its colour at the point, or the query edits the canvas. The assertion: the overlap reads red, the gradient's middle its 50% mix (128, 128, 255), empty canvas null (the samples below, which FakeSampleTests checks step by step); the saved rects are the input unchanged.",
+  "inputs": ["input/*.fake"],
+  "steps": [
+    {"id": "rect.select", "params": {"id": 1}},
+    {"id": "color.sample", "params": {"x": 90, "y": 40}},
+    {"id": "color.sample", "params": {"x": 60, "y": 40}},
+    {"id": "color.sample", "params": {"x": 200, "y": 200}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-sampled", "format": "json", "options": {}},
+  "expect": {
+    "out/two-fills-sampled.json": {"json": [
+      {"fill": {"end": {"x": 100, "y": 30}, "start": {"x": 0, "y": 30}, "stops": [{"color": {"a": 1, "b": 1, "g": 0, "r": 0}, "offset": 0}, {"color": {"a": 1, "b": 1, "g": 1, "r": 1}, "offset": 1}], "type": "linear"},
+       "h": 60, "id": 1, "locked": false, "name": "Rect 1", "w": 100, "x": 10, "y": 10},
+      {"fill": {"a": 1, "b": 0, "g": 0, "r": 1},
+       "h": 40, "id": 2, "locked": false, "name": "Rect 2", "w": 60, "x": 80, "y": 20}
+    ]}
+  },
+  "samples": [
+    {"color": {"hex": "#FF0000", "r": 255, "g": 0, "b": 0, "a": 255}},
+    {"color": {"hex": "#8080FF", "r": 128, "g": 128, "b": 255, "a": 255}},
+    {"color": null}
+  ],
+  "platforms": ["linux", "macos"]
+}

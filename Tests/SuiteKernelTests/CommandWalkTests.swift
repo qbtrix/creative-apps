@@ -19,7 +19,7 @@ import SuiteKernel
                         "fill.angle", "fill.gradient"]
     static let strokes = ["stroke.read", "stroke.add", "stroke.color", "stroke.width", "stroke.join", "stroke.cap", "stroke.dash",
                           "stroke.trim", "stroke.remove"]
-    static let walk = ["rect.list", "history.read", "rect.select", "doc.export-json", "file.recent", "file.open-recent", "file.open-in",
+    static let walk = ["rect.list", "color.sample", "history.read", "rect.select", "doc.export-json", "file.recent", "file.open-recent", "file.open-in",
                        "file.clear-recent"] + fills + strokes + ["rect.add", "rect.move", "edit.undo", "edit.redo", "rect.remove"]
 
     /// `doc` saved and opened again: a document at its saved state, with a clean history.
@@ -27,9 +27,9 @@ import SuiteKernel
         try FakeCanvasDocument.open(doc.save(), name: "canvas.fake")
     }
 
-    @Test func listNamesTheFakesThirtyEightIdsSorted() {
+    @Test func listNamesTheFakesThirtyNineIdsSorted() {
         #expect(catalog.app == "fake")
-        #expect(catalog.ids == ["doc.export-json", "edit.redo", "edit.undo", "file.clear-recent", "file.drop", "file.open-in",
+        #expect(catalog.ids == ["color.sample", "doc.export-json", "edit.redo", "edit.undo", "file.clear-recent", "file.drop", "file.open-in",
                               "file.open-recent", "file.recent", "fill.angle", "fill.gradient", "fill.read", "fill.stop-add",
                               "fill.stop-color", "fill.stop-move", "fill.stop-remove", "fill.type", "history.jump", "history.read",
                               "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select", "stroke.add", "stroke.cap",

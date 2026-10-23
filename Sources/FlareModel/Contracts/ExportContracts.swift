@@ -6,8 +6,9 @@ import Foundation
 #endif
 import FlareCore
 import SuiteKernel
+import SuiteModel
 
-/// mp4 and gif are export-pack's (FV-1), planned by FV-3 (`FlareVideoPlan`), refused with `unbuiltReason` until FV-4 writes them.
+/// mp4 and gif are export-pack's (FV-1), planned by FV-3 (`FlareVideoPlan`) and written by FV-4's `writeVideo`.
 public enum ExportFormat: String, CaseIterable, Hashable, Sendable { case svgFrame, lottie, pngSequence, mp4, gif }
 
 public struct ExportOptions: Hashable, Sendable {
@@ -43,6 +44,15 @@ public struct ExportResult: Equatable, Sendable {
 /// Implemented in FlareApp with CoreGraphics; the fake returns a fixed tiny PNG.
 public protocol FrameRasterizing: Sendable {
     func png(_ list: StageDrawList, scale: Double, transparent: Bool) throws -> Data
+    /// `list` drawn to fill exactly `width` × `height` pixels, for a movie or GIF frame (export-pack FV-4).
+    func frame(_ list: StageDrawList, width: Int, height: Int, transparent: Bool) throws -> MediaFrame
+}
+
+extension FrameRasterizing {
+    /// Until a rasterizer draws movie frames itself (StageRasterizer's is export-pack's FV-7).
+    public func frame(_: StageDrawList, width _: Int, height _: Int, transparent _: Bool) throws -> MediaFrame {
+        throw NotBuilt(reason: "This rasterizer can't draw movie frames yet.")
+    }
 }
 
 public protocol Exporting: Sendable {
@@ -51,4 +61,10 @@ public protocol Exporting: Sendable {
     /// Checks `Task.isCancelled` between frames and throws `CancellationError`, writing nothing.
     func export(_ document: Document, options: ExportOptions, rasterizer: any FrameRasterizing,
                 progress: @Sendable (Double) -> Void) async throws -> ExportResult
+    /// MP4 or GIF (export-pack FV-4): `plan`'s frames of `sceneID`, each rasterized at the plan's size and appended in
+    /// order to the one sink `media` opens at `path`, then finished; returns `path`. A cancel or a failure cancels the
+    /// sink (which deletes the partial file) and throws, so no file comes back.
+    func writeVideo(_ document: Document, sceneID: String, plan: FlareVideoPlan, to path: String,
+                    media: any MediaEncoding, rasterizer: any FrameRasterizing,
+                    progress: @Sendable (Double) -> Void) async throws -> String
 }

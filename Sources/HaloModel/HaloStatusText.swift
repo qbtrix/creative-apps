@@ -32,6 +32,13 @@ extension HaloComposition {
     /// must fit it at the 1000 pt window.
     public var statusTimecode: String { "\(playheadTimecode) · frame \(playheadFrame)" }
 
+    /// The longest the timecode pill reads in this composition: the last
+    /// frame's line, whose frame number has the most digits. The status bar
+    /// sizes the pill to it (digits drawn monospaced), so a playing playhead
+    /// never changes the row's width, ViewThatFits keeps one shape and the
+    /// transport keeps one identity while it plays (#4586).
+    public var statusTimecodeWidest: String { "\(timecode(lastFrame)) · frame \(lastFrame)" }
+
     /// The length and rate the tooltip ends with ("3 s at 24 fps").
     public var statusLengthText: String { "\(durationText) at \(frameRateText)" }
 
