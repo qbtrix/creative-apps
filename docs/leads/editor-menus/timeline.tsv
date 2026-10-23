@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-23T04:50Z	-	pr	C4	opened #4737 shell-adoption description
 2026-10-23T04:50Z	-	pr	EM-flare-halo	opened #4738
 2026-10-23T04:50Z	-	pr	EM-photo-design	opened #4739 stacked on #4738
+2026-10-23T04:52Z	-	heartbeat	EM-flare-halo	#4738 clean in lane; #4737 C4 in lane; #4739 waits on #4738
