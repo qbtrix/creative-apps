@@ -1,16 +1,16 @@
 # no-placeholders lead record
 
 Issue: #3776 · Packet: docs/blueprints/suite/features/no-placeholders.md
-Run: act-1a166b69fd0-x9m8 · Session: session_012bybPMvARipEyKrs5oNQwY · Started: 2026-10-23T03:08Z
-Stage: 3 wave 2
-Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a
-Next: NP-flare #4735 merged dev in, gate rerun, retarget to dev; then scoped run app=flare and critics
+Run: act-1a16a37a3ed-0kyn (relaunch; earlier act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
+Stage: done
+Base: 35a0b5e7e9520a764f3eabf02968a453082a87cc (main; PRs target dev)
+Next: none: feature complete (gap #4736 open for the MenuCommand scan)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| NP-a | ratchet test + launcher hides Check for Updates and Assets items | NP-1, NP-2 | MJ-NP, XJ-NP | report-problem:RP-a (met) | yes | 0 | merged #4717 | - | - |
-| NP-flare | Flare beta.2 items hidden, Library tab hidden, RJ-X64, built | NP-3, NP-4, NP-5, NP-6 | FJ-NP, XJ-NP, MJ-NP | NP-a; CS-flare (met); flare menu hand-offs | yes | 0 | open #4735 (base dev, head 978ebb15) | - | - |
+| NP-a | ratchet test + launcher hides Check for Updates and Assets items | NP-1, NP-2 | MJ-NP, XJ-NP | report-problem:RP-a (met) | yes | 0 | done | 39983291011 | - |
+| NP-flare | Flare beta.2 items hidden, Library tab hidden, RJ-X64, built | NP-3, NP-4, NP-5, NP-6 | FJ-NP, XJ-NP, MJ-NP | NP-a; CS-flare (met); flare menu hand-offs | yes | 0 | done | 39983291011 | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -41,3 +41,4 @@ Next: NP-flare #4735 merged dev in, gate rerun, retarget to dev; then scoped run
 - 04:45Z #4717 (NP-a) merged by the lane. NP-flare merged origin/dev (conflicts with pen-paths FP-6 in FlareCommandCatalog, its tests, mutation plan and flare golden: kept both sides); gate rerun before retarget to dev.
 
 - 2026-10-23T07:19:48Z: NP-flare #4735 merged 06:49Z (feature-done). Full CI 39914223799 queued on c2cc0c7c7. Note: dev macOS is broken by FlareStage.swift:81 until #4771 lands.
+- 2026-10-23T19:28Z Relaunch act-1a16a37a3ed-0kyn: lead branches rebased on main 35a0b5e7e. Full CI https://github.com/qbtrix/creative-apps/actions/runs/39983291011 is green on main and holds #4717 (NP-a) and #4735 (NP-flare). Posted Belt-Slice-Done for both and Belt-Contact-Sheet on #3776.
