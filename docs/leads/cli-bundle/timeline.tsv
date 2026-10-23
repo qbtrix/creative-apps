@@ -9,3 +9,6 @@ utc	stage	event	ref	note
 2026-10-23T03:41Z	4	stage-start	-	wave 2: CB-u, CB-m building
 2026-10-23T04:03Z	-	heartbeat	CB-a	#4715 open in lane; CB-u gate running; CB-m building
 2026-10-23T04:28Z	-	heartbeat	CB-a	#4715 open, clean; CB-u pushed 2cc1981 (split to test-first pending, PR on CB-a base); CB-m gate running
+2026-10-23T04:50Z	3	merged	#4715	CB-a merged by the fast lane
+2026-10-23T04:50Z	-	pr	CB-m	opened #4740, #4741 (CB-3 supervisor)
+2026-10-23T04:50Z	-	pr	CB-u	opened #4743
