@@ -2,7 +2,7 @@
 
 Issue: #4516 (earlier #3475) · Packet: docs/blueprints/library/features/tone-controls.md
 Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 · Issue for Belt lines: #3475
-Stage: 3 wave 1, LT-1 PR #4948 open (head 04d5f848, fast-lane); LT-2 waits on Wire tone-controls:TC-2. Checked 2026-10-23T21:33Z
+Stage: 3 wave 1, LT-1 PR #4948 open (head 04d5f848, fast-lane); TC-2 on dev as placeholder; LT-2 held pending supervisor (#3475 6375368223). Checked 2026-10-23T21:45Z
 Base: origin/dev 8a54f64c
 Next: lane merges #4948 (code: batch macOS gate); then if TC-2 (ToneRows) is still not on dev, release this feature's part of the run per supervisor; else LT-2 (removes the DevelopSlider typealias, wires ToneRows) in the same slice.
 
@@ -44,3 +44,4 @@ Next: lane merges #4948 (code: batch macOS gate); then if TC-2 (ToneRows) is sti
 - 2026-10-23T17:32:35Z: poll 3 of 3 identical (TC-a not on dev 35a0b5e7). Per rule 23 asked the supervisor (#3475 comment 6370840828) whether to build on a stub with a Wire line or park.
 - 2026-10-23T17:44:50Z: supervisor answer (#3475 6370854641): build LT-1/LT-2 now, model only, no placeholder view; Wire tone-controls:TC-2 for the view half; release this feature if TC-2 is still absent once LT-1/LT-2 merge. LT-2 is wholly the view (DevelopInspector), so it waits on the Wire; LT-1 builder started. TC-1 types (ToneSettings, ToneRules, ToneCommands) are on dev 8a54f64c; LibraryModel already links SuiteImaging.
 - 2026-10-23T18:06:19Z: LT-1 #4948: DevelopSettings.tone (ToneSettings) with flat keys, byte-for-byte fixture round trip (fixtures inline: Tests/LibraryModelTests/Fixtures/ does not exist), DevelopSlider kept as a typealias of ToneSlider (rename of every caller would pass 15 files; LT-2 removes it), ToneTarget stubs throw notBuilt until LT-5, LibraryToneTests skipped 'waits on LT-4'. Upstream gaps noted in the PR: TC-1 ToneSettings has no clamp/NaN guard and its coding (TC-7) and ToneRules bodies are stubs; IM-10's LibraryDevelop+Imaging.swift is not on dev (LT-4 depends on it).
+- 2026-10-23T21:45Z: TC-2 (#4862) is on dev, but its ToneRows is the placeholder (no controls). LT-2 on it would replace working Develop sliders with read-only text, and intents hit setTone, which throws notBuilt until LT-5. Asked the supervisor (#3475 comment 6375368223) to let LT-2 wait on TC-3 and LT-5, and to release this feature once LT-1 #4948 merges. LT-2 is not started.
