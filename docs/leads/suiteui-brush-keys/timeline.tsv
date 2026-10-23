@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-23T19:40:44Z	pr	wave 2 opened BK-design #4961, BK-photo #4965, BK-flare #4982; all carried rebased copies of BK-u (638-767 lines); restacking each on lead/brush-keys-BK-u (own 242-380 lines), gates running
 2026-10-23T20:03:23Z	heartbeat	no slice merged yet; oversize stacked PRs (#4958 #4961 #4965 #4982) off fast-lane until their parents merge; BK restack gates running
 2026-10-23T20:18:22Z	pr	BK-design #4961 (0512a230e), BK-photo #4965 (f402c0ed5), BK-flare #4982 (a3383a7dd) restacked on BK-u and force-pushed, CI: PASS each; mutate plans running before the body update
+2026-10-23T20:21:07Z	bodies	BK-design #4961 head 0512a230e Mutate 3/3; BK-photo #4965 head f402c0ed5 Mutate 3/3; BK-flare #4982 head a3383a7dd Mutate 2/2; stacked on BK-u #4939, waiting on its merge
