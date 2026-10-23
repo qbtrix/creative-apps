@@ -78,7 +78,7 @@ extension LibraryWindow {
         let options = ImportOptions(folder: folder, copyTo: copy.copyTo, byDate: copy.byDate)
         guard let params = try? JSONValue(encoding: options),
               (try? LibraryCatalog.catalog.run("file.import-folder", params: params, on: &model)) != nil else { return }
-        let known = model.knownIDs()
+        let known = model.importKnownIDs
         let name = URL(fileURLWithPath: folder).lastPathComponent
         let importer = model.services.importer.copying(model.importCopy)
         let (events, sink) = AsyncStream<ImportEvent>.makeStream()

@@ -48,6 +48,7 @@ import Testing
         for id in ["photo.remove-from-catalog", "photo.relink"] {
             #expect(LibraryCatalog.fileCommands.availability(id, on: library).why == nil)
         }
+        #expect(library.importKnownIDs == Set(library.items.map(\.id)) && library.importKnownIDs.count == 10_000)
     }
 
     @Test func importCopySummarySaysWhereThePhotosGo() {
