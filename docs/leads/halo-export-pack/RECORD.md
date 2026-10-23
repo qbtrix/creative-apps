@@ -9,7 +9,7 @@ Next: HX-8 (halo.md, built, feature-done) once placed-images:PH-z is built; Belt
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| HX-a | codec and alpha settings, ProRes refused; Render sheet Codec row and Transparent checkbox | HX-1, HX-2 | - | gradient-fill:HG-a, placed-images:PH-a | yes | 0 | pr #4841 | - | - |
+| HX-a | codec and alpha settings, ProRes refused; Render sheet Codec row and Transparent checkbox | HX-1, HX-2 | - | gradient-fill:HG-a, placed-images:PH-a | yes | 0 | merged #4841 (a8e0e252) | - | - |
 | HX-m | codec and alpha plan rules, alpha frames, RJ-H41; live renderer through services.media.movie | HX-3, HX-4 | - | HX-a | no | 0 | pr #4874, #4917 | - | - |
 | HX-u | snapshots, budget, journey skipped | HX-5, HX-6 | - | HX-a | yes | 0 | pr #4858 | - | - |
 | HX-z | journey live; halo.md, built, feature-done | HX-7, HX-8 | HaloExportPackJourneyTests | HX-m, HX-u; gradient-fill:HG-z | yes | 0 | pr #4942 (HX-7); HX-8 waits on PH-z | - | - |
@@ -50,3 +50,4 @@ Next: HX-8 (halo.md, built, feature-done) once placed-images:PH-z is built; Belt
 - 2026-10-23T16:12Z: HX-u #4858 opened, stacked on HX-a. #4857 filed. HX-3 is building on lead/halo-export-pack-HX-m.
 - 2026-10-23T17:10Z: HX-3 #4874 opened, stacked on HX-u (Head 9612572f, Mutate HaloRenderJob 8/8, HaloRenderFrame 3/3, HaloDocumentValues 2/2). HX-4 (writers, codec rows, RJ-H41) is next.
 - 2026-10-23T17:24Z: HX-4 #4917 opened, stacked on HX-3 (Head 363a1d9f, Mutate HaloMovieSink 4/4, HaloDocumentValues 2/2, HaloRenderFrame 3/3). HEVC and ProRes 4444 pickable; fractional fps refused for them in words. RJ-H41 is not in HX-4: it moves to HX-z with the live journey.
+- 2026-10-23T22:35Z: HX-a #4841 merged to dev (a8e0e252, batch-20261023204921). HX-u #4858 merged origin/dev, gate PASS, retargeted to dev (Head dfda2847). HX-3 #4874, HX-4 #4917, HX-z #4942 stay stacked on HX-u. Belt-Slice-Done for HX-a waits on a green ci.yml run on dev.

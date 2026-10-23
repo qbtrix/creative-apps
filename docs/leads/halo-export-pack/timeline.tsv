@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-23T21:11:00Z	4	heartbeat	HX-a	#4841 in lane batch-20261023204921 with #4855; no merges, no lane comments
 2026-10-23T21:32:00Z	4	heartbeat	HX-a	#4841 still in lane batch-20261023204921 (running); no merges, no lane comments
 2026-10-23T21:58:00Z	4	merged	HX-a	#4841 on dev as a8e0e252 (batch-20261023204921); merging dev into HX-u #4858, gate running, then retarget to dev
+2026-10-23T22:35:00Z	4	stage	HX-a	HX-a merged; HX-u retargeted to dev (dfda2847)
