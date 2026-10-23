@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-23T12:40Z	check	cli-bundle	full CI 39937843350 still queued; journeys flare 39941657825 in progress, halo 39947432602 queued; #4741 open	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
 2026-10-23T13:04Z	check	cli-bundle	full CI 39937843350 still queued; journeys flare 39941657825 in progress, halo 39947432602 queued; #4741 open, clean	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
 2026-10-23T13:26Z	check	cli-bundle	full CI 39937843350 in progress; flare journeys 39941657825 success (screens downloaded), halo 39947432602 in progress; #4741 open, clean	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T13:49Z	check	cli-bundle	full CI 39937843350 Linux green, macOS in progress; halo journeys 39947432602 in progress; #4741 open, clean	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
