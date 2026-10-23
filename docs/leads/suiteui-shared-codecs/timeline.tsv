@@ -37,3 +37,5 @@ utc	stage	event	ref	note
 2026-10-22T05:05Z	check-in	Journeys run 39720835412 (suite) is still queued for macOS. SC-f's critic panel waits on its ui-screens.
 2026-10-22T05:25Z	check-in	Journeys run 39720835412 (suite) is still queued for macOS. SC-f's critic panel waits on its ui-screens.
 2026-10-22T05:47Z	check-in	SC-f critic panel still waits on journeys run 39720835412 (queued since 04:10Z).
+2026-10-23T14:52:29Z	wave 2	SC-2 builder launched (supervisor merge)
+2026-10-23T16:45Z	wave 2	SC-2 #4873 (supervisor merge) and SC-halo #4875 (fast-lane) open

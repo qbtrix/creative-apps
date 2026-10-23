@@ -1,10 +1,10 @@
 # shared-codecs lead record
 
 Issue: #3718 · Packet: docs/blueprints/suiteui/features/shared-codecs.md
-Run: act-1a15fe5ef7c-rszn (resumes act-1a15e10a9c3-kwzx) · Started: 2026-10-21T10:20Z
-Stage: 3 wave 1
-Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: #4019 and #4020 wait on their queued macOS builds (runs 39664805180, 39664833728). SC-14 restacked on SC-13 4e6f468 (ac16760), gating; push and open its PR once #4019 merges. SC-2 after SC-1 and IM-a.
+Run: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui) · Started: 2026-10-23T14:52Z (earlier act-1a15fe5ef7c-rszn)
+Stage: 3 wave 2
+Base: origin/dev 8021b0f5
+Next: SC-2 building on lead/shared-codecs-SC-a (supervisor merge: Package.swift, project.yml; no fast-lane label). SC-halo and SC-raster then start; SC-photo waits on photo PX-m and IM-m; SC-library on library hand-offs; SC-z on AK-z.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -49,6 +49,7 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - SC-14 is built stacked on SC-13 now; its PR opens once SC-13 merges so its diff against dev fits the cap.
 - SC-2 edits Package.swift and project.yml as the packet says; it is a supervisor merge, off the fast lane.
 - Wave work runs as one worktree subagent per task (Workflow needs opt-in; lead.md fallback).
+- 2026-10-23T16:45Z: SC-halo builds from dev: it uses only core's PNG.write, which HaloModel already links, and no SC-2 API. SC-2 (#4873) is a supervisor merge (touches Package.swift for SuiteShell to link CoreRaster), no fast-lane label. SC-2 adds SuiteImageIO.swift to FormatListScan.allowed (FormatListRatchetTests; baseline and cap unchanged): a slight ratchet loosening for the supervisor to approve on #4873. encode has no profile: parameter yet (ColorProfile is CoreColor, not re-exported by CoreRaster); SC-4 adds it with an .sRGB default. HaloPNGWriter's line in Tests/imageio-baseline.txt is left for SC-11's prune (the ratchet ignores a listed file that no longer imports ImageIO).
 
 ## Open
 - SC-photo waits photo/export-pack; SC-library waits library spine (building); SC-z waits adopt-kernel-autosave AK-z (planned).
@@ -87,3 +88,5 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-22T05:05Z: Journeys run 39720835412 (suite) is still queued for macOS. SC-f's critic panel waits on its ui-screens.
 - 2026-10-22T05:25Z: Journeys run 39720835412 (suite) is still queued for macOS. SC-f's critic panel waits on its ui-screens.
 - 2026-10-22T05:47Z: SC-f critic panel still waits on journeys run 39720835412 (queued since 04:10Z).
+- 2026-10-23T14:52:29Z: run act-1a1693a3ff0-mwrd resumes. SC-f done; SC-1 #4020 merged. IM-a is done, so SC-2 starts: SuiteImageIO.swift already exists on dev from shell-media SM-6/SM-7, and SC-2 adds its stubs beside them. SuiteShell does not yet link CoreRaster.
+- 2026-10-23T16:45Z: SC-2 #4873 (SC-a) open for the supervisor merge. SC-5+SC-6 #4875 (SC-halo) open with fast-lane, current Fast-Check/Head. SC-photo, SC-library, SC-raster, SC-z stay blocked (export-pack, library spine, SC-4, AK-z). Status now also pushed to lead/suiteui-shared-codecs (the branch Belt reads).
