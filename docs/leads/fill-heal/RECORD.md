@@ -10,7 +10,7 @@ Next: FH-r #4574 and FH-c #4577 restacked on dev (gate rerun, retarget to dev); 
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | FH-a | rules, commands and dab coverage as stubs, checks disabled | FH-1, FH-2 | MJ-FH | suite-imaging:IM-a, brush-keys:BK-m (FH-1 only) | false | 0 | done (Belt-Slice-Done posted) | 39957675362 | – |
-| FH-u | palette Paint Bucket, Spot Heal, Remove on the stubs | FH-3, FH-4 | PJ-FH1 | FH-a, AB-photo, AL-photo, AX-photo, AU-photo, AC-colour, BK-photo | true | 0 | waiting | – | – |
+| FH-u | palette Paint Bucket, Spot Heal, Remove on the stubs | FH-3, FH-4 | PJ-FH1 | FH-a, AB-photo, AL-photo, AX-photo, AU-photo, AC-colour, BK-photo | true | 0 | building (FH-3 #4889 in lane, head ccf9d81; FH-4 next) | – | – |
 | FH-r | bucket and heal bodies over core | FH-5b, FH-5h | MJ-FH | FH-a | false | 0 | lane (#4574 base dev, head 2a2cb8b) | – | – |
 | FH-c | dab coverage body, commands one undo step | FH-5k, FH-6 | MJ-FH | FH-a, FH-r | false | 0 | lane (#4577 head ceb4ebb, base FH-r until #4574 merges) | – | – |
 | FH-photo | Photo adopts live, old tone-match heal gone, jobs pass | FH-7, FH-8, FH-9, FH-10 | PJ-FH1, PJ-FH2, MJ-FH-photo, MJ-FH | FH-c, FH-u, AJ-photo, BK-photo | true | 0 | waiting | – | – |
@@ -20,13 +20,15 @@ Next: FH-r #4574 and FH-c #4577 restacked on dev (gate rerun, retarget to dev); 
 |---|---|---|---|---|---|---|---|
 | FH-1 | FH-a | 2+ | stubs + disabled checks | Sources/SuiteImaging/Retouch/*, Sources/SuiteKernel/Stroke/DabCoverage.swift, tests, C4 parts | suites compile, disabled | #4556 | merged (in green full run 39957675362) |
 | FH-2 | FH-a | 1 | RJ-P51 folder, RJ-P04/P07 re-pointed, disabled waits_on FH-6 | Tests/RealJobs/photo/{bucket-background,dust-spots,remove-passerby}/* | RealJobs decode check | #3845 | merged (in green dev Linux run 39808732641) |
-| FH-3..FH-10 | – | later | see packet | see packet | see packet | – | waiting |
+| FH-3 | FH-u | 3 | palette Paint Bucket, Spot Heal, Remove disabled with help; bucket options | Sources/PhotoModel/*, Sources/PhotoApp/*, Tests/PhotoModelTests/PhotoRetouchToolsTests.swift, UITests/PhotoJourneyTests+Retouch.swift | PhotoRetouchToolsTests, photo.list-commands golden | #4889 | lane |
+| FH-4..FH-10 | – | later | see packet | see packet | see packet | – | waiting |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-23T16:49Z: FH-3 help text names FH-8 (the slice that enables the tools), not the packet's FH-5. Shift-J cycling needs SuiteUI: #4890 (needs-ui); Remove has no key until then. Spot heal and remove share the brush's Size/Hardness.
 - 2026-10-23T16:29Z: supervisor (#3778, 6369319918): AB-photo done; AJ-photo unmet (AJ-a not merged); start FH-u now on brush-keys' fakes; keep the slot while FH-r, FH-c, FH-u move; if only FH-photo is left and AJ-a is not on dev, release the run.
 - 2026-10-23T14:10Z: run act-1a1693a401e-chyn takes over on #3778 (supervisor: #4513 duplicate, #4574 counts under #3778). #4574/#4577 sat on branch bases the lane does not take; dev merged in (FH-a's squash, ours kept), gate rerun, retargeted to dev.
 - Base dev, not main: CLAUDE.md and the lane retarget main to dev.
