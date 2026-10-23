@@ -35,3 +35,4 @@ utc	stage	event	ref	note
 2026-10-23T17:43:33Z	wave	wave 2 launching: BK-photo, BK-design, BK-flare
 2026-10-23T17:47:46Z	wave	wave 2 launched (wf_86a3790e-94c): BK-photo, BK-design, BK-flare stacked on BK-u #4939
 2026-10-23T18:12:38Z	heartbeat	wave 2 building; slice PRs open on fast-lane, none needs-fix/needs-rebase, none merged yet
+2026-10-23T18:35:01Z	heartbeat	wave 2 builders still running; slice PRs open on fast-lane, clean, none merged yet
