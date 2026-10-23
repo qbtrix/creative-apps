@@ -1,0 +1,31 @@
+2026-10-20T14:02Z	1	stage-start	#3458	lead/cull-finish created; DR-1 built, gate running
+2026-10-20T14:16Z	1	gate-pass	DR-1	CI: PASS on e028ed1c; mutation plan added, re-gating
+2026-10-20T14:18Z	1	pr-open	DR-1	#3623 fast-lane, Head 178ec2c8; DR-2 gate running
+2026-10-20T14:23Z	1	blocked	DR-u,DR-m	DR-5 folded into DR-2; DR-3/6/7 wait on AC-library (#2999), MD-c/d/e
+2026-10-20T14:29Z	1	pr-open	DR-2,DR-5	#3625 stacked on #3623 (base its branch), Head e0752118, Mutate 2/2 LibraryModel.LibraryCulling
+2026-10-20T14:52Z	1	heartbeat	DR-a,DR-m	#3623 macOS build 39438676925 queued; #3625 waits on it; AC-library #2999 open, MD-10..13 not merged
+2026-10-20T15:16Z	1	heartbeat	DR-a,DR-m	#3623 macOS build 39438676925 still queued (macOS queue backed up); #3625 base stays DR-1 branch; AC-library #2999 open, MD-10..13 not merged
+2026-10-20T15:38Z	1	heartbeat	DR-a,DR-m	#3623 macOS build 39438676925 queued 75 min; no dev merges since 15:12Z; blockers unchanged
+2026-10-20T15:59Z	1	heartbeat	DR-a,DR-m	#3623 macOS build 39438676925 still queued (~95 min); blockers unchanged
+2026-10-20T16:22Z	heartbeat	no change: #3623/#3625 open, macOS build runs 39438676925/39439515810 still queued since 14:2xZ (runner backlog); blockers unchanged
+2026-10-20T16:44Z	heartbeat	no change: #3623/#3625 open; macOS build runs 39438676925/39439515810 still queued since 14:2xZ (2h20m, runner backlog); blockers SF-3 #3514, AC-library #2999, MD-10..13 unchanged
+2026-10-20T17:07Z	heartbeat	no change: #3623/#3625 open; macOS build runs 39438676925/39439515810 still queued since 14:2xZ (~2h40m); blockers SF-3 #3514, AC-library #2999, MD-10..13 unchanged
+2026-10-20T17:29Z	heartbeat	DR-1 #3623 macOS build 39438676925 started (in progress since 17:19Z); #3625 waits on it; blockers AC-library #2999, MD-10..13 unchanged
+2026-10-20T17:31Z	build	DR-1 #3623 macOS build 39438676925 green (17:30Z); waits on the fast-lane sweep to merge, then #3625 retargets to dev
+2026-10-20T17:42Z	merge	DR-1 #3623 merged 17:33Z. #3625 (DR-2 + DR-5) retargeted to dev, dev merged in (kept DR-2 side of 2 squash conflicts), gate PASS, mutate 2/2, head 3572982, fast-lane on
+2026-10-20T17:43:38Z	DR-2	macos-build-dispatched	run 39468542089 for head 3572982 (12 files, 247 lines, fast-lane on)
+2026-10-20T17:51:17Z	heartbeat	waiting	DR-2 #3625 macOS build 39468542089 queued; DR-3/DR-6 wait on MD-e, DR-7 on MD-c (MD-10 #3581, MD-11 #3570, MD-12 #3569 open); AC-library merged (#3190, #3248)
+2026-10-20T18:13:06Z	heartbeat	waiting	DR-2 #3625 build 39468542089 still queued; no dev merges since 17:45Z; MD-c/MD-e still open
+2026-10-20T18:35:01Z	heartbeat	waiting	DR-2 #3625 build 39468542089 still queued; lane merging again (5 since 18:18Z) but MD-c/MD-e still open
+2026-10-20T18:56:51Z	heartbeat	waiting	DR-2 #3625 build 39468542089 still queued; MD-12 #3569 merged 18:42Z; MD-c still needs MD-10/11/13, MD-e (MD-19..22) needs MD-20..22
+2026-10-20T19:18:13Z	heartbeat	waiting	DR-2 #3625 build 39468542089 still queued; only #3085 merged since 18:55Z; MD-c (MD-10/11/13) and MD-e (MD-20..22) still open
+2026-10-20T19:39:48Z	heartbeat	waiting	DR-2 #3625 build 39468542089 still queued; merged since 19:17Z: #3680, #3571 (no MD); MD-c (MD-10/11/13) and MD-e (MD-20..22) still open
+2026-10-20T20:00:50Z	heartbeat	waiting	DR-2 #3625 build 39468542089 still queued; merged since 19:38Z: #3697, #3643 (no MD); MD-c (MD-10/11/13) and MD-e (MD-20..22) still open
+2026-10-20T20:22:52Z	heartbeat	waiting	DR-2 #3625 build 39468542089 still queued; merged since 19:59Z: #3707, #3685, #3644 (no MD); MD-c (MD-10/11/13) and MD-e (MD-20..22) still open
+2026-10-20T20:44:36Z	heartbeat	waiting	DR-2 #3625 build 39468542089 still queued; merged since 20:21Z: #3734 (no MD); MD-c (MD-10/11/13) and MD-e (MD-20..22) still open
+2026-10-20T21:07:38Z	heartbeat	waiting	DR-2 #3625 clean, macOS build 39468542089 queued; merged since 20:43Z: #3735, #3728, #3671 (no MD)
+2026-10-20T21:28:48Z	heartbeat	waiting	DR-2 #3625 clean, build 39468542089 pending; lane batch merged 9 PRs 21:14-21:15Z (#3461, #3550, #3575, #3670...); MD-10 #3581, MD-11 #3570 open, MD-20..22 not built
+2026-10-20T21:50:11Z	heartbeat	blocked	DR-2 #3625 build 39468542089 stuck queued since 17:43Z (later builds ran); asked the supervisor on the PR to re-dispatch; MD-11 #3570 merged 21:37Z, MD-c left: MD-10 #3581, MD-13; MD-e left: MD-20..22
+2026-10-20T22:13:12Z	heartbeat	waiting	DR-2 #3625 macOS build 39468542089 green 22:05Z, awaits lane sweep; DR-3/6/7 blocked on MD-c (MD-10 #3581, MD-13) and MD-e (MD-20..22)
+2026-10-20T22:35:23Z	heartbeat	waiting	DR-2 #3625 still open, macOS green; lane active (run 39508948550); DR-3/6/7 still blocked on MD-c/MD-e
+2026-10-20T22:41:48Z	DR-a	done	#3625 merged (daee0e736); Belt-Slice-Done posted, proof run 39507806909; DR-3/6/7 wait on MD-c (MD-10,13) and MD-e (MD-20..22)
