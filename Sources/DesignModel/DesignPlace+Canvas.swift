@@ -2,10 +2,10 @@
 // inspector's Image section ask about a picture. `placedImage` is a node's picture in its frame, which the
 // canvas draws by cover. `runPlace` runs a `PlaceIntent` through the catalog and says why it refused, and
 // `placeActionHelp` is why Place…, Replace… or Reset Size is off: until PD-5 registers the place commands,
-// both say so. A Move-tool ⌥-drag inside the selected unlocked picture, off its handles, pans its focus
-// by the overflow in the node's own axes, each step under one token (`beginPicturePan`, `panIntent`); a fitted
-// picture doesn't pan, so ⌥ duplicates it; a drop's page point is `dropPoint`, and it
-// fills the selected frame or rectangle under it when Fill is on (`dropFills`). Linux-safe.
+// both say so. A Move-tool ⌥-drag on the one selected unlocked picture, the top layer there, off its handles, pans
+// its focus by the overflow in the node's own axes, each step under one token (`beginPicturePan`, `panIntent`); a
+// fitted picture or a multi-selection doesn't pan, so ⌥ duplicates; a drop's page point is `dropPoint`, and it fills
+// the selected frame or rectangle whose turned outline holds it when Fill is on (`dropFills`). Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -59,11 +59,12 @@ extension DesignWorkspace {
         }
     }
 
-    /// The pan an ⌥-drag from `point` starts: the Move tool, off the handles, inside the selected unlocked node's
-    /// turned outline, and its picture overflows the box. Anything else is nil, so ⌥ still duplicates or resizes.
+    /// The pan an ⌥-drag from `point` starts: the Move tool, off the handles, one node selected, it the topmost
+    /// unlocked layer under the pointer (`hitTest` passes over locked ones), and its picture overflows the box.
+    /// Anything else is nil, so ⌥ still duplicates every selected layer, resizes, or acts on the layer on top.
     public func beginPicturePan(at point: DesignPoint, option: Bool, token: String = UUID().uuidString) -> DesignPicturePan? {
-        guard option, tool == .move, handle(at: point) == nil, let node = selectedNode, node.contains(point),
-              lockHelp(node.id) == nil, let excess = panExcess, excess.x >= 1 || excess.y >= 1
+        guard option, tool == .move, !hasMultipleSelection, handle(at: point) == nil, let node = selectedNode,
+              hitTest(point) == node.id, let excess = panExcess, excess.x >= 1 || excess.y >= 1
         else { return nil }
         return DesignPicturePan(start: point, focus: node.placedFocus, token: token)
     }
@@ -94,9 +95,10 @@ extension DesignWorkspace {
         return DesignPoint(x: x / zoom, y: y / zoom)
     }
 
-    /// Whether a drop at `point` fills the selection: Fill is on and it lands in the selected unlocked frame or rectangle.
+    /// Whether a drop at `point` fills the selection: Fill is on and it lands inside the selected unlocked frame or
+    /// rectangle's turned outline.
     public func dropFills(at point: DesignPoint, fill: Bool) -> Bool {
-        guard fill, let node = selectedNode, node.kind.holdsPicture, node.frame.contains(point) else { return false }
+        guard fill, let node = selectedNode, node.kind.holdsPicture, node.contains(point) else { return false }
         return lockHelp(node.id) == nil
     }
 }

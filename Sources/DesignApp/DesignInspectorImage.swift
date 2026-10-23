@@ -1,8 +1,8 @@
 // DesignInspectorImage.swift (placed-images PD-u, PD-4): the inspector's Picture section on a frame or rectangle.
 // A layer showing a picture gets SuiteUI's PlacedImageRows (the file, Replace…, Reset Size), each sent as `.place`;
-// then Place in Frame… (`.placeFile(fill: true)`: the picture fills this layer; built from the catalog's place.image
-// spec, whose help is `placeActionHelp`) and the "Place into selected frame" checkbox, kept in user defaults
-// (DesignPlace.fillKey), which makes File > Place… and a drop fill the selected frame. The rows go grey together on
+// then Place in Frame… (`.placeFile(fill: true)`: the picture fills this layer; built from `placeInFrameSpec`, off
+// on `placeInFrameHelp`, a locked layer's reason first) and the "Place into selected frame" checkbox, kept in user
+// defaults (DesignPlace.fillKey), which makes File > Place… and a drop fill the selected frame. The rows go grey together on
 // Replace…'s reason until SuiteUI takes one reason per row (#4985); the note names every reason (`placeNote`).
 import DesignModel
 import SuiteKernel
@@ -16,15 +16,15 @@ struct DesignInspectorImage: View {
     @AppStorage(DesignPlace.fillKey) private var fill = false
 
     var body: some View {
-        let help = model.placeActionHelp()
+        let help = model.placeInFrameHelp
         InspectorSection("Picture") {
             if let asset = node.placedAsset {
                 PlacedImageRows(asset: asset, formats: model.placeFormats) { perform(.place($0, fill: false)) }
                     .disabled(model.placeActionHelp("place.replace") != nil)
             }
             InspectorRow("") {
-                MenuCommand(DesignMenuState.spec("place.image"), on: DesignMenuState(workspace: model, hasWindow: true),
-                            title: "Place in Frame…", systemImage: "photo.badge.plus") { perform(.placeFile(fill: true)) }
+                MenuCommand(DesignMenuState.placeInFrameSpec, on: DesignMenuState(workspace: model, hasWindow: true),
+                            systemImage: "photo.badge.plus") { perform(.placeFile(fill: true)) }
                     .suiteControl(id: "design.inspector.place", enabled: help == nil, reason: help)
             }
             InspectorRow("") {

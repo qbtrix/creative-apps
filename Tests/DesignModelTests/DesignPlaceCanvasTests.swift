@@ -14,19 +14,23 @@ import Testing
 private let asset = PlacedAsset(
     id: "asset-1", name: "photo.png", format: .png, natural: Size(width: 1200, height: 800), data: Data([1, 2, 3]))
 
-/// A page holding node-1, a 400 × 400 frame at (100, 100) (showing `asset` unless `picture` is off), selected.
+/// A page holding node-1, a 400 × 400 frame at (100, 100) (showing `asset` unless `picture` is off), selected,
+/// with `above` on top of it.
 private func opened(picture: Bool = true, locked: Bool = false, size: (Double, Double) = (400, 400),
-                    turn: (degrees: Double, flipX: Bool) = (0, false)) throws -> DesignWorkspace {
+                    turn: (degrees: Double, flipX: Bool) = (0, false), above: [DesignNode] = []) throws -> DesignWorkspace {
     var frame = DesignNode(id: "node-1", name: "Frame", kind: .frame, frame: rc(100, 100, size.0, size.1),
                            placedAsset: picture ? asset : nil)
     (frame.isLocked, frame.rotation, frame.flipX) = (locked, turn.degrees, turn.flipX)
-    let page = DesignPage(id: "page-1", name: "Page 1", frameWidth: 1440, frameHeight: 1024, nodes: [frame])
+    let page = DesignPage(id: "page-1", name: "Page 1", frameWidth: 1440, frameHeight: 1024, nodes: [frame] + above)
     var workspace = DesignWorkspace()
     try workspace.open(LiveFiling().encode(DesignDocument(pages: [page])))
     workspace.useServices(.live)
     workspace.selectItem("node-1")
     return workspace
 }
+
+/// node-2, a 100 × 100 rectangle at (250, 250).
+private let card = DesignNode(id: "node-2", name: "Card", kind: .rectangle, frame: rc(250, 250, 100, 100))
 
 extension JSONValue {
     /// The object field `key`; nil when this isn't an object or has no such field.
@@ -76,6 +80,24 @@ extension JSONValue {
         #expect(try opened(locked: true).beginPicturePan(at: pt(300, 300), option: true) == nil)
     }
 
+    @Test func anOptionDragOnSeveralLayersDuplicatesThemAll() throws {
+        var several = try opened(above: [card])
+        several.selectItem("node-2")
+        several.toggleSelection("node-1")
+        #expect(several.selectedNodeID == "node-1" && several.hasMultipleSelection)
+        #expect(several.beginPicturePan(at: pt(150, 150), option: true) == nil)
+        several.drag(from: pt(150, 150), to: pt(200, 150), modifiers: .option)
+        several.endDrag()
+        #expect(several.selectedPage?.nodes.count == 4)
+    }
+
+    @Test func aPanStartsOnlyWhenThePictureIsTheTopLayerThere() throws {
+        let covered = try opened(above: [card])
+        #expect(covered.hitTest(pt(300, 300)) == "node-2")
+        #expect(covered.beginPicturePan(at: pt(300, 300), option: true) == nil)
+        #expect(covered.beginPicturePan(at: pt(150, 150), option: true) != nil)
+    }
+
     @Test func onlyTheMoveToolPansOffTheHandles() throws {
         var drawing = try opened()
         drawing.selectTool(.rectangle)
@@ -107,6 +129,12 @@ extension JSONValue {
         #expect(!workspace.dropFills(at: pt(200, 200), fill: false))
         #expect(!workspace.dropFills(at: pt(700, 200), fill: true))
         #expect(!(try opened(locked: true)).dropFills(at: pt(200, 200), fill: true))
+    }
+
+    @Test func aDropFillsATurnedFrameByItsOutline() throws {
+        let turned = try opened(picture: false, size: (400, 100), turn: (90, false))
+        #expect(turned.dropFills(at: pt(300, 0), fill: true))
+        #expect(!turned.dropFills(at: pt(120, 150), fill: true))
     }
 
     @Test func aDropPointIsInPagePoints() {
