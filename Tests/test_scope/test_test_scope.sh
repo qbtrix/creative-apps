@@ -102,6 +102,14 @@ for p in Sources/SuiteUI/Tokens.swift Sources/SuiteKernel/Geometry.swift Sources
 done
 check "build-apps: no paths builds all" all "$(printf '' | python3 "$ts" build-apps)"
 
+# Changed paths to the `app` scopes whose tests cover what `changed` picks (scopes).
+scopes() { printf '%s\n' "$@" | python3 "$ts" scopes; }
+check "scopes: a Model and an app's snapshots, not the CLI tests Linux runs" photo "$(scopes Sources/PhotoModel/A.swift Sources/PhotoApp/B.swift)"
+check "scopes: SuiteUI and its tests" suiteui "$(scopes Sources/SuiteUI/A.swift Tests/SuiteUITests/B.swift Tests/AppAuditTests/C.swift)"
+check "scopes: a fixture and the kernel's" design,suite "$(scopes Tests/DesignModelTests/Fixtures/a.svg Tests/SuiteKernelTests/Fixtures/place/a.json)"
+check "scopes: a golden PNG and Package.swift are all" all,all "$(scopes Tests/AppSnapshotTests/Golden/canvas/a.png),$(scopes Package.swift)"
+check "scopes: docs, scripts, journeys and real jobs are none" "" "$(scopes docs/a.md scripts/ci UITests/PhotoJourneyTests.swift Tests/RealJobs/photo/x/input/a.png)"
+
 # Every perf and heavy list entry names a test that exists.
 missing=""
 while read -r app id; do

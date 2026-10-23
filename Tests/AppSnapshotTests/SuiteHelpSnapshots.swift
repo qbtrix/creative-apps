@@ -26,6 +26,16 @@ import Testing
         }
     }
 
+    /// cli-bundle CB-5b: suite-help-connect, the Connect an AI Assistant sheet for an installed bundle. Until CB-4
+    /// fills in the text both Copy buttons say why they're disabled; Install waits on CB-6.
+    @Test func connectSheet() throws {
+        let panel = AssistantConnectPanel(bundle: "/Applications/AfterGlow.app")
+        for (scheme, suffix) in [(ColorScheme.light, "light"), (.dark, "dark")] {
+            let sheet = AssistantConnectSheet(panel: panel, onCopy: { _ in }, onOpenAIAccess: {}, onClose: {})
+            try snapshot(staged(sheet), name: "suite-help-connect-\(suffix)", scheme: scheme)
+        }
+    }
+
     #if canImport(AppKit)
     /// Help > Beta Notes's window opens at its view's minimum size: with notes it is taller than with none, so the
     /// notes list doesn't collapse to nothing between the title and Close.

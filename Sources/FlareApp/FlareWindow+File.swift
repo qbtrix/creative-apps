@@ -16,6 +16,11 @@
 // FlareWindow's menu door. Each open and save is noted in the suite's recents
 // through the documents bridge (the first also hands over Flare's old list),
 // and Clear Menu and the file-flow commands' requests go to the bridge (FL-4).
+// A Lottie JSON (`FlareWorkspace.opensAsLottie`, lottie-open LO-4) opens through
+// FlareLottieOpen off the main actor and lands through `finishLottieOpen`:
+// untitled, with the import note above the stage (FlareImportNoteAdapter.swift); on the
+// LO-1 stub the open alert says "Opening Lottie arrives with LO-3." It isn't
+// noted in the recents yet (LO-5 decides).
 import AppKit
 import FlareCore
 import FlareModel
@@ -68,6 +73,7 @@ extension FlareWindow {
 
     /// Reads, decodes and opens `url`; a failure keeps the open document.
     func open(_ url: URL) {
+        if FlareWorkspace.opensAsLottie(url.path) { return openLottie(url) }
         let name = url.lastPathComponent
         model.beginOpen()
         Task {
@@ -90,6 +96,25 @@ extension FlareWindow {
                 model.noteRecent(url.path)
                 noteSuite(url, .opened)
             }
+        }
+    }
+
+    /// Reads `url` and opens it as a Lottie off the main actor; a failure keeps the open document.
+    func openLottie(_ url: URL) {
+        let name = url.deletingPathExtension().lastPathComponent
+        model.beginOpen()
+        Task {
+            let result = await Task.detached(priority: .userInitiated) {
+                () -> Result<(FlareDocument, [String]), FlareOpenError> in
+                let data: Data
+                do {
+                    data = try Data(contentsOf: url)
+                } catch {
+                    return .failure(.damaged(error.localizedDescription))
+                }
+                return Result { () throws(FlareOpenError) in try FlareLottieOpen.open(data: data, name: name) }
+            }.value
+            model.finishLottieOpen(result)
         }
     }
 

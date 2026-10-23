@@ -53,11 +53,14 @@
 # each: BASE_BRANCH plus up to LANE_BATCH_MAX ready PRs merged in order on a
 # scratch branch `lane/batch-<id>` (BATCH_PREFIX, merge drivers on, one merge
 # commit per PR whose subject names the PR and its head). The batch gets one
-# Linux-only CI run and, when it changes code, one macOS gate run (ci.yml's
-# `mac_only`: scripts/ci on macOS scoped to BATCH_APPS, build-apps over the
-# batch's changed code, anything shared meaning every app). Its macOS pass is
+# Linux-only CI run and, when it needs macOS, one macOS gate run (ci.yml's
+# `mac_only`: scripts/ci on macOS scoped to BATCH_APPS, mac_scope over the
+# batch's changed paths: build-apps over its code plus the tests test-scope
+# changed picks, golden PNGs and fixtures included, anything shared meaning
+# every app). Its macOS pass is
 # that run's `macOS` job or a LOCAL_MAC_CONTEXT commit status (the local Mac
-# gate) on the batch head. When both are green every PR lands in order
+# gate) on the batch head, unless the other one is red there: a red outranks a
+# green on the same head. When both are green every PR lands in order
 # (squash, head matched). A lone ready PR without code lands at once, as does
 # any lone PR with LANE_MAC_PER_PR=1; a lone code PR is a batch of one. A batch
 # that needs macOS forms when a slot frees (a batch resolved in this run),
@@ -79,10 +82,17 @@
 # branch is the whole state, so a later sweep resumes a batch a run left
 # behind; while one is in flight nothing else merges. A PR whose head moved or
 # that conflicts with an earlier PR in the batch waits for the next sweep. A
-# red base (the chain before any PR) means BASE_BRANCH itself is red: when it
-# is red on every job the tip is red on, the batch lands on the PRs' own proof,
-# as before batches, so a fix can get through; a job red only with the batch
-# is still bisected, with the base's red jobs set aside (BATCH_IGNORE).
+# red base (the chain before any PR) means BASE_BRANCH itself is red. On Linux
+# that is judged by job: when the base is red on every job the tip is red on,
+# the batch lands on the PRs' own proof, as before batches, so a fix can get
+# through; a job red only with the batch is still bisected, with the base's red
+# jobs set aside (BATCH_IGNORE). macOS is set aside that way only when the tip
+# passes it. When the tip fails macOS too, it goes by failing test instead
+# (mac_vs_base): every macOS gate on the chain is read against the tests that
+# fail on the base's own gate (BASE_MAC_FAILS), so a batch failing only those
+# lands, and one that adds a failing test is bisected to the PR that adds it,
+# whose comment names the new tests. A log that can't be read waits; a red
+# with no test to name (a build error, a crash) is never the base's.
 #
 # A red BASE_BRANCH gets its culprit found the same way (red_sweep): while a
 # `dev-red` issue for a red Linux job is open, each sweep bisects main..<red sha>
@@ -255,6 +265,8 @@ LOCAL_MAC_CONTEXT="local-ci/macos"  # the local Mac gate's commit status, a macO
 SLOT_FREED=0     # a batch resolved in this run: the next one forms without the timer
 BATCH_APPS=""    # the batch being resumed: its macOS gate scope (apps, all, or empty for no macOS gate)
 BATCH_IGNORE=""  # its jobs red on BASE_BRANCH alone (Linux, macOS), set aside while bisecting
+BASE_MAC_SET=0   # 1: the base and tip fail macOS, judged by test against the base's (BASE_MAC_FAILS)
+BASE_MAC_FAILS="" # those tests, one <File>.swift/<test> per line, sorted (mac_tests)
 # After starting a Linux run on a batch, wait this long (seconds, polling
 # every BATCH_POLL) for its verdict in the same run before leaving the rest to
 # the next sweep. Tests set it to 0.
@@ -435,6 +447,21 @@ build_apps() {
   apps=$(grep -E "$BUILD_RE" "$1" | python3 "$HERE/test-scope" build-apps 2>/dev/null) || apps=all
   [[ "$apps" =~ ^[a-z]+(,[a-z]+)*$ ]] || apps=all
   echo "$apps"
+}
+
+# mac_scope <files.txt>: the apps a batch macOS gate runs for these changed
+# paths: build_apps over the code, joined with main's scripts/test-scope
+# scopes over every path (a golden PNG or a fixture a test reads counts), so
+# the gate runs the tests scripts/test-scope changed picks. `all` when either
+# says so or test-scope fails; empty when nothing needs macOS.
+mac_scope() {
+  local code="" tests
+  [[ -z "$(build_paths "$1")" ]] || code=$(build_apps "$1")
+  tests=$(python3 "$HERE/test-scope" scopes <"$1" 2>/dev/null) || tests=all
+  [[ "$tests" =~ ^([a-z]+(,[a-z]+)*)?$ ]] || tests=all
+  case ",$code,$tests," in *,all,*) echo all; return ;; esac
+  # shellcheck disable=SC2086 # comma lists split into words
+  printf '%s\n' ${code//,/ } ${tests//,/ } | sort -u | paste -sd, -
 }
 
 # build_gate <pr.json> <files.txt> <mac-check run.json> <build run.json>:
@@ -864,7 +891,10 @@ dispatch_mac() {
 }
 
 # mac_verdict <sha>: the macOS gate on <sha>, from the newest MAC_GATE_RE check
-# run and the LOCAL_MAC_CONTEXT commit status; a pass from either counts:
+# run and the LOCAL_MAC_CONTEXT commit status. A red from either outranks a
+# green from the other (the local gate skips its known reds, CI_LOCAL_SKIP, so
+# its pass never covers a GitHub failure); otherwise a pass from either counts,
+# so a local pass lands while the GitHub job still runs:
 #   none   running   green|<url>   red|<url>|<job>
 # Any other conclusion (cancelled, timed out) is red, as check_verdict reads
 # Linux. An unreadable API answers running, so a blip never starts a second run.
@@ -882,14 +912,15 @@ mac_verdict() {
     | (if $s == null then "none" elif ($s.state | lc) == "success" then "green|\($s.target_url // "")"
        elif ($s.state | lc) == "pending" then "running" else "red|\($s.target_url // "")|\($ctx)" end) as $loc
     | [$gh, $loc] as $v
-    | first(($v[] | select(startswith("green|"))), ($v[] | select(startswith("red|"))),
+    | first(($v[] | select(startswith("red|"))), ($v[] | select(startswith("green|"))),
             ($v[] | select(. == "running")), "none")' 2>/dev/null || echo running
 }
 
 # batch_verdict <sha> <mode>: a chain commit's verdict from its Linux run(s)
 # (vote mode: probe_votes) and, when the batch has one (BATCH_APPS), its macOS
-# gate, then a tab and the Linux run count. A job in BATCH_IGNORE counts as
-# green. red|<url>|<job> when a job is red (Linux first), else none, more (a
+# gate (judged by test against the base's: mac_vs_base), then a tab and the
+# Linux run count. A job in BATCH_IGNORE counts as green. red|<url>|<job>[|<new
+# tests>] when a job is red (Linux first), else none, more (a
 # vote wants another run) or running when either is, else green|<urls>.
 batch_verdict() {
   local l n=0 m="green|" v
@@ -897,6 +928,7 @@ batch_verdict() {
   [[ "$l" != red* ]] || l="$l|Linux"
   [[ " $BATCH_IGNORE " != *" Linux "* ]] || l="green|"
   [[ -z "$BATCH_APPS" || " $BATCH_IGNORE " == *" macOS "* ]] || m=$(mac_verdict "$1")
+  (( ! BASE_MAC_SET )) || [[ "$m" != red* ]] || m=$(mac_vs_base "$m")
   for v in "$l" "$m"; do [[ "$v" != red* ]] || { printf '%s\t%s\n' "$v" "$n"; return; }; done
   for v in none more running; do
     [[ "$l" != "$v" && "$m" != "$v" ]] || { printf '%s\t%s\n' "$v" "$n"; return; }
@@ -906,12 +938,44 @@ batch_verdict() {
 }
 
 # red_jobs <sha>: the jobs red on <sha> (Linux, and macOS when the batch has
-# a macOS gate), space-separated.
+# a macOS gate, judged by test once BASE_MAC_SET; a log not read yet counts
+# red), space-separated.
 red_jobs() {
-  local j=""
+  local j="" m
   [[ "$(check_verdict "$1")" != red* ]] || j="Linux"
-  [[ -z "$BATCH_APPS" || "$(mac_verdict "$1")" != red* ]] || j="${j:+$j }macOS"
+  if [[ -n "$BATCH_APPS" ]]; then
+    m=$(mac_verdict "$1")
+    (( ! BASE_MAC_SET )) || [[ "$m" != red* ]] || { m=$(mac_vs_base "$m"); [[ "$m" != running ]] || m=red; }
+    [[ "$m" != red* ]] || j="${j:+$j }macOS"
+  fi
   echo "$j"
+}
+
+# mac_tests <red macOS verdict>: the tests its job's failed log says recorded
+# an issue (swift-testing's `Test <name> recorded an issue ... at <File>.swift:`;
+# a known issue doesn't count), one <File>.swift/<name> per line, sorted. The
+# file and name stay put when lines move; suite lines interleave under
+# parallel tests, so they aren't used. Nothing for the local gate (its log
+# isn't readable here). Fails when the GitHub log can't be read.
+mac_tests() {
+  local log
+  [[ "$1" != *"|$LOCAL_MAC_CONTEXT" ]] || return 0
+  log=$(failure_log "$1")
+  [[ -n "$log" ]] || return 1
+  LC_ALL=C sed -nE 's/.* Test (.+) recorded an issue.* at ([^ :]+\.swift):[0-9].*/\2\/\1/p' <<<"$log" | LC_ALL=C sort -u
+}
+
+# mac_vs_base <red macOS verdict>: that red judged against BASE_MAC_FAILS:
+# green|<url> when every failing test also fails on the base, red|<url>|<job>
+# with |<the new ones> when it adds any, red|<url>|<job> when it names none (a
+# build error or a crash is never the base's), running when the log can't be
+# read yet (never a pass).
+mac_vs_base() {
+  local rest="${1#red|}" ids new
+  ids=$(mac_tests "$1") || { echo running; return; }
+  new=$(LC_ALL=C comm -23 <(printf '%s\n' "$ids") <(printf '%s\n' "$BASE_MAC_FAILS") | grep . | paste -sd, - | sed 's/,/, /g' || true)
+  if [[ -n "$ids" && -z "$new" ]]; then echo "green|${rest%%|*} (fails only tests that fail on $BASE_BRANCH too)"
+  else echo "red|$rest${new:+|$new}"; fi
 }
 
 # settled <sha>: true when every job the batch runs (Linux, and its macOS gate
@@ -936,15 +1000,15 @@ batch_dispatch() {
   fi
 }
 
-# batch_apps <base sha> <tip sha>: the batch's macOS gate scope: build-apps
-# over the code (BUILD_RE) it changes, `all` for anything shared or when the
-# diff can't be read, nothing when it changes no code or LANE_MAC_PER_PR=1.
+# batch_apps <base sha> <tip sha>: the batch's macOS gate scope: mac_scope
+# over the paths it changes, `all` for anything shared or when the diff can't
+# be read, nothing when no changed path needs macOS or LANE_MAC_PER_PR=1.
 batch_apps() {
   local f
   (( ! LANE_MAC_PER_PR )) || return 0
   f=$(mktemp)
   git -C "$SCRATCH" diff --no-renames --name-only "$1" "$2" >"$f" 2>/dev/null || echo Package.swift >"$f"
-  [[ -z "$(build_paths "$f")" ]] || build_apps "$f"
+  mac_scope "$f"
   rm -f "$f"
 }
 
@@ -1048,12 +1112,13 @@ batch_start() {
 # the suspect: a base red on every job the tip is red on means BASE_BRANCH is
 # red, and the batch lands on the PRs' own proof so a fix can get through; a
 # base red on fewer jobs has those set aside (BATCH_IGNORE) and the bisect
-# goes on with the rest.
+# goes on with the rest. A tip failing macOS where the base does too is judged
+# by failing test instead (BASE_MAC_SET, mac_vs_base).
 BATCH_STATE=""
 batch_resume() {
   local br="$1" d k i sha v lo hi mid waited=0 line probes mode="" moded=0 bj tj on
   local chain=() verd=() nruns=()
-  DISPATCHED=""; BATCH_STATE=waiting; BATCH_IGNORE=""; BATCH_APPS=""
+  DISPATCHED=""; BATCH_STATE=waiting; BATCH_IGNORE=""; BATCH_APPS=""; BASE_MAC_SET=0; BASE_MAC_FAILS=""
   if ! scratch "$BASE_BRANCH" "$br"; then log "batch $br: could not fetch it; the next sweep tries again"; return; fi
   d="$SCRATCH"
   while read -r sha line; do
@@ -1093,7 +1158,19 @@ batch_resume() {
         lo=-1; hi=$k
         case "${verd[0]}" in
           red*)
-            bj=$(red_jobs "${chain[0]%%|*}"); tj=$(red_jobs "${chain[k]%%|*}"); line="${verd[0]#red|}"; line="${line%%|*}"
+            # A base and a tip both failing macOS: read the base's failing tests
+            # once, judge every macOS gate on the chain against them
+            # (mac_vs_base) and look again. A tip passing macOS sets it aside below.
+            v=$(mac_verdict "${chain[0]%%|*}")
+            if [[ -n "$BATCH_APPS" ]] && (( ! BASE_MAC_SET )) && [[ "$v" == red* && "$(mac_verdict "${chain[k]%%|*}")" != green* ]]; then
+              if ! BASE_MAC_FAILS=$(mac_tests "$v"); then log "batch $br: could not read the failing macOS tests on $BASE_BRANCH yet; waiting"; return; fi
+              BASE_MAC_SET=1
+              log "batch $br: $BASE_BRANCH is red on macOS on its own (${BASE_MAC_FAILS:-no test it could name}); judging macOS by failing test"
+              continue
+            fi
+            # Judged by test, macOS is never set aside or counted for own proof.
+            bj=$(red_jobs "${chain[0]%%|*}"); (( ! BASE_MAC_SET )) || bj="${bj%macOS}"; bj="${bj% }"
+            tj=$(red_jobs "${chain[k]%%|*}"); line="${verd[0]#red|}"; line="${line%%|*}"
             # Own proof only once every job on the tip has finished: a macOS gate
             # still running must not land code unproven. Until then the base's
             # red jobs are set aside below, so the tip waits on the rest.
@@ -1166,8 +1243,9 @@ batch_land() {
 # PRs based on its branch, the rest wait for the next batch. The comment's
 # first words are what evaluate looks for to hold the label at that head.
 batch_culprit() {
-  local br="$1" lo="$2" hi="$3" url="${4%%|*}" job="Linux" mode="$5"
-  [[ "$4" != *"|"* ]] || job="${4##*|}"
+  local br="$1" lo="$2" hi="$3" url="${4%%|*}" job="Linux" mode="$5" new=""
+  [[ "$4" != *"|"* ]] || job="${4#*|}"
+  [[ "$job" != *"|"* ]] || { new="${job#*|}"; job="${job%%|*}"; }
   shift 5
   local chain=("$@") n head after="" i pn hbr deps=""
   IFS='|' read -r _ n head <<<"${chain[hi]}"
@@ -1180,7 +1258,7 @@ batch_culprit() {
   write gh label create "$NEEDS_FIX_LABEL" -R "$REPO" --color d93f0b --force \
     --description "The lane's batch check fails with this PR on dev; push a fix" >/dev/null 2>&1 || true
   write gh pr edit "$n" -R "$REPO" --add-label "$NEEDS_FIX_LABEL" || log "could not add $NEEDS_FIX_LABEL"
-  comment_once "$n" "Fast lane: head $head fails the $job check once it lands on $BASE_BRANCH${after:+ after $after}: $url.$(vote_note "$mode") ${after:+Those PRs merged; }This one has the $NEEDS_FIX_LABEL label and waits.${deps:+ Stacked on its branch: $deps, which wait for the fix; restack them on it.} Fix it, rerun scripts/ci --changed, push, and move the Head: line; the lane drops the label on the new head and checks it again."
+  comment_once "$n" "Fast lane: head $head fails the $job check once it lands on $BASE_BRANCH${after:+ after $after}: $url.${new:+ Tests failing with it that pass on $BASE_BRANCH: $new.}$(vote_note "$mode") ${after:+Those PRs merged; }This one has the $NEEDS_FIX_LABEL label and waits.${deps:+ Stacked on its branch: $deps, which wait for the fix; restack them on it.} Fix it, rerun scripts/ci --changed, push, and move the Head: line; the lane drops the label on the new head and checks it again."
   batch_land "$br" "$lo" "batch of $lo PRs checked together on Linux${BATCH_APPS:+ and macOS} before #$n broke the chain" "${chain[@]}"
 }
 
@@ -1632,11 +1710,11 @@ evaluate() {
     eligible)
       # settle_ready lands it, or batches it with the pass's other eligible PRs:
       # rank|n|head|branch|apps|ready since|proof. rank orders p0, beta, the
-      # rest; apps is what its code needs on macOS (empty: no code).
+      # rest; apps is what it needs on macOS (mac_scope; empty: nothing).
       # ponytail: "ready since" is the head commit's date (no state is kept),
       # unreadable counts as old: a smaller batch, never a stuck one.
       local apps="" rank since
-      [[ -z "$(build_paths "$tmp/files.txt")" ]] || apps=$(build_apps "$tmp/files.txt")
+      apps=$(mac_scope "$tmp/files.txt")
       rank=$(jq -r '[.labels[]?.name] as $l | if ($l | index("p0")) then 0 elif ($l | index("beta")) then 1 else 2 end' "$tmp/pr.json")
       since=$(jq -r '(.commits // [] | last // {} | .committedDate // "") as $d | if $d == "" then 0 else ($d | try fromdateiso8601 catch 0) end' "$tmp/pr.json" 2>/dev/null || echo 0)
       READY+=("$rank|$n|$head|$(jq -r '.headRefName // ""' "$tmp/pr.json")|$apps|$since|${rest#*|*|}")

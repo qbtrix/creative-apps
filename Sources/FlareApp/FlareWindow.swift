@@ -5,7 +5,8 @@
 // inspector column is `inspectorWidth` wide in every state; the toolbar is New, Open, Save, Undo,
 // Redo, Auto-key, Animate… and Export…, each disabled with its area's reason
 // while it can't act. The content is the stage over the timeline (FlareCanvas)
-// while a document is open, else the empty state with New Animation; the
+// while a document is open, else the empty state with New Animation, which
+// opens a .flare dropped on it in this window (FlareShell.openQueue); the
 // inspector is FlareInspector (Properties and Library tabs). Every control
 // goes through one FlareIntent: `perform` and `help(for:)` in
 // FlareWindow+Router.swift hand it to its area's file, and a control's
@@ -81,7 +82,7 @@ struct FlareWindow: View {
             FlareCanvas(
                 model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
                 help: { help(for: $0) }, tick: { model.tick(target: $0, ticker: &$1) }, onKey: toolKey,
-                onFit: { fitted = $0 })
+                onFit: { fitted = $0 }, onDismissNote: { model.dismissImportNote() })
         } inspector: {
             FlareInspector(
                 model: model, tab: inspectorTab, perform: perform,
@@ -95,7 +96,7 @@ struct FlareWindow: View {
         .modifier(FlareNewSheet(presented: $presented, perform: perform))
         .modifier(FlareExportSheetAdapter(model: model, perform: perform))
         .modifier(FlareOpenStatus(model: model))
-        .modifier(FlareOpenQueueTaker(open: { open($0) }))
+        .suiteOpenQueue(FlareShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .modifier(FlareAutosaveAdapter(model: model, restore: { try model.restoreRecovery($0) }))
         .modifier(FlareLiveRegistration(read: { model }, write: { model.takeLive($0) }))
         .focusedSceneValue(
@@ -140,7 +141,7 @@ struct FlareWindow: View {
 }
 
 /// The window's content: the stage over the timeline while a document is
-/// open, else the empty state whose one action is New Animation (Open is the
+/// open, under the import note after a Lottie open (FlareImportNoteAdapter.swift), else the empty state whose one action is New Animation (Open is the
 /// toolbar's). New Animation is `.file(.new)` like the toolbar's New, so it
 /// takes `emptyNewIdentifier` to keep `suite.controls` free of duplicates.
 struct FlareCanvas: View {
@@ -156,6 +157,8 @@ struct FlareCanvas: View {
     /// The stage's keys it doesn't take itself (Return, Escape): the window's `toolKey`.
     var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
     var onFit: @MainActor (Double) -> Void = { _ in }
+    /// The import note's Dismiss (FlareImportNoteAdapter.swift): the window's `model.dismissImportNote()`.
+    var onDismissNote: @MainActor () -> Void = {}
     /// Ticks the model while playing: started when `model.isPlaying` turns true, stopped when it turns false or
     /// the canvas leaves the screen. Its `measuredFPS` feeds the stage's status pills.
     @State private var driver: PlaybackDriver?
@@ -163,6 +166,7 @@ struct FlareCanvas: View {
     var body: some View {
         if model.document != nil {
             VStack(spacing: 0) {
+                FlareImportNoteAdapter(rows: model.importNoteRows, onDismiss: onDismissNote)
                 FlareStage(
                     model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
                     help: help, onKey: onKey, measuredFPS: driver?.measuredFPS, onFit: onFit)
@@ -177,6 +181,12 @@ struct FlareCanvas: View {
                 message: "Create an animation to start drawing scenes and keyframes.",
                 action: ToolbarAction("New Animation", systemImage: "plus", identifier: Self.emptyNewIdentifier) {
                     perform(.file(.new))
+                },
+                onDrop: { urls in
+                    // A .flare dropped here opens in this window (FlareShell.openQueue), any more in new ones.
+                    let files = urls.filter { FlareHeadless.openExtensions.contains($0.pathExtension.lowercased()) }
+                    files.forEach(FlareShell.openQueue.open)
+                    return !files.isEmpty
                 })
         }
     }
