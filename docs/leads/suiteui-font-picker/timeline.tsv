@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-23T03:14Z	3	pr	FP-u	#4704 opened; gate CI: PASS on deb55ebe
 2026-10-23T03:15Z	3	gate	FP-z	CI: PASS on d3633a8d; pushed; PR waits on #4704
 2026-10-23T03:37:34Z	check-in	FP-u build 39894260475 queued; no green suiteui/full run on dev yet (full runs cancelled, scoped suiteui on cb9306a failed)	FP-u	waiting
+2026-10-23T04:04:16Z	check-in	FP-u build 39894260475 still queued (Mac runners busy); full runs on dev keep cancelling, newest 39897762608 pending on a8ea948	FP-u	waiting
