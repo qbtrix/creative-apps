@@ -4,14 +4,14 @@ Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
 Run: act-1a166b69fab-fd09 (took over from act-1a15e10a86f-7bk9) · Session: claude/pen-paths-lottie-open-a39k6m · Started: 2026-10-21T01:10Z (this run 2026-10-23T03:07Z)
 Stage: 3 wave 3
 Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a
-Next: (2026-10-23T03:31Z) FP-u open as #4706 (fast-lane, Fixes #4200), awaiting lane batch + macOS gate; FP-m (FP-6) building, PR next; FP-z after both merge.
+Next: (2026-10-23T03:38Z) FP-u #4706 and FP-m #4714 open, awaiting lane batch + macOS gate; then scoped CI app=flare, critic panels, Belt-Slice-Done; FP-z after both merge.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | FP-a | adapters as stubs, PathEditTarget conformance, Direct Select anchors via overlay | FP-1, FP-2 | MJ-FP | PN-a (done), shape-tools:FS-a (done) | yes | 1 | done (Belt-Slice-Done 08:56Z; Mac-Finish-Wanted) | #3838 | 08:08Z merged 5a911587 |
 | FP-u | snapshots, render budget, journey (skipped) | FP-3, FP-4 | J-FP | FP-a, PN-3 | yes | 0 | PR #4706 open, in lane | #4706 | – |
-| FP-m | Pen on PenRules; path specs in catalog | FP-5, FP-6 | MJ-FP | FP-a (done), PN-5 (done), PN-7, shape-tools:FS-m (unchained for FP-5), file-flow:FL-m | no | 0 | FP-5 merged (#4029, 14:11Z); FP-6 waits on FL-m | #4029 | – |
+| FP-m | Pen on PenRules; path specs in catalog | FP-5, FP-6 | MJ-FP | FP-a (done), PN-5 (done), PN-7, shape-tools:FS-m (unchained for FP-5), file-flow:FL-m | no | 0 | FP-5 merged (#4029); FP-6 PR #4714 open, in lane | #4029, #4714 | – |
 | FP-e | Direct Select anchor editing; stress budget | FP-7, FP-8 | MJ-FP, RJ-F27 | FP-a, PN-5 (done), PN-6 (done), stage-edit (closed); FlareSelection.swift avoided (AS-flare hand-off, planned) | no | 0 | done: run 39596004859 (only the Library timing flake; supervisor answer 12:04Z); FP-8 waits on test/stress-perf-journeys | #3958 | – |
 | FP-z | journey on; status built | FP-9, FP-10 | J-FP | FP-u, FP-m, FP-e, file-flow:FL-z | yes | 0 | waiting | – | – |
 
@@ -23,7 +23,7 @@ Next: (2026-10-23T03:31Z) FP-u open as #4706 (fast-lane, Fixes #4200), awaiting 
 | FP-3 | FP-u | 3 | snapshots + render budget; stage on PN-3 overlay init | Tests/AppSnapshotTests/FlareAnchorSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetFlareAnchorTests.swift, Sources/FlareApp/FlareWindow+Stage.swift | #4706 | – | in lane |
 | FP-4 | FP-u | 3 | journey written, skipped | UITests/FlareJourneyTests+Pen.swift | #4706 | – | in lane |
 | FP-5 | FP-m | 2 | Pen on PenRules | Sources/FlareModel/FlarePen+Kernel.swift, Sources/FlareModel/Live/LiveShapes.swift, Sources/FlareModel/Fakes/FakeShapes.swift, Sources/FlareModel/Contracts/ShapeContracts.swift, Sources/FlareModel/FlarePenFinish.swift | FlarePenKernelTests | – | building |
-| FP-6 | FP-m | 3 | twelve path specs in catalog | Sources/FlareModel/FlareCommandCatalog.swift, Tests/command-ids/flare.txt | FlarePathCommandTests | – | building |
+| FP-6 | FP-m | 3 | twelve path specs in catalog | Sources/FlareModel/FlareCommandCatalog.swift, Tests/command-ids/flare.txt | FlarePathCommandTests | #4714 | in lane |
 | FP-7 | FP-e | 2 | Direct Select anchor editing | Sources/FlareModel/FlareAnchors+Kernel.swift, Sources/FlareModel/FlareDrag.swift, Sources/FlareModel/FlareSelection.swift | FlareAnchorEditTests | #3958 | merged |
 | FP-8 | FP-e | 3 | anchor stress budget | Tests/FlareModelTests/FlareAnchorBudgetTests.swift, UITests/FlareJourneyTests+RealPerfAnchors.swift | FlareAnchorBudgetTests | – | waiting |
 | FP-9 | FP-z | 4 | journey on | UITests/FlareJourneyTests+Pen.swift | J-FP | – | waiting |

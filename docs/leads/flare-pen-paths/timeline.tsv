@@ -79,3 +79,4 @@ utc	stage	event	ref	note
 2026-10-22T02:41Z	heartbeat	#4204 head d34e2417 in lane macOS build 39711403708; #4203 PN-3 new head 01a576e2 in lane macOS build 39712632560; then FP-a post-round-2 panel and FP-u.
 2026-10-23T03:07Z	stage	run act-1a166b69fab-fd09 takes over at base e055e671; FL-m/FL-z met; wave 3 starts FP-u and FP-m (and LO-u on lottie-open).
 2026-10-23T03:31Z	pr	FP-u #4706 opened (head 9cd03fbb, scripts/ci --changed pass); #4012 relabelled gap (waits on #4030).
+2026-10-23T03:38Z	pr	FP-m #4714 opened (head 69884609, scripts/ci --changed pass, Mutate FlareCommandCatalog 10/10); LO-m stacks on it.
