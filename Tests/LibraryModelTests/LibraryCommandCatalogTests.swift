@@ -93,6 +93,8 @@ struct LibraryCatalogDoc: HeadlessDocument {
         case "file.clear-recent": .some("No Recent Files")
         case "file.open-in": .some(c.openInHelp)
         case "file.share-prepare": .some(c.shareHelp)
+        case "photo.remove-from-catalog": .some(c.selection.isEmpty ? LibraryCatalog.removeHelp : nil)  // catalog-files LC-6
+        case "photo.relink": .some(c.items.contains { $0.availability == .missing } ? nil : LibraryCatalog.relinkHelp)
         case "folders.list", "view.show-folder": .some(c.items.contains { $0.path?.hasPrefix("/") == true } ? nil : LibraryCatalog.noFolders)
         default: nil
         }
@@ -168,7 +170,8 @@ struct LibraryCatalogDoc: HeadlessDocument {
                 if (try? Self.catalog.run(spec.id, params: spec.example, on: &ran).undoStep) == spec.title { stepped.insert(spec.id) }
             }
         }
-        let edits = Set(LibraryCatalog.commands.filter { $0.kind == .edit }.map(\.id))
+        // Relink needs a missing photo and a real file on disk; RelinkTests proves its "Relink" step.
+        let edits = Set(LibraryCatalog.commands.filter { $0.kind == .edit }.map(\.id)).subtracting(["photo.relink"])
         #expect(edits.subtracting(stepped).isEmpty, "never recorded its step: \(edits.subtracting(stepped))")
     }
 
@@ -215,5 +218,6 @@ struct LibraryCatalogDoc: HeadlessDocument {
         "file.show-catalog | Show Catalog in Finder | The catalog file isn't damaged.",
         "notice.close | Close Notice | There is no notice to close.",
         "notice.show-failures | Show Failures | No files failed to import.",
-    ] + DevelopSlider.allCases.map { "\(LibraryCatalog.resetSliderID($0)) | Reset \($0.rawValue) | on" } + ["file.share-prepare | Share | on"]
+    ] + DevelopSlider.allCases.map { "\(LibraryCatalog.resetSliderID($0)) | Reset \($0.rawValue) | on" } + ["file.share-prepare | Share | on",
+        "photo.remove-from-catalog | Remove from Catalog | on", "photo.relink | Relink | No photo is missing."]
 }

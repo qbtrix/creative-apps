@@ -6,7 +6,8 @@
 // the before list back and redo the after list (FC-3), and undoing a delete
 // selects the deleted collection again when it was selected (FC-9). A drop's
 // "Import" step (LF-3) takes its photos out on undo and adds them back,
-// selected, on redo. Edits sharing an open coalesce key (one slider drag) stay
+// selected, on redo; a "Remove from Catalog" step (catalog-files LC-6) does the reverse and puts its photos
+// back where they were. Edits sharing an open coalesce key (one slider drag) stay
 // one step. The 100-step limit is the kernel's. Undo and redo never move the
 // loupe (#426). Linux-safe.
 
@@ -24,11 +25,15 @@ public struct CatalogChange: Hashable, Sendable {
     public internal(set) var selectedBefore: String?
     public internal(set) var removing: [PhotoItem]?
     public internal(set) var adding: [PhotoItem]?
+    /// Where the photos a Remove from Catalog step takes out sat in the catalog, ascending, so adding them back
+    /// puts each in its place; nil on an import step, whose photos add at the end.
+    public internal(set) var reinsertAt: [Int]?
 
     init(
         photos: [PhotoItem], collectionsBefore: [UserCollection]? = nil, collectionsAfter: [UserCollection]? = nil,
-        selectedBefore: String? = nil, removing: [PhotoItem]? = nil, adding: [PhotoItem]? = nil
+        selectedBefore: String? = nil, removing: [PhotoItem]? = nil, adding: [PhotoItem]? = nil, reinsertAt: [Int]? = nil
     ) {
+        self.reinsertAt = reinsertAt
         self.photos = photos
         self.collectionsBefore = collectionsBefore
         self.collectionsAfter = collectionsAfter
@@ -161,14 +166,36 @@ extension LibraryCatalog {
         if !applied.photos.isEmpty { restore(applied.photos) }
         if let removing = applied.removing { removePhotos(Set(removing.map(\.id))) }
         if let adding = applied.adding {
-            appendImported(adding)
+            if let places = applied.reinsertAt { reinsert(adding, at: places) } else { appendImported(adding) }
             select(Set(adding.map(\.id)))
         }
     }
 
-    /// Takes the photos with `ids` out (an import's undo); a loupe on one of them goes back to the grid.
+    /// Takes the photos with `ids` out of the catalog and records it as one "Remove from Catalog" step; no file
+    /// is touched. Ids not in the catalog are ignored; none records nothing.
+    mutating func removeFromCatalog(_ ids: Set<String>) {
+        let places = items.indices.filter { ids.contains(items[$0].id) }
+        guard !places.isEmpty else { return }
+        history.kernel.record("Remove from Catalog", CatalogChange(photos: [], adding: places.map { items[$0] }, reinsertAt: places))
+        history.open = false
+        removePhotos(ids)
+    }
+
+    /// Puts `photos` back at `places` (ascending, as they were before the remove), skipping any already back.
+    private mutating func reinsert(_ photos: [PhotoItem], at places: [Int]) {
+        var known = Set(items.map(\.id))
+        for (place, photo) in zip(places, photos) where known.insert(photo.id).inserted {
+            items.insert(photo, at: min(max(place, 0), items.count))
+        }
+        recount()
+        rebuildOrder()
+        saveRevision += 1
+    }
+
+    /// Takes the photos with `ids` out (an import's undo, Remove from Catalog); a loupe on one of them goes back
+    /// to the grid.
     private mutating func removePhotos(_ ids: Set<String>) {
-        items.removeAll { ids.contains($0.id) }
+        items = CatalogFileRules.removing(ids, from: items)
         if let focused = focusedItemID, ids.contains(focused) { (focusedItemID, mode) = (nil, .grid) }
         recount()
         rebuildOrder()
