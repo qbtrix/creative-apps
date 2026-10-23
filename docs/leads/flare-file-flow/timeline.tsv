@@ -106,3 +106,4 @@ utc	stage	event	ref	note
 2026-10-23T05:19Z	check	journeys 39898629239 (flare, 6acdb2011) still queued; #3482 quiet; no open file-flow findings
 2026-10-23T05:52Z	check	journeys 39898629239 (flare, 6acdb2011) in progress; #3482 quiet; no open file-flow findings
 2026-10-23T06:21Z	check	journeys 39898629239 (flare, 6acdb2011) failed: FLJ1 step 2 (drop opens no window) and testEveryMenuOpens Menus.swift:52 (Clear Menu); fix rounds used: gap #4764 filed, #1829 updated
+2026-10-23T06:53Z	check	#3482 quiet; no open file-flow findings; gaps #4764, #1829 hold what stays red
