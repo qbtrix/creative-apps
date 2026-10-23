@@ -6,5 +6,7 @@
 {"label":"a solid stroke traces the kernel's outline, not the fill's shape","file":"Sources/DesignModel/DesignStrokeOutline.swift","find":"guard !stroke.dash.isEmpty || !(stroke.trim?.isWhole ?? true) else { return nil }","replace":"","tests":"DesignStrokeOutlineTests"},
 {"label":"a zero dash stays zero: a dotted stroke paints nothing","file":"Sources/DesignModel/DesignStrokeOutline.swift","find":"i % 2 == 0 && d == 0 && stroke.cap != .butt","replace":"false","tests":"DesignStrokeOutlineTests"},
 {"label":"the outline is cut in document space: dashes facet at high zoom","file":"Sources/DesignModel/DesignStrokeOutline.swift","find":"outline.transformed(by: .scale(x: s, y: s))","replace":"outline","tests":"DesignStrokeOutlineTests"},
-{"label":"the stroke's opacity is dropped","file":"Sources/DesignModel/DesignStrokeOutline.swift","find":"color.a.isFinite ? min(max(color.a, 0), 1) : 1","replace":"1","tests":"DesignStrokeOutlineTests"}
+{"label":"the stroke's opacity is dropped","file":"Sources/DesignModel/DesignStrokeOutline.swift","find":"color.a.isFinite ? min(max(color.a, 0), 1) : 1","replace":"1","tests":"DesignStrokeOutlineTests"},
+{"label":"a rounded box traces square corners","file":"Sources/DesignModel/DesignStrokeOutline.swift","find":"box = ShapeSpec(kind: .rectangle, cornerRadius: drawnCornerRadius)","replace":"box = ShapeSpec(kind: .rectangle)","tests":"DesignStrokeOutlineTests"},
+{"label":"the dash phase stays in document points","file":"Sources/DesignModel/DesignStrokeOutline.swift","find":"drawn.dashPhase = stroke.dashPhase * s","replace":"drawn.dashPhase = stroke.dashPhase","tests":"DesignStrokeOutlineTests"}
 ]
