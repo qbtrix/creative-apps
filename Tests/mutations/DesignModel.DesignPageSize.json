@@ -54,5 +54,19 @@
     "find": "                frames.append(node.frame)\n",
     "replace": "",
     "tests": "DesignPageSizeTests.swift"
+  },
+  {
+    "label": "the past-edge note counts hidden layers",
+    "file": "Sources/DesignModel/DesignPageSize.swift",
+    "find": "let past = nodes.filter { !$0.isHidden && isPastEdge($0) }",
+    "replace": "let past = nodes.filter { isPastEdge($0) }",
+    "tests": "DesignPageSizeTests.swift"
+  },
+  {
+    "label": "the past-edge note shows while everything fits",
+    "file": "Sources/DesignModel/DesignPageSize.swift",
+    "find": "guard let first = past.first else { return nil }",
+    "replace": "guard let first = past.first ?? nodes.first else { return nil }",
+    "tests": "DesignPageSizeTests.swift"
   }
 ]
