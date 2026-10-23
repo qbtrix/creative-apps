@@ -36,4 +36,4 @@ Next: wave 1 builders open the contract slice PR(s)
 
 ## Open
 - NP-a opened as #4717 (11 files, +380/-17; three existing tests that pinned the stubs changed too). Gap found: the ratchet matches only `Button(`, so the launcher's `MenuCommand` placeholders in LauncherCommands+Home.swift (Clear Menu, Show Sidebar, Show Inspector) slip past it. NP-flare's builder extends the scan to `MenuCommand(` disabled entries and baselines them, so the ratchet covers what NP-1 promised.
-- NP-flare started 03:50Z, stacked on lead/no-placeholders-NP-a. #4297 (PF-u) is still needs-fix and dirty, so it goes ahead; the hand-off note is on #3459 (comment 6356870194). The MenuCommand scan extension rides in NP-flare only if it stays small; otherwise it becomes a gap issue.
+- NP-flare started 03:46Z, stacked on lead/no-placeholders-NP-a. #4297 (PF-u) is still needs-fix and dirty, so it goes ahead; the hand-off note is on #3459 (comment 6356870194). The MenuCommand scan extension rides in NP-flare only if it stays small; otherwise it becomes a gap issue.
