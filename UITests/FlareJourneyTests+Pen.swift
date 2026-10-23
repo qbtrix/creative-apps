@@ -3,19 +3,15 @@
 // the first (Path 1); Direct Select clicks it and its four anchors show (`suite.path.anchor-0-<i>`, PathEditOverlay's
 // probes); dragging the smooth anchor 30 pt moves it and its handles and no other anchor, one "Undo Edit Path";
 // Option-dragging its out handle leaves the in handle (a corner now); a marquee over the last two anchors and Delete
-// leave two. Written and skipped until FP-9 turns it on, on live services. One shot per step, `flare-pen-<step>`.
+// leave two. On live services since FP-9 (slice FP-z). One shot per step, `flare-pen-<step>`.
 import XCTest
 
 final class FlarePenJourneyTests: XCTestCase {
-    /// Off until FP-9 runs it on live services (it needs FP-5's Pen and FP-7's anchor edits there).
-    private static let liveLanded = false
-
     /// The path's four points, fractions of the stage; the second is dragged to `pull`, so it is smooth.
     private static let corners = [(0.2, 0.2), (0.5, 0.2), (0.5, 0.6), (0.2, 0.6)]
     private static let pull = (0.6, 0.15)
 
     @MainActor func testPenThenDragAnchor() throws {
-        guard Self.liveLanded else { throw XCTSkip("waits on FP-9") }
         let flare = Journey("Flare", self, arguments: ["-FlareSample", "empty"])
         XCTAssert(flare.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         let stage = flare.element("suite.canvas")

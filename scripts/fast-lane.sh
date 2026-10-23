@@ -53,11 +53,14 @@
 # each: BASE_BRANCH plus up to LANE_BATCH_MAX ready PRs merged in order on a
 # scratch branch `lane/batch-<id>` (BATCH_PREFIX, merge drivers on, one merge
 # commit per PR whose subject names the PR and its head). The batch gets one
-# Linux-only CI run and, when it changes code, one macOS gate run (ci.yml's
-# `mac_only`: scripts/ci on macOS scoped to BATCH_APPS, build-apps over the
-# batch's changed code, anything shared meaning every app). Its macOS pass is
+# Linux-only CI run and, when it needs macOS, one macOS gate run (ci.yml's
+# `mac_only`: scripts/ci on macOS scoped to BATCH_APPS, mac_scope over the
+# batch's changed paths: build-apps over its code plus the tests test-scope
+# changed picks, golden PNGs and fixtures included, anything shared meaning
+# every app). Its macOS pass is
 # that run's `macOS` job or a LOCAL_MAC_CONTEXT commit status (the local Mac
-# gate) on the batch head. When both are green every PR lands in order
+# gate) on the batch head, unless the other one is red there: a red outranks a
+# green on the same head. When both are green every PR lands in order
 # (squash, head matched). A lone ready PR without code lands at once, as does
 # any lone PR with LANE_MAC_PER_PR=1; a lone code PR is a batch of one. A batch
 # that needs macOS forms when a slot frees (a batch resolved in this run),
@@ -444,6 +447,21 @@ build_apps() {
   apps=$(grep -E "$BUILD_RE" "$1" | python3 "$HERE/test-scope" build-apps 2>/dev/null) || apps=all
   [[ "$apps" =~ ^[a-z]+(,[a-z]+)*$ ]] || apps=all
   echo "$apps"
+}
+
+# mac_scope <files.txt>: the apps a batch macOS gate runs for these changed
+# paths: build_apps over the code, joined with main's scripts/test-scope
+# scopes over every path (a golden PNG or a fixture a test reads counts), so
+# the gate runs the tests scripts/test-scope changed picks. `all` when either
+# says so or test-scope fails; empty when nothing needs macOS.
+mac_scope() {
+  local code="" tests
+  [[ -z "$(build_paths "$1")" ]] || code=$(build_apps "$1")
+  tests=$(python3 "$HERE/test-scope" scopes <"$1" 2>/dev/null) || tests=all
+  [[ "$tests" =~ ^([a-z]+(,[a-z]+)*)?$ ]] || tests=all
+  case ",$code,$tests," in *,all,*) echo all; return ;; esac
+  # shellcheck disable=SC2086 # comma lists split into words
+  printf '%s\n' ${code//,/ } ${tests//,/ } | sort -u | paste -sd, -
 }
 
 # build_gate <pr.json> <files.txt> <mac-check run.json> <build run.json>:
@@ -873,7 +891,10 @@ dispatch_mac() {
 }
 
 # mac_verdict <sha>: the macOS gate on <sha>, from the newest MAC_GATE_RE check
-# run and the LOCAL_MAC_CONTEXT commit status; a pass from either counts:
+# run and the LOCAL_MAC_CONTEXT commit status. A red from either outranks a
+# green from the other (the local gate skips its known reds, CI_LOCAL_SKIP, so
+# its pass never covers a GitHub failure); otherwise a pass from either counts,
+# so a local pass lands while the GitHub job still runs:
 #   none   running   green|<url>   red|<url>|<job>
 # Any other conclusion (cancelled, timed out) is red, as check_verdict reads
 # Linux. An unreadable API answers running, so a blip never starts a second run.
@@ -891,7 +912,7 @@ mac_verdict() {
     | (if $s == null then "none" elif ($s.state | lc) == "success" then "green|\($s.target_url // "")"
        elif ($s.state | lc) == "pending" then "running" else "red|\($s.target_url // "")|\($ctx)" end) as $loc
     | [$gh, $loc] as $v
-    | first(($v[] | select(startswith("green|"))), ($v[] | select(startswith("red|"))),
+    | first(($v[] | select(startswith("red|"))), ($v[] | select(startswith("green|"))),
             ($v[] | select(. == "running")), "none")' 2>/dev/null || echo running
 }
 
@@ -979,15 +1000,15 @@ batch_dispatch() {
   fi
 }
 
-# batch_apps <base sha> <tip sha>: the batch's macOS gate scope: build-apps
-# over the code (BUILD_RE) it changes, `all` for anything shared or when the
-# diff can't be read, nothing when it changes no code or LANE_MAC_PER_PR=1.
+# batch_apps <base sha> <tip sha>: the batch's macOS gate scope: mac_scope
+# over the paths it changes, `all` for anything shared or when the diff can't
+# be read, nothing when no changed path needs macOS or LANE_MAC_PER_PR=1.
 batch_apps() {
   local f
   (( ! LANE_MAC_PER_PR )) || return 0
   f=$(mktemp)
   git -C "$SCRATCH" diff --no-renames --name-only "$1" "$2" >"$f" 2>/dev/null || echo Package.swift >"$f"
-  [[ -z "$(build_paths "$f")" ]] || build_apps "$f"
+  mac_scope "$f"
   rm -f "$f"
 }
 
@@ -1689,11 +1710,11 @@ evaluate() {
     eligible)
       # settle_ready lands it, or batches it with the pass's other eligible PRs:
       # rank|n|head|branch|apps|ready since|proof. rank orders p0, beta, the
-      # rest; apps is what its code needs on macOS (empty: no code).
+      # rest; apps is what it needs on macOS (mac_scope; empty: nothing).
       # ponytail: "ready since" is the head commit's date (no state is kept),
       # unreadable counts as old: a smaller batch, never a stuck one.
       local apps="" rank since
-      [[ -z "$(build_paths "$tmp/files.txt")" ]] || apps=$(build_apps "$tmp/files.txt")
+      apps=$(mac_scope "$tmp/files.txt")
       rank=$(jq -r '[.labels[]?.name] as $l | if ($l | index("p0")) then 0 elif ($l | index("beta")) then 1 else 2 end' "$tmp/pr.json")
       since=$(jq -r '(.commits // [] | last // {} | .committedDate // "") as $d | if $d == "" then 0 else ($d | try fromdateiso8601 catch 0) end' "$tmp/pr.json" 2>/dev/null || echo 0)
       READY+=("$rank|$n|$head|$(jq -r '.headRefName // ""' "$tmp/pr.json")|$apps|$since|${rest#*|*|}")
