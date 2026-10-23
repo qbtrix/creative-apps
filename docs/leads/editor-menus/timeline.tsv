@@ -77,3 +77,4 @@ utc	stage	event	ref	note
 2026-10-23T22:18Z	check	editor-menus	22:20Z #4818 needs-fix cleared on bfcbce5; #4817 #4818 #4988 clean, waiting on next batch	https://github.com/qbtrix/creative-apps/pull/4818
 2026-10-23T22:40Z	check	editor-menus	22:40Z #4817 #4818 #4988 still clean, queued behind batch #4870 (macOS gate running)	https://github.com/qbtrix/creative-apps/pull/4818
 2026-10-23T23:02Z	check	editor-menus	23:02Z unchanged; batch #4870 macOS gate still running	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-23T23:24Z	check	editor-menus	23:25Z unchanged; batch macOS gate 40029779505 still running	https://github.com/qbtrix/creative-apps/pull/4818
