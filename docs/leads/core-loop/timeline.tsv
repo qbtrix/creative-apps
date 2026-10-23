@@ -214,3 +214,4 @@ utc	stage	event	ref	note
 2026-10-23T08:53Z	3	wait	panel target running	39906470758 in ui-test; 39901607429 in progress
 2026-10-23T09:25Z	3	panel	round-3 panel launched	39906470758 green; 2 critics
 2026-10-23T09:30Z	3	panel	round-3 panel triaged	#4732 fixer launched; gap #4787; #4698 noted
+2026-10-23T09:36Z	3	pr	#4788 opened	Fixes #4732 (H-J12 step 6)
