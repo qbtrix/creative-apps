@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 16:40Z	3	relaunch	dev 7e9f260	run act-1a164697376-dv7u on #4513; FH-2 merged; FH-1 unblocked; builder launched for FH-a, FH-r, FH-c stacked
 14:40Z	3	relaunch	dev cb79cbb	run act-1a1693a401e-chyn on #3778; FH-a done (run 39957675362); FH-r/FH-c restacked on dev; FH-u/FH-photo blocked on AB/BK/AJ-photo
 15:22Z	3	restack	dev	#4574 FH-r on dev, head 2a2cb8b, CI: PASS; #4577 FH-c head ceb4ebb, CI: PASS, base FH-r until #4574 merges; next poll in 20 min
+15:45Z	3	poll	dev 721168a	#4574 clean in lane, awaiting batch; #4577 on FH-r; waits unchanged (AB building, BK blocked, AJ waiting) poll 2/3; next poll 16:05Z
