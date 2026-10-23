@@ -31,3 +31,5 @@ utc	stage	event	ref	note
 2026-10-23T15:20:48Z	heartbeat	waiting	resumed by act-1a16953af22-wvhu; contract slice of the cross-line wait not merged
 2026-10-23T16:33:31Z	poll	blocked	TC-a not done (TC-2 ToneRows not on dev 35a0b5e7); poll 2/3
 2026-10-23T17:32:35Z	question	supervisor: build on stub or park (#3475 comment 6370840828)
+2026-10-23T17:44:50Z	decision	supervisor: build LT-1 model only, Wire TC-2
+2026-10-23T17:44:50Z	build	LT-1 started
