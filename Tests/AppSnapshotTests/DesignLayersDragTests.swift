@@ -36,7 +36,7 @@ extension BodyCountSuites {
             (workspace.selectedPage?.nodes.first { $0.id == frame40 }?.children ?? []).map(\.id)
         }
 
-        @Test(.timeLimit(.minutes(3)), .disabled("quarantine #3269 until 2026-10-22")) func aRowDragRunsTheEditorAtMostThreeTimesAndDropsOneStep() async throws {
+        @Test(.timeLimit(.minutes(3))) func aRowDragRunsTheEditorAtMostThreeTimesAndDropsOneStep() async throws {
             #if DEBUG
             let w = RenderBudgetWindow(DesignWindow(seed: try Self.seed()).allowsWindowActivationEvents())
             defer { w.close() }

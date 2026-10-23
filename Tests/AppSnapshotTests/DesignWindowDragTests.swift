@@ -71,7 +71,7 @@ extension BodyCountSuites {
             #endif
         }
 
-        @Test(.timeLimit(.minutes(3)), .disabled("quarantine #3261 until 2026-10-22")) func withoutTheBoxTheEditorRunsPerSample() async throws {
+        @Test(.timeLimit(.minutes(3))) func withoutTheBoxTheEditorRunsPerSample() async throws {
             #if DEBUG
             for gesture in Gesture.allCases {
                 let w = RenderBudgetWindow(DesignEditorWithoutBox(model: gesture.seed))
