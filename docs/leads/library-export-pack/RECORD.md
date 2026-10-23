@@ -1,10 +1,10 @@
 # export-pack (Library) lead record
 
 Issue: #3478 · Packet: docs/blueprints/library/features/export-pack.md
-Run: act-1a15e4969c2-pa6e (resumes act-1a15ac11868-4kb6) · Session: line lead (library: #1563, #3478) · Started: 2026-10-20T19:35Z
-Stage: parked (waiting-on-prereq; relaunches when XP-3 is on dev)
-Base: origin/dev ded2ca5 (main verified at 0dd23d659f4dbd8a0120aa85a321259327518251)
-Next: parked by the supervisor (#3478, 16:20Z). XP-2, XP-3 and XP-7 belong to SuiteUI export-pack #3477. Run released; it relaunches when XP-3 is on dev. LX slices stay open (beta must-have, no gaps).
+Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 (earlier act-1a15e4969c2-pa6e)
+Stage: 3 wave 1 (blocked on XP-a, re-checked at dev 35a0b5e7, 2026-10-23T16:33:31Z; blocked poll 2 of 3)
+Base: origin/dev 35a0b5e7
+Next: LX-1 and LX-3 are merged. LX-2 waits on XP-a (XP-3 ExportPick.metadata not on dev); LX-4 waits on XP-a, then builds on FakeMetadata (Wire: export-pack:XP-7)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -42,9 +42,5 @@ Next: parked by the supervisor (#3478, 16:20Z). XP-2, XP-3 and XP-7 belong to Su
 ## Open
 - XP-2 waits on shell-media SM-a; XP-3 waits on tone-controls TC-a and PL-a (SuiteUI lead's record).
 - 2026-10-21T11:50:25Z (act-1a15e4969c2-pa6e): re-read dev ded2ca5. No MetadataCarrying (XP-2), no ExportPick.metadata (XP-3), no StillMetadata (XP-7). SuiteUI lead's last poll says SM-a is not on dev. LX-2, LX-4, LX-5/6 and LX-7/8 cannot start. No open findings carry Feature: export-pack.
-
-- 2026-10-21T15:13:45Z check: Belt nudge; record moved to lead/library-export-pack. XP-2/3/7 still not on dev (no MetadataCarrying/StillMetadata/ExportPick.metadata); LX-2, LX-4 and dependents wait. 0 open findings.
-- 2026-10-21T15:36:27Z check: XP-2/3/7 still not on dev; LX-2, LX-4 and dependents wait. 0 open findings.
-- 2026-10-21T15:58:40Z check: XP-2/3/7 not on dev; LX-2, LX-4 wait. 0 open findings.
-- 2026-10-21T16:20:00Z check: XP-2/3/7 not on dev; asked the supervisor on #3478 for an ETA or a gap call. 0 findings.
-- 2026-10-21T16:43:01Z stage: supervisor parked export-pack (waiting-on-prereq), released this run, and said no gaps for the LX slices. LX-1 and LX-3 are on dev; LX-2, LX-4..LX-8 wait on XP-3/XP-7.
+- 2026-10-23T15:20:48Z: resumed by line lead act-1a16953af22-wvhu. Under contract-first waits (#4814), the XP-a waits are met once XP-a merges. XP-1 and XP-2 are on dev (MetadataCarrying, FakeMetadata), but XP-3 isn't, and no Belt-Slice-Done for XP-a is posted. So LX-2 waits, and LX-4 then builds on FakeMetadata with a Wire line for XP-7. Polling every 10 min.
+- 2026-10-23T16:33:31Z: records moved to lead/library-export-pack (docs/leads/library-export-pack/), the branch Belt watches; lead/export-pack-library is retired.
