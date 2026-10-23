@@ -44,7 +44,7 @@ extension DesignWorkspace: PlacedImageTarget {
         return node.frame.kernelRect
     }
 
-    /// PNG, JPEG and SVG.
+    /// Every case of `PlacedFormat`.
     public var placeFormats: Set<PlacedFormat> { Set(PlacedFormat.allCases) }
 
     /// The selected node's picture, its box the node's frame; nil when it shows none.
@@ -55,16 +55,13 @@ extension DesignWorkspace: PlacedImageTarget {
 
     /// A PNG's or JPEG's pixel size from its header, through CoreRaster; an SVG has no pixels and throws.
     public func rasterSize(_ data: Data, format: PlacedFormat) throws -> Size {
-        switch format {
-        case .png:
+        guard format != .svg else { throw CatalogError.failed(id: "place.image", message: Self.noRasterSize) }
+        if format == .png {
             let info = try PNG.info(data)
             return Size(width: Double(info.width), height: Double(info.height))
-        case .jpeg:
-            let info = try JPEG.info(data)
-            return Size(width: Double(info.width), height: Double(info.height))
-        case .svg:
-            throw CatalogError.failed(id: "place.image", message: Self.noRasterSize)
         }
+        let info = try JPEG.info(data)
+        return Size(width: Double(info.width), height: Double(info.height))
     }
 
     /// Adds a rectangle showing `asset` in `image.box`, named after the file without its extension, inside the
