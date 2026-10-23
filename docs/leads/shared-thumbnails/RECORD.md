@@ -1,73 +1,44 @@
-# Lead record: shared-thumbnails
+# shared-thumbnails lead record
 
-Run: act-1a15b69feea-et92. Feature issue #3719. Packet: docs/blueprints/suiteui/features/shared-thumbnails.md (v3, slices).
-Integration branch: dev. Base: origin/dev ba57546c41a623b5a426bc1f1158ce4de8a72c40.
+Issue: #3719 · Packet: docs/blueprints/suiteui/features/shared-thumbnails.md
+Run: act-1a16953ae34-05a4 (relaunch) · Started: 2026-10-23T15:30Z
+Stage: 3 wave 1 (ST-a: ST-1 + ST-2)
+Base: 721168a8f (origin/dev; brief main cb79cbb6 verified)
+Next: ST-a builder on lead/shared-thumbnails-ST-a (off dev): test-first commit (ST-1), then contract, fake, stubs and the CoreAsset links (ST-2). Protected Package.swift and project.yml, so the PR goes to the supervisor, no fast-lane label.
 
-## Plan
+## Slices
+| slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
+|---|---|---|---|---|---|---|---|---|---|
+| ST-a | SuiteShell and LibraryModel link CoreAsset; `ThumbnailPublishing.preview(for:)`; `FakeThumbnails`; `ThumbnailWriter` and `LiveThumbnailStoreAdapter` stubs; tests written, disabled | ST-1, ST-2 | MJ-ST | shared-codecs:SC-a (ST-2) | false | 0 | building | – | – |
+| ST-u | home Recent cards show `preview(for:)` on the fake, app mark when nil, within the render budget | ST-3, ST-4 | HJ-ST | ST-a | true | 0 | planned | – | – |
+| ST-m | writer stores and reads previews in `AfterGlow/Thumbnails/` within budget; Library reads disk before decoding | ST-5, ST-6 | MJ-ST | ST-a; adopt-kernel-autosave:AK-a (ST-5); library spine (ST-6) | false | 0 | planned | – | – |
+| ST-z | slot live, Photo publishes on save, Library over the shared store, feature built | ST-7, ST-8 | HJ-ST, MJ-ST | ST-u, ST-m; adopt-kernel-autosave:AK-photo (ST-7) | true | 0 | planned | – | – |
 
-| slice | tasks | state | waits on |
-|---|---|---|---|
-| ST-a | ST-1, ST-2 | blocked | shared-codecs:SC-a (ST-2 edits Package.swift and project.yml; feature planned, issue not filed) |
-| ST-u | ST-3, ST-4 | blocked | ST-a |
-| ST-m | ST-5, ST-6 | blocked | ST-a; adopt-kernel-autosave:AK-a (planned); library spine feature-done (building, #1044) |
-| ST-z | ST-7, ST-8 | blocked | ST-u, ST-m; adopt-kernel-autosave:AK-photo |
+## Tasks
+| id | slice | wave | behavior | files | test | PR | state |
+|---|---|---|---|---|---|---|---|
+| ST-1 | ST-a | 1 | tests first, disabled; RJ-X47 job folder | Tests/AppSnapshotTests/ThumbnailWriterTests.swift, Tests/LibraryModelTests/LibraryThumbnailDiskTests.swift, Tests/RealJobs/library/relaunch-grid/relaunch-grid.jobs.json | (disabled) | – | building |
+| ST-2 | ST-a | 1 | CoreAsset links; preview(for:); FakeThumbnails; writer and adapter stubs | Package.swift, project.yml, Sources/SuiteModel/Contracts/ThumbnailPublishing.swift, Sources/SuiteModel/Fakes/FakeThumbnails.swift, Sources/SuiteShell/ThumbnailWriter.swift, Sources/LibraryModel/Live/LiveThumbnailStoreAdapter.swift | FakeThumbnails test | – | building |
+| ST-3 | ST-u | 2 | home previews on the fake | Sources/AfterGlowApp/HomeGrid.swift, Tests/AppSnapshotTests/HomeGridPreviewTests.swift | HomeGridPreviewTests | – | planned |
+| ST-4 | ST-u | 3 | snapshots, render budget, journey skipped | Tests/AppSnapshotTests/HomePreviewSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHomePreviewTests.swift, UITests/AfterGlowJourneyTests+Previews.swift | RenderBudgetHomePreviewTests | – | planned |
+| ST-5 | ST-m | 2 | ThumbnailWriter body | Sources/SuiteShell/ThumbnailWriter.swift, Tests/AppSnapshotTests/ThumbnailWriterTests.swift, Tests/mutations/SuiteShell.ThumbnailWriter.json | ThumbnailWriterTests | – | planned |
+| ST-6 | ST-m | 2 | Library disk tier | see packet | LibraryThumbnailDiskTests | – | planned |
+| ST-7 | ST-z | 4 | live wiring | see packet | PhotoPublishesPreviewTests | – | planned |
+| ST-8 | ST-z | 5 | journey live, built, feature-done | see packet | journey | – | planned |
+
+## Reviews
+| slice | run | commit | lenses | filed | after round |
+|---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-23T15:30Z Relaunch act-1a16953ae34-05a4. The supervisor unparked this feature under contract-first waits (#3719 15:12Z; lead.md rule 12, #4814). SC-a's SC-1 is on dev (#4020) but SC-2 is not, so ST-2 builds ahead of it with a Wire line. AK-a is done (run 39568091135), so ST-5's wait is met with real code.
+- ST-1 and ST-2 ship as one slice PR (test-first commit, then ST-2): ST-1's tests name types only ST-2 declares.
+- ST-2 edits protected Package.swift and project.yml. The supervisor said on #3719 (2026-10-21) that they will land it, so the ST-a PR carries no fast-lane label.
+- PRs target `dev` (CLAUDE.md; the lane retargets PRs to main), not main.
+- Earlier runs (act-1a15b69feea-et92) were all blocked on SC-a; their heartbeat log is in RECORD.prev.
 
-ST-1's tests reference ThumbnailWriter, LiveThumbnailStoreAdapter and preview(for:), which only ST-2 declares. A test that names a missing type doesn't compile, so ST-1 can't merge alone. ST-2 links CoreAsset through Package.swift and project.yml, which are protected paths and need a supervisor merge, and the packet makes it wait on shared-codecs SC-a. One PR per slice means ST-a can't open until SC-a lands. Nothing in this feature can start now.
+## Wire
+- [ ] Wire: shared-codecs:SC-a (ST-2 built ahead; when SC-2 merges, merge dev into the ST-a branch, keeping both Package.swift/project.yml link changes)
 
-- 2026-10-20T22:27Z: stage 1-2: packet read, waves planned; every slice blocked: ST-a waits on shared-codecs SC-a (planned, unfiled), the rest chain on ST-a
-
-- 2026-10-21T00:19Z: worker restarted; still blocked on shared-codecs SC-a (ST-2 edits protected Package.swift/project.yml); rechecking
-
-- 2026-10-21T00:41Z: still blocked: no shared-codecs PR exists
-
-- 2026-10-21T01:03Z: still blocked: no shared-codecs PR
-
-- 2026-10-21T01:24Z: still blocked: no shared-codecs PR
-
-- 2026-10-21T01:47Z: hb6: no shared-codecs PR yet; SC-a still first
-
-- 2026-10-21T02:09Z: hb7: no shared-codecs PR yet
-
-- 2026-10-21T02:31Z: hb8: no shared-codecs PR yet
-
-- 2026-10-21T02:55Z: hb9: no shared-codecs PR yet
-
-- 2026-10-21T03:17Z: hb10: no shared-codecs PR yet
-
-- 2026-10-21T03:39Z: hb11: no shared-codecs PR yet
-
-- 2026-10-21T04:01Z: hb12: no shared-codecs PR yet
-
-- 2026-10-21T04:24Z: No shared-codecs SC-a PR yet; shared-thumbnails stays blocked on it.
-
-- 2026-10-21T04:46Z: #3718 shared-codecs open, no PR; supervisor queued it for the next shift. ST-a stays blocked.
-
-- 2026-10-21T05:08Z: #3718 shared-codecs open, no PR; ST-a blocked (supervisor queued #3718 for next shift).
-
-- 2026-10-21T05:30Z: #3718 shared-codecs open, no PR; ST-a blocked.
-
-- 2026-10-21T05:52Z: #3718 shared-codecs open, no PR; ST-a blocked.
-
-- 2026-10-21T06:26Z: Still blocked on shared-codecs #3718 (open, no PR; supervisor queued it for the next shift).
-
-- 2026-10-21T06:49Z: hb19: still blocked on shared-codecs #3718 (open).
-
-- 2026-10-21T07:13Z: hb20: still blocked on shared-codecs #3718 (open).
-
-- 2026-10-21T07:35Z: hb21: still blocked on shared-codecs #3718 (open).
-
-- 2026-10-21T07:57Z: hb22: still blocked on shared-codecs #3718 (open).
-
-- 2026-10-21T08:19Z: hb23: still blocked on shared-codecs #3718 (open).
-
-- 2026-10-21T08:41Z: hb24: still blocked on shared-codecs #3718 (open).
-
-- 2026-10-21T09:04Z: hb25: #3718 shared-codecs still open, no SC PR; no findings
-
-- 2026-10-21T09:26Z: hb26: #3718 still open, no SC PR; no findings
-
-- 2026-10-21T09:48Z: hb27: #3718 still open, no SC PR; no findings
-
-- 2026-10-21T10:12Z: Released per supervisor answer on #3721 (09:53Z) for this run. Resume state: no slice started; waits on shared-codecs #3718 SC-a (open, no PR). No open findings, no open PRs.
+## Open
+- –

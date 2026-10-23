@@ -27,3 +27,5 @@ ts	kind	note
 2026-10-21T09:26Z	blocked	hb26: #3718 still open, no SC PR; no findings
 2026-10-21T09:48Z	blocked	hb27: #3718 still open, no SC PR; no findings
 2026-10-21T10:12Z	released	Released per supervisor answer on #3721 (09:53Z) for this run. Resume state: no slice started; waits on shared-codecs #3718 SC-a (open, no PR). No open findings, no open PRs.
+2026-10-23T15:30Z	0	relaunch	-	run act-1a16953ae34-05a4; unparked under contract-first waits
+2026-10-23T15:35Z	3	builder	ST-a	ST-a builder starting on dev 721168a8f
