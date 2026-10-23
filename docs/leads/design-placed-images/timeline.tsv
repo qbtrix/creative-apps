@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-23T16:36Z	PD-a	gate	#3759	remote had dev merge + db8ca0f0 refactor; merged into local (no rebase), gate rerun on merged head
 2026-10-23T16:58Z	PD-a	gate	#3759	AnchorBudgetTests.marqueeScales load timeout (passes alone 0.9s); gate rerun; PD-m, PD-u building
 2026-10-23T17:20Z	PD-a	gate	#3759	27 load timeouts (HomeModelTests etc., no real failure); gate rerun queued for load<10; PD-m, PD-u gating
+2026-10-23T17:30Z	PD-m	pr	#4922	place + SVG image, stacked on #3759, gate PASS, mutations 3/3 + 16/16; PD-a pushed 3fc0a384

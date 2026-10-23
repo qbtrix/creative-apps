@@ -2,7 +2,7 @@
 
 Issue: #3454 · Packet: docs/blueprints/design/features/placed-images.md
 Run: act-1a16953aed5-oxsi · Session: claude/lead-placed-images-stroke-style-elhwn1 · Started: 2026-10-23T15:20Z (prior runs act-1a15da1b26c-9qo6, act-1a15ac70747-ky1f)
-Stage: 3 wave 1 building (16:15Z): PD-a #3759 gate rerun on 9e785245 (dev merge + format-ratchet fix: rasterSize no longer lists formats); PD-m on design/pd-m-place-model (stacked on PD-a); PD-u building on design/pd-u-place-canvas (PD-a + DK-u #4864)
+Stage: 3 wave 1 (17:30Z): PD-a #3759 pushed 3fc0a384 (dev merge + format-ratchet fix), gate rerun waiting on load; PD-m #4922 open (stacked on #3759, gate PASS); PD-u gating on design/pd-u-place-canvas (PD-a + DK-u #4864)
 Base: 721168a8 (origin/dev); main verified at cb79cbb6
 Next: supervisor merges #3759; PD-u and PD-m slice PRs stacked on design/pd-a-placed-image-stubs; then PD-z
 
@@ -11,7 +11,7 @@ Next: supervisor merges #3759; PD-u and PD-m slice PRs stacked on design/pd-a-pl
 |---|---|---|---|---|---|---|---|---|---|
 | PD-a | picture fields and PlacedImageTarget stubs, CoreRaster linked, checks and RJ-D12 written disabled | PD-1, PD-2 | MJ-PD | PL-a; gradient-fill:DG-a; transform:DT-a; shape-tools:DS-a; stroke-style:DK-m | no | 0 | open #3759 (supervisor-queued) | – | – |
 | PD-u | Place… and drop on the stubs, canvas draws by cover, inspector rows | PD-3, PD-4 | DJ-P1 | PD-a; DG-u; DE-u; PL-3; DA-a; DT-a; DT-u; DS-a; DS-u; DK-u | yes | 0 | waiting | – | – |
-| PD-m | fill into frame, focus as one step, SVG crop | PD-5, PD-6 | MJ-PD | PD-a; DG-m; DE-s; PL-7; DA-m; DT-m; DY-m; DS-m; DK-m | no | 0 | waiting | – | – |
+| PD-m | fill into frame, focus as one step, SVG crop | PD-5, PD-6 | MJ-PD | PD-a; DG-m; DE-s; PL-7; DA-m; DT-m; DY-m; DS-m; DK-m | no | 0 | open #4922 (stacked on #3759) | – | – |
 | PD-z | live journey, blueprint, feature-done | PD-7, PD-8 | DJ-P1 | PD-u, PD-m; DG-z | yes | 0 | waiting | – | – |
 
 ## Tasks
