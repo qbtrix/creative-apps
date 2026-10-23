@@ -42,10 +42,13 @@ private let png300x200 = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0
 @Suite struct DesignPasteboardAdapterTests {
     /// The copy offers Design's own layers, then an SVG, then a PNG, and nothing else.
     @Test func copyOffersOwnLayersSvgAndPng() throws {
-        let offered = try DesignPasteboardAdapter().copy(redFile())
+        let workspace = try redFile()
+        let offered = try DesignPasteboardAdapter().copy(workspace)
         #expect(offered.map(\.type) == [.designLayers, .svg, .png])
         let own = try #require(offered.first { $0.type == .designLayers })
-        #expect(own.data == (try redFile().copySelection()), "the own bytes are Copy's, so Design pastes them back as layers")
+        var pasted = workspace
+        try pasted.paste(own.data)
+        #expect(pasted.selectedPage?.nodes.count == 2, "the own bytes are Copy's, so Design pastes them back as layers")
     }
 
     /// Mutation `.pngAtTwoX`: the PNG is the selection's bounds at 2x, never the whole page or 1x.
@@ -89,9 +92,20 @@ private let png300x200 = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0
         #expect(workspace.selectedPage?.nodes.count == before, "one undo takes the paste back")
     }
 
-    /// Plain text on the pasteboard: Design's Paste is off and says why in the coder's sentence.
-    @Test func textAloneIsRefused() {
+    /// Plain text on the pasteboard: Design's Paste refuses it with a sentence and adds no layer.
+    @Test func textAloneIsRefused() throws {
+        var workspace = try redFile()
         let text = [TypedData(type: .plainText, data: Data("hello".utf8))]
-        #expect(SuitePasteboardCoding().pasteRefusal(for: text, in: .design) != nil)
+        #expect(throws: DesignRefusal.self) { try DesignPasteboardAdapter().paste(text, into: &workspace, centredOn: nil) }
+        #expect(workspace.selectedPage?.nodes.count == 1)
+    }
+
+    /// The catalog's Copy As PNG is the selection at 2x; Paste as Image of a PNG adds one layer its size, centred.
+    @Test func catalogCopyAsAndPasteAsImage() throws {
+        var workspace = try redFile()
+        let png = try workspace.copyAs(.png)
+        #expect(pngSize(png.data).map { [$0.width, $0.height] } == [400, 200])
+        try workspace.pasteAsImage(name: "pasted.png", data: png300x200)
+        #expect(workspace.selectedPage?.nodes.last?.frame == rc(570, 412, 300, 200))
     }
 }

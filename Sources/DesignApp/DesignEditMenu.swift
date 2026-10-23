@@ -1,16 +1,19 @@
 // DesignEditMenu.swift: the Design items of the Edit menu, placed after the
 // system's own Cut, Copy, Paste, Delete and Select All, which stay so they keep
-// working in text fields: Duplicate (⌘D). The system's Delete removes the
+// working in text fields: Duplicate (⌘D), then SuiteUI's CopyAsMenu (Copy As PNG,
+// SVG or Design Layers, and Paste as Image; clipboard-interop CB-6), each off with
+// its reason while the workspace can't act. The system's Delete removes the
 // selected layer: the canvas and the Layers list hook it (designPasteboardCommands),
 // so Edit holds one Delete, not a second look-alike. Also DesignMenu's `item`,
 // how every Design menu item is built from its catalog spec (AC-d3): SuiteUI's
 // MenuCommand on the spec over DesignMenuState, so it is disabled while the
 // spec says why, with that reason as its tooltip.
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
-/// Edit: Duplicate.
+/// Edit: Duplicate, Copy As and Paste as Image.
 struct DesignEditItems: View {
     let menu: DesignMenu
 
@@ -18,6 +21,9 @@ struct DesignEditItems: View {
         menu.item("edit.duplicate", systemImage: "plus.square.on.square", shortcut: KeyboardShortcut("d")) {
             menu.perform(.command(.duplicate))
         }
+        let perform = menu.perform
+        CopyAsMenu(on: menu.workspace, ownTitle: "Design Layers", copy: { perform(.copyAs($0)) },
+                   pasteAsImage: { perform(.pasteAsImage) })
     }
 }
 

@@ -78,6 +78,9 @@ struct DesignCatalogDoc: HeadlessDocument {
         case "shape.draw", "tool.shape": .some(w.shapeHelp)
         case "file.export", "view.zoom-in", "view.zoom-out", "view.fit": .some(w.isOpen ? nil : DesignToolbarItem.noFile)
         case "view.zoom-to-selection": .some(w.zoomToSelectionHelp)
+        // Copy As and Paste as Image (clipboard-interop CB-6): Copy's reason; Paste's, with no file first.
+        case "edit.copy-as": .some(w.copyHelp())
+        case "edit.paste-as-image": .some(w.addPageHelp ?? (w.editingTextID == nil ? nil : w.pasteHelp(nil)))
         // The transform rows' and Object items' reason (transform DT-6): the workspace's own transformHelp.
         default: id.hasPrefix("transform.") ? .some(w.transformHelp) : nil
         }
@@ -190,6 +193,7 @@ struct DesignCatalogDoc: HeadlessDocument {
         "edit.undo | Undo | Nothing to undo.", "edit.redo | Redo | Nothing to redo.",
         "edit.select | Select | on", "edit.select-all | Select All | on",
         "edit.duplicate | Duplicate | on", "edit.delete | Delete | on",
+        "edit.copy-as | Copy As | on", "edit.paste-as-image | Paste as Image | on",
         "object.group | Group | on", "object.ungroup | Ungroup | A isn't a group.",
         "object.bring-to-front | Bring to Front | on", "object.bring-forward | Bring Forward | on",
         "object.send-backward | Send Backward | Nothing would change.", "object.send-to-back | Send to Back | Nothing would change.",
