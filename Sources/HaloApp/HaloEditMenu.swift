@@ -18,7 +18,7 @@ import SwiftUI
 struct HaloEditMenu: Commands {
     @FocusedValue(\.haloProject) private var model
     @FocusedValue(\.haloPerform) private var perform
-    @FocusedValue(\.haloClipboard) private var clipboard
+    @FocusedValue(\.haloCopyPaste) private var clipboard
 
     private var target: HaloMenuTarget { HaloMenuTarget(model: model, perform: perform) }
 
@@ -36,7 +36,7 @@ struct HaloEditMenu: Commands {
 /// Edit's pasteboard group, a view so it re-reads HaloPasteboardState as the pasteboard and focus change.
 struct HaloPasteboardMenu: View {
     let model: HaloProject?
-    let clipboard: HaloClipboardAction?
+    let clipboard: HaloCopyPasteAction?
     let pasteboard: HaloPasteboardState
 
     static let textOnly = "works on text in a field; Halo copies frames, not layers, yet."

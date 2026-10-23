@@ -4,7 +4,7 @@
 // step the whole document and do nothing when there is no step. The menu
 // titles each for its step ("Undo New Layer") and disables it with
 // `model.unavailableHelp(for:)` ("Nothing to undo.") as help. The hook hands
-// the menu the window's clipboard action (clipboard-interop CB-10): Copy Frame
+// the menu the window's copy and paste action (clipboard-interop CB-10): Copy Frame
 // writes the frame at the playhead as a full-size PNG through HaloPasteboardAdapter
 // and the PasteboardBridge; Paste places the pasteboard's image or SVG at the
 // playhead, one step. HaloPasteboardState keeps Paste's reason current from the
@@ -15,13 +15,13 @@ import SuiteShell
 import SwiftUI
 
 /// What Edit's Copy Frame and Paste ask the focused window to do.
-enum HaloClipboardCommand { case copyFrame, paste }
+enum HaloCopyPasteCommand { case copyFrame, paste }
 
-typealias HaloClipboardAction = @MainActor (HaloClipboardCommand) -> Void
+typealias HaloCopyPasteAction = @MainActor (HaloCopyPasteCommand) -> Void
 
 extension FocusedValues {
-    /// The focused Halo window's clipboard action; nil with no Halo window.
-    @Entry var haloClipboard: HaloClipboardAction?
+    /// The focused Halo window's copy and paste action; nil with no Halo window.
+    @Entry var haloCopyPaste: HaloCopyPasteAction?
 }
 
 /// Why Paste can't run now (nil while it can), and whether a text field has focus.
@@ -68,11 +68,11 @@ extension HaloWindow {
     }
 
     func editScene(_ content: some View) -> some View {
-        content.focusedSceneValue(\.haloClipboard, { clipboard($0) })
+        content.focusedSceneValue(\.haloCopyPaste, { clipboard($0) })
     }
 
     /// Copy Frame writes the PNG; Paste places the best offered item. The Model refuses what it can't do.
-    func clipboard(_ command: HaloClipboardCommand) {
+    func clipboard(_ command: HaloCopyPasteCommand) {
         let bridge = PasteboardBridge()
         switch command {
         case .copyFrame:
