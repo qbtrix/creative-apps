@@ -99,3 +99,4 @@ utc	stage	event	ref	note
 2026-10-23T02:49:51Z	3	check	PH-u	lane build 39883924730 success; #4438 awaiting merge
 2026-10-23T03:12:02Z	3	merge	PH-u	#4438 merged ac4c7d9a; Linux check 39892571085 running; fixer merging dev into PH-z
 2026-10-23T03:14:34Z	3	ship	PH-z	#4649 retargeted to dev, fast-lane, head 68558fe0
+2026-10-23T03:36:29Z	3	done	PH-u	Belt-Slice-Done + Mac-Finish-Wanted, run 39892571085
