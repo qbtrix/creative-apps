@@ -108,7 +108,8 @@ var targets: [Target] =
 products += (apps + ["AfterGlow"]).map { .executable(name: "\($0)App", targets: ["\($0)App"]) }
 targets += [
     .target(name: "SuiteUI", dependencies: ["SuiteModel", "SuiteKernel", "SuiteImaging"]),
-    .target(name: "SuiteShell", dependencies: ["SuiteUI", "SuiteModel"]),
+    // SuiteImageIO hands CoreRaster's PixelBuffer in and out (shared-codecs SC-2).
+    .target(name: "SuiteShell", dependencies: ["SuiteUI", "SuiteModel", .product(name: "CoreRaster", package: core)]),
     .executableTarget(name: "AfterGlowApp", dependencies: ["SuiteUI", "SuiteShell", "SuiteModel"]),
     .testTarget(name: "SuiteUITests", dependencies: ["SuiteUI", "SuiteModel"]),
     .testTarget(

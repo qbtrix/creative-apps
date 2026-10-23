@@ -110,7 +110,8 @@ targets:
     type: framework
     platform: macOS
     sources: [Sources/SuiteShell]
-    dependencies: [{ target: SuiteUI }, { target: SuiteModel }, { target: SuiteKernel }]
+    # CreativeEngines carries CoreRaster for SuiteImageIO (shared-codecs SC-2).
+    dependencies: [{ target: SuiteUI }, { target: SuiteModel }, { target: SuiteKernel }, { target: CreativeEngines }]
   FlareModel: { templates: [Model] }
   # Every Model but Flare's links SuiteImaging (appended to the template's).
   DesignModel: { templates: [Model], dependencies: [{ target: SuiteImaging }] }
