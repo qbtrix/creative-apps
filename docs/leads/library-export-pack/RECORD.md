@@ -2,9 +2,11 @@
 
 Issue: #3478 · Packet: docs/blueprints/library/features/export-pack.md
 Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 (earlier act-1a15e4969c2-pa6e)
-Stage: 3 wave 1 (blocked on XP-a, re-checked at dev 35a0b5e7, 2026-10-23T16:33:31Z; blocked poll 3 of 3 at dev 35a0b5e7, 2026-10-23T17:32:35Z; Question for the supervisor posted on #3478 comment 6370841659)
-Base: origin/dev 35a0b5e7
-Next: LX-1 and LX-3 are merged. LX-2 waits on XP-a (XP-3 ExportPick.metadata not on dev); LX-4 waits on XP-a, then builds on FakeMetadata (Wire: export-pack:XP-7)
+Stage: 3 wave 2 (LX-2 and LX-4 building on the supervisor's stub ruling, #3478 comment 6372282767; started 2026-10-23T18:54:02Z at dev 0d4645bf)
+Base: origin/dev 0d4645bf
+Next: LX-2 (slice LX-a, with the SuiteUI ExportPick.metadata stub) and LX-4 (slice LX-m, on FakeMetadata) are with builders; then LX-a and LX-m PRs on the lane.
+- [ ] Wire: export-pack:XP-3
+- [ ] Wire: export-pack:XP-7
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -38,6 +40,8 @@ Next: LX-1 and LX-3 are merged. LX-2 waits on XP-a (XP-3 ExportPick.metadata not
 - Photos carry no GPS or serial fields, so the GPS drop is tested on ExportSidecar.kept(_:metadata:) with a tag list.
 - Tests/RealJobs/library/no-location/ is deferred until XP-7's input/gps-phone.jpg is on dev (it goes with LX-4).
 - Gap: export presets don't store the policy, so applying one resets it to noLocation (noted in #3696). This is a gap for LX-2's follow-up.
+
+- 2026-10-23T18:54:02Z: supervisor (#3478 comment 6372282767): build LX-2 and LX-4 now. The stub goes in SuiteUI, not Library (rule 12: the contract's own module; rule 20: one copy): ExportPick.metadata: ExportMetadata? = nil, field plus default, no UI, tested in SuiteUITests. The LX-2 PR body says XP-3 builds on the stub field. LX-4 builds on FakeMetadata with Wire: export-pack:XP-7; its macOS write tests stay disabled until XP-7.
 
 ## Open
 - XP-2 waits on shell-media SM-a; XP-3 waits on tone-controls TC-a and PL-a (SuiteUI lead's record).

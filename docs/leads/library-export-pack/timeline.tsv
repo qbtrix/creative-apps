@@ -50,3 +50,4 @@ time	event	task	note
 2026-10-23T18:14:47Z	heartbeat	XP-3 not on dev 98589662; no supervisor answer on #3478 yet
 2026-10-23T18:27:21Z	heartbeat	XP-3 not on dev 98589662; no supervisor answer on #3478 yet
 2026-10-23T18:38:55Z	heartbeat	XP-3 not on dev 0d4645bf; no supervisor answer on #3478 yet
+2026-10-23T18:54:02Z	stage	wave 2: LX-2 and LX-4 builders started at dev 0d4645bf on the supervisor's ruling (6372282767)
