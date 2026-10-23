@@ -68,13 +68,13 @@ import Testing
         #expect(config.installCLI(confirm: false) { _ in nil } == .null)
     }
 
-    @Test(.disabled("waits on CB-4")) func connectAnswersAssistantConnectsText() {
+    @Test func connectAnswersAssistantConnectsText() {
         let config = MCPConfig(bundle: Self.bundle, home: "/Users/tester")
         #expect(config.connectAssistant() == .object(["command": .string("\"\(Self.cli)\" mcp"),
                                                       "json": .string(AssistantConnect.configJSON(bundle: Self.bundle))]))
     }
 
-    @Test(.disabled("waits on CB-4")) func installWithoutConfirmReturnsThePlanOnly() {
+    @Test func installWithoutConfirmReturnsThePlanOnly() {
         let config = MCPConfig(bundle: Self.bundle, home: "/Users/tester")
         var asked = [String]()
         let plan = config.installCLI(confirm: false) { asked.append($0); return nil }
@@ -83,7 +83,7 @@ import Testing
         #expect(asked == ["/Users/tester/.local/bin/afterglow"])
     }
 
-    @Test(.disabled("waits on CB-4")) func aForeignFileIsRefusedWithItsReason() {
+    @Test func aForeignFileIsRefusedWithItsReason() {
         let config = MCPConfig(bundle: Self.bundle, home: "/Users/tester")
         guard case .object(let plan) = config.installCLI(confirm: true, existing: { _ in "/opt/homebrew/bin/afterglow" }) else {
             Issue.record("no plan"); return
