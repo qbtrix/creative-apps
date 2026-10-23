@@ -3,7 +3,7 @@
 // apps do. A rectangle or frame keeps the kernel's `PlacedAsset` and a focus on the node; its `frame` is
 // the picture's `PlacedImage.box`, so the frame stays the one source of the box. `rasterSize` reads a PNG's
 // or JPEG's header through CoreRaster, so the CLI places on Linux. A new picture is a rectangle inside the
-// selected frame (else the frame its box's centre falls in, else the page's top), named after the file; a
+// selected frame (else the frame its box's centre falls in, fitted to it, else the page's top), named after the file; a
 // fill puts the picture into the one selected rectangle or frame, refused with its lock help. Every edit is one step,
 // and steps under one drag token on one layer fold into one. The fit, the crop and the reset are the
 // kernel's (`PlaceRules`, run by `PlaceCommands`). Linux-safe.
@@ -65,13 +65,18 @@ extension DesignWorkspace: PlacedImageTarget {
     }
 
     /// Adds a rectangle showing `asset` in `image.box`, named after the file without its extension, inside the
-    /// selected frame (else the unlocked frame the box's centre falls in, else at the page's top), selected, as
-    /// one step named `name`.
+    /// selected frame (else the unlocked frame the box's centre falls in, refitted inside it, else at the page's
+    /// top), selected, as one step named `name`.
     public mutating func insertPlaced(_ asset: PlacedAsset, _ image: PlacedImage, name: String) throws -> String {
         if let help = placeHelp { throw CatalogError.unavailable(id: "place.image", why: help) }
-        let frame = DesignRect(image.box)
-        let centre = DesignPoint(x: frame.x + frame.width / 2, y: frame.y + frame.height / 2)
-        let parent = placeParent ?? selectedPage?.nodes.deepestFrame(containing: centre)
+        let box = DesignRect(image.box)
+        let centre = DesignPoint(x: box.x + box.width / 2, y: box.y + box.height / 2)
+        let landing = placeParent == nil ? selectedPage?.nodes.deepestFrame(containing: centre) : nil
+        let parent = placeParent ?? landing
+        // The fit and the landing frame are one frame: a box fitted to the page refits inside the frame it lands in.
+        let frame = landing.flatMap { selectedPage?.nodes.node($0) }.map {
+            DesignRect(PlaceRules.fitted(natural: asset.natural, in: $0.frame.kernelRect, at: Point(x: centre.x, y: centre.y)))
+        } ?? box
         let before = snapshot
         let id = try insertNode(.rectangle, frame: frame, in: parent)
         _ = pages.update(id) { ($0.name, $0.placedAsset, $0.placedFocus) = (Self.placedName(asset.name), asset, image.focus) }
