@@ -4,7 +4,7 @@ Issue: #3774 · Packet: docs/blueprints/suite/features/editor-menus.md
 Run: act-1a16a37a3ed-0kyn (relaunch; earlier act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
 Stage: 4 fixes
 Base: 35a0b5e7e9520a764f3eabf02968a453082a87cc (main; PRs target dev)
-Next: #4818 fix pushed (bfcbce5de), Head moved; lane drops needs-fix on new head. EM-flare-halo waits on #4817 #4818 #4988 + green run
+Next: #4817 #4988 clean in lane; #4818 new head bfcbce5de awaits lane re-check; then green suite run on main -> Belt-Slice-Done EM-flare-halo + contact sheet
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
