@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-23T16:00Z	3 wave 1	heartbeat	-	wave-1 builders gating
 2026-10-23T16:20Z	3 wave 1	heartbeat	-	wave-1 builders gating (6 concurrent swift builds)
 2026-10-23T16:49Z	3 wave 1	heartbeat	-	wave-1 builders gating; LS-1 on post-rebase gate
+2026-10-23T16:54Z	3 wave 1	pr-opened	#4893	AN-u/AN-5 head 855d46c6; AN-6 stacked lead/anchor-parenting-AN-u-6
