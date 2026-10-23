@@ -52,3 +52,4 @@ Next: ST-a builder on lead/shared-thumbnails-ST-a (off dev): test-first commit (
 - 2026-10-23T20:20:41Z: heartbeat: #4840 ST-a still needs-fix/no-fast-lane at 07c11358c, mergeable clean, waiting on supervisor Mac re-gate; #4950/#4951 stay drafts
 - 2026-10-23T20:42:21Z: heartbeat: #4840 ST-a unchanged at 07c11358c (needs-fix, awaiting supervisor Mac re-gate); #4950/#4951 drafts
 - 2026-10-23T21:04:27Z: heartbeat: #4840 ST-a unchanged at 07c11358c (needs-fix, awaiting supervisor Mac re-gate); #4950/#4951 drafts; dev idle 70 min
+- 2026-10-23T21:26:10Z: heartbeat: #4840 ST-a no status on 07c11358c yet (awaiting supervisor Mac re-gate); #4950/#4951 drafts; dev idle since 19:45Z
