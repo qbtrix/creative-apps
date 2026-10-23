@@ -4,7 +4,8 @@
 // never reads a Model or a service. A search field narrows the family list
 // (FontPickerRules.filtered), each family drawn in its own regular face; the
 // Face menu lists the family's faces (FontPickerRules.orderedFaces) and the
-// Size row scrubs or types the size (TextRules.sizes). Picking another family
+// Size row drags over FontPickerRules.sizeBarRange and types any size in
+// TextRules.sizes, in whole points. Picking another family
 // keeps the size and moves to its face nearest the current one
 // (FontPickerRules.nearestFace). The query is the picker's own state, so a
 // keystroke runs this body and no host's (swiftui-rules 1).
@@ -62,8 +63,9 @@ public struct FontPicker: View {
                 onChange: { choose(Self.choosing(face: $0, from: pick)) }
             )
             .suiteControl(id: "suite.fontpicker.face", enabled: true, reason: nil)
-            StudioScrubRow(
-                label: "Size", value: pick.size, range: TextRules.sizes, step: 1, unit: "pt",
+            InspectorSliderRow(
+                "Size", value: pick.size, in: TextRules.sizes, step: 1, unit: "pt",
+                decimals: FontPickerRules.sizeDecimals, track: Self.sizeTrack,
                 onChange: { choose(Self.choosing(size: $0, from: pick)) }
             )
             .suiteControl(id: "suite.fontpicker.size", enabled: true, reason: nil)
@@ -91,6 +93,11 @@ public struct FontPicker: View {
     nonisolated static func rows(_ families: [FontFamily], query: String) -> [String] {
         FontPickerRules.filtered(families, query: query).map(\.id)
     }
+
+    /// The Size bar's track: it drags over the common text sizes, not all of TextRules.sizes.
+    nonisolated static let sizeTrack = ScrubTrack(
+        positions: FontPickerRules.sizeBarRange, step: 1, position: { FontPickerRules.sizeBarPosition($0) },
+        value: { $0 })
 
     /// The Face menu's options for `family`, in menu order; none without a family.
     nonisolated static func faceOptions(_ family: FontFamily?) -> [InspectorOption<FontFace>] {

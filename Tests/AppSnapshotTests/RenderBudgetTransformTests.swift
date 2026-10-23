@@ -7,9 +7,10 @@
 // the window; `budget.turn` reads the turn in whole degrees. A knob drag
 // (`knobDragInThreeBodies`), a right-handle drag on the box turned 30°
 // (`turnedResizeInThreeBodies`) and 120 rotation-row steps
-// (`rotationScrubInThreeBodies`) each run at most 3 window bodies; `timing`
-// (Tests/perf-suites.txt, report-only) judges each one's p95 step within 8 ms.
-// Nested in BodyCountSuites: it reads a global body counter. macOS only.
+// (`rotationScrubInThreeBodies`) each gate at most 3 window bodies and that
+// the edit landed; `timing` (Tests/perf-suites.txt, report-only) runs all
+// three again and judges each p95 step within 8 ms. Nested in
+// BodyCountSuites: it reads a global body counter. macOS only.
 #if canImport(AppKit)
 import AppKit
 import SuiteKernel
@@ -107,11 +108,13 @@ extension BodyCountSuites {
         }
 
         @Test(.timeLimit(.minutes(4))) func timing() async throws {
-            expectP95(try await Self.knobDrag(), atMost: 8, target: 4)
-            expectP95(try await Self.turnedResize(), atMost: 8, target: 4)
-            expectP95(try await Self.rotationScrub(), atMost: 8, target: 4)
+            let (knob, resize, scrub) = try await (Self.knobDrag(), Self.turnedResize(), Self.rotationScrub())
+            expectP95(knob, atMost: 8, target: 4)
+            expectP95(resize, atMost: 8, target: 4)
+            expectP95(scrub, atMost: 8, target: 4)
         }
 
+        /// A quarter turn of the rotate knob over 120 samples, which turns the box about 90°.
         static func knobDrag() async throws -> RenderStep {
             let w = RenderBudgetWindow(TransformBudgetPage(item: TransformBox(box: Self.box)))
             defer { w.close() }
@@ -133,6 +136,7 @@ extension BodyCountSuites {
             return step
         }
 
+        /// A 40 pt drag of the right handle on the box turned 30°, which grows W.
         static func turnedResize() async throws -> RenderStep {
             let w = RenderBudgetWindow(TransformBudgetPage(item: TransformBox(box: Self.box, degrees: 30)))
             defer { w.close() }
@@ -151,6 +155,7 @@ extension BodyCountSuites {
             return step
         }
 
+        /// 120 VoiceOver steps of the Rotation row.
         static func rotationScrub() async throws -> RenderStep {
             let w = RenderBudgetWindow(TransformBudgetPage(item: TransformBox(box: Self.box)))
             defer { w.close() }

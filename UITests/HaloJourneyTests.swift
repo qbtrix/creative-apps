@@ -380,9 +380,7 @@ final class HaloJourneyTests: XCTestCase {
         let span = halo.element("halo.easing.key.x.0")
         scrollInspector(toShow: span, halo)
         span.click()
-        let easeOut = halo.element("halo.easing.preset.easeOut")
-        scrollInspector(toShow: easeOut, halo)
-        easeOut.click()
+        chip("halo.easing.preset.easeOut", halo).click()
         expectRow("halo.easing.key.x.0", reads: "Ease Out", halo)
         expectUndo("Undo Keyframe Easing", halo)
         halo.shot("loop-ease-out")
@@ -580,15 +578,16 @@ final class HaloJourneyTests: XCTestCase {
         XCTAssertEqual(before != viewerFrame(halo), state == "Playing", "the playhead doesn't look \(state)")
     }
 
-    /// The EASING chip titled `title`, scrolled whole into the inspector (the chips are lazy grids, #1411).
-    @MainActor private func chip(_ title: String, _ halo: Journey) -> XCUIElement {
+    /// The EASING chip `id` (`halo.easing.preset.<case>`), scrolled whole into the inspector. The chips
+    /// are lazy grids (#1411), so it scrolls toward the curve before the chip exists rather than waiting for it.
+    @MainActor private func chip(_ id: String, _ halo: Journey) -> XCUIElement {
         let inspector = halo.element("suite.inspector"), curve = halo.element("halo.easing")
         XCTAssert(curve.waitForExistence(timeout: 5), "no easing curve (halo.easing) with a span picked")
-        let chip = inspector.buttons.matching(NSPredicate(format: "label == %@", title)).firstMatch
+        let chip = halo.element(id)
         for _ in 0..<20 where !(chip.exists && inspector.frame.contains(chip.frame)) {
             inspector.scroll(byDeltaX: 0, deltaY: curve.frame.minY > inspector.frame.midY ? -40 : 40)
         }
-        XCTAssert(chip.exists, "no \(title) chip in EASING")
+        XCTAssert(chip.exists, "no \(id) chip in EASING")
         return chip
     }
 

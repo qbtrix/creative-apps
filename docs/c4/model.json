@@ -425,7 +425,7 @@
               {
                 "id": "suite-packaging",
                 "name": "Packaging",
-                "description": "BundleLayout (where each executable and framework sits, run paths), SizeReport and SizeBudget with evaluate.",
+                "description": "BundleLayout (where each executable and framework sits, run paths, and cliPath, where the bundled afterglow CLI lives), AssistantConnect (the command and MCP config text that connect an AI assistant to the bundled CLI, and the plan for linking it onto the PATH), SizeReport and SizeBudget with evaluate.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
                   "Sources/SuiteModel/Packaging/"
