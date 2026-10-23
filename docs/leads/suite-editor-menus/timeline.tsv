@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-23T04:50Z	-	pr	EM-photo-design	opened #4739 stacked on #4738
 2026-10-23T04:52Z	-	heartbeat	EM-flare-halo	#4738 clean in lane; #4737 C4 in lane; #4739 waits on #4738
 2026-10-23T05:14Z	-	heartbeat	EM-flare-halo	#4738 and #4737 in lane
+2026-10-23T05:24Z	-	wave	EM-library	wave 3 builder started (EM-7..EM-10), stacked on EM-photo-design
