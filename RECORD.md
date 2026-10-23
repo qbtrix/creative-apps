@@ -1,2 +1,3 @@
 - 2026-10-23T17:55:40Z: #4840 needs-fix (RenderBudgetWindowLifetimeTests :34). Analysis posted: likely a timing flake, since ST-a only links CoreAsset. Asked for a re-gate. ST-u/ST-m stay draft.
 - 2026-10-23T18:11:10Z: ST-u is draft #4950 (stacked on #4840). Filed needs-ui #4946 for per-image accessibility ids in ThumbnailGrid. Its timing test is disabled until the supervisor lists it in perf-suites.
+- 2026-10-23T18:17:56Z: heartbeat. #4840 is waiting for the supervisor to re-gate it. ST-m is still building.
