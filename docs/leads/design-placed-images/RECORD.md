@@ -11,7 +11,7 @@ Next: supervisor merges #3759; PD-u and PD-m slice PRs stacked on design/pd-a-pl
 |---|---|---|---|---|---|---|---|---|---|
 | PD-a | picture fields and PlacedImageTarget stubs, CoreRaster linked, checks and RJ-D12 written disabled | PD-1, PD-2 | MJ-PD | PL-a; gradient-fill:DG-a; transform:DT-a; shape-tools:DS-a; stroke-style:DK-m | no | 0 | open #3759 (supervisor-queued) | – | – |
 | PD-u | Place… and drop on the stubs, canvas draws by cover, inspector rows | PD-3, PD-4 | DJ-P1 | PD-a; DG-u; DE-u; PL-3; DA-a; DT-a; DT-u; DS-a; DS-u; DK-u | yes | 0 | waiting | – | – |
-| PD-m | fill into frame, focus as one step, SVG crop | PD-5, PD-6 | MJ-PD | PD-a; DG-m; DE-s; PL-7; DA-m; DT-m; DY-m; DS-m; DK-m | no | 0 | open #4922 (stacked on #3759) | – | – |
+| PD-m | fill into frame, focus as one step, SVG crop | PD-5, PD-6 | MJ-PD | PD-a; DG-m; DE-s; PL-7; DA-m; DT-m; DY-m; DS-m; DK-m | no | 1 | open #4922 (stacked on #3759), fix round 1 (#4930-#4935) | – | – |
 | PD-z | live journey, blueprint, feature-done | PD-7, PD-8 | DJ-P1 | PD-u, PD-m; DG-z | yes | 0 | waiting | – | – |
 
 ## Tasks
