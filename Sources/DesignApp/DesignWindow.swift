@@ -78,6 +78,9 @@ struct DesignWindow: View {
     /// The rect Zoom to Selection asked to show; the canvas takes it once it has that input (D0-5b).
     @State private var show: DesignRect?
     @Environment(\.openWindow) private var openWindow
+    /// Whether this is the key window, which live commands act on (EM-4).
+    @Environment(\.appearsActive) private var appearsActive
+    @State private var liveID = UUID()
     /// Cut, Copy and Paste carry Design's bytes on the general pasteboard.
     private let bridge = DesignPasteboardBridge()
 
@@ -132,6 +135,10 @@ struct DesignWindow: View {
             Text(shown.message)
         }
         .task { start() }
+        .onChange(of: appearsActive, initial: true) {
+            if appearsActive { DesignShell.front = (liveID, { model }, perform) }
+        }
+        .onDisappear { if DesignShell.front?.id == liveID { DesignShell.front = nil } }
         .unsavedChangesGuard(Self.unsavedHooks(model: { model }, perform: perform))
         .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }))
         .modifier(DesignHistoryArea(model: model, jump: { try model.jumpHistory(to: $0) }, restore: { try model.restoreRecovered(from: $0, name: $1) }, onNote: { note = $0 }))
@@ -225,6 +232,7 @@ struct DesignWindow: View {
             do { try model.pick(at: point, toStroke: toStroke) } catch { note = error.help }
         case .sampleSize(let size): model.setSampleSize(size)
         case .sampleTarget(let toStroke): model.setSampleTarget(toStroke: toStroke)
+        case .adoptLive(let result): model.adoptLiveCommand(result)
         }
     }
 
