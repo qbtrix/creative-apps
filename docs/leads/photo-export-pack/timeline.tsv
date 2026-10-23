@@ -166,3 +166,4 @@ utc	stage	event	ref	note
 2026-10-23T16:58Z	check-in	no supervisor notes; #4832 #4836 clean on lane, unmerged; no new export findings; no dev merges since 16:20; waits unchanged
 2026-10-23T17:29Z	check-in	no supervisor notes; #4832 #4836 clean, waiting in lane (lane busy with Linux checks; dev unmoved since 15:53); no export findings; XP-3/XP-4/PT-a not on dev
 2026-10-23T18:00Z	check-in	no supervisor notes; #4832 #4836 clean, still queued (lane merged a batch at 17:35); no export findings; XP-3/XP-4/PT-a not on dev
+2026-10-23T18:32Z	check-in	no supervisor notes; #4832 #4836 clean, still queued; no export findings; no dev merges since 17:58; waits unchanged
