@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-23T19:07Z	3 wave 3	built	LS-7	d364612 stacked, gate pass
 2026-10-23T19:11Z	3 wave 3	built	LS-3	e6baf6c stacked, gate pass; wave 3 built except LS-8 (core bump)
 2026-10-23T19:27Z	check	heartbeat	-	19:27Z: lane active (merged #3581 19:25Z); ours queued
+2026-10-23T19:50Z	check	heartbeat	-	19:49Z: lane merged #4741 19:32Z; ours queued, no lane comments
