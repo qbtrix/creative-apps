@@ -16,10 +16,11 @@ private let asset = PlacedAsset(
     id: "asset-1", name: "photo.png", format: .png, natural: Size(width: 1200, height: 800), data: Data([1, 2, 3]))
 
 /// A page holding node-1, a 400 × 400 frame at (100, 100) (showing `asset` unless `picture` is off), selected.
-private func opened(picture: Bool = true, locked: Bool = false) throws -> DesignWorkspace {
-    var frame = DesignNode(id: "node-1", name: "Frame", kind: .frame, frame: rc(100, 100, 400, 400),
+private func opened(picture: Bool = true, locked: Bool = false, size: (Double, Double) = (400, 400),
+                    turn: (degrees: Double, flipX: Bool) = (0, false)) throws -> DesignWorkspace {
+    var frame = DesignNode(id: "node-1", name: "Frame", kind: .frame, frame: rc(100, 100, size.0, size.1),
                            placedAsset: picture ? asset : nil)
-    frame.isLocked = locked
+    (frame.isLocked, frame.rotation, frame.flipX) = (locked, turn.degrees, turn.flipX)
     let page = DesignPage(id: "page-1", name: "Page 1", frameWidth: 1440, frameHeight: 1024, nodes: [frame])
     var workspace = DesignWorkspace()
     try workspace.open(LiveFiling().encode(DesignDocument(pages: [page])))
@@ -74,6 +75,31 @@ extension JSONValue {
         #expect(try opened().beginPicturePan(at: pt(600, 300), option: true) == nil)
         #expect(try opened(picture: false).beginPicturePan(at: pt(300, 300), option: true) == nil)
         #expect(try opened(locked: true).beginPicturePan(at: pt(300, 300), option: true) == nil)
+    }
+
+    @Test func onlyTheMoveToolPansOffTheHandles() throws {
+        var drawing = try opened()
+        drawing.selectTool(.rectangle)
+        #expect(drawing.beginPicturePan(at: pt(300, 300), option: true) == nil)
+        #expect(try opened().beginPicturePan(at: pt(100, 100), option: true) == nil)
+        #expect(try opened().beginPicturePan(at: pt(500, 300), option: true) == nil)
+    }
+
+    @Test func aFittedPictureDoesNotPanSoOptionDuplicates() throws {
+        var fitted = try opened(size: (600, 400))
+        #expect(fitted.beginPicturePan(at: pt(300, 300), option: true) == nil)
+        fitted.drag(from: pt(300, 300), to: pt(350, 300), modifiers: .option)
+        fitted.endDrag()
+        #expect(fitted.selectedPage?.nodes.count == 2)
+    }
+
+    @Test func aPanFollowsThePointerOnATurnedOrMirroredNode() throws {
+        let turned = try opened(turn: (90, false))
+        let pan = try #require(turned.beginPicturePan(at: pt(300, 300), option: true, token: "t"))
+        #expect(turned.panIntent(pan, to: pt(300, 340)) == .focus(Point(x: 0.3, y: 0.5), drag: "t"))
+        let mirrored = try opened(turn: (0, true))
+        let flipped = try #require(mirrored.beginPicturePan(at: pt(300, 300), option: true, token: "t"))
+        #expect(mirrored.panIntent(flipped, to: pt(340, 300)) == .focus(Point(x: 0.7, y: 0.5), drag: "t"))
     }
 
     @Test func aDropFillsOnlyTheSelectedFrameUnderIt() throws {

@@ -6,11 +6,11 @@
 // `place.focus`. Nested in BodyCountSuites, as every suite that reads a body counter is. macOS debug builds only.
 #if canImport(AppKit) && DEBUG
 import AppKit
-import DesignModel
 import SwiftUI
 import Testing
 
 @testable import DesignApp
+@testable import DesignModel
 
 extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetDesignPlaceTests {

@@ -1,25 +1,54 @@
 // DesignPlaceSnapshots.swift (placed-images PD-u, PD-3): Design's pictures on the canvas, drawn by cover
 // through SuiteUI's drawPlaced in DesignArtwork's Canvas, over the fill and under the stroke. A 1200 × 800
-// photo fitted at its own shape, the same photo in a 400 × 400 frame with radius 24 (cropped and rounded), and
-// an SVG logo in a rectangle. Writes design-image-fitted-, design-image-in-frame- and
+// chart (a grid, a centred circle, a corner square) fitted at its own shape, the same chart in a 400 × 400
+// frame with radius 24 (cropped, the circle still round, and rounded), and an SVG logo in a rectangle. Writes design-image-fitted-, design-image-in-frame- and
 // design-image-svg-{light,dark}.png. `DesignPlaceSeed` is the document RenderBudgetDesignPlaceTests and the
 // Image section's snapshots drive too. macOS only.
 import AppKit
+import ImageIO
 import SuiteKernel
 import SuiteUI
 import SwiftUI
 import Testing
+import UniformTypeIdentifiers
 
 @testable import DesignApp
 @testable import DesignModel
 
 /// Pages of pictures, as a file holding them opens.
 enum DesignPlaceSeed {
-    /// A `width` × `height` JPEG named "photo-<width>x<height>.jpg", red on the left half and blue on the right.
+    /// A `width` × `height` JPEG named "photo-<width>x<height>.jpg" (`chart`).
     static func photo(width: Int = 1200, height: Int = 800) throws -> PlacedAsset {
         PlacedAsset(id: "photo-\(width)x\(height)", name: "photo-\(width)x\(height).jpg", format: .jpeg,
-                    natural: Size(width: Double(width), height: Double(height)),
-                    data: try HaloPlaceSnapshots.jpeg(width: width, height: height))
+                    natural: Size(width: Double(width), height: Double(height)), data: try chart(width: width, height: height))
+    }
+
+    /// A 6 × 4 grid of white lines on blue, a red circle half the height across in the middle and a yellow
+    /// square in the top-left cell: a stretch turns the circle oval, a cover crop cuts the outer columns and
+    /// leaves it round, and the square shows which way up the picture is.
+    static func chart(width: Int, height: Int) throws -> Data {
+        let data = NSMutableData(), (w, h) = (CGFloat(width), CGFloat(height))
+        guard let space = CGColorSpace(name: CGColorSpace.sRGB),
+              let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
+                                      space: space, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { throw CocoaError(.fileWriteUnknown) }
+        context.setFillColor(CGColor(srgbRed: 0.1, green: 0.3, blue: 0.7, alpha: 1))
+        context.fill(CGRect(x: 0, y: 0, width: w, height: h))
+        context.setStrokeColor(CGColor(srgbRed: 1, green: 1, blue: 1, alpha: 1))
+        context.setLineWidth(max(h / 100, 1))
+        let lines = (0...6).map { CGFloat($0) * w / 6 }.flatMap { [CGPoint(x: $0, y: 0), CGPoint(x: $0, y: h)] }
+            + (0...4).map { CGFloat($0) * h / 4 }.flatMap { [CGPoint(x: 0, y: $0), CGPoint(x: w, y: $0)] }
+        context.strokeLineSegments(between: lines)
+        context.setFillColor(CGColor(srgbRed: 0.9, green: 0.1, blue: 0.1, alpha: 1))
+        context.fillEllipse(in: CGRect(x: w / 2 - h / 4, y: h / 4, width: h / 2, height: h / 2))
+        context.setFillColor(CGColor(srgbRed: 1, green: 0.8, blue: 0, alpha: 1))  // CG's origin is bottom-left
+        context.fill(CGRect(x: w / 24, y: h - h / 16 - h / 8, width: h / 8, height: h / 8))
+        guard let image = context.makeImage(),
+              let destination = CGImageDestinationCreateWithData(data, UTType.jpeg.identifier as CFString, 1, nil)
+        else { throw CocoaError(.fileWriteUnknown) }
+        CGImageDestinationAddImage(destination, image, nil)
+        guard CGImageDestinationFinalize(destination) else { throw CocoaError(.fileWriteUnknown) }
+        return data as Data
     }
 
     /// `node` showing `asset` on an 800 × 600 page, selected.
