@@ -19,10 +19,10 @@ Next: HX-u PR (stacked on HX-a); HX-m (HX-3, HX-4) stacked on HX-a
 |---|---|---|---|---|---|---|---|
 | HX-1 | HX-a | 1 | codec and alpha settings, stub refusal | Sources/HaloModel/Contracts/HaloDocumentValues.swift, Tests/HaloModelTests/HaloProResTests.swift | existing render tests; ProRes refused | #4841 | pr |
 | HX-2 | HX-a | 2 | Codec row, Transparent checkbox | Sources/HaloApp/HaloRenderSheet.swift | HaloRenderProResSnapshots.sheet | #4841 | pr |
-| HX-3 | HX-m | 2 | plan rules, alpha frames, RJ-H41 | Sources/HaloModel/HaloRenderJob.swift, see packet | HaloProResTests | - | blocked |
+| HX-3 | HX-m | 2 | plan rules, alpha frames (RJ-H41 moves to HX-4) | Sources/HaloModel/HaloRenderJob.swift, see packet | HaloProResTests, HaloRenderAlphaTests | - | building |
 | HX-4 | HX-m | 2 | live renderer via media.movie; HaloMovieWriter deleted | Sources/HaloModel/Live/LiveCompositionRendering.swift, Sources/HaloApp/HaloMovieWriter.swift | HaloMovieSinkTests | - | blocked |
-| HX-5 | HX-u | 3 | snapshots, budget | Tests/AppSnapshotTests/HaloRenderProResSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloRenderSheetTests.swift | codecSwitchInTwoBodies | - | blocked |
-| HX-6 | HX-u | 3 | journey skipped | UITests/HaloJourneyTests+ExportPack.swift | compiles, skipped | - | blocked |
+| HX-5 | HX-u | 3 | snapshots, budget | Tests/AppSnapshotTests/HaloRenderProResSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloRenderSheetTests.swift | codecSwitchInTwoBodies | #4858 | pr |
+| HX-6 | HX-u | 3 | journey skipped | UITests/HaloJourneyTests+ExportPack.swift | compiles, skipped | #4858 | pr |
 | HX-7 | HX-z | 4 | journey live | UITests/HaloJourneyTests+ExportPack.swift | testRenderLowerThirdWithAlpha | - | blocked |
 | HX-8 | HX-z | 5 | halo.md, built, feature-done | docs/blueprints/halo.md, docs/blueprints/halo/features/export-pack.wave.json | waves render --dry-run | - | blocked |
 
@@ -33,6 +33,10 @@ Next: HX-u PR (stacked on HX-a); HX-m (HX-3, HX-4) stacked on HX-a
 ## Decisions
 - Record lives on lead/halo-export-pack at docs/leads/halo-export-pack/: lead/export-pack already belongs to the suiteui export-pack lead (#3477).
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
+- HX-m ships as two PRs, both `Slice: HX-m`. HX-3 holds the plan rules, the alpha refusal, .mov naming and flattening movie frames without alpha over opaque black (a composition has no background fill, so PNG frames stay as they were). HX-4 holds the media service and writer. Together they are over the 400-line cap.
+- ProRes 4444 stays refused in the Codec row until HX-4 ("ProRes 4444 lands with HX-4."): HX-3 has no writer that can make one.
+- RJ-H41 moves to the HX-4 PR. The CLI refuses render.start on Linux, and its catalog step takes no codec or alpha yet, so a real ProRes job is checkable only once the writer and those params exist.
+- HX-4's shared MovieWriter takes whole-number fps only. #4857 (needs-ui, line:suiteui) asks for a rational rate; HaloMovieWriter stays for fractional rates until then.
 
 ## Open
 - HX-a blocked (2026-10-21T00:13Z): gradient-fill:HG-a done (#3516); placed-images:PH-a waiting (stage 0, waits on HS-a #3676 and suiteui PL-a).
@@ -42,3 +46,4 @@ Next: HX-u PR (stacked on HX-a); HX-m (HX-3, HX-4) stacked on HX-a
 - 2026-10-23T15:26:44Z: run act-1a16958d5fe-8dxu for #3472. The placed-images waits (PH-a, PH-u) are on dev, so HX-a is rebuilt on origin/dev 721168a8 from lead/halo-*-HX-a, its test commit first.
 - Wire: HX-a's `HaloRenderSettings.codec`/`alpha` and `choosing(...)` are what HX-3 (plan rules) and HX-4 (media.movie settings) read.
 - 2026-10-23T16:05Z: HX-a #4841 opened (Head b8579d50, Mutate HaloModel.HaloDocumentValues 2/2). HX-5's snapshots shipped in HX-a (first in the slice), so HX-u is the budget test and the skipped journey.
+- 2026-10-23T16:12Z: HX-u #4858 opened, stacked on HX-a. #4857 filed. HX-3 is building on lead/halo-export-pack-HX-m.
