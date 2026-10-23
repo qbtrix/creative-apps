@@ -7,7 +7,7 @@
 // slot (HaloRenderOptionRows): the Size label over Full and Half chips (the
 // sheet's own 0.25x-4x Size row is off: Halo renders at those two only), the
 // Folder label over the folder's name (`-HaloRenderTo`, one line, its path the
-// help, dimmed with the sheet) and Choose… (its `render.choose-folder` spec's
+// help, in the secondary text colour while the sheet is off) and Choose… (its `render.choose-folder` spec's
 // MenuCommand, its disabled help the sheet's Export wording), and one note at
 // the labels' inset: "Frame n of N" while
 // running, else the summary, or, with no folder, why (the error color). A
@@ -247,8 +247,8 @@ struct HaloRenderOptionRows: View {
             HStack(spacing: SuiteSpacing.s) {
                 Text(destination?.lastPathComponent ?? "None")
                     .lineLimit(1).truncationMode(.middle)
-                    .foregroundStyle(destination == nil ? SuiteColor.secondaryText : SuiteColor.textPrimary)
-                    .opacity(isEnabled ? 1 : SuiteColor.disabledOpacity)
+                    // Dimmed with the sheet by colour, not opacity: an opacity dim read 2.41:1 (#4661).
+                    .foregroundStyle(destination == nil || !isEnabled ? SuiteColor.textSecondary : SuiteColor.textPrimary)
                     .help(destination?.path(percentEncoded: false) ?? Self.noDestination)
                 MenuCommand(HaloMenuState.spec("render.choose-folder"), on: HaloMenuState(project: model)) { act(.choose) }
                     .haloControl(id: "halo.render.destination", enabled: editing, help: editing ? nil : Self.busy)
