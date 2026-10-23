@@ -4,7 +4,7 @@ Issue: #3478 · Packet: docs/blueprints/library/features/export-pack.md
 Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 (earlier act-1a15e4969c2-pa6e)
 Stage: 3 wave 2 (LX-2 and LX-4 building on the supervisor's stub ruling, #3478 comment 6372282767; started 2026-10-23T18:54:02Z at dev 0d4645bf)
 Base: origin/dev 0d4645bf
-Next: LX-2 (slice LX-a, with the SuiteUI ExportPick.metadata stub) and LX-4 (slice LX-m, on FakeMetadata) are with builders; then LX-a and LX-m PRs on the lane.
+Next: LX-2 #4960 and LX-4 #4962 on the lane; once both merge and a scoped library (or full) run contains them, LX-a and LX-m are done. Then LX-u (LX-5, LX-6) and LX-z (LX-7, LX-8).
 - [ ] Wire: export-pack:XP-3
 - [ ] Wire: export-pack:XP-7
 
@@ -13,7 +13,7 @@ Next: LX-2 (slice LX-a, with the SuiteUI ExportPick.metadata stub) and LX-4 (sli
 |---|---|---|---|---|---|---|---|---|---|
 | LX-a | options hold a metadata policy (default All but location); the sheet shows the shared Metadata row | LX-1, LX-2 | MX-LX | XP-a; export (built, #1554 closed) | no | 0 | LX-1 #3696 merged 7f3959c; LX-2 #4960 head efabeb8d on the lane | - | - |
 | LX-u | snapshots, render budget, journey written | LX-5, LX-6 | LJ-X1 | LX-a | yes | 0 | waiting | - | - |
-| LX-m | sidecar drops the policy's tags; writer carries metadata minus them | LX-3, LX-4 | MX-LX | LX-a; XP-6 (merged), XP-7 | yes | 0 | LX-3 merged f1e49054d; LX-4 waits XP-2 + XP-7 | - | - |
+| LX-m | sidecar drops the policy's tags; writer carries metadata minus them | LX-3, LX-4 | MX-LX | LX-a; XP-6 (merged), XP-7 | yes | 0 | LX-3 merged f1e49054d; LX-4 #4962 head 4070383d on the lane (Wire XP-7) | - | - |
 | LX-z | live services, journey on, feature-done | LX-7, LX-8 | LJ-X1 | LX-u, LX-m | no | 0 | waiting | - | - |
 
 ## Tasks
@@ -44,6 +44,8 @@ Next: LX-2 (slice LX-a, with the SuiteUI ExportPick.metadata stub) and LX-4 (sli
 - 2026-10-23T18:54:02Z: supervisor (#3478 comment 6372282767): build LX-2 and LX-4 now. The stub goes in SuiteUI, not Library (rule 12: the contract's own module; rule 20: one copy): ExportPick.metadata: ExportMetadata? = nil, field plus default, no UI, tested in SuiteUITests. The LX-2 PR body says XP-3 builds on the stub field. LX-4 builds on FakeMetadata with Wire: export-pack:XP-7; its macOS write tests stay disabled until XP-7.
 
 - 2026-10-23T19:12:34Z: LX-2 (#4960) keeps a Library-drawn Metadata row (SuiteUI ChoiceChips, titles from ExportMetadata, through the sheet's setOptions). Library's sheet is its own Form and never mounts SuiteExportSheet, so XP-4's shared row would never show there and the policy would have no control. When #3638 moves Library to the shared sheet, this row gives way to XP-4's.
+
+- 2026-10-23T19:20:32Z: LX-4 (#4962, head 4070383d, 7 files +261/-6, Mutate 3/3 LibraryModel.CarriedMetadata). The carry step is a LibraryModel helper (CarriedMetadata.still): an unreadable or empty source, or a carrier that throws, copies nothing. JPEGWriter reaches services through a new LibraryShell.services (LibraryApp.swift, LibraryWindow.swift: outside the packet's file list but in LibraryApp). The macOS write tests are disabled with 'waits on XP-7'; one enabled test runs on FakeMetadata.
 
 ## Open
 - XP-2 waits on shell-media SM-a; XP-3 waits on tone-controls TC-a and PL-a (SuiteUI lead's record).
