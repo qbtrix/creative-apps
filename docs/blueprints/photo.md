@@ -76,7 +76,9 @@ In plain words, v1 does:
   layer as one undo step, and Delete refuses to take every layer
   (`photo/multi-layer-select`).
 - **Tools on the rail:** Move V, Marquee M (rectangles only), Brush B, Eraser E
-  (each with its own size, hardness, opacity), Clone S, Heal J, Crop C.
+  (each with its own size, hardness, opacity), Clone S, Heal J, Crop C, and
+  Type T: a click opens a text box over the canvas, and the layer stays
+  editable text after a save and reopen (`photo/text-layers`).
 
 ### 0.2 What landed after v1
 
@@ -221,8 +223,8 @@ or writing any closed layered format.
 | Export | PNG, JPEG, TIFF and HEIC; a size as a percent or a longest side; quality for JPEG and HEIC | Export several sizes at once, web presets, metadata editing |
 | Fixes | #79, #252, #253, #289 (Photo's views), and #255, #586 tracked to SuiteUI | – |
 
-Tier 3 stays out of v2: text, paths and a pen, print setup, specialist
-controls and fills. The Gradient tool moved into the beta (`photo/gradient-fill`). Layer styles moved into the beta, built once
+Tier 3 stays out of v2: paths and a pen, print setup, specialist
+controls and fills. The Gradient tool moved into the beta (`photo/gradient-fill`). The Type tool and text layers moved into the beta (`photo/text-layers`). Layer styles moved into the beta, built once
 and shared (captain, 2026-10-21; `suiteui/layer-styles`), with clipping masks
 and PSD layer effects (`photo/masks-clipping`, `photo/psd-effects`).
 

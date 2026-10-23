@@ -46,16 +46,22 @@ public struct HaloInspectorScrub: Sendable, Hashable {
     public private(set) var awaitsRefresh = false
     /// When the last frame was taken, or the first refresh asked for.
     public private(set) var lastFrame: Double?
+    /// The last input event time taken, kept across refreshes until `end()`,
+    /// so an event's second call after a refresh doesn't show it again (#4588).
+    public private(set) var lastEvent: Double?
 
     public init() {}
 
     /// One pointer sample at `eventTime`, taken at `now`, with the bar's new
     /// value, or nil when the pointer moved but the value didn't. Two calls
-    /// for the same event (the bar's value and its drag) keep its time once;
-    /// a time that isn't finite is not kept.
+    /// for the same event (the bar's value and its drag) keep its time once,
+    /// even with a refresh between them; a time that isn't finite is not kept.
     public mutating func take(_ value: Double?, at eventTime: Double, now: Double) -> HaloScrubStep {
         if let value { pending = value }
-        if eventTime.isFinite, waiting.last != eventTime { waiting.append(eventTime) }
+        if eventTime.isFinite, lastEvent != eventTime {
+            waiting.append(eventTime)
+            lastEvent = eventTime
+        }
         guard awaitsRefresh else {
             awaitsRefresh = true
             lastFrame = now

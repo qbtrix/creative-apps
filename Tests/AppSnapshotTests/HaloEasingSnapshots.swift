@@ -40,6 +40,15 @@ import Testing
     }
 
     /// Ball's segments with none picked: the rows and "Pick a span above to shape its easing.".
+    /// Every preset chip carries its own id, `halo.easing.preset.<case>` (#4453).
+    @Test func eachChipHasItsIdentifier() {
+        let options = HaloEasingInspector.chipRows.flatMap { $0.map(HaloEasingInspector.chipOption) }
+        #expect(Set(options.map(\.id)) == Set(HaloEasingPreset.allCases))
+        #expect(options.map(\.identifier) == options.map { "halo.easing.preset.\($0.id.rawValue)" })
+        #expect(HaloEasingInspector.chipOption(.easeOut).identifier == "halo.easing.preset.easeOut")
+        #expect(HaloEasingInspector.chipOption(.easeInOut).title == "Ease In and Out")
+    }
+
     @Test func unpicked() throws {
         let project = try layer("Ball")
         #expect(project.keySegments.map(\.title) == ["Position X, frames 0–24", "Opacity, frames 0–12"])

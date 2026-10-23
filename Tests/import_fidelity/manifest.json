@@ -488,7 +488,7 @@
   },
   {
    "file": "psd/layer_effects.psd",
-   "what": "a layer with a stroke effect (lfx2)",
+   "what": "a layer with a stroke, two drop shadows and a satin (lfx2)",
    "width": 64,
    "height": 64,
    "bits": 8,
@@ -509,10 +509,24 @@
      "blend": "normal",
      "opacity": 255,
      "clip": false,
-     "mask": false
+     "mask": false,
+     "effects": [
+      "dropShadow",
+      "stroke"
+     ]
     }
    ],
-   "gap": 3496
+   "gap": 3496,
+   "loose": [
+    12,
+    12,
+    52,
+    52
+   ],
+   "notes": [
+    "Badge: satin (not kept)",
+    "Badge: second drop shadow (not kept)"
+   ]
   },
   {
    "file": "psd/rgb16.psd",

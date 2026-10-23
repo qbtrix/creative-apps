@@ -8,6 +8,7 @@
 // is SuiteUI's BusyNote (`library.import.progress`, with the import's
 // fraction); the import notice is a plain SwiftUI placeholder until SuiteUI's
 // InlineNotice (#780) lands.
+// The grid has its toolbar row (LibraryGridToolbar) above it.
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -161,9 +162,12 @@ struct LibraryBrowser: View {
                 .libraryShare(model)
         } else {
             // Top-aligned, so a short grid (an import's first batch) starts under the rows above.
-            LibraryGrid(model: model, menu: menu, thumbnails: thumbnails, onSelect: onSelect, onOpen: onOpen)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .libraryShare(model)
+            VStack(spacing: 0) {
+                LibraryGridToolbar(model: model, menu: menu)
+                LibraryGrid(model: model, menu: menu, thumbnails: thumbnails, onSelect: onSelect, onOpen: onOpen)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .libraryShare(model)
         }
     }
 }

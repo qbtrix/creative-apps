@@ -1,5 +1,9 @@
 [
 {"label":"Flip Horizontal draws the move arrows again","file":"Sources/SuiteUI/TransformRows.swift","find":"? \"arrow.left.and.right.righttriangle.left.righttriangle.right\"","replace":"? \"arrow.left.and.right\"","tests":"TransformRowsTests.swift"},
 {"label":"Flip Vertical draws the horizontal mirror","file":"Sources/SuiteUI/TransformRows.swift","find":": \"arrow.up.and.down.righttriangle.up.righttriangle.down\"","replace":": \"arrow.left.and.right.righttriangle.left.righttriangle.right\"","tests":"TransformRowsTests.swift"},
-{"label":"Flip Vertical takes the horizontal name","file":"Sources/SuiteUI/TransformRows.swift","find":"self == .horizontal ? \"Flip Horizontal\" : \"Flip Vertical\"","replace":"\"Flip Horizontal\"","tests":"TransformRowsTests.swift"}
+{"label":"Flip Vertical takes the horizontal name","file":"Sources/SuiteUI/TransformRows.swift","find":"self == .horizontal ? \"Flip Horizontal\" : \"Flip Vertical\"","replace":"\"Flip Horizontal\"","tests":"TransformRowsTests.swift"},
+{"label":"Typed W keeps the unturned top-left again","file":"Sources/SuiteUI/TransformRows.swift","find":"about: .left)","replace":"about: .topLeft)","tests":"TransformRowsTests.swift"},
+{"label":"Typed H keeps the centre, not the top side","file":"Sources/SuiteUI/TransformRows.swift","find":"about: .top)","replace":"about: .center)","tests":"TransformRowsTests.swift"},
+{"label":"A Mixed turn keeps the equal-value guard","file":"Sources/SuiteUI/TransformRows.swift","find":"if row == .rotation, mixed { return","replace":"if row == .rotation, mixed, value != 0 { return","tests":"TransformRowsTests.swift"},
+{"label":"A Mixed drag turns from 0 again each step","file":"Sources/SuiteUI/TransformRows.swift","find":"return .rotate(by: value - turned, drag: drag)","replace":"return .rotate(by: value, drag: drag)","tests":"TransformRowsTests.swift"}
 ]

@@ -85,4 +85,16 @@ import Testing
         #expect(openDesign().shapeHelp == nil)
         #expect(DesignWorkspace().shapeHelp?.isEmpty == false)
     }
+
+    /// DS-6: shape.draw is refused while a text edit holds the history, so it never draws an unrecorded node.
+    @Test func aTextEditHoldsTheShapeTool() throws {
+        var workspace = openDesign()
+        workspace.gesture(.text, pt(300, 300), pt(380, 340))
+        let id = try #require(workspace.selectedNodeID)
+        try workspace.beginTextEdit(id)
+        #expect(workspace.shapeHelp == "Finish editing the text first.")
+        #expect(throws: ShapeRefusal.self) {
+            try workspace.addShape(.defaults(.star), in: Rect(minX: 500, minY: 300, maxX: 600, maxY: 400), name: "Draw Star")
+        }
+    }
 }
