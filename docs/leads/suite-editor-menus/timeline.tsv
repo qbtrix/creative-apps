@@ -35,3 +35,4 @@ utc	stage	event	ref	note
 2026-10-23T09:06:28Z	wave	editor-menus	#4761 (EM-library, feature-done) merged origin/dev at e42863714, CI: PASS, retargeted to dev; Head moved, stacked note dropped.	https://github.com/qbtrix/creative-apps/pull/4761
 09:16Z	check	editor-menus	#4761 macOS build 39929804061 queued; scoped flare 39930432485 on post-#4771 dev 04140530e queued for the EM-flare-halo critics	https://github.com/qbtrix/creative-apps/actions/runs/39929804061
 09:38Z	check	editor-menus	#4761 macOS build 39929804061 in progress; scoped flare 39930432485 (04140530e) and scoped halo 39931655256 (138495f55) queued for the EM-flare-halo critics	https://github.com/qbtrix/creative-apps/actions/runs/39929804061
+09:39Z	lane	editor-menus	#4761 macOS build 39929804061 green on e42863714; waits on the lane's merge sweep	https://github.com/qbtrix/creative-apps/actions/runs/39929804061
