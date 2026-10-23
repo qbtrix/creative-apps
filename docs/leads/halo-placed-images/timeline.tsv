@@ -97,3 +97,4 @@ utc	stage	event	ref	note
 2026-10-23T02:28:12Z	3	check	PH-z	supervisor flagged stale inspector test (dev red); fixer dispatched on #4649 branch; #4438 still in Mac gate
 2026-10-23T02:34:12Z	3	fix	PH-z	inspector test fixed on #4649 head 5c2770b6, dev merged, CI: PASS
 2026-10-23T02:49:51Z	3	check	PH-u	lane build 39883924730 success; #4438 awaiting merge
+2026-10-23T03:12:02Z	3	merge	PH-u	#4438 merged ac4c7d9a; Linux check 39892571085 running; fixer merging dev into PH-z
