@@ -10,7 +10,8 @@ extension HaloProject: GradientFillTarget {
     /// Why the fill commands can't run: nothing selected, a text layer or a null.
     static let noFillLayer = "Select a solid or shape layer to fill.",
         textFillHelp = "A text layer takes a color, not a gradient.",
-        nullFillHelp = "A null layer has nothing to fill."
+        nullFillHelp = "A null layer has nothing to fill.",
+        pictureCoversFill = "The placed picture covers this solid's color."
 
     /// The selected solid's or shape's fill in its box; nil for text, null or
     /// no selection.
