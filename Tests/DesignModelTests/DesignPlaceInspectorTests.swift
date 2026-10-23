@@ -37,6 +37,15 @@ private func page(_ kind: DesignNodeKind = .frame, picture: Bool = false, size: 
         #expect(try !page(locked: true).placeFills(fill: true))
     }
 
+    @Test func placeInFrameIsOffOnALockedFrameWithTheLocksReason() throws {
+        let locked = try page(locked: true)
+        #expect(locked.placeInFrameHelp == locked.lockHelp("node-1"))
+        #expect(locked.placeInFrameHelp == "Unlock the layer to edit it.")
+        #expect(locked.placeNote?.hasPrefix("Unlock the layer to edit it.") == true)
+        #expect(try page().placeInFrameHelp == DesignWorkspace.placeNotBuilt)
+        #expect(try page(select: false).placeInFrameHelp == (try page()).placeActionHelp())
+    }
+
     @Test func onlyTheFirstFileFillsTheFrame() {
         let files = [(name: "a.png", data: Data([1])), (name: "b.png", data: Data([2])), (name: "c.png", data: Data([3]))]
         let at = Point(x: 10, y: 20)
