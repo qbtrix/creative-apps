@@ -48,3 +48,4 @@ Next: EP-2 builder on lead/adopt-kernel-eyedropper-photo-EP-m (off dev); then EP
 - 2026-10-21T20:48Z: released by the supervisor (every slice waits on PE-z, AB-photo, UP-z). No branch or PR was opened in this run.
 - 2026-10-22T00:22Z: Released by the supervisor; no further work in this run.
 - 2026-10-23T15:20:44Z: EP-m builder started (EP-2) on lead/adopt-kernel-eyedropper-photo-EP-m; toolchain 6.3.3 ready
+- 2026-10-23T17:32Z: wave 2: EP-m is #4837 (fast-lane, queued). EP-z builder started, stacked on EP-m.
