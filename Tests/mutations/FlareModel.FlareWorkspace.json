@@ -26,5 +26,12 @@
     "find": "        guard tool == .directSelect, selection.count == 1,",
     "replace": "        guard selection.count == 1,",
     "tests": "FlareAnchorEditTests"
+  },
+  {
+    "label": ".equalSeesTheNote: == ignores the import note, so Close on it never redraws the window",
+    "file": "Sources/FlareModel/FlareWorkspace.swift",
+    "find": "lhs.recent == rhs.recent && lhs.importNote == rhs.importNote",
+    "replace": "lhs.recent == rhs.recent",
+    "tests": "FlareLottieNoteTests"
   }
 ]
