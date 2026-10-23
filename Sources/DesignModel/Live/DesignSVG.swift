@@ -21,10 +21,11 @@
 // `translate(cx cy) scale(±1 ±1) translate(-cx -cy)`, TransformRules.matrix's
 // order. As on the canvas, a frame's clip and background turn and its children
 // keep their own; a group has no shape of its own.
-// A rectangle's or frame's picture (placed-images PD-6) is an <image> after its
-// fill, its file inline as a `data:` URI in `href`, at the kernel's cover crop
-// (PlaceRules.drawnRect), so it keeps its aspect; a frame's clip already holds it,
-// and a rectangle's gets its own <clipPath id="pic-<id>"> of its rounded box.
+// A rectangle's or frame's picture (placed-images PD-6) is an <image> between its
+// fill and its stroke, its file inline as a `data:` URI in `href`, at the kernel's
+// cover crop (PlaceRules.drawnRect), so it keeps its aspect, in a <clipPath> of the
+// rounded box. One <g> holds the node's opacity once; the stroke sits outside the
+// clip at full width, and a frame's children follow in the same clip.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -61,13 +62,24 @@ enum DesignSVG {
         let box = "x=\"\(number(x))\" y=\"\(number(y))\" width=\"\(number(f.width))\" height=\"\(number(f.height))\""
         let turned = turn(node, x: x, y: y)
         if node.kind != .group, let defs = gradient(node, x: x, y: y) { lines.append(pad + defs) }
+        if let image = picture(node, x: x, y: y, then: turned) {
+            let clip = XMLText.escaped((node.kind == .frame ? "clip-" : "pic-") + node.id), inClip = "<g clip-path=\"url(#\(clip))\">"
+            lines.append(pad + "<clipPath id=\"\(clip)\"><rect \(box)\(turned)\(corner(node))/></clipPath>")
+            lines.append(pad + "<g\(alpha(node))>")
+            lines.append(pad + "  <rect \(box)\(corner(node))\(fill(node))\(turned)/>")
+            lines.append(pad + "  " + inClip + image + "</g>")
+            if !paint(node).isEmpty { lines.append(pad + "  <rect \(box)\(corner(node)) fill=\"none\"\(paint(node))\(turned)/>") }
+            if node.kind == .frame {
+                lines.append(pad + "  " + inClip)
+                for child in node.children { write(child, origin: origin, depth: depth + 2, into: &lines) }
+                lines.append(pad + "  </g>")
+            }
+            lines.append(pad + "</g>")
+            return
+        }
         switch node.kind {
         case .rectangle, .instance:
-            let clip = XMLText.escaped("pic-" + node.id)
-            let image = picture(node, x: x, y: y, then: " clip-path=\"url(#\(clip))\"" + alpha(node) + turned)
-            if image != nil { lines.append(pad + "<clipPath id=\"\(clip)\"><rect \(box)\(corner(node))/></clipPath>") }
             lines.append(pad + "<rect \(box)\(corner(node))\(fill(node))\(paint(node))\(alpha(node))\(turned)/>")
-            if let image { lines.append(pad + image) }
         case .shape:
             let at = DesignRect(x: x, y: y, width: f.width, height: f.height)
             guard let path = node.path(in: at) else {  // a shape with no spec, or one the kernel refuses: its box
@@ -90,7 +102,6 @@ enum DesignSVG {
             lines.append(pad + "<clipPath id=\"\(id)\"><rect \(box)\(corner(node))\(turned)/></clipPath>")
             lines.append(pad + "<g clip-path=\"url(#\(id))\"\(alpha(node))>")
             lines.append(pad + "  <rect \(box)\(corner(node))\(fill(node))\(paint(node))\(turned)/>")
-            if let image = picture(node, x: x, y: y, then: turned) { lines.append(pad + "  " + image) }
             for child in node.children { write(child, origin: origin, depth: depth + 1, into: &lines) }
             lines.append(pad + "</g>")
         }

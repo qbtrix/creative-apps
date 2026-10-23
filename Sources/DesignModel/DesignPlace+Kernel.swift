@@ -3,8 +3,8 @@
 // apps do. A rectangle or frame keeps the kernel's `PlacedAsset` and a focus on the node; its `frame` is
 // the picture's `PlacedImage.box`, so the frame stays the one source of the box. `rasterSize` reads a PNG's
 // or JPEG's header through CoreRaster, so the CLI places on Linux. A new picture is a rectangle inside the
-// selected frame (else the frame under its box's top-left corner, else the page's top), named after the
-// file; a fill puts the picture into the one selected unlocked rectangle or frame. Every edit is one step,
+// selected frame (else the frame its box's centre falls in, else the page's top), named after the file; a
+// fill puts the picture into the one selected rectangle or frame, refused with its lock help. Every edit is one step,
 // and steps under one drag token on one layer fold into one. The fit, the crop and the reset are the
 // kernel's (`PlaceRules`, run by `PlaceCommands`). Linux-safe.
 #if canImport(FoundationEssentials)
@@ -23,12 +23,11 @@ extension DesignWorkspace: PlacedImageTarget {
     static let noRasterSize = "An SVG has no pixel size."
 
     /// Why nothing can be placed now; nil when it can: no page open, a text being edited, or the selected frame
-    /// (where the picture would land) or the selected picture is locked, with its lock help.
+    /// (where the picture would land) locked, with its lock help. A locked picture gates only its own edits.
     public var placeHelp: String? {
         guard selectedPage != nil else { return Self.noPlacePage }
         guard editingTextID == nil else { return Self.placeFinishText }
-        guard let node = selectedNode, node.kind == .frame || node.placedAsset != nil else { return nil }
-        return lockHelp(node.id)
+        return placeParent.flatMap(lockHelp)
     }
 
     /// What a new picture fits inside: the selected frame, else the selected page, else an empty rect.
@@ -38,9 +37,10 @@ extension DesignWorkspace: PlacedImageTarget {
         return Rect(minX: 0, minY: 0, maxX: page.frameWidth, maxY: page.frameHeight)
     }
 
-    /// The box a fill fills: the frame of the one selected rectangle or frame, unlocked; nil refuses the fill.
+    /// The box a fill fills: the frame of the one selected rectangle or frame; nil refuses the fill. A locked one
+    /// keeps its box, so `setPlaced` refuses the fill with the lock as the reason.
     public var placeFillBox: Rect? {
-        guard selectedNodeIDs.count == 1, let node = selectedNode, node.kind.holdsPicture, !isLockedInTree(node.id) else { return nil }
+        guard selectedNodeIDs.count == 1, let node = selectedNode, node.kind.holdsPicture else { return nil }
         return node.frame.kernelRect
     }
 
@@ -65,12 +65,13 @@ extension DesignWorkspace: PlacedImageTarget {
     }
 
     /// Adds a rectangle showing `asset` in `image.box`, named after the file without its extension, inside the
-    /// selected frame (else the frame under the box's top-left corner, else at the page's top), selected, as
+    /// selected frame (else the unlocked frame the box's centre falls in, else at the page's top), selected, as
     /// one step named `name`.
     public mutating func insertPlaced(_ asset: PlacedAsset, _ image: PlacedImage, name: String) throws -> String {
         if let help = placeHelp { throw CatalogError.unavailable(id: "place.image", why: help) }
         let frame = DesignRect(image.box)
-        let parent = placeParent ?? selectedPage?.nodes.deepestFrame(containing: DesignPoint(x: frame.x, y: frame.y))
+        let centre = DesignPoint(x: frame.x + frame.width / 2, y: frame.y + frame.height / 2)
+        let parent = placeParent ?? selectedPage?.nodes.deepestFrame(containing: centre)
         let before = snapshot
         let id = try insertNode(.rectangle, frame: frame, in: parent)
         _ = pages.update(id) { ($0.name, $0.placedAsset, $0.placedFocus) = (Self.placedName(asset.name), asset, image.focus) }
