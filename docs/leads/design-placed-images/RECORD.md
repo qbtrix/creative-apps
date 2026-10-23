@@ -55,3 +55,10 @@ Next: supervisor merges #3759; PD-u and PD-m slice PRs stacked on design/pd-a-pl
 - #4964 is at caab1ba5: 15 files, 398 lines, DesignPlace+Inspector mutations 8/8. It fixes #4966-#4969, #4980 and #4981. #4970, #4972, #4973 and #4975 are partly fixed; their SuiteUI parts are filed as needs-ui #4985.
 - Both PR bodies now carry the new Head lines and Fixes lines, with no footer.
 - The PD-u round-2 critic has started.
+
+## 2026-10-23T20:59Z PD-u critic round 2
+
+- 12 of the 16 claimed fixes hold. #4970, #4972, #4973 and #4975 are partial.
+- New findings: #4992 (major: ⌥-drag pans with several layers selected or another layer on top), #4993 (a drop on a rotated frame tests the unrotated box) and #4994 (Place in Frame… is enabled on a locked frame).
+- Fix round 2, PD-u's last: one new PR stacked on #4964, because #4963 and #4964 are at their size caps.
+- Gaps filed: #4996 (the ⌥-drag pan pointer and hint), #4997 (the kernel's place wording) and #4998 (the hand-drawn drop ring). #4970 and #4972 continue in needs-ui #4985.
