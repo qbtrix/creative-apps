@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 09:38Z	check	cli-bundle	#4741 (CB-3, supervisor merge) open, mergeable clean; CB-z waits	https://github.com/qbtrix/creative-apps/pull/4741
 09:54Z	check	cli-bundle	dev CI: full 39931493361 (138495f55) pending, 39929490747 queued; scoped flare 39930432485 / halo 39931655256 queued; #4741 open (no-fast-lane, needs-split, clean)	https://github.com/qbtrix/creative-apps/actions/runs/39931493361
 09:59Z	check	cli-bundle	heartbeat: full CI 39931493361 (138495f55, has #4771 but not #4761) still pending; scoped flare/halo queued; #4741 open	https://github.com/qbtrix/creative-apps/actions/runs/39931493361
+10:19Z	check	cli-bundle	full CI 39931493361 cancelled (superseded); new full CI 39937843350 on 622f200f9 (has #4771 and #4761) pending, decides NP and EM done; scoped flare/halo still queued; #4741 open	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
