@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-21T13:21:08Z	3	heartbeat	-	blocked: halo placed-images still Stage 0 (PH-a/PH-u)
 2026-10-21T13:42:11Z	heartbeat	check-in: still blocked; placed-images is at Stage 0, PH-a waits on HS-a (#3676), HK-a (key-editing) and PL-a.
 2026-10-22T16:37:55Z	takeover	run act-1a16474bd28-v3ht starts
+2026-10-23T15:26:44Z	3	takeover	-	run act-1a16958d5fe-8dxu starts; HF-a rebuilt on dev

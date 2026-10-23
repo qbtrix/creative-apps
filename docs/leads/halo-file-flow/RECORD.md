@@ -1,10 +1,10 @@
 # file-flow lead record
 
-Issue: #4514 (was #3474) · Packet: docs/blueprints/halo/features/file-flow.md
-Run: act-1a16474bd28-v3ht · Session: claude/halo-feature-lead-3yp4w1 · Started: 2026-10-22T16:00Z (took over from earlier runs)
-Stage: 3 wave 1 (HF-a building, stacked on PH-u)
-Base: 2cc149f57 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: HF-a PR opens when PH-a #4426 and PH-u (#4437/#4438) merge; HF-u then stacks on HF-a; HF-m waits on HT-m #4415 and PH-m
+Issue: #3474 (runs before used #4514) · Packet: docs/blueprints/halo/features/file-flow.md
+Run: act-1a16958d5fe-8dxu · Started: 2026-10-23T15:26:44Z (took over from act-1a16474bd28-v3ht)
+Stage: 3 wave 1 (HF-a rebuilt on dev, PR opening)
+Base: 721168a8 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
+Next: HF-a PR to dev; then HF-u and HF-m stacked on HF-a
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -39,3 +39,6 @@ Next: HF-a PR opens when PH-a #4426 and PH-u (#4437/#4438) merge; HF-u then stac
 - 2026-10-21T13:42:11Z check-in: still blocked; placed-images is at Stage 0, PH-a waits on HS-a (#3676), HK-a (key-editing) and PL-a.
 - 2026-10-22T16:37:55Z: New run act-1a16474bd28-v3ht for #4514. SF-a is on dev 7e9f260 (FileFlowTarget/FileFlowCommands in SuiteKernel/Files, SuiteFileDrop in SuiteShell, SuiteDocumentHost, SuiteDocumentsBridge used by Photo). HT-a and HS-a are merged; PH-u is drafts #4437/#4438 on PH-a #4426.
 - 2026-10-22T16:37:55Z: Decision: HF-a builds stacked on lead/halo-placed-images-PH-u2 (shares HaloViewer.swift and HaloFileMenu.swift, PH-u is A/C first), branch lead/halo-file-flow-HF-a; its PR opens after PH-u merges. Halo already has HaloDocumentHost.swift (A-HA-1) and .suiteApp(.halo, host:); HF-1 builds on that rather than adding a second host.
+- 2026-10-23T15:26:44Z: run act-1a16958d5fe-8dxu for #3474. The placed-images waits (PH-a, PH-u) are on dev, so HF-a is rebuilt on origin/dev 721168a8 from lead/halo-*-HF-a, its test commit first.
+- Wire: HF-3 sets `placesExtensions` from `placeFormats` (HaloPlace+Kernel.swift) once placed-images PH-m is on dev, and drops "Halo can't place images yet." then; HF-a keeps the packet's stub.
+- Wire: HF-1 SuiteFileCommands sits after New Window (dev kept New Window, #1081), not in place of it.
