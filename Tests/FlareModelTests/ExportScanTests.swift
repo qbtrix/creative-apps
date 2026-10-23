@@ -72,7 +72,7 @@ private func workspace(_ document: Document) -> FlareWorkspace {
 
 @Test func everyFormatExportsShowcaseCarryingTheScansWarnings() async throws {
     let showcase = FlareFixtures.showcase
-    for format in ExportFormat.allCases {
+    for format in ExportFormat.allCases where format.unbuiltReason == nil {
         let o = options(format, 0...2)
         let result = try await run(showcase, o)
         #expect(!result.files.isEmpty)

@@ -1,0 +1,37 @@
+[
+  {
+    "label": "dragIsOneStep: the drag token not passed to setFill, so 120 moves are 120 undo steps",
+    "file": "Sources/SuiteKernel/Fill/GradientCommands.swift",
+    "find": "try target.setFill(try change(selection.fill, selection.box), in: selection.box, name: title, drag: drag)",
+    "replace": "try target.setFill(try change(selection.fill, selection.box), in: selection.box, name: title, drag: nil)",
+    "tests": "GradientCommandsTests"
+  },
+  {
+    "label": "angleNeedsLinear: the angle allowed on a radial fill",
+    "file": "Sources/SuiteKernel/Fill/GradientCommands.swift",
+    "find": "return GradientRules.type(of: fill) == .linear ? .available : .unavailable(angleHelp)",
+    "replace": "return GradientRules.type(of: fill) != .solid ? .available : .unavailable(angleHelp)",
+    "tests": "GradientCommandsTests"
+  },
+  {
+    "label": "oneStepPerRun: setFill called twice per edit, so a run records two steps",
+    "file": "Sources/SuiteKernel/Fill/GradientCommands.swift",
+    "find": "        return .object([:])\n    }\n    /// `fill`, or a failure",
+    "replace": "        try target.setFill(selection.fill, in: selection.box, name: title, drag: nil)\n        return .object([:])\n    }\n    /// `fill`, or a failure",
+    "tests": "GradientCommandsTests"
+  },
+  {
+    "label": "aBadStopIndexFails: the stop index not checked, so a move past the end records a step",
+    "file": "Sources/SuiteKernel/Fill/GradientCommands.swift",
+    "find": "if let stop, !(0..<count).contains(stop) {",
+    "replace": "if let stop, stop < 0 {",
+    "tests": "GradientCommandsTests"
+  },
+  {
+    "label": "gradientSortsItsStopsAndTurnsTheLine: fill.gradient ignores its angle",
+    "file": "Sources/SuiteKernel/Fill/GradientCommands.swift",
+    "find": "to: p.angle ?? 0, in: box)",
+    "replace": "to: 0, in: box)",
+    "tests": "GradientCommandsTests"
+  }
+]

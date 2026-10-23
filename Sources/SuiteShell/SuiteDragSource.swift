@@ -26,9 +26,10 @@ enum SuiteDragSource {
         for rep in items.flatMap(coding.representations(of:)) where !registered.contains(rep.type.rawValue) {
             registered.insert(rep.type.rawValue)
             if rep.type == .fileURL {
-                let path = String(decoding: rep.data, as: UTF8.self)
-                let url = URL(string: path) ?? URL(fileURLWithPath: path)
-                provider.registerObject(url as NSURL, visibility: .all)
+                // PasteboardCoding writes `file://<path>` unescaped, so a `#` or `%` in a name is part of the path.
+                let text = String(decoding: rep.data, as: UTF8.self)
+                let path = text.hasPrefix("file://") ? String(text.dropFirst("file://".count)) : text
+                provider.registerObject(URL(fileURLWithPath: path) as NSURL, visibility: .all)
             } else {
                 let data = rep.data
                 provider.registerDataRepresentation(forTypeIdentifier: rep.type.rawValue, visibility: .all) { load in

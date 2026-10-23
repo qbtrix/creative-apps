@@ -31,7 +31,7 @@ private func largeWithCollections() -> LibraryCatalog {
 }
 
 @Suite struct LibraryCollectionsBudgetTests {
-    @Test(.disabled("waits on FC-9")) func cullWithCollectionsWithinBudget() throws {
+    @Test func cullWithCollectionsWithinBudget() throws {
         var catalog = largeWithCollections()
         let id = try #require(catalog.order.dropFirst(5_000).first)
         catalog.select([id])
@@ -45,7 +45,7 @@ private func largeWithCollections() -> LibraryCatalog {
         #expect(cost.median <= 10 * scale)
     }
 
-    @Test(.disabled("waits on FC-9")) func cullUnderFilterWithinBudget() throws {
+    @Test func cullUnderFilterWithinBudget() throws {
         var catalog = largeWithCollections()
         catalog.filter = LibraryFilter(hidesRejected: true)
         catalog.refreshShown()

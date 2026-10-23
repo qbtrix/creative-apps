@@ -3,13 +3,11 @@
 // `suiteui`. The editor's rows are SS-3's `suite.stroke.*`: `color` (its hex field), `width`, `join.<join>`,
 // `cap.<cap>`, `dash.<preset>`, `dash-length` and `gap` (Custom), `trim-start`, `trim-end`, `trim-offset`, `add` and
 // `remove`; the preview is `suite.gallery.stroke-editor.preview`; the page logs `<command id> <intent>` to
-// `suite.gallery.log`. SS-2 wrote it; SS-4 turns on steps 1 to 3 on the page's own stroke (colour, width, join and cap
-// apply there); steps 4 and 5 skip with "waits on SS-9", which runs them on live with dash and trim enabled.
+// `suite.gallery.log`. SS-2 wrote it; SS-4 turned on steps 1 to 3; SS-9 runs every step on live: the page runs each
+// intent as its stroke command on a local target with a History, and the preview's value adds the dash and the trim.
 import XCTest
 
 final class SuiteStrokeJourneyTests: XCTestCase {
-    private static let liveWait = true
-
     @MainActor func testStrokeEditorDashAndTrim() throws {
         let gallery = Journey("Library", self, name: "suiteui", arguments: ["-SuiteGallery", "index"])
         XCTAssert(gallery.element("suite.gallery.index").waitForExistence(timeout: 30), "no gallery index")
@@ -49,9 +47,9 @@ final class SuiteStrokeJourneyTests: XCTestCase {
         XCTAssert((preview.value as? String ?? "").hasSuffix("round round"), "the preview's join and cap didn't round")
         gallery.shot("stroke-editor-round")
 
-        if Self.liveWait { throw XCTSkip("waits on SS-9") } // SS-9 turns on steps 4 and 5 on live.
         gallery.element("suite.stroke.dash.dashed").click() // 4. Dashed, then Custom 10 and 4.
         expectStrokeLog(gallery, "stroke.dash", "the Dashed chip logged no stroke.dash")
+        XCTAssert((preview.value as? String ?? "").contains(" dash "), "the preview didn't dash: \(preview.value ?? "nothing")")
         gallery.shot("stroke-editor-dashed")
         gallery.element("suite.stroke.dash.custom").click()
         for (id, text) in [("suite.stroke.dash-length", "10"), ("suite.stroke.gap", "4")] {
@@ -60,11 +58,13 @@ final class SuiteStrokeJourneyTests: XCTestCase {
             gallery.press(.return)
         }
         expectStrokeLog(gallery, "stroke.dash", "the Custom pattern logged no stroke.dash")
+        XCTAssert((preview.value as? String ?? "").contains("dash 10 4"), "the pattern didn't follow: \(preview.value ?? "nothing")")
         gallery.shot("stroke-editor-custom-dash")
         let end = gallery.element("suite.stroke.trim-end") // 5. Trim End to 40%, Offset, Remove and Add.
         let endStart = end.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         endStart.press(forDuration: 0.1, thenDragTo: endStart.withOffset(CGVector(dx: -60, dy: 0)))
         expectStrokeLog(gallery, "stroke.trim", "the Trim End scrub logged no stroke.trim")
+        XCTAssert((preview.value as? String ?? "").contains("trim 0 to "), "the stroke didn't trim: \(preview.value ?? "nothing")")
         gallery.shot("stroke-editor-trimmed")
         let offset = gallery.element("suite.stroke.trim-offset").coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         offset.press(forDuration: 0.1, thenDragTo: offset.withOffset(CGVector(dx: 30, dy: 0)))

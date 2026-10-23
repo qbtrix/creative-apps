@@ -6,18 +6,31 @@ import FoundationEssentials
 import Foundation
 #endif
 import FlareCore
+import SuiteKernel
 
 public struct ShapeDraft: Equatable, Sendable {
     public var tool: FlareTool
     public var shape: FlareShape
-    public var anchors: [Point]         // pen only; empty for primitives
-    public var smoothAnchors: Set<Int>  // pen anchors made by a drag
-    public var isClosed: Bool
-    public var stageScale: Double       // pen only: the fit scale of its latest click, stage points per scene point
+    /// The pen's contour and stage scale (SuiteKernel's `PenDraft`); `pen` reads it for the Pen, and the fields below
+    /// are views of it.
+    var penStore: PenDraft
+    public var anchors: [Point] { penStore.contour.anchors.map(\.point) }  // pen only; empty for primitives
+    /// Pen anchors made by a drag: those with a handle.
+    public var smoothAnchors: Set<Int> {
+        Set(penStore.contour.anchors.indices.filter { penStore.contour.anchors[$0].handleOut != nil
+            || penStore.contour.anchors[$0].handleIn != nil })
+    }
+    public var isClosed: Bool { penStore.contour.closed }
+    /// Pen only: the fit scale of its latest click, stage points per scene point.
+    public var stageScale: Double {
+        get { penStore.scale }
+        set { penStore.scale = newValue }
+    }
     public init(tool: FlareTool, shape: FlareShape, anchors: [Point] = [],
                 smoothAnchors: Set<Int> = [], isClosed: Bool = false, stageScale: Double = 1) {
-        self.tool = tool; self.shape = shape; self.anchors = anchors
-        self.smoothAnchors = smoothAnchors; self.isClosed = isClosed; self.stageScale = stageScale
+        self.tool = tool; self.shape = shape
+        penStore = PenDraft(contour: Self.contour(of: shape, anchors: anchors, smooth: smoothAnchors, closed: isClosed),
+                            scale: stageScale)
     }
 }
 

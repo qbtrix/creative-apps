@@ -91,6 +91,16 @@ import Testing
         #expect(pen.contour.anchors.count == 1 && pen.contour.anchors.first?.handleOut == Point(x: 40, y: 10))
     }
 
+    /// #4012: a smooth anchor drawn with only its in-handle reads back with its out-handle mirrored through its point.
+    @Test func smoothAnchorWithOnlyHandleInMirrorsOut() throws {
+        let (p0, p1, c2) = (Point(x: 0, y: 0), Point(x: 100, y: 0), Point(x: 80, y: 20))
+        let path = FlarePath(elements: [.move(to: p0), .cubic(control1: p0, control2: c2, to: p1)])
+        let draft = ShapeDraft(tool: .pen, shape: FlareShape(points: [p0, p1], closed: false, path: path),
+                               anchors: [p0, p1], smoothAnchors: [1])
+        let anchor = try #require(draft.pen?.contour.anchors.last)
+        #expect(anchor.handleIn == c2 && anchor.handleOut == Point(x: 120, y: -20))
+    }
+
     @Test func penViewReadsTheDraftAndWritesItBack() throws {
         var workspace = Self.workspace(.pen)
         workspace.drag(from: Point(x: 0, y: 0), to: Point(x: 0, y: 0), stageScale: 2)

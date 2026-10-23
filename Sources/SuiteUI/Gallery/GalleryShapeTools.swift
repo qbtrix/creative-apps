@@ -91,8 +91,15 @@ struct GalleryShapeBoard: ShapeTarget {
 }
 
 struct GalleryShapeToolsPage: View {
-    @State private var board = GalleryShapeBoard()
+    @State private var board: GalleryShapeBoard
     @State private var log: [String] = []
+
+    /// The page with `tool` picked; the gallery opens it on Rectangle.
+    init(tool: ShapeSpec = .defaults(.rectangle)) {
+        var board = GalleryShapeBoard()
+        board.pickShapeTool(tool)
+        _board = State(initialValue: board)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
@@ -140,6 +147,9 @@ private struct GalleryShapeCanvas: View {
                     live = nil
                     onDrawn(Self.point(value.startLocation), Self.point(value.location), Self.held)
                 })
+        // A press into an inactive window draws too, as SwiftUI's own canvases do; it also lets the render budget's
+        // scripted drag, whose every press activates its window, reach the gesture.
+        .allowsWindowActivationEvents()
         .accessibilityElement().accessibilityLabel("Shape canvas")
         .accessibilityValue(shapes.last.map { "\(Int($0.box.width)) x \(Int($0.box.height))" } ?? "Empty")
         .accessibilityIdentifier("suite.gallery.shape-canvas")

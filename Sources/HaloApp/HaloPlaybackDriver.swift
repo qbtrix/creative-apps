@@ -8,7 +8,10 @@
 // the `haloRefreshLink` environment value so a test hosting the whole window
 // can swap in a link it fires by hand; no unit test ever starts a real one.
 // The transport stops the driver as soon as the Model stops playing, so a
-// paused composition costs no refreshes.
+// paused composition costs no refreshes. Under `-SuitePerfProbe` the
+// transport hands the driver the window's HaloProbe and calls `frameShown()`
+// when a tick moved the playhead, which records a `playback` frame at the
+// target of the refresh that moved it (HB-U4).
 #if canImport(AppKit)
 import AppKit
 import QuartzCore
@@ -34,6 +37,10 @@ final class HaloPlaybackDriver {
     private let onTick: @MainActor (Double) -> Void
     private let makeLink: LinkMaker
     private var link: (any HaloRefreshLink)?
+    /// The target of the latest refresh, which a frame shown is drawn at.
+    private var lastTarget: Double?
+    /// Where a frame shown is recorded; nil (and the recorder nil) records nothing.
+    var probe: HaloProbe?
 
     /// True while a link is attached.
     var isRunning: Bool { link != nil }
@@ -58,7 +65,14 @@ final class HaloPlaybackDriver {
 
     /// One refresh at `target` seconds on the media clock.
     func receive(target: Double) {
+        lastTarget = target
         onTick(target)
+    }
+
+    /// The latest tick moved the playhead: one `playback` frame at its target.
+    func frameShown() {
+        guard let probe, probe.isOn, let lastTarget else { return }
+        probe.drew(HaloProbe.playback, at: lastTarget)
     }
 }
 

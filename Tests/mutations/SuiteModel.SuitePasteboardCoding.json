@@ -1,0 +1,23 @@
+[
+ {
+  "label": ".ownTypeFirst: Design ranks PNG above its own layers",
+  "file": "Sources/SuiteModel/Pasteboard/SuitePasteboardCoding.swift",
+  "find": ".design: [.designLayers, .assetEnvelope, .svg, .png,",
+  "replace": ".design: [.png, .designLayers, .assetEnvelope, .svg,",
+  "tests": "SuitePasteboardCodingTests"
+ },
+ {
+  "label": ".photoTakesPixels: Photo takes an SVG before a PNG",
+  "file": "Sources/SuiteModel/Pasteboard/SuitePasteboardCoding.swift",
+  "find": ".photo: [.assetEnvelope, .png,",
+  "replace": ".photo: [.assetEnvelope, .svg, .png,",
+  "tests": "SuitePasteboardCodingTests"
+ },
+ {
+  "label": ".textRefused: Photo takes plain text, so text alone leaves Paste on",
+  "file": "Sources/SuiteModel/Pasteboard/SuitePasteboardCoding.swift",
+  "find": ".heic, .svg, .fileURL],",
+  "replace": ".heic, .svg, .plainText, .fileURL],",
+  "tests": "SuitePasteboardCodingTests"
+ }
+]

@@ -1,14 +1,11 @@
 // LibraryJourneyTests+CollectionsFile.swift: J16, collections survive a
-// relaunch (filters-collections; slice FC-e). Written before its code
-// (FC-13): FC-14 sets `waitsOn` to nil once FC-15's store has merged. Steps
-// 1-3 fake (`shoot`), step 4 live on `LibraryFiles.writeShoot`'s JPEGs.
+// relaunch (filters-collections; slice FC-e). Written by FC-13, enabled by
+// FC-14 (the codec) on FC-15's store. Steps 1-3 fake (`shoot`), step 4 live
+// on `LibraryFiles.writeShoot`'s JPEGs.
 import XCTest
 
 final class LibraryCollectionsFileJourneyTests: XCTestCase {
-    private static let waitsOn: String? = "waits on FC-14"
-
     @MainActor func testCollectionsSurviveRelaunch() throws {
-        if let reason = Self.waitsOn { throw XCTSkip(reason) }
         // Step 1 (F): Keepers of IMG_0001-IMG_0003, rejects hidden.
         let catalog = try LibraryFiles.freshCatalogDir()
         let folder = try LibraryFiles.freshPhotoFolder()

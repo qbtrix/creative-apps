@@ -12,12 +12,5 @@
     "find": "[\"jpg\", \"jpeg\", \"png\", \"heic\", \"heif\"]",
     "replace": "[\"jpg\", \"jpeg\", \"png\"]",
     "tests": "LibraryFileFlowTests.swift"
-  },
-  {
-    "label": "a drop is accepted before LF-3",
-    "file": "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
-    "find": "    public mutating func perform(_ actions: [DropAction]) throws {\n        throw LibraryError.invalid(Self.fileFlowUnavailable)\n",
-    "replace": "    public mutating func perform(_ actions: [DropAction]) throws {\n",
-    "tests": "LibraryFileFlowTests.swift"
   }
 ]

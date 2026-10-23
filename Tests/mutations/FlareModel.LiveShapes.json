@@ -23,8 +23,8 @@
   {
     "label": "the position keys are their own undo step",
     "file": "Sources/FlareModel/Live/LiveShapes.swift",
-    "find": "        }\n        return layer.id\n    }\n\n    /// The pen path",
-    "replace": "        }\n        for property in Self.positionKeys { try engine.perform(SetKeyframe(owner: owner, layerID: layer.id, property: property, keyframe: Keyframe(frame: 0, value: 0))) }\n        return layer.id\n    }\n\n    /// The pen path",
+    "find": "        }\n        return layer.id\n    }\n\n    private static func end",
+    "replace": "        }\n        for property in Self.positionKeys { try engine.perform(SetKeyframe(owner: owner, layerID: layer.id, property: property, keyframe: Keyframe(frame: 0, value: 0))) }\n        return layer.id\n    }\n\n    private static func end",
     "tests": "LiveShapesPositionKeyTests.swift"
   },
   {

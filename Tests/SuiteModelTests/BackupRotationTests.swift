@@ -1,7 +1,7 @@
 // BackupRotationTests.swift (catalog-backup BK-1 written, BK-3 on): rolling backups of one file over the suite
 // store, in a temp folder, on a test clock. 30 saves over 3 hours make 3 backups; a forced backup within the hour
 // is kept; 20 days of backups prune to the newest 10 plus the newest of each of the last 7 days, never the
-// newest; a restore backs up the current file first. Disabled until BK-3 gives the rotation its bodies.
+// newest; a restore backs up the current file first; an unforced backup within the hour copies nothing.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -24,7 +24,7 @@ import Testing
         try store.writeData("catalog.json", Data(text.utf8))
     }
 
-    @Test(.disabled("waits on BK-3")) func thirtySavesOverThreeHoursMakeThree() throws {
+    @Test func thirtySavesOverThreeHoursMakeThree() throws {
         let (rotation, store) = Self.make()
         for i in 0..<30 {
             let now = Self.at(minutes: i * 6)
@@ -34,7 +34,7 @@ import Testing
         #expect(rotation.list().map(\.date) == [Self.at(minutes: 120), Self.at(minutes: 60), Self.at(minutes: 0)])
     }
 
-    @Test(.disabled("waits on BK-3")) func forcedWithinTheHourIsKept() throws {
+    @Test func forcedWithinTheHourIsKept() throws {
         let (rotation, store) = Self.make()
         try Self.save(store, "one")
         try rotation.backUp(now: Self.at(minutes: 0), force: false)
@@ -46,7 +46,7 @@ import Testing
         #expect(quit?.bytes == 3)
     }
 
-    @Test(.disabled("waits on BK-3")) func twentyDaysPruneToTenPlusSevenDaily() throws {
+    @Test func twentyDaysPruneToTenPlusSevenDaily() throws {
         let (rotation, store) = Self.make()
         let day = 24 * 60
         // Two backups a day, at 09:00 and 18:00 from the start, for 20 days.
@@ -67,7 +67,7 @@ import Testing
         #expect(kept.first == Self.at(minutes: 19 * day + 18 * 60))
     }
 
-    @Test(.disabled("waits on BK-3")) func pruneNeverDropsTheNewest() throws {
+    @Test func pruneNeverDropsTheNewest() throws {
         let (rotation, store) = Self.make()
         try Self.save(store, "old")
         try rotation.backUp(now: Self.at(minutes: 0), force: true)
@@ -75,7 +75,7 @@ import Testing
         #expect(rotation.list().map(\.date) == [Self.at(minutes: 0)])
     }
 
-    @Test(.disabled("waits on BK-3")) func restoreBacksUpTheCurrentFileFirst() throws {
+    @Test func restoreBacksUpTheCurrentFileFirst() throws {
         let (rotation, store) = Self.make()
         try Self.save(store, "yesterday")
         let old = try #require(try rotation.backUp(now: Self.at(minutes: 0), force: true))
@@ -88,7 +88,7 @@ import Testing
         #expect(rotation.list().count == 2)
     }
 
-    @Test(.disabled("waits on BK-3")) func restoreOfAnUnknownNameChangesNothing() throws {
+    @Test func restoreOfAnUnknownNameChangesNothing() throws {
         let (rotation, store) = Self.make()
         try Self.save(store, "today")
         #expect(throws: SuiteError.self) { try rotation.restore("nope", now: Self.at(minutes: 0)) }
@@ -96,13 +96,19 @@ import Testing
         #expect(rotation.list().isEmpty)
     }
 
-    /// On now, BK-3 deletes it: the stubs never copy, never crash and refuse a restore with the reason.
-    @Test func stubsCopyNothing() throws {
+    @Test func unforcedWithinTheHourCopiesNothing() throws {
         let (rotation, store) = Self.make()
         try Self.save(store, "one")
+        try rotation.backUp(now: Self.at(minutes: 0), force: false)
+        try Self.save(store, "two")
+        #expect(try rotation.backUp(now: Self.at(minutes: 59), force: false) == nil)
+        #expect(try rotation.backUp(now: Self.at(minutes: 60), force: false)?.date == Self.at(minutes: 60))
+        #expect(rotation.list().count == 2)
+    }
+
+    @Test func noFileYetCopiesNothing() throws {
+        let (rotation, _) = Self.make()
         #expect(try rotation.backUp(now: Self.at(minutes: 0), force: true) == nil)
         #expect(rotation.list().isEmpty)
-        #expect(!rotation.shouldBackUp(now: Self.at(minutes: 0)))
-        #expect(throws: SuiteError.notAvailable(BackupRotation.unavailable)) { try rotation.restore("x", now: Self.at(minutes: 0)) }
     }
 }

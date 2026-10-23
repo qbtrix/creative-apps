@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "app": "design",
+  "inputs": ["seed.design"],
+  "steps": [
+    {"id": "page.rename", "params": {"name": "Card 1"}},
+    {"id": "page.add", "params": {}},
+    {"id": "page.rename", "params": {"name": "Card 2"}},
+    {"id": "page.add", "params": {}},
+    {"id": "page.rename", "params": {"name": "Card 3"}},
+    {"id": "page.select", "params": {"page": "page-1"}}
+  ],
+  "atomic": true,
+  "why": "Three card pages, each holding its frame. Headless Design has no shape or text command yet (#4092), so no card has a shape or title."
+}

@@ -163,6 +163,7 @@ extension FlareIntent.Timeline {
         case .insertFrames: "Insert Frame"
         case .removeFrames: "Remove Frame"
         case .setLabel: "Add Label"
+        case .selectAllKeys: "Select All Keys"
         }
     }
 }
@@ -193,6 +194,8 @@ extension FlareIntent.Export {
             case .svgFrame: "SVG frame"
             case .lottie: "Lottie"
             case .pngSequence: "PNG sequence"
+            case .mp4: "MP4"
+            case .gif: "GIF"
             }
         case .setFrames: "Frames"
         case .setStep: "Step"

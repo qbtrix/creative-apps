@@ -8,6 +8,7 @@
 // identity until PV-8 keeps its sheet and draft (`exportDraft`) inside it.
 import AppKit
 import PhotoModel
+import SuiteKernel
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -25,7 +26,10 @@ extension PhotoWindow {
     }
 
     func exportChosen() {
-        guard model.startExport(ExportOptions(format: exportFormat, quality: exportQuality)) else { return }
+        // The sheet's command with its choices; it starts the one write only while the sheet is open.
+        let params: [String: JSONValue] = ["format": .string(exportFormat.rawValue), "quality": .number(exportQuality)]
+        guard !model.isExportRunning, run("file.export", params, failing: "The image can't be exported."),
+              model.isExportRunning else { return }
         let name = model.fileName(for: exportFormat)
         if let folder = UserDefaults.standard.string(forKey: "PhotoExportTo") {
             write(to: URL(fileURLWithPath: folder).appending(path: name), as: exportFormat, quality: exportQuality, saving: false)
