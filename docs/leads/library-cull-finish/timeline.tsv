@@ -49,3 +49,4 @@
 2026-10-23T19:19:17Z	heartbeat	dev 0d4645bf; #4838 #4899 #4948 #4960 open on the lane; scoped: library run 40009734956 queued at 0d4645bf (contains none of our open PRs); TC-2 not on dev; LX-4 builder running
 2026-10-23T19:31:06Z	heartbeat	dev 8419a4a6 (#3581 MD-10 merged, not ours); #4838 #4899 #4948 #4960 #4962 open clean on the lane; TC-2 not on dev; no ci.yml run contains our PRs
 2026-10-23T19:56Z	fix	DR-u fix round 2 of 2: command-path spec fix (photo.delete-rejects control spec), #4838 head ad5deded; local gate test step segfaults on dev bccdc0f2 too, so no Fast-Check; the lane Linux run is the proof
+2026-10-23T20:09Z	split	#4838 needs-split (453 lines): render budget + journey moved to branch feat/cull-finish-dr-u-tests (PR after #4838 lands); #4838 head 84be0634, 310 lines/7 files, needs-split removed

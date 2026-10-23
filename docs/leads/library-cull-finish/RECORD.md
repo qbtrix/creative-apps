@@ -2,7 +2,7 @@
 
 Issue: #3458 · Packet: docs/blueprints/library/features/cull-finish.md
 Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 · earlier run act-1a15995d319-aamb
-Stage: build, wave 3; #4844 (DR-6) merged on dev 0d4645bf at 2026-10-23T18:38:28Z; #4838 (head 110671fc) and #4899 (now 9 files/223 lines vs dev) on the lane. Checked 2026-10-23T19:56Z
+Stage: build, wave 3; #4844 (DR-6) merged on dev 0d4645bf at 2026-10-23T18:38:28Z; #4838 (head 110671fc) and #4899 (now 9 files/223 lines vs dev) on the lane. Checked 2026-10-23T20:09Z
 Base: origin/dev 35a0b5e7
 Next: lane merges #4838, #4844, #4899 (#4899 fits 400/15 once #4844 lands); then a scoped run app=library for Belt-Slice-Done DR-u (+Mac-Finish-Wanted) and DR-m; then DR-z (DR-9 journey, DR-10 docs incl. the ⌥⌘⌫ packet wording and excludedPaths wiring gap)
 
@@ -57,3 +57,5 @@ Next: lane merges #4838, #4844, #4899 (#4899 fits 400/15 once #4844 lands); then
 - 2026-10-23T18:38:55Z: #4844 merged by the supervisor (merge commit 0d4645bf). #4899's diff against dev is now 9 files, 223 lines, within the lane's caps; its base is already dev.
 
 - 2026-10-23T19:56Z DR-u fix round 2 of 2: #4838 head ad5deded builds Delete Rejected and Move to Trash from `deleteRejectsControlSpec` (command-path audit). Local `scripts/ci --changed` tests segfault in this container on plain dev too; no Fast-Check, the lane's Linux run is the proof.
+
+- 2026-10-23T20:09Z #4838 split for the 400-line cap: head 84be0634 (310 lines). Pending follow-up PR from `feat/cull-finish-dr-u-tests` (RenderBudgetLibraryDeleteRejectsTests + LibraryJourneyTests+CullFinish) once #4838 is on dev.
