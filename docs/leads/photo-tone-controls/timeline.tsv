@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-23T17:18Z	1 build W1	check-in	PT-1 #4845	open, mergeable clean; dev unmoved at 35a0b5e7e since 16:13Z (no lane merges ~65 min); TC-2/TC-5 building
 2026-10-23T17:40Z	1 build W1	check-in	PT-1 #4845	open, mergeable clean; lane moving again (dev 8a54f64c9); TC-2/TC-5/TC-7 PRs open, TC-3/TC-4/TC-6 building
 2026-10-23T18:01Z	1 build W1	check-in	PT-1 #4845	open, mergeable clean; dev 985896623; TC-2 #4862, TC-5 #4880, TC-7 #4870 open (not merged); PT-2/PT-3 wait on their merge
+2026-10-23T18:21Z	1 build W1	check-in	PT-1 #4845	open, clean, in lane with TC-2 #4862, TC-5 #4880, TC-7 #4870 (all open, clean); dev 985896623
