@@ -1,0 +1,30 @@
+[
+  {
+    "label": "shadowGoesDown: dy sign flipped",
+    "file": "Sources/SuiteImaging/Style/LayerStyleSVG.swift",
+    "find": "dy=\"\\#(n(s.distance * sin(radians)))\"",
+    "replace": "dy=\"\\#(n(-s.distance * sin(radians)))\"",
+    "tests": "LayerStyleSVGTests"
+  },
+  {
+    "label": "disabledWritesNothing: a disabled effect written",
+    "file": "Sources/SuiteImaging/Style/LayerStyleSVG.swift",
+    "find": "let effects = StyleRules.paintOrder.compactMap(style.effect).filter(\\.isEnabled)",
+    "replace": "let effects = StyleRules.paintOrder.compactMap(style.effect)",
+    "tests": "LayerStyleSVGTests"
+  },
+  {
+    "label": "substitutionWarns: no warning for a mode past SVG 1.1",
+    "file": "Sources/SuiteImaging/Style/LayerStyleSVG.swift",
+    "find": "if !LayerStyleSVG.svg11.contains(mode) {",
+    "replace": "if false && !LayerStyleSVG.svg11.contains(mode) {",
+    "tests": "LayerStyleSVGTests"
+  },
+  {
+    "label": "regionGrowsByReach: region not grown",
+    "file": "Sources/SuiteImaging/Style/LayerStyleSVG.swift",
+    "find": "let pad = Double(StyleRules.reach(style)), n = number",
+    "replace": "let pad = 0.0, n = number",
+    "tests": "LayerStyleSVGTests"
+  }
+]
