@@ -92,3 +92,4 @@ utc	stage	event	ref	note
 2026-10-23T17:25Z	5	wait	-	#4843/#4852/#4854 open, clean, no needs-fix; dev unchanged since 35a0b5e7 (15:53Z), lane still batching; scoped flare run 39987518778 queued
 2026-10-23T17:47Z	5	wait	-	dev at 8a54f64c (3 PRs merged 17:35Z); batch 20261023174522 holds 12 older PRs (#4818..#4850), #4843 waits for the next; #4843/#4852/#4854 clean, no needs-fix
 2026-10-23T18:09Z	5	wait	-	lane bisecting batch 20261023174522 (probe -6); #4843 waits for the next batch; #4843/#4852/#4854 clean, no needs-fix
+2026-10-23T18:30Z	5	wait	-	lane still bisecting batch 20261023174522 (probes -3, -6); dev at 98589662; #4843/#4852/#4854 clean, no needs-fix
