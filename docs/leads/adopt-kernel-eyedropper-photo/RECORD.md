@@ -55,3 +55,4 @@ Next: EP-2 builder on lead/adopt-kernel-eyedropper-photo-EP-m (off dev); then EP
 - 2026-10-23T20:42:27Z: heartbeat: #4837 EP-m still queued in lane, no checks/status on 5d5b637; #4943 EP-z waits on EP-m
 - 2026-10-23T21:04:34Z: heartbeat: #4837 EP-m still queued, no checks on 5d5b637; dev idle 70 min (lane quiet); #4943 waits on EP-m
 - 2026-10-23T21:26:16Z: heartbeat: #4837 EP-m no checks on 5d5b637; dev idle since 19:45Z; #4943 waits on EP-m
+- 2026-10-23T21:50:28Z: dev batch at 21:40Z merged 12 PRs (#4841-#4862) and skipped #4837 (EP-m). The cause is the lane's open_list --limit 100: 144 PRs are open and #4837 was past the cutoff. Raised with the supervisor on #4837. #4840 (ST-a) is still waiting on the Mac re-gate. #4950/#4951 are drafts, #4943 waits on EP-m.
