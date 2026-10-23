@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-22T12:44Z	poll	stopped (DS-u done); no action.
 2026-10-22T12:43:28Z	check	still stopped per supervisor; timeline-keys TK-u critics filed #4416-#4420
 2026-10-23T15:25:45Z	resume	run act-1a16958d72f-a4mg resumed at stage 3 on dev 721168a8; wave 1 planned
+2026-10-23T15:27:34Z	wave	wave 1 launched: DS-photo, DS-design, DS-halo, DS-flare (wf_074719dc-c43)

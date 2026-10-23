@@ -4,7 +4,7 @@ Issue: #3757 (relaunch) · Packet: docs/blueprints/suiteui/features/document-set
 Run: act-1a16958d72f-a4mg · Session: cloud line lead (line:suiteui; with text-style, brush-keys, document-setup) · Started: 2026-10-23T15:25Z
 Stage: 3 wave 1 (combined waves across the three features)
 Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (dev)
-Next: wave 1 builds DS-photo, DS-design, DS-halo, DS-flare; then DS-z
+Next: wave 1 building DS-photo, DS-design, DS-halo, DS-flare (wf_074719dc-c43); on return: check PRs, then stack wave 2
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
