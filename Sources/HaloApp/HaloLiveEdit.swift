@@ -34,7 +34,7 @@ import SwiftUI
     @ObservationIgnored var playhead = HaloLivePlayhead()
     /// The deferred take-back of a ruler drag that has rested.
     @ObservationIgnored private var settling: Task<Void, Never>?
-    /// The window's `haloRefreshLink`, which HaloWindow sets once it appears;
+    /// The window's `haloRefreshLink`, which HaloWindow's RefreshLinkHandoff sets once it appears;
     /// an inspector scrub paces its writes on it. A row reading the closure
     /// from the environment would re-run whenever the window does, since
     /// SwiftUI can't compare closures.
