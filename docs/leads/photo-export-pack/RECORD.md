@@ -4,7 +4,7 @@ Issue: #3470 · Packet: docs/blueprints/photo/features/export-pack.md
 Run: act-1a15e2da54d-qlg1 (resumed; earlier act-1a15a9f4eba-h30y) · Session: claude/feature-lead-playbook-t69dpt · Started: 2026-10-20T18:40Z
 Stage: 3 building (unparked 2026-10-23T15:11Z under contract-first waits)
 Base: e382f9d7fba02ffdefc8ba2f23c9461b4774fad6
-Next: #4832 (PX-2) and #4836 (PX-6) land; PX-5 waits XP-4; PX-4 still on the supervisor's codec hold; PX-8 waits PT-a to merge
+Next: #4832 (PX-2) and #4836 (PX-6) land; PX-5 waits XP-4; PX-4 still on the supervisor's codec hold; PX-8 waits PX-7, PX-5, tone-controls PT-z and place-image PP-z (PT-a merged #4845)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

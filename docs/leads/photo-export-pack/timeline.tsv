@@ -172,3 +172,4 @@ utc	stage	event	ref	note
 2026-10-23T20:08Z	check-in	no supervisor notes; #4832 #4836 clean, still queued; no export findings; dev only regenerated docs; XP-3/XP-4/PT-a not on dev
 2026-10-23T20:40Z	check-in	no supervisor notes; #4832 #4836 clean, Head markers match, no checks on heads, waiting for a code batch; no export findings; no dev merges since 20:05; waits unchanged
 2026-10-23T21:12Z	check-in	no supervisor notes; #4832 #4836 clean, still queued; no export findings; no dev merges since 20:37; waits unchanged
+2026-10-23T21:44Z	check-in	no supervisor notes; lane landed a 12-PR batch at 21:42 incl. tone-controls PT-a #4845; #4832 #4836 still queued, no labels; no export findings; XP-3/XP-4 not on dev
