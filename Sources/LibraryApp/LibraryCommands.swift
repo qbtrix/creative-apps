@@ -8,7 +8,7 @@
 // Paste Settings ⇧⌘V, Reset Develop, Crop, Reset Crop. Metadata: Set Rating,
 // Set Flag, Set Label (6-9 name Red, Yellow, Green and Blue; Purple has no
 // key), Auto Advance (its help says it moves the loupe to the next photo after
-// a rating or a flag). Photo: Delete Rejected Photos… ⌘⌫ (cull-finish), fed by
+// a rating or a flag). Photo: Delete Rejected Photos… ⌥⌘⌫ (cull-finish), fed by
 // the trash area's LibraryMenu.Trash: the Model's title, disabled with its help. An item whose action is nil is disabled,
 // never hidden, and its help says why. Single keys (R, G, and 0-5, P, X and U
 // once the cull area routes them) act only while the grid or loupe has focus,
@@ -108,12 +108,12 @@ struct LibraryCommands: Commands {
         }
     }
 
-    /// Photo > Delete Rejected Photos… ⌘⌫: the Model's title, disabled with its help (no window says so).
+    /// Photo > Delete Rejected Photos… ⌥⌘⌫: the Model's title, disabled with its help (no window says so).
     static func deleteRejectsItem(_ trash: LibraryMenu.Trash?) -> MenuCommand {
         let trash = trash ?? LibraryMenu.Trash(help: noWindow)
         return MenuCommand(
             title: trash.title, systemImage: "trash", action: trash.help == nil ? trash.deleteRejects : nil,
-            reason: trash.help ?? noWindow, shortcut: KeyboardShortcut(.delete))
+            reason: trash.help ?? noWindow, shortcut: KeyboardShortcut(.delete, modifiers: [.command, .option]))
     }
 
     var body: some Commands {

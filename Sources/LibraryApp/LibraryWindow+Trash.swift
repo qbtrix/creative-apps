@@ -1,4 +1,4 @@
-// LibraryWindow+Trash.swift: the trash area (cull-finish DR-3). Photo > Delete Rejected Photos… ⌘⌫ asks
+// LibraryWindow+Trash.swift: the trash area (cull-finish DR-3). Photo > Delete Rejected Photos… ⌥⌘⌫ asks
 // once with the Model's `deleteRejectsMessage`: Move to Trash (destructive) calls `deleteRejects()`;
 // Cancel is the default, so Return cancels. The presented flag is this modifier's @State, so asking
 // re-renders no window body.
