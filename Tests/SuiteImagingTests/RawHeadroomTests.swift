@@ -69,7 +69,7 @@ import Testing
         }
     }
 
-    @Test(.disabled("waits on SR-3")) func theInfoIsTheFakesDNGRow() throws {
+    @Test func theInfoIsTheFakesDNGRow() throws {
         let info = try SuiteRaw.info(Self.dng, decoder: FakeRawDecoder())
         #expect(info.format == RawFormat(fileName: "x.dng"))
         #expect(info.camera == TinyDNG.camera && info.developable)
@@ -77,14 +77,14 @@ import Testing
         #expect(info.baselineStops == 1)
     }
 
-    @Test(.disabled("waits on SR-3")) func theDecodeCarriesTheBaseline() throws {
+    @Test func theDecodeCarriesTheBaseline() throws {
         let buffer = try SuiteRaw.decode(Self.dng, quality: .full, decoder: FakeRawDecoder())
         #expect(buffer.width == 64 && buffer.height == 48)
         let got = try Self.patches(buffer)
         for (g, want) in zip(got, TinyDNG.highlights.map { $0 * 2 }) { #expect(abs(Double(g) - want) < 1e-3, "\(got)") }
     }
 
-    @Test(.disabled("waits on SR-3")) func exposureMinusOneSeparatesThePatches() throws {
+    @Test func exposureMinusOneSeparatesThePatches() throws {
         let decoded = try SuiteRaw.decode(Self.dng, quality: .full, decoder: FakeRawDecoder())
         let pulled = try Self.exposureMinusOne(decoded)
         let got = try Self.patches(pulled)
@@ -94,7 +94,7 @@ import Testing
     }
 
     /// The trap: an 8-bit step before the slider leaves both patches at white.
-    @Test(.disabled("waits on SR-3")) func eightBitsFirstFlattensThem() throws {
+    @Test func eightBitsFirstFlattensThem() throws {
         let decoded = try SuiteRaw.decode(Self.dng, quality: .full, decoder: FakeRawDecoder())
         let byte = try ImagingColor.toOutput(decoded, profile: .sRGB, bitDepth: .eight)
         let clipped = try PixelBuffer(rgba8: byte.samples.map { UInt8(clamping: $0) }, width: byte.width, height: byte.height)
@@ -103,14 +103,14 @@ import Testing
     }
 
     /// The preview comes back as decoded: the marker, no baseline, never enlarged.
-    @Test(.disabled("waits on SR-3")) func thePreviewIsTheMarkerWithoutBaseline() throws {
+    @Test func thePreviewIsTheMarkerWithoutBaseline() throws {
         let preview = try SuiteRaw.decode(Self.dng, quality: .thumbnail(longestSide: 16), decoder: FakeRawDecoder())
         #expect(preview.width == 16 && preview.height == 12)
         let p = try preview.pixel(x: 0, y: 0)
         #expect(p.r == 1 && p.g == 0 && p.b == 1 && p.a == 1)
     }
 
-    @Test(.disabled("waits on SR-3")) func theFakesRefusals() throws {
+    @Test func theFakesRefusals() throws {
         let nef = try #require(RawFormat(fileName: "y.NEF"))
         #expect(throws: RawRefusal.unreadable(nef)) {
             try SuiteRaw.decode(.bytes(TinyDNG.notRaw, fileName: "y.NEF"), quality: .full, decoder: FakeRawDecoder())
