@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-23T15:37Z	3 wave 1	blocked	CB-photo	SC-photo unbuilt (shared-codecs planned); file wait on PhotoPasteboard.swift; CB-library waits ST-a (commented #3753)
 2026-10-23T15:59Z	3 wave 1	heartbeat	-	wave-1 builders gating
 2026-10-23T16:20Z	3 wave 1	heartbeat	-	wave-1 builders gating (6 concurrent swift builds)
+2026-10-23T16:49Z	3 wave 1	heartbeat	-	wave-1 builders gating; LS-1 on post-rebase gate
