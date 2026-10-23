@@ -4,7 +4,7 @@ Issue: #3730 (earlier run used duplicate #4507) · Packet: docs/blueprints/suite
 Run: act-1a166b69fbd-mmos · Session: claude/font-picker-lead-5om1cy · Started: 2026-10-22T16:36Z (this run resumed 2026-10-23T03:10Z)
 Stage: 3 wave 2
 Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a (origin/dev)
-Next: #4704 waits on its queued macOS build 39894260475 (supervisor told 04:3x); then FP-z PR (feature-done) from /home/user/fpz after merging dev; Belt-Slice-Done for FP-a on a green scoped suiteui or full run holding #4644
+Next: #4704 macOS build 39894260475 running (since 04:54); then FP-z PR (feature-done) from /home/user/fpz after merging dev; Belt-Slice-Done FP-a when scoped suiteui 39900719671 (349fc24e) passes
 
 ## Slices
 
