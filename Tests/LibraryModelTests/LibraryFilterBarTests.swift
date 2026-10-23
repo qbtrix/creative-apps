@@ -1,5 +1,5 @@
 // LibraryFilterBarTests.swift: the filter bar's behavior (filters-collections
-// FC-7), written by FC-6 and disabled until FC-7 builds it, on the `shoot`
+// FC-7), written by FC-6 and enabled by FC-7, on the `shoot`
 // fixture in name order with J13 step 1's culls (IMG_0001 5★, IMG_0002 3★,
 // IMG_0003 Picked, IMG_0004 Rejected, IMG_0005 3★, IMG_0006 Picked).
 import Testing
@@ -26,7 +26,7 @@ import Testing
 
     private func ids(_ numbers: [Int]) -> [String] { numbers.map(id) }
 
-    @Test(.disabled("waits on FC-7")) func eachToggleChangesTheOrderAsJ13Says() {
+    @Test func eachToggleChangesTheOrderAsJ13Says() {
         var catalog = culled()
         #expect(catalog.filterValue == "All photos; 24 of 24")
 
@@ -58,7 +58,7 @@ import Testing
         #expect(catalog.filterValue == "Rejects hidden; 23 of 24")
     }
 
-    @Test(.disabled("waits on FC-7")) func rejectedAndHideRejectedExcludeEachOther() {
+    @Test func rejectedAndHideRejectedExcludeEachOther() {
         var catalog = culled()
         catalog.toggleHideRejected()
         catalog.toggleFilterFlag(.reject)
@@ -74,7 +74,7 @@ import Testing
         #expect(catalog.activeFilter.rating == .any)
     }
 
-    @Test(.disabled("waits on FC-7")) func aFilterKeepsWhatItStillShows() {
+    @Test func aFilterKeepsWhatItStillShows() {
         var catalog = culled()
         catalog.select([id(1), id(4), id(7)])
         catalog.setRatingRule(.atLeast(3))
@@ -91,7 +91,7 @@ import Testing
         #expect(catalog.mode == .loupe && catalog.focusedItemID == id(1))
     }
 
-    @Test(.disabled("waits on FC-7")) func unflaggingUnderPickedAdvancesThenReturnsToTheGrid() {
+    @Test func unflaggingUnderPickedAdvancesThenReturnsToTheGrid() {
         var services = LibraryServices.fake()
         services.culling = LiveCulling()
         var catalog = culled(services)
@@ -112,7 +112,7 @@ import Testing
         #expect(catalog.order == ids([3, 6]) && !catalog.isHiddenByFilter)
     }
 
-    @Test(.disabled("waits on FC-7")) func aFilterChangeRecordsNoUndoStepAndBumpsTheRevision() {
+    @Test func aFilterChangeRecordsNoUndoStepAndBumpsTheRevision() {
         var catalog = culled()
         let title = catalog.undoTitle
         var revision = catalog.collectionsRevision
@@ -131,7 +131,7 @@ import Testing
         #expect(catalog.items.first { $0.id == id(6) }?.flag == PhotoFlag.none)
     }
 
-    @Test(.disabled("waits on FC-7")) func eachControlSaysWhyUntilItCanAct() {
+    @Test func eachControlSaysWhyUntilItCanAct() {
         var empty = LibraryCatalog()
         let help = "Import or load photos to filter them."
         #expect(empty.filterHelp == help && empty.clearFilterHelp == help)

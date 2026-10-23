@@ -25,11 +25,11 @@ import Testing
         return catalog
     }
 
-    @Test(.disabled("waits on FC-12")) func smartSelected() throws {
+    @Test func smartSelected() throws {
         try snapshots(smart(), name: "library-smart-selected")
     }
 
-    @Test(.disabled("waits on FC-12")) func smartEmpty() throws {
+    @Test func smartEmpty() throws {
         var catalog = smart()
         var none = LibraryFilter.all
         none.rating = .exactly(1)

@@ -1,0 +1,5 @@
+[
+{"label":"A resize pointer ignores the box's turn","file":"Sources/SuiteUI/HandlePointer.swift","find":"let index = ((start + steps) % ring.count + ring.count) % ring.count","replace":"let index = start","tests":"HandlePointerTests.swift"},
+{"label":"A turn moves the resize pointer the wrong way round","file":"Sources/SuiteUI/HandlePointer.swift","find":"let index = ((start + steps) % ring.count + ring.count) % ring.count","replace":"let index = ((start - steps) % ring.count + ring.count) % ring.count","tests":"HandlePointerTests.swift"},
+{"label":"A turn rounds down to the 45 below","file":"Sources/SuiteUI/HandlePointer.swift","find":"let steps = Int((turn / 45).rounded())","replace":"let steps = Int((turn / 45).rounded(.towardZero))","tests":"HandlePointerTests.swift"}
+]

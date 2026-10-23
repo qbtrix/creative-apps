@@ -203,6 +203,17 @@ import Testing
         #expect(!none.isSelected("header"))
     }
 
+    /// Picked rows side by side join into one band: a row squares the edge it
+    /// shares with a picked neighbour, and a lone picked row keeps every corner.
+    @Test func adjacentPicksJoin() {
+        let joins = LayerTreeList.selectionJoins(["a", "b", "c", "d", "e"], selected: ["a", "b", "c", "e"].contains)
+        #expect(joins["a"] == LayerRowJoin(above: false, below: true))
+        #expect(joins["b"] == LayerRowJoin(above: true, below: true))
+        #expect(joins["c"] == LayerRowJoin(above: true, below: false))
+        #expect(joins["d"] == nil && joins["e"] == nil)
+        #expect(LayerTreeList.selectionJoins(["a", "b"], selected: { $0 == "b" }).isEmpty)
+    }
+
     /// A flat leaf row of `tree200`, named Sky.
     private func flatRow() -> LayerRow {
         var row = KernelFixtures.tree200.rows(expanded: [])[0]

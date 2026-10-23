@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "app": "fake",
+  "why": "RJ-X34: draws a 5-point star at inner ratio 0.5 on an empty canvas, draws a second star, undoes once and checks the saved rects: the first star keeps its spec and the undo took the second away in one step. The packet's polygon with 2 sides can't sit in this job, since a refused step stops a batch; FakeShapeTests.realJobX34 runs it on this input and checks it refuses and adds nothing.",
+  "inputs": ["input/*.fake"],
+  "steps": [
+    {"id": "shape.draw", "params": {"kind": "star", "points": 5, "innerRatio": 0.5, "x": 0, "y": 0, "w": 100, "h": 100}},
+    {"id": "shape.draw", "params": {"kind": "star", "points": 7, "innerRatio": 0.3, "x": 120, "y": 0, "w": 60, "h": 60}},
+    {"id": "edit.undo", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-star", "format": "json", "options": {}},
+  "expect": {
+    "out/empty-star.json": {"json": [
+      {"h": 100, "id": 1, "locked": false, "name": "Star 1",
+       "shape": {"cornerRadius": 0, "end": {"x": 1, "y": 1}, "head": 12, "innerRatio": 0.5, "kind": "star", "points": 5, "sides": 5,
+                 "start": {"x": 0, "y": 0}},
+       "w": 100, "x": 0, "y": 0}
+    ]}
+  },
+  "platforms": ["linux", "macos"]
+}

@@ -2,7 +2,7 @@
   "title": "Editable gradient fills: the shared editor in FILL, every edit a fill command",
   "wave": 6,
   "order": 10,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "flare/gradient-fill (adopter of S24); #2315; RJ-F31",

@@ -11,7 +11,8 @@ final class DesignStrokeJourneyTests: XCTestCase {
     static let arguments = ["-DesignFixture", "cards", "-SuiteWindowSize", "1024x768"]
     /// Desktop's row (collapsed when the file opens) and A's inside it (DesignFixtures.cards).
     static let desktopRow = "design.layer.node-1", rowA = "design.layer.node-2"
-    static let addStroke = "design.inspector.stroke-add"
+    /// The editor's own Add Stroke, the section's only one (#3864).
+    static let addStroke = "suite.stroke.add"
 
     /// The packet's dashed border: add, width, cap, dash, three undos, then an old file's strokes.
     @MainActor func testDashedBorder() throws {
@@ -29,6 +30,9 @@ final class DesignStrokeJourneyTests: XCTestCase {
             XCTFail("the stroke editor shows no suite.stroke.\(row)")
         }
         XCTAssertFalse(design.element("suite.stroke.trim-start").exists, "Design's stroke editor shows trim rows")
+        for twin in ["design.inspector.stroke-width", "design.inspector.stroke-remove"] {
+            XCTAssertFalse(design.element(twin).exists, "\(twin) beside the editor's own row (#3864)")
+        }
         design.shot("stroke-added")
 
         let width = design.element("suite.stroke.width") // 2. Width 2, Round cap, Dashed: one step each.

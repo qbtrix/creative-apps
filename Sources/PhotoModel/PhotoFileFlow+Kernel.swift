@@ -19,6 +19,8 @@ import SuiteModel
 public enum PhotoFileRequest: Hashable, Sendable {
     /// Open the file in a window; hand it to another app; drop a missing file from the shared recents; empty them.
     case open(path: String), handOff(path: String, app: String), forget(fileID: String), clearRecent
+    /// Start a new white image of this size in an empty window or a new one (the home's New Photo, #3648).
+    case newImage(width: Int, height: Int)
 }
 
 /// The file flow's state on the workspace: the window's view of the shared recents and the open file's path.
@@ -141,6 +143,21 @@ extension PhotoWorkspace: FileFlowTarget {
         }
     }
 
+    /// The open image as the suite names it, for File > Open In ▸: nil with no image, before it has a path on disk,
+    /// or for a type the suite doesn't know.
+    public var suiteDocument: SuiteDocumentRef? {
+        guard canvas != nil, let path = fileFlow.documentPath else { return nil }
+        return Self.suiteRef(path, registry: fileFlow.registry)
+    }
+
+    /// Photo's suite ref for the file at `path`; nil for a type the suite doesn't know.
+    static func suiteRef(_ path: String, registry: SuiteTypeRegistry) -> SuiteDocumentRef? {
+        let name = path.split(separator: "/").last.map(String.init) ?? path
+        guard let type = registry.type(forExtension: fileExtension(name)) else { return nil }
+        return SuiteDocumentRef(path: path, fileID: SuiteDocumentRef.fileID(forPath: path), app: .photo,
+                                type: type.id, displayName: name)
+    }
+
     /// What the file-flow commands left for the window, oldest first; empties the list.
     public mutating func takeFileRequests() -> [PhotoFileRequest] {
         defer { fileFlow.requests = [] }
@@ -158,12 +175,7 @@ extension PhotoWorkspace: FileFlowTarget {
     public static func takeOldRecents(_ stored: inout [String]?, registry: SuiteTypeRegistry = .standard) -> [SuiteDocumentRef] {
         let paths = stored ?? []
         stored = nil
-        return paths.reversed().compactMap { path in
-            let name = path.split(separator: "/").last.map(String.init) ?? path
-            guard let type = registry.type(forExtension: fileExtension(name)) else { return nil }
-            return SuiteDocumentRef(path: path, fileID: SuiteDocumentRef.fileID(forPath: path), app: .photo,
-                                    type: type.id, displayName: name)
-        }
+        return paths.reversed().compactMap { suiteRef($0, registry: registry) }
     }
 
     /// A file name's extension, lowercased; "" for none.

@@ -1,0 +1,51 @@
+[
+  {
+    "label": "droppedEndRun: a change to the selection keeps the edit run, so one scrub spans two selections",
+    "file": "Sources/FlareModel/FlareSelectionAdapter.swift",
+    "find": "        if changed { endCoalescing() }\n",
+    "replace": "        _ = changed\n",
+    "tests": "FlareKernelSelectionAdapterTests"
+  },
+  {
+    "label": "refusalIsSuccess: a click the kernel reports as no change is adopted as a change and ends the run",
+    "file": "Sources/FlareModel/FlareSelectionAdapter.swift",
+    "find": "            changed = next.pick(hit, .replace)\n",
+    "replace": "            changed = next.pick(hit, .replace) || true\n",
+    "tests": "FlareKernelSelectionAdapterTests"
+  },
+  {
+    "label": "endsRunAlways: setting the same selection ends the edit run",
+    "file": "Sources/FlareModel/FlareSelectionAdapter.swift",
+    "find": "adopt(next, changed: next.ordered != picks.ordered)",
+    "replace": "adopt(next, changed: true)",
+    "tests": "FlareKernelSelectionAdapterTests"
+  },
+  {
+    "label": "layerToggleByItem: Shift-click under Select drops only the hit item, not its layer",
+    "file": "Sources/FlareModel/FlareSelectionAdapter.swift",
+    "find": "        } else if tool == .select, picks.ordered.contains(where: { $0.layerID == hit.layerID }) {\n",
+    "replace": "        } else if tool == .select, picks.ordered.contains(hit) {\n",
+    "tests": "FlareKernelSelectionAdapterTests|WorkspaceWiringTests"
+  },
+  {
+    "label": "marqueeNeverExtends: a Shift-marquee replaces the selection",
+    "file": "Sources/FlareModel/FlareSelectionAdapter.swift",
+    "find": "Marquee.union(selection, found, extending: extending)",
+    "replace": "Marquee.union(selection, found, extending: false)",
+    "tests": "FlareKernelSelectionAdapterTests"
+  },
+  {
+    "label": "marqueeAlwaysExtends: a plain marquee joins the selection",
+    "file": "Sources/FlareModel/FlareSelectionAdapter.swift",
+    "find": "Marquee.union(selection, found, extending: extending)",
+    "replace": "Marquee.union(selection, found, extending: true)",
+    "tests": "FlareKernelSelectionAdapterTests"
+  },
+  {
+    "label": "panelIgnoresPrimary: the layers panel keeps its layer when the selection changes",
+    "file": "Sources/FlareModel/FlareSelectionAdapter.swift",
+    "find": "        selectedLayerID = next.primary?.layerID\n",
+    "replace": "",
+    "tests": "FlareKernelSelectionAdapterTests"
+  }
+]

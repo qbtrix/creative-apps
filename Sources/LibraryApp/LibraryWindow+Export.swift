@@ -66,7 +66,8 @@ extension LibraryWindow {
         let help: String? = model.services.unavailable["exporter"] ?? options?.naming.help
         return LibraryExportSheet(
             state: model.exportState, count: model.exportTargets.count, preview: model.exportPreview,
-            writable: JPEGWriter.writableFormats(), exportHelp: help, presets: areas.export.presets, actions: actions)
+            writable: JPEGWriter.writableFormats(), exportHelp: help, presets: areas.export.presets, actions: actions,
+            catalog: model)
     }
 
     /// The sheet in the launch folder, the last one, or Pictures; the stored

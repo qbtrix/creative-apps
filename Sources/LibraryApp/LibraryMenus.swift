@@ -63,6 +63,7 @@ struct LibraryMenu {
         var actualSize: Action?
         var setSort: (@MainActor (LibrarySort) -> Void)?
         var sort: LibrarySort = .captureDate
+        var setCellSize: (@MainActor (Int) -> Void)?  // the grid toolbar's Size bar
         var first: Action?
         var last: Action?
         var zoomInTitle: String = "Zoom In"
@@ -114,6 +115,7 @@ struct LibraryMenu {
     var view = Viewing()
     var photo = Photo()
     var export = Export()
+    var share = Share()
     /// The services' reasons by member ("importer", "loupe", ...): `LibraryCatalog.help(for:)`.
     var reasons: [String: String] = [:]
 

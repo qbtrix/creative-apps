@@ -1,8 +1,9 @@
-// DesignTransformTests.swift (transform DT-1 written, DT-5 turns on): MJ-DT, the Model walk of a node's
+// DesignTransformTests.swift (transform DT-1 written, DT-5 turned on): MJ-DT, the Model walk of a node's
 // turn and mirrors. A node keeps `rotation` (clockwise degrees about its frame's centre) and `flipX` /
 // `flipY` beside its unturned `frame`, so an old file without the keys opens upright and a file with
-// upright nodes is written as before. The schema tests run now; the transform commands' walk is disabled
-// by name until DT-5 builds the bodies of DesignTransform+Kernel. Runs on Linux and macOS.
+// upright nodes is written as before. The transform commands' walk runs on DesignTransform+Kernel's
+// bodies (DT-5): a turn keeps the centre, several turn about the union in one step, and the hit test
+// follows the turned outline. Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -67,7 +68,7 @@ private func sample() throws -> DesignWorkspace {
     @Test func helpSaysWhyItCantTransform() throws {
         var workspace = try sample()
         #expect(workspace.transformSelection == workspace.treeNode("node-2")?.transformBox)
-        #expect(workspace.turnHelp == "Turning and mirroring a layer isn't built yet.")
+        #expect(workspace.turnHelp == nil)
         try workspace.setNodeLocked("node-2", true)
         #expect(workspace.turnHelp == workspace.lockHelp("node-2"))
         workspace.deselect()
@@ -75,18 +76,23 @@ private func sample() throws -> DesignWorkspace {
         #expect(workspace.turnHelp == "Select a layer first.")
     }
 
-    /// Object > Flip and Rotate 90° are off with the rows' reason until the catalog has the specs (DT-6).
+    /// Object > Flip and Rotate 90° are on over a layer (the catalog has the specs, DT-6) and off with
+    /// the rows' reason with nothing selected.
     @Test func objectItemsSayWhyTheyAreOff() throws {
-        let workspace = try sample()
+        var workspace = try sample()
+        for id in ["transform.flip", "transform.rotate"] {
+            #expect(DesignMenuState.spec(id).availability(DesignMenuState(workspace: workspace, hasWindow: true)) == .available)
+        }
+        workspace.deselect()
         let state = DesignMenuState(workspace: workspace, hasWindow: true)
         for id in ["transform.flip", "transform.rotate"] {
-            #expect(DesignMenuState.spec(id).availability(state) == .unavailable(workspace.turnHelp ?? ""))
+            #expect(DesignMenuState.spec(id).availability(state) == .unavailable("Select a layer first."))
         }
         #expect(DesignMenuState.spec("object.nothing").availability(state) == .unavailable("Design has no object.nothing command."))
         #expect(DesignControlID.all.contains(DesignControlID.inspectorFlip("horizontal")))
     }
 
-    @Test(.disabled("waits on DT-5"))
+    @Test
     func turnKeepsCentre() throws {
         var workspace = try sample()
         workspace.runTransform(.rotate(by: 90, drag: nil))
@@ -98,7 +104,7 @@ private func sample() throws -> DesignWorkspace {
         #expect(abs((bounds.minY + bounds.maxY) / 2 - 150) < 1e-9)
     }
 
-    @Test(.disabled("waits on DT-5"))
+    @Test
     func flipKeepsFrame() throws {
         var workspace = try sample()
         workspace.runTransform(.flip(.horizontal))
@@ -107,7 +113,7 @@ private func sample() throws -> DesignWorkspace {
         #expect(node.frame == rc(100, 100, 200, 100))
     }
 
-    @Test(.disabled("waits on DT-5"))
+    @Test
     func severalTurnAboutUnionInOneStep() throws {
         var workspace = try sample()
         try workspace.addNode(.rectangle, frame: rc(400, 100, 100, 100), in: "node-1")
@@ -120,7 +126,7 @@ private func sample() throws -> DesignWorkspace {
         #expect(workspace.treeNode("node-2")?.rotation == 0 && workspace.treeNode("node-3")?.rotation == 0)
     }
 
-    @Test(.disabled("waits on DT-5"))
+    @Test
     func lockedRefuses() throws {
         var workspace = try sample()
         try workspace.setNodeLocked("node-2", true)
@@ -128,7 +134,7 @@ private func sample() throws -> DesignWorkspace {
         #expect(workspace.treeNode("node-2")?.rotation == 0)
     }
 
-    @Test(.disabled("waits on DT-5"))
+    @Test
     func cornerGapMisses() throws {
         var workspace = try sample()
         workspace.runTransform(.rotate(by: 45, drag: nil))
@@ -137,7 +143,7 @@ private func sample() throws -> DesignWorkspace {
         #expect(workspace.hitTest(DesignPoint(x: 200, y: 150)) == "node-2")
     }
 
-    @Test(.disabled("waits on DT-5"))
+    @Test
     func oneStepPerGesture() throws {
         var workspace = try sample()
         for _ in 0..<60 { workspace.runTransform(.rotate(by: 0.25, drag: "knob")) }

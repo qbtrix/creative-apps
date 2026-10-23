@@ -2,8 +2,9 @@
 // With the Eyedropper active the canvas's own pointer handler (DesignCanvasFeedback.onPointer, the call its
 // continuous hover makes) moves the loupe to the pointer, at the canvas's zoom; with any other tool there is no
 // loupe. A click sends exactly one pick to the window, onto the fill; an Option-click exactly one, onto the
-// stroke. The hover store is a fresh one bound around each test, so the app's shared one is never touched.
-// macOS only.
+// stroke; with Stroke chosen in the inspector the two swap. The loupe reads the Model's sample size, and the
+// options (DesignSampleOptions) sit in the inspector, inside the window and clear of the artboard. The hover
+// store is a fresh one bound around each test, so the app's shared one is never touched. macOS only.
 #if canImport(AppKit)
 import AppKit
 import DesignModel
@@ -58,12 +59,21 @@ import Testing
         #expect(Self.picks(model, at: CGPoint(x: 150, y: 140), zoom: 1, []).isEmpty, "a Move click picked a colour")
     }
 
-    @Test func theSizeChipsSetTheSampleSize() {
-        let model = Self.eyedropper()
+    /// #3989: the size is the Model's, so the loupe the store shows reads the square the inspector chose.
+    @Test func theLoupeFollowsTheModelsSampleSize() {
+        var model = Self.eyedropper()
         let store = DesignCanvasHover()
-        #expect(store.sampleSize == .point)
-        store.setSampleSize(.fiveByFive, on: model)
-        #expect(store.sampleSize == .fiveByFive)
+        store.record(DesignPoint(x: 150, y: 140), modifiers: [], on: model)
+        model.setSampleSize(.fiveByFive)
+        #expect(store.loupe(for: model) == model.loupe(at: DesignPoint(x: 150, y: 140), modifiers: []))
+    }
+
+    /// #3993: with Stroke chosen in the inspector a plain click picks the stroke, and Option the fill.
+    @Test func theStrokeOptionTurnsAPlainClickOntoTheStroke() {
+        var model = Self.eyedropper()
+        model.setSampleTarget(toStroke: true)
+        #expect(Self.picks(model, at: CGPoint(x: 150, y: 140), zoom: 1, []).map(\.toStroke) == [true])
+        #expect(Self.picks(model, at: CGPoint(x: 150, y: 140), zoom: 1, .option).map(\.toStroke) == [false])
     }
 
     @Test func aClickSendsOneFillPick() {
@@ -78,6 +88,31 @@ import Testing
         #expect(picks.count == 1, "an Option-click sent \(picks.count) picks")
         #expect(picks.first?.point == DesignPoint(x: 150, y: 140))
         #expect(picks.first?.toStroke == true)
+    }
+}
+
+extension BodyCountSuites {
+    /// #3985, #3986: the Eyedropper's options sit in the inspector, inside the window and clear of the artboard,
+    /// each control big enough to click and the two apart. The real window counts its bodies in statics, so this
+    /// runs with the other body-count suites, one at a time.
+    @MainActor @Suite struct DesignEyedropperOptionsLayoutTests {
+        @Test(.timeLimit(.minutes(1))) func theOptionsSitInTheInspector() async throws {
+            let window = CGRect(x: 0, y: 0, width: 1440, height: 900)
+            let w = RenderBudgetWindow(DesignWindow(seed: DesignEyedropperOverlayTests.eyedropper()), size: window.size)
+            defer { w.close() }
+            try await w.settle(500)
+            let board = try #require(await w.element("suite.canvas.artboard"), "no artboard")
+            let inspector = try #require(await w.element("design.properties"), "no inspector")
+            let chip = try #require(await w.element("suite.sample.size.1"), "no size chip")
+            let target = try #require(await w.element("design.sample.target"), "no Fill/Stroke picker")
+            for (name, frame) in [("size chip", chip), ("Fill/Stroke picker", target)] {
+                #expect(window.contains(frame), "the \(name) \(frame) leaves the window")
+                #expect(inspector.insetBy(dx: -1, dy: -1).contains(frame), "the \(name) \(frame) is outside the inspector")
+                #expect(!frame.intersects(board), "the \(name) \(frame) covers the artboard \(board)")
+                #expect(frame.height >= 20 && frame.width >= 24, "the \(name) \(frame) is too small to click")
+            }
+            #expect(!chip.intersects(target), "the size chips overlap the Fill/Stroke picker")
+        }
     }
 }
 #endif

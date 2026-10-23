@@ -1,7 +1,7 @@
 // LibraryJourneyTests+Smart.swift: J15, a smart collection from the filter
 // (docs/blueprints/library/features/filters-collections.md), on `shoot`'s
-// fakes. Written before its code (contract rule 13, FC-11): each step starts
-// with `try pending()`, skipping with "waits on FC-12"; FC-12 drops the calls.
+// fakes. Written before its code (contract rule 13, FC-11) and enabled by
+// FC-12 once smart collections were built.
 import XCTest
 
 final class LibrarySmartJourneyTests: XCTestCase {
@@ -31,9 +31,6 @@ final class LibrarySmartJourneyTests: XCTestCase {
         }
     }
 
-    /// The task that enables the steps; FC-12 removes every call.
-    private func pending() throws { throw XCTSkip("waits on FC-12") }
-
     /// The journey launched in step 1, or a skip when it never launched.
     @MainActor private func launched() throws -> Journey {
         guard let library else { throw XCTSkip("step 1 didn't launch") }
@@ -42,7 +39,6 @@ final class LibrarySmartJourneyTests: XCTestCase {
 
     /// Step 1: by name, IMG_0001 in the loupe, 5, 4 and 2 down the shoot, Escape.
     @MainActor private func rateThree() throws {
-        try pending()
         let library = Journey("Library", self, arguments: Self.fake)
         self.library = library
         sortByName(library)
@@ -57,7 +53,6 @@ final class LibrarySmartJourneyTests: XCTestCase {
 
     /// Step 2: Rating > At Least 4 Stars, then File > New Smart Collection from Filter.
     @MainActor private func newSmartCollection() throws {
-        try pending()
         let library = try launched()
         chooseRating("At Least 4 Stars", library)
         library.press(character: "n", [.command, .option])
@@ -74,7 +69,6 @@ final class LibrarySmartJourneyTests: XCTestCase {
 
     /// Step 3: All Photos, Clear Filter, IMG_0003 at 5 stars: the smart row counts 3.
     @MainActor private func ratingChangesTheCount() throws {
-        try pending()
         let library = try launched()
         sidebarRow("All Photos", library).click()
         viewMenu("Filter", "Clear Filter", library)
@@ -87,7 +81,6 @@ final class LibrarySmartJourneyTests: XCTestCase {
 
     /// Step 4: the smart row, Rating > Exactly 5 Stars: IMG_0001 and IMG_0003, one Edit Rules step.
     @MainActor private func editRules() throws {
-        try pending()
         let library = try launched()
         sidebarRow(Self.smartName, library).click()
         XCTAssert(cell("IMG_0002", library).waitForExistence(timeout: 10), "the smart collection doesn't show IMG_0002")
@@ -100,7 +93,6 @@ final class LibrarySmartJourneyTests: XCTestCase {
 
     /// Step 5: Undo: the rules go back and three cells show again.
     @MainActor private func undoEdit() throws {
-        try pending()
         let library = try launched()
         library.press(character: "z", .command)
         XCTAssert(cell("IMG_0002", library).waitForExistence(timeout: 10), "Undo didn't bring IMG_0002 back")
@@ -109,7 +101,6 @@ final class LibrarySmartJourneyTests: XCTestCase {
 
     /// Step 6: Rating > Exactly 1 Star: the smart empty state with Show All Photos.
     @MainActor private func emptyRules() throws {
-        try pending()
         let library = try launched()
         chooseRating("Exactly 1 Star", library)
         let message = "Photos that match this collection's rules appear here. Change the rules in the filter bar."

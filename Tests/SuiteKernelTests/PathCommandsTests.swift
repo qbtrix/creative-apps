@@ -1,4 +1,6 @@
-// PathCommandsTests.swift (pen-paths PN-1 written, PN-7 turns on; the spec shape check runs now): the twelve commands.
+// PathCommandsTests.swift (pen-paths PN-1 written, PN-7 turns on): the twelve commands on a test target with a kernel
+// `History`. Each edit run records one step named its title, a drag is one step, every why-not reads, `path.draw`
+// round-trips `path.read`. Mutations: Tests/mutations/SuiteKernel.PathCommands.json.
 import Testing
 import SuiteKernel
 /// One path in edit, its history folding steps by drag token (`FillDoc`'s pattern).
@@ -18,6 +20,10 @@ struct PathDoc: PathEditTarget {
         "path.handle-move": (.edit, "Move Handle"), "path.anchor-insert": (.edit, "Add Point"), "path.anchor-remove": (.edit, "Delete Points"),
         "path.anchor-convert": (.edit, "Convert Points")]
     static func run(_ intent: PathIntent, _ doc: inout PathDoc) throws -> CommandOutcome? { try catalog?.run(intent.command.id, params: intent.command.params, on: &doc) }
+    static func why(_ id: String, _ doc: PathDoc) -> String? { catalog?.availability(id, on: doc).why }
+    static func pen(_ points: [(Double, Double)], _ doc: inout PathDoc) throws {
+        for p in points { _ = try run(.penAdd(Point(x: p.0, y: p.1), handleOut: nil), &doc) }
+    }
     @Test func specsAreTheTwelveWithTheirTitles() throws {
         let catalog = try #require(Self.catalog)
         #expect(catalog.ids == Self.titles.keys.sorted())
@@ -26,35 +32,94 @@ struct PathDoc: PathEditTarget {
             #expect(spec.kind == kind && spec.params.validate(spec.example).isEmpty && (title == nil || spec.title == title), "\(id)")
         }
     }
-    @Test(.disabled("waits on PN-7")) func oneStepPerRun() throws {
+    @Test func oneStepPerRun() throws {
         var doc = PathDoc.editing
-        #expect(try Self.run(.move(dx: 5, dy: 0, drag: nil), &doc)?.undoStep == "Move Points" && doc.history.undoSteps.count == 1)
-        #expect(try Self.run(.remove, &doc)?.undoStep == "Delete Points" && doc.history.undoSteps.count == 2)
+        let edits: [(PathIntent, String)] = [(.move(dx: 5, dy: 0, drag: nil), "Move Points"),
+                                             (.handle(AnchorEditTests.mid, .handleOut, to: Point(x: 130, y: 0), breaking: false, drag: nil), "Move Handle"),
+                                             (.convert(.corner), "Convert Points"), (.insert(Point(x: 150, y: 0)), "Add Point"), (.remove, "Delete Points")]
+        _ = try Self.run(.selectAll, &doc)
+        #expect(doc.anchorSelection.set.count == 3 && doc.history.undoSteps.isEmpty)
+        for (count, (intent, title)) in edits.enumerated() {
+            #expect(try Self.run(intent, &doc)?.undoStep == title && doc.history.undoSteps.count == count + 1, "\(intent)")
+        }
+        try Self.pen([(0, 0), (50, 0), (50, 50)], &doc)
+        #expect(doc.history.undoSteps.count == 5 && doc.penDraft?.contour.anchors.count == 3)
+        #expect(try Self.run(.close, &doc)?.undoStep == "Add Path" && doc.history.undoSteps.count == 6 && doc.penDraft == nil)
+        try Self.pen([(0, 0), (50, 0)], &doc)
+        #expect(try Self.run(.finish, &doc)?.undoStep == "Add Path" && doc.history.undoSteps.count == 7 && doc.penDraft == nil)
+        try Self.pen([(0, 0)], &doc)
+        _ = try Self.run(.cancel, &doc)
+        #expect(doc.penDraft == nil && doc.history.undoSteps.count == 7)
     }
-    @Test(.disabled("waits on PN-7")) func dragIsOneStep() throws {
+    @Test func dragIsOneStep() throws {
         var doc = PathDoc.editing
         for i in 0..<120 { _ = try Self.run(.handle(AnchorEditTests.mid, .handleOut, to: Point(x: 120, y: Double(i)), breaking: false, drag: "d1"), &doc) }
         #expect(doc.history.undoSteps.map(\.name) == ["Move Handle"])
+        #expect(doc.history.undoSteps.first?.payload == PathDoc.editing.pathInEdit)
+        _ = try Self.run(.selectAll, &doc)
+        for _ in 0..<10 { _ = try Self.run(.move(dx: 1, dy: 0, drag: "d2"), &doc) }
+        #expect(doc.history.undoSteps.map(\.name) == ["Move Handle", "Move Points"])
+        #expect(doc.pathInEdit?.path.contours.first?.anchors.first?.point == Point(x: 10, y: 0))
     }
-    @Test(.disabled("waits on PN-7")) func closeNeedsThree() throws {
+    @Test func closeNeedsThree() throws {
         var doc = PathDoc(penDraft: PenRulesTests.draft([(0, 0), (50, 0)]))
-        #expect(Self.catalog?.availability("path.close", on: doc) != .available)
+        #expect(Self.why("path.close", doc) == "Click a third point to close the path.")
+        doc.penDraft = PenRulesTests.draft([(0, 0), (50, 0), (0, 0)])
+        #expect(Self.why("path.close", doc) == "Click a third point to close the path.")
         doc.penDraft = PenRulesTests.draft([(0, 0), (50, 0), (50, 50)])
         #expect(Self.catalog?.availability("path.close", on: doc) == .available)
+        _ = try Self.run(.close, &doc)
+        let contour = doc.pathInEdit?.path.contours.first
+        #expect(contour?.closed == true && contour?.anchors.count == 3 && doc.penDraft == nil)
     }
-    @Test(.disabled("waits on PN-7")) func insertUnavailableOffThePath() throws {
+    @Test func insertUnavailableOffThePath() throws {
         var doc = PathDoc.editing
         #expect(throws: CatalogError.self) { try Self.run(.insert(Point(x: 100, y: 90)), &doc) }
         #expect(doc.history.undoSteps.isEmpty)
+        _ = try Self.run(.insert(Point(x: 150, y: 2)), &doc)
+        #expect(doc.pathInEdit?.path.contours.first?.anchors.count == 4 && doc.anchorSelection.ordered == [AnchorRef(contour: 0, index: 2)])
     }
-    @Test(.disabled("waits on PN-7")) func drawRoundTripsRead() throws {
+    @Test func everyWhyNot() throws {
+        let empty = PathDoc()
+        #expect(Self.why("path.read", empty) == "Select a path or start one with the Pen.")
+        #expect(Self.why("path.anchor-select", empty) == "Select a path to edit its points." && Self.why("path.anchor-move", empty) == "Select a path to edit its points.")
+        #expect(Self.why("path.close", empty) == "Click with the Pen to start a path." && Self.why("path.cancel", empty) == "Click with the Pen to start a path.")
+        #expect(Self.why("path.finish", PathDoc(penDraft: PenRulesTests.draft([(0, 0)]))) == "Click a second point to finish the path.")
+        #expect(Self.why("path.draw", PathDoc(pathHelp: "The layer is locked.")) == "The layer is locked.")
+        var none = PathDoc.editing
+        none.anchorSelection = Selection()
+        for id in ["path.anchor-move", "path.anchor-remove", "path.anchor-convert"] { #expect(Self.why(id, none) == "Select a point first.", "\(id)") }
+        var doc = PathDoc.editing
+        #expect(throws: CatalogError.self) { try Self.run(.handle(AnchorRef(contour: 0, index: 0), .handleOut, to: Point(x: 9, y: 9), breaking: false, drag: nil), &doc) }
+        #expect(throws: CatalogError.self) { try Self.run(.handle(AnchorRef(contour: 0, index: 7), .handleOut, to: Point(x: 9, y: 9), breaking: true, drag: nil), &doc) }
+        #expect(doc.history.undoSteps.isEmpty)
+        _ = try Self.run(.handle(AnchorRef(contour: 0, index: 0), .handleOut, to: Point(x: 9, y: 9), breaking: true, drag: nil), &doc)
+        #expect(doc.history.undoSteps.count == 1)
+    }
+    @Test func drawRefusesFewerThanTwo() throws {
+        var doc = PathDoc()
+        let one: JSONValue = .object(["contours": .array([.object(["closed": .bool(false), "anchors": .array([.object(["x": .number(0), "y": .number(0), "kind": .string("corner")])])])])])
+        #expect(throws: CatalogError.self) { try Self.catalog?.run("path.draw", params: one, on: &doc) }
+        #expect(doc.pathInEdit == nil && doc.history.undoSteps.isEmpty)
+    }
+    @Test func selectByRefRectAndAll() throws {
+        var doc = PathDoc.editing
+        _ = try Self.run(.select(anchors: nil, rect: Rect(minX: 150, minY: -10, maxX: 250, maxY: 10), extend: false), &doc)
+        #expect(doc.anchorSelection.ordered == [AnchorRef(contour: 0, index: 2)])
+        _ = try Self.run(.select(anchors: [AnchorRef(contour: 0, index: 0), AnchorRef(contour: 3, index: 0)], rect: nil, extend: true), &doc)
+        #expect(doc.anchorSelection.set == [AnchorRef(contour: 0, index: 2), AnchorRef(contour: 0, index: 0)])
+        _ = try Self.run(.selectAll, &doc)
+        #expect(doc.anchorSelection.set.count == 3 && doc.history.undoSteps.isEmpty)
+    }
+    @Test func drawRoundTripsRead() throws {
         var (source, doc) = (PathDoc.editing, PathDoc())
         guard case .object(let fields)? = try Self.catalog?.run("path.read", params: .object([:]), on: &source).result, let contours = fields["contours"]
         else { Issue.record("no contours"); return }
+        #expect(fields["selected"] == .array([.array([.number(0), .number(1)])]))
         _ = try Self.catalog?.run("path.draw", params: .object(["contours": contours]), on: &doc)
-        #expect(doc.pathInEdit?.path == AnchorEditTests.path())
+        #expect(doc.pathInEdit?.path == AnchorEditTests.path() && doc.history.undoSteps.map(\.name) == ["Add Path"])
     }
-    @Test(.disabled("waits on PN-7")) func intentCommandRoundTrips() throws {
+    @Test func intentCommandRoundTrips() throws {
         let intents: [PathIntent] = [.penAdd(Point(x: 1, y: 2), handleOut: nil), .close, .finish, .cancel, .selectAll, .move(dx: 1, dy: 2, drag: "d"),
                                      .select(anchors: [AnchorEditTests.mid], rect: Rect(minX: 0, minY: 0, maxX: 5, maxY: 5), extend: true),
                                      .handle(AnchorEditTests.mid, .handleIn, to: Point(x: 0, y: 0), breaking: true, drag: nil),

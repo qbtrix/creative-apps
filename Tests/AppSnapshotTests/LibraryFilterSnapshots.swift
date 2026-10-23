@@ -10,7 +10,7 @@ import Testing
 
 @MainActor
 @Suite struct LibraryFilterSnapshots {
-    @Test(.disabled("waits on FC-7")) func filterStates() throws {
+    @Test func filterStates() throws {
         var catalog = LibraryCatalog()
         catalog.load(LibraryFixtures.photos(named: "shoot"))
         catalog.setSort(.name)
