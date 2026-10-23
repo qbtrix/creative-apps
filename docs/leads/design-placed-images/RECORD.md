@@ -62,3 +62,9 @@ Next: supervisor merges #3759; PD-u and PD-m slice PRs stacked on design/pd-a-pl
 - New findings: #4992 (major: ⌥-drag pans with several layers selected or another layer on top), #4993 (a drop on a rotated frame tests the unrotated box) and #4994 (Place in Frame… is enabled on a locked frame).
 - Fix round 2, PD-u's last: one new PR stacked on #4964, because #4963 and #4964 are at their size caps.
 - Gaps filed: #4996 (the ⌥-drag pan pointer and hint), #4997 (the kernel's place wording) and #4998 (the hand-drawn drop ring). #4970 and #4972 continue in needs-ui #4985.
+
+## 2026-10-23T21:40Z PD-u fix round 2
+
+- #5001 is at 3ecf2a5e: 7 files, 113 lines, stacked on #4964. It fixes #4992, #4993 and #4994. CI: PASS. Mutations: DesignPlace+Canvas 14/14, DesignPlace+Inspector 11/11.
+- The PR body and the builder's three issue comments had the attribution footer. I rewrote them via MCP without it.
+- PD-u has used both of its fix rounds. Its leftovers are gaps #4996-#4998, and its SuiteUI parts are in #4985.
