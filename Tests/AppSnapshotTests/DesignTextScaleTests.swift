@@ -51,7 +51,9 @@ import Testing
         for zoom in zooms {
             #expect(DesignTextOverlay.fontSize(for: node, zoom: zoom) == node.textStyle.size * zoom, "zoom \(zoom)")
             let editor = DesignTextFont.nsFont(node.textStyle, scale: DesignWorkspace.textEditScale(zoom: zoom))
-            #expect(editor.pointSize == node.textStyle.size * zoom, "zoom \(zoom)")
+            // Compared as Double: inside #expect a CGFloat == Double pair fails even when the two
+            // hold the same bits (32.0 == 32.0 recorded false); the explicit conversion is exact.
+            #expect(Double(editor.pointSize) == node.textStyle.size * zoom, "zoom \(zoom)")
             #expect(editor.fontName == committed.fontName, "zoom \(zoom)")
         }
     }
