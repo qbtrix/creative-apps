@@ -8,7 +8,7 @@
   },
   {
     "label": ".opensUntitled: the workspace opens the JSON under its own name, so Save would write over it",
-    "file": "Sources/FlareModel/FlareFiles.swift",
+    "file": "Sources/FlareModel/FlareLottieOpen.swift",
     "find": "            restoreRecovery(document)\n            return skipped\n",
     "replace": "            finishOpen(.success(document), named: name)\n            return skipped\n",
     "tests": "FlareLottieOpenTests"
