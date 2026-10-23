@@ -38,5 +38,6 @@ Next: wave 1 builders open the contract slice PR(s)
 - PR bodies carry no attribution footer; any footer the tooling adds is removed with update_pull_request after the PR opens.
 - One combined wave plan across #3776, #3774 and #3773 (same session); builders are worktree subagents, at most 4 at once.
 - EM-a is one PR (EM-1 + EM-2, about 290 lines, 6 files). Photo and Design keep their own delegates (PhotoAppDelegate, FlareAppDelegate): the adopt checks whether they subclass SuiteAppDelegate before replacing the adaptor.
+- Delegates checked: Halo uses `SuiteAppDelegate` directly; Photo's `PhotoAppDelegate` subclasses it (inherits reopen); Flare's `FlareAppDelegate` is a plain `NSObject` delegate, so EM-flare makes it subclass `SuiteAppDelegate` (override `applicationDidFinishLaunching`, call super) or the reopen rule never runs in Flare. Library uses `.suiteApp` without a custom delegate; Design to be read at EM-photo-design.
 
 ## Open
