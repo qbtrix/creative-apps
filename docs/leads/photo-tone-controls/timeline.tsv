@@ -66,3 +66,4 @@ utc	stage	event	ref	note
 2026-10-23T20:10Z	W1	check-in	PT-1 #4845	still in lane; dev 61c481df9; TC-2 #4862, TC-5 #4880, TC-6 #4953 open; PT-2..PT-4 still waiting
 2026-10-23T20:31Z	W1	check-in	PT-1 #4845	still in lane; dev 61c481df9; TC-2 #4862, TC-5 #4880, TC-6 #4953 open; PT-2..PT-4 still waiting
 2026-10-23T20:54Z	W1	check-in	PT-1 #4845	still in lane; dev 61c481df9 (no merge since 19:45Z); TC-2 #4862, TC-5 #4880, TC-6 #4953 open; PT-2..PT-4 still waiting
+2026-10-23T21:15Z	W1	check-in	PT-1 #4845	still in lane; dev 61c481df9 (no merge since 19:45Z; lane running, no dev-red); TC-2 #4862, TC-5 #4880, TC-6 #4953 open; PT-2..PT-4 still waiting
