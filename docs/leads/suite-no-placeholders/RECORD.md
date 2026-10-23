@@ -10,7 +10,7 @@ Next: NP-flare #4735 merged dev in, gate rerun, retarget to dev; then scoped run
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | NP-a | ratchet test + launcher hides Check for Updates and Assets items | NP-1, NP-2 | MJ-NP, XJ-NP | report-problem:RP-a (met) | yes | 0 | merged #4717 | - | - |
-| NP-flare | Flare beta.2 items hidden, Library tab hidden, RJ-X64, built | NP-3, NP-4, NP-5, NP-6 | FJ-NP, XJ-NP, MJ-NP | NP-a; CS-flare (met); flare menu hand-offs | yes | 0 | opened #4735 (base lead/no-placeholders-NP-a; 15 files +187/-31; head fb77b276) | - | - |
+| NP-flare | Flare beta.2 items hidden, Library tab hidden, RJ-X64, built | NP-3, NP-4, NP-5, NP-6 | FJ-NP, XJ-NP, MJ-NP | NP-a; CS-flare (met); flare menu hand-offs | yes | 0 | open #4735 (base dev, head 978ebb15) | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
