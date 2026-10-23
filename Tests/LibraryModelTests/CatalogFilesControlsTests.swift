@@ -36,13 +36,18 @@ import Testing
         #expect(library.removeCount == 4)
     }
 
-    @Test func fileCommandsAreOffWithTheReason() {
-        let library = LibraryCatalog()
-        for id in ["photo.remove-from-catalog", "photo.relink"] {
+    /// LC-7: each control takes its own command's reason, and nothing is off for file management any more.
+    @Test func fileCommandsAreOffWithTheirOwnReason() {
+        var library = LibraryCatalog()
+        for (id, why) in [("photo.remove-from-catalog", LibraryCatalog.removeHelp), ("photo.relink", LibraryCatalog.relinkHelp)] {
             #expect(LibraryCatalog.fileSpec(id)?.id == id)
-            #expect(LibraryCatalog.fileCommands.availability(id, on: library).why == LibraryCatalog.catalogFilesHelp)
+            #expect(LibraryCatalog.fileCommands.availability(id, on: library).why == why)
         }
-        #expect(LibraryCatalog.catalogFilesHelp == "File management arrives with LC-5.")
+        library.load(LibraryFixtures.photos(named: "large-missing"))
+        library.select(Set(library.order.prefix(3)))
+        for id in ["photo.remove-from-catalog", "photo.relink"] {
+            #expect(LibraryCatalog.fileCommands.availability(id, on: library).why == nil)
+        }
     }
 
     @Test func importCopySummarySaysWhereThePhotosGo() {
