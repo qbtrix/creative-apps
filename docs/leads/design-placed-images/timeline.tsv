@@ -70,3 +70,4 @@ utc	stage	event	ref	note
 2026-10-23T19:51Z	PD-u	fix	#4963 #4964	heartbeat: PD-u fix round 1 building u1; #4959 fixer running; no needs-fix
 2026-10-23T20:14Z	PD-u	fix	#4963 #4964	heartbeat: PD-u fix round 1 gating u1, building u2; #4959 fixer running; no needs-fix
 2026-10-23T20:36Z	PD-m	fix-round-2	#4922	head 614b8785 fixes #4959 (frame refit under centre); CI: PASS; DesignPlace+Kernel 11/11; gaps #4990 (#4931) #4991 (#4932 rest); 2 rounds done
+2026-10-23T20:44Z	PD-u	fix-round-1	#4963 #4964	u1 6a4229b4 (7 files, 400 lines, Canvas 12/12); u2 caab1ba5 (15 files, 398 lines, Inspector 8/8); CI: PASS both; 11 findings fixed, 5 partial (SuiteUI parts in needs-ui #4985); round-2 critic started

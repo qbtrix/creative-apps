@@ -48,3 +48,10 @@ Next: supervisor merges #3759; PD-u and PD-m slice PRs stacked on design/pd-a-pl
 - PD-u round-1 fixer: its u2 gate is running.
 - DK-u fixer: #4925-#4928 and #4989 are in progress.
 - DK-z and PD-z are held: open findings are above 5.
+
+## 2026-10-23T20:44Z PD-u fix round 1
+
+- #4963 is at 6a4229b4: 7 files, 400 lines, DesignPlace+Canvas mutations 12/12. It fixes #4974 and #4976-#4979. #4971 is fixed in the Model part only.
+- #4964 is at caab1ba5: 15 files, 398 lines, DesignPlace+Inspector mutations 8/8. It fixes #4966-#4969, #4980 and #4981. #4970, #4972, #4973 and #4975 are partly fixed; their SuiteUI parts are filed as needs-ui #4985.
+- Both PR bodies now carry the new Head lines and Fixes lines, with no footer.
+- The PD-u round-2 critic has started.
