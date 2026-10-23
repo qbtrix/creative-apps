@@ -65,3 +65,5 @@ utc	stage	event	ref	note
 2026-10-23T19:32Z	PD-u	pr	#4964	PD-u part 2 opened (UI, 9 files +208/-4, base #4963), CI: PASS at 5be4d22c; conflicts with #4864 in DesignCanvasMarks.swift, second to land merges dev
 2026-10-23T19:32Z	PD-u	critic	#4963 #4964	critics started: correctness, first-use clarity
 2026-10-23T19:36Z	PD-u	critic	#4963 #4964	first-use clarity critic filed 10: #4966 #4968 #4971 #4972 (major), #4967 #4969 #4970 #4973 #4974 #4975 (minor); fix round 1 waits for the correctness critic
+2026-10-23T19:39Z	PD-u	critic	#4963 #4964	correctness critic filed 6: #4976 (AppSnapshotTests compile) #4977 #4978 #4979 #4980 #4981
+2026-10-23T19:39Z	PD-u	fix	#4963 #4964	fix round 1 started for 16 findings (#4966-#4981); PR bodies rewritten through the GitHub MCP tool, which posts no attribution footer
