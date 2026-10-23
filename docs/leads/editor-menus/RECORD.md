@@ -52,3 +52,4 @@ Next: #4738 and C4 #4737 in lane; #4739 retargets to dev after #4738 merges; the
 
 ## 2026-10-23T06:45:10Z
 - #4738 EM-flare-halo merged (06:40:59Z). #4739 merged dev (FlareApp.swift conflict from the parent squash, resolved to dev, which the slice does not touch); retarget to dev once the gate passes. #4761 follows.
+- 2026-10-23T06:51:45Z: #4739 on dev base, head b78892b7a, CI: PASS. #4761 merging the new head, gate running. Scoped runs for EM-flare-halo come from verify-dispatch (our dispatch is 403).
