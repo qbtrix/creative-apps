@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 2026-10-23T17:29:06Z	nudge	Belt nudge read; records for run act-1a16958d72f-a4mg mirrored here (Belt reads lead/suiteui-brush-keys)
 2026-10-23T17:43:33Z	pr	BK-u PR #4939 opened (fast-lane, 399 lines, CI: PASS)
 2026-10-23T17:43:33Z	wave	wave 2 launching: BK-photo, BK-design, BK-flare
+2026-10-23T17:47:46Z	wave	wave 2 launched (wf_86a3790e-94c): BK-photo, BK-design, BK-flare stacked on BK-u #4939
