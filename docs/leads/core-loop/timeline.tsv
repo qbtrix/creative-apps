@@ -209,3 +209,4 @@ utc	stage	event	ref	note
 2026-10-23T04:26Z	3	merge	#4703	transport ink on dev; panel waits for a halo run containing 5394474d and 8392f462
 2026-10-23T05:18Z	3	wait	journeys	no run with both fixes; 39901607429 at 5394474d has #4702
 2026-10-23T06:20Z	3	wait	journeys	39885862047 cancelled; panel target halo run 39906470758 at 349fc24e
+2026-10-23T07:19Z	3	wait	panel target queued	39906470758 queued; 39901607429 in progress
