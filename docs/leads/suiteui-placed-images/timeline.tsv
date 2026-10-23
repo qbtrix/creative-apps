@@ -152,3 +152,4 @@ utc	stage	event	ref	note
 22:44Z	stage	#4613 pushed f1cba0a
 23:40Z	pl9-wait	#4613 macOS build queued
 00:12Z	pl9-blocked	dev quarantine expired; asked supervisor
+00:48Z	pl9-merge	dev merged, gate running

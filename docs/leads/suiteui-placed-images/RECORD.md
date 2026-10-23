@@ -2,9 +2,9 @@
 
 Issue: #3457 · Packet: docs/blueprints/suiteui/features/placed-images.md
 Run: act-1a1647a67aa-dau5 (relaunch) · Started: 2026-10-22T16:45Z
-Stage: PL-9 #4613 macOS build green; lane Linux check red on expired journey quarantine (dev-wide)
+Stage: Quarantine renewed (#4660); merged dev into PL-9 (6bb70f89f), unioned place + SH-8 shape commands (46 ids), kernel+CLI tests 824 pass
 Base: 854a3b52c66aaa12582e9190f404265b84594a05
-Next: When dev renews UITests/quarantine.json: merge dev into PL-9, gate, push, Head; then PL-10 stack
+Next: Gate pl9-ci3.log; on PASS push and move #4613 Head
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -33,6 +33,7 @@ Next: When dev renews UITests/quarantine.json: merge dev into PL-9, gate, push, 
 |---|---|---|---|---|---|
 
 ## Decisions
+- Fake now carries both place and shape; describeAll cap 32 KB
 - Not fixing in PR (protected file); asked supervisor on #3457
 - Wait on lane macOS build
 - -
