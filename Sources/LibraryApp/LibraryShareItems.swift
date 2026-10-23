@@ -4,7 +4,7 @@
 // prepare through `LibraryCatalog.prepareShare` (`file.share-prepare`), the
 // copies landing in `Share/<run>` beside the catalog file; while
 // `shareHelp` says why Share can't run (nothing selected, an export running,
-// or the SH-1 stubs), both are off with that reason. The button is rebuilt
+// or no exporter), both are off with that reason. The button is rebuilt
 // for each selection, so files prepared for one are never offered for the next.
 import Foundation
 import LibraryModel
@@ -12,9 +12,11 @@ import SuiteUI
 import SwiftUI
 
 extension LibraryWindow {
-    /// File > Share…: off with `shareHelp` until SH-5 opens the system's share menu for the selection.
+    /// File > Share…: the system's share sheet for the selection's copies (LibraryWindow+Share.swift); off with
+    /// `shareHelp` while Share can't run.
     var shareMenu: LibraryMenu.Share {
-        LibraryMenu.Share(share: nil, help: model.shareHelp ?? LibraryMenu.Share.menuNotBuilt)
+        let help = model.shareHelp
+        return LibraryMenu.Share(share: enabled(help == nil) { shareFromMenu() }, help: help)
     }
 }
 

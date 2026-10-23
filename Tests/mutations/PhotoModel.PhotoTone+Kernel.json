@@ -1,0 +1,6 @@
+[
+  {"label": "layerToneFromImage: a selected adjustment layer reads the image's tone", "file": "Sources/PhotoModel/PhotoTone+Kernel.swift", "find": "case .layer(_, let settings): return settings.tone", "replace": "case .layer: return adjustments.tone", "tests": "PhotoToneTests"},
+  {"label": "noImageHasTone: the adapter reports a tone with no image open", "file": "Sources/PhotoModel/PhotoTone+Kernel.swift", "find": "        guard canvas != nil else { return nil }\n", "replace": "", "tests": "PhotoToneTests"},
+  {"label": "toneLeftOutOfIdentity: a set tone still reads as identity", "file": "Sources/PhotoModel/AdjustmentSettings.swift", "find": "tone.isNeutral(nil) && ", "replace": "", "tests": "PhotoToneTests"},
+  {"label": "neutralToneStored: the stored form keeps a neutral tone", "file": "Sources/PhotoModel/PhotoAdjust+Imaging.swift", "find": "if !tone.isNeutral(nil) { try c.encode(tone, forKey: .tone) }", "replace": "try c.encode(tone, forKey: .tone)", "tests": "PhotoToneTests"}
+]

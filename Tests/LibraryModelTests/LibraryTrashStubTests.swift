@@ -1,6 +1,6 @@
 // LibraryTrashStubTests.swift: cull-finish DR-1's contract. FakeTrash moves
 // and puts back in memory, the live stub refuses with its reason, and Delete
-// Rejects is off with a reason until DR-6. Runs on Linux and macOS.
+// Rejects names its targets, on since DR-6. Runs on Linux and macOS.
 @testable import LibraryModel
 import Testing
 
@@ -36,7 +36,7 @@ import Testing
     #expect(LibraryKey(character: "5") == .rating(5))
 }
 
-@Test func deleteRejectsIsOffWithAReasonUntilItsBody() {
+@Test func deleteRejectsNamesItsTargets() {
     var photos = LibraryFixtures.shoot()
     for index in [1, 4, 7] { photos[index].flag = .reject }
     var catalog = LibraryCatalog(services: .fake(photos))
@@ -44,9 +44,9 @@ import Testing
     #expect(catalog.deleteRejectsTargets.map(\.name) == ["IMG_0002", "IMG_0005", "IMG_0008"])
     #expect(catalog.deleteRejectsTitle == "Delete 3 Rejected Photos…")
     #expect(catalog.deleteRejectsMessage == "Move 3 rejected photos to the Trash?")
-    #expect(catalog.deleteRejectsHelp != nil)
+    #expect(catalog.deleteRejectsHelp == nil)
     catalog.deleteRejects()
-    #expect(catalog.items.count == 24)
+    #expect(catalog.items.count == 21)
 
     var none = LibraryCatalog(services: .fake())
     none.load(LibraryFixtures.shoot())
