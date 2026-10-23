@@ -1,17 +1,17 @@
 # report-problem lead record
 
 Issue: #3772 · Packet: docs/blueprints/suite/features/report-problem.md
-Run: act-1a16391fd34-thw9 · Resumed: 2026-10-22T12:30Z (previous run act-1a1601c3538-r0c9, started 2026-10-21T10:50Z)
-Stage: All slices done (run 39836789801); Belt-Slice-Done posted for RP-a, RP-u, RP-m
+Run: act-1a1659bd4ae-sr68 · Resumed: 2026-10-22T22:00Z (previous runs act-1a16391fd34-thw9, act-1a1601c3538-r0c9)
+Stage: All slices done (Linux check 39857152000); Belt-Contact-Sheet posted with journeys, audit and review
 Base: dc87ad2b0bcebf2b6bef749328a03ba06687275f
-Next: Belt-Contact-Sheet once journeys run 39855707652 (after CI run 39836789801) completes
+Next: beta-hardening lane takes round 1: findings #4662-#4669 and CI findings #4646 #4647 #4648
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| RP-a | Contract stubs and disabled checks; Help group in the launcher | RP-1, RP-2 | see packet | - | yes | 0 | planned | | |
-| RP-u | SuiteUI ProblemReportSheet and BetaNotesView on the stubs; compose-email and Save | RP-3, RP-3e | see packet | RP-a (RP-3) | yes | 0 | planned | | |
-| RP-m | Report bodies (redaction, suite filter, 7 days, newest 3), help catalog + CLI, C4, feature-done | RP-4, RP-5, RP-6, RP-7 | see packet | RP-a (RP-4, RP-5), RP-u (RP-6) | no | 0 | planned | | |
+| RP-a | Contract stubs and disabled checks; Help group in the launcher | RP-1, RP-2 | see packet | - | yes | 0 | done | 39857152000 | wanted (39836789801) |
+| RP-u | SuiteUI ProblemReportSheet and BetaNotesView on the stubs; compose-email and Save | RP-3, RP-3e | see packet | RP-a (RP-3) | yes | 0 | done | 39857152000 | wanted (39836789801) |
+| RP-m | Report bodies (redaction, suite filter, 7 days, newest 3), help catalog + CLI, C4, feature-done | RP-4, RP-5, RP-6, RP-7 | see packet | RP-a (RP-4, RP-5), RP-u (RP-6) | no | 0 | done | 39857152000 | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -29,6 +29,7 @@ Next: Belt-Contact-Sheet once journeys run 39855707652 (after CI run 39836789801
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
+| RP-a, RP-u | 39855707652 | 28e2b852 | clarity, journey, design, layout, controls, oracle, mouse, taste, jobs | #4662 #4663 #4664 #4665 #4666 #4667 #4668 #4669 | 0 |
 
 ## Decisions
 - RP-3e: the packet names no beta address, so the compose-email has no recipients and the person types one; `ProblemReportOutput.betaAddresses` holds it if one is set.
@@ -45,4 +46,4 @@ Next: Belt-Contact-Sheet once journeys run 39855707652 (after CI run 39836789801
 - #4459 (RP-7, feature-done) merged as 3578eaee2; waiting for a green full CI (or scoped: suite) run on dev containing it, then Belt-Contact-Sheet on #3772.
 
 ## Open
-- none
+- findings #4662 #4663 #4664 #4665 #4666 #4667 #4668 #4669 (critic panel, round 0); CI findings #4646 #4647 #4648 (red journeys in 39855707652)
