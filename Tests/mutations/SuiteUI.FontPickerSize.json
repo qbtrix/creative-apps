@@ -1,0 +1,5 @@
+[
+{"label": "the Size row shows two decimals", "file": "Sources/SuiteUI/FontPickerRules+Size.swift", "find": "public static let sizeDecimals = 0", "replace": "public static let sizeDecimals = 2", "tests": "FontPickerSizeTests.readsWholePoints"},
+{"label": "the Size bar spans every size", "file": "Sources/SuiteUI/FontPickerRules+Size.swift", "find": "public static let sizeBarRange: ClosedRange<Double> = 1...200", "replace": "public static let sizeBarRange: ClosedRange<Double> = 1...1_600", "tests": "FontPickerSizeTests.barSpansCommonSizes"},
+{"label": "the Size bar doesn't clamp a typed size", "file": "Sources/SuiteUI/FontPickerRules+Size.swift", "find": "return min(max(size, sizeBarRange.lowerBound), sizeBarRange.upperBound)", "replace": "return size", "tests": "FontPickerSizeTests.barClampsTypedSizes"}
+]

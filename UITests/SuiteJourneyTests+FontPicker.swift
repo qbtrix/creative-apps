@@ -9,12 +9,8 @@
 import XCTest
 
 extension SuiteJourneyTests {
-    /// Off until FP-4 lands the view these steps drive (FP-3) and its identifiers.
-    private static let fontPickerViewLanded = false
-
     /// FP-4: search, face, size and a family switch on the font picker's gallery page.
     @MainActor func testFontPickerPicksAFace() throws {
-        guard Self.fontPickerViewLanded else { throw XCTSkip("waits on FP-4") }
         let gallery = Journey("Library", self, name: "suiteui", arguments: ["-SuiteGallery", "index"])
         XCTAssert(gallery.element("suite.gallery.index").waitForExistence(timeout: 30), "no gallery index")
 
@@ -35,10 +31,10 @@ extension SuiteJourneyTests {
         gallery.shot("font-picker-search")
 
         // 3. Pick System UI's Bold face, then set the size to 36: the log names the pick.
-        gallery.element("suite.fontpicker.family.System UI").click()
-        gallery.element("suite.fontpicker.face").click()
+        clickFontPickerRow(gallery, "System UI")
+        fontPickerFaceMenu(gallery).click()
         gallery.app.menuItems["Bold"].firstMatch.click()
-        gallery.element("suite.fontpicker.size").doubleClick()
+        gallery.element("suite.fontpicker.size").coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).doubleClick()
         gallery.app.typeKey("a", modifierFlags: .command)
         gallery.app.typeText("36\r")
         expectFontPickerLog(gallery, "pick(System UI, Bold, 36)")
@@ -48,15 +44,52 @@ extension SuiteJourneyTests {
         gallery.element("suite.fontpicker.search").click()
         gallery.app.typeKey("a", modifierFlags: .command)
         gallery.app.typeKey(.delete, modifierFlags: [])
-        gallery.element("suite.fontpicker.family.Serif").click()
+        clickFontPickerRow(gallery, "Serif")
         expectFontPickerLog(gallery, "pick(Serif, Regular, 36)")
 
-        // 5. Rows read their family name; the face menu opens from the keyboard.
+        // 5. Rows read their family name; Escape closes the open Face menu, and the arrow keys move the
+        //    list's selection: Down from Serif picks System UI (Regular, its face nearest Serif's), Up goes back.
         XCTAssertEqual(gallery.element("suite.fontpicker.family.Mono").label, "Mono", "the Mono row doesn't read its name")
-        gallery.element("suite.fontpicker.face").click()
+        fontPickerFaceMenu(gallery).click()
+        XCTAssert(gallery.app.menus.firstMatch.waitForExistence(timeout: 3), "clicking Face opened no menu")
         gallery.app.typeKey(.escape, modifierFlags: [])
+        XCTAssert(fontPickerWait { !gallery.app.menus.firstMatch.exists }, "Escape didn't close the Face menu")
+        clickFontPickerRow(gallery, "Serif")
         gallery.press(.downArrow, step: "font-picker-keyboard")
+        expectFontPickerLog(gallery, "pick(System UI, Regular, 36)")
+        XCTAssert(fontPickerWait { gallery.element("suite.fontpicker.family.System UI").isSelected },
+                  "Down didn't move the selection to System UI")
         gallery.shot("font-picker-keyboard")
+        gallery.press(.upArrow, step: "font-picker-keyboard-up")
+        expectFontPickerLog(gallery, "pick(Serif, Regular, 36)")
+    }
+
+    /// Clicks a family row at its centre: the List's ScrollView has no hit point
+    /// for the row's text element on the macOS runner (#4790), so the click goes
+    /// to the row's coordinate rather than through XCUIElement.click().
+    @MainActor private func clickFontPickerRow(_ gallery: Journey, _ name: String) {
+        let row = gallery.element("suite.fontpicker.family.\(name)")
+        XCTAssert(row.waitForExistence(timeout: 5), "no row for \(name)")
+        row.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click()
+    }
+
+    /// The Face row's menu control; the row's identifier can also land on its group, so match the control types.
+    @MainActor private func fontPickerFaceMenu(_ gallery: Journey) -> XCUIElement {
+        let types = [XCUIElement.ElementType.menuButton, .popUpButton, .button].map { NSNumber(value: $0.rawValue) }
+        let menu = gallery.element("suite.fontpicker").descendants(matching: .any).matching(
+            NSPredicate(format: "elementType IN %@ AND (identifier == %@ OR label == %@)", types, "suite.fontpicker.face", "Face")
+        ).firstMatch
+        XCTAssert(menu.waitForExistence(timeout: 5), "no Face menu (suite.fontpicker.face)")
+        return menu
+    }
+
+    /// Polls `condition` for up to five seconds.
+    @MainActor private func fontPickerWait(_ condition: () -> Bool) -> Bool {
+        for _ in 0..<10 {
+            if condition() { return true }
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        return condition()
     }
 
     @MainActor private func expectFontPickerLog(_ gallery: Journey, _ line: String) {

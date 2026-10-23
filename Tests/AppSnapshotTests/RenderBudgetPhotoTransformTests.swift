@@ -11,7 +11,10 @@
 // times either way. The window needs `allowsWindowActivationEvents`: a test
 // process only sends activation clicks, and the handles are a SwiftUI gesture.
 // Each test checks the draft moved: the drag grew its box, the scrub turned it
-// (`setTransform`, PT-5). The step p95 (budget 16 ms) is printed, never asserted, until the
+// (`setTransform`, PT-5). A scrub's steps run on the window's live copy, which
+// it takes back only once they go quiet (LiveTransformCopy+Kernel.swift), so
+// each test reads the workspace after waiting, up to 2 s, for that edit to land
+// (`landed`). The step p95 (budget 16 ms) is printed, never asserted, until the
 // supervisor lists these in Tests/perf-suites.txt. Nested in BodyCountSuites,
 // as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
@@ -41,7 +44,9 @@ extension BodyCountSuites {
             }
             print("RENDER-BUDGET photo transform corner drag p95 \(String(format: "%.2f", step.p95)) ms (budget 16, print-only)")
             #expect(step.steps >= Self.samples, "\(step)")
-            let after = try #require(edited.workspace)
+            let after = try #require(await Self.landed(edited) {
+                ($0.transformSelection?.box).map { $0 != draft.before.box } ?? true
+            })
             #expect(after.transformDraft != nil, "the corner drag ended Free Transform")
             let box = try #require(after.transformSelection?.box)
             #expect(box.width > draft.before.box.width && box.height > draft.before.box.height,
@@ -62,7 +67,9 @@ extension BodyCountSuites {
             print("RENDER-BUDGET photo transform rotation scrub p95 \(String(format: "%.2f", step.p95)) ms (budget 16, print-only)")
             #expect(found, "the Rotation row isn't adjustable")
             #expect(step.steps >= Self.samples, "\(step)")
-            let after = try #require(edited.workspace)
+            let after = try #require(await Self.landed(edited) {
+                ($0.transformSelection?.degrees).map { $0 != draft.before.degrees } ?? true
+            })
             #expect(after.transformDraft != nil, "the scrub ended Free Transform")
             let degrees = try #require(after.transformSelection?.degrees)
             #expect(degrees != draft.before.degrees, "the scrub didn't turn the draft from \(draft.before.degrees)°")
@@ -85,6 +92,16 @@ extension BodyCountSuites {
             try model.beginTransform()
             let before = try #require(model.transformSelection)
             return Draft(model: model, before: before)
+        }
+
+        /// The window's workspace once `done` holds for it, else after 2 s as it is then, for the
+        /// expects to judge. Not a timing bound: it waits for the live copy's hand-back to land.
+        static func landed(_ edited: PhotoWindowEditedView, until done: (PhotoWorkspace) -> Bool) async -> PhotoWorkspace? {
+            for _ in 0..<100 {
+                if let shown = edited.workspace, done(shown) { return shown }
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+            return edited.workspace
         }
 
         /// Waits for the hosted window to settle; returns its edited view, the draft still up.
