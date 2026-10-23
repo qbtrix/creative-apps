@@ -15,12 +15,17 @@
 // window group has no id, so a Dock click with no window open takes the
 // system's reopen, which opens one. A hand-off the host accepts
 // (`.new`: New Composition; `.open` a .halo: open it) waits in HaloShell's
-// inbox until a window takes it (HaloWindow+File.swift). File keeps Halo's
-// own Open Recent, so the suite's (SuiteFileCommands) isn't added.
+// inbox until a window takes it (HaloWindow+File.swift).
+// File-flow (HF-2): File gets the suite's Open Recent ▸ and Open In ▸
+// (SuiteFileCommands, in HaloFileMenu) in place of Halo's own Open Recent,
+// and the viewer takes drops (`.suiteFileDrop`, HaloViewer); all three read
+// HaloShell's one documents bridge, which starts watching the suite's
+// recents at launch (HaloAppDelegate).
 // Views only read HaloProject and call its methods; all state lives in
 // HaloModel (scripts/ci checks this).
 import HaloModel
 import Observation
+import SuiteModel
 import SuiteShell
 import SuiteUI
 import SwiftUI
@@ -39,8 +44,17 @@ import SwiftUI
     }
 }
 
-/// The process's hand-off host and the inbox it delivers to.
+/// The process's hand-off host, the inbox it delivers to, and the documents bridge: the suite's recents and
+/// routing, on fakes for a `-HaloFixture` launch.
 @MainActor enum HaloShell {
+    static let bridge: SuiteDocumentsBridge = {
+        let arguments = ProcessInfo.processInfo.arguments
+        let services: SuiteServices = HaloLaunch.current.fixture == nil
+            ? .live(support: SuiteLocations.supportFolder(arguments: arguments, home: NSHomeDirectory()),
+                    app: .halo, arguments: arguments)
+            : .fake()
+        return SuiteDocumentsBridge(app: .halo, services: services)
+    }()
     static let inbox = HaloHandOffInbox()
     static let host = HaloDocumentHost { command in
         await MainActor.run { HaloShell.inbox.send(command) }
@@ -49,7 +63,7 @@ import SwiftUI
 
 @main
 struct HaloApp: App {
-    @NSApplicationDelegateAdaptor(SuiteAppDelegate.self) private var delegate
+    @NSApplicationDelegateAdaptor private var delegate: HaloAppDelegate
 
     var body: some Scene {
         WindowGroup {
@@ -67,5 +81,12 @@ struct HaloApp: App {
                 HaloAnimationMenu()
             }
             .suiteEditor(.halo, host: HaloShell.host, live: HaloLive.channel)
+    }
+}
+
+/// Suite hand-offs (SuiteAppDelegate), and watching the suite's recents once the app has launched.
+@MainActor final class HaloAppDelegate: SuiteAppDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        Task { await HaloShell.bridge.watch() }
     }
 }
