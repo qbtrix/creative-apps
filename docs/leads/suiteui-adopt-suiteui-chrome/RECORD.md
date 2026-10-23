@@ -2,7 +2,7 @@
 
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
 Run: act-1a1646f0a9f-d1ei (#1942; slice AC-export-sheet; earlier runs act-1a160ca3d68-sbnc, act-1a15ef870d6-3mm5, act-1a15ce4fb40-9k5r) · Session: claude/suiteui-feature-lead-v7e2hk · Resumed: 2026-10-22T16:30Z
-Stage: 3 awaiting supervisor (AC-export-sheet blocked on shared-codecs:SC-f)
+Stage: AC-export-sheet blocked on SC-15/SC-16 (shared-codecs)
 Base: dev 722a4fe9c (2026-10-22T23:19Z poll)
 Next: re-read shared-codecs:SC-f each poll: SC-15 (owns Sources/PhotoApp/PhotoWindow+Export.swift) and SC-16 (replaces Sources/LibraryModel/Contracts/ExportFormats.swift) on dev? Once both merge, AC-e1 + AC-e2 ship as one slice PR to dev with feature-done
 
@@ -34,6 +34,7 @@ Next: re-read shared-codecs:SC-f each poll: SC-15 (owns Sources/PhotoApp/PhotoWi
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-23T00:12Z — Poll: SC-15/SC-16 not on dev, no open PR carries either slice; still blocked.
 - 22:44Z poll: dev c67fd3937; ExportFormats.swift still on dev, no SC-15/SC-16 PR; no supervisor reply on #1942. AC-export-sheet stays blocked.
 - 22:13Z poll: dev 38a65b10d; ExportFormats.swift still on dev, no SC-15/SC-16 PR; no supervisor reply on #1942. AC-export-sheet stays blocked.
 - 21:42Z poll: dev 066cd28d6; ExportFormats.swift still on dev, no SC-15/SC-16 PR; no supervisor reply on #1942. AC-export-sheet stays blocked.

@@ -75,3 +75,4 @@ utc	stage	event	ref	note
 2026-10-22T22:13Z	poll	AC-export-sheet	blocked on SC-f (SC-15/16 no PR)
 2026-10-22T22:44Z	poll	AC-export-sheet	blocked on SC-f (SC-15/16 no PR)
 2026-10-22T23:19Z	poll	AC-export-sheet	SC-15/SC-16 not on dev, no open PR
+2026-10-23T00:12Z	poll	AC-export-sheet	SC-15/16 absent
