@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-23T21:18Z	check	heartbeat	-	21:18Z: lane batch 20261023204921 Linux green, macOS gate running; ours next, no needs-fix
 2026-10-23T21:40Z	check	heartbeat	-	21:4xZ check: #4893 #4902-#4905 #4911 #4891 open, fast-lane, no needs-fix; batch 20261023204921 macOS gate running, ours queue for next batch; stacked tasks wait parents
 2026-10-23T22:05Z	check	heartbeat	-	22:1xZ check: #4904 needs-rebase (DesignCommandCatalog + design.list-commands golden): merged origin/dev, union of CopyAs + groupSpecs; regating
+2026-10-23T22:26Z	fix	rebase	#4904	#4904 needs-rebase resolved: merged origin/dev (catalog CopyAs + groupSpecs; golden union), scripts/ci --changed PASS on clean build, pushed ac0c1f6, Head: moved
