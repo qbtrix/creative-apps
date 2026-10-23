@@ -129,3 +129,5 @@ Loop: v3 (the packet has a `## Slices` table).
 - 04:47Z check-in: journeys run 39898629239 still queued for a macOS runner. No new #3482 comments, no open file-flow findings.
 
 - 05:19Z check-in: journeys run 39898629239 still queued (macOS runner). #3482 quiet, no open file-flow findings.
+
+- 05:52Z check-in: journeys run 39898629239 now in progress (job 120234783799). #3482 quiet, no open file-flow findings.
