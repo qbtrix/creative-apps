@@ -6,6 +6,7 @@
 // A turned or mirrored layer carries `transform="rotate(d cx cy) …"` about its frame's centre (transform DT-6),
 // and RJ-D15's 60 small turns under one drag token write `rotate(15 60 35)` and undo in one step.
 // A shape writes its kernel path as a <path>, closed only where its contour is (shape-tools DS-6, RJ-D35).
+// A stroke writes StrokeSVG's attributes, its join, cap and dash too (stroke-style DK-7, RJ-D36).
 // Runs on Linux and macOS.
 @testable import DesignModel
 import Foundation
@@ -97,7 +98,7 @@ import Testing
         let plain = DesignNode(id: "p", name: "P", kind: .rectangle, frame: rect(0, 0, 10, 10), stroke: .default)
         let plainText = svg(plain)
         #expect(plainText.contains("<rect x=\"0\" y=\"0\" width=\"10\" height=\"10\" fill=\"#d9d9d9\" stroke=\"#000000\"/>"))
-        for attribute in ["opacity=", "stroke-width=", "rx="] { #expect(!plainText.contains(attribute), "\(attribute) written at its default") }
+        for attribute in ["opacity=", "stroke-width=", "rx=", "stroke-linejoin=", "stroke-linecap=", "stroke-dash"] { #expect(!plainText.contains(attribute), "\(attribute) written at its default") }
         let styled = DesignNode(id: "s", name: "S", kind: .rectangle, frame: rect(0, 0, 10, 10), cornerRadius: 3,
                                 opacity: 0.5, stroke: DesignStroke(color: DesignColor(255, 0, 16), width: 2.5))
         #expect(svg(styled).contains(
@@ -107,6 +108,23 @@ import Testing
         let noStroke = DesignNode(id: "n", name: "N", kind: .ellipse, frame: rect(0, 0, 10, 10),
                                   stroke: DesignStroke(color: .black, width: 0))
         #expect(!svg(noStroke).contains("stroke"))
+    }
+
+    /// A dashed, round-capped stroke writes StrokeSVG's attributes (stroke-style DK-7, RJ-D36), each left out at its
+    /// SVG default: no miter join and no zero dash offset, but the cap, the dash and a bevel join are written.
+    @Test func dashedStroke() {
+        var stroke = VectorStroke(color: FillColor(r: 0, g: 0, b: 0), width: 2)
+        stroke.cap = .round
+        stroke.dash = [8, 4]
+        let dashed = DesignNode(id: "d", name: "D", kind: .rectangle, frame: rect(0, 0, 10, 10), stroke: stroke)
+        let text = svg(dashed)
+        #expect(text.contains(
+            "fill=\"#d9d9d9\" stroke=\"#000000\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-dasharray=\"8 4\"/>"))
+        #expect(!text.contains("stroke-linejoin=") && !text.contains("stroke-dashoffset="))
+        stroke.join = .bevel
+        stroke.dashPhase = 3
+        let beveled = svg(DesignNode(id: "b", name: "B", kind: .rectangle, frame: rect(0, 0, 10, 10), stroke: stroke))
+        #expect(beveled.contains("stroke-linejoin=\"bevel\" stroke-linecap=\"round\" stroke-dasharray=\"8 4\" stroke-dashoffset=\"3\""))
     }
 
     /// Blue to white down the unit box: a 90° line, as `fill.angle` 90 stores it.
