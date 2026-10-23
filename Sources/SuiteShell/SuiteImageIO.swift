@@ -6,11 +6,72 @@
 // SC-2 and SC-4 add decoding, file info and the CoreRaster paths beside them.
 // Formats come from SuiteImageFormats, so this file spells out no list of its own.
 import CoreGraphics
+import CoreRaster
 import Foundation
 import ImageIO
 import SuiteModel
 
 public enum SuiteImageIO {
+    // MARK: Decoding, file info and the CoreRaster paths (shared-codecs SC-2 stubs; SC-4 gives them bodies)
+
+    /// A file's facts read without decoding its pixels: the size already
+    /// oriented, the Exif orientation (1 to 8), the capture date and the raw
+    /// Exif and TIFF dictionaries.
+    public struct Info: Sendable {
+        public var width, height: Int
+        public var orientation: Int
+        public var captureDate: Date?
+        public var exif, tiff: [String: any Sendable]
+
+        public init(width: Int, height: Int, orientation: Int, captureDate: Date?,
+                    exif: [String: any Sendable], tiff: [String: any Sendable]) {
+            self.width = width; self.height = height; self.orientation = orientation
+            self.captureDate = captureDate; self.exif = exif; self.tiff = tiff
+        }
+    }
+
+    /// What `encode(_:as:)` writes: PNG and JPEG through CoreRaster, HEIC
+    /// and TIFF through ImageIO.
+    public enum Format: Sendable { case png, jpeg(quality: Double), heic(quality: Double), tiff(bitDepth: Int) }
+
+    /// The registry's formats this Mac's ImageIO reads. Empty until SC-4
+    /// asks `CGImageSourceCopyTypeIdentifiers`: `decode` reads nothing yet.
+    public static var readable: Set<SuiteImageFormat> { [] }
+
+    /// The registry's formats this Mac's ImageIO writes. Empty until SC-4
+    /// asks `CGImageDestinationCopyTypeIdentifiers`: `encode` writes nothing
+    /// yet, so no panel may offer a format through it.
+    public static var writable: Set<SuiteImageFormat> { [] }
+
+    /// The file's facts without decoding pixels. Not built yet: throws.
+    public static func info(_ url: URL) throws -> Info {
+        throw notBuilt("Reading \(url.lastPathComponent)'s image info")
+    }
+
+    /// Pixels, oriented, as CoreRaster's premultiplied linear buffer;
+    /// `longestSide` shrinks while decoding. Not built yet: throws.
+    public static func decode(_ data: Data, longestSide: Int?) throws -> PixelBuffer {
+        throw notBuilt("Decoding an image into pixels")
+    }
+
+    /// `buffer` as a complete `format` file. Not built yet: throws. SC-4
+    /// adds the output colour profile (default sRGB) with its body.
+    public static func encode(_ buffer: PixelBuffer, as format: Format) throws -> Data {
+        throw notBuilt("Encoding pixels as an image file")
+    }
+
+    /// For the CoreGraphics rasterizers: the image as PNG through CoreRaster.
+    /// Not built yet: throws.
+    public static func png(_ image: CGImage) throws -> Data {
+        throw notBuilt("Encoding a PNG through CoreRaster")
+    }
+
+    private static func notBuilt(_ what: String) -> SuiteError {
+        .notAvailable("\(what) isn't built yet (shared-codecs SC-4).")
+    }
+
+    // MARK: Shell-media's calls (SM-6, SM-7)
+
     /// The first image in `data`, turned upright by its EXIF orientation and
     /// shrunk so its longer side is at most `longestSide` (never enlarged);
     /// nil keeps the stored size.
