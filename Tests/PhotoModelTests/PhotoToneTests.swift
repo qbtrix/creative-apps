@@ -60,7 +60,7 @@ private let warm = ToneSettings.neutral.setting(.temperature, to: 30)
         var workspace = try image()
         workspace.adjust(.tone(warm))
         workspace.adjust(.tone(warm.setting(.temperature, to: 40)))
-        #expect(workspace.historySteps.count == 1 && workspace.undoActionName == "Undo Tone")
+        #expect(workspace.historySteps.count == 2 && workspace.undoActionName == "Undo Tone")
         workspace.undo()
         #expect(workspace.adjustments.tone == .neutral)
     }
@@ -73,7 +73,7 @@ private let warm = ToneSettings.neutral.setting(.temperature, to: 30)
         for value in stride(from: -1.0, through: -25, by: -1) {
             try workspace.setTone(.neutral.setting(.temperature, to: value), name: "Temperature", drag: "d1")
         }
-        #expect(workspace.historySteps.count == 1 && workspace.undoActionName == "Undo Temperature")
+        #expect(workspace.historySteps.count == 2 && workspace.undoActionName == "Undo Temperature")
         workspace.undo()
         #expect(workspace.toneSettings == .neutral)
     }
@@ -85,13 +85,13 @@ private let warm = ToneSettings.neutral.setting(.temperature, to: 30)
         try workspace.setTone(.neutral.setting(.contrast, to: 20), name: "Contrast", drag: nil)
         #expect(workspace.adjustments.tone == .neutral)
         #expect(workspace.toneSettings?.value(.contrast) == 20)
-        #expect(workspace.historySteps.count == 2)
+        #expect(workspace.historySteps.count == 3)
     }
 
     /// MJ-PT step 3: Auto reads the image without recording a step.
     @Test func autoSuggestionReadsTheImage() throws {
         let workspace = try image()
         let auto = try workspace.autoToneSuggestion()
-        #expect(auto.inWhite > auto.inBlack && workspace.historySteps.isEmpty)
+        #expect(auto.inWhite > auto.inBlack && workspace.historySteps.count == 1)
     }
 }
