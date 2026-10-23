@@ -78,3 +78,4 @@ Next: (2026-10-23T17:29:30Z) #4878 (BK-m) and #4923 (BK-z, stacked, feature-done
 - 2026-10-23T22:42:04Z: heartbeat: #4878,#4923 open, no needs-fix/needs-rebase (dev-based heads show mergeable state unknown while GitHub recomputes). Lane batch 20261023215139 still in flight; dev still 491ec546.
 - 2026-10-23T23:04:34Z: heartbeat: #4878,#4923 open, clean, no fix/rebase labels. Dev moved only by the generated-docs commit 654fb363. Lane batch 20261023215139 (#4818..#4870) still in flight; ours wait for the next.
 - 2026-10-23T23:25:42Z: heartbeat: #4878,#4923 unchanged (open, clean). Lane batch 20261023215139 still in flight; dev CI 40037716897 running at 654fb363.
+- 2026-10-23T23:47:12Z: heartbeat: #4878,#4923 unchanged (open, clean). Lane batch 20261023215139 (PRs #4818..#4870, none ours) failed its macOS gate 40029779505; no bisect probe branch yet. Ours wait for the next batch. Dev CI 40037716897 still running at 654fb363.
