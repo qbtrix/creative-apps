@@ -11,7 +11,7 @@ Next: LX-2 (slice LX-a, with the SuiteUI ExportPick.metadata stub) and LX-4 (sli
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| LX-a | options hold a metadata policy (default All but location); the sheet shows the shared Metadata row | LX-1, LX-2 | MX-LX | XP-a; export (built, #1554 closed) | no | 0 | LX-1 #3696 merged 7f3959c; LX-2 waits XP-3 | - | - |
+| LX-a | options hold a metadata policy (default All but location); the sheet shows the shared Metadata row | LX-1, LX-2 | MX-LX | XP-a; export (built, #1554 closed) | no | 0 | LX-1 #3696 merged 7f3959c; LX-2 #4960 head efabeb8d on the lane | - | - |
 | LX-u | snapshots, render budget, journey written | LX-5, LX-6 | LJ-X1 | LX-a | yes | 0 | waiting | - | - |
 | LX-m | sidecar drops the policy's tags; writer carries metadata minus them | LX-3, LX-4 | MX-LX | LX-a; XP-6 (merged), XP-7 | yes | 0 | LX-3 merged f1e49054d; LX-4 waits XP-2 + XP-7 | - | - |
 | LX-z | live services, journey on, feature-done | LX-7, LX-8 | LJ-X1 | LX-u, LX-m | no | 0 | waiting | - | - |
@@ -42,6 +42,8 @@ Next: LX-2 (slice LX-a, with the SuiteUI ExportPick.metadata stub) and LX-4 (sli
 - Gap: export presets don't store the policy, so applying one resets it to noLocation (noted in #3696). This is a gap for LX-2's follow-up.
 
 - 2026-10-23T18:54:02Z: supervisor (#3478 comment 6372282767): build LX-2 and LX-4 now. The stub goes in SuiteUI, not Library (rule 12: the contract's own module; rule 20: one copy): ExportPick.metadata: ExportMetadata? = nil, field plus default, no UI, tested in SuiteUITests. The LX-2 PR body says XP-3 builds on the stub field. LX-4 builds on FakeMetadata with Wire: export-pack:XP-7; its macOS write tests stay disabled until XP-7.
+
+- 2026-10-23T19:12:34Z: LX-2 (#4960) keeps a Library-drawn Metadata row (SuiteUI ChoiceChips, titles from ExportMetadata, through the sheet's setOptions). Library's sheet is its own Form and never mounts SuiteExportSheet, so XP-4's shared row would never show there and the policy would have no control. When #3638 moves Library to the shared sheet, this row gives way to XP-4's.
 
 ## Open
 - XP-2 waits on shell-media SM-a; XP-3 waits on tone-controls TC-a and PL-a (SuiteUI lead's record).
