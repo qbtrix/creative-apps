@@ -191,7 +191,6 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
     /// PJ-DS (document-setup DS-8): File > New opens the shared New sheet; 4 × 6 in at 300 ppi, Transparent,
     /// Create makes a 1200 × 1800 image over the checkerboard.
     @MainActor func testNewImageFromSheet() throws {
-        try XCTSkipIf(true, "waits on DS-8")
         let photo = launch(photoArguments(), window: nil)
         photo.press(character: "n", .command) // 1. File > New.
         XCTAssert(photo.element("suite.newdoc").waitForExistence(timeout: 10), "File > New opened no New sheet (suite.newdoc)")
