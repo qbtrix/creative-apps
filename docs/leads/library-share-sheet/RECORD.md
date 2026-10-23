@@ -2,9 +2,9 @@
 
 Issue: #3789 · Packet: docs/blueprints/library/features/share-sheet.md
 Run: act-1a1693fbf6d-ap2g · Session: claude/large-catalog-share-sheet-2tdm4i (earlier act-1a1648ae708-bncr, act-1a15df37b73-k199, act-1a15b98bc49-4lk9) · Started: 2026-10-20T23:00Z (resumed 2026-10-22T16:55Z)
-Stage: 3 wave 4 (SH-z #4612 open with fast-lane and feature-done, head de155da4, in the lane)
+Stage: 3 wave 4 (SH-z #4612 merged 17:35Z as 55017fac; library-scoped run 39997279554 on 8a54f64c contains it, queued)
 Base: 8021b0f56a45a59540cd4ea0ff99651c5fb8dc2a (origin/dev)
-Next: after #4612 merges and a green library or full run contains it: Belt-Slice-Done SH-z, Mac-Finish-Wanted SH-z, Belt-Contact-Sheet
+Next: when run 39997279554 (or a later library or full run containing 55017fac) is green: Belt-Slice-Done SH-z, Mac-Finish-Wanted SH-z, Belt-Contact-Sheet
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: after #4612 merges and a green library or full run contains it: Belt-Slice
 | SH-a | sharing preset, share folder, ShareButton: the contract | SH-1, SH-2 | MJ-SH | - | yes | 0 | done #3809 (482f03c6) | 39571804700 | wanted |
 | SH-u | Share in the toolbar and File menu, journey | SH-4, SH-4b | LJ-SH | SH-a | yes | 1 | done #3814 | 39601343733 | wanted; finisher PR #4432 open |
 | SH-m | prepare writes the files, launch cleanup, command, RJ-L55 | SH-3, SH-3c | MJ-SH | SH-a, file-flow:LF-m, catalog-backup:BK-m | no | 0 | done #4592 (567d03bb) | 39957675362 | - |
-| SH-z | live wiring, journey on, built | SH-5, SH-6 | LJ-SH, MJ-SH | SH-u, SH-m | yes | 0 | in lane (#4612, 113 lines, 11 files) | - | - |
+| SH-z | live wiring, journey on, built | SH-5, SH-6 | LJ-SH, MJ-SH | SH-u, SH-m | yes | 0 | merged (#4612, 55017fac); awaiting green library run | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -23,8 +23,8 @@ Next: after #4612 merges and a green library or full run contains it: Belt-Slice
 | SH-4b | SH-u | 2 | render budget | Tests/AppSnapshotTests/RenderBudgetLibraryShareTests.swift | prepareThreeInTwoBodies | #3814 | merged |
 | SH-3 | SH-m | 3 | SharePrep bodies, file.share-prepare in the catalog and ledger | Sources/LibraryModel/LibraryShare+Kernel.swift, Sources/LibraryModel/LibraryCommandCatalog.swift, Tests/command-ids/library.txt, Tests/LibraryModelTests/LibrarySharePrepTests.swift, Tests/mutations/LibraryModel.LibraryShare+Kernel.json | LibrarySharePrepTests | #4592 | merged |
 | SH-3c | SH-m | 3 | RJ-L55 job folder | Tests/RealJobs/library/share-three/ | scripts/jobs check | #4592 | merged |
-| SH-5 | SH-z | 4 | buttons and menu on live, journey on | Sources/LibraryApp/LibraryShareItems.swift, UITests/LibraryJourneyTests+Share.swift | LJ-SH | #4612 | open |
-| SH-6 | SH-z | 4 | status built, feature-done | docs/blueprints/library/features/share-sheet.wave.json | waves render | #4612 | open |
+| SH-5 | SH-z | 4 | buttons and menu on live, journey on | Sources/LibraryApp/LibraryShareItems.swift, UITests/LibraryJourneyTests+Share.swift | LJ-SH | #4612 | merged |
+| SH-6 | SH-z | 4 | status built, feature-done | docs/blueprints/library/features/share-sheet.wave.json | waves render | #4612 | merged |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
