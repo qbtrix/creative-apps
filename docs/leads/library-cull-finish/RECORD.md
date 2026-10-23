@@ -2,7 +2,7 @@
 
 Issue: #3458 · Packet: docs/blueprints/library/features/cull-finish.md
 Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 · earlier run act-1a15995d319-aamb
-Stage: build, wave 3; #4844 (DR-6) merged on dev 0d4645bf at 2026-10-23T18:38:28Z; #4838 (head 110671fc) and #4899 (now 9 files/223 lines vs dev) on the lane. Checked 2026-10-23T19:31:06Z
+Stage: build, wave 3; #4844 (DR-6) merged on dev 0d4645bf at 2026-10-23T18:38:28Z; #4838 (head 110671fc) and #4899 (now 9 files/223 lines vs dev) on the lane. Checked 2026-10-23T19:56Z
 Base: origin/dev 35a0b5e7
 Next: lane merges #4838, #4844, #4899 (#4899 fits 400/15 once #4844 lands); then a scoped run app=library for Belt-Slice-Done DR-u (+Mac-Finish-Wanted) and DR-m; then DR-z (DR-9 journey, DR-10 docs incl. the ⌥⌘⌫ packet wording and excludedPaths wiring gap)
 
@@ -55,3 +55,5 @@ Next: lane merges #4838, #4844, #4899 (#4899 fits 400/15 once #4844 lands); then
 - 2026-10-23T17:58:33Z: supervisor answer (#3458 6371335630, 6371346311): the supervisor lands #4844 as a merge commit after the Linux check and the local Mac gate; #4899 then rides the lane (its base is already dev, no retarget needed). Shortcut catalog is a suite-wide gap, #4945 (off this line). Decision ticked.
 - 2026-10-23T18:14:47Z: #4838 got needs-fix from the batch macOS gate (supervisor 6371534274): LibraryCullFinishSnapshots.swift:16 'shoot' is inaccessible (LibraryFixtures.shoot is internal in LibraryModel). Fixed with `@testable import LibraryModel` (Design snapshots do the same with DesignModel), merged origin/dev, scripts/ci --changed CI: PASS, pushed 110671fc, Head line moved. Fix round 1 of 2 for DR-u.
 - 2026-10-23T18:38:55Z: #4844 merged by the supervisor (merge commit 0d4645bf). #4899's diff against dev is now 9 files, 223 lines, within the lane's caps; its base is already dev.
+
+- 2026-10-23T19:56Z DR-u fix round 2 of 2: #4838 head ad5deded builds Delete Rejected and Move to Trash from `deleteRejectsControlSpec` (command-path audit). Local `scripts/ci --changed` tests segfault in this container on plain dev too; no Fast-Check, the lane's Linux run is the proof.
