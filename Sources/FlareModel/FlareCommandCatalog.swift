@@ -111,7 +111,12 @@ extension FlareWorkspace {
         .typed("file.new", title: "New", summary: "Opens a new animation with one scene, from the New Animation sheet's values when given.",
                kind: .file, params: NewParams.self, schema: newSchema, example: .object(["preset": .string("Square")]),
                availability: { _ in .available }) { w, p in try w.attemptNew(p) },
-        take("file.open", "Open", "Opens a .flare file's bytes, as text.", .file, OpenParams.self, example: openExample, { _ in nil }) { w, p in
+        take("file.open", "Open", "Opens a .flare file's bytes, or a Lottie .json's as an untitled animation, as text.", .file,
+             OpenParams.self, example: openExample, { _ in nil }) { w, p in
+            if p.name.lowercased().hasSuffix(".json") {
+                do throws(FlareOpenError) { _ = try w.openLottie(Data(p.data.utf8), named: p.name) } catch { throw CatalogError.failed(id: "file.open", message: error.message) }
+                return
+            }
             if case .failure(let error) = decodeFile(Data(p.data.utf8)) { throw CatalogError.failed(id: "file.open", message: error.message) }
             try? w.open(Data(p.data.utf8), named: p.name)
         },

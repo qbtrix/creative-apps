@@ -78,6 +78,26 @@ extension FlareWorkspace {
         if case .failure(let error) = result { throw error }
     }
 
+    /// Reads a Lottie JSON's bytes through FlareLottieOpen; pure, so the app runs it off the main thread like
+    /// `decodeFile`.
+    public static func decodeLottie(_ data: Data, named name: String) -> Result<(FlareDocument, [String]), FlareOpenError> {
+        Result { () throws(FlareOpenError) in try FlareLottieOpen.open(data: data, name: name) }
+    }
+
+    /// Opens a Lottie JSON's bytes at once as unsaved, untitled work, so Save asks for a .flare and never writes
+    /// the JSON; returns the skipped sentences. A refusal keeps the open document, says why in `loadState` and
+    /// throws.
+    public mutating func openLottie(_ data: Data, named name: String) throws(FlareOpenError) -> [String] {
+        switch Self.decodeLottie(data, named: name) {
+        case .success(let (document, skipped)):
+            restoreRecovery(document)
+            return skipped
+        case .failure(let error):
+            loadState = .failed(error.message)
+            throw error
+        }
+    }
+
     /// The file's bytes for the open document; nil, with the reason in `saveError`, when there is nothing to save
     /// or the document can't be written. Saving twice with no edit between gives the same bytes.
     public mutating func saveData() -> FlareSave? {
