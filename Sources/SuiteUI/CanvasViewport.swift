@@ -24,8 +24,9 @@
 // `canvasFitScale` (EditorDetail's palette-clear fit) when one is set.
 // `showsRulers: false` drops the rulers and their corner; the canvas keeps
 // their band (CanvasLayout's `inset`) so the artboard doesn't jump, unless
-// `holdsRulerBand` is false: no band, the artboard centred (Library's loupe). A drag that starts on a ruler goes to `onRulerDrag`, never
-// `onDrag`: a RulerDrag per move and one on release, carrying the ruler's axis
+// `holdsRulerBand` is false: no band, the artboard centred (Library's loupe).
+// A drag that starts on a ruler goes to `onRulerDrag`, never `onDrag`: a
+// RulerDrag per move and one on release, carrying the ruler's axis
 // (.horizontal for the top one), the document coordinate across it and, on
 // release, whether the pointer is back over the ruler (the host removes the
 // guide then). `checkerboard: false` puts the document on the plain artboard color
