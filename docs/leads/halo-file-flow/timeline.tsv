@@ -52,3 +52,4 @@ utc	stage	event	ref	note
 2026-10-23T19:00:00Z	3	heartbeat	HF-z	lane still bisecting batch-20261023174522 (#4818-#4850); #4855 queued for a later batch, no lane comments
 2026-10-23T19:22:00Z	3	heartbeat	HF-z	batch-20261023192105 holds 12 PRs up to #4842; #4855 next in line, no lane comments, no findings
 2026-10-23T19:43:00Z	3	heartbeat	HF-z	batch-20261023192105 still running; #4855 waits for the next batch; no lane comments
+2026-10-23T20:04:00Z	3	heartbeat	HF-z	batch-20261023192105 red, lane bisecting (probes -3, -6); #4855 waits for the next batch
