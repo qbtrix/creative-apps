@@ -68,3 +68,4 @@ utc	stage	event	ref	note
 2026-10-23T19:39Z	PD-u	critic	#4963 #4964	correctness critic filed 6: #4976 (AppSnapshotTests compile) #4977 #4978 #4979 #4980 #4981
 2026-10-23T19:39Z	PD-u	fix	#4963 #4964	fix round 1 started for 16 findings (#4966-#4981); PR bodies rewritten through the GitHub MCP tool, which posts no attribution footer
 2026-10-23T19:51Z	PD-u	fix	#4963 #4964	heartbeat: PD-u fix round 1 building u1; #4959 fixer running; no needs-fix
+2026-10-23T20:14Z	PD-u	fix	#4963 #4964	heartbeat: PD-u fix round 1 gating u1, building u2; #4959 fixer running; no needs-fix
