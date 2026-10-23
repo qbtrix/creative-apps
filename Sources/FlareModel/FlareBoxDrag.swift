@@ -60,11 +60,14 @@ extension FlareWorkspace {
         }
     }
 
+    /// Whether the selection box's handles can act: only Select on the scene has them, since the box commit keys scene
+    /// layers. `handle(at:)` and `selectionReadout` both ask this, so a handle is drawn exactly when a press holds it.
+    var boxHandlesAct: Bool { tool == .select && editingSymbolID == nil && !selectKeysSymbol(selection) }
+
     /// The selection box's handle within `hitSlop` stage points of `point`, or nil: a resize handle first
-    /// (`HandleHit`), else the rotate zone. Only Select on the scene has handles, since the box commit keys scene layers.
+    /// (`HandleHit`), else the rotate zone; nil unless `boxHandlesAct`.
     func handle(at point: Point, stageScale: Double) -> StageHandle? {
-        guard tool == .select, editingSymbolID == nil, point.isFinite, !selectKeysSymbol(selection),
-              let box = selectionBounds else { return nil }
+        guard boxHandlesAct, point.isFinite, let box = selectionBounds else { return nil }
         let tolerance = HandleHit.tolerance(screen: Self.hitSlop, zoom: stageScale)
         let all = handles(of: box, rotation: 0, stageScale: stageScale)
         if let hit = HandleHit.handle(at: point, in: box, tolerance: tolerance), hit != .inside {

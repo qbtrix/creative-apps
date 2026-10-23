@@ -19,5 +19,19 @@
     "find": "? grip.box : BoxMath.resized(grip.box, grip.handle.editorHandle, by: delta, modifiers: keys)",
     "replace": "? grip.box : grip.box",
     "tests": "FlareSelectionReadTests"
+  },
+  {
+    "label": "Direct Select's readout draws Select's dead handles again",
+    "file": "Sources/FlareModel/FlareSelectionRead.swift",
+    "find": "let shown = boxHandlesAct ? box.map",
+    "replace": "let shown = true ? box.map",
+    "tests": "FlareSelectionReadTests"
+  },
+  {
+    "label": "the readout never offers handles, even to Select",
+    "file": "Sources/FlareModel/FlareSelectionRead.swift",
+    "find": "                                handles: shown)",
+    "replace": "                                handles: [])",
+    "tests": "FlareSelectionReadTests"
   }
 ]

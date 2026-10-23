@@ -69,9 +69,11 @@ extension FlareWorkspace {
             return ["rotation": t.rotation, "scaleX": t.scaleX, "scaleY": t.scaleY].merging(changes[id] ?? [:]) { $1 }
         }
         func shared(_ key: String) -> Double? { Self.shared(values.compactMap { $0[key] }) }
+        // Handles only where a press can hold one (`boxHandlesAct`): Direct Select keeps just the outline (#4774).
+        let shown = boxHandlesAct ? box.map { handles(of: $0, rotation: 0, stageScale: stageScale) } ?? [] : []
         return SelectionReadout(count: tool == .select ? selectedLayerIDs.count : selection.count, box: box,
                                 rotation: shared("rotation"), scaleX: shared("scaleX"), scaleY: shared("scaleY"),
-                                handles: box.map { handles(of: $0, rotation: 0, stageScale: stageScale) } ?? [])
+                                handles: shown)
     }
 
     /// The value every entry shares (within 1e-9), or nil when they differ or there are none.

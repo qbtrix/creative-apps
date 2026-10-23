@@ -33,5 +33,12 @@
     "find": "        return BoxGrip(handle: handle, box: box)\n",
     "replace": "        return nil\n",
     "tests": "FlareBoxDragTests"
+  },
+  {
+    "label": "the box handles act for every tool, so Direct Select draws and grabs them",
+    "file": "Sources/FlareModel/FlareBoxDrag.swift",
+    "find": "var boxHandlesAct: Bool { tool == .select && ",
+    "replace": "var boxHandlesAct: Bool { ",
+    "tests": "FlareSelectionReadTests"
   }
 ]
