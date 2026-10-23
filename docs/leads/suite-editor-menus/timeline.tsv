@@ -10,3 +10,6 @@ utc	stage	event	ref	note
 2026-10-23T04:03Z	-	heartbeat	EM-a	#4710 lane macOS build-only run 39896014966 in progress; EM-flare-halo, EM-photo-design building
 2026-10-23T04:12Z	3	merged	#4710	EM-a merged by the fast lane
 2026-10-23T04:20Z	4	fix-sent	EM-flare-halo	builder sent back: ask persisted deny; real AIAccessCenter async ask + mutate
+2026-10-23T04:50Z	-	pr	C4	opened #4737 shell-adoption description
+2026-10-23T04:50Z	-	pr	EM-flare-halo	opened #4738
+2026-10-23T04:50Z	-	pr	EM-photo-design	opened #4739 stacked on #4738
