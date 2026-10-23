@@ -14,6 +14,7 @@ import Foundation
 #endif
 import FlareCore
 @testable import FlareModel
+import SuiteKernel
 import SuiteModel
 import Testing
 
@@ -59,7 +60,7 @@ private let logo = """
 
 @Suite struct FlarePasteboardAdapterTests {
     /// The copy offers Flare's own layers, then an SVG, then a PNG, and nothing else.
-    @Test(.disabled("waits on CB-8")) func copyOffersOwnLayersSvgAndPng() throws {
+    @Test func copyOffersOwnLayersSvgAndPng() throws {
         let offered = copied(at: 12)
         #expect(offered.map(\.type) == [.flareLayers, .svg, .png])
         var workspace = bounce(at: 12)
@@ -69,7 +70,7 @@ private let logo = """
     }
 
     /// Mutation `.pngAtPlayhead`: the PNG is drawn at frame 12, at 1x, never at frame 0.
-    @Test(.disabled("waits on CB-8")) func pngIsDrawnAtThePlayhead() throws {
+    @Test func pngIsDrawnAtThePlayhead() throws {
         let at12 = try #require(copied(at: 12).first { $0.type == .png })
         let at0 = try #require(copied(at: 0).first { $0.type == .png })
         #expect(at12.data != at0.data, "the PNG at frame 12 is the frame 0 picture")
@@ -78,7 +79,7 @@ private let logo = """
     }
 
     /// The SVG frame is one document holding the squashed ball at frame 12, unlike frame 0's.
-    @Test(.disabled("waits on CB-8")) func svgIsTheFrameAtThePlayhead() throws {
+    @Test func svgIsTheFrameAtThePlayhead() throws {
         let at12 = try #require(copied(at: 12).first { $0.type == .svg })
         let at0 = try #require(copied(at: 0).first { $0.type == .svg })
         let text = String(decoding: at12.data, as: UTF8.self)
@@ -88,7 +89,7 @@ private let logo = """
     }
 
     /// The coder hands Flare its own layers first, and an SVG beside a PNG as vectors, not pixels.
-    @Test(.disabled("waits on CB-8")) func flareTakesOwnLayersThenVectors() throws {
+    @Test func flareTakesOwnLayersThenVectors() throws {
         let coder = SuitePasteboardCoding()
         let offered = copied(at: 12)
         guard case .appLayers(let type, _)? = coder.bestItem(from: offered, for: .flare) else {
@@ -102,7 +103,7 @@ private let logo = """
     }
 
     /// Mutation `.svgPlacesVectors`: a pasted SVG adds its two groups as layers, one undo step, never a bitmap.
-    @Test(.disabled("waits on CB-8")) func pastedSvgAddsItsGroupsAsLayers() {
+    @Test(.disabled("waits on svg-place PF-5")) func pastedSvgAddsItsGroupsAsLayers() {
         var workspace = bounce(at: 12)
         let before = layerNames(workspace)
         Seam.paste(.vector(svg: logo, name: "logo"), into: &workspace)
@@ -113,8 +114,32 @@ private let logo = """
         #expect(layerNames(workspace) == before, "one undo takes the paste back")
     }
 
+    /// Mutation `.svgPlacesVectors`: a pasted SVG goes to `place.image` as an SVG file, never drawn to pixels first
+    /// (Flare refuses pixels with the kernel's format sentence). Until svg-place PF-5 the place path says it isn't
+    /// built; after it the SVG's two groups are layers.
+    @Test func pastedSvgRunsThePlacePath() {
+        var workspace = bounce(at: 12)
+        let before = layerNames(workspace)
+        Seam.paste(.vector(svg: logo, name: "logo"), into: &workspace)
+        let added = layerNames(workspace).count - before.count
+        let refusal = workspace.layerError?.message
+        #expect(refusal != PlaceRules.formatHelp, "the SVG reached place.image as a picture")
+        #expect(added == 2 || refusal?.contains("svg-place") == true,
+                "the paste neither added the logo's layers nor reached svg-place's place path: \(String(describing: refusal))")
+    }
+
+    /// A PNG goes to `place.image` too, which refuses it in Flare's words and changes nothing.
+    @Test func pastedPngIsRefusedByThePlacePath() {
+        var workspace = bounce(at: 12)
+        let before = layerNames(workspace)
+        let png = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
+        Seam.paste(.image(png: png, pixelWidth: 1, pixelHeight: 1), into: &workspace)
+        #expect(layerNames(workspace) == before)
+        #expect(workspace.layerError?.message == PlaceRules.formatHelp)
+    }
+
     /// Flare's own layers pasted back are Edit > Paste's: "Ball copy", one step.
-    @Test(.disabled("waits on CB-8")) func pastedOwnLayersAreACopy() throws {
+    @Test func pastedOwnLayersAreACopy() throws {
         var workspace = bounce(at: 12)
         let copy = workspace.copy()
         let own = try #require(copy)
