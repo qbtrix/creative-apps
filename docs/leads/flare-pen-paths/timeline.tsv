@@ -91,3 +91,4 @@ utc	stage	event	ref	note
 2026-10-23T06:15Z	check	FP-z #4753 merged 06:04Z (869d9a545); waiting on a dev Linux run containing it
 2026-10-23T06:37Z	check	FP-z: dev Linux check 39911065344 on e68a0162c (contains 869d9a545) in progress
 2026-10-23T06:40Z	check	FP-z done: Belt-Slice-Done + Mac-Finish-Wanted on #3519 (run 39911065344); contact sheet waits on full CI 39910511135 screens
+2026-10-23T07:00Z	check	heartbeat: FP-u critic panel and contact sheet pending (gaps #4012)
