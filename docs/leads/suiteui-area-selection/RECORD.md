@@ -4,7 +4,7 @@ Issue: #3752 · Packet: docs/blueprints/suiteui/features/area-selection.md
 Run: act-1a1693a4009-hyio (line lead: area-selection, adjust-everywhere, shared-raw) · Session: claude/feature-lead-playbook-fkjibd · Started: 2026-10-23T14:40Z
 Stage: 3 wave 1
 Base: 35a0b5e7e9520a764f3eabf02968a453082a87cc
-Next: check between waves: which of #4842, #4860, #4861, #4876, #4877 merged; retarget #4861 to dev once #4860 merges; post Belt-Slice-Done for AR-r / AR-design once a dev CI run with a green Linux job contains their last PR.
+Next: #4842 (AR-r) and #4860 merged 21:40Z; #4876 restacked on dev (head 230ce4d, fast-lane) and #4861 retargeted to dev (head 10670461, fast-lane). Post Belt-Slice-Done AR-r when scoped suiteui run 40029042081 (dev 491ec54) is green; AR-design after #4861 lands; restack #4877 once #4876 merges.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
