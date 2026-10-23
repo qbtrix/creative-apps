@@ -1,9 +1,9 @@
 [
   {
     "label": "the first suffix is 1, not 2",
-    "file": "Sources/SuiteModel/Values/UniqueFileNames.swift",
-    "find": "var number = 2",
-    "replace": "var number = 1",
+    "file": "Sources/LibraryModel/Contracts/ExportNaming+Kernel.swift",
+    "find": "var name = base, number = 2",
+    "replace": "var name = base, number = 1",
     "tests": "LibraryExportContractTests"
   },
   {
