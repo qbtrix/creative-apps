@@ -173,10 +173,27 @@ extension FlareWorkspace {
         setFrameRate,  // frame-rates FR-10, FlareFrameRate+Kernel.swift
     ] + GradientCommands.specs(FlareWorkspace.self)  // the eight fill.* commands (gradient-fill FG-5)
         + FileFlowCommands.specs(FlareWorkspace.self)  // file.recent, open-recent, clear-recent, open-in, drop (file-flow FL-3)
+        + hiddenCommands  // the beta.2 items the menus hide (no-placeholders NP-3)
         + PathCommands.specs(FlareWorkspace.self)  // the twelve path.* commands, the Pen and Direct Select's points (pen-paths FP-6)
 }
 
 extension FlareWorkspace {
+    /// The beta.2 commands (no-placeholders NP-3): id, title, and the name `laterReason` gives.
+    static let betaTwo: [(id: String, title: String, name: String)] = [
+        ("view.toggle-onion", "Onion Skin", "Onion skin"), ("view.toggle-motion-path", "Motion Path", "Motion path"),
+        ("window.interactions", "Interactions", "Interactions"), ("window.assist", "Animate with Assist", "Assist"),
+        ("library.convert-to-symbol", "Convert to Symbol", "Convert to Symbol"), ("library.exit-symbol", "Exit Symbol", "Exit Symbol"),
+    ]
+    /// Commands whose menu items the beta hides; each stays in the catalog, unavailable with `laterReason`.
+    public static let menuHidden = Set(betaTwo.map(\.id))
+    /// Why a hidden command can't run: "Onion skin comes in a later beta."
+    public static func laterReason(_ id: String) -> String {
+        "\(betaTwo.first { $0.id == id }?.name ?? "This") comes in a later beta."
+    }
+    static let hiddenCommands = betaTwo.map { command in
+        act(command.id, command.title, "Comes in a later beta; the menu hides it.", .view, { _ in laterReason(command.id) }) { _ in }
+    }
+
     /// Why Restore and Discard wait: the recovery file holds the open animation's unsaved changes.
     public static let recoveryKeepsEdits = "The open animation has unsaved changes; save them first."
     var recoveryHelp: String? { isDirty ? Self.recoveryKeepsEdits : nil }

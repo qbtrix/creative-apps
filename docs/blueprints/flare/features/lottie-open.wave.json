@@ -24,7 +24,7 @@
     "Tests/RealJobs/flare/open-recolour-lottie/open-recolour-lottie.jobs.json",
     "Sources/FlareApp/FlareFilePanels.swift",
     "Sources/FlareApp/FlareWindow+File.swift",
-    "Sources/FlareApp/FlareImportNote.swift",
+    "Sources/FlareApp/FlareImportNoteAdapter.swift",
     "Tests/AppSnapshotTests/RenderBudgetFlareLottieOpenTests.swift",
     "Sources/FlareModel/FlareFiles.swift",
     "Sources/FlareModel/FlareHeadless.swift",
@@ -69,7 +69,7 @@
       "owned": [
         "Sources/FlareApp/FlareFilePanels.swift",
         "Sources/FlareApp/FlareWindow+File.swift",
-        "Sources/FlareApp/FlareImportNote.swift",
+        "Sources/FlareApp/FlareImportNoteAdapter.swift",
         "Tests/AppSnapshotTests/RenderBudgetFlareLottieOpenTests.swift"
       ],
       "waits": {

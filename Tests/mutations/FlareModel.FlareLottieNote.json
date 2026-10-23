@@ -1,0 +1,37 @@
+[
+  {
+    "label": ".namesEverySkip: a landed open drops the skipped list, so the note says nothing was skipped",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "            importNote = skipped\n",
+    "replace": "            importNote = []\n",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".dismissCloses: Dismiss leaves the note up",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "public mutating func dismissImportNote() { importNote = nil }",
+    "replace": "public mutating func dismissImportNote() {}",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".saysNothingSkipped: a clean open shows an empty note",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "importNote.isEmpty ? [Self.nothingSkipped] : importNote",
+    "replace": "importNote",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".dropRoutesJSON: a dropped .json goes to the bridge, which refuses it",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "if case .refuse(let path, _) = action, opensAsLottie(path) {",
+    "replace": "if case .refuse(let path, _) = action, opensAsLottie(path), false {",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".loadClearsNote: another document keeps an old Lottie's note",
+    "file": "Sources/FlareModel/FlareWorkspace.swift",
+    "find": "        importNote = nil\n",
+    "replace": "",
+    "tests": "FlareLottieNoteTests"
+  }
+]
