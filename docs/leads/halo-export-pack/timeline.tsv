@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-23T22:35:00Z	4	stage	HX-a	HX-a merged; HX-u retargeted to dev (dfda2847)
 2026-10-23T23:05:00Z	4	done	HX-a	Belt-Slice-Done HX-a run 40029046141; Mac-Finish-Wanted posted
 2026-10-23T23:20:00Z	4	stage	HX-u	waiting on lane batch; findings 0
+2026-10-23T23:40:00Z	4	stage	HX-u	waiting on lane batch (macOS gate run 40029779505 busy)
