@@ -89,3 +89,4 @@ time	kind	note
 2026-10-23T16:25Z	DK-u	pr	#4864	CI: PASS at 97439dd8, 7 files +352\/-8; critic panel (correctness, first-use clarity) started
 2026-10-23T16:36Z	DK-m	gate	design/dk-m-stroke-model	builder in gate; DK-u critic panel running
 2026-10-23T16:50Z	DK-m	pr	#4888	CI: PASS at 60acae85, 15 files +199/-93; DK-7 split to design/dk-m-stroke-svg (file cap); critic started
+2026-10-23T16:58Z	DK-m	build	design/dk-m-stroke-svg	DK-7 building; critics on #4864 #4888 running
