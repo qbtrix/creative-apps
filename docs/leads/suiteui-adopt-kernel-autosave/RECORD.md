@@ -2,7 +2,7 @@
 
 Issue: #3713 · Packet: docs/blueprints/suiteui/features/adopt-kernel-autosave.md
 Run: act-1a16c618fe7-h4fd (line lead, line:suiteui; relaunch after park) · earlier runs act-1a163b2abfe-f182, act-1a15c07cabb-mtlw
-Stage: 3 wave 1 (this run)
+Stage: 3 wave 1 building (AK-6, then AK-9 stacked on it)
 Base: origin/dev 654fb3632
 Next: Wave 1 builds AK-6 (Library catalog under the root; Wire: library:spine) and then AK-9 (four-editor journey, Photo step skipped until AK-8). AK-8 waits on shared-codecs SC-f (supervisor: don't touch PhotoWindow+File.swift). AK-11 follows AK-6, AK-8, AK-9.
 
