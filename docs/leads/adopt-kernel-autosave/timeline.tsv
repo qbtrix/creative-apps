@@ -52,3 +52,4 @@ utc	stage	event	ref	note
 18:10Z	AK	heartbeat	-	no change
 18:40Z	AK	AK-10 retarget	#4428	f9be9a48 base dev
 2026-10-22T19:51Z	3	merged	AK-10	#4428 b653cb7bfd
+2026-10-24T05:34:34Z	resume	run act-1a16c618fe7-h4fd: AK-4, AK-10 merged; wave 1 = AK-6 then AK-9; AK-8 waits SC-f

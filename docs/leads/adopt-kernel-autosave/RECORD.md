@@ -1,17 +1,17 @@
 # adopt-kernel-autosave lead record
 
 Issue: #3713 · Packet: docs/blueprints/suiteui/features/adopt-kernel-autosave.md
-Run: act-1a163b2abfe-f182 (relaunch; first run act-1a15c07cabb-mtlw) · Started: 2026-10-22
-Stage: parked by the supervisor (AK-10 landing via lane)
-Base: 1a518080de143b64a57ee1838c3ef01b775e52e6
-Next: AK side ended (parked by the supervisor): #4427 and #4428 on dev; relaunch takes AK-6, AK-8, AK-9, AK-11
+Run: act-1a16c618fe7-h4fd (line lead, line:suiteui; relaunch after park) · earlier runs act-1a163b2abfe-f182, act-1a15c07cabb-mtlw
+Stage: 3 wave 1 (this run)
+Base: origin/dev 654fb3632
+Next: Wave 1 builds AK-6 (Library catalog under the root; Wire: library:spine) and then AK-9 (four-editor journey, Photo step skipped until AK-8). AK-8 waits on shared-codecs SC-f (supervisor: don't touch PhotoWindow+File.swift). AK-11 follows AK-6, AK-8, AK-9.
 
 ## Slices
 
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | AK-a | One app-folder rule and a never-overwrite legacy plan; a ratchet stops new support-dir lookups | AK-1, AK-2 | – | autosave-history:AH-a (merged) | false | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39568091135 | – |
-| AK-flare | Flare autosaves through the kernel schedule into its app folder | AK-3, AK-4 | – | AK-a (AK-3); autosave-history:AH-z (AK-4) | false | 0 | planned | – | – |
+| AK-flare | Flare autosaves through the kernel schedule into its app folder | AK-3, AK-4 | – | AK-a (AK-3); autosave-history:AH-z (AK-4) | false | 0 | merged (Belt-Slice-Done pending a dev run) | – | – |
 | AK-library | Library's catalog lives in the app folder, legacy moved once | AK-5, AK-6 | – | AK-a (AK-5); library spine hand-off (AK-6) | false | 0 | planned | – | – |
 | AK-photo | Photo recovery lives in the app folder | AK-7, AK-8 | – | AK-a (AK-7); SC-f, PH-z (AK-8) | false | 0 | planned | – | – |
 | AK-z | Design and Halo adopt; the ratchet baseline reaches zero; feature built | AK-9, AK-10, AK-11 | – | DA-z, HA-z (AK-9); AH-z (AK-10) | false | 0 | planned | – | – |
@@ -23,13 +23,13 @@ Next: AK side ended (parked by the supervisor): #4427 and #4428 on dev; relaunch
 | AK-1 | AK-a | 1 | contract stubs, disabled tests, support-dir ratchet | Sources/SuiteModel/Store/SuiteLocations.swift, Sources/SuiteModel/Store/LegacySupport.swift, Tests/SuiteModelTests/SuiteLocationsAppFolderTests.swift, Tests/SuiteModelTests/SupportFolderRatchetTests.swift, Tests/support-dir-baseline.txt | SupportFolderRatchetTests | #3835 | merged |
 | AK-2 | AK-a | 1 | bodies, tests on, mutation plan | Sources/SuiteModel/Store/SuiteLocations.swift, Sources/SuiteModel/Store/LegacySupport.swift, Tests/SuiteModelTests/SuiteLocationsAppFolderTests.swift, Tests/mutations/SuiteModel.SuiteLocations.json, docs/c4/parts/creative-apps/suite-model/suite-store.json | SuiteLocationsAppFolderTests; .appFolderHasAppSegment .neverOverwrites .flagReachesApp | #3835 | merged (Mutate 3/3) |
 | AK-3 | AK-flare | 2 | see packet | see packet | see packet | #3842 | merged |
-| AK-4 | AK-flare | 4 | see packet | see packet | see packet | #4010 | open (68b3c4e6, dev merged; rounds used) |
+| AK-4 | AK-flare | 4 | see packet | see packet | see packet | #4010 | merged (a3c4bff97) |
 | AK-5 | AK-library | 2 | see packet | see packet | see packet | #3848 | merged |
-| AK-6 | AK-library | – | see packet | see packet | see packet | – | blocked (spine) |
+| AK-6 | AK-library | – | see packet | see packet | see packet | – | building wave 1 (Wire: library:spine) |
 | AK-7 | AK-photo | 2 | see packet | see packet | see packet | #3841 | merged |
 | AK-8 | AK-photo | – | see packet | see packet | see packet | – | blocked (SC-f, PH-z) |
 | AK-9 | AK-z | – | see packet | see packet | see packet | – | blocked (DA-z, HA-z) |
-| AK-10 | AK-z | 5 | see packet | see packet | see packet | #4427, #4428 | open (split: tests 292 lines, source 185 lines) |
+| AK-10 | AK-z | 5 | see packet | see packet | see packet | #4427, #4428 | merged (31da7d22f6, b653cb7bfd) |
 | AK-11 | AK-z | – | see packet | see packet | see packet | – | planned |
 
 ## Reviews
@@ -39,6 +39,7 @@ Next: AK side ended (parked by the supervisor): #4427 and #4428 on dev; relaunch
 
 ## Decisions
 
+- 2026-10-24T05:34:34Z relaunch as run act-1a16c618fe7-h4fd. AK-4 (#4010) and AK-10 (#4427, #4428) are on dev. The supervisor (2026-10-24) says to build every AK task that doesn't touch PhotoWindow+File.swift now, on the kernel's fakes, with Wire: lines. So AK-6 builds now against spine's dev state (Wire: library:spine), and AK-9 is written with the Photo step skipped ("waits on AK-8"); Design DA-z and Halo HA-z are built. AK-8 stays until SC-f lands. Open gap #4018 stays a gap.
 - 2026-10-22T19:51Z #4428 (AK-10 source) merged by the lane as b653cb7bfd. AK side ended; relaunch takes AK-6, AK-8, AK-9, AK-11.
 - 18:40Z #4427 (AK-10 tests) merged (31da7d22f6). Merged dev into feat/ak-10-flare-delete (f9be9a48): one conflict in FlareWindow.swift, resolved by keeping #4428's rename FlareRecovery.swift -> FlareAutosaveAdapter.swift (same body as AK-4's squash). scripts/ci --changed: CI: PASS. #4428 retargeted to dev, Head moved, no footer. AK side ends here, as the supervisor said; AK-6, AK-8, AK-9 and AK-11 wait for the relaunch.
 - 18:10Z heartbeat: no change; #4427 build green, waiting for its lane batch
