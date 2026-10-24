@@ -40,6 +40,7 @@ Loop: v3 (the packet has a `## Slices` table).
 - Rule 20: no Flare encoder and no local copy of MovieSettings or FrameClock, so FV-1 does not start until SM-a is on dev.
 - 2026-10-24: this session's GitHub writes get the attribution footer appended on the way out, so PATCHing it out of PR bodies doesn't hold; the lane strips it from the squash commit and waits on nothing for it. Left as is.
 
+- 2026-10-24T22:21:55Z: two sessions led this run at once; act-1a16fe1fa9f-sqqi wrote its record to lead/export-pack (stale since the 2026-10-23T17:03Z move). It stops writing there; this record on lead/flare-export-pack is the only one. #4854 is back at 565669e7.
 - 2026-10-24: the FV-u budget test hang is #4852's own defect (stack: FlareFileDialogs.chooseFolder from startExport), not a flake: fixed on its branch rather than waiting for the bisect's needs-fix.
 
 ## Open
