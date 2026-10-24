@@ -14,3 +14,4 @@ utc	stage	event	ref	note
 2026-10-24T14:05Z	3	stage-start	act-1a16e2f645b-47gj	resumed; #4911 merged, #5156 ready, HY-7 starts
 2026-10-24T13:57Z	3	check	act-1a16e2f645b-47gj	bodies moved to this run; #5156 and #5174 in the lane; HY-7 builder started; no findings
 2026-10-24T20:08Z	3	heartbeat	act-1a16e2f645b-47gj	resumed after container restart; HY-7 builder lost, restarting; #5156 #5174 still open
+2026-10-24T20:15Z	stage	HY-7 builder restarted; #5156 waits behind lane batch 20261024183708 (dev-red #5183)

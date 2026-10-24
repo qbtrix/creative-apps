@@ -7,7 +7,7 @@ Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTes
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
 Stage: 3 wave 5 (resume): #4911 LS-1 merged on dev 78983bc; #5156 HY-1 ready, clean, waits the lane; #5157/#5158/#5161 drafts; LS-2 is #5174 (open); HY-7 being built per the supervisor's 13:10Z answer (shared SuiteUI GPU layer view)
 Base: 6be19b3 (origin/dev)
-Next: HY-7 builder on lead/halo-layer-styles-HY-z (SuiteUI StyleLayerView + Halo viewer + no-upload budget test); when #5156 merges, merge dev into #5158, gate, Head, ready; when #5174 LS-2 lands, the same for #5157 then #5161
+Next: HY-7 builder restarted after the container restart (fresh branch lead/halo-layer-styles-HY-z from HY-u fbb199f2); when #5156 merges, merge dev into #5158, gate, Head, ready; when #5174 LS-2 lands, the same for #5157 then #5161
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -48,6 +48,7 @@ Next: HY-7 builder on lead/halo-layer-styles-HY-z (SuiteUI StyleLayerView + Halo
 - 2026-10-24 (revised): the supervisor answered (#3936, 10:55Z) that building HY-7 ahead on the StyleRoute stub with a Wire line is right, superseding the earlier "not built ahead". Open point asked on #3936: the viewer draws items in a SwiftUI Canvas and no app holds a RenderDispatcher yet; feeding StyleRoute a layer RenderSurface per frame means a PixelBuffer upload per step (render-contract rule 3). HY-7 is built once the route shape is answered; until then the viewer draws styled layers unstyled and the journey stays skipped.
 
 ## Open
+- 2026-10-24T20:15Z: container restart lost the first HY-7 builder (nothing pushed); restarted. #5156 still clean and unmerged (only the fast-lane check on 0e12bffd): the lane is bisecting batch 20261024183708 (probe -6 macOS gate running, #5156 not in it) with dev-red #5183 open. If #5156 isn't batched once that batch resolves: `Question for the supervisor:` on #3936.
 - 2026-10-24: draft PRs opened per the supervisor: #5156 (HY-1), #5157 (HY-2), #5158 (HY-m), #5161 (HY-u). They go ready once #4911 and LS-2 are on dev and dev is merged in.
 - 2026-10-24T06:40Z: HY-1 gate PASS at e52c9ca after fixing the catalog counts, the conformance exemption (the eleven stubs' examples refuse until LS-6) and the halo list-commands golden (+11 ids only). HY-2 blocked on LS-2; HY-5 on LS-m.
 - 2026-10-24: run resumed on the supervisor's direction (build on LS-a's fakes). HY-1 committed test-first on `lead/halo-layer-styles-HY-a`, stacked on LS-1 (#4911, open). The PR waits for #4911 to land so its diff stays HY-a's own.
