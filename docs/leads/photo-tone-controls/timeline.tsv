@@ -85,3 +85,4 @@ utc	stage	event	ref	note
 2026-10-24T02:13Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, waiting; no lane run since 01:29Z; dev 654fb3632
 2026-10-24T02:34Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, waiting; no lane run since 01:29Z; dev 654fb3632
 2026-10-24T02:56Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, waiting; lane run in progress since 02:43Z; dev 654fb3632
+2026-10-24T03:17Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, waiting; lane 02:43Z merged nothing, 03:06Z in progress; dev 654fb3632
