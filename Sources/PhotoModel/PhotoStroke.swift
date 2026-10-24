@@ -39,7 +39,7 @@
 //   crop           the same rectangle is the pending crop (Apply Crop commits
 //                  it); a click drops it (PhotoCropSize.swift).
 //   eyedropper     the color under the pointer becomes the brush color, never
-//                  an undo step (PhotoEyedropper.swift).
+//                  an undo step (PhotoSample+Kernel.swift).
 //   move           shifts every picked image layer by the drag, in whole
 //                  pixels, as one step ("Move Layer", "Move Layers" for several).
 //
