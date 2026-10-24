@@ -18,7 +18,8 @@
 // the hosted window at the journeys' 1000 by 640, the `suite.inspector`
 // column starts at the same x, and is at least HaloWindow.inspectorWidth
 // wide, with Ball selected at frame 12 and with its x 0 key picked and
-// eased Out, so ending a drag never moves the stage. L8 (#4314): the TEXT
+// eased Out, so ending a drag never moves the stage; there, with one layer,
+// the status bar reads "1 layer" (#3925). L8 (#4314): the TEXT
 // color row's "Color" label, at the window's inspector width, is at least
 // its fitting width. A miss is a `finding` on the view's owner, not a fix in
 // the test. macOS only.
@@ -271,6 +272,20 @@ extension BodyCountSuites {
             for column in columns.map({ $0.insetBy(dx: -SuiteSpacing.m, dy: 0) }) {
                 #expect(column.width >= HaloWindow.inspectorWidth - 0.5, "the inspector is under its width: \(report)")
             }
+        }
+
+        /// #3925: at the journeys' 1000 pt window the status bar still counts the layers ("1 layer").
+        @Test(.timeLimit(.minutes(3))) func statusBarCountsLayersAtJourneyWidth() async throws {
+            var project = HaloLaunch(arguments: ["Halo", "-HaloSample", "empty"]).project()
+            project.newLayer(.solid)
+            let summary = try #require(project.selectedComposition?.layerSummary, "no composition")
+            #expect(summary == "1 layer")
+            let host = try await AXHost(HaloWindow(model: project), size: Self.window)
+            defer { host.close() }
+            let row = host.frames(prefix: "halo.transport.").merging(host.frames(prefix: HaloLayoutTests.historyID)) { a, _ in a }
+            let report = "#3925 at \(Self.window.width) pt: \(row.sorted { $0.value.minX < $1.value.minX }.map { "\($0.key) \($0.value.minX)" })"
+            print(report)
+            #expect(host.frame(text: { $0 == summary }) != nil, "the status bar doesn't read \(summary): \(report)")
         }
     }
 }
