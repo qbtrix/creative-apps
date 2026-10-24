@@ -113,4 +113,38 @@ func adjustCatalog() throws -> CommandCatalog<AdjustTestTarget> {
         guard case .array(let rows) = list.result else { Issue.record("not a list"); return }
         #expect(rows.count == 7)
     }
+
+    /// Weights replace the B&W kind in place and no weights remove it; Invert toggles off again.
+    @Test func kindsReplaceAndToggle() throws {
+        let catalog = try adjustCatalog()
+        var doc = AdjustTestTarget()
+        doc.look.kinds = [.blackAndWhite(.neutral), .invert]
+        let red = GrayWeights(red: 100, yellow: 60, green: 40, cyan: 60, blue: 20, magenta: 80)
+        let weights: [String: JSONValue] = ["red": .number(100), "yellow": .number(60), "green": .number(40),
+                                            "cyan": .number(60), "blue": .number(20), "magenta": .number(80)]
+        _ = try catalog.run("adjust.black-and-white", params: .object(["weights": .object(weights)]), on: &doc)
+        #expect(doc.kinds == [.blackAndWhite(red), .invert])
+        _ = try catalog.run("adjust.invert", params: .object([:]), on: &doc)
+        #expect(doc.kinds == [.blackAndWhite(red)])
+        _ = try catalog.run("adjust.black-and-white", params: .object([:]), on: &doc)
+        #expect(doc.kinds.isEmpty && doc.history.steps.count == 3)
+    }
+
+    /// A built-in's name is taken ignoring case; a saved look deletes once, its id its name's slug; an unknown id is refused.
+    @Test func savedLookDeletes() throws {
+        let catalog = try adjustCatalog()
+        let store = FakePresetStore()
+        var doc = AdjustTestTarget(store: store)
+        #expect(throws: CatalogError.unavailable(id: "look.save", why: "You already have a look named \u{201C}black & white\u{201D}.")) {
+            try catalog.run("look.save", params: .object(["name": .string("black & white")]), on: &doc)
+        }
+        let saved = try catalog.run("look.save", params: .object(["name": .string("My Look")]), on: &doc)
+        #expect(saved.result == .object(["id": .string("my-look")]))
+        _ = try catalog.run("look.delete", params: .object(["id": .string("my-look")]), on: &doc)
+        #expect(store.list(kind: LookPreset.recordKind).isEmpty)
+        #expect(throws: CatalogError.self) { try catalog.run("look.delete", params: .object(["id": .string("my-look")]), on: &doc) }
+        #expect(throws: CatalogError.unavailable(id: "look.delete", why: "A built-in look can't be deleted.")) {
+            try catalog.run("look.delete", params: .object(["id": .string("bw")]), on: &doc)
+        }
+    }
 }
