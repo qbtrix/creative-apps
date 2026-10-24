@@ -2,8 +2,9 @@
 // HF-1 written, HF-3 turns it on). HaloProject as a FileFlowTarget, with
 // HaloDocumentHost as its suite document host: it names itself "halo", opens
 // a dropped .halo through the host, hands a PNG to Photo (image layers are
-// S20), imports its old Open Recent list once, and a drop that opens or
-// hands off changes no document. Runs on Linux and macOS.
+// S20), imports its old Open Recent list once, Open Recent reads the suite's
+// list and no list of Halo's own (#5080), and a drop that opens or hands off
+// changes no document. Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -102,6 +103,16 @@ private actor Delivered {
     @Test func aPNGHandsOffToPhoto() throws {
         let project = try opened()
         #expect(plan(project, "/w/Sunset.png") == [.handOff(path: "/w/Sunset.png", app: "photo")])
+    }
+
+    @Test func openRecentReadsTheSuitesList() throws {
+        var project = HaloProject()
+        project.didSave(name: "Spot", path: "/w/Spot.halo")
+        #expect(project.unavailableHelp(for: .openRecent("/w/Spot.halo")) == "No recent projects.",
+                "Open Recent read a list of Halo's own")
+        project.updateFileFlow(recents: [RecentFileEntry(fileID: "f1", name: "Intro.halo", path: "/w/Intro.halo",
+                                                         app: "halo", lastUsed: Date(timeIntervalSince1970: 0))])
+        #expect(project.unavailableHelp(for: .openRecent("/w/Intro.halo")) == nil)
     }
 
     @Test func theOldRecentsAreImportedOnce() async throws {
