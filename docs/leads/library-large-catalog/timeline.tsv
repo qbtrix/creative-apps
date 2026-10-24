@@ -90,3 +90,4 @@
 2026-10-24T20:01Z	3	poll	LG-grid	probe -6 macOS running; #5050 waits
 2026-10-24T20:21Z	3	poll	LG-grid	probe -6 macOS 65 min (run 40123913661); #5050 waits
 2026-10-24T20:42Z	poll	bisect -6 green, -7 red: culprit #4886; #5050 next batch
+2026-10-24T21:02Z	poll	#5050 in batch 20261024205137, gates running
