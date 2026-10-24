@@ -18,7 +18,7 @@ import Testing
         var probe: TimelineFadeMark { TimelineFadeMark(record: { _ in }, sample: { self.all.append($0) }) }
     }
 
-    @Test func aKeyDragRecordsASamplePerPointerSample() {
+    @Test func aKeyDragRecordsASamplePerPointerSample() async throws {
         let samples = Samples()
         let view = TimelineLanesView(frame: NSRect(x: 0, y: 0, width: 1_600, height: SuiteSize.timelineLane))
         let pointer = TimelineLanePointer<String>()
@@ -31,7 +31,8 @@ import Testing
         let start = CGPoint(x: tickX(Self.mapping, 40), y: SuiteSize.timelineLane / 2)
         view.press(at: start, flags: [])
         for step in 1...80 { view.drag(to: CGPoint(x: start.x + CGFloat(step), y: start.y)) }
-        spinUntil { samples.all.count >= 80 }
+        // Each sample lands on a later main-actor turn: suspend so those turns run.
+        for _ in 0..<50 where samples.all.count < 80 { try await Task.sleep(for: .milliseconds(20)) }
         #expect(samples.all.count == 80, "80 pointer samples recorded \(samples.all.count)")
         #expect(samples.all.allSatisfy { $0.series == TimelineFadeMark.keyDragSeries && $0.shownAt >= $0.eventTime })
         view.release(at: CGPoint(x: start.x + 80, y: start.y))
