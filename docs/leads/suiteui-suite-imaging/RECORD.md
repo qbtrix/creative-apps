@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: 14:02Z poll: nothing has merged, and all 7 PRs are clean (#5154 and #5163 lack fast-lane until their parents merge; #5178 is no-fast-lane for the supervisor). The newest dev CI run is still 40087964618, which predates the stack. #3723 is open, and IM-8b q 6383016723 is unanswered. Waiting on the lane batch.
+Next: 14:22Z poll: dev moved to e79e9afcb after the lane landed a batch, but none of ours were in it. #5154 and #5163 have fast-lane again, all of ours are in the queue, and #5178 is no-fast-lane for the supervisor. No dev CI run contains the stack yet. #3723 is open, and IM-8b q 6383016723 is unanswered.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
 
