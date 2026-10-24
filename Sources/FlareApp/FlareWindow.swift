@@ -20,10 +20,12 @@
 // isn't idle.
 // It publishes the menu bar's FlareMenu (FlareCommands.swift): `perform` and
 // `help` for every section 3.4 item, the Undo and Redo step names, Loop and
-// the selection's Edit reasons. The model's file flow follows the suite's
-// recents (the bridge's list, the only one Open Recent reads; #5126).
+// the selection's Edit reasons, and File > Place…'s reason and action; the
+// window takes SVG drops (FlarePlace.swift). The model's file flow follows the
+// suite's recents (the bridge's list, the only one Open Recent reads; #5126).
 import FlareModel
 import SuiteModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -42,13 +44,17 @@ struct FlareWindow: View {
     @State var exportTask: Task<Void, Never>? = nil
     /// The first file the last export wrote, for Reveal in Finder.
     @State var exportedFile: URL? = nil
-    let launch = FlareLaunch(arguments: ProcessInfo.processInfo.arguments)
+    /// The process's flags; a hosted-window test passes its own, so `-FlareExportTo` reaches the export and no
+    /// folder panel opens.
+    var launch = FlareLaunch(arguments: ProcessInfo.processInfo.arguments)
 
     #if DEBUG
     /// How many times a window's body ran; RenderBudgetFlareTests counts an interaction's.
     static var bodyRuns = 0
     /// The model the last body ran on, for the hosted-window tests to read back.
     static var shownModel: FlareWorkspace?
+    /// The last body's place (FlarePlace.swift), for RenderBudgetFlarePlaceTests to send the menu's place.
+    @MainActor static var placeProbe: (@MainActor ([(name: String, data: Data)]) -> Void)?
     /// The last body's `perform`, for the hosted-window tests to send intents through (FlareFileFlowLiveTests).
     @MainActor static var shownPerform: ((FlareIntent) -> Void)?
     #endif
@@ -63,6 +69,7 @@ struct FlareWindow: View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
         let _ = Self.shownModel = model
+        let _ = Self.placeProbe = { _ = place($0) }
         let _ = Self.shownPerform = { perform($0) }
         #endif
         SuiteWindow(
@@ -101,7 +108,8 @@ struct FlareWindow: View {
         .suiteOpenQueue(FlareShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .modifier(FlareAutosaveAdapter(model: model, restore: { try model.restoreRecovery($0) }))
         .onChange(of: Self.bridge.recents(for: .flare), initial: true) { model.updateFileFlow(recents: $1) }
-        .modifier(FlareLiveRegistration(read: { model }, write: { model.takeLive($0) }))
+        .suiteLiveWindow(FlareLive.front, read: { FlareHeadless(workspace: model) }, write: { model.takeLive($0) })
+        .placeDropTarget(formats: model.placeFormats) { files, _ in place(files) }
         .focusedSceneValue(
             \.flareMenu,
             FlareMenu(
@@ -109,6 +117,7 @@ struct FlareWindow: View {
                 undoTitle: model.undoActionName ?? "Undo", redoTitle: model.redoActionName ?? "Redo",
                 loops: model.loops, editHelps: model.editHelps,
                 selectionHelps: [model.deleteHelp, model.orderHelp(forward: true), model.orderHelp(forward: false)],
+                placeHelp: model.placeMenuHelp, place: { choosePlace() },
                 document: model.suiteDocument))
     }
 
