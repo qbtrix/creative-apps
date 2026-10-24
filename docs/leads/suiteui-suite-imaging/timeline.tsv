@@ -87,3 +87,4 @@ utc	stage	event	ref	note
 2026-10-24T20:23Z	poll	check	all	probe -6 macOS gate still running; nothing merged; no needs-rebase/needs-fix
 2026-10-24T20:42Z	poll	check	all	probe -6 green (through #4886), -7 red on #4887; awaiting prefix merge
 2026-10-24T21:02Z	poll	check	all	#4886 re-batched in 20261024205137; awaiting gate
+2026-10-24T21:22Z	poll	check	all	batch 20261024205137 red on Onboarding timeouts (not ours); bisecting
