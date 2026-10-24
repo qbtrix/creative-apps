@@ -1,12 +1,13 @@
 {
   "id": "imaging-adjust",
   "name": "Adjust",
-  "description": "Adjust/ and the SuiteImaging namespace: AdjustSettings (exposure, levels, curve, hue and saturation) with its clamps and its one Codable form Photo and Library both read, and ImagingProgram, which compiles settings to CoreRender's tone adjustments (CPU) and tone program (GPU) in one fixed order. suite-imaging IM-2 declares them as stubs; IM-3 and IM-4 fill the bodies.",
+  "description": "Adjust/, the SuiteImaging namespace and RasterSize (the one PNG/JPEG size reader): AdjustSettings (exposure, levels, curve, hue and saturation) with its clamps and its one Codable form Photo and Library both read, and ImagingProgram, which compiles settings to CoreRender's tone adjustments (CPU) and tone program (GPU) in one fixed order. suite-imaging IM-2 declares them as stubs; IM-3 and IM-4 fill the bodies.",
   "technology": "Swift 6, Foundation (FoundationEssentials), CoreColor, CoreRaster and CoreRender, Linux and macOS",
   "paths": [
     "Sources/SuiteImaging/Adjust/AdjustSettings.swift",
     "Sources/SuiteImaging/Adjust/ImagingProgram.swift",
     "Sources/SuiteImaging/Color/",
+    "Sources/SuiteImaging/RasterSize.swift",
     "Sources/SuiteImaging/SuiteImaging.swift"
   ],
   "order": 100

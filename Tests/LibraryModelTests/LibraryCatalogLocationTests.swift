@@ -95,4 +95,21 @@ import Testing
                 exists: { $0 == Self.oldCatalog }) == .nothing)
         }
     }
+
+    /// The store's folder: a named one, then the registered default, then the launch's.
+    @Test func storeFolderOrder() {
+        let launch = LibrarySupport.catalogFolder(arguments: [], home: Self.home)
+        #expect(LibrarySupport.storeFolder(named: "/n", registered: "/r", arguments: [], home: Self.home) == "/n")
+        #expect(LibrarySupport.storeFolder(named: nil, registered: "/r", arguments: [], home: Self.home) == "/r")
+        #expect(LibrarySupport.storeFolder(named: nil, registered: "", arguments: [], home: Self.home) == launch)
+        #expect(LibrarySupport.storeFolder(named: nil, registered: nil, arguments: [], home: Self.home) == launch)
+    }
+
+    /// A named folder or a registered default (a test process) never moves the real old catalog.
+    @Test func storeMovesLegacyOnlyOnTheLaunchFolder() {
+        #expect(LibrarySupport.storeMovesLegacy(named: nil, registered: nil))
+        #expect(LibrarySupport.storeMovesLegacy(named: nil, registered: ""))
+        #expect(!LibrarySupport.storeMovesLegacy(named: "/n", registered: nil))
+        #expect(!LibrarySupport.storeMovesLegacy(named: nil, registered: "/r"))
+    }
 }
