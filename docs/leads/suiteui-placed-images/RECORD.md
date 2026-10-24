@@ -2,7 +2,7 @@
 
 Issue: #3457 · Packet: docs/blueprints/suiteui/features/placed-images.md
 Run: act-1a16cc5a05a-lc3g (relaunch) · Started: 2026-10-24T06:40Z
-Stage: 3 wave 2 (PL-z: #4616 and #4617 merged, dev 6ad8cad; waiting for a green scoped suiteui or full ci.yml run containing 6ad8cad)
+Stage: done (PL-z slice-done on full CI 40102257393 at dev e79e9afc; Belt-Slice-Done and Belt-Contact-Sheet posted on #3457)
 Base: dev 830af22de
 Next: #4616 and #4617 (rebuilt on dev, docs-only, one file each) land through the lane's Linux run; then Belt-Slice-Done PL-z on the first green ci.yml run on dev containing them, then Belt-Contact-Sheet.
 
