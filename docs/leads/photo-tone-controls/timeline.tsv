@@ -114,3 +114,4 @@ utc	stage	event	ref	note
 2026-10-24T12:44Z	W4	check-in	PT-5	bisect probe -6 (macOS 40092825860) still running; tracked PRs clean, unmerged; 0 tone findings (#5166 is export, not ours); no dev-red
 2026-10-24T13:07Z	W4	check-in	PT-5	bisect probe -6 macOS gate 40092825860 still running (its Linux check passed); tracked PRs clean, unmerged; 0 tone findings; no dev-red
 2026-10-24T13:30Z	W4	check-in	PT-5	probe -6 macOS failed: RenderBudgetToneRowsTests.sliderDragInThreeBodies (100 of 120 tone.set), test from #5006 (suiteui TC-3, other lead); probe -3 running; ours unlabelled
+2026-10-24T13:52Z	W4	check-in	PT-5	probe -3 Linux passed, macOS 40097890001 running; tracked PRs unlabelled, unmerged; no dev-red; dev 6be19b34e
