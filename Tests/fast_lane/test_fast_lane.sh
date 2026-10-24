@@ -1435,6 +1435,24 @@ expect "autolabel: a PR without a Belt-Lead line is left alone" "$(grep -cE '^pr
 expect "autolabel: a non-crew author is left alone" "$(grep -cE '^pr [a-z]+ 32 ' "$sw/calls")" 0
 expect "autolabel: no-fast-lane and needs-human PRs are left alone" "$(grep -cE '^pr [a-z]+ (33|34) ' "$sw/calls")" 0
 
+# The auto-label must not loop (#4708 flipped four times in 20 minutes): the
+# not-eligible verdict removes the label, and the next sweep used to put it
+# back. #40 is a Belt-Lead PR that touches a protected path. The lane judges
+# it once on h40 and leaves it unlabelled until the author pushes a new head.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+pr_at 40 h40 '[{"filename": ".github/workflows/ci.yml", "status": "modified"}]'
+jq '.labels = [] | .body += "\nBelt-Lead: act-20261023-1"' "$sw/40.json" >"$sw/x" && mv "$sw/x" "$sw/40.json"
+lane_sweep
+lane_sweep
+lane_sweep
+expect "relabel loop: a not-eligible Belt-Lead PR is labelled once, not on every sweep" \
+  "$(grep -c '^pr edit 40 .*--add-label fast-lane$' "$sw/calls"),$(grep -c '^pr comment 40 .*Fast lane: labelled because the PR carries Belt-Lead\.' "$sw/calls"),$(grep -c '^pr comment 40 .*Fast lane: not eligible' "$sw/calls")" "1,1,1"
+pr_at 40 h40b '[{"filename": ".github/workflows/ci.yml", "status": "modified"}]'
+jq '.labels = [] | .body += "\nBelt-Lead: act-20261023-1"' "$sw/40.json" >"$sw/x" && mv "$sw/x" "$sw/40.json"
+lane_sweep
+expect "relabel loop: a new head gets labelled and judged again" \
+  "$(grep -c '^pr edit 40 .*--add-label fast-lane$' "$sw/calls"),$(grep -c '^pr comment 40 .*Fast lane: not eligible' "$sw/calls")" "2,2"
+
 # Batch macOS gate: with LANE_MAC_PER_PR=0 (the default) no code PR gets a
 # macOS build of its own. A batch whose PRs change code runs one macOS gate
 # (ci.yml's mac_only) next to its Linux check, scoped to the union of its apps

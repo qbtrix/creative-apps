@@ -1733,7 +1733,7 @@ evaluate() {
       ;;
     not-eligible)
       write gh pr edit "$n" -R "$REPO" --remove-label "$LABEL" || log "could not remove label"
-      comment_once "$n" "Fast lane: not eligible. ${rest//;/; }. This PR now needs normal captain review."
+      comment_once "$n" "Fast lane: not eligible. ${rest//;/; }. This PR now needs normal captain review (head $head)."
       ;;
     red)
       if [[ "$rest" == "review failed" ]]; then
@@ -1840,7 +1840,7 @@ merges_since_ci() {
 
 # Every open PR, one call: the sweep's labelled PRs and the Belt leads to label both come from it.
 open_list() {
-  gh pr list -R "$REPO" --state open --limit 100 --json number,labels,author,baseRefName,body
+  gh pr list -R "$REPO" --state open --limit 100 --json number,labels,author,baseRefName,body,headRefOid
 }
 
 # lane_prs <open_list json>: open fast-lane PRs on any base, oldest first (decide retargets main and skips the rest).
@@ -1850,14 +1850,20 @@ lane_prs() {
 
 # belt_unlabelled <open_list json>: the crew's PRs into BASE_BRANCH whose body has a
 # `Belt-Lead:` line, with no LABEL and no opt-out label. Belt leads often forget the label.
+# A PR the lane already judged not-eligible on its current head stays unlabelled
+# (the verdict comment names the head), or the label would flip every sweep; a
+# new push is a new head and gets a fresh look.
 belt_unlabelled() {
+  local n h
   jq -r --arg l "$LABEL" --arg base "$BASE_BRANCH" --arg authors "$FAST_LANE_AUTHORS" --arg out "$OPT_OUT_LABELS" '
     ([$l] + ($out | split(" "))) as $skip
     | .[] | select(.baseRefName == $base
         and (.author.login as $a | ($authors | split(" ")) | index($a) != null)
         and ((.body // "") | test("(^|\n)Belt-Lead:"))
         and (all(.labels[]?; .name as $n | ($skip | index($n)) == null)))
-    | .number' <<<"$1" | sort -n
+    | "\(.number) \(.headRefOid)"' <<<"$1" | sort -n | while read -r n h; do
+    has_comment "$n" "needs normal captain review (head $h)." </dev/null || echo "$n"
+  done
 }
 
 # belt_label <open_list json>: label each belt_unlabelled PR; the sweep then evaluates it as usual.
