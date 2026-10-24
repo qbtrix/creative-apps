@@ -237,8 +237,12 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
     public var cornerRadius: Double
     /// How opaque the layer draws, 0...1; 1 is fully opaque.
     public var opacity: Double
-    /// The outline drawn centered on the shape's edge; nil draws none.
-    public var stroke: DesignStroke?
+    /// The outline drawn centered on the shape's edge; nil draws none. Boxed with the extras: the kernel's
+    /// stroke (join, cap, dash) is too big to keep inline (DesignNodeStackTests).
+    public var stroke: DesignStroke? {
+        get { extras.value.stroke }
+        set { extras.value.stroke = newValue }
+    }
     /// How a text node's text is set; every other kind keeps `.default`.
     public var textStyle: DesignTextStyle
     /// The kernel's gradient fill, its points in the node's unit box (0...1 across its frame), so a
@@ -258,7 +262,7 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         get { extras.value.shape }
         set { extras.value.shape = newValue }
     }
-    /// The gradient and shape spec, on the heap so a node stays small on a thread's stack (DesignNodeExtras).
+    /// The stroke, gradient and shape spec, on the heap so a node stays small on a thread's stack (DesignNodeExtras).
     private var extras = DesignNodeExtrasBox()
 
     public init(
@@ -271,8 +275,9 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         (self.id, self.name, self.kind, self.frame) = (id, name, kind, frame)
         (self.children, self.isHidden, self.isLocked) = (children, isHidden, isLocked)
         (self.fill, self.text, self.cornerRadius) = (fill ?? kind.defaultFill, text, cornerRadius)
-        (self.opacity, self.stroke, self.textStyle) = (opacity, stroke, textStyle)
-        if gradient != nil { self.gradient = gradient }  // a plain node keeps the shared empty box
+        (self.opacity, self.textStyle) = (opacity, textStyle)
+        if stroke != nil { self.stroke = stroke }  // a plain node keeps the shared empty box
+        if gradient != nil { self.gradient = gradient }
     }
 
     /// `node` with every field kept and the id replaced (duplicate, paste). A field added to

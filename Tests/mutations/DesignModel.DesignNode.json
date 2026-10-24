@@ -9,9 +9,23 @@
   {
     "label": "a copy drops the stroke",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "opacity: node.opacity, stroke: node.stroke, textStyle: node.textStyle)",
-    "replace": "opacity: node.opacity, stroke: nil, textStyle: node.textStyle)",
+    "find": "        extras = node.extras\n",
+    "replace": "        extras = node.extras\n        extras.value.stroke = nil\n",
     "tests": "DesignStyleSchemaTests.swift"
+  },
+  {
+    "label": "aCopyKeepsItsOwnStroke: a new node drops the stroke it is given",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "if stroke != nil { self.stroke = stroke }",
+    "replace": "",
+    "tests": "DesignNodeStackTests"
+  },
+  {
+    "label": "aCopyKeepsItsOwnStroke: the boxed stroke always reads nil",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "get { extras.value.stroke }",
+    "replace": "get { nil }",
+    "tests": "DesignNodeStackTests"
   },
   {
     "label": "the text style is not decoded",
