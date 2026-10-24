@@ -6,7 +6,9 @@
 // it. Values in, closures out, as the export sheet does: a nil action disables
 // its button, and `restoreHelp` is the reason Restore can't run (on the
 // stubs, "Backups arrive with BK-3."). Its frame, message line and Cancel /
-// Restore… row are SuiteUI's SuiteSheet.
+// Restore… row are SuiteUI's SuiteSheet. The list is a
+// bordered well of fixed height, so a tall window never pushes the buttons away
+// from the rows.
 import Foundation
 import LibraryModel
 import SuiteUI
@@ -50,7 +52,8 @@ struct LibraryBackupSheet: View {
                             .accessibilityIdentifier("library.backup.row")
                     }
                 }
-                .frame(minHeight: SuiteSize.contentMinimum.height)
+                .listStyle(.bordered)
+                .frame(height: SuiteSize.contentMinimum.height)
             }
         }
         .confirmationDialog("Restore This Backup?", isPresented: $confirming, titleVisibility: .visible) {
