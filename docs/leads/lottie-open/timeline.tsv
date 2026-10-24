@@ -1,0 +1,79 @@
+utc	stage	event	ref	note
+2026-10-21T10:50:35Z	stage	stage 0: record created	#3791	base dev 11919406
+2026-10-21T10:50:35Z	wave	wave 1 starts	LO-a	-
+2026-10-21T10:55:43Z	3	building	wave 1	builders running; no PR yet
+2026-10-21T11:14:55Z	3	heartbeat	wave	builders and gates running; no new PR; dev at 11919406
+2026-10-21T11:29:19Z	LO-a	pr	#4031	LO-1+LO-2; head 29f13e14; Mutate plan pending
+2026-10-21T11:29:33Z	LO-a	question	#3791 issuecomment-6314815070	supervisor asked to file needs-core: named skipped layers
+2026-10-21T11:32:45Z	LO-a	push	#4031	head 878c83cd; Mutate 3/3; footer removed
+2026-10-21T11:37:03Z	heartbeat	check	-	LO-a #4031 open clean fast-lane; LO-u/LO-m wait FL-m
+2026-10-21T11:59:47Z	heartbeat	all PRs open and clean; no needs-fix/needs-rebase; FL-m not seen	-	waiting on lane
+2026-10-21T12:24:23Z	heartbeat	PRs open and clean, no needs-fix; FL-m not seen	-	waiting on lane
+2026-10-21T12:47:23Z	heartbeat	#4031 held by Linux red on Photo CommandPathTests (heads predate #4008); merging dev in and re-gating	-	fix in flight
+2026-10-21T13:09:06Z	fix	dev merged into #4031 (36899c79); scripts/ci --changed PASS; Head line moved	#4031	back in the lane
+2026-10-21T13:16:12Z	heartbeat	#4031 waiting on macOS gate; FL-m not seen	-	waiting on lane
+2026-10-21T13:43:24Z	heartbeat	#4031 waiting on macOS gate; FL-m not seen	-	waiting on lane
+2026-10-21T15:12Z	heartbeat	check	-	#4026 #4029 #4031 merged; LP-a and LO-a Belt-Slice-Done on 39620526621; #4033 needs-rebase and #4027 (stale Linux flake) getting origin/dev merged in; Belt nudge answered (branches are lead/pen-paths, lead/lottie-*)
+2026-10-21T15:39Z	heartbeat	check	-	#4027/#4033 in lane macOS build; FL-m no PR; #3770 open
+2026-10-21T16:09Z	heartbeat	check	-	LO-u/LO-m wait on FL-m (no PR yet)
+2026-10-21T16:31Z	heartbeat	poll	-	LO-u/LO-m wait on FL-m (no PR yet); PN-3 #3770 still open
+2026-10-21T17:06:25Z	LO-u	poll	-	still waits on FL-m (no PR yet) and FP-m
+2026-10-21T17:31:01Z	heartbeat	poll	-	LO-u/LO-m still wait on FL-m (no PR yet)
+2026-10-21T17:55:05Z	heartbeat	poll	-	LO-u/LO-m still wait on FL-m (no PR yet)
+2026-10-21T18:19:15Z	heartbeat	poll	-	LO-u/LO-m still wait on FL-m (no PR yet)
+2026-10-21T18:42:09Z	heartbeat	poll	-	no FL-m PR; LO-u/LO-m wait
+2026-10-21T19:05Z	heartbeat	No FL-m PR open yet (only #3698 DF-1, Design's); LO-u and LO-m still wait.
+2026-10-21T19:27Z	heartbeat	No Flare FL-m PR yet (open file-flow PRs are Design #3698 and Photo #4165); LO-u and LO-m still wait.
+2026-10-21T19:48Z	heartbeat	No Flare FL-m PR yet; LO-u and LO-m still wait.
+2026-10-21T20:11Z	heartbeat	No Flare FL-m PR yet; LO-u and LO-m still wait.
+2026-10-21T20:33Z	heartbeat	No Flare FL-m PR yet; LO-u and LO-m still wait.
+2026-10-21T20:56Z	heartbeat	No Flare FL-m PR yet; LO-u and LO-m still wait.
+2026-10-21T20:59Z	heartbeat	LO-u and LO-m still wait on Flare file-flow FL-m; no FL-m PR open (open file-flow PRs: #3698 Design, #4165 Photo).
+2026-10-21T21:17Z	heartbeat	LO-u and LO-m still wait on Flare file-flow FL-m; no FL-m PR open.
+2026-10-21T21:43Z	heartbeat	LO-u and LO-m still wait on Flare file-flow FL-m; no FL-m PR open.
+2026-10-21T22:05Z	heartbeat	LO-u and LO-m still wait on Flare file-flow FL-m; no FL-m PR open.
+2026-10-21T22:27Z	heartbeat	LO-u/LO-m wait on Flare FL-m; no FL-m PR yet (open file-flow PRs: #4165 Photo, #3698 Design).
+2026-10-21T22:49Z	heartbeat	LO-u/LO-m wait on Flare FL-m; no FL-m PR yet.
+2026-10-21T23:12Z	heartbeat	LO-u/LO-m wait on Flare FL-m (no PR yet).
+2026-10-21T23:34Z	heartbeat	LO-u/LO-m wait on Flare FL-m (no PR yet).
+2026-10-21T23:55Z	heartbeat	LO-u/LO-m wait on Flare FL-m (no PR yet).
+2026-10-22T00:24Z	heartbeat	LO-u/LO-m wait on Flare FL-m (no PR yet).
+2026-10-22T00:46Z	heartbeat	LO-u/LO-m wait on Flare FL-m; file-flow FL-a #4259 open, no FL-m PR yet.
+2026-10-22T01:08Z	heartbeat	LO-u/LO-m wait on Flare FL-m; no FL-m PR open (#4259 is file-flow FL-a).
+2026-10-22T01:29Z	heartbeat	LO-u/LO-m wait on Flare FL-m; no FL-m PR open.
+2026-10-22T01:51Z	heartbeat	LO-u/LO-m wait on Flare FL-m; no FL-m PR open.
+2026-10-22T02:20Z	heartbeat	LO-u/LO-m still blocked on Flare FL-m; no FL-m PR yet.
+2026-10-22T02:41Z	heartbeat	LO-u/LO-m still blocked on Flare FL-m; no FL-m PR yet.
+2026-10-23T03:07Z	stage	run act-1a166b69fab-fd09 takes over at base e055e671; FL-m met; LO-u building; LO-m after FP-m PR opens.
+2026-10-23T03:31Z	pr	LO-u #4708 opened (head 4f68ade0, scripts/ci --changed pass, 5/5 mutations); filed #4709 (suite: Lottie JSON row in SuiteTypeRegistry).
+2026-10-23T03:38Z	wave	LO-m (LO-3, LO-3h) builder started, stacked on FP-m #4714.
+2026-10-23T03:57Z	pr	LO-m #4719 opened (head 24acb329, stacked on #4714, 15 files +287/-46 incl. FP-m, Mutate FlareLottieOpen 6/6); import.report to LO-z; filed #4720 (suite: --in-place guard).
+2026-10-23T03:59Z	check	#4708 labelled by lane, mergeable; #4719 lane check running; no open lottie-open findings.
+2026-10-23T04:19Z	check	dev-red #3856 (Halo #4703, not ours); #4708 and #4719 in lane, clean
+04:45Z	check	#4719 merged dev, body at 24396acd; #4708 Adapter rename gating
+05:06Z	check	#4708 in lane (macOS build on fdc8247c), #4719 in lane (Linux check on 24396acd); no open lottie-open findings
+05:27Z	check	#4719 lane-held: its Linux check red only on Halo command-path baseline (#3856), noted on #3791; #4708 in lane
+2026-10-23T06:00Z	check	LO-u #4708 Linux red on command path (bare Dismiss button); fixed as Close (CS-2), gate running
+2026-10-23T05:58Z	check	LO-u #4708 fix pushed f9b35b581 (Close, CS-2); full scripts/ci PASS; Head moved
+2026-10-23T06:15Z	check	#4708 waits on lane macOS build of f9b35b581; #4719 held on Halo red (#3856 open)
+2026-10-23T06:37Z	check	dev Linux green at 985db0a43 (Halo fixed); merged dev into LO-m #4719 (68dd0bc78), gating to re-run its stale red; #4708 macOS build queued
+2026-10-23T07:00Z	check	heartbeat: FP-u critic panel and contact sheet pending (gaps #4012)
+2026-10-23T07:02Z	check	#4719 (LO-m): merged dev after #4708, golden resolved (dev + file.open summary), CI: PASS, pushed 3ace3fab, Head moved
+2026-10-23T07:21Z	wave	LO-z (LO-5 + LO-6) builder started, stacked on #4719 (lead/lottie-open-LO-z); LO-u done waits on CI 39914223799 Linux (c2cc0c7c7)
+2026-10-23T07:25Z	slice-done	LO-u merged-done: run 39915272307 Linux green (c2cc0c7c7); Belt-Slice-Done + Mac-Finish-Wanted posted on #3791
+2026-10-23T07:41Z	heartbeat	#4719 head 3ace3fabb waiting on lane macOS build; LO-z builder running
+2026-10-23T07:55Z	pr	LO-z PR #4780 head 35fc26032 (fast-lane, feature-done); base set to lead/lottie-open-LO-m while #4719 is open (20 files vs dev), retarget to dev when #4719 merges
+2026-10-23T08:11Z	fix	dev Flare macOS build broken by #4708 x #4716 (FlareOpenQueue removed); fix PR #4784 (p0, fast-lane), noted on #3856. After it merges: merge dev into #4719 (and #4780 via its base) and #4775, rerun gate, move Head lines
+2026-10-23T08:35Z	heartbeat	#4784 (dev macOS fix, p0) waiting on its macOS build; #4719 LO-m needs dev merged after it; #4780 LO-z stacked on LO-m
+2026-10-23T08:45Z	push	#4784 merged (27d183b9); dev merged into LO-m #4719 (46e8f690), LO-m into LO-z #4780 (e748a9e9); gate PASS on both; Head lines moved
+2026-10-23T08:51Z	heartbeat	#4719 macOS build queued on 46e8f690; #4780 stacked, waits for #4719
+2026-10-23T09:13Z	heartbeat	#4719 macOS build 39927014589 in progress; #4780 waits
+2026-10-23T09:30Z	merged	#4719 LO-m merged 89b66fee; #4780 retargeted to dev, dev merged in (conflicts resolved to LO-z side), 15 files, head 6db445dc, gate PASS; LO-m Slice-Done waits a dev run containing 89b66fee
+2026-10-23T09:34Z	heartbeat	#4780 macOS build in progress on 6db445dc; no dev CI run on 89b66fee yet
+2026-10-23T09:56Z	heartbeat	#4780 macOS build green (39932423371), awaiting lane batch; dev Linux check 39934106780 on 89b66fee running
+2026-10-23T10:05Z	slice-done	LO-m Belt-Slice-Done posted (run 39934106780, comment 6362435477)
+2026-10-23T10:25:26Z	heartbeat	#4780 needs-rebase from #4786 resolved (merge keeps the 3-row cap and import.report); gate PASS, mutate FlareLottieNote 12/12; pushed 0a1e3a66
+2026-10-23T10:48:34Z	heartbeat	#4780 needs-rebase dropped; lane macOS build 39939160914 queued on 0a1e3a66. LO-u screens: flare scoped 39916329868 at c2cc0c7c red on the pre-#4784 FlareOpenQueue break, no snapshots; waiting for full CI 39937843350 (622f200f9) for the critic panel
+2026-10-23T11:14:11Z	heartbeat	#4780 still waiting: lane macOS build 39939160914 queued (macOS runners saturated); full CI 39937843350 pending, so no LO-u screens yet
+2026-10-23T11:36:18Z	heartbeat	#4780 still waiting on lane macOS build 39939160914 (queued since 10:26Z); macOS runners busy with older scoped runs (design, library, halo), journeys full and CI 39929490747; full CI 39937843350 still pending
+2026-10-23T11:58:22Z	heartbeat	#4780 still waiting on lane macOS build 39939160914 (queued since 10:26Z); full CI 39937843350 still pending; nothing to act on
