@@ -236,3 +236,4 @@ utc	stage	event	ref	note
 2026-10-24T13:39Z	3	check-in	no change	40086684417 running; SuiteUI #4283 #4282 open
 2026-10-24T15:42Z	3	check-in	no change	#4283/#4282 open; 40086684417 cancelled, no H-J12; 40092892249 running, 40104925079 queued
 2026-10-24T17:44Z	3	check-in	no change	#4283/#4282 open; 40092892249, 40114117621 cancelled, no H-J12; 40108214191, 40104925079 running
+2026-10-24T19:46Z	3	check-in	H-J12 pass	halo 40104925079 e79e9afc; failing set = baseline 16; #4283/#4282 open
