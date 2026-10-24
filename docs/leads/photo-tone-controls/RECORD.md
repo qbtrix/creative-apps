@@ -2,9 +2,9 @@
 
 Issue: #3468 · Packet: docs/blueprints/photo/features/tone-controls.md
 Run: act-1a16cd04539-4jc0 · Session: claude/feature-lead-playbook-9tb3qe · Started: 2026-10-24T07:30Z (takes over from act-1a16958d691-2ax3)
-Stage: build W4 (PT-3 #5105 in the lane; PT-4 building on the TC-6 stubs; PT-2 #5007, PT-6 #5008 in the lane)
+Stage: build W4 done (PT-3 #5105, PT-4 #5112, PT-2 #5007, PT-6 #5008 in the lane); PT-5 waits on TC-3 #5006
 Base: 830af22de (dev now 1bbaba6c1)
-Next: PT-4 PR from build-wave (lead/photo-tone-PT-4); PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #4880 / TC-6 #4953 merge
+Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #4880 / TC-6 #4953 merge; critic panel on PT-m once a scoped photo run shows it; PT-7/PT-8 after PT-u and PT-m land
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -20,7 +20,7 @@ Next: PT-4 PR from build-wave (lead/photo-tone-PT-4); PT-5 once TC-3 #5006 merge
 | PT-1 | PT-a | 2 | tone in AdjustmentSettings; adapter stubs; PhotoToneTests disabled | Sources/PhotoModel/AdjustmentSettings.swift, PhotoTone+Kernel.swift, Tests/PhotoModelTests/PhotoToneTests.swift | PhotoToneTests | #4845 | merged |
 | PT-2 | PT-a | 3 | Adjust panel ToneRows | Sources/PhotoApp/AdjustmentsInspector.swift | PhotoToneSnapshots.panel | #5007 | in lane |
 | PT-3 | PT-m | 4 | live route and export | PhotoAdjust+Imaging.swift, PhotoRender.swift | PhotoToneTests | #5105 | in lane |
-| PT-4 | PT-m | 4 | adapter bodies, catalog, jobs | PhotoTone+Kernel.swift, PhotoCommandCatalog.swift, RealJobs | PhotoToneCommandTests | – | building |
+| PT-4 | PT-m | 4 | adapter bodies, catalog, jobs | PhotoTone+Kernel.swift, PhotoCommandCatalog.swift, RealJobs | PhotoToneCommandTests | #5112 | in lane |
 | PT-5 | PT-u | 4 | snapshots, budget | Tests/AppSnapshotTests/PhotoToneSnapshots.swift, RenderBudgetPhotoToneTests.swift | snapshots | – | waiting |
 | PT-6 | PT-u | 4 | journey skipped | UITests/PhotoJourneyTests+Tone.swift | compiles | #5008 | in lane (stacked on #5007) |
 | PT-7 | PT-z | 5 | journey on live | UITests/PhotoJourneyTests+Tone.swift | journey | – | waiting |

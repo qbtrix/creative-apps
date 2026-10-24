@@ -100,3 +100,4 @@ utc	stage	event	ref	note
 2026-10-24T07:55Z	W4	check-in	PT-3, PT-4	builders running; #5007, #5008 queued; TC-3/5/6 open; dev f58e1190; no needs-fix
 2026-10-24T08:16Z	W4	check-in	PT-3, PT-4	builders in scripts/ci gate; lane landed a batch (dev 1bbaba6c1), #5007/#5008 not in it; TC-3/5/6 open
 2026-10-24T08:40Z	W4	check-in	PT-3, PT-4	PT-3 PR #5105 opened (CI: PASS; footer removed from body); PT-4 building; #5007/#5008/#5105 clean in lane; TC-3/5/6 open; dev 1bbaba6c1; no needs-fix; 0 tone findings
+2026-10-24T08:45Z	W4	done	PT-3, PT-4	build-wave wf_3eec3e40-086 done: #5105, #5112 open in lane (footers removed); 0 tone findings
