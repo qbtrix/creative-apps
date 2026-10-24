@@ -1,20 +1,20 @@
 # export-pack (Flare) lead record
 
 Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
-Run: act-1a1695ebf10-z0v8 (resumed 2026-10-23; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih) · resumed from act-1a15d4ed024-1wsg at 23:2xZ
-Stage: 3 build
+Run: act-1a16c619006-nour (took over 2026-10-24 from act-1a1695ebf10-z0v8; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T02:26Z
+Stage: 3 build (fix round 1 in lane)
 Base: 721168a (origin/dev)
-Next: watch #4843 → #4852 → #4854 land; critics on each slice after the scoped flare run shows its screens; Belt-Slice-Done per slice, then Belt-Contact-Sheet
+Next: (2026-10-24) #5025 (FV-a fix round 1, 7 findings), #5005 (mac finish), #4852 (FV-u) and #4854 (FV-z, stacked) all open, clean, in the lane. 10 findings open (>5): no new feature task. On merge: Belt-Slice-Done FV-u/FV-z on a green run containing them, Mac-Finish-Wanted, panel on FJ-X1 screens, contact sheet.
 
 Loop: v3 (the packet has a `## Slices` table).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| FV-a | MP4 and GIF with frame rate and loop on stubs; sheet chips and Size row | FV-1, FV-2 | MJ-FV | XP-a, shell-media SM-a | yes | 1 | merged-done; review 1 filed #5012-#5021 (10); fix round 1 running (fix-batch wf_05bf9ee4-9bc on #5012 #5013 #5014 #5015 #5017 #5018 #5020); #5016/#5019 wait on needs-ui #4819, #5021 on #5023, #5012's unit on #5022 | https://github.com/qbtrix/creative-apps/actions/runs/40029025919 | |
-| FV-u | snapshots, render budget, journey written | FV-5, FV-6 | FJ-X1 | FV-a; XP-4 | yes | 0 | PR #4852 (base dev, clean, awaiting lane batch) | | |
+| FV-a | MP4 and GIF with frame rate and loop on stubs; sheet chips and Size row | FV-1, FV-2 | MJ-FV | XP-a, shell-media SM-a | yes | 1 | merged-done; review 1 filed #5012-#5021 (10); fix round 1 PR #5025 (clean, in lane; on #5012 #5013 #5014 #5015 #5017 #5018 #5020); #5016/#5019 wait on needs-ui #4819, #5021 on #5023, #5012's unit on #5022 | https://github.com/qbtrix/creative-apps/actions/runs/40029025919 | |
+| FV-u | snapshots, render budget, journey written | FV-5, FV-6 | FJ-X1 | FV-a; XP-4 | yes | 0 | PR #4852 (base dev, clean, awaiting lane batch; Head c1835cd6) | | |
 | FV-m | frame plan, alpha, even size; live adapter streams to the writers | FV-3, FV-4 | MJ-FV | FV-a; XP-6 (merged), SM-w | no | 0 | done (Belt-Slice-Done posted) | https://github.com/qbtrix/creative-apps/actions/runs/39957675362 | n/a |
-| FV-z | real files on live, journey passes, blueprint | FV-7, FV-8 | FJ-X1 | FV-u, FV-m; gradient-fill:FG-z; svg-place:PF-z | no | 0 | PR #4854 (stacked on #4852) | | |
+| FV-z | real files on live, journey passes, blueprint | FV-7, FV-8 | FJ-X1 | FV-u, FV-m; gradient-fill:FG-z; svg-place:PF-z | no | 0 | PR #4854 (base lead/export-pack-fvu, stacked on #4852; feature-done) | | |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
