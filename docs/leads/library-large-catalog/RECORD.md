@@ -22,7 +22,7 @@ Next: watch #5050 (LG-5 + LG-8, feature-done) merge in the next lane batch and t
 | LG-4 | LG-model | 2 | one-pass export names (stems parsed once, one taken set) | Contracts/ExportNaming+Kernel.swift, Live/LiveExporter.swift, LargeCatalogEquivalenceTests.swift, mutations | LargeCatalogEquivalenceTests | #4847 | merged |
 | LG-5 | LG-grid | 3 | visible-first pass, two screens prefetched nearest first, off-window requests cancelled (decode stops), photo lookup by id | LibraryThumbnails.swift, LibraryWindow+Thumbnails.swift, Live/LiveThumbnails.swift, LibraryThumbnailPrefetchTests.swift, mutations | LibraryThumbnailPrefetchTests, aCancelledRequestDecodesNothing | #5050 | open |
 | LG-8 | LG-grid | 4 | status built, feature-done (folded into #5050, rule 22: under 50 lines) | large-catalog.wave.json | scripts/waves render --dry-run | #5050 | building |
-| LG-7 | LG-grid | 4 | RJ-L56 on the 10,000 fixture's .library (sha256 of the rated catalog), journey's skip dropped (RJ-L07) | large-catalog.jobs.json, input/large.library, LibraryJourneyTests+Large.swift | RealJobsTests (RJ-L56) | – | #5054 | merged 18:19Z |
+| LG-7 | LG-grid | 4 | RJ-L56 on the 10,000 fixture's .library (sha256 of the rated catalog), journey's skip dropped (RJ-L07) | large-catalog.jobs.json, input/large.library, LibraryJourneyTests+Large.swift | RealJobsTests (RJ-L56) | #5054 | merged 18:19Z |
 | LG-6 | LG-grid | 3 | loupe neighbours decode behind the render, superseded step's dropped | RenderQueue.swift, LibraryWindow+Loupe.swift, LibraryRenderQueueAheadTests.swift, mutations | LibraryRenderQueueAheadTests | #5042 | merged 18:19Z |
 
 ## Reviews
