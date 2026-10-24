@@ -88,3 +88,4 @@ utc	stage	event	ref	note
 2026-10-24T17:42Z	check	check-in	suiteui run 40114493184 still queued; #4880 #4953 #5006 #5064 clean in lane; 0 new findings; no unblocking slice merges
 2026-10-24T18:04Z	check	check-in	suiteui run 40114493184 in_progress; #4880 #4953 #5006 #5064 clean in lane; 0 new findings; no unblocking slice merges
 2026-10-24T18:26Z	check	check-in	AJ-a done (run 40114493184 green, Belt-Slice-Done posted); TC-5 #4880 merged 18:20Z; #4953 #5006 #5064 clean in lane; findings #5184-#5191 are Halo/Photo, none ours
+2026-10-24T18:48Z	check	check-in	#4953 #5006 #5064 clean in lane; scoped suiteui 40120688017 (d13c3ff2, has TC-5) running; findings #5193-#5205 are other lines; only slice merge PD-a #3759 (design), unblocks nothing
