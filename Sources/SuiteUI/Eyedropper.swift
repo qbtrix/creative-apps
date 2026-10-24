@@ -47,11 +47,10 @@ public struct EyedropperButton: View {
         }
     }
 
-    /// The sampler's colour as the nearest 8-bit sRGB colour; nil when it picked nothing.
+    /// The sampler's colour, converted to sRGB, as the nearest 8-bit colour; nil when it picked nothing.
     nonisolated static func hex(_ color: NSColor?) -> HexColor? {
         guard let rgb = color?.usingColorSpace(.sRGB) else { return nil }
-        return HexColor(Color.Resolved(
-            red: Float(rgb.redComponent), green: Float(rgb.greenComponent), blue: Float(rgb.blueComponent)))
+        return HexColor(FillColor(r: rgb.redComponent, g: rgb.greenComponent, b: rgb.blueComponent))
     }
 }
 
