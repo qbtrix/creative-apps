@@ -221,10 +221,10 @@ final class PhotoJourneyTests: XCTestCase {
 
         // JPEG from the keyboard: Shift-Command-E opens Export, Return exports at 90%.
         photo.app.typeKey("e", modifierFlags: [.command, .shift])
-        let jpeg = photo.app.sheets.radioButtons["JPEG"]
+        let jpeg = photo.element("photo.export.format.jpeg")
         XCTAssert(jpeg.waitForExistence(timeout: 5), "Shift-Command-E showed no Export sheet with a JPEG choice")
         jpeg.click()
-        let quality = photo.app.sheets.sliders["photo.export.quality"]
+        let quality = photo.app.sheets.sliders["Quality"]
         XCTAssert(quality.waitForExistence(timeout: 5), "choosing JPEG showed no Quality slider")
         photo.shot("export-jpeg")
         photo.app.typeKey(.return, modifierFlags: [])

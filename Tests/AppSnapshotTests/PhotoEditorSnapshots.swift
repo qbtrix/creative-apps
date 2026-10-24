@@ -149,10 +149,16 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
         try shoot("gradient-tool", model)
     }
 
+    /// SuiteUI's export sheet on an open image with JPEG picked (export-pack PX-2).
+    /// Writes photo-export-sheet-light/dark.png.
     @Test func exportSheet() throws {
+        var model = try opened()
+        model.openExport()
+        model.editExport(ExportOptions(format: .jpeg, quality: 0.9))
+        #expect(PhotoExportSheetAdapter.formats.map(\.id) == ["png", "jpeg"])
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                ExportSheet(format: .jpeg, quality: 0.9).frame(maxWidth: .infinity, maxHeight: .infinity),
+                PhotoExportSheetAdapter(model: model).frame(maxWidth: .infinity, maxHeight: .infinity),
                 name: "photo-export-sheet-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }
