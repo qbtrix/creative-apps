@@ -26,6 +26,8 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 2026-10-24 22:11Z: hb39: no change; dev still afef017c (#5222), no new merges; #5088/#5089/#5091 open, fast-lane only, no needs-*; #3721 still 13 comments, no supervisor answer; UP-z still waits on the app slices and SC-z.
+
 - 2026-10-24 21:49Z: hb38: no change. #5088/#5089/#5091 still open with fast-lane only (no needs-*). dev moved by one single merge, afef017c (#5222), which didn't include #5088. #3721 has no supervisor answer yet (13 comments). UP-z is still blocked.
 
 - 2026-10-24 21:27Z: hb37: no change. #5088/#5089/#5091 still open with fast-lane only (no needs-*). dev is still 1a98629c. #3721 has no supervisor answer yet (13 comments). UP-z is still blocked.

@@ -93,3 +93,4 @@ ts	kind	note
 2026-10-24T21:05:09Z	poll	hb36: no change; dev 1a98629c (#5059) without #5088; no supervisor answer
 2026-10-24T21:27:25Z	poll	hb37: no change; dev 1a98629c; no supervisor answer
 2026-10-24T21:48:52Z	poll	hb38: no change; dev afef017c (#5222) without #5088; no supervisor answer
+2026-10-24T22:10:30Z	poll	hb39: no change; dev afef017c; slice PRs open; no supervisor answer
