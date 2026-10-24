@@ -41,6 +41,11 @@ page.add
 page.delete
 page.rename
 page.select
+place.focus
+place.image
+place.read
+place.replace
+place.reset-size
 select.enter-group
 select.exit-group
 select.pick
