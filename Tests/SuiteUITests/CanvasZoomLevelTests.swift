@@ -26,11 +26,11 @@ import Testing
 }
 
 @Test func theFitUsesTheHostsPaletteFitWhenItHasOne() {
-    let document = CGSize(width: 1000, height: 1000), viewport = CGSize(width: 1200, height: 800)
+    let document = CGSize(width: 1000, height: 1000), viewport = CGSize(width: 900, height: 1200)
     let paletteFit = EditorDetailLayout.paletteFit(toolCount: 8)
     let expected = EditorDetailLayout(viewport: viewport, toolCount: 8).fitScale(artboard: document)
     #expect(paletteFit(viewport, document) == expected)
     #expect(ZoomMath.scale(.fit, document: document, in: viewport, using: paletteFit) == expected)
-    // The palette's room makes it tighter than the plain fit.
+    // The palette takes room at the sides, so a tall viewport fits tighter than the plain fit.
     #expect(expected < ZoomMath.fit(document: document, in: viewport))
 }
