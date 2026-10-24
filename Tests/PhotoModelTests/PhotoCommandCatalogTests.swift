@@ -131,6 +131,8 @@ struct PhotoCommandCatalogTests {
                 row("Cut", image, ws.cutHelp), row("Copy", image, ws.copyHelp), row("Paste", true, ws.pasteHelp(true)),
                 row("Select All", ws.canSelectAll), row("Delete Selection", ws.canEditSelection), row("Fill Selection", ws.canEditSelection),
                 row("All", image), row("Deselect", ws.canDeselect)]
+            + ["Invert", "Feather…", "Expand…", "Contract…"].map { row($0, image && !ws.areaRecipe.isEmpty) }
+            + [row("Reselect", image && ws.lastAreaRecipe != nil)]
             + [row("Image Size…", image), row("Canvas Size…", image && ws.flipHelp == nil)] + ["Rotate 90° Clockwise", "Rotate 90° Counterclockwise", "Rotate 180°", "Straighten…"].map { row($0, image) }
             + [row("New Layer", image),
                "New Adjustment Layer|\(!ws.adjustmentLayerKinds.isEmpty && adjust == nil)|\(adjust ?? "New Adjustment Layer")",
@@ -144,9 +146,8 @@ struct PhotoCommandCatalogTests {
 
     /// Commands with no menu item: the catalog's only (gradient-fill PG-3); the Layers list's pick, All Layers
     /// (Select menu, PM-3) and opacity (multi-layer-select PM-5); the eyedropper's sample query (PE-6), a tool's.
-    /// The area commands (area-selection AR-10) get their Select menu items in AR-photo-u.
-    static let noMenu: Set = ["select.rect", "select.ellipse", "select.lasso", "select.polygon", "select.wand", "select.invert",
-                              "select.feather", "select.expand", "select.contract", "select.reselect", "image.gradient", "layer.pick", "layer.select-all", "layer.set-opacity", "layer.move-by",
+    /// The area shapes (area-selection AR-10) run from their tools; Invert through Reselect have Select menu items (AR-11).
+    static let noMenu: Set = ["select.rect", "select.ellipse", "select.lasso", "select.polygon", "select.wand", "image.gradient", "layer.pick", "layer.select-all", "layer.set-opacity", "layer.move-by",
                               "color.sample"]
     /// Every non-tool command but the menu-less ones, the shared file-flow ones, the place ones and Free Transform's
     /// (transform PT-5, ahead of its menu items) and the History panel's (history-panel PH-5) and text layers' (the Type tool and inspector run them), in menu order (the catalog lists them as the menus do).
