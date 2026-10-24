@@ -9,9 +9,12 @@
 //   PhotoEditMenuSnapshots does,
 // - photo-layers-delete-refused: every row picked, Delete refused, the status
 //   line saying "At least one layer must stay."
+// - photo-layers-toggled-panel: the journey's step 2, rows 1 to 3 picked
+//   and row 2 Command-clicked off (two separate picked rows).
 // The window states are shot through PhotoEditor, as PhotoEditorSnapshots
-// does. Until PM-4 fills in the Shift range, the range is set on the kernel
-// selection directly (`@testable`), so the picture is the finished state.
+// does, and the picks go through `pickLayer`, as a row click does. A window
+// shot draws SuiteWindow's sidebar blank (#3972), so each layer state also
+// shoots the Layers panel alone as photo-layers-<state>-panel.
 // macOS only.
 import CoreRaster
 import PhotoModel
@@ -29,10 +32,22 @@ import Testing
         var model = try Self.fourLayers()
         let order = model.layers.map(\.id)
         let first = try #require(order.first)
-        model.layerSelection.replace([first])
-        model.layerSelection.pick(order[2], .extend, order: order)
+        model.pickLayer(first, .replace)
+        model.pickLayer(order[2], .extend)
         #expect(model.selectedLayerIDs == Array(order.prefix(3)))
         try shoot("several-picked", model)
+    }
+
+    /// The journey's step 2: rows 1 to 3 picked, then row 2 Command-clicked off.
+    @Test func toggledOff() throws {
+        var model = try Self.fourLayers()
+        let order = model.layers.map(\.id)
+        let first = try #require(order.first)
+        model.pickLayer(first, .replace)
+        model.pickLayer(order[2], .extend)
+        model.pickLayer(order[1], .toggle)
+        #expect(model.selectedLayerIDs == [order[0], order[2]])
+        try shootPanel("toggled", model)
     }
 
     @Test func allPicked() throws {
@@ -82,6 +97,20 @@ import Testing
             try snapshot(
                 PhotoEditor(model: model, tiles: tiles, renderMilliseconds: 8, zoom: 1),
                 name: "photo-layers-\(state)-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        }
+        try shootPanel(state, model)
+    }
+
+    /// The Layers panel alone: window shots draw SuiteWindow's sidebar blank (#3972).
+    private func shootPanel(_ state: String, _ model: PhotoWorkspace) throws {
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(
+                PhotoLayerList(model: model, perform: { _ in })
+                    .frame(width: SuiteSize.editorPanelWidth, height: 240)
+                    .background(SuiteColor.panel)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .padding(SuiteSpacing.xxl),
+                name: "photo-layers-\(state)-panel-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }
 }
