@@ -91,8 +91,11 @@ extension PhotoWorkspace {
         addArea(shape, modifiers: done.modifiers, command: done.tool.areaCommand)
     }
 
-    /// Whether a Marquee drag adds a step on release instead of being the selection as it drags.
-    func marqueeJoins(_ stroke: PhotoStroke) -> Bool { areaMode(stroke.modifiers) != .replace || areaOptions.feather > 0 }
+    /// Whether a Marquee drag adds a step on release (it joins an area, or feathers) instead of being the selection as it drags.
+    func marqueeJoins(_ stroke: PhotoStroke) -> Bool {
+        let had = stroke.areaBefore.map { $0.selection != nil && !$0.area.recipe.isEmpty } ?? !areaRecipe.isEmpty
+        return (had && areaMode(stroke.modifiers) != .replace) || areaOptions.feather > 0
+    }
 
     /// The mode a shape joins by: the held keys' while Shift or Option is down, else the options'.
     func areaMode(_ keys: DragModifiers) -> AreaCombine {
