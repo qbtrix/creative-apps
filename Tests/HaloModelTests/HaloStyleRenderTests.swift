@@ -89,6 +89,6 @@ import Testing
         let pixels = try Self.render(Self.keyedGlow, at: 30)
         var right = 120
         while right < 200, try pixels.pixel(x: right, y: 60).a > 0.01 { right += 1 }
-        #expect(abs((right - 120) - Self.reach(pixels)) <= 1, "the glow sits off centre: placed without its origin")
+        #expect(try abs((right - 120) - Self.reach(pixels)) <= 1, "the glow sits off centre: placed without its origin")
     }
 }
