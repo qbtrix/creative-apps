@@ -1,7 +1,7 @@
 # design-stroke-style lead record
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
-Run: act-1a16953aed5-oxsi · Session: claude/lead-placed-images-stroke-style-elhwn1 · Started: 2026-10-23T15:20Z (prior runs act-1a1627ce3b4-ayhz, act-1a1605b0534-rn47, act-1a15e909498-4bkk, act-1a15abb305f-lc8g, act-1a159c9b6b4-va3c)
+Run: act-1a16cc9673d-cmzv · Session: claude/feature-lead-placed-images-dkjo55 · Started: 2026-10-24T07:20Z (prior runs act-1a16953aed5-oxsi, act-1a1627ce3b4-ayhz, act-1a1605b0534-rn47, act-1a15e909498-4bkk, act-1a15abb305f-lc8g, act-1a159c9b6b4-va3c)
 Stage: 3 wave 1 (16:50Z): DK-u #4864 open (critic running); DK-m #4888 open (DK-5, DK-6, critic running); DK-7 building on design/dk-m-stroke-svg (15-file cap split)
 Base: 721168a8 (origin/dev); main verified at cb79cbb6
 Next: DK-u and DK-m slice PRs; critic panels; then DK-z
@@ -26,6 +26,7 @@ Next: DK-u and DK-m slice PRs; critic panels; then DK-z
 | – | – | – | – | – | – |
 
 ## Decisions
+- 2026-10-24 run act-1a16cc9673d-cmzv: resumed; brief main HEAD 654fb363 verified, dev 830af22d. Status branches stay lead/design-*; PRs target dev. All slice PRs are clean and wait on the lane (PD-a #3759 on the supervisor); no new feature task while open findings exceed 5.
 - 2026-10-23 run act-1a16953aed5-oxsi: one lead holds stroke-style and placed-images (#3454, record lead/design-placed-images); one wave plan. Contract-first waits (lead.md rule 12): shape-tools is built, so DK-u and DK-m start now. Brief says integration branch main; PRs still target dev (the lane retargets main). #4014 is closed, so DK-u's StrokeEditor wiring can use styleHelp.
 - 2026-10-22T09:03Z supervisor: don't take DS-u/DS-m into this run; finish the eyedropper slices and end the run; stroke-style relaunches after DS-u and DS-m.
 - Status branch is lead/design-<feature> (record docs/leads/design-<feature>/): lead/<feature> belongs to the SuiteUI lead of the same feature name.
