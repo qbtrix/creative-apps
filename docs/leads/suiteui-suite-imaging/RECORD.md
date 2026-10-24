@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: 15:03Z poll: nothing of ours has merged, and all 7 PRs are clean. #5154 and #5163 lost fast-lane again for stacked size and come back once their parents land. The photo and halo scoped runs passed on e79e9afcb, which does not contain our PRs; design is still running. #3723 is open, and IM-8b q 6383016723 is unanswered.
+Next: 15:23Z poll: nothing of ours has merged. All 7 PRs are clean, and our 6 fast-lane PRs are labelled again. Batch lane/batch-20261024144917 (12 other PRs, macOS gate running since 14:49Z) does not include ours, so they go in a later batch. #3723 is open, and IM-8b q 6383016723 is unanswered.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
 
