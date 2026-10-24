@@ -78,7 +78,8 @@ final class AfterGlowOnboardingJourneys: XCTestCase {
         launcher.shot("onboarding-focus")
 
         // 2. Photos, then Continue.
-        launcher.click("Photos", in: .window)
+        // By identifier: a focusable chip doesn't come through XCUI as a button titled Photos (#3328).
+        Self.chip(.photos, in: welcome).click()
         XCTAssert(Self.waitFor { Self.chip(.photos, in: welcome).isSelected }, "the Photos chip isn't selected after a click")
         launcher.click("Continue", in: .window)
 
