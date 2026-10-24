@@ -4,7 +4,7 @@ Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/feat
 Run: act-1a16cae79dd-mtf2 · Started: 2026-10-24T06:54Z (prior: act-1a1693a401e-chyn, act-1a164697376-dv7u)
 Stage: 3 wave 4
 Base: e5dcf939 (dev; brief's main HEAD 654fb363 verified)
-Next: FH-7 gate rerun on 9d18965 (first run: load timeouts only in OnboardingModelTests/StorePreferencesTests); FH-7-jobs d7b07b7 CI: PASS; open FH-7 PR on pass, then FH-7-jobs PR; FH-8 builder mutating; poll lane for #4577/#4889/#4896
+Next: FH-7 PR #5107 (base FH-c) and FH-7-jobs PR #5108 (base FH-7) opened, fast-lane; retarget to dev as parents merge; FH-8 builder gating; then FH-8 PR, FH-9 PR after FH-7 merges, FH-10; poll lane for #4577/#4889/#4896
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
