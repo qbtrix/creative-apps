@@ -5,9 +5,9 @@ Run: act-1a16c627cc6-nlss · Session: claude/layer-styles-lead-vx2vrg · Started
 Wire: suiteui layer-styles:LS-a
 Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTests.glowReachesItsKeyedSize and glowIsNotClipped; add the no-padding mutation, origin dropped in LiveFrameRendering's styled composite)
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
-Stage: #4911 (LS-1) merged 12:18Z; dev merged into #5156 HY-1 (gate running). LS-2 not on dev yet (16720838f/82d118eb3 not ancestors of origin/dev), so #5157, #5161 stay drafts; #5158 HY-m only needs HY-1. Attribution footers removed from #5157, #5158, #5161 bodies and the #3936 comment via the GitHub MCP update tools (the gh api REST route re-appends it server-side; MCP does not). HY-7 route question on #3936 unanswered
+Stage: #5156 HY-1 ready (draft off), dev merged in at 0e12bffd0, diff HY-1 only (+228/-18, 13 files), gate CI: PASS, Head moved, footer gone. The first gate in the main clone crashed in AfterGlowCLITests.SampleOpenTests (LibraryHeadless.init, signal 11) from a stale incremental build: the same suite passes on a fresh origin/dev build and on 0e12bffd0, so gates now run in the clean worktree /home/user/dev-check. Merging HY-1 into #5158 HY-m, gate running. LS-2 not on dev: #5157, #5161 stay drafts. HY-7 route question on #3936 unanswered
 Base: a41e7f1 (origin/dev)
-Next: #5156 gate PASS, push, move Head: and strip footer via MCP update_pull_request, mark ready (draft=false); then merge dev+HY-1 into #5158, gate, ready; #5157 and #5161 once LS-2 lands; HY-7 once the supervisor answers the route shape; then HY-8
+Next: #5158 gate PASS, push, move Head: via MCP update_pull_request (REST re-appends the footer), mark ready; #5157 then #5161 once LS-2 lands (merge dev, gate, Head, ready); HY-7 once the supervisor answers the route shape; then HY-8
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
