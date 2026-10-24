@@ -4,7 +4,7 @@ Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/feat
 Run: act-1a16cae79dd-mtf2 · Started: 2026-10-24T06:54Z (prior: act-1a1693a401e-chyn, act-1a164697376-dv7u)
 Stage: 3 wave 4
 Base: e5dcf939 (dev; brief's main HEAD 654fb363 verified)
-Next: fix round 1 running: #5095 (heal off-canvas) and #5093 (bucket edge) on branches from dev; then #5094 (feathered coverage, stacked on FH-c); PRs open #5107/#5108/#5109 queued behind #4577/#4889 in the lane (lane merging oldest first); hold FH-9 and FH-10 until FH-7/FH-8 merge. Note: the environment appends a footer to PR and issue bodies that a PATCH cannot remove; the lane strips it from squash commits
+Next: fix round 1: #5121 (fix #5095, base dev) open; fix-5093 being re-stacked on FH-7 with a regenerated RJ-P51 golden (then PR, base FH-7); then #5094 stacked on FH-c; PRs #5107/#5108/#5109 queued behind #4577/#4889; hold FH-9 and FH-10 until FH-7/FH-8 merge
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
