@@ -1,9 +1,11 @@
 // FlarePlaybackTicksTests.swift: LA-2's platform-neutral core (docs/blueprints/flare.md, 7.5). A fake tick source
-// (a list of display-link target timestamps) drives FlareWorkspace.tick the way PlaybackDriver does on macOS. The
-// acceptance test: it stops when paused and uses the link's target timestamp, not wall time. Also QB-L4's CI gate:
-// 5 s at the document rate drops at most 2 frames.
+// (a list of display-link target timestamps) drives FlareWorkspace.tick the way SuiteUI's PlaybackDriver does on
+// macOS. The acceptance test: it stops when paused and uses the link's target timestamp, not wall time. Also QB-L4's
+// CI gate: 5 s at the document rate drops at most 2 frames. The ticker's and the budget's own rules are SuiteKernel's
+// PlaybackTimingTests.
 import FlareCore
 @testable import FlareModel
+import SuiteKernel
 import Testing
 
 /// A 48-frame scene at 24 fps.
@@ -90,16 +92,6 @@ private func run(_ w: inout FlareWorkspace, _ ticker: inout PlaybackTicker, _ ta
     #expect(frames.count < 300)
 }
 
-@Test func lateOrBrokenTargetsAreIgnored() {
-    var ticker = PlaybackTicker()
-    #expect(ticker.elapsed(toTarget: 1) == nil)
-    #expect(ticker.elapsed(toTarget: 0.5) == nil)
-    #expect(ticker.elapsed(toTarget: 1) == nil)
-    #expect(ticker.elapsed(toTarget: .nan) == nil)
-    #expect(ticker.elapsed(toTarget: .infinity) == nil)
-    #expect(ticker.lastTarget == 1)
-    #expect(ticker.elapsed(toTarget: 1.25) == 0.25)
-}
 
 @Test(arguments: [60.0, 120.0])
 func fiveSecondsAtTheDocumentRateDropNoFrames(hz: Double) {
@@ -120,12 +112,4 @@ func fiveSecondsAtTheDocumentRateDropNoFrames(hz: Double) {
     let ticks = targets(hz: 60, count: 301).map { $0 >= 1002.5 ? $0 + 0.1 : $0 }
     let dropped = PlaybackBudget.droppedFrames(in: run(&w, &ticker, ticks), timelineFrames: 48)
     #expect(dropped > 0 && dropped <= PlaybackBudget.ciMaxDroppedFrames)
-}
-
-@Test func droppedFramesCountForwardStepsAcrossTheLoop() {
-    #expect(PlaybackBudget.droppedFrames(in: [46, 47, 0, 1, 1], timelineFrames: 48) == 0)
-    #expect(PlaybackBudget.droppedFrames(in: [0, 3], timelineFrames: 48) == 2)
-    #expect(PlaybackBudget.droppedFrames(in: [47, 1], timelineFrames: 48) == 1)
-    #expect(PlaybackBudget.droppedFrames(in: [5], timelineFrames: 48) == 0)
-    #expect(PlaybackBudget.droppedFrames(in: [0, 3], timelineFrames: 0) == 0)
 }

@@ -22,6 +22,7 @@
 // `help` for every section 3.4 item, the Undo and Redo step names, the recent
 // files, Loop and the selection's Edit reasons.
 import FlareModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 

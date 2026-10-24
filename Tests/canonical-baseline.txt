@@ -21,7 +21,6 @@ Sources/FlareApp/FlarePasteboard.swift
 Sources/FlareApp/FlareStageSelection.swift
 Sources/FlareApp/FlareWindow+Export.swift
 Sources/FlareApp/FlareWindow+Layers.swift
-Sources/FlareApp/PlaybackDriver.swift
 Sources/FlareApp/StageRasterizer.swift
 Sources/FlareModel/Contracts/ExportContracts.swift
 Sources/FlareModel/EasingEditing.swift
@@ -35,8 +34,6 @@ Sources/FlareModel/FlareEasing.swift
 Sources/FlareModel/FlareExport.swift
 Sources/FlareModel/FlareLaunch.swift
 Sources/FlareModel/FlareLayers.swift
-Sources/FlareModel/FlarePlayback.swift
-Sources/FlareModel/FlarePlaybackTicks.swift
 Sources/FlareModel/FlareSaveStatus.swift
 Sources/FlareModel/FlareSelection.swift
 Sources/FlareModel/FlareSelectionRead.swift

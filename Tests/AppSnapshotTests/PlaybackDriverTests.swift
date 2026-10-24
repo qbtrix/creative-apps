@@ -1,14 +1,14 @@
-// PlaybackDriverTests.swift: LA-2's live driver against its fake (docs/blueprints/flare.md, 7.5). The same target
-// timestamps fed through PlaybackDriver and straight into FlareWorkspace.tick (the Linux fake's path) land on the
-// same frames; a paused workspace stops the display link; the driver times by the targets it is given, not wall time.
-// `measuredFPS` (IT-9): ticks 1/24 s apart for a second measure 24, every other one dropped 12, and none before a
-// second has passed or after a stop.
+// PlaybackDriverTests.swift: LA-2's live driver, SuiteUI's PlaybackDriver (#5077), playing Flare against its fake
+// (docs/blueprints/flare.md, 7.5). The same target timestamps fed through the driver and straight into
+// FlareWorkspace.tick (the Linux fake's path) land on the same frames; a paused workspace stops the display link; the
+// driver times by the targets it is given, not wall time. The driver's own rules, `measuredFPS` among them, are
+// SuiteUITests' SuitePlaybackDriverTests.
 #if canImport(AppKit)
 import AppKit
 import FlareModel
+import SuiteKernel
+import SuiteUI
 import Testing
-
-@testable import FlareApp
 
 /// Holds the workspace the driver's closure plays, as the window's state does.
 @MainActor
@@ -64,32 +64,6 @@ private final class Player {
         player.driver.receive(target: 7002)
         #expect(!player.driver.isRunning && player.model.currentFrame == frame)
         player.driver.stop()
-    }
-
-    /// One second of ticks at 24 Hz, from the link's media clock; `keep` picks which arrive.
-    private func measure(_ keep: (Int) -> Bool) -> PlaybackDriver {
-        let driver = PlaybackDriver { _, _ in true }
-        for tick in 0...24 where keep(tick) { driver.receive(target: 7000 + Double(tick) / 24) }
-        return driver
-    }
-
-    @Test func aSecondOfTicksAtTwentyFourMeasuresTwentyFour() {
-        #expect(measure { _ in true }.measuredFPS == 24)
-    }
-
-    @Test func everyOtherTickDroppedMeasuresTwelve() {
-        #expect(measure { $0 % 2 == 0 }.measuredFPS == 12)
-    }
-
-    @Test func noMeasureBeforeASecondOrAfterAStop() {
-        #expect(measure { $0 < 12 }.measuredFPS == nil)
-        let driver = measure { _ in true }
-        driver.stop()
-        #expect(driver.measuredFPS == nil)
-        let late = measure { _ in true }
-        late.receive(target: .nan)
-        late.receive(target: 6999)
-        #expect(late.measuredFPS == 24)
     }
 }
 #endif
