@@ -50,6 +50,8 @@ public actor LiveThumbnails: ThumbnailProviding {
             cache[key]?.lastUse = clock
             return hit.image
         }
+        // A request the grid scrolled past (large-catalog LG-5) decodes nothing.
+        if Task.isCancelled { throw LibraryError.cancelled }
         let image = try await render(photo, longSide: side)
         insert(image, for: key)
         return image
