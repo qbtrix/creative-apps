@@ -52,3 +52,4 @@ ts	kind	note
 2026-10-21T18:41:35Z	nudge	Belt nudge read; state re-read from source: #4058 awaiting batch, no supervisor reply yet, no blocking slice on dev
 2026-10-21T19:02:29Z	released	supervisor answer: release this run; waiting-on-prereq
 2026-10-22T16:50:00Z	relaunch	run act-1a1647fe637-pfga on #4502; all remaining slices blocked (ST-z, SC-z not on dev); nothing to build
+2026-10-24T07:10:00Z	relaunch	run act-1a16ca8dead-fbso on #3721; unparked: ST-a #4840 meets ST-z; wave 1 UP-photo, UP-flare, UP-halo stacked

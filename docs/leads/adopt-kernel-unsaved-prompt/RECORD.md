@@ -1,10 +1,10 @@
 # Lead record: adopt-kernel-unsaved-prompt
 
-Run: act-1a1647fe637-pfga (resumes act-1a15e33396b-eo15, act-1a15b69feea-et92). Feature issue #4502 (was #3721). Packet: docs/blueprints/suiteui/features/adopt-kernel-unsaved-prompt.md (v3, slices).
-Integration branch: dev (main only takes dev SHAs that passed full CI). Base: origin/dev ac7f95c9f6b0516253108a270145e4280f243b69.
+Run: act-1a16ca8dead-fbso (resumes act-1a1647fe637-pfga, act-1a15e33396b-eo15, act-1a15b69feea-et92). Feature issue #4502 (was #3721). Packet: docs/blueprints/suiteui/features/adopt-kernel-unsaved-prompt.md (v3, slices).
+Integration branch: dev (main only takes dev SHAs that passed full CI). Base: origin/dev e5dcf93.
 Stage: 3 wave 1
-Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: nothing to build. UP-photo waits shared-thumbnails ST-z (which waits shared-codecs SC-a; SC-a's IM-a wait is now met, so it can start under its own lead); UP-flare/UP-halo follow UP-photo; UP-z waits SC-z. Wait for those.
+Base: e5dcf93
+Next: wave 1 builds UP-photo (UP-7 + UP-8) on dev; UP-flare and UP-halo stack on it; UP-z waits on shared-codecs SC-f (contract) and the app slices.
 
 ## Plan
 
@@ -13,14 +13,20 @@ Next: nothing to build. UP-photo waits shared-thumbnails ST-z (which waits share
 | UP-a | UP-1, UP-2 | done (#3795; run 39568091135) | – |
 | UP-u | UP-3, UP-4 | done (#3824, #3828; run 39568091135) | – |
 | UP-design | UP-5, UP-6 | done (#4037; Mac-Finish-Wanted posted) | – (AC-zoom done: f886c912 on dev, Linux 39571804700 green) |
-| UP-photo | UP-7, UP-8 | blocked | shared-thumbnails:ST-z (blocked on shared-codecs SC-a), UP-design |
-| UP-flare | UP-9, UP-10 | blocked | adopt-kernel-autosave:AK-flare (planned), UP-photo |
-| UP-halo | UP-11, UP-12 | blocked | UP-flare (shared journey file) |
+| UP-photo | UP-7, UP-8 | building | shared-thumbnails:ST-z (met by contract ST-a #4840), UP-design |
+| UP-flare | UP-9, UP-10 | building (stacked) | adopt-kernel-autosave:AK-flare (on dev 5ecec459), UP-photo |
+| UP-halo | UP-11, UP-12 | building (stacked) | UP-flare (shared journey file) |
 | UP-z | UP-13, UP-14 | blocked | the four app slices; shared-codecs:SC-z (planned) |
 
 One PR per slice: each app slice's PR holds its test-first task and its adoption task, so an app slice starts only once its external wait clears.
 
+## Wires
+
+- [ ] Wire: shared-thumbnails:ST-z (UP-photo built on ST-a's contract, #4840)
+
 ## Decisions
+
+- 2026-10-24T07:10Z: relaunch act-1a16ca8dead-fbso on #3721. Supervisor unparked (06:45Z): ST-a merged (#4840), so UP-photo's ST-z wait is met under contract-first waits; AK-flare on dev. Base dev e5dcf93 (the brief says main; CLAUDE.md and the lane say dev, and the lane retargets main PRs to dev). UP-z still waits on shared-codecs SC-f (contract) not yet merged.
 
 - 2026-10-22T16:50Z: relaunch act-1a1647fe637-pfga on #4502. Re-read waits from source: UP-a, UP-u, UP-design done; ST-z not on dev, SC-a not started (its IM-a wait cleared today), SC-z planned. Every remaining slice is blocked, so this run builds nothing for this feature.
 
