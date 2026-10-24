@@ -86,3 +86,4 @@ utc	stage	event	ref	note
 2026-10-24T16:56Z	check	check-in	scoped suiteui run 40109073275 (has OC-u) still in progress; 7 PRs open, no needs-fix/needs-rebase; no new findings or Slice: merges since 16:30Z
 2026-10-24T17:20Z	check	check-in	OC-u done (run 40109073275 green, Belt-Slice-Done posted); #4846 AJ-a, #4867 AJ-7, #4870 TC-7 merged; #5064 regating after dev merge; 0 new findings
 2026-10-24T17:42Z	check	check-in	suiteui run 40114493184 still queued; #4880 #4953 #5006 #5064 clean in lane; 0 new findings; no unblocking slice merges
+2026-10-24T18:04Z	check	check-in	suiteui run 40114493184 in_progress; #4880 #4953 #5006 #5064 clean in lane; 0 new findings; no unblocking slice merges
