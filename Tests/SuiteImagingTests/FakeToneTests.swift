@@ -7,7 +7,7 @@ import SuiteImaging
 import SuiteKernel
 import Testing
 
-@Suite(.disabled("waits on TC-9's FakeToneDocument body")) struct FakeToneTests {
+@Suite struct FakeToneTests {
     let catalog = FakeToneDocument.catalog
     /// RJ-X41's folder.
     static let job = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
