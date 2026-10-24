@@ -138,3 +138,4 @@ time	kind	note
 2026-10-24T03:50Z	-	heartbeat	-	9 PRs open clean, no needs-fix; lane bisect probe -7 green, -9 red (#4864 old head, fixed on 2bd18bb86); 32 findings, z held
 2026-10-24T04:13Z	-	heartbeat	-	9 PRs open clean; lane probe -8 running (Linux + macOS); 32 findings, z held
 2026-10-24T04:35Z	DK-u	needs-fix	#4864	supervisor pulled for old-head macOS fails; fix 2bd18bb86 already on head; fast-lane re-added
+2026-10-24T04:57Z	-	heartbeat	-	needs-fix cleared on #4864 (head 2bd18bb8, fast-lane); 9 PRs open, none merged; probe -8 macOS running; findings 32
