@@ -94,3 +94,4 @@
 2026-10-24T21:23Z	poll	batch 20261024205137 macOS red, bisect -3/-6 running
 2026-10-24T21:43Z	poll	probes -3/-6 macOS running; #5050 open
 2026-10-24T22:03Z	poll	probe macOS gates at 46 min; #5050 open
+2026-10-24T22:23Z	poll	probe macOS gates at 66 min; #5050 open

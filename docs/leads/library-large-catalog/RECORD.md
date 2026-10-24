@@ -56,6 +56,7 @@ Next: watch #5050 (LG-5 + LG-8, feature-done) merge in the next lane batch and t
 - 21:23Z: batch 20261024205137: Linux green, macOS gate red. The lane is bisecting (probes -3 and -6 running since 21:17Z). #5050 is PR 7 of 14, right after probe -6; if -6 is red the culprit is ahead of it and #5050 waits again.
 - 21:43Z: probes -3 and -6: Linux green, macOS gates still running (26 min). #5050 open, no needs-fix.
 - 22:03Z: probe macOS gates (40133570032, 40133484228) on runners since 21:17Z, 46 min; the earlier probe took about 75. #5050 open, no needs-fix.
+- 22:23Z: probe macOS gates still running, 66 min. #5050 open, no needs-fix.
 - 16:09Z: #5050 (LG-5) got needs-rebase (conflict with #4951 disk tier in LiveThumbnails.swift). Merged origin/dev into -lg5, kept the cancel check first then the disk read/store; scripts/ci --changed running (fix round 1).
 - 15:38Z: poll: still no change; LG-grid PRs queued, #5114 awaits supervisor, beta question open ~2h.
 - 15:19Z: poll: unchanged; LG-grid PRs still queued, #5114 awaits supervisor, beta question unanswered.
