@@ -3,8 +3,9 @@
 // Bool. The run holds the state and refuses the moves it doesn't allow (no
 // open over a running write, no start but from the sheet); this file says
 // which move each window action is. Export… opens the sheet on the last
-// choices, Export starts one write on the sheet's choice, and the write's
-// outcome (the file's name, a cancelled save panel, an error) ends it.
+// choices, a pick in the sheet (export-pack PX-2) changes the open sheet's
+// choice, Export starts one write on it, and the write's outcome (the file's
+// name, a cancelled save panel, an error) ends it.
 // Linux-safe.
 import SuiteKernel
 
@@ -27,6 +28,23 @@ extension PhotoWorkspace {
     public mutating func openExport() -> Bool {
         guard canvas != nil else { return false }
         return exportRun.begin(exportOptions)
+    }
+
+    /// The open sheet's choices; nil with no sheet open.
+    public var exportChoice: ExportOptions? {
+        if case .editing(let o) = exportRun { return o }
+        return nil
+    }
+
+    /// A pick in the open sheet (a format chip, Quality): the sheet shows `o`,
+    /// its quality held to the 0.1...1 `file.export` takes; kept as the last
+    /// choices only on Export. False (and no change) with no sheet open.
+    @discardableResult
+    public mutating func editExport(_ o: ExportOptions) -> Bool {
+        guard isExportSheetOpen else { return false }
+        var picked = o
+        picked.quality = picked.quality.isNaN ? exportOptions.quality : min(max(picked.quality, 0.1), 1)
+        return exportRun.begin(picked)
     }
 
     /// Export: from the open sheet, keeps `o` as the last choices and starts
