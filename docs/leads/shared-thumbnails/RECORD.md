@@ -1,18 +1,18 @@
 # shared-thumbnails lead record
 
 Issue: #3719 · Packet: docs/blueprints/suiteui/features/shared-thumbnails.md
-Run: act-1a16953ae34-05a4 (relaunch) · Started: 2026-10-23T15:30Z
-Stage: 3 wave 1 (ST-a: ST-1 + ST-2)
-Base: 721168a8f (origin/dev; brief main cb79cbb6 verified)
-Next: ST-a builder on lead/shared-thumbnails-ST-a (off dev): test-first commit (ST-1), then contract, fake, stubs and the CoreAsset links (ST-2). Protected Package.swift and project.yml, so the PR goes to the supervisor, no fast-lane label.
+Run: act-1a16cc96904-199n (relaunch 2026-10-24T07:20Z) · Started: 2026-10-23T15:30Z
+Stage: 3 wave 3 (ST-z builder; ST-u #4950 and ST-m #4951 in the lane)
+Base: 830af22de (origin/dev; brief main 654fb363 verified)
+Next: ST-z builder on lead/shared-thumbnails-ST-z (stacked on ST-u + ST-m), draft PR until #4950/#4951 merge; then wait for a CI run on dev (scoped suiteui or full) containing #4950 and #4951 for Belt-Slice-Done.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| ST-a | SuiteShell and LibraryModel link CoreAsset; `ThumbnailPublishing.preview(for:)`; `FakeThumbnails`; `ThumbnailWriter` and `LiveThumbnailStoreAdapter` stubs; tests written, disabled | ST-1, ST-2 | MJ-ST | shared-codecs:SC-a (ST-2) | false | 0 | building | – | – |
-| ST-u | home Recent cards show `preview(for:)` on the fake, app mark when nil, within the render budget | ST-3, ST-4 | HJ-ST | ST-a | true | 0 | planned | – | – |
-| ST-m | writer stores and reads previews in `AfterGlow/Thumbnails/` within budget; Library reads disk before decoding | ST-5, ST-6 | MJ-ST | ST-a; adopt-kernel-autosave:AK-a (ST-5); library spine (ST-6) | false | 0 | planned | – | – |
-| ST-z | slot live, Photo publishes on save, Library over the shared store, feature built | ST-7, ST-8 | HJ-ST, MJ-ST | ST-u, ST-m; adopt-kernel-autosave:AK-photo (ST-7) | true | 0 | planned | – | – |
+| ST-a | SuiteShell and LibraryModel link CoreAsset; `ThumbnailPublishing.preview(for:)`; `FakeThumbnails`; `ThumbnailWriter` and `LiveThumbnailStoreAdapter` stubs; tests written, disabled | ST-1, ST-2 | MJ-ST | shared-codecs:SC-a (ST-2) | false | 0 | done | 40070077878 | – |
+| ST-u | home Recent cards show `preview(for:)` on the fake, app mark when nil, within the render budget | ST-3, ST-4 | HJ-ST | ST-a | true | 0 | building (#4950) | – | – |
+| ST-m | writer stores and reads previews in `AfterGlow/Thumbnails/` within budget; Library reads disk before decoding | ST-5, ST-6 | MJ-ST | ST-a; adopt-kernel-autosave:AK-a (ST-5); library spine (ST-6) | false | 0 | building (#4951) | – | – |
+| ST-z | slot live, Photo publishes on save, Library over the shared store, feature built | ST-7, ST-8 | HJ-ST, MJ-ST | ST-u, ST-m; adopt-kernel-autosave:AK-photo (ST-7) | true | 0 | building | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -35,6 +35,8 @@ Next: ST-a builder on lead/shared-thumbnails-ST-a (off dev): test-first commit (
 - ST-1 and ST-2 ship as one slice PR (test-first commit, then ST-2): ST-1's tests name types only ST-2 declares.
 - ST-2 edits protected Package.swift and project.yml. The supervisor said on #3719 (2026-10-21) that they will land it, so the ST-a PR carries no fast-lane label.
 - PRs target `dev` (CLAUDE.md; the lane retargets PRs to main), not main.
+- 2026-10-24T07:30Z Relaunch act-1a16cc96904-199n. ST-z starts now: its wait on adopt-kernel-autosave:AK-photo is met under contract-first waits (AK-a merged; rule 12). ST-7 keeps its PhotoWindow+File.swift edit to a few lines so AK-8 merges over it easily. ST-z is stacked on ST-u and ST-m and opened as a draft until they merge (its diff vs dev is over the size cap until then).
+- Scoped library run 40070367564 red on RenderBudgetLibraryFoldersTests.expandFolderInTwoBodies (Library folders, not this feature's files); holds no slice.
 - Earlier runs (act-1a15b69feea-et92) were all blocked on SC-a; their heartbeat log is in RECORD.prev.
 
 ## Wire

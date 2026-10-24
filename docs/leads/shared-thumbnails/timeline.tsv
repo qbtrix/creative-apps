@@ -64,3 +64,4 @@ ts	kind	note
 2026-10-24T06:00:12Z	wait	check	no change: dev still 654fb3632; #4837 EP-m open awaiting supervisor reply on 6380464537 (prefix skipped by lane); #4840 ST-a awaiting supervisor gate merge
 2026-10-24T06:22:16Z	wait	check	no change: dev 654fb3632; #4837 EP-m open, not in batch-20261024050226 (probe -6 running), no supervisor reply; #4840 ST-a open, supervisor merge pending
 2026-10-24T07:05:06Z	wait	check	ST-a #4840 merged (4446461); full CI 40070365168 + scoped suite/library running on it. Restacked ST-u #4950 (223c79c, 8 files/385 lines) and ST-m #4951 (d6f2c3e, 11 files/224 lines; add/add conflicts taken from ST-m, dev side == ST-a 07c1135 stubs) on dev; scripts/ci --changed PASS both; undrafted, fast-lane, Head moved. ST-z blocked: ST-7 needs adopt-kernel-autosave AK-photo (AK-8, PhotoWindow+File.swift), not on dev, no open PR.
+2026-10-24T07:24:52Z	3	stage-start	-	relaunch act-1a16cc96904-199n; ST-z builder started stacked on #4950+#4951
