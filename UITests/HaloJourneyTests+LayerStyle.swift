@@ -7,14 +7,14 @@
 // holding 0, Packet-Review 1 amendment 2). A click on the bar opens its field, as on
 // TRANSFORM's rows (HaloJourneyTests+Inspector.swift). Steps 3 and 4 shoot the viewer at frames 15 and 30, and at 0
 // (`halo.viewer.canvas`); the PNG render of frames 0 and 30 is RJ-H43's (HY-6). One shot per step,
-// `layer-style-<step>`. Skipped until HY-7 draws styles in the viewer.
+// `layer-style-<step>`. Skipped until LS-9: HY-7 routes styles to the GPU view, whose draw throws until then.
 import XCTest
 
 final class HaloLayerStyleJourneyTests: XCTestCase {
     private static let badge = "comp-1-layer-3"
 
     @MainActor func testKeyedGlow() throws {
-        throw XCTSkip("waits on HY-7") // HY-7 turns it on: `walkTheKeyedGlow()` in place of this line.
+        throw XCTSkip("waits on LS-9") // LS-9 builds StyleRoute.draw: `walkTheKeyedGlow()` in place of this line.
     }
 
     /// Steps 1 to 4.

@@ -9,7 +9,9 @@
 // picture, SuiteUI's drawPlaced without strokes, PH-3), a shape the ellipse in it, a text layer
 // is a resolved Text on the pinned baseline rule (its line box's top-left at
 // bounds.origin, its first baseline at bounds.y + ascent). The selected
-// layer's world box gets SuiteUI's SelectionOutline. The frame Render Frame
+// layer's world box gets SuiteUI's SelectionOutline. With the GPU style route
+// up (HaloStyledViewer, HY-7), a list with a styled solid or shape draws in
+// runs: Canvases between styled layers, each styled one on SuiteUI's StyleLayerView. The frame Render Frame
 // shows (HaloRenderedFrameView) and the viewer's gestures (HaloViewerGestures,
 // with ⌥-drag panning a placed picture, HaloPlaceFocusDrag) sit over it. The artboard's value is `viewerSummary` ("Frame 30:
 // Background, Badge, Title: Hello Halo"); its child `halo.viewer.canvas` reads
@@ -87,19 +89,17 @@ struct HaloLiveLayers: View {
 struct HaloDrawnLayers: View {
     let list: HaloDrawList
     let selectedLayerID: String?
+    @Environment(\.haloStyleRoute) private var route
 
     var body: some View {
-        let list = list
-        // The Canvas's own working space must be linear: its default
-        // (.nonLinear) mixes each item's opacity in sRGB inside the Canvas,
-        // before the linear drawing group ever sees it (HF-1 keyed-6, #1161).
-        Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: false) { context, size in
-            let fit = HaloCanvasFit.transform(HaloCanvasFit.layout(list: list, size: size))
-            for item in list.items {
-                drawItem(item, in: context, fit: fit)
+        Group {
+            // HY-7: styled solids and shapes on SuiteUI's GPU layer view while its route is up.
+            if let route, list.items.contains(where: HaloDrawList.isStyled), route.isAvailable {
+                HaloStyledViewer(list: list, route: route) { canvas($0) }
+            } else {
+                canvas(list.items)
             }
         }
-        .drawingGroup(opaque: false, colorMode: .linear)
         .allowsHitTesting(false)
         .accessibilityElement()
         .accessibilityLabel("Layers")
@@ -114,6 +114,21 @@ struct HaloDrawnLayers: View {
                 }
             }
         }
+    }
+
+    /// `items` of the list in one linear Canvas over the fitted frame, bottom first.
+    private func canvas(_ items: [HaloDrawItem]) -> some View {
+        let list = list
+        // The Canvas's own working space must be linear: its default
+        // (.nonLinear) mixes each item's opacity in sRGB inside the Canvas,
+        // before the linear drawing group ever sees it (HF-1 keyed-6, #1161).
+        Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: false) { context, size in
+            let fit = HaloCanvasFit.transform(HaloCanvasFit.layout(list: list, size: size))
+            for item in items {
+                drawItem(item, in: context, fit: fit)
+            }
+        }
+        .drawingGroup(opaque: false, colorMode: .linear)
     }
 }
 
