@@ -65,3 +65,4 @@ Next: ST-a builder on lead/shared-thumbnails-ST-a (off dev): test-first commit (
 - 2026-10-24T01:10:44Z: 01:10Z check: dev still 654fb3632; lane bisect probe batch-20261023215139-6 unchanged; #4837 EP-m open (fast-lane, no needs-fix); #4840 ST-a waits on supervisor Mac re-gate
 - 2026-10-24T01:31:46Z: 01:31Z check: lane bisect moved to probe batch-20261023215139-9 (first 9 PRs, includes #4837 EP-m), so the culprit is past PR 6; #4837 no needs-fix; #4840 ST-a still waits on supervisor Mac re-gate; dev 654fb3632
 - 2026-10-24T01:53:22Z: 01:53Z check: probe batch-20261023215139-9 (incl. #4837 EP-m) Linux check green (run 40050009822), macOS gate 40050012604 running since 01:29Z; #4840 ST-a still waits on supervisor Mac re-gate; dev 654fb3632
+- 2026-10-24T02:14:52Z: 02:14Z check: probe -9 macOS gate 40050012604 still running (45 min); #4837 EP-m unmerged; #4840 ST-a still waits on supervisor Mac re-gate; dev 654fb3632
