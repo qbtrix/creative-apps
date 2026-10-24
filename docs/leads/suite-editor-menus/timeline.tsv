@@ -113,3 +113,4 @@ utc	stage	event	ref	note
 2026-10-24T12:54:28Z	check	EM-flare-halo	mirror resynced from lead/editor-menus (run act-1a16db4d43e-gerb)
 2026-10-24T13:18:58Z	check	EM-flare-halo	no change; lane stalled since 12:11Z
 2026-10-24T13:37:37Z	check	EM-flare-halo	no change; batch bisect moving
+2026-10-24T13:56:16Z	check	EM-flare-halo	no change; batch still bisecting
