@@ -40,6 +40,7 @@ Next: watch #5042 #5050 #5054 to merge and the supervisor to land #5114 (perf-su
 - LG-6 scope: neighbour prefetch already exists but runs beside the render, unbounded per step; LG-6 queues the neighbours behind the render in RenderQueue and drops a superseded step's pending decodes, so stale prefetches never evict the focus's decodes.
 
 ## Open
+- 16:09Z: #5050 (LG-5) got needs-rebase (conflict with #4951 disk tier in LiveThumbnails.swift). Merged origin/dev into -lg5, kept the cancel check first then the disk read/store; scripts/ci --changed running (fix round 1).
 - 15:38Z: poll: still no change; LG-grid PRs queued, #5114 awaits supervisor, beta question open ~2h.
 - 15:19Z: poll: unchanged; LG-grid PRs still queued, #5114 awaits supervisor, beta question unanswered.
 - 14:59Z: poll: no change; #5042/#5050/#5054 queued in lane, #5114 awaits supervisor, beta question (6384907277) still unanswered.
