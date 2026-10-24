@@ -1,6 +1,6 @@
 // DesignGroupPick+Kernel.swift (area-selection AR-14): Design's click on SuiteKernel's GroupPick. A Move press
 // picks the outermost group in the entered one, ⌘ (`.deep`) the layer under the pointer; a double-click
-// (`.enter`) enters the picked group; enterGroup and exitGroup step in and out one level. select.pick, select.enter-group
+// (`.enter`) or Return enters the picked group, Escape steps out one level. select.pick, select.enter-group
 // and select.exit-group run the kernel's rule on the pick tree: the selected page's layers with each frame
 // made a leaf and its children lifted beside it (carrying its lock), so a frame is a place, not a group a click
 // lifts to. A pick is view state, never an undo step. Linux-safe.
@@ -61,6 +61,12 @@ extension DesignWorkspace: GroupPickTarget {
         groupScope = .root
         return GroupPick.target(hit: hit, scope: .root, deep: deep, in: tree)
     }
+
+    /// Escape on the canvas: out of the entered group, or deselect at the root.
+    var escapeAction: DesignCanvasKeyAction { groupScope.path.isEmpty ? .deselect : .exitGroup }
+
+    /// Return on the canvas enters the picked group when it can.
+    var canEnterGroup: Bool { Self.catalog.availability("select.enter-group", on: self).why == nil }
 
     /// Edit > Enter Group and Return: enters the picked group; nothing when it can't.
     public mutating func enterGroup() { _ = try? Self.catalog.run("select.enter-group", params: .object([:]), on: &self) }

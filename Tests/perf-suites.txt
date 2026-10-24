@@ -90,6 +90,7 @@ library LibraryModelTests.LibraryCollectionsFileTests/twentyCollectionsOverTenTh
 library LibraryModelTests.addToThousandWithinBudget
 library LibraryModelTests.suggestWithinBudget
 library LibraryModelTests.largeBudget
+library LibraryModelTests.LargeCatalogModelBudgetTests
 
 design DesignModelTests.DesignSnapBudgetTests
 design DesignModelTests.DesignSelectBudgetTests

@@ -5,7 +5,7 @@
 // `<typeID>.<type>`, `suite.gradient.type.<type>` by default; while `typeHelp` says why it can't act it is off and that
 // reason shows under it), the stop bar (`suite.gradient.bar`, its handles `suite.gradient.stop.<n>`, inset half a
 // handle each side by the kernel's `GradientBar`), the selected stop's colour (the suite colour row labelled
-// "Stop 2 · 50%", live through a drag, hex field `suite.gradient.color`) and, for a linear fill unless `showsAngle` is
+// "Stop 2 · 50%" with its opacity, live through a drag, hex field `suite.gradient.color`) and, for a linear fill unless `showsAngle` is
 // false, the angle bar (`suite.gradient.angle`). The bar's gesture math is `GradientBarDrag`: a click adds a stop, a drag moves one under
 // one drag token, a drag 40 pt off removes it; arrows nudge the selected stop 1% and Delete removes it. A colour-panel
 // session and an angle scrub each carry one token too, so the app folds each gesture into one undo step. Where a stop
@@ -80,7 +80,8 @@ public struct GradientEditor: View {
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             if types.count > 1 { typeSwitch }
             if type != .solid { bar }
-            InspectorColorWellRow(GradientEditorText.selectedStop(index, of: fill), color: GradientEditorText.hex(GradientRules.color(of: fill, at: stopOffset)), onChange: recolor) {
+            InspectorColorWellRow(GradientEditorText.selectedStop(index, of: fill), color: GradientEditorText.hex(stopColor),
+                                  opacity: stopColor.a, onChange: recolor) {
                 colorToken = nil
             }
             .hexIdentifier("suite.gradient.color")
@@ -204,13 +205,14 @@ public struct GradientEditor: View {
         return .handled
     }
 
-    /// The colour row's pick: the selected stop's colour, its alpha kept, under the session's token.
-    private func recolor(_ hex: HexColor) {
+    /// The selected stop's colour (a solid's own).
+    private var stopColor: FillColor { GradientRules.color(of: fill, at: stopOffset) }
+
+    /// The colour row's pick: the selected stop's colour and opacity, under the session's token.
+    private func recolor(_ hex: HexColor, _ alpha: Double) {
         let token = colorToken ?? GradientBarDrag.newToken()
         colorToken = token
-        let alpha = GradientRules.color(of: fill, at: stopOffset).a
-        let picked = hex.resolved
-        send(.color(index: index, FillColor(r: Double(picked.red), g: Double(picked.green), b: Double(picked.blue), a: alpha), drag: token))
+        send(.color(index: index, GradientEditorText.fillColor(hex, alpha: alpha), drag: token))
     }
 
     private func send(_ intent: GradientIntent, keepRefusal: Bool = false) {
@@ -314,7 +316,13 @@ enum GradientEditorText {
         return names.first { hue < $0.0 }?.1 ?? "red"
     }
 
-    /// The colour row's 8-bit colour for `color` (its alpha is kept by the editor, not the row).
+    /// A colour row's pick as a fill colour: its sRGB channels and `alpha`.
+    static func fillColor(_ hex: HexColor, alpha: Double) -> FillColor {
+        let picked = hex.resolved
+        return FillColor(r: Double(picked.red), g: Double(picked.green), b: Double(picked.blue), a: alpha)
+    }
+
+    /// The colour row's 8-bit colour for `color` (its alpha goes to the row's opacity).
     static func hex(_ color: FillColor) -> HexColor {
         HexColor(SwiftUI.Color.Resolved(red: Float(color.r), green: Float(color.g), blue: Float(color.b)))
     }

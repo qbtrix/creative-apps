@@ -1,0 +1,16 @@
+[
+  {
+    "label": ".namesUniqueIgnoringCase: names compared with their case",
+    "file": "Sources/SuiteModel/Presets/PresetStore.swift",
+    "find": "$0.name.lowercased() == r.name.lowercased()",
+    "replace": "$0.name == r.name",
+    "tests": "PresetStoreTests"
+  },
+  {
+    "label": ".relaunchKeepsLooks: the stored file never read back",
+    "file": "Sources/SuiteModel/Presets/PresetStore.swift",
+    "find": "(try? store.read(Self.file, as: [PresetRecord].self).value) ?? []",
+    "replace": "[PresetRecord]()",
+    "tests": "PresetStoreTests"
+  }
+]
