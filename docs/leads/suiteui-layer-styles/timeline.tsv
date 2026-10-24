@@ -92,3 +92,4 @@ utc	stage	event	ref	note
 2026-10-24T22:10Z	3	check	lane	22:10Z: batch-20261024205137 (none of ours) still bisecting; all 11 of ours clean, queued; #5174 now labelled beta (priority); 0 findings
 2026-10-24T22:33Z	3	check	lane	22:32Z: all 11 PRs clean+queued, none merged; batch-20261024205137 (none ours) still bisecting (-3,-6); 0 findings; dev afef017c
 2026-10-24T22:55Z	3	check	lane	22:55Z: all 11 PRs clean+queued, none merged; batch-20261024205137 (none ours) bisecting, now probe -1 (#5192 alone); 0 findings; dev afef017c
+2026-10-24T23:17Z	3	check	lane	23:17Z: all 11 PRs clean+queued, none merged; batch-20261024205137 (none ours) probe -1 (#5192) macOS gate running, lane sweeping; 0 findings; dev afef017c
