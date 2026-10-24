@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: IM-8b is #5151 (stacked on #5148); supervisor asked (comment 6383016723) whether Photo's resident route may stand in for LiveToneSurface. Order ruled (a) at 10:30Z: Library adopts exposure, levels, curve; IM-10b building, IM-11 after it. IM-8d and IM-12 wait EP-z (#3723); IM-13 waits ST-a.
+Next: IM-8b is #5151 (stacked on #5148); supervisor asked (comment 6383016723) whether Photo's resident route may stand in for LiveToneSurface. Order ruled (a) at 10:30Z: Library adopts exposure, levels, curve; IM-10b committed (32ff1ed), mutate and gate next, IM-11 after it. Local LibraryModelTests crash (signal 11 in LibraryCatalog.init) also on dev's Library sources: stale build here, clean rebuild running. IM-8d and IM-12 wait EP-z (#3723); IM-13 waits ST-a.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -32,7 +32,7 @@ Next: IM-8b is #5151 (stacked on #5148); supervisor asked (comment 6383016723) w
 | IM-8d | IM-photo | delete PhotoLiveTone | – | blocked: EP-z #3723 |
 | IM-9 | IM-library | Library imaging tests | #4591 | merged |
 | IM-10 p1 | IM-library | develop levels/curve points are SuiteImaging's | #4886 | open (fast-lane, clean) |
-| IM-10b | IM-library | LiveDevelop on the shared list | – | building (stacked on #4886) |
+| IM-10b | IM-library | LiveDevelop on the shared list | – | committed 32ff1ed; gating (stacked on #4886) |
 | IM-11 | IM-library | loupe on the GPU route | – | next after IM-10b |
 | IM-12 | IM-z | delete Photo's copies | – | blocked: EP-z |
 | IM-13 | IM-z | no-baseline rule, Photo's Metal link removed | – | blocked: ST-a |
