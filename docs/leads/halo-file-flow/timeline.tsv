@@ -118,3 +118,4 @@ utc	stage	event	ref	note
 2026-10-24T18:56:28Z	poll	dev 67446118; no labels; no new findings; #4894 (HF-m) in lane/batch-20261024183708
 2026-10-24T19:18:10Z	poll	dev 67446118; no labels; no new findings; batch-20261024183708 red, bisecting (probe -6); #4894 is 11/12
 2026-10-24T19:39:58Z	poll	dev 6f66ca33; no labels; no new findings; batch-20261024183708 still bisecting (probe -6); #4894 waits
+2026-10-24T20:02:06Z	poll	dev 6f66ca33; no labels; no new findings; batch-20261024183708 probe -6 macOS gate (run 40123913661) still running; #4894 waits
