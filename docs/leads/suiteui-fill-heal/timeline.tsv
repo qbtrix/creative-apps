@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 01:38Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; lane bisect probe -6 green, probe -9 (40050012604) running; AJ-a #4846 and BK-photo #4965 open in lane
 01:59Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; probe -9 Linux green, macOS gate 40050012604 running; AJ-a #4846 in lane; BK-photo #4965 open but lost fast-lane label (brush-keys lead owns it)
 02:21Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; probe -9 macOS gate 40050012604 still running; AJ-a #4846 in lane; BK-photo #4965 open, no labels
+02:42Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; bisect: probe -6 green, probe -9 macOS red (40050012604), culprit in 7-9; AJ-a #4846 in lane; BK-photo #4965 open, no labels
