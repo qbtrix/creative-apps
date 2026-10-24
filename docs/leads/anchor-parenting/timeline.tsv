@@ -74,3 +74,4 @@ utc	stage	event	ref	note
 2026-10-24T03:55Z	check	heartbeat	-	03:56Z check: #4893 AN-u open fast-lane; lane bisect probe -7 green, -9 red, culprit likely PR 8 or 9 of batch (not ours); AN-6 stacked
 2026-10-24T04:18Z	check	heartbeat	-	04:18Z check: #4893 AN-u open fast-lane; lane bisect last probe -8 macOS running (not ours); AN-6 stacked
 2026-10-24T04:39Z	check	heartbeat	-	04:40Z check: #4893 AN-u open fast-lane; lane bisect probe -8 macOS still running (not ours); AN-6 stacked
+2026-10-24T05:01Z	check	heartbeat	-	05:02Z check: #4893 AN-u open fast-lane; lane bisect probe -8 macOS running 60 min (not ours); AN-6 stacked
