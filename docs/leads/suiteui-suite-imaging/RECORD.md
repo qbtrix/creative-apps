@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: 21:42Z poll: batch 20261024205137 (holds #4886) still bisecting: probes -3 and -6 Linux green, macOS gates running. #5163 dirty (Loupe.swift vs #5042), no needs-rebase; #5178 dirty via stack. No needs-fix. #3723 open; supervisor q 6383016723 unanswered. Poll again ~22:00Z.
+Next: 22:02Z poll: batch 20261024205137 (holds #4886) still bisecting: probes -3 and -6 macOS gates running 45 min. #5163 dirty (Loupe.swift vs #5042), no needs-rebase; #5178 dirty via stack. No needs-fix. #3723 open; supervisor q 6383016723 unanswered. Poll again ~22:20Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
 
