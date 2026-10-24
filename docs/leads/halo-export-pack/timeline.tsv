@@ -75,3 +75,4 @@ utc	stage	event	ref	note
 2026-10-24T02:59Z	4	stage	-	heartbeat: bisect probe -7 running; slices queued
 2026-10-24T03:20Z	4	stage	-	heartbeat: bisect probe -7 macOS running; slices queued
 2026-10-24T03:41Z	4	stage	-	heartbeat: bisect probe -7 macOS running; slices queued
+2026-10-24T04:04Z	4	stage	-	heartbeat: probe -7 green, probe -8 running; our PRs wait for next batch
