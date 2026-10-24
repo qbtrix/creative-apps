@@ -2,9 +2,9 @@
 
 Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a16ee71e35-s8g5 · Session: claude/large-catalog-lead-4ijm0b (earlier act-1a16c627c84-u86z, act-1a1693fbf6d-ap2g, act-1a15df37b73-k199) · Started: 2026-10-21T10:19Z (resumed 2026-10-23T14:20Z, 2026-10-24T05:10Z, 2026-10-24T17:15Z)
-Stage: 3 wave 3 (LG-grid: LG-6 #5042 and LG-5 #5050 open)
+Stage: 3 wave 3 (LG-grid: LG-6 #5042 and LG-7 #5054 merged; LG-5+LG-8 #5050 open)
 Base: da62659fc9460750cd2c1d1483b253c2d9a02375 (origin/dev)
-Next: watch #5042 #5050 #5054 merge (fast lane, beta) and #5114 land; then Belt-Slice-Done LG-grid on a green ci.yml run containing the last of them
+Next: watch #5050 (LG-5 + LG-8, feature-done) merge in the next lane batch and the supervisor land #5114; then Belt-Slice-Done LG-grid on a green ci.yml run on dev containing the last of them
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -22,8 +22,8 @@ Next: watch #5042 #5050 #5054 merge (fast lane, beta) and #5114 land; then Belt-
 | LG-4 | LG-model | 2 | one-pass export names (stems parsed once, one taken set) | Contracts/ExportNaming+Kernel.swift, Live/LiveExporter.swift, LargeCatalogEquivalenceTests.swift, mutations | LargeCatalogEquivalenceTests | #4847 | merged |
 | LG-5 | LG-grid | 3 | visible-first pass, two screens prefetched nearest first, off-window requests cancelled (decode stops), photo lookup by id | LibraryThumbnails.swift, LibraryWindow+Thumbnails.swift, Live/LiveThumbnails.swift, LibraryThumbnailPrefetchTests.swift, mutations | LibraryThumbnailPrefetchTests, aCancelledRequestDecodesNothing | #5050 | open |
 | LG-8 | LG-grid | 4 | status built, feature-done (folded into #5050, rule 22: under 50 lines) | large-catalog.wave.json | scripts/waves render --dry-run | #5050 | building |
-| LG-7 | LG-grid | 4 | RJ-L56 on the 10,000 fixture's .library (sha256 of the rated catalog), journey's skip dropped (RJ-L07) | large-catalog.jobs.json, input/large.library, LibraryJourneyTests+Large.swift | RealJobsTests (RJ-L56) | – | #5054 open |
-| LG-6 | LG-grid | 3 | loupe neighbours decode behind the render, superseded step's dropped | RenderQueue.swift, LibraryWindow+Loupe.swift, LibraryRenderQueueAheadTests.swift, mutations | LibraryRenderQueueAheadTests | #5042 | open |
+| LG-7 | LG-grid | 4 | RJ-L56 on the 10,000 fixture's .library (sha256 of the rated catalog), journey's skip dropped (RJ-L07) | large-catalog.jobs.json, input/large.library, LibraryJourneyTests+Large.swift | RealJobsTests (RJ-L56) | – | #5054 | merged 18:19Z |
+| LG-6 | LG-grid | 3 | loupe neighbours decode behind the render, superseded step's dropped | RenderQueue.swift, LibraryWindow+Loupe.swift, LibraryRenderQueueAheadTests.swift, mutations | LibraryRenderQueueAheadTests | #5042 | merged 18:19Z |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -43,6 +43,7 @@ Next: watch #5042 #5050 #5054 merge (fast lane, beta) and #5114 land; then Belt-
 ## Open
 - 17:15Z: relaunched (run act-1a16ee71e35-s8g5). Brief names main as base and PR target; dev stays the target (CLAUDE.md, the lane, and the supervisor's 17:00Z answer all on dev).  Supervisor added `beta` to #5042 #5050 #5054. #5050: merged origin/dev, kept the cancel check ahead of the disk tier; scripts/ci --changed PASS; pushed 59a9c47c with LG-8 folded in, Head moved, feature-done; the lane dropped needs-rebase.
 - 18:00Z: Belt nudge. The 17:15Z-17:28Z record went to a wrong branch, lead/large-catalog; ported here, the branch Belt reads. #5042 #5050 #5054 open, clean, fast-lane + beta, waiting on a lane batch; #5114 waits on the supervisor (protected Tests/perf-suites.txt).
+- 18:20Z: #5042 and #5054 merged 18:19Z (lane/batch-20261024172211). #5050 merges clean with dev 7114d06f, waits on the next batch; #5114 on the supervisor.
 - 16:09Z: #5050 (LG-5) got needs-rebase (conflict with #4951 disk tier in LiveThumbnails.swift). Merged origin/dev into -lg5, kept the cancel check first then the disk read/store; scripts/ci --changed running (fix round 1).
 - 15:38Z: poll: still no change; LG-grid PRs queued, #5114 awaits supervisor, beta question open ~2h.
 - 15:19Z: poll: unchanged; LG-grid PRs still queued, #5114 awaits supervisor, beta question unanswered.
