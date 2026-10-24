@@ -2,9 +2,9 @@
 
 Issue: #3774 · Packet: docs/blueprints/suite/features/editor-menus.md
 Run: act-1a16a37a3ed-0kyn (relaunch; earlier act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
-Stage: EM-flare-halo: supervisor landing prefix
+Stage: EM-flare-halo: #4818 merged; #4817, #4988 in lane
 Base: 35a0b5e7e9520a764f3eabf02968a453082a87cc (main; PRs target dev)
-Next: #4818 (supervisor/prefix-215139), #4817, #4988 merge, then main CI
+Next: #4817 and #4988 merge, then main CI
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

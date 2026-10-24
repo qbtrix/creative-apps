@@ -101,3 +101,4 @@ utc	stage	event	ref	note
 2026-10-24T07:08Z	check	editor-menus	07:08Z supervisor answered: landing #4818..#4837 by hand after re-proof; lane fixes #5048/#5053	https://github.com/qbtrix/creative-apps/issues/3774
 2026-10-24T07:29Z	check	editor-menus	07:29Z #4818 not yet merged; supervisor landing in progress	https://github.com/qbtrix/creative-apps/issues/3774
 2026-10-24T07:52Z	check	editor-menus	07:52Z prefix branch Linux green (40071878407), Mac gate pending; #4818 unmerged	https://github.com/qbtrix/creative-apps/issues/3774
+2026-10-24T08:14Z	check	editor-menus	08:14Z #4818 merged 08:01Z (supervisor prefix); #4817/#4988 ready, not in batch 20261024081307	https://github.com/qbtrix/creative-apps/pull/4818
