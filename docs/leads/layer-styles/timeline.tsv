@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-24T19:12Z	3	check	#4903,#5174,#5176	19:12Z: #4903 #5174 #5176 clean, waiting for batch; LS-8/9 wait on core bump; 0 findings
 2026-10-24T19:35Z	3	check	#4903,#5174,#5176	19:35Z: all clean, waiting for batch; 0 findings
 2026-10-24T19:57Z	3	check	lane	19:57Z: all 11 PRs clean, no labels; #4891/#4893 still in batch-20261024183708 (-6 probe); dev 6f66ca33; 0 findings
+2026-10-24T20:18Z	3	check	lane	20:19Z: all 11 PRs clean, no labels; batch-20261024183708 -6 probe: Linux pass, macOS gate run 40123913661 in progress since 19:08Z; dev ef37711d; 0 findings
