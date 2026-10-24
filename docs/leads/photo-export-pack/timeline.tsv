@@ -206,3 +206,4 @@ utc	stage	event	ref	note
 2026-10-24T14:15Z	check-in	quiet: no supervisor comment, no new finding; #5171 open on the lane (no needs-fix; a lane run in progress since 13:57Z); no XP-3/XP-4 PR; nothing merged since 12:18Z
 2026-10-24T14:47Z	check-in	lane merging again (#5087 #5097 #5138 #5046 at 14:17-14:20Z); #5171 still open, no needs-fix; no supervisor comment, no new finding; no XP-3/XP-4 PR
 2026-10-24T15:18Z	check-in	quiet: #5171 still open, no needs-fix; no supervisor comment, no new finding; no XP-3/XP-4 PR; nothing merged since 14:20Z
+2026-10-24T15:51Z	check-in	a 12-PR batch landed 15:47-15:48Z (older PRs first); #5171 still open, no needs-fix; no supervisor comment, no new finding; no XP-3/XP-4 PR
