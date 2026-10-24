@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-24T09:09:17Z	findings	pr	#5121 fixes #5095; #5093 fix re-stacking on FH-7 (golden)
 2026-10-24T09:19:34Z	findings	pr	#5129 fixes #5093 (stacked on FH-7); #5094 fixer started
 2026-10-24T09:41:36Z	findings	pr	#5137 fixes #5094 (stacked on FH-c); round 1 PRs all open
+2026-10-24T10:03:46Z	queue	check	lane batch 20261024081307 still bisecting; fill-heal PRs queued behind it, none flagged
