@@ -151,3 +151,4 @@ time	kind	note
 2026-10-24T08:10Z	3	heartbeat	-	dev 1bbaba6c (batch 20261024050226 landed, no lead PR in it); #4864 #4888 #3759 still merge clean into dev; none needs-fix
 2026-10-24T08:32:49Z	3	check	-	dev 1bbaba6c; lane batch 20261024081307 (#4903-#4952) bisecting, no lead PR in it; lead PRs clean, fast-lane, none needs-fix
 2026-10-24T08:53:52Z	3	check	-	dev 1bbaba6c unchanged; lane batch 20261024081307 still bisecting (probes 0,1,3,6), no lead PR in it
+2026-10-24T09:15:08Z	3	check	-	dev 1bbaba6c unchanged; lane batch 20261024081307 still bisecting (no lead PR in it); lead PRs waiting
