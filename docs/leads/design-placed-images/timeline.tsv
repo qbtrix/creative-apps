@@ -123,3 +123,4 @@ utc	stage	event	ref	note
 2026-10-24T13:36:56Z	3	check	-	dev 6be19b34 unchanged; batch 20261024110214 bisecting (probe -3); no lead PR batched; #4864 #4888 #3759 clean
 2026-10-24T13:58:47Z	3	check	-	dev 6be19b34 unchanged; batch 20261024110214 still bisecting; no lead PR batched; #4864 #4888 #3759 clean
 2026-10-24T14:20:02Z	3	check	-	dev 366cf36e (#5138 #5097 #5087 landed); PD-a #3759 now conflicts in DesignNode/Extras/StackTests, fixer dispatched; #4864 #4888 clean
+2026-10-24T14:38:05Z	3	fix	-	PD-a #3759 merged dev 366cf36e, head 8b376993, CI: PASS; stacked PD branches merge clean on it
