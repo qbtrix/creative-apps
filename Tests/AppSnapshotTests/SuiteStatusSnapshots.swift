@@ -7,7 +7,9 @@
 // commits the baselines). The bar's zoom and size text come from its
 // StatusPillComposing, PillStyle maps onto StatusPillStyle, each style has its
 // color and symbol (an error is stateError, not a warning), and a pill that
-// acts registers the reason its tooltip shows. macOS only.
+// acts registers the reason its tooltip shows. Only pills that need attention
+// are tinted: the zoom pill reads grey like the size pill (#3136). macOS only.
+import AppKit
 import SwiftUI
 import Testing
 
@@ -44,6 +46,33 @@ import Testing
     @Test func aNilZoomDrawsNoZoomPill() {
         #expect(ViewerStatusBar(zoom: nil, size: "24 photos").zoomText == nil)
         #expect(ViewerStatusBar(zoom: 1, size: "800 × 600 px").zoomText == ViewerZoom.percentText(1))
+    }
+
+    /// Only a pill that needs attention is tinted; the rest, the zoom pill too, read grey (#3136). Both
+    /// pills hold "100%", so their darkest glyph pixels match unless one draws in a different ink.
+    @Test func theZoomPillReadsGreyLikeTheSizePill() throws {
+        let text = ViewerZoom.percentText(1)
+        let width: CGFloat = 300
+        let bar = ViewerStatusBar(zoom: 1, size: text).frame(width: width)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        let image = try #require(render(bar, scheme: .light))
+        let pill = NSHostingView(rootView: StatusPillFace(.plain) { Text(text) }.fixedSize()).fittingSize.width
+        let sizeEnd = width - SuiteSpacing.s
+        let zoomEnd = sizeEnd - pill - SuiteSpacing.pillGap
+        /// The darkest luminance inside one pill, 2 pt in from its edges.
+        func darkest(endingAt end: CGFloat) -> CGFloat {
+            var low: CGFloat = 1
+            for x in Int(end - pill + 2)..<Int(end - 2) {
+                for y in 2..<Int(SuiteSize.pillHit) {
+                    guard let color = image.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB) else { continue }
+                    low = min(low, 0.299 * color.redComponent + 0.587 * color.greenComponent + 0.114 * color.blueComponent)
+                }
+            }
+            return low
+        }
+        let (zoom, size) = (darkest(endingAt: zoomEnd), darkest(endingAt: sizeEnd))
+        #expect(size < 0.8, "no glyphs in the size pill (darkest \(size)): the crop missed it")
+        #expect(abs(zoom - size) < 0.08, "the zoom pill's ink (darkest \(zoom)) isn't the size pill's grey (\(size))")
     }
 
     @Test func everyPillStyleMaps() {
