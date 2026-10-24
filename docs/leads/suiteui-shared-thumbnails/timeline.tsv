@@ -72,3 +72,4 @@ ts	kind	note
 2026-10-24T08:32:49Z	wait	heartbeat	-	dev 1bbaba6 (scoped suite green; full CI 40078344003 running); #4950/#4951 clean, waiting for a lane batch; 0 findings; #5102 part-1 gate rerun (first run: Home/Onboarding 60s timeouts under load, pass alone)
 2026-10-24T08:54:20Z	wait	heartbeat	-	dev 1bbaba6: full CI 40078344003/40078508656 red (none of ours on dev); #4950/#4951 clean, not batched; #5102 now part 1 (head bc9e690, gate PASS); ST-z2 gate running; 0 findings
 2026-10-24T09:16:28Z	wait	heartbeat	-	dev 1bbaba6 full CI red x3 (none of ours on dev); #4950/#4951/#5102 clean, not batched; ST-z2 gate died at 08:43 (detached run), restarted; 0 findings
+2026-10-24T09:26:54Z	3	pr-open	#5133	ST-z part 2 draft (6 files/208, head 914d92a, gate PASS) stacked on #5102; fast-lane + feature-done; both undraft once #4950/#4951 merge

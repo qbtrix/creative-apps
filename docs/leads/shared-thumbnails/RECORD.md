@@ -12,7 +12,7 @@ Next: ST-z builder on lead/shared-thumbnails-ST-z (stacked on ST-u + ST-m), draf
 | ST-a | SuiteShell and LibraryModel link CoreAsset; `ThumbnailPublishing.preview(for:)`; `FakeThumbnails`; `ThumbnailWriter` and `LiveThumbnailStoreAdapter` stubs; tests written, disabled | ST-1, ST-2 | MJ-ST | shared-codecs:SC-a (ST-2) | false | 0 | done | 40070077878 | – |
 | ST-u | home Recent cards show `preview(for:)` on the fake, app mark when nil, within the render budget | ST-3, ST-4 | HJ-ST | ST-a | true | 0 | building (#4950) | – | – |
 | ST-m | writer stores and reads previews in `AfterGlow/Thumbnails/` within budget; Library reads disk before decoding | ST-5, ST-6 | MJ-ST | ST-a; adopt-kernel-autosave:AK-a (ST-5); library spine (ST-6) | false | 0 | building (#4951) | – | – |
-| ST-z | slot live, Photo publishes on save, Library over the shared store, feature built | ST-7, ST-8 | HJ-ST, MJ-ST | ST-u, ST-m; adopt-kernel-autosave:AK-photo (ST-7) | true | 0 | building (#5102 ST-7 Photo+slot; ST-z2 PR Library disk+journey+built) | – | – |
+| ST-z | slot live, Photo publishes on save, Library over the shared store, feature built | ST-7, ST-8 | HJ-ST, MJ-ST | ST-u, ST-m; adopt-kernel-autosave:AK-photo (ST-7) | true | 0 | building (#5102 ST-7 Photo+slot, head bc9e690; #5133 Library disk+journey+built, head 914d92a; both draft, gate PASS) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -40,7 +40,7 @@ Next: ST-z builder on lead/shared-thumbnails-ST-z (stacked on ST-u + ST-m), draf
 - 2026-10-24T07:55Z Belt watches lead/suiteui-shared-thumbnails and docs/leads/suiteui-shared-thumbnails/RECORD.md. Every RECORD push now goes to both branches (same commit), with the record mirrored at both paths.
 - Earlier runs (act-1a15b69feea-et92) were all blocked on SC-a; their heartbeat log is in RECORD.prev.
 
-- 2026-10-24T08:15Z ST-z came back at 548 lines/13 files, over the 400 cap even after its parents merge. Split into two stacked PRs, both `Slice: ST-z`: #5102 (ST-7 Photo publish on save + live slot, 7 files/340) and ST-z2 (Library grid on disk, journey on live previews, wave.json built, feature-done; 6 files/208). The hard cap wins over "one PR per slice"; the slice is done once a run contains ST-z2.
+- 2026-10-24T08:15Z ST-z came back at 548 lines/13 files, over the 400 cap even after its parents merge. Split into two stacked PRs, both `Slice: ST-z`: #5102 (ST-7 Photo publish on save + live slot, 7 files/340) and #5133 (Library grid on disk, journey on live previews, wave.json built, feature-done; 6 files/208). The hard cap wins over "one PR per slice"; the slice is done once a run contains ST-z2.
 
 ## Wire
 - [x] Wire: shared-codecs:SC-a (ST-2 built ahead; when SC-2 merges, merge dev into the ST-a branch, keeping both Package.swift/project.yml link changes)
