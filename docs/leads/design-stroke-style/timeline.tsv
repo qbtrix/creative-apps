@@ -159,3 +159,4 @@ time	kind	note
 2026-10-24T11:04:11Z	3	check	-	dev 6ad8cadb; lane fix #5150 (lists all open PRs) merged; new batch 20261024110214 (#5006-#5144) has no lead PR; #4864/#4888/#3759 merge clean
 2026-10-24T11:26:15Z	3	check	-	dev 6ad8cadb unchanged; batch 20261024110214 in flight, no lead PR in it; lead PRs waiting
 2026-10-24T11:48:12Z	3	check	-	dev 6ad8cadb unchanged; batch 20261024110214 still in flight, no lead PR in it
+2026-10-24T12:10:58Z	3	check	-	dev 6ad8cadb unchanged; batch 20261024110214 bisecting (probe -6), no lead PR in it; #4864 #4888 #3759 clean, no needs-fix
