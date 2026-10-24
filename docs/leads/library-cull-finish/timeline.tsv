@@ -88,3 +88,4 @@
 2026-10-24T03:41Z	heartbeat	no change; lane probe -7 macOS still running; PRs waiting for next batch
 2026-10-24T03:57Z	heartbeat	no change; lane probe -7 green, bisect continues (-8 next); PRs waiting for next batch
 2026-10-24T04:14Z	heartbeat	no change; lane probe -8 running (decides batch culprit); PRs waiting for next batch
+2026-10-24T04:31Z	heartbeat	no change; lane probe -8 Linux green, macOS running; PRs waiting for next batch
