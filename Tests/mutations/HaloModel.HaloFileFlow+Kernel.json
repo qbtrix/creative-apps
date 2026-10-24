@@ -1,0 +1,4 @@
+[
+  {"label": "hasDocumentFollowsTheComposition: a drop sees a composition where there is none", "file": "Sources/HaloModel/HaloFileFlow+Kernel.swift", "find": "    public var hasDocument: Bool { selectedComposition != nil }\n", "replace": "    public var hasDocument: Bool { selectedComposition == nil }\n", "tests": "HaloFileFlowStubTests.hasDocumentFollowsTheComposition"},
+  {"label": "theSavedProjectIsASuiteDocument: an unsaved project hands Open In a document", "file": "Sources/HaloModel/HaloFileFlow+Kernel.swift", "find": "        guard let path = file.path else { return nil }\n", "replace": "        let path = file.path ?? \"/Untitled.halo\"\n", "tests": "HaloFileFlowStubTests.theSavedProjectIsASuiteDocument"}
+]
