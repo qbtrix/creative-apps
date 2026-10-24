@@ -1,7 +1,7 @@
 // DesignExportSheet+Kernel.swift: what File > Export…'s sheet reads (design-export DE-6):
 // the scope chips' titles, the options it opens with (Selection falls back to Frame when nothing
 // exportable is selected), a whole 1x to 3x scale (PNG only; `scaleHelp` says why it's off), the run's
-// options until idle, and the file list: the plan's files, then (Selection) each hidden selected
+// options until idle and why they're off once a run starts, and the file list: the plan's files, then (Selection) each hidden selected
 // layer, skipped. The fake run (DE-7): its files, its steps (one fails on `-DesignExportFail`) and
 // the finished summary. Linux-safe.
 import SuiteKernel
@@ -51,6 +51,14 @@ extension ExportRun where Options == DesignExportOptions {
         switch self {
         case .idle: nil
         case .editing(let options), .running(let options, _, _), .finished(let options, _), .failed(let options, _): options
+        }
+    }
+
+    /// Why the Scale and Scope chips are off: nil while editing (or idle), else the run is under way or done.
+    public var optionsHelp: String? {
+        switch self {
+        case .idle, .editing: nil
+        case .running, .finished, .failed: "The export is under way or done. Close the sheet and export again to change it."
         }
     }
 

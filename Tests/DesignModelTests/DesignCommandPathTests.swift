@@ -58,7 +58,7 @@ import Testing
         let png = try files("png", 1, "frame")
         #expect(png == one("Desktop.png", 1440, 1024))
         #expect(try files("svg", 1, "frame") == one("Desktop.svg", 1440, 1024))
-        #expect(try files("png", 2, "frame") == one("Desktop.png", 2880, 2048))
+        #expect(try files("png", 2, "frame") == one("Desktop@2x.png", 2880, 2048))
         #expect(try files("png", 1, "selection") != png, "scope reached the run")
         #expect(throws: CatalogError.self) {
             var w = Self.oneLayer
