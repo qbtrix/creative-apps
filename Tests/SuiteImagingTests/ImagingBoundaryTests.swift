@@ -209,7 +209,7 @@ enum ImagingBoundary {
 
     @Test func theTreePassesWithTheBaseline() throws {
         let baseline = ImagingBoundary.baseline(try Self.read("Tests/metal-boundary-baseline.txt"))
-        #expect(baseline.count == 4)
+        #expect(baseline.count == 1)
         let files = try Self.sourceTree()
         #expect(files.count > 100 && files["Sources/SuiteImaging/SuiteImaging.swift"] != nil)
         let result = ImagingBoundary.check(files: files, manifest: try Self.read("Package.swift"), baseline: baseline)
