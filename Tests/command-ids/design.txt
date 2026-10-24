@@ -41,6 +41,9 @@ page.add
 page.delete
 page.rename
 page.select
+select.enter-group
+select.exit-group
+select.pick
 shape.draw
 tool.ellipse
 tool.eyedropper

@@ -2,9 +2,9 @@
 // It moves the selected collection's rejects to the Trash through
 // `services.trash`, takes them out of the catalog as one "Delete Rejects"
 // step whose undo puts files and photos back, and remembers their paths so a
-// re-import skips them. DR-1 holds the stubs: the targets, title and
-// message are real; `deleteRejectsHelp` disables the item until DR-6 gives
-// `deleteRejects` its body. Linux-safe.
+// re-import skips them (`excludedPaths`, LibraryImport). A move that fails
+// keeps its photo and names it in `cullError`; the undo and redo of the step
+// live in LibraryUndoAdapter. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -42,7 +42,7 @@ extension LibraryCatalog {
         if deleteRejectsTargets.isEmpty {
             return "No rejected photos in \(selectedCollection?.name ?? "this collection")."
         }
-        return services.unavailable["trash"] ?? "Delete Rejects isn't connected yet (cull-finish)."
+        return services.unavailable["trash"]
     }
 
     /// The dialog's question: "Move 3 rejected photos to the Trash?"
@@ -52,9 +52,39 @@ extension LibraryCatalog {
     }
 
     /// Trash every target and take the moved ones out as one "Delete Rejects"
-    /// step; the status line says how many and names any it couldn't move,
-    /// which stay in the catalog. DR-1: does nothing until DR-6.
+    /// step; any it couldn't move stay in the catalog and are named in
+    /// `cullError` after how many moved. A sample (no file) leaves the catalog
+    /// without a Trash call.
     public mutating func deleteRejects() {
         guard deleteRejectsHelp == nil else { return }
+        let targets = Set(deleteRejectsTargets.map(\.id))
+        var moved: [TrashedPhoto] = [], failed: [String] = []
+        for (index, photo) in items.enumerated() where targets.contains(photo.id) {
+            guard let path = photo.path else {
+                moved.append(TrashedPhoto(photo: photo, index: index, trashedPath: nil))
+                continue
+            }
+            do {
+                moved.append(TrashedPhoto(photo: photo, index: index, trashedPath: try services.trash.moveToTrash(path)))
+            } catch {
+                failed.append(Self.trashFailure("Couldn't move", photo, error))
+            }
+        }
+        guard !moved.isEmpty else {
+            cullError = failed.first
+            return
+        }
+        takeOutTrashed(moved)
+        history.kernel.record("Delete Rejects", CatalogChange(photos: [], trashed: moved))
+        history.open = false
+        let count = moved.count == 1 ? "Moved 1 photo to the Trash." : "Moved \(moved.count) photos to the Trash."
+        cullError = failed.isEmpty ? nil : ([count] + failed).joined(separator: " ")
+    }
+
+    /// "Couldn't move IMG_4: <reason>." for a Trash call on `photo` that threw `error`.
+    static func trashFailure(_ verb: String, _ photo: PhotoItem, _ error: any Error) -> String {
+        let reason = (error as? LibraryError)?.message ?? String(describing: error)
+        let line = "\(verb) \(photo.name): \(reason)"
+        return line.hasSuffix(".") ? line : line + "."
     }
 }
