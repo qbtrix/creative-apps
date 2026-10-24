@@ -7,6 +7,7 @@ Base: origin/dev 830af22de
 Next: Lane: #5039 AK-6 in the lane; #5040 AK-9 stacked on it. AK-8 waits SC-f (re-read each poll); AK-11 after AK-6, AK-8, AK-9.
 
 ## Run act-1a16fe1fa73-5x3s decisions
+- 22:59Z: the 22:27Z poll was one-shot, so no heartbeat ran from 22:28Z to 22:59Z. Each poll now schedules the next one 15 min out.
 - Brief rule 1: main checked out at e79e9afc; lead/export-pack and lead/brush-keys rebased onto origin/main and pushed (--force-with-lease).
 - PR base stays `dev`: CLAUDE.md, scripts/fast-lane.sh (BASE_BRANCH=dev) and every earlier run land through dev; a fast-lane PR on main is retargeted to dev anyway.
 - PR bodies: the session's GitHub relay re-appends a generated-by footer on every edit; the fast lane strips it from the squash commit (its comment on #5043), so nothing waits on it.
