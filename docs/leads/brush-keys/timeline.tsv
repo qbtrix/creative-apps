@@ -68,3 +68,4 @@ utc	stage	event	ref	note
 2026-10-24T10:13:57Z	3	poll	-	unchanged: all 8 open+clean; batch 20261024081307 probes -1 mac red/linux green, -0 no runs (dev mac red #5113); dev 9f476af7; blocked-poll 2/3
 2026-10-24T10:31:09Z	3	question	-	blocked-poll 3/3 identical (batch 20261024081307 probes unchanged since ~08:50; dev 9f476af7; dev-red #5113); posted Question for the supervisor on #3758 (issuecomment-6383133497)
 2026-10-24T10:48:30Z	3	poll	-	state changed: dev-red #5113 closed (full CI green on 9f476af7, run 40081823899); dev fffff7c1 (#4616 docs); all 8 PRs open, none merged; batch 20261024081307 branches unchanged; no supervisor reply yet; blocked-poll reset 0
+2026-10-24T11:05:10Z	3	poll	-	supervisor 10:52 on #3758: old batch 20261024081307 doomed (built on red dev), dropped; new batch 20261024110214 (12 PRs, none ours) running; dev 6ad8cadb; all 8 ours open, queued for next batch
