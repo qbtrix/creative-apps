@@ -48,6 +48,18 @@ extension PhotoWorkspace {
         selectionMask = selection == nil ? nil : mask
     }
 
+    /// The selection's closed outlines in canvas pixels, for the ants: the mask's where its coverage crosses half,
+    /// else the rectangle's corners; none without a selection.
+    public var areaOutline: [[Point]] {
+        if selectionMask != nil { return maskOutline }
+        guard let selection else { return [] }
+        let (x0, y0, x1, y1) = (Double(selection.x), Double(selection.y), Double(selection.maxX), Double(selection.maxY))
+        return [[Point(x: x0, y: y0), Point(x: x1, y: y0), Point(x: x1, y: y1), Point(x: x0, y: y1)]]
+    }
+
+    /// `mask`'s outline (`AreaMask.outline`); none without a mask or when it can't be traced.
+    static func outline(_ mask: Mask?) -> [[Point]] { mask.flatMap { try? AreaMask.outline($0) } ?? [] }
+
     /// `rect` in the kernel's document space.
     static func box(_ rect: PixelRect) -> Rect {
         Rect(minX: Double(rect.x), minY: Double(rect.y), maxX: Double(rect.maxX), maxY: Double(rect.maxY))
