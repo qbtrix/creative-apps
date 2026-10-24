@@ -54,3 +54,4 @@ utc	stage	event	ref	note
 05:58Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; batch-20261024050226 macOS red, lane bisecting: probe -6 (#4864) Linux 40067471044 + macOS 40067473896 running; AJ-a #4846 in that batch; BK-photo #4965 regained fast-lane
 06:20Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; bisect probe -6 (#4864) macOS 40067473896 still running; AJ-a #4846 in that batch; BK-photo #4965 open
 06:42Z	3	poll	dev e5dcf939	nothing to act on; #4577/#4889/#4896 open, no needs-*; dev took #4840,#5048 (not ours); AJ-a #4846 not on dev yet; BK-photo #4965 open
+2026-10-24T07:24Z	poll	FH-7 builder running on lead/fill-heal-FH-7 (FH-c+FH-3); #4577 #4889 in lane, #4896 stacked; mirror synced
