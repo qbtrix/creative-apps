@@ -1,0 +1,4 @@
+[
+{"label":"a refusal doesn't shake the field","file":"Sources/SuiteUI/SidebarRow.swift","find":"refusals += 1","replace":"refusals += 0","tests":"SidebarRenameRefusalTests"},
+{"label":"the refusal's reason wraps","file":"Sources/SuiteUI/SidebarRow.swift","find":".lineLimit(1)","replace":".lineLimit(nil)","tests":"SidebarRenameRefusalTests"}
+]
