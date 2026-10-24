@@ -158,3 +158,4 @@ utc	stage	event	ref	note
 2026-10-24T21:13:39Z	heartbeat	batch 20261024205137 (holds #4854): Linux green, macOS gate running; #5025 queued
 2026-10-24T22:21:55Z	fix	FV-z: a second session (act-1a16fe1fa9f-sqqi, recording on lead/export-pack) pushed a duplicate StageRasterizer.frame onto #4854 (9836fb32) and moved its body; reverted to the batch-tested head 565669e7 and restored the body. #5025 stays the frame fix for #5017. Kept the duplicate at backup/fvz-frame-fix (local only)
 2026-10-24T22:22:32Z	stage	record: run act-1a16fe1fa9f-sqqi; FV-u done; #4854 Belt-Lead back to this run
+2026-10-24T22:28:25Z	heartbeat	#4854 (565669e7) open, clean, fast-lane, not merged; #5025 still queued; batch 20261024205137 probes still on origin
