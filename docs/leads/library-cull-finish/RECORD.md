@@ -2,7 +2,7 @@
 
 Issue: #3458 · Packet: docs/blueprints/library/features/cull-finish.md
 Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 · earlier run act-1a15995d319-aamb
-Stage: build, wave 3; #4844 (DR-6) merged on dev 0d4645bf at 2026-10-23T18:38:28Z; #4838 (head 110671fc) and #4899 (now 9 files/223 lines vs dev) on the lane. Checked 2026-10-24T00:43Z
+Stage: build, wave 3; #4844 (DR-6) merged on dev 0d4645bf at 2026-10-23T18:38:28Z; #4838 (head 110671fc) and #4899 (now 9 files/223 lines vs dev) on the lane. Checked 2026-10-24T00:56Z
 Base: origin/dev 35a0b5e7
 Next: lane merges #4838, #4844, #4899 (#4899 fits 400/15 once #4844 lands); then a scoped run app=library for Belt-Slice-Done DR-u (+Mac-Finish-Wanted) and DR-m; then DR-z (DR-9 journey, DR-10 docs incl. the ⌥⌘⌫ packet wording and excludedPaths wiring gap)
 
