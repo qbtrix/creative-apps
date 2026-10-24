@@ -90,3 +90,4 @@ utc	stage	event	ref	note
 2026-10-24T07:08Z	check	cli-bundle	07:08Z #4999 open clean, waiting on lane	https://github.com/qbtrix/creative-apps/pull/4999
 2026-10-24T07:29Z	check	cli-bundle	07:29Z #4999 open clean, waiting on lane	https://github.com/qbtrix/creative-apps/pull/4999
 2026-10-24T07:52Z	check	cli-bundle	07:52Z #4999 open, waiting on lane	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T08:14Z	check	cli-bundle	08:14Z #4999 ready, not in batch 20261024081307	https://github.com/qbtrix/creative-apps/pull/4999
