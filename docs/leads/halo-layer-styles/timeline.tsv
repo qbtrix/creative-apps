@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-24T22:20Z	check	#4874 still in the Mac gate; #5156 #5174 not landed yet; nothing to merge
 2026-10-24T22:36Z	check	#4874 still open (supervisor lands it first); #5156 #5174 not landed; stack unchanged
 2026-10-24T22:53Z	check	#4874 #5156 #5174 still open; waiting on the supervisor landing per 21:55Z answer
+2026-10-24T23:12Z	check	#4874 #5156 #5174 still open (supervisor landing pending); stack unchanged
