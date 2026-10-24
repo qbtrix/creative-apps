@@ -1,0 +1,23 @@
+[
+ {
+  "label": ".sliderTakesKey: a key press with a slider focused steps the frame",
+  "file": "Sources/SuiteModel/EditMenu/FocusedSliderKeyRouting.swift",
+  "find": "fromKey ? .slider : .app",
+  "replace": "fromKey ? .app : .app",
+  "tests": "FocusedSliderKeyRoutingTests"
+ },
+ {
+  "label": ".offItemStaysOn: an off item swallows the slider's key",
+  "file": "Sources/SuiteModel/EditMenu/FocusedSliderKeyRouting.swift",
+  "find": "isEnabled: appEnabled || route == .slider",
+  "replace": "isEnabled: appEnabled",
+  "tests": "FocusedSliderKeyRoutingTests"
+ },
+ {
+  "label": ".noSliderIsTheApps: with no slider focused the item reads the slider help",
+  "file": "Sources/SuiteModel/EditMenu/FocusedSliderKeyRouting.swift",
+  "find": "return SliderKeyItem(route: .app, isEnabled: appEnabled, help: appHelp)",
+  "replace": "return SliderKeyItem(route: .app, isEnabled: appEnabled, help: sliderHelp)",
+  "tests": "FocusedSliderKeyRoutingTests"
+ }
+]
