@@ -94,7 +94,7 @@ enum ImageIOImportScan {
     @Test func fixtureImportInHaloModelFails() throws {
         let files = ["Sources/HaloModel/HaloFixture.swift": "import Foundation\n\(Self.line)\n",
                      ImageIOImportScan.adapter: "\(Self.line)\n",
-                     "Sources/PhotoApp/ImageIOCodec.swift": "\(Self.line)\n"]
+                     "Sources/LibraryApp/Platform/ImageIODecoder.swift": "\(Self.line)\n"]
         let problems = try Self.withTree(files) { try ImageIOImportScan.problems(root: $0, baseline: try Self.baseline()) }
         #expect(problems == ["Sources/HaloModel/HaloFixture.swift imports ImageIO; call SuiteImageIO (\(ImageIOImportScan.adapter)) instead"])
     }

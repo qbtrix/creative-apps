@@ -173,7 +173,7 @@ enum FormatListScan {
         try String(contentsOf: root.appendingPathComponent("Tests/format-lists-baseline.txt"), encoding: .utf8)
     }
     /// Today's baseline size; a slice lowers it with its lines, nothing raises it.
-    static let baselineCap = 25
+    static let baselineCap = 24
 
     /// A temp tree holding `files` (path to text) under its root.
     static func tree(_ files: [String: String]) throws -> URL {

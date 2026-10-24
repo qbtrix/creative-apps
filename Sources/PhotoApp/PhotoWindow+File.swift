@@ -224,7 +224,7 @@ extension PhotoWindow {
         if PhotoWorkspace.fileKind(forName: url.lastPathComponent) == .document { return openDocument(url) }
         do {
             let data = try Data(contentsOf: url)
-            let side = ImageIOCodec.pixelSize(of: data).flatMap {
+            let side = ImageIOCodec.pixelSize(of: url).flatMap {
                 PhotoWorkspace.decodeLongestSide(width: $0.width, height: $0.height)
             }
             try model.openImage(data, name: url.lastPathComponent, codec: ImageIOCodec(), longestSide: side)
