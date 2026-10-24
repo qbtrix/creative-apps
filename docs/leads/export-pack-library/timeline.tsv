@@ -44,3 +44,4 @@ time	event	task	note
 2026-10-24T08:33Z	heartbeat	lane: #4960 #4962 eligible (Fast-Check marker), 57 ready PRs queued behind batch 20261024081307
 2026-10-24T08:56Z	wave	LX-u builder started, stacked on feat/export-pack-lx2 (#4960)
 2026-10-24T09:18Z	build	LX-u #5128 opened, stacked on #4960
+2026-10-24T09:18Z	heartbeat	no lane merges since 08:05Z; #4960 #4962 #5128 waiting
