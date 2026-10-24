@@ -1,0 +1,16 @@
+[
+  {
+    "label": "sampledGreenFromRed: SampledColor's FillColor init reads green from red",
+    "file": "Sources/PhotoModel/Contracts/OutputContracts.swift",
+    "find": "green: HexText.byte(fill.g)",
+    "replace": "green: HexText.byte(fill.r)",
+    "tests": "PhotoColourFillTests"
+  },
+  {
+    "label": "sampledFillSwapsGreen: SampledColor's fill writes red as green",
+    "file": "Sources/PhotoModel/Contracts/OutputContracts.swift",
+    "find": "g: Double(green) / 255",
+    "replace": "g: Double(red) / 255",
+    "tests": "PhotoColourFillTests"
+  }
+]
