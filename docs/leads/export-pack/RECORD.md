@@ -33,6 +33,7 @@ Next: Lane: chain #4960 → #5043 → #5065 → #5104 → #5106; #5044 and #5074
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-24T08:51:29Z Heartbeat 08:52Z: chain #4960 → #5043 → #5065 → #5104 → #5106 open; #5044, #5074 in the lane. No merges, no Belt-Slice-Done. Full CI 40078344003 on dev 1bbaba6c1 is red on macOS; none of our PRs has merged, so it is not ours.
 - 2026-10-24T08:31:23Z XP-8 #5106 (2 files, +164/−12): GalleryExportBoard plans each pick through ExportRules and writes through FakeMedia.still at the planned size; refused picks fail with the rules' sentence; fake writer capped at 4096 px per side. ExportPackLiveTests (5). Footer stripped and verified. XP-10 waits on merges.
 - 2026-10-24T08:27:17Z Heartbeat 08:30Z: chain #4960 → #5043 → #5065 → #5104 open; #5044 and #5074 in the lane; XP-8 building. No merges yet, so no Belt-Slice-Done (dev CI 1bbaba6c1 holds none).
 - 2026-10-24T08:20:37Z Wave 4: XP-8 stacked on XP-5 #5104 (XP-6 already merged as #3586). It plans through ExportRules and does not depend on XP-9 #5074's fake writer. XP-10 waits on XP-7, XP-8 and XP-9.
