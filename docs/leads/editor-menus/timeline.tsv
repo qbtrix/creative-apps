@@ -104,3 +104,4 @@ utc	stage	event	ref	note
 2026-10-24T08:14Z	check	editor-menus	08:14Z #4818 merged 08:01Z (supervisor prefix); #4817/#4988 ready, not in batch 20261024081307	https://github.com/qbtrix/creative-apps/pull/4818
 2026-10-24T08:36Z	check	editor-menus	08:36Z #4817/#4988 ready; batch 20261024081307 bisecting, no new batch yet	https://github.com/qbtrix/creative-apps/pull/4817
 2026-10-24T08:58Z	check	editor-menus	08:57Z: lane sweep running, no new batch yet	https://github.com/qbtrix/creative-apps/issues/3774
+2026-10-24T09:20Z	check	editor-menus	09:19Z: lane macOS gates blocked by dev-red #5113	https://github.com/qbtrix/creative-apps/issues/5113
