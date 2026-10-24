@@ -4,12 +4,12 @@ Issue: #3777 · Packet: docs/blueprints/suiteui/features/adjust-everywhere.md
 Run: act-1a15cb4e0f5-ipbr (took over from act-1a15c4e2e3b-zh3u, released 04:25Z) · Session: claude/lead-fill-heal-adjust-everywhere-4clx57 · Started: 2026-10-21T02:36Z, relaunched 2026-10-21T04:29Z
 Stage: 3 wave 1
 Base: 2ab0eb96320db973b5aad0644449ee5ed3980ab9
-Next: wait on IM-a (#3715) per the supervisor's 04:24Z answer on #3777; poll every 20 min; if nothing lands by 06:30Z the run is released and relaunched once IM-a is on dev
+Next: AJ-a (#4846) and AJ-7 (#4867) merged 17:02-17:03Z; post Belt-Slice-Done: AJ-a once a green suiteui/full run includes da62659 or later (scoped suiteui 40114493184 queued). AJ-k #5064: dev merged in, regating, then fast-lane + Head. AJ-6 waits on TC-m; AJ-u on OC-photo-u; adopters blocked.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| AJ-a | kinds, filters, commands, looks and the preset store as stubs | AJ-1, AJ-2 | – | suite-imaging:IM-a (AJ-1) | false | 0 | building (AJ-2s) | – | – |
+| AJ-a | kinds, filters, commands, looks and the preset store as stubs | AJ-1, AJ-2 | – | suite-imaging:IM-a (AJ-1) | false | 0 | merged #4846 (awaiting green suiteui/full run) | – | – |
 | AJ-u | shared adjust UI on the stubs | AJ-3, AJ-4 | – | AJ-a, OC-photo-u | true | 0 | waiting | – | – |
 | AJ-k | kind and filter bodies | AJ-5, AJ-5f | – | AJ-a, IM-m | false | 0 | waiting | – | – |
 | AJ-c | commands and looks live | AJ-6, AJ-7 | – | AJ-k, TC-m, AJ-a | false | 0 | waiting | – | – |
@@ -51,3 +51,4 @@ Next: wait on IM-a (#3715) per the supervisor's 04:24Z answer on #3777; poll eve
 - 2026-10-24T08:33Z check-in: #4846 needs-fix: macOS gate stall (Onboarding/Home 60s timeouts) unrelated; merged dev, gate PASS, pushed 3325d7a6, Head updated; restacking #5064
 
 - 2026-10-24T08:40Z restack: #5064 restacked on #4846 3325d7a6: gate PASS, pushed 80e6d515, Head updated, footer removed
+- 2026-10-24T17:19Z: #4846 (AJ-a) merged 17:02:08Z, #4867 (AJ-7) merged 17:03:20Z. #5064 is on base dev with 509 lines (squash), so I merged origin/dev into lead/adjust-everywhere-AJ-5f-v2 (add/add conflicts in FilterRules.swift and FilterRulesTests.swift; dev's copies equal the AJ-1b stubs, kept ours); own diff 3 files +162/-12; gating.
