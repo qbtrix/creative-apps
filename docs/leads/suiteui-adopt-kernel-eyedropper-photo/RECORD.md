@@ -2,14 +2,14 @@
 
 Issue: #3723 · Packet: docs/blueprints/suiteui/features/adopt-kernel-eyedropper-photo.md
 Run: act-1a16cc5a05a-lc3g (relaunch) · Started: 2026-10-24T06:40Z
-Stage: 3 wave 2 (EP-m landed; EP-z #4943 in the lane)
+Stage: 3 wave 2 (EP-m slice-done; EP-z #4943 Linux green, waiting for its batch)
 Base: 721168a8f (origin/dev; brief main cb79cbb6 verified)
-Next: #4943 (EP-z, head 69dedd1) lands through the lane batch; Belt-Slice-Done EP-m and EP-z on the first green ci.yml run on dev containing each; then Belt-Contact-Sheet.
+Next: #4943 (EP-z, head 69dedd1) lands through the lane batch macOS gate; Belt-Slice-Done EP-z on the first green ci.yml run on dev containing it; then Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| EP-m | click and `color.sample` both read `SampleRules.mean` through Photo's kernel adapter; Photo's ColorSampling, SampledColor and FakeSampling gone | EP-1, EP-2 | MJ-EP | photo/eyedropper:PE-z (packet), adopt-kernel-export:AX-photo (EP-2), adopt-kernel-brush:AB-photo (EP-2) | false | 0 | merged | – | – |
+| EP-m | click and `color.sample` both read `SampleRules.mean` through Photo's kernel adapter; Photo's ColorSampling, SampledColor and FakeSampling gone | EP-1, EP-2 | MJ-EP | photo/eyedropper:PE-z (packet), adopt-kernel-export:AX-photo (EP-2), adopt-kernel-brush:AB-photo (EP-2) | false | 0 | done | – | run 40077009798 |
 | EP-z | PhotoEyedropper.swift and LiveSampling.swift deleted, baseline shrunk, built | EP-3, EP-4 | MJ-EP, PJ-EP | EP-m, adopt-kernel-unsaved-prompt:UP-z (EP-3) | false | 0 | building | – | – |
 
 ## Tasks
