@@ -117,3 +117,4 @@ Next: Lane: #4871 TS-a and #5047 TS-7 in the lane. After #4871 merges, merge dev
 - Wire: adopt-kernel-easing:AE-halo (TS-halo)
 - Wire: adjust-everywhere:AJ-halo (TS-halo)
 - Wire: anchor-parenting:AN-halo (TS-halo)
+- 2026-10-24T22:25:39Z (act-1a16fe1fad3-lsp3): resumed on the Belt nudge. Belt reads lead/suiteui-text-style, which had fallen behind lead/text-style. It is synced again, and both are written on every stage from now on.
