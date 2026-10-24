@@ -83,3 +83,4 @@ utc	stage	event	ref	note
 2026-10-24T06:30:35Z	3	heartbeat	-	DS-photo/design/halo/flare clean in lane queue; dev at 4446461e; no dev-red
 2026-10-24T06:46:52Z	3	heartbeat	-	DS-photo/design/halo/flare queued in lane; lane still bisecting batch 20261024050226; no dev-red
 2026-10-24T07:05:31Z	3	poll	-	all slice PRs open+clean+fast-lane; lane bisecting batch 20261024050226 (not ours); no dev-red; footer lines on #4965/#4961/#4982 re-appended by the posting service after PATCH, the lane strips them at squash
+2026-10-24T07:22:25Z	3	poll	-	no merges; dev 830af22d; lane active (CI on other branches, scoped suiteui run 40072349724 on dev in progress); #4939 #4887 #4901 #4918 #4891 ready; stacked #4965/#4961/#4982 lost fast-lane over cap as expected, wait for BK-u; blocked poll 2/3
