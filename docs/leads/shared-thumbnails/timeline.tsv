@@ -69,3 +69,4 @@ ts	kind	note
 2026-10-24T07:54:08Z	wait	heartbeat	-	Belt nudge: mirrored RECORD to lead/suiteui-shared-thumbnails; ST-z builder running; #4950/#4951 wait for the next lane batch
 2026-10-24T08:10:42Z	3	split	#5102	ST-z over cap (548/13); split into #5102 (ST-7, 340/7) + ST-z2 (208/6), both Slice ST-z; gating part 1
 2026-10-24T08:11:28Z	wait	heartbeat	-	dev 1bbaba6 (scoped suite/library/photo/flare running); #4950/#4951 open clean, not batched; 0 findings; ST-z builder done, split gating
+2026-10-24T08:32:49Z	wait	heartbeat	-	dev 1bbaba6 (scoped suite green; full CI 40078344003 running); #4950/#4951 clean, waiting for a lane batch; 0 findings; #5102 part-1 gate rerun (first run: Home/Onboarding 60s timeouts under load, pass alone)
