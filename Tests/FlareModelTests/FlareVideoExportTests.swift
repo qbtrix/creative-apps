@@ -144,6 +144,27 @@ struct FlareVideoExportTests {
         #expect(w.exportProblem == nil && w.exportFileCount == 1)
     }
 
+    /// FV-5: an MP4 or GIF run counts the plan's frames, so the sheet's bar moves through one file; a file run
+    /// still counts files.
+    @Test(arguments: [ExportFormat.mp4, .gif])
+    func aVideoRunCountsItsFrames(format: ExportFormat) throws {
+        var w = bounce(); _ = w.openExport(); w.setExportFormat(format)
+        let started = w.startExport()
+        let o = try #require(w.exportingOptions)
+        #expect(started && w.exportState == .running(o, done: 0, total: 60))
+        w.exportProgressed(0.5)
+        #expect(w.exportState == .running(o, done: 30, total: 60))
+        var half = bounce(); _ = half.openExport(); half.setExportFormat(format); half.setExportFrameRate(15)
+        let halfStarted = half.startExport()
+        #expect(halfStarted && half.exportState == .running(try #require(half.exportingOptions), done: 0, total: 30))
+        var png = bounce(); _ = png.openExport(); png.setExportFormat(.pngSequence); png.setExportStep(2)
+        let pngStarted = png.startExport()
+        #expect(pngStarted && png.exportState == .running(try #require(png.exportingOptions), done: 0, total: 30))
+        var svg = bounce(); _ = svg.openExport()
+        let svgStarted = svg.startExport()
+        #expect(svgStarted && svg.exportState == .running(try #require(svg.exportingOptions), done: 0, total: 1))
+    }
+
     @Test func svgLottieAndPNGStillExport() async throws {
         #expect(ExportFormat.svgFrame.unbuiltReason == nil && ExportFormat.lottie.unbuiltReason == nil)
         #expect(ExportFormat.pngSequence.unbuiltReason == nil)
