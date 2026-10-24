@@ -6,9 +6,9 @@
 // transparency. Choose ProRes 4444." Then it picks ProRes 4444, ticks the
 // checkbox and starts: `<tmp>/Bounce.mov` is written, and its first frame
 // has alpha 0 in the corner, where the composition has only its background.
-// Written first (HX-6): skips until HX-7 turns it on, once HX-3's plan rules
-// and HX-4's writer let ProRes 4444 through. The Model half is
-// HaloProResTests. One shot per step, `halo-export-pack-<n>-<step>`.
+// Written first (HX-6) and turned on by HX-7, once HX-3's plan rules and
+// HX-4's writer let ProRes 4444 through, on live services. The Model half is
+// HaloProResTests; RJ-H41's CLI check waits on #4929. One shot per step, `halo-export-pack-<n>-<step>`.
 import AVFoundation
 import CoreGraphics
 import XCTest
@@ -19,7 +19,6 @@ final class HaloExportPackJourneyTests: XCTestCase {
 
     /// HJ-X1: Render… refuses alpha on H.264, then writes Bounce.mov in ProRes 4444 with alpha.
     @MainActor func testRenderLowerThirdWithAlpha() throws {
-        throw XCTSkip("waits on HX-7")
         let folder = FileManager.default.temporaryDirectory.appending(path: "halo-export-pack-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         addTeardownBlock { try? FileManager.default.removeItem(at: folder) }
