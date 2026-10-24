@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: IM-8b is #5151 (stacked on #5148); supervisor asked (comment 6383016723) whether Photo's resident route may stand in for LiveToneSurface. Order ruled (a) at 10:30Z: Library adopts exposure, levels, curve; IM-10b committed (32ff1ed), mutate and gate next; IM-11 split into IM-11a (Model, committed e7b0234, rebased on IM-10b test fix 65fa4fe) and IM-11b (macOS view). LibraryModelTests crash was a stale build (fixed by a clean rebuild). IM-8d and IM-12 wait EP-z (#3723); IM-13 waits ST-a.
+Next: IM-10b is #5153 (stacked on #4886). IM-11a (4d753ae) mutated 4/4, gate running; PR stacks on #5153. Then IM-11b (macOS view: SuiteImaging tone writer, loupe on the resident texture, LibraryDevelopLatencyTests on). Supervisor question 6383016723 (IM-8b) open. IM-8d and IM-12 wait EP-z (#3723); IM-13 waits ST-a.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
 
@@ -34,8 +34,8 @@ Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imag
 | IM-8d | IM-photo | delete PhotoLiveTone | – | blocked: EP-z #3723 |
 | IM-9 | IM-library | Library imaging tests | #4591 | merged |
 | IM-10 p1 | IM-library | develop levels/curve points are SuiteImaging's | #4886 | open (fast-lane, clean) |
-| IM-10b | IM-library | LiveDevelop on the shared list | – | committed 32ff1ed + 65fa4fe (shared-list test compares with Library sliders zeroed); mutate 8/8 + 4/4; gate running |
-| IM-11a | IM-library | loupe GPU frame (Model): LiveDevelop.steps, LiveLoupeImaging.gpuFrame, histogram from the CPU-developed preview | – | committed e7b0234 (stacked on IM-10b); gating after IM-10b |
+| IM-10b | IM-library | LiveDevelop on the shared list | #5153 | open (fast-lane, Fast-Check 65fa4fe, mutate 8/8 + 4/4; stacked on #4886) |
+| IM-11a | IM-library | loupe GPU frame (Model): LiveDevelop.steps, LiveLoupeImaging.gpuFrame, histogram from the CPU-developed preview | – | 4d753ae (stacked on #5153); mutate 4/4; gate running |
 | IM-11b | IM-library | loupe view on LiveToneSurface + CanvasHost; LibraryDevelopLatencyTests on | – | after IM-11a |
 | IM-12 | IM-z | delete Photo's copies | – | blocked: EP-z |
 | IM-13 | IM-z | no-baseline rule, Photo's Metal link removed | – | blocked: ST-a |
