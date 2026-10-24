@@ -65,7 +65,8 @@
 # any lone PR with LANE_MAC_PER_PR=1; a lone code PR is a batch of one. No
 # proof is trusted once it is stale (proof_stale, lesson 244): dev changed a
 # ratchet, lint or baseline path (RATCHET_RE) since the proof's base, or the
-# PR changes one and dev moved at all. A lone PR with a stale proof is checked
+# PR changes one and dev moved on anything but the generated files
+# (GENERATED_RE). A lone PR with a stale proof is checked
 # as a batch of one on today's dev, and a batch whose base went stale that way
 # is dropped before it lands and forms again on today's dev. A batch
 # that needs macOS forms when a slot frees (a batch resolved in this run),
@@ -210,6 +211,11 @@ AUDIT_REASON="loosens the app audit: needs the captain's review"
 # command-path baselines), the ratchet tests themselves, the canonical concept
 # lists and the app audit. Matched ignoring case.
 RATCHET_RE="(^scripts/|^\\.github/workflows/ci\\.yml\$|baseline|ratchet|commandpath|placeholdermenu|^tests/canonical-|${AUDIT_RE})"
+# The files .github/workflows/generated.yml commits straight to dev (its `git
+# add` list). A dev move made only of these never stales a proof: they hold no
+# code, and a generated commit under a batch with a ratchet PR dropped the whole
+# batch on 2026-10-23.
+GENERATED_RE="^(docs/c4/(model\\.json\$|parts/)|docs/blueprints/[^/]+/(features/waves\\.md|jobs\\.md)\$)"
 # Canonical first (docs/factory/lead.md rule 20): a PR that adds a Swift file
 # under Sources/<X>Model or Sources/<X>App named for a canonical concept
 # (Tests/canonical-concepts.txt) needs an `Allow-Dup: <concept> <reason>` body
@@ -862,8 +868,9 @@ scratch() {
 # proof_stale <base> <tip>: why a Linux proof of <tip>, run on top of <base>,
 # no longer holds on origin/BASE_BRANCH in the scratch clone (lesson 244);
 # nothing when it still does. Stale: dev changed a RATCHET_RE path since
-# <base>, or <base>..<tip> changes one and dev moved at all. A comparison that
-# fails counts as stale. Trees only (--no-renames), so blob:none is enough.
+# <base>, or <base>..<tip> changes one and dev moved on anything but the
+# generated files (GENERATED_RE). A comparison that fails counts as stale.
+# Trees only (--no-renames), so blob:none is enough.
 proof_stale() {
   local mine dev hit
   if [[ -z "$1" ]] || ! mine=$(git -C "$SCRATCH" diff --name-only --no-renames "$1" "$2" 2>/dev/null) \
@@ -873,7 +880,7 @@ proof_stale() {
   hit=$(grep -iE -- "$RATCHET_RE" <<<"$dev" | paste -sd, - | sed 's/,/, /g' || true)
   if [[ -n "$hit" ]]; then echo "$BASE_BRANCH changed $hit since"; return; fi
   hit=$(grep -iE -- "$RATCHET_RE" <<<"$mine" | paste -sd, - | sed 's/,/, /g' || true)
-  if [[ -n "$hit" && -n "$dev" ]]; then echo "it changes $hit and $BASE_BRANCH moved since"; fi
+  if [[ -n "$hit" ]] && grep -vE -- "$GENERATED_RE" <<<"$dev" | grep -q .; then echo "it changes $hit and $BASE_BRANCH moved since"; fi
 }
 
 # batch_branches: every batch branch at REMOTE, `<sha> <name>` per line.
