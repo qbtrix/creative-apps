@@ -128,3 +128,4 @@ utc	stage	event	ref	note
 2026-10-24T10:58:09Z	blocked	lane still stuck on batch 20261024081307 after dev green (55 ready PRs wait); filed #5152 (needs-human) for the supervisor
 2026-10-24T11:17:44Z	lane	lane moving: batch 20261024110214 has #5025 (not #4852/#4854/#5005, next batch); #5152 closed
 2026-10-24T11:36:51Z	heartbeat	batch 20261024110214: Linux green, macOS gate running (#5025 in it)
+2026-10-24T11:56:05Z	heartbeat	batch 20261024110214 macOS gate in scripts/ci (tests), 53 min in
