@@ -81,3 +81,4 @@ utc	stage	event	ref	note
 2026-10-24T17:24:09Z	W2	check	PY-1	no change: #5177 queued; #5174, #5176 open; dev c09201386
 2026-10-24T17:52:02Z	W2	check	PY-1	#5177 queued (unstable = a cancelled fast-lane job, not a gate); #5174, #5176 open
 2026-10-24T18:18:32Z	W2	check	PY-1	no change: #5177 queued; #5174, #5176 open; dev-red #5183 not ours
+2026-10-24T18:47:36Z	W2	fix	PY-1	needs-rebase on #5177 (catalog test, golden): merged dev, kept path. and style. exclusions, golden = dev + style.*; gate queued
