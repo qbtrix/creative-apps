@@ -4,7 +4,7 @@ Issue: #4512 (was #3753) · Packet: docs/blueprints/suiteui/features/clipboard-i
 Run: act-1a16cdcb4a5-trd4 · Session: claude/feature-lead-playbook-9a8kbw · Started: 2026-10-23T15:30Z
 Stage: 3 wave 2
 Base: 9f476af7419db0cc5753aa119ec0bd3b1a12899a (origin/dev)
-Next: Next: wait for the lane to merge the batch (#4903 #4904 #4905 #4911), then open stacked PRs
+Next: Next: lane merges #4902 #4904 #4905 #5116 #5149 #5125; then check
 
 
 
