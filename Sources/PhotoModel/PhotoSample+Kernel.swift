@@ -2,7 +2,9 @@
 // (eyedropper PE-1 stubs, PE-6 bodies), so `color.sample` and the Eyedropper
 // tool read the same colour: the composite a person sees, in canvas pixels,
 // the mean of the tool's `SampleSize` square (SuiteKernel's SampleRules, the
-// one mean every sampler uses), rendering only that square. Picking is tool
+// one mean every sampler uses), rendering only that square. It is Photo's
+// only sampling path: an Eyedropper click (`sampleDrag`) and `color.sample`
+// both read `sampledColor` (adopt-kernel-eyedropper-photo EP-2). Picking is tool
 // state, not a document edit, so it is never an undo step. The square's size is the
 // tool's own option (`setSampleSize`). Which press picks and when the loupe
 // shows (eyedropper PE-3) are decided here too, so the window only routes.
@@ -45,6 +47,13 @@ extension PhotoWorkspace: SampleTarget {
         }
         func channel(_ value: Double) -> UInt8 { UInt8(clamping: SampleRules.byte(value)) }
         setToolOption(.color(red: channel(picked.r), green: channel(picked.g), blue: channel(picked.b)))
+    }
+
+    /// One Eyedropper drag event at `point` (canvas pixels): the same pick
+    /// as `pickBrushColor`, so a click and `color.sample` read one colour.
+    /// Off the image, or with nothing to sample, it changes nothing.
+    mutating func sampleDrag(at point: Mask.Point) {
+        try? pickBrushColor(at: Point(x: point.x, y: point.y))
     }
 
     /// Sets the square the eyedropper reads.

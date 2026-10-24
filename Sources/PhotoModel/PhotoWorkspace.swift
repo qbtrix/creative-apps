@@ -153,9 +153,9 @@ public struct PhotoWorkspace: Sendable {
     }
 
     /// Why the palette shows `tool` disabled, as its tooltip; nil once it works.
-    /// The eyedropper asks the sampling service, so `.fake` enables it.
+    /// The eyedropper reads the kernel's mean, so it is enabled on any services.
     public func toolHelp(_ tool: PhotoTool) -> String? {
-        tool == .eyedropper ? services.sampling.unavailableHelp : tool.unavailableHelp
+        tool == .eyedropper ? nil : tool.unavailableHelp
     }
 
     /// Drops the status line's message.
