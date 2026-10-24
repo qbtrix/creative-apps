@@ -94,3 +94,4 @@ utc	stage	event	ref	note
 2026-10-24T21:13:24Z	3	heartbeat	heartbeat 21:13Z: 11 PRs open, fast-lane, all mergeable clean (incl. #5039/#5047); none merged; journeys suiteui 40124405113 still in progress; full CI on ef37711de running; dev-red #5183 open (not ours)
 2026-10-24T21:52:52Z	3	stage	-	run act-1a16fe1fa73-5x3s starts: base stays dev; #5039 AK-6 queued in lane, #5040 stacked; AK-8 waits SC-f (shared-codecs still planned on dev)
 2026-10-24T22:19:47Z	3	poll	-	poll 22:3xZ: records now mirrored to lead/suiteui-* (this run had pushed only lead/<f>); none merged; dev afef017c; lane still on batch 20261024205137 macOS probe -3; no open findings; #5039 queued, #5040 stacked; SC-f still planned (AK-8 held per supervisor)
+2026-10-24T22:21:10Z	3	poll	-	poll 22:21Z: all six lead branches verified on remote; none of this run's PRs merged; dev afef017c; all clean; no open line:suiteui findings; waiting on lane batch
