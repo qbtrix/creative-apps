@@ -1,9 +1,9 @@
 # tone-controls lead record
 
 Issue: #3468 · Packet: docs/blueprints/photo/features/tone-controls.md
-Run: act-1a16cd04539-4jc0 · Session: claude/feature-lead-playbook-9tb3qe · Started: 2026-10-24T07:30Z (takes over from act-1a16958d691-2ax3)
-Stage: build W4 done (PT-3 #5105, PT-4 #5112, PT-2 #5007, PT-6 #5008 in the lane); PT-5 waits on TC-3 #5006
-Base: 830af22de (dev now 1bbaba6c1)
+Run: act-1a16f6941b7-zb0r · Session: claude/feature-lead-tone-layer-styles-v57ny4 · Started: 2026-10-24T19:30Z (takes over from act-1a16cd04539-4jc0)
+Stage: build W4 in the lane (PT-2 #5007, PT-3 #5105 clean; PT-4 #5112, PT-6 #5008 re-merged with dev after needs-rebase); PT-5 waits on TC-3 #5006
+Base: 830af22de (dev now 6f66ca334)
 Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #4880 / TC-6 #4953 merge; critic panel on PT-m once a scoped photo run shows it; PT-7/PT-8 after PT-u and PT-m land
 
 ## Slices
@@ -60,6 +60,7 @@ Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #48
 - PT-3 and PT-4 start now (rule 12): TC-1, the tone contract, has merged; IM-photo (LiveToneSurface, the PhotoAdjust+Imaging adapter) is on dev; gradient-fill, transform, history-panel, eyedropper and place-image are all `built`. Tests that need the TC-5 / TC-6 bodies are written and disabled by name, with `Wire:` lines in the PR body.
 - PT-3 and PT-4 branch from dev, not stacked on #5008: they are Model-only, share no files with PT-2/PT-6, and stacking would push their diffs over 400 lines while #5007/#5008 wait in the lane.
 - PT-5 waits on TC-3 (#5006): snapshots and a render budget of the TC-2 placeholder rows would only be redone when TC-3 lands.
+- Run act-1a16f6941b7-zb0r (2026-10-24T19:30Z) takes over; same base-dev and status-branch choices. The brief named lead/tone-controls; it belongs to the live SuiteUI lead (#3476, last commit 19:33Z), so it is not force-pushed and status stays on lead/photo-tone-controls.
 
 ## Open
 - [x] Wire: tone-controls:TC-2 (#4862 merged, dev 491ec5461): PT-2 #5007 builds on ToneRows(settings:help:hidden:onIntent:).
