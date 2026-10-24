@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: #5163 (IM-11b) opened, stacked on #5154; the IM-library slice is done once #4886, #5153, #5154 and #5163 are in a green suiteui-scoped or full ci.yml run on dev. The supervisor was asked for the LibraryDevelopLatencyTests perf-suites line (it lands .disabled). Supervisor question 6383016723 (IM-8b) is open. IM-8d and IM-12 wait on EP-z (#3723); IM-13 waits on ST-a; IM-14 comes last.
+Next: 12:18Z poll: nothing merged; no needs-fix or needs-rebase; no supervisor replies; EP-z #3723 still open; no dev ci.yml run since 10:57Z has the stack. Waiting on the lane for #4886, #5148, #5151 and #5153, then #5154 and #5163. IM-8d and IM-12 wait on EP-z; IM-13 waits on ST-a; IM-14 comes last.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
 
@@ -36,7 +36,7 @@ Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imag
 | IM-10 p1 | IM-library | develop levels/curve points are SuiteImaging's | #4886 | open (fast-lane, clean) |
 | IM-10b | IM-library | LiveDevelop on the shared list | #5153 | open (fast-lane, Fast-Check 65fa4fe, mutate 8/8 + 4/4; stacked on #4886) |
 | IM-11a | IM-library | loupe GPU frame (Model): LiveDevelop.steps, LiveLoupeImaging.gpuFrame, histogram from the CPU-developed preview | #5154 | open (fast-lane, Fast-Check 4d753ae, mutate 4/4; stacked on #5153) |
-| IM-11b | IM-library | loupe view writes the GPU frame (ImagingGPU.display into the CanvasHost resident texture); LibraryDevelopLatencyTests on the GPU route | #5163 | open, fast-lane, stacked on #5154; mutate 7/7, CI: PASS at 805e3850e |
+| IM-11b | IM-library | loupe view writes the GPU frame (ImagingGPU.display into the CanvasHost resident texture); LibraryDevelopLatencyTests on the GPU route | #5163 | open; the lane dropped fast-lane (869 lines against dev while stacked) and its Belt-Lead sweep re-adds it once #4886, #5153 and #5154 merge; mutate 7/7, CI: PASS at 805e3850e |
 | IM-12 | IM-z | delete Photo's copies | – | blocked: EP-z |
 | IM-13 | IM-z | no-baseline rule, Photo's Metal link removed | – | blocked: ST-a |
 | IM-14 | IM-z | feature-done | – | last |

@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-24T11:43Z	3	check	IM-11b	catalog half f6083f3 (showLoupeFrame, loupeSteps, LoupeImaging.gpuFrame); LibraryCatalog tests signal 11 at the dev base too, clean rebuild running; app half next
 2026-10-24T11:50Z	IM-library	build	IM-11b	app half committed fe06ec95e; gating
 2026-10-24T12:01Z	IM-library	pr	IM-11b	#5163 opened (7/7, CI PASS); perf line asked
+2026-10-24T12:18Z	IM-library	check	poll	nothing merged; #5163 off lane for stacked size
