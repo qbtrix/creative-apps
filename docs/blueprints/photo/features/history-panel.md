@@ -58,7 +58,8 @@ Model walk in `PhotoHistoryJumpTests` (Linux).
    dim.
 3. Paint one stroke: the ten dimmed rows go, a "Brush" row is current.
 4. Quit with unsaved work and relaunch (PH-6, `testRestoreAfterQuit`): the
-   alert offers "Restore the autosaved changes to “portrait.jpg”?"; Restore
+   alert offers "Restore portrait.jpg from <time>?" (Photo's words,
+   `RecoveryOffer`); Restore
    shows the 3-step image.
 
 ## Jobs

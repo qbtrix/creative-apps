@@ -61,8 +61,10 @@ final class PhotoPlaceJourneyTests: XCTestCase {
     /// File > Place…, then the file at `url` chosen in the panel by its path.
     @MainActor private func place(_ url: URL, _ photo: Journey) {
         photo.press(character: "p", [.command, .shift])
-        let panel = photo.app.sheets.firstMatch.exists ? photo.app.sheets.firstMatch : photo.app.dialogs.firstMatch
-        XCTAssert(panel.waitForExistence(timeout: 10), "Place… opened no panel")
+        // The panel is a sheet or a dialog: wait for either before picking, as it takes a moment to come up.
+        let sheet = photo.app.sheets.firstMatch, dialog = photo.app.dialogs.firstMatch
+        XCTAssert(waitFor { sheet.exists || dialog.exists }, "Place… opened no panel")
+        let panel = sheet.exists ? sheet : dialog
         photo.press(character: "g", [.command, .shift])
         let goTo = panel.sheets.firstMatch.exists ? panel.sheets.firstMatch : panel.textFields.firstMatch
         XCTAssert(goTo.waitForExistence(timeout: 5), "Shift-Command-G opened no Go to field in the panel")
