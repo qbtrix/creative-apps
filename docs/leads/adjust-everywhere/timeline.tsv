@@ -11,3 +11,4 @@ utc	stage	event	ref	note
 05:56Z	3	poll	dev 71ffa4d	dev unchanged; IM-a #3715 and BK-m #3758 open, no new comments, no IM-a PR open; #3845/#3846 clean in fast lane; next poll 06:17Z
 2026-10-23T14:53Z	-	start	run act-1a1693a4009-hyio, line lead; wave 1 plan
 2026-10-23T14:53Z	AJ-a	builder	AJ-1+AJ-2l then AJ-k, AJ-7 launched, base dev 8021b0f5
+2026-10-24T06:57Z	AJ-k	recut	#4863 needs-split; AJ-5f-v2 on #4846, gating

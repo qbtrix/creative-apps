@@ -43,3 +43,6 @@ Next: wait on IM-a (#3715) per the supervisor's 04:24Z answer on #3777; poll eve
 - Wave 1 (base dev 8021b0f5): builder B AJ-a (AJ-1 + LookPresets.swift), then stacked AJ-k (AJ-5, AJ-5f), AJ-7, and AJ-6 if TC-m is on dev.
 - Blocked: AJ-u on OC-photo-u; AJ-photo on IM-photo (#4619 needs-split); AJ-library on IM-z, ST-m, OC-library-m; AJ-halo on AN-halo.
 - Open findings for this feature: 0, so no wave gate.
+
+## Run act-1a16cae7922-5nat
+- 2026-10-24T06:57Z: resume on #3777, dev e5dcf939. AJ-5 body is on dev (#4853). #4846 (AJ-a second half, 359 lines) clean in lane; #4867 (AJ-c, AJ-7) clean in lane. #4863 (AJ-k) got needs-split at 816 lines (old #4834 commits): re-cut as lead/adjust-everywhere-AJ-5f-v2 on #4846's head (own change 3 files +162/-12), gating; #4863 closes when its replacement opens. Blocked as before; AJ-6 waits on TC-m. 0 open findings.
