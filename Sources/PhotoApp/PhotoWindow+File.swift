@@ -375,7 +375,6 @@ struct PhotoFileArea: ViewModifier {
     let model: PhotoWorkspace
     let files: PhotoFileSession
     let perform: PhotoPerform
-    @Environment(\.openWindow) private var openWindow
 
     func body(content: Content) -> some View {
         content
@@ -418,7 +417,7 @@ struct PhotoFileArea: ViewModifier {
                 guard let offer = files.recoveryOffer, let hook = await PhotoWindowEditedView.hook(for: files) else { return }
                 if let choice = await hook.askToRestore(offer) { perform(.file(choice)) } else { files.recoveryOffer = nil }
             }
-            .task { if let intent = PhotoOpenQueue.shared.windowAppeared(openWindow) { perform(intent) } }
+            .suiteOpenQueue(PhotoShell.openQueue, isEmpty: model.canvas == nil, open: perform)
             // A clean close leaves nothing to recover; a dirty one asked first (Don't Save discards).
             .onDisappear { if !model.isDirty { files.autosave?.discard() } }
     }

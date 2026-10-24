@@ -11,7 +11,7 @@
 // (FlareAppDelegate). Every hand-off reaches FlareShell.host, a
 // FlareDocumentHost that hands each dropped or reopened animation to
 // FlareShell.openQueue (SuiteUI's SuiteOpenQueue): an empty window opens it in
-// place, else it opens in a new window.
+// place, else it opens in a new window, even on a cold launch that shows none.
 // Editor menus (EM-5): `.suiteEditor` adds Window's Switch To ▸ and AI
 // Access… and the suite's Help group; FlareLive's channel answers live
 // `afterglow` commands on the active window's animation. The delegate is a
@@ -63,6 +63,7 @@ struct FlareApp: App {
                 FlareCommands()
             }
             .suiteEditor(.flare, host: FlareShell.host, live: FlareLive.channel)
+            .suiteOpenQueue(FlareShell.openQueue)
     }
 }
 

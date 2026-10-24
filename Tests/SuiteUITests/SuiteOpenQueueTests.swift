@@ -2,7 +2,9 @@
 // window. An empty window takes a file in place (once: it isn't empty while
 // that file opens), else a new window is asked for and takes the oldest
 // waiting file when it appears; the first window also asks for one per file
-// that came before any window could.
+// that came before any window could. On a cold launch no window may come:
+// the app's opener (from the scene's commands, `appLaunched`) asks for one
+// window per file, whichever arrives first, and never asks twice.
 import Foundation
 import SuiteUI
 import Testing
@@ -49,5 +51,50 @@ import Testing
         #expect(asked == 1)
         #expect(queue.windowAppeared(requestWindow: { asked += 1 }) == b)
         #expect(asked == 1)
+    }
+
+    @Test func aColdLaunchOpensAWindowWithoutWaitingForOne() {
+        let queue = SuiteOpenQueue(windowID: "t")
+        var asked = 0
+        queue.appLaunched(requestWindow: { asked += 1 })
+        #expect(asked == 0)
+        queue.open(a)
+        #expect(asked == 1)
+        #expect(queue.windowAppeared(requestWindow: { asked += 1 }) == a)
+        #expect(asked == 1)
+    }
+
+    @Test func aFileBeforeTheOpenerStillGetsAWindow() {
+        let queue = SuiteOpenQueue(windowID: "t")
+        queue.open(a)
+        var asked = 0
+        queue.appLaunched(requestWindow: { asked += 1 })
+        #expect(asked == 1)
+        // The commands' body runs again: no second window for the same file.
+        queue.appLaunched(requestWindow: { asked += 1 })
+        #expect(asked == 1)
+        #expect(queue.windowAppeared(requestWindow: { asked += 1 }) == a)
+        #expect(asked == 1)
+    }
+
+    @Test func twoColdFilesOpenTwoWindowsNotThree() {
+        let queue = SuiteOpenQueue(windowID: "t")
+        var asked = 0
+        queue.appLaunched(requestWindow: { asked += 1 })
+        queue.open(a)
+        queue.open(b)
+        #expect(asked == 2)
+        #expect(queue.windowAppeared(requestWindow: { asked += 1 }) == a)
+        #expect(queue.windowAppeared(requestWindow: { asked += 1 }) == b)
+        #expect(asked == 2)
+    }
+
+    @Test func anyItemCanWait() {
+        let queue = SuiteOpenQueue(windowID: "t", items: Int.self)
+        var opened: [Int] = []
+        _ = queue.windowAppeared(requestWindow: {})
+        queue.setEmpty(UUID(), open: { opened.append($0) })
+        queue.open(7)
+        #expect(opened == [7])
     }
 }
