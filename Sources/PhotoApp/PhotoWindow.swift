@@ -14,7 +14,9 @@
 // handle drag or row scrub runs on LiveTransformCopy the same way. Its workspace runs on
 // `fileServices(.live)`, or under `-PhotoFixture` on the fixture's fakes
 // (`launchOptions`, read once from the process; S-12), whose picture it
-// renders and keeps fitted while the window settles, until the user zooms. Open, Save, Save As and their
+// renders fitted. The zoom is a ZoomLevel (SuiteKernel's one zoom model): a new or opened picture is
+// fitted, and stays fitted as the window resizes until the user picks another level (ZoomMath.scale,
+// clear of the floating palette); the canvas's pinch and keys hand it a level. Open, Save, Save As and their
 // launch arguments live in PhotoWindow+File.swift, Export's write in
 // PhotoWindow+Export.swift.
 //
@@ -39,14 +41,8 @@ struct PhotoWindow: View {
     @State var liveStroke = LiveStroke()
     @State var dragLine = LiveDragLine()
     @State var liveTransform = LiveTransformCopy()
-    @State var zoom = 1.0
+    @State var zoomLevel: ZoomLevel
     @State var viewport = CGSize.zero
-    /// A new image waits to be fitted until the canvas has a size.
-    @State var fitPending = false
-    /// A launch fixture's picture refits as the window settles, until the user zooms.
-    @State var fitFollowsViewport = false
-    /// The zoom the last fit chose; a zoom that differs means the user zoomed.
-    @State var fittedZoom: Double?
     @State var documentURL: URL?
     @State var note: String?
     /// The error or refusal the window's alert shows; nil while it is closed.
@@ -95,24 +91,30 @@ struct PhotoWindow: View {
     /// A window on `model`: the launch workspace in the app, a test's own in tests, at `zoom`.
     init(model: PhotoWorkspace = PhotoWindow.launchWorkspace(), zoom: Double = 1) {
         _model = State(initialValue: model)
-        _zoom = State(initialValue: zoom)
+        _zoomLevel = State(initialValue: ZoomLevel(scale: zoom))
     }
+
+    /// The zoom the canvas draws at: the level against the viewport, fitted clear of the floating
+    /// palette (every tool shows while an image is open).
+    var zoom: Double {
+        let size = model.canvas.map { CGSize(width: $0.width, height: $0.height) } ?? .zero
+        return ZoomMath.scale(zoomLevel, document: size, in: viewport, using: Self.paletteFit)
+    }
+
+    /// The fit EditorDetail hands Command-0, so a fitted image clears the floating palette.
+    static let paletteFit = EditorDetailLayout.paletteFit(toolCount: PhotoTool.allCases.count)
 
     var body: some View {
         PhotoEditor(
             model: model, tiles: renderer.tiles, renderMilliseconds: renderer.milliseconds,
-            renderBackend: renderer.backend, note: renderer.failure ?? note, zoom: zoom, onViewport: viewportChanged, onZoom: setZoom, perform: perform,
+            renderBackend: renderer.backend, note: renderer.failure ?? note, zoom: zoom, onViewport: { viewport = $0 }, onZoomLevel: { zoomLevel = $0 }, perform: perform,
             straighten: straightenDraft)
             .environment(\.photoDragLine, dragLine)
             .environment(\.photoLiveTransform, liveTransform)
             .focusedSceneValue(\.photoMenu, PhotoMenu(model: model, isPresenting: isPresenting, perform: perform))
             .onChange(of: model.revision) { renderer.show(model) }
             .onAppear { if let rendering { renderer.follow(rendering) { renderer.show(model) } } }
-            .onChange(of: model.canvas) {
-                fitFollowsViewport = false
-                fitPending = true
-                fit()
-            }
+            .onChange(of: model.canvas) { zoomLevel = .fit }
             // The status line's message goes 4 s after it appears; a new message restarts the wait.
             .task(id: model.statusMessage) {
                 guard model.statusMessage != nil else { return }
@@ -243,10 +245,10 @@ struct PhotoWindow: View {
         case .sendBackward: model.sendSelectedLayerBackward()
         case .selectLayerAbove: model.selectLayerAbove()
         case .selectLayerBelow: model.selectLayerBelow()
-        case .zoomIn: setZoom(ZoomMath.zoomedIn(from: zoom))
-        case .zoomOut: setZoom(ZoomMath.zoomedOut(from: zoom))
-        case .actualSize: setZoom(1)
-        case .fit: fit()
+        case .zoomIn: zoomLevel = ZoomKey.zoomIn.level(from: zoom, steps: ZoomMath.steps)
+        case .zoomOut: zoomLevel = ZoomKey.zoomOut.level(from: zoom, steps: ZoomMath.steps)
+        case .actualSize: zoomLevel = .actual
+        case .fit: zoomLevel = .fit
         case .file(let intent): performFile(intent)
         case .edit(let intent): performEdit(intent)
         case .crop(let intent): performCrop(intent)
@@ -274,42 +276,11 @@ struct PhotoWindow: View {
 
     // MARK: Zoom
 
-    /// A fixture's picture is there before any change, so render and fit it,
-    /// and keep it fitted while the window settles until the user zooms.
+    /// A fixture's picture is there before any change, so render it, fitted.
     private func showLaunchImage() {
         guard model.canvas != nil else { return }
         renderer.show(model)
-        fitFollowsViewport = true
-        fitPending = true
-        fit()
-    }
-
-    /// Sets the zoom within ZoomMath's range (10% to 3200%).
-    private func setZoom(_ scale: Double) {
-        zoom = ZoomMath.clamped(scale.isFinite ? scale : 1)
-    }
-
-    /// Fits the image in the canvas clear of the floating palette (every tool shows while an image is
-    /// open), once the canvas has been laid out.
-    private func fit() {
-        guard let canvas = model.canvas, viewport.width > 0, viewport.height > 0 else { return }
-        fitPending = false
-        let toolCount = PhotoTool.allCases.count
-        // The fit EditorDetail hands Command-0, so a fitted image clears the floating palette.
-        let paletteFit: @Sendable (CGSize, CGSize) -> Double = { viewport, artboard in
-            EditorDetailLayout(viewport: viewport, toolCount: toolCount).fitScale(artboard: artboard)
-        }
-        setZoom(ZoomMath.fit(document: CGSize(width: canvas.width, height: canvas.height), in: viewport, using: paletteFit))
-        fittedZoom = zoom
-    }
-
-    private func viewportChanged(_ size: CGSize) {
-        viewport = size
-        if fitPending || (fitFollowsViewport && zoom == fittedZoom) {
-            fit()
-        } else {
-            fitFollowsViewport = false
-        }
+        zoomLevel = .fit
     }
 
     // MARK: Image
