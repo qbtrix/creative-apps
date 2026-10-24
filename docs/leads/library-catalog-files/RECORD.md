@@ -123,3 +123,4 @@ Next: (2026-10-23T17:39:52Z) #4879 LC-a, #4924 LC-u, #4937 LC-5, #4938 LC-6 wait
 - 2026-10-24T20:13:54Z: poll: #4923 #4924 #4937 #4938 #4949 all in fast-lane, none ejected; waiting on lane batch and a green scoped library run
 - 2026-10-24T20:44:30Z: poll: #4923 #4924 #4937 #4938 #4949 all clean and ready; lane is bisecting batch-20261024183708 with 115 ready PRs queued behind it
 - 2026-10-24T21:02:24Z: slice-done: #4879 LC-a done in scoped library run 40129102226
+- 2026-10-24T21:14:41Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
