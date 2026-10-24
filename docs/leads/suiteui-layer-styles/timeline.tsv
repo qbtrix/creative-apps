@@ -88,3 +88,4 @@ utc	stage	event	ref	note
 2026-10-24T20:41Z	3	check	lane	20:41Z: batch-20261024183708 resolved: culprit #4887 (not ours, needs-fix), prefix 5050..4886 merging; #4891/#4893 wait for next batch; all 11 of ours clean; 0 findings
 2026-10-24T21:03Z	3	check	lane	21:03Z: new batch-20261024205137 (5192 5207 5208 5209 5213 5050 4236 4854 4884 4885 4886 4888) has none of ours; all 11 clean, queued; dev 1a98629c; 0 findings
 2026-10-24T21:25Z	3	check	lane	21:25Z: batch-20261024205137 (none of ours) red, bisecting (-3, -6 probes); all 11 of ours clean, queued; 0 findings
+2026-10-24T21:47Z	3	check	lane	21:47Z: batch-20261024205137 (none of ours) still bisecting; all 11 of ours clean, queued; dev afef017c; 0 findings
