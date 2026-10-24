@@ -102,3 +102,4 @@ utc	stage	event	ref	note
 2026-10-24T11:35Z	0	stage-start	act-1a16daeb4e8-vghz	relaunch; rebased on main 9f476af; waiting for #5150 promote
 2026-10-24T11:34Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI in_progress/null; main 9f476af74
 2026-10-24T11:54Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI in_progress/null; main 9f476af74
+2026-10-24T12:03Z	3	heartbeat	lead/suite-cli-bundle	mirror resynced from lead/cli-bundle; #4999 open clean, CI 40087964618 in progress
