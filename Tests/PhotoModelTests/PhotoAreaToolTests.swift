@@ -111,8 +111,10 @@ import Testing
 
     @Test func aLassoWithNoAreaSelectsNothing() throws {
         var workspace = try canvas(.lasso)
+        let steps = workspace.historySteps.count
         drag(&workspace, [(10, 10), (20, 20), (30, 30)])
         #expect(workspace.selection == nil && workspace.areaRecipe.isEmpty)
+        #expect(workspace.historySteps.count == steps, "a lasso along a line adds no undo step")
     }
 
     @Test func thePolygonClosesOnAClickNearItsFirstCorner() throws {

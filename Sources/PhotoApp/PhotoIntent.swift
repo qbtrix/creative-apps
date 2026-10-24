@@ -60,6 +60,10 @@ extension PhotoTool: PaletteTool {
         switch self {
         case .move: "Move"
         case .marquee: "Marquee"
+        case .ellipse: "Ellipse"
+        case .lasso: "Lasso"
+        case .polygon: "Polygon Lasso"
+        case .wand: "Magic Wand"
         case .brush: "Brush"
         case .eraser: "Eraser"
         case .clone: "Clone"
@@ -76,6 +80,10 @@ extension PhotoTool: PaletteTool {
         switch self {
         case .move: "arrow.up.and.down.and.arrow.left.and.right"
         case .marquee: "rectangle.dashed"
+        case .ellipse: "circle.dashed"
+        case .lasso: "lasso"
+        case .polygon: "hexagon"
+        case .wand: "wand.and.stars"
         case .brush: "paintbrush.pointed"
         case .eraser: "eraser"
         case .clone: "square.on.square"
@@ -92,6 +100,9 @@ extension PhotoTool: PaletteTool {
         switch self {
         case .move: "v"
         case .marquee: "m"
+        case .ellipse, .polygon: nil
+        case .lasso: "l"
+        case .wand: "w"
         case .brush: "b"
         case .eraser: "e"
         case .clone: "s"

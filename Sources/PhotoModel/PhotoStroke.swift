@@ -85,6 +85,11 @@ struct PhotoStroke: Sendable, Equatable {
     var modifiers: DragModifiers = []
     /// Gradient: where the pointer is now; the gradient runs from `start` to here on release.
     var end: Mask.Point?
+    /// Lasso: the path so far; area tools: the zoom the drag saw last, and the
+    /// selection a Marquee drag began on (PhotoAreaTool.swift).
+    var points: [Mask.Point] = []
+    var zoom: Double = 1
+    var areaBefore: PhotoAreaBefore?
 }
 
 extension PhotoWorkspace {
@@ -159,8 +164,8 @@ extension PhotoWorkspace {
                     along: [last ?? start, end], size: brushOptions.size, layer: id, before: &current.before,
                     coverage: &current.coverage, healing: current.tool == .heal, skippingFirst: last != nil)
             }
-        case .marquee:
-            selectionDrag(&current, to: end, modifiers: modifiers, zoom: zoom, in: canvas)
+        case .marquee, .ellipse, .lasso, .polygon, .wand:
+            areaDrag(&current, to: end, modifiers: modifiers, zoom: zoom, in: canvas)
         case .crop:
             cropDrag(current, to: end, modifiers: modifiers, zoom: zoom, in: canvas)
         case .move:
@@ -236,7 +241,9 @@ extension PhotoWorkspace {
         case .clone, .heal:
             guard let id = done.layerID, !done.before.isEmpty else { return }
             record(.tiles(layer: id, done.before), named: done.tool == .heal ? "Heal" : "Clone")
-        case .marquee, .crop, .eyedropper:
+        case .marquee, .ellipse, .lasso, .polygon, .wand:
+            endAreaDrag(done)
+        case .crop, .eyedropper:
             break
         case .gradient:
             guard let end = done.end else { return }
