@@ -16,3 +16,4 @@ utc	stage	event	ref	note
 2026-10-24T20:08Z	3	heartbeat	act-1a16e2f645b-47gj	resumed after container restart; HY-7 builder lost, restarting; #5156 #5174 still open
 2026-10-24T20:15Z	stage	HY-7 builder restarted; #5156 waits behind lane batch 20261024183708 (dev-red #5183)
 2026-10-24T21:46Z	stage	HY-7 PR #5218 opened (draft); question to supervisor on #5156 lane wait
+2026-10-24T22:03Z	check	supervisor lands #5156 then #5174; beta label added to #5157 #5158 #5161 #5218; dev-red #5183 closed

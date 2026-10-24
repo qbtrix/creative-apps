@@ -7,7 +7,7 @@ Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTes
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
 Stage: 3 wave 5: every HY slice has a PR. #5156 HY-1 ready (clean, unbatched ~10h); drafts #5157 HY-2, #5158 HY-m, #5161 HY-u, #5218 HY-z (HY-7, 8/8 mutations, 13 files +391/-7 own); LS-2 #5174 open
 Base: 6be19b3 (origin/dev)
-Next: act on the supervisor's answer about #5156 (21:50Z question on #3936); when #5156 merges, merge dev into #5158, gate, Head, ready; when #5174 lands, the same for #5157, #5161, then #5218; HY-8 (feature-done) after HY-7 lands
+Next: the supervisor lands #5156 then #5174 by hand after #4874 (21:55Z answer); the stack retargeter moves drafts onto dev. Then merge dev into #5158, gate, Head, ready; then #5157, #5161, #5218 the same; HY-8 (feature-done) after HY-7 lands
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: act on the supervisor's answer about #5156 (21:50Z question on #3936); whe
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-24T21:55Z (supervisor): every PR of this beta feature carries `beta` (lane order p0, beta, rest), stacked drafts included. Added to #5157 #5158 #5161 #5218. #5156/#5174 waited because dev-red #5183 (Design drag timing) failed every macOS gate until #5222.
 - 2026-10-24 (resume act-1a16e2f645b-47gj): the brief asks to rebase `lead/layer-styles` onto main and force-push. Not done: that branch is the SuiteUI layer-styles lead's live status channel (#3937, last push 13:56Z); this feature's channel stays `lead/halo-layer-styles`, as decided earlier. Work stays on `origin/dev` (the brief's main verified at 4f00afb; CLAUDE.md targets dev). PR bodies move to the new Belt-Lead id.
 - 2026-10-24: HY-7 follows the supervisor's 13:10Z answer on #3936: a shared SuiteUI GPU layer view keeps one `RenderDispatcher`, uploads a layer's raster only when its content changes, runs only `StyleRoute.draw` per step and draws the resident result; Halo's viewer passes style and layer. Wire: suiteui layer-styles:LS-9 (StyleRoute body).
 - 2026-10-24: HY-a is 525 changed lines over LS-2 (HY-1 223 in 12 files, HY-2 302 in 8), over the 400 cap, so it ships as two PRs, both `Slice: HY-a`: HY-1 once #4911 is on dev, HY-2 once LS-2 is. Posted on #3936.
