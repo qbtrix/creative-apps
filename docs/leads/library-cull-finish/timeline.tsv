@@ -119,3 +119,4 @@
 2026-10-24T13:19:51Z	heartbeat	lane still bisecting batch-20261024110214 (probe 6); ours eligible, waiting for the next batch
 2026-10-24T13:41:31Z	heartbeat	lane still bisecting batch-20261024110214 (probe 3); ours eligible, all open+clean
 2026-10-24T14:04:22Z	heartbeat	no merges; lane still bisecting batch-20261024110214 (probe 3), 131 ready PRs queued; all PRs clean fast-lane, no needs-fix, no findings
+2026-10-24T14:26:18Z	heartbeat	bisect landed a prefix of batch-20261024110214 on dev (14:16-14:20Z); our PRs not in it, all still open fast-lane, no needs-fix; 132 ready queued
