@@ -1,4 +1,4 @@
-// HaloLayerStyle+Suite.swift (layer-styles HY-2): adapters onto SuiteUI for the styling area. HaloStyleMenuItems
+// HaloStyleAdapter.swift (layer-styles HY-2): adapters onto SuiteUI for the styling area. HaloStyleMenuItems
 // is one MenuCommand per Layer menu style id, titled and disabled by the Model; HaloStyleSheet is LayerStylePanel
 // over Done (Return), until LS-3 gives the panel its own; HaloStyleSheetHost presents it while `stylePanel` is set.
 // Views only read HaloProject and call its methods.

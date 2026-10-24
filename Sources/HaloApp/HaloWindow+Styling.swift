@@ -1,7 +1,7 @@
 // HaloWindow+Styling.swift (layer-styles HY-2): the styling area's hook. The window publishes `runStyleMenu` as
 // the `haloRunStyleMenu` focused value, which the Layer menu's HaloStyleMenuItems call: it runs the id on the
 // project and puts what Copy returns on LayerStylePasteboard, which Paste reads. `stylingScene(_:)` presents
-// HaloStyleSheet (HaloLayerStyle+Suite.swift) while `stylePanel` is set, each gesture sent to `runStyle`.
+// HaloStyleSheet (HaloStyleAdapter.swift) while `stylePanel` is set, each gesture sent to `runStyle`.
 import HaloModel
 import SuiteImaging
 import SuiteUI
