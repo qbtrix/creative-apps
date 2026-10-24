@@ -191,3 +191,4 @@ time	kind	note
 2026-10-24T22:00:38Z	3	check	-	poll: full CI 40129856269 green (contains 674461187); lane batch-20261024205137 still bisecting (#4888); no needs-fix/needs-rebase
 2026-10-24T22:22:22Z	3	check	-	poll: scoped design 40135075233 on afef017c2 green, #5212 closed; batch-20261024205137 macOS gate red on #4888 tip (dev was red then), probes -3/-6 macOS gates queued since 21:17; no needs-fix/needs-rebase
 2026-10-24T22:44:07Z	3	check	-	poll: batch-20261024205137 bisect now at probe -1 (#5192 only; #4888 is the batch tip); dev unchanged at afef017c2; our 8 PRs clean, no needs-fix/needs-rebase
+2026-10-24T23:06:10Z	3	check	-	poll: batch-20261024205137 bisect probe -1 (#5192) macOS gate 40139723227 running since 22:42; full CI 40137153379 on afef017c2 running; dev unchanged; our 8 PRs clean, no labels
