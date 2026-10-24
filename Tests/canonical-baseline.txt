@@ -2,7 +2,6 @@
 # (docs/factory/lead.md), grandfathered. Written by scripts/check-dup-logic
 # --update-baseline, never by hand. It only shrinks: move a concept into
 # SuiteModel, delete the app copy, and drop its line in the same PR.
-Sources/DesignApp/DesignClosePrompt.swift
 Sources/DesignApp/DesignLayersPanel.swift
 Sources/DesignApp/DesignRasterizer.swift
 Sources/DesignApp/DesignSaveStatus.swift
@@ -138,4 +137,3 @@ Sources/PhotoModel/PhotoSelectionMask.swift
 Sources/PhotoModel/PhotoStraighten.swift
 Sources/PhotoModel/PhotoTileUpdate.swift
 Sources/PhotoModel/PhotoTransform.swift
-Sources/PhotoModel/PhotoUnsavedPrompt.swift
