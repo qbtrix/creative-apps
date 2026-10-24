@@ -35,6 +35,8 @@ enum PhotoEdit: Sendable, Equatable {
     case group([PhotoEdit])
     /// Free Transform's draft as it was (nil: none was up), for its own steps.
     case draft(TransformDraft?)
+    /// The selection's recipe and Reselect's, as they were (AR-10).
+    case area(PhotoArea)
 }
 
 /// The whole layer stack, for edits that add, remove or resize layers.
@@ -201,6 +203,10 @@ extension PhotoWorkspace {
             let inverse = PhotoEdit.draft(transformDraft)
             transformDraft = draft
             touch(.all)
+            return inverse
+        case .area(let saved):
+            let inverse = PhotoEdit.area(area)
+            area = saved
             return inverse
         }
     }
