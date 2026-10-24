@@ -5,10 +5,9 @@
 // controls). Report a Problem… begins ProblemReportSheet on the front window over ShellHelpProvider's report
 // (RP-3); Copy puts the text on the pasteboard, and Save… and Email… hand it to ProblemReportActions (RP-3e),
 // so the app sends nothing itself. Beta Notes opens a window titled Beta Notes over BetaNotes.current,
-// sized to its content and then centred, so it stays on a small screen. Connect an AI Assistant…
-// (cli-bundle CB-5) begins AssistantConnectSheet on the front window over the running AfterGlow.app's
-// AssistantConnectPanel; Copy puts its text on the pasteboard and Open AI Access opens Window > AI Access…'s
-// list. The item is disabled, saying why, outside AfterGlow.app.
+// centred so it stays on a small screen. Connect an AI Assistant… (cli-bundle CB-5) begins AssistantConnectSheet
+// on the front window over the running AfterGlow.app's AssistantConnectPanel; Copy puts its text on the pasteboard
+// and Open AI Access opens Window > AI Access…'s list. The item is disabled, saying why, outside AfterGlow.app.
 import AppKit
 import SuiteKernel
 import SuiteModel
