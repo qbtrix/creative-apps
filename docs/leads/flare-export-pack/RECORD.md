@@ -4,7 +4,7 @@ Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
 Run: act-1a16c619006-nour (took over 2026-10-24 from act-1a1695ebf10-z0v8; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T02:26Z
 Stage: 3 build (fix round 1 in lane)
 Base: 721168a (origin/dev)
-Next: (2026-10-24) #5025 (FV-a fix round 1, 7 findings), #5005 (mac finish), #4852 (FV-u) and #4854 (FV-z, stacked) all open, clean, in the lane. 10 findings open (>5): no new feature task. On merge: Belt-Slice-Done FV-u/FV-z on a green run containing them, Mac-Finish-Wanted, panel on FJ-X1 screens, contact sheet.
+Next: (2026-10-24 06:35Z) #4852 (FV-u) is in batch 20261024050226, red and bisecting (probes -1, -3, -6); #4854 (stacked), #5025, #5005 wait for the next batch. 10 findings open (>5): no new feature task. On merge: Belt-Slice-Done FV-u/FV-z on a green run containing them, Mac-Finish-Wanted, panel on FJ-X1 screens, contact sheet.
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -38,6 +38,7 @@ Loop: v3 (the packet has a `## Slices` table).
 - Belt watches lead/export-pack, which the suiteui export-pack lead (#3477) also uses for docs/leads/export-pack. This record lives at docs/leads/flare-export-pack/ so neither lead overwrites the other.
 - PRs target dev (CLAUDE.md), as for file-flow.
 - Rule 20: no Flare encoder and no local copy of MovieSettings or FrameClock, so FV-1 does not start until SM-a is on dev.
+- 2026-10-24: this session's GitHub writes get the attribution footer appended on the way out, so PATCHing it out of PR bodies doesn't hold; the lane strips it from the squash commit and waits on nothing for it. Left as is.
 
 ## Open
 - shell-media (docs/blueprints/suite/features/shell-media.md) is `planned` with feature_issue "file when ready"; SM-a and SM-w are not on dev. All four slices wait on it. Noted on #3481.
