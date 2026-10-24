@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-24T02:07Z	check	heartbeat	-	02:07Z check: #4903/#4911 open fast-lane; lane bisect probe -9 running (not ours); LS-2/5/11 stacked
 2026-10-24T02:29Z	check	heartbeat	-	02:29Z check: #4903/#4911 open fast-lane; lane bisect probe -9 running (not ours); LS-2/5/11 stacked
 2026-10-24T02:50Z	check	heartbeat	-	02:51Z check: #4903/#4911 open fast-lane; lane bisect probe -7 running (not ours); LS-2/5/11 stacked
+2026-10-24T03:12Z	check	heartbeat	-	03:12Z check: #4903/#4911 open fast-lane; lane bisect probe -7 macOS running (not ours); LS-2/5/11 stacked
