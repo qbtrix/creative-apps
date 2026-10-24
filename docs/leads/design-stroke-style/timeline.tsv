@@ -178,3 +178,4 @@ time	kind	note
 2026-10-24T17:36:19Z	3	check	-	dev c0920138; fixer restacking #4888/#4916 and #5002/#5011; PD-a #3759 clean at 346de227, awaits supervisor; no slice done
 2026-10-24T17:57:37Z	3	check	-	#4888 restacked f75a597f clean vs dev; fixer on #4916 and #5002/#5011; PD-a #3759 awaits supervisor
 2026-10-24T18:19:24Z	3	check	-	#4888 f75a597f, #4916 36c3b4b2, #5002 af79946f restacked clean vs dev; #5011 in progress; PD-a #3759 awaits supervisor
+2026-10-24T18:22:29Z	3	fix	-	fixer done: #4888 f75a597f (stroke boxed for nodeStaysSmall), #4916 36c3b4b2, #5002 af79946f, #5011 98a7c4f0; all CI: PASS, Head lines moved
