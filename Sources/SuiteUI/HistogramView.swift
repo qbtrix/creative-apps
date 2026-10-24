@@ -2,8 +2,8 @@
 // develop panel, Photo's Levels): a ToneHistogram's bins as a filled outline in
 // the field well, with a clipping marker in each top corner, shadows left and
 // highlights right, lit in the warning color while any pixel clips there. With
-// no bins the well says `emptyMessage`, so an empty well never reads as a
-// black photo. The outline is ToneCurveEditor's `histogramPoints`, the one
+// no bins the well says `emptyMessage`, centred, and draws no markers, so an
+// empty well never reads as a black photo or a clipping warning. The outline is ToneCurveEditor's `histogramPoints`, the one
 // path both draw. It counts nothing: the host hands it a ToneHistogram it
 // counted off the main actor (SuiteModel's ToneHistogram from the engine's
 // counts). One accessibility element, "Histogram", valued with its clipping
@@ -37,6 +37,8 @@ public struct HistogramView: View {
             .overlay {
                 if histogram.heights.isEmpty {
                     Text(emptyMessage).font(SuiteFont.inspectorMeta).foregroundStyle(SuiteColor.secondaryText)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, SuiteSpacing.m)
                 }
             }
             .accessibilityElement(children: .ignore)
@@ -58,7 +60,7 @@ public struct HistogramView: View {
             context.fill(path, with: .color(SuiteColor.secondaryText.opacity(0.6)))
         }
         let side = SuiteSize.curveHandle
-        for (left, clips) in [(true, histogram.clipsShadows), (false, histogram.clipsHighlights)] {
+        for (left, clips) in zip([true, false], Self.clipMarkers(histogram)) {
             let x = left ? plot.minX : plot.maxX
             var corner = Path()
             corner.move(to: CGPoint(x: x, y: plot.minY))
@@ -67,6 +69,12 @@ public struct HistogramView: View {
             corner.closeSubpath()
             context.fill(corner, with: .color(clips ? SuiteColor.stateWarning : SuiteColor.tick))
         }
+    }
+
+    /// The corner markers, shadows then highlights, each lit while that end
+    /// clips; none for an empty well, which has nothing to clip.
+    nonisolated public static func clipMarkers(_ histogram: ToneHistogram) -> [Bool] {
+        histogram.heights.isEmpty ? [] : [histogram.clipsShadows, histogram.clipsHighlights]
     }
 
     /// "Shadows clipped, Highlights clipped", "No clipping", or `empty` with no bins.
