@@ -91,3 +91,4 @@ utc	stage	event	ref	note
 2026-10-24T10:04:10Z	blocked	lane stalled on batch 20261024081307 (probe 0 shown running, runs ended red); reported on #5113; #5036 waits
 2026-10-24T10:23:23Z	heartbeat	lane still stalled, #5113 open; #5036 unchanged
 2026-10-24T10:38:30Z	unblocked	dev green at 9f476af7, #5113 closed; #5036 waits for the next batch
+2026-10-24T10:58:09Z	blocked	lane stall filed as #5152; #5036 waits
