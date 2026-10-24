@@ -71,3 +71,4 @@ utc	stage	event	ref	note
 2026-10-24T14:44Z	3	check	14:44Z	all 11 lead PRs clean again on dev e79e9afc; no batch in flight yet, ours eligible for the next; 0 findings
 2026-10-24T15:06Z	3	check	15:06Z	lane batch-20261024144917 in flight (12 older/priority PRs #3621..#4951, none ours); our 11 PRs clean, eligible for a later batch; 0 findings
 2026-10-24T15:28Z	3	check	15:28Z	no change: batch-20261024144917 (none ours) still running; our 11 PRs clean; 0 findings
+2026-10-24T15:50Z	3	check	15:51Z	batch-20261024144917 landed (dev 33cd6e97), none ours; our PRs recomputing mergeable; 0 findings
