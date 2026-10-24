@@ -1,0 +1,80 @@
+2026-10-21T10:19Z	stage	start	-	record opened on lead/large-catalog from dev e2b8aa76
+2026-10-21T10:19Z	build	dispatch	LG-a	builder on large-catalog/lg-a (LG-1, LG-2)
+2026-10-21T11:30Z	ship	pr-opened	LG-a	#4006 head 95d4c1b8, Fast-Check pass, macOS build green, waiting on the lane batch
+2026-10-21T11:45Z	check	heartbeat	LG-a	#4006 open, still waiting on the lane batch (macOS build green); dev ded2ca57
+2026-10-21T12:12Z	ship	merged	LG-a	#4006 merged as c2aa3391; dev Linux check 39596004859 running
+2026-10-21T12:28Z	check	ci	LG-a	Linux 39596004859 red on LibraryFoldersTests.tenThousandPaths timing (not LG-a); next check 39598650564 on 76d0c892
+2026-10-21T12:45Z	check	ci	LG-a	Linux 39598650564 red on LargeCatalogBudgetTests fixture timing (ours) + LibraryFoldersTests (not ours)
+2026-10-21T12:45Z	fix	round1	LG-a	fixer dispatched on large-catalog/lg-a-fix: timing out of the gate
+2026-10-21T12:55Z	ship	opened	LG-a	fix round 1 PR #4073 head 3deedf28, CI: PASS; asked supervisor on #3790 to list LargeCatalogFixtureBudgetTests in perf-suites
+2026-10-21T13:05Z	done	slice	LG-a	Belt-Slice-Done on 39601343733; only red LibraryFoldersTests (#3961)
+2026-10-21T13:05Z	check	question	-	supervisor asked on #3790 to list LibraryFoldersTests/tenThousandPaths in perf-suites (3 reds)
+2026-10-21T13:25Z	fix	round1	LG-a	#4073 updated per supervisor 12:54Z: perf-suites line swap, un-disable, rebase
+2026-10-21T13:25Z	check	wait	LG-model	FC-a, MD-e, DR-m unset (poll 2)
+2026-10-21T13:32Z	ship	updated	LG-a	#4073 head 3b18f2a7: perf-suites line swapped, budget suite enabled, rebased; CI: PASS; supervisor merges by hand
+2026-10-21T13:39Z	check	blocked	LG-model	FC-a, MD-e, DR-m unset (poll 3); rule-23 question to supervisor, issuecomment-6317524570
+2026-10-23T14:20Z	0	stage-start	#3790	resumed by act-1a1693fbf6d-ap2g; record at docs/leads/large-catalog/
+2026-10-23T14:56Z	3	stage-start	LG-model	supervisor answer (b): build with rule-18 stubs for MD-e, DR-m; FC built
+2026-10-23T15:31Z	3	build	LG-model	one-pass names, cheap hasExportTarget, direct selectAll; debug budgets: plan, beginExport, load, shift pass; select all 0.885 ms (debug 0.5); release run pending; equivalence tests pass
+2026-10-23T15:44Z	3	build	LG-model	built on large-catalog/lg-model a07f54e7f; release select all 5.0 ms alone (kernel unique 4.6 ms, #4835 filed); Mutate 2/2 adapter, exporter plans running
+2026-10-23T15:53Z	3	pr-opened	#4847	LG-model: LG-3 + LG-4, Mutate 17/17, CI: PASS 9f19aa0a
+2026-10-23T16:16Z	3	heartbeat	LG-model	#4847 clean, fast-lane queue (46); no findings; LG-grid still blocked on ST-m
+2026-10-23T16:39Z	3	heartbeat	LG-model	#4847 clean, queued (lane last merged #4796 15:47Z, no dev-red); no findings; LG-grid blocked: shared-thumbnails at ST-a (#4840 open), ST-m not started
+2026-10-23T17:01Z	3	heartbeat	LG-model	#4847 clean, Head marker current, queued (no lane merge since 15:47Z, no dev-red); no findings; ST-a #4840 open, ST-m not started
+2026-10-23T17:23Z	3	heartbeat	LG-model	#4847 clean, queued (lane active: Linux checks on other PRs; last merge 15:47Z; no dev-red); no findings; ST-a #4840 open, ST-m not started
+2026-10-23T17:45Z	3	heartbeat	LG-model	#4847 clean, queued (lane merged #4612, #4816 at 17:36Z); no findings; ST-a #4840 needs-fix, ST-m not started
+2026-10-23T18:09Z	3	heartbeat	LG-model	#4847 clean, queued; no findings; ST-a #4840 needs-fix, ST-m not started
+2026-10-23T18:31Z	3	heartbeat	LG-model	#4847 clean, queued; no findings; ST-a #4840 needs-fix, ST-m not started
+2026-10-23T18:53Z	3	heartbeat	LG-model	#4847 clean, queued; no findings; ST-a #4840 needs-fix, ST-m not started
+2026-10-23T19:10Z	3	heartbeat	LG-model	#4847 clean, queued; no findings; ST-a #4840 needs-fix, ST-m not started
+19:28Z	3	heartbeat	LG-model	#4847 open, fast-lane, clean; ST-a #4840 still needs-fix
+19:51Z	3	heartbeat	LG-model	#4847 open, clean, fast-lane; ST-a #4840 needs-fix
+20:13Z	3	heartbeat	LG-model	#4847 open, clean, fast-lane; ST-a #4840 needs-fix
+20:25Z	3	heartbeat	LG-model	#4847 open, clean, fast-lane; ST-a #4840 needs-fix
+20:48Z	3	heartbeat	LG-model	#4847 open, clean, fast-lane; ST-a #4840 needs-fix
+21:10Z	3	heartbeat	LG-model	#4847 open, clean, fast-lane, waiting in lane; ST-a #4840 needs-fix; full CI 39999410389 green
+2026-10-23T21:33:54Z	3	heartbeat	LG-model	#4847 open, clean, fast-lane, waiting in lane; ST-m now open as #4951 (stacked on ST-a #4840, which is still needs-fix); no findings, no dev-red
+2026-10-23T21:56:47Z	3	merged	LG-model	#4847 merged 21:40Z as afb9cbed; scoped library run 40029034328 on 491ec546 (contains it) queued; ST-m #4951 open, stacked on ST-a #4840 (needs-fix); no findings, no dev-red
+2026-10-23T22:19:00Z	3	heartbeat	LG-model	library run 40029034328 (contains afb9cbed) macOS (library) in progress; ST-a #4840 needs-fix, ST-m #4951 open; no findings, no dev-red
+2026-10-23T22:41:20Z	3	heartbeat	LG-model	library run 40029034328: Scoped build and tests passed, bundle-apps in progress; ST-a #4840 needs-fix, ST-m #4951 open; no findings, no dev-red
+2026-10-23T22:53:22Z	3	slice-done	LG-model	LG-model done: library run 40029034328 green (contains afb9cbed); Belt-Slice-Done posted on #3790 (comment 6376331375); LG-grid waits on ST-m #4951 (stacked on ST-a #4840 needs-fix)
+2026-10-23T23:17:58Z	3	question	LG-grid	LG-grid wait on shared-thumbnails re-read: ST-a #4840 needs-fix since 19:15Z, ST-m #4951 stacked; rule 23 question posted on #3790 (comment 6376659460) proposing LG-6 ahead of LG-5
+2026-10-23T23:39:51Z	3	heartbeat	LG-grid	no supervisor answer yet on #3790 (6376659460); ST-a #4840 needs-fix (unchanged since 19:15Z), ST-m #4951 open; no findings, no dev-red
+2026-10-24T00:02Z	3	heartbeat	LG-grid	no change: #3790 question unanswered; #4840 needs-fix; #4951 open; no findings, no dev-red
+2026-10-24T05:10Z	3	resume	LG-grid	resumed by act-1a16c627c84-u86z; supervisor answered (6380089356): LG-6 first, LG-5 on ST-a fakes after #4840 merges; #4840 open, no findings
+2026-10-24T06:06Z	3	build	LG-grid	LG-6 built on claude/large-catalog-lead-jhxt1n (test first d337a44, feat 8c7721c); scripts/mutate LibraryModel.RenderQueue 4/4 caught; scripts/ci --changed running; mirror to lead/library-large-catalog restored (Belt nudge)
+2026-10-24T06:08Z	3	pr	LG-grid	#5042 opened (LG-6), Fast-Check on 8c7721cf, fast-lane
+2026-10-24T06:16Z	3	build	LG-grid	LG-5 built on claude/large-catalog-lead-jhxt1n-lg5 from dev (tests first: prefetch pass, cancelled decode); scripts/mutate LibraryModel.LibraryThumbnails running
+2026-10-24T06:30Z	3	pr	LG-grid	#5050 opened (LG-5), mutate 18/18, Fast-Check on 5b84195d, fast-lane
+2026-10-24T06:45Z	4	build	LG-grid	LG-7 built on claude/large-catalog-lead-jhxt1n-lg7 (RJ-L56 enabled, journey on); perf-suites line asked of the supervisor
+2026-10-24T06:31Z	4	pr	LG-grid	#5054 opened (LG-7), Fast-Check on 151645e4, fast-lane
+2026-10-24T06:49Z	4	poll	LG-grid	#5042 #5050 #5054 waiting for a batch; attribution footers removed from PR bodies
+2026-10-24T07:08Z	4	poll	LG-grid	three PRs queued behind older batches; no dev-red
+2026-10-24T07:25Z	4	poll	LG-grid	three PRs still queued; no dev-red
+07:45Z	4	poll	LG-grid	#5042 #5050 #5054 open; lane moving (#4132 07:43Z)
+08:04Z	4	poll	LG-grid	#5042 #5050 #5054 open; lane batch landed 08:03Z
+08:23Z	4	poll	LG-grid	#5042 #5050 #5054 clean, queued behind 127 fast-lane PRs
+08:49Z	4	pr	LG-grid	#5114 perf-suites line + enable LargeCatalogModelBudgetTests (supervisor lands)
+09:08Z	4	poll	LG-grid	dev-red #5113 (lottie-oracle meson, not ours) holds macOS gates; #5042 #5050 #5054 #5114 open
+09:27Z	4	poll	LG-grid	dev-red #5113 open; #5042 #5050 #5054 #5114 waiting
+09:47Z	4	poll	LG-grid	all PRs open; dev-red #5113 open
+10:09Z	4	poll	LG-grid	all PRs open; lane stalled behind dev-red #5113
+10:29Z	4	poll	LG-grid	no change; lane stalled behind dev-red #5113
+10:49Z	4	poll	LG-grid	dev-red #5113 closed; PRs still queued
+11:06Z	4	poll	LG-grid	lane moving; PRs queued
+11:24Z	4	poll	LG-grid	no change; PRs queued
+11:42Z	4	poll	LG-grid	no change; PRs queued
+12:01Z	4	poll	LG-grid	no change; PRs queued
+12:21Z	4	poll	LG-grid	all queued, no change
+12:41Z	4	poll	LG-grid	queued behind older PRs
+13:00Z	4	poll	LG-grid	still queued
+13:20Z	4	poll	LG-grid	still queued
+13:40Z	4	question	LG-grid	asked the supervisor about beta priority
+13:59Z	4	poll	LG-grid	awaiting supervisor answer
+14:18Z	4	poll	LG-grid	awaiting supervisor answer
+14:39Z	4	poll	LG-grid	queued; beta question unanswered
+14:59Z	4	poll	LG-grid	no change
+15:19Z	4	poll	LG-grid	unchanged
+15:38Z	4	poll	LG-grid	no change
+16:09Z	4	needs-rebase	LG-grid	#5050 merge dev, resolve LiveThumbnails.swift
+2026-10-24T17:15Z	3	stage-start	LG-grid	relaunch act-1a16ee71e35-s8g5; #5050 dev merge, LG-8 folded in
