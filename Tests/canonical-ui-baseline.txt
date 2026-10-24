@@ -31,7 +31,6 @@ A Sources/PhotoApp/CanvasSizeSheet.swift::CanvasSizeSheet Sheet
 A Sources/PhotoApp/ExportSheet.swift::ExportSheet Sheet
 A Sources/PhotoApp/ImageSizeSheet.swift::ImageSizeSheet Sheet
 A Sources/PhotoApp/PhotoLayerList.swift::PhotoLayerList LayerList
-A Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine StatusBar
 A Sources/PhotoApp/StraightenSheet.swift::StraightenSheet Sheet
 B Sources/AfterGlowApp/HomeGrid.swift::HomeGrid caps-header
 B Sources/AfterGlowApp/HomeRunningStrip.swift::HomeRunningStrip caps-header
@@ -70,6 +69,4 @@ B Sources/LibraryApp/LibraryExportSheet.swift::LibraryExportSheet sheet-buttons
 B Sources/PhotoApp/CanvasSizeSheet.swift::CanvasSizeSheet sheet-buttons
 B Sources/PhotoApp/ExportSheet.swift::ExportSheet sheet-buttons
 B Sources/PhotoApp/ImageSizeSheet.swift::ImageSizeSheet sheet-buttons
-B Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine error-label
-B Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine preview-pill
 B Sources/PhotoApp/StraightenSheet.swift::StraightenSheet sheet-buttons

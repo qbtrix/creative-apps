@@ -120,8 +120,6 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
         model.selectLayer(curves.id)
         drag(&model, .brush, (200, 200), (300, 260))
         #expect(model.statusMessage == "Select an image layer in the sidebar to paint on.")
-        #expect(PhotoStatusLine.messageFont == SuiteFont.caption)
-        #expect(PhotoStatusLine.messageFont != SuiteFont.pill)
         try snapshot(
             PhotoEditor(model: model, tiles: try photoTiles(model), renderMilliseconds: 8, zoom: 1),
             name: "photo-status-message-dark", scheme: .dark)

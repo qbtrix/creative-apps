@@ -1,5 +1,5 @@
 // PhotoSaveStatusLabel.swift: the save status `photo.bar.saved` in the status
-// slot beside PhotoStatusLine; the window's subtitle mirrors its title. The
+// slot beside the status bar; the window's subtitle mirrors its title. The
 // status is the `photoSaveStatus` PhotoFileArea puts in the environment, drawn
 // by SuiteUI's EditorSaveStatus (`editorState` maps it), nothing with no
 // image; its tooltip (PhotoSaveStatus.help) says what each means and what to

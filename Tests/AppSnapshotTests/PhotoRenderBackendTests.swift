@@ -228,9 +228,9 @@ import Testing
     }
 
     @Test func theStatusLineNamesTheBackendThatDrew() {
-        #expect(PhotoStatusLine.renderText(12.4, backend: nil) == "12 ms render")
-        #expect(PhotoStatusLine.renderText(40, backend: "cpu") == "CPU · 40 ms render")
-        #expect(PhotoStatusLine.renderText(7.6, backend: "Metal (Apple M2 Pro)") == "GPU (Metal) · 8 ms render")
+        #expect(PhotoEditor.renderText(12.4, backend: nil) == "12 ms render")
+        #expect(PhotoEditor.renderText(40, backend: "cpu") == "CPU · 40 ms render")
+        #expect(PhotoEditor.renderText(7.6, backend: "Metal (Apple M2 Pro)") == "GPU (Metal) · 8 ms render")
     }
 
     /// Waits up to 10 s for a picture drawn by `backend`.
