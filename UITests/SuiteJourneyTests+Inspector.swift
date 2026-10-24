@@ -125,7 +125,7 @@ extension SuiteJourneyTests {
         // 3. Pick in the system color panel: changes log no end until the panel closes, then exactly one.
         let well = gallery.app.colorWells.firstMatch
         XCTAssert(well.waitForExistence(timeout: 5), "no Fill color well")
-        well.click()
+        inspectorPoint(well).click()  // In the hex field's row, so on screen; through the element: #2957, #3228.
         let panel = inspectorColorPanel(gallery)
         XCTAssert(panel.waitForExistence(timeout: 5), "clicking the Fill well opened no Colors panel")
         for spot in [CGVector(dx: 0.3, dy: 0.3), CGVector(dx: 0.6, dy: 0.35)] {
