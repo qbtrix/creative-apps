@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-24T08:13:26Z	3	batch	4939	lane batch 20261024081307 formed with BK-u #4939 at a57fe915 (12 PRs); DS #4887 #4901 #4918 #4891 wait for the next batch; dev 1bbaba6c
 2026-10-24T08:30:33Z	3	batch	4939	batch 20261024081307 red (Linux run 40077175533: FormatListRatchet on DesignPasteboardBridge/DesignWindow, CommandPath halo HaloEditMenu: clipboard-interop PRs, not ours); lane bisecting probes -3/-6; #4939 at position 9 waits
 2026-10-24T08:47:09Z	3	poll	-	batch 20261024081307 still bisecting (probes -0,-1,-3,-6); dev-red #5113 opened 08:44 (macos, range main..1bbaba6c, none of our PRs; lane keeps merging); no merges of ours
+2026-10-24T09:04:12Z	3	poll	-	unchanged: batch 20261024081307 bisecting, dev 1bbaba6c, dev-red #5113 (not ours); blocked poll 1/3 since supervisor reset
