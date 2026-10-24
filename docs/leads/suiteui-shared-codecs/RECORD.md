@@ -1,10 +1,10 @@
 # shared-codecs lead record
 
 Issue: #3718 · Packet: docs/blueprints/suiteui/features/shared-codecs.md
-Run: act-1a16cae7989-hj12 (line lead: area-selection, shared-codecs, shared-raw) · Session: claude/feature-lead-playbook-bs72fe · Started: 2026-10-24T06:50Z (earlier act-1a1693a4009-hyio, act-1a1693a3ff0-mwrd)
-Stage: 3 wave 2
-Base: origin/dev 830af22d
-Next: wave 3: SC-photo (SC-3 tests first, then SC-4), SC-raster (SC-9), SC-library (SC-7); #4875 (SC-halo) on the lane; SC-z waits on the four slices and AK-z (contract-first).
+Run: act-1a1702c569a-0puo · Session: claude/suiteui-feature-lead-run-azjeoo · Started: 2026-10-24T23:00Z (earlier: act-1a16cae7989-hj12 (line lead: area-selection, shared-codecs, shared-raw) · Session: claude/feature-lead-playbook-bs72fe · Started: 2026-10-24T06:50Z (earlier act-1a1693a4009-hyio, act-1a1693a3ff0-mwrd))
+Stage: 3 wave 4
+Base: origin/dev afef017c (main ef37711d + #5059, #5222)
+Next: SC-halo done (full CI 40129856269; Belt-Slice-Done posted). Wave 4: SC-11 (SC-z part, on dev), SC-8 stacked on SC-7 #5069 with SC-4c #5101 merged in, and SC-10 stacked on SC-9 #5071 with SC-4c merged in; SC-12 folds into the last of those to merge. On the lane: #5073, #5076, #5098, #5101, #5069, #5071.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -94,3 +94,9 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-23T19:41Z: scoped suiteui run 40005632479 completed success; posted Belt-Slice-Done: SC-a on #3718 (issuecomment-6373270722). SC-a is ui:false (Model walk), so no critic panel. #4875 (SC-halo) still open on the lane.
 - 2026-10-23T18:55Z: SC-2 #4873 merged 18:35Z (2f94f450), so SC-a's tasks are all merged. Scoped suiteui run 40005632479 on dev 0d4645bf (contains 2f94f450) is queued; Belt-Slice-Done SC-a posts when it completes green. #4875 (SC-halo) open on the lane. Other slices still blocked.
 - 2026-10-24T07:05Z: run act-1a16cae7989-hj12 resumes on dev 830af22d. Server-added footers removed from #4848, #4859, #4865, #4872 bodies so Head: is the last line again (#4828, #4861, #4875, #4876 already clean). Contract-first waits (rule 12) applied to the slice table.
+
+## Run act-1a1702c569a-0puo decisions
+- Integration branch: the brief says main, but the fast lane only merges into dev (main fast-forwards from green dev), so slice PRs base on and target dev, as earlier runs did.
+- lead/<feature> was rebuilt on main ef37711d (its old history shares no base with the rewritten main): records copied onto main and force-pushed with lease.
+- Contract-first waits (rule 12): every cross-feature wait is met, since each named feature's first slice has merged (checked by its owned files on dev).
+- SC-11 waits only on SC-6 (merged in #4875) and AK-z (met contract-first, AK-a merged), so it ships now as its own PR.

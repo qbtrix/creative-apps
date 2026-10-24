@@ -74,3 +74,6 @@ utc	stage	event	ref	note
 2026-10-24T06:47Z	check-in	bisect narrowed to first 6 PRs (probes -1,-3 running), ahead of #4870/#4875; dev e5dcf939; no labels to fix; no new findings
 2026-10-24T07:05Z	resume	run act-1a16cae7989-hj12 resumes on dev 830af22d; records refreshed, contract-first waits applied (SC-photo, SC-library, SC-raster startable)
 2026-10-24T07:12Z	wave	wave 3 started: builders for SC-3 then SC-4 (SC-photo), SC-7 (SC-library), SC-9 (SC-raster), each in its own worktree
+2026-10-24T23:20Z	resume	run act-1a1702c569a-0puo resumes on dev afef017c
+2026-10-24T23:20Z	slice-done	SC-halo: full CI 40129856269 green, contains #4875; Belt-Slice-Done posted
+2026-10-24T23:20Z	wave	wave 4: SC-11, SC-8 (on #5069 + SC-4c), SC-10 (on #5071 + SC-4c)
