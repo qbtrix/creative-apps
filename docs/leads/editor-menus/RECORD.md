@@ -4,7 +4,7 @@ Issue: #3774 · Packet: docs/blueprints/suite/features/editor-menus.md
 Run: act-1a16a37a3ed-0kyn (relaunch; earlier act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
 Stage: EM-flare-halo: fixes in lane
 Base: 35a0b5e7e9520a764f3eabf02968a453082a87cc (main; PRs target dev)
-Next: await bisect probe -6 macOS gate (holds #4818)
+Next: await bisect verdict; #4818's prefix probe -6 green
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
