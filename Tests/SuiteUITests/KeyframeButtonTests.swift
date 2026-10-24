@@ -134,3 +134,33 @@ private struct KeyframeButtonHost: View {
     for child in (node.accessibilityChildren?() ?? nil) ?? [] { found += axButtons(in: child) }
     return found
 }
+
+/// With `unavailableHelp` the pair disables itself, so a host passes only its intents and `registers` (#4824):
+/// both buttons read disabled with no `.disabled` from outside, and the entries list them disabled with the reason.
+@MainActor @Test func unavailableHelpDisablesThePairItself() {
+    let app = NSApplication.shared
+    for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
+        app.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: attribute))
+    }
+    let why = "Select a layer to animate it."
+    let host = NSHostingView(rootView: KeyframeButton(
+        "Opacity", id: "k", state: .animated, unavailableHelp: why, registers: true, onToggle: {}, onKey: {}).padding(20))
+    let window = NSWindow(
+        contentRect: CGRect(x: 0, y: 0, width: 200, height: 100), styleMask: [.titled], backing: .buffered, defer: false)
+    window.contentView = host
+    window.orderFrontRegardless()
+    defer { window.orderOut(nil) }
+    spinUntil { axEnabled(in: window).count == 2 }
+    #expect(axEnabled(in: window) == ["k": false, "k.diamond": false])
+}
+
+/// Each identified button's enabled state under `element`.
+@MainActor private func axEnabled(in element: Any) -> [String: Bool] {
+    let node = element as AnyObject
+    var found = [String: Bool]()
+    if node.accessibilityRole?() == .button, let id = node.accessibilityIdentifier?() ?? nil, !id.isEmpty {
+        found[id] = node.isAccessibilityEnabled?() ?? true
+    }
+    for child in (node.accessibilityChildren?() ?? nil) ?? [] { found.merge(axEnabled(in: child)) { $1 } }
+    return found
+}
