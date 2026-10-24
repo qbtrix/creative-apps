@@ -80,3 +80,4 @@ ts	kind	note
 2026-10-24T16:19:54Z	poll	hb23: no change
 2026-10-24T16:41:57Z	poll	hb24: no change
 2026-10-24T17:04:39Z	poll	hb25: dev da62659f (12-PR batch, #5088 not in it); PRs unchanged; no supervisor answer
+2026-10-24T17:26:18Z	poll	hb26: dev c0920138 (#5182); PRs unchanged; no supervisor answer
