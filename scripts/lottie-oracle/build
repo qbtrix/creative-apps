@@ -51,16 +51,18 @@ tag=$(field tag)
 commit=$(field commit)
 [[ -n "$tag" && "$commit" =~ ^[0-9a-f]{40}$ ]] || die "VERSION needs tag= and a 40-hex commit="
 
-for tool in git meson ninja cc c++; do
-  command -v "$tool" >/dev/null 2>&1 || die "missing $tool (install: brew install meson ninja, or pip install meson ninja)"
-done
-
 hash_of() { if command -v shasum >/dev/null 2>&1; then shasum -a 256 "$1"; else sha256sum "$1"; fi | cut -d' ' -f1; }
 stamp="$tag $commit $(hash_of "$here/render.c")"
 if [[ -x "$bin" && -f "$out/stamp" && "$(cat "$out/stamp")" == "$stamp" ]]; then
   echo "lottie-oracle: ThorVG $tag already built at $bin"
   exit 0
 fi
+
+# The build tools are checked only when a build is needed: a cached build (CI restores .build/lottie-oracle
+# by VERSION) runs without meson or ninja installed.
+for tool in git meson ninja cc c++; do
+  command -v "$tool" >/dev/null 2>&1 || die "missing $tool (install: brew install meson ninja, or pip install meson ninja)"
+done
 
 src="$out/src"
 rm -rf "$src" "$out/meson" "$out/install" "$out/stamp" "$bin"

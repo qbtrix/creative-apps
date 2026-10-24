@@ -1,5 +1,6 @@
 // Contracts/OutputContracts.swift: export at a size (PV-8) and the
-// eyedropper's sample (PV-9). Linux-safe.
+// eyedropper's sample size (PV-9; the sample itself is SuiteKernel's
+// `SampleRules.mean`, read in PhotoSample+Kernel.swift). Linux-safe.
 import CoreRaster
 import SuiteKernel
 
@@ -36,22 +37,3 @@ public protocol ExportSizing: PhotoUseCase {
 /// How many pixels the eyedropper averages: the kernel's, which every app's
 /// eyedropper and `color.sample` share (eyedropper PE-1).
 public typealias SampleSize = SuiteKernel.SampleSize
-
-/// A sampled color, 8-bit sRGB like ToolOptions' color.
-public struct SampledColor: Hashable, Sendable {
-    public var red: UInt8
-    public var green: UInt8
-    public var blue: UInt8
-    public init(red: UInt8, green: UInt8, blue: UInt8) {
-        self.red = red; self.green = green; self.blue = blue
-    }
-}
-
-/// PV-9: the eyedropper.
-public protocol ColorSampling: PhotoUseCase {
-    /// The mean color of the `size` x `size` square centered on (x, y) in
-    /// `picture` (the composited image around the point, with the point at
-    /// `center` in it), over the pixels that are inside it and not fully
-    /// transparent, straight alpha, encoded to sRGB. Nil when there are none.
-    func sample(_ picture: PixelBuffer, center: (x: Int, y: Int), size: SampleSize) -> SampledColor?
-}

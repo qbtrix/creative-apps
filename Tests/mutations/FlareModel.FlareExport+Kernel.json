@@ -61,5 +61,19 @@
     "find": "evenSize: format == .mp4)",
     "replace": "evenSize: false)",
     "tests": "FlareVideoExportTests"
+  },
+  {
+    "label": "a video run counts its file, not its frames",
+    "file": "Sources/FlareModel/FlareExport+Kernel.swift",
+    "find": "        return exportState.start(total: exportRunTotal)\n",
+    "replace": "        return exportState.start(total: exportFileCount)\n",
+    "tests": "FlareVideoExportTests"
+  },
+  {
+    "label": "a video run counts the scene's frames, not the planned rate's",
+    "file": "Sources/FlareModel/FlareExport+Kernel.swift",
+    "find": "        return plan.frames.count\n",
+    "replace": "        return selectedScene?.durationFrames ?? plan.frames.count\n",
+    "tests": "FlareVideoExportTests"
   }
 ]

@@ -178,6 +178,8 @@ struct DesignWindow: View {
         case .nudge(let direction, let shift): model.nudge(direction, shift: shift)
         case .deleteSelection: model.deleteSelection()
         case .deselect: model.deselect()
+        case .enterGroup: model.enterGroup()
+        case .exitGroup: model.exitGroup()
         case .select(let id): model.selectItem(id)
         case .toggleSelect(let id): model.toggleSelection(id)
         // The ids below come from the model's own rows, so a refused call can't happen.

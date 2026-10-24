@@ -47,7 +47,7 @@ Blueprint sections: photo.md 4 (tools), 6 (Tool Options), 8.
 | PG-a | `PhotoTool.gradient` is in the palette with its help ("Not built yet (PG-3).") and its options hold a `Fill`, and Tool Options shows the editor on the stubs. | PG-1, PG-2 | MJ-PG | suiteui/gradient-fill GF-a (cross-line); AC-photo (PG-1) |
 | PG-u | A drag shows its line on the canvas, the options have snapshots and a render budget, and the journey is written. | PG-5, PG-6 | PJ-G1 | PG-a; GF-3 (PG-5, cross-line) |
 | PG-m | A drag draws the dithered gradient into the selected layer inside the selection as one undo step, and the options take each editor intent. | PG-3, PG-4 | MJ-PG | PG-a; GF-5 (PG-4, cross-line) |
-| PG-z | The tool runs on live services, the journey passes on live, and the blueprint has the tool in. | PG-7, PG-8 | PJ-G1 | PG-u, PG-m |
+| PG-z | The tool runs on live services, the journey passes on live, and the blueprint has the tool in. | PG-7, PG-8, PG-9 | PJ-G1 | PG-u, PG-m |
 
 PG-u waits only on PG-a (rule 18); PG-m never waits on PG-u. MJ-PG is the
 Model walk in `PhotoGradientToolTests` (Linux).
@@ -111,6 +111,7 @@ y}, to: {x, y}}`; unavailable with `noImage` or `noLayer`.
 | PG-6 | – | The drag's line on the canvas overlay; the journey written and skipped (`XCTSkip("waits on PG-7")`) | `Sources/PhotoApp/PhotoCanvasOverlay.swift`, `UITests/PhotoJourneyTests+Gradient.swift` | PG-2 | ~140, 2 |
 | PG-7 | – | Live: the journey turned on, on live services | `UITests/PhotoJourneyTests+Gradient.swift` | PG-6, PG-3, PG-4 | ~40, 1 |
 | PG-8 | – | photo.md: the Gradient tool moves from v2 Out to the tools; `status: built`; `feature-done` | `docs/blueprints/photo.md`, `docs/blueprints/photo/features/gradient-fill.wave.json` | PG-7, PG-5 | ~30, 2 |
+| PG-9 | – | The Tool Options colour row switches to `InspectorColorWellRow`'s opacity init and `ToolOptions` keeps the colour's alpha, so the brush and the gradient tool paint at it; it also stores the kernel's `FillMemory` beside the fill and saves it, so linear → radial → linear keeps the angle (gap audit C3) | `Sources/PhotoApp/PhotoToolOptions.swift`, `Sources/PhotoModel/ToolOptions.swift`, `Tests/PhotoModelTests/PhotoToolColorAlphaTests.swift`, `Tests/mutations/PhotoModel.ToolOptions.json` | PG-2, suiteui gradient-fill C3 (the opacity colour row and the kernel's opt-in no fill, cross-line) | ~150, 4 |
 
 ## Build waves
 
@@ -119,6 +120,7 @@ y}, to: {x, y}}`; unavailable with `noImage` or `noLayer`.
 - Wave 3: PG-5, PG-6. Independent in this wave: both.
 - Wave 4: PG-7. Independent in this wave: PG-7 alone.
 - Wave 5: PG-8 (shared prose, `feature-done`, final). Independent in this wave: PG-8 alone.
+- With its slice (gap audit C3, added 2026-10-21): PG-9, after PG-2 and the suiteui C3 pull request.
 
 Longest chain: PG-1 → PG-2 → PG-6 → PG-7 → PG-8 (5). Chain of 5: the
 options need the tool, the journey drives the options, PG-7 turns it on
@@ -136,6 +138,7 @@ live, PG-8 is the prose task.
 | PG-6 | compiles, skipped | – | – |
 | PG-7 | `PhotoGradientJourneyTests.testSkyGradient` steps 1 to 5 | a step fails | – |
 | PG-8 | `scripts/waves render --dry-run` | status not built | – |
+| PG-9 | `PhotoToolColorAlphaTests`: a colour option at 50% stores alpha 0.5 and a later RGB-only change keeps it; a linear fill at 45° switched to radial and back reads 45° after a save and open | the alpha resets to 1 | `PhotoModel.ToolOptions`: alpha dropped in the colour option → `.colorKeepsAlpha`; RGB change resets alpha → `.rgbKeepsAlpha` |
 
 ## Quality tests
 
