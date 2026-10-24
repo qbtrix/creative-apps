@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-24T06:55Z	3	stage-start	wave 4	relaunch act-1a16cae79dd-mtf2; #4577/#4889/#4896 open in lane, no needs-*; FH-7 starts stacked
 07:24Z	4	poll	dev 830af22d	FH-7 builder running on lead/fill-heal-FH-7; #4577/#4889 in lane, no needs-*; #4896 stacked; status mirrored to lead/suiteui-fill-heal
 07:55Z	4	stage	FH-7 built (Mutate 3/3); split RJ-P04 to -FH-7-jobs for the file cap; findings #5093-#5095; gates running
+2026-10-24T08:27:04Z	FH-photo	gate	FH-7-jobs d7b07b7 CI: PASS; FH-7 9d18965 rerun (load timeouts)
