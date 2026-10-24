@@ -69,3 +69,6 @@ Next: DK-u and DK-m slice PRs; critic panels; then DK-z
 
 ## 2026-10-24T02:44Z fix: #4864 macOS gate failure (DK-u)
 The lane probe batch-20261023215139-9's macOS gate (run 40050012604) failed on DesignStrokeSnapshots.editor and RenderBudgetDesignStrokeTests. Cause: DesignStrokeSeed stroked only top-level nodes, and node-3 sits in the Desktop frame. Fix 2bd18bb86 uses page.nodes.update. Gate rerunning; then move the Head: line and merge the new base into #5002 and #5011.
+
+## 2026-10-24T04:35Z needs-fix on #4864 (DK-u)
+At 04:14Z the supervisor pulled #4864 from the lane for the batch -9 macOS failures, which ran the old head 97439dd8. The fix 2bd18bb86 was already on the head; the Width id matches StrokeEditorRow.width. I re-added fast-lane so the next batch's macOS gate proves the fix, and replied on the PR.
