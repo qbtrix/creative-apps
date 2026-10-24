@@ -31,7 +31,7 @@ extension FlareWorkspace {
     }
 
     /// Nil when Export can start; otherwise why not, in the sheet's words: no document, a scene that's gone, frames
-    /// outside the scene, a step under 1, a scale other than 1x or 2x (in that order). Nil while idle with a document.
+    /// outside the scene, a step under 1, an MP4 or GIF rate under 1, a scale other than 1x or 2x (in that order). Nil while idle with a document.
     public var exportProblem: String? {
         guard document != nil else { return "Open or create an animation first." }
         guard let o = exportingOptions else { return nil }
@@ -40,6 +40,7 @@ extension FlareWorkspace {
             return Self.exportMessage(PNGExportError.frameOutOfRange(o.frames))
         }
         if o.step < 1 { return Self.exportMessage(PNGExportError.invalidStep(o.step)) }
+        if o.format.writesVideo, let fps = o.fps, fps < 1 { return "The frame rate must be 1 or more." }
         if o.scale != 1, o.scale != 2 { return "Scale must be 1x or 2x." }
         return nil
     }
@@ -115,13 +116,21 @@ extension FlareWorkspace {
 }
 
 extension ExportFormat {
-    /// Why the Export sheet doesn't list this format yet; nil once it does. The Model exports every format (MP4 and
-    /// GIF through `Exporting.writeVideo`, export-pack FV-4); the window writes them once FV-2 and FV-7 land.
-    public var unbuiltReason: String? {
-        switch self {
-        case .mp4: "MP4 joins the Export sheet with FV-2."
-        case .gif: "GIF joins the Export sheet with FV-2."
-        case .svgFrame, .lottie, .pngSequence: nil
-        }
+    /// Why the Export sheet doesn't list this format yet; nil once it does. Every format is listed since export-pack
+    /// FV-2.
+    public var unbuiltReason: String? { nil }
+
+    /// MP4 and GIF: one file streamed through `Exporting.writeVideo` on a `FlareVideoPlan`, sized by the shared Size
+    /// row, at a frame rate; the others come back from `Exporting.export` as data.
+    public var writesVideo: Bool { self == .mp4 || self == .gif }
+}
+
+extension ExportOptions {
+    /// The sheet's Size row: the shared size's scale for MP4 and GIF (1 for a pixel or long-edge size), else the
+    /// run's scale.
+    public var sheetScale: Double {
+        guard format.writesVideo else { return scale }
+        if case .scale(let factor) = size { return factor }
+        return 1
     }
 }

@@ -1,0 +1,10 @@
+{
+  "id": "imaging-raw",
+  "name": "Raw",
+  "description": "Raw/ (docs/blueprints/suiteui/features/shared-raw.md): the suite's one camera RAW decode. RawFormat (a file is RAW when the format registry's camera RAW row names its extension), RawRefusal's four sentences, RawSize, RawFileInfo, RawQuality and RawDecodePlan (the embedded preview, a draft develop or every pixel), SuiteRaw (info and decode into the working space's Float32 buffer, the file's baseline applied as one exposure step, no clamp), the RawDecoding seam, FakeRawDecoder's fixed table for tests on every platform and, on macOS, SystemRawDecoder over Core Image's CIRAWFilter. Imports no ImageIO and no Metal. shared-raw SR-2 declares them as stubs; SR-3 and SR-4 fill the bodies.",
+  "technology": "Swift 6, Foundation (FoundationEssentials) and CoreRaster, Linux and macOS; Core Image on macOS",
+  "paths": [
+    "Sources/SuiteImaging/Raw/"
+  ],
+  "order": 130
+}

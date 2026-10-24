@@ -10,8 +10,8 @@
 # CreativeEngines, which compiles only Bundle/Engines/CreativeEngines.swift and
 # is the only target linking the creative-core products; SuiteKernel and
 # SuiteUI read FlareCore's geometry through it, SuiteImaging the raster and
-# tone engines), each <X>Model as a static library, each
-# <X>App as an application with the helper run path, and the AfterGlowApp
+# tone engines, SuiteShell and LibraryModel CoreAsset's thumbnail store),
+# each <X>Model as a static library, each <X>App as an application with the helper run path, and the AfterGlowApp
 # launcher. Frameworks are not embedded here: bundle-apps assembles them into
 # AfterGlow.app/Contents/Frameworks. Every non-test target of Package.swift
 # must be a target here; Tests/SuiteModelTests/BuildGraphTests fails when one
@@ -82,7 +82,8 @@ targets:
     platform: macOS
     sources: [Bundle/Engines]
     dependencies:
-      [{ package: creative-core, product: FlareCore }, { package: creative-core, product: CoreRaster },
+      [{ package: creative-core, product: CoreAsset }, { package: creative-core, product: FlareCore },
+       { package: creative-core, product: CoreRaster },
        { package: creative-core, product: CoreColor }, { package: creative-core, product: CoreRender },
        { package: creative-core, product: CoreRenderMetal }]
   SuiteModel: { type: framework, platform: macOS, sources: [Sources/SuiteModel] }
@@ -110,7 +111,8 @@ targets:
     type: framework
     platform: macOS
     sources: [Sources/SuiteShell]
-    dependencies: [{ target: SuiteUI }, { target: SuiteModel }, { target: SuiteKernel }]
+    # CreativeEngines carries CoreRaster for SuiteImageIO (shared-codecs SC-2) and CoreAsset for ThumbnailWriter.
+    dependencies: [{ target: SuiteUI }, { target: SuiteModel }, { target: SuiteKernel }, { target: CreativeEngines }]
   FlareModel: { templates: [Model] }
   # Every Model but Flare's links SuiteImaging (appended to the template's).
   DesignModel: { templates: [Model], dependencies: [{ target: SuiteImaging }] }
