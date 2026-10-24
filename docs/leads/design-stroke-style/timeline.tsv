@@ -130,3 +130,4 @@ time	kind	note
 2026-10-24T01:15Z	-	heartbeat	-	no merges; 9 PRs clean, no needs-fix/needs-rebase; waiting on lane batch; 32 findings open, z slices held
 2026-10-24T01:37Z	-	heartbeat	-	no merges; 9 PRs clean; lane bisecting batch 20261023215139 (macOS gate red at 9180338f, probe -9 running); 32 findings open, z slices held
 2026-10-24T01:58Z	-	heartbeat	-	no merges; 9 PRs clean; bisect probe batch-20261023215139-9 ends at #4864 (old head 97439dd8), Linux green, macOS running; 32 findings open, z slices held
+2026-10-24T02:20Z	-	heartbeat	-	no merges; 9 PRs clean; bisect probe -9 macOS gate still running; 32 findings open, z slices held
