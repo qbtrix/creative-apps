@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: IM-8a PR (Photo's canvas files off Metal, through ImagingGPU.Target); then IM-8b (live route on LayeredToneBase) stacked on it, IM-11 (loupe on the GPU route) stacked on #4886. IM-10b waits the curve/levels order ruling. IM-8d and IM-12 wait EP-z (#3723); IM-13 waits ST-a.
+Next: IM-8b (live route on LayeredToneBase) stacked on it, IM-11 (loupe on the GPU route) stacked on #4886. IM-10b waits the curve/levels order ruling. IM-8d and IM-12 wait EP-z (#3723); IM-13 waits ST-a.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -27,7 +27,7 @@ Next: IM-8a PR (Photo's canvas files off Metal, through ImagingGPU.Target); then
 | IM-17 | IM-photo | layered live tone base | #4620 | merged |
 | IM-16 | IM-photo | ImagingGPU system backend, one-pass display | #4851 | merged |
 | IM-8s | IM-photo | dispatcher route runs ImagingProgram's steps | #4856 | merged |
-| IM-8a | IM-photo | Photo canvas files off Metal (ImagingGPU.Target, SuiteUI residentTarget) | – | gating |
+| IM-8a | IM-photo | Photo canvas files off Metal (ImagingGPU.Target, SuiteUI residentTarget) | #5148 | open (fast-lane, Fast-Check c0b53be) |
 | IM-8b | IM-photo | live route on LayeredToneBase; PhotoRenderRoute mapping deleted | – | planned (stacks on IM-8a) |
 | IM-8d | IM-photo | delete PhotoLiveTone | – | blocked: EP-z #3723 |
 | IM-9 | IM-library | Library imaging tests | #4591 | merged |
