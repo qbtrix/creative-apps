@@ -3,7 +3,7 @@
 Issue: #3936 · Packet: docs/blueprints/halo/features/layer-styles.md
 Run: act-1a16c627cc6-nlss · Session: claude/layer-styles-lead-vx2vrg · Started: 2026-10-24 (resumed; earlier run act-1a1648ae75a-4dqz)
 Wire: suiteui layer-styles:LS-a
-Stage: wave 2 (HY-5 built; HY-2 built, mutate 5/5, gate running; HY-a PR waits on #4911 + LS-2)
+Stage: wave 2 (HY-5 built; HY-2 built, gate PASS; HY-a PR waits on #4911 + LS-2)
 Base: a41e7f1 (origin/dev)
 Next: open the HY-a PR (HY-1, e52c9ca) once #4911 is on dev, then the HY-m PR's first half (HY-5, 3290e96) once HY-a lands; HY-6 next (needs LS-8's `StyleProgram.render`); HY-2 waits on LS-2 (SuiteUI `LayerStylePanel` placeholder, no PR yet)
 

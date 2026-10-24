@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-24T06:51Z	HY-5	built, gate PASS, mutate 4/4, pushed lead/halo-layer-styles-HY-m 3290e96
 2026-10-24T08:10Z	HY-2	built on HY-a (mutate 4/4), gate rerun after command-path fix
 2026-10-24T09:05Z	HY-2	spec-built menu items + Done, mutate 5/5, pushed HY-a 786456f6d, scripts/ci --changed running
+2026-10-24T09:20Z	HY-2	scripts/ci --changed PASS at 786456f6d
