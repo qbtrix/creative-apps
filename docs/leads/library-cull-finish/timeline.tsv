@@ -115,3 +115,4 @@
 2026-10-24T11:52:04Z	heartbeat	main still #5117; full CI 40087964618 on dev 4f00afb8 (#5150) running, green promotes main and the lane then sees our older PRs. All open+clean
 2026-10-24T12:14:22Z	check	full CI 40087964618 green; main promoted to #5150: lane now lists every open PR, our older PRs enter its queue. All open+clean
 2026-10-24T12:36:35Z	heartbeat	main has the --limit 1000 fix; last finished sweep predates it (96 PRs, ours absent); next sweep 40094613224 pending. All open, no needs-fix
+2026-10-24T12:58:00Z	check	lane sweep 40092907790 now lists all 233 PRs: #4838 #4899 #4960 #4962 decision eligible; batch probe in flight, 119 ready wait
