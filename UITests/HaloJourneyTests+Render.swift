@@ -137,13 +137,14 @@ final class HaloRenderJourneyTests: XCTestCase {
         return halo.app.descendants(matching: .any).matching(predicate).firstMatch
     }
 
-    /// The progress note's "Frame n of `total`", read from a static text's label or value.
+    /// The progress note's "Frame n of `total`", read from any element's label or value: the note is an
+    /// InspectorNote (`halo.render.frame`), one element whose label is its text, not a static text (#2435).
     @MainActor private func progressText(of total: Int, _ halo: Journey) -> XCUIElement {
         let tail = " of \(total)"
         let predicate = NSPredicate(
             format: "(label BEGINSWITH 'Frame ' AND label ENDSWITH %@) OR (value BEGINSWITH 'Frame ' AND value ENDSWITH %@)",
             tail, tail)
-        return halo.app.staticTexts.matching(predicate).firstMatch
+        return halo.app.descendants(matching: .any).matching(predicate).firstMatch
     }
 
     /// The pixel size of the PNG at `url`, decoded with ImageIO; nil when it doesn't decode.

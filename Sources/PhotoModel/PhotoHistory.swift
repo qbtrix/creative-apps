@@ -35,6 +35,8 @@ enum PhotoEdit: Sendable, Equatable {
     case group([PhotoEdit])
     /// Free Transform's draft as it was (nil: none was up), for its own steps.
     case draft(TransformDraft?)
+    /// The path list and the path whose points showed (PhotoPaths+Kernel.swift).
+    case paths([PhotoPath], editing: String?)
 }
 
 /// The whole layer stack, for edits that add, remove or resize layers.
@@ -202,6 +204,8 @@ extension PhotoWorkspace {
             transformDraft = draft
             touch(.all)
             return inverse
+        case .paths(let list, let editing):
+            return applyPaths(list, editing: editing)
         }
     }
 

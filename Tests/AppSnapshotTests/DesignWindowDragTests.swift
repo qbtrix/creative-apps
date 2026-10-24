@@ -4,7 +4,11 @@
 // the samples go to the live drag box (DesignLiveDrag), which only the canvas
 // reads. The same gestures on DesignEditor hosted without the box, every
 // sample written straight to the workspace, run it about once per sample, so
-// the bound can fail. `dragSamples` drives one gesture and counts the editor;
+// the bound can fail; that control drags with layer snapping off, since a snapped
+// or whole-point sample that leaves the document as it was runs no body. Gestures
+// press in page points mapped onto the artboard (`suite.canvas.artboard`), not
+// the `suite.canvas` container, which also spans the margin before the artboard.
+// `dragSamples` drives one gesture and counts the editor;
 // later drag checks (D0-9d) call it. The window is hosted off screen through
 // the render-budget harness (RenderBudgetHarness.swift); DesignEditor.bodyRuns
 // is a process-global debug counter, so the suite nests in BodyCountSuites.
@@ -71,7 +75,7 @@ extension BodyCountSuites {
             #endif
         }
 
-        @Test(.timeLimit(.minutes(3)), .disabled("quarantine #3261 until 2026-10-22")) func withoutTheBoxTheEditorRunsPerSample() async throws {
+        @Test(.timeLimit(.minutes(3))) func withoutTheBoxTheEditorRunsPerSample() async throws {
             #if DEBUG
             for gesture in Gesture.allCases {
                 let w = RenderBudgetWindow(DesignEditorWithoutBox(model: gesture.seed))
@@ -89,7 +93,7 @@ extension BodyCountSuites {
             _ gesture: Gesture, in w: RenderBudgetWindow<V>, samples: Int = 120
         ) async throws -> RenderStep {
             try await w.settle(800)
-            let board = try #require(await w.element("suite.canvas"), "no canvas")
+            let board = try #require(await w.element("suite.canvas.artboard"), "no artboard")
             let start = w.point(gesture.from, on: page, in: board)
             let end = w.point(
                 CGPoint(x: gesture.from.x + gesture.by.dx, y: gesture.from.y + gesture.by.dy), on: page, in: board)
@@ -110,7 +114,9 @@ extension BodyCountSuites {
 }
 
 /// DesignEditor without the live drag box: every sample is written straight to the workspace, as
-/// the window did before D0-8a. The control the bound is checked against.
+/// the window did before D0-8a. The control the bound is checked against. Snapping is off (⌘'s
+/// `.noSnap`, which a test's events can't hold) so each sample moves the box: on `crowd` a snapped
+/// move or resize holds still for about half the samples, and an unchanged workspace runs no body.
 private struct DesignEditorWithoutBox: View {
     @State private var model: DesignWorkspace
     @State private var zoom = 1.0
@@ -124,7 +130,7 @@ private struct DesignEditorWithoutBox: View {
     private func perform(_ intent: DesignIntent) {
         switch intent {
         case .drag(let from, let to, let modifiers):
-            model.drag(from: DesignPoint(from), to: DesignPoint(to), modifiers: modifiers)
+            model.drag(from: DesignPoint(from), to: DesignPoint(to), modifiers: modifiers.union(.noSnap))
         case .endDrag: model.endDrag()
         default: break
         }

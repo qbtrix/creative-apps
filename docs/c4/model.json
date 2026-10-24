@@ -600,7 +600,7 @@
               {
                 "id": "kernel-place",
                 "name": "Place",
-                "description": "Place/: the suite's one picture model. Size, PlacedFormat (png, jpeg, svg), PlacedAsset (a file's bytes, embedded once per document), PlacedImage (an asset shown in a layer's box with a cover focus), PlacedAssets (one copy per id, pruned on save), PlacedVector (an SVG flattened into paint items) and the PlacedImageTarget protocol an app's workspace conforms to; PlaceRules (the format sniff, the content id, the 32 MB cap, the contain fit, the cover crop and the reset box) and PlaceRules.vector (an SVG as a PlacedVector); PlaceIntent (the place gestures as commands) and PlaceCommands (the five place.* command specs every app registers). placed-images PL-1 declares them as stubs (specs with real ids, schemas and availability); PL-5, PL-6 and PL-7 fill the bodies.",
+                "description": "Place/: the suite's one picture model. Size, PlacedFormat (png, jpeg, svg), PlacedAsset (a file's bytes, embedded once per document), PlacedImage (an asset shown in a layer's box with a cover focus), PlacedAssets (one copy per id, pruned on save), PlacedVector (an SVG flattened into paint items) and the PlacedImageTarget protocol an app's workspace conforms to; PlaceRules (the format sniff, the content id, the 32 MB cap, the contain fit, the cover crop and the reset box) and PlaceRules.vector (an SVG as a PlacedVector); PlaceIntent (the place gestures as commands) and PlaceCommands (the five place.* command specs every app registers). The place commands are how an agent places a picture the way a person does: SuiteUI's Place… panel, its drop target, PlacedImageView and the placed-image rows run their gestures through PlaceCommands, the gallery's place-image page on a live target, and the fake canvas (FakeCanvasDocument, each rect's placed image and its one copy of every asset) takes them, so RJ-X36 runs on the CLI. placed-images PL-1 declares them as stubs (specs with real ids, schemas and availability); PL-5, PL-6 and PL-7 fill the bodies; PL-8 wires the gallery and PL-9 makes the fake a target.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Place/"
@@ -659,6 +659,15 @@
                 "paths": [
                   "Sources/SuiteKernel/Text/"
                 ]
+              },
+              {
+                "id": "kernel-zoom",
+                "name": "Zoom",
+                "description": "Zoom/: ViewZoom, the suite's one zoom model (#5070): ZoomSteps (the 10% to 3200% clamp, Zoom In and Zoom Out over the suite's stops or an app's own table, the snap that lands a pinch near 100% on 100%, the fit scale, the anchor that keeps the point under the pointer still, the percent text), ZoomLevel (fit, 100% or a scale; fit follows the viewport) and ZoomKey (Command-plus, minus, 0 and 1). SuiteUI's ZoomMath, ViewerZoom and CanvasViewport wrap it; Flare's stage and Library's loupe step their own tables on it.",
+                "technology": "Swift 6, FlareCore, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Zoom/"
+                ]
               }
             ]
           },
@@ -674,12 +683,26 @@
               {
                 "id": "imaging-adjust",
                 "name": "Adjust",
-                "description": "Adjust/ and the SuiteImaging namespace: AdjustSettings (exposure, levels, curve, hue and saturation) with its clamps and its one Codable form Photo and Library both read, and ImagingProgram, which compiles settings to CoreRender's tone adjustments (CPU) and tone program (GPU) in one fixed order. suite-imaging IM-2 declares them as stubs; IM-3 and IM-4 fill the bodies.",
+                "description": "Adjust/, the SuiteImaging namespace and RasterSize (the one PNG/JPEG size reader): AdjustSettings (exposure, levels, curve, hue and saturation) with its clamps and its one Codable form Photo and Library both read, and ImagingProgram, which compiles settings to CoreRender's tone adjustments (CPU) and tone program (GPU) in one fixed order. suite-imaging IM-2 declares them as stubs; IM-3 and IM-4 fill the bodies.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), CoreColor, CoreRaster and CoreRender, Linux and macOS",
                 "paths": [
-                  "Sources/SuiteImaging/Adjust/",
+                  "Sources/SuiteImaging/Adjust/AdjustSettings.swift",
+                  "Sources/SuiteImaging/Adjust/ImagingProgram.swift",
                   "Sources/SuiteImaging/Color/",
+                  "Sources/SuiteImaging/RasterSize.swift",
                   "Sources/SuiteImaging/SuiteImaging.swift"
+                ]
+              },
+              {
+                "id": "imaging-adjust-kinds",
+                "name": "Adjust kinds, filters and looks",
+                "description": "The adjust-everywhere part of Adjust/: AdjustKinds (GrayWeights, ImagingKind's Black & White and Invert compiled to a GPU tone program and its CPU twin, and ImagingFilter's five filters with their ranges), FilterRules (each filter over creative-core on a layer's padded bounds, mixed by a selection's coverage), LookPresets (LookPreset and the six BuiltInLooks) and AdjustCommands, the adjust.*, filter.* and look.* commands an app adds on an AdjustTarget, each edit one undo step. adjust-everywhere AJ-1 and AJ-2 declare them as stubs; AJ-5, AJ-5f and AJ-6 fill the bodies.",
+                "technology": "Swift 6, CoreRaster, CoreRender and SuiteKernel, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Adjust/AdjustKinds.swift",
+                  "Sources/SuiteImaging/Adjust/FilterRules.swift",
+                  "Sources/SuiteImaging/Adjust/AdjustCommands.swift",
+                  "Sources/SuiteImaging/Adjust/LookPresets.swift"
                 ]
               },
               {
@@ -701,12 +724,39 @@
                 ]
               },
               {
+                "id": "imaging-select",
+                "name": "Select",
+                "description": "Select/ (docs/blueprints/suiteui/features/area-selection.md): AreaMask turns SuiteKernel's AreaRecipe into a CoreRaster Mask. Each shape renders to its own mask (rectangle and ellipse from core's statics, lasso and polygon by Mask.polygon, the magic wand by floodMask on the target layer or, with All Layers, the composite) and joins the area by replace, add, subtract or intersect; invert, feather and expand (a disk max of the coverage, a min for contract) apply where they sit in the steps. The outline for the marching ants is the mask's contours at 0.5. area-selection AR-5 declares it as a stub; AR-6 fills the body.",
+                "technology": "Swift 6, CoreRaster and SuiteKernel, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Select/"
+                ]
+              },
+              {
                 "id": "imaging-tone",
                 "name": "Tone",
                 "description": "Tone/ (docs/blueprints/suiteui/features/tone-controls.md): the suite's one tone and sharpen adjustment. ToneSlider and ToneGroup (White Balance, Tone, Presence, Sharpen), ToneSettings with Library's Develop keys, ToneRules (the settings as one CoreRender tone program, the same CPU steps, one unsharp pass and Auto from CoreRaster's AutoTone, with the sliders still waiting on the engine), and ToneCommands: the ToneTarget protocol, the ToneIntents the SuiteUI tone rows send and the tone.read, tone.set, tone.reset and tone.auto specs every adopting app registers. tone-controls TC-1 declares them as stubs; TC-5 to TC-7 fill the bodies.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), SuiteKernel's command catalog, CoreRender and CoreRaster, Linux and macOS",
                 "paths": [
                   "Sources/SuiteImaging/Tone/"
+                ]
+              },
+              {
+                "id": "imaging-raw",
+                "name": "Raw",
+                "description": "Raw/ (docs/blueprints/suiteui/features/shared-raw.md): the suite's one camera RAW decode. RawFormat (a file is RAW when the format registry's camera RAW row names its extension), RawRefusal's four sentences, RawSize, RawFileInfo, RawQuality and RawDecodePlan (the embedded preview, a draft develop or every pixel), SuiteRaw (info and decode into the working space's Float32 buffer, the file's baseline applied as one exposure step, no clamp), the RawDecoding seam, FakeRawDecoder's fixed table for tests on every platform and, on macOS, SystemRawDecoder over Core Image's CIRAWFilter. Imports no ImageIO and no Metal. shared-raw SR-2 declares them as stubs; SR-3 and SR-4 fill the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and CoreRaster, Linux and macOS; Core Image on macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Raw/"
+                ]
+              },
+              {
+                "id": "imaging-style",
+                "name": "Style",
+                "description": "Style/ (docs/blueprints/suiteui/features/layer-styles.md): the suite's one layer style. LayerStyle with its eight StyleKinds (drop and inner shadow, outer and inner glow, stroke, colour and gradient overlay, bevel), StyleRules (ranges, defaults, paint order, reach, presets, the copy and paste JSON), StyleProgram (the one mapping to and from CoreRaster's LayerStyleStack and the CPU render), LayerStyleSVG (a style as one SVG filter with warnings) and StyleCommands: the LayerStyleTarget protocol, the StyleIntents views send and the eleven style.* specs every adopting app registers. layer-styles LS-1 declares them as stubs; LS-5 to LS-8 fill the bodies.",
+                "technology": "Swift 6, SuiteKernel's command catalog, CoreRaster, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Style/"
                 ]
               }
             ]
