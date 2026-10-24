@@ -6,6 +6,7 @@
 // while it isn't idle (HaloRenderSheetHost), with Halo's rows in the options
 // slot (HaloRenderOptionRows): the Size label over Full and Half chips (the
 // sheet's own 0.25x-4x Size row is off: Halo renders at those two only), the
+// Codec and Transparent background rows (HaloRenderSheet.swift, HX-2), the
 // Folder label over the folder's name (`-HaloRenderTo`, one line, its path the
 // help, dimmed with the sheet) and Choose… (its `render.choose-folder` spec's
 // MenuCommand, its disabled help the sheet's Export wording), and one note at
@@ -198,10 +199,10 @@ struct HaloRenderExportAdapter: View {
             readout, formats: Self.formats, idPrefix: "halo.render",
             onFormat: { id in
                 if let format = HaloRenderSettings.Format(rawValue: id) {
-                    act(.settings(HaloRenderSettings(format: format, halfSize: settings.halfSize)))
+                    act(.settings(settings.choosing(format: format)))
                 }
             },
-            onScale: { act(.settings(HaloRenderSettings(format: settings.format, halfSize: $0 < 1))) },
+            onScale: { act(.settings(settings.choosing(halfSize: $0 < 1))) },
             onQuality: { _ in },
             onExport: { act(.start) },
             onClose: { act(.close) },
@@ -242,7 +243,8 @@ struct HaloRenderOptionRows: View {
                     InspectorOption(id: true, title: "Half", identifier: "halo.render.size.half"),
                 ],
                 selected: settings.halfSize
-            ) { act(.settings(HaloRenderSettings(format: settings.format, halfSize: $0))) }
+            ) { act(.settings(settings.choosing(halfSize: $0))) }
+            HaloRenderMovieRows(settings: settings, editing: editing, busy: Self.busy, act: act)
             Text("Folder").font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.textSecondary)
             HStack(spacing: SuiteSpacing.s) {
                 Text(destination?.lastPathComponent ?? "None")
