@@ -40,6 +40,7 @@ Next: watch #5042 #5050 #5054 to merge and the supervisor to land #5114 (perf-su
 - LG-6 scope: neighbour prefetch already exists but runs beside the render, unbounded per step; LG-6 queues the neighbours behind the render in RenderQueue and drops a superseded step's pending decodes, so stale prefetches never evict the focus's decodes.
 
 ## Open
+- 13:00Z: poll: #5042/#5050/#5054 still queued in fast lane, no needs-fix/needs-rebase; #5114 awaits supervisor; #3790 unchanged.
 - 12:41Z: poll: #5042/#5050/#5054 still queued (lane landed #4911 at 12:18, oldest first); #5114 awaits supervisor; #3790 unchanged.
 - 12:21Z: poll: #5042/#5050/#5054 open, fast-lane, no needs-fix/needs-rebase; #5114 awaits supervisor; #3790 unchanged (17 comments).
 - 12:01Z: poll: no change; #5042 #5050 #5054 queued, #5114 awaits supervisor; no new #3790 comments
