@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-24T06:51Z	check	heartbeat	-	06:52Z check: #4903/#4911 open fast-lane; batch 20261024050226 (not ours) bisect -3/-1 running; LS-2/5/11 stacked
 2026-10-24T07:14Z	check	heartbeat	-	07:14Z check: #4903 #4911 open fast-lane awaiting batch, stacked LS-2 LS-3 LS-5 LS-6 LS-7 LS-11 held, LS-8 LS-9 wait core bump
 2026-10-24T08:15Z	3	heartbeat	#4911	relaunch act-1a16cdcb4a5-trd4; LS-1/LS-10 queued
+2026-10-24T08:16Z	3	stage-start	LS-4	wave 2: LS-4 stacked on LS-3 (lead/layer-styles-LS-u-4); LS-8/LS-9 wait the core LE-cpu bump
