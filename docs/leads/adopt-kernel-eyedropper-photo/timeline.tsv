@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-24T07:05:11Z	wait	check	no change: #4837 EP-m still open, not in batch-20261024050226; no supervisor reply; EP-z #4943 waits
 2026-10-24T07:30Z	0	relaunch	-	run act-1a16cc5a05a-lc3g
 2026-10-24T07:30Z	wait	check	supervisor hand-batching prefix ending at #4837 (supervisor/prefix-215139, Linux 40071878407 green); #4837 Belt-Lead line moved to this run; #4943 waits
+2026-10-24T07:44:14Z	wait	check	no change: #4837 open (supervisor prefix pending), #4943 waits
