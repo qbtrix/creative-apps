@@ -87,3 +87,4 @@ utc	stage	event	ref	note
 2026-10-24T01:57Z	check	editor-menus	01:58Z probe -9 Linux green, macOS running	https://github.com/qbtrix/creative-apps/actions/runs/40050012604
 2026-10-24T02:20Z	check	editor-menus	02:20Z: #4817/#4818/#4988 open clean, batch probe -9 macOS running	https://github.com/qbtrix/creative-apps/pull/4818
 2026-10-24T02:41Z	check	editor-menus	02:42Z: bisect probe -9 macOS red (culprit in #4837..#4864, not ours); #4818 in green prefix -6	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-24T03:04Z	check	editor-menus	03:04Z: bisect probe -7 macOS running; #4818 in green prefix -6	https://github.com/qbtrix/creative-apps/pull/4818
