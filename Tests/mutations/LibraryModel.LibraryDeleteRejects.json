@@ -1,0 +1,30 @@
+[
+  {
+    "label": "onlyRejectsGo",
+    "file": "Sources/LibraryModel/LibraryDeleteRejects.swift",
+    "find": "collectionItems.filter { $0.flag == .reject }",
+    "replace": "collectionItems.filter { $0.flag != .reject }",
+    "tests": "LibraryDeleteRejectsTests.swift"
+  },
+  {
+    "label": "failedMoveKeepsPhoto",
+    "file": "Sources/LibraryModel/LibraryDeleteRejects.swift",
+    "find": "                failed.append(Self.trashFailure(\"Couldn't move\", photo, error))",
+    "replace": "                moved.append(TrashedPhoto(photo: photo, index: index, trashedPath: nil))",
+    "tests": "LibraryDeleteRejectsTests.swift"
+  },
+  {
+    "label": "reimportSkipsTrashed",
+    "file": "Sources/LibraryModel/LibraryImport.swift",
+    "find": "        return knownIDs().union(excludedPaths)",
+    "replace": "        return knownIDs()",
+    "tests": "LibraryDeleteRejectsTests.swift"
+  },
+  {
+    "label": "undoPutsFilesBack",
+    "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "find": "                do { try trash.putBack(trashedPath, to: path) } catch {",
+    "replace": "                do { _ = (trashedPath, path) } catch {",
+    "tests": "LibraryDeleteRejectsTests.swift"
+  }
+]
