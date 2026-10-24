@@ -39,6 +39,7 @@ Next: Lane: #5039 AK-6 in the lane; #5040 AK-9 stacked on it. AK-8 waits SC-f (r
 
 ## Decisions
 
+- 2026-10-24T09:14:04Z Heartbeat 09:14Z: #5039 in the lane, #5040 stacked; no merges. AK-8 waits: shared-codecs planned. Dev-red #5113 is a macOS setup failure, not ours.
 - 2026-10-24T08:51:41Z Heartbeat 08:52Z: #5039 in the lane, #5040 stacked; no merges. AK-8 waits: shared-codecs planned. Dev macOS red at 1bbaba6c1 (not ours).
 - 2026-10-24T08:27:57Z Heartbeat 08:30Z: #5039 in the lane, #5040 stacked on it; no merges. AK-8 still waits: shared-codecs planned on dev. Dev CI 1bbaba6c1 holds none of our slices.
 - 2026-10-24T08:06:50Z Heartbeat 07:40Z: #5039 in the lane, #5040 stacked on it; no merges yet. AK-8 still waits on shared-codecs SC-f (wave.json planned). No open findings.
