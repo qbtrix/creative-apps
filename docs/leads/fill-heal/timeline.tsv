@@ -35,3 +35,4 @@ utc	stage	event	ref	note
 23:00Z	3	poll	dev 654fb363	#4577/#4889/#4896 open, no needs-* labels, queued in lane; AJ-a #4834 closed unmerged, #4846 needs-split, AJ-a not on dev; BK-photo #4965 now fast-lane; nothing to act on
 23:22Z	3	poll	dev 654fb363	#4577/#4889/#4896 open, no needs-* labels, queued; AJ-a #4846 back to fast-lane (needs-split gone), #4834 closed, no replacement found; BK-photo #4965 fast-lane; nothing to act on
 23:45Z	3	poll	dev 654fb363	nothing to act on: #4577 #4889 fast-lane, #4896 stacked, none merged; AJ-a #4846 open fast-lane; BK-photo #4965 open, no labels now; full CI 40037716897 running on dev 654fb363
+00:08Z	3	poll	dev 654fb363	nothing to act on: #4577 #4889 fast-lane, #4896 stacked, none merged, no needs-* labels; AJ-a #4846 open fast-lane; BK-photo #4965 open, no labels
