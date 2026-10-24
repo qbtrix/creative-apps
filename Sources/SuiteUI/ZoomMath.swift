@@ -1,51 +1,46 @@
-// ZoomMath.swift: the zoom CanvasViewport applies itself (pinch, Command-plus,
-// Command-minus, Command-0), clamped to 10% to 3200%. Zoom In and Zoom Out
-// step through ViewerZoom's stops; Fit is ViewerZoom's fit scale inside the
-// viewport's margin. A zoom that isn't a number is 100%, and a viewport with
-// no room fits at the smallest zoom, never a division by zero.
-// `anchoredOrigin` is the one place a pointer gesture's zoom is anchored: the
-// artboard origin that keeps the document point under the pointer there.
-// CanvasHostView's pinch turns it into its pan and CanvasLayout into the
-// viewport's scroll offset; keys, menus and sliders still zoom about the
-// view centre.
-// SuiteCanvasNavigating is the live CanvasNavigating (UC7) over it: the same
-// stops, clamp and fit through PlaneExtent, the view-to-document point and the
-// arrow-key pan step. Plain math, no SwiftUI, tested on its own (ZoomMathTests,
-// CanvasPanTests).
+// ZoomMath.swift: SuiteKernel's zoom model (ViewZoom.swift, the one copy) in CoreGraphics types,
+// for CanvasViewport and the editor windows: the 10% to 3200% clamp, Zoom In and Zoom Out over the
+// suite's stops, the fit inside the viewport's margin, and `anchoredOrigin`, the artboard origin
+// that keeps the document point under the pointer there. A zoom that isn't a number is 100%, and a
+// viewport with no room fits at the smallest zoom, never a division by zero. CanvasHostView's pinch
+// and CanvasLayout's anchored scroll both go through `anchoredOrigin`.
+// SuiteCanvasNavigating is the live CanvasNavigating (UC7) over it: the same stops, clamp and fit
+// through PlaneExtent, the view-to-document point and the arrow-key pan step. Plain math, no
+// SwiftUI, tested on its own (ZoomMathTests, CanvasPanTests; the model in ViewZoomTests).
 import CoreGraphics
+import struct SuiteKernel.ZoomSteps
+import typealias SuiteKernel.Point
 
 public enum ZoomMath {
+    /// The suite's stops and range (SuiteKernel's ZoomSteps.suite).
+    public static let steps = ZoomSteps.suite
+
     /// The zoom range, in points per document pixel: 10% to 3200%.
-    public static let range: ClosedRange<Double> = 0.1...32
+    public static var range: ClosedRange<Double> { steps.range }
 
     /// `zoom` kept inside `range`; 100% when it isn't a number.
-    public static func clamped(_ zoom: Double) -> Double {
-        zoom.isNaN ? 1 : min(max(zoom, range.lowerBound), range.upperBound)
-    }
+    public static func clamped(_ zoom: Double) -> Double { steps.clamped(zoom) }
 
     /// The next stop above `zoom`, within `range`.
-    public static func zoomedIn(from zoom: Double) -> Double {
-        clamped(ViewerZoom.zoomedIn(from: zoom))
-    }
+    public static func zoomedIn(from zoom: Double) -> Double { steps.zoomedIn(from: zoom) }
 
     /// The next stop below `zoom`, within `range`.
-    public static func zoomedOut(from zoom: Double) -> Double {
-        clamped(ViewerZoom.zoomedOut(from: zoom))
-    }
+    public static func zoomedOut(from zoom: Double) -> Double { steps.zoomedOut(from: zoom) }
 
-    /// The zoom that fits `document` inside `viewport` with `margin` on every
-    /// side, never above 100%, within `range`.
+    /// The zoom that fits `document` inside `viewport` with `margin` on every side, never above 100%,
+    /// within `range`.
     public static func fit(document: CGSize, in viewport: CGSize, margin: CGFloat = SuiteSpacing.xxl) -> Double {
         clamped(ViewerZoom.fitScale(artboard: document, in: viewport, inset: margin))
     }
 
-    /// The artboard origin that keeps the document point under `pointer` under it when the zoom
-    /// goes from `old` to `new`, all in view points. Both zooms are clamped first, so a zoom held at
-    /// a range end leaves the origin where it was. Only their ratio counts, so a fit-relative zoom
-    /// works as well as an absolute one. TimelineZoom.anchoredOffset is the timeline's one-axis kin.
+    /// The artboard origin that keeps the document point under `pointer` under it when the zoom goes
+    /// from `old` to `new`, all in view points (ZoomSteps.anchoredOrigin). TimelineZoom.anchoredOffset
+    /// is the timeline's one-axis kin.
     public static func anchoredOrigin(pointer: CGPoint, origin: CGPoint, from old: Double, to new: Double) -> CGPoint {
-        let ratio = CGFloat(clamped(new) / clamped(old))
-        return CGPoint(x: pointer.x - (pointer.x - origin.x) * ratio, y: pointer.y - (pointer.y - origin.y) * ratio)
+        let p = steps.anchoredOrigin(
+            pointer: Point(x: Double(pointer.x), y: Double(pointer.y)), origin: Point(x: Double(origin.x), y: Double(origin.y)),
+            from: old, to: new)
+        return CGPoint(x: p.x, y: p.y)
     }
 }
 

@@ -175,7 +175,7 @@ import Testing
                 "running value \(running.height) pt tall, Matching \(matching.height) pt")
     }
 
-    @Test(.disabled("quarantine #3258 until 2026-10-22")) func homeAtEachWidth() async {
+    @Test func homeAtEachWidth() async {
         let (model, services) = await model()
         for width in Self.widths {
             for appearance in SnapshotAppearance.allCases {

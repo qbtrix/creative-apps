@@ -5,7 +5,7 @@ import Foundation
 import Testing
 import SuiteImaging
 
-@Suite(.disabled("waits on TC-7")) struct ToneSettingsTests {
+@Suite struct ToneSettingsTests {
     static func keys(_ s: ToneSettings) throws -> Set<String> {
         Set((try JSONSerialization.jsonObject(with: JSONEncoder().encode(s)) as? [String: Any] ?? [:]).keys)
     }
@@ -38,6 +38,17 @@ import SuiteImaging
         #expect(ToneSettings.neutral.setting(.exposure, to: 9).value(.exposure) == 5)
         #expect(ToneSettings.neutral.setting(.sharpenRadius, to: 0).value(.sharpenRadius) == 0.5)
         #expect(ToneSettings.neutral.setting(.contrast, to: 20).setting(.contrast, to: .nan).value(.contrast) == 20)
+        #expect(ToneSettings.neutral.setting(.sharpenAmount, to: .infinity).value(.sharpenAmount) == 300)
+        let json = #"{"shadows": -250, "sharpenThreshold": 80}"#
+        let decoded = try? JSONDecoder().decode(ToneSettings.self, from: Data(json.utf8))
+        #expect(decoded?.value(.shadows) == -100 && decoded?.value(.sharpenThreshold) == 50)
+    }
+
+    /// Library's other catalog keys (crop, curve, levels) are not tone and are ignored, not refused.
+    @Test func otherKeysIgnored() throws {
+        let json = #"{"exposure": 1, "crop": {"x": 0}, "curve": [], "levels": {}}"#
+        let s = try JSONDecoder().decode(ToneSettings.self, from: Data(json.utf8))
+        #expect(s == ToneSettings.neutral.setting(.exposure, to: 1))
     }
 
     /// `reset(.tone)` clears TONE and leaves white balance; `reset(nil)` clears everything.
