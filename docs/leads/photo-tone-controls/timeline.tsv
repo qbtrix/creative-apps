@@ -131,3 +131,4 @@ utc	stage	event	ref	note
 2026-10-24T19:39:05Z	W4	fix	PT-4	new run act-1a16f6941b7-zb0r; needs-rebase on #5008 and #5112: merged dev; PT-6 kept PT-2 and dev; PT-4 kept pathCommands and ToneCommands, path.* and tone.* exclusions, ledger and golden as union; gates running
 2026-10-24T20:30:53Z	W4	check	PT-4	#5112 adopted the other session's equivalent dev merge 79358946 (gate PASS); Head and Belt-Lead moved; #5008 PT-6 head f126c565 gate PASS
 2026-10-24T20:58:29Z	W4	check	PT-4	all tone PRs open and clean; waits #5006 TC-3 and #4953 TC-6 still open; no scoped photo run yet
+2026-10-24T21:19:59Z	W4	check	PT-4	no merges; lane batch-20261024205137 red on macOS gate, bisect probes -3 and -6 running; our PRs and waits open and clean
