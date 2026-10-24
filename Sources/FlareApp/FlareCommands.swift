@@ -9,7 +9,7 @@
 // titled by the step, as in "Undo Set Keyframe Easing". File > Open Sample
 // lists Bounce, Character, Button and Keyed Ball, the keyed document the
 // easing journey starts from; Open Recent lists the window's recent files,
-// then Clear Menu. The focused window publishes a FlareMenu as a focused
+// then Clear Menu. Document Settings… opens the shared setup sheet on the open scene. The focused window publishes a FlareMenu as a focused
 // scene value (FlareWindow.swift); with none focused every item disables. The
 // value carries the selection's Edit reasons too, so a new selection is a new
 // value and the items re-read their reasons. ⌘A is Select All Keys while the
@@ -37,6 +37,10 @@ struct FlareMenu {
     var selectionHelps: [String?] = []
     /// The open animation's file, which File > Open In ▸ hands to another app; nil before it has one (file-flow FL-2).
     var document: SuiteDocumentRef?
+    /// File > Document Settings… (document-setup DS-14): shows the shared sheet in settings mode; `settingsHelp` is
+    /// why it can't, nil when a scene is open.
+    var documentSettings: @MainActor () -> Void = {}
+    var settingsHelp: String? = "Open a Flare window first."
 
     /// Open Sample's items: the sample's name for `.openSample(name:)`, and its title.
     static let samples: [(name: String, title: String)] = [
@@ -86,6 +90,9 @@ struct FlareCommands: Commands {
             item(.file(.save), key: KeyboardShortcut("s"))
             item(.file(.saveAs), key: KeyboardShortcut("s", modifiers: [.command, .shift]))
             item(.export(.showSheet), key: KeyboardShortcut("e", modifiers: [.command, .shift]))
+            if let spec = FlareWorkspace.menuSpec("document.set-settings") {
+                MenuCommand(spec, on: menu.settingsHelp, title: "Document Settings…") { menu.documentSettings() }
+            }
             item(.file(.close), key: KeyboardShortcut("w"))
         }
         CommandGroup(replacing: .undoRedo) {
