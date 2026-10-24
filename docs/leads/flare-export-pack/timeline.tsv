@@ -148,3 +148,4 @@ utc	stage	event	ref	note
 2026-10-24T17:37:54Z	stage	#5025 needs-rebase: merged dev, gate running. #5005 closed as superseded by #5025 (same readout). FV-z gap found: StageRasterizer has no frame(), so live MP4/GIF throws; #5025 will draw real frames and drop the live refusal (#5017)
 2026-10-24T17:57:45Z	stage	#5025 pushed 9c2bc627 (dev merged, StageRasterizer.frame, live refusal dropped; mutate 10/10; gate PASS); Head moved
 2026-10-24T18:19:33Z	heartbeat	#4854 and #5025 queued in the fast lane, mergeable; waiting on a batch
+2026-10-24T18:41:25Z	heartbeat	#4854 (FV-z) in lane/batch-20261024183708 (Linux + macOS gate running); #5025 queued for a later batch
