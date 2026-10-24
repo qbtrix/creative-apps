@@ -1,0 +1,23 @@
+[
+  {
+    "label": "heldRunSettles: a held drag's sample still starts the quiet hand-back",
+    "file": "Sources/PhotoApp/LiveTransformCopy+Kernel.swift",
+    "find": "        if held { return live }\n",
+    "replace": "",
+    "tests": "LiveTransformCopyTests"
+  },
+  {
+    "label": "holdKeepsTheTimer: hold() leaves the waiting quiet hand-back",
+    "file": "Sources/PhotoApp/LiveTransformCopy+Kernel.swift",
+    "find": "        held = true\n        settle?.cancel()\n        settle = nil\n",
+    "replace": "        held = true\n",
+    "tests": "LiveTransformCopyTests"
+  },
+  {
+    "label": "takeKeepsHold: take() doesn't let go, so a later row scrub never settles",
+    "file": "Sources/PhotoApp/LiveTransformCopy+Kernel.swift",
+    "find": "        held = false\n",
+    "replace": "",
+    "tests": "LiveTransformCopyTests"
+  }
+]
