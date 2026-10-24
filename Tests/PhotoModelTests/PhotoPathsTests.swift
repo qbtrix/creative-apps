@@ -120,4 +120,24 @@ import Testing
         #expect(workspace.penDraft == nil)
         #expect(workspace.editingPathID == nil)
     }
+
+    @Test func aFlatFileAsksBeforeDroppingPaths() throws {
+        var workspace = try open()
+        workspace.didSave(as: "beach.png", kind: .image(.png))
+        #expect(workspace.saveAction == .writeImage(.png))
+        _ = try workspace.addPath(Self.triangle, name: "Add Path")
+        #expect(workspace.needsDocument)
+        #expect(workspace.saveAction == .askKeepLayers(.png))
+    }
+
+    @Test func pathEditsMoveTheRevisionWithoutRedrawingTheCanvas() throws {
+        var workspace = try open()
+        let opened = workspace.revision
+        _ = try workspace.addPath(Self.triangle, name: "Add Path")
+        #expect(workspace.revision > opened)
+        #expect(workspace.damage(since: opened) == .none)
+        let added = workspace.revision
+        workspace.undo()
+        #expect(workspace.revision > added)
+    }
 }

@@ -44,9 +44,9 @@ extension PhotoWorkspace {
         return .image(format)
     }
 
-    /// What the image needs to keep: more than one layer, a mask or an adjustment layer.
+    /// What the image needs to keep: more than one layer, a mask, an adjustment layer or a path.
     public var needsDocument: Bool {
-        layers.count > 1 || !masks.isEmpty || layers.contains { $0.hasMask || $0.kind != .pixels }
+        layers.count > 1 || !masks.isEmpty || layers.contains { $0.hasMask || $0.kind != .pixels } || !paths.isEmpty
     }
 
     /// What File > Save does now: write the document, write the flat file, ask
