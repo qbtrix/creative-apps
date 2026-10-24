@@ -2,7 +2,7 @@
 
 Issue: #3472 (runs before used #4509) · Packet: docs/blueprints/halo/features/export-pack.md
 Run: act-1a16cd045be-qv3g · Started: 2026-10-24T07:20Z (took over from act-1a16958d5fe-8dxu)
-Stage: 4 wave 4 (HX-a #4841, HX-u #4858, HX-m #4874 + #4917, HX-z #4942 open)
+Stage: 5 wave 5 (HX-8 on #4942 branch, gating; HX-u #4858, HX-3 #4874, HX-4 #4917 in lane)
 Base: 721168a8 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
 Next: HX-8 (halo.md, built, feature-done) once placed-images:PH-z is built; Belt-Slice-Done per slice once a green ci.yml run holds it
 
