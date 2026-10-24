@@ -1,0 +1,16 @@
+[
+  {
+    "label": "haloInitDropsBlue: HaloLayerColor's FillColor init reads blue from green",
+    "file": "Sources/HaloModel/HaloTextEdits+Color.swift",
+    "find": "blue: fill.b)",
+    "replace": "blue: fill.g)",
+    "tests": "HaloColourFillTests"
+  },
+  {
+    "label": "haloBytesOwnRounding: bytes truncate instead of HexText's rounding",
+    "file": "Sources/HaloModel/HaloTextEdits+Color.swift",
+    "find": "(HexText.byte(red), HexText.byte(green), HexText.byte(blue))",
+    "replace": "(HexText.byte(red), HexText.byte(green), UInt8(clamping: Int(blue.isFinite ? blue * 255 : 0)))",
+    "tests": "HaloColourFillTests"
+  }
+]

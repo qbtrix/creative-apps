@@ -21,8 +21,6 @@ struct LiveColorSampling: ColorSampling {
             guard i + 3 < bytes.count else { return nil }
             return SampleRGBA(r: bytes[i], g: bytes[i + 1], b: bytes[i + 2], a: bytes[i + 3])
         }
-        guard let mean else { return nil }
-        func byte(_ channel: Double) -> UInt8 { UInt8(clamping: SampleRules.byte(channel)) }
-        return SampledColor(red: byte(mean.r), green: byte(mean.g), blue: byte(mean.b))
+        return mean.map(SampledColor.init)
     }
 }

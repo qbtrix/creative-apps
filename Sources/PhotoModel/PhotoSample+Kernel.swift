@@ -43,8 +43,8 @@ extension PhotoWorkspace: SampleTarget {
         guard let picked = sampledColor(at: point, size: sampleSize) else {
             throw PhotoRefusal("Nothing to sample there.")
         }
-        func channel(_ value: Double) -> UInt8 { UInt8(clamping: SampleRules.byte(value)) }
-        setToolOption(.color(red: channel(picked.r), green: channel(picked.g), blue: channel(picked.b)))
+        let color = SampledColor(picked)
+        setToolOption(.color(red: color.red, green: color.green, blue: color.blue))
     }
 
     /// Sets the square the eyedropper reads.

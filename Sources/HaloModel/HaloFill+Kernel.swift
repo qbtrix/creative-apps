@@ -68,7 +68,7 @@ extension HaloLayer {
     /// This layer's fill in `box`: its gradient mapped out of the unit box, or
     /// its solid color.
     func fill(in box: Rect) -> Fill {
-        guard let gradient else { return .solid(FillColor(r: color.red, g: color.green, b: color.blue, a: 1)) }
+        guard let gradient else { return .solid(color.fill) }
         return GradientRules.mapped(gradient, from: Self.unitBox, to: box)
     }
 
