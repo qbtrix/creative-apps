@@ -46,3 +46,4 @@ utc	stage	event	ref	note
 03:04Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; bisect: probe -7 (#4837) Linux green, macOS 40055393733 running; #4864 pushed a macOS-gate fix (Linux 40056011488); AJ-a #4846 in lane; BK-photo #4965 open, no labels
 03:25Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; bisect: probe -7 (#4837) macOS 40055393733 still running; #4864 fix Linux green (40056011488); AJ-a #4846 in lane; BK-photo #4965 open, no labels
 03:48Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; bisect: probe -7 (#4837) macOS green (40055393733), culprit in 8-9; AJ-a #4846 in lane; BK-photo #4965 open, no labels
+04:10Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; bisect: probe -8 (#4839) Linux 40060703756 + macOS 40060705865 running; AJ-a #4846 in lane; BK-photo #4965 back on fast-lane
