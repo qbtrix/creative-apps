@@ -133,3 +133,4 @@ utc	stage	event	ref	note
 2026-10-24T20:58:29Z	W4	check	PT-4	all tone PRs open and clean; waits #5006 TC-3 and #4953 TC-6 still open; no scoped photo run yet
 2026-10-24T21:19:59Z	W4	check	PT-4	no merges; lane batch-20261024205137 red on macOS gate, bisect probes -3 and -6 running; our PRs and waits open and clean
 2026-10-24T21:41:51Z	W4	check	PT-4	no merges; batch-20261024205137 bisect macOS probes -3 and -6 still running (Linux green); our PRs and waits open and clean; no scoped photo run
+2026-10-24T22:04:15Z	W4	check	PT-4	no merges; batch-20261024205137 bisect macOS probes -3/-6 still running after 45 min; our PRs and waits open and clean (#5174 now beta); no scoped photo run
