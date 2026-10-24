@@ -1,8 +1,8 @@
 // LibraryExcludedPathsCodingTests.swift: the catalog file keeps the paths
 // Delete Rejects trashed (cull-finish DR-7). A catalog with excluded paths
 // round-trips; with none the file is byte-equal to the golden, so every old
-// catalog stays as it was; `photo.delete-rejects` is a command with its
-// availability. Runs on Linux and macOS.
+// catalog stays as it was; `photo.delete-rejects` stays in the window (DR-u)
+// with its availability. Runs on Linux and macOS.
 import Foundation
 @testable import LibraryModel
 import SuiteKernel
@@ -50,19 +50,17 @@ private func shootWithRejects() -> LibraryCatalog {
     #expect(throws: LibraryError.damagedCatalog("")) { try coding.decodeFile(Data(bad.utf8)) }
 }
 
-@Test func deleteRejectsIsACommandWithItsAvailability() throws {
-    let catalog = LibraryCatalog.catalog
-    #expect(catalog.ids.contains("photo.delete-rejects"))
+@Test func deleteRejectsStaysInTheWindowWithItsAvailability() {
+    // DR-u: the window asks before anything moves to the Trash, so the id is not an agent command.
+    #expect(!LibraryCatalog.catalog.ids.contains("photo.delete-rejects"))
     var none = LibraryCatalog(services: .fake())
     none.load(LibraryFixtures.shoot())
-    #expect(catalog.availability("photo.delete-rejects", on: none).why == none.deleteRejectsHelp)
     #expect(none.deleteRejectsHelp != nil)
-    #expect(throws: CatalogError.self) { try catalog.run("photo.delete-rejects", params: .object([:]), on: &none) }
 
     var rejects = shootWithRejects()
-    #expect(catalog.availability("photo.delete-rejects", on: rejects).why == nil)
-    let ran = try catalog.run("photo.delete-rejects", params: .object([:]), on: &rejects)
-    #expect(ran.undoStep == "Delete Rejects")
-    #expect(ran.result == .object(["moved": .number(3), "failed": .number(0)]))
+    #expect(rejects.deleteRejectsHelp == nil)
+    #expect(rejects.deleteRejectsTargets.count == 3)
+    rejects.deleteRejects()
     #expect(rejects.items.count == 21)
+    #expect(rejects.excludedPaths.count == 3)
 }

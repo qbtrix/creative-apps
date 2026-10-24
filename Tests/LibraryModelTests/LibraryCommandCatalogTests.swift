@@ -49,7 +49,6 @@ struct LibraryCatalogDoc: HeadlessDocument {
             ("empty", LibraryCatalog(services: .fake())), ("grid", grid), ("two selected", two), ("culled", culled),
             ("undone", with(culled) { $0.undo() }), ("loupe", loupe),
             ("cropping", with(loupe) { $0.toggleCrop(); $0.setCropAngle(-3) }),
-            ("rejects", with(two) { $0.setFlag(.reject) }),  // DR-7: Delete Rejects has rejects to trash
             ("every slider", with(two) { c in  // CS-5: each Reset <slider> has a value to reset
                 for slider in DevelopSlider.allCases { c.setDevelop(slider, to: 1, coalesceKey: nil); c.endCoalescing() }
             }),
@@ -76,7 +75,6 @@ struct LibraryCatalogDoc: HeadlessDocument {
         case "photo.reset-develop": .some(menu(c.canEditDevelop, "develop", "Develop isn't connected yet."))
         case "photo.crop": .some(menu(c.cropHelp == nil, "crop", "Crop isn't connected yet."))
         case "photo.reset-crop": .some(menu(c.resetCropHelp == nil, "crop", "Crop isn't connected yet."))
-        case "photo.delete-rejects": .some(c.deleteRejectsHelp)
         case "file.import-folder": .some(c.importHelp)  // CS-3: the window's enablement and reasons
         case "file.export": .some(c.exportHelp)
         case "export.set-folder", "export.apply-preset", "export.save-preset": .some(c.exportEditingHelp)  // CS-5
@@ -95,6 +93,7 @@ struct LibraryCatalogDoc: HeadlessDocument {
         case "file.clear-recent": .some("No Recent Files")
         case "file.open-in": .some(c.openInHelp)
         case "file.share-prepare": .some(c.shareHelp)
+        case "thumbnails.stats": .some(c.thumbnailDisk == nil ? "Thumbnails aren't kept on disk yet." : nil)
         case "folders.list", "view.show-folder": .some(c.items.contains { $0.path?.hasPrefix("/") == true } ? nil : LibraryCatalog.noFolders)
         default: nil
         }
@@ -202,7 +201,6 @@ struct LibraryCatalogDoc: HeadlessDocument {
         "photo.copy-settings | Copy Settings | Develop isn't connected yet.", "photo.paste-settings | Paste Settings | Develop isn't connected yet.",
         "photo.reset-develop | Reset Develop | on", "photo.crop | Crop | Crop isn't connected yet.",
         "photo.reset-crop | Reset Crop | Crop isn't connected yet.",
-        "photo.delete-rejects | Delete Rejects | No rejected photos in All Photos.",
         "metadata.set-rating | Set Rating | on", "metadata.pick | Pick | on", "metadata.reject | Reject | on",
         "metadata.clear-flag | Clear Flag | on", "metadata.set-label | Set Label | on", "metadata.auto-advance | Auto Advance | on",
         "file.recent | Recent Files | on", "file.open-recent | Open Recent | on", "file.clear-recent | Clear Menu | No Recent Files",
@@ -218,5 +216,6 @@ struct LibraryCatalogDoc: HeadlessDocument {
         "file.show-catalog | Show Catalog in Finder | The catalog file isn't damaged.",
         "notice.close | Close Notice | There is no notice to close.",
         "notice.show-failures | Show Failures | No files failed to import.",
-    ] + DevelopSlider.allCases.map { "\(LibraryCatalog.resetSliderID($0)) | Reset \($0.rawValue) | on" } + ["file.share-prepare | Share | on"]
+    ] + DevelopSlider.allCases.map { "\(LibraryCatalog.resetSliderID($0)) | Reset \($0.rawValue) | on" } + ["file.share-prepare | Share | on",
+        "thumbnails.stats | Thumbnail Stats | Thumbnails aren't kept on disk yet."]
 }

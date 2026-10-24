@@ -42,7 +42,8 @@ private func stacked() throws -> DesignWorkspace {
     workspace.deselect()
     try workspace.setExpanded("node-1", false)
     #expect(!workspace.layerRows.contains { $0.id == "node-3" })
-    workspace.gesture(.move, pt(330, 330), pt(330, 330))
+    // A ⌘ press picks the rectangle itself, not its group (area-selection AR-14).
+    workspace.gesture(.move, pt(330, 330), pt(330, 330), [.deep])
     #expect(workspace.selectedNodeID == "node-3")
     #expect(workspace.layerRows.map(\.id) == ["node-1", "node-2", "node-3"])
 }

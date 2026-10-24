@@ -6,7 +6,6 @@
 // async importer and export runner do the rest. Show Original (CS-3) is state the loupe's render reads.
 // CS-5: the export sheet's controls (`export.*`), the notice row's (`notice.*`, `file.show-catalog`) and Develop's
 // per-slider resets (`photo.reset-<slider>`) as specs too; the window still opens panels and reveals files.
-// Delete Rejects (cull-finish DR-7) is `photo.delete-rejects`; its dialog stays in the window.
 // The grid toolbar's controls (#3632) are view.thumbnail-size, view.sort, file.import-folder and file.export.
 // Ids are `<menu>.<action>` in lowercase; Tests/command-ids/library.txt keeps them. Linux-safe.
 #if canImport(FoundationEssentials)
@@ -61,7 +60,7 @@ extension LibraryCatalog {
     /// Every Library menu action as a command spec, in menu order.
     public static let commands: [CommandSpec<LibraryCatalog>] = fileAndEditSpecs + viewSpecs + photoSpecs + metadataSpecs
         + FileFlowCommands.specs(LibraryCatalog.self)
-        + folderSpecs + exportSheetSpecs + noticeSpecs + resetSliderSpecs + [sharePrepareSpec]
+        + folderSpecs + exportSheetSpecs + noticeSpecs + resetSliderSpecs + [sharePrepareSpec, thumbnailStatsSpec]
 
     /// The specs as a catalog whose history is the catalog's own.
     public static let catalog: CommandCatalog<LibraryCatalog> =
@@ -172,13 +171,6 @@ extension LibraryCatalog {
               "crop", "Crop isn't connected yet.", on: { $0.cropHelp == nil }, run: { $0.toggleCrop() }),
         photo("photo.reset-crop", "Reset Crop", "Clears the loupe photo's crop, or puts the open draft back to Original.", .edit,
               "crop", "Crop isn't connected yet.", on: { $0.resetCropHelp == nil }, run: { $0.resetCrop() }),
-        sheet("photo.delete-rejects", "Delete Rejects", "Moves the collection's rejected photos to the Trash as one step.", .edit,
-              NoParams.self, help: { $0.deleteRejectsHelp }) { c, _ in
-            let before = c.items.count, targets = c.deleteRejectsTargets.count
-            c.deleteRejects()
-            let moved = before - c.items.count
-            return .object(["moved": .number(Double(moved)), "failed": .number(Double(targets - moved))])
-        },
     ]
 
     static let metadataSpecs: [CommandSpec<LibraryCatalog>] = [
@@ -347,6 +339,28 @@ extension ExportState {
     var isRunning: Bool { if case .running = self { true } else { false } }
 }
 
+extension LibraryCatalog {
+    /// The disk tier behind the grid's thumbnails (shared-thumbnails ST-6), nil while they are kept in memory only.
+    var thumbnailDisk: LiveThumbnailStoreAdapter? { (services.thumbnails as? LiveThumbnails)?.disk }
+
+    /// `thumbnails.stats`: thumbnails decoded and served from disk since the disk tier opened, for a relaunch to read.
+    static let thumbnailStatsSpec: CommandSpec<LibraryCatalog> =
+        .typed("thumbnails.stats", title: "Thumbnail Stats",
+               summary: "Counts the grid thumbnails decoded and the ones read from disk since launch.", kind: .query,
+               params: NoParams.self, schema: ParamSchema.none,
+               result: .object(["decoded": .integer("Thumbnails decoded.", minimum: 0),
+                                "fromDisk": .integer("Thumbnails read from disk.", minimum: 0)], required: ["decoded", "fromDisk"]),
+               example: .object([:]),
+               availability: { available($0.thumbnailDisk == nil ? "Thumbnails aren't kept on disk yet." : nil) }
+        ) { c, _ -> JSONValue in
+            guard let disk = c.thumbnailDisk else {
+                throw CatalogError.unavailable(id: "thumbnails.stats", why: "Thumbnails aren't kept on disk yet.")
+            }
+            let stats = disk.stats
+            return .object(["decoded": .number(Double(stats.decoded)), "fromDisk": .number(Double(stats.fromDisk))])
+        }
+}
+
 /// File > Share… as its menu item reads it: why it can't act now, nil when it can.
 public struct LibraryShareMenu: Sendable, Equatable {
     public var help: String?
@@ -354,10 +368,15 @@ public struct LibraryShareMenu: Sendable, Equatable {
 }
 
 extension LibraryCatalog {
-    /// File > Share… (`file.share`): the window opens the system's share menu for the selection, so the spec stays
-    /// out of `commands` (and the ledger) like Import Folder… and Export…; it is available while the menu's help is nil.
+    /// File > Share… (`file.share`): the window opens the system's share sheet for the copies `prepareShare` makes,
+    /// so the spec stays out of `commands` (and the ledger) like Import Folder… and Export…; it is available while the
+    /// menu's help is nil. Run, it sends the caller to `file.share-prepare`, which names the same copies.
     public static let shareMenuSpec: CommandSpec<LibraryShareMenu> =
         .typed("file.share", title: "Share…", summary: "Shares the selected photos, location off.", kind: .file,
                params: NoParams.self, schema: ParamSchema.none, example: .object([:]), availability: { available($0.help) }
-        ) { _, _ -> JSONValue in throw CatalogError.notBuilt(id: "file.share", feature: "SH-5") }
+        ) { _, _ -> JSONValue in throw CatalogError.unavailable(id: "file.share", why: shareInWindow) }
+
+    /// Why `file.share` doesn't run as a command.
+    static let shareInWindow =
+        "File > Share… opens the system's share sheet in the window; file.share-prepare makes the copies."
 }
