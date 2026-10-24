@@ -80,3 +80,4 @@ utc	stage	event	ref	note
 2026-10-23T23:24Z	check	editor-menus	23:25Z unchanged; batch macOS gate 40029779505 still running	https://github.com/qbtrix/creative-apps/pull/4818
 2026-10-23T23:47Z	check	editor-menus	23:48Z batch macOS gate red on Design stroke tests from #4864, not ours; lane bisecting	https://github.com/qbtrix/creative-apps/actions/runs/40029779505
 2026-10-24T00:09Z	check	editor-menus	00:10Z no bisect probes yet; dev CI 40037716897 still running	https://github.com/qbtrix/creative-apps/actions/runs/40029779505
+2026-10-24T00:30Z	check	editor-menus	00:31Z lane bisecting: probe -6 Linux and macOS running	https://github.com/qbtrix/creative-apps/actions/runs/40044879600
