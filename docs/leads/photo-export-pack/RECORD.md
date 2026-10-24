@@ -4,12 +4,12 @@ Issue: #3470 · Packet: docs/blueprints/photo/features/export-pack.md
 Run: act-1a15e2da54d-qlg1 (resumed; earlier act-1a15a9f4eba-h30y) · Session: claude/feature-lead-playbook-t69dpt · Started: 2026-10-20T18:40Z
 Stage: 3 building (unparked 2026-10-23T15:11Z under contract-first waits)
 Base: e382f9d7fba02ffdefc8ba2f23c9461b4774fad6
-Next: PX-a Belt-Slice-Done once dev Linux run 40077014447 (contains #4832) is green; PX-5 waits XP-4; PX-4 still on the supervisor's codec hold; PX-8 waits PX-7, PX-5, tone-controls PT-z and place-image PP-z (PT-a merged #4845)
+Next: PX-5 waits XP-4; swap XP-3's Size/Metadata rows in when it merges; PX-4 still on the supervisor's codec hold; PX-8 waits PX-7, PX-5, tone-controls PT-z and place-image PP-z (PT-a merged #4845)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| PX-a | Photo export reads ExportOptions on stubs; Export… opens SuiteExportSheet with Size row and four formats | PX-1, PX-2 | MJ-PX | XP-1, XP-6 (merged, PX-1); XP-3 + AX-photo (PX-2) | yes | 0 | merged (PX-1, PX-2); awaiting green Linux on dev | – | – |
+| PX-a | Photo export reads ExportOptions on stubs; Export… opens SuiteExportSheet with Size row and four formats | PX-1, PX-2 | MJ-PX | XP-1, XP-6 (merged, PX-1); XP-3 + AX-photo (PX-2) | yes | 0 | done (Belt-Slice-Done 08:54Z, run 40077014447) | – | – |
 | PX-u | sheet snapshots, render budget, journey written | PX-5, PX-6 | PJ-X1 | PX-a; XP-4 (PX-5) | yes | 0 | waiting | – | – |
 | PX-m | exact-size resample, PNG/JPEG/HEIC/TIFF through the shared encoder, headless and in app | PX-3, PX-4 | MJ-PX | PX-1 + XP-6 (PX-3, met); SM-w (PX-4) | yes | 0 | building (PX-1, PX-3 merged; PX-4 parked) | – | – |
 | PX-z | live services, journey, blueprint, built | PX-7, PX-8 | PJ-X1 | PX-u, PX-m; tone-controls:PT-z, place-image:PP-z (PX-8) | yes | 0 | waiting | – | – |

@@ -193,3 +193,4 @@ utc	stage	event	ref	note
 2026-10-24T07:17Z	check-in	06:57Z batch merged 5 non-Photo PRs; #4832/#4836 still open clean; XP-3/XP-4 not on dev, XP-7 #5044 open; no new findings
 2026-10-24T07:49Z	check-in	no Photo change: #4832/#4836 open clean; #4132 merged 07:43Z; XP-9 #5074 and XP-7 #5044 open, XP-3/XP-4 not on dev; no new findings
 2026-10-24T08:21Z	check-in	#4832 PX-2 and #4836 PX-6 merged 08:02Z; PX-a awaits green Linux on dev run 40077014447; XP-3/XP-4 not on dev
+2026-10-24T08:53Z	check-in	PX-a done: Linux green on run 40077014447; Belt-Slice-Done + Mac-Finish-Wanted posted on #3470; XP-3/XP-4 not on dev
