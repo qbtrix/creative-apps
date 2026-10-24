@@ -94,3 +94,4 @@ utc	stage	event	ref	note
 2026-10-24T08:27:17Z	3	heartbeat	XP-8 building
 2026-10-24T08:31:23Z	3	pr-open	XP-8 #5106
 2026-10-24T08:51:29Z	3	heartbeat	no merges; dev macOS red (not ours)
+2026-10-24T09:13:52Z	3	heartbeat	dev-red #5113 is CI setup, not ours
