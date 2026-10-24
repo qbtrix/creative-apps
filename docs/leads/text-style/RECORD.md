@@ -118,3 +118,4 @@ Next: Lane: #4871 TS-a and #5047 TS-7 in the lane. After #4871 merges, merge dev
 - Wire: adjust-everywhere:AJ-halo (TS-halo)
 - Wire: anchor-parenting:AN-halo (TS-halo)
 - 2026-10-24T22:25:39Z (act-1a16fe1fad3-lsp3): resumed on the Belt nudge. Belt reads lead/suiteui-text-style, which had fallen behind lead/text-style. It is synced again, and both are written on every stage from now on.
+- 2026-10-24T23:29:22Z (act-1a16fe1fad3-lsp3): opened TS-9 #5226 (TS-halo, adb9e98a, fast-lane, clean). Opened TS-8 #5228 (TS-design, 59358e68), stacked on TS-7 #5047; it gets fast-lane once retargeted to dev. Queued in the lane with no flags: TS-u #4958 and TS-7 #5047. Dev is at afef017c, and no slice has merged yet. Open findings: 0. Next: TS-10, TS-11 and TS-12 once TS-9 lands.
