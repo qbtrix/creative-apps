@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-24T05:18:02Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; bisect of batch 20261023215139 done (probe -8 green); new lane/batch-20261024050226 (12 PRs #4839-#4875, none of ours) Linux+macOS running; ours queue for the next batch; dev 654fb363 green
 2026-10-24T05:39:42Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; lane/batch-20261024050226 (none of ours) Linux green, macOS gate running; ours queue for the next batch; dev 654fb363 green
 2026-10-24T06:00:53Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; lane/batch-20261024050226 (none of ours) red on macOS gate, bisecting (probe -6); ours queue for the next batch; dev 654fb363 green
+2026-10-24T06:23:38Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; lane bisect of batch 20261024050226 (none of ours): probe -6 Linux green, macOS running; ours queue for the next batch; dev 654fb363 green
