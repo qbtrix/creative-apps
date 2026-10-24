@@ -107,3 +107,4 @@ utc	stage	event	ref	note
 2026-10-24T10:09Z	W4	check-in	PT-5	no change: #5105, #5112, #5007, #5008 clean, unmerged; TC-3/5/6 open; dev 9f476af74; 0 tone findings; lane stalled: every sweep since ~08:30 reports batch 20261024081307 "probe 0 running" though its runs finished red; reported to supervisor on #5113 at 10:04Z
 2026-10-24T10:31Z	W4	check-in	PT-5	no change: tracked PRs clean, unmerged; dev 9f476af74; 0 tone findings; lane still stalled on batch 20261024081307, no supervisor reply on #5113 yet
 2026-10-24T10:54Z	W4	check-in	PT-5	dev-red #5113 closed (green at 9f476af74, main moved); dev 6883dd335 (#4616 docs only); tracked PRs open, clean, unmerged; 0 tone findings
+2026-10-24T11:15Z	W4	check-in	PT-5	no change for us: dev 6ad8cadba (#4617 docs, #5150 lane lists every open PR); tracked PRs open, unmerged, no labels; no dev-red; 0 tone findings
