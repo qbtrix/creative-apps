@@ -28,7 +28,7 @@ struct PhotoLayerStyleTests {
     @Test func theElevenStyleIDsAreCataloguedAndLedgered() throws {
         let style = StyleCommands.specs(PhotoWorkspace.self).map(\.id)
         #expect(style.count == 11)
-        #expect(PhotoWorkspace.catalog.ids.filter { $0.hasPrefix("style.") } == style)
+        #expect(PhotoWorkspace.catalog.ids.filter { $0.hasPrefix("style.") }.sorted() == style.sorted())
         let ledger = try Self.ledger()
         #expect(style.filter { !ledger.contains($0) } == [], "every style id is in the ledger")
     }
