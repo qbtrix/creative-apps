@@ -38,6 +38,7 @@ has to end up.
 | Design | drag a shape on `crowd`, 120 samples | 3 / 3 / 3 | 4.1 / 6 / 8.3 ms | none in flight; at design-window DW-b's bound |
 | Design | marquee select on `crowd`, 120 samples | 3 / 3 / 3 | 2.7 / 4 / 8.3 ms | none in flight; at DW-b's bound |
 | Library | scroll the grid, 120 steps of 12 pt (`samples`) | 0 / 0 / 0 | 6.6 / 10 / 8.3 ms | none in flight |
+| Library | step the Develop tab's Midtones handle 120 times at 120 Hz (`samples`, first photo in the loupe; `RenderBudgetLibraryLevelsTests`) | 120 / 120 / 0 | 24.7 ms p95, printed, not judged | each step reruns the window body once; a Levels edit should only touch the inspector and the loupe. The histogram is counted once per loupe render off the main thread (`LibraryHistogramBudgetTests`) |
 | Library | select, 10 clicks on grid cells | 10 / 10 / 10 | 80 / 120 / 33 ms | none in flight |
 | Library | loupe step | not driven | not driven | the loupe's arrow keys need a key window, which a test process can't have |
 | Flare | step the easing X1 scrub row 60 times | 60 / 60 / 60 | 11–13 ms p95 release, 12 ms debug / 20 / 8.3 ms | #1471 removed the per-step ticks; measured on the finisher's Mac (busy, not quiet), over the 8.3 ms target and under the 20 ms report bound |
