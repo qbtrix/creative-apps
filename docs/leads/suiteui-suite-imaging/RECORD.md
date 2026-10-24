@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: 17:03Z poll: batch 20261024160327 landed on dev at 17:03Z (70fcce5dc) without ours. #4886, #5148, #5151 and #5153 (fast-lane) are next in line; #5154 and #5163 wait on their parents, and #5178 waits on the supervisor. Full dev CI 40111414009 is running on 33cd6e97c, which does not contain our PRs. #3723 is open, and IM-8b q 6383016723 is unanswered.
+Next: 17:23Z poll: no merges; all 7 open, none needs-fix/needs-rebase. Lane batch 20261024172211 (12 PRs, #4882..#5134) excludes ours; ours queue for the next batch. #3723 open (IM-8d/IM-12 blocked); supervisor q 6383016723 unanswered. Poll again ~17:41Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
 
