@@ -111,3 +111,4 @@ utc	stage	event	ref	note
 2026-10-24T10:49Z	check	editor-menus	10:48Z: dev-red #5113 closed 10:38Z (main at 9f476af7); waiting for lane's next batch	https://github.com/qbtrix/creative-apps/actions/runs/40081823899
 2026-10-24T11:12Z	check	editor-menus	11:15Z batch 20261024110214 excludes #4817/#4988; reported limit-100 cause on #3774	https://github.com/qbtrix/creative-apps/issues/3774#issuecomment-6383506030
 2026-10-24T12:54:28Z	check	EM-flare-halo	mirror resynced from lead/editor-menus (run act-1a16db4d43e-gerb)
+2026-10-24T13:18:58Z	check	EM-flare-halo	no change; lane stalled since 12:11Z
