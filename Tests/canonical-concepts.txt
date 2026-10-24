@@ -29,6 +29,7 @@ Placed image: PlacedImage PlacedAsset ImageLayer PlaceImage
 Tone settings: AdjustmentSettings DevelopSettings DevelopValues DevelopLevels ToneCurve HueSaturation LiveTone LiveDevelop GammaTrack LevelsFormat
 Tone: ToneSettings ToneSlider
 Render route: RenderRoute Rasterizer Rasterizing TileUpdate CompositeCache
+Vector rasterizer: VectorRasterizer VectorDrawList VectorDrawItem
 Recovery: Recovery CatalogStore RecoveryFile
 Image codec: Codec ImageIODecoder JPEGWriter PNGWriter FramePNG
 Playback: Playback PlaybackClock PlaybackTicks
