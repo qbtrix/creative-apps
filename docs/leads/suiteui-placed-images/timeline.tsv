@@ -156,3 +156,4 @@ utc	stage	event	ref	note
 00:53Z	pl9-push	6bb70f89f pushed, Head moved
 2026-10-24T07:53:24Z	wait	check	PL-8/PL-9 merged; #4616/#4617 rebuilt on dev, clean, waiting for the lane
 2026-10-24T08:08:29Z	wait	question	no lane run on #4616/#4617 after 45 min; supervisor asked on #3457
+2026-10-24T08:36:00Z	wait	check	#4616/#4617 still no lane run; no supervisor reply yet on #3457
