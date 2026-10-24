@@ -147,3 +147,4 @@ time	kind	note
 2026-10-24T07:12Z	-	heartbeat	-	probe -1 macOS 40070370339 running; #3759 kept current with dev by the supervisor (4f3e1ba3); #4864 waits, no needs-fix; findings 32
 2026-10-24T07:22Z	3	stage-start	-	run act-1a16cc9673d-cmzv resumed; #4864 #4888 #4916 #5002 clean on fast-lane, #3759 supervisor; scoped design run 40072347300 on dev 830af22d running
 2026-10-24T07:26Z	3	heartbeat	-	closed #4931 dup of gap #4990; slice PRs waiting on lane
+2026-10-24T07:48Z	3	heartbeat	-	scoped design 40072347300 green on dev 830af22d (no lead slice in it yet); all slice PRs clean, none needs-fix; lane batch 20261024050226 bisecting
