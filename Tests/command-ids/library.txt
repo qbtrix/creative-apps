@@ -55,3 +55,4 @@ photo.reset-tint
 photo.reset-vibrance
 photo.reset-saturation
 file.share-prepare
+photo.delete-rejects

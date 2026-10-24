@@ -6,6 +6,8 @@
 // `keywords`, `title`, `caption` and `camera` (metadata-more MD-12) are
 // written only when set, `camera` with only the details it has, so a catalog
 // without them stays byte-equal; a missing key decodes as empty.
+// `excludedPaths` (cull-finish DR-7) lists, sorted, the files Delete Rejects
+// trashed so a re-import skips them; it is left out when empty.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -20,9 +22,15 @@ public struct LiveCatalogCoding: CatalogCoding {
     public init() {}
 
     public func encode(_ photos: [PhotoItem]) throws -> Data {
+        try encode(photos, excludedPaths: [])
+    }
+
+    /// The catalog file with the paths a re-import skips.
+    public func encode(_ photos: [PhotoItem], excludedPaths: Set<String>) throws -> Data {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys, .prettyPrinted, .withoutEscapingSlashes]
-        let file = FileV1(version: Self.version, photos: photos.map(Record.init))
+        let file = FileV1(version: Self.version, photos: photos.map(Record.init),
+                          excludedPaths: excludedPaths.isEmpty ? nil : excludedPaths.sorted())
         do {
             return try encoder.encode(file) + Data("\n".utf8)
         } catch {
@@ -31,17 +39,23 @@ public struct LiveCatalogCoding: CatalogCoding {
     }
 
     public func decode(_ data: Data) throws -> [PhotoItem] {
+        try decodeFile(data).photos
+    }
+
+    /// The photos and the paths a re-import skips (empty when the file has none).
+    public func decodeFile(_ data: Data) throws -> (photos: [PhotoItem], excludedPaths: Set<String>) {
         let decoder = JSONDecoder()
         let version = try Self.probeVersion(data)
         guard version == Self.version, let file = try? decoder.decode(FileV1.self, from: data) else {
             throw LibraryError.damagedCatalog("")
         }
-        return try file.photos.map { try $0.photo() }
+        return (try file.photos.map { try $0.photo() }, Set(file.excludedPaths ?? []))
     }
 
     struct FileV1: Codable {
         var version: Int
         var photos: [Record]
+        var excludedPaths: [String]?
     }
 
     /// One photo as stored; `availability` is never stored (it is checked at launch).
