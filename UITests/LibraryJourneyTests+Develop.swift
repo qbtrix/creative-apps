@@ -356,10 +356,8 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         return value.isEmpty ? element.label : value
     }
 
-    /// The first number an element reads: a slider row's own number (a ScrubField bar reads through its Slider
-    /// representation), else the first in its text ("+0.50 EV" is 0.5); nil reads as NaN.
+    /// The first number an element reads ("+0.50 EV" is 0.5); nil reads as NaN.
     @MainActor private static func number(_ element: XCUIElement) -> Double {
-        if let number = element.value as? NSNumber { return number.doubleValue }
         let words = text(element).split(whereSeparator: { !"+-.0123456789".contains($0) })
         return words.lazy.compactMap { Double($0) }.first ?? .nan
     }
