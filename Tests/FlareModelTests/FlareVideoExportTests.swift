@@ -119,16 +119,18 @@ struct FlareVideoExportTests {
         #expect(other as? SuiteError == .notAvailable("No encoder.") && FlareWorkspace.exportMessage(other) == "No encoder.")
     }
 
-    /// #5017: the live exporter can't draw MP4 or GIF yet, so Export is refused with a reason instead of writing
-    /// blank frames; SVG, Lottie and PNG still start.
+    /// #5017: an exporter that can't write MP4 or GIF refuses Export with its reason instead of writing blank frames,
+    /// while SVG, Lottie and PNG still start. The live one draws real frames (StageRasterizer's `frame`), so it has none.
     @Test(arguments: [ExportFormat.mp4, .gif])
-    func theLiveExporterRefusesVideoWithAReason(format: ExportFormat) throws {
+    func anExporterWithoutVideoRefusesItWithItsReason(format: ExportFormat) throws {
+        #expect(LiveExportAdapter(stage: FakeStage()).videoUnbuiltReason == nil)
         var document = FlareFixtures.bounce
         document.scenes[0].fps = 30; document.scenes[0].durationFrames = 60
-        var w = FlareWorkspace(services: .built); w.load(document); _ = w.openExport()
+        var services = FlareServices.fake(); services.export = NoVideoExport()
+        var w = FlareWorkspace(services: services); w.load(document); _ = w.openExport()
         #expect(w.exportProblem == nil)
         w.setExportFormat(format)
-        #expect(w.exportProblem == "MP4 and GIF can't be drawn yet." && w.exportFileCount == 0)
+        #expect(w.exportProblem == NoVideoExport.reason && w.exportFileCount == 0)
         let started = w.startExport()
         #expect(!started)
     }
@@ -273,4 +275,22 @@ extension Tag {
     @Tag static var everyFrame: Self
     @Tag static var gifKeepsAlpha: Self
     @Tag static var mp4IsEven: Self
+}
+
+/// FakeExport, but it can't write MP4 or GIF.
+private struct NoVideoExport: Exporting {
+    static let reason = "This exporter can't write video."
+    let base = FakeExport(frameDelay: .zero)
+    var videoUnbuiltReason: String? { Self.reason }
+    func warnings(_ document: Document, options: ExportOptions) -> [String] { base.warnings(document, options: options) }
+    func export(_ document: Document, options: ExportOptions, rasterizer: any FrameRasterizing,
+                progress: @Sendable (Double) -> Void) async throws -> ExportResult {
+        try await base.export(document, options: options, rasterizer: rasterizer, progress: progress)
+    }
+    func writeVideo(_ document: Document, sceneID: String, plan: FlareVideoPlan, to path: String,
+                    media: any MediaEncoding, rasterizer: any FrameRasterizing,
+                    progress: @Sendable (Double) -> Void) async throws -> String {
+        try await base.writeVideo(document, sceneID: sceneID, plan: plan, to: path, media: media,
+                                  rasterizer: rasterizer, progress: progress)
+    }
 }

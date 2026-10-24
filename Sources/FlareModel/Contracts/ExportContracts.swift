@@ -49,7 +49,7 @@ public protocol FrameRasterizing: Sendable {
 }
 
 extension FrameRasterizing {
-    /// Until a rasterizer draws movie frames itself (StageRasterizer's is export-pack's FV-7).
+    /// For a rasterizer that draws no movie frames (StageRasterizer draws them since export-pack's FV-7).
     public func frame(_: StageDrawList, width _: Int, height _: Int, transparent _: Bool) throws -> MediaFrame {
         throw NotBuilt(reason: "This rasterizer can't draw movie frames yet.")
     }
@@ -73,10 +73,4 @@ public protocol Exporting: Sendable {
 
 extension Exporting {
     public var videoUnbuiltReason: String? { nil }
-}
-
-extension LiveExportAdapter {
-    /// The live app has no frame rasterizer yet (StageRasterizer's `frame` is export-pack's FV-7, which drops this),
-    /// so MP4 and GIF stay refused there with the reason instead of failing after the folder pick.
-    public var videoUnbuiltReason: String? { "MP4 and GIF can't be drawn yet." }
 }

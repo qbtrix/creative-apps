@@ -49,7 +49,7 @@
     "tests": "FlareVideoExportTests"
   },
   {
-    "label": "the live exporter's MP4 and GIF are not refused",
+    "label": "an exporter without video doesn't refuse MP4 and GIF",
     "file": "Sources/FlareModel/FlareExport.swift",
     "find": "        if o.format.writesVideo, let reason = services.export.videoUnbuiltReason { return reason }\n",
     "replace": "",
