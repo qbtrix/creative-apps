@@ -99,3 +99,4 @@
 2026-10-24T06:47Z	heartbeat	PRs still on lane; batch 20261024050226 still bisecting (probe -1), none of ours
 2026-10-24T07:05Z	heartbeat	PRs still on lane, none merged; dev at 830af22d
 2026-10-24T07:25Z	resume	act-1a16cc967d9-mcuv; #4838 and #4899 on lane, clean, no needs-fix
+2026-10-24T07:48Z	heartbeat	#4838, #4899 clean on lane, not merged; excludedPaths wiring builder running
