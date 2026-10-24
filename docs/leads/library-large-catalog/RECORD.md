@@ -40,6 +40,7 @@ Next: watch #5042 #5050 #5054 to merge and the supervisor's perf-suites answer (
 - LG-6 scope: neighbour prefetch already exists but runs beside the render, unbounded per step; LG-6 queues the neighbours behind the render in RenderQueue and drops a superseded step's pending decodes, so stale prefetches never evict the focus's decodes.
 
 ## Open
+- 07:45Z: poll: #5042 #5050 #5054 open (fast-lane, no needs-fix/rebase); #3790 no supervisor answer yet; no open dev-red; lane merged #4132 at 07:43Z
 - 2026-10-24T07:25Z: poll: #5042 #5050 #5054 still queued, no labels changed; no dev merges since 06:58Z (a batch in its gate); no dev-red; no supervisor answer yet.
 - 2026-10-24T07:08Z: poll: #5042 #5050 #5054 still queued (lane landing older PRs, #4906..#4987 merged 06:58Z); no dev-red; no supervisor answer on perf-suites yet.
 - 2026-10-24T06:49Z: poll: #5042 #5050 #5054 open, no needs-fix/needs-rebase, no open dev-red; supervisor has not answered the perf-suites line yet. Lane flagged AI attribution footers: removed from the three PR bodies and the #3790 question.
