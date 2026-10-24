@@ -10,6 +10,7 @@ import Observation
 import SuiteKernel
 import SuiteModel
 import Synchronization
+import SwiftUI
 
 /// Why the channel couldn't listen.
 public struct LiveChannelError: Error, CustomStringConvertible, Sendable { public let description: String }
@@ -105,12 +106,13 @@ public final class LiveCommandChannel {
                 latest.record(decision, client: client, app: app)
                 try? await latest.save(to: grants)
             }
-            guard decision != .deny, ContinuousClock.now - asked < .seconds(110) else {
+            let waited = ContinuousClock.now - asked
+            guard AIAccessGrants.answeredInTime(decision: decision, waited: waited) else {
                 audit("refused")
                 return Self.failure(id, -32010, "\(title) has no answer for \(client) yet")
             }
             // Only an allow once in time holds the connection; a late one (AIAccessCenter.ask with no sheet) doesn't.
-            if decision == .allowOnce, kind != .file { allowedOnce[connection] = client }
+            if AIAccessGrants.holdsConnection(decision: decision, kind: kind.rawValue, waited: waited) { allowedOnce[connection] = client }
         }
         (drivers[connection], connectedClient) = (client, client)
         let (outcome, reply): (String, [UInt8]) = switch perform(command, params) {
@@ -263,4 +265,30 @@ final class Reply: Sendable {
     let done = DispatchSemaphore(value: 0), value = Mutex<[UInt8]>([])
     func set(_ bytes: [UInt8]) { value.withLock { $0 = bytes }; done.signal() }
     func wait() -> [UInt8] { done.wait(); return value.withLock { $0 } }
+}
+
+extension View {
+    /// Makes this window the one `front`'s live channel reaches whenever it becomes the active window, and lets
+    /// go when it closes; `read` is its document now and `write` lands a command's result in it.
+    public func suiteLiveWindow<Document>(_ front: LiveFront<Document>, read: @escaping @MainActor () -> Document?,
+                                          write: @escaping @MainActor (Document) -> Void) -> some View {
+        modifier(LiveWindowRegistration(front: front, read: read, write: write))
+    }
+}
+
+/// Registers its window with a LiveFront on appear and whenever it becomes active; releases it on close.
+struct LiveWindowRegistration<Document>: ViewModifier {
+    let front: LiveFront<Document>
+    let read: @MainActor () -> Document?
+    let write: @MainActor (Document) -> Void
+    @State private var id = UUID()
+    @Environment(\.appearsActive) private var appearsActive
+
+    func body(content: Content) -> some View {
+        content
+            .onChange(of: appearsActive, initial: true) { _, active in
+                if active { front.register(id, read: read, write: write) }
+            }
+            .onDisappear { front.release(id) }
+    }
 }
