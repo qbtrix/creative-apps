@@ -26,6 +26,8 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 2026-10-24T14:55Z: hb19: dev still e79e9afc (last batch 14:20Z took #5087, the PR before #5088). #5088/#5089/#5091 open with fast-lane, no needs-* label. #3721 Question still unanswered (13 comments). UP-z still waits on the app slices and SC-z.
+
 - 14:32Z: hb18: the lane is moving again. Between 14:16Z and 14:20Z it merged #5087, #5097, #5138 and #5046. #5087 was opened just before #5088, so UP-photo should go in a coming batch. #5088, #5089 and #5091 are still open and labelled only fast-lane. #3721 has had no new comment since 08:58Z. UP-z is still waiting.
 
 - 14:11Z: hb17: no change. #5088, #5089 and #5091 are open and labelled only fast-lane. dev's head is still 6be19b34 (12:34Z); the lane has merged nothing for anyone in about 95 minutes. #3721 has had no new comment since 08:58Z. UP-z is still waiting.
