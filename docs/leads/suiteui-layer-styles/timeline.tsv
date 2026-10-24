@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-24T18:26Z	3	check	lane	18:26Z batch-172211 resolved, no batch in flight; ours next. #4904 dirty again after dev moved (lane integrates; fixer only on needs-rebase). others clean/recomputing. findings 0.
 2026-10-24T18:49Z	3	check	lane	18:49Z #5174 #5176 clean, queued behind batch-20261024183708. findings 0.
 2026-10-24T19:12Z	3	check	#4903,#5174,#5176	19:12Z: #4903 #5174 #5176 clean, waiting for batch; LS-8/9 wait on core bump; 0 findings
+2026-10-24T19:35Z	3	check	#4903,#5174,#5176	19:35Z: all clean, waiting for batch; 0 findings
