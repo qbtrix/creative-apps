@@ -9,10 +9,11 @@
 // the crop still pending (the image still 800 x 600); the overlay's pill
 // (`photo.canvas.crop.aspect`) reads 1:1. 3:2 then Swap reads 2:3 with H > W;
 // Free drops the pill. A drag from image pixel (10, 10) to (210, 110) gives
-// W 200, H 100 within a pixel at Fit (a point's worth when a point is more).
-// It is aimed from the pending crop's mark (`photo.canvas.crop`), whose frame
-// over the crop the fields show gives the image's place and zoom on screen:
-// `suite.canvas` is the scroll area around the image, not the image (#566).
+// W 200, H 100 and X, Y 10 within a pixel at Fit (a point's worth when a
+// point is more). It is aimed from `suite.canvas`, the image's own frame at
+// the zoom, over the image's 800 x 600 pixels, read again before each drag.
+// The small crop mark's whole-point frame gave a zoom 1% off, 4 px at x 600
+// (#2591).
 // X 700 and Return reads X 800 - W (600) clamped. Return on the canvas then
 // applies it: the image becomes W x H and Edit shows Undo Crop. A click on
 // the canvas would start a new crop (a click is a drag that doesn't move), so
@@ -106,6 +107,8 @@ final class PhotoCropJourneyTests: XCTestCase {
         expectCropPending(photo, "the drag")
         expectField("photo.crop.width", around: 200, within: slack, photo)
         expectField("photo.crop.height", around: 100, within: slack, photo)
+        expectField("photo.crop.x", around: 10, within: slack, photo)
+        expectField("photo.crop.y", around: 10, within: slack, photo)
         XCTAssertFalse(pill.exists, "a Free drag shows an aspect pill")
         let dragged = number(in: "photo.crop.width", photo)
         photo.shot("crop-typed-dragged")
@@ -119,7 +122,7 @@ final class PhotoCropJourneyTests: XCTestCase {
         // 8. Keys back to the canvas by a drag over the same crop, then Return applies it.
         let x = number(in: "photo.crop.x", photo), y = number(in: "photo.crop.y", photo)
         let h = number(in: "photo.crop.height", photo)
-        drag(from: CGPoint(x: x, y: y), to: CGPoint(x: 805, y: y + h), on: image, photo)
+        drag(from: CGPoint(x: x, y: y), to: CGPoint(x: 805, y: y + h), on: imageOnScreen(photo), photo)
         expectCropPending(photo, "the drag back to the canvas")
         expectField("photo.crop.x", around: x, within: slack, photo)
         let finalW = number(in: "photo.crop.width", photo), finalH = number(in: "photo.crop.height", photo)
@@ -161,9 +164,11 @@ final class PhotoCropJourneyTests: XCTestCase {
         XCTAssert(pill.waitForExistence(timeout: 5), "the aspect pill doesn't read \(text) (it reads \(shown.exists ? shown.label : "nothing"))")
     }
 
-    /// A label or value holding `text`, as the status bar's "800 × 600 px".
+    /// A label or value in the status bar holding `text`, as "800 × 600 px". The
+    /// search stays in the bar: one over the whole app reads every element's
+    /// value and timed out evaluating the query (#2591).
     @MainActor private func expectText(_ text: String, _ photo: Journey, _ message: String) {
-        let match = photo.app.descendants(matching: .any)
+        let match = photo.element("suite.status").descendants(matching: .any)
             .matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", text, text)).firstMatch
         XCTAssert(match.waitForExistence(timeout: 5), message)
     }
@@ -231,15 +236,12 @@ final class PhotoCropJourneyTests: XCTestCase {
         at(start).press(forDuration: 0.1, thenDragTo: at(end))
     }
 
-    /// Where image pixel (0, 0) sits on screen and the points per pixel, read
-    /// from the pending crop's mark, whose frame covers the crop the fields show.
+    /// Where image pixel (0, 0) sits on screen and the points per pixel:
+    /// `suite.canvas` is the image's frame at the zoom, over beach.png's 800 x 600.
     @MainActor private func imageOnScreen(_ photo: Journey) -> (origin: CGPoint, scale: CGFloat) {
-        let mark = photo.element("photo.canvas.crop").frame
-        let (x, y) = (number(in: "photo.crop.x", photo), number(in: "photo.crop.y", photo))
-        let (w, h) = (number(in: "photo.crop.width", photo), number(in: "photo.crop.height", photo))
-        let scale = mark.width / CGFloat(max(w, 1))
-        XCTAssertEqual(
-            mark.height / CGFloat(max(h, 1)), scale, accuracy: 0.01, "the crop mark \(mark) isn't \(w) × \(h) at one zoom")
-        return (CGPoint(x: mark.minX - CGFloat(x) * scale, y: mark.minY - CGFloat(y) * scale), scale)
+        let frame = photo.element("suite.canvas").frame
+        let scale = frame.width / 800
+        XCTAssertEqual(frame.height / 600, scale, accuracy: 0.01, "the canvas \(frame) isn't 800 × 600 at one zoom")
+        return (frame.origin, scale)
     }
 }

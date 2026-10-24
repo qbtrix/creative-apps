@@ -68,13 +68,13 @@ final class PhotoTransformJourneyTests: XCTestCase {
         photo.press(.return)
         XCTAssert(box.waitForNonExistence(timeout: 5), "Return left the transform box up")
         XCTAssert(photo.app.buttons["Undo Free Transform"].waitForExistence(timeout: 5), "Return made no Free Transform step")
-        XCTAssert(text(line, photo).waitForNonExistence(timeout: 5), "the commit left the layer at \(line)")
+        XCTAssert(text(line, in: inspector(photo)).waitForNonExistence(timeout: 5), "the commit left the layer at \(line)")
         photo.shot("transform-4-committed")
 
         // 5. Command-Z: the layer is back where it was, the draft up again; Escape drops it.
         photo.press(character: "z", .command)
         XCTAssert(photo.app.buttons["Redo Free Transform"].waitForExistence(timeout: 5), "Command-Z didn't undo the transform")
-        XCTAssert(text(line, photo).waitForExistence(timeout: 5), "Command-Z didn't put the layer back at \(line)")
+        XCTAssert(text(line, in: inspector(photo)).waitForExistence(timeout: 5), "Command-Z didn't put the layer back at \(line)")
         photo.shot("transform-5-undone")
         photo.element("suite.canvas").click()
         photo.press(.escape)
@@ -83,14 +83,14 @@ final class PhotoTransformJourneyTests: XCTestCase {
         // 6. Edit > Transform > Flip Horizontal: one Flip Horizontal step, the layer in place.
         choose(["Edit", "Transform", "Flip Horizontal"], photo)
         XCTAssert(photo.app.buttons["Undo Flip Horizontal"].waitForExistence(timeout: 5), "the flip made no step")
-        XCTAssert(text(line, photo).waitForExistence(timeout: 5), "the flip moved the layer off \(line)")
+        XCTAssert(text(line, in: inspector(photo)).waitForExistence(timeout: 5), "the flip moved the layer off \(line)")
         photo.shot("transform-6-flipped")
     }
 
     /// MJ-PT step 6: Image > Canvas Size…, the crop note, +400 about the centre, OK, Undo.
     @MainActor func testCanvasSizeBorder() throws {
         let photo = try openBeach()
-        XCTAssert(text("800 × 600 px", photo).waitForExistence(timeout: 5), "beach.png isn't 800 × 600 px")
+        XCTAssert(text("800 × 600 px", in: status(photo)).waitForExistence(timeout: 5), "beach.png isn't 800 × 600 px")
 
         // 1. Width -200: the sheet warns the canvas will be cropped.
         choose(["Image", "Canvas Size…"], photo)
@@ -106,7 +106,7 @@ final class PhotoTransformJourneyTests: XCTestCase {
         typeSize("400", into: "photo.canvas-size.width", photo)
         typeSize("400", into: "photo.canvas-size.height", photo)
         XCTAssert(note.waitForNonExistence(timeout: 5), "the crop note stayed while the canvas only grows")
-        XCTAssert(text("New size 1200 × 1000 px", photo).waitForExistence(timeout: 5), "the sheet doesn't read 1200 × 1000")
+        XCTAssert(text("New size 1200 × 1000 px", in: photo.app.sheets.firstMatch).waitForExistence(timeout: 5), "the sheet doesn't read 1200 × 1000")
         XCTAssert(photo.element("photo.canvas-size.anchor.center").exists, "the sheet has no centre anchor")
         photo.shot("transform-canvas-sheet")
 
@@ -114,13 +114,13 @@ final class PhotoTransformJourneyTests: XCTestCase {
         ok.click()
         XCTAssert(ok.waitForNonExistence(timeout: 5), "OK left the Canvas Size sheet up")
         XCTAssert(photo.app.buttons["Undo Canvas Size"].waitForExistence(timeout: 5), "OK made no Canvas Size step")
-        XCTAssert(text("1200 × 1000 px", photo).waitForExistence(timeout: 5), "the image isn't 1200 × 1000 px")
+        XCTAssert(text("1200 × 1000 px", in: status(photo)).waitForExistence(timeout: 5), "the image isn't 1200 × 1000 px")
         photo.shot("transform-canvas-border")
 
         // 4. Command-Z: 800 x 600 again.
         photo.element("suite.canvas").click()
         photo.press(character: "z", .command)
-        XCTAssert(text("800 × 600 px", photo).waitForExistence(timeout: 5), "Command-Z didn't give back 800 × 600 px")
+        XCTAssert(text("800 × 600 px", in: status(photo)).waitForExistence(timeout: 5), "Command-Z didn't give back 800 × 600 px")
         photo.shot("transform-canvas-undone")
     }
 
@@ -138,15 +138,23 @@ final class PhotoTransformJourneyTests: XCTestCase {
         return photo
     }
 
-    /// The first element whose label or value holds `string`.
-    @MainActor private func text(_ string: String, _ photo: Journey) -> XCUIElement {
-        photo.app.descendants(matching: .any)
+    /// The first element under `root` whose label or value holds `string`. The search stays in one part of
+    /// the window: one over the whole app reads every element's value and timed out evaluating the query
+    /// (#4262, #4263), as the crop journey's did (#2591).
+    @MainActor private func text(_ string: String, in root: XCUIElement) -> XCUIElement {
+        root.descendants(matching: .any)
             .matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", string, string)).firstMatch
     }
 
+    /// The inspector, whose header reads the selected layer's line.
+    @MainActor private func inspector(_ photo: Journey) -> XCUIElement { photo.element("suite.inspector") }
+
+    /// The status bar, which reads the image's size.
+    @MainActor private func status(_ photo: Journey) -> XCUIElement { photo.element("suite.status") }
+
     /// The header's selected-layer line, "Pasted Layer W × H px at X, Y"; empty when none shows.
     @MainActor private func layerLine(_ photo: Journey) -> String {
-        let header = text(" px at ", photo)
+        let header = text(" px at ", in: inspector(photo))
         guard header.waitForExistence(timeout: 5) else { return "" }
         let said = [header.label, header.value as? String ?? ""].joined(separator: "\n")
         let lines = said.split(whereSeparator: \.isNewline).map(String.init)

@@ -15,6 +15,8 @@ import ImageIO
 import XCTest
 
 final class PhotoDocumentsJourneyTests: XCTestCase {
+    /// The identifier of the Open Recent item last clicked, for a failed reopen's message.
+    private var clickedRecent = ""
     /// PJ-1: save a layered PNG as a Photo Document, close it, reopen it from Open Recent.
     @MainActor func testSaveLayeredDocumentAndReopen() throws {
         let (folder, beach) = try beachFolder("pj1")
@@ -29,7 +31,8 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         chooseBlend("Multiply", photo)
         typeValue("50", into: "photo.layer.opacity", photo)
         expectRow("Layer 1", meta: "Multiply 50%", photo)
-        expectStatus("Edited", photo)
+        // The autosave, 5 s after the last edit, may already read "Edited, autosaved": still edited.
+        expectStatus("Edited", photo, prefix: true)
         let edited = steadyCanvas(photo)
         photo.shot("documents-1-edited")
 
@@ -65,7 +68,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         quit(photo)
         photo = launch(photoArguments(saveTo: folder), window: nil)
         openRecent("beach.ora", photo)
-        XCTAssert(photo.window(named: "beach.ora").waitForExistence(timeout: 30), "Open Recent didn't reopen beach.ora")
+        expectReopened("beach.ora", photo)
         openLayers(photo)
         let header = photo.app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS '2 layers'"))
         XCTAssert(header.firstMatch.waitForExistence(timeout: 10), "the image header doesn't count 2 layers")
@@ -128,8 +131,9 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
             ("NotZip.ora", Data("not a zip".utf8), "It isn't a Photo Document or an image Photo can open."),
             ("Newer.ora", edited(#""format":1,"#, #""format":2,"#), "It was saved by a newer version of Photo. Update Photo to open it."),
             ("Missing.ora", Self.storedZip(entries.filter { $0.name != "data/layer-2.png" }), "It is damaged and can't be read."),
-            ("Large.ora", edited(#""canvas":{"height":600,"width":800}"#, #""canvas":{"height":4000,"width":5000}"#),
-             "It is larger than Photo can open: up to 16 megapixels."),
+            // 48 MP, past PhotoWorkspace.maxOpenPixels (40 MP since #2969).
+            ("Large.ora", edited(#""canvas":{"height":600,"width":800}"#, #""canvas":{"height":6000,"width":8000}"#),
+             "It is larger than Photo can open: up to 40 megapixels."),
         ]
         for (index, item) in cases.enumerated() {
             let url = folder.appending(path: item.file)
@@ -152,7 +156,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         let original = try Data(contentsOf: beach)
         var photo = launch(photoArguments(open: beach), window: "beach.png")
         paint(photo)
-        expectStatus("Edited", photo)
+        expectStatus("Edited", photo, prefix: true)
         photo.shot("documents-2-painted")
 
         // 2. Command-W asks; Cancel keeps the window, still Edited.
@@ -172,7 +176,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         quit(photo)
         photo = launch(photoArguments(), window: nil)
         openRecent("beach.png", photo)
-        XCTAssert(photo.window(named: "beach.png").waitForExistence(timeout: 30), "Open Recent didn't reopen beach.png")
+        expectReopened("beach.png", photo)
         expectStatus("Saved", photo)
         let undo = photo.app.buttons["photo.bar.undo"]
         XCTAssert(undo.waitForExistence(timeout: 5) && !undo.isEnabled, "the reopened beach.png kept the stroke's undo")
@@ -305,7 +309,20 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
     @MainActor private func openRecent(_ name: String, _ photo: Journey) {
         let first = recentMenu(photo).children(matching: .menuItem).firstMatch
         XCTAssertEqual(first.title, name, "Open Recent's first entry")
+        // suite.file.recent.<id> is the suite's menu (SuiteFileCommands); anything else is another menu's item.
+        clickedRecent = first.identifier
         first.click()
+    }
+
+    /// Waits for the window Open Recent opens on `name`; a failure lists the windows, alert texts and status
+    /// line the app shows instead, since the reopen has failed on CI with no other trace (#4332, #2592).
+    @MainActor private func expectReopened(_ name: String, _ photo: Journey) {
+        guard !photo.window(named: name).waitForExistence(timeout: 30) else { return }
+        let windows = photo.app.windows.allElementsBoundByIndex.map { $0.title.isEmpty ? $0.identifier : $0.title }
+        let alerts = (photo.app.sheets.allElementsBoundByIndex + photo.app.dialogs.allElementsBoundByIndex)
+            .flatMap { $0.staticTexts.allElementsBoundByIndex.map(\.label) }
+        let status = photo.element("photo.status.message")
+        XCTFail("Open Recent didn't reopen \(name) (clicked item \(clickedRecent)): windows \(windows), alerts \(alerts), status \(status.exists ? status.label : "none")")
     }
 
     /// A system alert: the window's sheet, or a dialog.
