@@ -3,16 +3,18 @@
 Issue: #3936 · Packet: docs/blueprints/halo/features/layer-styles.md
 Run: act-1a16c627cc6-nlss · Session: claude/layer-styles-lead-vx2vrg · Started: 2026-10-24 (resumed; earlier run act-1a1648ae75a-4dqz)
 Wire: suiteui layer-styles:LS-a
-Stage: wave 3 (HY-u built and pushed at 60549a3ba on lead/halo-layer-styles-HY-u: HY-3 + HY-4; Linux gate CI: PASS at 60549a3ba; PRs open in stack order HY-1 (after #4911), HY-2 (after LS-2), HY-m, HY-u)
+Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTests.glowReachesItsKeyedSize and glowIsNotClipped; add the no-padding mutation, origin dropped in LiveFrameRendering's styled composite)
+Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
+Stage: wave 3 (HY-6 built at 073ed78a9 on lead/halo-layer-styles-HY-m, ahead of LS-8 on the StyleProgram stub; Mutate 10/10 HaloModel.LiveFrameRendering; gate CI running. HY-u pushed at 60549a3ba, gate PASS. PRs open in stack order HY-1 (after #4911), HY-2 (after LS-2), HY-m, HY-u)
 Base: a41e7f1 (origin/dev)
-Next: open the HY-a PR (HY-1, e52c9ca) once #4911 is on dev, then the HY-m PR's first half (HY-5, 3290e96) once HY-a lands; HY-6 next (needs LS-8's `StyleProgram.render`); HY-2 waits on LS-2 (SuiteUI `LayerStylePanel` placeholder, no PR yet)
+Next: open the HY-a PR (HY-1, e52c9ca) once #4911 is on dev, then the HY-m PR (HY-5 + HY-6) once HY-a lands, then HY-u; HY-2 waits on LS-2; HY-7 can be built ahead on the StyleRoute stub
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | HY-a | `HaloLayer.style`, five style properties, `style.*` in the catalog on stubs, Layer > Layer Style… opens the panel | HY-1, HY-2 | MJ-HY | suiteui LS-a (#4911 open; stacked on it) | yes | 0 | building | – | – |
 | HY-u | inspector style rows with stopwatches, snapshots, render budget, journey written | HY-3, HY-4 | HJ-Y1 | HY-a | yes | 0 | waiting | – | – |
-| HY-m | style commands one undo step, five properties key and ease, frame renderer draws keyed styles | HY-5, HY-6 | MJ-HY | HY-a; LS-m | no | 0 | building | – | – |
+| HY-m | style commands one undo step, five properties key and ease, frame renderer draws keyed styles | HY-5, HY-6 | MJ-HY | HY-a; LS-m | no | 0 | built, gate running | – | – |
 | HY-z | viewer draws through the live route, journey on live, halo.md built | HY-7, HY-8 | HJ-Y1 | HY-u, HY-m; LS-gpu (HY-7); file-flow:HF-z (HY-8) | yes | 0 | waiting | – | – |
 
 ## Tasks
@@ -22,7 +24,7 @@ Next: open the HY-a PR (HY-1, e52c9ca) once #4911 is on dev, then the HY-m PR's 
 | HY-2 | HY-a | 2 | Layer menu items by id; panel sheet while `stylePanel` is set | Sources/HaloApp/HaloCommands.swift, Sources/HaloApp/HaloWindow+Styling.swift, Sources/HaloApp/HaloWindow.swift | HaloLayerStyleSnapshots.panel, `Mutate: 5/5 HaloModel.HaloStyleMenu` | – | built, gate PASS on lead/halo-layer-styles-HY-a (786456f, +302 over HY-1); PR waits on LS-2 on dev |
 | HY-5 | HY-m | 2 | adapter bodies; tests on | Sources/HaloModel/HaloStyle+Kernel.swift, Tests/HaloModelTests/HaloLayerStyleTests.swift, Tests/mutations/HaloModel.HaloStyle+Kernel.json | HaloLayerStyleTests (10 on), `Mutate: 4/4 HaloModel.HaloStyle+Kernel` | – | built, gate PASS on lead/halo-layer-styles-HY-m (3290e96, +80/-16, 4 files over HY-1); stacked on HY-a |
 | HY-3 | HY-u | 3 | inspector style rows with stopwatches | Sources/HaloApp/HaloLayerInspector.swift, Tests/AppSnapshotTests/HaloLayerStyleSnapshots.swift | HaloLayerStyleSnapshots.styleRows | – | built on lead/halo-layer-styles-HY-u (HY-m merged with HY-a); pushed (a5bf6960e); gate CI: PASS |
-| HY-6 | HY-m | 3 | frame renderer draws keyed styles; RJ-H43 job | Sources/HaloModel/Live/LiveFrameRendering.swift, Tests/HaloModelTests/HaloStyleRenderTests.swift, Tests/mutations/HaloModel.LiveFrameRendering.json, Tests/RealJobs/halo/keyed-glow/ | HaloStyleRenderTests | – | waiting (HY-5) |
+| HY-6 | HY-m | 3 | frame renderer draws keyed styles; RJ-H43 job | Sources/HaloModel/Live/LiveFrameRendering.swift, Tests/HaloModelTests/HaloStyleRenderTests.swift, Tests/mutations/HaloModel.LiveFrameRendering.json, Tests/RealJobs/halo/keyed-glow/ | HaloStyleRenderTests | – | built ahead of LS-8 on lead/halo-layer-styles-HY-m (073ed78a9; HY-m is +229/-24, 9 files over HY-a); 4 tests on, 2 pixel tests disabled until LS-8; `Mutate: 10/10 HaloModel.LiveFrameRendering`; RJ-H43 job deferred |
 | HY-4 | HY-u | 4 | render budget; journey written, skipped | Tests/AppSnapshotTests/RenderBudgetHaloLayerStyleTests.swift, UITests/HaloJourneyTests+LayerStyle.swift | RenderBudgetHaloLayerStyleTests | – | pushed (60549a3ba), gate CI: PASS; macOS only, journey skipped until HY-7 |
 | HY-7 | HY-z | 5 | viewer live frame via `StyleRoute`; journey on | Sources/HaloApp/HaloViewerCanvas.swift, UITests/HaloJourneyTests+LayerStyle.swift | HaloLayerStyleJourneyTests.testKeyedGlow | – | waiting (HY-4, HY-6, LS-gpu) |
 | HY-8 | HY-z | 6 | halo.md row; `status: built`; `feature-done` | docs/blueprints/halo.md, docs/blueprints/halo/features/layer-styles.wave.json | scripts/waves render --dry-run | – | waiting (HY-7, HF-z) |
