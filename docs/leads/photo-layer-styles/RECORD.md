@@ -2,9 +2,9 @@
 
 Issue: #3793 · Packet: docs/blueprints/photo/features/layer-styles.md
 Run: act-1a16cd04539-4jc0 · Session: claude/feature-lead-playbook-9tb3qe · Started: 2026-10-24T07:30Z (takes over from act-1a16958d691-2ax3)
-Stage: build W1 (PY-1 builder running, workflow wf_fee9bae7-0b7)
-Base: 78983bc33 (dev at 12:22Z, LS-1 #4911 merged)
-Next: PY-1 PR into the lane; then W2: PY-2 (on PY-1), PY-5/PY-6 once LS-m lands
+Stage: W1 shipped (PY-1 #5177 in the lane); W2 waiting on LS-a's LS-2 #5174 (PY-2) and LS-m #5176 (PY-5, PY-6)
+Base: 78983bc33 (PY-1); dev 6be19b34e at 13:12Z
+Next: PY-2 stacked on #5177 once #5174 (panel, `LayerStylePasteboard`) merges; PY-5/PY-6 once #5176 (LS-m) merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -17,8 +17,8 @@ Next: PY-1 PR into the lane; then W2: PY-2 (on PY-1), PY-5/PY-6 once LS-m lands
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| PY-1 | PY-a | 1 | `PhotoLayer.style`; adapter stubs (`showStylePanel` real); catalog specs and ids; tests disabled | Sources/PhotoModel/PhotoLayer.swift, Sources/PhotoModel/PhotoStyle+Kernel.swift, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/PhotoModelTests/PhotoLayerStyleTests.swift | PhotoLayerStyleTests (disabled), command-id list | – | building (W1) |
-| PY-2 | PY-a | 2 | Layer menu items by id; panel sheet while `stylePanel` is set; pasteboard via `LayerStylePasteboard` | Sources/PhotoApp/PhotoCommands+Layer.swift, Sources/PhotoApp/PhotoWindow+Styling.swift, Sources/PhotoApp/PhotoWindow.swift | PhotoLayerStyleSnapshots.panel | – | waiting (PY-1) |
+| PY-1 | PY-a | 1 | `PhotoLayer.style`; adapter stubs (`showStylePanel` real); catalog specs and ids; tests disabled | Sources/PhotoModel/PhotoLayer.swift, Sources/PhotoModel/PhotoStyle+Kernel.swift, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/PhotoModelTests/PhotoLayerStyleTests.swift | PhotoLayerStyleTests (disabled), command-id list | #5177 | PR open, fast-lane (head 484c897c7) |
+| PY-2 | PY-a | 2 | Layer menu items by id; panel sheet while `stylePanel` is set; pasteboard via `LayerStylePasteboard` | Sources/PhotoApp/PhotoCommands+Layer.swift, Sources/PhotoApp/PhotoWindow+Styling.swift, Sources/PhotoApp/PhotoWindow.swift | PhotoLayerStyleSnapshots.panel | – | waiting (PY-1 #5177, LS-2 #5174) |
 | PY-5 | PY-m | 2 | adapter bodies; tests on | Sources/PhotoModel/PhotoStyle+Kernel.swift, Tests/PhotoModelTests/PhotoLayerStyleTests.swift, Tests/mutations/PhotoModel.PhotoStyle+Kernel.json | PhotoLayerStyleTests | – | waiting (PY-1, LS-m) |
 | PY-6 | PY-m | 2 | styles in composite and `.ora`; RJ-P44, RJ-X51 | Sources/PhotoModel/PhotoLayerComposite.swift, Sources/PhotoModel/PhotoDocumentFile.swift, Tests/PhotoModelTests/PhotoStyleRenderTests.swift, Tests/mutations/PhotoModel.PhotoLayerComposite.json, Tests/mutations/PhotoModel.PhotoDocumentFile.json, Tests/RealJobs/photo/outline-cutout/, Tests/RealJobs/photo/style-drop-shadow/ | PhotoStyleRenderTests | – | waiting (PY-1, LS-m) |
 | PY-3 | PY-u | 3 | snapshots, render budget | Tests/AppSnapshotTests/PhotoLayerStyleSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoLayerStyleTests.swift | RenderBudgetPhotoLayerStyleTests.distanceScrubInThreeBodies | – | waiting (PY-2) |
@@ -35,6 +35,7 @@ Next: PY-1 PR into the lane; then W2: PY-2 (on PY-1), PY-5/PY-6 once LS-m lands
 - No task starts: PY-1 needs SuiteImaging's `LayerStyle`, `LayerStyleTarget` and `StyleCommands`, none of which exist on dev (no SuiteImaging target yet). Rule 20 forbids a Photo copy, and LS-a is the suiteui line's work, so nothing is stubbed here.
 
 ## Open
+- 13:12Z: PY-1 PR #5177 open (186+/3−, 10 files, Mutate 4/4, Wire: PY-5). Lead accepts its +4/−1 to Sources/PhotoModel/PhotoWorkspace.swift (same line; the contract's `stylePanel` must be stored and an extension can't store). PY-2 needs the SuiteUI style panel and `LayerStylePasteboard`, not on dev: they come with LS-2 #5174.
 - 12:22Z: LS-1 #4911 merged (78983bc33); `Sources/SuiteImaging/Style/` on dev. PY-1 builder launched on that base.
 - 2026-10-24T07:35Z (run act-1a16cd04539-4jc0): LS-1 #4911 (the LS-a contract, `Style/` stubs) is open, clean and queued in the lane; dev 830af22de has SuiteImaging Adjust, Color, Retouch, Route, Select and Tone, but no Style. PY-1 still waits; rule 20 rules out a Photo copy.
 - 2026-10-23T15:35Z: dev 721168a8f has SuiteImaging (Adjust, Color, Retouch, Route, Tone) but no Style/: no `LayerStyle`, `LayerStyleTarget` or `StyleCommands`. #3937 is unparked under rule 12 too but has no LS-a PR yet. Rule 20 still rules out a Photo copy, so PY-1 waits; this run builds tone-controls meanwhile.

@@ -65,3 +65,5 @@ utc	stage	event	ref	note
 2026-10-24T12:22Z	W1	start	PY-1	LS-1 #4911 merged at 78983bc33; PY-1 builder launched (wf_fee9bae7-0b7)
 2026-10-24T12:44Z	W1	check-in	PY-1	PY-1 builder wf_fee9bae7-0b7 still running; 0 layer-styles findings; no dev-red
 2026-10-24T13:07Z	W1	check-in	PY-1	builder committed failing test 9a8fec86f and contract 484c897c7; PR not open yet; 0 layer-styles findings
+2026-10-24T13:12Z	W1	pr	PY-1	#5177 open, head 484c897c7, Mutate 4/4, Wire PY-5; PhotoWorkspace.swift +4/-1 accepted (stored stylePanel)
+2026-10-24T13:12Z	W2	wait	PY-2	needs SuiteUI style panel + LayerStylePasteboard from LS-2 #5174 (open); PY-5/PY-6 wait on LS-m #5176 (open)
