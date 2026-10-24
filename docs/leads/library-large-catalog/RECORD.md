@@ -2,9 +2,9 @@
 
 Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a16c627c84-u86z · Session: claude/large-catalog-lead-jhxt1n (earlier act-1a1693fbf6d-ap2g, act-1a15df37b73-k199) · Started: 2026-10-21T10:19Z (resumed 2026-10-23T14:20Z, 2026-10-24T05:10Z)
-Stage: 3 wave 3 (LG-grid: LG-6 #5042 open; LG-5 building)
+Stage: 3 wave 3 (LG-grid: LG-6 #5042 and LG-5 #5050 open)
 Base: 8021b0f56a45a59540cd4ea0ff99651c5fb8dc2a (origin/dev)
-Next: LG-5 PR (mutate, scripts/ci --changed, open); then LG-7, LG-8
+Next: LG-7 (jobs RJ-L07 re-pointed, RJ-L56 on; journey skip dropped; perf-suites line asked of the supervisor), then LG-8; watch #5042 #5050
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -20,7 +20,7 @@ Next: LG-5 PR (mutate, scripts/ci --changed, open); then LG-7, LG-8
 | LG-2 | LG-a | 1 | large journey (skipped), -LibraryLargeFixture flag, RJ-L56 folder | LibraryJourneyTests+Large.swift, LibraryLaunch.swift, large-catalog.jobs.json | launch flag test, scripts/jobs check | #4006 | merged |
 | LG-3 | LG-model | 2 | direct select all, cheap can-export check | LibrarySelectionAdapter.swift, LibraryActions.swift, LibraryExport.swift, LargeCatalogEquivalenceTests.swift, mutations | LargeCatalogEquivalenceTests | #4847 | merged |
 | LG-4 | LG-model | 2 | one-pass export names (stems parsed once, one taken set) | Contracts/ExportNaming+Kernel.swift, Live/LiveExporter.swift, LargeCatalogEquivalenceTests.swift, mutations | LargeCatalogEquivalenceTests | #4847 | merged |
-| LG-5 | LG-grid | 3 | visible-first pass, two screens prefetched nearest first, off-window requests cancelled (decode stops), photo lookup by id | LibraryThumbnails.swift, LibraryWindow+Thumbnails.swift, Live/LiveThumbnails.swift, LibraryThumbnailPrefetchTests.swift, mutations | LibraryThumbnailPrefetchTests, aCancelledRequestDecodesNothing | - | building |
+| LG-5 | LG-grid | 3 | visible-first pass, two screens prefetched nearest first, off-window requests cancelled (decode stops), photo lookup by id | LibraryThumbnails.swift, LibraryWindow+Thumbnails.swift, Live/LiveThumbnails.swift, LibraryThumbnailPrefetchTests.swift, mutations | LibraryThumbnailPrefetchTests, aCancelledRequestDecodesNothing | #5050 | open |
 | LG-6 | LG-grid | 3 | loupe neighbours decode behind the render, superseded step's dropped | RenderQueue.swift, LibraryWindow+Loupe.swift, LibraryRenderQueueAheadTests.swift, mutations | LibraryRenderQueueAheadTests | #5042 | open |
 
 ## Reviews
@@ -38,6 +38,7 @@ Next: LG-5 PR (mutate, scripts/ci --changed, open); then LG-7, LG-8
 - LG-6 scope: neighbour prefetch already exists but runs beside the render, unbounded per step; LG-6 queues the neighbours behind the render in RenderQueue and drops a superseded step's pending decodes, so stale prefetches never evict the focus's decodes.
 
 ## Open
+- 2026-10-24T06:30Z: #5050 opened (LG-5; 255+/21-, 6 files; CI: PASS on 5b84195d; Mutate 18/18). LibraryWindow+Thumbnails.swift and Live/LiveThumbnails.swift are outside the owned list.
 - 2026-10-24T06:08Z: #5042 opened (LG-6; 187+/26-, 4 files; CI: PASS on 8c7721cf; Mutate 4/4). LibraryWindow+Loupe.swift is outside the owned list (one call site).
 - 2026-10-23T23:17Z: LG-grid wait re-read: contract-first (supervisor 15:13Z) makes it met when ST-a #4840 merges; #4840 needs-fix since 19:15Z. Rule 23 question posted on #3790 proposing LG-6 (loupe, no thumbnail store) ahead of LG-5.
 - 2026-10-23T15:53Z: #4847 opened (238 lines, 10 files; CI: PASS on 9f19aa0a; Mutate 17/17). Fixes #3213 #3214; Refs #3110 #1650 #4835.
