@@ -1,0 +1,10 @@
+{
+  "id": "imaging-style",
+  "name": "Style",
+  "description": "Style/ (docs/blueprints/suiteui/features/layer-styles.md): the suite's one layer style. LayerStyle with its eight StyleKinds (drop and inner shadow, outer and inner glow, stroke, colour and gradient overlay, bevel), StyleRules (ranges, defaults, paint order, reach, presets, the copy and paste JSON), StyleProgram (the one mapping to and from CoreRaster's LayerStyleStack and the CPU render), LayerStyleSVG (a style as one SVG filter with warnings) and StyleCommands: the LayerStyleTarget protocol, the StyleIntents views send and the eleven style.* specs every adopting app registers. layer-styles LS-1 declares them as stubs; LS-5 to LS-8 fill the bodies.",
+  "technology": "Swift 6, SuiteKernel's command catalog, CoreRaster, Linux and macOS",
+  "paths": [
+    "Sources/SuiteImaging/Style/"
+  ],
+  "order": 130
+}
