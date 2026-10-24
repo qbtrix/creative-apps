@@ -1,10 +1,11 @@
-// LiveSamplingTests.swift: PE-5 of eyedropper, the live `ColorSampling`.
+// LiveSamplingTests.swift: PE-5 of eyedropper, the live sampler.
 // It returns SuiteKernel's mean of the `size` square centred on the point,
 // skips fully transparent pixels, and gives nil when nothing it reads is
 // inside the picture or opaque. Pictures are built from straight sRGB bytes,
 // so the expected colours are exact. Runs on Linux and macOS.
 import CoreRaster
 @testable import PhotoModel
+import SuiteKernel
 import Testing
 
 @Suite struct LiveSamplingTests {
@@ -17,6 +18,9 @@ import Testing
         for y in 0..<height { for x in 0..<width { bytes += color(x, y) } }
         return try PixelBuffer(rgba8: bytes, width: width, height: height)
     }
+
+    /// A sample's r, g and b as sRGB bytes.
+    private static func rgb(_ color: FillColor) -> [Int] { [color.r, color.g, color.b].map(SampleRules.byte) }
 
     /// Columns 0 to 2 red, 3 and 4 blue.
     private func redBlue() throws -> PixelBuffer {
@@ -31,21 +35,17 @@ import Testing
     /// two blue; anchored anywhere else it reads another mix.
     @Test func meanOfTheSquareCentredOnThePoint() throws {
         let image = try redBlue()
-        #expect(sampling.sample(image, center: (x: 3, y: 2), size: .threeByThree)
-            == SampledColor(red: 85, green: 0, blue: 170))
-        #expect(sampling.sample(image, center: (x: 1, y: 2), size: .threeByThree)
-            == SampledColor(red: 255, green: 0, blue: 0))
-        #expect(sampling.sample(image, center: (x: 4, y: 4), size: .point) == SampledColor(red: 0, green: 0, blue: 255))
-        #expect(sampling.sample(image, center: (x: 2, y: 2), size: .fiveByFive)
-            == SampledColor(red: 153, green: 0, blue: 102))
+        #expect(sampling.sample(image, center: (x: 3, y: 2), size: .threeByThree).map(Self.rgb) == [85, 0, 170])
+        #expect(sampling.sample(image, center: (x: 1, y: 2), size: .threeByThree).map(Self.rgb) == [255, 0, 0])
+        #expect(sampling.sample(image, center: (x: 4, y: 4), size: .point).map(Self.rgb) == [0, 0, 255])
+        #expect(sampling.sample(image, center: (x: 2, y: 2), size: .fiveByFive).map(Self.rgb) == [153, 0, 102])
     }
 
     /// skipsTransparent: one opaque green pixel among transparent ones reads
     /// pure green, and an all-transparent square reads nil.
     @Test func transparentPixelsAreSkipped() throws {
         let image = try picture(3, 3) { x, y in x == 1 && y == 1 ? [0, 255, 0, 255] : [0, 0, 0, 0] }
-        #expect(sampling.sample(image, center: (x: 1, y: 1), size: .threeByThree)
-            == SampledColor(red: 0, green: 255, blue: 0))
+        #expect(sampling.sample(image, center: (x: 1, y: 1), size: .threeByThree).map(Self.rgb) == [0, 255, 0])
         #expect(sampling.sample(image, center: (x: 0, y: 0), size: .point) == nil)
     }
 
@@ -56,7 +56,6 @@ import Testing
         #expect(sampling.sample(image, center: (x: -3, y: -3), size: .threeByThree) == nil)
         #expect(sampling.sample(image, center: (x: 5, y: 0), size: .point) == nil)
         #expect(sampling.sample(image, center: (x: 9, y: 9), size: .fiveByFive) == nil)
-        #expect(sampling.sample(image, center: (x: 5, y: 2), size: .threeByThree)
-            == SampledColor(red: 0, green: 0, blue: 255))
+        #expect(sampling.sample(image, center: (x: 5, y: 2), size: .threeByThree).map(Self.rgb) == [0, 0, 255])
     }
 }

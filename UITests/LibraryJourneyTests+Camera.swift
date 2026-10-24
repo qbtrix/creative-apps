@@ -75,7 +75,7 @@ final class LibraryCameraJourneyTests: XCTestCase {
         try Self.write(folder.appending(path: "a.jpg"), .jpeg, properties: Self.cameraExif)
         try Self.write(folder.appending(path: "b.png"), .png, properties: [:])
         let library = Journey("Library", self, arguments: [
-            "-LibraryImportFolder", folder.path, "-LibraryImportOnLaunch", "-LibraryCatalogDir", catalog.path,
+            "-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path, "-LibraryImportOnLaunch",
         ])
         defer { library.app.terminate() }
         XCTAssert(cell("/a.jpg", library).waitForExistence(timeout: 30), "a.jpg wasn't imported")
