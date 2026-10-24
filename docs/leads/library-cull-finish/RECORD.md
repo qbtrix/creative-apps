@@ -2,7 +2,7 @@
 
 Issue: #3458 · Packet: docs/blueprints/library/features/cull-finish.md
 Run: act-1a170488aff-41nk (line lead, line:library) · resumed 2026-10-24T23:40Z · earlier act-1a16cc967d9-mcuv, act-1a16953af22-wvhu, act-1a15995d319-aamb
-Stage: build, wave 3; #4838 merged (DR-u part 1); #5130 (DR-u tests, base dev, Linux 40109534004 green), #4899 (ffe411ac) and #5100 (stacked on #4899) on the lane. Checked 2026-10-24T23:42:58Z
+Stage: DR-u #5130, DR-m #4899+#5100 on the lane; DR-9 gating (Swift installed), DR-10 and C4-only PR committed locally; checked 2026-10-24T23:47:17Z
 Base: origin/dev 830af22d
 Next: lane merges #4838, #4899; DR-u tests PR (feat/cull-finish-dr-u-tests) opens once #4838 is on dev; builder wires excludedPaths into headless and window save (RJ-L06), stacked on #4899; then scoped run app=library for Belt-Slice-Done DR-u, DR-m; then DR-z
 
