@@ -26,6 +26,8 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 2026-10-24T15:38Z: hb21: dev still e79e9afc (no lane merge since 14:20Z). #5088/#5089/#5091 open with fast-lane, no needs-* label. #3721 Question still unanswered. UP-z still waits.
+
 - 2026-10-24T15:17Z: hb20: dev still e79e9afc (no lane merge since 14:20Z). #5088/#5089/#5091 open with fast-lane, no needs-* label. #3721 Question still unanswered. UP-z still waits.
 
 - 2026-10-24T14:55Z: hb19: dev still e79e9afc (last batch 14:20Z took #5087, the PR before #5088). #5088/#5089/#5091 open with fast-lane, no needs-* label. #3721 Question still unanswered (13 comments). UP-z still waits on the app slices and SC-z.
