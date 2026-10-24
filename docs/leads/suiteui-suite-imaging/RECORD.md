@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: 13:19Z poll: nothing merged; all six PRs clean (#5154 and #5163 are off the lane again for stacked size); the lane is still bisecting batch-20261024110214, and probe -6's macOS gate has been running since 12:10Z; no supervisor replies; EP-z #3723 still open. Waiting on the lane.
+Next: 13:39Z: the supervisor approved the perf line, and #5178 (IM-11c) opened for them to land. Nothing has merged; the lane is still bisecting batch-20261024110214. The IM-library slice needs #4886, #5153, #5154, #5163 and #5178 in a green run. EP-z #3723 is still open; IM-8b question 6383016723 is open.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
 
@@ -37,6 +37,7 @@ Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imag
 | IM-10b | IM-library | LiveDevelop on the shared list | #5153 | open (fast-lane, Fast-Check 65fa4fe, mutate 8/8 + 4/4; stacked on #4886) |
 | IM-11a | IM-library | loupe GPU frame (Model): LiveDevelop.steps, LiveLoupeImaging.gpuFrame, histogram from the CPU-developed preview | #5154 | open (fast-lane, Fast-Check 4d753ae, mutate 4/4; stacked on #5153) |
 | IM-11b | IM-library | loupe view writes the GPU frame (ImagingGPU.display into the CanvasHost resident texture); LibraryDevelopLatencyTests on the GPU route | #5163 | open; the lane dropped fast-lane (869 lines against dev while stacked) and its Belt-Lead sweep re-adds it once #4886, #5153 and #5154 merge; mutate 7/7, CI: PASS at 805e3850e |
+| IM-11c | IM-library | perf-suites line for LibraryDevelopLatencyTests; drop .disabled (supervisor-approved 6384762237) | #5178 | open, no-fast-lane (protected path), supervisor lands; stacked on #5163; CI: PASS |
 | IM-12 | IM-z | delete Photo's copies | – | blocked: EP-z |
 | IM-13 | IM-z | no-baseline rule, Photo's Metal link removed | – | blocked: ST-a |
 | IM-14 | IM-z | feature-done | – | last |
