@@ -103,3 +103,4 @@
 2026-10-24T08:06Z	build	DR-m #5100 excludedPaths wiring opened, stacked on #4899
 2026-10-24T08:11Z	heartbeat	#4838 #4899 #5100 clean, waiting for a lane batch (other lines batching)
 2026-10-24T08:33Z	heartbeat	lane: #4838 #4899 eligible, 57 ready PRs queued behind batch 20261024081307 (bisecting); #5100 skips until its base is dev
+2026-10-24T08:56Z	wave	DR-u tests rebuilt as one commit on #4838 head (2 files, +143); gate running; lane queue unchanged
