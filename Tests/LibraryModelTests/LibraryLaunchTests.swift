@@ -167,3 +167,13 @@ private func launchCatalog(_ arguments: [String]) -> LibraryCatalog {
     #expect(catalog.isEmpty)
     #expect(catalog.services.isPreview)
 }
+
+/// LC-7: `-LibraryImportCopyTo <path>` and `-LibraryImportByDate` are the launch import's copy choice; without them
+/// it adds in place, and dated folders need a folder to copy to.
+@Test func importCopyFlagsParse() {
+    let copying = LibraryLaunch(arguments: ["-LibraryImportFolder", "/card", "-LibraryImportCopyTo", "/Pictures", "-LibraryImportByDate"])
+    #expect(copying.importCopy == ImportCopyOptions(copyTo: "/Pictures", byDate: true))
+    #expect(LibraryLaunch(arguments: ["-LibraryImportCopyTo", "/Pictures"]).importCopy == ImportCopyOptions(copyTo: "/Pictures"))
+    #expect(LibraryLaunch(arguments: ["-LibraryImportByDate"]).importCopy == ImportCopyOptions())
+    #expect(LibraryLaunch(arguments: ["-LibraryImportFolder", "/card"]).importCopy == ImportCopyOptions())
+}
