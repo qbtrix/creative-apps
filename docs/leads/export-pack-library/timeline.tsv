@@ -70,3 +70,4 @@ time	event	task	note
 2026-10-24T17:21:02Z	heartbeat	batch-20261024160327 resolved; no batch in flight, next sweep forms one; our 8 PRs clean fast-lane
 2026-10-24T17:43:03Z	heartbeat	batch-20261024172211 in flight (12 PRs, none ours); our 8 PRs clean fast-lane, #5044 now clean; waiting for next batch
 2026-10-24T18:05:25Z	heartbeat	batch-20261024172211 still in flight (none ours); our 8 PRs clean fast-lane, queued for next batch
+2026-10-24T18:27:01Z	heartbeat	batch-20261024172211 resolved; no batch in flight; our 8 PRs open fast-lane (#5130/#5044 mergeable recomputing), due in next batch
