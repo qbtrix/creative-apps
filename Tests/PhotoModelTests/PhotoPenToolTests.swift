@@ -62,10 +62,12 @@ import Testing
         var workspace = try open()
         workspace.runPath(.penAdd(Point(x: 3, y: 3), handleOut: nil))
         workspace.runPath(.penAdd(Point(x: 12, y: 8), handleOut: Point(x: 16, y: 8)))
+        workspace.runPath(.penAdd(Point(x: 20, y: 3), handleOut: nil))
         workspace.runPath(.finish)
         let contour = try #require(workspace.pathInEdit?.path.contours.first)
         #expect(!contour.closed)
-        #expect(contour.anchors.last?.handleOut == Point(x: 16, y: 8))
+        #expect(contour.anchors.count == 3)
+        #expect(contour.anchors[1].handleOut == Point(x: 16, y: 8))
         workspace.runPath(.close)
         #expect(workspace.statusMessage != nil)
     }
