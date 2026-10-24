@@ -1,7 +1,7 @@
 # file-flow lead record
 
 Issue: #3474 (runs before used #4514) · Packet: docs/blueprints/halo/features/file-flow.md
-Run: act-1a16958d5fe-8dxu · Started: 2026-10-23T15:26:44Z (took over from act-1a16474bd28-v3ht)
+Run: act-1a16cd045be-qv3g · Started: 2026-10-24T07:20Z (took over from act-1a16958d5fe-8dxu)
 Stage: 3 wave 2 (HF-a #4855, HF-u #4868, HF-3 #4894, HF-4 #4936 open)
 Base: 721168a8, PR base 35a0b5e7 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
 Next: HF-7 (journey live) waits on HF-u #4868 reaching dev; HF-8 (docs, built, feature-done) after it. Belt-Slice-Done per slice once a green ci.yml run holds it
