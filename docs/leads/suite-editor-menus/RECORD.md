@@ -73,3 +73,4 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-24T15:10:51Z: no change; batch-20261024144917 still in flight, #4817/#4988 next in line.
 - 2026-10-24T15:29:24Z: no change; batch-20261024144917 still in flight.
 - 2026-10-24T15:48:04Z: no change; batch-20261024144917 still in flight.
+- 2026-10-24T15:52:49Z: #4817 got needs-rebase: FlareWindow.swift conflicted with dev (File > Place drop target next to the live line). Merged origin/dev, kept suiteLiveWindow plus placeDropTarget; scripts/ci --changed running.

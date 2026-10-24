@@ -120,3 +120,4 @@ utc	stage	event	ref	note
 2026-10-24T15:10:51Z	check	EM-flare-halo	no change; batch in flight
 2026-10-24T15:29:24Z	check	EM-flare-halo	no change; batch in flight
 2026-10-24T15:48:04Z	check	EM-flare-halo	no change; batch in flight
+2026-10-24T15:52:49Z	fix	EM-flare-halo	#4817 needs-rebase resolved locally; gate running
