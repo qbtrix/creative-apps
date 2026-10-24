@@ -68,3 +68,4 @@ utc	stage	event	ref	note
 2026-10-24T00:47Z	3	stage	-	heartbeat: lane bisecting prior batch
 2026-10-24T01:09Z	3	stage	-	heartbeat: lane bisecting prior batch
 2026-10-24T01:30Z	3	stage	-	heartbeat: lane bisecting prior batch
+2026-10-24T01:54Z	3	stage	-	heartbeat: probe -9 Linux green, macOS running; slices wait for the next batch
