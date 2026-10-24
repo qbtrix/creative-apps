@@ -2,7 +2,7 @@
 
 Issue: #3758 (#4531 closed as duplicate) · Packet: docs/blueprints/suiteui/features/brush-keys.md
 Run: act-1a16c619037-500v (resumed from act-1a16958d72f-a4mg) · Session: cloud line lead (line:suiteui; brush-keys + document-setup) · Resumed: 2026-10-24
-Stage: 3 wave 3 (resume triage: fixers on needs-rebase PRs)
+Stage: 3 wave 3 (BK app slices: conflicts resolved ahead of BK-u merge)
 Base: 654fb36328cdb049dfd1bcda411a126d316c639c (main at resume)
 Next: wait for the lane to merge BK-u #4939 (head a57fe915); then merge dev into BK-photo #4965, BK-design #4961, BK-flare #4982 to drop under the cap and re-add fast-lane; BK-z folds into the last adopt slice
 
