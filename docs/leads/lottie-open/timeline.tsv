@@ -97,3 +97,4 @@ utc	stage	event	ref	note
 2026-10-24T11:56:05Z	heartbeat	batch with #5036: macOS gate running tests
 2026-10-24T12:10:11Z	lane	batch with #5036 macOS red only on RenderBudgetToneRowsTests (not ours; #5036 is UITests only); lane bisects
 2026-10-24T12:29:55Z	heartbeat	#5036 in batch 20261024110214, lane bisecting (probe 6 running)
+2026-10-24T12:56:52Z	heartbeat	#5036 waits on probe 6 of batch 20261024110214
