@@ -1,9 +1,9 @@
 # layer-styles lead record
 
 Issue: #3793 · Packet: docs/blueprints/photo/features/layer-styles.md
-Run: act-1a16cd04539-4jc0 · Session: claude/feature-lead-playbook-9tb3qe · Started: 2026-10-24T07:30Z (takes over from act-1a16958d691-2ax3)
+Run: act-1a16f6941b7-zb0r · Session: claude/feature-lead-tone-layer-styles-v57ny4 · Started: 2026-10-24T19:30Z (takes over from act-1a16cd04539-4jc0)
 Stage: W1 shipped (PY-1 #5177 in the lane); W2 waiting on LS-a's LS-2 #5174 (PY-2) and LS-m #5176 (PY-5, PY-6)
-Base: 78983bc33 (PY-1); dev 6be19b34e at 13:12Z
+Base: 78983bc33 (PY-1); dev 6f66ca334 at 19:39Z
 Next: PY-2 stacked on #5177 once #5174 (panel, `LayerStylePasteboard`) merges; PY-5/PY-6 once #5176 (LS-m) merges
 
 ## Slices
@@ -33,6 +33,7 @@ Next: PY-2 stacked on #5177 once #5174 (panel, `LayerStylePasteboard`) merges; P
 ## Decisions
 - Worked from `origin/dev`, not `main`: the brief named `main` (verified at 0dd23d65), but the packet exists only on dev (main is 365 commits behind) and CLAUDE.md says branch from and target dev.
 - No task starts: PY-1 needs SuiteImaging's `LayerStyle`, `LayerStyleTarget` and `StyleCommands`, none of which exist on dev (no SuiteImaging target yet). Rule 20 forbids a Photo copy, and LS-a is the suiteui line's work, so nothing is stubbed here.
+- Run act-1a16f6941b7-zb0r (2026-10-24T19:30Z) takes over; base dev. The brief named lead/layer-styles; it belongs to the live SuiteUI lead (#3937, last commit 19:35Z), so it is not force-pushed and status stays on lead/photo-layer-styles.
 
 ## Open
 - 13:12Z: PY-1 PR #5177 open (186+/3−, 10 files, Mutate 4/4, Wire: PY-5). Lead accepts its +4/−1 to Sources/PhotoModel/PhotoWorkspace.swift (same line; the contract's `stylePanel` must be stored and an extension can't store). PY-2 needs the SuiteUI style panel and `LayerStylePasteboard`, not on dev: they come with LS-2 #5174.
