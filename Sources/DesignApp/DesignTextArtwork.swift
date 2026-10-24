@@ -1,7 +1,8 @@
 // DesignTextArtwork.swift: how the canvas paints a text node, called by
 // DesignArtwork in paint order inside its Canvas: the node's text in its style's
 // family, size, weight and alignment (DesignTextFont, the font the inline editor
-// uses too) and its fill color, clipped to its frame, from the frame's top. A
+// uses too) and its fill (its colour, or its gradient over its frame as the
+// resolved text's shading, gradient-fill DG-3), clipped to its frame, from the frame's top. A
 // fixed-width box wraps its text at the frame's width; an auto-width box, which the
 // window fits to its text on commit (canvas-basics CB-6), keeps one line per
 // paragraph. The context comes in already scaled by the canvas zoom, so the style's
@@ -20,11 +21,15 @@ enum DesignTextArtwork {
         let box = node.frame.cgRect
         clipped.clip(to: Path(box))
         let style = node.textStyle
-        let text = Text(node.text).font(DesignTextFont.font(style)).foregroundStyle(node.fill.color)
-        let resolved = clipped.resolve(text)
+        let text = Text(node.text).font(DesignTextFont.font(style))
+        var resolved = clipped.resolve(text)
         let wraps = style.fixedWidth == true
         let measured = resolved.measure(in: CGSize(width: wraps ? box.width : .infinity, height: box.height))
-        clipped.draw(resolved, in: textRect(measured: measured, in: box, wraps: wraps, style: style))
+        let rect = textRect(measured: measured, in: box, wraps: wraps, style: style)
+        // The text is uncoloured, so the resolved text's shading fills it: the solid colour or the
+        // gradient, in the context's page points (the zoom is already on the context).
+        resolved.shading = artworkShading(for: node, scale: 1)
+        clipped.draw(resolved, in: rect)
     }
 
     /// The rect `measured` text is laid out in inside `box`: at the box's top, across by the style's

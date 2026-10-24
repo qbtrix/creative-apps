@@ -5,7 +5,9 @@
 // moves the current row and dims the rows past it; the panel brings its
 // keyboard selection back to the current row when the listing changes. A
 // click on a row, or Return on the selected one, asks the window to jump there
-// once (`HistoryIntent.jump`). Values in, intents out.
+// once (`HistoryIntent.jump`). The rows sit on the inspector's 12 pt inset,
+// the edge the header card and the Adjust tab's cards share. Values in,
+// intents out.
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -29,6 +31,6 @@ struct PhotoHistoryTab: View {
     }
 
     var body: some View {
-        panel
+        panel.padding(.horizontal, SuiteSpacing.m)
     }
 }

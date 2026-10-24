@@ -37,7 +37,7 @@ struct AllAppsCatalogTests {
         let named = listed.compactMap { app -> String? in
             if case .object(let f) = app, case .string(let name)? = f["name"] { name } else { nil }
         }
-        #expect(named == Self.names + ["fake"], "list-apps lists the five in registry order, then the fake")
+        #expect(named == Self.names + ["suite", "fake"], "list-apps lists the five in registry order, the suite, then the fake")
     }
 
     @Test(arguments: names)
@@ -56,10 +56,14 @@ struct AllAppsCatalogTests {
         "Design's select example names node-1, which a real file need not hold": ["edit.select: exampleRuns"],
         "Halo saves the playhead and the selection in the file": [
             "animation.go-to-end: queryOrViewChangesNoBytes", "animation.next-frame: queryOrViewChangesNoBytes",
-            "easing.select-lane-keys: queryOrViewChangesNoBytes", "layer.select: queryOrViewChangesNoBytes",
+            "easing.select-lane-keys: queryOrViewChangesNoBytes", "timeline.pick-keys: queryOrViewChangesNoBytes",
+            "layer.select: queryOrViewChangesNoBytes",
             "timeline.scrub: queryOrViewChangesNoBytes", "viewer.drag-begin: queryOrViewChangesNoBytes"],
+        "The kernel's place.image example is an SVG, which Photo doesn't place": ["place.image: exampleRuns"],
+        "The kernel's shape.draw names its step for the kind drawn (\"Draw Star\")": ["shape.draw: stepNamedTitle"],
         "Halo's drag end with no drag is a no-op edit that stays enabled": [
             "viewer.drag-end: stepNamedTitle", "viewer.drag-end: editRecordsOneStep", "viewer.drag-end: undoRestoresBytes"],
+        "The kernel's transform.flip is titled Flip while its step names the axis": ["transform.flip: stepNamedTitle"],
     ]
 
     /// `D`'s law problems on the real job input `path`, as "<id>: <law>", less an example that can't run because its

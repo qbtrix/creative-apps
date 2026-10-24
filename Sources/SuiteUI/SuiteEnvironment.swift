@@ -12,13 +12,18 @@
 // SuiteControlInventory while it is on screen; a nil id registers nothing.
 // With `identifies` false it only registers, for a view whose parts carry
 // their own identifiers: an identifier on a view of several elements lands on
-// every one of them (KeyframeButton, #1282). The publishing call also sets
+// every one of them (KeyframeButton, #1282). `.suiteControl(entry:identifies:)`
+// lists a whole entry, so the toggle-style controls (InspectorAction,
+// SegmentedTabs, KeyframeButton) report `selected` (ControlStateTests).
+// The publishing call also sets
 // `gridProbe`, `scrubProbe`, `chipProbe` and `curveProbe`, so grids, layer
 // lists, scrub fields, chips and curve editors record their frames, samples
-// and marks into the window's `suite.perf` (SP1, SP4, SP6, SP7, SJ20); only
-// the hidden element watches the recorder,
-// so a frame never runs the window's body. Plain keys rather than `@Entry`,
-// as in Glass.swift.
+// and marks into the window's `suite.perf` (SP1, SP4, SP6, SP7, SJ20), and
+// `suiteProbeRecorder`, the window's SuiteProbeRecorder itself, so an app
+// view records its own samples, drawn frames and marks into that one probe
+// (#3401); outside a publishing call it is nil. Only the hidden element
+// watches the recorder, so recording never runs the window's body or the
+// recording view's. Plain keys rather than `@Entry`, as in Glass.swift.
 import SwiftUI
 
 extension EnvironmentValues {
@@ -34,6 +39,12 @@ extension EnvironmentValues {
         set { self[SuiteControlStoreKey.self] = newValue }
     }
 
+    /// The window's probe recorder; nil without `-SuitePerfProbe`, so every call through it is skipped.
+    public var suiteProbeRecorder: SuiteProbeRecorder? {
+        get { self[SuiteProbeRecorderKey.self] }
+        set { self[SuiteProbeRecorderKey.self] = newValue }
+    }
+
     /// True inside a `.suiteProbes()` that publishes.
     var suiteProbesHosted: Bool {
         get { self[SuiteProbesHostedKey.self] }
@@ -47,6 +58,10 @@ private struct SuiteReduceMotionKey: EnvironmentKey {
 
 private struct SuiteControlStoreKey: EnvironmentKey {
     static let defaultValue: SuiteControlStore? = nil
+}
+
+private struct SuiteProbeRecorderKey: EnvironmentKey {
+    static let defaultValue: SuiteProbeRecorder? = nil
 }
 
 private struct SuiteProbesHostedKey: EnvironmentKey {
@@ -86,11 +101,16 @@ extension View {
 
 extension ToolbarAction {
     /// The action's `suite.controls` entry: disabled with its tooltip as the
-    /// reason while unavailable; nil without an identifier.
+    /// reason while unavailable, a toggle's state as `selected`; nil without an identifier.
     public func controlEntry(role: String? = nil) -> ControlEntry? {
         guard let identifier else { return nil }
         return ControlEntry(id: identifier, enabled: isEnabled, reason: isEnabled ? nil : help, role: role)
+            .selecting(toggleState)
     }
+
+    /// A toggle's `selected`: on only while it is on and able to act (a disabled
+    /// toggle draws off); nil for a plain action.
+    var toggleState: Bool? { isToggle ? isSelected && isEnabled : nil }
 }
 
 private struct SuiteControlModifier: ViewModifier {
@@ -125,6 +145,33 @@ private struct SuiteControlModifier: ViewModifier {
     }
 }
 
+extension View {
+    /// Lists `entry` in the window's `suite.controls` while on screen, its
+    /// `selected` state included, so a toggle-style SuiteUI control reports
+    /// whether it is on; nil lists nothing. With `identifies` the entry's id
+    /// is also the view's accessibility identifier.
+    func suiteControl(entry: ControlEntry?, identifies: Bool) -> some View {
+        modifier(SuiteControlEntryModifier(entry: entry, identifies: identifies))
+    }
+}
+
+/// Places one entry for the view's lifetime; each change replaces the last one placed.
+private struct SuiteControlEntryModifier: ViewModifier {
+    let entry: ControlEntry?
+    let identifies: Bool
+    @Environment(\.suiteControlStore) private var store
+    @State private var owner = UUID()
+
+    func body(content: Content) -> some View {
+        Group {
+            if identifies, let id = entry?.id { content.accessibilityIdentifier(id) } else { content }
+        }
+        .onAppear { store?.place(entry, replacing: nil, owner: owner) }
+        .onChange(of: entry) { old, new in store?.place(new, replacing: old, owner: owner) }
+        .onDisappear { store?.place(nil, replacing: entry, owner: owner) }
+    }
+}
+
 private struct SuiteProbesModifier: ViewModifier {
     let requested: Bool
     @Environment(\.suiteProbesHosted) private var hosted
@@ -140,6 +187,7 @@ private struct SuiteProbesModifier: ViewModifier {
                 .environment(\.scrubProbe, recorder.scrubProbe)
                 .environment(\.chipProbe, recorder.chipProbe)
                 .environment(\.curveProbe, recorder.curveProbe)
+                .environment(\.suiteProbeRecorder, recorder)
                 .background(alignment: .topLeading) {
                     SuitePerfHost(recorder: recorder)
                         .preference(key: SuiteProbeElementsKey.self, value: [SuitePerfElement.identifier])
@@ -152,9 +200,11 @@ private struct SuiteProbesModifier: ViewModifier {
     }
 }
 
-/// The window's frame probe behind `.suiteProbes()`. Each control probe is
+/// The window's frame probe behind `.suiteProbes()`, read by app views as
+/// `suiteProbeRecorder`. Read it with `@Environment`, never `@ObservedObject`:
+/// observing it runs the reader's body on every sample. Each control probe is
 /// built once, so its environment value stays the same closure across passes.
-@MainActor final class SuiteProbeRecorder: ObservableObject {
+@MainActor public final class SuiteProbeRecorder: ObservableObject {
     @Published private(set) var probe = SuiteFrameProbe()
     private(set) var gridProbe = GridProbe { _, _ in }
     private(set) var scrubProbe = ScrubProbe { _ in }
@@ -170,6 +220,17 @@ private struct SuiteProbesModifier: ViewModifier {
         curveProbe = CurveProbe(
             record: { [weak self] sample in self?.probe.record(sample) },
             mark: { [weak self] mark in self?.mark(mark) })
+    }
+
+    /// An input sample: the event's timestamp and the target timestamp of the refresh that showed it.
+    public func record(_ sample: ProbeSample) { probe.record(sample) }
+
+    /// A frame of `series` drawn at the target timestamp `time` (scrolls, playback).
+    public func drew(_ series: String, at time: Double) { probe.drew(series, at: time) }
+
+    /// An in-app moment on `series`, stamped now on the clock the control probes use.
+    public func mark(_ name: String, series: String) {
+        probe.mark(name, series: series, at: ProcessInfo.processInfo.systemUptime)
     }
 
     private func mark(_ mark: ProbeMark) {

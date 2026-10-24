@@ -1,0 +1,37 @@
+[
+  {
+    "label": "a click on the shown folder forgets Include Subfolders",
+    "file": "Sources/LibraryModel/LibraryFolders+Sidebar.swift",
+    "find": "        return scope.subfolders\n",
+    "replace": "        return true\n",
+    "tests": "LibraryFoldersClickTests"
+  },
+  {
+    "label": "a collection's click keeps the folder rule",
+    "file": "Sources/LibraryModel/LibraryFolders+Sidebar.swift",
+    "find": "        next.folder = nil\n",
+    "replace": "\n",
+    "tests": "LibraryFoldersClickTests"
+  },
+  {
+    "label": "Include Subfolders keeps the folder's choice",
+    "file": "Sources/LibraryModel/LibraryFolders+Sidebar.swift",
+    "find": "subfolders: !folderIncludesSubfolders(row: id)",
+    "replace": "subfolders: folderIncludesSubfolders(row: id)",
+    "tests": "LibraryFoldersClickTests"
+  },
+  {
+    "label": "a row's click selects nothing",
+    "file": "Sources/LibraryModel/LibraryFolders+Sidebar.swift",
+    "find": "selectedFolderRowID ?? selectedCollectionID",
+    "replace": "selectedCollectionID",
+    "tests": "LibraryFoldersClickTests"
+  },
+  {
+    "label": "a JSON export ignores shown",
+    "file": "Sources/LibraryModel/LibraryHeadless.swift",
+    "find": "try Self.wantsShown(options) ? shownFile() : catalogFile()",
+    "replace": "try catalogFile()",
+    "tests": "LibraryHeadlessTests"
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "id": "kernel-text",
+  "name": "Text",
+  "description": "Text/: the suite's one text style. TextStyle (family, weight, italic, size, rgba and a paragraph, with .standard) and ParagraphStyle, TextLayout and TextStyle.Alignment as FlareCore's ParagraphStyle, TextLayout and TextAlignment under kernel names; TextStyleField (size, line height, tracking) and TextStyleRules (each field's range, the clamping setter and the one layout over FlareCore's TextLayout.lay, tracking in thousandths of an em); the TextStyleTarget protocol an app's workspace conforms to, TextIntent (the text inspector's gestures as commands) and TextCommands (the seven text.* command specs every app registers). text-style TS-1 declares them as stubs (specs with real ids, schemas and availability); TS-5 and TS-6 fill the bodies.",
+  "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+  "paths": [
+    "Sources/SuiteKernel/Text/"
+  ],
+  "order": 130
+}

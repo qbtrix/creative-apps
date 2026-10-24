@@ -18,6 +18,13 @@ import Testing
         #expect(XMLText.escaped("&amp;") == "&amp;amp;")
     }
 
+    @Test func unescapedReadsBackWhatEscapedWrote() {
+        let text = "a&b<c>\"d'&lt;"
+        #expect(XMLText.unescaped(XMLText.escaped(text)) == text)
+        #expect(XMLText.unescaped("&amp;lt;") == "&lt;")
+        #expect(XMLText.unescaped("Layer 1 &copy;") == "Layer 1 &copy;")
+    }
+
     /// No Model other than SuiteModel writes the `&amp;` entity itself: they call XMLText.
     @Test func noAppModelKeepsItsOwnEscaper() throws {
         let sources = URL(fileURLWithPath: #filePath).deletingLastPathComponent()

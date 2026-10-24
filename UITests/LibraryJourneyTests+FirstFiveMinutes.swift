@@ -15,17 +15,22 @@ final class LibraryFirstFiveJourneys: XCTestCase {
         library.snap("first5-imported")
     }
 
-    /// Metadata > Set Rating > 3 Stars and Set Flag > Pick on a clicked photo: its cell says so.
+    /// Metadata > Set Rating > 3 Stars and Set Flag > Pick on a clicked photo: its cell reads 3 stars, and
+    /// the picks collection (whatever the catalog calls it, Favorites or Picks) counts one more photo.
     @MainActor func testFirst5RateAndPick() throws {
         let library = try importShoot([])
         let photo = cell("IMG_0001", library)
         photo.click()
         library.choose(menu: ["Metadata", "Set Rating", "3 Stars"], stuck: Self.stuckRate)
+        XCTAssert(FirstFive.wait(5) { photo.label.localizedCaseInsensitiveContains("3 stars") }, "IMG_0001 reads \(photo.label), not 3 stars")
+        let before = collectionCounts(library)
         library.choose(menu: ["Metadata", "Set Flag", "Pick"], stuck: Self.stuckRate)
-        // The grid badge names a pick "Flagged".
-        let marked = { (label: String) in label.localizedCaseInsensitiveContains("3 stars")
-            && (label.localizedCaseInsensitiveContains("pick") || label.localizedCaseInsensitiveContains("flagged")) }
-        XCTAssert(FirstFive.wait(5) { marked(photo.label) }, "IMG_0001 reads \(photo.label), not 3 stars and picked")
+        var after: [String: Int] = [:]
+        let picked = FirstFive.wait(5) {
+            after = self.collectionCounts(library)
+            return after.contains { name, count in count == (before[name] ?? 0) + 1 }
+        }
+        XCTAssert(picked, "picking IMG_0001 added it to no collection: the sidebar read \(before), then \(after)")
         library.snap("first5-rated")
     }
 
@@ -47,7 +52,7 @@ final class LibraryFirstFiveJourneys: XCTestCase {
     }
 
     /// Where a new user gets stuck, by finding issue.
-    private static let stuckRate = "(first five minutes: finding #TBD)"
+    private static let stuckRate = "(first five minutes)"
 
     /// Library on a fresh catalog and profile after the toolbar's Import Folder… on the 24-photo shoot.
     @MainActor private func importShoot(_ arguments: [String]) throws -> Journey {
@@ -63,6 +68,24 @@ final class LibraryFirstFiveJourneys: XCTestCase {
         XCTAssert(library.element("library.import.notice").waitForExistence(timeout: 60), "Import Folder… imported nothing")
         XCTAssert(cell("IMG_0001", library).waitForExistence(timeout: 30), "the grid shows no imported photo")
         return library
+    }
+
+    /// Each sidebar collection's name and photo count, from one snapshot of the sidebar: a row's first
+    /// non-number text is its name, its first number its count (0 when it shows none).
+    @MainActor private func collectionCounts(_ library: Journey) -> [String: Int] {
+        guard let sidebar = try? library.element("suite.sidebar").snapshot() else { return [:] }
+        let rows: Set<XCUIElement.ElementType> = [.tableRow, .outlineRow, .cell]
+        func texts(_ node: XCUIElementSnapshot) -> [String] {
+            [node.label, node.value as? String ?? ""].filter { !$0.isEmpty } + node.children.flatMap { texts($0) }
+        }
+        var counts: [String: Int] = [:]
+        func walk(_ node: XCUIElementSnapshot) {
+            guard rows.contains(node.elementType) else { return node.children.forEach { walk($0) } }
+            let words = texts(node)
+            if let name = words.first(where: { Int($0) == nil }) { counts[name] = words.compactMap { Int($0) }.first ?? 0 }
+        }
+        walk(sidebar)
+        return counts
     }
 
     /// The grid cell whose photo id names `name`.

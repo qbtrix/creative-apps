@@ -1,8 +1,8 @@
 // PhotoKernelTransformTests.swift: Photo's live transform runs on SuiteKernel
 // (adopt-kernel-transform AT-p1). Its handle hit is HandleHit's answer, a
 // side or corner drag is BoxMath.resized with Shift and Option forwarded, a
-// rotate drag snaps through BoxMath.snappedDegrees, and applying or flipping
-// still refuses as PV-7. Runs on Linux and macOS.
+// rotate drag snaps through BoxMath.snappedDegrees. Applying and flipping are
+// LiveTransformTests' (transform PT-4). Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -109,15 +109,5 @@ import Testing
         #expect(snapped.transform.degrees == BoxMath.snappedDegrees(free.transform.degrees, modifiers: .shift))
         #expect(snapped.transform.degrees == 15)
         #expect(snapped.transform.scaleX == 1 && snapped.transform.dx == 0)
-    }
-
-    @Test func applyingAndFlippingStillRefuseAsPV7() throws {
-        let pixels = try FakeMasking().mask(from: nil, layerBounds: PixelRect(x: 0, y: 0, width: 2, height: 2))
-        let content = PlacedPixels(pixels: pixels, x: 0, y: 0)
-        let refusal = PhotoRefusal("Not built yet (PV-7).")
-        #expect(live.unavailableHelp == refusal.message)
-        #expect(throws: refusal) { try live.applied(draft, to: content) }
-        #expect(throws: refusal) { try live.flipped(content, .horizontal) }
-        #expect(throws: refusal) { try live.flipped(content, .vertical) }
     }
 }

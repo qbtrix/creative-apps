@@ -1,0 +1,7 @@
+[
+{"label": "two steps: the selection is a second undo step", "file": "Sources/HaloModel/HaloShape+Kernel.swift", "find": "            doc.selectedLayerID = layer.id\n            added = layer.id\n        }\n", "replace": "            added = layer.id\n        }\n        _ = edit(\"Select Layer\", control: \"halo.shape.draw\") { doc in doc.selectedLayerID = added }\n", "tests": "HaloShapeTests"},
+{"label": "a bad spec is drawn instead of refused", "file": "Sources/HaloModel/HaloShape+Kernel.swift", "find": "        if let help = ShapeRules.help(spec) { throw ShapeRefusal.invalid(help) }\n", "replace": "", "tests": "HaloShapeTests"},
+{"label": "the Shape button never says why with no composition", "file": "Sources/HaloModel/HaloShape+Kernel.swift", "find": "        selectedComposition == nil ? \"Make a composition first.\" : nil\n", "replace": "        nil\n", "tests": "HaloShapeTests"},
+{"label": "spec ignored: a shape layer with a spec still draws the ellipse", "file": "Sources/HaloModel/Live/HaloOutlines.swift", "find": "            if let spec = item.shape { outline(spec,", "replace": "            if let spec = item.shape, false { outline(spec,", "tests": "HaloShapeTests"},
+{"label": "the spec path skips the layer matrix", "file": "Sources/HaloModel/Live/HaloOutlines.swift", "find": "path.transformed(by: m).flattened(", "replace": "path.flattened(", "tests": "HaloShapeTests"}
+]

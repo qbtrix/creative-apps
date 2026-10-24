@@ -5,6 +5,7 @@
 // progress takes every drag. Runs on Linux and macOS.
 import CoreRaster
 @testable import PhotoModel
+import SuiteKernel
 import Testing
 
 @Suite struct PhotoDragRoutingTests {
@@ -45,19 +46,26 @@ import Testing
         model.drag(from: Self.a, to: Self.b)
         model.endDrag()
         #expect(model.historySteps == steps && !model.canUndo)
+        // The kernel's mean of the composite under the drag's end, not a fake's colour (EP-2).
+        let want = try #require(model.sampledColor(at: Point(x: Self.b.x, y: Self.b.y), size: model.sampleSize))
         let options = model.brushOptions
-        #expect((options.red, options.green, options.blue) == (255, 204, 0))
+        #expect([options.red, options.green, options.blue].map(Int.init) == [want.r, want.g, want.b].map(SampleRules.byte))
     }
 
-    @Test func theLiveEyedropperRefusesWithoutAChange() throws {
+    /// On `.live` (its sampler built, eyedropper PE-5) a drag picks the white
+    /// canvas into the brush colour, still with no history step.
+    @Test func theLiveEyedropperPicksWithNoHistoryStep() throws {
         var model = PhotoWorkspace()
         try model.newCanvas(width: 64, height: 64)
+        model.setToolOption(.color(red: 10, green: 20, blue: 30))
         model.selectTool(.eyedropper)
-        let before = model
+        let steps = model.historySteps
         model.drag(from: Mask.Point(x: 8, y: 8), to: Mask.Point(x: 40, y: 40))
         model.endDrag()
-        #expect(model == before)
-        #expect(model.toolHelp(.eyedropper)?.isEmpty == false)
+        #expect(model.historySteps == steps)
+        let options = model.brushOptions
+        #expect((options.red, options.green, options.blue) == (255, 255, 255))
+        #expect(model.toolHelp(.eyedropper) == nil)
     }
 
     @Test func aTransformInProgressTakesTheDrag() throws {

@@ -159,5 +159,19 @@
     "find": "onScreen < Self.legibleTextSize",
     "replace": "onScreen <= Self.legibleTextSize",
     "tests": "DesignTextLiveFitTests"
+  },
+  {
+    "label": "the knob above several layers hovers as the top handle (#4224)",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "if boxHandle(at: point) == .rotate, let box = selectionBounds {",
+    "replace": "if boxHandle(at: point) == .top, let box = selectionBounds {",
+    "tests": "DesignKnobSeveralTests"
+  },
+  {
+    "label": "the knob above several layers shows the move pointer (#4224)",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "DesignHover(nodeID: nil, outline: box, pointer: .resize(.rotate))",
+    "replace": "DesignHover(nodeID: nil, outline: box, pointer: .move)",
+    "tests": "DesignKnobSeveralTests"
   }
 ]

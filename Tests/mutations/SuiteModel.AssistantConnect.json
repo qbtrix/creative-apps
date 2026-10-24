@@ -1,0 +1,6 @@
+[
+{"label": "quoting dropped (.pathWithSpaceQuoted)", "file": "Sources/SuiteModel/Packaging/AssistantConnect.swift", "find": "\"\\\"\\(shellQuoted(cli(bundle: bundle)))\\\" mcp\"", "replace": "\"\\(cli(bundle: bundle)) mcp\"", "tests": "AssistantConnectTests"},
+{"label": "foreign-file check skipped (.neverOverwritesForeignFile)", "file": "Sources/SuiteModel/Packaging/AssistantConnect.swift", "find": "return .refuse(reason: foreign(at: at, target: target))", "replace": "return .link(at: at, to: cli)", "tests": "AssistantConnectTests"},
+{"label": "our own link is not recognised (.ourLinkIsAlreadyLinked)", "file": "Sources/SuiteModel/Packaging/AssistantConnect.swift", "find": "if target == cli { return .alreadyLinked(at) }", "replace": "if target == at { return .alreadyLinked(at) }", "tests": "AssistantConnectTests"},
+{"label": "a quote in the path left unescaped in the JSON (.quotesAndBackslashesAreEscaped)", "file": "Sources/SuiteModel/Packaging/AssistantConnect.swift", "find": "case \"\\\"\": out += \"\\\\\\\"\"", "replace": "case \"\\\"\": out += \"\\\"\"", "tests": "AssistantConnectTests"}
+]

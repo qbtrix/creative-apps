@@ -1,0 +1,16 @@
+[
+  {
+    "label": "theWindowBecomesTheCatalogTheCommandRanOn: the live result dropped",
+    "file": "Sources/LibraryModel/LibraryCatalog+Live.swift",
+    "find": "        self = ran.library\n",
+    "replace": "        _ = ran\n",
+    "tests": "LibraryLiveTakeTests"
+  },
+  {
+    "label": "theWindowBecomesTheCatalogTheCommandRanOn: the window rewraps its own catalog instead",
+    "file": "Sources/LibraryModel/LibraryCatalog+Live.swift",
+    "find": "        self = ran.library\n",
+    "replace": "        self = LibraryHeadless(catalog: self).library\n",
+    "tests": "LibraryLiveTakeTests"
+  }
+]

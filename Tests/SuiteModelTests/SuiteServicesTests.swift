@@ -1,17 +1,18 @@
 // SuiteServicesTests.swift: SuiteServices (SC-4b). `.fake` is a preview with
-// nothing pending, `with(animations:updates:)` swaps only those two members,
-// and `slotFeatures` names a feature for each of the 15 slotted members.
+// only `media` and `text` pending (shell-media SM-1, shell-text ST-1), `with(animations:updates:)` swaps
+// only those two members, and `slotFeatures` names a feature for each of the 17 slotted members.
 import SuiteModel
 import Testing
 
 @Suite struct SuiteServicesTests {
     static let slotted = ["switching", "recents", "creating", "routing", "sending", "receiving", "roundTrips",
-                          "pasteboard", "assets", "linking", "preferences", "settings", "onboarding", "thumbnails", "home"]
+                          "pasteboard", "assets", "linking", "preferences", "settings", "onboarding", "thumbnails", "home", "media",
+                          "text"]
 
-    @Test func fakeIsAPreviewWithNothingPending() {
+    @Test func fakeIsAPreviewWithOnlyMediaAndTextPending() {
         let s = SuiteServices.fake()
         #expect(s.isPreview)
-        #expect(s.pending.isEmpty)
+        #expect(Set(s.pending.keys) == ["media", "text"])
     }
 
     @Test func fakeSharesOneSwitchingBetweenSendingAndReceiving() async throws {
@@ -37,14 +38,14 @@ import Testing
             (s.preferences, swapped.preferences), (s.settings, swapped.settings), (s.thumbnails, swapped.thumbnails),
         ]
         for (a, b) in kept { #expect(a as AnyObject === b as AnyObject) }
-        #expect(swapped.isPreview && swapped.pending.isEmpty)
+        #expect(swapped.isPreview && swapped.pending == s.pending)
         let none = s.with()
         #expect(none.updates as AnyObject === s.updates as AnyObject)
     }
 
     @Test func slotFeaturesNamesAFeatureForEachSlottedMember() {
         #expect(Set(SuiteServices.slotFeatures.keys) == Set(Self.slotted))
-        #expect(SuiteServices.slotFeatures.count == 15)
+        #expect(SuiteServices.slotFeatures.count == 17)
         #expect(SuiteServices.slotFeatures["animations"] == nil && SuiteServices.slotFeatures["updates"] == nil)
         for member in Self.slotted {
             let feature = SuiteServices.slotFeatures[member] ?? ""

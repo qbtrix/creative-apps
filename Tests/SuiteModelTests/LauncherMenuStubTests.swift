@@ -96,9 +96,11 @@ private func occurrences(of needle: String, in text: String) -> Int {
                 #expect(found.contains(shortcut), "\(item.title) lacks \(shortcut)")
             }
         }
+        // A submenu may carry a symbol (`Menu("Switch To", systemImage: …)`), so match up to the title's closing quote.
         for (title, file) in menus {
-            let total = texts.values.reduce(0) { $0 + occurrences(of: "Menu(\"\(title)\")", in: $1) }
-            #expect(total == 1 && occurrences(of: "Menu(\"\(title)\")", in: texts[file] ?? "") == 1, "\(title) ▸")
+            let call = "Menu(\"\(title)\""
+            let total = texts.values.reduce(0) { $0 + occurrences(of: call, in: $1) }
+            #expect(total == 1 && occurrences(of: call, in: texts[file] ?? "") == 1, "\(title) ▸")
         }
     }
 
@@ -153,11 +155,12 @@ private func occurrences(of needle: String, in text: String) -> Int {
         for scene in ["Window(\"AfterGlow\", id: \"home\")", "Settings {", "Window(\"Welcome to AfterGlow\", id: \"onboarding\")"] {
             #expect(occurrences(of: scene, in: app) == 1, "\(scene)")
         }
-        for group in [
-            "SuiteCommands(app: .launcher)", "LauncherCommandsHome()", "LauncherCommandsAssets()",
-            "LauncherCommandsUpdate()", "LauncherCommandsSettings()",
-        ] {
+        for group in ["SuiteCommands(app: .launcher)", "LauncherCommandsHome()", "LauncherCommandsSettings()"] {
             #expect(occurrences(of: group, in: app) == 1, "\(group)")
+        }
+        // No placeholder menu item in the beta (NP-2): the assets and updater stubs are out of every scene.
+        for stub in ["LauncherCommandsAssets()", "LauncherCommandsUpdate()"] {
+            #expect(occurrences(of: stub, in: app) == 0, "\(stub) is back in a scene")
         }
         #expect(app.contains("@NSApplicationDelegateAdaptor(LauncherDelegate.self)"))
     }

@@ -1,7 +1,8 @@
 // SuiteFileDrop.swift (file-flow SF-2 on the fakes, SF-3 mark, SF-8 live): a window takes dropped files and
 // folders. The kernel's drop rule (DropPlan) gives one action per file, worked out with the bridge's
 // registry, and the window performs them in one step. While files hover, a mark at the window's bottom says
-// what the first one will do: "Open in Halo", "Place in Sunset", or why it can't open.
+// what the first one will do: "Open in Halo", "Place in Sunset", or why it can't open. The mark stays a
+// moment after the release, so a refused file is read, not silently ignored.
 import Foundation
 import SuiteKernel
 import SuiteModel
@@ -11,16 +12,36 @@ import UniformTypeIdentifiers
 
 extension View {
     /// Takes file drops for `app`: each file opens, is placed into the open document (`documentName`), is
-    /// handed to the app that reads it, or is refused, and `perform` gets every action at once.
+    /// handed to the app that reads it, or is refused, and `perform` gets every action at once. `opens` are
+    /// extensions the app opens itself though no suite type names them; `perform` must open those itself.
     public func suiteFileDrop(_ app: SuiteApp, bridge: SuiteDocumentsBridge, hasDocument: Bool,
-                              places: Set<String>, documentName: String? = nil,
+                              places: Set<String>, opens: Set<String> = [], documentName: String? = nil,
                               perform: @escaping ([DropAction]) -> Void) -> some View {
         let registry = bridge.registry
         let plan: ([String]) -> [DropAction] = { paths in
-            DropPlan.plan(paths, into: app.rawValue, hasDocument: hasDocument, places: places,
-                          readers: { @Sendable ext in SuiteDocumentsBridge.readers(in: registry, ofExtension: ext) })
+            DropPlan.plan(paths, into: app, registry: registry, hasDocument: hasDocument, places: places, opens: opens)
         }
         return modifier(SuiteFileDropModifier(app: app, documentName: documentName, plan: plan, perform: perform))
+    }
+
+    /// Takes file drops for `app` and performs them: opens and places through the app's document `host`,
+    /// hand-offs through the bridge to the app that reads the file.
+    public func suiteFileDrop(_ app: SuiteApp, bridge: SuiteDocumentsBridge, host: (any SuiteDocumentHost)?,
+                              hasDocument: Bool, places: Set<String>, documentName: String? = nil) -> some View {
+        suiteFileDrop(app, bridge: bridge, hasDocument: hasDocument, places: places, documentName: documentName) { actions in
+            Task { await bridge.perform(actions, host: host) }
+        }
+    }
+}
+
+extension DropPlan {
+    /// The drop rule for `app` over `registry`, as the drop modifier plans it. An extension in `opens` is the
+    /// app's own open, so its mark says "Open in" rather than refusing a file the app then opens.
+    public static func plan(_ paths: [String], into app: SuiteApp, registry: SuiteTypeRegistry, hasDocument: Bool,
+                            places: Set<String>, opens: Set<String> = []) -> [DropAction] {
+        plan(paths, into: app.rawValue, hasDocument: hasDocument, places: places, readers: { ext in
+            opens.contains(ext) ? [app.rawValue] : SuiteDocumentsBridge.readers(in: registry, ofExtension: ext)
+        })
     }
 }
 
@@ -59,19 +80,57 @@ struct SuiteDropMarkView: View {
     }
 }
 
-private struct SuiteFileDropModifier: ViewModifier {
+/// What the drop mark shows: the planned actions of the files hovering now, or of the last drop for
+/// `linger` after it. A plan that lands after its files left (a stale session) is dropped.
+@MainActor @Observable final class SuiteDropHover {
+    /// How long the mark stays after a drop.
+    static let linger: Duration = .seconds(3)
+
+    private(set) var actions: [DropAction] = []
+    @ObservationIgnored private var session = 0
+
+    /// A new hover begins; its plan comes in with `planned(_:for:)`.
+    func begin() -> Int {
+        session += 1
+        return session
+    }
+
+    /// The hover `session`'s plan, unless another hover or the exit came since.
+    func planned(_ actions: [DropAction], for session: Int) {
+        if session == self.session { self.actions = actions }
+    }
+
+    /// The files left without a drop.
+    func exit() {
+        session += 1
+        actions = []
+    }
+
+    /// The files were dropped: the mark keeps saying what happened, then clears unless a new hover began.
+    func dropped(_ actions: [DropAction], linger: Duration = SuiteDropHover.linger) {
+        session += 1
+        let session = self.session
+        self.actions = actions
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: linger)
+            if let self, self.session == session { self.actions = [] }
+        }
+    }
+}
+
+struct SuiteFileDropModifier: ViewModifier {
     let app: SuiteApp
     let documentName: String?
     let plan: ([String]) -> [DropAction]
     let perform: ([DropAction]) -> Void
-    @State private var hovering: [DropAction] = []
+    @State var hover = SuiteDropHover()
 
     func body(content: Content) -> some View {
         content
-            .onDrop(of: [.fileURL], delegate: SuiteFileDropDelegate(plan: plan, perform: perform, hovering: $hovering))
+            .onDrop(of: [.fileURL], delegate: SuiteFileDropDelegate(plan: plan, perform: perform, hover: hover))
             .overlay(alignment: .bottom) {
-                if let sentence = SuiteDropMark.sentence(for: hovering, app: app, documentName: documentName) {
-                    SuiteDropMarkView(sentence: sentence, refused: SuiteDropMark.refuses(hovering))
+                if let sentence = SuiteDropMark.sentence(for: hover.actions, app: app, documentName: documentName) {
+                    SuiteDropMarkView(sentence: sentence, refused: SuiteDropMark.refuses(hover.actions))
                         .padding(SuiteSpacing.l)
                         .allowsHitTesting(false)
                 }
@@ -80,26 +139,27 @@ private struct SuiteFileDropModifier: ViewModifier {
 }
 
 /// Plans the hovering files once when they enter (the mark changes once), clears the mark when they leave,
-/// and on release plans and performs them.
+/// and on release plans and performs them, the mark saying what the drop did.
 private struct SuiteFileDropDelegate: DropDelegate {
     let plan: ([String]) -> [DropAction]
     let perform: ([DropAction]) -> Void
-    @Binding var hovering: [DropAction]
+    let hover: SuiteDropHover
 
     func validateDrop(info: DropInfo) -> Bool { info.hasItemsConforming(to: [.fileURL]) }
 
     func dropEntered(info: DropInfo) {
-        let plan = self.plan, hovering = $hovering
-        Self.paths(info) { paths in hovering.wrappedValue = plan(paths) }
+        let plan = self.plan, hover = self.hover
+        let session = hover.begin()
+        Self.paths(info) { paths in hover.planned(plan(paths), for: session) }
     }
 
-    func dropExited(info: DropInfo) { hovering = [] }
+    func dropExited(info: DropInfo) { hover.exit() }
 
     func performDrop(info: DropInfo) -> Bool {
-        hovering = []
-        let plan = self.plan, perform = self.perform
+        let plan = self.plan, perform = self.perform, hover = self.hover
         Self.paths(info) { paths in
             let actions = plan(paths)
+            hover.dropped(actions)
             if !actions.isEmpty { perform(actions) }
         }
         return true

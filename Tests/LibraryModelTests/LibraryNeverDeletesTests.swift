@@ -1,14 +1,20 @@
 // LibraryNeverDeletesTests.swift: Library never deletes a file (cull-finish).
 // Delete Rejects moves files to the Trash through `services.trash`; nothing
-// under Sources/Library* calls a file-deleting API, except the catalog
-// store setting a damaged catalog aside. Runs on Linux and macOS.
+// under Sources/Library* calls a file-deleting API, except the catalog and
+// collections stores setting a damaged file aside and the
+// share copies' launch cleanup. Runs on Linux and macOS.
 import Foundation
 import Testing
 
 /// File-deleting calls; a hit outside `allowed` fails.
 private let deleting = ["removeItem(", "unlink(", "rmdir(", "remove(atPath"]
-/// The one place a delete is allowed: the store replaces its set-aside copy.
-private let allowed = ["Sources/LibraryApp/Platform/CatalogStore.swift"]
+/// The only places a delete is allowed: each store replaces its set-aside copy, and the launch cleanup empties
+/// `<support>/Share/`, which holds only the copies Library made for the share sheet (share-sheet SH-3).
+private let allowed = [
+    "Sources/LibraryApp/Platform/CatalogStore.swift",
+    "Sources/LibraryApp/Platform/CollectionsStore.swift",
+    "Sources/LibraryModel/LibraryShare+Kernel.swift",
+]
 
 @Test func librarySourcesNeverDeleteAFile() throws {
     let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent()

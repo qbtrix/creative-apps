@@ -56,7 +56,7 @@ import Testing
         window.contentView = NSHostingView(rootView: view.frame(width: size.width, height: size.height))
         window.orderFrontRegardless()
         defer { window.orderOut(nil) }
-        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+        spinUntil { pointMarkNodes(in: window).count > 1 }
         return pointMarkNodes(in: window).count
     }
     let bare = elements(Text(verbatim: "Under"))

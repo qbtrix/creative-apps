@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-X45, pending IM-10 (suiteui/suite-imaging): neither catalog can set a tone by command yet (Photo has no adjust.set, Library no develop.set), Library's Saturation waits on creative-core until IM-10 runs ImagingProgram.adjustments, and the harness runs one app per job, so platforms is [] and the harness skips the job on both. Opens beach.png (64 x 48 sRGB: sky, sea and sand bands) in Photo and in Library, sets Exposure +1 stop and Saturation -50 in each, and exports a PNG from each. The trap: the same slider gives a different picture in each app (gamma read as its reciprocal, saturation missing, levels units mixed). The assertion: the two exports match within 1 level per channel and both differ clearly from the original; the turn-on adds the two commands, runs the stages in order, compares out/beach-library.png against out/beach-photo.png, and sets platforms to linux and macos.",
+  "pending": "IM-10",
+  "waits_on": "IM-10",
+  "inputs": ["input/*.png"],
+  "stages": [
+    {"app": "photo", "steps": [
+      {"id": "adjust.set", "params": {"exposure": 1, "saturation": -50}}
+    ], "output": {"dir": "out", "name": "{stem}-photo", "format": "png", "options": {}}},
+    {"app": "library", "steps": [
+      {"id": "develop.set", "params": {"exposure": 1, "saturation": -50}}
+    ], "output": {"dir": "out", "name": "{stem}-library", "format": "png", "options": {}}}
+  ],
+  "atomic": true,
+  "expect": {
+    "out/beach-library.png": {"pixels": {"size": [64, 48], "tolerance": 1, "reference": "out/beach-photo.png"}}
+  },
+  "platforms": []
+}

@@ -39,9 +39,9 @@ extension DesignExportOptions {
         return options
     }
 
-    /// Why the Scale chips are off: SVG and PDF are vectors, written at 1x whatever the scale.
+    /// Why the Scale chips are off: SVG and PDF are vectors, written at 1x whatever the scale (PNG and JPEG take one).
     public var scaleHelp: String? {
-        format == .png ? nil : "SVG and PDF are vectors, so they don't take a scale."
+        [.png, .jpeg].contains(format) ? nil : "SVG and PDF are vectors, so they don't take a scale."
     }
 }
 
@@ -84,8 +84,9 @@ extension DesignWorkspace {
         guard let plan = try? exportPlan(options, existing: []) else { return [] }
         let files = plan.map { item in
             let size = "\(Self.whole(item.width)) × \(Self.whole(item.height))"
-            let text = options.format == .png
-                ? "\(item.fileName) \(size), \(exportFactor(options.format, options.scale))x, \(item.pixelWidth) × \(item.pixelHeight) px"
+            let factor = options.size == .scale(Double(options.scale)) ? "\(exportFactor(options.format, options.scale))x, " : ""
+            let text = [.png, .jpeg].contains(options.format)
+                ? "\(item.fileName) \(size), \(factor)\(item.pixelWidth) × \(item.pixelHeight) px"
                 : "\(item.fileName) \(size) pt"
             return DesignExportRow(id: item.nodeID, text: text, skipped: nil)
         }
