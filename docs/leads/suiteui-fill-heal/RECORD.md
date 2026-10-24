@@ -4,7 +4,7 @@ Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/feat
 Run: act-1a16cae79dd-mtf2 · Started: 2026-10-24T06:54Z (prior: act-1a1693a401e-chyn, act-1a164697376-dv7u)
 Stage: 3 wave 4
 Base: e5dcf939 (dev; brief's main HEAD 654fb363 verified)
-Next: batch 20261024110214 (#5087-#5036) macOS gate still running (since 11:02); fill-heal PRs open, proofs valid, no needs-* label, expected in the next batch (2026-10-24T11:52:56Z); on each merge retarget children to dev; then FH-9 docs PR and FH-10; then Belt-Slice-Done per slice on a green run; critic panel on FH-photo
+Next: batch 20261024110214 (#5087-#5036) macOS red at 12:09, lane bisecting (probe -6); fill-heal PRs open, proofs valid, no needs-* label, queued for the batch after (2026-10-24T12:15:08Z); on each merge retarget children to dev; then FH-9 docs PR and FH-10; then Belt-Slice-Done per slice on a green run; critic panel on FH-photo
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
