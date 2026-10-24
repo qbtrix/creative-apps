@@ -86,6 +86,18 @@ import Testing
         #expect(worst > 0 && worst < 0.5, "chord error \(worst) view points")
     }
 
+    @Test func theDashPhaseScalesWithTheZoom() throws {
+        // 40 on, 40 off from phase 40 opens on a gap: the first dash starts 40 pt along the top edge, at (140, 100),
+        // which is (280, 200) at 2x. A phase left in document points starts mid-dash at the corner instead (#5010).
+        let stroke = VectorStroke(width: 2, dash: [40, 40], dashPhase: 40)
+        let first = { (path: VectorPath?) in path?.elements.lazy.compactMap { e -> Point? in
+            if case .move(let p) = e { return p } else { return nil }
+        }.first }
+        let rect = Self.node(.rectangle)
+        #expect(first(rect.strokedPath(stroke)) == Point(x: 140, y: 100))
+        #expect(first(rect.strokedPath(stroke, scale: 2)) == Point(x: 280, y: 200))
+    }
+
     @Test func aDashedStrokeBreaksTheOutline() {
         // A 600 pt perimeter at 8 on, 4 off: 50 dashes.
         let dashed = Self.node(.rectangle).strokedPath(VectorStroke(width: 2, dash: [8, 4]))
