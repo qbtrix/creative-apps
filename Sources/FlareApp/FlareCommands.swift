@@ -9,7 +9,9 @@
 // titled by the step, as in "Undo Set Keyframe Easing". File > Open Sample
 // lists Bounce, Character, Button and Keyed Ball, the keyed document the
 // easing journey starts from; Open Recent lists the window's recent files,
-// then Clear Menu. Document Settings… opens the shared setup sheet on the open scene. The focused window publishes a FlareMenu as a focused
+// then Clear Menu. File > Place… (⇧⌘P, svg-place PF-3) is off with
+// `place.image`'s reason until an animation is open. Document Settings… opens
+// the shared setup sheet on the open scene. The focused window publishes a FlareMenu as a focused
 // scene value (FlareWindow.swift); with none focused every item disables. The
 // value carries the selection's Edit reasons too, so a new selection is a new
 // value and the items re-read their reasons. ⌘A is Select All Keys while the
@@ -35,6 +37,9 @@ struct FlareMenu {
     var editHelps: [FlareEditAction: String] = [:]
     /// The keyframe Delete reason (`deleteHelp`), then Bring Forward's and Send Backward's.
     var selectionHelps: [String?] = []
+    /// Why File > Place… can't run (`place.image`'s reason), and the panel it opens (FlarePlace.swift).
+    var placeHelp: String? = "Open a Flare window first."
+    var place: @MainActor () -> Void = {}
     /// The open animation's file, which File > Open In ▸ hands to another app; nil before it has one (file-flow FL-2).
     var document: SuiteDocumentRef?
     /// File > Document Settings… (document-setup DS-14): shows the shared sheet in settings mode; `settingsHelp` is
@@ -147,12 +152,15 @@ struct FlareCommands: Commands {
         }
     }
 
-    /// The suite's Open Recent ▸ and Open In ▸, after Open… (file-flow FL-2), and the File items Flare hides;
-    /// Open Sample ▸ opens the Save group in `body`, as section 3.4 orders File (#4604).
+    /// The suite's Open Recent ▸ and Open In ▸, after Open… (file-flow FL-2), File > Place… (svg-place PF-u),
+    /// and the File items Flare hides; Open Sample ▸ opens the Save group in `body`, as section 3.4 orders File (#4604).
     /// Its own builder keeps `body` within the builder's ten top-level commands.
     @CommandsBuilder private var suiteFileMenu: some Commands {
         SuiteFileCommands(app: .flare, bridge: FlareShell.bridge, document: menu.document)
-        CommandGroup(replacing: .importExport) {}
+        CommandGroup(replacing: .importExport) {
+            MenuCommand(FlareWorkspace.placeMenuSpec, on: menu.placeHelp,
+                        shortcut: KeyboardShortcut("p", modifiers: [.command, .shift])) { menu.place() }
+        }
         CommandGroup(replacing: .printItem) {}
     }
 

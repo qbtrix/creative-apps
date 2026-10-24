@@ -1,0 +1,16 @@
+[
+  {
+    "label": ".removeIsRepeatable: a random seed makes the same remove give different pixels",
+    "file": "Sources/SuiteImaging/Retouch/HealRules.swift",
+    "find": "return try pixels.filledFromSurroundings(grown, seed: seed)",
+    "replace": "return try pixels.filledFromSurroundings(grown, seed: UInt64.random(in: 0...UInt64.max))",
+    "tests": "HealRulesTests/theSameSeedGivesTheSamePixels"
+  },
+  {
+    "label": ".healCopiesFromSource: the offset read backwards samples the wrong side",
+    "file": "Sources/SuiteImaging/Retouch/HealRules.swift",
+    "find": "offset: (dx: sourceOffset.dx, dy: sourceOffset.dy)",
+    "replace": "offset: (dx: -sourceOffset.dx, dy: -sourceOffset.dy)",
+    "tests": "HealRulesTests/healCopiesTextureFromTheSource"
+  }
+]
