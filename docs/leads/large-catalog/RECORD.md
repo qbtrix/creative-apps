@@ -1,17 +1,17 @@
 # large-catalog lead record
 
 Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
-Run: act-1a1693fbf6d-ap2g · Session: claude/large-catalog-share-sheet-2tdm4i (earlier act-1a15df37b73-k199) · Started: 2026-10-21T10:19Z (resumed 2026-10-23T14:20Z)
-Stage: 3 wave 2 (LG-model done: #4847, afb9cbed, run 40029034328; LG-grid blocked on suiteui ST-m)
+Run: act-1a16c627c84-u86z · Session: claude/large-catalog-lead-jhxt1n (earlier act-1a1693fbf6d-ap2g, act-1a15df37b73-k199) · Started: 2026-10-21T10:19Z (resumed 2026-10-23T14:20Z, 2026-10-24T05:10Z)
+Stage: 3 wave 3 (LG-grid: LG-6 building first on the supervisor's answer; LG-5 waits on ST-a #4840)
 Base: 8021b0f56a45a59540cd4ea0ff99651c5fb8dc2a (origin/dev)
-Next: await the supervisor's answer on #3790 (6376659460: LG-6 ahead of LG-5?); LG-5 starts on ST-a fakes (Wire: line) once #4840 merges (23:39Z)
+Next: LG-6 PR (RenderQueue neighbour lane, far-decode drop); LG-5 on ST-a fakes with `Wire: shared-thumbnails:ST-a` once #4840 merges, stacked on LG-6
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | LG-a | 10,000-photo fixture and every budget test, disabled | LG-1, LG-2 | MJ-LG | metadata-more:MD-a (met) | no | 1 | done #4006, fix #4073 (c5801375) | 39601343733 | - |
 | LG-model | load off main with id index, IndexSet selection, one-pass export plan | LG-3, LG-4 | MJ-LG | LG-a; FC-a (met: filters-collections built), MD-e, DR-m (stubs, supervisor's answer b) | no | 0 | done (#4847, afb9cbed; run 40029034328) | - | - |
-| LG-grid | grid and loupe within budget, jobs, built | LG-5..LG-8 | LJ-LG, MJ-LG | LG-model; suiteui shared-thumbnails ST-m; FC-c (met) | yes | 0 | blocked | - | - |
+| LG-grid | grid and loupe within budget, jobs, built | LG-5..LG-8 | LJ-LG, MJ-LG | LG-model; suiteui shared-thumbnails ST-m; FC-c (met) | yes | 0 | building (LG-6) | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -31,6 +31,8 @@ Next: await the supervisor's answer on #3790 (6376659460: LG-6 ahead of LG-5?); 
 - LG-1 and LG-2 shipped as one LG-a PR. LG-3 and LG-4 ship as one LG-model PR (one PR per slice).
 - LG-model starts now on the supervisor's answer (b) on #3790 (2026-10-21 13:44Z): build on what dev has, parts that need FC-a, MD-e, DR-m behind stubs declared in the contract (rule 18). filters-collections is built on dev, so FC-a and FC-c are met.
 - LG-7's Tests/perf-suites.txt line is the supervisor's (protected).
+- LG-6 before LG-5: supervisor's answer on #3790 (comment 6380089356, 2026-10-24T04:55Z). LG-5 builds on ST-a's fakes with a `Wire: shared-thumbnails:ST-a` line once #4840 merges.
+- LG-6 scope: neighbour prefetch already exists but runs beside the render, unbounded per step; LG-6 queues the neighbours behind the render in RenderQueue and drops a superseded step's pending decodes, so stale prefetches never evict the focus's decodes.
 
 ## Open
 - 2026-10-23T23:17Z: LG-grid wait re-read: contract-first (supervisor 15:13Z) makes it met when ST-a #4840 merges; #4840 needs-fix since 19:15Z. Rule 23 question posted on #3790 proposing LG-6 (loupe, no thumbnail store) ahead of LG-5.
