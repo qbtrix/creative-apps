@@ -49,3 +49,5 @@ Next: wait on IM-a (#3715) per the supervisor's 04:24Z answer on #3777; poll eve
 - 2026-10-24T07:18Z: AJ-k re-cut opened as #5064 (base lead/adjust-everywhere-AJ-1b, #4846's branch, so the diff is its own 3 files +162/-12; 509 against dev). Retarget to dev and add fast-lane once #4846 merges. #4863 closed as superseded. CI: PASS at 12731553, mutate 3/3.
 
 - 2026-10-24T08:33Z check-in: #4846 needs-fix: macOS gate stall (Onboarding/Home 60s timeouts) unrelated; merged dev, gate PASS, pushed 3325d7a6, Head updated; restacking #5064
+
+- 2026-10-24T08:40Z restack: #5064 restacked on #4846 3325d7a6: gate PASS, pushed 80e6d515, Head updated, footer removed
