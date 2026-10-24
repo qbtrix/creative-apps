@@ -1,7 +1,8 @@
 // SuiteDocumentsBridgeTests.swift: file-flow SF-7 (packet suite/features/file-flow.md). The bridge over the
 // services' recents, routing and hand-offs: an open and a save note two events; `recents(for: .design)` lists
 // only Design's files and drops one deleted from disk; `openIn` sends one hand-off with the verb open; Open In
-// reads its targets and its refusal from the routing slot. Each test gets its own temp folder. macOS only.
+// reads its targets and its refusal from the routing slot; reopening the app's own file goes to its document host,
+// another app's to that app. Each test gets its own temp folder. macOS only.
 #if os(macOS)
 import Foundation
 import SuiteModel
@@ -73,6 +74,37 @@ private func ref(_ path: String, _ app: SuiteApp, _ type: SuiteTypeID) -> SuiteD
         #expect(bridge.openInTargets(for: poster) == routing.openInTargets(for: .designDocument, from: .design))
         #expect(bridge.openInRefusal(for: poster) == routing.openInRefusal(for: .designDocument, from: .design))
         #expect(!bridge.openInTargets(for: poster).contains(.design))
+    }
+
+    @Test func reopeningTheAppsOwnFileGoesToItsHostNotLaunchServices() async throws {
+        let services = SuiteServices.fake()
+        let handOffs = try #require(services.sending as? FakeHandOffs)
+        let bridge = SuiteDocumentsBridge(app: .design, services: services)
+        let host = RecordingHost()
+        bridge.host = host
+        let paths = try files(["Poster.design", "Bounce.flare"])
+        let poster = ref(paths[0], .design, .designDocument), bounce = ref(paths[1], .flare, .flareAnimation)
+        await bridge.note(poster, .opened)
+        await bridge.note(bounce, .opened)
+
+        try await bridge.reopen(poster.fileID)
+        #expect(await host.accepted.map(\.documents) == [[poster]], "Design's own file didn't reach Design's host")
+        #expect(await host.accepted.first?.verb == .open)
+        #expect(await handOffs.sent.isEmpty, "Design's own file went out through Launch Services")
+
+        try await bridge.reopen(bounce.fileID)
+        #expect(await handOffs.sent.map(\.to) == [.flare], "Flare's file didn't go to Flare")
+        #expect(await host.accepted.count == 1)
+    }
+}
+
+/// A document host that accepts every hand-off and keeps each one.
+private actor RecordingHost: SuiteDocumentHost {
+    private(set) var accepted: [HandOff] = []
+    func refusal(for handOff: HandOff) async -> SuiteError? { nil }
+    func accept(_ handOff: HandOff) async throws(SuiteError) -> HandOffState {
+        accepted.append(handOff)
+        return .accepted
     }
 }
 #endif
