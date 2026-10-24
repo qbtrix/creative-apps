@@ -17,6 +17,8 @@
 // KS-2), else Edit > Select All on the stage's art. While a text field has
 // focus (FILL's hex field, a layer name), Undo, Redo, Cut, Copy, Paste, Delete
 // and Select All give way to it (SuiteUI's MenuCommand.givingWay, #4830).
+// While an inspector slider has the keys, the arrow items give way to it
+// (MenuCommand.givingWayToSlider, #2487).
 import FlareModel
 import SuiteModel
 import SuiteShell
@@ -161,10 +163,11 @@ struct FlareCommands: Commands {
             isOn: Binding(get: { menu.loops }, set: { on in menu.perform(.timeline(.setLoops(on))) })
         )
         .disabled(menu.help(.timeline(.setLoops(!menu.loops))) != nil)
-        item(.timeline(.step(1)), key: KeyboardShortcut(.rightArrow, modifiers: []))
-        item(.timeline(.step(-1)), key: KeyboardShortcut(.leftArrow, modifiers: []))
-        item(.timeline(.nextKeyframe), key: KeyboardShortcut(.rightArrow, modifiers: .option))
-        item(.timeline(.previousKeyframe), key: KeyboardShortcut(.leftArrow, modifiers: .option))
+        // A focused inspector slider keeps its arrows, ⌥ for a tenth step; the frame steps only from the canvas or timeline (#2487).
+        item(.timeline(.step(1)), key: KeyboardShortcut(.rightArrow, modifiers: [])).givingWayToSlider()
+        item(.timeline(.step(-1)), key: KeyboardShortcut(.leftArrow, modifiers: [])).givingWayToSlider()
+        item(.timeline(.nextKeyframe), key: KeyboardShortcut(.rightArrow, modifiers: .option)).givingWayToSlider()
+        item(.timeline(.previousKeyframe), key: KeyboardShortcut(.leftArrow, modifiers: .option)).givingWayToSlider()
         item(.timeline(.goToStart), key: KeyboardShortcut(.home, modifiers: []))
         item(.timeline(.goToEnd), key: KeyboardShortcut(.end, modifiers: []))
         Divider()

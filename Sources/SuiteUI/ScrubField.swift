@@ -13,7 +13,8 @@
 // tenth; a modifier change re-anchors so nothing jumps), click or press
 // Return to type (Return or a click away commits, Escape cancels; after
 // Return or Escape the field has the keys again), arrows step with the same
-// modifiers, and the bar takes Home and End. A click or drag gives it the
+// modifiers (a menu's arrow items give way while it has the keys,
+// SuiteSliderFocus), and the bar takes Home and End. A click or drag gives it the
 // keys (focus interactions `.edit`), with or without keyboard navigation. Hover shows a dotted underline under the
 // value; focus draws the 2 pt accent ring 1 pt outside; disabled draws at 40%.
 // A ScrubTrack lets the bar move along a non-linear track (Photo's log gamma);
@@ -64,6 +65,8 @@ public struct ScrubField: View {
     @Environment(\.scrubProbe) private var probe
     @FocusState private var isTyping: Bool
     @FocusState private var isFocused: Bool
+    /// This field's token in SuiteSliderFocus, so a menu's plain arrows reach it while it has the keys (#2487).
+    @State private var focusToken = UUID()
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -132,6 +135,8 @@ public struct ScrubField: View {
         // arrows and Home/End never reached the bar on a default Mac.
         .focusable(!editing && isEnabled, interactions: .edit)
         .focused($isFocused)
+        .onChange(of: isFocused) { SuiteSliderFocus.shared.update(focusToken, isFocused: isFocused) }
+        .onDisappear { SuiteSliderFocus.shared.update(focusToken, isFocused: false) }
         .focusEffectDisabled()
         .onHover { hovering = $0 }
         .onKeyPress(keys: [.upArrow, .downArrow, .leftArrow, .rightArrow, .home, .end, .return, .space]) { press($0) }
