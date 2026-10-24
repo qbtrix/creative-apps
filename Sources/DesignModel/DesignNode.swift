@@ -291,7 +291,7 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
             fill: container.decode(DesignColor.self, forKey: .fill), text: container.decode(String.self, forKey: .text),
             cornerRadius: container.decodeIfPresent(Double.self, forKey: .cornerRadius) ?? 0,
             opacity: container.decodeIfPresent(Double.self, forKey: .opacity) ?? 1,
-            stroke: container.decodeIfPresent(DesignStroke.self, forKey: .stroke),
+            stroke: Self.stroke(in: container),
             textStyle: container.decodeIfPresent(DesignTextStyle.self, forKey: .textStyle) ?? .default,
             gradient: container.decodeIfPresent(Fill.self, forKey: .gradient))
         rotation = try container.decodeIfPresent(Double.self, forKey: .rotation) ?? 0
@@ -299,6 +299,16 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         flipY = try container.decodeIfPresent(Bool.self, forKey: .flipY) ?? false
         shape = try container.decodeIfPresent(ShapeSpec.self, forKey: .shape)
     }
+
+    /// The stroke as saved now (the kernel's), else as a file written before stroke-style saved it: a colour in
+    /// 0...255 bytes and a width, with the default join and cap; nil when there is none.
+    private static func stroke(in container: KeyedDecodingContainer<CodingKeys>) throws -> DesignStroke? {
+        if let stroke = try? container.decodeIfPresent(DesignStroke.self, forKey: .stroke) { return stroke }
+        return try container.decodeIfPresent(OldStroke.self, forKey: .stroke).map { DesignStroke(color: $0.color, width: $0.width) }
+    }
+
+    /// A stroke as files before stroke-style held it.
+    private struct OldStroke: Decodable { var color: DesignColor; var width: Double }
 
     /// The file's keys, one per stored field.
     enum CodingKeys: String, CodingKey {
