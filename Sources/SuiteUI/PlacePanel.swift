@@ -1,4 +1,4 @@
-// PlacePanel.swift: the Place… file panel (placed-images PL-3): an `NSOpenPanel` limited to `formats`, several files
+// PlacePanel.swift: the Place… file panel (placed-images PL-3): SuiteFilePanels' Open panel limited to `formats`, several files
 // at once, read off the main actor through `PlaceReader` with the drop's format and size checks.
 import AppKit
 import Foundation
@@ -11,13 +11,8 @@ public enum PlacePanel {
 
     /// The chosen files of `formats`; none when cancelled or when none could be read.
     @MainActor public static func choose(formats: Set<PlacedFormat>) async -> [(name: String, data: Data)] {
-        let panel = NSOpenPanel()
-        panel.canChooseFiles = true
-        panel.canChooseDirectories = false
-        panel.allowsMultipleSelection = true
-        panel.allowedContentTypes = PlaceReader.types(for: formats)
-        panel.prompt = "Place"
-        guard panel.runModal() == .OK else { return [] }
-        return await PlaceReader.read(panel.urls.map(PlaceItem.file), formats: formats).taken
+        let urls = SuiteFilePanels.chooseFiles(types: PlaceReader.types(for: formats), multiple: true, prompt: "Place")
+        guard !urls.isEmpty else { return [] }
+        return await PlaceReader.read(urls.map(PlaceItem.file), formats: formats).taken
     }
 }

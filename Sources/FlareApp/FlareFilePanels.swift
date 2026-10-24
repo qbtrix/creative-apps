@@ -5,7 +5,7 @@
 // or "Saved"; XCUITest reads no edited dot), shows a failed save's `saveError`
 // or a failed open's `loadState` message in a system alert each time the
 // Model sets it again, and opens `-FlareOpenFile`'s file once, in the first
-// window, the way Open Recent does. FlareFileDialogs are the AppKit panels:
+// window, the way Open Recent does. FlareFileDialogs are the dialogs: SuiteFilePanels'
 // open for .flare and Lottie JSON files, save for .flare files, the export's folder, and the close prompt's
 // Save, Don't Save and Cancel, in the kernel's shared words (UnsavedPrompt).
 // The window title is SuiteWindow's (`model.title`).
@@ -80,29 +80,17 @@ final class FlareEditedView: NSView {
 
     /// The open panel, for one .flare or Lottie JSON file (`FlareLottieOpen.fileExtensions`); nil when cancelled.
     static func chooseFile() -> URL? {
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = [fileType] + FlareLottieOpen.fileExtensions.compactMap { UTType(filenameExtension: $0) }
-        panel.allowsMultipleSelection = false
-        return panel.runModal() == .OK ? panel.url : nil
+        SuiteFilePanels.chooseFile(types: SuiteFilePanels.openTypes(for: .flare, adding: FlareLottieOpen.fileExtensions))
     }
 
     /// The save panel, starting at `name`; nil when cancelled.
     static func chooseSaveURL(named name: String) -> URL? {
-        let panel = NSSavePanel()
-        panel.allowedContentTypes = [fileType]
-        panel.nameFieldStringValue = name
-        return panel.runModal() == .OK ? panel.url : nil
+        SuiteFilePanels.chooseSaveURL(named: name, types: [fileType])
     }
 
     /// The folder panel for an export; nil when cancelled.
     static func chooseFolder() -> URL? {
-        let panel = NSOpenPanel()
-        panel.canChooseFiles = false
-        panel.canChooseDirectories = true
-        panel.allowsMultipleSelection = false
-        panel.canCreateDirectories = true
-        panel.prompt = "Export"
-        return panel.runModal() == .OK ? panel.url : nil
+        SuiteFilePanels.chooseFolder(prompt: "Export")
     }
 
     /// Asks whether to save `title`'s changes before it closes: a sheet on
