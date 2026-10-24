@@ -30,8 +30,11 @@ public struct InspectorAction: View {
         .accessibilityAddTraits(action.isSelected ? .isSelected : [])
         .disabled(!action.isEnabled)
         .help(Self.help(action, iconOnly: iconOnly))
-        .suiteControl(entry: Self.entry(action, isToggle: isToggle), identifies: true)
+        .suiteControl(entry: entry, identifies: true)
     }
+
+    /// The entry this action registers in `suite.controls`.
+    var entry: ControlEntry? { Self.entry(action, isToggle: isToggle) }
 
     /// The `suite.controls` entry: the action's own, plus a toggle's on state, which is off
     /// while it can't act since it draws off; nil without an identifier.

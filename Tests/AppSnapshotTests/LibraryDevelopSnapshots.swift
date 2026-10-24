@@ -10,12 +10,12 @@
 // three-point curve and Midtones 1.20, so CURVE and LEVELS show their
 // resets). macOS only.
 import AppKit
-import SuiteUI
 import SwiftUI
 import Testing
 
 @testable import LibraryApp
 @testable import LibraryModel
+@testable import SuiteUI
 
 @MainActor
 @Suite struct LibraryDevelopSnapshots {
@@ -124,6 +124,23 @@ import Testing
         #expect(DevelopInspector.levelsScale(.gamma) == 1)
         #expect(DevelopInspector.levelsRange(.outWhite) == 0...255)
         #expect(DevelopInspector.levelsRange(.gamma) == DevelopLevels.gammaRange)
+    }
+
+    /// Show Original is a toggle: its `suite.controls` entry reads selected false while off and true while on,
+    /// never absent (#4659: the control-state journey read "selected absent" before a press).
+    /// Both lists agree: the window's `suite.controls` (the button) and `library.controls` (the action).
+    @Test func showOriginalReportsOnAndOff() {
+        var develop = LibraryMenu.Develop()
+        func selected() -> [Bool?] {
+            let original = DevelopInspector.original(develop)
+            return [DevelopInspector.originalButton(original).entry?.selected, original.controlEntry()?.selected]
+        }
+        develop.toggleOriginal = {}
+        #expect(selected() == [false, false])
+        develop.showsOriginal = true
+        #expect(selected() == [true, true])
+        develop.toggleOriginal = nil
+        #expect(selected() == [false, false], "a toggle that can't act reads off")
     }
 
     @Test func identifiers() {

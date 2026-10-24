@@ -11,7 +11,8 @@
 // samples and the loupe histogram, `library.develop.curve`) and LEVELS (a
 // row per field, 0...255 whole numbers, Midtones 0.10...9.99 with two places,
 // `library.develop.levels.<field>`), each with its reset while off neutral (DV-10),
-// Show Original (`\`), Sync from the first selected photo, and Paste
+// Show Original (`\`, a toggle whose `suite.controls` entry reads `selected`
+// on or off), Sync from the first selected photo, and Paste
 // Settings with the copied settings named under it. Each row and action
 // carries its `library.develop.*` identifier and is off, saying why, while
 // its LibraryMenu closure is nil. Values in, closures out; it never writes
@@ -142,11 +143,8 @@ struct DevelopInspector: View {
 
     /// Show Original, Sync and Paste Settings, with the copied settings named under Paste.
     @ViewBuilder private var actions: some View {
-        let original = ToolbarAction(
-            "Show Original", systemImage: "eye", isSelected: develop.showsOriginal,
-            unavailableHelp: develop.toggleOriginal == nil ? "Open a photo in the loupe to compare it with its original." : nil,
-            shortcut: "\\", identifier: "library.develop.original", perform: { develop.toggleOriginal?() })
-        InspectorAction(original)
+        let original = Self.original(develop)
+        Self.originalButton(original)
             .keyboardShortcut("\\", modifiers: [])
             .libraryControl(original)
         let sync = ToolbarAction(
@@ -163,6 +161,19 @@ struct DevelopInspector: View {
             // A plain line until InspectorAction takes help while enabled (needs-ui).
             InspectorNote("Copied: \(copied)", identifier: "library.develop.copied")
         }
+    }
+
+    /// Show Original (`\`): a toggle, so `library.controls` reports it on or off (`selected`), never absent.
+    static func original(_ develop: LibraryMenu.Develop) -> ToolbarAction {
+        ToolbarAction(
+            "Show Original", systemImage: "eye", isSelected: develop.showsOriginal,
+            unavailableHelp: develop.toggleOriginal == nil ? "Open a photo in the loupe to compare it with its original." : nil,
+            shortcut: "\\", identifier: "library.develop.original", isToggle: true, perform: { develop.toggleOriginal?() })
+    }
+
+    /// Show Original's button: an InspectorAction toggle, so the window's `suite.controls` reports it on or off.
+    static func originalButton(_ original: ToolbarAction) -> InspectorAction {
+        InspectorAction(original, isToggle: true)
     }
 
     /// Why a row is off when its closure is nil (outside a window).
