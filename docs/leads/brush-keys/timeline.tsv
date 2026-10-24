@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-24T05:55:53Z	3	fix-round	#4939	dev merged into BK-u, head a57fe915, Fast-Check pass, Head moved
 2026-10-24T05:56:35Z	3	heartbeat	-	lane bisecting batch 20261024050226 (none of ours); our clean PRs queued; no dev-red, 0 findings
 2026-10-24T06:13:29Z	3	heartbeat	-	lane still bisecting batch 20261024050226; needs-rebase dropped on #4887; 5 PRs clean in queue; no dev-red
+2026-10-24T06:29:44Z	3	mirror	-	Belt reads lead/suiteui-brush-keys; both kept in sync from now
