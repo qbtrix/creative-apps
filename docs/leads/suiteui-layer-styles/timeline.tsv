@@ -69,3 +69,4 @@ utc	stage	event	ref	note
 2026-10-24T13:59Z	3	check	13:59Z	no merges; lane still bisecting batch-20261024110214 (probe 3, since 11:02), 131 ready PRs queued incl all 11 of ours; 0 findings
 2026-10-24T14:21Z	3	check	14:21Z	lane batch-20261024110214 landed (dev e6185fdf); none of our 11 PRs in it; they await the next batch (mergeable recomputing); 0 findings
 2026-10-24T14:44Z	3	check	14:44Z	all 11 lead PRs clean again on dev e79e9afc; no batch in flight yet, ours eligible for the next; 0 findings
+2026-10-24T15:06Z	3	check	15:06Z	lane batch-20261024144917 in flight (12 older/priority PRs #3621..#4951, none ours); our 11 PRs clean, eligible for a later batch; 0 findings
