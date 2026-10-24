@@ -78,3 +78,4 @@ utc	stage	event	ref	note
 2026-10-24T04:25Z	3	stage	-	heartbeat: probe -8 Linux green, macOS running; our PRs wait for next batch
 2026-10-24T04:47Z	3	stage	-	heartbeat: probe -8 macOS running; our PRs wait for next batch
 2026-10-24T05:10Z	3	stage	-	heartbeat: new batch 20261024050226 has HX-u #4858 and HF-u #4868; HF-m #4894 next batch; supervisor: crash is #5032, carry on
+2026-10-24T05:32Z	3	stage	-	heartbeat: batch Linux green, macOS gate running
