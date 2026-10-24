@@ -90,3 +90,4 @@ utc	stage	event	ref	note
 2026-10-24T08:14Z	3	heartbeat	#4902	relaunch act-1a16cdcb4a5-trd4; CB-6/8/10 queued; ST-a merged so CB-12 starts
 2026-10-24T08:16Z	3	stage-start	CB-12,CB-14	wave 2: CB-12 (CB-library, Wire shared-thumbnails:ST-m) and CB-14 (CB-photo, Wire area-selection:AR-photo-m) building
 2026-10-24T09:47Z	3	heartbeat	-	resumed after restart; wave 2 builders CB-12, CB-14, LS-4 finished
+2026-10-24T09:49Z	3	pr-opened	#5116 #5125	CB-12 Library copy #5116 (e3cc3053), CB-14 Photo paste-as-image #5125 (08ef8554); CB-13 started on shared-codecs contract (Wire: shared-codecs:SC-photo)
