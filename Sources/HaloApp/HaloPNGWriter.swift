@@ -1,17 +1,14 @@
 // HaloPNGWriter.swift: the PNG sequence sink (render-out RO-6, #429). Render…
 // hands it a folder URL; `begin` makes that folder (and any missing parents)
 // and refuses a path that is already a file, so no frame lands over it.
-// `write` turns each frame into an sRGB, straight-alpha image through
-// HaloFrameImage, the same image the viewer shows (RO-5), and writes it as
-// one PNG named by the plan through CGImageDestination. `finish` keeps every
+// `write` turns each frame into core's PNG bytes through `HaloHeadless.png`
+// (8-bit sRGB, straight alpha, the CLI export's bytes; shared-codecs SC-6)
+// and writes them as one file named by the plan. `finish` keeps every
 // frame written so far, cancelled or not: a cancelled sequence leaves its
 // first frames on disk. Errors say what went wrong in words the render
 // sheet shows. macOS only.
-import CoreGraphics
 import Foundation
 import HaloModel
-import ImageIO
-import UniformTypeIdentifiers
 
 struct HaloPNGWriter: RenderSink, Sendable {
     enum Failure: Error, CustomStringConvertible, Equatable {
@@ -50,12 +47,11 @@ struct HaloPNGWriter: RenderSink, Sendable {
     }
 
     mutating func write(_ frame: HaloRenderedFrame, named fileName: String) throws {
-        let url = folder.appending(path: fileName)
-        guard let image = HaloFrameImage.cgImage(frame),
-            let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.png.identifier as CFString, 1, nil)
-        else { throw Failure.unwritable(fileName) }
-        CGImageDestinationAddImage(destination, image, nil)
-        guard CGImageDestinationFinalize(destination) else { throw Failure.unwritable(fileName) }
+        do {
+            try HaloHeadless.png(frame).write(to: folder.appending(path: fileName))
+        } catch {
+            throw Failure.unwritable(fileName)
+        }
         written.append(fileName)
     }
 
