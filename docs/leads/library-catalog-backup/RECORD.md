@@ -133,3 +133,4 @@ Next: (2026-10-23T17:29:30Z) #4878 (BK-m) and #4923 (BK-z, stacked, feature-done
 - 2026-10-24T19:34:40Z: check: #4923 BK-z #4923 at ebe7dcb0 ready (fast-lane), waits for a batch. Scoped library run 40120685023 (BK-m) macOS (library) in progress. 0 open findings.
 - 2026-10-24T20:11:38Z: ci: run 40120685023 scoped library run lost its macOS runner mid-test (no test failed); re-ran failed jobs once
 - 2026-10-24T20:11:54Z: blocked: run 40120685023 re-run refused (403); BK-m/LC-a slice-done waits for the next green scoped library or full run on dev; supervisor please dispatch ci.yml app=library if none follows the next library merge
+- 2026-10-24T20:13:51Z: poll: #4923 #4924 #4937 #4938 #4949 all in fast-lane, none ejected; waiting on lane batch and a green scoped library run
