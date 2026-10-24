@@ -77,7 +77,7 @@ public struct HaloStyleMenuState: Sendable {
         .typed(id, title: HaloProject.styleMenuTitle(id), summary: HaloMenuState.spec(id).summary, kind: .edit,
                params: JSONValue.self, example: .object([:]),
                availability: { state in state.why(id).map(Availability.unavailable) ?? .available }) { state, _ in
-            state.project?.runStyleMenu(id, pasted: state.pasted) ?? .null
+            state.project?.runStyleMenu(id, pasted: state.pasted) ?? JSONValue.null
         }
     }
 
@@ -86,6 +86,6 @@ public struct HaloStyleMenuState: Sendable {
         "style.panel", title: "Done", summary: "Close the layer style panel.", kind: .view, params: JSONValue.self,
         example: .object([:]), availability: { _ in .available }) { state, _ in
         state.project?.runStyle(.show(nil))
-        return .null
+        return JSONValue.null
     }
 }
