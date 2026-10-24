@@ -170,3 +170,4 @@ utc	stage	event	ref	note
 2026-10-24T13:36Z	check	PL-z	PL-z: no new ci.yml run on dev since 12:22Z; still no green full or scoped run at or after 6ad8cad
 2026-10-24T14:02Z	check	PL-z	PL-z: no new ci.yml run on dev since 12:22Z; lane sweeping (fast-lane runs at 13:57Z); waiting for a full or scoped run
 2026-10-24T14:30Z	check	PL-z	PL-z: full CI 40102257393 on dev e79e9afc (contains 6ad8cad) in progress; scoped photo/design and Linux check also running; waiting for it to finish green
+2026-10-24T14:57Z	check	PL-z	PL-z: full CI 40102257393 on dev e79e9afc (contains 6ad8cad) still in progress; waiting for it to finish green
