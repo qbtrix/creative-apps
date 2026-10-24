@@ -72,7 +72,7 @@ func adjustCatalog() throws -> CommandCatalog<AdjustTestTarget> {
     }
 
     /// Each edit records one step named its title.
-    @Test(.disabled("waits on AJ-6")) func eachEditIsOneNamedStep() throws {
+    @Test func eachEditIsOneNamedStep() throws {
         let catalog = try adjustCatalog()
         var doc = AdjustTestTarget()
         #expect(try catalog.run("adjust.invert", params: .object([:]), on: &doc).undoStep == "Invert")
@@ -84,7 +84,7 @@ func adjustCatalog() throws -> CommandCatalog<AdjustTestTarget> {
     }
 
     /// look.apply is one step and undo restores tone, adjust and kinds.
-    @Test(.disabled("waits on AJ-6")) func lookIsOneStep() throws {
+    @Test func lookIsOneStep() throws {
         let catalog = try adjustCatalog()
         var doc = AdjustTestTarget()
         let before = doc.look
@@ -95,7 +95,7 @@ func adjustCatalog() throws -> CommandCatalog<AdjustTestTarget> {
     }
 
     /// A look saved from one target applies the same tone, adjust and kinds to another; built-ins can't be deleted.
-    @Test(.disabled("waits on AJ-6")) func lookKeepsTone() throws {
+    @Test func lookKeepsTone() throws {
         let catalog = try adjustCatalog()
         let store = FakePresetStore()
         var first = AdjustTestTarget(store: store), second = AdjustTestTarget(store: store)
