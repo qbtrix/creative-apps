@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-24T00:51Z	check	editor-menus	00:52Z probe -6 Linux green, macOS running	https://github.com/qbtrix/creative-apps/actions/runs/40044879600
 2026-10-24T01:13Z	check	editor-menus	01:14Z probe -6 macOS gate still running	https://github.com/qbtrix/creative-apps/actions/runs/40044879600
 2026-10-24T01:36Z	check	editor-menus	01:36Z probe -6 green on Linux and macOS; probe -9 running	https://github.com/qbtrix/creative-apps/actions/runs/40044879600
+2026-10-24T01:57Z	check	editor-menus	01:58Z probe -9 Linux green, macOS running	https://github.com/qbtrix/creative-apps/actions/runs/40050012604
