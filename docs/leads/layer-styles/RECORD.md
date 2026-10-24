@@ -2,9 +2,9 @@
 
 Issue: #3937 · Packet: docs/blueprints/suiteui/features/layer-styles.md
 Run: act-1a16cdcb4a5-trd4 · Session: claude/feature-lead-playbook-9a8kbw · Started: 2026-10-23T15:30Z
-Stage: 3 wave 1
+Stage: 3 wave 2
 Base: 1bbaba6c1e4b460f13b959e69183c50208b14a8a (origin/dev)
-Next: LS-1 #4911 and LS-10 #4903 to merge, then open stacked LS-2, LS-5, LS-11
+Next: LS-1 #4911 and LS-10 #4903 to merge, then open stacked LS-2, LS-5, LS-11; LS-4 stacked on LS-3
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
