@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-24T11:22Z	3	check	IM-10b	mutate LiveDevelop 8/8, LibraryDevelop+Imaging 4/4; test fix 65fa4fe; scripts/ci --changed running; IM-11a rebased to e7b0234
 2026-10-24T11:27Z	3	open	IM-10b	#5153 opened (fast-lane, 65fa4fe); IM-11a 4d753ae mutate 4/4, gate running
 2026-10-24T11:29Z	3	open	IM-11a	#5154 opened (fast-lane, 4d753ae, mutate 4/4, CI: PASS); IM-11b started
+2026-10-24T11:43Z	3	check	IM-11b	catalog half f6083f3 (showLoupeFrame, loupeSteps, LoupeImaging.gpuFrame); LibraryCatalog tests signal 11 at the dev base too, clean rebuild running; app half next
