@@ -2,14 +2,14 @@
 
 Issue: #3793 · Packet: docs/blueprints/photo/features/layer-styles.md
 Run: act-1a16cd04539-4jc0 · Session: claude/feature-lead-playbook-9tb3qe · Started: 2026-10-24T07:30Z (takes over from act-1a16958d691-2ax3)
-Stage: 0 setup, blocked: suiteui layer-styles LS-a (the contract slice) has not merged, so rule 12 is not met yet
-Base: 9f476af74 (dev at 09:27Z)
-Next: re-check LS-1 #4911 (open, clean, fast-lane, queued) each tone wave; once `Sources/SuiteImaging/Style/` is on dev, start PY-1 on its stubs
+Stage: build W1 (PY-1 builder running, workflow wf_fee9bae7-0b7)
+Base: 78983bc33 (dev at 12:22Z, LS-1 #4911 merged)
+Next: PY-1 PR into the lane; then W2: PY-2 (on PY-1), PY-5/PY-6 once LS-m lands
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| PY-a | `PhotoLayer.style`, `style.*` in the catalog on stubs, Layer > Layer Style… opens the panel | PY-1, PY-2 | MJ-PY | multi-layer-select (built #3535); file-flow:PF-m (done); suiteui layer-styles LS-a (not started) | yes | 0 | blocked (LS-a) | – | – |
+| PY-a | `PhotoLayer.style`, `style.*` in the catalog on stubs, Layer > Layer Style… opens the panel | PY-1, PY-2 | MJ-PY | multi-layer-select (built #3535); file-flow:PF-m (done); suiteui layer-styles LS-a (merged #4911) | yes | 0 | building | – | – |
 | PY-u | panel snapshots, render budget, journey written | PY-3, PY-4 | PJ-Y1 | PY-a | yes | 0 | waiting | – | – |
 | PY-m | style commands as one undo step, composite draws styles padded, `.ora` keeps them | PY-5, PY-6 | MJ-PY | PY-a; LS-m | no | 0 | waiting | – | – |
 | PY-z | live canvas through `StyleRoute`, journey on live, photo.md built | PY-7, PY-8 | PJ-Y1 | PY-u, PY-m; text-layers:TX-z (PY-8); LS-gpu, IM-photo (PY-7) | yes | 0 | waiting | – | – |
@@ -17,7 +17,7 @@ Next: re-check LS-1 #4911 (open, clean, fast-lane, queued) each tone wave; once 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| PY-1 | PY-a | 1 | `PhotoLayer.style`; adapter stubs (`showStylePanel` real); catalog specs and ids; tests disabled | Sources/PhotoModel/PhotoLayer.swift, Sources/PhotoModel/PhotoStyle+Kernel.swift, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/PhotoModelTests/PhotoLayerStyleTests.swift | PhotoLayerStyleTests (disabled), command-id list | – | blocked (LS-a) |
+| PY-1 | PY-a | 1 | `PhotoLayer.style`; adapter stubs (`showStylePanel` real); catalog specs and ids; tests disabled | Sources/PhotoModel/PhotoLayer.swift, Sources/PhotoModel/PhotoStyle+Kernel.swift, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/PhotoModelTests/PhotoLayerStyleTests.swift | PhotoLayerStyleTests (disabled), command-id list | – | building (W1) |
 | PY-2 | PY-a | 2 | Layer menu items by id; panel sheet while `stylePanel` is set; pasteboard via `LayerStylePasteboard` | Sources/PhotoApp/PhotoCommands+Layer.swift, Sources/PhotoApp/PhotoWindow+Styling.swift, Sources/PhotoApp/PhotoWindow.swift | PhotoLayerStyleSnapshots.panel | – | waiting (PY-1) |
 | PY-5 | PY-m | 2 | adapter bodies; tests on | Sources/PhotoModel/PhotoStyle+Kernel.swift, Tests/PhotoModelTests/PhotoLayerStyleTests.swift, Tests/mutations/PhotoModel.PhotoStyle+Kernel.json | PhotoLayerStyleTests | – | waiting (PY-1, LS-m) |
 | PY-6 | PY-m | 2 | styles in composite and `.ora`; RJ-P44, RJ-X51 | Sources/PhotoModel/PhotoLayerComposite.swift, Sources/PhotoModel/PhotoDocumentFile.swift, Tests/PhotoModelTests/PhotoStyleRenderTests.swift, Tests/mutations/PhotoModel.PhotoLayerComposite.json, Tests/mutations/PhotoModel.PhotoDocumentFile.json, Tests/RealJobs/photo/outline-cutout/, Tests/RealJobs/photo/style-drop-shadow/ | PhotoStyleRenderTests | – | waiting (PY-1, LS-m) |
@@ -35,6 +35,7 @@ Next: re-check LS-1 #4911 (open, clean, fast-lane, queued) each tone wave; once 
 - No task starts: PY-1 needs SuiteImaging's `LayerStyle`, `LayerStyleTarget` and `StyleCommands`, none of which exist on dev (no SuiteImaging target yet). Rule 20 forbids a Photo copy, and LS-a is the suiteui line's work, so nothing is stubbed here.
 
 ## Open
+- 12:22Z: LS-1 #4911 merged (78983bc33); `Sources/SuiteImaging/Style/` on dev. PY-1 builder launched on that base.
 - 2026-10-24T07:35Z (run act-1a16cd04539-4jc0): LS-1 #4911 (the LS-a contract, `Style/` stubs) is open, clean and queued in the lane; dev 830af22de has SuiteImaging Adjust, Color, Retouch, Route, Select and Tone, but no Style. PY-1 still waits; rule 20 rules out a Photo copy.
 - 2026-10-23T15:35Z: dev 721168a8f has SuiteImaging (Adjust, Color, Retouch, Route, Tone) but no Style/: no `LayerStyle`, `LayerStyleTarget` or `StyleCommands`. #3937 is unparked under rule 12 too but has no LS-a PR yet. Rule 20 still rules out a Photo copy, so PY-1 waits; this run builds tone-controls meanwhile.
 - Blocked on suiteui layer-styles LS-a (#3937, still `waiting-on-prereq` at 03:13Z). LS-a waits on suite-imaging:IM-a (IM-1 #4028 still open: Linux green at 02:30Z, macOS job skipped, awaiting the supervisor macOS run and merge; IM-2 stacked), brush-keys:BK-u, gradient-fill:GF-a, and core types from LE-a. Bump #3825 (7966e5a) merged 2026-10-21 but carries only Flare core PRs. No `SuiteImaging` target or `LayerStyle` types on dev 66a8458.
