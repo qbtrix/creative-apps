@@ -55,3 +55,4 @@ ts	kind	note
 2026-10-24T07:51:41Z	pr	UP-flare #5089 opened (a981f4a4, gate PASS, base UP-photo); UP-halo gate running
 2026-10-24T07:53:10Z	pr	UP-halo opened (67110503, gate PASS, base UP-flare)
 2026-10-24T08:15:37Z	poll	hb1: three slice PRs in lane, clean; UP-z blocked on SC-z
+2026-10-24T08:36:34Z	poll	hb2: unchanged; three slice PRs in lane; UP-z blocked on SC-z

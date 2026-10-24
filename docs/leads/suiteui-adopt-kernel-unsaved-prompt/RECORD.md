@@ -26,6 +26,8 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 2026-10-24T08:37Z: hb2: unchanged from hb1: #5088, #5089, #5091 open in lane, no needs-* label; UP-z blocked on SC-z. Second identical poll.
+
 - 2026-10-24T08:20Z: hb1: #5088, #5089, #5091 open, fast-lane, no needs-* label (lane's only note: the server-appended footer, stripped on squash). UP-z still blocked on SC-z and the app slices. No findings.
 
 - 2026-10-24T07:52Z: UP-halo gate PASS at 67110503 (live set all four apps), pushed, PR #5091 on the UP-flare branch, fast-lane.
