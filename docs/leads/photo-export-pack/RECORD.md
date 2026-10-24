@@ -4,12 +4,12 @@ Issue: #3470 · Packet: docs/blueprints/photo/features/export-pack.md
 Run: act-1a15e2da54d-qlg1 (resumed; earlier act-1a15a9f4eba-h30y) · Session: claude/feature-lead-playbook-t69dpt · Started: 2026-10-20T18:40Z
 Stage: 3 building (unparked 2026-10-23T15:11Z under contract-first waits)
 Base: e382f9d7fba02ffdefc8ba2f23c9461b4774fad6
-Next: #4832 (PX-2) and #4836 (PX-6) land; PX-5 waits XP-4; PX-4 still on the supervisor's codec hold; PX-8 waits PX-7, PX-5, tone-controls PT-z and place-image PP-z (PT-a merged #4845)
+Next: PX-a Belt-Slice-Done once dev Linux run 40077014447 (contains #4832) is green; PX-5 waits XP-4; PX-4 still on the supervisor's codec hold; PX-8 waits PX-7, PX-5, tone-controls PT-z and place-image PP-z (PT-a merged #4845)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| PX-a | Photo export reads ExportOptions on stubs; Export… opens SuiteExportSheet with Size row and four formats | PX-1, PX-2 | MJ-PX | XP-1, XP-6 (merged, PX-1); XP-3 + AX-photo (PX-2) | yes | 0 | building | – | – |
+| PX-a | Photo export reads ExportOptions on stubs; Export… opens SuiteExportSheet with Size row and four formats | PX-1, PX-2 | MJ-PX | XP-1, XP-6 (merged, PX-1); XP-3 + AX-photo (PX-2) | yes | 0 | merged (PX-1, PX-2); awaiting green Linux on dev | – | – |
 | PX-u | sheet snapshots, render budget, journey written | PX-5, PX-6 | PJ-X1 | PX-a; XP-4 (PX-5) | yes | 0 | waiting | – | – |
 | PX-m | exact-size resample, PNG/JPEG/HEIC/TIFF through the shared encoder, headless and in app | PX-3, PX-4 | MJ-PX | PX-1 + XP-6 (PX-3, met); SM-w (PX-4) | yes | 0 | building (PX-1, PX-3 merged; PX-4 parked) | – | – |
 | PX-z | live services, journey, blueprint, built | PX-7, PX-8 | PJ-X1 | PX-u, PX-m; tone-controls:PT-z, place-image:PP-z (PX-8) | yes | 0 | waiting | – | – |
@@ -18,11 +18,11 @@ Next: #4832 (PX-2) and #4836 (PX-6) land; PX-5 waits XP-4; PX-4 still on the sup
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | PX-1 | PX-a | 1 | PhotoExport+Kernel stubs; PhotoExportPackTests disabled | Sources/PhotoModel/PhotoExport+Kernel.swift, Tests/PhotoModelTests/PhotoExportPackTests.swift | compiles; existing export tests pass | #3678 | merged 21:15Z (head 061e0972) |
-| PX-2 | PX-a | – | Export… opens SuiteExportSheet; Photo's ExportSheet.swift deleted | Sources/PhotoApp/PhotoWindow+Export.swift, Sources/PhotoApp/ExportSheet.swift | PhotoExportPackSnapshots.sheet | – | PR #4832 (XP-3 ahead on fakes; AX-photo merged #3890) |
+| PX-2 | PX-a | – | Export… opens SuiteExportSheet; Photo's ExportSheet.swift deleted | Sources/PhotoApp/PhotoWindow+Export.swift, Sources/PhotoApp/ExportSheet.swift | PhotoExportPackSnapshots.sheet | #4832 | merged 08:02Z (head 383ff525) |
 | PX-3 | PX-m | 1 (stacked on PX-1) | exportPixels and headless export on ExportOptions; RJ-P01 | Sources/PhotoModel/PhotoExport+Kernel.swift, Sources/PhotoModel/PhotoHeadless.swift, Tests/PhotoModelTests/PhotoExportPackTests.swift, Tests/mutations/PhotoModel.PhotoExport+Kernel.json, Tests/RealJobs/photo/instagram/ | PhotoExportPackTests | #3729 | merged 22:41Z (head e2c55886, Mutate 4/4) |
 | PX-4 | PX-m | – | app writes formats through services.media.still | Sources/PhotoApp/ImageIOCodec.swift, Tests/AppSnapshotTests/PhotoExportFormatsTests.swift | PhotoExportFormatsTests | – | parked (supervisor: no third codec path; waits shared-codecs XK3 + shell-media, no issue yet) |
-| PX-5 | PX-u | – | snapshots, render budget | Tests/AppSnapshotTests/PhotoExportPackSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoExportPackTests.swift | RenderBudgetPhotoExportPackTests.typingWidthInTwoBodies | – | waits PX-2, XP-4 |
-| PX-6 | PX-u | – | journey written, skipped | UITests/PhotoJourneyTests+ExportPack.swift | compiles, skipped | – | PR #4836 (skipped until PX-7) |
+| PX-5 | PX-u | – | snapshots, render budget | Tests/AppSnapshotTests/PhotoExportPackSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoExportPackTests.swift | RenderBudgetPhotoExportPackTests.typingWidthInTwoBodies | – | waits XP-4 |
+| PX-6 | PX-u | – | journey written, skipped | UITests/PhotoJourneyTests+ExportPack.swift | compiles, skipped | #4836 | merged 08:02Z (head a1c038a6; skipped until PX-7) |
 | PX-7 | PX-z | – | journey on live | UITests/PhotoJourneyTests+ExportPack.swift | PhotoExportPackJourneyTests.testExportForInstagram | – | waits PX-6, PX-3, PX-4 |
 | PX-8 | PX-z | – | photo.md, status built, feature-done | docs/blueprints/photo.md, docs/blueprints/photo/features/export-pack.wave.json | scripts/waves render --dry-run | – | waits PX-7, PX-5, PT-z, PP-z |
 
