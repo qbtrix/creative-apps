@@ -19,5 +19,40 @@
   "find": "[.sortedKeys, .withoutEscapingSlashes]",
   "replace": "[.withoutEscapingSlashes]",
   "tests": "AIAccessAuditTests"
+ },
+ {
+  "label": ".lateAllowOnceHolds: an allow once after the answer window holds the connection",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessAudit.swift",
+  "find": "decision == .allowOnce && kind != fileKind && waited < answerWindow",
+  "replace": "decision == .allowOnce && kind != fileKind",
+  "tests": "AIAccessAnswerTests"
+ },
+ {
+  "label": ".fileAllowOnceHolds: an allow once for a file command holds the connection",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessAudit.swift",
+  "find": "decision == .allowOnce && kind != fileKind && waited < answerWindow",
+  "replace": "decision == .allowOnce && waited < answerWindow",
+  "tests": "AIAccessAnswerTests"
+ },
+ {
+  "label": ".answerWindowLonger: the answer window lets the 111 s fallback through",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessAudit.swift",
+  "find": "answerWindow: Duration = .seconds(110)",
+  "replace": "answerWindow: Duration = .seconds(112)",
+  "tests": "AIAccessAnswerTests"
+ },
+ {
+  "label": ".lateAnswerRuns: a late allow runs the command asked about",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessAudit.swift",
+  "find": "decision != .deny && waited < answerWindow",
+  "replace": "decision != .deny",
+  "tests": "AIAccessAnswerTests"
+ },
+ {
+  "label": ".liveFrontReleaseAny: closing a background window drops the front one",
+  "file": "Sources/SuiteModel/AIAccess/AIAccessAudit.swift",
+  "find": "        guard window == id else { return }\n",
+  "replace": "",
+  "tests": "LiveFrontTests"
  }
 ]

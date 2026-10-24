@@ -10,6 +10,7 @@ import AppKit
 import CoreGraphics
 import Foundation
 import ImageIO
+import SuiteImaging
 import SuiteKernel
 import SwiftUI
 import UniformTypeIdentifiers
@@ -100,7 +101,7 @@ struct GalleryPlaceBoard: PlacedImageTarget {
     }
 
     func rasterSize(_ data: Data, format: PlacedFormat) throws -> Size {
-        guard let size = PlacedRaster.pixelSize(data), size.width > 0, size.height > 0 else {
+        guard let size = SuiteImaging.rasterSize(of: data) else {
             throw CatalogError.failed(id: "place.image", message: "The file has no readable size.")
         }
         return size

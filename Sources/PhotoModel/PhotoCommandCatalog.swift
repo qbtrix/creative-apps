@@ -115,7 +115,7 @@ extension PhotoWorkspace {
             act("tool.\(tool.rawValue)", tool.rawValue.capitalized, "Picks the \(tool.rawValue) tool for canvas drags.", .view,
                 gate { $0.toolHelp(tool) }) { $0.selectTool(tool) }
         }
-        + HistoryCommands.specs(PhotoWorkspace.self) + SampleCommands.specs(PhotoWorkspace.self) + textCommands
+        + HistoryCommands.specs(PhotoWorkspace.self) + SampleCommands.specs(PhotoWorkspace.self) + textCommands + pathCommands
         + ToneCommands.specs(PhotoWorkspace.self)
 
     static let fileCommands: [CommandSpec<PhotoWorkspace>] = [
