@@ -1,0 +1,37 @@
+[
+  {
+    "label": "nearestUnclippedBase: the walk does not stop at the first unclipped layer",
+    "file": "Sources/SuiteKernel/Layers/ClipRules.swift",
+    "find": "return below.last { !isClipped($0.payload) }?.id",
+    "replace": "return below.first { !isClipped($0.payload) }?.id",
+    "tests": "ClipRulesTests"
+  },
+  {
+    "label": "bottomHasNoBase: the bottom layer is given itself",
+    "file": "Sources/SuiteKernel/Layers/ClipRules.swift",
+    "find": "let below = siblings[..<index]",
+    "replace": "let below = siblings[...index]",
+    "tests": "ClipRulesTests"
+  },
+  {
+    "label": "skipsClipped: a clipped layer below counts as a base",
+    "file": "Sources/SuiteKernel/Layers/ClipRules.swift",
+    "find": "return below.last { !isClipped($0.payload) }?.id",
+    "replace": "return below.last?.id",
+    "tests": "ClipRulesTests"
+  },
+  {
+    "label": "clippedRunStops: clipped(onto:) keeps going past an unclipped layer",
+    "file": "Sources/SuiteKernel/Layers/ClipRules.swift",
+    "find": "return above.prefix { isClipped($0.payload) }.map(\\.id)",
+    "replace": "return above.filter { isClipped($0.payload) }.map(\\.id)",
+    "tests": "ClipRulesTests"
+  },
+  {
+    "label": "clippedBaseRefused: a clipped layer is taken as a base",
+    "file": "Sources/SuiteKernel/Layers/ClipRules.swift",
+    "find": "!isClipped(siblings[index].payload) else { return [] }",
+    "replace": "true else { return [] }",
+    "tests": "ClipRulesTests"
+  }
+]
