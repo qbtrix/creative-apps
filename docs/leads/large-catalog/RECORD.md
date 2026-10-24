@@ -4,7 +4,7 @@ Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a16ee71e35-s8g5 · Session: claude/large-catalog-lead-4ijm0b (earlier act-1a16c627c84-u86z, act-1a1693fbf6d-ap2g, act-1a15df37b73-k199) · Started: 2026-10-21T10:19Z (resumed 2026-10-23T14:20Z, 2026-10-24T05:10Z, 2026-10-24T17:15Z)
 Stage: 3 wave 3 (LG-grid: LG-6 #5042 and LG-5 #5050 open)
 Base: da62659fc9460750cd2c1d1483b253c2d9a02375 (origin/dev)
-Next: push #5050's dev merge with LG-8 folded in (status built, feature-done, beta), move its Head line; then watch #5042 #5050 #5054 merge and #5114 land; then Belt-Slice-Done LG-grid on a green run
+Next: watch #5042 #5050 #5054 merge (fast lane, beta) and #5114 land; then Belt-Slice-Done LG-grid on a green ci.yml run containing the last of them
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
