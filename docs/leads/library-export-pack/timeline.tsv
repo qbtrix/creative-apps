@@ -77,3 +77,4 @@ time	event	task	note
 2026-10-23T23:31Z	heartbeat	poll: all five PRs open on lane; batch 20261023215139 macOS job running since 22:35Z; no reply on #3475; no dev-red
 2026-10-23T23:43Z	heartbeat	poll: all five PRs open on lane; batch 20261023215139 macOS job still running; no reply on #3475; no dev-red
 2026-10-23T23:55Z	heartbeat	poll: all five PRs open on lane; batch 20261023215139 (none of ours) macOS gate red, lane will bisect; no reply on #3475; no dev-red
+2026-10-24T00:07Z	heartbeat	poll: all five PRs open on lane; red batch 20261023215139 awaiting bisect, full CI on dev 654fb363 running; no reply on #3475; no dev-red
