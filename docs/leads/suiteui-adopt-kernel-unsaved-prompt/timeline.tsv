@@ -51,3 +51,4 @@ ts	kind	note
 2026-10-21T18:40:41Z	question	blocked poll 3; Question for the supervisor 6323716714
 2026-10-21T18:41:35Z	nudge	Belt nudge read; state re-read from source: #4058 awaiting batch, no supervisor reply yet, no blocking slice on dev
 2026-10-21T19:02:29Z	released	supervisor answer: release this run; waiting-on-prereq
+2026-10-24T08:40:00Z	pr	UP-photo #5088 opened (b33630f9, gate PASS, fast-lane); record moved to the watched branch; restacking UP-flare, UP-halo
