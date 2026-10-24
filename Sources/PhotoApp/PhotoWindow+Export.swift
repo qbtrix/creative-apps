@@ -41,10 +41,8 @@ extension PhotoWindow {
             write(to: URL(fileURLWithPath: folder).appending(path: name), as: exportFormat, quality: exportQuality, saving: false)
             return
         }
-        let panel = NSSavePanel()
-        panel.allowedContentTypes = [exportFormat == .png ? .png : .jpeg]
-        panel.nameFieldStringValue = name
-        guard panel.runModal() == .OK, let url = panel.url else { return model.endExport(.failure(CancellationError())) }
+        guard let url = SuiteFilePanels.chooseSaveURL(named: name, types: [exportFormat == .png ? .png : .jpeg], prompt: "Export")
+        else { return model.endExport(.failure(CancellationError())) }
         write(to: url, as: exportFormat, quality: exportQuality, saving: false)
     }
 }

@@ -394,10 +394,7 @@ struct DesignWindow: View {
     }
 
     private func chooseFile() {
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = [Self.fileType]
-        panel.allowsMultipleSelection = false
-        guard panel.runModal() == .OK, let url = panel.url else { return }
+        guard let url = SuiteFilePanels.chooseFile(types: SuiteFilePanels.openTypes(for: .design)) else { return }
         // A window that holds a file keeps it, edited or not; the chosen file gets its own window.
         if model.takesOpenedFile {
             open(url)
@@ -427,10 +424,8 @@ struct DesignWindow: View {
     private func saveAs() {
         guard model.isOpen else { return }
         if let url = Self.launchSaveURL { return write(to: url) }
-        let panel = NSSavePanel()
-        panel.allowedContentTypes = [Self.fileType]
-        panel.nameFieldStringValue = model.documentURL?.lastPathComponent ?? "Untitled.design"
-        guard panel.runModal() == .OK, let url = panel.url else { return }
+        let name = SuiteFilePanels.fileName(model.documentURL?.lastPathComponent, extension: "design")
+        guard let url = SuiteFilePanels.chooseSaveURL(named: name, types: [Self.fileType]) else { return }
         write(to: url)
     }
 
