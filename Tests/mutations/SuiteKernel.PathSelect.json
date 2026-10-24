@@ -1,0 +1,6 @@
+[
+  {"label": "modeIgnored: the first contour always replaces the selection", "file": "Sources/SuiteKernel/Paths/PathSelect.swift", "find": "recipe.apply(.shape(first, p.mode ?? .replace))", "replace": "recipe.apply(.shape(first, .replace))", "tests": "PathSelectTests"},
+  {"label": "contoursReplace: each later contour replaces the ones before", "file": "Sources/SuiteKernel/Paths/PathSelect.swift", "find": "for shape in shapes.dropFirst() { recipe.apply(.shape(shape, .add)) }", "replace": "for shape in shapes.dropFirst() { recipe.apply(.shape(shape, .replace)) }", "tests": "PathSelectTests"},
+  {"label": "pathSpace: the polygon stays in the path's own space, not the document's", "file": "Sources/SuiteKernel/Paths/PathSelect.swift", "find": "            .transformed(by: edit.toDocument).flattened(tolerance: tolerance)", "replace": "            .flattened(tolerance: tolerance)", "tests": "PathSelectTests"},
+  {"label": "lineSelects: a two-point line makes an empty polygon instead of refusing", "file": "Sources/SuiteKernel/Paths/PathSelect.swift", "find": "count >= 3, points.allSatisfy", "replace": "count >= 2, points.allSatisfy", "tests": "PathSelectTests"}
+]
