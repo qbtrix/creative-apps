@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: IM-11b catalog half committed (LoupeGPUFrame lands via showLoupeFrame, loupeSteps); writing the app half (loupe presenter writes the frame through LiveToneSurface into the CanvasHost texture) and the latency test. LibraryCatalog-based Model tests crash (signal 11) on Linux at the dev merge base too; clean rebuild running to rule out stale state. Supervisor question 6383016723 (IM-8b) open. IM-8d and IM-12 wait on EP-z (#3723); IM-13 waits on ST-a.
+Next: IM-11b app half committed (fe06ec95e: LibraryLoupeGPU writes the GPU frame through ImagingGPU.display into the canvas host's resident texture; LoupePicture.make tries gpuFrame first in loupe and develop renders; latency test on the GPU route; 3 new mutations). Running mutate and scripts/ci --changed, then the PR stacked on #5154. The signal 11 was a stale build: a clean rebuild passes every loupe suite. Supervisor question 6383016723 (IM-8b) open. IM-8d and IM-12 wait on EP-z (#3723); IM-13 waits on ST-a.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
 
@@ -36,7 +36,7 @@ Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imag
 | IM-10 p1 | IM-library | develop levels/curve points are SuiteImaging's | #4886 | open (fast-lane, clean) |
 | IM-10b | IM-library | LiveDevelop on the shared list | #5153 | open (fast-lane, Fast-Check 65fa4fe, mutate 8/8 + 4/4; stacked on #4886) |
 | IM-11a | IM-library | loupe GPU frame (Model): LiveDevelop.steps, LiveLoupeImaging.gpuFrame, histogram from the CPU-developed preview | #5154 | open (fast-lane, Fast-Check 4d753ae, mutate 4/4; stacked on #5153) |
-| IM-11b | IM-library | loupe view on LiveToneSurface + CanvasHost resident texture; LibraryDevelopLatencyTests on | – | building on lead/suite-imaging-IM-11b (stacked on #5154, dev merged in for ImagingGPU and residentTexture) |
+| IM-11b | IM-library | loupe view writes the GPU frame (ImagingGPU.display into the CanvasHost resident texture); LibraryDevelopLatencyTests on the GPU route | – | committed fe06ec95e on lead/suite-imaging-IM-11b; gating (mutate, scripts/ci --changed) |
 | IM-12 | IM-z | delete Photo's copies | – | blocked: EP-z |
 | IM-13 | IM-z | no-baseline rule, Photo's Metal link removed | – | blocked: ST-a |
 | IM-14 | IM-z | feature-done | – | last |
