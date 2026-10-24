@@ -1,0 +1,44 @@
+[
+  {
+    "label": "no Cancel check before each file",
+    "file": "Sources/DesignModel/DesignExportLive+Kernel.swift",
+    "find": "            if isCancelled() { outcome.cancelled = true; break }\n            do {",
+    "replace": "            do {",
+    "tests": "DesignExportLiveTests"
+  },
+  {
+    "label": "no Cancel check between render and write",
+    "file": "Sources/DesignModel/DesignExportLive+Kernel.swift",
+    "find": "                if isCancelled() { outcome.cancelled = true; break }\n                try await write",
+    "replace": "                try await write",
+    "tests": "DesignExportLiveTests"
+  },
+  {
+    "label": "a failed write lets the run go on",
+    "file": "Sources/DesignModel/DesignExportLive+Kernel.swift",
+    "find": "                outcome.failed = (name(item), error)\n                break",
+    "replace": "                outcome.failed = (name(item), error)\n                continue",
+    "tests": "DesignExportLiveTests"
+  },
+  {
+    "label": "progress reports before the write",
+    "file": "Sources/DesignModel/DesignExportLive+Kernel.swift",
+    "find": "            outcome.written.append(name(item))\n            await progressed(outcome.written.count)",
+    "replace": "            outcome.written.append(name(item))\n            await progressed(items.count)",
+    "tests": "DesignExportLiveTests"
+  },
+  {
+    "label": "the finished line names no file",
+    "file": "Sources/DesignModel/DesignExportLive+Kernel.swift",
+    "find": "return \"Exported \\(count) to \\(folder)\" + (list.isEmpty ? \".\" : \": \\(list).\")",
+    "replace": "return \"Exported \\(count) to \\(folder).\"",
+    "tests": "DesignExportLiveTests"
+  },
+  {
+    "label": "the failed line drops how to fix it",
+    "file": "Sources/DesignModel/DesignExportLive+Kernel.swift",
+    "find": "\\(reason) Choose another folder and export again.\"",
+    "replace": "\\(reason)\"",
+    "tests": "DesignExportLiveTests"
+  }
+]
