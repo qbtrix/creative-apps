@@ -55,3 +55,4 @@ utc	stage	event	ref	note
 2026-10-24T11:02Z	3	build	IM-10b	feat committed 32ff1ed; LibraryModelTests segfault reproduces on dev sources too (container build), clean rebuild; mirror to lead/suiteui-suite-imaging for Belt
 2026-10-24T11:07Z	3	build	IM-11a	IM-11 split: IM-11a Model (LiveDevelop.steps, LiveLoupeImaging.gpuFrame, 4-mutation plan) committed 2d0ef01 on IM-10b; clean rebuild for LibraryModelTests still compiling
 2026-10-24T11:22Z	3	check	IM-10b	mutate LiveDevelop 8/8, LibraryDevelop+Imaging 4/4; test fix 65fa4fe; scripts/ci --changed running; IM-11a rebased to e7b0234
+2026-10-24T11:27Z	3	open	IM-10b	#5153 opened (fast-lane, 65fa4fe); IM-11a 4d753ae mutate 4/4, gate running
