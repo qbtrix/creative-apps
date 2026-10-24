@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 00:08Z	3	poll	dev 654fb363	nothing to act on: #4577 #4889 fast-lane, #4896 stacked, none merged, no needs-* labels; AJ-a #4846 open fast-lane; BK-photo #4965 open, no labels
 00:32Z	3	poll	dev 654fb363	nothing to act on: #4577 #4889 fast-lane, #4896 stacked, none merged, no needs-* labels; lane run 40044859262 in progress; AJ-a #4846 open fast-lane; BK-photo #4965 open, no labels
 00:54Z	3	poll	dev 654fb363	nothing to act on: #4577 #4889 fast-lane, #4896 stacked, none merged, no needs-* labels; AJ-a #4846 open fast-lane; BK-photo #4965 open, no labels (updated 00:35Z)
+01:16Z	3	poll	dev 654fb363	nothing to act on: #4577 #4889 fast-lane, #4896 stacked, none merged, no needs-* labels; full CI 40037716897 green on dev 654fb363; lane bisecting batch-20261023215139 (probe -6 macOS gate 40044879600 running); AJ-a #4846 open fast-lane; BK-photo #4965 open, no labels
