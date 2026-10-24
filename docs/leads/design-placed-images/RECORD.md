@@ -1,7 +1,7 @@
 # placed-images lead record
 
 Issue: #3454 · Packet: docs/blueprints/design/features/placed-images.md
-Run: act-1a16953aed5-oxsi · Session: claude/lead-placed-images-stroke-style-elhwn1 · Started: 2026-10-23T15:20Z (prior runs act-1a15da1b26c-9qo6, act-1a15ac70747-ky1f)
+Run: act-1a16cc9673d-cmzv · Session: claude/feature-lead-placed-images-dkjo55 · Started: 2026-10-24T07:20Z (prior runs act-1a16953aed5-oxsi, act-1a15da1b26c-9qo6, act-1a15ac70747-ky1f)
 Stage: 3 wave 1 (17:30Z): PD-a #3759 pushed 3fc0a384 (dev merge + format-ratchet fix), gate rerun waiting on load; PD-m #4922 open (stacked on #3759, gate PASS); PD-u gating on design/pd-u-place-canvas (PD-a + DK-u #4864)
 Base: 721168a8 (origin/dev); main verified at cb79cbb6
 Next: supervisor merges #3759; PD-u and PD-m slice PRs stacked on design/pd-a-placed-image-stubs; then PD-z
@@ -31,6 +31,7 @@ Next: supervisor merges #3759; PD-u and PD-m slice PRs stacked on design/pd-a-pl
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-24 run act-1a16cc9673d-cmzv: resumed; brief main HEAD 654fb363 verified, dev 830af22d. Status branches stay lead/design-*; PRs target dev. All slice PRs are clean and wait on the lane (PD-a #3759 on the supervisor); no new feature task while open findings exceed 5.
 - 2026-10-23 run act-1a16953aed5-oxsi: contract-first waits (lead.md rule 12, supervisor 15:11Z): every other feature's contract slice has merged (stroke-style DK-a, design-export, gradient/transform/shape-tools/eyedropper built), so PD-u and PD-m start now, stacked on PD-a #3759 since PD-a is this feature's own contract. One lead holds placed-images and stroke-style.
 - PRs target dev (CLAUDE.md); brief's main HEAD b3011ab9 verified, work branches from origin/dev a48992b7.
 - PD-1 touches Package.swift (protected): the packet says the supervisor merges it after the macOS build; the PR will say so.
