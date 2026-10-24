@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-24T07:32:36Z	heartbeat	#5036 still open in the lane; batch 20261024050226 bisecting ahead of it
 2026-10-24T07:54:03Z	heartbeat	#5036 waits; lane held behind bisect probe -1 (run 40070370339)
 2026-10-24T08:25:47Z	wait	#5036 waits for the next lane batch; lead/flare-lottie-open created as a mirror for Belt
+2026-10-24T08:45:58Z	heartbeat	#5036 unchanged; lane bisecting batch 20261024081307 ahead of it
