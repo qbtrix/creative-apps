@@ -40,6 +40,7 @@ Next: watch #5042 #5050 #5054 to merge and the supervisor to land #5114 (perf-su
 - LG-6 scope: neighbour prefetch already exists but runs beside the render, unbounded per step; LG-6 queues the neighbours behind the render in RenderQueue and drops a superseded step's pending decodes, so stale prefetches never evict the focus's decodes.
 
 ## Open
+- 09:08Z: poll: dev-red #5113 open (macOS setup: lottie-oracle cache hit skips meson install, from #4132; .github/scripts fix for the supervisor, not ours); it holds macOS batch gates, so #5042 #5050 #5054 wait; #5114 open (no-fast-lane); #3790 nothing new
 - 08:49Z: supervisor approved the perf-suites line (#3790 6382106137); opened #5114 (perf-suites line + drop .disabled, no-fast-lane, supervisor lands); #5042 #5050 #5054 still queued; no dev-red
 - 08:23Z: poll: #5042 #5050 #5054 open, mergeable clean, in the lane queue (127 open fast-lane PRs); #3790 no supervisor answer; no open dev-red
 - 08:04Z: poll: #5042 #5050 #5054 open (fast-lane, no needs-fix/rebase); #3790 no supervisor answer yet; no open dev-red; lane batch merged #4836..#5053 at 08:03Z
