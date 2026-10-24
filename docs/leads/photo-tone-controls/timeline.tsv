@@ -102,3 +102,4 @@ utc	stage	event	ref	note
 2026-10-24T08:40Z	W4	check-in	PT-3, PT-4	PT-3 PR #5105 opened (CI: PASS; footer removed from body); PT-4 building; #5007/#5008/#5105 clean in lane; TC-3/5/6 open; dev 1bbaba6c1; no needs-fix; 0 tone findings
 2026-10-24T08:45Z	W4	done	PT-3, PT-4	build-wave wf_3eec3e40-086 done: #5105, #5112 open in lane (footers removed); 0 tone findings
 2026-10-24T09:04Z	W4	check-in	PT-5	#5105, #5112, #5007, #5008 clean in lane (bodies end on Head:); TC-3/5/6 open; dev 1bbaba6c1; lane sweep running; dev-red #5113 (macos, range has no tone PR); 0 tone findings
+2026-10-24T09:27Z	W4	check-in	PT-5	#5105, #5112, #5007, #5008 clean, not yet batched; TC-3/5/6 open; dev 9f476af74 (#5117 dev-red fix); dev-red #5113 open, no tone PR; 0 tone findings
