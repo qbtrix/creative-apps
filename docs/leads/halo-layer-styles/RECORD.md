@@ -3,7 +3,7 @@
 Issue: #3936 · Packet: docs/blueprints/halo/features/layer-styles.md
 Run: act-1a16c627cc6-nlss · Session: claude/layer-styles-lead-vx2vrg · Started: 2026-10-24 (resumed; earlier run act-1a1648ae75a-4dqz)
 Wire: suiteui layer-styles:LS-a
-Stage: wave 2 (HY-5 built on HY-1, stacked; HY-2 blocked on LS-2)
+Stage: wave 2 (HY-5 built; HY-2 built on LS-2 placeholders, in gate)
 Base: a41e7f1 (origin/dev)
 Next: open the HY-a PR (HY-1, e52c9ca) once #4911 is on dev, then the HY-m PR's first half (HY-5, 3290e96) once HY-a lands; HY-6 next (needs LS-8's `StyleProgram.render`); HY-2 waits on LS-2 (SuiteUI `LayerStylePanel` placeholder, no PR yet)
 
@@ -48,3 +48,11 @@ Next: open the HY-a PR (HY-1, e52c9ca) once #4911 is on dev, then the HY-m PR's 
 - 2026-10-22T17:00Z: #3937 (suiteui layer-styles) open, `waiting-on-prereq`; SuiteImaging on dev a41e7f1 has Adjust and Route only.
 - Halo placed-images PH-a #4426 open (PH-u #4437, #4438 stacked); no placed-images slice merged for Halo.
 - Halo file-flow HF-m (HF-3, HF-4) not merged; file-flow.wave.json still `planned`.
+
+### Decision (HY-2, 2026-10-24)
+- Layer menu style items are spec-built (`HaloStyleMenuState.spec(id)`, MenuCommand(spec, on:)). While a `style.*`
+  body is LS-6's stub, the item's help is a dry run on a copy: "Not built yet (layer-styles LS-6)."; it heals when
+  LS-6 lands. Paste says "Copy a layer style first." while LayerStylePasteboard (LS-2 placeholder) reads nil.
+- The panel opens and closes through `showStylePanel` (spec availability respected); the sheet carries its own
+  Done (spec `HaloStyleMenuState.done`, Return) until LS-3 gives LayerStylePanel one.
+- Wire: suiteui layer-styles:LS-2 (LayerStylePanel, LayerStylePasteboard placeholders).
