@@ -12,7 +12,7 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 | HX-a | codec and alpha settings, ProRes refused; Render sheet Codec row and Transparent checkbox | HX-1, HX-2 | - | gradient-fill:HG-a, placed-images:PH-a | yes | 0 | done #4841 (a8e0e252) | [40029046141](https://github.com/qbtrix/creative-apps/actions/runs/40029046141) | wanted |
 | HX-m | codec and alpha plan rules, alpha frames, RJ-H41; live renderer through services.media.movie | HX-3, HX-4 | - | HX-a | no | 0 | pr #4874, #4917 | - | - |
 | HX-u | snapshots, budget, journey skipped | HX-5, HX-6 | - | HX-a | yes | 0 | pr #4858 | - | - |
-| HX-z | journey live; halo.md, built, feature-done | HX-7, HX-8 | HaloExportPackJourneyTests | HX-m, HX-u; gradient-fill:HG-z | yes | 0 | pr #4942 (HX-7); HX-8 waits on PH-z | - | - |
+| HX-z | journey live; halo.md, built, feature-done | HX-7, HX-8 | HaloExportPackJourneyTests | HX-m, HX-u; gradient-fill:HG-z | yes | 0 | pr #4942 (HX-7, HX-8) | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -24,7 +24,7 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 | HX-5 | HX-u | 3 | snapshots, budget | Tests/AppSnapshotTests/HaloRenderProResSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloRenderSheetTests.swift | codecSwitchInTwoBodies | #4858 | pr |
 | HX-6 | HX-u | 3 | journey skipped | UITests/HaloJourneyTests+ExportPack.swift | compiles, skipped | #4858 | pr |
 | HX-7 | HX-z | 4 | journey live; RJ-H41 as a pending job (#4929) | UITests/HaloJourneyTests+ExportPack.swift, Tests/RealJobs/halo/prores-alpha/prores-alpha.jobs.pending.json | testRenderLowerThirdWithAlpha | #4942 | pr |
-| HX-8 | HX-z | 5 | halo.md, built, feature-done | docs/blueprints/halo.md, docs/blueprints/halo/features/export-pack.wave.json | waves render --dry-run | - | blocked |
+| HX-8 | HX-z | 5 | halo.md, built, feature-done | docs/blueprints/halo.md, docs/blueprints/halo/features/export-pack.wave.json | waves render --dry-run | #4942 | pr |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
