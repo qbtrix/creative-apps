@@ -45,6 +45,7 @@ Next: watch #5050 (LG-5 + LG-8, feature-done) merge in the next lane batch and t
 - 18:00Z: Belt nudge. The 17:15Z-17:28Z record went to a wrong branch, lead/large-catalog; ported here, the branch Belt reads. #5042 #5050 #5054 open, clean, fast-lane + beta, waiting on a lane batch; #5114 waits on the supervisor (protected Tests/perf-suites.txt).
 - 18:20Z: #5042 and #5054 merged 18:19Z (lane/batch-20261024172211). #5050 merges clean with dev 7114d06f, waits on the next batch; #5114 on the supervisor.
 - 18:40Z: poll: #5050 in lane/batch-20261024183708; #5114 on the supervisor; scoped library CI 40120685023 queued (has #5042 #5054).
+- 19:01Z: poll: #5050's batch Linux green, macOS gate running; #5114 on the supervisor.
 - 16:09Z: #5050 (LG-5) got needs-rebase (conflict with #4951 disk tier in LiveThumbnails.swift). Merged origin/dev into -lg5, kept the cancel check first then the disk read/store; scripts/ci --changed running (fix round 1).
 - 15:38Z: poll: still no change; LG-grid PRs queued, #5114 awaits supervisor, beta question open ~2h.
 - 15:19Z: poll: unchanged; LG-grid PRs still queued, #5114 awaits supervisor, beta question unanswered.
