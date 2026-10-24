@@ -100,3 +100,4 @@ utc	stage	event	ref	note
 2026-10-24T12:56:52Z	heartbeat	#5036 waits on probe 6 of batch 20261024110214
 2026-10-24T13:23:39Z	status	probe 6 red on RenderBudgetToneRowsTests (not ours); probe 3 running; #5036 waits
 2026-10-24T13:50:14Z	heartbeat	probe 3 macOS running (Linux green); #5036 waits
+2026-10-24T14:10:29Z	heartbeat	probe 3 macOS still running; #5036 waits
