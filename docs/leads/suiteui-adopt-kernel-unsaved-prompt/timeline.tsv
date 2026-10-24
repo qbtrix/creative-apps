@@ -53,3 +53,4 @@ ts	kind	note
 2026-10-21T19:02:29Z	released	supervisor answer: release this run; waiting-on-prereq
 2026-10-24T08:40:00Z	pr	UP-photo #5088 opened (b33630f9, gate PASS, fast-lane); record moved to the watched branch; restacking UP-flare, UP-halo
 2026-10-24T07:51:41Z	pr	UP-flare #5089 opened (a981f4a4, gate PASS, base UP-photo); UP-halo gate running
+2026-10-24T07:53:10Z	pr	UP-halo opened (67110503, gate PASS, base UP-flare)
