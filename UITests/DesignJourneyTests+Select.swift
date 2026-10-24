@@ -20,7 +20,7 @@
 // as CGEvents, and a runner without post-event access skips that step by name.
 // C's center within 2 pt of the canvas center skips naming #2147 (CanvasViewport
 // can't scroll to a rect yet). Every other step still asserts first.
-// DJ-AR (area-selection AR-13, turned on by AR-14): A and Title grouped into a card;
+// DJ-AR (area-selection AR-13, on since AR-14): A and Title grouped into a card;
 // a click on Title picks the card (its box is the card's 140 pt height), a drag moves
 // it whole; a double-click on Title picks Title; Escape picks the card again.
 import CoreGraphics
@@ -123,12 +123,9 @@ final class DesignSelectJourneyTests: XCTestCase {
 
     /// The card's and Title's heights on the page: the selection box tells which one is picked.
     static let cardHeight = 140.0, titleHeight = 32.0
-    /// False until AR-14 makes Design's click group-aware; AR-14 deletes it with the skip.
-    static let groupPickBuilt = false
 
     /// DJ-AR: a click on a grouped layer picks its group, a double-click enters it, Escape steps out.
-    @MainActor func testClickGroupThenEnter() throws {
-        guard Self.groupPickBuilt else { throw XCTSkip("waits on AR-14") }
+    @MainActor func testClickGroupThenEnter() {
         let design = open()
         let undo = design.element("design.bar.undo"), selection = design.element("design.canvas.selection")
         let artboard = design.element(Self.artboard)
