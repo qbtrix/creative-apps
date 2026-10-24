@@ -73,10 +73,7 @@ extension PhotoWorkspace {
             if current.points.isEmpty { current.points = [current.start] }
             if current.points.last != end { current.points.append(end) }
         }
-        guard current.tool == .marquee else {
-            current.modifiers = modifiers
-            return
-        }
+        guard current.tool == .marquee else { return current.modifiers = modifiers }
         let before = current.areaBefore ?? PhotoAreaBefore(selection: selection, mask: selectionMask, area: area)
         current.areaBefore = before
         selectionDrag(&current, to: end, modifiers: modifiers, zoom: zoom, in: canvas)
