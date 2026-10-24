@@ -4,6 +4,7 @@
 // end event); a null takes no color. Components clamp to 0...1 and a NaN pick
 // is ignored. The row shows and sends 8-bit sRGB through `bytes`.
 // Linux-safe: no UI imports.
+import SuiteKernel
 
 extension HaloLayerColor {
     /// The color of 8-bit sRGB components, each divided by 255.
@@ -11,12 +12,17 @@ extension HaloLayerColor {
         self.init(red: Double(red) / 255, green: Double(green) / 255, blue: Double(blue) / 255)
     }
 
-    /// The 8-bit sRGB components: each clamped to 0...1 (a NaN reads 0), times
-    /// 255, rounded. The same rule `linearPixel` decodes for the renderer.
+    /// The 8-bit sRGB components: HexText's rounding, each clamped to 0...1,
+    /// times 255, rounded (a NaN or an infinity reads 0).
     public var bytes: (red: UInt8, green: UInt8, blue: UInt8) {
-        func byte(_ v: Double) -> UInt8 { UInt8(((v.isNaN ? 0 : min(max(v, 0), 1)) * 255).rounded()) }
-        return (byte(red), byte(green), byte(blue))
+        (HexText.byte(red), HexText.byte(green), HexText.byte(blue))
     }
+
+    /// The kernel's colour as Halo's (both sRGB 0...1), its alpha dropped: a layer's colour has no alpha.
+    public init(_ fill: FillColor) { self.init(red: fill.r, green: fill.g, blue: fill.b) }
+
+    /// This colour as the kernel's FillColor, opaque.
+    public var fill: FillColor { FillColor(r: red, g: green, b: blue) }
 
     /// Every component in 0...1; nil when one is NaN.
     var clampedToUnit: HaloLayerColor? {

@@ -45,6 +45,12 @@ public struct SampledColor: Hashable, Sendable {
     public init(red: UInt8, green: UInt8, blue: UInt8) {
         self.red = red; self.green = green; self.blue = blue
     }
+
+    /// The nearest 8-bit colour to the kernel's `fill` (both sRGB), its alpha dropped; HexText's rounding.
+    public init(_ fill: FillColor) { self.init(red: HexText.byte(fill.r), green: HexText.byte(fill.g), blue: HexText.byte(fill.b)) }
+
+    /// This colour as the kernel's FillColor, opaque.
+    public var fill: FillColor { FillColor(r: Double(red) / 255, g: Double(green) / 255, b: Double(blue) / 255) }
 }
 
 /// PV-9: the eyedropper.

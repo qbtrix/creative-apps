@@ -67,8 +67,7 @@ struct PhotoSampleLoupe: View {
     var color: HexColor? {
         guard let hover, let c = model.sampledColor(at: Point(x: hover.x, y: hover.y), size: model.sampleSize)
         else { return nil }
-        func byte(_ channel: Double) -> UInt8 { UInt8(clamping: SampleRules.byte(channel)) }
-        return HexColor(byte(c.r), byte(c.g), byte(c.b))
+        return HexColor(c)
     }
 }
 
