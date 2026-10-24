@@ -8,7 +8,10 @@
 // then moves the transport and History out of their pills to the row's
 // leading edge (L5: transport left, pills right), then drops the zoom pill,
 // then the timecode; the transport and History never go (#4272, #4449),
-// and the content adds no width to SuiteWindow's minimum. Space, ←, →,
+// and the content adds no width to SuiteWindow's minimum. After a failed
+// save the bar leads with SuiteUI's EditorSaveStatus, `halo.saveStatus`:
+// "Not saved", the reason its tooltip (adopt-kernel-unsaved-prompt UP-12);
+// "Edited" stays in the title bar's subtitle. Space, ←, →,
 // Home, End, I and O become HaloCommands sent to `perform`, and ⌫ (the
 // delete command) sends the Model's `deleteCommand`: the picked keys while any
 // are picked, else the selected layer, as in the layer list. Files dropped on
@@ -134,6 +137,10 @@ struct HaloViewer: View {
     private func statusBar(_ comp: HaloComposition, artboard: CGSize, _ row: HaloStatusRow) -> some View {
         let zoom: Double? = row.zoom ? ViewerZoom.fitScale(artboard: artboard, in: viewport) : nil
         return ViewerStatusBar(zoom: zoom, size: comp.sizeText) {
+            if model.file.unsaved, let error = model.file.error {
+                // Its tooltip is why the save failed.
+                EditorSaveStatus(.notSaved, title: model.saveStatus, help: error, identifier: "halo.saveStatus")
+            }
             if row.timecode {
                 // The current time in primary ink, in the pill type so the
                 // bar fits the content column; the length is in the tooltip.

@@ -1,7 +1,5 @@
 # HaloApp's menu items and buttons built without a command spec (command-catalog CC-11).
-# max: 5
-Sources/HaloApp/HaloWindow+File.swift: Button(alertSaveNeedsPanel ? "Save As…" : "Save") { goOn(saving: true) }
-Sources/HaloApp/HaloWindow+File.swift: Button("Don't Save", role: .destructive) { goOn(saving: false) }
+# max: 3
 Sources/HaloApp/HaloWindow+File.swift: Button("OK", role: .cancel) {}
 Sources/HaloApp/HaloWindow+Layers.swift: Button("Rename") { onRename(id, draft ?? name(id)) }
 Sources/HaloApp/RenameRefusalAlert.swift: Button("Rename") { onRename(refusal, draft ?? refusal.name) }

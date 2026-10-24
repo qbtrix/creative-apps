@@ -106,7 +106,7 @@ final class HaloSuiteMenusJourneyTests: XCTestCase {
             let sheet = halo.app.sheets.firstMatch
             if sheet.exists {
                 halo.shot("suite-menus-close-prompt")
-                sheet.buttons["Don't Save"].click()
+                sheet.buttons["halo.close.dontSave"].click()
             } else {
                 halo.app.windows.firstMatch.buttons[XCUIIdentifierCloseWindow].click()
             }
