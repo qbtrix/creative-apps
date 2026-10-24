@@ -79,3 +79,4 @@ Next: EP-2 builder on lead/adopt-kernel-eyedropper-photo-EP-m (off dev); then EP
 - 2026-10-24T05:38:11Z: lane run 40064397299 named #4864 culprit but dropped stale batch: nothing merged (dev still 654fb3632) though its comment said prefix merged. New batch-20261024050226 starts at #4839 and skips #4818..#4837 (open_list --limit 100). Asked supervisor on #4837 (comment 6380464537) to hand-merge cleared prefix and fix lane. #4840 ST-a waits on supervisor gate merge
 - 2026-10-24T06:00:18Z: no change: dev still 654fb3632; #4837 EP-m open awaiting supervisor reply on 6380464537 (prefix skipped by lane); #4840 ST-a awaiting supervisor gate merge
 - 2026-10-24T06:22:21Z: no change: dev 654fb3632; #4837 EP-m open, not in batch-20261024050226 (probe -6 running), no supervisor reply; #4840 ST-a open, supervisor merge pending
+- 2026-10-24T07:05:11Z: no change: #4837 EP-m still open, not in batch-20261024050226; no supervisor reply; EP-z #4943 waits
