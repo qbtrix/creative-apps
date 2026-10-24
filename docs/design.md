@@ -424,7 +424,7 @@ no second row component.
   an adjustable value with units. Color is never alone. Differentiate
   Without Color adds the shape cues on the stage too.
 - **Reduce Motion:** state fades become instant, the recording dot stops,
-  the curve editor's preview dot stops.
+  the curve editor's preview dot stops, a refused rename's field doesn't shake.
 - **Increase Contrast:** the Dark + IC and Light + IC columns above: the
   ladder steps double, `outline` goes to 30%, secondary text moves toward
   primary, and the state colors brighten (Dark) or deepen (Light).
