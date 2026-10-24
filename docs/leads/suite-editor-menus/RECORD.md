@@ -87,3 +87,4 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-24T18:58:05Z: batch-20261024183708 still in flight; #4988 queued for the next batch.
 - 2026-10-24T19:16:41Z: batch-20261024183708 is bisecting (probe -6); none of ours in it. #4988 queued.
 - 2026-10-24T19:35:09Z: batch-20261024183708 still bisecting; #4988 queued.
+- 2026-10-24T19:53:47Z: bisect probe batch-20261024183708-6: Linux green, macOS gate running (run 40123913661). #4988 queued.
