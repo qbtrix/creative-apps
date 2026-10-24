@@ -17,7 +17,8 @@
 // File-flow (PF-2): the scene takes part in switching (`.suiteApp`), File
 // gets the suite's Open Recent ▸ and Open In ▸ (SuiteFileCommands), and the
 // editor takes drops (`.suiteFileDrop`); all three read PhotoShell's one
-// documents bridge, which starts watching the suite's recents at launch.
+// documents bridge, which moves the old Photo list in once and starts
+// watching the suite's recents at launch. Windows note through it too.
 // Finding #4260: the delegate is a SuiteAppDelegate, so a hand-off file
 // (Open Recent ▸, Open In from another app) reaches PhotoShell.host, a
 // PhotoDocumentHost that opens each image through PhotoOpenQueue.
@@ -90,7 +91,10 @@ struct PhotoApp: App {
 /// Finder opens, suite hand-offs, the suite's recents and Quit's unsaved-changes prompts.
 @MainActor final class PhotoAppDelegate: SuiteAppDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        Task { await PhotoShell.bridge.watch() }
+        Task {
+            await PhotoFileSession.importOldRecents(into: PhotoShell.bridge)
+            await PhotoShell.bridge.watch()
+        }
     }
 
     override func application(_ application: NSApplication, open urls: [URL]) {

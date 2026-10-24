@@ -1,7 +1,8 @@
 // StoreRecentsTests.swift: the live RecentWork over FileStore (SC-5a).
 // Each write lands in recents.json with a new revision, calls onWrite once
 // and yields on changes(); a second instance on the same folder sees it
-// after externalChange(). A fresh temp folder per test.
+// after externalChange(), and a relaunched one reads every app's notes as
+// one list. A fresh temp folder per test.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -96,6 +97,18 @@ import Testing
         #expect(await firstChanges.next() == 2)
         #expect(try await first.list().items.map(\.ref.displayName) == ["Intro.halo", "Logo.design"])
         #expect(try onDisk(store) == (["Intro.halo", "Logo.design"], 2))
+    }
+
+    @Test func twoAppsNotesOutliveARelaunchInOneList() async throws {
+        let store = makeStore()
+        let photo = StoreRecents(store: store), halo = StoreRecents(store: FileStore(folder: store.folder))
+        try await photo.note(ref("beach.png", .photo, .png), event: .opened, at: now, thumbnail: nil)
+        try await halo.note(ref("Intro.halo", .halo, .haloProject), event: .saved, at: now + 60, thumbnail: nil)
+        try await photo.note(ref("beach.png", .photo, .png), event: .saved, at: now + 120, thumbnail: nil)
+        let relaunched = StoreRecents(store: FileStore(folder: store.folder))
+        let items = try await relaunched.list().items
+        #expect(items.map(\.ref.displayName) == ["beach.png", "Intro.halo"], "one entry per file, newest first")
+        #expect(items.map(\.ref.app) == [.photo, .halo])
     }
 
     @Test func externalChangeWithNothingNewYieldsNothing() async throws {
