@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: 12:18Z poll: nothing merged; no needs-fix or needs-rebase; no supervisor replies; EP-z #3723 still open; no dev ci.yml run since 10:57Z has the stack. Waiting on the lane for #4886, #5148, #5151 and #5153, then #5154 and #5163. IM-8d and IM-12 wait on EP-z; IM-13 waits on ST-a; IM-14 comes last.
+Next: 12:38Z poll: nothing merged; all six PRs clean, none needs-fix or needs-rebase; no supervisor replies; EP-z #3723 still open. The lane's last code batch was lane/batch-20261024110214, so the stack waits for a macOS slot. #5154 and #5163 get fast-lane back from the Belt-Lead sweep once their parents merge.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
 
