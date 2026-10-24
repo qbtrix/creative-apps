@@ -8,7 +8,8 @@ import AppKit
 import SuiteKernel
 import SwiftUI
 
-/// The eyedropper button of a colour row: the system screen sampler; Escape picks nothing. Listed in
+/// The eyedropper button of a colour row: the system screen sampler; Escape picks nothing. It lights on hover and
+/// press (HoverButtonStyle). Listed in
 /// `suite.controls` as `suite.color.eyedropper`; with `help` it is disabled and that is its tooltip.
 public struct EyedropperButton: View {
     /// The button's VoiceOver label and title.
@@ -28,7 +29,7 @@ public struct EyedropperButton: View {
                 .frame(minWidth: SuiteSize.iconButtonHit, minHeight: SuiteSize.iconButtonHit)
                 .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(HoverButtonStyle())
         .foregroundStyle(SuiteColor.textSecondary)
         .help(help ?? Self.title)
         .accessibilityLabel(Self.title)
