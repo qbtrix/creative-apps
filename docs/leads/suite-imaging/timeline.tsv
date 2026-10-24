@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-24T10:16Z	3	build	IM-8b	test-first + toneOperations from imagingSteps, mutate 5/5, gate running; supervisor question on LiveToneSurface vs resident route
 2026-10-24T10:21Z	3	pr-open	IM-8b	#5151 stacked on #5148, CI: PASS, mutate 5/5
 2026-10-24T10:24Z	3	question	IM-10b/IM-11	curve/levels order asked on #3715 (6383074009); all remaining tasks open or blocked; polling
+2026-10-24T10:52Z	3	build	IM-10b	order ruled (a): Library adopts exposure, levels, curve; test-first commit, LiveDevelop on ImagingProgram.adjustments, tests running
