@@ -110,3 +110,4 @@ utc	stage	event	ref	note
 2026-10-24T15:54:14Z	poll	batch 20261024144917 landed (dev 33cd6e97); ours next in queue, unlabelled
 2026-10-24T16:16:35Z	poll	#4868 (HF-u) in lane batch 20261024160327; awaiting batch CI
 2026-10-24T16:37:30Z	poll	#4868 (HF-u) still in batch 20261024160327 (CI running, no probes)
+2026-10-24T16:59:17Z	poll	#4868 (HF-u) in batch 20261024160327, CI running; dev 33cd6e97
