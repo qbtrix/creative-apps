@@ -1,0 +1,16 @@
+[
+  {
+    "label": ".undoRestoresBytes: a run that records two steps leaves undo short of the original",
+    "file": "Sources/SuiteImaging/Retouch/RetouchCommands.swift",
+    "find": "try t.replaceTarget(healed, name: \"Spot Heal\")",
+    "replace": "try t.replaceTarget(healed, name: \"Spot Heal\"); try t.replaceTarget(healed, name: \"Spot Heal\")",
+    "tests": "RetouchCommandsTests/eachCommandIsOneStepThatUndoRestoresByteForByte"
+  },
+  {
+    "label": ".removeUsesSelection: remove with no stroke ignores the selection",
+    "file": "Sources/SuiteImaging/Retouch/RetouchCommands.swift",
+    "find": "} else if let selection = t.selectionCoverage {",
+    "replace": "} else if let selection = Optional<Mask>.none {",
+    "tests": "RetouchCommandsTests/removeWithNoPointsUsesTheSelection"
+  }
+]

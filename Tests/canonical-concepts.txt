@@ -42,3 +42,4 @@ Unsaved prompt: UnsavedPrompt ClosePrompt SaveStatus
 Launch flags: FlareLaunch HaloLaunch LibraryLaunch PhotoLaunch ProjectLaunch LaunchFlags LaunchArguments LaunchArgs
 File envelope: FileEnvelope FileFormat Filing
 Layer style: LayerStyle LayerEffect StyleEffect DropShadow InnerShadow OuterGlow InnerGlow Bevel Emboss ColorOverlay GradientOverlay EffectStack
+Raster size: RasterSize ImageHeader
