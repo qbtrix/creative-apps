@@ -1,0 +1,69 @@
+ts	kind	note
+2026-10-20T22:27Z	stage	stage 1-2: packet read, waves planned; every slice blocked: ST-a waits on shared-codecs SC-a (planned, unfiled), the rest chain on ST-a
+2026-10-21T00:19Z	poll	worker restarted; still blocked on shared-codecs SC-a (ST-2 edits protected Package.swift/project.yml); rechecking
+2026-10-21T00:41Z	poll	still blocked: no shared-codecs PR exists
+2026-10-21T01:03Z	poll	still blocked: no shared-codecs PR
+2026-10-21T01:24Z	poll	still blocked: no shared-codecs PR
+2026-10-21T01:47Z	blocked	hb6: no shared-codecs PR yet; SC-a still first
+2026-10-21T02:09Z	blocked	hb7: no shared-codecs PR yet
+2026-10-21T02:31Z	blocked	hb8: no shared-codecs PR yet
+2026-10-21T02:55Z	blocked	hb9: no shared-codecs PR yet
+2026-10-21T03:17Z	blocked	hb10: no shared-codecs PR yet
+2026-10-21T03:39Z	blocked	hb11: no shared-codecs PR yet
+2026-10-21T04:01Z	blocked	hb12: no shared-codecs PR yet
+2026-10-21T04:24Z	poll	No shared-codecs SC-a PR yet; shared-thumbnails stays blocked on it.
+2026-10-21T04:46Z	poll	#3718 shared-codecs open, no PR; supervisor queued it for the next shift. ST-a stays blocked.
+2026-10-21T05:08Z	poll	#3718 shared-codecs open, no PR; ST-a blocked (supervisor queued #3718 for next shift).
+2026-10-21T05:30Z	poll	#3718 shared-codecs open, no PR; ST-a blocked.
+2026-10-21T05:52Z	poll	#3718 shared-codecs open, no PR; ST-a blocked.
+2026-10-21T06:26Z	blocked	Still blocked on shared-codecs #3718 (open, no PR; supervisor queued it for the next shift).
+2026-10-21T06:49Z	blocked	hb19: still blocked on shared-codecs #3718 (open).
+2026-10-21T07:13Z	blocked	hb20: still blocked on shared-codecs #3718 (open).
+2026-10-21T07:35Z	blocked	hb21: still blocked on shared-codecs #3718 (open).
+2026-10-21T07:57Z	blocked	hb22: still blocked on shared-codecs #3718 (open).
+2026-10-21T08:19Z	blocked	hb23: still blocked on shared-codecs #3718 (open).
+2026-10-21T08:41Z	blocked	hb24: still blocked on shared-codecs #3718 (open).
+2026-10-21T09:04Z	blocked	hb25: #3718 shared-codecs still open, no SC PR; no findings
+2026-10-21T09:26Z	blocked	hb26: #3718 still open, no SC PR; no findings
+2026-10-21T09:48Z	blocked	hb27: #3718 still open, no SC PR; no findings
+2026-10-21T10:12Z	released	Released per supervisor answer on #3721 (09:53Z) for this run. Resume state: no slice started; waits on shared-codecs #3718 SC-a (open, no PR). No open findings, no open PRs.
+2026-10-23T15:30Z	0	relaunch	-	run act-1a16953ae34-05a4; unparked under contract-first waits
+2026-10-23T15:35Z	3	builder	ST-a	ST-a builder starting on dev 721168a8f
+2026-10-23T15:20:44Z	wave1	build-start	ST-a builder started (ST-1 test commit, ST-2) on lead/shared-thumbnails-ST-a; pinned core 7966e5a has CoreAsset/ThumbnailStore, so ST-2 links without a bump
+2026-10-23T17:32Z	2	stage	wave 2: ST-a is #4840 (touches Package.swift, so it needs a supervisor merge; no-fast-lane added). ST-u and ST-m builders started, stacked on ST-a, opened as drafts. Decision: ST-6 is built now (two-line call in spine's LiveThumbnails.swift, which spine hasn't edited in 12h; the lane integrates conflicts).
+2026-10-23T19:15:35Z	ST-a	wire-ticked	SC-a ticked; dev merged into #4840 head 07c11358c; CI pass; re-gate asked
+2026-10-23T19:36:47Z	ST-u	restacked	#4950 head 5b8f875 CI pass
+2026-10-23T19:40:02Z	ST-m	restacked	#4951 head 06dfc0e CI pass
+2026-10-23T19:58:03Z	-	check	#4840 awaits supervisor Mac re-gate at 07c11358c; #4950/#4951 drafts restacked, waiting.
+2026-10-23T20:20:41Z	wait	check	heartbeat: #4840 ST-a still needs-fix/no-fast-lane at 07c11358c, mergeable clean, waiting on supervisor Mac re-gate; #4950/#4951 stay drafts
+2026-10-23T20:42:21Z	wait	check	heartbeat: #4840 ST-a unchanged at 07c11358c (needs-fix, awaiting supervisor Mac re-gate); #4950/#4951 drafts
+2026-10-23T21:04:27Z	wait	check	heartbeat: #4840 ST-a unchanged at 07c11358c (needs-fix, awaiting supervisor Mac re-gate); #4950/#4951 drafts; dev idle 70 min
+2026-10-23T21:26:10Z	wait	check	heartbeat: #4840 ST-a no status on 07c11358c yet (awaiting supervisor Mac re-gate); #4950/#4951 drafts; dev idle since 19:45Z
+2026-10-23T21:50:21Z	wait	check	dev batch at 21:40Z merged 12 PRs (#4841-#4862) and skipped #4837 (EP-m). The cause is the lane's open_list --limit 100: 144 PRs are open and #4837 was past the cutoff. Raised with the supervisor on #4837. #4840 (ST-a) is still waiting on the Mac re-gate. #4950/#4951 are drafts, #4943 waits on EP-m.
+2026-10-23T22:13:33Z	wait	check	No dev merges since 21:40Z. #4840 (ST-a) still waits on the supervisor's Mac re-gate. #4837 (EP-m) is 97th of the newest open PRs, just inside the lane's 100-PR window. Supervisor not yet answered. #4943/#4950/#4951 unchanged.
+2026-10-23T22:34:52Z	wait	check	Still no dev merges since 21:40Z. #4840 has no status on its head and is still waiting on the supervisor's Mac re-gate. #4837 is now 99th newest, so it is still inside the lane's window. No supervisor reply. Stacked slices unchanged.
+2026-10-23T22:57:28Z	wait	check	Dev only gained the generated-docs commit; no lane batch since 21:40Z. #4840 still has no status and is waiting on the supervisor. #4837 is 99th newest, still inside the lane's window. No supervisor reply. Stacked slices unchanged.
+2026-10-23T23:18:57Z	wait	check	#4837 (EP-m) is in lane/batch-20261023215139, a batch of 12 with #4818-#4870. Its Linux check passed and the macOS gate run 40029779505 is still in progress after 1.5h. I updated the supervisor note on #4837. #4840 (ST-a) still has no status and is waiting on the supervisor's Mac re-gate. A full CI run on dev 654fb36 is in progress.
+2026-10-23T23:41:37Z	wait	check	heartbeat: batch-20261023215139 macOS gate 40029779505 still in progress (~1h50m); #4837 EP-m waits in it; #4840 ST-a still needs-fix/no-fast-lane awaiting supervisor Mac re-gate; #4943/#4950/#4951 wait on parents
+2026-10-24T00:04:03Z	wait	check	check: batch-20261023215139 macOS gate 40029779505 FAILED 23:44Z on Design stroke tests (RenderBudgetDesignStrokeTests.widthScrubInThreeBodies, DesignStrokeSnapshots.editor: selectedStroke nil); not EP-m's Photo-only diff; lane bisect pending, #4837 not labelled needs-fix. #4840 ST-a unchanged (needs-fix/no-fast-lane, no status, supervisor re-gate).
+2026-10-24T00:26:26Z	wait	check	check: lane bisecting batch-20261023215139 (probe -6 = first 6 PRs, before #4837); #4837 open, no needs-fix; #4840 ST-a unchanged awaiting supervisor re-gate
+2026-10-24T00:48:33Z	wait	check	check: bisect still on probe batch-20261023215139-6 (macOS gate on first 6 PRs); #4837 open, no needs-fix; #4840 ST-a unchanged awaiting supervisor re-gate
+2026-10-24T01:10:44Z	wait	check	01:10Z check: dev still 654fb3632; lane bisect probe batch-20261023215139-6 unchanged; #4837 EP-m open (fast-lane, no needs-fix); #4840 ST-a waits on supervisor Mac re-gate
+2026-10-24T01:31:46Z	wait	check	01:31Z check: lane bisect moved to probe batch-20261023215139-9 (first 9 PRs, includes #4837 EP-m), so the culprit is past PR 6; #4837 no needs-fix; #4840 ST-a still waits on supervisor Mac re-gate; dev 654fb3632
+2026-10-24T01:53:22Z	wait	check	01:53Z check: probe batch-20261023215139-9 (incl. #4837 EP-m) Linux check green (run 40050009822), macOS gate 40050012604 running since 01:29Z; #4840 ST-a still waits on supervisor Mac re-gate; dev 654fb3632
+2026-10-24T02:14:52Z	wait	check	02:14Z check: probe -9 macOS gate 40050012604 still running (45 min); #4837 EP-m unmerged; #4840 ST-a still waits on supervisor Mac re-gate; dev 654fb3632
+2026-10-24T02:37:23Z	wait	check	02:37Z check: probe -9 macOS gate 40050012604 failed on RenderBudgetDesignStrokeTests.widthScrubInThreeBodies and DesignStrokeSnapshots.editor, tests that #4864 (design DK-3) adds itself; culprit is #4864, not #4837 EP-m (Photo-only), which should land when the bisect finishes; #4840 ST-a still waits on supervisor Mac re-gate
+2026-10-24T02:58:27Z	wait	check	02:58Z check: lane opened probe batch-20261023215139-7 (49949b4, first 7 PRs ending at #4837 EP-m); its runs decide EP-m; #4840 ST-a still waits on supervisor Mac re-gate; dev 654fb3632
+2026-10-24T03:20:16Z	wait	check	batch-20261023215139 probe -7 (49949b4, ends at #4837): Linux 40055390941 green, macOS gate 40055393733 running; -9 red on Design stroke tests points at #4864. #4837 open fast-lane; #4840 ST-a still needs-fix/no-fast-lane awaiting supervisor Mac re-gate; dev 654fb3632
+2026-10-24T03:42:09Z	wait	check	probe -7 macOS gate 40055393733 still in_progress (started 02:44Z, likely waiting on a macOS runner); #4837 open fast-lane, no needs-fix; #4840 ST-a unchanged (needs-fix/no-fast-lane, supervisor Mac re-gate)
+2026-10-24T04:04:24Z	wait	check	probe -7 (49949b4, ends at #4837) macOS gate 40055393733 green at 03:46Z with Linux 40055390941 green: #4837 EP-m cleared, culprit is #4839 or #4864 (likely #4864); waiting for lane to merge prefix. #4840 ST-a unchanged (supervisor Mac re-gate)
+2026-10-24T04:26:11Z	wait	check	bisect continues: probe -8 (5c349da, adds #4839) Linux 40060703756 green, macOS gate 40060705865 running; #4837 cleared by -7, not merged yet (dev 654fb3632). #4840 ST-a unchanged
+2026-10-24T04:53:03Z	wait	check	probe -8 (adds #4839) macOS gate 40060705865 still in_progress since 04:01Z; dev 654fb3632, #4837 not merged yet; #4840 ST-a unchanged
+2026-10-24T05:15:38Z	wait	check	bisect -8 macOS gate 40060705865 passed (05:05Z): #4837 EP-m and #4839 clear, culprit #4864; waiting for lane to merge prefix. #4840 ST-a: supervisor cleared window-lifetime flake (dev flaky 1/3), merging via gate at 2dbfc165
+2026-10-24T05:38:06Z	wait	check	lane run 40064397299 named #4864 culprit but dropped stale batch: nothing merged (dev still 654fb3632) though its comment said prefix merged. New batch-20261024050226 starts at #4839 and skips #4818..#4837 (open_list --limit 100). Asked supervisor on #4837 (comment 6380464537) to hand-merge cleared prefix and fix lane. #4840 ST-a waits on supervisor gate merge
+2026-10-24T06:00:12Z	wait	check	no change: dev still 654fb3632; #4837 EP-m open awaiting supervisor reply on 6380464537 (prefix skipped by lane); #4840 ST-a awaiting supervisor gate merge
+2026-10-24T06:22:16Z	wait	check	no change: dev 654fb3632; #4837 EP-m open, not in batch-20261024050226 (probe -6 running), no supervisor reply; #4840 ST-a open, supervisor merge pending
+2026-10-24T07:05:06Z	wait	check	ST-a #4840 merged (4446461); full CI 40070365168 + scoped suite/library running on it. Restacked ST-u #4950 (223c79c, 8 files/385 lines) and ST-m #4951 (d6f2c3e, 11 files/224 lines; add/add conflicts taken from ST-m, dev side == ST-a 07c1135 stubs) on dev; scripts/ci --changed PASS both; undrafted, fast-lane, Head moved. ST-z blocked: ST-7 needs adopt-kernel-autosave AK-photo (AK-8, PhotoWindow+File.swift), not on dev, no open PR.
+2026-10-24T07:24:52Z	3	stage-start	-	relaunch act-1a16cc96904-199n; ST-z builder started stacked on #4950+#4951
+2026-10-24T07:47:19Z	wait	heartbeat	-	dev f58e119; #4950/#4951 open fast-lane, not yet in a lane batch (batch-20261024050226 still bisecting); 0 open findings; ST-z builder running
+2026-10-24T07:54:08Z	wait	heartbeat	-	Belt nudge: mirrored RECORD to lead/suiteui-shared-thumbnails; ST-z builder running; #4950/#4951 wait for the next lane batch

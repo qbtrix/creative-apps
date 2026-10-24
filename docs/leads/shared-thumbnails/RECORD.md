@@ -37,6 +37,7 @@ Next: ST-z builder on lead/shared-thumbnails-ST-z (stacked on ST-u + ST-m), draf
 - PRs target `dev` (CLAUDE.md; the lane retargets PRs to main), not main.
 - 2026-10-24T07:30Z Relaunch act-1a16cc96904-199n. ST-z starts now: its wait on adopt-kernel-autosave:AK-photo is met under contract-first waits (AK-a merged; rule 12). ST-7 keeps its PhotoWindow+File.swift edit to a few lines so AK-8 merges over it easily. ST-z is stacked on ST-u and ST-m and opened as a draft until they merge (its diff vs dev is over the size cap until then).
 - Scoped library run 40070367564 red on RenderBudgetLibraryFoldersTests.expandFolderInTwoBodies (Library folders, not this feature's files); holds no slice.
+- 2026-10-24T07:55Z Belt watches lead/suiteui-shared-thumbnails and docs/leads/suiteui-shared-thumbnails/RECORD.md. Every RECORD push now goes to both branches (same commit), with the record mirrored at both paths.
 - Earlier runs (act-1a15b69feea-et92) were all blocked on SC-a; their heartbeat log is in RECORD.prev.
 
 ## Wire
