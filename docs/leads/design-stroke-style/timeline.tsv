@@ -188,3 +188,4 @@ time	kind	note
 2026-10-24T20:54:14Z	3	check	-	poll: full CI 40129856269 Linux green, macOS running; #4888 in lane/batch-20261024205137; #5212 open, no reply; no needs-fix/needs-rebase
 2026-10-24T21:16:28Z	3	check	-	poll: full CI 40129856269 macOS still running; #4888 still in lane/batch-20261024205137; #5212 open, no reply; no needs-fix/needs-rebase
 2026-10-24T21:38:22Z	3	check	-	poll: #5222 (drag-test time limits, for #5212) on dev afef017c2; full CI 40129856269 macOS still running; lane bisecting batch-20261024205137 (#4888 in prefix); no needs-fix/needs-rebase
+2026-10-24T22:00:38Z	3	check	-	poll: full CI 40129856269 green (contains 674461187); lane batch-20261024205137 still bisecting (#4888); no needs-fix/needs-rebase
