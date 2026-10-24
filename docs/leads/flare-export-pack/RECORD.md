@@ -4,7 +4,7 @@ Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
 Run: act-1a16c619006-nour (took over 2026-10-24 from act-1a1695ebf10-z0v8; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T02:26Z
 Stage: 3 build (fix round 1 in lane)
 Base: 721168a (origin/dev)
-Next: (2026-10-24 08:25Z) Bisect done: probe -1 (run 40070370339, #4839 alone) green, so #4852's old head was the culprit; its fixed head 01a21adb and #4854 (f2abc05f) are pushed with Fast-Check pass. The lane's current batch (lane/batch-20261024081307, #4903-#4952, none of ours, Linux red, bisecting) runs first; #4852, #4854, #5025, #5005 wait for the next batch and its macOS gate, which proves the budget test fix. 10 findings open: no new feature task. On merge: Belt-Slice-Done FV-u/FV-z, Mac-Finish-Wanted, panel on the FJ-X1 screens, contact sheet.
+Next: FV-u merged (9c276b81). Retarget #4854 (FV-z) to dev after the gate passes on the dev-merged head; once FV-z merges and a green run contains both, post Belt-Slice-Done FV-u and FV-z + Mac-Finish-Wanted on #3481, then the FJ-X1 critic panel and the contact sheet. 10 findings open: no new feature work.
 
 Loop: v3 (the packet has a `## Slices` table).
 
