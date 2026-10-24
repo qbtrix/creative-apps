@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-24T16:12Z	check	check-in	7 PRs open, no needs-fix (#5064 waits on #4846); scoped suiteui run 40109073275 queued at 33cd6e97 (contains OC-u #4582) for Belt-Slice-Done; finding #5179 is line:photo (Photo journey testTier1Tone), not ours; no Slice: merges since 15:50Z
 2026-10-24T16:34Z	check	check-in	scoped suiteui run 40109073275 (33cd6e97, has OC-u) in progress; 7 PRs open, no needs-fix/needs-rebase; no new findings or Slice: merges since 16:10Z
 2026-10-24T16:56Z	check	check-in	scoped suiteui run 40109073275 (has OC-u) still in progress; 7 PRs open, no needs-fix/needs-rebase; no new findings or Slice: merges since 16:30Z
+2026-10-24T17:20Z	check	check-in	OC-u done (run 40109073275 green, Belt-Slice-Done posted); #4846 AJ-a, #4867 AJ-7, #4870 TC-7 merged; #5064 regating after dev merge; 0 new findings
