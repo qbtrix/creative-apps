@@ -52,3 +52,4 @@ utc	stage	event	ref	note
 2026-10-24T20:17Z	check	check-in	No change: #4953 TC-6, #5006 TC-u, #5064 AJ-k open on the lane, clean. No PR merged on dev since 19:54Z; scoped library run 40129102226 in progress at ef37711d. Finding #5215 (design) not ours.
 2026-10-24T20:39Z	check	check-in	No change: #4953 TC-6, #5006 TC-u, #5064 AJ-k open on the lane, clean. No PR merged since 20:17Z; full CI 40129856269 running at ef37711d (predates our PRs). No new findings.
 2026-10-24T21:00Z	check	check-in	No change: #4953 TC-6, #5006 TC-u, #5064 AJ-k open on the lane, clean. Only #5059 (docs) merged since 20:38Z; full CI 40129856269 at ef37711d still running. No new findings.
+2026-10-24T21:22Z	check	check-in	No change: #4953 TC-6, #5006 TC-u, #5064 AJ-k open on the lane, clean. No merges since 21:00Z; full CI 40129856269 at ef37711d still running. Findings #5220 (photo), #5221 (suite), #5224 (design) not ours.
