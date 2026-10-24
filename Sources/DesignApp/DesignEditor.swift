@@ -21,6 +21,7 @@
 // publishes. In debug builds `bodyRuns` counts its body's runs, so
 // DesignWindowDragTests can prove a canvas drag leaves the editor still.
 import DesignModel
+import enum SuiteKernel.ZoomLevel
 import SuiteUI
 import SwiftUI
 
@@ -30,7 +31,7 @@ struct DesignEditor: View {
     var note: String?
     var zoom = 1.0
     var onViewport: @MainActor (CGSize) -> Void = { _ in }
-    var onZoom: @MainActor (Double) -> Void = { _ in }
+    var onZoomLevel: @MainActor (ZoomLevel) -> Void = { _ in }
     var perform: DesignPerform = { _ in }
     /// The window's History panel, which the History button toggles.
     @Environment(\.designHistory) private var history
@@ -59,7 +60,7 @@ struct DesignEditor: View {
             DesignLayersPanel(model: model, perform: perform)
         } content: {
             EditorDetail {
-                DesignCanvas(model: model, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform)
+                DesignCanvas(model: model, zoom: zoom, onViewport: onViewport, onZoomLevel: onZoomLevel, perform: perform)
             } palette: {
                 if model.isOpen {
                     ToolbarGroup(palette, axis: .vertical, style: .floating)
