@@ -4,7 +4,7 @@ Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/feat
 Run: act-1a16cae79dd-mtf2 · Started: 2026-10-24T06:54Z (prior: act-1a1693a401e-chyn, act-1a164697376-dv7u)
 Stage: 3 wave 4
 Base: e5dcf939 (dev; brief's main HEAD 654fb363 verified)
-Next: build FH-7 (FH-photo) stacked on FH-c #4577 + FH-3 #4889; poll the lane for #4577/#4889/#4896 between steps
+Next: FH-7 gate running on lead/fill-heal-FH-7 (88075ef) and -FH-7-jobs (942027e); open both PRs on pass; then FH-8; poll lane for #4577/#4889/#4896
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -21,7 +21,9 @@ Next: build FH-7 (FH-photo) stacked on FH-c #4577 + FH-3 #4889; poll the lane fo
 | FH-1 | FH-a | 2+ | stubs + disabled checks | Sources/SuiteImaging/Retouch/*, Sources/SuiteKernel/Stroke/DabCoverage.swift, tests, C4 parts | suites compile, disabled | #4556 | merged (in green full run 39957675362) |
 | FH-2 | FH-a | 1 | RJ-P51 folder, RJ-P04/P07 re-pointed, disabled waits_on FH-6 | Tests/RealJobs/photo/{bucket-background,dust-spots,remove-passerby}/* | RealJobs decode check | #3845 | merged (in green dev Linux run 39808732641) |
 | FH-3 | FH-u | 3 | palette Paint Bucket, Spot Heal, Remove disabled with help; bucket options | Sources/PhotoModel/*, Sources/PhotoApp/*, Tests/PhotoModelTests/PhotoRetouchToolsTests.swift, UITests/PhotoJourneyTests+Retouch.swift | PhotoRetouchToolsTests, photo.list-commands golden | #4889 | lane |
-| FH-4..FH-10 | – | later | see packet | see packet | see packet | – | waiting |
+| FH-7 | FH-photo | 4 | PhotoWorkspace: RetouchTarget, heal via retouch.heal, toneShift gone, RJ-P51 on | Sources/PhotoModel/PhotoRetouch*.swift, PhotoStroke, catalog, ids, mutations | PhotoRetouchKernelTests, Mutate 3/3 | – | gate (14 files) |
+| FH-7j | FH-photo | 4 | RJ-P04 dust-spots on (split from FH-7 for the 15-file cap) | Tests/RealJobs/photo/dust-spots/* | RealJobs | – | gate |
+| FH-8..FH-10 | FH-photo | later | see packet | see packet | see packet | – | waiting |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -43,6 +45,7 @@ Next: build FH-7 (FH-photo) stacked on FH-c #4577 + FH-3 #4889; poll the lane fo
 - [ ] Wire: brush-keys:BK-photo (built on its fakes in FH-3/FH-4; swap in when it merges)
 
 ## Open
+- 2026-10-24T07:55Z: findings filed from FH-7's build: #5093 (bucket edge tint), #5094 (feathered coverage squared), #5095 (heal throws off-canvas). Open findings: 3. RJ-P07 stays disabled (needs select.lasso).
 - 2026-10-23T16:59Z: FH-4 PR #4896 (stacked on #4889, head 57c9396, gate pass); #4895 filed (needs-ui stroke-trail mark; MotionPathMarks placeholder).
 - 2026-10-23T16:08Z: FH-u/FH-photo waits unchanged 3 polls; question for the supervisor on #3778 (comment 6369264328).
 - 2026-10-23T14:10Z: waits: AB-photo building (adopt-kernel-brush lead record, last push 10-19), BK-photo blocked (#4531), AJ-photo waiting (#3777); AL, AX, AU, AC done. FH-u and FH-photo stay blocked.
