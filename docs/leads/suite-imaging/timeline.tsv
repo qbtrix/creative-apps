@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-24T10:13Z	3	pr-open	IM-8a	#5148 Photo canvas files off Metal; gate pass; mutate unmeasurable on Linux
 2026-10-24T10:45Z	3	build	IM-8b	test-first + toneOperations from imagingSteps, mutate 5/5, gate running; supervisor question on LiveToneSurface vs resident route
 2026-10-24T11:05Z	3	pr-open	IM-8b	#5151 stacked on #5148, CI: PASS, mutate 5/5
+2026-10-24T11:15Z	3	question	IM-10b/IM-11	curve/levels order asked on #3715 (6383074009); all remaining tasks open or blocked; polling
