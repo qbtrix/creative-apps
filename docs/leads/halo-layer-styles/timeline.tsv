@@ -11,3 +11,4 @@ utc	stage	event	ref	note
 2026-10-24T08:10Z	HY-2	built on HY-a (mutate 4/4), gate rerun after command-path fix
 2026-10-24T09:05Z	HY-2	spec-built menu items + Done, mutate 5/5, pushed HY-a 786456f6d, scripts/ci --changed running
 2026-10-24T09:20Z	HY-2	scripts/ci --changed PASS at 786456f6d
+2026-10-24T14:05Z	3	stage-start	act-1a16e2f645b-47gj	resumed; #4911 merged, #5156 ready, HY-7 starts

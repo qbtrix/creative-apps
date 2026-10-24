@@ -1,13 +1,13 @@
 # layer-styles (Halo) lead record
 
 Issue: #3936 · Packet: docs/blueprints/halo/features/layer-styles.md
-Run: act-1a16c627cc6-nlss · Session: claude/layer-styles-lead-vx2vrg · Started: 2026-10-24 (resumed; earlier run act-1a1648ae75a-4dqz)
+Run: act-1a16e2f645b-47gj · Session: claude/layer-styles-lead-rsr0u8 · Started: 2026-10-24 (resumed 14:0xZ; earlier runs act-1a16c627cc6-nlss, act-1a1648ae75a-4dqz)
 Wire: suiteui layer-styles:LS-a
 Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTests.glowReachesItsKeyedSize and glowIsNotClipped; add the no-padding mutation, origin dropped in LiveFrameRendering's styled composite)
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
-Stage: #5156 HY-1 ready at 0e12bffd0 (dev merged, HY-1-only diff, gate CI: PASS). #5158 HY-m has HY-1 merged in at 7d53f16b4 (gate CI: PASS, Head moved), still a draft: its diff carries HY-1 until #5156 lands. #5157 HY-2 and #5161 HY-u stay drafts until LS-2 is on dev. All PR bodies and the #3936 comment are footer-free (MCP update tools; the REST route re-appends it). Gates run in the clean worktree /home/user/dev-check (the main clone's stale build crashed AfterGlowCLITests). HY-7 route question on #3936 unanswered
-Base: a41e7f1 (origin/dev)
-Next: when #5156 merges, merge dev into #5158, gate, Head, ready; when LS-2 lands, the same for #5157 then #5161; HY-7 once the supervisor answers the route shape; then HY-8
+Stage: 3 wave 5 (resume): #4911 LS-1 merged on dev 78983bc; #5156 HY-1 ready, clean, waits the lane; #5157/#5158/#5161 drafts; LS-2 is #5174 (open); HY-7 being built per the supervisor's 13:10Z answer (shared SuiteUI GPU layer view)
+Base: 6be19b3 (origin/dev)
+Next: HY-7 builder on lead/halo-layer-styles-HY-z (SuiteUI StyleLayerView + Halo viewer + no-upload budget test); when #5156 merges, merge dev into #5158, gate, Head, ready; when #5174 LS-2 lands, the same for #5157 then #5161
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,8 @@ Next: when #5156 merges, merge dev into #5158, gate, Head, ready; when LS-2 land
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-24 (resume act-1a16e2f645b-47gj): the brief asks to rebase `lead/layer-styles` onto main and force-push. Not done: that branch is the SuiteUI layer-styles lead's live status channel (#3937, last push 13:56Z); this feature's channel stays `lead/halo-layer-styles`, as decided earlier. Work stays on `origin/dev` (the brief's main verified at 4f00afb; CLAUDE.md targets dev). PR bodies move to the new Belt-Lead id.
+- 2026-10-24: HY-7 follows the supervisor's 13:10Z answer on #3936: a shared SuiteUI GPU layer view keeps one `RenderDispatcher`, uploads a layer's raster only when its content changes, runs only `StyleRoute.draw` per step and draws the resident result; Halo's viewer passes style and layer. Wire: suiteui layer-styles:LS-9 (StyleRoute body).
 - 2026-10-24: HY-a is 525 changed lines over LS-2 (HY-1 223 in 12 files, HY-2 302 in 8), over the 400 cap, so it ships as two PRs, both `Slice: HY-a`: HY-1 once #4911 is on dev, HY-2 once LS-2 is. Posted on #3936.
 - 2026-10-24: HY-u is stacked on HY-m merged with HY-a, not on HY-a alone: the inspector's style rows come from HY-5's `rows(for:)` (rows follow effects), and HY-a alone lists none. The view splits `propertyRows` into TRANSFORM and LAYER STYLE; `besideWidth` measures the style titles too. No mutation plan for HY-3: it is macOS view code only, and `scripts/mutate` runs on Linux Model targets.
 - 2026-10-24: HY-5 built now on LS-a's types, not after LS-m: its tests call only Halo's adapter (`setStyle`, the keyed write, the rows), none of LS-5/LS-6's bodies. The keying hooks are two small edits in `Live/HaloKeyRules.swift` (outside the owns list): rows append `styleProperties`, and `setStatic` writes a style property into the style.
