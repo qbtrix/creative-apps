@@ -2,8 +2,7 @@
 // to creative-core and nowhere else. A PNG core refuses is refused, not handed to a local fallback reader; PNG
 // bytes are `PNG.write`'s; a JPEG is read by `JPEG.read` (not sniffed as a PNG) and turned upright by its Exif
 // orientation; a broken file throws instead of decoding to an empty image. Black box through the
-// `PhotoImageCodec` surface and core's public codecs, so the file compiles before and after SC-4. Disabled until
-// SC-4 removes the fallback and applies the orientation.
+// `PhotoImageCodec` surface and core's public codecs, so the file compiled before SC-4 and runs after it.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -54,7 +53,7 @@ import PhotoModel
         return Data(bytes)
     }
 
-    @Test(.disabled("waits on SC-4"))
+    @Test
     func aPNGCoreRefusesIsRefusedNotReadByAFallback() throws {
         let png = Self.inserting("QUUX", [1, 2, 3], into: try PNG.write(Self.buffer(Self.halves)))
         #expect(throws: CodecError.self) { try PNG.read(png) }
@@ -63,7 +62,7 @@ import PhotoModel
         }
     }
 
-    @Test(.disabled("waits on SC-4"))
+    @Test
     func pngIsCoresBothWays() throws {
         let data = try codec.encode(Self.halves, as: .png, quality: 1)
         #expect(data == (try PNG.write(Self.buffer(Self.halves))), "the PNG is core's bytes")
@@ -74,7 +73,7 @@ import PhotoModel
                 "a 16-bit PNG, which only core reads, decodes as core decodes it")
     }
 
-    @Test(.disabled("waits on SC-4"))
+    @Test
     func aJPEGIsReadByCoresJPEGReader() throws {
         let jpeg = try JPEG.write(Self.buffer(Self.halves), quality: 90)
         let core = try JPEG.read(jpeg)
@@ -83,7 +82,7 @@ import PhotoModel
         #expect(try codec.decode(codec.encode(Self.halves, as: .jpeg, quality: 0.9), longestSide: nil).width == 16)
     }
 
-    @Test(.disabled("waits on SC-4"))
+    @Test
     func aJPEGWithExifOrientationSixDecodesUpright() throws {
         let jpeg = Self.withOrientation(6, try JPEG.write(Self.buffer(Self.halves), quality: 95))
         #expect(try JPEG.info(jpeg).orientation == 6, "the fixture carries orientation 6")
@@ -101,7 +100,7 @@ import PhotoModel
         #expect(small.height == 8)
     }
 
-    @Test(.disabled("waits on SC-4"))
+    @Test
     func aBrokenFileThrowsInsteadOfDecodingEmpty() throws {
         let png = try PNG.write(Self.buffer(Self.halves))
         var badCRC = [UInt8](png)
