@@ -1,7 +1,8 @@
 // LibraryExportPackSnapshots.swift: the export sheet's Metadata row (export-pack
 // LX-2), editing with All but location picked, in Light and Dark:
 // library-export-metadata. The row's policy is the one the shared ExportPick
-// carries. macOS only; LX-5 adds the render budget.
+// carries. LX-5's render budget for a pick is
+// RenderBudgetLibraryExportPackTests. macOS only.
 import LibraryModel
 import SuiteKernel
 import SuiteUI
