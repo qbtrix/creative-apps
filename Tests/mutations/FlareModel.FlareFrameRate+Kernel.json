@@ -36,9 +36,9 @@
   },
   {
     "label": "playbackExact: playback ticks by the whole rate, so a second at 23.976 reaches frame 24",
-    "file": "Sources/FlareModel/FlarePlayback.swift",
-    "find": "rate: rate.sceneRate, durationFrames: frames,",
-    "replace": "rate: SceneRate(whole: rate.nominal), durationFrames: frames,",
+    "file": "Sources/FlareModel/FlarePlayback+Kernel.swift",
+    "find": "rate: playbackRate,",
+    "replace": "rate: FrameRate(whole: playbackRate.nominal),",
     "tests": "FlareNewDocumentTests"
   }
 ]
