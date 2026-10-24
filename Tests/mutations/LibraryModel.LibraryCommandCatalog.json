@@ -63,6 +63,13 @@
     "tests": "LibraryCommandPathTests"
   },
   {
+    "label": "paramsReachRun: Save as Preset takes a blank name",
+    "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "find": "guard !p.name.allSatisfy(\\.isWhitespace), let options = c.exportRun.options else {",
+    "replace": "guard let options = c.exportRun.options else {",
+    "tests": "LibraryCommandPathTests"
+  },
+  {
     "label": "runSendsAnAgentToThePrepare: File > Share… still reads as not built",
     "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
     "find": "throw CatalogError.unavailable(id: \"file.share\", why: shareInWindow)",

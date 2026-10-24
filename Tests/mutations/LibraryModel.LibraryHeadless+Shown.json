@@ -1,23 +1,16 @@
 [
   {
-    "label": "showOriginalReadsBackOnThenOff, realJobPasses(show-original): the shown export never reports Show Original",
+    "label": "showOriginalReadsBackOnThenOff, realJobPasses(show-original): the shown export never reports Show Original on",
     "file": "Sources/LibraryModel/LibraryHeadless+Shown.swift",
-    "find": "original: library.showsOriginal ? true : nil",
-    "replace": "original: nil",
+    "find": "original: library.showsOriginal, shown: names",
+    "replace": "original: false, shown: names",
     "tests": "LibraryHeadlessShownTests|LibraryHeadlessTests"
   },
   {
-    "label": "showOriginalReadsBackOnThenOff, realJobPasses(browse-folders): the shown export writes original false while it is off",
+    "label": "showOriginalReadsBackOnThenOff, realJobPasses(show-original-off): the shown export reports Show Original on whatever its state",
     "file": "Sources/LibraryModel/LibraryHeadless+Shown.swift",
-    "find": "original: library.showsOriginal ? true : nil",
-    "replace": "original: library.showsOriginal",
+    "find": "original: library.showsOriginal, shown: names",
+    "replace": "original: true, shown: names",
     "tests": "LibraryHeadlessShownTests|LibraryHeadlessTests"
-  },
-  {
-    "label": "showOriginalReadsBackOnThenOff: the shown export reports Show Original on whatever its state",
-    "file": "Sources/LibraryModel/LibraryHeadless+Shown.swift",
-    "find": "original: library.showsOriginal ? true : nil",
-    "replace": "original: true",
-    "tests": "LibraryHeadlessShownTests"
   }
 ]
