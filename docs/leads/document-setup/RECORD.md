@@ -4,7 +4,7 @@ Issue: #3757 (relaunch) · Packet: docs/blueprints/suiteui/features/document-set
 Run: act-1a16c619037-500v (resumed from act-1a16958d72f-a4mg) · Session: cloud line lead (line:suiteui; brush-keys + document-setup) · Resumed: 2026-10-24
 Stage: 3 wave 3 (resume triage: fixers on needs-rebase PRs)
 Base: 654fb36328cdb049dfd1bcda411a126d316c639c (main at resume)
-Next: fixer merging dev into DS-design #4887 (needs-rebase, design.list-commands.json golden); DS-photo #4901, DS-halo #4918, DS-flare #4891 clean in the lane; DS-z folds into the last adopt slice
+Next: wait for the lane to merge DS-photo #4901, DS-design #4887, DS-halo #4918, DS-flare #4891; then DS-z folded into the last adopt slice
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -13,7 +13,7 @@ Next: fixer merging dev into DS-design #4887 (needs-rebase, design.list-commands
 | DS-m | DocumentSetup + commands bodies, mutation plans | DS-3, DS-4 | – | DS-a | false | 0 | done #4184 | – | – |
 | DS-u | shared NewDocumentSheet in the gallery; journey + render budget | DS-5, DS-6 | SuiteJourneyTests+DocumentSetup | DS-a, frame-rates:FR-u, area-selection:AR-u | true | 0 | done #4309 c0f2c506 | 39746353013 | wanted |
 | DS-photo | Photo new image on the setup | DS-7, DS-8 | PhotoJourneyTests+Documents | DS-u, DS-m, CB-s, AC-zoom, CB-photo | true | 0 | pr #4901 | – | – |
-| DS-design | Design new document on the setup | DS-9, DS-10 | DesignJourneyTests+Page | DS-u, DS-m, CB-design | true | 0 | pr #4887 (needs-rebase; fixer dispatched) | – | – |
+| DS-design | Design new document on the setup | DS-9, DS-10 | DesignJourneyTests+Page | DS-u, DS-m, CB-design | true | 0 | pr #4887 (dev merged in, head 2d92107d, clean) | – | – |
 | DS-halo | Halo composition settings on the setup | DS-11, DS-12 | HaloJourneyTests+Settings | DS-a (DS-11); DS-u, DS-m, FR-halo, UP-halo, CB-halo (DS-12) | true | 0 | pr #4918 | – | – |
 | DS-flare | Flare document setup on the setup | DS-13, DS-14 | FlareJourneyTests+NewSheet | DS-u, DS-m, FR-flare, CB-flare | true | 0 | pr #4891 | – | – |
 | DS-z | delete old sheets; status built; feature-done | DS-15, DS-16 | – | DS-halo, DS-flare, DS-photo, DS-design | true | 0 | blocked | – | – |
