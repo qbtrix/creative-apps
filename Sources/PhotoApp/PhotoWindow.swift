@@ -51,8 +51,6 @@ struct PhotoWindow: View {
     @State var note: String?
     /// The error or refusal the window's alert shows; nil while it is closed.
     @State var problem: PhotoProblem?
-    @State var exportFormat = ImageFormat.png
-    @State var exportQuality = 0.9
     @State var isResizing = false
     /// The Straighten sheet's choices; nil while it is closed.
     @State var straightenDraft: StraightenDraft?
@@ -121,9 +119,8 @@ struct PhotoWindow: View {
                 model.clearStatus()
             }
             .sheet(isPresented: Binding(get: { model.isExportSheetOpen }, set: { if !$0 { model.dismissExport() } })) {
-                ExportSheet(
-                    format: exportFormat, quality: exportQuality, workspace: model, onFormat: { exportFormat = $0 },
-                    onQuality: { exportQuality = $0 }, onExport: exportChosen, onCancel: { model.dismissExport() })
+                PhotoExportSheetAdapter(
+                    model: model, onPick: { model.editExport($0) }, onExport: exportChosen, onClose: { model.dismissExport() })
             }
             .sheet(isPresented: $isResizing) {
                 if let canvas = model.canvas {
@@ -259,6 +256,7 @@ struct PhotoWindow: View {
         case .sample(let intent): performSample(intent)
         case .place(let intent): performPlace(intent)
         case .text(let intent): performType(intent)
+        case .path(let intent): model.runPath(intent)
         case .confirm: if confirmTransform() {} else { model.applyCrop() }
         case .dismiss:
             if dismissTransform() {} else if model.pendingCrop != nil { model.cancelCrop() } else { model.deselect() }

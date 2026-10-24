@@ -20,7 +20,7 @@ private func shootWithRejects(_ trash: FakeTrash = FakeTrash()) -> LibraryCatalo
     return catalog
 }
 
-@Test(.disabled("DR-6")) func deleteRejectsTrashesThemAsOneStep() {
+@Test func deleteRejectsTrashesThemAsOneStep() {
     let trash = FakeTrash()
     var catalog = shootWithRejects(trash)
     let kept = catalog.items.filter { $0.flag != .reject }.map(\.id)
@@ -33,7 +33,7 @@ private func shootWithRejects(_ trash: FakeTrash = FakeTrash()) -> LibraryCatalo
     #expect(catalog.deleteRejectsTargets.isEmpty)
 }
 
-@Test(.disabled("DR-6")) func undoPutsEachPhotoBackWhereItSat() {
+@Test func undoPutsEachPhotoBackWhereItSat() {
     let trash = FakeTrash()
     var catalog = shootWithRejects(trash)
     let before = catalog.items.map(\.id)
@@ -46,7 +46,7 @@ private func shootWithRejects(_ trash: FakeTrash = FakeTrash()) -> LibraryCatalo
     #expect(trash.moved.count == 3)
 }
 
-@Test(.disabled("DR-6")) func aFailedMoveKeepsThatPhotoAndNamesIt() {
+@Test func aFailedMoveKeepsThatPhotoAndNamesIt() {
     let trash = FakeTrash(failing: ["/fixture/shoot/IMG_0005.jpg"])
     var catalog = shootWithRejects(trash)
     catalog.deleteRejects()
@@ -55,7 +55,7 @@ private func shootWithRejects(_ trash: FakeTrash = FakeTrash()) -> LibraryCatalo
     #expect(catalog.cullError?.contains("IMG_0005") == true)
 }
 
-@Test(.disabled("DR-6")) func aFailedPutBackLeavesThePhotoOutAndSaysSo() {
+@Test func aFailedPutBackLeavesThePhotoOutAndSaysSo() {
     let trash = FakeTrash()
     var catalog = shootWithRejects(trash)
     catalog.deleteRejects()
@@ -69,7 +69,7 @@ private func shootWithRejects(_ trash: FakeTrash = FakeTrash()) -> LibraryCatalo
     #expect(catalog.cullError?.contains("IMG_0008") == true)
 }
 
-@Test(.disabled("DR-6")) func aSamplePhotoLeavesWithoutATrashCall() {
+@Test func aSamplePhotoLeavesWithoutATrashCall() {
     let trash = FakeTrash()
     var photos = LibraryFixtures.photos(named: "samples")
     guard !photos.isEmpty else { Issue.record("no samples"); return }
@@ -94,7 +94,7 @@ private func shootWithRejects(_ trash: FakeTrash = FakeTrash()) -> LibraryCatalo
     #expect(catalog.history.undo.count == steps)
 }
 
-@Test(.disabled("DR-6")) func aReimportSkipsTheTrashedPaths() {
+@Test func aReimportSkipsTheTrashedPaths() {
     var catalog = shootWithRejects()
     catalog.deleteRejects()
     let skip = catalog.beginImport() ?? []
@@ -102,3 +102,38 @@ private func shootWithRejects(_ trash: FakeTrash = FakeTrash()) -> LibraryCatalo
         #expect(skip.contains("/fixture/shoot/IMG_" + LibraryFixtures.padded(n, to: 4) + ".jpg"))
     }
 }
+
+@Test func undoMakesTheTrashedPathsKnownAgain() {
+    var catalog = shootWithRejects()
+    catalog.deleteRejects()
+    #expect(catalog.excludedPaths.count == 3)
+    catalog.undo()
+    #expect(catalog.excludedPaths.isEmpty)
+    #expect(catalog.items.count == 24)
+    catalog.redo()
+    #expect(catalog.excludedPaths.count == 3)
+}
+
+/// 300 rejects in the 10,000-photo catalog on FakeTrash: ≤ 50 ms debug (packet Quality tests).
+@Test func largeBudget() {
+    var photos = LibraryFixtures.largePhotos(count: 10_000, folder: "/fixture/large")
+    for index in photos.indices { photos[index].flag = index % 33 == 0 && index < 9_900 ? .reject : PhotoFlag.none }
+    var services = LibraryServices.fake(photos)
+    services.trash = FakeTrash()
+    var fresh = LibraryCatalog(services: services)
+    fresh.load(photos)
+    #expect(fresh.deleteRejectsTargets.count == 300)
+    var catalog = fresh
+    let cost = Budget.measure("library delete-rejects-300-of-10000", runs: 5) {
+        catalog = fresh
+        catalog.deleteRejects()
+    }
+    #expect(catalog.items.count == 9_700)
+    #expect(cost.median <= 50 * budgetScale)
+}
+
+#if DEBUG
+private let budgetScale = 1.0
+#else
+private let budgetScale = 0.1
+#endif
