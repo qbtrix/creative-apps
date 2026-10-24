@@ -1,6 +1,6 @@
 # SuiteShell's menu items and buttons built without a command spec (command-path, command-state CS-2).
 # max: 6
-Sources/SuiteShell/AIAccessCommands.swift: Button(AIAccessPrompt.menuTitle) { AIAccessCenter.shared.showList() }
+Sources/SuiteShell/AIAccessCommands.swift: Button(AIAccessPrompt.menuTitle, systemImage: AIAccessPrompt.menuSymbol) { AIAccessCenter.shared.showList() }
 Sources/SuiteShell/OpenInMenu.swift: Button(SuiteFileMenu.noRecentFiles) {}
 Sources/SuiteShell/OpenInMenu.swift: Button(file.name) { reopen(file.fileID) }
 Sources/SuiteShell/OpenInMenu.swift: Button("Clear Menu") { clear() }

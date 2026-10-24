@@ -5,7 +5,11 @@
 // (pure members hold the reference fake), and `pending` lists every such
 // member so views disable its controls with that reason. `animations` and
 // `updates` have no slot: they stay fakes until a process swaps them with
-// `with(animations:updates:)`.
+// `with(animations:updates:)`. `SuiteLocations.processSupportFolder` is the
+// support folder a real process uses: the `SuiteSupportDir` default (the
+// `-SuiteSupportDir` launch argument, or the one the snapshot tests register),
+// else AfterGlow's folder in the home.
+import Foundation
 import SuiteModel
 
 /// What every slot may need to build its member.
@@ -17,6 +21,16 @@ public struct SlotContext: Sendable {
 
     public init(store: FileStore, support: String, app: SuiteApp, arguments: [String]) {
         self.store = store; self.support = support; self.app = app; self.arguments = arguments
+    }
+}
+
+extension SuiteLocations {
+    /// This process's support folder, read at each use: UserDefaults holds the `-SuiteSupportDir` launch
+    /// argument and any registered default.
+    public static var processSupportFolder: String {
+        supportFolder(
+            arguments: [supportDirFlag, UserDefaults.standard.string(forKey: "SuiteSupportDir") ?? ""],
+            home: NSHomeDirectory())
     }
 }
 
