@@ -1,6 +1,7 @@
 // LibraryHeadless.swift (adopt-command-catalog AC-l3): Library's document with no window, for the afterglow CLI, MCP
 // and the real jobs. A `.library` file is a stored zip (core's ZipStore): `catalog.json` in the catalog file's format
-// (LiveCatalogCoding) and the photos under `images/`. Opening it imports every image the catalog doesn't list yet.
+// (LiveCatalogCoding) and the photos under `images/`. Opening it imports every image the catalog doesn't list yet,
+// except the paths Delete Rejects trashed (`excludedPaths`, kept in the catalog file; cull-finish DR-m).
 // Commands are `LibraryCatalog.catalog`'s, lifted; saving writes the zip back; export writes the catalog file
 // ("json") or the picks as PNGs at a long side through CoreRaster's codec, which refuses until core's PNG lands
 // (qbtrix/creative-core#562). Linux-safe: no UI imports.
@@ -32,11 +33,11 @@ public struct LibraryHeadless: HeadlessDocument {
     /// The file's name without its extension, for the export's names.
     public private(set) var stem: String
 
-    init(photos: [PhotoItem], images: [String: Data], stem: String) {
+    init(photos: [PhotoItem], images: [String: Data], stem: String, excludedPaths: Set<String> = []) {
         var services = LibraryServices.fake()
         services.culling = LiveCulling(); services.coding = LiveCatalogCoding(); services.isPreview = false
         library = LibraryCatalog(services: services)
-        library.restore(photos)
+        library.restore(photos, excludedPaths: excludedPaths)
         self.images = images; self.stem = stem
     }
 
@@ -50,13 +51,15 @@ public struct LibraryHeadless: HeadlessDocument {
     public static func open(_ data: Data, name: String) throws -> LibraryHeadless {
         do {
             let entries = try ZipStore.entries(data)
-            var photos = try entries[catalogEntry].map { try LiveCatalogCoding().decode($0) } ?? []
+            let file = try entries[catalogEntry].map { try LiveCatalogCoding().decodeFile($0) }
+            var photos = file?.photos ?? []
+            let excluded = file?.excludedPaths ?? []
             let images = entries.filter { $0.key.hasPrefix(imageFolder) }
-            let listed = Set(photos.compactMap(\.path))
+            let listed = Set(photos.compactMap(\.path)).union(excluded)
             for (path, bytes) in images.sorted(by: { $0.key < $1.key }) where !listed.contains(path) {
                 photos.append(try photo(bytes, path: path))
             }
-            return LibraryHeadless(photos: photos, images: images, stem: fileStem(name))
+            return LibraryHeadless(photos: photos, images: images, stem: fileStem(name), excludedPaths: excluded)
         } catch let error as CatalogError { throw error } catch {
             throw CatalogError.failed(id: "open", message: "\(name) isn't a Library file: \(error)")
         }
@@ -128,7 +131,7 @@ public struct LibraryHeadless: HeadlessDocument {
     }
 
     func catalogFile() throws -> Data {
-        do { return try LiveCatalogCoding().encode(library.items) } catch {
+        do { return try LiveCatalogCoding().encode(library.items, excludedPaths: library.excludedPaths) } catch {
             throw CatalogError.failed(id: "save", message: "\(error)")
         }
     }

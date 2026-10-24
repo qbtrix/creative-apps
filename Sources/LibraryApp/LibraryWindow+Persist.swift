@@ -22,8 +22,8 @@ final class PersistAreaState {
 
 /// What the launch read found.
 enum PersistLaunchResult: Sendable, Equatable {
-    /// The file's photos (nil: there is no file) and the ids whose files are gone.
-    case restored([PhotoItem]?, missing: Set<String>)
+    /// The file's photos (nil: there is no file), the paths a re-import skips and the ids whose files are gone.
+    case restored([PhotoItem]?, excludedPaths: Set<String> = [], missing: Set<String>)
     case failed(LibraryError)
 }
 
@@ -45,7 +45,7 @@ extension LibraryWindow {
             }.value
             model.applyLaunch(result)
             // The file's photos replaced the catalog: drop the old photos' thumbnails too.
-            if case .restored(.some, _) = result { areas.thumbnails.store.clear() }
+            if case .restored(.some, _, _) = result { areas.thumbnails.store.clear() }
         }
     }
 
@@ -65,7 +65,7 @@ extension LibraryWindow {
         areas.persist.pending?.cancel()
         guard let request = model.saveRequest(), let store = model.services.store as? CatalogStore else { return }
         do {
-            try store.writeNow(model.services.coding.encode(request.photos))
+            try store.writeNow(model.services.coding.encode(request.photos, excludedPaths: request.excludedPaths))
             model.didSave(revision: request.revision)
         } catch {
             model.failSave(error as? LibraryError ?? .invalid("Library couldn't save its catalog."))
@@ -83,7 +83,7 @@ extension LibraryWindow {
         Task {
             let failure = await Task.detached(priority: .utility) { () -> LibraryError? in
                 do {
-                    try await store.write(coding.encode(request.photos))
+                    try await store.write(coding.encode(request.photos, excludedPaths: request.excludedPaths))
                     return nil
                 } catch {
                     return error as? LibraryError ?? .invalid("Library couldn't save its catalog.")
@@ -105,11 +105,11 @@ extension LibraryWindow {
         -> PersistLaunchResult {
         do {
             guard let data = try await store.read() else { return .restored(nil, missing: []) }
-            let photos = try coding.decode(data)
-            let missing = photos.filter { photo in
+            let file = try coding.decodeFile(data)
+            let missing = file.photos.filter { photo in
                 photo.path.map { !FileManager.default.fileExists(atPath: $0) } ?? false
             }
-            return .restored(photos, missing: Set(missing.map(\.id)))
+            return .restored(file.photos, excludedPaths: file.excludedPaths, missing: Set(missing.map(\.id)))
         } catch LibraryError.damagedCatalog(let detail) {
             _ = try? await store.setAside()
             return .failed(.damagedCatalog(detail))
@@ -131,8 +131,8 @@ extension LibraryCatalog {
     /// Hands the launch read's result to the restore methods.
     mutating func applyLaunch(_ result: PersistLaunchResult) {
         switch result {
-        case .restored(let photos, let missing):
-            restore(photos)
+        case .restored(let photos, let excludedPaths, let missing):
+            restore(photos, excludedPaths: excludedPaths)
             markMissing(missing)
         case .failed(let error):
             failRestore(error)

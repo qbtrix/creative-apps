@@ -33,5 +33,26 @@
     "find": "try LibraryCatalog.catalog.run(id, params: json, on: &doc.library).result",
     "replace": "try { var copy = doc.library; return try LibraryCatalog.catalog.run(id, params: json, on: &copy).result }()",
     "tests": "LibraryHeadlessTests"
+  },
+  {
+    "label": "headlessSaveReopenKeepsExcludedPaths, realJobPasses(delete-rejects): open imports the trashed images again",
+    "file": "Sources/LibraryModel/LibraryHeadless.swift",
+    "find": "let listed = Set(photos.compactMap(\\.path)).union(excluded)",
+    "replace": "let listed = Set(photos.compactMap(\\.path))",
+    "tests": "LibraryExcludedPathsReopenTests"
+  },
+  {
+    "label": "headlessSaveReopenKeepsExcludedPaths, realJobPasses(delete-rejects): save drops the excluded paths from the catalog file",
+    "file": "Sources/LibraryModel/LibraryHeadless.swift",
+    "find": "encode(library.items, excludedPaths: library.excludedPaths)",
+    "replace": "encode(library.items, excludedPaths: [])",
+    "tests": "LibraryExcludedPathsReopenTests"
+  },
+  {
+    "label": "headlessSaveReopenKeepsExcludedPaths: open forgets the file's excluded paths",
+    "file": "Sources/LibraryModel/LibraryHeadless.swift",
+    "find": "stem: fileStem(name), excludedPaths: excluded)",
+    "replace": "stem: fileStem(name))",
+    "tests": "LibraryExcludedPathsReopenTests"
   }
 ]

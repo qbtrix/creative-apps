@@ -1,8 +1,7 @@
 {
   "version": 1,
   "app": "library",
-  "why": "Pending DR-8 (cull-finish): the live Trash. Deletes a four-photo shoot's two rejects: the catalog file must list beach and dock only, remember fog and pier in excludedPaths, and the runner's scratch images/ folder must no longer hold fog.png or pier.png.",
-  "pending": "DR-8",
+  "why": "Deletes a four-photo shoot's two rejects: the catalog file must list beach and dock only, remember fog and pier in excludedPaths, and the runner's scratch images/ folder must no longer hold fog.png or pier.png.",
   "inputs": ["input/*.library"],
   "steps": [
     {"id": "photo.delete-rejects", "params": {}}
@@ -21,5 +20,5 @@
       ]
     }}
   },
-  "platforms": []
+  "platforms": ["linux", "macos"]
 }
