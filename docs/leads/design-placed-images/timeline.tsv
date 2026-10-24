@@ -114,3 +114,4 @@ utc	stage	event	ref	note
 2026-10-24T10:20:22Z	3	check	-	dev 9f476af7 unchanged; lane active (Linux checks running) but batch 20261024081307 unresolved since 08:13; lead PRs waiting
 2026-10-24T10:42:10Z	3	check	-	dev 9f476af7 unchanged; lane batch 20261024081307 still open; lead PRs waiting
 2026-10-24T11:04:11Z	3	check	-	dev 6ad8cadb; lane fix #5150 (lists all open PRs) merged; new batch 20261024110214 (#5006-#5144) has no lead PR; #4864/#4888/#3759 merge clean
+2026-10-24T11:26:15Z	3	check	-	dev 6ad8cadb unchanged; batch 20261024110214 in flight, no lead PR in it; lead PRs waiting
