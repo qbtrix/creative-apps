@@ -26,6 +26,8 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 2026-10-24T10:13Z: hb6: unchanged. No supervisor answer; #5088/#5089/#5091 open in lane, no needs-*; UP-z on SC-z.
+
 - 2026-10-24T09:52Z: hb5: unchanged. No supervisor answer; #5088/#5089/#5091 open in lane, no needs-*; UP-z on SC-z.
 
 - 2026-10-24T09:30Z: hb4: no supervisor answer yet on #3721. #5088's fast-lane check passed at 08:02Z (proof accepted); it waits for a batch's macOS gate. #5089/#5091 stacked behind it, no needs-* label. UP-z still on SC-z. Next poll 10:00Z.
