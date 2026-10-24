@@ -1,10 +1,15 @@
 # adopt-kernel-autosave lead record
 
 Issue: #3713 · Packet: docs/blueprints/suiteui/features/adopt-kernel-autosave.md
-Run: act-1a16c618fe7-h4fd (line lead, line:suiteui; relaunch after park) · earlier runs act-1a163b2abfe-f182, act-1a15c07cabb-mtlw
+Run: act-1a16fe1fa73-5x3s (line lead, line:suiteui; relaunch) · earlier: act-1a16c618fe7-h4fd (line lead, line:suiteui; relaunch after park)
 Stage: 3 wave 1 PRs open (AK-6 #5039, AK-9 #5040)
 Base: origin/dev 830af22de
 Next: Lane: #5039 AK-6 in the lane; #5040 AK-9 stacked on it. AK-8 waits SC-f (re-read each poll); AK-11 after AK-6, AK-8, AK-9.
+
+## Run act-1a16fe1fa73-5x3s decisions
+- Brief rule 1: main checked out at e79e9afc; lead/export-pack and lead/brush-keys rebased onto origin/main and pushed (--force-with-lease).
+- PR base stays `dev`: CLAUDE.md, scripts/fast-lane.sh (BASE_BRANCH=dev) and every earlier run land through dev; a fast-lane PR on main is retargeted to dev anyway.
+- PR bodies: the session's GitHub relay re-appends a generated-by footer on every edit; the fast lane strips it from the squash commit (its comment on #5043), so nothing waits on it.
 
 ## Slices
 
