@@ -31,3 +31,4 @@ utc	stage	event	ref	note
 2026-10-23T23:34Z	check	heartbeat	-	23:35Z check: #4903/#4911 open fast-lane awaiting batch macOS gate; LS-2/5/11 stacked
 2026-10-23T23:55Z	check	heartbeat	-	23:56Z check: #4903/#4911 open fast-lane, queued behind batch 20261023215139 (red, not ours); LS-2/5/11 stacked
 2026-10-24T00:17Z	check	heartbeat	-	00:17Z check: #4903/#4911 open fast-lane, lane queue stalled behind red batch (not ours); LS-2/5/11 stacked
+2026-10-24T00:39Z	check	heartbeat	-	00:39Z check: #4903/#4911 open fast-lane; lane bisecting red batch (not ours); LS-2/5/11 stacked
