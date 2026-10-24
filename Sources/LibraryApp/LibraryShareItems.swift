@@ -1,7 +1,8 @@
 // LibraryShareItems.swift: Library's Share (share-sheet SH-4, packet
-// docs/blueprints/library/features/share-sheet.md): SuiteUI's ShareButton in
-// the grid's and the loupe's top-trailing corner, and File > Share…. Both
-// prepare through `LibraryCatalog.prepareShare` (`file.share-prepare`), the
+// docs/blueprints/library/features/share-sheet.md): SuiteUI's ShareButton as
+// an item of the grid's toolbar row (after Export…), and as a glass pill over
+// the loupe's top-trailing corner, opposite its Grid pill; and File > Share….
+// Both prepare through `LibraryCatalog.prepareShare` (`file.share-prepare`), the
 // copies landing in `Share/<run>` beside the catalog file; while
 // `shareHelp` says why Share can't run (nothing selected, an export running,
 // or no exporter), both are off with that reason. The button is rebuilt
@@ -21,20 +22,28 @@ extension LibraryWindow {
 }
 
 extension View {
-    /// The Share button (`suite.share`) over this view's top-trailing corner, for `model`'s selection.
+    /// The Share pill (`suite.share`) over this view's top-trailing corner, for `model`'s selection.
     func libraryShare(_ model: LibraryCatalog) -> some View {
-        let help = model.shareHelp
-        return overlay(alignment: .topTrailing) {
-            GlassPanel {
-                ShareButton(help: help) {
-                    let support = CatalogStore().folder.path(percentEncoded: false)
-                    let files = try await model.prepareShare(support: support, run: UUID().uuidString)
-                    return files.map { URL(fileURLWithPath: $0) }
-                }
-            }
-            .id(model.exportTargets.map(\.id))
-            .libraryControl(id: "suite.share", enabled: help == nil, help: help)
-            .padding(SuiteSpacing.l)
+        overlay(alignment: .topTrailing) {
+            LibraryShareItem(model: model)
+                .buttonStyle(HoverButtonStyle(glass: true))
+                .padding(SuiteSpacing.l)
         }
+    }
+}
+
+/// SuiteUI's ShareButton (`suite.share`) for `model`'s selection; the host gives it its look.
+struct LibraryShareItem: View {
+    let model: LibraryCatalog
+
+    var body: some View {
+        let help = model.shareHelp
+        ShareButton(help: help) {
+            let support = CatalogStore().folder.path(percentEncoded: false)
+            let files = try await model.prepareShare(support: support, run: UUID().uuidString)
+            return files.map { URL(fileURLWithPath: $0) }
+        }
+        .id(model.exportTargets.map(\.id))
+        .libraryControl(id: "suite.share", enabled: help == nil, help: help)
     }
 }
