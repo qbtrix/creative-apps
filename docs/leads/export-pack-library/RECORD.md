@@ -2,7 +2,7 @@
 
 Issue: #3478 · Packet: docs/blueprints/library/features/export-pack.md
 Run: act-1a170488aff-41nk (line lead, line:library) · resumed 2026-10-24T23:40Z (earlier act-1a16cc967d9-mcuv, act-1a16953af22-wvhu, act-1a15e4969c2-pa6e)
-Stage: 3 wave 2; LX-2 #4960 (efabeb8d), LX-4 #4962 (4070383d) and LX-u #5128 (stacked on #4960) on the lane, waiting for a batch; checked 2026-10-24T23:43:08Z
+Stage: 3 wave 2; LX-2 #4960, LX-4 #4962, LX-u #5128 on the lane; LX-7 (feat/export-pack-lx7, stacked on #5128) and LX-8 (feat/export-pack-lx8) built locally, gating; checked 2026-10-24T23:47:17Z
 Base: origin/dev 830af22d
 Next: lane merges #4960 then retarget LX-u #5128 to dev; #4962 on lane; LX-z (LX-7 live journey, LX-8 built) after LX-u and LX-m; Wire XP-7 swaps in when #5044 merges
 
