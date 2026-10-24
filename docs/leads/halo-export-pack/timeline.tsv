@@ -91,3 +91,4 @@ utc	stage	event	ref	note
 2026-10-24T08:40:14Z	poll	dev unmoved since 08:05; lane bisecting lane/batch-20261024081307 (#4903-#4952); our base PRs eligible on marker, queued behind ~62 ready PRs; no needs-fix/needs-rebase; no new findings
 2026-10-24T09:02:13Z	poll	dev unmoved (1bbaba6c); lane still bisecting lane/batch-20261024081307; all 8 PRs open, no needs-fix/needs-rebase
 2026-10-24T09:23:46Z	poll	dev unmoved (1bbaba6c); lane still bisecting lane/batch-20261024081307; our PRs queued
+2026-10-24T09:45:03Z	poll	dev at 9f476af7 (#5117); 8 PRs open, no needs-fix/needs-rebase; lane batch 20261024081307 still bisecting
