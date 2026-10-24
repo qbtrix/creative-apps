@@ -71,3 +71,4 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-24T14:33:32Z: batch-20261024110214 resolved (its branches are gone); #4817/#4988 still open, ready for the next batch.
 - 2026-10-24T14:52:16Z: new batch-20261024144917 holds 12 older PRs, not #4817/#4988; ours go in a later batch.
 - 2026-10-24T15:10:51Z: no change; batch-20261024144917 still in flight, #4817/#4988 next in line.
+- 2026-10-24T15:29:24Z: no change; batch-20261024144917 still in flight.
