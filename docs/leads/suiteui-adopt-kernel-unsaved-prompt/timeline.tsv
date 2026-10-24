@@ -83,3 +83,4 @@ ts	kind	note
 2026-10-24T17:26:18Z	poll	hb26: dev c0920138 (#5182); PRs unchanged; no supervisor answer
 2026-10-24T17:47:48Z	poll	hb27: dev unchanged c0920138; PRs unchanged; no supervisor answer
 2026-10-24T18:09:36Z	poll	hb28: dev unchanged c0920138; PRs unchanged; no supervisor answer
+2026-10-24T18:30:59Z	poll	hb29: dev d13c3ff2 (12-PR batch, #5088 not in it); PRs unchanged; no supervisor answer
