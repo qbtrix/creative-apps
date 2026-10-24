@@ -133,3 +133,4 @@
 2026-10-24T18:05:25Z	heartbeat	batch-20261024172211 still in flight (none ours); our 8 PRs clean fast-lane, queued for next batch
 2026-10-24T18:27:01Z	heartbeat	batch-20261024172211 resolved; no batch in flight; our 8 PRs open fast-lane (#5130/#5044 mergeable recomputing), due in next batch
 2026-10-24T18:49:33Z	heartbeat	batch-20261024183708 in flight (12 PRs up to #4897, none ours); ours next by age; #5130/#5044 test-merge clean on dev
+2026-10-24T19:11:20Z	heartbeat	batch-20261024183708 red, bisecting (probe -6); none ours; our 8 PRs all clean fast-lane, waiting for next batch
