@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "app": "flare",
+  "why": "RJ-F12 (flare/lottie-open LO-5): on since LO-5 opened .json through FlareLottieOpen and added import.report; the job runs import.report first (refused unless the document came from a Lottie: it proves the open). Opens bounce.json (a ball shape layer with three position keys over a solid floor), sets the ball's fill to orange and exports Lottie. The input's bytes must be unchanged (Save never targets the JSON); LO-5 pins the exported file's keyframe count and fill colour: its sha256, checked by hand to hold the ball's three position keys (frames 0, 24 and 47) and fl.c [1, 0.5, 0, 1].",
+  "inputs": ["input/*.json"],
+  "steps": [
+    {"id": "import.report", "params": {}},
+    {"id": "shape.set-fill", "params": {"sceneID": "scene-1", "layerID": "layer-2", "index": 0, "fill": {"r": 1, "g": 0.5, "b": 0, "a": 1}}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-recoloured", "format": "lottie"},
+  "expect": {
+    "out/bounce-recoloured.lottie": {"sha256": "304330e358c951e38a4406f5118dce08642391ca9d82a7d30fade2710149bba4"},
+    "input/bounce.json": {"sha256": "8868a87f2afa682228fe032bf22a0bbcce9d3e669aaccd53e2eab2873803d4a6"}
+  },
+  "platforms": ["linux", "macos"]
+}

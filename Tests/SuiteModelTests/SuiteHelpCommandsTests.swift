@@ -46,11 +46,20 @@ import Testing
         #expect(text.contains("isEnabled: false"))
     }
 
+    /// The Beta Notes window opens centred, so its Close button stays on a small screen (#4646).
+    @Test func betaNotesWindowOpensCentred() throws {
+        let text = try source(Self.help)
+        let notes = try #require(text.components(separatedBy: "func showBetaNotes()").last)
+        #expect(notes.contains("window.center()"), "the Beta Notes window opens where AppKit drops it")
+    }
+
     @Test func providerAdaptsSuiteModel() throws {
         let text = try source("Sources/SuiteShell/ShellHelpProvider.swift")
         #expect(text.contains("public struct ShellHelpProvider: HelpProviding"))
         #expect(text.contains("ProblemReport.build(") && text.contains("BetaNotes.current"))
         #expect(!text.contains("URLSession") && !text.contains("NSWorkspace"), "the provider reaches the network")
+        // ProcessInfo.hostName resolves the name over the network and raises macOS's local network prompt.
+        #expect(!text.contains(".hostName"), "the provider asks the network for the host name")
     }
 
     /// RP-5b: the sheet's report holds this Mac's crashes, read from CrashFolder's folder and files only.
@@ -83,6 +92,22 @@ import Testing
         for socket in ["URLSession", "NSWorkspace", "mailto:", "import Network", "CFStream", "NWConnection"] {
             #expect(!glue.contains(socket) && !help.contains(socket), "\(socket): the app sends the report itself")
         }
+    }
+
+    /// cli-bundle CB-5: Connect an AI Assistant… is in every app's group and begins AssistantConnectSheet over the
+    /// running bundle's panel; Copy puts the sheet's text on the pasteboard; the provider names the bundle.
+    @Test func connectAssistantBeginsItsSheet() throws {
+        let help = try source(Self.help)
+        #expect(help.contains("[\"help.report-problem\", \"help.beta-notes\", \"help.connect-assistant\"] + (app"))
+        #expect(help.contains("if id == \"help.connect-assistant\", let bundle = ShellHelpProvider().bundle"))
+        let connect = try #require(help.components(separatedBy: "func showConnect(").last)
+        #expect(connect.contains("AssistantConnectSheet(") && connect.contains("AssistantConnectPanel(bundle: bundle)"))
+        #expect(connect.contains("NSPasteboard.general.setString(text, forType: .string)"), "Copy doesn't copy the text")
+        #expect(connect.contains("AIAccessCenter.shared.showList()") && connect.contains("beginSheet(panel)"))
+        let provider = try source("Sources/SuiteShell/ShellHelpProvider.swift")
+        #expect(provider.contains("AssistantConnectPanel.bundle(containing: Bundle.main.bundlePath)"))
+        let journey = try source("UITests/AfterGlowJourneyTests+Connect.swift")
+        #expect(journey.contains("func testConnectAssistant()") && journey.contains("suite.help.connect.copyCommand"))
     }
 
     @Test func launcherAddsTheGroupInPlaceOfItsWelcomeGroup() throws {

@@ -10,8 +10,10 @@
 // pixels at scale 2. SwiftUI has no rotate pointer (PointerStyle), so a
 // rotate zone and the knob show the crosshair, `rectSelection`; a resize
 // handle shows the frame-resize pointer for where it sits after the turn
-// (HandlePointer), its hit rect over the drawn mark. Under a probe host each
-// drag sample reports on the `handle-drag` series (HandleDragProbe).
+// (HandlePointer), its hit rect over the drawn mark. A press that activates
+// the window drags too, as the canvases' own first-mouse clicks do. Under a
+// probe host each drag sample reports on the `handle-drag` series
+// (HandleDragProbe).
 import AppKit
 import SuiteKernel
 import SwiftUI
@@ -229,6 +231,9 @@ public struct SelectionHandlesEditor: View {
                     report(eventTime)
                 }
                 .onEnded { _ in if drag.ended() { onEnd() } })
+        // A press into an inactive window turns or resizes too, as the canvases' first-mouse clicks do;
+        // without it the first drag on a background window did nothing.
+        .allowsWindowActivationEvents()
     }
 
     /// The hit rects sit over the drawn marks so their pointers show, so they fill the mark under the pointer.

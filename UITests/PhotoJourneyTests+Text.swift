@@ -69,7 +69,7 @@ final class PhotoTextJourneyTests: XCTestCase {
         openRecent("beach.ora", photo)
         XCTAssert(photo.window(named: "beach.ora").waitForExistence(timeout: 30), "Open Recent didn't reopen beach.ora")
         XCTAssert(photo.app.staticTexts["SUMMER SALE"].waitForExistence(timeout: 10), "the reopened file lost the text layer")
-        photo.press(character: "t")
+        pickType(photo)
         photo.element("suite.canvas").coordinate(withNormalizedOffset: Self.title).click()
         let box = photo.element("photo.text.box")
         XCTAssert(box.waitForExistence(timeout: 5), "a Type tool click on the title opened no box")
@@ -85,11 +85,19 @@ final class PhotoTextJourneyTests: XCTestCase {
     /// Where the title goes: the sky, a fifth of the way down the canvas.
     private static let title = CGVector(dx: 0.3, dy: 0.2)
 
+    /// Clicks the canvas with the Move tool, then presses T: tool keys reach only a focused canvas
+    /// (PhotoEditor), as the Crop and Eyedropper journeys click it before C and I.
+    @MainActor private func pickType(_ photo: Journey) {
+        let tool = photo.element("suite.tools").buttons["Type"]
+        XCTAssert(tool.waitForExistence(timeout: 5), "no Type tool on the palette (suite.tools)")
+        photo.element("suite.canvas").click()
+        photo.press(character: "t")
+        XCTAssert(Self.waitUntil { tool.isSelected }, "T didn't pick the Type tool")
+    }
+
     /// T, a click on the sky, `words`, Return.
     @MainActor private func typeTitle(_ words: String, _ photo: Journey) {
-        photo.press(character: "t")
-        let tool = photo.element("suite.tools").buttons["Type"]
-        XCTAssert(tool.waitForExistence(timeout: 5) && tool.isSelected, "T didn't pick the Type tool")
+        pickType(photo)
         photo.element("suite.canvas").coordinate(withNormalizedOffset: Self.title).click()
         XCTAssert(photo.element("photo.text.box").waitForExistence(timeout: 5), "the click opened no text box (photo.text.box)")
         photo.app.typeText(words)

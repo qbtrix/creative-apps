@@ -66,7 +66,8 @@ import Testing
         #expect(HaloRenderExportAdapter.formats.map { ExportSheetIDs("halo.render").format($0.id) }
             == ["halo.render.format.pngSequence", "halo.render.format.movie"])
         let found = try controls(view)
-        #expect(Set(found.keys) == ["halo.render.cancel", "halo.render.destination", "halo.render.format", "halo.render.start"])
+        // HX-2's checkbox shows for a PNG sequence too; the Codec row only for a movie.
+        #expect(Set(found.keys) == ["halo.render.alpha", "halo.render.cancel", "halo.render.destination", "halo.render.format", "halo.render.start"])
         #expect(found["halo.render.start"]?.enabled == true)
         #expect(found["halo.render.destination"]?.enabled == true)
         try shoot(view, "")
@@ -127,20 +128,39 @@ import Testing
     }
 
     /// The summary, the missing-folder problem and the progress line start where the Folder label does (#4454).
+    /// The problem is an error note, whose element starts at its Label's symbol, so it is held to where a bare
+    /// error note at a column's x 0 reports itself; the summary and frame notes are plain text, at the label's x.
     @Test(.timeLimit(.minutes(1))) func notesSitOnTheLabelInset() throws {
-        let cases: [(String, HaloRenderExportAdapter)] = [
-            ("halo.render.summary", sheet(try editing())),
-            ("halo.render.problem", HaloRenderExportAdapter(model: try editing(), destination: nil, output: nil) { _ in }),
-            ("halo.render.frame", sheet(try running())),
+        let errorLead = try Self.lead(of: InspectorNote(HaloRenderOptionRows.noDestination, kind: .error, identifier: "note", column: (0, "column")))
+        let cases: [(String, HaloRenderExportAdapter, lead: CGFloat)] = [
+            ("halo.render.summary", sheet(try editing()), 0),
+            ("halo.render.problem", HaloRenderExportAdapter(model: try editing(), destination: nil, output: nil) { _ in }, errorLead),
+            ("halo.render.frame", sheet(try running()), 0),
         ]
-        for (id, view) in cases {
+        for (id, view, lead) in cases {
             let window = Self.host(view)
             defer { window.close() }
             let nodes = Self.nodes(in: window.contentView as Any)
             let label = try #require(Self.frame(nodes.first { Self.label($0) == "Folder" }, in: window), "no Folder label")
             let note = try #require(Self.frame(nodes.first { ($0.accessibilityIdentifier?() ?? nil) == id }, in: window), "no \(id)")
-            #expect(abs(note.minX - label.minX) <= 0.5, "\(id) starts at \(note.minX), the Folder label at \(label.minX)")
+            #expect(
+                abs(note.minX - label.minX - lead) <= 0.5,
+                "\(id) starts at \(note.minX), the Folder label at \(label.minX), a note \(lead) in from its column")
         }
+    }
+
+    /// How far right of its column's x 0 `note` (identifier "note", column space "column") reports its element.
+    private static func lead(of note: InspectorNote) throws -> CGFloat {
+        let window = host(VStack(alignment: .leading, spacing: 0) {
+            Text("Folder")
+            note
+        }.coordinateSpace(.named("column")))
+        defer { window.close() }
+        let nodes = nodes(in: window.contentView as Any)
+        let column = try #require(frame(nodes.first { label($0) == "Folder" }, in: window), "no column text")
+        let shown = try #require(frame(nodes.first { ($0.accessibilityIdentifier?() ?? nil) == "note" }, in: window), "no note")
+        print("halo.render notes: a bare error note starts \(shown.minX - column.minX) right of its column")
+        return shown.minX - column.minX
     }
 
     /// `view` in a borderless window far off every screen, accessibility on, so its elements report frames.

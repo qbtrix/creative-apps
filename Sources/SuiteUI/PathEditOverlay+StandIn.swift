@@ -31,6 +31,6 @@ extension PathEditOverlay {
                   path: path.isEmpty ? nil
                       : PathInEdit(id: "stand-in", path: VectorPath(contours: path.map(\.contour)), toDocument: .identity),
                   selection: Selection(), tool: tool, zoom: zoom) { _ in }
-        interactive = false
+        takesPresses = false
     }
 }

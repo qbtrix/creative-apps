@@ -2,8 +2,8 @@
   "title": "Open a Lottie file in Flare: File > Open and drop read a Lottie JSON through FlareCore's reader, name what was skipped, and save as .flare",
   "wave": 8,
   "order": 10,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#3791",
   "beta": true,
   "covers": "beta gaps 2026-10-21 Flare must-have (Flare audit B5); feature map A2 (the open half; dotLottie stays later); real job RJ-F12 (re-pointed)",
   "waits_on": "file-flow FL-m (Flare's open and drop paths, FlareFiles.swift and the catalog); the stage-matches-export fix in flight (an opened file's colour and trim keys draw on the stage)",
@@ -24,7 +24,7 @@
     "Tests/RealJobs/flare/open-recolour-lottie/open-recolour-lottie.jobs.json",
     "Sources/FlareApp/FlareFilePanels.swift",
     "Sources/FlareApp/FlareWindow+File.swift",
-    "Sources/FlareApp/FlareImportNote.swift",
+    "Sources/FlareApp/FlareImportNoteAdapter.swift",
     "Tests/AppSnapshotTests/RenderBudgetFlareLottieOpenTests.swift",
     "Sources/FlareModel/FlareFiles.swift",
     "Sources/FlareModel/FlareHeadless.swift",
@@ -69,7 +69,7 @@
       "owned": [
         "Sources/FlareApp/FlareFilePanels.swift",
         "Sources/FlareApp/FlareWindow+File.swift",
-        "Sources/FlareApp/FlareImportNote.swift",
+        "Sources/FlareApp/FlareImportNoteAdapter.swift",
         "Tests/AppSnapshotTests/RenderBudgetFlareLottieOpenTests.swift"
       ],
       "waits": {

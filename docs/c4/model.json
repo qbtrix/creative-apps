@@ -28,7 +28,7 @@
               {
                 "id": "suiteui-sources",
                 "name": "SuiteUI sources",
-                "description": "The shared design system (Sources/SuiteUI, linking SuiteModel for SuiteApp): spacing, radius, size, type and color tokens; Liquid Glass applied in one snapshot-aware place (Glass) and GlassPanel; the SuiteWindow shell (sidebar, content, inspector) with SidebarSection and SidebarRow; ToolbarGroup palette actions; the content layer (CanvasSurface, SurfaceCard, EmptyStateView, ViewerStatusBar, BusyNote for open, save and import progress, and TransportCapsule, the shared transport over TransportStepping); the editor-kernel chrome (SuiteExportSheet, SuiteStrokePacer, SuitePointerPressure, BrushCursorMark, and ToolKeys, the one tool-letter lookup and the one map from AppKit modifier flags to KeyModifiers); the editor shell after the Ripple editor (EditorShell, EditorTopBar and its bar items, the docked ToolbarGroup rail, CanvasViewport with its Ruler, optional checkerboard, ZoomMath clamped zoom and fit with SuiteCanvasNavigating, the live CanvasNavigating over it, SuiteHandleGeometry, the live HandleGeometryProviding over the kernel's BoxMath and HandleHit, and CanvasMarks with SelectionHandlesEditor, the selection box whose handles resize and rotate it, SegmentedTabs and the ColorWell hex row, with the eyedropper's EyedropperButton, SampleLoupe and SampleSizeChips); pro inspector parts (InspectorHeader, InspectorRows, ScrubField and NumericInput number entry); the Studio easing parts (CurveEditor, StudioScrubRow, ChoiceChips); ShapeToolOptions, the shape tool's kind chips and per-kind rows with their range help; AppMark, the one view that draws an app's mark (icon, glyph or line style) from AppMarkArt, path data scripts/render-marks generates from Bundle/Marks; ThumbnailGrid with its selection math; HistoryPanel, the one History panel over the kernel's HistoryListing, and the autosaveRecovery modifier over SuiteModel's RecoveryFolder (autosave-history); StrokeEditor, the one stroke editor, which sends the kernel's StrokeIntents and never edits a document (stroke-style); and TimelineStrip with its frame mapping, shared by Flare and Halo, with TimelineLaneLayers, the rules of its AppKit lanes renderer (which lanes redraw from an Equatable diff, a layer frame per lane, a press routed to the lane classification); MenuCommand, the one menu item, built from a SuiteKernel CommandSpec (MenuCommand+Catalog) so its title, enabled state and why-not help come from the app's command catalog; SuiteGallery, the component gallery the journeys drive, with a command-catalog page over the kernel's FakeCanvasDocument; and PathEditOverlay with PenTool, the Pen and point editor's overlay (a placeholder drawing the path only, on a local contour stand-in until the kernel's path types land). HistogramView (a ToneHistogram's bins in the field well with shadow and highlight clipping markers), shared by Library's develop panel and Photo's Levels. UnsavedGuard is the one unsaved-changes asker: the unsavedChangesGuard modifier and UnsavedGuard.proceed show the kernel's UnsavedPrompt as a Save, Don't Save or Cancel sheet before a dirty window closes, its document is replaced or the app quits (adopt-kernel-unsaved-prompt).",
+                "description": "The shared design system (Sources/SuiteUI, linking SuiteModel for SuiteApp): spacing, radius, size, type and color tokens; Liquid Glass applied in one snapshot-aware place (Glass) and GlassPanel; the SuiteWindow shell (sidebar, content, inspector) with SidebarSection and SidebarRow; ToolbarGroup palette actions; the content layer (CanvasSurface, SurfaceCard, EmptyStateView, ViewerStatusBar, BusyNote for open, save and import progress, and TransportCapsule, the shared transport over TransportStepping); the editor-kernel chrome (SuiteExportSheet, SuiteStrokePacer, SuitePointerPressure, BrushCursorMark, and ToolKeys, the one tool-letter lookup and the one map from AppKit modifier flags to KeyModifiers); the editor shell after the Ripple editor (EditorShell, EditorTopBar and its bar items, the docked ToolbarGroup rail, CanvasViewport with its Ruler, optional checkerboard, ZoomMath clamped zoom and fit with SuiteCanvasNavigating, the live CanvasNavigating over it, SuiteHandleGeometry, the live HandleGeometryProviding over the kernel's BoxMath and HandleHit, and CanvasMarks with SelectionHandlesEditor, the selection box whose handles resize and rotate it, SegmentedTabs and the ColorWell hex row, with the eyedropper's EyedropperButton, SampleLoupe and SampleSizeChips); pro inspector parts (InspectorHeader, InspectorRows, ScrubField and NumericInput number entry); the Studio easing parts (CurveEditor, StudioScrubRow, ChoiceChips); ShapeToolOptions, the shape tool's kind chips and per-kind rows with their range help; AppMark, the one view that draws an app's mark (icon, glyph or line style) from AppMarkArt, path data scripts/render-marks generates from Bundle/Marks; ThumbnailGrid with its selection math; HistoryPanel, the one History panel over the kernel's HistoryListing, and the autosaveRecovery modifier over SuiteModel's RecoveryFolder (autosave-history); StrokeEditor, the one stroke editor, which sends the kernel's StrokeIntents and never edits a document (stroke-style); and TimelineStrip with its frame mapping, shared by Flare and Halo, with TimelineLaneLayers, the rules of its AppKit lanes renderer (which lanes redraw from an Equatable diff, a layer frame per lane, a press routed to the lane classification); MenuCommand, the one menu item, built from a SuiteKernel CommandSpec (MenuCommand+Catalog) so its title, enabled state and why-not help come from the app's command catalog; SuiteGallery, the component gallery the journeys drive, with a command-catalog page over the kernel's FakeCanvasDocument; and PathEditOverlay with PenTool, the Pen and point editor's overlay (a placeholder drawing the path only, on a local contour stand-in until the kernel's path types land). HistogramView (a ToneHistogram's bins in the field well with shadow and highlight clipping markers), shared by Library's develop panel and Photo's Levels. UnsavedGuard is the one unsaved-changes asker: the unsavedChangesGuard modifier and UnsavedGuard.proceed show the kernel's UnsavedPrompt as a Save, Don't Save or Cancel sheet before a dirty window closes, its document is replaced or the app quits (adopt-kernel-unsaved-prompt). FontPicker is the one font picker (font-picker): a search that ignores case and accents, the family list drawn in each family's own face, the Face menu and the Size row, over FontPickerRules (filter, face order, nearest face) and the FontPicking contract; the gallery page runs on FakeText's families or a host's live list.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/SuiteUI/"
@@ -425,7 +425,7 @@
               {
                 "id": "suite-packaging",
                 "name": "Packaging",
-                "description": "BundleLayout (where each executable and framework sits, run paths), SizeReport and SizeBudget with evaluate.",
+                "description": "BundleLayout (where each executable and framework sits, run paths, and cliPath, where the bundled afterglow CLI lives), AssistantConnect (the command and MCP config text that connect an AI assistant to the bundled CLI, and the plan for linking it onto the PATH), SizeReport and SizeBudget with evaluate.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
                   "Sources/SuiteModel/Packaging/"
@@ -456,7 +456,8 @@
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
                   "Sources/SuiteModel/Help/",
-                  "Sources/AfterGlowCLICore/HelpReports.swift"
+                  "Sources/AfterGlowCLICore/HelpReports.swift",
+                  "Sources/AfterGlowCLICore/MCPConfig.swift"
                 ]
               }
             ]
@@ -516,7 +517,7 @@
               {
                 "id": "kernel-layers",
                 "name": "Layer tree and fixtures",
-                "description": "LayerTree<Payload>, the one layer tree: LayerPayload, LayerNode (nesting, hide, lock, a follow link), LayerRow (the layers panel's flat rows from rows(expanded:)), ArrangeStep and TreeRefusal; move, arrange, group, ungroup, duplicate and the follow link are stubs for EK-12 and EK-13. Fakes/KernelFixtures.swift holds the shared fixtures: tree200 (200 nodes, seven roots, groups three deep, one hidden, one locked) and cards (the snapping packet's page in Desktop). Fakes/FakeCanvasDocument.swift is the command catalog's fake app: a headless document of named rects with its six commands plus undo and redo, the file-flow commands and the eight fill commands (each rect an optional fill in its own box, left out of the JSON when nil), its fixture, and CommandCatalog.empty for an app that has adopted no command yet.",
+                "description": "LayerTree<Payload>, the one layer tree: LayerPayload, LayerNode (nesting, hide, lock, a follow link), LayerRow (the layers panel's flat rows from rows(expanded:)), ArrangeStep and TreeRefusal; move, arrange, group, ungroup, duplicate and the follow link are stubs for EK-12 and EK-13. Fakes/KernelFixtures.swift holds the shared fixtures: tree200 (200 nodes, seven roots, groups three deep, one hidden, one locked) and cards (the snapping packet's page in Desktop). Fakes/FakeCanvasDocument.swift is the command catalog's fake app: a headless document of named rects with its six commands plus undo and redo, the file-flow commands and the eight fill commands (each rect an optional fill in its own box, left out of the JSON when nil, and an optional ShapeSpec from shape.draw, the same way), its fixture, and CommandCatalog.empty for an app that has adopted no command yet.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Layers/",
@@ -581,7 +582,7 @@
               {
                 "id": "kernel-shapes",
                 "name": "Shapes",
-                "description": "The shape tools every app's shape layer shares: ShapeKind and ShapeSpec (a drawn shape's recipe, Codable, with each kind's defaults; line and arrow ends in the box's unit space); ShapeRules, a spec's path in a box through FlareCore's PathBuilders, the box a drag draws (Shift squares it or snaps a line to 45 degrees, Option grows it from the centre) and why a spec can't be drawn; ShapeTarget, the document an app adopts; ShapeIntent, one option change from the tool's panel; ShapeCommands, shape.draw (one undo step) and tool.shape (view state). SH-1 declares the rules and commands as stubs; SH-5 and SH-6 fill the bodies.",
+                "description": "The shape tools every app's shape layer shares: ShapeKind and ShapeSpec (a drawn shape's recipe, Codable, with each kind's defaults; line and arrow ends in the box's unit space); ShapeRules, a spec's path in a box through FlareCore's PathBuilders, the box a drag draws (Shift squares it or snaps a line to 45 degrees, Option grows it from the centre) and why a spec can't be drawn; ShapeTarget, the document an app adopts; ShapeIntent, one option change from the tool's panel; ShapeCommands, shape.draw (one undo step, refusing a spec ShapeRules can't draw) and tool.shape (view state). SuiteUI's ShapeToolOptions panel sends ShapeIntents, which run as tool.shape; the gallery's shape-tools page and the fake app (each drawn rect keeps its ShapeSpec, so RJ-X34 runs on the CLI) adopt ShapeTarget.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Shapes/"
@@ -608,7 +609,7 @@
               {
                 "id": "kernel-sample",
                 "name": "Sample",
-                "description": "Sample/: the suite's one colour sampler. SampleSize (point, 3 × 3, 5 × 5) and SampleRGBA (one 8-bit straight-alpha pixel); SampleRules (mean, the alpha-weighted mean of a square over a reader closure that skips transparent pixels, and hex); the SampleTarget protocol an app's workspace conforms to and SampleCommands (the color.sample query every app registers). eyedropper EY-1 declares them as stubs (the spec with its real id, schema and availability); EY-5 and EY-6 fill the bodies.",
+                "description": "Sample/: the suite's one colour sampler. SampleSize (point, 3 × 3, 5 × 5) and SampleRGBA (one 8-bit straight-alpha pixel); SampleRules (mean, the alpha-weighted mean of a square over a reader closure that skips transparent pixels, and hex); the SampleTarget protocol an app's workspace conforms to and SampleCommands (the color.sample query every app registers). The color.sample command is how an agent reads a colour the way a person does with the eyedropper: SuiteUI's EyedropperButton on every colour row picks from the screen, its SampleLoupe rings the pointer of a canvas tool with the colour under it, and the gallery page and the fake canvas (FakeCanvasDocument, its topmost rect) sample through color.sample, so RJ-X33 runs on the CLI. eyedropper EY-1 declares them as stubs (the spec with its real id, schema and availability); EY-5 and EY-6 fill the bodies; EY-8 makes the fake a target.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Sample/"
@@ -676,9 +677,22 @@
                 "description": "Adjust/ and the SuiteImaging namespace: AdjustSettings (exposure, levels, curve, hue and saturation) with its clamps and its one Codable form Photo and Library both read, and ImagingProgram, which compiles settings to CoreRender's tone adjustments (CPU) and tone program (GPU) in one fixed order. suite-imaging IM-2 declares them as stubs; IM-3 and IM-4 fill the bodies.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), CoreColor, CoreRaster and CoreRender, Linux and macOS",
                 "paths": [
-                  "Sources/SuiteImaging/Adjust/",
+                  "Sources/SuiteImaging/Adjust/AdjustSettings.swift",
+                  "Sources/SuiteImaging/Adjust/ImagingProgram.swift",
                   "Sources/SuiteImaging/Color/",
                   "Sources/SuiteImaging/SuiteImaging.swift"
+                ]
+              },
+              {
+                "id": "imaging-adjust-kinds",
+                "name": "Adjust kinds, filters and looks",
+                "description": "The adjust-everywhere part of Adjust/: AdjustKinds (GrayWeights, ImagingKind's Black & White and Invert compiled to a GPU tone program and its CPU twin, and ImagingFilter's five filters with their ranges), FilterRules (each filter over creative-core on a layer's padded bounds, mixed by a selection's coverage), LookPresets (LookPreset and the six BuiltInLooks) and AdjustCommands, the adjust.*, filter.* and look.* commands an app adds on an AdjustTarget, each edit one undo step. adjust-everywhere AJ-1 and AJ-2 declare them as stubs; AJ-5, AJ-5f and AJ-6 fill the bodies.",
+                "technology": "Swift 6, CoreRaster, CoreRender and SuiteKernel, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Adjust/AdjustKinds.swift",
+                  "Sources/SuiteImaging/Adjust/FilterRules.swift",
+                  "Sources/SuiteImaging/Adjust/AdjustCommands.swift",
+                  "Sources/SuiteImaging/Adjust/LookPresets.swift"
                 ]
               },
               {
@@ -697,6 +711,15 @@
                 "technology": "Swift 6, CoreRaster and SuiteKernel, Linux and macOS",
                 "paths": [
                   "Sources/SuiteImaging/Retouch/"
+                ]
+              },
+              {
+                "id": "imaging-select",
+                "name": "Select",
+                "description": "Select/ (docs/blueprints/suiteui/features/area-selection.md): AreaMask turns SuiteKernel's AreaRecipe into a CoreRaster Mask. Each shape renders to its own mask (rectangle and ellipse from core's statics, lasso and polygon by Mask.polygon, the magic wand by floodMask on the target layer or, with All Layers, the composite) and joins the area by replace, add, subtract or intersect; invert, feather and expand (a disk max of the coverage, a min for contract) apply where they sit in the steps. The outline for the marching ants is the mask's contours at 0.5. area-selection AR-5 declares it as a stub; AR-6 fills the body.",
+                "technology": "Swift 6, CoreRaster and SuiteKernel, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Select/"
                 ]
               },
               {
@@ -785,11 +808,12 @@
               {
                 "id": "shell-adoption",
                 "name": "Adoption modifier",
-                "description": "The .suiteApp(_:host:live:) modifier each app adds to its scene (it starts the app's live command channel when given one), SuiteAppDelegate (receives hand-off files through application(_:open:) and passes them to the app's SuiteDocumentHost), and the settings route to the launcher.",
+                "description": "The .suiteApp(_:host:live:) modifier each app adds to its scene (it starts the app's live command channel when given one), .suiteEditor(_:host:live:) (.suiteApp plus Window > Switch To with AI Access and the suite's Help group), SuiteAppDelegate (receives hand-off files through application(_:open:) and passes them to the app's SuiteDocumentHost, and on a Dock click with no window opens one through ReopenRule and the openWindow a window registers with .suiteReopenWindow(id:)), and the settings route to the launcher.",
                 "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
                 "paths": [
                   "Sources/SuiteShell/SuiteAppModifier.swift",
                   "Sources/SuiteShell/SuiteAppDelegate.swift",
+                  "Sources/SuiteShell/SuiteEditorScene.swift",
                   "Sources/SuiteShell/SettingsRoute.swift"
                 ]
               },
