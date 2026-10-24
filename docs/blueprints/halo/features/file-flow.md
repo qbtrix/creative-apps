@@ -32,8 +32,9 @@ HF-u waits only on HF-a (rule 18); HF-m never waits on HF-u. HF-m is marked `"ui
    `HaloFileFlowJourneyTests.testOpenRecentAndDrop`): File > Open Recent ▸
    lists `Intro.halo` only.
 2. Drop `Promo.halo` from Finder on the viewer: it opens in a new window.
-3. Drop `Sunset.png`: the mark reads "Halo can't place images yet."
-4. Drop `Bounce.flare`: a composition with the scene, as Open In ▸ Halo makes.
+3. Drop `Sunset.png`: the mark says where it goes; no Halo window opens.
+4. Drop `Bounce.flare`: the mark reads "Open in Flare" and the file goes to
+   Flare (rule 20; flare-in-halo makes it a scene); no Halo window opens.
 
 ## Jobs
 
