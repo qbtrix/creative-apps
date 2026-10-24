@@ -48,9 +48,14 @@ final class PhotoPlaceJourneyTests: XCTestCase {
         // took longer than that to read on CI (#4333), so the status is read first, as soon as Place is clicked.
         place(large, photo) {
             let status = photo.element("photo.status.message")
-            XCTAssert(
-                self.waitFor(seconds: 15) { status.exists && status.label.contains("Placed at 20%.") },
-                "the status line doesn't read Placed at 20%. (it reads \(status.exists ? status.label : "nothing"))")
+            var seen: [String] = []
+            let read = self.waitFor(seconds: 15) {
+                guard status.exists else { return false }
+                let label = status.label
+                if !seen.contains(label) { seen.append(label) }
+                return label.contains("Placed at 20%.")
+            }
+            XCTAssert(read, "the status line doesn't read Placed at 20%. (it read \(seen))")
             photo.shot("place-fitted")
         }
         let fitted = photo.app.staticTexts["photo-4000x3000"]

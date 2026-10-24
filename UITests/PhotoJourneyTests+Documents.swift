@@ -66,7 +66,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         quit(photo)
         photo = launch(photoArguments(saveTo: folder), window: nil)
         openRecent("beach.ora", photo)
-        XCTAssert(photo.window(named: "beach.ora").waitForExistence(timeout: 30), "Open Recent didn't reopen beach.ora")
+        expectReopened("beach.ora", photo)
         openLayers(photo)
         let header = photo.app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS '2 layers'"))
         XCTAssert(header.firstMatch.waitForExistence(timeout: 10), "the image header doesn't count 2 layers")
@@ -174,7 +174,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         quit(photo)
         photo = launch(photoArguments(), window: nil)
         openRecent("beach.png", photo)
-        XCTAssert(photo.window(named: "beach.png").waitForExistence(timeout: 30), "Open Recent didn't reopen beach.png")
+        expectReopened("beach.png", photo)
         expectStatus("Saved", photo)
         let undo = photo.app.buttons["photo.bar.undo"]
         XCTAssert(undo.waitForExistence(timeout: 5) && !undo.isEnabled, "the reopened beach.png kept the stroke's undo")
@@ -308,6 +308,17 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         let first = recentMenu(photo).children(matching: .menuItem).firstMatch
         XCTAssertEqual(first.title, name, "Open Recent's first entry")
         first.click()
+    }
+
+    /// Waits for the window Open Recent opens on `name`; a failure lists the windows, alert texts and status
+    /// line the app shows instead, since the reopen has failed on CI with no other trace (#4332, #2592).
+    @MainActor private func expectReopened(_ name: String, _ photo: Journey) {
+        guard !photo.window(named: name).waitForExistence(timeout: 30) else { return }
+        let windows = photo.app.windows.allElementsBoundByIndex.map { $0.title.isEmpty ? $0.identifier : $0.title }
+        let alerts = (photo.app.sheets.allElementsBoundByIndex + photo.app.dialogs.allElementsBoundByIndex)
+            .flatMap { $0.staticTexts.allElementsBoundByIndex.map(\.label) }
+        let status = photo.element("photo.status.message")
+        XCTFail("Open Recent didn't reopen \(name): windows \(windows), alerts \(alerts), status \(status.exists ? status.label : "none")")
     }
 
     /// A system alert: the window's sheet, or a dialog.
