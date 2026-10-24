@@ -126,3 +126,4 @@ utc	stage	event	ref	note
 2026-10-24T16:30:57Z	check	EM-flare-halo	no change; batch in flight
 2026-10-24T16:49:37Z	check	EM-flare-halo	no change; batch in flight
 2026-10-24T17:08:15Z	check	EM-flare-halo	prior batch resolved; ours clean, waiting
+2026-10-24T17:26:57Z	check	EM-flare-halo	#4817 in batch-20261024172211

@@ -79,3 +79,4 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-24T16:30:57Z: no change; batch-20261024160327 still in flight.
 - 2026-10-24T16:49:37Z: no change; batch-20261024160327 still in flight.
 - 2026-10-24T17:08:15Z: batch-20261024160327 resolved; #4817 and #4988 both merge clean with dev and wait for the next batch.
+- 2026-10-24T17:26:57Z: #4817 is in batch-20261024172211 (at 9e16d071c); #4988 waits for the next batch.
