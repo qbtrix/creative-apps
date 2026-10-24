@@ -40,6 +40,7 @@ Next: watch #5042 #5050 #5054 to merge and the supervisor to land #5114 (perf-su
 - LG-6 scope: neighbour prefetch already exists but runs beside the render, unbounded per step; LG-6 queues the neighbours behind the render in RenderQueue and drops a superseded step's pending decodes, so stale prefetches never evict the focus's decodes.
 
 ## Open
+- 13:40Z: poll: LG-grid PRs still queued; lane idle since 12:18Z with 155 fast-lane PRs open, ours behind them. Asked the supervisor on #3790 whether the PRs should get beta priority. Removed the auto-added attribution footers from both #3790 comments.
 - 13:20Z: poll: #5042/#5050/#5054 still queued in fast lane, no needs-fix/needs-rebase; #5114 awaits supervisor; #3790 unchanged.
 - 13:00Z: poll: #5042/#5050/#5054 still queued in fast lane, no needs-fix/needs-rebase; #5114 awaits supervisor; #3790 unchanged.
 - 12:41Z: poll: #5042/#5050/#5054 still queued (lane landed #4911 at 12:18, oldest first); #5114 awaits supervisor; #3790 unchanged.
