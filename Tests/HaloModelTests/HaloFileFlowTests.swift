@@ -119,8 +119,8 @@ private actor Delivered {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent("HaloFileFlow-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let recents = StoreRecents(store: FileStore(folder: folder.path))
-        var stored: [HaloRecentFile]? = [HaloRecentFile(name: "Intro.halo", path: "/w/Intro.halo"),
-                                         HaloRecentFile(name: "Spot.halo", path: "/w/Spot.halo")]
+        var stored: [HaloFileRef]? = [HaloFileRef(name: "Intro.halo", path: "/w/Intro.halo"),
+                                      HaloFileRef(name: "Spot.halo", path: "/w/Spot.halo")]
         for round in 0..<2 {
             let refs = HaloProject.takeOldRecents(&stored)
             if round == 1 { #expect(refs.isEmpty, "the old list was imported twice") }

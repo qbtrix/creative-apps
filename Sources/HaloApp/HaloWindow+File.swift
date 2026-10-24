@@ -180,9 +180,11 @@ extension HaloWindow {
     /// once per process.
     private func launchFiles() {
         var stored = UserDefaults.standard.data(forKey: Self.recentKey)
-            .flatMap { try? JSONDecoder().decode([HaloRecentFile].self, from: $0) }
-        for ref in HaloProject.takeOldRecents(&stored) { Self.bridge.noted(ref, .opened) }
+            .flatMap { try? JSONDecoder().decode([HaloFileRef].self, from: $0) }
+        let refs = HaloProject.takeOldRecents(&stored), bridge = Self.bridge
         UserDefaults.standard.removeObject(forKey: Self.recentKey)
+        // One task, each note awaited, so the oldest is noted first and the newest stays on top.
+        Task { for ref in refs { await bridge.note(ref, .opened) } }
         guard !HaloLaunchFile.opened, let path = HaloLaunch.current.openFile else { return }
         HaloLaunchFile.opened = true
         openFile(at: path)
@@ -237,10 +239,9 @@ private enum HaloOpenDecoder {
 
 extension HaloProject {
     /// `halo.file.progress`'s BusyNote text, "Opening <name>…", from `beginOpen`
-    /// until `finishOpen`; nil otherwise. The pending file rides at the head of
-    /// `file.recent` while it opens.
+    /// until `finishOpen`; nil otherwise.
     var openingNote: String? {
-        file.opening ? "Opening \(file.recent.first?.name ?? "project")…" : nil
+        file.opening ? "Opening \(file.pending?.name ?? "project")…" : nil
     }
 }
 

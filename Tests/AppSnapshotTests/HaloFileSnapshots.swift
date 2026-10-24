@@ -38,7 +38,7 @@ import Testing
         var project = HaloProject(services: .fake, document: try #require(HaloFixtures.project("two-comps")))
         project.beginOpen(name: "Spot", path: "/t/Spot.halo")
         #expect(project.file.opening)
-        #expect(project.file.recent.first?.name == "Spot")
+        #expect(project.file.pending?.name == "Spot")
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
                 HaloViewer(model: project).overlay {

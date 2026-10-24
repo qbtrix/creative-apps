@@ -119,7 +119,7 @@ extension HaloProject: FileFlowTarget {
 
     /// Halo's old Open Recent list (newest first) as suite refs, oldest first so noting them in order keeps the
     /// newest on top; empties `stored`, so a second call imports nothing.
-    public static func takeOldRecents(_ stored: inout [HaloRecentFile]?) -> [SuiteDocumentRef] {
+    public static func takeOldRecents(_ stored: inout [HaloFileRef]?) -> [SuiteDocumentRef] {
         guard let old = stored else { return [] }
         stored = nil
         return old.reversed().map { suiteRef(path: $0.path, name: $0.name) }
