@@ -154,3 +154,4 @@ utc	stage	event	ref	note
 00:12Z	pl9-blocked	dev quarantine expired; asked supervisor
 00:48Z	pl9-merge	dev merged, gate running
 00:53Z	pl9-push	6bb70f89f pushed, Head moved
+2026-10-24T07:53:24Z	wait	check	PL-8/PL-9 merged; #4616/#4617 rebuilt on dev, clean, waiting for the lane

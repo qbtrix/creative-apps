@@ -1,10 +1,10 @@
 # placed-images lead record
 
 Issue: #3457 · Packet: docs/blueprints/suiteui/features/placed-images.md
-Run: act-1a1647a67aa-dau5 (relaunch) · Started: 2026-10-22T16:45Z
-Stage: PL-9 #4613 pushed 6bb70f89f after CI: PASS, Head moved
-Base: 854a3b52c66aaa12582e9190f404265b84594a05
-Next: Lane macOS build then merge; then PL-10 stack (#4616/#4617): retarget, merge 6bb70f89f then dev, gate, push
+Run: act-1a16cc5a05a-lc3g (relaunch) · Started: 2026-10-24T06:40Z
+Stage: 3 wave 2 (PL-z: PL-10 #4616/#4617 in the lane)
+Base: dev 830af22de
+Next: #4616 and #4617 (rebuilt on dev, docs-only, one file each) land through the lane's Linux run; then Belt-Slice-Done PL-z on the first green ci.yml run on dev containing them, then Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: Lane macOS build then merge; then PL-10 stack (#4616/#4617): retarget, mer
 | PL-a | The kernel's Place module declares every type, rule and command spec as stubs, SuiteUI's panel, drop target, view and rows exist as placeholders on the gallery's place-image page, and the checks are written, disabled. | PL-1, PL-2 | SJ0 | gradient-fill:GF-a (PL-1, PL-2); editor-kernel (PL-1); suite-harness (PL-2); editor-in-window (PL-2); autosave-history:AH-a (PL-1, PL-2) | true | 0 | done | 39571804700 | wanted |
 | PL-u | On the gallery page a dropped, chosen or sample PNG, JPEG or SVG shows in its box at its own aspect, the drop highlights only for files it takes, and the rows show the file and size with Replace… and Reset Size, every control identified, within the render budget. | PL-3, PL-4 | PJ1 | PL-a (PL-3) | true | 0 | merged-done | https://github.com/qbtrix/creative-apps/actions/runs/39617481529 | wanted |
 | PL-m | The rules sniff the format, refuse what they can't take with a reason, fit a new image inside the canvas without upscaling, crop by cover around the focus so nothing stretches, flatten an SVG into paint, and every place command records exactly one undo step (a focus drag one). | PL-5, PL-6, PL-7 | KJ-place | PL-a (PL-5, PL-6, PL-7); command-catalog:CC-run (PL-7) | false | 0 | done | 39473997761 | – |
-| PL-z | The gallery runs its intents through PlaceCommands on a live target, the fake app takes placed images so RJ-X36 runs on the CLI, and the feature is built. | PL-8, PL-9, PL-10 | PJ1, KJ-place | PL-u (PL-8); PL-m (PL-8, PL-9); gradient-fill:GF-z (PL-9); autosave-history:AH-z (PL-8, PL-9, PL-10); transform-tools:TT-z (PL-8, PL-9, PL-10); eyedropper:EY-z (PL-8, PL-9, PL-10); shape-tools:SH-z (PL-8, PL-9, PL-10); stroke-style:SS-d (PL-8, PL-9, PL-10) | true | 0 | waiting | – | – |
+| PL-z | The gallery runs its intents through PlaceCommands on a live target, the fake app takes placed images so RJ-X36 runs on the CLI, and the feature is built. | PL-8, PL-9, PL-10 | PJ1, KJ-place | PL-u (PL-8); PL-m (PL-8, PL-9); gradient-fill:GF-z (PL-9); autosave-history:AH-z (PL-8, PL-9, PL-10); transform-tools:TT-z (PL-8, PL-9, PL-10); eyedropper:EY-z (PL-8, PL-9, PL-10); shape-tools:SH-z (PL-8, PL-9, PL-10); stroke-style:SS-d (PL-8, PL-9, PL-10) | true | 0 | building | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -24,9 +24,9 @@ Next: Lane macOS build then merge; then PL-10 stack (#4616/#4617): retarget, mer
 | PL-5 | PL-m | – | see packet task table (waits: PL-1) | Sources/SuiteKernel/Place/PlaceRules.swift, Tests/SuiteKernelTests/PlaceRulesTests.swift, Tests/mutations/SuiteKernel.PlaceRules.json | packet acceptance row | #3598 | merged 13:02 (lane batch 39425106447) |
 | PL-6 | PL-m | – | see packet task table (waits: PL-1) | Sources/SuiteKernel/Place/PlaceVector.swift, Tests/SuiteKernelTests/PlaceVectorTests.swift, Tests/mutations/SuiteKernel.PlaceVector.json, Tests/SuiteKernelTests/Fixtures/place/ | packet acceptance row | #3599 | merged 13:59 (squash c76647d, batch 39433379397) |
 | PL-7 | PL-m | – | see packet task table (waits: PL-5, PL-6, command-catalog:CC-run) | Sources/SuiteKernel/Place/PlaceCommands.swift, Tests/SuiteKernelTests/PlaceCommandsTests.swift, Tests/mutations/SuiteKernel.PlaceCommands.json | packet acceptance row | #3626 | merged 18:18 (squash 299a29c) |
-| PL-8 | PL-z | – | see packet task table (waits: PL-4, PL-7) | Sources/SuiteUI/Gallery/GalleryPlaceImage.swift, Sources/SuiteUI/PlacedImageView.swift, Tests/SuiteUITests/PlaceLiveTests.swift | packet acceptance row | #4578 | open |
-| PL-9 | PL-z | – | see packet task table (waits: PL-7, gradient-fill:GF-z) | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeCanvasPlaceTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/place-image/ | packet acceptance row | #4613 | open |
-| PL-10 | PL-z | – | see packet task table (waits: PL-8, PL-9) | docs/c4/parts/creative-apps/suite-kernel/kernel-place.json, docs/blueprints/suiteui/features/placed-images.wave.json | packet acceptance row | #4616/#4617 | open |
+| PL-8 | PL-z | – | see packet task table (waits: PL-4, PL-7) | Sources/SuiteUI/Gallery/GalleryPlaceImage.swift, Sources/SuiteUI/PlacedImageView.swift, Tests/SuiteUITests/PlaceLiveTests.swift | packet acceptance row | #4578 | merged |
+| PL-9 | PL-z | – | see packet task table (waits: PL-7, gradient-fill:GF-z) | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeCanvasPlaceTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/place-image/ | packet acceptance row | #4613 | merged |
+| PL-10 | PL-z | – | see packet task table (waits: PL-8, PL-9) | docs/c4/parts/creative-apps/suite-kernel/kernel-place.json, docs/blueprints/suiteui/features/placed-images.wave.json | packet acceptance row | #4616/#4617 | open, rebuilt on dev (b5dbf7b, 3c8ba26), in the lane |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -113,3 +113,9 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 04:22Z: heartbeat: no open findings; PL-z waits on SH-z, TT-z, EY-z, AH-z, SS-d
 - 04:46Z: heartbeat: no open findings; PL-z waits on SH-z, TT-z, EY-z, AH-z, SS-d
 - 05:14Z: heartbeat: no open findings; PL-z waits on SH-z, TT-z, EY-z, AH-z, SS-d
+
+## Run act-1a16cc5a05a-lc3g
+Relaunched 2026-10-24T06:40Z. PL-8 (#4578) and PL-9 (#4613) are merged on dev.
+
+- 07:2xZ: #4616 and #4617 carried the old stacked history; each was rebuilt on origin/dev with its one file (wave.json status built + feature_issue #3457; kernel-place.json description), force-pushed and retargeted to dev. Bodies carry Belt-Lead/Feature/Slice. No Fast-Check line: this container has no Swift toolchain (every lint passed, swift build could not run), so the lane's Linux-only run on the docs-only head is the proof.
+- Status channel is this file on lead/suiteui-placed-images; lead/placed-images is a stale mirror.
