@@ -56,3 +56,4 @@ utc	stage	event	ref	note
 06:42Z	3	poll	dev e5dcf939	nothing to act on; #4577/#4889/#4896 open, no needs-*; dev took #4840,#5048 (not ours); AJ-a #4846 not on dev yet; BK-photo #4965 open
 2026-10-24T07:24Z	poll	FH-7 builder running on lead/fill-heal-FH-7 (FH-c+FH-3); #4577 #4889 in lane, #4896 stacked; mirror synced
 07:55Z	4	stage	FH-7 built (Mutate 3/3); split RJ-P04 to -FH-7-jobs for the file cap; findings #5093-#5095; gates running
+2026-10-24T08:27:04Z	FH-photo	gate	FH-7-jobs d7b07b7 CI: PASS; FH-7 9d18965 rerun (load timeouts)
