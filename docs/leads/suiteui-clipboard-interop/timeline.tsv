@@ -114,3 +114,4 @@ utc	stage	event	ref	note
 2026-10-24T16:58Z	3	check	lane	16:58Z all 11 PRs clean, no needs-rebase left. batch-20261024160327 (#5110,#4839-#4871, not ours) still in flight; ours next. findings 0.
 2026-10-24T17:20Z	3	check	#4904	17:20Z #4904 (CB-design) needs-rebase on DesignEditMenu.swift: fixer dispatched. #5116 #5125 #5149 clean. batch-160327 resolved (dev c0920138), no batch in flight. findings 0.
 2026-10-24T17:33Z	3	fix	#4904	CB-design needs-rebase fixed: merged dev (DesignEditMenu: Duplicate, Enter/Exit Group, CopyAsMenu), ci --changed PASS, head 5d1d39f9, Head line moved.
+2026-10-24T17:42Z	3	check	lane	17:42Z all 11 PRs clean, no labels pending. batch-20261024172211 (#5134,#5042,#5054,#5102,#4817,#4875-#4882; not ours) in flight; ours next by age. findings 0.
