@@ -141,3 +141,4 @@ utc	stage	event	ref	note
 2026-10-24T15:21:37Z	status	probe 4 green -> culprit #5006 or #5007; probe 5 next; #5025/#5036 next batch
 2026-10-24T15:41:54Z	heartbeat	probe 5 not started yet; lane sweep 40106560135 in progress since 15:28Z
 2026-10-24T16:02:17Z	status	batch 20261024110214 resolved: #5087 #5097 #5138 merged, #5144 needs-fix (RenderBudgetToneRowsTests), rest requeued; our PRs wait behind batch 20261024144917 with 128 ready PRs (p0/beta/oldest-first order)
+2026-10-24T16:22:38Z	status	#4852 (FV-u) at 01a21adb is in batch 20261024160327 (Linux 40109791579, macOS 40109793853); #4854 stacks on it
