@@ -80,3 +80,4 @@ utc	stage	event	ref	note
 2026-10-24T06:08Z	check	heartbeat	-	06:08Z check: #4893 AN-u open fast-lane; batch 20261024050226 (not ours) bisect probe -6 macOS running; AN-6 stacked
 2026-10-24T06:29Z	check	heartbeat	-	06:30Z check: #4893 AN-u open fast-lane; batch 20261024050226 (not ours) bisect at probes -3/-1; dev full CI running; AN-6 stacked
 2026-10-24T06:50Z	check	heartbeat	-	06:52Z check: #4893 AN-u open fast-lane; batch 20261024050226 (not ours) bisect: -6 red, -3 macOS running, -1 macOS queued; dev CI running; AN-6 stacked
+2026-10-24T07:14Z	check	heartbeat	-	07:14Z check: #4893 open fast-lane, lane bisecting batch 20261024050226 (not ours), AN-halo AN-flare-u AN-6 wait #4893, AN-10 waits #4891
