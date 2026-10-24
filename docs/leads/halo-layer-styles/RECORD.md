@@ -5,9 +5,9 @@ Run: act-1a16c627cc6-nlss · Session: claude/layer-styles-lead-vx2vrg · Started
 Wire: suiteui layer-styles:LS-a
 Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTests.glowReachesItsKeyedSize and glowIsNotClipped; add the no-padding mutation, origin dropped in LiveFrameRendering's styled composite)
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
-Stage: wave 3 (HY-6 built at 073ed78a9 on lead/halo-layer-styles-HY-m, ahead of LS-8 on the StyleProgram stub; Mutate 10/10 HaloModel.LiveFrameRendering; gate CI: PASS at 073ed78a9, pushed. HY-u pushed at 60549a3ba, gate PASS. PRs open in stack order HY-1 (after #4911), HY-2 (after LS-2), HY-m, HY-u)
+Stage: wave 3 done as far as the waits allow (HY-1..HY-6 built, every branch gate PASS: HY-a 786456f6d, HY-m 073ed78a9, HY-u 60549a3ba). No PR open: HY-a carries LS-1/LS-2 (SuiteUI line) until #4911 and LS-2 land; supervisor asked 2026-10-24 10:5xZ whether #4911 is stuck. HY-7 waits on LS-9, HY-8 on HY-7
 Base: a41e7f1 (origin/dev)
-Next: open the HY-a PR (HY-1, e52c9ca) once #4911 is on dev, then the HY-m PR (HY-5 + HY-6) once HY-a lands, then HY-u; HY-2 waits on LS-2; HY-7 can be built ahead on the StyleRoute stub
+Next: on the supervisor's answer or #4911 merging, open HY-a (HY-1 + HY-2 once LS-2 is on dev), then HY-m, then HY-u, each with its Fast-Check/Head marker; on LS-9 build HY-7 (viewer through StyleRoute, journey on); then HY-8
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -43,6 +43,7 @@ Next: open the HY-a PR (HY-1, e52c9ca) once #4911 is on dev, then the HY-m PR (H
 - Worked from `origin/dev` (a41e7f1), not `main`: the brief named `main` (verified HEAD 0dd23d65), but CLAUDE.md says branch from and target dev, and the lane retargets main PRs to dev.
 - Status channel is `lead/halo-layer-styles` with `docs/leads/halo-layer-styles/`: `lead/layer-styles` already carries the Photo layer-styles lead's `docs/leads/layer-styles/RECORD.md` (#4511), so this record is added there under its own folder and never overwrites Photo's.
 - No task starts: HY-1 needs SuiteImaging's `LayerStyle`, `LayerStyleTarget` and `StyleCommands` (LS-a), none on dev; rule 20 forbids a Halo copy, and LS-a is the suiteui line's work, so nothing is stubbed here.
+- 2026-10-24: HY-7 is not built ahead on LS-9's stub. Halo's viewer draws in a SwiftUI Canvas, and drawing StyleRoute's GPU RenderSurface there is a new screen route under render-contract rules 1-4, not the packet's ~140-line view edit. On a stub that always throws it would be blind macOS code that never runs. It waits on LS-9's body, and the route design goes to review then.
 
 ## Open
 - 2026-10-24T06:40Z: HY-1 gate PASS at e52c9ca after fixing the catalog counts, the conformance exemption (the eleven stubs' examples refuse until LS-6) and the halo list-commands golden (+11 ids only). HY-2 blocked on LS-2; HY-5 on LS-m.
