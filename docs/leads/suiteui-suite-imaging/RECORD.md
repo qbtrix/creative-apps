@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: 18:01Z poll: no merges; all 7 open and clean; #5154 and #5163 now carry fast-lane too (6 ready, #5178 no-fast-lane). Batch 20261024172211 (excludes ours) Linux green, macOS gate running; ours go in the next batch. #3723 open (IM-8d/IM-12 blocked); supervisor q 6383016723 unanswered. Poll again ~18:20Z.
+Next: 18:22Z poll: batch 20261024172211 landed (dev d14b59a64) without ours; no merges of ours. #5163 now dirty vs dev: left to the lane to integrate (CLAUDE.md), fix only on needs-rebase. Full dev CI 40118143413 red on c09201386 (predates ours). #3723 open; supervisor q 6383016723 unanswered. Poll again ~18:40Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
 
