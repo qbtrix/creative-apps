@@ -94,3 +94,4 @@ Next: (2026-10-23T17:29:30Z) #4878 (BK-m) and #4923 (BK-z, stacked, feature-done
 - 2026-10-24T04:34:07Z: heartbeat: #4878,#4923 all open+clean, none merged; lane bisect probe lane/batch-20261023215139-8 macOS gate running (none of ours); dev 654fb363 green, no slice of ours
 - 2026-10-24T04:56:15Z: heartbeat: #4878,#4923 all open+clean, none merged; lane bisect probe -8 macOS gate still running (none of ours); dev 654fb363 green, no slice of ours
 - 2026-10-24T05:18:02Z: heartbeat: #4878,#4923 all open+clean, none merged; bisect of batch 20261023215139 done (probe -8 green); new lane/batch-20261024050226 (12 PRs #4839-#4875, none of ours) Linux+macOS running; ours queue for the next batch; dev 654fb363 green
+- 2026-10-24T05:39:42Z: heartbeat: #4878,#4923 all open+clean, none merged; lane/batch-20261024050226 (none of ours) Linux green, macOS gate running; ours queue for the next batch; dev 654fb363 green
