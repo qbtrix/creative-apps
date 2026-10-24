@@ -1,9 +1,10 @@
 // PhotoFileFlowLiveTests.swift: file-flow PF-4 (packet photo/features/file-flow.md). The real Photo window,
 // hosted on the render budget harness, notes each open and each save in the suite's shared recents through
 // SuiteDocumentsBridge: opening beach.png and saving it reach the bridge once each, in that order, with the
-// file's path and Photo as the app. PF-3's half, Photo's old Open Recent list imported once and its key
-// removed, is written here and disabled until PF-2 retires the key. Each test gets its own temp folder and a bridge on
-// fake services. Nests in BodyCountSuites: hosted windows run one at a time. macOS only.
+// file's path and Photo as the app, and the workspace's file flow lists what the bridge lists. With no bridge
+// injected, the window notes through the process's one bridge, the one Open Recent reads (#5080). Photo's old
+// Open Recent list is imported once and its key removed. Each test gets its own temp folder and a bridge on fake
+// services. Nests in BodyCountSuites: hosted windows run one at a time. macOS only.
 #if os(macOS)
 import AppKit
 import CoreRaster
@@ -60,6 +61,7 @@ extension BodyCountSuites {
         }
 
         @Test(.timeLimit(.minutes(1))) func anOpenAndASaveReachTheBridgeOnceEach() async throws {
+            UserDefaults.standard.removeObject(forKey: "PhotoRecentFiles")
             let (bridge, recording) = Self.bridge()
             let url = try Self.beach()
             let w = RenderBudgetWindow(PhotoWindow(model: PhotoWorkspace(services: .fake)))
@@ -78,9 +80,14 @@ extension BodyCountSuites {
             #expect(await recording.events == [.opened, .saved], "an event was noted twice")
             #expect(await recording.paths == [path, path])
             #expect(bridge.recents(for: .photo).map(\.path) == [path])
+            #expect(edited.workspace?.recentFiles.map(\.path) == [path], "the file flow didn't get the bridge's list")
         }
 
-        @Test(.disabled("waits on PF-2: the old key stays until the window switches over"), .timeLimit(.minutes(1)))
+        @Test func aWindowNotesThroughTheBridgeOpenRecentReads() {
+            #expect(PhotoFileSession().documents === PhotoShell.bridge, "Photo notes through a second bridge")
+        }
+
+        @Test(.timeLimit(.minutes(1)))
         func theOldListIsImportedOnceAndItsKeyRemoved() async throws {
             let old = try Self.beach().path(percentEncoded: false)
             UserDefaults.standard.set([old], forKey: "PhotoRecentFiles")
