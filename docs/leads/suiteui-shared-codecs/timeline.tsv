@@ -59,3 +59,4 @@ utc	stage	event	ref	note
 2026-10-24T01:16Z	check-in	lane batch-20261023215139-6 macOS gate still running (50 min); no merges since 22:40Z; our PRs unchanged; 0 open findings
 2026-10-24T01:38Z	check-in	lane bisect at batch-20261023215139-9 (Linux + macOS running); no merges since 22:40Z; our PRs unchanged; 0 open findings
 2026-10-24T02:00Z	check-in	lane probe batch-20261023215139-9: Linux green, macOS gate running; no merges since 22:40Z; our PRs unchanged; 0 open findings
+2026-10-24T02:21Z	check-in	lane probe batch-20261023215139-9 macOS gate still running (52 min); no merges since 22:40Z (lane throughput is the blocker, supervisor-owned); our PRs unchanged; 0 open findings
