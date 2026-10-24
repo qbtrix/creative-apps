@@ -39,6 +39,7 @@ Next: Lane: #5039 AK-6 in the lane; #5040 AK-9 stacked on it. AK-8 waits SC-f (r
 
 ## Decisions
 
+- 2026-10-24T08:06:50Z Heartbeat 07:40Z: #5039 in the lane, #5040 stacked on it; no merges yet. AK-8 still waits on shared-codecs SC-f (wave.json planned). No open findings.
 - 2026-10-24T06:59:59Z AK-6 opened as #5039 and AK-9 as #5040 (stacked; journey only, Photo leg XCTSkip waits on AK-8).
 - 2026-10-24T05:38:36Z Belt-Slice-Done AK-flare posted on #3713 (issuecomment-6380467453): full CI 40037716897 on dev 654fb3632 holds #3842 and #4010; Linux and macOS green; main promoted. The tool appended a footer, which I removed with an edit.
 - 2026-10-24T05:34:34Z relaunch as run act-1a16c618fe7-h4fd. AK-4 (#4010) and AK-10 (#4427, #4428) are on dev. The supervisor (2026-10-24) says to build every AK task that doesn't touch PhotoWindow+File.swift now, on the kernel's fakes, with Wire: lines. So AK-6 builds now against spine's dev state (Wire: library:spine), and AK-9 is written with the Photo step skipped ("waits on AK-8"); Design DA-z and Halo HA-z are built. AK-8 stays until SC-f lands. Open gap #4018 stays a gap.
