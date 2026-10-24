@@ -79,8 +79,8 @@ final class LibraryExportBatchJourneyTests: XCTestCase {
     /// Library on the JPEGs in `folder`, imported on launch, exporting to `exportTo`.
     @MainActor func live(_ folder: URL, catalog: URL, exportTo: URL) -> Journey {
         Journey("Library", self, arguments: [
-            "-LibraryImportFolder", folder.path, "-LibraryImportOnLaunch",
-            "-LibraryCatalogDir", catalog.path, "-LibraryExportTo", exportTo.path,
+            "-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path,
+            "-LibraryExportTo", exportTo.path, "-LibraryImportOnLaunch",
         ])
     }
 

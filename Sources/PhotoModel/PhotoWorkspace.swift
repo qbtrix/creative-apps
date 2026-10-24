@@ -26,7 +26,7 @@ import SuiteKernel
 
 /// The tools on Photo's floating tool palette.
 public enum PhotoTool: String, CaseIterable, Sendable {
-    case move, marquee, brush, eraser, clone, heal, crop, eyedropper, gradient, text
+    case move, marquee, brush, eraser, clone, heal, crop, eyedropper, gradient, text, pen
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every other tool works: the canvas sends its drags to
@@ -138,6 +138,8 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var progress: String?
     /// The file flow's recents, open path and requests for the window (PhotoFileFlow+Kernel.swift).
     public internal(set) var fileFlow = PhotoFileFlowState()
+    /// The document's paths and the Pen's view state (PhotoPaths+Kernel.swift).
+    var pathState = PhotoPathState()
     /// Test hook: how many times `layerGeometryChanged` ran, and its last call
     /// (PhotoMask.swift). Not part of `==`.
     var geometryChangeCount = 0
@@ -155,9 +157,9 @@ public struct PhotoWorkspace: Sendable {
     }
 
     /// Why the palette shows `tool` disabled, as its tooltip; nil once it works.
-    /// The eyedropper asks the sampling service, so `.fake` enables it.
+    /// The eyedropper reads the kernel's mean, so it is enabled on any services.
     public func toolHelp(_ tool: PhotoTool) -> String? {
-        tool == .eyedropper ? services.sampling.unavailableHelp : tool.unavailableHelp
+        tool == .eyedropper ? nil : tool.unavailableHelp
     }
 
     /// Drops the status line's message.
@@ -197,6 +199,7 @@ public struct PhotoWorkspace: Sendable {
         masks = [:]
         editsMask = false
         transformDraft = nil
+        pathState = PhotoPathState()
         statusMessage = nil
         fileKind = nil
         history = PhotoHistory()
@@ -250,7 +253,7 @@ public struct PhotoWorkspace: Sendable {
         var next = adjustments
         next.apply(edit)
         guard next != adjustments else { return }
-        record(.adjustments(adjustments), named: edit.kind.title, coalescing: "adjust-\(edit.kind.rawValue)")
+        record(.adjustments(adjustments), named: edit.title, coalescing: "adjust-\(edit.section)")
         adjustments = next
         touch(.all, adjustmentsOnly: true)
     }
@@ -393,12 +396,13 @@ extension PhotoWorkspace: Equatable {
             && lhs.exportRun == rhs.exportRun
             && lhs.fileKind == rhs.fileKind && lhs.savedStepID == rhs.savedStepID
             && lhs.statusMessage == rhs.statusMessage && lhs.textBox == rhs.textBox && lhs.progress == rhs.progress && lhs.masks == rhs.masks && lhs.pixels == rhs.pixels
+            && lhs.pathState == rhs.pathState
     }
 }
 
 extension AdjustmentEdit {
-    /// The section this edit changes.
-    var kind: AdjustmentKind {
+    /// The section this edit changes; nil for tone, which has no AdjustmentKind.
+    var kind: AdjustmentKind? {
         switch self {
         case .exposure: .exposure
         case .blackPoint, .whitePoint, .gamma, .gammaField: .levels
@@ -406,8 +410,15 @@ extension AdjustmentEdit {
         case .blurSigma: .blur
         case .hue, .saturation, .lightness: .hueSaturation
         case .setEnabled(let kind, _), .reset(let kind): kind
+        case .tone: nil
         }
     }
+
+    /// The undo step's name: the section's title, or "Tone".
+    var title: String { kind?.title ?? "Tone" }
+
+    /// The key a run of these edits folds under.
+    var section: String { kind?.rawValue ?? "tone" }
 }
 
 extension AdjustmentKind {
