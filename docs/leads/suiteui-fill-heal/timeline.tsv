@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-24T09:19:34Z	findings	pr	#5129 fixes #5093 (stacked on FH-7); #5094 fixer started
 2026-10-24T09:41:36Z	findings	pr	#5137 fixes #5094 (stacked on FH-c); round 1 PRs all open
 2026-10-24T10:03:46Z	queue	check	lane batch 20261024081307 still bisecting; fill-heal PRs queued behind it, none flagged
+2026-10-24T10:24:56Z	queue	check	lane batch 20261024081307 stalled since 08:32 with dev red (#5113); fill-heal PRs queued, none flagged
