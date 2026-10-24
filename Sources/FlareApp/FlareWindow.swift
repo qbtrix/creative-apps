@@ -22,6 +22,14 @@
 // `help` for every section 3.4 item, the Undo and Redo step names, the recent
 // files, Loop and the selection's Edit reasons, and File > Place…'s reason and
 // action; the window takes SVG drops (FlarePlace.swift).
+// Unsaved changes: SuiteUI's `.unsavedChangesGuard` sits on the root with
+// Flare's hooks (`unsavedHooks`, buttons `flare.close.*`), so File > Close
+// (Command-W) and the close button ask Save, Don't Save or Cancel over an
+// edited animation; Open, Open Recent, Open Sample and New ask the same sheet
+// first (`replacing`, through `UnsavedGuard.proceed`). Save runs File > Save
+// and lands only when the write landed and the workspace then reads clean, so
+// a cancelled Save panel or a failed write keeps the animation.
+import AppKit
 import FlareModel
 import SuiteShell
 import SuiteUI
@@ -100,6 +108,7 @@ struct FlareWindow: View {
                 shape: shapeOptions)
         }
         .modifier(FlareFilePanels(model: model, launch: launch, perform: perform))
+        .unsavedChangesGuard(guardHooks)
         .modifier(FlareDocumentSheet(
             sheet: $presented, setup: model.documentSetup, limits: model.documentLimits, perform: perform,
             apply: { model.applyDocumentSetup($0, anchor: $1); return model.layerError == nil }))
@@ -148,6 +157,43 @@ struct FlareWindow: View {
                 isSelected: intent == .timeline(.toggleAutoKey) && model.autoKey,
                 unavailableHelp: help(for: intent), identifier: intent.identifier
             ) { perform(intent) }
+        }
+    }
+
+    // MARK: Unsaved changes
+
+    /// The unsaved guard's hooks for a window (`flare.close.*`): the name is the open animation's title
+    /// ("Untitled" before its first save, nil with nothing open), the dirty state the workspace's
+    /// DocumentSession, and Save runs `save`, landing only when it wrote and the workspace then reads clean.
+    // view-static: main-actor
+    static func unsavedHooks(
+        model: @escaping @MainActor () -> FlareWorkspace, save: @escaping @MainActor () async -> Bool
+    ) -> UnsavedHooks {
+        UnsavedHooks(
+            idPrefix: "flare",
+            documentName: {
+                let workspace = model()
+                return workspace.document == nil ? nil : workspace.title
+            },
+            isDirty: { model().isDirty },
+            save: {
+                let wrote = await save()
+                return wrote && !model().isDirty
+            })
+    }
+
+    /// This window's hooks: File > Save on its workspace, written where Save writes.
+    var guardHooks: UnsavedHooks {
+        Self.unsavedHooks(model: { model }, save: { await save(asking: false) })
+    }
+
+    /// Runs `replace` (Open, Open Recent, Open Sample or New) once the unsaved guard lets it go on: at once
+    /// while the animation is clean, else after the guard's sheet on the key window.
+    func replacing(_ replace: @escaping @MainActor () -> Void) {
+        let hooks = guardHooks
+        guard hooks.isDirty() else { return replace() }
+        Task { @MainActor in
+            if await UnsavedGuard.proceed(hooks, in: NSApp.keyWindow) { replace() }
         }
     }
 }
