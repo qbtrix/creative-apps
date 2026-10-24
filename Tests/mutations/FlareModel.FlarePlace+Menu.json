@@ -1,0 +1,37 @@
+[
+  {
+    "label": "pngRefusesInFlaresWords: a PNG's refusal names every format the kernel knows, not Flare's SVG",
+    "file": "Sources/FlareModel/FlarePlace+Menu.swift",
+    "find": "case .unavailable(_, let why) where why == PlaceRules.formatHelp: placeFormatHelp",
+    "replace": "case .unavailable(_, let why) where why == PlaceRules.formatHelp: why",
+    "tests": "FlarePlaceMenuTests"
+  },
+  {
+    "label": "noAnimationRefusesWithItsReason: a refusal shows the command's id and wording, not the reason alone",
+    "file": "Sources/FlareModel/FlarePlace+Menu.swift",
+    "find": "case .unavailable(_, let why): why",
+    "replace": "case .unavailable: error.description",
+    "tests": "FlarePlaceMenuTests"
+  },
+  {
+    "label": "pngRefusesInFlaresWords: a refusal leaves the status line empty",
+    "file": "Sources/FlareModel/FlarePlace+Menu.swift",
+    "find": "placeStatus = Self.placeRefusal(error)",
+    "replace": "placeStatus = nil",
+    "tests": "FlarePlaceMenuTests"
+  },
+  {
+    "label": "noAnimationTurnsPlaceOff: File > Place… stays on with no animation open",
+    "file": "Sources/FlareModel/FlarePlace+Menu.swift",
+    "find": "Self.placeCatalog.availability(\"place.image\", on: self).why",
+    "replace": "nil as String?",
+    "tests": "FlarePlaceMenuTests"
+  },
+  {
+    "label": "refusalsReadAsTheirReason: a damaged file's message reads as the command's error",
+    "file": "Sources/FlareModel/FlarePlace+Menu.swift",
+    "find": "case .failed(_, let message): message",
+    "replace": "case .failed: error.description",
+    "tests": "FlarePlaceMenuTests"
+  }
+]
