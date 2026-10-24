@@ -140,3 +140,4 @@ time	kind	note
 2026-10-24T04:35Z	DK-u	needs-fix	#4864	supervisor pulled for old-head macOS fails; fix 2bd18bb86 already on head; fast-lane re-added
 2026-10-24T04:57Z	-	heartbeat	-	needs-fix cleared on #4864 (head 2bd18bb8, fast-lane); 9 PRs open, none merged; probe -8 macOS running; findings 32
 2026-10-24T05:19Z	-	heartbeat	-	#4864@2bd18bb8 in lane batch 20261024050226 (Linux green, macOS gate 40064703313 running); probe -8 green; 9 PRs open, none merged; findings 32
+2026-10-24T05:41Z	-	heartbeat	-	#4864 batch 20261024050226 macOS gate 40064703313 still running; 9 PRs open, none merged; findings 32
