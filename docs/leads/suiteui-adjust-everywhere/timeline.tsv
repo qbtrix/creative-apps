@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-24T07:18Z	AJ-k	pr	#5064 opened stacked on #4846; #4863 closed
 2026-10-24T07:40Z	check	check-in	no merges yet; all slice PRs open in fast lane, none needs-fix/rebase; scoped suiteui 40072349724 green on 830af22d holds none of ours; no open findings for this feature
 2026-10-24T08:02Z	check	check-in	no change: slice PRs still open in fast lane, none flagged; no new suiteui/full run holds ours; blockers unmerged; no open findings
+2026-10-24T08:33Z	check	check-in	#4846 needs-fix: macOS gate stall (Onboarding/Home 60s timeouts) unrelated; merged dev, gate PASS, pushed 3325d7a6, Head updated; restacking #5064
