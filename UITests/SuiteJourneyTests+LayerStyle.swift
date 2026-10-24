@@ -4,13 +4,13 @@
 // switch), the selected kind's rows by field (`distance`, `angle`, `altitude`, `opacity`, `blend`,
 // `position.<inside|outside|center>`, `fill.gradient`), `presets`, `done` and `help`; the shared editor is
 // `suite.gradient.bar`. The preview is `suite.gallery.layer-style.preview`, its value the enabled kinds ("no style",
-// "dropShadow, outerGlow"); the page logs `<command id> <intent>` to `suite.gallery.log`. Written in LS-2, skipped
-// until LS-4 turns it on. SJ0 (testGalleryOpensEveryPage) opens the page meanwhile.
+// "dropShadow, outerGlow"); the page logs `<command id> <intent>` to `suite.gallery.log`. Written in LS-2, turned on
+// in LS-4.
 import XCTest
 
 final class SuiteLayerStyleJourneyTests: XCTestCase {
     @MainActor func testLayerStylePanelEditsAStyle() throws {
-        throw XCTSkip("waits on LS-4") // LS-4 turns it on: `walkTheLayerStylePanel()` in place of this line.
+        walkTheLayerStylePanel()
     }
 
     /// Steps 1 to 7 on the page.
