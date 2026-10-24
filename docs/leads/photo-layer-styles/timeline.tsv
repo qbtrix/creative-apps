@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-24T18:47:36Z	W2	fix	PY-1	needs-rebase on #5177 (catalog test, golden): merged dev, kept path. and style. exclusions, golden = dev + style.*; gate queued
 2026-10-24T19:39:05Z	W2	fix	PY-1	new run act-1a16f6941b7-zb0r; needs-rebase on #5177 again: merged dev 6f66ca334, kept path./paths. and style. exclusions, golden = dev + style.*; gate running
 2026-10-24T20:36:17Z	W2	check	PY-1	#5177 adopted the other session's equivalent dev merge df2624ae (gate PASS); Head and Belt-Lead moved to this run
+2026-10-24T20:58:29Z	W2	check	PY-1	#5177 lane Linux check run 40129059695 green; fast-lane batch in progress; waits #5174 LS-2 and #5176 LS-m still open
