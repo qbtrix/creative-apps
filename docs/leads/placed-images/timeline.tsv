@@ -101,3 +101,5 @@ utc	stage	event	ref	note
 2026-10-21T13:22:56Z	PL-4	check-in	run act-1a15e9d8ac8-27wz start; #3942 macOS build green, awaiting lane
 2026-10-22T16:45Z	0	relaunch	-	run act-1a1647a67aa-dau5
 2026-10-22T16:45Z	3	builder	PL-8	PL-8 builder started on dev
+2026-10-24T07:30Z	0	relaunch	-	run act-1a16cc5a05a-lc3g
+2026-10-24T07:30Z	3	pr	PL-10	#4616/#4617 rebuilt on dev (b5dbf7b, 3c8ba26), retargeted to dev; lane Linux run is the proof
