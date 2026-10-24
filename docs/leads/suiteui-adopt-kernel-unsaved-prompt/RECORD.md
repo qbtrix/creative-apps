@@ -16,7 +16,7 @@ Next: UP-photo #5088, UP-flare #5089, UP-halo #5091 stacked (all fast-lane, gate
 | UP-photo | UP-7, UP-8 | in lane (#5088, head b33630f9) | shared-thumbnails:ST-z (met by contract ST-a #4840), UP-design |
 | UP-flare | UP-9, UP-10 | in lane (#5089, head a981f4a4, base UP-photo) | adopt-kernel-autosave:AK-flare (on dev 5ecec459), UP-photo |
 | UP-halo | UP-11, UP-12 | in lane (#5091, head 67110503, base UP-flare) | UP-flare (shared journey file) |
-| UP-z | UP-13, UP-14 | blocked | the four app slices; shared-codecs:SC-z (planned) |
+| UP-z | UP-13, UP-14 | blocked | the four app slices (#5088, #5089, #5091 in lane); shared-codecs:SC-z (`canonical-baseline.txt` chain SC-z → UP-13; SC-f, SC-a merged, SC-photo/halo/library/raster PRs open) |
 
 One PR per slice: each app slice's PR holds its test-first task and its adoption task, so an app slice starts only once its external wait clears.
 
@@ -25,6 +25,8 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 - [ ] Wire: shared-thumbnails:ST-z (UP-photo built on ST-a's contract, #4840)
 
 ## Decisions
+
+- 2026-10-24T08:20Z: hb1: #5088, #5089, #5091 open, fast-lane, no needs-* label (lane's only note: the server-appended footer, stripped on squash). UP-z still blocked on SC-z and the app slices. No findings.
 
 - 2026-10-24T07:52Z: UP-halo gate PASS at 67110503 (live set all four apps), pushed, PR #5091 on the UP-flare branch, fast-lane.
 
