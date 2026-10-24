@@ -72,3 +72,4 @@ utc	stage	event	ref	note
 2026-10-24T15:06Z	3	check	15:06Z	lane batch-20261024144917 in flight (12 older/priority PRs #3621..#4951, none ours); our 11 PRs clean, eligible for a later batch; 0 findings
 2026-10-24T15:28Z	3	check	15:28Z	no change: batch-20261024144917 (none ours) still running; our 11 PRs clean; 0 findings
 2026-10-24T15:50Z	3	check	15:51Z	batch-20261024144917 landed (dev 33cd6e97), none ours; our PRs recomputing mergeable; 0 findings
+2026-10-24T16:14Z	3	check	#5174	16:20Z needs-rebase on #5174 (LS-2, SuiteGallery.swift): fixer dispatched. #5176 clean, queued. findings 0.
