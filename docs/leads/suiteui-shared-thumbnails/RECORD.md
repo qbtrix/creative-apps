@@ -2,7 +2,7 @@
 
 Issue: #3719 · Packet: docs/blueprints/suiteui/features/shared-thumbnails.md
 Run: act-1a16cc96904-199n (relaunch 2026-10-24T07:20Z) · Started: 2026-10-23T15:30Z
-Stage: 3 wave 3 (ST-z builder; ST-u #4950 and ST-m #4951 in the lane)
+Stage: 3 wave 3 (ST-z split into #5102 + ST-z2; ST-u #4950 and ST-m #4951 in the lane)
 Base: 830af22de (origin/dev; brief main 654fb363 verified)
 Next: ST-z builder on lead/shared-thumbnails-ST-z (stacked on ST-u + ST-m), draft PR until #4950/#4951 merge; then wait for a CI run on dev (scoped suiteui or full) containing #4950 and #4951 for Belt-Slice-Done.
 
@@ -12,7 +12,7 @@ Next: ST-z builder on lead/shared-thumbnails-ST-z (stacked on ST-u + ST-m), draf
 | ST-a | SuiteShell and LibraryModel link CoreAsset; `ThumbnailPublishing.preview(for:)`; `FakeThumbnails`; `ThumbnailWriter` and `LiveThumbnailStoreAdapter` stubs; tests written, disabled | ST-1, ST-2 | MJ-ST | shared-codecs:SC-a (ST-2) | false | 0 | done | 40070077878 | – |
 | ST-u | home Recent cards show `preview(for:)` on the fake, app mark when nil, within the render budget | ST-3, ST-4 | HJ-ST | ST-a | true | 0 | building (#4950) | – | – |
 | ST-m | writer stores and reads previews in `AfterGlow/Thumbnails/` within budget; Library reads disk before decoding | ST-5, ST-6 | MJ-ST | ST-a; adopt-kernel-autosave:AK-a (ST-5); library spine (ST-6) | false | 0 | building (#4951) | – | – |
-| ST-z | slot live, Photo publishes on save, Library over the shared store, feature built | ST-7, ST-8 | HJ-ST, MJ-ST | ST-u, ST-m; adopt-kernel-autosave:AK-photo (ST-7) | true | 0 | building | – | – |
+| ST-z | slot live, Photo publishes on save, Library over the shared store, feature built | ST-7, ST-8 | HJ-ST, MJ-ST | ST-u, ST-m; adopt-kernel-autosave:AK-photo (ST-7) | true | 0 | building (#5102 ST-7 Photo+slot; ST-z2 PR Library disk+journey+built) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -40,9 +40,11 @@ Next: ST-z builder on lead/shared-thumbnails-ST-z (stacked on ST-u + ST-m), draf
 - 2026-10-24T07:55Z Belt watches lead/suiteui-shared-thumbnails and docs/leads/suiteui-shared-thumbnails/RECORD.md. Every RECORD push now goes to both branches (same commit), with the record mirrored at both paths.
 - Earlier runs (act-1a15b69feea-et92) were all blocked on SC-a; their heartbeat log is in RECORD.prev.
 
+- 2026-10-24T08:15Z ST-z came back at 548 lines/13 files, over the 400 cap even after its parents merge. Split into two stacked PRs, both `Slice: ST-z`: #5102 (ST-7 Photo publish on save + live slot, 7 files/340) and ST-z2 (Library grid on disk, journey on live previews, wave.json built, feature-done; 6 files/208). The hard cap wins over "one PR per slice"; the slice is done once a run contains ST-z2.
+
 ## Wire
 - [x] Wire: shared-codecs:SC-a (ST-2 built ahead; when SC-2 merges, merge dev into the ST-a branch, keeping both Package.swift/project.yml link changes)
-- [ ] Wire: Library live services build LiveThumbnails with the disk store (folder + budget); then un-pend RealJobs relaunch-grid. Do in ST-z or a follow-up before close.
+- [~] Wire (in ST-z2): Library live services build LiveThumbnails with the disk store (folder + budget); then un-pend RealJobs relaunch-grid. Do in ST-z or a follow-up before close.
 
 ## Open
 - –
