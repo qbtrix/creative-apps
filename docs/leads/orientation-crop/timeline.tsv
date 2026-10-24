@@ -100,3 +100,5 @@ utc	stage	event	ref	note
 2026-10-24T22:07Z	check	check-in	no merges since 21:44Z; #4953 #5006 #5064 in lane, no flags; no new findings; scoped design afef017c running
 2026-10-24T22:29Z	check	check-in	no merges since 22:06Z; #4953 #5006 #5064 in lane, no flags; no new findings; full CI 40137153379 at afef017c running
 2026-10-24T22:51Z	check	check-in	no merges since 22:28Z; #4953 #5006 #5064 in lane, no flags; finding #5227 is inspector-controls (not ours); full CI 40137153379 running
+2026-10-24T23:20Z	resume	run act-1a1702c569a-0puo resumes on dev afef017c; lead branch rebuilt on main ef37711d; contract-first waits re-read, every remaining slice startable
+2026-10-24T23:20Z	wave	wave 4: OC-library-m (OC-7, OC-8) and OC-photo-m (OC-11, OC-12)

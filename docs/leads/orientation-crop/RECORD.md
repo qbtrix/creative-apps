@@ -1,10 +1,10 @@
 # orientation-crop lead record
 
 Issue: #3756 · Packet: docs/blueprints/suiteui/features/orientation-crop.md
-Run: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui: tone-controls, shared-codecs, orientation-crop) · Started: 2026-10-23T14:51Z
-Stage: 3 wave 3
-Base: origin/dev 8021b0f56a45a59540cd4ea0ff99651c5fb8dc2a
-Next: OC-u done (scoped suiteui run 40109073275 green at 33cd6e97; Belt-Slice-Done posted 17:19Z). Remaining slices blocked: OC-library-m (IM-z, CB-library), OC-photo-m (DS-photo), OC-photo-u (AR-photo-u), OC-z (CB-z).
+Run: act-1a1702c569a-0puo · Session: claude/suiteui-feature-lead-run-azjeoo · Started: 2026-10-24T23:00Z (earlier: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui: tone-controls, shared-codecs, orientation-crop) · Started: 2026-10-23T14:51Z)
+Stage: 3 wave 4
+Base: origin/dev afef017c (main ef37711d + #5059, #5222)
+Next: wave 4: OC-library-m (OC-7+OC-8) and OC-photo-m (OC-11+OC-12), one PR each on dev. Then OC-library-u and OC-photo-u stacked on them, and OC-z folded into the last adopt slice.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -50,3 +50,9 @@ Next: OC-u done (scoped suiteui run 40109073275 green at 33cd6e97; Belt-Slice-Do
 - 2026-10-24T08:33Z check-in: no merges; no needs-fix/rebase; no new findings; waits unchanged
 - 2026-10-24T15:48:35Z: #4582 (OC-u) merged by the lane batch. Belt-Slice-Done waits for a green scoped-suiteui or full ci.yml run on dev containing it. Waits unchanged: IM-z, CB-library, DS-photo, AR-photo-u, CB-z.
 - 2026-10-24T17:19Z: scoped suiteui run 40109073275 (33cd6e97, contains #4582) concluded success; posted Belt-Slice-Done: OC-u on #3756.
+
+## Run act-1a1702c569a-0puo decisions
+- Integration branch: the brief says main, but the fast lane only merges into dev (main fast-forwards from green dev), so slice PRs base on and target dev, as earlier runs did.
+- lead/<feature> was rebuilt on main ef37711d (its old history shares no base with the rewritten main): records copied onto main and force-pushed with lease.
+- Contract-first waits (rule 12): every cross-feature wait is met, since each named feature's first slice has merged (checked by its owned files on dev).
+- The earlier run held OC-library-m, OC-photo-m, OC-photo-u and OC-z as blocked on IM-z, CB-library, DS-photo, AR-photo-u and CB-z. Under rule 12 those are met (IM-a, CB-a, DS-a and AR-a merged), so they are startable. Cross-line hand-offs LF-m, PT-m and PF-m are treated the same way, with Wire lines.
