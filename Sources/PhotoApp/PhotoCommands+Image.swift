@@ -26,5 +26,7 @@ struct PhotoImageMenu: View {
         menu.item("image.rotate-ccw") { menu.perform(.rotate(.degrees270)) }
         menu.item("image.rotate-180") { menu.perform(.rotate(.degrees180)) }
         menu.item("image.straighten") { menu.perform(.straighten) }
+        Divider()
+        PhotoAdjustmentsMenu()
     }
 }
