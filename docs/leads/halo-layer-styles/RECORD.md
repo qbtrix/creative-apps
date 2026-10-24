@@ -5,9 +5,9 @@ Run: act-1a16c627cc6-nlss · Session: claude/layer-styles-lead-vx2vrg · Started
 Wire: suiteui layer-styles:LS-a
 Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTests.glowReachesItsKeyedSize and glowIsNotClipped; add the no-padding mutation, origin dropped in LiveFrameRendering's styled composite)
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
-Stage: wave 4 PRs open as drafts per the supervisor (2026-10-24T10:55Z): #5156 HY-1 (d67848d07), #5157 HY-2 (e5c78d244), #5158 HY-m (187f8fe87), #5161 HY-u (fbb199f2a), each gate CI: PASS, fast-lane, Fast-Check/Head set. HY-1 gained its rule-14 plan HaloModel.HaloLayerStyle 3/3, merged forward into HY-a and HY-m; HY-a merged into HY-u. HY-7 route design asked on #3936
+Stage: #4911 (LS-1) merged 12:18Z; dev merged into #5156 HY-1 (gate running). LS-2 not on dev yet (16720838f/82d118eb3 not ancestors of origin/dev), so #5157, #5161 stay drafts; #5158 HY-m only needs HY-1. Attribution footers removed from #5157, #5158, #5161 bodies and the #3936 comment via the GitHub MCP update tools (the gh api REST route re-appends it server-side; MCP does not). HY-7 route question on #3936 unanswered
 Base: a41e7f1 (origin/dev)
-Next: once #4911 and LS-2 are on dev, merge dev into each PR in stack order (HY-1, HY-2, HY-m, HY-u), rerun the gate, move Head:, mark ready; build HY-7 ahead on the StyleRoute stub with Wire: LS-9 once the supervisor answers how the viewer gets a layer surface; then HY-8
+Next: #5156 gate PASS, push, move Head: and strip footer via MCP update_pull_request, mark ready (draft=false); then merge dev+HY-1 into #5158, gate, ready; #5157 and #5161 once LS-2 lands; HY-7 once the supervisor answers the route shape; then HY-8
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
