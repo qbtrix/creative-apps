@@ -26,6 +26,8 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 2026-10-24 18:09Z: hb28: dev unchanged at c0920138; no lane batch since 17:03Z. #5088/#5089/#5091 open, fast-lane, no needs-* label. #3721 unchanged (13 comments, no supervisor answer). UP-z still waits.
+
 - 2026-10-24 17:48Z: hb27: dev unchanged at c0920138; no lane batch since 17:03Z. #5088/#5089/#5091 open, fast-lane, no needs-* label. #3721 unchanged (13 comments, no supervisor answer). UP-z still waits.
 
 - 2026-10-24 17:27Z: hb26: dev moved by one direct commit c0920138 (#5182, tests fix); no lane batch since 17:03Z. #5088/#5089/#5091 open, fast-lane, no needs-* label, not touched since 12:45Z. #3721 unchanged (13 comments, no supervisor answer). UP-z still waits.
