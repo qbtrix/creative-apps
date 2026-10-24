@@ -4,7 +4,7 @@ Issue: #3478 · Packet: docs/blueprints/library/features/export-pack.md
 Run: act-1a16cc967d9-mcuv (line lead, line:library) · resumed 2026-10-24 (earlier act-1a16953af22-wvhu, act-1a15e4969c2-pa6e)
 Stage: 3 wave 2; LX-2 #4960 (efabeb8d) and LX-4 #4962 open on the lane; checked 2026-10-24T07:48Z
 Base: origin/dev 830af22d
-Next: lane merges #4960 (then SuiteUI XP-3 #5043, stacked on it) and #4962; LX-u (LX-5 render budget + LX-6 journey skipped) stacked on feat/export-pack-lx2; Wire XP-7 swaps in when #5044 merges
+Next: LX-u building (feat/export-pack-lx-u, stacked on #4960); lane merges #4960, #4962; Wire XP-7 swaps in when #5044 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
