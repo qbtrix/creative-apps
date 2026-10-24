@@ -13,6 +13,7 @@
 // (`afterglow run --live library`). Closing the window quits (D2), so a Dock
 // click relaunches; `.suiteReopenWindow` opens the window if the app is still
 // running with none.
+// Launch empties the last session's share copies (share-sheet SH-5).
 import Foundation
 import LibraryModel
 import SuiteModel
@@ -49,6 +50,10 @@ import SwiftUI
 @main
 struct LibraryApp: App {
     @NSApplicationDelegateAdaptor private var delegate: SuiteAppDelegate
+
+    /// Empties the last session's share copies (`Share/` beside the catalog file, share-sheet SH-5); a folder that
+    /// can't be emptied waits for the next launch.
+    init() { try? SharePrep.cleanup(support: CatalogStore().folder.path(percentEncoded: false)) }
 
     var body: some Scene {
         Window("Library", id: "library") { LibraryWindow().suiteReopenWindow(id: "library") }
