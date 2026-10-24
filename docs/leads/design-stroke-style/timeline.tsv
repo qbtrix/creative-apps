@@ -143,3 +143,4 @@ time	kind	note
 2026-10-24T05:41Z	-	heartbeat	-	#4864 batch 20261024050226 macOS gate 40064703313 still running; 9 PRs open, none merged; findings 32
 2026-10-24T06:04Z	-	heartbeat	-	batch 20261024050226 macOS red: Flare RenderBudgetFlareExportPackTests.progressInOneBodyPerTick time limit then AppSnapshotTests hang (not stroke code); bisect probe -6 at #4864 running (40067473896); findings 32
 2026-10-24T06:28Z	-	heartbeat	-	probe -6 (whole batch #4846,#4852,#4858,#4861,#4864) red on the Flare export-pack budget test that #4852 adds; RenderBudgetDesignStrokeTests and DesignStroke suites passed; #4864 not named; findings 32
+2026-10-24T06:49Z	-	heartbeat	-	lane bisecting batch 20261024050226 (probe -1 macOS queued); #3759 got a dev merge 1611484f (Linux check running); #4864 waits, no needs-fix; findings 32
