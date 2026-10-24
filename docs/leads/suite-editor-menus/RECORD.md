@@ -82,3 +82,4 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-24T17:26:57Z: #4817 is in batch-20261024172211 (at 9e16d071c); #4988 waits for the next batch.
 - 2026-10-24T17:45:35Z: batch-20261024172211 (has #4817): Linux check green, macOS gate queued. #4988 and #5164 open.
 - 2026-10-24T18:04:08Z: batch-20261024172211 macOS gate running (run 40115812591). #4817, #4988, #5164 open.
+- 2026-10-24T18:20:39Z: #4817 merged to dev as 18f35c38f2df21e6e0e23c6d949283099be54328. Left: #4988, then #5164 (retarget to dev after #4988).

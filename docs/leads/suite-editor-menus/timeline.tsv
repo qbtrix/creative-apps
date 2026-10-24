@@ -129,3 +129,4 @@ utc	stage	event	ref	note
 2026-10-24T17:26:57Z	check	EM-flare-halo	#4817 in batch-20261024172211
 2026-10-24T17:45:35Z	check	EM-flare-halo	batch macOS gate queued
 2026-10-24T18:04:08Z	check	EM-flare-halo	batch macOS gate running
+2026-10-24T18:20:39Z	merge	EM-flare-halo	#4817 merged
