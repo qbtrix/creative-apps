@@ -160,3 +160,4 @@ utc	stage	event	ref	note
 2026-10-24T22:22:32Z	stage	record: run act-1a16fe1fa9f-sqqi; FV-u done; #4854 Belt-Lead back to this run
 2026-10-24T22:28:25Z	heartbeat	#4854 (565669e7) open, clean, fast-lane, not merged; #5025 still queued; batch 20261024205137 probes still on origin
 2026-10-24T22:43:50Z	heartbeat	#4854 and #5025 not on dev (dev afef017c unchanged); both wait in the lane
+2026-10-24T23:05:41Z	heartbeat	#4854 in batch 20261024205137 (bisecting, probes -1,-6 out); #5025 not batched; dev still afef017c
