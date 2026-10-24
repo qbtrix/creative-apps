@@ -1,0 +1,10 @@
+{
+  "id": "kernel-playback",
+  "name": "Playback",
+  "description": "Playback/: the suite's one playback clock (#5077). PlaybackTicker turns display-link target timestamps into elapsed seconds (the first tick after a reset only sets the baseline); PlaybackTiming maps seconds from a start frame onto the frame shown at the exact rate through FlareCore's Timeline.playbackFrame, with once, loop and ping-pong; PlaybackBudget counts QB-L4's dropped frames. SuiteUI's PlaybackDriver runs it on the display link; Flare and Halo adapt it.",
+  "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+  "paths": [
+    "Sources/SuiteKernel/Playback/"
+  ],
+  "order": 200
+}

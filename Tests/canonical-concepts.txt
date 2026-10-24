@@ -31,8 +31,7 @@ Tone: ToneSettings ToneSlider
 Render route: RenderRoute Rasterizer Rasterizing TileUpdate CompositeCache
 Recovery: Recovery CatalogStore RecoveryFile
 Image codec: Codec ImageIODecoder JPEGWriter PNGWriter FramePNG
-# Playback clock: SuiteKernel/Playback (ticker, timing, budget) and SuiteUI's PlaybackDriver on a RefreshLink.
-Playback: Playback PlaybackClock PlaybackTicks PlaybackTiming PlaybackDriver RefreshLink
+Playback: Playback PlaybackClock PlaybackTicks
 Thumbnail: Thumbnail
 Zoom: Zoom ViewMath
 Eyedropper: Eyedropper Sampling
