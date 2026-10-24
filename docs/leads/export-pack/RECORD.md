@@ -1,10 +1,10 @@
 # export-pack lead record
 
-Issue: #4523 · Packet: docs/blueprints/suiteui/features/export-pack.md
-Run: act-1a16469734c-d0s8 · Session: claude/feature-lead-playbook-d50vpe · Started: 2026-10-22 (earlier run act-1a15821c836-93pf on #3477)
-Stage: 4 wave 1
-Base: origin/dev 7e9f260a
-Next: XP-2 in wave 1 (shell-media SM-a and SM-w are on dev: SM-1 #4034 to SM-8 #4239); XP-7 after XP-2; XP-3 once tone-controls TC-a (TC-1, TC-2) merges.
+Issue: #3477 · Packet: docs/blueprints/suiteui/features/export-pack.md
+Run: act-1a16c618fe7-h4fd (line lead, line:suiteui; unparked by the supervisor 2026-10-24) · earlier runs act-1a16469734c-d0s8, act-1a15821c836-93pf
+Stage: 3 wave 1 (this run)
+Base: origin/dev 654fb3632
+Next: Wave 1 builds XP-3 (stacked on #4960's ExportPick.metadata stub; Wire: library export-pack:LX-a) and XP-7 (SM-w built). XP-4 stacks on XP-3.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -18,7 +18,7 @@ Next: XP-2 in wave 1 (shell-media SM-a and SM-w are on dev: SM-1 #4034 to SM-8 #
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | XP-1 | XP-a | 1 | ExportOptions.swift stubs, C4 part, suite written disabled | Sources/SuiteKernel/Export/ExportOptions.swift, Tests/SuiteKernelTests/ExportOptionsTests.swift, docs/c4/parts/creative-apps/suite-kernel/kernel-export-session.json | ExportOptionsTests compiles disabled; KernelShapeTests over Export/ | #3552 | merged #3552 09:28Z (fast lane) |
-| XP-2 | XP-a | – | MetadataCarrying, FakeMetadata, SuiteServices.metadata | Sources/SuiteModel/Contracts/MetadataCarrying.swift, Sources/SuiteModel/Fakes/FakeMetadata.swift, Sources/SuiteModel/SuiteServices.swift, Tests/SuiteModelTests/FakeMetadataTests.swift | FakeMetadataTests | – | waits SM-a |
+| XP-2 | XP-a | – | MetadataCarrying, FakeMetadata, SuiteServices.metadata | Sources/SuiteModel/Contracts/MetadataCarrying.swift, Sources/SuiteModel/Fakes/FakeMetadata.swift, Sources/SuiteModel/SuiteServices.swift, Tests/SuiteModelTests/FakeMetadataTests.swift | FakeMetadataTests | #4740 | merged (21074aea4) |
 | XP-3 | XP-a | – | ExportPick.size/.metadata, placeholder rows, gallery page, journey skipped | Sources/SuiteUI/ExportSheet.swift, Sources/SuiteUI/Gallery/GalleryExportPack.swift, Sources/SuiteUI/SuiteGallery.swift, UITests/SuiteJourneyTests+Export.swift | SJ0 | – | waits TC-a, PL-a |
 | XP-4 | XP-u | – | Size and Metadata rows | Sources/SuiteUI/ExportSheet.swift, Tests/SuiteUITests/ExportPackRowsTests.swift | ExportPackRowsTests | – | waits XP-3 |
 | XP-5 | XP-u | – | Snapshots, render budget, journey on | Tests/AppSnapshotTests/SuiteExportPackSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetExportPackTests.swift, UITests/SuiteJourneyTests+Export.swift | XJ1 | – | waits XP-4 |
@@ -33,6 +33,7 @@ Next: XP-2 in wave 1 (shell-media SM-a and SM-w are on dev: SM-1 #4034 to SM-8 #
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-24T05:34:08Z resume as run act-1a16c618fe7-h4fd. XP-2 is on dev (#4740). TC-a's placeholder (#4862) and editor-kernel are on dev, and placed-images PL-a's owned files are on dev, so XP-3 builds now. Per the supervisor, XP-3 builds on the ExportPick.metadata stub in Library's #4960 (LX-2) rather than adding a second one: it stacks on feat/export-pack-lx2 and adds only `.size`, the placeholder rows, the gallery page and the skipped journey. shell-media is built (SM-w), so XP-7 builds now. No open findings for XP slices (the FV-a findings #5012-#5021 are the Flare lead's).
 - 2026-10-22 resume (#4523): same plan; base and target stay dev (the lane merges into dev; main fast-forwards from green dev).
 - PRs target dev, not main: CLAUDE.md sends crew PRs to dev and the lane retargets main anyway; main was verified at b3011ab.
 - XP-1's wait on autosave-history:AH-a is read as AH-1 only: the shared file is kernel-export-session.json, which AH-1 edits and AH-2 doesn't (the placed-images lead reads its A/C wait the same way). XP-1 is built now; its PR opens after #3543 merges.
