@@ -59,3 +59,4 @@ utc	stage	event	ref	note
 2026-10-24T08:27:04Z	FH-photo	gate	FH-7-jobs d7b07b7 CI: PASS; FH-7 9d18965 rerun (load timeouts)
 2026-10-24T08:33:25Z	FH-photo	pr	FH-7 #5107 (9d18965), FH-7-jobs #5108 (d7b07b7) opened
 2026-10-24T08:35:32Z	FH-photo	pr	FH-8 #5109 (6e6e7bb) opened; mutate 3/3 + 3/3
+2026-10-24T08:36:40Z	findings	fix	round 1 started: #5095, #5093 (then #5094)
