@@ -95,8 +95,11 @@ struct LibraryImagingTests {
     @Test func liveDevelopRendersWhatTheSharedListRenders() throws {
         let cpu = CPUBackend()
         let image = try developGradient()
+        // Library's own passes (white balance, contrast, highlights and
+        // shadows, whites and blacks) aren't in the shared list: compare the shared controls.
+        let own: [DevelopSlider] = [.temperature, .tint, .contrast, .highlights, .shadows, .whites, .blacks]
         for (_, settings) in try Self.catalogDevelops() {
-            let tone = settings.setting(crop: nil)
+            let tone = own.reduce(settings.setting(crop: nil)) { $0.setting($1, to: 0) }
             let live = try LiveDevelop().render(image, settings: tone)
             var surface = try cpu.surface(image)
             for step in ImagingProgram.adjustments(Self.adjust(tone)) { surface = try cpu.adjusted(surface, step) }
