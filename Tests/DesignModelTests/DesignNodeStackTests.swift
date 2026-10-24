@@ -70,6 +70,8 @@ import Testing
         #expect(copy.stroke?.width == 5)
         #expect(DesignNode(id: "dup", copying: original).stroke == original.stroke)
         #expect(DesignNode(id: "plain", name: "R", kind: .rectangle, frame: rc(0, 0, 1, 1)).stroke == nil)
+        let given = DesignNode(id: "s", name: "R", kind: .rectangle, frame: rc(0, 0, 1, 1), stroke: original.stroke)
+        #expect(given.stroke?.width == 3)
     }
 }
 
