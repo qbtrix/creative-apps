@@ -5,11 +5,11 @@
 // and `fileScene(_:)` presents the system exporter, clearing the request on
 // every exit. A write is atomic and ends in `didSave` or `didFailSave`.
 // Open… sets `request = .open` (the system importer); Open Recent opens its
-// path. With unsaved edits both first set `request = .confirmUnsaved(then:)`:
-// "Save changes to <title>?" with Save (then go on, unless the save fails),
-// Don't Save (go on) and Cancel. On an untitled project Save reads "Save As…":
-// it opens the exporter and the held open stops there, since `.saveAs` has
-// no continuation yet. An open runs `beginOpen`,
+// path. With unsaved edits both first ask through SuiteUI's
+// `UnsavedGuard.proceed` (the window's `unsavedHooks`, buttons `halo.close.*`):
+// the kernel's question with Save (then go on, unless the save fails), Don't
+// Save (go on) and Cancel. On an untitled project Save opens the exporter and
+// the held open stops there. An open runs `beginOpen`,
 // decodes off the main actor and ends in `finishOpen`; meanwhile
 // `halo.file.progress` reads "Opening <name>…". A failed open or save shows
 // the Model's message in one system alert; the project stays as it was.
@@ -20,8 +20,9 @@
 // `model.saveStatus` (journeys read the label: XCUITest reads SwiftUI values
 // as empty, #262); the title is `model.windowTitle`, and the title bar's
 // subtitle (`.navigationSubtitle`) is `model.windowSubtitle`, "Edited" or
-// "Not saved" while the work isn't on disk, else empty. SwiftUI offers no hook to confirm a window
-// close, so closing is not guarded yet (#1065 asks SuiteWindow for one).
+// "Not saved" while the work isn't on disk, else empty. Closing asks through the guard on the window's
+// root (HaloWindow.swift).
+import AppKit
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -31,7 +32,11 @@ extension HaloWindow {
         switch command {
         case .save, .saveAs: save(saveAs: command == .saveAs)
         case .open, .openRecent:
-            if model.file.unsaved { request = .confirmUnsaved(then: command) } else { openNow(command) }
+            let hooks = Self.unsavedHooks(model: { model }, perform: perform)
+            guard hooks.isDirty() else { return openNow(command) }
+            Task { @MainActor in
+                if await UnsavedGuard.proceed(hooks, in: NSApp.keyWindow) { openNow(command) }
+            }
         default: break
         }
     }
@@ -63,14 +68,6 @@ extension HaloWindow {
                     openFile(at: url.path, scoped: url.startAccessingSecurityScopedResource() ? url : nil)
                 }
             }
-            .alert(
-                "Save changes to \(model.windowTitle)?" as String,
-                isPresented: Binding(get: { pendingCommand != nil }, set: { if !$0, pendingCommand != nil { request = nil } })
-            ) {
-                Button(alertSaveNeedsPanel ? "Save As…" : "Save") { goOn(saving: true) }
-                Button("Don't Save", role: .destructive) { goOn(saving: false) }
-                Button("Cancel", role: .cancel) { request = nil }
-            }
             .modifier(HaloFileAlert(message: model.file.error))
             .task { launchFiles() }
             .onChange(of: model.recent) { _, recent in Self.storeRecent(recent) }
@@ -80,18 +77,6 @@ extension HaloWindow {
     /// The window's title.
     var fileWindowTitle: String { model.windowTitle }
 
-    /// The command the unsaved-changes alert holds back.
-    private var pendingCommand: HaloCommand? {
-        if case .confirmUnsaved(let then) = request { then } else { nil }
-    }
-
-    /// Whether the unsaved-changes alert's save needs the panel (an untitled
-    /// project): its button then reads "Save As…" and the held open doesn't
-    /// run after it, so the button promises only the save.
-    private var alertSaveNeedsPanel: Bool {
-        model.saveTarget(launchPath: HaloLaunch.current.saveTo, saveAs: false) == .ask
-    }
-
     /// Writes where `saveTarget` says or asks with the panel; true once written.
     @discardableResult private func save(saveAs: Bool) -> Bool {
         switch model.saveTarget(launchPath: HaloLaunch.current.saveTo, saveAs: saveAs) {
@@ -100,16 +85,6 @@ extension HaloWindow {
             request = .saveAs
             return false
         }
-    }
-
-    /// The unsaved-changes alert's Save or Don't Save: runs the held command
-    /// without asking again, after the alert closes. A Save that needs the
-    /// panel or fails stops there.
-    private func goOn(saving: Bool) {
-        guard let command = pendingCommand else { return }
-        request = nil
-        if saving, !save(saveAs: false) { return }
-        Task { openNow(command) }
     }
 
     /// Open… or Open Recent with no question asked.
