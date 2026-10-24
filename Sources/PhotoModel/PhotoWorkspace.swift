@@ -250,7 +250,7 @@ public struct PhotoWorkspace: Sendable {
         var next = adjustments
         next.apply(edit)
         guard next != adjustments else { return }
-        record(.adjustments(adjustments), named: edit.kind.title, coalescing: "adjust-\(edit.kind.rawValue)")
+        record(.adjustments(adjustments), named: edit.title, coalescing: "adjust-\(edit.section)")
         adjustments = next
         touch(.all, adjustmentsOnly: true)
     }
@@ -397,8 +397,8 @@ extension PhotoWorkspace: Equatable {
 }
 
 extension AdjustmentEdit {
-    /// The section this edit changes.
-    var kind: AdjustmentKind {
+    /// The section this edit changes; nil for tone, which has no AdjustmentKind.
+    var kind: AdjustmentKind? {
         switch self {
         case .exposure: .exposure
         case .blackPoint, .whitePoint, .gamma, .gammaField: .levels
@@ -406,8 +406,15 @@ extension AdjustmentEdit {
         case .blurSigma: .blur
         case .hue, .saturation, .lightness: .hueSaturation
         case .setEnabled(let kind, _), .reset(let kind): kind
+        case .tone: nil
         }
     }
+
+    /// The undo step's name: the section's title, or "Tone".
+    var title: String { kind?.title ?? "Tone" }
+
+    /// The key a run of these edits folds under.
+    var section: String { kind?.rawValue ?? "tone" }
 }
 
 extension AdjustmentKind {
