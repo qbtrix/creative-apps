@@ -37,7 +37,10 @@
     "Sources/HaloModel/HaloCommandCatalog.swift",
     "Tests/command-ids/halo.txt",
     "docs/blueprints/halo.md",
-    "docs/blueprints/halo/features/gradient-fill.wave.json"
+    "docs/blueprints/halo/features/gradient-fill.wave.json",
+    "Sources/HaloApp/HaloTextInspector.swift",
+    "Tests/HaloModelTests/HaloLayerAlphaTests.swift",
+    "Tests/mutations/HaloModel.HaloLayer.json"
   ],
   "slices": [
     {
@@ -130,7 +133,8 @@
       "behavior": "The inspector runs on live services, the journey passes on live, and the blueprint lists gradient fills.",
       "tasks": [
         "HG-8",
-        "HG-9"
+        "HG-9",
+        "HG-10"
       ],
       "journeys": [
         "HJ-G1"
@@ -138,23 +142,38 @@
       "waits": {
         "HG-u": [
           "HG-8",
-          "HG-9"
+          "HG-9",
+          "HG-10"
         ],
         "HG-m": [
-          "HG-8"
+          "HG-8",
+          "HG-10"
         ],
         "core-loop:CL-z": [
           "HG-9"
         ],
         "key-editing:KE-z": [
           "HG-9"
+        ],
+        "shape-tools:HS-a": [
+          "HG-10"
+        ],
+        "stroke-style:HK-a": [
+          "HG-10"
+        ],
+        "placed-images:PH-a": [
+          "HG-10"
         ]
       },
       "ui": true,
       "owned": [
         "UITests/HaloJourneyTests+Gradient.swift",
         "docs/blueprints/halo.md",
-        "docs/blueprints/halo/features/gradient-fill.wave.json"
+        "docs/blueprints/halo/features/gradient-fill.wave.json",
+        "Sources/HaloApp/HaloTextInspector.swift",
+        "Sources/HaloModel/HaloLayer.swift",
+        "Tests/HaloModelTests/HaloLayerAlphaTests.swift",
+        "Tests/mutations/HaloModel.HaloLayer.json"
       ]
     }
   ]
