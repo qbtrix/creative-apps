@@ -2,22 +2,22 @@
 
 Issue: #3723 · Packet: docs/blueprints/suiteui/features/adopt-kernel-eyedropper-photo.md
 Run: act-1a16cc5a05a-lc3g (relaunch) · Started: 2026-10-24T06:40Z
-Stage: 3 wave 1 (EP-m: EP-2)
+Stage: 3 wave 2 (EP-m landed; EP-z #4943 in the lane)
 Base: 721168a8f (origin/dev; brief main cb79cbb6 verified)
-Next: #4837 (EP-m) lands through the supervisor's hand-batched prefix (supervisor/prefix-215139, Linux check 40071878407 green); then retarget #4943 (EP-z) to dev; Belt-Slice-Done for each on the first green ci.yml run on dev containing it.
+Next: #4943 (EP-z, head 69dedd1) lands through the lane batch; Belt-Slice-Done EP-m and EP-z on the first green ci.yml run on dev containing each; then Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| EP-m | click and `color.sample` both read `SampleRules.mean` through Photo's kernel adapter; Photo's ColorSampling, SampledColor and FakeSampling gone | EP-1, EP-2 | MJ-EP | photo/eyedropper:PE-z (packet), adopt-kernel-export:AX-photo (EP-2), adopt-kernel-brush:AB-photo (EP-2) | false | 0 | building | – | – |
-| EP-z | PhotoEyedropper.swift and LiveSampling.swift deleted, baseline shrunk, built | EP-3, EP-4 | MJ-EP, PJ-EP | EP-m, adopt-kernel-unsaved-prompt:UP-z (EP-3) | false | 0 | blocked | – | – |
+| EP-m | click and `color.sample` both read `SampleRules.mean` through Photo's kernel adapter; Photo's ColorSampling, SampledColor and FakeSampling gone | EP-1, EP-2 | MJ-EP | photo/eyedropper:PE-z (packet), adopt-kernel-export:AX-photo (EP-2), adopt-kernel-brush:AB-photo (EP-2) | false | 0 | merged | – | – |
+| EP-z | PhotoEyedropper.swift and LiveSampling.swift deleted, baseline shrunk, built | EP-3, EP-4 | MJ-EP, PJ-EP | EP-m, adopt-kernel-unsaved-prompt:UP-z (EP-3) | false | 0 | building | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | EP-1 | EP-m | 1 | PhotoSampleKernelTests (disabled), RJ-X49 job folder (mutation plan already on dev from PE-a) | Tests/PhotoModelTests/PhotoSampleKernelTests.swift, Tests/RealJobs/photo/sample-edge/*, Tests/mutations/PhotoModel.PhotoSample+Kernel.json | PhotoSampleKernelTests | #4579 | merged |
-| EP-2 | EP-m | 2 | sampleDrag on SampleRules.mean; ColorSampling, SampledColor, FakeSampling, PhotoServices.sampling removed | Sources/PhotoModel/PhotoSample+Kernel.swift, Contracts/OutputContracts.swift, Fakes/FakeOutput.swift, PhotoServices.swift, PhotoStroke.swift, Tests/PhotoModelTests/PhotoSample*Tests.swift | PhotoSampleKernelTests | #4837 | open, in the supervisor's prefix (supervisor/prefix-215139) |
-| EP-3 | EP-z | 3 | delete PhotoEyedropper.swift, LiveSampling.swift and their tests and plan; shrink canonical baseline | Sources/PhotoModel/PhotoEyedropper.swift, Live/LiveSampling.swift, Live/NotBuilt.swift, Tests/PhotoModelTests/LiveSamplingTests.swift, Tests/mutations/PhotoModel.LiveSampling.json, Tests/canonical-baseline.txt | scripts/check-dup-logic | #4943 | open, stacked on #4837 (Wire UP-z) |
+| EP-2 | EP-m | 2 | sampleDrag on SampleRules.mean; ColorSampling, SampledColor, FakeSampling, PhotoServices.sampling removed | Sources/PhotoModel/PhotoSample+Kernel.swift, Contracts/OutputContracts.swift, Fakes/FakeOutput.swift, PhotoServices.swift, PhotoStroke.swift, Tests/PhotoModelTests/PhotoSample*Tests.swift | PhotoSampleKernelTests | #4837 | merged 08:02Z (fb09de4) |
+| EP-3 | EP-z | 3 | delete PhotoEyedropper.swift, LiveSampling.swift and their tests and plan; shrink canonical baseline | Sources/PhotoModel/PhotoEyedropper.swift, Live/LiveSampling.swift, Live/NotBuilt.swift, Tests/PhotoModelTests/LiveSamplingTests.swift, Tests/mutations/PhotoModel.LiveSampling.json, Tests/canonical-baseline.txt | scripts/check-dup-logic | #4943 | open, origin/dev merged (69dedd1), fast-lane |
 | EP-4 | EP-z | 4 | status built, feature-done | docs/blueprints/suiteui/features/adopt-kernel-eyedropper-photo.wave.json | waves render --dry-run | #4943 | open, same PR as EP-3 |
 
 ## Reviews
@@ -85,3 +85,4 @@ Next: #4837 (EP-m) lands through the supervisor's hand-batched prefix (superviso
 Relaunched 2026-10-24T06:40Z on main 654fb36. The supervisor is hand-landing the prefix the lane cleared (supervisor/prefix-215139, ending at #4837; Linux check 40071878407 green). #4837's `Belt-Lead:` line now names this run. Once #4837 merges, #4943 (EP-z) is retargeted to dev. Its own commits are 10 files.
 
 - Status channel is this file on lead/suiteui-adopt-kernel-eyedropper-photo (Belt reads it); the copy on lead/adopt-kernel-eyedropper-photo is a stale mirror.
+- 08:10Z: #4837 merged as fb09de4. origin/dev merged into #4943 (modify/delete conflicts on the three EP-3 deletions resolved as deletions); the diff vs dev is EP-z's 10 files. Every lint passes; swift build can't run here, so the Fast-Check line was removed and fast-lane added; the lane's Linux run and the batch macOS gate are its proof.
