@@ -51,6 +51,7 @@ Next: watch #5050 (LG-5 + LG-8, feature-done) merge in the next lane batch and t
 - 19:41Z: poll: probe -6 Linux green, macOS gate running; #5050 open, no label.
 - 20:01Z: poll: probe -6 macOS gate still running; #5050 open, no label.
 - 20:21Z: poll: probe -6 macOS job (run 40123913661) on a runner since 19:14Z, ~65 min vs ~30 for the batch gate; possibly stuck, the supervisor's call. #5050 open, no label.
+- 20:42Z: bisect moved: probe -6 macOS green 20:28Z; -9 and -7 macOS red, so the culprit is PR 7 of the batch (#4886, Design), not #5050. #5050 is after it and waits for the next batch.
 - 16:09Z: #5050 (LG-5) got needs-rebase (conflict with #4951 disk tier in LiveThumbnails.swift). Merged origin/dev into -lg5, kept the cancel check first then the disk read/store; scripts/ci --changed running (fix round 1).
 - 15:38Z: poll: still no change; LG-grid PRs queued, #5114 awaits supervisor, beta question open ~2h.
 - 15:19Z: poll: unchanged; LG-grid PRs still queued, #5114 awaits supervisor, beta question unanswered.
