@@ -121,3 +121,4 @@ utc	stage	event	ref	note
 2026-10-24T19:12Z	3	check	#4904,#5116,#5125	19:12Z: #4904/#5116/#5125 needs-rebase, fixers active (5116/5125 resumed to push); #4905 #5149 clean; 0 findings
 2026-10-24T19:21Z	3	fix	#4904	#4904 re-integrated with dev (DesignWindow.swift: suiteLiveWindow + DesignPasteboardAdapter), CI: PASS, head 9630aad1, Head line moved; clean, lane to drop needs-rebase
 2026-10-24T19:23Z	3	fix	#5125	#5125 re-integrated (photo.list-commands.json golden, 105 cmds), CI: PASS, head cb26282c, Head moved; clean
+2026-10-24T19:24Z	3	fix	#5116	#5116 re-integrated (catalog + golden + tests + command-ids keep edit.copy and backups), CI: PASS, head db34798d, Head moved; clean. All 3 rebases done
