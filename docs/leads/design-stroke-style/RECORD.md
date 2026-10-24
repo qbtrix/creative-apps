@@ -66,3 +66,6 @@ Next: DK-u and DK-m slice PRs; critic panels; then DK-z
 
 - Opened #5011 (design/dk-u3-stroke-corners, 1110e183), stacked on #5002. Rounded boxes now fill with circular corners, which fixes #5009. It adds a dash-phase test (#5010) and the corner-radius mutation (#4928). Plan DesignModel.DesignStrokeOutline: 10/10 caught. The gate is running.
 - This was DK-u's last round. Anything left open after #5011 becomes a gap.
+
+## 2026-10-24T02:44Z fix: #4864 macOS gate failure (DK-u)
+The lane probe batch-20261023215139-9's macOS gate (run 40050012604) failed on DesignStrokeSnapshots.editor and RenderBudgetDesignStrokeTests. Cause: DesignStrokeSeed stroked only top-level nodes, and node-3 sits in the Desktop frame. Fix 2bd18bb86 uses page.nodes.update. Gate rerunning; then move the Head: line and merge the new base into #5002 and #5011.
