@@ -1,7 +1,8 @@
 // FlareFileFlowLiveTests.swift: file-flow FL-4 (packet flare/features/file-flow.md). The real Flare window,
 // hosted on the render budget harness, notes each open and each save in the suite's shared recents through
 // SuiteDocumentsBridge: opening Bounce.flare from Open Recent and saving it reach the bridge once each, in that
-// order, with the file's path; then Open In ▸ Halo on the saved animation sends one hand-off. Each test gets its
+// order, with the file's path, and the workspace's file flow lists what the bridge lists (Flare keeps no list of
+// its own, #5126); then Open In ▸ Halo on the saved animation sends one hand-off. Each test gets its
 // own temp folder and a bridge on fake services (`FlareWindow.bridgeOverride`). Nests in BodyCountSuites: hosted
 // windows run one at a time. macOS only.
 #if os(macOS)
@@ -74,6 +75,7 @@ extension BodyCountSuites {
             #expect(await recording.events == [.opened, .saved], "an event was noted twice")
             #expect(await recording.paths == [path, path])
             #expect(FlareWindow.bridge.recents(for: .flare).map(\.path) == [path])
+            #expect(FlareWindow.shownModel?.recentFiles.map(\.path) == [path], "the file flow didn't get the bridge's list")
 
             let ref = try #require(FlareWindow.shownModel?.suiteDocument, "the saved animation has no suite ref")
             try await FlareWindow.bridge.openIn(ref, app: .halo)
