@@ -9,7 +9,7 @@
 // Save writes, and a recovered project decodes them through the same
 // `ProjectFiles.decode` Open uses (damaged bytes throw its error), then reads
 // edited, with no path and no steps; `restoreRecovered` does that in the open
-// window's project, keeping its services and recent list (HA-7b). No history
+// window's project, keeping its services and file flow (HA-7b). No history
 // logic lives here.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -60,7 +60,7 @@ extension HaloProject {
     }
 
     /// Puts a recovery copy's project in place of this one, as `recovered`
-    /// builds it, on this project's services and keeping its recent list.
+    /// builds it, on this project's services and keeping its file flow.
     /// Damaged bytes throw Open's error and leave the project as it was.
     public mutating func restoreRecovered(from data: Data, name: String?) throws {
         let state = try services.files.decode(data)
