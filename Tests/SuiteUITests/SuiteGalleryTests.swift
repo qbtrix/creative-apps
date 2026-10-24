@@ -109,6 +109,21 @@ import Testing
         #expect(plain.galleryRequest == nil)
     }
 
+    /// An app's own sidebar (Halo, Design, Flare, Photo) hosts the gallery as
+    /// the sections inits do (#4443: Halo's timeline page opened Halo instead);
+    /// the editor-window page passes nil, so it never recurses.
+    @Test func theAppSidebarInitHostsTheGallery() {
+        let hosted = SuiteWindow(
+            galleryPage: SuiteGallery.request(from: ["-SuiteGallery", "timeline"]), title: "Halo",
+            sidebar: { Text(verbatim: "Sidebar") }, content: { Text(verbatim: "Content") },
+            inspector: { Text(verbatim: "Inspector") })
+        #expect(hosted.galleryRequest?.page == "timeline")
+        let inner = SuiteWindow(
+            galleryPage: nil, title: "Window", sidebar: { Text(verbatim: "Sidebar") },
+            content: { Text(verbatim: "Content") }, inspector: { Text(verbatim: "Inspector") })
+        #expect(inner.galleryRequest == nil)
+    }
+
     /// The editor-window page is a whole SuiteWindow; under the back row it
     /// must not raise the gallery's minimum height over the window's own, or
     /// SwiftUI grows a `-SuiteWindowSize` window past the visible frame (#2497).

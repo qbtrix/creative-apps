@@ -27,8 +27,9 @@
 // The `sidebar:` init takes an app's own list instead of the sections (the
 // sections inits put a SuiteSidebarList there); either way the slot is one
 // container carrying `suite.sidebar`, so the app's list keeps its own
-// identifier inside it. That init skips the -SuiteGallery check too, so a
-// gallery page built on it never recurses. `documentActions` (New, Open,
+// identifier inside it. It reads -SuiteGallery too (Halo hosts gallery
+// pages); its internal `galleryPage:` twin skips the check, so a gallery page
+// built on it never recurses. `documentActions` (New, Open,
 // Save) sit beside the title after the sidebar toggle, `actions` trail. A
 // non-nil `subtitle` is the title bar's subtitle (the save state; "" shows
 // none); nil leaves it to the caller (Halo sets its own). `inspectorWidth`
@@ -171,7 +172,21 @@ extension SuiteWindow {
         @ViewBuilder inspector: () -> Inspector
     ) {
         self.init(
-            gallery: nil, title: title, subtitle: subtitle, documentActions: documentActions, actions: actions,
+            galleryPage: SuiteGallery.request(from: ProcessInfo.processInfo.arguments), title: title,
+            subtitle: subtitle, documentActions: documentActions, actions: actions, inspectorWidth: inspectorWidth,
+            sidebar: sidebar, content: content, inspector: inspector)
+    }
+
+    /// The same window without the launch-argument check: it shows
+    /// `galleryPage` when given, else the app. The editor-window page passes nil.
+    init(
+        galleryPage: GalleryRequest?, title: String, subtitle: String? = nil, documentActions: [ToolbarAction] = [],
+        actions: [ToolbarAction] = [], inspectorWidth: CGFloat? = nil,
+        @ViewBuilder sidebar: () -> Sidebar, @ViewBuilder content: () -> Content,
+        @ViewBuilder inspector: () -> Inspector
+    ) {
+        self.init(
+            gallery: galleryPage, title: title, subtitle: subtitle, documentActions: documentActions, actions: actions,
             inspectorWidth: inspectorWidth, sidebar: sidebar(), content: content(), inspector: inspector())
     }
 
