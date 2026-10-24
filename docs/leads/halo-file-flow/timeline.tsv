@@ -87,3 +87,4 @@ utc	stage	event	ref	note
 2026-10-24T07:37Z	4	wave	-	HF-z (HF-7 live journey, step 4 now the Flare hand-off per rule 20; HF-8 docs, built) built on lead/halo-file-flow-HF-z, stacked on HF-u; gate running
 2026-10-24T07:53Z	5	ship	HF-z	#5092 opened (feature-done), head a1b66ac9, CI: PASS
 2026-10-24T08:17:32Z	poll	lane merging #4828-#4837 oldest first; our PRs queued, clean, no needs-fix/needs-rebase; no file-flow/export-pack findings
+2026-10-24T08:40:14Z	poll	dev unmoved since 08:05; lane bisecting lane/batch-20261024081307 (#4903-#4952); our base PRs eligible on marker, queued behind ~62 ready PRs; no needs-fix/needs-rebase; no new findings
