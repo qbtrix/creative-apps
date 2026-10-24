@@ -56,3 +56,4 @@ utc	stage	event	ref	note
 2026-10-24T02:42:51Z	3	check	#4878,#4923	all open+clean; probe batch-20261023215139-9 macOS gate 40050012604 red, so culprit sits between probes 6 and 9 (not ours); awaiting next lane sweep; dev 654fb363 green
 2026-10-24T03:05:07Z	3	check	#4878,#4923	all open+clean; lane bisect now on probe batch-20261023215139-7 (not ours); dev 654fb363 green
 2026-10-24T03:26:54Z	3	check	#4878,#4923	all open+clean; probe batch-20261023215139-7 Linux green, macOS gate running since 02:44Z (not ours); dev 654fb363 green
+2026-10-24T03:49:09Z	3	check	#4878,#4923	all open+clean; probe batch-20261023215139-7 green both gates, culprit is PR 8 or 9 of that batch (not ours); awaiting next lane sweep; dev 654fb363 green
