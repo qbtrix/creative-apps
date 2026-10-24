@@ -105,3 +105,4 @@ utc	stage	event	ref	note
 2026-10-24T13:43:54Z	poll	queued; batch 20261024110214 (12 others) still bisecting (-3/-6); no labels
 2026-10-24T14:04:53Z	poll	queued; batch 20261024110214 (12 others) still bisecting (-3/-6); no labels
 2026-10-24T14:26:02Z	poll	batch 20261024110214 resolved (dev e79e9afc); ours not in it; no batch in flight; no labels
+2026-10-24T14:47:46Z	poll	dev e79e9afc; no batch in flight; ours unmerged, unlabelled
