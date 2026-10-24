@@ -119,3 +119,4 @@ Relaunched 2026-10-24T06:40Z. PL-8 (#4578) and PL-9 (#4613) are merged on dev.
 
 - 07:2xZ: #4616 and #4617 carried the old stacked history; each was rebuilt on origin/dev with its one file (wave.json status built + feature_issue #3457; kernel-place.json description), force-pushed and retargeted to dev. Bodies carry Belt-Lead/Feature/Slice. No Fast-Check line: this container has no Swift toolchain (every lint passed, swift build could not run), so the lane's Linux-only run on the docs-only head is the proof.
 - Status channel is this file on lead/suiteui-placed-images; lead/placed-images is a stale mirror.
+- 08:10Z: no lane run on #4616/#4617 after ~45 min (scheduled sweeps cancelled); asked the supervisor on #3457 (issuecomment-6381806667).
