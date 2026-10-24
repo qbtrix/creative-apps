@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-24T08:15Z	3	heartbeat	#4911	relaunch act-1a16cdcb4a5-trd4; LS-1/LS-10 queued
 2026-10-24T08:16Z	3	stage-start	LS-4	wave 2: LS-4 stacked on LS-3 (lead/layer-styles-LS-u-4); LS-8/LS-9 wait the core LE-cpu bump
 2026-10-24T09:47Z	3	heartbeat	-	resumed after restart; wave 2 builders CB-12, CB-14, LS-4 finished
+2026-10-24T09:49Z	3	wave-built	lead/layer-styles-LS-u-4	LS-4 stacked at 59f2ead2; before its PR, restore journey XCTSkip (waits on LS-12) so it files no findings
