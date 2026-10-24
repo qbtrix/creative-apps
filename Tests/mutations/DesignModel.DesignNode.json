@@ -18,14 +18,14 @@
     "file": "Sources/DesignModel/DesignNode.swift",
     "find": "if stroke != nil { self.stroke = stroke }",
     "replace": "",
-    "tests": "DesignNodeStackTests"
+    "tests": "DesignStrokeBoxTests"
   },
   {
     "label": "aCopyKeepsItsOwnStroke: the boxed stroke always reads nil",
     "file": "Sources/DesignModel/DesignNode.swift",
     "find": "get { extras.value.stroke }",
     "replace": "get { nil }",
-    "tests": "DesignNodeStackTests"
+    "tests": "DesignStrokeBoxTests"
   },
   {
     "label": "the text style is not decoded",

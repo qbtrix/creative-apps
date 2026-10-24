@@ -60,19 +60,6 @@ import Testing
         #expect(copy.shape == nil && copy.gradient == nil)
         #expect(copy != original)
     }
-
-    @Test func aCopyKeepsItsOwnStroke() {
-        var original = Self.chain(0)
-        original.stroke = DesignStroke(color: .black, width: 3)
-        var copy = original
-        copy.stroke?.width = 5
-        #expect(original.stroke?.width == 3)
-        #expect(copy.stroke?.width == 5)
-        #expect(DesignNode(id: "dup", copying: original).stroke == original.stroke)
-        #expect(DesignNode(id: "plain", name: "R", kind: .rectangle, frame: rc(0, 0, 1, 1)).stroke == nil)
-        let given = DesignNode(id: "s", name: "R", kind: .rectangle, frame: rc(0, 0, 1, 1), stroke: original.stroke)
-        #expect(given.stroke?.width == 3)
-    }
 }
 
 /// The thread's answer, read back after the semaphore.
