@@ -1,6 +1,4 @@
-// PhotoAreaToolTests.swift (area-selection AR-11): the Ellipse, Lasso, Polygon Lasso and Magic Wand tools, and the
-// Marquee when it joins or feathers. Each release adds one shape to the area recipe as one undo step named for its
-// command, joined by the held keys' mode or else the options' mode, then feathered. Runs on Linux and macOS.
+// PhotoAreaToolTests.swift (area-selection AR-11): the area tools' drags (PhotoAreaTool.swift). Linux and macOS.
 import CoreRaster
 @testable import PhotoModel
 import SuiteKernel
@@ -27,6 +25,8 @@ import Testing
     @Test func theEllipseSelectsTheEllipseInItsDragAsOneUndoStep() throws {
         var workspace = try canvas(.ellipse)
         let steps = workspace.historySteps.count
+        drag(&workspace, [(10, 10), (10.5, 30)])
+        #expect(workspace.selection == nil && workspace.historySteps.count == steps, "a click selects nothing")
         drag(&workspace, [(10, 10), (30, 20), (50, 40)])
         #expect(workspace.areaRecipe.steps == [.shape(.ellipse(Rect(minX: 10, minY: 10, maxX: 50, maxY: 40)), .replace)])
         #expect(workspace.selectionCoverage(x: 30, y: 25) > 0.9)
@@ -35,13 +35,6 @@ import Testing
         #expect(workspace.undoActionName == "Undo Ellipse Select")
         workspace.undo()
         #expect(workspace.selection == nil && workspace.areaRecipe.isEmpty)
-    }
-
-    @Test func aClickWithTheEllipseSelectsNothing() throws {
-        var workspace = try canvas(.ellipse)
-        let steps = workspace.historySteps.count
-        drag(&workspace, [(10, 10), (10.5, 30)])
-        #expect(workspace.selection == nil && workspace.historySteps.count == steps)
     }
 
     @Test func heldKeysPickTheModeOverTheOptions() throws {

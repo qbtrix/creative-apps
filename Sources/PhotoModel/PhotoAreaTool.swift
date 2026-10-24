@@ -1,10 +1,7 @@
-// PhotoAreaTool.swift (area-selection AR-11): the Ellipse, Lasso, Polygon Lasso and Magic Wand tools, and the
-// Marquee when it joins or feathers. A release adds one shape to the area recipe through `setArea`: one undo step
-// named for the shape's command, joined by the held keys' mode (Shift adds, Option subtracts, both intersect) or
-// else the options' `mode`, then feathered by the options' `feather`. The ellipse fills its drag's rectangle, the
-// lasso its path, the wand seeds at the press; the polygon gains a corner at each press and release and closes on
-// a click within 8 points of its first. A Marquee drag that neither joins nor feathers stays live (PV-5's).
-// `areaDraft` is the outline a drag draws before its release. Linux-safe.
+// PhotoAreaTool.swift (area-selection AR-11): the Ellipse, Lasso, Polygon Lasso and Magic Wand tools, and a
+// Marquee that joins or feathers. A release adds one shape to the area recipe as one undo step named for its
+// command, joined by the held keys' mode or else the options', then feathered. A plain Marquee drag stays live
+// (PV-5). The polygon closes on a click within 8 points of its first corner. Linux-safe.
 #if canImport(Glibc)
 import Glibc
 #elseif canImport(Musl)
@@ -15,8 +12,7 @@ import Darwin
 import CoreRaster
 import SuiteKernel
 
-/// What the area tools are set to: the mode a shape joins by with no key held, the feather each shape gets
-/// (0...250 px), and the wand's tolerance (0...255 per channel), Contiguous and All Layers.
+/// The area tools' mode (with no key held), feather (0...250 px) and wand tolerance (0...255), Contiguous, All Layers.
 public struct PhotoAreaOptions: Hashable, Sendable {
     public var mode: AreaCombine
     public var feather: Double
@@ -31,13 +27,10 @@ public struct PhotoAreaOptions: Hashable, Sendable {
 
     /// These options with feather and tolerance in their ranges; a value that isn't finite becomes 0.
     func clamped() -> PhotoAreaOptions {
-        var copy = self
-        copy.feather = Self.clamp(feather, 250)
-        copy.tolerance = Self.clamp(tolerance, 255)
-        return copy
+        let clamp = { (value: Double, top: Double) in value.isFinite ? min(max(value, 0), top) : 0 }
+        return PhotoAreaOptions(mode: mode, feather: clamp(feather, 250), tolerance: clamp(tolerance, 255),
+                                contiguous: contiguous, allLayers: allLayers)
     }
-
-    static func clamp(_ value: Double, _ top: Double) -> Double { value.isFinite ? min(max(value, 0), top) : 0 }
 }
 
 /// The selection as it was when a Marquee drag began, put back when the drag joins instead.
@@ -50,14 +43,7 @@ struct PhotoAreaBefore: Sendable, Equatable {
 extension PhotoTool {
     /// The area command a release with this tool runs; nil for a tool that doesn't select.
     public var areaCommand: String? {
-        switch self {
-        case .marquee: "select.rect"
-        case .ellipse: "select.ellipse"
-        case .lasso: "select.lasso"
-        case .polygon: "select.polygon"
-        case .wand: "select.wand"
-        default: nil
-        }
+        self == .marquee ? "select.rect" : [.ellipse, .lasso, .polygon, .wand].contains(self) ? "select.\(rawValue)" : nil
     }
 }
 
@@ -65,8 +51,7 @@ extension PhotoWorkspace {
     /// Sets the area tools' options, feather and tolerance clamped to their ranges.
     public mutating func setAreaOptions(_ options: PhotoAreaOptions) { areaOptions = options.clamped() }
 
-    /// The outline the area tool draws before its release, in canvas pixels: the lasso's path, the ellipse's or a
-    /// joining Marquee's outline (closed), the polygon's corners so far; empty with none.
+    /// The outline an area tool shows before its release, in canvas pixels (the polygon's corners so far); or empty.
     public var areaDraft: [Point] {
         if tool == .polygon { return areaCorners.map(\.kernel) }
         guard let stroke else { return [] }
@@ -152,10 +137,8 @@ extension PhotoWorkspace {
         var recipe = areaRecipe
         recipe.apply(.shape(shape, areaMode(modifiers)))
         if areaOptions.feather > 0 { recipe.apply(.feather(areaOptions.feather)) }
-        do { try setArea(recipe.normalized(), command: command ?? "select.rect") } catch { statusMessage = Self.areaFailed }
+        do { try setArea(recipe.normalized(), command: command ?? "select.rect") } catch { statusMessage = "Couldn't make the selection." }
     }
-
-    static let areaFailed = "Couldn't make the selection."
 
     /// The area `points` enclose, by the shoelace formula, closed from the last point to the first.
     static func area(_ points: [Mask.Point]) -> Double {

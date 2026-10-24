@@ -84,8 +84,7 @@ struct PhotoStroke: Sendable, Equatable {
     var modifiers: DragModifiers = []
     /// Gradient: where the pointer is now; the gradient runs from `start` to here on release.
     var end: Mask.Point?
-    /// Lasso: the path so far; area tools: the zoom the drag saw last, and the
-    /// selection a Marquee drag began on (PhotoAreaTool.swift).
+    /// Area tools: the lasso's path, the last zoom, the Marquee's starting selection (PhotoAreaTool.swift).
     var points: [Mask.Point] = []
     var zoom: Double = 1
     var areaBefore: PhotoAreaBefore?
