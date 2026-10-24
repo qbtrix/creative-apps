@@ -219,6 +219,8 @@ check "a red journeys check doesn't block" "eligible|150|2|Fast-Check marker" "$
   '[{"__typename":"CheckRun","name":"macOS journeys","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"}]'
 check "a red scoped journeys check doesn't block" "eligible|150|2|Fast-Check marker" "$MARKED" "$BASE_FILES" \
   '[{"__typename":"CheckRun","name":"macOS journeys (photo)","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"}]'
+check "a journeys run waiting for a macOS slot doesn't block" "eligible|150|2|Fast-Check marker" "$MARKED" "$BASE_FILES" \
+  '[{"__typename":"CheckRun","name":"Journeys wait","workflowName":"Journeys","status":"IN_PROGRESS","conclusion":null}]'
 check "a green macOS check alone is no proof (a Linux check)" "linux-dispatch|feat/x" . "$BASE_FILES" \
   '[{"__typename":"CheckRun","name":"macOS","workflowName":"","status":"COMPLETED","conclusion":"SUCCESS"}]'
 check "a green Linux check alone is proof" "eligible|150|2|1 checks green" . "$BASE_FILES" \
@@ -1180,6 +1182,32 @@ expect "ratchet race: it forms again on today's dev, with a new Linux check" \
   "$(git -C "$sw/origin.git" rev-parse dev),2"
 batch_green; lane_sweep
 expect "ratchet race: the new batch lands on its check" "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 83,pr merge 84"
+# The Generated workflow (.github/workflows/generated.yml) pushes docs/c4/model.json,
+# docs/c4/parts, waves.md and jobs.md straight to dev every few hours. Those
+# commits touch no code, so they don't make a proof stale: a batch with a
+# ratchet-touching PR still lands (on 10-23 one dropped an 8-PR batch after 6 h).
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+pr_at 85 h85 "$DOCS"; real_pr 85
+pr_at 86 h86 "$DOCS"; real_pr 86 Tests/placeholder-menu-baseline.txt
+lane_sweep
+OLD_TIP=$(batch_tip)
+dev_moves docs/c4/model.json; dev_moves docs/blueprints/photo/jobs.md; dev_moves docs/blueprints/photo/features/waves.md
+dev_moves docs/c4/parts/creative-apps/photo-model/photo-model-sources.json
+verdict "$OLD_TIP" success
+lane_sweep
+expect "generated: dev moved only by generated files: a batch with a ratchet PR lands on its check" \
+  "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -),$(grep -c '^workflow run ci.yml .*-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls")" "pr merge 85,pr merge 86,1"
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+pr_at 85 h85 "$DOCS"; real_pr 85
+pr_at 86 h86 "$DOCS"; real_pr 86 Tests/placeholder-menu-baseline.txt
+lane_sweep
+OLD_TIP=$(batch_tip)
+dev_moves docs/c4/model.json; dev_moves Sources/HaloApp/HaloTransport.swift
+verdict "$OLD_TIP" success
+lane_sweep
+expect "generated: dev also moved by another path: the batch lands nothing and forms again on today's dev" \
+  "$(grep -c '^pr merge' "$sw/calls"),$(git -C "$sw/origin.git" rev-parse "$(batch_tip)~2"),$(grep -c '^workflow run ci.yml .*-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls")" \
+  "0,$(git -C "$sw/origin.git" rev-parse dev),2"
 
 # A red batch is bisected by prefix: #60 good, #61 bad, #62 good. The tip is
 # red; the chain after 1 PR is green; after 2 red: #61 is the culprit. #60
