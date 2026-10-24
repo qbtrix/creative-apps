@@ -111,3 +111,9 @@ Next: Lane: #4871 TS-a and #5047 TS-7 in the lane. After #4871 merges, merge dev
 - TS-2 and everything UI wait on font-picker FP-a, itself blocked on shell-text ST-a.
 - 2026-10-22T16:40Z: shell-text is built now, so font-picker FP-a (#3730, parked) can relaunch; TS-a, TS-u, TS-design, TS-halo wait on it.
 
+
+- 2026-10-24T21:54:37Z (act-1a16fe1fad3-lsp3): Belt-Slice-Done TS-m posted on #3779 (full CI 40129856269, ef37711de9, contains #3847). Open: TS-u #4958 (96663e95) and TS-7 #5047 (a05c0e2a) are queued in the lane. TS-8 is building, stacked on TS-7. TS-9 is building from dev.
+- Wire: brush-keys:BK-design (TS-design, #5047)
+- Wire: adopt-kernel-easing:AE-halo (TS-halo)
+- Wire: adjust-everywhere:AJ-halo (TS-halo)
+- Wire: anchor-parenting:AN-halo (TS-halo)
