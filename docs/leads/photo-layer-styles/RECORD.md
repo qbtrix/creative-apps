@@ -3,7 +3,7 @@
 Issue: #3793 · Packet: docs/blueprints/photo/features/layer-styles.md
 Run: act-1a16cd04539-4jc0 · Session: claude/feature-lead-playbook-9tb3qe · Started: 2026-10-24T07:30Z (takes over from act-1a16958d691-2ax3)
 Stage: 0 setup, blocked: suiteui layer-styles LS-a (the contract slice) has not merged, so rule 12 is not met yet
-Base: 830af22de (origin/dev)
+Base: 1bbaba6c1 (dev at 08:40Z)
 Next: re-check LS-1 #4911 (open, clean, fast-lane, queued) each tone wave; once `Sources/SuiteImaging/Style/` is on dev, start PY-1 on its stubs
 
 ## Slices
