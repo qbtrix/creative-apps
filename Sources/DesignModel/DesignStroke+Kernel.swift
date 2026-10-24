@@ -17,11 +17,10 @@ extension DesignNode {
 /// Design's one adapter between its 0...255 colour and the kernel's 0...1 `FillColor`; the fill and the stroke
 /// both go through it.
 extension DesignColor {
-    /// The kernel's colour as Design's, its opacity dropped; each part is `SampleRules.byte`, so out-of-range
+    /// The kernel's colour as Design's, its opacity dropped; each part is `HexText.byte`, so out-of-range
     /// parts clamp and NaN is 0.
     init(kernel color: FillColor) {
-        func byte(_ part: Double) -> UInt8 { UInt8(clamping: SampleRules.byte(part)) }
-        self.init(byte(color.r), byte(color.g), byte(color.b))
+        self.init(HexText.byte(color.r), HexText.byte(color.g), HexText.byte(color.b))
     }
 
     /// This opaque colour as the kernel's.

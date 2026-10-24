@@ -169,11 +169,8 @@ enum DesignSVG {
         return value < 1 ? " opacity=\"\(number(value))\"" : ""
     }
 
-    /// `#rrggbb`, lowercase.
-    static func hex(_ color: DesignColor) -> String {
-        func pair(_ byte: UInt8) -> String { (byte < 16 ? "0" : "") + String(byte, radix: 16) }
-        return "#" + pair(color.red) + pair(color.green) + pair(color.blue)
-    }
+    /// `#rrggbb`: HexText's format, lowercased for SVG.
+    static func hex(_ color: DesignColor) -> String { HexText.format(color.kernelColor).lowercased() }
 
     /// A coordinate: whole values without a fraction ("100", not "100.0"), others in Swift's
     /// shortest form; a value that is not finite writes 0.

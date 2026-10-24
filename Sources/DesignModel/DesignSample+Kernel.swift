@@ -71,8 +71,7 @@ extension DesignWorkspace {
         }
         walk(nodes, opacity: 1)
         guard a > 0 else { return nil }
-        func byte(_ channel: Double) -> UInt8 { UInt8(clamping: SampleRules.byte(channel)) }
-        return SampleRGBA(r: byte(r), g: byte(g), b: byte(b), a: byte(a))
+        return SampleRGBA(r: HexText.byte(r), g: HexText.byte(g), b: HexText.byte(b), a: HexText.byte(a))
     }
 }
 

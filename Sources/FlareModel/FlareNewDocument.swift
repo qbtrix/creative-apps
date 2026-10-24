@@ -65,20 +65,14 @@ public struct NewDocumentSpec: Sendable, Equatable {
                 backgroundHex: Self.hex(background))
     }
 
-    /// "#RRGGBB" for a color, channels clamped to 0...1.
-    public static func hex(_ color: FlareColor) -> String {
-        "#" + [color.r, color.g, color.b].map { value in
-            let byte = Int((min(max(value.isFinite ? value : 0, 0), 1) * 255).rounded())
-            return String(byte >> 4, radix: 16, uppercase: true) + String(byte & 15, radix: 16, uppercase: true)
-        }.joined()
-    }
+    /// "#RRGGBB" for a color (HexText's: channels clamp to 0...1, a NaN or an infinity reads 00).
+    public static func hex(_ color: FlareColor) -> String { HexText.format(color) }
 
-    /// The opaque color "#RRGGBB" (or "RRGGBB") names; nil when it names none.
+    /// The opaque color `hex` names in HexText's forms ("#RRGGBB", "RRGGBB", "#RGB", or "#RRGGBBFF");
+    /// nil when it names none or a translucent one.
     public static func color(hex: String) -> FlareColor? {
-        let digits = hex.hasPrefix("#") ? hex.dropFirst() : Substring(hex)
-        guard digits.count == 6, digits.allSatisfy(\.isHexDigit), let value = Int(digits, radix: 16) else { return nil }
-        let channel = { (shift: Int) in Double(value >> shift & 0xFF) / 255 }
-        return FlareColor(r: channel(16), g: channel(8), b: channel(0))
+        guard let color = HexText.parse(hex), HexText.byte(color.a) == 255 else { return nil }
+        return color
     }
 
     /// The canvas preset the scene service builds from.

@@ -19,5 +19,19 @@
     "find": "if !side.contains(h) {",
     "replace": "if !side.contains(w) {",
     "tests": "DocumentSetupTests"
+  },
+  {
+    "label": "zeroAlphaOpaque: a zero alpha byte no longer reads as transparent",
+    "file": "Sources/SuiteKernel/Document/DocumentSetup.swift",
+    "find": "HexText.byte(color.a) == 0 ?",
+    "replace": "false ?",
+    "tests": "DocumentBackgroundHexTests|DocumentSetupTests"
+  },
+  {
+    "label": "anyHexLength: the background takes the shorthand and other HexText forms",
+    "file": "Sources/SuiteKernel/Document/DocumentSetup.swift",
+    "find": "text.count == 7 || text.count == 9,",
+    "replace": "",
+    "tests": "DocumentBackgroundHexTests|DocumentSetupTests"
   }
 ]

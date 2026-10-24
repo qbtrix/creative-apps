@@ -27,11 +27,7 @@ extension DesignWorkspace {
     public func loupe(at point: DesignPoint?, modifiers: DesignModifiers) -> DesignLoupe? {
         guard tool == .eyedropper, isOpen, let point, point.isFinite else { return nil }
         let read = sampledColor(at: Point(x: point.x, y: point.y), size: sampleSize)
-        let color = read.map { color in
-            DesignColor(
-                UInt8(clamping: SampleRules.byte(color.r)), UInt8(clamping: SampleRules.byte(color.g)),
-                UInt8(clamping: SampleRules.byte(color.b)))
-        }
+        let color = read.map(DesignColor.init(kernel:))
         return DesignLoupe(point: point, color: color, toStroke: sampleToStroke != modifiers.contains(.option))
     }
 
