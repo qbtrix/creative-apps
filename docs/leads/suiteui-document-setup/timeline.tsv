@@ -99,3 +99,4 @@ utc	stage	event	ref	note
 2026-10-24T11:05:10Z	3	poll	-	supervisor 10:52 on #3758: old batch 20261024081307 doomed (built on red dev), dropped; new batch 20261024110214 (12 PRs, none ours) running; dev 6ad8cadb; all 8 ours open, queued for next batch
 2026-10-24T11:21:54Z	3	poll	-	batch 20261024110214 (none ours) still running Linux+mac; all 8 ours open+clean, queued; dev 6ad8cadb; no dev-red; blocked-poll 1/3
 2026-10-24T11:38:49Z	3	poll	-	batch 20261024110214 (none ours): Linux green 11:22, macOS gate running; all 8 ours open+clean, queued; dev 6ad8cadb; no dev-red
+2026-10-24T11:55:57Z	3	poll	-	unchanged since 11:38: batch 20261024110214 (none ours) macOS gate still running (started 11:02); all 8 ours open+clean, queued; dev 6ad8cadb; blocked-poll 2/3
