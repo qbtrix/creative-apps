@@ -2,9 +2,9 @@
 
 Issue: #3468 · Packet: docs/blueprints/photo/features/tone-controls.md
 Run: act-1a16cd04539-4jc0 · Session: claude/feature-lead-playbook-9tb3qe · Started: 2026-10-24T07:30Z (takes over from act-1a16958d691-2ax3)
-Stage: build W4 (PT-3, PT-4 building on the TC-5/TC-6 stubs; PT-2 #5007, PT-6 #5008 in the lane)
+Stage: build W4 (PT-3 #5105 in the lane; PT-4 building on the TC-6 stubs; PT-2 #5007, PT-6 #5008 in the lane)
 Base: 830af22de (dev now 1bbaba6c1)
-Next: PT-3 and PT-4 PRs from build-wave (branches lead/photo-tone-PT-3, lead/photo-tone-PT-4); PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #4880 / TC-6 #4953 merge
+Next: PT-4 PR from build-wave (lead/photo-tone-PT-4); PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #4880 / TC-6 #4953 merge
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -19,7 +19,7 @@ Next: PT-3 and PT-4 PRs from build-wave (branches lead/photo-tone-PT-3, lead/pho
 |---|---|---|---|---|---|---|---|
 | PT-1 | PT-a | 2 | tone in AdjustmentSettings; adapter stubs; PhotoToneTests disabled | Sources/PhotoModel/AdjustmentSettings.swift, PhotoTone+Kernel.swift, Tests/PhotoModelTests/PhotoToneTests.swift | PhotoToneTests | #4845 | merged |
 | PT-2 | PT-a | 3 | Adjust panel ToneRows | Sources/PhotoApp/AdjustmentsInspector.swift | PhotoToneSnapshots.panel | #5007 | in lane |
-| PT-3 | PT-m | 4 | live route and export | PhotoAdjust+Imaging.swift, PhotoRender.swift | PhotoToneTests | – | building |
+| PT-3 | PT-m | 4 | live route and export | PhotoAdjust+Imaging.swift, PhotoRender.swift | PhotoToneTests | #5105 | in lane |
 | PT-4 | PT-m | 4 | adapter bodies, catalog, jobs | PhotoTone+Kernel.swift, PhotoCommandCatalog.swift, RealJobs | PhotoToneCommandTests | – | building |
 | PT-5 | PT-u | 4 | snapshots, budget | Tests/AppSnapshotTests/PhotoToneSnapshots.swift, RenderBudgetPhotoToneTests.swift | snapshots | – | waiting |
 | PT-6 | PT-u | 4 | journey skipped | UITests/PhotoJourneyTests+Tone.swift | compiles | #5008 | in lane (stacked on #5007) |
@@ -64,3 +64,5 @@ Next: PT-3 and PT-4 PRs from build-wave (branches lead/photo-tone-PT-3, lead/pho
 - [x] Wire: tone-controls:TC-2 (#4862 merged, dev 491ec5461): PT-2 #5007 builds on ToneRows(settings:help:hidden:onIntent:).
 - [ ] Wire: tone-controls:TC-5 (#4880 open) turns on PT-3's disabled cases; TC-6 (#4953 open) PT-4's; TC-3 (#5006 open) starts PT-5.
 - [x] Supervisor (FYI, not a stall): Fast Lane has merged nothing since dev 654fb3632 (~22:55Z) because it is bisecting batch lane/batch-20261023215139: probe -9 macOS gate failed 01:29Z, probe -7 macOS gate passed (started 02:43Z); probe -8 Linux passed; at 05:02Z the lane started a new batch, lane/batch-20261024050226, with 12 older PRs (#4839-#4875). Its macOS gate went red; since 05:45Z it bisects (probe -6). #5007, #5008 and the TC waits are not in it and are queued for a later batch. #5007, #5008 and the TC waits (#5006, #4880, #4953) sit clean with fast-lane for the next batch. Resolved 2026-10-24T06:42Z: dev moved to e5dcf9394 (#4840 landed from batch-20261024050226, whose bisection continues at probes -1/-3); #5007, #5008 and the TC waits are still open and queued.
+- PT-3 #5105 (head d86457b20, 5 files, +227/−19): 4 cases on, 2 disabled "waits on TC-5 #4880" with a Wire: line. Mutate 3/4 PhotoAdjust+Imaging: `.sharpenOnCanvas` escapes until TC-5, since only the disabled liveMatchesExportWithSharpenOn can catch it; 2/2 PhotoRender. Its check found an attribution footer after the Head: line, and the lead took it out of the body.
+- #5027 (CI finding, testTier1Tone: dragging Black made no Levels step) is the Levels journey, outside tone-controls' files. It doesn't count toward this feature's findings.
