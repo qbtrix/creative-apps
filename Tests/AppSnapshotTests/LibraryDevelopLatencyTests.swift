@@ -19,7 +19,7 @@ import Testing
 
 @testable import LibraryModel
 
-@Suite(.serialized, .disabled("waits on its Tests/perf-suites.txt line")) struct LibraryDevelopLatencyTests {
+@Suite(.serialized) struct LibraryDevelopLatencyTests {
     static let config = _isDebugAssertConfiguration() ? "debug" : "release"
     static let events = config == "release" ? 30 : 3
     static let width = 7680, height = 4320
