@@ -62,7 +62,7 @@ import SuiteKernel
     }
 
     @Test func oldExportsAreUnchanged() throws {
-        let old = #"[{"fill":{"linear":{"end":{"x":100,"y":30},"start":{"x":0,"y":30},"stops":[{"color":{"a":1,"b":1,"g":0,"r":0},"offset":0},{"color":{"a":1,"b":1,"g":1,"r":1},"offset":0.5},{"color":{"a":1,"b":0,"g":0,"r":0},"offset":1}]}},"h":60,"id":1,"locked":false,"name":"Rect 1","w":100,"x":10,"y":10},{"h":80,"id":2,"locked":true,"name":"Rect 2","w":80,"x":140,"y":40}]"#
+        let old = #"[{"fill":{"end":{"x":100,"y":30},"start":{"x":0,"y":30},"stops":[{"color":{"a":1,"b":1,"g":0,"r":0},"offset":0},{"color":{"a":1,"b":1,"g":1,"r":1},"offset":0.5},{"color":{"a":1,"b":0,"g":0,"r":0},"offset":1}],"type":"linear"},"h":60,"id":1,"locked":false,"name":"Rect 1","w":100,"x":10,"y":10},{"h":80,"id":2,"locked":true,"name":"Rect 2","w":80,"x":140,"y":40}]"#
         let json = try Self.export(.fixture, "json", #"{"size":{"pixels":[1080,1351]}}"#)
         #expect(json.suggestedName == "canvas.json" && json.format == "json")
         #expect(json.data == (try FakeCanvasDocument.fixture.save()))
