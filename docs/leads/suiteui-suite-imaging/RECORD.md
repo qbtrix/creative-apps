@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: 23:21Z poll: batch 20261024205137 bisect: probe -1 Linux green, macOS still running; #4886 11th of 12, not reached. All 7 PRs open, no needs-fix/needs-rebase; #5163/#5178 dirty, waiting for needs-rebase. Full CI on dev afef017c2 running (none of ours). #3723 open; supervisor q 6383016723 unanswered. Poll again ~23:40Z.
+Next: 23:43Z poll: batch 20261024205137 probe -1 macOS gate (40139723227) still in progress after 1h (likely waiting for a macOS runner; dev full CI 40137153379 also running). #4886 not reached. All 7 PRs open, no needs-fix/needs-rebase; #5163/#5178 dirty. #3723 open; supervisor q 6383016723 unanswered. Poll again ~00:02Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
 
