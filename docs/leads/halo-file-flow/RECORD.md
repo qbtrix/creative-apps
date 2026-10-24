@@ -77,3 +77,4 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - The container had no swift; scripts/cloud-setup.sh installed 6.3.3 and the gate ran.
 - 21:56Z heartbeat: no merges yet; lane bisecting batch 20261024205137 (macOS gates -3, -6 running), Linux check 40135990775 on HX-m. All six PRs clean, fast-lane, no needs-fix. Newest dev green CI 40129856269 (ef37711d) holds none of our open PRs. New halo finding #5225 is a play-journey CI finding, not this feature.
 - 22:18Z check-in: #4894 HF-m, #4936 HF-4, #5092 HF-z open, clean, fast-lane, no needs-fix; waiting for a batch. No green dev ci.yml run holds a slice's last PR yet (40137153379 in progress at afef017c holds none). No new findings.
+- 22:41Z check-in: all six PRs still open with fast-lane and no needs-fix (REST pulls returned 503, so states came from search). No green dev ci.yml run holds a slice's last PR (40137153379 still running at afef017c). No new findings.
