@@ -93,3 +93,4 @@ utc	stage	event	ref	note
 2026-10-24T08:14Z	check	cli-bundle	08:14Z #4999 ready, not in batch 20261024081307	https://github.com/qbtrix/creative-apps/pull/4999
 2026-10-24T08:36Z	check	cli-bundle	08:36Z #4999 ready; waiting for next batch	https://github.com/qbtrix/creative-apps/pull/4999
 2026-10-24T08:58Z	check	cli-bundle	08:57Z: #4999 ready, waiting for next batch	https://github.com/qbtrix/creative-apps/issues/3773
+2026-10-24T09:20Z	check	cli-bundle	09:19Z: lane macOS gates blocked by dev-red #5113	https://github.com/qbtrix/creative-apps/issues/5113
