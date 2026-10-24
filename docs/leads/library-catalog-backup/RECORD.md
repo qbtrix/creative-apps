@@ -136,3 +136,4 @@ Next: (2026-10-23T17:29:30Z) #4878 (BK-m) and #4923 (BK-z, stacked, feature-done
 - 2026-10-24T20:13:51Z: poll: #4923 #4924 #4937 #4938 #4949 all in fast-lane, none ejected; waiting on lane batch and a green scoped library run
 - 2026-10-24T20:44:27Z: poll: #4923 #4924 #4937 #4938 #4949 all clean and ready; lane is bisecting batch-20261024183708 with 115 ready PRs queued behind it
 - 2026-10-24T21:02:21Z: slice-done: #4878 BK-m done in scoped library run 40129102226
+- 2026-10-24T21:14:38Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
