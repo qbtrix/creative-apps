@@ -7,8 +7,8 @@
 // (`suite.transform.x` ... `.rotation`), and Edit > Free Transform puts the
 // box (`photo.canvas.transform-box`) and its turn knob (`suite.handles.turn`)
 // on the layer's bounds. A shift-drag out from the bottom-right handle scales
-// it in proportion; 15 typed in Rotation turns the box (the knob reads
-// "15 degrees"); Return on the canvas commits one "Free Transform" step, the
+// it in proportion; 15 typed in Rotation turns the box (the knob, a slider,
+// reads 15; #5147); Return on the canvas commits one "Free Transform" step, the
 // box goes and the layer's line changes. Command-Z puts the layer's line back
 // and the draft up again (the commit's undo restores the draft); Escape drops
 // it. Edit > Transform > Flip Horizontal is one "Flip Horizontal" step that
@@ -58,7 +58,7 @@ final class PhotoTransformJourneyTests: XCTestCase {
 
         // 3. 15 in Rotation: the knob reads 15 degrees.
         typeRotation("15", photo)
-        let turned = NSPredicate(format: "value CONTAINS '15 degrees'")
+        let turned = NSPredicate(format: "value == 15")
         let knob = photo.element("suite.handles.turn")
         wait(for: [XCTNSPredicateExpectation(predicate: turned, object: knob)], timeout: 5)
         photo.shot("transform-3-turned")

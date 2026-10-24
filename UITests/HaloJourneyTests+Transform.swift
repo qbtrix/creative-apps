@@ -2,7 +2,8 @@
 // the viewer (transform HT-2, docs/blueprints/halo/features/transform.md,
 // Journey steps 1-4). On `-HaloFixture keyed` (Bounce, 1920 by 1080, 24 fps)
 // it selects Ball: its box shows SuiteUI's eight handles and the knob
-// (`suite.handles.*`, `suite.handles.turn`). Then a Shift-drag out of the
+// (`suite.handles.*`, `suite.handles.turn`, a slider whose value is the turn
+// in degrees, #5147). Then a Shift-drag out of the
 // bottom-right corner scales Ball in proportion (Scale X and Y read the same
 // in the inspector), and at 1 s, with Rotation animated, a Shift-drag of the
 // knob turns it in 15° steps and keys 1 s; Undo takes the turn back in one
@@ -40,7 +41,7 @@ extension HaloJourneyTests {
         for _ in 0..<24 { halo.press(.rightArrow) }
         shiftDrag(halo.element("suite.handles.turn"), by: CGVector(dx: 60, dy: 30))
         let knob = halo.element("suite.handles.turn")
-        let turn = (knob.value as? String).flatMap { Double($0.prefix { $0.isNumber || $0 == "-" }) } ?? .nan
+        let turn = (knob.value as? NSNumber)?.doubleValue ?? .nan
         XCTAssertEqual(turn.truncatingRemainder(dividingBy: 15), 0, accuracy: 0.01, "the turn isn't a 15° step: \(turn)")
         let key = halo.app.descendants(matching: .any).matching(
             NSPredicate(format: "label == %@", "Animate Rotation")).firstMatch
@@ -49,7 +50,7 @@ extension HaloJourneyTests {
 
         // 4. Undo: the turn goes in one step.
         halo.press(character: "z", .command)
-        XCTAssertEqual(knob.value as? String, "0 degrees", "Undo didn't take the turn back in one step")
+        XCTAssertEqual((knob.value as? NSNumber)?.doubleValue, 0, "Undo didn't take the turn back in one step")
         halo.shot("transform-undone")
     }
 
