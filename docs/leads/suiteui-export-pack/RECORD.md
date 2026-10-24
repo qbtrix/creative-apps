@@ -2,7 +2,7 @@
 
 Issue: #3477 · Packet: docs/blueprints/suiteui/features/export-pack.md
 Run: act-1a16c618fe7-h4fd (line lead, line:suiteui; unparked by the supervisor 2026-10-24) · earlier runs act-1a16469734c-d0s8, act-1a15821c836-93pf
-Stage: 3 wave 1 (this run)
+Stage: 3 wave 1 building (XP-3, XP-7)
 Base: origin/dev 654fb3632
 Next: Wave 1 builds XP-3 (stacked on #4960's ExportPick.metadata stub; Wire: library export-pack:LX-a) and XP-7 (SM-w built). XP-4 stacks on XP-3.
 

@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-20T22:46Z	poll	poll: SM-a not on dev; XP-2 blocked
 2026-10-22T16:24Z	4	resume	#4523	new run act-1a16469734c-d0s8; wave 1 = XP-2
 2026-10-24T05:34:08Z	resume	run act-1a16c618fe7-h4fd: XP-2 merged #4740; wave 1 = XP-3 (on #4960), XP-7
+2026-10-24T05:37:03Z	wave	wave 1 launched: XP-3 (stacked on feat/export-pack-lx2), XP-7
