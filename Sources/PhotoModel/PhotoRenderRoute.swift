@@ -7,11 +7,12 @@
 // then display bytes: a pixel layer's tiles under the region are `composite`
 // with its blend mode and opacity (only each tile's painted part goes up, and
 // an opaque normal tile that covers the region replaces it, PhotoLayerComposite's
-// two shortcuts); exposure, levels and curves are `adjusted` with the same
-// sRGB encoding, blur is `gaussianBlur`, and the bytes come from `display`.
-// An adjustment layer and Hue/Saturation have no RenderOp, so they read the
-// picture back, run on CoreRaster and upload it again; a section at its
-// identity is skipped, as CoreRaster returns the buffer itself there. The CPU
+// two shortcuts); the adjustments are ImagingProgram's steps, the suite's
+// shared list (`imagingSteps`), each `adjusted` in its order, blur is
+// `gaussianBlur`, and the bytes come from `display`. An adjustment layer and
+// Hue/Saturation (Photo's own matrix) read the picture back, run on CoreRaster
+// and upload it again; a section at its identity has no step, as CoreRaster
+// returns the buffer itself there. The CPU
 // route renders each damaged tile on its own task; the GPU route renders each
 // row of damaged tiles as one region, the rows on their own tasks. With
 // resident tiles (`residentTiles`, the GPU route's ResidentSurfaces) a region
@@ -211,33 +212,26 @@ extension PhotoWorkspace {
 }
 
 extension AdjustmentSettings {
-    /// The enabled adjustments applied to `surface` through `dispatcher`, in
-    /// `applied(to:)`'s order. Takes `surface`: it is released on the way.
+    /// The enabled adjustments applied to `surface` through `dispatcher`:
+    /// ImagingProgram's steps (`imagingSteps`, the list `applied(to:)` runs),
+    /// then the blur. Takes `surface`: it is released on the way.
     func applied(to surface: RenderSurface, on dispatcher: RenderDispatcher) throws -> RenderSurface {
         var result = surface
         func step(_ next: () throws -> RenderSurface) throws {
             result = PhotoWorkspace.replace(result, with: try next(), on: dispatcher)
         }
         do {
-            // Each step is skipped at its identity, where CoreRaster returns the buffer itself, so the
-            // result is the same bits and an untouched section costs the GPU no round trip.
-            if isEnabled(.exposure), exposure != 0 { try step { try dispatcher.adjusted(result, .exposure(stops: exposure)) } }
-            if isEnabled(.levels), [blackPoint, whitePoint, gamma] != [0, 1, 1] {
-                try step {
-                    try dispatcher.adjusted(
-                        result,
-                        .levels(inBlack: blackPoint, inWhite: whitePoint, gamma: gamma, outBlack: 0, outWhite: 1,
-                                encoding: .sRGB))
-                }
-            }
-            if isEnabled(.curves), !curvePoints.allSatisfy({ $0.x == $0.y }) {
-                try step { try dispatcher.adjusted(result, .curves(points: curvePoints, encoding: .sRGB)) }
-            }
-            if isEnabled(.hueSaturation), hue != 0 || saturation != 0 || lightness != 0 {
-                // No ToneAdjustment for it: read back, CoreRaster, upload again.
-                try step {
-                    try dispatcher.surface(
-                        dispatcher.read(result).hueSaturation(hue: hue, saturation: saturation, lightness: lightness))
+            // ImagingProgram leaves out each step at its identity, where CoreRaster returns the buffer
+            // itself, so the result is the same bits and an untouched section costs the GPU no round trip.
+            for adjustment in imagingSteps {
+                if case .hueSaturation = adjustment {
+                    // Photo's own matrix, as runImaging runs it: read back, CoreRaster, upload again.
+                    try step {
+                        try dispatcher.surface(
+                            dispatcher.read(result).hueSaturation(hue: hue, saturation: saturation, lightness: lightness))
+                    }
+                } else {
+                    try step { try dispatcher.adjusted(result, adjustment) }
                 }
             }
             if blurMargin > 0 { try step { try dispatcher.gaussianBlur(result, sigma: blurSigma) } }

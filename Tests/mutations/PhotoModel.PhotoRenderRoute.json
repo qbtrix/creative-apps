@@ -1,0 +1,4 @@
+[
+{"label": "everyStepMapped: the route leaves the curve out of ImagingProgram's steps", "file": "Sources/PhotoModel/PhotoRenderRoute.swift", "find": "            for adjustment in imagingSteps {", "replace": "            for adjustment in imagingSteps([.exposure, .levels, .hueSaturation]) {", "tests": "PhotoRenderRouteImagingTests"},
+{"label": "sharedOrder: the route runs the curve before levels", "file": "Sources/PhotoModel/PhotoRenderRoute.swift", "find": "            for adjustment in imagingSteps {", "replace": "            for adjustment in imagingSteps([.exposure, .curves]) + imagingSteps([.levels, .hueSaturation]) {", "tests": "PhotoRenderRouteImagingTests"}
+]
