@@ -97,3 +97,4 @@ utc	stage	event	ref	note
 2026-10-24T06:42Z	W3	lane	dev	dev moved 654fb3632 -> e5dcf9394; supervisor note ticked; #5007, #5008 queued
 2026-10-24T07:09Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, queued; dev 830af22de (lane landing again); TC-3/5/6 still open
 2026-10-24T07:35Z	W4	start	PT-3, PT-4	build-wave on dev 830af22de; TC-5/TC-6 stubs (rule 12); #5007, #5008 clean in lane
+2026-10-24T07:55Z	W4	check-in	PT-3, PT-4	builders running; #5007, #5008 queued; TC-3/5/6 open; dev f58e1190; no needs-fix
