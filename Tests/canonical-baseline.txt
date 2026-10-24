@@ -47,7 +47,6 @@ Sources/HaloApp/HaloEasingInspector.swift
 Sources/HaloApp/HaloHistoryArea.swift
 Sources/HaloApp/HaloLaunch.swift
 Sources/HaloApp/HaloPNGWriter.swift
-Sources/HaloApp/HaloPlaybackDriver.swift
 Sources/HaloApp/HaloTextRasterizer.swift
 Sources/HaloApp/HaloWindow+Easing.swift
 Sources/HaloApp/HaloWindow+Layers.swift

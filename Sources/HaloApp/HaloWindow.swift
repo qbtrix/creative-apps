@@ -17,7 +17,7 @@
 // `-HaloControlsProbe`, publishes the `halo.controls` JSON
 // (HaloControls.swift). A viewer drag or inspector scrub shows through its
 // `live` HaloLiveEdit and reaches `perform` once, at its end; RefreshLinkHandoff
-// hands `live` the `haloRefreshLink` its scrubs pace on, so this body never
+// hands `live` the `refreshLink` its scrubs pace on, so this body never
 // reads that closure (SwiftUI can't compare closures, so every environment
 // change, such as a sheet opening, would re-run the window). The toolbar's New Composition… is `halo.composition.new`. Views only read HaloProject and call its methods; all
 // state lives in HaloModel (scripts/ci checks this).
@@ -145,12 +145,12 @@ struct HaloWindow: View {
     }
 }
 
-/// Hands the window's `haloRefreshLink` to `live` once it appears. Only this
+/// Hands the window's `refreshLink` to `live` once it appears. Only this
 /// modifier's body reads the closure, so an environment change re-runs it, not
 /// HaloWindow's body (RenderBudgetHaloRenderTests' open Render… budget).
 private struct RefreshLinkHandoff: ViewModifier {
     let live: HaloLiveEdit
-    @Environment(\.haloRefreshLink) private var makeLink
+    @Environment(\.refreshLink) private var makeLink
 
     func body(content: Content) -> some View {
         content.onAppear { live.makeLink = makeLink }

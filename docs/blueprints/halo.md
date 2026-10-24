@@ -297,7 +297,7 @@ later feature edits that file:
 | `document: HaloDocumentState` | everything | `HaloProject.swift`, through `edit` and `restore` |
 | `services: HaloServices` | every extension | `init(services:)` |
 | `history: HaloHistory` | Edit menu | `HaloHistory.swift`, and `edit` in `HaloProject.swift` |
-| `playback: HaloPlaybackState` (playing, loops, start frame, start time) | transport, driver | `HaloPlayback.swift` |
+| `playback: HaloPlaybackState` (playing, loops, start frame, start time) | transport, driver | `HaloPlayback+Kernel.swift` |
 | `viewerDrag: HaloViewerDragState?` (layer, start point, delta) | viewer | `HaloViewerDrag.swift` |
 | `selectedKeys: Set<HaloKeyRef>` | timeline, inspector, Animation menu | `HaloKeySelection.swift` |
 | `file: HaloFileState` (name, path, unsaved, opening, error, recent) | title, File menu, alerts | `HaloFiles.swift` |
@@ -391,9 +391,9 @@ its span) does not hide children. A parent cycle can't be made
    rendered file is made from, and HF-1 holds the viewer to it.
 3. A viewer drag changes only `viewerDrag`; the viewer redraws
    `drawList.offsetting(layer, by: delta)`. Mouse-up commits once.
-4. Playback is driven by a display link in `HaloPlaybackDriver.swift` that
-   calls `model.tick(now:)`; the frame math is `PlaybackClock` (FlareCore's
-   `Timeline.playbackFrame` in the live type), tested on Linux.
+4. Playback is driven by SuiteUI's `PlaybackDriver` display link, which
+   calls `model.tick(now:)`; the frame math is `PlaybackClock`, whose live
+   type adapts SuiteKernel's `PlaybackTiming` (#5077), tested on Linux.
 
 **Commands and availability.** `HaloCommand` (Model, W0) lists every
 command in v1, each in one of nine areas (section 6's command table):
@@ -665,7 +665,7 @@ one file per contract under `Live/`).
 | Ease keys | `KeyEasing` | `FakeKeyEasing` | `Live/LiveKeyEasing.swift` (easing) | H-J7, H-J12 |
 | Undo and redo | `ProjectHistory` | `FakeProjectHistory` | `Live/LiveProjectHistory.swift` (history-files) | H-J8, all Edit-menu asserts |
 | Save and open | `ProjectFiles` | `FakeProjectFiles` (envelope, version and size checked; contents not validated) | `Live/LiveProjectFiles.swift` (history-files) | H-J10, H-J11 |
-| Play | `PlaybackClock` | `FakePlaybackClock` | `Live/LivePlaybackClock.swift` (viewer-playback) | H-J4 |
+| Play | `PlaybackClock` | `FakePlaybackClock` | `Live/HaloPlaybackClock+Kernel.swift` (viewer-playback) | H-J4 |
 | Render a frame to pixels | `FrameRendering` (+ `TextRasterizing`) | `FakeFrameRendering`, `FakeTextRasterizer` | `Live/LiveFrameRendering.swift` (viewer-playback); `HaloTextRasterizer.swift` in HaloApp (text-layers) | H-J20, H-J22 |
 | Render a composition to files | `CompositionRendering` (+ `RenderSink`) | `FakeCompositionRendering` | `Live/LiveCompositionRendering.swift` (render-out); sinks `HaloPNGWriter.swift`, `HaloMovieWriter.swift` in HaloApp | H-J21 |
 
@@ -683,7 +683,7 @@ goes through `edit`; every read is a computed property.
 | `HaloProject.swift` (W0) | `edit(_:control:coalesceKey:_:)` (internal), `endCoalescing()`, `dismissRefusal()`, `var refusal: HaloRefusal?`, `takeLayerID()` (internal) |
 | `HaloViewerState.swift` (W0) | `var viewerDrawList: HaloDrawList?` (drawing at the playhead plus the drag offset), `var viewerSummary: String` |
 | `HaloCommand.swift` (W0) | `enum HaloCommand`, `func unavailableHelp(for: HaloCommand) -> String?`, `func title(for: HaloCommand) -> String` (Undo and Redo carry the step name) |
-| `HaloPlayback.swift` (viewer-playback) | `play(at now: Double)`, `pause()`, `togglePlay(at:)`, `setLoops(_:)`, `tick(now:)`, `stepFrame(by:)`, `goToStart()`, `goToEnd()` |
+| `HaloPlayback+Kernel.swift` (viewer-playback) | `play(at now: Double)`, `pause()`, `togglePlay(at:)`, `setLoops(_:)`, `tick(now:)`, `stepFrame(by:)`, `goToStart()`, `goToEnd()` |
 | `HaloViewerDrag.swift` (layer-keys) | `beginViewerDrag(at: HaloPoint)`, `moveViewerDrag(to: HaloPoint)`, `endViewerDrag()`, `cancelViewerDrag()` |
 | `HaloKeying.swift` (layer-keys) | `var propertyRows: [HaloPropertyRow]`, `setProperty(_:to:)` (coalesced per row), `setProperty(_:text:)` (a typed value, parsed by `HaloProperty.parse`; not a number sets the refusal), `endPropertyScrub()` (calls `endCoalescing()`), `toggleAnimation(_:)`, `toggleKey(_:)`, `setParent(_:)`, `var parentChoices: [(id: String, name: String)]` |
 | `HaloLayerEdits.swift` (layer-panel) | `deleteSelectedLayer()`, `renameLayer(_:to:)`, `moveLayer(_:to:)`, `duplicateSelectedLayer()` |
