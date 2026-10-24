@@ -67,3 +67,4 @@ utc	stage	event	ref	note
 2026-10-24T01:22Z	check	heartbeat	-	01:23Z check: #4893 AN-u open fast-lane; lane bisect probe -6 macOS gate still running (not ours); AN-6 stacked
 2026-10-24T01:45Z	check	heartbeat	-	01:46Z check: #4893 AN-u open fast-lane; lane bisect probe -6 green, probe -9 running (not ours); AN-6 stacked
 2026-10-24T02:06Z	check	heartbeat	-	02:07Z check: #4893 AN-u open fast-lane; lane bisect probe -9 macOS running (not ours); AN-6 stacked
+2026-10-24T02:29Z	check	heartbeat	-	02:29Z check: #4893 AN-u open fast-lane; lane bisect probe -9 macOS still running (not ours); AN-6 stacked
