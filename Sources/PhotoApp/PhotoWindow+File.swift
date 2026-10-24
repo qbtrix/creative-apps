@@ -164,6 +164,9 @@ extension PhotoWindow {
     /// none); empty only if the system refuses the extension.
     static let documentTypes: [UTType] = UTType(filenameExtension: "ora", conformingTo: .data).map { [$0] } ?? []
 
+    /// What Open offers: the document, then the registry's Photo image types that ImageIOCodec decodes.
+    static let openTypes: [UTType] = documentTypes + ImageIOCodec.decodable(SuiteFilePanels.openTypes(for: .photo))
+
     func performFile(_ intent: FileIntent) {
         switch intent {
         case .saveDocument:
@@ -213,10 +216,7 @@ extension PhotoWindow {
     }
 
     func chooseFile() {
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = Self.documentTypes + [.png, .jpeg, .heic]
-        panel.allowsMultipleSelection = false
-        guard panel.runModal() == .OK, let url = panel.url else { return }
+        guard let url = SuiteFilePanels.chooseFile(types: Self.openTypes) else { return }
         open(url)
     }
 
@@ -283,11 +283,9 @@ extension PhotoWindow {
             if model.needsDocument { return writeDocument(to: folder.appending(path: model.documentFileName)) }
             return write(to: folder.appending(path: model.fileName(for: .png)), as: .png, quality: model.exportOptions.quality, saving: true)
         }
-        let panel = NSSavePanel()
-        panel.allowedContentTypes = Self.documentTypes + [.png, .jpeg]
-        panel.nameFieldStringValue = model.needsDocument
+        let name = model.needsDocument
             ? model.documentFileName : model.fileName(for: ImageFormat(fileName: model.documentName ?? "") ?? .png)
-        guard panel.runModal() == .OK, let url = panel.url else { return }
+        guard let url = SuiteFilePanels.chooseSaveURL(named: name, types: Self.documentTypes + [.png, .jpeg]) else { return }
         if PhotoWorkspace.fileKind(forName: url.lastPathComponent) == .document { return writeDocument(to: url) }
         write(to: url, as: ImageFormat(fileName: url.lastPathComponent) ?? .png, quality: model.exportOptions.quality, saving: true)
     }

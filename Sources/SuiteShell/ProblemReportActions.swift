@@ -1,10 +1,11 @@
 // ProblemReportActions.swift (report-problem RP-3e): the AppKit glue behind the Report a Problem sheet's
 // Save… and Email…. Email… hands the sheet's text to the system's compose-mail service with
 // ProblemReportOutput's subject and recipients, so the person's own mail app opens it unsent; Save… writes the
-// same text as a .txt where the person picks in a save panel. Neither opens a socket: nothing leaves the Mac
+// same text as a .txt where the person picks in SuiteFilePanels' save panel. Neither opens a socket: nothing leaves the Mac
 // unless the person sends it.
 import AppKit
 import SuiteModel
+import SuiteUI
 import UniformTypeIdentifiers
 
 @MainActor enum ProblemReportActions {
@@ -20,11 +21,7 @@ import UniformTypeIdentifiers
 
     /// Asks where to save the report, then writes the sheet's text there as plain text.
     static func save(_ output: ProblemReportOutput) {
-        let panel = NSSavePanel()
-        panel.allowedContentTypes = [.plainText]
-        panel.nameFieldStringValue = output.fileName
-        panel.canCreateDirectories = true
-        guard panel.runModal() == .OK, let url = panel.url else { return }
+        guard let url = SuiteFilePanels.chooseSaveURL(named: output.fileName, types: [.plainText]) else { return }
         do {
             try Data(output.text.utf8).write(to: url, options: .atomic)
         } catch {

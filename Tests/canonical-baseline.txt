@@ -17,6 +17,7 @@ Sources/DesignModel/Live/LiveFiling.swift
 Sources/DesignModel/Live/LiveMarquee.swift
 Sources/DesignModel/Live/LiveTransforming.swift
 Sources/FlareApp/FlareEasingPopover.swift
+Sources/FlareApp/FlareFilePanels.swift
 Sources/FlareApp/FlarePasteboard.swift
 Sources/FlareApp/FlareStageSelection.swift
 Sources/FlareApp/FlareWindow+Export.swift
