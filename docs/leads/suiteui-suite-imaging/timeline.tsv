@@ -34,4 +34,22 @@ utc	stage	event	ref	note
 2026-10-22T05:05Z	check-in	#4028 is still open on head e48f3225, in the supervisor's Mac gate queue. IM-2 is held.
 2026-10-22T05:25Z	check-in	#4028 is still open, clean on head e48f3225, in the supervisor's Mac gate queue. IM-2 is held.
 2026-10-22T05:47Z	check-in	#4028 (IM-1) open and clean at e48f3225, in the supervisor's Mac gate queue; IM-2 waits on its merge.
-2026-10-22T17:44Z	sync	Record mirrored from lead/suite-imaging 627e5a2 (live run act-1a1647fe637-pfga, #4498, stage 3 wave 4). Run act-1a16308fb6c-s1cb stands down to avoid a second lead.
+2026-10-22T10:00Z	3	pr-merged	#4028	IM-1 merged by the supervisor; IM-2 restacked on dev 122cbbb
+2026-10-22T10:20Z	3	wave-start	wave 3	IM-3, IM-4, IM-15 builders stacked on lead/suite-imaging-IM-2 (c2091c6)
+2026-10-22T16:50Z	3	relaunch	#4498	run act-1a1647fe637-pfga; IM-a done (run 39811900368)
+2026-10-22T16:50Z	3	wave-start	wave 4	IM-5, IM-6+IM-7, IM-9+IM-10 via wf_13e8c7bf-e3f on 3578eae; fixer on #4390, #4389
+2026-10-22T17:13Z	check-in	-	#4390 (1e298a84), #4389 (971da1e8) open, fixer gating; wave 4 builders running, no PRs yet
+2026-10-22T17:30Z	3	wave-done	wave 4	#4590 IM-5, #4593 IM-6+IM-7, #4591 IM-9; IM-10 blocked on #4390
+2026-10-22T17:34Z	check-in	-	#4390 #4590 #4591 #4593 in lane, none merged; #4389 fixer splitting
+2026-10-22T17:40Z	fix-done	#4389 #4390	fixer merged dev into both; #4389 +259/4 files head 54233b8f, #4390 head 844fd682; both CI PASS, back in fast-lane
+2026-10-22T17:55Z	check-in	-	none merged; lane on per-PR macOS builds, IM PR builds queued (runner backlog); dev Linux 39826514621 running at 1dd51a3e
+2026-10-22T18:18Z	check-in	-	none merged; lane Linux run 39829914426 on #4590 head 1fe5b534; other IM PRs await macOS builds
+2026-10-22T18:40Z	3	relaunch	act-1a164d620b2-ve0e	issue #3715; wave 5 starts: IM-10 on #4390+#4591, IM-8 on #4593+#4590
+2026-10-22T18:50Z	3	wave5-blocked	IM-8,IM-10	both builders stopped (packet conflicts); #4590 IM-5 merged; re-cut next
+2026-10-24T00:00Z	3	relaunch	act-1a16d523b32-v6tj	IM-a, IM-m done; wave 7: IM-8a gating, #4886 open
+2026-10-24T10:13Z	3	pr-open	IM-8a	#5148 Photo canvas files off Metal; gate pass; mutate unmeasurable on Linux
+2026-10-24T10:16Z	3	build	IM-8b	test-first + toneOperations from imagingSteps, mutate 5/5, gate running; supervisor question on LiveToneSurface vs resident route
+2026-10-24T10:21Z	3	pr-open	IM-8b	#5151 stacked on #5148, CI: PASS, mutate 5/5
+2026-10-24T10:24Z	3	question	IM-10b/IM-11	curve/levels order asked on #3715 (6383074009); all remaining tasks open or blocked; polling
+2026-10-24T10:52Z	3	build	IM-10b	order ruled (a): Library adopts exposure, levels, curve; test-first commit, LiveDevelop on ImagingProgram.adjustments, tests running
+2026-10-24T11:02Z	3	build	IM-10b	feat committed 32ff1ed; LibraryModelTests segfault reproduces on dev sources too (container build), clean rebuild; mirror to lead/suiteui-suite-imaging for Belt
