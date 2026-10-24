@@ -4,7 +4,7 @@ Issue: #3478 · Packet: docs/blueprints/library/features/export-pack.md
 Run: act-1a16cc967d9-mcuv (line lead, line:library) · resumed 2026-10-24 (earlier act-1a16953af22-wvhu, act-1a15e4969c2-pa6e)
 Stage: 3 wave 2; LX-2 #4960 (efabeb8d) and LX-4 #4962 open on the lane; checked 2026-10-24T07:48Z
 Base: origin/dev 830af22d
-Next: LX-u building (feat/export-pack-lx-u, stacked on #4960); lane merges #4960, #4962; Wire XP-7 swaps in when #5044 merges
+Next: lane merges #4960 then retarget LX-u #5128 to dev; #4962 on lane; LX-z (LX-7 live journey, LX-8 built) after LX-u and LX-m; Wire XP-7 swaps in when #5044 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -51,3 +51,5 @@ Next: LX-u building (feat/export-pack-lx-u, stacked on #4960); lane merges #4960
 - 2026-10-24T07:25Z: resumed by act-1a16cc967d9-mcuv. Supervisor ruling 2026-10-23 18:46Z: build LX-2 and LX-4 now; add ExportPick.metadata to SuiteUI with a neutral default (field + default, tested, no UI). Library's sheet draws its own Form (not SuiteExportSheet), so LX-2 adds a Metadata row of ChoiceChips over ExportMetadata.allCases with ExportMetadata.title, and maps options.metadata into ExportPick.metadata.
 
 - 2026-10-24T07:48Z: the previous run had already opened #4960 (LX-2, with the stub) and #4962 (LX-4), which the record missed; this run's duplicate builders were stopped before pushing. SuiteUI XP-3 #5043 is stacked on #4960 and builds on its stub, per the ruling.
+
+- 2026-10-24T09:18Z: LX-u (LX-5 render budget metadataPickInTwoBodies, LX-6 journey skipped "waits on LX-7") is PR #5128, head 039c3002, base feat/export-pack-lx2, 3 files +235/-1, Fast-Check pass (build only: no Linux test target covers these). The journey writes its own GPS JPEG because the gps-phone.jpg fixture is LX-3s. macOS-only guesses to watch: export names "gps-phone 2.jpg" and the chip .isSelected trait.
