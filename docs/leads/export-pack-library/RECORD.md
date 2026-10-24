@@ -2,9 +2,9 @@
 
 Issue: #3478 · Packet: docs/blueprints/library/features/export-pack.md
 Run: act-1a16cc967d9-mcuv (line lead, line:library) · resumed 2026-10-24 (earlier act-1a16953af22-wvhu, act-1a15e4969c2-pa6e)
-Stage: 3 wave 2 (LX-2 and LX-4 building on stubs, 2026-10-24T07:25Z)
+Stage: 3 wave 2; LX-2 #4960 (efabeb8d) and LX-4 #4962 open on the lane; checked 2026-10-24T07:48Z
 Base: origin/dev 830af22d
-Next: builders open LX-a (SuiteUI ExportPick.metadata stub + LX-2 row + LX-5 metadata snapshot) and LX-4 (JPEGWriter on FakeMetadata); then LX-u stacked on LX-a
+Next: lane merges #4960 (then SuiteUI XP-3 #5043, stacked on it) and #4962; LX-u (LX-5 render budget + LX-6 journey skipped) stacked on feat/export-pack-lx2; Wire XP-7 swaps in when #5044 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -18,9 +18,9 @@ Next: builders open LX-a (SuiteUI ExportPick.metadata stub + LX-2 row + LX-5 met
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | LX-1 | LX-a | 1 | ExportOptions.metadata (default noLocation, old files read it), sidecar xmp(for:metadata:) signature; LibraryExportMetadataTests written, disabled | LibraryContracts.swift, ExportSidecar.swift, LibraryExportMetadataTests.swift | old file reads noLocation | #3696 c6102dd | merged 7f3959c |
-| LX-2 | LX-a | - | sheet Metadata row via ExportPick.metadata | LibraryExportSheet.swift | LibraryExportPackSnapshots.metadata | - | waits XP-3 |
+| LX-2 | LX-a | 2 | sheet Metadata row + ExportPick.metadata stub (SuiteUI) | LibraryExportSheet.swift, ExportSheet.swift | LibraryExportPackSnapshots.metadata | #4960 | open, fast-lane, Fast-Check efabeb8d |
 | LX-3 | LX-m | 2 | sidecar policy; LiveExporter passes the policy; RJ-L16/RJ-X03 folder; tests on | ExportSidecar.swift, LiveExporter.swift, tests, mutation plans, Tests/RealJobs/library/no-location/ | LibraryExportMetadataTests; Mutate ExportSidecar 7/7, LiveExporter 6/6 | #3699 f1e49054d | merged |
-| LX-4 | LX-m | - | JPEGWriter carries metadata via services.metadata | JPEGWriter.swift, LibraryExportMetadataWriteTests.swift | macOS | - | waits XP-2, XP-7 |
+| LX-4 | LX-m | 2 | JPEGWriter carries metadata via services.metadata (FakeMetadata) | JPEGWriter.swift, LibraryExportMetadataWriteTests.swift | macOS | #4962 | open, fast-lane |
 | LX-5..LX-8 | | - | see packet | | | - | waiting |
 
 ## Wires
@@ -49,3 +49,5 @@ Next: builders open LX-a (SuiteUI ExportPick.metadata stub + LX-2 row + LX-5 met
 - 2026-10-23T15:20:48Z: resumed by line lead act-1a16953af22-wvhu. Under contract-first waits (#4814), the XP-a waits are met once XP-a merges. XP-1 and XP-2 are on dev (MetadataCarrying, FakeMetadata), but XP-3 isn't, and no Belt-Slice-Done for XP-a is posted. So LX-2 waits, and LX-4 then builds on FakeMetadata with a Wire line for XP-7. Polling every 10 min.
 
 - 2026-10-24T07:25Z: resumed by act-1a16cc967d9-mcuv. Supervisor ruling 2026-10-23 18:46Z: build LX-2 and LX-4 now; add ExportPick.metadata to SuiteUI with a neutral default (field + default, tested, no UI). Library's sheet draws its own Form (not SuiteExportSheet), so LX-2 adds a Metadata row of ChoiceChips over ExportMetadata.allCases with ExportMetadata.title, and maps options.metadata into ExportPick.metadata.
+
+- 2026-10-24T07:48Z: the previous run had already opened #4960 (LX-2, with the stub) and #4962 (LX-4), which the record missed; this run's duplicate builders were stopped before pushing. SuiteUI XP-3 #5043 is stacked on #4960 and builds on its stub, per the ruling.
