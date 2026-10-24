@@ -25,7 +25,7 @@ private func withLayer() throws -> PhotoWorkspace {
 }
 
 /// Adjustment layer `id`'s tone, wherever the selection is.
-private func layerTone(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> ToneSettings? {
+private func toneOf(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> ToneSettings? {
     guard case .adjustment(let settings)? = workspace.layers.first(where: { $0.id == id })?.kind else { return nil }
     return settings.tone
 }
@@ -80,10 +80,10 @@ private func layerTone(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> Tone
         let id = try #require(workspace.selectedLayerID)
         try workspace.setTone(.neutral.setting(.contrast, to: 20), name: "Contrast", drag: nil)
         #expect(workspace.adjustments.tone == .neutral)
-        #expect(layerTone(workspace, id)?.value(.contrast) == 20 && workspace.toneSettings?.value(.contrast) == 20)
+        #expect(toneOf(workspace, id)?.value(.contrast) == 20 && workspace.toneSettings?.value(.contrast) == 20)
         #expect(workspace.historySteps.count == 3 && workspace.undoActionName == "Undo Contrast")
         workspace.undo()
-        #expect(layerTone(workspace, id) == .neutral)
+        #expect(toneOf(workspace, id) == .neutral)
     }
 
     /// A drag on a layer folds too.
@@ -104,7 +104,7 @@ private func layerTone(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> Tone
         #expect(throws: CatalogError.self) {
             try workspace.setTone(.neutral.setting(.sharpenAmount, to: 80), name: "Amount", drag: nil)
         }
-        #expect(layerTone(workspace, id) == .neutral && workspace.adjustments.tone == .neutral)
+        #expect(toneOf(workspace, id) == .neutral && workspace.adjustments.tone == .neutral)
         #expect(workspace.historySteps.count == 2)
     }
 

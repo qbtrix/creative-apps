@@ -88,3 +88,7 @@ view.zoom-in
 view.zoom-out
 history.jump
 history.read
+tone.read
+tone.set
+tone.reset
+tone.auto
