@@ -66,3 +66,4 @@ utc	stage	event	ref	note
 2026-10-24T10:03:46Z	queue	check	lane batch 20261024081307 still bisecting; fill-heal PRs queued behind it, none flagged
 2026-10-24T10:24:56Z	queue	check	lane batch 20261024081307 stalled since 08:32 with dev red (#5113); fill-heal PRs queued, none flagged
 2026-10-24T10:47:10Z	queue	check	lane merging again (#4616); fill-heal PRs queued, none flagged
+2026-10-24T11:10:20Z	queue	check	lane #5150 now sees all open PRs; batch 20261024110214 in flight without fill-heal; proofs valid
