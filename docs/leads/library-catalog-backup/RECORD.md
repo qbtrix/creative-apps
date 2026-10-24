@@ -97,3 +97,4 @@ Next: (2026-10-23T17:29:30Z) #4878 (BK-m) and #4923 (BK-z, stacked, feature-done
 - 2026-10-24T05:39:42Z: heartbeat: #4878,#4923 all open+clean, none merged; lane/batch-20261024050226 (none of ours) Linux green, macOS gate running; ours queue for the next batch; dev 654fb363 green
 - 2026-10-24T06:00:53Z: heartbeat: #4878,#4923 all open+clean, none merged; lane/batch-20261024050226 (none of ours) red on macOS gate, bisecting (probe -6); ours queue for the next batch; dev 654fb363 green
 - 2026-10-24T06:23:38Z: heartbeat: #4878,#4923 all open+clean, none merged; lane bisect of batch 20261024050226 (none of ours): probe -6 Linux green, macOS running; ours queue for the next batch; dev 654fb363 green
+- 2026-10-24T06:45:20Z: heartbeat: #4878,#4923 all open+clean, none merged; dev now e5dcf939 (#4840, #5048; none of ours); bisect of batch 20261024050226: probe -6 red on macOS, probes -3 and -1 running; scoped library at 4446461e has no slice of ours, so no critics yet
