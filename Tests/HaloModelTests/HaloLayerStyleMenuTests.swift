@@ -25,7 +25,7 @@ import Testing
     @Test func layerStyleOpensThePanelAtDropShadow() throws {
         var project = try HaloLayerStyleTests.selecting("Title")
         #expect(project.styleMenuHelp("style.panel") == nil, "Layer Style… is live on a selected layer")
-        project.runStyle(.show(.dropShadow))
+        #expect(project.runStyleMenu("style.panel") == nil, "Layer Style… returns nothing")
         #expect(project.stylePanel == .dropShadow)
         project.runStyle(.show(nil))
         #expect(project.stylePanel == nil, "Done closes it")
