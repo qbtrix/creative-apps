@@ -1,49 +1,32 @@
-// StyleLayerView.swift: one styled layer on the GPU, for any app (layer-styles
-// HY-7). StyleLayerRoute holds the system GPU backend and one StyleLayerGPU per
-// layer id, so each layer keeps its own resident raster: it uploads only when
-// the layer's content changes, and a style step (a Glow Size scrub) runs just
-// StyleRoute.draw into the canvas host's resident texture. Until LS-9 builds
-// that draw the layer shows unstyled, never blank. The view is an embedded
-// CanvasHostView the size of its frame; the app hands it a content key, the
-// layer's pixels (linear premultiplied, read only for new content) and the
-// style, nothing app-specific. Off the GPU route (View > Rendering set to CPU,
-// no GPU, pipelines compiling, or a write that failed) `isAvailable` is false
-// and the app draws the layer its own way. macOS only; no Metal import
-// (ImagingBoundaryTests): the device and texture types come from SuiteImaging.
+// StyleLayerView.swift (layer-styles HY-7): one styled layer on the GPU for any app; StyleLayerRoute keeps one
+// StyleLayerGPU per layer id. Off the GPU route `isAvailable` is false and the app draws the layer itself.
 import AppKit
 import CoreRaster
 import SuiteImaging
 import SwiftUI
 
 @MainActor @Observable public final class StyleLayerRoute {
-    /// The app's: the suite's shared rendering choice and the system GPU.
     public static let shared = StyleLayerRoute(preference: RenderingPreference(suiteName: RenderingPreference.suiteName))
-
     @ObservationIgnored let preference: any RenderingPreferenceReading
     @ObservationIgnored private var backend: ImagingGPU.Backend??
     @ObservationIgnored private var layers: [String: StyleLayerGPU] = [:]
     /// True once a GPU write failed; the app then draws its layers itself.
     public private(set) var failed = false
-
     public init(preference: any RenderingPreferenceReading) { self.preference = preference }
-
-    /// Whether styled layers draw here: a choice other than CPU, a healthy backend with its pipelines ready, no failure.
+    /// A choice other than CPU, a healthy backend with its pipelines ready, and no failure.
     public var isAvailable: Bool {
         guard preference.choice != .cpu, !failed else { return false }
         if backend == nil { backend = ImagingGPU.systemBackend() }
         guard let gpu = backend ?? nil else { return false }
         return gpu.isHealthy && gpu.isReady
     }
-
     /// Layer `id`'s GPU drawer, made on first use; nil without a backend.
     public func layer(_ id: String) -> StyleLayerGPU? {
-        if let held = layers[id] { return held }
         guard let gpu = backend ?? nil else { return nil }
-        let made = StyleLayerGPU(gpu)
-        layers[id] = made
-        return made
+        let held = layers[id] ?? StyleLayerGPU(gpu)
+        layers[id] = held
+        return held
     }
-
     /// Layer `id` with `style` into `view`'s resident texture, `width` x `height`.
     func draw(_ id: String, content: AnyHashable, width: Int, height: Int, style: LayerStyle?,
               pixels: () -> PixelBuffer?, into view: CanvasHostView) {
@@ -57,11 +40,9 @@ import SwiftUI
             view.show(Shown(width: width, height: height))
         } catch {
             layers[id] = nil
-            // Not during the view update that called this.
-            Task { @MainActor in self.failed = true }
+            Task { @MainActor in self.failed = true }  // not during the view update that called this
         }
     }
-
     /// The layer's size with no tiles: the texture holds the pixels.
     struct Shown: CanvasContentProviding {
         let width: Int, height: Int
@@ -70,20 +51,13 @@ import SwiftUI
     }
 }
 
-/// Layer `id` drawn with `style` over its whole frame by `route`. `content`
-/// keys the layer's pixels without its style; `pixels` makes them, `width` x `height`.
+/// Layer `id` drawn with `style` over its frame by `route`; `content` keys `pixels` (linear premultiplied).
 public struct StyleLayerView: View {
-    let route: StyleLayerRoute
-    let id: String
-    let content: AnyHashable
-    let width: Int, height: Int
-    let style: LayerStyle?
+    let route: StyleLayerRoute, id: String, content: AnyHashable, width: Int, height: Int, style: LayerStyle?
     let pixels: () -> PixelBuffer?
-
     public init(route: StyleLayerRoute, id: String, content: AnyHashable, width: Int, height: Int, style: LayerStyle?,
                 pixels: @escaping () -> PixelBuffer?) {
-        (self.route, self.id, self.content, self.width, self.height) = (route, id, content, width, height)
-        (self.style, self.pixels) = (style, pixels)
+        (self.route, self.id, self.content, self.width, self.height, self.style, self.pixels) = (route, id, content, width, height, style, pixels)
     }
 
     public var body: some View {

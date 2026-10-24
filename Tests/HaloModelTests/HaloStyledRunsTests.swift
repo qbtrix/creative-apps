@@ -1,8 +1,4 @@
-// HaloStyledRunsTests.swift: what the viewer hands the GPU layer view
-// (layer-styles HY-7). A draw list splits into runs the Canvas draws and
-// styled solids and shapes the GPU view draws, in order; a styled layer's
-// content key ignores its style, so a scrub keeps its raster; its pixels are
-// what the frame renderer draws for it unstyled. Linux and macOS.
+// HaloStyledRunsTests.swift (layer-styles HY-7): the runs, the style-free content key and the unstyled pixels.
 import CoreRaster
 @testable import HaloModel
 import SuiteImaging
@@ -13,17 +9,11 @@ import Testing
         HaloDrawItem(layerID: id, kind: kind, bounds: HaloLayerRect(x: x, y: 2, width: 4, height: 3), matrix: .identity,
                      opacity: 1, color: HaloLayerColor(red: 1, green: 0, blue: 0), blendMode: .normal, style: style)
     }
-
     static let glow = HaloStyleRenderTests.glow(10)
 
     @Test func runsKeepOrderAndSplitAtStyledLayers() {
-        let list = HaloDrawList(width: 10, height: 8, frame: 0, items: [
-            Self.item("a"), Self.item("b", .shape, style: Self.glow), Self.item("c", style: LayerStyle.none),
-            Self.item("d", .text, style: Self.glow),
-        ])
-        #expect(list.styledRuns == [
-            .drawn([list.items[0]]), .styled(list.items[1]), .drawn([list.items[2], list.items[3]]),
-        ])
+        let (a, b, c, d) = (Self.item("a"), Self.item("b", .shape, style: Self.glow), Self.item("c", style: .none), Self.item("d", .text, style: Self.glow))
+        #expect(HaloDrawList(width: 10, height: 8, frame: 0, items: [a, b, c, d]).styledRuns == [.drawn([a]), .styled(b), .drawn([c, d])])
     }
 
     @Test func contentIgnoresStyleButNotPlacement() {
@@ -34,10 +24,7 @@ import Testing
     }
 
     @Test func pixelsAreTheUnstyledLayer() throws {
-        let item = Self.item("a", style: Self.glow)
-        let list = HaloDrawList(width: 10, height: 8, frame: 0, items: [item])
-        let unstyled = HaloDrawList(width: 10, height: 8, frame: 0, items: [Self.item("a")])
-        let frame = try LiveFrameRendering().render(unstyled, width: 10, height: 8, text: nil)
-        #expect(list.stylePixels(item) == frame.pixels)
+        let frame = try LiveFrameRendering().render(HaloDrawList(width: 10, height: 8, frame: 0, items: [Self.item("a")]), width: 10, height: 8, text: nil)
+        #expect(HaloDrawList(width: 10, height: 8, frame: 0, items: []).stylePixels(Self.item("a", style: Self.glow)) == frame.pixels)
     }
 }
