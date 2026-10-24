@@ -12,7 +12,8 @@
 // undo." help is proven by HaloHistoryCommandTests (help tags on menu items
 // don't read reliably).
 // An edit reads "Edited", in `halo.file` and the title bar's subtitle;
-// Open Recent > Spot asks to save, Don't Save reopens the saved file. Then
+// Open Recent > Spot asks to save (the suite's unsaved sheet, its buttons
+// `halo.close.*`), Don't Save reopens the saved file. Then
 // `huge` is saved and reopened: the first shot after that launch has the
 // `halo.file.progress` row (HB-U5), then the list holds Solid 2000 down to
 // Solid 1 and the status bar reads "2000 layers". Last, a save with no edit
@@ -80,10 +81,10 @@ final class HaloFilesJourneyTests: XCTestCase {
         // 4. File > Open Recent > Spot asks first; Don't Save reopens the file.
         openRecent("Spot", halo)
         let ask = alert(halo)
-        XCTAssert(
-            text("Save changes to Spot?", in: ask).waitForExistence(timeout: 5), "no Save changes to Spot? alert")
+        let question = "Do you want to save the changes made to the document \u{201C}Spot\u{201D}?"
+        XCTAssert(text(question, in: ask).waitForExistence(timeout: 5), "no unsaved-changes sheet for Spot")
         halo.shot("files-4-unsaved-alert")
-        ask.buttons["Don't Save"].click()
+        ask.buttons["halo.close.dontSave"].click()
         expectStatus("Saved", halo)
         XCTAssert(waitFor { !self.sidebarRow("Comp 3", halo).exists }, "Don't Save kept the new composition")
         XCTAssert(sidebarRow("Intro", halo).exists && sidebarRow("Outro", halo).exists, "Spot didn't reopen")
