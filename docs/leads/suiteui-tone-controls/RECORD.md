@@ -50,3 +50,4 @@ Next: TC-a done (run 40029042081 green, Belt-Slice-Done posted 23:24Z). TC-u PR 
 - 2026-10-23T18:32Z: no PR merged yet; all seven of this run's PRs wait on the lane (#4873 on the supervisor). Builders share scratchpad gate.lock; a stale holder blocked gates ~30 min and was cleared.
 - 2026-10-23T22:05Z: #4862 merged; merged dev into TC-u (add/add on ToneRows.swift and the tone journey, took TC-u's superset), gated CI: PASS, opened #5006.
 - 2026-10-23T23:24Z: TC-a done: scoped suiteui run 40029042081 green at 491ec546; Belt-Slice-Done on #3476 (ui false, no panel).
+- 2026-10-24T06:57Z: run act-1a16cae7922-5nat resumes on #3476 (dev e5dcf939). TC-u #5006, TC-5 #4880, TC-6 #4953 (stacked on #4880), TC-7 #4870 wait in the lane; no needs-fix or needs-rebase. No open finding names tone-controls (#3323 is inspector-controls' SJ16). Full CI 40070365168 on 4446461e in progress.
