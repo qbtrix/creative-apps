@@ -46,3 +46,4 @@ time	event	task	note
 2026-10-24T09:18Z	build	LX-u #5128 opened, stacked on #4960
 2026-10-24T09:18Z	heartbeat	no lane merges since 08:05Z; #4960 #4962 #5128 waiting
 2026-10-24T09:40Z	heartbeat	lane merging others; #4960 #4962 #5128 waiting
+2026-10-24T10:03:06Z	heartbeat	all PRs open+clean; lane batch in flight, 51 ready wait; dev head #5117
