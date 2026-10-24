@@ -111,3 +111,4 @@ utc	stage	event	ref	note
 2026-10-24T16:43:02Z	heartbeat	#5036 still queued
 2026-10-24T17:37:54Z	heartbeat	#5036 (fix round 1, #4954) queued for a lane batch; then the LO-u/LO-z critic panel and Belt-Contact-Sheet
 2026-10-24T17:58:38Z	heartbeat	LO fix round 1 (#5036, finding #4954) queued in the fast lane, mergeable; then the LO-u/LO-z critic panel and the contact sheet
+2026-10-24T18:19:33Z	heartbeat	#5036 queued in the fast lane, mergeable; waiting on a batch
