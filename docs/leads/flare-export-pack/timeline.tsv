@@ -151,3 +151,4 @@ utc	stage	event	ref	note
 2026-10-24T18:41:25Z	heartbeat	#4854 (FV-z) in lane/batch-20261024183708 (Linux + macOS gate running); #5025 queued for a later batch
 2026-10-24T19:02:53Z	heartbeat	#4854 batch 20261024183708: Linux green, macOS gate running; #5025 queued
 2026-10-24T19:25:05Z	heartbeat	batch 20261024183708 macOS red on DesignApp/DesignCommands.swift (LiveFront, not Flare); bisect probe -6 (holds #4854) running; #5025 queued
+2026-10-24T19:47:16Z	heartbeat	probe 20261024183708-6 (holds #4854) macOS gate still running; #5025 queued
