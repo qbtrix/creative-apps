@@ -125,3 +125,4 @@ utc	stage	event	ref	note
 2026-10-24T16:57:27Z	W2	check	PT-2	no change: batch 160327 macOS gate 40109793853 still running (45 min); our PRs queued, unlabelled; dev 33cd6e97c; no dev-red
 2026-10-24T17:24:09Z	W2	check	PT-2	batch 160327 green and merged (dev c09201386); batch 172211 running with #4880 (TC-5, a Wire trigger) among 12 older PRs; ours still queued, unlabelled; no dev-red
 2026-10-24T17:52:02Z	W2	check	PT-2	batch 172211 Linux green, macOS gate 40115812591 still queued; #4880 not merged yet; ours queued, unlabelled; dev c09201386; no dev-red
+2026-10-24T18:18:32Z	W2	check	PT-2	batch 172211 macOS gate in progress; #4880 not merged; ours queued, unlabelled; dev-red #5183 (macos, range main..33cd6e97c) has none of our PRs, not ours to fix
