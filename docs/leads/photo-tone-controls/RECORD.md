@@ -75,3 +75,5 @@ Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #48
 - 15:22Z: probe -4 green on both gates, so the batch break is #5006 or #5007; waiting on probe -5.
 
 - 16:10Z: #5179 (CI finding, testTier1Tone: the Curves header click no longer folds Curves) went red at e79e9afcb, before any tone-controls PR merged. The range from the last pass touches only #5046, #5097 (zoom) and #5087 (paths). It is not filed against this feature, so no fix is started; PT-6 (#5008) touches the tone rows, so re-check #5179 once #5008 lands.
+
+- 17:24Z: batch 172211 carries #4880 (TC-5). Once it is on dev, turn on the Wire tests that wait on TC-5.
