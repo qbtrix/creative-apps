@@ -209,3 +209,4 @@ utc	stage	event	ref	note
 2026-10-24T15:51Z	check-in	a 12-PR batch landed 15:47-15:48Z (older PRs first); #5171 still open, no needs-fix; no supervisor comment, no new finding; no XP-3/XP-4 PR
 2026-10-24T16:22Z	check-in	new finding #5179 (testTier1Tone: Curves header fold) is tone-controls', not export; #5171 still open, no needs-fix; no supervisor comment; no XP-3/XP-4 PR
 2026-10-24T16:54Z	check-in	quiet: #5171 still open, no needs-fix; no supervisor comment, no new finding; no XP-3/XP-4 PR; nothing merged since 15:48Z
+2026-10-24T17:26Z	check-in	quiet: #5171 open, no needs-fix/rebase; lane batch landed 17:01-17:03Z without it; no XP-3/XP-4 PR; no new findings or supervisor comments
