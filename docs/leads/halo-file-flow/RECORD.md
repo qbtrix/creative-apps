@@ -1,7 +1,7 @@
 # file-flow lead record
 
 Issue: #3474 (runs before used #4514) · Packet: docs/blueprints/halo/features/file-flow.md
-Run: act-1a16cd045be-qv3g · Started: 2026-10-24T07:20Z (took over from act-1a16958d5fe-8dxu)
+Run: act-1a16fbc5164-vi4c · Started: 2026-10-24T21:10Z (resumed)
 Stage: 5 (every task in a PR: HF-u #4868, HF-3 #4894, HF-4 #4936, HF-z #5092 feature-done)
 Base: 721168a8, PR base 35a0b5e7 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
 Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev holds its last PR, then Belt-Contact-Sheet
@@ -37,6 +37,7 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 2026-10-24T21:40Z: run act-1a16fbc5164-vi4c. HF-m #4894 (Linux 40035628317 green, 236 lines / 15 files) and HF-z #5092 (Fast-Check marker) are lane-eligible and wait for a batch; #4936 waits on its base, the HF-m branch. No needs-fix, no file-flow findings. The record stays on lead/halo-file-flow: lead/file-flow belongs to the suite lead (#3480).
 - HF-a blocked (2026-10-21T00:13Z): transform:HT-a likely in (#3702 adapter bodies merged), shape-tools:HS-a in review (#3676), placed-images:PH-u not started (PH-a still waiting).
 - 2026-10-21T13:42:11Z check-in: still blocked; placed-images is at Stage 0, PH-a waits on HS-a (#3676), HK-a (key-editing) and PL-a.
 - 2026-10-22T16:37:55Z: New run act-1a16474bd28-v3ht for #4514. SF-a is on dev 7e9f260 (FileFlowTarget/FileFlowCommands in SuiteKernel/Files, SuiteFileDrop in SuiteShell, SuiteDocumentHost, SuiteDocumentsBridge used by Photo). HT-a and HS-a are merged; PH-u is drafts #4437/#4438 on PH-a #4426.
