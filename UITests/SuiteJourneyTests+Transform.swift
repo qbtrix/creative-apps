@@ -9,7 +9,7 @@
 // navigation on, Tabs through every `suite.transform.*` row and both flips.
 // The page's log (`suite.gallery.log`)
 // names each command it ran. The rows are sliders, so they read out their
-// number ("15"); the knob's turn is the `suite.handles.turn` read-out ("15 degrees"). Steps 2 to 4 assert what
+// number ("15"), and so does the knob (`suite.handles.turn`, #5147), its turn in degrees. Steps 2 to 4 assert what
 // the page does once TT-5's rules and TT-7's live target land.
 import XCTest
 
@@ -104,7 +104,7 @@ final class SuiteTransformJourneyTests: XCTestCase {
         XCTAssertEqual((degrees - 10).truncatingRemainder(dividingBy: 15), 0, "the Shift-drag turned \(degrees - 10)°, not a 15° step")
         let turn = gallery.element("suite.handles.turn")
         XCTAssertEqual(turn.label, "Rotate")
-        XCTAssertEqual(turn.value as? String, "\(Int(degrees)) degrees")
+        XCTAssertEqual((turn.value as? NSNumber)?.doubleValue.rounded(), degrees, "the knob doesn't read the turn")
         gallery.shot("transform-snapped")
     }
 

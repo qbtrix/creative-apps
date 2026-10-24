@@ -10,7 +10,11 @@
 // pixels at scale 2. SwiftUI has no rotate pointer (PointerStyle), so a
 // rotate zone and the knob show the crosshair, `rectSelection`; a resize
 // handle shows the frame-resize pointer for where it sits after the turn
-// (HandlePointer), its hit rect over the drawn mark. A press that activates
+// (HandlePointer), its hit rect over the drawn mark. To VoiceOver and XCUI
+// the knob (`suite.handles.turn`) is an adjustable slider named Rotate whose
+// value is the turn (XCUI reads the number, VoiceOver "90 degrees"; #5147,
+// as #5132 did for the number fields); increment and decrement turn it 1°,
+// 15° with Shift, each one finished turn (onRotate, then onEnd). A press that activates
 // the window drags too, as the canvases' own first-mouse clicks do. Under a
 // probe host each drag sample reports on the `handle-drag` series
 // (HandleDragProbe).
@@ -209,9 +213,17 @@ public struct SelectionHandlesEditor: View {
                         .onHover { hover(.rotate, $0) }
                         .pointerStyle(Self.pointer(.rotateTopLeft, degrees: degrees))
                         .position(x: knob.midX, y: knob.midY)
-                        .accessibilityElement()
-                        .accessibilityLabel("Rotate")
-                        .accessibilityValue(Self.knobValue(degrees))
+                        .accessibilityRepresentation {
+                            // No `step:`: a stepped Slider builds a tick per step on every body pass (#5132).
+                            Slider(value: Binding(get: { degrees }, set: { turn(by: $0 - degrees) }),
+                                   in: min(-360, degrees)...max(360, degrees)) {
+                                Text("Rotate")
+                            }
+                            .accessibilityValue(Self.knobValue(degrees))
+                            .accessibilityAdjustableAction { direction in
+                                turn(by: Self.knobStep(direction, shift: NSEvent.modifierFlags.contains(.shift)) ?? 0)
+                            }
+                        }
                         .accessibilityIdentifier("suite.handles.turn")
                 }
             }
@@ -234,6 +246,13 @@ public struct SelectionHandlesEditor: View {
         // A press into an inactive window turns or resizes too, as the canvases' first-mouse clicks do;
         // without it the first drag on a background window did nothing.
         .allowsWindowActivationEvents()
+    }
+
+    /// An accessibility step or set: one finished turn by `by` degrees, as a whole knob drag would end.
+    private func turn(by: Double) {
+        guard by != 0, by.isFinite else { return }
+        onRotate(by)
+        onEnd()
     }
 
     /// The hit rects sit over the drawn marks so their pointers show, so they fill the mark under the pointer.
@@ -291,6 +310,16 @@ extension SelectionHandlesEditor {
     /// The knob's read-out: its turn spoken in whole degrees ("15 degrees").
     nonisolated static func knobValue(_ degrees: Double) -> String {
         NumericInput.spoken(degrees, decimals: 0, unit: "°")
+    }
+
+    /// The knob's accessibility step in degrees, clockwise positive: 1, 15 with Shift; nil for another direction.
+    nonisolated static func knobStep(_ direction: AccessibilityAdjustmentDirection, shift: Bool) -> Double? {
+        let step = shift ? 15.0 : 1.0
+        switch direction {
+        case .increment: return step
+        case .decrement: return -step
+        default: return nil
+        }
     }
 }
 

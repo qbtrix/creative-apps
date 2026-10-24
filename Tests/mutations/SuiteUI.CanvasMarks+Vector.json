@@ -1,0 +1,5 @@
+[
+  {"label": "shiftStepsFifteen: Shift steps the knob 1° like an unmodified step", "file": "Sources/SuiteUI/CanvasMarks+Vector.swift", "find": "let step = shift ? 15.0 : 1.0", "replace": "let step = 1.0", "tests": "RotateKnobAccessibilityTests"},
+  {"label": "aStepIsAFinishedTurn: an accessibility step turns the box but never ends the turn, so no undo step lands", "file": "Sources/SuiteUI/CanvasMarks+Vector.swift", "find": "        onRotate(by)\n        onEnd()\n", "replace": "        onRotate(by)\n", "tests": "RotateKnobAccessibilityTests"},
+  {"label": "decrementTurnsBack: decrement turns the box clockwise like increment", "file": "Sources/SuiteUI/CanvasMarks+Vector.swift", "find": "case .decrement: return -step", "replace": "case .decrement: return step", "tests": "RotateKnobAccessibilityTests"}
+]

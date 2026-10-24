@@ -95,8 +95,8 @@ private struct Rows: View {
     }
 }
 
-/// `view` in a window on screen, with the app's accessibility tree on.
-@MainActor private func axWindow(_ view: some View) -> NSWindow {
+/// `view` in a window on screen, with the app's accessibility tree on (RotateKnobAccessibilityTests too).
+@MainActor func axWindow(_ view: some View) -> NSWindow {
     for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
         NSApplication.shared.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: attribute))
     }
@@ -109,7 +109,7 @@ private struct Rows: View {
 }
 
 /// The first element under `element` with `role`, in tree order.
-@MainActor private func axElement(in element: Any, role: NSAccessibility.Role) -> NSObject? {
+@MainActor func axElement(in element: Any, role: NSAccessibility.Role) -> NSObject? {
     let node = element as AnyObject
     if node.accessibilityRole?() == role { return node as? NSObject }
     for child in (node.accessibilityChildren?() ?? nil) ?? [] {
