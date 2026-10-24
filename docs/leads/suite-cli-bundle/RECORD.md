@@ -1,10 +1,10 @@
 # cli-bundle lead record
 
 Issue: #3773 · Packet: docs/blueprints/suite/features/cli-bundle.md
-Run: act-1a16a37a3ed-0kyn (relaunch; earlier act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
-Stage: CB-z: #4999 waiting on lane
-Base: 35a0b5e7e9520a764f3eabf02968a453082a87cc (main; PRs target dev)
-Next: supervisor: lane --limit 100 starves old PRs
+Run: act-1a16daeb4e8-vghz (relaunch; earlier act-1a16a37a3ed-0kyn, act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
+Stage: 3 polling (CB-z: #4999 and #5000 waiting on lane)
+Base: 9f476af7419db0cc5753aa119ec0bd3b1a12899a (main, verified 11:30Z; dev 6ad8cad is main + 4)
+Next: wait for full CI run 40087964618 on dev (holds lane fix #5150) to promote main; then the lane lists #4999. Once #4999 merges, rebuild #5000 on dev (3 docs files), drop no-fast-lane, move Head.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -53,3 +53,8 @@ Next: supervisor: lane --limit 100 starves old PRs
 - Both PRs open after #4741 (supervisor, scripts/bundle-apps) merges; CB-z's diff against dev otherwise holds that protected path.
 - Gap #4762: the bundle runner RJ-X62 waits on.
 - 2026-10-23T19:28Z Relaunch act-1a16a37a3ed-0kyn: rebased on main 35a0b5e7e. Full CI https://github.com/qbtrix/creative-apps/actions/runs/39983291011 (green, main) holds CB-a (#4755), CB-u (#4743) and CB-m (#4740); done markers posted. #4741 (CB-m bundle script) is still open with the supervisor; CB-z waits on it.
+
+## 2026-10-24T11:35Z relaunch act-1a16daeb4e8-vghz
+- lead/cli-bundle rebased on main 9f476af (88 record commits, docs/leads only).
+- Lane starvation cause (--limit 100) fixed by #5150 on dev 4f00afb; lane runs scripts from main, so it applies after full CI run 40087964618 promotes.
+- #4999 open, clean, Head 941da48 matches; #5000 held (no-fast-lane) until #4999 merges.
