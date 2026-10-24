@@ -4,7 +4,7 @@ Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/feat
 Run: act-1a16cae79dd-mtf2 · Started: 2026-10-24T06:54Z (prior: act-1a1693a401e-chyn, act-1a164697376-dv7u)
 Stage: 3 wave 4
 Base: e5dcf939 (dev; brief's main HEAD 654fb363 verified)
-Next: fix round 1: #5121 (fix #5095, base dev) open; fix-5093 being re-stacked on FH-7 with a regenerated RJ-P51 golden (then PR, base FH-7); then #5094 stacked on FH-c; PRs #5107/#5108/#5109 queued behind #4577/#4889; hold FH-9 and FH-10 until FH-7/FH-8 merge
+Next: fix round 1: #5121 (#5095, base dev), #5129 (#5093, base FH-7, regenerated RJ-P51 golden) open; #5094 fixer running, stacked on FH-c; PRs #5107/#5108/#5109 queued behind #4577/#4889; retarget stacked PRs to dev as parents merge; hold FH-9 and FH-10 until FH-7/FH-8 merge
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
