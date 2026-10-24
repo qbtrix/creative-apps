@@ -74,3 +74,4 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-24T15:29:24Z: no change; batch-20261024144917 still in flight.
 - 2026-10-24T15:48:04Z: no change; batch-20261024144917 still in flight.
 - 2026-10-24T15:52:49Z: #4817 got needs-rebase: FlareWindow.swift conflicted with dev (File > Place drop target next to the live line). Merged origin/dev, kept suiteLiveWindow plus placeDropTarget; scripts/ci --changed running.
+- 2026-10-24T16:07:58Z: #4817 merge of dev pushed (9e16d071c), scripts/ci --changed CI: PASS, Head line moved; waits for the lane to drop needs-rebase. #4988 is independent and still merges clean.
