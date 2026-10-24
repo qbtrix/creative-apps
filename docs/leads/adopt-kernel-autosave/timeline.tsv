@@ -54,3 +54,4 @@ utc	stage	event	ref	note
 2026-10-22T19:51Z	3	merged	AK-10	#4428 b653cb7bfd
 2026-10-24T05:34:34Z	resume	run act-1a16c618fe7-h4fd: AK-4, AK-10 merged; wave 1 = AK-6 then AK-9; AK-8 waits SC-f
 2026-10-24T05:37:12Z	wave	wave 1 launched: AK-6 (Wire: library:spine), AK-9 stacked on AK-6 with the Photo step skipped (waits on AK-8)
+2026-10-24T05:38:36Z	slice-done	AK-flare run 40037716897

@@ -11,7 +11,7 @@ Next: Wave 1 builds AK-6 (Library catalog under the root; Wire: library:spine) a
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | AK-a | One app-folder rule and a never-overwrite legacy plan; a ratchet stops new support-dir lookups | AK-1, AK-2 | – | autosave-history:AH-a (merged) | false | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39568091135 | – |
-| AK-flare | Flare autosaves through the kernel schedule into its app folder | AK-3, AK-4 | – | AK-a (AK-3); autosave-history:AH-z (AK-4) | false | 0 | merged (Belt-Slice-Done pending a dev run) | – | – |
+| AK-flare | Flare autosaves through the kernel schedule into its app folder | AK-3, AK-4 | – | AK-a (AK-3); autosave-history:AH-z (AK-4) | false | 0 | done (Belt-Slice-Done posted, run 40037716897) | – | – |
 | AK-library | Library's catalog lives in the app folder, legacy moved once | AK-5, AK-6 | – | AK-a (AK-5); library spine hand-off (AK-6) | false | 0 | planned | – | – |
 | AK-photo | Photo recovery lives in the app folder | AK-7, AK-8 | – | AK-a (AK-7); SC-f, PH-z (AK-8) | false | 0 | planned | – | – |
 | AK-z | Design and Halo adopt; the ratchet baseline reaches zero; feature built | AK-9, AK-10, AK-11 | – | DA-z, HA-z (AK-9); AH-z (AK-10) | false | 0 | planned | – | – |
@@ -39,6 +39,7 @@ Next: Wave 1 builds AK-6 (Library catalog under the root; Wire: library:spine) a
 
 ## Decisions
 
+- 2026-10-24T05:38:36Z Belt-Slice-Done AK-flare posted on #3713 (issuecomment-6380467453): full CI 40037716897 on dev 654fb3632 holds #3842 and #4010; Linux and macOS green; main promoted. The tool appended a footer, which I removed with an edit.
 - 2026-10-24T05:34:34Z relaunch as run act-1a16c618fe7-h4fd. AK-4 (#4010) and AK-10 (#4427, #4428) are on dev. The supervisor (2026-10-24) says to build every AK task that doesn't touch PhotoWindow+File.swift now, on the kernel's fakes, with Wire: lines. So AK-6 builds now against spine's dev state (Wire: library:spine), and AK-9 is written with the Photo step skipped ("waits on AK-8"); Design DA-z and Halo HA-z are built. AK-8 stays until SC-f lands. Open gap #4018 stays a gap.
 - 2026-10-22T19:51Z #4428 (AK-10 source) merged by the lane as b653cb7bfd. AK side ended; relaunch takes AK-6, AK-8, AK-9, AK-11.
 - 18:40Z #4427 (AK-10 tests) merged (31da7d22f6). Merged dev into feat/ak-10-flare-delete (f9be9a48): one conflict in FlareWindow.swift, resolved by keeping #4428's rename FlareRecovery.swift -> FlareAutosaveAdapter.swift (same body as AK-4's squash). scripts/ci --changed: CI: PASS. #4428 retargeted to dev, Head moved, no footer. AK side ends here, as the supervisor said; AK-6, AK-8, AK-9 and AK-11 wait for the relaunch.
