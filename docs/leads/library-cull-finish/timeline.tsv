@@ -143,3 +143,4 @@
 2026-10-24T21:45:08Z	heartbeat	batch-20261024205137 still bisecting (probes -3,-6), none ours; all 8 PRs open, clean, fast-lane
 2026-10-24T22:07:12Z	heartbeat	batch-20261024205137 probes -3,-6 macOS gates in progress since 21:17Z (Linux green); none ours; 8 PRs open, clean
 2026-10-24T22:29:33Z	heartbeat	batch-20261024205137: probe -6 macOS green, -3 macOS still running; none ours; 8 PRs open, clean
+2026-10-24T22:50:42Z	heartbeat	batch-20261024205137 still bisecting (new probe -1); none ours; 8 PRs open, clean
