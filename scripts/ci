@@ -75,7 +75,7 @@
 # docs/blueprints/suite/feature-map.json, and each jobs.md renders without
 # being written (the Generated workflow writes them on dev).
 #
-# The fixture tests: Tests/contact_sheet, audit_lower, test_died, ci_findings, jetsam,
+# The fixture tests: Tests/contact_sheet, audit_lower, test_died, ci_findings, jetsam, roadmap_numbers,
 # sample_surfaces, test_scope and bump_core test the scripts of the same names (some need jq).
 #
 # The journey quarantine check runs Tests/quarantine, then scripts/quarantine
@@ -401,6 +401,8 @@ echo "== journeys wait (Tests/journeys_wait)"
 bash Tests/journeys_wait/test_journeys_wait.sh || fail "journeys wait: scripts/journeys-wait broke its decision tests"
 echo "== jetsam summary (Tests/jetsam)"
 bash Tests/jetsam/test_jetsam_summary.sh || fail "jetsam summary: scripts/jetsam-summary broke its fixture test"
+echo "== roadmap numbers (Tests/roadmap_numbers)"
+bash Tests/roadmap_numbers/test_roadmap_numbers.sh || fail "roadmap numbers: scripts/roadmap-numbers broke its fixture test"
 echo "== sample surfaces (Tests/sample_surfaces)"
 bash Tests/sample_surfaces/test_sample_surfaces.sh || fail "sample surfaces: scripts/sample-surfaces broke its fixture test"
 echo "== test scope (Tests/test_scope)"
