@@ -2,7 +2,7 @@
 
 Issue: #4516 (earlier #3475) · Packet: docs/blueprints/library/features/tone-controls.md
 Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 · Issue for Belt lines: #3475
-Stage: 3 wave 1, LT-1 PR #4948 open (head 04d5f848, fast-lane); LT-2 held per supervisor (#3475 6379613029): waits for TC-3 and LT-5. Checked 2026-10-24T05:57Z
+Stage: 3 wave 1, LT-1 PR #4948 open (head 04d5f848, fast-lane); LT-2 held per supervisor (#3475 6379613029): waits for TC-3 and LT-5. Checked 2026-10-24T06:13Z
 Base: origin/dev 8a54f64c
 Next: lane merges #4948 (code: batch macOS gate); then release tone-controls from this run per supervisor (Belt relaunches once TC-3 is on dev). No LT-2 PR.
 

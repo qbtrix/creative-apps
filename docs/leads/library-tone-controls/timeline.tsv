@@ -88,3 +88,4 @@ utc	stage	event	ref	note
 2026-10-24T05:23Z	heartbeat	PRs still on lane; batch 20261024050226 macOS gate running (none of ours)
 2026-10-24T05:39Z	heartbeat	PRs still on lane; batch 20261024050226 macOS gate running (none of ours)
 2026-10-24T05:57Z	heartbeat	PRs still on lane; batch 20261024050226 red on macOS, bisecting (probe -6), none of ours
+2026-10-24T06:13Z	heartbeat	PRs still on lane; batch 20261024050226 bisect probe -6 macOS running, none of ours
