@@ -108,3 +108,4 @@ utc	stage	event	ref	note
 2026-10-24T10:31Z	W4	check-in	PT-5	no change: tracked PRs clean, unmerged; dev 9f476af74; 0 tone findings; lane still stalled on batch 20261024081307, no supervisor reply on #5113 yet
 2026-10-24T10:54Z	W4	check-in	PT-5	dev-red #5113 closed (green at 9f476af74, main moved); dev 6883dd335 (#4616 docs only); tracked PRs open, clean, unmerged; 0 tone findings
 2026-10-24T11:15Z	W4	check-in	PT-5	no change for us: dev 6ad8cadba (#4617 docs, #5150 lane lists every open PR); tracked PRs open, unmerged, no labels; no dev-red; 0 tone findings
+2026-10-24T11:38Z	W4	check-in	PT-5	lane batch 20261024110214 holds #5008 (PT-6), #5007 (PT-2), #5006 (TC-3): Linux green, macOS gate running since 11:02Z; #5105, #5112 not batched yet; dev 6ad8cadba; 0 tone findings
