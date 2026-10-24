@@ -111,3 +111,4 @@ utc	stage	event	ref	note
 2026-10-24T16:14Z	3	check	#5116	16:20Z needs-rebase on #5116 (CB-12): fixer dispatched (merge dev, ci --changed, Head). batch-20261024160327 holds #5110,#4839-#4871, none ours; ours next. findings 0.
 2026-10-24T16:35Z	3	check	#5116	16:36Z #5116 fixer still running (ci --changed). #5125 #5149 clean, queued. findings 0.
 2026-10-24T16:37Z	3	fix	#5116	CB-12 needs-rebase fixed: merged dev (LibraryCommandCatalog + tests + list-commands golden kept edit.copy and thumbnails.stats), ci --changed PASS, head c8bf79f5, Head line moved.
+2026-10-24T16:58Z	3	check	lane	16:58Z all 11 PRs clean, no needs-rebase left. batch-20261024160327 (#5110,#4839-#4871, not ours) still in flight; ours next. findings 0.
