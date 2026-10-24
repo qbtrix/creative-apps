@@ -87,3 +87,4 @@ ts	kind	note
 2026-10-24T18:53:02Z	poll	hb30: dev 67446118 (#3759); PRs unchanged; no supervisor answer
 2026-10-24T19:15:08Z	poll	hb31: dev unchanged 67446118; PRs unchanged; no supervisor answer
 2026-10-24T19:37:06Z	poll	hb32: no change; dev 6f66ca33 (#5114) without #5088; no supervisor answer
+2026-10-24T19:59:15Z	poll	hb33: no change; dev 6f66ca33; #5131 (not ours) needs-fix; no supervisor answer
