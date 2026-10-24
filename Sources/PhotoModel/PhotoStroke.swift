@@ -9,7 +9,7 @@
 // Drags route by component: with a Free Transform in progress every drag goes
 // to `transformDrag` (PhotoTransform.swift); otherwise by tool, marquee to
 // `selectionDrag` (PhotoSelectionMask.swift), crop to `cropDrag`
-// (PhotoCropSize.swift), eyedropper to `sampleDrag` (PhotoEyedropper.swift),
+// (PhotoCropSize.swift), eyedropper to `sampleDrag` (PhotoSample+Kernel.swift),
 // a Pen drag adds a draft point on release (`runPath`, PhotoPaths+Kernel.swift),
 // and the rest paint or move here.
 //

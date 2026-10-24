@@ -2134,7 +2134,9 @@ SuiteUI does not have; section 6.4 lists them as issues to file.
 can't act yet is disabled by a nil action):
 
 - **Library**: About, Hide, Quit (no Settings window in v1).
-- **File**: Import Folder… ⇧⌘I, Load Sample Photos, Export… ⇧⌘E, Close ⌘W.
+- **File**: Import Folder… ⇧⌘I, Load Sample Photos, Export… ⇧⌘E, Share…
+  (share-sheet), Open Recent ▸ and Open In ▸ (the suite's file flow),
+  Restore Catalog Backup… (catalog-backup), Close ⌘W.
 - **Edit**: Undo <step> ⌘Z, Redo <step> ⇧⌘Z, Select All ⌘A, Deselect ⇧⌘A.
 - **View**: Grid, Loupe, Zoom In ⌘+ (in the grid: Larger
   Thumbnails), Zoom Out ⌘− (Smaller Thumbnails), Zoom to Fit ⌘0, Actual Size
