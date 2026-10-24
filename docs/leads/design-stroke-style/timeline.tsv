@@ -164,3 +164,4 @@ time	kind	note
 2026-10-24T12:53:39Z	3	check	-	dev 6be19b34; no lead PR in any batch; #4864 #4888 #3759 clean
 2026-10-24T13:15:17Z	3	check	-	dev 6be19b34 unchanged; lane active (Linux integration runs), no lead PR batched yet; #4864 #4888 #3759 clean
 2026-10-24T13:36:56Z	3	check	-	dev 6be19b34 unchanged; batch 20261024110214 bisecting (probe -3); no lead PR batched; #4864 #4888 #3759 clean
+2026-10-24T13:58:47Z	3	check	-	dev 6be19b34 unchanged; batch 20261024110214 still bisecting; no lead PR batched; #4864 #4888 #3759 clean
