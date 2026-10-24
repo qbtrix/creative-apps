@@ -76,3 +76,4 @@ utc	stage	event	ref	note
 2026-10-24T04:39Z	check	heartbeat	-	04:40Z check: #4893 AN-u open fast-lane; lane bisect probe -8 macOS still running (not ours); AN-6 stacked
 2026-10-24T05:01Z	check	heartbeat	-	05:02Z check: #4893 AN-u open fast-lane; lane bisect probe -8 macOS running 60 min (not ours); AN-6 stacked
 2026-10-24T05:24Z	check	heartbeat	-	05:25Z check: #4893 AN-u open fast-lane; old bisect done, new batch 20261024050226 (PRs 4839-4875, not ours) Linux green, macOS running; AN-6 stacked
+2026-10-24T05:46Z	check	heartbeat	-	05:47Z check: #4893 AN-u open fast-lane; batch 20261024050226 (not ours) red on macOS, bisect probe -6 running; AN-6 stacked
