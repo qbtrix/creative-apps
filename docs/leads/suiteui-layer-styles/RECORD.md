@@ -3,8 +3,8 @@
 Issue: #3937 · Packet: docs/blueprints/suiteui/features/layer-styles.md
 Run: act-1a16cdcb4a5-trd4 · Session: claude/feature-lead-playbook-9a8kbw · Started: 2026-10-23T15:30Z
 Stage: 3 wave 2
-Base: 78983bc33639a92c21e537086428c885f5602d55 (origin/dev)
-Next: Next: 16:11Z check
+Base: 33cd6e97cd3ba54100f0f04244af7a1faeb94e7a (origin/dev)
+Next: next: LS-3 after #5174, LS-6/7 after #5176
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
