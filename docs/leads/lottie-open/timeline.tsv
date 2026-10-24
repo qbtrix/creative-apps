@@ -77,3 +77,5 @@ utc	stage	event	ref	note
 2026-10-23T11:14:11Z	heartbeat	#4780 still waiting: lane macOS build 39939160914 queued (macOS runners saturated); full CI 39937843350 pending, so no LO-u screens yet
 2026-10-23T11:36:18Z	heartbeat	#4780 still waiting on lane macOS build 39939160914 (queued since 10:26Z); macOS runners busy with older scoped runs (design, library, halo), journeys full and CI 39929490747; full CI 39937843350 still pending
 2026-10-23T11:58:22Z	heartbeat	#4780 still waiting on lane macOS build 39939160914 (queued since 10:26Z); full CI 39937843350 still pending; nothing to act on
+2026-10-24T05:35:59Z	slice-done	LO-z Belt-Slice-Done on full run 40037716897; Mac-Finish-Wanted LO-z
+2026-10-24T05:35:59Z	fix-round	round 1 for #4954 (journey note match), branch fix/lottie-open-4954
