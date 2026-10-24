@@ -32,3 +32,21 @@ utc	stage	event	ref	note
 2026-10-21T12:25Z	heartbeat		Heartbeat: dev still red (#3856); #3844 held at a880a6f9, #3847 stacked.
 2026-10-21T12:52Z	heartbeat	heartbeat: #3844 TS-5 held while dev red (#3856, photo line); #3847 stacked
 2026-10-22T16:40Z	relaunch		run act-1a164697376-dv7u on #4519; TS-m done (run 39808732641); rest blocked on FP-a
+2026-10-23T15:25:45Z	resume	run act-1a16958d72f-a4mg resumed at stage 3 on dev 721168a8; wave 1 planned
+2026-10-23T15:27:34Z	wave	wave 1 launched: TS-a (wf_5e1bd12c-3c2)
+2026-10-23T17:29:06Z	nudge	Belt nudge read; records for run act-1a16958d72f-a4mg mirrored here (Belt reads lead/suiteui-text-style)
+2026-10-23T17:43:33Z	wave	wave 2 launching: TS-u on TS-a #4871
+2026-10-23T17:47:46Z	wave	wave 2 launched (wf_01c03c8e-a81): TS-u stacked on TS-a #4871 (font-picker built)
+2026-10-23T18:12:38Z	heartbeat	wave 2 building; slice PRs open on fast-lane, none needs-fix/needs-rebase, none merged yet
+2026-10-23T18:35:01Z	heartbeat	wave 2 builders still running; slice PRs open on fast-lane, clean, none merged yet
+2026-10-23T18:56:56Z	heartbeat	wave 2 builders running; slice PRs clean on fast-lane, lane active (dev at 0d4645bfb), none merged yet
+2026-10-23T18:59:08Z	pr	TS-u PR #4958 opened (head c7790823e, CI: PASS), stacked on TS-a #4871: own diff ~271 lines over TS-a; PR reads 579 vs dev until TS-a merges, then merge origin/dev into it and move Head:
+2026-10-23T19:18:23Z	heartbeat	slice PRs open and clean; wave 2 building
+2026-10-23T19:31:58Z	pr	TS-u #4958 restacked on TS-a (head a2f7151ee, test commit first, own diff 6 files +272/-3), scripts/ci --changed CI: PASS, Head moved
+2026-10-23T19:40:44Z	heartbeat	slice PRs open and clean
+2026-10-23T20:03:23Z	heartbeat	no slice merged yet; oversize stacked PRs (#4958 #4961 #4965 #4982) off fast-lane until their parents merge; BK restack gates running
+2026-10-23T20:25:13Z	heartbeat	parents #4871 #4939 open; stacked children off fast-lane (size) until parents merge; DS PRs #4887 #4891 #4901 #4918 clean, queued
+2026-10-23T20:48:41Z	heartbeat	all 10 slice PRs open, clean, fast-lane; lane bisecting batch 20261023192105 (no needs-fix on ours)
+2026-10-23T21:12:41Z	heartbeat	queued behind lane batch 20261023204921 (#4841-#4862, Linux green, macOS running); ours not in it; no needs-fix, no dev-red
+2026-10-23T21:35:13Z	heartbeat	still queued: batch 20261023204921 macOS gate running; no needs-fix, no dev-red
+2026-10-24T05:34:44Z	resume	run act-1a16c618fe7-h4fd: TS-a #4871 queued, TS-u #4958 stacked; wave 3 = TS-7

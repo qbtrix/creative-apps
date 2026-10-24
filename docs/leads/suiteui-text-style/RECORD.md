@@ -1,17 +1,17 @@
 # text-style lead record
 
-Issue: #4519 (relaunch of #3779) · Packet: docs/blueprints/suiteui/features/text-style.md
-Run: act-1a164697376-dv7u · Started: 2026-10-22T16:40Z
-Stage: 3 wave 2 (blocked)
-Base: 7e9f260ae8f69dea63663c1bc7ea945c6b1d2f80 (dev)
-Next: wait on font-picker FP-a (TS-2) and FP-u (TS-u); poll every 20 min
+Issue: #3779 (relaunch #4519) · Packet: docs/blueprints/suiteui/features/text-style.md
+Run: act-1a16c618fe7-h4fd (line lead, line:suiteui) · earlier run act-1a16958d72f-a4mg
+Stage: 3 wave 3 (this run)
+Base: origin/dev 654fb3632
+Next: TS-a #4871 is in the lane. TS-u #4958 is stacked on it, so dev gets merged in once #4871 lands. TS-7 builds now on TS-m (Wire: brush-keys:BK-design, which shares DesignCommandCatalog). TS-8 needs TS-3. TS-9 waits on adjust-everywhere AJ-a, whose contract isn't merged; AE-flare is building, and AN-a is on dev.
 
 ## Slices
 
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| TS-a | TextStyle, rules, commands and rows declared; checks written, disabled | TS-1, TS-2 | – | font-picker:FP-a (TS-2) | true | 0 | TS-1 merged #3836; TS-2 blocked (FP-a) | – | – |
-| TS-u | the rows read and scrub the style | TS-3, TS-4 | – | TS-a, font-picker:FP-u | true | 0 | planned | – | – |
+| TS-a | TextStyle, rules, commands and rows declared; checks written, disabled | TS-1, TS-2 | – | font-picker:FP-a (TS-2) | true | 0 | pr #4871 | – | – |
+| TS-u | the rows read and scrub the style | TS-3, TS-4 | – | TS-a, font-picker:FP-u | true | 0 | pr #4958 | – | – |
 | TS-m | ranges clamp, tracking em-relative, layout, one undo step per scrub | TS-5, TS-6 | – | TS-1 | false | 0 | done | 39808732641 | – |
 | TS-design | Design adopts | TS-7, TS-8 | – | TS-m, TS-u, adopt-command-catalog:AC-design (built), brush-keys:BK-design (planned) | true | 0 | planned | – | – |
 | TS-halo | Halo adopts; feature built | TS-9, TS-10, TS-11, TS-12 | – | TS-design, TS-m, TS-u, AE-halo, AJ-halo, AN-halo (planned) | true | 0 | planned | – | – |
@@ -21,12 +21,19 @@ Next: wait on font-picker FP-a (TS-2) and FP-u (TS-u); poll every 20 min
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | TS-1 | TS-a | 1 | contract types, specs that throw NotBuilt, disabled suites | Sources/SuiteKernel/Text/TextStyle.swift, Sources/SuiteKernel/Text/TextStyleRules.swift, Sources/SuiteKernel/Text/TextCommands.swift, Tests/SuiteKernelTests/TextStyleRulesTests.swift, Tests/SuiteKernelTests/TextStyleLayoutTests.swift, Tests/SuiteKernelTests/TextCommandsTests.swift, docs/c4/parts/creative-apps/suite-kernel/kernel-text.json | suites compile disabled; KernelShapeTests unchanged | #3836 | merged |
-| TS-2 | TS-a | – | TextStyleRows | Sources/SuiteUI/TextStyleRows.swift | see packet | – | blocked (FP-a) |
+| TS-2 | TS-a | – | TextStyleRows | Sources/SuiteUI/TextStyleRows.swift | TextStyleRowsTests | #4871 | pr |
 | TS-5 | TS-m | 2 | rule and layout bodies | Sources/SuiteKernel/Text/TextStyleRules.swift, Tests/SuiteKernelTests/TextStyleRulesTests.swift, Tests/SuiteKernelTests/TextStyleLayoutTests.swift, Tests/mutations/SuiteKernel.TextStyleRules.json | .trackingIsEmRelative .lineHeightClamps .lastLineNotJustified | #3844 | merged |
 | TS-6 | TS-m | 2 | command bodies | Sources/SuiteKernel/Text/TextCommands.swift, Tests/SuiteKernelTests/TextCommandsTests.swift, Tests/mutations/SuiteKernel.TextCommands.json | .scrubIsOneStep .familyKeepsWeight | #3847 | merged |
 | TS-3 | TS-u | – | see packet | see packet | see packet | – | blocked |
 | TS-4 | TS-u | – | see packet | see packet | see packet | – | blocked |
-| TS-7..TS-12 | TS-design, TS-halo | – | see packet | see packet | see packet | – | blocked |
+| TS-7 | TS-design | 3 | Design adopts TextStyleTarget (test first) | see packet | DesignTextStyleTests; Mutate | – | building |
+| TS-8..TS-12 | TS-design, TS-halo | – | see packet | see packet | see packet | – | waits (TS-3; AJ-a, AE-flare) |
+
+## Wire
+- [ ] Wire: brush-keys:BK-design (built ahead in TS-7: TS-design shares a Design app file; BK-a is on dev)
+- [ ] Wire: anchor-parenting:AN-halo (TS-9, when built: AN-a is on dev)
+- [ ] Wire: adjust-everywhere:AJ-halo (TS-9 waits: AJ-a's contract isn't merged)
+- [ ] Wire: adopt-kernel-easing:AE-halo (TS-9 waits: AE-flare not done)
 
 ## Reviews
 
@@ -35,6 +42,7 @@ Next: wait on font-picker FP-a (TS-2) and FP-u (TS-u); poll every 20 min
 
 ## Decisions
 
+- 2026-10-24T05:34:44Z relaunch as run act-1a16c618fe7-h4fd, using contract-first waits (lead.md rule 12). BK-a is on dev, so TS-7 builds now on TS-m's kernel and gets a Wire: line for BK-design. TS-9 still waits, because adjust-everywhere's first slice AJ-a hasn't merged (FilterRules and AdjustCommands are missing on dev). TS-m's Belt-Slice-Done was posted on #4519 (run 39808732641).
 - 2026-10-21T01:21:08Z: integration base is dev (7277a83a), not main.
 - 2026-10-21T01:21:08Z: TS-m unchained from TS-a: TS-5 and TS-6 need only TS-1's kernel code, not TS-2's SuiteUI rows (which wait on font-picker FP-a); they stack on TS-1.
 - 2026-10-21T01:21:08Z: TS tests measure with a fixed-advances closure of their own, since FakeText belongs to shell-text ST-a (not built).
@@ -91,6 +99,7 @@ Next: wait on font-picker FP-a (TS-2) and FP-u (TS-u); poll every 20 min
 
 - 2026-10-21T12:52Z heartbeat: #3844 TS-5 held while dev red (#3856, photo line); #3847 stacked
 - 2026-10-22T16:40Z: run act-1a164697376-dv7u on new issue #4519. TS-1 #3836, TS-5 #3844, TS-6 #3847 merged and in green dev Linux run 39808732641 (401242a59): Belt-Slice-Done TS-m posted on #4519.
+- 2026-10-23T15:25Z (act-1a16958d72f-a4mg): contract-first waits (lead.md rule 12, #4814): a wait on another feature is met once that feature's first slice merged; each wait built ahead of its slice is listed under Wire. Merged-done = green `Linux` on a dev CI run containing the slice's last PR.
 
 ## Open
 
