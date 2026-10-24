@@ -106,6 +106,8 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var collectionsRevision = 0  // bumps on every collections or filter change
     public internal(set) var collectionsSavedRevision = 0
     public internal(set) var collectionsNotice: String?  // the damaged-file notice
+    /// Paths Delete Rejects moved to the Trash, which an import skips (cull-finish DR-6).
+    public internal(set) var excludedPaths: Set<String> = []
 
     public init(services: LibraryServices = .fake()) {
         self.services = services
@@ -133,7 +135,7 @@ public struct LibraryCatalog: Sendable, Equatable {
             && lhs.showsTestValues == rhs.showsTestValues
             && lhs.collectionsRevision == rhs.collectionsRevision
             && lhs.collectionsSavedRevision == rhs.collectionsSavedRevision
-            && lhs.collectionsNotice == rhs.collectionsNotice
+            && lhs.collectionsNotice == rhs.collectionsNotice && lhs.excludedPaths == rhs.excludedPaths
         return browse && work && loupe && file
     }
 

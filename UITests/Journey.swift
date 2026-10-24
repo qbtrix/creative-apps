@@ -39,6 +39,10 @@ struct Journey {
     /// Launches `.build/apps/<appName>App.app` (or `bundle`) fresh, with no
     /// restored windows and `arguments` added to its launch arguments. Shots
     /// and the audit tally go under `name`; nil means the app's name in lower case.
+    /// A switch with no value (`-LibraryImportOnLaunch`) goes last: AppKit reads
+    /// arguments as `-Key value` pairs, so a switch in the middle takes the next
+    /// flag as its value, that flag's path is left on its own, and the app opens
+    /// it as a document at launch and shows no window.
     init(_ appName: String, _ test: XCTestCase, name: String? = nil, arguments: [String] = [], bundle: URL? = nil) {
         // This file is UITests/Journey.swift, so its grandparent is the repo root.
         let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()

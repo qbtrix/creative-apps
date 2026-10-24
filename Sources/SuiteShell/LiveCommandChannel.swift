@@ -43,7 +43,7 @@ public final class LiveCommandChannel {
             do throws(CatalogError) { let outcome = try D.catalog.run(id, params: params, on: &doc); apply(doc); return .success(outcome) }
             catch { return .failure(error) }
         }
-        let support = SuiteLocations.supportFolder(arguments: ProcessInfo.processInfo.arguments, home: NSHomeDirectory())
+        let support = SuiteLocations.processSupportFolder
         grants = StorePreferences(store: FileStore(folder: support))
     }
 

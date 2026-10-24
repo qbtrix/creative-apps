@@ -13,12 +13,22 @@ public struct ExportNaming: Hashable, Sendable, Codable {
     /// `/` and `:` made "-" (SuiteModel's rule), leading dots dropped; the photo's name when
     /// that leaves nothing.
     public func stem(for photo: PhotoItem, index: Int, count: Int) -> String {
+        Self.stem(for: photo, index: index, digits: String(max(count, 1)).count, pieces: pieces)
+    }
+
+    /// The stems of `photos` in order, the template parsed once (LG-4).
+    public func stems(for photos: [PhotoItem]) -> [String] {
+        let pieces = pieces, digits = String(max(photos.count, 1)).count
+        return photos.enumerated().map { Self.stem(for: $1, index: $0, digits: digits, pieces: pieces) }
+    }
+
+    private static func stem(for photo: PhotoItem, index: Int, digits: Int, pieces: [Piece]) -> String {
         let filled = pieces.map { piece -> String in
             switch piece {
             case .text(let text): return text
             case .token("name"): return photo.name
             case .token("date"): return LibraryCatalog.dayText(photo.captureDate, utcOffset: 0)
-            case .token("seq"): return LibraryFixtures.padded(index + 1, to: String(max(count, 1)).count)
+            case .token("seq"): return LibraryFixtures.padded(index + 1, to: digits)
             case .token("rating"): return String(min(max(photo.rating, 0), 5))
             case .token(let other): return "{\(other)}"
             }
@@ -54,17 +64,25 @@ public struct ExportNaming: Hashable, Sendable, Codable {
 public enum ExportNames {
     /// `<stem>.<ext>`, then `<stem> 2.<ext>`, `<stem> 3.<ext>` … skipping `existing`
     /// and names earlier in the list; with `sidecar`, `<chosen stem>.xmp` must be free too.
+    /// Names compare lowercased (UniqueFileNames' rule). One pass: `taken` holds lowercased
+    /// stems and grows per photo, so a plan of n photos never rescans the names before it (LG-4).
     public static func unique(stems: [String], format: ExportFormat, sidecar: Bool,
                               existing: Set<String>) -> [String] {
         let image = "." + format.fileExtension
         let suffixes = sidecar ? [image, ".xmp"] : [image]
         var taken = Set(existing.compactMap { name in
-            suffixes.first { name.lowercased().hasSuffix($0) }.map { String(name.dropLast($0.count)) }
+            suffixes.first { name.lowercased().hasSuffix($0) }.map { String(name.dropLast($0.count)).lowercased() }
         })
         return stems.map { stem in
-            let picked = UniqueFileNames.name(stem, extension: "", among: taken)
+            let base = UniqueFileNames.name(stem, extension: "", among: [])
+            var name = base, number = 2
+            while taken.contains(name.lowercased()) {
+                name = "\(base) \(number)"
+                number += 1
+            }
+            let picked = name.lowercased()
             taken.insert(picked)
-            return picked + image
+            return name + image
         }
     }
 }
