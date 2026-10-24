@@ -114,3 +114,4 @@ utc	stage	event	ref	note
 2026-10-24T17:28:23Z	merge	#4868 (HF-u) merged 10642721; stacked PRs on dev; #5092 needs-rebase fixed: dev merged in, head 63616302, CI --changed PASS
 2026-10-24T17:50:46Z	slice-done	HF-u Belt-Slice-Done + Mac-Finish-Wanted on #3474 (https://github.com/qbtrix/creative-apps/actions/runs/40116034771, Linux check green on c0920138); no open findings for this feature
 2026-10-24T18:12:34Z	poll	dev c0920138 unchanged; open PRs unlabelled, not in batch; no findings for this feature
+2026-10-24T18:34:10Z	poll	dev d13c3ff2; batch landed without ours; open PRs unlabelled; no new findings
