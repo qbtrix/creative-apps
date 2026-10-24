@@ -10,6 +10,11 @@
 # files to dev as github-actions[bot], the way ci.yml's `audit-lower` pushes
 # lowered baselines: on a refused push (dev moved) it fetches dev and
 # regenerates on top, up to 3 retries. GITHUB_TOKEN pushes start no workflow.
+# While a lane batch is in flight (a lane/batch-* branch at origin) it waits,
+# polling every 2 minutes for up to 90, then pushes anyway: a dev move under a
+# batch with a ratchet-touching PR made the lane drop the whole batch
+# (scripts/fast-lane.sh proof_stale; 8 clean PRs went back to the queue on
+# 2026-10-23 after 6 h).
 #
 # Transition guard: the lane runs its script from main, which moves only on a
 # green dev, so for a while a PR that edits a generated file directly can still
@@ -51,7 +56,7 @@ jobs:
   generate:
     name: Generate
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 100  # up to 90 min waiting on a lane batch, then the work
     steps:
       - uses: actions/checkout@v4
         with:
@@ -67,6 +72,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           report=""
+          deadline=$((SECONDS + 90 * 60))  # the most this run waits on lane batches, over every attempt
           # GitHub runs this with bash -e: each status is caught with ||.
           for attempt in 1 2 3 4; do
             report=""
@@ -85,6 +91,12 @@ jobs:
               break
             fi
             files=$(git diff --cached --name-only)
+            # A lane batch in flight would be dropped by this push (its proof goes
+            # stale when dev moves): wait for it, 2 min at a time, up to the deadline.
+            while (( SECONDS < deadline )) && [[ -n "$(git ls-remote --heads origin 'refs/heads/lane/batch-*')" ]]; do
+              echo "A lane batch is in flight (lane/batch-* at origin); waiting 2 min before pushing."
+              sleep 120
+            done
             git commit -q -m "$title" -m "Written by $run_url from the parts on dev $(git rev-parse --short HEAD)." -m "$files"
             if git push origin HEAD:refs/heads/dev; then
               printf 'Generated: pushed %s to dev.\n\n%s\n' "$(git rev-parse --short HEAD)" "$files" >>"$GITHUB_STEP_SUMMARY"

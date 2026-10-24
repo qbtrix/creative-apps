@@ -58,7 +58,7 @@
   {
     "label": "a copy drops the gradient",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "        gradient = node.gradient",
+    "find": "        extras = node.extras",
     "replace": "",
     "tests": "DesignGradientTests.swift"
   },
@@ -72,8 +72,8 @@
   {
     "label": "a copy drops the picture",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "        placedAsset = node.placedAsset",
-    "replace": "",
+    "find": "        extras = node.extras",
+    "replace": "        extras = node.extras; placedAsset = nil",
     "tests": "DesignPlaceTests.swift"
   },
   {
@@ -93,8 +93,8 @@
   {
     "label": "an ellipse or text keeps a picture",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "(kind.holdsPicture ? placedAsset : nil, placedFocus ?? Self.centreFocus)",
-    "replace": "(placedAsset, placedFocus ?? Self.centreFocus)",
+    "find": "if kind.holdsPicture, placedAsset != nil { self.placedAsset = placedAsset }",
+    "replace": "if placedAsset != nil { self.placedAsset = placedAsset }",
     "tests": "DesignPlaceTests.swift"
   },
   {
