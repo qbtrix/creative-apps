@@ -2,9 +2,9 @@
 
 Issue: #4516 (earlier #3475) · Packet: docs/blueprints/library/features/tone-controls.md
 Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 · Issue for Belt lines: #3475
-Stage: 3 wave 1, LT-1 PR #4948 open (head 04d5f848, fast-lane); TC-2 on dev as placeholder; LT-2 held pending supervisor (#3475 6375368223). Checked 2026-10-24T03:57Z
+Stage: 3 wave 1, LT-1 PR #4948 open (head 04d5f848, fast-lane); LT-2 held per supervisor (#3475 6379613029): waits for TC-3 and LT-5. Checked 2026-10-24T04:14Z
 Base: origin/dev 8a54f64c
-Next: lane merges #4948 (code: batch macOS gate); then if TC-2 (ToneRows) is still not on dev, release this feature's part of the run per supervisor; else LT-2 (removes the DevelopSlider typealias, wires ToneRows) in the same slice.
+Next: lane merges #4948 (code: batch macOS gate); then release tone-controls from this run per supervisor (Belt relaunches once TC-3 is on dev). No LT-2 PR.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -18,7 +18,7 @@ Next: lane merges #4948 (code: batch macOS gate); then if TC-2 (ToneRows) is sti
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | LT-1 | LT-a | 1 | DevelopSettings.tone, flattened coding, ToneSlider, ToneTarget stubs, LibraryToneTests disabled | DevelopValues.swift, LibraryTone+Kernel.swift, LibraryToneTests.swift | fixture round trip | #4948 | open, fast-lane; head 04d5f848; CI: PASS; 13 files +261/-124; no Mutate line (stub per packet) |
-| LT-2 | LT-a | 2 | Develop TONE and COLOR rows become ToneRows | DevelopInspector.swift | LibraryToneSnapshots.develop | - | waits on Wire tone-controls:TC-2 |
+| LT-2 | LT-a | 2 | Develop TONE and COLOR rows become ToneRows | DevelopInspector.swift | LibraryToneSnapshots.develop | - | held: waits for TC-3 and LT-5 (supervisor 6379613029) |
 
 ## Wires
 - [ ] Wire: tone-controls:TC-2 (LT-2: ToneRows in DevelopInspector; no placeholder view per supervisor)
@@ -35,6 +35,8 @@ Next: lane merges #4948 (code: batch macOS gate); then if TC-2 (ToneRows) is sti
 - Stage 0.4: no task can start. LT-1 needs ToneSettings/ToneRules/ToneRows from suiteui TC-a, absent from Sources; per #3476's record TC-a itself waits on gradient-fill GF-2 (and AH-a, PL-a).
 
 - Run act-1a15df37b73-k199: the brief says to rebase lead/tone-controls onto origin/main with --force-with-lease. Not done: that branch is the suiteui tone-controls lead's record (#3476), it shares no merge base with main and carries 1,739 non-record commits, so a rebase rewrites another lead's live history. This record stays on lead/library-tone-controls. Raised as a question below.
+
+- 2026-10-24T04:14Z: supervisor answer on #3475 (6379613029): LT-2 waits for TC-3 and LT-5; never ship a swap that turns working sliders read-only. Let LT-1 (#4948) land, then release tone-controls from this run; Belt relaunches it once TC-3 is on dev.
 
 ## Open
 - 2026-10-22T16:50Z (run act-1a16474bd12-7ncx, #4516): rule 23 re-read. TC-a is still unmerged: #4520 record says TC-1 is building, and no open PR carries Feature: tone-controls. Sources/SuiteImaging/Tone/ is absent on dev. LT-a stays blocked. 0 open findings.
