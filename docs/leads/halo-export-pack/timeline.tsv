@@ -125,3 +125,4 @@ utc	stage	event	ref	note
 2026-10-24T21:33Z	5	push	#4874,#4917,#4942	scripts/ci --changed PASS on each; force-with-lease to HX-m 07046e24, HX-4 cc83cdee, HX-z 13e6000c; Head lines moved; needs-split dropped
 2026-10-24T21:56Z	5	poll	-	no merges; lane bisecting batch 20261024205137; no new findings for this feature
 2026-10-24T22:18Z	check	22:18Z check-in: lane merged dev into #4874 (head 4513f1e4, Linux check green); #4917, #4942 open, clean, no needs-fix. No green dev run holds a slice's last PR yet. No new findings.
+2026-10-24T22:41Z	check	22:41Z check-in: all six PRs still open with fast-lane and no needs-fix (REST pulls returned 503, so states came from search). No green dev ci.yml run holds a slice's last PR (40137153379 still running at afef017c). No new findings.
