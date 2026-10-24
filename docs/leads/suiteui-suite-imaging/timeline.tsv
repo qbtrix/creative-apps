@@ -81,3 +81,4 @@ utc	stage	event	ref	note
 2026-10-24T18:22Z	poll	check	all	batch landed without ours; #5163 dirty, lane integrates
 2026-10-24T18:42Z	poll	check	all	#4886 in batch 20261024183708
 2026-10-24T19:02Z	poll	check	all	#4886 batch on macOS; #5163 conflicts with #5042 in Loupe.swift
+2026-10-24T19:22Z	poll	check	all	batch red on DesignApp (not ours), bisect probe ends at #4886

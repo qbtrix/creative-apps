@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: 19:02Z poll: batch 20261024183708 (with #4886) Linux green, macOS gate running. #5163 dirty: real conflict in LibraryWindow+Loupe.swift with #5042 (LG-6, 1e73e172e); #5178 dirty via stack. Resolve when the lane labels needs-rebase (expected, Swift has no merge driver). #3723 open; supervisor q 6383016723 unanswered. Poll again ~19:20Z.
+Next: 19:22Z poll: batch 20261024183708 macOS red on DesignApp/DesignCommands.swift (LiveFront API, a design PR, not ours); lane bisecting, probe -6 ends at #4886. #5163 still dirty (Loupe.swift vs #5042), no needs-rebase yet; #5178 dirty via stack. #3723 open; supervisor q 6383016723 unanswered. Poll again ~19:40Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
 
