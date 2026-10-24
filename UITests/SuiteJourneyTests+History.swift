@@ -2,7 +2,8 @@
 // the Journey steps 1 to 4 of docs/blueprints/suiteui/features/autosave-history.md (numbered below), in Library,
 // shot under `suiteui`. Rows are `suite.history.row.<n>`, 0 for "Open"; the page logs `history.jump {"index": <n>}`
 // to `suite.gallery.log`. AH-2 wrote it skipped; AH-4 turned it on over AH-3's panel: the rows sit in `suite.history`,
-// the current one carries the selected trait, a click jumps, Up and Down move the selection and Return jumps.
+// the current one carries the selected trait, a click at a row's centre jumps, Up and Down move the selection and
+// Return jumps.
 import XCTest
 
 final class SuiteHistoryJourneyTests: XCTestCase {
@@ -18,7 +19,7 @@ final class SuiteHistoryJourneyTests: XCTestCase {
         for n in 0...Self.steps where !gallery.element("suite.history.row.\(n)").exists { XCTFail("no suite.history.row.\(n)") }
         expectCurrent(gallery, 8)
         gallery.shot("history-panel-open")
-        gallery.element("suite.history.row.4").click() // 2. The fourth step is current; one jump logged.
+        clickRow(gallery, 4) // 2. The fourth step is current; one jump logged.
         expectLog(gallery, "history.jump {\"index\": 4}", "the click on step 4 logged no jump")
         expectCurrent(gallery, 4)
         gallery.shot("history-panel-jumped")
@@ -32,12 +33,20 @@ final class SuiteHistoryJourneyTests: XCTestCase {
         for _ in 0..<8 { gallery.app.typeKey(.upArrow, modifierFlags: []) } // Up past "Open" stays on "Open".
         gallery.app.typeKey(.return, modifierFlags: [])
         expectLog(gallery, "history.jump {\"index\": 0}", "Up past Open and Return logged no jump to 0")
-        gallery.element("suite.history.row.6").click()
+        clickRow(gallery, 6)
         expectLog(gallery, "history.jump {\"index\": 6}", "the click on step 6 logged no jump")
-        gallery.element("suite.history.row.0").click() // 4. "Open": nothing applied, every step dims.
+        clickRow(gallery, 0) // 4. "Open": nothing applied, every step dims.
         expectLog(gallery, "history.jump {\"index\": 0}", "the click on Open logged no jump to 0")
         expectCurrent(gallery, 0)
         gallery.shot("history-panel-base")
+    }
+
+    /// Clicks row `index` at its centre, as a person does: through the element, XCUITest looks for a hit point on
+    /// the panel's ScrollView, finds none on the runner and fails (#2957, #3853).
+    @MainActor private func clickRow(_ gallery: Journey, _ index: Int) {
+        let row = gallery.element("suite.history.row.\(index)")
+        XCTAssert(row.waitForExistence(timeout: 5), "no suite.history.row.\(index)")
+        row.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click()
     }
 
     /// Row `index` is selected and reads applied; every row after it reads not applied.

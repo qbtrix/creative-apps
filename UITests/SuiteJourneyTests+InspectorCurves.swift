@@ -178,8 +178,8 @@ extension SuiteJourneyTests {
         XCTAssertGreaterThan(curvesPoint(first)?.y ?? 0, (before?.y ?? 1) + 0.05, "handle 1 didn't rise")
         XCTAssert(curvesLines(log).contains { $0.hasPrefix("handle1 ") }, "the drag logged no handle1 move")
 
-        // 2. Tab moves to handle 2 (0.58, 1); ↑ nudges it 0.01 and ⇧↑ to the next 0.1
-        // (a nudge snaps to its step, so 1.01 goes to 1.1), one end each.
+        // 2. Tab moves to handle 2 (0.58, 1); ↑ nudges it 0.01 and ⇧↑ adds 0.1 (the contract's
+        // "0.01, ⇧ 0.1": CurveEditor.nudged takes 1.01 to 1.11, #3175), one end each.
         let start = curvesPoint(second)?.y ?? 0
         gallery.press(.tab)
         gallery.press(.upArrow)
@@ -187,7 +187,7 @@ extension SuiteJourneyTests {
         XCTAssertEqual((curvesPoint(second)?.y ?? 0) - start, 0.01, accuracy: 0.001, "↑ didn't nudge handle 2 by 0.01")
         gallery.press(.upArrow, .shift)
         curvesExpect(["easing ends 3"], log)
-        XCTAssertEqual((curvesPoint(second)?.y ?? 0) - start, 0.1, accuracy: 0.001, "⇧↑ didn't nudge handle 2 to the next 0.1")
+        XCTAssertEqual((curvesPoint(second)?.y ?? 0) - start, 0.11, accuracy: 0.001, "⇧↑ didn't add 0.1 to handle 2")
         gallery.shot("curves-easing-nudged")
 
         // 3. Reduce Motion on: the preview dot stops (`preview-stopped`, series `curve-preview`).
