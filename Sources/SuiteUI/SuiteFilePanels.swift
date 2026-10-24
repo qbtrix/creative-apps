@@ -28,8 +28,8 @@ import UniformTypeIdentifiers
     public static var answer: ((Request) -> [URL]?)?
     /// Where the last chosen folder is kept; each app is its own process, so its own defaults domain.
     public static var defaults = UserDefaults.standard
-    static let lastDirectoryKey = "SuiteFilePanelLastDirectory"
-    static let launchKey = "SuiteFilePanelAnswer"
+    nonisolated static let lastDirectoryKey = "SuiteFilePanelLastDirectory"
+    nonisolated static let launchKey = "SuiteFilePanelAnswer"
 
     /// Every type the registry says `app` opens, then `extensions` (Flare's Lottie JSON), once each.
     public nonisolated static func openTypes(for app: SuiteApp, adding extensions: [String] = []) -> [UTType] {
