@@ -58,3 +58,16 @@ import SuiteKernel
         }
     }
 }
+
+/// A New document's background reads its hex through HexText: "#" and six or eight digits, either case, written
+/// back upper case; a zero alpha byte is transparent.
+@Suite struct DocumentBackgroundHexTests {
+    @Test func backgroundHexReadsThroughHexText() {
+        #expect(DocumentBackground(parsing: "#ff8800") == .color(hex: "#FF8800"))
+        #expect(DocumentBackground(parsing: "#FF880080") == .color(hex: "#FF880080"))
+        #expect(DocumentBackground(parsing: "#ff880000") == .transparent)
+        for text in ["#F80", "FF8800", "#GG0000", "#FF88001", " #FF8800", "#+12345", "#FF8800 "] {
+            #expect(DocumentBackground(parsing: text) == nil, "\(text) read as a background")
+        }
+    }
+}

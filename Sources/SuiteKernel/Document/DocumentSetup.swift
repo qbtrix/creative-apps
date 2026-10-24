@@ -37,9 +37,8 @@ public enum DocumentBackground: Hashable, Sendable, Codable {
         case "white": self = .white
         case "transparent": self = .transparent
         default:
-            let digits = text.dropFirst().uppercased()
-            guard text.hasPrefix("#"), digits.count == 6 || digits.count == 8, digits.allSatisfy(\.isHexDigit) else { return nil }
-            self = digits.count == 8 && digits.hasSuffix("00") ? .transparent : .color(hex: "#" + digits)
+            guard text.hasPrefix("#"), text.count == 7 || text.count == 9, let color = HexText.parse(text) else { return nil }
+            self = HexText.byte(color.a) == 0 ? .transparent : .color(hex: text.uppercased())
         }
     }
 

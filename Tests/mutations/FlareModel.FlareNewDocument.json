@@ -1,0 +1,16 @@
+[
+  {
+    "label": "translucentHex: a translucent hex reads as an opaque Flare colour",
+    "file": "Sources/FlareModel/FlareNewDocument.swift",
+    "find": "HexText.byte(color.a) == 255",
+    "replace": "true",
+    "tests": "FlareHexTextTests"
+  },
+  {
+    "label": "ownHexFormat: the New document writes lower case, not the kernel's format",
+    "file": "Sources/FlareModel/FlareNewDocument.swift",
+    "find": "public static func hex(_ color: FlareColor) -> String { HexText.format(color) }",
+    "replace": "public static func hex(_ color: FlareColor) -> String { HexText.format(color).lowercased() }",
+    "tests": "FlareHexTextTests"
+  }
+]
