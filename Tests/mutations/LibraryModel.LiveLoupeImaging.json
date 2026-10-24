@@ -1,0 +1,30 @@
+[
+  {
+    "label": "the GPU frame's histogram is the undeveloped picture's, not the decoded base developed on the CPU",
+    "file": "Sources/LibraryModel/Live/LiveLoupeImaging.swift",
+    "find": "let developed = try await render(photo, settings: settings, longSide: longSide, quality: .preview)",
+    "replace": "let developed = try await render(photo, settings: .neutral, longSide: longSide, quality: .preview)",
+    "tests": "LibraryLoupeGPURouteTests"
+  },
+  {
+    "label": "the route ignores the View > Rendering CPU choice",
+    "file": "Sources/LibraryModel/Live/LiveLoupeImaging.swift",
+    "find": "ImagingRoute.choose(preferGPU: preferGPU, steps: steps) == .gpu",
+    "replace": "ImagingRoute.choose(preferGPU: true, steps: steps) == .gpu",
+    "tests": "LibraryLoupeGPURouteTests"
+  },
+  {
+    "label": "a crop no longer keeps the CPU route",
+    "file": "Sources/LibraryModel/Live/LiveLoupeImaging.swift",
+    "find": "guard settings.crop == nil else { return nil }",
+    "replace": "",
+    "tests": "LibraryLoupeGPURouteTests"
+  },
+  {
+    "label": "whites and blacks become linear levels on the GPU route",
+    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "find": "steps.append(.levels(inBlack: inBlack, inWhite: inWhite, gamma: 1, outBlack: outBlack, outWhite: outWhite, encoding: .sRGB))",
+    "replace": "steps.append(.levels(inBlack: inBlack, inWhite: inWhite, gamma: 1, outBlack: outBlack, outWhite: outWhite, encoding: .linear))",
+    "tests": "LibraryLoupeGPURouteTests"
+  }
+]

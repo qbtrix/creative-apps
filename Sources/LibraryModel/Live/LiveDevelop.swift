@@ -62,6 +62,25 @@ public struct LiveDevelop: DevelopRendering {
         return p + shared.dropFirst(exposure.count)
     }
 
+    /// `passes(for:)` as the steps the loupe's GPU route writes, in the same
+    /// order (suite-imaging IM-11); nil while a pass has no step (Vibrance).
+    /// Whites and blacks are levels on sRGB values with gamma 1.
+    public static func steps(for s: DevelopSettings) -> [ToneAdjustment]? {
+        var steps: [ToneAdjustment] = []
+        for pass in passes(for: s) {
+            switch pass {
+            case .whiteBalance(let temperature, let tint): steps.append(.whiteBalance(temperature: temperature, tint: tint))
+            case .contrast(let amount): steps.append(.contrast(amount))
+            case .highlightsShadows(let highlights, let shadows): steps.append(.highlightsShadows(highlights: highlights, shadows: shadows))
+            case .whitesBlacks(let inBlack, let inWhite, let outBlack, let outWhite):
+                steps.append(.levels(inBlack: inBlack, inWhite: inWhite, gamma: 1, outBlack: outBlack, outWhite: outWhite, encoding: .sRGB))
+            case .color: return nil
+            case .shared(let step): steps.append(step)
+            }
+        }
+        return steps
+    }
+
     public func render(_ buffer: PixelBuffer, settings: DevelopSettings) throws -> PixelBuffer {
         for slider in DevelopSlider.allCases where settings.value(slider) != 0 {
             if let why = Self.waiting[slider] { throw LibraryError.renderFailed(why) }
