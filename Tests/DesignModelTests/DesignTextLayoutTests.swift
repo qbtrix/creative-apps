@@ -32,6 +32,7 @@ private func fixed(_ graphemes: [String]) -> (advances: [Double], ascent: Double
         var centered = DesignTextStyle.default
         centered.alignment = .center
         #expect(!centered.drawsThroughLayout, "centre alignment draws the old way")
+        #expect(centered.kernel(.black, boxWidth: nil).paragraph.alignment == .center, "the layout centres it")
     }
 
     @Test func justifiedLinesSpanTheBoxAndTheLastStaysLeft() throws {
