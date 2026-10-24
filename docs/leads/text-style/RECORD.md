@@ -1,10 +1,10 @@
 # text-style lead record
 
 Issue: #3779 (relaunch #4519) · Packet: docs/blueprints/suiteui/features/text-style.md
-Run: act-1a16958d72f-a4mg · Session: cloud line lead (line:suiteui; with text-style, brush-keys, document-setup) · Started: 2026-10-23T15:25Z
-Stage: 3 wave 2 (combined waves across the three features)
-Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (dev)
-Next: TS-u #4958 waits on TS-a #4871 merging, then merge dev into lead/text-style-TS-u to shrink it under 400; TS-design after BK-design; TS-halo waits on AJ-a
+Run: act-1a16c618fe7-h4fd (line lead, line:suiteui) · earlier run act-1a16958d72f-a4mg
+Stage: 3 wave 3 (this run)
+Base: origin/dev 654fb3632
+Next: TS-a #4871 is in the lane. TS-u #4958 is stacked on it, so dev gets merged in once #4871 lands. TS-7 builds now on TS-m (Wire: brush-keys:BK-design, which shares DesignCommandCatalog). TS-8 needs TS-3. TS-9 waits on adjust-everywhere AJ-a, whose contract isn't merged; AE-flare is building, and AN-a is on dev.
 
 ## Slices
 
@@ -26,13 +26,14 @@ Next: TS-u #4958 waits on TS-a #4871 merging, then merge dev into lead/text-styl
 | TS-6 | TS-m | 2 | command bodies | Sources/SuiteKernel/Text/TextCommands.swift, Tests/SuiteKernelTests/TextCommandsTests.swift, Tests/mutations/SuiteKernel.TextCommands.json | .scrubIsOneStep .familyKeepsWeight | #3847 | merged |
 | TS-3 | TS-u | – | see packet | see packet | see packet | – | blocked |
 | TS-4 | TS-u | – | see packet | see packet | see packet | – | blocked |
-| TS-7..TS-12 | TS-design, TS-halo | – | see packet | see packet | see packet | – | blocked |
+| TS-7 | TS-design | 3 | Design adopts TextStyleTarget (test first) | see packet | DesignTextStyleTests; Mutate | – | building |
+| TS-8..TS-12 | TS-design, TS-halo | – | see packet | see packet | see packet | – | waits (TS-3; AJ-a, AE-flare) |
 
 ## Wire
-- [ ] Wire: anchor-parenting:AN-halo (TS-halo shares a Halo app file)
-- [ ] Wire: brush-keys:BK-design (TS-design shares a Design app file)
-- [ ] Wire: adjust-everywhere:AJ-halo (TS-halo
-- [ ] Wire:  contract not merged)
+- [ ] Wire: brush-keys:BK-design (built ahead in TS-7: TS-design shares a Design app file; BK-a is on dev)
+- [ ] Wire: anchor-parenting:AN-halo (TS-9, when built: AN-a is on dev)
+- [ ] Wire: adjust-everywhere:AJ-halo (TS-9 waits: AJ-a's contract isn't merged)
+- [ ] Wire: adopt-kernel-easing:AE-halo (TS-9 waits: AE-flare not done)
 
 ## Reviews
 
@@ -41,6 +42,7 @@ Next: TS-u #4958 waits on TS-a #4871 merging, then merge dev into lead/text-styl
 
 ## Decisions
 
+- 2026-10-24T05:34:44Z relaunch as run act-1a16c618fe7-h4fd, using contract-first waits (lead.md rule 12). BK-a is on dev, so TS-7 builds now on TS-m's kernel and gets a Wire: line for BK-design. TS-9 still waits, because adjust-everywhere's first slice AJ-a hasn't merged (FilterRules and AdjustCommands are missing on dev). TS-m's Belt-Slice-Done was posted on #4519 (run 39808732641).
 - 2026-10-21T01:21:08Z: integration base is dev (7277a83a), not main.
 - 2026-10-21T01:21:08Z: TS-m unchained from TS-a: TS-5 and TS-6 need only TS-1's kernel code, not TS-2's SuiteUI rows (which wait on font-picker FP-a); they stack on TS-1.
 - 2026-10-21T01:21:08Z: TS tests measure with a fixed-advances closure of their own, since FakeText belongs to shell-text ST-a (not built).
