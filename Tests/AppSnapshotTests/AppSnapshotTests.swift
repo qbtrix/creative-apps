@@ -155,6 +155,7 @@ func snapshot(_ view: some View, name: String, scheme: ColorScheme) throws {
 @MainActor
 func render(_ view: some View, scheme: ColorScheme) -> NSBitmapImageRep? {
     _ = TestDefaults.registered
+    _ = DragSessions.faked  // a drag an earlier test leaked would block this run-loop turn
     let size = CGSize(width: 1440, height: 900)
     let host = NSHostingView(rootView: view
         .frame(width: size.width, height: size.height)
