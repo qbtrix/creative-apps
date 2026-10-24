@@ -4,7 +4,7 @@ Issue: #3791 · Packet: docs/blueprints/flare/features/lottie-open.md
 Run: act-1a16c619006-nour (took over from act-1a166b69fab-fd09) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T10:50Z (this run 2026-10-24)
 Stage: 4 fix round 1
 Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a
-Next: (2026-10-24 06:35Z) All four slices have Belt-Slice-Done (LO-z on full run 40037716897). Fix round 1: PR #5036 (Fixes #4954, Fast-Check pass at 942fcb1c) waits for the lane. Then panel on LO-u/LO-z screens from the next flare journeys run, contact sheet (gaps #4709, #4720). Branch is lead/lottie-open (no lead/flare-lottie-open exists).
+Next: (2026-10-24 08:25Z) All four slices have Belt-Slice-Done (LO-z on full run 40037716897). Fix round 1: PR #5036 (Fixes #4954, Fast-Check pass at 942fcb1c) waits for the lane's next batch (the current one, lane/batch-20261024081307, is #4903-#4952 and bisecting). Then panel on LO-u/LO-z screens from the next flare journeys run, contact sheet (gaps #4709, #4720). Record lives here; lead/flare-lottie-open mirrors lead/lottie-open and docs/leads/flare-lottie-open/RECORD.md points here.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
