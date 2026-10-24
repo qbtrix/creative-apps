@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: 16:03Z poll: batch 20261024144917 landed on dev at 15:48Z (33cd6e97c) without ours. #4886, #5148, #5151 and #5153 are fast-lane and next in line; #5154 and #5163 wait on their parents, and #5178 waits on the supervisor. Scoped suiteui and suite runs are queued on 33cd6e97c, which does not contain our PRs. #3723 is open, and IM-8b q 6383016723 is unanswered.
+Next: 16:23Z poll: no merges. All 7 PRs are clean, and our 6 fast-lane PRs are labelled. Batch 20261024160327 (#5110 and #4839-#4871, macOS gate running) does not include ours. The lane goes oldest first, so #4886 should be in the next batch. #3723 is open, and IM-8b q 6383016723 is unanswered.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
 
