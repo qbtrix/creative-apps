@@ -27,7 +27,7 @@ struct DesignCatalogDoc: HeadlessDocument {
 
 @Suite struct DesignCommandCatalogTests {
     /// Design's states: no file, nothing selected, one layer, a locked and a hidden layer, a group, several layers,
-    /// two pages, an edit to undo, an undone edit, mid-drag and mid text edit.
+    /// two pages, an edit to undo, an undone edit, mid-drag, mid text edit, a gradient and an entered group.
     static var states: [(String, DesignWorkspace)] {
         let cards = DesignFixtures.cards
         func with(_ base: DesignWorkspace = cards, _ change: (inout DesignWorkspace) -> Void) -> DesignWorkspace {
@@ -45,6 +45,7 @@ struct DesignCatalogDoc: HeadlessDocument {
             ("editing text", with { try? $0.beginTextEdit("node-5") }),
             ("gradient", with(one) { $0.runFill(.type(.linear)); $0.runFill(.add(offset: 0.5)) }),
             ("picture", with(one) { _ = try? DesignWorkspace.catalog.run("place.image", params: pictureParams, on: &$0) }),
+            ("entered group", with { $0.selectItem("node-6"); $0.enterGroup() }),
         ]
     }
 
@@ -94,8 +95,9 @@ struct DesignCatalogDoc: HeadlessDocument {
     }
 
     @Test func availabilityMatchesHelp() {
-        // The fill commands had no help before the catalog: their rules are GradientCommands' (DesignGradientTests).
-        for id in DesignWorkspace.catalog.ids where !id.hasPrefix("fill.") {
+        // The fill commands had no help before the catalog: their rules are GradientCommands' (DesignGradientTests);
+        // nor had the group picks, whose rules are GroupPick's (DesignGroupPickTests, AR-14).
+        for id in DesignWorkspace.catalog.ids where !id.hasPrefix("fill.") && !id.hasPrefix("select.") {
             #expect(Self.oldHelp(id, DesignWorkspace()) != nil, "\(id) has no old help to match")
             for (state, w) in Self.states {
                 let old = Self.oldHelp(id, w) ?? nil
@@ -214,6 +216,8 @@ struct DesignCatalogDoc: HeadlessDocument {
         "fill.stop-remove | Remove Gradient Stop | Switch the fill to a gradient first.",
         "fill.stop-color | Gradient Stop Color | on", "fill.angle | Gradient Angle | Angle is for a linear gradient.",
         "color.sample | Sample Color | on", "color.pick | Pick Colour | on",
+        "select.pick | Pick | on", "select.enter-group | Enter Group | Pick a group with layers in it first.",
+        "select.exit-group | Exit Group | No group is entered.",
         "transform.read | Transform | on", "transform.set | Transform | on", "transform.rotate | Rotate | on",
         "transform.scale | Scale | on", "transform.flip | Flip | on", "transform.reset | Reset Rotation | on",
         "page.add | Add Page | on", "page.rename | Rename Page | on",
