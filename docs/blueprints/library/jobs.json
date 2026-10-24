@@ -116,8 +116,7 @@
     "sources": [
       "https://community.adobe.com/t5/lightroom-classic-discussions/prevent-re-import-of-images-previously-deleted-from-lightroom-classic/td-p/13988083",
       "https://community.adobe.com/t5/lightroom-classic-discussions/lightroom-classic-continues-to-break-workflows-especially-when-deleting/m-p/12517273"
-    ],
-    "waits_on": "DR-8"
+    ]
   },
   "RJ-L07": {
     "id": "RJ-L07",
