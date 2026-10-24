@@ -117,3 +117,4 @@ utc	stage	event	ref	note
 2026-10-24T07:01:28Z	fix	#4854 head f2abc05f merged FV-u fix, Head moved
 2026-10-24T07:32:36Z	heartbeat	probe -3 (40070297560) red on the old #4852 head, same hang; probe -1 running; fixes already on 01a21adb/f2abc05f
 2026-10-24T07:54:03Z	heartbeat	lane held: bisect probe -1 macOS gate (run 40070370339, #4839 only) running since 06:51; our PRs unchanged
+2026-10-24T08:25:47Z	wait	probe -1 green: #4852 confirmed culprit, fix already pushed; lane batch 20261024081307 (not ours) ahead

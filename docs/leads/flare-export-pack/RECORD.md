@@ -4,7 +4,7 @@ Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
 Run: act-1a16c619006-nour (took over 2026-10-24 from act-1a1695ebf10-z0v8; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T02:26Z
 Stage: 3 build (fix round 1 in lane)
 Base: 721168a (origin/dev)
-Next: (2026-10-24 07:35Z, bisect probe -3 run 40070297560 red on the same chooseFolder hang at the old head, confirming #4852; probe -1 still running) #4852 (01a21adb) and #4854 (f2abc05f, carries the FV-u fix) pushed with Fast-Check pass and Head moved; both wait for the lane's next batch and its macOS gate, which proves the budget test fix. #5025, #5005 queued. 10 findings open: no new feature task. On merge: Belt-Slice-Done FV-u/FV-z, Mac-Finish-Wanted, panel on FJ-X1 screens, contact sheet.
+Next: (2026-10-24 08:25Z) Bisect done: probe -1 (run 40070370339, #4839 alone) green, so #4852's old head was the culprit; its fixed head 01a21adb and #4854 (f2abc05f) are pushed with Fast-Check pass. The lane's current batch (lane/batch-20261024081307, #4903-#4952, none of ours, Linux red, bisecting) runs first; #4852, #4854, #5025, #5005 wait for the next batch and its macOS gate, which proves the budget test fix. 10 findings open: no new feature task. On merge: Belt-Slice-Done FV-u/FV-z, Mac-Finish-Wanted, panel on the FJ-X1 screens, contact sheet.
 
 Loop: v3 (the packet has a `## Slices` table).
 
