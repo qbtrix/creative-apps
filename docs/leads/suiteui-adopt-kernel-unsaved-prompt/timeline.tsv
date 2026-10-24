@@ -67,3 +67,4 @@ ts	kind	note
 2026-10-24T12:00:03Z	poll	hb11: no change; slices queued, Question unanswered
 2026-10-24T12:22:20Z	poll	hb12: no change; slices queued, Question unanswered
 2026-10-24T12:43:49Z	poll	hb13: no change; dev not moving lane-wide, Question unanswered
+2026-10-24T12:45:24Z	poll	hb13b: #5088 is clean (fast-lane check green at 08:02Z, no statuses), so it waits on a lane batch. The attribution footer is stripped from the #5088, #5089 and #5091 bodies; the marker lines are unchanged.
