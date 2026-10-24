@@ -121,3 +121,4 @@ utc	stage	event	ref	note
 2026-10-24T15:22:25Z	W2	check	PT-2	probe -4 green (Linux+macOS); culprit narrowed to #5006 or #5007, probe -5 not started; dev e79e9afcb, no dev-red, no tone findings
 2026-10-24T15:44:57Z	W2	check	PT-2	batch 20261024110214 probe -5 not started (probes -3, -4 green); #5006/#5007 unlabelled; dev e79e9afcb, no dev-red, no tone findings
 2026-10-24T16:08:44Z	W2	check	PT-2	batch 110214 resolved through #5144 (#5087, #5097 on dev); #5006/#5007 back in queue unlabelled; batch 144917 merged, 160327 running (older PRs); dev 33cd6e97c; finding #5179 testTier1Tone Curves fold red at e79e9afcb, predates our PRs (photo/suite range 1bbaba6c1..e79e9afcb: #5046, #5097, #5087), not ours
+2026-10-24T16:29:52Z	W2	check	PT-2	no change: batch 160327 macOS gate running; our PRs queued, unlabelled; dev 33cd6e97c; #5179 still open (not ours)
