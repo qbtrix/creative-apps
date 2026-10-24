@@ -117,3 +117,4 @@ utc	stage	event	ref	note
 2026-10-24T14:14:50Z	check	EM-flare-halo	batch probe 3; #4817/#4988 ready behind it
 2026-10-24T14:33:32Z	check	EM-flare-halo	prior batch resolved; ours wait for the next
 2026-10-24T14:52:16Z	check	EM-flare-halo	batch-20261024144917 excludes ours
+2026-10-24T15:10:51Z	check	EM-flare-halo	no change; batch in flight
