@@ -272,7 +272,7 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         (self.children, self.isHidden, self.isLocked) = (children, isHidden, isLocked)
         (self.fill, self.text, self.cornerRadius) = (fill ?? kind.defaultFill, text, cornerRadius)
         (self.opacity, self.stroke, self.textStyle) = (opacity, stroke, textStyle)
-        self.gradient = gradient
+        if gradient != nil { self.gradient = gradient }  // a plain node keeps the shared empty box
     }
 
     /// `node` with every field kept and the id replaced (duplicate, paste). A field added to
@@ -282,10 +282,9 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
             id: id, name: node.name, kind: node.kind, frame: node.frame, children: node.children,
             isHidden: node.isHidden, isLocked: node.isLocked, fill: node.fill, text: node.text,
             cornerRadius: node.cornerRadius, opacity: node.opacity, stroke: node.stroke, textStyle: node.textStyle)
-        gradient = node.gradient
+        extras = node.extras
         rotation = node.rotation
         (flipX, flipY) = (node.flipX, node.flipY)
-        shape = node.shape
     }
 
     /// Decodes a node; a field a file written before it existed lacks takes its default: square
@@ -306,7 +305,7 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         rotation = try container.decodeIfPresent(Double.self, forKey: .rotation) ?? 0
         flipX = try container.decodeIfPresent(Bool.self, forKey: .flipX) ?? false
         flipY = try container.decodeIfPresent(Bool.self, forKey: .flipY) ?? false
-        shape = try container.decodeIfPresent(ShapeSpec.self, forKey: .shape)
+        if let shape = try container.decodeIfPresent(ShapeSpec.self, forKey: .shape) { self.shape = shape }
     }
 
     /// The file's keys, one per stored field.
