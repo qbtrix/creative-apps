@@ -1,6 +1,7 @@
 // ShellHelpProvider.swift (report-problem RP-2): SuiteModel's ProblemReport and BetaNotes adapted to the
 // kernel's HelpProviding, so the Help catalog's commands read this Mac's app, version, build, macOS and model,
-// and its recent crash files through CrashFolderReader (RP-5b). Reads no network: the host name it redacts
+// and its recent crash files through CrashFolderReader (RP-5b). It answers through SuiteHelpCatalog's
+// reportAnswer and notesAnswer, as the CLI's HelpReports does, so the sheet and the CLI never differ. Reads no network: the host name it redacts
 // comes from gethostname, never ProcessInfo.hostName, which raises the local network prompt.
 import Foundation
 import SuiteKernel
@@ -18,11 +19,7 @@ public struct ShellHelpProvider: HelpProviding {
             build: info["CFBundleVersion"] as? String ?? "",
             macOS: process.operatingSystemVersionString, model: Self.model(),
             crashes: CrashFolderReader.read(), now: Date(), home: NSHomeDirectory(), user: NSUserName(), host: Self.host())
-        return .object([
-            "app": .string(report.app), "version": .string(report.version), "build": .string(report.build),
-            "macOS": .string(report.macOS), "model": .string(report.model),
-            "crashes": .array(report.crashes.map { .string($0) }), "text": .string(report.text(note: note)),
-        ])
+        return SuiteHelpCatalog.reportAnswer(report, text: report.text(note: note))
     }
 
     /// The AfterGlow.app this process runs in, a helper app's included; nil outside one (cli-bundle CB-5).
@@ -35,9 +32,7 @@ public struct ShellHelpProvider: HelpProviding {
         return .object(["command": .string(panel.command), "json": .string(panel.configJSON)])
     }
 
-    public func betaNotes() -> JSONValue {
-        .object(["notes": .array(BetaNotes.current.map { .object(["title": .string($0.title), "detail": .string($0.detail)]) })])
-    }
+    public func betaNotes() -> JSONValue { SuiteHelpCatalog.notesAnswer(BetaNotes.current) }
 
     /// This Mac's host name from the kernel. ProcessInfo.hostName resolves it over the network, which raises
     /// macOS's local network prompt; gethostname reads no network.
