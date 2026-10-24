@@ -90,3 +90,4 @@ Next: (2026-10-23T17:29:30Z) #4878 (BK-m) and #4923 (BK-z, stacked, feature-done
 - 2026-10-24T03:05:07Z: heartbeat: #4878,#4923 unchanged (open, clean). Lane bisect moved to probe lane/batch-20261023215139-7; that batch holds none of ours. Dev 654fb363 green.
 - 2026-10-24T03:26:54Z: heartbeat: #4878,#4923 unchanged (open, clean). Probe lane/batch-20261023215139-7 passed Linux; its macOS gate has run since 02:44Z. That batch holds none of ours. Dev 654fb363 green.
 - 2026-10-24T03:49:09Z: heartbeat: #4878,#4923 unchanged (open, clean). Probe -7 passed both gates, so the culprit of batch 20261023215139 is its 8th or 9th PR, none ours. Next lane sweep should probe -8. Dev 654fb363 green.
+- 2026-10-24T04:11:01Z: heartbeat: #4878,#4923 unchanged (open, clean). Lane now on the last probe, lane/batch-20261023215139-8 (Fast Lane 40060686633 running); that batch holds none of ours. Dev 654fb363 green.
