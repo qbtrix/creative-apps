@@ -197,3 +197,4 @@ utc	stage	event	ref	note
 2026-10-24T09:24Z	check-in	no supervisor or finding changes; XP-3/XP-4 not on dev; XP-9 #5074 open; PX-5 waits XP-4
 2026-10-24T09:55Z	check-in	no change: no supervisor comment or finding; XP-3/XP-4 not on dev; XP-7 #5044, XP-9 #5074 open
 2026-10-24T10:26Z	check-in	no change: no supervisor comment or finding; nothing merged to dev since 09:50Z; XP-3/XP-4 not on dev
+2026-10-24T10:58Z	check-in	no change for export: no supervisor comment or finding; XP-3/XP-4 not on dev; XP-7 #5044, XP-9 #5074 open
