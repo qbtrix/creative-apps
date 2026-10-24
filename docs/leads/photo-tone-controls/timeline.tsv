@@ -129,4 +129,4 @@ utc	stage	event	ref	note
 2026-10-24T18:47:36Z	W2	fix	PT-2	needs-rebase on #5007, #5008, #5112 after the Pen (#5134) landed: merged dev; PT-2 kept .tone and .path in PhotoIntent/PhotoWindow; PT-6 took PT-2; PT-4 kept pathCommands and ToneCommands, ledger plus golden as union; gates running
 2026-10-24T18:47:36Z	W2	check	PT-2	#4880 TC-5 merged (batch 172211 macOS failed, a later batch carried it); the TC-5 tests turn on after our tone PRs land; dev 674461187; dev-red #5183 not ours
 2026-10-24T19:39:05Z	W4	fix	PT-4	new run act-1a16f6941b7-zb0r; needs-rebase on #5008 and #5112: merged dev; PT-6 kept PT-2 and dev; PT-4 kept pathCommands and ToneCommands, path.* and tone.* exclusions, ledger and golden as union; gates running
-2026-10-24T20:30:53Z	check	PT-4 #5112 adopted head 79358946 gate PASS; Head/Belt-Lead moved to this run
+2026-10-24T20:30:53Z	W4	check	PT-4	#5112 adopted the other session's equivalent dev merge 79358946 (gate PASS); Head and Belt-Lead moved; #5008 PT-6 head f126c565 gate PASS
