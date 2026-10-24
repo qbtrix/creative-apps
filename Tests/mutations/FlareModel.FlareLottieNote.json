@@ -23,8 +23,8 @@
   {
     "label": ".dropRoutesJSON: a dropped .json goes to the bridge, which refuses it",
     "file": "Sources/FlareModel/FlareLottieNote.swift",
-    "find": "if case .refuse(let path, _) = action, opensAsLottie(path) {",
-    "replace": "if case .refuse(let path, _) = action, opensAsLottie(path), false {",
+    "find": "case .open(let path) where opensAsLottie(path), .refuse(let path, _) where opensAsLottie(path):",
+    "replace": "case .open(let path) where opensAsLottie(path), .refuse(let path, _) where opensAsLottie(path) && false:",
     "tests": "FlareLottieNoteTests"
   },
   {
@@ -81,6 +81,13 @@
     "file": "Sources/FlareModel/FlareLottieNote.swift",
     "find": "guard importNote.count > max + 1 else",
     "replace": "guard importNote.count > max else",
+    "tests": "FlareLottieNoteTests"
+  },
+  {
+    "label": ".dropRoutesPlannedOpen: a .json the stage plans as Flare's open goes to the bridge, which drops it",
+    "file": "Sources/FlareModel/FlareLottieNote.swift",
+    "find": "case .open(let path) where opensAsLottie(path), .refuse(let path, _) where opensAsLottie(path):",
+    "replace": "case .open(let path) where opensAsLottie(path) && false, .refuse(let path, _) where opensAsLottie(path):",
     "tests": "FlareLottieNoteTests"
   },
   {

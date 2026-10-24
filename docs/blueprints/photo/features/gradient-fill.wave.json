@@ -37,7 +37,8 @@
     "Sources/PhotoApp/PhotoCanvasOverlay.swift",
     "UITests/PhotoJourneyTests+Gradient.swift",
     "docs/blueprints/photo.md",
-    "docs/blueprints/photo/features/gradient-fill.wave.json"
+    "docs/blueprints/photo/features/gradient-fill.wave.json",
+    "Tests/PhotoModelTests/PhotoToolColorAlphaTests.swift"
   ],
   "slices": [
     {
@@ -125,7 +126,8 @@
       "behavior": "The tool runs on live services, the journey passes on live, and the blueprint has the tool in.",
       "tasks": [
         "PG-7",
-        "PG-8"
+        "PG-8",
+        "PG-9"
       ],
       "journeys": [
         "PJ-G1"
@@ -133,17 +135,23 @@
       "waits": {
         "PG-u": [
           "PG-7",
-          "PG-8"
+          "PG-8",
+          "PG-9"
         ],
         "PG-m": [
-          "PG-7"
+          "PG-7",
+          "PG-9"
         ]
       },
       "ui": true,
       "owned": [
         "UITests/PhotoJourneyTests+Gradient.swift",
         "docs/blueprints/photo.md",
-        "docs/blueprints/photo/features/gradient-fill.wave.json"
+        "docs/blueprints/photo/features/gradient-fill.wave.json",
+        "Sources/PhotoApp/PhotoToolOptions.swift",
+        "Sources/PhotoModel/ToolOptions.swift",
+        "Tests/PhotoModelTests/PhotoToolColorAlphaTests.swift",
+        "Tests/mutations/PhotoModel.ToolOptions.json"
       ]
     }
   ]
