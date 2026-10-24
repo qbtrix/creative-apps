@@ -40,3 +40,4 @@ time	event	task	note
 2026-10-23T15:20:48Z	heartbeat	waiting	resumed by act-1a16953af22-wvhu; contract slice of the cross-line wait not merged
 2026-10-24T07:25Z	resume	act-1a16cc967d9-mcuv; LX-2 + LX-4 start on stubs
 2026-10-24T07:48Z	heartbeat	#4960, #4962 on lane; duplicates stopped
+2026-10-24T08:11Z	heartbeat	#4960 #4962 clean, waiting for a lane batch; 0 own findings
