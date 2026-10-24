@@ -52,3 +52,4 @@ time	event	task	note
 2026-10-24T11:08:51Z	heartbeat	lane fix #5150 (lists every open PR, not newest 100) merged 10:55Z: our older PRs now visible to the lane; all open+clean
 2026-10-24T11:30:09Z	check	lane sweep sees only newest ~100 PRs (lowest #5005): #4838/#4899/#4960/#4962 invisible until main promotes past #5150 (lane runs scripts from main); stacked PRs wait on them. All open+clean
 2026-10-24T11:52:04Z	heartbeat	main still #5117; full CI 40087964618 on dev 4f00afb8 (#5150) running, green promotes main and the lane then sees our older PRs. All open+clean
+2026-10-24T12:14:22Z	check	full CI 40087964618 green; main promoted to #5150: lane now lists every open PR, our older PRs enter its queue. All open+clean
