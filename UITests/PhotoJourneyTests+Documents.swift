@@ -15,6 +15,8 @@ import ImageIO
 import XCTest
 
 final class PhotoDocumentsJourneyTests: XCTestCase {
+    /// The identifier of the Open Recent item last clicked, for a failed reopen's message.
+    private var clickedRecent = ""
     /// PJ-1: save a layered PNG as a Photo Document, close it, reopen it from Open Recent.
     @MainActor func testSaveLayeredDocumentAndReopen() throws {
         let (folder, beach) = try beachFolder("pj1")
@@ -307,6 +309,8 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
     @MainActor private func openRecent(_ name: String, _ photo: Journey) {
         let first = recentMenu(photo).children(matching: .menuItem).firstMatch
         XCTAssertEqual(first.title, name, "Open Recent's first entry")
+        // suite.file.recent.<id> is the suite's menu (SuiteFileCommands); anything else is another menu's item.
+        clickedRecent = first.identifier
         first.click()
     }
 
@@ -318,7 +322,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         let alerts = (photo.app.sheets.allElementsBoundByIndex + photo.app.dialogs.allElementsBoundByIndex)
             .flatMap { $0.staticTexts.allElementsBoundByIndex.map(\.label) }
         let status = photo.element("photo.status.message")
-        XCTFail("Open Recent didn't reopen \(name): windows \(windows), alerts \(alerts), status \(status.exists ? status.label : "none")")
+        XCTFail("Open Recent didn't reopen \(name) (clicked item \(clickedRecent)): windows \(windows), alerts \(alerts), status \(status.exists ? status.label : "none")")
     }
 
     /// A system alert: the window's sheet, or a dialog.
