@@ -4,7 +4,7 @@ Issue: #3777 · Packet: docs/blueprints/suiteui/features/adjust-everywhere.md
 Run: act-1a15cb4e0f5-ipbr (took over from act-1a15c4e2e3b-zh3u, released 04:25Z) · Session: claude/lead-fill-heal-adjust-everywhere-4clx57 · Started: 2026-10-21T02:36Z, relaunched 2026-10-21T04:29Z
 Stage: 3 wave 1
 Base: 2ab0eb96320db973b5aad0644449ee5ed3980ab9
-Next: AJ-a (#4846) and AJ-7 (#4867) merged 17:02-17:03Z; post Belt-Slice-Done: AJ-a once a green suiteui/full run includes da62659 or later (scoped suiteui 40114493184 queued). AJ-k #5064: dev merged in, regating, then fast-lane + Head. AJ-6 waits on TC-m; AJ-u on OC-photo-u; adopters blocked.
+Next: AJ-a (#4846) and AJ-7 (#4867) merged 17:02-17:03Z; post Belt-Slice-Done: AJ-a once a green suiteui/full run includes da62659 or later (scoped suiteui 40114493184 queued). AJ-k #5064 in the lane (bfa7700e, Fast-Check pass). AJ-6 waits on TC-m; AJ-u on OC-photo-u; adopters blocked.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -52,3 +52,4 @@ Next: AJ-a (#4846) and AJ-7 (#4867) merged 17:02-17:03Z; post Belt-Slice-Done: A
 
 - 2026-10-24T08:40Z restack: #5064 restacked on #4846 3325d7a6: gate PASS, pushed 80e6d515, Head updated, footer removed
 - 2026-10-24T17:19Z: #4846 (AJ-a) merged 17:02:08Z, #4867 (AJ-7) merged 17:03:20Z. #5064 is on base dev with 509 lines (squash), so I merged origin/dev into lead/adjust-everywhere-AJ-5f-v2 (add/add conflicts in FilterRules.swift and FilterRulesTests.swift; dev's copies equal the AJ-1b stubs, kept ours); own diff 3 files +162/-12; gating.
+- 2026-10-24T17:31Z: #5064 gate CI: PASS at bfa7700e; pushed, Head updated, fast-lane added (base dev, 3 files +162/-12).
