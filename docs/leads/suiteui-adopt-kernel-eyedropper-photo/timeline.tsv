@@ -14,3 +14,4 @@ utc	stage	event	ref	note
 2026-10-24T08:36:00Z	wait	check	lane Linux check on #4943 running (run 40078192845); full CI 40078344003 on dev 1bbaba6 (contains fb09de4) running for EP-m
 2026-10-24T09:04:00Z	done	slice	Belt-Slice-Done EP-m (scoped photo 40077009798 on 1bbaba6); #4943 lane Linux 40078192845 green, waiting for batch
 2026-10-24T09:29Z	wait	EP-z	#4943 Linux green; dev now 9f476af (#5117 fixes the Lottie oracle step that reddened every macOS gate); waiting for next batch
+2026-10-24T09:55Z	wait	EP-z	#4943 still open, no batch yet; full CI 40081823899 on dev 9f476af running
