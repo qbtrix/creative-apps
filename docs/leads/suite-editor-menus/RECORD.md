@@ -85,3 +85,4 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-24T18:20:39Z: #4817 merged to dev as 18f35c38f2df21e6e0e23c6d949283099be54328. Left: #4988, then #5164 (retarget to dev after #4988).
 - 2026-10-24T18:39:34Z: #4988 mergeable clean, Head marker current; not in batch-20261024183708 (12 older PRs), waits for the next.
 - 2026-10-24T18:58:05Z: batch-20261024183708 still in flight; #4988 queued for the next batch.
+- 2026-10-24T19:16:41Z: batch-20261024183708 is bisecting (probe -6); none of ours in it. #4988 queued.
