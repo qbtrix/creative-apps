@@ -1,20 +1,20 @@
 # brush-keys lead record
 
 Issue: #3758 (#4531 closed as duplicate) · Packet: docs/blueprints/suiteui/features/brush-keys.md
-Run: act-1a16958d72f-a4mg · Session: cloud line lead (line:suiteui; with text-style, brush-keys, document-setup) · Started: 2026-10-23T15:25Z
-Stage: 3 wave 2 (combined waves across the three features)
-Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (dev)
-Next: Restack BK-design/photo/flare on BK-u and move Head:; then wait on BK-u #4939; BK-z after the slices merge
+Run: act-1a16c619037-500v (resumed from act-1a16958d72f-a4mg) · Session: cloud line lead (line:suiteui; brush-keys + document-setup) · Resumed: 2026-10-24
+Stage: 3 wave 3 (resume triage: fixers on needs-rebase PRs)
+Base: 654fb36328cdb049dfd1bcda411a126d316c639c (main at resume)
+Next: fixer merging dev into BK-u #4939 (needs-rebase, SuiteGallery.swift); once BK-u merges, merge dev into BK-photo #4965/BK-design #4961/BK-flare #4982 to drop under the cap; BK-z folds into the last adopt slice
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | BK-a | contract: BrushKeys stubs, BrushKeyCommands specs, disabled tests | BK-1, BK-2 | – | – | false | 0 | done (#4057; Linux 39643409752; Belt-Slice-Done posted) | – | – |
 | BK-m | step bands, hardness, opacity digits; mutation plan; C4 part | BK-3, BK-4 | – | BK-a | false | 0 | done (#4058 → 1fe5c4ea; Linux 39661533247; Belt-Slice-Done posted) | – | – |
-| BK-u | ToolKeys routing, readout, gallery, journey, render budget | BK-5, BK-6 | SJ-BK | BK-a; anchor-parenting:AN-u (planned; waits OC-u) | true | 0 | pr #4939 (fast-lane, head f646e4da) | – | – |
-| BK-photo | Photo adopts brush keys | BK-7, BK-8 | – | BK-a (BK-7); BK-m, BK-u, adopt-kernel-brush:AB-photo, adopt-suiteui-chrome:AC-colour, area-selection:AR-photo-u (not started), OC-photo-m (BK-8) | true | 0 | pr #4965 | – | – |
-| BK-design | Design adopts brush keys | BK-9, BK-10 | – | BK-m, BK-u, adopt-suiteui-chrome:AC-tools, document-setup:DS-design (not started) (BK-10) | true | 0 | pr #4961 | – | – |
-| BK-flare | Flare adopts brush keys | BK-11, BK-12 | – | BK-m, BK-u, anchor-parenting:AN-flare-u (not started) (BK-12) | true | 0 | pr #4982 | – | – |
+| BK-u | ToolKeys routing, readout, gallery, journey, render budget | BK-5, BK-6 | SJ-BK | BK-a; anchor-parenting:AN-u (planned; waits OC-u) | true | 0 | pr #4939 (needs-rebase; fixer dispatched 2026-10-24) | – | – |
+| BK-photo | Photo adopts brush keys | BK-7, BK-8 | – | BK-a (BK-7); BK-m, BK-u, adopt-kernel-brush:AB-photo, adopt-suiteui-chrome:AC-colour, area-selection:AR-photo-u (not started), OC-photo-m (BK-8) | true | 0 | pr #4965 (stacked on BK-u, over cap until BK-u merges) | – | – |
+| BK-design | Design adopts brush keys | BK-9, BK-10 | – | BK-m, BK-u, adopt-suiteui-chrome:AC-tools, document-setup:DS-design (not started) (BK-10) | true | 0 | pr #4961 (stacked on BK-u, over cap until BK-u merges) | – | – |
+| BK-flare | Flare adopts brush keys | BK-11, BK-12 | – | BK-m, BK-u, anchor-parenting:AN-flare-u (not started) (BK-12) | true | 0 | pr #4982 (stacked on BK-u, over cap until BK-u merges) | – | – |
 | BK-z | RJ-X76 on; status built; feature-done | BK-13, BK-14 | RJ-X76 | BK-photo, BK-design, BK-flare | false | 0 | blocked | – | – |
 
 ## Tasks
