@@ -1,0 +1,23 @@
+[
+  {
+    "label": "locationReadsTheSelectedStopInPercent: the row reads the raw offset, so a stop at 50% shows 0.5",
+    "file": "Sources/SuiteUI/GradientEditor.swift",
+    "find": "static func percent(_ offset: Double) -> Double { min(max(offset, 0), 1) * 100 }",
+    "replace": "static func percent(_ offset: Double) -> Double { min(max(offset, 0), 1) }",
+    "tests": "GradientEditorTests"
+  },
+  {
+    "label": "locationReadsTheSelectedStopInPercent: a typed location past 100 moves the stop off the bar",
+    "file": "Sources/SuiteUI/GradientEditor.swift",
+    "find": "percent.isFinite ? min(max(percent / 100, 0), 1) : 0",
+    "replace": "percent.isFinite ? max(percent / 100, 0) : 0",
+    "tests": "GradientEditorTests"
+  },
+  {
+    "label": "typeSwitchIsSharedAndNamesItsNote: the off switch's note loses its prefix, so apps can't find it",
+    "file": "Sources/SuiteUI/GradientEditor.swift",
+    "find": "public nonisolated static func helpID(in prefix: String) -> String { \"\\(prefix).help\" }",
+    "replace": "public nonisolated static func helpID(in prefix: String) -> String { \"help\" }",
+    "tests": "GradientEditorTests"
+  }
+]

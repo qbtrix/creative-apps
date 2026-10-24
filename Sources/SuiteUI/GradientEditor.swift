@@ -5,8 +5,10 @@
 // `<typeID>.<type>`, `suite.gradient.type.<type>` by default; while `typeHelp` says why it can't act it is off and that
 // reason shows under it), the stop bar (`suite.gradient.bar`, its handles `suite.gradient.stop.<n>`, inset half a
 // handle each side by the kernel's `GradientBar`), the selected stop's colour (the suite colour row labelled
-// "Stop 2 · 50%", live through a drag, hex field `suite.gradient.color`) and, for a linear fill unless `showsAngle` is
-// false, the angle bar (`suite.gradient.angle`). The bar's gesture math is `GradientBarDrag`: a click adds a stop, a drag moves one under
+// "Stop 2 · 50%", live through a drag, hex field `suite.gradient.color`), under the bar the selected stop's Location
+// in percent (`suite.gradient.location`, its samples one move under one token) and, for a linear fill unless
+// `showsAngle` is false, the angle bar (`suite.gradient.angle`). The switch is its own view, `GradientTypeSwitch`, so
+// an app shows the same one over a solid fill's colour row. The bar's gesture math is `GradientBarDrag`: a click adds a stop, a drag moves one under
 // one drag token, a drag 40 pt off removes it; arrows nudge the selected stop 1% and Delete removes it. A colour-panel
 // session and an angle scrub each carry one token too, so the app folds each gesture into one undo step. Where a stop
 // lands after an add or a move comes from `GradientRules`, so the selection follows it.
@@ -32,6 +34,7 @@ public struct GradientEditor: View {
     @State private var drag: GradientBarDrag?
     @State private var colorToken: String?
     @State private var angleToken: String?
+    @State private var locationToken: String?
     /// True after a remove the two-stop rule refused, until the next gesture.
     @State private var refused = false
     @FocusState private var barFocused: Bool
@@ -43,15 +46,15 @@ public struct GradientEditor: View {
     static let ringWidth: CGFloat = 1, selectedRingWidth: CGFloat = 3
 
     /// The identifier of `type`'s segment under the switch's prefix.
-    nonisolated static func typeID(_ type: FillType, in prefix: String) -> String { "\(prefix).\(type.rawValue)" }
+    nonisolated static func typeID(_ type: FillType, in prefix: String) -> String { GradientTypeSwitch.typeID(type, in: prefix) }
 
     /// The bar and its handles dim with the rest of the rows while the editor is off.
     nonisolated static func barOpacity(enabled: Bool) -> Double { enabled ? 1 : SuiteColor.disabledOpacity }
 
     /// `showsAngle: false` for a tool whose drag sets the line (Photo's Gradient tool); `types` limits the switch (the
     /// three paints by default); `typeID` prefixes its segments' identifiers; `typeHelp` turns it off and says why.
-    public init(fill: Fill, box: Rect, showsAngle: Bool = true, types: [FillType] = [.solid, .linear, .radial],
-                typeID: String = "suite.gradient.type", typeHelp: String? = nil,
+    public init(fill: Fill, box: Rect, showsAngle: Bool = true, types: [FillType] = FillType.allCases,
+                typeID: String = GradientTypeSwitch.defaultID, typeHelp: String? = nil,
                 onIntent: @escaping @MainActor (GradientIntent) -> Void) {
         self.fill = fill
         self.box = box
@@ -78,8 +81,13 @@ public struct GradientEditor: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
-            if types.count > 1 { typeSwitch }
-            if type != .solid { bar }
+            if types.count > 1 {
+                GradientTypeSwitch(type: type, types: types, typeID: typePrefix, help: typeHelp) { send(.type($0)) }
+            }
+            if type != .solid {
+                bar
+                location
+            }
             InspectorColorWellRow(GradientEditorText.selectedStop(index, of: fill), color: GradientEditorText.hex(GradientRules.color(of: fill, at: stopOffset)), onChange: recolor) {
                 colorToken = nil
             }
@@ -100,19 +108,19 @@ public struct GradientEditor: View {
         .accessibilityIdentifier("suite.gradient")
     }
 
-    /// The Solid / Linear / Radial switch: a system segmented Picker, off with its reason under it while `typeHelp` is set.
-    @ViewBuilder private var typeSwitch: some View {
-        Picker("Fill type", selection: Binding(get: { type }, set: { picked in if picked != type { send(.type(picked)) } })) {
-            ForEach(types, id: \.self) { option in
-                Text(GradientEditorText.type(option)).tag(option).accessibilityIdentifier(Self.typeID(option, in: typePrefix))
-            }
+    /// The selected stop's Location, 0...100%: each sample moves it under the row's token, so a scrub is one undo step
+    /// and the selection follows the stop when it passes another.
+    private var location: some View {
+        InspectorSliderRow("Location", value: GradientEditorText.percent(stopOffset), in: 0...100, step: 1, unit: "%", decimals: 0) { percent in
+            let stop = index, offset = GradientEditorText.offset(percent: percent)
+            let token = locationToken ?? GradientBarDrag.newToken()
+            locationToken = token
+            selected = GradientRules.movingStop(fill, index: stop, to: offset).index
+            send(.move(index: stop, offset: offset, drag: token))
+        } onEnd: {
+            locationToken = nil
         }
-        .pickerStyle(.segmented)
-        .labelsHidden()
-        .disabled(typeHelp != nil)
-        .help(typeHelp ?? "Fill type")
-        .suiteControl(id: typePrefix, enabled: typeHelp == nil, reason: typeHelp, identifies: false)
-        if let typeHelp { InspectorNote(typeHelp, kind: .secondary, identifier: "\(typePrefix).help") }
+        .accessibilityIdentifier("suite.gradient.location")
     }
 
     /// The selected stop's offset; a solid reads its own colour at 0.
@@ -222,6 +230,43 @@ public struct GradientEditor: View {
     }
 }
 
+/// The Solid / Linear / Radial switch: a system segmented Picker, its segments `<typeID>.<type>`, off with its reason
+/// under it (`<typeID>.help`) while `help` is set. A nil `type` (a selection whose fills differ) picks no segment.
+/// GradientEditor shows it over a gradient; an app shows it over a solid fill's own colour row.
+public struct GradientTypeSwitch: View {
+    /// The default identifier prefix.
+    public static let defaultID = "suite.gradient.type"
+    private let type: FillType?, types: [FillType], prefix: String, help: String?
+    private let onPick: @MainActor (FillType) -> Void
+
+    public init(type: FillType?, types: [FillType] = FillType.allCases, typeID: String = Self.defaultID, help: String? = nil,
+                onPick: @escaping @MainActor (FillType) -> Void) {
+        (self.type, self.types, self.prefix, self.help, self.onPick) = (type, types, typeID, help, onPick)
+    }
+
+    /// The identifier of `type`'s segment under `prefix`.
+    public nonisolated static func typeID(_ type: FillType, in prefix: String) -> String { "\(prefix).\(type.rawValue)" }
+    /// The identifier of the note that says why the switch is off.
+    public nonisolated static func helpID(in prefix: String) -> String { "\(prefix).help" }
+
+    public var body: some View {
+        Picker("Fill type", selection: Binding<FillType?>(get: { type }, set: { picked in
+            if let picked, picked != type { onPick(picked) }
+        })) {
+            ForEach(types, id: \.self) { option in
+                Text(GradientEditorText.type(option)).tag(FillType?.some(option))
+                    .accessibilityIdentifier(Self.typeID(option, in: prefix))
+            }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .disabled(help != nil)
+        .help(help ?? "Fill type")
+        .suiteControl(id: prefix, enabled: help == nil, reason: help, identifies: false)
+        if let help { InspectorNote(help, kind: .secondary, identifier: Self.helpID(in: prefix)) }
+    }
+}
+
 /// The stop bar's gesture as intents, pure so tests drive it. Points are in the bar's row, `width` wide, its offsets
 /// inset half a handle each side (`GradientBar`). A press on a handle picks its stop, a press elsewhere is
 /// an add on release; a horizontal drag moves the stop under one token (its index following re-sorts), and a release
@@ -288,6 +333,15 @@ enum GradientEditorText {
 
     /// The colour row's label: "Stop 2 · 50%" for the selected stop, "Color" for a solid.
     static func selectedStop(_ index: Int, of fill: Fill) -> String { GradientBar.stopLabel(index, of: fill) }
+
+    /// The Location row's value for a stop at `offset`: 0.5 is 50.
+    static func percent(_ offset: Double) -> Double { min(max(offset, 0), 1) * 100 }
+
+    /// The stop offset for the Location row's `percent`, clamped to 0...1.
+    static func offset(percent: Double) -> Double { percent.isFinite ? min(max(percent / 100, 0), 1) : 0 }
+
+    /// The Location row's text for a stop at `offset`: "50%".
+    static func location(_ offset: Double) -> String { NumericInput.text(percent(offset), decimals: 0, unit: "%") }
 
     /// "45°", rounded to a whole degree; "–" when there is no angle.
     static func angle(_ degrees: Double?) -> String {

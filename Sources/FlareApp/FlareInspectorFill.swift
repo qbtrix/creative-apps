@@ -1,13 +1,13 @@
 // FlareInspectorFill.swift: the inspector's FILL and STROKE sections
 // (inspector-timeline IT-5, gradient-fill FG-2), from `model.paint`. FILL
-// opens with the Solid / Linear / Radial switch (`flare.inspector.fillType`)
-// over every fill; a pick sends `.runFill(.type(_))`. Under it a solid fill is
-// a color row (`flare.inspector.fill`) whose pick or typed hex sends
-// `.setFill`, a gradient (`paint.gradient`) is SuiteUI's GradientEditor
-// without its own type switch (`editorTypes`), whose gestures send
-// `.runFill(_)`, and fills that differ read Mixed. The switch
+// opens with SuiteUI's one Solid / Linear / Radial switch (`suite.gradient.type`)
+// over every fill; a pick sends `.runFill(.type(_))`. A gradient
+// (`paint.gradient`) is SuiteUI's GradientEditor, its own switch on top, whose
+// gestures send `.runFill(_)`; a solid fill is SuiteUI's `GradientTypeSwitch`
+// over a color row (`flare.inspector.fill`) whose pick or typed hex sends
+// `.setFill`, and fills that differ read Mixed. The switch
 // and the editor are off, with the router's reason as their tooltip and as a
-// note under the switch (`flare.inspector.fillHelp`), while the kernel's
+// note under the switch (`fillHelpID`), while the kernel's
 // `fillHelp` says why. STROKE is the color row
 // (`flare.inspector.stroke`, `.setStrokeColor`), the Width bar
 // (`flare.inspector.strokeWidth`, in pt: each drag sample sends
@@ -41,16 +41,8 @@ struct FlareInspectorFill: View {
     /// Why a paint property's stopwatch can't act; nil while it can.
     var keyHelp: @MainActor (String) -> String? = { _ in nil }
 
-    /// The fill type switch's chips, one control each (`flare.inspector.fillType.<type>`).
-    static let fillTypes = FillType.allCases.map {
-        InspectorOption(id: $0, title: $0.rawValue.capitalized, identifier: "flare.inspector.fillType.\($0.rawValue)")
-    }
-
     /// The note under the switch that says why it is off.
-    static let fillHelpID = "flare.inspector.fillHelp"
-
-    /// The editor's own switch offers only `fill`'s type, so it hides: FILL's switch above is the one Type control.
-    nonisolated static func editorTypes(_ fill: Fill) -> [FillType] { [GradientRules.type(of: fill)] }
+    static let fillHelpID = GradientTypeSwitch.helpID(in: GradientTypeSwitch.defaultID)
 
     var body: some View {
         InspectorSection("Fill") { fill }
@@ -59,19 +51,12 @@ struct FlareInspectorFill: View {
 
     @ViewBuilder private var fill: some View {
         let help = reasonFor(.runFill(.type(.solid)))
-        let type = paint.gradient.map { GradientRules.type(of: $0.fill) } ?? (paint.fillIsGradient ? nil : .solid)
-        ChoiceChips(options: Self.fillTypes, selected: type) { send(.runFill(.type($0))) }
-            .disabled(help != nil)
-            .help(help ?? "Fill type")
-            .suiteControl(id: "flare.inspector.fillType", enabled: help == nil, reason: help, identifies: false)
-        if let help { InspectorNote(help, kind: .secondary, identifier: Self.fillHelpID) }
         if let gradient = paint.gradient {
-            GradientEditor(fill: gradient.fill, box: gradient.box, types: Self.editorTypes(gradient.fill)) {
-                send(.runFill($0))
-            }
+            GradientEditor(fill: gradient.fill, box: gradient.box, typeHelp: help) { send(.runFill($0)) }
                 .disabled(help != nil)
                 .help(help ?? "Edit Fill")
         } else {
+            GradientTypeSwitch(type: paint.fillIsGradient ? nil : .solid, help: help) { send(.runFill(.type($0))) }
             HStack(spacing: SuiteSpacing.xs) {
                 color("Fill", hex: paint.fillHex, id: "flare.inspector.fill") { .setFill(hex: $0) }
                 key("Fill", name: "fill", id: "flare.inspector.key.fill")
