@@ -41,3 +41,4 @@ time	event	task	note
 2026-10-24T07:25Z	resume	act-1a16cc967d9-mcuv; LX-2 + LX-4 start on stubs
 2026-10-24T07:48Z	heartbeat	#4960, #4962 on lane; duplicates stopped
 2026-10-24T08:11Z	heartbeat	#4960 #4962 clean, waiting for a lane batch; 0 own findings
+2026-10-24T08:33Z	heartbeat	lane: #4960 #4962 eligible (Fast-Check marker), 57 ready PRs queued behind batch 20261024081307
