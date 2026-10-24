@@ -58,3 +58,4 @@ Next: PT-1 #4845 in the fast lane (head 39f902f, CI: PASS, mutations 4/4); PT-2 
 ## Open
 - [x] Wire: tone-controls:TC-2 (#4862 merged, dev 491ec5461): PT-2 #5007 builds on ToneRows(settings:help:hidden:onIntent:).
 - [ ] Wire: tone-controls:TC-5 (#4880 open) for PT-3; TC-6 (#4953 open) for PT-4; TC-3 (#5006 open) for PT-5.
+- [ ] Supervisor: no Fast Lane run since 2026-10-23T23:10Z (dev CI in progress since 23:06Z, suiteui journeys since 23:10Z). #5007, #5008 and the TC waits (#5006, #4880, #4953) sit clean with fast-lane; dev 654fb3632. Noted 2026-10-24T00:24Z.
