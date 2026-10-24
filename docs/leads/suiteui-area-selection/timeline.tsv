@@ -1,0 +1,89 @@
+time	task	event	note
+2026-10-21T13:22:44Z	-	start	run act-1a15e9d8ac8-27wz, stage 1 packet read; AR-a startable
+2026-10-21T13:23:56Z	AR-a	builder	AR-1+AR-2 builder launched on lead/area-selection-AR-a
+2026-10-21T15:00Z	check	AR-a builder relaunched after the worker restart; records moved to suiteui-area-selection
+2026-10-21T15:10Z	stage	AR-a PR #4093 open; AR-m (AR-3, AR-4) building stacked
+2026-10-21T15:25Z	check	#4093 macOS build dispatched by lane; AR-m builder running; no findings
+2026-10-21T15:40Z	stage	AR-m PRs #4096 (AR-3) and #4098 (AR-4) open, stacked on #4093
+2026-10-21T15:44Z	check	#4093 macOS build green, Linux running; #4096/#4098 lost fast-lane on stacked size (522/594), relabel as the stack merges
+2026-10-21T16:20Z	stage	#4093 AR-a merged; #4096 restacked on dev (b02c125) and back in fast-lane; AR-7 and AR-13 builders launched
+2026-10-21T16:30Z	stage	AR-13 PR #4120 open (fast-lane, e73836b)
+2026-10-21T16:35Z	stage	AR-7 PR #4122 open (fast-lane, 24bf6e5); AR-8 builder stacked on it
+2026-10-21T16:38Z	AR-a	merged-done	Belt-Slice-Done run 39632745681
+2026-10-21T16:38Z	AR-u	fix	#4124 held for bodyRuns gate fold
+2026-10-21T16:41Z	AR-u	fixed	#4124 b45e6b4
+2026-10-21T16:58Z	AR-m/AR-u/AR-design	mac-build	queued for 4096 4120 4122
+2026-10-21T17:19Z	AR-design	mac-green	#4120 39636490860
+2026-10-21T17:40Z	heartbeat	#4120 (AR-13) merged as af840a6 in a batch of 5 (Linux run 39642386919). #4122 (AR-7) macOS build 39636526138 is green and waits on the next batch; #4096 (AR-3) build 39634352484 is still queued. #4098 and #4124 stay stacked (needs-split) until their bases merge. AR-14 waits on AR-m (#4096, #4098).
+2026-10-21T18:04Z	heartbeat	#4122 (AR-7) merged as 7f8c544 (batch of 6, Linux run 39645897530). I merged dev into lead/area-selection-AR-8: the add/add on GalleryAreaSelect.swift took the branch side, since dev's copy equals AR-7's head 24bf6e5. #4124 is now +182/-5 in 3 files, head 8386fa7, scripts/ci --changed PASS. Head moved via MCP; needs-split is dropped and fast-lane is on. #4096 (AR-3) macOS build 39634352484 is now in progress; #4098 waits on it.
+2026-10-21T18:23Z	heartbeat	#4096 (AR-3) macOS build 39634352484 is green; it waits on the next lane batch. The lane dispatched macOS build 39649626905 for #4124 (AR-8, head 8386fa7). #4098 stays stacked until #4096 merges.
+18:54Z	heartbeat	#4096 (AR-3) merged as e3b6fb8. #4098 (AR-4) restacked on dev (add/add on GroupPick taken ours, dev equal to b02c125), gate PASS, head 432656d, needs-split dropped, fast-lane on. #4124 (AR-8) macOS build 39649626905 still running. AR-14 starts once #4098 merges.
+19:13Z	heartbeat	macOS builds green: #4098 (AR-4, run 39657301406) and #4124 (AR-8, run 39649626905). Both wait on a lane batch. AR-14 starts once #4098 merges.
+19:33Z	heartbeat	#4098 (AR-4) and #4124 (AR-8): macOS builds green, both wait on a lane batch (27 runs queued repo-wide). No needs-fix, no findings.
+19:53Z	heartbeat	#4124 (AR-8, AR-u) merged as 369ecc7; Linux check 39664459063 is running on it. #4098 (AR-4) waits on a lane batch with its macOS build green.
+20:09Z	heartbeat	AR-u done: Belt-Slice-Done and Mac-Finish-Wanted posted on #3752 (Linux 39664459063 green on 369ecc7). #4098 (AR-4) merged as f2e75f9; Linux check 39667367345 on 606e821, which contains it, is running, so AR-m's done signal waits for it. AT-design is merged (#3593, #3604), but AR-14 (AR-design) still waits on design/pen-paths DP-m (DP-6 and DP-7 not yet opened) for the shared DesignCommandCatalog chain.
+20:23Z	heartbeat	AR-m done: Belt-Slice-Done posted on #3752 (Linux 39667367345 green on 606e821). Done slices: AR-a, AR-u, AR-m. AR-design (AR-14) waits on design/pen-paths DP-m (no PR yet). AR-r and AR-10 wait on IM-a.
+20:43Z	heartbeat	No change: AR-design waits on DP-m (no PR yet); AR-r and AR-10 wait on IM-a (#4028 open).
+21:11Z	heartbeat	heartbeat: AR-design waits on DP-m (no PRs yet); AR-r and AR-10 wait on IM-a #4028 (open).
+21:33Z	heartbeat	heartbeat: no change. AR-design waits on DP-m (no PRs); AR-r and AR-10 wait on IM-a #4028 (open).
+21:54Z	heartbeat	heartbeat: no change. AR-design waits on DP-m (no PRs); AR-r and AR-10 wait on IM-a #4028 (open).
+22:17Z	heartbeat	heartbeat: no change. AR-design waits on DP-m (no PRs); AR-r and AR-10 wait on IM-a #4028 (open).
+22:44Z	heartbeat	heartbeat: no change. AR-design waits on DP-m (no PRs); AR-r and AR-10 wait on IM-a #4028 (open).
+23:07Z	heartbeat	heartbeat: no change. AR-design waits on DP-m (no PRs); AR-r and AR-10 wait on IM-a #4028 (open).
+23:35Z	heartbeat	heartbeat: no change. AR-design waits on DP-m (no PRs); AR-r and AR-10 wait on IM-a #4028 (open).
+00:03Z	heartbeat	AR-design waits on DP-m (no PRs yet); AR-r/AR-10 wait on IM-a #4028 (open)
+00:27Z	heartbeat	AR-design waits on DP-m (no PRs yet); AR-r/AR-10 wait on IM-a #4028 (open)
+00:51Z	heartbeat	AR-design waits on DP-m (no PRs yet); AR-r/AR-10 wait on IM-a #4028 (open)
+01:14Z	heartbeat	AR-design waits on DP-m (no PRs yet); AR-r/AR-10 wait on IM-a #4028 (open)
+01:35Z	heartbeat	AR-design waits on DP-m (no PRs yet); AR-r/AR-10 wait on IM-a #4028 (open)
+01:58Z	heartbeat	AR-design waits on DP-m (no PRs yet); AR-r/AR-10 wait on IM-a #4028 (open)
+02:20Z	heartbeat	AR-design waits on DP-m (no PRs yet); AR-r/AR-10 wait on IM-a #4028 (open)
+02:42Z	heartbeat	AR-design waits on DP-m (no PRs yet); AR-r/AR-10 wait on IM-a #4028 (open)
+03:05Z	heartbeat	AR-design waits on DP-m (no PRs yet); AR-r/AR-10 wait on IM-a #4028 (open)
+03:34Z	heartbeat	heartbeat: no open findings; DP-m has no PRs; IM-a #4028 open
+03:58Z	heartbeat	heartbeat: no open findings; DP-m has no PRs; IM-a #4028 open
+04:22Z	heartbeat	heartbeat: no open findings; DP-m has no PRs; IM-a #4028 open
+04:46Z	heartbeat	heartbeat: no open findings; DP-m has no PRs; IM-a #4028 open
+05:14Z	heartbeat	heartbeat: no open findings; DP-m has no PRs; IM-a #4028 open
+2026-10-23T17:31Z	3	heartbeat	-	resume after Belt nudge; wave 1 PRs recorded (run act-1a1693a4009-hyio)
+2026-10-23T17:31Z	3	pr-opened	#4842	wave 1
+2026-10-23T17:31Z	3	pr-opened	#4876	wave 1
+2026-10-23T17:31Z	3	pr-opened	#4877	wave 1
+2026-10-23T17:31Z	3	pr-opened	#4860	wave 1
+2026-10-23T17:31Z	3	pr-opened	#4861	wave 1
+2026-10-23T17:54Z	3	heartbeat	-	poll: none of the wave 1 PRs merged yet; dev 98589662; waits unchanged
+2026-10-23T18:17Z	3	heartbeat	-	poll: no wave 1 PR merged; no needs-fix/needs-rebase; dev 98589662
+2026-10-23T18:40Z	3	heartbeat	-	poll: no wave 1 PR merged yet (lane batching); no needs-fix/needs-rebase; dev 0d4645bf
+2026-10-23T19:02Z	3	heartbeat	-	poll: no wave 1 PR merged yet (lane busy); no needs-fix/needs-rebase; dev 0d4645bfb
+2026-10-23T19:24Z	3	heartbeat	-	poll: 0 of 15 wave 1 PRs merged; 7 fast-lane queued, 8 stacked needs-split; 0 findings; waits unchanged
+2026-10-23T19:46Z	3	heartbeat	-	lane batch 20261023192105 red on CommandPathTests; bisecting; culprit is in another line's app-menu PRs (#4818/#4832/#4838/#4841), ours touch no app menus; wave 1 PRs waiting on the lane
+2026-10-23T20:09Z	3	heartbeat	-	no wave 1 PR merged yet; none labelled needs-fix or needs-rebase; lane still resolving batch 20261023192105 (CommandPathTests red, not ours)
+2026-10-23T20:30Z	3	heartbeat	-	lane bisect named #4818 (another line) needs-fix for CommandPathTests; ours clear, none merged yet, waiting for the next batch
+2026-10-23T20:53Z	3	heartbeat	-	batch 20261023204921 (Linux 40022175153, macOS 40022179889) carries #4842 #4853 #4860; #4828 #4834 not picked up yet, recheck next poll; none merged
+2026-10-23T21:17Z	3	heartbeat	-	batch 20261023204921 (#4842 #4853 #4860) Linux green, macOS running; #4828 #4834 ride next batch; none merged
+2026-10-23T21:39Z	3	heartbeat	-	batch 20261023204921 macOS gate 40022179889 still running (50m); none merged; no needs-fix/needs-rebase; 0 findings
+2026-10-23T22:25Z	3	restack	#4876 #4861	#4842 #4860 merged; #4876 restacked + fast-lane; #4861 retargeted to dev; AR-r waits on scoped suiteui 40029042081
+2026-10-23T23:01Z	3	heartbeat	-	no merges; suiteui run 40029042081 in progress; #4876 #4861 fast-lane
+2026-10-23T23:24Z	3	heartbeat	-	AR-r Belt-Slice-Done posted (run 40029042081)
+2026-10-23T23:47Z	3	heartbeat	-	no merges since 654fb36; lane batch 20261023215139 macOS red (bisecting, #4870 not ours); our wave 1 PRs wait on fast-lane, none needs-fix/needs-rebase; CI run 40037716897 on dev in progress
+2026-10-24T00:10Z	3	heartbeat	-	no merges since 654fb36 (lane held by red macOS batch bisect); none of our PRs needs-fix/needs-rebase; waits unchanged (TC-m, IM-z, SC-15, SC-4, OC-photo-u none; AC-colour only old PRs)
+2026-10-24T00:31Z	3	heartbeat	-	no merges since 654fb36; full CI 40037716897 on dev 654fb36 green; lane bisecting batch 20261023215139 (probe -6 at #4836 running); none of ours needs-fix/needs-rebase; waits unchanged
+2026-10-24T00:54Z	3	heartbeat	-	no merges since 654fb36 (lane still bisecting batch 20261023215139); none of ours needs-fix/needs-rebase; waits unchanged
+2026-10-24T01:16Z	3	heartbeat	-	no merges since 654fb36; lane bisect probe batch-20261023215139-6 Linux green, macOS gate 40044879600 still running; none of ours needs-fix/needs-rebase; waits unchanged
+2026-10-24T01:38Z	3	heartbeat	-	no merges since 654fb36 (lane bisect of batch 20261023215139 still in flight); none of ours needs-fix/needs-rebase; waits unchanged
+2026-10-24T02:00Z	3	heartbeat	-	no merges since 654fb36 (lane bisect of batch 20261023215139 at probe -9, #4864, macOS gate in flight); none of ours needs-fix/needs-rebase; waits unchanged
+2026-10-24T02:21Z	3	heartbeat	-	no merges since 654fb36 (lane bisect of batch 20261023215139 still in flight); none of ours needs-fix/needs-rebase; waits unchanged
+2026-10-24T02:43Z	3	heartbeat	-	no merges since 654fb36 (lane bisect of batch 20261023215139: probe -6 green, probe -9 macOS red, culprit between); none of ours needs-fix/needs-rebase; waits unchanged
+2026-10-24T03:05Z	3	heartbeat	-	no merges since 654fb36 (lane bisect of batch 20261023215139 at probe -7, #4837; #4864 fixing its macOS break); none of ours needs-fix/needs-rebase; waits unchanged
+2026-10-24T03:26Z	3	heartbeat	-	no merges since 654fb36 (lane bisect of batch 20261023215139 at probe -7, #4837, macOS gate in flight); none of ours needs-fix/needs-rebase; waits unchanged
+2026-10-24T03:48Z	3	heartbeat	-	no merges since 654fb36 (lane bisect of batch 20261023215139: probe -7 #4837 macOS green, next probe pending); none of ours needs-fix/needs-rebase; waits unchanged
+2026-10-24T04:09Z	3	heartbeat	-	no merges since 654fb36 (lane bisect of batch 20261023215139 at probe -8, #4839, runs in flight); none of ours needs-fix/needs-rebase; waits unchanged
+2026-10-24T04:32Z	3	heartbeat	-	poll: dev still 654fb36; lane bisect probe -8 (#4839) macOS 40060705865 running; no needs-fix/needs-rebase; waits unchanged
+2026-10-24T04:53Z	3	heartbeat	-	poll: dev still 654fb36; bisect probe -8 (#4839) Linux green, macOS 40060705865 running; no needs-fix/needs-rebase; waits unchanged
+2026-10-24T05:16Z	3	heartbeat	-	poll: dev still 654fb36; old bisect ended, new batch 20261024050226 (12 PRs incl. ours #4846 #4861 #4867) Linux 40064700946 + macOS 40064703313 running since 05:02Z; no needs-fix/needs-rebase; waits unchanged
+2026-10-24T05:38Z	3	heartbeat	-	poll: dev still 654fb36; batch 20261024050226 (ours #4846 #4861 #4867) Linux green, macOS 40064703313 running; no needs-fix/needs-rebase; waits unchanged
+2026-10-24T06:00Z	3	heartbeat	-	poll: dev still 654fb36; batch 20261024050226 macOS red, lane bisecting: probe -6 (#4864, prefix holds ours #4846 #4861) Linux 40067471044 + macOS 40067473896 running; no needs-fix/needs-rebase; waits unchanged
+2026-10-24T06:21Z	3	heartbeat	-	poll: dev still 654fb36; bisect probe -6 (#4864, holds ours #4846 #4861) macOS 40067473896 still running; no needs-fix/needs-rebase; waits unchanged
+2026-10-24T06:43Z	3	heartbeat	-	poll: dev e5dcf93 (#4840, #5048), none of ours; batch 20261024050226 probe -6 red, bisecting -3 (#4852) and -1 (#4839), prefix holds ours #4846 #4861; no needs-fix/needs-rebase; waits unchanged
+2026-10-24T07:05Z	3	resume	-	run act-1a16cae7989-hj12 resumes on dev 830af22d; records refreshed, contract-first waits applied, PR bodies cleaned
+2026-10-24T07:12Z	3	wave	-	wave 2 started: builder restacks #4877 on dev, then AR-11 and AR-12 (AR-photo-u) stacked on it
