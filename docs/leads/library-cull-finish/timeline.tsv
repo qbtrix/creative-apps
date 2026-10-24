@@ -102,3 +102,4 @@
 2026-10-24T07:48Z	heartbeat	#4838, #4899 clean on lane, not merged; excludedPaths wiring builder running
 2026-10-24T08:06Z	build	DR-m #5100 excludedPaths wiring opened, stacked on #4899
 2026-10-24T08:11Z	heartbeat	#4838 #4899 #5100 clean, waiting for a lane batch (other lines batching)
+2026-10-24T08:33Z	heartbeat	lane: #4838 #4899 eligible, 57 ready PRs queued behind batch 20261024081307 (bisecting); #5100 skips until its base is dev
