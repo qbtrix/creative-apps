@@ -238,3 +238,20 @@ import Testing
                                               dash: [8, 4]))
     }
 }
+
+/// The stroke lives in DesignNode's copy-on-write extras box (DesignNodeStackTests pins the node's size); it must
+/// still behave as a value.
+@Suite struct DesignStrokeBoxTests {
+    @Test func aCopyKeepsItsOwnStroke() {
+        let frame = DesignRect(x: 0, y: 0, width: 1, height: 1)
+        var original = DesignNode(id: "a", name: "R", kind: .rectangle, frame: frame)
+        #expect(original.stroke == nil)
+        original.stroke = DesignStroke(color: .black, width: 3)
+        var copy = original
+        copy.stroke?.width = 5
+        #expect(original.stroke?.width == 3)
+        #expect(copy.stroke?.width == 5)
+        #expect(DesignNode(id: "dup", copying: original).stroke == original.stroke)
+        #expect(DesignNode(id: "s", name: "R", kind: .rectangle, frame: frame, stroke: original.stroke).stroke?.width == 3)
+    }
+}
