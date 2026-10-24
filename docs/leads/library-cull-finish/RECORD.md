@@ -1,8 +1,8 @@
 # cull-finish lead record
 
 Issue: #3458 · Packet: docs/blueprints/library/features/cull-finish.md
-Run: act-1a16cc967d9-mcuv (line lead, line:library) · resumed 2026-10-24 · earlier act-1a16953af22-wvhu, act-1a15995d319-aamb
-Stage: build, wave 3; #4838 (84be0634, Linux check 40028953909 green) and #4899 (f1071bc8) on the lane, waiting for a batch. Checked 2026-10-24T07:25Z
+Run: act-1a170488aff-41nk (line lead, line:library) · resumed 2026-10-24T23:40Z · earlier act-1a16cc967d9-mcuv, act-1a16953af22-wvhu, act-1a15995d319-aamb
+Stage: build, wave 3; #4838 merged (DR-u part 1); #5130 (DR-u tests, base dev, Linux 40109534004 green), #4899 (ffe411ac) and #5100 (stacked on #4899) on the lane. Checked 2026-10-24T23:42:58Z
 Base: origin/dev 830af22d
 Next: lane merges #4838, #4899; DR-u tests PR (feat/cull-finish-dr-u-tests) opens once #4838 is on dev; builder wires excludedPaths into headless and window save (RJ-L06), stacked on #4899; then scoped run app=library for Belt-Slice-Done DR-u, DR-m; then DR-z
 
@@ -65,3 +65,5 @@ Next: lane merges #4838, #4899; DR-u tests PR (feat/cull-finish-dr-u-tests) open
 - 2026-10-24T08:06Z: DR-m excludedPaths wiring (RJ-L06 on, Linux green) is PR #5100, head 40a3f838, base feat/cull-finish-dr7-8, Fast-Check pass, mutate 10/10. Retarget to dev after #4899 merges. The PR-edit API re-appends a tool footer to the body; the lane strips attribution from the squash.
 
 - 2026-10-24T09:21Z: DR-u tests (render budget + J-DR1 journey skipped "waits on DR-9") are PR #5130, base feat/cull-finish-dr-u (#4838), 2 files +143, CI: PASS. Retarget to dev when #4838 merges.
+
+- 2026-10-24T23:42:58Z: resumed by act-1a170488aff-41nk. The brief says to rebase lead/cull-finish onto main; it is retired (records live here on lead/library-cull-finish), so it is left as is. PRs keep targeting dev: scripts/fast-lane.sh merges only into dev, and main takes dev SHAs after full CI. #4838 merged 2026-10-24T15:48Z; #5130 already targets dev. DR-u is done once #5130 is on dev and a library run covers it.

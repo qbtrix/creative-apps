@@ -145,3 +145,4 @@
 2026-10-24T22:29:33Z	heartbeat	batch-20261024205137: probe -6 macOS green, -3 macOS still running; none ours; 8 PRs open, clean
 2026-10-24T22:50:42Z	heartbeat	batch-20261024205137 still bisecting (new probe -1); none ours; 8 PRs open, clean
 2026-10-24T23:12:29Z	heartbeat	batch-20261024205137: -3 macOS red, probe -1 macOS running; dev full CI running since 22:06Z; none ours; 8 PRs open, clean
+2026-10-24T23:42:58Z	resume	act-1a170488aff-41nk resumed; #4838 merged; #5130 (dev), #4899, #5100 waiting for a batch; batch-20261024205137 probe -1 macOS running, none ours
