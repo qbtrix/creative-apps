@@ -1,0 +1,5 @@
+[
+{"label":"a cold launch's opener is kept but asks for no window for files already waiting","file":"Sources/SuiteUI/SuiteOpenQueue.swift","find":"if first { for _ in pending { opener() } }","replace":"_ = first","tests":"SuiteOpenQueueTests"},
+{"label":"every opener asks again, so a rebuilt menu opens a second window per file","file":"Sources/SuiteUI/SuiteOpenQueue.swift","find":"let first = requestWindow == nil","replace":"let first = true","tests":"SuiteOpenQueueTests"},
+{"label":"a file with no empty window waits without asking the opener","file":"Sources/SuiteUI/SuiteOpenQueue.swift","find":"        pending.append(item)\n        requestWindow?()","replace":"        pending.append(item)","tests":"SuiteOpenQueueTests"}
+]

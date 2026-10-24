@@ -41,7 +41,7 @@ extension PhotoWindow {
                 switch request {
                 case .open(let path):
                     let url = URL(fileURLWithPath: path)
-                    if model.canvas == nil { open(url) } else { PhotoOpenQueue.shared.open(url) }
+                    if model.canvas == nil { open(url) } else { PhotoShell.openQueue.open(.openFile(url)) }
                 case .handOff(let path, let app):
                     Task { await PhotoShell.bridge.handOff([.handOff(path: path, app: app)]) }
                 case .forget, .clearRecent, .newImage: continue
