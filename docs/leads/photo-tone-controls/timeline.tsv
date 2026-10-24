@@ -137,3 +137,4 @@ utc	stage	event	ref	note
 2026-10-24T22:26:07Z	W4	check	PT-4	no merges; bisect macOS probes -3/-6 still running on runners (70 min); full CI 40137153379 on dev running; our PRs and waits open and clean
 2026-10-24T22:48:13Z	W4	check	PT-4	no merges; bisect probe -6 macOS green but -3 red (inconsistent), lane now probing -1; our PRs and waits open and clean, none labelled needs-fix
 2026-10-24T23:14:59Z	W4	check	PT-4	no merges; bisect probe -1 macOS running (Linux green); full CI on dev running; our PRs and waits open and clean
+2026-10-24T23:43:19Z	W4	check	PT-4	check-in: no merges; batch-20261024205137 probe -1 macOS still running, full CI 40137153379 running; no scoped photo run
