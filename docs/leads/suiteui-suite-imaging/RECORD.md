@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: 13:39Z: the supervisor approved the perf line, and #5178 (IM-11c) opened for them to land. Nothing has merged; the lane is still bisecting batch-20261024110214. The IM-library slice needs #4886, #5153, #5154, #5163 and #5178 in a green run. EP-z #3723 is still open; IM-8b question 6383016723 is open.
+Next: 14:02Z poll: nothing has merged, and all 7 PRs are clean (#5154 and #5163 lack fast-lane until their parents merge; #5178 is no-fast-lane for the supervisor). The newest dev CI run is still 40087964618, which predates the stack. #3723 is open, and IM-8b q 6383016723 is unanswered. Waiting on the lane batch.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
 

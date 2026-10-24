@@ -65,3 +65,4 @@ utc	stage	event	ref	note
 2026-10-24T12:59Z	IM-library	check	poll	nothing merged; waiting on lane batch
 2026-10-24T13:19Z	IM-library	check	poll	lane bisect probe macOS gate running
 2026-10-24T13:42Z	IM-library	pr	IM-11c	#5178 perf line, supervisor lands
+2026-10-24T14:02Z	poll	check	all	no merges; lane batch pending
