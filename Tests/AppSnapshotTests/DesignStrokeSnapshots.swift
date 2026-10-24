@@ -23,12 +23,9 @@ enum DesignStrokeSeed {
         var model = DesignFixtures.cards
         model.useServices(.live)
         model.load(model.pages.map { page in
+            // B sits inside the Desktop frame, so the stroke goes on through the tree, not the top level.
             var page = page
-            page.nodes = page.nodes.map { node in
-                var node = node
-                if node.id == "node-3" { node.stroke = stroked ? stroke : nil }
-                return node
-            }
+            _ = page.nodes.update("node-3") { $0.stroke = stroked ? stroke : nil }
             return page
         })
         model.selectItem(selected)
