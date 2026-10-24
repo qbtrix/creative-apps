@@ -85,3 +85,4 @@ utc	stage	event	ref	note
 2026-10-24T07:02Z	3	stage	-	heartbeat: lane bisect probes -3/-1 macOS running
 2026-10-24T07:32Z	3	stage	-	takeover by act-1a16cd045be-qv3g; HF-u #4868, HF-3 #4894, HF-4 #4936 in lane; building HF-z
 2026-10-24T07:37Z	4	wave	-	HF-z (HF-7 live journey, step 4 now the Flare hand-off per rule 20; HF-8 docs, built) built on lead/halo-file-flow-HF-z, stacked on HF-u; gate running
+2026-10-24T07:53Z	5	ship	HF-z	#5092 opened (feature-done), head a1b66ac9, CI: PASS
