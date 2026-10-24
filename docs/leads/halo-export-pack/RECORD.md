@@ -1,7 +1,7 @@
 # export-pack lead record
 
 Issue: #3472 (runs before used #4509) · Packet: docs/blueprints/halo/features/export-pack.md
-Run: act-1a16cd045be-qv3g · Started: 2026-10-24T07:20Z (took over from act-1a16958d5fe-8dxu)
+Run: act-1a16fbc5164-vi4c · Started: 2026-10-24T21:10Z (took over from act-1a16cd045be-qv3g)
 Stage: 5 (every task in a PR: HX-u #4858, HX-3 #4874, HX-4 #4917, HX-z #4942 feature-done)
 Base: 721168a8 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
 Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev holds its last PR, then Belt-Contact-Sheet
@@ -19,7 +19,7 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 |---|---|---|---|---|---|---|---|
 | HX-1 | HX-a | 1 | codec and alpha settings, stub refusal | Sources/HaloModel/Contracts/HaloDocumentValues.swift, Tests/HaloModelTests/HaloProResTests.swift | existing render tests; ProRes refused | #4841 | merged |
 | HX-2 | HX-a | 2 | Codec row, Transparent checkbox | Sources/HaloApp/HaloRenderSheet.swift | HaloRenderProResSnapshots.sheet | #4841 | merged |
-| HX-3 | HX-m | 2 | plan rules, alpha frames (RJ-H41 moves to HX-4) | Sources/HaloModel/HaloRenderJob.swift, see packet | HaloProResTests, HaloRenderAlphaTests | #4874 | pr |
+| HX-3 | HX-m | 2 | plan rules, alpha frames (RJ-H41 moves to HX-4) | Sources/HaloModel/HaloRenderJob.swift, see packet | HaloProResTests, HaloRenderAlphaTests | #4874 | pr (rebuilt on dev, 183 lines) |
 | HX-4 | HX-m | 2 | live renderer via media.movie; HaloMovieWriter kept for fractional fps | Sources/HaloModel/Live/LiveCompositionRendering.swift, Sources/HaloApp/HaloMovieWriter.swift | HaloMovieSinkTests | #4917 | pr |
 | HX-5 | HX-u | 3 | snapshots, budget | Tests/AppSnapshotTests/HaloRenderProResSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloRenderSheetTests.swift | codecSwitchInTwoBodies | #4858 | pr |
 | HX-6 | HX-u | 3 | journey skipped | UITests/HaloJourneyTests+ExportPack.swift | compiles, skipped | #4858 | pr |
@@ -40,6 +40,7 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - HX-4's shared MovieWriter takes whole-number fps only. #4857 (needs-ui, line:suiteui) asks for a rational rate; HaloMovieWriter stays for fractional rates until then.
 
 ## Open
+- 2026-10-24T21:40Z: run act-1a16fbc5164-vi4c. #4874 (HX-3) was labelled needs-split at 654 lines / 16 files and conflicted with dev: its branch still carried the HX-a commits that merged squashed as #4841 and HX-u's #4858 files. Rebuilt lead/halo-export-pack-HX-m on origin/dev from its own two commits (3eaa0b3d test first, 9612572f): 13 files, +149/-34. HX-4 (#4917) and HX-z (#4942) re-stacked on it by cherry-pick, no conflicts. The record stays on lead/halo-export-pack: lead/export-pack belongs to the suiteui lead (#3477), so the brief's rebase of it is not done here.
 - HX-a blocked (2026-10-21T00:13Z): gradient-fill:HG-a done (#3516); placed-images:PH-a waiting (stage 0, waits on HS-a #3676 and suiteui PL-a).
 - 2026-10-21T13:42:11Z check-in: still blocked; placed-images is at Stage 0, PH-a waits on HS-a (#3676), HK-a (key-editing) and PL-a.
 - 2026-10-22T16:37:55Z: New run act-1a16474bd28-v3ht for #4509. Cross-line waits are met on dev 7e9f260: ExportRules/keepsAlpha (SuiteKernel/Export/ExportOptions.swift), MovieCodec/MovieSettings/.prores4444 (SuiteModel/Values/Media.swift), media.movie (MediaEncoding.swift, FakeMedia.swift), SuiteShell/Media/MovieWriter.swift. gradient-fill is built. PH-a #4426 is open (fast-lane, clean, waits on its macOS build).

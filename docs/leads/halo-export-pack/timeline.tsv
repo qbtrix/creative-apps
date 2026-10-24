@@ -121,3 +121,4 @@ utc	stage	event	ref	note
 2026-10-24T19:39:58Z	poll	dev 6f66ca33; no labels; no new findings
 2026-10-24T20:02:06Z	poll	dev 6f66ca33; no labels; no new findings
 2026-10-24T20:24:06Z	poll	dev ef37711d; no labels; no new findings
+2026-10-24T21:40Z	5	fix	#4874	needs-split: rebuilt HX-m on dev from its own commits (13 files, 183 lines); HX-4, HX-z re-stacked
