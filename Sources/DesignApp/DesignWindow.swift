@@ -83,9 +83,6 @@ struct DesignWindow: View {
     /// The rect Zoom to Selection asked to show; the canvas takes it once it has that input (D0-5b).
     @State private var show: DesignRect?
     @Environment(\.openWindow) private var openWindow
-    /// Whether this is the key window, which live commands act on (EM-4).
-    @Environment(\.appearsActive) private var appearsActive
-    @State private var liveID = UUID()
     /// Cut, Copy and Paste through the suite's coder; the PNG is drawn here, on the main actor.
     private let pasteboard = DesignPasteboardAdapter(png: { raster in
         try MainActor.assumeIsolated { try DesignRasterizer.png(raster) }
@@ -142,10 +139,8 @@ struct DesignWindow: View {
             Text(shown.message)
         }
         .task { start() }
-        .onChange(of: appearsActive, initial: true) {
-            if appearsActive { DesignShell.front = (liveID, { model }, perform) }
-        }
-        .onDisappear { if DesignShell.front?.id == liveID { DesignShell.front = nil } }
+        // The key window is the one live commands act on (EM-4).
+        .suiteLiveWindow(DesignShell.front, read: { DesignHeadless(model) }, write: { perform(.adoptLive($0.workspace)) })
         .unsavedChangesGuard(Self.unsavedHooks(model: { model }, perform: perform))
         .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }))
         .modifier(DesignHistoryArea(model: model, jump: { try model.jumpHistory(to: $0) }, restore: { try model.restoreRecovered(from: $0, name: $1) }, onNote: { note = $0 }))

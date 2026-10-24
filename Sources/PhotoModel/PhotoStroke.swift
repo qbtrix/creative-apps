@@ -10,6 +10,7 @@
 // to `transformDrag` (PhotoTransform.swift); otherwise by tool, marquee to
 // `selectionDrag` (PhotoSelectionMask.swift), crop to `cropDrag`
 // (PhotoCropSize.swift), eyedropper to `sampleDrag` (PhotoSample+Kernel.swift),
+// a Pen drag adds a draft point on release (`runPath`, PhotoPaths+Kernel.swift),
 // and the rest paint or move here.
 //
 //   brush, eraser  a round stroke through the pointer samples on the selected
@@ -167,7 +168,7 @@ extension PhotoWorkspace {
             moveSelectedLayers(current, to: end)
         case .eyedropper:
             break
-        case .gradient:
+        case .gradient, .pen:
             current.end = end
         case .text:
             break
@@ -242,6 +243,8 @@ extension PhotoWorkspace {
             do { try drawGradient(from: done.start, to: end) } catch { statusMessage = "Couldn't draw the gradient." }
         case .text:
             openTextBox(at: done.start)
+        case .pen:
+            runPath(.penAdd(done.start.kernel, handleOut: done.end?.kernel))
         case .move:
             if done.layersBefore != layers, !done.layersBefore.isEmpty {
                 let moved = zip(done.layersBefore, layers).filter { $0.offsetX != $1.offsetX || $0.offsetY != $1.offsetY }
