@@ -42,6 +42,7 @@ Next: Lane: #4871 TS-a and #5047 TS-7 in the lane. After #4871 merges, merge dev
 
 ## Decisions
 
+- 2026-10-24T08:07:00Z Heartbeat 07:40Z: #5047 in the lane. TS-u #4958 now carries fast-lane with base dev (lane sweep); it still merges after #4871. TS-8 starts once TS-u merges; TS-9 still waits on AJ-a (adjust-everywhere planned).
 - 2026-10-24T07:00:09Z TS-7 opened as #5047 (Wire: brush-keys:BK-design).
 - 2026-10-24T05:34:44Z relaunch as run act-1a16c618fe7-h4fd, using contract-first waits (lead.md rule 12). BK-a is on dev, so TS-7 builds now on TS-m's kernel and gets a Wire: line for BK-design. TS-9 still waits, because adjust-everywhere's first slice AJ-a hasn't merged (FilterRules and AdjustCommands are missing on dev). TS-m's Belt-Slice-Done was posted on #4519 (run 39808732641).
 - 2026-10-21T01:21:08Z: integration base is dev (7277a83a), not main.
