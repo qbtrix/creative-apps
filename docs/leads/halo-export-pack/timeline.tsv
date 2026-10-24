@@ -65,3 +65,4 @@ utc	stage	event	ref	note
 2026-10-23T23:20:00Z	4	stage	HX-u	waiting on lane batch; findings 0
 2026-10-23T23:40:00Z	4	stage	HX-u	waiting on lane batch (macOS gate run 40029779505 busy)
 2026-10-24T00:02Z	4	stage	-	heartbeat: waiting on next lane batch
+2026-10-24T00:25Z	4	stage	-	heartbeat: waiting on next lane batch
