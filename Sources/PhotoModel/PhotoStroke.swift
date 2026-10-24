@@ -43,6 +43,9 @@
 //                  an undo step (PhotoEyedropper.swift).
 //   move           shifts every picked image layer by the drag, in whole
 //                  pixels, as one step ("Move Layer", "Move Layers" for several).
+//   bucket, spot heal, remove
+//                  nothing until the release runs one command, one undo step
+//                  (PhotoRetouchRelease.swift).
 //
 // Brush, eraser, clone and heal write through `paintTarget()`: the selected
 // layer's pixels, or on an adjustment layer nothing, with the refusal in
@@ -245,7 +248,9 @@ extension PhotoWorkspace {
         case .heal:
             guard done.layerID != nil else { return }
             healStroke(done)
-        case .marquee, .crop, .eyedropper, .bucket, .spotHeal, .remove:
+        case .bucket, .spotHeal, .remove:
+            retouchRelease(done)
+        case .marquee, .crop, .eyedropper:
             break
         case .gradient:
             guard let end = done.end else { return }
