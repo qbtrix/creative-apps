@@ -106,3 +106,4 @@ utc	stage	event	ref	note
 2026-10-24T07:45Z	3	fix	PD-m	#4922 merged PD-a base (4 catalog files, union), CI: PASS, head f2a7207c
 2026-10-24T07:48Z	3	heartbeat	-	scoped design 40072347300 green on dev 830af22d (no lead slice in it yet); all slice PRs clean, none needs-fix; lane batch 20261024050226 bisecting
 2026-10-24T08:10Z	3	heartbeat	-	dev 1bbaba6c (batch 20261024050226 landed, no lead PR in it); #4864 #4888 #3759 still merge clean into dev; none needs-fix
+2026-10-24T08:32:49Z	3	check	-	dev 1bbaba6c; lane batch 20261024081307 (#4903-#4952) bisecting, no lead PR in it; lead PRs clean, fast-lane, none needs-fix
