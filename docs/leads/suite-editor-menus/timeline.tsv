@@ -97,3 +97,4 @@ utc	stage	event	ref	note
 2026-10-24T05:40Z	check	editor-menus	05:40Z asked supervisor: batch 20261023215139 green prefix unmerged	https://github.com/qbtrix/creative-apps/issues/3774#issuecomment-6380477896
 2026-10-24T06:02Z	check	editor-menus	06:02Z prefix still unmerged; batch 20261024050226 macOS red, bisecting; no supervisor reply yet	https://github.com/qbtrix/creative-apps/issues/3774#issuecomment-6380477896
 2026-10-24T06:24Z	check	editor-menus	06:24Z prefix still unmerged; probe -6 macOS running; no supervisor reply yet	https://github.com/qbtrix/creative-apps/issues/3774#issuecomment-6380477896
+2026-10-24T06:46Z	check	editor-menus	06:46Z prefix still unmerged; batch 20261024050226 bisecting (probe -1 macOS queued); no supervisor reply	https://github.com/qbtrix/creative-apps/issues/3774#issuecomment-6380477896
