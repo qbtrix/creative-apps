@@ -109,3 +109,4 @@ utc	stage	event	ref	note
 2026-10-23T23:20	heartbeat	#4852 clean, awaiting batch; journeys flare job started 23:07
 2026-10-23T23:42	heartbeat	#4852 clean, awaiting batch; journeys flare job still running
 2026-10-24T00:05	stage	FV-a critic panel started (wf_513793d1-fcf) on journeys 40032678706 ui-screens; audit flare contrast 10, identifier 34, overlap 1
+2026-10-24T00:10	stage	FV-a review: 13 confirmed, 10 filed #5012-#5021; needs-ui #5022 #5023 filed; fix round 1 started (wf_05bf9ee4-9bc, 7 findings)

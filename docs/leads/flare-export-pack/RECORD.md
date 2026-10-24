@@ -11,8 +11,8 @@ Loop: v3 (the packet has a `## Slices` table).
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| FV-a | MP4 and GIF with frame rate and loop on stubs; sheet chips and Size row | FV-1, FV-2 | MJ-FV | XP-a, shell-media SM-a | yes | 0 | merged-done (Belt-Slice-Done + Mac-Finish-Wanted posted); review waits on journeys run 40032678706 ui-screens | https://github.com/qbtrix/creative-apps/actions/runs/40029025919 | |
-| FV-u | snapshots, render budget, journey written | FV-5, FV-6 | FJ-X1 | FV-a; XP-4 | yes | 0 | PR #4852 (stacked on #4843) | | |
+| FV-a | MP4 and GIF with frame rate and loop on stubs; sheet chips and Size row | FV-1, FV-2 | MJ-FV | XP-a, shell-media SM-a | yes | 1 | merged-done; review 1 filed #5012-#5021 (10); fix round 1 running (fix-batch wf_05bf9ee4-9bc on #5012 #5013 #5014 #5015 #5017 #5018 #5020); #5016/#5019 wait on needs-ui #4819, #5021 on #5023, #5012's unit on #5022 | https://github.com/qbtrix/creative-apps/actions/runs/40029025919 | |
+| FV-u | snapshots, render budget, journey written | FV-5, FV-6 | FJ-X1 | FV-a; XP-4 | yes | 0 | PR #4852 (base dev, clean, awaiting lane batch) | | |
 | FV-m | frame plan, alpha, even size; live adapter streams to the writers | FV-3, FV-4 | MJ-FV | FV-a; XP-6 (merged), SM-w | no | 0 | done (Belt-Slice-Done posted) | https://github.com/qbtrix/creative-apps/actions/runs/39957675362 | n/a |
 | FV-z | real files on live, journey passes, blueprint | FV-7, FV-8 | FJ-X1 | FV-u, FV-m; gradient-fill:FG-z; svg-place:PF-z | no | 0 | PR #4854 (stacked on #4852) | | |
 
