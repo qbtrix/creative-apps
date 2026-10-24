@@ -10,7 +10,7 @@ import XCTest
 
 final class DesignEditJourneyTests: XCTestCase {
     /// The slice this journey waits on; CB-6 sets it to nil.
-    private static let waitsOn: String? = "CB-6"
+    private static let waitsOn: String? = nil
     static let arguments = ["-DesignFixture", "cards", "-SuiteWindowSize", "1024x768"]
     /// The types a Design copy offers (SuiteTypeID's designLayers, svg and png).
     private static let ownType = NSPasteboard.PasteboardType("org.creativesuite.design.layers")

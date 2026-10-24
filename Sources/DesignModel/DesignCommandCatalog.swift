@@ -7,7 +7,8 @@
 // SuiteKernel's TransformCommands on its TransformTarget (transform DT-6); color.sample is SampleCommands on its
 // SampleTarget and color.pick the Eyedropper's click (eyedropper DY-6); shape.draw and tool.shape are ShapeCommands on its
 // ShapeTarget (shape-tools DS-6); select.pick, select.enter-group and select.exit-group are GroupPick's on its
-// GroupPickTarget (area-selection AR-14). Ids are `<menu>.<action>` in lowercase; Tests/command-ids/design.txt keeps them. Linux-safe.
+// GroupPickTarget (area-selection AR-14); edit.copy-as and edit.paste-as-image are CopyAsCommands on
+// DesignPasteboardAdapter's CopyAsTarget (clipboard-interop CB-6). Ids are `<menu>.<action>` in lowercase; Tests/command-ids/design.txt keeps them. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -32,7 +33,7 @@ extension DesignWorkspace {
 
     /// Every Design action as a command spec, in menu order, the History panel's two after the tools, then the View menu's.
     public static let commands: [CommandSpec<DesignWorkspace>] =
-        fileSpecs + editSpecs + objectSpecs + GradientCommands.specs(DesignWorkspace.self) + SampleCommands.specs(DesignWorkspace.self)
+        fileSpecs + editSpecs + CopyAsCommands.specs(DesignWorkspace.self) + objectSpecs + GradientCommands.specs(DesignWorkspace.self) + SampleCommands.specs(DesignWorkspace.self)
             + [pick] + groupSpecs + TransformCommands.specs(DesignWorkspace.self) + pageSpecs + toolSpecs + ShapeCommands.specs(DesignWorkspace.self)
             + HistoryCommands.specs(DesignWorkspace.self) + viewSpecs
 
