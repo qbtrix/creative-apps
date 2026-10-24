@@ -1,10 +1,10 @@
 # editor-menus lead record
 
 Issue: #3774 · Packet: docs/blueprints/suite/features/editor-menus.md
-Run: act-1a16a37a3ed-0kyn (relaunch; earlier act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
-Stage: EM-flare-halo: #4817/#4988 waiting on lane
-Base: 35a0b5e7e9520a764f3eabf02968a453082a87cc (main; PRs target dev)
-Next: supervisor: lane --limit 100 starves old PRs
+Run: act-1a16db4d43e-gerb (relaunch; earlier act-1a16a37a3ed-0kyn, act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
+Stage: EM-flare-halo: #4817/#4988 in lane; #2487 (slider keeps arrows) building on lead/editor-menus-2487
+Base: 9f476af7419db0cc5753aa119ec0bd3b1a12899a (main; PRs target dev)
+Next: lane: batch #4817/#4988 (#5150 fixed the limit), then the #2487 PR stacked on #4988
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -60,3 +60,4 @@ Next: supervisor: lane --limit 100 starves old PRs
 
 - 09:53Z: #4761 (EM-library, feature-done) merged. All editor-menus slices are on dev. Done markers wait on a green full CI (Linux+macOS) on a dev head that includes it, plus its journeys run.
 - 2026-10-23T19:28Z Relaunch act-1a16a37a3ed-0kyn: rebased on main 35a0b5e7e. Full CI https://github.com/qbtrix/creative-apps/actions/runs/39983291011 (green, main) holds the newest PRs for EM-a (#4737), EM-photo-design (#4771) and EM-library (#4761); done markers posted. EM-flare-halo is open: #4816 merged after main; #4817 and #4818 are in the lane. The supervisor added #4830 (focused text fields keep edit keys, shared layer); builder started on lead/editor-menus-4830.
+- 2026-10-24T11:46Z Relaunch act-1a16db4d43e-gerb on main 9f476af74. The supervisor folded #2487 into EM-flare-halo (captain: a focused inspector slider takes ← and →; Animate's frame steps only from the canvas or timeline). Failing test 18c976e, then the fix on lead/editor-menus-2487, stacked on #4988: SuiteModel FocusedSliderKeyRouting, SuiteUI MenuCommand.givingWayToSlider, ScrubField publishes its focus, Flare's four arrow items wrap.
