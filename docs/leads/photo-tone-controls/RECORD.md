@@ -71,3 +71,5 @@ Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #48
 - 09:04Z: dev-red #5113 (macos job, range main..1bbaba6c1, 16 PRs) has no tone-controls or layer-styles PR in it, so it is not ours and nothing to do (CLAUDE.md, Parallel agents).
 
 - 14:37Z: batch order puts #5006 then #5007 at positions 5 and 6; probe -4 macOS running. The failing test ships with #5006, so the culprit is most likely #5006 (not ours). A fixer runs only if `needs-fix` lands on #5007.
+
+- 15:22Z: probe -4 green on both gates, so the batch break is #5006 or #5007; waiting on probe -5.
