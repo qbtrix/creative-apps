@@ -109,3 +109,4 @@
 2026-10-24T09:40Z	heartbeat	lane merging others (last dev 09:24Z); #4838 #4899 #5100 #5130 waiting
 2026-10-24T10:03:06Z	heartbeat	all PRs open+clean; lane batch in flight, 51 ready wait; dev head #5117
 2026-10-24T10:24:51Z	heartbeat	no merges since #5117 (09:24Z); all PRs open+clean, lane batch in flight
+2026-10-24T10:46:06Z	heartbeat	dev moved to #4616; ours all open+clean on the lane; XP-3/XP-7 not merged
