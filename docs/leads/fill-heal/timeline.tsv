@@ -62,3 +62,4 @@ utc	stage	event	ref	note
 2026-10-24T08:35:32Z	FH-photo	pr	FH-8 #5109 (6e6e7bb) opened; mutate 3/3 + 3/3
 2026-10-24T08:36:40Z	findings	fix	round 1 started: #5095, #5093 (then #5094)
 2026-10-24T09:09:17Z	findings	pr	#5121 fixes #5095; #5093 fix re-stacking on FH-7 (golden)
+2026-10-24T09:19:34Z	findings	pr	#5129 fixes #5093 (stacked on FH-7); #5094 fixer started
