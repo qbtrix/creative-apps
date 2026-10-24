@@ -1,0 +1,16 @@
+[
+  {
+    "label": "nanCrashes: the finite guard goes, so a NaN component traps",
+    "file": "Sources/SuiteModel/Values/SuiteColor.swift",
+    "find": "v.isFinite ? Int((min(max(v, 0), 1) * 255).rounded()) : 0",
+    "replace": "Int((min(max(v, 0), 1) * 255).rounded())",
+    "tests": "SuiteColorHexParityTests|ValuesExchangeTests"
+  },
+  {
+    "label": "truncates: each component is truncated instead of rounded",
+    "file": "Sources/SuiteModel/Values/SuiteColor.swift",
+    "find": "Int((min(max(v, 0), 1) * 255).rounded())",
+    "replace": "Int(min(max(v, 0), 1) * 255)",
+    "tests": "SuiteColorHexParityTests|ValuesExchangeTests"
+  }
+]
