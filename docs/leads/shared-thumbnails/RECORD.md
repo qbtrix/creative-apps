@@ -73,3 +73,4 @@ Next: ST-a builder on lead/shared-thumbnails-ST-a (off dev): test-first commit (
 - 2026-10-24T04:04:24Z: probe -7 (49949b4, ends at #4837) macOS gate 40055393733 green at 03:46Z with Linux 40055390941 green: #4837 EP-m cleared, culprit is #4839 or #4864 (likely #4864); waiting for lane to merge prefix. #4840 ST-a unchanged (supervisor Mac re-gate)
 - 2026-10-24T04:26:11Z: bisect continues: probe -8 (5c349da, adds #4839) Linux 40060703756 green, macOS gate 40060705865 running; #4837 cleared by -7, not merged yet (dev 654fb3632). #4840 ST-a unchanged
 - 2026-10-24T04:53:03Z: probe -8 (adds #4839) macOS gate 40060705865 still in_progress since 04:01Z; dev 654fb3632, #4837 not merged yet; #4840 ST-a unchanged
+- 2026-10-24T05:15:38Z: bisect -8 macOS gate 40060705865 passed (05:05Z): #4837 EP-m and #4839 clear, culprit #4864; waiting for lane to merge prefix. #4840 ST-a: supervisor cleared window-lifetime flake (dev flaky 1/3), merging via gate at 2dbfc165
