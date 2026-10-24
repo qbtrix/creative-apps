@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-24T21:46Z	stage	HY-7 PR #5218 opened (draft); question to supervisor on #5156 lane wait
 2026-10-24T22:03Z	check	supervisor lands #5156 then #5174; beta label added to #5157 #5158 #5161 #5218; dev-red #5183 closed
 2026-10-24T22:20Z	check	#4874 still in the Mac gate; #5156 #5174 not landed yet; nothing to merge
+2026-10-24T22:36Z	check	#4874 still open (supervisor lands it first); #5156 #5174 not landed; stack unchanged
