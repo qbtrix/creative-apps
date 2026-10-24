@@ -19,6 +19,7 @@
 // file goes to that app; the mark at the bottom says which before the drop.
 import PhotoModel
 import SuiteShell
+import enum SuiteKernel.ZoomLevel
 import SuiteUI
 import SwiftUI
 
@@ -31,7 +32,7 @@ struct PhotoEditor: View {
     var note: String?
     var zoom = 1.0
     var onViewport: @MainActor (CGSize) -> Void = { _ in }
-    var onZoom: @MainActor (Double) -> Void = { _ in }
+    var onZoomLevel: @MainActor (ZoomLevel) -> Void = { _ in }
     var perform: PhotoPerform = { _ in }
     /// The Straighten sheet's choices while it is open, previewed on the canvas.
     var straighten: StraightenDraft?
@@ -63,7 +64,7 @@ struct PhotoEditor: View {
         } content: {
             EditorDetail {
                 PhotoCanvas(
-                    model: model, tiles: tiles, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform,
+                    model: model, tiles: tiles, zoom: zoom, onViewport: onViewport, onZoomLevel: onZoomLevel, perform: perform,
                     straighten: straighten)
                     .scrollIndicators(.never)
             } palette: {
@@ -122,7 +123,7 @@ struct PhotoCanvas: View {
     let tiles: CanvasTiles?
     let zoom: Double
     var onViewport: @MainActor (CGSize) -> Void = { _ in }
-    var onZoom: @MainActor (Double) -> Void = { _ in }
+    var onZoomLevel: @MainActor (ZoomLevel) -> Void = { _ in }
     var perform: PhotoPerform = { _ in }
     var straighten: StraightenDraft?
     /// The document point under the pointer, for the brush cursor; nil once it leaves.
@@ -137,7 +138,7 @@ struct PhotoCanvas: View {
             if let canvas = model.canvas {
                 let size = CGSize(width: canvas.width, height: canvas.height)
                 CanvasViewport(
-                    documentSize: size, zoom: zoom, pointer: model.tool.pointer, onSize: onViewport, onZoom: onZoom,
+                    documentSize: size, zoom: zoom, pointer: model.tool.pointer, onSize: onViewport, onZoomLevel: onZoomLevel,
                     onDrag: { perform(.drag($0, $1)) }, onDragEnd: { perform(.endDrag) }, onKey: key,
                     onPointer: { hover = $0 }
                 ) {
