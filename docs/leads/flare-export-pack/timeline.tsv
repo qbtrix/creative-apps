@@ -138,3 +138,4 @@ utc	stage	event	ref	note
 2026-10-24T14:26:45Z	status	batch order 5087,5097,5138,5144,5006,5007,5008,5025,5029,5030,5035,5036; probe 3 green, probe 6 red -> culprit #5006 or #5007 (probe 4 running); #5025/#5036 go to the next batch
 2026-10-24T14:47:09Z	status	correction: probe N holds the first N PRs. probe 3 (5087,5097,5138) green, probe 6 (+5144,5006,5007) red -> culprit #5144, #5006 or #5007; probe 4 (+5144) macOS running; #5025/#5036 still go to the next batch
 2026-10-24T15:07:38Z	heartbeat	probe 4 macOS still running; lane also started batch 20261024144917 (12 PRs, none of ours)
+2026-10-24T15:21:37Z	status	probe 4 green -> culprit #5006 or #5007; probe 5 next; #5025/#5036 next batch
