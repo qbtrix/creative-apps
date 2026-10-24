@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-24T05:56Z	3	stage	-	heartbeat: batch macOS red on a Flare hang; lane bisecting
 2026-10-24T06:17Z	3	stage	-	heartbeat: bisect probe -6 Linux green, macOS running
 2026-10-24T06:42Z	3	stage	-	heartbeat: probe -6 red on Flare export-pack hang (on dev); waiting on lane bisect
+2026-10-24T07:02Z	3	stage	-	heartbeat: lane bisect probes -3/-1 macOS running
