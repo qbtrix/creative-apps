@@ -71,3 +71,4 @@ time	task	event	note
 2026-10-24T00:54Z	3	heartbeat	-	no merges since 654fb36 (lane still bisecting batch 20261023215139); none of ours needs-fix/needs-rebase; waits unchanged
 2026-10-24T01:16Z	3	heartbeat	-	no merges since 654fb36; lane bisect probe batch-20261023215139-6 Linux green, macOS gate 40044879600 still running; none of ours needs-fix/needs-rebase; waits unchanged
 2026-10-24T01:38Z	3	heartbeat	-	no merges since 654fb36 (lane bisect of batch 20261023215139 still in flight); none of ours needs-fix/needs-rebase; waits unchanged
+2026-10-24T02:00Z	3	heartbeat	-	no merges since 654fb36 (lane bisect of batch 20261023215139 at probe -9, #4864, macOS gate in flight); none of ours needs-fix/needs-rebase; waits unchanged
