@@ -90,3 +90,4 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-24T19:53:47Z: bisect probe batch-20261024183708-6: Linux green, macOS gate running (run 40123913661). #4988 queued.
 - 2026-10-24T20:12:23Z: probe batch-20261024183708-6 macOS gate still running; lane sweeps continue. #4988 queued.
 - 2026-10-24T20:30:54Z: batch-20261024183708 bisect moved on to probes -7 and -9. #4988 queued.
+- 2026-10-24T20:49:23Z: batch-20261024183708 resolved, no batch in flight; #4988 should join the next one.
