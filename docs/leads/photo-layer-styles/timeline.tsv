@@ -72,3 +72,4 @@ utc	stage	event	ref	note
 2026-10-24T14:14Z	W2	check-in	PY-2	no change: #5177, #5174, #5176 open
 2026-10-24T14:38:06Z	W2	check	PY-1	#5177 open in lane; #5174 and #5176 still open; dev e79e9afcb
 2026-10-24T15:00:36Z	W2	fix	PY-1	#5177 needs-rebase (PhotoWorkspace.swift vs dev pathState); merged dev at 11905cabb keeping both fields; gate running
+2026-10-24T15:21:07Z	W2	fix	PY-1	#5177 dev merge 11905cabb pushed; scripts/ci --changed PASS; Head moved
