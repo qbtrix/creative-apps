@@ -80,3 +80,4 @@ utc	stage	event	ref	note
 2026-10-24T05:35:59Z	slice-done	LO-z Belt-Slice-Done on full run 40037716897; Mac-Finish-Wanted LO-z
 2026-10-24T05:35:59Z	fix-round	round 1 for #4954 (journey note match), branch fix/lottie-open-4954
 2026-10-24T05:46:34Z	fix	PR #5036 (Fixes #4954) opened, Fast-Check pass at 942fcb1c; waits for the lane, then a flare journeys run
+2026-10-24T06:32:55Z	heartbeat	#5036 open in the lane, not yet batched

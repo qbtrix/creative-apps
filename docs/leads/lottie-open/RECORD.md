@@ -4,7 +4,7 @@ Issue: #3791 · Packet: docs/blueprints/flare/features/lottie-open.md
 Run: act-1a16c619006-nour (took over from act-1a166b69fab-fd09) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T10:50Z (this run 2026-10-24)
 Stage: 4 fix round 1
 Base: e055e6713e4e852d6c19d98f7c2fd82c6758e67a
-Next: (2026-10-24) All four slices have Belt-Slice-Done (LO-z on full run 40037716897). Fix round 1 for CI finding #4954 (journey note match): PR fix/lottie-open-4954. Then panel on LO-u/LO-z screens from the next flare journeys run, contact sheet (gaps #4709, #4720).
+Next: (2026-10-24 06:35Z) All four slices have Belt-Slice-Done (LO-z on full run 40037716897). Fix round 1: PR #5036 (Fixes #4954, Fast-Check pass at 942fcb1c) waits for the lane. Then panel on LO-u/LO-z screens from the next flare journeys run, contact sheet (gaps #4709, #4720). Branch is lead/lottie-open (no lead/flare-lottie-open exists).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -41,6 +41,7 @@ Next: (2026-10-24) All four slices have Belt-Slice-Done (LO-z on full run 400377
 
 - RJ-F12 stays as open-recolour-lottie.jobs.pending.json (waits_on LO-5): the .pending name is how the harness skips a job; LO-5 renames it.
 - Fixtures live under Tests/FlareModelTests/Fixtures/Lottie/; the wave lists them without the folder (LO-3 reads them there).
+- 2026-10-24: this session's GitHub writes get the attribution footer appended on the way out, so PATCHing it out of PR bodies doesn't hold; the lane strips it from the squash commit and waits on nothing for it. Left as is.
 
 ## Open
 - 2026-10-21T18:42:09Z: no file-flow FL-m PR open; LO-u/LO-m still waiting.
