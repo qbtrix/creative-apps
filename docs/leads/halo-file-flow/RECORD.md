@@ -11,7 +11,7 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 |---|---|---|---|---|---|---|---|---|---|
 | HF-a | adapter stubs; scene adopts suiteApp, Open Recent via SuiteFileCommands, file drop | HF-1, HF-2 | - | transform:HT-a, shape-tools:HS-a, placed-images:PH-u | yes | 0 | done #4855 (f2955985) | [40029046141](https://github.com/qbtrix/creative-apps/actions/runs/40029046141) | wanted |
 | HF-m | adapter bodies, catalog ids, recents imported once, RJ-H42 | HF-3, HF-4 | - | HF-a; gradient-fill:HG-m, autosave-history:HA-m, transform:HT-m, shape-tools:HS-m, stroke-style:HK-m, placed-images:PH-m | yes | 0 | pr #4894 (HF-3, on dev), #4936 (HF-4) | - | - |
-| HF-u | snapshots, render budget, journey skipped | HF-5, HF-6 | - | HF-a | yes | 0 | pr #4868 | - | - |
+| HF-u | snapshots, render budget, journey skipped | HF-5, HF-6 | - | HF-a | yes | 0 | done #4868 (10642721) | [40116034771](https://github.com/qbtrix/creative-apps/actions/runs/40116034771) | wanted |
 | HF-z | journey live; halo.md, built, feature-done | HF-7, HF-8 | HaloFileFlowJourneyTests | HF-m, HF-u; export-pack:HX-z, placed-images:PH-z | yes | 0 | pr #5092 | - | - |
 
 ## Tasks
