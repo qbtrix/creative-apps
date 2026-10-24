@@ -4,7 +4,7 @@ Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a16c627c84-u86z · Session: claude/large-catalog-lead-jhxt1n (earlier act-1a1693fbf6d-ap2g, act-1a15df37b73-k199) · Started: 2026-10-21T10:19Z (resumed 2026-10-23T14:20Z, 2026-10-24T05:10Z)
 Stage: 3 wave 3 (LG-grid: LG-6 building first on the supervisor's answer; LG-5 waits on ST-a #4840)
 Base: 8021b0f56a45a59540cd4ea0ff99651c5fb8dc2a (origin/dev)
-Next: LG-6 PR (RenderQueue neighbour lane, far-decode drop); LG-5 on ST-a fakes with `Wire: shared-thumbnails:ST-a` once #4840 merges, stacked on LG-6
+Next: LG-6 PR (RenderQueue neighbour lane, far-decode drop; 2 commits on claude/large-catalog-lead-jhxt1n, Mutate 4/4, gate running); LG-5 on ST-a fakes with `Wire: shared-thumbnails:ST-a` once #4840 merges, stacked on LG-6
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
