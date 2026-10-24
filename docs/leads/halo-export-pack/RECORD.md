@@ -11,7 +11,7 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 |---|---|---|---|---|---|---|---|---|---|
 | HX-a | codec and alpha settings, ProRes refused; Render sheet Codec row and Transparent checkbox | HX-1, HX-2 | - | gradient-fill:HG-a, placed-images:PH-a | yes | 0 | done #4841 (a8e0e252) | [40029046141](https://github.com/qbtrix/creative-apps/actions/runs/40029046141) | wanted |
 | HX-m | codec and alpha plan rules, alpha frames, RJ-H41; live renderer through services.media.movie | HX-3, HX-4 | - | HX-a | no | 0 | pr #4874, #4917 | - | - |
-| HX-u | snapshots, budget, journey skipped | HX-5, HX-6 | - | HX-a | yes | 0 | pr #4858 | - | - |
+| HX-u | snapshots, budget, journey skipped | HX-5, HX-6 | - | HX-a | yes | 0 | done #4858 (151b422a) | [40116034771](https://github.com/qbtrix/creative-apps/actions/runs/40116034771) | wanted |
 | HX-z | journey live; halo.md, built, feature-done | HX-7, HX-8 | HaloExportPackJourneyTests | HX-m, HX-u; gradient-fill:HG-z | yes | 0 | pr #4942 (HX-7, HX-8) | - | - |
 
 ## Tasks
