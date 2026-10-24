@@ -57,3 +57,4 @@ ts	kind	note
 2026-10-24T08:15:37Z	poll	hb1: three slice PRs in lane, clean; UP-z blocked on SC-z
 2026-10-24T08:36:34Z	poll	hb2: unchanged; three slice PRs in lane; UP-z blocked on SC-z
 2026-10-24T08:58:32Z	question	hb3: 3rd identical poll; Question on #3721 (lane holding #5088? UP-13 before SC-z?)
+2026-10-24T09:29:38Z	poll	hb4: no answer yet; #5088 lane check green, waiting on batch macOS gate
