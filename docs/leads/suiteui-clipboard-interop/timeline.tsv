@@ -118,3 +118,4 @@ utc	stage	event	ref	note
 2026-10-24T18:04Z	3	check	lane	18:04Z no change: all 11 PRs clean; batch-20261024172211 (not ours) still in flight. findings 0.
 2026-10-24T18:26Z	3	check	lane	18:26Z batch-172211 resolved, no batch in flight; ours next. #4904 dirty again after dev moved (lane integrates; fixer only on needs-rebase). others clean/recomputing. findings 0.
 2026-10-24T18:49Z	3	check	#4904,#5116,#5125	18:49Z needs-rebase on #4904 (DesignWindow.swift), #5116 (Library catalog/goldens), #5125 (photo golden): three fixers dispatched. #5149 queued. findings 0.
+2026-10-24T19:12Z	3	check	#4904,#5116,#5125	19:12Z: #4904/#5116/#5125 needs-rebase, fixers active (5116/5125 resumed to push); #4905 #5149 clean; 0 findings
