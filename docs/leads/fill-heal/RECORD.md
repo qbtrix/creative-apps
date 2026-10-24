@@ -1,10 +1,10 @@
 # fill-heal lead record
 
 Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/features/fill-heal.md
-Run: act-1a1693a401e-chyn · Started: 2026-10-23T14:10Z (prior: act-1a164697376-dv7u)
-Stage: 3 wave 1
-Base: cb79cbb (dev, verify HEAD)
-Next: FH-c #4577 and FH-u #4889/#4896 in lane; FH-c slice-done once a green suiteui/full run holds its merge; poll lane and dev CI every 20 min; FH-photo waits checked each poll
+Run: act-1a16cae79dd-mtf2 · Started: 2026-10-24T06:54Z (prior: act-1a1693a401e-chyn, act-1a164697376-dv7u)
+Stage: 3 wave 4
+Base: e5dcf939 (dev; brief's main HEAD 654fb363 verified)
+Next: build FH-7 (FH-photo) stacked on FH-c #4577 + FH-3 #4889; poll the lane for #4577/#4889/#4896 between steps
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -28,6 +28,8 @@ Next: FH-c #4577 and FH-u #4889/#4896 in lane; FH-c slice-done once a green suit
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-24T06:54Z: relaunch (16 h limit; captain: full capacity). FH-7 built ahead now, stacked on #4577 (FH-6) and #4889 (FH-3), rule 22/23: AJ-photo is a shared-file order wait (catalog, ledger), not code; the lane integrates the conflict if AJ-photo lands first.
+- PR base stays dev: CLAUDE.md and the lane retarget main to dev (the brief's "base main" is the integration branch name, its HEAD verified).
 - 2026-10-23T16:49Z: FH-3 help text names FH-8 (the slice that enables the tools), not the packet's FH-5. Shift-J cycling needs SuiteUI: #4890 (needs-ui); Remove has no key until then. Spot heal and remove share the brush's Size/Hardness.
 - 2026-10-23T16:29Z: supervisor (#3778, 6369319918): AB-photo done; AJ-photo unmet (AJ-a not merged); start FH-u now on brush-keys' fakes; keep the slot while FH-r, FH-c, FH-u move; if only FH-photo is left and AJ-a is not on dev, release the run.
 - 2026-10-23T14:10Z: run act-1a1693a401e-chyn takes over on #3778 (supervisor: #4513 duplicate, #4574 counts under #3778). #4574/#4577 sat on branch bases the lane does not take; dev merged in (FH-a's squash, ours kept), gate rerun, retargeted to dev.
