@@ -1,10 +1,8 @@
-// CoreRasterImageCodec.swift (adopt-command-catalog AC-p2): PhotoImageCodec over creative-core's PNG and JPEG
-// codecs, for the headless document and Linux. Pixels cross as CoreRaster's premultiplied linear PixelBuffer, as
-// core's codecs take them. Until core's PNG lands (IC-4/IC-5 at the pinned commit) a PNG falls back to the small
-// reader and writer here (W3C PNG: 8-bit RGB or RGBA, no interlace, the five filters; zlib through core's
-// Deflate and Inflate); JPEG refuses with core's reason until IC-jpeg. Any other file (HEIC, TIFF, a PSD's composite)
-// goes to SuiteImaging's SystemImageDecoder, which reads them on macOS and nothing on Linux; `readExtensions` says
-// which this platform reads. Linux-safe.
+// CoreRasterImageCodec.swift (adopt-command-catalog AC-p2, shared-codecs SC-4): PhotoImageCodec over creative-core's
+// PNG and JPEG codecs, for the headless document and Linux. Pixels cross as CoreRaster's premultiplied linear
+// PixelBuffer, as core's codecs take them. Every PNG and JPEG is core's, both ways: a file core refuses is refused,
+// never read another way, and a JPEG is turned upright by its Exif orientation (CIPA DC-008 values 1 to 8).
+// Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -43,93 +41,31 @@ public struct CoreRasterImageCodec: PhotoImageCodec {
         let buffer = try PixelBuffer(rgba8: image.rgba8, width: image.width, height: image.height)
         switch format {
         case .jpeg: return try JPEG.write(buffer, quality: Int((min(max(quality, 0), 1) * 100).rounded()))
-        case .png:
-            do { return try PNG.write(buffer) } catch CodecError.unsupported { return try Self.writePNG(buffer) }
+        case .png: return try PNG.write(buffer)
         }
     }
 
     static let signature: [UInt8] = [137, 80, 78, 71, 13, 10, 26, 10]
 
-    /// `data` as a premultiplied linear buffer: core's PNG, then this file's, for a PNG; core's JPEG otherwise.
+    /// `data` as a premultiplied linear buffer: core's PNG reader for a PNG signature, core's JPEG reader (and
+    /// the Exif orientation) for anything else. Core's errors pass through.
     static func read(_ data: Data) throws -> PixelBuffer {
-        guard data.starts(with: signature) else { return try JPEG.read(data) }
-        do { return try PNG.read(data) } catch CodecError.unsupported { return try readPNG(data) }
+        guard data.starts(with: signature) else { return upright(try JPEG.read(data), orientation: try JPEG.info(data).orientation) }
+        return try PNG.read(data)
     }
 
-    /// `buffer` as an 8-bit RGBA PNG: straight sRGB rows, filter 0, one IDAT.
-    static func writePNG(_ buffer: PixelBuffer) throws -> Data {
-        let rgba = try buffer.rgba8(), stride = buffer.width * 4
-        var raw = [UInt8](), out = signature
-        raw.reserveCapacity(buffer.height * (stride + 1))
-        for y in 0..<buffer.height { raw.append(0); raw += rgba[(y * stride)..<((y + 1) * stride)] }
-        func chunk(_ type: String, _ body: [UInt8]) {
-            let typed = Array(type.utf8) + body
-            out += bigEndian(body.count) + typed + bigEndian(Int(crc32(typed)))
+    /// `stored` as shown for Exif `orientation`: 2 mirrors, 3 turns half round, 4 flips, 5 and 7 turn a quarter
+    /// and mirror, 6 turns a quarter clockwise, 8 a quarter anticlockwise; 1 and unknown values leave it.
+    static func upright(_ stored: PixelBuffer, orientation: Int) -> PixelBuffer {
+        switch orientation {
+        case 2: stored.flipped(.horizontal)
+        case 3: stored.rotated(.degrees180)
+        case 4: stored.flipped(.vertical)
+        case 5: stored.rotated(.degrees90).flipped(.horizontal)
+        case 6: stored.rotated(.degrees90)
+        case 7: stored.rotated(.degrees270).flipped(.horizontal)
+        case 8: stored.rotated(.degrees270)
+        default: stored
         }
-        chunk("IHDR", bigEndian(buffer.width) + bigEndian(buffer.height) + [8, 6, 0, 0, 0])
-        chunk("IDAT", [UInt8](Deflate.zlib(Data(raw))))
-        chunk("IEND", [])
-        return Data(out)
-    }
-
-    /// An 8-bit RGB or RGBA, non-interlaced PNG; `CodecError` for anything else or a broken file.
-    static func readPNG(_ data: Data) throws -> PixelBuffer {
-        let b = [UInt8](data)
-        func be(_ at: Int) -> Int { b[at..<(at + 4)].reduce(0) { $0 << 8 | Int($1) } }
-        var at = 8, idat = [UInt8](), width = 0, height = 0, channels = 0
-        while at + 12 <= b.count {
-            let length = be(at), type = String(decoding: b[(at + 4)..<(at + 8)], as: UTF8.self)
-            guard length >= 0, at + 12 + length <= b.count else { throw CodecError.damaged("a chunk runs past the end") }
-            if type == "IHDR", length == 13 {
-                (width, height) = (be(at + 8), be(at + 12))
-                let form = Array(b[(at + 16)..<(at + 21)])
-                guard form == [8, 6, 0, 0, 0] || form == [8, 2, 0, 0, 0] else {
-                    throw CodecError.unsupported("PNG depth, colour type or interlace \(form) waits on IC-4")
-                }
-                channels = form[1] == 6 ? 4 : 3
-            }
-            if type == "IDAT" { idat += b[(at + 8)..<(at + 8 + length)] }
-            at += 12 + length
-        }
-        guard channels > 0, (1...PNG.maxSide).contains(width), (1...PNG.maxSide).contains(height) else {
-            throw CodecError.damaged("no usable IHDR")
-        }
-        let stride = width * channels, raw = [UInt8](try Inflate.zlib(Data(idat), limit: height * (stride + 1)))
-        guard raw.count == height * (stride + 1) else { throw CodecError.damaged("the image data is short") }
-        var rows = [UInt8](repeating: 0, count: height * stride)
-        for y in 0..<height {
-            let filter = raw[y * (stride + 1)], row = y * stride, src = y * (stride + 1) + 1
-            guard filter <= 4 else { throw CodecError.damaged("filter type \(filter)") }
-            for x in 0..<stride {
-                let a = x >= channels ? Int(rows[row + x - channels]) : 0, up = y > 0 ? Int(rows[row - stride + x]) : 0
-                let c = x >= channels && y > 0 ? Int(rows[row - stride + x - channels]) : 0
-                let p = a + up - c, (pa, pb, pc) = (abs(p - a), abs(p - up), abs(p - c))
-                let predictor = switch filter {
-                case 1: a
-                case 2: up
-                case 3: (a + up) / 2
-                case 4: pa <= pb && pa <= pc ? a : (pb <= pc ? up : c)
-                default: 0
-                }
-                rows[row + x] = UInt8(truncatingIfNeeded: Int(raw[src + x]) + predictor)
-            }
-        }
-        var rgba = rows
-        if channels == 3 {
-            rgba = [UInt8](repeating: 255, count: width * height * 4)
-            for i in 0..<(width * height) { rgba[(i * 4)..<(i * 4 + 3)] = rows[(i * 3)..<(i * 3 + 3)] }
-        }
-        return try PixelBuffer(rgba8: rgba, width: width, height: height)
-    }
-
-    static func bigEndian(_ value: Int) -> [UInt8] { (0..<4).map { UInt8(truncatingIfNeeded: value >> (24 - 8 * $0)) } }
-
-    static let crcTable: [UInt32] = (0..<256).map { n in
-        (0..<8).reduce(UInt32(n)) { c, _ in c & 1 == 1 ? 0xEDB8_8320 ^ (c >> 1) : c >> 1 }
-    }
-
-    /// The PNG chunk CRC (ISO 3309, as the W3C PNG spec's annex D gives it).
-    static func crc32(_ bytes: [UInt8]) -> UInt32 {
-        bytes.reduce(UInt32.max) { crcTable[Int(($0 ^ UInt32($1)) & 0xFF)] ^ ($0 >> 8) } ^ UInt32.max
     }
 }
