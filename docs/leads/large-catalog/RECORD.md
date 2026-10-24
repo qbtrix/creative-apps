@@ -40,6 +40,7 @@ Next: watch #5042 #5050 #5054 to merge and the supervisor's perf-suites answer (
 - LG-6 scope: neighbour prefetch already exists but runs beside the render, unbounded per step; LG-6 queues the neighbours behind the render in RenderQueue and drops a superseded step's pending decodes, so stale prefetches never evict the focus's decodes.
 
 ## Open
+- 2026-10-24T07:08Z: poll: #5042 #5050 #5054 still queued (lane landing older PRs, #4906..#4987 merged 06:58Z); no dev-red; no supervisor answer on perf-suites yet.
 - 2026-10-24T06:49Z: poll: #5042 #5050 #5054 open, no needs-fix/needs-rebase, no open dev-red; supervisor has not answered the perf-suites line yet. Lane flagged AI attribution footers: removed from the three PR bodies and the #3790 question.
 - 2026-10-24T06:31Z: LG-7 PR #5054 open (fast-lane, line:library; Fast-Check on 151645e4; 4 files +6/-20). #5042, #5050, #5054 wait for a batch.
 - 2026-10-24T06:45Z: LG-7 built on claude/large-catalog-lead-jhxt1n-lg7 (RJ-L56 passes on Linux in 1.1 s debug); scripts/ci --changed running. #5042 and #5050 clean, waiting for a batch.
