@@ -119,3 +119,4 @@ utc	stage	event	ref	note
 2026-10-24T07:54:03Z	heartbeat	lane held: bisect probe -1 macOS gate (run 40070370339, #4839 only) running since 06:51; our PRs unchanged
 2026-10-24T08:25:47Z	wait	probe -1 green: #4852 confirmed culprit, fix already pushed; lane batch 20261024081307 (not ours) ahead
 2026-10-24T08:45:58Z	heartbeat	lane still bisecting batch 20261024081307 (probes -1,-3 red); #4852 #4854 #5025 #5005 unchanged, wait for next batch
+2026-10-24T09:05:52Z	blocked	dev red #5113: macOS job fails in setup (lottie-oracle cache hit skips meson install, #4132); every lane macOS gate red until the supervisor fixes it; root cause posted on #5113
