@@ -139,6 +139,8 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var fileFlow = PhotoFileFlowState()
     /// The layer style panel's open section, nil when closed (PhotoStyle+Kernel.swift).
     public internal(set) var stylePanel: StyleKind?
+    /// The document's paths and the Pen's view state (PhotoPaths+Kernel.swift).
+    var pathState = PhotoPathState()
     /// Test hook: how many times `layerGeometryChanged` ran, and its last call
     /// (PhotoMask.swift). Not part of `==`.
     var geometryChangeCount = 0
@@ -197,6 +199,7 @@ public struct PhotoWorkspace: Sendable {
         masks = [:]
         editsMask = false
         transformDraft = nil
+        pathState = PhotoPathState()
         statusMessage = nil
         fileKind = nil
         history = PhotoHistory()
@@ -393,6 +396,7 @@ extension PhotoWorkspace: Equatable {
             && lhs.exportRun == rhs.exportRun && lhs.stylePanel == rhs.stylePanel
             && lhs.fileKind == rhs.fileKind && lhs.savedStepID == rhs.savedStepID
             && lhs.statusMessage == rhs.statusMessage && lhs.textBox == rhs.textBox && lhs.progress == rhs.progress && lhs.masks == rhs.masks && lhs.pixels == rhs.pixels
+            && lhs.pathState == rhs.pathState
     }
 }
 

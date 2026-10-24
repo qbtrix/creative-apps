@@ -659,6 +659,15 @@
                 "paths": [
                   "Sources/SuiteKernel/Text/"
                 ]
+              },
+              {
+                "id": "kernel-zoom",
+                "name": "Zoom",
+                "description": "Zoom/: ViewZoom, the suite's one zoom model (#5070): ZoomSteps (the 10% to 3200% clamp, Zoom In and Zoom Out over the suite's stops or an app's own table, the snap that lands a pinch near 100% on 100%, the fit scale, the anchor that keeps the point under the pointer still, the percent text), ZoomLevel (fit, 100% or a scale; fit follows the viewport) and ZoomKey (Command-plus, minus, 0 and 1). SuiteUI's ZoomMath, ViewerZoom and CanvasViewport wrap it; Flare's stage and Library's loupe step their own tables on it.",
+                "technology": "Swift 6, FlareCore, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Zoom/"
+                ]
               }
             ]
           },
@@ -674,12 +683,13 @@
               {
                 "id": "imaging-adjust",
                 "name": "Adjust",
-                "description": "Adjust/ and the SuiteImaging namespace: AdjustSettings (exposure, levels, curve, hue and saturation) with its clamps and its one Codable form Photo and Library both read, and ImagingProgram, which compiles settings to CoreRender's tone adjustments (CPU) and tone program (GPU) in one fixed order. suite-imaging IM-2 declares them as stubs; IM-3 and IM-4 fill the bodies.",
+                "description": "Adjust/, the SuiteImaging namespace and RasterSize (the one PNG/JPEG size reader): AdjustSettings (exposure, levels, curve, hue and saturation) with its clamps and its one Codable form Photo and Library both read, and ImagingProgram, which compiles settings to CoreRender's tone adjustments (CPU) and tone program (GPU) in one fixed order. suite-imaging IM-2 declares them as stubs; IM-3 and IM-4 fill the bodies.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), CoreColor, CoreRaster and CoreRender, Linux and macOS",
                 "paths": [
                   "Sources/SuiteImaging/Adjust/AdjustSettings.swift",
                   "Sources/SuiteImaging/Adjust/ImagingProgram.swift",
                   "Sources/SuiteImaging/Color/",
+                  "Sources/SuiteImaging/RasterSize.swift",
                   "Sources/SuiteImaging/SuiteImaging.swift"
                 ]
               },
