@@ -122,3 +122,4 @@ utc	stage	event	ref	note
 2026-10-24T20:24:06Z	poll	dev ef37711d; no labels; no new findings; batch-20261024183708 still bisecting at -6; #4894 waits
 2026-10-24T21:20Z	5	poll	-	#4894, #5092 eligible, waiting for a batch; no findings
 2026-10-24T21:56Z	5	poll	-	no merges; lane bisecting batch 20261024205137; no new findings for this feature
+2026-10-24T22:18Z	check	22:18Z check-in: #4894 HF-m, #4936 HF-4, #5092 HF-z open, clean, fast-lane, no needs-fix; waiting for a batch. No green dev ci.yml run holds a slice's last PR yet (40137153379 in progress at afef017c holds none). No new findings.
