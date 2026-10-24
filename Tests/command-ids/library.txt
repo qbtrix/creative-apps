@@ -1,4 +1,6 @@
 # Library's command ids (adopt-command-catalog AC-l2). Never reuse one; mark a removed id "retired <id>".
+catalog.backups
+catalog.restore-backup
 edit.deselect
 edit.redo
 edit.select
@@ -55,5 +57,6 @@ photo.reset-tint
 photo.reset-vibrance
 photo.reset-saturation
 file.share-prepare
+thumbnails.stats
 photo.remove-from-catalog
 photo.relink

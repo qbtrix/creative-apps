@@ -6,6 +6,7 @@
 import CoreRaster
 import FlareCore
 import SuiteKernel
+import SuiteModel
 
 /// One layer as the viewer and the renderer draw it at a frame.
 public struct HaloDrawItem: Sendable, Hashable {
@@ -107,14 +108,96 @@ public struct HaloPlaybackTick: Sendable, Hashable {
     public init(frame: Int, ended: Bool) { self.frame = frame; self.ended = ended }
 }
 
-/// What Render… writes (tier 2, #429).
+/// What Render… writes (tier 2, #429). HX-1 (export-pack) adds the movie's
+/// codec and whether frames keep their transparency; the plan and the writers
+/// read them from HX-3 and HX-4, so until then a render is what it was.
 public struct HaloRenderSettings: Sendable, Hashable {
     public enum Format: String, CaseIterable, Sendable { case pngSequence, movie }
     public var format: Format
     /// Half size: width and height halved, then rounded down to even (movie
     /// encoders need even sizes), at least 2. The plan carries the pixel size.
     public var halfSize: Bool
-    public init(format: Format, halfSize: Bool = false) { self.format = format; self.halfSize = halfSize }
+    /// The movie's codec; a PNG sequence ignores it.
+    public var codec: MovieCodec = .h264
+    /// Frames without the composition's background, the movie keeping alpha.
+    public var alpha = false
+    public init(format: Format, halfSize: Bool = false, codec: MovieCodec = .h264, alpha: Bool = false) {
+        self.format = format; self.halfSize = halfSize; self.codec = codec; self.alpha = alpha
+    }
+
+    /// The Codec row's choices, in order.
+    public static let codecs: [MovieCodec] = [.h264, .hevc, .prores4444]
+    /// Why ProRes 4444 can't be picked yet: the plan's alpha rules are HX-3's.
+    public static let proResWaits = "ProRes 4444 lands with HX-3."
+    /// Why HEVC can't be picked yet: Halo's own writer is H.264 only until HX-4.
+    public static let hevcWaits = "HEVC lands with HX-4."
+
+    /// Why `codec` can't be picked yet, or nil.
+    public static func codecRefusal(_ codec: MovieCodec) -> String? {
+        switch codec {
+        case .h264: nil
+        case .hevc, .hevcAlpha: hevcWaits
+        case .prores4444: proResWaits
+        }
+    }
+
+    /// The suite's export format for `codec`, which names it and says whether it keeps alpha.
+    static func formatID(_ codec: MovieCodec) -> String? {
+        switch codec {
+        case .h264: "mp4"
+        case .hevc: "mp4-hevc"
+        case .prores4444: "mov-prores"
+        case .hevcAlpha: nil
+        }
+    }
+
+    /// The codec's name on the Codec row: the suite's format name ("H.264", "ProRes 4444").
+    public static func codecTitle(_ codec: MovieCodec) -> String {
+        formatID(codec).flatMap { ExportFormats.spec($0)?.name } ?? "HEVC with alpha"
+    }
+
+    /// Why the Transparent background checkbox is off, or nil: a PNG
+    /// sequence always may; a movie only with a codec that keeps alpha, in
+    /// `ExportRules.refusal`'s words ("H.264 can't keep transparency. Choose ProRes 4444.").
+    public var alphaRefusal: String? {
+        guard format == .movie, !codec.keepsAlpha else { return nil }
+        let options = SuiteExportOptions(format: Self.formatID(codec) ?? "mp4", alpha: true)
+        return ExportRules.refusal(options, source: (width: 2, height: 2), formats: ExportFormats.all)
+            ?? "\(Self.codecTitle(codec)) can't keep transparency."
+    }
+
+    /// These settings with `format`; alpha goes off where the new format can't keep it.
+    public func choosing(format: Format) -> HaloRenderSettings {
+        var next = self
+        next.format = format
+        if next.alphaRefusal != nil { next.alpha = false }
+        return next
+    }
+
+    /// These settings at half or full size.
+    public func choosing(halfSize: Bool) -> HaloRenderSettings {
+        var next = self
+        next.halfSize = halfSize
+        return next
+    }
+
+    /// These settings with `codec`, alpha off where it can't keep it;
+    /// unchanged while `codecRefusal(codec)` refuses it.
+    public func choosing(codec: MovieCodec) -> HaloRenderSettings {
+        guard Self.codecRefusal(codec) == nil else { return self }
+        var next = self
+        next.codec = codec
+        if next.alphaRefusal != nil { next.alpha = false }
+        return next
+    }
+
+    /// These settings with alpha on or off; unchanged when `alphaRefusal` refuses turning it on.
+    public func choosing(alpha: Bool) -> HaloRenderSettings {
+        guard !alpha || alphaRefusal == nil else { return self }
+        var next = self
+        next.alpha = alpha
+        return next
+    }
 }
 
 /// The frames one render writes and what each is called.

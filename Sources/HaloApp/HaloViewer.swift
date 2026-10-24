@@ -13,10 +13,13 @@
 // delete command) sends the Model's `deleteCommand`: the picked keys while any
 // are picked, else the selected layer, as in the layer list. Files dropped on
 // the canvas are placed at the drop point through the window's `haloPlace`
-// (PH-3).
+// (PH-3). Any other file dropped on the viewer, or the empty state, follows
+// the suite's drop rule (file-flow HF-2, `suiteFileDrop`): a .halo opens
+// through HaloShell's host, a file another app reads goes to that app.
 // Views only read HaloProject; state lives in HaloModel.
 import HaloModel
 import SuiteKernel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -34,6 +37,11 @@ struct HaloViewer: View {
     private var placeHelp: String? { HaloPlace.help(model, place) }
 
     var body: some View {
+        viewer.suiteFileDrop(.halo, bridge: HaloShell.bridge, host: HaloShell.host, hasDocument: model.hasDocument,
+                             places: model.placesExtensions, documentName: model.file.name)
+    }
+
+    @ViewBuilder private var viewer: some View {
         if let comp = model.selectedComposition {
             let artboard = CGSize(width: comp.width, height: comp.height)
             VStack(spacing: 0) {

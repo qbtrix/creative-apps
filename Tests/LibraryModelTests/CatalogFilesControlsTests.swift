@@ -36,13 +36,13 @@ import Testing
         #expect(library.removeCount == 4)
     }
 
+    /// On an empty catalog both controls are off and say why, whether the stubs or LC-6's bodies answer.
     @Test func fileCommandsAreOffWithTheReason() {
         let library = LibraryCatalog()
         for id in ["photo.remove-from-catalog", "photo.relink"] {
             #expect(LibraryCatalog.fileSpec(id)?.id == id)
-            #expect(LibraryCatalog.fileCommands.availability(id, on: library).why == LibraryCatalog.catalogFilesHelp)
+            #expect(LibraryCatalog.fileCommands.availability(id, on: library).why?.isEmpty == false)
         }
-        #expect(LibraryCatalog.catalogFilesHelp == "File management arrives with LC-5.")
     }
 
     @Test func importCopySummarySaysWhereThePhotosGo() {

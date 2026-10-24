@@ -15,7 +15,7 @@
 // collections file's state for the journeys.
 //
 // The area hooks: each area (edit, import, thumbnails, cull, persist, loupe,
-// develop, crop, export, filters) fills its own `LibraryWindow+<Area>.swift` with the
+// develop, crop, export, filters, trash) fills its own `LibraryWindow+<Area>.swift` with the
 // LibraryMenu sub-struct it owns, its `<Area>AreaState` in `areas`, and the
 // lifecycle hooks this body calls. The window's single keys go to the area
 // that owns them through the menu; a nil action ignores the key.
@@ -108,6 +108,7 @@ struct LibraryWindow: View {
         // The export area (LibraryWindow+Export.swift) moves `exportState` off `.idle`.
         .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) { exportSheet }
         .modifier(backupArea)  // File > Restore Catalog Backup… (LibraryWindow+Backup.swift)
+        .modifier(trashArea)  // Photo > Delete Rejected Photos… and its confirm (LibraryWindow+Trash.swift)
         .modifier(filesArea)  // Remove from Catalog… and Locate… (LibraryWindow+Files.swift)
         .task {
             importAreaLaunch()
