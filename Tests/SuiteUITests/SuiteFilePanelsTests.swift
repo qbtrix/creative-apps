@@ -93,10 +93,8 @@ import UniformTypeIdentifiers
         #expect(SuiteFilePanels.launchAnswer(defaults) == [])
     }
 
-    /// Files that still build their own panel; shrink only, as each app moves onto SuiteFilePanels.
+    /// Files that still build their own panel; shrink only. Library's import panel waits on #4924 and #4949.
     static let unmoved: Set<String> = [
-        "Sources/HaloApp/HaloWindow+Render.swift",
-        "Sources/LibraryApp/LibraryWindow+Export.swift",
         "Sources/LibraryApp/LibraryWindow+Import.swift",
     ]
 
