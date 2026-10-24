@@ -61,3 +61,5 @@ Next: lane merges #4838, #4899; DR-u tests PR (feat/cull-finish-dr-u-tests) open
 - 2026-10-23T20:09Z #4838 split for the 400-line cap: head 84be0634 (310 lines). Pending follow-up PR from `feat/cull-finish-dr-u-tests` (RenderBudgetLibraryDeleteRejectsTests + LibraryJourneyTests+CullFinish) once #4838 is on dev.
 
 - 2026-10-24T07:25Z resumed by act-1a16cc967d9-mcuv after the 16h limit (supervisor 07:20Z: continue under contract-first waits and the rule-12 stub rule). PRs target dev (CLAUDE.md; the lane retargets main to dev).
+
+- 2026-10-24T08:06Z: DR-m excludedPaths wiring (RJ-L06 on, Linux green) is PR #5100, head 40a3f838, base feat/cull-finish-dr7-8, Fast-Check pass, mutate 10/10. Retarget to dev after #4899 merges. The PR-edit API re-appends a tool footer to the body; the lane strips attribution from the squash.
