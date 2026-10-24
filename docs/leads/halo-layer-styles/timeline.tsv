@@ -3,5 +3,7 @@ utc	stage	event	ref	note
 2026-10-22T17:05Z	0	stopped	#3937	blocked on suiteui LS-a, halo placed-images PH-a (#4426), file-flow HF-m
 2026-10-22T17:40Z	0	heartbeat	#3937	re-check 2: LS-a, PH-a #4426, HF-m all still open
 2026-10-22T18:01Z	0	question	#3936	re-check 3 identical: asked the supervisor whether to release until LS-a merges
-2026-10-24T00:00Z	1	stage-start	#3936	resumed as act-1a16c627cc6-nlss; building on LS-a stubs (#4911)
-2026-10-24T00:30Z	1	commit	HY-1	test-first, 64944d2 on lead/halo-layer-styles-HY-a
+2026-10-24T05:20Z	1	stage-start	#3936	resumed as act-1a16c627cc6-nlss; building on LS-a stubs (#4911)
+2026-10-24T05:50Z	1	commit	HY-1	test-first, 64944d2 on lead/halo-layer-styles-HY-a
+2026-10-24T06:40Z	1	gate-pass	HY-1	e52c9ca scripts/ci --changed PASS; PR waits on #4911
+2026-10-24T06:40Z	1	blocked	HY-2	waits on suiteui LS-2 (LayerStylePanel placeholder)

@@ -5,7 +5,7 @@ Run: act-1a16c627cc6-nlss · Session: claude/layer-styles-lead-vx2vrg · Started
 Wire: suiteui layer-styles:LS-a
 Stage: wave 1 (HY-1 built on LS-a's stubs, stacked on #4911)
 Base: a41e7f1 (origin/dev)
-Next: HY-2 (Layer > Layer Style… and the panel sheet) in the HY-a slice; open the HY-a PR once #4911 lands on dev
+Next: open the HY-a PR (HY-1, e52c9ca) once #4911 is on dev; HY-2 waits on LS-2 (SuiteUI `LayerStylePanel` placeholder, no PR yet), HY-5 on LS-m
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -18,8 +18,8 @@ Next: HY-2 (Layer > Layer Style… and the panel sheet) in the HY-a slice; open 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| HY-1 | HY-a | 1 | `HaloLayer.style`; five properties; adapter stubs; specs and ids; tests disabled | Sources/HaloModel/HaloLayer.swift, Sources/HaloModel/Contracts/HaloValues.swift, Sources/HaloModel/HaloStyle+Kernel.swift, Sources/HaloModel/HaloCommandCatalog.swift, Tests/command-ids/halo.txt, Tests/HaloModelTests/HaloLayerStyleTests.swift | HaloLayerStyleTests (6 on, 4 disabled), command-id list | – | built on branch lead/halo-layer-styles-HY-a (64944d2) |
-| HY-2 | HY-a | 2 | Layer menu items by id; panel sheet while `stylePanel` is set | Sources/HaloApp/HaloCommands.swift, Sources/HaloApp/HaloWindow+Styling.swift, Sources/HaloApp/HaloWindow.swift | HaloLayerStyleSnapshots.panel | – | waiting (HY-1) |
+| HY-1 | HY-a | 1 | `HaloLayer.style`; five properties; adapter stubs; specs and ids; tests disabled | Sources/HaloModel/HaloLayer.swift, Sources/HaloModel/Contracts/HaloValues.swift, Sources/HaloModel/HaloStyle+Kernel.swift, Sources/HaloModel/HaloCommandCatalog.swift, Tests/command-ids/halo.txt, Tests/HaloModelTests/HaloLayerStyleTests.swift | HaloLayerStyleTests (6 on, 4 disabled), command-id list | – | built, gate PASS on lead/halo-layer-styles-HY-a (e52c9ca, +223/-18, 12 files over LS-1); PR waits on #4911 |
+| HY-2 | HY-a | 2 | Layer menu items by id; panel sheet while `stylePanel` is set | Sources/HaloApp/HaloCommands.swift, Sources/HaloApp/HaloWindow+Styling.swift, Sources/HaloApp/HaloWindow.swift | HaloLayerStyleSnapshots.panel | – | blocked (LS-2: `LayerStylePanel` placeholder not on dev or in #4911) |
 | HY-5 | HY-m | 2 | adapter bodies; tests on | Sources/HaloModel/HaloStyle+Kernel.swift, Tests/HaloModelTests/HaloLayerStyleTests.swift, Tests/mutations/HaloModel.HaloStyle+Kernel.json | HaloLayerStyleTests | – | waiting (HY-1, LS-m) |
 | HY-3 | HY-u | 3 | inspector style rows with stopwatches | Sources/HaloApp/HaloLayerInspector.swift, Tests/AppSnapshotTests/HaloLayerStyleSnapshots.swift | HaloLayerStyleSnapshots | – | waiting (HY-2) |
 | HY-6 | HY-m | 3 | frame renderer draws keyed styles; RJ-H43 job | Sources/HaloModel/Live/LiveFrameRendering.swift, Tests/HaloModelTests/HaloStyleRenderTests.swift, Tests/mutations/HaloModel.LiveFrameRendering.json, Tests/RealJobs/halo/keyed-glow/ | HaloStyleRenderTests | – | waiting (HY-5) |
@@ -40,6 +40,7 @@ Next: HY-2 (Layer > Layer Style… and the panel sheet) in the HY-a slice; open 
 - No task starts: HY-1 needs SuiteImaging's `LayerStyle`, `LayerStyleTarget` and `StyleCommands` (LS-a), none on dev; rule 20 forbids a Halo copy, and LS-a is the suiteui line's work, so nothing is stubbed here.
 
 ## Open
+- 2026-10-24T06:40Z: HY-1 gate PASS at e52c9ca after fixing the catalog counts, the conformance exemption (the eleven stubs' examples refuse until LS-6) and the halo list-commands golden (+11 ids only). HY-2 blocked on LS-2; HY-5 on LS-m.
 - 2026-10-24: run resumed on the supervisor's direction (build on LS-a's fakes). HY-1 committed test-first on `lead/halo-layer-styles-HY-a`, stacked on LS-1 (#4911, open). The PR waits for #4911 to land so its diff stays HY-a's own.
 - 2026-10-22T18:01Z re-check 3 on dev 5b2cafa: #3937 still `waiting-on-prereq`, no `LayerStyle`/`StyleCommands` on dev; PH-a #4426 open (fast-lane, mergeable clean, not merged); no HF-3/HF-4 merge. Third identical poll: `Question for the supervisor:` posted on #3936 (rule 23). Next: act on the answer, else re-read the three waits.
 - 2026-10-22T17:40Z re-check 2 on dev 1632da1: #3937 still `waiting-on-prereq`, no `LayerStyle`/`StyleCommands` on dev; PH-a #4426 open (fast-lane, not merged); no HF-3/HF-4 merge. Nothing starts. A third identical poll posts `Question for the supervisor:` on #3936 (rule 23).
