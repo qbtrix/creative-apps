@@ -77,3 +77,6 @@
 15:19Z	4	poll	LG-grid	unchanged
 15:38Z	4	poll	LG-grid	no change
 16:09Z	4	needs-rebase	LG-grid	#5050 merge dev, resolve LiveThumbnails.swift
+2026-10-24T17:15Z	3	stage-start	LG-grid	relaunch act-1a16ee71e35-s8g5; #5050 dev merge, LG-8 folded in
+2026-10-24T17:28Z	3	push	LG-grid	#5050 dev merge + LG-8 (wave built) pushed 59a9c47c, scripts/ci --changed PASS, Head moved, feature-done
+2026-10-24T18:00Z	3	poll	LG-grid	Belt nudge; record ported from lead/large-catalog; #5042 #5050 #5054 open clean in lane queue, #5114 on supervisor
