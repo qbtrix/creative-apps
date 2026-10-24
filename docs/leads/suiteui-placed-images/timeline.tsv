@@ -163,3 +163,4 @@ utc	stage	event	ref	note
 2026-10-24T10:22Z	wait	PL-z	supervisor replied on #3457 (lane saw only newest 100 PRs; fix #5150); landing #4616/#4617 by hand; #4616 Linux 40085554838 running
 2026-10-24T10:49Z	check	PL-z	#4616 merged 10:42Z; #4617 open (clean); full CI 40081823899 green on 9f476af predates #4616
 2026-10-24T11:16Z	check	PL-z	#4617 merged 11:03Z as 6ad8cad (#4616 fffff7c); full CI 40087964618 on 4f00afb predates it; waiting for a scoped suiteui or full run on/after 6ad8cad
+2026-10-24T11:42Z	check	PL-z	no full/scoped run on 6ad8cad+ yet (Linux check 40088931360 green on 6ad8cad; full 40087964618 on 4f00afb still running)
