@@ -71,3 +71,4 @@ ts	kind	note
 2026-10-24T13:05:22Z	poll	hb14: no change; the 3 slice PRs are clean and waiting on the lane, dev is at 6be19b34, no supervisor answer
 2026-10-24T13:26:59Z	poll	hb15: no change; the lane has merged nothing since 12:34Z, no supervisor answer
 2026-10-24T13:49:28Z	poll	hb16: no change; dev is still at 6be19b34, no supervisor answer
+2026-10-24T14:11:42Z	poll	hb17: no change; dev is still at 6be19b34, no supervisor answer

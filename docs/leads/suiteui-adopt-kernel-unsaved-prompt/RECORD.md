@@ -26,6 +26,8 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 14:11Z: hb17: no change. #5088, #5089 and #5091 are open and labelled only fast-lane. dev's head is still 6be19b34 (12:34Z); the lane has merged nothing for anyone in about 95 minutes. #3721 has had no new comment since 08:58Z. UP-z is still waiting.
+
 - 13:49Z: hb16: no change. #5088, #5089 and #5091 are open and labelled only fast-lane. dev's head is still 6be19b34 (12:34Z), so the lane has merged nothing in 75 minutes. #3721 has had no new comment since 08:58Z. UP-z is still waiting.
 
 - 13:27Z: hb15: no change. #5088, #5089 and #5091 are open and labelled only fast-lane. dev's head is still 6be19b34 (12:34Z), so the lane has merged nothing in about 50 minutes. #3721 has had no new comment since 08:58Z. UP-z is still waiting.
