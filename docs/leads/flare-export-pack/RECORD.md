@@ -1,10 +1,10 @@
 # export-pack (Flare) lead record
 
 Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
-Run: act-1a16c619006-nour (took over 2026-10-24 from act-1a1695ebf10-z0v8; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T02:26Z
+Run: act-1a16fe1fa9f-sqqi (relaunched 2026-10-24T21:39Z after act-1a16c619006-nour hit the 16-hour limit; before it act-1a1695ebf10-z0v8; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T02:26Z
 Stage: 3 build (fix round 1 in lane)
 Base: 721168a (origin/dev)
-Next: #5025 (fix round 1, r-b1) merged dev and now draws live MP4/GIF frames (StageRasterizer.frame, FV-7's drawing; the live refusal is dropped), head 9c2bc627, gate PASS. #5005 closed as its duplicate. FV-z's live journey needs both #4854 and #5025 on dev. Once both merge and a green run contains FV-u and FV-z, post Belt-Slice-Done FV-u and FV-z + Mac-Finish-Wanted on #3481, then the FJ-X1 critic panel and the contact sheet. 10 findings open: no new feature work.
+Next: #4854 (FV-z, 565669e7) and #5025 (fix round 1, frame drawing) wait in the lane. Once both merge and a green flare-scoped or full run contains them: Belt-Slice-Done FV-z on #3481, then the FJ-X1 critic panel and Belt-Contact-Sheet. Findings open: no new feature work.
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -12,9 +12,9 @@ Loop: v3 (the packet has a `## Slices` table).
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | FV-a | MP4 and GIF with frame rate and loop on stubs; sheet chips and Size row | FV-1, FV-2 | MJ-FV | XP-a, shell-media SM-a | yes | 1 | merged-done; review 1 filed #5012-#5021 (10); fix round 1 PR #5025 (clean, in lane; on #5012 #5013 #5014 #5015 #5017 #5018 #5020); #5016/#5019 wait on needs-ui #4819, #5021 on #5023, #5012's unit on #5022 | https://github.com/qbtrix/creative-apps/actions/runs/40029025919 | |
-| FV-u | snapshots, render budget, journey written | FV-5, FV-6 | FJ-X1 | FV-a; XP-4 | yes | 0 | PR #4852 (base dev, clean, awaiting lane batch; Head c1835cd6) | | |
+| FV-u | snapshots, render budget, journey written | FV-5, FV-6 | FJ-X1 | FV-a; XP-4 | yes | 0 | merged-done (#4852, 9c276b81); Belt-Slice-Done + Mac-Finish-Wanted posted | https://github.com/qbtrix/creative-apps/actions/runs/40114485052 | wanted |
 | FV-m | frame plan, alpha, even size; live adapter streams to the writers | FV-3, FV-4 | MJ-FV | FV-a; XP-6 (merged), SM-w | no | 0 | done (Belt-Slice-Done posted) | https://github.com/qbtrix/creative-apps/actions/runs/39957675362 | n/a |
-| FV-z | real files on live, journey passes, blueprint | FV-7, FV-8 | FJ-X1 | FV-u, FV-m; gradient-fill:FG-z; svg-place:PF-z | no | 0 | PR #4854 (base lead/export-pack-fvu, stacked on #4852; feature-done) | | |
+| FV-z | real files on live, journey passes, blueprint | FV-7, FV-8 | FJ-X1 | FV-u, FV-m; gradient-fill:FG-z; svg-place:PF-z | no | 0 | PR #4854 (base dev, Head 565669e7, feature-done, in lane) | | |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -40,7 +40,7 @@ Loop: v3 (the packet has a `## Slices` table).
 - Rule 20: no Flare encoder and no local copy of MovieSettings or FrameClock, so FV-1 does not start until SM-a is on dev.
 - 2026-10-24: this session's GitHub writes get the attribution footer appended on the way out, so PATCHing it out of PR bodies doesn't hold; the lane strips it from the squash commit and waits on nothing for it. Left as is.
 
-- 2026-10-24T22:21:55Z: two sessions led this run at once; act-1a16fe1fa9f-sqqi wrote its record to lead/export-pack (stale since the 2026-10-23T17:03Z move). It stops writing there; this record on lead/flare-export-pack is the only one. #4854 is back at 565669e7.
+- 2026-10-24T22:21:55Z: act-1a16fe1fa9f-sqqi wrote its first hour to the stale lead/export-pack record (FV-u Belt-Slice-Done posted 21:50Z) and pushed a duplicate StageRasterizer.frame onto #4854; reverted #4854 to the batch-tested 565669e7. #5025 (nour's fix round 1) stays the frame fix and keeps its Belt-Lead line. From here this record is the only one.
 - 2026-10-24: the FV-u budget test hang is #4852's own defect (stack: FlareFileDialogs.chooseFolder from startExport), not a flake: fixed on its branch rather than waiting for the bisect's needs-fix.
 
 ## Open
