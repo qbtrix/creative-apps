@@ -39,14 +39,15 @@ extension HaloProject: HeadlessDocument {
         let transforms = TransformCommands.specs(HaloProject.self).map(\.id)  // HT-6: then the six transform commands
         let rates = ["composition.set-frame-rate"]  // FR-8b: the composition's rate
         let places = ["place.read", "place.image", "place.replace", "place.reset-size", "place.focus"]  // PH-6: the five place commands
+        let files = FileFlowCommands.specs(HaloProject.self).map(\.id)  // HF-3: the suite's file flow, its file.open-recent too
         let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
-        let all = ids + shapes + fills + strokes + history + transforms + rates + places + window
+        let all = ids.filter { $0 != "file.open-recent" } + shapes + fills + strokes + history + transforms + rates + places + files + window
         #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
     }
 
     @Test func areaHelpMatches() {
         for (n, state) in Self.keyedStates().enumerated() {
-            for command in HaloCommand.allCases {
+            for command in HaloCommand.allCases where command.commandID != "file.open-recent" {  // HF-3: the suite's spec
                 let why = catalog.availability(command.commandID, on: state).why
                 #expect(why == state.unavailableHelp(for: command), "\(command.commandID) on state \(n)")
             }
@@ -131,6 +132,7 @@ extension HaloProject: HeadlessDocument {
         "the jump example needs steps; the fixture has none (HA-6)": ["history.jump: exampleRuns"],
         "flipping isn't in Halo yet; the flip refuses with flipHelp (HT-6)": ["transform.flip: exampleRuns"],
         "the examples need a placed image; Ball shows none (HaloPlaceTests run them, PH-6)": ["place.focus place.read place.replace place.reset-size: exampleRuns"],
+        "Ball has no recent files and no other app opens a .halo (HaloFileFlowTests run them, HF-3)": ["file.clear-recent file.open-in: exampleRuns"],
     ]
 
     @Test func conformance() {
