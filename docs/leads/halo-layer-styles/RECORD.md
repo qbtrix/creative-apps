@@ -5,9 +5,9 @@ Run: act-1a16c627cc6-nlss · Session: claude/layer-styles-lead-vx2vrg · Started
 Wire: suiteui layer-styles:LS-a
 Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTests.glowReachesItsKeyedSize and glowIsNotClipped; add the no-padding mutation, origin dropped in LiveFrameRendering's styled composite)
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
-Stage: #5156 HY-1 ready (draft off), dev merged in at 0e12bffd0, diff HY-1 only (+228/-18, 13 files), gate CI: PASS, Head moved, footer gone. The first gate in the main clone crashed in AfterGlowCLITests.SampleOpenTests (LibraryHeadless.init, signal 11) from a stale incremental build: the same suite passes on a fresh origin/dev build and on 0e12bffd0, so gates now run in the clean worktree /home/user/dev-check. Merging HY-1 into #5158 HY-m, gate running. LS-2 not on dev: #5157, #5161 stay drafts. HY-7 route question on #3936 unanswered
+Stage: #5156 HY-1 ready at 0e12bffd0 (dev merged, HY-1-only diff, gate CI: PASS). #5158 HY-m has HY-1 merged in at 7d53f16b4 (gate CI: PASS, Head moved), still a draft: its diff carries HY-1 until #5156 lands. #5157 HY-2 and #5161 HY-u stay drafts until LS-2 is on dev. All PR bodies and the #3936 comment are footer-free (MCP update tools; the REST route re-appends it). Gates run in the clean worktree /home/user/dev-check (the main clone's stale build crashed AfterGlowCLITests). HY-7 route question on #3936 unanswered
 Base: a41e7f1 (origin/dev)
-Next: #5158 gate PASS, push, move Head: via MCP update_pull_request (REST re-appends the footer), mark ready; #5157 then #5161 once LS-2 lands (merge dev, gate, Head, ready); HY-7 once the supervisor answers the route shape; then HY-8
+Next: when #5156 merges, merge dev into #5158, gate, Head, ready; when LS-2 lands, the same for #5157 then #5161; HY-7 once the supervisor answers the route shape; then HY-8
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
