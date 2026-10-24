@@ -68,3 +68,4 @@ utc	stage	event	ref	note
 2026-10-24T00:31Z	heartbeat	poll: all five PRs open; lane bisecting red batch 20261023215139 (probe -6); full CI dev 654fb363 green (none of our slice-closing PRs in it); no reply on #3475; no dev-red
 2026-10-24T00:43Z	heartbeat	poll: all five PRs open; lane bisect probe 20261023215139-6 running; no reply on #3475; no dev-red
 2026-10-24T00:56Z	heartbeat	no change; lane bisect probe -6 macOS running; PRs waiting for next batch
+2026-10-24T01:08Z	heartbeat	no change; lane bisect probe -6 macOS still running; PRs waiting for next batch
