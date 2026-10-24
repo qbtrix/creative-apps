@@ -1,11 +1,12 @@
-// FlarePlayback.swift: the playhead and the transport (docs/blueprints/flare.md, sections 1, 3.1 and 7.5, LM-7).
-// `playClock` is the playhead's position in seconds from the timeline's first frame while playing; the display link
-// (LA-2) calls `advance(elapsed:)` with the seconds since its last tick and the frame comes from
-// `Timeline.playbackFrame`, so it never drifts from the clock. The timeline is the edited symbol's while editing in
-// place (`timelineFrames`), played at the scene's rate. Nothing here touches the document, so scrubbing and
-// playback are never undo steps (QB-F3). The clock ticks by the scene's exact rate (FR-10b): 23.976 plays 24000
-// frames per 1001 seconds; the timecode counts in its nominal whole rate.
-import FlareCore
+// FlarePlayback+Kernel.swift: the playhead and the transport (docs/blueprints/flare.md, sections 1, 3.1 and 7.5), on
+// the suite's playback clock (SuiteKernel Playback, #5077). `playClock` is the playhead's position in seconds from the
+// timeline's first frame while playing; SuiteUI's PlaybackDriver calls `tick(target:ticker:)` once per refresh with
+// the refresh's target timestamp, the ticker turns it into elapsed seconds for `advance(elapsed:)`, and the frame and
+// the end of a play-once come from `PlaybackTiming`, so they never drift from the clock. The first tick after a play
+// only sets the ticker's baseline, so a pause never counts. The timeline is the edited symbol's while editing in
+// place (`timelineFrames`), played at the scene's exact rate (23.976 plays 24000 frames per 1001 s); the timecode
+// counts in its nominal whole rate. Nothing here touches the document, so scrubbing and playback are never undo
+// steps (QB-F3).
 import SuiteKernel
 
 extension FlareWorkspace {
@@ -120,13 +121,21 @@ extension FlareWorkspace {
         guard isPlaying else { return }
         guard canPlay else { isPlaying = false; return }
         guard elapsed.isFinite, elapsed > 0 else { return }
-        let rate = playbackRate, frames = timelineFrames
         playClock += elapsed
-        guard let frame = try? Timeline.playbackFrame(elapsed: playClock, rate: rate.sceneRate, durationFrames: frames,
-                                                      loop: loops)
-        else { isPlaying = false; return }
-        currentFrame = frame
-        if !loops, playClock * Double(rate.numerator) / Double(rate.denominator) >= Double(frames) { isPlaying = false }
+        let tick = PlaybackTiming.tick(startFrame: 0, elapsed: playClock, rate: playbackRate,
+                                       durationFrames: timelineFrames, mode: loops ? .loop : .once)
+        currentFrame = tick.frame
+        if tick.ended { isPlaying = false }
+    }
+
+    /// The display link's entry point: one call per refresh with the frame's target timestamp. Moves the play clock
+    /// through `advance(elapsed:)` and returns whether playback is still running; the driver stops its link on false.
+    /// Paused, it moves nothing and resets the ticker, so the next play starts timing from its first tick.
+    public mutating func tick(target: Double, ticker: inout PlaybackTicker) -> Bool {
+        guard isPlaying else { ticker.reset(); return false }
+        if let elapsed = ticker.elapsed(toTarget: target) { advance(elapsed: elapsed) }
+        if !isPlaying { ticker.reset() }
+        return isPlaying
     }
 
     /// Puts the playhead on `frame`, clamped to the timeline; a running play continues from there.

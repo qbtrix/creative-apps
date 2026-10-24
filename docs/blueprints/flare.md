@@ -56,9 +56,10 @@ and the easing inspector (`FlareApp.swift`, `FlareCommands.swift`,
   `Sources/FlareModel/FlareWorkspaceState.swift`, not in `FlareExport.swift`
   and `FlareAssist.swift`; `FlareExport.swift` holds the workspace's export
   methods (LM-0c3), and `FlareAssist.swift` will hold assist's (LM-0c4).
-- The display-link tick math is in the Model: `PlaybackTicker` and
-  `FlareWorkspace.tick(target:ticker:)` in `FlarePlaybackTicks.swift`;
-  `Sources/FlareApp/PlaybackDriver.swift` only owns the link.
+- Playback runs on the suite's clock (#5077): `PlaybackTicker`,
+  `PlaybackTiming` and `PlaybackBudget` in SuiteKernel's `Playback/`, and the
+  display link in SuiteUI's `PlaybackDriver`. Flare keeps the transport and
+  `FlareWorkspace.tick(target:ticker:)` in `FlarePlayback+Kernel.swift`.
 - The Ellipse tool works on the workspace itself in
   `Sources/FlareModel/FlareDrawing.swift`, a stopgap until LC-4's
   ellipse builder in `PathBuilders.swift` (qbtrix/creative-core#182). Machine refusal text sits in
@@ -235,7 +236,7 @@ later task edits that file:
 | `services: FlareServices` | every extension | `init(services:)` |
 | `selection: [StageAddress]`, `marquee: Rect?` | stage, inspector | `Sources/FlareModel/FlareSelection.swift` (LM-0a3) |
 | `draft: ShapeDraft?`, `dragPreview: StageDrawList?` | stage overlay | `Sources/FlareModel/FlareDrag.swift` (LM-0a3) |
-| `currentFrame: Int`, `isPlaying`, `loops`, `playClock: Double` | timeline, stage | `Sources/FlareModel/FlarePlayback.swift` (LM-7) |
+| `currentFrame: Int`, `isPlaying`, `loops`, `playClock: Double` | timeline, stage | `Sources/FlareModel/FlarePlayback+Kernel.swift` (LM-7) |
 | `autoKey: Bool` | inspector, stage | `Sources/FlareModel/FlareAnimate.swift` (LM-0b) |
 | `onion: OnionSettings`, `showsMotionPath` | stage overlay | `Sources/FlareModel/FlareOnionState.swift` (LM-0b) |
 | `editingSymbolID: String?` | every owner-aware call | `Sources/FlareModel/FlareSymbols.swift` (LM-0c1) |
