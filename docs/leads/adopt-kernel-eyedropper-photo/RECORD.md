@@ -65,3 +65,4 @@ Next: EP-2 builder on lead/adopt-kernel-eyedropper-photo-EP-m (off dev); then EP
 - 2026-10-24T00:26:32Z: check: lane bisecting batch-20261023215139 (probe -6 = first 6 PRs, before #4837); #4837 open, no needs-fix; #4840 ST-a unchanged awaiting supervisor re-gate
 - 2026-10-24T00:48:38Z: check: bisect still on probe batch-20261023215139-6 (macOS gate on first 6 PRs); #4837 open, no needs-fix; #4840 ST-a unchanged awaiting supervisor re-gate
 - 2026-10-24T01:10:50Z: 01:10Z check: dev still 654fb3632; lane bisect probe batch-20261023215139-6 unchanged; #4837 EP-m open (fast-lane, no needs-fix); #4840 ST-a waits on supervisor Mac re-gate
+- 2026-10-24T01:31:51Z: 01:31Z check: lane bisect moved to probe batch-20261023215139-9 (first 9 PRs, includes #4837 EP-m), so the culprit is past PR 6; #4837 no needs-fix; #4840 ST-a still waits on supervisor Mac re-gate; dev 654fb3632
