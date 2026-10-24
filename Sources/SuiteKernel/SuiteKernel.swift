@@ -14,6 +14,9 @@
 //   Snap/       the snap contract: candidates and the order of offsets
 //   Transform/  box resize math by handle and handle hit testing
 //   Export/     the export run's states and progress
+//   Playback/   the playback clock: display-link targets to elapsed seconds,
+//               seconds to the frame shown (once, loop, ping-pong), the QB-L4
+//               dropped-frame count; SuiteUI's PlaybackDriver runs it
 //   Session/    the document session (dirty, save status, autosave, recovery)
 //               and versioned JSON probing
 //   Stroke/     pressure samples, smoothing, dab spacing, brush settings and
