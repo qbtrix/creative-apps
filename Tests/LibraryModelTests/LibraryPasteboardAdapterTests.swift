@@ -68,13 +68,13 @@ private func exported(_ item: PhotoItem) async throws -> Data {
 
 @Suite struct LibraryPasteboardAdapterTests {
     /// The copy offers a PNG, then a file URL, and nothing else.
-    @Test(.disabled("waits on CB-12")) func copyOffersPngThenFileURL() async throws {
+    @Test func copyOffersPngThenFileURL() async throws {
         let offered = try await copied(photo())
         #expect(offered.map(\.type) == [.png, .fileURL])
     }
 
     /// Mutation `.copiesDeveloped`: exposure +1 copies as the developed pixels at full size, never the original.
-    @Test(.disabled("waits on CB-12")) func pngIsTheDevelopedPhotoAtFullSize() async throws {
+    @Test func pngIsTheDevelopedPhotoAtFullSize() async throws {
         let brighter = photo(DevelopSettings.neutral.setting(.exposure, to: 1))
         let png = try #require(try await copied(brighter).first { $0.type == .png })
         let text = String(decoding: png.data, as: UTF8.self)
@@ -87,7 +87,7 @@ private func exported(_ item: PhotoItem) async throws -> Data {
 
     /// Mutation `.stripsLocation`: the file URL names a copy written by the writer without the location
     /// properties, never the original file (which may carry GPS).
-    @Test(.disabled("waits on CB-12")) func fileURLIsACleanCopyWithoutLocation() async throws {
+    @Test func fileURLIsACleanCopyWithoutLocation() async throws {
         let item = photo()
         let library = catalog(item)
         let writer = try #require(library.services.writer as? FakeJPEGWriter)
@@ -105,7 +105,7 @@ private func exported(_ item: PhotoItem) async throws -> Data {
     }
 
     /// With nothing selected, Copy offers nothing and writes no file.
-    @Test(.disabled("waits on CB-12")) func nothingSelectedCopiesNothing() async throws {
+    @Test func nothingSelectedCopiesNothing() async throws {
         let library = catalog(photo(), selected: false)
         let writer = try #require(library.services.writer as? FakeJPEGWriter)
         let offered = try await Seam.copy(library, folder: clipFolder, encode: echo)
