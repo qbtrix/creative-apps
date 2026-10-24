@@ -112,7 +112,8 @@ struct GalleryGradientEditorPage: View {
     }
 }
 
-/// The preview: the box painted with `fill`.
+/// The preview: the box painted with `fill`. Static text, so its summary reaches AXValue, what the journey's
+/// `.value` reads; a plain element sends it only as its value description (#4229, #262).
 private struct GalleryGradientPreview: View {
     let fill: Fill
 
@@ -124,6 +125,7 @@ private struct GalleryGradientPreview: View {
         .frame(width: SuiteSize.contentMinimum.width, height: SuiteSize.contentMinimum.height)
         .clipShape(.rect(cornerRadius: SuiteRadius.medium))
         .accessibilityElement()
+        .accessibilityAddTraits(.isStaticText)
         .accessibilityLabel("Fill preview")
         .accessibilityValue(GalleryGradientEditor.summary(fill))
         .accessibilityIdentifier("suite.gallery.gradient-editor.preview")
