@@ -60,9 +60,9 @@ import UniformTypeIdentifiers
         run(Request(kind: .save, types: types, name: name, prompt: prompt), accessory: accessory)?.first
     }
 
-    /// The folder panel, which can make a new folder; nil when cancelled.
-    public static func chooseFolder(prompt: String = "Choose", directory: URL? = nil) -> URL? {
-        run(Request(kind: .folder, prompt: prompt, directory: directory))?.first
+    /// The folder panel, which can make a new folder, with an optional accessory (import options); nil when cancelled.
+    public static func chooseFolder(prompt: String = "Choose", directory: URL? = nil, accessory: NSView? = nil) -> URL? {
+        run(Request(kind: .folder, prompt: prompt, directory: directory), accessory: accessory)?.first
     }
 
     /// The launch argument's answer: its path, none for "" (Cancel), nil without the argument.
@@ -99,6 +99,8 @@ import UniformTypeIdentifiers
             open.canChooseFiles = request.kind == .open
             open.canChooseDirectories = request.kind == .folder
             open.allowsMultipleSelection = request.multiple
+            open.accessoryView = accessory
+            open.isAccessoryViewDisclosed = accessory != nil
             panel = open
         }
         if !request.types.isEmpty { panel.allowedContentTypes = request.types }

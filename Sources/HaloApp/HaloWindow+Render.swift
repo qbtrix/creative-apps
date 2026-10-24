@@ -150,14 +150,7 @@ struct HaloRenderSheetHost: ViewModifier {
 
     /// A folder the person picks; nil when they cancel.
     private func chosenFolder() -> URL? {
-        let panel = NSOpenPanel()
-        panel.canChooseFiles = false
-        panel.canChooseDirectories = true
-        panel.canCreateDirectories = true
-        panel.allowsMultipleSelection = false
-        panel.prompt = "Choose"
-        guard panel.runModal() == .OK else { return nil }
-        return panel.url
+        SuiteFilePanels.chooseFolder()
     }
 }
 

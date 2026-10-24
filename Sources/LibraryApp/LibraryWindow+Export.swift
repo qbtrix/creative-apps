@@ -8,6 +8,7 @@ import AppKit
 import Foundation
 import LibraryModel
 import SuiteModel
+import SuiteUI
 import SwiftUI
 
 /// The last options (offered again), the presets, and the running export.
@@ -147,13 +148,10 @@ extension LibraryWindow {
 
     private func cancelExport() { if model.cancelExport() { areas.export.run?.cancel() } }
 
-    /// Choose…: the open panel, folders only; the editing options take its folder.
+    /// Choose…: SuiteFilePanels' folder panel, starting in the options' folder; the editing options take its folder.
     private func exportChooseFolder() {
         guard var options = LibraryExportSheet.options(model.exportState) else { return }
-        let panel = NSOpenPanel()
-        (panel.canChooseFiles, panel.canChooseDirectories, panel.canCreateDirectories) = (false, true, true)
-        panel.directoryURL = URL(fileURLWithPath: options.folder)
-        guard panel.runModal() == .OK, let url = panel.url else { return }
+        guard let url = SuiteFilePanels.chooseFolder(directory: URL(fileURLWithPath: options.folder)) else { return }
         options.folder = url.path(percentEncoded: false)
         model.setExportOptions(options)
     }
