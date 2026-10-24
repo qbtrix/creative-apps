@@ -1,6 +1,6 @@
 // PhotoPlace+Menu.swift (place-image PP-3): what File > Place… and the canvas drop read and run. The menu item is
 // on when `place.image` can run and the panel can choose, else off with the first reason. A place runs each file
-// through `place.image` (the catalog's once PP-6 registers it, else the place specs on their own), centred or at
+// through `place.image` in Photo's catalog, centred or at
 // the drop point, and a refusal goes to the status line. A drop's point comes in the artboard's points at the
 // canvas zoom. Linux-safe.
 #if canImport(FoundationEssentials)
@@ -40,17 +40,17 @@ extension PhotoWorkspace {
         }
     }
 
-    /// A refusal in the status line's words: the reason alone, not the command's id.
+    /// A refusal in the status line's words: the reason alone, not the command's id. The kernel's format
+    /// refusal names every format it knows; Photo's names the two it places.
     static func placeRefusal(_ error: CatalogError) -> String {
         switch error {
+        case .unavailable(_, let why) where why == PlaceRules.formatHelp: placeFormatHelp
         case .unavailable(_, let why): why
         case .failed(_, let message): message
         default: error.description
         }
     }
 
-    /// The catalog `place.image` runs through: Photo's once it registers the place specs (PP-6), else those specs alone.
-    static let placeCatalog = catalog.spec("place.image") != nil ? catalog
-        : (try? CommandCatalog<PhotoWorkspace>(app: "photo", PlaceCommands.specs(PhotoWorkspace.self),
-                                               history: { $0.history.kernel })) ?? .empty(app: "photo")
+    /// The catalog `place.image` runs through: Photo's, which registers the place specs.
+    static let placeCatalog = catalog
 }

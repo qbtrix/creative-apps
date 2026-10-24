@@ -194,6 +194,8 @@ extension FlareIntent.Export {
             case .svgFrame: "SVG frame"
             case .lottie: "Lottie"
             case .pngSequence: "PNG sequence"
+            case .mp4: "MP4"
+            case .gif: "GIF"
             }
         case .setFrames: "Frames"
         case .setStep: "Step"
@@ -204,6 +206,9 @@ extension FlareIntent.Export {
         case .dismiss: "Done"
         case .tryAgain: "Try Again"
         case .reveal: "Reveal in Finder"
+        case .setSize: "Size"
+        case .setFrameRate: "Frame rate"
+        case .setLoop: "Loop forever"
         }
     }
 }

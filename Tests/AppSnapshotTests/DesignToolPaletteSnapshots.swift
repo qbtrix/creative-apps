@@ -1,6 +1,7 @@
 // DesignToolPaletteSnapshots.swift (eyedropper DY-2): Design's window on the `cards` fixture with the floating
-// tool palette showing every tool, the Eyedropper (I) last, disabled with its reason until DY-5 makes its click
-// pick. Writes design-tool-palette-light.png and design-tool-palette-dark.png. macOS only.
+// tool palette showing every tool, the Eyedropper (I) last, enabled since DY-5 made its click
+// pick. Writes design-tool-palette-light.png and design-tool-palette-dark.png. The Shape and Eyedropper option
+// shots render the inspector panel alone: the window snapshot leaves its inspector column blank. macOS only.
 #if canImport(AppKit)
 import DesignModel
 import SuiteUI
@@ -15,7 +16,7 @@ import Testing
         #expect(DesignTool.allCases.last == .eyedropper)
         #expect(DesignTool.eyedropper.title == "Eyedropper")
         #expect(DesignTool.eyedropper.shortcut == "i")
-        #expect(DesignTool.eyedropper.unavailableHelp?.isEmpty == false, "a disabled tool says why")
+        #expect(DesignTool.eyedropper.unavailableHelp == nil, "DY-5: a click picks")
         var model = DesignWorkspace()
         model.useServices(.fake)
         let opened = model.openFixture("cards")
@@ -31,7 +32,7 @@ import Testing
     /// Writes design-shape-options-light.png and design-shape-options-dark.png.
     @Test func theShapeToolShowsItsOptions() throws {
         #expect(DesignTool.shape.title == "Shape" && DesignTool.shape.shortcut == "u")
-        #expect(DesignTool.shape.unavailableHelp?.isEmpty == false, "a disabled tool says why")
+        #expect(DesignTool.shape.unavailableHelp == nil, "DS-5: the Shape tool draws, so it is enabled")
         var model = DesignWorkspace()
         model.useServices(.fake)
         let opened = model.openFixture("cards")
@@ -40,7 +41,7 @@ import Testing
         #expect(model.tool == .shape)
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                DesignEditor(model: model, zoom: 0.5),
+                OptionsPanel(model: model),
                 name: "design-shape-options-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }
@@ -57,9 +58,39 @@ import Testing
         model.setSampleTarget(toStroke: true)
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                DesignEditor(model: model, zoom: 0.5),
+                OptionsPanel(model: model),
                 name: "design-eyedropper-options-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
+    }
+
+    /// eyedropper #4061: in the inspector the chips share its width, so the selected Point chip reads "Point" in full,
+    /// not "Poi…" as it did when the chips sat sized to fit on the artboard. Writes design-eyedropper-point-light.png
+    /// and -dark.png.
+    @Test func theEyedropperShowsPointInFull() throws {
+        var model = DesignWorkspace()
+        model.useServices(.fake)
+        let opened = model.openFixture("cards")
+        #expect(opened)
+        model.selectTool(.eyedropper)
+        model.setSampleSize(.point)
+        #expect(model.sampleSize == .point)
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(
+                OptionsPanel(model: model),
+                name: "design-eyedropper-point-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        }
+    }
+}
+
+/// The inspector at the editor's panel width. The window snapshot leaves the split view's inspector column
+/// blank, so a tool's options are shot here, where they draw.
+private struct OptionsPanel: View {
+    let model: DesignWorkspace
+    var body: some View {
+        DesignInspector(model: model, perform: { _ in })
+            .frame(width: SuiteSize.editorPanelWidth)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding(SuiteSpacing.xxl)
     }
 }
 #endif

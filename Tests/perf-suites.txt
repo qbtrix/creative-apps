@@ -11,10 +11,12 @@
 # design, photo, library, halo, suite, suiteui). id is Target.Suite (every
 # test in it), Target.Suite/test (one test, when the rest of the suite times
 # nothing) or Target.freeTest. Tests/test_scope checks each id exists, and
-# that every enabled test asserting a wall-clock bound is listed here
-# (`scripts/test-scope timing` names the ones that aren't). A test that only
-# looks timed (an injected clock, a hang guard) carries a `// not-timing: <why>`
-# comment in its body instead. Only the supervisor edits this file.
+# that every enabled test asserting a wall-clock bound, itself or through a
+# helper like expectP95, is listed here or grandfathered in
+# Tests/timing-baseline.txt (`scripts/test-scope timing` names the ones that
+# aren't). A test that only looks timed (an injected clock, a hang guard)
+# carries a `// not-timing: <why>` comment in its body instead. Only the
+# supervisor edits this file.
 
 photo PhotoModelTests.PhotoBudgetTests
 photo PhotoModelTests.PhotoBrushCopyCostTests
@@ -45,6 +47,8 @@ halo HaloModelTests.HaloTimelineCostTests
 halo HaloModelTests.HaloViewerBudgetTests
 halo HaloModelTests.HaloEasingBudgetTests
 halo AppSnapshotTests.BodyCountSuites/RenderBudgetHaloTests/timing
+halo AppSnapshotTests.BodyCountSuites/RenderBudgetHaloKeyEditingTests/timing
+halo AppSnapshotTests.BodyCountSuites/RenderBudgetHaloShapeTests/starDragTiming
 
 flare FlareModelTests.FlareEasingDragCostTests
 flare FlareModelTests.LiveKeysBudgetTests
@@ -81,8 +85,11 @@ library LibraryModelTests.statusRowWithinBudget
 library LibraryModelTests.planWithinBudget
 library AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryTests/timing
 library LibraryModelTests.LibraryFoldersTests/tenThousandPaths
+library LibraryModelTests.LargeCatalogFixtureBudgetTests
 library LibraryModelTests.LibraryCollectionsFileTests/twentyCollectionsOverTenThousandIDsWithinBudget
-library LibraryModelTests.LargeCatalogBudgetTests/fixtureBuildsTenThousandDeterministically
+library LibraryModelTests.addToThousandWithinBudget
+library LibraryModelTests.suggestWithinBudget
+library LibraryModelTests.largeBudget
 
 design DesignModelTests.DesignSnapBudgetTests
 design DesignModelTests.DesignSelectBudgetTests
@@ -97,6 +104,8 @@ design DesignModelTests.aDrawingStrokePastARunKeepsOneUnusedIDAcrossItsMoves
 design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignTests/timing
 design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignRasterTests/writeTiming
 design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignEyedropperTests/loupeTrackTiming
+design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignTransformTests/timing
+design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignShapeTests/timing
 
 suite AppSnapshotTests.BodyCountSuites/RenderBudgetAfterGlowOnboardingTests/timing
 suite SuiteModelTests.StoreBudgetTests
@@ -109,5 +118,7 @@ suiteui SuiteUITests.FrameProbeTests/summaryWithinBudget
 suiteui SuiteUITests.ListBudgetTests
 suiteui SuiteUITests.TimelineBudgetTests
 suiteui AppSnapshotTests.BodyCountSuites/RenderBudgetEyedropperTests/loupeTrackTiming
+suiteui AppSnapshotTests.BodyCountSuites/RenderBudgetPenPathsTests/timing
+suiteui AppSnapshotTests.BodyCountSuites/RenderBudgetTransformTests/timing
 suiteui AppSnapshotTests.GoldenImageTests/compareWithinBudget
 suiteui SuiteUITests.PlaceDropTests/largeFileOffMain

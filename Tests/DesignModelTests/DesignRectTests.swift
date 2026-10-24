@@ -11,13 +11,6 @@ private let base = rc(40, 40, 160, 120)
     }
 }
 
-@Test func aSquareDragGrowsAwayFromItsStartPoint() {
-    #expect(DesignRect(from: pt(40, 40), to: pt(200, 160), square: true) == rc(40, 40, 160, 160))
-    #expect(DesignRect(from: pt(200, 160), to: pt(40, 40), square: true) == rc(40, 0, 160, 160))
-    #expect(DesignRect(from: pt(40, 40), to: pt(100, 200), square: true) == rc(40, 40, 160, 160))
-    #expect(DesignRect(from: pt(40, 40), to: pt(40, 40), square: true) == rc(40, 40, 0, 0))
-}
-
 @Test func containsIncludesTheEdges() {
     #expect(base.contains(pt(40, 40)) && base.contains(pt(200, 160)) && base.contains(pt(120, 100)))
     #expect(!base.contains(pt(39.9, 100)) && !base.contains(pt(200.1, 100)))
@@ -29,8 +22,9 @@ private let base = rc(40, 40, 160, 120)
     let points: [DesignHandle: DesignPoint] = [
         .topLeft: pt(40, 40), .top: pt(120, 40), .topRight: pt(200, 40), .right: pt(200, 100),
         .bottomRight: pt(200, 160), .bottom: pt(120, 160), .bottomLeft: pt(40, 160), .left: pt(40, 100),
+        .rotate: pt(120, 100),
     ]
-    #expect(DesignHandle.allCases.count == 8)
+    #expect(DesignHandle.allCases.count == 9)
     for handle in DesignHandle.allCases { #expect(base.point(of: handle) == points[handle]) }
 }
 

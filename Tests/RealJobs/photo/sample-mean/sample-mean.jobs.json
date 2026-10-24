@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-P36: samples a 20 x 20 checkerboard of pure red and pure blue pixels (red where x + y is even) with color.sample, a 5 x 5 square at (10, 10) and then a point outside the image, and exports the PNG. The trap: the square starts at the point instead of centring on it, reads the active layer instead of the composite, or the query edits the image. The assertion: the 5 x 5 mean is 13 red and 12 blue pixels, (133, 0, 122) within 1 per channel; outside the image the colour is null; the export is the input unchanged.",
+  "inputs": ["input/*.png"],
+  "steps": [
+    {"id": "color.sample", "params": {"x": 10, "y": 10, "size": 5}},
+    {"id": "color.sample", "params": {"x": -5, "y": -5}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-sampled", "format": "png", "options": {}},
+  "expect": {
+    "out/checker-red-blue-sampled.png": {"pixels": {"tolerance": 0, "reference": "input/checker-red-blue.png"}}
+  },
+  "samples": [
+    {"color": {"hex": "#85007A", "r": 133, "g": 0, "b": 122, "a": 255}},
+    {"color": null}
+  ],
+  "platforms": ["linux", "macos"]
+}

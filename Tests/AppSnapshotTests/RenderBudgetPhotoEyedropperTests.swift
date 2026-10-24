@@ -6,7 +6,9 @@
 // PhotoCanvas's own state and only PhotoCanvasOverlay's PhotoSampleLoupe reads
 // it, so PhotoEditor's body (a debug-only counter) runs at most 3 times.
 // `loupeTrackTiming` prints the step p95 (budget 16 ms, a 60 Hz frame) and
-// asserts nothing on time until the supervisor lists it in Tests/perf-suites.txt. Nested in BodyCountSuites, as every suite
+// asserts nothing on time until the supervisor lists it in Tests/perf-suites.txt.
+// `optionsShowTheBrushColour` checks the hosted window's Tool Options carry
+// the size chips and the brush colour a pick lands in. Nested in BodyCountSuites, as every suite
 // that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -32,6 +34,19 @@ extension BodyCountSuites {
             // assertion in the gate can go red on a loaded runner. Budget p95 16 ms, target 8.3 ms.
             print("RENDER-BUDGET photo eyedropper loupe track p95 \(String(format: "%.2f", track.p95)) ms (budget 16, target 8.3)")
             #expect(moves == 120, "the pointer moved \(moves) of 120 times")
+        }
+
+        /// The Eyedropper's options show the brush colour it picks into next to its size chips, so a pick
+        /// shows where it went (packet journey step 3) without switching to the Brush.
+        @Test(.timeLimit(.minutes(2))) func optionsShowTheBrushColour() async throws {
+            var open = try PhotoWorkspace.fixture(.sample)
+            open.selectTool(.eyedropper)
+            let w = RenderBudgetWindow(PhotoWindow(model: open))
+            defer { w.close() }
+            try await w.settle(untilStable: { BodyCountSuites.PhotoWindowStrokeTests.editorBodies() })
+            let ids = w.identifiers()
+            #expect(ids.contains("suite.sample.size.1"), "no size chips in the Eyedropper's options")
+            #expect(ids.contains("photo.tool.color"), "the Eyedropper's options don't show the brush colour")
         }
 
         /// 120 pointer moves over the hosted window's canvas, left to right across its middle.

@@ -1,6 +1,6 @@
 // HaloJourneyTests+Inspector.swift: H-J6, keying TRANSFORM from the
 // inspector (layer-keys, LK-13; docs/blueprints/halo/features/layer-keys.md,
-// Journey steps 2). On `-HaloFixture keyed` (Bounce: Ball keyed on x at 0
+// Journey steps 2). On `-HaloSample keyed` (Bounce: Ball keyed on x at 0
 // and 24 and opacity at 0 and 12, and Floor) it selects Ball, whose lane
 // reads "3 keyframes", animates Rotation at 6, finds it Animated at 20,
 // keys it there with a drag on the bar, steps it with → and Shift-→
@@ -23,7 +23,7 @@ import XCTest
 extension HaloJourneyTests {
     /// H-J6: animate, scrub, drag, step, type and key from the inspector.
     @MainActor func testInspectorKeysTransform() {
-        let halo = Journey("Halo", self, arguments: ["-HaloFixture", "keyed", "-HaloWindowSize", "1000x640"])
+        let halo = Journey("Halo", self, arguments: ["-HaloSample", "keyed", "-HaloWindowSize", "1000x640"])
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
 
         // 1. Select Ball: its lane reads 3 keyframes (x at 0, 24; opacity at 0, 12).

@@ -21,7 +21,7 @@ public enum FlareIntent: Sendable, Equatable {
 
     public enum File: Sendable, Equatable {
         case new, create(preset: String?, width: Double, height: Double,
-                         fps: Int, durationFrames: Int, backgroundHex: String), open, openRecent(path: String),
+                         fps: FrameRate, durationFrames: Int, backgroundHex: String), open, openRecent(path: String),
              clearRecent, openSample(name: String), save, saveAs, close
     }
 
@@ -49,7 +49,7 @@ public enum FlareIntent: Sendable, Equatable {
              toggleAnimated(String), toggleKey(String), setFill(hex: String), setStrokeColor(hex: String),
              setStrokeWidth(Double), scrubStrokeWidth(Double), setStrokeCap(String), setStrokeJoin(String),
              setSceneSize(width: Double, height: Double), setSceneBackground(hex: String),
-             setSceneTiming(fps: Int, durationFrames: Int), easingPreset(String),
+             setSceneTiming(rate: FrameRate, durationFrames: Int), easingPreset(String),
              easingHandle(index: Int, x: Double, y: Double), endEasingHandle, runFill(GradientIntent)
     }
 
@@ -76,7 +76,9 @@ public enum FlareIntent: Sendable, Equatable {
     /// case whose three payloads are three chips, so its name carries the format.
     public enum Export: Sendable, Equatable {
         case showSheet, setFormat(ExportFormat), setFrames(from: Int, to: Int), setStep(Int), setScale(Double),
-             setTransparent(Bool), start, cancel, dismiss, tryAgain, reveal
+             setTransparent(Bool), start, cancel, dismiss, tryAgain, reveal,
+             // MP4 and GIF (export-pack FV-2): the shared Size row's scale, the frame rate, GIF's loop.
+             setSize(Double), setFrameRate(Int), setLoop(Bool)
     }
     public enum Assist: Sendable, Equatable { case showPopover }
 
@@ -128,8 +130,8 @@ public enum FlareIntent: Sendable, Equatable {
     /// One representative value of every case, in contract order, so tests can enumerate them all.
     /// A new case must be added here too; FlareIntentTests counts them.
     public static let examples: [FlareIntent] = [
-        .file(.new), .file(.create(preset: nil, width: 1920, height: 1080, fps: 24, durationFrames: 48,
-                                   backgroundHex: "#FFFFFF")),
+        .file(.new), .file(.create(preset: nil, width: 1920, height: 1080, fps: FrameRate(whole: 24),
+                                   durationFrames: 48, backgroundHex: "#FFFFFF")),
         .file(.open), .file(.openRecent(path: "")), .file(.clearRecent), .file(.openSample(name: "")),
         .file(.save), .file(.saveAs), .file(.close),
         .edit(.undo), .edit(.redo), .edit(.cut), .edit(.copy), .edit(.paste), .edit(.duplicate), .edit(.delete),
@@ -147,7 +149,7 @@ public enum FlareIntent: Sendable, Equatable {
         .inspector(.setStrokeColor(hex: "")), .inspector(.setStrokeWidth(1)), .inspector(.scrubStrokeWidth(1)),
         .inspector(.setStrokeCap("")),
         .inspector(.setStrokeJoin("")), .inspector(.setSceneSize(width: 1, height: 1)),
-        .inspector(.setSceneBackground(hex: "")), .inspector(.setSceneTiming(fps: 24, durationFrames: 48)),
+        .inspector(.setSceneBackground(hex: "")), .inspector(.setSceneTiming(rate: FrameRate(whole: 24), durationFrames: 48)),
         .inspector(.easingPreset("")), .inspector(.easingHandle(index: 0, x: 0, y: 0)),
         .inspector(.endEasingHandle), .inspector(.runFill(.type(.solid))),
         .timeline(.scrub(frame: 0)), .timeline(.goToStart), .timeline(.goToEnd), .timeline(.step(1)),
@@ -165,7 +167,8 @@ public enum FlareIntent: Sendable, Equatable {
         .interactions(.toggleEditor),
         .export(.showSheet), .export(.setFormat(.svgFrame)), .export(.setFrames(from: 0, to: 47)),
         .export(.setStep(1)), .export(.setScale(1)), .export(.setTransparent(false)), .export(.start),
-        .export(.cancel), .export(.dismiss), .export(.tryAgain), .export(.reveal),
+        .export(.cancel), .export(.dismiss), .export(.tryAgain), .export(.reveal), .export(.setSize(1)),
+        .export(.setFrameRate(30)), .export(.setLoop(true)),
         .assist(.showPopover),
     ]
 }
@@ -324,6 +327,9 @@ extension FlareIntent.Export {
         case .dismiss: "dismiss"
         case .tryAgain: "tryAgain"
         case .reveal: "reveal"
+        case .setSize: "setSize"
+        case .setFrameRate: "setFrameRate"
+        case .setLoop: "setLoop"
         }
     }
 }

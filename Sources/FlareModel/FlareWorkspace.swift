@@ -92,6 +92,14 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     public internal(set) var saveError: String?
     public internal(set) var loadState = LoadState.idle
     public internal(set) var recent: [String] = []
+    /// The suite's recents as the window last read them, and the requests the file-flow commands leave it.
+    public internal(set) var fileFlow = FlareFileFlowState()
+    /// The note a Lottie open leaves: one sentence per part left out; nil once dismissed or another document
+    /// loads (FlareLottieNote.swift).
+    public internal(set) var importNote: [String]?
+    /// The open document's Lottie open's skipped sentences, after Dismiss too; nil when it didn't come from a
+    /// Lottie (`import.report`, FlareLottieNote.swift).
+    public internal(set) var importReport: [String]?
     /// Why the last layer change or undo was refused; nil after one succeeds.
     public internal(set) var layerError: FlareLayerError?
     /// The easing editor's segment, as last picked; `selectedEasingSegment`
@@ -155,6 +163,8 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
         (machineID, machinePreview, machineError) = (nil, nil, nil)
         (exportState, assist) = (.idle, AssistState())
         (fileName, savedDocument, saveError, loadState) = (nil, document, nil, .idle)
+        importNote = nil
+        importReport = nil
     }
 
     /// Selects a scene by id. An id not in the document is ignored. Selecting
@@ -283,7 +293,7 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
             && lhs.paintError == rhs.paintError && lhs.selectedKeys == rhs.selectedKeys
             && lhs.timelineError == rhs.timelineError
         let files = lhs.fileName == rhs.fileName && lhs.isDirty == rhs.isDirty && lhs.saveError == rhs.saveError
-            && lhs.loadState == rhs.loadState && lhs.recent == rhs.recent
+            && lhs.loadState == rhs.loadState && lhs.recent == rhs.recent && lhs.importNote == rhs.importNote
         return editing && animating && panels && files
     }
 }

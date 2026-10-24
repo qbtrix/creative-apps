@@ -1,9 +1,9 @@
 // DesignKernelTransformAdapterTests.swift: Design's box transform runs on
 // SuiteKernel (adopt-kernel-transform AT-d1). Each DesignHandle is the
-// EditorHandle of the same name and the kernel's inside and rotate are no
-// Design handle; Shift and Option reach the kernel as EditModifiers; a resize
+// EditorHandle of the same name, the rotate knob included (DT-u), and the
+// kernel's inside is no Design handle; Shift and Option reach the kernel as EditModifiers; a resize
 // is BoxMath.resized, the handles BoxMath.handles' centres, a press
-// HandleHit.handle at the workspace's handleTolerance, and a box of several
+// HandleHit.handle at the workspace's handleTolerance, else the knob's square, and a box of several
 // layers scales each one by BoxMath.scaled, never below 1 pt (AT-d2). The app's own tests pin the
 // behaviour; these pin the forwarding.
 // Plan: Tests/mutations/DesignModel.KernelTransformAdapter.json. Runs on Linux
@@ -16,6 +16,7 @@ import Testing
     static let pairs: [(DesignHandle, EditorHandle)] = [
         (.topLeft, .topLeft), (.top, .top), (.topRight, .topRight), (.right, .right),
         (.bottomRight, .bottomRight), (.bottom, .bottom), (.bottomLeft, .bottomLeft), (.left, .left),
+        (.rotate, .rotate),
     ]
 
     /// `rect`'s edges as the kernel's Rect, built here so a test never trusts the adapter's own.
@@ -31,7 +32,6 @@ import Testing
             #expect(design.isCorner == editor.isCorner)
         }
         #expect(DesignHandle(.inside) == nil)
-        #expect(DesignHandle(.rotate) == nil)
     }
 
     @Test func shiftAndOptionReachTheKernelAndNoSnapDoesNot() {
@@ -62,7 +62,7 @@ import Testing
         let rect = rc(40, 40, 160, 120)
         let shown = rect.handles(size: 6)
         let squares = BoxMath.handles(of: Self.edges(rect), size: 6)
-        #expect(shown.count == 8)
+        #expect(shown.count == 9)
         for (design, editor) in Self.pairs {
             let square = squares[editor]
             #expect(shown[design] == square.map { pt(($0.minX + $0.maxX) / 2, ($0.minY + $0.maxY) / 2) })
@@ -75,9 +75,12 @@ import Testing
         let rect = Self.edges(rc(40, 40, 160, 120))
         for tolerance in [2.0, 10.0] {
             workspace.setHandleTolerance(tolerance)
+            let knob = try #require(BoxMath.handles(of: rect, size: tolerance)[.rotate])
             for x in stride(from: 26.0, through: 214, by: 4) {
                 for y in stride(from: 26.0, through: 174, by: 4) {
+                    let onKnob = max(abs(x - (knob.minX + knob.maxX) / 2), abs(y - (knob.minY + knob.maxY) / 2)) <= tolerance
                     let want = HandleHit.handle(at: Point(x: x, y: y), in: rect, tolerance: tolerance).flatMap(DesignHandle.init)
+                        ?? (onKnob ? .rotate : nil)
                     #expect(workspace.handle(at: pt(x, y)) == want, "\(x), \(y) at \(tolerance)")
                 }
             }

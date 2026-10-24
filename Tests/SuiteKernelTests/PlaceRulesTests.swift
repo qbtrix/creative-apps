@@ -40,6 +40,8 @@ import SuiteKernel
         let past = PlaceRules.drawnRect(Self.image(Point(x: -1, y: 0.5)), natural: Self.wide)
         #expect(past.minX <= 0 && past.maxX >= 300)
         #expect(PlaceRules.resetBox(Self.image(), natural: Self.wide) == Rect(minX: 0, minY: 100, maxX: 300, maxY: 200))
+        let fit = PlacedImage(assetID: "a", box: PlaceRules.fitted(natural: Size(width: 1200, height: 400), in: Self.canvas, at: nil))
+        #expect(PlaceRules.resetBox(fit, natural: Size(width: 1200, height: 400)) == fit.box, "a fitted box is already reset")
     }
     // The mutation plan's named checks (Tests/mutations/SuiteKernel.PlaceRules.json).
     @Test func neverUpscales() {

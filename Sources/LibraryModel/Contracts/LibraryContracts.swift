@@ -38,6 +38,9 @@ public protocol JPEGWriting: Sendable {
     /// export. The default writes no metadata at all (export-pack, LX-1).
     func write(_ image: DisplayImage, quality: Int, folder: String, fileName: String,
                metadataFrom source: String?, dropping: Set<String>) async throws
+    /// Removes everything inside `folder`, keeping the folder; a missing folder is already empty. The default
+    /// empties it on disk (`SharePrep.empty`).
+    func removeAll(in folder: String) async throws
 }
 
 extension JPEGWriting {

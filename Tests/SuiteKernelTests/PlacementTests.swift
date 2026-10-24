@@ -1,4 +1,4 @@
-// PlacementTests.swift (anchor-parenting AN-2, turned on by AN-3): a layer's
+// PlacementTests.swift (anchor-parenting AN-2, on since AN-3): a layer's
 // Placement turns and scales about its anchor, moving the anchor keeps the
 // layer where it is on screen, and the matrix is Halo's local matrix
 // T(x, y) · R · S · T(−anchor) (HaloKeyRules.localMatrix).
@@ -6,7 +6,7 @@ import Foundation
 import Testing
 import SuiteKernel
 
-@Suite(.disabled("waits on AN-3")) struct PlacementTests {
+@Suite struct PlacementTests {
     static let box = Rect(minX: 0, minY: 0, maxX: 100, maxY: 100)
     static func corners(_ r: Rect) -> [Point] {
         [Point(x: r.minX, y: r.minY), Point(x: r.maxX, y: r.minY), Point(x: r.maxX, y: r.maxY), Point(x: r.minX, y: r.maxY)]
@@ -65,6 +65,14 @@ import SuiteKernel
                 #expect(Self.near(p.matrix.apply(q), halo, 1e-6))
             }
         }
+    }
+
+    /// An anchor that isn't a finite point leaves the placement as it is.
+    @Test func nonFiniteAnchorIsNoChange() {
+        let p = Placement(x: 12, y: 34, scaleX: 2, scaleY: 2, rotation: 30, anchorX: 5, anchorY: 6)
+        #expect(p.movingAnchor(to: Point(x: .nan, y: 0)) == p)
+        #expect(p.movingAnchor(to: Point(x: 0, y: .infinity)) == p)
+        #expect(p.movingAnchor(to: Point(x: p.anchorX, y: p.anchorY)) == p)
     }
 
     /// The nine points of a box, for the picker and `{at:}`.

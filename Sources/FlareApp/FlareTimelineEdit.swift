@@ -2,7 +2,8 @@
 // A key press selects it (Shift adds, Command toggles); a drag sends `.moveKeys` per frame step keyed by its start,
 // one merged "Move Keyframe", then `.endKeyDrag`; a refused step moves nothing and sets `timelineError`. Delete and
 // the context menu (a right press selects the key) delete keys, insert or remove a frame and add or remove the label
-// at the playhead, disabled by `FlareWindow.timelineHelp`. Labels draw in a row on the ruler, only when one exists.
+// at the playhead, disabled by `FlareWindow.timelineHelp`; each item and the label popover's Add Label is a MenuCommand on
+// its catalog spec (command-state CS-12). Labels draw in a row on the ruler, only when one exists.
 // key-select-all KS-2: Select All Keys leads the context menu, and ⌘A with the strip focused sends the same intent
 // (the strip's onSelectAllKeys, which FlareCommands' ⌘A item reads as FocusedValues.timelineSelectAll).
 import FlareModel
@@ -81,20 +82,19 @@ struct FlareTimelineEdit: View {
         item("Remove Frame", .removeFrames(1))
         Divider()
         let label = model.timelineLabels[model.currentFrame]
-        Button("Add Label…") {
+        let labelSpec = FlareWorkspace.menuSpec(for: .timeline(.setLabel(nil)))
+        MenuCommand(labelSpec, on: model.document == nil ? "Open an animation to label its frames." : nil, title: "Add Label…") {
             labelName = label ?? ""
             namingLabel = true
         }
-        .disabled(model.document == nil)
-        .help(model.document == nil ? "Open an animation to label its frames." : "Name a label at the playhead.")
-        Button("Remove Label") { perform(.timeline(.setLabel(nil))) }
-            .disabled(label == nil)
-            .help(label == nil ? "No label at the playhead." : "Remove Label")
+        MenuCommand(labelSpec, on: label == nil ? "No label at the playhead." : nil, title: "Remove Label") {
+            perform(.timeline(.setLabel(nil)))
+        }
     }
 
     private func item(_ title: String, _ intent: FlareIntent.Timeline) -> some View {
         let reason = FlareWindow.timelineHelp(intent, in: model)
-        return Button(title) { perform(.timeline(intent)) }.disabled(reason != nil).help(reason ?? title)
+        return MenuCommand(FlareWorkspace.menuSpec(for: .timeline(intent)), on: reason, title: title) { perform(.timeline(intent)) }
     }
 
     /// The label's name: Return or Add Label sets it at the playhead.
@@ -108,7 +108,8 @@ struct FlareTimelineEdit: View {
             TextField("Label at frame \(model.currentFrame)", text: $labelName)
                 .accessibilityIdentifier("flare.timeline.labelName")
                 .onSubmit { if !name.isEmpty { add() } }
-            Button("Add Label", action: add).disabled(name.isEmpty)
+            MenuCommand(FlareWorkspace.menuSpec(for: .timeline(.setLabel(name))),
+                        on: FlareWindow.timelineHelp(.setLabel(name), in: model), title: "Add Label", perform: add)
         }
         .padding(SuiteSpacing.m)
     }

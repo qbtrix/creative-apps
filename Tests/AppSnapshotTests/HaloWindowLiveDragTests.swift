@@ -6,7 +6,10 @@
 // dragged events at 120 Hz and a mouse-up, as PhotoWindowStrokeTests does.
 // Spec, per drag: HaloWindow's body (a debug-only counter) runs at most 3
 // times, the viewer's drawn layers redraw as it goes, and the drag lands as
-// one undo step. While Ball's X is scrubbed between its keys (which adds a
+// one undo step. "As it goes" is checked at every 20th sample, after a short
+// pause that lets the run loop turn: the drawn layers' body must have run
+// since the last check. That holds on any runner speed, unlike a lower bound
+// on frames drawn in 120 Hz of wall-clock time. While Ball's X is scrubbed between its keys (which adds a
 // key), nothing else in the window moves, appears or goes until the release. Dragging Floor in the viewer
 // lands where the Model's own begin/move/end puts it; scrubbing X in the
 // inspector changes X. macOS only.
@@ -33,7 +36,8 @@ extension BodyCountSuites {
             let end = CGPoint(x: start.x + 120, y: start.y + 30)
 
             let drawn = Self.layerBodies()
-            let (runs, after) = try await hosted.drag(from: start, to: end)
+            var stalls = Self.Stalls()
+            let (runs, after) = try await hosted.drag(from: start, to: end, every: 20) { stalls.check() }
             let redrawn = Self.layerBodies().map { $0 - (drawn ?? 0) }
 
             var expected = project
@@ -47,11 +51,11 @@ extension BodyCountSuites {
             expected.endViewerDrag()
             let want = try #require(expected.viewerDrawList?.worldBox(of: Self.floor))
             let got = try #require(after.viewerDrawList?.worldBox(of: Self.floor))
-            let report = "VIEWER-DRAG samples=120@120Hz | window bodies \(runs.map(String.init) ?? "n/a"), drawn layers \(redrawn.map(String.init) ?? "n/a"), undo \(after.undoTitle ?? "nil") selected \(after.selectedLayerID ?? "nil"), Floor at \(got.x),\(got.y) (want \(want.x),\(want.y))"
+            let report = "VIEWER-DRAG samples=120@120Hz | window bodies \(runs.map(String.init) ?? "n/a"), drawn layers \(redrawn.map(String.init) ?? "n/a") (no draw at \(stalls.missed) of 6 checks), undo \(after.undoTitle ?? "nil") selected \(after.selectedLayerID ?? "nil"), Floor at \(got.x),\(got.y) (want \(want.x),\(want.y))"
             print(report)
 
             if let runs { #expect(runs <= 3, "the window ran per drag sample: \(report)") }
-            if let redrawn { #expect(redrawn >= 30, "the viewer didn't draw the drag as it went: \(report)") }
+            #expect(stalls.missed == 0, "the viewer didn't draw the drag as it went: \(report)")
             #expect(after.history.undo.count == project.history.undo.count + 1, "the drag isn't one step: \(report)")
             #expect(after.undoTitle == "Undo Move", "\(report)")
             #expect(abs(got.x - want.x) < 0.5 && abs(got.y - want.y) < 0.5, "the drag landed elsewhere: \(report)")
@@ -92,6 +96,20 @@ extension BodyCountSuites {
             #endif
         }
 
+        /// Counts the checks at which HaloLiveLayers' body hadn't run since the
+        /// one before (the first check compares with the drag's start); 0 in
+        /// release, which has no counter.
+        @MainActor struct Stalls {
+            private var last = HaloWindowLiveDragTests.layerBodies()
+            private(set) var missed = 0
+
+            mutating func check() {
+                let now = HaloWindowLiveDragTests.layerBodies()
+                if let now, let last, now <= last { missed += 1 }
+                last = now
+            }
+        }
+
         @Test(.timeLimit(.minutes(3))) func anInspectorScrubRunsTheWindowAtMostThreeTimes() async throws {
             var project = HaloLaunch(arguments: ["Halo", "-HaloSample", "keyed"]).project()
             project.selectLayer(Self.floor)
@@ -102,15 +120,18 @@ extension BodyCountSuites {
             let start = CGPoint(x: row.midX, y: row.midY)
 
             let drawn = Self.layerBodies()
-            let (runs, after) = try await hosted.drag(from: start, to: CGPoint(x: start.x + 120, y: start.y))
+            var stalls = Self.Stalls()
+            let (runs, after) = try await hosted.drag(from: start, to: CGPoint(x: start.x + 120, y: start.y), every: 20) {
+                stalls.check()
+            }
             let redrawn = Self.layerBodies().map { $0 - (drawn ?? 0) }
 
             let moved = after.propertyRows.first { $0.property == .x }?.value
-            let report = "INSPECTOR-SCRUB samples=120@120Hz | window bodies \(runs.map(String.init) ?? "n/a"), drawn layers \(redrawn.map(String.init) ?? "n/a"), undo \(after.undoTitle ?? "nil"), X \(x) -> \(moved.map { "\($0)" } ?? "nil")"
+            let report = "INSPECTOR-SCRUB samples=120@120Hz | window bodies \(runs.map(String.init) ?? "n/a"), drawn layers \(redrawn.map(String.init) ?? "n/a") (no draw at \(stalls.missed) of 6 checks), undo \(after.undoTitle ?? "nil"), X \(x) -> \(moved.map { "\($0)" } ?? "nil")"
             print(report)
 
             if let runs { #expect(runs <= 3, "the window ran per scrub sample: \(report)") }
-            if let redrawn { #expect(redrawn >= 30, "the viewer didn't draw the scrub as it went: \(report)") }
+            #expect(stalls.missed == 0, "the viewer didn't draw the scrub as it went: \(report)")
             #expect(after.history.undo.count == project.history.undo.count + 1, "the scrub isn't one step: \(report)")
             #expect(after.undoTitle == "Undo Change Position X", "\(report)")
             #expect(moved != nil && moved != x, "the scrub didn't change X: \(report)")
@@ -123,7 +144,7 @@ extension BodyCountSuites {
     let window: NSWindow
     let host: CountingHostingView<AnyView>
 
-    init(_ project: HaloProject) async throws {
+    init(_ project: HaloProject, size: CGSize = CGSize(width: 1280, height: 820)) async throws {
         let app = NSApplication.shared
         for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
             app.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: attribute))
@@ -133,7 +154,7 @@ extension BodyCountSuites {
         // viewer takes those too, as it does in a key window.
         host = CountingHostingView(rootView: AnyView(
             HaloWindow(model: project).environment(\.haloViewerTakesActivationClicks, true)))
-        let frame = CGRect(x: 0, y: 0, width: 1280, height: 820)
+        let frame = CGRect(origin: .zero, size: size)
         host.frame = frame
         window = NSWindow(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false

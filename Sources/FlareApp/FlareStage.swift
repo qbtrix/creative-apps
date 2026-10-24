@@ -8,13 +8,20 @@
 // through its KeyModifiers (AC-tools); every other key goes to `onKey` (the window's `toolKey`). The floating
 // glass palette lists FlareTool.allCases, each with `model.toolHelp` as its reason when it can't act, then Finish
 // Path with `model.finishPathHelp`; it sits inside the vertical ruler. Under the stage the window's one
-// ViewerStatusBar shows the zoom percent, the scene size, on the fakes a "Preview data" warning pill, then
+// ViewerStatusBar shows the zoom percent, the scene size, after a failed save "Not saved" in the error color
+// (`flare.saveStatus`, its tooltip the failure, as Design's and Photo's status lines carry theirs), on the fakes a
+// "Preview data" warning pill, then
 // `model.statusPills` from the canvas's `measuredFPS` (IT-9): aspect and rate, the rate shown while playing (a warning
-// while frames drop) and "Text not shown (n)". A drag out of a ruler pulls a guide (FlareStageGuides, SE-2); the hidden
+// while frames drop), "Text not shown (n)" and, under Direct Select, why no points can be edited (`pathHelp`). A drag out of a ruler pulls a guide (FlareStageGuides, SE-2); the hidden
 // `flare.stage.zoom` reads the zoom for journeys. It only reads `model`; every change goes through `perform`.
+// A file dropped on the stage follows the suite's drop rule (file-flow FL-2, `suiteFileDrop`): a .flare opens
+// through the app's document host, another app's file goes to that app, and the mark at the bottom says which
+// before the drop. A Lottie .json, which no suite type names, is planned as Flare's own open (`opens`), so the
+// mark says "Open in Flare", and opens through FlareShell.openQueue (`FlareWorkspace.lottieDrops`, lottie-open LO-4).
 import AppKit
 import FlareCore
 import FlareModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -49,6 +56,10 @@ struct FlareStage: View {
             VStack(spacing: 0) {
                 stage(size: size, scale: scale)
                 ViewerStatusBar(zoom: scale, size: Self.sizeText(size)) {
+                    if let status = model.saveStatus {
+                        // Its tooltip is why the save failed.
+                        EditorSaveStatus(.notSaved, title: status, help: model.saveError ?? "", identifier: "flare.saveStatus")
+                    }
                     if model.services.isPreview {
                         Text("Preview data").accessibilityIdentifier("flare.status.preview").statusPill(.warning)
                             .help(Self.previewHelp)
@@ -63,9 +74,19 @@ struct FlareStage: View {
             .onChange(of: fit, initial: true) { _, fit in onFit(fit) }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier(Self.identifier)
+            .suiteFileDrop(.flare, bridge: FlareShell.bridge, hasDocument: model.hasDocument,
+                           places: model.placesExtensions, opens: Self.opens, documentName: model.fileName) { actions in
+                let (lottie, rest) = FlareWorkspace.lottieDrops(actions)
+                Task { @MainActor in
+                    for path in lottie { FlareShell.openQueue.open(URL(fileURLWithPath: path)) }
+                    if !rest.isEmpty { await FlareShell.bridge.perform(rest, host: FlareShell.host) }
+                }
+            }
         }
     }
 
+    /// The extensions the stage opens itself though no suite type names them: Lottie's .json.
+    static let opens = Set(FlareLottieOpen.fileExtensions)
     /// The stage and its status bar; the journeys measure the palette against its leading ruler.
     static let identifier = "flare.stagePane"
     /// The zoom readout journeys read ("Fit", "200%"): the status bar's pill text doesn't reach XCUITest (#1452).
@@ -95,6 +116,7 @@ struct FlareStage: View {
         if let warning = pills.maskWarning {
             Text(warning).accessibilityIdentifier("flare.status.masks").statusPill(.warning)
         }
+        if let help = pills.pathHelp { Text(help).accessibilityIdentifier("flare.status.pathHelp") }
     }
 
     /// The scene's size for the status bar in whole points ("550 × 400 pt"); a non-finite side reads 0.

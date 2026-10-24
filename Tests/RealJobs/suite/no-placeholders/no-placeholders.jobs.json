@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "app": "suite",
+  "why": "RJ-X64 (suite/no-placeholders NP-5), pending FJ-NP: the job opens every menu in the launcher and in Flare and clicks every enabled item once on the tour's Bounce.flare (the input is a link to Bundle/Samples/Bounce.flare). The trap: a visible menu item that does nothing, or one whose help says it isn't available yet (Onion Skin, Motion Path, Interactions, Animate with Assist, Convert to Symbol, Exit Symbol, the Library tab). The assertion: every enabled item changes the document, opens a window or sheet, or changes a shown view state; no visible item's help says it isn't available yet; only AfterGlow > Settings… is in Tests/placeholder-menu-baseline.txt. The harness can't express this: it runs catalog commands on one app's files, has no menu bar to open or click, and its 'suite' app knows only the Help commands. So platforms is [] and the harness skips the job on both. The check runs as the journeys FJ-NP (FlareMenusJourneyTests.testNoBetaTwoItems) and XJ-NP (AfterGlowMenusJourneyTests.testNoPlaceholderItems) on macOS, and as MJ-NP (PlaceholderMenuTests over the baseline; FlareMenuVisibilityTests: each hidden command is unavailable with its later-beta reason) on Linux. The stages below are the job as the harness would run it once it can drive menus.",
+  "pending": "FJ-NP",
+  "waits_on": "FJ-NP",
+  "inputs": ["input/*.flare"],
+  "stages": [
+    {"app": "suite", "steps": [{"id": "menus.click-every-enabled", "params": {"window": "launcher"}}]},
+    {"app": "flare", "steps": [{"id": "menus.click-every-enabled", "params": {"window": "Bounce.flare"}}],
+     "output": {"dir": "out", "name": "menus", "format": "json", "options": {}}}
+  ],
+  "atomic": true,
+  "expect": {
+    "out/menus.json": {"json": {"deadItems": [], "notYetHelp": [], "baseline": ["AfterGlow > Settings…"]}}
+  },
+  "platforms": []
+}

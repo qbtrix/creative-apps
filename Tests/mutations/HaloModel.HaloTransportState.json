@@ -1,0 +1,5 @@
+[
+{"label":"every transport button reads enabled","file":"Sources/HaloModel/HaloTransportState.swift","find":"        public var isEnabled: Bool { unavailableHelp == nil }\n","replace":"        public var isEnabled: Bool { true }\n","tests":"HaloTransportStateTests"},
+{"label":"the enabled set lists the disabled buttons","file":"Sources/HaloModel/HaloTransportState.swift","find":"buttons.filter(\\.isEnabled)","replace":"buttons.filter { !$0.isEnabled }","tests":"HaloTransportStateTests"},
+{"label":"a button's help ignores its command","file":"Sources/HaloModel/HaloTransportState.swift","find":"why = project.unavailableHelp(for: command)","replace":"why = project.unavailableHelp(for: .playPause)","tests":"HaloTransportStateTests"}
+]

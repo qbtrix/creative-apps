@@ -17,7 +17,9 @@
 // KeyframeFacing (UC3; SuiteKeyframeFacing unless a gallery passes a Fake),
 // and its fades follow `suiteReduceMotion`. With `registers` each button
 // lists itself in `suite.controls` with its tooltip as the reason while it
-// can't act (`entries`); hosts that list the pair themselves leave it off.
+// can't act (`entries`), and reports `selected`: the stopwatch on once
+// animated, the diamond on while keyed here (`stateEntries`); hosts that list
+// the pair themselves leave it off.
 // Owns presentation state only: hover.
 import SwiftUI
 
@@ -129,11 +131,20 @@ public struct KeyframeButton: View {
         return (stopwatch, diamond)
     }
 
+    /// `entries` with each button's on state: the stopwatch selected once animated, the diamond
+    /// selected while a key sits at the playhead.
+    nonisolated public static func stateEntries(
+        _ property: String, id: String, state: KeyState, enabled: Bool, unavailable: String? = nil
+    ) -> (stopwatch: ControlEntry, diamond: ControlEntry?) {
+        let plain = entries(property, id: id, state: state, enabled: enabled, unavailable: unavailable)
+        return (plain.stopwatch.selecting(state != .idle), plain.diamond?.selecting(state == .keyedHere))
+    }
+
     public var body: some View {
         let help = Self.help(property, state: state, unavailable: unavailableHelp)
         let face = facing.face(for: state.presence)
         let entries = id.map {
-            Self.entries(property, id: $0, state: state, enabled: isEnabled, unavailable: unavailableHelp)
+            Self.stateEntries(property, id: $0, state: state, enabled: isEnabled, unavailable: unavailableHelp)
         }
         return HStack(spacing: 0) {
             Button(action: onToggle) {
@@ -152,8 +163,7 @@ public struct KeyframeButton: View {
             .accessibilityLabel("Animate \(property)")
             .accessibilityValue(face.spoken)
             .accessibilityIdentifier(id ?? face.symbol)
-            .suiteControl(id: registers ? entries?.stopwatch.id : nil, enabled: isEnabled,
-                          reason: entries?.stopwatch.reason, identifies: false)
+            .suiteControl(entry: registers ? entries?.stopwatch : nil, identifies: false)
             ZStack {
                 if let diamond = Self.diamond(of: face) {
                     Button(action: onKey) {
@@ -167,8 +177,7 @@ public struct KeyframeButton: View {
                     .help(help.diamond ?? "")
                     .accessibilityLabel("\(diamond.action), \(property)")
                     .accessibilityIdentifier(id.map(Self.diamondID) ?? diamond.symbol)
-                    .suiteControl(id: registers ? entries?.diamond?.id : nil, enabled: isEnabled,
-                                  reason: entries?.diamond?.reason, identifies: false)
+                    .suiteControl(entry: registers ? entries?.diamond : nil, identifies: false)
                 }
             }
             .frame(width: SuiteSize.keyframeButton, height: SuiteSize.keyframeButton)

@@ -1,7 +1,7 @@
 // DesignGradientSnapshots.swift (gradient-fill DG-6): Design's gradient fills on the canvas and in the
-// inspector's Fill section, side by side at the editor's panel width. `cards` opened with A (node-2) given a
-// blue-to-white linear gradient and Title (node-5) a radial one, as a file saved with them opens (the fill
-// commands are DG-4's), then: A selected (the chips on Linear, SuiteUI's GradientEditor with its stop bar,
+// inspector's Fill section, side by side at the editor's panel width, the inspector scrolled to its end so
+// the Fill rows show. `cards` opened with A (node-2) given a blue-to-white linear gradient and Title (node-5)
+// the radial the Radial chip makes from it, as a file saved with them opens, then: A selected (the chips on Linear, SuiteUI's GradientEditor with its stop bar,
 // colour and angle rows), Title selected (Radial, no angle row, the text painted through the radial), and B
 // (solid) selected, the chips on Solid with no editor. Writes design-fill-linear-, design-fill-radial-text- and
 // design-fill-solid-switch-{light,dark}.png. `DesignGradientSeed` is the document RenderBudgetDesignGradientTests
@@ -20,7 +20,11 @@ enum DesignGradientSeed {
     static let blue = FillColor(r: 0.09, g: 0.47, b: 0.95)
     static let stops = [GradientStop(offset: 0, color: blue), GradientStop(offset: 1, color: FillColor(r: 1, g: 1, b: 1))]
     static let linear = Fill.linear(stops: stops, start: Point(x: 0, y: 0.5), end: Point(x: 1, y: 0.5))
-    static let radial = Fill.radial(stops: stops, center: Point(x: 0.5, y: 0.5), radius: 0.5)
+    /// The radial the Radial chip makes on `frame`: the stops about its centre out to half its diagonal, in its unit box.
+    static func radial(_ frame: DesignRect) -> Fill {
+        let box = frame.kernelRect
+        return GradientRules.mapped(GradientRules.converted(linear, to: .radial, in: box), from: box, to: DesignNode.unitBox)
+    }
 
     /// The workspace with `selected` selected.
     static func cards(selecting selected: String) -> DesignWorkspace {
@@ -29,7 +33,7 @@ enum DesignGradientSeed {
         func filled(_ nodes: [DesignNode]) -> [DesignNode] {
             nodes.map { node in
                 var node = node
-                node.gradient = ["node-2": linear, "node-5": radial][node.id] ?? node.gradient
+                node.gradient = ["node-2": linear, "node-5": radial(node.frame)][node.id] ?? node.gradient
                 node.children = filled(node.children)
                 return node
             }
@@ -80,6 +84,8 @@ private struct FillSample: View {
         HStack(alignment: .top, spacing: 0) {
             DesignCanvas(model: model, zoom: 0.5)
             DesignInspector(model: model, perform: { _ in })
+                // Scrolled to the end, where Fill sits above Text, so its editor rows show.
+                .defaultScrollAnchor(.bottom)
                 .frame(width: SuiteSize.editorPanelWidth)
                 .frame(maxHeight: .infinity, alignment: .top)
                 .padding(SuiteSpacing.xxl)

@@ -96,8 +96,8 @@ public enum PhotoLayerComposite {
         read: @Sendable (Int) throws -> PixelBuffer
     ) throws -> [(Int, PixelBuffer)] {
         let layer = content.layer
-        // ponytail: PV-5 masks with masking.masked. An adjustment layer never gets here.
-        guard case .pixels = layer.kind, let tiled = content.pixels else { return [] }
+        // ponytail: PV-5 masks with masking.masked. An adjustment layer never gets here; a text layer draws its tiles.
+        guard layer.kind == .pixels || layer.kind.textLayer != nil, let tiled = content.pixels else { return [] }
         let region = PixelRect(x: origin.x - layer.offsetX, y: origin.y - layer.offsetY, width: width, height: height)
         // Each layer tile under the region, in picture pixels, filed under
         // every picture tile it overlaps.

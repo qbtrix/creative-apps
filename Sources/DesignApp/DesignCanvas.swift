@@ -56,7 +56,8 @@ struct DesignCanvas: View {
         return CanvasViewport(
             documentSize: CGSize(width: page.frameWidth, height: page.frameHeight), zoom: zoom,
             pointer: feedback.pointer, unit: "pt", onSize: onViewport, onZoom: onZoom,
-            onDrag: { perform(.drag($0, $1, .current)) }, onDragEnd: { perform(.endDrag) },
+            // The Eyedropper picks through DesignSampleLoupe's tap alone, so a click picks once, not twice.
+            onDrag: model.tool == .eyedropper ? nil : { perform(.drag($0, $1, .current)) }, onDragEnd: { perform(.endDrag) },
             onKey: model.editingTextID == nil ? { key($0) } : nil, onPointer: feedback.onPointer
         ) {
             DesignArtwork(painted: painted, zoom: zoom, editingTextID: model.editingTextID)
@@ -89,11 +90,18 @@ struct DesignCanvas: View {
             return .handled
         }
         // The rail shows Pen disabled; its letter must not pick it either.
-        let typed = press.characters.lowercased()
-        guard let tool = DesignTool.allCases.first(where: { $0.isEnabled && $0.shortcut.map(String.init) == typed })
-        else { return .ignored }
+        guard let tool = DesignTool.picked(byTyped: press.characters) else { return .ignored }
         perform(.tool(tool))
         return .handled
+    }
+}
+
+extension DesignTool {
+    /// The tool `characters` pick through SuiteUI's ToolKeys: one letter, either case, of a tool the palette shows
+    /// enabled; nil for any other text (AC-tools).
+    static func picked(byTyped characters: String) -> DesignTool? {
+        guard characters.count == 1, let key = characters.first else { return nil }
+        return ToolKeys.tool(forKey: key, in: allCases)
     }
 }
 

@@ -1,6 +1,6 @@
-// TextCommandsTests.swift (text-style TS-1 written, TS-6 turns on): the seven text commands on a test target with a
-// kernel `History`. The specs' ids, titles, kinds and availability and the intents' commands are real now and checked
-// now; each run being one undo step, a scrub under one drag token being one step and the nearest-face rule wait on TS-6.
+// TextCommandsTests.swift (text-style TS-1 written, TS-6 on): the seven text commands on a test target with a kernel
+// `History`: the specs' ids, titles, kinds and availability, the intents' commands, each run being one undo step, a
+// scrub under one drag token being one step, and the nearest-face rule.
 import Testing
 import SuiteKernel
 
@@ -49,7 +49,7 @@ struct TextDoc: TextStyleTarget {
         #expect(TextIntent.font(family: "Serif", weight: 600, italic: false).command.id == "text.set-font")
         #expect(TextIntent.tracking(20, drag: nil).command.params == .object(["value": .number(20)]))
     }
-    @Test(.disabled("waits on TS-6")) func eachCommandIsOneStep() throws {
+    @Test func eachCommandIsOneStep() throws {
         let catalog = try #require(Self.catalog)
         var doc = TextDoc()
         let runs: [(String, JSONValue)] = [
@@ -68,7 +68,7 @@ struct TextDoc: TextStyleTarget {
         #expect(doc.history.steps.last == "Font" && doc.style?.family == "Serif")
         #expect(try catalog.run("text.read", params: .object([:]), on: &doc).undoStep == nil)
     }
-    @Test(.disabled("waits on TS-6")) func lineHeightScrubIsOneStep() throws {
+    @Test func lineHeightScrubIsOneStep() throws {
         let catalog = try #require(Self.catalog)
         var doc = TextDoc()
         for sample in 0..<60 {
@@ -78,7 +78,7 @@ struct TextDoc: TextStyleTarget {
         #expect(doc.history.steps == ["Line Height"])
         #expect(doc.undo() && doc.style?.paragraph.lineHeight == 1.2)
     }
-    @Test(.disabled("waits on TS-6")) func setFontPicksTheNearestFace() throws {
+    @Test func setFontPicksTheNearestFace() throws {
         let catalog = try #require(Self.catalog)
         var doc = TextDoc()
         doc.style?.weight = 700
@@ -91,7 +91,7 @@ struct TextDoc: TextStyleTarget {
         #expect(throws: CatalogError.self) { try catalog.run("text.set-font", params: .object(["family": .string("Nope")]), on: &doc) }
         #expect(doc.style?.family == "System")
     }
-    @Test(.disabled("waits on TS-6")) func noTextSelectedIsUnavailableWithTheReason() throws {
+    @Test func noTextSelectedIsUnavailableWithTheReason() throws {
         let catalog = try #require(Self.catalog)
         let none = TextDoc(style: nil, help: "Select a text layer first.")
         for id in catalog.ids { #expect(catalog.availability(id, on: none) == .unavailable("Select a text layer first."), "\(id)") }

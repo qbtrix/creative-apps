@@ -48,9 +48,9 @@ import Testing
         var model = FlareWorkspace(launch: FlareLaunch(arguments: ["-FlareFixture", "bounce"]))
         model.selectLayer("ball")
         let paint = try #require(model.paint, "Ball should have a paint readout, so FILL shows")
-        let reason = try #require(FlareWindow.inspectorHelp(.runFill(.type(.solid)), in: model),
-                                  "Ball's fill type can't be edited yet, so the switch has a reason")
-        let w = RenderBudgetWindow(Self.sections(paint, reasonFor: { FlareWindow.inspectorHelp($0, in: model) }))
+        #expect(FlareWindow.inspectorHelp(.runFill(.type(.solid)), in: model) == nil, "Ball's fill can be edited (FG-5)")
+        let reason = "Select a layer to paint it."
+        let w = RenderBudgetWindow(Self.sections(paint, reasonFor: { _ in reason }))
         defer { w.close() }
         try await w.settle(500)
         #expect(await w.element(FlareInspectorFill.fillHelpID) != nil, "the off switch shows no note")

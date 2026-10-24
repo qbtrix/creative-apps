@@ -232,12 +232,16 @@ private final class KeyCapableWindow: NSWindow {
     /// The window-coordinate frame of the accessibility element called `identifier`, waiting up to two seconds.
     func element(_ identifier: String) async -> CGRect? {
         for _ in 0..<100 {
-            if let screen = Self.frame(of: identifier, in: host) {
-                return window.convertFromScreen(screen)
-            }
+            if let frame = elementNow(identifier) { return frame }
             try? await Task.sleep(for: .milliseconds(20))
         }
         return nil
+    }
+
+    /// The window-coordinate frame of the accessibility element called `identifier` now; nil, without
+    /// waiting, when there is none (a lazy list's row it never laid out).
+    func elementNow(_ identifier: String) -> CGRect? {
+        Self.frame(of: identifier, in: host).map { window.convertFromScreen($0) }
     }
 
     /// The window frame of the first element with `role` inside the element called `identifier` (a

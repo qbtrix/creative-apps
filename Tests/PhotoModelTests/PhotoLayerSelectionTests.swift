@@ -3,7 +3,8 @@
 // a top-first range from the anchor, Command toggles, All picks every layer,
 // a delete or an undo leaves only live ids, and the selection is never empty
 // while there are layers. `selectedLayerID` stays the primary, and setting it
-// leaves one layer picked. Runs on Linux and macOS.
+// leaves one layer picked; a redo and an open keep only live ids too. Runs on
+// Linux and macOS.
 import CoreRaster
 @testable import PhotoModel
 import SuiteKernel
@@ -51,7 +52,7 @@ func layerID(_ workspace: PhotoWorkspace, _ name: String) -> PhotoLayer.ID {
         #expect(workspace.selectedLayerID == top)
     }
 
-    @Test(.disabled("waits on PM-4")) func shiftPicksATopFirstRangeFromTheAnchor() throws {
+    @Test func shiftPicksATopFirstRangeFromTheAnchor() throws {
         var workspace = try fourLayers()
         let (one, two, three) = (layerID(workspace, "Layer 1"), layerID(workspace, "Layer 2"), layerID(workspace, "Layer 3"))
         workspace.pickLayer(one, .replace)
@@ -63,7 +64,7 @@ func layerID(_ workspace: PhotoWorkspace, _ name: String) -> PhotoLayer.ID {
         #expect(workspace.selectedLayerID == two)
     }
 
-    @Test(.disabled("waits on PM-4")) func commandTogglesOneLayer() throws {
+    @Test func commandTogglesOneLayer() throws {
         var workspace = try fourLayers()
         let (one, three) = (layerID(workspace, "Layer 1"), layerID(workspace, "Layer 3"))
         workspace.pickLayer(one, .replace)
@@ -81,7 +82,7 @@ func layerID(_ workspace: PhotoWorkspace, _ name: String) -> PhotoLayer.ID {
         #expect(!workspace.selectedLayerIDs.isEmpty && workspace.selectedLayerID != nil)
     }
 
-    @Test(.disabled("waits on PM-4")) func deletingThePrimaryLeavesTheRestWithANewPrimary() throws {
+    @Test func deletingThePrimaryLeavesTheRestWithANewPrimary() throws {
         var workspace = try fourLayers()
         let (one, three) = (layerID(workspace, "Layer 1"), layerID(workspace, "Layer 3"))
         workspace.pickLayer(one, .replace)
@@ -104,5 +105,29 @@ func layerID(_ workspace: PhotoWorkspace, _ name: String) -> PhotoLayer.ID {
         #expect(workspace.layerSelection.ordered.allSatisfy(live.contains))
         #expect(!workspace.selectedLayerIDs.isEmpty)
         #expect(workspace.selectedLayerID.map(live.contains) == true)
+    }
+
+    @Test func redoKeepsOnlyLiveIDs() throws {
+        var workspace = try fourLayers()
+        let one = layerID(workspace, "Layer 1"), top = workspace.selectedLayerID
+        workspace.selectAllLayers()
+        workspace.removeLayer(one)
+        workspace.undo()
+        workspace.selectAllLayers()
+        workspace.redo()
+        #expect(!workspace.layers.contains { $0.id == one })
+        #expect(workspace.selectedLayerIDs.count == 3 && !workspace.layerSelection.contains(one))
+        #expect(workspace.selectedLayerID == top)
+    }
+
+    @Test func openingPicksTheSavedLayerAlone() throws {
+        var workspace = try fourLayers()
+        let (one, three) = (layerID(workspace, "Layer 1"), layerID(workspace, "Layer 3"))
+        workspace.pickLayer(three, .replace)
+        workspace.pickLayer(one, .toggle)
+        let saved = try workspace.snapshot()
+        workspace.selectAllLayers()
+        try workspace.openDocument(saved, name: "b.ora")
+        #expect(workspace.selectedLayerIDs == [one] && workspace.layerSelection.ordered == [one])
     }
 }

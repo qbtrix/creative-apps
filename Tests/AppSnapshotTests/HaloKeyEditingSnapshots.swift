@@ -3,7 +3,8 @@
 // unkeyed, top first). HaloViewer with Ball's key at 0 picked and Rig's at 0
 // added with Shift, so keys on two lanes draw picked; HaloViewer after Select
 // All Keys, every key of every lane picked; HaloTimelineView hosted in a
-// 1440 x 900 window, with Ball's key at 0 pressed and dragged 6 frames right
+// 1440 x 900 window, the playhead parked at 30 (its band takes a press before
+// a key under it), with Ball's key at 0 pressed and dragged 6 frames right
 // by real mouse events and held there, so the strip draws the step and the
 // time pill over the grabbed key (the PNG is taken before the mouse-up; the
 // recorder doesn't apply the commands, so the Model keeps the keys at 0); and
@@ -58,6 +59,9 @@ import Testing
 
     @Test func aKeyDragShowsTheTimePill() async throws {
         var project = try parented()
+        // The playhead's band takes a press before a key under it (TimelineLaneLayers.route) and the
+        // fixture opens on Ball's key at 0, so park it off the drag's path: the press grabs the key.
+        project.scrub(to: 30)
         let ball = try layer("Ball", in: project), rig = try layer("Rig", in: project)
         project.pickLaneKeys(layerID: ball, frame: 0, mode: .replace)
         project.pickLaneKeys(layerID: rig, frame: 0, mode: .extend)
@@ -88,6 +92,7 @@ import Testing
             try await w.settle(100)
             #expect(sent.commands.contains(.moveKeys(by: 6, dragStart: 0)), "the drag sent \(sent.commands)")
             #expect(sent.commands.last == .endKeyDrag, "the drag didn't end with endKeyDrag: \(sent.commands)")
+            #expect(!sent.commands.contains { if case .scrub = $0 { true } else { false } }, "the drag scrubbed: \(sent.commands)")
         }
     }
 

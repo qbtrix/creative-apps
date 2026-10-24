@@ -1,0 +1,23 @@
+[
+  {
+    "label": ".seedsTheFixture: a -SuiteFixture launch never writes the store",
+    "file": "Sources/FlareModel/FlareLaunch+Kernel.swift",
+    "find": "guard let name = suiteFixture(in: arguments) else { return false }",
+    "replace": "guard let name = suiteFixture(in: arguments), name.isEmpty else { return false }",
+    "tests": "FlareSuiteFixtureTests"
+  },
+  {
+    "label": ".documentsLandInSupport: the fixture documents go nowhere Open Recent can find them",
+    "file": "Sources/FlareModel/FlareLaunch+Kernel.swift",
+    "find": "documentsTo: support + \"/Documents\", now: now)",
+    "replace": "documentsTo: support + \"/Elsewhere\", now: now)",
+    "tests": "FlareSuiteFixtureTests"
+  },
+  {
+    "label": ".readsTheFixtureFlag: the fixture name is read from the wrong flag",
+    "file": "Sources/FlareModel/FlareLaunch+Kernel.swift",
+    "find": "value(after: \"-SuiteFixture\", in: arguments) }",
+    "replace": "value(after: \"-SuiteFixtureDocuments\", in: arguments) }",
+    "tests": "FlareSuiteFixtureTests"
+  }
+]

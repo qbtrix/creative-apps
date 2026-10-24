@@ -1,8 +1,9 @@
 // DesignRecoveryStore+Kernel.swift (design/autosave-history DA-7): where a Design window's autosave writes
 // its recovery copies. `-SuiteSupportDir <path>` puts them under `<path>/Design/Recovery/` (the
-// journeys pass a temp folder); a launch that ignores restored state (the journeys'
-// `-ApplePersistenceIgnoreState YES`) without one keeps none, so no journey leaves a copy for the
-// next to be offered; any other launch writes under the suite root
+// journeys pass a temp folder); a launch that ignores restored state without one keeps none, so no
+// journey or test leaves a copy for the next to be offered. It ignores state when argv says
+// `-ApplePersistenceIgnoreState YES` (the journeys) or the caller says so (`ignoringState`: the app
+// passes the user default, which a test host registers, TestDefaults); any other launch writes under the suite root
 // (`~/Library/Application Support/AfterGlow/Design/`, SuiteLocations.appFolder). Linux-safe.
 import SuiteModel
 
@@ -11,14 +12,14 @@ public enum DesignRecoveryStore {
     static let app = "Design", ext = "design"
 
     /// The recovery folder for a launch with `arguments` and home folder `home`; nil keeps no copies.
-    public static func folder(arguments: [String], home: String) -> RecoveryFolder? {
-        guard let path = folderPath(arguments: arguments, home: home) else { return nil }
+    public static func folder(arguments: [String], home: String, ignoringState: Bool = false) -> RecoveryFolder? {
+        guard let path = folderPath(arguments: arguments, home: home, ignoringState: ignoringState) else { return nil }
         return RecoveryFolder(store: FileStore(folder: path), ext: ext)
     }
 
     /// The folder `folder(arguments:home:)` writes under; nil keeps no copies.
-    static func folderPath(arguments: [String], home: String) -> String? {
-        if !hasSupportDir(arguments), ignoresState(arguments) { return nil }
+    static func folderPath(arguments: [String], home: String, ignoringState: Bool = false) -> String? {
+        if !hasSupportDir(arguments), ignoringState || ignoresState(arguments) { return nil }
         return SuiteLocations.appFolder(app, arguments: arguments, home: home)
     }
 

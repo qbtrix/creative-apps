@@ -1,12 +1,12 @@
 // PhotoTransform+Kernel.swift: Photo as SuiteKernel's TransformTarget
 // (transform PT-1 contract, PT-5 bodies), and Free Transform's begin, commit
-// and cancel, and Canvas Size. The box the kernel sees is the draft's box
+// and cancel. The box the kernel sees is the draft's box
 // (scaled about its top-left and moved, turned about its centre), else the
 // selected pixel layer's bounds, cut to the selection when one is set.
 // A scale, turn or move edits the draft as one step whose undo puts the
 // previous draft back (a drag's steps fold under its token); commit resamples
 // the layer once as one "Free Transform" step; a flip mirrors the layer's
-// pixels in place at once, never a draft. Canvas Size refuses until PT-6.
+// pixels in place at once, never a draft. Canvas Size is PhotoImageOps'.
 // Linux-safe.
 import CoreRaster
 import SuiteKernel
@@ -124,12 +124,5 @@ extension PhotoWorkspace {
         guard transformDraft != nil else { return }
         transformDraft = nil
         touch(.all)
-    }
-
-    /// Image > Canvas Size: grows or crops the canvas to `width` x `height`
-    /// about `anchor` as one "Canvas Size" step. PT-1 stub: refuses until PT-6.
-    public mutating func resizeCanvas(width: Int, height: Int, anchor: BoxAnchor) throws {
-        guard canvas != nil else { throw RasterError.invalid("no image is open") }
-        throw NotBuilt(feature: "PT-6").refuse()
     }
 }

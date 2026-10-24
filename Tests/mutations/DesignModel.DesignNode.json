@@ -44,15 +44,15 @@
   {
     "label": "a full-size handle sits on the kernel square's corner, not its centre",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "shown[handle] = DesignPoint(x: (square.minX + square.maxX) / 2",
-    "replace": "shown[handle] = DesignPoint(x: square.minX",
+    "find": "shown[handle] = DesignPoint(x: (square.minX + square.maxX + Double(h) * size) / 2",
+    "replace": "shown[handle] = DesignPoint(x: square.minX + Double(h) * size / 2",
     "tests": "DesignCompactSelectionTests.swift"
   },
   {
     "label": "a compact rect's corners are pushed inside",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "DesignPoint(x: at.x + Double(h) * size / 2, y: at.y + Double(v) * size / 2)",
-    "replace": "DesignPoint(x: at.x - Double(h) * size / 2, y: at.y - Double(v) * size / 2)",
+    "find": "let (h, v) = compact && handle.isCorner ? handle.direction : (0, 0)",
+    "replace": "let (h, v) = compact && handle.isCorner ? (-handle.direction.x, -handle.direction.y) : (0, 0)",
     "tests": "DesignCompactSelectionTests.swift"
   },
   {
