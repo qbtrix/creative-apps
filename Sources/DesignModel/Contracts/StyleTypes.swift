@@ -2,6 +2,7 @@
 // (corner radius, opacity, stroke, text style) and the tier-2 values (paths,
 // components, variables) that D2-1 adds to the file. Value types, Codable, so
 // they go into a file as they are. Linux-safe.
+import SuiteKernel
 
 /// A stroke drawn centered on the shape's outline.
 public struct DesignStroke: Sendable, Hashable, Codable {
@@ -16,9 +17,12 @@ public struct DesignStroke: Sendable, Hashable, Codable {
     public static let `default` = DesignStroke(color: .black, width: 1)
 }
 
-public enum DesignTextAlignment: String, CaseIterable, Sendable, Codable { case leading, center, trailing }
+/// A text layer's alignment: the kernel's `TextStyle.Alignment` (FlareCore's leading, center, trailing and
+/// justified), so a file's "leading", "center" and "trailing" decode as they did (text-style TS-7).
+public typealias DesignTextAlignment = TextStyle.Alignment
 
-/// How a text layer's text is set. The app measures and draws it; the Model only stores it.
+/// How a text layer's text is set. The app measures and draws it; the Model only stores it. Its file keys and
+/// the kernel's `TextStyle` view of it live in DesignTextStyle+Kernel.swift.
 public struct DesignTextStyle: Sendable, Hashable, Codable {
     /// A family name the system font list offers; "System" is the system font.
     public var family: String
@@ -31,25 +35,15 @@ public struct DesignTextStyle: Sendable, Hashable, Codable {
     /// text wraps (a Text drag, canvas-basics CB-3). Left out of the file when nil, so a file
     /// written before it opens as auto width and keeps its bytes.
     public var fixedWidth: Bool?
+    /// The italic face; a multiple of ascent + descent, 0.5...4; thousandths of an em, -100...500. Each is left
+    /// out of the file at its default (upright, 1.2, 0), so a file written before them keeps its bytes.
+    public var italic = false, lineHeight = 1.2, tracking = 0.0
 
     public init(
         family: String, size: Double, weight: Int, alignment: DesignTextAlignment, fixedWidth: Bool? = nil
     ) {
         (self.family, self.size, self.weight, self.alignment) = (family, size, weight, alignment)
         self.fixedWidth = fixedWidth
-    }
-
-    private enum CodingKeys: String, CodingKey { case family, size, weight, alignment, fixedWidth }
-
-    /// Decodes a style; a file without `fixedWidth` is auto width (nil). The synthesized
-    /// encoder leaves a nil `fixedWidth` out.
-    public init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        try self.init(
-            family: container.decode(String.self, forKey: .family), size: container.decode(Double.self, forKey: .size),
-            weight: container.decode(Int.self, forKey: .weight),
-            alignment: container.decode(DesignTextAlignment.self, forKey: .alignment),
-            fixedWidth: container.decodeIfPresent(Bool.self, forKey: .fixedWidth))
     }
 
     public static let `default` = DesignTextStyle(family: "System", size: 16, weight: 400, alignment: .leading)

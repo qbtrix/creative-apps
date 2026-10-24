@@ -1,0 +1,16 @@
+[
+  {
+    "label": "oldFilesUnchanged: default line height written",
+    "file": "Sources/DesignModel/DesignTextStyle+Kernel.swift",
+    "find": "if lineHeight != Self.defaultLineHeight { try c.encode(lineHeight, forKey: .lineHeight) }",
+    "replace": "try c.encode(lineHeight, forKey: .lineHeight)",
+    "tests": "DesignTextStyleTests"
+  },
+  {
+    "label": "fontChangeRefits: refit skipped on a family change",
+    "file": "Sources/DesignModel/DesignTextStyle+Kernel.swift",
+    "find": "family != other.family || weight != other.weight",
+    "replace": "weight != other.weight",
+    "tests": "DesignTextStyleTests"
+  }
+]

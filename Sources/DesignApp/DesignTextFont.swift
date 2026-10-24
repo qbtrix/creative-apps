@@ -56,7 +56,7 @@ enum DesignTextFont {
     /// How the lines of `style` align inside their box.
     static func textAlignment(_ style: DesignTextStyle) -> TextAlignment {
         switch style.alignment {
-        case .leading: .leading
+        case .leading, .justified: .leading
         case .center: .center
         case .trailing: .trailing
         }
@@ -65,7 +65,7 @@ enum DesignTextFont {
     /// Where a box puts text of `style`: always at its top, across as aligned.
     static func frameAlignment(_ style: DesignTextStyle) -> Alignment {
         switch style.alignment {
-        case .leading: .topLeading
+        case .leading, .justified: .topLeading
         case .center: .top
         case .trailing: .topTrailing
         }
@@ -74,7 +74,7 @@ enum DesignTextFont {
     /// How far across its box the text sits: 0 leading, 0.5 centered, 1 trailing.
     static func across(_ style: DesignTextStyle) -> Double {
         switch style.alignment {
-        case .leading: 0
+        case .leading, .justified: 0
         case .center: 0.5
         case .trailing: 1
         }

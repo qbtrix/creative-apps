@@ -45,6 +45,13 @@ select.enter-group
 select.exit-group
 select.pick
 shape.draw
+text.read
+text.set-alignment
+text.set-font
+text.set-italic
+text.set-line-height
+text.set-size
+text.set-tracking
 tool.ellipse
 tool.eyedropper
 tool.frame
