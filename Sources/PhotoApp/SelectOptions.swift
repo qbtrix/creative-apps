@@ -19,12 +19,12 @@ struct SelectOptions: View {
     }
 
     /// The workspace's area options with its tool as an area shape.
-    static func options(_ model: PhotoWorkspace) -> AreaOptions {
+    nonisolated static func options(_ model: PhotoWorkspace) -> AreaOptions {
         let o = model.areaOptions
         return AreaOptions(tool: AreaTool(rawValue: model.tool.rawValue) ?? .rect, mode: o.mode, feather: o.feather,
                            tolerance: o.tolerance, contiguous: o.contiguous, allLayers: o.allLayers)
     }
 
     /// The palette tool for an area shape: the Marquee draws the rectangle.
-    static func tool(_ shape: AreaTool) -> PhotoTool { PhotoTool(rawValue: shape.rawValue) ?? .marquee }
+    nonisolated static func tool(_ shape: AreaTool) -> PhotoTool { PhotoTool(rawValue: shape.rawValue) ?? .marquee }
 }
