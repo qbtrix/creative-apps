@@ -29,7 +29,6 @@ Next: IM-8b is #5151 (stacked on #5148); supervisor asked (comment 6383016723) w
 | IM-8s | IM-photo | dispatcher route runs ImagingProgram's steps | #4856 | merged |
 | IM-8a | IM-photo | Photo canvas files off Metal (ImagingGPU.Target, SuiteUI residentTarget) | #5148 | open (fast-lane, Fast-Check c0b53be) |
 | IM-8b | IM-photo | live route's program from ImagingProgram (output levels) | #5151 | open (fast-lane, Fast-Check, mutate 5/5) |
-| IM-8b | IM-photo | live route on LayeredToneBase; PhotoRenderRoute mapping deleted | – | planned (stacks on IM-8a) |
 | IM-8d | IM-photo | delete PhotoLiveTone | – | blocked: EP-z #3723 |
 | IM-9 | IM-library | Library imaging tests | #4591 | merged |
 | IM-10 p1 | IM-library | develop levels/curve points are SuiteImaging's | #4886 | open (fast-lane, clean) |
