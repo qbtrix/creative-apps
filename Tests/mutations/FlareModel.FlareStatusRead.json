@@ -1,0 +1,16 @@
+[
+  {
+    "label": "flareStops: Flare's table gains 150%, so 100% zooms in to 150%",
+    "file": "Sources/FlareModel/FlareStatusRead.swift",
+    "find": "2.0 / 3, 1, 2, 3, 4, 6, 8, 12, 16, 32])",
+    "replace": "2.0 / 3, 1, 1.5, 2, 3, 4, 6, 8, 12, 16, 32])",
+    "tests": "FlareViewMathTests.swift"
+  },
+  {
+    "label": "fitReadout: the fitted stage reads its percent instead of Fit",
+    "file": "Sources/FlareModel/FlareStatusRead.swift",
+    "find": "zoom.map(ZoomSteps.percentText) ?? \"Fit\"",
+    "replace": "zoom.map(ZoomSteps.percentText) ?? \"100%\"",
+    "tests": "FlareViewMathTests.swift"
+  }
+]

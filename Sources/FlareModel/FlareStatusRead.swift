@@ -6,10 +6,21 @@
 // still shows each of 24 frames once. Under the document rate it is dropping (QB-L4, report-only). A scene with text
 // the stage can't draw says so: "Text not shown (1)", and so does one with masks or mattes: "Masks not shown (1)".
 // Under Direct Select, `pathHelp` says why no points can be edited ("Unlock Layer 1 to edit its points.").
+// The stage's zoom readout ("Fit", "200%") and Flare's zoom stop table on the suite's zoom model live here too.
 // Integer math on clamped values, so nothing here can trap.
 import FlareCore
+import struct SuiteKernel.ZoomSteps
 
 extension FlareWorkspace {
+    /// Flare's Zoom In and Zoom Out stops on the suite's zoom model (SuiteKernel's ZoomSteps, docs/blueprints/flare.md
+    /// 3.4 and J14): no 150%, so 100% zooms in to 200%, within 10%...3200%.
+    public static let zoomSteps = ZoomSteps(stops: [0.1, 0.25, 1.0 / 3, 0.5, 2.0 / 3, 1, 2, 3, 4, 6, 8, 12, 16, 32])
+
+    /// The stage's zoom readout: "Fit" for nil (the stage fits its window), else the suite's whole percent ("200%").
+    public static func zoomReadout(_ zoom: Double?) -> String {
+        zoom.map(ZoomSteps.percentText) ?? "Fit"
+    }
+
     /// The pills for the selected scene; `measuredFPS` is the driver's measure while playing, nil before it has one.
     public func statusPills(measuredFPS: Double?) -> StatusPills {
         guard let scene = selectedScene else { return StatusPills(aspect: "–", size: "–", fps: "–") }
