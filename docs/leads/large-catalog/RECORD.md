@@ -21,6 +21,7 @@ Next: LG-7 (jobs RJ-L07 re-pointed, RJ-L56 on; journey skip dropped; perf-suites
 | LG-3 | LG-model | 2 | direct select all, cheap can-export check | LibrarySelectionAdapter.swift, LibraryActions.swift, LibraryExport.swift, LargeCatalogEquivalenceTests.swift, mutations | LargeCatalogEquivalenceTests | #4847 | merged |
 | LG-4 | LG-model | 2 | one-pass export names (stems parsed once, one taken set) | Contracts/ExportNaming+Kernel.swift, Live/LiveExporter.swift, LargeCatalogEquivalenceTests.swift, mutations | LargeCatalogEquivalenceTests | #4847 | merged |
 | LG-5 | LG-grid | 3 | visible-first pass, two screens prefetched nearest first, off-window requests cancelled (decode stops), photo lookup by id | LibraryThumbnails.swift, LibraryWindow+Thumbnails.swift, Live/LiveThumbnails.swift, LibraryThumbnailPrefetchTests.swift, mutations | LibraryThumbnailPrefetchTests, aCancelledRequestDecodesNothing | #5050 | open |
+| LG-7 | LG-grid | 4 | RJ-L56 on the 10,000 fixture's .library (sha256 of the rated catalog), journey's skip dropped (RJ-L07) | large-catalog.jobs.json, input/large.library, LibraryJourneyTests+Large.swift | RealJobsTests (RJ-L56) | – | building |
 | LG-6 | LG-grid | 3 | loupe neighbours decode behind the render, superseded step's dropped | RenderQueue.swift, LibraryWindow+Loupe.swift, LibraryRenderQueueAheadTests.swift, mutations | LibraryRenderQueueAheadTests | #5042 | open |
 
 ## Reviews
@@ -35,9 +36,11 @@ Next: LG-7 (jobs RJ-L07 re-pointed, RJ-L56 on; journey skip dropped; perf-suites
 - LG-7's Tests/perf-suites.txt line is the supervisor's (protected).
 - LG-6 before LG-5: supervisor's answer on #3790 (comment 6380089356, 2026-10-24T04:55Z). LG-5 builds on ST-a's fakes with a `Wire: shared-thumbnails:ST-a` line once #4840 merges.
 - LG-5 does not use ST-a: it is the grid's visible-range pass, cancellation and id lookup in LibraryThumbnailCache. The shared store's disk tier arrives with shared-thumbnails ST-6, so LG-5 goes from dev now (supervisor 6380369203: full capacity) without a `Wire:` line, on branch claude/large-catalog-lead-jhxt1n-lg5.
+- LG-7: RJ-L07 already needs and closes with library/large-catalog in jobs.json (done in LG-a), so re-pointing means turning its journey on. RJ-L56 checks the catalog by sha256 (inline JSON would be 3 MB); its 1,000-photo export plan stays in LargeCatalogModelBudgetTests, since the PNG export waits on image-codecs. LargeCatalogModelBudgetTests stays .disabled until the supervisor lists it in Tests/perf-suites.txt (asked on #3790, comment 6380909327).
 - LG-6 scope: neighbour prefetch already exists but runs beside the render, unbounded per step; LG-6 queues the neighbours behind the render in RenderQueue and drops a superseded step's pending decodes, so stale prefetches never evict the focus's decodes.
 
 ## Open
+- 2026-10-24T06:45Z: LG-7 built on claude/large-catalog-lead-jhxt1n-lg7 (RJ-L56 passes on Linux in 1.1 s debug); scripts/ci --changed running. #5042 and #5050 clean, waiting for a batch.
 - 2026-10-24T06:30Z: #5050 opened (LG-5; 255+/21-, 6 files; CI: PASS on 5b84195d; Mutate 18/18). LibraryWindow+Thumbnails.swift and Live/LiveThumbnails.swift are outside the owned list.
 - 2026-10-24T06:08Z: #5042 opened (LG-6; 187+/26-, 4 files; CI: PASS on 8c7721cf; Mutate 4/4). LibraryWindow+Loupe.swift is outside the owned list (one call site).
 - 2026-10-23T23:17Z: LG-grid wait re-read: contract-first (supervisor 15:13Z) makes it met when ST-a #4840 merges; #4840 needs-fix since 19:15Z. Rule 23 question posted on #3790 proposing LG-6 (loupe, no thumbnail store) ahead of LG-5.
