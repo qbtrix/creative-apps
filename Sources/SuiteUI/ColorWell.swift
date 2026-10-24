@@ -75,7 +75,8 @@ public struct HexColor: Hashable, Sendable {
         self.blue = blue
     }
 
-    public init(_ rgb: RGB8) { self.init(rgb.red, rgb.green, rgb.blue) }
+    /// A copy: RGB8 is this type, under the HexColorEditing contract's name.
+    public init(_ rgb: RGB8) { self = rgb }
 
     public static let black = HexColor(0, 0, 0)
 
@@ -85,7 +86,7 @@ public struct HexColor: Hashable, Sendable {
         self.init(rgb)
     }
 
-    public var rgb: RGB8 { RGB8(red, green, blue) }
+    public var rgb: RGB8 { self }
 
     /// "#RRGGBB", upper case.
     public var text: String { HexColorText().format(rgb) }

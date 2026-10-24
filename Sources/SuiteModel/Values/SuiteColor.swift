@@ -1,8 +1,10 @@
 // SuiteColor.swift: a colour as the suite stores it, in its own space and
 // never converted on save. Foundation free, Linux-safe, Sendable. It stays
 // its own type, not the kernel's FillColor: it carries a colour space and is
-// the hand-off and pasteboard format. Its `hex` mirrors SuiteKernel's HexText
-// (SuiteModel links no other module); SuiteColorHexParityTests pins the two.
+// the hand-off and pasteboard format. Its `hex` is SuiteKernel's HexText over
+// the components as they are (no space conversion), without the "#".
+import SuiteKernel
+
 
 /// The colour spaces a stored colour can be in.
 public enum SuiteColorSpace: String, Codable, Sendable { case sRGB, displayP3 }
@@ -17,12 +19,5 @@ public struct SuiteColorValue: Codable, Hashable, Sendable {
 
     /// "RRGGBB" (alpha dropped), for hex rows: HexText's format without the "#", components clamped to 0...1,
     /// a NaN or an infinity reads 00.
-    public var hex: String {
-        func byte(_ v: Double) -> String {
-            let n = v.isFinite ? Int((min(max(v, 0), 1) * 255).rounded()) : 0
-            let s = String(n, radix: 16, uppercase: true)
-            return s.count == 1 ? "0" + s : s
-        }
-        return byte(red) + byte(green) + byte(blue)
-    }
+    public var hex: String { String(HexText.format(FillColor(r: red, g: green, b: blue)).dropFirst()) }
 }

@@ -1,7 +1,6 @@
 // SuiteColorHexParityTests.swift: SuiteColorValue's "RRGGBB" is the kernel's HexText format without the "#"
-// (#5078). SuiteModel links no other module, so it keeps a mirror of HexText's rounding; this test, in a target
-// that sees both, pins the mirror to the codec on every byte and on the edges (out of range clamps, a NaN or an
-// infinity reads 00), so the two can't drift. The components are written in their own space, never converted.
+// (#5078) on every byte and on the edges (out of range clamps, a NaN or an infinity reads 00, where the old copy
+// trapped). The components are written in their own space, never converted, and alpha is dropped.
 import SuiteKernel
 import SuiteModel
 import Testing
