@@ -1,4 +1,4 @@
-// FlareUnsavedGuardTests.swift (adopt-kernel-unsaved-prompt UP-9, disabled until UP-10): the hooks a Flare window
+// FlareUnsavedGuardTests.swift (adopt-kernel-unsaved-prompt UP-9, on since UP-10): the hooks a Flare window
 // hands SuiteUI's `.unsavedChangesGuard` and `UnsavedGuard.proceed` (FlareWindow.unsavedHooks). Their buttons are
 // `flare.close.*`; the name is the open animation's title ("Untitled" before its first save, nil with nothing
 // open); the dirty state is the workspace's DocumentSession; and Save runs File > Save, landing only when the write
@@ -61,7 +61,7 @@ import Testing
 }
 
 @MainActor
-@Suite(.disabled("waits on UP-10: FlareWindow.unsavedHooks")) struct FlareUnsavedGuardTests {
+@Suite struct FlareUnsavedGuardTests {
     @Test func buttonsAreFlaresCloseIDs() {
         let hooks = FlareBox().hooks
         #expect(hooks.idPrefix == "flare")
