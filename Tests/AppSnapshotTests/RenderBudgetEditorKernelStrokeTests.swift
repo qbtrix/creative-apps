@@ -13,7 +13,7 @@ import Testing
 
 extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetEditorKernelStrokeTests {
-        @Test(.timeLimit(.minutes(2)), .disabled("quarantine #3264 until 2026-10-22")) func testStrokePadBodies() async throws {
+        @Test(.timeLimit(.minutes(2))) func testStrokePadBodies() async throws {
             let w = RenderBudgetWindow(StrokePadBudgetHost())
             defer { w.close() }
             let bodies = { () -> Int? in
@@ -31,31 +31,20 @@ extension BodyCountSuites {
             }
             // The pad's samples never reach the window. Target: 0.
             expectBodies(step, atMost: 1, target: 0)
-            #expect(await strokes(in: w) == "1 strokes", "the drag drew no stroke on the pad")
+            let drawn = await strokes(in: w)
+            #expect(drawn == "1 strokes", "the drag drew no stroke on the pad: \(drawn ?? "no probe")")
         }
 
-        /// The pad's accessibility value ("N strokes"), waiting up to two seconds for the drag to show.
+        /// The pad's stroke count ("N strokes"), waiting up to two seconds for the drag to show. It is read
+        /// from the pad's probe, as AppKit hands the pad's own SwiftUI value back as nil (#262).
         private func strokes(in w: RenderBudgetWindow<StrokePadBudgetHost>) async -> String? {
-            var value: String?
+            var label: String?
             for _ in 0..<100 {
-                value = Self.value(of: "suite.gallery.stroke-pad", in: w.host)
-                if value == "1 strokes" { return value }
+                label = w.label("suite.gallery.stroke-pad.strokes")
+                if label == "1 strokes" { return label }
                 try? await Task.sleep(for: .milliseconds(20))
             }
-            return value
-        }
-
-        private static func value(of identifier: String, in element: Any, depth: Int = 0) -> String? {
-            let node = element as AnyObject
-            if (node.accessibilityIdentifier?() ?? nil) == identifier {
-                let raw: Any?? = node.accessibilityValue?()
-                return (raw ?? nil) as? String
-            }
-            guard depth < 60 else { return nil }
-            for child in (node.accessibilityChildren?() ?? nil) ?? [] {
-                if let found = value(of: identifier, in: child, depth: depth + 1) { return found }
-            }
-            return nil
+            return label
         }
     }
 }
