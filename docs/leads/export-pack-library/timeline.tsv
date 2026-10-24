@@ -38,3 +38,4 @@ time	event	task	note
 2026-10-21T11:20:35Z	check	-	no XP-2/3/7 PR yet; LX-2/LX-4 wait
 2026-10-21T11:50:25Z	check	-	run act-1a15e4969c2-pa6e resumed; XP-2/3/7 not on dev; LX-2/LX-4 wait
 2026-10-23T15:20:48Z	heartbeat	waiting	resumed by act-1a16953af22-wvhu; contract slice of the cross-line wait not merged
+2026-10-24T07:25Z	resume	act-1a16cc967d9-mcuv; LX-2 + LX-4 start on stubs

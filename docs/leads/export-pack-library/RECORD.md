@@ -1,10 +1,10 @@
 # export-pack (Library) lead record
 
 Issue: #3478 · Packet: docs/blueprints/library/features/export-pack.md
-Run: act-1a16953af22-wvhu (line lead, line:library) · resumed 2026-10-23 (earlier act-1a15e4969c2-pa6e)
-Stage: 3 wave 1 (blocked, re-checked at dev 721168a8, 2026-10-23T15:20:48Z)
-Base: origin/dev 721168a8
-Next: LX-1 and LX-3 are merged. LX-2 waits on XP-a (XP-3 ExportPick.metadata not on dev); LX-4 waits on XP-a, then builds on FakeMetadata (Wire: export-pack:XP-7)
+Run: act-1a16cc967d9-mcuv (line lead, line:library) · resumed 2026-10-24 (earlier act-1a16953af22-wvhu, act-1a15e4969c2-pa6e)
+Stage: 3 wave 2 (LX-2 and LX-4 building on stubs, 2026-10-24T07:25Z)
+Base: origin/dev 830af22d
+Next: builders open LX-a (SuiteUI ExportPick.metadata stub + LX-2 row + LX-5 metadata snapshot) and LX-4 (JPEGWriter on FakeMetadata); then LX-u stacked on LX-a
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -22,6 +22,10 @@ Next: LX-1 and LX-3 are merged. LX-2 waits on XP-a (XP-3 ExportPick.metadata not
 | LX-3 | LX-m | 2 | sidecar policy; LiveExporter passes the policy; RJ-L16/RJ-X03 folder; tests on | ExportSidecar.swift, LiveExporter.swift, tests, mutation plans, Tests/RealJobs/library/no-location/ | LibraryExportMetadataTests; Mutate ExportSidecar 7/7, LiveExporter 6/6 | #3699 f1e49054d | merged |
 | LX-4 | LX-m | - | JPEGWriter carries metadata via services.metadata | JPEGWriter.swift, LibraryExportMetadataWriteTests.swift | macOS | - | waits XP-2, XP-7 |
 | LX-5..LX-8 | | - | see packet | | | - | waiting |
+
+## Wires
+- [ ] Wire: export-pack:XP-3 (LX-2 builds on a stub ExportPick.metadata in SuiteUI, supervisor 2026-10-23 18:46Z; XP-3 builds on that field)
+- [ ] Wire: export-pack:XP-7 (LX-4 builds on FakeMetadata; swap in the live copy when XP-7 merges)
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -43,3 +47,5 @@ Next: LX-1 and LX-3 are merged. LX-2 waits on XP-a (XP-3 ExportPick.metadata not
 - XP-2 waits on shell-media SM-a; XP-3 waits on tone-controls TC-a and PL-a (SuiteUI lead's record).
 - 2026-10-21T11:50:25Z (act-1a15e4969c2-pa6e): re-read dev ded2ca5. No MetadataCarrying (XP-2), no ExportPick.metadata (XP-3), no StillMetadata (XP-7). SuiteUI lead's last poll says SM-a is not on dev. LX-2, LX-4, LX-5/6 and LX-7/8 cannot start. No open findings carry Feature: export-pack.
 - 2026-10-23T15:20:48Z: resumed by line lead act-1a16953af22-wvhu. Under contract-first waits (#4814), the XP-a waits are met once XP-a merges. XP-1 and XP-2 are on dev (MetadataCarrying, FakeMetadata), but XP-3 isn't, and no Belt-Slice-Done for XP-a is posted. So LX-2 waits, and LX-4 then builds on FakeMetadata with a Wire line for XP-7. Polling every 10 min.
+
+- 2026-10-24T07:25Z: resumed by act-1a16cc967d9-mcuv. Supervisor ruling 2026-10-23 18:46Z: build LX-2 and LX-4 now; add ExportPick.metadata to SuiteUI with a neutral default (field + default, tested, no UI). Library's sheet draws its own Form (not SuiteExportSheet), so LX-2 adds a Metadata row of ChoiceChips over ExportMetadata.allCases with ExportMetadata.title, and maps options.metadata into ExportPick.metadata.
