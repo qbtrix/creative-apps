@@ -17,9 +17,11 @@ import Testing
         #expect(TimelineLook.keyFill(Self.keys[2], on: picked, playhead: 30) == SuitePalette.textSecondary)
     }
 
-    @Test func aKeyAtThePlayheadIsKeyedPickedOrNot() {
+    @Test func anIdleKeyAtThePlayheadIsKeyedAndAPickedOneStaysPicked() {
+        // A pick outranks the playhead: Select All with the playhead on a key column picks every key visibly.
         let picked = TimelineTrack(id: "ball", name: "Ball", keys: Self.keys, pickedFrames: [12], isSelected: true)
-        #expect(TimelineLook.keyFill(Self.keys[1], on: picked, playhead: 12) == SuitePalette.stateKeyed)
+        #expect(TimelineLook.keyFill(Self.keys[1], on: picked, playhead: 12) == SuitePalette.accent)
+        #expect(TimelineLook.keyFill(picked: true, atPlayhead: true) == SuitePalette.accent)
         let idle = TimelineTrack(id: "ball", name: "Ball", keys: Self.keys)
         #expect(TimelineLook.keyFill(Self.keys[2], on: idle, playhead: 24) == SuitePalette.stateKeyed)
         #expect(TimelineLook.keyFill(Self.keys[0], on: idle, playhead: 24) == SuitePalette.textSecondary)
