@@ -27,6 +27,7 @@ Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #48
 | PT-8 | PT-z | 6 | photo.md, built, feature-done | docs/blueprints/photo.md, tone-controls.wave.json | scripts/ci | – | waiting |
 
 ## Waves (combined plan, all three features)
+- 13:30Z: bisect probe -6 (first 6 of batch 20261024110214) macOS gate 40092825860 failed on `RenderBudgetToneRowsTests.sliderDragInThreeBodies` (120 Temperature steps sent 100 `tone.set`). That test comes from #5006 (TC-3, suiteui tone-controls lead act-1a1693a3ff0-mwrd, line:suiteui): not this run's to fix. Probe -3 running (40097887707/40097890001). PT-5 stays blocked on #5006; #5008 and #5007 don't touch ToneRows.
 - W1: PM-1 (SuiteUI LayerTreeList multi-select, no waits) and PP-a (PP-1 and PP-2 in one PR; waits met by PL-1 #3578 and PL-m on dev). The files do not overlap.
 - W2: PM-2 once photo-gradient-fill PG-a is slice-done; PP-3 once placed-images PL-2 has merged; PT-1 once suiteui tone-controls TC-a is slice-done.
 - W3: PM-3 (after PM-2), PP-4 (after PP-3), PT-2 (after PT-1), PM-4 (after PM-2).
