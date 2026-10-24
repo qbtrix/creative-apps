@@ -39,6 +39,7 @@ Next: Lane: #5039 AK-6 in the lane; #5040 AK-9 stacked on it. AK-8 waits SC-f (r
 
 ## Decisions
 
+- 2026-10-24T08:27:57Z Heartbeat 08:30Z: #5039 in the lane, #5040 stacked on it; no merges. AK-8 still waits: shared-codecs planned on dev. Dev CI 1bbaba6c1 holds none of our slices.
 - 2026-10-24T08:06:50Z Heartbeat 07:40Z: #5039 in the lane, #5040 stacked on it; no merges yet. AK-8 still waits on shared-codecs SC-f (wave.json planned). No open findings.
 - 2026-10-24T06:59:59Z AK-6 opened as #5039 and AK-9 as #5040 (stacked; journey only, Photo leg XCTSkip waits on AK-8).
 - 2026-10-24T05:38:36Z Belt-Slice-Done AK-flare posted on #3713 (issuecomment-6380467453): full CI 40037716897 on dev 654fb3632 holds #3842 and #4010; Linux and macOS green; main promoted. The tool appended a footer, which I removed with an edit.
