@@ -57,3 +57,35 @@ extension HaloProject {
         return pasted.map { .object(["style": $0]) }
     }
 }
+
+/// What a Layer menu style item built from its spec reads: the focused project (nil with no Halo window) and the
+/// style on the pasteboard, which Paste needs.
+public struct HaloStyleMenuState: Sendable {
+    public var project: HaloProject?
+    public var pasted: JSONValue?
+
+    public init(project: HaloProject?, pasted: JSONValue?) { (self.project, self.pasted) = (project, pasted) }
+
+    /// Why the item for `id` can't run now, worded as `HaloProject.styleMenuHelp`; nil when it can.
+    public func why(_ id: String) -> String? {
+        guard let project else { return HaloMenuState.noWindow }
+        return project.styleMenuHelp(id, pasted: pasted)
+    }
+
+    /// The Layer menu item's spec for `id`: its menu title, its catalog summary, available when `why(id)` is nil.
+    public static func spec(_ id: String) -> CommandSpec<HaloStyleMenuState> {
+        .typed(id, title: HaloProject.styleMenuTitle(id), summary: HaloMenuState.spec(id).summary, kind: .edit,
+               params: JSONValue.self, example: .object([:]),
+               availability: { state in state.why(id).map(Availability.unavailable) ?? .available }) { state, _ in
+            state.project?.runStyleMenu(id, pasted: state.pasted) ?? .null
+        }
+    }
+
+    /// The style sheet's Done: it closes the panel, so it is always available.
+    public static let done = CommandSpec<HaloStyleMenuState>.typed(
+        "style.panel", title: "Done", summary: "Close the layer style panel.", kind: .view, params: JSONValue.self,
+        example: .object([:]), availability: { _ in .available }) { state, _ in
+        state.project?.runStyle(.show(nil))
+        return .null
+    }
+}

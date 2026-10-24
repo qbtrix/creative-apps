@@ -56,4 +56,15 @@ import Testing
         #expect(project.runStyleMenu("style.clear") == nil)
         #expect(project.document == before)
     }
+
+    @Test func theSpecsReadTheWindowAndThePasteboard() throws {
+        let noWindow = HaloStyleMenuState(project: nil, pasted: nil)
+        #expect(HaloProject.styleMenuIDs.allSatisfy { HaloStyleMenuState.spec($0).availability(noWindow).why == HaloMenuState.noWindow })
+        let project = try HaloLayerStyleTests.selecting("Title")
+        let open = HaloStyleMenuState(project: project, pasted: nil)
+        #expect(HaloStyleMenuState.spec("style.panel").availability(open) == .available)
+        #expect(HaloStyleMenuState.spec("style.paste").availability(open).why == HaloProject.nothingCopied)
+        #expect(HaloStyleMenuState.spec("style.panel").title == "Layer Style…")
+        #expect(HaloStyleMenuState.done.availability(noWindow) == .available, "Done always closes the panel")
+    }
 }

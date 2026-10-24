@@ -14,22 +14,17 @@ struct HaloStyleMenuItems: View {
 
     var ids: [String] { HaloProject.styleMenuIDs }
 
-    /// Nil when `id` can run now; else "<title>: <why>".
-    func help(_ id: String) -> String? {
-        let why = if let model, run != nil {
-            model.styleMenuHelp(id, pasted: LayerStylePasteboard.read())
-        } else {
-            HaloMenuState(project: nil).availability(id).why
-        }
-        return why.map { "\(HaloProject.styleMenuTitle(id)): \($0)" }
+    /// What the items read: the project while there is a window to send to, and the pasteboard's style.
+    var state: HaloStyleMenuState {
+        HaloStyleMenuState(project: run == nil ? nil : model, pasted: LayerStylePasteboard.read())
     }
+
+    /// Nil when `id` can run now; else "<title>: <why>".
+    func help(_ id: String) -> String? { state.why(id).map { "\(HaloProject.styleMenuTitle(id)): \($0)" } }
 
     var body: some View {
         ForEach(ids, id: \.self) { id in
-            let why = help(id)
-            MenuCommand(HaloProject.styleMenuTitle(id), help: why ?? HaloMenuState.spec(id).summary, isEnabled: why == nil) {
-                run?(id)
-            }
+            MenuCommand(HaloStyleMenuState.spec(id), on: state) { run?(id) }
         }
     }
 }
@@ -44,8 +39,8 @@ struct HaloStyleSheet: View {
             LayerStylePanel(
                 style: model.styleSelection, selected: model.stylePanel ?? .dropShadow, help: model.styleHelp,
                 onIntent: onIntent)
-            Button("Done") { onIntent(.show(nil)) }
-                .keyboardShortcut(.defaultAction)
+            MenuCommand(HaloStyleMenuState.done, on: HaloStyleMenuState(project: model, pasted: nil),
+                        shortcut: .defaultAction) { onIntent(.show(nil)) }
                 .accessibilityIdentifier("halo.style.done")
         }
         .padding(SuiteSpacing.m)
