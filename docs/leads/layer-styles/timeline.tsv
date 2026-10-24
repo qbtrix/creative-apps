@@ -66,3 +66,4 @@ utc	stage	event	ref	note
 2026-10-24T12:54Z	3	pr-opened	#5176	LS-5 open, fast-lane, Head 2a220ddf, mutate 4/4, no footer; LS-6/LS-7 stack on its merge
 2026-10-24T13:13Z	3	check	13:13Z	lane sweep 40094798603 (post-#5150) lists our PRs and rates them ready; 126 ready PRs wait while batch-20261024110214 bisects; no merges; 0 findings
 2026-10-24T13:36Z	3	check	13:36Z	no merges since 78983bc3; all 11 lead PRs open, clean, fast-lane, eligible in lane; 0 findings
+2026-10-24T13:59Z	3	check	13:59Z	no merges; lane still bisecting batch-20261024110214 (probe 3, since 11:02), 131 ready PRs queued incl all 11 of ours; 0 findings
