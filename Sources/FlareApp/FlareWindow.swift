@@ -40,7 +40,9 @@ struct FlareWindow: View {
     @State var exportTask: Task<Void, Never>? = nil
     /// The first file the last export wrote, for Reveal in Finder.
     @State var exportedFile: URL? = nil
-    let launch = FlareLaunch(arguments: ProcessInfo.processInfo.arguments)
+    /// The process's flags; a hosted-window test passes its own, so `-FlareExportTo` reaches the export and no
+    /// folder panel opens.
+    var launch = FlareLaunch(arguments: ProcessInfo.processInfo.arguments)
 
     #if DEBUG
     /// How many times a window's body ran; RenderBudgetFlareTests counts an interaction's.

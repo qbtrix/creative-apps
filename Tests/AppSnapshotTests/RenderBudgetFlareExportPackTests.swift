@@ -1,6 +1,7 @@
 // RenderBudgetFlareExportPackTests.swift: the export sheet's progress budget for MP4 and GIF (export-pack FV-5;
 // docs/blueprints/flare/features/export-pack.md, Quality tests) on the real window through the harness
 // (RenderBudgetHarness.swift). On `bounce` (48 frames) with the fakes and `-FlareExportTo` on a temp folder, it
+// passes the window the same launch as its model, so the run writes to the temp folder and no folder panel opens. It
 // presses the toolbar's Export…, picks the GIF chip and presses Export: the run counts the plan's 48 frames, so the
 // bar moves once per frame. `progressInOneBodyPerTick` gates the window bodies over the run at one per frame plus
 // the start and the finish. The sheet is found from `attachedSheet`'s accessibility tree and Export… is a toolbar
@@ -24,7 +25,7 @@ extension BodyCountSuites {
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
             defer { try? FileManager.default.removeItem(at: folder) }
             let launch = FlareLaunch(arguments: ["-FlareFixture", "bounce", "-FlareExportTo", folder.path])
-            let w = RenderBudgetWindow(FlareWindow(model: FlareWorkspace(launch: launch)))
+            let w = RenderBudgetWindow(FlareWindow(model: FlareWorkspace(launch: launch), launch: launch))
             defer { w.close() }
             w.window.styleMask.insert(.titled)
             w.window.contentView = nil
