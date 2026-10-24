@@ -1,7 +1,8 @@
 // Platform/CatalogStore.swift: CatalogStoring on the file system (persist
 // PE-4). `catalog.json` lives in the -LibraryCatalogDir folder when the app
-// was launched with one, else in Application Support/Library; the folder is
-// made on the first write. A write lands atomically (Foundation writes an
+// was launched with one, else in Library's folder under the suite root
+// (adopt-kernel-autosave AK-6); the folder is made on the first write, and an
+// earlier build's catalog moves in once before the first read. A write lands atomically (Foundation writes an
 // auxiliary file and renames it over the catalog), so a reader never sees a
 // partial file and nothing temporary is left beside it. `writeNow` is the
 // same write, synchronous, for the flush on quit. `setAside` renames a
@@ -9,6 +10,7 @@
 // FileManager only.
 import Foundation
 import LibraryModel
+import SuiteModel
 
 struct CatalogStore: CatalogStoring {
     static let fileName = "catalog.json"
@@ -16,24 +18,44 @@ struct CatalogStore: CatalogStoring {
 
     /// The folder `catalog.json` lives in.
     let folder: URL
+    /// True when the folder came from the launch, so an earlier build's
+    /// catalog may move into it; false for a folder a test names.
+    let fromLaunch: Bool
 
-    /// `directory` is the -LibraryCatalogDir path; nil means Application
-    /// Support/Library.
-    init(directory: String? = LibraryLaunch(arguments: ProcessInfo.processInfo.arguments).catalogDir) {
-        folder = directory.map { URL(fileURLWithPath: $0, isDirectory: true) } ?? Self.defaultFolder
+    /// `directory` is a folder a test names; nil means the launch's
+    /// (`LibrarySupport.catalogFolder`: -LibraryCatalogDir, else Library's
+    /// folder under the suite root).
+    init(directory: String? = nil) {
+        let path = directory ?? LibrarySupport.catalogFolder(arguments: ProcessInfo.processInfo.arguments, home: NSHomeDirectory())
+        folder = URL(fileURLWithPath: path, isDirectory: true)
+        fromLaunch = directory == nil
     }
 
-    /// Application Support/Library in the user's domain; the temporary folder
-    /// when the system has none to give.
+    /// Where an earlier build kept Library's files (Application Support/
+    /// Library). Collections still live here until their own move.
     static var defaultFolder: URL {
-        let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-        return (support ?? FileManager.default.temporaryDirectory).appendingPathComponent("Library", isDirectory: true)
+        URL(fileURLWithPath: SuiteLocations.legacyFolder("Library", home: NSHomeDirectory()), isDirectory: true)
     }
 
     var fileURL: URL { folder.appendingPathComponent(Self.fileName, isDirectory: false) }
     var setAsideURL: URL { folder.appendingPathComponent(Self.setAsideName, isDirectory: false) }
 
+    /// Moves an earlier build's catalog here once, before the first load, by
+    /// `LibrarySupport.legacyCatalogStep`: never over a catalog already here
+    /// (both are kept) and never deleting. A failed move leaves the old file.
+    func moveLegacyCatalog() {
+        guard fromLaunch else { return }
+        let manager = FileManager.default
+        let step = LibrarySupport.legacyCatalogStep(
+            arguments: ProcessInfo.processInfo.arguments, home: NSHomeDirectory(),
+            exists: { manager.fileExists(atPath: $0) })
+        guard case let .move(from, to) = step else { return }
+        try? manager.createDirectory(at: folder, withIntermediateDirectories: true)
+        try? manager.moveItem(atPath: from, toPath: to)
+    }
+
     func read() async throws -> Data? {
+        moveLegacyCatalog()
         guard FileManager.default.fileExists(atPath: fileURL.path) else { return nil }
         do {
             return try Data(contentsOf: fileURL)
