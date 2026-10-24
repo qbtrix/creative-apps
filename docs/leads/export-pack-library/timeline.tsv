@@ -50,3 +50,4 @@ time	event	task	note
 2026-10-24T10:24:51Z	heartbeat	no merges since #5117 (09:24Z); all PRs open+clean, lane batch in flight
 2026-10-24T10:46:06Z	heartbeat	dev moved to #4616; ours all open+clean on the lane; XP-3/XP-7 not merged
 2026-10-24T11:08:51Z	heartbeat	lane fix #5150 (lists every open PR, not newest 100) merged 10:55Z: our older PRs now visible to the lane; all open+clean
+2026-10-24T11:30:09Z	check	lane sweep sees only newest ~100 PRs (lowest #5005): #4838/#4899/#4960/#4962 invisible until main promotes past #5150 (lane runs scripts from main); stacked PRs wait on them. All open+clean
