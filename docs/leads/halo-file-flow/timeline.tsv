@@ -70,3 +70,4 @@ utc	stage	event	ref	note
 2026-10-24T01:30Z	3	stage	-	heartbeat: lane bisecting prior batch
 2026-10-24T01:54Z	3	stage	-	heartbeat: probe -9 Linux green, macOS running; slices wait for the next batch
 2026-10-24T02:15Z	3	stage	-	heartbeat: probe -9 macOS still running; slices queued
+2026-10-24T02:37Z	3	stage	-	heartbeat: probe -9 macOS red (culprit in #4836..#4864, not ours); slices queued
