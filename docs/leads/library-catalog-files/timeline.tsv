@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-24T03:05:07Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; lane bisect now on probe batch-20261023215139-7 (not ours); dev 654fb363 green
 2026-10-24T03:26:54Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; probe batch-20261023215139-7 Linux green, macOS gate running since 02:44Z (not ours); dev 654fb363 green
 2026-10-24T03:49:09Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; probe batch-20261023215139-7 green both gates, culprit is PR 8 or 9 of that batch (not ours); awaiting next lane sweep; dev 654fb363 green
+2026-10-24T04:11:01Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; lane probing batch-20261023215139-8 (last probe; not ours), Fast Lane 40060686633 running; dev 654fb363 green
