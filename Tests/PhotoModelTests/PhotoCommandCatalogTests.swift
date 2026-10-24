@@ -5,6 +5,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
+import SuiteImaging
 import SuiteKernel
 import Testing
 @testable import PhotoModel
@@ -79,7 +80,14 @@ struct PhotoCommandCatalogTests {
     }
     /// The kernel's transform.flip is titled "Flip" while its step names the axis ("Flip Horizontal"), as the
     /// transform packet asks. (Free Transform's commit and cancel refuse without a draft: the filter above drops them.)
-    static let tolerated = ["transform.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\""]
+    /// The kernel's retouch.spot-heal example heals at (20, 20), off the 16 x 12 fixture, so it changes no pixel and
+    /// records no step (fill-heal FH-7; PhotoRetouchKernelTests heals a spot on the image as one step).
+    static let tolerated = [
+        "retouch.spot-heal: stepNamedTitle: its undo step reads \"Delete\", not \"Spot Heal\"",
+        "retouch.spot-heal: editRecordsOneStep: it recorded 0 undo steps, not one",
+        "retouch.spot-heal: undoRestoresBytes: edit.undo after it leaves save() bytes unlike those before it",
+        "transform.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\"",
+    ]
 
     @Test func ledger() throws {
         let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../command-ids/photo.txt")
@@ -153,7 +161,10 @@ struct PhotoCommandCatalogTests {
             && !placeIDs.contains($0) && !$0.hasPrefix("history.") && !$0.hasPrefix("text.")
             && !$0.hasPrefix("layer.mask-") // masks-clipping PK-2 adds their Layer menu items.
             && !$0.hasPrefix("path.") && !$0.hasPrefix("paths.") // the Pen and its overlay run them (#5072); no menu yet.
+            && !retouchIDs.contains($0) // fill-heal FH-8 adds the palette's fill and heal tools.
     }
+    /// The fill and heal commands (fill-heal FH-7), which the palette's tools run, not a menu.
+    static let retouchIDs = Set(RetouchCommands.specs(PhotoWorkspace.self).map(\.id))
     /// The place commands (place-image PP-5): File > Place… runs place.image through PhotoPlace+Menu, not a catalog row.
     static let placeIDs = Set(PlaceCommands.specs(PhotoWorkspace.self).map(\.id))
     /// The shared file-flow commands (PF-3), which today's menus don't show yet.

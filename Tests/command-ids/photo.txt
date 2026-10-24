@@ -106,3 +106,7 @@ path.anchor-remove
 path.anchor-convert
 paths.list
 paths.edit
+fill.bucket
+retouch.spot-heal
+retouch.heal
+retouch.remove
