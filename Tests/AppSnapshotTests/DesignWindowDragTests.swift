@@ -62,6 +62,10 @@ extension BodyCountSuites {
 
         static let page = CGSize(width: 1440, height: 1024)
 
+        /// The control's samples per gesture. Without the box each sample re-lays out all 2,000 layers
+        /// (about 200 ms), so 120 samples took 20+ s a gesture; 12 still shows one run per sample.
+        static let controlSamples = 12
+
         @Test(.timeLimit(.minutes(3))) func aDragRunsTheEditorAtMostThreeTimes() async throws {
             #if DEBUG
             for gesture in Gesture.allCases {
@@ -80,9 +84,9 @@ extension BodyCountSuites {
             for gesture in Gesture.allCases {
                 let w = RenderBudgetWindow(DesignEditorWithoutBox(model: gesture.seed))
                 defer { w.close() }
-                let step = try await Self.dragSamples(gesture, in: w)
-                // About 120: one run per sample. Over 60 leaves room for a coalesced event.
-                #expect((step.bodies ?? 0) > 60, "without the box the \(gesture) ran the editor too few times: \(step)")
+                let step = try await Self.dragSamples(gesture, in: w, samples: Self.controlSamples)
+                // About `controlSamples`: one run per sample. Over half leaves room for a coalesced event.
+                #expect((step.bodies ?? 0) > Self.controlSamples / 2, "without the box the \(gesture) ran the editor too few times: \(step)")
             }
             #endif
         }
