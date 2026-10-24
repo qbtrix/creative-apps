@@ -90,7 +90,8 @@
 # that conflicts with an earlier PR in the batch waits for the next sweep. A
 # red base (the chain before any PR) means BASE_BRANCH itself is red. On Linux
 # that is judged by job: when the base is red on every job the tip is red on,
-# the batch lands on the PRs' own proof, as before batches, so a fix can get
+# a batch (one formed before the dev-red issue opened; none forms while it is
+# open, below) lands on the PRs' own proof, as before batches, so a fix can get
 # through; a job red only with the batch is still bisected, with the base's red
 # jobs set aside (BATCH_IGNORE). macOS is set aside that way only when the tip
 # passes it. When the tip fails macOS too, it goes by failing test instead
@@ -111,6 +112,14 @@
 # (budget_failure), the test can flip at random, so each probe runs up to 3
 # times and is called on 2 of 3, at most MAX_BISECT_BUDGET runs per red, and a
 # value within BUDGET_NEAR of its budget posts the culprit as "likely".
+# While that issue is open (BASE_RED) no new batch forms and ready PRs wait:
+# every probe of a batch on a red base is red, so its bisect only burns runs
+# and can blame an innocent PR. A batch already in flight whose base holds the
+# issue's red sha gets a `lane/batch-<id>-red` marker branch; once the issue
+# is closed and BASE_BRANCH has moved past that base, a marked batch is
+# dropped with its probes (no label, no comment: its PRs were not at fault) and
+# the same sweep forms a fresh one. A batch whose base predates the red commit
+# is never marked, so it can't be dropped this way.
 # `--bisect <good>..<bad> <issue> [<branch>]` runs one such bisect by hand.
 #
 # A lead's PR (a `Feature:` body line) never closes a `feature-lead` issue
@@ -290,6 +299,8 @@ BATCH_WAIT="${FAST_LANE_BATCH_WAIT:-420}"
 BATCH_POLL="${FAST_LANE_BATCH_POLL:-60}"
 READY=()   # eligible PRs this pass, n|head|branch|proof (settle_ready lands or batches them)
 HOLD=0     # a batch is in flight: eligible PRs wait for the next sweep
+BASE_RED=""      # the open dev-red issue for a red Linux job (red_sweep): no new batch forms
+BASE_RED_SHA=""  # its culprit range's red sha: a batch whose base holds it gets a <batch>-red marker
 SCRATCH="" # the run's scratch clone of REMOTE (scratch)
 # Culprit by bisect on a red BASE_BRANCH (red_sweep, red_bisect).
 RED_LABEL="dev-red"
@@ -1072,6 +1083,7 @@ settle_ready() {
   READY=()
   (( ${#items[@]} )) || return 0
   if (( HOLD )); then log "a batch is in flight: ${#items[@]} ready PR(s) wait for the next sweep"; return 0; fi
+  if [[ -n "$BASE_RED" ]]; then log "$BASE_BRANCH is red on Linux (dev-red #$BASE_RED): no batch forms; ${#items[@]} ready PR(s) wait"; return 0; fi
   if (( ! LANE_MAC_PER_PR )); then
     for it in "${items[@]}"; do IFS='|' read -r _ _ _ _ apps _ <<<"$it"; [[ -z "$apps" ]] || need=1; done
   fi
@@ -1163,6 +1175,20 @@ batch_resume() {
   k=${#chain[@]}
   if (( k == 0 )); then log "batch $br: nothing left to land; dropping it"; batch_drop "$br"; BATCH_STATE=done; return; fi
   chain=("$(git -C "$d" rev-parse "origin/$br~$k")||" "${chain[@]}")  # [0] = the base
+  # A base holding dev's red commit gets a <batch>-red marker while dev is red;
+  # once dev is green on a newer commit, a marked batch can't pass and is
+  # dropped (its PRs untouched) so this sweep forms a fresh one.
+  if (( ! DRY_RUN )); then
+    if [[ -n "$BASE_RED_SHA" ]] && git -C "$d" merge-base --is-ancestor "$BASE_RED_SHA" "${chain[0]%%|*}" 2>/dev/null; then
+      batch_branches | grep -qE " ${br//./\\.}-red\$" \
+        || git -C "$d" push -q origin "${chain[0]%%|*}:refs/heads/$br-red" 2>/dev/null \
+        || log "batch $br: could not mark its red base"
+    elif [[ -z "$BASE_RED" && "${chain[0]%%|*}" != "$(git -C "$d" rev-parse "origin/$BASE_BRANCH")" ]] \
+        && batch_branches | grep -qE " ${br//./\\.}-red\$"; then
+      log "batch $br: formed on a red $BASE_BRANCH that is green again; dropping it, its PRs batch again"
+      batch_drop "$br"; BATCH_STATE=done; return
+    fi
+  fi
   BATCH_APPS=$(batch_apps "${chain[0]%%|*}" "${chain[k]%%|*}")
   on="Linux${BATCH_APPS:+ and macOS}"
   log "batch $br: $k PR(s), checked on Linux${BATCH_APPS:+ and macOS ($BATCH_APPS)}"
@@ -1399,6 +1425,7 @@ red_sweep() {
   [[ -n "${issue:-}" ]] || return 0
   grep -qiE '^- Failing jobs:.*linux' <<<"$body" || { log "dev-red #$issue: not a Linux red; nothing to bisect"; return 0; }
   bad=$(grep -oE '^- Culprit range: `main\.\.[0-9a-f]{40}`' <<<"$body" | grep -oE '[0-9a-f]{40}' | head -1 || true)
+  BASE_RED="$issue"; BASE_RED_SHA="$bad"
   pin=$(git ls-remote --heads "$REMOTE" "refs/heads/${BISECT_PREFIX}*" 2>/dev/null | sed -E 's:.*refs/heads/'"$BISECT_PREFIX"'([0-9a-f]+)-[0-9]+$:\1:' | sort -u | head -1 || true)
   [[ -z "$pin" ]] || bad="$pin"
   [[ -n "$bad" ]] || { log "dev-red #$issue: no culprit range in the body"; return 0; }
