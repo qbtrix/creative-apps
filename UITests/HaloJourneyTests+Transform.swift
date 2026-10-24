@@ -7,7 +7,9 @@
 // in the inspector), and at 1 s, with Rotation animated, a Shift-drag of the
 // knob turns it in 15° steps and keys 1 s; Undo takes the turn back in one
 // step. It runs on the live Model (HT-7): HT-3's drags commit through HT-5's
-// adapter. Shots: `halo-transform-*`.
+// adapter. Numbers come from the TRANSFORM rows (sliders XCUITest reads as a
+// number or "15°"), not the knob's value, which XCUITest reads as empty
+// (#262, #4692). Shots: `halo-transform-*`.
 import XCTest
 
 extension HaloJourneyTests {
@@ -30,17 +32,17 @@ extension HaloJourneyTests {
 
         // 2. Shift-drag the bottom-right corner out: Scale X and Y read the same.
         shiftDrag(halo.element("suite.handles.bottomRight"), by: CGVector(dx: 40, dy: 10))
-        let scaleX = halo.element("halo.inspector.row.scaleX"), scaleY = halo.element("halo.inspector.row.scaleY")
-        XCTAssert(scaleX.waitForExistence(timeout: 5), "no Scale X row")
-        XCTAssertEqual(scaleX.value as? String, scaleY.value as? String, "Scale X and Y differ after a Shift-drag")
+        let steps = ViewerDragSteps(halo: halo)
+        let (scaleX, scaleY) = (steps.pixels("scaleX"), steps.pixels("scaleY"))
+        XCTAssertEqual(scaleX, scaleY, "Scale X and Y differ after a Shift-drag")
         halo.shot("transform-scaled")
 
         // 3. At 1 s with Rotation animated, Shift-drag the knob: a key at 1 s.
         halo.element("halo.inspector.key.rotation").click()
         for _ in 0..<24 { halo.press(.rightArrow) }
         shiftDrag(halo.element("suite.handles.turn"), by: CGVector(dx: 60, dy: 30))
-        let knob = halo.element("suite.handles.turn")
-        let turn = (knob.value as? String).flatMap { Double($0.prefix { $0.isNumber || $0 == "-" }) } ?? .nan
+        let turn = steps.pixels("rotation")
+        XCTAssertNotEqual(turn, 0, "the Shift-drag of the knob didn't turn Ball")
         XCTAssertEqual(turn.truncatingRemainder(dividingBy: 15), 0, accuracy: 0.01, "the turn isn't a 15° step: \(turn)")
         let key = halo.app.descendants(matching: .any).matching(
             NSPredicate(format: "label == %@", "Animate Rotation")).firstMatch
@@ -49,7 +51,7 @@ extension HaloJourneyTests {
 
         // 4. Undo: the turn goes in one step.
         halo.press(character: "z", .command)
-        XCTAssertEqual(knob.value as? String, "0 degrees", "Undo didn't take the turn back in one step")
+        XCTAssertEqual(steps.pixels("rotation"), 0, "Undo didn't take the turn back in one step")
         halo.shot("transform-undone")
     }
 
