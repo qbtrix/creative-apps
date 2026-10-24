@@ -92,3 +92,4 @@ utc	stage	event	ref	note
 2026-10-24T03:06Z	-	heartbeat	-	9 PRs open clean; #4864 Head 2bd18bb86 gate PASS, stacks #5002 6f071d1c #5011 b5011388 merged base, gating; 32 findings open, z held
 2026-10-24T03:28Z	-	heartbeat	-	9 PRs open; #4864 Linux green on 2bd18bb86, lane run in progress; no slice merged yet; 32 findings open, z held
 2026-10-24T03:50Z	-	heartbeat	-	9 PRs open clean, no needs-fix; lane bisect probe -7 green, -9 red (#4864 old head, fixed on 2bd18bb86); 32 findings, z held
+2026-10-24T04:13Z	-	heartbeat	-	9 PRs open clean; lane probe -8 running (Linux + macOS); 32 findings, z held
