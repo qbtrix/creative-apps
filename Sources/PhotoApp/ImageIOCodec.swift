@@ -1,5 +1,5 @@
 // ImageIOCodec.swift: PhotoModel's PhotoImageCodec on ImageIO. Decoding reads
-// any image ImageIO knows (PNG, JPEG, HEIC, ...), applies its orientation, and
+// any image ImageIO knows (PNG, JPEG, HEIC, ...; `decodableTypes`, which bound Photo's Open panel), applies its orientation, and
 // shrinks it to `longestSide` when asked. It draws into an 8-bit sRGB
 // context, which only holds premultiplied alpha, then unpremultiplies with
 // Accelerate, because the model takes straight alpha. Encoding writes PNG
@@ -22,6 +22,14 @@ struct ImageIOCodec: PhotoImageCodec {
             case .unwritable: "The image couldn't be written."
             }
         }
+    }
+
+    /// The content types ImageIO decodes on this Mac: what `decode` can read.
+    static let decodableTypes: [UTType] = ((CGImageSourceCopyTypeIdentifiers() as? [String]) ?? []).compactMap(UTType.init)
+
+    /// The types of `types` this codec decodes: each conforms to a type ImageIO reads.
+    static func decodable(_ types: [UTType]) -> [UTType] {
+        types.filter { type in decodableTypes.contains { type.conforms(to: $0) } }
     }
 
     /// The pixel size ImageIO reports for the file's first image.

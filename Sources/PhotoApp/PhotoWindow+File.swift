@@ -164,6 +164,9 @@ extension PhotoWindow {
     /// none); empty only if the system refuses the extension.
     static let documentTypes: [UTType] = UTType(filenameExtension: "ora", conformingTo: .data).map { [$0] } ?? []
 
+    /// What Open offers: the document, then the registry's Photo image types that ImageIOCodec decodes.
+    static let openTypes: [UTType] = documentTypes + ImageIOCodec.decodable(SuiteFilePanels.openTypes(for: .photo))
+
     func performFile(_ intent: FileIntent) {
         switch intent {
         case .saveDocument:
@@ -213,8 +216,7 @@ extension PhotoWindow {
     }
 
     func chooseFile() {
-        // Every type the registry says Photo opens: its document and each SuiteImageFormats format.
-        guard let url = SuiteFilePanels.chooseFile(types: SuiteFilePanels.openTypes(for: .photo)) else { return }
+        guard let url = SuiteFilePanels.chooseFile(types: Self.openTypes) else { return }
         open(url)
     }
 
