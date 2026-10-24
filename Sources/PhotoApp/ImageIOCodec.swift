@@ -40,7 +40,9 @@ struct ImageIOCodec: PhotoImageCodec {
     func encode(_ image: DecodedImage, as format: ImageFormat, quality: Double) throws -> Data {
         do {
             let buffer = try PixelBuffer(rgba8: image.rgba8, width: image.width, height: image.height)
-            return try SuiteImageIO.encode(buffer, as: format == .png ? .png : .jpeg(quality: quality))
+            // One branch per format, not a ternary: two formats on one line are a list (FormatListRatchetTests).
+            if format == .png { return try SuiteImageIO.encode(buffer, as: .png) }
+            return try SuiteImageIO.encode(buffer, as: .jpeg(quality: quality))
         } catch {
             throw Failure.unwritable
         }
