@@ -1294,7 +1294,7 @@ batch_culprit() {
   for (( i = 1; i <= lo; i++ )); do IFS='|' read -r _ pn _ <<<"${chain[i]}"; after+="${after:+, }#$pn"; done
   # Stacked dependents (a lead's next slice is based on this branch) wait with it.
   hbr=$(gh pr view "$n" -R "$REPO" --json headRefName --jq .headRefName 2>/dev/null || true)
-  [[ -z "$hbr" ]] || deps=$(gh pr list -R "$REPO" --state open --limit 100 --json number,baseRefName 2>/dev/null \
+  [[ -z "$hbr" ]] || deps=$(gh pr list -R "$REPO" --state open --limit 1000 --json number,baseRefName 2>/dev/null \
     | jq -r --arg b "$hbr" '[.[] | select(.baseRefName == $b) | "#\(.number)"] | join(", ")' 2>/dev/null || true)
   log "batch $br: PR #$n at $head is the culprit ($job: $url${mode:+, $mode}${deps:+; stacked on it: $deps})"
   write gh label create "$NEEDS_FIX_LABEL" -R "$REPO" --color d93f0b --force \
@@ -1847,7 +1847,7 @@ merges_since_ci() {
 
 # Every open PR, one call: the sweep's labelled PRs and the Belt leads to label both come from it.
 open_list() {
-  gh pr list -R "$REPO" --state open --limit 100 --json number,labels,author,baseRefName,body
+  gh pr list -R "$REPO" --state open --limit 1000 --json number,labels,author,baseRefName,body
 }
 
 # lane_prs <open_list json>: open fast-lane PRs on any base, oldest first (decide retargets main and skips the rest).
