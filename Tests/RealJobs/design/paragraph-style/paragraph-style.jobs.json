@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "app": "design",
+  "why": "RJ-D50, pending DX-7: Design's headless export writes SVG only until DX-7 rasterizes PNG live. Selects the 300 pt fixed-width Paragraph in the Card frame and sets it justified, line height 1.5, letter spacing 20 and italic, each one text.* step, then exports the frame as PNG: its 380 x 200 pixels have the wrapped lines' ink reaching both edges of the box (a justified line spans 40...340 within 2 px), the second baseline 1.5 x (ascent + descent) below the first, and the last line flush left. DesignTextLayoutTests checks the layout's maths on Linux.",
+  "pending": "DX-7",
+  "inputs": ["input/*.design"],
+  "steps": [
+    {"id": "edit.select", "params": {"ids": ["node-2"]}},
+    {"id": "text.set-alignment", "params": {"alignment": "justified"}},
+    {"id": "text.set-line-height", "params": {"value": 1.5}},
+    {"id": "text.set-tracking", "params": {"value": 20}},
+    {"id": "text.set-italic", "params": {"on": true}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}", "format": "png", "options": {}},
+  "expect": {
+    "out/paragraph.png": {"pixels": {"tolerance": 2, "size": [380, 200], "at": {"x": 2, "y": 2, "rgb": [255, 255, 255]}}}
+  },
+  "platforms": []
+}
