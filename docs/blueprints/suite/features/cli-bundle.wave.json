@@ -2,7 +2,7 @@
   "title": "The afterglow CLI ships inside AfterGlow.app, and Help > Connect an AI Assistant shows and copies the MCP command for it, with an Install Command-Line Tool that asks first",
   "wave": "BG1",
   "order": 30,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "beta gaps 2026-10-21 suite must-have 2 (suite audit row 6, under-specified 7); real job RJ-X62 (new)",
