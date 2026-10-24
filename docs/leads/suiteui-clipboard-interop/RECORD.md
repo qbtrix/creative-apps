@@ -1,10 +1,10 @@
 # clipboard-interop lead record
 
 Issue: #4512 (was #3753) · Packet: docs/blueprints/suiteui/features/clipboard-interop.md
-Run: act-1a1695ebfeb-d54n · Session: claude/feature-lead-playbook-9a8kbw · Started: 2026-10-23T15:30Z
+Run: act-1a16cdcb4a5-trd4 · Session: claude/feature-lead-playbook-9a8kbw · Started: 2026-10-23T15:30Z
 Stage: 3 wave 1
-Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (origin/dev)
-Next: CB-6 #4904, CB-8 #4902, CB-10 #4905 to merge, then critics on scoped design/flare/halo runs; CB-13 waits SC-photo, CB-12 waits ST-a
+Base: 1bbaba6c1e4b460f13b959e69183c50208b14a8a (origin/dev)
+Next: CB-6 #4904, CB-8 #4902, CB-10 #4905 to merge; build CB-12 on ST-a (merged #4840); CB-13 waits shared-codecs SC-f (not merged)
 
 
 
