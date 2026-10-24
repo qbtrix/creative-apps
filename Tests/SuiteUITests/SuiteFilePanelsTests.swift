@@ -95,13 +95,9 @@ import UniformTypeIdentifiers
 
     /// Files that still build their own panel; shrink only, as each app moves onto SuiteFilePanels.
     static let unmoved: Set<String> = [
-        "Sources/DesignApp/DesignExport+Kernel.swift",
-        "Sources/DesignApp/DesignWindow.swift",
         "Sources/HaloApp/HaloWindow+Render.swift",
         "Sources/LibraryApp/LibraryWindow+Export.swift",
         "Sources/LibraryApp/LibraryWindow+Import.swift",
-        "Sources/PhotoApp/PhotoWindow+Export.swift",
-        "Sources/PhotoApp/PhotoWindow+File.swift",
     ]
 
     @Test func noOtherFileBuildsAPanel() throws {
