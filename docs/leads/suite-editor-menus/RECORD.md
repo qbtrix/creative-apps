@@ -96,3 +96,4 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-24T21:45:03Z: batch-20261024205137 still bisecting; #4988 queued.
 - 2026-10-24T22:03:32Z: batch-20261024205137 still bisecting; #4988 queued.
 - 2026-10-24T22:22:08Z: batch-20261024205137 probes -3 and -6: Linux green, macOS gates running since 21:17Z. #4988 queued.
+- 2026-10-24T22:36:44Z: GitHub REST API answered 503 on this check; git works. batch-20261024205137 probes still up; #4988 queued.
