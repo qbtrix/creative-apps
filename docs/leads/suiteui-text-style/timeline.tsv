@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-23T21:12:41Z	heartbeat	queued behind lane batch 20261023204921 (#4841-#4862, Linux green, macOS running); ours not in it; no needs-fix, no dev-red
 2026-10-23T21:35:13Z	heartbeat	still queued: batch 20261023204921 macOS gate running; no needs-fix, no dev-red
 2026-10-24T05:34:44Z	resume	run act-1a16c618fe7-h4fd: TS-a #4871 queued, TS-u #4958 stacked; wave 3 = TS-7
+2026-10-24T05:37:21Z	wave	wave 1 launched: TS-7 (Wire: brush-keys:BK-design)
