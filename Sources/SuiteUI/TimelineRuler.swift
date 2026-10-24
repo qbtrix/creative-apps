@@ -26,6 +26,7 @@ struct TimelineRuler: View {
     var rate: FrameRate? = nil
     let onScrub: @MainActor (Int) -> Void
     @Environment(\.suiteSnapshotRendering) private var snapshot
+    @Environment(\.timelineFadeMark) private var probe
     @State private var sender = TimelineScrubSender()
 
     #if DEBUG
@@ -47,7 +48,7 @@ struct TimelineRuler: View {
         .contentShape(Rectangle())
         .gesture(DragGesture(minimumDistance: 0).onChanged { drag in
             let frame = mapping.frame(atX: Double(drag.location.x - timelineInset) + scrollX)
-            sender.send(frame, from: playhead, to: onScrub)
+            if sender.send(frame, from: playhead, to: onScrub) { probe?.report(TimelineFadeMark.scrubSeries) }
         }.onEnded { _ in sender.end() })
         .accessibilityElement()
         .accessibilityLabel("Frame Ruler")
