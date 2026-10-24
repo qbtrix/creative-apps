@@ -1,6 +1,6 @@
 // DesignCanvasKeys.swift: what a key pressed on the canvas does (#2706). Arrows
-// nudge the selection (Shift: ten points), Delete removes it, Escape deselects and
-// Return edits a selected text node; nil leaves the key to the system (the canvas
+// nudge the selection (Shift: ten points), Delete removes it, Escape steps out of an
+// entered group or deselects, and Return enters a picked group or edits a selected text node; nil leaves the key to the system (the canvas
 // then pans on an arrow). "The selection" is every selected layer: with several,
 // nudge and delete go through `run` (DesignCanvasEditing). Command, Option or
 // Control held leaves every key to the menus. The keyboard's own flags never stop
@@ -38,6 +38,8 @@ public enum DesignCanvasKeyAction: Hashable, Sendable {
     case nudge(DesignDirection, shift: Bool)
     case deleteSelection, deselect
     case editText(String)
+    /// Return on a picked group, Escape inside one (DesignGroupPick+Kernel).
+    case enterGroup, exitGroup
 }
 
 extension DesignWorkspace {
@@ -50,8 +52,9 @@ extension DesignWorkspace {
         switch key {
         case .arrow(let direction): return hasSelection ? .nudge(direction, shift: modifiers.contains(.shift)) : nil
         case .delete: return hasSelection ? .deleteSelection : nil
-        case .escape: return .deselect
+        case .escape: return escapeAction
         case .enter:
+            if canEnterGroup { return .enterGroup }
             guard let node = selectedNode, node.kind == .text else { return nil }
             return .editText(node.id)
         }

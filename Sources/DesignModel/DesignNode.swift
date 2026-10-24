@@ -243,7 +243,10 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
     public var textStyle: DesignTextStyle
     /// The kernel's gradient fill, its points in the node's unit box (0...1 across its frame), so a
     /// resize never touches it; nil paints `fill` (solid). Written only when set (gradient-fill DG-1).
-    public var gradient: Fill?
+    public var gradient: Fill? {
+        get { extras.value.gradient }
+        set { extras.value.gradient = newValue }
+    }
     /// The turn, clockwise degrees about the frame's centre, (-180, 180]; `frame` stays the unturned box,
     /// so snapping, resize and the layer list never see it. Written only when not 0 (transform DT-1).
     public var rotation: Double = 0
@@ -251,7 +254,12 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
     public var flipX = false, flipY = false
     /// A shape node's polygon, star, line or arrow, drawn in `frame` by ShapeRules; nil for every other
     /// kind. Written only when set (shape-tools DS-1).
-    public var shape: ShapeSpec?
+    public var shape: ShapeSpec? {
+        get { extras.value.shape }
+        set { extras.value.shape = newValue }
+    }
+    /// The gradient and shape spec, on the heap so a node stays small on a thread's stack (DesignNodeExtras).
+    private var extras = DesignNodeExtrasBox()
 
     public init(
         id: String, name: String, kind: DesignNodeKind, frame: DesignRect,
@@ -263,7 +271,8 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         (self.id, self.name, self.kind, self.frame) = (id, name, kind, frame)
         (self.children, self.isHidden, self.isLocked) = (children, isHidden, isLocked)
         (self.fill, self.text, self.cornerRadius) = (fill ?? kind.defaultFill, text, cornerRadius)
-        (self.opacity, self.stroke, self.textStyle, self.gradient) = (opacity, stroke, textStyle, gradient)
+        (self.opacity, self.stroke, self.textStyle) = (opacity, stroke, textStyle)
+        if gradient != nil { self.gradient = gradient }  // a plain node keeps the shared empty box
     }
 
     /// `node` with every field kept and the id replaced (duplicate, paste). A field added to
@@ -273,10 +282,9 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
             id: id, name: node.name, kind: node.kind, frame: node.frame, children: node.children,
             isHidden: node.isHidden, isLocked: node.isLocked, fill: node.fill, text: node.text,
             cornerRadius: node.cornerRadius, opacity: node.opacity, stroke: node.stroke, textStyle: node.textStyle)
-        gradient = node.gradient
+        extras = node.extras
         rotation = node.rotation
         (flipX, flipY) = (node.flipX, node.flipY)
-        shape = node.shape
     }
 
     /// Decodes a node; a field a file written before it existed lacks takes its default: square
@@ -297,7 +305,7 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         rotation = try container.decodeIfPresent(Double.self, forKey: .rotation) ?? 0
         flipX = try container.decodeIfPresent(Bool.self, forKey: .flipX) ?? false
         flipY = try container.decodeIfPresent(Bool.self, forKey: .flipY) ?? false
-        shape = try container.decodeIfPresent(ShapeSpec.self, forKey: .shape)
+        if let shape = try container.decodeIfPresent(ShapeSpec.self, forKey: .shape) { self.shape = shape }
     }
 
     /// The stroke as saved now (the kernel's), else as a file written before stroke-style saved it: a colour in

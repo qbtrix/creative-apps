@@ -58,7 +58,7 @@
   {
     "label": "a copy drops the gradient",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "        gradient = node.gradient",
+    "find": "        extras = node.extras",
     "replace": "",
     "tests": "DesignGradientTests.swift"
   },
