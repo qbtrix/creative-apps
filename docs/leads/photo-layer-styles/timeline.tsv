@@ -75,3 +75,4 @@ utc	stage	event	ref	note
 2026-10-24T15:21:07Z	W2	fix	PY-1	#5177 dev merge 11905cabb pushed; scripts/ci --changed PASS; Head moved
 2026-10-24T15:22:25Z	W2	check	PY-1	#5177 head 11905cabb mergeable clean, needs-rebase awaiting lane sweep; #5174/#5176 open
 2026-10-24T15:44:57Z	W2	fix	PY-1	#5177 needs-rebase dropped by lane; footer added by the REST edit stripped from body (ends on Head 11905cabb); #5174/#5176 open
+2026-10-24T16:08:44Z	W2	check	PY-1	#5177 queued in lane (head 11905cabb, clean); #5174 now needs-rebase (other lead), #5176 open; dev 33cd6e97c
