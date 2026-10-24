@@ -6,7 +6,9 @@
 // changing a path is one undo step that keeps the whole list (`PhotoEdit.paths`);
 // a drag's edits fold under its token. Which path shows its points, the draft
 // and the picked anchors are view state, outside History, and a new or opened
-// image resets them. Linux-safe.
+// image resets them. The catalog runs the shared `path.*` specs plus
+// `paths.list` and `paths.edit`; `runPath` sends the overlay's intents through
+// it. Linux-safe.
 import SuiteKernel
 
 /// One path in the document's path list, in canvas pixels.
@@ -107,5 +109,37 @@ extension PhotoWorkspace: PathEditTarget {
     mutating func loadPaths(_ list: [PhotoPath]) {
         let numbers = list.compactMap { $0.id.hasPrefix("path-") ? Int($0.id.dropFirst(5)) : nil }
         pathState = PhotoPathState(paths: list, nextNumber: (numbers.max() ?? 0) + 1)
+    }
+}
+
+extension PhotoWorkspace {
+    struct PathPickParams: Codable, Sendable { var id: String? }
+
+    /// The twelve shared path commands, then Photo's two for its path list: read it, and pick the path in edit.
+    static let pathCommands: [CommandSpec<PhotoWorkspace>] = PathCommands.specs(PhotoWorkspace.self) + [
+        .typed("paths.list", title: "List Paths", summary: "Lists the document's paths, each with its id and name.", kind: .query,
+               params: NoParams.self, schema: .none, example: .object([:]), availability: gate { $0.pathHelp }) { w, _ in
+            JSONValue.object(["paths": .array(w.paths.map { JSONValue.object(["id": .string($0.id), "name": .string($0.name)]) })])
+        },
+        .typed("paths.edit", title: "Edit Path Points", summary: "Shows the points of the path with this id for editing; no id hides them.",
+               kind: .view, params: PathPickParams.self,
+               schema: .object(["id": .optional(.string("A path id from paths.list.", maxLength: 64))], required: ["id"]),
+               example: .object([:]), availability: gate { $0.pathHelp }) { w, p in
+            guard p.id == nil || w.paths.contains(where: { $0.id == p.id }) else {
+                throw CatalogError.unavailable(id: "paths.edit", why: "There is no path \(p.id ?? "").")
+            }
+            w.editPath(p.id)
+            return JSONValue.object([:])
+        },
+    ]
+
+    /// Runs one Pen or point-editor gesture as its command in the catalog; a refusal goes to the status line.
+    public mutating func runPath(_ intent: PathIntent) {
+        let command = intent.command
+        do {
+            _ = try Self.catalog.run(command.id, params: command.params, on: &self)
+        } catch {
+            if case .unavailable(_, let why) = error { statusMessage = why } else { statusMessage = error.description }
+        }
     }
 }
