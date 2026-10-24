@@ -26,6 +26,8 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 2026-10-24T10:56Z: hb8: #5088/#5089/#5091 unchanged since 08:02Z (fast-lane only, unmerged, no needs-* label); no supervisor answer; UP-z still waits on the app slices + shared-codecs:SC-z. Keep polling.
+
 - 2026-10-24T10:35Z: hb7: #5088/#5089/#5091 still open (fast-lane only, no needs-* label, unmerged); no supervisor answer to the 08:59Z Question; UP-z still waits on the app slices + shared-codecs:SC-z. Keep polling.
 
 - 2026-10-24T10:13Z: hb6: unchanged. No supervisor answer; #5088/#5089/#5091 open in lane, no needs-*; UP-z on SC-z.
