@@ -240,8 +240,10 @@ Nothing goes below 10 pt.
 
 **Motion.** Hover and state changes fade background, color and border over
 0.14 s, ease in and out (`SuiteMotion.state`). Under Reduce Motion they
-change at once. No other chrome animates; the artwork is the only thing that
-moves.
+change at once. The one other chrome motion is feedback: a refused rename's
+field shakes once, side to side, and stays still under Reduce Motion
+(`SuiteMotion.shakeOffset`, #3462). Otherwise the artwork is the only thing
+that moves.
 
 ### State colors
 
