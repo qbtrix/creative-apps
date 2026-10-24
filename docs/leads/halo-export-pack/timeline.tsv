@@ -86,3 +86,4 @@ utc	stage	event	ref	note
 2026-10-24T07:02Z	4	stage	-	heartbeat: lane bisect probes -3/-1 macOS running
 2026-10-24T07:32Z	4	stage	-	takeover by act-1a16cd045be-qv3g; HX-u #4858, HX-3 #4874, HX-4 #4917, HX-7 #4942 in lane; folding HX-8 into #4942
 2026-10-24T07:37Z	5	wave	-	HX-8 (halo.md Render, built) committed on lead/halo-export-pack-HX-z; gate running
+2026-10-24T07:53Z	5	ship	HX-z	HX-8 pushed to #4942 (feature-done), head 49b95d64, CI: PASS
