@@ -5,7 +5,7 @@ Run: act-1a16c627cc6-nlss · Session: claude/layer-styles-lead-vx2vrg · Started
 Wire: suiteui layer-styles:LS-a
 Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTests.glowReachesItsKeyedSize and glowIsNotClipped; add the no-padding mutation, origin dropped in LiveFrameRendering's styled composite)
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
-Stage: wave 3 (HY-6 built at 073ed78a9 on lead/halo-layer-styles-HY-m, ahead of LS-8 on the StyleProgram stub; Mutate 10/10 HaloModel.LiveFrameRendering; gate CI running. HY-u pushed at 60549a3ba, gate PASS. PRs open in stack order HY-1 (after #4911), HY-2 (after LS-2), HY-m, HY-u)
+Stage: wave 3 (HY-6 built at 073ed78a9 on lead/halo-layer-styles-HY-m, ahead of LS-8 on the StyleProgram stub; Mutate 10/10 HaloModel.LiveFrameRendering; gate CI: PASS at 073ed78a9, pushed. HY-u pushed at 60549a3ba, gate PASS. PRs open in stack order HY-1 (after #4911), HY-2 (after LS-2), HY-m, HY-u)
 Base: a41e7f1 (origin/dev)
 Next: open the HY-a PR (HY-1, e52c9ca) once #4911 is on dev, then the HY-m PR (HY-5 + HY-6) once HY-a lands, then HY-u; HY-2 waits on LS-2; HY-7 can be built ahead on the StyleRoute stub
 
@@ -14,7 +14,7 @@ Next: open the HY-a PR (HY-1, e52c9ca) once #4911 is on dev, then the HY-m PR (H
 |---|---|---|---|---|---|---|---|---|---|
 | HY-a | `HaloLayer.style`, five style properties, `style.*` in the catalog on stubs, Layer > Layer Style… opens the panel | HY-1, HY-2 | MJ-HY | suiteui LS-a (#4911 open; stacked on it) | yes | 0 | building | – | – |
 | HY-u | inspector style rows with stopwatches, snapshots, render budget, journey written | HY-3, HY-4 | HJ-Y1 | HY-a | yes | 0 | waiting | – | – |
-| HY-m | style commands one undo step, five properties key and ease, frame renderer draws keyed styles | HY-5, HY-6 | MJ-HY | HY-a; LS-m | no | 0 | built, gate running | – | – |
+| HY-m | style commands one undo step, five properties key and ease, frame renderer draws keyed styles | HY-5, HY-6 | MJ-HY | HY-a; LS-m | no | 0 | built, gate PASS | – | – |
 | HY-z | viewer draws through the live route, journey on live, halo.md built | HY-7, HY-8 | HJ-Y1 | HY-u, HY-m; LS-gpu (HY-7); file-flow:HF-z (HY-8) | yes | 0 | waiting | – | – |
 
 ## Tasks
