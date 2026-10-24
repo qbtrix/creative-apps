@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: IM-11a is #5154 (stacked on #5153 on #4886). Building IM-11b: the loupe draws the GPU frame through LiveToneSurface into the CanvasHost resident texture when the shared View > Rendering choice isn't CPU. Supervisor question 6383016723 (IM-8b) is open. IM-8d and IM-12 wait on EP-z (#3723); IM-13 waits on ST-a.
+Next: IM-11b catalog half committed (LoupeGPUFrame lands via showLoupeFrame, loupeSteps); writing the app half (loupe presenter writes the frame through LiveToneSurface into the CanvasHost texture) and the latency test. LibraryCatalog-based Model tests crash (signal 11) on Linux at the dev merge base too; clean rebuild running to rule out stale state. Supervisor question 6383016723 (IM-8b) open. IM-8d and IM-12 wait on EP-z (#3723); IM-13 waits on ST-a.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
 
