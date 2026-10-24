@@ -49,6 +49,7 @@ Next: watch #5050 (LG-5 + LG-8, feature-done) merge in the next lane batch and t
 - 19:21Z: #5114 landed 19:18Z (supervisor). #5050's batch-20261024183708 red on macOS: DesignApp/DesignCommands.swift compile errors (LiveFront<DesignHeadless>), not from #5050 (Library only); lane bisecting (batch-...-6). #5050 waits.
 - 19:21Z: poll: bisect probe batch-20261024183708-6 running; #5050 open, no label.
 - 19:41Z: poll: probe -6 Linux green, macOS gate running; #5050 open, no label.
+- 20:01Z: poll: probe -6 macOS gate still running; #5050 open, no label.
 - 16:09Z: #5050 (LG-5) got needs-rebase (conflict with #4951 disk tier in LiveThumbnails.swift). Merged origin/dev into -lg5, kept the cancel check first then the disk read/store; scripts/ci --changed running (fix round 1).
 - 15:38Z: poll: still no change; LG-grid PRs queued, #5114 awaits supervisor, beta question open ~2h.
 - 15:19Z: poll: unchanged; LG-grid PRs still queued, #5114 awaits supervisor, beta question unanswered.
