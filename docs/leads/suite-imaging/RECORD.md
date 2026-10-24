@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: IM-8b (live route on LayeredToneBase) stacked on it, IM-11 (loupe on the GPU route) stacked on #4886. IM-10b waits the curve/levels order ruling. IM-8d and IM-12 wait EP-z (#3723); IM-13 waits ST-a.
+Next: IM-8b (live route's program from ImagingProgram; output levels) gating, stacked on #5148; supervisor asked (comment 6383016723) whether Photo's resident route may stand in for LiveToneSurface; IM-11 (loupe on the GPU route) stacked on #4886. IM-10b waits the curve/levels order ruling. IM-8d and IM-12 wait EP-z (#3723); IM-13 waits ST-a.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
