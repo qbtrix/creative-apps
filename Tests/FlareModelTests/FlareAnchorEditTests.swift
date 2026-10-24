@@ -201,7 +201,10 @@ import Testing
         }
         workspace.load(document)
         workspace.selectTool(.directSelect)
-        let middle = try #require(workspace.stageList?.items.first.map { $0.transform.apply(Point(x: 30, y: 25)) })
+        // The rectangle's middle in its own space (its layer's origin since a drawn shape is centred), then the scene.
+        let box = try #require(workspace.layers.first?.shapes.first?.bounds)
+        let local = Point(x: (box.minX + box.maxX) / 2, y: (box.minY + box.maxY) / 2)
+        let middle = try #require(workspace.stageList?.items.first.map { $0.transform.apply(local) })
         workspace.drag(from: middle, to: middle)
         let before = Self.anchors(workspace)
         try #require(before.count == 5)

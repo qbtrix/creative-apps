@@ -39,14 +39,14 @@ struct DesignLaunch: Codable, Hashable, Sendable {
     /// Design's hand-off host, the stub that opens nothing until DF-3.
     static let host = DesignDocument(pages: [])
 
-    /// The key window: its id, its file and where its intents go (DesignWindow keeps it current).
-    static var front: (id: UUID, model: @MainActor () -> DesignWorkspace, perform: DesignPerform)?
+    /// The key window, which DesignWindow joins with `suiteLiveWindow`: its file, and where a command's result goes.
+    static let front = LiveFront<DesignHeadless>()
 
     /// Live commands on the key window's file; a client runs only on a grant it already holds.
     static let live = LiveCommandChannel(
         app: SuiteApp.design.displayName,
-        document: { () -> DesignHeadless? in front.map { DesignHeadless($0.model()) } },
-        apply: { (result: DesignHeadless) in front?.perform(.adoptLive(result.workspace)) },
+        document: { front.document() },
+        apply: { front.apply($0) },
         ask: { await AIAccessCenter.shared.ask($0) })
 }
 

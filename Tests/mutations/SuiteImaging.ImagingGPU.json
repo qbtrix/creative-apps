@@ -1,0 +1,4 @@
+[
+{"label": "displayStepsLast: the display step is skipped", "file": "Sources/SuiteImaging/Route/ImagingGPU.swift", "find": "        program + displaySteps.gpu\n", "replace": "        program\n", "tests": "ImagingGPUTests/displayStepsLast"},
+{"label": "programInWrite: the program is left out of the write", "file": "Sources/SuiteImaging/Route/ImagingGPU.swift", "find": "premultiplied: true, tone: tone)", "replace": "premultiplied: true, tone: nil)", "tests": "ImagingGPUTests/programInWrite"}
+]
