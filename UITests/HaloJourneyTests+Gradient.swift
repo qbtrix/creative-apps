@@ -61,11 +61,13 @@ final class HaloGradientJourneyTests: XCTestCase {
         halo.press(.return)
     }
 
-    /// Scrolls the inspector (`suite.inspector`) until `element` lies whole inside it.
+    /// Scrolls the inspector (`suite.inspector`) until `element` lies whole inside it. FILL's type chips are a
+    /// lazy grid that makes no element below the fold, so it scrolls down until one exists first (#4439, #1411).
     @MainActor private func scrollInspector(toShow element: XCUIElement, _ halo: Journey) {
         let inspector = halo.element("suite.inspector")
         XCTAssert(inspector.waitForExistence(timeout: 5), "no inspector (suite.inspector)")
-        XCTAssert(element.waitForExistence(timeout: 5), "nothing to scroll to in the inspector")
+        for _ in 0..<20 where !element.waitForExistence(timeout: 0.5) { inspector.scroll(byDeltaX: 0, deltaY: -40) }
+        XCTAssert(element.exists, "nothing to scroll to in the inspector")
         for _ in 0..<20 where !inspector.frame.contains(element.frame) {
             inspector.scroll(byDeltaX: 0, deltaY: element.frame.minY < inspector.frame.minY ? 40 : -40)
         }
