@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-24T10:35Z	3	check	10:34Z	no merges yet (lane queue; dev full CI 40081823899 in progress); 0 open findings for feature
 2026-10-24T10:57Z	3	check	10:56Z	no merges yet; dev full CI 40081823899 green at 9f476af7; lane fix #5150 (list all open PRs) landed 10:55Z, queue should now see our PRs; 0 findings for feature
 2026-10-24T11:20Z	3	check	11:18Z	no merges; lane run 40087724110 ruled #5116 #5149 eligible but batch-20261024110214 was full (12); #4891-#4911 absent from lane listing until #5150 reaches main (dev CI 10:57 in progress); 0 findings for feature
+2026-10-24T11:42Z	3	check	11:41Z	no merges; main still 9f476af7, dev CI 40087964618 on 4f00afb8 in progress; lane 40089822850 lists #5116 #5125 #5149 only; 0 findings for feature
