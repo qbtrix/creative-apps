@@ -1,0 +1,16 @@
+[
+  {
+    "label": ".keysWhenRecording: auto-key ignored, so a digit while recording writes the base value, not a key here",
+    "file": "Sources/FlareModel/FlareOpacityKeys+Kernel.swift",
+    "find": "recording = w.autoKey",
+    "replace": "recording = false",
+    "tests": "FlareOpacityKeysTests"
+  },
+  {
+    "label": ".everySelected: only the primary layer changes",
+    "file": "Sources/FlareModel/FlareOpacityKeys+Kernel.swift",
+    "find": "let layers = w.propertyLayerIDs",
+    "replace": "let layers = Array(w.propertyLayerIDs.prefix(1))",
+    "tests": "FlareOpacityKeysTests"
+  }
+]

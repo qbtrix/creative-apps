@@ -58,6 +58,7 @@ layer.remove
 layer.rename
 layer.reorder
 layer.set-flags
+layer.set-opacity
 layer.set-parent
 library.convert-to-symbol
 library.exit-symbol

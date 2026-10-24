@@ -175,6 +175,7 @@ extension FlareWorkspace {
         + FileFlowCommands.specs(FlareWorkspace.self)  // file.recent, open-recent, clear-recent, open-in, drop (file-flow FL-3)
         + hiddenCommands  // the beta.2 items the menus hide (no-placeholders NP-3)
         + PathCommands.specs(FlareWorkspace.self)  // the twelve path.* commands, the Pen and Direct Select's points (pen-paths FP-6)
+        + BrushKeyCommands.specs(FlareWorkspace.self).filter { $0.id == "layer.set-opacity" }  // the digits (brush-keys BK-12)
         + [importReportCommand]  // the last Lottie open's skipped parts (lottie-open LO-5, FlareLottieNote.swift)
 }
 

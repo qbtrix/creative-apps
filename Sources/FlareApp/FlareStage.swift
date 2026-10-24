@@ -192,6 +192,7 @@ struct FlareStage: View {
     /// letter included, which the window's `toolKey` ignores) goes to `onKey`.
     private func key(_ press: KeyPress) -> KeyPress.Result {
         if press.key == .escape { live = nil }
+        if let routed = opacityKey(press) { return routed }  // the digits: the selected layers' opacity (FlareStage+Keys)
         guard press.modifiers.isEmpty, let tool = FlareTool.picked(byTyped: press.characters, help: model.toolHelp)
         else { return onKey(press) }
         perform(.tools(.choose(tool)))
