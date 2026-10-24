@@ -78,3 +78,12 @@ private func firstFrame(_ workspace: DesignWorkspace) -> (page: DesignPage, fram
     workspace.redo()
     #expect(firstFrame(workspace)?.page.sizeText == "1080 × 1920 pt")
 }
+
+@Test func aLiveNewFileTakesTheSetupAndAnyOtherFileRefuses() {
+    var fresh = DesignWorkspace()
+    fresh.newFile()
+    let shaped = DesignHeadless(fresh).shapingNewFile(DocumentSetup(width: 393, height: 852))
+    #expect(shaped.flatMap { firstFrame($0.workspace) }?.page.sizeText == "393 × 852 pt")
+    #expect(DesignHeadless(DesignFixtures.cards).shapingNewFile(DocumentSetup(width: 393, height: 852)) == nil)
+}
+

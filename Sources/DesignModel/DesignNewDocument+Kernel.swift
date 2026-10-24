@@ -85,3 +85,13 @@ extension DesignWorkspace {
         }
     }
 }
+
+extension DesignHeadless {
+    /// This document with `shapeNewFile(setup)` applied, for the window to adopt after its New File ran;
+    /// nil when the file is not a plain New File (the unsaved guard was cancelled) or the setup is refused.
+    public func shapingNewFile(_ setup: DocumentSetup) -> DesignHeadless? {
+        var next = workspace
+        guard next.shapeNewFile(setup) else { return nil }
+        return DesignHeadless(next, name: name)
+    }
+}
