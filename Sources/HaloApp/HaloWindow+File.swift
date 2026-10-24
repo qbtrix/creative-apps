@@ -23,6 +23,7 @@
 // "Not saved" while the work isn't on disk, else empty. SwiftUI offers no hook to confirm a window
 // close, so closing is not guarded yet (#1065 asks SuiteWindow for one).
 import HaloModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -72,6 +73,7 @@ extension HaloWindow {
                 Button("Cancel", role: .cancel) { request = nil }
             }
             .modifier(HaloFileAlert(message: model.file.error))
+            .modifier(HaloCompositionSettingsSheet(setup: model.documentSetup, apply: { model.applySetup($0, anchor: $1) }))
             .task { launchFiles() }
             .onChange(of: model.recent) { _, recent in Self.storeRecent(recent) }
             .onChange(of: HaloShell.inbox.pending, initial: true) { for command in HaloShell.inbox.take() { perform(command) } }
@@ -199,6 +201,24 @@ extension HaloProject {
     /// `file.recent` while it opens.
     var openingNote: String? {
         file.opening ? "Opening \(file.recent.first?.name ?? "project")…" : nil
+    }
+}
+
+/// Composition Settings…; Apply closes it once `applySetup` takes the setup.
+private struct HaloCompositionSettingsSheet: ViewModifier {
+    let setup: DocumentSetup?
+    let apply: @MainActor (DocumentSetup, BoxAnchor) -> Bool
+    @State private var shown = false
+    func body(content: Content) -> some View {
+        content
+            .sheet(isPresented: $shown) {
+                if let setup {
+                    NewDocumentSheet(.settings, setup: setup, limits: CompositionSettings.limits,
+                                     onDone: { setup, anchor in if apply(setup, anchor) { shown = false } },
+                                     onCancel: { shown = false })
+                }
+            }
+            .focusedSceneValue(\.haloCompositionSettings, { shown = true })
     }
 }
 

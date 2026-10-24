@@ -31,6 +31,7 @@ public struct HaloComposition: Identifiable, Codable, Sendable, Hashable {
     /// The frame the viewer shows, in 0..<durationFrames; HaloProject's
     /// `scrub(to:)` keeps it there.
     public var playheadFrame: Int = 0
+    public var background: DocumentBackground = .white
 
     public init(
         id: String, name: String, width: Int, height: Int, frameRate: FrameRate, durationFrames: Int,
@@ -145,9 +146,10 @@ public struct HaloProject: Sendable, Equatable {
     public mutating func newComposition(_ settings: CompositionSettings) -> Bool {
         guard let frames = settings.durationFrames else { return false }
         return edit("New Composition", control: "halo.composition.new") { doc in
-            let comp = HaloComposition(
+            var comp = HaloComposition(
                 id: doc.takeCompositionID(), name: doc.uniqueName(settings.name.normalizedName), width: settings.width,
                 height: settings.height, frameRate: settings.frameRate, durationFrames: frames)
+            comp.background = settings.background
             doc.compositions.append(comp)
             doc.selectedCompositionID = comp.id
             doc.selectedLayerID = nil

@@ -19,8 +19,9 @@ extension HaloProject {
         + PlaceCommands.specs(HaloProject.self) + windowSpecs
 
     /// The render sheet's Choose… and the unsaved alert's Save and Don't Save (CS-7): headless they check
-    /// availability and change nothing, since the panel and the held command are the window's.
-    static let windowSpecs: [CommandSpec<HaloProject>] = [
+    /// availability and change nothing, since the panel and the held command are the window's. The kernel's
+    /// `document.read-settings` and `document.set-settings` (document-setup DS-12) come first.
+    static let windowSpecs: [CommandSpec<HaloProject>] = documentSetupSpecs + [
         .typed("render.choose-folder", title: "Choose…", summary: "Asks for the folder the open render writes into.", kind: .view,
                params: Param.None.self, schema: ParamSchema.none, example: .object([:]), availability: available(Param.render)) { p, _ in try p.windowStep("render.choose-folder", p.unavailableHelp(for: Param.render)) },
         .typed("file.answer-unsaved", title: "Save Changes", summary: "Answers the unsaved-changes alert: save, then go on, or dontSave and go on.",
@@ -43,7 +44,7 @@ extension HaloProject {
     }
 
     /// New Composition's Create: the sheet's settings over the suggested ones; refused in their problems' words.
-    mutating func runNewComposition(_ o: HaloHeadless.NewOptions) throws -> JSONValue {
+    mutating func runNewComposition(_ o: SetupNewOptions) throws -> JSONValue {
         if let why = unavailableHelp(for: .newComposition) { throw CatalogError.unavailable(id: "composition.new", why: why) }
         let settings = o.settings(over: suggestedSettings)
         guard newComposition(settings) else { throw CatalogError.failed(id: "composition.new", message: settings.problems.joined(separator: " ")) }
@@ -154,7 +155,7 @@ extension HaloProject {
     static func spec(for c: HaloCommand) -> CommandSpec<HaloProject> {
         switch c {
         case .newComposition: .typed("composition.new", title: "New Composition", summary: "Adds a composition with the sheet's settings, else the suggested ones, and selects it.",
-                                     kind: .edit, params: HaloHeadless.NewOptions.self, schema: Param.newComposition, example: .object([:]), availability: available(c)) { p, o in try p.runNewComposition(o) }
+                                     kind: .edit, params: SetupNewOptions.self, schema: newSetupSchema, example: .object([:]), availability: available(c)) { p, o in try p.runNewComposition(o) }
         case .duplicateComposition: plain(c, "composition.duplicate", "Duplicate Composition", .edit, "Copies the selected composition.")
         case .deleteComposition: plain(c, "composition.delete", "Delete Composition", .edit, "Deletes the selected composition; one always stays.")
         case .selectComposition: typed(c, "composition.select", "Select Composition", .view, "Selects a composition.", Param.ID.self, obj(["id": Param.id]), ["id": .string("comp-1")]) { .selectComposition($0.id) }
@@ -284,9 +285,6 @@ private enum Param {
     struct Bezier: Decodable, Sendable { var x1, y1, x2, y2: Double }; struct Handle: Decodable, Sendable { var index: Int; var x, y: Double }
     struct Render: Decodable, Sendable { var format: String; var halfSize: Bool? }
     static let render = HaloCommand.startRender(HaloRenderSettings(format: .pngSequence))
-    static let newComposition = ParamSchema.object(["name": name, "width": size, "height": size, "seconds": .number(minimum: 0),
-                                                     "fps": .integer(minimum: 1)], required: [])
-    static let size = ParamSchema.integer(minimum: CompositionSettings.sizeRange.lowerBound, maximum: CompositionSettings.sizeRange.upperBound)
     /// The unsaved alert's answers a control sends: the kernel's, but Cancel, which only closes it.
     struct Answer: Decodable, Sendable { var answer: String }
     static let answers: [(name: String, answer: UnsavedPrompt.Answer)] = [("save", .save), ("dontSave", .dontSave)]
