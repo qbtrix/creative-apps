@@ -5,9 +5,10 @@
 // controls). Report a Problem… begins ProblemReportSheet on the front window over ShellHelpProvider's report
 // (RP-3); Copy puts the text on the pasteboard, and Save… and Email… hand it to ProblemReportActions (RP-3e),
 // so the app sends nothing itself. Beta Notes opens a window titled Beta Notes over BetaNotes.current,
-// centred so it stays on a small screen. Connect an AI Assistant… (cli-bundle CB-5) begins AssistantConnectSheet
-// on the front window over the running AfterGlow.app's AssistantConnectPanel; Copy puts its text on the pasteboard
-// and Open AI Access opens Window > AI Access…'s list. The item is disabled, saying why, outside AfterGlow.app.
+// sized to its content and then centred, so it stays on a small screen. Connect an AI Assistant…
+// (cli-bundle CB-5) begins AssistantConnectSheet on the front window over the running AfterGlow.app's
+// AssistantConnectPanel; Copy puts its text on the pasteboard and Open AI Access opens Window > AI Access…'s
+// list. The item is disabled, saying why, outside AfterGlow.app.
 import AppKit
 import SuiteKernel
 import SuiteModel
@@ -127,11 +128,15 @@ public struct SuiteHelpCommands: Commands {
     /// Opens, or brings forward, the Beta Notes window.
     func showBetaNotes() {
         if notes == nil {
-            let window = NSWindow(contentViewController: NSHostingController(rootView: BetaNotesView(notes: BetaNotes.current) { [weak self] in
+            let content = NSHostingController(rootView: BetaNotesView(notes: BetaNotes.current) { [weak self] in
                 self?.notes?.close()
-            }))
+            })
+            let window = NSWindow(contentViewController: content)
             window.title = "Beta Notes"
             window.isReleasedWhenClosed = false
+            // The window opens 1 pt wide and grows to its content after it is shown, rightwards from where
+            // center() put it, so Close ran off a 1024 pt screen (#4760). Size it first, then centre it.
+            window.setContentSize(content.view.fittingSize)
             window.center()
             notes = window
         }
