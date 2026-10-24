@@ -1,0 +1,76 @@
+utc	stage	event	ref	note
+2026-10-21T10:50Z	0	stage-start	#3718	base 1191940
+2026-10-21T10:50Z	2	stage-end	#3718	combined plan with suite-imaging; wave 1 SC-13, SC-1
+2026-10-21T10:50Z	3	stage-start	wave1	SC-13 SC-1 builders launched
+2026-10-21T19:24Z	3	heartbeat	wave1	#4019 SC-13, #4020 SC-1: merged dev for #4008 fix, re-gating
+2026-10-21T19:37Z	heartbeat	SC-13 #4019 head 4e6f468 and SC-1 #4020 head bc99791 re-gated after dev merge (pasteboard files baselined, caps 25/10); bodies moved to the new heads
+2026-10-21T20:09Z	status-channel	RECORD also pushed to lead/suiteui-shared-codecs (the branch Belt reads) from now on
+2026-10-21T20:10Z	stage	SC-14 restacked on SC-13 4e6f468; gate running
+2026-10-21T20:26Z	gate	SC-14 ac167606 gated CI: PASS and pushed to lead/shared-codecs-SC-14; PR opens once #4019 merges
+2026-10-21T20:49Z	check-in	check-in: #4019 and #4020 macOS builds green, Fast-Check current; waiting on the lane sweep (run 39671360946 in progress). SC-14 gated, PR opens once #4019 merges.
+2026-10-21T21:11Z	check-in	check-in: #4019 and #4020 still open, green macOS builds, no lane refusal; lane sweeps are being cancelled by newer ones. SC-14 still gated on #4019.
+2026-10-21T21:33Z	check-in	check-in: #4019 is in lane batch 20261021205717; bisect probe -2 (ends at #4019) running, run 39679213310; the red is at probe -4 (#4163), after us. #4020 still waiting. SC-14 gated on #4019.
+2026-10-21T21:56Z	check-in	#4019 (SC-13) still open: its lane probe lane/batch-20261021205717-2 (run 39679213310) went red on CommandPathTests/CommandPathLimitTests (library, launcher baselines). The cause is #3967 (LibraryBackupSheet baseline lines over #4023's limit), which sits ahead of #4019 in that probe. #4019 touches only Tests/SuiteModelTests, Tests/AfterGlowCLITests and the format-list baseline. Waiting for the bisect to name #3967. #4020 (SC-1) is still waiting. SC-14 is held until #4019 merges.
+2026-10-21T22:18Z	check-in	#4019 (SC-13) merged as d2c129e51 and #4020 (SC-1) as d8b1b2109. SC-14 has dev merged in (it conflicted only on its own two test files, so SC-14's versions were kept) and scripts/ci --changed is running; its PR (slice SC-f) opens on CI: PASS. SC-2 waits on IM-a.
+2026-10-21T22:26Z	stage	SC-14 opened as PR #4238 (slice SC-f, fast-lane), head 5b6eba7365e00f49fcdb1b9effdd84f269ab64d1, scripts/ci --changed CI: PASS. SC-2 waits on IM-a (#4028 then IM-2).
+2026-10-21T22:48Z	check-in	#4238 (SC-14): mergeable, no needs-fix; waiting on the lane's macOS build (run 39688920608). Removed a server-added footer from the body so Head: is the last line again.
+2026-10-21T23:12Z	check-in	SC-14 #4238 (SC-f) waits on lane macOS build 39688920608 (queued since 22:46Z); no needs-fix, no refusal.
+2026-10-21T23:35Z	check-in	SC-14 #4238 macOS build 39688920608 failed: dev's RenderBudgetPhotoPlaceTests uses PhotoPlaceIntent.files, removed by #4164 (not this PR's). Ported fix #4215 as 7b9039c0; re-gating before push.
+2026-10-21T23:39Z	stage	SC-14 #4238 pushed 7b9039c0 (CI: PASS; ports #4215's fix for dev's RenderBudgetPhotoPlaceTests break); Head line moved; waits on the lane's new macOS build.
+2026-10-22T00:00Z	check-in	SC-14 #4238 head 7b9039c0 waits on lane macOS build 39695868336 (queued). #4215 merged on dev, so the port now equals dev.
+2026-10-22T00:22Z	check-in	SC-14 #4238 (SC-f) waits on lane macOS build 39695868336, still queued since 23:49Z (runner backlog); mergeable, no needs-fix.
+2026-10-22T00:44Z	check-in	SC-14 #4238 still waits on lane macOS build 39695868336, queued since 23:49Z; no needs-fix or refusal.
+2026-10-22T00:55Z	check-in	dev is red on our ratchet: FormatListRatchetTests.realTreePasses flags Media.swift's StillFormat (SM-1 #4034 landed alongside SC-13 #4019). Shell-media's #4258 fixes it. A trial merge of dev, #4238 and #4258 merges cleanly and passes all 41 tests in the format, plist and media suites, so #4238 stays as it is.
+2026-10-22T01:06Z	check-in	SC-14 #4238: lane macOS build 39695868336 has been running since 01:01Z. #4258 (dev's ratchet fix) is still open.
+2026-10-22T01:28Z	check-in	Build 39695868336 passed on 7b9039c. At 00:56Z the supervisor merged #4270 (StillFormat from SuiteImageFormats) into SC-14, giving head b60d61fd; landing #4238 turns dev's ratchet green. The lane's new macOS build 39704535700 is queued. I'm re-gating b60d61fd so the Head: line can move to it.
+2026-10-22T01:35Z	check-in	SC-14 #4238 head b60d61fd (dev merge + supervisor's #4270) re-gated: CI PASS; Head: line moved; lane macOS build 39704535700 queued.
+2026-10-22T01:50Z	check-in	SC-14 #4238: lane macOS build 39704535700 green on b60d61fd; Fast-Check/Head current; waits for the lane's merge sweep.
+2026-10-22T02:10Z	check-in	SC-14 #4238 eligible (green macOS build, current Head:, no needs-fix/refusal); lane sweeps are active on dev (#4243 merged 02:07Z). Other SC slices are blocked: SC-2 on IM-a, SC-photo on export-pack, SC-library on library spine, SC-z on AK-z.
+2026-10-22T02:30Z	check-in	SC-14 #4238 merged as 6603b0f1d, so every SC-f task is merged (SC-13 #4019, SC-14 #4238). Merged-done waits on dev Linux check 39710840412 (b5a6e7e0, in progress); then Belt-Slice-Done SC-f on #3718. Scoped run 'suite' 39710836943 is queued on the same sha.
+2026-10-22T02:43Z	check-in	SC-f is merged-done. The Linux job of dev run 39710840412 (b5a6e7e0a) is green, and Belt-Slice-Done SC-f is posted on #3718 (comment 6331405875). Its critic panel will review the screens of scoped suite run 39710836943 once that run finishes. Still waiting: SC-2 on IM-a, SC-photo, SC-library, SC-z.
+2026-10-22T03:04Z	check-in	SC-f's critic panel waits on scoped suite run 39710836943, queued since 02:20Z. I asked the supervisor about it in the same question on #3715. SC-2 waits on IM-a.
+2026-10-22T03:24Z	check-in	Scoped suite run 39710836943 is still queued (since 02:20Z), so SC-f's critic panel is held. No supervisor reply yet.
+2026-10-22T03:45Z	check-in	Unchanged. Scoped suite run 39710836943 is still queued, so SC-f's critic panel is held.
+2026-10-22T04:06Z	check-in	Scoped suite run 39710836943 started at about 03:52Z and is in progress. SC-f's critic panel starts when its ui-screens are up.
+2026-10-22T04:23Z	check-in	Scoped suite run 39710836943 completed green: macOS (suite) passed, 03:52-04:09Z. It uploaded no snapshots or ui-screens. It handed the journeys to journeys.yml run 39720835412, which is pending behind three earlier journey runs. SC-f's critic panel runs on those ui-screens.
+2026-10-22T04:44Z	check-in	Journeys run 39720835412 (suite) is still pending in the macOS queue. SC-f's critic panel waits on its ui-screens.
+2026-10-22T05:05Z	check-in	Journeys run 39720835412 (suite) is still queued for macOS. SC-f's critic panel waits on its ui-screens.
+2026-10-22T05:25Z	check-in	Journeys run 39720835412 (suite) is still queued for macOS. SC-f's critic panel waits on its ui-screens.
+2026-10-22T05:47Z	check-in	SC-f critic panel still waits on journeys run 39720835412 (queued since 04:10Z).
+2026-10-23T14:52:29Z	wave 2	SC-2 builder launched (supervisor merge)
+2026-10-23T16:45Z	wave 2	SC-2 #4873 (supervisor merge) and SC-halo #4875 (fast-lane) open
+2026-10-23T18:55Z	check-in	SC-2 #4873 merged; SC-a waits on scoped suiteui run 40005632479
+2026-10-23T19:19Z	check-in	run 40005632479 in_progress; #4875 open in lane
+2026-10-23T19:41Z	SC-a	done	run 40005632479 green; Belt-Slice-Done posted
+2026-10-23T20:05Z	check-in	PRs open+clean in lane (batch 20261023192105 bisecting); no needs-fix, no findings
+2026-10-23T20:27Z	check-in	PRs open+clean in lane; no needs-fix, no findings
+2026-10-23T20:49Z	check-in	PRs open+clean; lane bisect named #4818 (not ours) needs-fix at 20:44Z; no findings
+2026-10-23T21:12Z	check-in	PRs open+clean; lane batch 20261023204921 Linux green, macOS gate running; no findings
+2026-10-23T21:34Z	check-in	PRs open+clean; lane batch 20261023204921 macOS gate still running; no findings
+2026-10-23T22:05Z	check-in	#4875 open+clean; waiting
+2026-10-23T22:28Z	check-in	PRs open+clean (#4582 dirty, lane integrates); TC-a run 40029042081 still queued; no findings
+2026-10-23T22:51Z	check-in	PRs open+clean (#4582 dirty, lane integrates); TC-a run 40029042081 in progress; no findings
+2026-10-23T23:07Z	check-in	PRs open+clean (#4582 dirty, lane integrates); TC-a run 40029042081 in progress; no findings
+2026-10-23T23:24Z	check-in	PRs open+clean; no findings
+2026-10-23T23:46Z	check-in	no merges since 22:40Z; #4582 dirty (lane integrates), #4870 #4875 #4880 #4953 #5006 clean fast-lane; 0 open findings for this feature
+2026-10-24T00:10Z	check-in	no merges since 22:40Z; no workflow run in the repo since 23:10Z (lane sweep idle, CI 23:06Z and journeys still in_progress); our PRs unchanged; 0 open findings
+2026-10-24T00:31Z	check-in	lane resumed 00:24Z, bisecting batch-20261023215139 (probe -6: #4818..#4836, none ours); full CI 40037716897 on dev 654fb363 green; our PRs unchanged; 0 open findings
+2026-10-24T00:54Z	check-in	lane still on batch-20261023215139-6 (Linux green, macOS gate running); no merges since 22:40Z; our PRs unchanged; 0 open findings
+2026-10-24T01:16Z	check-in	lane batch-20261023215139-6 macOS gate still running (50 min); no merges since 22:40Z; our PRs unchanged; 0 open findings
+2026-10-24T01:38Z	check-in	lane bisect at batch-20261023215139-9 (Linux + macOS running); no merges since 22:40Z; our PRs unchanged; 0 open findings
+2026-10-24T02:00Z	check-in	lane probe batch-20261023215139-9: Linux green, macOS gate running; no merges since 22:40Z; our PRs unchanged; 0 open findings
+2026-10-24T02:21Z	check-in	lane probe batch-20261023215139-9 macOS gate still running (52 min); no merges since 22:40Z (lane throughput is the blocker, supervisor-owned); our PRs unchanged; 0 open findings
+2026-10-24T02:43Z	check-in	no change: our 6 PRs open (fast-lane, none needs-fix/needs-rebase; #4582 dirty for lane integration); probe batch-20261023215139-9 macOS gate failed, no Fast Lane sweep since 01:29Z, no dev merges since 22:40Z; 0 open findings
+2026-10-24T03:05Z	check-in	no change: our 6 PRs open (fast-lane, none needs-fix/needs-rebase; #4582 dirty for lane integration); lane resumed bisect, probe batch-20261023215139-7 macOS gate running since 02:44Z; no dev merges since 22:40Z; 0 open findings
+2026-10-24T03:27Z	check-in	no change: our 6 PRs open (fast-lane, none needs-fix/needs-rebase; #4582 dirty for lane integration); probe batch-20261023215139-7 macOS gate still running; no dev merges since 22:40Z; finding #5027 (line:photo, PhotoJourneyTests.testTier1Tone at dev 491ec546) not ours: TC-a #4862 touched only SuiteUI + Suite journey, PhotoApp does not use ToneRows; likely #4856 (photo dispatcher) in the same batch
+2026-10-24T03:49Z	check-in	no change: our 6 PRs open (fast-lane, none needs-fix/needs-rebase; #4582 dirty for lane integration); probe batch-20261023215139-7 passed both gates (7 green, 9 red: bisect near its verdict); no dev merges since 22:40Z; #5027 still line:photo, not ours
+2026-10-24T04:11Z	check-in	no change: our 6 PRs open (fast-lane, none needs-fix/needs-rebase; #4582 dirty for lane integration); last bisect probe batch-20261023215139-8 running since 04:01Z (7 green, 9 red); no dev merges since 22:40Z; #5027 line:photo, not ours
+2026-10-24T04:33Z	check-in	no change: our 6 PRs open (fast-lane, none needs-fix/needs-rebase; #4582 dirty for lane integration); probe batch-20261023215139-8 Linux green, macOS gate running since 04:01Z; supervisor fix/mac-finish-* branches in flight; no dev merges since 22:40Z; #5027 line:photo, not ours
+2026-10-24T04:55Z	check-in	no change: our 6 PRs open (fast-lane, none needs-fix/needs-rebase; #4582 dirty for lane integration); probe batch-20261023215139-8 macOS gate still running (54 min); no dev merges since 22:40Z; #5027 line:photo, not ours
+2026-10-24T05:17Z	check-in	bisect of batch-20261023215139 finished (probe 8 green); new lane/batch-20261024050226 (12 PRs) carries our #4870 (TC-m) and #4875 (SC-halo), Linux+macOS gates running since 05:02Z; #4880/#4953/#5006/#4582 wait for the next batch; none needs-fix/needs-rebase; #5027 line:photo, not ours
+2026-10-24T05:39Z	check-in	batch-20261024050226 Linux green, macOS gate running (#4870,#4875); dev 654fb363; no needs-fix/needs-rebase; no new findings
+2026-10-24T06:03Z	check-in	batch-20261024050226 macOS gate red (run 40064703313: RenderBudgetFlareExportPack timeout + AppSnapshotTests hang, not ours); lane bisecting, probe -6 excludes #4870/#4875; dev 654fb363; no labels to fix; no new findings
+2026-10-24T06:25Z	check-in	dev 4446461e (#4840, not ours); bisect probe batch-20261024050226-6 Linux green, macOS running; #4870/#4875 still waiting; no labels to fix; no new findings
+2026-10-24T06:47Z	check-in	bisect narrowed to first 6 PRs (probes -1,-3 running), ahead of #4870/#4875; dev e5dcf939; no labels to fix; no new findings
+2026-10-24T07:05Z	resume	run act-1a16cae7989-hj12 resumes on dev 830af22d; records refreshed, contract-first waits applied (SC-photo, SC-library, SC-raster startable)
+2026-10-24T07:12Z	wave	wave 3 started: builders for SC-3 then SC-4 (SC-photo), SC-7 (SC-library), SC-9 (SC-raster), each in its own worktree
