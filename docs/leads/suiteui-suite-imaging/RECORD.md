@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: IM-10b is #5153 (stacked on #4886). IM-11a (4d753ae) mutated 4/4, gate running; PR stacks on #5153. Then IM-11b (macOS view: SuiteImaging tone writer, loupe on the resident texture, LibraryDevelopLatencyTests on). Supervisor question 6383016723 (IM-8b) open. IM-8d and IM-12 wait EP-z (#3723); IM-13 waits ST-a.
+Next: IM-11a is #5154 (stacked on #5153 on #4886). Building IM-11b: the loupe draws the GPU frame through LiveToneSurface into the CanvasHost resident texture when the shared View > Rendering choice isn't CPU. Supervisor question 6383016723 (IM-8b) is open. IM-8d and IM-12 wait on EP-z (#3723); IM-13 waits on ST-a.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
 
@@ -35,8 +35,8 @@ Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imag
 | IM-9 | IM-library | Library imaging tests | #4591 | merged |
 | IM-10 p1 | IM-library | develop levels/curve points are SuiteImaging's | #4886 | open (fast-lane, clean) |
 | IM-10b | IM-library | LiveDevelop on the shared list | #5153 | open (fast-lane, Fast-Check 65fa4fe, mutate 8/8 + 4/4; stacked on #4886) |
-| IM-11a | IM-library | loupe GPU frame (Model): LiveDevelop.steps, LiveLoupeImaging.gpuFrame, histogram from the CPU-developed preview | – | 4d753ae (stacked on #5153); mutate 4/4; gate running |
-| IM-11b | IM-library | loupe view on LiveToneSurface + CanvasHost; LibraryDevelopLatencyTests on | – | after IM-11a |
+| IM-11a | IM-library | loupe GPU frame (Model): LiveDevelop.steps, LiveLoupeImaging.gpuFrame, histogram from the CPU-developed preview | #5154 | open (fast-lane, Fast-Check 4d753ae, mutate 4/4; stacked on #5153) |
+| IM-11b | IM-library | loupe view on LiveToneSurface + CanvasHost resident texture; LibraryDevelopLatencyTests on | – | building on lead/suite-imaging-IM-11b (stacked on #5154, dev merged in for ImagingGPU and residentTexture) |
 | IM-12 | IM-z | delete Photo's copies | – | blocked: EP-z |
 | IM-13 | IM-z | no-baseline rule, Photo's Metal link removed | – | blocked: ST-a |
 | IM-14 | IM-z | feature-done | – | last |
