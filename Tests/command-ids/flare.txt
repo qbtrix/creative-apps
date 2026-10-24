@@ -10,6 +10,7 @@ color-key.remove
 color-key.set
 document.metadata
 edit.copy
+edit.copy-as
 edit.cut
 edit.delete
 edit.deselect

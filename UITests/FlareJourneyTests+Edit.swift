@@ -72,8 +72,10 @@ final class FlareEditJourneys: XCTestCase {
         flare.press(.escape)
     }
 
-    /// The slice FJ-CB waits on; CB-8 sets it to nil.
-    private static let copyOutWaitsOn: String? = "CB-8"
+    /// The slice FJ-CB waits on; CB-8 set it to nil.
+    private static let copyOutWaitsOn: String? = nil
+    /// The slice the SVG paste (step 3) waits on: Flare's place path turns an SVG's groups into layers; nil once built.
+    private static let svgPasteWaitsOn: String? = "svg-place PF-5"
     private static let svgType = NSPasteboard.PasteboardType("public.svg-image")
     /// Two groups, red and blue: svg-place makes a layer of each, named after the group.
     private static let logo = """
@@ -114,6 +116,7 @@ final class FlareEditJourneys: XCTestCase {
         flare.shot("edit-copy-types")
 
         // 3. An SVG logo on the pasteboard, Edit > Paste: its two groups are layers, one step.
+        if let waitsOn = Self.svgPasteWaitsOn { throw XCTSkip("the SVG paste waits on \(waitsOn)") }
         _ = pasteboard.clearContents()
         XCTAssert(pasteboard.setData(Data(Self.logo.utf8), forType: Self.svgType), "could not put an SVG on the pasteboard")
         choose("Paste", flare)
