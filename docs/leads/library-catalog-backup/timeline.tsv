@@ -71,3 +71,4 @@ utc	stage	event	ref	note
 2026-10-24T08:30:14Z	3	check	#4878,#4923	all open, no needs-fix/needs-rebase, no PR activity since 08:00; base PRs merge clean into dev 1bbaba6c (unchanged); ours queue for the next batch; 0 open findings
 2026-10-24T08:52:01Z	3	check	#4878,#4923	all open, no needs-fix/needs-rebase, no PR activity since 08:25; base PRs merge clean into dev 1bbaba6c (unchanged since 08:08, no batch landed); ours queue for the next batch; 0 open findings
 2026-10-24T09:15:39Z	3	check	#4878,#4923	lane sweep lists only newest 100 of 209 open PRs (fast-lane.sh:1850 --limit 100), so #4878/#4879 are never evaluated; reported to supervisor on #3788 (comment 6382420373); dev 1bbaba6c; 0 findings open
+2026-10-24T09:37:01Z	3	check	#4878,#4923	no slice PR merged or labelled needs-fix/needs-rebase; still starved by lane --limit 100; no supervisor reply on #3788 yet; dev 9f476af7; 0 findings open; no slice qualifies for Belt-Slice-Done
