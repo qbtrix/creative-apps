@@ -2,7 +2,7 @@
 
 Issue: #3457 · Packet: docs/blueprints/suiteui/features/placed-images.md
 Run: act-1a16cc5a05a-lc3g (relaunch) · Started: 2026-10-24T06:40Z
-Stage: 3 wave 2 (PL-z: supervisor landing #4616/#4617 on a Linux check each; lane fix #5150)
+Stage: 3 wave 2 (PL-z: #4616 merged; #4617 waiting on supervisor landing; lane fix #5150)
 Base: dev 830af22de
 Next: #4616 and #4617 (rebuilt on dev, docs-only, one file each) land through the lane's Linux run; then Belt-Slice-Done PL-z on the first green ci.yml run on dev containing them, then Belt-Contact-Sheet.
 
