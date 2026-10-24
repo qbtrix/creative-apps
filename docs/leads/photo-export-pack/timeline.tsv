@@ -189,3 +189,4 @@ utc	stage	event	ref	note
 2026-10-24T05:09Z	check-in	no change: #4832/#4836 open clean; nothing merged since 21:42Z; XP-3/XP-4 not on dev; no new findings; lane run in progress
 2026-10-24T05:41Z	check-in	no change: #4832/#4836 open clean; nothing merged since 21:42Z; XP-3/XP-4 not on dev; no new findings; lane run in progress
 2026-10-24T06:14Z	check-in	no change: #4832/#4836 open clean; nothing merged since 21:42Z; XP-7 #5044 opened (StillMetadata on ImageIO), XP-3/XP-4 not on dev; no new findings
+2026-10-24T06:46Z	check-in	lane moving again: #4840 06:24Z and #5048 06:39Z merged; #4832/#4836 still open clean; XP-3/XP-4 not on dev, XP-7 #5044 open; no new findings
