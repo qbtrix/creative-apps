@@ -2,7 +2,7 @@
 
 Issue: #3472 (runs before used #4509) · Packet: docs/blueprints/halo/features/export-pack.md
 Run: act-1a16fbc5164-vi4c · Started: 2026-10-24T21:10Z (took over from act-1a16cd045be-qv3g)
-Stage: 5 (every task in a PR: HX-u #4858, HX-3 #4874, HX-4 #4917, HX-z #4942 feature-done)
+Stage: 5 (every task in a PR: HX-3 #4874 07046e24, HX-4 #4917 cc83cdee, HX-z #4942 13e6000c feature-done; rebuilt on dev 2026-10-24)
 Base: 721168a8 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
 Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev holds its last PR, then Belt-Contact-Sheet
 
