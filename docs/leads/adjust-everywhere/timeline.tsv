@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-23T14:53Z	-	start	run act-1a1693a4009-hyio, line lead; wave 1 plan
 2026-10-23T14:53Z	AJ-a	builder	AJ-1+AJ-2l then AJ-k, AJ-7 launched, base dev 8021b0f5
 2026-10-24T06:57Z	AJ-k	recut	#4863 needs-split; AJ-5f-v2 on #4846, gating
+2026-10-24T07:18Z	AJ-k	pr	#5064 opened stacked on #4846; #4863 closed

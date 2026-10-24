@@ -46,3 +46,4 @@ Next: wait on IM-a (#3715) per the supervisor's 04:24Z answer on #3777; poll eve
 
 ## Run act-1a16cae7922-5nat
 - 2026-10-24T06:57Z: resume on #3777, dev e5dcf939. AJ-5 body is on dev (#4853). #4846 (AJ-a second half, 359 lines) clean in lane; #4867 (AJ-c, AJ-7) clean in lane. #4863 (AJ-k) got needs-split at 816 lines (old #4834 commits): re-cut as lead/adjust-everywhere-AJ-5f-v2 on #4846's head (own change 3 files +162/-12), gating; #4863 closes when its replacement opens. Blocked as before; AJ-6 waits on TC-m. 0 open findings.
+- 2026-10-24T07:18Z: AJ-k re-cut opened as #5064 (base lead/adjust-everywhere-AJ-1b, #4846's branch, so the diff is its own 3 files +162/-12; 509 against dev). Retarget to dev and add fast-lane once #4846 merges. #4863 closed as superseded. CI: PASS at 12731553, mutate 3/3.
