@@ -85,3 +85,4 @@ utc	stage	event	ref	note
 2026-10-24T19:42Z	poll	check	all	probe -6 with #4886 on macOS; design red on dev itself
 2026-10-24T20:02Z	poll	check	all	probe -6 macOS still running
 2026-10-24T20:23Z	poll	check	all	probe -6 macOS gate still running; nothing merged; no needs-rebase/needs-fix
+2026-10-24T20:42Z	poll	check	all	probe -6 green (through #4886), -7 red on #4887; awaiting prefix merge
