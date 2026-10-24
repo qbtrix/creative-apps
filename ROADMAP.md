@@ -94,6 +94,7 @@ feature issue.
 | Export at a size, HEIC and TIFF | not yet | [#3470](https://github.com/qbtrix/creative-apps/issues/3470) |
 | Layer styles, layer masks and clipping | not yet | [#3793](https://github.com/qbtrix/creative-apps/issues/3793) [#3859](https://github.com/qbtrix/creative-apps/issues/3859) |
 | PSD layer effects open as editable styles | not yet | [#3930](https://github.com/qbtrix/creative-apps/issues/3930) |
+| Paths and a pen tool (shared with Flare and Design) | not yet | [#5072](https://github.com/qbtrix/creative-apps/issues/5072) |
 
 ### Library
 
@@ -143,6 +144,8 @@ feature issue.
 | No placeholder menu items | works | [#3776](https://github.com/qbtrix/creative-apps/issues/3776) |
 | The CLI inside the app; Help > Connect an AI Assistant | partial | [#3773](https://github.com/qbtrix/creative-apps/issues/3773) |
 | Switch To, AI Access and Help menus in every editor | partial | [#3774](https://github.com/qbtrix/creative-apps/issues/3774) |
+
+Every app gets one shared zoom ([#5070](https://github.com/qbtrix/creative-apps/issues/5070)).
 
 ## 3. Known gaps
 
@@ -210,20 +213,30 @@ Research only. Each has a blueprint and no code yet.
 | 3D | Prism | Scenes, models, materials, lights, cameras and keys; renders stills and frame sequences for Halo, Flare and Design | [docs/blueprints/3d.md](docs/blueprints/3d.md) |
 | PDF | Folio | Read, mark up, fill, sign, organize, lightly edit and export PDFs | [docs/blueprints/pdf.md](docs/blueprints/pdf.md) |
 
-## 6. Not planned for v1
+## 6. After the beta, by tier
 
-- One shared window or menu bar for all apps. Each app keeps its own windows,
-  menus and file types inside the one AfterGlow app.
-- Cloud sync, accounts or web sharing in the free core. Hosted sync comes
-  later as the paid Team module.
-- Third-party code running inside an app. Plugins work through commands, the
-  CLI and MCP instead.
-- iPad and iPhone builds, and a sandboxed App Store build.
-- Halo expressions, masks and track mattes, keying, tracking, 3D layers and
-  motion blur.
+**Next, right after the beta:**
+
+- Photo magic wand.
+- Photo skew, distort and perspective.
+- Halo masks and track mattes.
+- Halo motion blur.
 - Design Auto Layout.
-- Photo paths and a pen tool, magic wand, skew, distort, perspective and warp,
-  and print setup.
+
+**Later:**
+
+- Photo print setup.
+- Halo expressions, keying, tracking and 3D layers.
+
+**Not planned:**
+
+- One shared window or menu bar for all apps. Each app keeps its own windows
+  inside the one AfterGlow app.
+- Cloud sync or accounts in the free core. Hosted sync comes as the paid Team
+  module.
+- Third-party code running inside an app. Plugins work through commands, the
+  CLI and MCP.
+- iPad, iPhone and a sandboxed App Store build, for now.
 
 ## 7. Progress log
 
