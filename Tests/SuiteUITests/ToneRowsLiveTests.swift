@@ -3,6 +3,7 @@
 // so a slider drag of many samples under one token is one undo step that one undo takes back, and the log line names
 // the command and the step. macOS only (SuiteUI).
 import SuiteImaging
+import SuiteKernel
 @testable import SuiteUI
 import Testing
 
