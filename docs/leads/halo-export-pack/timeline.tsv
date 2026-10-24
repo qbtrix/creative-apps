@@ -108,3 +108,4 @@ utc	stage	event	ref	note
 2026-10-24T14:47:46Z	poll	dev e79e9afc; no batch in flight; ours unmerged, unlabelled
 2026-10-24T15:10:20Z	poll	batch 20261024144917 in flight (12 older PRs, none ours); ours queued, unlabelled
 2026-10-24T15:32:08Z	poll	batch 20261024144917 (12 others) still in flight; ours queued, unlabelled
+2026-10-24T15:54:14Z	poll	batch 20261024144917 landed (dev 33cd6e97); ours next in queue, unlabelled
