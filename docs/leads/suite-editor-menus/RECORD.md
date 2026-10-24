@@ -68,3 +68,4 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-24T13:37:37Z: no change on #4817/#4988/#5164; batch-20261024110214 is still bisecting (new probe -3), so the lane is slow, not stopped.
 - 2026-10-24T13:56:16Z: no change on #4817/#4988/#5164; batch-20261024110214 still bisecting.
 - 2026-10-24T14:14:50Z: sweep 40100183592 (13:54Z) ran: batch-20261024110214 at probe 3; #4817/#4988 ready behind it (132 ready PRs wait). No action ours.
+- 2026-10-24T14:33:32Z: batch-20261024110214 resolved (its branches are gone); #4817/#4988 still open, ready for the next batch.
