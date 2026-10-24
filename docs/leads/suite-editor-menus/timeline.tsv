@@ -124,3 +124,4 @@ utc	stage	event	ref	note
 2026-10-24T16:07:58Z	fix	EM-flare-halo	#4817 head 9e16d071c pushed, CI: PASS
 2026-10-24T16:12:26Z	check	EM-flare-halo	needs-rebase dropped; next batch excludes ours
 2026-10-24T16:30:57Z	check	EM-flare-halo	no change; batch in flight
+2026-10-24T16:49:37Z	check	EM-flare-halo	no change; batch in flight
