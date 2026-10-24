@@ -1,7 +1,8 @@
 // PhotoHeadless.swift (adopt-command-catalog AC-p2): Photo's document with no window, for the afterglow CLI, MCP and
 // the real jobs. It opens Photo's own file (OpenRaster .ora), PNG and JPEG through `CoreRasterImageCodec`, saves .ora,
 // exports the flattened image as PNG or JPEG on the suite's export options (export-pack PX-3), and runs `PhotoWorkspace.catalog` lifted
-// onto itself. Linux-safe: no UI imports.
+// onto itself. Its services come from the caller (`.live` by default): the CLI's registry passes `.live` with
+// SuiteModel's LiveText on macOS, since `.live`'s FakeText draws a clear frame. Linux-safe: no UI imports.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -9,7 +10,7 @@ import Foundation
 #endif
 import SuiteKernel
 
-/// Photo's headless document: one `PhotoWorkspace` on the live services.
+/// Photo's headless document: one `PhotoWorkspace` on the caller's services.
 public struct PhotoHeadless: HeadlessDocument {
     public static let app = "photo", openExtensions = ["ora", "png", "jpg", "jpeg"], exportFormats = ["png", "jpeg"]
     /// Why the window's file commands refuse here: the CLI opens, saves and exports instead.
@@ -28,9 +29,12 @@ public struct PhotoHeadless: HeadlessDocument {
     public init(workspace: PhotoWorkspace) { self.workspace = workspace }
 
     /// The file `data`, named `name`, by its extension: a Photo document (.ora) with its layers, or a flat PNG or
-    /// JPEG. Throws `ArchiveError` for a bad document, `CodecError` for an image core can't read yet.
-    public static func open(_ data: Data, name: String) throws -> PhotoHeadless {
-        var workspace = PhotoWorkspace(services: .live)
+    /// JPEG, on `services`. Throws `ArchiveError` for a bad document, `CodecError` for an image core can't read yet.
+    public static func open(_ data: Data, name: String) throws -> PhotoHeadless { try open(data, name: name, services: .live) }
+
+    /// `open(_:name:)` on `services`.
+    public static func open(_ data: Data, name: String, services: PhotoServices) throws -> PhotoHeadless {
+        var workspace = PhotoWorkspace(services: services)
         switch name.split(separator: ".").last.map({ $0.lowercased() }) ?? "" {
         case "ora": try workspace.openDocument(workspace.services.archive.package(fromContainer: data), name: name, codec: codec)
         case "png", "jpg", "jpeg": try workspace.openImage(data, name: name, codec: codec)
@@ -40,9 +44,12 @@ public struct PhotoHeadless: HeadlessDocument {
     }
 
     /// A white image `width` x `height` (1024 x 768 when absent), its one layer "Background".
-    public static func new(_ options: JSONValue) throws -> PhotoHeadless {
+    public static func new(_ options: JSONValue) throws -> PhotoHeadless { try new(options, services: .live) }
+
+    /// `new(_:)` on `services`.
+    public static func new(_ options: JSONValue, services: PhotoServices) throws -> PhotoHeadless {
         let o = try options.decode(NewOptions.self)
-        var workspace = PhotoWorkspace(services: .live)
+        var workspace = PhotoWorkspace(services: services)
         do { try workspace.newCanvas(width: o.width ?? 1024, height: o.height ?? 768) } catch {
             throw CatalogError.failed(id: "new", message: "\(error)")
         }

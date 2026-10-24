@@ -12,8 +12,8 @@
 // editing), Library (photo catalog) and Halo (motion graphics).
 //
 //   SuiteModel  the suite's shared Linux-safe values (identity, the app list;
-//             docs/blueprints/suite.md), Foundation only, linked by every
-//             <X>Model. With SuiteModelTests, on Linux and macOS.
+//             docs/blueprints/suite.md), Foundation only but for Text/
+//             (LiveText on Core Text, macOS only), linked by every <X>Model. With SuiteModelTests, on Linux and macOS.
 //   SuiteKernel  the editor kernel: one Linux-safe library, one module per
 //             editor concept the apps used to build five times (history,
 //             selection, layer tree, keys and easing, snap, transform, export,

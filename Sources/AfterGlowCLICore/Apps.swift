@@ -2,7 +2,8 @@
 // HeadlessDocument type, erased to a HeadlessApp so the router can list and
 // pick one by name, and HeadlessSession, one open document of any app. Both
 // forward to the app's catalog, so a command runs once the app adopts it
-// (adopt-command-catalog) and command-catalog CC-7 fills `run`.
+// (adopt-command-catalog) and command-catalog CC-7 fills `run`. Photo's documents run
+// on `.live` with LiveText on macOS, so text layers draw their words (FakeText on Linux).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -14,6 +15,7 @@ import FlareModel
 import HaloModel
 import LibraryModel
 import PhotoModel
+import SuiteModel
 
 /// One app's headless document type, erased so the router can list it and open files with it.
 public struct HeadlessApp: Sendable {
@@ -92,11 +94,21 @@ struct TypedSession<D: HeadlessDocument>: SessionBox {
 public enum Apps {
     /// The five apps, in the suite's order: photo, design, flare, halo, library.
     public static let all: [HeadlessApp] = [
-        HeadlessApp(PhotoHeadless.self), HeadlessApp(DesignHeadless.self), HeadlessApp(FlareHeadless.self),
+        HeadlessApp(PhotoHeadless.self, open: { try PhotoHeadless.open($0, name: $1, services: photoServices) },
+                    new: { try PhotoHeadless.new($0, services: photoServices) }),
+        HeadlessApp(DesignHeadless.self), HeadlessApp(FlareHeadless.self),
         HeadlessApp(HaloHeadless.self), HeadlessApp(LibraryHeadless.self),
     ]
     /// The suite's Help commands ("suite"), over the `.suitehelp` files `HelpReports` reads. Never in `all`.
     public static let suite = HeadlessApp(SuiteHelpDocument.self, open: { data, _ in try HelpReports.open(data) }, new: HelpReports.new)
+    /// Photo's live services, with Core Text's LiveText where it exists.
+    static var photoServices: PhotoServices {
+        var services = PhotoServices.live
+        #if canImport(AppKit)
+        services.text = LiveText()
+        #endif
+        return services
+    }
     /// The fake app ("fake", SuiteKernel's FakeCanvasDocument). Never in `all`; the tests add it.
     public static let fake = HeadlessApp(FakeCanvasDocument.self)
 

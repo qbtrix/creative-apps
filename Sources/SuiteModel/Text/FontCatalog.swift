@@ -11,7 +11,6 @@
 #if canImport(AppKit)
 import AppKit
 import CoreText
-import SuiteModel
 
 /// Lists the Mac's font families and their faces.
 public struct FontCatalog: FontListing {

@@ -16,7 +16,6 @@
 import AppKit
 import CoreGraphics
 import CoreText
-import SuiteModel
 
 /// Draws placed spans into a straight-alpha sRGB frame.
 public struct GlyphRasterizer: GlyphRasterizing {

@@ -15,7 +15,6 @@
 #if canImport(AppKit)
 import AppKit
 import CoreText
-import SuiteModel
 
 /// Measures spans through Core Text: one advance per grapheme.
 public struct CoreTextMeasurer: TextMeasuring {

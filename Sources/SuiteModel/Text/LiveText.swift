@@ -4,7 +4,6 @@
 // this only forwards. Layout stays in creative-core: callers place graphemes
 // from these metrics and hand the placed spans back to draw.
 #if canImport(AppKit)
-import SuiteModel
 
 /// Measures, lists fonts and draws placed glyphs on Core Text.
 public struct LiveText: TextServices {

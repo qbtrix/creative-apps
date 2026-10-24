@@ -3,7 +3,7 @@
 // on FakeText's three families, the first family's first face picked at 12 pt;
 // each pick lands in the log (`suite.gallery.log`) as
 // "pick(<family>, <face>, <size>)". FP-6: with live services the page lists
-// the live families instead. SuiteUI can't reach SuiteShell's LiveText, so a
+// the live families instead: a
 // host passes its font list as `.environment(\.suiteFontListing, services.text)`;
 // under -SuiteGalleryFakes, or with no list set, the page keeps FakeText's.
 //
