@@ -75,3 +75,4 @@ Next: (2026-10-23T17:39:52Z) #4879 LC-a, #4924 LC-u, #4937 LC-5, #4938 LC-6 wait
 - 2026-10-24T03:49:09Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Probe -7 passed both gates, so the culprit of batch 20261023215139 is its 8th or 9th PR, none ours. Next lane sweep should probe -8. Dev 654fb363 green.
 - 2026-10-24T04:11:01Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Lane now on the last probe, lane/batch-20261023215139-8 (Fast Lane 40060686633 running); that batch holds none of ours. Dev 654fb363 green.
 - 2026-10-24T04:34:07Z: heartbeat: #4879,#4924,#4937,#4938,#4949 all open+clean, none merged; lane bisect probe lane/batch-20261023215139-8 macOS gate running (none of ours); dev 654fb363 green, no slice of ours
+- 2026-10-24T04:56:15Z: heartbeat: #4879,#4924,#4937,#4938,#4949 all open+clean, none merged; lane bisect probe -8 macOS gate still running (none of ours); dev 654fb363 green, no slice of ours
