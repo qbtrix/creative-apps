@@ -26,7 +26,7 @@ import SuiteKernel
 
 /// The tools on Photo's floating tool palette.
 public enum PhotoTool: String, CaseIterable, Sendable {
-    case move, marquee, brush, eraser, clone, heal, crop, eyedropper, gradient, text
+    case move, marquee, brush, eraser, clone, heal, crop, eyedropper, gradient, text, pen
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every other tool works: the canvas sends its drags to
