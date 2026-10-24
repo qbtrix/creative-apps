@@ -49,3 +49,4 @@ utc	stage	event	ref	note
 04:10Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; bisect: probe -8 (#4839) Linux 40060703756 + macOS 40060705865 running; AJ-a #4846 in lane; BK-photo #4965 back on fast-lane
 04:31Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; bisect: probe -8 (#4839) Linux green, macOS 40060705865 running; AJ-a #4846 in lane; BK-photo #4965 open, no labels again
 04:53Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; bisect probe -8 (#4839) macOS 40060705865 still running (since 04:01Z); AJ-a #4846 in lane; BK-photo #4965 open, no labels
+05:15Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; old bisect over; new batch-20261024050226 (12 PRs #4839..#4875, incl AJ-a #4846; none of ours), Linux 40064700946 + macOS 40064703313 running; BK-photo #4965 open, no labels
