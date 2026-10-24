@@ -4,8 +4,7 @@
 // with Save, Don't Save and Cancel (`<app>.close.save|dontSave|cancel`, from UnsavedPrompt.answers); Escape
 // cancels and the window stays, still dirty; ⌘W again and ⌘D (Don't Save) closes it. Then a fresh launch, an
 // edit and File > New (Open… in Halo, which has no New that replaces the project) ask the same; Save on the untitled document opens the Save panel, and cancelling the
-// panel (a sheet, or the app-modal dialog Design's runs) keeps the document. Each app's leg skips by name until its slice turns it on (UP-6 Design, UP-8 Photo,
-// UP-10 Flare, UP-12 Halo); the test runs every leg and skips at the end naming the legs still waiting.
+// panel (a sheet, or the app-modal dialog Design's runs) keeps the document. Every leg runs; none skips (UP-14).
 // The bundle doesn't link SuiteKernel, so the words below mirror UnsavedPrompt (Sources/SuiteKernel/Session/
 // DocumentSession.swift) and must change with it.
 import XCTest
@@ -24,9 +23,6 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
         let edit: @MainActor (Journey) -> Void
     }
 
-    /// The editors whose leg runs; each slice adds its app here and deletes its skip.
-    private static let live: Set<String> = ["Design", "Photo", "Flare", "Halo"]
-
     /// UnsavedPrompt.message(for:).
     private static func message(for name: String) -> String {
         "Do you want to save the changes made to the document \u{201C}\(name)\u{201D}?"
@@ -36,12 +32,8 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
     private static let answers = [("save", "Save"), ("dontSave", "Don't Save"), ("cancel", "Cancel")]
 
     /// SJ-UP: every editor asks the same question the same way before it closes or replaces a dirty document.
-    @MainActor func testEveryEditorAsksBeforeClosing() throws {
-        var waiting: [String] = []
-        for leg in Leg.allCases {
-            do { try run(leg) } catch let skip as XCTSkip { waiting.append(skip.message ?? "a leg skipped") }
-        }
-        if !waiting.isEmpty { throw XCTSkip(waiting.joined(separator: "; ")) }
+    @MainActor func testEveryEditorAsksBeforeClosing() {
+        for leg in Leg.allCases { run(leg) }
     }
 
     // MARK: - Legs
@@ -50,16 +42,16 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
     /// `@MainActor` function is implicitly Sendable, and XCTestCase isn't).
     private enum Leg: CaseIterable { case design, photo, flare, halo }
 
-    @MainActor private func run(_ leg: Leg) throws {
+    @MainActor private func run(_ leg: Leg) {
         switch leg {
-        case .design: try designLeg()
-        case .photo: try photoLeg()
-        case .flare: try flareLeg()
-        case .halo: try haloLeg()
+        case .design: designLeg()
+        case .photo: photoLeg()
+        case .flare: flareLeg()
+        case .halo: haloLeg()
         }
     }
 
-    @MainActor private func designLeg() throws {
+    @MainActor private func designLeg() {
         askBeforeClosing(Editor(
             app: "Design", prefix: "design", name: "Untitled",
             arguments: ["-DesignServices", "live", "-DesignFixture", "cards", "-SuiteWindowSize", "1024x768"],
@@ -70,8 +62,7 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
             }))
     }
 
-    @MainActor private func photoLeg() throws {
-        guard Self.live.contains("Photo") else { throw XCTSkip("waits on UP-8") }
+    @MainActor private func photoLeg() {
         let recovery = FileManager.default.temporaryDirectory.appending(path: "photo-unsaved-\(UUID().uuidString)")
         addTeardownBlock { try? FileManager.default.removeItem(at: recovery) }
         askBeforeClosing(Editor(
@@ -83,15 +74,13 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
             }))
     }
 
-    @MainActor private func flareLeg() throws {
-        guard Self.live.contains("Flare") else { throw XCTSkip("waits on UP-10") }
+    @MainActor private func flareLeg() {
         askBeforeClosing(Editor(
             app: "Flare", prefix: "flare", name: "Untitled", arguments: ["-FlareFixture", "bounce"],
             edit: { flare in flare.element("suite.sidebar").buttons["New Layer"].click() }))
     }
 
-    @MainActor private func haloLeg() throws {
-        guard Self.live.contains("Halo") else { throw XCTSkip("waits on UP-12") }
+    @MainActor private func haloLeg() {
         askBeforeClosing(Editor(
             app: "Halo", prefix: "halo", name: "Untitled", arguments: ["-HaloSample", "two-comps"],
             newItem: "Open\u{2026}", canvas: "halo.viewer",
