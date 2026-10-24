@@ -26,7 +26,7 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
-- 2026-10-24T12:44Z: hb13: #5088/#5089/#5091 unchanged since 08:02Z (fast-lane only, unmerged, no needs-* label). dev has not moved (base f58e1190 on #5088 and on other leads' PRs), so the lane is holding everything, not this slice. No supervisor answer; UP-z still waits on the app slices + shared-codecs:SC-z. Keep polling.
+- 2026-10-24T12:44Z: hb13: #5088/#5089/#5091 unchanged since 08:02Z (fast-lane only, unmerged, no needs-* label). Correction: dev did move (last 6be19b34 at 12:34Z; older PRs #4911, #4617 and #4616 landed). #5150 (10:55Z, "fix(lane): list every open PR, not the newest 100") likely explains why the lane never saw #5088, so a batch should pick it up now. No supervisor answer; UP-z still waits on the app slices + shared-codecs:SC-z. Keep polling.
 
 - 2026-10-24T12:22Z: hb12: #5088/#5089/#5091 unchanged since 08:02Z (fast-lane only, unmerged, no needs-* label); no supervisor answer; UP-z still waits on the app slices + shared-codecs:SC-z. Keep polling.
 
