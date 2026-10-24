@@ -40,3 +40,4 @@ utc	stage	event	ref	note
 2026-10-24T00:10Z	check-in	no merges since 22:40Z; no workflow run in the repo since 23:10Z (lane sweep idle, CI 23:06Z and journeys still in_progress); our PRs unchanged; 0 open findings
 2026-10-24T00:31Z	check-in	lane resumed 00:24Z, bisecting batch-20261023215139 (probe -6: #4818..#4836, none ours); full CI 40037716897 on dev 654fb363 green; our PRs unchanged; 0 open findings
 2026-10-24T00:54Z	check-in	lane still on batch-20261023215139-6 (Linux green, macOS gate running); no merges since 22:40Z; our PRs unchanged; 0 open findings
+2026-10-24T01:16Z	check-in	lane batch-20261023215139-6 macOS gate still running (50 min); no merges since 22:40Z; our PRs unchanged; 0 open findings
