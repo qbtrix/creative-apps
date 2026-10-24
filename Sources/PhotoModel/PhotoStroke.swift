@@ -9,7 +9,7 @@
 // Drags route by component: with a Free Transform in progress every drag goes
 // to `transformDrag` (PhotoTransform.swift); otherwise by tool, marquee to
 // `selectionDrag` (PhotoSelectionMask.swift), crop to `cropDrag`
-// (PhotoCropSize.swift), eyedropper to `sampleDrag` (PhotoEyedropper.swift),
+// (PhotoCropSize.swift), eyedropper to `sampleDrag` (PhotoSample+Kernel.swift),
 // and the rest paint or move here.
 //
 //   brush, eraser  a round stroke through the pointer samples on the selected
