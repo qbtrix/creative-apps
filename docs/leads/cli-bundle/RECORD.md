@@ -4,7 +4,7 @@ Issue: #3773 · Packet: docs/blueprints/suite/features/cli-bundle.md
 Run: act-1a16daeb4e8-vghz (relaunch; earlier act-1a16a37a3ed-0kyn, act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
 Stage: 3 polling (CB-z: #4999 and #5000 waiting on lane)
 Base: 9f476af7419db0cc5753aa119ec0bd3b1a12899a (main, verified 11:30Z; dev 6ad8cad is main + 4)
-Next: wait for full CI run 40087964618 on dev (holds lane fix #5150) to promote main; then the lane lists #4999. Once #4999 merges, rebuild #5000 on dev (3 docs files), drop no-fast-lane, move Head.
+Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) batches #4999; once it merges, rebuild #5000 on dev (3 docs files + feature_issue #3773), drop no-fast-lane, move Head.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -58,3 +58,4 @@ Next: wait for full CI run 40087964618 on dev (holds lane fix #5150) to promote 
 - lead/cli-bundle rebased on main 9f476af (88 record commits, docs/leads only).
 - Lane starvation cause (--limit 100) fixed by #5150 on dev 4f00afb; lane runs scripts from main, so it applies after full CI run 40087964618 promotes.
 - #4999 open, clean, Head 941da48 matches; #5000 held (no-fast-lane) until #4999 merges.
+- 12:12Z full CI 40087964618 green; main promoted 9f476af -> 4f00afb (holds #5150).
