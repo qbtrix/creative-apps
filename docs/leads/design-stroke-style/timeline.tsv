@@ -160,3 +160,4 @@ time	kind	note
 2026-10-24T11:26:15Z	3	check	-	dev 6ad8cadb unchanged; batch 20261024110214 in flight, no lead PR in it; lead PRs waiting
 2026-10-24T11:48:12Z	3	check	-	dev 6ad8cadb unchanged; batch 20261024110214 still in flight, no lead PR in it
 2026-10-24T12:10:58Z	3	check	-	dev 6ad8cadb unchanged; batch 20261024110214 bisecting (probe -6), no lead PR in it; #4864 #4888 #3759 clean, no needs-fix
+2026-10-24T12:32:51Z	3	check	-	dev 78983bc3 (#4911 landed); no lead PR in a batch; #4864 #4888 #3759 clean, no needs-fix/needs-rebase
