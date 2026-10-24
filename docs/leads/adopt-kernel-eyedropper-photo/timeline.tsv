@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-24T07:44:14Z	wait	check	no change: #4837 open (supervisor prefix pending), #4943 waits
 2026-10-24T23:20Z	0	relaunch	-	run act-1a1703c2617-uijr; status branch rebuilt on main ef37711d
 2026-10-24T23:22Z	3	check	#4943	EP-m merged #4837 08:02Z; #4943 EP-z eligible (Linux 40078192845 green), queued behind 120 ready PRs
+2026-10-24T23:50Z	check	EP-z	#4943 open, clean, lane-eligible; no needs-fix/needs-rebase; waiting on batch
