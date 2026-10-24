@@ -112,3 +112,4 @@ utc	stage	event	ref	note
 2026-10-24T16:16:35Z	poll	#4858 (HX-u) in lane batch 20261024160327; awaiting batch CI
 2026-10-24T16:37:30Z	poll	#4858 (HX-u) still in batch 20261024160327 (CI running, no probes)
 2026-10-24T16:59:17Z	poll	#4858 (HX-u) in batch 20261024160327, CI running; dev 33cd6e97
+2026-10-24T17:28:23Z	merge	#4858 (HX-u) merged 151b422a; #4874 (HX-m) now on dev, conflicted, left for lane integration
