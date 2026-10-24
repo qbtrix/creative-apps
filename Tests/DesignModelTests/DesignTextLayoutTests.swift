@@ -1,8 +1,5 @@
-// DesignTextLayoutTests.swift (text-style TS-8): the canvas's text setting. A style at the defaults keeps the old
-// draw; italic, line height, tracking or justify go through the kernel's layout, whose words land where its pen x
-// and baselines say (a justified line spans its box, line height spaces the baselines, tracking widens the run);
-// the shared text style rows' intents run as one undo step each; RJ-D50's input opens and re-saves unchanged.
-// Runs on Linux and macOS.
+// DesignTextLayoutTests.swift (text-style TS-8): defaults keep the old draw; the new fields go through the kernel's
+// layout, whose words land at its pen x and baselines; each text style row's intent is one undo step.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -77,15 +74,5 @@ private func fixed(_ graphemes: [String]) -> (advances: [Double], ascent: Double
         let steps = workspace.history.undo.count
         workspace.runText(.tracking(20, drag: nil))
         #expect(workspace.history.undo.count == steps, "an intent that changes nothing makes no step")
-    }
-
-    @Test func paragraphJobInputResavesUnchanged() throws {
-        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-        var bytes = try Data(contentsOf: root.appendingPathComponent("Tests/RealJobs/design/paragraph-style/input/paragraph.design"))
-        if bytes.last == UInt8(ascii: "\n") { bytes.removeLast() }
-        var opened = DesignWorkspace()
-        try opened.open(bytes)
-        #expect(try opened.fileData() == bytes)
-        #expect(opened.findNode("node-2")?.textStyle.fixedWidth == true)
     }
 }

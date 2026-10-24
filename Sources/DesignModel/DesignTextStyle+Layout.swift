@@ -1,8 +1,6 @@
-// DesignTextStyle+Layout.swift (text-style TS-8): how the canvas sets a text layer whose style uses the new fields.
-// A style at the defaults (upright, line height 1.2, no tracking, not justified) draws as it always has; any other
-// goes through the kernel's `TextStyleRules.layout`, and `laidOut` hands the app its words, each at its pen x and
-// baseline (justify gaps, alignment lead and tracking included), plus the extent they fill, so measuring and drawing
-// read the one layout. `runText` runs a shared text style row's intent through Design's catalog. Linux-safe.
+// DesignTextStyle+Layout.swift (text-style TS-8): a style off the defaults (italic, line height, tracking, justify)
+// is set by the kernel's `TextStyleRules.layout`; `laidOut` gives the app each word at its pen x and baseline and the
+// extent, so measuring and drawing read one layout. `runText` runs a text style row's intent. Linux-safe.
 import SuiteKernel
 
 /// One word of a laid-out text layer: its text, its pen x and its baseline y, in points from the box's top left.

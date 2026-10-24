@@ -1,12 +1,7 @@
-// DesignJourneyTests+TextStyle.swift (text-style TS-3, DJ-TS; turned on by
-// TS-8): Design's paragraph style journey. On the `cards` fixture at 1024 × 768,
-// every step with the mouse on visible controls: a box dragged 150 pt wide with
-// the Text tool takes two sentences; with its row selected, the shared text
-// style rows (`suite.text.*`) set Italic, Justify, Line Height 1.5 and Letter
-// Spacing 20, each one undo step whose canvas picture differs from the one
-// before it; Undo then steps back one control at a time. The family pick and
-// its refit wait on a measurer in the app (`services.text` isn't wired, so a
-// refit only scales with size); the Model tests cover it.
+// DesignJourneyTests+TextStyle.swift (text-style TS-3, DJ-TS; on since TS-8): on `cards` at 1024 × 768, a
+// dragged 150 pt text box takes two sentences; the shared rows (`suite.text.*`) set Italic, Justify, Line Height
+// 1.5 and Letter Spacing 20, each one step that changes the canvas; Undo steps back one at a time. No family-pick
+// refit step: `services.text` isn't wired in the app, so the Model tests cover it.
 import XCTest
 
 final class DesignTextStyleJourneyTests: XCTestCase {
@@ -32,8 +27,9 @@ final class DesignTextStyleJourneyTests: XCTestCase {
         start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 150 * points, dy: 24 * points)))
         design.app.typeText("The first sentence runs past the box. The second one wraps below it.")
         canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.9)).click()
-        XCTAssert(Self.waitForGone(design.element("design.text")), "the click on the blank area left the text editor open")
-        let row = newLayerRow(design)
+        XCTAssert(design.element("design.text").waitForNonExistence(timeout: 5), "the click on the blank area left the text editor open")
+        let row = design.element("suite.sidebar").descendants(matching: .any).matching(NSPredicate(
+            format: "identifier BEGINSWITH 'design.layer.node-' AND NOT (identifier IN %@)", Array(Self.fixtureLayers))).firstMatch
         XCTAssert(row.waitForExistence(timeout: 5), "no Layers row for the dragged text")
         row.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click()
         let inspector = design.element("suite.inspector")
@@ -92,27 +88,5 @@ final class DesignTextStyleJourneyTests: XCTestCase {
         XCTAssert(inspector.textFields.firstMatch.waitForExistence(timeout: 5), "clicking \(id) opened no typing field")
         design.app.typeKey("a", modifierFlags: .command)
         design.app.typeText("\(value)\r")
-    }
-
-    /// The first Layers row that isn't one of the fixture's layers.
-    @MainActor private func newLayerRow(_ design: Journey) -> XCUIElement {
-        let rows = design.element("suite.sidebar").descendants(matching: .any)
-            .matching(NSPredicate(format: "identifier BEGINSWITH 'design.layer.'"))
-        for _ in 0..<25 {
-            if let found = rows.allElementsBoundByIndex.first(where: { !Self.fixtureLayers.contains($0.identifier) }) {
-                return found
-            }
-            Thread.sleep(forTimeInterval: 0.2)
-        }
-        return rows.matching(NSPredicate(format: "identifier == 'design.layer.none'")).firstMatch
-    }
-
-    /// Whether `element` is gone within five seconds.
-    @MainActor private static func waitForGone(_ element: XCUIElement) -> Bool {
-        for _ in 0..<25 {
-            if !element.exists { return true }
-            Thread.sleep(forTimeInterval: 0.2)
-        }
-        return false
     }
 }
