@@ -135,3 +135,4 @@ utc	stage	event	ref	note
 2026-10-24T13:23:39Z	status	batch 20261024110214 probe 6 red on RenderBudgetToneRowsTests (not ours); probe 3 running
 2026-10-24T13:50:14Z	heartbeat	probe 3 macOS running (Linux green)
 2026-10-24T14:10:29Z	heartbeat	probe 3 macOS still running
+2026-10-24T14:26:45Z	status	batch order 5087,5097,5138,5144,5006,5007,5008,5025,5029,5030,5035,5036; probe 3 green, probe 6 red -> culprit #5006 or #5007 (probe 4 running); #5025/#5036 go to the next batch
