@@ -54,3 +54,4 @@ utc	stage	event	ref	note
 2026-10-24T08:16Z	W0	check-in	PY-1	LS-1 #4911 open; Style/ not on dev 1bbaba6c1
 2026-10-24T08:40Z	W0	check-in	PY-1	LS-1 #4911 open; Style/ not on dev 1bbaba6c1
 2026-10-24T09:04Z	W0	check-in	PY-1	LS-1 #4911 open, clean; Style/ not on dev 1bbaba6c1; dev-red #5113 not ours
+2026-10-24T09:27Z	W0	check-in	PY-1	LS-1 #4911 in lane batch 20261024081307 (bisecting, probes -0/-1/-3/-6); Style/ not on dev 9f476af74

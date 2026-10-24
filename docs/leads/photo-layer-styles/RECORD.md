@@ -3,7 +3,7 @@
 Issue: #3793 · Packet: docs/blueprints/photo/features/layer-styles.md
 Run: act-1a16cd04539-4jc0 · Session: claude/feature-lead-playbook-9tb3qe · Started: 2026-10-24T07:30Z (takes over from act-1a16958d691-2ax3)
 Stage: 0 setup, blocked: suiteui layer-styles LS-a (the contract slice) has not merged, so rule 12 is not met yet
-Base: 1bbaba6c1 (dev at 08:40Z)
+Base: 9f476af74 (dev at 09:27Z)
 Next: re-check LS-1 #4911 (open, clean, fast-lane, queued) each tone wave; once `Sources/SuiteImaging/Style/` is on dev, start PY-1 on its stubs
 
 ## Slices
@@ -39,3 +39,4 @@ Next: re-check LS-1 #4911 (open, clean, fast-lane, queued) each tone wave; once 
 - 2026-10-23T15:35Z: dev 721168a8f has SuiteImaging (Adjust, Color, Retouch, Route, Tone) but no Style/: no `LayerStyle`, `LayerStyleTarget` or `StyleCommands`. #3937 is unparked under rule 12 too but has no LS-a PR yet. Rule 20 still rules out a Photo copy, so PY-1 waits; this run builds tone-controls meanwhile.
 - Blocked on suiteui layer-styles LS-a (#3937, still `waiting-on-prereq` at 03:13Z). LS-a waits on suite-imaging:IM-a (IM-1 #4028 still open: Linux green at 02:30Z, macOS job skipped, awaiting the supervisor macOS run and merge; IM-2 stacked), brush-keys:BK-u, gradient-fill:GF-a, and core types from LE-a. Bump #3825 (7966e5a) merged 2026-10-21 but carries only Flare core PRs. No `SuiteImaging` target or `LayerStyle` types on dev 66a8458.
 - Belt watches `lead/photo-layer-styles` (with `docs/leads/photo-layer-styles/`). This record is mirrored there; `lead/layer-styles` is the brief's original channel and stays in sync.
+- 09:27Z: LS-1 #4911 is 6th of 12 in lane batch 20261024081307, which is bisecting. PY-1 starts when it lands on dev.
