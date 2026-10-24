@@ -64,3 +64,4 @@ Next: HX-8 (halo.md, built, feature-done) once placed-images:PH-z is built; Belt
 - 02:37Z heartbeat: lane bisect probe -9 (up to #4864) macOS gate 40050012604 failed at 02:33, so the culprit sits between #4836 and #4864, outside our PRs. Bisect continues; our slices are still queued. dev is unchanged at 654fb363; no findings and no supervisor reply.
 - 02:59Z heartbeat: lane bisect probe -7 (up to #4837) started at 02:43 (Linux 40055390941, macOS 40055393733). dev is unchanged at 654fb363; our slices are still queued; no findings and no supervisor reply.
 - 03:20Z heartbeat: lane bisect probe -7 (up to #4837) macOS gate 40055393733 still running. dev is unchanged at 654fb363; our slices are still queued; no findings and no supervisor reply.
+- 03:41Z heartbeat: lane bisect probe -7 (up to #4837) macOS gate 40055393733 still running (58 min). dev is unchanged at 654fb363; our slices are still queued; no findings and no supervisor reply.
