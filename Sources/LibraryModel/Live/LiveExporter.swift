@@ -23,9 +23,7 @@ public struct LiveExporter: PhotoExporting {
     }
 
     public func plan(_ photos: [PhotoItem], options: ExportOptions, existingNames: Set<String>) -> ExportPlan {
-        let stems = photos.enumerated().map { index, photo in
-            options.naming.stem(for: photo, index: index, count: photos.count)
-        }
+        let stems = options.naming.stems(for: photos)
         let names = ExportNames.unique(stems: stems, format: options.format, sidecar: options.sidecar,
                                        existing: existingNames)
         let dropping = ExportRules.dropped(options.metadata).properties

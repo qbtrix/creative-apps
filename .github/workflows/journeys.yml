@@ -21,12 +21,24 @@
 # HEAD_SHA (the `sha` input) and BRANCH, passed to the scripts in the shell;
 # the run title names the CI run it follows ("after CI run <id>: ...").
 #
-# Concurrency is on the macOS job, keyed by branch and scope
+# The macOS job starts only once `Journeys wait` (scripts/journeys-wait, a
+# cheap ubuntu job) lets it: the org has about 5 hosted macOS runners, and
+# journeys runs of 2-4 h each were holding 3-5 of them, so the lane's macOS
+# gate and the dev run behind Promote queued an hour. The wait polls every
+# 3 min and goes only when no ci.yml run is queued for a runner and fewer than
+# 2 older journeys runs are alive (queued or running), oldest first, so the
+# journeys hold at most 2 runners and CI's queue drains ahead of them. When a
+# newer run of the same branch and scope is alive it cancels this run instead
+# (that run covers a newer head). After 5 h it goes anyway, so every app's
+# journeys still run. The fast lane ignores the `Journeys wait` check
+# (REPORT_ONLY_RE in scripts/fast-lane.sh).
+#
+# Concurrency is on the run, keyed by branch and scope
 # (journeys-<branch>-<app|full>), never cancelling a running one: GitHub keeps
-# the running run plus the newest pending one and cancels a superseded pending
-# one, so a journeys run that started always finishes (Findings, Audit lower)
-# and only the newest waits for a runner. Its own group, so it never holds CI's
-# `ci-dev`.
+# the running run (waiting or on macOS) plus the newest pending one and cancels
+# a superseded pending one, so a journeys run that reached macOS always
+# finishes (Findings, Audit lower) and only the newest waits. Its own group, so
+# it never holds CI's `ci-dev`.
 name: Journeys
 run-name: "${{ inputs.ci_run && format('after CI run {0}: ', inputs.ci_run) || '' }}journeys ${{ inputs.app || 'full' }} at ${{ inputs.sha || github.sha }}"
 
@@ -53,17 +65,37 @@ env:
   HEAD_SHA: ${{ inputs.sha || github.sha }}
   BRANCH: ${{ github.ref_name }}
 
+concurrency:
+  group: journeys-${{ github.ref_name }}-${{ inputs.app || 'full' }}
+  cancel-in-progress: false
+
 jobs:
+  # Holds on ubuntu until the macOS job may take a runner (header). Its name
+  # must not start with "macOS": the lane and the sentinel count those jobs.
+  # actions: write lets it cancel its own run when a newer one supersedes it.
+  wait:
+    name: Journeys wait
+    runs-on: ubuntu-latest
+    timeout-minutes: 330  # scripts/journeys-wait gives up holding after 300
+    permissions:
+      actions: write
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SCOPE: ${{ inputs.app || 'full' }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { sparse-checkout: scripts/journeys-wait, sparse-checkout-cone-mode: false }
+      - run: scripts/journeys-wait
+
   # Its own runner and timeout: the five apps' journeys take an hour or more.
   # Audit lower reads its `ui` output and `ui-screens`.
   journeys:
     name: ${{ inputs.app && format('macOS journeys ({0})', inputs.app) || 'macOS journeys' }}
+    needs: [wait]
     runs-on: macos-26
     timeout-minutes: 150
     continue-on-error: true
-    concurrency:
-      group: journeys-${{ github.ref_name }}-${{ inputs.app || 'full' }}
-      cancel-in-progress: false
     outputs:
       ui: ${{ steps.ui.outcome }}
     # issues: write lets scripts/quarantine check each quarantined journey's
@@ -98,6 +130,9 @@ jobs:
       # through each app (UITests/) and exports a whole-window PNG per step,
       # uploaded as `ui-screens`. A failed journey fails this job (not the
       # run), and the log goes to Findings.
+      # On this hosted runner (RUNNER_ENVIRONMENT=github-hosted) it skips the
+      # journeys that post key events, which need Accessibility access the runner
+      # lacks; they run on the local Mac gate (docs/engineering.md).
       # XcodeGen is a pinned release, checked against its sha256 (Homebrew
       # can't pin a version). automationmodetool lets the test runner drive
       # the UI without a password prompt.

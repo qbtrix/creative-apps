@@ -129,7 +129,7 @@ public struct AIAccessCommands: Commands {
 
     public var body: some Commands {
         CommandGroup(after: .windowArrangement) {
-            Button(AIAccessPrompt.menuTitle) { AIAccessCenter.shared.showList() }
+            Button(AIAccessPrompt.menuTitle, systemImage: AIAccessPrompt.menuSymbol) { AIAccessCenter.shared.showList() }
         }
     }
 }
