@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-24T12:27Z	3	merged	#4911	LS-1 layer style module stubs merged as 78983bc3; builders opening stacked LS-2 (lead/layer-styles-LS-a-2) and LS-5 (lead/layer-styles-LS-m) PRs
 2026-10-24T12:50Z	3	check	12:49Z	no new merges; LS-2 PR #5174 opened by builder (LS-5 builder running CI); lane sweep 40094798603 in progress, none completed since main moved; 0 findings for feature
 2026-10-24T12:52Z	3	pr-opened	#5174	LS-2 open, fast-lane, clean, Head 88b145d9 matches, no footer; LS-3 stacks on its merge. LS-5 builder in local CI
+2026-10-24T12:54Z	3	pr-opened	#5176	LS-5 open, fast-lane, Head 2a220ddf, mutate 4/4, no footer; LS-6/LS-7 stack on its merge
