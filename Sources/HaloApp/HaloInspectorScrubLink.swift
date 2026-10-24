@@ -1,7 +1,7 @@
 // HaloInspectorScrubLink.swift: a TRANSFORM bar's scrub on the screen's
 // refresh (CL-probe, #4275). HaloPropertyRowView hands it every pointer
 // sample of a drag on its bar; HaloInspectorScrub (HaloModel) holds them. The
-// first starts a link from the window's `haloRefreshLink` (HaloLiveEdit.makeLink); each refresh writes the latest
+// first starts a link from the window's `refreshLink` (HaloLiveEdit.makeLink); each refresh writes the latest
 // value once through `write` (the window's HaloLiveEdit) and, under
 // `-SuitePerfProbe`, records one `inspector-scrub` sample per event it shows,
 // stamped shown on the next main-actor turn as HaloProbe's are. An idle
@@ -12,7 +12,7 @@ import SuiteUI
 
 @MainActor final class HaloInspectorScrubLink {
     private var scrub = HaloInspectorScrub()
-    private var link: (any HaloRefreshLink)?
+    private var link: (any RefreshLink)?
     private var write: @MainActor (Double) -> Void = { _ in }
     private var probe = HaloProbe(nil)
 
@@ -20,7 +20,7 @@ import SuiteUI
     /// kept it. `write` puts a value on screen; `probe` records what each
     /// refresh shows.
     func take(
-        _ value: Double?, probe: HaloProbe, makeLink: HaloPlaybackDriver.LinkMaker,
+        _ value: Double?, probe: HaloProbe, makeLink: PlaybackDriver.LinkMaker,
         write: @escaping @MainActor (Double) -> Void
     ) {
         self.write = write

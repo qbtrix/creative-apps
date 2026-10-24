@@ -19,6 +19,7 @@
 // a scrub's once the drag rests (`settle`). Presentation state only.
 import HaloModel
 import Observation
+import SuiteUI
 import SwiftUI
 
 @MainActor @Observable final class HaloLiveEdit {
@@ -34,11 +35,11 @@ import SwiftUI
     @ObservationIgnored var playhead = HaloLivePlayhead()
     /// The deferred take-back of a ruler drag that has rested.
     @ObservationIgnored private var settling: Task<Void, Never>?
-    /// The window's `haloRefreshLink`, which HaloWindow's RefreshLinkHandoff sets once it appears;
+    /// The window's `refreshLink`, which HaloWindow's RefreshLinkHandoff sets once it appears;
     /// an inspector scrub paces its writes on it. A row reading the closure
     /// from the environment would re-run whenever the window does, since
     /// SwiftUI can't compare closures.
-    @ObservationIgnored var makeLink: HaloPlaybackDriver.LinkMaker = HaloScreenLink.make
+    @ObservationIgnored var makeLink: PlaybackDriver.LinkMaker = ScreenRefreshLink.make
 
     /// What a viewer shows of `model`: the live drag's project, else the
     /// playing frame, else `model` itself.

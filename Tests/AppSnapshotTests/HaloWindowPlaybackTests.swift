@@ -2,7 +2,7 @@
 // (#1296), on the render budget harness (RenderBudgetHarness.swift). It hosts
 // HaloWindow itself on `-HaloSample keyed` (24 fps, live services), already
 // playing, with the transport's driver on a HaloFakeLink (the
-// `haloRefreshLink` environment value), since the headless CI runner can't
+// `refreshLink` environment value), since the headless CI runner can't
 // serve a real display link. It fires one second of 120 Hz refresh targets,
 // one per real 1/120 s, and counts body runs (debug-only counters). Spec
 // (#4274): ticks land in HaloLiveEdit, so HaloWindow runs at most 3 times and
@@ -60,7 +60,7 @@ extension BodyCountSuites {
             let start = 5000.0
             project.play(at: start)
             var links: [HaloFakeLink] = []
-            let w = RenderBudgetWindow(HaloWindow(model: project).environment(\.haloRefreshLink) { receive in
+            let w = RenderBudgetWindow(HaloWindow(model: project).environment(\.refreshLink) { receive in
                 let link = HaloFakeLink(receive)
                 links.append(link)
                 return link

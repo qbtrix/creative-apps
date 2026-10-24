@@ -8,9 +8,9 @@
 // disagrees with its disabled state (#4352). Play shows pause.fill while playing and reads `playLabel`
 // as its value. Loop is a button-style Toggle that reads `loopLabel` and
 // draws its on state (system highlight, accent ink) so a person can see
-// whether looping is on. It owns the HaloPlaybackDriver: running while
+// whether looping is on. It owns a PlaybackDriver (SuiteUI): running while
 // `model.playback.playing`, stopped otherwise or once the transport leaves
-// the screen, on the `haloRefreshLink` the environment gives; each refresh
+// the screen, on the `refreshLink` the environment gives; each refresh
 // sends `.tick(now)` through `perform`, and a playhead that moved while
 // playing (the live edit's playing frame, HaloPlayheadShown) is a `playback`
 // frame in the probe (HaloProbe). Each
@@ -25,8 +25,8 @@ struct HaloTransport: View {
     let model: HaloProject
     var perform: @MainActor (HaloCommand) -> Void = { _ in }
 
-    @State private var driver: HaloPlaybackDriver?
-    @Environment(\.haloRefreshLink) private var makeLink
+    @State private var driver: PlaybackDriver?
+    @Environment(\.refreshLink) private var makeLink
     @Environment(\.suiteProbeRecorder) private var recorder
 
     var body: some View {
@@ -41,7 +41,7 @@ struct HaloTransport: View {
         .background {
             HaloPlayheadShown(model: model) { shown in
                 Color.clear.onChange(of: shown.selectedComposition?.playheadFrame) {
-                    if shown.playback.playing { driver?.frameShown() }
+                    if shown.playback.playing, let at = driver?.lastTarget { HaloProbe(recorder).drew(HaloProbe.playback, at: at) }
                 }
             }
         }
@@ -79,8 +79,7 @@ struct HaloTransport: View {
             return
         }
         let perform = perform
-        let running = driver ?? HaloPlaybackDriver(onTick: { now in perform(.tick(now)) }, makeLink: makeLink)
-        running.probe = HaloProbe(recorder)
+        let running = driver ?? PlaybackDriver(onTick: { now, _ in perform(.tick(now)); return true }, makeLink: makeLink)
         driver = running
         running.start()
     }

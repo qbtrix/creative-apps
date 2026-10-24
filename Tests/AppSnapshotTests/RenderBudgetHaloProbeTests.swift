@@ -82,7 +82,7 @@ extension BodyCountSuites {
             let start = 5000.0
             project.play(at: start)
             var links: [HaloFakeLink] = []
-            let window = HaloWindow(model: project).environment(\.haloRefreshLink) { receive in
+            let window = HaloWindow(model: project).environment(\.refreshLink) { receive in
                 let link = HaloFakeLink(receive)
                 links.append(link)
                 return link
