@@ -10,9 +10,13 @@
 // failed write removes the files it wrote. Cancel cancels the task, which
 // leaves the run idle with nothing written. The rasterizer is FakeRasterizer
 // on the fakes and StageRasterizer otherwise. Reveal in Finder selects the
-// first file written.
+// first file written. MP4 and GIF (export-pack FV-2) stream the Model's frame
+// plan into one `<scene>.mp4` or `.gif` through `writeVideo` on shell-media's
+// writers (FakeMedia on the fakes), which delete a cancelled partial file.
 import AppKit
 import FlareModel
+import SuiteModel
+import SuiteShell
 
 extension FlareWindow {
     /// Acts on an export intent.
@@ -24,6 +28,9 @@ extension FlareWindow {
         case .setStep(let step): model.setExportStep(step)
         case .setScale(let scale): model.setExportScale(scale)
         case .setTransparent(let on): model.setExportTransparent(on)
+        case .setSize(let scale): model.setExportSize(.scale(scale))
+        case .setFrameRate(let fps): model.setExportFrameRate(fps)
+        case .setLoop(let on): model.setExportLoop(on)
         case .start: startExport()
         case .cancel:
             if case .running = model.exportState { exportTask?.cancel() } else { model.dismissExport() }
@@ -49,6 +56,7 @@ extension FlareWindow {
         let exporter = model.services.export
         let rasterizer: any FrameRasterizing = model.services.isPreview ? FakeRasterizer() : StageRasterizer()
         let named = launch.exportFolder
+        let media: any MediaEncoding = model.services.isPreview ? FakeMedia() : LiveMedia()
         exportedFile = nil
         exportTask = Task {
             let (fractions, sink) = AsyncStream.makeStream(of: Double.self)
@@ -58,11 +66,25 @@ extension FlareWindow {
                 guard let folder = named.map({ URL(fileURLWithPath: $0) }) ?? FlareFileDialogs.chooseFolder() else {
                     throw CancellationError()
                 }
-                let result = try await exporter.export(document, options: options, rasterizer: rasterizer) { sink.yield($0) }
-                try Task.checkCancellation()
-                let names = try await Task.detached(priority: .userInitiated) {
-                    try Self.write(result.files, into: folder)
-                }.value
+                let names: [String]
+                if options.format.writesVideo {
+                    let plan = try model.exportVideoPlan()
+                    let name = "\(options.sceneID).\(options.format.rawValue)"
+                    if FileManager.default.fileExists(atPath: folder.appending(path: name).path) {
+                        throw ExportWriteRefusal.alreadyThere(name: name, folder: folder.lastPathComponent)
+                    }
+                    _ = try await exporter.writeVideo(
+                        document, sceneID: options.sceneID, plan: plan, to: folder.appending(path: name).path,
+                        media: media, rasterizer: rasterizer
+                    ) { sink.yield($0) }
+                    names = [name]
+                } else {
+                    let result = try await exporter.export(document, options: options, rasterizer: rasterizer) { sink.yield($0) }
+                    try Task.checkCancellation()
+                    names = try await Task.detached(priority: .userInitiated) {
+                        try Self.write(result.files, into: folder)
+                    }.value
+                }
                 exportedFile = names.first.map { folder.appending(path: $0) }
                 model.endExport(.success(names))
             } catch {

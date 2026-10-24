@@ -1,6 +1,7 @@
 // FlareLottieNote.swift: the window's side of a Lottie open (feature lottie-open LO-4,
 // docs/blueprints/flare/features/lottie-open.md). A .json path, picked in the open panel or dropped on the stage
-// where the suite's drop rule refuses it, opens through FlareLottieOpen (`opensAsLottie`, `lottieDrops`). The app
+// (planned as Flare's own open, so the drop mark says "Open in Flare"), opens through FlareLottieOpen
+// (`opensAsLottie`, `lottieDrops`). The app
 // reads and opens the file off the main actor and lands the result through `finishLottieOpen`: the document opens
 // untitled, so Save asks for a .flare and never writes the JSON, and `importNote` keeps one sentence per part the
 // reader left out, which the note above the stage lists (`importNoteRows`, "Nothing was skipped." for none, the first
@@ -42,12 +43,17 @@ extension FlareWorkspace {
         FlareLottieOpen.fileExtensions.contains(URL(fileURLWithPath: path).pathExtension.lowercased())
     }
 
-    /// A drop's actions split: the Lottie files the suite's rule refused, which Flare opens itself, and the rest,
-    /// in order, for the documents bridge.
+    /// A drop's actions split: the Lottie files, planned as Flare's own open (the stage's `opens`) or refused by
+    /// the suite's rule, which Flare opens itself, and the rest, in order, for the documents bridge (which has no
+    /// suite type for a .json, so it would drop the open).
     public static func lottieDrops(_ actions: [DropAction]) -> (lottie: [String], rest: [DropAction]) {
         var lottie: [String] = [], rest: [DropAction] = []
         for action in actions {
-            if case .refuse(let path, _) = action, opensAsLottie(path) { lottie.append(path) } else { rest.append(action) }
+            switch action {
+            case .open(let path) where opensAsLottie(path), .refuse(let path, _) where opensAsLottie(path):
+                lottie.append(path)
+            default: rest.append(action)
+            }
         }
         return (lottie, rest)
     }
