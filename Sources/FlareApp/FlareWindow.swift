@@ -19,9 +19,11 @@
 // the export sheet is FlareExportSheetAdapter's, shown while the Model's run
 // isn't idle.
 // It publishes the menu bar's FlareMenu (FlareCommands.swift): `perform` and
-// `help` for every section 3.4 item, the Undo and Redo step names, the recent
-// files, Loop and the selection's Edit reasons.
+// `help` for every section 3.4 item, the Undo and Redo step names, Loop and
+// the selection's Edit reasons. The model's file flow follows the suite's
+// recents (the bridge's list, the only one Open Recent reads; #5126).
 import FlareModel
+import SuiteModel
 import SuiteUI
 import SwiftUI
 
@@ -98,13 +100,14 @@ struct FlareWindow: View {
         .modifier(FlareOpenStatus(model: model))
         .suiteOpenQueue(FlareShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .modifier(FlareAutosaveAdapter(model: model, restore: { try model.restoreRecovery($0) }))
+        .onChange(of: Self.bridge.recents(for: .flare), initial: true) { model.updateFileFlow(recents: $1) }
         .modifier(FlareLiveRegistration(read: { model }, write: { model.takeLive($0) }))
         .focusedSceneValue(
             \.flareMenu,
             FlareMenu(
                 perform: { menuPerform($0) }, help: { menuHelp($0) },
                 undoTitle: model.undoActionName ?? "Undo", redoTitle: model.redoActionName ?? "Redo",
-                recent: model.recent, loops: model.loops, editHelps: model.editHelps,
+                loops: model.loops, editHelps: model.editHelps,
                 selectionHelps: [model.deleteHelp, model.orderHelp(forward: true), model.orderHelp(forward: false)],
                 document: model.suiteDocument))
     }

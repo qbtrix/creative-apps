@@ -3,8 +3,9 @@
 // (`finishOpen`); a bad file leaves the open document as it was and says why in `loadState`, with section 3.3's
 // text for each FormatError. A save hands the app the file's bytes (`saveData`), and the app reports the write
 // back (`didSave`, `saveFailed`). `isDirty` is the kernel session's: dirty while the document differs from the one
-// last opened or saved, so undoing back to the save is clean again. The Open Recent list keeps file paths, most recent first (`noteRecent`;
-// the menu and Clear Menu are the suite's, FlareFileFlow+Kernel.swift). Autosave is due `autosaveDelay` seconds after the last edit while the document is dirty
+// last opened or saved, so undoing back to the save is clean again. The app notes the path each open or save lands
+// at (`noteRecent`), which is the open file (`filePath`); Open Recent and Clear Menu are the suite's one recents
+// list (FlareFileFlow+Kernel.swift), and Flare keeps none of its own. Autosave is due `autosaveDelay` seconds after the last edit while the document is dirty
 // (`autosaveDue`), and `recoveryData()` is the dirty document's file bytes; `restoreRecovery` lands a recovered
 // document again as unsaved, untitled work. The app does the file panels and the disk. Dirty, due and the launch
 // offer are the kernel session's, and a save ends the open run (FlareFiles+Kernel.swift); Flare keeps no copy.
@@ -114,16 +115,10 @@ extension FlareWorkspace {
         saveError = Self.sentence("Flare couldn't save this animation", reason)
     }
 
-    /// The most entries the Open Recent list keeps.
-    public static let recentLimit = 10
-
-    /// The app calls this after a successful open or save, with the file's path (not its display name),
-    /// so two files with one name in different folders stay two entries and the menu can reopen each.
-    /// The path moves to the front; the oldest entry past `recentLimit` drops off.
-    public mutating func noteRecent(_ path: String) {
-        recent = [path] + recent.filter { $0 != path }
-        recent = Array(recent.prefix(Self.recentLimit))
-    }
+    /// The app calls this after a successful open or save, with the file's path (not its display name): it
+    /// becomes `filePath`, where Save writes and what Open In hands over. The window notes it in the suite's
+    /// recents too; Flare keeps no list.
+    public mutating func noteRecent(_ path: String) { filePath = path }
 
     /// Seconds after the last edit before the app writes the recovery file.
     public static let autosaveDelay: Double = 30
@@ -143,7 +138,7 @@ extension FlareWorkspace {
     }
 
     /// Lands a recovered document as unsaved work: `load`, then no saved document and no file name, so `isDirty`
-    /// is true and `title` reads "Untitled"; `recent` is untouched and the undo history starts empty.
+    /// is true and `title` reads "Untitled" (so `suiteDocument` is nil); the undo history starts empty.
     public mutating func restoreRecovery(_ document: Document) {
         load(document)
         savedDocument = nil
