@@ -4,7 +4,7 @@ Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/feat
 Run: act-1a16cae79dd-mtf2 · Started: 2026-10-24T06:54Z (prior: act-1a1693a401e-chyn, act-1a164697376-dv7u)
 Stage: 3 wave 4
 Base: e5dcf939 (dev; brief's main HEAD 654fb363 verified)
-Next: waiting on the lane: batch 20261024081307 (#4903-#4952) still bisecting at 2026-10-24T10:03:46Z; #4577 and #4889 are next in line, all 9 fill-heal PRs mergeable with no needs-* label; on each merge retarget its children to dev; then FH-9 docs PR and FH-10; then Belt-Slice-Done per slice on a green run; critic panel on FH-photo
+Next: lane stalled: batch 20261024081307 (#4903-#4952) unresolved since 08:32 (probes -1/-3/-6 red on macOS, dev red #5113 since 08:44, last lane sweep success 09:22); fill-heal PRs all mergeable, no needs-* label, waiting behind it (2026-10-24T10:24:56Z); supervisor owns the lane; on each merge retarget children to dev; then FH-9 docs PR and FH-10; then Belt-Slice-Done per slice on a green run; critic panel on FH-photo
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
