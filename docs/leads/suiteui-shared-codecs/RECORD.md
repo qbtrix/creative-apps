@@ -1,27 +1,27 @@
 # shared-codecs lead record
 
 Issue: #3718 · Packet: docs/blueprints/suiteui/features/shared-codecs.md
-Run: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui) · Started: 2026-10-23T14:52Z (earlier act-1a15fe5ef7c-rszn)
+Run: act-1a16cae7989-hj12 (line lead: area-selection, shared-codecs, shared-raw) · Session: claude/feature-lead-playbook-bs72fe · Started: 2026-10-24T06:50Z (earlier act-1a1693a4009-hyio, act-1a1693a3ff0-mwrd)
 Stage: 3 wave 2
-Base: origin/dev 8021b0f5
-Next: SC-2 building on lead/shared-codecs-SC-a (supervisor merge: Package.swift, project.yml; no fast-lane label). SC-halo and SC-raster then start; SC-photo waits on photo PX-m and IM-m; SC-library on library hand-offs; SC-z on AK-z.
+Base: origin/dev 830af22d
+Next: wave 3: SC-photo (SC-3 tests first, then SC-4), SC-raster (SC-9), SC-library (SC-7); #4875 (SC-halo) on the lane; SC-z waits on the four slices and AK-z (contract-first).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| SC-f | one shared image-format list (SuiteImageFormats) every app and the CLI read | SC-13, SC-14, SC-15, SC-16 | photo open/export panels | – | yes | 0 | building | – | – |
+| SC-f | one shared image-format list (SuiteImageFormats) every app and the CLI read | SC-13, SC-14, SC-15, SC-16 | photo open/export panels | – | yes | 0 | done (Belt-Slice-Done 2026-10-22) | – | – |
 | SC-a | core PNG parity proven; SuiteImageIO stubs in SuiteShell | SC-1, SC-2 | – | suite-imaging:IM-a (SC-2 only) | no | 0 | done: run 40005632479 green; Belt-Slice-Done posted 19:41Z (ui false, no critic panel) | – | – |
-| SC-photo | Photo's codec routes through SuiteImageIO | SC-3, SC-4 | rotated-photo | SC-a, photo/export-pack | no | 0 | planned | – | – |
-| SC-halo | Halo frame PNG writes through core | SC-5, SC-6 | – | SC-a | no | 0 | open (#4875) | – | – |
-| SC-library | Library decode/JPEG through SuiteImageIO | SC-7, SC-8 | – | SC-a, SC-f, SC-photo, library spine | no | 0 | planned | – | – |
-| SC-raster | Design/Flare rasterizers write PNG through SuiteImageIO | SC-9, SC-10 | – | SC-a, SC-photo | no | 0 | planned | – | – |
+| SC-photo | Photo's codec routes through SuiteImageIO | SC-3, SC-4 | rotated-photo | SC-a, IM-m (both done) | no | 0 | startable | – | – |
+| SC-halo | Halo frame PNG writes through core | SC-5, SC-6 | – | SC-a (done) | no | 0 | open (#4875, fast-lane, clean) | – | – |
+| SC-library | Library decode/JPEG through SuiteImageIO | SC-7, SC-8 | – | SC-a, SC-f (both done) | no | 0 | startable | – | – |
+| SC-raster | Design/Flare rasterizers write PNG through SuiteImageIO | SC-9, SC-10 | – | SC-a (done) | no | 0 | startable | – | – |
 | SC-z | HaloFramePNG retired, ImageIO baseline at its floor, feature built | SC-11, SC-12 | – | all slices, AK-z | no | 0 | planned | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | SC-13 | SC-f | 1 | acceptance tests first; format-list ratchet live | Tests/SuiteModelTests/SuiteImageFormatsTests.swift, Tests/SuiteModelTests/FormatListRatchetTests.swift, Tests/format-lists-baseline.txt, Tests/AfterGlowCLITests/ImageFormatParityTests.swift | FormatListRatchetTests | #4019 | in review |
-| SC-14 | SC-f | 2 | SuiteImageFormats value + plists read it | Sources/SuiteModel/Values/SuiteImageFormats.swift, Sources/SuiteModel/Values/SuiteTypes.swift, Bundle/Info/Photo.plist, Bundle/Info/Library.plist, Tests/SuiteModelTests/PlistShapeAppsTests.swift, Tests/mutations/SuiteModel.SuiteImageFormats.json, docs/c4/parts/creative-apps/suite-model/suite-identity.json | SuiteImageFormatsTests | – | building (stacked on SC-13) |
+| SC-14 | SC-f | 2 | SuiteImageFormats value + plists read it | Sources/SuiteModel/Values/SuiteImageFormats.swift, Sources/SuiteModel/Values/SuiteTypes.swift, Bundle/Info/Photo.plist, Bundle/Info/Library.plist, Tests/SuiteModelTests/PlistShapeAppsTests.swift, Tests/mutations/SuiteModel.SuiteImageFormats.json, docs/c4/parts/creative-apps/suite-model/suite-identity.json | SuiteImageFormatsTests | #4238 | merged |
 | SC-15 | SC-f | 3 | Photo open/export lists from SuiteImageFormats | Sources/PhotoModel/PhotoImageFile.swift, Sources/PhotoModel/PhotoHeadless.swift, Sources/PhotoApp/PhotoWindow+File.swift, Sources/PhotoApp/PhotoWindow+Export.swift | PhotoFormats tests | – | planned |
 | SC-16 | SC-f | 4 | Library export lists from SuiteImageFormats | Sources/LibraryModel/Contracts/LibraryValues.swift, Sources/LibraryModel/Contracts/ExportFormats.swift, Sources/LibraryModel/Contracts/ExportPresets.swift, Sources/LibraryApp/Platform/JPEGWriter.swift | Library format tests | – | planned |
 | SC-1 | SC-a | 1 | core PNG parity + ImageIO import ratchet live | Tests/PhotoModelTests/CorePNGParityTests.swift, Tests/SuiteModelTests/ImageIOImportRatchetTests.swift, Tests/imageio-baseline.txt, Tests/AppSnapshotTests/SuiteImageIOTests.swift, Tests/PhotoModelTests/Fixtures/png-parity/ | CorePNGParityTests, ImageIOImportRatchetTests | #4020 | merged |
@@ -52,7 +52,8 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-23T16:45Z: SC-halo builds from dev: it uses only core's PNG.write, which HaloModel already links, and no SC-2 API. SC-2 (#4873) is a supervisor merge (touches Package.swift for SuiteShell to link CoreRaster), no fast-lane label. SC-2 adds SuiteImageIO.swift to FormatListScan.allowed (FormatListRatchetTests; baseline and cap unchanged): a slight ratchet loosening for the supervisor to approve on #4873. encode has no profile: parameter yet (ColorProfile is CoreColor, not re-exported by CoreRaster); SC-4 adds it with an .sRGB default. HaloPNGWriter's line in Tests/imageio-baseline.txt is left for SC-11's prune (the ratchet ignores a listed file that no longer imports ImageIO).
 
 ## Open
-- SC-photo waits photo/export-pack; SC-library waits library spine (building); SC-z waits adopt-kernel-autosave AK-z (planned).
+- Under contract-first (lead.md rule 12): SC-photo, SC-library and SC-raster are startable; SC-z waits on the four slices plus AK-z's contract slice.
+- Open findings for this feature: 0.
 - 2026-10-21T19:24Z: #4019 and #4020 were held on red Linux by dev's CommandPathTests photo failure (PhotoPlace.swift:36), which #4008 fixed on dev; both branches merge origin/dev and re-gate.
 
 - 2026-10-21T19:37Z: #4019 and #4020 merged dev (#4008 fix), baselined the pasteboard files dev added, re-gated CI: PASS, moved Head: lines. Both await the lane.
@@ -92,3 +93,4 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-23T16:45Z: SC-2 #4873 (SC-a) open for the supervisor merge. SC-5+SC-6 #4875 (SC-halo) open with fast-lane, current Fast-Check/Head. SC-photo, SC-library, SC-raster, SC-z stay blocked (export-pack, library spine, SC-4, AK-z). Status now also pushed to lead/suiteui-shared-codecs (the branch Belt reads).
 - 2026-10-23T19:41Z: scoped suiteui run 40005632479 completed success; posted Belt-Slice-Done: SC-a on #3718 (issuecomment-6373270722). SC-a is ui:false (Model walk), so no critic panel. #4875 (SC-halo) still open on the lane.
 - 2026-10-23T18:55Z: SC-2 #4873 merged 18:35Z (2f94f450), so SC-a's tasks are all merged. Scoped suiteui run 40005632479 on dev 0d4645bf (contains 2f94f450) is queued; Belt-Slice-Done SC-a posts when it completes green. #4875 (SC-halo) open on the lane. Other slices still blocked.
+- 2026-10-24T07:05Z: run act-1a16cae7989-hj12 resumes on dev 830af22d. Server-added footers removed from #4848, #4859, #4865, #4872 bodies so Head: is the last line again (#4828, #4861, #4875, #4876 already clean). Contract-first waits (rule 12) applied to the slice table.
