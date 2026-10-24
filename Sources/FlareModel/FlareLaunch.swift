@@ -1,7 +1,9 @@
 // FlareLaunch.swift: Flare's launch flags (draw-key-save, DK-1). `-FlareFixture <name>` opens a fixture on fakes,
 // `-FlareSample <name>` opens the same document on the real services, `-FlareOpenFile <path>` names a file the window
-// reads (DK-12), and `-FlareSaveTo` / `-FlareExportTo` name the folders saves and exports go to. Unknown flags, a flag
-// with no value and an unknown fixture name are ignored, so a bad launch opens an empty window, never a crash.
+// reads (DK-12), and `-FlareSaveTo` / `-FlareExportTo` name the folders saves and exports go to. On fakes,
+// `-FlareExportFrameDelay <ms>` sets the pause after each PNG frame, so a journey can still reach Cancel mid-run
+// (each XCUITest lookup takes about a second). Unknown flags, a flag with no value and an unknown fixture name are
+// ignored, so a bad launch opens an empty window, never a crash.
 import FlareCore
 
 public struct FlareLaunch: Sendable, Equatable {
@@ -12,6 +14,8 @@ public struct FlareLaunch: Sendable, Equatable {
     public var saveFolder: String?
     /// `-FlareExportTo`: the folder an export writes to (read by export later).
     public var exportFolder: String?
+    /// `-FlareExportFrameDelay`: the fakes' pause after each PNG frame, in whole milliseconds; nil keeps theirs.
+    public var exportFrameDelay: Duration?
 
     /// Walks `arguments` (the process's, program name included or not). The last source flag wins.
     public init(arguments: [String]) {
@@ -31,6 +35,7 @@ public struct FlareLaunch: Sendable, Equatable {
             case "-FlareOpenFile": source = .file(value)
             case "-FlareSaveTo": saveFolder = value
             case "-FlareExportTo": exportFolder = value
+            case "-FlareExportFrameDelay": exportFrameDelay = Int(value).map { .milliseconds(max($0, 0)) }
             default:
                 index = next
                 continue
@@ -49,7 +54,9 @@ extension FlareWorkspace {
     /// Services by source: `.fake()` for a fixture, `.built` otherwise (DK-3); `.fixture` and `.sample` open their
     /// fixture document. `.file` opens nothing here: the window reads the file off the main thread (DK-12).
     public init(launch: FlareLaunch) {
-        self.init(services: launch.usesFakes ? .fake() : .built)
+        var services = launch.usesFakes ? FlareServices.fake() : .built
+        if launch.usesFakes, let delay = launch.exportFrameDelay { services.export = FakeExport(frameDelay: delay) }
+        self.init(services: services)
         switch launch.source {
         case .fixture(let name), .sample(let name):
             if let document = FlareFixtures.named(name) { load(document) }
