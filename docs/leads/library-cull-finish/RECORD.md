@@ -63,3 +63,5 @@ Next: lane merges #4838, #4899; DR-u tests PR (feat/cull-finish-dr-u-tests) open
 - 2026-10-24T07:25Z resumed by act-1a16cc967d9-mcuv after the 16h limit (supervisor 07:20Z: continue under contract-first waits and the rule-12 stub rule). PRs target dev (CLAUDE.md; the lane retargets main to dev).
 
 - 2026-10-24T08:06Z: DR-m excludedPaths wiring (RJ-L06 on, Linux green) is PR #5100, head 40a3f838, base feat/cull-finish-dr7-8, Fast-Check pass, mutate 10/10. Retarget to dev after #4899 merges. The PR-edit API re-appends a tool footer to the body; the lane strips attribution from the squash.
+
+- 2026-10-24T09:21Z: DR-u tests (render budget + J-DR1 journey skipped "waits on DR-9") are PR #5130, base feat/cull-finish-dr-u (#4838), 2 files +143, CI: PASS. Retarget to dev when #4838 merges.

@@ -105,3 +105,4 @@
 2026-10-24T08:33Z	heartbeat	lane: #4838 #4899 eligible, 57 ready PRs queued behind batch 20261024081307 (bisecting); #5100 skips until its base is dev
 2026-10-24T08:56Z	wave	DR-u tests rebuilt as one commit on #4838 head (2 files, +143); gate running; lane queue unchanged
 2026-10-24T09:18Z	heartbeat	no lane merges since 08:05Z; #4838 #4899 #5100 waiting; DR-u tests gate in tests
+2026-10-24T09:21Z	build	DR-u tests #5130 opened, stacked on #4838
