@@ -1,0 +1,36 @@
+utc	stage	event	ref	note
+2026-10-21T10:52Z	0	stage-start	#3715	base 1191940
+2026-10-21T10:52Z	2	stage-end	#3715	combined plan with shared-codecs; wave 1 IM-1
+2026-10-21T10:52Z	3	stage-start	wave1	IM-1 builder launched
+2026-10-21T19:24Z	3	heartbeat	wave1	#4028 IM-1 supervisor-approved, Mac gate queued
+2026-10-21T20:09Z	status-channel	RECORD also pushed to lead/suiteui-suite-imaging (the branch Belt reads) from now on
+2026-10-21T20:10Z	stage	IM-2 restacked on IM-1 5b40c257
+2026-10-21T20:26Z	gate	IM-2 775148e3 gated CI: PASS and pushed to lead/suite-imaging-IM-2; PR opens once #4028 merges
+2026-10-21T20:49Z	check-in	check-in: #4028 (IM-1, Package.swift) still on the supervisor's Mac gate. IM-2 gated on lead/suite-imaging-IM-2.
+2026-10-21T21:11Z	check-in	check-in: #4028 still open (supervisor merge; lane re-labels it each sweep). IM-2 gated.
+2026-10-21T21:33Z	check-in	check-in: #4028 still open on the supervisor's Mac gate. IM-2 gated.
+2026-10-21T21:56Z	check-in	#4028 (IM-1) still waiting for the supervisor merge (Package.swift). IM-2 is ready on lead/suite-imaging-IM-2 (775148e3).
+2026-10-21T22:18Z	check-in	#4028 (IM-1) still waiting for the supervisor merge. IM-2 is held.
+2026-10-21T22:48Z	check-in	#4028 (IM-1) still waiting for the supervisor merge. IM-2 is held.
+2026-10-21T23:12Z	check-in	IM-1 #4028 still waits on supervisor merge (Package.swift); IM-2 gated (head 775148e3), PR opens once IM-1 lands.
+2026-10-21T23:35Z	check-in	IM-1 #4028 still waits on supervisor merge; IM-2 ready (775148e3).
+2026-10-22T00:00Z	check-in	IM-1 #4028 still waits on supervisor merge; IM-2 ready (775148e3).
+2026-10-22T00:22Z	check-in	IM-1 #4028 still waits on the supervisor (Package.swift). IM-2 is gated on lead/suite-imaging-IM-2 (775148e3), and its PR opens once #4028 is on dev.
+2026-10-22T00:44Z	check-in	IM-1 #4028 now has dev merged in (head c5ab15b) and still waits on the supervisor. IM-2 is merged onto that head and pushed (26ba4c88); the scripts/ci --changed re-gate is running.
+2026-10-22T00:55Z	check-in	IM-2 re-gate on IM-1 c5ab15b: CI FAIL only on dev's red FormatListRatchetTests (fixed by #4258, not IM-2's). Merge dev and re-gate once #4258 and #4028 land, then open the PR.
+2026-10-22T01:06Z	check-in	IM-1 #4028 still waits on the supervisor; IM-2 holds at 26ba4c88 until #4028 and #4258 land.
+2026-10-22T01:28Z	check-in	IM-1 #4028 still waits on the supervisor; IM-2 holds at 26ba4c88.
+2026-10-22T01:35Z	check-in	IM-2 ready on 26ba4c888, waits for IM-1 #4028 (supervisor merge, Package.swift).
+2026-10-22T01:50Z	check-in	IM-1 #4028 still open (supervisor merge); IM-2 ready on 26ba4c888.
+2026-10-22T02:10Z	check-in	IM-1 #4028 still open (supervisor merge); IM-2 ready on 26ba4c888.
+2026-10-22T02:30Z	check-in	IM-1 #4028 still open (supervisor merge); IM-2 ready on 26ba4c888.
+2026-10-22T02:43Z	check-in	IM-1 #4028 is still open (head 4c8262db). It edits a protected path, so it needs a supervisor merge; the lane relabels it on every sweep. IM-2 is ready on 26ba4c888 and opens after IM-1 merges.
+2026-10-22T03:04Z	check-in	Rule 23: IM-1 #4028 has been unchanged for three polls (mergeable and clean, head 4c8262dbb). I posted a Question for the supervisor on #3715 (comment 6331661077). IM-2 is still ready on 26ba4c888.
+2026-10-22T03:24Z	check-in	No supervisor reply yet on #3715. IM-1 #4028 is still open (clean, head 4c8262dbb). IM-2 is held.
+2026-10-22T03:45Z	check-in	Unchanged. No reply on #3715, #4028 is still open, and dev is still at b5a6e7e0a. IM-2 is held.
+2026-10-22T04:06Z	check-in	Unchanged. No reply on #3715, and #4028 is still open. IM-2 is held.
+2026-10-22T04:23Z	check-in	Supervisor answered on #3715 at 03:06Z. #4028 is 4th in the local Mac gate queue, and they merge it once it passes. No pushes to it in the meantime. IM-2 is held until it merges.
+2026-10-22T04:44Z	check-in	#4028 is still open. Its head moved to e48f3225 (not my push; base is now dev 8a1d65345), and it is in the supervisor's Mac gate queue. IM-2 is held until it merges.
+2026-10-22T05:05Z	check-in	#4028 is still open on head e48f3225, in the supervisor's Mac gate queue. IM-2 is held.
+2026-10-22T05:25Z	check-in	#4028 is still open, clean on head e48f3225, in the supervisor's Mac gate queue. IM-2 is held.
+2026-10-22T05:47Z	check-in	#4028 (IM-1) open and clean at e48f3225, in the supervisor's Mac gate queue; IM-2 waits on its merge.
