@@ -63,7 +63,8 @@ final class LibrarySuiteMenusJourneyTests: XCTestCase {
     /// journey's fixture if closing its one window quit it. Either way a window opens.
     @MainActor private func dockReopens(_ library: Journey) throws {
         library.app.activate()
-        for _ in 0..<5 where library.app.windows.count > 0 {
+        // Closing the one window quits Library (D2): a window query on a quit app fails the test, so stop then.
+        for _ in 0..<5 where library.app.state != .notRunning && library.app.windows.count > 0 {
             library.press(character: "w", .command)
             Thread.sleep(forTimeInterval: 0.5)
         }

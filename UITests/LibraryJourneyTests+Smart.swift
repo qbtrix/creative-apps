@@ -46,6 +46,9 @@ final class LibrarySmartJourneyTests: XCTestCase {
         XCTAssert(first.waitForExistence(timeout: 10), "no grid cell for IMG_0001")
         first.doubleClick()
         XCTAssert(library.element("library.loupe").waitForExistence(timeout: 10), "double-click didn't open the loupe")
+        // The loupe's keys act while it has focus, so click the photo first, as the loupe journey does.
+        let photo = library.element("library.loupe.photo")
+        if photo.waitForExistence(timeout: 3) { photo.click() }
         for stars in ["5", "4", "2"] { library.press(character: stars) }
         library.press(.escape)
         XCTAssert(cell("IMG_0024", library).waitForExistence(timeout: 10), "Escape didn't return to the grid")
