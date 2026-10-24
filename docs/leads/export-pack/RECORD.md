@@ -2,7 +2,7 @@
 
 Issue: #3477 · Packet: docs/blueprints/suiteui/features/export-pack.md
 Run: act-1a16c618fe7-h4fd (line lead, line:suiteui; unparked by the supervisor 2026-10-24) · earlier runs act-1a16469734c-d0s8, act-1a15821c836-93pf
-Stage: 3 wave 3 PR open (XP-5 #5104 stacked on #5065); open #5043, #5044, #5065, #5074, #5104
+Stage: 3 wave 4 building (XP-8 stacked on #5104); open #5043, #5044, #5065, #5074, #5104
 Base: origin/dev 830af22de
 Next: Lane: chain #4960 → #5043 → #5065 → #5104; #5044 and #5074 in the lane. XP-8 next once XP-6 is in (XP-5 done as a PR); XP-10 last. Critics run once a scoped suiteui run shows the export-pack screens.
 
@@ -24,7 +24,7 @@ Next: Lane: chain #4960 → #5043 → #5065 → #5104; #5044 and #5074 in the la
 | XP-5 | XP-u | – | Snapshots, render budget, journey on | Tests/AppSnapshotTests/SuiteExportPackSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetExportPackTests.swift, UITests/SuiteJourneyTests+Export.swift | XJ1 | #5104 | open, stacked on #5065 (journey on, 12 PNGs) |
 | XP-6 | XP-m | 1 (stacked on XP-1) | ExportRules bodies, ExportOptions(json:), format list | Sources/SuiteKernel/Export/ExportOptions.swift, Tests/SuiteKernelTests/ExportOptionsTests.swift, Tests/mutations/SuiteKernel.ExportOptions.json | ExportOptionsTests on; Mutate | #3586 | merged #3586 by 11:14Z as b538c92c (fast lane; Mutate 5/5) |
 | XP-7 | XP-m | – | StillMetadata live on ImageIO | Sources/SuiteShell/Media/StillMetadata.swift, Tests/AppSnapshotTests/StillMetadataTests.swift, Tests/RealJobs/fixtures/gps-phone.jpg | StillMetadataTests | #5044 | open, in lane |
-| XP-8 | XP-z | – | Gallery sheet plans through ExportRules; live test | Sources/SuiteUI/Gallery/GalleryExportPack.swift, Tests/SuiteUITests/ExportPackLiveTests.swift | ExportPackLiveTests | – | waits XP-5, XP-6 |
+| XP-8 | XP-z | – | Gallery sheet plans through ExportRules; live test | Sources/SuiteUI/Gallery/GalleryExportPack.swift, Tests/SuiteUITests/ExportPackLiveTests.swift | ExportPackLiveTests | – | building wave 4 (stacked on #5104; XP-6 merged #3586) |
 | XP-9 | XP-z | – | Fake app exports with ExportOptions(json:); RJ-X42 | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeCanvasExportTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/export-pack/ | FakeCanvasExportTests | #5074 | open, in the lane (Wire: tone-controls:TC-z; Mutate 24/24) |
 | XP-10 | XP-z | – | C4 names rows and rules; status built; feature-done | docs/c4/parts/creative-apps/suite-kernel/kernel-export-session.json, docs/blueprints/suiteui/features/export-pack.wave.json | scripts/ci | – | waits XP-7, XP-8, XP-9 |
 
@@ -33,6 +33,7 @@ Next: Lane: chain #4960 → #5043 → #5065 → #5104; #5044 and #5074 in the la
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-24T08:20:37Z Wave 4: XP-8 stacked on XP-5 #5104 (XP-6 already merged as #3586). It plans through ExportRules and does not depend on XP-9 #5074's fake writer. XP-10 waits on XP-7, XP-8 and XP-9.
 - 2026-10-24T08:20:07Z XP-5 #5104 opened (3 files, +158/−15): 6 snapshot states × light/dark, RenderBudgetExportPackTests (typing and mode switch at ≤ 2 bodies), journey steps 1 to 6 un-skipped. Footer stripped and verified. The typing budget test is new in shape; the batch macOS gate is its first real run.
 - 2026-10-24T08:07:38Z Wave 3: XP-5 (snapshots, RenderBudgetExportPackTests, journey on) stacked on XP-4 #5065. XP-8 waits on XP-5 and XP-6; XP-10 last.
 - 2026-10-24T08:06:39Z Wave 2 PRs: XP-4 #5065 (base lead/export-pack-XP-3) and XP-9 #5074 (base dev). Bodies checked: no attribution footer, trailer order right (moved #5074's Mutate line to sit above Fast-Check). Wave 3 starts XP-5 stacked on XP-4.
