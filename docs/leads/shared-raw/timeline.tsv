@@ -1,0 +1,13 @@
+utc	stage	event	ref	note
+2026-10-22T16:36Z	0	stage-start	0	act-1a16474bd3a-i9ae, issue #4508
+2026-10-22T16:36Z	3	wave-start	SR-a	wave 1: SR-1
+2026-10-22T21:30Z	3	heartbeat	SR-1	builder relaunched after container restart
+2026-10-22T21:33Z	heartbeat	SR-1 building
+2026-10-22T21:48Z	pr-opened	SR-1 #4645 (head 69e12ed3)
+2026-10-22T21:48Z	agent-start	SR-2 builder
+2026-10-22T21:55Z	restart	container restart: SR-2 builder relaunched on its worktree
+2026-10-22T22:11Z	pushed	SR-2 00bab7ba; SR-3/4/5 builders launched
+2026-10-22T22:32Z	pushed	SR-3 a111888e
+2026-10-22T22:35Z	pushed	SR-5 833a2b5c
+2026-10-22T22:36Z	pushed	SR-4 built, rebased on SR-3
+2026-10-22T22:41Z	pushed	SR-4 64beb91a
