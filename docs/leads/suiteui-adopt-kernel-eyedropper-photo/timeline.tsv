@@ -11,3 +11,4 @@ utc	stage	event	ref	note
 2026-10-22T00:22Z	check-in	Released by the supervisor; no further work in this run.
 2026-10-24T07:53:12Z	wait	check	#4837 open (clean, supervisor prefix pending); #4943 waits on it; record moved to the Belt-read branch
 2026-10-24T08:08:29Z	build	push	#4837 merged fb09de4; #4943 merged dev, 69dedd1 pushed, fast-lane, Belt-Lead moved
+2026-10-24T08:36:00Z	wait	check	lane Linux check on #4943 running (run 40078192845); full CI 40078344003 on dev 1bbaba6 (contains fb09de4) running for EP-m
