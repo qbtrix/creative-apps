@@ -4,7 +4,7 @@ Run: act-1a16ca8dead-fbso (resumes act-1a1647fe637-pfga, act-1a15e33396b-eo15, a
 Integration branch: dev (main only takes dev SHAs that passed full CI). Base: origin/dev e5dcf93.
 Stage: 3 wave 1
 Base: e5dcf93
-Next: UP-photo #5088, UP-flare #5089, UP-halo opened stacked (all fast-lane, gate PASS); poll the lane and post Belt-Slice-Done per slice once a green ci.yml run contains it. Earlier: UP-photo is #5088 (fast-lane, gate PASS at b33630f9). Restack UP-flare (built at 11eed166) on UP-photo and UP-halo (47d29734) on UP-flare, resolve the suite journey's `live` set to Design, Photo, Flare, Halo, gate, open their PRs. UP-z waits on shared-codecs SC-f (contract) and the app slices.
+Next: UP-photo #5088, UP-flare #5089, UP-halo #5091 stacked (all fast-lane, gate PASS); poll the lane and post Belt-Slice-Done per slice once a green ci.yml run contains it. Earlier: UP-photo is #5088 (fast-lane, gate PASS at b33630f9). Restack UP-flare (built at 11eed166) on UP-photo and UP-halo (47d29734) on UP-flare, resolve the suite journey's `live` set to Design, Photo, Flare, Halo, gate, open their PRs. UP-z waits on shared-codecs SC-f (contract) and the app slices.
 
 ## Plan
 
@@ -15,7 +15,7 @@ Next: UP-photo #5088, UP-flare #5089, UP-halo opened stacked (all fast-lane, gat
 | UP-design | UP-5, UP-6 | done (#4037; Mac-Finish-Wanted posted) | – (AC-zoom done: f886c912 on dev, Linux 39571804700 green) |
 | UP-photo | UP-7, UP-8 | in lane (#5088, head b33630f9) | shared-thumbnails:ST-z (met by contract ST-a #4840), UP-design |
 | UP-flare | UP-9, UP-10 | in lane (#5089, head a981f4a4, base UP-photo) | adopt-kernel-autosave:AK-flare (on dev 5ecec459), UP-photo |
-| UP-halo | UP-11, UP-12 | in lane (head 67110503, base UP-flare) | UP-flare (shared journey file) |
+| UP-halo | UP-11, UP-12 | in lane (#5091, head 67110503, base UP-flare) | UP-flare (shared journey file) |
 | UP-z | UP-13, UP-14 | blocked | the four app slices; shared-codecs:SC-z (planned) |
 
 One PR per slice: each app slice's PR holds its test-first task and its adoption task, so an app slice starts only once its external wait clears.
@@ -26,11 +26,11 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
-- 2026-10-24T09:20Z: UP-halo gate PASS at 67110503 (live set all four apps), pushed, PR opened on the UP-flare branch, fast-lane.
+- 2026-10-24T07:52Z: UP-halo gate PASS at 67110503 (live set all four apps), pushed, PR #5091 on the UP-flare branch, fast-lane.
 
-- 2026-10-24T09:05Z: UP-flare rebased on UP-photo (live set Design, Photo, Flare), gate PASS, PR #5089 (base UP-photo branch, fast-lane). UP-halo rebased on UP-flare (live set all four), gate running.
+- 2026-10-24T07:40Z: UP-flare rebased on UP-photo (live set Design, Photo, Flare), gate PASS, PR #5089 (base UP-photo branch, fast-lane). UP-halo rebased on UP-flare (live set all four), gate running.
 
-- 2026-10-24T08:40Z: Belt nudge: the watched record is this path (docs/leads/suiteui-adopt-kernel-unsaved-prompt on lead/suiteui-adopt-kernel-unsaved-prompt), so this run's record moves here from lead/adopt-kernel-unsaved-prompt; pushed after every stage. UP-photo opened as #5088 (base dev, fast-lane, Fast-Check pass at b33630f9; first commit 19e502c is the failing test). UP-flare and UP-halo were built in parallel on dev; each edits SuiteJourneyTests+Unsaved.swift's live set, so they restack on UP-photo in order before their PRs open.
+- 2026-10-24T07:20Z: Belt nudge: the watched record is this path (docs/leads/suiteui-adopt-kernel-unsaved-prompt on lead/suiteui-adopt-kernel-unsaved-prompt), so this run's record moves here from lead/adopt-kernel-unsaved-prompt; pushed after every stage. UP-photo opened as #5088 (base dev, fast-lane, Fast-Check pass at b33630f9; first commit 19e502c is the failing test). UP-flare and UP-halo were built in parallel on dev; each edits SuiteJourneyTests+Unsaved.swift's live set, so they restack on UP-photo in order before their PRs open.
 
 - 2026-10-24T07:10Z: relaunch act-1a16ca8dead-fbso on #3721. Supervisor unparked (06:45Z): ST-a merged (#4840), so UP-photo's ST-z wait is met under contract-first waits; AK-flare on dev. Base dev e5dcf93 (the brief says main; CLAUDE.md and the lane say dev, and the lane retargets main PRs to dev). UP-z still waits on shared-codecs SC-f (contract) not yet merged.
 
