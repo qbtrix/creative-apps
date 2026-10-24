@@ -130,3 +130,4 @@ utc	stage	event	ref	note
 2026-10-24T11:36:51Z	heartbeat	batch 20261024110214: Linux green, macOS gate running (#5025 in it)
 2026-10-24T11:56:05Z	heartbeat	batch 20261024110214 macOS gate in scripts/ci (tests), 53 min in
 2026-10-24T12:10:11Z	lane	batch 20261024110214 macOS red only on RenderBudgetToneRowsTests.sliderDragInThreeBodies (100 sets vs 120), not ours; lane bisects; #5025 should clear
+2026-10-24T12:30:16Z	heartbeat	batch 20261024110214 bisecting (probe 6 macOS running); #4852 #4854 queued for next batch
