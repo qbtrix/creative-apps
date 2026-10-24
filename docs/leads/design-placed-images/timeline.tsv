@@ -130,3 +130,4 @@ utc	stage	event	ref	note
 2026-10-24T15:46:49Z	3	check	-	dev e79e9afc unchanged; PD-a #3759 now at f32aa3ec (dev merged in, supervisor-side); batch 20261024144917 in flight; slice PRs clean, no needs-fix
 2026-10-24T16:08:27Z	3	check	-	dev 33cd6e97 (batch 20261024144917 landed); DK-u #4864 now in batch 20261024160327; #4888 #3759 clean, no needs-fix
 2026-10-24T16:29:39Z	3	check	-	dev 33cd6e97 unchanged; batch 20261024160327 (with #4864) in flight; PD-a at d1e9200a; all clean
+2026-10-24T16:50:56Z	3	check	-	dev 33cd6e97 unchanged; batch 20261024160327 (with #4864) still in flight; all slice PRs clean
