@@ -3,16 +3,12 @@
 // 48 frames, scene `scene-1`) with `-FlareExportTo` on this test's own temp folder, so Export writes with no panel.
 // File > Export… shows the MP4 and GIF chips; GIF with Loop forever writes scene-1.gif, 48 frames that loop
 // forever; MP4 writes scene-1.mp4 (an `ftyp` box); Cancel on a running MP4 leaves no file. One shot per step,
-// `flare-export-pack-<step>`. Skipped until FV-7 puts it on the live services.
+// `flare-export-pack-<step>`. On the live services (LiveMedia) since FV-7.
 import ImageIO
 import XCTest
 
 final class FlareExportPackJourneyTests: XCTestCase {
-    /// FV-7 turns this on once the run writes on the live services.
-    private static let live = false
-
     @MainActor func testExportLoopAsGIFAndMP4() throws {
-        guard Self.live else { throw XCTSkip("waits on FV-7") }
         let folder = FileManager.default.temporaryDirectory.appending(path: "flare-export-pack-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         addTeardownBlock { try? FileManager.default.removeItem(at: folder) }

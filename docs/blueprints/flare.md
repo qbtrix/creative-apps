@@ -132,13 +132,13 @@ The suite design's Flare MVP, made concrete.
 | Scenes | Add, rename, remove, reorder, switch; canvas size, background, fps and duration |
 | Library | Symbols with usage counts; Convert to Symbol, place an instance, edit a symbol in place with a breadcrumb, rename, delete when unused. Swatches: add the current fill as a swatch, apply one, remove one |
 | Interact | A state machine editor (machines added with a first state, rename and delete; states from frame ranges or labels; transitions with a trigger and conditions; bool and number inputs with defaults) with inline issues, and a live preview with a control per input |
-| Export | SVG of the current frame, Lottie JSON (position, scale, rotation and opacity tracks), PNG sequence (range, step, 1x or 2x), with a named warning for anything not written. Nothing is dropped silently |
+| Export | SVG of the current frame, Lottie JSON (position, scale, rotation and opacity tracks), PNG sequence (range, step, 1x or 2x), MP4 and GIF of the whole scene (the shared Size row, a frame rate, and Loop forever for GIF) through the suite's movie and animated-image writers, with a named warning for anything not written. Nothing is dropped silently |
 | Assist | "Animate this": a prompt becomes a list of registered commands, shown as a proposal in the AI-suggestion color, previewed, then accepted as one undo step or rejected. UI and contract ship in v1 on the fake; the live provider arrives with the suite's model provider (Phase 3) |
 | Text in files | v1 has no text tool. A file or proposal that holds text still works: text items are not drawn, a "Text not shown (n)" warning pill appears, the items survive save untouched, and export skips them with a named warning. Assist proposals that add or edit text are rejected whole, with a reason |
 
 ### Later (v1.1 and after)
 
-Video and GIF export; audio track and waveform (G50); shape tween (G48);
+Audio track and waveform (G50); shape tween (G48);
 bones (G49); the text tool, text on the stage and text in SVG and Lottie;
 masks and clipping; boolean and path ops; a graph (value over time) editor;
 editing the motion path and follow-a-path; pencil with smoothing and a
@@ -180,7 +180,7 @@ captain settled the debatable ones in section 9.
 | Snapping and align | Later | Guides land in v1; snapping to them is the first Later item |
 | Play range | Later | Loop over the whole scene covers v1 |
 | Actual fps readout | v1 | It makes playback quality visible to the person, not only to tests |
-| GIF export | Later (decision 10) | The suite doc's MVP lists SVG, Lottie and PNG sequence; the domain read lists GIF too |
+| GIF export | v1 (export-pack) | First Later (decision 10); export-pack writes MP4 and GIF through the suite's shared writers, so Flare carries no encoder |
 | State machine editor and Assist | v1, after the core loop | The suite doc puts both in Flare's MVP. They come last in the order (section 8), so cutting them later costs nothing built before them |
 
 ---
@@ -531,7 +531,7 @@ window, because a second window could not share the window's one model.
 | Screen | Opened from | Contents |
 |---|---|---|
 | New Animation sheet | File > New ⌘N, empty state | Presets grid (1080p 16:9, Square 1080, Vertical 9:16, Web 550x400, Custom), width, height, fps (12, 24, 25, 30, 60), duration, background; Create (primary) |
-| Export sheet | File > Export… ⇧⌘E, top bar Export | Format tabs (SVG frame, Lottie, PNG sequence); options (frame or range, step, scale 1x or 2x, transparent background); warnings list (warning color, triangle); progress with Cancel; never overwrites: when the folder already holds a file the run refuses with "<name> is already in <folder>. Choose another folder." and Try Again, leaving that file untouched; on success a success row with Reveal in Finder; on failure an error row with the reason and Try Again |
+| Export sheet | File > Export… ⇧⌘E, top bar Export | Format tabs (SVG frame, Lottie, PNG sequence, MP4, GIF); options (frame or range, step, scale 1x or 2x, transparent background; for MP4 and GIF the shared Size row and a frame rate, and Loop forever for GIF); progress counts files, or frames for MP4 and GIF; warnings list (warning color, triangle); progress with Cancel; never overwrites: when the folder already holds a file the run refuses with "<name> is already in <folder>. Choose another folder." and Try Again, leaving that file untouched; on success a success row with Reveal in Finder; on failure an error row with the reason and Try Again |
 | Easing popover | Timeline segment, inspector TIMING row | Presets grid (Linear, Ease, Ease In, Ease Out, Ease In Out, Hold), the curve editor with two handles and a playing dot, four numbers |
 | Onion skin popover | Timeline chip, View menu | On, before count, after count, falloff, tint chips before and after |
 | Assist popover | Top bar Animate…, Animate menu | Prompt field, Generate, progress, proposal list (each command as a row in the AI color), Preview, Accept (one undo), Reject. Errors in place: "Assist didn't answer in 20 s. Try again.", "Assist had no suggestion for this.", the provider's message on failure, and the reason when a proposal is refused (unknown command, or text) |
