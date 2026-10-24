@@ -4,7 +4,7 @@ Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
 Run: act-1a16c619006-nour (took over 2026-10-24 from act-1a1695ebf10-z0v8; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T02:26Z
 Stage: 3 build (fix round 1 in lane)
 Base: 721168a (origin/dev)
-Next: FV-u merged (9c276b81). #4854 (FV-z) retargeted to dev at 565669e7 with a fresh Fast-Check; waits for a batch. Once FV-z merges and a green run contains both, post Belt-Slice-Done FV-u and FV-z + Mac-Finish-Wanted on #3481, then the FJ-X1 critic panel and the contact sheet. 10 findings open: no new feature work.
+Next: #5025 (fix round 1, r-b1) merged dev and now draws live MP4/GIF frames (StageRasterizer.frame, FV-7's drawing; the live refusal is dropped), head 9c2bc627, gate PASS. #5005 closed as its duplicate. FV-z's live journey needs both #4854 and #5025 on dev. Once both merge and a green run contains FV-u and FV-z, post Belt-Slice-Done FV-u and FV-z + Mac-Finish-Wanted on #3481, then the FJ-X1 critic panel and the contact sheet. 10 findings open: no new feature work.
 
 Loop: v3 (the packet has a `## Slices` table).
 
