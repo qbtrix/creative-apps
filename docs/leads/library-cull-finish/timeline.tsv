@@ -96,3 +96,4 @@
 2026-10-24T05:57Z	heartbeat	PRs still on lane; batch 20261024050226 red on macOS, bisecting (probe -6), none of ours
 2026-10-24T06:13Z	heartbeat	PRs still on lane; batch 20261024050226 bisect probe -6 macOS running, none of ours
 2026-10-24T06:31Z	heartbeat	PRs still on lane; batch 20261024050226 bisecting (probes -1,-3), none of ours; dev CI 40070365168 running (none of ours merged)
+2026-10-24T06:47Z	heartbeat	PRs still on lane; batch 20261024050226 still bisecting (probe -1), none of ours
