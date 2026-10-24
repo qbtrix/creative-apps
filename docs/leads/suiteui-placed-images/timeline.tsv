@@ -160,3 +160,4 @@ utc	stage	event	ref	note
 2026-10-24T09:04:00Z	wait	check	#4616/#4617 still no lane run; no supervisor reply on #3457
 2026-10-24T09:29Z	wait	PL-z	#4616/#4617 still no lane run; no supervisor reply on #3457
 2026-10-24T09:55Z	wait	PL-z	#4616/#4617 still no lane run; no supervisor reply on #3457
+2026-10-24T10:22Z	wait	PL-z	supervisor replied on #3457 (lane saw only newest 100 PRs; fix #5150); landing #4616/#4617 by hand; #4616 Linux 40085554838 running
