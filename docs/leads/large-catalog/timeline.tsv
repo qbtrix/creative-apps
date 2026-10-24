@@ -54,3 +54,4 @@
 07:45Z	4	poll	LG-grid	#5042 #5050 #5054 open; lane moving (#4132 07:43Z)
 08:04Z	4	poll	LG-grid	#5042 #5050 #5054 open; lane batch landed 08:03Z
 08:23Z	4	poll	LG-grid	#5042 #5050 #5054 clean, queued behind 127 fast-lane PRs
+08:49Z	4	pr	LG-grid	#5114 perf-suites line + enable LargeCatalogModelBudgetTests (supervisor lands)
