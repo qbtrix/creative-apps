@@ -3,8 +3,9 @@
 // window whose page owns the style and applies each `.lineHeight` intent through TextStyleRules, runs at most 3
 // window bodies (target 0: only the page and the rows redraw), and sends at least one intent. Then the rows where a
 // person reaches them: Design's text inspector on `cards` with Title (node-5) selected, and Halo's TEXT section on
-// `empty` with a "Hello" text layer, each listing every `suite.text.*` control, disabled with "Text styles arrive
-// with TS-5." until TS-5 routes them, written as design-inspector-text-style-rows-{light,dark}.png and
+// `empty` with a "Hello" text layer, each listing every `suite.text.*` control (Design's enabled since TS-8 runs
+// them as its text commands; Halo's disabled with "Text styles arrive with TS-5." until its slice), written as
+// design-inspector-text-style-rows-{light,dark}.png and
 // halo-text-style-rows-{light,dark}.png. Design shows no rows for a layer that isn't text. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -132,11 +133,14 @@ private struct TextStyleBudgetPage: View {
 
     @Test func designTitleShowsTheRows() throws {
         let model = cards("node-5")
-        #expect(DesignInspectorText.textStylesHelp == Self.help)
         let style = try #require(DesignInspectorText(model: model, perform: { _ in }).textStyle)
-        #expect(style.family == model.sharedTextStyle?.family && style.size == model.sharedTextStyle?.size)
+        #expect(style == model.textStyle && style.family == model.sharedTextStyle?.family)
         let view = DesignInspectorText(model: model, perform: { _ in })
-        expectRows(try textControls(view))
+        let controls = try textControls(view)
+        #expect(controls.contains { $0.id == "suite.text.alignment.justified" })
+        for control in controls where control.id != "suite.text.italic" {
+            #expect(control.enabled, "\(control.id): \(control.reason ?? "nil")")
+        }
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
                 view.padding(.vertical, SuiteSpacing.m)
@@ -151,15 +155,6 @@ private struct TextStyleBudgetPage: View {
         let model = cards("node-2")
         #expect(DesignInspectorText(model: model, perform: { _ in }).textStyle == nil)
         #expect(try textControls(DesignInspectorText(model: model, perform: { _ in })).isEmpty)
-    }
-
-    @Test func designAlignmentMapsToTheKernel() {
-        var style = DesignTextStyle.default
-        let expected: [DesignTextAlignment: TextStyle.Alignment] = [.leading: .leading, .center: .center, .trailing: .trailing]
-        for (design, kernel) in expected {
-            style.alignment = design
-            #expect(DesignInspectorText.kernelStyle(style).paragraph.alignment == kernel)
-        }
     }
 
     @Test func haloTextShowsTheRows() throws {

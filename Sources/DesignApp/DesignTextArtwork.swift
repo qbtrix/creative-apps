@@ -8,7 +8,10 @@
 // paragraph. The context comes in already scaled by the canvas zoom, so the style's
 // size is in page points and text grows and shrinks with the artwork. Alignment
 // places the measured text across the box: one line sits exactly as aligned; text
-// that wraps fills the box's width. style-rows SR-t.
+// that wraps fills the box's width. style-rows SR-t. A style using italic, line height,
+// tracking or justify (text-style TS-8) draws word by word where the kernel's layout put
+// them (DesignTextFont.setting, the same setting the box is measured by), in its italic
+// face or, when the family has none, slanted about each word's baseline.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -21,6 +24,10 @@ enum DesignTextArtwork {
         let box = node.frame.cgRect
         clipped.clip(to: Path(box))
         let style = node.textStyle
+        if style.drawsThroughLayout {
+            drawLaidOut(node, in: clipped)
+            return
+        }
         let text = Text(node.text).font(DesignTextFont.font(style))
         var resolved = clipped.resolve(text)
         let wraps = style.fixedWidth == true
@@ -30,6 +37,32 @@ enum DesignTextArtwork {
         // gradient, in the context's page points (the zoom is already on the context).
         resolved.shading = artworkShading(for: node, scale: 1)
         clipped.draw(resolved, in: rect)
+    }
+
+    /// Draws each word of `node`'s laid-out text at its pen x and baseline, filled like the plain path.
+    private static func drawLaidOut(_ node: DesignNode, in context: GraphicsContext) {
+        let style = node.textStyle
+        let box = node.frame.cgRect
+        let fixed = style.fixedWidth == true
+        guard let set = DesignTextFont.setting(node.text, style, wrapWidth: fixed ? Double(box.width) : nil) else { return }
+        let (font, oblique) = DesignTextFont.face(style)
+        let left = Double(box.minX) + (fixed ? 0 : (Double(box.width) - set.width) * DesignTextFont.across(style))
+        let unbounded = CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
+        for word in set.words {
+            var resolved = context.resolve(
+                Text(word.text).font(Font(font as CTFont)).tracking(CGFloat(style.trackingPoints)))
+            resolved.shading = artworkShading(for: node, scale: 1)
+            let rise = resolved.firstBaseline(in: unbounded)
+            let pen = CGPoint(x: left + word.x, y: Double(box.minY) + word.baseline)
+            guard oblique else {
+                context.draw(resolved, at: CGPoint(x: pen.x, y: pen.y - rise), anchor: .topLeading)
+                continue
+            }
+            var slanted = context
+            slanted.translateBy(x: pen.x, y: pen.y)
+            slanted.concatenate(DesignTextFont.obliqueShear)
+            slanted.draw(resolved, at: CGPoint(x: 0, y: -rise), anchor: .topLeading)
+        }
     }
 
     /// The rect `measured` text is laid out in inside `box`: at the box's top, across by the style's

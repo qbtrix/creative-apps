@@ -6,8 +6,11 @@
 // the Model's default family ("System") is the system font. Weight is CSS's 100...900,
 // rounded to the nearest hundred. A family the Mac doesn't have falls back to the
 // system font at the same size and weight. These are document fonts, the user's
-// content, not chrome: the shell's type stays SuiteFont.
+// content, not chrome: the shell's type stays SuiteFont. A style using italic, line height,
+// tracking or justify (text-style TS-8) is set by the kernel's layout over Core Text's advances
+// (`setting`), drawn in its italic face or, when the family has none, slanted (`obliqueShear`).
 import AppKit
+import CoreText
 import DesignModel
 import SwiftUI
 
@@ -39,6 +42,10 @@ enum DesignTextFont {
     /// line per paragraph with no `wrapWidth`, wrapped at `wrapWidth` with one. The window commits
     /// an edit with it (canvas-basics CB-6) and the inline editor sizes its field by it.
     static func measure(_ text: String, _ style: DesignTextStyle, wrapWidth: Double?) -> DesignTextExtent {
+        if style.drawsThroughLayout {
+            let set = setting(text, style, wrapWidth: wrapWidth)
+            return DesignTextExtent(width: ceil(set?.width ?? 0), height: ceil(set?.height ?? 0))
+        }
         let wrap = wrapWidth.flatMap { $0.isFinite && $0 > 0 ? $0 : nil } ?? .greatestFiniteMagnitude
         let string = NSAttributedString(string: text, attributes: [.font: nsFont(style)])
         let bounds = string.boundingRect(
@@ -51,6 +58,40 @@ enum DesignTextFont {
     /// wrapped at the frame's width for a fixed-width one.
     static func measure(_ draft: String, in node: DesignNode) -> DesignTextExtent {
         measure(draft, node.textStyle, wrapWidth: node.textStyle.fixedWidth == true ? node.frame.width : nil)
+    }
+
+    /// The face a laid-out `style` draws in at `scale`: its italic face when the family has one (`oblique` false),
+    /// else the upright face, which the artwork slants (`oblique` true).
+    static func face(_ style: DesignTextStyle, scale: Double = 1) -> (font: NSFont, oblique: Bool) {
+        let upright = nsFont(style, scale: scale)
+        guard style.italic else { return (upright, false) }
+        let italic = NSFontManager.shared.convert(upright, toHaveTrait: .italicFontMask)
+        let slanted = italic.fontDescriptor.symbolicTraits.contains(.italic)
+        return slanted ? (italic, false) : (upright, true)
+    }
+
+    /// The shear a synthesized oblique draws with: 12° to the right, about the baseline.
+    static let obliqueShear = CGAffineTransform(a: 1, b: 0, c: -tan(12 * Double.pi / 180), d: 1, tx: 0, ty: 0)
+
+    /// `text` set in `style` by the kernel's layout (DesignTextStyle.laidOut), wrapped at `wrapWidth`, each grapheme's
+    /// advance read from Core Text in the face it draws in; the artwork draws these words and `measure` sizes the box by them.
+    static func setting(_ text: String, _ style: DesignTextStyle, wrapWidth: Double?) -> DesignTextSetting? {
+        let font = face(style).font
+        return style.laidOut(text, wrap: wrapWidth) { graphemes in
+            let run = CTLineCreateWithAttributedString(
+                NSAttributedString(string: graphemes.joined(), attributes: [.font: font]) as CFAttributedString)
+            var ascent: CGFloat = 0, descent: CGFloat = 0
+            _ = CTLineGetTypographicBounds(run, &ascent, &descent, nil)
+            var advances = [Double](), utf16 = 0
+            var pen = Double(CTLineGetOffsetForStringIndex(run, 0, nil))
+            for grapheme in graphemes {
+                utf16 += grapheme.utf16.count
+                let next = Double(CTLineGetOffsetForStringIndex(run, utf16, nil))
+                advances.append(Swift.max(0, next - pen))
+                pen = next
+            }
+            return (advances, Double(ascent), Double(descent))
+        }
     }
 
     /// How the lines of `style` align inside their box.
