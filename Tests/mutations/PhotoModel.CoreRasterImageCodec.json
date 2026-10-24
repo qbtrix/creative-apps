@@ -10,7 +10,7 @@
     "label": "errorsSurface: a core error is swallowed into an empty buffer",
     "file": "Sources/PhotoModel/CoreRasterImageCodec.swift",
     "find": "return try PNG.read(data)",
-    "replace": "return (try? PNG.read(data)) ?? (try PixelBuffer(width: 1, height: 1))",
+    "replace": "return try (try? PNG.read(data)) ?? PixelBuffer(width: 1, height: 1)",
     "tests": "PhotoCodecRouteTests"
   }
 ]
