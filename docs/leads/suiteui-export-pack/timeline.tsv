@@ -93,3 +93,4 @@ utc	stage	event	ref	note
 2026-10-24T08:20:37Z	3	stage-start	wave 4 XP-8
 2026-10-24T08:27:17Z	3	heartbeat	XP-8 building
 2026-10-24T08:31:23Z	3	pr-open	XP-8 #5106
+2026-10-24T08:51:29Z	3	heartbeat	no merges; dev macOS red (not ours)
