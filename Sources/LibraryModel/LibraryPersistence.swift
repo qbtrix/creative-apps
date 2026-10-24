@@ -15,9 +15,17 @@ extension LibraryCatalog {
     /// with one id the first is kept); state `.ready`; saved. Called with nil
     /// when there is no file: keeps the current photos (a fixture's).
     public mutating func restore(_ photos: [PhotoItem]?) {
+        restore(photos, excludedPaths: [])
+    }
+
+    /// `restore`, with the file's paths Delete Rejects trashed (cull-finish
+    /// DR-m), which the next import skips and the next save writes again.
+    /// Ignored with nil photos: no file keeps the catalog as it is.
+    public mutating func restore(_ photos: [PhotoItem]?, excludedPaths: Set<String>) {
         if let photos {
             var seen = Set<String>()
             items = photos.filter { seen.insert($0.id).inserted }
+            self.excludedPaths = excludedPaths
             history = CatalogHistory()
             thumbnails = [:]
             pendingThumbnails = [:]
@@ -44,9 +52,9 @@ extension LibraryCatalog {
 
     /// What to write: nil when the session reads clean (every change is saved)
     /// or when `catalogState.canSave` is false (loading, or a newer file).
-    public func saveRequest() -> (revision: Int, photos: [PhotoItem])? {
+    public func saveRequest() -> (revision: Int, photos: [PhotoItem], excludedPaths: Set<String>)? {
         guard catalogState.canSave, catalogSession.isDirty else { return nil }
-        return (saveRevision, items)
+        return (saveRevision, items, excludedPaths)
     }
 
     /// A save of `revision` finished. An older answer arriving late never

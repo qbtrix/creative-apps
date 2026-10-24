@@ -112,6 +112,18 @@ public protocol CatalogCoding: Sendable {
     /// `newerCatalog` for a version above 1. A missing `develop` object
     /// decodes as neutral settings.
     func decode(_ data: Data) throws -> [PhotoItem]
+    /// The catalog file with the paths a re-import skips (cull-finish DR-7).
+    func encode(_ photos: [PhotoItem], excludedPaths: Set<String>) throws -> Data
+    /// The photos and the paths a re-import skips (empty when the file has none).
+    func decodeFile(_ data: Data) throws -> (photos: [PhotoItem], excludedPaths: Set<String>)
+}
+
+extension CatalogCoding {
+    /// A coding with no excluded paths (the fake) writes the photos alone.
+    public func encode(_ photos: [PhotoItem], excludedPaths: Set<String>) throws -> Data { try encode(photos) }
+    public func decodeFile(_ data: Data) throws -> (photos: [PhotoItem], excludedPaths: Set<String>) {
+        (try decode(data), [])
+    }
 }
 
 /// J3, J5. The loupe's picture. Live: `LiveLoupeImaging(decoder:develop:)`,

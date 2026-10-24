@@ -1,0 +1,16 @@
+[
+  {
+    "label": "restoreKeepsExcludedPathsForImportAndSave: restore drops the file's excluded paths, so the window's next import brings the rejects back",
+    "file": "Sources/LibraryModel/LibraryPersistence.swift",
+    "find": "self.excludedPaths = excludedPaths",
+    "replace": "_ = excludedPaths",
+    "tests": "LibraryExcludedPathsReopenTests"
+  },
+  {
+    "label": "restoreKeepsExcludedPathsForImportAndSave: the save request carries no excluded paths, so the window's next save forgets them",
+    "file": "Sources/LibraryModel/LibraryPersistence.swift",
+    "find": "return (saveRevision, items, excludedPaths)",
+    "replace": "return (saveRevision, items, [])",
+    "tests": "LibraryExcludedPathsReopenTests"
+  }
+]
