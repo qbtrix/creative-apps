@@ -1,10 +1,10 @@
 # adopt-kernel-eyedropper-photo lead record
 
 Issue: #3723 · Packet: docs/blueprints/suiteui/features/adopt-kernel-eyedropper-photo.md
-Run: act-1a16953ae34-05a4 (relaunch) · Started: 2026-10-23T15:30Z
+Run: act-1a16cc5a05a-lc3g (relaunch) · Started: 2026-10-24T06:40Z
 Stage: 3 wave 1 (EP-m: EP-2)
 Base: 721168a8f (origin/dev; brief main cb79cbb6 verified)
-Next: EP-2 builder on lead/adopt-kernel-eyedropper-photo-EP-m (off dev); then EP-z (EP-3 + EP-4) stacked on it, built ahead of UP-z under contract-first waits.
+Next: #4837 (EP-m) lands through the supervisor's hand-batched prefix (supervisor/prefix-215139, Linux check 40071878407 green); then retarget #4943 (EP-z) to dev; Belt-Slice-Done for each on the first green ci.yml run on dev containing it.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -80,3 +80,6 @@ Next: EP-2 builder on lead/adopt-kernel-eyedropper-photo-EP-m (off dev); then EP
 - 2026-10-24T06:00:18Z: no change: dev still 654fb3632; #4837 EP-m open awaiting supervisor reply on 6380464537 (prefix skipped by lane); #4840 ST-a awaiting supervisor gate merge
 - 2026-10-24T06:22:21Z: no change: dev 654fb3632; #4837 EP-m open, not in batch-20261024050226 (probe -6 running), no supervisor reply; #4840 ST-a open, supervisor merge pending
 - 2026-10-24T07:05:11Z: no change: #4837 EP-m still open, not in batch-20261024050226; no supervisor reply; EP-z #4943 waits
+
+## Run act-1a16cc5a05a-lc3g
+Relaunched 2026-10-24T06:40Z on main 654fb36. The supervisor is hand-landing the prefix the lane cleared (supervisor/prefix-215139, ending at #4837; Linux check 40071878407 green). #4837's `Belt-Lead:` line now names this run. Once #4837 merges, #4943 (EP-z) is retargeted to dev. Its own commits are 10 files.

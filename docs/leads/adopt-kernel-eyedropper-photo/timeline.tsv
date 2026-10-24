@@ -46,3 +46,5 @@ utc	stage	event	ref	note
 2026-10-24T06:00:18Z	wait	check	no change: dev still 654fb3632; #4837 EP-m open awaiting supervisor reply on 6380464537 (prefix skipped by lane); #4840 ST-a awaiting supervisor gate merge
 2026-10-24T06:22:21Z	wait	check	no change: dev 654fb3632; #4837 EP-m open, not in batch-20261024050226 (probe -6 running), no supervisor reply; #4840 ST-a open, supervisor merge pending
 2026-10-24T07:05:11Z	wait	check	no change: #4837 EP-m still open, not in batch-20261024050226; no supervisor reply; EP-z #4943 waits
+2026-10-24T07:30Z	0	relaunch	-	run act-1a16cc5a05a-lc3g
+2026-10-24T07:30Z	wait	check	supervisor hand-batching prefix ending at #4837 (supervisor/prefix-215139, Linux 40071878407 green); #4837 Belt-Lead line moved to this run; #4943 waits
