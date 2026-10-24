@@ -4,7 +4,7 @@ Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/feat
 Run: act-1a16cae79dd-mtf2 · Started: 2026-10-24T06:54Z (prior: act-1a1693a401e-chyn, act-1a164697376-dv7u)
 Stage: 3 wave 4
 Base: e5dcf939 (dev; brief's main HEAD 654fb363 verified)
-Next: FH-7 PR #5107 (base FH-c) and FH-7-jobs PR #5108 (base FH-7) opened, fast-lane; retarget to dev as parents merge; FH-8 builder gating; then FH-8 PR, FH-9 PR after FH-7 merges, FH-10; poll lane for #4577/#4889/#4896
+Next: PRs open: #5107 FH-7, #5108 FH-7-jobs, #5109 FH-8 (stacked; retarget to dev as parents #4577/#4889/#4896 merge); hold FH-9 (docs, 8b86cd6) and FH-10 (wave built, feature-done) until FH-7/FH-8 merge; poll lane
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
