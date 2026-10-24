@@ -42,6 +42,9 @@
 //                  an undo step (PhotoEyedropper.swift).
 //   move           shifts every picked image layer by the drag, in whole
 //                  pixels, as one step ("Move Layer", "Move Layers" for several).
+//   bucket, spot heal, remove
+//                  nothing until the release runs one command, one undo step
+//                  (PhotoRetouchRelease.swift).
 //
 // Brush, eraser, clone and heal write through `paintTarget()`: the selected
 // layer's pixels, or on an adjustment layer nothing, with the refusal in
@@ -85,6 +88,7 @@ struct PhotoStroke: Sendable, Equatable {
     /// Gradient: where the pointer is now; the gradient runs from `start` to here on release.
     var end: Mask.Point?
     /// Heal: the stroke's points so far, for `retouch.heal` on release.
+    /// Remove: the points the stroke passed, from `start`, a quarter of the brush apart.
     var path: [Mask.Point] = []
 }
 
@@ -168,8 +172,10 @@ extension PhotoWorkspace {
         case .move:
             if begun { current.layersBefore = layers }
             moveSelectedLayers(current, to: end)
-        case .eyedropper, .bucket, .spotHeal, .remove:
+        case .eyedropper, .bucket, .spotHeal:
             break
+        case .remove:
+            trace(&current, to: end)
         case .gradient:
             current.end = end
         case .text:
@@ -208,9 +214,9 @@ extension PhotoWorkspace {
     }
 
     /// Whether the drag under way only moves a line over the canvas until its
-    /// release draws (the Gradient tool's), so the window can keep its later
+    /// release draws (the Gradient tool's, and Remove's outline), so the window can keep its later
     /// samples off the workspace the panels read.
-    public var dragShowsLineOnly: Bool { stroke?.tool == .gradient }
+    public var dragShowsLineOnly: Bool { stroke?.tool == .gradient || stroke?.tool == .remove }
 
     /// Becomes `live`: a copy of this workspace a stroke drew on
     /// (`dragPaintsOnly`). Ignored when `live` is another image (another
@@ -241,7 +247,9 @@ extension PhotoWorkspace {
         case .heal:
             guard done.layerID != nil else { return }
             healStroke(done)
-        case .marquee, .crop, .eyedropper, .bucket, .spotHeal, .remove:
+        case .bucket, .spotHeal, .remove:
+            retouchRelease(done)
+        case .marquee, .crop, .eyedropper:
             break
         case .gradient:
             guard let end = done.end else { return }
