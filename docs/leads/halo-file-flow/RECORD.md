@@ -37,7 +37,7 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
-- 2026-10-24T21:40Z: run act-1a16fbc5164-vi4c. HF-m #4894 (Linux 40035628317 green, 236 lines / 15 files) and HF-z #5092 (Fast-Check marker) are lane-eligible and wait for a batch; #4936 waits on its base, the HF-m branch. No needs-fix, no file-flow findings. The record stays on lead/halo-file-flow: lead/file-flow belongs to the suite lead (#3480).
+- 2026-10-24T21:20Z: run act-1a16fbc5164-vi4c. HF-m #4894 (Linux 40035628317 green, 236 lines / 15 files) and HF-z #5092 (Fast-Check marker) are lane-eligible and wait for a batch; #4936 waits on its base, the HF-m branch. No needs-fix, no file-flow findings. The record stays on lead/halo-file-flow: lead/file-flow belongs to the suite lead (#3480).
 - HF-a blocked (2026-10-21T00:13Z): transform:HT-a likely in (#3702 adapter bodies merged), shape-tools:HS-a in review (#3676), placed-images:PH-u not started (PH-a still waiting).
 - 2026-10-21T13:42:11Z check-in: still blocked; placed-images is at Stage 0, PH-a waits on HS-a (#3676), HK-a (key-editing) and PL-a.
 - 2026-10-22T16:37:55Z: New run act-1a16474bd28-v3ht for #4514. SF-a is on dev 7e9f260 (FileFlowTarget/FileFlowCommands in SuiteKernel/Files, SuiteFileDrop in SuiteShell, SuiteDocumentHost, SuiteDocumentsBridge used by Photo). HT-a and HS-a are merged; PH-u is drafts #4437/#4438 on PH-a #4426.
@@ -75,3 +75,4 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - HF-z stacked on HF-u, not HF-4: HF-u carries a newer dev merge, so a base of HF-4 would show dev's changes in the diff; the journey needs HF-m only at run time and HF-m lands first.
 - HF-7 step 4: Bounce.flare is handed to Flare ("Open in Flare"), not made a composition: Halo isn't a .flare reader until flare-in-halo, and rule 20 keeps the hand-off. Packet steps updated.
 - The container had no swift; scripts/cloud-setup.sh installed 6.3.3 and the gate ran.
+- 21:56Z heartbeat: no merges yet; lane bisecting batch 20261024205137 (macOS gates -3, -6 running), Linux check 40135990775 on HX-m. All six PRs clean, fast-lane, no needs-fix. Newest dev green CI 40129856269 (ef37711d) holds none of our open PRs. New halo finding #5225 is a play-journey CI finding, not this feature.
