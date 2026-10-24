@@ -8,7 +8,7 @@ import Foundation
 import SuiteKernel
 import Testing
 
-@Suite(.disabled("TS-9 builds the bodies")) struct HaloTextStyleTests {
+@Suite struct HaloTextStyleTests {
     let catalog = HaloProject.catalog
 
     /// The old-format composition file, whose "Name" layer is text with no style (`Fixtures/comp-30fps.halo`).

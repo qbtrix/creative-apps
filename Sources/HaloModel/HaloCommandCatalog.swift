@@ -11,12 +11,16 @@ extension HaloProject {
     /// (gradient-fill HG-7), its nine `stroke.*` commands (stroke-style HK-6), the History panel's
     /// `history.read` and `history.jump` (autosave-history HA-6), the six `transform.*` commands on the
     /// selected layer (transform HT-6), `frameRateSpecs` (frame-rates FR-8b), the five `place.*`
-    /// commands (placed-images PH-6), then `windowSpecs`.
+    /// commands (placed-images PH-6), `textStyleSpecs` (text-style TS-9), then `windowSpecs`.
     public static let commandSpecs: [CommandSpec<HaloProject>] =
         HaloCommand.allCases.map(spec(for:)) + ShapeCommands.specs(HaloProject.self)
         + GradientCommands.specs(HaloProject.self) + StrokeCommands.specs(HaloProject.self)
         + HistoryCommands.specs(HaloProject.self) + TransformCommands.specs(HaloProject.self) + frameRateSpecs
-        + PlaceCommands.specs(HaloProject.self) + windowSpecs
+        + PlaceCommands.specs(HaloProject.self) + textStyleSpecs + windowSpecs
+
+    /// The kernel's text commands but `text.set-size`: Halo's own (`HaloCommand.setFontSize`, which the
+    /// inspector's size row runs) keeps that id, so the catalog holds it once.
+    static let textStyleSpecs = TextCommands.specs(HaloProject.self).filter { $0.id != "text.set-size" }
 
     /// The render sheet's Choose… and the unsaved alert's Save and Don't Save (CS-7): headless they check
     /// availability and change nothing, since the panel and the held command are the window's.
