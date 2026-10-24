@@ -141,3 +141,4 @@ utc	stage	event	ref	note
 2026-10-24T19:47:51Z	3	check	-	scoped design 40123009289 (674461187) red only on withoutTheBoxTheEditorRunsPerSample 180s timeout; filed #5212 (blocks all design slice-done); DK-m #4888/#4916 and PD #4922/#4963/#4964/#5001 restacked, CI: PASS, waiting on lane; DK-u #5002/#5011 waiting on lane
 2026-10-24T20:10:28Z	3	check	-	poll: no new design run since 40123009289 (red, #5212 timeout, no reply); lane idle on our PRs, none needs-fix/needs-rebase
 2026-10-24T20:31:57Z	3	check	-	poll: full CI 40129856269 queued on dev ef37711de (contains PD-a); #5212 open, no reply; our 10 PRs clean, no needs-fix/needs-rebase, none merged
+2026-10-24T20:54:14Z	3	check	-	poll: full CI 40129856269 Linux green, macOS running; #4888 in lane/batch-20261024205137; #5212 open, no reply; no needs-fix/needs-rebase
