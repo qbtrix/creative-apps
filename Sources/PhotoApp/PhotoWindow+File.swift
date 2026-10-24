@@ -190,7 +190,7 @@ extension PhotoWindow {
         case .flatten(let format):
             files.keepLayers = nil
             guard let url = documentURL else { return saveAs() }
-            write(to: url, as: format, quality: exportQuality, saving: true)
+            write(to: url, as: format, quality: model.exportOptions.quality, saving: true)
         case .clearRecent: files.clearRecent()
         case .restore(let offer):
             files.recoveryOffer = nil
@@ -286,7 +286,7 @@ extension PhotoWindow {
             writeDocument(to: url)
         case .writeImage(let format):
             guard let url = documentURL else { return saveAs() }
-            write(to: url, as: format, quality: exportQuality, saving: true)
+            write(to: url, as: format, quality: model.exportOptions.quality, saving: true)
         case .askKeepLayers(let format): files.keepLayers = format
         case .saveAs: saveAs()
         }
@@ -298,7 +298,7 @@ extension PhotoWindow {
         guard model.canvas != nil else { return }
         if let folder = Self.saveToFolder {
             if model.needsDocument { return writeDocument(to: folder.appending(path: model.documentFileName)) }
-            return write(to: folder.appending(path: model.fileName(for: .png)), as: .png, quality: exportQuality, saving: true)
+            return write(to: folder.appending(path: model.fileName(for: .png)), as: .png, quality: model.exportOptions.quality, saving: true)
         }
         let panel = NSSavePanel()
         panel.allowedContentTypes = Self.documentTypes + [.png, .jpeg]
@@ -306,7 +306,7 @@ extension PhotoWindow {
             ? model.documentFileName : model.fileName(for: ImageFormat(fileName: model.documentName ?? "") ?? .png)
         guard panel.runModal() == .OK, let url = panel.url else { return }
         if PhotoWorkspace.fileKind(forName: url.lastPathComponent) == .document { return writeDocument(to: url) }
-        write(to: url, as: ImageFormat(fileName: url.lastPathComponent) ?? .png, quality: exportQuality, saving: true)
+        write(to: url, as: ImageFormat(fileName: url.lastPathComponent) ?? .png, quality: model.exportOptions.quality, saving: true)
     }
 
     /// `-PhotoSaveTo`'s folder, when given.

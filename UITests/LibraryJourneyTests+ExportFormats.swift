@@ -25,8 +25,8 @@ final class LibraryExportFormatsJourneyTests: XCTestCase {
         addTeardownBlock { for url in [folder, catalog, out] { try? FileManager.default.removeItem(at: url) } }
         _ = try LibraryFiles.writeShoot(in: folder)
         let library = Journey("Library", self, arguments: [
-            "-LibraryImportFolder", folder.path, "-LibraryImportOnLaunch",
-            "-LibraryCatalogDir", catalog.path, "-LibraryExportTo", out.path,
+            "-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path,
+            "-LibraryExportTo", out.path, "-LibraryImportOnLaunch",
         ])
 
         // Step 1: PNG hides Quality, previews IMG_0001.png and writes 89 50 4E 47.
