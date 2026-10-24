@@ -3,7 +3,9 @@
 // launch names one, else Library's folder under the suite root
 // (`SuiteLocations.appFolder("Library")`, which `-SuiteSupportDir` moves).
 // `legacyCatalog` is where an earlier build kept it, under Application Support,
-// for the move-once rule (`LegacySupport.plan`). Pure strings, Linux-safe.
+// for the move-once rule (`LegacySupport.plan`). `storeFolder` adds the
+// folder a test names and the `LibraryCatalogDir` default, which a test
+// process registers. Pure strings, Linux-safe.
 import SuiteModel
 
 /// Library's folders under the suite's support root.
@@ -34,5 +36,20 @@ public enum LibrarySupport {
         return LegacySupport.plan(
             old: SuiteLocations.legacyFolder(legacyCatalog, home: home),
             new: folder + "/" + catalogName, exists: exists)
+    }
+
+    /// The store's folder: the one a test names, else the `LibraryCatalogDir`
+    /// default (tests register one; it also holds the launch argument), else
+    /// `catalogFolder`'s.
+    public static func storeFolder(named: String?, registered: String?, arguments: [String], home: String) -> String {
+        if let named, !named.isEmpty { return named }
+        if let registered, !registered.isEmpty { return registered }
+        return catalogFolder(arguments: arguments, home: home)
+    }
+
+    /// Whether the store may move the earlier build's catalog: only on the
+    /// launch's own folder, never one a test names or a registered default.
+    public static func storeMovesLegacy(named: String?, registered: String?) -> Bool {
+        (named ?? "").isEmpty && (registered ?? "").isEmpty
     }
 }
