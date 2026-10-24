@@ -43,6 +43,8 @@ final class LibraryAreas {
 struct LibraryWindow: View {
     @State var model: LibraryCatalog
     @State var areas = LibraryAreas()
+    /// The loupe's GPU route (suite-imaging IM-11); nil in a test window.
+    @Environment(\.libraryLoupeGPU) var loupeGPU
 
     /// `arguments` are the launch arguments (LibraryLaunch); a test passes a fixture's.
     init(arguments: [String] = ProcessInfo.processInfo.arguments) {
@@ -122,6 +124,7 @@ struct LibraryWindow: View {
         .onAppear {
             LibraryShell.read = { model }
             LibraryShell.take = { model.takeLive($0) }
+            loupeGPU?.onFailure = { loupeAreaRender(.full) }
         }
         .onDisappear {
             LibraryShell.read = nil
