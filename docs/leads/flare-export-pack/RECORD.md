@@ -4,7 +4,7 @@ Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
 Run: act-1a16c619006-nour (took over 2026-10-24 from act-1a1695ebf10-z0v8; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T02:26Z
 Stage: 3 build (fix round 1 in lane)
 Base: 721168a (origin/dev)
-Next: (2026-10-24 06:35Z) #4852 (FV-u) is in batch 20261024050226, red and bisecting (probes -1, -3, -6); #4854 (stacked), #5025, #5005 wait for the next batch. 10 findings open (>5): no new feature task. On merge: Belt-Slice-Done FV-u/FV-z on a green run containing them, Mac-Finish-Wanted, panel on FJ-X1 screens, contact sheet.
+Next: (2026-10-24 06:45Z) Batch 20261024050226's macOS gate (run 40064703313) failed on #4852's RenderBudgetFlareExportPackTests.progressInOneBodyPerTick: FlareWindow read launch from the process, so -FlareExportTo never reached startExport and NSSavePanel.runModal hung. Fix on lead/export-pack-fvu (window takes the test's launch), gate running; then push, move #4852's Head. #4854 (stacked), #5025, #5005 queued. 10 findings open: no new feature task.
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -39,6 +39,8 @@ Loop: v3 (the packet has a `## Slices` table).
 - PRs target dev (CLAUDE.md), as for file-flow.
 - Rule 20: no Flare encoder and no local copy of MovieSettings or FrameClock, so FV-1 does not start until SM-a is on dev.
 - 2026-10-24: this session's GitHub writes get the attribution footer appended on the way out, so PATCHing it out of PR bodies doesn't hold; the lane strips it from the squash commit and waits on nothing for it. Left as is.
+
+- 2026-10-24: the FV-u budget test hang is #4852's own defect (stack: FlareFileDialogs.chooseFolder from startExport), not a flake: fixed on its branch rather than waiting for the bisect's needs-fix.
 
 ## Open
 - shell-media (docs/blueprints/suite/features/shell-media.md) is `planned` with feature_issue "file when ready"; SM-a and SM-w are not on dev. All four slices wait on it. Noted on #3481.
