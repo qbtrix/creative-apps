@@ -60,7 +60,9 @@ Model walk in `PhotoHistoryJumpTests` (Linux).
 4. Quit with unsaved work and relaunch (PH-6, `testRestoreAfterQuit`): the
    alert offers "Restore portrait.jpg from <time>?" (Photo's words,
    `RecoveryOffer`); Restore
-   shows the 3-step image.
+   shows the 3-step image, edited, with nothing to undo: for the beta a
+   restore brings back the picture only and history starts fresh (captain,
+   2026-10-24, #4406).
 
 ## Jobs
 

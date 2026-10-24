@@ -4,7 +4,8 @@
 // 2. File > Place… (Shift-Command-P), choose `logo.png` (200 x 100) in the panel: a layer `logo` above
 //    Background, centred (the canvas's middle shows the logo's red left half, then its blue right half),
 //    one "Place Image" step.
-// 3. Place `photo-4000x3000.jpg`: a second layer, and the status line reads "Placed at 20%.".
+// 3. Place `photo-4000x3000.jpg`: the status line reads "Placed at 20%." (read right after the Place
+//    click, as the window clears it 4 s after it shows), and a second layer.
 // 4. Undo: the photo layer goes in one step (Redo names Place Image); the logo stays.
 // Step 5 (an SVG refused) can't go through the panel, which offers only PNG and JPEG; PhotoPlaceSnapshots'
 // `refused` and PhotoPlaceTests prove it. A drop from Finder can't be driven either; PhotoPlaceTests' drop-point
@@ -43,13 +44,17 @@ final class PhotoPlaceJourneyTests: XCTestCase {
         XCTAssert(waitFor { self.centred(photo) }, "the logo isn't centred: the canvas's middle isn't red, then blue")
         photo.shot("place-logo")
 
-        place(large, photo) // 3.
+        // 3. The window clears the status line 4 s after it shows, and the panel's close and the layer list
+        // took longer than that to read on CI (#4333), so the status is read first, as soon as Place is clicked.
+        place(large, photo) {
+            let status = photo.element("photo.status.message")
+            XCTAssert(
+                self.waitFor(seconds: 15) { status.exists && status.label.contains("Placed at 20%.") },
+                "the status line doesn't read Placed at 20%. (it reads \(status.exists ? status.label : "nothing"))")
+            photo.shot("place-fitted")
+        }
         let fitted = photo.app.staticTexts["photo-4000x3000"]
         XCTAssert(fitted.waitForExistence(timeout: 15), "the layer list lists no photo-4000x3000")
-        let status = photo.app.staticTexts.matching(
-            NSPredicate(format: "label == 'Placed at 20%.' OR value == 'Placed at 20%.'")).firstMatch
-        XCTAssert(status.waitForExistence(timeout: 5), "the status line doesn't read Placed at 20%.")
-        photo.shot("place-fitted")
 
         photo.press(character: "z", .command) // 4.
         XCTAssert(waitFor { !fitted.exists }, "Undo left the photo layer")
@@ -58,8 +63,9 @@ final class PhotoPlaceJourneyTests: XCTestCase {
         photo.shot("place-undone")
     }
 
-    /// File > Place…, then the file at `url` chosen in the panel by its path.
-    @MainActor private func place(_ url: URL, _ photo: Journey) {
+    /// File > Place…, then the file at `url` chosen in the panel by its path; `placed` runs right after the
+    /// Place click, before the wait for the panel to close.
+    @MainActor private func place(_ url: URL, _ photo: Journey, placed: () -> Void = {}) {
         photo.press(character: "p", [.command, .shift])
         // The panel is a sheet or a dialog: wait for either before picking, as it takes a moment to come up.
         let sheet = photo.app.sheets.firstMatch, dialog = photo.app.dialogs.firstMatch
@@ -74,6 +80,7 @@ final class PhotoPlaceJourneyTests: XCTestCase {
         XCTAssert(button.waitForExistence(timeout: 5), "the panel has no Place button")
         XCTAssert(waitFor { button.isEnabled }, "the panel didn't pick \(url.lastPathComponent)")
         button.click()
+        placed()
         XCTAssert(waitFor { !panel.exists }, "the panel didn't close on Place")
     }
 
@@ -102,9 +109,9 @@ final class PhotoPlaceJourneyTests: XCTestCase {
         return (0..<3).map { Int(bytes[$0]) }
     }
 
-    /// Polls `condition` for up to five seconds.
-    @MainActor private func waitFor(_ condition: () -> Bool) -> Bool {
-        for _ in 0..<25 where !condition() { Thread.sleep(forTimeInterval: 0.2) }
+    /// Polls `condition` for up to `seconds`.
+    @MainActor private func waitFor(seconds: Double = 5, _ condition: () -> Bool) -> Bool {
+        for _ in 0..<Int(seconds * 5) where !condition() { Thread.sleep(forTimeInterval: 0.2) }
         return condition()
     }
 
