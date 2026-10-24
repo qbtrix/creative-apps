@@ -84,6 +84,8 @@ struct PhotoStroke: Sendable, Equatable {
     var modifiers: DragModifiers = []
     /// Gradient: where the pointer is now; the gradient runs from `start` to here on release.
     var end: Mask.Point?
+    /// Heal: the stroke's points so far, for `retouch.heal` on release.
+    var path: [Mask.Point] = []
 }
 
 extension PhotoWorkspace {
@@ -154,9 +156,10 @@ extension PhotoWorkspace {
                 // A move after the press starts on the dab the last event laid, so it skips that one.
                 let last = current.samples.last.map { Mask.Point($0.point) }
                 current.samples = [StrokeSample(point: end.kernel)]
+                if current.tool == .heal { current.path += last == nil ? [start, end] : [end] }
                 stamp(
                     along: [last ?? start, end], size: brushOptions.size, layer: id, before: &current.before,
-                    coverage: &current.coverage, healing: current.tool == .heal, skippingFirst: last != nil)
+                    coverage: &current.coverage, skippingFirst: last != nil)
             }
         case .marquee:
             selectionDrag(&current, to: end, modifiers: modifiers, zoom: zoom, in: canvas)
@@ -165,7 +168,7 @@ extension PhotoWorkspace {
         case .move:
             if begun { current.layersBefore = layers }
             moveSelectedLayers(current, to: end)
-        case .eyedropper:
+        case .eyedropper, .bucket, .spotHeal, .remove:
             break
         case .gradient:
             current.end = end
@@ -232,10 +235,13 @@ extension PhotoWorkspace {
             paint(&done, adding: nil, pressure: 1)
             guard let id = done.layerID, !done.before.isEmpty else { return }
             record(.tiles(layer: id, done.before), named: done.tool == .brush ? "Paint" : "Erase")
-        case .clone, .heal:
+        case .clone:
             guard let id = done.layerID, !done.before.isEmpty else { return }
-            record(.tiles(layer: id, done.before), named: done.tool == .heal ? "Heal" : "Clone")
-        case .marquee, .crop, .eyedropper:
+            record(.tiles(layer: id, done.before), named: "Clone")
+        case .heal:
+            guard done.layerID != nil else { return }
+            healStroke(done)
+        case .marquee, .crop, .eyedropper, .bucket, .spotHeal, .remove:
             break
         case .gradient:
             guard let end = done.end else { return }

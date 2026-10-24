@@ -4,6 +4,7 @@
 // the menu's label ("Rotate 90° Clockwise"). Zoom is window state, so the view.zoom commands are no-ops. Linux-safe.
 import CoreRaster
 import FlareCore
+import SuiteImaging
 import SuiteKernel
 
 extension PhotoWorkspace {
@@ -115,6 +116,7 @@ extension PhotoWorkspace {
                 gate { $0.toolHelp(tool) }) { $0.selectTool(tool) }
         }
         + HistoryCommands.specs(PhotoWorkspace.self) + SampleCommands.specs(PhotoWorkspace.self) + textCommands
+        + RetouchCommands.specs(PhotoWorkspace.self)
 
     static let fileCommands: [CommandSpec<PhotoWorkspace>] = [
         .typed("file.new", title: "New Image", summary: "Opens a new white image of the given size.", kind: .file,
