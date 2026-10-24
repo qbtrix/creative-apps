@@ -86,9 +86,11 @@ extension PhotoWorkspace: PathEditTarget {
         pathState.anchors.clear()
     }
 
-    /// Records the path list and editing path as they are, before a change.
+    /// Records the path list and editing path as they are, before a change, and moves `revision` with no canvas
+    /// damage, so the window's autosave sees the edit.
     mutating func recordPaths(named name: String, coalescing: String? = nil) {
         record(.paths(paths, editing: pathState.editingID), named: name, coalescing: coalescing)
+        touch(.none)
     }
 
     /// Puts back `list` and `editing` for undo and returns what they replaced; the picked anchors go, since their
@@ -97,6 +99,7 @@ extension PhotoWorkspace: PathEditTarget {
         let inverse = PhotoEdit.paths(paths, editing: pathState.editingID)
         (pathState.paths, pathState.editingID) = (list, editing)
         pathState.anchors.clear()
+        touch(.none)
         return inverse
     }
 
