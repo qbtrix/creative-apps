@@ -8,7 +8,11 @@
 // card's caption until ThumbnailBadges has its badge (#804); until then a
 // caption carries the card's age and its tooltip the app. The recents take
 // the height left between the New row and the running strip and clip to it
-// (ThumbnailGrid scrolls itself live).
+// (ThumbnailGrid scrolls itself live). Each card shows its document's
+// published preview, asked once through HomePreviews when the cards change
+// and kept for the window's life; a document without one shows its app's mark
+// (shared-thumbnails ST-3).
+import AppKit
 import SuiteModel
 import SuiteUI
 import SwiftUI
@@ -19,8 +23,20 @@ struct HomeGrid: View {
     let images: [String: Image]
     let isPreview: Bool
     let open: ToolbarAction
+    /// A test passes previews it loaded; the window keeps its own.
+    var loaded: HomePreviews<Image>? = nil
+    @State private var own = HomeGrid.previews()
+    private var previews: HomePreviews<Image> { loaded ?? own }
+
+    #if DEBUG
+    // view-static: main-actor
+    static var bodyRuns = 0
+    #endif
 
     var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.m) {
             header
             ChipRow(chips) { model.filter(SuiteApp(rawValue: $0), now: Date()) }
@@ -40,6 +56,9 @@ struct HomeGrid: View {
         }
         .frame(maxWidth: .infinity, minHeight: .zero, maxHeight: .infinity, alignment: .topLeading)
         .clipped()
+        .task(id: model.state.cards.map(\.item.ref.fileID)) {
+            await previews.load(model.state.cards.map(\.item.ref), from: model.thumbnails)
+        }
     }
 
     private var header: some View {
@@ -73,18 +92,41 @@ struct HomeGrid: View {
         return CGSize(width: width, height: width * 3 / 4)
     }
 
-    private func item(_ card: RecentCard) -> ThumbnailItem<String> { Self.item(card, images: images) }
+    private func item(_ card: RecentCard) -> ThumbnailItem<String> { Self.item(card, images: images, previews: previews) }
 
-    /// A card as a cell: its name and age, the app in the tooltip.
-    static func item(_ card: RecentCard, images: [String: Image]) -> ThumbnailItem<String> {
+    /// A card as a cell: its name and age, the app in the tooltip. With `previews`, its published
+    /// preview, else its own thumbnail, else the app's mark once the preview answered nil; the
+    /// accessibility value then says which ("Today, preview" or "Today, app mark").
+    static func item(_ card: RecentCard, images: [String: Image], previews: HomePreviews<Image>? = nil) -> ThumbnailItem<String> {
         let name = card.item.ref.displayName
+        let own = card.item.thumbnail.flatMap { images[$0] }
+        let shown = previews.map { $0.picture(for: card.item.ref, fallback: own) } ?? own
+        let kind = previews?.kind(for: card.item.ref) ?? .waiting
+        let said = kind == .preview ? ", preview" : kind == .mark && own == nil ? ", app mark" : ""
         return ThumbnailItem(
-            id: card.item.ref.fileID, image: card.isMissing ? nil : card.item.thumbnail.flatMap { images[$0] },
+            id: card.item.ref.fileID, image: card.isMissing ? nil : shown,
             caption: card.isMissing ? "\(name) · Missing" : "\(name) · \(card.age)",
-            accessibilityValue: card.isMissing ? "Missing, \(card.age)" : card.age,
+            accessibilityValue: card.isMissing ? "Missing, \(card.age)" : card.age + said,
             help: card.isMissing ? SuiteError.fileMissing(name: name).message
                 : "\(name), \(card.item.ref.app.displayName), \(card.age)",
             isUnreadable: card.isMissing)
+    }
+
+    /// The window's previews: PNG bytes through NSImage, the app's mark drawn once per app.
+    // view-static: main-actor
+    static func previews() -> HomePreviews<Image> {
+        HomePreviews(decode: { NSImage(data: $0).map { Image(nsImage: $0) } }, mark: mark)
+    }
+
+    /// The app's mark (SuiteUI AppMark, never a symbol) centred at half the card's height on a
+    /// clear 4:3 card, rendered once so a card draws it as any other picture.
+    // view-static: main-actor
+    static func mark(_ app: SuiteApp) -> Image? {
+        let width = HomeLayout.cardMax, height = HomeLayout.cardMax * 3 / 4
+        let renderer = ImageRenderer(content: AppMark(app: app, style: .icon)
+            .frame(width: height / 2, height: height / 2)
+            .frame(width: width, height: height))
+        return renderer.nsImage.map { Image(nsImage: $0) }
     }
 
     /// "2 items matching “logo”" beside RECENT while a search is on; nil without one (HomeModel's, #1866).
