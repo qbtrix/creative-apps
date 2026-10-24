@@ -79,3 +79,5 @@ Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #48
 - 17:24Z: batch 172211 carries #4880 (TC-5). Once it is on dev, turn on the Wire tests that wait on TC-5.
 
 - 18:19Z: dev-red #5183 opened 17:56Z for the full macOS job, range main..33cd6e97c (#3621 ... #4951). None of our PRs is in it; the lane keeps merging.
+
+- 18:55Z: #4880 (TC-5) is on dev. The Pen PR #5134 conflicted with PT-2, PT-6 and PT-4 (PhotoIntent, PhotoWindow, catalog, command-ids, photo.list-commands golden). Resolved by keeping both; the golden is dev plus our tone.* entries, sorted by id.

@@ -126,3 +126,5 @@ utc	stage	event	ref	note
 2026-10-24T17:24:09Z	W2	check	PT-2	batch 160327 green and merged (dev c09201386); batch 172211 running with #4880 (TC-5, a Wire trigger) among 12 older PRs; ours still queued, unlabelled; no dev-red
 2026-10-24T17:52:02Z	W2	check	PT-2	batch 172211 Linux green, macOS gate 40115812591 still queued; #4880 not merged yet; ours queued, unlabelled; dev c09201386; no dev-red
 2026-10-24T18:18:32Z	W2	check	PT-2	batch 172211 macOS gate in progress; #4880 not merged; ours queued, unlabelled; dev-red #5183 (macos, range main..33cd6e97c) has none of our PRs, not ours to fix
+2026-10-24T18:47:36Z	W2	fix	PT-2	needs-rebase on #5007, #5008, #5112 after the Pen (#5134) landed: merged dev; PT-2 kept .tone and .path in PhotoIntent/PhotoWindow; PT-6 took PT-2; PT-4 kept pathCommands and ToneCommands, ledger plus golden as union; gates running
+2026-10-24T18:47:36Z	W2	check	PT-2	#4880 TC-5 merged (batch 172211 macOS failed, a later batch carried it); the TC-5 tests turn on after our tone PRs land; dev 674461187; dev-red #5183 not ours
