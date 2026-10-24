@@ -41,6 +41,7 @@ Next: ST-z builder on lead/shared-thumbnails-ST-z (stacked on ST-u + ST-m), draf
 - Earlier runs (act-1a15b69feea-et92) were all blocked on SC-a; their heartbeat log is in RECORD.prev.
 
 - 2026-10-24T08:15Z ST-z came back at 548 lines/13 files, over the 400 cap even after its parents merge. Split into two stacked PRs, both `Slice: ST-z`: #5102 (ST-7 Photo publish on save + live slot, 7 files/340) and #5133 (Library grid on disk, journey on live previews, wave.json built, feature-done; 6 files/208). The hard cap wins over "one PR per slice"; the slice is done once a run contains ST-z2.
+- 10:16Z Supervisor answered the 07:54Z question: Belt's stall check reads `lead/suiteui-shared-thumbnails`. Keep pushing every RECORD update to both branches. The ST-z drafts stacked on #4950/#4951 are approved. The lane says the body footer (re-added by the session proxy) blocks nothing, because it is stripped at squash.
 
 ## Wire
 - [x] Wire: shared-codecs:SC-a (ST-2 built ahead; when SC-2 merges, merge dev into the ST-a branch, keeping both Package.swift/project.yml link changes)
