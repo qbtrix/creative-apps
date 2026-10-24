@@ -111,3 +111,4 @@ utc	stage	event	ref	note
 2026-10-24T11:38Z	W4	check-in	PT-5	lane batch 20261024110214 holds #5008 (PT-6), #5007 (PT-2), #5006 (TC-3): Linux green, macOS gate running since 11:02Z; #5105, #5112 not batched yet; dev 6ad8cadba; 0 tone findings
 2026-10-24T12:00Z	W4	check-in	PT-5	batch 20261024110214 (#5008, #5007, #5006) macOS gate run 40088280853 still in scripts/ci; tracked PRs clean, unmerged; dev 6ad8cadba; 0 tone findings
 2026-10-24T12:22Z	W4	check-in	PT-5	batch 20261024110214 macOS gate failed; lane bisecting (probe -6 running) with #5008, #5007, #5006 inside; none needs-fix yet; dev 78983bc33
+2026-10-24T12:44Z	W4	check-in	PT-5	bisect probe -6 (macOS 40092825860) still running; tracked PRs clean, unmerged; 0 tone findings (#5166 is export, not ours); no dev-red
