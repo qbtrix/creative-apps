@@ -4,7 +4,7 @@ Issue: #3937 · Packet: docs/blueprints/suiteui/features/layer-styles.md
 Run: act-1a16cdcb4a5-trd4 · Session: claude/feature-lead-playbook-9a8kbw · Started: 2026-10-23T15:30Z
 Stage: 3 wave 2
 Base: 9f476af7419db0cc5753aa119ec0bd3b1a12899a (origin/dev)
-Next: Next: lane batch holds #4903 #4911; then open LS-2/LS-5 stacks
+Next: Next: wait for the lane to merge the batch (#4903 #4904 #4905 #4911), then open stacked PRs
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
