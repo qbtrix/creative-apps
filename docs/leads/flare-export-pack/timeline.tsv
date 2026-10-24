@@ -155,3 +155,4 @@ utc	stage	event	ref	note
 2026-10-24T20:09:13Z	heartbeat	probe 20261024183708-6 (holds #4854) macOS gate run 40123913661 still in progress since 19:08Z; #5025 queued
 2026-10-24T20:30:47Z	heartbeat	probe 20261024183708-6 (holds #4854) green: Linux 40123911228, macOS 40123913661; awaiting the lane's merge; #5025 queued
 2026-10-24T20:52:23Z	heartbeat	#4854 re-batched into lane/batch-20261024205137 (probe -6 was green; -7, -9 red); #5025 queued. Tried stripping the attribution footer from #4854/#5025/#5036 bodies via gh api PATCH: the session proxy re-appends it on every write (lane strips it from the squash). For the supervisor.
+2026-10-24T21:13:39Z	heartbeat	batch 20261024205137 (holds #4854): Linux green, macOS gate running; #5025 queued
