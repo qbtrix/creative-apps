@@ -2,7 +2,7 @@
 
 Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a16ee71e35-s8g5 · Session: claude/large-catalog-lead-4ijm0b (earlier act-1a16c627c84-u86z, act-1a1693fbf6d-ap2g, act-1a15df37b73-k199) · Started: 2026-10-21T10:19Z (resumed 2026-10-23T14:20Z, 2026-10-24T05:10Z, 2026-10-24T17:15Z)
-Stage: 3 wave 3 (LG-grid: LG-6 #5042 and LG-7 #5054 merged; LG-5+LG-8 #5050 open)
+Stage: 3 wave 3 (LG-grid: #5042 #5054 merged 18:19Z, #5114 landed 19:18Z; LG-5+LG-8 #5050 open, last)
 Base: da62659fc9460750cd2c1d1483b253c2d9a02375 (origin/dev)
 Next: watch #5050 (LG-5 + LG-8, feature-done) merge in the next lane batch and the supervisor land #5114; then Belt-Slice-Done LG-grid on a green ci.yml run on dev containing the last of them
 
@@ -46,6 +46,7 @@ Next: watch #5050 (LG-5 + LG-8, feature-done) merge in the next lane batch and t
 - 18:20Z: #5042 and #5054 merged 18:19Z (lane/batch-20261024172211). #5050 merges clean with dev 7114d06f, waits on the next batch; #5114 on the supervisor.
 - 18:40Z: poll: #5050 in lane/batch-20261024183708; #5114 on the supervisor; scoped library CI 40120685023 queued (has #5042 #5054).
 - 19:01Z: poll: #5050's batch Linux green, macOS gate running; #5114 on the supervisor.
+- 19:21Z: #5114 landed 19:18Z (supervisor). #5050's batch-20261024183708 red on macOS: DesignApp/DesignCommands.swift compile errors (LiveFront<DesignHeadless>), not from #5050 (Library only); lane bisecting (batch-...-6). #5050 waits.
 - 16:09Z: #5050 (LG-5) got needs-rebase (conflict with #4951 disk tier in LiveThumbnails.swift). Merged origin/dev into -lg5, kept the cancel check first then the disk read/store; scripts/ci --changed running (fix round 1).
 - 15:38Z: poll: still no change; LG-grid PRs queued, #5114 awaits supervisor, beta question open ~2h.
 - 15:19Z: poll: unchanged; LG-grid PRs still queued, #5114 awaits supervisor, beta question unanswered.
