@@ -125,3 +125,4 @@
 2026-10-24T15:32:24Z	heartbeat	batch-20261024144917 (with #4838 DR-u): Linux green, macOS running; other PRs unchanged, no needs-fix
 2026-10-24T15:54:25Z	heartbeat	#4838 (DR-u) merged 15:48Z; #5130 now on dev; #4899 needs-rebase (command-id goldens), fixer started; DR-u Belt-Slice-Done waits for a green scoped/full run containing #4838 and #5130
 2026-10-24T16:16:28Z	heartbeat	batch-20261024160327 in flight (none of ours); #4899 fixer running its gate; #5130 #4960 #4962 #5044 clean, wait next batch
+2026-10-24T16:19:37Z	fix	#4899 merged dev at ffe411ac, CI: PASS; photo.delete-rejects stays window-only per #4838 (confirm before Trash), PR test now asserts that
