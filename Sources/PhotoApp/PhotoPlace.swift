@@ -44,7 +44,9 @@ extension PhotoWindow {
                     if model.canvas == nil { open(url) } else { PhotoOpenQueue.shared.open(url) }
                 case .handOff(let path, let app):
                     Task { await PhotoShell.bridge.handOff([.handOff(path: path, app: app)]) }
-                case .forget, .clearRecent, .newImage: continue
+                case .forget: Task { await files.documents.refresh() }
+                case .clearRecent: Task { await files.documents.clear(app: .photo) }
+                case .newImage: continue
                 }
             }
         case .files(let files, let at): model.place(files, at: at)

@@ -16,7 +16,8 @@
 // (`launchOptions`, read once from the process; S-12), whose picture it
 // renders and keeps fitted while the window settles, until the user zooms. Open, Save, Save As and their
 // launch arguments live in PhotoWindow+File.swift, Export's write in
-// PhotoWindow+Export.swift.
+// PhotoWindow+Export.swift. The file flow follows the suite's recents and the
+// open file's URL (`syncFileFlow`).
 //
 // Each v2 area's intents go to its PhotoWindow+<Area>.swift (file, edit,
 // crop, history, select, adjustment layer, transform, export, sample), and
@@ -107,6 +108,8 @@ struct PhotoWindow: View {
             .environment(\.photoLiveTransform, liveTransform)
             .focusedSceneValue(\.photoMenu, PhotoMenu(model: model, isPresenting: isPresenting, perform: perform))
             .onChange(of: model.revision) { renderer.show(model) }
+            .onChange(of: files.documents.recents(for: .photo), initial: true) { syncFileFlow() }
+            .onChange(of: documentURL) { syncFileFlow() }
             .onAppear { if let rendering { renderer.follow(rendering) { renderer.show(model) } } }
             .onChange(of: model.canvas) {
                 fitFollowsViewport = false

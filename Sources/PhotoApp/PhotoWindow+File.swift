@@ -2,7 +2,7 @@
 // PV-1): its intents, its route, its hook on the window, the services the
 // window runs on, and open, Save, Save As and the writes they share. New
 // Image, Open, Save and Save As route through PhotoWindow.perform to the
-// helpers here; Keep layers?' choices and Clear Menu are FileIntents. Save
+// helpers here; Keep layers?' choices are FileIntents. Save
 // goes where `model.saveAction` says: a document is written over its `.ora`
 // (PhotoPackageIO, the snapshot taken off the main actor), a flat image over
 // its file, a flat file whose image has layers asks "Keep layers?" (Save as
@@ -18,9 +18,11 @@
 // Open reads an `.ora` and decodes its PNGs off the main actor, then opens
 // the snapshot; a bad document shows its ArchiveError message and the window
 // keeps what it had. Flat files open through `openImage`, so Save knows
-// their kind. Each successful open and save is noted in Open Recent and,
-// through SuiteDocumentsBridge (file-flow PF-4), in the suite's shared
-// recents: `.opened` or `.saved`, once each, with the file's suite type.
+// their kind. Each successful open and save is noted once, `.opened` or
+// `.saved`, in the suite's one recents list through the process's
+// SuiteDocumentsBridge (PhotoShell.bridge, the one Open Recent reads; #5080),
+// and in the system's list for the Dock. The old `PhotoRecentFiles` list moves
+// into the suite's once, at launch or on the first note, and its key goes.
 // `-PhotoOpenFile <path>` opens a file at launch; `-PhotoRecoveryDir
 // <folder>` keeps autosaves there. PhotoFileSession is the file state the
 // window and PhotoFileArea share. PhotoFileArea
@@ -51,8 +53,6 @@ enum FileIntent {
     case saveDocument
     /// Keep layers?: Flatten into the open file's format.
     case flatten(ImageFormat)
-    /// Open Recent > Clear Menu.
-    case clearRecent
     /// The launch offer: Restore its image into the window.
     case restore(RecoveryOffer)
     /// The launch offer: Discard what the crash left behind.
@@ -84,8 +84,6 @@ final class PhotoFileSession {
     var working: PhotoFileWork?
     /// Saves that landed, so the unsaved prompt's Save knows it did.
     var saves = 0
-    /// Open Recent's files, newest first.
-    private(set) var recentFiles: [URL] = PhotoFileSession.storedRecent()
     /// The window's autosave, made on its workspace's recovery store when the window appears.
     private(set) var autosave: PhotoAutosave?
     /// The launch's restore offer while it waits for Restore or Discard.
@@ -109,43 +107,34 @@ final class PhotoFileSession {
     }
 
     /// The bridge opens and saves are noted through; nil uses the process's (tests inject one).
-    @ObservationIgnored var bridge: SuiteDocumentsBridge?
+    var bridge: SuiteDocumentsBridge?
+    /// The suite's recents this window notes in and lists: the process's one bridge unless a test injected one.
+    var documents: SuiteDocumentsBridge { bridge ?? PhotoShell.bridge }
 
-    /// Photo's bridge on the live suite store (`-SuiteSupportDir` moves it), made on first use.
-    static let suiteBridge: SuiteDocumentsBridge = {
-        let arguments = ProcessInfo.processInfo.arguments
-        let support = SuiteLocations.supportFolder(arguments: arguments, home: NSHomeDirectory())
-        return SuiteDocumentsBridge(app: .photo, services: .live(support: support, app: .photo, arguments: arguments))
-    }()
-
-    /// Notes `url` in Open Recent: the system's list, Photo's own (an app with
-    /// no declared document types may not get the system's), and the suite's
-    /// shared recents as `event`, when the suite knows the file's type.
+    /// Notes `url` as `event` in the suite's recents, when the suite knows its type, and in the system's list.
     func noteRecent(_ url: URL, _ event: RecentEvent) {
         NSDocumentController.shared.noteNewRecentDocumentURL(url)
-        store(Array(([url] + recentFiles.filter { $0 != url }).prefix(10)))
-        let bridge = self.bridge ?? Self.suiteBridge
+        let bridge = documents
         guard let type = bridge.registry.type(forExtension: url.pathExtension)?.id else { return }
         let path = url.path(percentEncoded: false)
-        bridge.noted(SuiteDocumentRef(path: path, fileID: SuiteDocumentRef.fileID(forPath: path), app: .photo,
-                                      type: type, displayName: url.lastPathComponent), event)
+        let ref = SuiteDocumentRef(path: path, fileID: SuiteDocumentRef.fileID(forPath: path), app: .photo,
+                                   type: type, displayName: url.lastPathComponent)
+        Task {
+            await Self.importOldRecents(into: bridge)
+            await bridge.note(ref, event)
+        }
     }
 
-    func clearRecent() {
-        NSDocumentController.shared.clearRecentDocuments(nil)
-        store([])
-    }
+    /// Photo's old Open Recent list, read before the suite's list was the only one.
+    static let oldRecentKey = "PhotoRecentFiles"
 
-    private nonisolated static let recentKey = "PhotoRecentFiles"
-
-    /// The saved list; Open Recent reads it with no window open.
-    nonisolated static func storedRecent() -> [URL] {
-        (UserDefaults.standard.stringArray(forKey: recentKey) ?? []).map { URL(fileURLWithPath: $0) }
-    }
-
-    private func store(_ urls: [URL]) {
-        recentFiles = urls
-        UserDefaults.standard.set(urls.map(\.path), forKey: Self.recentKey)
+    /// Moves the old list into the suite's recents once, oldest first so the newest stays on top, and removes its key.
+    static func importOldRecents(into bridge: SuiteDocumentsBridge) async {
+        var stored = UserDefaults.standard.stringArray(forKey: oldRecentKey)
+        guard stored != nil else { return }
+        let refs = PhotoWorkspace.takeOldRecents(&stored, registry: bridge.registry)
+        UserDefaults.standard.removeObject(forKey: oldRecentKey)
+        for ref in refs { await bridge.note(ref, .opened) }
     }
 }
 
@@ -155,6 +144,11 @@ extension PhotoWindow {
     nonisolated static func fileServices(_ live: PhotoServices) -> PhotoServices {
         guard let folder = UserDefaults.standard.string(forKey: "PhotoRecoveryDir") else { return live }
         return live.recovering(in: URL(fileURLWithPath: folder, isDirectory: true))
+    }
+
+    /// The file flow's view of the suite's recents and the open file, for Open Recent, Clear Menu and Open In.
+    func syncFileFlow() {
+        model.updateFileFlow(recents: files.documents.recents(for: .photo), documentPath: documentURL?.path(percentEncoded: false))
     }
 
     /// The last save failed and the image is still edited (D-8's "Not saved").
@@ -174,7 +168,6 @@ extension PhotoWindow {
             files.keepLayers = nil
             guard let url = documentURL else { return saveAs() }
             write(to: url, as: format, quality: exportQuality, saving: true)
-        case .clearRecent: files.clearRecent()
         case .restore(let offer):
             files.recoveryOffer = nil
             restore(offer)
@@ -388,7 +381,6 @@ struct PhotoFileArea: ViewModifier {
                     BusyNote(work.note, identifier: work.identifier, delay: .milliseconds(100))
                 }
             }
-            .focusedSceneValue(\.photoRecentFiles, files.recentFiles)
             // Keep layers? as a sheet on the window; Cancel (or no window) just closes it.
             .task(id: files.keepLayers) {
                 guard let format = files.keepLayers else { return }
@@ -593,17 +585,4 @@ final class PhotoWindowEditedView: NSView, PhotoUnsavedWindow {
     nonisolated override func forwardingTarget(for aSelector: Selector!) -> Any? {
         original?.responds(to: aSelector) == true ? original : super.forwardingTarget(for: aSelector)
     }
-}
-
-extension FocusedValues {
-    /// The focused Photo window's Open Recent files, newest first.
-    var photoRecentFiles: [URL]? {
-        get { self[PhotoRecentFilesKey.self] }
-        set { self[PhotoRecentFilesKey.self] = newValue }
-    }
-}
-
-/// A plain key rather than `@Entry`, as PhotoMenuKey.
-private struct PhotoRecentFilesKey: FocusedValueKey {
-    typealias Value = [URL]
 }
