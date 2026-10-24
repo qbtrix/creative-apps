@@ -93,3 +93,4 @@ utc	stage	event	ref	note
 2026-10-24T05:05Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, queued; lane batch-20261024050226 (#4839-#4875) running; dev 654fb3632
 2026-10-24T05:26Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, queued; batch-20261024050226 Linux passed, macOS gate running; dev 654fb3632
 2026-10-24T05:47Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, queued; batch-20261024050226 bisecting (probe -6); dev 654fb3632
+2026-10-24T06:15Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, queued; probe -6 Linux passed, macOS gate running; dev 654fb3632
