@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-24T05:50Z	1	commit	HY-1	test-first, 64944d2 on lead/halo-layer-styles-HY-a
 2026-10-24T06:40Z	1	gate-pass	HY-1	e52c9ca scripts/ci --changed PASS; PR waits on #4911
 2026-10-24T06:40Z	1	blocked	HY-2	waits on suiteui LS-2 (LayerStylePanel placeholder)
+2026-10-24T06:51Z	HY-5	built, gate PASS, mutate 4/4, pushed lead/halo-layer-styles-HY-m 3290e96

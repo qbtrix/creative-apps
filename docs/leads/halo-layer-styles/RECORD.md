@@ -3,16 +3,16 @@
 Issue: #3936 · Packet: docs/blueprints/halo/features/layer-styles.md
 Run: act-1a16c627cc6-nlss · Session: claude/layer-styles-lead-vx2vrg · Started: 2026-10-24 (resumed; earlier run act-1a1648ae75a-4dqz)
 Wire: suiteui layer-styles:LS-a
-Stage: wave 1 (HY-1 built on LS-a's stubs, stacked on #4911)
+Stage: wave 2 (HY-5 built on HY-1, stacked; HY-2 blocked on LS-2)
 Base: a41e7f1 (origin/dev)
-Next: open the HY-a PR (HY-1, e52c9ca) once #4911 is on dev; HY-2 waits on LS-2 (SuiteUI `LayerStylePanel` placeholder, no PR yet), HY-5 on LS-m
+Next: open the HY-a PR (HY-1, e52c9ca) once #4911 is on dev, then the HY-m PR's first half (HY-5, 3290e96) once HY-a lands; HY-6 next (needs LS-8's `StyleProgram.render`); HY-2 waits on LS-2 (SuiteUI `LayerStylePanel` placeholder, no PR yet)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | HY-a | `HaloLayer.style`, five style properties, `style.*` in the catalog on stubs, Layer > Layer Style… opens the panel | HY-1, HY-2 | MJ-HY | suiteui LS-a (#4911 open; stacked on it) | yes | 0 | building | – | – |
 | HY-u | inspector style rows with stopwatches, snapshots, render budget, journey written | HY-3, HY-4 | HJ-Y1 | HY-a | yes | 0 | waiting | – | – |
-| HY-m | style commands one undo step, five properties key and ease, frame renderer draws keyed styles | HY-5, HY-6 | MJ-HY | HY-a; LS-m | no | 0 | waiting | – | – |
+| HY-m | style commands one undo step, five properties key and ease, frame renderer draws keyed styles | HY-5, HY-6 | MJ-HY | HY-a; LS-m | no | 0 | building | – | – |
 | HY-z | viewer draws through the live route, journey on live, halo.md built | HY-7, HY-8 | HJ-Y1 | HY-u, HY-m; LS-gpu (HY-7); file-flow:HF-z (HY-8) | yes | 0 | waiting | – | – |
 
 ## Tasks
@@ -20,7 +20,7 @@ Next: open the HY-a PR (HY-1, e52c9ca) once #4911 is on dev; HY-2 waits on LS-2 
 |---|---|---|---|---|---|---|---|
 | HY-1 | HY-a | 1 | `HaloLayer.style`; five properties; adapter stubs; specs and ids; tests disabled | Sources/HaloModel/HaloLayer.swift, Sources/HaloModel/Contracts/HaloValues.swift, Sources/HaloModel/HaloStyle+Kernel.swift, Sources/HaloModel/HaloCommandCatalog.swift, Tests/command-ids/halo.txt, Tests/HaloModelTests/HaloLayerStyleTests.swift | HaloLayerStyleTests (6 on, 4 disabled), command-id list | – | built, gate PASS on lead/halo-layer-styles-HY-a (e52c9ca, +223/-18, 12 files over LS-1); PR waits on #4911 |
 | HY-2 | HY-a | 2 | Layer menu items by id; panel sheet while `stylePanel` is set | Sources/HaloApp/HaloCommands.swift, Sources/HaloApp/HaloWindow+Styling.swift, Sources/HaloApp/HaloWindow.swift | HaloLayerStyleSnapshots.panel | – | blocked (LS-2: `LayerStylePanel` placeholder not on dev or in #4911) |
-| HY-5 | HY-m | 2 | adapter bodies; tests on | Sources/HaloModel/HaloStyle+Kernel.swift, Tests/HaloModelTests/HaloLayerStyleTests.swift, Tests/mutations/HaloModel.HaloStyle+Kernel.json | HaloLayerStyleTests | – | waiting (HY-1, LS-m) |
+| HY-5 | HY-m | 2 | adapter bodies; tests on | Sources/HaloModel/HaloStyle+Kernel.swift, Tests/HaloModelTests/HaloLayerStyleTests.swift, Tests/mutations/HaloModel.HaloStyle+Kernel.json | HaloLayerStyleTests (10 on), `Mutate: 4/4 HaloModel.HaloStyle+Kernel` | – | built, gate PASS on lead/halo-layer-styles-HY-m (3290e96, +80/-16, 4 files over HY-1); stacked on HY-a |
 | HY-3 | HY-u | 3 | inspector style rows with stopwatches | Sources/HaloApp/HaloLayerInspector.swift, Tests/AppSnapshotTests/HaloLayerStyleSnapshots.swift | HaloLayerStyleSnapshots | – | waiting (HY-2) |
 | HY-6 | HY-m | 3 | frame renderer draws keyed styles; RJ-H43 job | Sources/HaloModel/Live/LiveFrameRendering.swift, Tests/HaloModelTests/HaloStyleRenderTests.swift, Tests/mutations/HaloModel.LiveFrameRendering.json, Tests/RealJobs/halo/keyed-glow/ | HaloStyleRenderTests | – | waiting (HY-5) |
 | HY-4 | HY-u | 4 | render budget; journey written, skipped | Tests/AppSnapshotTests/RenderBudgetHaloLayerStyleTests.swift, UITests/HaloJourneyTests+LayerStyle.swift | RenderBudgetHaloLayerStyleTests | – | waiting (HY-3) |
@@ -32,6 +32,7 @@ Next: open the HY-a PR (HY-1, e52c9ca) once #4911 is on dev; HY-2 waits on LS-2 
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-24: HY-5 built now on LS-a's types, not after LS-m: its tests call only Halo's adapter (`setStyle`, the keyed write, the rows), none of LS-5/LS-6's bodies. The keying hooks are two small edits in `Live/HaloKeyRules.swift` (outside the owns list): rows append `styleProperties`, and `setStatic` writes a style property into the style.
 - 2026-10-24: built on LS-a's stubs (#4911) per the supervisor, not waiting for its merge; HY-a's PR opens once #4911 is on dev.
 - HY-1 touches three files outside its owns list, each a few lines: `HaloProject.swift` (stored `stylePanel`, part of `==`), `HaloLayerDefaults.swift` and `HaloFixtures.swift` (switch arms for the five new `HaloProperty` cases, which exhaustive switches require).
 - The five style properties sit in `HaloProperty.styles`, not `allCases`, so the transform rows and key rules stay unchanged until HY-5's `rows(for:)`. The disabled HY-5 tests read the rows through `propertyRows`.
