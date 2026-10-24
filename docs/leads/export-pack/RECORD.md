@@ -33,6 +33,7 @@ Next: Lane: chain #4960 → #5043 → #5065 → #5104; #5044 and #5074 in the la
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-24T08:27:17Z Heartbeat 08:30Z: chain #4960 → #5043 → #5065 → #5104 open; #5044 and #5074 in the lane; XP-8 building. No merges yet, so no Belt-Slice-Done (dev CI 1bbaba6c1 holds none).
 - 2026-10-24T08:20:37Z Wave 4: XP-8 stacked on XP-5 #5104 (XP-6 already merged as #3586). It plans through ExportRules and does not depend on XP-9 #5074's fake writer. XP-10 waits on XP-7, XP-8 and XP-9.
 - 2026-10-24T08:20:07Z XP-5 #5104 opened (3 files, +158/−15): 6 snapshot states × light/dark, RenderBudgetExportPackTests (typing and mode switch at ≤ 2 bodies), journey steps 1 to 6 un-skipped. Footer stripped and verified. The typing budget test is new in shape; the batch macOS gate is its first real run.
 - 2026-10-24T08:07:38Z Wave 3: XP-5 (snapshots, RenderBudgetExportPackTests, journey on) stacked on XP-4 #5065. XP-8 waits on XP-5 and XP-6; XP-10 last.
