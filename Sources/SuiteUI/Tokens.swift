@@ -224,6 +224,8 @@ public enum SuiteFont {
     public static let pill = Font.caption2.weight(.semibold).monospacedDigit()
     /// Timecode and frame readouts.
     public static let timecode = Font.caption.monospaced()
+    /// Plain text read as code or a log, at body size: a problem report, a crash.
+    public static let code = Font.body.monospaced()
     /// A Studio group header (KEYFRAMES, EASING): 10 pt semibold, set in caps
     /// with SuiteSize.capsTracking.
     public static let sectionCaps = Font.caption.weight(.semibold)

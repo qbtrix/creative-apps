@@ -1,7 +1,8 @@
 // GalleryEditorKernelChrome.swift: the editor-kernel page's chrome (EK-30) on
 // the fakes: Export opens SuiteExportSheet and walks a fake run to 10 of 10;
 // the stroke pad paints a SuiteStrokePacer-paced drag at SuitePointerPressure
-// under a BrushCursorMark. The pad's samples stay in its own state.
+// under a BrushCursorMark. The pad's samples stay in its own state; its
+// stroke count is also a ProbeElement (`suite.gallery.stroke-pad.strokes`).
 // EK-31: with the panel focused, a tool letter (B, V) picks its tool through
 // ToolKeys and the `suite.gallery.tool-status` line names it.
 import SuiteKernel
@@ -104,6 +105,7 @@ struct GalleryStrokePad: View {
 
     var body: some View {
         let shown = dots
+        let strokes = "\(dots.filter(\.starts).count) strokes"
         ZStack(alignment: .topLeading) {
             Canvas { context, _ in
                 for (a, b) in zip(shown, shown.dropFirst()) where !b.starts {
@@ -131,7 +133,11 @@ struct GalleryStrokePad: View {
         .onAppear { SuitePointerPressure.watch() }
         .accessibilityElement()
         .accessibilityLabel("Stroke pad")
-        .accessibilityValue("\(dots.filter(\.starts).count) strokes")
+        .accessibilityValue(strokes)
         .accessibilityIdentifier("suite.gallery.stroke-pad")
+        // AppKit hands a plain element's SwiftUI value back as nil (#262), so a test reads the count here.
+        .overlay(alignment: .topLeading) {
+            ProbeElement("suite.gallery.stroke-pad.strokes", label: strokes, size: CGSize(width: 1, height: 1))
+        }
     }
 }

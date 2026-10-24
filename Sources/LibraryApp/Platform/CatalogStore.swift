@@ -1,6 +1,8 @@
 // Platform/CatalogStore.swift: CatalogStoring on the file system (persist
 // PE-4). `catalog.json` lives in the -LibraryCatalogDir folder when the app
-// was launched with one, else in Application Support/Library; the folder is
+// was launched with one, else in `defaultFolder`, read at each use: the
+// `LibraryCatalogDir` default when set (the snapshot tests register one),
+// else Application Support/Library. The folder is
 // made on the first write. A write lands atomically (Foundation writes an
 // auxiliary file and renames it over the catalog), so a reader never sees a
 // partial file and nothing temporary is left beside it. `writeNow` is the
@@ -14,18 +16,24 @@ struct CatalogStore: CatalogStoring {
     static let fileName = "catalog.json"
     static let setAsideName = "catalog.json.bad"
 
-    /// The folder `catalog.json` lives in.
-    let folder: URL
+    /// The folder named at init; nil means `defaultFolder`, read at each use.
+    private let named: URL?
 
-    /// `directory` is the -LibraryCatalogDir path; nil means Application
-    /// Support/Library.
+    /// The folder `catalog.json` lives in.
+    var folder: URL { named ?? Self.defaultFolder }
+
+    /// `directory` is the -LibraryCatalogDir path; nil means `defaultFolder`.
     init(directory: String? = LibraryLaunch(arguments: ProcessInfo.processInfo.arguments).catalogDir) {
-        folder = directory.map { URL(fileURLWithPath: $0, isDirectory: true) } ?? Self.defaultFolder
+        named = directory.map { URL(fileURLWithPath: $0, isDirectory: true) }
     }
 
-    /// Application Support/Library in the user's domain; the temporary folder
-    /// when the system has none to give.
+    /// The `LibraryCatalogDir` default when set, else Application
+    /// Support/Library in the user's domain; the temporary folder when the
+    /// system has none to give.
     static var defaultFolder: URL {
+        if let path = UserDefaults.standard.string(forKey: "LibraryCatalogDir"), !path.isEmpty {
+            return URL(fileURLWithPath: path, isDirectory: true)
+        }
         let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
         return (support ?? FileManager.default.temporaryDirectory).appendingPathComponent("Library", isDirectory: true)
     }
