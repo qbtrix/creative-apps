@@ -77,3 +77,4 @@ utc	stage	event	ref	note
 2026-10-24T17:03Z	poll	check	all	batch landed; ours next
 2026-10-24T17:23Z	poll	check	all	no merges; batch 20261024172211 excludes ours; #3723 open
 2026-10-24T17:42Z	poll	check	all	no merges; batch 20261024172211 in flight without ours; #3723 open
+2026-10-24T18:02Z	poll	check	all	no merges; 6 PRs fast-lane ready; batch 20261024172211 on macOS without ours
