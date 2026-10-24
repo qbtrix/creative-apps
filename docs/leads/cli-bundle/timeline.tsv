@@ -97,3 +97,4 @@ utc	stage	event	ref	note
 2026-10-24T09:42Z	check	cli-bundle	09:42Z: still blocked by dev-red #5113	https://github.com/qbtrix/creative-apps/issues/5113
 2026-10-24T10:04Z	check	cli-bundle	10:04Z: still blocked by dev-red #5113; lane stuck on batch 20261024081307	https://github.com/qbtrix/creative-apps/issues/5113
 2026-10-24T10:27Z	check	cli-bundle	10:26Z: unchanged, lane stuck behind dev-red #5113	https://github.com/qbtrix/creative-apps/issues/5113
+2026-10-24T10:49Z	check	cli-bundle	10:48Z: dev-red #5113 closed 10:38Z; waiting for lane's next batch	https://github.com/qbtrix/creative-apps/actions/runs/40081823899
