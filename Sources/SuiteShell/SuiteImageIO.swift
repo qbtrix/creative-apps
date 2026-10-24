@@ -1,19 +1,22 @@
 // SuiteImageIO.swift: the suite's one ImageIO adapter (shared-codecs rule 20).
 // No other file under Sources/ imports ImageIO (ImageIOImportRatchetTests).
-// Shell-media lands the first calls here: a still read upright at a size,
-// one image encoded as a registry format, and frames written as an animated
-// GIF or APNG. Shared-codecs'
-// SC-2 and SC-4 add decoding, file info and the CoreRaster paths beside them.
+// Shell-media's calls read a still upright at a size, encode one image as a
+// registry format and write frames as an animated GIF or APNG. Shared-codecs'
+// SC-4 adds the CoreRaster paths: file info, decoding into SuiteImaging's
+// working space (PNG and JPEG by core, everything else by ImageIO) and
+// encoding from it (PNG and JPEG by core, HEIC and TIFF by ImageIO).
 // Export-pack's XP-7 adds the metadata calls StillMetadata makes.
 // Formats come from SuiteImageFormats, so this file spells out no list of its own.
+import CoreColor
 import CoreGraphics
 import CoreRaster
 import Foundation
 import ImageIO
+import SuiteImaging
 import SuiteModel
 
 public enum SuiteImageIO {
-    // MARK: Decoding, file info and the CoreRaster paths (shared-codecs SC-2 stubs; SC-4 gives them bodies)
+    // MARK: Decoding, file info and the CoreRaster paths (shared-codecs SC-4)
 
     /// A file's facts read without decoding its pixels: the size already
     /// oriented, the Exif orientation (1 to 8), the capture date and the raw
@@ -31,44 +34,208 @@ public enum SuiteImageIO {
         }
     }
 
-    /// What `encode(_:as:)` writes: PNG and JPEG through CoreRaster, HEIC
-    /// and TIFF through ImageIO.
+    /// What `encode(_:as:profile:)` writes: PNG and JPEG through CoreRaster,
+    /// HEIC and TIFF through ImageIO.
     public enum Format: Sendable { case png, jpeg(quality: Double), heic(quality: Double), tiff(bitDepth: Int) }
 
-    /// The registry's formats this Mac's ImageIO reads. Empty until SC-4
-    /// asks `CGImageSourceCopyTypeIdentifiers`: `decode` reads nothing yet.
-    public static var readable: Set<SuiteImageFormat> { [] }
+    /// The registry's formats this Mac's ImageIO reads.
+    public static var readable: Set<SuiteImageFormat> { registry(in: CGImageSourceCopyTypeIdentifiers()) }
 
-    /// The registry's formats this Mac's ImageIO writes. Empty until SC-4
-    /// asks `CGImageDestinationCopyTypeIdentifiers`: `encode` writes nothing
-    /// yet, so no panel may offer a format through it.
-    public static var writable: Set<SuiteImageFormat> { [] }
+    /// The registry's writable formats this Mac's ImageIO also writes, so no
+    /// panel offers one nothing here encodes.
+    public static var writable: Set<SuiteImageFormat> {
+        registry(in: CGImageDestinationCopyTypeIdentifiers()).filter { !$0.writeBitDepths.isEmpty }
+    }
 
-    /// The file's facts without decoding pixels. Not built yet: throws.
+    private static func registry(in identifiers: CFArray) -> Set<SuiteImageFormat> {
+        let known = Set((identifiers as? [String]) ?? [])
+        return Set(SuiteImageFormats.all.filter { known.contains($0.typeID.rawValue) })
+    }
+
+    /// The file's facts without decoding pixels; the size is the upright one.
     public static func info(_ url: URL) throws -> Info {
-        throw notBuilt("Reading \(url.lastPathComponent)'s image info")
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+            let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+            let width = properties[kCGImagePropertyPixelWidth] as? Int,
+            let height = properties[kCGImagePropertyPixelHeight] as? Int, width > 0, height > 0
+        else { throw SuiteError.readFailed("\(url.lastPathComponent) isn't an image the Mac can read.") }
+        let orientation = orientation(of: properties)
+        let exif = properties[kCGImagePropertyExifDictionary] as? [String: Any] ?? [:]
+        let tiff = properties[kCGImagePropertyTIFFDictionary] as? [String: Any] ?? [:]
+        let quarter = (5...8).contains(orientation)
+        return Info(width: quarter ? height : width, height: quarter ? width : height, orientation: orientation,
+                    captureDate: captureDate(exif), exif: exif.compactMapValues(sendable),
+                    tiff: tiff.compactMapValues(sendable))
     }
 
-    /// Pixels, oriented, as CoreRaster's premultiplied linear buffer;
-    /// `longestSide` shrinks while decoding. Not built yet: throws.
+    /// The Exif orientation, 1 when it is missing or out of range.
+    static func orientation(of properties: [CFString: Any]) -> Int {
+        let value = properties[kCGImagePropertyOrientation] as? Int ?? 1
+        return (1...8).contains(value) ? value : 1
+    }
+
+    /// Exif's "yyyy:MM:dd HH:mm:ss" capture time, with its "+hh:mm" offset when the file has one, else in the
+    /// current time zone.
+    static func captureDate(_ exif: [String: Any]) -> Date? {
+        guard let original = exif[kCGImagePropertyExifDateTimeOriginal as String] as? String else { return nil }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        if let zone = exif[kCGImagePropertyExifOffsetTimeOriginal as String] as? String {
+            formatter.dateFormat = "yyyy:MM:dd HH:mm:ssxxx"
+            if let date = formatter.date(from: original + zone) { return date }
+        }
+        formatter.timeZone = TimeZone.current
+        formatter.dateFormat = "yyyy:MM:dd HH:mm:ss"
+        return formatter.date(from: original)
+    }
+
+    /// A property value as plain Sendable values: strings, numbers and arrays or dictionaries of them.
+    static func sendable(_ value: Any) -> (any Sendable)? {
+        switch value {
+        case let text as String: return text
+        case let number as NSNumber: return number
+        case let list as [Any]: return list.compactMap(sendable)
+        case let table as [String: Any]: return table.compactMapValues(sendable)
+        default: return nil
+        }
+    }
+
+    /// Pixels, oriented, in SuiteImaging's working space as CoreRaster's
+    /// premultiplied buffer; `longestSide` shrinks while decoding. PNG and
+    /// JPEG are read by CoreRaster from the file's own ICC profile (none or
+    /// one core can't use means sRGB); everything else by ImageIO into an
+    /// extended-range linear sRGB Float32 context, so 16-bit and float
+    /// sources keep their depth and nothing is cut at 1.
     public static func decode(_ data: Data, longestSide: Int?) throws -> PixelBuffer {
-        throw notBuilt("Decoding an image into pixels")
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil) else {
+            throw SuiteError.readFailed("This isn't an image the Mac can read.")
+        }
+        if data.starts(with: [137, 80, 78, 71]) || data.starts(with: [0xFF, 0xD8, 0xFF]) {
+            let icc = CGImageSourceCreateImageAtIndex(source, 0, nil)?.colorSpace?.copyICCData()
+            let profile = icc.flatMap { try? ColorProfile(iccData: $0 as Data) } ?? .sRGB
+            let stored: PixelBuffer
+            if data.starts(with: [0xFF, 0xD8]) {
+                stored = upright(try JPEG.read(data), try JPEG.info(data).orientation)
+            } else {
+                stored = try PNG.read(data)
+            }
+            return try ImagingColor.toWorking(try shrunk(stored, to: longestSide), from: profile)
+        }
+        guard CGImageSourceGetCount(source) > 0,
+            let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+            let stored = storedLongestSide(source)
+        else { throw SuiteError.readFailed("This isn't an image the Mac can read.") }
+        let image: CGImage?
+        var orientation = orientation(of: properties)
+        if let side = longestSide, side > 0, side < stored {
+            image = CGImageSourceCreateThumbnailAtIndex(source, 0, [
+                kCGImageSourceCreateThumbnailFromImageAlways: true, kCGImageSourceCreateThumbnailWithTransform: true,
+                kCGImageSourceShouldAllowFloat: true, kCGImageSourceThumbnailMaxPixelSize: side,
+            ] as CFDictionary)
+            orientation = 1
+        } else {
+            image = CGImageSourceCreateImageAtIndex(source, 0, [kCGImageSourceShouldAllowFloat: true] as CFDictionary)
+        }
+        guard let image else { throw SuiteError.readFailed("The image couldn't be decoded.") }
+        return try ImagingColor.toWorking(upright(try working(image), orientation), from: ImagingColor.workingProfile)
     }
 
-    /// `buffer` as a complete `format` file. Not built yet: throws. SC-4
-    /// adds the output colour profile (default sRGB) with its body.
-    public static func encode(_ buffer: PixelBuffer, as format: Format) throws -> Data {
-        throw notBuilt("Encoding pixels as an image file")
+    /// The quarter turn, then the mirror, that shows a stored picture with Exif `orientation` upright.
+    private static let turns: [Int: QuarterTurn] = [3: .degrees180, 5: .degrees90, 6: .degrees90, 7: .degrees270,
+                                                    8: .degrees270]
+
+    static func upright(_ stored: PixelBuffer, _ orientation: Int) -> PixelBuffer {
+        let turned = turns[orientation].map { stored.rotated($0) } ?? stored
+        switch orientation {
+        case 2, 5, 7: return turned.flipped(.horizontal)
+        case 4: return turned.flipped(.vertical)
+        default: return turned
+        }
+    }
+
+    /// `buffer` with its longer side at most `side` (never enlarged), bilinear.
+    static func shrunk(_ buffer: PixelBuffer, to side: Int?) throws -> PixelBuffer {
+        let longest = max(buffer.width, buffer.height)
+        guard let side, side > 0, longest > side else { return buffer }
+        let scale = Double(side) / Double(longest)
+        return try buffer.resized(width: max(Int((Double(buffer.width) * scale).rounded()), 1),
+                                  height: max(Int((Double(buffer.height) * scale).rounded()), 1), filter: .bilinear)
+    }
+
+    /// 128-bit RGBA: 32-bit float components, little-endian (every Mac's host order), alpha last, premultiplied.
+    private static let floatInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue
+        | CGBitmapInfo.floatComponents.rawValue | CGBitmapInfo.byteOrder32Little.rawValue)
+
+    /// `image` drawn into an extended-range linear sRGB Float32 context (Core Graphics converts from the
+    /// image's own profile, keeping colours outside sRGB and values above 1) as a premultiplied buffer.
+    static func working(_ image: CGImage) throws -> PixelBuffer {
+        let width = image.width, height = image.height
+        var out = try PixelBuffer(width: width, height: height)
+        var floats = [Float](repeating: 0, count: width * height * 4)
+        let drawn = floats.withUnsafeMutableBytes { raw -> Bool in
+            guard let space = CGColorSpace(name: CGColorSpace.extendedLinearSRGB),
+                let context = CGContext(
+                    data: raw.baseAddress, width: width, height: height, bitsPerComponent: 32,
+                    bytesPerRow: width * 4 * MemoryLayout<Float>.size, space: space, bitmapInfo: floatInfo.rawValue)
+            else { return false }
+            context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+            return true
+        }
+        guard drawn else { throw SuiteError.readFailed("The image couldn't be decoded.") }
+        // The bitmap's first row in memory is the top row, as PixelBuffer's.
+        for y in 0..<height {
+            for x in 0..<width {
+                let i = (y * width + x) * 4
+                guard i + 3 < floats.count else { continue }
+                try out.setPixel(x: x, y: y, RGBA(r: floats[i], g: floats[i + 1], b: floats[i + 2], a: floats[i + 3]))
+            }
+        }
+        return out
+    }
+
+    /// `buffer` (working space) as a complete `format` file in `profile`. PNG and JPEG in sRGB are core's
+    /// `PNG.write` and `JPEG.write`; HEIC, TIFF, and PNG or JPEG in another profile go through
+    /// `ImagingColor.toOutput` to `profile` at the format's depth (16 bits for `.tiff(bitDepth: 16)`) and
+    /// `CGImageDestination`, which embeds the profile's ICC bytes.
+    public static func encode(_ buffer: PixelBuffer, as format: Format, profile: ColorProfile = .sRGB) throws -> Data {
+        switch format {
+        case .png where profile == .sRGB: return try PNG.write(buffer)
+        case .jpeg(let quality) where profile == .sRGB:
+            return try JPEG.write(buffer, quality: min(max(Int((quality * 100).rounded()), 1), 100))
+        case .png: return try encode(try image(of: buffer, profile: profile, depth: .eight), as: .png, quality: nil)
+        case .jpeg(let quality):
+            return try encode(try image(of: buffer, profile: profile, depth: .eight), as: .jpeg, quality: quality)
+        case .heic(let quality):
+            return try encode(try image(of: buffer, profile: profile, depth: .eight), as: .heic, quality: quality)
+        case .tiff(let bits):
+            return try encode(try image(of: buffer, profile: profile, depth: bits > 8 ? .sixteen : .eight),
+                              as: .tiff, quality: nil)
+        }
+    }
+
+    /// `buffer` taken to `profile` at `depth` as a straight-alpha CGImage tagged with that profile. 16-bit
+    /// samples are big-endian, Core Graphics' default byte order.
+    static func image(of buffer: PixelBuffer, profile: ColorProfile, depth: ImagingBitDepth) throws -> CGImage {
+        let output = try ImagingColor.toOutput(buffer, profile: profile, bitDepth: depth)
+        let bytes: [UInt8] = depth == .sixteen
+            ? output.samples.flatMap { [UInt8($0 >> 8), UInt8($0 & 0xFF)] }
+            : output.samples.map { UInt8(min($0, 255)) }
+        let space = profile == .sRGB ? CGColorSpace(name: CGColorSpace.sRGB)
+            : CGColorSpace(iccData: try profile.iccData() as CFData)
+        let bits = depth.rawValue
+        guard let space, let provider = CGDataProvider(data: Data(bytes) as CFData),
+            let image = CGImage(
+                width: output.width, height: output.height, bitsPerComponent: bits, bitsPerPixel: bits * 4,
+                bytesPerRow: output.width * bits / 2, space: space,
+                bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue), provider: provider,
+                decode: nil, shouldInterpolate: true, intent: .defaultIntent)
+        else { throw SuiteError.ioFailed("the image couldn't be prepared for writing") }
+        return image
     }
 
     /// For the CoreGraphics rasterizers: the image as PNG through CoreRaster.
-    /// Not built yet: throws.
     public static func png(_ image: CGImage) throws -> Data {
-        throw notBuilt("Encoding a PNG through CoreRaster")
-    }
-
-    private static func notBuilt(_ what: String) -> SuiteError {
-        .notAvailable("\(what) isn't built yet (shared-codecs SC-4).")
+        try PNG.write(try working(image))
     }
 
     // MARK: Shell-media's calls (SM-6, SM-7)
