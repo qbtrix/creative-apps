@@ -86,3 +86,4 @@ utc	stage	event	ref	note
 2026-10-24T06:08Z	check	heartbeat	-	06:08Z check: #4902/#4904/#4905 open fast-lane; batch 20261024050226 (not ours) bisect probe -6 running
 2026-10-24T06:29Z	check	heartbeat	-	06:30Z check: #4902/#4904/#4905 open fast-lane; batch 20261024050226 (not ours) bisect probes -3/-1 running
 2026-10-24T06:51Z	check	heartbeat	-	06:52Z check: #4902/#4904/#4905 open fast-lane; batch 20261024050226 (not ours) bisect -3/-1 running
+2026-10-24T07:14Z	check	heartbeat	-	07:14Z check: #4902 #4904 #4905 open fast-lane awaiting batch, CB-library waits ST-a, CB-photo waits SC-photo
