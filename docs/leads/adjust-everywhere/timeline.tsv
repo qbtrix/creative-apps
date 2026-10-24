@@ -17,3 +17,4 @@ utc	stage	event	ref	note
 2026-10-24T08:02Z	check	check-in	no change: slice PRs still open in fast lane, none flagged; no new suiteui/full run holds ours; blockers unmerged; no open findings
 2026-10-24T08:33Z	check	check-in	#4846 needs-fix: macOS gate stall (Onboarding/Home 60s timeouts) unrelated; merged dev, gate PASS, pushed 3325d7a6, Head updated; restacking #5064
 2026-10-24T08:40Z	stage	restack	#5064 restacked on #4846 3325d7a6: gate PASS, pushed 80e6d515, Head updated, footer removed
+2026-10-24T08:48Z	check	check-in	no merges since last check; #4846 needs-fix awaits lane on 3325d7a6; #5064 restacked 80e6d515; no new findings; no waited slice merged since 10-24
