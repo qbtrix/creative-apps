@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-24T05:46:34Z	fix	PR #5036 (Fixes #4954) opened, Fast-Check pass at 942fcb1c; waits for the lane, then a flare journeys run
 2026-10-24T06:32:55Z	heartbeat	#5036 open in the lane, not yet batched
 2026-10-24T07:32:36Z	heartbeat	#5036 still open in the lane; batch 20261024050226 bisecting ahead of it
+2026-10-24T07:54:03Z	heartbeat	#5036 waits; lane held behind bisect probe -1 (run 40070370339)
