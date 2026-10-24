@@ -1,7 +1,7 @@
 {
   "version": 1,
   "app": "photo",
-  "why": "RJ-P51: opens logo.png (48 x 32, flat white, a navy disc of radius 10 at 24, 16 with a 4 x 4 supersampled anti-aliased edge), fills from (4, 4) at tolerance 32, contiguous, red, and exports a PNG. The trap: the fill bleeds into the anti-aliased edge or misses the corners. The assertion, against expected/logo-filled.png: every white pixel is red and the disc is unchanged but for the 16 outermost edge pixels, which the bucket's one-pixel anti-aliased edge tints (by up to 31 levels).",
+  "why": "RJ-P51: opens logo.png (48 x 32, flat white, a navy disc of radius 10 at 24, 16 with a 4 x 4 supersampled anti-aliased edge), fills from (4, 4) at tolerance 32, contiguous, red, and exports a PNG. The trap: the fill bleeds into the anti-aliased edge or misses the corners. The assertion, against expected/logo-filled.png: every white pixel is red and the disc, its anti-aliased edge included, is byte-identical to the input: the bucket's soft edge stays inside the tolerance, so no edge pixel past it is tinted (#5093).",
   "inputs": ["input/*.png"],
   "steps": [
     {"id": "fill.bucket", "params": {"x": 4, "y": 4, "tolerance": 32, "contiguous": true, "allLayers": false, "color": {"r": 1, "g": 0, "b": 0, "a": 1}}}
