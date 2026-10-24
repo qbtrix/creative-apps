@@ -6,8 +6,8 @@
 // renders on the shared CPU backend; Saturation renders instead of waiting
 // on creative-core. IM-10 made DevelopLevels and DevelopCurvePoint
 // SuiteImaging's types and gave ToneCurve its AdjustCurve conversions, so the
-// catalog cases run; the LiveDevelop cases wait on IM-10b, which runs the
-// shared list. Runs on Linux and macOS.
+// catalog cases run; IM-10b runs the shared list in LiveDevelop and turns
+// on the rest. Runs on Linux and macOS.
 import CoreRaster
 import CoreRender
 import Foundation
@@ -92,7 +92,7 @@ struct LibraryImagingTests {
         #expect(ToneCurve(.identity) == .identity)
     }
 
-    @Test(.disabled("waits on IM-10b")) func liveDevelopRendersWhatTheSharedListRenders() throws {
+    @Test func liveDevelopRendersWhatTheSharedListRenders() throws {
         let cpu = CPUBackend()
         let image = try developGradient()
         for (_, settings) in try Self.catalogDevelops() {
@@ -111,12 +111,36 @@ struct LibraryImagingTests {
         }
     }
 
-    @Test(.disabled("waits on IM-10b")) func saturationRenders() throws {
+    @Test func saturationRenders() throws {
         #expect(LiveDevelop.waiting[.saturation] == nil)
         let image = try developGradient()
         let grey = try LiveDevelop().render(image, settings: DevelopSettings.neutral.setting(.saturation, to: -100))
         let before = try image.pixel(x: 63, y: 0), after = try grey.pixel(x: 63, y: 0)
         #expect(abs(before.r - before.g) > 0.5)
         #expect(abs(after.r - after.g) <= 1.0 / 255 && abs(after.g - after.b) <= 1.0 / 255)
+    }
+
+    /// Library runs levels before the curve, as Photo does: a curve-plus-levels
+    /// edit renders the list Photo's live route runs for the same settings
+    /// (`ImagingProgram.adjustments`, PhotoImagingTests), not Library's old
+    /// curve-then-levels order (the supervisor's ruling on #3715).
+    @Test func curvePlusLevelsRendersAsPhotoDoes() throws {
+        let curve = try #require(ToneCurve(points: [.init(x: 0, y: 0), .init(x: 0.5, y: 0.7), .init(x: 1, y: 1)]))
+        let levels = DevelopLevels.neutral.setting(.inBlack, to: 0.1).setting(.gamma, to: 1.3).setting(.outWhite, to: 0.9)
+        let settings = DevelopSettings.neutral.setting(curve: curve).setting(levels: levels)
+        let steps = ImagingProgram.adjustments(Self.adjust(settings))
+        #expect(steps.count == 2)
+        guard case .levels = steps.first, case .curves = steps.last else {
+            Issue.record("the shared list runs levels, then the curve: \(steps)")
+            return
+        }
+        let cpu = CPUBackend(), image = try developGradient()
+        var surface = try cpu.surface(image)
+        for step in steps { surface = try cpu.adjusted(surface, step) }
+        let live = try LiveDevelop().render(image, settings: settings)
+        #expect(live == (try cpu.read(surface)))
+        let old = try image.curves(points: curve.points.map { CurvePoint(x: Float($0.x), y: Float($0.y)) }, encoding: .sRGB)
+            .levels(inBlack: 0.1, inWhite: 1, gamma: 1.3, outBlack: 0, outWhite: 0.9, encoding: .sRGB)
+        #expect(live != old)
     }
 }
