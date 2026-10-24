@@ -17,7 +17,8 @@ final class SuiteTransformJourneyTests: XCTestCase {
     /// The row's number (`suite.transform.<row>`): each row is a slider, so macOS gives its value as a number (#4822).
     @MainActor private static func value(_ gallery: Journey, _ row: String) -> String {
         let element = gallery.element("suite.transform.\(row)")
-        if let number = element.value as? NSNumber { return number.stringValue }
+        // Whole, as the rows show it: the slider reports the raw Double, which a turned resize can leave at 79.99….
+        if let number = element.value as? NSNumber { return String(Int(number.doubleValue.rounded())) }
         return (element.value as? String) ?? element.label
     }
 
