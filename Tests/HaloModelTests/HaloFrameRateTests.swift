@@ -79,7 +79,8 @@ import Testing
     }
 
     @Test func playbackClockRunsAtExactRate() {
-        #expect(abs(HaloProject.clockSeconds(10.01, at: Self.ntsc) * 30 - 300) < 1e-6)
-        #expect(HaloProject.clockSeconds(2, at: FrameRate(whole: 24)) == 2)
+        let clock = LivePlaybackClock()
+        #expect(clock.tick(startFrame: 0, elapsed: 10.01, rate: Self.ntsc, durationFrames: 1000, loops: false).frame == 300)
+        #expect(clock.tick(startFrame: 0, elapsed: 2, rate: FrameRate(whole: 24), durationFrames: 1000, loops: false).frame == 48)
     }
 }

@@ -10,6 +10,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
+import SuiteKernel
 
 /// What every service shares: whether its controls can act yet.
 public protocol HaloService: Sendable {
@@ -130,10 +131,11 @@ public protocol ProjectFiles: HaloService {
 
 /// #37: which frame to show while playing.
 public protocol PlaybackClock: HaloService {
-    /// The frame `elapsed` seconds after play began on `startFrame`. Loop
-    /// wraps to 0; play-once stops on the last frame with `ended` true.
+    /// The frame `elapsed` seconds after play began on `startFrame` at the
+    /// exact `rate`. Loop wraps to 0; play-once ends on the last frame once
+    /// it has had its time, with `ended` true.
     func tick(
-        startFrame: Int, elapsed: Double, framesPerSecond: Int, durationFrames: Int, loops: Bool) -> HaloPlaybackTick
+        startFrame: Int, elapsed: Double, rate: FrameRate, durationFrames: Int, loops: Bool) -> HaloPlaybackTick
 }
 
 /// #451, #430: a frame as pixels (CoreRaster), the reference the viewer and

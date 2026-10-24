@@ -63,12 +63,10 @@ Sources/HaloModel/Fakes/FakeTextRasterizer.swift
 Sources/HaloModel/HaloFramePNG.swift
 Sources/HaloModel/HaloHistory.swift
 Sources/HaloModel/HaloKeySelection.swift
-Sources/HaloModel/HaloPlayback.swift
 Sources/HaloModel/HaloProjectLaunch.swift
 Sources/HaloModel/Live/HaloEasingRules.swift
 Sources/HaloModel/Live/HaloFileEnvelope.swift
 Sources/HaloModel/Live/LiveKeyEasing.swift
-Sources/HaloModel/Live/LivePlaybackClock.swift
 Sources/HaloModel/Live/LiveProjectHistory.swift
 Sources/LibraryApp/CropInspector.swift
 Sources/LibraryApp/LibraryCropOverlay.swift
