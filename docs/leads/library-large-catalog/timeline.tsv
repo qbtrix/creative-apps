@@ -86,3 +86,4 @@
 2026-10-24T19:01Z	3	poll	LG-grid	#5050 batch macOS gate running; #5114 supervisor
 2026-10-24T19:21Z	3	poll	LG-grid	#5114 landed; #5050 batch red on DesignApp compile, lane bisecting
 2026-10-24T19:21Z	3	poll	LG-grid	bisect probe -6 running; #5050 waits
+2026-10-24T19:41Z	3	poll	LG-grid	probe -6 macOS running; #5050 waits
