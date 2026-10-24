@@ -67,4 +67,16 @@ public protocol Exporting: Sendable {
     func writeVideo(_ document: Document, sceneID: String, plan: FlareVideoPlan, to path: String,
                     media: any MediaEncoding, rasterizer: any FrameRasterizing,
                     progress: @Sendable (Double) -> Void) async throws -> String
+    /// Why this exporter can't write MP4 or GIF yet; nil once it can. `exportProblem` refuses Export with it.
+    var videoUnbuiltReason: String? { get }
+}
+
+extension Exporting {
+    public var videoUnbuiltReason: String? { nil }
+}
+
+extension LiveExportAdapter {
+    /// The live app has no frame rasterizer yet (StageRasterizer's `frame` is export-pack's FV-7, which drops this),
+    /// so MP4 and GIF stay refused there with the reason instead of failing after the folder pick.
+    public var videoUnbuiltReason: String? { "MP4 and GIF can't be drawn yet." }
 }
