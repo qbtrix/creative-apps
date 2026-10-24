@@ -78,3 +78,4 @@ utc	stage	event	ref	note
 2026-10-24T16:58Z	3	check	lane	16:58Z all 11 PRs clean, no needs-rebase left. batch-20261024160327 (#5110,#4839-#4871, not ours) still in flight; ours next. findings 0.
 2026-10-24T17:20Z	3	check	lane	17:20Z ours all clean (except #4904, fixer out). batch-160327 resolved, dev c0920138; no batch in flight yet. findings 0.
 2026-10-24T17:42Z	3	check	lane	17:42Z all 11 PRs clean, no labels pending. batch-20261024172211 (#5134,#5042,#5054,#5102,#4817,#4875-#4882; not ours) in flight; ours next by age. findings 0.
+2026-10-24T18:04Z	3	check	lane	18:04Z no change: all 11 PRs clean; batch-20261024172211 (not ours) still in flight. findings 0.
