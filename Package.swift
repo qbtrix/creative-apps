@@ -12,8 +12,9 @@
 // editing), Library (photo catalog) and Halo (motion graphics).
 //
 //   SuiteModel  the suite's shared Linux-safe values (identity, the app list;
-//             docs/blueprints/suite.md), Foundation only, linked by every
-//             <X>Model. With SuiteModelTests, on Linux and macOS.
+//             docs/blueprints/suite.md), Foundation and SuiteKernel (for
+//             HexText, the one hex codec), linked by every <X>Model. With
+//             SuiteModelTests, on Linux and macOS.
 //   SuiteKernel  the editor kernel: one Linux-safe library, one module per
 //             editor concept the apps used to build five times (history,
 //             selection, layer tree, keys and easing, snap, transform, export,
@@ -91,7 +92,7 @@ var targets: [Target] =
     + model("Library", ["CoreAsset", "CoreRaster", "CoreColor"])
     + model("Halo", ["FlareCore", "CoreRaster"])
     + [
-        .target(name: "SuiteModel"),
+        .target(name: "SuiteModel", dependencies: ["SuiteKernel"]),
         .testTarget(name: "SuiteModelTests", dependencies: ["SuiteModel"]),
         .target(name: "SuiteKernel", dependencies: [.product(name: "FlareCore", package: core)]),
         .testTarget(name: "SuiteKernelTests", dependencies: ["SuiteKernel"]),

@@ -9,13 +9,11 @@ import FoundationEssentials
 import Foundation
 #endif
 
-public struct RGB8: Hashable, Sendable {
-    public var red: UInt8, green: UInt8, blue: UInt8
-    public init(_ red: UInt8, _ green: UInt8, _ blue: UInt8) { self.red = red; self.green = green; self.blue = blue }
-}
+/// The contract's 8-bit sRGB colour: HexColor itself, under the blueprint's name (one colour type, #5078).
+public typealias RGB8 = HexColor
 
 public protocol HexColorEditing: Sendable {
-    /// "#RRGGBB", "RRGGBB" or "#RGB" in either case; nil otherwise.
+    /// "#RRGGBB", "RRGGBB" or "#RGB" in either case, or an opaque "#RRGGBBFF"; nil otherwise.
     func parse(_ text: String) -> RGB8?
     /// The color after the hex field closes: the parsed color, or `old` for text that isn't one.
     func committed(_ text: String, old: RGB8) -> RGB8

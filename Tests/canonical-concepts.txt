@@ -23,6 +23,7 @@ Transform: Transform Transforming
 Parent: Parent Parenting
 Bones: Bone
 Gradient: Gradient
+Hex colour: HexColor HexText
 Autosave: Autosave
 Pen: PenDraft PenRules PenTool
 Placed image: PlacedImage PlacedAsset ImageLayer PlaceImage

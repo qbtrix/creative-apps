@@ -53,6 +53,7 @@ SuiteUI, and `SuiteKernelTests` covers it on Linux.
 | `Snap/` | `Snapping`: the candidates and the order of offsets. The `SnapLines` and `SnapGaps` engines are stubs that the snapping feature fills |
 | `Export/` | `ExportRun<Options>`: idle, editing, running, finished or failed |
 | `Session/` | `DocumentSession` (dirty, save status, autosave, recovery) and `VersionedJSON` |
+| `Fill/` | `Fill` and `FillColor` (FlareCore's sRGB colour, the one value a colour crosses apps as), `HexText` (the one hex codec: parse, format, byte rounding), the gradient and stroke rules and commands |
 | `Stroke/` | `StrokeSmoother`, `DabSpacer`, `BrushSettings`, `BrushPreset`, `LiveCopy` |
 | `Commands/` | `CommandSpec`, `CommandCatalog` (list, describe, run, batch), `ParamSchema`, `JSONValue` and `HeadlessDocument`: the command layer below |
 

@@ -1,0 +1,16 @@
+[
+  {
+    "label": "hashKept: the hex keeps HexText's leading #",
+    "file": "Sources/SuiteModel/Values/SuiteColor.swift",
+    "find": "FillColor(r: red, g: green, b: blue)).dropFirst())",
+    "replace": "FillColor(r: red, g: green, b: blue)))",
+    "tests": "SuiteColorHexParityTests|ValuesExchangeTests"
+  },
+  {
+    "label": "channelsSwapped: the hex writes blue where green goes",
+    "file": "Sources/SuiteModel/Values/SuiteColor.swift",
+    "find": "FillColor(r: red, g: green, b: blue)",
+    "replace": "FillColor(r: red, g: blue, b: green)",
+    "tests": "SuiteColorHexParityTests|ValuesExchangeTests"
+  }
+]
