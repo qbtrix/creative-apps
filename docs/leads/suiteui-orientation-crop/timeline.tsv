@@ -77,3 +77,4 @@ utc	stage	event	ref	note
 2026-10-24T13:37Z	check	check-in	no change: 7 fast-lane PRs clean awaiting batch; #5064 waits on #4846; no new dev CI, findings or unblocking slices
 2026-10-24T13:59Z	check	check-in	no change: 7 fast-lane PRs clean awaiting batch; #5064 waits on #4846; no new dev CI, findings or unblocking slices
 2026-10-24T14:20Z	check	check-in	no change: 7 fast-lane PRs clean awaiting batch (lane merged #5087 at 14:16Z, not a wait of ours); #5064 waits on #4846; no new dev CI or findings
+2026-10-24T14:43Z	check	check-in	no change: 7 fast-lane PRs clean awaiting batch; #5064 waits on #4846; dev runs at e79e9af (Linux green, scoped design/photo) hold no slice of ours; no new findings or unblocking Slice merges
