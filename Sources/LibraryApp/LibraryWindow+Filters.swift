@@ -6,7 +6,9 @@
 // with no app edit. `LibraryFilterBar` draws the bar: Picked, Unflagged and
 // Rejected chips, the rating and label menus, Hide Rejected, the summary
 // and Clear; a control that can't act is disabled with its reason as help,
-// and each is listed in `library.controls`.
+// and each is listed in `library.controls`. When one row doesn't fit the
+// content column the bar takes two (chips and Hide Rejected, then the menus,
+// summary and Clear), and no control is squeezed below its own width.
 // The hooks read `collections.json` at launch, write it 500 ms after each
 // change, and flush it on quit; every state change is a LibraryCatalog
 // method. FC-5 mounts the bar, publishes `\.libraryFilters` and calls the
@@ -192,57 +194,85 @@ struct LibraryFilterBar: View {
     private var clearHelp: String { menu.clearFilterHelp ?? "Show every photo in the collection." }
 
     var body: some View {
-        HStack(spacing: SuiteSpacing.s) {
-            if let caption {
-                Text(caption).font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText)
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: SuiteSpacing.s) {
+                flagControls
+                ruleMenus
+                Spacer(minLength: SuiteSpacing.s)
+                summary
             }
-            // One ChipRow per chip, so each chip's button carries its own identifier.
-            ForEach(Self.flags, id: \.self) { flag in
-                ChipRow([ChipItem(id: flag, title: Self.title(flag), isOn: filter.flags.contains(flag))]) {
-                    menu.toggleFlag?($0)
-                }
-                .disabled(menu.toggleFlag == nil)
-                .help(filterHelp)
-                .libraryControl(
-                    id: "library.filter.flag.\(flag.rawValue.lowercased())", enabled: menu.toggleFlag != nil,
-                    help: filterHelp)
-            }
-            Menu(filter.rating.title) {
-                ForEach(Self.ratings, id: \.self) { rule in
-                    Toggle(rule.title, isOn: Binding(get: { filter.rating == rule }, set: { _ in menu.setRating?(rule) }))
+            VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
+                HStack(spacing: SuiteSpacing.s) { flagControls }
+                HStack(spacing: SuiteSpacing.s) {
+                    ruleMenus
+                    Spacer(minLength: SuiteSpacing.s)
+                    summary
                 }
             }
-            .fixedSize()
-            .disabled(menu.setRating == nil)
-            .help(filterHelp)
-            .libraryControl(id: "library.filter.rating", enabled: menu.setRating != nil, help: filterHelp)
-            Toggle("Hide Rejected", isOn: Binding(get: { filter.hidesRejected }, set: { _ in menu.toggleHideRejected?() }))
-                .toggleStyle(.checkbox)
-                .disabled(menu.toggleHideRejected == nil)
-                .help(filterHelp)
-                .libraryControl(
-                    id: "library.filter.hideRejected", enabled: menu.toggleHideRejected != nil, help: filterHelp)
-            Menu(filter.labels.isEmpty ? "Any Label" : "Labels (\(filter.labels.count))") {
-                ForEach(PhotoLabel.allCases, id: \.self) { label in
-                    Toggle(label.rawValue, isOn: Binding(
-                        get: { filter.labels.contains(label) }, set: { _ in menu.toggleLabel?(label) }))
-                }
-            }
-            .fixedSize()
-            .disabled(menu.toggleLabel == nil)
-            .help(filterHelp)
-            .libraryControl(id: "library.filter.label", enabled: menu.toggleLabel != nil, help: filterHelp)
-            Spacer(minLength: SuiteSpacing.s)
-            Text(value).font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText).lineLimit(1)
-            Button("Clear") { menu.clearFilter?() }
-                .disabled(menu.clearFilter == nil)
-                .help(clearHelp)
-                .libraryControl(id: "library.filter.clear", enabled: menu.clearFilter != nil, help: clearHelp)
         }
         .padding(.horizontal, SuiteSpacing.m)
         .padding(.vertical, SuiteSpacing.xs)
         .accessibilityElement(children: .contain)
         .accessibilityValue(value)
         .accessibilityIdentifier("library.filter")
+    }
+
+    /// The caption, the Picked, Unflagged and Rejected chips, and Hide Rejected, each at its own width.
+    @ViewBuilder private var flagControls: some View {
+        if let caption {
+            Text(caption).font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText).lineLimit(1)
+        }
+        // One ChipRow per chip, so each chip's button carries its own identifier.
+        ForEach(Self.flags, id: \.self) { flag in
+            ChipRow([ChipItem(id: flag, title: Self.title(flag), isOn: filter.flags.contains(flag))]) {
+                menu.toggleFlag?($0)
+            }
+            .fixedSize()
+            .disabled(menu.toggleFlag == nil)
+            .help(filterHelp)
+            .libraryControl(
+                id: "library.filter.flag.\(flag.rawValue.lowercased())", enabled: menu.toggleFlag != nil,
+                help: filterHelp)
+        }
+        Toggle("Hide Rejected", isOn: Binding(get: { filter.hidesRejected }, set: { _ in menu.toggleHideRejected?() }))
+            .toggleStyle(.checkbox)
+            .fixedSize()
+            .disabled(menu.toggleHideRejected == nil)
+            .help(filterHelp)
+            .libraryControl(
+                id: "library.filter.hideRejected", enabled: menu.toggleHideRejected != nil, help: filterHelp)
+    }
+
+    /// The rating and label menus.
+    @ViewBuilder private var ruleMenus: some View {
+        Menu(filter.rating.title) {
+            ForEach(Self.ratings, id: \.self) { rule in
+                Toggle(rule.title, isOn: Binding(get: { filter.rating == rule }, set: { _ in menu.setRating?(rule) }))
+            }
+        }
+        .fixedSize()
+        .disabled(menu.setRating == nil)
+        .help(filterHelp)
+        .libraryControl(id: "library.filter.rating", enabled: menu.setRating != nil, help: filterHelp)
+        Menu(filter.labels.isEmpty ? "Any Label" : "Labels (\(filter.labels.count))") {
+            ForEach(PhotoLabel.allCases, id: \.self) { label in
+                Toggle(label.rawValue, isOn: Binding(
+                    get: { filter.labels.contains(label) }, set: { _ in menu.toggleLabel?(label) }))
+            }
+        }
+        .fixedSize()
+        .disabled(menu.toggleLabel == nil)
+        .help(filterHelp)
+        .libraryControl(id: "library.filter.label", enabled: menu.toggleLabel != nil, help: filterHelp)
+    }
+
+    /// What the filter shows ("Rejects hidden; 23 of 24"), which truncates first, and Clear.
+    @ViewBuilder private var summary: some View {
+        Text(value).font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText).lineLimit(1)
+        Button("Clear") { menu.clearFilter?() }
+            .fixedSize()
+            .disabled(menu.clearFilter == nil)
+            .help(clearHelp)
+            .libraryControl(id: "library.filter.clear", enabled: menu.clearFilter != nil, help: clearHelp)
     }
 }
