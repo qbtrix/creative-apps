@@ -43,7 +43,7 @@ private let judgesRenders = true
         var value = 0.0
         let cost = Budget.measure("develop set-in-10000") {
             value += 0.01
-            catalog.recordEdit(DevelopSlider.exposure.rawValue, coalesceKey: "develop-exposure", ids: ids) {
+            catalog.recordEdit(DevelopSlider.exposure.title, coalesceKey: "develop-exposure", ids: ids) {
                 $0.develop = $0.develop.setting(.exposure, to: value)
             }
         }
