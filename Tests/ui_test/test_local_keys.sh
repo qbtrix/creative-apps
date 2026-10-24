@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016,SC2034  # check() evals its single-quoted condition, which reads these
 # Tests/ui_test/test_local_keys.sh: fixture test for scripts/ui-test's
 # local-key journeys, the ones that post key events and so run only on the
 # local Mac gate (#3035, #3559). It runs a copy of scripts/ui-test in a temp
@@ -39,6 +40,7 @@ run() {
 check() { if eval "$2"; then echo "ok   $1"; else echo "FAIL $1"; fail=1; fi; }
 
 run github-hosted
+hosted_out=$out
 for t in FlareJourneyTests/FlareDrawJourneys/testDrawShapesWithEachTool \
   FlareJourneyTests/FlareEditOrderJourneys/testSelectAllOrderAndEscape \
   FlareJourneyTests/FlareViewJourneys/testZoomPanAndGuides; do
@@ -59,9 +61,9 @@ while IFS=/ read -r target class name; do
   for f in "$repo/UITests/$target.swift" "$repo/UITests/$target+"*.swift; do
     [[ -f "$f" ]] || continue
     if grep -qE "(class|extension)[[:space:]]+$class([^A-Za-z0-9_]|\$)" "$f" \
-        && grep -qE "func[[:space:]]+$name[[:space:]]*\(" "$f"; then found=1; break; fi
+        && grep -qE "func[[:space:]]+${name}[[:space:]]*\(" "$f"; then found=1; break; fi
   done
   check "$target/$class/$name exists in UITests/" '[[ -n "$found" ]]'
-done < <(printf '%s\n' "$out" | sed -n 's/^ui-test: skipped: needs local key events: //p')
+done < <(printf '%s\n' "$hosted_out" | sed -n 's/^ui-test: skipped: needs local key events: //p')
 
 exit $fail
