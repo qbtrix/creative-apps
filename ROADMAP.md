@@ -9,7 +9,7 @@ changes as work lands.
 ## 1. Where we are
 
 **Stage: beta, in progress.** The first beta is aimed at 27 to 29 October
-2026. That date is an estimate, not a promise. The counts below are measured
+2026. That date is an estimate. The counts below are measured
 from the issue tracker. A feature is one piece of work with its own issue; a
 slice is one small, tested step of a feature. `scripts/roadmap-numbers`
 rewrites this table.
@@ -38,7 +38,7 @@ feature issue.
 
 | Mark | Meaning |
 |---|---|
-| works | The feature issue is closed and its tests pass. The whole beta build is checked again before release. |
+| works | The feature issue is closed. Open bugs against it are listed under Known gaps, and the whole beta build is checked again before release. |
 | partial | Some steps have landed. |
 | not yet | Planned for the beta, not landed. |
 
@@ -120,7 +120,8 @@ feature issue.
 | Capability | Status | Issue |
 |---|---|---|
 | A composition, layers, keys with easing | works | [#777](https://github.com/qbtrix/creative-apps/issues/777) [#1036](https://github.com/qbtrix/creative-apps/issues/1036) [#1038](https://github.com/qbtrix/creative-apps/issues/1038) [#1333](https://github.com/qbtrix/creative-apps/issues/1333) |
-| Play at the composition rate; drag in the viewer to key | works | [#1035](https://github.com/qbtrix/creative-apps/issues/1035) [#1971](https://github.com/qbtrix/creative-apps/issues/1971) |
+| Play at the composition rate | works | [#1035](https://github.com/qbtrix/creative-apps/issues/1035) [#1971](https://github.com/qbtrix/creative-apps/issues/1971) |
+| Drag a layer in the viewer to key it (fails in a full test run) | partial | [#1036](https://github.com/qbtrix/creative-apps/issues/1036) [#1283](https://github.com/qbtrix/creative-apps/issues/1283) |
 | Move and edit keys on the timeline | works | [#3536](https://github.com/qbtrix/creative-apps/issues/3536) |
 | Text, shape, gradient and image layers; stroke style; transform | works | [#1509](https://github.com/qbtrix/creative-apps/issues/1509) [#3445](https://github.com/qbtrix/creative-apps/issues/3445) [#3417](https://github.com/qbtrix/creative-apps/issues/3417) [#3456](https://github.com/qbtrix/creative-apps/issues/3456) [#3447](https://github.com/qbtrix/creative-apps/issues/3447) [#3443](https://github.com/qbtrix/creative-apps/issues/3443) |
 | Undo, save, reopen, autosave | works | [#1037](https://github.com/qbtrix/creative-apps/issues/1037) [#3442](https://github.com/qbtrix/creative-apps/issues/3442) |
@@ -178,7 +179,7 @@ feature issue.
 | Photo | Ellipse and lasso selections, add, subtract, invert and feather; layer groups |
 | Library | Filter by flag or rating, collections, a metadata panel, compare two photos |
 | Halo | Effects (blur, fill, levels), precompose, footage layers, per-property lanes |
-| Suite | Library to Photo and back, shared colour and asset libraries, the updater |
+| Suite | Library to Photo and back, shared colour and asset libraries, a Settings window, the updater |
 
 ### 4.2 Plugins
 
@@ -233,9 +234,9 @@ issues.
 |---|---|
 | 2026-10-12 | App shells, the shared UI kit and CI in place (PR [#1](https://github.com/qbtrix/creative-apps/issues/1)) |
 | 2026-10-14 | Photo v1, the first raster editor build for daily use (PR [#581](https://github.com/qbtrix/creative-apps/issues/581)) |
-| 2026-10-17 | AfterGlow.app assembled from all five apps (PR [#1445](https://github.com/qbtrix/creative-apps/issues/1445)); beta scope set |
+| 2026-10-17 | AfterGlow.app assembled from all five apps (PR [#1445](https://github.com/qbtrix/creative-apps/issues/1445)); beta plans for Flare and Design export, onboarding and Halo playback (PR [#1968](https://github.com/qbtrix/creative-apps/issues/1968)) |
 | 2026-10-18 | Flare draw, key and save loop ([#1365](https://github.com/qbtrix/creative-apps/issues/1365)); Halo render to files ([#1505](https://github.com/qbtrix/creative-apps/issues/1505)); Photo adjustment layers ([#1501](https://github.com/qbtrix/creative-apps/issues/1501)) |
-| 2026-10-19 | One app bundle ([#1331](https://github.com/qbtrix/creative-apps/issues/1331)), home ([#1503](https://github.com/qbtrix/creative-apps/issues/1503)), onboarding ([#1972](https://github.com/qbtrix/creative-apps/issues/1972)), the `afterglow` CLI ([#2998](https://github.com/qbtrix/creative-apps/issues/2998)), Design window ([#1494](https://github.com/qbtrix/creative-apps/issues/1494)) |
+| 2026-10-19 | The home ([#1503](https://github.com/qbtrix/creative-apps/issues/1503)), onboarding ([#1972](https://github.com/qbtrix/creative-apps/issues/1972)), the `afterglow` CLI ([#2998](https://github.com/qbtrix/creative-apps/issues/2998)), Design window ([#1494](https://github.com/qbtrix/creative-apps/issues/1494)) |
 | 2026-10-20 | Flare export ([#1973](https://github.com/qbtrix/creative-apps/issues/1973)), Library develop and export ([#1527](https://github.com/qbtrix/creative-apps/issues/1527) [#1554](https://github.com/qbtrix/creative-apps/issues/1554)), app switching ([#1507](https://github.com/qbtrix/creative-apps/issues/1507)), MCP ([#3000](https://github.com/qbtrix/creative-apps/issues/3000)) |
-| 2026-10-21 | Design export ([#1970](https://github.com/qbtrix/creative-apps/issues/1970)); Halo playback loop measured and closed ([#1971](https://github.com/qbtrix/creative-apps/issues/1971)) |
+| 2026-10-21 | Design export ([#1970](https://github.com/qbtrix/creative-apps/issues/1970)); Halo playback keeps up at the composition rate ([#1971](https://github.com/qbtrix/creative-apps/issues/1971)) |
 | 2026-10-22 | Every action a command with its state ([#3771](https://github.com/qbtrix/creative-apps/issues/3771)); Report a Problem and Beta Notes ([#3772](https://github.com/qbtrix/creative-apps/issues/3772)) |
