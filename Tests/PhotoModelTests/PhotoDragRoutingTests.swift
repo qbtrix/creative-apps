@@ -5,6 +5,7 @@
 // progress takes every drag. Runs on Linux and macOS.
 import CoreRaster
 @testable import PhotoModel
+import SuiteKernel
 import Testing
 
 @Suite struct PhotoDragRoutingTests {
@@ -45,8 +46,10 @@ import Testing
         model.drag(from: Self.a, to: Self.b)
         model.endDrag()
         #expect(model.historySteps == steps && !model.canUndo)
+        // The kernel's mean of the composite under the drag's end, not a fake's colour (EP-2).
+        let want = try #require(model.sampledColor(at: Point(x: Self.b.x, y: Self.b.y), size: model.sampleSize))
         let options = model.brushOptions
-        #expect((options.red, options.green, options.blue) == (255, 204, 0))
+        #expect([options.red, options.green, options.blue].map(Int.init) == [want.r, want.g, want.b].map(SampleRules.byte))
     }
 
     /// On `.live` (its sampler built, eyedropper PE-5) a drag picks the white
