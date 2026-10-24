@@ -103,3 +103,4 @@ utc	stage	event	ref	note
 2026-10-24T21:51:36Z	lane	poll	batch 20261024205137 still bisecting; fill-heal PRs queued
 2026-10-24T22:13:00Z	lane	poll	batch 20261024205137 probes -3/-6 still running; fill-heal PRs queued
 2026-10-24T22:35:26Z	lane	poll	batch 20261024205137 still bisecting (lane alive, dev CI 40137153379 running); fill-heal PRs queued
+2026-10-24T23:20:00Z	lead	restack	dev rewritten (root 4f00afb8); fixer replaying #5107 #5108 #5109 #5129 #5121
