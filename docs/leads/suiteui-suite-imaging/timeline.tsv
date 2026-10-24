@@ -92,3 +92,4 @@ utc	stage	event	ref	note
 2026-10-24T22:01Z	poll	check	all	bisect probes still running; nothing merged
 2026-10-24T22:21Z	poll	check	all	bisect probes still running; nothing merged
 2026-10-24T22:41Z	poll	check	all	probe -6 green, -3 red (flaky); #4886 not reached
+2026-10-24T23:01Z	poll	check	all	bisect at probe -1; #4886 not reached
