@@ -1,7 +1,7 @@
 // HaloLayerStyleTests.swift: layer-styles MJ-HY, the Model walk. A layer's style saves under its own key and old
 // projects re-save byte for byte (HY-1); the eleven `style.*` ids are in the catalog, the panel opens and closes,
 // and the five style properties stay out of the transform rows (HY-1). The adapter's writes, keys and rows are
-// written and wait on HY-5's bodies. Linux and macOS.
+// run on HY-5's bodies. Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -87,7 +87,7 @@ import Testing
 
     // HY-5: the adapter's bodies.
 
-    @Test(.disabled("waits on HY-5")) func anUnkeyedWriteUpdatesTheStyleInOneStep() throws {
+    @Test func anUnkeyedWriteUpdatesTheStyleInOneStep() throws {
         var project = try Self.selecting("Title")
         try project.setStyle(Self.lifted, name: "Add Outer Glow", drag: nil)
         let steps = project.history.undo.count
@@ -97,7 +97,7 @@ import Testing
         #expect(project.selectedLayer?.tracks[HaloProperty.glowSize.rawValue] == nil)
     }
 
-    @Test(.disabled("waits on HY-5")) func aKeyedWriteSetsAKeyAtThePlayhead() throws {
+    @Test func aKeyedWriteSetsAKeyAtThePlayhead() throws {
         var project = try Self.selecting("Title")
         try project.setStyle(Self.lifted, name: "Add Outer Glow", drag: nil)
         project.toggleAnimation(.glowSize)
@@ -107,7 +107,7 @@ import Testing
         #expect(track.contains { $0.frame == 5 && $0.value == 20 })
     }
 
-    @Test(.disabled("waits on HY-5")) func rowsFollowTheEffects() throws {
+    @Test func rowsFollowTheEffects() throws {
         var project = try Self.selecting("Title")
         #expect(project.propertyRows.allSatisfy { !HaloProperty.styles.contains($0.property) })
         try project.setStyle(LayerStyle(effects: Array(Self.lifted.effects.prefix(1)), fillOpacity: 1), name: "Add Drop Shadow", drag: nil)
@@ -116,7 +116,7 @@ import Testing
         #expect(project.propertyRows.map(\.property).filter(HaloProperty.styles.contains) == HaloProperty.styles)
     }
 
-    @Test(.disabled("waits on HY-5")) func keysSurviveRemovingAndReAddingTheGlow() throws {
+    @Test func keysSurviveRemovingAndReAddingTheGlow() throws {
         var project = try Self.selecting("Title")
         try project.setStyle(Self.lifted, name: "Add Outer Glow", drag: nil)
         project.toggleAnimation(.glowSize)
