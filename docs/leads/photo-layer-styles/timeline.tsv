@@ -68,3 +68,4 @@ utc	stage	event	ref	note
 2026-10-24T13:12Z	W1	pr	PY-1	#5177 open, head 484c897c7, Mutate 4/4, Wire PY-5; PhotoWorkspace.swift +4/-1 accepted (stored stylePanel)
 2026-10-24T13:12Z	W2	wait	PY-2	needs SuiteUI style panel + LayerStylePasteboard from LS-2 #5174 (open); PY-5/PY-6 wait on LS-m #5176 (open)
 2026-10-24T13:30Z	W2	check-in	PY-2	#5177 open; LS-2 #5174 and LS-m #5176 still open; 0 layer-styles findings
+2026-10-24T13:52Z	W2	check-in	PY-2	no change: #5177, #5174, #5176 open
