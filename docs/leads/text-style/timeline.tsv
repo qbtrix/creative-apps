@@ -54,3 +54,4 @@ utc	stage	event	ref	note
 2026-10-24T07:00:09Z	3	pr-opened	#5047 TS-7
 2026-10-24T08:07:00Z	3	heartbeat	#5047 lane, #4958 labelled
 2026-10-24T08:28:38Z	3	heartbeat	#4958 restacked on TS-a
+2026-10-24T08:51:52Z	3	heartbeat	#4958 labelled fast-lane
