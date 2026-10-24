@@ -46,3 +46,4 @@ utc	stage	event	ref	note
 2026-10-22T18:18Z	check-in	-	none merged; lane Linux run 39829914426 on #4590 head 1fe5b534; other IM PRs await macOS builds
 2026-10-22T18:40Z	3	relaunch	act-1a164d620b2-ve0e	issue #3715; wave 5 starts: IM-10 on #4390+#4591, IM-8 on #4593+#4590
 2026-10-22T18:50Z	3	wave5-blocked	IM-8,IM-10	both builders stopped (packet conflicts); #4590 IM-5 merged; re-cut next
+2026-10-24T00:00Z	3	relaunch	act-1a16d523b32-v6tj	IM-a, IM-m done; wave 7: IM-8a gating, #4886 open
