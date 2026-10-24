@@ -100,13 +100,8 @@ public struct HaloHistoryEntry: Sendable, Hashable {
     }
 }
 
-/// Where playback is after a tick.
-public struct HaloPlaybackTick: Sendable, Hashable {
-    public var frame: Int
-    /// True once play-once has shown the last frame; the window stops then.
-    public var ended: Bool
-    public init(frame: Int, ended: Bool) { self.frame = frame; self.ended = ended }
-}
+/// Where playback is after a tick: the suite clock's (SuiteKernel Playback).
+public typealias HaloPlaybackTick = PlaybackTick
 
 /// What Render… writes (tier 2, #429). HX-1 (export-pack) adds the movie's
 /// codec and whether frames keep their transparency; the plan and the writers

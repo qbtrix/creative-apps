@@ -4,6 +4,7 @@
 // nothing, Play/Pause and Loop off with the clock's help; Set In / Out Point
 // keep W0's answers. Linux and macOS.
 @testable import HaloModel
+import SuiteKernel
 import Testing
 
 private let sixCommands: [HaloCommand] = [
@@ -15,7 +16,7 @@ private struct HelpClock: PlaybackClock {
     let help: String
     var unavailableHelp: String? { help }
     func tick(
-        startFrame: Int, elapsed: Double, framesPerSecond: Int, durationFrames: Int, loops: Bool
+        startFrame: Int, elapsed: Double, rate: FrameRate, durationFrames: Int, loops: Bool
     ) -> HaloPlaybackTick {
         HaloPlaybackTick(frame: startFrame, ended: true)
     }

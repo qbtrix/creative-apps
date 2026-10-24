@@ -1,13 +1,10 @@
-// HaloPlayback.swift: the transport's workspace methods (#37, VP-3): play,
-// pause, toggle, Loop, the display link's tick, frame steps and the start and
-// end jumps, plus the labels the transport reads. `services.clock` does the
-// frame math; a tick re-anchors when the playhead moved since the last tick
-// (a scrub while playing) and on each loop wrap, so turning Loop off mid-play
-// ends the current pass. Never calls `edit`: playback is not an undo step
-// (QB-F3). Writes only `playback` and the playhead, through `scrub(to:)`.
-// `tickChanges(now:)` says whether a tick would change anything, so the
-// window ticks only then and a refresh between frames writes nothing.
-// Frames are timed by the composition's exact rate (frame-rates FR-8).
+// HaloPlayback+Kernel.swift: the transport's workspace methods (#37, VP-3) on the suite's playback clock (#5077):
+// play, pause, toggle, Loop, the display link's tick, frame steps and the start and end jumps, plus the labels the
+// transport reads. `services.clock` does the frame math (live and fake both SuiteKernel's `PlaybackTiming`, at the
+// composition's exact rate); a tick re-anchors when the playhead moved since the last tick (a scrub while playing)
+// and on each loop wrap, so turning Loop off mid-play ends the current pass. Never calls `edit`: playback is not an
+// undo step (QB-F3). Writes only `playback` and the playhead, through `scrub(to:)`. `tickChanges(now:)` says
+// whether a tick would change anything, so the window ticks only then and a refresh between frames writes nothing.
 // Linux-safe: no UI imports.
 import SuiteKernel
 
@@ -54,8 +51,8 @@ extension HaloProject {
             state.startTime = now
         }
         let n = comp.durationFrames
-        let rate = comp.frameRate, fps = rate.nominal
-        if state.loops, n > 0, fps > 0 {
+        let rate = comp.frameRate
+        if state.loops, n > 0, rate.numerator > 0 {
             let full = rate.seconds(ofFrame: n)
             let pass = rate.seconds(ofFrame: n - state.startFrame)
             if now - state.startTime >= pass {
@@ -66,21 +63,12 @@ extension HaloProject {
             }
         }
         let t = services.clock.tick(
-            startFrame: state.startFrame, elapsed: Self.clockSeconds(now - state.startTime, at: rate), framesPerSecond: fps,
-            durationFrames: n, loops: state.loops)
+            startFrame: state.startFrame, elapsed: now - state.startTime, rate: rate, durationFrames: n, loops: state.loops)
         scrub(to: t.frame)
         state.lastFrame = selectedComposition?.playheadFrame ?? t.frame
         if t.ended { state.playing = false }
         playback = state
         return state.playing
-    }
-
-    /// `elapsed` real seconds as the clock's seconds at the whole rate it counts by, so its frame is
-    /// `elapsed` times the exact rate: 10.01 s at 29.97 is frame 300, where 30 would say 300.3.
-    static func clockSeconds(_ elapsed: Double, at rate: FrameRate) -> Double {
-        let fps = rate.nominal
-        guard fps > 0 else { return elapsed }
-        return elapsed * Double(rate.numerator) / (Double(rate.denominator) * Double(fps))
     }
 
     /// Whether `tick(now:)` at `now` would change anything: the frame, the
