@@ -140,7 +140,8 @@ public struct ScrubField: View {
         .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: anchor == nil)
         .help(label)
         .modifier(ScrubAccessibility(
-            label: label, spoken: NumericInput.spoken(value, decimals: decimals, unit: unit), editing: editing, track: track, position: track.position(value), adjust: adjust))
+            label: label, spoken: NumericInput.spoken(value, decimals: decimals, unit: unit), editing: editing,
+            track: track, position: track.position(value), adjust: adjust))
     }
 
     /// The bar slider, drawn as the Studio editor's number row (Flare's easing
