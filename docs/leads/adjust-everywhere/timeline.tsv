@@ -23,3 +23,4 @@ utc	stage	event	ref	note
 2026-10-24T09:54Z	check	check-in	no slice PR merged; dev CI 40081823899 (post-#5117) still running, Linux check 40082286767 green; #4846 needs-fix at 3325d7a6 pending lane re-eval; waits unchanged
 2026-10-24T10:16Z	check	check-in	no merges; #4846 needs-fix pending lane re-eval (gate passed on 3325d7a); dev full CI 40081823899 still running; no slice done
 2026-10-24T10:39Z	check	check-in	dev full CI 40081823899 green at 9f476af7 (lane macOS gate unblocked); no slice PR merged yet; #4846 needs-fix pending lane re-eval; no slice done
+2026-10-24T11:01Z	check	check-in	no slice PR merged; #4846 needs-fix pending lane re-eval; dev full CI 40087964618 at 4f00afb running (has no slice PR); merged slices since 06Z (SR-2a, PL-10, others) clear none of my waits; no slice done
