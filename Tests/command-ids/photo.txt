@@ -91,3 +91,7 @@ view.zoom-in
 view.zoom-out
 history.jump
 history.read
+fill.bucket
+retouch.spot-heal
+retouch.heal
+retouch.remove

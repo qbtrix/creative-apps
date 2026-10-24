@@ -64,6 +64,9 @@ struct AllAppsCatalogTests {
         "Halo's drag end with no drag is a no-op edit that stays enabled": [
             "viewer.drag-end: stepNamedTitle", "viewer.drag-end: editRecordsOneStep", "viewer.drag-end: undoRestoresBytes"],
         "The kernel's transform.flip is titled Flip while its step names the axis": ["transform.flip: stepNamedTitle"],
+        "Photo's square.png is flat where the heal examples act, so they change no pixel and record no step": [
+            "retouch.spot-heal: stepNamedTitle", "retouch.spot-heal: editRecordsOneStep", "retouch.spot-heal: undoRestoresBytes",
+            "retouch.remove: stepNamedTitle", "retouch.remove: editRecordsOneStep", "retouch.remove: undoRestoresBytes"],
     ]
 
     /// `D`'s law problems on the real job input `path`, as "<id>: <law>", less an example that can't run because its
