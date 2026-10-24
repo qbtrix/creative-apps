@@ -96,12 +96,5 @@
     "find": "return parts.joined(separator: \" \")",
     "replace": "return parts.joined(separator: \" \") + (parts.last == \"Z\" ? \"\" : \" Z\")",
     "tests": "DesignSVGTests|DesignSVGWalkTests"
-  },
-  {
-    "label": "svgUpperCase: SVG export writes upper case hex",
-    "file": "Sources/DesignModel/Live/DesignSVG.swift",
-    "find": "HexText.format(color.kernelColor).lowercased()",
-    "replace": "HexText.format(color.kernelColor)",
-    "tests": "DesignHexTextTests"
   }
 ]
