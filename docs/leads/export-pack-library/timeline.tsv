@@ -76,3 +76,4 @@ time	event	task	note
 2026-10-24T19:33:02Z	heartbeat	batch-20261024183708 still bisecting (probe -6); none ours; our 8 PRs clean fast-lane
 2026-10-24T19:55:07Z	heartbeat	batch-20261024183708 still bisecting (probe -6); none ours; our 8 PRs clean fast-lane
 2026-10-24T20:16:49Z	heartbeat	batch-20261024183708 macOS red; probe -6 macOS in progress since 19:14Z; none ours; our 8 PRs clean fast-lane
+2026-10-24T20:38:38Z	heartbeat	batch-20261024183708 bisect advancing (probes -6,-7,-9); none ours; our 8 PRs clean fast-lane
