@@ -168,12 +168,12 @@ struct DevelopInspector: View {
         ToolbarAction(
             "Show Original", systemImage: "eye", isSelected: develop.showsOriginal,
             unavailableHelp: develop.toggleOriginal == nil ? "Open a photo in the loupe to compare it with its original." : nil,
-            shortcut: "\\", identifier: "library.develop.original", isToggle: false, perform: { develop.toggleOriginal?() })
+            shortcut: "\\", identifier: "library.develop.original", isToggle: true, perform: { develop.toggleOriginal?() })
     }
 
     /// Show Original's button: an InspectorAction toggle, so the window's `suite.controls` reports it on or off.
     static func originalButton(_ original: ToolbarAction) -> InspectorAction {
-        InspectorAction(original, isToggle: false)
+        InspectorAction(original, isToggle: true)
     }
 
     /// Why a row is off when its closure is nil (outside a window).
