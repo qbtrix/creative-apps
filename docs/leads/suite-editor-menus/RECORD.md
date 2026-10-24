@@ -94,3 +94,4 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-24T21:08:03Z: batch-20261024205137 took 5 p0, 1 beta and 6 PRs older than #4988; #4988 still queued in order.
 - 2026-10-24T21:26:31Z: batch-20261024205137 is bisecting (probes -3, -6); not ours. #4988 queued.
 - 2026-10-24T21:45:03Z: batch-20261024205137 still bisecting; #4988 queued.
+- 2026-10-24T22:03:32Z: batch-20261024205137 still bisecting; #4988 queued.
