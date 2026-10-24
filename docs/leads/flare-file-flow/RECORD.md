@@ -273,3 +273,5 @@ Loop: v3 (the packet has a `## Slices` table).
 - 19:14Z check-in: #3482 quiet, no open file-flow findings. Gaps #4764 and #1829 still open.
 
 - 19:46Z check-in: #3482 quiet, no open file-flow findings. Gaps #4764 and #1829 still open.
+
+- 20:17Z check-in: #3482 quiet, no open file-flow findings. #1829 got a bot repeat on run 40122103750 (flare identifier audit 27 vs baseline 12, Legs button; not file-flow). Gaps #4764 and #1829 still open.
