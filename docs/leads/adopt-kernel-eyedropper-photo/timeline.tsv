@@ -1,0 +1,53 @@
+utc	stage	event	ref	note
+2026-10-20T22:15Z	0	stage-start	#3723	lead branch from dev 74844410
+2026-10-20T22:15Z	3	heartbeat	#3439	no task can start: PE-z not merged (PE-a #3706 open); AX-photo, AB-photo, UP-z not merged
+2026-10-20T22:30Z	3	heartbeat	#3439	poll 2 blocked, unchanged: PE-z not merged (no Belt-Slice-Done on #3439, #3706 PE-a open, no PhotoSample+Kernel.swift on dev 52606a3e); AX-photo blocked, AB-photo building, UP-z not started
+2026-10-21T00:05Z	3	stage-start	EP-1	poll 3: PE-a merged (#3706), adapter stubs on dev 0c2c10dd; EP-1 starts, EP-2 waits PE-z/AX-photo/AB-photo
+2026-10-21T10:53Z	0	stage-start	#3723	relaunch act-1a15e10a9c3-kwzx base 1191940; blocked: PE-z (#3439 PE-m in progress), AX-photo, AB-photo, UP-z planned
+2026-10-21T19:24Z	3	heartbeat	#3723	poll 2 blocked: PE-m waits PH-m (#3439), PE-z not started; AX-photo merged #3890
+2026-10-21T20:09Z	status-channel	RECORD also pushed to lead/suiteui-adopt-kernel-eyedropper-photo (the branch Belt reads) from now on
+2026-10-21T20:09Z	poll	poll 3 blocked; supervisor question on #3723
+2026-10-21T20:48Z	released	supervisor released the feature from this run; waiting-on-prereq
+2026-10-22T00:22Z	check-in	Released by the supervisor; no further work in this run.
+2026-10-22T16:45Z	0	relaunch	-	run act-1a1647a67aa-dau5; PE-z built
+2026-10-22T16:45Z	3	builder	EP-1	EP-1 builder started on dev
+2026-10-23T15:30Z	0	relaunch	-	run act-1a16953ae34-05a4; contract-first waits; AB-photo done, AX-photo merged
+2026-10-23T15:35Z	3	builder	EP-2	EP-m builder starting on dev 721168a8f
+2026-10-23T15:20:44Z	wave1	build-start	EP-m builder started (EP-2) on lead/adopt-kernel-eyedropper-photo-EP-m; toolchain 6.3.3 ready
+2026-10-23T17:32Z	2	stage	wave 2: EP-m is #4837 (fast-lane, queued). EP-z builder started, stacked on EP-m.
+2026-10-23T17:53Z	2	pr	EP-z opened as #4943 (head 5457514, stacked on #4837, fast-lane + feature-done, CI: PASS, own commits 10 files +9/-107). The UP-z Wire line stays open. Stripped a tool-appended attribution footer from #4943 and from the #4840 comment.
+2026-10-23T19:58:03Z	-	check	#4837 EP-m fast-lane queued (no checks/comments yet, lane backlog); #4943 waits (stacked size).
+2026-10-23T20:20:47Z	wait	check	heartbeat: #4837 EP-m fast-lane at 5d5b637, no checks yet (lane backlog); #4943 EP-z waits on EP-m
+2026-10-23T20:42:27Z	wait	check	heartbeat: #4837 EP-m still queued in lane, no checks/status on 5d5b637; #4943 EP-z waits on EP-m
+2026-10-23T21:04:34Z	wait	check	heartbeat: #4837 EP-m still queued, no checks on 5d5b637; dev idle 70 min (lane quiet); #4943 waits on EP-m
+2026-10-23T21:26:16Z	wait	check	heartbeat: #4837 EP-m no checks on 5d5b637; dev idle since 19:45Z; #4943 waits on EP-m
+2026-10-23T21:50:28Z	wait	check	dev batch at 21:40Z merged 12 PRs (#4841-#4862) and skipped #4837 (EP-m). The cause is the lane's open_list --limit 100: 144 PRs are open and #4837 was past the cutoff. Raised with the supervisor on #4837. #4840 (ST-a) is still waiting on the Mac re-gate. #4950/#4951 are drafts, #4943 waits on EP-m.
+2026-10-23T22:13:39Z	wait	check	No dev merges since 21:40Z. #4840 (ST-a) still waits on the supervisor's Mac re-gate. #4837 (EP-m) is 97th of the newest open PRs, just inside the lane's 100-PR window. Supervisor not yet answered. #4943/#4950/#4951 unchanged.
+2026-10-23T22:34:57Z	wait	check	Still no dev merges since 21:40Z. #4840 has no status on its head and is still waiting on the supervisor's Mac re-gate. #4837 is now 99th newest, so it is still inside the lane's window. No supervisor reply. Stacked slices unchanged.
+2026-10-23T22:57:33Z	wait	check	Dev only gained the generated-docs commit; no lane batch since 21:40Z. #4840 still has no status and is waiting on the supervisor. #4837 is 99th newest, still inside the lane's window. No supervisor reply. Stacked slices unchanged.
+2026-10-23T23:19:03Z	wait	check	#4837 (EP-m) is in lane/batch-20261023215139, a batch of 12 with #4818-#4870. Its Linux check passed and the macOS gate run 40029779505 is still in progress after 1.5h. I updated the supervisor note on #4837. #4840 (ST-a) still has no status and is waiting on the supervisor's Mac re-gate. A full CI run on dev 654fb36 is in progress.
+2026-10-23T23:41:43Z	wait	check	heartbeat: batch-20261023215139 macOS gate 40029779505 still in progress (~1h50m); #4837 EP-m waits in it; #4840 ST-a still needs-fix/no-fast-lane awaiting supervisor Mac re-gate; #4943/#4950/#4951 wait on parents
+2026-10-24T00:04:08Z	wait	check	check: batch-20261023215139 macOS gate 40029779505 FAILED 23:44Z on Design stroke tests (RenderBudgetDesignStrokeTests.widthScrubInThreeBodies, DesignStrokeSnapshots.editor: selectedStroke nil); not EP-m's Photo-only diff; lane bisect pending, #4837 not labelled needs-fix. #4840 ST-a unchanged (needs-fix/no-fast-lane, no status, supervisor re-gate).
+2026-10-24T00:26:32Z	wait	check	check: lane bisecting batch-20261023215139 (probe -6 = first 6 PRs, before #4837); #4837 open, no needs-fix; #4840 ST-a unchanged awaiting supervisor re-gate
+2026-10-24T00:48:38Z	wait	check	check: bisect still on probe batch-20261023215139-6 (macOS gate on first 6 PRs); #4837 open, no needs-fix; #4840 ST-a unchanged awaiting supervisor re-gate
+2026-10-24T01:10:50Z	wait	check	01:10Z check: dev still 654fb3632; lane bisect probe batch-20261023215139-6 unchanged; #4837 EP-m open (fast-lane, no needs-fix); #4840 ST-a waits on supervisor Mac re-gate
+2026-10-24T01:31:51Z	wait	check	01:31Z check: lane bisect moved to probe batch-20261023215139-9 (first 9 PRs, includes #4837 EP-m), so the culprit is past PR 6; #4837 no needs-fix; #4840 ST-a still waits on supervisor Mac re-gate; dev 654fb3632
+2026-10-24T01:53:28Z	wait	check	01:53Z check: probe batch-20261023215139-9 (incl. #4837 EP-m) Linux check green (run 40050009822), macOS gate 40050012604 running since 01:29Z; #4840 ST-a still waits on supervisor Mac re-gate; dev 654fb3632
+2026-10-24T02:14:57Z	wait	check	02:14Z check: probe -9 macOS gate 40050012604 still running (45 min); #4837 EP-m unmerged; #4840 ST-a still waits on supervisor Mac re-gate; dev 654fb3632
+2026-10-24T02:37:28Z	wait	check	02:37Z check: probe -9 macOS gate 40050012604 failed on RenderBudgetDesignStrokeTests.widthScrubInThreeBodies and DesignStrokeSnapshots.editor, tests that #4864 (design DK-3) adds itself; culprit is #4864, not #4837 EP-m (Photo-only), which should land when the bisect finishes; #4840 ST-a still waits on supervisor Mac re-gate
+2026-10-24T02:58:32Z	wait	check	02:58Z check: lane opened probe batch-20261023215139-7 (49949b4, first 7 PRs ending at #4837 EP-m); its runs decide EP-m; #4840 ST-a still waits on supervisor Mac re-gate; dev 654fb3632
+2026-10-24T03:20:21Z	wait	check	batch-20261023215139 probe -7 (49949b4, ends at #4837): Linux 40055390941 green, macOS gate 40055393733 running; -9 red on Design stroke tests points at #4864. #4837 open fast-lane; #4840 ST-a still needs-fix/no-fast-lane awaiting supervisor Mac re-gate; dev 654fb3632
+2026-10-24T03:42:15Z	wait	check	probe -7 macOS gate 40055393733 still in_progress (started 02:44Z, likely waiting on a macOS runner); #4837 open fast-lane, no needs-fix; #4840 ST-a unchanged (needs-fix/no-fast-lane, supervisor Mac re-gate)
+2026-10-24T04:04:29Z	wait	check	probe -7 (49949b4, ends at #4837) macOS gate 40055393733 green at 03:46Z with Linux 40055390941 green: #4837 EP-m cleared, culprit is #4839 or #4864 (likely #4864); waiting for lane to merge prefix. #4840 ST-a unchanged (supervisor Mac re-gate)
+2026-10-24T04:26:17Z	wait	check	bisect continues: probe -8 (5c349da, adds #4839) Linux 40060703756 green, macOS gate 40060705865 running; #4837 cleared by -7, not merged yet (dev 654fb3632). #4840 ST-a unchanged
+2026-10-24T04:53:09Z	wait	check	probe -8 (adds #4839) macOS gate 40060705865 still in_progress since 04:01Z; dev 654fb3632, #4837 not merged yet; #4840 ST-a unchanged
+2026-10-24T05:15:43Z	wait	check	bisect -8 macOS gate 40060705865 passed (05:05Z): #4837 EP-m and #4839 clear, culprit #4864; waiting for lane to merge prefix. #4840 ST-a: supervisor cleared window-lifetime flake (dev flaky 1/3), merging via gate at 2dbfc165
+2026-10-24T05:38:11Z	wait	check	lane run 40064397299 named #4864 culprit but dropped stale batch: nothing merged (dev still 654fb3632) though its comment said prefix merged. New batch-20261024050226 starts at #4839 and skips #4818..#4837 (open_list --limit 100). Asked supervisor on #4837 (comment 6380464537) to hand-merge cleared prefix and fix lane. #4840 ST-a waits on supervisor gate merge
+2026-10-24T06:00:18Z	wait	check	no change: dev still 654fb3632; #4837 EP-m open awaiting supervisor reply on 6380464537 (prefix skipped by lane); #4840 ST-a awaiting supervisor gate merge
+2026-10-24T06:22:21Z	wait	check	no change: dev 654fb3632; #4837 EP-m open, not in batch-20261024050226 (probe -6 running), no supervisor reply; #4840 ST-a open, supervisor merge pending
+2026-10-24T07:05:11Z	wait	check	no change: #4837 EP-m still open, not in batch-20261024050226; no supervisor reply; EP-z #4943 waits
+2026-10-24T07:30Z	0	relaunch	-	run act-1a16cc5a05a-lc3g
+2026-10-24T07:30Z	wait	check	supervisor hand-batching prefix ending at #4837 (supervisor/prefix-215139, Linux 40071878407 green); #4837 Belt-Lead line moved to this run; #4943 waits
+2026-10-24T07:44:14Z	wait	check	no change: #4837 open (supervisor prefix pending), #4943 waits
+2026-10-24T23:20Z	0	relaunch	-	run act-1a1703c2617-uijr; status branch rebuilt on main ef37711d
+2026-10-24T23:22Z	3	check	#4943	EP-m merged #4837 08:02Z; #4943 EP-z eligible (Linux 40078192845 green), queued behind 120 ready PRs
