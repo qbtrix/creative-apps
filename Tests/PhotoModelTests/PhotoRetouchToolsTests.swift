@@ -27,7 +27,8 @@ import Testing
             var model = try PhotoWorkspace.fixture(.sample)
             model.selectTool(tool)
             let before = model
-            model.drag(from: Mask.Point(x: 520, y: 180), to: Mask.Point(x: 600, y: 260), modifiers: [])
+            // From the sun's edge, so a spot heal at the press has an edge to rebuild.
+            model.drag(from: Mask.Point(x: 475, y: 220), to: Mask.Point(x: 600, y: 260), modifiers: [])
             #expect(model.pixels == before.pixels, "\(tool)")
             #expect(!model.dragPaintsOnly)
             model.endDrag()

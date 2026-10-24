@@ -74,6 +74,13 @@ import Testing
         #expect(healed.r > 0.5 && healed.g > 0.5, "the dot healed from the white around it")
     }
 
+    @Test func aRemoveStrokeFillsAllItPassedOver() throws {
+        var workspace = try dotted()
+        drag(&workspace, .remove, (0...32).map { point(16 + Double($0), 32) })
+        let filled = try #require(try layerPixel(workspace, 32, 32))
+        #expect(filled.r > 0.5 && filled.g > 0.5, "the dot halfway along the stroke is gone")
+    }
+
     @Test func aToolThatCantActSaysWhyAndRecordsNothing() throws {
         for tool in [PhotoTool.bucket, .spotHeal, .remove] {
             var workspace = try dotted()
