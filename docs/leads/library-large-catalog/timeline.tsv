@@ -88,3 +88,4 @@
 2026-10-24T19:21Z	3	poll	LG-grid	bisect probe -6 running; #5050 waits
 2026-10-24T19:41Z	3	poll	LG-grid	probe -6 macOS running; #5050 waits
 2026-10-24T20:01Z	3	poll	LG-grid	probe -6 macOS running; #5050 waits
+2026-10-24T20:21Z	3	poll	LG-grid	probe -6 macOS 65 min (run 40123913661); #5050 waits
