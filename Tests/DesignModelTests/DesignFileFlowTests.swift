@@ -47,7 +47,7 @@ import SuiteModel
         #expect(listed.map(\.lastUsed) == listed.map(\.lastUsed).sorted(by: >))
     }
 
-    @Test(.disabled("DF-3 turns on")) func openInIsOffWithItsReason() throws {
+    @Test func openInIsOffWithItsReason() throws {
         let catalog = try #require(Self.catalog)
         let document = Self.document()
         #expect(document.openInApps.isEmpty)

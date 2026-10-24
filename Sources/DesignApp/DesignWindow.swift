@@ -20,6 +20,7 @@
 // always writes the file that document belongs to (#436). Two launch arguments let the UI journeys skip the panels:
 // `-DesignOpenFile <file path>` opens that file once, in the first window, and
 // `-DesignSaveTo <file path>` makes Save and Save As write exactly that path.
+// Each open and save is noted in the suite's recents (DesignShell.bridge), which File > Open Recent ▸ lists.
 // DesignWindowOptions reads three more: `-DesignServices fake` (every window),
 // `-DesignFixture <name>` (a fixture opened unsaved in the first window; an
 // unknown name leaves it empty and says so on the status line) and
@@ -410,6 +411,7 @@ struct DesignWindow: View {
     private func open(_ url: URL) {
         do {
             try model.open(Data(contentsOf: url), at: url)
+            if let ref = model.suiteDocument { DesignShell.bridge.noted(ref, .opened) }
             fitting = true
             fit()
         } catch {
@@ -440,6 +442,7 @@ struct DesignWindow: View {
         do {
             try model.fileData().write(to: url, options: .atomic)
             model.didSave(to: url)
+            if let ref = model.suiteDocument { DesignShell.bridge.noted(ref, .saved) }
             note = "Saved \(url.lastPathComponent)"
         } catch {
             problem = .saving(url.lastPathComponent, Self.reason(error))

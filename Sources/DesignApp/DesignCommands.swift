@@ -1,5 +1,6 @@
 // DesignCommands.swift: Design's menu bar. File: New File, Open…, Close, Save, Save As…,
-// Export… ⇧⌘E (the export sheet, DesignExportArea);
+// Export… ⇧⌘E (the export sheet, DesignExportArea), then the suite's Open Recent ▸ and Open In ▸
+// (SuiteFileCommands over DesignShell.bridge; Open In gets the focused window's saved file);
 // Edit: Undo and Redo named for the edit, then after the stock Cut, Copy, Paste,
 // Delete and Select All, Duplicate (DesignEditMenu); Page: Add Page,
 // Rename Page…, Delete Page; Object: Group, Ungroup, Arrange, Align and
@@ -22,6 +23,7 @@
 // selected layers while the canvas or the Layers list has focus (`canDeleteLayer`).
 import AppKit
 import DesignModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -144,6 +146,7 @@ struct DesignCommands: Commands {
 
     var body: some Commands {
         CommandGroup(replacing: .newItem) { DesignFileMenu(menu: menu) }
+        SuiteFileCommands(app: .design, bridge: DesignShell.bridge, document: menu.workspace.suiteDocument)
         // `.saveItem` holds the system's Close, which DesignFileMenu's own Close replaces.
         CommandGroup(replacing: .saveItem) {}
         CommandGroup(replacing: .undoRedo) { DesignHistoryMenu(menu: menu, field: DesignFieldUndo.shared.state) }
