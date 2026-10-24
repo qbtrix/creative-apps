@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-24T12:08Z	check	check-in	no slice PR merged; #4846 still needs-fix (awaiting lane re-eval of 3325d7a); full CI 40087964618 at 4f00afb still running, no slice PR in it; new findings #5159 (flare) #5166 (photo) are other lines; no waits unblocked
 2026-10-24T12:30Z	check	check-in	#4846 lost needs-fix (lane accepted 3325d7a), awaiting batch; full CI 40087964618 at 4f00afb green 12:11Z so main promotes with the #5150 lane fix (no slice PR of mine in it); no new findings; only LS-1 #4911 merged, no waits unblocked
 2026-10-24T12:52Z	check	check-in	no slice PR merged; all 7 fast-lane PRs clean (no needs-fix/needs-rebase), awaiting batch; no new ci.yml run on dev since Linux check at 78983bc (LS-1) green 12:36Z; no new findings; no waits unblocked
+2026-10-24T13:15Z	check	check-in	no change: 7 fast-lane PRs clean awaiting batch; #5064 waits on #4846; no new dev CI, findings or unblocking slices
