@@ -23,6 +23,8 @@
 // SuiteDocumentsBridge (PhotoShell.bridge, the one Open Recent reads; #5080),
 // and in the system's list for the Dock. The old `PhotoRecentFiles` list moves
 // into the suite's once, at launch or on the first note, and its key goes.
+// A document save that lands first publishes the file's thumbnail to the
+// suite's previews off the main actor (shared-thumbnails ST-7).
 // `-PhotoOpenFile <path>` opens a file at launch; `-PhotoRecoveryDir
 // <folder>` keeps autosaves there. PhotoFileSession is the file state the
 // window and PhotoFileArea share. PhotoFileArea
@@ -110,6 +112,21 @@ final class PhotoFileSession {
     var bridge: SuiteDocumentsBridge?
     /// The suite's recents this window notes in and lists: the process's one bridge unless a test injected one.
     var documents: SuiteDocumentsBridge { bridge ?? PhotoShell.bridge }
+
+    /// Where saved documents' previews go; nil uses the suite's (tests inject one).
+    @ObservationIgnored var thumbnails: (any ThumbnailPublishing)?
+
+    /// The suite's previews in the live support folder (`-SuiteSupportDir` moves it), made on first use.
+    static let suiteThumbnails: any ThumbnailPublishing = SuiteServices.liveThumbnails(
+        support: SuiteLocations.supportFolder(arguments: ProcessInfo.processInfo.arguments, home: NSHomeDirectory()))
+
+    /// Publishes the thumbnail of the document saved at `url` to the suite's previews, off the main actor (ST-7).
+    func publishPreview(of url: URL, archive: any DocumentArchiving) async {
+        let (path, thumbnails) = (url.path(percentEncoded: false), thumbnails ?? Self.suiteThumbnails)
+        _ = await Task.detached(priority: .utility) {
+            await PhotoSavedPreview.publish(documentAt: path, archive: archive, to: thumbnails)
+        }.value
+    }
 
     /// Notes `url` as `event` in the suite's recents, when the suite knows its type, and in the system's list.
     func noteRecent(_ url: URL, _ event: RecentEvent) {
@@ -300,6 +317,7 @@ extension PhotoWindow {
             do {
                 let snapshot = try await Task.detached(priority: .userInitiated) { try workspace.snapshot() }.value
                 try await PhotoPackageIO.write(snapshot, to: url, archive: workspace.services.archive, codec: ImageIOCodec())
+                await files.publishPreview(of: url, archive: workspace.services.archive)
                 didSave(url, kind: .document, opened: opened)
             } catch {
                 didFailSave(error)

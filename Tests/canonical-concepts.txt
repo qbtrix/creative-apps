@@ -43,3 +43,4 @@ Launch flags: FlareLaunch HaloLaunch LibraryLaunch PhotoLaunch ProjectLaunch Lau
 File envelope: FileEnvelope FileFormat Filing
 Layer style: LayerStyle LayerEffect StyleEffect DropShadow InnerShadow OuterGlow InnerGlow Bevel Emboss ColorOverlay GradientOverlay EffectStack
 Recents: Recent RecentFile RecentMenu
+Raster size: RasterSize ImageHeader
