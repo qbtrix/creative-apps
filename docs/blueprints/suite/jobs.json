@@ -816,7 +816,7 @@
     "sources": [
       "captain"
     ],
-    "waits_on": "SC-3",
+    "waits_on": "SC-4",
     "added_by": "suiteui/shared-codecs"
   },
   "RJ-X47": {
