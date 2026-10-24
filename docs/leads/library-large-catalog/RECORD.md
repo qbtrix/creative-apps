@@ -4,7 +4,7 @@ Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a16c627c84-u86z · Session: claude/large-catalog-lead-jhxt1n (earlier act-1a1693fbf6d-ap2g, act-1a15df37b73-k199) · Started: 2026-10-21T10:19Z (resumed 2026-10-23T14:20Z, 2026-10-24T05:10Z)
 Stage: 3 wave 3 (LG-grid: LG-6 #5042 and LG-5 #5050 open)
 Base: 8021b0f56a45a59540cd4ea0ff99651c5fb8dc2a (origin/dev)
-Next: watch #5042 #5050 #5054 to merge and the supervisor's perf-suites answer (#3790); then LG-8 (status built, feature-done), then Belt-Slice-Done LG-grid
+Next: watch #5042 #5050 #5054 to merge and the supervisor to land #5114 (perf-suites); then LG-8 (status built, feature-done), then Belt-Slice-Done LG-grid
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -40,6 +40,7 @@ Next: watch #5042 #5050 #5054 to merge and the supervisor's perf-suites answer (
 - LG-6 scope: neighbour prefetch already exists but runs beside the render, unbounded per step; LG-6 queues the neighbours behind the render in RenderQueue and drops a superseded step's pending decodes, so stale prefetches never evict the focus's decodes.
 
 ## Open
+- 08:49Z: supervisor approved the perf-suites line (#3790 6382106137); opened #5114 (perf-suites line + drop .disabled, no-fast-lane, supervisor lands); #5042 #5050 #5054 still queued; no dev-red
 - 08:23Z: poll: #5042 #5050 #5054 open, mergeable clean, in the lane queue (127 open fast-lane PRs); #3790 no supervisor answer; no open dev-red
 - 08:04Z: poll: #5042 #5050 #5054 open (fast-lane, no needs-fix/rebase); #3790 no supervisor answer yet; no open dev-red; lane batch merged #4836..#5053 at 08:03Z
 - 07:45Z: poll: #5042 #5050 #5054 open (fast-lane, no needs-fix/rebase); #3790 no supervisor answer yet; no open dev-red; lane merged #4132 at 07:43Z
