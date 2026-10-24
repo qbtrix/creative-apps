@@ -54,3 +54,4 @@ Next: HX-8 (halo.md, built, feature-done) once placed-images:PH-z is built; Belt
 - 2026-10-23T23:05Z: Belt-Slice-Done HX-a posted (Linux check run 40029046141 on dev 491ec546) with Mac-Finish-Wanted. HX-u #4858 waits on the lane batch.
 - 2026-10-23T23:20Z: #4858 (HX-u) waits on a lane batch; HX-3 #4874 retargets when it merges. Open line:halo findings #5004 #4693 #4222 #3926 touch no export-pack file: findings 0.
 - 2026-10-23T23:40Z: dev unchanged since 654fb363; the lane's macOS gate for batch 20261023215139 (run 40029779505) has run since 21:51, so #4858 wait for the next batch. No lane comments, no supervisor reply, no new findings.
+- 00:02Z heartbeat: dev unchanged at 654fb363. Batch lane/batch-20261023215139 macOS gate 40029779505 ended in failure at 23:45 (its PRs are bisected, not ours). Our PRs wait for the next batch; no lane comment, no supervisor reply, 0 findings.
