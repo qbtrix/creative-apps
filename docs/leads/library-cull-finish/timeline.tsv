@@ -122,3 +122,4 @@
 2026-10-24T14:26:18Z	heartbeat	bisect landed a prefix of batch-20261024110214 on dev (14:16-14:20Z); our PRs not in it, all still open fast-lane, no needs-fix; 132 ready queued
 2026-10-24T14:48:20Z	heartbeat	batch-20261024110214 resolved (no lane/batch branches left); lane sweep 40103574354 running since 14:40Z, next batch forming; all our PRs clean fast-lane, no needs-fix
 2026-10-24T15:10:43Z	heartbeat	#4838 (DR-u) is PR 12/12 in lane/batch-20261024144917 (formed 14:49Z, Linux+macOS checks running); #4899 #4960 #4962 #5044 wait for the next batch; no needs-fix
+2026-10-24T15:32:24Z	heartbeat	batch-20261024144917 (with #4838 DR-u): Linux green, macOS running; other PRs unchanged, no needs-fix
