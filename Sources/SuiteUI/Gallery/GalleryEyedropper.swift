@@ -138,6 +138,7 @@ private struct EyedropperPage: View {
                 lines.append(board.pick(next))
             }, onEnd: { lines.append(board.endPick()) })
             .hexIdentifier("suite.gallery.eyedropper.hex")
+            .suiteControl(id: "suite.gallery.eyedropper.hex", enabled: true, reason: nil, identifies: false)
             HStack(spacing: SuiteSpacing.s) {
                 Toggle(isOn: $tool) {
                     Label("Eyedropper", systemImage: "eyedropper")
