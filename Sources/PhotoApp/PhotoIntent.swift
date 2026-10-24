@@ -46,6 +46,8 @@ enum PhotoIntent {
     case file(FileIntent), edit(EditIntent), crop(CropIntent), history(HistoryIntent), select(SelectIntent)
     case adjustmentLayer(AdjustmentLayerIntent), transform(TransformIntent), export(ExportIntent), sample(SampleIntent)
     case place(PhotoPlaceIntent), text(TypeIntent)
+    /// One Pen or point-editor gesture from PhotoPenOverlay, run through the catalog.
+    case path(PathIntent)
     /// Return: commits a free transform, else applies a pending crop.
     case confirm
     /// Escape: cancels a free transform, else cancels a pending crop or deselects.
@@ -71,6 +73,7 @@ extension PhotoTool: PaletteTool {
         case .bucket: "Paint Bucket"
         case .gradient: "Gradient"
         case .text: "Type"
+        case .pen: "Pen"
         }
     }
 
@@ -89,6 +92,7 @@ extension PhotoTool: PaletteTool {
         case .bucket: "drop.fill"
         case .gradient: "square.bottomhalf.filled"
         case .text: "textformat"
+        case .pen: "pencil.tip"
         }
     }
 
@@ -108,6 +112,7 @@ extension PhotoTool: PaletteTool {
         case .bucket: "g"
         case .gradient: "g"
         case .text: "t"
+        case .pen: "p"
         }
     }
 

@@ -33,6 +33,26 @@ struct EchoHelp: HelpProviding {
         #expect(report?.params.validate(.object(["app": .string("word")])).isEmpty == false)
     }
 
+    /// Every suite app can be reported on, and the note holds 10,000 characters, not one more (#4668).
+    @Test func reportAcceptsEveryAppAndANoteUpToItsLimit() throws {
+        let report = try #require(catalog.spec("help.report-problem"))
+        for app in ["launcher", "flare", "design", "photo", "library", "halo"] {
+            #expect(report.params.validate(.object(["app": .string(app)])).isEmpty, "\(app) can't be reported on")
+        }
+        #expect(report.params.validate(.object(["note": .string(String(repeating: "a", count: 10_000))])).isEmpty)
+        #expect(!report.params.validate(.object(["note": .string(String(repeating: "a", count: 10_001))])).isEmpty)
+    }
+
+    /// One mapping for both providers (#4667): a report's encoded fields plus its text, and the notes as
+    /// title and detail objects.
+    @Test func answersAreOneShapeForEveryProvider() throws {
+        struct Fields: Encodable { let app = "Photo", crashes = ["c"] }
+        #expect(SuiteHelpCatalog.reportAnswer(Fields(), text: "t")
+            == .object(["app": .string("Photo"), "crashes": .array([.string("c")]), "text": .string("t")]))
+        #expect(SuiteHelpCatalog.notesAnswer([(title: "T", detail: "D")])
+            == .object(["notes": .array([.object(["title": .string("T"), "detail": .string("D")])])]))
+    }
+
     @Test func reportReturnsTheProvidersReport() throws {
         var doc = SuiteHelpDocument(app: "launcher", provider: EchoHelp())
         let out = try catalog.run("help.report-problem", params: .object(["app": .string("photo"), "note": .string("hi")]), on: &doc)
