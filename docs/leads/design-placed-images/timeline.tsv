@@ -137,3 +137,4 @@ utc	stage	event	ref	note
 2026-10-24T18:19:24Z	3	check	-	#4888 f75a597f, #4916 36c3b4b2, #5002 af79946f restacked clean vs dev; #5011 in progress; PD-a #3759 awaits supervisor
 2026-10-24T18:41:52Z	3	check	-	PD-a #3759 merged to dev 674461187; scoped design run 40120669902 is on d13c3ff2 (pre-PD-a); #4888 conflicts with PD-a in DesignNode/Extras; fixers restacking DK-m and PD-m/PD-u stacks
 2026-10-24T19:04:41Z	3	check	-	PD-a merged 674461187; scoped design 40123009289 queued; 40120669902 red only on DesignWindowDragTests.withoutTheBoxTheEditorRunsPerSample 180s timeout (un-quarantined by #4983, ~117s locally; not our slices); fixers A/B restacking DK-m and PD stacks
+2026-10-24T19:25:47Z	3	check	-	dev 6f66ca334; scoped design 40123009289 (674461187) in progress; restacks underway: dk-m-stroke-model, pd-m, pd-u1 clean vs dev; dk-m-svg, pd-u2, pd-u3 pending; dk-u2/u3 clean, waiting on lane
