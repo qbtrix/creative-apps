@@ -110,6 +110,7 @@ struct FlareWindow: View, BodyCounted {
                 shape: shapeOptions)
         }
         .modifier(FlareFilePanels(model: model, launch: launch, perform: perform))
+        .unsavedChangesGuard(guardHooks)
         .modifier(FlareDocumentSheet(
             sheet: $presented, setup: model.documentSetup, limits: model.documentLimits, perform: perform,
             apply: { model.applyDocumentSetup($0, anchor: $1); return model.layerError == nil }))
