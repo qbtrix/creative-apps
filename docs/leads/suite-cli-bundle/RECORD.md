@@ -4,7 +4,7 @@ Issue: #3773 · Packet: docs/blueprints/suite/features/cli-bundle.md
 Run: act-1a16a37a3ed-0kyn (relaunch; earlier act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
 Stage: CB-z in lane
 Base: 35a0b5e7e9520a764f3eabf02968a453082a87cc (main; PRs target dev)
-Next: dev-red #5113 clears, #4999 merges, then unhold #5000
+Next: #4999 merges, then unhold #5000
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
