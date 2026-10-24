@@ -123,3 +123,4 @@ utc	stage	event	ref	note
 2026-10-24T09:25:09Z	heartbeat	still blocked on dev red #5113 (open, no fix yet); our PRs unchanged
 2026-10-24T09:44:20Z	heartbeat	still blocked on dev red #5113; our PRs unchanged
 2026-10-24T10:04:10Z	blocked	lane stalled: sweeps log batch 20261024081307 probe 0 running though its runs ended red 08:13/08:27; nothing merged ~1.5h; reported on #5113 for the supervisor
+2026-10-24T10:23:23Z	heartbeat	lane still stalled, dev red #5113 open, no supervisor reply; our PRs unchanged
