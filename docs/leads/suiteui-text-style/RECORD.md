@@ -2,7 +2,7 @@
 
 Issue: #3779 (relaunch #4519) · Packet: docs/blueprints/suiteui/features/text-style.md
 Run: act-1a16c618fe7-h4fd (line lead, line:suiteui) · earlier run act-1a16958d72f-a4mg
-Stage: 3 wave 3 (this run)
+Stage: 3 wave 1 building (TS-7); TS-8 waits on TS-3 #4958, TS-9 blocked on AJ-a and AE-flare
 Base: origin/dev 654fb3632
 Next: TS-a #4871 is in the lane. TS-u #4958 is stacked on it, so dev gets merged in once #4871 lands. TS-7 builds now on TS-m (Wire: brush-keys:BK-design, which shares DesignCommandCatalog). TS-8 needs TS-3. TS-9 waits on adjust-everywhere AJ-a, whose contract isn't merged; AE-flare is building, and AN-a is on dev.
 
