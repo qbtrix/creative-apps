@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-24T00:52:54Z	3	check	#4878,#4923	all open+clean; lane bisect of batch 20261023215139 still on probe -6 (not ours); dev at 654fb363 green; full journeys 40044846192 pending
 2026-10-24T01:15:29Z	3	check	#4878,#4923	all open+clean; bisect probe batch-20261023215139-6: Linux green, macOS gate 40044879600 running since 00:25Z (not ours); dev 654fb363 green
 2026-10-24T01:37:12Z	3	check	#4878,#4923	all open+clean; probe -6 green both gates, lane now on probe batch-20261023215139-9 (Fast Lane 40049986432 running; not ours); dev 654fb363 green
+2026-10-24T01:58:55Z	3	check	#4878,#4923	all open+clean; lane still bisecting batch 20261023215139 at probe -9 (not ours); dev 654fb363 green
