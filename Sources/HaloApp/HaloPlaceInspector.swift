@@ -1,8 +1,8 @@
 // HaloPlaceInspector.swift (placed-images PH-3): the IMAGE slot of Halo's layer inspector, under FILL, shown only
 // while a solid is selected (`shows`). A solid with a picture shows SuiteUI's PlacedImageRows (its file line
 // "logo.svg · SVG · 480 × 160", Replace… and Reset Size), each sending one PlaceIntent to the window's `haloPlace`
-// action. Under it the Fill checkbox (`halo.inspector.place.fill`) keeps the preference File > Place… and the drop
-// read: a placed file fills the selected solid. While `help` says why placing can't run, the rows and the checkbox
+// action. Under it the Place row's checkbox, "Into the selected solid" (`halo.inspector.place.fill`), keeps the
+// preference the next File > Place… and drop read: a placed file fills the selected solid. While `help` says why placing can't run, the rows and the checkbox
 // are off with that reason as their tooltip and as a note (`halo.inspector.placeHelp`). Its inputs are values, so
 // a snapshot can show any picture; `init(model:)` reads them from the project. Values in, intents out.
 import HaloModel
@@ -21,6 +21,8 @@ struct HaloPlaceInspector: View {
 
     nonisolated static let fillID = "halo.inspector.place.fill"
     nonisolated static let helpID = "halo.inspector.placeHelp"
+    /// The Fill checkbox's title, under the row's "Place" label: a preference for the next place, not a command.
+    nonisolated static let fillTitle = "Into the selected solid"
 
     /// Whether IMAGE shows for a layer of `kind`: solids only.
     nonisolated static func shows(_ kind: HaloLayerKind?) -> Bool { kind == .solid }
@@ -35,12 +37,12 @@ struct HaloPlaceInspector: View {
                     .disabled(help != nil)
                     .help(help ?? "The placed file")
             }
-            InspectorRow("") {
-                Toggle("Fill the selected solid", isOn: $fill)
+            InspectorRow("Place") {
+                Toggle(Self.fillTitle, isOn: $fill)
                     .toggleStyle(.checkbox)
             }
             .disabled(help != nil)
-            .help(help ?? "A placed file fills the selected solid instead of adding a layer")
+            .help(help ?? "The next Place… or drop fills the selected solid instead of adding a layer")
             .haloControl(id: Self.fillID, enabled: help == nil, help: help)
             if let help { InspectorNote(help, kind: .secondary, identifier: Self.helpID) }
         }
