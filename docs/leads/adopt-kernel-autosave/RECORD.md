@@ -2,9 +2,9 @@
 
 Issue: #3713 · Packet: docs/blueprints/suiteui/features/adopt-kernel-autosave.md
 Run: act-1a16c618fe7-h4fd (line lead, line:suiteui; relaunch after park) · earlier runs act-1a163b2abfe-f182, act-1a15c07cabb-mtlw
-Stage: 3 wave 1 building (AK-6, then AK-9 stacked on it)
-Base: origin/dev 654fb3632
-Next: Wave 1 builds AK-6 (Library catalog under the root; Wire: library:spine) and then AK-9 (four-editor journey, Photo step skipped until AK-8). AK-8 waits on shared-codecs SC-f (supervisor: don't touch PhotoWindow+File.swift). AK-11 follows AK-6, AK-8, AK-9.
+Stage: 3 wave 1 PRs open (AK-6 #5039, AK-9 #5040)
+Base: origin/dev 830af22de
+Next: Lane: #5039 AK-6 in the lane; #5040 AK-9 stacked on it. AK-8 waits SC-f (re-read each poll); AK-11 after AK-6, AK-8, AK-9.
 
 ## Slices
 
@@ -25,10 +25,10 @@ Next: Wave 1 builds AK-6 (Library catalog under the root; Wire: library:spine) a
 | AK-3 | AK-flare | 2 | see packet | see packet | see packet | #3842 | merged |
 | AK-4 | AK-flare | 4 | see packet | see packet | see packet | #4010 | merged (a3c4bff97) |
 | AK-5 | AK-library | 2 | see packet | see packet | see packet | #3848 | merged |
-| AK-6 | AK-library | – | see packet | see packet | see packet | – | building wave 1 (Wire: library:spine) |
+| AK-6 | AK-library | 1 | see packet | see packet | see packet | #5039 | open, in lane (Wire: library:spine) |
 | AK-7 | AK-photo | 2 | see packet | see packet | see packet | #3841 | merged |
 | AK-8 | AK-photo | – | see packet | see packet | see packet | – | blocked (SC-f, PH-z) |
-| AK-9 | AK-z | – | see packet | see packet | see packet | – | blocked (DA-z, HA-z) |
+| AK-9 | AK-z | 1 | see packet | see packet | see packet | #5040 | open, stacked on #5039 (Photo leg skipped until AK-8) |
 | AK-10 | AK-z | 5 | see packet | see packet | see packet | #4427, #4428 | merged (31da7d22f6, b653cb7bfd) |
 | AK-11 | AK-z | – | see packet | see packet | see packet | – | planned |
 
@@ -39,6 +39,7 @@ Next: Wave 1 builds AK-6 (Library catalog under the root; Wire: library:spine) a
 
 ## Decisions
 
+- 2026-10-24T06:59:59Z AK-6 opened as #5039 and AK-9 as #5040 (stacked; journey only, Photo leg XCTSkip waits on AK-8).
 - 2026-10-24T05:38:36Z Belt-Slice-Done AK-flare posted on #3713 (issuecomment-6380467453): full CI 40037716897 on dev 654fb3632 holds #3842 and #4010; Linux and macOS green; main promoted. The tool appended a footer, which I removed with an edit.
 - 2026-10-24T05:34:34Z relaunch as run act-1a16c618fe7-h4fd. AK-4 (#4010) and AK-10 (#4427, #4428) are on dev. The supervisor (2026-10-24) says to build every AK task that doesn't touch PhotoWindow+File.swift now, on the kernel's fakes, with Wire: lines. So AK-6 builds now against spine's dev state (Wire: library:spine), and AK-9 is written with the Photo step skipped ("waits on AK-8"); Design DA-z and Halo HA-z are built. AK-8 stays until SC-f lands. Open gap #4018 stays a gap.
 - 2026-10-22T19:51Z #4428 (AK-10 source) merged by the lane as b653cb7bfd. AK side ended; relaunch takes AK-6, AK-8, AK-9, AK-11.
