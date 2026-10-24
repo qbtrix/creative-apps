@@ -2,8 +2,8 @@
   "title": "Share from Library: File > Share and a toolbar Share button send the selected photos (developed, location off) through the system share sheet",
   "wave": 7,
   "order": 40,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#3789",
   "beta": true,
   "covers": "beta gaps 2026-10-21 Library must-haves (audit row 11); suite audit V1 row (File > Share on every exporter: Library first); real job RJ-L55 (new)",
   "waits_on": "export-pack (wave 5: the sharing preset, location off); file-flow LF-m (catalog and ledger); spine (building); blueprint 1.3's sharing non-goal re-cut by the captain's 2026-10-21 call",
@@ -22,6 +22,7 @@
     "Tests/SuiteUITests/ShareButtonTests.swift",
     "Sources/LibraryApp/LibraryShareItems.swift",
     "Sources/LibraryApp/LibraryMenus+Share.swift",
+    "Sources/LibraryApp/LibraryWindow+Share.swift",
     "UITests/LibraryJourneyTests+Share.swift",
     "Tests/AppSnapshotTests/RenderBudgetLibraryShareTests.swift",
     "Sources/LibraryModel/LibraryCommandCatalog.swift",
@@ -117,6 +118,7 @@
       ],
       "owned": [
         "Sources/LibraryApp/LibraryShareItems.swift",
+        "Sources/LibraryApp/LibraryWindow+Share.swift",
         "UITests/LibraryJourneyTests+Share.swift",
         "docs/blueprints/library/features/share-sheet.wave.json"
       ],

@@ -93,6 +93,10 @@ struct LibraryCatalogDoc: HeadlessDocument {
         case "file.clear-recent": .some("No Recent Files")
         case "file.open-in": .some(c.openInHelp)
         case "file.share-prepare": .some(c.shareHelp)
+        case "catalog.backups": .some(nil)
+        case "catalog.restore-backup": .some(c.importState != .idle ? LibraryBackups.importing
+                                             : c.backup.backups == nil ? LibraryBackups.noBackups : nil)
+        case "thumbnails.stats": .some(c.thumbnailDisk == nil ? "Thumbnails aren't kept on disk yet." : nil)
         case "photo.remove-from-catalog": .some(c.selection.isEmpty ? LibraryCatalog.removeHelp : nil)  // catalog-files LC-6
         case "photo.relink": .some(c.items.contains { $0.availability == .missing } ? nil : LibraryCatalog.relinkHelp)
         case "folders.list", "view.show-folder": .some(c.items.contains { $0.path?.hasPrefix("/") == true } ? nil : LibraryCatalog.noFolders)
@@ -219,5 +223,7 @@ struct LibraryCatalogDoc: HeadlessDocument {
         "notice.close | Close Notice | There is no notice to close.",
         "notice.show-failures | Show Failures | No files failed to import.",
     ] + DevelopSlider.allCases.map { "\(LibraryCatalog.resetSliderID($0)) | Reset \($0.rawValue) | on" } + ["file.share-prepare | Share | on",
-        "photo.remove-from-catalog | Remove from Catalog | on", "photo.relink | Relink | No photo is missing."]
+        "thumbnails.stats | Thumbnail Stats | Thumbnails aren't kept on disk yet."]
+        + ["catalog.backups | Catalog Backups | on", "catalog.restore-backup | Restore Catalog Backup | \(LibraryBackups.noBackups)"]
+        + ["photo.remove-from-catalog | Remove from Catalog | on", "photo.relink | Relink | No photo is missing."]
 }

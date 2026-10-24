@@ -92,6 +92,19 @@ public enum SuiteHelpCatalog {
     static let needsBundle = "Connecting an assistant needs AfterGlow.app: run the bundled afterglow, or pass --bundle <path to AfterGlow.app>."
     static func bundled(_ doc: SuiteHelpDocument) -> Availability { doc.provider.bundle == nil ? .unavailable(needsBundle) : .available }
 
+    /// A report's answer, the one shape every provider gives: its encoded fields plus `text`; null when it
+    /// doesn't encode to an object.
+    public static func reportAnswer(_ report: some Encodable, text: String) -> JSONValue {
+        guard case .object(var fields)? = try? JSONValue(encoding: report) else { return .null }
+        fields["text"] = .string(text)
+        return .object(fields)
+    }
+
+    /// The notes' answer: `{"notes": [{"title", "detail"}]}`, in the order given.
+    public static func notesAnswer(_ notes: [(title: String, detail: String)]) -> JSONValue {
+        .object(["notes": .array(notes.map { .object(["title": .string($0.title), "detail": .string($0.detail)]) })])
+    }
+
     /// The specs, in Help menu order.
     static let specs: [CommandSpec<SuiteHelpDocument>] = [
         .typed("help.report-problem", title: "Report a Problem…",

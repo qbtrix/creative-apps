@@ -5,7 +5,8 @@
 // and runs them, and keeps the stored form Photo's: the same keys, Floats
 // written as Floats, `enabled` in AdjustmentKind order, and output levels
 // written only when they move off 0 and 1, so a file from before them opens
-// with neutral output levels and saves again byte for byte. Hue/saturation
+// with neutral output levels and saves again byte for byte; `tone` likewise
+// only when off neutral (tone-controls PT-1). Hue/saturation
 // stays Photo's own matrix (HueSaturation.swift): the GPU route and the live
 // tone route run that matrix, and they move together (IM-8). Linux-safe.
 import CoreRaster
@@ -76,7 +77,7 @@ extension AdjustmentSettings {
 extension AdjustmentSettings: Codable {
     private enum CodingKeys: String, CodingKey {
         case exposure, blackPoint, whitePoint, gamma, outputBlack, outputWhite, curvePoints, blurSigma
-        case hue, saturation, lightness, enabled
+        case hue, saturation, lightness, enabled, tone
     }
 
     public init(from decoder: any Decoder) throws {
@@ -97,7 +98,8 @@ extension AdjustmentSettings: Codable {
                 curve: Self.imagingCurve(try c.decode([CurvePoint].self, forKey: .curvePoints)),
                 hueSaturation: hueSaturation),
             blurSigma: try c.decode(Double.self, forKey: .blurSigma),
-            enabled: Set(try c.decode([AdjustmentKind].self, forKey: .enabled)))
+            enabled: Set(try c.decode([AdjustmentKind].self, forKey: .enabled)),
+            tone: try c.decodeIfPresent(ToneSettings.self, forKey: .tone) ?? .neutral)
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -114,5 +116,6 @@ extension AdjustmentSettings: Codable {
         try c.encode(saturation, forKey: .saturation)
         try c.encode(lightness, forKey: .lightness)
         try c.encode(AdjustmentKind.allCases.filter(enabled.contains), forKey: .enabled)
+        if !tone.isNeutral(nil) { try c.encode(tone, forKey: .tone) }
     }
 }

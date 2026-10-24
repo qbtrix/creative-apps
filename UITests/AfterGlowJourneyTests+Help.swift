@@ -1,10 +1,12 @@
 // AfterGlowJourneyTests+Help.swift (report-problem RP-2, on in RP-5b): XJ-RP, the suite Help menu in the
 // launcher. Help lists Report a Problem…, Beta Notes and Welcome to AfterGlow; Welcome opens the tour; Report a
-// Problem… opens the sheet with a crash from a fixture folder (`-SuiteCrashDir`), the home path shown as `~`;
-// Beta Notes opens the known-issues window. Every click is a mouse click on a
+// Problem… opens the sheet with a crash from a fixture folder (`-SuiteCrashDir`), the home path shown as `~`,
+// takes a typed note, copies note plus report to the pasteboard and closes; Beta Notes opens the known-issues
+// window and Close closes it. Every click is a mouse click on a
 // menu item found by title, and only by title: SwiftUI doesn't carry `.accessibilityIdentifier` onto a menu
 // item, so a live item reads AppKit's "menuAction:" (#4647). The menu shot is a screen shot, since an open menu
 // sits outside the window.
+import AppKit
 import XCTest
 
 final class AfterGlowHelpJourneyTests: XCTestCase {
@@ -43,7 +45,22 @@ final class AfterGlowHelpJourneyTests: XCTestCase {
         XCTAssert(line("~/Applications/Photo.app").exists, "the home path isn't shown as ~")
         XCTAssertFalse(line(Self.home + "/").exists, "the home path leaks into the report")
         XCTAssertFalse(line("Browser-journey.ips").exists, "another app's crash is in the report")
+
+        // Type a note, Copy: the pasteboard holds the note on top of the report (#4663).
+        let note = sheet.descendants(matching: .any)["suite.help.report.note"]
+        XCTAssert(note.waitForExistence(timeout: 5), "the sheet has no note field")
+        note.click()
+        note.typeText("The brush lagged.")
         launcher.shot("help-report")
+        NSPasteboard.general.clearContents()
+        sheet.descendants(matching: .any)["suite.help.report.copy"].click()
+        let pasted = NSPasteboard.general.string(forType: .string) ?? ""
+        XCTAssert(pasted.hasPrefix("The brush lagged."), "Copy didn't put the note on top: \(pasted.prefix(80))")
+        XCTAssert(pasted.contains("Photo-journey.ips"), "Copy left the crash out of the report")
+
+        // Close, by mouse, leaves the sheet (#4664).
+        sheet.descendants(matching: .any)["suite.help.report.close"].click()
+        XCTAssert(sheet.waitForNonExistence(timeout: 5), "Close left the report sheet open")
     }
 
     /// The app's home: built from the user name, since a sandboxed runner's NSHomeDirectory() is its container.
@@ -68,6 +85,9 @@ final class AfterGlowHelpJourneyTests: XCTestCase {
         let notes = launcher.app.windows.matching(NSPredicate(format: "title == 'Beta Notes'")).firstMatch
         XCTAssert(notes.waitForExistence(timeout: 10), "Help > Beta Notes opened no window")
         launcher.shot("help-beta-notes")
+        // Close, by mouse, closes the window (#4664).
+        notes.descendants(matching: .any)["suite.help.beta-notes.close"].click()
+        XCTAssert(notes.waitForNonExistence(timeout: 5), "Close left the Beta Notes window open")
     }
 
     /// Clicks the menu bar's Help menu and returns it.
