@@ -1,10 +1,15 @@
 # export-pack lead record
 
 Issue: #3477 · Packet: docs/blueprints/suiteui/features/export-pack.md
-Run: act-1a16c618fe7-h4fd (line lead, line:suiteui; unparked by the supervisor 2026-10-24) · earlier runs act-1a16469734c-d0s8, act-1a15821c836-93pf
+Run: act-1a16fe1fa73-5x3s (line lead, line:suiteui; relaunch) · earlier: act-1a16c618fe7-h4fd (line lead, line:suiteui; unparked by the supervisor 2026-10-24)
 Stage: 3 wave 4 PR open (XP-8 #5106 stacked on #5104); open #5043, #5044, #5065, #5074, #5104, #5106
 Base: origin/dev 830af22de
 Next: Lane: chain #4960 → #5043 → #5065 → #5104 → #5106; #5044 and #5074 in the lane. XP-10 (C4 part, wave.json built, feature-done) once XP-7, XP-8 and XP-9 merge. Critics once a scoped suiteui run shows the export-pack screens.
+
+## Run act-1a16fe1fa73-5x3s decisions
+- Brief rule 1: main checked out at e79e9afc; lead/export-pack and lead/brush-keys rebased onto origin/main and pushed (--force-with-lease).
+- PR base stays `dev`: CLAUDE.md, scripts/fast-lane.sh (BASE_BRANCH=dev) and every earlier run land through dev; a fast-lane PR on main is retargeted to dev anyway.
+- PR bodies: the session's GitHub relay re-appends a generated-by footer on every edit; the fast lane strips it from the squash commit (its comment on #5043), so nothing waits on it.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
