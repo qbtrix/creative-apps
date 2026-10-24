@@ -1,0 +1,5 @@
+[
+  {"label": "activeToolOnly: a brush key steps the Brush's settings whatever tool is active, so the eraser takes the brush's size", "file": "Sources/PhotoModel/PhotoBrushKeys+Kernel.swift", "find": "return toolOptions.settings", "replace": "return brushOptions.settings", "tests": "PhotoBrushKeysTests"},
+  {"label": "oneStepForAll: a digit with the Move tool sets each selected layer as its own undo step", "file": "Sources/PhotoModel/PhotoBrushKeys+Kernel.swift", "find": "endAdjust(); setOpacity(id, percent: percent); endAdjust()", "replace": "for other in selectedLayerIDs { endAdjust(); layerSelection.replace([other]); setOpacity(other, percent: percent) }; _ = id", "tests": "PhotoBrushKeysTests"},
+  {"label": "coalesced: two digits in a row merge into one undo step", "file": "Sources/PhotoModel/PhotoBrushKeys+Kernel.swift", "find": "endAdjust(); setOpacity(id, percent: percent); endAdjust()", "replace": "setOpacity(id, percent: percent)", "tests": "PhotoBrushKeysTests"}
+]

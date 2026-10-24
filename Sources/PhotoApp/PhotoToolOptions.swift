@@ -4,7 +4,10 @@
 // and the marquee's actions live here; the crop's, selection's, transform's
 // and eyedropper's own options each live in their file (CropOptions,
 // SelectOptions, TransformOptions, SampleOptions). Values in, intents out.
+// PhotoBrushKeys (brush-keys BK-8) turns the canvas's `[`, `]`, Shift and digits into option or opacity intents.
+import AppKit
 import PhotoModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -127,4 +130,40 @@ extension ToolOptions {
 extension ToolOptionEdit {
     /// The brush color edit for `hex`.
     static func brushColor(_ hex: HexColor) -> ToolOptionEdit { .color(red: hex.red, green: hex.green, blue: hex.blue) }
+}
+
+/// The opacity digits typed so far on the canvas; a box, so a digit changes no state a body reads.
+@MainActor final class PhotoBrushKeyBuffer { var digits = OpacityDigits() }
+
+/// The canvas's brush keys through ToolKeys.brushAction: with a painting tool, `[` and `]` step its size, Shift with
+/// them its hardness, and digits set its opacity; with no painting tool, digits set the selected layers' opacity as
+/// one undo step. A step acts on the active tool's options only.
+enum PhotoBrushKeys {
+    /// SwiftUI's modifiers as the contracts' KeyModifiers: Shift, Option and Command.
+    nonisolated static func modifiers(_ held: EventModifiers) -> KeyModifiers {
+        let pairs: [(EventModifiers, KeyModifiers)] = [(.shift, .shift), (.option, .option), (.command, .command)]
+        return pairs.reduce(into: KeyModifiers()) { mods, pair in if held.contains(pair.0) { mods.insert(pair.1) } }
+    }
+
+    /// Sends the intents `press` stands for and returns its action; nil for a key that isn't one, or a digit that
+    /// can't act (no image, or no selected layer).
+    @MainActor static func route(
+        _ press: KeyPress, model: PhotoWorkspace, buffer: PhotoBrushKeyBuffer, perform: PhotoPerform
+    ) -> BrushKeyAction? {
+        guard let action = ToolKeys.brushAction(
+            forKey: press.characters, modifiers: modifiers(press.modifiers), at: ProcessInfo.processInfo.systemUptime,
+            firstResponder: NSApplication.shared.keyWindow?.firstResponder, settings: model.activeBrush,
+            digits: &buffer.digits)
+        else { return nil }
+        if case .layerOpacity(let percent) = action {
+            guard model.layerOpacityHelp == nil, let id = model.selectedLayerID else { return nil }
+            perform(.endAdjust)
+            perform(.opacity(id, percent))
+            perform(.endAdjust)
+        } else {
+            guard let edit = PhotoWorkspace.toolOptionEdit(for: action) else { return nil }
+            perform(.toolOption(edit))
+        }
+        return action
+    }
 }

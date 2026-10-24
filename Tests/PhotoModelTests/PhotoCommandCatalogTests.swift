@@ -152,6 +152,7 @@ struct PhotoCommandCatalogTests {
         !$0.hasPrefix("tool.") && !$0.hasPrefix("transform.") && !noMenu.contains($0) && !fileFlowIDs.contains($0)
             && !placeIDs.contains($0) && !$0.hasPrefix("history.") && !$0.hasPrefix("text.")
             && !$0.hasPrefix("layer.mask-") // masks-clipping PK-2 adds their Layer menu items.
+            && !$0.hasPrefix("brush.") // brush-keys BK-8: Edit > Brush builds them from their specs (PhotoCommands+Edit.swift).
     }
     /// The place commands (place-image PP-5): File > Place… runs place.image through PhotoPlace+Menu, not a catalog row.
     static let placeIDs = Set(PlaceCommands.specs(PhotoWorkspace.self).map(\.id))

@@ -31,6 +31,7 @@ extension PhotoCommands {
         CommandGroup(after: .pasteboard) {
             PhotoSelectionEditMenu(menu: menu)
             PhotoTransformEditMenu(menu: menu)
+            PhotoBrushEditMenu(menu: menu)
         }
     }
 }
@@ -159,6 +160,31 @@ struct PhotoTransformEditMenu: View {
                 MenuCommand(spec, on: menu.workspace, title: "Flip Vertical", systemImage: "arrow.up.and.down") {
                     menu.perform(.transform(.kernel(.flip(.vertical))))
                 }
+            }
+        }
+    }
+}
+
+/// Edit > Brush (brush-keys BK-8): Larger, Smaller, Harder and Softer, the canvas's `]`, `[`, `}` and `{` as
+/// menu items. Each reads the kernel's spec on the focused workspace, so it is off with no painting tool and
+/// says why, and steps the active tool's options by the same rule as the key.
+struct PhotoBrushEditMenu: View {
+    let menu: PhotoMenu
+
+    var body: some View {
+        Divider()
+        Menu("Brush") {
+            step("brush.size-up", "Larger", "plus.circle")
+            step("brush.size-down", "Smaller", "minus.circle")
+            step("brush.hardness-up", "Harder", "circle.fill")
+            step("brush.hardness-down", "Softer", "circle.dashed")
+        }
+    }
+
+    private func step(_ id: String, _ title: String, _ symbol: String) -> MenuCommand {
+        menu.item(id, title: title, systemImage: symbol) {
+            if let action = menu.workspace.brushStep(id), let edit = PhotoWorkspace.toolOptionEdit(for: action) {
+                menu.perform(.toolOption(edit))
             }
         }
     }
