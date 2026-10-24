@@ -100,3 +100,4 @@ utc	stage	event	ref	note
 2026-10-24T12:05Z	3	check	12:04Z	no merges; lane runs scripts from main (fast-lane.yml checkout ref: main), main still 9f476af7 so #5150 not live: lane 40091581655 saw 94 PRs, lowest #5036, so #4891-#4911 invisible; dev CI 40087964618 (4f00afb8) still running; 0 findings for feature
 2026-10-24T12:28Z	3	check	12:26Z	main moved to 4f00afb8 (lane PR-list fix live); no merges for feature yet; 0 findings
 2026-10-24T12:50Z	3	check	12:49Z	no new merges; LS-2 PR #5174 opened by builder (LS-5 builder running CI); lane sweep 40094798603 in progress, none completed since main moved; 0 findings for feature
+2026-10-24T13:13Z	3	check	13:13Z	lane sweep 40094798603 (post-#5150) lists our PRs and rates them ready; 126 ready PRs wait while batch-20261024110214 bisects; no merges; 0 findings
