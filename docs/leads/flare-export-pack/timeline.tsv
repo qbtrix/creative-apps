@@ -114,3 +114,4 @@ utc	stage	event	ref	note
 2026-10-24T06:32:55Z	heartbeat	batch 20261024050226 (with #4852) red, lane bisecting; #4854 #5025 #5005 queued
 2026-10-24T06:34:43Z	fix	batch macOS gate 40064703313 red on #4852 (export panel hang in budget test); fix on lead/export-pack-fvu, gate running
 2026-10-24T06:48:36Z	fix	#4852 head 01a21adb (budget test launch fix), Head moved; FV-z merge gating
+2026-10-24T07:01:28Z	fix	#4854 head f2abc05f merged FV-u fix, Head moved
