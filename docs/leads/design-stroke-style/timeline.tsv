@@ -132,3 +132,4 @@ time	kind	note
 2026-10-24T01:58Z	-	heartbeat	-	no merges; 9 PRs clean; bisect probe batch-20261023215139-9 ends at #4864 (old head 97439dd8), Linux green, macOS running; 32 findings open, z slices held
 2026-10-24T02:20Z	-	heartbeat	-	no merges; 9 PRs clean; bisect probe -9 macOS gate still running; 32 findings open, z slices held
 2026-10-24T02:44Z	DK-u	fix	#4864	seed strokes nested node-3 (macOS gate red) 2bd18bb86
+2026-10-24T03:06Z	-	heartbeat	-	9 PRs open clean; #4864 Head 2bd18bb86 gate PASS, stacks #5002 6f071d1c #5011 b5011388 merged base, gating; 32 findings open, z held
