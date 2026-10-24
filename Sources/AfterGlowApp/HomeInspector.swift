@@ -71,12 +71,7 @@ struct HomeInspector: View {
     /// Locate…: the person picks where the file went; the card re-points to
     /// it. The inspector and the missing-file notice both call it.
     static func locate(_ ref: SuiteDocumentRef, model: HomeModel) {
-        let panel = NSOpenPanel()
-        panel.canChooseFiles = true
-        panel.canChooseDirectories = false
-        panel.allowsMultipleSelection = false
-        panel.prompt = "Locate"
-        guard panel.runModal() == .OK, let url = panel.url else { return }
+        guard let url = SuiteFilePanels.chooseFile(types: [], prompt: "Locate") else { return }
         Task { await model.locate(ref.fileID, newPath: url.path(percentEncoded: false), now: Date()) }
     }
 }

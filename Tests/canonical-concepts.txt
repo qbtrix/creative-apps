@@ -38,6 +38,7 @@ Eyedropper: Eyedropper Sampling
 Straighten: Straighten Leveling
 Histogram: Histogram
 Pasteboard: Pasteboard
+File panel: FilePanel FileDialog FilePanels
 Unsaved prompt: UnsavedPrompt ClosePrompt SaveStatus
 Launch flags: FlareLaunch HaloLaunch LibraryLaunch PhotoLaunch ProjectLaunch LaunchFlags LaunchArguments LaunchArgs
 File envelope: FileEnvelope FileFormat Filing

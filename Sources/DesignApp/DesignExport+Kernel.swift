@@ -6,7 +6,7 @@
 // Scale (`scale.<n>x`, off with `scaleHelp` for SVG and PDF) and Scope (`scope.<scope>`) chips, the
 // file list (`items`) and the plan's refusal (`result`). Export on the fakes (DE-7) runs fake steps
 // that write nothing. Export on the live services (DE-10) writes into `-DesignExportTo`, else the
-// folder an NSOpenPanel picks (its Cancel leaves the sheet editing): the plan is named against the
+// folder SuiteFilePanels' folder panel picks (its Cancel leaves the sheet editing): the plan is named against the
 // folder's listing, each item renders (SVG from `exportSVG`, PNG and PDF from DesignRasterizer) and
 // is written `.withoutOverwriting`, progress steps per file, and the sheet and the status line read
 // "Exported n file(s) to <folder>". A write that throws ends the run failed with the file's name and
@@ -82,13 +82,7 @@ struct DesignExportArea: ViewModifier {
         #if DEBUG
         if let testFolder { return testFolder }
         #endif
-        let panel = NSOpenPanel()
-        panel.canChooseFiles = false
-        panel.canChooseDirectories = true
-        panel.allowsMultipleSelection = false
-        panel.canCreateDirectories = true
-        panel.prompt = "Export"
-        return panel.runModal() == .OK ? panel.url : nil
+        return SuiteFilePanels.chooseFolder(prompt: "Export")
     }
 
     /// The live run (DE-10, DE-11): names against the folder's listing, then one render and one
