@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-24T04:53Z	3	heartbeat	-	poll: dev still 654fb36; bisect probe -8 (#4839) Linux green, macOS 40060705865 running; no needs-fix/needs-rebase; waits unchanged
 2026-10-24T05:16Z	3	heartbeat	-	poll: dev still 654fb36; old bisect ended, new batch 20261024050226 (12 PRs incl. ours #4846 #4861 #4867) Linux 40064700946 + macOS 40064703313 running since 05:02Z; no needs-fix/needs-rebase; waits unchanged
 2026-10-24T05:38Z	3	heartbeat	-	poll: dev still 654fb36; batch 20261024050226 (ours #4846 #4861 #4867) Linux green, macOS 40064703313 running; no needs-fix/needs-rebase; waits unchanged
+2026-10-24T06:00Z	3	heartbeat	-	poll: dev still 654fb36; batch 20261024050226 macOS red, lane bisecting: probe -6 (#4864, prefix holds ours #4846 #4861) Linux 40067471044 + macOS 40067473896 running; no needs-fix/needs-rebase; waits unchanged
