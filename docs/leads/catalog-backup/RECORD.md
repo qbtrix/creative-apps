@@ -101,3 +101,4 @@ Next: (2026-10-23T17:29:30Z) #4878 (BK-m) and #4923 (BK-z, stacked, feature-done
 - 2026-10-24T07:07:26Z: heartbeat: #4878,#4923 all open+clean, none merged; dev now 830af22d (none of ours); bisect of batch 20261024050226: probes -1 and -3 Linux green, macOS running; ours queue for the next batch
 - 2026-10-24T07:28:47Z: heartbeat: #4878,#4923 all open+clean, none merged; dev 830af22d (none of ours); bisect of batch 20261024050226: probe -3 red on macOS, -1 macOS running; ours queue for the next batch
 - 2026-10-24T07:45:26Z: heartbeat: #4878,#4923 all open, no needs-fix/needs-rebase, base PRs merge clean into dev f58e119 (#4132 merged; none of ours); ours queue for the next batch; 0 open findings
+- 2026-10-24T08:08:10Z: heartbeat: #4878,#4923 all open, no needs-fix/needs-rebase, base PRs merge clean into dev 1bbaba6 (lane landed #4818-#4837 and #5034; none of ours); ours queue for the next batch; 0 open findings
