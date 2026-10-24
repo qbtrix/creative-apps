@@ -7,7 +7,7 @@
 // commits the baselines). The bar's zoom and size text come from its
 // StatusPillComposing, PillStyle maps onto StatusPillStyle, each style has its
 // color and symbol (an error is stateError, not a warning), and a pill that
-// acts registers the reason its tooltip shows. macOS only.
+// acts registers the reason its tooltip shows and rings on hover and press. macOS only.
 import SwiftUI
 import Testing
 
@@ -84,6 +84,15 @@ import Testing
         #expect(entries.last?.reason == nil)
         #expect(onion.tooltip == "Onion skin")
         #expect(store.inventory.violations().isEmpty)
+    }
+
+    /// A pill that acts shows the pointer is on it and the press (design.md: hover never by fill alone): a 1 pt
+    /// outline under the pointer, accent while pressed, nothing at rest or while disabled.
+    @Test func anActingPillRingsOnHoverAndPress() {
+        #expect(StatusPillStyle.edge(hovering: false, pressed: false, enabled: true) == nil)
+        #expect(StatusPillStyle.edge(hovering: true, pressed: false, enabled: true) == SuiteColor.outline)
+        #expect(StatusPillStyle.edge(hovering: true, pressed: true, enabled: true) == SuiteColor.accent)
+        #expect(StatusPillStyle.edge(hovering: true, pressed: false, enabled: false) == nil)
     }
 }
 

@@ -6,7 +6,8 @@
 // `.statusPill(.toggle(isOn: true))` takes the selected tint and accent text,
 // one marked `.statusPill(.warning)` the warning tint and color with a
 // triangle, and one marked `.statusPill(.error)` (a failed save or render)
-// the error tint and color with an exclamation circle. Chrome, but flat: no glass and no band. The zoom text comes from
+// the error tint and color with an exclamation circle. A pill that acts (`.statusPill(_:id:help:reason:action:)`)
+// is a button ringed 1 pt in `outline` under the pointer and `accent` while pressed. Chrome, but flat: no glass and no band. The zoom text comes from
 // ViewerZoom, so every app formats it the same way. StatusPillFace is one pill on its own, for
 // a hint over a canvas; its tint sits on the opaque panel color, so it reads off the bar too.
 import SwiftUI
@@ -184,6 +185,39 @@ extension View {
 }
 
 extension StatusPillStyle {
+    /// An acting pill's 1 pt edge: `outline` under the pointer, `accent` while pressed, none at rest or disabled.
+    /// Hover never shows by fill alone (design.md, Surfaces).
+    static func edge(hovering: Bool, pressed: Bool, enabled: Bool) -> Color? {
+        guard enabled else { return nil }
+        return pressed ? SuiteColor.accent : hovering ? SuiteColor.outline : nil
+    }
+}
+
+/// The button an acting pill is: its face, ringed by `StatusPillStyle.edge`, in the 24 pt hit height.
+private struct StatusPillButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View { Face(configuration: configuration) }
+
+    private struct Face: View {
+        let configuration: Configuration
+        @State private var hovering = false
+        @Environment(\.isEnabled) private var isEnabled
+
+        var body: some View {
+            configuration.label
+                .overlay {
+                    if let edge = StatusPillStyle.edge(hovering: hovering, pressed: configuration.isPressed, enabled: isEnabled) {
+                        Capsule().strokeBorder(edge, lineWidth: 1)
+                    }
+                }
+                .opacity(isEnabled ? 1 : SuiteColor.disabledOpacity)
+                .frame(height: SuiteSize.pillHit)
+                .contentShape(.rect)
+                .onHover { hovering = $0 }
+        }
+    }
+}
+
+extension StatusPillStyle {
     /// The view style for a StatusPillComposing pill's style.
     public init(_ style: PillStyle) {
         switch style {
@@ -225,8 +259,9 @@ extension ViewerStatusBar {
     @ViewBuilder fileprivate func trailingPill(_ view: Subview) -> some View {
         let style = view.containerValues.statusPillStyle
         if let control = view.containerValues.statusPillControl {
-            Button { ChipProbe.press(probe, control.action) } label: { pill(style) { view } }
-                .buttonStyle(.plain)
+            Button { ChipProbe.press(probe, control.action) } label: { StatusPillFace(style) { view } }
+                .buttonStyle(StatusPillButtonStyle())
+                .accessibilityAddTraits(style == .toggle(isOn: true) ? .isSelected : [])
                 .disabled(control.reason != nil)
                 .help(control.tooltip)
                 .suiteControl(id: control.id, enabled: control.reason == nil, reason: control.reason)
