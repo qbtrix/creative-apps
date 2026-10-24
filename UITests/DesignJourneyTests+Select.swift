@@ -22,7 +22,8 @@
 // can't scroll to a rect yet). Every other step still asserts first.
 // DJ-AR (area-selection AR-13, on since AR-14): A and Title grouped into a card;
 // a click on Title picks the card (its box is the card's 140 pt height), a drag moves
-// it whole; a double-click on Title picks Title; Escape picks the card again.
+// it whole; a double-click on Title picks Title; Escape picks the card again; in again, a click on the
+// status bar's "In Group 1" pill picks the card again too (the way out with the mouse alone).
 import CoreGraphics
 import XCTest
 
@@ -123,6 +124,8 @@ final class DesignSelectJourneyTests: XCTestCase {
 
     /// The card's and Title's heights on the page: the selection box tells which one is picked.
     static let cardHeight = 140.0, titleHeight = 32.0
+    /// DesignControlID.statusGroup: the status bar's pill while a group is entered.
+    static let groupPill = "design.status.group"
 
     /// DJ-AR: a click on a grouped layer picks its group, a double-click enters it, Escape steps out.
     @MainActor func testClickGroupThenEnter() {
@@ -160,6 +163,16 @@ final class DesignSelectJourneyTests: XCTestCase {
         XCTAssert(Self.waitUntil { selection.exists && Self.pageHeight(selection, on: artboard) == Self.cardHeight },
                   "Escape picked a box \(Self.pageHeight(selection, on: artboard)) high, not the card")
         design.shot("select-group-exited")
+
+        // 6. In again, and out with the mouse alone: the status bar's "In Group 1" pill exits the group.
+        point((190, 56), on: artboard).doubleClick()
+        let groupPill = design.element(Self.groupPill)
+        XCTAssert(groupPill.waitForExistence(timeout: 5), "entering the card showed no group pill in the status bar")
+        groupPill.click()
+        XCTAssert(Self.waitUntil { selection.exists && Self.pageHeight(selection, on: artboard) == Self.cardHeight },
+                  "the group pill picked a box \(Self.pageHeight(selection, on: artboard)) high, not the card")
+        XCTAssert(Self.waitUntil { !groupPill.exists }, "the group pill stayed after exiting the group")
+        design.shot("select-group-pill-exited")
     }
 
     /// The selection box's height in page points, rounded.

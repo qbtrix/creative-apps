@@ -139,4 +139,15 @@ import Testing
         workspace.exitGroup()
         #expect(workspace.selectedNodeIDs == [card] && workspace.groupScope == .root)
     }
+
+    /// While a group is entered the status bar names it (its pill is the mouse's way out); at the root it says nothing.
+    @Test func theStatusNamesTheEnteredGroupUntilItIsLeft() throws {
+        var (workspace, _) = try Self.card()
+        #expect(workspace.groupScopeText == nil)
+        try Self.pick(Self.onTitle, on: &workspace)
+        workspace.enterGroup()
+        #expect(workspace.groupScopeText == "In Group 1")
+        workspace.exitGroup()
+        #expect(workspace.groupScopeText == nil)
+    }
 }

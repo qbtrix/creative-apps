@@ -6,7 +6,7 @@
 // the pages and layer tree in the sidebar (DesignLayersPanel), the canvas in
 // EditorDetail with the floating tool palette over its leading edge while a
 // file is open and the status line under it (zoom, "Page 1440 × 1024 pt", the last
-// message, "2 Layers" with a selection, the save state's slot
+// message, "In Group 1" while a group is entered (a click on it exits the group), "2 Layers" with a selection, the save state's slot
 // (DesignSaveStatus), the active tool), and Properties (DesignInspector) in the
 // inspector. Values in, intents out: it reads the workspace and sends every
 // action to `perform`, so the same view draws the live window and the
@@ -69,6 +69,10 @@ struct DesignEditor: View {
                     if let note {
                         Text(note)
                             .suiteControl(id: DesignControlID.statusNote, enabled: true, reason: nil)
+                    }
+                    if let group = model.groupScopeText {
+                        Text(group).statusPill(.toggle(isOn: true), id: DesignControlID.statusGroup,
+                                               help: DesignWorkspace.groupScopeHelp) { perform(.exitGroup) }
                     }
                     if let count = model.selectionCountText {
                         Text(count)

@@ -101,6 +101,8 @@ public enum DesignControlID {
     public static let statusSave = "design.status.save"
     public static let statusSelection = "design.status.selection"
     public static let statusNote = "design.status.note"
+    /// The status bar's pill while a group is entered; a click exits the group.
+    public static let statusGroup = "design.status.group"
     /// The Layers panel's container identifier, which journeys query; a region, not a control,
     /// so it is left out of `all`.
     public static let layers = "design.layers"
@@ -154,7 +156,7 @@ public enum DesignControlID {
     /// Every fixed id: the named ones, the toolbar's, and one per tool, frame field, edge and axis.
     public static let all: [String] = [
         canvas, canvasSelection, canvasHover, canvasBadge, canvasGuides, canvasMarquee,
-        statusTool, statusSave, statusSelection, statusNote, pageAdd, pageDelete,
+        statusTool, statusSave, statusSelection, statusNote, statusGroup, pageAdd, pageDelete,
         inspectorHeader, inspectorFill, inspectorFillType, inspectorCornerRadius, inspectorOpacity,
         inspectorStrokeColor, inspectorStrokeWidth, inspectorStrokeAdd, inspectorStrokeRemove,
         inspectorTextFamily, inspectorTextSize,
