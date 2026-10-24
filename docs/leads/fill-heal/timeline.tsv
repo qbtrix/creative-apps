@@ -1,0 +1,105 @@
+utc	stage	event	ref	note
+2026-10-21T02:36Z	0	stage-start	-	setup, base 2ab0eb963
+2026-10-21T02:36Z	3	stage-start	wave1	FH-2 / AJ-2s; IM-a and BK-m not merged
+2026-10-21T03:28Z	3	pr-opened	#3845	FH-2 real jobs disabled; IM-a, BK-m still open (re-read 03:3xZ)
+2026-10-21T04:01Z	3	blocked-poll-2	#3715,#3758	IM-a and BK-m not started; FH-2 #3845 in lane
+2026-10-21T04:20Z	3	supervisor-question	#3778	3 identical blocked polls on IM-a/BK-m
+2026-10-21T04:29Z	3	relaunch	act-1a15cb4e0f5-ipbr	new run carries the state; IM-a/BK-m still not on dev (da68f32); waiting per supervisor
+04:51Z	3	poll	dev 0eca6ab	no SuiteImaging; IM-a #3715 and BK-m #3758 open, no new comments; #3845/#3846 open in fast lane; next poll 05:11Z
+05:13Z	3	poll	dev 229c5ef	no SuiteImaging; IM-a #3715 and BK-m #3758 open, no new comments, no IM-a PR open; #3845/#3846 clean in fast lane; next poll 05:34Z
+05:35Z	3	poll	dev 71ffa4d	no SuiteImaging; IM-a #3715 and BK-m #3758 open, no new comments, no IM-a PR open; #3845/#3846 clean in fast lane; next poll 05:55Z
+05:56Z	3	poll	dev 71ffa4d	dev unchanged; IM-a #3715 and BK-m #3758 open, no new comments, no IM-a PR open; #3845/#3846 clean in fast lane; next poll 06:17Z
+16:40Z	3	relaunch	dev 7e9f260	run act-1a164697376-dv7u on #4513; FH-2 merged; FH-1 unblocked; builder launched for FH-a, FH-r, FH-c stacked
+14:40Z	3	relaunch	dev cb79cbb	run act-1a1693a401e-chyn on #3778; FH-a done (run 39957675362); FH-r/FH-c restacked on dev; FH-u/FH-photo blocked on AB/BK/AJ-photo
+15:22Z	3	restack	dev	#4574 FH-r on dev, head 2a2cb8b, CI: PASS; #4577 FH-c head ceb4ebb, CI: PASS, base FH-r until #4574 merges; next poll in 20 min
+15:45Z	3	poll	dev 721168a	#4574 clean in lane, awaiting batch; #4577 on FH-r; waits unchanged (AB building, BK blocked, AJ waiting) poll 2/3; next poll 16:05Z
+16:08Z	3	poll	dev 35a0b5e	#4574 still in lane; waits unchanged 3/3; supervisor question posted on #3778 (6369264328); next poll 16:28Z
+16:32Z	3	poll	dev 35a0b5e	supervisor answered: FH-u starts on brush-keys fakes (Wire: brush-keys:BK-photo); FH-3 building; #4574 in lane; next poll 16:52Z
+16:49Z	3	build	dev 35a0b5e	FH-3 PR #4889 opened (head ccf9d81, gate pass); #4890 filed (SuiteUI key cycling); FH-4 next
+16:59Z	3	build	dev 35a0b5e	FH-4 PR #4896 opened on lead/fill-heal-FH-3 (head 57c9396, gate pass); #4895 filed; #4574 still in lane
+17:22Z	3	poll	dev 35a0b5e	no merges; lane bisecting batch 20261023155119 (macOS probe queued); #4574 #4577 #4889 #4896 open; attribution footers stripped from #4889/#4896 bodies; waits unchanged; next poll 17:42Z
+17:55Z	3	poll	dev 8a54f64	#4574 (FH-r) merged as a05d7be; FH-c merged dev, gate pass, pushed 7d32ede, #4577 retargeted to dev + Head moved; no green suiteui/full run on a05d7be yet (full CI at 35a0b5e running); #4889 #4896 open; next poll 18:15Z
+18:15Z	3	poll	dev 9858966	no fill-heal merges since a05d7be; #4577 #4889 #4896 open, no needs-fix/needs-rebase; no green suiteui/full run on a05d7be yet (full CI at 9858966 pending, macOS runners saturated); AJ-a (#4834, #4846 needs-split) and brush-keys (#4939) still open; next poll 18:35Z
+18:36Z	3	poll	dev 2f94f450	no change: #4577/#4889/#4896 open fast-lane, no needs-fix; no suiteui/full green run on dev yet (full on 9858966 pending); AJ-a #4834 open, BK-u #4939 open
+18:58Z	3	poll	dev 0d4645bf	no change: #4577/#4889/#4896 open, no needs-fix; scoped suiteui run 40005632479 queued on 0d4645b (holds a05d7be) -> FH-r done when green; AJ-a/BK-u not on dev
+19:19Z	3	poll	dev 0d4645bf	no change: #4577/#4889/#4896 open, no needs-fix; suiteui run 40005632479 still queued; full 39999410389 queued; AJ-a/BK-u not on dev
+19:41Z	3	slice-done	dev bccdc0f2	FH-r done: scoped suiteui 40005632479 green on 0d4645b (holds a05d7be); Belt-Slice-Done posted; #4577/#4889/#4896 open, no needs-fix; AJ-a/BK-u not on dev
+20:03Z	3	poll	dev 61c481df	#4577 #4889 #4896 open in lane, no needs-fix/needs-rebase; AJ-a and BK-photo not on dev
+20:25Z	3	poll	dev 61c481df	no change: #4577 #4889 #4896 open in lane, no needs-fix/needs-rebase; dev unmoved; AJ-a and BK-photo not on dev
+20:46Z	3	poll	dev 61c481df	no change: #4577 #4889 #4896 open in lane, no needs-fix/needs-rebase; dev unmoved, lane sweeping (run 40021284339); BK-photo is #4965, open; AJ-a not on dev
+21:11Z	3	poll	dev 61c481df	no change: #4577 #4889 #4896 open, no needs-fix/needs-rebase; lane batch 20261023204921 (#4862) on macOS gate 40022179889; full CI 40024093736 queued on dev; AJ-a, BK-photo #4965 not on dev
+21:32Z	3	poll	dev 61c481df	no change: #4577 #4889 #4896 open, no needs-fix/needs-rebase; lane batch (#4862) still on macOS gate 40022179889; full CI 40024093736 running on dev; AJ-a, BK-photo #4965 not on dev
+21:54Z	3	poll	dev 491ec546	lane batch landed 12 PRs (#4841..#4862), none ours; #4577 #4889 #4896 open, no needs-fix/needs-rebase; AJ-a, BK-photo #4965 not on dev
+22:17Z	3	poll	dev 491ec546	#4577/#4889/#4896 open, clean, no needs-* labels, queued in lane; AJ-a #4834 needs-rebase, #4846 needs-split; BK-photo #4965 open; nothing to act on
+22:39Z	3	poll	dev 491ec546	#4577/#4889/#4896 open, no needs-* labels, lane active (run 40034629743 pending); AJ-a #4834 needs-rebase, #4846 needs-split; BK-photo #4965 open; nothing to act on
+23:00Z	3	poll	dev 654fb363	#4577/#4889/#4896 open, no needs-* labels, queued in lane; AJ-a #4834 closed unmerged, #4846 needs-split, AJ-a not on dev; BK-photo #4965 now fast-lane; nothing to act on
+23:22Z	3	poll	dev 654fb363	#4577/#4889/#4896 open, no needs-* labels, queued; AJ-a #4846 back to fast-lane (needs-split gone), #4834 closed, no replacement found; BK-photo #4965 fast-lane; nothing to act on
+23:45Z	3	poll	dev 654fb363	nothing to act on: #4577 #4889 fast-lane, #4896 stacked, none merged; AJ-a #4846 open fast-lane; BK-photo #4965 open, no labels now; full CI 40037716897 running on dev 654fb363
+00:08Z	3	poll	dev 654fb363	nothing to act on: #4577 #4889 fast-lane, #4896 stacked, none merged, no needs-* labels; AJ-a #4846 open fast-lane; BK-photo #4965 open, no labels
+00:32Z	3	poll	dev 654fb363	nothing to act on: #4577 #4889 fast-lane, #4896 stacked, none merged, no needs-* labels; lane run 40044859262 in progress; AJ-a #4846 open fast-lane; BK-photo #4965 open, no labels
+00:54Z	3	poll	dev 654fb363	nothing to act on: #4577 #4889 fast-lane, #4896 stacked, none merged, no needs-* labels; AJ-a #4846 open fast-lane; BK-photo #4965 open, no labels (updated 00:35Z)
+01:16Z	3	poll	dev 654fb363	nothing to act on: #4577 #4889 fast-lane, #4896 stacked, none merged, no needs-* labels; full CI 40037716897 green on dev 654fb363; lane bisecting batch-20261023215139 (probe -6 macOS gate 40044879600 running); AJ-a #4846 open fast-lane; BK-photo #4965 open, no labels
+01:38Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; lane bisect probe -6 green, probe -9 (40050012604) running; AJ-a #4846 and BK-photo #4965 open in lane
+01:59Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; probe -9 Linux green, macOS gate 40050012604 running; AJ-a #4846 in lane; BK-photo #4965 open but lost fast-lane label (brush-keys lead owns it)
+02:21Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; probe -9 macOS gate 40050012604 still running; AJ-a #4846 in lane; BK-photo #4965 open, no labels
+02:42Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; bisect: probe -6 green, probe -9 macOS red (40050012604), culprit in 7-9; AJ-a #4846 in lane; BK-photo #4965 open, no labels
+03:04Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; bisect: probe -7 (#4837) Linux green, macOS 40055393733 running; #4864 pushed a macOS-gate fix (Linux 40056011488); AJ-a #4846 in lane; BK-photo #4965 open, no labels
+03:25Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; bisect: probe -7 (#4837) macOS 40055393733 still running; #4864 fix Linux green (40056011488); AJ-a #4846 in lane; BK-photo #4965 open, no labels
+03:48Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; bisect: probe -7 (#4837) macOS green (40055393733), culprit in 8-9; AJ-a #4846 in lane; BK-photo #4965 open, no labels
+04:10Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; bisect: probe -8 (#4839) Linux 40060703756 + macOS 40060705865 running; AJ-a #4846 in lane; BK-photo #4965 back on fast-lane
+04:31Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; bisect: probe -8 (#4839) Linux green, macOS 40060705865 running; AJ-a #4846 in lane; BK-photo #4965 open, no labels again
+04:53Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; bisect probe -8 (#4839) macOS 40060705865 still running (since 04:01Z); AJ-a #4846 in lane; BK-photo #4965 open, no labels
+05:15Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; old bisect over; new batch-20261024050226 (12 PRs #4839..#4875, incl AJ-a #4846; none of ours), Linux 40064700946 + macOS 40064703313 running; BK-photo #4965 open, no labels
+05:37Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; batch-20261024050226 (incl AJ-a #4846) Linux green, macOS 40064703313 running; BK-photo #4965 open, no labels
+05:58Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; batch-20261024050226 macOS red, lane bisecting: probe -6 (#4864) Linux 40067471044 + macOS 40067473896 running; AJ-a #4846 in that batch; BK-photo #4965 regained fast-lane
+06:20Z	3	poll	dev 654fb363	nothing to act on; #4577/#4889/#4896 open, no needs-*; bisect probe -6 (#4864) macOS 40067473896 still running; AJ-a #4846 in that batch; BK-photo #4965 open
+06:42Z	3	poll	dev e5dcf939	nothing to act on; #4577/#4889/#4896 open, no needs-*; dev took #4840,#5048 (not ours); AJ-a #4846 not on dev yet; BK-photo #4965 open
+2026-10-24T06:55Z	3	stage-start	wave 4	relaunch act-1a16cae79dd-mtf2; #4577/#4889/#4896 open in lane, no needs-*; FH-7 starts stacked
+07:24Z	4	poll	dev 830af22d	FH-7 builder running on lead/fill-heal-FH-7; #4577/#4889 in lane, no needs-*; #4896 stacked; status mirrored to lead/suiteui-fill-heal
+07:55Z	4	stage	FH-7 built (Mutate 3/3); split RJ-P04 to -FH-7-jobs for the file cap; findings #5093-#5095; gates running
+2026-10-24T08:27:04Z	FH-photo	gate	FH-7-jobs d7b07b7 CI: PASS; FH-7 9d18965 rerun (load timeouts)
+2026-10-24T08:33:25Z	FH-photo	pr	FH-7 #5107 (9d18965), FH-7-jobs #5108 (d7b07b7) opened
+2026-10-24T08:35:32Z	FH-photo	pr	FH-8 #5109 (6e6e7bb) opened; mutate 3/3 + 3/3
+2026-10-24T08:36:40Z	findings	fix	round 1 started: #5095, #5093 (then #5094)
+2026-10-24T09:09:17Z	findings	pr	#5121 fixes #5095; #5093 fix re-stacking on FH-7 (golden)
+2026-10-24T09:19:34Z	findings	pr	#5129 fixes #5093 (stacked on FH-7); #5094 fixer started
+2026-10-24T09:41:36Z	findings	pr	#5137 fixes #5094 (stacked on FH-c); round 1 PRs all open
+2026-10-24T10:03:46Z	queue	check	lane batch 20261024081307 still bisecting; fill-heal PRs queued behind it, none flagged
+2026-10-24T10:24:56Z	queue	check	lane batch 20261024081307 stalled since 08:32 with dev red (#5113); fill-heal PRs queued, none flagged
+2026-10-24T10:47:10Z	queue	check	lane merging again (#4616); fill-heal PRs queued, none flagged
+2026-10-24T11:10:20Z	queue	check	lane #5150 now sees all open PRs; batch 20261024110214 in flight without fill-heal; proofs valid
+2026-10-24T11:31:50Z	queue	check	batch 20261024110214 macOS gate running; fill-heal next
+2026-10-24T11:52:56Z	queue	check	batch 20261024110214 macOS gate still running; fill-heal next
+2026-10-24T12:15:08Z	queue	check	batch 20261024110214 macOS red, bisecting; fill-heal still queued
+2026-10-24T12:37:19Z	queue	check	batch 20261024110214 bisecting; fill-heal still queued
+2026-10-24T12:59:01Z	queue	check	no change; batch 20261024110214 bisecting
+2026-10-24T13:21:09Z	queue	check	batch 110214 bisecting at -6; ours unflagged, waiting next batch
+2026-10-24T13:43:10Z	queue	check	batch 110214 bisecting at -3; ours unflagged, waiting next batch
+2026-10-24T14:05:24Z	queue	check	probe -3 macOS gate running; ours unflagged, waiting next batch
+2026-10-24T14:27:36Z	queue	check	batch 110214 resolved; ours clean vs dev, awaiting next batch
+2026-10-24T14:48:35Z	queue	check	no batch yet, mac slots busy; ours clean
+2026-10-24T15:10:52Z	queue	check	#4577 in batch 144917, mac gate running; #4889,#5121 next
+2026-10-24T15:32:23Z	queue	check	batch 144917 mac gate still running
+2026-10-24T15:55:18Z	merge	#4577	FH-c merged 223e539b3; #5137 dev-merge, #5107 held off dev
+2026-10-24T16:13:14Z	fix	#5137	dev merged, ci PASS, pushed 8c35f3f5
+2026-10-24T16:22:57Z	check-in	#5107 no-fast-lane hold; #5129 FH-7 merge, gate	batch 20261024160327 has none of ours
+2026-10-24T16:35:05Z	fix-round-1	#5129 FH-7 merged in, ci PASS, pushed b734de2d3, Head moved	session proxy re-appends a Claude Code footer to PR bodies on every edit; lane strips it from squash
+2026-10-24T16:44:39Z	check-in	no merges; #5137 needs-rebase dropped; batch 20261024160327 still in flight	scoped suiteui 40109073275 in progress
+2026-10-24T17:05:56Z	check-in	batch 20261024160327 landed (not ours); scoped suiteui 40109073275 green with 223e539b3	FH-c slice-done waits on #5137 merge
+2026-10-24T17:28:03Z	check-in	batch 20261024172211 in flight (#4817-#4882, not ours); #4889 next by age	no flags on our PRs
+2026-10-24T17:50:15Z	check-in	batch 20261024172211 still in flight; #4889/#5121/#5137 ready with matching Head lines	waiting on lane
+2026-10-24T18:11:38Z	check-in	batch 20261024172211: Linux green, macOS gate 40115812591 in progress	waiting on lane
+2026-10-24T18:33:58Z	FH-u	#4889 merged origin/dev (PhotoTool enum, tool options, photo golden), gate running	lane needs-rebase
+2026-10-24T18:44:52Z	FH-u	#4889 dev merge pushed 6ad2a4440, CI: PASS, Head moved	awaiting lane
+2026-10-24T18:56:38Z	FH-u	#4896 merged FH-3 head (PhotoStroke remove/pen cases), gate running; #4889 needs-rebase dropped, batch 20261024183708 in flight without ours	check-in
+2026-10-24T19:07:32Z	FH-u	#4896 pushed 9f36d7cf8, CI: PASS, Head moved	waits #4889 merge for retarget
+2026-10-24T19:17:58Z	lane	batch 20261024183708 bisecting (probe -6); ours not in it; no change	check-in
+2026-10-24T19:40:04Z	lane	batch 20261024183708 still bisecting; ours queued; no change	check-in
+2026-10-24T20:02:10Z	lane	batch 20261024183708 probe -6 macOS gate running since 19:08; ours queued; no change	check-in
+2026-10-24T20:24:04Z	lane	batch 20261024183708 probe -6 still on macOS gate; ours queued; no change	check-in
+2026-10-24T20:46:23Z	lane	batch 20261024183708 resolved; no batch in flight; #4889 #5121 #5137 ready for next	check-in
+2026-10-24T21:09:45Z	lane	poll	batch 20261024205137 in flight (no fill-heal PRs); #4889 #5121 #5137 ready for next batch
+2026-10-24T21:30:37Z	lane	poll	batch 20261024205137 bisecting (no fill-heal PRs); #4889 #5121 #5137 still queued
+2026-10-24T21:51:36Z	lane	poll	batch 20261024205137 still bisecting; fill-heal PRs queued
+2026-10-24T22:13:00Z	lane	poll	batch 20261024205137 probes -3/-6 still running; fill-heal PRs queued
+2026-10-24T22:35:26Z	lane	poll	batch 20261024205137 still bisecting (lane alive, dev CI 40137153379 running); fill-heal PRs queued
