@@ -4,7 +4,7 @@ Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
 Run: act-1a16c619006-nour (took over 2026-10-24 from act-1a1695ebf10-z0v8; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T02:26Z
 Stage: 3 build (fix round 1 in lane)
 Base: 721168a (origin/dev)
-Next: FV-u merged (9c276b81). Retarget #4854 (FV-z) to dev after the gate passes on the dev-merged head; once FV-z merges and a green run contains both, post Belt-Slice-Done FV-u and FV-z + Mac-Finish-Wanted on #3481, then the FJ-X1 critic panel and the contact sheet. 10 findings open: no new feature work.
+Next: FV-u merged (9c276b81). #4854 (FV-z) retargeted to dev at 565669e7 with a fresh Fast-Check; waits for a batch. Once FV-z merges and a green run contains both, post Belt-Slice-Done FV-u and FV-z + Mac-Finish-Wanted on #3481, then the FJ-X1 critic panel and the contact sheet. 10 findings open: no new feature work.
 
 Loop: v3 (the packet has a `## Slices` table).
 

@@ -144,3 +144,4 @@ utc	stage	event	ref	note
 2026-10-24T16:22:38Z	status	#4852 (FV-u) at 01a21adb is in batch 20261024160327 (Linux 40109791579, macOS 40109793853); #4854 stacks on it
 2026-10-24T16:43:02Z	heartbeat	batch 20261024160327 Linux green, macOS running (#4852)
 2026-10-24T17:13:38Z	merge	#4852 (FV-u) merged 17:02:19Z as 9c276b81; FV-z branch merged dev (kept FV-z live journey), gate running, then retarget #4854 to dev
+2026-10-24T17:14:11Z	push	#4854 (FV-z) dev merged in, gate PASS, head 565669e7, retargeted to dev, Head line moved
