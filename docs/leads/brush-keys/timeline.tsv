@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-24T06:29:44Z	3	mirror	-	Belt reads lead/suiteui-brush-keys; both kept in sync from now
 2026-10-24T06:30:35Z	3	fix-round	#4965,#4961,#4982	fixer merging BK-u + dev into the three BK app slices ahead of BK-u's merge; lane queue unchanged, dev at 4446461e, no dev-red
 2026-10-24T06:46:52Z	3	heartbeat	-	BK-photo #4965 now clean (92bbfcae, dev+BK-u merged in); BK-design/flare fixer running; BK-u #4939 queued; lane still bisecting batch 20261024050226; no dev-red
+2026-10-24T06:53:12Z	3	fix-round	#4965,#4961,#4982	BK-u + dev merged into all three; #4961 resolved DesignCommandCatalog.swift and design.list-commands.json golden; all CI: PASS, clean, Head moved
