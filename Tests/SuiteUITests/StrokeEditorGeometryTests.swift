@@ -1,7 +1,8 @@
 // StrokeEditorGeometryTests.swift (stroke-style DK-a, #3867): StrokeEditor in an inspector-width Stroke section, read
 // from a hosted window's accessibility tree. The Join, Cap and Dash chip groups share the Width row's leading and
-// trailing edges, and Remove Stroke starts on its leading edge: no extra inset inside the section. It sets both AX
-// attributes and waits (spinUntil) for every row it reads, so it passes run alone. macOS only.
+// trailing edges, each group's chips sit on one line (Custom is never left alone under Solid), and Remove Stroke
+// starts on its leading edge: no extra inset inside the section. It sets both AX attributes and waits (spinUntil) for
+// every row it reads, so it passes run alone. macOS only.
 import AppKit
 import SuiteKernel
 @testable import SuiteUI
@@ -24,6 +25,12 @@ import Testing
             }
             #expect(abs(chips.minX - width.minX) <= 0.5, "\(id) starts at \(chips.minX), Width at \(width.minX)")
             #expect(abs(chips.maxX - width.maxX) <= 0.5, "\(id) ends at \(chips.maxX), Width at \(width.maxX)")
+        }
+        for group in ["join", "cap", "dash"] {
+            let chips = frames.filter { $0.key.hasPrefix("suite.stroke.\(group).") }
+            #expect(chips.count >= 3, "\(group) has \(chips.count) chips")
+            let lines = Set(chips.values.map { $0.midY.rounded() })
+            #expect(lines.count == 1, "\(group) chips wrap onto \(lines.count) lines: \(chips.mapValues(\.midY))")
         }
         if let remove = frames["suite.stroke.remove"] {
             #expect(abs(remove.minX - width.minX) <= 0.5, "Remove Stroke starts at \(remove.minX), Width at \(width.minX)")
