@@ -75,3 +75,8 @@ utc	stage	event	ref	note
 2026-10-23T20:48:41Z	heartbeat	all 10 slice PRs open, clean, fast-lane; lane bisecting batch 20261023192105 (no needs-fix on ours)
 2026-10-23T21:12:41Z	heartbeat	queued behind lane batch 20261023204921 (#4841-#4862, Linux green, macOS running); ours not in it; no needs-fix, no dev-red
 2026-10-23T21:35:13Z	heartbeat	still queued: batch 20261023204921 macOS gate running; no needs-fix, no dev-red
+2026-10-24T05:33:01Z	resume	run act-1a16c619037-500v resumed at main 654fb36; no dev-red, no open findings; DS-design #4887 needs-rebase -> fixer; DS-photo/halo/flare clean in lane
+2026-10-24T05:55:53Z	3	fix-round	#4887	dev merged into DS-design, head 2d92107d, Fast-Check pass, Head moved
+2026-10-24T05:56:35Z	3	heartbeat	-	lane bisecting batch 20261024050226 (none of ours); our clean PRs queued; no dev-red, 0 findings
+2026-10-24T06:13:29Z	3	heartbeat	-	lane still bisecting batch 20261024050226; needs-rebase dropped on #4887; 5 PRs clean in queue; no dev-red
+2026-10-24T06:29:44Z	3	mirror	-	Belt reads lead/suiteui-document-setup; record mirrored from lead/document-setup, both kept in sync from now

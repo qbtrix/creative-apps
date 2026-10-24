@@ -1,19 +1,19 @@
 # document-setup lead record
 
 Issue: #3757 (relaunch) · Packet: docs/blueprints/suiteui/features/document-setup.md
-Run: act-1a16958d72f-a4mg · Session: cloud line lead (line:suiteui; with text-style, brush-keys, document-setup) · Started: 2026-10-23T15:25Z
-Stage: 3 wave 2 (combined waves across the three features)
-Base: 721168a8f0ae8897cce7279184c52015ecef0f4f (dev)
-Next: wave 1 PRs open (DS-photo #4901, DS-design #4887, DS-halo #4918, DS-flare #4891); then DS-z after all four merge
+Run: act-1a16c619037-500v (resumed from act-1a16958d72f-a4mg) · Session: cloud line lead (line:suiteui; brush-keys + document-setup) · Resumed: 2026-10-24
+Stage: 3 wave 3 (resume triage: fixers on needs-rebase PRs)
+Base: 654fb36328cdb049dfd1bcda411a126d316c639c (main at resume)
+Next: wait for the lane to merge DS-photo #4901, DS-design #4887, DS-halo #4918, DS-flare #4891; then DS-z folded into the last adopt slice
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DS-a | contract stubs + disabled DocumentSetupTests + C4 part | DS-1, DS-2 | – | frame-rates:FR-a (merged) | false | 0 | done #4182 | 39724795297 | – |
 | DS-m | DocumentSetup + commands bodies, mutation plans | DS-3, DS-4 | – | DS-a | false | 0 | done #4184 | – | – |
-| DS-u | shared NewDocumentSheet in the gallery; journey + render budget | DS-5, DS-6 | SuiteJourneyTests+DocumentSetup | DS-a, frame-rates:FR-u, area-selection:AR-u | true | 0 | pr #4309 (DS-5 merged #4299) | – | – |
+| DS-u | shared NewDocumentSheet in the gallery; journey + render budget | DS-5, DS-6 | SuiteJourneyTests+DocumentSetup | DS-a, frame-rates:FR-u, area-selection:AR-u | true | 0 | done #4309 c0f2c506 | 39746353013 | wanted |
 | DS-photo | Photo new image on the setup | DS-7, DS-8 | PhotoJourneyTests+Documents | DS-u, DS-m, CB-s, AC-zoom, CB-photo | true | 0 | pr #4901 | – | – |
-| DS-design | Design new document on the setup | DS-9, DS-10 | DesignJourneyTests+Page | DS-u, DS-m, CB-design | true | 0 | pr #4887 | – | – |
+| DS-design | Design new document on the setup | DS-9, DS-10 | DesignJourneyTests+Page | DS-u, DS-m, CB-design | true | 0 | pr #4887 (dev merged in, head 2d92107d, clean) | – | – |
 | DS-halo | Halo composition settings on the setup | DS-11, DS-12 | HaloJourneyTests+Settings | DS-a (DS-11); DS-u, DS-m, FR-halo, UP-halo, CB-halo (DS-12) | true | 0 | pr #4918 | – | – |
 | DS-flare | Flare document setup on the setup | DS-13, DS-14 | FlareJourneyTests+NewSheet | DS-u, DS-m, FR-flare, CB-flare | true | 0 | pr #4891 | – | – |
 | DS-z | delete old sheets; status built; feature-done | DS-15, DS-16 | – | DS-halo, DS-flare, DS-photo, DS-design | true | 0 | blocked | – | – |
@@ -26,7 +26,7 @@ Next: wave 1 PRs open (DS-photo #4901, DS-design #4887, DS-halo #4918, DS-flare 
 | DS-3 | DS-m | 2 | DocumentSetup bodies | Sources/SuiteKernel/Document/DocumentSetup.swift, Tests/SuiteKernelTests/DocumentSetupTests.swift, Tests/mutations/SuiteKernel.DocumentSetup.json | DocumentSetupTests value half | #4184 | merged |
 | DS-4 | DS-m | 2 | commands run with anchor, one undo step | Sources/SuiteKernel/Document/DocumentSetupCommands.swift, Tests/mutations/SuiteKernel.DocumentSetupCommands.json | DocumentSetupTests command half | #4184 | merged |
 | DS-5 | DS-u | – | NewDocumentSheet in the gallery | Sources/SuiteUI/NewDocumentSheet.swift, Sources/SuiteUI/Gallery/GalleryNewDocument.swift, Sources/SuiteUI/SuiteGallery.swift, Tests/SuiteUITests/NewDocumentSheetTests.swift | NewDocumentSheetTests | #4299 | merged |
-| DS-6 | DS-u | – | journey + render budget | UITests/SuiteJourneyTests+DocumentSetup.swift, Tests/AppSnapshotTests/RenderBudgetNewDocumentTests.swift | journey; RenderBudgetNewDocumentTests | #4309 | pr |
+| DS-6 | DS-u | – | journey + render budget | UITests/SuiteJourneyTests+DocumentSetup.swift, Tests/AppSnapshotTests/RenderBudgetNewDocumentTests.swift | journey; RenderBudgetNewDocumentTests | #4309 | merged |
 | DS-7..DS-16 | adopt slices, DS-z | – | see packet | see packet | see packet | – | blocked |
 
 ## Wire
