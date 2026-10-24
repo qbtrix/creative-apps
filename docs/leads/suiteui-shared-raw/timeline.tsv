@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-24T03:26Z	3	heartbeat	-	no merges since 654fb36 (lane bisect of batch 20261023215139 at probe -7, #4837, macOS gate in flight); none of ours needs-fix/needs-rebase; waits unchanged
 2026-10-24T03:48Z	3	heartbeat	-	no merges since 654fb36 (lane bisect of batch 20261023215139: probe -7 #4837 macOS green, next probe pending); none of ours needs-fix/needs-rebase; waits unchanged
 2026-10-24T04:09Z	3	heartbeat	-	no merges since 654fb36 (lane bisect of batch 20261023215139 at probe -8, #4839, runs in flight); none of ours needs-fix/needs-rebase; waits unchanged
+2026-10-24T04:32Z	3	heartbeat	-	poll: dev still 654fb36; lane bisect probe -8 (#4839) macOS 40060705865 running; no needs-fix/needs-rebase; waits unchanged
