@@ -145,3 +145,4 @@ utc	stage	event	ref	note
 2026-10-24T16:43:02Z	heartbeat	batch 20261024160327 Linux green, macOS running (#4852)
 2026-10-24T17:13:38Z	merge	#4852 (FV-u) merged 17:02:19Z as 9c276b81; FV-z branch merged dev (kept FV-z live journey), gate running, then retarget #4854 to dev
 2026-10-24T17:14:11Z	push	#4854 (FV-z) dev merged in, gate PASS, head 565669e7, retargeted to dev, Head line moved
+2026-10-24T17:37:54Z	stage	#5025 needs-rebase: merged dev, gate running. #5005 closed as superseded by #5025 (same readout). FV-z gap found: StageRasterizer has no frame(), so live MP4/GIF throws; #5025 will draw real frames and drop the live refusal (#5017)
