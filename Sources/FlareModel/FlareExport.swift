@@ -62,6 +62,14 @@ extension FlareWorkspace {
         return o.fps ?? scenes.first { $0.id == o.sceneID }?.fps
     }
 
+    /// What an MP4 or GIF run will write ("550 × 400 px, 48 frames"), shown before Export; nil for the other formats
+    /// and while Export is refused.
+    public var exportOutputLine: String? {
+        guard exportProblem == nil, exportingOptions?.format.writesVideo == true,
+              let plan = try? exportVideoPlan() else { return nil }
+        return "\(plan.width) × \(plan.height) px, \(plan.frames.count) frames"
+    }
+
     /// The finished run's line ("Exported scene-1.svg." or "Exported 7 files."); nil otherwise.
     public var exportSummary: String? {
         guard case .finished(_, let names) = exportState else { return nil }
