@@ -1,17 +1,17 @@
 # tone-controls lead record
 
 Issue: #3468 · Packet: docs/blueprints/photo/features/tone-controls.md
-Run: act-1a16958d691-2ax3 · Session: claude/feature-lead-photo-cl2258 · Started: 2026-10-23T15:00Z (takes over from the released run act-1a15eecbafe-u0f9)
-Stage: build W1 (PT-1 in the lane, #4845)
-Base: 721168a8f
-Next: PT-1 #4845 in the fast lane (head 39f902f, CI: PASS, mutations 4/4); PT-2 once SuiteUI TC-2 (ToneRows) is on dev; re-check TC-2, TC-5, TC-6 and LS-a (#3937) each wave
+Run: act-1a16cd04539-4jc0 · Session: claude/feature-lead-playbook-9tb3qe · Started: 2026-10-24T07:30Z (takes over from act-1a16958d691-2ax3)
+Stage: build W4 (PT-3, PT-4 building on the TC-5/TC-6 stubs; PT-2 #5007, PT-6 #5008 in the lane)
+Base: 830af22de
+Next: PT-3 and PT-4 PRs from build-wave (branches lead/photo-tone-PT-3, lead/photo-tone-PT-4); PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #4880 / TC-6 #4953 merge
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | PT-a | AdjustmentSettings.tone and the ToneTarget adapter as stubs; Adjust panel shows ToneRows | PT-1, PT-2 | MJ-PT | suiteui tone-controls TC-a (TC-1 #4555 merged; TC-2 building) | yes | 0 | building | – | – |
 | PT-u | snapshots, render budget, journey written | PT-5, PT-6 | PJ-T1 | PT-a; TC-3 (PT-5) | yes | 0 | waiting | – | – |
-| PT-m | live route and export path; adapter bodies; catalog; RJ-P12–14 | PT-3, PT-4 | MJ-PT | PT-a; IM-photo, TC-5, TC-6; catalog chain | no | 0 | waiting | – | – |
+| PT-m | live route and export path; adapter bodies; catalog; RJ-P12–14 | PT-3, PT-4 | MJ-PT | PT-a; IM-photo (on dev), TC-5, TC-6 (stubs, rule 12); catalog chain (all built) | no | 0 | building | – | – |
 | PT-z | journey on live, feature-done | PT-7, PT-8 | PJ-T1 | PT-u, PT-m; PG-z (PT-8) | yes | 0 | waiting | – | – |
 
 ## Tasks
@@ -19,8 +19,8 @@ Next: PT-1 #4845 in the fast lane (head 39f902f, CI: PASS, mutations 4/4); PT-2 
 |---|---|---|---|---|---|---|---|
 | PT-1 | PT-a | 2 | tone in AdjustmentSettings; adapter stubs; PhotoToneTests disabled | Sources/PhotoModel/AdjustmentSettings.swift, PhotoTone+Kernel.swift, Tests/PhotoModelTests/PhotoToneTests.swift | PhotoToneTests | #4845 | merged |
 | PT-2 | PT-a | 3 | Adjust panel ToneRows | Sources/PhotoApp/AdjustmentsInspector.swift | PhotoToneSnapshots.panel | #5007 | in lane |
-| PT-3 | PT-m | 4 | live route and export | PhotoAdjust+Imaging.swift, PhotoRender.swift | PhotoToneTests | – | waiting |
-| PT-4 | PT-m | 4 | adapter bodies, catalog, jobs | PhotoTone+Kernel.swift, PhotoCommandCatalog.swift, RealJobs | PhotoToneCommandTests | – | waiting |
+| PT-3 | PT-m | 4 | live route and export | PhotoAdjust+Imaging.swift, PhotoRender.swift | PhotoToneTests | – | building |
+| PT-4 | PT-m | 4 | adapter bodies, catalog, jobs | PhotoTone+Kernel.swift, PhotoCommandCatalog.swift, RealJobs | PhotoToneCommandTests | – | building |
 | PT-5 | PT-u | 4 | snapshots, budget | Tests/AppSnapshotTests/PhotoToneSnapshots.swift, RenderBudgetPhotoToneTests.swift | snapshots | – | waiting |
 | PT-6 | PT-u | 4 | journey skipped | UITests/PhotoJourneyTests+Tone.swift | compiles | #5008 | in lane (stacked on #5007) |
 | PT-7 | PT-z | 5 | journey on live | UITests/PhotoJourneyTests+Tone.swift | journey | – | waiting |
@@ -55,7 +55,12 @@ Next: PT-1 #4845 in the fast lane (head 39f902f, CI: PASS, mutations 4/4); PT-2 
 - PT-2 runs a ToneIntent through a new `PhotoIntent.tone` case and `PhotoWindow+Tone.swift` (the per-area pattern), so the PR touches 6 files, not the packet's 1. It is still well inside the caps.
 - No dead controls: until PT-4, `toneHelp` is non-nil with an image open, so the rows and tone.* commands stay off and say why.
 
+- Run act-1a16cd04539-4jc0 (2026-10-24) takes over; same base-dev and status-branch choices. Brief step one checked main at 654fb3632.
+- PT-3 and PT-4 start now (rule 12): TC-1, the tone contract, has merged; IM-photo (LiveToneSurface, the PhotoAdjust+Imaging adapter) is on dev; gradient-fill, transform, history-panel, eyedropper and place-image are all `built`. Tests that need the TC-5 / TC-6 bodies are written and disabled by name, with `Wire:` lines in the PR body.
+- PT-3 and PT-4 branch from dev, not stacked on #5008: they are Model-only, share no files with PT-2/PT-6, and stacking would push their diffs over 400 lines while #5007/#5008 wait in the lane.
+- PT-5 waits on TC-3 (#5006): snapshots and a render budget of the TC-2 placeholder rows would only be redone when TC-3 lands.
+
 ## Open
 - [x] Wire: tone-controls:TC-2 (#4862 merged, dev 491ec5461): PT-2 #5007 builds on ToneRows(settings:help:hidden:onIntent:).
-- [ ] Wire: tone-controls:TC-5 (#4880 open) for PT-3; TC-6 (#4953 open) for PT-4; TC-3 (#5006 open) for PT-5.
+- [ ] Wire: tone-controls:TC-5 (#4880 open) turns on PT-3's disabled cases; TC-6 (#4953 open) PT-4's; TC-3 (#5006 open) starts PT-5.
 - [x] Supervisor (FYI, not a stall): Fast Lane has merged nothing since dev 654fb3632 (~22:55Z) because it is bisecting batch lane/batch-20261023215139: probe -9 macOS gate failed 01:29Z, probe -7 macOS gate passed (started 02:43Z); probe -8 Linux passed; at 05:02Z the lane started a new batch, lane/batch-20261024050226, with 12 older PRs (#4839-#4875). Its macOS gate went red; since 05:45Z it bisects (probe -6). #5007, #5008 and the TC waits are not in it and are queued for a later batch. #5007, #5008 and the TC waits (#5006, #4880, #4953) sit clean with fast-lane for the next batch. Resolved 2026-10-24T06:42Z: dev moved to e5dcf9394 (#4840 landed from batch-20261024050226, whose bisection continues at probes -1/-3); #5007, #5008 and the TC waits are still open and queued.
