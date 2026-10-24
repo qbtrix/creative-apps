@@ -149,3 +149,4 @@ utc	stage	event	ref	note
 2026-10-24T17:57:45Z	stage	#5025 pushed 9c2bc627 (dev merged, StageRasterizer.frame, live refusal dropped; mutate 10/10; gate PASS); Head moved
 2026-10-24T18:19:33Z	heartbeat	#4854 and #5025 queued in the fast lane, mergeable; waiting on a batch
 2026-10-24T18:41:25Z	heartbeat	#4854 (FV-z) in lane/batch-20261024183708 (Linux + macOS gate running); #5025 queued for a later batch
+2026-10-24T19:02:53Z	heartbeat	#4854 batch 20261024183708: Linux green, macOS gate running; #5025 queued
