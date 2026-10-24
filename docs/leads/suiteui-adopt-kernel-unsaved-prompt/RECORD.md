@@ -26,6 +26,8 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 2026-10-24 17:08Z: hb25: lane landed another 12-PR batch 17:01-17:03Z (dev da62659f: #5110, #4839, #4846, #4852, #4858, #4861, #4864, #4866, #4867, #4868, #4870, #4871); #5088 not in it, still fast-lane, open, no needs-* label; #5089/#5091 unchanged (stacked). #3721 unchanged (13 comments, no supervisor answer). UP-z still waits on the app slices and SC-z.
+
 - 2026-10-24T16:42Z: hb24: dev still 33cd6e97 (no merge since the 15:48Z batch). #5088/#5089/#5091 open with fast-lane, no needs-* label. #3721 Question still unanswered. UP-z still waits.
 
 - 2026-10-24T16:20Z: hb23: dev still 33cd6e97 (no merge since the 15:48Z batch). #5088/#5089/#5091 open with fast-lane, no needs-* label. #3721 Question still unanswered. UP-z still waits.
