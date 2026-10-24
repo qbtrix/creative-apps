@@ -161,7 +161,10 @@ row without a direct source *inferred*.
 - Cloud sync, sharing services, accounts, people or face recognition,
   maps, printing, slideshows, books, tethered capture.
 - Managing files on disk: Library never moves, renames or deletes a user's
-  file in v1. Import references files where they are.
+  file in v1, with one exception. Photo > Delete Rejected Photos… (⌥⌘⌫)
+  moves the selected collection's rejected photos to the macOS Trash after
+  asking once, and Undo puts the files and the photos back where they were.
+  Import references files where they are, and skips the paths it trashed.
 - A plugin or scripting API; reading any closed catalog format.
 - An iPad or iPhone build.
 
@@ -175,7 +178,7 @@ loop needs to be trustworthy (undo, errors, speed). Everything else waits.
 | Import a folder (PNG, JPEG, HEIC; subfolders included), skipping files already in the catalog, with progress and a list of files that failed | Camera raw (#427), video, import from a camera or card reader with copy, duplicate detection by content |
 | Grid of real thumbnails, built off the main thread, cached; sort by date, name, rating; Larger and Smaller Thumbnails | Stacks, a filmstrip under the loupe, a disk thumbnail cache (v1 rebuilds thumbnails in memory each launch) |
 | Loupe with Left and Right, zoom to fit, 100% and back, pan when zoomed | Compare two photos side by side, survey mode |
-| Cull from the keyboard in grid and loupe: 0 to 5 stars, P pick, X reject, U unflag; color labels from the inspector; Auto Advance | Keyboard color labels (6 to 9), keywords (#744), camera details (#744) |
+| Cull from the keyboard in grid and loupe: 0 to 5 stars, P pick, X reject, U unflag, 6 to 9 color labels (Red, Yellow, Green, Blue); color labels from the inspector; Auto Advance; Delete Rejected Photos to the Trash, with undo | Keywords (#744), camera details (#744) |
 | Undo and redo of every catalog change, named ("Undo Set Rating") | A history panel |
 | Develop: exposure, temperature, tint, contrast, highlights, shadows, each with reset; a histogram with clipping warnings; copy and paste settings | Curves, HSL, vibrance and saturation, sharpening, noise reduction, lens corrections, presets, local masks, auto tone |
 | Crop with aspect presets (Original, Free, 1:1, 4:5, 3:2, 16:9) and straighten ±45° | Flip, perspective (upright) correction, a crop guide other than thirds |
@@ -359,7 +362,7 @@ Within a tier the order is the order a session meets the feature.
 | 1 | Import a folder (PNG, JPEG, HEIC), capture date from Exif, skip known files | S1 (tier 1 in priorities); S2 for the date | #210 |
 | 2 | Grid of real thumbnails, sorted by capture date | S1 | #33 |
 | 3 | Loupe: one photo large, Left and Right, back to the grid | S1 | #29 (closed), #724 (zoom) |
-| 4 | Cull from the keyboard: 0 to 5 stars, pick, reject, unflag | S1; S3 and S4 define the rating scale people exchange | #211, #724 (keys in the loupe) |
+| 4 | Cull from the keyboard: 0 to 5 stars, pick, reject, unflag, color labels on 6 to 9 (Red, Yellow, Green, Blue) | S1; S3 and S4 define the rating scale people exchange | #211, #724 (keys in the loupe), #3458 (label keys) |
 | 5 | Auto Advance after a rating or flag | S1 | #426 |
 | 6 | Undo and redo of every change, named | S5 (every Mac editor); *inferred* as tier 1 | spine (no issue yet) |
 | 7 | Develop: exposure, white balance (temperature, tint), contrast, highlights, shadows, with a histogram | S1 | #32, #423 |
