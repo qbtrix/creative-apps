@@ -7,6 +7,7 @@ Base: origin/dev 830af22de
 Next: Lane: chain #4960 → #5043 → #5065 → #5104 → #5106; #5044 and #5074 in the lane. XP-10 (C4 part, wave.json built, feature-done) once XP-7, XP-8 and XP-9 merge. Critics once a scoped suiteui run shows the export-pack screens.
 
 ## Run act-1a16fe1fa73-5x3s decisions
+- 22:59Z: the 22:27Z poll was one-shot, so no heartbeat ran from 22:28Z to 22:59Z. Each poll now schedules the next one 15 min out.
 - Brief rule 1: main checked out at e79e9afc; lead/export-pack and lead/brush-keys rebased onto origin/main and pushed (--force-with-lease).
 - PR base stays `dev`: CLAUDE.md, scripts/fast-lane.sh (BASE_BRANCH=dev) and every earlier run land through dev; a fast-lane PR on main is retargeted to dev anyway.
 - PR bodies: the session's GitHub relay re-appends a generated-by footer on every edit; the fast lane strips it from the squash commit (its comment on #5043), so nothing waits on it.
