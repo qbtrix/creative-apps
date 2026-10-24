@@ -76,6 +76,14 @@ import SuiteImaging
         #expect(try filled.pixel(x: 4, y: 8) == Self.red, "a white edge pixel is all fill")
     }
 
+    @Test func aHolePastTheToleranceStaysUnchanged() throws {
+        var p = try Self.framedSquare(ring: nil)
+        let mixed = RGBA(r: 0.467784, g: 0.502886, b: 0.644480, a: 1), options = BucketOptions(tolerance: 32)
+        try p.setPixel(x: 8, y: 6, mixed)
+        let filled = try BucketRules.fill(p, region: BucketRules.region(seed: (8, 8), in: p, options: options, selection: nil), color: Self.red)
+        #expect(try filled.pixel(x: 8, y: 6) == mixed && filled.pixel(x: 8, y: 5) == Self.red)
+    }
+
     @Test func anEdgePixelWithinTheToleranceBlendsByItsOwnCoverage() throws {
         var p = try Self.framedSquare(ring: nil)
         let nearWhite = RGBA(r: 0.830770, g: 0.854993, b: 0.913099, a: 1) // sRGB (235, 238, 245)

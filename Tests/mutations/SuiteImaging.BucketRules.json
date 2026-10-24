@@ -18,7 +18,7 @@
     "file": "Sources/SuiteImaging/Retouch/BucketRules.swift",
     "find": "                                     antiAlias: false)",
     "replace": "                                     antiAlias: options.antiAlias)",
-    "tests": "BucketRulesTests/anEdgePixelPastTheToleranceStaysUnchanged"
+    "tests": "BucketRulesTests/aHolePastTheToleranceStaysUnchanged"
   },
   {
     "label": ".edgeBlendsByOwnCoverage: no soft edge fills a part-seed edge pixel as fully as the seed colour",
