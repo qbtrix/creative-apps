@@ -1,10 +1,10 @@
 # shared-raw lead record
 
 Issue: #3737 · Packet: docs/blueprints/suiteui/features/shared-raw.md
-Run: act-1a16cae7989-hj12 (line lead: area-selection, shared-codecs, shared-raw) · Session: claude/feature-lead-playbook-bs72fe · Started: 2026-10-24T06:50Z (earlier act-1a1693a4009-hyio, act-1a1693a3ff0-mwrd)
-Stage: 3 wave 1
-Base: origin/dev 830af22d
-Next: #4828 → #4848 → #4859/#4872 → #4865 restack and drop needs-split as each base merges; SR-6 once SC-photo's SC-4 lands (or Wire shared-codecs:SC-photo); SR-z after SR-m/SR-photo.
+Run: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
+Stage: 3 wave 1 (restack onto rewritten dev)
+Base: main ef37711d (verified) / dev afef017c
+Next: replay #4848 → #4859 → #4865 and #4872 onto new dev, split, fast-lane; SR-6 on SC-photo; SR-z after SR-m/SR-photo.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -17,8 +17,8 @@ Next: #4828 → #4848 → #4859/#4872 → #4865 restack and drop needs-split as 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| SR-2a | SR-a | 1 | raw contract stubs over a fake decoder | Sources/SuiteImaging/Raw/*, tests, docs/c4/parts imaging-raw | Raw*Tests compile | #4828 | open, fast-lane (head 3b3b338) |
-| SR-2b | SR-a | 1 | headroom checks, system decoder seam | Sources/SuiteImaging/Raw/* | tests | #4848 | open, stacked on #4828 (needs-split) |
+| SR-2a | SR-a | 1 | raw contract stubs over a fake decoder | Sources/SuiteImaging/Raw/*, tests, docs/c4/parts imaging-raw | Raw*Tests compile | #4828 | merged (ea5171eb) |
+| SR-2b | SR-a | 1 | headroom checks, system decoder seam | Sources/SuiteImaging/Raw/* | tests | #4848 | restacking on new dev |
 | SR-3 | SR-m | 1 | formats from the registry, refusals, plan | Sources/SuiteImaging/Raw/{RawFormat,SuiteRaw}.swift | Mutate 4/4 + 2/2 | #4859 | open, stacked on #4848 (needs-split) |
 | SR-4 | SR-m | 1 | system decoder over CIRAWFilter (macOS) | Sources/SuiteImaging/Raw/SystemRawDecoder.swift | Mutate pending/3 (macOS only) | #4865 | open, stacked on #4859 (needs-split) |
 | SR-5 | SR-photo | 1 | Photo raw-open tests, journey, RJ-X50 job, disabled | Tests/PhotoModelTests, UITests, jobs | compiles | #4872 | open, stacked on #4848 (needs-split) |
@@ -30,6 +30,7 @@ Next: #4828 → #4848 → #4859/#4872 → #4865 restack and drop needs-split as 
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-24T23:20Z: dev was rewritten to a new root (4f00afb8, #5150); old slice branches share no history with it, so fixers replay each PR's own commits onto the new dev, split to the 400-line/15-file cap, re-gate and force-with-lease push the lead/* branches (same PR numbers).
 - Status branch is lead/suiteui-shared-raw (the name Belt reads); lead/shared-raw kept as a mirror.
 - SR-2 (~530 lines) split into SR-2a and SR-2b; the stale SR-3..5 remote branches were overwritten (force-with-lease on their old shas).
 - SR-4 asks the supervisor in its PR to add SystemRawDecoderTests.decodeTime to Tests/perf-suites.txt and run its macOS-only mutation plan.

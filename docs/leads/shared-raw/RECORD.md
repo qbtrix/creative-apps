@@ -1,50 +1,41 @@
 # shared-raw lead record
 
-Issue: #4508 · Packet: docs/blueprints/suiteui/features/shared-raw.md
-Run: act-1a16474bd3a-i9ae · Session: session_01Rid1ErRRerebigzwJKJtpV · Started: 2026-10-22T16:36Z
-Stage: 3 (wave 2)
-Base: 7e9f260ae8f69dea63663c1bc7ea945c6b1d2f80 (origin/dev)
-Next: open SR-2's PR once #4645 merges, then SR-3's and SR-5's once SR-2 merges, then SR-4's once SR-3 merges (bodies ready in the scratchpad: sr2.md, sr3.md, sr5.md, sr4.md). SR-6 is blocked on SC-15 and SC-4; SR-7 needs SR-4 and SR-6.
+Issue: #3737 · Packet: docs/blueprints/suiteui/features/shared-raw.md
+Run: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
+Stage: 3 wave 1 (restack onto rewritten dev)
+Base: main ef37711d (verified) / dev afef017c
+Next: replay #4848 → #4859 → #4865 and #4872 onto new dev, split, fast-lane; SR-6 on SC-photo; SR-z after SR-m/SR-photo.
 
 ## Slices
-
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| SR-a | test DNGs written in-repo; Raw/ module as stubs over a fake decoder; tests disabled | SR-1, SR-2 | MJ-SR | suite-imaging:IM-a (built: #4028) | false | 0 | SR-1 PR #4645; SR-2 pushed 00bab7ba (PR waits on #4645, 881 lines vs dev) | – | – |
-| SR-m | formats parse, plan, refusals, system decoder with headroom | SR-3, SR-4 | MJ-SR, MJ-SR-mac | SR-a; IM-4 (merged #4393) | false | 0 | SR-3 pushed; SR-4 pushed on SR-3 | – | – |
-| SR-photo | Photo opens RAW as a float layer | SR-5, SR-6 | MJ-SR-photo, PJ-SR | SR-a; shared-codecs SC-15, SC-4 (SR-6; not merged) | true | 0 | SR-5 pushed; SR-6 blocked | – | – |
-| SR-z | live, RJ-X50, concept line, built | SR-7, SR-8 | PJ-SR, MJ-SR | SR-m, SR-photo; tone-controls:TC-a, pen-paths:PN-a (SR-8) | true | 0 | planned | – | – |
+| SR-a | test DNGs; Raw/ module as stubs over a fake decoder | SR-1, SR-2a, SR-2b | MJ-SR | IM-a (met) | false | 0 | building (SR-1 #4645 merged; #4828, #4848) | – | – |
+| SR-m | formats, plan, refusals, system decoder with headroom | SR-3, SR-4 | MJ-SR, MJ-SR-mac | SR-a | false | 0 | building (#4859, #4865) | – | – |
+| SR-photo | Photo opens RAW as a float layer | SR-5, SR-6 | MJ-SR-photo, PJ-SR | SR-a; shared-codecs SC-f (done), SC-photo | true | 0 | building (SR-5 #4872; SR-6 waits SC) | – | – |
+| SR-z | live, RJ-X50, concept line, built | SR-7, SR-8 | PJ-SR, MJ-SR | SR-m, SR-photo; TC-a, PN-a | true | 0 | waiting | – | – |
 
 ## Tasks
-
-| id | slice | wave | state | PR |
-|---|---|---|---|---|
-| SR-1 | SR-a | 1 | PR open | #4645 |
-| SR-2 | SR-a | 2 | pushed 00bab7ba; PR after #4645 | – |
-| SR-3 | SR-m | 3 | pushed a111888e (mutants 6/6); PR after SR-2 merges | – |
-| SR-4 | SR-m | 3 | pushed 64beb91a (on SR-3); PR after SR-3 merges | – |
-| SR-5 | SR-photo | 3 | pushed 833a2b5c; PR after SR-2 merges | – |
-| SR-6 | SR-photo | – | blocked (SC-15, SC-4) | – |
-| SR-7 | SR-z | – | planned | – |
-| SR-8 | SR-z | – | blocked (TC-a) | – |
+| id | slice | wave | behavior | files | test | PR | state |
+|---|---|---|---|---|---|---|---|
+| SR-2a | SR-a | 1 | raw contract stubs over a fake decoder | Sources/SuiteImaging/Raw/*, tests, docs/c4/parts imaging-raw | Raw*Tests compile | #4828 | merged (ea5171eb) |
+| SR-2b | SR-a | 1 | headroom checks, system decoder seam | Sources/SuiteImaging/Raw/* | tests | #4848 | restacking on new dev |
+| SR-3 | SR-m | 1 | formats from the registry, refusals, plan | Sources/SuiteImaging/Raw/{RawFormat,SuiteRaw}.swift | Mutate 4/4 + 2/2 | #4859 | open, stacked on #4848 (needs-split) |
+| SR-4 | SR-m | 1 | system decoder over CIRAWFilter (macOS) | Sources/SuiteImaging/Raw/SystemRawDecoder.swift | Mutate pending/3 (macOS only) | #4865 | open, stacked on #4859 (needs-split) |
+| SR-5 | SR-photo | 1 | Photo raw-open tests, journey, RJ-X50 job, disabled | Tests/PhotoModelTests, UITests, jobs | compiles | #4872 | open, stacked on #4848 (needs-split) |
+| SR-6 | SR-photo | – | Photo opens RAW | Sources/PhotoModel | – | – | waiting (SC-15, SC-4) |
+| SR-7, SR-8 | SR-z | – | live, RJ-X50, built | – | – | – | waiting |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
 
 ## Decisions
-- Base is origin/dev, PRs target dev (CLAUDE.md: never target main).
-- SR-a is ~700 lines (SR-1 ~400, SR-2 ~300): over the 400-line cap, so it ships as two PRs, SR-1 first (the test commit), SR-2 stacked on it.
-- Slice branches are lead/shared-raw-<slice>.
-- SR-1 carries only the fixtures, writers and TinyDNGTests: the three Raw*Tests reference SR-2's types and can't compile before them, so they are SR-2's first commit (rule 22, test first in the slice PR).
-- SR-1 builder relaunched after a container restart (first attempt lost before any commit).
-- Belt reads lead/suiteui-shared-raw (docs/leads/suiteui-shared-raw/); each push mirrors the RECORD and timeline there as well.
+- 2026-10-24T23:20Z: dev was rewritten to a new root (4f00afb8, #5150); old slice branches share no history with it, so fixers replay each PR's own commits onto the new dev, split to the 400-line/15-file cap, re-gate and force-with-lease push the lead/* branches (same PR numbers).
+- Status branch is lead/suiteui-shared-raw (the name Belt reads); lead/shared-raw kept as a mirror.
+- SR-2 (~530 lines) split into SR-2a and SR-2b; the stale SR-3..5 remote branches were overwritten (force-with-lease on their old shas).
+- SR-4 asks the supervisor in its PR to add SystemRawDecoderTests.decodeTime to Tests/perf-suites.txt and run its macOS-only mutation plan.
 
 ## Open
-- SR-6 waits on shared-codecs SC-15 and SC-4 (no commits on dev); SR-8 waits on tone-controls TC-a.
-- scripts/test-scope maps Tests/SuiteImagingTests/ to no suite, so `scripts/ci --changed` only builds them: each SR builder also runs `swift test --filter SuiteImagingTests` and the PR says so (SR-1: 64 pass). Raised to the supervisor on #4508.
-- PR bodies: the session's GitHub writes append a "Generated by Claude Code" footer server-side, and a PATCH re-adds it, so it can't be removed from here. The lane strips it from the squash commit and nothing waits on it.
-- SR-2 adds part imaging-raw.json (own description, path Sources/SuiteImaging/Raw/); RawRefusal is also Hashable (RawDecodePlan carries it).
-- SR-4 was built in parallel with SR-3, then rebased onto SR-3 before any PR so `theRowThroughSuiteRaw` runs from the start. That makes SR-2 → SR-3 → SR-4 one chain. SR-5 sits beside SR-3 on SR-2.
-- SR-4 has never run: Linux can't compile CoreImage. Its first run is the lane's macOS gate. R1 (does Core Image accept tiny-bayer.dng?) is open until then; if not, switch to tiny-linear.dng.
-- SR-4's report-only `SystemRawDecoderTests.decodeTime` belongs on Tests/perf-suites.txt, which only the supervisor edits. Ask in the SR-4 PR.
+- SR-6 waits on shared-codecs SC-photo (SC-4), which this run builds now; SR-8 on tone-controls TC-a and pen-paths PN-a (contract-first: their contract slices).
+- Open findings for this feature: 0.
+- 2026-10-24T07:05Z: run act-1a16cae7989-hj12 resumes on dev 830af22d. Server-added footers removed from #4848, #4859, #4865, #4872 bodies so Head: is the last line again (#4828, #4861, #4875, #4876 already clean). Contract-first waits (rule 12) applied to the slice table.
