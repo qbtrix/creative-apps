@@ -86,3 +86,4 @@ utc	stage	event	ref	note
 2026-10-24T08:25:47Z	wait	#5036 waits for the next lane batch; lead/flare-lottie-open created as a mirror for Belt
 2026-10-24T08:45:58Z	heartbeat	#5036 unchanged; lane bisecting batch 20261024081307 ahead of it
 2026-10-24T09:05:52Z	blocked	dev red #5113 (lottie-oracle meson on cache hit, #4132) blocks the lane macOS gate; #5036 waits
+2026-10-24T09:25:09Z	heartbeat	still blocked on dev red #5113; #5036 unchanged
