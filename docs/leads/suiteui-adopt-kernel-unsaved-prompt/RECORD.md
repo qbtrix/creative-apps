@@ -14,8 +14,8 @@ Next: UP-photo is #5088 (fast-lane, gate PASS at b33630f9). Restack UP-flare (bu
 | UP-u | UP-3, UP-4 | done (#3824, #3828; run 39568091135) | – |
 | UP-design | UP-5, UP-6 | done (#4037; Mac-Finish-Wanted posted) | – (AC-zoom done: f886c912 on dev, Linux 39571804700 green) |
 | UP-photo | UP-7, UP-8 | in lane (#5088, head b33630f9) | shared-thumbnails:ST-z (met by contract ST-a #4840), UP-design |
-| UP-flare | UP-9, UP-10 | built (11eed166), restacking on UP-photo | adopt-kernel-autosave:AK-flare (on dev 5ecec459), UP-photo |
-| UP-halo | UP-11, UP-12 | built (47d29734), restacking on UP-flare | UP-flare (shared journey file) |
+| UP-flare | UP-9, UP-10 | in lane (#5089, head a981f4a4, base UP-photo) | adopt-kernel-autosave:AK-flare (on dev 5ecec459), UP-photo |
+| UP-halo | UP-11, UP-12 | restacked on UP-flare (67110503), gate running | UP-flare (shared journey file) |
 | UP-z | UP-13, UP-14 | blocked | the four app slices; shared-codecs:SC-z (planned) |
 
 One PR per slice: each app slice's PR holds its test-first task and its adoption task, so an app slice starts only once its external wait clears.
@@ -25,6 +25,8 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 - [ ] Wire: shared-thumbnails:ST-z (UP-photo built on ST-a's contract, #4840)
 
 ## Decisions
+
+- 2026-10-24T09:05Z: UP-flare rebased on UP-photo (live set Design, Photo, Flare), gate PASS, PR #5089 (base UP-photo branch, fast-lane). UP-halo rebased on UP-flare (live set all four), gate running.
 
 - 2026-10-24T08:40Z: Belt nudge: the watched record is this path (docs/leads/suiteui-adopt-kernel-unsaved-prompt on lead/suiteui-adopt-kernel-unsaved-prompt), so this run's record moves here from lead/adopt-kernel-unsaved-prompt; pushed after every stage. UP-photo opened as #5088 (base dev, fast-lane, Fast-Check pass at b33630f9; first commit 19e502c is the failing test). UP-flare and UP-halo were built in parallel on dev; each edits SuiteJourneyTests+Unsaved.swift's live set, so they restack on UP-photo in order before their PRs open.
 
