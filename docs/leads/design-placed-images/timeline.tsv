@@ -143,3 +143,4 @@ utc	stage	event	ref	note
 2026-10-24T20:31:57Z	3	check	-	poll: full CI 40129856269 queued on dev ef37711de (contains PD-a); #5212 open, no reply; our 10 PRs clean, no needs-fix/needs-rebase, none merged
 2026-10-24T20:54:14Z	3	check	-	poll: full CI 40129856269 Linux green, macOS running; #4888 in lane/batch-20261024205137; #5212 open, no reply; no needs-fix/needs-rebase
 2026-10-24T21:16:28Z	3	check	-	poll: full CI 40129856269 macOS still running; #4888 still in lane/batch-20261024205137; #5212 open, no reply; no needs-fix/needs-rebase
+2026-10-24T21:38:22Z	3	check	-	poll: #5222 (drag-test time limits, for #5212) on dev afef017c2; full CI 40129856269 macOS still running; lane bisecting batch-20261024205137 (#4888 in prefix); no needs-fix/needs-rebase
