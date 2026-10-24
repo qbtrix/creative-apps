@@ -67,3 +67,4 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-24T13:18:58Z: no change on #4817/#4988/#5164. No lane sweep has completed since 12:11Z (40094613224 and later PR-event runs cancelled); batch-20261024110214 still at probe 6. Not ours to fix; supervisor: the lane looks stalled.
 - 2026-10-24T13:37:37Z: no change on #4817/#4988/#5164; batch-20261024110214 is still bisecting (new probe -3), so the lane is slow, not stopped.
 - 2026-10-24T13:56:16Z: no change on #4817/#4988/#5164; batch-20261024110214 still bisecting.
+- 2026-10-24T14:14:50Z: sweep 40100183592 (13:54Z) ran: batch-20261024110214 at probe 3; #4817/#4988 ready behind it (132 ready PRs wait). No action ours.
