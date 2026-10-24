@@ -71,3 +71,4 @@ utc	stage	event	ref	note
 2026-10-24T15:03Z	poll	check	all	no merges
 2026-10-24T15:22Z	poll	check	all	not in current batch
 2026-10-24T15:43Z	poll	check	all	queued behind batch
+2026-10-24T16:03Z	poll	check	all	batch landed without ours
