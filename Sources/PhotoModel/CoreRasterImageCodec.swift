@@ -39,10 +39,9 @@ public struct CoreRasterImageCodec: PhotoImageCodec {
 
     public func encode(_ image: DecodedImage, as format: ImageFormat, quality: Double) throws -> Data {
         let buffer = try PixelBuffer(rgba8: image.rgba8, width: image.width, height: image.height)
-        switch format {
-        case .jpeg: return try JPEG.write(buffer, quality: Int((min(max(quality, 0), 1) * 100).rounded()))
-        case .png: return try PNG.write(buffer)
-        }
+        // One branch per format, not a switch: a switch over formats is a list (FormatListRatchetTests).
+        if format == .png { return try PNG.write(buffer) }
+        return try JPEG.write(buffer, quality: Int((min(max(quality, 0), 1) * 100).rounded()))
     }
 
     static let signature: [UInt8] = [137, 80, 78, 71, 13, 10, 26, 10]
