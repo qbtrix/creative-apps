@@ -79,3 +79,4 @@ utc	stage	event	ref	note
 2026-10-24T19:43:38Z	4	stage	#4924,#4949	LC-u test fix (f1fc4a65) and new lc-mu (LC-6 + LC-u) both clean-build CI: PASS. Pushed LC-u #4924 at f1fc4a65 (12 files, +389), lc-mu at 8116fe3b, LC-z #4949 at 650cc5ff (over lc-mu: 15 files, +300/-92), Head lines moved, fast-lane on all. Whole LC stack is ready: #4937 then #4938 stacked; #4924 on dev; #4949 on lc-mu, to retarget to dev once #4924 and #4938 land. 0 open findings.
 2026-10-24T20:11:41Z	4	ci	run 40120685023	scoped library run lost its macOS runner mid-test (no test failed); re-ran failed jobs once
 2026-10-24T20:11:57Z	4	blocked	run 40120685023	re-run refused (403); BK-m/LC-a slice-done waits for the next green scoped library or full run on dev; supervisor please dispatch ci.yml app=library if none follows the next library merge
+2026-10-24T20:13:54Z	4	poll	#4923 #4924 #4937 #4938 #4949	all in fast-lane, none ejected; waiting on lane batch and a green scoped library run
