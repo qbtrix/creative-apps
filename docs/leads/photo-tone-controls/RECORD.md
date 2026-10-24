@@ -3,7 +3,7 @@
 Issue: #3468 · Packet: docs/blueprints/photo/features/tone-controls.md
 Run: act-1a16cd04539-4jc0 · Session: claude/feature-lead-playbook-9tb3qe · Started: 2026-10-24T07:30Z (takes over from act-1a16958d691-2ax3)
 Stage: build W4 (PT-3, PT-4 building on the TC-5/TC-6 stubs; PT-2 #5007, PT-6 #5008 in the lane)
-Base: 830af22de (dev now f58e1190)
+Base: 830af22de (dev now 1bbaba6c1)
 Next: PT-3 and PT-4 PRs from build-wave (branches lead/photo-tone-PT-3, lead/photo-tone-PT-4); PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #4880 / TC-6 #4953 merge
 
 ## Slices
