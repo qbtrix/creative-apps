@@ -87,3 +87,4 @@ utc	stage	event	ref	note
 2026-10-24T20:58:29Z	W2	check	PY-1	#5177 lane Linux check run 40129059695 green; fast-lane batch in progress; waits #5174 LS-2 and #5176 LS-m still open
 2026-10-24T21:19:59Z	W2	check	PY-1	no merges; lane batch-20261024205137 red on macOS gate, bisect probes -3 and -6 running; our PRs and waits open and clean
 2026-10-24T21:41:51Z	W2	check	PY-1	no merges; batch-20261024205137 bisect macOS probes -3 and -6 still running (Linux green); our PRs and waits open and clean; no scoped photo run
+2026-10-24T22:04:15Z	W2	check	PY-1	no merges; batch-20261024205137 bisect macOS probes -3/-6 still running after 45 min; our PRs and waits open and clean (#5174 now beta); no scoped photo run
