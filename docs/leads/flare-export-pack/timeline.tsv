@@ -113,3 +113,4 @@ utc	stage	event	ref	note
 2026-10-24T05:36:24Z	stage	run act-1a16c619006-nour took over; #5025 #5005 #4852 #4854 open and clean in lane; 10 findings open, no new feature task
 2026-10-24T06:32:55Z	heartbeat	batch 20261024050226 (with #4852) red, lane bisecting; #4854 #5025 #5005 queued
 2026-10-24T06:34:43Z	fix	batch macOS gate 40064703313 red on #4852 (export panel hang in budget test); fix on lead/export-pack-fvu, gate running
+2026-10-24T06:48:36Z	fix	#4852 head 01a21adb (budget test launch fix), Head moved; FV-z merge gating

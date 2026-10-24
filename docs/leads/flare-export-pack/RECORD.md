@@ -4,7 +4,7 @@ Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
 Run: act-1a16c619006-nour (took over 2026-10-24 from act-1a1695ebf10-z0v8; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T02:26Z
 Stage: 3 build (fix round 1 in lane)
 Base: 721168a (origin/dev)
-Next: (2026-10-24 06:45Z) Batch 20261024050226's macOS gate (run 40064703313) failed on #4852's RenderBudgetFlareExportPackTests.progressInOneBodyPerTick: FlareWindow read launch from the process, so -FlareExportTo never reached startExport and NSSavePanel.runModal hung. Fix on lead/export-pack-fvu (window takes the test's launch), gate running; then push, move #4852's Head. #4854 (stacked), #5025, #5005 queued. 10 findings open: no new feature task.
+Next: (2026-10-24 07:05Z) #4852 FV-u fix pushed (01a21adb: FlareWindow takes the test's launch; scripts/ci --changed PASS; Head moved). Merging it into #4854 (lead/export-pack-fvz), gate running, then move its Head. Both wait for the lane's next batch and its macOS gate. #5025, #5005 queued. 10 findings open: no new feature task.
 
 Loop: v3 (the packet has a `## Slices` table).
 
