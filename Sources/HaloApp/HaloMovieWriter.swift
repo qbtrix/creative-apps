@@ -5,9 +5,16 @@
 // ends the session at frames x den / num s, so a 48-frame, 24 fps plan is
 // exactly 2 s long and 300 frames at 29.97 are 10.01 s (frame-rates FR-8b);
 // the track counts in the clock's track timescale. Each frame is
-// HaloFrameImage's sRGB image drawn over opaque black, so transparent areas
-// become black. `finish(cancelled: true)` cancels the writer, which deletes
-// the file it created.
+// HaloFrameImage's sRGB image drawn over opaque black (transparent areas
+// become black) by MovieWriter's `taggedBuffer`, which converts it into the
+// BT.709 colour space the tags name, so a player shows the frame's own
+// colours rather than 709-tagged sRGB values about 12/255 too bright.
+// `finish(cancelled: true)` cancels the writer, which deletes the file it
+// created.
+//
+// MovieWriter, SuiteShell's canonical writer, was moved from this type and
+// replaces it at Halo's `services.media` adoption. Not yet: it times frames
+// at a whole-number rate, and Halo renders exact rates such as 29.97.
 //
 // It uses the macOS 26 receiver API (`inputPixelBufferReceiver(for:)`,
 // `start()`, `appendImmediately(_:with:)`): the pixel buffer adaptor,
@@ -22,6 +29,7 @@ import CoreMedia
 import CoreVideo
 import Foundation
 import HaloModel
+import SuiteShell
 
 /// Why a movie couldn't be written; its description is what Render Out shows.
 struct HaloMovieWriterError: Error, CustomStringConvertible {
@@ -39,6 +47,7 @@ struct HaloMovieWriter: RenderSink {
     private var width = 0
     private var height = 0
     private var clock: HaloMovieClock?
+    private var space: CGColorSpace?
     private var written = 0
 
     init(url: URL) {
@@ -51,6 +60,9 @@ struct HaloMovieWriter: RenderSink {
         }
         guard !FileManager.default.fileExists(atPath: url.path) else {
             throw HaloMovieWriterError(description: "A file named \(url.lastPathComponent) already exists.")
+        }
+        guard let space = MovieWriter.bt709Space() else {
+            throw HaloMovieWriterError(description: "The movie's BT.709 colour space couldn't be made.")
         }
         let writer = try AVAssetWriter(outputURL: url, fileType: .mp4)
         let input = AVAssetWriterInput(mediaType: .video, outputSettings: Self.outputSettings(plan))
@@ -67,6 +79,7 @@ struct HaloMovieWriter: RenderSink {
         width = plan.width
         height = plan.height
         self.clock = clock
+        self.space = space
         written = 0
     }
 
@@ -132,52 +145,17 @@ struct HaloMovieWriter: RenderSink {
         ]
     }
 
-    /// `frame` as a BGRA buffer of the plan's size: opaque black, then the
-    /// frame's sRGB image over it, tagged BT.709 like the track.
+    /// `frame` as a BGRA buffer of the plan's size, tagged BT.709 like the
+    /// track: opaque black, then the frame's sRGB image drawn over it.
     private func pixelBuffer(_ frame: HaloRenderedFrame) throws -> CVReadOnlyPixelBuffer {
-        guard let image = HaloFrameImage.cgImage(frame) else {
+        guard let image = HaloFrameImage.cgImage(frame), let space else {
             throw HaloMovieWriterError(description: "Frame \(frame.frame) has no pixels to write.")
         }
-        let attributes: [String: Any] = [
-            kCVPixelBufferCGBitmapContextCompatibilityKey as String: true,
-            kCVPixelBufferIOSurfacePropertiesKey as String: [String: Any](),
-        ]
-        var created: CVPixelBuffer?
-        let status = CVPixelBufferCreate(
-            kCFAllocatorDefault, width, height, kCVPixelFormatType_32BGRA, attributes as CFDictionary, &created)
-        guard status == kCVReturnSuccess, let buffer = created else {
-            throw HaloMovieWriterError(description: "No memory for a \(width) × \(height) movie frame.")
+        do {
+            return try MovieWriter.taggedBuffer(image, width: width, height: height, space: space, keepAlpha: false)
+        } catch {
+            throw HaloMovieWriterError(description: "Frame \(frame.frame) couldn't be drawn: \(error.message)")
         }
-        guard Self.draw(image, into: buffer, width: width, height: height) else {
-            throw HaloMovieWriterError(description: "Frame \(frame.frame) couldn't be drawn.")
-        }
-        CVBufferSetAttachment(
-            buffer, kCVImageBufferColorPrimariesKey, kCVImageBufferColorPrimaries_ITU_R_709_2, .shouldPropagate)
-        CVBufferSetAttachment(
-            buffer, kCVImageBufferTransferFunctionKey, kCVImageBufferTransferFunction_ITU_R_709_2, .shouldPropagate)
-        CVBufferSetAttachment(
-            buffer, kCVImageBufferYCbCrMatrixKey, kCVImageBufferYCbCrMatrix_ITU_R_709_2, .shouldPropagate)
-        // The buffer is never touched again: the read-only wrapper owns it.
-        return CVReadOnlyPixelBuffer(unsafeBuffer: buffer)
-    }
-
-    /// Fills `buffer` with opaque black and draws `image` over it; false
-    /// when its memory can't be drawn into. Unlocked again before returning.
-    private static func draw(_ image: CGImage, into buffer: CVPixelBuffer, width: Int, height: Int) -> Bool {
-        CVPixelBufferLockBaseAddress(buffer, [])
-        defer { CVPixelBufferUnlockBaseAddress(buffer, []) }
-        guard let base = CVPixelBufferGetBaseAddress(buffer),
-              let space = CGColorSpace(name: CGColorSpace.sRGB),
-              let context = CGContext(
-                  data: base, width: width, height: height, bitsPerComponent: 8,
-                  bytesPerRow: CVPixelBufferGetBytesPerRow(buffer), space: space,
-                  bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue)
-        else { return false }
-        let bounds = CGRect(x: 0, y: 0, width: width, height: height)
-        context.setFillColor(gray: 0, alpha: 1)
-        context.fill(bounds)
-        context.draw(image, in: bounds)
-        return true
     }
 
     private static func failure(_ writer: AVAssetWriter) -> HaloMovieWriterError {
