@@ -40,5 +40,26 @@
     "find": "size: size, dropping: dropping))",
     "replace": "size: size))",
     "tests": "LibraryExportMetadataTests/writerDrops"
+  },
+  {
+    "label": "uniqueNamesInOnePass: taken names keep only each stem's base, not the name a photo got, so a third copy repeats a name",
+    "file": "Sources/LibraryModel/Contracts/ExportNaming+Kernel.swift",
+    "find": "let picked = name.lowercased()",
+    "replace": "let picked = base.lowercased()",
+    "tests": "LargeCatalogEquivalenceTests"
+  },
+  {
+    "label": "taken names compare with case, so IMG and img both get one name",
+    "file": "Sources/LibraryModel/Contracts/ExportNaming+Kernel.swift",
+    "find": "while taken.contains(name.lowercased())",
+    "replace": "while taken.contains(name)",
+    "tests": "LargeCatalogEquivalenceTests"
+  },
+  {
+    "label": "the parsed-once stems pad {seq} to one digit",
+    "file": "Sources/LibraryModel/Contracts/ExportNaming+Kernel.swift",
+    "find": "digits = String(max(photos.count, 1)).count",
+    "replace": "digits = 1",
+    "tests": "LargeCatalogEquivalenceTests"
   }
 ]
