@@ -1,10 +1,10 @@
 # layer-styles lead record
 
 Issue: #3793 · Packet: docs/blueprints/photo/features/layer-styles.md
-Run: act-1a16958d691-2ax3 · Session: claude/feature-lead-photo-cl2258 · Started: 2026-10-23T15:00Z (takes over from act-1a16155057c-20lg; unparked by the supervisor on #3793 at 15:13Z)
+Run: act-1a16cd04539-4jc0 · Session: claude/feature-lead-playbook-9tb3qe · Started: 2026-10-24T07:30Z (takes over from act-1a16958d691-2ax3)
 Stage: 0 setup, blocked: suiteui layer-styles LS-a (the contract slice) has not merged, so rule 12 is not met yet
-Base: 721168a8f (origin/dev)
-Next: re-check #3937 for LS-a merged (`Sources/SuiteImaging/Style/` on dev) each wave of tone-controls; once it is, start PY-1 on its fakes
+Base: 830af22de (origin/dev)
+Next: re-check LS-1 #4911 (open, clean, fast-lane, queued) each tone wave; once `Sources/SuiteImaging/Style/` is on dev, start PY-1 on its stubs
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -35,6 +35,7 @@ Next: re-check #3937 for LS-a merged (`Sources/SuiteImaging/Style/` on dev) each
 - No task starts: PY-1 needs SuiteImaging's `LayerStyle`, `LayerStyleTarget` and `StyleCommands`, none of which exist on dev (no SuiteImaging target yet). Rule 20 forbids a Photo copy, and LS-a is the suiteui line's work, so nothing is stubbed here.
 
 ## Open
+- 2026-10-24T07:35Z (run act-1a16cd04539-4jc0): LS-1 #4911 (the LS-a contract, `Style/` stubs) is open, clean and queued in the lane; dev 830af22de has SuiteImaging Adjust, Color, Retouch, Route, Select and Tone, but no Style. PY-1 still waits; rule 20 rules out a Photo copy.
 - 2026-10-23T15:35Z: dev 721168a8f has SuiteImaging (Adjust, Color, Retouch, Route, Tone) but no Style/: no `LayerStyle`, `LayerStyleTarget` or `StyleCommands`. #3937 is unparked under rule 12 too but has no LS-a PR yet. Rule 20 still rules out a Photo copy, so PY-1 waits; this run builds tone-controls meanwhile.
 - Blocked on suiteui layer-styles LS-a (#3937, still `waiting-on-prereq` at 03:13Z). LS-a waits on suite-imaging:IM-a (IM-1 #4028 still open: Linux green at 02:30Z, macOS job skipped, awaiting the supervisor macOS run and merge; IM-2 stacked), brush-keys:BK-u, gradient-fill:GF-a, and core types from LE-a. Bump #3825 (7966e5a) merged 2026-10-21 but carries only Flare core PRs. No `SuiteImaging` target or `LayerStyle` types on dev 66a8458.
 - Belt watches `lead/photo-layer-styles` (with `docs/leads/photo-layer-styles/`). This record is mirrored there; `lead/layer-styles` is the brief's original channel and stays in sync.
