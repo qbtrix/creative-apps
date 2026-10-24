@@ -68,3 +68,4 @@ ts	kind	note
 2026-10-24T07:47:19Z	wait	heartbeat	-	dev f58e119; #4950/#4951 open fast-lane, not yet in a lane batch (batch-20261024050226 still bisecting); 0 open findings; ST-z builder running
 2026-10-24T07:54:08Z	wait	heartbeat	-	Belt nudge: mirrored RECORD to lead/suiteui-shared-thumbnails; ST-z builder running; #4950/#4951 wait for the next lane batch
 2026-10-24T08:10:42Z	3	split	#5102	ST-z over cap (548/13); split into #5102 (ST-7, 340/7) + ST-z2 (208/6), both Slice ST-z; gating part 1
+2026-10-24T08:11:28Z	wait	heartbeat	-	dev 1bbaba6 (scoped suite/library/photo/flare running); #4950/#4951 open clean, not batched; 0 findings; ST-z builder done, split gating
