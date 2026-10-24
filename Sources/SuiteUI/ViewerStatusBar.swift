@@ -2,7 +2,8 @@
 // status pills, right-aligned and 4 pt apart: the zoom percent (none when
 // `zoom` is nil, as in a photo grid), the document size, then each view of the trailing slot (a tool name, a render time, a
 // View menu) in its own pill. A pill is a 20 pt capsule on the row fill (24
-// to hit) in the 10 pt pill type and secondary text. A trailing view marked
+// to hit) in the 10 pt pill type and secondary text, the zoom pill's too: only
+// a pill that needs attention is tinted (#3136). A trailing view marked
 // `.statusPill(.toggle(isOn: true))` takes the selected tint and accent text,
 // one marked `.statusPill(.warning)` the warning tint and color with a
 // triangle, and one marked `.statusPill(.error)` (a failed save or render)
@@ -88,11 +89,7 @@ public struct ViewerStatusBar<Trailing: View>: View {
         HStack(spacing: SuiteSpacing.pillGap) {
             Spacer(minLength: SuiteSpacing.s)
             if let zoomText {
-                pill(.plain) {
-                    Text(zoomText)
-                        .foregroundStyle(SuiteColor.textPrimary)
-                        .accessibilityLabel("Zoom \(zoomText)")
-                }
+                pill(.plain) { Text(zoomText).accessibilityLabel("Zoom \(zoomText)") }
                 .help("Zoom")
             }
             pill(.plain) { Text(sizeText) }
