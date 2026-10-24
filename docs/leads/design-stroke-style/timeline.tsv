@@ -176,3 +176,4 @@ time	kind	note
 2026-10-24T16:50:56Z	3	check	-	dev 33cd6e97 unchanged; batch 20261024160327 (with #4864) still in flight; all slice PRs clean
 2026-10-24T17:14:16Z	3	check	-	DK-u #4864 merged to dev 2ca935a4; #4888 needs-rebase; fixer restacking DK-m and DK-u stacks; PD-a #3759 awaits supervisor
 2026-10-24T17:36:19Z	3	check	-	dev c0920138; fixer restacking #4888/#4916 and #5002/#5011; PD-a #3759 clean at 346de227, awaits supervisor; no slice done
+2026-10-24T17:57:37Z	3	check	-	#4888 restacked f75a597f clean vs dev; fixer on #4916 and #5002/#5011; PD-a #3759 awaits supervisor
