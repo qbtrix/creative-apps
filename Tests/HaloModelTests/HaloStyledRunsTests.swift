@@ -12,7 +12,7 @@ import Testing
     static let glow = HaloStyleRenderTests.glow(10)
 
     @Test func runsKeepOrderAndSplitAtStyledLayers() {
-        let (a, b, c, d) = (Self.item("a"), Self.item("b", .shape, style: Self.glow), Self.item("c", style: .none), Self.item("d", .text, style: Self.glow))
+        let (a, b, c, d) = (Self.item("a"), Self.item("b", .shape, style: Self.glow), Self.item("c", style: LayerStyle.none), Self.item("d", .text, style: Self.glow))
         #expect(HaloDrawList(width: 10, height: 8, frame: 0, items: [a, b, c, d]).styledRuns == [.drawn([a]), .styled(b), .drawn([c, d])])
     }
 
