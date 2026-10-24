@@ -76,8 +76,7 @@ extension PhotoWorkspace {
         resized.selection = nil
         record(.stack(stackState), named: "Canvas Size")
         restore(resized)
-        let crop = PixelRect(x: -dx, y: -dy, width: width, height: height)
-        for layer in layers { layerGeometryChanged(layer.id, .cropped(crop)) }
+        for layer in layers { layerGeometryChanged(layer.id, .canvasResized(dx: dx, dy: dy)) }
         touch(.all)
     }
 

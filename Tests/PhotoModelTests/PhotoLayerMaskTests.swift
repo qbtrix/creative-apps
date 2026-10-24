@@ -1,4 +1,4 @@
-// PhotoLayerMaskTests.swift (masks-clipping PK-1 written, PK-5 turns on): a layer mask is grey coverage the
+// PhotoLayerMaskTests.swift (masks-clipping PK-1, PK-5): a layer mask is grey coverage the
 // layer's size and place. From Selection is white inside the marquee and black outside; a second mask is
 // refused; Apply makes the hidden pixels transparent in one undo step; a crop cuts the mask with its layer;
 // a duplicate copies it; Delete and Disable are one step each, Edit Mask none. PhotoMaskCommandTests checks
@@ -23,7 +23,7 @@ func maskGrey(_ ws: PhotoWorkspace, _ id: PhotoLayer.ID, _ x: Int, _ y: Int) -> 
 }
 
 @Suite struct PhotoLayerMaskTests {
-    @Test(.disabled("waits on PK-5")) func fromSelectionRevealsInside() throws {
+    @Test func fromSelectionRevealsInside() throws {
         var (ws, id) = try maskedFixture()
         let marquee = PixelRect(x: 4, y: 3, width: 6, height: 5)
         ws.setSelection(marquee)
@@ -43,7 +43,7 @@ func maskGrey(_ ws: PhotoWorkspace, _ id: PhotoLayer.ID, _ x: Int, _ y: Int) -> 
         #expect(ws.masks[id] == nil && ws.selectedLayer?.hasMask == false)
     }
 
-    @Test(.disabled("waits on PK-5")) func revealAllIsRefusedWithAMask() throws {
+    @Test func revealAllIsRefusedWithAMask() throws {
         var (ws, id) = try maskedFixture()
         try ws.addMask(.hide)
         #expect(maskGrey(ws, id, 0, 0) == 0 && maskGrey(ws, id, 15, 11) == 0)
@@ -56,7 +56,7 @@ func maskGrey(_ ws: PhotoWorkspace, _ id: PhotoLayer.ID, _ x: Int, _ y: Int) -> 
         #expect(maskGrey(ws, id, 0, 0) == 1 && maskGrey(ws, id, 15, 11) == 1)
     }
 
-    @Test(.disabled("waits on PK-5")) func applyIsOneStep() throws {
+    @Test func applyIsOneStep() throws {
         var (ws, id) = try maskedFixture()
         ws.setSelection(PixelRect(x: 0, y: 0, width: 8, height: 12))
         try ws.addMask(.selection)
@@ -73,7 +73,7 @@ func maskGrey(_ ws: PhotoWorkspace, _ id: PhotoLayer.ID, _ x: Int, _ y: Int) -> 
         #expect(ws.pixels[id] == before && ws.masks[id] == mask && ws.selectedLayer?.hasMask == true)
     }
 
-    @Test(.disabled("waits on PK-5")) func maskFollowsCrop() throws {
+    @Test func maskFollowsCrop() throws {
         var (ws, id) = try maskedFixture()
         let marquee = PixelRect(x: 4, y: 3, width: 6, height: 5)
         ws.setSelection(marquee)
@@ -92,7 +92,7 @@ func maskGrey(_ ws: PhotoWorkspace, _ id: PhotoLayer.ID, _ x: Int, _ y: Int) -> 
         }
     }
 
-    @Test(.disabled("waits on PK-5")) func maskKeepsItsLayersSize() throws {
+    @Test func maskKeepsItsLayersSize() throws {
         var (ws, id) = try maskedFixture()
         try ws.addMask(.reveal)
         func matches() -> Bool { ws.masks[id]?.width == ws.pixels[id]?.width && ws.masks[id]?.height == ws.pixels[id]?.height }
@@ -110,7 +110,7 @@ func maskGrey(_ ws: PhotoWorkspace, _ id: PhotoLayer.ID, _ x: Int, _ y: Int) -> 
         #expect(matches())
     }
 
-    @Test(.disabled("waits on PK-5")) func duplicateCopiesTheMask() throws {
+    @Test func duplicateCopiesTheMask() throws {
         var (ws, id) = try maskedFixture()
         ws.setSelection(PixelRect(x: 4, y: 3, width: 6, height: 5))
         try ws.addMask(.selection)
@@ -120,7 +120,7 @@ func maskGrey(_ ws: PhotoWorkspace, _ id: PhotoLayer.ID, _ x: Int, _ y: Int) -> 
         #expect(ws.masks[copy] == ws.masks[id])
     }
 
-    @Test(.disabled("waits on PK-5")) func deleteAndEnableAreOneStepEach() throws {
+    @Test func deleteAndEnableAreOneStepEach() throws {
         var (ws, id) = try maskedFixture()
         try ws.addMask(.reveal)
         let count = ws.historySteps.count
@@ -135,13 +135,12 @@ func maskGrey(_ ws: PhotoWorkspace, _ id: PhotoLayer.ID, _ x: Int, _ y: Int) -> 
         ws.undo()
         #expect(ws.masks[id] != nil && ws.selectedLayer?.hasMask == true)
         ws.setEditsMask(true)
-        #expect(ws.editsMask && ws.historySteps.count == count)
+        #expect(ws.editsMask && ws.historySteps.count == count + 1 && ws.historyIndex == count - 1)
     }
 }
 
 @Suite struct PhotoMaskCommandTests {
     static let ids = ["layer.mask-add", "layer.mask-delete", "layer.mask-apply", "layer.mask-enable", "layer.mask-edit"]
-    static let notBuilt = "Not built yet (PK-5)."
 
     func why(_ id: String, _ ws: PhotoWorkspace) -> String? { PhotoWorkspace.catalog.availability(id, on: ws).why }
 
@@ -160,21 +159,21 @@ func maskGrey(_ ws: PhotoWorkspace, _ id: PhotoLayer.ID, _ x: Int, _ y: Int) -> 
         // "Paint" has a mask.
         let paint = try PhotoWorkspace.fixture(.layered)
         #expect(why("layer.mask-add", paint) == "This layer already has a mask.")
-        for id in Self.ids.dropFirst() { #expect(why(id, paint) == Self.notBuilt, "\(id)") }
+        for id in Self.ids.dropFirst() { #expect(why(id, paint) == nil, "\(id)") }
         let (plain, _) = try maskedFixture()
-        #expect(why("layer.mask-add", plain) == Self.notBuilt)
+        #expect(why("layer.mask-add", plain) == nil)
         #expect(plain.addMaskHelp(.selection) == "Make a selection first.")
         for id in Self.ids.dropFirst() { #expect(why(id, plain) == "This layer has no mask.", "\(id)") }
     }
 
-    @Test func theStubsRefuseAsNotBuilt() throws {
+    @Test func aRefusalChangesNothing() throws {
         var (ws, _) = try maskedFixture()
-        let refusal = PhotoRefusal(Self.notBuilt), before = ws
-        #expect(throws: refusal) { try ws.addMask(.reveal) }
+        let before = ws
+        #expect(throws: PhotoRefusal("Make a selection first.")) { try ws.addMask(.selection) }
         #expect(throws: PhotoRefusal("This layer has no mask.")) { try ws.deleteMask() }
-        var paint = try PhotoWorkspace.fixture(.layered)
-        #expect(throws: refusal) { try paint.applyMask() }
-        #expect(throws: refusal) { try paint.setMaskEnabled(false) }
+        #expect(throws: PhotoRefusal("This layer has no mask.")) { try ws.applyMask() }
+        #expect(throws: PhotoRefusal("This layer has no mask.")) { try ws.setMaskEnabled(false) }
+        ws.setEditsMask(true)
         #expect(ws == before)
     }
 
