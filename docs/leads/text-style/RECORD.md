@@ -42,6 +42,7 @@ Next: Lane: #4871 TS-a and #5047 TS-7 in the lane. After #4871 merges, merge dev
 
 ## Decisions
 
+- 2026-10-24T09:14:14Z Heartbeat 09:14Z: #4958 kept fast-lane, stacked on #4871; #5047 in the lane. TS-9 waits on AJ-a (adjust-everywhere planned). Dev-red #5113 is a macOS setup failure, not ours.
 - 2026-10-24T08:51:52Z Heartbeat 08:52Z: #4958 had no fast-lane after the restack (the lane only labels PRs based on dev), so I added it; it waits on #4871 as a stacked PR. #5047 in the lane. TS-9 waits on AJ-a (adjust-everywhere planned).
 - 2026-10-24T08:28:38Z Heartbeat 08:30Z: the lane kept dropping fast-lane from TS-u #4958 because, based on dev, it carries #4871's commits (579 lines, over the 400 cap). Retargeted it to lead/text-style-TS-a (stacked, own diff ~275 lines). Fixed its body: Belt-Lead set to this run, Refs #3779 added, Mutate moved after Refs. Head unchanged. GitHub retargets it to dev when #4871 merges. #5047 in the lane. TS-9 still waits on AJ-a (adjust-everywhere planned).
 - 2026-10-24T08:07:00Z Heartbeat 07:40Z: #5047 in the lane. TS-u #4958 now carries fast-lane with base dev (lane sweep); it still merges after #4871. TS-8 starts once TS-u merges; TS-9 still waits on AJ-a (adjust-everywhere planned).
