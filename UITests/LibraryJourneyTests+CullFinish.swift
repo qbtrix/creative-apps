@@ -1,11 +1,10 @@
 // LibraryJourneyTests+CullFinish.swift: J-DR1 (docs/blueprints/library/features/cull-finish.md, Journey
 // steps): label keys 7 and 9 with undo, then Delete Rejected Photos… with Cancel, Move to Trash, Undo,
-// Redo and a re-import that finds nothing new. Skipped until DR-9 runs the window on the live Trash.
+// Redo and a re-import that finds nothing new, on live services and the live Trash in a scratch folder (DR-9).
 import XCTest
 
 final class LibraryCullFinishJourneyTests: XCTestCase {
     @MainActor func testDeleteRejects() throws {
-        try XCTSkipIf(true, "waits on DR-9")
         // Step 1: the shoot, imported live from a scratch folder.
         let folder = try LibraryFiles.freshPhotoFolder()
         let catalog = try LibraryFiles.freshCatalogDir()
