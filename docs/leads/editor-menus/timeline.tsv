@@ -93,3 +93,4 @@ utc	stage	event	ref	note
 2026-10-24T04:11Z	check	editor-menus	04:12Z: bisect probe -8 (deciding probe) running; #4818 in green prefix	https://github.com/qbtrix/creative-apps/pull/4818
 2026-10-24T04:33Z	check	editor-menus	04:33Z: bisect probe -8 macOS running; #4818 in green prefix	https://github.com/qbtrix/creative-apps/pull/4818
 2026-10-24T04:54Z	check	editor-menus	04:55Z: bisect probe -8 macOS still running; #4818 in green prefix	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-24T05:17Z	check	editor-menus	05:18Z: probe -8 green -> culprit #4864; prefix incl #4818 not yet merged; new batch 20261024050226 started without it	https://github.com/qbtrix/creative-apps/pull/4818
