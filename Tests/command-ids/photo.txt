@@ -5,6 +5,7 @@ edit.cut
 edit.delete-selection
 edit.fill-selection
 edit.paste
+edit.paste-as-image
 edit.redo
 edit.select-all
 edit.undo
