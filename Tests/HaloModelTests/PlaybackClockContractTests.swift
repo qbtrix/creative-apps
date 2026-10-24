@@ -3,6 +3,7 @@
 // type, so the two must agree. The edges match FlareCore's playbackFrame.
 // Runs on Linux and macOS.
 import HaloModel
+import SuiteKernel
 import Testing
 
 let playbackClocks: [any PlaybackClock] = [FakePlaybackClock(), LivePlaybackClock()]
@@ -10,7 +11,7 @@ let playbackClocks: [any PlaybackClock] = [FakePlaybackClock(), LivePlaybackCloc
 /// VP-2's rows: 24 fps, 72 frames.
 private func tick(_ clock: any PlaybackClock, _ start: Int, _ elapsed: Double, n: Int = 72, loops: Bool)
     -> HaloPlaybackTick {
-    clock.tick(startFrame: start, elapsed: elapsed, framesPerSecond: 24, durationFrames: n, loops: loops)
+    clock.tick(startFrame: start, elapsed: elapsed, rate: FrameRate(whole: 24), durationFrames: n, loops: loops)
 }
 
 @Test(arguments: playbackClocks)
@@ -46,29 +47,29 @@ func clockHoldsTheStartForNoTime(clock: any PlaybackClock) {
 
 @Test(arguments: playbackClocks)
 func clockLoopWrapsToZero(clock: any PlaybackClock) {
-    #expect(clock.tick(startFrame: 50, elapsed: 1, framesPerSecond: 24, durationFrames: 60, loops: true)
+    #expect(clock.tick(startFrame: 50, elapsed: 1, rate: FrameRate(whole: 24), durationFrames: 60, loops: true)
         == HaloPlaybackTick(frame: 14, ended: false))
-    #expect(clock.tick(startFrame: 59, elapsed: 1.0 / 24, framesPerSecond: 24, durationFrames: 60, loops: true)
+    #expect(clock.tick(startFrame: 59, elapsed: 1.0 / 24, rate: FrameRate(whole: 24), durationFrames: 60, loops: true)
         == HaloPlaybackTick(frame: 0, ended: false))
 }
 
 @Test(arguments: playbackClocks)
 func clockPlayOnceStopsOnTheLastFrame(clock: any PlaybackClock) {
-    #expect(clock.tick(startFrame: 0, elapsed: 0.7, framesPerSecond: 30, durationFrames: 60, loops: false)
+    #expect(clock.tick(startFrame: 0, elapsed: 0.7, rate: FrameRate(whole: 30), durationFrames: 60, loops: false)
         == HaloPlaybackTick(frame: 21, ended: false))
-    #expect(clock.tick(startFrame: 50, elapsed: 1, framesPerSecond: 24, durationFrames: 60, loops: false)
+    #expect(clock.tick(startFrame: 50, elapsed: 1, rate: FrameRate(whole: 24), durationFrames: 60, loops: false)
         == HaloPlaybackTick(frame: 59, ended: true))
-    #expect(clock.tick(startFrame: 0, elapsed: 1e300, framesPerSecond: 24, durationFrames: 60, loops: false)
+    #expect(clock.tick(startFrame: 0, elapsed: 1e300, rate: FrameRate(whole: 24), durationFrames: 60, loops: false)
         == HaloPlaybackTick(frame: 59, ended: true))
 }
 
 @Test(arguments: playbackClocks)
 func clockStaysOnStartFrameForNoTime(clock: any PlaybackClock) {
     for elapsed in [Double.nan, .infinity, -1, 0] {
-        #expect(clock.tick(startFrame: 7, elapsed: elapsed, framesPerSecond: 24, durationFrames: 60, loops: true)
+        #expect(clock.tick(startFrame: 7, elapsed: elapsed, rate: FrameRate(whole: 24), durationFrames: 60, loops: true)
             == HaloPlaybackTick(frame: 7, ended: false))
     }
-    #expect(clock.tick(startFrame: 7, elapsed: 1, framesPerSecond: 0, durationFrames: 60, loops: true)
+    #expect(clock.tick(startFrame: 7, elapsed: 1, rate: FrameRate(whole: 0), durationFrames: 60, loops: true)
         == HaloPlaybackTick(frame: 0, ended: false))
-    #expect(clock.tick(startFrame: 7, elapsed: 1, framesPerSecond: 24, durationFrames: 0, loops: true).frame == 0)
+    #expect(clock.tick(startFrame: 7, elapsed: 1, rate: FrameRate(whole: 24), durationFrames: 0, loops: true).frame == 0)
 }
