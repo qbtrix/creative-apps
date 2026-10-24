@@ -56,3 +56,4 @@ utc	stage	event	ref	note
 2026-10-24T06:03Z	check-in	batch-20261024050226 macOS gate red (run 40064703313: RenderBudgetFlareExportPack timeout + AppSnapshotTests hang, not ours); lane bisecting, probe -6 excludes #4870/#4875; dev 654fb363; no labels to fix; no new findings
 2026-10-24T06:25Z	check-in	dev 4446461e (#4840, not ours); bisect probe batch-20261024050226-6 Linux green, macOS running; #4870/#4875 still waiting; no labels to fix; no new findings
 2026-10-24T06:47Z	check-in	bisect narrowed to first 6 PRs (probes -1,-3 running), ahead of #4870/#4875; dev e5dcf939; no labels to fix; no new findings
+2026-10-24T06:57Z	OC-u	resume	run act-1a16cae7922-5nat; #4582 dirty, dev merged locally, gating
