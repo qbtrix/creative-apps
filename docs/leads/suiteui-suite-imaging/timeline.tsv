@@ -90,3 +90,4 @@ utc	stage	event	ref	note
 2026-10-24T21:22Z	poll	check	all	batch 20261024205137 red on Onboarding timeouts (not ours); bisecting
 2026-10-24T21:41Z	poll	check	all	bisect probes -3/-6 macOS running; nothing merged
 2026-10-24T22:01Z	poll	check	all	bisect probes still running; nothing merged
+2026-10-24T22:21Z	poll	check	all	bisect probes still running; nothing merged
