@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-25T01:15Z	3	stage-start	wave 2	SR-6 building on SR-5 (Wire shared-codecs:SC-photo)
 2026-10-25T01:45:00Z	3	pr-opened	SR-6	#5262 head b441375c, 137 lines, 5 files, CI: PASS
 2026-10-25T03:12:00Z	3	heartbeat	lane	batch-20261025023716 (holds #4848, #4877): Linux green, macOS gate running; nothing merged, no needs-fix
+2026-10-25T03:35:00Z	3	heartbeat	lane	batch-20261025023716 macOS red: DesignPlaceSnapshots.swift:39 type-check timeout (#4963's file, not ours); lane bisecting (probe -6); our PRs wait for the next batch
