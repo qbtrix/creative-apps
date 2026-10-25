@@ -96,5 +96,33 @@
     "find": "hash.add(word: develop.fingerprint)",
     "replace": "for slider in DevelopSlider.allCases { hash.add(word: develop.value(slider).bitPattern) }",
     "tests": "LibraryDevelopValuesTests"
+  },
+  {
+    "label": "a scroll never cancels the requests it left behind (.cancelsOffscreen)",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "for (id, pending) in pendingThumbnails where !shown.contains(id) && !window.ids.contains(id) {",
+    "replace": "for (id, pending) in pendingThumbnails where shown.isEmpty && !shown.contains(id) && !window.ids.contains(id) {",
+    "tests": "LibraryThumbnailPrefetchTests.swift"
+  },
+  {
+    "label": "the two screens either side are never requested",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "requests += request(window.ahead, asked: &asked, in: catalog, rebuilt: &rebuilt)",
+    "replace": "_ = window.ahead",
+    "tests": "LibraryThumbnailPrefetchTests.swift"
+  },
+  {
+    "label": "the prefetch runs farthest first",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "if low - distance >= 0 { ahead.append(order[low - distance]) }",
+    "replace": "if low - distance >= 0 { ahead.insert(order[low - distance], at: 0) }",
+    "tests": "LibraryThumbnailPrefetchTests.swift"
+  },
+  {
+    "label": "the prefetch window is one screen, not two",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "let margin = 2 * shown.count",
+    "replace": "let margin = shown.count",
+    "tests": "LibraryThumbnailPrefetchTests.swift"
   }
 ]

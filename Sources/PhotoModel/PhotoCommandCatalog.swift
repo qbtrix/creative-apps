@@ -4,6 +4,7 @@
 // the menu's label ("Rotate 90° Clockwise"). Zoom is window state, so the view.zoom commands are no-ops. Linux-safe.
 import CoreRaster
 import FlareCore
+import SuiteImaging
 import SuiteKernel
 
 extension PhotoWorkspace {
@@ -18,8 +19,6 @@ extension PhotoWorkspace {
     public struct StraightenParams: Codable, Sendable { public var degrees: Double; public var cropToFit: Bool }
     /// Export's sheet values: the format and, for JPEG, the quality (0.1...1; the last choice when left out).
     public struct ExportParams: Codable, Sendable { public var format: String; public var quality: Double? }
-    /// A rectangle in canvas pixels (select.rect).
-    public struct RectParams: Codable, Sendable { public var x, y, width, height: Int }
     /// image.gradient's: "linear" or "radial", stops as sRGB 0...1, and the two points in canvas pixels.
     public struct GradientParams: Codable, Sendable {
         public struct Stop: Codable, Sendable { public var offset, r, g, b, a: Double }
@@ -115,6 +114,7 @@ extension PhotoWorkspace {
                 gate { $0.toolHelp(tool) }) { $0.selectTool(tool) }
         }
         + HistoryCommands.specs(PhotoWorkspace.self) + SampleCommands.specs(PhotoWorkspace.self) + textCommands + pathCommands
+        + ToneCommands.specs(PhotoWorkspace.self)
 
     static let fileCommands: [CommandSpec<PhotoWorkspace>] = [
         .typed("file.new", title: "New Image", summary: "Opens a new white image of the given size.", kind: .file,
@@ -168,17 +168,7 @@ extension PhotoWorkspace {
         act("edit.fill-selection", "Fill", "Fills the selected pixels with the brush color.", .edit, menu(selectionHelp)) { $0.fillSelection() },
         act("select.all", "All", "Selects the whole image.", .view, gate { $0.canSelectAll ? nil : noImage }) { $0.selectAll() },
         act("select.deselect", "Deselect", "Drops the selection.", .view, menu { $0.canDeselect ? nil : "Nothing is selected." }) { $0.deselect() },
-        .typed("select.rect", title: "Select Rectangle", summary: "Selects a rectangle of the image, clipped to it.", kind: .view,
-               params: RectParams.self, schema: .object(["x": .integer("Left, in pixels."), "y": .integer("Top, in pixels."),
-                                                         "width": .integer("Width in pixels.", minimum: 1), "height": .integer("Height in pixels.", minimum: 1)],
-                                                        required: ["x", "y", "width", "height"]),
-               example: .object(["x": .number(0), "y": .number(0), "width": .number(8), "height": .number(6)]), availability: menu()) { w, p in
-            guard let rect = w.canvas.flatMap({ PixelRect(x: p.x, y: p.y, width: p.width, height: p.height).intersection($0.rect) }) else {
-                throw CatalogError.failed(id: "select.rect", message: "The rectangle is outside the image.")
-            }
-            w.setSelection(rect); return JSONValue.object([:])
-        },
-    ]
+    ] + AreaSelectCommands.specs(PhotoWorkspace.self)
     static let selectionHelp: @Sendable (PhotoWorkspace) -> String? = { $0.canEditSelection ? nil : "Select part of the selected layer first." }
 
     static let imageCommands: [CommandSpec<PhotoWorkspace>] = [
