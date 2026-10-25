@@ -174,3 +174,4 @@ utc	stage	event	ref	note
 2026-10-25T11:53Z	3	lane	lane	check: none of our PRs labelled; only #4886 merged since 11:30 (not ours); no open dev-red
 2026-10-25T12:15Z	3	lane	lane	check: none of our PRs labelled; only #4943 merged since 11:50 (not ours); no open dev-red; 1 open suiteui finding (#2848, needs-human), under the cap
 2026-10-25T12:36Z	3	lane	lane	check: none of our 10 PRs labelled or merged (all fast-lane+beta, last updated ~05:00); only #4943 merged since 12:10; no open dev-red
+2026-10-25T12:58Z	3	lane	lane	check: none of our PRs labelled or merged; only #4953 merged since 12:30 (not ours); no open dev-red
