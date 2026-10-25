@@ -246,3 +246,4 @@ utc	stage	event	ref	note
 2026-10-25T10:03Z	3	check-in	no change	full 40181391877 running
 2026-10-25T12:06Z	3	check-in	no change	full 40181391877 running, 40183384651 pending
 2026-10-25T14:10Z	3	check-in	no change	40181391877 cancelled before Halo; 40183384651 running, 40192756357 pending
+2026-10-25T16:14Z	3	check-in	no change	40183384651, 40192756357 cancelled before Halo; 40206772498 running
