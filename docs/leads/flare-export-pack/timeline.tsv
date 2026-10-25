@@ -179,3 +179,4 @@ utc	stage	event	ref	note
 2026-10-25T04:54:51Z	heartbeat	no change: batch 20261025023716 probe -1 still running; dev ee8ccd61; #4854 565669e7, #5025 9c2bc627 wait
 2026-10-25T05:16:31Z	heartbeat	batch 20261025023716 probe -2 now (culprit is #2 or #3); dev ee8ccd61; #4854, #5025 wait
 2026-10-25T05:37:51Z	heartbeat	batch 20261025023716 resolved: #4888 merged, culprit #4963/#4988; no batch now; dev 13fb2f59 (lane auto-revert); #4854, #5025 wait for next batch
+2026-10-25T06:02:35Z	heartbeat	batch 20261025054232 formed without #4854/#5025 (bisecting -6); both bodies carry valid markers, no checks on heads; likely mergeable UNKNOWN after dev moved; #5025 attribution footer stripped; dev 13fb2f59
