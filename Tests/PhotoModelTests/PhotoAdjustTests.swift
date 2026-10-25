@@ -178,6 +178,27 @@ import Testing
         #expect(PhotoWorkspace(services: .fake).adjustPreview("filter.sharpen", [:]) == nil)
     }
 
+    @Test func aSheetsFilterAndKindRunAsTheirCommand() throws {
+        let filters: [ImagingFilter] = [
+            .gaussianBlur(radius: 1.5), .motionBlur(degrees: 30, distance: 4), .sharpen(amount: 150, radius: 1.5, threshold: 2),
+            .reduceNoise(strength: 70, detail: 20), .addNoise(amount: 20, monochrome: true, seed: 7),
+        ]
+        for f in filters {
+            var ws = try Self.checker()
+            let id = try #require(ws.selectedLayerID), before = try Self.layerPixels(ws, id)
+            let (command, params) = PhotoWorkspace.adjustCommand(f)
+            _ = try PhotoWorkspace.catalog.run(command, params: .object(params), on: &ws)
+            #expect(try Self.layerPixels(ws, id) == (try FilterRules.apply(f, to: before, coverage: nil)), "\(f.id)")
+        }
+        let w = GrayWeights(red: 10, yellow: 20, green: 30, cyan: 40, blue: 50, magenta: 60)
+        var ws = try Self.checker()
+        for kind in [ImagingKind.blackAndWhite(w), .invert] {
+            let (command, params) = PhotoWorkspace.adjustCommand(kind)
+            _ = try PhotoWorkspace.catalog.run(command, params: .object(params), on: &ws)
+        }
+        #expect(ws.adjustments.kinds == [.blackAndWhite(w), .invert])
+    }
+
     @Test func kindsRoundTripAndAFileWithoutThemSavesAsBefore() throws {
         let plain = try JSONEncoder().encode(AdjustmentSettings())
         #expect(!String(decoding: plain, as: UTF8.self).contains("kinds"))
