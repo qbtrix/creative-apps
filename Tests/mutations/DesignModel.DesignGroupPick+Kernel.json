@@ -1,0 +1,7 @@
+[
+{"label":"scopeResetsOnDeselect: a deselect keeps the entered group, so a later click picks inside it","file":"Sources/DesignModel/DesignWorkspace.swift","find":"(selectedNodeID, groupScope) = (nil, .root)","replace":"selectedNodeID = nil","tests":"DesignGroupPickTests"},
+{"label":"commandPicksDeepest: a ⌘ press on the canvas lifts to the group like a plain one","file":"Sources/DesignModel/DesignGroupPick+Kernel.swift","find":"let deep = modifiers.contains(.deep)","replace":"let deep = false","tests":"DesignGroupPickTests"},
+{"label":"a press outside the entered group keeps it entered","file":"Sources/DesignModel/DesignGroupPick+Kernel.swift","find":"        groupScope = .root\n        return GroupPick.target","replace":"        return GroupPick.target","tests":"DesignGroupPickTests"},
+{"label":"a double-click on the picked group doesn't enter it","file":"Sources/DesignModel/DesignGroupPick+Kernel.swift","find":"if modifiers.contains(.enter), let id = pickedLayer,","replace":"if false, let id = pickedLayer,","tests":"DesignGroupPickTests"},
+{"label":"Escape deselects inside an entered group instead of stepping out","file":"Sources/DesignModel/DesignGroupPick+Kernel.swift","find":"groupScope.path.isEmpty ? .deselect : .exitGroup","replace":".deselect","tests":"DesignGroupPickTests"}
+]
