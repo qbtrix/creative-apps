@@ -164,3 +164,4 @@ Next: Lane: #4871 TS-a and #5047 TS-7 in the lane. After #4871 merges, merge dev
 - 2026-10-25T15:47:12Z (act-1a171c8932a-sa22): 15:47Z poll: 7 fast-lane PRs open, clean, eligible; dev took #5039, #5320; no needs-fix/needs-rebase, no dev-red, 0 findings.
 - 2026-10-25T16:07:53Z (act-1a171c8932a-sa22): 16:08Z poll: no change; 7 fast-lane PRs open, clean, eligible; dev at a57210d1; no needs-fix/needs-rebase, no dev-red, 0 findings.
 - 2026-10-25T16:28:26Z (act-1a171c8932a-sa22): 16:28Z poll: 7 fast-lane PRs open, clean, eligible; dev took #5044; no needs-fix/needs-rebase, no dev-red, 0 findings.
+- 2026-10-25T16:49:11Z (act-1a171c8932a-sa22): 16:49Z poll: dev-red #5321 (macos, range #4960 #5007 #5008 #5318, none ours) holds code batches; our 7 fast-lane PRs open, clean, eligible, wait; no needs-fix/needs-rebase, 0 findings.
