@@ -126,3 +126,4 @@ utc	stage	event	ref	note
 2026-10-25T09:19Z	3	heartbeat	lane	full CI 40178111920 on dev 8d3a12c4b: Linux green, macOS running; no merges or flags on ours; no dev-red
 2026-10-25T09:42Z	3	heartbeat	lane	dev-red #5316 (sched run 40179648854): macOS red on HomeModelTests/OnboardingModelTests 60s timeouts, Suite line, not #4877 (Photo suites green); full run 40178111920 still running; 7 open PRs unchanged
 2026-10-25T10:06Z	3	heartbeat	lane	7 open PRs unchanged; dev-red #5316 (Suite timeouts) open, not ours
+2026-10-25T10:27Z	3	heartbeat	lane	dev green: full run 40178111920 success at 8d3a12c4b, main promoted, #5316 closed; 7 open PRs unchanged (#5096 unstable only from a cancelled lane check)
