@@ -27,6 +27,8 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 2026-10-25 00:30Z: hb41: no change; dev afef017c fix(tests): give each Design drag gesture its own ; #5088/#5089/#5091/#5231 open, fast-lane only, no needs-*; the lane is bisecting batch 20261024235353 (#5192–#5214, none ours); no open findings.
+
 - 2026-10-25 00:20Z: Belt nudge: this run's record pushes went to lead/adopt-kernel-unsaved-prompt by mistake; carried them here, the branch Belt reads. State unchanged: dev afef017c, #5088/#5089/#5091/#5231 open, fast-lane only, no needs-*; no open findings.
 
 - 2026-10-24 23:40Z: wave 2 done: UP-z is #5231 (head d3b3389e, +14/-230, 6 files, fast-lane + feature-done, base the UP-halo branch). It deletes DesignClosePrompt and PhotoUnsavedPrompt (and its text test), drops their two canonical-baseline lines, and runs SJ-UP with no skipped leg; the wave reads built, #3721. scripts/ci --changed: CI: PASS. Built ahead of SC-z under the never-wait rule (Wire above).

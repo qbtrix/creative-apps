@@ -98,3 +98,4 @@ ts	kind	note
 2026-10-24T23:00:00Z	relaunch	run act-1a1701f664c-e58p on #3721; wave 2 UP-z built ahead (Wire SC-z)
 2026-10-24T23:40:00Z	pr	UP-z #5231 opened (stacked on #5091), CI: PASS; all slices built
 2026-10-25T00:20:00Z	nudge	Belt nudge; record carried to the branch Belt reads; no change in the lane
+2026-10-25T00:30:00Z	poll	hb41: no change; lane bisecting a batch without our PRs
