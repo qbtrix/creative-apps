@@ -85,3 +85,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 2026-10-25T09:06:07Z: batch-20261025090316 (p0 PRs) running without #4999; waits for the next batch. Same body-footer note as editor-menus
 - 2026-10-25T09:24:02Z: batch-20261025090316 (p0, not ours) bisecting; #4999 waits
 - 2026-10-25T09:41:54Z: batch-20261025090316 (p0, not ours) probe -6 macOS running; #4999 waits
+- 2026-10-25T09:59:52Z: batch-20261025090316 (p0, not ours) still bisecting; #4999 waits
