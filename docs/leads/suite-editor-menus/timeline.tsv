@@ -157,3 +157,4 @@ utc	stage	event	ref	note
 2026-10-25T02:01:37Z	check	EM-flare-halo	batch-20261024235353 bisect at probe -9; #4988 (beta) queued
 2026-10-25T02:20:09Z	check	EM-flare-halo	batch-20261024235353 bisect at probe -10; #4988 (beta) queued
 2026-10-25T02:38:46Z	check	EM-flare-halo	#4988 in lane/batch-20261025023716 (12 PRs, 10th); Linux + macOS gates running
+2026-10-25T02:57:17Z	check	EM-flare-halo	batch-20261025023716 (with #4988): Linux check green, macOS gate 40155151356 queued
