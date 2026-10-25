@@ -1,10 +1,12 @@
 // ExportSheet.swift: SuiteExportSheet (EK-30), drawn over ExportSheetRows, a
-// readout of the kernel's ExportRun: Format chips, Size (unless the host draws
+// readout of the kernel's ExportRun (or the host's own words for it): its
+// title ("Export" unless the host names it), Format chips, Size (unless the host draws
 // its own scale) and (when the format takes one) Quality rows, 8 pt apart, then the host's own options rows (the slot, #1989),
 // a progress bar while running, the finished or failed line after, and the
-// actions that state offers (ExportSheetAction). Every control's identifier
-// hangs off the host's prefix (ExportSheetIDs, "suite.export" by default) and
-// registers in `suite.controls`. When the progress row appears it marks
+// actions that state offers (ExportSheetAction); a host's `startReason` turns
+// Export off while editing and says why. Every control's identifier hangs off
+// the host's prefix (ExportSheetIDs, "suite.export" by default; the line is
+// `<prefix>.summary`) and registers in `suite.controls`. When the progress row appears it marks
 // `progress-shown` on the prefix's series in the window's `suite.perf`
 // (HB-U5, QB-L9). It holds no state; every edit goes to the host, which
 // moves its run.
@@ -64,6 +66,11 @@ public struct ExportSheetRows: Hashable, Sendable {
         }
         (self.progress, self.line, self.editable) = (progress, line, editable)
     }
+
+    /// The host's own readout, for a host whose run carries its own progress count or summary words.
+    public init(rows: [Row], editable: Bool, progress: ExportProgress?, line: Line?) {
+        (self.rows, self.editable, self.progress, self.line) = (rows, editable, progress, line)
+    }
 }
 
 /// A button the sheet may show.
@@ -77,6 +84,7 @@ public struct ExportSheetIDs: Hashable, Sendable {
     public init(_ prefix: String = "suite.export") { self.prefix = prefix }
     public var formats: String { prefix + ".format" }
     public var progress: String { prefix + ".progress" }
+    public var summary: String { prefix + ".summary" }
     public var start: String { id(.start) }
     public func format(_ id: String) -> String { "\(formats).\(id)" }
     public func id(_ action: ExportSheetAction) -> String { "\(prefix).\(action.rawValue)" }
@@ -84,28 +92,31 @@ public struct ExportSheetIDs: Hashable, Sendable {
 
 public struct SuiteExportSheet<Options: View>: View {
     let readout: ExportSheetRows, formats: [FormatChoice], ids: ExportSheetIDs, options: Options
+    let title: String, startReason: String?
     let onFormat: @MainActor (String) -> Void, onScale: @MainActor (Double) -> Void, onQuality: @MainActor (Double) -> Void
     let onExport: @MainActor () -> Void, onClose: @MainActor () -> Void
     let onTryAgain: (@MainActor () -> Void)?, onReveal: (@MainActor () -> Void)?
     @Environment(\.suiteProbeRecorder) private var recorder
 
     /// `options` are the host's rows, drawn under the sheet's own and disabled with them; Try Again and Reveal
-    /// show only when the host handles them.
+    /// show only when the host handles them. `startReason`, while editing, turns Export off and says why.
     public init(
         _ readout: ExportSheetRows, formats: [FormatChoice], idPrefix: String = "suite.export",
+        title: String = "Export", startReason: String? = nil,
         onFormat: @escaping @MainActor (String) -> Void, onScale: @escaping @MainActor (Double) -> Void,
         onQuality: @escaping @MainActor (Double) -> Void, onExport: @escaping @MainActor () -> Void,
         onClose: @escaping @MainActor () -> Void, onTryAgain: (@MainActor () -> Void)? = nil,
         onReveal: (@MainActor () -> Void)? = nil, @ViewBuilder options: () -> Options
     ) {
         (self.readout, self.formats, self.ids, self.options) = (readout, formats, ExportSheetIDs(idPrefix), options())
+        (self.title, self.startReason) = (title, startReason)
         (self.onFormat, self.onScale, self.onQuality) = (onFormat, onScale, onQuality)
         (self.onExport, self.onClose, self.onTryAgain, self.onReveal) = (onExport, onClose, onTryAgain, onReveal)
     }
 
     public var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.l) {
-            Text("Export").font(SuiteFont.title)
+            Text(title).font(SuiteFont.title)
             VStack(spacing: SuiteSpacing.s) {
                 ForEach(Array(readout.rows.enumerated()), id: \.offset) { row($0.element) }
                 options
@@ -116,8 +127,12 @@ public struct SuiteExportSheet<Options: View>: View {
                     .onAppear { recorder?.mark("progress-shown", series: ids.prefix) }
             }
             switch readout.line {
-            case .finished(let text): Label(text, systemImage: "checkmark.circle").foregroundStyle(SuiteColor.stateSuccess)
-            case .failed(let text): Label(text, systemImage: "exclamationmark.circle").foregroundStyle(SuiteColor.stateError)
+            case .finished(let text):
+                Label(text, systemImage: "checkmark.circle").foregroundStyle(SuiteColor.stateSuccess)
+                    .accessibilityIdentifier(ids.summary)
+            case .failed(let text):
+                Label(text, systemImage: "exclamationmark.circle").foregroundStyle(SuiteColor.stateError)
+                    .accessibilityIdentifier(ids.summary)
             case nil: EmptyView()
             }
             HStack {
@@ -136,7 +151,7 @@ public struct SuiteExportSheet<Options: View>: View {
             Button(action == .cancel ? "Cancel" : "Done", action: onClose)
                 .keyboardShortcut(.cancelAction).suiteControl(id: ids.id(action), enabled: true, reason: nil)
         case .start:
-            let help = readout.editable ? nil : "The export is already under way or done."
+            let help = readout.editable ? startReason : "The export is already under way or done."
             Button("Export", action: onExport)
                 .keyboardShortcut(.defaultAction).disabled(help != nil).help(help ?? "Export with these settings")
                 .suiteControl(id: ids.start, enabled: help == nil, reason: help, role: "primary")

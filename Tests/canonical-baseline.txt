@@ -75,7 +75,6 @@ Sources/HaloModel/Live/LivePlaybackClock.swift
 Sources/HaloModel/Live/LiveProjectHistory.swift
 Sources/LibraryApp/CropInspector.swift
 Sources/LibraryApp/LibraryCropOverlay.swift
-Sources/LibraryApp/LibraryExportSheet.swift
 Sources/LibraryApp/LibraryWindow+Crop.swift
 Sources/LibraryApp/LibraryWindow+Export.swift
 Sources/LibraryApp/LibraryWindow+Thumbnails.swift

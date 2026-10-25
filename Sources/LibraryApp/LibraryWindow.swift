@@ -1,7 +1,7 @@
 // LibraryWindow.swift: the Library window. It is SuiteWindow with the
 // collections in the sidebar, LibraryBrowser as content (with LibraryStatusBar
 // under it in the loupe and on preview data), LibraryInspector in the inspector, and
-// LibraryExportSheet while an export is under way. It owns the LibraryCatalog, hands its values and methods
+// LibraryExportSheetAdapter while an export is under way. It owns the LibraryCatalog, hands its values and methods
 // to the views, publishes the menu bar's LibraryMenu as a focused value, and
 // publishes the `library.controls` JSON (LibraryControls.swift).
 // The catalog starts from the launch arguments: a fixture's fakes and photos,

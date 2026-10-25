@@ -1,13 +1,21 @@
-// LibraryExportSheet.swift: File > Export… (export EX-6): editing, the progress
-// row, the summary. Values in, closures out; a nil action disables its control.
-// Each control but the dismiss-only Cancel and Done, and the name alert's Save
-// (#4208), is its catalog command's MenuCommand on the window's catalog
-// (command-state CS-6), so it is off with the command's reason too.
+// LibraryExportSheetAdapter.swift: File > Export… (export EX-6) on SuiteUI's
+// SuiteExportSheet (#5270), its ids under `library.export`. The shared sheet
+// draws the title ("Export 3 Photos"), Format chips for the formats this Mac
+// writes, the progress row ("Exporting 2 of 3" while the second photo writes),
+// the summary line (the run's ExportSummary words, failed once a photo failed)
+// and Cancel, Export, Try Again, Reveal in Finder and Done. Library's own rows
+// fill the options slot: Size chips, Long Edge, Quality (0 to 100, for formats
+// that take one), Folder with Choose…, Name, Preset, Write Sidecar, the preview
+// line, Save as Preset… and, after a failed run, the files that failed. Values
+// in, closures out; a nil action leaves its control off. The slot's commands
+// are their catalog command's MenuCommand on the window's catalog (command-state
+// CS-6); Export is off with the fields', the exporter's or the catalog's reason.
 import LibraryModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
-struct LibraryExportSheet: View {
+struct LibraryExportSheetAdapter: View {
     struct Actions {
         var setOptions: (@MainActor (ExportOptions) -> Void)?
         var chooseFolder, export, cancel, retry, close, showInFinder: LibraryMenu.Action?
@@ -15,8 +23,8 @@ struct LibraryExportSheet: View {
         var savePreset: (@MainActor (String) -> Void)?
     }
 
-    let state: ExportState, count: Int, preview: String?, writable: Set<ExportFormat>, exportHelp: String?
-    let presets: [ExportPreset], actions: Actions, progressDelay: Duration
+    let run: ExportRun<ExportOptions>, summary: ExportSummary?, count: Int, preview: String?
+    let writable: Set<ExportFormat>, exportHelp: String?, presets: [ExportPreset], actions: Actions
     /// The window's catalog, which the controls' specs read; nil (a snapshot) leaves the actions alone to decide.
     var catalog: LibraryCatalog?
     @State private var longEdgeText: String
@@ -24,28 +32,33 @@ struct LibraryExportSheet: View {
     @State private var savingPreset = false
     @State private var presetName = ""
 
-    init(state: ExportState, count: Int, preview: String?, writable: Set<ExportFormat>, exportHelp: String?,
-         presets: [ExportPreset], actions: Actions = Actions(), progressDelay: Duration = .milliseconds(100),
-         catalog: LibraryCatalog? = nil) {
-        (self.state, self.count, self.preview, self.writable, self.catalog) = (state, count, preview, writable, catalog)
-        (self.exportHelp, self.presets, self.actions, self.progressDelay) = (exportHelp, presets, actions, progressDelay)
-        let options = Self.options(state)
+    init(run: ExportRun<ExportOptions>, summary: ExportSummary?, count: Int, preview: String?, writable: Set<ExportFormat>,
+         exportHelp: String?, presets: [ExportPreset], actions: Actions = Actions(), catalog: LibraryCatalog? = nil) {
+        (self.run, self.summary, self.count, self.preview, self.writable) = (run, summary, count, preview, writable)
+        (self.exportHelp, self.presets, self.actions, self.catalog) = (exportHelp, presets, actions, catalog)
+        let options = Self.options(run)
         _longEdgeText = State(initialValue: options?.longEdge.map(String.init) ?? "")
         _qualityText = State(initialValue: options.map { String($0.quality) } ?? "")
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: SuiteSpacing.m) {
-            Text(Self.title(count)).font(SuiteFont.headline)
-            switch state {
-            case .idle: EmptyView()
-            case .editing(let options): editing(options)
-            case .running(let done, let total): running(done: done, total: total)
-            case .finished(let summary): finished(summary)
+        let formats = Self.formats(writable: writable)
+        SuiteExportSheet(
+            Self.readout(run, summary: summary, formats: formats), formats: formats, idPrefix: "library.export",
+            title: Self.title(count), startReason: Self.options(run).flatMap(startReason),
+            onFormat: { (id: String) -> Void in if let format = ExportFormat(rawValue: id) { change { $0.format = format } } },
+            onScale: { _ in }, onQuality: { _ in },
+            onExport: { actions.export?() },
+            onClose: { if case .running = run { actions.cancel?() } else { actions.close?() } },
+            onTryAgain: summary?.failedIDs.isEmpty == false ? actions.retry : nil,
+            onReveal: summary?.written.isEmpty == false ? actions.showInFinder : nil
+        ) {
+            if let options = Self.options(run) { editing(options) }
+            if let summary, !summary.failures.isEmpty {
+                InspectorNote(Self.failureLines(summary.failures).joined(separator: "\n"), identifier: "library.export.failures")
             }
         }
-        .padding(SuiteSpacing.l).frame(width: SuiteSize.contentIdealWidth)
-        .onChange(of: Self.options(state)) { (_: ExportOptions?, options: ExportOptions?) -> Void in sync(options) }
+        .onChange(of: Self.options(run)) { (_: ExportOptions?, options: ExportOptions?) -> Void in sync(options) }
     }
 
     @ViewBuilder private func editing(_ options: ExportOptions) -> some View {
@@ -53,22 +66,21 @@ struct LibraryExportSheet: View {
             InspectorOption(id: edge, title: edge == 0 ? "Original Size" : String(edge),
                             identifier: "library.export.size." + (edge == 0 ? "original" : String(edge)))
         }
-        let formats: [InspectorOption<ExportFormat>] = ExportFormat.allCases.filter { $0.help(writable: writable) == nil }
-            .map { InspectorOption(id: $0, title: $0.rawValue, identifier: "library.export.format.\($0.rawValue)") }
         let formatHelp = ExportFormat.allCases.compactMap { $0.help(writable: writable) }.joined(separator: " ")
-        let blocked: String? = fieldsHelp(options) ?? exportHelp
-        Form {
-            LabeledContent("Size") {
-                ChoiceChips(options: sizes, selected: options.longEdge ?? 0) { (edge: Int) -> Void in
-                    change { $0.longEdge = edge == 0 ? nil : edge }
-                }
+        VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
+            Text("Size").font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.textSecondary)
+            ChoiceChips(options: sizes, selected: options.longEdge ?? 0) { (edge: Int) -> Void in
+                change { $0.longEdge = edge == 0 ? nil : edge }
             }
+        }
+        Form {
             TextField("Long Edge (px)", text: Binding(get: { longEdgeText }, set: { setLongEdge($0) }),
                       prompt: Text("Original"))
                 .accessibilityLabel("Long Edge").accessibilityIdentifier("library.export.longEdge")
-            TextField("Quality", text: Binding(get: { qualityText }, set: { setQuality($0) }))
-                .disabled(!options.format.usesQuality)
-                .accessibilityLabel("Quality").accessibilityIdentifier("library.export.quality")
+            if options.format.usesQuality {
+                TextField("Quality", text: Binding(get: { qualityText }, set: { setQuality($0) }))
+                    .accessibilityLabel("Quality").accessibilityIdentifier("library.export.quality")
+            }
             LabeledContent("Folder") {
                 HStack(spacing: SuiteSpacing.s) {
                     Text(URL(fileURLWithPath: options.folder).lastPathComponent).lineLimit(1).truncationMode(.middle)
@@ -77,12 +89,6 @@ struct LibraryExportSheet: View {
                                 reason: Self.notEditing)
                         .accessibilityIdentifier("library.export.chooseFolder")
                 }
-            }
-            LabeledContent("Format") {
-                ChoiceChips(options: formats, selected: options.format) { (format: ExportFormat) -> Void in
-                    change { $0.format = format }
-                }
-                .help(formatHelp)
             }
             TextField("Name", text: Binding(get: { options.naming.template }, set: { setTemplate($0) }))
                 .help(options.naming.help ?? "Tokens: {name}, {date}, {seq}, {rating}.")
@@ -101,18 +107,14 @@ struct LibraryExportSheet: View {
                 .help(ExportSidecar.unavailable ?? "Writes an XMP file with the rating beside each photo.")
                 .accessibilityIdentifier("library.export.sidecar")
         }
+        if !formatHelp.isEmpty { Text(formatHelp).font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText) }
         Text(preview ?? "").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText)
-            .accessibilityIdentifier("library.export.preview")
+            .frame(maxWidth: .infinity, alignment: .leading).accessibilityIdentifier("library.export.preview")
         HStack {
             MenuCommand("export.save-preset", on: catalog, title: "Save as Preset…", action: askPresetName,
                         reason: ExportPresets.unavailable ?? Self.notEditing)
                 .accessibilityIdentifier("library.export.savePreset")
             Spacer()
-            Button("Cancel") { actions.close?() }.keyboardShortcut(.cancelAction)
-                .accessibilityIdentifier("library.export.cancel")
-            MenuCommand("file.export", on: catalog, title: "Export", action: blocked == nil ? actions.export : nil,
-                        reason: blocked ?? Self.notEditing, shortcut: .defaultAction)
-                .accessibilityIdentifier("library.export.export")
         }
         .alert("Save as Preset", isPresented: $savingPreset) {
             TextField("Name", text: $presetName).accessibilityIdentifier("library.export.presetName")
@@ -121,43 +123,31 @@ struct LibraryExportSheet: View {
         }
     }
 
-    @ViewBuilder private func running(done: Int, total: Int) -> some View {
-        BusyNote(ExportProgress(done: done + 1, total: total).text, identifier: "library.export.progress",
-                 fraction: (done, total), delay: progressDelay)
-        HStack {
-            Spacer()
-            MenuCommand("export.cancel", on: catalog, title: "Cancel", action: actions.cancel,
-                        reason: "No export is running.", shortcut: .cancelAction)
-                .accessibilityIdentifier("library.export.cancel")
+    /// What the shared sheet shows for `run`: the Format row alone (Library draws its own size and quality), the
+    /// photo being written counted in the progress ("Exporting 2 of 3" with one done), and a finished run's
+    /// summary in its own words, failed when a photo failed.
+    static func readout(_ run: ExportRun<ExportOptions>, summary: ExportSummary?, formats: [FormatChoice]) -> ExportSheetRows {
+        let base = ExportSheetRows(run, formats: formats, showsSize: false) { ExportPick(format: $0.format.rawValue) }
+        var progress = base.progress, line = base.line
+        if case .running(_, let done, let total) = run { progress = ExportProgress(done: done + 1, total: total) }
+        if case .finished = run, let summary {
+            line = summary.failures.isEmpty ? .finished(summary.message) : .failed(summary.message)
         }
+        return ExportSheetRows(rows: base.rows, editable: base.editable, progress: progress, line: line)
     }
 
-    @ViewBuilder private func finished(_ summary: ExportSummary) -> some View {
-        let failed = !summary.failures.isEmpty
-        if failed {
-            InspectorNote(summary.message, kind: .error, identifier: "library.export.summary")
-            InspectorNote(Self.failureLines(summary.failures).joined(separator: "\n"), identifier: "library.export.failures")
-        } else if summary.cancelled {
-            InspectorNote(summary.message, identifier: "library.export.summary")
-        } else {
-            Label(summary.message, systemImage: "checkmark.circle").foregroundStyle(SuiteColor.stateSuccess)
-                .accessibilityIdentifier("library.export.summary")
-        }
-        HStack {
-            if !summary.failedIDs.isEmpty {
-                MenuCommand("export.retry", on: catalog, title: "Try Again", action: actions.retry,
-                            reason: "No photos failed to export.")
-                    .accessibilityIdentifier("library.export.retry")
-            }
-            Spacer()
-            if !summary.written.isEmpty {
-                MenuCommand("export.show-in-finder", on: catalog, title: "Show in Finder", action: actions.showInFinder,
-                            reason: "Nothing has been exported yet.")
-                    .accessibilityIdentifier("library.export.showInFinder")
-            }
-            Button("Done") { actions.close?() }.keyboardShortcut(.defaultAction)
-                .accessibilityIdentifier("library.export.done")
-        }
+    /// The Format chips: the formats this Mac writes; Library's own Quality field stands in for the shared row.
+    nonisolated static func formats(writable: Set<ExportFormat>) -> [FormatChoice] {
+        ExportFormat.allCases.filter { $0.help(writable: writable) == nil }
+            .map { FormatChoice(id: $0.rawValue, name: $0.rawValue, hasQuality: false) }
+    }
+
+    /// Why Export is off while editing: a field that doesn't read, the exporter's or the name's help, no action,
+    /// or `file.export` unable to run on the catalog.
+    private func startReason(_ options: ExportOptions) -> String? {
+        if let blocked = fieldsHelp(options) ?? exportHelp { return blocked }
+        guard actions.export != nil else { return Self.notEditing }
+        return catalog.flatMap { LibraryCatalog.catalog.spec("file.export")?.availability($0).why }
     }
 
     nonisolated static let sizes = [1024, 2048, 4096, 0]
@@ -192,6 +182,11 @@ struct LibraryExportSheet: View {
         return nil
     }
 
+    nonisolated static func options(_ run: ExportRun<ExportOptions>) -> ExportOptions? {
+        if case .editing(let options) = run { return options }
+        return nil
+    }
+
     private func fieldsHelp(_ options: ExportOptions) -> String? {
         let range = ExportOptions.longEdgeRange
         if !(options.longEdge == nil && longEdgeText.isEmpty), Self.number(longEdgeText, in: range) == nil {
@@ -211,7 +206,7 @@ struct LibraryExportSheet: View {
     }
 
     private func change(_ edit: (inout ExportOptions) -> Void) {
-        guard var options = Self.options(state) else { return }
+        guard var options = Self.options(run) else { return }
         edit(&options)
         actions.setOptions?(options)
     }

@@ -101,12 +101,12 @@ final class LibraryExportJourneyTests: XCTestCase {
         }
     }
 
-    /// Step 3 (L): "Exported 2 photos." with Show in Finder; `names` are JPEGs with a long edge of 1024.
+    /// Step 3 (L): "Exported 2 photos." with Reveal in Finder (the shared sheet's label); `names` are JPEGs with a long edge of 1024.
     @MainActor private func expectExported(_ names: [String], in out: URL, _ library: Journey) throws {
         let summary = library.element("library.export.summary")
         XCTAssert(summary.waitForExistence(timeout: 60), "no summary (library.export.summary)")
         XCTAssert(wait(5) { Self.text(summary) == "Exported 2 photos." }, "the summary reads \(Self.text(summary))")
-        XCTAssert(sheetButton("Show in Finder", library).exists, "the summary has no Show in Finder")
+        XCTAssert(sheetButton("Reveal in Finder", library).exists, "the summary has no Reveal in Finder")
         if names.first == "IMG_0001.jpg" { library.shot("exported") }
         for name in names {
             let url = out.appending(path: name)
