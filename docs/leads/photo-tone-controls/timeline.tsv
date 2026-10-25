@@ -141,3 +141,4 @@ utc	stage	event	ref	note
 2026-10-25T00:07:46Z	W4	check	PT-4	check-in: full CI 40137153379 green (no tone slice merged yet); batch-20261024205137 resolved; batch-20261024235353 (12 PRs, none ours) running; our PRs clean, wait for next batch
 2026-10-25T00:31:24Z	W4	check	PT-4	check-in: batch-20261024235353 red on Linux+macOS, lane bisecting (probe -6 Linux green, macOS running); our PRs clean, not in it
 2026-10-25T00:55:08Z	W4	check	PT-4	check-in: no change; batch-20261024235353 bisect probe -6 macOS still running; our PRs clean
+2026-10-25T01:19:18Z	W4	check	PT-4	check-in: batch-20261024235353 probe -6 green, probe -9 running; our PRs clean, not in it
