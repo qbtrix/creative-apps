@@ -147,7 +147,9 @@ struct PhotoCommandCatalogTests {
 
     /// Commands with no menu item: the catalog's only (gradient-fill PG-3; image.flip has Image > Flip Canvas since OC-13); the Layers list's pick, All Layers
     /// (Select menu, PM-3) and opacity (multi-layer-select PM-5); the eyedropper's sample query (PE-6), a tool's.
-    static let noMenu: Set = ["select.rect", "image.gradient", "layer.pick", "layer.select-all", "layer.set-opacity", "layer.move-by",
+    /// The area commands (area-selection AR-10) get their Select menu items in AR-photo-u.
+    static let noMenu: Set = ["select.rect", "select.ellipse", "select.lasso", "select.polygon", "select.wand", "select.invert",
+                              "select.feather", "select.expand", "select.contract", "select.reselect", "image.gradient", "layer.pick", "layer.select-all", "layer.set-opacity", "layer.move-by",
                               "color.sample"]
     /// Every non-tool command but the menu-less ones, the shared file-flow ones, the place ones and Free Transform's
     /// (transform PT-5, ahead of its menu items) and the History panel's (history-panel PH-5) and text layers' (the Type tool and inspector run them), in menu order (the catalog lists them as the menus do).
