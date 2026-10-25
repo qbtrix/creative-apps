@@ -84,3 +84,4 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - 00:08Z check-in: all six PRs open, clean, fast-lane, no needs-fix. Old batch resolved; new batch 20261024235353 (Linux 40144575552, macOS gate 40144578021) holds none of our heads, so ours wait for the next one. No slice-done, no new findings.
 - 00:30Z check-in: all six PRs open, clean, fast-lane, no needs-fix. Batch 20261024235353 (none of ours) is red and bisecting (probe -6 macOS gate 40145609051); dev still afef017c. No slice-done, no new findings.
 - 00:52Z check-in: no change. All six PRs open, clean, fast-lane, no needs-fix. Lane still bisecting batch 20261024235353 (probe -6 macOS gate 40145609051); dev still afef017c. No slice-done, no new findings.
+- 01:24Z heartbeat: #4894 (HF-m) clean on dev, #4936 (HF-4) clean stacked on HF-m, #5092 (HF-z) clean on dev; none merged yet, no needs-fix or needs-rebase; 0 open findings. Belt nudge received, resuming polling.
