@@ -150,3 +150,4 @@ utc	stage	event	ref	note
 2026-10-24T23:51:33Z	check	EM-flare-halo	batch-20261024205137 bisect finished, no lane batch open; #4988 clean, waiting for next batch; #5164 body footer re-added by tooling on edit (lane strips it from the squash)
 2026-10-25T00:10:29Z	check	EM-flare-halo	batch-20261024235353 (12 PRs, beta/p0) bisecting at probe -6 without #4988; added beta (the feature's label, #3774) to #4988 and #5164 so they queue in the beta tier
 2026-10-25T00:29:01Z	check	EM-flare-halo	batch-20261024235353 still at probe -6; #4988 (beta) queued for the next batch
+2026-10-25T00:47:31Z	check	EM-flare-halo	batch-20261024235353 probe -6 still running (macOS gate); #4988 (beta) queued
