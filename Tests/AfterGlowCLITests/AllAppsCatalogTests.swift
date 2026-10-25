@@ -2,7 +2,7 @@
 // app's `list-commands` match their goldens in Golden/apps/, every catalog keeps the kernel's laws on a real job's
 // input, and every real job under Tests/RealJobs/<app>/ passes or is skipped for a reason that names its gap.
 // A `<app>.list-commands.json` golden holds one compact command per line, sorted by id (`goldenText`), so two PRs
-// that add different commands touch different lines and merge cleanly.
+// that add different commands touch different lines and merge cleanly. The test checks that layout byte for byte;
 // `AFTERGLOW_RECORD_GOLDENS=1 swift test --filter AllAppsCatalogTests` rewrites the goldens from the CLI.
 import AfterGlowCLICore
 import DesignModel
@@ -73,6 +73,8 @@ struct AllAppsCatalogTests {
             try Data(try Self.goldenText(commands).utf8).write(to: file)
         }
         #expect(commands == (try Self.golden("\(app).list-commands")), "\(app) list-commands differs")
+        #expect(try String(contentsOf: file, encoding: .utf8) == (try Self.goldenText(commands)),
+                "\(app).list-commands.json isn't one command per line sorted by id; rerun with AFTERGLOW_RECORD_GOLDENS=1")
         guard case .object(let fields) = commands, case .array(let listed)? = fields["commands"] else { Issue.record("no commands"); return }
         #expect(fields["app"] == .string(app))
         #expect(!listed.isEmpty, "\(app) lists no commands")
