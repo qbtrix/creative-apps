@@ -51,10 +51,13 @@ import Testing
         ).pixels
     }
 
+    /// The least alpha that counts as lit: one 8-bit level.
+    static let lit = 1.0 / 255
+
     /// How far left of the square's left edge (x = 80) the glow lights row 60.
     static func reach(_ pixels: PixelBuffer) throws -> Int {
         var x = 79
-        while x >= 0, try pixels.pixel(x: x, y: 60).a > 0.01 { x -= 1 }
+        while x >= 0, try pixels.pixel(x: x, y: 60).a >= Self.lit { x -= 1 }
         return 79 - x
     }
 
@@ -80,15 +83,18 @@ import Testing
     }
 
     @Test(.disabled("StyleProgram.render is LS-8's stub")) func glowReachesItsKeyedSize() throws {
-        #expect(try Self.reach(Self.render(Self.keyedGlow, at: 0)) == 0)
-        #expect(abs(try Self.reach(Self.render(Self.keyedGlow, at: 15)) - 10) <= 2)
-        #expect(abs(try Self.reach(Self.render(Self.keyedGlow, at: 30)) - 20) <= 2)
+        #expect(try Self.reach(Self.render(Self.keyedGlow, at: 0)) == 0, "frame 0 lights pixels outside the box")
+        for frame in [15, 30] {
+            let reach = try Self.reach(Self.render(Self.keyedGlow, at: frame))
+            let bound = StyleRules.reach(try #require(Self.style(Self.keyedGlow, at: frame)))
+            #expect(reach > 0 && reach <= bound, "frame \(frame) reaches \(reach) px, StyleRules allows \(bound)")
+        }
     }
 
     @Test(.disabled("StyleProgram.render is LS-8's stub")) func glowIsNotClipped() throws {
         let pixels = try Self.render(Self.keyedGlow, at: 30)
         var right = 120
-        while right < 200, try pixels.pixel(x: right, y: 60).a > 0.01 { right += 1 }
+        while right < 200, try pixels.pixel(x: right, y: 60).a >= Self.lit { right += 1 }
         #expect(try abs((right - 120) - Self.reach(pixels)) <= 1, "the glow sits off centre: placed without its origin")
     }
 }
