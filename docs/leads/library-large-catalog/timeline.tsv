@@ -100,3 +100,4 @@
 2026-10-24T23:24Z	poll	probe -1 macOS running; #5050 open
 2026-10-24T23:44Z	poll	probe -1 macOS at 62 min; #5050 open
 2026-10-25T00:04Z	poll	#5050 in batch 20261024235353, gates running
+2026-10-25T00:25Z	poll	batch 20261024235353 red (Onboarding timeout, LayerStyleGallery), not #5050; probe -6 running
