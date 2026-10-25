@@ -79,3 +79,7 @@ Next: wait for the lane to batch our open PRs (batch-20261024235353 holds none o
 ### 2026-10-25T04:42:20Z: stage
 
 PD-u #4963 was the culprit of red batch lane/batch-20261025023716 (macOS type-check timeout at DesignPlaceSnapshots.swift:39). Fixed in d709ee35, now 399 lines; restacked #4964 at 312c1dcb and #5001 at c0b36b50; all three pass scripts/ci --changed; Head lines moved; fast-lane restored on #4963. #4922 (PD-m) waits on the next batch. PD-z is held while more than 5 findings are open.
+
+### 2026-10-25T05:54:44Z: stage
+
+#4922 needs-rebase cleared: dev merged, catalog/golden/tests unioned with stroke.*, 373 lines/11 files, ci --changed PASS, Head 3c334c7a; #4963 fix d709ee35 awaits next batch
