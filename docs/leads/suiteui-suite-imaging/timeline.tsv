@@ -114,3 +114,4 @@ utc	stage	event	ref	note
 2026-10-25T07:57Z	heartbeat	poll: dev 13fb2f591; bisect probe -3 macOS still running
 2026-10-25T08:18Z	heartbeat	poll: dev 7e5bcd82f (#5287 not ours); bisect probe -3 macOS still running
 2026-10-25T08:39Z	heartbeat	poll: bisect probe -3 green (has #4886); probe -4 running
+2026-10-25T09:01Z	heartbeat	poll: bisect -4 red (culprit #4960, not ours); #4886 due to land; dev 8d3a12c4b
