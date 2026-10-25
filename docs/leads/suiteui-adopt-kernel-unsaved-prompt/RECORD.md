@@ -27,6 +27,7 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 2026-10-25 05:06Z: hb57: supervisor added beta to #5231 (05:04Z). #5088 (stack base) has no priority label, so p0/beta PRs keep going ahead of it; asked the supervisor on #3721 whether to label #5088/#5089/#5091 beta too. Labels left as they are.
 - 2026-10-25 04:54Z: hb56: no change; lane refs: batch-20261025023716 batch-20261025023716-1 batch-20261025023716-3 batch-20261025023716-6 ; #5088 eligible, waits behind p0/beta; no findings.
 - 2026-10-25 04:39Z: hb55: no change; lane refs: batch-20261025023716 batch-20261025023716-1 batch-20261025023716-3 batch-20261025023716-6 ; #5088 eligible, waits behind p0/beta; no findings.
 - 2026-10-25 04:24Z: hb54: no change; lane refs: batch-20261025023716 batch-20261025023716-1 batch-20261025023716-3 batch-20261025023716-6 ; #5088 eligible, waits behind p0/beta; no findings.
