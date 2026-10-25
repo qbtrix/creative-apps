@@ -65,9 +65,37 @@
   {
     "label": "the gradient is not decoded",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "gradient: container.decodeIfPresent(Fill.self, forKey: .gradient))",
-    "replace": "gradient: nil)",
+    "find": "gradient: container.decodeIfPresent(Fill.self, forKey: .gradient),",
+    "replace": "gradient: nil,",
     "tests": "DesignGradientTests.swift"
+  },
+  {
+    "label": "a copy drops the picture",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "        extras = node.extras",
+    "replace": "        extras = node.extras; placedAsset = nil",
+    "tests": "DesignPlaceTests.swift"
+  },
+  {
+    "label": "the picture is not decoded",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "placedAsset: container.decodeIfPresent(PlacedAsset.self, forKey: .placedAsset),",
+    "replace": "placedAsset: nil,",
+    "tests": "DesignPlaceTests.swift"
+  },
+  {
+    "label": "a centred focus is written, so an old file saves with a new key",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "if placedFocus != Self.centreFocus { try container.encode(placedFocus, forKey: .placedFocus) }",
+    "replace": "try container.encode(placedFocus, forKey: .placedFocus)",
+    "tests": "DesignPlaceTests.swift"
+  },
+  {
+    "label": "an ellipse or text keeps a picture",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "if kind.holdsPicture, placedAsset != nil { self.placedAsset = placedAsset }",
+    "replace": "if placedAsset != nil { self.placedAsset = placedAsset }",
+    "tests": "DesignPlaceTests.swift"
   },
   {
     "label": "the turn is not decoded",
