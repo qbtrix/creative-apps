@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
 Stage: 3 wave 8
 Base: c16bcd16c (origin/dev)
-Next: 08:18Z: dev moved to 7e5bcd82f (#5287, not ours); bisect probe lane/batch-20261025054232-3 macOS run 40171578102 still in progress (~70 min). All ours labelled fast-lane except #5178; no needs-fix/needs-rebase; no supervisor reply. IM-13 waits on #5151, #5163. Poll ~08:38Z.
+Next: 08:39Z: bisect probe -3 (#4837, #4886, #4943, #4953) passed macOS (run 40171578102 success), so #4886 is before the culprit and should land when the bisect ends; probe -4 now running (macOS 40176391007). dev 7e5bcd82f; no needs-fix/needs-rebase; no supervisor reply. IM-13 waits on #5151, #5163. Poll ~08:59Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a170cfbf58-pshm, feature issue #3715). This copy is refreshed with it after every stage.
 
