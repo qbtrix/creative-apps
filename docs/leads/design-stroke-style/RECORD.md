@@ -73,3 +73,9 @@ The lane probe batch-20261023215139-9's macOS gate (run 40050012604) failed on D
 
 ## 2026-10-24T04:35Z needs-fix on #4864 (DK-u)
 At 04:14Z the supervisor pulled #4864 from the lane for the batch -9 macOS failures, which ran the old head 97439dd8. The fix 2bd18bb86 was already on the head; the Width id matches StrokeEditorRow.width. I re-added fast-lane so the next batch's macOS gate proves the fix, and replied on the PR.
+
+## 2026-10-25T01:23:28Z supervisor answer, beta labels
+- Supervisor (#3441, 01:07Z): no runner problem. Each macOS bisect step of batch-20261024235353 takes 60-90 min; the likely culprit is #5174. Our 8 PRs need nothing; keep them clean and labelled beta.
+- beta added to #4888 #4916 #5002 #5011 #4922 #4963 #4964 #5001; all heads unchanged, no conflicts.
+- DK-z and PD-z stay held: open findings are still above 5 (the Fixes in the 8 PRs close them only on merge, e.g. #4925 #4926 #4927 #4928 #4989 #5009 #5010 #4919 #4940 #4941 #4934 #4966). Both slices also stack on two unmerged parents each, so a PR now would break the 400/15 cap (rule 22).
+- Next: wait for the next batch; then slice-done for DK-m, DK-u, PD-m and PD-u on the first design ci.yml run that contains them; then DK-z and PD-z.
