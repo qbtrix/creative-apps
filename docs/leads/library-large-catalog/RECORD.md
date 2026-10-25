@@ -2,16 +2,16 @@
 
 Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a16ee71e35-s8g5 · Session: claude/large-catalog-lead-4ijm0b (earlier act-1a16c627c84-u86z, act-1a1693fbf6d-ap2g, act-1a15df37b73-k199) · Started: 2026-10-21T10:19Z (resumed 2026-10-23T14:20Z, 2026-10-24T05:10Z, 2026-10-24T17:15Z)
-Stage: 3 wave 3 (LG-grid: #5042 #5054 merged 18:19Z, #5114 landed 19:18Z; LG-5+LG-8 #5050 open, last)
+Stage: 3 wave 3 done: LG-grid merged (#5050 7d301de7 at 02:22Z, last PR); waiting for a green ci.yml run on dev containing 7d301de7
 Base: da62659fc9460750cd2c1d1483b253c2d9a02375 (origin/dev)
-Next: watch #5050 (LG-5 + LG-8, feature-done) merge in the next lane batch and the supervisor land #5114; then Belt-Slice-Done LG-grid on a green ci.yml run on dev containing the last of them
+Next: find the green full or scoped-library ci.yml run on dev at or after 7d301de7 (feature-done should dispatch it), then Belt-Slice-Done LG-grid, critic panel on its screens, Belt-Contact-Sheet, Mac-Finish-Wanted
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | LG-a | 10,000-photo fixture and every budget test, disabled | LG-1, LG-2 | MJ-LG | metadata-more:MD-a (met) | no | 1 | done #4006, fix #4073 (c5801375) | 39601343733 | - |
 | LG-model | load off main with id index, IndexSet selection, one-pass export plan | LG-3, LG-4 | MJ-LG | LG-a; FC-a (met: filters-collections built), MD-e, DR-m (stubs, supervisor's answer b) | no | 0 | done (#4847, afb9cbed; run 40029034328) | - | - |
-| LG-grid | grid and loupe within budget, jobs, built | LG-5..LG-8 | LJ-LG, MJ-LG | LG-model; suiteui shared-thumbnails ST-m; FC-c (met) | yes | 0 | building (LG-5, LG-6) | - | - |
+| LG-grid | grid and loupe within budget, jobs, built | LG-5..LG-8 | LJ-LG, MJ-LG | LG-model; suiteui shared-thumbnails ST-m; FC-c (met) | yes | 0 | merged-done (#5050 7d301de7) | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -20,8 +20,8 @@ Next: watch #5050 (LG-5 + LG-8, feature-done) merge in the next lane batch and t
 | LG-2 | LG-a | 1 | large journey (skipped), -LibraryLargeFixture flag, RJ-L56 folder | LibraryJourneyTests+Large.swift, LibraryLaunch.swift, large-catalog.jobs.json | launch flag test, scripts/jobs check | #4006 | merged |
 | LG-3 | LG-model | 2 | direct select all, cheap can-export check | LibrarySelectionAdapter.swift, LibraryActions.swift, LibraryExport.swift, LargeCatalogEquivalenceTests.swift, mutations | LargeCatalogEquivalenceTests | #4847 | merged |
 | LG-4 | LG-model | 2 | one-pass export names (stems parsed once, one taken set) | Contracts/ExportNaming+Kernel.swift, Live/LiveExporter.swift, LargeCatalogEquivalenceTests.swift, mutations | LargeCatalogEquivalenceTests | #4847 | merged |
-| LG-5 | LG-grid | 3 | visible-first pass, two screens prefetched nearest first, off-window requests cancelled (decode stops), photo lookup by id | LibraryThumbnails.swift, LibraryWindow+Thumbnails.swift, Live/LiveThumbnails.swift, LibraryThumbnailPrefetchTests.swift, mutations | LibraryThumbnailPrefetchTests, aCancelledRequestDecodesNothing | #5050 | open |
-| LG-8 | LG-grid | 4 | status built, feature-done (folded into #5050, rule 22: under 50 lines) | large-catalog.wave.json | scripts/waves render --dry-run | #5050 | building |
+| LG-5 | LG-grid | 3 | visible-first pass, two screens prefetched nearest first, off-window requests cancelled (decode stops), photo lookup by id | LibraryThumbnails.swift, LibraryWindow+Thumbnails.swift, Live/LiveThumbnails.swift, LibraryThumbnailPrefetchTests.swift, mutations | LibraryThumbnailPrefetchTests, aCancelledRequestDecodesNothing | #5050 | merged 02:22Z |
+| LG-8 | LG-grid | 4 | status built, feature-done (folded into #5050, rule 22: under 50 lines) | large-catalog.wave.json | scripts/waves render --dry-run | #5050 | merged 02:22Z |
 | LG-7 | LG-grid | 4 | RJ-L56 on the 10,000 fixture's .library (sha256 of the rated catalog), journey's skip dropped (RJ-L07) | large-catalog.jobs.json, input/large.library, LibraryJourneyTests+Large.swift | RealJobsTests (RJ-L56) | #5054 | merged 18:19Z |
 | LG-6 | LG-grid | 3 | loupe neighbours decode behind the render, superseded step's dropped | RenderQueue.swift, LibraryWindow+Loupe.swift, LibraryRenderQueueAheadTests.swift, mutations | LibraryRenderQueueAheadTests | #5042 | merged 18:19Z |
 
@@ -68,6 +68,7 @@ Next: watch #5050 (LG-5 + LG-8, feature-done) merge in the next lane batch and t
 - 01:26Z: probe -6 (holds #5050) green on Linux and macOS. The lane probes -9 next (since 01:18Z); #5050 should merge with the green prefix once the bisect ends.
 - 01:46Z: probe -9 Linux green; macOS gate running (28 min). #5050 open, no needs-fix.
 - 02:06Z: probe -9 macOS gate still running (48 min). #5050 open, no needs-fix.
+- 02:22Z: #5050 merged as 7d301de7 (batch 20261024235353 green prefix). LG-grid's PRs are all on dev. No ci.yml run on dev at 7d301de7 yet.
 - 16:09Z: #5050 (LG-5) got needs-rebase (conflict with #4951 disk tier in LiveThumbnails.swift). Merged origin/dev into -lg5, kept the cancel check first then the disk read/store; scripts/ci --changed running (fix round 1).
 - 15:38Z: poll: still no change; LG-grid PRs queued, #5114 awaits supervisor, beta question open ~2h.
 - 15:19Z: poll: unchanged; LG-grid PRs still queued, #5114 awaits supervisor, beta question unanswered.
