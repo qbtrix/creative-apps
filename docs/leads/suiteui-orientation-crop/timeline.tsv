@@ -127,3 +127,4 @@ utc	stage	event	ref	note
 2026-10-25T06:56:50Z	check	heartbeat	06:56Z: all 16 PRs open and clean; lane probe batch-20261025054232-6 (through #5006 TC-u): Linux green, macOS gate still running; dev 13fb2f59; no new findings, no dev-red
 2026-10-25T07:26:58Z	check	heartbeat	16 PRs open; #5006 fixed for probe -6 macOS red; probe -3 running; no dev-red
 2026-10-25T07:47:24Z	check	heartbeat	16 PRs open and clean; probe -3 Linux green, macOS running; dev 13fb2f59; no dev-red; no new findings on our features
+2026-10-25T08:08:05Z	check	heartbeat	16 PRs open and clean; probe -3 macOS still running; dev 7e5bcd82 (#5287, not ours); no dev-red; no new findings on our features
