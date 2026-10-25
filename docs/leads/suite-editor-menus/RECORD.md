@@ -105,3 +105,4 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-25T00:29:01Z: batch-20261024235353 still at probe -6; #4988 (beta) queued for the next batch
 - 2026-10-25T00:47:31Z: batch-20261024235353 probe -6 still running (macOS gate); #4988 (beta) queued
 - 2026-10-25T01:06:07Z: batch-20261024235353-6 macOS gate (run 40145609051) in progress since 00:09Z; #4988 (beta) queued
+- 2026-10-25T01:24:36Z: batch-20261024235353 bisect moved to probe -9; #4988 (beta) queued for the next batch
