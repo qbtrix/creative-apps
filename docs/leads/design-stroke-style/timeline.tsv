@@ -229,3 +229,4 @@ time	kind	note
 2026-10-25T11:52:20Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; #4886 merged via batch 111803; batch 114830 (#4943) Linux running; ours queue behind
 2026-10-25T12:12:16Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; batch 114830 (#4943 only) Linux green, macOS gate pending; ours wait for next batch
 2026-10-25T12:32:10Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; #4943 merged; batch 122638 (#4953 only) Linux running; ours wait
+2026-10-25T12:52:57Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; batch 122638 (#4953 only) Linux green; dev 58bb6d4d green; ours wait
