@@ -244,3 +244,4 @@ utc	stage	event	ref	note
 2026-10-25T05:59Z	3	check-in	stable	halo 40153720478 green; H-J12 and PlayHittable pass; no new failures
 2026-10-25T08:01Z	3	check-in	no change	full 40162316813 cancelled; no newer halo run
 2026-10-25T10:03Z	3	check-in	no change	full 40181391877 running
+2026-10-25T12:06Z	3	check-in	no change	full 40181391877 running, 40183384651 pending
