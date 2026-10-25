@@ -142,3 +142,4 @@ utc	stage	event	ref	note
 2026-10-25T12:25:59Z	check	heartbeat	all 16 open+clean (#5246 at 85a1b8bd, #5266 clean); none merged; dev 58bb6d4d (#4943) no dev-red; lane landing PRs one at a time
 2026-10-25T12:46:57Z	check	heartbeat	all 16 open+clean; none merged; dev 58bb6d4d no dev-red; new finding #5317 (Photo journey testTier1Tone, Levels Black drag, line:photo) not ours
 2026-10-25T13:07:36Z	check	heartbeat	#4953 (TC-m last PR) merged 930337d5, awaiting green dev ci.yml (full or scoped suiteui); other 15 open+clean; dev no dev-red; #5317 not ours
+2026-10-25T13:28:47Z	slice	TC-m	Belt-Slice-Done posted (Linux job green in run 40195226753 at 930337d5); other 15 PRs open+clean; no dev-red
