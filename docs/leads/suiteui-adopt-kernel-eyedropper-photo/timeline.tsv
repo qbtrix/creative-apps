@@ -79,3 +79,4 @@ utc	stage	event	ref	note
 2026-10-25T10:18Z	check	EP-z	probe -6 macOS 40180145089 still running; dev-red #5316 open; #4943 open, no needs-fix
 2026-10-25T10:38Z	check	EP-z	probe -6 mac still running (79m); probe -9 linux running; #4943 open clean
 2026-10-25T10:58Z	check	EP-z	probe -6 green both gates; #4943 in green prefix; dev-red closed
+2026-10-25T11:18Z	check	EP-z	old batch dropped; new batch #4886 only; #4943 waits
