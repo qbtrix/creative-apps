@@ -122,3 +122,4 @@ Next: lane: probe batch-20261025023716-3 (holds #4988) resolves; once #4988 merg
 - 2026-10-25T04:17:23Z: Belt nudge: mirror lead/suite-editor-menus had stopped at 03:34Z; resynced. Probe -1 (#4888) macOS gate running; #4988 waits.
 - 2026-10-25T04:35:51Z: batch-20261025023716 probe -1 (#4888) macOS gate still running; #4988 waits
 - 2026-10-25T04:53:45Z: probe -1 (#4888) macOS gate still running; #4988 waits
+- 2026-10-25T05:11:37Z: lane bisect moved to probe -2 (#4963); #4988 is next after it
