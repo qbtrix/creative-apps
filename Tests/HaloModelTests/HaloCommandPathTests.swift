@@ -33,7 +33,7 @@ struct HaloCommandPathTests {
         Control(name: "HaloTransport Loop", id: "animation.loop", params: none),
         Control(name: "Layers Rename", id: "layer.rename", params: .object(["id": .string("comp-1-layer-1"), "name": .string("Ground")])),
         Control(name: "RenameRefusalAlert Rename", id: "composition.rename", params: .object(["id": .string("comp-1"), "name": .string("Intro")])),
-        Control(name: "NewCompositionSheet Create", id: "composition.new", params: newSettings),
+        Control(name: "NewDocumentSheet Create", id: "composition.new", params: newSettings),
         Control(name: "Render sheet Choose…", id: "render.choose-folder", params: none),
         Control(name: "Render sheet Render", id: "render.start", params: renderSettings),
         Control(name: "Unsaved alert Save", id: "file.answer-unsaved", params: .object(["answer": .string("save")])),

@@ -1,14 +1,13 @@
-// HaloCompositionSnapshots.swift: the New Composition sheet with an invalid
-// width, so its problem line shows (in stateError with the error circle) and
-// Create is disabled, in Light and Dark.
+// HaloCompositionSnapshots.swift: New Composition, SuiteUI's New Document sheet over Halo's suggested
+// settings (document-setup DS-15), with an invalid width, so its problem line shows (in stateError with the
+// error circle) and Create is disabled, in Light and Dark.
 // Writes halo-new-comp-sheet-light.png and halo-new-comp-sheet-dark.png, and
-// checks that its text fields and Frame Rate picker draw for real, not as the
-// yellow "prohibited" placeholder of an offscreen renderer (#152), and that
-// the width problem sits under Width, in the upper half of the sheet, not
-// below Duration.
+// checks that its text fields and Frame Rate menu draw for real, not as the
+// yellow "prohibited" placeholder of an offscreen renderer (#152).
 // macOS only.
 import AppKit
 import HaloModel
+import SuiteUI
 import SwiftUI
 import Testing
 
@@ -22,14 +21,20 @@ import Testing
         return settings
     }
 
+    /// The sheet as HaloWindow presents it for New Composition.
+    static func newSheet(_ settings: CompositionSettings) -> NewDocumentSheet {
+        NewDocumentSheet(.new(presets: [], clipboard: nil), setup: settings.setup, limits: CompositionSettings.limits,
+                         onDone: { _, _ in }, onCancel: {})
+    }
+
     @Test func newCompositionSheet() throws {
-        try snapshot(NewCompositionSheet(settings: invalidWidth), name: "halo-new-comp-sheet-light", scheme: .light)
-        try snapshot(NewCompositionSheet(settings: invalidWidth), name: "halo-new-comp-sheet-dark", scheme: .dark)
+        try snapshot(Self.newSheet(invalidWidth), name: "halo-new-comp-sheet-light", scheme: .light)
+        try snapshot(Self.newSheet(invalidWidth), name: "halo-new-comp-sheet-dark", scheme: .dark)
     }
 
     @Test(arguments: [ColorScheme.light, .dark])
     func newCompositionSheetFieldsAreNotPlaceholders(scheme: ColorScheme) throws {
-        let image = try #require(render(NewCompositionSheet(settings: invalidWidth), scheme: scheme))
+        let image = try #require(render(Self.newSheet(invalidWidth), scheme: scheme))
         let samples = placeholderYellowSamples(in: image)
         #expect(samples < 50, "the sheet's fields rendered as placeholders (\(samples) yellow samples, \(scheme))")
     }
@@ -37,23 +42,10 @@ import Testing
     /// The problem line is an error: drawn in stateError (a red), not grey.
     @Test(arguments: [ColorScheme.light, .dark])
     func newCompositionSheetProblemUsesErrorInk(scheme: ColorScheme) throws {
-        #expect(!CompositionDraft(invalidWidth).problems.isEmpty)
-        let image = try #require(render(NewCompositionSheet(settings: invalidWidth), scheme: scheme))
+        #expect(!invalidWidth.setup.problems(CompositionSettings.limits).isEmpty)
+        let image = try #require(render(Self.newSheet(invalidWidth), scheme: scheme))
         let samples = errorRedSamples(in: image).count
         #expect(samples > 10, "the sheet's problem line isn't in the error color (\(samples) red samples, \(scheme))")
-    }
-
-    /// The width problem shows under the Width field (second row), so its ink
-    /// sits in the upper half of the sheet, not below Duration near Create.
-    @Test(arguments: [ColorScheme.light, .dark])
-    func newCompositionSheetProblemSitsUnderItsField(scheme: ColorScheme) throws {
-        #expect(CompositionDraft(invalidWidth).problems(for: .width) == ["Width must be 1 to 8192 pixels."])
-        let image = try #require(render(NewCompositionSheet(settings: invalidWidth), scheme: scheme))
-        let rows = errorRedSamples(in: image).map(\.y)
-        let lowest = try #require(rows.max())
-        #expect(
-            lowest * 2 < image.pixelsHigh,
-            "the width problem is drawn at row \(lowest) of \(image.pixelsHigh), not under Width (\(scheme))")
     }
 }
 

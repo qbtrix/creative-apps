@@ -55,14 +55,14 @@ final class HaloJourneyTests: XCTestCase {
         let sheet = halo.app.sheets.firstMatch
         enter("abc", into: "Width", in: sheet)
         XCTAssert(
-            Self.contains("Width must be a whole number of pixels.", in: sheet).waitForExistence(timeout: 5),
+            Self.contains("Width must be 1 to 8192 px.", in: sheet).waitForExistence(timeout: 5),
             "no problem line for a width of abc")
         XCTAssertFalse(sheet.buttons["Create"].isEnabled, "Create is enabled with a width of abc")
         halo.shot("new-composition-invalid")
         enter("1080", into: "Width", in: sheet)
         enter("1920", into: "Height", in: sheet)
         XCTAssert(frameRateMenu(in: sheet).waitForExistence(timeout: 5),
-                  "no Frame Rate menu (halo.composition.sheet.frameRate) in the sheet")
+                  "no Frame Rate menu (suite.newdoc.rate) in the sheet")
         pickFrameRate("24 fps", in: sheet, halo)
         halo.shot("new-composition-filled")
         halo.click("Create", in: .sheet, step: "new-composition")
@@ -322,16 +322,15 @@ final class HaloJourneyTests: XCTestCase {
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         var steps = ViewerDragSteps(halo: halo)
 
-        // 1. New Composition… Loop, 24 fps, 2 s: the header and the sidebar read it.
+        // 1. New Composition… 24 fps, 2 s: the header and the sidebar read it.
         halo.click("New Composition…")
         let sheet = halo.app.sheets.firstMatch
-        enter("Loop", into: "Name", in: sheet)
-        enter("2", into: "Duration (seconds)", in: sheet)
+        enter("2", into: "Duration", in: sheet)
         pickFrameRate("24 fps", in: sheet, halo)
         halo.click("Create", in: .sheet)
         XCTAssert(header("1920 × 1080", halo).waitForExistence(timeout: 5), "the header doesn't read 1920 × 1080")
         XCTAssert(header("24 fps · 2 s", halo).exists, "the header doesn't read 24 fps · 2 s")
-        XCTAssert(Self.contains("Loop", in: halo.element("suite.sidebar")).exists, "the sidebar has no Loop row")
+        XCTAssert(Self.contains("Comp 1", in: halo.element("suite.sidebar")).exists, "the sidebar has no Comp 1 row")
         halo.shot("loop-new")
 
         // 2. Layer > New > Solid: the first row is Solid 1, drawn on the canvas.
@@ -736,16 +735,16 @@ final class HaloJourneyTests: XCTestCase {
     }
 
     /// Clicks the sheet's field labelled `label`, selects its text and types `text`.
-    /// The New Composition sheet's Frame Rate menu: SuiteUI's FrameRateMenu, a
-    /// menu button (not a pop-up, #4341) carrying `halo.composition.sheet.frameRate`.
+    /// The New Composition sheet's Frame Rate menu: SuiteUI's FrameRateMenu in the shared
+    /// New Document sheet, a menu button (not a pop-up, #4341) carrying `suite.newdoc.rate`.
     @MainActor private func frameRateMenu(in sheet: XCUIElement) -> XCUIElement {
-        sheet.menuButtons["halo.composition.sheet.frameRate"].firstMatch
+        sheet.menuButtons["suite.newdoc.rate"].firstMatch
     }
 
     /// Opens the sheet's Frame Rate menu and picks `rate`, titled as FrameRate's description ("24 fps").
     @MainActor private func pickFrameRate(_ rate: String, in sheet: XCUIElement, _ halo: Journey) {
         let menu = frameRateMenu(in: sheet)
-        XCTAssert(menu.waitForExistence(timeout: 5), "no Frame Rate menu (halo.composition.sheet.frameRate)")
+        XCTAssert(menu.waitForExistence(timeout: 5), "no Frame Rate menu (suite.newdoc.rate)")
         menu.click()
         let item = halo.app.menuItems[rate]
         XCTAssert(item.waitForExistence(timeout: 5), "the Frame Rate menu offers no \(rate)")

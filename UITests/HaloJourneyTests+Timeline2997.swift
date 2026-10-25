@@ -20,8 +20,8 @@ extension HaloTimelineJourneyTests {
         halo.reachable("New Composition…").click()
         let sheet = halo.app.sheets.firstMatch
         XCTAssert(sheet.waitForExistence(timeout: 5), "New Composition… opened no sheet")
-        var menu = sheet.menuButtons["Frame Rate"]
-        if !menu.waitForExistence(timeout: 5) { menu = sheet.popUpButtons["Frame Rate"] }
+        var menu = sheet.menuButtons["suite.newdoc.rate"]
+        if !menu.waitForExistence(timeout: 5) { menu = sheet.popUpButtons["suite.newdoc.rate"] }
         XCTAssert(menu.waitForExistence(timeout: 5), "the sheet has no Frame Rate menu")
         menu.click()
         let ntsc = halo.app.menuItems["29.97 fps"]
@@ -29,8 +29,8 @@ extension HaloTimelineJourneyTests {
         XCTAssert(halo.app.menuItems["23.976 fps"].exists && halo.app.menuItems["59.94 fps"].exists, "the menu lacks the NTSC rates")
         halo.shot("rates-1-menu")
         ntsc.click()
-        let duration = sheet.textFields["Duration (seconds)"]
-        XCTAssert(duration.waitForExistence(timeout: 5), "no Duration (seconds) field")
+        let duration = sheet.textFields["Duration"]
+        XCTAssert(duration.waitForExistence(timeout: 5), "no Duration field")
         duration.click()
         duration.typeKey("a", modifierFlags: .command)
         duration.typeText("10")

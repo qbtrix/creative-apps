@@ -9,8 +9,8 @@
 // Each area file also has a `<area>Scene(_:)` hook, applied here in a fixed
 // order, where it attaches its sheets, alerts, importers and launch tasks.
 // A dialog an area's route asks for is the one `request`; that area's hook
-// presents it and sets it back to nil. New Composition opens
-// NewCompositionSheet; a refused rename opens RenameRefusalAlert with the
+// presents it and sets it back to nil. New Composition opens SuiteUI's
+// NewDocumentSheet; a refused rename opens RenameRefusalAlert with the
 // typed name kept. The window publishes `perform` as the `haloPerform`
 // focused value and its project as `haloProject` (the menus read titles and
 // availability from it), opens on HaloLaunch's project and, under
@@ -100,9 +100,9 @@ struct HaloWindow: View {
                 .frame(minWidth: .zero, idealWidth: Self.inspectorWidth - 2 * SuiteSpacing.m, maxWidth: .infinity, alignment: .top)
             }
             .sheet(isPresented: $showsNewComposition) {
-                NewCompositionSheet(
-                    settings: model.suggestedSettings, state: HaloMenuState(project: model),
-                    onCreate: { settings in if model.newComposition(settings) { showsNewComposition = false } },
+                NewDocumentSheet(
+                    .new(presets: [], clipboard: nil), setup: model.suggestedSettings.setup, limits: CompositionSettings.limits,
+                    onDone: { setup, _ in if model.newComposition(setup) { showsNewComposition = false } },
                     onCancel: { showsNewComposition = false })
             }
             .modifier(RenameRefusalAlert(
