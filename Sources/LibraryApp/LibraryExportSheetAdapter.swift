@@ -126,7 +126,7 @@ struct LibraryExportSheetAdapter: View {
     /// What the shared sheet shows for `run`: the Format row alone (Library draws its own size and quality), the
     /// photo being written counted in the progress ("Exporting 2 of 3" with one done), and a finished run's
     /// summary in its own words, failed when a photo failed.
-    static func readout(_ run: ExportRun<ExportOptions>, summary: ExportSummary?, formats: [FormatChoice]) -> ExportSheetRows {
+    nonisolated static func readout(_ run: ExportRun<ExportOptions>, summary: ExportSummary?, formats: [FormatChoice]) -> ExportSheetRows {
         let base = ExportSheetRows(run, formats: formats, showsSize: false) { ExportPick(format: $0.format.rawValue) }
         var progress = base.progress, line = base.line
         if case .running(_, let done, let total) = run { progress = ExportProgress(done: done + 1, total: total) }
