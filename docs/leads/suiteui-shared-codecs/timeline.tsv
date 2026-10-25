@@ -96,3 +96,4 @@ utc	stage	event	ref	note
 2026-10-25T05:36:40Z	check	heartbeat	05:36Z: all 16 PRs open, none needs-fix/needs-rebase (lane dropped #5244's label); #5263 at 96e0e8b5 clean; dev 13fb2f59; new finding #5293 (suiteui canonical problem alert) and older #5227/#5288 not on our features; no dev-red
 2026-10-25T05:57:39Z	check	heartbeat	05:57Z: all 16 PRs open and clean; lane batch-20261025054232 (has #4953 TC-6, #5006 TC-u) is bisecting, probe -6 (prefix through #5006) on Linux + macOS gate; dev 13fb2f59; no new findings, no dev-red
 2026-10-25T06:17:04Z	check	heartbeat	06:16Z: all 16 PRs open and clean; lane probe batch-20261025054232-6 (through #5006 TC-u) still running Linux + macOS gate; dev 13fb2f59; no new findings, no dev-red
+2026-10-25T06:37:20Z	check	heartbeat	06:37Z: all 16 PRs open and clean; lane probe batch-20261025054232-6 (through #5006 TC-u): Linux green, macOS gate running; dev 13fb2f59; no new findings, no dev-red
