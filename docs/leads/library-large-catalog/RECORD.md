@@ -63,6 +63,7 @@ Next: watch #5050 (LG-5 + LG-8, feature-done) merge in the next lane batch and t
 - 23:44Z: probe -1 macOS gate still running (62 min). #5050 open, no needs-fix.
 - 00:04Z: probe -1 macOS green 23:52Z; the lane closed that bisect without a needs-fix on #5050 and started batch lane/batch-20261024235353 (Linux 40144575552, macOS 40144578021, since 23:54Z). #5050 is PR 4 of 14 in it.
 - 00:25Z: batch 20261024235353 red on both. Linux: OnboardingModelTests aSendAfterARefusalClearsTheOldSentence hit its 60 s limit. macOS: LayerStyleGalleryTests aSwitchThatCantActYetSaysWhy expectation. Neither is Library or #5050. The lane is bisecting (probe -6 since 00:09Z); #5050 is PR 4, inside -6.
+- 00:45Z: probe -6 (holds #5050) Linux green; macOS gate running (36 min). #5050 open, no needs-fix.
 - 16:09Z: #5050 (LG-5) got needs-rebase (conflict with #4951 disk tier in LiveThumbnails.swift). Merged origin/dev into -lg5, kept the cancel check first then the disk read/store; scripts/ci --changed running (fix round 1).
 - 15:38Z: poll: still no change; LG-grid PRs queued, #5114 awaits supervisor, beta question open ~2h.
 - 15:19Z: poll: unchanged; LG-grid PRs still queued, #5114 awaits supervisor, beta question unanswered.
