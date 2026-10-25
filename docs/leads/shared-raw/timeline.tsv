@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-25T04:18:00Z	3	heartbeat	lane	batch-20261025023716 bisect: probe -1 macOS still running; nothing merged, no needs-fix
 2026-10-25T05:20Z	3	heartbeat	lane	no merges; #4889 and #4848 wait in the lane, no dev-red
 2026-10-25T05:40Z	3	heartbeat	lane	no merges or lane flags; wave-2 PRs wait in the lane; no dev-red
+2026-10-25T06:02Z	3	heartbeat	lane	batch 20261025054232 red, lane bisecting; our PRs unflagged; no dev-red
