@@ -144,3 +144,4 @@ Next: lane: probe batch-20261025023716-3 (holds #4988) resolves; once #4988 merg
 - 2026-10-25T10:54:04Z: batch-20261025090316 (p0, not ours): probes -6 and -9 green, bisect narrowing; #4988 waits
 - 2026-10-25T11:12:03Z: batch-20261025090316 resolved; no batch in flight; #4988 clean, ready for the next batch
 - 2026-10-25T11:30:14Z: lane batch-20261025111803 holds only #4886 (p0); #4988 waits for the next batch
+- 2026-10-25T11:48:11Z: batch-20261025111803 resolved without #4988; still open, clean, fast-lane; waiting for next batch
