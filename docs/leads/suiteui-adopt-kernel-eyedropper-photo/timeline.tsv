@@ -74,3 +74,4 @@ utc	stage	event	ref	note
 2026-10-25T08:41Z	check	EP-z	Probe -3 green (macOS 40171578102). Lane on probe -4. #4943 open, clean.
 2026-10-25T09:02Z	check	EP-z	Bisect pinned #4960; lane said #4943 merged but it is still open and not on dev. Flagged in RECORD.
 2026-10-25T09:19Z	check	EP-z	#4943 re-batched in lane/batch-20261025090316
+2026-10-25T09:39Z	check	EP-z	bisect probe -6 Linux green, macOS running
