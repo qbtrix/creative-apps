@@ -81,3 +81,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 2026-10-25T07:53:37Z: batch-20261025054232 probe -3 macOS still running; #4999 waits for the next batch
 - 2026-10-25T08:11:29Z: batch-20261025054232 probe -3 macOS still running; #4999 waits for the next batch
 - 2026-10-25T08:29:24Z: batch-20261025054232 probe -4 running; #4999 waits for the next batch
+- 2026-10-25T08:47:24Z: no batch in flight; #4999 clean and ready for the next batch
