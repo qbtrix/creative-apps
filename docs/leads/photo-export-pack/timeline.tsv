@@ -259,3 +259,4 @@ utc	stage	event	ref	note
 2026-10-25T18:36Z	check-in	lane still oldest-first (#5105 PT-3 18:12Z); #5171/#5206 clean, queued, no lane note; #5345 quarantines XP-7 HEIC checks for dev-red #5321 (captain's); no new findings, XP-3/XP-4 or supervisor comments
 2026-10-25T19:08Z	check-in	lane oldest-first (#5112 PT-4 18:38Z); #5171/#5206 clean, queued; dev-red #5321 triage now names #5112 (tone-controls), not ours; #5346 fixes XP-7 HEIC (captain); no new findings, XP-3/XP-4 or supervisor comments
 2026-10-25T19:39Z	check-in	lane oldest-first (#5127 export chips finish pass 19:12Z, #5171 still clean against it); #5171/#5206 queued; dev-red #5321 bisect names #5112 (tone-controls PT-4, Linux), not ours; no new findings, XP-3/XP-4 or supervisor comments
+2026-10-25T20:11Z	check-in	#5148 landed 19:52Z (older, oldest-first); #5171/#5206 clean, waiting their turn; dev-red #5321 open, revert #5349 of PT-4 pending (not ours); no XP-3/XP-4, no findings
