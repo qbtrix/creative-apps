@@ -204,3 +204,4 @@ utc	stage	event	ref	note
 2026-10-25T15:06:43Z	3	heartbeat	-	#4999 eligible, queued; no batch in flight
 2026-10-25T15:24:39Z	3	heartbeat	-	#4999 eligible, queued behind p0
 2026-10-25T15:42:41Z	3	heartbeat	-	QUEUE: 50+ open p0 fast-lane PRs sort ahead of beta #4999; ~1 code PR per 20 min. Supervisor: raise #4999 to p0 if CB-z should land sooner
+2026-10-25T16:00:37Z	3	heartbeat	-	#4999 still beta, queued behind p0
