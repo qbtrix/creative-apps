@@ -15,11 +15,8 @@
 // Report: one PHOTO-RENDER-8K line per backend in
 // .build/snapshots/photo-render-budget.txt. The document autosaves into a temp
 // folder, never the user's. In Tests/perf-suites.txt, so the merge gate skips
-// it. `BodyCountSuites.PhotoFlipCanvasBudgetTests` (orientation-crop OC-14,
-// quality row "render: Photo Flip Canvas on an 8K two-layer image") hosts the
-// real Photo window on an 8K two-layer image and holds Image > Flip Canvas
-// Horizontal to at most 2 window bodies (target 1); nested in BodyCountSuites
-// since it reads a global body counter. macOS only.
+// it. PhotoFlipCanvasBudgetTests (OC-14, in BodyCountSuites): Flip Canvas on an
+// 8K two-layer window takes at most 2 window bodies. macOS only.
 import CoreRaster
 import CoreRender
 import CoreRenderMetal

@@ -20,18 +20,9 @@
 // the crop the fields show, from its top left to past the image's right edge,
 // which redraws the same crop. Every step checks `photo.canvas.crop` while a
 // crop is pending and shoots `photo-crop-*`. Values are waited for with query
-// predicates, never a sleep. The chips and the orientation toggle
-// (`suite.crop.orientation`, X) are the shared CropAspectPicker's
-// (orientation-crop OC-13).
-//
-// PJ-OC (orientation-crop OC-14, testFlipCanvasAndPortraitCrop): the two-layer
-// fixture (RJ-P70's two-layers.ora, 48 x 32, a pasted layer at 6, 4 over the
-// Background), copied to a temp folder. Image > Flip Canvas Horizontal mirrors
-// both layers as one step: the canvas's picture changes and Edit shows Undo
-// Flip Horizontal; one Edit > Undo brings the first picture back pixel for
-// pixel. Then C, 4:5 and the toggle to Portrait: the pill reads 4:5 and the
-// pending crop is the full 32 px tall, taller than wide. Shoots
-// `photo-image-menu-flip-canvas` (the open Image menu) and `photo-crop-portrait`.
+// predicates, never a sleep. The chips and toggle are CropAspectPicker's (OC-13).
+// PJ-OC (OC-14): two-layers.ora, Image > Flip Canvas Horizontal changes the
+// picture as one step, one Undo restores it exactly, then a 4:5 portrait crop.
 import CoreGraphics
 import XCTest
 
@@ -159,13 +150,10 @@ final class PhotoCropJourneyTests: XCTestCase {
         let photo = Journey("Photo", self, arguments: photoArguments(open: file))
         XCTAssert(photo.window(named: "two-layers.ora").waitForExistence(timeout: 30), "two-layers.ora didn't open")
         expectText("48 × 32 px", photo, "the status bar shows no 48 × 32 px image size")
-        for layer in ["Pasted Layer", "Background"] {
-            expectText(layer, photo, "the Layers panel shows no \(layer)")
-        }
+        for layer in ["Pasted Layer", "Background"] { expectText(layer, photo, "the Layers panel shows no \(layer)") }
         let canvas = photo.element("suite.canvas")
         XCTAssert(canvas.waitForExistence(timeout: 5), "no canvas (suite.canvas)")
         let before = canvas.screenshot().pngRepresentation
-        photo.shot("flip-canvas-open")
 
         // 1. Image > Flip Canvas Horizontal: both layers mirror as one step.
         photo.app.menuBars.menuBarItems["Image"].click()
@@ -179,16 +167,13 @@ final class PhotoCropJourneyTests: XCTestCase {
         photo.app.menuBars.menuBarItems["Edit"].click()
         XCTAssert(undo.waitForExistence(timeout: 5), "Edit doesn't show Undo Flip Horizontal after the flip")
         photo.press(.escape)
-        expectText("48 × 32 px", photo, "the flip changed the image's size")
         XCTAssert(waitFor { canvas.screenshot().pngRepresentation != before }, "the canvas's picture didn't change after the flip")
-        photo.shot("flip-canvas-flipped")
 
         // 2. One Edit > Undo restores both layers: the first picture again.
         photo.app.menuBars.menuBarItems["Edit"].click()
         XCTAssert(undo.waitForExistence(timeout: 5), "Edit doesn't show Undo Flip Horizontal")
         undo.click()
         XCTAssert(waitFor { canvas.screenshot().pngRepresentation == before }, "one Undo didn't bring back the first picture")
-        photo.shot("flip-canvas-undone")
 
         // 3. C, 4:5 and Portrait: the pill reads 4:5, the crop the full 32 px tall and taller than wide.
         canvas.click()

@@ -1,8 +1,6 @@
-// PhotoImageMenuSnapshots.swift (orientation-crop OC-13): Photo's Image menu items with no image
-// open (all disabled, each saying why in its tooltip) beside an open image (all enabled), Flip
-// Canvas Horizontal and Vertical after the rotations, in Light and Dark. The menu bar doesn't
-// render here, so the items are drawn in columns, as PhotoEditMenuSnapshots does. Writes
-// photo-image-menu-flip-canvas-light.png and photo-image-menu-flip-canvas-dark.png. macOS only.
+// PhotoImageMenuSnapshots.swift (orientation-crop OC-13): the Image menu's items, Flip Canvas
+// Horizontal and Vertical among them, with no image (disabled) beside an open one, drawn in columns
+// as PhotoEditMenuSnapshots does. Writes photo-image-menu-flip-canvas-{light,dark}.png. macOS only.
 import PhotoModel
 import SuiteUI
 import SwiftUI
