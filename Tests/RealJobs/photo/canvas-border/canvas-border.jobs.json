@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-P18: adds a 200 px border to a 2000 x 1400 photo (flat navy, a 100 px orange square in its top-left corner) with Canvas Size 2400 x 1800 about the centre, and exports the PNG. The trap: the new border is transparent, or only the right and bottom grow. The assertion: the photo sits at (200, 200) unchanged and the whole 200 px band on every side is the background colour, white.",
+  "inputs": ["input/*.png"],
+  "steps": [
+    {"id": "image.canvas-size", "params": {"width": 2400, "height": 1800, "anchor": "center"}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-bordered", "format": "png", "options": {}},
+  "expect": {
+    "out/photo-2000x1400-bordered.png": {"pixels": {"tolerance": 0, "reference": "expected/photo-2000x1400-bordered.png"}}
+  },
+  "platforms": ["linux", "macos"]
+}

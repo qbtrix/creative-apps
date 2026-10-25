@@ -15,15 +15,15 @@ import Testing
 @Suite struct PhotoV2StateTests {
     @Test func newWorkspaceIsLive() {
         let workspace = PhotoWorkspace()
-        let sampling = String(describing: type(of: workspace.services.sampling))
-        #expect(sampling == String(describing: type(of: PhotoServices.live.sampling)))
-        #expect(!sampling.hasPrefix("Fake"))
+        let sizing = String(describing: type(of: workspace.services.exportSizing))
+        #expect(sizing == String(describing: type(of: PhotoServices.live.exportSizing)))
+        #expect(!sizing.hasPrefix("Fake"))
     }
 
-    @Test func eyedropperHelpComesFromSampling() {
+    @Test func eyedropperIsEnabledOnEveryServices() {
         let live = PhotoWorkspace()
-        #expect(live.toolHelp(.eyedropper) == live.services.sampling.unavailableHelp)
-        #expect(live.toolHelp(.eyedropper) == "Not built yet (PV-9).")
+        // The eyedropper reads the kernel's mean, no service (EP-2), so it is enabled on `.live` too.
+        #expect(live.toolHelp(.eyedropper) == nil)
         #expect(PhotoTool.eyedropper.unavailableHelp == "Not built yet (PV-9).")
         let fake = PhotoWorkspace(services: .fake)
         #expect(fake.toolHelp(.eyedropper) == nil)

@@ -1,13 +1,15 @@
 // Live/HaloOutlines.swift (VP-4a): the outline a solid (its rectangle) or a
-// shape (its ellipse) covers in composition space, for VP-4b's
+// shape (its ellipse, or its spec's path, HS-5) covers in composition space, for VP-4b's
 // LiveFrameRendering. An item drawn at translate + positive scale only keeps
 // its world box, so the renderer uses CoreRaster's exact Mask.rectangle /
 // Mask.ellipse; any other matrix maps the outline's points through
 // HaloMatrix.apply and flattens it with FlareCore's Path to a polygon for
 // Mask.polygon. A non-finite or degenerate outline is nil: it draws nothing.
-// Linux-safe.
+// A shape's stroke (HK-5) is the outline of its trimmed, dashed path, its
+// trim sampled at the frame from the Trim tracks. Linux-safe.
 import CoreRaster
 import FlareCore
+import SuiteKernel
 
 /// The two outlines an item can have.
 enum HaloOutlineShape: Sendable, Hashable {
@@ -68,7 +70,9 @@ enum HaloOutlines {
     static func outline(of item: HaloDrawItem, scale: Double = 1) -> HaloOutline? {
         switch item.kind {
         case .solid: outline(.rectangle, bounds: item.bounds, matrix: item.matrix, scale: scale)
-        case .shape: outline(.ellipse, bounds: item.bounds, matrix: item.matrix, scale: scale)
+        case .shape:
+            if let spec = item.shape { outline(spec, bounds: item.bounds, matrix: item.matrix, scale: scale) }
+            else { outline(.ellipse, bounds: item.bounds, matrix: item.matrix, scale: scale) }
         case .text, .null: nil
         }
     }
@@ -93,6 +97,72 @@ enum HaloOutlines {
               var points = lines.first, points.count >= 3
         else { return nil }
         if points.first == points.last { points.removeLast() }
+        guard points.allSatisfy({ $0.x.isFinite && $0.y.isFinite }) else { return nil }
+        return .polygon(points)
+    }
+
+    /// A shape layer's `spec` drawn in `bounds` (layer space) through the
+    /// kernel's ShapeRules, every point mapped through `matrix`, flattened at
+    /// 0.25 / `scale` to a polygon. Nil for a spec ShapeRules refuses, an open
+    /// path (a line or arrow) or a non-finite point.
+    static func outline(_ spec: ShapeSpec, bounds r: HaloLayerRect, matrix m: HaloMatrix, scale: Double = 1) -> HaloOutline? {
+        guard isFinite(m), m.determinant != 0, scale.isFinite, scale > 0,
+              let path = try? ShapeRules.path(spec, in: Rect(minX: r.x, minY: r.y, maxX: r.x + r.width, maxY: r.y + r.height)),
+              let lines = try? path.transformed(by: m).flattened(tolerance: 0.25 / scale),
+              var points = lines.first, points.count >= 3
+        else { return nil }
+        if points.first == points.last { points.removeLast() }
+        guard points.allSatisfy({ $0.x.isFinite && $0.y.isFinite }) else { return nil }
+        return .polygon(points)
+    }
+
+    /// `layer`'s stroke with its trim at frame `f` (HK-5): with a stored trim
+    /// or any trim track, each of Trim Start, End and Offset is its track
+    /// sampled at `f` (the stored value with no track). Nil off shape layers.
+    static func stroke(of layer: HaloLayer, in c: HaloComposition, at f: Int) -> VectorStroke? {
+        guard layer.kind == .shape, var stroke = layer.stroke else { return nil }
+        guard stroke.trim != nil || HaloProperty.trims.contains(where: { layer.tracks[$0.rawValue] != nil })
+        else { return stroke }
+        func v(_ p: HaloProperty) -> Double { HaloKeyRules.value(p, of: layer, in: c, at: f) }
+        stroke.trim = StrokeTrim(
+            start: v(.trimStart), end: v(.trimEnd), offset: v(.trimOffset), mode: stroke.trim?.mode ?? .together)
+        return stroke
+    }
+
+    /// A shape item's stroke as the outline of its painted path (trimmed,
+    /// then dashed: StrokeRules.paintedPath) through FlareCore's
+    /// `Path.outlined`, in layer space, then mapped through the matrix and
+    /// flattened at 0.25 / `scale`. Nil with no stroke, nothing painted, or
+    /// anything refused or non-finite.
+    static func strokeOutline(of item: HaloDrawItem, scale: Double = 1) -> HaloOutline? {
+        let r = item.bounds, m = item.matrix
+        guard item.kind == .shape, let stroke = item.stroke, isFinite(m), m.determinant != 0, scale.isFinite, scale > 0,
+              [r.x, r.y, r.width, r.height].allSatisfy(\.isFinite)
+        else { return nil }
+        let box = Rect(minX: r.x, minY: r.y, maxX: r.x + r.width, maxY: r.y + r.height)
+        let shape: FlareCore.Path?
+        if let spec = item.shape { shape = try? ShapeRules.path(spec, in: box) }
+        else { shape = path(.ellipse, bounds: r, matrix: .identity) }
+        let layerTolerance = 0.25 / (scale * abs(m.determinant).squareRoot())
+        guard let shape, let painted = try? StrokeRules.paintedPath(shape, stroke), !painted.elements.isEmpty,
+              let outline = try? painted.outlined(
+                width: stroke.width, join: stroke.join, cap: stroke.cap, miterLimit: 4, tolerance: layerTolerance),
+              let rings = try? outline.transformed(by: m).flattened(tolerance: 0.25 / scale)
+        else { return nil }
+        return polygon(joining: rings)
+    }
+
+    /// `rings` as one even-odd polygon: each ring is entered from the first
+    /// ring's start and left back to it, so every bridge edge is crossed
+    /// twice and cancels. Nil with no ring of 3 points or a non-finite point.
+    static func polygon(joining rings: [[HaloPoint]]) -> HaloOutline? {
+        let closed = rings.map { $0.count > 1 && $0.first == $0.last ? Array($0.dropLast()) : $0 }.filter { $0.count >= 3 }
+        guard let anchor = closed.first?.first else { return nil }
+        var points: [HaloPoint] = []
+        for ring in closed {
+            guard let start = ring.first else { continue }
+            points += ring + [start, anchor]
+        }
         guard points.allSatisfy({ $0.x.isFinite && $0.y.isFinite }) else { return nil }
         return .polygon(points)
     }

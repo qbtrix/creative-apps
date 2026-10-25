@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "app": "design",
+  "why": "RJ-D41, pending DX-7: Design's headless export writes SVG only until DX-4 rasterizes JPEG and DX-7 runs it live. Exports the 540 x 675 pt \"Post\" frame, its corners cut by a 60 pt radius, as JPEG at Pixels 1080 x 1350: the file decodes at exactly 1080 x 1350 (not 2x on top) and its transparent top-left corner reads the frame's white fill within 2/255, not black. The PNG half, {\"size\":{\"longEdge\":512}}, is 410 x 512 with that corner's alpha 0. DesignExportPackTests runs the plan half of both on Linux.",
+  "pending": "DX-7",
+  "inputs": ["input/*.design"],
+  "steps": [
+    {"id": "page.select", "params": {"page": "page-1"}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}", "format": "jpeg", "options": {"size": {"pixels": [1080, 1350]}, "quality": 0.9}},
+  "expect": {
+    "out/cards.jpeg": {"pixels": {"tolerance": 2, "size": [1080, 1350], "at": {"x": 2, "y": 2, "rgb": [255, 255, 255]}}}
+  },
+  "platforms": []
+}

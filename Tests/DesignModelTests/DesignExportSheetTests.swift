@@ -49,9 +49,9 @@ import Testing
         var cards = DesignFixtures.cards
         cards.selectItem("node-1")
         let one = cards.exportRows(DesignExportOptions(format: .png, scale: 1, scope: .frame))
-        #expect(one == [DesignExportRow(id: "node-1", text: "Desktop.png 1440 × 1024, 1x, 1440 × 1024 px", skipped: nil)])
+        #expect(one == [DesignExportRow(id: "node-1", text: "Desktop.png 1440 × 1024 pt, 1x, 1440 × 1024 px", skipped: nil)])
         let two = cards.exportRows(DesignExportOptions(format: .png, scale: 2, scope: .frame))
-        #expect(two.map(\.text) == ["Desktop.png 1440 × 1024, 2x, 2880 × 2048 px"])
+        #expect(two.map(\.text) == ["Desktop.png 1440 × 1024 pt, 2x, 2880 × 2048 px"])
         let svg = cards.exportRows(DesignExportOptions(format: .svg, scale: 3, scope: .frame))
         #expect(svg.map(\.text) == ["Desktop.svg 1440 × 1024 pt"])
         let page = cards.exportRows(DesignExportOptions(format: .pdf, scale: 1, scope: .page))

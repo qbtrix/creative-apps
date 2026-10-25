@@ -1,0 +1,23 @@
+[
+  {
+    "label": "cmPerInch: a centimetre is read as a tenth of an inch",
+    "file": "Sources/SuiteKernel/Document/DocumentSetup.swift",
+    "find": "static let cmPerInch = 2.54",
+    "replace": "static let cmPerInch = 10.0",
+    "tests": "DocumentSetupTests"
+  },
+  {
+    "label": "pixelsRound: a size in a unit floors to whole pixels instead of rounding",
+    "file": "Sources/SuiteKernel/Document/DocumentSetup.swift",
+    "find": "Int(min(max(exact.rounded(), 0), Double(Int32.max)))",
+    "replace": "Int(min(max(exact.rounded(.down), 0), Double(Int32.max)))",
+    "tests": "DocumentSetupTests"
+  },
+  {
+    "label": "heightLimit: the height field is checked with the width's pixels",
+    "file": "Sources/SuiteKernel/Document/DocumentSetup.swift",
+    "find": "if !side.contains(h) {",
+    "replace": "if !side.contains(w) {",
+    "tests": "DocumentSetupTests"
+  }
+]

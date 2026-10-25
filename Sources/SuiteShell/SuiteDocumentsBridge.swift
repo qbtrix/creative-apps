@@ -3,7 +3,8 @@
 // document to another app and answers which apps read an extension. It keeps the list it last read and
 // refreshes it after each note, on `refresh()` and on each change `watch()` hears, so a menu reads it without
 // waiting. A refresh drops every file gone from disk from the shared list. Open In's targets and its refusal
-// come from the services' routing slot.
+// come from the services' routing slot. `thumbnails` is the services' shared previews, the one store a
+// process's saves publish to.
 import Foundation
 import Observation
 import SuiteKernel
@@ -17,6 +18,8 @@ import SuiteModel
     /// The shared recents list as last read, newest first.
     public private(set) var items: [RecentItem] = []
     @ObservationIgnored private let services: SuiteServices
+    /// The suite's previews this process publishes saved documents' thumbnails to.
+    public var thumbnails: any ThumbnailPublishing { services.thumbnails }
     @ObservationIgnored private let now: @Sendable () -> Date
     @ObservationIgnored private let exists: @Sendable (String) -> Bool
 
@@ -89,7 +92,7 @@ import SuiteModel
     }
 
     /// Hands each opened or handed-off file of a drop to the app that reads it. Places and refusals are
-    /// the app's own (SF-8 performs the rest through its document host).
+    /// the app's own: `perform(_:host:)` gives them to its document host.
     public func handOff(_ actions: [DropAction]) async {
         for action in actions {
             let target: String?
@@ -101,6 +104,30 @@ import SuiteModel
             guard let target, let to = SuiteApp(rawValue: target), let ref = ref(action.path, app: to) else { continue }
             try? await openIn(ref, app: to)
         }
+    }
+
+    /// Performs a drop: in an app, each opened or placed file goes to `host` as a hand-off to the app itself;
+    /// hand-offs, and opens on the home, go to the app that reads the file. Refusals do nothing.
+    public func perform(_ actions: [DropAction], host: (any SuiteDocumentHost)?) async {
+        var rest: [DropAction] = []
+        for action in actions {
+            let verb: HandOffVerb
+            switch action {
+            case .open: verb = .open
+            case .place: verb = .place
+            case .handOff, .refuse:
+                rest.append(action)
+                continue
+            }
+            guard app != .launcher, let host else {
+                rest.append(action)
+                continue
+            }
+            guard let ref = ref(action.path, app: app) else { continue }
+            let handOff = HandOff(id: HandOff.newID(), from: app, to: app, verb: verb, documents: [ref], createdAt: now())
+            _ = try? await host.accept(handOff)
+        }
+        await handOff(rest)
     }
 
     /// The apps that read an extension, the owner first.

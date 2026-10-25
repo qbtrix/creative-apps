@@ -28,7 +28,9 @@
 // (`ToolbarAction(spec, on:)` on HaloMenuTarget's state, the spec and title
 // HaloMenuTarget.item uses), so title, enablement and reason
 // match it; a row's menu reads the project with that row selected, and a pick
-// selects the row first. Values in, commands out.
+// selects the row first. Values in, commands out. The list sits in the inspector's
+// scroll view, so under `-SuitePerfProbe` each move of its top in that scroll
+// view records a `layers-scroll` frame (HaloProbe).
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -36,6 +38,7 @@ import SwiftUI
 struct HaloLayerList: View {
     let model: HaloProject
     var perform: @MainActor (HaloCommand) -> Void = { _ in }
+    @Environment(\.suiteProbeRecorder) private var recorder
 
     /// Halo's ids for the shared list, kept from the hand-rolled rows so the journeys still find them.
     static let naming = LayerTreeNaming.app(
@@ -74,6 +77,9 @@ struct HaloLayerList: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .onGeometryChange(for: Double.self) { Double($0.frame(in: .scrollView(axis: .vertical)).minY) } action: { _ in
+            HaloProbe(recorder).drew(HaloProbe.layersScroll)
+        }
         .focusable()
         .focusEffectDisabled()
         .onDeleteCommand { perform(.deleteLayer) }

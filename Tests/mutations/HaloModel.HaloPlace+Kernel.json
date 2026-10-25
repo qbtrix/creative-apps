@@ -1,0 +1,7 @@
+[
+{"label":"text layers allowed to fill","file":"Sources/HaloModel/HaloPlace+Kernel.swift","find":"let layer = selectedLayer, layer.kind == .solid else { return nil }","replace":"let layer = selectedLayer, layer.kind != .null else { return nil }","tests":"textRefusesFill"},
+{"label":"drag key dropped","file":"Sources/HaloModel/HaloPlace+Kernel.swift","find":"edit(name, control: \"halo.place\", coalesceKey: key)","replace":"edit(name, control: \"halo.place\", coalesceKey: nil)","tests":"focusDragIsOneStep"},
+{"label":"the placed solid goes on top of everything, not the selection","file":"Sources/HaloModel/HaloPlace+Kernel.swift","find":"layers.insert(layer, at: comp.layers.firstIndex { $0.id == doc.selectedLayerID } ?? 0)","replace":"layers.insert(layer, at: 0)","tests":"HaloPlaceTests"},
+{"label":"the place step loses the command's name","file":"Sources/HaloModel/HaloPlace+Kernel.swift","find":"let added = edit(name, control: \"halo.place\")","replace":"let added = edit(\"Place\", control: \"halo.place\")","tests":"HaloPlaceTests"},
+{"label":"a fill keeps the solid's colour, not the picture","file":"Sources/HaloModel/HaloPlace+Kernel.swift","find":"if let asset { doc.compositions[c].layers[l].placedAsset = asset }","replace":"","tests":"HaloPlaceTests"}
+]

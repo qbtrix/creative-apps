@@ -8,7 +8,8 @@
 // loupe service through a RenderQueue (one running, the latest waiting) off
 // the main actor; its result goes back through showLoupeRender or
 // failLoupeRender, which keep only the current token's (latest wins). The
-// neighbours are decoded ahead so stepping is quick. Every state change is a
+// neighbours decode ahead behind that render on the same queue, and a newer
+// step drops an older step's pending ones (LG-6). Every state change is a
 // LibraryCatalog method; each menu item runs a `LibraryAction`.
 import AppKit
 import LibraryModel
@@ -55,6 +56,7 @@ extension LibraryWindow {
             setSort: enabled(model.help(.setSort(model.sort)) == nil) { (sort: LibrarySort) in
                 try? model.run(.setSort(sort))
             }, sort: model.sort,
+            setCellSize: { (size: Int) in try? model.run(.setCellSize(size)) },
             first: act(.showFirst),
             last: act(.showLast),
             zoomInTitle: model.zoomInTitle, zoomOutTitle: model.zoomOutTitle,
@@ -70,8 +72,7 @@ extension LibraryWindow {
     func loupeAreaFocusChanged() {
         guard model.mode == .loupe else { return }
         model.loupeFocusChanged(from: areas.thumbnails.store.cache)
-        loupeAreaRender(.full)
-        loupeAreaPrefetch()
+        loupeAreaRender(.full, prefetching: model.neighboursToPrefetch())
     }
 
     /// The screen's long side in pixels: the size the loupe renders at.
@@ -82,16 +83,21 @@ extension LibraryWindow {
     }
 
     /// Asks the catalog for the render it needs and runs it through the queue
-    /// off the main actor; the result lands under its token.
-    func loupeAreaRender(_ quality: RenderQuality) {
+    /// off the main actor; the result lands under its token. `neighbours`
+    /// replace the queue's pending decodes ahead; nil keeps them.
+    func loupeAreaRender(_ quality: RenderQuality, prefetching neighbours: [PhotoItem]? = nil) {
         guard let request = model.loupeRequest(longSide: loupeLongSide, quality: quality) else { return }
         let state = areas.loupe
         loupeAreaListen(state)
         let service = model.services.loupe
         let deliver = state.deliver
         let queue = state.queue
+        let longSide = request.longSide
+        let ahead = neighbours.map { photos in
+            RenderQueue.Ahead(photos) { await service.prefetch([$0], longSide: longSide) }
+        }
         Task.detached(priority: .userInitiated) {
-            await queue.submit(token: request.token) {
+            await queue.submit(token: request.token, prefetching: ahead) {
                 let result: Result<RenderedPhoto, LibraryError>
                 do {
                     result = .success(try await service.render(
@@ -117,17 +123,6 @@ extension LibraryWindow {
                 case .failure(let error): model.failLoupeRender(error, token: finished.token)
                 }
             }
-        }
-    }
-
-    /// Decodes the photos before and after the loupe's ahead, off the main actor.
-    private func loupeAreaPrefetch() {
-        let neighbours = model.neighboursToPrefetch()
-        guard !neighbours.isEmpty else { return }
-        let service = model.services.loupe
-        let longSide = loupeLongSide
-        Task.detached(priority: .utility) {
-            await service.prefetch(neighbours, longSide: longSide)
         }
     }
 }

@@ -50,4 +50,29 @@ import Testing
         #expect(AIAccessPrompt.status(.deny) == "Denied")
         #expect(AIAccessPrompt.menuTitle == "AI Access…")
     }
+
+    @Test func emptyMessageExplainsHowClientsAppear() {
+        let message = AIAccessPrompt.emptyMessage
+        #expect(message.contains("AI assistant"))
+        #expect(message.contains(AIAccessPrompt.alwaysAllow) && message.contains(AIAccessPrompt.deny))
+        #expect(message.contains("revoke"))
+        #expect(!message.hasPrefix("Clients"))
+    }
+
+    @Test func menuItemsCarrySymbols() {
+        #expect(SymbolName.isPlausible(AIAccessPrompt.menuSymbol))
+        #expect(SymbolName.isPlausible(SwitchMenu.menuSymbol))
+        #expect(AIAccessPrompt.menuSymbol == "sparkles")
+        #expect(SwitchMenu.menuSymbol == "square.grid.2x2")
+    }
+}
+
+/// An SF Symbol name's shape: non-empty, lowercase dot-separated words of letters and digits.
+private enum SymbolName {
+    static func isPlausible(_ name: String) -> Bool {
+        let parts = name.split(separator: ".", omittingEmptySubsequences: false)
+        return !name.isEmpty && parts.allSatisfy { part in
+            !part.isEmpty && part.allSatisfy { $0.isASCII && ($0.isLowercase || $0.isNumber) }
+        }
+    }
 }

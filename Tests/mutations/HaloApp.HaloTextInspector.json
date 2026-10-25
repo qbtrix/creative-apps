@@ -1,0 +1,16 @@
+[
+  {
+    "label": "hexInSwapsRedBlue: a picked hex color reaches the Halo layer with red and blue swapped",
+    "file": "Sources/HaloApp/HaloTextInspector.swift",
+    "find": "init(hex: HexColor) { self.init(bytes: hex.red, hex.green, hex.blue) }",
+    "replace": "init(hex: HexColor) { self.init(bytes: hex.blue, hex.green, hex.red) }",
+    "tests": "HaloHexColorBridgeTests"
+  },
+  {
+    "label": "hexOutSwapsRedGreen: a Halo layer color shows in the color row with red and green swapped",
+    "file": "Sources/HaloApp/HaloTextInspector.swift",
+    "find": "return HexColor(b.red, b.green, b.blue)",
+    "replace": "return HexColor(b.green, b.red, b.blue)",
+    "tests": "HaloHexColorBridgeTests"
+  }
+]

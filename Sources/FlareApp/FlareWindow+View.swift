@@ -28,8 +28,8 @@ extension FlareWindow {
         case .zoomIn where (zoom ?? fitted) >= FlareZoom.range.upperBound: return "Already at the largest zoom."
         case .zoomOut where (zoom ?? fitted) <= FlareZoom.range.lowerBound: return "Already at the smallest zoom."
         case .clearGuides: return model.clearGuidesHelp
-        case .toggleOnion: return "The stage doesn't draw onion skins yet."
-        case .toggleMotionPath: return "The stage doesn't draw the motion path yet."
+        // Hidden from the View menu (FlareWorkspace.menuHidden); any other caller reads the same reason.
+        case .toggleOnion, .toggleMotionPath: return FlareIntent.view(intent).commandID.map(FlareWorkspace.laterReason)
         default: return nil
         }
     }

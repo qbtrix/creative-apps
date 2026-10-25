@@ -1,0 +1,65 @@
+[
+  {
+    "label": "optionSubtracts: Option alone maps to add",
+    "file": "Sources/SuiteKernel/Selection/AreaShape.swift",
+    "find": "(option ? .subtract : .replace)",
+    "replace": "(option ? .add : .replace)",
+    "tests": "AreaShapeTests"
+  },
+  {
+    "label": "intersectNeedsBoth: Shift and Option add instead of intersecting",
+    "file": "Sources/SuiteKernel/Selection/AreaShape.swift",
+    "find": "shift ? (option ? .intersect : .add)",
+    "replace": "shift ? (option ? .add : .add)",
+    "tests": "AreaShapeTests"
+  },
+  {
+    "label": "lassoCloses: the closing point is dropped",
+    "file": "Sources/SuiteKernel/Selection/AreaShape.swift",
+    "find": "return points + [first]",
+    "replace": "return points",
+    "tests": "AreaShapeTests"
+  },
+  {
+    "label": "closesOnce: an already closed outline is closed again",
+    "file": "Sources/SuiteKernel/Selection/AreaShape.swift",
+    "find": "guard points.count > 1, let first = points.first, points.last == first else { return points }",
+    "replace": "guard points.count > 1, let first = points.first, points.last == first, false else { return points }",
+    "tests": "AreaShapeTests"
+  },
+  {
+    "label": "simplifyKeepsCorners: points exactly a pixel apart are dropped (<= for <)",
+    "file": "Sources/SuiteKernel/Selection/AreaShape.swift",
+    "find": "if dx * dx + dy * dy < 1 { continue }",
+    "replace": "if dx * dx + dy * dy <= 1 { continue }",
+    "tests": "AreaShapeTests"
+  },
+  {
+    "label": "simplifyDropsTremor: the lasso is not simplified",
+    "file": "Sources/SuiteKernel/Selection/AreaShape.swift",
+    "find": "Self.closed(Self.simplified(Self.open(points)))",
+    "replace": "Self.closed(Self.open(points))",
+    "tests": "AreaShapeTests"
+  },
+  {
+    "label": "polygonKeepsCorners: the polygon is simplified like a lasso",
+    "file": "Sources/SuiteKernel/Selection/AreaShape.swift",
+    "find": "return .shape(.polygon(Self.closed(Self.open(points))), mode)",
+    "replace": "return .shape(.polygon(Self.closed(Self.simplified(Self.open(points)))), mode)",
+    "tests": "AreaShapeTests"
+  },
+  {
+    "label": "replaceStartsOver: a replace shape keeps the earlier steps",
+    "file": "Sources/SuiteKernel/Selection/AreaShape.swift",
+    "find": "case .shape(_, .replace): steps = [step]",
+    "replace": "case .shape(_, .replace): steps.append(step)",
+    "tests": "AreaShapeTests"
+  },
+  {
+    "label": "invertTwiceIsIdentity: a second invert is appended",
+    "file": "Sources/SuiteKernel/Selection/AreaShape.swift",
+    "find": "case .invert where steps.last == .invert: steps.removeLast()",
+    "replace": "case .invert where steps.last == .invert: steps.append(step)",
+    "tests": "AreaShapeTests"
+  }
+]

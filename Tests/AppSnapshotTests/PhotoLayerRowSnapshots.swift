@@ -77,4 +77,20 @@ import Testing
         #expect(sent.count == 2)
         if case .selectLayer(let id) = sent.first { #expect(id == background) } else { Issue.record("no select first: \(sent)") }
     }
+
+    /// A row already picked keeps every pick: its menu's pick sends no select, so Delete acts on them all.
+    @Test func pickedRowMenuKeepsEveryPick() throws {
+        var model = try twoLayers()
+        let top = try #require(model.selectedLayerID)
+        let background = try #require(model.layers.first { $0.id != top }?.id)
+        model.pickLayer(background, .toggle)
+        #expect(Set(model.selectedLayerIDs) == [top, background])
+        var sent: [PhotoIntent] = []
+        let menu = PhotoMenu(model: model, perform: { sent.append($0) })
+        let items = PhotoLayerList.rowMenu(menu, row: top)
+        #expect(items.first { $0.identifier == "photo.layer.delete" }?.isEnabled == false)
+        items.first { $0.identifier == "photo.layer.duplicate" }?.perform()
+        #expect(sent.count == 1)
+        if case .selectLayer = sent.first { Issue.record("a picked row's menu replaced the picks: \(sent)") }
+    }
 }

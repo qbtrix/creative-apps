@@ -21,7 +21,7 @@
 # since then was never measured against its new number, so it's left for the
 # next run.
 #
-# ci.yml's audit-lower job runs it on dev after a green macOS job and pushes
+# journeys.yml's audit-lower job runs it on dev after a green full journeys run and pushes
 # the lower baseline to dev; Tests/audit_lower tests it. Needs jq. bash 3.2
 # compatible.
 #

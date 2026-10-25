@@ -24,8 +24,9 @@ public enum CLI {
         public static let io: Int32 = 74
     }
 
-    /// The apps the router knows: the five and the fake, which the tests and the binary's journey drive.
-    public static let registry = Apps.all + [Apps.fake]
+    /// The apps the router knows: the five, the suite's Help commands, and the fake, which the tests and the binary's
+    /// journey drive.
+    public static let registry = Apps.all + [Apps.suite, Apps.fake]
 
     /// Runs one invocation (`arguments` without the program name) over `io` among `apps`. Returns the exit code.
     public static func run(_ arguments: [String], apps: [HeadlessApp] = registry, io: any CLIIO) -> Int32 {

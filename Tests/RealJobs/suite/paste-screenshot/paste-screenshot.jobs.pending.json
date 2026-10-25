@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "app": "suite",
+  "why": "RJ-X73, pending CB-10 (suiteui/clipboard-interop): named .jobs.pending.json so the harness skips it, since the harness runs one app per job and knows no 'suite' app, and no app's catalog reads the CLI's pasteboard folder until CB-4, CB-6, CB-8 and CB-10 (Design and Halo have no edit.paste yet, Halo has no placed-image layer until halo/placed-images PH-m). CB-10 renames it to paste-screenshot.jobs.json once the harness runs its stages in order over one pasteboard folder, sets platforms to linux and macos (run C), and replaces each placed block with the saved file's real JSON. The job: input/screenshot.png (a synthetic 160 x 100 px PNG: a title bar, a sidebar and a blue panel) is put on the CLI's pasteboard folder; Design, file.new and edit.paste, save; Flare, file.new and edit.paste, save; Halo, composition.new, timeline.scrub to 30 and edit.paste, save. The trap: the paste is refused, lands at the top-left corner, or starts at time 0 in Halo. The assertion: each saved file has exactly one new placed-image layer of 160 x 100, centred in its canvas (Design's 1440 x 1024 page: origin (640, 462); Flare's scene: its centre; Halo's 1920 x 1080 composition: origin (880, 490)), and Halo's layer's in point is frame 30. Mutations: DesignModel.DesignPasteboardAdapter .pasteCentres, HaloModel.HaloPasteboardAdapter .pasteAtPlayhead.",
+  "pending": "CB-10",
+  "waits_on": "CB-10",
+  "inputs": ["input/screenshot.png"],
+  "pasteboard": ["input/screenshot.png"],
+  "stages": [
+    {"app": "design", "steps": [
+      {"id": "file.new", "params": {}},
+      {"id": "edit.paste", "params": {}}
+    ], "output": {"dir": "out", "name": "pasted", "format": "design", "options": {}}},
+    {"app": "flare", "steps": [
+      {"id": "file.new", "params": {}},
+      {"id": "edit.paste", "params": {}}
+    ], "output": {"dir": "out", "name": "pasted", "format": "flare", "options": {}}},
+    {"app": "halo", "steps": [
+      {"id": "composition.new", "params": {}},
+      {"id": "timeline.scrub", "params": {"frame": 30}},
+      {"id": "edit.paste", "params": {}}
+    ], "output": {"dir": "out", "name": "pasted", "format": "halo", "options": {}}}
+  ],
+  "atomic": true,
+  "expect": {
+    "out/pasted.design": {"placed": {"count": 1, "size": [160, 100], "origin": [640, 462]}},
+    "out/pasted.flare": {"placed": {"count": 1, "size": [160, 100], "centred": true}},
+    "out/pasted.halo": {"placed": {"count": 1, "size": [160, 100], "origin": [880, 490], "inFrame": 30}}
+  },
+  "platforms": []
+}

@@ -1,0 +1,33 @@
+{
+  "app": "photo",
+  "version": "0.9.0",
+  "build": "412",
+  "macOS": "26.1 (25B78)",
+  "model": "Mac15,3",
+  "home": "/Users/tester",
+  "user": "tester",
+  "host": "testers-mac",
+  "now": "2026-10-21T12:00:00Z",
+  "crashes": [
+    {
+      "name": "Photo-2026-10-20-090000.ips",
+      "modified": "2026-10-20T09:00:00Z",
+      "text": "{\"app_name\":\"Photo\",\"name\":\"Photo\",\"timestamp\":\"2026-10-20 09:00:00\",\"os_version\":\"macOS 26.1\"}\n{\n \"procPath\": \"/Users/tester/Applications/AfterGlow.app/Contents/Helpers/Photo.app/Contents/MacOS/Photo\",\n \"exception\": {\n  \"type\": \"EXC_BAD_ACCESS\",\n  \"signal\": \"SIGSEGV\"\n },\n \"faultingThread\": 0,\n \"threads\": [\n  {\n   \"triggered\": true,\n   \"frames\": [\n    {\n     \"symbol\": \"BrushStroke.commit\",\n     \"sourceFile\": \"/Users/tester/src/BrushStroke.commit.swift\",\n     \"sourceLine\": 12\n    }\n   ]\n  },\n  {\n   \"frames\": [\n    {\n     \"symbol\": \"idle\"\n    }\n   ]\n  }\n ],\n \"userName\": \"tester\",\n \"hostName\": \"testers-mac\"\n}"
+    },
+    {
+      "name": "WebBrowser-2026-10-21-080000.ips",
+      "modified": "2026-10-21T08:00:00Z",
+      "text": "{\"app_name\":\"WebBrowser\",\"name\":\"WebBrowser\",\"timestamp\":\"2026-10-21 08:00:00\",\"os_version\":\"macOS 26.1\"}\n{\n \"procPath\": \"/Applications/WebBrowser.app/Contents/MacOS/WebBrowser\",\n \"exception\": {\n  \"type\": \"EXC_BAD_ACCESS\",\n  \"signal\": \"SIGSEGV\"\n },\n \"faultingThread\": 0,\n \"threads\": [\n  {\n   \"triggered\": true,\n   \"frames\": [\n    {\n     \"symbol\": \"PageLoad.render\",\n     \"sourceFile\": \"/Users/tester/src/PageLoad.render.swift\",\n     \"sourceLine\": 12\n    }\n   ]\n  },\n  {\n   \"frames\": [\n    {\n     \"symbol\": \"idle\"\n    }\n   ]\n  }\n ],\n \"userName\": \"tester\",\n \"hostName\": \"testers-mac\"\n}"
+    },
+    {
+      "name": "Photo-2026-10-21-110000.ips",
+      "modified": "2026-10-21T11:00:00Z",
+      "text": "{\"app_name\":\"Photo\",\"name\":\"Photo\",\"timestamp\":\"2026-10-21 11:00:00\",\"os_version\":\"macOS 26.1\"}\n{\n \"procPath\": \"/Users/tester/Applications/AfterGlow.app/Contents/Helpers/Photo.app/Contents/MacOS/Photo\",\n \"exception\": {\n  \"type\": \"EXC_BAD_ACCESS\",\n  \"signal\": \"SIGSEGV\"\n },\n \"faultingThread\": 0,\n \"threads\": [\n  {\n   \"triggered\": true,\n   \"frames\": [\n    {\n     \"symbol\": \"LayerStack.merge\",\n     \"sourceFile\": \"/Users/tester/src/LayerStack.merge.swift\",\n     \"sourceLine\": 12\n    }\n   ]\n  },\n  {\n   \"frames\": [\n    {\n     \"symbol\": \"idle\"\n    }\n   ]\n  }\n ],\n \"userName\": \"tester\",\n \"hostName\": \"testers-mac\"\n}"
+    },
+    {
+      "name": "Halo-2026-10-11-100000.ips",
+      "modified": "2026-10-11T10:00:00Z",
+      "text": "{\"app_name\":\"Halo\",\"name\":\"Halo\",\"timestamp\":\"2026-10-11 10:00:00\",\"os_version\":\"macOS 26.1\"}\n{\n \"procPath\": \"/Users/tester/Applications/AfterGlow.app/Contents/Helpers/Halo.app/Contents/MacOS/Halo\",\n \"exception\": {\n  \"type\": \"EXC_BAD_ACCESS\",\n  \"signal\": \"SIGSEGV\"\n },\n \"faultingThread\": 0,\n \"threads\": [\n  {\n   \"triggered\": true,\n   \"frames\": [\n    {\n     \"symbol\": \"Timeline.scrub\",\n     \"sourceFile\": \"/Users/tester/src/Timeline.scrub.swift\",\n     \"sourceLine\": 12\n    }\n   ]\n  },\n  {\n   \"frames\": [\n    {\n     \"symbol\": \"idle\"\n    }\n   ]\n  }\n ],\n \"userName\": \"tester\",\n \"hostName\": \"testers-mac\"\n}"
+    }
+  ]
+}

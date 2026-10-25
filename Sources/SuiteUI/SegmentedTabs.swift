@@ -8,7 +8,8 @@
 // A click on a segment also puts focus in it, so ← and → then step to the
 // previous or next tab (`step`) with keyboard navigation off too, and each
 // segment carries its option's identifier, or `<id>.<option id>`, and is
-// listed in `suite.controls` under it (`segmentEntries`).
+// listed in `suite.controls` under it (`segmentEntries`), the picked one
+// `selected: true` and the rest `false`.
 // A selection change fades over 0.14 s (at once under `suiteReduceMotion`)
 // and reports a `fade-start`/`fade-end` pair on series `tabs` (QB-S9;
 // TabsProbe, which a probe host sets). Given an `id` it lists itself in
@@ -77,10 +78,13 @@ public struct SegmentedTabs<ID: Hashable & Sendable>: View {
 
     /// The `suite.controls` entries of the identified segments, which share the switch's state and reason.
     nonisolated static func segmentEntries(
-        _ tabs: [InspectorOption<ID>], in id: String?, enabled: Bool, reason: String?
+        _ tabs: [InspectorOption<ID>], in id: String?, enabled: Bool, reason: String?, selection: ID? = nil
     ) -> [ControlEntry] {
         tabs.compactMap { option in
-            segmentID(option, in: id).map { ControlEntry(id: $0, enabled: enabled, reason: enabled ? nil : reason) }
+            segmentID(option, in: id).map {
+                ControlEntry(id: $0, enabled: enabled, reason: enabled ? nil : reason)
+                    .selecting(selection.map { picked in option.id == picked })
+            }
         }
     }
 
@@ -128,9 +132,9 @@ public struct SegmentedTabs<ID: Hashable & Sendable>: View {
                 .suiteControl(id: id, enabled: enabled, reason: enabled ? nil : help)
                 .background {
                     // The segments keep the identifiers the picker set; these only list them.
-                    ForEach(Self.segmentEntries(tabs, in: id, enabled: enabled, reason: help), id: \.id) { entry in
-                        Color.clear.suiteControl(
-                            id: entry.id, enabled: entry.enabled, reason: entry.reason, identifies: false)
+                    let entries = Self.segmentEntries(tabs, in: id, enabled: enabled, reason: help, selection: selection)
+                    ForEach(entries, id: \.id) { entry in
+                        Color.clear.suiteControl(entry: entry, identifies: false)
                     }
                 }
                 .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: lit)

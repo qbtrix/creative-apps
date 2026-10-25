@@ -1,8 +1,9 @@
 // PlistShapeAppsTests.swift: the five app plists in Bundle/Info/ against a
 // literal table (docs/blueprints/suite.md 2.6; bundle packet BU-5b). Each app
 // has its own bundle id and icon, is Owner (Editor) of its own format only,
-// Photo and Library read the three image types as Alternate, and every app
-// opens the hand-off type as Viewer. Reads the XML with PropertyListSerialization.
+// Photo and Library read every image type the registry lists as Alternate
+// (shared-codecs SC-14: the registry's public rows, from SuiteImageFormats),
+// and every app opens the hand-off type as Viewer. Reads the XML with PropertyListSerialization.
 import Foundation
 import SuiteModel
 import Testing
@@ -13,12 +14,13 @@ import Testing
         var name: String
         var bundleID: String
         var owns: String?
-        var imageRole: String?          // the role it reads png, jpeg and heic with; nil for none
+        var imageRole: String?          // the role it reads the registry's image types with; nil for none
         var testDescription: String { name }
     }
 
     static let handOff = "org.creativesuite.suite.handoff"
-    static let images = ["public.png", "public.jpeg", "public.heic"]
+    /// The registry's public rows: every image type SuiteImageFormats lists.
+    static let images = SuiteTypeRegistry.standard.types.filter { $0.owner == nil }.map(\.id.rawValue)
     static let owned = ["org.creativesuite.flare.animation", "org.creativesuite.design.document",
                         "org.creativesuite.photo.openraster", "org.creativesuite.halo.project"]
 
@@ -82,6 +84,7 @@ import Testing
     @Test(arguments: rows) func readsImagesAsAlternateOnlyWhereListed(_ row: Row) throws {
         let types = Self.documentTypes(try Self.plist(row.name))
         let images = types.filter { Self.images.contains($0.type) }
+        #expect(Self.images == SuiteImageFormats.all.map(\.typeID.rawValue))
         if let role = row.imageRole {
             #expect(images.map(\.type).sorted() == Self.images.sorted())
             #expect(images.allSatisfy { $0.rank == "Alternate" && $0.role == role })

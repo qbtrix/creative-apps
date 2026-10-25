@@ -5,7 +5,10 @@
 // the picked keys (⌫ from the viewer or timeline, refused under
 // `halo.timeline`), a preset, a custom curve from the X1 Y1 X2 Y2 rows (coalesced per layer, as a handle
 // drag is), a curve handle (index 0 the first, 1 the second), and the end of
-// a drag, nudge or scrub, which ends the coalesced step. `easingScene(_:)` is
+// a drag, nudge or scrub, which ends the coalesced step. The timeline's key
+// editing (key-editing KE-2) routes here too: a lane press in its pick mode
+// (pickLaneKeys), ⌘A (selectAllKeys), a key drag's moves under one dragStart
+// and its end (HaloKeyPick+Kernel, HaloKeyMove+Kernel). `easingScene(_:)` is
 // a pass-through: the easing area shows no dialog.
 import HaloModel
 import SwiftUI
@@ -24,6 +27,10 @@ extension HaloWindow {
         case .moveEasingHandle(let index, let x, let y):
             model.moveEasingHandle(index == 0 ? .first : .second, to: HaloPoint(x: x, y: y))
         case .endEasingDrag: model.endCoalescing()
+        case .pickLaneKeys(let layerID, let frame, let mode): model.pickLaneKeys(layerID: layerID, frame: frame, mode: mode)
+        case .selectAllKeys: model.selectAllKeys()
+        case .moveKeys(let frames, let dragStart): model.moveKeys(by: frames, dragStart: dragStart)
+        case .endKeyDrag: model.endKeyDrag()
         default: break
         }
     }

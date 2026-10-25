@@ -1,6 +1,6 @@
 // FlareRecentTests.swift: the Open Recent list in FlareWorkspace (FlareFiles.swift, MP-1 of
 // docs/blueprints/flare/features/mac-platform.md): most recent first, deduplicated by exact path, at most
-// `recentLimit` entries, cleared on request and kept across a new document. Runs on Linux and macOS.
+// `recentLimit` entries and kept across a new document (Clear Menu is the suite's, FlareFileFlowTests). Runs on Linux and macOS.
 @testable import FlareModel
 import Testing
 
@@ -32,15 +32,6 @@ struct FlareRecentTests {
         workspace.noteRecent("/x/a.flare")
         workspace.noteRecent("/y/a.flare")
         #expect(workspace.recent == ["/y/a.flare", "/x/a.flare"])
-    }
-
-    @Test("clearRecent empties the list")
-    func clears() {
-        var workspace = FlareWorkspace(services: .fake())
-        workspace.noteRecent("/a.flare")
-        workspace.noteRecent("/b.flare")
-        workspace.clearRecent()
-        #expect(workspace.recent.isEmpty)
     }
 
     @Test("a new document leaves the list as it was")

@@ -1,0 +1,30 @@
+[
+  {
+    "label": "prefetchesNeighbours: the neighbours brought with a render are never decoded",
+    "file": "Sources/LibraryModel/RenderQueue.swift",
+    "find": "        guard let pending = ahead, let photo = pending.photos.first else { return nil }\n",
+    "replace": "        guard let pending = ahead, let photo = pending.photos.first, pending.photos.isEmpty else { return nil }\n",
+    "tests": "LibraryRenderQueueAheadTests"
+  },
+  {
+    "label": "dropsFarDecodes: a newer step's neighbours join the older step's pending ones instead of replacing them",
+    "file": "Sources/LibraryModel/RenderQueue.swift",
+    "find": "        if let prefetching { ahead = prefetching }\n",
+    "replace": "        if let prefetching { ahead = Ahead((ahead?.photos ?? []) + prefetching.photos, decode: prefetching.decode) }\n",
+    "tests": "LibraryRenderQueueAheadTests"
+  },
+  {
+    "label": "a waiting render runs after the pending neighbours instead of before them",
+    "file": "Sources/LibraryModel/RenderQueue.swift",
+    "find": "        if let next = waiting {\n",
+    "replace": "        if let next = waiting, ahead == nil {\n",
+    "tests": "LibraryRenderQueueAheadTests"
+  },
+  {
+    "label": "a render with no neighbours clears the pending ones",
+    "file": "Sources/LibraryModel/RenderQueue.swift",
+    "find": "        if let prefetching { ahead = prefetching }\n",
+    "replace": "        ahead = prefetching\n",
+    "tests": "LibraryRenderQueueAheadTests"
+  }
+]

@@ -2,8 +2,8 @@
 // the canvas renders by compositing the visible layers bottom-up, each through
 // PhotoLayerComposite (a pixel layer at its offset with its blend mode and
 // opacity, CoreRaster's composite; an adjustment layer passes through), then
-// running the enabled adjustments in order: exposure, levels, curves,
-// hue/saturation, blur. Levels and curves work on display (sRGB-encoded)
+// running the enabled adjustments in order: SuiteImaging's ImagingProgram steps
+// (exposure, levels, curves, hue/saturation), then blur. Levels and curves work on display (sRGB-encoded)
 // values, as photo editors' tone tools do (CoreRaster's ToneEncoding.sRGB),
 // so mid grey sits near 0.5 on their axes; exposure stays linear. The blur reads a margin of 3 sigma around the region,
 // so a region renders exactly as the same pixels of the whole image would.
@@ -12,8 +12,9 @@
 // parallel, redrawing only the tiles that changed since the frame before
 // (PhotoWorkspace.damage(since:)) and timing itself for the status line. The
 // curve editor's line (`curveSamples`) runs the same CoreRaster curve over a
-// ramp, and its histogram (`curvesHistogram`) counts the display values of the
-// image as it enters Curves, so both show what the render does; `curvesHistogramKey` changes
+// ramp, and its histogram (`curvesHistogram`, the suite's ToneHistogram, which
+// Levels draws too) counts the display values of the image as it enters
+// Curves, so both show what the render does; `curvesHistogramKey` changes
 // exactly when that count can. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -21,6 +22,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
+import SuiteModel
 
 /// One rendered picture: display bytes for the canvas, the revision they show
 /// and how long the render took.
@@ -40,25 +42,17 @@ extension AdjustmentSettings {
     }
 
     /// The enabled adjustments applied to `buffer`, in order.
+    /// The tone sections are ImagingProgram's steps (`imagingSteps`), each
+    /// skipped at its identity, then the blur.
     func applied(to buffer: PixelBuffer) throws -> PixelBuffer {
-        var result = try appliedBeforeCurves(to: buffer)
-        if isEnabled(.curves) { result = try result.curves(points: curvePoints, encoding: .sRGB) }
-        if isEnabled(.hueSaturation) {
-            result = try result.hueSaturation(hue: hue, saturation: saturation, lightness: lightness)
-        }
+        var result = try runImaging(imagingSteps, on: buffer)
         if blurMargin > 0 { result = try result.gaussianBlur(sigma: blurSigma) }
         return result
     }
 
     /// Exposure then levels, where enabled: the image Curves maps.
     func appliedBeforeCurves(to buffer: PixelBuffer) throws -> PixelBuffer {
-        var result = buffer
-        if isEnabled(.exposure) { result = try result.exposure(stops: exposure) }
-        if isEnabled(.levels) {
-            result = try result.levels(
-                inBlack: blackPoint, inWhite: whitePoint, gamma: gamma, outBlack: 0, outWhite: 1, encoding: .sRGB)
-        }
-        return result
+        try runImaging(imagingSteps([.exposure, .levels]), on: buffer)
     }
 
     /// The tone curve at `count` evenly spaced display values from 0 through 1,
@@ -89,28 +83,31 @@ extension PhotoWorkspace {
 
     /// Rec. 709 luminance of the image as it enters Curves (the layers
     /// composited, then exposure and levels), counted on display (sRGB-encoded)
-    /// values like the curve's axis, in 256 bins scaled so the
-    /// tallest is 1: the histogram the curve editor draws behind the curve.
-    /// Empty with no image open, and when the task counting it is cancelled
-    /// (it stops before the next row); all zeros when every pixel is transparent.
+    /// values like the curve's axis, in 256 bins, with its clipping: the
+    /// histogram Levels shows and the curve editor draws behind the curve.
+    /// Empty with no image open, when every pixel is transparent, and when the
+    /// task counting it is cancelled (it stops before the next row).
     /// Cost: it reads at most 256 evenly spaced rows, so about 256 x width
     /// pixels composited, adjusted and counted, whatever the image's height.
-    public func curvesHistogram() -> [Double] {
-        guard let canvas else { return [] }
+    /// A cancelled task stops between rows and gets `empty`.
+    public func curvesHistogram() -> ToneHistogram {
+        guard let canvas else { return .empty }
         var counts = [Int](repeating: 0, count: 256)
+        var shadows = 0, highlights = 0
         // ponytail: recounts every sampled row on each call; cache counts per
         // tile by damage(since:) if it shows up in a drag profile.
         for y in stride(from: 0, to: canvas.height, by: (canvas.height + 255) / 256) {
-            guard !Task.isCancelled else { return [] }
+            guard !Task.isCancelled else { return .empty }
             let row = PixelRect(x: 0, y: y, width: canvas.width, height: 1)
             // Can't fail: the same pixels render on the canvas.
             guard let pixels = try? adjustments.appliedBeforeCurves(to: composited(row)),
                 let histogram = try? Histogram(of: pixels, bins: counts.count, encoding: .sRGB)
             else { continue }
             counts = zip(counts, histogram.luminance).map(+)
+            shadows += histogram.shadowClipped
+            highlights += histogram.highlightClipped
         }
-        let tallest = Double(counts.max() ?? 0)
-        return counts.map { tallest > 0 ? Double($0) / tallest : 0 }
+        return ToneHistogram(channels: [counts], shadowClipped: shadows, highlightClipped: highlights)
     }
 
     /// A value that changes exactly when `curvesHistogram()` can: with any
@@ -122,7 +119,9 @@ extension PhotoWorkspace {
         let defaults = AdjustmentSettings(), on = adjustments
         let exposure = on.isEnabled(.exposure) ? on : defaults, levels = on.isEnabled(.levels) ? on : defaults
         return CurvesHistogramKey(
-            content: contentRevision, tone: [exposure.exposure, levels.blackPoint, levels.whitePoint, levels.gamma])
+            content: contentRevision,
+            tone: [exposure.exposure, levels.blackPoint, levels.whitePoint, levels.gamma, levels.outputBlack,
+                   levels.outputWhite])
     }
 
     /// `rect` of the canvas, composited and adjusted.
@@ -142,14 +141,16 @@ extension PhotoWorkspace {
     func composited(_ rect: PixelRect) throws -> PixelBuffer {
         var result = try PixelBuffer(width: rect.width, height: rect.height)
         for layer in layers.reversed() where layer.isVisible && layer.opacity > 0 {
-            let content = LayerContent(
-                layer: layer, pixels: pixels[layer.id], mask: layer.isMaskEnabled ? masks[layer.id] : nil)
+            let content = LayerContent(layer: layer, pixels: pixels[layer.id], mask: shownMask(of: layer))
             result = try PhotoLayerComposite.composite(
                 content, onto: result, origin: (x: rect.x, y: rect.y),
                 adjusting: services.adjustmentLayers, masking: services.masking)
         }
         return result
     }
+
+    /// `layer`'s mask when it has one and it is enabled: what hides part of the layer on the canvas.
+    func shownMask(of layer: PhotoLayer) -> TiledPixels? { layer.isMaskEnabled ? masks[layer.id] : nil }
 }
 
 /// See `PhotoWorkspace.curvesHistogramKey`.

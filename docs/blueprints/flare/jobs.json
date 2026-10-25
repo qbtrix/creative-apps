@@ -215,7 +215,8 @@
     "needs_note": "flare-export + a player oracle (not in the beta-80 plan)",
     "closes_with": "flare/lottie-player-check",
     "trap": "Unsupported features dropped silently; easing differs in the player",
-    "run": "C",
+    "run": "Cm",
+    "test": "Tests/AppSnapshotTests/LottiePlayerParityTests.swift",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
@@ -242,7 +243,8 @@
     "since": "2026-10-19",
     "sources": [
       "https://help.lottiefiles.com/hc/en-us/articles/30718780265369-Lottie-Creator-Key-Features"
-    ]
+    ],
+    "waits_on": "LO-5"
   },
   "RJ-F13": {
     "id": "RJ-F13",

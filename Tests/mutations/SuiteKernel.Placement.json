@@ -1,0 +1,23 @@
+[
+  {
+    "label": "keepPlaceScaled: keep-place ignores scale",
+    "file": "Sources/SuiteKernel/Transform/Placement.swift",
+    "find": "(Matrix.rotation(degrees: rotation) * Matrix.scale(x: scaleX, y: scaleY)).apply(offset)",
+    "replace": "Matrix.rotation(degrees: rotation).apply(offset)",
+    "tests": "PlacementTests"
+  },
+  {
+    "label": "anchorSign: the anchor offset is taken the wrong way round",
+    "file": "Sources/SuiteKernel/Transform/Placement.swift",
+    "find": "let offset = Point(x: p.x - anchorX, y: p.y - anchorY)",
+    "replace": "let offset = Point(x: anchorX - p.x, y: anchorY - p.y)",
+    "tests": "PlacementTests"
+  },
+  {
+    "label": "anchorPoint measures from the origin, not the box",
+    "file": "Sources/SuiteKernel/Transform/Placement.swift",
+    "find": "return Point(x: box.minX + (box.maxX - box.minX) * u, y: box.minY + (box.maxY - box.minY) * v)",
+    "replace": "return Point(x: (box.maxX - box.minX) * u, y: (box.maxY - box.minY) * v)",
+    "tests": "PlacementTests"
+  }
+]

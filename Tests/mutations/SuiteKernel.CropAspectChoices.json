@@ -1,0 +1,16 @@
+[
+  {
+    "label": "squareToggle: the orientation toggle stays on for 1:1, which has nothing to turn",
+    "file": "Sources/SuiteKernel/Crop/CropAspectChoices.swift",
+    "find": "case .ratio(let w, let h) where w == h:",
+    "replace": "case .ratio(let w, let h) where w == h && w > 1:",
+    "tests": "CropAspectChoicesTests"
+  },
+  {
+    "label": "zeroTaken: a custom 0 is read as a ratio instead of refused",
+    "file": "Sources/SuiteKernel/Crop/CropAspectChoices.swift",
+    "find": "guard wide >= 1, tall >= 1 else",
+    "replace": "guard wide >= 0, tall >= 0 else",
+    "tests": "CropAspectChoicesTests"
+  }
+]

@@ -7,9 +7,11 @@
 // `drags(_:)` stay as wrappers (`sampling` is Option, zoom 1).
 //
 // Drags route by component: with a Free Transform in progress every drag goes
-// to `transformDrag` (PhotoTransform.swift); otherwise by tool, marquee to
+// to `transformDrag` (PhotoTransform.swift), which moves, scales or turns the
+// box and records one step on release; otherwise by tool, marquee to
 // `selectionDrag` (PhotoSelectionMask.swift), crop to `cropDrag`
-// (PhotoCropSize.swift), eyedropper to `sampleDrag` (PhotoEyedropper.swift),
+// (PhotoCropSize.swift), eyedropper to `sampleDrag` (PhotoSample+Kernel.swift),
+// a Pen drag adds a draft point on release (`runPath`, PhotoPaths+Kernel.swift),
 // and the rest paint or move here.
 //
 //   brush, eraser  a round stroke through the pointer samples on the selected
@@ -40,8 +42,8 @@
 //                  it); a click drops it (PhotoCropSize.swift).
 //   eyedropper     the color under the pointer becomes the brush color, never
 //                  an undo step (PhotoEyedropper.swift).
-//   move           shifts the selected layer by the drag, in whole pixels
-//                  ("Move Layer").
+//   move           shifts every picked image layer by the drag, in whole
+//                  pixels, as one step ("Move Layer", "Move Layers" for several).
 //
 // Brush, eraser, clone and heal write through `paintTarget()`: the selected
 // layer's pixels, or on an adjustment layer nothing, with the refusal in
@@ -82,6 +84,11 @@ struct PhotoStroke: Sendable, Equatable {
     /// Marquee: the modifier keys `selectionDrag` saw last (Shift adds,
     /// Option subtracts, PV-5).
     var modifiers: DragModifiers = []
+    /// Gradient: where the pointer is now; the gradient runs from `start` to here on release.
+    var end: Mask.Point?
+    /// Free Transform: the draft at the press and the handle the press took (nil off the box).
+    var transformFrom: TransformDraft?
+    var transformHandle: TransformHandle?
 }
 
 extension PhotoWorkspace {
@@ -162,8 +169,12 @@ extension PhotoWorkspace {
             cropDrag(current, to: end, modifiers: modifiers, zoom: zoom, in: canvas)
         case .move:
             if begun { current.layersBefore = layers }
-            moveSelectedLayer(current, to: end)
+            moveSelectedLayers(current, to: end)
         case .eyedropper:
+            break
+        case .gradient, .pen:
+            current.end = end
+        case .text:
             break
         }
         stroke = current
@@ -190,6 +201,19 @@ extension PhotoWorkspace {
         transformDraft == nil && [.brush, .eraser, .clone, .heal].contains(tool)
     }
 
+    /// The Gradient tool's line while it drags, from the press to where the
+    /// pointer is now, in canvas pixels, for the canvas overlay; nil with no
+    /// gradient drag or one that hasn't moved.
+    public var gradientDrag: (from: Mask.Point, to: Mask.Point)? {
+        guard let stroke, stroke.tool == .gradient, let end = stroke.end, end != stroke.start else { return nil }
+        return (stroke.start, end)
+    }
+
+    /// Whether the drag under way only moves a line over the canvas until its
+    /// release draws (the Gradient tool's), so the window can keep its later
+    /// samples off the workspace the panels read.
+    public var dragShowsLineOnly: Bool { stroke?.tool == .gradient && transformDraft == nil }
+
     /// Becomes `live`: a copy of this workspace a stroke drew on
     /// (`dragPaintsOnly`). Ignored when `live` is another image (another
     /// canvas or layer stack), so a stroke never overwrites a newer document.
@@ -208,6 +232,10 @@ extension PhotoWorkspace {
     public mutating func endDrag() {
         guard var done = stroke else { return }
         stroke = nil
+        if let before = done.transformFrom {
+            if transformDraft != before { record(.draft(before), named: "Transform") }
+            return
+        }
         switch done.tool {
         case .brush, .eraser:
             paint(&done, adding: nil, pressure: 1)
@@ -218,9 +246,17 @@ extension PhotoWorkspace {
             record(.tiles(layer: id, done.before), named: done.tool == .heal ? "Heal" : "Clone")
         case .marquee, .crop, .eyedropper:
             break
+        case .gradient:
+            guard let end = done.end else { return }
+            do { try drawGradient(from: done.start, to: end) } catch { statusMessage = "Couldn't draw the gradient." }
+        case .text:
+            openTextBox(at: done.start)
+        case .pen:
+            runPath(.penAdd(done.start.kernel, handleOut: done.end?.kernel))
         case .move:
             if done.layersBefore != layers, !done.layersBefore.isEmpty {
-                record(.layers(done.layersBefore, selected: selectedLayerID), named: "Move Layer")
+                let moved = zip(done.layersBefore, layers).filter { $0.offsetX != $1.offsetX || $0.offsetY != $1.offsetY }
+                record(.layers(done.layersBefore, selected: selectedLayerID), named: moved.count > 1 ? "Move Layers" : "Move Layer")
             }
         }
     }
@@ -233,21 +269,27 @@ extension PhotoWorkspace {
         return PixelRect(from: a, to: b).intersection(canvas.rect)
     }
 
-    private mutating func moveSelectedLayer(_ current: PhotoStroke, to end: Mask.Point) {
-        guard let id = selectedLayerID, let at = index(of: id),
-            let before = current.layersBefore.first(where: { $0.id == id })
-        else { return }
-        if case .adjustment = layers[at].kind {
+    /// Moves every picked image layer to where it was at the press plus the
+    /// drag so far, so the whole drag is one change from `layersBefore`.
+    private mutating func moveSelectedLayers(_ current: PhotoStroke, to end: Mask.Point) {
+        guard selectedLayerID != nil else { return }
+        let targets = movableSelectedLayers
+        guard !targets.isEmpty else {
             statusMessage = Self.moveRefusal
             return
         }
         let dx = end.x - current.start.x, dy = end.y - current.start.y
         guard dx.isFinite, dy.isFinite, abs(dx) < 1e7, abs(dy) < 1e7 else { return }
-        let x = before.offsetX + Int(dx.rounded()), y = before.offsetY + Int(dy.rounded())
-        guard x != layers[at].offsetX || y != layers[at].offsetY else { return }
-        layers[at].offsetX = x
-        layers[at].offsetY = y
-        touch(.all)
+        var moved = false
+        for at in targets {
+            guard let before = current.layersBefore.first(where: { $0.id == layers[at].id }) else { continue }
+            let x = before.offsetX + Int(dx.rounded()), y = before.offsetY + Int(dy.rounded())
+            guard x != layers[at].offsetX || y != layers[at].offsetY else { continue }
+            layers[at].offsetX = x
+            layers[at].offsetY = y
+            moved = true
+        }
+        if moved { touch(.all) }
     }
 
     /// Adds a pointer sample to the stroke (nil: the stroke ends) and paints

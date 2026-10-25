@@ -9,7 +9,10 @@
 // is built from the Layer menu's catalog spec on the same state,
 // `ToolbarAction(spec, on:)` titled as the menu titles it, so its title,
 // enablement and reason are the menu's; a row's menu reads the workspace with
-// that row selected, and a pick selects the row, then runs. Values in, intents out.
+// that row selected (a row already picked keeps every pick, as Delete and Hide
+// act on all of them), and a pick selects an unpicked row, then runs. Every
+// picked layer draws selected, and a row click leaves as `pickLayer` with its
+// mode (multi-layer-select PM-3). Values in, intents out.
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -23,9 +26,9 @@ struct PhotoLayerList: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             LayerTreeList(
-                rows: model.layerRows, childCount: { _ in 0 }, selection: model.selectedLayerID,
+                rows: model.layerRows, childCount: { _ in 0 }, selected: Self.selected(model),
                 naming: PhotoLayerRow.naming, options: PhotoLayerRow.options,
-                decorations: Self.decorations(model), onSelect: { perform(.selectLayer($0)) },
+                decorations: Self.decorations(model), onPick: { perform(.pickLayer($0, $1)) },
                 contextActions: { Self.rowMenu(menu, row: $0) }
             ) { action in
                 switch action {
@@ -43,6 +46,11 @@ struct PhotoLayerList: View {
 
     /// The Layer menu's target over this panel's workspace.
     private var menu: PhotoMenu { PhotoMenu(model: model, perform: perform) }
+
+    /// The rows drawn picked: every selected layer's id.
+    nonisolated static func selected(_ model: PhotoWorkspace) -> Set<String> {
+        Set(model.selectedLayerIDs)
+    }
 
     /// Each layer's kind symbol and caption by id; help names blend and opacity.
     nonisolated static func decorations(_ model: PhotoWorkspace) -> [String: LayerRowDecoration] {
@@ -83,12 +91,14 @@ struct PhotoLayerList: View {
         return actions
     }
 
-    /// Row `id`'s context menu: each item as the Layer menu shows it with that row selected; a pick selects it first.
+    /// Row `id`'s context menu: each item as the Layer menu shows it with that row selected; a pick selects it
+    /// first. A row already picked keeps every pick, so the menu acts on all of them.
     // view-static: main-actor
     static func rowMenu(_ menu: PhotoMenu, row id: PhotoLayer.ID) -> [ToolbarAction] {
         var state = menu.state()
-        state.workspace.selectLayer(id)
-        return rowCommands(row: id).map { action(menu, $0, in: state, selecting: id) }
+        let picked = state.workspace.selectedLayerIDs.contains(id)
+        if !picked { state.workspace.selectLayer(id) }
+        return rowCommands(row: id).map { action(menu, $0, in: state, selecting: picked ? nil : id) }
     }
 
     /// `command` from its catalog spec on `state`, titled as the Layer menu titles it; a pick selects `selecting` first.

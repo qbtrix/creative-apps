@@ -1,0 +1,4 @@
+[
+{"label":"the TEXT field's key ignores the words, so an Undo or Redo never reaches a focused field","file":"Sources/HaloModel/HaloTextInspectorRules.swift","find":"        HaloTextFieldKey(layerID: selectedLayerID, words: selectedText?.string)\n","replace":"        HaloTextFieldKey(layerID: selectedLayerID, words: selectedText.map { _ in \"\" })\n","tests":"HaloTextFieldKeyTests"},
+{"label":"the TEXT field's key ignores the selection, so a new layer keeps the old field","file":"Sources/HaloModel/HaloTextInspectorRules.swift","find":"HaloTextFieldKey(layerID: selectedLayerID, words:","replace":"HaloTextFieldKey(layerID: nil, words:","tests":"HaloTextFieldKeyTests"}
+]

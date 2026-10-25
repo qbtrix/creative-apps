@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "app": "suite",
+  "why": "RJ-X65 (suite/report-problem RP-5): Help > Report a Problem… from Photo after two Photo crashes. The input holds what the sheet reads on the tester's Mac (home /Users/tester, user tester, host testers-mac) and four crash files: two Photo crashes from the last two days, a web browser's crash from this morning and a Halo crash ten days old. The trap: the report leaks the home path, user or host name, picks up the browser's or the old crash, or sends anything itself. The assertion: the saved answer is the sheet's report with exactly the two Photo crashes, newest first, every path under ~ and no user or host name; the CLI reads only its input and opens no socket, so it passes with the network denied. Its rules are SuiteModel's and Foundation only, so it runs on Linux as well as headless on macOS (Cm).",
+  "inputs": [
+    "input/*.suitehelp"
+  ],
+  "steps": [
+    {
+      "id": "help.report-problem",
+      "params": {
+        "note": "Photo quit while I painted."
+      }
+    }
+  ],
+  "atomic": true,
+  "output": {
+    "dir": "out",
+    "name": "{stem}-report",
+    "format": "suitehelp"
+  },
+  "expect": {
+    "out/photo-after-two-crashes-report.suitehelp": {
+      "json": {
+        "answer": {
+          "app": "Photo",
+          "build": "412",
+          "crashes": [
+            "Photo-2026-10-21-110000.ips\n{\"app_name\":\"Photo\",\"name\":\"Photo\",\"timestamp\":\"2026-10-21 11:00:00\",\"os_version\":\"macOS 26.1\"}\n{\n  \"crashedThread\" : 0,\n  \"exception\" : {\n    \"signal\" : \"SIGSEGV\",\n    \"type\" : \"EXC_BAD_ACCESS\"\n  },\n  \"frames\" : [\n    {\n      \"sourceFile\" : \"~/src/LayerStack.merge.swift\",\n      \"sourceLine\" : 12,\n      \"symbol\" : \"LayerStack.merge\"\n    }\n  ],\n  \"procPath\" : \"~/Applications/AfterGlow.app/Contents/Helpers/Photo.app/Contents/MacOS/Photo\"\n}",
+            "Photo-2026-10-20-090000.ips\n{\"app_name\":\"Photo\",\"name\":\"Photo\",\"timestamp\":\"2026-10-20 09:00:00\",\"os_version\":\"macOS 26.1\"}\n{\n  \"crashedThread\" : 0,\n  \"exception\" : {\n    \"signal\" : \"SIGSEGV\",\n    \"type\" : \"EXC_BAD_ACCESS\"\n  },\n  \"frames\" : [\n    {\n      \"sourceFile\" : \"~/src/BrushStroke.commit.swift\",\n      \"sourceLine\" : 12,\n      \"symbol\" : \"BrushStroke.commit\"\n    }\n  ],\n  \"procPath\" : \"~/Applications/AfterGlow.app/Contents/Helpers/Photo.app/Contents/MacOS/Photo\"\n}"
+          ],
+          "macOS": "26.1 (25B78)",
+          "model": "Mac15,3",
+          "text": "Photo quit while I painted.\n\nPhoto 0.9.0 (412)\nmacOS 26.1 (25B78)\nMac Mac15,3\n\nCrashes (2, newest first):\n\nPhoto-2026-10-21-110000.ips\n{\"app_name\":\"Photo\",\"name\":\"Photo\",\"timestamp\":\"2026-10-21 11:00:00\",\"os_version\":\"macOS 26.1\"}\n{\n  \"crashedThread\" : 0,\n  \"exception\" : {\n    \"signal\" : \"SIGSEGV\",\n    \"type\" : \"EXC_BAD_ACCESS\"\n  },\n  \"frames\" : [\n    {\n      \"sourceFile\" : \"~/src/LayerStack.merge.swift\",\n      \"sourceLine\" : 12,\n      \"symbol\" : \"LayerStack.merge\"\n    }\n  ],\n  \"procPath\" : \"~/Applications/AfterGlow.app/Contents/Helpers/Photo.app/Contents/MacOS/Photo\"\n}\n\nPhoto-2026-10-20-090000.ips\n{\"app_name\":\"Photo\",\"name\":\"Photo\",\"timestamp\":\"2026-10-20 09:00:00\",\"os_version\":\"macOS 26.1\"}\n{\n  \"crashedThread\" : 0,\n  \"exception\" : {\n    \"signal\" : \"SIGSEGV\",\n    \"type\" : \"EXC_BAD_ACCESS\"\n  },\n  \"frames\" : [\n    {\n      \"sourceFile\" : \"~/src/BrushStroke.commit.swift\",\n      \"sourceLine\" : 12,\n      \"symbol\" : \"BrushStroke.commit\"\n    }\n  ],\n  \"procPath\" : \"~/Applications/AfterGlow.app/Contents/Helpers/Photo.app/Contents/MacOS/Photo\"\n}",
+          "version": "0.9.0"
+        },
+        "app": "photo"
+      }
+    }
+  },
+  "platforms": [
+    "linux",
+    "macos"
+  ]
+}

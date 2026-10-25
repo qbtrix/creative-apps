@@ -14,12 +14,20 @@
 // same on the Assets page (the sidebar's Assets row) and in the Settings
 // window (⌘,) for the controls each registers; both are placeholders today
 // and register none, which the log notes. This is a sweep, not feature coverage.
+// Last, the suite menus every editor now shares (editor-menus EM-9): Window >
+// Switch To and AI Access…, and Help's Report a Problem… and Beta Notes, which
+// the launcher shows under the same ids (editorMenus).
 import XCTest
 
 final class AfterGlowControlJourneys: XCTestCase {
     static let prefix = "afterglow."
     /// The New tiles and their preset menus, swept last: a click launches an app.
     static let launching = "afterglow.home.new."
+    /// The menu items `.suiteEditor` gives every editor and the launcher has too, by menu: a title or an id.
+    static let editorMenus: [(menu: String, item: String)] = [
+        ("Window", "Switch To"), ("Window", "AI Access…"),
+        ("Help", "suite.help.report-problem"), ("Help", "suite.help.beta-notes"),
+    ]
 
     @MainActor func testEveryControlActsOrSaysWhy() {
         let suite = SuiteHarness(self)
@@ -56,6 +64,19 @@ final class AfterGlowControlJourneys: XCTestCase {
         if onSettings.isEmpty { print("SJ19: the Settings window registers no control of its own") }
         _ = sweep(onSettings, home, page: "settings")
         home.press(character: "w", .command)
+        editorMenusExist(home)
+    }
+
+    /// Each of `editorMenus` is in its menu; the menu closes again unclicked.
+    @MainActor private func editorMenusExist(_ home: Journey) {
+        bringBack(home)
+        for (menu, item) in Self.editorMenus {
+            let bar = home.app.menuBars.firstMatch.menuBarItems[menu]
+            XCTAssert(bar.waitForExistence(timeout: 5), "the launcher has no \(menu) menu")
+            bar.click()
+            XCTAssert(bar.menuItems[item].waitForExistence(timeout: 3), "\(menu) holds no \(item)")
+            home.press(.escape)
+        }
     }
 
     /// Clicks each enabled control of `ids` (judged as the list gives it now)
