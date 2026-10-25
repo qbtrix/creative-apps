@@ -149,3 +149,4 @@ utc	stage	event	ref	note
 2026-10-25T07:04Z	check	07:04Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; batch 20261025054232 probe -6 macOS gate still running (68 min); dev 13fb2f591 unchanged; no slice done; 0 findings
 2026-10-25T07:26Z	check	07:26Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; batch 20261025054232 probe -6 macOS red, probe -3 Linux+macOS running (no Halo PR in batch); dev 13fb2f591; no slice done; 0 findings
 2026-10-25T07:48Z	check	07:48Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; batch 20261025054232 probe -3 Linux green, macOS gate running; dev 13fb2f591; no slice done; 0 findings
+2026-10-25T08:11Z	check	08:11Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; dev 7e5bcd82f (#5287, scripts only); batch 20261025054232 probe -3 macOS gate still running; no slice done; 0 findings
