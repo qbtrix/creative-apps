@@ -4,8 +4,6 @@
 Sources/DesignApp/DesignRasterizer.swift
 Sources/FlareApp/StageRasterizer.swift
 Sources/HaloApp/HaloPNGWriter.swift
-Sources/LibraryApp/Platform/ImageIODecoder.swift
-Sources/LibraryApp/Platform/JPEGWriter.swift
 Sources/SuiteShell/PasteboardBridge.swift
 Sources/SuiteUI/Gallery/GalleryPlaceImage.swift
 Sources/SuiteUI/PlacedImageView.swift

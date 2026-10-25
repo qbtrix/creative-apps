@@ -5,8 +5,8 @@
 // bytes; the orientation-6 still decodes upright; RJ-X46's camera pair (added by SC-3) decodes 3024 x 4032
 // with its JPEG and HEIC within 3 levels. The tests call the entry points SC-8 keeps, `ImageIODecoder`'s
 // `scan(folder:)` and `decode(path:maxLongSide:)`. SC-8 adds the writer's side: `JPEGWriter` offers exactly
-// the export formats `SuiteImageIO` writes, and its lossless files decode back. Written first, disabled until
-// SC-8. macOS only.
+// the export formats `SuiteImageIO` writes, and its lossless files decode back. Written first, enabled
+// by SC-8. macOS only.
 #if os(macOS)
 import Foundation
 import LibraryModel
@@ -79,7 +79,7 @@ import Testing
 
     /// Every fixture folder scans to today's size, kind, capture date and camera, with no failures. No fixture
     /// carries Exif DateTimeOriginal, so each capture date is the file's creation date.
-    @Test(.disabled("waits on SC-8")) func importFixturesScanAsToday() async throws {
+    @Test func importFixturesScanAsToday() async throws {
         let root = try packageRoot()
         for folder in try expected().folders {
             let url = root.appending(path: folder.folder)
@@ -102,7 +102,7 @@ import Testing
     }
 
     /// Each scanned fixture decodes at full size to its scanned (upright) size.
-    @Test(.disabled("waits on SC-8")) func importFixturesDecodeAtTheirScannedSize() async throws {
+    @Test func importFixturesDecodeAtTheirScannedSize() async throws {
         let root = try packageRoot()
         for folder in try expected().folders {
             for file in folder.files {
@@ -114,7 +114,7 @@ import Testing
     }
 
     /// The orientation-6 still (16 x 32 stored) decodes 32 x 16 with its upright corners red, green, blue, white.
-    @Test(.disabled("waits on SC-8")) func orientationSixStillDecodesUpright() async throws {
+    @Test func orientationSixStillDecodesUpright() async throws {
         let root = try packageRoot()
         for still in try expected().upright {
             let image = try await decoder.decode(path: root.appending(path: still.path).path, maxLongSide: nil)
@@ -129,7 +129,7 @@ import Testing
 
     /// RJ-X46's JPEG and HEIC (4032 x 3024 stored, orientation 6) scan and decode 3024 x 4032, and the two
     /// decodes agree within 3 levels on a 64-pixel grid, so neither path drops the orientation or the profile.
-    @Test(.disabled("waits on SC-8")) func cameraPairDecodesUpright() async throws {
+    @Test func cameraPairDecodesUpright() async throws {
         let root = try packageRoot()
         let pair = try expected().rjX46
         let shown = try #require(size(pair.pixelSize))
@@ -156,7 +156,7 @@ import Testing
 
     /// JPEGWriter offers exactly the export formats SuiteImageIO writes, and a PNG and a TIFF it writes decode
     /// back through ImageIODecoder at their size, every sample within 1 level.
-    @Test(.disabled("waits on SC-8")) func writerFilesRoundTripThroughSuiteImageIO() async throws {
+    @Test func writerFilesRoundTripThroughSuiteImageIO() async throws {
         let writable = ExportFormat.allCases.filter { format in
             SuiteImageFormat(fileName: "a." + format.fileExtension).map { SuiteImageIO.writable.contains($0) } ?? false
         }
