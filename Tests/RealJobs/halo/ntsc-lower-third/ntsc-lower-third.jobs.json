@@ -22,7 +22,7 @@
         "layers": [
           {"id": "comp-1-layer-1", "name": "Text 1", "kind": "text", "inFrame": 0, "outFrame": 300, "opacity": 1, "blendMode": "normal",
            "color": {"red": 0.1, "green": 0.1, "blue": 0.1},
-           "text": {"string": "Lower Third", "fontSize": 72, "width": 475.19999999999993, "height": 72},
+           "text": {"string": "Lower Third", "fontSize": 72, "width": {"$linux": 475.19999999999993}, "height": {"$linux": 72}},
            "tracks": {"x": [
              {"frame": 0, "value": 0, "easing": {"linear": {}}},
              {"frame": 299, "value": 600, "easing": {"linear": {}}}]}}

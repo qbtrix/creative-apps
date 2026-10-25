@@ -4,8 +4,10 @@
 // this platform with "macOS-only: <why>" (or "Linux-only: <why>") before it
 // runs, then runs the script through ScriptRunner (forcing, so a rerun
 // replaces its outputs) and compares each expected output: sha256 on the
-// whole digest, JSON parsed and compared equal, or pixels within a
-// tolerance. Pixels need a PNG decoder (creative-core image-codecs), not in
+// whole digest, JSON parsed and compared equal (where the expected JSON holds
+// `{"$linux": v}`, the value must be v on Linux and any finite number on macOS:
+// a text box the macOS CLI measures with Core Text, which Linux only
+// estimates), or pixels within a tolerance. Pixels need a PNG decoder (creative-core image-codecs), not in
 // yet, so a job whose other expectations hold but that expects pixels is
 // skipped "waits on image-codecs", never passed. Files are reached only
 // through CLIIO; the runner's own report is captured, so one JSON object
@@ -86,11 +88,30 @@ public enum RealJobs {
             return digest == hex.lowercased() ? .pass : .fail("sha256 is \(digest), expected \(hex)")
         case ("json", let expected):
             guard let got = try? JSONValue(json: data) else { return .fail("is not JSON") }
-            return got == expected ? .pass : .fail("JSON differs from the expected value")
+            return matches(got, expected) ? .pass : .fail("JSON differs from the expected value")
         case ("pixels", .object):
             return .skip
         default:
             return .fail("has an unknown or malformed expectation \(kind)")
+        }
+    }
+
+    /// Whether `got` equals `want`, where a `{"$linux": v}` in `want` is v on Linux and any finite number elsewhere.
+    public static func matches(_ got: JSONValue, _ want: JSONValue) -> Bool {
+        switch (got, want) {
+        case (_, .object(let w)) where w.count == 1 && w["$linux"] != nil:
+            #if os(Linux)
+            return got == w["$linux"]
+            #else
+            if case .number(let n) = got { return n.isFinite }
+            return false
+            #endif
+        case (.object(let g), .object(let w)):
+            return g.count == w.count && w.allSatisfy { key, value in g[key].map { matches($0, value) } ?? false }
+        case (.array(let g), .array(let w)):
+            return g.count == w.count && zip(g, w).allSatisfy { matches($0, $1) }
+        default:
+            return got == want
         }
     }
 

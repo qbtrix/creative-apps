@@ -2,7 +2,9 @@
 // HeadlessDocument type, erased to a HeadlessApp so the router can list and
 // pick one by name, and HeadlessSession, one open document of any app. Both
 // forward to the app's catalog, so a command runs once the app adopts it
-// (adopt-command-catalog) and command-catalog CC-7 fills `run`.
+// (adopt-command-catalog) and command-catalog CC-7 fills `run`. Photo and Halo
+// open on their live services with SuiteText's LiveText on macOS, so their text
+// commands draw (#5193, #5280); on Linux they keep their fakes.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -15,6 +17,9 @@ import HaloModel
 import LibraryModel
 import PhotoModel
 import SuiteImaging
+#if canImport(SuiteText)
+import SuiteText
+#endif
 
 /// One app's headless document type, erased so the router can list it and open files with it.
 public struct HeadlessApp: Sendable {
@@ -93,9 +98,31 @@ struct TypedSession<D: HeadlessDocument>: SessionBox {
 public enum Apps {
     /// The five apps, in the suite's order: photo, design, flare, halo, library.
     public static let all: [HeadlessApp] = [
-        HeadlessApp(PhotoHeadless.self), HeadlessApp(DesignHeadless.self), HeadlessApp(FlareHeadless.self),
-        HeadlessApp(HaloHeadless.self), HeadlessApp(LibraryHeadless.self),
+        HeadlessApp(PhotoHeadless.self, open: { try PhotoHeadless.open($0, name: $1, services: photoServices) },
+                    new: { try PhotoHeadless.new($0, services: photoServices) }),
+        HeadlessApp(DesignHeadless.self), HeadlessApp(FlareHeadless.self),
+        HeadlessApp(HaloHeadless.self, open: { try HaloHeadless.open($0, name: $1, services: haloServices) },
+                    new: { try HaloHeadless.new($0, services: haloServices) }),
+        HeadlessApp(LibraryHeadless.self),
     ]
+
+    /// Photo's live services, drawing text with SuiteText's LiveText where the build has it (macOS).
+    static var photoServices: PhotoServices {
+        var services = PhotoServices.live
+        #if canImport(SuiteText)
+        services.text = LiveText()
+        #endif
+        return services
+    }
+
+    /// Halo's live services, drawing text with LiveText through HaloTextAdapter where the build has it (macOS).
+    static var haloServices: HaloServices {
+        var services = HaloServices.live
+        #if canImport(SuiteText)
+        services.text = HaloTextAdapter(LiveText())
+        #endif
+        return services
+    }
     /// The suite's Help commands ("suite"), over the `.suitehelp` files `HelpReports` reads. Never in `all`.
     public static let suite = HeadlessApp(SuiteHelpDocument.self, open: { data, _ in try HelpReports.open(data) }, new: HelpReports.new)
     /// The fake app ("fake", SuiteKernel's FakeCanvasDocument). Never in `all`; the tests add it.

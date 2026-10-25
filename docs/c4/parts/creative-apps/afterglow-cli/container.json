@@ -49,6 +49,12 @@
       "target": "halo-model",
       "description": "opens, saves and exports Halo documents through HaloHeadless",
       "style": "sync"
+    },
+    {
+      "source": "afterglow-cli",
+      "target": "suite-text",
+      "description": "draws Photo and Halo text with the live text service (macOS only)",
+      "style": "sync"
     }
   ]
 }
