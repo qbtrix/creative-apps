@@ -1,6 +1,6 @@
 // LibraryCollectionsStoreTests.swift: CollectionsStore on the file system
 // (filters-collections FC-15 check row; slice FC-e). Written before its code
-// (FC-13): FC-15 drops the `.disabled` traits. Each test uses a fresh temp folder.
+// (FC-13); FC-15 enabled it. Each test uses a fresh temp folder.
 #if os(macOS)
 import Foundation
 import LibraryModel
@@ -20,7 +20,7 @@ import Testing
     }
 
     /// No file reads nil; writes round-trip; writeNow has written when it returns.
-    @Test(.disabled("waits on FC-15")) func readsNilThenWritesRoundTrip() async throws {
+    @Test func readsNilThenWritesRoundTrip() async throws {
         let store = try store()
         defer { try? FileManager.default.removeItem(at: store.folder) }
         #expect(try await store.read() == nil)
@@ -33,7 +33,7 @@ import Testing
         #expect(try names(in: store) == ["collections.json"])
     }
 
-    @Test(.disabled("waits on FC-15")) func setAsideRenamesToBadReplacingAnOlderOne() async throws {
+    @Test func setAsideRenamesToBadReplacingAnOlderOne() async throws {
         let store = try store()
         defer { try? FileManager.default.removeItem(at: store.folder) }
         try Data("old bad".utf8).write(to: store.setAsideURL)

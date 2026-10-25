@@ -37,10 +37,10 @@ final class HaloFirstFiveJourneys: XCTestCase {
         let halo = newComposition(["-HaloRenderTo", renders.path])
         addTitle(halo)
         halo.choose(menu: ["File", "Render…"])
-        segment("Movie", in: "halo.render.format", halo)
-        segment("Half", in: "halo.render.size", halo)
+        segment("Movie", halo)
+        segment("Half", halo)
         halo.snap("first5-render-sheet")
-        halo.reachable("Render", in: halo.app.sheets.firstMatch).click()
+        halo.reachable("Render", in: halo.app.sheets.firstMatch, stuck: "(the sheet's button reads Export until #3402)").click()
         let written = try XCTUnwrap(FirstFive.file(in: renders, ext: "mp4", timeout: 240), "Render wrote no .mp4")
         let head = try Data(contentsOf: written).prefix(12)
         XCTAssertEqual(String(decoding: head.dropFirst(4).prefix(4), as: UTF8.self), "ftyp", "the movie isn't MPEG-4")
@@ -71,12 +71,12 @@ final class HaloFirstFiveJourneys: XCTestCase {
         XCTAssert(FirstFive.wait(5) { (field.value as? String) == "Hello" }, "the title reads \(String(describing: field.value))")
     }
 
-    /// Clicks the segment titled `title` of the Render sheet's picker `id`.
-    @MainActor private func segment(_ title: String, in id: String, _ halo: Journey) {
+    /// Clicks the Render sheet's choice a person reads as `title`: a format or Size chip, a button whose
+    /// label is its title. The Size chips have no picker of their own to search under (#3924).
+    @MainActor private func segment(_ title: String, _ halo: Journey) {
         let named = NSPredicate(format: "label == %@ OR title == %@", title, title)
-        var choice = halo.element(id).descendants(matching: .any).matching(named).firstMatch
-        if !choice.waitForExistence(timeout: 10) { choice = halo.app.sheets.firstMatch.radioButtons.matching(named).firstMatch }
-        XCTAssert(choice.waitForExistence(timeout: 5), "the Render sheet offers no \(title)")
+        let choice = halo.app.sheets.firstMatch.descendants(matching: .any).matching(named).firstMatch
+        XCTAssert(choice.waitForExistence(timeout: 10), "the Render sheet offers no \(title)")
         choice.click()
     }
 

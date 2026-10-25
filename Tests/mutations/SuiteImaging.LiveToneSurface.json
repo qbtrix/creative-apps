@@ -1,0 +1,5 @@
+[
+{"label": "stepIsOneWrite: the base is re-uploaded on every draw", "file": "Sources/SuiteImaging/Route/LiveToneSurface.swift", "find": "        if let held = tiles[index] { return held }", "replace": "        if let held = tiles[index], false { return held }", "tests": "LiveToneSurfaceTests/stepIsOneWrite"},
+{"label": "matchesCpu: the program is left out of the display write", "file": "Sources/SuiteImaging/Route/LiveToneSurface.swift", "find": "premultiplied: true, tone: tone)", "replace": "premultiplied: true, tone: nil)", "tests": "LiveToneSurfaceTests/matchesCpu"},
+{"label": "sharpenFollowsBase: the sharpen cache is kept after a base change", "file": "Sources/SuiteImaging/Route/LiveToneSurface.swift", "find": "if let held = sharpened[index], damaged.contains", "replace": "if let held = sharpened[index], false, damaged.contains", "tests": "LiveToneSurfaceTests/sharpenFollowsBase"}
+]

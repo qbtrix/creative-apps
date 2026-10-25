@@ -1,0 +1,30 @@
+[
+  {
+    "label": "a lone smooth anchor drops its trailing move",
+    "file": "Sources/FlareModel/FlarePen+Kernel.swift",
+    "find": "                path.elements.append(.move(to: handle))\n",
+    "replace": "",
+    "tests": "FlarePenKernelTests/loneSmoothFirstAnchorKeepsHandle"
+  },
+  {
+    "label": "the pen ignores the stage scale",
+    "file": "Sources/FlareModel/FlarePen+Kernel.swift",
+    "find": "PenRules.add(start, handleOut: end, to: base, scale: scale)",
+    "replace": "PenRules.add(start, handleOut: end, to: base, scale: 1)",
+    "tests": "FlarePenStageScaleTests"
+  },
+  {
+    "label": "one anchor finishes a path",
+    "file": "Sources/FlareModel/FlarePen+Kernel.swift",
+    "find": "public static let minimumFinishAnchors = 2",
+    "replace": "public static let minimumFinishAnchors = 1",
+    "tests": "FlarePenFinishTests"
+  },
+  {
+    "label": "a missing out-handle is the in-handle reflected the wrong way (#4012)",
+    "file": "Sources/FlareModel/FlarePen+Kernel.swift",
+    "find": "Point(x: 2 * anchor.point.x - handle.x, y: 2 * anchor.point.y - handle.y)",
+    "replace": "Point(x: 2 * handle.x - anchor.point.x, y: 2 * handle.y - anchor.point.y)",
+    "tests": "FlarePenKernelTests/smoothAnchorWithOnlyHandleInMirrorsOut"
+  }
+]

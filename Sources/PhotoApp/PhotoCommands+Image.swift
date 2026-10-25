@@ -1,6 +1,8 @@
 // PhotoCommands+Image.swift: Photo's Image menu in the menu bar (Image Size…,
-// the three rotations and Straighten…), each from its catalog spec: off with no image.
+// Canvas Size…, the three rotations and Straighten…), each from its catalog
+// spec: off with no image, and Canvas Size… also while Free Transform is open.
 import PhotoModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -18,6 +20,7 @@ struct PhotoImageMenu: View {
 
     var body: some View {
         menu.item("image.resize") { menu.perform(.imageSize) }
+        menu.item("image.canvas-size") { menu.perform(.transform(.canvasSize)) }
         Divider()
         menu.item("image.rotate-cw") { menu.perform(.rotate(.degrees90)) }
         menu.item("image.rotate-ccw") { menu.perform(.rotate(.degrees270)) }

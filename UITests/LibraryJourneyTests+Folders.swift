@@ -1,13 +1,14 @@
 // LibraryJourneyTests+Folders.swift: LJ-FO (folders), browse the catalog by the folders its photos sit in
 // (packet docs/blueprints/library/features/folders.md, Journey step 1). Three fixture folders are imported
-// into one catalog, `trips` with 2025/ and 2026/ inside: FOLDERS shows three roots with counts, a subfolder's
-// click shows only its photos, and Include Subfolders off on `trips` shows only its own. Written first
-// (FO-1): skips until FO-6 puts the section on live.
+// into one catalog, `trips` with 2025/ and 2026/ inside: FOLDERS shows each with its count, a subfolder's click
+// shows only its photos, and Include Subfolders off on `trips` shows only its own, which a later click on it
+// keeps. The three sit in the temporary folder, so FOLDERS roots there and the test opens each collapsed
+// group until the row it wants shows. Rows are found by title in `suite.sidebar`, grid cells by id prefix.
+// On since FO-6.
 import XCTest
 
 final class LibraryFoldersJourneyTests: XCTestCase {
     @MainActor func testBrowseFolders() throws {
-        throw XCTSkip("waits on FO-6")
         let catalog = try LibraryFiles.freshCatalogDir()
         let trips = try LibraryFiles.freshPhotoFolder(), family = try LibraryFiles.freshPhotoFolder()
         let pets = try LibraryFiles.freshPhotoFolder()
@@ -30,26 +31,46 @@ final class LibraryFoldersJourneyTests: XCTestCase {
         }
         let browser = try XCTUnwrap(library)
 
-        // FOLDERS shows three roots with their counts.
-        let root = browser.element("library.folders.\(trips.path)")
-        XCTAssert(root.waitForExistence(timeout: 10), "no FOLDERS row for trips")
+        // FOLDERS shows each imported folder.
+        let root = folderRow(trips.lastPathComponent, browser)
+        XCTAssert(root.exists, "no FOLDERS row for trips")
         for folder in [family, pets] {
-            XCTAssert(browser.element("library.folders.\(folder.path)").exists, "no FOLDERS row for \(folder.lastPathComponent)")
+            XCTAssert(folderRow(folder.lastPathComponent, browser).exists, "no FOLDERS row for \(folder.lastPathComponent)")
         }
-        browser.shot("library-sidebar-folders", element: browser.element("library.folders"))
+        browser.shot("library-sidebar-folders", element: browser.element("suite.sidebar"))
 
-        // Expand trips, click 2025: the grid shows its two photos.
-        root.disclosureTriangles.firstMatch.click()
-        let year = browser.element("library.folders.\(trips.appending(path: "2025").path)")
-        XCTAssert(year.waitForExistence(timeout: 5), "trips didn't expand to 2025")
+        // Open trips, click 2025: the grid shows its two photos.
+        let year = folderRow("2025", browser)
+        XCTAssert(year.exists, "trips didn't open to 2025")
         year.click()
-        XCTAssertEqual(browser.app.descendants(matching: .any).matching(identifier: "library.grid.cell").count, 2)
+        expectCells(2, browser, "2025's click")
         browser.shot("library-folder-selected")
 
-        // Include Subfolders off on trips: only its own photo.
+        // Include Subfolders off on trips: only its own photo, and a click on trips keeps it.
         root.rightClick()
         browser.app.menuItems["Include Subfolders"].click()
+        expectCells(1, browser, "Include Subfolders off on trips")
         root.click()
-        XCTAssertEqual(browser.app.descendants(matching: .any).matching(identifier: "library.grid.cell").count, 1)
+        expectCells(1, browser, "a click on trips after Include Subfolders")
+    }
+
+    /// The sidebar row titled `title`, opening every collapsed group in the sidebar until it shows.
+    @MainActor private func folderRow(_ title: String, _ library: Journey) -> XCUIElement {
+        let types = [XCUIElement.ElementType.tableRow, .outlineRow, .cell].map { NSNumber(value: $0.rawValue) }
+        let sidebar = library.element("suite.sidebar")
+        let row = sidebar.descendants(matching: .any).matching(NSPredicate(format: "elementType IN %@", types))
+            .containing(NSPredicate(format: "label == %@ OR value == %@", title, title)).firstMatch
+        let closed = sidebar.disclosureTriangles.matching(NSPredicate(format: "value == 0"))
+        for _ in 0..<12 where !row.waitForExistence(timeout: 2) && closed.count > 0 { closed.firstMatch.click() }
+        return row
+    }
+
+    /// The grid shows `count` cells.
+    @MainActor private func expectCells(_ count: Int, _ library: Journey, _ step: String) {
+        let cells = library.app.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier BEGINSWITH %@", "library.grid.cell."))
+        let settled = NSPredicate { _, _ in cells.count == count }
+        _ = XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: settled, object: nil)], timeout: 5)
+        XCTAssertEqual(cells.count, count, step)
     }
 }

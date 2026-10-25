@@ -33,19 +33,5 @@
     "find": "return String(name[first...last])",
     "replace": "return String(name[first...])",
     "tests": "DesignRenameTests.swift"
-  },
-  {
-    "label": "the disabled Eyedropper's tooltip no longer names the tool and its key",
-    "file": "Sources/DesignModel/DesignWorkspace.swift",
-    "find": "case .eyedropper: \"Eyedropper (I): picking a fill or stroke color from the canvas isn't built yet.\"",
-    "replace": "case .eyedropper: \"Picking a fill or stroke color from the canvas isn't built yet.\"",
-    "tests": "DesignNodeTests.swift"
-  },
-  {
-    "label": "the disabled Eyedropper's tooltip names the wrong key",
-    "file": "Sources/DesignModel/DesignWorkspace.swift",
-    "find": "case .eyedropper: \"Eyedropper (I): picking a fill or stroke color from the canvas isn't built yet.\"",
-    "replace": "case .eyedropper: \"Eyedropper (E): picking a fill or stroke color from the canvas isn't built yet.\"",
-    "tests": "DesignNodeTests.swift"
   }
 ]

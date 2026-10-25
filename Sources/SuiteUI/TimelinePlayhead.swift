@@ -14,6 +14,7 @@
 // TimelinePlayheadGrab.dims), so no lane redraws when it moves. Equatable
 // without its closure, so the strip skips it unless the playhead, the
 // scroll, the keyed rows or the work area change.
+import SuiteKernel
 import SwiftUI
 
 struct TimelinePlayhead: View {
@@ -27,6 +28,8 @@ struct TimelinePlayhead: View {
     let keys: [TimelinePlayheadKey]
     /// The host's work area; the lanes outside it dim. Nil dims nothing.
     var workArea: ClosedRange<Int>? = nil
+    /// The document's rate, when the host knows it: the pill reads its timecode, as the host's readout does.
+    var rate: FrameRate? = nil
     let onScrub: @MainActor (Int) -> Void
     @State private var sender = TimelineScrubSender()
 
@@ -36,7 +39,7 @@ struct TimelinePlayhead: View {
     #endif
 
     /// What the pill reads: the playhead in the host's unit.
-    var label: String { TimelineTime.label(frame: mapping.clamp(playhead), fps: fps, unit: unit) }
+    var label: String { TimelineTime.label(frame: mapping.clamp(playhead), fps: fps, rate: rate, unit: unit) }
 
     var body: some View {
         #if DEBUG
@@ -54,6 +57,7 @@ struct TimelinePlayhead: View {
                     // A view background, not a color one, so it keeps to the safe area (#1034).
                     .background(alignment: .center) { Capsule().fill(SuiteColor.accentFill) }
                     .offset(x: pill.minX, y: pill.minY)
+                    .accessibilityIdentifier("suite.timeline.playhead")
             }
             .contentShape(TimelinePlayheadGrab.shape(lineX: lineX, pill: pill, height: proxy.size.height))
             .gesture(DragGesture(minimumDistance: 0).onChanged { drag in
@@ -72,7 +76,7 @@ struct TimelinePlayhead: View {
             let rect = CGRect(x: dim.lowerBound, y: ruler, width: dim.upperBound - dim.lowerBound, height: max(size.height - ruler, 0))
             lanes.fill(Path(rect), with: .color(SuiteColor.laneBed.opacity(TimelinePlayheadGrab.dimOpacity)))
         }
-        let rules = TimelineRulerLabels(mapping: mapping, unit: unit, fps: fps)
+        let rules = TimelineRulerLabels(mapping: mapping, unit: unit, fps: fps, rate: rate)
         let grounds = TimelinePlayheadGrab.grounds(pill: pill, rules: rules, scrollX: scroll.x)
         for (index, ground) in grounds.enumerated() {
             // The pill's ground is its capsule grown 2 pt; a label's is its text band.
@@ -115,7 +119,7 @@ extension TimelinePlayhead: Equatable {
     /// Compares what the layer draws; the closure is left out.
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.mapping == rhs.mapping && lhs.playhead == rhs.playhead && lhs.unit == rhs.unit && lhs.fps == rhs.fps
-            && lhs.scroll == rhs.scroll && lhs.keys == rhs.keys && lhs.workArea == rhs.workArea
+            && lhs.scroll == rhs.scroll && lhs.keys == rhs.keys && lhs.workArea == rhs.workArea && lhs.rate == rhs.rate
     }
 }
 

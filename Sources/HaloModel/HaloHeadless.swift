@@ -38,11 +38,7 @@ public struct HaloHeadless: HeadlessDocument {
     public static func new(_ options: JSONValue) throws -> HaloHeadless {
         let o = try options.decode(NewOptions.self)
         var project = HaloProject(services: .live)
-        var settings = project.suggestedSettings
-        settings.name = o.name ?? settings.name
-        (settings.width, settings.height) = (o.width ?? settings.width, o.height ?? settings.height)
-        settings.framesPerSecond = o.fps ?? settings.framesPerSecond
-        settings.durationSeconds = o.seconds ?? settings.durationSeconds
+        let settings = o.settings(over: project.suggestedSettings)
         guard project.newComposition(settings) else {
             throw CatalogError.failed(id: "new", message: settings.problems.joined(separator: " "))
         }
@@ -59,7 +55,13 @@ public struct HaloHeadless: HeadlessDocument {
         }
         let rendered = try renderFrame(options)
         let name = "\(workspace.selectedComposition?.name ?? "frame")-\(rendered.frame).png"
-        return [ExportedFile(suggestedName: name, format: format, data: try HaloFramePNG.data(rendered.pixels))]
+        return [ExportedFile(suggestedName: name, format: format, data: try Self.png(rendered))]
+    }
+
+    /// `frame` as a PNG: CoreRaster's `PNG.write` bytes, 8-bit sRGB RGBA with straight alpha. The CLI's export and
+    /// the render's PNG sequence both write it, so a file and the viewer agree.
+    public static func png(_ frame: HaloRenderedFrame) throws -> Data {
+        try PNG.write(frame.pixels, bitsPerChannel: 8)
     }
 
     /// The selected composition at `frame` (the playhead when absent) at 1/`scale` size (1 when absent), drawn as
@@ -103,6 +105,13 @@ public struct HaloHeadless: HeadlessDocument {
         }
     }
 
-    struct NewOptions: Decodable { var name: String?; var width, height, fps: Int?; var seconds: Double? }
+    /// `new`'s options and New Composition's sheet values; each one given replaces the suggested setting.
+    struct NewOptions: Decodable, Sendable {
+        var name: String?; var width, height, fps: Int?; var seconds: Double?
+        func settings(over base: CompositionSettings) -> CompositionSettings {
+            CompositionSettings(name: name ?? base.name, width: width ?? base.width, height: height ?? base.height,
+                                framesPerSecond: fps ?? base.framesPerSecond, durationSeconds: seconds ?? base.durationSeconds)
+        }
+    }
     struct RenderOptions: Decodable { var frame, scale: Int? }
 }

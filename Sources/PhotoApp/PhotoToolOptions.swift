@@ -10,7 +10,7 @@ import SwiftUI
 
 /// The active tool's options: a preset, size, hardness and opacity for the brush (plus
 /// its color) and the eraser, each tool's own; what to do with a selection;
-/// applying a crop.
+/// applying a crop; the eyedropper's sample size and the brush color it picks into.
 struct ToolOptionsSection: View {
     let model: PhotoWorkspace
     let perform: PhotoPerform
@@ -19,6 +19,10 @@ struct ToolOptionsSection: View {
     static let eyedropperHint = "Click the image to pick a color for the brush."
     /// The Gradient tool's one-line hint.
     static let gradientHint = "Drag across the image to draw a gradient from the press to the release."
+    /// The Type tool's one-line hint.
+    static let typeHint = "Click the image to type. Return adds the text; Escape cancels it."
+    /// The Pen's one-line hint.
+    static let penHint = "Click for corners, drag for curves, click the first point to close; Return leaves the path open. Hold Command to move points."
 
     var body: some View {
         let options = model.toolOptions
@@ -65,9 +69,15 @@ struct ToolOptionsSection: View {
             case .eyedropper:
                 hint(Self.eyedropperHint)
                 SampleOptions(model: model, perform: perform)
+                // The brush colour a pick lands in, so the pick shows without switching tools.
+                colorRow(options)
             case .gradient:
                 hint(Self.gradientHint)
                 PhotoFillToolOptions(model: model, perform: perform)
+            case .text:
+                hint(Self.typeHint)
+            case .pen:
+                hint(Self.penHint)
             }
         }
     }
@@ -87,9 +97,7 @@ struct ToolOptionsSection: View {
     }
 
     private func colorRow(_ options: ToolOptions) -> some View {
-        InspectorColorWellRow("Color", color: HexColor(options.red, options.green, options.blue)) {
-            perform(.toolOption(.color(red: $0.red, green: $0.green, blue: $0.blue)))
-        }
+        InspectorColorWellRow("Color", color: options.hex) { perform(.toolOption(.brushColor($0))) }
         .accessibilityIdentifier("photo.tool.color")
     }
 
@@ -113,4 +121,14 @@ func toolCommand(
 ) -> some View {
     InspectorAction(ToolbarAction(title, systemImage: symbol, unavailableHelp: help) { perform(intent) })
         .accessibilityIdentifier("photo.tool." + title.lowercased().replacingOccurrences(of: " ", with: "-"))
+}
+
+/// Photo's one bridge to SuiteUI's HexColor: the brush color's 8-bit sRGB channels.
+extension ToolOptions {
+    var hex: HexColor { HexColor(red, green, blue) }
+}
+
+extension ToolOptionEdit {
+    /// The brush color edit for `hex`.
+    static func brushColor(_ hex: HexColor) -> ToolOptionEdit { .color(red: hex.red, green: hex.green, blue: hex.blue) }
 }

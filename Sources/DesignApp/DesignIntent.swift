@@ -19,6 +19,8 @@ enum DesignIntent {
     case endDrag
     case nudge(DesignDirection, shift: Bool)
     case deleteSelection, deselect
+    /// Edit > Enter Group or Return; Edit > Exit Group or Escape inside a group (select.enter-group, select.exit-group).
+    case enterGroup, exitGroup
     case select(String)
     /// Shift-click: add the layer to the selection or take it out.
     case toggleSelect(String)
@@ -56,6 +58,10 @@ enum DesignIntent {
     case setPageSize(width: Double, height: Double)
     /// An Eyedropper click: the colour at the page point onto the selection's stroke (Option) or fill, one step.
     case pick(DesignPoint, toStroke: Bool)
+    /// The inspector's Eyedropper options: the square it reads, and whether a plain click picks the stroke.
+    case sampleSize(SampleSize), sampleTarget(toStroke: Bool)
+    /// A live command ran on a copy of the file (EM-4): the window becomes it.
+    case adoptLive(DesignWorkspace)
 }
 
 /// Where a view sends its intents.
@@ -130,21 +136,34 @@ extension DesignTool: PaletteTool {
 }
 
 extension DesignColor {
-    /// The color as SwiftUI draws it, through SuiteUI's hex bridge.
-    var color: Color { HexColor(red, green, blue).color }
+    /// Design's one bridge to SuiteUI's HexColor: the same 8-bit sRGB channels.
+    init(hex: HexColor) { self.init(hex.red, hex.green, hex.blue) }
+
+    /// The color as SuiteUI's color rows and parser speak it.
+    var hex: HexColor { HexColor(red, green, blue) }
+
+    /// The color as SwiftUI draws it, through the hex bridge.
+    var color: Color { hex.color }
 }
 
 extension DesignModifiers {
-    /// The modifier keys held right now and View > Snap to Layers, for the drag the pointer is making.
+    /// The modifier keys held right now and View > Snap to Layers, for the drag the pointer is making; ⌘ also
+    /// picks the deepest layer (`.deep`) and the second press of a double-click enters the picked group (`.enter`).
     static var current: DesignModifiers {
-        make(flags: NSEvent.modifierFlags, defaults: .standard)
+        var modifiers = make(flags: NSEvent.modifierFlags, defaults: .standard)
+        if KeyModifiers(flags: NSEvent.modifierFlags).contains(.command) { modifiers.insert(.deep) }
+        // clickCount is only read on a mouse-down: AppKit raises on a non-mouse event.
+        if let event = NSApp.currentEvent, event.type == .leftMouseDown, event.clickCount >= 2 { modifiers.insert(.enter) }
+        return modifiers
     }
 
     /// Shift and Option as held; `.noSnap` when ⌘ is held or Snap to Layers is off in `defaults` (snapping SN-8).
+    /// The flags are read through SuiteUI's `KeyModifiers(flags:)` (AC-tools).
     static func make(flags: NSEvent.ModifierFlags, defaults: UserDefaults) -> DesignModifiers {
-        DesignModifiers(
-            shift: flags.contains(.shift), option: flags.contains(.option),
-            command: flags.contains(.command), snapToLayers: snapsToLayers(in: defaults))
+        let held = KeyModifiers(flags: flags)
+        return DesignModifiers(
+            shift: held.contains(.shift), option: held.contains(.option),
+            command: held.contains(.command), snapToLayers: snapsToLayers(in: defaults))
     }
 
     /// View > Snap to Layers as `defaults` holds it; a missing value reads as on.

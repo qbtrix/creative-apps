@@ -1,6 +1,6 @@
 // LibraryCollectionsNoticeSnapshots.swift: the samples after a damaged
 // collections file was set aside (filters-collections FC-13; slice FC-e).
-// FC-14 drops the `.disabled` trait. library-collections-damaged-{light,dark}.png.
+// Enabled by FC-14. library-collections-damaged-{light,dark}.png.
 import LibraryModel
 import SwiftUI
 import Testing
@@ -9,7 +9,7 @@ import Testing
 
 @MainActor
 @Suite struct LibraryCollectionsNoticeSnapshots {
-    @Test(.disabled("waits on FC-14")) func damaged() throws {
+    @Test func damaged() throws {
         var catalog = LibraryCatalog()
         catalog.loadSamples()
         catalog.failRestoreCollections(setAsideAs: "collections.json.bad")

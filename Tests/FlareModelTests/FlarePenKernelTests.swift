@@ -1,5 +1,6 @@
 // FlarePenKernelTests.swift (pen-paths FP-1): 200 seeded pen sequences on the built services, each hashed (FNV-1a) from
-// today's drafts and commits so FP-5's move onto PenRules draws exactly as before; `penDraft` reads them back.
+// today's drafts and commits (a commit as the stage draws it) so FP-5's move onto PenRules draws exactly as before;
+// `penDraft` reads them back.
 import FlareCore
 @testable import FlareModel
 import SuiteKernel
@@ -40,6 +41,28 @@ import Testing
         return shape.points.map(text).joined(separator: ";") + "|" + elements.joined(separator: " ") + "|\(shape.closed)"
     }
 
+    /// The layer's first shape as the stage draws it at frame 0, mapped through the layer's placement. A value the
+    /// placement's round trip left within 1e-6 of the 1/1024 grid the pen draws on is read on it (float error only).
+    static func onStage(_ layer: Layer?) -> FlareShape? {
+        guard let layer, var shape = layer.shapes.first else { return nil }
+        let m = layer.placement(at: 0).transform.matrix
+        func snap(_ v: Double) -> Double { let g = (v * 1024).rounded() / 1024; return abs(v - g) < 1e-6 ? g : v }
+        func stage(_ p: Point) -> Point { let q = m.apply(p); return Point(x: snap(q.x), y: snap(q.y)) }
+        shape.points = shape.points.map(stage)
+        shape.path = shape.path.map {
+            FlarePath(elements: $0.elements.map { element in
+                switch element {
+                case .move(let p): .move(to: stage(p))
+                case .line(let p): .line(to: stage(p))
+                case .quad(let c, let p): .quad(control: stage(c), to: stage(p))
+                case .cubic(let c1, let c2, let p): .cubic(control1: stage(c1), control2: stage(c2), to: stage(p))
+                case .close: .close
+                }
+            })
+        }
+        return shape
+    }
+
     static func fnv(_ text: String) -> String {
         var hash: UInt32 = 0x811C_9DC5
         for byte in text.utf8 { hash = (hash ^ UInt32(byte)) &* 0x0100_0193 }
@@ -59,7 +82,7 @@ import Testing
                 ? Point(x: point.x + Double(random.next(81) - 40), y: point.y + Double(random.next(81) - 40)) : point
             let scale = [0.5, 1, 2][random.next(3)]
             workspace.drag(from: point, to: end, stageScale: scale)
-            let committed = workspace.layers.first?.shapes.first
+            let committed = Self.onStage(workspace.layers.first)
             log.append(text(workspace.draft?.shape) + "#\(workspace.layers.count)#" + text(committed))
         }
         return fnv(log.joined(separator: "\n"))
@@ -91,6 +114,16 @@ import Testing
         #expect(pen.contour.anchors.count == 1 && pen.contour.anchors.first?.handleOut == Point(x: 40, y: 10))
     }
 
+    /// #4012: a smooth anchor drawn with only its in-handle reads back with its out-handle mirrored through its point.
+    @Test func smoothAnchorWithOnlyHandleInMirrorsOut() throws {
+        let (p0, p1, c2) = (Point(x: 0, y: 0), Point(x: 100, y: 0), Point(x: 80, y: 20))
+        let path = FlarePath(elements: [.move(to: p0), .cubic(control1: p0, control2: c2, to: p1)])
+        let draft = ShapeDraft(tool: .pen, shape: FlareShape(points: [p0, p1], closed: false, path: path),
+                               anchors: [p0, p1], smoothAnchors: [1])
+        let anchor = try #require(draft.pen?.contour.anchors.last)
+        #expect(anchor.handleIn == c2 && anchor.handleOut == Point(x: 120, y: -20))
+    }
+
     @Test func penViewReadsTheDraftAndWritesItBack() throws {
         var workspace = Self.workspace(.pen)
         workspace.drag(from: Point(x: 0, y: 0), to: Point(x: 0, y: 0), stageScale: 2)
@@ -119,7 +152,9 @@ import Testing
         let path = VectorPath(polyline: [Point(x: 0, y: 0), Point(x: 50, y: 0), Point(x: 50, y: 50)], closed: true)
         let id = try workspace.addPath(path, name: "Add Path")
         #expect(workspace.layers.first?.id == id && workspace.undoActionName == "Undo Add Path")
-        #expect(workspace.layers.first?.shapes.first?.path == path)
+        // The new layer's origin is the path's centre (25, 25), so the path is kept around it (LiveShapes.commit).
+        let centred = VectorPath(polyline: [Point(x: -25, y: -25), Point(x: 25, y: -25), Point(x: 25, y: 25)], closed: true)
+        #expect(workspace.layers.first?.shapes.first?.path == centred)
         #expect(throws: (any Error).self) { try workspace.addPath(VectorPath(), name: "Add Path") }
     }
 }

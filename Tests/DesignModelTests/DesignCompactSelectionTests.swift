@@ -1,5 +1,5 @@
 // DesignCompactSelectionTests.swift: a small selection stays usable. Under three
-// handles across on either side only the corners show, pushed outside the box,
+// handles across on either side only the corners and the rotate knob show, pushed outside the box,
 // and a press inside the box moves it instead of grabbing a handle. Also the
 // inline editor's scale and the Open guard (one file per window).
 // Runs on Linux and macOS.
@@ -8,7 +8,8 @@ import Testing
 
 @Test func aLargeRectShowsEightHandlesOnItsCornersAndSides() {
     let handles = rc(0, 0, 100, 60).handles(size: 10)
-    #expect(handles.count == 8)
+    #expect(handles.count == 9)
+    #expect(handles[.rotate] == pt(50, -20))
     #expect(handles[.topLeft] == pt(0, 0))
     #expect(handles[.top] == pt(50, 0))
     #expect(handles[.right] == pt(100, 30))
@@ -23,16 +24,17 @@ import Testing
     #expect(
         box.handles(size: 10) == [
             .topLeft: pt(5, 15), .topRight: pt(135, 15), .bottomLeft: pt(5, 49), .bottomRight: pt(135, 49),
+            .rotate: pt(70, 0),
         ])
     // Narrow but tall is compact too.
     #expect(rc(0, 0, 20, 400).handles(size: 10).keys.sorted { $0.rawValue < $1.rawValue } == [
-        .bottomLeft, .bottomRight, .topLeft, .topRight,
+        .bottomLeft, .bottomRight, .rotate, .topLeft, .topRight,
     ])
 }
 
 @Test func aNonFiniteHandleSizeIsNeverCompact() {
     #expect(!rc(0, 0, 5, 5).isCompact(handleSize: .nan))
-    #expect(rc(0, 0, 5, 5).handles(size: .nan).count == 8)
+    #expect(rc(0, 0, 5, 5).handles(size: .nan).count == 9)
 }
 
 /// A text-sized node, selected, at a zoom where a handle is 18 document points across.

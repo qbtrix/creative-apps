@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "app": "design",
+  "why": "RJ-X66 (sample-files SS-7): opens the tour's Design sample, Bundle/Samples/Cards.design (the input is a link to it, so the job follows the shipped file), selects its second card's page and saves; the saved bytes are checked. Its SVG export writes one file per card frame, and a script output takes one.",
+  "inputs": ["input/*.design"],
+  "steps": [
+    {"id": "page.select", "params": {"page": "page-2"}}
+  ],
+  "atomic": true,
+  "expect": {
+    "out/Cards.design": {"sha256": "acc0150cfab8e17d75014046756c1e8c05384bc07c1cb4d88246d6b3686489a4"}
+  },
+  "platforms": ["linux", "macos"]
+}

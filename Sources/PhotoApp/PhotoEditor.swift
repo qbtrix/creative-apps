@@ -13,8 +13,13 @@
 // disabled with a tooltip saying why, and a disabled tool's shortcut key does
 // nothing. The canvas shows no scrollers: AppKit's scroller parts are unnamed
 // buttons (the app audit's unnamed check), and a zoomed image still pans by
-// scrolling.
+// scrolling. A file dropped anywhere on the window follows the suite's drop
+// rule (file-flow PF-2, `suiteFileDrop`): an image on an open one places as a
+// layer in one Place step, centred; with none open it opens; another app's
+// file goes to that app; the mark at the bottom says which before the drop.
+// With the Pen, PhotoPenOverlay puts SuiteUI's PathEditOverlay over the canvas.
 import PhotoModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -84,6 +89,8 @@ struct PhotoEditor: View {
         } inspector: {
             PhotoPanel(model: model, perform: perform)
         }
+        .suiteFileDrop(.photo, bridge: PhotoShell.bridge, hasDocument: model.hasDocument,
+                       places: model.placesExtensions, documentName: model.documentName) { perform(.place(.drop($0))) }
     }
 
     /// One toolbar command: the Model's title, symbol, reason and identifier, sending its intent.
@@ -107,10 +114,10 @@ struct PhotoEditor: View {
 
 /// The canvas: the rendered picture (CanvasTiles on SuiteUI's EmbeddedCanvasHost) on the checkerboard with PhotoCanvasOverlay's
 /// marks over it (fed the pointer's document point), or the empty state. Drags go to the active tool;
-/// with the canvas focused, V M B E S J C I pick enabled tools, Delete clears the selection
+/// with the canvas focused, V M B E S J C I G T P pick enabled tools, Delete clears the selection
 /// (Shift-Delete fills it), Return sends `confirm` (apply a crop) and Escape `dismiss` (cancel it
-/// or deselect). Dropping an image file opens it. While the Straighten sheet is
-/// open the picture turns by its angle under StraightenMarks.
+/// or deselect). Drops land on the whole editor (PhotoEditor's `suiteFileDrop`), not here. While the
+/// Straighten sheet is open the picture turns by its angle under StraightenMarks.
 struct PhotoCanvas: View {
     let model: PhotoWorkspace
     let tiles: CanvasTiles?
@@ -123,6 +130,8 @@ struct PhotoCanvas: View {
     @State private var hover: CGPoint?
     /// The app's View > Rendering; nil (the tile layers) in tests.
     @Environment(\.photoRendering) private var rendering
+    /// The window's live drag line (LiveDragLine.swift); only the overlay reads its line.
+    @Environment(\.photoDragLine) private var dragLine
 
     var body: some View {
         Group {
@@ -139,11 +148,19 @@ struct PhotoCanvas: View {
                         }
                     }
                 } overlay: {
-                    PhotoCanvasOverlay(model: model, zoom: zoom, hover: hover, perform: perform)
+                    // The overlay spans the artboard at `zoom`, so a drop's point divides back to document pixels.
+                    PhotoCanvasOverlay(model: model, zoom: zoom, hover: hover, perform: perform, liveLine: dragLine)
+                        .frame(width: size.width * zoom, height: size.height * zoom, alignment: .topLeading)
                     if let straighten,
                         let frame = model.straightenFrame(degrees: straighten.degrees, cropToFit: straighten.cropToFit)
                     {
                         StraightenMarks(frame: frame, cropToFit: straighten.cropToFit, zoom: zoom)
+                    }
+                    PhotoTextBoxOverlay(model: model, zoom: zoom, perform: perform)
+                        .frame(width: size.width * zoom, height: size.height * zoom, alignment: .topLeading)
+                    if model.tool == .pen {
+                        PhotoPenOverlay(model: model, zoom: zoom, perform: perform)
+                            .frame(width: size.width * zoom, height: size.height * zoom, alignment: .topLeading)
                     }
                 }
             } else {
@@ -152,11 +169,6 @@ struct PhotoCanvas: View {
                     message: "Open a photo, drop one here, or make a new image with File > New Image.",
                     action: ToolbarAction("Open…", systemImage: "folder") { perform(.open) })
             }
-        }
-        .dropDestination(for: URL.self) { urls, _ in
-            guard let url = urls.first else { return false }
-            perform(.openFile(url))
-            return true
         }
     }
 
@@ -171,13 +183,27 @@ struct PhotoCanvas: View {
             perform(.dismiss)
         default:
             // A disabled tool's key does nothing, as its palette button does.
-            guard
-                let tool = PhotoTool.allCases.first(where: { $0.shortcut.map(String.init) == press.characters.lowercased() }),
-                model.toolHelp(tool) == nil
-            else { return .ignored }
+            guard let tool = PhotoTool.picked(byTyped: press.characters, help: model.toolHelp) else { return .ignored }
             perform(.tool(tool))
         }
         return .handled
+    }
+}
+
+/// The Pen over the canvas (#5072): SuiteUI's PathEditOverlay draws the draft and the path in edit and turns presses
+/// and keys into the kernel's PathIntents, sent as `.path` (PhotoWorkspace.runPath runs each as its catalog command).
+/// While Command is held it edits points (Direct Selection); whether it is held is the view's own state.
+struct PhotoPenOverlay: View {
+    let model: PhotoWorkspace
+    let zoom: Double
+    var perform: PhotoPerform = { _ in }
+    @State private var editsPoints = false
+
+    var body: some View {
+        PathEditOverlay(draft: model.penDraft, path: model.pathInEdit, selection: model.anchorSelection,
+                        tool: editsPoints ? .directSelect : .pen, zoom: zoom) { perform(.path($0)) }
+            .onModifierKeysChanged(mask: .command) { _, keys in editsPoints = keys.contains(.command) }
+            .accessibilityIdentifier("photo.canvas.pen")
     }
 }
 

@@ -40,6 +40,12 @@ public struct LibraryHeadless: HeadlessDocument {
         self.images = images; self.stem = stem
     }
 
+    /// The window's catalog as a headless document, for the live command channel (editor-menus EM-7). It keeps the
+    /// window's services and holds no images: the window's photos are files on disk.
+    public init(catalog: LibraryCatalog) {
+        library = catalog; images = [:]; stem = "Library"
+    }
+
     /// A `.library` file: its catalog's photos, then every listed-nowhere image under `images/` as a new photo.
     public static func open(_ data: Data, name: String) throws -> LibraryHeadless {
         do {
@@ -76,10 +82,13 @@ public struct LibraryHeadless: HeadlessDocument {
         return try ZipStore.archive(files, first: Self.catalogEntry)
     }
 
-    /// "json": the catalog file. "png": each pick, developed, at `longSide` (its own size when absent).
+    /// "json": the catalog file, or the shown photos with `contents` "shown". "png": each pick, developed, at
+    /// `longSide` (its own size when absent).
     public func export(_ format: String, options: JSONValue) throws -> [ExportedFile] {
         switch format {
-        case "json": return [ExportedFile(suggestedName: stem + ".json", format: format, data: try catalogFile())]
+        case "json":
+            let data = try Self.wantsShown(options) ? shownFile() : catalogFile()
+            return [ExportedFile(suggestedName: stem + ".json", format: format, data: data)]
         case "png": break
         default: throw CatalogError.unavailable(id: "export", why: "Library exports png and json.")
         }

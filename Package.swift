@@ -22,9 +22,18 @@
 //             are), linked by every <X>Model and by SuiteUI
 //             (docs/blueprints/suiteui/features/editor-kernel.md). With
 //             SuiteKernelTests, on Linux and macOS.
+//   SuiteImaging  the suite's one imaging library: the adjustment values,
+//             the tone program they compile to, the CPU or GPU route and the
+//             live GPU tone surface (docs/blueprints/suiteui/features/
+//             suite-imaging.md). Linux-safe over CoreRaster, CoreRender and
+//             CoreColor; CoreRenderMetal only on macOS (`imagingMetal`), and
+//             the only target outside SuiteUI's canvas host that may touch
+//             Metal (SuiteImagingTests/ImagingBoundaryTests). Linked by the
+//             Design, Photo, Library and Halo Models, SuiteUI and the CLI.
+//             With SuiteImagingTests, on Linux and macOS.
 //   SuiteShell  macOS glue every app process links: the shared menu commands
-//             (Window > Switch To) and, later, the live suite services.
-//             macOS only.
+//             (Window > Switch To) and, later, the live suite services, with
+//             CoreAsset for the shared thumbnail store. macOS only.
 //   AfterGlowApp  the launcher: the home window that opens the five apps.
 //             macOS only.
 //
@@ -53,11 +62,20 @@ import PackageDescription
 // brush perf suites, and opens "chore(core): bump creative-core to <sha>".
 let core = "creative-core"
 
-func model(_ name: String, _ engines: [String]) -> [Target] {
-    [
+// SuiteImaging's Metal backend exists only on macOS; on Linux SuiteImaging
+// builds over the CPU engines alone.
+#if os(macOS)
+let imagingMetal: [Target.Dependency] = [.product(name: "CoreRenderMetal", package: core)]
+#else
+let imagingMetal: [Target.Dependency] = []
+#endif
+
+func model(_ name: String, _ engines: [String], imaging: Bool = true) -> [Target] {
+    let suite: [Target.Dependency] = ["SuiteModel", "SuiteKernel"] + (imaging ? ["SuiteImaging"] : [])
+    return [
         .target(
             name: "\(name)Model",
-            dependencies: ["SuiteModel", "SuiteKernel"] + engines.map { .product(name: $0, package: core) }
+            dependencies: suite + engines.map { .product(name: $0, package: core) }
         ),
         .testTarget(name: "\(name)ModelTests", dependencies: [.target(name: "\(name)Model")]),
     ]
@@ -67,18 +85,21 @@ let apps = ["Flare", "Design", "Photo", "Library", "Halo"]
 
 var products: [Product] = [.executable(name: "afterglow", targets: ["AfterGlowCLI"])]
 var targets: [Target] =
-    model("Flare", ["FlareCore"])
-    + model("Design", ["CoreColor"])
+    model("Flare", ["FlareCore"], imaging: false)
+    + model("Design", ["CoreColor", "CoreRaster"])
     + model("Photo", ["CoreRaster", "CoreColor", "CoreRender"])
-    + model("Library", ["CoreRaster", "CoreColor"])
+    + model("Library", ["CoreAsset", "CoreRaster", "CoreColor"])
     + model("Halo", ["FlareCore", "CoreRaster"])
     + [
         .target(name: "SuiteModel"),
         .testTarget(name: "SuiteModelTests", dependencies: ["SuiteModel"]),
         .target(name: "SuiteKernel", dependencies: [.product(name: "FlareCore", package: core)]),
         .testTarget(name: "SuiteKernelTests", dependencies: ["SuiteKernel"]),
+        .target(name: "SuiteImaging",
+                dependencies: ["SuiteKernel", "SuiteModel"] + ["CoreRaster", "CoreRender", "CoreColor"].map { .product(name: $0, package: core) } + imagingMetal),
+        .testTarget(name: "SuiteImagingTests", dependencies: ["SuiteImaging"]),
         .testTarget(name: "AppAuditTests"),
-        .target(name: "AfterGlowCLICore", dependencies: ["SuiteKernel", "SuiteModel"] + apps.map { .target(name: "\($0)Model") }),
+        .target(name: "AfterGlowCLICore", dependencies: ["SuiteKernel", "SuiteModel", "SuiteImaging"] + apps.map { .target(name: "\($0)Model") }),
         .executableTarget(name: "AfterGlowCLI", dependencies: ["AfterGlowCLICore"]),
         .testTarget(name: "AfterGlowCLITests", dependencies: ["AfterGlowCLICore"]),
     ]
@@ -86,8 +107,9 @@ var targets: [Target] =
 #if os(macOS)
 products += (apps + ["AfterGlow"]).map { .executable(name: "\($0)App", targets: ["\($0)App"]) }
 targets += [
-    .target(name: "SuiteUI", dependencies: ["SuiteModel", "SuiteKernel"]),
-    .target(name: "SuiteShell", dependencies: ["SuiteUI", "SuiteModel"]),
+    .target(name: "SuiteUI", dependencies: ["SuiteModel", "SuiteKernel", "SuiteImaging"]),
+    // SuiteImageIO hands CoreRaster's PixelBuffer in and out (shared-codecs SC-2); ThumbnailWriter stores through CoreAsset.
+    .target(name: "SuiteShell", dependencies: ["SuiteUI", "SuiteModel", .product(name: "CoreAsset", package: core), .product(name: "CoreRaster", package: core)]),
     .executableTarget(name: "AfterGlowApp", dependencies: ["SuiteUI", "SuiteShell", "SuiteModel"]),
     .testTarget(name: "SuiteUITests", dependencies: ["SuiteUI", "SuiteModel"]),
     .testTarget(

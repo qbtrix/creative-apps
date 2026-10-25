@@ -8,6 +8,7 @@
 // is SuiteUI's BusyNote (`library.import.progress`, with the import's
 // fraction); the import notice is a plain SwiftUI placeholder until SuiteUI's
 // InlineNotice (#780) lands.
+// The grid has its toolbar row (LibraryGridToolbar) above it.
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -41,7 +42,16 @@ struct LibraryBrowser: View {
     /// Why Import Folder… can't act when neither the menu nor the services say.
     static let importFallbackHelp = "Import isn't connected yet."
 
+    #if DEBUG
+    /// How many times the content's body ran; RenderBudgetLibraryFoldersTests checks a folder's
+    /// disclosure leaves it, and the grid under it, alone.
+    @MainActor static var bodyRuns = 0
+    #endif
+
     var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        #endif
         VStack(spacing: 0) {
             if case .running(let progress) = model.importState {
                 BusyNote(
@@ -52,11 +62,12 @@ struct LibraryBrowser: View {
                 if notice.source == .import, let importNotice = model.importNotice {
                     LibraryImportNoticeRow(
                         notice: importNotice, onClose: menu.file.dismissImportNotice,
-                        expanded: importFailuresExpanded)
+                        expanded: importFailuresExpanded || model.showsImportFailures,
+                        onShowFailures: menu.file.showImportFailures, catalog: model)
                 } else {
                     LibraryNoticeRow(
                         notice: notice, action: noticeAction(notice),
-                        onClose: notice.source == .cull ? menu.cull.dismissCullError : nil)
+                        onClose: notice.source == .cull ? menu.cull.dismissCullError : nil, catalog: model)
                 }
             }
             if let message = model.collectionsNotice {
@@ -148,23 +159,33 @@ struct LibraryBrowser: View {
                 })
         } else if model.loupeItem != nil {
             LibraryLoupe(model: model, menu: menu, onStep: onStep, onGrid: onGrid)
+                .libraryShare(model)
         } else {
             // Top-aligned, so a short grid (an import's first batch) starts under the rows above.
-            LibraryGrid(model: model, menu: menu, thumbnails: thumbnails, onSelect: onSelect, onOpen: onOpen)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            // Share ends the toolbar row, so it covers no photo and no toolbar control.
+            VStack(spacing: 0) {
+                HStack(spacing: 0) {
+                    LibraryGridToolbar(model: model, menu: menu)
+                    LibrarySharePill(model: model).padding(.trailing, SuiteSpacing.m)
+                }
+                LibraryGrid(model: model, menu: menu, thumbnails: thumbnails, onSelect: onSelect, onOpen: onOpen)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
     }
 }
 
 /// The notice slot's row: the message with an error or warning symbol, and
-/// the source's action as a button when it has one, and Close when the
-/// source passes `onClose` (a refused cull change). A plain placeholder until
-/// the import feature restyles it.
+/// the source's action as its catalog command's item (CS-6) when it has one,
+/// and Close when the source passes `onClose` (a refused cull change). A plain
+/// placeholder until the import feature restyles it.
 struct LibraryNoticeRow: View {
     static let closeHelp = "Close the notice."
     let notice: LibraryNoticeContent
     var action: ToolbarAction?
     var onClose: (@MainActor () -> Void)?
+    /// The window's catalog, which the action's spec (`notice.action?.commandID`) reads; nil in a snapshot.
+    var catalog: LibraryCatalog?
 
     var body: some View {
         HStack(spacing: SuiteSpacing.s) {
@@ -173,9 +194,8 @@ struct LibraryNoticeRow: View {
                 .foregroundStyle(notice.isError ? SuiteColor.stateError : SuiteColor.stateWarning)
                 .lineLimit(2)
             Spacer(minLength: SuiteSpacing.s)
-            if let action {
-                Button(action.title, action: action.perform)
-                    .help(action.help)
+            if let action, let id = notice.action?.commandID {
+                MenuCommand(id, on: catalog, title: action.title, action: action.perform, reason: action.help)
                     .libraryControl(id: "library.notice.action", enabled: true, help: nil)
             }
             if let onClose {
@@ -195,7 +215,8 @@ struct LibraryNoticeRow: View {
 
 /// The last import's notice (`library.import.notice`): its message, in the
 /// error style when `isError` and the warning style when some files failed;
-/// Show, which lists each `name: reason` failure; and Close, which calls the
+/// Show, which lists each `name: reason` failure (`notice.show-failures`, the
+/// window's, so the catalog holds whether they show); and Close, which calls the
 /// import area's `onClose` (`dismissImportNotice()`), disabled with its
 /// reason until the area passes one.
 struct LibraryImportNoticeRow: View {
@@ -203,12 +224,18 @@ struct LibraryImportNoticeRow: View {
     static let closeUnavailable = "Closing the import notice isn't connected yet."
     let notice: ImportNotice
     let onClose: (@MainActor () -> Void)?
-    @State private var expanded: Bool
+    /// Whether the failures are listed: the catalog's `showsImportFailures`, or a snapshot's choice.
+    let expanded: Bool
+    /// Show and Hide: the window's `notice.show-failures`, nil (off) until it passes one.
+    let onShowFailures: (@MainActor () -> Void)?
+    let catalog: LibraryCatalog?
 
-    init(notice: ImportNotice, onClose: (@MainActor () -> Void)?, expanded: Bool = false) {
-        self.notice = notice
-        self.onClose = onClose
-        _expanded = State(initialValue: expanded)
+    init(
+        notice: ImportNotice, onClose: (@MainActor () -> Void)?, expanded: Bool = false,
+        onShowFailures: (@MainActor () -> Void)? = nil, catalog: LibraryCatalog? = nil
+    ) {
+        (self.notice, self.onClose, self.expanded) = (notice, onClose, expanded)
+        (self.onShowFailures, self.catalog) = (onShowFailures, catalog)
     }
 
     /// Each failure as `name: reason`, the name the file's last path component.
@@ -240,8 +267,8 @@ struct LibraryImportNoticeRow: View {
                     .lineLimit(2)
                 Spacer(minLength: SuiteSpacing.s)
                 if !notice.failures.isEmpty {
-                    Button(expanded ? "Hide" : "Show") { expanded.toggle() }
-                        .help(expanded ? "Hide the files that couldn't be imported." : "List the files that couldn't be imported.")
+                    MenuCommand("notice.show-failures", on: catalog, title: expanded ? "Hide" : "Show",
+                                action: onShowFailures, reason: "Showing the failures isn't connected yet.")
                         .libraryControl(id: "library.import.notice.show", enabled: true, help: nil)
                 }
                 Button("Close", systemImage: "xmark") { onClose?() }

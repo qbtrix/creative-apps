@@ -1,0 +1,37 @@
+[
+  {
+    "label": ".subfoldersToggle: the subfolder flag is ignored, so a folder always shows its descendants' photos",
+    "file": "Sources/LibraryModel/LibraryFolders+Kernel.swift",
+    "find": "return subfolders && parent.hasPrefix(",
+    "replace": "return parent.hasPrefix(",
+    "tests": "LibraryFoldersTests/(filter|aSibling)"
+  },
+  {
+    "label": ".prefixLeak: the descendant test drops the trailing slash, so /a/b shows /a/bc's photos",
+    "file": "Sources/LibraryModel/LibraryFolders+Kernel.swift",
+    "find": "parent.hasPrefix(path.hasSuffix(\"/\") ? path : path + \"/\")",
+    "replace": "parent.hasPrefix(path)",
+    "tests": "LibraryFoldersTests/(filter|aSibling)"
+  },
+  {
+    "label": ".unknownPathRefused: view.show-folder takes a path that isn't in the tree",
+    "file": "Sources/LibraryModel/LibraryFolders+Kernel.swift",
+    "find": "guard Self.hasFolder(path, in: LibraryFolders.tree(items)) else {",
+    "replace": "guard !path.isEmpty else {",
+    "tests": "LibraryFoldersTests/showFolder"
+  },
+  {
+    "label": ".subfoldersDefaultOn: view.show-folder without subfolders shows only the folder's own photos",
+    "file": "Sources/LibraryModel/LibraryFolders+Kernel.swift",
+    "find": "p.subfolders ?? true",
+    "replace": "p.subfolders ?? false",
+    "tests": "LibraryFoldersTests/filter"
+  },
+  {
+    "label": ".listDepth: folders.list gives every row depth 0",
+    "file": "Sources/LibraryModel/LibraryFolders+Kernel.swift",
+    "find": "folderRows(node.children, depth: depth + 1)",
+    "replace": "folderRows(node.children, depth: depth)",
+    "tests": "LibraryFoldersTests/list"
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "app": "library",
+  "why": "RJ-L55 (share-sheet SH-3c): drops three geotagged JPEGs (GPS, body and lens serial numbers, a maker note) on the catalog, which selects them, and prepares them for the share sheet. Each copy is a JPEG at quality 85 with a long edge of 2048, written without the location properties; a relaunch empties Share/. Pending #3741: the CLI keeps file commands window-only; LibrarySharePrepTests runs these steps on Linux through the fake exporter and writer, then writes the files the command names and runs the launch cleanup.",
+  "pending": "#3741",
+  "inputs": ["input/shoot/IMG_0001.jpg", "input/shoot/IMG_0002.jpg", "input/shoot/IMG_0003.jpg"],
+  "steps": [
+    {"id": "file.drop", "params": {"paths": ["input/shoot"]}},
+    {"id": "file.share-prepare", "params": {"support": "out", "run": "share-three"}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "Share/share-three", "format": "jpeg", "options": {"size": {"longEdge": 2048}, "quality": 0.85, "metadata": "noLocation"}},
+  "expect": {
+    "out/Share/share-three/IMG_0001.jpg": {"longEdge": 2048, "drops": ["{GPS}", "{Exif}.BodySerialNumber", "{Exif}.LensSerialNumber", "{Exif}.MakerNote"]},
+    "out/Share/share-three/IMG_0002.jpg": {"longEdge": 2048, "drops": ["{GPS}", "{Exif}.BodySerialNumber", "{Exif}.LensSerialNumber", "{Exif}.MakerNote"]},
+    "out/Share/share-three/IMG_0003.jpg": {"longEdge": 2048, "drops": ["{GPS}", "{Exif}.BodySerialNumber", "{Exif}.LensSerialNumber", "{Exif}.MakerNote"]},
+    "out/Share": {"afterRelaunch": []}
+  },
+  "platforms": []
+}

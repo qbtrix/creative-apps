@@ -1,0 +1,16 @@
+[
+  {
+    "label": "linearPoints: the end written for the start",
+    "file": "Sources/SuiteKernel/Fill/GradientSVG.swift",
+    "find": "x1=\"\\#(number(start.x))\" y1=\"\\#(number(start.y))\"",
+    "replace": "x1=\"\\#(number(end.x))\" y1=\"\\#(number(end.y))\"",
+    "tests": "GradientSVGTests"
+  },
+  {
+    "label": "opaqueStopHasNoOpacity: stop-opacity written at 1",
+    "file": "Sources/SuiteKernel/Fill/GradientSVG.swift",
+    "find": "let opacity = alpha < 1 ?",
+    "replace": "let opacity = alpha <= 1 ?",
+    "tests": "GradientSVGTests"
+  }
+]

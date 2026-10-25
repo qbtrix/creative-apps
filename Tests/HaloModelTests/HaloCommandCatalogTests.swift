@@ -2,6 +2,7 @@
 // on the `keyed` states, runs do what the routes do, ids keep the ledger, conformance holds but for the gaps in `exempt`.
 import Foundation
 @testable import HaloModel
+import SuiteImaging
 import SuiteKernel
 import Testing
 
@@ -32,7 +33,17 @@ extension HaloProject: HeadlessDocument {
     @Test func oneSpecPerCase() {
         let ids = HaloCommand.allCases.map(\.commandID)
         #expect(ids.count == 62 && Set(ids).count == ids.count)
-        #expect(catalog.ids == ids.sorted() && HaloProject.commandSpecs.map(\.id) == ids)
+        let shapes = ShapeCommands.specs(HaloProject.self).map(\.id)  // HS-6: the kernel's shape commands follow
+        let fills = GradientCommands.specs(HaloProject.self).map(\.id)  // HG-7: then its fill commands
+        let strokes = StrokeCommands.specs(HaloProject.self).map(\.id)  // HK-6: then its stroke commands
+        let history = ["history.read", "history.jump"]  // HA-6: then the History panel's two
+        let transforms = TransformCommands.specs(HaloProject.self).map(\.id)  // HT-6: then the six transform commands
+        let rates = ["composition.set-frame-rate"]  // FR-8b: the composition's rate
+        let places = ["place.read", "place.image", "place.replace", "place.reset-size", "place.focus"]  // PH-6: the five place commands
+        let styles = StyleCommands.specs(HaloProject.self).map(\.id)  // HY-1: then the eleven style commands
+        let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
+        let all = ids + shapes + fills + strokes + history + transforms + rates + places + styles + window
+        #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
     }
 
     @Test func areaHelpMatches() {
@@ -107,12 +118,22 @@ extension HaloProject: HeadlessDocument {
     static let exempt: [String: [String]] = [
         "Halo saves the playhead in the file": ["animation.go-to-end animation.next-frame timeline.scrub: queryOrViewChangesNoBytes"],
         "the step names the property or direction": ["inspector.set-property inspector.set-property-text inspector.toggle-animation inspector.toggle-key layer.send-backward: stepNamedTitle"],
-        "a no-op edit stays enabled (in point at frame 0, drag end with no drag)": ["animation.set-in-point viewer.drag-end: stepNamedTitle",
-            "animation.set-in-point viewer.drag-end: editRecordsOneStep", "animation.set-in-point viewer.drag-end: undoRestoresBytes"],
+        "a no-op edit stays enabled (in point at frame 0, drag end with no drag, reset of an unturned layer)": [
+            "animation.set-in-point transform.reset viewer.drag-end: stepNamedTitle",
+            "animation.set-in-point transform.reset viewer.drag-end: editRecordsOneStep",
+            "animation.set-in-point transform.reset viewer.drag-end: undoRestoresBytes"],
+        "the kernel's shape.draw names its step for the kind drawn (\"Draw Star\")": ["shape.draw: stepNamedTitle"],
         "undo of a duplicate keeps the bumped id counter": ["layer.duplicate: undoRestoresBytes"],
-        "the example needs a picked key, text layer, render, recent file or room to move": ["animation.easing animation.go-to-start animation.previous-frame composition.delete easing.delete-keys easing.end-drag easing.move-handle easing.set-custom file.open-recent layer.bring-forward render.cancel render.close-sheet text.end-size-scrub text.set text.set-color text.set-size: exampleRuns"],
+        "the example needs a picked key, text layer, render, recent file or room to move": ["animation.easing animation.go-to-start animation.previous-frame composition.delete easing.delete-keys easing.end-drag easing.move-handle easing.set-custom file.open-recent layer.bring-forward render.cancel render.close-sheet text.end-size-scrub text.set text.set-size: exampleRuns"],
         "files and rendering run through HaloHeadless in AC-h2": ["file.open file.save file.save-as render.start: exampleRuns"],
         "key editing's move is a stub until KE-4": ["timeline.move-keys: exampleRuns"],
+        "the window's own steps need an open render or unsaved edits (CS-7)": ["file.answer-unsaved render.choose-folder: exampleRuns"],
+        "the stop and angle examples need a gradient; Ball's fill is solid": ["fill.angle fill.stop-add fill.stop-move fill.stop-remove: exampleRuns"],
+        "strokes are for shape layers; Ball is a solid (HaloStrokeTests run them)": ["stroke.add stroke.cap stroke.color stroke.dash stroke.join stroke.read stroke.remove stroke.trim stroke.width: exampleRuns"],
+        "the jump example needs steps; the fixture has none (HA-6)": ["history.jump: exampleRuns"],
+        "flipping isn't in Halo yet; the flip refuses with flipHelp (HT-6)": ["transform.flip: exampleRuns"],
+        "the examples need a placed image; Ball shows none (HaloPlaceTests run them, PH-6)": ["place.focus place.read place.replace place.reset-size: exampleRuns"],
+        "the style commands are LS-a's stubs until LS-6; Ball has no style to copy or clear (HY-5)": ["style.add style.clear style.copy style.enable style.fill-opacity style.panel style.paste style.preset style.read style.remove style.set: exampleRuns"],
     ]
 
     @Test func conformance() {

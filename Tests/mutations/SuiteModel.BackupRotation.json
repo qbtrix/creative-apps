@@ -1,0 +1,7 @@
+[
+{"label":".atMostHourly: hour check skipped","file":"Sources/SuiteModel/Store/BackupRotation.swift","find":"return now.timeIntervalSince(newest.date) >= Self.hour || now < newest.date","replace":"return true","tests":"BackupRotationTests"},
+{"label":".atMostHourly: an unforced backup ignores the hour","file":"Sources/SuiteModel/Store/BackupRotation.swift","find":"guard force || shouldBackUp(now: now), let data","replace":"guard let data","tests":"BackupRotationTests"},
+{"label":".keepsNewestPerDay: daily keep uses the oldest of the day","file":"Sources/SuiteModel/Store/BackupRotation.swift","find":"for entry in entries {","replace":"for entry in entries.reversed() {","tests":"BackupRotationTests"},
+{"label":"listed oldest first","file":"Sources/SuiteModel/Store/BackupRotation.swift","find":"$0.date > $1.date","replace":"$0.date < $1.date","tests":"BackupRotationTests"},
+{"label":"restore loses the current file","file":"Sources/SuiteModel/Store/BackupRotation.swift","find":"        try backUp(now: now, force: true)\n        try store.writeData(file, data)","replace":"        try store.writeData(file, data)","tests":"BackupRotationTests"}
+]

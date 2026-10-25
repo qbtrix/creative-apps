@@ -44,9 +44,10 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     public internal(set) var tool: FlareTool = .select
     /// The Shape tool's options (FlareShape+Kernel.swift): view state, never an undo step.
     public internal(set) var shapeTool: ShapeSpec = .defaults(.star)
-    /// The stage selection (FlareSelection.swift); a change drops the picked anchors.
-    public internal(set) var selection: [StageAddress] = [] {
-        didSet { if oldValue != selection { anchorSelectionStore = Selection() } }
+    /// The stage selection: SuiteKernel's ordered selection, which `selection` reads (FlareSelectionAdapter.swift);
+    /// a change drops the picked anchors.
+    var picks = Selection<StageAddress>() {
+        didSet { if oldValue.ordered != picks.ordered { anchorSelectionStore = Selection() } }
     }
     /// The picked anchors of the path in edit (FlareAnchors+Kernel.swift).
     var anchorSelectionStore = Selection<AnchorRef>()
@@ -91,6 +92,14 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     public internal(set) var saveError: String?
     public internal(set) var loadState = LoadState.idle
     public internal(set) var recent: [String] = []
+    /// The suite's recents as the window last read them, and the requests the file-flow commands leave it.
+    public internal(set) var fileFlow = FlareFileFlowState()
+    /// The note a Lottie open leaves: one sentence per part left out; nil once dismissed or another document
+    /// loads (FlareLottieNote.swift).
+    public internal(set) var importNote: [String]?
+    /// The open document's Lottie open's skipped sentences, after Dismiss too; nil when it didn't come from a
+    /// Lottie (`import.report`, FlareLottieNote.swift).
+    public internal(set) var importReport: [String]?
     /// Why the last layer change or undo was refused; nil after one succeeds.
     public internal(set) var layerError: FlareLayerError?
     /// The easing editor's segment, as last picked; `selectedEasingSegment`
@@ -104,6 +113,8 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     var guideDragSerial = 0
     /// Why the last fill or stroke edit was refused (FlarePaint.swift).
     public internal(set) var paintError: String?
+    /// The status line's word on the last place: its report, or why it refused (FlarePlace+Menu.swift).
+    public internal(set) var placeStatus: String?
     /// The timeline's selected keys, why the last timeline edit was refused, and the key drag's coalesce serial,
     /// bumped to end the drag (FlareTimelineEdit.swift).
     public internal(set) var selectedKeys: [KeyRef] = []
@@ -148,12 +159,14 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
         selectedLayerID = nil
         easingSelection = nil
         layerError = nil
-        (paintError, selectedKeys, timelineError, keyDragSerial) = (nil, [], nil, 0)
+        (paintError, placeStatus, selectedKeys, timelineError, keyDragSerial) = (nil, nil, [], nil, 0)
         cancelDrag(); selection = []; currentFrame = 0
         (isPlaying, playClock, editingSymbolID, symbolReturnFrame) = (false, 0, nil, 0)
         (machineID, machinePreview, machineError) = (nil, nil, nil)
         (exportState, assist) = (.idle, AssistState())
         (fileName, savedDocument, saveError, loadState) = (nil, document, nil, .idle)
+        importNote = nil
+        importReport = nil
     }
 
     /// Selects a scene by id. An id not in the document is ignored. Selecting
@@ -279,10 +292,10 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
             && lhs.editingSymbolID == rhs.editingSymbolID && lhs.symbolReturnFrame == rhs.symbolReturnFrame
         let panels = lhs.machineID == rhs.machineID && lhs.machinePreview == rhs.machinePreview
             && lhs.machineError == rhs.machineError && lhs.exportState == rhs.exportState && lhs.assist == rhs.assist
-            && lhs.paintError == rhs.paintError && lhs.selectedKeys == rhs.selectedKeys
+            && lhs.paintError == rhs.paintError && lhs.placeStatus == rhs.placeStatus && lhs.selectedKeys == rhs.selectedKeys
             && lhs.timelineError == rhs.timelineError
         let files = lhs.fileName == rhs.fileName && lhs.isDirty == rhs.isDirty && lhs.saveError == rhs.saveError
-            && lhs.loadState == rhs.loadState && lhs.recent == rhs.recent
+            && lhs.loadState == rhs.loadState && lhs.recent == rhs.recent && lhs.importNote == rhs.importNote
         return editing && animating && panels && files
     }
 }

@@ -1,12 +1,14 @@
 // HaloLayer.swift: one layer in a Halo composition: what kind it is, the
 // frames it is visible for, its color, opacity, blend mode, the rectangle a
 // solid fills, its keyframe tracks, the layer it follows, a text layer's
-// words, a solid's or shape's gradient (gradient-fill HG-1) and a shape
-// layer's ShapeSpec (shape-tools HS-1). Codable; decoding goes through the clamping init. Linux-safe: no UI imports. Layers live in `HaloComposition.layers`,
+// words, a solid's or shape's gradient (gradient-fill HG-1), a shape
+// layer's ShapeSpec (shape-tools HS-1), its stroke (stroke-style HK-1) and a
+// solid's placed picture and focus (placed-images PH-1) and its layer style (layer-styles HY-1). Codable; decoding goes through the clamping init. Linux-safe: no UI imports. Layers live in `HaloComposition.layers`,
 // top first; HaloProject adds and selects them. `blendMode` is CoreRaster's
 // BlendMode, never a mirror of it.
 import CoreRaster
 import FlareCore
+import SuiteImaging
 import SuiteKernel
 
 /// What a layer draws: a solid fill, a shape, text, or nothing (a null that
@@ -95,9 +97,26 @@ public struct HaloLayer: Identifiable, Codable, Sendable, Hashable {
     /// HS-1: what a shape layer draws in its box (a star's points, a
     /// polygon's sides); nil draws the ellipse. Coded under "shape" only when set.
     public var shape: ShapeSpec?
+    /// HK-1: a shape layer's outline, the kernel's VectorStroke; nil draws
+    /// none. Coded under "stroke" only when set.
+    public var stroke: VectorStroke?
+    /// PH-1: a solid's picture, drawn into the solid's box; nil fills `color`. Coded only when set.
+    public var placedAsset: PlacedAsset?
+    /// PH-1: the picture's point (0...1) kept in view when it covers the box; the centre is coded as nothing.
+    public var placedFocus: Point {
+        get { storedPlacedFocus ?? Self.defaultPlacedFocus }
+        set { storedPlacedFocus = newValue == Self.defaultPlacedFocus ? nil : newValue }
+    }
+    private var storedPlacedFocus: Point?
+    /// HY-1: the layer's style, SuiteImaging's LayerStyle; nil for none, so an old project opens and re-saves
+    /// unchanged. Coded under "style" only when set.
+    public var style: LayerStyle?
+    /// The kernel's default focus in `PlacedImage`, the picture's centre.
+    static let defaultPlacedFocus = Point(x: 0.5, y: 0.5)
 
     enum CodingKeys: String, CodingKey {
-        case id, name, kind, inFrame, outFrame, color, storedOpacity = "opacity", blendMode, rect, tracks, parentID, text, gradient, shape
+        case id, name, kind, inFrame, outFrame, color, storedOpacity = "opacity", blendMode, rect, tracks, parentID, text, gradient, shape, stroke, placedAsset, style
+        case storedPlacedFocus = "placedFocus"
     }
 
     /// Decodes through the clamping init, so a file can't carry an opacity
@@ -116,6 +135,10 @@ public struct HaloLayer: Identifiable, Codable, Sendable, Hashable {
         text = try c.decodeIfPresent(HaloTextContent.self, forKey: .text)
         gradient = try c.decodeIfPresent(Fill.self, forKey: .gradient)
         shape = try c.decodeIfPresent(ShapeSpec.self, forKey: .shape)
+        stroke = try c.decodeIfPresent(VectorStroke.self, forKey: .stroke)
+        placedAsset = try c.decodeIfPresent(PlacedAsset.self, forKey: .placedAsset)
+        placedFocus = try c.decodeIfPresent(Point.self, forKey: .storedPlacedFocus) ?? Self.defaultPlacedFocus
+        style = try c.decodeIfPresent(LayerStyle.self, forKey: .style)
     }
 
     /// Clamps `opacity` to 0...1; a NaN opacity falls back to 1, the default.
@@ -150,6 +173,10 @@ public struct HaloLayer: Identifiable, Codable, Sendable, Hashable {
         copy.text = text
         copy.gradient = gradient
         copy.shape = shape
+        copy.stroke = stroke
+        copy.placedAsset = placedAsset
+        copy.placedFocus = placedFocus
+        copy.style = style
         return copy
     }
 }

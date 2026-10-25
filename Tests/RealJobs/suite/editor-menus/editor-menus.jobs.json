@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "app": "suite",
+  "why": "RJ-X63 (suite/editor-menus EM-8, EM-9), a journey job (run J), pending journey-only: in each of the five editors, Control-Command-0, Window > AI Access…, one live command, then close the last window and click the Dock icon. The trap: an editor that looks finished but strands the tester, with no way back to Home, no AI access, or a closed window that never comes back. The assertion: in all five, Home is frontmost after Control-Command-0, the AI Access window opens, the live command's change shows in the document, and a window exists after the Dock click. Mutation: SuiteModel.ReopenRule (.reopensOnlyWhenNone). The CLI harness runs catalog steps on a file and can't press a menu, read the frontmost app or click the Dock, so its check is the five <App>SuiteMenusJourneyTests that input/editors.json lists, in the macOS journeys run; the live step's model half is each app's live-take test (LibraryLiveTakeTests for Library). platforms stays empty until the harness can drive a running editor over its live socket.",
+  "pending": "journey-only",
+  "inputs": ["input/editors.json"],
+  "steps": [
+    {"id": "suite.switch-to", "params": {"app": "launcher", "keys": "control-command-0"}},
+    {"id": "suite.ai-access", "params": {}},
+    {"id": "suite.live", "params": {"command": "edit.select-all"}},
+    {"id": "suite.reopen", "params": {"after": "close-last-window"}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-menus", "format": "json"},
+  "expect": {
+    "out/editors-menus.json": {"json": {
+      "photo": {"home": true, "aiAccess": true, "live": true, "reopened": true},
+      "design": {"home": true, "aiAccess": true, "live": true, "reopened": true},
+      "flare": {"home": true, "aiAccess": true, "live": true, "reopened": true},
+      "halo": {"home": true, "aiAccess": true, "live": true, "reopened": true},
+      "library": {"home": true, "aiAccess": true, "live": true, "reopened": true}
+    }}
+  },
+  "platforms": []
+}

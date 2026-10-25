@@ -5,16 +5,17 @@
 // to the views, publishes the menu bar's LibraryMenu as a focused value, and
 // publishes the `library.controls` JSON (LibraryControls.swift).
 // The catalog starts from the launch arguments: a fixture's fakes and photos,
-// or the live services over the Platform adapters.
+// or the live services over the Platform adapters (XMPSidecarWriter among them).
 //
 // The sidebar has two sections: Library (All Photos, Picks, Recently
 // Added) and Collections (yours, with New Collection as its add button and a
-// double-click rename while those can act). LibraryFilterBar sits above
+// double-click rename while those can act), then FOLDERS when the catalog's photos sit in any
+// (LibraryFoldersSection.swift). LibraryFilterBar sits above
 // LibraryBrowser; the hidden `library.collections` element carries the
 // collections file's state for the journeys.
 //
 // The area hooks: each area (edit, import, thumbnails, cull, persist, loupe,
-// develop, crop, export, filters) fills its own `LibraryWindow+<Area>.swift` with the
+// develop, crop, export, filters, trash) fills its own `LibraryWindow+<Area>.swift` with the
 // LibraryMenu sub-struct it owns, its `<Area>AreaState` in `areas`, and the
 // lifecycle hooks this body calls. The window's single keys go to the area
 // that owns them through the menu; a nil action ignores the key.
@@ -46,7 +47,8 @@ struct LibraryWindow: View {
     /// `arguments` are the launch arguments (LibraryLaunch); a test passes a fixture's.
     init(arguments: [String] = ProcessInfo.processInfo.arguments) {
         let launch = LibraryLaunch(arguments: arguments)
-        let services = launch.services(decoder: ImageIODecoder(), writer: JPEGWriter(), store: CatalogStore())
+        let services = launch.services(
+            decoder: ImageIODecoder(), writer: JPEGWriter(), store: CatalogStore(), sidecars: XMPSidecarWriter())
         _model = State(initialValue: LibraryCatalog(launch: launch, services: services))
     }
 
@@ -63,9 +65,16 @@ struct LibraryWindow: View {
         SuiteWindow(
             title: "Library",
             sections: sidebarSections(filters),
-            selection: model.selectedCollectionID,
-            onSelect: { model.selectCollection($0) },
-            onRename: filters.renameCollection
+            selection: model.sidebarSelection,
+            // A FOLDERS row's click shows its folder (view.show-folder); any other row's selects its collection.
+            onSelect: { model.selectSidebarRow($0) },
+            onRename: filters.renameCollection,
+            contextActions: { id in
+                guard LibraryFolders.isRowID(id) else { return [] }
+                return LibraryFoldersSection.actions(
+                    help: model.showFolderHelp, show: { model.selectSidebarRow(id) },
+                    toggleSubfolders: { model.toggleFolderSubfolders(row: id) })
+            }
         ) {
             VStack(spacing: 0) {
                 LibraryFilterBar(
@@ -89,6 +98,7 @@ struct LibraryWindow: View {
                 onLabel: { model.setLabel($0) })
         }
         .focusedSceneValue(\.libraryMenu, menu)
+        .focusedSceneValue(\.libraryCatalog, model)
         .focusedSceneValue(\.libraryFilters, filters)
         .suiteFileDrop(.library, bridge: LibraryShell.bridge, hasDocument: model.hasDocument,
                        places: model.placesExtensions, perform: { try? model.perform($0) })
@@ -98,16 +108,33 @@ struct LibraryWindow: View {
         .background { ProbeElement("library.collections", label: model.collectionsFileValue) }
         // The export area (LibraryWindow+Export.swift) moves `exportState` off `.idle`.
         .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) { exportSheet }
+        .modifier(backupArea)  // File > Restore Catalog Backup… (LibraryWindow+Backup.swift)
+        .modifier(trashArea)  // Photo > Delete Rejected Photos… and its confirm (LibraryWindow+Trash.swift)
         .task {
             importAreaLaunch()
             persistAreaLaunch()
             filtersAreaLaunch()
         }
-        .onChange(of: model.saveRevision) { _, _ in persistAreaChanged() }
+        .onChange(of: model.saveRevision) { _, _ in
+            persistAreaChanged()
+            cullAreaChanged()
+        }
         .onChange(of: model.focusedItemID) { _, _ in loupeAreaFocusChanged() }
         .onChange(of: model.mode) { _, _ in loupeAreaFocusChanged() }
-        .onChange(of: model.catalogState) { _, _ in importAreaCatalogReady() }
+        .onChange(of: model.catalogState) { _, _ in
+            importAreaCatalogReady()
+            cullAreaCatalogReady()
+        }
         .onChange(of: model.collectionsRevision) { _, _ in filtersAreaChanged(areas.filters) }
+        // The live command channel (editor-menus EM-7) reads this window's catalog and lands a result in it.
+        .onAppear {
+            LibraryShell.read = { model }
+            LibraryShell.take = { model.takeLive($0) }
+        }
+        .onDisappear {
+            LibraryShell.read = nil
+            LibraryShell.take = nil
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
             persistAreaFlush()
             filtersAreaFlush(areas.filters)
@@ -124,7 +151,8 @@ struct LibraryWindow: View {
         photo.resetCrop = crop.resetCrop
         return LibraryMenu(
             edit: editMenu, file: fileMenu, thumbnails: thumbnailsMenu, cull: cullMenu, persist: persistMenu,
-            view: viewMenu, photo: photo, export: exportMenu, reasons: model.services.unavailable)
+            view: viewMenu, photo: photo, export: exportMenu, share: shareMenu,
+            reasons: model.services.unavailable)
     }
 
     /// A single key to the area that owns it; ignored (so the grid or the
@@ -191,7 +219,7 @@ struct LibraryWindow: View {
             SidebarSection(
                 id: "collections", title: "Collections", items: rows.filter { UserCollection.isUserID($0.id) },
                 addAction: add),
-        ]
+        ] + [LibraryFoldersSection.section(LibraryFoldersSection.tree(model))].compactMap { $0 }
     }
 
     static func symbol(for collectionID: String) -> String {

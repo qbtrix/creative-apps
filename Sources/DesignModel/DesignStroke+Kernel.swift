@@ -44,8 +44,15 @@ extension DesignWorkspace: StrokeTarget {
     /// The primary selected layer's stroke.
     public var selectedStroke: VectorStroke? { selectedNode?.vectorStroke }
 
-    /// Why the editor's dash rows can't act yet.
-    public var strokeDashHelp: String? { StrokeRules.waitingCore }
+    /// Why the editor's dash rows can't act yet: Join and Cap's reason, so the editor shows one note.
+    public var strokeDashHelp: String? { Self.joinCapHelp }
+
+    /// Why the Join, Cap and Dash chips can't act until DK-5 (`strokeChange` drops them); the editor's `styleHelp`
+    /// and `dashHelp`.
+    public static let joinCapHelp = "Design's strokes stay solid, with the default join and cap, for now."
+
+    /// `joinCapHelp` on a stroked layer; nil without a stroke, where the editor shows Add Stroke alone.
+    public var strokeStyleHelp: String? { selectedStroke == nil ? nil : Self.joinCapHelp }
 
     /// Stub until DK-6: refuses with `StrokeRules.notBuilt` and changes nothing.
     public mutating func setStroke(_ stroke: VectorStroke?, name: String, drag: String?) throws {

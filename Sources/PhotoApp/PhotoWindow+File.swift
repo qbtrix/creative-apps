@@ -21,6 +21,8 @@
 // their kind. Each successful open and save is noted in Open Recent and,
 // through SuiteDocumentsBridge (file-flow PF-4), in the suite's shared
 // recents: `.opened` or `.saved`, once each, with the file's suite type.
+// A document save that lands first publishes the file's thumbnail, off the
+// main actor, to the previews the bridge holds (shared-thumbnails ST-7).
 // `-PhotoOpenFile <path>` opens a file at launch; `-PhotoRecoveryDir
 // <folder>` keeps autosaves there. PhotoFileSession is the file state the
 // window and PhotoFileArea share. PhotoFileArea
@@ -57,6 +59,10 @@ enum FileIntent {
     case restore(RecoveryOffer)
     /// The launch offer: Discard what the crash left behind.
     case discardRecovery
+    /// The home's New Photo (#3648): a new white image of this size.
+    case newImage(width: Int, height: Int)
+    /// A live command ran on a copy of the image (EM-3): the window becomes it.
+    case adoptLive(PhotoWorkspace)
 }
 
 /// Long file work running off the main actor, for the window's notes.
@@ -114,6 +120,14 @@ final class PhotoFileSession {
         return SuiteDocumentsBridge(app: .photo, services: .live(support: support, app: .photo, arguments: arguments))
     }()
 
+    /// Publishes the thumbnail of the document saved at `url` to the bridge's previews, off the main actor (ST-7).
+    func publishPreview(of url: URL, archive: any DocumentArchiving) async {
+        let (path, thumbnails) = (url.path(percentEncoded: false), (bridge ?? Self.suiteBridge).thumbnails)
+        _ = await Task.detached(priority: .utility) {
+            await PhotoSavedPreview.publish(documentAt: path, archive: archive, to: thumbnails)
+        }.value
+    }
+
     /// Notes `url` in Open Recent: the system's list, Photo's own (an app with
     /// no declared document types may not get the system's), and the suite's
     /// shared recents as `event`, when the suite knows the file's type.
@@ -148,6 +162,13 @@ final class PhotoFileSession {
 extension PhotoWindow {
     /// The services a window runs on when no fixture is asked for: `.live`,
     /// its autosaves in `-PhotoRecoveryDir`'s folder when one is given.
+    /// Photo's `.live` services with the suite's live text (Core Text), so text layers draw their words.
+    nonisolated static var liveServices: PhotoServices {
+        var services = PhotoServices.live
+        services.text = LiveText()
+        return services
+    }
+
     nonisolated static func fileServices(_ live: PhotoServices) -> PhotoServices {
         guard let folder = UserDefaults.standard.string(forKey: "PhotoRecoveryDir") else { return live }
         return live.recovering(in: URL(fileURLWithPath: folder, isDirectory: true))
@@ -169,7 +190,7 @@ extension PhotoWindow {
         case .flatten(let format):
             files.keepLayers = nil
             guard let url = documentURL else { return saveAs() }
-            write(to: url, as: format, quality: exportQuality, saving: true)
+            write(to: url, as: format, quality: model.exportOptions.quality, saving: true)
         case .clearRecent: files.clearRecent()
         case .restore(let offer):
             files.recoveryOffer = nil
@@ -177,6 +198,10 @@ extension PhotoWindow {
         case .discardRecovery:
             files.recoveryOffer = nil
             files.startAutosave(model.services.recovery).discardLeftBehind()
+        case .newImage(let width, let height):
+            guard (try? model.newCanvas(width: width, height: height)) != nil else { return }
+            documentURL = nil
+        case .adoptLive(let result): model.adoptLiveCommand(result)
         }
     }
 
@@ -261,7 +286,7 @@ extension PhotoWindow {
             writeDocument(to: url)
         case .writeImage(let format):
             guard let url = documentURL else { return saveAs() }
-            write(to: url, as: format, quality: exportQuality, saving: true)
+            write(to: url, as: format, quality: model.exportOptions.quality, saving: true)
         case .askKeepLayers(let format): files.keepLayers = format
         case .saveAs: saveAs()
         }
@@ -273,7 +298,7 @@ extension PhotoWindow {
         guard model.canvas != nil else { return }
         if let folder = Self.saveToFolder {
             if model.needsDocument { return writeDocument(to: folder.appending(path: model.documentFileName)) }
-            return write(to: folder.appending(path: model.fileName(for: .png)), as: .png, quality: exportQuality, saving: true)
+            return write(to: folder.appending(path: model.fileName(for: .png)), as: .png, quality: model.exportOptions.quality, saving: true)
         }
         let panel = NSSavePanel()
         panel.allowedContentTypes = Self.documentTypes + [.png, .jpeg]
@@ -281,7 +306,7 @@ extension PhotoWindow {
             ? model.documentFileName : model.fileName(for: ImageFormat(fileName: model.documentName ?? "") ?? .png)
         guard panel.runModal() == .OK, let url = panel.url else { return }
         if PhotoWorkspace.fileKind(forName: url.lastPathComponent) == .document { return writeDocument(to: url) }
-        write(to: url, as: ImageFormat(fileName: url.lastPathComponent) ?? .png, quality: exportQuality, saving: true)
+        write(to: url, as: ImageFormat(fileName: url.lastPathComponent) ?? .png, quality: model.exportOptions.quality, saving: true)
     }
 
     /// `-PhotoSaveTo`'s folder, when given.
@@ -299,6 +324,7 @@ extension PhotoWindow {
             do {
                 let snapshot = try await Task.detached(priority: .userInitiated) { try workspace.snapshot() }.value
                 try await PhotoPackageIO.write(snapshot, to: url, archive: workspace.services.archive, codec: ImageIOCodec())
+                await files.publishPreview(of: url, archive: workspace.services.archive)
                 didSave(url, kind: .document, opened: opened)
             } catch {
                 didFailSave(error)
@@ -410,7 +436,7 @@ struct PhotoFileArea: ViewModifier {
                 guard let offer = files.recoveryOffer, let hook = await PhotoWindowEditedView.hook(for: files) else { return }
                 if let choice = await hook.askToRestore(offer) { perform(.file(choice)) } else { files.recoveryOffer = nil }
             }
-            .task { if let url = PhotoOpenQueue.shared.windowAppeared(openWindow) { perform(.openFile(url)) } }
+            .task { if let intent = PhotoOpenQueue.shared.windowAppeared(openWindow) { perform(intent) } }
             // A clean close leaves nothing to recover; a dirty one asked first (Don't Save discards).
             .onDisappear { if !model.isDirty { files.autosave?.discard() } }
     }

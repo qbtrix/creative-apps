@@ -5,15 +5,18 @@
 // bottom trailing corner while the HaloHistoryShelf says so, reading the
 // Model's `historyListing` (the kernel `History.listing`) and sending a row's
 // jump to the Model's `jumpHistory(to:)`; and `.autosaveRecovery` with the
-// hooks the Model gives: the file name, the unsaved mark and HaloFiles' bytes.
+// hooks the Model gives: the file name, the unsaved mark and HaloFiles' bytes,
+// written to HaloRecoveryStore's folder for this launch (`<support>/Halo/Recovery/`,
+// none for a journey launch or a test host without `-SuiteSupportDir`), and a
+// Restore that hands the copy to the window's `restoreRecovered` (HA-7b).
 // The shelf is the window's own presentation state, never the Model's; the
 // History button by the transport (HaloHistoryControl in HaloControls.swift)
 // toggles it (HA-3). Every jump goes through the window's `jumpHistory(_:)`
 // once; the panel follows an undo or a jump because each window body hands it
-// the Model's listing as it now is. On HA-1's stubs a jump throws and does nothing, and the folder
-// is nil, so autosave stays off until HA-7. No history logic lives here.
+// the Model's listing as it now is. No history logic lives here.
 import HaloModel
 import SuiteKernel
+import SuiteModel
 import SuiteUI
 import SwiftUI
 
@@ -40,7 +43,12 @@ extension HaloWindow {
 
     /// The History panel and the autosave hooks over `content`.
     func historyScene(_ content: some View) -> some View {
-        content.modifier(HaloHistoryArea(model: model) { index in jumpHistory(index) })
+        content.modifier(HaloHistoryArea(model: model, restore: restoreRecovered) { index in jumpHistory(index) })
+    }
+
+    /// Restore on the recovery offer: the copy's project in place of this one, named as the file open now.
+    func restoreRecovered(_ data: Data) throws {
+        try model.restoreRecovered(from: data, name: model.file.name)
     }
 
     /// A row click or Return in the panel: one jump on the Model, which the panel then follows
@@ -56,6 +64,8 @@ extension HaloWindow {
 /// The panel over the window and the autosave hooks; it reads `model` and sends each jump to `onJump` once.
 struct HaloHistoryArea: ViewModifier {
     let model: HaloProject
+    /// Puts a recovered copy's bytes in the window; the snapshots' host keeps no copies, so never calls it.
+    var restore: @MainActor (Data) throws -> Void = { _ in }
     let onJump: @MainActor (Int) -> Void
     /// A shelf given from outside (the snapshots'), else the window's own.
     @Environment(\.haloHistoryShelf) private var given
@@ -74,12 +84,18 @@ struct HaloHistoryArea: ViewModifier {
                 }
             }
             .environment(\.haloHistoryShelf, shelf)
-            .autosaveRecovery(hooks, folder: nil, delay: 2, edits: model.historyListing.hashValue)
+            .autosaveRecovery(hooks, folder: Self.folder, delay: 2, edits: model.historyListing.hashValue)
     }
+
+    /// Where this launch's window keeps its recovery copies; nil keeps none. The ignore-state default covers
+    /// the launch flag and a test host's registered one, so hosted windows never write or offer real copies.
+    private static let folder = HaloRecoveryStore.folder(
+        arguments: ProcessInfo.processInfo.arguments, home: NSHomeDirectory(),
+        ignoringState: UserDefaults.standard.bool(forKey: "ApplePersistenceIgnoreState"))
 
     /// What `.autosaveRecovery` reads from the Model.
     private var hooks: AutosaveHooks {
-        let project = model
+        let project = model, restore = self.restore
         return AutosaveHooks(
             window: "halo.main",
             documentName: { project.file.name },
@@ -88,6 +104,6 @@ struct HaloHistoryArea: ViewModifier {
                 guard project.file.unsaved else { return nil }
                 return { try project.recoveryBytes() }
             },
-            restore: { _ in throw HaloNotBuilt("Restoring a recovered copy arrives with HA-5.") })
+            restore: { data in try restore(data) })
     }
 }

@@ -137,6 +137,7 @@ extension FlareIntent.Inspector {
         case .easingPreset: "Easing"
         case .easingHandle: "Move Easing Handle"
         case .endEasingHandle: "End Easing Handle"
+        case .runFill: "Edit Fill"
         }
     }
 }
@@ -162,6 +163,7 @@ extension FlareIntent.Timeline {
         case .insertFrames: "Insert Frame"
         case .removeFrames: "Remove Frame"
         case .setLabel: "Add Label"
+        case .selectAllKeys: "Select All Keys"
         }
     }
 }
@@ -192,6 +194,8 @@ extension FlareIntent.Export {
             case .svgFrame: "SVG frame"
             case .lottie: "Lottie"
             case .pngSequence: "PNG sequence"
+            case .mp4: "MP4"
+            case .gif: "GIF"
             }
         case .setFrames: "Frames"
         case .setStep: "Step"
@@ -202,6 +206,9 @@ extension FlareIntent.Export {
         case .dismiss: "Done"
         case .tryAgain: "Try Again"
         case .reveal: "Reveal in Finder"
+        case .setSize: "Size"
+        case .setFrameRate: "Frame rate"
+        case .setLoop: "Loop forever"
         }
     }
 }

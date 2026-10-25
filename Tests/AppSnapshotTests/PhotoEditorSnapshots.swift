@@ -138,21 +138,27 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
     }
 
     /// The Gradient tool picked (gradient-fill PG-1): its palette button is
-    /// disabled with "Not built yet (PG-3).", and Tool Options shows its hint.
+    /// enabled since PG-3, and Tool Options shows its hint.
     /// Writes photo-gradient-tool-light/dark.png.
     @Test func gradientTool() throws {
         var model = try opened()
         model.selectTool(.gradient)
         #expect(model.tool == .gradient)
-        #expect(PhotoPaletteTool(.gradient, in: model).unavailableHelp == "Not built yet (PG-3).")
+        #expect(PhotoPaletteTool(.gradient, in: model).unavailableHelp == nil)
         #expect(ToolOptionsSection.gradientHint == "Drag across the image to draw a gradient from the press to the release.")
         try shoot("gradient-tool", model)
     }
 
+    /// SuiteUI's export sheet on an open image with JPEG picked (export-pack PX-2).
+    /// Writes photo-export-sheet-light/dark.png.
     @Test func exportSheet() throws {
+        var model = try opened()
+        model.openExport()
+        model.editExport(ExportOptions(format: .jpeg, quality: 0.9))
+        #expect(PhotoExportSheetAdapter.formats.map(\.id) == ["png", "jpeg"])
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                ExportSheet(format: .jpeg, quality: 0.9).frame(maxWidth: .infinity, maxHeight: .infinity),
+                PhotoExportSheetAdapter(model: model).frame(maxWidth: .infinity, maxHeight: .infinity),
                 name: "photo-export-sheet-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }
