@@ -83,3 +83,7 @@ PD-u #4963 was the culprit of red batch lane/batch-20261025023716 (macOS type-ch
 ### 2026-10-25T05:54:44Z: stage
 
 #4922 needs-rebase cleared: dev merged, catalog/golden/tests unioned with stroke.*, 373 lines/11 files, ci --changed PASS, Head 3c334c7a; #4963 fix d709ee35 awaits next batch
+
+### 2026-10-25T13:34:40Z: queue check
+
+lane sweep 13:10Z: #4916 #4922 #4963 #5002 eligible (marker + local-ci/prescreen), stacked PRs wait on base; 65 ready PRs queued behind single-PR batches; nothing to fix, waiting on lane
