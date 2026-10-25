@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 2026-10-25T02:32Z	check	#5158 (333603baa, body clean) and #5174 (6e467f797) open+clean, no needs-fix; lane busy on lane/batch-20261024235353-10 (Linux+macOS running); no dev-red; no open findings
 2026-10-25T02:49Z	check	#5158 (333603baa) and #5174 (6e467f797) both in lane/batch-20261025023716 (12 PRs; Linux running, macOS gate queued); no needs-fix; no dev-red; no open findings
 2026-10-25T03:10Z	check	lane/batch-20261025023716 (with #5158, #5174): Linux check success, macOS gate in progress; no needs-fix; no dev-red
+2026-10-25T03:27Z	check	lane/batch-20261025023716 macOS gate red (run 40155151356): DesignPlaceSnapshots.swift:39 type-check timeout, from #4963 (batch pos 2, Design), not ours; lane bisecting (-6 probe running); #5158/#5174 wait for next batch; no needs-fix on ours; no dev-red
