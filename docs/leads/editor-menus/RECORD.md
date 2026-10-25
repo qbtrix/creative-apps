@@ -119,3 +119,4 @@ Next: lane: probe batch-20261025023716-3 (holds #4988) resolves; once #4988 merg
 - #4988 is PR 3 of probe batch-20261025023716-3 (Linux + macOS gates running); -6 went red on Design commits. #4988 and #5164 merge clean with dev.
 - No critic panel for EM-flare-halo this run, as in earlier runs; Belt's done rule is a green ci.yml run holding the last PR.
 - 2026-10-25T04:07:19Z: probe -3 macOS red at DesignPlaceSnapshots.swift:39 (type-check timeout; not #4988 files); bisect now at probe -1 (#4888). #4988 waits.
+- 2026-10-25T04:17:23Z: Belt nudge: mirror lead/suite-editor-menus had stopped at 03:34Z; resynced. Probe -1 (#4888) macOS gate running; #4988 waits.
