@@ -1,0 +1,44 @@
+[
+  {
+    "label": ".neutralIsEmpty: neutral check dropped, exposure 0 emits a step",
+    "file": "Sources/SuiteImaging/Tone/ToneRules.swift",
+    "find": "if exposure != 0 { out.append(.exposure(stops: exposure)) }",
+    "replace": "out.append(.exposure(stops: exposure))",
+    "tests": "ToneRulesTests"
+  },
+  {
+    "label": ".whitesBrighten: whites sign flipped",
+    "file": "Sources/SuiteImaging/Tone/ToneRules.swift",
+    "find": "let inWhite = whites > 0 ? 1 - whites / levelsScale : 1",
+    "replace": "let inWhite = whites > 0 ? 1 + whites / levelsScale : 1",
+    "tests": "ToneRulesTests"
+  },
+  {
+    "label": ".brightnessLifts: brightness gamma inverted",
+    "file": "Sources/SuiteImaging/Tone/ToneRules.swift",
+    "find": "let gamma = Float(pow(2, brightness / 100))",
+    "replace": "let gamma = Float(pow(2, -brightness / 100))",
+    "tests": "ToneRulesTests"
+  },
+  {
+    "label": ".unsharpThreshold: threshold not divided by 255",
+    "file": "Sources/SuiteImaging/Tone/ToneRules.swift",
+    "find": "s.value(.sharpenThreshold) / 255)",
+    "replace": "s.value(.sharpenThreshold))",
+    "tests": "ToneRulesTests"
+  },
+  {
+    "label": ".vibranceWaits: vibrance not skipped while waiting",
+    "file": "Sources/SuiteImaging/Tone/ToneRules.swift",
+    "find": "if vibrance != 0 && waiting[.vibrance] == nil {",
+    "replace": "if vibrance != 0 {",
+    "tests": "ToneRulesTests"
+  },
+  {
+    "label": ".autoReadsLevels: auto blacks sign flipped",
+    "file": "Sources/SuiteImaging/Tone/ToneRules.swift",
+    "find": "black > 0 ? -black * levelsScale : 0",
+    "replace": "black > 0 ? black * levelsScale : 0",
+    "tests": "ToneRulesTests"
+  }
+]
