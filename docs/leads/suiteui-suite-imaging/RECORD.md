@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
 Stage: 3 wave 8
 Base: c16bcd16c (origin/dev)
-Next: 06:12Z: IM-8d opened as #5295 (route into SuiteImaging, 6/6) and #5297 (Photo on it, PhotoLiveTone deleted, 5/5), stacked on #5151; the lane re-labels #5295 once #5151 merges. IM-12 builder running stacked on #5297. Poll ~06:32Z for merges, needs-fix and a dev Linux run.
+Next: 06:27Z poll: dev 13fb2f591. PRs #4886:clean #5148:clean #5151:clean #5153:clean #5154:clean #5163:dirty #5178:dirty #5295:clean #5297:dirty . Findings 0. IM-12 builder running stacked on #5297. Poll ~06:47Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a170cfbf58-pshm, feature issue #3715). This copy is refreshed with it after every stage.
 
