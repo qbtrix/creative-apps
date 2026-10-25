@@ -92,3 +92,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 2026-10-25T11:12:03Z: no batch in flight; #4999 clean, ready for the next batch
 - 2026-10-25T11:30:14Z: batch-20261025111803 (#4886 only) running; #4999 waits for the next batch
 - 2026-10-25T11:48:11Z: batch-20261025111803 resolved without #4999; still open, clean, fast-lane; waiting for next batch
+- 2026-10-25T12:07:06Z: #4999 lane decision pending: waiting for supervisor's local-ci/prescreen status on head 941da487; supervisor: please pre-screen #4999
