@@ -5,7 +5,7 @@ Run: act-1a171ab9e77-es26 · Session: claude/layer-styles-lead-2ph8nc · Started
 Wire: suiteui layer-styles:LS-a
 Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTests.glowReachesItsKeyedSize and glowIsNotClipped; add the no-padding mutation, origin dropped in LiveFrameRendering's styled composite)
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
-Stage: 3 polling (12:31Z): lane moving again: #4886 merged 11:36Z, #4943 12:11Z, batch 122638 holds #4953 alone. #5158 HY-m (333603baa) and #5174 LS-2 (cb6c0a2f8) ready and clean, queued behind the remaining p0 PRs (#4962, #5006, #5007, ...). Drafts #5157, #5161, #5218 wait on #5174; no dev-red; no supervisor answer yet
+Stage: 3 polling (14:05Z): lane landing one p0 PR per batch (~30 min): #4953, #4962, #5006 merged 12:49–13:51Z; batch 140134 holds #5007. 57 open fast-lane p0 PRs sort ahead of #5158 HY-m (333603baa) and #5174 LS-2 (cb6c0a2f8), both ready and clean. At this rate they land in days, not hours, unless the supervisor batches them (asked on #3936 06:47Z and 09:29Z, no answer). Drafts #5157, #5161, #5218 wait on #5174; no dev-red
 Base: 13fb2f591 (origin/dev; main 3db45eb verified at relaunch)
 Next: read the supervisor answer on #3936 (09:29Z follow-up), else wait for the lane. On #5174 merge: merge dev into #5157, #5161, #5218 in order, gate, push, Head, ready
 
