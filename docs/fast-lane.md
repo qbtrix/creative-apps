@@ -88,9 +88,10 @@ that needs macOS forms when a slot frees (a batch resolved in this run),
 when LANE_BATCH_MAX PRs are ready, or once the oldest ready head is
 LANE_BATCH_WAIT_MIN minutes old, and never while the lane's own queued and
 running macOS runs (mac_slots_busy) fill LANE_MAC_SLOTS. One batch runs at a
-time: a second one off the same base would land untested with the first, so
-until speculative batches exist the slots are a guard rail on the shared
-macOS pool, not a second batch.
+time (HOLD, set by batch_held): a second one off the same base would land
+untested with the first, so until speculative batches exist the slots are a
+guard rail on the shared macOS pool, not a second batch. The one exception is
+a batch of one under LANE_VERIFY_AFTER=1 (below).
 A red batch is bisected by prefix on the same branch (batch_resume):
 `lane/batch-<id>-<i>` points at the chain after i PRs and gets the same
 Linux and macOS runs, until PR hi is the first that turns the chain red: PRs
@@ -164,13 +165,26 @@ settle_ready hands each code PR to batch_start alone, whose lone-PR rule
 says dev moved under it; then it is a batch of one, checked on Linux on
 today's dev (batch_apps is empty in this mode), and lands on that. The
 pre-screen screens a head once, so a stale proof re-waits on that Linux
-check, not on a new pre-screen. A red dev holds no code PR here: red_holds
+check, not on a new pre-screen. A batch of one holds only its own PR
+(BATCH_SOLO: batch_held puts it in INFLIGHT, so it is never batched or
+landed twice, and sets no HOLD): every other ready PR with fresh proof lands
+beside it in the same sweep, and several stale PRs each get their own batch
+of one and check in parallel (batch ids stay unique within a run), at most
+LANE_BATCH_MAX at once, since one ratchet commit on dev makes every proof
+stale together; the rest wait for a later sweep. The sweep does not wait
+BATCH_WAIT on such a batch; a later sweep reads its verdict. Landings beside
+it move dev under the batch, so its green result goes through batch_land's
+proof_stale on today's dev like any batch: stale, it is dropped and the PR
+forms a new batch of one there; not stale, it lands. Two kinds still hold
+the lane: a batch of two or more (PRs without code), and a batch of one
+whose PR changes a RATCHET_RE path itself, which proof_stale would call
+stale after every landing beside it, so it would never land. A red dev holds no code PR here: red_holds
 exists because every batch probe on a red base is red, and an own-proof
 landing runs no probe (the pre-screen already excuses failures dev has on
 its own). PRs without code still batch, held by red_holds as above.
 
-Auto-revert (revert_sweep, after the batches so a revert waits for one in
-flight): while the dev-red issue is open (red_sweep; a Linux or a macOS red),
+Auto-revert (revert_sweep, after the batches so a revert waits for one
+holding the lane): while the dev-red issue is open (red_sweep; a Linux or a macOS red),
 the lane makes one revert call on it. The culprit (revert_culprit) is
 red_bisect's verdict on the issue (a certain one: a "likely" verdict from a
 timing budget test is not enough), else the only PR commit (a subject ending

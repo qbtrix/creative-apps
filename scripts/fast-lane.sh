@@ -11,7 +11,8 @@
 # dev's culprit, every open fast-lane PR is evaluated (decide, the pure
 # decision function), and settle_ready lands the ready ones or forms the next
 # `lane/batch-<id>` (BATCH_PREFIX). Invariants a change must keep:
-# - One batch at a time; while one is in flight nothing else merges.
+# - One batch at a time; while one is in flight nothing else merges, except
+#   with LANE_VERIFY_AFTER=1, where a batch of one holds only its own PR.
 # - The batch branch is the whole state: its merge commits (BATCH_SUBJECT_RE)
 #   name each PR and head, `<batch>-<i>` are its probes and `<batch>-red`
 #   marks a base that held dev's red commit (dropped once dev is green).
@@ -191,6 +192,7 @@ BATCH_WAIT="${FAST_LANE_BATCH_WAIT:-420}"
 BATCH_POLL="${FAST_LANE_BATCH_POLL:-60}"
 READY=()   # eligible PRs this pass, n|head|branch|proof (settle_ready lands or batches them)
 HOLD=0     # a batch is in flight: eligible PRs wait for the next sweep
+INFLIGHT=" "  # PRs in a batch still waiting (batch_held): never batched or landed twice
 BASE_RED=""      # the open dev-red issue (red_sweep), whatever job it names
 BASE_RED_JOBS="" # its "- Failing jobs:" line, lowercased: red_holds reads linux and macos off it
 BASE_RED_SHA=""  # its culprit range's red sha: a batch whose base holds it gets a <batch>-red marker
@@ -999,7 +1001,8 @@ red_holds() {
 
 # settle_ready: what the pass found eligible (READY:
 # rank|n|head|branch|apps|since|proof), ordered p0, beta, the rest, then
-# oldest. While a batch is in flight they all wait. A lone PR that needs no
+# oldest. While a batch holds the lane (HOLD) they all wait; a PR in a batch
+# still waiting (INFLIGHT) is left to it. A lone PR that needs no
 # macOS goes to batch_start, which lands it on its own proof unless that is
 # stale (proof_stale); anything else becomes a batch, at once when none of
 # it needs macOS, otherwise when a macOS slot is free and one of: a batch
@@ -1007,22 +1010,21 @@ red_holds() {
 # ready LANE_BATCH_WAIT_MIN minutes.
 settle_ready() {
   local items=() it apps need=0 busy oldest now
-  while IFS= read -r it; do [[ -z "$it" ]] || items+=("$it"); done \
-    < <(printf '%s\n' ${READY[@]+"${READY[@]}"} | sort -t'|' -k1,1n -k2,2n)
+  while IFS= read -r it; do  # a PR in a batch still waiting (INFLIGHT) is that batch's
+    [[ -z "$it" || "$INFLIGHT" == *" $(cut -d'|' -f2 <<<"$it") "* ]] || items+=("$it")
+  done < <(printf '%s\n' ${READY[@]+"${READY[@]}"} | sort -t'|' -k1,1n -k2,2n)
   READY=()
   (( ${#items[@]} )) || return 0
   if (( HOLD )); then log "a batch is in flight: ${#items[@]} ready PR(s) wait for the next sweep"; return 0; fi
   # Verify after merge: each code PR lands alone on its own proof (Linux and
   # the pre-screen), red dev or not, through batch_start of one: a stale proof
-  # (proof_stale) makes it a Linux batch of one on today's dev, and the rest
-  # then wait (HOLD). PRs without code batch as before.
+  # (proof_stale) makes it a Linux batch of one on today's dev, which holds
+  # only that PR (batch_held). PRs without code batch as before.
   if (( LANE_VERIFY_AFTER )); then
     local rest=()
     for it in "${items[@]}"; do
       IFS='|' read -r _ _ _ _ apps _ <<<"$it"
-      if [[ -z "$apps" ]]; then rest+=("$it")
-      elif (( HOLD )); then log "a batch of one is in flight: #$(cut -d'|' -f2 <<<"$it") waits for the next sweep"
-      else batch_start "$it"; fi
+      if [[ -z "$apps" ]]; then rest+=("$it"); else batch_start "$it"; fi
     done
     (( ${#rest[@]} && ! HOLD )) || return 0
     items=("${rest[@]}")
@@ -1085,12 +1087,31 @@ batch_start() {
       return 0
     fi
     log "batch: #$n's own proof is stale ($stale); checking it on $BASE_BRANCH as a batch of one"
+    # Batches of one run side by side (batch_held); a dev ratchet change makes
+    # every proof stale at once, so at most LANE_BATCH_MAX run.
+    if (( $(wc -w <<<"$INFLIGHT") >= LANE_BATCH_MAX )); then
+      log "batch: $LANE_BATCH_MAX batches of one are in flight; #$n waits for the next sweep"; return 0
+    fi
   fi
-  id=$(date -u +%Y%m%d%H%M%S); br="${BATCH_PREFIX}$id"
+  # Batches of one can form several per second (LANE_VERIFY_AFTER=1): ids stay unique.
+  id=$(date -u +%Y%m%d%H%M%S); (( id > LAST_BATCH_ID )) || id=$(( LAST_BATCH_ID + 1 )); LAST_BATCH_ID=$id; br="${BATCH_PREFIX}$id"
   if ! git -C "$d" push -q origin "HEAD:refs/heads/$br" 2>/dev/null; then log "batch: could not push $br; the ready PRs wait"; return 0; fi
   log "batch $br: ${#merged[@]} PRs ($(for it in "${merged[@]}"; do IFS='|' read -r _ n _ <<<"$it"; printf '#%s ' "$n"; done))"
   batch_resume "$br"
-  [[ "$BATCH_STATE" != waiting ]] || HOLD=1
+  batch_held || true
+}
+
+# batch_held: after batch_resume, true when the batch still waits: its PRs
+# join INFLIGHT, and HOLD stops every other merge, except for a BATCH_SOLO one
+# (a stale proof's recheck, which needs no other PR to wait). Whatever lands
+# beside it moves BASE_BRANCH, so its green result is judged again by
+# batch_land's proof_stale and rechecked on today's dev, not landed, when that
+# says the base went stale.
+LAST_BATCH_ID=0
+batch_held() {
+  [[ "$BATCH_STATE" == waiting ]] || return 1
+  INFLIGHT+="$BATCH_PRS"
+  (( BATCH_SOLO )) || HOLD=1
 }
 
 # batch_resume <branch>: reads the batch chain (BASE_BRANCH, then one merge
@@ -1106,20 +1127,30 @@ batch_start() {
 # goes on with the rest. A tip failing macOS where the base does too is judged
 # by failing test instead (BASE_MAC_SET, mac_vs_base).
 BATCH_STATE=""
+BATCH_SIZE=0  # its PR count, 0 until read
+BATCH_PRS=""  # its PR numbers, " <n> " each
+# A batch of one with LANE_VERIFY_AFTER=1 whose PR changes no RATCHET_RE path:
+# it holds no other PR and never sleeps for its verdict (the next sweep reads
+# it). A ratchet-changing PR would go stale under every landing beside it, so
+# its batch holds the lane as before.
+BATCH_SOLO=0
 batch_resume() {
   local br="$1" d k i sha v lo hi mid waited=0 line probes mode="" moded=0 bj tj on
   local chain=() verd=() nruns=()
-  DISPATCHED=""; BATCH_STATE=waiting; BATCH_IGNORE=""; BATCH_APPS=""; BASE_MAC_SET=0; BASE_MAC_FAILS=""
+  DISPATCHED=""; BATCH_STATE=waiting; BATCH_SIZE=0; BATCH_PRS=""; BATCH_SOLO=0; BATCH_IGNORE=""; BATCH_APPS=""; BASE_MAC_SET=0; BASE_MAC_FAILS=""
   if ! scratch "$BASE_BRANCH" "$br"; then log "batch $br: could not fetch it; the next sweep tries again"; return; fi
   d="$SCRATCH"
   while read -r sha line; do
     [[ "$line" =~ $BATCH_SUBJECT_RE ]] || continue
     chain+=("$sha|${BASH_REMATCH[1]}|${BASH_REMATCH[2]}")
   done < <(git -C "$d" log --first-parent --reverse --format='%H %s' "origin/$BASE_BRANCH..origin/$br" 2>/dev/null)
-  k=${#chain[@]}
+  k=${#chain[@]}; BATCH_SIZE=$k
+  for line in ${chain[@]+"${chain[@]}"}; do IFS='|' read -r _ i _ <<<"$line"; BATCH_PRS+=" $i "; done
   if (( k == 0 )); then log "batch $br: nothing left to land; dropping it"; batch_drop "$br"; BATCH_STATE=done; return; fi
   chain=("$(git -C "$d" rev-parse "origin/$br~$k")||" "${chain[@]}")  # [0] = the base
   BATCH_APPS=$(batch_apps "${chain[0]%%|*}" "${chain[k]%%|*}")
+  if (( LANE_VERIFY_AFTER && k == 1 )) && line=$(git -C "$d" diff --name-only --no-renames "${chain[0]%%|*}" "${chain[k]%%|*}" 2>/dev/null) \
+      && ! grep -qiE -- "$RATCHET_RE" <<<"$line"; then BATCH_SOLO=1; fi
   # A base holding dev's red commit gets a <batch>-red marker while dev is red;
   # once dev is green on a newer commit, a marked batch can't pass and is
   # dropped (its PRs untouched) so this sweep forms a fresh one.
@@ -1203,7 +1234,7 @@ batch_resume() {
           batch_probe "$br" "$mid" "${chain[mid]%%|*}" "${verd[mid]}" "${nruns[mid]}" "$mode"
         fi ;;
     esac
-    if (( waited >= BATCH_WAIT )); then return; fi
+    if (( waited >= BATCH_WAIT || BATCH_SOLO )); then return; fi
     sleep "$BATCH_POLL"; waited=$(( waited + BATCH_POLL ))
   done
 }
@@ -1639,7 +1670,7 @@ Refs #$BASE_RED. This reverts commit $c. The fast lane opened this PR and lands 
 }
 
 # revert_land <n>|<head>|<branch>: the lane's open revert PR for the open
-# dev-red issue lands, once no batch is in flight (HOLD), on its own Linux
+# dev-red issue lands, once no batch holds the lane (HOLD), on its own Linux
 # check (started once per head, its comment the record). A stale check
 # (proof_stale), or a merge refused because dev moved under it into a
 # conflict, gets the revert rebuilt on today's BASE_BRANCH and checked again;
@@ -2045,10 +2076,10 @@ main() {
   while read -r _ br; do
     [[ "$br" =~ ^${BATCH_PREFIX}[0-9]+$ ]] || continue  # probes (<batch>-<i>) belong to their batch
     batch_resume "$br"
-    if [[ "$BATCH_STATE" == waiting ]]; then HOLD=1; else SLOT_FREED=1; fi
+    batch_held || SLOT_FREED=1
   done < <(batch_branches)
   # With LANE_VERIFY_AFTER=1 a red dev gets its culprit reverted; after the
-  # batches, so a revert waits for one in flight (HOLD).
+  # batches, so a revert waits for one holding the lane (HOLD).
   revert_sweep
   local explicit=${#prs[@]}
   if (( explicit == 0 )); then
