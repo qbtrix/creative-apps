@@ -103,3 +103,4 @@ time	task	event	note
 2026-10-25T06:24Z	3	heartbeat	lane	no merges; batch 20261025054232 bisecting; no needs-fix/needs-rebase on ours; no dev-red
 2026-10-25T06:46Z	3	heartbeat	lane	no merges or lane comments since 06:20; no dev-red; no new dev ci run
 2026-10-25T07:08Z	3	heartbeat	lane	batch 20261025054232 bisect: probe -6 macOS red, probe -3 running; no flags on ours; no dev-red; no dev ci run
+2026-10-25T07:30Z	3	heartbeat	lane	bisect probe -3 Linux green, macOS running; no flags on ours; no dev-red; no dev ci run
