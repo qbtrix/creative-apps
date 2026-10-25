@@ -27,6 +27,7 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 2026-10-25 08:54Z: hb73: slices #5088/#5089/#5091/#5231 still open, beta, no needs-*; lane batches: none.
 - 2026-10-25 08:39Z: hb72: slices #5088/#5089/#5091/#5231 still open, beta, no needs-*; lane batches: batch-20261025054232 batch-20261025054232-3 batch-20261025054232-4 batch-20261025054232-6 .
 - 2026-10-25 08:27Z: hb71: slices #5088/#5089/#5091/#5231 still open, beta, no needs-*; lane batches: batch-20261025054232 batch-20261025054232-3 batch-20261025054232-4 batch-20261025054232-6 .
 - 2026-10-25 08:00Z: hb70: slices #5088/#5089/#5091/#5231 still open, beta, no needs-*; lane batches: batch-20261025054232 batch-20261025054232-3 batch-20261025054232-6 .
