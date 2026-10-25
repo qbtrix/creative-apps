@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "app": "halo",
+  "new": {"name": "Intro", "width": 1280, "height": 720, "fps": 30, "seconds": 5},
+  "inputs": ["seed.halo"],
+  "steps": [
+    {"id": "layer.new", "params": {"kind": "solid"}},
+    {"id": "layer.new", "params": {"kind": "shape"}},
+    {"id": "timeline.scrub", "params": {"frame": 0}},
+    {"id": "inspector.toggle-animation", "params": {"property": "x"}},
+    {"id": "inspector.set-property", "params": {"property": "x", "value": -200}},
+    {"id": "inspector.end-property-scrub", "params": {}},
+    {"id": "timeline.scrub", "params": {"frame": 45}},
+    {"id": "inspector.set-property", "params": {"property": "x", "value": 640}},
+    {"id": "inspector.end-property-scrub", "params": {}},
+    {"id": "layer.new", "params": {"kind": "text"}},
+    {"id": "text.set", "params": {"text": "Hello, Halo"}},
+    {"id": "text.set-size", "params": {"size": 96}},
+    {"id": "text.end-size-scrub", "params": {}},
+    {"id": "text.set-color", "params": {"red": 1, "green": 1, "blue": 1}},
+    {"id": "timeline.scrub", "params": {"frame": 0}},
+    {"id": "inspector.toggle-animation", "params": {"property": "opacity"}},
+    {"id": "inspector.set-property", "params": {"property": "opacity", "value": 0}},
+    {"id": "inspector.end-property-scrub", "params": {}},
+    {"id": "timeline.scrub", "params": {"frame": 30}},
+    {"id": "inspector.set-property", "params": {"property": "opacity", "value": 1}},
+    {"id": "inspector.end-property-scrub", "params": {}},
+    {"id": "timeline.scrub", "params": {"frame": 0}}
+  ],
+  "atomic": true,
+  "why": "A 5 s, 30 fps intro: a solid behind, a shape sliding in from the left (x keys at 0 and 45) and a white title fading in (opacity keys at 0 and 30). The solid and shape keep their default colors: headless text.set-color acts only on a text layer."
+}

@@ -21,8 +21,6 @@ Sources/DesignApp/DesignWindow.swift::DesignWindow.lastWorkspace
 Sources/DesignApp/DesignWindow.swift::DesignWindow.launchSaveURL
 Sources/DesignApp/DesignWindow.swift::DesignWindow.reason
 Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow.keyState
-Sources/FlareApp/FlareInspectorScene.swift::FlareInspectorScene.hex
-Sources/FlareApp/FlareInspectorScene.swift::FlareInspectorScene.rates
 Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet.number
 Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet.text
 Sources/FlareApp/FlareStage.swift::FlareStage.sizeText
@@ -61,9 +59,7 @@ Sources/PhotoApp/CurvesSection.swift::AdjustmentsPanel.showsEnable
 Sources/PhotoApp/CurvesSection.swift::CurvesEditor.unit
 Sources/PhotoApp/ImageSizeSheet.swift::ImageSizeSheet.side
 Sources/PhotoApp/PhotoCommands+Layer.swift::PhotoLayerMenu.shortcut
-Sources/PhotoApp/PhotoCommands+Layer.swift::PhotoLayerMenu.systemImage
 Sources/PhotoApp/PhotoEditor.swift::PhotoEditor.bodyRuns
-Sources/PhotoApp/PhotoLayerList.swift::PhotoLayerList.commands
 Sources/PhotoApp/PhotoWindow+File.swift::PhotoWindow.reason
 Sources/PhotoApp/PhotoWindow+File.swift::PhotoWindow.saveToFolder
 Sources/SuiteUI/AppMark.swift::AppMark.draw

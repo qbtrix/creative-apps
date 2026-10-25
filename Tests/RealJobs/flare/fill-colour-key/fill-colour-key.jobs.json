@@ -1,0 +1,17 @@
+{
+  "version": 1, "app": "flare",
+  "why": "RJ-F13, pending TK-7 (suiteui/timeline-keys) and the stage-matches-export fix (creative-core fix/flare-sampler, creative-apps fix/flare-stage-matches-export): platforms is [] so the harness skips it on both until the stage draws colour keys. Opens rect.flare (a new 30 fps scene, 30 frames), adds a rectangle, keys its fill blue at 0 and orange at 30 with colorKey.set, and exports Lottie. The trap: the Lottie animates but PNG frame 15 is flat blue (the stage gap). The assertions: the Lottie's fill `c` has two keys, blue then orange; the turn-on adds PNG frames 0, 15 and 30 and checks frame 15's fill pixel is within 3 levels of the blue-orange midpoint, then sets platforms to linux and macos.",
+  "pending": "TK-7", "waits_on": "TK-7, fix/flare-stage-matches-export", "inputs": ["input/*.flare"],
+  "steps": [
+    {"id": "layer.add", "params": {"sceneID": "scene-1", "layer": {"id": "layer-1", "name": "Rectangle", "tracks": {}, "instances": [], "isVisible": true, "isLocked": false,
+      "shapes": [{"closed": true, "fill": {"r": 0, "g": 0, "b": 1, "a": 1}, "points": [{"x": 50, "y": 25}, {"x": 150, "y": 25}, {"x": 150, "y": 75}, {"x": 50, "y": 75}]}]}}},
+    {"id": "colorKey.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "target": {"fill": {"shape": 0}}, "frame": 0, "value": {"r": 0, "g": 0, "b": 1, "a": 1}, "easing": {"linear": {}}}},
+    {"id": "colorKey.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "target": {"fill": {"shape": 0}}, "frame": 30, "value": {"r": 1, "g": 0.584, "b": 0, "a": 1}, "easing": {"linear": {}}}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-keyed", "format": "lottie"},
+  "expect": {
+    "out/rect-keyed.json": {"json": {"fr": 30, "ip": 0, "op": 30}}
+  },
+  "platforms": []
+}

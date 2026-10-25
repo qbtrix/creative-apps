@@ -1,0 +1,16 @@
+[
+ {
+  "label": ".handOffStaysHidden: a hidden hand-off launch opens a window",
+  "file": "Sources/SuiteModel/Switching/ReopenRule.swift",
+  "find": "        guard !launchedHidden else { return false }\n",
+  "replace": "",
+  "tests": "SuiteEditorReopenTests"
+ },
+ {
+  "label": ".reopensOnlyWhenNone: a Dock click opens a window only while one is visible",
+  "file": "Sources/SuiteModel/Switching/ReopenRule.swift",
+  "find": "return visibleWindows == 0",
+  "replace": "return visibleWindows != 0",
+  "tests": "SuiteEditorReopenTests"
+ }
+]

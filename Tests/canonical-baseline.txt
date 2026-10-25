@@ -16,10 +16,8 @@ Sources/DesignModel/Live/LiveClipboard.swift
 Sources/DesignModel/Live/LiveFiling.swift
 Sources/DesignModel/Live/LiveMarquee.swift
 Sources/DesignModel/Live/LiveTransforming.swift
-Sources/FlareApp/FlareAutosave.swift
 Sources/FlareApp/FlareEasingPopover.swift
 Sources/FlareApp/FlarePasteboard.swift
-Sources/FlareApp/FlareRecovery.swift
 Sources/FlareApp/FlareStageSelection.swift
 Sources/FlareApp/FlareWindow+Export.swift
 Sources/FlareApp/FlareWindow+Layers.swift
@@ -101,7 +99,6 @@ Sources/LibraryModel/Live/LiveThumbnails.swift
 Sources/LibraryModel/LoupeZoom.swift
 Sources/PhotoApp/CropOptions.swift
 Sources/PhotoApp/CropOverlay.swift
-Sources/PhotoApp/ExportSheet.swift
 Sources/PhotoApp/ImageIOCodec.swift
 Sources/PhotoApp/PhotoAutosave.swift
 Sources/PhotoApp/PhotoHistoryTab.swift

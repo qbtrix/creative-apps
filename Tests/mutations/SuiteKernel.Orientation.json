@@ -1,0 +1,23 @@
+[
+  {
+    "label": "flipThenTurn: the flip is composed on the wrong side, before this value's turns",
+    "file": "Sources/SuiteKernel/Crop/Orientation.swift",
+    "find": "public func flipped(_ d: FlipDirection) -> Orientation { then(d == .horizontal ? .upMirrored : .downMirrored) }",
+    "replace": "public func flipped(_ d: FlipDirection) -> Orientation { (d == .horizontal ? Orientation.upMirrored : .downMirrored).then(self) }",
+    "tests": "OrientationTests"
+  },
+  {
+    "label": "sizeSwaps: an odd number of turns keeps the image's sides",
+    "file": "Sources/SuiteKernel/Crop/Orientation.swift",
+    "find": "turns % 2 == 1 ? (h, w) : (w, h)",
+    "replace": "mirrored ? (h, w) : (w, h)",
+    "tests": "OrientationTests"
+  },
+  {
+    "label": "mirrorReversesTurns: a mirror after a turn keeps the turn's direction",
+    "file": "Sources/SuiteKernel/Crop/Orientation.swift",
+    "find": "next.turns + (next.mirrored ? -turns : turns)",
+    "replace": "next.turns + turns",
+    "tests": "OrientationTests"
+  }
+]

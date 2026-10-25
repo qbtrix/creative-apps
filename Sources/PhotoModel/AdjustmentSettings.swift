@@ -14,8 +14,15 @@
 // shows halfway between black and white. PhotoRender applies the enabled
 // sections to the canvas (exposure, levels, curves, hue/saturation, then
 // blur). Settings are Hashable, so an adjustment layer can hold them, and
-// Codable, so a document can store them. Linux-safe.
+// Codable, so a document can store them. Exposure, levels, the curve and
+// hue/saturation live in SuiteImaging's AdjustSettings (`imaging`); Photo's
+// Float values, the stored form and the render's steps are read out of it in
+// PhotoAdjust+Imaging.swift. `tone` is the suite's ToneSettings (white
+// balance, tone, presence, sharpen; tone-controls PT-1), set whole by one
+// `.tone` edit; it has no AdjustmentKind, so it has no switch and no section
+// of its own, and PT-3 renders it. Linux-safe.
 import CoreRaster
+import SuiteImaging
 
 /// One adjustment section in the inspector.
 public enum AdjustmentKind: String, CaseIterable, Sendable, Codable {
@@ -41,9 +48,11 @@ public enum AdjustmentEdit: Sendable, Equatable {
     case setEnabled(AdjustmentKind, Bool)
     /// Puts a section's values back to their defaults; its switch stays.
     case reset(AdjustmentKind)
+    /// The whole tone section, as the tone commands set it: one edit, one step.
+    case tone(ToneSettings)
 }
 
-public struct AdjustmentSettings: Sendable, Hashable, Codable {
+public struct AdjustmentSettings: Sendable, Hashable {
     public static let exposureRange: ClosedRange<Float> = -5...5
     public static let levelsRange: ClosedRange<Float> = 0...1
     /// Black and white snap to thousandths: fine next to 8-bit's 1/255.
@@ -62,22 +71,23 @@ public struct AdjustmentSettings: Sendable, Hashable, Codable {
     /// Saturation and lightness.
     public static let percentRange: ClosedRange<Double> = -100...100
 
-    /// Stops.
-    public private(set) var exposure: Float = 0
-    public private(set) var blackPoint: Float = 0
-    public private(set) var whitePoint: Float = 1
-    public private(set) var gamma: Float = 1
-    /// The tone curve's control points, x strictly increasing.
-    public private(set) var curvePoints = [CurvePoint(x: 0, y: 0), CurvePoint(x: 1, y: 1)]
+    /// Exposure, levels, the tone curve and hue/saturation, in the suite's
+    /// shared value; `exposure`, `blackPoint` and the rest read it.
+    public private(set) var imaging = AdjustSettings.neutral
     /// Gaussian blur radius in pixels.
     public private(set) var blurSigma: Double = 0
-    /// Degrees.
-    public private(set) var hue: Double = 0
-    public private(set) var saturation: Double = 0
-    public private(set) var lightness: Double = 0
     public private(set) var enabled: Set<AdjustmentKind> = Set(AdjustmentKind.allCases)
+    /// White balance, tone, presence and sharpen; stored under "tone", left
+    /// out when neutral.
+    public private(set) var tone: ToneSettings = .neutral
 
     public init() {}
+
+    /// The stored form read back (PhotoAdjust+Imaging.swift), unchecked like
+    /// the stored values themselves.
+    init(imaging: AdjustSettings, blurSigma: Double, enabled: Set<AdjustmentKind>, tone: ToneSettings = .neutral) {
+        (self.imaging, self.blurSigma, self.enabled, self.tone) = (imaging, blurSigma, enabled, tone)
+    }
 
     public func isEnabled(_ kind: AdjustmentKind) -> Bool { enabled.contains(kind) }
 
@@ -88,37 +98,39 @@ public struct AdjustmentSettings: Sendable, Hashable, Codable {
         return defaults == self
     }
 
-    /// True when no enabled section changes the image.
+    /// True when no enabled section, and no tone slider, changes the image.
     public var isIdentity: Bool {
-        AdjustmentKind.allCases.allSatisfy { !isEnabled($0) || isIdentity($0) }
+        tone.isNeutral(nil) && AdjustmentKind.allCases.allSatisfy { !isEnabled($0) || isIdentity($0) }
     }
 
     public mutating func apply(_ edit: AdjustmentEdit) {
         switch edit {
         case .exposure(let value):
-            exposure = Self.clamp(value, to: Self.exposureRange) ?? exposure
+            imaging.exposure = Double(Self.clamp(value, to: Self.exposureRange) ?? exposure)
         case .blackPoint(let value):
-            if let value = Self.levelsValue(value), value < whitePoint { blackPoint = value }
+            if let value = Self.levelsValue(value), value < whitePoint { imaging.levels.inputBlack = Double(value) }
         case .whitePoint(let value):
-            if let value = Self.levelsValue(value), value > blackPoint { whitePoint = value }
+            if let value = Self.levelsValue(value), value > blackPoint { imaging.levels.inputWhite = Double(value) }
         case .gamma(let value):
-            gamma = Self.clamp(value, to: Self.gammaRange) ?? gamma
+            imaging.levels.gamma = Double(Self.clamp(value, to: Self.gammaRange) ?? gamma)
         case .gammaField(let value):
             if !Self.showsAs(value, gamma) { apply(.gamma(Float(value))) }
         case .curvePoints(let points):
-            curvePoints = Self.curve(points) ?? curvePoints
+            if let points = Self.curve(points) { imaging.curve = Self.imagingCurve(points) }
         case .blurSigma(let value):
             blurSigma = Self.clamp(value, to: Self.sigmaRange) ?? blurSigma
         case .hue(let value):
-            hue = Self.clamp(value, to: Self.hueRange) ?? hue
+            imaging.hueSaturation.hue = Self.clamp(value, to: Self.hueRange) ?? hue
         case .saturation(let value):
-            saturation = Self.clamp(value, to: Self.percentRange) ?? saturation
+            imaging.hueSaturation.saturation = Self.clamp(value, to: Self.percentRange) ?? saturation
         case .lightness(let value):
-            lightness = Self.clamp(value, to: Self.percentRange) ?? lightness
+            imaging.hueSaturation.lightness = Self.clamp(value, to: Self.percentRange) ?? lightness
         case .setEnabled(let kind, let isOn):
             if isOn { enabled.insert(kind) } else { enabled.remove(kind) }
         case .reset(let kind):
             reset(kind)
+        case .tone(let settings):
+            tone = settings
         }
     }
 
@@ -126,19 +138,15 @@ public struct AdjustmentSettings: Sendable, Hashable, Codable {
         let defaults = AdjustmentSettings()
         switch kind {
         case .exposure:
-            exposure = defaults.exposure
+            imaging.exposure = defaults.imaging.exposure
         case .levels:
-            blackPoint = defaults.blackPoint
-            whitePoint = defaults.whitePoint
-            gamma = defaults.gamma
+            imaging.levels = defaults.imaging.levels
         case .curves:
-            curvePoints = defaults.curvePoints
+            imaging.curve = defaults.imaging.curve
         case .blur:
             blurSigma = defaults.blurSigma
         case .hueSaturation:
-            hue = defaults.hue
-            saturation = defaults.saturation
-            lightness = defaults.lightness
+            imaging.hueSaturation = defaults.imaging.hueSaturation
         }
     }
 

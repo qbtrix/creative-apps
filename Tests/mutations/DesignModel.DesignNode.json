@@ -44,30 +44,58 @@
   {
     "label": "a full-size handle sits on the kernel square's corner, not its centre",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "shown[handle] = DesignPoint(x: (square.minX + square.maxX) / 2",
-    "replace": "shown[handle] = DesignPoint(x: square.minX",
+    "find": "shown[handle] = DesignPoint(x: (square.minX + square.maxX + Double(h) * size) / 2",
+    "replace": "shown[handle] = DesignPoint(x: square.minX + Double(h) * size / 2",
     "tests": "DesignCompactSelectionTests.swift"
   },
   {
     "label": "a compact rect's corners are pushed inside",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "DesignPoint(x: at.x + Double(h) * size / 2, y: at.y + Double(v) * size / 2)",
-    "replace": "DesignPoint(x: at.x - Double(h) * size / 2, y: at.y - Double(v) * size / 2)",
+    "find": "let (h, v) = compact && handle.isCorner ? handle.direction : (0, 0)",
+    "replace": "let (h, v) = compact && handle.isCorner ? (-handle.direction.x, -handle.direction.y) : (0, 0)",
     "tests": "DesignCompactSelectionTests.swift"
   },
   {
     "label": "a copy drops the gradient",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "        gradient = node.gradient",
+    "find": "        extras = node.extras",
     "replace": "",
     "tests": "DesignGradientTests.swift"
   },
   {
     "label": "the gradient is not decoded",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "gradient: container.decodeIfPresent(Fill.self, forKey: .gradient))",
-    "replace": "gradient: nil)",
+    "find": "gradient: container.decodeIfPresent(Fill.self, forKey: .gradient),",
+    "replace": "gradient: nil,",
     "tests": "DesignGradientTests.swift"
+  },
+  {
+    "label": "a copy drops the picture",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "        extras = node.extras",
+    "replace": "        extras = node.extras; placedAsset = nil",
+    "tests": "DesignPlaceTests.swift"
+  },
+  {
+    "label": "the picture is not decoded",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "placedAsset: container.decodeIfPresent(PlacedAsset.self, forKey: .placedAsset),",
+    "replace": "placedAsset: nil,",
+    "tests": "DesignPlaceTests.swift"
+  },
+  {
+    "label": "a centred focus is written, so an old file saves with a new key",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "if placedFocus != Self.centreFocus { try container.encode(placedFocus, forKey: .placedFocus) }",
+    "replace": "try container.encode(placedFocus, forKey: .placedFocus)",
+    "tests": "DesignPlaceTests.swift"
+  },
+  {
+    "label": "an ellipse or text keeps a picture",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "if kind.holdsPicture, placedAsset != nil { self.placedAsset = placedAsset }",
+    "replace": "if placedAsset != nil { self.placedAsset = placedAsset }",
+    "tests": "DesignPlaceTests.swift"
   },
   {
     "label": "the turn is not decoded",

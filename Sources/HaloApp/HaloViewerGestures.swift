@@ -5,14 +5,16 @@
 // at the artboard's own size. A drag (minimum distance 0) sends
 // `beginViewerDrag` at its start, which hits and selects. Its moves go to the
 // window's HaloLiveEdit as the window's project with that move applied
-// (`moveViewerDrag` on a copy, HaloLiveEdit.show), so only the drawn layers re-run per sample;
+// (`moveViewerDrag` on a copy, HaloLiveEdit.show), so only the drawn layers re-run per sample,
+// at most once per display refresh (HaloViewerPace, #4276; the latest move wins);
 // the release sends the last `moveViewerDrag` and `endViewerDrag`, and the
 // Model records one "Move". Hosted without a HaloLiveEdit, each move is sent
 // as it comes. A click focuses it, so Escape sends `cancelViewerDrag` and
 // drops the live preview. It is hidden from accessibility: the artboard
 // element (`halo.viewer`) around it names it. It reads its model and never
 // assigns it. With the shape tool on (`haloShapeDrawing`, HS-3) a press
-// draws through it instead.
+// draws through it instead. Under `-SuitePerfProbe` each move records a
+// `viewer-drag` sample (HaloProbe), the first with `preview-before-mouse-up`.
 import AppKit
 import HaloModel
 import SuiteKernel
@@ -33,15 +35,16 @@ struct HaloViewerGestures: View {
     @State private var size = CGSize.zero
     /// Whether this drag already sent its begin.
     @State private var dragging = false
-    /// The press and the latest move, in composition pixels; nil with no drag
-    /// or after Escape.
+    /// The press, in composition pixels; nil with no drag or after Escape.
     @State private var start: HaloPoint?
-    @State private var last: HaloPoint?
+    /// The drag's moves, paced to one live write per refresh, and its last move.
+    @State private var pace = HaloViewerPace()
     /// Whether this press draws a shape (the tool was on when it began).
     @State private var drawsShape = false
     @Environment(\.haloLiveEdit) private var live
     @Environment(\.haloShapeDrawing) private var shapes
     @Environment(\.haloViewerTakesActivationClicks) private var takesActivationClicks
+    @Environment(\.suiteProbeRecorder) private var recorder
 
     var body: some View {
         let comp = model.selectedComposition
@@ -61,7 +64,8 @@ struct HaloViewerGestures: View {
             .focusEffectDisabled()
             .onExitCommand {
                 if let shapes, drawsShape || shapes.isOn { return shapes.escape() }
-                (start, last) = (nil, nil)
+                start = nil
+                pace.cancel()
                 live?.project = nil
                 perform(.cancelViewerDrag)
             }
@@ -83,24 +87,31 @@ struct HaloViewerGestures: View {
                     return shapes.drag(model.shapeTool, from: start, to: now, modifiers: held)
                 }
                 guard let start, let now = point(value.location) else { return }
-                guard let live else { return perform(.moveViewerDrag(x: now.x, y: now.y)) }
-                last = now
+                let probe = HaloProbe(recorder)
+                guard let live else {
+                    perform(.moveViewerDrag(x: now.x, y: now.y))
+                    return probe.sample(HaloProbe.viewerDrag)
+                }
+                let first = pace.isFresh
                 // A press over empty space started no drag; there is nothing to preview.
                 guard model.viewerDrag != nil || live.project == nil else { return }
-                live.show { shown in
-                    // The window may not have drawn the begin yet; the copy takes it too.
-                    if shown.viewerDrag == nil { shown.beginViewerDrag(at: start) }
-                    shown.moveViewerDrag(to: now)
+                pace.move(to: now, probe: probe) { point in
+                    live.show { shown in
+                        // The window may not have drawn the begin yet; the copy takes it too.
+                        if shown.viewerDrag == nil { shown.beginViewerDrag(at: start) }
+                        shown.moveViewerDrag(to: point)
+                    }
                 }
+                if first { probe.mark(HaloProbe.previewBeforeMouseUp, series: HaloProbe.viewerDrag) }
             }
             .onEnded { _ in
                 if drawsShape {
                     (dragging, drawsShape, start) = (false, false, nil)
                     return shapes?.release() ?? ()
                 }
-                if let last { perform(.moveViewerDrag(x: last.x, y: last.y)) }
+                if let last = pace.end(probe: HaloProbe(recorder)) { perform(.moveViewerDrag(x: last.x, y: last.y)) }
                 perform(.endViewerDrag)
-                (dragging, start, last) = (false, nil, nil)
+                (dragging, start) = (false, nil)
                 live?.project = nil
             }
     }

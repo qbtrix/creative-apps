@@ -14,15 +14,24 @@ import Testing
         for round in 0..<10 {
             weak var freed: NSWindow?
             do {
-                let w = RenderBudgetWindow(Text("round \(round)"), keyCapable: true)
+                // Each AppKit call in its own pool, so what it autoreleases is let go when the call returns,
+                // not when the test's own pool drains after the last round.
+                let w = autoreleasepool { RenderBudgetWindow(Text("round \(round)"), keyCapable: true) }
                 freed = w.window
-                w.window.makeKey()
+                autoreleasepool { w.window.makeKey() }
                 #expect(w.window.canBecomeKey)
                 try await w.settle(20)
-                w.close()
+                autoreleasepool { w.close() }
             }
-            for _ in 0..<100 where freed != nil { try await Task.sleep(for: .milliseconds(10)) }
-            #expect(freed == nil, "round \(round): the closed window is still alive, so its teardown went untested")
+            // AppKit drops its last references to a closed window on a later run-loop turn: turn the run loop,
+            // each turn in its own pool, until the window is freed or 5 s pass. A window something really
+            // keeps alive still fails below.
+            let deadline = Date().addingTimeInterval(5)
+            while freed != nil, Date() < deadline {
+                autoreleasepool { _ = RunLoop.main.run(mode: .default, before: Date().addingTimeInterval(0.01)) }
+                await Task.yield()
+            }
+            #expect(freed == nil, "round \(round): the closed window is still alive after 5 s, so it leaked")
         }
     }
 }

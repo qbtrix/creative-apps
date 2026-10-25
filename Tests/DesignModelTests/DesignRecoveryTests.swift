@@ -30,6 +30,16 @@ struct DesignRecoveryTests {
         #expect(listing.steps.count == 2 && listing.index == 2)
     }
 
+    /// A never-saved "New Design" carries no saved mark; once saved, the base reads "Open" beside it.
+    @Test func onlyASavedFileMarksItsSave() throws {
+        var workspace = openDesign()
+        #expect(workspace.historyListing.base == "New Design" && workspace.historyListing.savedIndex == nil)
+        workspace.didSave(to: URL(fileURLWithPath: "/tmp/card.design"))
+        try workspace.addNode(.rectangle, frame: rc(0, 0, 10, 10), in: "node-1")
+        let listing = workspace.historyListing
+        #expect(listing.base == "Open" && listing.savedIndex == 0 && listing.index == 1)
+    }
+
     @Test func jumpLandsOnIndex() throws {
         var workspace = try edited(12)
         let atTwo = try edited(2).pages

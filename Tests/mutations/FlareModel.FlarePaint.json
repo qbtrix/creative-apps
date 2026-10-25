@@ -23,8 +23,8 @@
   {
     "label": "solidReplacesGradient: the gradient refusal kept",
     "file": "Sources/FlareModel/FlarePaint.swift",
-    "find": "        paintStep(nil) { try properties.setFill(.solid(color), of: items, in: &$0) }",
-    "replace": "        if found.contains(where: { if case .solid = $0.1.fill { false } else { true } }) { return paintError = \"Gradients can't be edited yet.\" }; paintStep(nil) { try properties.setFill(.solid(color), of: items, in: &$0) }",
+    "find": "        paintStep(keys.isEmpty ? nil : \"Set Fill\") { engine in",
+    "replace": "        if found.contains(where: { if case .solid = $0.1.fill { false } else { true } }) { return paintError = \"Gradients can't be edited yet.\" }; paintStep(keys.isEmpty ? nil : \"Set Fill\") { engine in",
     "tests": "FlarePaintGradientTests"
   }
 ]

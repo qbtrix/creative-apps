@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "app": "library",
+  "why": "RJ-L56 (large-catalog LG-7): open the 10,000-photo fixture's catalog headless (LibraryFixtures.largePhotos, no files), select all and rate every photo 3 as one step, then write the catalog back; the trap is a scan per photo that is fine at 200 and stalls at 10,000. The 1,000-photo export plan is timed by LargeCatalogModelBudgetTests.exportPlanWithinBudget, since the picks' PNG export waits on image-codecs (qbtrix/creative-core#562).",
+  "inputs": ["input/*.library"],
+  "steps": [
+    {"id": "edit.select-all", "params": {}},
+    {"id": "metadata.set-rating", "params": {"stars": 3}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-catalog", "format": "json", "options": {}},
+  "expect": {
+    "out/large-catalog.json": {"sha256": "ec3bb70a961996d297506d3276641f5d20105769e6b5191c48f1dd3711d2b8e9"}
+  },
+  "platforms": ["linux", "macos"]
+}

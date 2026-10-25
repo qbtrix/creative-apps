@@ -19,7 +19,32 @@ private struct ShapeDoc: HeadlessDocument {
     func export(_ format: String, options: JSONValue) throws -> [ExportedFile] { [ExportedFile(suggestedName: "a.json", format: format, data: try save())] }
     func summary() -> JSONValue { .object(["value": .number(value)]) }
 }
+/// A document Copy As, Paste as Image and Copy Frame act on: a selection flag and the last pasted file's name.
+private struct ClipDoc: CopyAsTarget, CopyFrameTarget {
+    var selected = true, pasted: String?
+    var copyAsHelp: String? { selected ? nil : "Select something to copy." }
+    var pasteAsImageHelp: String? { nil }
+    var copyFrameHelp: String? { nil }
+    func copyAs(_ format: CopyAsFormat) throws -> CopiedBytes {
+        CopiedBytes(type: format == .png ? "public.png" : format == .svg ? "public.svg-image" : "app.layers", data: Data([1, 2]))
+    }
+    mutating func pasteAsImage(name: String, data: Data) throws { pasted = name }
+    func copyFrame() throws -> Data { Data([3]) }
+}
 @Suite struct CommandShapeTests {
+    /// clipboard-interop CB-1: Copy As (`{format: png | svg | own}`), Paste as Image and Copy Frame are specs with
+    /// closed schemas whose examples validate, the right kinds, and the target's help as their availability.
+    @Test func copyAsSpecsHaveSchemasAndKinds() throws {
+        let specs = CopyAsCommands.specs(ClipDoc.self), frame = CopyAsCommands.frameSpecs(ClipDoc.self)
+        #expect(specs.map(\.id) == ["edit.copy-as", "edit.paste-as-image"] && frame.map(\.id) == ["edit.copy-frame"])
+        #expect(specs.map(\.kind) == [.query, .edit] && frame.map(\.kind) == [.query])
+        for spec in specs + frame { #expect(spec.params.validate(spec.example).isEmpty, "\(spec.id)'s example doesn't validate") }
+        let copyAs = try #require(specs.first)
+        #expect(!copyAs.params.validate(.object(["format": .string("gif")])).isEmpty)
+        #expect(copyAs.availability(ClipDoc(selected: false)).why == "Select something to copy.")
+        #expect(CopyAsFormat.allCases.map(\.rawValue) == ["png", "svg", "own"])
+    }
+
     /// CJ0: every public type and method exists, and the stubs answer without trapping.
     @Test func everySignatureExists() throws {
         let catalog = ShapeDoc.catalog, spec = try #require(catalog.spec("value.bump")), described = try #require(catalog.describe("value.bump"))
@@ -62,16 +87,72 @@ private struct ShapeDoc: HeadlessDocument {
         #expect(try JSONValue(encoding: ShapeDoc.Bump(by: 2)) == .object(["by": .number(2)]) && JSONValue.number(2).decode(Double.self) == 2)
     }
 
+    /// brush-keys BK-1: the six brush and opacity specs, each with its kind, a closed params schema its example
+    /// validates against, and a description that round trips.
+    @Test func brushKeySpecsHaveSchemas() throws {
+        let catalog = try CommandCatalog(app: "test", BrushKeyCommands.specs(BrushKeysDoc.self), history: { $0.history })
+        let kinds: [String: CommandKind] = ["brush.size-up": .view, "brush.size-down": .view, "brush.hardness-up": .view,
+                                            "brush.hardness-down": .view, "brush.set-opacity": .view, "layer.set-opacity": .edit]
+        #expect(catalog.ids == kinds.keys.sorted())
+        for (id, kind) in kinds {
+            let spec = try #require(catalog.spec(id)), described = try #require(catalog.describe(id))
+            #expect(spec.kind == kind && !spec.title.isEmpty && !spec.summary.isEmpty, "\(id)")
+            #expect(spec.params.validate(spec.example).isEmpty && !spec.params.validate(.object(["x": .number(1)])).isEmpty, "\(id)")
+            #expect(try JSONValue(encoding: described).decode(CommandDescription.self) == described, "\(id)")
+        }
+        for id in ["brush.set-opacity", "layer.set-opacity"] {
+            #expect(try #require(catalog.spec(id)).params.validate(.object(["percent": .number(101)])).count == 1, "\(id)")
+        }
+    }
+
     /// Every public type in Commands/ has a `///` line above it.
     @Test func publicTypesDocumented() throws {
         let root = KernelShapeTests.kernelSources, files = try KernelShapeTests.swiftFiles(under: root).filter { $0.hasPrefix("Commands/") }
         let typeLine = try Regex(#"^\s*public (struct|enum|protocol) "#)
-        #expect(files.count == 8)
+        #expect(files.count == 10)
         for file in files {
             let lines = try String(contentsOf: root.appendingPathComponent(file), encoding: .utf8).split(separator: "\n", omittingEmptySubsequences: false)
             for (i, line) in lines.enumerated() where line.contains(typeLine) && !(i > 0 && lines[i - 1].contains("///")) {
                 Issue.record("Sources/SuiteKernel/\(file):\(i + 1) has no doc line: \(line)")
             }
         }
+    }
+}
+
+/// A photo for the crop and orientation commands (orientation-crop OC-1): its orientation, its crop
+/// frame in its bounds (the unit square), why each can't act, and one undo history for both.
+struct CropShapeTarget: OrientationTarget, CropTarget {
+    struct State: Hashable, Sendable { var orientation = Orientation.up, frame: CropFrame? }
+    var state = State(), orientationHelp: String?, cropHelp: String?, applied = 0, history = History<State>()
+    var orientation: Orientation { state.orientation }
+    var cropFrame: CropFrame? { state.frame }
+    var cropBounds: Rect { Rect(minX: 0, minY: 0, maxX: 1, maxY: 1) }
+    mutating func setOrientation(_ o: Orientation, name: String) throws { history.record(name, state); state.orientation = o }
+    mutating func setCropFrame(_ f: CropFrame?, name: String) throws { history.record(name, state); state.frame = f }
+    mutating func applyCrop() throws { history.record("Crop", state); applied += 1 }
+    static func catalog() throws -> CommandCatalog<CropShapeTarget> {
+        try CommandCatalog(app: "test", CropCommands.specs(CropShapeTarget.self)) { $0.history }
+    }
+}
+
+extension CommandShapeTests {
+    /// OC-1: the nine ids in one catalog, every one an undoable edit whose example passes its schema,
+    /// each blocked by its side's help, and a param outside its schema refused.
+    @Test func cropCommandsShape() throws {
+        let catalog = try CropShapeTarget.catalog()
+        #expect(catalog.ids == ["crop.apply", "crop.reset", "crop.set-aspect", "crop.set-frame", "crop.swap",
+                                "image.flip", "image.rotate-180", "image.rotate-ccw", "image.rotate-cw"])
+        for id in catalog.ids {
+            let spec = try #require(catalog.spec(id))
+            #expect(spec.undoable && !spec.title.isEmpty && !spec.summary.isEmpty && spec.params.validate(spec.example).isEmpty, "\(id)")
+        }
+        var blocked = CropShapeTarget(orientationHelp: "Open a photo first.", cropHelp: "Pick a photo to crop.")
+        #expect(catalog.availability("image.rotate-cw", on: blocked).why == "Open a photo first.")
+        #expect(catalog.availability("crop.swap", on: blocked).why == "Pick a photo to crop.")
+        #expect(throws: CatalogError.unavailable(id: "image.flip", why: "Open a photo first.")) {
+            try catalog.run("image.flip", params: .object(["axis": .string("vertical")]), on: &blocked)
+        }
+        let flip = try #require(catalog.spec("image.flip"))
+        #expect(!flip.params.validate(.object(["axis": .string("diagonal")])).isEmpty)
     }
 }

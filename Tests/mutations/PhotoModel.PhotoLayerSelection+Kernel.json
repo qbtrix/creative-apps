@@ -1,0 +1,5 @@
+[
+  {"label": "rangeTopFirst: the picked layers come back in pick order, not top first as the list shows them", "file": "Sources/PhotoModel/PhotoLayerSelection+Kernel.swift", "find": "layers.map(\\.id).filter { layerSelection.contains($0) }", "replace": "layerSelection.ordered", "tests": "PhotoLayerSelectionTests"},
+  {"label": "pruneAfterUndo: an undo or a redo keeps the ids of layers it took away", "file": "Sources/PhotoModel/PhotoLayerSelection+Kernel.swift", "find": "        layerSelection.prune { restored.contains($0) }\n", "replace": "", "tests": "PhotoLayerSelectionTests"},
+  {"label": "neverEmpty: toggling off the last picked layer leaves nothing selected", "file": "Sources/PhotoModel/PhotoLayerSelection+Kernel.swift", "find": "        if layerSelection.ordered.isEmpty { layerSelection.replace([id]) }\n", "replace": "", "tests": "PhotoLayerSelectionTests"}
+]
