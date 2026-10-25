@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
 Stage: 3 wave 8
 Base: c16bcd16c (origin/dev)
-Next: 06:05Z poll: dev 13fb2f591. PRs #4886:clean #5148:clean #5151:clean #5153:clean #5154:clean #5163:dirty #5178:dirty . Findings 0. IM-8d builder running (lift the live route into SuiteImaging, stacked on IM-8b). Poll again ~06:25Z.
+Next: 06:12Z: IM-8d opened as #5295 (route into SuiteImaging, 6/6) and #5297 (Photo on it, PhotoLiveTone deleted, 5/5), stacked on #5151; the lane re-labels #5295 once #5151 merges. IM-12 builder running stacked on #5297. Poll ~06:32Z for merges, needs-fix and a dev Linux run.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a170cfbf58-pshm, feature issue #3715). This copy is refreshed with it after every stage.
 
@@ -31,14 +31,14 @@ Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imag
 | IM-8s | IM-photo | dispatcher route runs ImagingProgram's steps | #4856 | merged |
 | IM-8a | IM-photo | Photo canvas files off Metal (ImagingGPU.Target, SuiteUI residentTarget) | #5148 | open (fast-lane, Fast-Check c0b53be) |
 | IM-8b | IM-photo | live route's program from ImagingProgram (output levels) | #5151 | open (fast-lane, Fast-Check, mutate 5/5) |
-| IM-8d | IM-photo | delete PhotoLiveTone | – | wave 8 (EP-m done, contract-first) |
+| IM-8d | IM-photo | live route into SuiteImaging (LiveLayerRoute); Photo adapter; PhotoLiveTone deleted | #5295, #5297 | open (Fast-Check, mutate 6/6 + 5/5; stacked on #5151) |
 | IM-9 | IM-library | Library imaging tests | #4591 | merged |
 | IM-10 p1 | IM-library | develop levels/curve points are SuiteImaging's | #4886 | open (fast-lane, clean) |
 | IM-10b | IM-library | LiveDevelop on the shared list | #5153 | open (fast-lane, Fast-Check 65fa4fe, mutate 8/8 + 4/4; stacked on #4886) |
 | IM-11a | IM-library | loupe GPU frame (Model): LiveDevelop.steps, LiveLoupeImaging.gpuFrame, histogram from the CPU-developed preview | #5154 | open (fast-lane, Fast-Check 4d753ae, mutate 4/4; stacked on #5153) |
 | IM-11b | IM-library | loupe view writes the GPU frame (ImagingGPU.display into the CanvasHost resident texture); LibraryDevelopLatencyTests on the GPU route | #5163 | open; the lane dropped fast-lane (869 lines against dev while stacked) and its Belt-Lead sweep re-adds it once #4886, #5153 and #5154 merge; mutate 7/7, CI: PASS at 805e3850e |
 | IM-11c | IM-library | perf-suites line for LibraryDevelopLatencyTests; drop .disabled (supervisor-approved 6384762237) | #5178 | open, no-fast-lane (protected path), supervisor lands; stacked on #5163; CI: PASS |
-| IM-12 | IM-z | delete Photo's copies | – | after IM-8d |
+| IM-12 | IM-z | delete Photo's copies | – | building (stacked on #5297) |
 | IM-13 | IM-z | no-baseline rule, Photo's Metal link removed | – | wave 8 (ST merged; Package.swift: supervisor merge) |
 | IM-14 | IM-z | feature-done | – | last |
 
