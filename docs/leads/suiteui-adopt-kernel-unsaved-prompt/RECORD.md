@@ -27,6 +27,7 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 2026-10-25 14:25Z: hb95: no change; all four slice PRs open beta, #5088 waiting for a batch. Lane batches: batch-20261025140134 .
 - 2026-10-25 14:10Z: hb94: no change; #5088 needs-fix cleared on 369581255, all four slice PRs open beta, waiting for a batch. Lane batches: batch-20261025140134 .
 - 2026-10-25 13:56Z: hb93: #5088 fix pushed, head 369581255921e820ef51d3bf41d255ba0dde3ebe (scripts/ci --changed: CI: PASS); Head: line moved. Fix round 1 of 2 for UP-photo. Waiting for the lane to drop needs-fix and batch it.
 - 2026-10-25 13:52Z: hb92: #5088 needs-fix (local Mac pre-screen: tests call instance PhotoWindowEditedView.save()). Merged origin/dev, added instance save() forwarding to the static one (369581255); scripts/ci --changed running before push.

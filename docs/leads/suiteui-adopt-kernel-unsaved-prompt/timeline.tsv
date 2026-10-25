@@ -152,3 +152,4 @@ ts	kind	note
 2026-10-25T13:52:14Z	fix	hb92: #5088 needs-fix, instance save() added, gate running
 2026-10-25T13:56:40Z	push	hb93: #5088 fix pushed 369581255, Head moved
 2026-10-25T14:10:25Z	poll	hb94: no change
+2026-10-25T14:25:35Z	poll	hb95: no change
