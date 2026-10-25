@@ -125,6 +125,8 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var services: PhotoServices = .live
     /// The selection's coverage when it isn't an exact rectangle (PhotoSelectionMask.swift).
     public internal(set) var selectionMask: Mask?
+    /// The selection's kernel recipe and Reselect's (PhotoArea+Kernel.swift).
+    var area = PhotoArea()
     /// The Marquee tool's shape and feather (PhotoSelectionMask.swift).
     public internal(set) var selectionOptions = SelectionOptions()
     /// Each masked layer's mask, its own size, coverage as gray, alpha 1 (PhotoMask.swift).
@@ -212,6 +214,7 @@ public struct PhotoWorkspace: Sendable {
         cloneSource = nil
         stroke = nil
         selectionMask = nil
+        area = PhotoArea()
         masks = [:]
         editsMask = false
         transformDraft = nil
@@ -405,7 +408,7 @@ extension PhotoWorkspace: Equatable {
             && lhs.eraserOptions == rhs.eraserOptions && lhs.bucketOptions == rhs.bucketOptions && lhs.adjustments == rhs.adjustments
             && lhs.selection == rhs.selection && lhs.pendingCrop == rhs.pendingCrop
             && lhs.cloneSource == rhs.cloneSource && lhs.stroke == rhs.stroke
-            && lhs.history == rhs.history && lhs.selectionMask == rhs.selectionMask
+            && lhs.history == rhs.history && lhs.selectionMask == rhs.selectionMask && lhs.area == rhs.area
             && lhs.selectionOptions == rhs.selectionOptions && lhs.editsMask == rhs.editsMask
             && lhs.cropAspect == rhs.cropAspect && lhs.transformDraft == rhs.transformDraft
             && lhs.sampleSize == rhs.sampleSize && lhs.exportOptions == rhs.exportOptions

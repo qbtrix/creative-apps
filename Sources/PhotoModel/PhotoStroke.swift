@@ -7,7 +7,8 @@
 // `drags(_:)` stay as wrappers (`sampling` is Option, zoom 1).
 //
 // Drags route by component: with a Free Transform in progress every drag goes
-// to `transformDrag` (PhotoTransform.swift); otherwise by tool, marquee to
+// to `transformDrag` (PhotoTransform.swift), which moves, scales or turns the
+// box and records one step on release; otherwise by tool, marquee to
 // `selectionDrag` (PhotoSelectionMask.swift), crop to `cropDrag`
 // (PhotoCropSize.swift), eyedropper to `sampleDrag` (PhotoSample+Kernel.swift),
 // a Pen drag adds a draft point on release (`runPath`, PhotoPaths+Kernel.swift),
@@ -85,6 +86,9 @@ struct PhotoStroke: Sendable, Equatable {
     var modifiers: DragModifiers = []
     /// Gradient: where the pointer is now; the gradient runs from `start` to here on release.
     var end: Mask.Point?
+    /// Free Transform: the draft at the press and the handle the press took (nil off the box).
+    var transformFrom: TransformDraft?
+    var transformHandle: TransformHandle?
 }
 
 extension PhotoWorkspace {
@@ -208,7 +212,7 @@ extension PhotoWorkspace {
     /// Whether the drag under way only moves a line over the canvas until its
     /// release draws (the Gradient tool's), so the window can keep its later
     /// samples off the workspace the panels read.
-    public var dragShowsLineOnly: Bool { stroke?.tool == .gradient }
+    public var dragShowsLineOnly: Bool { stroke?.tool == .gradient && transformDraft == nil }
 
     /// Becomes `live`: a copy of this workspace a stroke drew on
     /// (`dragPaintsOnly`). Ignored when `live` is another image (another
@@ -228,6 +232,10 @@ extension PhotoWorkspace {
     public mutating func endDrag() {
         guard var done = stroke else { return }
         stroke = nil
+        if let before = done.transformFrom {
+            if transformDraft != before { record(.draft(before), named: "Transform") }
+            return
+        }
         switch done.tool {
         case .brush, .eraser:
             paint(&done, adding: nil, pressure: 1)
