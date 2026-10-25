@@ -241,3 +241,4 @@ utc	stage	event	ref	note
 2026-10-24T23:52Z	3	check-in	no change	40120300288, 40126229135 cancelled; 40135928519 running; #5225 waits for a repeat
 2026-10-25T01:54Z	3	check-in	no change	40135928519 cancelled; 40144068200, 40151119583 running; #5225 waits for a repeat
 2026-10-25T03:56Z	3	check-in	#5225 closed	halo 40151119583 green; H-J12 and PlayHittable pass; no new failures
+2026-10-25T05:59Z	3	check-in	stable	halo 40153720478 green; H-J12 and PlayHittable pass; no new failures
