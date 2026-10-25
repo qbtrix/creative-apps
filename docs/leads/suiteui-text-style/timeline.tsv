@@ -94,3 +94,4 @@ utc	stage	event	ref	note
 2026-10-24T22:25:39Z	3	mirror	-	lead/suiteui-text-style resynced from lead/text-style after a 30 min gap
 2026-10-24T23:29:22Z	3	pr	#5226 #5228	TS-9 and TS-8 opened; TS-u, TS-7, TS-9 queued; none merged; 0 findings
 2026-10-24T23:51:25Z	3	poll	-	dev still afef017c; no slice merged; no needs-fix/needs-rebase; lane batch 20261024205137-1 macOS gate green 23:50Z
+2026-10-25T00:13:12Z	3	poll	-	dev still afef017c; batch 20261024235353 red on Linux, lane bisecting (probe -6); no flags on our PRs
