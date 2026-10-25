@@ -107,3 +107,4 @@ utc	stage	event	ref	note
 2026-10-25T09:30:32Z	check	heartbeat	16 PRs open+clean; batch-090316 red on HomeModel/Onboarding timeouts (not ours); probe -6 (to #5007, carries #4953 #5006) running; no dev-red
 2026-10-25T09:51:24Z	check	heartbeat	16 PRs open+clean; probe -6 Linux green, macOS gate running; dev-red #5316 (range #3935 #4877 #4888 #5274 #5287, none ours)
 2026-10-25T10:11:28Z	check	heartbeat	16 PRs open+clean; dev CI 40178111920 green at 8d3a12c, #5316 closed; probe -6 macOS gate still running
+2026-10-25T10:31:17Z	check	heartbeat	16 PRs open+clean; probe -6 macOS gate still running, probe -9 Linux started; dev 8d3a12c green; no dev-red
