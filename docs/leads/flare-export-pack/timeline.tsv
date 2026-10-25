@@ -181,3 +181,4 @@ utc	stage	event	ref	note
 2026-10-25T05:37:51Z	heartbeat	batch 20261025023716 resolved: #4888 merged, culprit #4963/#4988; no batch now; dev 13fb2f59 (lane auto-revert); #4854, #5025 wait for next batch
 2026-10-25T06:02:35Z	heartbeat	batch 20261025054232 formed without #4854/#5025 (bisecting -6); both bodies carry valid markers, no checks on heads; likely mergeable UNKNOWN after dev moved; #5025 attribution footer stripped; dev 13fb2f59
 2026-10-25T06:24:44Z	heartbeat	lane HOLD: batch 20261025054232 still bisecting (probe -6 c70077f5); #4854 and #5025 open, clean, markers valid; wait for next batch
+2026-10-25T06:46:18Z	heartbeat	lane HOLD: batch 20261025054232 probe -6 macOS gate (run 40167308409) still running since 05:56Z, Linux green; #4854/#5025 unchanged, wait
