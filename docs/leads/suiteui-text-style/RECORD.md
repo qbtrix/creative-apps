@@ -173,3 +173,4 @@ Next: Lane: #4871 TS-a and #5047 TS-7 in the lane. After #4871 merges, merge dev
 - 2026-10-25T19:35:27Z (act-1a171c8932a-sa22): 19:35Z poll: TS-u #4958, TS-7 #5047, TS-9 #5226 still open with fast-lane; dev red on Linux (#5112) holds batches. TS-z at f5a22c94 waits on the restack. 0 findings, no Packet-Review.
 - 2026-10-25T19:56:33Z (act-1a171c8932a-sa22): 19:56Z poll: TS-u/TS-7/TS-9 still open in lane, blocked by dev-red (#5112, revert #5349 open). 0 findings.
 - 2026-10-25T20:17:16Z (act-1a171c8932a-sa22): 20:17Z poll: unchanged; lane held by dev-red #5321. 0 findings.
+- 2026-10-25T20:38:29Z (act-1a171c8932a-sa22): 20:38Z poll: unchanged; lane held by dev-red #5321. 0 findings.
