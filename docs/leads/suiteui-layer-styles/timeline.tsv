@@ -103,3 +103,4 @@ utc	stage	event	ref	note
 2026-10-25T01:54Z	3	check	lane	#5156 (Halo HY-1) merged 01:41Z; lane integrated dev into #5174 (head 6e467f79), Linux check 40151633219 running; probe -9 Linux green, macOS 40150116582 running; our other 9 PRs unchanged; no dev-red, no findings
 2026-10-25T02:18:24Z	3	fix	lane	#4905 (CB-10) needs-rebase: merged origin/dev, resolved catalog + golden + 2 count tests (styles + clip both kept); toolchain reinstalled, scripts/ci --changed running; probe -9 macOS still running
 2026-10-25T02:31:43Z	3	fix	lane	#4905 (CB-10) needs-rebase fixed: dev merged, scripts/ci --changed PASS, pushed 86a73634, Head: moved
+2026-10-25T02:41Z	3	lane	lane	batch-20261024235353 resolved: #5192..#5050 merged, #5174 clean and waits for the next batch; no dev-red; none of ours merged yet

@@ -4,7 +4,7 @@ Issue: #3937 · Packet: docs/blueprints/suiteui/features/layer-styles.md
 Run: act-1a1705bc1ae-pb09 · Session: claude/feature-lead-suiteui-ebo2et · Resumed: 2026-10-25T00:03Z
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
-Next: lane sweep on #4905; probe -9 macOS; next check 02:39Z
+Next: lane sweep on #4905 (needs-rebase fixed at 86a7363) and next batch for #5174; next check 03:05Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
