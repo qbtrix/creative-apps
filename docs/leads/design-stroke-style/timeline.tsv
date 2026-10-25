@@ -235,3 +235,4 @@ time	kind	note
 2026-10-25T13:54:02Z	3	heartbeat	#4916 #5002 #5011	all seven open, no fix labels; #5006 merged (dev d3323f6a); no batch in flight; ours eligible, waiting on lane
 2026-10-25T14:15:00Z	3	heartbeat	#4916 #5002 #5011	batch 20261025140134 holds only #5007 (photo); all seven of ours still ready (fast-lane, line:design, beta), no fix label; dev d3323f6a; DK-z/PD-z held
 2026-10-25T14:35:05Z	3	heartbeat	#4916 #5002 #5011	dev 15237407 (#5007 landed); no batch in flight; all seven of ours ready, heads unchanged, no fix label; DK-z/PD-z held
+2026-10-25T14:55:33Z	3	heartbeat	#4916 #5002 #5011	dev 0e8ebba3 (#4960 landed); batch 20261025143843 holds only #5008; all seven of ours ready, heads unchanged, no fix label; DK-z/PD-z held
