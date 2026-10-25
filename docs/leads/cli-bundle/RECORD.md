@@ -1,9 +1,9 @@
 # cli-bundle lead record
 
 Issue: #3773 · Packet: docs/blueprints/suite/features/cli-bundle.md
-Run: act-1a16daeb4e8-vghz (relaunch; earlier act-1a16a37a3ed-0kyn, act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
-Stage: 3 polling (CB-z: #4999 eligible, not in batch 20261024144917; waits for a later batch; #5000 waits on #4999)
-Base: 9f476af7419db0cc5753aa119ec0bd3b1a12899a (main, verified 11:30Z; dev 6ad8cad is main + 4)
+Run: act-1a17129eefa-0kqr (relaunch; earlier act-1a16daeb4e8-vghz, act-1a16a37a3ed-0kyn, act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
+Stage: 3 polling (CB-z: #4999 eligible, waits for a lane batch; #5000 waits on #4999)
+Base: afef017c27a56ec18983e58672a8a15c94083ce4 (main, verified at relaunch; PRs target dev)
 Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) batches #4999; once it merges, rebuild #5000 on dev (3 docs files + feature_issue #3773), drop no-fast-lane, move Head.
 
 ## Slices
@@ -61,3 +61,7 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 12:12Z full CI 40087964618 green; main promoted 9f476af -> 4f00afb (holds #5150).
 - 14:13Z lane run 40100183592 rates #4999 eligible (Fast-Check marker, 298 lines/13 files, CLEAN); it waits because batch lane/batch-20261024110214 (12 PRs, from 11:02Z) is still bisecting (probe 3). One batch at a time, so #4999 joins the next one.
 - 15:05Z batch 20261024110214 resolved; new batch lane/batch-20261024144917 (14:49Z) holds 12 older/priority PRs (#3621 … #4951), not #4999. #4999 stays eligible for a later batch.
+
+## 2026-10-25T03:48:09Z relaunch act-1a17129eefa-0kqr
+- lead/cli-bundle rebuilt on main afef017 (record files only).
+- #4999 open, merges clean with dev, Head 941da48 current; not in batch-20261025023716 (bisecting). #5000 held (no-fast-lane, needs-split) until #4999 merges.
