@@ -107,3 +107,4 @@ utc	stage	event	ref	note
 2026-10-25T04:55:29Z	W2	check	PY-1	#5177 needs-rebase (golden + command-ids/photo.txt); merged dev as f0a54e9d, gate running; #5174 LS-2 new head cb6c0a2f, needs-fix dropped
 2026-10-25T05:12:13Z	W2	fix	PY-1	#5177 rebase: gate PASS at f0a54e9d, pushed, Head moved
 2026-10-25T05:36:18Z	W2	check	PY-1	lane dropped needs-rebase on #5177; #5174 #5176 #5177 unmerged; PY-2/5/6 still blocked
+2026-10-25T06:00:53Z	W2	check	PY-1	all 9 PRs open, clean, no needs-fix/rebase; lane batch-20261025054232 Linux red, bisecting (probe -6); LS-2/LS-m unmerged, PY-2/5/6 still wait
