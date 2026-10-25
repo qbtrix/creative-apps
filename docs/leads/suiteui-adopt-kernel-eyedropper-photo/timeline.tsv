@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-25T05:04Z	check	EP-z	#4943 open, clean, fast-lane; dev ee8ccd61, EP-z merges clean; waiting for a batch
 2026-10-25T05:24Z	check	EP-z	#4943 open, labelled p0+beta, merges clean onto dev 63592c7b; waiting for its batch
 2026-10-25T05:43Z	check	EP-z	#4943 open, p0+beta, clean onto dev 13fb2f59; no new lane comments; waiting for its batch
+2026-10-25T06:03Z	check	EP-z	#4943 in lane batch 20261025054232 (pos 2/12), batch under bisect (probe -6); still clean, no needs-fix

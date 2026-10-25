@@ -95,3 +95,4 @@ Relaunched 2026-10-24T23:20Z on main ef37711d. #4943's `Belt-Lead:` line now nam
 - 00:30Z: Belt nudge answered. #4943 is unchanged (open, clean, eligible, head 69dedd1) and waits on a lane batch. Nothing to fix.
 - 2026-10-25T03:47Z: dev unstuck (1bbaba6c..2e7d5264, incl. #5238 "form no batch on a red dev"). #4943 merges clean onto it; still fast-lane, no needs-fix/needs-rebase.
 - 2026-10-25T05:24Z: #4943 now labelled p0 + beta (05:09Z), so it heads the next batch. Still clean onto dev 63592c7b; no needs-fix/needs-rebase.
+- 2026-10-25T06:03Z: #4943 is 2nd of 12 in lane/batch-20261025054232 (after #4886). The lane is bisecting it (probe -6 = first six PRs), so the full batch was red somewhere; no needs-fix on #4943.
