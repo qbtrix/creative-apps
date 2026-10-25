@@ -9,8 +9,8 @@
   {
     "label": "refusalIsSuccess: startExport reports true when the kernel's start refuses (already running)",
     "file": "Sources/FlareModel/FlareExport+Kernel.swift",
-    "find": "        return exportState.start(total: exportFileCount)\n",
-    "replace": "        _ = exportState.start(total: exportFileCount)\n        return true\n",
+    "find": "        return exportState.start(total: exportRunTotal)\n",
+    "replace": "        _ = exportState.start(total: exportRunTotal)\n        return true\n",
     "tests": "ExportScanTests.swift"
   },
   {

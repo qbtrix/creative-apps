@@ -204,6 +204,8 @@ public enum HaloEditError: Error, Sendable, Hashable {
     case emptyText
     case noKeySelected
     case notBuilt(String)
+    /// A refusal already in words, such as ExportRules' sentence for alpha on H.264.
+    case refused(String)
 
     public var message: String {
         switch self {
@@ -218,6 +220,7 @@ public enum HaloEditError: Error, Sendable, Hashable {
         case .emptyText: "Enter some text."
         case .noKeySelected: "Pick a key in the EASING list first."
         case .notBuilt(let what): "\(what) isn't built yet."
+        case .refused(let sentence): sentence
         }
     }
 }

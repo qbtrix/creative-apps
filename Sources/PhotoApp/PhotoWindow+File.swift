@@ -21,6 +21,8 @@
 // their kind. Each successful open and save is noted in Open Recent and,
 // through SuiteDocumentsBridge (file-flow PF-4), in the suite's shared
 // recents: `.opened` or `.saved`, once each, with the file's suite type.
+// A document save that lands first publishes the file's thumbnail to the
+// suite's previews off the main actor (shared-thumbnails ST-7).
 // `-PhotoOpenFile <path>` opens a file at launch; `-PhotoRecoveryDir
 // <folder>` keeps autosaves there. PhotoFileSession is the file state the
 // window and PhotoFileArea share. PhotoFileArea
@@ -118,6 +120,21 @@ final class PhotoFileSession {
         return SuiteDocumentsBridge(app: .photo, services: .live(support: support, app: .photo, arguments: arguments))
     }()
 
+    /// Where saved documents' previews go; nil uses the suite's (tests inject one).
+    @ObservationIgnored var thumbnails: (any ThumbnailPublishing)?
+
+    /// The suite's previews in the live support folder (`-SuiteSupportDir` moves it), made on first use.
+    static let suiteThumbnails: any ThumbnailPublishing = SuiteServices.liveThumbnails(
+        support: SuiteLocations.supportFolder(arguments: ProcessInfo.processInfo.arguments, home: NSHomeDirectory()))
+
+    /// Publishes the thumbnail of the document saved at `url` to the suite's previews, off the main actor (ST-7).
+    func publishPreview(of url: URL, archive: any DocumentArchiving) async {
+        let (path, thumbnails) = (url.path(percentEncoded: false), thumbnails ?? Self.suiteThumbnails)
+        _ = await Task.detached(priority: .utility) {
+            await PhotoSavedPreview.publish(documentAt: path, archive: archive, to: thumbnails)
+        }.value
+    }
+
     /// Notes `url` in Open Recent: the system's list, Photo's own (an app with
     /// no declared document types may not get the system's), and the suite's
     /// shared recents as `event`, when the suite knows the file's type.
@@ -173,7 +190,7 @@ extension PhotoWindow {
         case .flatten(let format):
             files.keepLayers = nil
             guard let url = documentURL else { return saveAs() }
-            write(to: url, as: format, quality: exportQuality, saving: true)
+            write(to: url, as: format, quality: model.exportOptions.quality, saving: true)
         case .clearRecent: files.clearRecent()
         case .restore(let offer):
             files.recoveryOffer = nil
@@ -269,7 +286,7 @@ extension PhotoWindow {
             writeDocument(to: url)
         case .writeImage(let format):
             guard let url = documentURL else { return saveAs() }
-            write(to: url, as: format, quality: exportQuality, saving: true)
+            write(to: url, as: format, quality: model.exportOptions.quality, saving: true)
         case .askKeepLayers(let format): files.keepLayers = format
         case .saveAs: saveAs()
         }
@@ -281,7 +298,7 @@ extension PhotoWindow {
         guard model.canvas != nil else { return }
         if let folder = Self.saveToFolder {
             if model.needsDocument { return writeDocument(to: folder.appending(path: model.documentFileName)) }
-            return write(to: folder.appending(path: model.fileName(for: .png)), as: .png, quality: exportQuality, saving: true)
+            return write(to: folder.appending(path: model.fileName(for: .png)), as: .png, quality: model.exportOptions.quality, saving: true)
         }
         let panel = NSSavePanel()
         panel.allowedContentTypes = Self.documentTypes + [.png, .jpeg]
@@ -289,7 +306,7 @@ extension PhotoWindow {
             ? model.documentFileName : model.fileName(for: ImageFormat(fileName: model.documentName ?? "") ?? .png)
         guard panel.runModal() == .OK, let url = panel.url else { return }
         if PhotoWorkspace.fileKind(forName: url.lastPathComponent) == .document { return writeDocument(to: url) }
-        write(to: url, as: ImageFormat(fileName: url.lastPathComponent) ?? .png, quality: exportQuality, saving: true)
+        write(to: url, as: ImageFormat(fileName: url.lastPathComponent) ?? .png, quality: model.exportOptions.quality, saving: true)
     }
 
     /// `-PhotoSaveTo`'s folder, when given.
@@ -307,6 +324,7 @@ extension PhotoWindow {
             do {
                 let snapshot = try await Task.detached(priority: .userInitiated) { try workspace.snapshot() }.value
                 try await PhotoPackageIO.write(snapshot, to: url, archive: workspace.services.archive, codec: ImageIOCodec())
+                await files.publishPreview(of: url, archive: workspace.services.archive)
                 didSave(url, kind: .document, opened: opened)
             } catch {
                 didFailSave(error)

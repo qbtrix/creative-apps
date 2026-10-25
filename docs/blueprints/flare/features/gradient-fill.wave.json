@@ -31,7 +31,8 @@
     "Tests/FlareModelTests/FlarePaintGradientTests.swift",
     "Tests/mutations/FlareModel.FlarePaint.json",
     "docs/blueprints/flare.md",
-    "docs/blueprints/flare/features/gradient-fill.wave.json"
+    "docs/blueprints/flare/features/gradient-fill.wave.json",
+    "Tests/FlareModelTests/FlarePaintAlphaTests.swift"
   ],
   "slices": [
     {
@@ -115,7 +116,8 @@
       "behavior": "The FILL section runs on live services, the journey passes on live, and #2315 closes.",
       "tasks": [
         "FG-7",
-        "FG-8"
+        "FG-8",
+        "FG-9"
       ],
       "journeys": [
         "FJ-G1"
@@ -123,18 +125,27 @@
       "waits": {
         "FG-u": [
           "FG-7",
-          "FG-8"
+          "FG-8",
+          "FG-9"
         ],
         "FG-m": [
           "FG-7",
-          "FG-8"
+          "FG-8",
+          "FG-9"
+        ],
+        "stroke-style:FK-a": [
+          "FG-9"
         ]
       },
       "ui": true,
       "owned": [
         "UITests/FlareJourneyTests+Gradient.swift",
         "docs/blueprints/flare.md",
-        "docs/blueprints/flare/features/gradient-fill.wave.json"
+        "docs/blueprints/flare/features/gradient-fill.wave.json",
+        "Sources/FlareApp/FlareInspectorFill.swift",
+        "Sources/FlareModel/FlarePaint.swift",
+        "Tests/FlareModelTests/FlarePaintAlphaTests.swift",
+        "Tests/mutations/FlareModel.FlarePaint.json"
       ]
     }
   ]
