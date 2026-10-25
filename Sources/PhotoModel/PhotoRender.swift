@@ -2,10 +2,11 @@
 // the canvas renders by compositing the visible layers bottom-up, each through
 // PhotoLayerComposite (a pixel layer at its offset with its blend mode and
 // opacity, CoreRaster's composite; an adjustment layer passes through), then
-// running the enabled adjustments in order: SuiteImaging's ImagingProgram steps
-// (exposure, levels, curves, hue/saturation), then blur. Levels and curves work on display (sRGB-encoded)
+// running the enabled adjustments in order: the tone section's unsharp pass,
+// then SuiteImaging's ImagingProgram steps (tone's own, exposure, levels,
+// curves, hue/saturation), then blur. Levels and curves work on display (sRGB-encoded)
 // values, as photo editors' tone tools do (CoreRaster's ToneEncoding.sRGB),
-// so mid grey sits near 0.5 on their axes; exposure stays linear. The blur reads a margin of 3 sigma around the region,
+// so mid grey sits near 0.5 on their axes; exposure stays linear. The blur and the unsharp pass read a margin of 3 sigma around the region,
 // so a region renders exactly as the same pixels of the whole image would.
 // `composite()` is the whole image at full size (export, tests); PhotoRenderer
 // turns a workspace into display bytes (sRGB, straight alpha) tile by tile, in
@@ -22,6 +23,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
+import SuiteImaging
 import SuiteModel
 
 /// One rendered picture: display bytes for the canvas, the revision they show
@@ -41,11 +43,27 @@ extension AdjustmentSettings {
         isEnabled(.blur) && blurSigma > 0 ? Int((3 * blurSigma).rounded(.up)) : 0
     }
 
-    /// The enabled adjustments applied to `buffer`, in order.
-    /// The tone sections are ImagingProgram's steps (`imagingSteps`), each
-    /// skipped at its identity, then the blur.
+    /// Pixels a region reads beyond itself: the blur's margin or the tone
+    /// section's unsharp radius, ceil(3 sigma), whichever is wider.
+    var readMargin: Int {
+        max(blurMargin, unsharp.map { Int((3 * $0.sigma).rounded(.up)) } ?? 0)
+    }
+
+    /// The enabled adjustments applied to `buffer`, in order: the tone
+    /// section's unsharp pass (`unsharp`), then ImagingProgram's steps
+    /// (`imagingSteps`: tone's own first, each section skipped at its
+    /// identity), then the blur. The canvas draws in the same order.
     func applied(to buffer: PixelBuffer) throws -> PixelBuffer {
-        var result = try runImaging(imagingSteps, on: buffer)
+        try applied(to: buffer, sharpening: unsharp)
+    }
+
+    /// `applied(to:)` with `sharpening` as the unsharp pass, nil for none.
+    func applied(
+        to buffer: PixelBuffer, sharpening: (amount: Double, sigma: Double, threshold: Double)?
+    ) throws -> PixelBuffer {
+        var result = buffer
+        if let s = sharpening { result = try result.unsharpMask(amount: s.amount, sigma: s.sigma, threshold: s.threshold) }
+        result = try runImaging(imagingSteps, on: result)
         if blurMargin > 0 { result = try result.gaussianBlur(sigma: blurSigma) }
         return result
     }
@@ -112,21 +130,22 @@ extension PhotoWorkspace {
 
     /// A value that changes exactly when `curvesHistogram()` can: with any
     /// change to the layers or their pixels, and with exposure or levels as
-    /// they apply (a switched-off section counts as its defaults). A Curves,
+    /// they apply (a switched-off section counts as its defaults), and with the
+    /// tone section, whose steps run before them. A Curves,
     /// Hue/Saturation or Blur edit leaves it as it was, so the inspector
     /// recounts only when it must, never during a curve drag.
     public var curvesHistogramKey: CurvesHistogramKey {
         let defaults = AdjustmentSettings(), on = adjustments
         let exposure = on.isEnabled(.exposure) ? on : defaults, levels = on.isEnabled(.levels) ? on : defaults
         return CurvesHistogramKey(
-            content: contentRevision,
+            content: contentRevision, toneSection: on.tone,
             tone: [exposure.exposure, levels.blackPoint, levels.whitePoint, levels.gamma, levels.outputBlack,
                    levels.outputWhite])
     }
 
     /// `rect` of the canvas, composited and adjusted.
     func rendered(_ rect: PixelRect) throws -> PixelBuffer {
-        guard let canvas, let outer = rect.expanded(by: adjustments.blurMargin).intersection(canvas.rect),
+        guard let canvas, let outer = rect.expanded(by: adjustments.readMargin).intersection(canvas.rect),
             let inner = rect.intersection(canvas.rect)
         else { throw RasterError.invalid("region \(rect) is outside the image") }
         let adjusted = try adjustments.applied(to: composited(outer))
@@ -156,6 +175,7 @@ extension PhotoWorkspace {
 /// See `PhotoWorkspace.curvesHistogramKey`.
 public struct CurvesHistogramKey: Equatable, Sendable {
     let content: Int
+    let toneSection: ToneSettings
     let tone: [Float]
 }
 
