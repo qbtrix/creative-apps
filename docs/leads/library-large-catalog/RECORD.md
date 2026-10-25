@@ -2,16 +2,16 @@
 
 Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a16ee71e35-s8g5 · Session: claude/large-catalog-lead-4ijm0b (earlier act-1a16c627c84-u86z, act-1a1693fbf6d-ap2g, act-1a15df37b73-k199) · Started: 2026-10-21T10:19Z (resumed 2026-10-23T14:20Z, 2026-10-24T05:10Z, 2026-10-24T17:15Z)
-Stage: 3 wave 3 done: LG-grid merged (#5050 7d301de7 at 02:22Z, last PR); waiting for a green ci.yml run on dev containing 7d301de7
+Stage: 3 wave 3 done: Belt-Slice-Done LG-grid posted 03:07Z on full CI 40154669999 (Linux green at 3db45eb4, contains 7d301de7); critic panel running on scoped library run 40154658752 snapshots
 Base: da62659fc9460750cd2c1d1483b253c2d9a02375 (origin/dev)
-Next: find the green full or scoped-library ci.yml run on dev at or after 7d301de7 (feature-done should dispatch it), then Belt-Slice-Done LG-grid, critic panel on its screens, Belt-Contact-Sheet, Mac-Finish-Wanted
+Next: critic panel (mouse, taste, job, first-use clarity) on 40154658752 snapshots and journeys 40156889770 ui-screens, file findings; then Belt-Contact-Sheet on 40154669999 and Mac-Finish-Wanted LG-grid
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | LG-a | 10,000-photo fixture and every budget test, disabled | LG-1, LG-2 | MJ-LG | metadata-more:MD-a (met) | no | 1 | done #4006, fix #4073 (c5801375) | 39601343733 | - |
 | LG-model | load off main with id index, IndexSet selection, one-pass export plan | LG-3, LG-4 | MJ-LG | LG-a; FC-a (met: filters-collections built), MD-e, DR-m (stubs, supervisor's answer b) | no | 0 | done (#4847, afb9cbed; run 40029034328) | - | - |
-| LG-grid | grid and loupe within budget, jobs, built | LG-5..LG-8 | LJ-LG, MJ-LG | LG-model; suiteui shared-thumbnails ST-m; FC-c (met) | yes | 0 | merged-done (#5050 7d301de7) | - | - |
+| LG-grid | grid and loupe within budget, jobs, built | LG-5..LG-8 | LJ-LG, MJ-LG | LG-model; suiteui shared-thumbnails ST-m; FC-c (met) | yes | 0 | merged-done (#5050 7d301de7) | 40154669999 | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -70,6 +70,7 @@ Next: find the green full or scoped-library ci.yml run on dev at or after 7d301d
 - 02:06Z: probe -9 macOS gate still running (48 min). #5050 open, no needs-fix.
 - 02:22Z: #5050 merged as 7d301de7 (batch 20261024235353 green prefix). LG-grid's PRs are all on dev. No ci.yml run on dev at 7d301de7 yet.
 - 02:33Z: CI on dev at 3db45eb4 (contains 7d301de7): scoped library 40154658752 running, full CI 40154669999 queued.
+- 03:07Z: scoped library 40154658752 green; full CI 40154669999 Linux green (macOS running); Linux check 40154675623 green. Posted Belt-Slice-Done LG-grid on full CI (first post on the scoped run deleted: rule 6 needs a Linux job). Stripped attribution footers from three #3790 comments.
 - 02:46Z: scoped library 40154658752 running; full CI 40154669999 queued.
 - 16:09Z: #5050 (LG-5) got needs-rebase (conflict with #4951 disk tier in LiveThumbnails.swift). Merged origin/dev into -lg5, kept the cancel check first then the disk read/store; scripts/ci --changed running (fix round 1).
 - 15:38Z: poll: still no change; LG-grid PRs queued, #5114 awaits supervisor, beta question open ~2h.
