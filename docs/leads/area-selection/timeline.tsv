@@ -115,3 +115,4 @@ time	task	event	note
 2026-10-25T10:27Z	3	heartbeat	lane	dev green: full run 40178111920 success at 8d3a12c4b, main promoted, #5316 closed; 7 open PRs unchanged (#5096 unstable only from a cancelled lane check)
 2026-10-25T10:50Z	3	heartbeat	lane	lane batch-20261025090316 bisecting (probe 9); 7 open PRs ready and waiting, unchanged; dev 8d3a12c4b green
 2026-10-25T11:13Z	3	heartbeat	lane	7 open PRs unchanged, ready in lane; dev 68bec9fe7 (SuiteText move + generated refresh, not ours); no dev-red
+2026-10-25T11:35Z	3	heartbeat	lane	7 open PRs unchanged and mergeable, waiting in lane; dev 68bec9fe7; no dev-red
