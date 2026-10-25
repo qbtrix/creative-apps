@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-25T05:35Z	check	bisect done: -2 macOS red, #4888 merged, #4963 is the culprit (already on a new head d709ee354); #5158 and #5174 clean, wait for next batch; no dev-red, 0 findings
 2026-10-25T06:10Z	check	relaunch act-1a171ab9e77-es26	#5158	#5158/#5174 clean, not in lane/batch-20261025054232 (red, bisecting); Belt-Lead moved on 4 PRs; no dev-red, 0 findings
 2026-10-25T06:28Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane/batch-20261025054232 still bisecting at -6
+2026-10-25T06:47Z	check	third identical poll	#3936	Question for the supervisor posted (rule 23): #5158/#5174 unbatched while batch-20261025054232 -6 macOS probe runs since 05:56Z

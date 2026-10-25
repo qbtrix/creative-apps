@@ -7,7 +7,7 @@ Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTes
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
 Stage: 3 polling: #5156 HY-1 merged 01:41Z. #5158 HY-m (333603baa) and #5174 LS-2 (cb6c0a2f8) ready and clean, not in lane/batch-20261025054232 (red, bisecting at -6). Drafts #5157 HY-2, #5161 HY-u, #5218 HY-z wait on #5174
 Base: 13fb2f591 (origin/dev; main 3db45eb verified at relaunch)
-Next: wait for the lane batch holding #5158 and #5174. On #5174 merge: merge dev into #5157, #5161, #5218 in order, gate, push, Head, ready. Belt-Slice-Done per slice on a green CI run (HY-a counted done by Belt); HY-8 (feature-done) after HY-7 lands
+Next: read the supervisor answer on #3936 (06:47Z question), else keep waiting for the lane batch holding #5158 and #5174. On #5174 merge: merge dev into #5157, #5161, #5218 in order, gate, push, Head, ready
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
