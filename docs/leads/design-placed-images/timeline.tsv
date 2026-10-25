@@ -159,3 +159,4 @@ utc	stage	event	ref	note
 2026-10-25T02:30:30Z	3	heartbeat	lane	batch-20261024235353 resolved: prefix merged (dev 3db45eb4, incl #5238 no batch on red dev); our 8 PRs not in it, still open/clean/beta, wait next batch; DK-z/PD-z held (findings>5)
 2026-10-25T02:46:41Z	3	heartbeat	lane/batch-20261025023716	new batch (12 PRs) holds #4888 #5002 #4963; #4922 and stacked #4916 #5011 #4964 #5001 wait next batch; no needs-fix; DK-z/PD-z held
 2026-10-25T03:02:43Z	3	heartbeat	lane/batch-20261025023716	batch with #4888 #5002 #4963 still running (dev 3db45eb4); no needs-fix/needs-rebase; DK-z/PD-z held
+2026-10-25T03:18:54Z	3	heartbeat	lane/batch-20261025023716-6	batch red, bisecting; probe -6 (through #5174) contains #4888 #4963 #5002; no needs-fix on ours; DK-z/PD-z held
