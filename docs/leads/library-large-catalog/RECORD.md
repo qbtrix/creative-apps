@@ -69,6 +69,7 @@ Next: find the green full or scoped-library ci.yml run on dev at or after 7d301d
 - 01:46Z: probe -9 Linux green; macOS gate running (28 min). #5050 open, no needs-fix.
 - 02:06Z: probe -9 macOS gate still running (48 min). #5050 open, no needs-fix.
 - 02:22Z: #5050 merged as 7d301de7 (batch 20261024235353 green prefix). LG-grid's PRs are all on dev. No ci.yml run on dev at 7d301de7 yet.
+- 02:33Z: CI on dev at 3db45eb4 (contains 7d301de7): scoped library 40154658752 running, full CI 40154669999 queued.
 - 16:09Z: #5050 (LG-5) got needs-rebase (conflict with #4951 disk tier in LiveThumbnails.swift). Merged origin/dev into -lg5, kept the cancel check first then the disk read/store; scripts/ci --changed running (fix round 1).
 - 15:38Z: poll: still no change; LG-grid PRs queued, #5114 awaits supervisor, beta question open ~2h.
 - 15:19Z: poll: unchanged; LG-grid PRs still queued, #5114 awaits supervisor, beta question unanswered.
