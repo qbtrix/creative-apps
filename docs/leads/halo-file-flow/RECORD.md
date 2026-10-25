@@ -89,3 +89,4 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - 02:04Z: #4936 (HF-4) with HF-m's dev merge merged in: gate CI: PASS + AfterGlowCLITests 165 pass; pushed a713dc260, Head and Belt-Lead moved. #5092 (HF-z) still clean with dev.
 - 02:18Z heartbeat: #4894, #4936, #5092 all clean, none merged; no needs-fix/needs-rebase; 0 open findings. Lane waits on bisect probe lane/batch-20261024235353-9 macOS gate (40150116582, running since 01:18Z).
 - 02:40Z heartbeat: lane run 40152661631 rates #4894 and #5092 eligible (Fast-Check marker), #4936 skips until its base HF-m merges. Not in batch 20261025023716 (layer-styles HY stack); waiting for the next batch. 0 open findings.
+- 03:02Z heartbeat: all PRs clean and unmerged; no needs-fix/needs-rebase; 0 open findings. Lane batch 20261025023716 (HY stack) waits on a macOS runner behind dev's scoped runs at 3db45eb45; ours ride the next batch.
