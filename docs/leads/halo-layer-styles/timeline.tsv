@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-25T09:27Z	question	lane	#3936	follow-up: batch 090316 red again with same p0 head; #5158/#5174 still unbatched
 2026-10-25T09:45Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025090316 batch-20261025090316-6 
 2026-10-25T10:03Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025090316 batch-20261025090316-6 batch-20261025090316-red 
+2026-10-25T10:22Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025090316 batch-20261025090316-6 batch-20261025090316-red 
