@@ -148,3 +148,4 @@ Next: lane: probe batch-20261025023716-3 (holds #4988) resolves; once #4988 merg
 - 2026-10-25T12:07:06Z: #4988 eligible (Fast-Check + local-ci/prescreen); lane now lands code PRs one at a time, queued behind #4943 (batch-20261025114830)
 - 2026-10-25T12:25:07Z: #4988 eligible, still queued in the one-at-a-time lane
 - 2026-10-25T12:43:10Z: lane serial batch now #4953 (batch-20261025122638); #4988 still queued
+- 2026-10-25T13:01:08Z: lane serial batch now #4962 (batch-20261025125743); #4988 still queued
