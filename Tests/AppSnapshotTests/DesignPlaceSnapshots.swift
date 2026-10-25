@@ -36,8 +36,15 @@ enum DesignPlaceSeed {
         context.fill(CGRect(x: 0, y: 0, width: w, height: h))
         context.setStrokeColor(CGColor(srgbRed: 1, green: 1, blue: 1, alpha: 1))
         context.setLineWidth(max(h / 100, 1))
-        let lines = (0...6).map { CGFloat($0) * w / 6 }.flatMap { [CGPoint(x: $0, y: 0), CGPoint(x: $0, y: h)] }
-            + (0...4).map { CGFloat($0) * h / 4 }.flatMap { [CGPoint(x: 0, y: $0), CGPoint(x: w, y: $0)] }
+        var lines: [CGPoint] = []
+        for column in 0...6 {
+            let x = CGFloat(column) * w / 6
+            lines += [CGPoint(x: x, y: 0), CGPoint(x: x, y: h)]
+        }
+        for row in 0...4 {
+            let y = CGFloat(row) * h / 4
+            lines += [CGPoint(x: 0, y: y), CGPoint(x: w, y: y)]
+        }
         context.strokeLineSegments(between: lines)
         context.setFillColor(CGColor(srgbRed: 0.9, green: 0.1, blue: 0.1, alpha: 1))
         context.fillEllipse(in: CGRect(x: w / 2 - h / 4, y: h / 4, width: h / 2, height: h / 2))
