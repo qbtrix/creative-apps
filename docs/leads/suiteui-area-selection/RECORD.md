@@ -4,7 +4,7 @@ Issue: #3752 · Packet: docs/blueprints/suiteui/features/area-selection.md
 Run: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main ef37711d (verified) / dev ae3efdb8
-Next: lane merges #4877, then retarget #5096 → #5103 → #5254 → #5256 in turn; open the C4-only kernel-selection description PR (AR-z).
+Next: lane merges #4877, then retarget #5096 → #5103 → #5254 → #5256 in turn; #5268 (C4) rides on dev.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -32,6 +32,7 @@ Next: lane merges #4877, then retarget #5096 → #5103 → #5254 → #5256 in tu
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-25T02:50Z: Opened #5268 (docs-only C4, kernel-selection names AreaShape/AreaRecipe/GroupPick, head b0022ba4, CI: PASS, fast-lane). The 01:45Z stamps above were written at about 02:45Z.
 - 2026-10-25T01:45Z: AR-z opened as #5254 (AR-15, 145 lines/15 files, head fb70b0ab) and #5256 (AR-16, feature-done, 94 lines/4 files, head ea17435d), both CI: PASS. The kernel-selection C4 description goes in a separate docs-only PR (check-c4-descriptions refuses it alongside code).
 - 2026-10-25T01:15Z: wave 2: AR-z (AR-15+AR-16) building on AR-11-ui (Wire suite-imaging:IM-z); 0 open findings.
 - 2026-10-25T01:20Z: replay done: #4877 (AR-10, 15 files), #5096 (AR-11, 11 files +387), #5103 (AR-11 ui, 12 files +281), all CI: PASS and fast-lane; AR-5/6 and AR-9 already on dev and dropped.
