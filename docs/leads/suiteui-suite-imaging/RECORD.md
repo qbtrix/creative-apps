@@ -1,12 +1,12 @@
 # suite-imaging lead record
 
 Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-imaging.md
-Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
-Stage: 3 wave 7
-Base: 9f476af (origin/dev)
-Next: 01:48Z poll: dev c16bcd16c (#5156, not ours). Batch 20261024235353 (none of ours) bisect: -9 Linux green, macOS running. All 7 PRs open, no needs-fix/needs-rebase; #5163/#5178 dirty. #3723 open; supervisor q 6383016723 unanswered. Poll again ~02:08Z.
+Run: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
+Stage: 3 wave 8
+Base: c16bcd16c (origin/dev)
+Next: 05:43Z poll: dev 13fb2f591. All 7 PRs open, none merged, no needs-fix/needs-rebase (#5163/#5178 dirty, the lane integrates). IM-8d re-cut: lift the Photo live route (liveStack fold, liveRegion, PhotoCompositeCache) into SuiteImaging as a Linux-safe route over ToneRendering, then delete PhotoLiveTone; builder stacked on IM-8b. Poll again ~06:05Z.
 
-Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
+Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a170cfbf58-pshm, feature issue #3715). This copy is refreshed with it after every stage.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -31,15 +31,15 @@ Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imag
 | IM-8s | IM-photo | dispatcher route runs ImagingProgram's steps | #4856 | merged |
 | IM-8a | IM-photo | Photo canvas files off Metal (ImagingGPU.Target, SuiteUI residentTarget) | #5148 | open (fast-lane, Fast-Check c0b53be) |
 | IM-8b | IM-photo | live route's program from ImagingProgram (output levels) | #5151 | open (fast-lane, Fast-Check, mutate 5/5) |
-| IM-8d | IM-photo | delete PhotoLiveTone | – | blocked: EP-z #3723 |
+| IM-8d | IM-photo | delete PhotoLiveTone | – | wave 8 (EP-m done, contract-first) |
 | IM-9 | IM-library | Library imaging tests | #4591 | merged |
 | IM-10 p1 | IM-library | develop levels/curve points are SuiteImaging's | #4886 | open (fast-lane, clean) |
 | IM-10b | IM-library | LiveDevelop on the shared list | #5153 | open (fast-lane, Fast-Check 65fa4fe, mutate 8/8 + 4/4; stacked on #4886) |
 | IM-11a | IM-library | loupe GPU frame (Model): LiveDevelop.steps, LiveLoupeImaging.gpuFrame, histogram from the CPU-developed preview | #5154 | open (fast-lane, Fast-Check 4d753ae, mutate 4/4; stacked on #5153) |
 | IM-11b | IM-library | loupe view writes the GPU frame (ImagingGPU.display into the CanvasHost resident texture); LibraryDevelopLatencyTests on the GPU route | #5163 | open; the lane dropped fast-lane (869 lines against dev while stacked) and its Belt-Lead sweep re-adds it once #4886, #5153 and #5154 merge; mutate 7/7, CI: PASS at 805e3850e |
 | IM-11c | IM-library | perf-suites line for LibraryDevelopLatencyTests; drop .disabled (supervisor-approved 6384762237) | #5178 | open, no-fast-lane (protected path), supervisor lands; stacked on #5163; CI: PASS |
-| IM-12 | IM-z | delete Photo's copies | – | blocked: EP-z |
-| IM-13 | IM-z | no-baseline rule, Photo's Metal link removed | – | blocked: ST-a |
+| IM-12 | IM-z | delete Photo's copies | – | after IM-8d |
+| IM-13 | IM-z | no-baseline rule, Photo's Metal link removed | – | wave 8 (ST merged; Package.swift: supervisor merge) |
 | IM-14 | IM-z | feature-done | – | last |
 
 ## Reviews
@@ -47,6 +47,9 @@ Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imag
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-25T05:43Z: IM-8d re-cut. The 02:11Z builder found the task impossible while SuiteImaging route edits were off limits. SuiteImaging is this feature's own target, so the next builder moves Photo's live route into Sources/SuiteImaging/Route (Linux-safe, generic over ToneRendering/ResidentSurfaces, a write closure in place of MTLTexture). Photo adapts and PhotoLiveTone.swift is deleted. Split into two PRs if over 400 lines.
+- 2026-10-25T02:11Z: IM-8d is more than a delete: on #5151's head PhotoTileUpdate still calls liveStack/liveRegion and PhotoRenderRoute holds PhotoCompositeCache, so the builder repoints them onto LayeredToneBase/LiveToneSurface. IM-13 needs both stacks (IM-8 Photo Metal gone, IM-11 Library loupe) and Package.swift, so it starts once #5151 and #5163 merge, not stacked across two chains. Open findings #5093-#5095 are fill-heal's, not ours.
+- 2026-10-25T02:10Z: relaunch act-1a170cfbf58-pshm after the 16-hour limit. The brief names main as integration branch; PRs keep base dev (CLAUDE.md: main only takes dev SHAs that passed full CI). lead/suite-imaging rebased onto main. IM-8d's EP-z wait is met contract-first (EP-m Belt-Slice-Done on #3723, run 40077009798); IM-13's ST-a wait is met (shared-thumbnails #4950, #4951, #5102 merged).
 - 2026-10-24: relaunch act-1a16d523b32-v6tj. IM-a and IM-m done (Belt-Slice-Done on 39939121278). IM-8 cut: IM-8a moves Photo's three canvas files off Metal through SuiteImaging (ImagingGPU.backend/Target, CanvasHostView.residentTarget), baseline down to Package.swift only; IM-8b moves the live route.
 - 2026-10-22T18:40Z: relaunch act-1a164d620b2-ve0e on #3715 (#4498 closed). Base is dev e16b985 (main 0dd23d6 lacks the packet). Library spine #1044 closed, photo #3144 merged, so IM-8 and IM-10 start now, stacked (rule 22) on their open predecessors. IM-8d (EP-z planned) and IM-13 (ST-a planned) stay blocked.
 - 2026-10-22T17:30Z: wave 4 done (wf_13e8c7bf-e3f). Contract checks: IM-5 clean; IM-7's only miss is the server-appended 'Generated by' footer, which a PATCH can't remove (as on earlier PRs), so I accept it; IM-10's builder shipped IM-9 alone as #4591 because IM-10 needs IM-3's Library key decoding (#4390, not on dev). IM-9 is a valid test-first task, so #4591 stays open as IM-9 and IM-10 waits on #4390.

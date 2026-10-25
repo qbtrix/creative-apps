@@ -101,3 +101,4 @@ utc	stage	event	ref	note
 2026-10-25T01:06Z	poll	check	all	dev moved (#4874); nothing of ours merged
 2026-10-25T01:27Z	poll	check	all	other batch bisect at -9; nothing merged
 2026-10-25T01:48Z	poll	check	all	other batch bisect at -9; nothing of ours merged
+2026-10-25T05:43Z	3	heartbeat	-	mirror of lead/suite-imaging; 7 PRs open, IM-8d re-cut
