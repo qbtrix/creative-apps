@@ -133,3 +133,4 @@ utc	stage	event	ref	note
 2026-10-25T14:11Z	heartbeat	no merges of ours; #5006 landed, batch holds #5007; dev d3323f6a7; no dev-red; 0 findings
 2026-10-25T14:33Z	heartbeat	no merges of ours; #5007 landed; full CI on d3323f6a7 macOS running; no dev-red; 0 findings
 2026-10-25T14:55Z	heartbeat	no merges of ours; #4960 landed, batch holds #5008; full CI on d3323f6a7 running; no dev-red; 0 findings
+2026-10-25T15:17Z	heartbeat	no merges of ours; #5008, #5318 landed, batch holds #5039; full CI on d3323f6a7 running; no dev-red; 0 findings
