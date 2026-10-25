@@ -142,3 +142,4 @@ utc	stage	event	ref	note
 2026-10-25T10:46:58Z	3	poll	-	10:47Z poll: probe -6 green (Linux+macOS), probe -9 Linux green (holds #5039); lane should land the prefix next; no merges yet
 2026-10-25T11:03:15Z	3	poll	-	11:03Z poll: no merges; probe -6 green, waiting on next lane sweep (last ended ~10:41Z); probe -9 macOS gate not yet dispatched
 2026-10-25T11:19:48Z	3	poll	-	11:19Z poll: nothing merged; batch 20261025090316 resolved without landing ours yet, new batch 20261025111803 Linux check running; dev 68bec9fe7, no dev-red; #4960 still needs-fix (timing flake, evidence posted, no supervisor reply)
+2026-10-25T11:35:25Z	3	poll	-	11:35Z poll: nothing merged; batch 20261025111803 Linux check still running (17 min); dev 68bec9fe7 Linux check green, full CI in progress, no dev-red; #4960 still needs-fix awaiting supervisor
