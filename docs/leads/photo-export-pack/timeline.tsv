@@ -230,3 +230,4 @@ utc	stage	event	ref	note
 2026-10-25T03:10Z	check-in	quiet: #5171/#5206 open clean, no needs-fix; no XP-3/XP-4 PR; no supervisor reply on #5193
 2026-10-25T03:41Z	check-in	quiet: #5171/#5206 open clean, no needs-fix; no XP-3/XP-4 PR; no supervisor reply on #5193
 2026-10-25T04:13Z	check-in	quiet: #5171/#5206 open clean, no needs-fix; no XP-3/XP-4 PR; no supervisor reply on #5193
+2026-10-25T04:45Z	check-in	new finding #5279 (Free Transform preview) not export/text, left; #5171/#5206 open clean; no XP-3/XP-4 PR; no supervisor reply on #5193
