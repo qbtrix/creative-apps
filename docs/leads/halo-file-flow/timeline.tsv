@@ -136,3 +136,4 @@ utc	stage	event	ref	note
 2026-10-25T02:18Z	check	02:18Z heartbeat: #4894, #4936, #5092 all clean, none merged; no needs-fix/needs-rebase; 0 open findings. Lane waits on bisect probe lane/batch-20261024235353-9 macOS gate (40150116582, running since 01:18Z).
 2026-10-25T02:40Z	check	02:40Z heartbeat: lane run 40152661631 rates #4894 and #5092 eligible (Fast-Check marker), #4936 skips until its base HF-m merges. Not in batch 20261025023716 (layer-styles HY stack); waiting for the next batch. 0 open findings.
 2026-10-25T03:02Z	check	03:02Z heartbeat: all PRs clean and unmerged; no needs-fix/needs-rebase; 0 open findings. Lane batch 20261025023716 (HY stack) waits on a macOS runner behind dev's scoped runs at 3db45eb45; ours ride the next batch.
+2026-10-25T03:24Z	check	03:24Z heartbeat: #4894 #4936 #5092 #4917 #4942 open, clean, no needs-fix; lane bisecting HY batch 20261025023716 (macOS gate red, probe -6 running); no slice done; 0 findings
