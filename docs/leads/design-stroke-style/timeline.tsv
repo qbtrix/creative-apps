@@ -220,3 +220,4 @@ time	kind	note
 2026-10-25T08:51:53Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; batch 054232 probe -4 (#4960) macOS red, bisect near its end
 2026-10-25T09:11:27Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; old batch resolved, new batch 090316 (12 PRs, none ours) running; ours queue for the next
 2026-10-25T09:31:47Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; batch 090316 red (none ours), bisecting at probe 6; ours queue for the next batch
+2026-10-25T09:51:02Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; batch 090316 bisect at probe 6 (macOS running); scheduled dev CI 40179648854 red (not ours); ours queue
