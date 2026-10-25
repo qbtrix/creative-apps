@@ -5,7 +5,7 @@
 // Written with the window budgets before the grid and loupe fixes (LG-2); LG-7
 // turns it on once LG-5 and LG-6 are in, as RJ-L07 (first paint 1.5 s, scroll
 // p95 16 ms, loupe step p95 50 ms).
-import Foundation
+import AppKit
 import XCTest
 
 final class LibraryLargeCatalogJourneyTests: XCTestCase {
@@ -14,11 +14,12 @@ final class LibraryLargeCatalogJourneyTests: XCTestCase {
     /// LJ-LG: launch on 10,000 photos, the grid paints within 1.5 s, scroll
     /// 120 rows, select all, shift-click a range, open the loupe and step 20 times.
     @MainActor func testTenThousandPhotos() throws {
-        let started = ProcessInfo.processInfo.systemUptime
+        let started = Date()
         let library = Journey("Library", self, arguments: Self.large)
         let first = cell("IMG_00001", library)
         XCTAssert(first.waitForExistence(timeout: 10), "no grid cell for IMG_00001")
-        let paintMs = (ProcessInfo.processInfo.systemUptime - started) * 1000
+        // From the app's own launch, not the runner's: Journey first waits for the display to settle (#5230).
+        let paintMs = Date().timeIntervalSince(launchDate() ?? started) * 1000
         XCTAssertLessThanOrEqual(paintMs, 1_500, "the first grid paint took \(Int(paintMs)) ms, over 1.5 s")
         library.shot("large-grid")
 
@@ -50,6 +51,14 @@ final class LibraryLargeCatalogJourneyTests: XCTestCase {
                   "after 20 steps the loupe reads \(readout)")
         library.shot("large-loupe")
         library.app.terminate()
+    }
+
+    /// When LaunchServices launched .build/apps/LibraryApp.app, the newest if several; nil if it wasn't.
+    @MainActor private func launchDate() -> Date? {
+        let path = Journey.repoRoot.appending(path: ".build/apps/LibraryApp.app").resolvingSymlinksInPath().path
+        return NSWorkspace.shared.runningApplications
+            .filter { $0.bundleURL?.resolvingSymlinksInPath().path == path }
+            .compactMap(\.launchDate).max()
     }
 
     /// The grid cell for the photo whose id is `id`.
