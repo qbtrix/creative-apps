@@ -2,7 +2,7 @@
 
 Issue: #3752 · Packet: docs/blueprints/suiteui/features/area-selection.md
 Run: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
-Stage: 3 wave 1 (stacks replayed; in the lane)
+Stage: 3 wave 2 (next slices stacked; wave 1 in the lane)
 Base: main ef37711d (verified) / dev ae3efdb8
 Next: wait for the lane to merge #4877, then retarget #5096 → #5103 to dev in turn; build AR-z ahead on IM-a (Wire suite-imaging:IM-z).
 
@@ -32,6 +32,7 @@ Next: wait for the lane to merge #4877, then retarget #5096 → #5103 to dev in 
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-25T01:15Z: wave 2: AR-z (AR-15+AR-16) building on AR-11-ui (Wire suite-imaging:IM-z); 0 open findings.
 - 2026-10-25T01:20Z: replay done: #4877 (AR-10, 15 files), #5096 (AR-11, 11 files +387), #5103 (AR-11 ui, 12 files +281), all CI: PASS and fast-lane; AR-5/6 and AR-9 already on dev and dropped.
 - 2026-10-24T23:20Z: dev was rewritten to a new root (4f00afb8, #5150); old slice branches share no history with it, so fixers replay each PR's own commits onto the new dev, split to the 400-line/15-file cap, re-gate and force-with-lease push the lead/* branches (same PR numbers).
 - Status branch is lead/suiteui-area-selection (the name Belt reads); lead/area-selection kept as a mirror.

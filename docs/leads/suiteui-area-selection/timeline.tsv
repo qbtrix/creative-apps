@@ -89,3 +89,4 @@ time	task	event	note
 2026-10-24T07:12Z	3	wave	-	wave 2 started: builder restacks #4877 on dev, then AR-11 and AR-12 (AR-photo-u) stacked on it
 2026-10-24T23:20:00Z	lead	restack	dev rewritten (root 4f00afb8); fixer replaying #4877 #5096 #5103
 2026-10-25T01:20:00Z	3	pr-opened	stacks	replayed onto dev ae3efdb8, gated, fast-lane
+2026-10-25T01:15Z	3	stage-start	wave 2	AR-z (AR-15+AR-16) building on AR-11-ui (Wire suite-imaging:IM-z)
