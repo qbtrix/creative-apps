@@ -102,3 +102,4 @@ utc	stage	event	ref	note
 2026-10-24T23:49:23Z	3	poll	-	poll 23:49Z: no merges; dev afef017c (dev CI from 22:06Z passed); lane batch 20261024205137 probe -1 macOS gate still running; our PRs clean; SC-f unchanged, AK-8 held; no new findings; next poll 00:05Z
 2026-10-25T00:06:48Z	3	poll	-	poll 00:06Z: no merges; dev afef017c; batch 20261024205137 done; new batch 20261024235353 (12 PRs: p0/beta first, then #4236) has none of ours; our Head: markers all match, so ours are ready and queued behind it; SC-f unchanged, AK-8 held; no new findings; next poll 00:22Z
 2026-10-25T00:23:30Z	3	poll	-	poll 00:22Z: no run PR merged; batch 20261024235353 red, lane bisecting (probe -6); our PRs ready and queued; SC-f still open, AK-8 held; no new findings for this feature
+2026-10-25T00:38:40Z	3	poll	-	poll 00:38Z: no run PR merged; batch 20261024235353 probe -6 Linux green, macOS gate running; our PRs ready and queued; SC-f still open, AK-8 held; no new findings
