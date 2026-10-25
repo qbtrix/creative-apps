@@ -45,6 +45,15 @@ select.enter-group
 select.exit-group
 select.pick
 shape.draw
+stroke.add
+stroke.cap
+stroke.color
+stroke.dash
+stroke.join
+stroke.read
+stroke.remove
+stroke.trim
+stroke.width
 tool.ellipse
 tool.eyedropper
 tool.frame
