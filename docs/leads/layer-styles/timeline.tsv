@@ -94,3 +94,4 @@ utc	stage	event	ref	note
 2026-10-24T22:55Z	3	check	lane	22:55Z: all 11 PRs clean+queued, none merged; batch-20261024205137 (none ours) bisecting, now probe -1 (#5192 alone); 0 findings; dev afef017c
 2026-10-24T23:17Z	3	check	lane	23:17Z: all 11 PRs clean+queued, none merged; batch-20261024205137 (none ours) probe -1 (#5192) macOS gate running, lane sweeping; 0 findings; dev afef017c
 2026-10-24T23:40Z	3	check	lane	23:39Z: all 11 PRs clean+queued, none merged; batch-20261024205137 branches gone, nothing landed (dev afef017c), no new batch yet; 0 findings
+2026-10-25T00:03Z	3	check	lane	00:03Z: run act-1a1705bc1ae-pb09 resumed; lead branch rebased on main afef017c; all 11 PRs clean+queued, none merged; lane batch-20261024235353 (#4236, none ours) gating; no dev-red; 0 findings for this feature
