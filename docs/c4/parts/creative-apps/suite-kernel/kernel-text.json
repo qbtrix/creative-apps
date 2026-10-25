@@ -6,5 +6,25 @@
   "paths": [
     "Sources/SuiteKernel/Text/"
   ],
-  "order": 130
+  "order": 130,
+  "relationships": [
+    {
+      "source": "kernel-text",
+      "target": "design-model-sources",
+      "description": "adopted by Design: its text layers are a TextStyleTarget and register the seven text.* commands (text-style TS-7, TS-8)",
+      "style": "sync"
+    },
+    {
+      "source": "kernel-text",
+      "target": "halo-model-sources",
+      "description": "adopted by Halo: its text layers take TextStyle through the catalog and are set by the kernel's TextLayout (text-style TS-9, TS-10)",
+      "style": "sync"
+    },
+    {
+      "source": "kernel-text",
+      "target": "photo-model-sources",
+      "description": "adopted by Photo through photo/text-layers: PhotoText+Kernel maps its text layers onto TextStyle",
+      "style": "sync"
+    }
+  ]
 }
