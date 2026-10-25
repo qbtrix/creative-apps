@@ -179,3 +179,4 @@ utc	stage	event	ref	note
 2026-10-25T09:51:02Z	3	heartbeat	#4922 #4963 #4964 #5001	all open, no fix labels; batch 090316 bisect at probe 6 (macOS running); scheduled dev CI 40179648854 red (not ours); ours queue
 2026-10-25T10:11:03Z	3	heartbeat	#4922 #4963 #4964 #5001	all open, no fix labels; batch 090316 probe 6 macOS gate still running; ours queue for next batch
 2026-10-25T10:31:09Z	3	heartbeat	#4922 #4963 #4964 #5001	all open, no fix labels; batch 090316 bisect at probe 9 (#5044); ours queue for next batch
+2026-10-25T10:51:32Z	3	heartbeat	#4922 #4963 #4964 #5001	all open, no fix labels; batch 090316 bisect: probe 6 mac + probe 9 linux green; ours queue for next batch
