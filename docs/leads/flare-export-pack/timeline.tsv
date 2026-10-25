@@ -176,3 +176,4 @@ utc	stage	event	ref	note
 2026-10-25T03:49:50Z	heartbeat	batch 20261025023716 still bisecting: probes -6, -3 (culprit in first 6; #4854 is 9th); dev 2e7d5264 (docs #3935); #5025 waits
 2026-10-25T04:11:17Z	heartbeat	batch 20261025023716 bisecting: probe -1 now (culprit in first 3; #4854 9th, will ride next batch); dev 2e7d5264; #5025 waits
 2026-10-25T04:33:43Z	heartbeat	batch 20261025023716 still bisecting (probe -1); dev ee8ccd61 (#4877 landed); #4854 clean, no needs-fix, body attribution-free; #5025 waits
+2026-10-25T04:54:51Z	heartbeat	no change: batch 20261025023716 probe -1 still running; dev ee8ccd61; #4854 565669e7, #5025 9c2bc627 wait
