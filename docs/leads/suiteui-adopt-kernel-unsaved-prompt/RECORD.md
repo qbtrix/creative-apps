@@ -27,6 +27,7 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 2026-10-25 06:57Z: hb65: no change; lane refs: batch-20261025054232 batch-20261025054232-6 ; stack all beta, #5088 waits; no findings.
 - 2026-10-25 06:42Z: hb64: no change; lane refs: batch-20261025054232 batch-20261025054232-6 ; stack all beta, #5088 waits; no findings.
 - 2026-10-25 06:27Z: hb63: no change; lane refs: batch-20261025054232 batch-20261025054232-6 ; stack all beta, #5088 waits; no findings.
 - 2026-10-25 06:12Z: hb62: no change; lane refs: batch-20261025054232 batch-20261025054232-6 ; stack all beta, #5088 waits; no findings.
