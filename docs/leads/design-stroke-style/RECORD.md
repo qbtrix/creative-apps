@@ -79,3 +79,7 @@ At 04:14Z the supervisor pulled #4864 from the lane for the batch -9 macOS failu
 - beta added to #4888 #4916 #5002 #5011 #4922 #4963 #4964 #5001; all heads unchanged, no conflicts.
 - DK-z and PD-z stay held: open findings are still above 5 (the Fixes in the 8 PRs close them only on merge, e.g. #4925 #4926 #4927 #4928 #4989 #5009 #5010 #4919 #4940 #4941 #4934 #4966). Both slices also stack on two unmerged parents each, so a PR now would break the 400/15 cap (rule 22).
 - Next: wait for the next batch; then slice-done for DK-m, DK-u, PD-m and PD-u on the first design ci.yml run that contains them; then DK-z and PD-z.
+
+### 2026-10-25T04:42:20Z: stage
+
+#4888, #4916, #5002 and #5011 are clean and wait on the next batch. The batch red was #4963 (placed-images), not ours. DK-z is held while more than 5 findings are open.
