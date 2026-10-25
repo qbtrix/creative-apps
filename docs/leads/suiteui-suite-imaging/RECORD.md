@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
 Stage: 3 wave 8
 Base: c16bcd16c (origin/dev)
-Next: 07:35Z: dev still 13fb2f591. Cause found: the lane is bisecting red batch lane/batch-20261025054232 (14 PRs incl. #4886); probe -3 macOS gate run 40171578102 in progress. Noted on #3715 (issuecomment-6394930056). IM-13 waits on #5151, #5163. Poll ~07:55Z.
+Next: 07:57Z: dev still 13fb2f591; bisect probe lane/batch-20261025054232-3 macOS run 40171578102 still in progress (50 min). No needs-fix/needs-rebase; no supervisor reply. IM-13 waits on #5151, #5163. Poll ~08:17Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a170cfbf58-pshm, feature issue #3715). This copy is refreshed with it after every stage.
 
