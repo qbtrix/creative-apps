@@ -109,3 +109,4 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-25T01:43:07Z: batch-20261024235353 bisect at probe -9; #4988 (beta) queued
 - 2026-10-25T02:01:37Z: batch-20261024235353 bisect at probe -9; #4988 (beta) queued
 - 2026-10-25T02:20:09Z: batch-20261024235353 bisect at probe -10; #4988 (beta) queued
+- 2026-10-25T02:38:46Z: #4988 in lane/batch-20261025023716 (12 PRs, 10th); Linux + macOS gates running
