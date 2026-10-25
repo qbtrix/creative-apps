@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-25T02:15Z	check	#5158 (333603baa) and #5174 (head now 6e467f797) open+clean, no needs-fix; no dev-red; no open findings; waiting on lane batch
 2026-10-25T02:32Z	check	#5158 (333603baa, body clean) and #5174 (6e467f797) open+clean, no needs-fix; lane busy on lane/batch-20261024235353-10 (Linux+macOS running); no dev-red; no open findings
 2026-10-25T02:49Z	check	#5158 (333603baa) and #5174 (6e467f797) both in lane/batch-20261025023716 (12 PRs; Linux running, macOS gate queued); no needs-fix; no dev-red; no open findings
+2026-10-25T03:10Z	check	lane/batch-20261025023716 (with #5158, #5174): Linux check success, macOS gate in progress; no needs-fix; no dev-red
