@@ -71,3 +71,4 @@ utc	stage	event	ref	note
 2026-10-25T07:42Z	check	EP-z	Probe -3 (#4886,#4943,#4953): Linux passed (run 40171576048), macOS gate 40171578102 running. #4943 open, clean.
 2026-10-25T08:02Z	check	EP-z	Probe -3 macOS gate 40171578102 still running (55 min). #4943 open, clean, no needs-fix.
 2026-10-25T08:22Z	check	EP-z	Probe -3 macOS gate 40171578102 still in scripts/ci step (75 min). #4943 open, clean, no needs-fix.
+2026-10-25T08:41Z	check	EP-z	Probe -3 green (macOS 40171578102). Lane on probe -4. #4943 open, clean.
