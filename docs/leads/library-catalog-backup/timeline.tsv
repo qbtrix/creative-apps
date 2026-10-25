@@ -132,3 +132,4 @@ utc	stage	event	ref	note
 2026-10-25T04:37:19Z	4	poll	#4923 #4924 #4937 #4938 #4949	queued behind p0/beta PRs (lane order); none ejected
 2026-10-25T04:47:04Z	4	poll	#4923 #4924 #4937 #4938 #4949	queued behind p0/beta PRs (lane order); none ejected
 2026-10-25T05:07:23Z	4	poll	#4923 #4924 #4937 #4938 #4949	queued behind p0/beta PRs (lane order); none ejected
+2026-10-25T05:17:09Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
