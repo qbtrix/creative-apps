@@ -190,3 +190,4 @@ utc	stage	event	ref	note
 2026-10-25T13:34:40Z	3	heartbeat	#4922 #4963 #4964 #5001	lane sweep 13:10Z: #4916 #4922 #4963 #5002 eligible (marker + local-ci/prescreen), stacked PRs wait on base; 65 ready PRs queued behind single-PR batches; nothing to fix, waiting on lane
 2026-10-25T13:54:02Z	3	heartbeat	#4922 #4963 #4964 #5001	all seven open, no fix labels; #5006 merged (dev d3323f6a); no batch in flight; ours eligible, waiting on lane
 2026-10-25T14:15:00Z	3	heartbeat	#4922 #4963 #4964 #5001	batch 20261025140134 holds only #5007 (photo); all seven of ours still ready (fast-lane, line:design, beta), no fix label; dev d3323f6a; DK-z/PD-z held
+2026-10-25T14:35:05Z	3	heartbeat	#4922 #4963 #4964 #5001	dev 15237407 (#5007 landed); no batch in flight; all seven of ours ready, heads unchanged, no fix label; DK-z/PD-z held
