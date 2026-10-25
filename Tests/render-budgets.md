@@ -184,6 +184,30 @@ In a second run Photo with Metal on crashed while opening the 8K photo
 high, over Metal's 16384 limit); direct launches hit it 5 times in 5. The
 journey's failure names those frames.
 
+## Stress journeys on complex files (`scripts/ui-test perf`)
+
+The beta quality gate for big documents. The `<X>StressPerfJourneyTests`
+run beside the real-perf journeys, through the same `Journey.health` checks
+and the same limits (step p95 33 ms where a `suite.perf` series records,
+20% main-thread surface allocation, a 2 s accessibility answer, idle CPU
+under 10% 3 s after). A gesture that misses one stays red and gets a
+`finding` issue; the budget doesn't move.
+
+| App | Fixture | Gestures |
+|---|---|---|
+| Design | `stress`: 5,000 shapes loose on one page | Select All, drag all, ⌘Z, marquee over ~1,250, drag them, ⌘Z, pan, zoom |
+| Flare | `stress`: 200 layers, 500 pen stars (5,000 anchors), 600 keys over 600 frames | Select All, drag all, ⌘Z, Direct Select marquee over ~120 stars, drag them, ⌘Z, ruler scrub 0 to 599, keys at 300 on every lane on screen dragged 10 frames, Play 5 s |
+| Halo | `crowd`: 300 solids, 5,000 keys | → held 3 s, End/Home 3 s, Play 5 s |
+| Photo | `stress`: 3840 x 2160, 100 layers (24 adjustment, 25 masked), GPU | Select Layer Below 3 s, Move tool drag, every eye on screen toggled, Levels Black drag with all visible |
+
+Design has no paths or Direct Select yet, so the 5,000-anchor case is
+Flare's. Flare's Direct Select picks items, not single anchors, until #390;
+neither Flare nor Halo has Select All Keys, and Halo can't move keys. Photo
+selects one layer at a time.
+
+Measured: pending the first `scripts/ui-test perf` run (numbers land here
+with a `finding` issue per gesture over its limit).
+
 ## What the harness can't drive
 
 The test process is never the active app. Every press it sends is a
