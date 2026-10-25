@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
 Stage: 3 wave 8
 Base: c16bcd16c (origin/dev)
-Next: 09:22Z: old bisect ended with #4960 needs-fix, but the green prefix did not land; the lane re-batched as lane/batch-20261025090316 (14 PRs incl. #4886), red on Linux, now bisecting (probe -6). dev 8d3a12c4b; no needs-fix/needs-rebase on ours; no supervisor reply. IM-13 waits on #5151, #5163. Poll ~09:42Z.
+Next: 09:43Z: batch 090316 probe -6 (#4837, #4886, #4943, #4953, #4962, #5006, #5007) green on Linux, macOS gate 40180145089 running. dev 8d3a12c4b full CI 40179648854 failed (none of ours on dev; not our fix). No needs-fix/needs-rebase on ours; no supervisor reply. IM-13 waits on #5151, #5163. Poll ~10:03Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a170cfbf58-pshm, feature issue #3715). This copy is refreshed with it after every stage.
 
