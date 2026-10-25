@@ -62,28 +62,28 @@ extension BodyCountSuites {
 
         static let page = CGSize(width: 1440, height: 1024)
 
-        @Test(.timeLimit(.minutes(3))) func aDragRunsTheEditorAtMostThreeTimes() async throws {
+        // One case per gesture, so each drag gets the whole time limit (a hang guard, not a budget).
+        @Test(.timeLimit(.minutes(3)), arguments: Gesture.allCases)
+        func aDragRunsTheEditorAtMostThreeTimes(_ gesture: Gesture) async throws {
             #if DEBUG
-            for gesture in Gesture.allCases {
-                let w = RenderBudgetWindow(DesignWindow(seed: gesture.seed))
-                defer { w.close() }
-                let step = try await Self.dragSamples(gesture, in: w)
-                // The press and the release reach the window; the 120 samples between them don't.
-                #expect((step.bodies ?? 0) >= 1, "the \(gesture) never reached the window: \(step)")
-                expectBodies(step, atMost: 3, target: 3)
-            }
+            let w = RenderBudgetWindow(DesignWindow(seed: gesture.seed))
+            defer { w.close() }
+            let step = try await Self.dragSamples(gesture, in: w)
+            // The press and the release reach the window; the 120 samples between them don't.
+            #expect((step.bodies ?? 0) >= 1, "the \(gesture) never reached the window: \(step)")
+            expectBodies(step, atMost: 3, target: 3)
             #endif
         }
 
-        @Test(.timeLimit(.minutes(3))) func withoutTheBoxTheEditorRunsPerSample() async throws {
+        // One case per gesture: all four in one case took ~117 s here and passed 180 s on CI runners.
+        @Test(.timeLimit(.minutes(3)), arguments: Gesture.allCases)
+        func withoutTheBoxTheEditorRunsPerSample(_ gesture: Gesture) async throws {
             #if DEBUG
-            for gesture in Gesture.allCases {
-                let w = RenderBudgetWindow(DesignEditorWithoutBox(model: gesture.seed))
-                defer { w.close() }
-                let step = try await Self.dragSamples(gesture, in: w)
-                // About 120: one run per sample. Over 60 leaves room for a coalesced event.
-                #expect((step.bodies ?? 0) > 60, "without the box the \(gesture) ran the editor too few times: \(step)")
-            }
+            let w = RenderBudgetWindow(DesignEditorWithoutBox(model: gesture.seed))
+            defer { w.close() }
+            let step = try await Self.dragSamples(gesture, in: w)
+            // About 120: one run per sample. Over 60 leaves room for a coalesced event.
+            #expect((step.bodies ?? 0) > 60, "without the box the \(gesture) ran the editor too few times: \(step)")
             #endif
         }
 

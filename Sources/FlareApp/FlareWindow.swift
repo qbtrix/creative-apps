@@ -23,6 +23,7 @@
 // files, Loop and the selection's Edit reasons, and File > Place…'s reason and
 // action; the window takes SVG drops (FlarePlace.swift).
 import FlareModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -104,7 +105,7 @@ struct FlareWindow: View {
         .modifier(FlareOpenStatus(model: model))
         .suiteOpenQueue(FlareShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .modifier(FlareAutosaveAdapter(model: model, restore: { try model.restoreRecovery($0) }))
-        .modifier(FlareLiveRegistration(read: { model }, write: { model.takeLive($0) }))
+        .suiteLiveWindow(FlareLive.front, read: { FlareHeadless(workspace: model) }, write: { model.takeLive($0) })
         .placeDropTarget(formats: model.placeFormats) { files, _ in place(files) }
         .focusedSceneValue(
             \.flareMenu,
