@@ -145,3 +145,4 @@ utc	stage	event	ref	note
 2026-10-25T02:31:43Z	3	fix	lane	#4905 (CB-10) needs-rebase fixed: dev merged, scripts/ci --changed PASS, pushed 86a73634, Head: moved
 2026-10-25T02:41Z	3	lane	lane	batch-20261024235353 resolved: #5192..#5050 merged, #5174 clean and waits for the next batch; no dev-red; none of ours merged yet
 2026-10-25T03:02Z	3	lane	lane	#4905 needs-rebase dropped by the lane; batch-20261025023716 Linux green, macOS queued; full CI on dev 3db45eb queued; no dev-red; none of ours merged yet
+2026-10-25T03:25Z	3	lane	lane	batch-20261025023716 macOS gate failed, bisect pending; no needs-fix/needs-rebase on ours; no dev-red; no merges since 02:30Z; full CI dev 3db45eb in progress
