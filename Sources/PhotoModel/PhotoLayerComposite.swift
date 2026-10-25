@@ -1,14 +1,15 @@
 // PhotoLayerComposite.swift: one layer's contribution to the picture under
 // it, the per-layer step of the renderer and of LiveEdit's Merge Down and
 // Flatten (photo-seams review note 2), so all three pick up adjustment layers
-// and masks from one place. Today a pixel layer composites with its blend
-// mode and opacity at its offset (CoreRaster's composite, tile by tile, each
-// clipped to the region, exactly as the renderer always did); an adjustment
-// layer (AL-2 of photo-adjustment-layers) turns `below` into
-// `adjusting.applying` its settings with its opacity and blend mode, or gives
-// `below` back when hidden or at opacity 0; the mask is ignored until PV-5
-// fills it through `masking` (and passes it to `applying`). Callers still skip
-// hidden and 0 % layers themselves. Linux-safe.
+// and masks from one place. A pixel layer composites with its blend mode and
+// opacity at its offset (CoreRaster's composite, tile by tile, each clipped to
+// the region); with a mask, each of its tiles under the region is first
+// `masking.masked` by the mask there, once, before either shortcut below looks
+// at it. An adjustment layer (AL-2 of photo-adjustment-layers) turns `below`
+// into `adjusting.applying` its settings with its opacity and blend mode, or
+// gives `below` back when hidden or at opacity 0; its mask is still not passed
+// to `applying`. Callers still skip hidden and 0 % layers themselves.
+// Linux-safe.
 //
 // Cost: CoreRaster's composite returns a fresh copy of its backdrop, so each
 // layer tile goes onto one tile of the picture's own grid instead of onto the
@@ -50,11 +51,13 @@ public enum PhotoLayerComposite {
         let columns = below.tileColumns
         if columns == 1 && below.tileRows == 1 {
             let pieces = try pictureTiles(content, width: below.width, height: below.height, columns: 1,
-                                          origin: origin) { _ in below }
+                                          origin: origin, masking: masking) { _ in below }
             return pieces.first?.1 ?? below
         }
         let pieces = try pictureTiles(content, width: below.width, height: below.height, columns: columns,
-                                      origin: origin) { try below.tile(column: $0 % columns, row: $0 / columns) }
+                                      origin: origin, masking: masking) {
+            try below.tile(column: $0 % columns, row: $0 / columns)
+        }
         guard !pieces.isEmpty else { return below }
         var picture = below
         for (index, piece) in pieces {
@@ -79,7 +82,7 @@ public enum PhotoLayerComposite {
             return picture
         }
         let pieces = try pictureTiles(content, width: below.width, height: below.height, columns: below.columns,
-                                      origin: origin) { index in
+                                      origin: origin, masking: masking) { index in
             guard below.tiles.indices.contains(index) else { throw RasterError.invalid("tile \(index) is missing") }
             return below.tiles[index]
         }
@@ -90,15 +93,25 @@ public enum PhotoLayerComposite {
 
     /// The picture tiles `content` lands on (row-major index on a grid of
     /// `columns`), each read through `read` and composited with every layer
-    /// tile over it; empty for a layer with no pixels.
+    /// tile over it (masked first when the layer has a mask); empty for a layer with no pixels.
     private static func pictureTiles(
         _ content: LayerContent, width: Int, height: Int, columns: Int, origin: (x: Int, y: Int),
-        read: @Sendable (Int) throws -> PixelBuffer
+        masking: any LayerMasking, read: @Sendable (Int) throws -> PixelBuffer
     ) throws -> [(Int, PixelBuffer)] {
         let layer = content.layer
-        // ponytail: PV-5 masks with masking.masked. An adjustment layer never gets here; a text layer draws its tiles.
-        guard layer.kind == .pixels || layer.kind.textLayer != nil, let tiled = content.pixels else { return [] }
+        // An adjustment layer never gets here; a text layer draws its tiles.
+        guard layer.kind == .pixels || layer.kind.textLayer != nil, let own = content.pixels else { return [] }
         let region = PixelRect(x: origin.x - layer.offsetX, y: origin.y - layer.offsetY, width: width, height: height)
+        var shown = own
+        if let mask = content.mask {
+            let under = own.tileIndices(in: region).filter { own.tiles.indices.contains($0) }
+            let masked = try inParallel(under.count) { k in
+                let r = own.tileRect(under[k])
+                return try masking.masked(own.tiles[under[k]], at: (r.x, r.y), by: mask)
+            }
+            for (i, tile) in zip(under, masked) { shown.tiles[i] = tile }
+        }
+        let tiled = shown
         // Each layer tile under the region, in picture pixels, filed under
         // every picture tile it overlaps.
         let size = PixelBuffer.tileSize
