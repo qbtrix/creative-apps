@@ -151,3 +151,4 @@ utc	stage	event	ref	note
 2026-10-25T04:06:21Z	W4	check	PT-4	no merges; ours clean; lane batch-20261025023716 probe -3 macOS red, -1 running (culprit in first 3, none ours); full CI 40154669999 still running
 2026-10-25T04:30:41Z	W4	check	PT-4	no merges of ours; dev took #4877; ours unflagged; lane batch-20261025023716 probe -1 macOS running; full CI 40154669999 still running
 2026-10-25T04:55:29Z	W4	check	PT-4	#5112 needs-rebase (photo.list-commands.json golden); merged dev as cb5f2555 with an id-keyed union, gate running; scoped photo 40162166948 holds none of ours
+2026-10-25T05:12:13Z	W4	fix	PT-4	#5112 rebase: gate PASS at cb5f2555, pushed, Head moved
