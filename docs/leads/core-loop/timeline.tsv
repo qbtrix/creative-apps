@@ -239,3 +239,4 @@ utc	stage	event	ref	note
 2026-10-24T19:46Z	3	check-in	H-J12 pass	halo 40104925079 e79e9afc; failing set = baseline 16; #4283/#4282 open
 2026-10-24T21:49Z	3	check-in	new red #5225	halo 40123178052 d13c3ff2: H-J12 pass; PlayHittable disabled-dim red, triaged, watch for repeat
 2026-10-24T23:52Z	3	check-in	no change	40120300288, 40126229135 cancelled; 40135928519 running; #5225 waits for a repeat
+2026-10-25T01:54Z	3	check-in	no change	40135928519 cancelled; 40144068200, 40151119583 running; #5225 waits for a repeat
