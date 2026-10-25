@@ -1,5 +1,5 @@
 // PhotoLiveToneTests.swift: the live route (SuiteImaging's LiveLayerRoute through PhotoImagingAdapter.swift) on the resident GPU route with a target that
-// runs tone programs. A whole-image slider step (levels, curves, Photo's hue/saturation matrix) gives the
+// runs tone programs. A whole-image slider step (levels, curves, hue/saturation) gives the
 // CoreRaster reference within 2 display levels and composites nothing after the first picture; an adjustment
 // layer at the top, one under a pixel layer, and one at 50 % Multiply all take the live route (layer tiles stay
 // resident, nothing read back) and give the reference, and a step on the top or middle layer composites

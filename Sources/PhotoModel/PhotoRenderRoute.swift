@@ -9,9 +9,9 @@
 // an opaque normal tile that covers the region replaces it, PhotoLayerComposite's
 // two shortcuts); the adjustments are ImagingProgram's steps, the suite's
 // shared list (`imagingSteps`), each `adjusted` in its order, blur is
-// `gaussianBlur`, and the bytes come from `display`. An adjustment layer and
-// Hue/Saturation (Photo's own matrix) read the picture back, run on CoreRaster
-// and upload it again; a section at its identity has no step, as CoreRaster
+// `gaussianBlur`, and the bytes come from `display`. An adjustment layer
+// reads the picture back, runs on CoreRaster and uploads it again, and a step
+// the preferred backend lacks (Hue/Saturation on Metal) runs on the CPU; a section at its identity has no step, as CoreRaster
 // returns the buffer itself there. The CPU
 // route renders each damaged tile on its own task; the GPU route renders each
 // row of damaged tiles as one region, the rows on their own tasks. With
@@ -225,15 +225,7 @@ extension AdjustmentSettings {
             // ImagingProgram leaves out each step at its identity, where CoreRaster returns the buffer
             // itself, so the result is the same bits and an untouched section costs the GPU no round trip.
             for adjustment in imagingSteps {
-                if case .hueSaturation = adjustment {
-                    // Photo's own matrix, as runImaging runs it: read back, CoreRaster, upload again.
-                    try step {
-                        try dispatcher.surface(
-                            dispatcher.read(result).hueSaturation(hue: hue, saturation: saturation, lightness: lightness))
-                    }
-                } else {
-                    try step { try dispatcher.adjusted(result, adjustment) }
-                }
+                try step { try dispatcher.adjusted(result, adjustment) }
             }
             if blurMargin > 0 { try step { try dispatcher.gaussianBlur(result, sigma: blurSigma) } }
         } catch {

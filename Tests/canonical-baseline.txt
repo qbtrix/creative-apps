@@ -122,7 +122,6 @@ Sources/PhotoModel/Fakes/FakeEdit.swift
 Sources/PhotoModel/Fakes/FakeGeometry.swift
 Sources/PhotoModel/Fakes/FakeOutput.swift
 Sources/PhotoModel/GammaTrack.swift
-Sources/PhotoModel/HueSaturation.swift
 Sources/PhotoModel/Live/LiveAdjustmentLayers.swift
 Sources/PhotoModel/Live/LiveCrop.swift
 Sources/PhotoModel/Live/LiveExportSizing.swift

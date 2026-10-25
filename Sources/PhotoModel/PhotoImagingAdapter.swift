@@ -5,9 +5,8 @@
 // (CoreRender's `ToneRendering`), a region is drawn from `liveStack()`: the
 // visible layers as `LiveLayer`s, folded by the route under the image's own
 // operations. The program is SuiteImaging's step list, the one `applied(to:)`
-// runs, and Hue/Saturation is Photo's own colour matrix and lightness
-// (HueSaturation.swift) as a ToneProgram matrix operation, so the GPU picture
-// matches the CPU's. `liveStack` is nil, and the region takes the dispatcher
+// runs, every step as it is (Hue/Saturation is core's, IM-12), so the GPU
+// picture matches the CPU's. `liveStack` is nil, and the region takes the dispatcher
 // route, when the image's Blur is on (it reads neighbours), when a visible
 // adjustment layer has an enabled mask, when a layer's opacity is outside
 // 0...1, or when the services' adjustment layers are not the live ones.
@@ -17,15 +16,11 @@ import CoreRender
 import SuiteImaging
 
 extension AdjustmentSettings {
-    /// The enabled tone steps that change the image: ImagingProgram's steps as `applied(to:)` runs them, with
-    /// Hue/Saturation as Photo's own matrix (`runImaging`); nil while Blur would run.
+    /// The enabled tone steps that change the image: ImagingProgram's steps as `applied(to:)` and
+    /// `runImaging` run them; nil while Blur would run.
     var toneOperations: [ToneProgram.Operation]? {
         guard blurMargin == 0 else { return nil }
-        return imagingSteps.map { step in
-            guard case .hueSaturation = step else { return .adjustment(step) }
-            return .matrix(rows: PixelBuffer.colorMatrix(hue: hue, saturation: saturation),
-                           lightness: Float(min(max(lightness, -100), 100) / 100))
-        }
+        return imagingSteps.map(ToneProgram.Operation.adjustment)
     }
 }
 

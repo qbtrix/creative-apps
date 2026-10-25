@@ -12,5 +12,19 @@
     "find": "            hue: try c.decode(Double.self, forKey: .hue),\n            saturation: try c.decode(Double.self, forKey: .saturation),",
     "replace": "            hue: try c.decode(Double.self, forKey: .saturation),\n            saturation: try c.decode(Double.self, forKey: .hue),",
     "tests": "PhotoImagingTests"
+  },
+  {
+    "label": "hueSaturationIsCoresColorAdjust: the CPU render skips its last step, hue/saturation",
+    "file": "Sources/PhotoModel/PhotoAdjust+Imaging.swift",
+    "find": "            for step in steps {\n                let next = try cpu.adjusted(surface, step)",
+    "replace": "            for step in steps.dropLast() {\n                let next = try cpu.adjusted(surface, step)",
+    "tests": "PhotoImagingTests"
+  },
+  {
+    "label": "hueSaturationIsCoresColorAdjust: the CPU render hands back the picture it was given",
+    "file": "Sources/PhotoModel/PhotoAdjust+Imaging.swift",
+    "find": "            return try cpu.read(surface)\n",
+    "replace": "            _ = try cpu.read(surface)\n            return buffer\n",
+    "tests": "PhotoImagingTests"
   }
 ]
