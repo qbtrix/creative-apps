@@ -169,3 +169,4 @@ utc	stage	event	ref	note
 2026-10-25T08:35:03Z	3	poll	-	08:35Z poll: dev 7e5bcd82f; probe -3 done, lane now on probe -4 (40176388578/40176391007); no merges of ours, no needs-fix; no dev-red, no new findings, SC-f not on dev
 2026-10-25T08:51:50Z	3	poll	-	08:51Z poll: #4960 (LX-2) got needs-fix from probe -4 (macOS 40176391007): HomeModelTests/OnboardingModelTests 60s time limits only; #4960 touches neither, probe -6 holding #4960 passed both, probe -3 ran them 628s at the edge -> load, not this PR; commented evidence and asked supervisor to re-check (issuecomment-6395611121); no code change, no empty commit. dev 8d3a12c4b; no dev-red
 2026-10-25T09:07:46Z	3	poll	-	09:07Z poll: no merges; batch 20261025090316 running; #4960 needs-fix awaits supervisor; #5308 still open; no dev-red
+2026-10-25T09:24:49Z	3	poll	-	09:24Z poll: no merges; batch 20261025090316 Linux red on HomeModelTests time limits (load), bisecting; evidence added on #4960
