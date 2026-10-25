@@ -109,3 +109,4 @@ utc	stage	event	ref	note
 2026-10-25T10:11:28Z	check	heartbeat	16 PRs open+clean; dev CI 40178111920 green at 8d3a12c, #5316 closed; probe -6 macOS gate still running
 2026-10-25T10:31:17Z	check	heartbeat	16 PRs open+clean; probe -6 macOS gate still running, probe -9 Linux started; dev 8d3a12c green; no dev-red
 2026-10-25T10:51:11Z	check	heartbeat	16 PRs open+clean; probe -6 (carries #4953 #5006) green on Linux+macOS, awaiting lane merge; probe -9 Linux green; dev 8d3a12c green
+2026-10-25T11:13:12Z	check	heartbeat	16 PRs open+clean; probe -6 green prefix (#4953 #5006) not merged yet, lane run 40187391992 in progress; dev 68bec9fe green; no dev-red
