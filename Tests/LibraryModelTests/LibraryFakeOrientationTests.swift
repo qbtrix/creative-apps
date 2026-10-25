@@ -48,4 +48,19 @@ import Testing
         #expect(FakeBehavior.cropShaped(wide, nil, facing: .down).pixelSize == wide.pixelSize)
         #expect(FakeBehavior.cropShaped(wide, half).pixelSize == PixelSize(width: 150, height: 200))
     }
+
+    /// X belongs to the aspect picker's swap while a crop draft is open, so it never rejects the
+    /// photo there; once the crop closes, X rejects again. P still picks with the draft open.
+    @Test func xNeverRejectsWhileACropDraftIsOpen() throws {
+        var catalog = LibraryCatalog(services: .fake())
+        catalog.load([wide])
+        catalog.open("scan")
+        catalog.beginCrop()
+        #expect(catalog.cullChange(forKey: .reject) == nil)
+        if let change = catalog.cullChange(forKey: .reject) { try catalog.run(.cull(change)) }
+        #expect(catalog.items.first?.flag == PhotoFlag.none)
+        #expect(catalog.cullChange(forKey: .pick) == .flag(.pick))
+        catalog.cancelCrop()
+        #expect(catalog.cullChange(forKey: .reject) == .flag(.reject))
+    }
 }
