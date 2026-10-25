@@ -55,7 +55,13 @@ public struct HaloHeadless: HeadlessDocument {
         }
         let rendered = try renderFrame(options)
         let name = "\(workspace.selectedComposition?.name ?? "frame")-\(rendered.frame).png"
-        return [ExportedFile(suggestedName: name, format: format, data: try HaloFramePNG.data(rendered.pixels))]
+        return [ExportedFile(suggestedName: name, format: format, data: try Self.png(rendered))]
+    }
+
+    /// `frame` as a PNG: CoreRaster's `PNG.write` bytes, 8-bit sRGB RGBA with straight alpha. The CLI's export and
+    /// the render's PNG sequence both write it, so a file and the viewer agree.
+    public static func png(_ frame: HaloRenderedFrame) throws -> Data {
+        try PNG.write(frame.pixels, bitsPerChannel: 8)
     }
 
     /// The selected composition at `frame` (the playhead when absent) at 1/`scale` size (1 when absent), drawn as

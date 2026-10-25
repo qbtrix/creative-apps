@@ -5,7 +5,8 @@
 // link's ticks over the last second (`PlaybackDriver.measuredFPS`), capped at the document rate, since a 60 Hz link
 // still shows each of 24 frames once. Under the document rate it is dropping (QB-L4, report-only). A scene with text
 // the stage can't draw says so: "Text not shown (1)", and so does one with masks or mattes: "Masks not shown (1)".
-// Under Direct Select, `pathHelp` says why no points can be edited ("Unlock Layer 1 to edit its points.").
+// Under Direct Select, `pathHelp` says why no points can be edited ("Unlock Layer 1 to edit its points."). After a place,
+// `placeNote` is what it did or why it refused (FlarePlace+Menu.swift).
 // Integer math on clamped values, so nothing here can trap.
 import FlareCore
 
@@ -25,6 +26,7 @@ extension FlareWorkspace {
         let masked = ExportScan.maskedLayers(scene.layers, document?.symbols ?? [])
         if masked > 0 { pills.maskWarning = "Masks not shown (\(masked))" }
         if tool == .directSelect { pills.pathHelp = pathHelp }
+        pills.placeNote = placeStatus
         return pills
     }
 
@@ -57,6 +59,7 @@ public struct StatusPills: Sendable, Equatable {
     public var textWarning: String?                         // "Text not shown (1)"
     public var maskWarning: String?                         // "Masks not shown (1)"
     public var pathHelp: String?                            // Direct Select: why no points can be edited
+    public var placeNote: String?                           // the last place: "Placed logo.svg: 2 layers."
 
     public init(
         aspect: String, size: String, fps: String, actualFPS: String? = nil, isDropping: Bool = false,
