@@ -45,6 +45,13 @@ extension HaloComposition {
 extension HaloProject {
     public var documentSetup: DocumentSetup? { selectedComposition?.documentSetup }
 
+    /// Adds a composition from the shared New Document sheet's `setup`, named as the suggested settings are;
+    /// false for a setup with a problem.
+    @discardableResult
+    public mutating func newComposition(_ setup: DocumentSetup) -> Bool {
+        newComposition(CompositionSettings(name: suggestedSettings.name, setup: setup))
+    }
+
     /// Applies `setup` to the selected composition, old content kept at `anchor`, as one "Document Settings"
     /// step; false with no composition or a setup with a problem (CompositionSettings checks it against `limits`).
     @discardableResult

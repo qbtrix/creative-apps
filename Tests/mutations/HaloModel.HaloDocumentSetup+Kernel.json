@@ -1,4 +1,6 @@
 [
 {"label":"keysKeepTimes: a longer composition stretches the keys to its new length","file":"Sources/HaloModel/HaloDocumentSetup+Kernel.swift","find":"{ rate == old ? $0 : rate.frame(atSeconds: old.seconds(ofFrame: $0)) }","replace":"{ $0 * frames / max(1, end) }","tests":"HaloCompositionSettingsTests"},
-{"label":"oldFilesUnchanged: a white composition writes its background too","file":"Sources/HaloModel/HaloFrameRate+Kernel.swift","find":"if background != .white { try c.encode(background, forKey: .background) }","replace":"try c.encode(background, forKey: .background)","tests":"HaloCompositionSettingsTests"}
+{"label":"oldFilesUnchanged: a white composition writes its background too","file":"Sources/HaloModel/HaloFrameRate+Kernel.swift","find":"if background != .white { try c.encode(background, forKey: .background) }","replace":"try c.encode(background, forKey: .background)","tests":"HaloCompositionSettingsTests"},
+{"label":"setupAddsSelectedCompositionInOneStep: the new composition takes the sheet's setup","file":"Sources/HaloModel/HaloDocumentSetup+Kernel.swift","find":"newComposition(CompositionSettings(name: suggestedSettings.name, setup: setup))","replace":"newComposition(suggestedSettings)","tests":"HaloNewCompositionSetupTests"},
+{"label":"setupAddsSelectedCompositionInOneStep: it is named after the next id","file":"Sources/HaloModel/HaloDocumentSetup+Kernel.swift","find":"CompositionSettings(name: suggestedSettings.name, setup: setup)","replace":"CompositionSettings(name: \"Comp 1\", setup: setup)","tests":"HaloNewCompositionSetupTests"}
 ]
