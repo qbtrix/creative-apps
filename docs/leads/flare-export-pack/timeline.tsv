@@ -168,3 +168,4 @@ utc	stage	event	ref	note
 2026-10-25T00:56:51Z	heartbeat	unchanged: batch 20261024235353 still at probe -6 (formed 23:53Z); #4854 565669e7 and #5025 9c2bc627 open, waiting; dev afef017c
 2026-10-25T01:18:12Z	heartbeat	dev ae3efdb8 (+#4874 only); batch 20261024235353 probe -6 still up; #4854 and #5025 open, not in it
 2026-10-25T01:40:01Z	heartbeat	batch 20261024235353 bisecting (probe -9 added); dev ae3efdb8; #4854 and #5025 open, waiting for next batch
+2026-10-25T02:01:40Z	heartbeat	dev c16bcd16 (+#5156); batch 20261024235353 still bisecting (-6, -9); #4854 and #5025 open, waiting
