@@ -226,3 +226,4 @@ utc	stage	event	ref	note
 2026-10-25T01:03Z	check-in	quiet: #5171/#5206 open, no needs-fix; no XP-3/XP-4 PR; no supervisor reply on #5193
 2026-10-25T01:34Z	check-in	quiet: #5171/#5206 open, no needs-fix; no XP-3/XP-4 PR; no supervisor reply on #5193
 2026-10-25T02:06Z	check-in	quiet: #5171/#5206 open, no needs-fix; no XP-3/XP-4 PR; no supervisor reply on #5193
+2026-10-25T02:38Z	check-in	#5192 (captain, p0 #5191) merged 02:20Z; #5171/#5206 still mergeable clean, no needs-fix; no XP-3/XP-4 PR; no supervisor reply on #5193
