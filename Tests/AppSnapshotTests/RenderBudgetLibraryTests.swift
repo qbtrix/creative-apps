@@ -33,6 +33,10 @@ extension BodyCountSuites {
             expectP95(select, atMost: 120, target: 33)  // dev: 80 ms
         }
 
+        /// orientation-crop OC-10: Photo > Rotate Right on the loupe's 24 MP photo is one edit, so at most
+        /// two window bodies (the edit, then its render landing); its p95 is reported, not gated.
+        @Test(.disabled("waits on OC-9"), .timeLimit(.minutes(2))) func rotateInLoupe() async throws {}
+
         static func run() async throws -> (scroll: RenderStep, select: RenderStep) {
             let w = RenderBudgetWindow(LibraryWindow(arguments: ["Library", "-LibraryFixture", "samples"]))
             defer { w.close() }

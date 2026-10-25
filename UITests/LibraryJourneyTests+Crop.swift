@@ -65,6 +65,13 @@ extension LibraryJourneyTests {
     /// The live 1:1 frame's side at 5° on a 6000 × 4000 photo (MJ6L).
     private static let cropLiveWidth = 3545
 
+    /// LJ-OC (orientation-crop OC-10): the sideways IMG_0001 selected, Photo >
+    /// Rotate Right stands its thumbnail up; then IMG_0002, a landscape photo,
+    /// cropped in the loupe on 4:5 turned portrait frames a tall 4:5.
+    @MainActor func testRotateFlipAndPortraitCrop() throws {
+        throw XCTSkip("waits on OC-9")
+    }
+
     // MARK: - Steps
 
     /// Step 1: by name, IMG_0001 in the loupe, the Develop tab, the photo clicked, R: the frame
