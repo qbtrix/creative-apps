@@ -178,3 +178,4 @@ utc	stage	event	ref	note
 2026-10-25T06:59:49Z	3	heartbeat	-	batch-20261025054232 probe -6 macOS gate still running; #4988 waits for the next batch
 2026-10-25T07:17:50Z	3	heartbeat	-	batch-20261025054232 (not ours) bisecting at probe -3; #4988 waits for the next batch
 2026-10-25T07:35:44Z	3	heartbeat	-	batch-20261025054232 probe -3 macOS running (Linux green); #4988 waits for the next batch
+2026-10-25T07:53:37Z	3	heartbeat	-	batch-20261025054232 probe -3 macOS still running; #4988 waits for the next batch
