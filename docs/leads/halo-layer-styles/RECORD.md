@@ -5,9 +5,9 @@ Run: act-1a16e2f645b-47gj · Session: claude/layer-styles-lead-rsr0u8 · Started
 Wire: suiteui layer-styles:LS-a
 Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTests.glowReachesItsKeyedSize and glowIsNotClipped; add the no-padding mutation, origin dropped in LiveFrameRendering's styled composite)
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
-Stage: 3 wave 5: every HY slice has a PR. #5156 HY-1 ready (clean, unbatched ~10h); drafts #5157 HY-2, #5158 HY-m, #5161 HY-u, #5218 HY-z (HY-7, 8/8 mutations, 13 files +391/-7 own); LS-2 #5174 open
-Base: 6be19b3 (origin/dev)
-Next: the supervisor lands #5156 then #5174 by hand after #4874 (21:55Z answer); the stack retargeter moves drafts onto dev. Then merge dev into #5158, gate, Head, ready; then #5157, #5161, #5218 the same; HY-8 (feature-done) after HY-7 lands
+Stage: 3 wave 5: #5156 HY-1 merged 01:41Z (dev c16bcd16c). #5158 HY-m: dev merged in (add/add took HY-m side), CI: PASS, head 333603baa, ready. Drafts #5157 HY-2, #5161 HY-u, #5218 HY-z wait on LS-2 #5174 (open, batch gate pending)
+Base: c16bcd16c (origin/dev)
+Next: watch #5158 batch and #5174 needs-fix. On #5174 merge: merge dev into #5157, #5161, #5218 in order, gate, push, Head, ready. Belt-Slice-Done per slice on green CI; HY-8 (feature-done) after HY-7 lands
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
