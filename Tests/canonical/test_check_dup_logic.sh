@@ -2,7 +2,8 @@
 # Tests/canonical/test_check_dup_logic.sh: scripts/check-dup-logic, the
 # canonical-first ratchet (docs/factory/lead.md rule 20), on scratch trees that
 # use the repo's real Tests/canonical-concepts.txt: stem matching by name and
-# by primary type, the adapter exemption, the SuiteModel exclusion, the
+# by primary type, the adapter rule (an adapter's name never counts, its primary
+# type does), the SuiteModel exclusion, the
 # baseline that only shrinks, and the fast lane's --paths mode with Allow-Dup.
 # Run: bash Tests/canonical/test_check_dup_logic.sh   (exit 0 = all pass)
 # bash 3.2 compatible, needs python3.
@@ -60,6 +61,14 @@ add Sources/DesignApp/Canvas/Overlay.swift $'// struct UndoNote is a comment, no
 expect "matches by primary type, comments skipped" "Sources/DesignApp/Canvas/Overlay.swift: new app-local Selection logic" "$(run | head -1)"
 rm "$tmp/r/Sources/DesignApp/Canvas/Overlay.swift"
 add Sources/DesignApp/Canvas/Overlay+Kernel.swift 'struct SelectionOverlay {}'
+expect "an adapter that declares a concept type counts" "Sources/DesignApp/Canvas/Overlay+Kernel.swift: new app-local Selection logic" "$(run | head -1)"
+add Sources/HaloModel/HaloHistory+Kernel.swift 'public struct HaloHistory: Sendable {}'
+expect "a +Kernel name is no pass for its own History type" "Sources/HaloModel/HaloHistory+Kernel.swift: new app-local History logic" "$(run | grep HaloHistory)"
+rm "$tmp/r/Sources/HaloModel/HaloHistory+Kernel.swift"
+add Sources/PhotoModel/PhotoUndoAdapter.swift 'enum PhotoUndoAdapter {}'
+expect "an Adapter name is no pass for its own Undo type" "Sources/PhotoModel/PhotoUndoAdapter.swift: new app-local Undo logic" "$(run | grep PhotoUndo)"
+rm "$tmp/r/Sources/PhotoModel/PhotoUndoAdapter.swift"
+add Sources/DesignApp/Canvas/Overlay+Kernel.swift $'import SuiteKernel\nextension SelectionOverlayModel: SelectionTarget {}'
 add Sources/SuiteModel/Selection/Selection.swift 'public struct Selection {}'
 
 out=$(run); rc=$?
