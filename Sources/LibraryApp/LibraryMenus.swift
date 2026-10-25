@@ -107,6 +107,14 @@ struct LibraryMenu {
         var exportHelp: String?  // why Export… can't act, before the services' reason
     }
 
+    /// Photo > Delete Rejected Photos… (cull-finish, LibraryWindow+Trash.swift): the Model's
+    /// title, and the action that opens the confirm, nil while `help` says why it can't run.
+    struct Trash {
+        var deleteRejects: Action?
+        var title: String = "Delete Rejected Photos…"
+        var help: String?
+    }
+
     var edit = Edit()
     var file = File()
     var thumbnails = Thumbnails()
@@ -128,4 +136,6 @@ struct LibraryMenu {
 
 extension FocusedValues {
     @Entry var libraryMenu: LibraryMenu?
+    /// Published by the trash area, which owns the confirm's presented flag.
+    @Entry var libraryTrash: LibraryMenu.Trash?
 }

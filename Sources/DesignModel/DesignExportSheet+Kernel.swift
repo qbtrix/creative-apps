@@ -83,11 +83,11 @@ extension DesignWorkspace {
     public func exportRows(_ options: DesignExportOptions) -> [DesignExportRow] {
         guard let plan = try? exportPlan(options, existing: []) else { return [] }
         let files = plan.map { item in
-            let size = "\(Self.whole(item.width)) × \(Self.whole(item.height))"
+            let size = "\(Self.whole(item.width)) × \(Self.whole(item.height)) pt"
             let factor = options.size == .scale(Double(options.scale)) ? "\(exportFactor(options.format, options.scale))x, " : ""
             let text = [.png, .jpeg].contains(options.format)
                 ? "\(item.fileName) \(size), \(factor)\(item.pixelWidth) × \(item.pixelHeight) px"
-                : "\(item.fileName) \(size) pt"
+                : "\(item.fileName) \(size)"
             return DesignExportRow(id: item.nodeID, text: text, skipped: nil)
         }
         guard options.scope == .selection, let page = selectedPage else { return files }
