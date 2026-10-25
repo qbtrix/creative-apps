@@ -115,4 +115,5 @@ ts	kind	note
 2026-10-24T22:44:57Z	wait	heartbeat	-	ST-z2 #5133 still queued: batch 20261024205137 bisecting (-6 green, -3 red, -1 probing since 22:42Z)
 2026-10-24T23:06:59Z	wait	heartbeat	-	ST-z2 #5133 still queued: batch 20261024205137 probe -1 macOS gate running since 22:42Z
 2026-10-25T02:35:00Z	3	stage-start	-	relaunch act-1a170e37e52-d0q6; lead branch recreated on main afef017c2; #5133 conflicts with dev in LibraryWindow.swift, merging dev
-2026-10-25T03:20:00Z	3	pr-update	ST-z	#5133 dev merged in (LibraryWindow.swift conflict resolved), scripts/ci --changed PASS, Head 502e566f9; open findings 0
+2026-10-25T02:40:00Z	3	pr-update	ST-z	#5133 dev merged in (LibraryWindow.swift conflict resolved), scripts/ci --changed PASS, Head 502e566f9; open findings 0
+2026-10-25T03:03:00Z	3	heartbeat	ST-z	#5133 at 502e566f9 waits for the next batch (batch 20261025023716 in its macOS gate); no lane comment on the new head; open findings 0
