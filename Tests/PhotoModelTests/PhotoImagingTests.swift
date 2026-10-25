@@ -68,6 +68,23 @@ import Testing
         #expect(AdjustmentSettings().imagingSteps.isEmpty)
     }
 
+    /// Hue/saturation is core's ColorAdjust (`PixelBuffer.hueSaturation`, suite-imaging IM-12) on every route:
+    /// the CPU render gives core's pixels, and the live program is ImagingProgram's steps as they are.
+    @Test func hueSaturationIsCoresColorAdjust() throws {
+        var settings = AdjustmentSettings()
+        for edit: AdjustmentEdit in [.exposure(0.2), .hue(40), .saturation(-30), .lightness(10)] { settings.apply(edit) }
+        var buffer = try PixelBuffer(width: 4, height: 2)
+        for x in 0..<4 {
+            try buffer.setPixel(x: x, y: 0, RGBA(r: Float(x) / 3, g: 0.2, b: 0.6, a: 1))
+            try buffer.setPixel(x: x, y: 1, RGBA(r: 0.3, g: Float(x) / 3 * 0.5, b: 0.1, a: 0.5))
+        }
+        let exposed = try buffer.exposure(stops: 0.2)
+        let core = try exposed.hueSaturation(hue: Float(40), saturation: Float(-30), lightness: Float(10))
+        #expect(try settings.runImaging(settings.imagingSteps, on: buffer) == core)
+        #expect(try settings.runImaging(Array(settings.imagingSteps.prefix(1)), on: buffer) == exposed)
+        #expect(settings.toneOperations == settings.imagingSteps.map(ToneProgram.Operation.adjustment))
+    }
+
     @Test func aLegacyFileGainsNeutralOutputLevels() throws {
         let opened = try PhotoHeadless.open(try Data(contentsOf: Self.legacy), name: "adjust-legacy.ora")
         let settings = opened.workspace.adjustments

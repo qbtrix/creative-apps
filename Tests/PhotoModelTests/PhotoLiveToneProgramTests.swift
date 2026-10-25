@@ -1,7 +1,7 @@
 // PhotoLiveToneProgramTests.swift: the live route's program comes from SuiteImaging (suite-imaging IM-8,
-// slice IM-photo). `toneOperations` is ImagingProgram's step list, as the CPU render runs it, with
-// hue/saturation as Photo's own matrix: a file's output levels reach the live GPU picture, a disabled section
-// adds nothing, and Blur still sends the region to the dispatcher route. Linux-safe.
+// slice IM-photo). `toneOperations` is ImagingProgram's step list, as the CPU render runs it, hue/saturation
+// core's own (IM-12): a file's output levels reach the live GPU picture, a disabled section adds nothing, and
+// Blur still sends the region to the dispatcher route. Linux-safe.
 import CoreRaster
 import CoreRender
 import Foundation
@@ -28,19 +28,18 @@ import Testing
         #expect(levels == [.levels(inBlack: 0.1, inWhite: 0.9, gamma: 1.2, outBlack: 0.2, outWhite: 0.8, encoding: .sRGB)])
     }
 
-    @Test func theCPUStepsWithPhotosMatrix() throws {
+    @Test func theCPUStepsAsTheyAre() throws {
         let s = try Self.settings()
         let operations = try #require(s.toneOperations)
-        let matrix = ToneProgram.Operation.matrix(rows: PixelBuffer.colorMatrix(hue: 30, saturation: 20), lightness: -0.1)
-        let expected = s.imagingSteps.dropLast().map(ToneProgram.Operation.adjustment) + [matrix]
         #expect(s.imagingSteps.count == 4)
-        #expect(operations == expected)
+        #expect(operations == s.imagingSteps.map(ToneProgram.Operation.adjustment))
+        #expect(operations.last == .adjustment(.hueSaturation(hue: 30, saturation: 20, lightness: -10)))
     }
 
     @Test func aDisabledSectionAddsNothing() throws {
         let operations = try #require(try Self.settings(enabled: #""exposure","curves""#).toneOperations)
         #expect(operations.count == 2)
-        #expect(!operations.contains { if case .matrix = $0 { true } else { false } })
+        #expect(!operations.contains { if case .adjustment(.hueSaturation) = $0 { true } else { false } })
     }
 
     @Test func blurTakesTheDispatcherRoute() throws {
