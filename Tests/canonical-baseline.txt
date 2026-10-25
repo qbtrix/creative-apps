@@ -99,7 +99,6 @@ Sources/LibraryModel/Live/LiveThumbnails.swift
 Sources/LibraryModel/LoupeZoom.swift
 Sources/PhotoApp/CropOptions.swift
 Sources/PhotoApp/CropOverlay.swift
-Sources/PhotoApp/ExportSheet.swift
 Sources/PhotoApp/ImageIOCodec.swift
 Sources/PhotoApp/PhotoAutosave.swift
 Sources/PhotoApp/PhotoHistoryTab.swift
@@ -128,13 +127,11 @@ Sources/PhotoModel/Live/LiveAdjustmentLayers.swift
 Sources/PhotoModel/Live/LiveCrop.swift
 Sources/PhotoModel/Live/LiveExportSizing.swift
 Sources/PhotoModel/Live/LiveRecovery.swift
-Sources/PhotoModel/Live/LiveSampling.swift
 Sources/PhotoModel/Live/LiveSelection.swift
 Sources/PhotoModel/Live/LiveTransform.swift
 Sources/PhotoModel/PhotoClipboard.swift
 Sources/PhotoModel/PhotoCropSize.swift
 Sources/PhotoModel/PhotoDocumentFile.swift
-Sources/PhotoModel/PhotoEyedropper.swift
 Sources/PhotoModel/PhotoHistory.swift
 Sources/PhotoModel/PhotoKeepLayers.swift
 Sources/PhotoModel/PhotoLevelsFormat.swift

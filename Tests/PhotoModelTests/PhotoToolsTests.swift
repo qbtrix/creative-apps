@@ -21,8 +21,8 @@ import Testing
 
 /// Whether `tool` visibly changed from `a` to `b`: the pixels for the
 /// painting tools, the selection for marquee, the pending crop for crop, the
-/// layers' offsets for move, the brush color for the eyedropper and the open
-/// box for the Type tool.
+/// layers' offsets for move, the brush color for the eyedropper, the open
+/// box for the Type tool and the draft or paths for the Pen.
 private func shows(_ tool: PhotoTool, changeFrom a: PhotoWorkspace, to b: PhotoWorkspace) -> Bool {
     switch tool {
     case .brush, .eraser, .clone, .heal, .gradient:
@@ -37,6 +37,8 @@ private func shows(_ tool: PhotoTool, changeFrom a: PhotoWorkspace, to b: PhotoW
         a.brushOptions != b.brushOptions
     case .text:
         a.textBox != b.textBox
+    case .pen:
+        a.penDraft != b.penDraft || a.paths != b.paths
     }
 }
 

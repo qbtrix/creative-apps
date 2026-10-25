@@ -73,6 +73,7 @@ public struct SuiteGallery: View {
         GalleryEyedropper.pages, GalleryGradientEditor.pages, GalleryPlaceImage.pages, GalleryAreaSelect.pages,
         GalleryNewDocument.pages, GalleryFontPicker.pages,
         GalleryToneRows.pages,
+        GalleryCrop.pages,
         GalleryExportPack.pages,
     ]
 
