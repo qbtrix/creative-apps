@@ -89,3 +89,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 2026-10-25T10:17:58Z: batch-20261025090316 (p0, not ours) still bisecting; #4999 waits
 - 2026-10-25T10:35:57Z: batch-20261025090316 (p0, not ours) bisecting; #4999 waits
 - 2026-10-25T10:54:04Z: batch-20261025090316 (p0, not ours) bisect narrowing; #4999 waits
+- 2026-10-25T11:12:03Z: no batch in flight; #4999 clean, ready for the next batch
