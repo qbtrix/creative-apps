@@ -153,6 +153,7 @@ import Testing
         let plain = try JSONEncoder().encode(AdjustmentSettings())
         #expect(!String(decoding: plain, as: UTF8.self).contains("kinds"))
         var ws = try Self.checker()
+        ws.services = .live  // PhotoHeadless opens through the live archive
         try Self.run("adjust.invert", on: &ws)
         ws.addAdjustmentLayer(.blackAndWhite)
         let saved = try PhotoHeadless(workspace: ws).save()

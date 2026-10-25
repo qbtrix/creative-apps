@@ -14,7 +14,7 @@ enum LiveAdjustmentLayers { static func make() -> any AdjustmentLayering { LiveA
 
 struct LiveAdjustmentLayering: AdjustmentLayering {
     var unavailableHelp: String? { nil }
-    var kinds: [AdjustmentKind] { [.exposure, .levels, .curves, .hueSaturation] }
+    var kinds: [AdjustmentKind] { [.exposure, .levels, .curves, .hueSaturation, .blackAndWhite, .invert] }
 
     /// Throws `RasterError.invalid` when `opacity` is outside 0...1 or not
     /// finite, when `mask` is not the size of `below`, or when an adjustment fails.

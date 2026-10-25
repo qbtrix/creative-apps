@@ -427,6 +427,8 @@ extension AdjustmentKind {
         case .curves: "Curves"
         case .blur: "Blur"
         case .hueSaturation: "Hue/Saturation"
+        case .blackAndWhite: "Black & White"
+        case .invert: "Invert"
         }
     }
 }

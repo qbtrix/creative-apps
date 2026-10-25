@@ -103,3 +103,14 @@ path.anchor-remove
 path.anchor-convert
 paths.list
 paths.edit
+adjust.black-and-white
+adjust.invert
+filter.gaussian-blur
+filter.motion-blur
+filter.sharpen
+filter.reduce-noise
+filter.add-noise
+look.list
+look.apply
+look.save
+look.delete

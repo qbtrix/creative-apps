@@ -16,6 +16,7 @@
 // is outside 0...1, or when the services' adjustment layers are not the live ones. Linux-safe.
 import CoreRaster
 import CoreRender
+import SuiteImaging
 import Synchronization
 
 extension AdjustmentSettings {
@@ -35,7 +36,7 @@ extension AdjustmentSettings {
             operations.append(.matrix(rows: PixelBuffer.colorMatrix(hue: hue, saturation: saturation),
                                       lightness: Float(min(max(lightness, -100), 100) / 100)))
         }
-        return operations
+        return operations + AdjustKinds.program(kinds)
     }
 }
 

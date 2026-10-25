@@ -11,7 +11,8 @@ import Testing
         #expect(settings.blackPoint == 0 && settings.whitePoint == 1 && settings.gamma == 1)
         #expect(settings.blurSigma == 0)
         #expect(settings.hue == 0 && settings.saturation == 0 && settings.lightness == 0)
-        #expect(AdjustmentKind.allCases.allSatisfy(settings.isEnabled))
+        #expect(AdjustmentKind.sections.allSatisfy(settings.isEnabled))
+        #expect(!settings.isEnabled(.blackAndWhite) && !settings.isEnabled(.invert))
         #expect(settings.isIdentity)
     }
 

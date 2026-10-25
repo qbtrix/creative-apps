@@ -20,13 +20,29 @@
 // PhotoAdjust+Imaging.swift. `tone` is the suite's ToneSettings (white
 // balance, tone, presence, sharpen; tone-controls PT-1), set whole by one
 // `.tone` edit; it has no AdjustmentKind, so it has no switch and no section
-// of its own, and PT-3 renders it. Linux-safe.
+// of its own, and PT-3 renders it. `kinds` holds Black & White and Invert
+// (adjust-everywhere AJ-8), the suite's ImagingKinds, run after hue/saturation
+// in order; their switch is whether the list holds them, so `enabled` never
+// does and a file from before them opens and saves as it did. Linux-safe.
 import CoreRaster
 import SuiteImaging
 
 /// One adjustment section in the inspector.
 public enum AdjustmentKind: String, CaseIterable, Sendable, Codable {
-    case exposure, levels, curves, blur, hueSaturation
+    case exposure, levels, curves, blur, hueSaturation, blackAndWhite, invert
+
+    /// The sections with values and a switch of their own, the ones `enabled` holds.
+    public static let sections: [AdjustmentKind] = [.exposure, .levels, .curves, .blur, .hueSaturation]
+}
+
+extension ImagingKind {
+    /// The adjustment this kind is.
+    var adjustment: AdjustmentKind {
+        switch self {
+        case .blackAndWhite: .blackAndWhite
+        case .invert: .invert
+        }
+    }
 }
 
 /// One change the inspector can ask for.
@@ -76,20 +92,35 @@ public struct AdjustmentSettings: Sendable, Hashable {
     public private(set) var imaging = AdjustSettings.neutral
     /// Gaussian blur radius in pixels.
     public private(set) var blurSigma: Double = 0
-    public private(set) var enabled: Set<AdjustmentKind> = Set(AdjustmentKind.allCases)
+    public private(set) var enabled: Set<AdjustmentKind> = Set(AdjustmentKind.sections)
     /// White balance, tone, presence and sharpen; stored under "tone", left
     /// out when neutral.
     public private(set) var tone: ToneSettings = .neutral
+    /// Black & White and Invert, in the order they run; stored under "kinds",
+    /// left out when empty.
+    public private(set) var kinds: [ImagingKind] = []
 
     public init() {}
 
     /// The stored form read back (PhotoAdjust+Imaging.swift), unchecked like
     /// the stored values themselves.
-    init(imaging: AdjustSettings, blurSigma: Double, enabled: Set<AdjustmentKind>, tone: ToneSettings = .neutral) {
-        (self.imaging, self.blurSigma, self.enabled, self.tone) = (imaging, blurSigma, enabled, tone)
+    init(imaging: AdjustSettings, blurSigma: Double, enabled: Set<AdjustmentKind>, tone: ToneSettings = .neutral,
+         kinds: [ImagingKind] = []) {
+        (self.imaging, self.blurSigma, self.enabled, self.tone, self.kinds) = (imaging, blurSigma, enabled, tone, kinds)
     }
 
-    public func isEnabled(_ kind: AdjustmentKind) -> Bool { enabled.contains(kind) }
+    /// A section's switch; Black & White's and Invert's is whether `kinds` holds them.
+    public func isEnabled(_ kind: AdjustmentKind) -> Bool {
+        AdjustmentKind.sections.contains(kind) ? enabled.contains(kind) : kinds.contains { $0.adjustment == kind }
+    }
+
+    /// Replaces the kinds (AdjustTarget's `setKinds`).
+    mutating func setKinds(_ kinds: [ImagingKind]) { self.kinds = kinds }
+
+    /// Imaging, tone and kinds from `look`; blur and the switches stay.
+    mutating func apply(_ look: LookPreset) {
+        (imaging, tone, kinds) = (look.adjust, look.tone, look.kinds)
+    }
 
     /// Whether a section's values leave the image as it is.
     public func isIdentity(_ kind: AdjustmentKind) -> Bool {
@@ -125,6 +156,12 @@ public struct AdjustmentSettings: Sendable, Hashable {
             imaging.hueSaturation.saturation = Self.clamp(value, to: Self.percentRange) ?? saturation
         case .lightness(let value):
             imaging.hueSaturation.lightness = Self.clamp(value, to: Self.percentRange) ?? lightness
+        case .setEnabled(let kind, let isOn) where !AdjustmentKind.sections.contains(kind):
+            if !isOn {
+                kinds.removeAll { $0.adjustment == kind }
+            } else if !isEnabled(kind) {
+                kinds.append(kind == .invert ? .invert : .blackAndWhite(.neutral))
+            }
         case .setEnabled(let kind, let isOn):
             if isOn { enabled.insert(kind) } else { enabled.remove(kind) }
         case .reset(let kind):
@@ -147,6 +184,8 @@ public struct AdjustmentSettings: Sendable, Hashable {
             blurSigma = defaults.blurSigma
         case .hueSaturation:
             imaging.hueSaturation = defaults.imaging.hueSaturation
+        case .blackAndWhite, .invert:
+            kinds.removeAll { $0.adjustment == kind }
         }
     }
 
