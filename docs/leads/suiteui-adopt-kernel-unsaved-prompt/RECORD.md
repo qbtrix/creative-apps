@@ -27,6 +27,8 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 2026-10-25 01:00Z: hb42: no change; dev afef017c fix(tests): give each Design drag gesture its own ; #5088/#5089/#5091/#5231 open, fast-lane only, no needs-*; no open findings.
+
 - 2026-10-25 00:30Z: hb41: no change; dev afef017c fix(tests): give each Design drag gesture its own ; #5088/#5089/#5091/#5231 open, fast-lane only, no needs-*; the lane is bisecting batch 20261024235353 (#5192–#5214, none ours); no open findings.
 
 - 2026-10-25 00:20Z: Belt nudge: this run's record pushes went to lead/adopt-kernel-unsaved-prompt by mistake; carried them here, the branch Belt reads. State unchanged: dev afef017c, #5088/#5089/#5091/#5231 open, fast-lane only, no needs-*; no open findings.
