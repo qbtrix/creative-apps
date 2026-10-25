@@ -208,13 +208,9 @@ private struct AutosaveRecoveryModifier: ViewModifier {
             } message: { item in
                 Text(AutosaveDriver.message(item))
             }
-            .alert(
-                driver.restoreError ?? "",
-                isPresented: Binding(get: { driver.restoreError != nil }, set: { if !$0 { driver.dismissRestoreError() } })
-            ) {
-                Button("OK") { driver.dismissRestoreError() }
-                    .accessibilityIdentifier("suite.recovery.restoreError")
-            }
+            .suiteProblemAlert(
+                Binding(get: { driver.restoreError }, set: { if $0 == nil { driver.dismissRestoreError() } }),
+                okID: "suite.recovery.restoreError")
     }
 }
 

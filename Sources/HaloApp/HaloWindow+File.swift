@@ -202,7 +202,7 @@ extension HaloProject {
     }
 }
 
-/// The system alert for a failed save or open, shown each time the Model's
+/// The problem alert (suiteProblemAlert) for a failed save or open, shown each time the Model's
 /// message is set again (an open clears it at `beginOpen`, so the same
 /// failure twice shows twice). Dismissing it keeps the message, so `halo.file`
 /// still reads "Not saved"; the alert owns only whether it is showing.
@@ -212,12 +212,7 @@ private struct HaloFileAlert: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .alert(
-                shown ?? "",
-                isPresented: Binding(get: { shown != nil }, set: { if !$0 { shown = nil } })
-            ) {
-                Button("OK", role: .cancel) {}
-            }
+            .suiteProblemAlert($shown)
             .onChange(of: message) { _, new in if let new { shown = new } }
     }
 }
