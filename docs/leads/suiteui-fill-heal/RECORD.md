@@ -2,9 +2,9 @@
 
 Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/features/fill-heal.md
 Run: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
-Stage: 3 wave 2 (next slices stacked; wave 1 in the lane)
+Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main ef37711d (verified) / dev ae3efdb8
-Next: wait for the lane to merge #4889 / #5121 / #5137, then retarget #4896, #5245 to dev; FH-9 and FH-10 after FH-7 merges.
+Next: lane merges #4889/#5121/#5137/#5253, then retarget #4896 (add fast-lane) and #5245 to dev; FH-7 chain, then #5109 → #5251.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -30,6 +30,7 @@ Next: wait for the lane to merge #4889 / #5121 / #5137, then retarget #4896, #52
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-25T01:45Z: FH-9 opened as #5253 (docs-only C4, on dev, head 2f2b89ff) and FH-10 as #5251 (feature-done, on FH-8, head 2043f944), both CI: PASS.
 - 2026-10-25T01:15Z: wave 2: FH-9 (C4-only, on dev) and FH-10 (feature-done, on FH-8) building; 0 open findings.
 - 2026-10-25T01:20Z: replay done: #5107 split into #5245 (FH-7a, 10 files, on FH-3) and #5107 (FH-7b, 7 files, on FH-7a); #5108, #5129 on FH-7; #5109 on lead/fill-heal-FH-8-base (FH-7b + FH-4 merged), retarget to dev once both land; #5121 #5137 on dev. All CI: PASS.
 - 2026-10-24T23:20Z: dev was rewritten to a new root (4f00afb8, #5150); old slice branches share no history with it, so fixers replay each PR's own commits onto the new dev, split to the 400-line/15-file cap, re-gate and force-with-lease push the lead/* branches (same PR numbers).
