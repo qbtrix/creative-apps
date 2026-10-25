@@ -50,3 +50,5 @@ Next: #5096 (AR-photo-u) back in the fast lane at 7c7f27654 (387+/11-, 11 files)
 - Wire: suite-imaging:IM-z [ ] (AR-z builds ahead on IM-a's merged contract; swap and tick once IM-z's Belt-Slice-Done lands)
 - Open findings for this feature: 0.
 - 2026-10-24T07:05Z: run act-1a16cae7989-hj12 resumes on dev 830af22d. Server-added footers removed from #4848, #4859, #4865, #4872 bodies so Head: is the last line again (#4828, #4861, #4875, #4876 already clean). Contract-first waits (rule 12) applied to the slice table.
+
+- 2026-10-25T09:42Z: dev-red #5316 names #4877 in range; failures are Suite Home/Onboarding model timeouts, not Photo selection. AR-photo-m waits for a green full or scoped run containing #4877.
