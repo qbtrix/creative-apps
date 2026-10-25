@@ -132,3 +132,4 @@ utc	stage	event	ref	note
 2026-10-25T08:03:25Z	3	poll	-	08:03Z poll: dev 13fb2f591 unchanged; probe -3 macOS gate 40171578102 running (56m), Linux green; no merges, no needs-fix on ours; #4965/#4961/#4982 cycle fast-lane on/off (needs-split) while they wait on #4939; no dev-red, no new findings, SC-f not on dev
 2026-10-25T08:18:47Z	3	poll	-	08:18Z poll: dev 7e5bcd82f (#5287 ci-findings dedup, not ours); probe -3 macOS gate 40171578102 running (71m), Linux green; no merges of ours, no needs-fix; no dev-red, no new findings, SC-f not on dev
 2026-10-25T08:35:08Z	3	poll	-	08:35Z poll: dev 7e5bcd82f; probe -3 done, lane now on probe -4 (40176388578/40176391007); no merges of ours, no needs-fix; no dev-red, no new findings, SC-f not on dev
+2026-10-25T08:51:55Z	3	poll	-	08:51Z poll: dev 8d3a12c4b; no merges of ours; no needs-fix on this feature; no dev-red, no new findings, SC-f not on dev
