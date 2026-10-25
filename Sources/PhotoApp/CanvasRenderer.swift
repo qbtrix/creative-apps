@@ -49,6 +49,10 @@ final class CanvasRenderer {
     private var waiting: PhotoWorkspace?
     /// Called with each picture's revision as its tiles reach the view (the brush ink test times this).
     @ObservationIgnored var onPicture: ((Int) -> Void)?
+    #if DEBUG
+    /// Pictures every renderer in the process has handed its view (the idle-work tests read it).
+    static var pictures = 0
+    #endif
     /// Where renders run; `use` switches it.
     @ObservationIgnored private(set) var route = PhotoRenderRoute.cpu
     /// The backend that drew the picture shown ("cpu", or the GPU's name); nil before the first.
@@ -130,6 +134,9 @@ final class CanvasRenderer {
                 let update = try await PhotoRenderer.update(workspace, since: since, route: route, target: target)
                 tiles.apply(update, prepared: await Self.prepared(update))
                 if backend != update.backend { backend = update.backend }
+                #if DEBUG
+                Self.pictures += 1
+                #endif
                 onPicture?(update.revision)
                 lastMilliseconds = update.milliseconds
                 if !quiet, ContinuousClock.now - timed >= Self.timing {

@@ -102,6 +102,7 @@ extension PhotoWorkspace {
         func owned() throws {
             if picture == base { picture = try tone.adjusted(base, tone: ToneProgram([])) }
         }
+        PhotoRenderCount.layers(stack.steps.count)
         for step in stack.steps {
             switch step {
             case .adjustment(let layer, let program):
