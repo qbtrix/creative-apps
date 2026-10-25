@@ -4,7 +4,7 @@
 // 8 bits, not interlaced), decoded with core's `PNG.read`, and held to what the existing rasterizer tests read
 // through ImageIO: every pixel within 2 levels of the ImageIO decode (both premultiplied 8-bit sRGB) and the
 // known pixels of DesignRasterizerTests and RasterizerTests (the gray shape and its transparent corners; the
-// white scene, the clear corner and the ball's fill). Written first, disabled until SC-10. macOS only.
+// white scene, the clear corner and the ball's fill). Written first (SC-9), turned on by SC-10. macOS only.
 #if canImport(AppKit)
 import CoreRaster
 import FlareModel
@@ -68,7 +68,7 @@ import Testing
 
     /// Design: the one-shape 200 × 100 page keeps its clear corners and gray shape, and `cards`' Desktop frame
     /// at 1x decodes the same through core and ImageIO.
-    @Test(.disabled("waits on SC-10")) func designPNGDecodesToTheSamePixels() throws {
+    @Test func designPNGDecodesToTheSamePixels() throws {
         let shape = DesignNode(id: "r", name: "R", kind: .rectangle, frame: DesignRect(x: 50, y: 25, width: 100, height: 50))
         let page = DesignPage(id: "p", name: "P", frameWidth: 200, frameHeight: 100, nodes: [shape])
         let item = DesignExportItem(nodeID: "p", fileName: "P.png", width: 200, height: 100, pixelWidth: 200, pixelHeight: 100)
@@ -85,7 +85,7 @@ import Testing
 
     /// Flare: `bounce` frame 0 without its Background, opaque and transparent, keeps its white or clear corner
     /// and the ball's fill (0.95, 0.36, 0.2), and the whole frame decodes the same through core and ImageIO.
-    @Test(.disabled("waits on SC-10")) func flarePNGDecodesToTheSamePixels() throws {
+    @Test func flarePNGDecodesToTheSamePixels() throws {
         var list = FakeStage().drawList(FlareFixtures.bounce, sceneID: "scene-1", frame: 0, editing: nil)
         _ = try decodesAlike(try StageRasterizer().png(list, scale: 1, transparent: false), width: 550, height: 400, "bounce")
         list.items.removeAll { $0.address.layerID == "background" }
