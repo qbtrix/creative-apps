@@ -107,3 +107,4 @@ utc	stage	event	ref	note
 2026-10-25T04:20:46Z	3	poll	-	poll: dev still 2e7d5264; no slice PR merged; no needs-fix/needs-rebase; 0 open findings
 2026-10-25T04:43:59Z	3	poll	-	poll: dev at ee8ccd61 (#4877, lane batch landing); no slice PR merged; no needs-fix/needs-rebase; 0 open findings
 2026-10-25T05:07:55Z	3	poll	-	poll: dev still ee8ccd61; no slice PR merged; no needs-fix/needs-rebase; 0 open findings
+2026-10-25T05:32:16Z	3	poll	-	poll: dev at 13fb2f59 (#4888 + lane auto-revert commits); no slice PR merged; no needs-fix/needs-rebase; 0 open findings
