@@ -149,3 +149,4 @@ ts	kind	note
 2026-10-25T12:55:22Z	poll	hb89: no change
 2026-10-25T13:10:17Z	poll	hb90: no change
 2026-10-25T13:25:30Z	poll	hb91: no change
+2026-10-25T13:52:14Z	fix	hb92: #5088 needs-fix, instance save() added, gate running
