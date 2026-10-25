@@ -201,3 +201,4 @@ utc	stage	event	ref	note
 2026-10-25T13:55:08Z	3	heartbeat	-	#4988 eligible, queued behind p0 PRs; no batch in flight
 2026-10-25T14:13:03Z	3	heartbeat	-	lane batch now #5007 (batch-20261025140134); #4988 queued behind p0
 2026-10-25T14:30:56Z	3	heartbeat	-	#4988 eligible, queued; no batch in flight
+2026-10-25T14:48:50Z	3	heartbeat	-	lane batch now #5008 (batch-20261025143843); #4988 queued behind p0
