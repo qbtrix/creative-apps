@@ -100,3 +100,4 @@ utc	stage	event	ref	note
 2026-10-25T00:48Z	3	check	lane	00:48Z: none of our 10 PRs changed since 00:00Z, none merged, no needs-fix/needs-rebase; batch-20261024235353 (incl. #5174 LS-2) bisect probe -6 Linux 40145607006 green, macOS 40145609051 still running; last dev CI 40137153379 green at afef017c (none of ours in it); no dev-red; 0 findings for this feature
 2026-10-25T01:12Z	3	check	lane	no change on our 10 PRs; batch-20261024235353 bisect: probe -6 macOS 40145609051 still running; no dev-red, no findings
 2026-10-25T01:33Z	3	check	lane	no change on our 10 PRs; batch-20261024235353 bisect now at probe -9 (through #5050, before #5174): Linux 40150114209 + macOS 40150116582 running; no dev-red, no findings
+2026-10-25T01:54Z	3	check	lane	#5156 (Halo HY-1) merged 01:41Z; lane integrated dev into #5174 (head 6e467f79), Linux check 40151633219 running; probe -9 Linux green, macOS 40150116582 running; our other 9 PRs unchanged; no dev-red, no findings
