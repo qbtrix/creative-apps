@@ -28,6 +28,22 @@ import Testing
         return workspace
     }
 
+    /// The recovery file is Photo's own: it keeps the layers, the masks and the document entry, not the merged
+    /// picture or its thumbnail that Save writes for other OpenRaster readers. Flattening the picture for them
+    /// was a whole-image composite 5 s after every edit.
+    @Test func aRecoveryEntryCarriesNoMergedImage() throws {
+        let workspace = try editedImage()
+        let archive = PhotoServices.live.archive
+        let entry = try #require(try workspace.recoveryEntry(now: 5, archive: archive, codec: RawCodec()))
+        #expect(entry.package.files["data/layer-1.png"] != nil && entry.package.files["data/layer-2.png"] != nil)
+        #expect(entry.package.files["mergedimage.png"] == nil && entry.package.files["Thumbnails/thumbnail.png"] == nil)
+        let saved = try workspace.documentPackage(archive: archive, codec: RawCodec())
+        #expect(saved.files["mergedimage.png"] != nil && saved.files["Thumbnails/thumbnail.png"] != nil)
+        var restored = PhotoWorkspace(services: .fake)
+        try restored.restore(entry, archive: archive, codec: RawCodec())
+        #expect(restored.layers.map(\.name) == workspace.layers.map(\.name))
+    }
+
     @Test func theDelayIsFiveSeconds() {
         #expect(PhotoWorkspace.autosaveDelay == 5)
     }

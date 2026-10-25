@@ -163,6 +163,18 @@ private func block(on semaphore: DispatchSemaphore) {
         #expect(codec.encodes.withLock { $0 } == 2 * once, "the next edit didn't try again")
     }
 
+    /// A write encodes the layers (and masks) and nothing else: no merged picture, no thumbnail. Those took a
+    /// whole-image composite and two more PNGs 5 s after every edit, and Photo never reads them back.
+    @Test func aWriteEncodesOnlyTheLayers() async throws {
+        let model = try edited()
+        let autosave = makeAutosave()
+        let codec = CountingCodec()
+        autosave.noteEdit(at: 0)
+        await autosave.tick(model: model, now: 5, codec: codec)
+        #expect(autosave.autosaved)
+        #expect(codec.encodes.withLock { $0 } == model.layers.count, "a write encoded more than one PNG per layer")
+    }
+
     /// The 8K budget fixture's window autosaves while the zoom budget runs; that must land in a temp
     /// folder, or the user's next Photo launch offers to restore a test image.
     @Test func budgetFixtureAutosavesOutsideTheUsersRecoveryFolder() async throws {
