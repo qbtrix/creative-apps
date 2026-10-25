@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-25T01:52Z	check	no merges yet (12 PRs open on lane, all clean, no needs-fix); dev ae3efdb8 runs green (Linux check, scoped halo); no open findings
 2026-10-25T02:00Z	3	pr-opened	#5261	SC-10 (SC-raster) on SC-9; SC-4 chain dev-drift fix started
 2026-10-25T02:11Z	check	heartbeat	no lane merges of ours; dev c16bcd16 (Linux check green); 13 PRs open incl #5261, no needs-fix/needs-rebase; no open finding on our features (#3323 is inspector-controls)
+2026-10-25T02:30Z	3	pr-opened	#5265	SC-8 (SC-library) on SC-7; oversized until SC-4 chain lands
