@@ -137,3 +137,4 @@ utc	stage	event	ref	note
 2026-10-25T15:39Z	heartbeat	no merges of ours; #5039 landed; full CI 40199840550 green, main d3323f6a7; no dev-red; 0 findings
 2026-10-25T16:00Z	heartbeat	no merges of ours; dev a57210d15; main d3323f6a7; no dev-red; 0 findings
 2026-10-25T16:22Z	heartbeat	no merges of ours; dev c2681786c; main d3323f6a7; no dev-red; 0 findings
+2026-10-25T16:44Z	heartbeat	no merges of ours; dev-red #5321 not ours (#4960 #5007 #5008 #5318); main d3323f6a7; 0 findings
