@@ -2,7 +2,7 @@
 // (all disabled) beside an image with one hidden layer selected (Delete and
 // the order and selection moves disabled, "Show Layer"), and two layers with
 // the top one selected (all but Bring Forward and Select Layer Above), in
-// Light and Dark. New Adjustment Layer holds the four kinds (never Blur),
+// Light and Dark. New Adjustment Layer holds the six kinds (never Blur),
 // the submenu and its items disabled with "Open an image first." with no
 // image, and enabled with one;
 // the menu bar doesn't render here, so the items are drawn in
