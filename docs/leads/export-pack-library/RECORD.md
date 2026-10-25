@@ -2,7 +2,7 @@
 
 Issue: #3478 · Packet: docs/blueprints/library/features/export-pack.md
 Run: act-1a170488aff-41nk (line lead, line:library) · resumed 2026-10-24T23:40Z (earlier act-1a16cc967d9-mcuv, act-1a16953af22-wvhu, act-1a15e4969c2-pa6e)
-Stage: 3 wave 2; LX-2 #4960, LX-4 #4962, LX-u #5128 on the lane; LX-7 (feat/export-pack-lx7, stacked on #5128) and LX-8 (feat/export-pack-lx8) built locally, gating; checked 2026-10-24T23:47:17Z
+Stage: 3 wave 2; LX-2 #4960, LX-4 #4962, LX-u #5128 on the lane; LX-z: LX-7 #5242, LX-8 #5243 stacked; checked 2026-10-25T00:07:45Z
 Base: origin/dev 830af22d
 Next: lane merges #4960 then retarget LX-u #5128 to dev; #4962 on lane; LX-z (LX-7 live journey, LX-8 built) after LX-u and LX-m; Wire XP-7 swaps in when #5044 merges
 
@@ -21,7 +21,9 @@ Next: lane merges #4960 then retarget LX-u #5128 to dev; #4962 on lane; LX-z (LX
 | LX-2 | LX-a | 2 | sheet Metadata row + ExportPick.metadata stub (SuiteUI) | LibraryExportSheet.swift, ExportSheet.swift | LibraryExportPackSnapshots.metadata | #4960 | open, fast-lane, Fast-Check efabeb8d |
 | LX-3 | LX-m | 2 | sidecar policy; LiveExporter passes the policy; RJ-L16/RJ-X03 folder; tests on | ExportSidecar.swift, LiveExporter.swift, tests, mutation plans, Tests/RealJobs/library/no-location/ | LibraryExportMetadataTests; Mutate ExportSidecar 7/7, LiveExporter 6/6 | #3699 f1e49054d | merged |
 | LX-4 | LX-m | 2 | JPEGWriter carries metadata via services.metadata (FakeMetadata) | JPEGWriter.swift, LibraryExportMetadataWriteTests.swift | macOS | #4962 | open, fast-lane |
-| LX-5..LX-8 | | - | see packet | | | - | waiting |
+| LX-5..LX-6 | LX-u | - | see packet | | | #5128 | open |
+| LX-7 | LX-z | 4 | journey on | LibraryJourneyTests+ExportPack.swift | LJ-X1 | #5242 | open, stacked on #5128 |
+| LX-8 | LX-z | 5 | status built | export-pack.wave.json | waves render | #5243 | open, feature-done, stacked on #5242 |
 
 ## Wires
 - [ ] Wire: export-pack:XP-3 (LX-2 builds on a stub ExportPick.metadata in SuiteUI, supervisor 2026-10-23 18:46Z; XP-3 builds on that field)
