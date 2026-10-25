@@ -167,3 +167,4 @@ utc	stage	event	ref	note
 2026-10-25T03:48:09Z	3	stage-start	-	relaunch act-1a17129eefa-0kqr on main afef017
 2026-10-25T04:07:19Z	3	heartbeat	#4988	probe -3 red on Design snapshot, bisect at -1
 2026-10-25T04:17:23Z	3	heartbeat	#4988	mirror resynced; bisect at probe -1
+2026-10-25T04:35:51Z	3	heartbeat	-	batch-20261025023716 probe -1 (#4888) macOS gate still running; #4988 waits
