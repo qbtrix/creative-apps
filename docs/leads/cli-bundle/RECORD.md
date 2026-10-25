@@ -102,3 +102,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 2026-10-25T14:13:03Z: #4999 eligible, queued behind p0
 - 2026-10-25T14:30:56Z: #4999 eligible, queued; no batch in flight
 - 2026-10-25T14:48:50Z: #4999 eligible, queued behind p0
+- 2026-10-25T15:06:43Z: #4999 eligible, queued; no batch in flight
