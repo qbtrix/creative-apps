@@ -123,15 +123,7 @@ struct DesignWindow: View {
             fit()
         }
         .onChange(of: model.pages) { note = nil }
-        .alert(
-            problem?.title ?? "",
-            isPresented: Binding(get: { problem != nil }, set: { if !$0 { problem = nil } }),
-            presenting: problem
-        ) { _ in
-            Button("OK", role: .cancel) {}
-        } message: { shown in
-            Text(shown.message)
-        }
+        .suiteProblemAlert($problem, title: { $0.title }, message: { $0.message })
         .task { start() }
         // The key window is the one live commands act on (EM-4).
         .suiteLiveWindow(DesignShell.front, read: { DesignHeadless(model) }, write: { perform(.adoptLive($0.workspace)) })

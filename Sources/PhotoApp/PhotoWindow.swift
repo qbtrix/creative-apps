@@ -145,15 +145,7 @@ struct PhotoWindow: View {
             } message: {
                 Text("Enter a new name for the layer.")
             }
-            .alert(
-                problem?.title ?? "",
-                isPresented: Binding(get: { problem != nil }, set: { if !$0 { problem = nil } }),
-                presenting: problem
-            ) { _ in
-                Button("OK", role: .cancel) {}
-            } message: { shown in
-                Text(shown.message)
-            }
+            .suiteProblemAlert($problem, title: { $0.title }, message: { $0.message })
             .task {
                 SuitePointerPressure.watch()
                 showLaunchImage()

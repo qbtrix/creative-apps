@@ -1,0 +1,6 @@
+[
+{"label":"OK leaves the problem set: the alert comes straight back","file":"Sources/SuiteUI/SuiteAlerts.swift","find":"set: { if !$0 { problem.wrappedValue = nil } }","replace":"set: { _ in }","tests":"SuiteProblemAlertTests"},
+{"label":"presenting clears the problem: the alert closes as it opens","file":"Sources/SuiteUI/SuiteAlerts.swift","find":"set: { if !$0 { problem.wrappedValue = nil } }","replace":"set: { _ in problem.wrappedValue = nil }","tests":"SuiteProblemAlertTests"},
+{"label":"the message is dropped: a failed save says only its title","file":"Sources/SuiteUI/SuiteAlerts.swift","find":"var message: String? { problem.wrappedValue.flatMap(messageOf) }","replace":"var message: String? { nil }","tests":"SuiteProblemAlertTests"},
+{"label":"the String form drops the OK id: a journey can't press it","file":"Sources/SuiteUI/SuiteAlerts.swift","find":"suiteProblemAlert(problem, title: { $0 }, okID: okID)","replace":"suiteProblemAlert(problem, title: { $0 })","tests":"SuiteProblemAlertTests"}
+]
