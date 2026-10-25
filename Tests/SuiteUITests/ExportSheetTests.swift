@@ -87,6 +87,24 @@ import Testing
         }
     }
 
+    /// A host names the sheet, turns Export off with its own reason while editing, and words the line itself
+    /// (Library's "Export 2 Photos", an unknown name token, its summary under `<prefix>.summary`).
+    @MainActor @Test func aHostTitlesTheSheetBlocksExportAndWordsTheLine() {
+        let formats = [FormatChoice(id: "JPEG", name: "JPEG", hasQuality: false)]
+        let base = ExportSheetRows(ExportRun<ExportPick>.editing(ExportPick(format: "JPEG")), formats: formats) { $0 }
+        let worded = ExportSheetRows(rows: base.rows, editable: false, progress: nil, line: .failed("2 photos couldn't be exported."))
+        #expect(worded.rows == base.rows && !worded.editable && worded.line == .failed("2 photos couldn't be exported."))
+        #expect(ExportSheetIDs("library.export").summary == "library.export.summary")
+        let store = SuiteControlStore()
+        let sheet = SuiteExportSheet(
+            base, formats: formats, idPrefix: "library.export", title: "Export 2 Photos", startReason: "Unknown token {nope}.",
+            onFormat: { _ in }, onScale: { _ in }, onQuality: { _ in }, onExport: {}, onClose: {}
+        ) { EmptyView() }
+        host(sheet.environment(\.suiteControlStore, store))
+        let start = store.inventory.document().controls.first { $0.id == "library.export.start" }
+        #expect(start?.enabled == false && start?.reason == "Unknown token {nope}.", "\(String(describing: start))")
+    }
+
     @MainActor private func host(_ view: some View) {
         let host = NSHostingView(rootView: view)
         let window = NSWindow(
