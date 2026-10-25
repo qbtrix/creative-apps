@@ -24,10 +24,12 @@ import Testing
         var project = Self.selected()
         let before = project.history.undo.count
         project.runFilter(.add("gaussian-blur"))
+        #expect(project.layerFilters.map(\.step) == [.filter(.gaussianBlur(radius: 2))])
+        project.runFilter(.value("gaussian-blur", slider: "radius", 6, drag: nil))
         project.runFilter(.add("gaussian-blur"))
         project.runFilter(.add("invert"))
-        #expect(project.layerFilters.map(\.step) == [.filter(.gaussianBlur(radius: 2)), .kind(.invert)])
-        #expect(project.history.undo.count == before + 2)
+        #expect(project.layerFilters.map(\.step) == [.filter(.gaussianBlur(radius: 6)), .kind(.invert)])
+        #expect(project.history.undo.count == before + 3)
     }
 
     @Test func aDragIsOneStepClampedAndKeepsTheOtherValues() {
