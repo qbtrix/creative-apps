@@ -1,6 +1,9 @@
 // AllAppsCatalogTests.swift (adopt-command-catalog AC-z1): one walk over every app the CLI knows. `list-apps` and each
 // app's `list-commands` match their goldens in Golden/apps/, every catalog keeps the kernel's laws on a real job's
 // input, and every real job under Tests/RealJobs/<app>/ passes or is skipped for a reason that names its gap.
+// A `<app>.list-commands.json` golden holds one compact command per line, sorted by id (`goldenText`), so two PRs
+// that add different commands touch different lines and merge cleanly. The test checks that layout byte for byte;
+// `AFTERGLOW_RECORD_GOLDENS=1 swift test --filter AllAppsCatalogTests` rewrites the goldens from the CLI.
 import AfterGlowCLICore
 import DesignModel
 import FlareModel
@@ -40,10 +43,38 @@ struct AllAppsCatalogTests {
         #expect(named == Self.names + ["suite", "fake"], "list-apps lists the five in registry order, the suite, then the fake")
     }
 
+    /// `value` as the CLI writes it (keys sorted, slashes bare), on one line.
+    static func compact(_ value: JSONValue) throws -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        return String(decoding: try encoder.encode(value), as: UTF8.self)
+    }
+
+    /// A `list-commands` reply as its golden's text: the top-level keys sorted on the first and last lines, and between
+    /// them one compact command per line, sorted by id, each but the last with a trailing comma.
+    static func goldenText(_ reply: JSONValue) throws -> String {
+        guard case .object(let fields) = reply, case .array(let commands)? = fields["commands"] else { return try compact(reply) + "\n" }
+        func id(_ command: JSONValue) -> String {
+            if case .object(let f) = command, case .string(let id)? = f["id"] { id } else { "" }
+        }
+        let lines = try commands.sorted { id($0).utf8.lexicographicallyPrecedes(id($1).utf8) }.map(compact)
+        let parts = try fields.keys.sorted().map { key in
+            key == "commands" ? "\"commands\":[\n" + lines.joined(separator: ",\n") + "\n]" : try compact(.string(key)) + ":" + compact(fields[key] ?? .null)
+        }
+        return "{" + parts.joined(separator: ",") + "}\n"
+    }
+
     @Test(arguments: names)
     func listCommandsMatchesItsGolden(app: String) throws {
         let commands = try Self.printed([app, "list-commands"])
+        let file = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .appendingPathComponent("Golden/apps/\(app).list-commands.json")
+        if ProcessInfo.processInfo.environment["AFTERGLOW_RECORD_GOLDENS"] == "1" {
+            try Data(try Self.goldenText(commands).utf8).write(to: file)
+        }
         #expect(commands == (try Self.golden("\(app).list-commands")), "\(app) list-commands differs")
+        #expect(try String(contentsOf: file, encoding: .utf8) == (try Self.goldenText(commands)),
+                "\(app).list-commands.json isn't one command per line sorted by id; rerun with AFTERGLOW_RECORD_GOLDENS=1")
         guard case .object(let fields) = commands, case .array(let listed)? = fields["commands"] else { Issue.record("no commands"); return }
         #expect(fields["app"] == .string(app))
         #expect(!listed.isEmpty, "\(app) lists no commands")
