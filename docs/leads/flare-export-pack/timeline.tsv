@@ -163,3 +163,4 @@ utc	stage	event	ref	note
 2026-10-24T23:05:41Z	heartbeat	#4854 in batch 20261024205137 (bisecting, probes -1,-6 out); #5025 not batched; dev still afef017c
 2026-10-24T23:27:16Z	heartbeat	dev still afef017c; batch 20261024205137 probes -1,-3,-6 out; lane sweep 40141784951 running; #4854/#5025 not merged
 2026-10-24T23:49:21Z	heartbeat	batch 20261024205137 branches gone, dev still afef017c; #4854 open clean fast-lane+feature-done, no needs-fix; waits next batch
+2026-10-25T00:13:04Z	heartbeat	new batch 20261024235353 (12 PRs, probe -6) excludes #4854 and #5025; both open, clean, fast-lane, no needs-fix; dev still afef017c
