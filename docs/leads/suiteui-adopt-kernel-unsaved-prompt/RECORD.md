@@ -27,6 +27,7 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 2026-10-25 03:39Z: hb51: no change; lane refs: batch-20261025023716 batch-20261025023716-3 batch-20261025023716-6 ; #5088 eligible, waits behind p0/beta; no findings.
 - 2026-10-25 03:24Z: hb50: no change; batch 20261025023716 bisecting (probe -6); it held p0/beta PRs (#5219, #5238, #5174), which the lane orders ahead of unlabelled #5088; #5088 eligible, waits; no findings.
 - 2026-10-25 03:09Z: hb49: no change; lane refs: lane/batch-20261025023716 ; #5088 eligible, waiting; stack unchanged; no findings.
 - 2026-10-25 02:53Z: hb48: no change; lane refs: lane/batch-20261025023716 ; #5088 eligible, waiting; stack unchanged; no findings.
