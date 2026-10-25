@@ -245,3 +245,4 @@ utc	stage	event	ref	note
 2026-10-25T11:08Z	check-in	#5307 (captain) merged 11:06Z: SuiteText target, first step to CLI text for #5193; follow-up wiring (Package.swift) is the captain's. 5171/5206 open clean; no XP-3/XP-4; no new findings
 2026-10-25T11:40Z	check-in	quiet: 5171/5206 open clean; no XP-3/XP-4; no #5193 CLI follow-up PR yet; no supervisor reply; no new findings; #4886 (library) merged 11:36Z
 2026-10-25T12:12Z	check-in	quiet: 5171/5206 still clean after #4943 (photo eyedropper) merged 12:11Z; no XP-3/XP-4; no #5193 CLI follow-up yet; no supervisor reply; no new findings
+2026-10-25T12:43Z	check-in	new finding #5317 (Tier1Tone Levels journey, same as #5289) not export/text, left alone; 5171/5206 clean; no XP-3/XP-4; no #5193 follow-up; no supervisor reply
