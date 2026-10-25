@@ -109,3 +109,4 @@ utc	stage	event	ref	note
 2026-10-25T05:07:55Z	3	poll	-	poll: dev still ee8ccd61; no slice PR merged; no needs-fix/needs-rebase; 0 open findings
 2026-10-25T05:32:16Z	3	poll	-	poll: dev at 13fb2f59 (#4888 + lane auto-revert commits); no slice PR merged; no needs-fix/needs-rebase; 0 open findings
 2026-10-25T05:56:28Z	3	poll	-	poll: dev still 13fb2f59; no slice PR merged; no needs-fix/needs-rebase; 0 open findings
+2026-10-25T06:47:40Z	3	fix	TS-7	run act-1a171c8932a-sa22 started: lead branch rebased on main (3db45eb4). TS-a #4871 merged. Lane flagged needs-rebase on TS-7 #5047 (catalog, catalog tests, command ids, golden vs stroke.* from DK-6). Merged dev, kept stroke.* and text.* specs; gate running. TS-8 #5228 restacks next. TS-u #4958 and TS-9 #5226 clean in the lane. 0 open findings.
