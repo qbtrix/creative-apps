@@ -26,7 +26,7 @@ import SuiteKernel
 
 /// The tools on Photo's floating tool palette.
 public enum PhotoTool: String, CaseIterable, Sendable {
-    case move, marquee, brush, eraser, clone, heal, crop, eyedropper, gradient, text
+    case move, marquee, brush, eraser, clone, heal, crop, eyedropper, gradient, text, pen
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every other tool works: the canvas sends its drags to
@@ -136,6 +136,8 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var progress: String?
     /// The file flow's recents, open path and requests for the window (PhotoFileFlow+Kernel.swift).
     public internal(set) var fileFlow = PhotoFileFlowState()
+    /// The document's paths and the Pen's view state (PhotoPaths+Kernel.swift).
+    var pathState = PhotoPathState()
     /// Test hook: how many times `layerGeometryChanged` ran, and its last call
     /// (PhotoMask.swift). Not part of `==`.
     var geometryChangeCount = 0
@@ -194,6 +196,7 @@ public struct PhotoWorkspace: Sendable {
         masks = [:]
         editsMask = false
         transformDraft = nil
+        pathState = PhotoPathState()
         statusMessage = nil
         fileKind = nil
         history = PhotoHistory()
@@ -390,6 +393,7 @@ extension PhotoWorkspace: Equatable {
             && lhs.exportRun == rhs.exportRun
             && lhs.fileKind == rhs.fileKind && lhs.savedStepID == rhs.savedStepID
             && lhs.statusMessage == rhs.statusMessage && lhs.textBox == rhs.textBox && lhs.progress == rhs.progress && lhs.masks == rhs.masks && lhs.pixels == rhs.pixels
+            && lhs.pathState == rhs.pathState
     }
 }
 
