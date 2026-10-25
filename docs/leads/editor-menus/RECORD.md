@@ -123,3 +123,4 @@ Next: lane: probe batch-20261025023716-3 (holds #4988) resolves; once #4988 merg
 - 2026-10-25T04:35:51Z: batch-20261025023716 probe -1 (#4888) macOS gate still running; #4988 waits
 - 2026-10-25T04:53:45Z: probe -1 (#4888) macOS gate still running; #4988 waits
 - 2026-10-25T05:11:37Z: lane bisect moved to probe -2 (#4963); #4988 is next after it
+- 2026-10-25T05:30:03Z: batch-20261025023716 resolved (#4888 merged); #4988 ready for next batch; PR bodies carry run act-1a17129eefa-0kqr, footer stripped from #5164
