@@ -5,9 +5,9 @@ Run: act-1a171ab9e77-es26 · Session: claude/layer-styles-lead-2ph8nc · Started
 Wire: suiteui layer-styles:LS-a
 Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTests.glowReachesItsKeyedSize and glowIsNotClipped; add the no-padding mutation, origin dropped in LiveFrameRendering's styled composite)
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
-Stage: 3 polling (20:10Z): dev-red #5321 still open (since 16:34Z) (macOS; range #4960 #5007 #5008 #5318, none ours), so no new code batch forms until it clears. Lane still one p0 PR per batch (#5112, #5127, #5148 merged 18:38–19:52Z; batch 200223 in flight). #5158 HY-m (333603baa) and #5174 LS-2 (cb6c0a2f8) ready and clean behind ~50 p0 PRs; no answer on #3936 (06:47Z, 09:29Z). Drafts #5157, #5161, #5218 wait on #5174
+Stage: 3 Packet-Review 1 (21:30Z): 11 amendments read (#3936, 21:15Z, packet f7c2ab5bb); fixes for 1, 6, 7, 8, 10 being built test first on #5158 HY-m, 2 on #5161 HY-u. dev-red #5321 still open (not ours); #5158 and #5174 still unbatched
 Base: 13fb2f591 (origin/dev; main 3db45eb verified at relaunch)
-Next: read the supervisor answer on #3936 (09:29Z follow-up), else wait for the lane. On #5174 merge: merge dev into #5157, #5161, #5218 in order, gate, push, Head, ready
+Next: gate and push HY-m's amendment commit, move its Head:; journey fix on HY-u; then wait for the lane. On #5174 merge: merge dev into #5157, #5161, #5218 in order, gate, push, Head, ready
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,18 @@ Next: read the supervisor answer on #3936 (09:29Z follow-up), else wait for the 
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-25T21:30Z Packet-Review 1 (#3936, 21:15Z), each amendment:
+  1. `Param.property` lists `HaloProperty.keyable` (`allCases + styles`), so `inspector.set-property` / `inspector.toggle-animation` take a style property; on HY-m (#5158), since HY-1 is merged. RJ-H43's job uses `timeline.scrub` + `inspector.*`, not `key.set`, when it is written (HY-z).
+  2. Three keys (0, 30 and the stopwatch's last-frame key holding 0): HY-u's journey now expects "3 keyframes"; RJ-H43's expected track lists all three; packet line 60's wording rides HY-8's packet edit.
+  3. Already so on HY-m: `setStatic` writes the style and clears the track. No change.
+  4. Already so on HY-m: `HaloDrawItem.style` and `HaloDrawRules.style(of:in:at:placing:)`. No change.
+  5. Already so on HY-m: `LiveFrameRendering.styled` merges source and stroke into one buffer, one `StyleProgram.render`, one composite. No change.
+  6. HY-m: `styleSelection` is the style sampled at the playhead (`HaloLayer.sampledStyle`); `setStyle` keys a keyed number it changes at the playhead (`HaloKeyRules.keyed`, clamped). Tests in `HaloStyleKeysTests`.
+  7. HY-m: `shadowDistance` range 0...1_000 (`HaloValues.swift`), test `shadowDistanceRunsToAThousand`.
+  8. HY-m: `keySegments`, `compositionKeys` (the lane) and `HaloEasingRules.keys`/rank iterate `HaloProperty.keyable`.
+  9. Not applied: `HaloKeyRules.rows` keeps the style rows (only while their effect is on). `HaloKeying`'s stopwatch and key-diamond lookups read `propertyRows` for any property, and HY-u's inspector already splits that list into TRANSFORM and LAYER STYLE; a separate `styleRows` would duplicate the row build and the lookups. The transform list is still `HaloProperty.allCases`.
+  10. HY-m: `HaloStyleRenderTests` counts a pixel lit at alpha ≥ 1/255; frame 0 lights nothing outside the box; frames 15 and 30 reach > 0 and ≤ `StyleRules.reach` of the sampled style (still disabled until LS-8).
+  11. Already so on HY-2 (#5157): Copy writes `LayerStylePasteboard`, Paste reads it and is disabled with help when it is empty. No change.
 - 2026-10-25T06:08Z (relaunch act-1a171ab9e77-es26): Belt-Lead lines on #5157 #5158 #5161 #5218 moved to the new run id. Status channel stays lead/halo-layer-styles and PRs stay on dev, as decided earlier.
 - 2026-10-24T21:55Z (supervisor): every PR of this beta feature carries `beta` (lane order p0, beta, rest), stacked drafts included. Added to #5157 #5158 #5161 #5218. #5156/#5174 waited because dev-red #5183 (Design drag timing) failed every macOS gate until #5222.
 - 2026-10-24 (resume act-1a16e2f645b-47gj): the brief asks to rebase `lead/layer-styles` onto main and force-push. Not done: that branch is the SuiteUI layer-styles lead's live status channel (#3937, last push 13:56Z); this feature's channel stays `lead/halo-layer-styles`, as decided earlier. Work stays on `origin/dev` (the brief's main verified at 4f00afb; CLAUDE.md targets dev). PR bodies move to the new Belt-Lead id.
