@@ -4,20 +4,21 @@
 // scaled by `scale`, the canvas filled with the list's background unless `transparent`, then every non-text item in
 // paint order exactly as FlareStage draws it on screen: `StagePath.cgPath` with the item's matrix, the fill (solid or
 // gradient, clipped to the path) and the stroke (its trimmed, dashed `strokePath`) at `width × stretch` with its cap
-// and join, both at the item's opacity. ImageIO encodes the CGImage as PNG. A zero or non-finite size, a context CoreGraphics won't make and a
-// PNG it won't finalize each throw a RasterizerError; nothing here force-unwraps or crashes.
+// and join, both at the item's opacity. SuiteImageIO.png encodes the CGImage as PNG (shared-codecs SC-10). A zero
+// or non-finite size, a context CoreGraphics won't make and a PNG it won't write each throw a RasterizerError;
+// nothing here force-unwraps or crashes.
 import CoreGraphics
 import FlareCore
 import FlareModel
 import Foundation
-import ImageIO
+import SuiteShell
 
 enum RasterizerError: Error, Equatable {
     /// The list's size times `scale` is zero, negative, not finite or wider than `StageRasterizer.maxSide`.
     case invalidSize
     /// CoreGraphics made no bitmap context or no image for this size.
     case contextUnavailable
-    /// ImageIO could not write the PNG.
+    /// SuiteImageIO could not write the PNG.
     case encodeFailed
 }
 
@@ -118,15 +119,9 @@ struct StageRasterizer: FrameRasterizing {
         return CGGradient(colorsSpace: space, colors: colors, locations: locations)
     }
 
-    /// `image` as PNG bytes through ImageIO.
+    /// `image` as PNG bytes through SuiteImageIO, the suite's one encoder.
     private static func encodePNG(_ image: CGImage) throws -> Data {
-        let data = NSMutableData()
-        guard let destination = CGImageDestinationCreateWithData(data, "public.png" as CFString, 1, nil) else {
-            throw RasterizerError.encodeFailed
-        }
-        CGImageDestinationAddImage(destination, image, nil)
-        guard CGImageDestinationFinalize(destination) else { throw RasterizerError.encodeFailed }
-        return data as Data
+        do { return try SuiteImageIO.png(image) } catch { throw RasterizerError.encodeFailed }
     }
 
     private static func cap(_ cap: Stroke.Cap) -> CGLineCap {

@@ -5,22 +5,22 @@
 // that is empty or over its max side. Here the artwork page's painted list (DesignPage.painted)
 // is drawn by DesignArtwork at zoom 1 through ImageRenderer at that scale, redrawn into an 8-bit
 // sRGB bitmap with alpha the plan's pixel size, so nothing painted stays transparent, and written
-// as PNG by ImageIO. Nothing here touches a window or the Model's state, so no window body runs
-// during a write. A render or encode that fails throws a DesignRasterizerError. The PDF (DE-9)
+// as PNG by SuiteImageIO.png (core's PNG writer; shared-codecs SC-10). Nothing here touches a
+// window or the Model's state, so no window body runs during a write. A render or encode that
+// fails throws a DesignRasterizerError. The PDF (DE-9)
 // draws the same artwork view through ImageRenderer.render into one PDF page whose media box is
 // the artwork page's size in points, the raster's scale left out: a PDF is vector, in points.
 // macOS only.
 import CoreGraphics
 import DesignModel
 import Foundation
-import ImageIO
+import SuiteShell
 import SwiftUI
-import UniformTypeIdentifiers
 
 enum DesignRasterizerError: Error, Equatable {
     /// ImageRenderer or CoreGraphics made no image.
     case renderFailed
-    /// ImageIO could not write the PNG.
+    /// SuiteImageIO could not write the PNG, or the PDF came out empty.
     case encodeFailed
 }
 
@@ -74,13 +74,8 @@ enum DesignRasterizer {
         return out
     }
 
-    /// `image` as PNG bytes through ImageIO.
+    /// `image` as PNG bytes through SuiteImageIO, the suite's one encoder.
     private static func encodePNG(_ image: CGImage) throws -> Data {
-        let data = NSMutableData()
-        guard let destination = CGImageDestinationCreateWithData(data, UTType.png.identifier as CFString, 1, nil)
-        else { throw DesignRasterizerError.encodeFailed }
-        CGImageDestinationAddImage(destination, image, nil)
-        guard CGImageDestinationFinalize(destination) else { throw DesignRasterizerError.encodeFailed }
-        return data as Data
+        do { return try SuiteImageIO.png(image) } catch { throw DesignRasterizerError.encodeFailed }
     }
 }
