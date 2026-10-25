@@ -1,0 +1,7 @@
+[
+  {"label": "onlyAStyledOrMultiLineLayerTakesTheLayout: a styled one-line layer keeps the old draw", "file": "Sources/HaloModel/HaloText+Layout.swift", "find": "style != TextStyle.standard || string.contains(where: \\.isNewline)", "replace": "style != TextStyle.standard && string.contains(where: \\.isNewline)", "tests": "HaloTextLayoutTests.onlyAStyledOrMultiLineLayerTakesTheLayout"},
+  {"label": "trackingWidensTheRun: tracking is read as whole ems", "file": "Sources/HaloModel/HaloText+Layout.swift", "find": "style.paragraph.tracking / 1000 * fontSize", "replace": "style.paragraph.tracking * fontSize", "tests": "HaloTextLayoutTests.trackingWidensTheRun"},
+  {"label": "centreLeadsTheShorterLineIn: every line leads at 0", "file": "Sources/HaloModel/HaloText+Layout.swift", "find": "x: line.x.first ?? 0,", "replace": "x: 0,", "tests": "HaloTextLayoutTests.centreLeadsTheShorterLineIn"},
+  {"label": "twoLinesSitALineHeightApart: a line keeps its trailing newline", "file": "Sources/HaloModel/HaloText+Layout.swift", "find": "            while let last = text.last, last.isWhitespace { text.removeLast() }\n", "replace": "", "tests": "HaloTextLayoutTests.twoLinesSitALineHeightApart"},
+  {"label": "theRowsGesturesSetTheLayersStyle: a gesture runs nothing", "file": "Sources/HaloModel/HaloText+Layout.swift", "find": "        _ = try? Self.catalog.run(command.id, params: command.params, on: &self)\n", "replace": "        _ = command\n", "tests": "HaloTextLayoutTests.theRowsGesturesSetTheLayersStyle"}
+]
