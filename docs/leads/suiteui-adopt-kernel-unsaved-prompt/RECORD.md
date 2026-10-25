@@ -27,6 +27,8 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 2026-10-25 02:00Z: hb44: no change; dev c16bcd16 feat(halo): layers carry a style; the five style p; #5088/#5089/#5091/#5231 open, fast-lane only, no needs-*; no open findings.
+
 - 2026-10-25 01:30Z: hb43: no change; dev ae3efdb8 feat(halo): plan refuses alpha on H.264 and keeps ; #5088/#5089/#5091/#5231 open, fast-lane only, no needs-*; no open findings.
 
 - 2026-10-25 01:00Z: hb42: no change; dev afef017c fix(tests): give each Design drag gesture its own ; #5088/#5089/#5091/#5231 open, fast-lane only, no needs-*; no open findings.
