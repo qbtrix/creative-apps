@@ -152,3 +152,4 @@ utc	stage	event	ref	note
 2026-10-25T09:38:30Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; lane still bisecting batch-20261025054232 (probe 4)
 2026-10-25T09:48:14Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
 2026-10-25T10:08:36Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
+2026-10-25T10:18:22Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
