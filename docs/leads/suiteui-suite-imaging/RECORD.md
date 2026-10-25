@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
 Stage: 3 wave 8
 Base: c16bcd16c (origin/dev)
-Next: 10:28Z: batch 090316 probe -6 (#4837, #4886, #4943, #4953, #4962, #5006, #5007) macOS gate 40180145089 still in scripts/ci (started 09:27Z). dev 8d3a12c4b; dev-red #5316 closed 10:06Z. None of ours merged; no needs-fix/needs-rebase; 0 open findings; no supervisor reply. IM-13 waits on #5151, #5163. Poll ~10:48Z.
+Next: 10:50Z: batch 090316 probe -6 (with #4886) green on Linux and macOS (40180145089). Probe -9 (adds #5008, #5039, #5044) Linux green 40184674040, macOS gate pending. Bisect continues; dev 8d3a12c4b, no dev-red open. None of ours merged; no needs-fix/needs-rebase; 0 open findings; no supervisor reply. IM-13 waits on #5151, #5163. Poll ~11:10Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a170cfbf58-pshm, feature issue #3715). This copy is refreshed with it after every stage.
 
