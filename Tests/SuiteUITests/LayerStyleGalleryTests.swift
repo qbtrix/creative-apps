@@ -32,9 +32,11 @@ import Testing
     }
 
     @Test func aSwitchThatCantActYetSaysWhy() {
+        // A typed value: a bare `LayerStyle.none` passed as `LayerStyle?` reads as Optional's `.none` (no layer).
+        let unstyled: LayerStyle? = LayerStyle(effects: [], fillOpacity: 1)
         #expect(LayerStyleText.reason(style: nil, help: nil) == StyleRules.noLayerHelp)
-        #expect(LayerStyleText.reason(style: LayerStyle.none, help: "This layer is locked.") == "This layer is locked.")
-        #expect(LayerStyleText.reason(style: LayerStyle.none, help: nil) == LayerStyleText.pending)
+        #expect(LayerStyleText.reason(style: unstyled, help: "This layer is locked.") == "This layer is locked.")
+        #expect(LayerStyleText.reason(style: unstyled, help: nil) == LayerStyleText.pending)
         #expect(!LayerStyleText.pending.isEmpty)
     }
 
