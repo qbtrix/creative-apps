@@ -9,13 +9,18 @@
 // PNG keeps transparency, JPEG is laid on opaque white first. A failed open
 // or export leaves the workspace as it was. Export and Save As offer the
 // document's name with the format's extension (`fileName(for:)`); Save As
-// renames the document to the file it wrote (`didSave(as:)`). Linux-safe.
+// renames the document to the file it wrote (`didSave(as:)`). Opening asks the
+// codec for working-space float pixels first (`decodeLinear`, shared-raw
+// SR-6): a buffer becomes the layer as it is, so values above 1 and colours
+// outside sRGB survive; nil takes the 8-bit `decode` route. The default reads
+// camera RAW through `SuiteRaw`; PhotoApp's codec reads every file. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
 import CoreRaster
+import SuiteImaging
 
 /// Pixels on their way in from or out to a file.
 public struct DecodedImage: Sendable, Equatable {
@@ -56,6 +61,24 @@ public protocol PhotoImageCodec: Sendable {
     func decode(_ data: Data, longestSide: Int?) throws -> DecodedImage
     /// `image` as a file in `format`; `quality` (0...1) for JPEG.
     func encode(_ image: DecodedImage, as format: ImageFormat, quality: Double) throws -> Data
+    /// The file's pixels in the working space (extended-range linear sRGB, Float32, premultiplied, upright),
+    /// no longer than `longestSide` when given, or nil to take `decode`'s 8-bit route.
+    /// Default: `decodeRaw`, so a RAW file opens through `SuiteRaw` and any other file through `decode`.
+    func decodeLinear(_ data: Data, fileName: String, longestSide: Int?) throws -> PixelBuffer?
+}
+
+extension PhotoImageCodec {
+    public func decodeLinear(_ data: Data, fileName: String, longestSide: Int?) throws -> PixelBuffer? {
+        try decodeRaw(data, fileName: fileName, longestSide: longestSide)
+    }
+
+    /// A camera RAW file's linear float pixels through `SuiteRaw` (every pixel, or a draft at `longestSide`),
+    /// or nil when `fileName` isn't RAW (the format registry's camera RAW row).
+    public func decodeRaw(_ data: Data, fileName: String, longestSide: Int?) throws(RawRefusal) -> PixelBuffer? {
+        guard RawFormat(fileName: fileName) != nil else { return nil }
+        let quality: RawQuality = longestSide.map { .preview(longestSide: $0) } ?? .full
+        return try SuiteRaw.decode(.bytes(data, fileName: fileName), quality: quality)
+    }
 }
 
 extension PhotoWorkspace {
@@ -82,9 +105,14 @@ extension PhotoWorkspace {
         start(with: TiledPixels(background), name: name)
     }
 
-    /// Opens a file's `data` through `codec`. Throws what the codec or
-    /// `open(rgba8:width:height:name:)` throws.
+    /// Opens a file's `data` through `codec`: its working-space buffer as the
+    /// layer when `decodeLinear` gives one, else its 8-bit decode. Throws what
+    /// the codec or `open(rgba8:width:height:name:)` throws (a RAW file's
+    /// `RawRefusal`); the workspace is unchanged.
     public mutating func open(_ data: Data, name: String, codec: some PhotoImageCodec, longestSide: Int? = nil) throws {
+        if let linear = try codec.decodeLinear(data, fileName: name, longestSide: longestSide) {
+            return start(with: TiledPixels(linear), name: name)
+        }
         let image = try codec.decode(data, longestSide: longestSide)
         try open(rgba8: image.rgba8, width: image.width, height: image.height, name: name)
     }

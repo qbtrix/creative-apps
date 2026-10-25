@@ -18,6 +18,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
+import SuiteImaging
 import SuiteKernel
 
 /// The save status the window shows (its subtitle and status slot).
@@ -73,11 +74,18 @@ extension PhotoWorkspace {
     /// Opens a flat file through `open(_:name:codec:longestSide:)` and sets
     /// `fileKind` from its name, so a just-opened PNG saves in place. A file
     /// opened smaller (`longestSide`, past the pixel cap) is `.readOnly`:
-    /// Save asks where rather than replace the full-size original.
+    /// Save asks where rather than replace the full-size original. A camera
+    /// RAW file opens untitled under its stem ("x.DNG" is "x"), so Save
+    /// writes `.ora` and never the RAW file.
     public mutating func openImage(
         _ data: Data, name: String, codec: some PhotoImageCodec, longestSide: Int? = nil
     ) throws {
         try open(data, name: name, codec: codec, longestSide: longestSide)
+        if RawFormat(fileName: name) != nil {
+            documentName = name.lastIndex(of: ".").map { String(name[..<$0]) } ?? name
+            fileKind = nil
+            return
+        }
         fileKind = longestSide == nil ? Self.fileKind(forName: name) : .readOnly
     }
 
