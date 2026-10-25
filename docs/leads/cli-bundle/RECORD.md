@@ -104,3 +104,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 2026-10-25T14:48:50Z: #4999 eligible, queued behind p0
 - 2026-10-25T15:06:43Z: #4999 eligible, queued; no batch in flight
 - 2026-10-25T15:24:39Z: #4999 eligible, queued behind p0
+- 2026-10-25T15:42:41Z: QUEUE: 50+ open p0 fast-lane PRs sort ahead of beta #4999; ~1 code PR per 20 min. Supervisor: raise #4999 to p0 if CB-z should land sooner
