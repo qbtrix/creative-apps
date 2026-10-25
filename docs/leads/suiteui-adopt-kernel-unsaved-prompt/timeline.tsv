@@ -105,3 +105,4 @@ ts	kind	note
 2026-10-25T02:01:22Z	poll	hb45: #5088 eligible, queued behind in-flight batch
 2026-10-25T02:23:57Z	poll	hb46: no change
 2026-10-25T02:39:12Z	poll	hb47: #5088 not in new batch, waits
+2026-10-25T02:53:58Z	poll	hb48: no change
