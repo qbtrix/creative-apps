@@ -138,3 +138,4 @@ utc	stage	event	ref	note
 2026-10-25T16:00Z	heartbeat	no merges of ours; dev a57210d15; main d3323f6a7; no dev-red; 0 findings
 2026-10-25T16:22Z	heartbeat	no merges of ours; dev c2681786c; main d3323f6a7; no dev-red; 0 findings
 2026-10-25T16:44Z	heartbeat	no merges of ours; dev-red #5321 not ours (#4960 #5007 #5008 #5318); main d3323f6a7; 0 findings
+2026-10-25T17:05Z	heartbeat	no merges of ours; dev 5b1d3a19b; dev-red #5321 likely flaky, not ours; main d3323f6a7; 0 findings
