@@ -10,7 +10,8 @@
 # per code batch scoped to its apps, priority order, slots, the timer, a red
 # base set aside per job on Linux and judged by failing test on macOS, the culprit's stacked PRs named), no batch forming on a red dev and a batch on a red base dropped once dev is green, and the red-dev
 # bisect, with its 2-of-3 vote mode for a timing budget test, and the
-# auto-revert of a red dev's culprit (LANE_VERIFY_AFTER=1). No network,
+# auto-revert of a red dev's culprit and own-proof landing on the pre-screen
+# (LANE_VERIFY_AFTER=1). No network,
 # needs bash, git and jq.
 #
 # checks-green.json is a check rollup shaped like a green flare-core PR: the CI
@@ -1852,6 +1853,47 @@ rvdev macos "Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Sources/DesignMo
 LANE_VERIFY_AFTER=1 lane_sweep
 expect "auto-revert: a macOS red with two PRs reverts nothing and leaves the pick to a human" \
   "$(creates),$(grep -c "^issue comment 520 .*2 PRs in main\.\.${RED:0:7} and no bisect verdict names one of them (red: macos), so a human picks the culprit\. <!-- lane-revert none -->" "$sw/calls")" "0,1"
+# Verify after merge, own-proof landing (LANE_VERIFY_AFTER=1): a code PR lands
+# alone as soon as its head has Linux proof and a green local-ci/prescreen (the
+# supervisor's pre-screen on the Mac), with no batch and no macOS run; without
+# the pre-screen it waits, a red one is red, a stale proof becomes a Linux
+# batch of one on today's dev, and a red dev holds nothing. PRs without code
+# need no pre-screen.
+PS='. + [{"__typename":"StatusContext","context":"local-ci/prescreen","state":"%s"}]'
+LANE_VERIFY_AFTER=1 check "verify after: Linux proof and a green prescreen make a code PR eligible" \
+  "eligible|150|2|4 checks green, local-ci/prescreen" . "$BASE_FILES" "$(printf "$PS" SUCCESS)"
+LANE_VERIFY_AFTER=1 check "verify after: no prescreen on the head waits" "pending|waiting for local-ci/prescreen on head $HEAD_SHA" . "$BASE_FILES" .
+LANE_VERIFY_AFTER=1 check "verify after: a pending prescreen waits" "pending|waiting for local-ci/prescreen on head $HEAD_SHA" . "$BASE_FILES" "$(printf "$PS" PENDING)"
+LANE_VERIFY_AFTER=1 check "verify after: a red prescreen is red" "red|local-ci/prescreen" . "$BASE_FILES" "$(printf "$PS" FAILURE)"
+LANE_VERIFY_AFTER=1 check "verify after: Linux proof still comes first" "linux-dispatch|feat/x" . "$BASE_FILES" "[] | $(printf "$PS" SUCCESS)"
+LANE_VERIFY_AFTER=1 check "verify after: a PR without code needs no prescreen" "eligible|150|2|4 checks green" . $'docs/a.md\ndocs/b.md' .
+check "verify after off: the prescreen is ignored, red or not" "eligible|150|2|4 checks green" . "$BASE_FILES" "$(printf "$PS" FAILURE)"
+prescreen() { jq -n --arg s "$2" '{statuses: [{context: "local-ci/prescreen", state: $s}]}' >"$sw/status.$1.json"; }
+head_of() { jq -r .headRefOid "$sw/$1.json"; }
+fresh; cpr 160 Sources/PhotoModel/A.swift; cpr 161 Sources/DesignModel/B.swift
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: code PRs with Linux proof and no prescreen wait: no merge, no batch, nothing runs" \
+  "$(merges),$(batch_tip),$(grep -c '^workflow run' "$sw/calls")" ",,0"
+prescreen "$(head_of 160)" success; prescreen "$(head_of 161)" success
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: with a green prescreen each lands on its own proof, no batch, no macOS run" \
+  "$(merges),$(batch_tip),$(grep -c '^workflow run' "$sw/calls")" "pr merge 160,pr merge 161,,0"
+expect "verify after: the merge comment names the prescreen" "$(grep -c '^pr comment 160 .*merged into dev (.*Fast-Check marker, local-ci/prescreen)' "$sw/calls")" 1
+fresh; cpr 162 Sources/PhotoModel/A.swift; cpr 163 Sources/DesignModel/B.swift
+prescreen "$(head_of 162)" success; prescreen "$(head_of 163)" success
+lane_sweep
+expect "verify after off: the same PRs still batch with a macOS gate" \
+  "$(merges),$( [[ -n "$(batch_tip)" ]] && echo batch),$(grep -c -- '-f mac_only=true' "$sw/calls")" ",batch,1"
+fresh; cpr 164 Sources/PhotoModel/A.swift; prescreen "$(head_of 164)" success
+dev_moves Tests/command-path-baseline/halo.txt; DEV=$(git -C "$sw/origin.git" rev-parse dev)
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: a stale proof re-waits as a Linux batch of one on today's dev, no macOS gate" \
+  "$(merges),$(git -C "$sw/origin.git" rev-parse "$(batch_tip)~1"),$(grep -c -- '-f mac_only=true' "$sw/calls"),$(grep -c -- '-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls")" ",$DEV,0,1"
+batch_green; LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: and lands on that check" "$(merges)" "pr merge 164"
+fresh; cpr 165 Sources/PhotoModel/A.swift; prescreen "$(head_of 165)" success; redissue "" linux
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: a red dev holds no code PR that has its own proof" "$(merges),$(batch_tip)" "pr merge 165,"
 LANE_MAC_PER_PR=1
 
 exit "$fail"

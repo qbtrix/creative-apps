@@ -17,8 +17,9 @@
 # macOS build and Linux-only batches; LANE_MAC_SLOTS, LANE_BATCH_MAX and
 # LANE_BATCH_WAIT_MIN tune batching (empty: the defaults in
 # scripts/fast-lane.sh); LANE_VERIFY_AFTER=1 turns on verify after merge
-# (docs/fast-lane.md: a red dev's culprit is reverted in a lane-revert PR the
-# lane opens and lands). While a `dev-red` issue is open the sweep
+# (docs/fast-lane.md: a code PR lands alone on its Linux proof plus the
+# local-ci/prescreen status, and a red dev's culprit is reverted in a
+# lane-revert PR the lane opens and lands). While a `dev-red` issue is open the sweep
 # also bisects dev's culprit range with `ci/bisect-<sha>-<i>` branches, one
 # Linux-only run each. The sweep waits up to 7 minutes for such a run, so the
 # job's timeout leaves room for it. workflow_run and schedule fire from the copy of this file on the default
