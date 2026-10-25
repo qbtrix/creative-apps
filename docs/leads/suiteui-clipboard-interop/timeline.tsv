@@ -152,3 +152,4 @@ utc	stage	event	ref	note
 2026-10-25T04:33Z	3	lane	lane	#5174 LS-2 fix pushed cb6c0a2f (typed LayerStyle? in the reason test), gate PASS, Head moved
 2026-10-25T04:54Z	3	lane	lane	dev full CI 40154669999 green at 3db45eb; #5174 needs-fix dropped; #5125 needs-rebase resolved (golden), gate running; #4893 #4902-#4905 open, fast-lane, clean
 2026-10-25T05:01Z	3	lane	lane	#5125 merge with origin/dev pushed (df1da94), gate PASS, Head line moved; waiting for the lane to drop needs-rebase
+2026-10-25T05:17Z	3	lane	lane	check: no merges; no dev-red; #5125 clean at df1da94, awaits lane sweep; others fast-lane
