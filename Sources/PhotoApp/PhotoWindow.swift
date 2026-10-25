@@ -12,7 +12,7 @@
 // stroke draws on LiveStroke's LiveCopy and comes back once, at its end or before
 // any other intent, so drawing never re-runs the panels; a Free Transform
 // handle drag or row scrub runs on LiveTransformCopy the same way. Its workspace runs on
-// `fileServices(.live)`, or under `-PhotoFixture` on the fixture's fakes
+// `fileServices(liveServices)`, or under `-PhotoFixture` on the fixture's fakes
 // (`launchOptions`, read once from the process; S-12), whose picture it
 // renders and keeps fitted while the window settles, until the user zooms. Open, Save, Save As and their
 // launch arguments live in PhotoWindow+File.swift, Export's write in
@@ -88,9 +88,9 @@ struct PhotoWindow: View {
     /// This process's `-PhotoFixture`, read once.
     nonisolated static let launchOptions = PhotoLaunchOptions(arguments: ProcessInfo.processInfo.arguments)
 
-    /// The fixture on the fakes under `-PhotoFixture`, else a workspace on `fileServices(.live)`.
+    /// The fixture on the fakes under `-PhotoFixture`, else a workspace on `fileServices(liveServices)`.
     nonisolated static func launchWorkspace() -> PhotoWorkspace {
-        PhotoWorkspace.launch(launchOptions) ?? PhotoWorkspace(services: fileServices(.live))
+        PhotoWorkspace.launch(launchOptions) ?? PhotoWorkspace(services: fileServices(liveServices))
     }
 
     /// A window on `model`: the launch workspace in the app, a test's own in tests, at `zoom`.

@@ -86,7 +86,7 @@ let apps = ["Flare", "Design", "Photo", "Library", "Halo"]
 var products: [Product] = [.executable(name: "afterglow", targets: ["AfterGlowCLI"])]
 var targets: [Target] =
     model("Flare", ["FlareCore"], imaging: false)
-    + model("Design", ["CoreColor"])
+    + model("Design", ["CoreColor", "CoreRaster"])
     + model("Photo", ["CoreRaster", "CoreColor", "CoreRender"])
     + model("Library", ["CoreAsset", "CoreRaster", "CoreColor"])
     + model("Halo", ["FlareCore", "CoreRaster"])

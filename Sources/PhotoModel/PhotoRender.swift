@@ -141,14 +141,16 @@ extension PhotoWorkspace {
     func composited(_ rect: PixelRect) throws -> PixelBuffer {
         var result = try PixelBuffer(width: rect.width, height: rect.height)
         for layer in layers.reversed() where layer.isVisible && layer.opacity > 0 {
-            let content = LayerContent(
-                layer: layer, pixels: pixels[layer.id], mask: layer.isMaskEnabled ? masks[layer.id] : nil)
+            let content = LayerContent(layer: layer, pixels: pixels[layer.id], mask: shownMask(of: layer))
             result = try PhotoLayerComposite.composite(
                 content, onto: result, origin: (x: rect.x, y: rect.y),
                 adjusting: services.adjustmentLayers, masking: services.masking)
         }
         return result
     }
+
+    /// `layer`'s mask when it has one and it is enabled: what hides part of the layer on the canvas.
+    func shownMask(of layer: PhotoLayer) -> TiledPixels? { layer.isMaskEnabled ? masks[layer.id] : nil }
 }
 
 /// See `PhotoWorkspace.curvesHistogramKey`.
