@@ -2,9 +2,9 @@
 
 Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/features/fill-heal.md
 Run: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
-Stage: 3 wave 1 (restack onto rewritten dev)
-Base: main ef37711d (verified) / dev afef017c
-Next: #4889 next batch then #4896 to dev; replay #5107 (split) #5108 #5109 #5129 #5121 onto new dev; FH-c done after fix PRs land green.
+Stage: 3 wave 1 (stacks replayed; in the lane)
+Base: main ef37711d (verified) / dev ae3efdb8
+Next: wait for the lane to merge #4889 / #5121 / #5137, then retarget #4896, #5245 to dev; FH-9 and FH-10 after FH-7 merges.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -20,9 +20,9 @@ Next: #4889 next batch then #4896 to dev; replay #5107 (split) #5108 #5109 #5129
 |---|---|---|---|---|---|---|---|
 | FH-1 | FH-a | 2+ | stubs + disabled checks | Sources/SuiteImaging/Retouch/*, Sources/SuiteKernel/Stroke/DabCoverage.swift, tests, C4 parts | suites compile, disabled | #4556 | merged (in green full run 39957675362) |
 | FH-2 | FH-a | 1 | RJ-P51 folder, RJ-P04/P07 re-pointed, disabled waits_on FH-6 | Tests/RealJobs/photo/{bucket-background,dust-spots,remove-passerby}/* | RealJobs decode check | #3845 | merged (in green dev Linux run 39808732641) |
-| FH-3 | FH-u | 3 | palette Paint Bucket, Spot Heal, Remove disabled with help; bucket options | Sources/PhotoModel/*, Sources/PhotoApp/*, Tests/PhotoModelTests/PhotoRetouchToolsTests.swift, UITests/PhotoJourneyTests+Retouch.swift | PhotoRetouchToolsTests, photo.list-commands golden | #4889 | lane |
-| FH-7 | FH-photo | 4 | PhotoWorkspace: RetouchTarget, heal via retouch.heal, toneShift gone, RJ-P51 on | Sources/PhotoModel/PhotoRetouch*.swift, PhotoStroke, catalog, ids, mutations | PhotoRetouchKernelTests, Mutate 3/3 | – | gate (14 files) |
-| FH-7j | FH-photo | 4 | RJ-P04 dust-spots on (split from FH-7 for the 15-file cap) | Tests/RealJobs/photo/dust-spots/* | RealJobs | – | gate |
+| FH-3 | FH-u | 3 | palette Paint Bucket, Spot Heal, Remove disabled with help; bucket options | Sources/PhotoModel/*, Sources/PhotoApp/*, Tests/PhotoModelTests/PhotoRetouchToolsTests.swift, UITests/PhotoJourneyTests+Retouch.swift | PhotoRetouchToolsTests, photo.list-commands golden | #4889 | lane (6ad2a444, base dev) |
+| FH-7 | FH-photo | 4 | PhotoWorkspace: RetouchTarget, heal via retouch.heal, toneShift gone, RJ-P51 on | Sources/PhotoModel/PhotoRetouch*.swift, PhotoStroke, catalog, ids, mutations | PhotoRetouchKernelTests, Mutate 4/4 | #5245 (7a), #5107 (7b) | stacked on #4889 |
+| FH-7j | FH-photo | 4 | RJ-P04 dust-spots on (split from FH-7 for the 15-file cap) | Tests/RealJobs/photo/dust-spots/* | RealJobs | #5108 | stacked on #5107 |
 | FH-8..FH-10 | FH-photo | later | see packet | see packet | see packet | – | waiting |
 
 ## Reviews
@@ -30,6 +30,7 @@ Next: #4889 next batch then #4896 to dev; replay #5107 (split) #5108 #5109 #5129
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-25T01:20Z: replay done: #5107 split into #5245 (FH-7a, 10 files, on FH-3) and #5107 (FH-7b, 7 files, on FH-7a); #5108, #5129 on FH-7; #5109 on lead/fill-heal-FH-8-base (FH-7b + FH-4 merged), retarget to dev once both land; #5121 #5137 on dev. All CI: PASS.
 - 2026-10-24T23:20Z: dev was rewritten to a new root (4f00afb8, #5150); old slice branches share no history with it, so fixers replay each PR's own commits onto the new dev, split to the 400-line/15-file cap, re-gate and force-with-lease push the lead/* branches (same PR numbers).
 - 2026-10-24T06:54Z: relaunch (16 h limit; captain: full capacity). FH-7 built ahead now, stacked on #4577 (FH-6) and #4889 (FH-3), rule 22/23: AJ-photo is a shared-file order wait (catalog, ledger), not code; the lane integrates the conflict if AJ-photo lands first.
 - PR base stays dev: CLAUDE.md and the lane retarget main to dev (the brief's "base main" is the integration branch name, its HEAD verified).
