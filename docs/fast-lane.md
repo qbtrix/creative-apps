@@ -143,11 +143,59 @@ dropped with its probes (no label, no comment: its PRs were not at fault) and
 the same sweep forms a fresh one. A batch whose base predates the red commit
 is never marked, so it can't be dropped this way.
 
+## Verify after merge (LANE_VERIFY_AFTER=1)
+
+The repo variable LANE_VERIFY_AFTER (fast-lane.yml passes it in; unset,
+empty or 0 is the lane described above) moves the checks from before the
+merge to after it: a red BASE_BRANCH is answered by reverting its culprit.
+
+Auto-revert (revert_sweep, after the batches so a revert waits for one in
+flight): while the dev-red issue is open (red_sweep; a Linux or a macOS red),
+the lane makes one revert call on it. The culprit (revert_culprit) is
+red_bisect's verdict on the issue (a certain one: a "likely" verdict from a
+timing budget test is not enough), else the only PR commit (a subject ending
+`(#N)`; generated commits have none) in the issue's range main..<red sha>. A
+Linux red with several PRs waits for the bisect. A macOS-only red with
+several PRs names none, since red_bisect runs Linux probes only and
+reverting newest first would hit innocent PRs, each step a full macOS run on
+dev to read; a human picks. The revert (revert_open) is `git revert` of the
+culprit's squash commit on today's BASE_BRANCH in the scratch clone (merge
+drivers on), pushed as `lane/revert-<n>` (REVERT_PREFIX) and opened as a PR
+labelled `lane-revert` (REVERT_LABEL) and `p0`, never `fast-lane`. Its body
+names the failing jobs, the failing tests read from the red sha's logs
+(red_tests) and the run, and says `Refs` the dev-red issue, so landing it
+closes nothing. The culprit PR is merged, so its feature-lead issue (by the
+PR's `Feature:` line, feature_lead), or the PR itself, gets one comment with
+the failure and how to bring the change back (a new PR that reverts the
+revert, plus the fix), and a `finding` issue labelled `line:<app>` is filed
+(build_apps over the culprit's files; shared code or several apps:
+`line:suite`). The call ends with a REVERT_MARK comment on the dev-red issue,
+which also records a call that found nothing to revert: the culprit is a
+revert itself (never reverted), not a PR's commit, does not revert cleanly,
+or no culprit was named, touches a protected path (captain review only, and
+the lane's token can't push workflows), or its revert could not be pushed or
+opened. With one call per issue no sweep opens two reverts,
+and a dev still red after its revert waits for a human.
+
+The revert PR (a bot author on a REVERT_PREFIX branch with REVERT_LABEL,
+its body saying `Refs #<the open dev-red issue>.`; one from an older issue is
+never landed under a new one) never goes through decide: revert_land starts
+one Linux-only CI run on its head (its comment is the record), and on a
+green one lands it with land(), proof_stale permitting. A stale check, or a
+merge GitHub refuses because dev moved under the revert into a conflict,
+gets the revert cherry-picked onto today's BASE_BRANCH and checked again. It needs no prescreen, no macOS run
+and no batch, and lands while the dev-red issue holds batches, since it puts
+back code BASE_BRANCH already ran. Landing it dispatches CI on BASE_BRANCH
+(dispatch_reason), whose green run promotes main and closes the issue. A red
+check on the revert, a rebuild that conflicts, or a revert left open after
+its issue closed waits for a human. GitHub Actions must be allowed to create pull requests in the repo
+settings, or the call records that the revert was pushed but not opened.
+
 ## CI dispatch on dev
 
 A lead's PR (a `Feature:` body line) never closes a `feature-lead` issue
 (lead_refs). After its merges the lane dispatches CI on BASE_BRANCH at most
-once per run (dispatch_reason): a FEATURE_LABEL PR, a UI_RE change, or
+once per run (dispatch_reason): a lane revert, a FEATURE_LABEL PR, a UI_RE change, or
 DISPATCH_EVERY merged PRs since the last CI run. Promotion of main is
 ci.yml's job.
 
