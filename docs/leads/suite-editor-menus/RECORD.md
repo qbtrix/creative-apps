@@ -152,3 +152,4 @@ Next: lane: probe batch-20261025023716-3 (holds #4988) resolves; once #4988 merg
 - 2026-10-25T13:19:02Z: #4988 still queued in the serial lane; no batch in flight
 - 2026-10-25T13:37:13Z: #4988 eligible; lane batch now #5006 (batch-20261025132815), #4988 waits for a later sweep
 - 2026-10-25T13:55:08Z: #4988 eligible, queued behind p0 PRs; no batch in flight
+- 2026-10-25T14:13:03Z: lane batch now #5007 (batch-20261025140134); #4988 queued behind p0
