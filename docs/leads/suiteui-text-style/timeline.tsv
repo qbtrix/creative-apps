@@ -96,3 +96,4 @@ utc	stage	event	ref	note
 2026-10-24T23:51:25Z	3	poll	-	dev still afef017c; no slice merged; no needs-fix/needs-rebase; lane batch 20261024205137-1 macOS gate green 23:50Z
 2026-10-25T00:13:12Z	3	poll	-	dev still afef017c; batch 20261024235353 red on Linux, lane bisecting (probe -6); no flags on our PRs
 2026-10-25T00:35:25Z	3	poll	-	dev still afef017c; batch probe -6 Linux green, macOS gate running; no flags on our PRs
+2026-10-25T01:02:49Z	3	poll	-	poll: dev still afef017c, no slice merges; no needs-fix/needs-rebase on our PRs; lane batch 20261024235353 bisecting (probe -6 Linux green 40145607006, macOS gate 40145609051 running); findings 0
