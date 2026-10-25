@@ -163,3 +163,4 @@ Next: (2026-10-23T17:29:30Z) #4878 (BK-m) and #4923 (BK-z, stacked, feature-done
 - 2026-10-25T04:07:15Z: poll: #4923 #4924 #4937 #4938 #4949 queued behind p0/beta PRs (lane order); none ejected
 - 2026-10-25T04:16:59Z: poll: #4923 #4924 #4937 #4938 #4949 queued behind p0/beta PRs (lane order); none ejected
 - 2026-10-25T04:37:19Z: poll: #4923 #4924 #4937 #4938 #4949 queued behind p0/beta PRs (lane order); none ejected
+- 2026-10-25T04:47:04Z: poll: #4923 #4924 #4937 #4938 #4949 queued behind p0/beta PRs (lane order); none ejected
