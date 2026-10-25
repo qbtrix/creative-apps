@@ -149,3 +149,4 @@ utc	stage	event	ref	note
 2026-10-25T03:18:53Z	W4	check	PT-4	check-in: batch-20261025023716 macOS red (a Design PR: DesignPlaceSnapshots.swift:39 type-check timeout), bisecting, probe -6 running; full CI 40154669999 running; our PRs clean
 2026-10-25T03:42:29Z	W4	check	PT-4	no merges; ours clean; lane batch-20261025023716 probe -6 macOS red, probe -3 running; full CI 40154669999 still running
 2026-10-25T04:06:21Z	W4	check	PT-4	no merges; ours clean; lane batch-20261025023716 probe -3 macOS red, -1 running (culprit in first 3, none ours); full CI 40154669999 still running
+2026-10-25T04:30:41Z	W4	check	PT-4	no merges of ours; dev took #4877; ours unflagged; lane batch-20261025023716 probe -1 macOS running; full CI 40154669999 still running
