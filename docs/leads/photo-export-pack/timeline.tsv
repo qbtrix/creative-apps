@@ -262,3 +262,4 @@ utc	stage	event	ref	note
 2026-10-25T20:11Z	check-in	#5148 landed 19:52Z (older, oldest-first); #5171/#5206 clean, waiting their turn; dev-red #5321 open, revert #5349 of PT-4 pending (not ours); no XP-3/XP-4, no findings
 2026-10-25T20:43Z	check-in	#5151 landed 20:33Z (older, oldest-first); #5171/#5206 clean, next in turn; dev-red #5321 open, revert #5349 clean; finding #5351 is tone (PT-4), not ours
 2026-10-25T21:16Z	check-in	#5153 landed 21:04Z (older, oldest-first); #5171/#5206 clean, waiting; dev-red #5321 open, revert #5349 clean; no new findings
+2026-10-25T21:48Z	check-in	PT-4 revert #5349 landed 21:39Z (dev-red fix, ahead of us); #5155 landed 21:42Z; #5171/#5206 clean, waiting; mac-finish #5353 (export note size, PX-a) opened, no file overlap with #5171; dev-red #5321 still open
