@@ -148,3 +148,4 @@ utc	stage	event	ref	note
 2026-10-25T12:24:48Z	3	poll	-	12:24Z poll: #4943 landed (58bb6d4d5), none of ours yet; lane sweep pending; no dev-red; #4960 still needs-fix awaiting supervisor
 2026-10-25T12:41:23Z	3	poll	-	12:41Z poll: no merges of ours; batch 20261025122638 Linux check running; lane re-added fast-lane to needs-split #4965/#4961/#4982 (its sweep, not mine); no dev-red; #4960 still needs-fix awaiting supervisor
 2026-10-25T12:58:54Z	3	poll	-	12:58Z poll: no merges of ours; no dev-red; working export-pack #4960/#5043 restack
+2026-10-25T13:14:17Z	3	poll	-	13:14Z poll: dev 930337d52, no merges of ours, no dev-red; scripts/ci --changed still building for #4960 (lx2) and #5043 (XP-3) restacks, push on PASS
