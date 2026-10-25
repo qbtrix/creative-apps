@@ -133,3 +133,4 @@ ts	kind	note
 2026-10-25T08:26Z	heartbeat	batch 20261025054232 bisect now on probe -4 (67d888bc4); dev 7e5bcd82f; #5133 clean at 502e566f9, no lane labels or new comments; waits for next batch
 2026-10-25T08:48Z	heartbeat	batch 20261025054232 resolved (probe -4 macOS red, branches gone); no new batch yet; #5133 at 502e566f9 merges clean onto dev 7e5bcd82f, no lane labels; waits for next batch
 2026-10-25T09:10Z	heartbeat	new batch 20261025090316 (12 PRs: prior set minus #4960 plus #5105) formed without #5133; #5133 at 502e566f9 merges clean onto dev 8d3a12c4b, no lane labels; waits for next batch
+2026-10-25T09:33Z	heartbeat	batch 20261025090316 (without #5133) red on Linux+macOS, bisecting (probe -6 at #5007 running); #5133 at 502e566f9 clean onto dev 8d3a12c4b, local-ci/prescreen success, no lane labels; waits for next batch
