@@ -25,9 +25,14 @@ private struct Layer: LiveLayer {
 
 private typealias Stack = LiveLayerStack<Layer>
 
+/// A region of the picture.
+private struct Rect: LiveRegion {
+    var x = 0, y = 0, width: Int, height: Int
+}
+
 private enum Fixture {
     static let (width, height) = (8, 4)
-    static let rect = PixelRect(x: 0, y: 0, width: width, height: height)
+    static let rect = Rect(width: width, height: height)
     static let bright: [ToneProgram.Operation] = [.adjustment(.exposure(stops: 0.5))]
     static let dark: [ToneProgram.Operation] = [.adjustment(.exposure(stops: -1))]
     static let image: [ToneProgram.Operation] = [.matrix(rows: [0, 1, 0, 1, 0, 0, 0, 0, 1], lightness: 0)]
@@ -40,7 +45,7 @@ private enum Fixture {
     }
 
     /// A solid layer's one composite step over the region, its tile resident.
-    static func tiles(_ layers: [Layer], _ rect: PixelRect, _ resident: ResidentSurfaces) throws -> [CompositeStep] {
+    static func tiles(_ layers: [Layer], _ rect: Rect, _ resident: ResidentSurfaces) throws -> [CompositeStep] {
         try layers.compactMap { layer in
             var pixels = try PixelBuffer(width: rect.width, height: rect.height)
             for y in 0..<rect.height { for x in 0..<rect.width { try pixels.setPixel(x: x, y: y, layer.color) } }
@@ -51,7 +56,7 @@ private enum Fixture {
     }
 
     /// `stack` drawn on a stand-in GPU: the written picture's first pixel.
-    static func draw(_ stack: Stack, cache: LiveCompositeCache = LiveCompositeCache(),
+    static func draw(_ stack: Stack, cache: LiveCompositeCache<Rect> = LiveCompositeCache(),
                      gpu: CPUBackend = CPUBackend(name: "stand-in")) throws -> RGBA {
         let resident = ResidentSurfaces(backend: gpu)
         let dispatcher = RenderDispatcher(preferred: gpu, fallback: CPUBackend())
@@ -125,7 +130,7 @@ private enum Fixture {
     }
 
     @Test func aSecondDrawCompositesNothingAndNewLayersReplaceTheBase() throws {
-        let (cache, gpu) = (LiveCompositeCache(), CPUBackend(name: "stand-in"))
+        let (cache, gpu) = (LiveCompositeCache<Rect>(), CPUBackend(name: "stand-in"))
         let stack = try #require(Stack.folding([Fixture.red, Fixture.adjustment("a", Fixture.dark)], image: []))
         _ = try Fixture.draw(stack, cache: cache, gpu: gpu)
         _ = try Fixture.draw(stack, cache: cache, gpu: gpu)
