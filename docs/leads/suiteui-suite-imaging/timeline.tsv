@@ -112,3 +112,4 @@ utc	stage	event	ref	note
 2026-10-25T07:12Z	heartbeat	poll: dev 13fb2f591, 0 merged; labels restored; lane run in progress; awaiting supervisor
 2026-10-25T07:35Z	heartbeat	poll: dev 13fb2f591; lane bisecting batch-20261025054232 (has #4886); follow-up on #3715
 2026-10-25T07:57Z	heartbeat	poll: dev 13fb2f591; bisect probe -3 macOS still running
+2026-10-25T08:18Z	heartbeat	poll: dev 7e5bcd82f (#5287 not ours); bisect probe -3 macOS still running
