@@ -42,7 +42,7 @@ extension PhotoWorkspace {
     public var exportNote: String? {
         guard let choice = exportChoice, let canvas else { return nil }
         let alpha = choice.format == .png ? "PNG keeps transparent pixels." : "JPEG has no transparency: transparent pixels export white."
-        return "Exports \(Self.sizeText(width: canvas.width, height: canvas.height)). \(alpha)"
+        return "Exports \(Self.sizeText(width: canvas.width, height: canvas.height)).\n\(alpha)"
     }
 
     /// A pick in the open sheet (a format chip, Quality): the sheet shows `o`,

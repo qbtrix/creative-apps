@@ -125,8 +125,8 @@ import Testing
         var workspace = try whiteImage(6, 4)
         #expect(workspace.exportNote == nil)
         workspace.openExport()
-        #expect(workspace.exportNote == "Exports 6 × 4 px. PNG keeps transparent pixels.")
+        #expect(workspace.exportNote == "Exports 6 × 4 px.\nPNG keeps transparent pixels.")
         workspace.editExport(jpeg)
-        #expect(workspace.exportNote == "Exports 6 × 4 px. JPEG has no transparency: transparent pixels export white.")
+        #expect(workspace.exportNote == "Exports 6 × 4 px.\nJPEG has no transparency: transparent pixels export white.")
     }
 }
