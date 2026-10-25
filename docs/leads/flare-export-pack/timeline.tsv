@@ -184,3 +184,4 @@ utc	stage	event	ref	note
 2026-10-25T06:46:18Z	heartbeat	lane HOLD: batch 20261025054232 probe -6 macOS gate (run 40167308409) still running since 05:56Z, Linux green; #4854/#5025 unchanged, wait
 2026-10-25T07:08:22Z	heartbeat	lane HOLD: batch 20261025054232 bisect moved to probe -3 (74829566); dev still 13fb2f59; #4854/#5025 not in batch, wait
 2026-10-25T07:34:55Z	heartbeat	lane HOLD: batch 20261025054232 still at probe -3 (74829566); dev 13fb2f59; #4854/#5025 wait
+2026-10-25T08:01:16Z	heartbeat	lane HOLD: probe -6 macOS gate failed 07:06Z (~70 min run); probe -3 (74829566) Linux green, macOS gate 40171578102 running since 07:07Z; #4854/#5025 wait for next batch
