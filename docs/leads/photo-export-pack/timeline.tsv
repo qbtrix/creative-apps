@@ -255,3 +255,4 @@ utc	stage	event	ref	note
 2026-10-25T16:28Z	check-in	lane moving again (#5044 XP-7 merged 16:19Z, not a Photo wire); #5171/#5206 clean, queued; no XP-3/XP-4, no new findings, no dev-red, no supervisor comments
 2026-10-25T16:59Z	check-in	dev-red #5321 (macos; range #4960 #5007 #5008 #5318, triage likely flaky; tone-controls PRs, not export-pack): not ours; #5171/#5206 clean, queued; no merges since 16:25Z; no XP-3/XP-4, findings or supervisor comments
 2026-10-25T17:32Z	check-in	lane landing beta/p0 one by one, oldest first (#5074 XP-9 16:59Z); #5171 then #5206 next, markers match heads; dev-red #5321 still open, not ours; no XP-3/XP-4, findings or supervisor comments
+2026-10-25T18:04Z	check-in	new findings #5331 (tone Levels journey) and #5332 (New Photo from Home): not export/text, left alone; dev-red #5321 triage now names #5044 (XP-7, suiteui) 0.94, not ours; #5171/#5206 queued (dev moved: #5075, #5333); no XP-3/XP-4 or supervisor comments
