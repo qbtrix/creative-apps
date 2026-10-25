@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-25T04:10Z	check	bisect at -1 probe (running since 03:50Z); #5158/#5174 open+clean, no needs-fix; no dev-red
 2026-10-25T04:34Z	check	bisect still on -1 probe (#4888); #5158 clean in queue; #5174 got needs-fix (supervisor, LayerStyleGalleryTests reason), other lead pushed fix cb6c0a2f8 at 04:29Z; no dev-red, 0 findings
 2026-10-25T04:53Z	check	-1 macOS probe (#4888) still running since 03:50Z; #5158 clean; #5174 needs-fix dropped at cb6c0a2f8; #4963 pushed d709ee354; no dev-red, 0 findings
+2026-10-25T05:13Z	check	bisect moved to -2 probe (#4888+#4963) at 05:06Z; #5158 clean; #5174 clean at cb6c0a2f8; no dev-red, 0 findings
