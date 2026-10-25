@@ -133,3 +133,4 @@ utc	stage	event	ref	note
 2026-10-25T08:18:47Z	3	poll	-	08:18Z poll: dev 7e5bcd82f (#5287 ci-findings dedup, not ours); probe -3 macOS gate 40171578102 running (71m), Linux green; no merges of ours, no needs-fix; no dev-red, no new findings, SC-f not on dev
 2026-10-25T08:35:08Z	3	poll	-	08:35Z poll: dev 7e5bcd82f; probe -3 done, lane now on probe -4 (40176388578/40176391007); no merges of ours, no needs-fix; no dev-red, no new findings, SC-f not on dev
 2026-10-25T08:51:55Z	3	poll	-	08:51Z poll: dev 8d3a12c4b; no merges of ours; no needs-fix on this feature; no dev-red, no new findings, SC-f not on dev
+2026-10-25T09:07:51Z	3	poll	-	09:07Z poll: no merges; batch 20261025090316 running; #4960 needs-fix awaits supervisor; #5308 still open; no dev-red
