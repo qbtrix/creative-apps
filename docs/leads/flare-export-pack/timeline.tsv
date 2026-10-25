@@ -173,3 +173,4 @@ utc	stage	event	ref	note
 2026-10-25T02:45:00Z	heartbeat	batch 20261025023716 formed (12 PRs) with #4854 at 565669e7; #5025 not in it (cap), next batch; dev 3db45eb4
 2026-10-25T03:07:16Z	heartbeat	batch 20261025023716 (with #4854) still running, no probes; #5025 waits; dev 3db45eb4
 2026-10-25T03:28:53Z	heartbeat	batch 20261025023716 red, bisecting: probe -6 (124a1095, first 6 PRs; #4854 is 9th); #5025 waits; dev 3db45eb4
+2026-10-25T03:49:50Z	heartbeat	batch 20261025023716 still bisecting: probes -6, -3 (culprit in first 6; #4854 is 9th); dev 2e7d5264 (docs #3935); #5025 waits
