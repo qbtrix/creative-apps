@@ -111,3 +111,4 @@ utc	stage	event	ref	note
 2026-10-25T03:35:00Z	3	heartbeat	lane	batch-20261025023716 macOS red: DesignPlaceSnapshots.swift:39 type-check timeout (#4963's file, not ours); lane bisecting (probe -6); our PRs wait for the next batch
 2026-10-25T03:57:00Z	3	heartbeat	lane	batch-20261025023716 still bisecting (probe -1 running; -3 red); nothing merged
 2026-10-25T04:18:00Z	3	heartbeat	lane	batch-20261025023716 bisect: probe -1 macOS still running; nothing merged, no needs-fix
+2026-10-25T04:55Z	3	fix	lane	#4889 needs-rebase fixed, head 7ebd2bcf1
