@@ -20,10 +20,8 @@
 // PhotoAdjust+Imaging.swift. `tone` is the suite's ToneSettings (white
 // balance, tone, presence, sharpen; tone-controls PT-1), set whole by one
 // `.tone` edit; it has no AdjustmentKind, so it has no switch and no section
-// of its own, and PT-3 renders it. `kinds` holds Black & White and Invert
-// (adjust-everywhere AJ-8), the suite's ImagingKinds, run after hue/saturation
-// in order; their switch is whether the list holds them, so `enabled` never
-// does and a file from before them opens and saves as it did. Linux-safe.
+// of its own, and PT-3 renders it. `kinds` holds Black & White and Invert (AJ-8);
+// their switch is whether the list holds them, never `enabled`. Linux-safe.
 import CoreRaster
 import SuiteImaging
 
@@ -36,7 +34,6 @@ public enum AdjustmentKind: String, CaseIterable, Sendable, Codable {
 }
 
 extension ImagingKind {
-    /// The adjustment this kind is.
     var adjustment: AdjustmentKind {
         switch self {
         case .blackAndWhite: .blackAndWhite
@@ -96,8 +93,7 @@ public struct AdjustmentSettings: Sendable, Hashable {
     /// White balance, tone, presence and sharpen; stored under "tone", left
     /// out when neutral.
     public private(set) var tone: ToneSettings = .neutral
-    /// Black & White and Invert, in the order they run; stored under "kinds",
-    /// left out when empty.
+    /// Black & White and Invert, in the order they run after hue/saturation.
     public private(set) var kinds: [ImagingKind] = []
 
     public init() {}

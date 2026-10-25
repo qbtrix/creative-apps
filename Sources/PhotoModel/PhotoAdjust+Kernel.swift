@@ -1,11 +1,7 @@
-// PhotoAdjust+Kernel.swift (adjust-everywhere AJ-8): Photo's workspace as the
-// suite's AdjustTarget, so `PhotoWorkspace.commands` runs Black & White,
-// Invert, the five filters and the looks. Kinds and looks act on what the
-// inspector edits (`adjustTarget`): the selected adjustment layer, or the
-// whole image's adjustments; each is one undo step. A filter rewrites only the
-// selected pixel layer, from that layer's own pixels, weighted by the
-// selection's coverage, as one step that records only the tiles it changed.
-// Saved looks live in `services.looks`. Linux-safe.
+// PhotoAdjust+Kernel.swift (AJ-8): Photo as the suite's AdjustTarget. Kinds and
+// looks act on what the inspector edits (`adjustTarget`), as one undo step. A
+// filter rewrites only the selected pixel layer, from its own pixels, weighted
+// by the selection's coverage, as one step. Looks live in `services.looks`. Linux-safe.
 import CoreRaster
 import SuiteImaging
 import SuiteKernel

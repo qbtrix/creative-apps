@@ -79,9 +79,8 @@ struct PhotoCommandCatalogTests {
     }
     /// The kernel's transform.flip is titled "Flip" while its step names the axis ("Flip Horizontal"), as the
     /// transform packet asks. (Free Transform's commit and cancel refuse without a draft: the filter above drops them.)
-    /// The suite's adjust examples (AJ-8) change nothing on the flat fixture: Black & White's `{}` removes a B&W that
-    /// isn't there, Reduce Noise smooths flat colour to itself, and look.delete's "mine" isn't saved; PhotoAdjustTests
-    /// runs each on a picture it changes.
+    /// The suite's adjust examples (AJ-8) change nothing on the flat fixture (no B&W to remove, flat colour has no noise,
+    /// no saved look "mine"); PhotoAdjustTests runs each on a picture it changes.
     static let tolerated = [
         "adjust.black-and-white: stepNamedTitle: its undo step reads \"Delete\", not \"Black & White\"",
         "adjust.black-and-white: editRecordsOneStep: it recorded 0 undo steps, not one",

@@ -8,9 +8,8 @@
 // with neutral output levels and saves again byte for byte; `tone` likewise
 // only when off neutral (tone-controls PT-1). Hue/saturation
 // stays Photo's own matrix (HueSaturation.swift): the GPU route and the live
-// tone route run that matrix, and they move together (IM-8). Black & White
-// and Invert (`kinds`, AJ-8) run after it, in order, and are stored under
-// "kinds" only when there are any. Linux-safe.
+// tone route run that matrix, and they move together (IM-8). `kinds` (AJ-8)
+// run after it and are stored under "kinds" only when there are any. Linux-safe.
 import CoreRaster
 import CoreRender
 import SuiteImaging
@@ -50,9 +49,8 @@ extension AdjustmentSettings {
     /// Every enabled section's step, as the render runs them.
     var imagingSteps: [ToneAdjustment] { imagingSteps() }
 
-    /// `steps` run in order on `buffer` by CoreRender's CPU backend, a
-    /// hue/saturation step through Photo's matrix. Throws `RasterError.invalid`
-    /// when a step fails.
+    /// `steps` run in order on `buffer` by CoreRender's CPU backend, a hue/saturation
+    /// step through Photo's matrix. Throws `RasterError.invalid` when a step fails.
     func runImaging(_ steps: [ToneAdjustment], on buffer: PixelBuffer) throws -> PixelBuffer {
         var result = buffer, run: [ToneAdjustment] = []
         for step in steps {
