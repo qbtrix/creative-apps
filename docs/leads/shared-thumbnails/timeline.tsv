@@ -138,3 +138,4 @@ ts	kind	note
 2026-10-25T10:17Z	heartbeat	batch 20261025090316 still bisecting (-6, -red); dev unchanged at 8d3a12c4b; #5133 at 502e566f9 clean, prescreen success, no lane labels or new comments; waits for next batch
 2026-10-25T10:38Z	heartbeat	batch 20261025090316 still bisecting (new probe -9); dev unchanged at 8d3a12c4b; #5133 at 502e566f9 clean, no new lane comments; waits for next batch
 2026-10-25T11:01Z	heartbeat	batch 20261025090316 still bisecting (-6, -9, -red); dev unchanged at 8d3a12c4b; #5133 at 502e566f9 clean, labels fast-lane/feature-done/beta only, no new comments; waits for next batch
+2026-10-25T11:23Z	heartbeat	new batch 20261025111803 formed with only #4886, again without #5133 (third skip); dev now 68bec9fe7; #5133 at 502e566f9 merges clean, prescreen success, no new lane comments; asking supervisor on #3719
