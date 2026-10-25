@@ -1,10 +1,10 @@
 # design-stroke-style lead record
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
-Run: act-1a16cc9673d-cmzv · Session: claude/feature-lead-placed-images-dkjo55 · Started: 2026-10-24T07:20Z (prior runs act-1a16953aed5-oxsi, act-1a1627ce3b4-ayhz, act-1a1605b0534-rn47, act-1a15e909498-4bkk, act-1a15abb305f-lc8g, act-1a159c9b6b4-va3c)
+Run: act-1a170488b43-wwo9 · resumed after Belt nudge 2026-10-25T00:11:38Z · Started: 2026-10-23
 Stage: 3 wave 1 (16:50Z): DK-u #4864 open (critic running); DK-m #4888 open (DK-5, DK-6, critic running); DK-7 building on design/dk-m-stroke-svg (15-file cap split)
 Base: 721168a8 (origin/dev); main verified at cb79cbb6
-Next: DK-u and DK-m slice PRs; critic panels; then DK-z
+Next: wait for the lane to batch our open PRs (batch-20261024235353 holds none of them); then slice-done on the first ci.yml run on dev that contains each slice's last PR
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
