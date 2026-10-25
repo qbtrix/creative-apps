@@ -114,3 +114,4 @@ utc	stage	event	ref	note
 2026-10-25T07:35:54Z	W2	check	PY-1	no merges; all our PRs clean, unflagged; TC-3 #5006 pushed new head f2963229; lane probe batch-20261025054232-3 Linux green, macOS running
 2026-10-25T07:59:48Z	W2	check	PY-1	unchanged: no merges, all 9 PRs clean, unflagged; lane probe batch-20261025054232-3 macOS gate still running (since 07:07Z)
 2026-10-25T08:23:11Z	W2	check	PY-1	lane probe batch-20261025054232-3 green on Linux and macOS (#4886 #4943 #4953 TC-6), so the macOS culprit is in 4-6 (#4960 #4962 #5006 TC-3); probe -4 queued; all 9 PRs clean, unflagged; dev 7e5bcd82
+2026-10-25T08:48:16Z	W2	check	PY-1	all 9 PRs open, clean, unflagged; batch-20261025054232 probe -4 macOS red, -3 green: macOS culprit #4960; lane should land #4886 #4943 #4953 next; dev 7e5bcd82 Linux green; no scoped photo run holds our slices yet
