@@ -242,3 +242,4 @@ utc	stage	event	ref	note
 2026-10-25T09:31Z	check-in	quiet: 5171/5206 open clean, no XP-3/XP-4, no supervisor reply, no new findings
 2026-10-25T10:03Z	check-in	quiet: 5171/5206 open clean, no XP-3/XP-4, no supervisor reply, no new findings, no dev merges since 09:28Z
 2026-10-25T10:35Z	check-in	quiet: 5171/5206 open clean, no XP-3/XP-4, no supervisor reply, no new findings; lane idle (last dev merge 08:48Z), no dev-red
+2026-10-25T11:08Z	check-in	#5307 (captain) merged 11:06Z: SuiteText target, first step to CLI text for #5193; follow-up wiring (Package.swift) is the captain's. 5171/5206 open clean; no XP-3/XP-4; no new findings
