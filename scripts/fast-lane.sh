@@ -1487,12 +1487,15 @@ bisect_drop() {
 revert_sweep() {
   (( LANE_VERIFY_AFTER )) || return 0
   local open comments got c subj n
-  # The lane's revert PR: a bot's (the lane's token) on a REVERT_PREFIX branch with REVERT_LABEL.
-  open=$(open_list 2>/dev/null | jq -r --arg l "$REVERT_LABEL" --arg p "$REVERT_PREFIX" 'first(.[]
-    | select(.author.is_bot == true and ((.headRefName // "") | startswith($p)) and any(.labels[]?; .name == $l)))
+  [[ -n "$BASE_RED" ]] || return 0
+  # The lane's revert PR for this dev-red issue: a bot's (the lane's token) on
+  # a REVERT_PREFIX branch with REVERT_LABEL, whose body refs the issue. One
+  # left from an older red is never landed under a new one; a human closes it.
+  open=$(open_list 2>/dev/null | jq -r --arg l "$REVERT_LABEL" --arg p "$REVERT_PREFIX" --arg r "Refs #$BASE_RED." 'first(.[]
+    | select(.author.is_bot == true and ((.headRefName // "") | startswith($p)) and any(.labels[]?; .name == $l)
+        and ((.body // "") | contains($r))))
     | "\(.number)|\(.headRefOid)|\(.headRefName)"' 2>/dev/null || true)
   if [[ -n "$open" ]]; then revert_land "$open"; return 0; fi
-  [[ -n "$BASE_RED" ]] || return 0
   if ! comments=$(gh api "repos/$REPO/issues/$BASE_RED/comments" --paginate --jq '.[].body' 2>/dev/null); then
     log "auto-revert: could not read dev-red #$BASE_RED's comments; the next sweep looks again"; return 0
   fi
@@ -1558,15 +1561,25 @@ red_tests() {
 # it back, and a `finding` issue is filed for its app (line:<app>, line:suite
 # for shared code).
 revert_open() {
-  local c="$1" n="$2" subj="$3" how="$4" br="$REVERT_PREFIX$2" d="$SCRATCH" why tests url m lead f app
+  local c="$1" n="$2" subj="$3" how="$4" br="$REVERT_PREFIX$2" d="$SCRATCH" why tests url m lead f app denied
   local bot=(-c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com")
+  f=$(mktemp); git -C "$d" diff --no-renames --name-only "$c^" "$c" >"$f" 2>/dev/null || true
+  # A protected path stays captain-reviewed, a revert by the lane included (and its token can't push workflows).
+  denied=$(grep -Ei -- "$DENY_RE" "$f" | paste -sd, - | sed 's/,/, /g' || true)
+  if [[ -n "$denied" ]]; then
+    rm -f "$f"; revert_note "${c:0:7}" "#$n (${c:0:7}) is the culprit ($how), but it touches protected paths ($denied), so a human reverts it"; return 0
+  fi
+  app=$(build_apps "$f"); rm -f "$f"
+  [[ "$app" =~ ^[a-z]+$ && "$app" != all ]] || app=suite
   if (( DRY_RUN )); then log "dry-run, would revert #$n (${c:0:7}: $how) on $br"; return 0; fi
   if ! git -C "$d" checkout -q -B revert "origin/$BASE_BRANCH" 2>/dev/null || ! bash "$HERE/install-merge-drivers" "$d" >/dev/null 2>&1 \
       || ! git -C "$d" "${bot[@]}" revert --no-edit "$c" >/dev/null 2>&1; then
     git -C "$d" revert --abort >/dev/null 2>&1 || true
     revert_note "${c:0:7}" "#$n (${c:0:7}) is the culprit ($how), but it does not revert cleanly on today's $BASE_BRANCH, so a human reverts it"; return 0
   fi
-  if ! git -C "$d" push -q -f origin "HEAD:refs/heads/$br" 2>/dev/null; then log "auto-revert: could not push $br; the next sweep tries again"; return 0; fi
+  if ! git -C "$d" push -q -f origin "HEAD:refs/heads/$br" 2>/dev/null; then
+    revert_note "${c:0:7}" "#$n (${c:0:7}) is the culprit ($how), but the lane could not push its revert to $br, so a human reverts it"; return 0
+  fi
   tests=$(red_tests "$BASE_RED_SHA")
   why="$BASE_BRANCH went red on ${BASE_RED_JOBS#*: } at ${BASE_RED_SHA:0:7} (dev-red #$BASE_RED, run ${BASE_RED_RUN:-not named})${tests:+, failing $tests}"
   write gh label create "$REVERT_LABEL" -R "$REPO" --color b60205 --force --description "The fast lane's revert of a red dev's culprit" >/dev/null 2>&1 || true
@@ -1581,23 +1594,20 @@ Refs #$BASE_RED. This reverts commit $c. The fast lane opened this PR and lands 
   lead=$(feature_lead "$n")
   write gh issue comment "${lead:-$n}" -R "$REPO" --body "Fast lane: #$n was reverted by #$m. $why, and the lane found #$n as the culprit ($how). Nothing is lost: to bring it back, open a new PR that reverts #$m's commit and fixes the failure, run scripts/ci --changed, and send it through the lane again." \
     || log "could not comment on #${lead:-$n}"
-  f=$(mktemp); git -C "$d" diff --no-renames --name-only "$c^" "$c" >"$f" 2>/dev/null || true
-  app=$(build_apps "$f"); rm -f "$f"
-  [[ "$app" =~ ^[a-z]+$ && "$app" != all ]] || app=suite
   write gh issue create -R "$REPO" --title "Reverted #$n: $BASE_BRANCH red on ${BASE_RED_JOBS#*: }" --label "$FINDING_LABEL" --label "line:$app" \
     --body "#$n ($subj) was reverted by #$m. $why. The lane found it as the culprit: $how. Fix the failure and bring the change back in a new PR that reverts #$m's commit." >/dev/null \
     || log "could not file the finding for #$n"
 }
 
-# revert_land <n>|<head>|<branch>: the lane's open revert PR, while dev is red
-# and no batch is in flight (HOLD), lands on its own Linux check (started once
-# per head, its comment the record). A stale check (proof_stale) gets the
-# revert rebuilt on today's BASE_BRANCH, checked again; a red one, or a green
-# dev, leaves it to a human.
+# revert_land <n>|<head>|<branch>: the lane's open revert PR for the open
+# dev-red issue lands, once no batch is in flight (HOLD), on its own Linux
+# check (started once per head, its comment the record). A stale check
+# (proof_stale), or a merge refused because dev moved under it into a
+# conflict, gets the revert rebuilt on today's BASE_BRANCH and checked again;
+# a red check, or a rebuild that conflicts, leaves it to a human.
 revert_land() {
   local m head br v stale
   IFS='|' read -r m head br <<<"$1"
-  [[ -n "$BASE_RED" ]] || { log "auto-revert: #$m is open and no dev-red issue is; a human closes or lands it"; return 0; }
   v=$(check_verdict "$head")
   case "$v" in
     none)
@@ -1610,13 +1620,18 @@ revert_land() {
       if (( HOLD )); then log "auto-revert: #$m waits for the batch in flight"; return 0; fi
       if ! scratch "$BASE_BRANCH" "$br"; then log "auto-revert: could not fetch $br; the next sweep looks again"; return 0; fi
       stale=$(proof_stale "$(git -C "$SCRATCH" merge-base "$head" "origin/$BASE_BRANCH" 2>/dev/null || true)" "$head")
-      if [[ -z "$stale" ]]; then land "$m" "$head" "its own Linux check, ${v#green|}" || true; return 0; fi
-      log "auto-revert: #$m's Linux check is stale ($stale); rebuilding it on today's $BASE_BRANCH"
+      if [[ -z "$stale" ]]; then
+        land "$m" "$head" "its own Linux check, ${v#green|}" && return 0
+        [[ "$(gh pr view "$m" -R "$REPO" --json mergeable 2>/dev/null | jq -r '.mergeable // ""')" == CONFLICTING ]] || return 0
+        stale="it conflicts with $BASE_BRANCH"
+      fi
+      log "auto-revert: #$m's Linux check no longer holds ($stale); rebuilding it on today's $BASE_BRANCH"
+      if (( DRY_RUN )); then log "dry-run, would rebuild $br"; return 0; fi
       if ! git -C "$SCRATCH" checkout -q -B revert "origin/$BASE_BRANCH" 2>/dev/null \
           || ! git -C "$SCRATCH" -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" cherry-pick "$head" >/dev/null 2>&1 \
           || ! git -C "$SCRATCH" push -q -f origin "HEAD:refs/heads/$br" 2>/dev/null; then
         git -C "$SCRATCH" cherry-pick --abort >/dev/null 2>&1 || true
-        comment_once "$m" "Fast lane: this revert's Linux check is stale ($stale) and the lane could not rebuild it on $BASE_BRANCH, so a human looks."
+        comment_once "$m" "Fast lane: this revert's Linux check no longer holds ($stale) and the lane could not rebuild it on $BASE_BRANCH, so a human looks."
       fi ;;
   esac
 }

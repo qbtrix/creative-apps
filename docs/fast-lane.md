@@ -172,19 +172,23 @@ revert, plus the fix), and a `finding` issue labelled `line:<app>` is filed
 `line:suite`). The call ends with a REVERT_MARK comment on the dev-red issue,
 which also records a call that found nothing to revert: the culprit is a
 revert itself (never reverted), not a PR's commit, does not revert cleanly,
-or no culprit was named. With one call per issue no sweep opens two reverts,
+or no culprit was named, touches a protected path (captain review only, and
+the lane's token can't push workflows), or its revert could not be pushed or
+opened. With one call per issue no sweep opens two reverts,
 and a dev still red after its revert waits for a human.
 
-The revert PR (a bot author on a REVERT_PREFIX branch with REVERT_LABEL)
-never goes through decide: revert_land starts one Linux-only CI run on its
-head (its comment is the record), and on a green one lands it with land(),
-proof_stale permitting (a stale check gets the revert cherry-picked onto
-today's BASE_BRANCH and checked again). It needs no prescreen, no macOS run
+The revert PR (a bot author on a REVERT_PREFIX branch with REVERT_LABEL,
+its body saying `Refs #<the open dev-red issue>.`; one from an older issue is
+never landed under a new one) never goes through decide: revert_land starts
+one Linux-only CI run on its head (its comment is the record), and on a
+green one lands it with land(), proof_stale permitting. A stale check, or a
+merge GitHub refuses because dev moved under the revert into a conflict,
+gets the revert cherry-picked onto today's BASE_BRANCH and checked again. It needs no prescreen, no macOS run
 and no batch, and lands while the dev-red issue holds batches, since it puts
 back code BASE_BRANCH already ran. Landing it dispatches CI on BASE_BRANCH
 (dispatch_reason), whose green run promotes main and closes the issue. A red
-check on the revert, or a revert left open after the issue closed, waits for
-a human. GitHub Actions must be allowed to create pull requests in the repo
+check on the revert, a rebuild that conflicts, or a revert left open after
+its issue closed waits for a human. GitHub Actions must be allowed to create pull requests in the repo
 settings, or the call records that the revert was pushed but not opened.
 
 ## CI dispatch on dev

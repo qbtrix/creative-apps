@@ -710,7 +710,8 @@ gh() {
       [[ ! -e "$sw/labels.$n.fail" ]] || return 1
       jq -c '{labels: map({name: .})}' <<<"$(cat "$sw/labels.$n" 2>/dev/null || echo '[]')" | jq -r "${!#}" ;;
     "pr comment "*|"issue comment "*) echo "$a" >>"$sw/calls"; printf '%s\n' "${!#}" >>"$sw/$3.comments" ;;
-    "pr merge "*) echo "$a" >>"$sw/calls"; touch "$sw/$3.merged"; printf '%s\n' "${!#}" >"$sw/$3.squash" ;;
+    "pr merge "*) [[ ! -e "$sw/merge.fail.$3" ]] || return 1  # $sw/merge.fail.<n>: GitHub refuses the merge
+      echo "$a" >>"$sw/calls"; touch "$sw/$3.merged"; printf '%s\n' "${!#}" >"$sw/$3.squash" ;;
     "pr edit "*"--body "*) echo "pr edit $3 --body" >>"$sw/calls"; printf '%s\n' "${!#}" >"$sw/$3.edited" ;;
     "pr edit "*"--base "*) echo "$a" >>"$sw/calls"; jq '.baseRefName = "dev"' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
     "pr edit "*"--add-label fast-lane") echo "$a" >>"$sw/calls"
@@ -1807,6 +1808,31 @@ rvdev linux 'Sources/PhotoModel/A.swift|Revert "feat(photo): a (#201)" (#205)'
 LANE_VERIFY_AFTER=1 lane_sweep; LANE_VERIFY_AFTER=1 lane_sweep
 expect "auto-revert: never reverts a revert, and says so once on the issue" \
   "$(creates),$(grep -c "^issue comment 520 .*is a revert itself, and the lane never reverts a revert, so a human looks\. <!-- lane-revert ${RED:0:7} -->" "$sw/calls"),$(grep -c '^issue comment 520 .*Auto-revert' "$sw/calls")" "0,1,1"
+
+# A revert lands only under the dev-red issue it refs: one left open from an
+# older red is never landed under a new issue.
+rvdev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+LANE_VERIFY_AFTER=1 lane_sweep; verdict "$(jq -r .headRefOid "$sw/600.json")" success
+jq '.[0].number = 530' "$sw/red.json" >"$sw/x" && mv "$sw/x" "$sw/red.json"
+printf '%s\n' "Auto-revert: an earlier call. <!-- lane-revert none -->" >"$sw/530.comments"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: a revert from an older dev-red issue is never checked or landed under a new one" \
+  "$(merges),$(grep -c -- '--ref lane/revert-201$' "$sw/calls")" ",0"
+
+# A culprit on a protected path stays with a human (the lane's token can't push workflows either).
+rvdev linux "scripts/tool.sh|chore: tool (#201)"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: a culprit touching a protected path is left to a human" \
+  "$(creates),$(git -C "$sw/origin.git" for-each-ref 'refs/heads/lane/revert-*' | wc -l | tr -d ' '),$(grep -c "^issue comment 520 .*touches protected paths (scripts/tool.sh), so a human reverts it\. <!-- lane-revert" "$sw/calls")" "0,0,1"
+
+# A revert GitHub refuses as conflicting (dev moved under it) is rebuilt on today's dev.
+rvdev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+LANE_VERIFY_AFTER=1 lane_sweep; verdict "$(jq -r .headRefOid "$sw/600.json")" success
+dev_moves docs/later.md; DEV=$(git -C "$sw/origin.git" rev-parse dev)
+jq '.mergeable = "CONFLICTING"' "$sw/600.json" >"$sw/x" && mv "$sw/x" "$sw/600.json"; touch "$sw/merge.fail.600"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: a revert refused as conflicting is rebuilt on today's dev, not merged" \
+  "$(merges),$(git -C "$sw/origin.git" rev-parse refs/heads/lane/revert-201~1),$(git -C "$sw/origin.git" diff --name-only "$DEV" refs/heads/lane/revert-201)" ",$DEV,Sources/PhotoModel/A.swift"
 
 # A Linux red with two PRs waits for the bisect, then reverts the PR it names.
 rvdev linux "docs/a.md|docs: a (#201)" "docs/b.md|docs: b (#202)"
