@@ -198,3 +198,4 @@ utc	stage	event	ref	note
 2026-10-25T13:19:02Z	3	heartbeat	-	#4999 local-ci/prescreen now success on 941da487; eligible, waiting for the lane
 2026-10-25T13:37:13Z	3	heartbeat	-	#4999 prescreen green, eligible; waiting for the lane
 2026-10-25T13:55:08Z	3	heartbeat	-	#4999 eligible, queued behind p0 PRs; no batch in flight
+2026-10-25T14:13:03Z	3	heartbeat	-	#4999 eligible, queued behind p0
