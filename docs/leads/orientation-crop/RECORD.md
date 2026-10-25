@@ -2,9 +2,9 @@
 
 Issue: #3756 · Packet: docs/blueprints/suiteui/features/orientation-crop.md
 Run: act-1a1702c569a-0puo · Session: claude/suiteui-feature-lead-run-azjeoo · Started: 2026-10-24T23:00Z (earlier: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui: tone-controls, shared-codecs, orientation-crop) · Started: 2026-10-23T14:51Z)
-Stage: 3 wave 4
-Base: origin/dev afef017c (main ef37711d + #5059, #5222)
-Next: wave 4: OC-library-m (OC-7+OC-8) and OC-photo-m (OC-11+OC-12), one PR each on dev. Then OC-library-u and OC-photo-u stacked on them, and OC-z folded into the last adopt slice.
+Stage: 3 polling (wave 4 PRs on the lane)
+Base: origin/dev ae3efdb8
+Next: wait for the lane on OC-library-m #5246 and OC-photo-m #5244; meanwhile build OC-library-u stacked on #5246 and OC-photo-u stacked on #5244 (OC-z folds into the last). Done checks read the CI run on dev that contains each.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,9 +12,9 @@ Next: wave 4: OC-library-m (OC-7+OC-8) and OC-photo-m (OC-11+OC-12), one PR each
 | OC-a | contract: Orientation, CropAspect, CropRules stubs, CropCommands, C4 part; disabled tests | OC-1, OC-2 | – | – | false | 0 | done (#4082 → f080846e; Linux 39620526621; Belt-Slice-Done posted) | – | – |
 | OC-m | Orientation and CropRules bodies; two mutation plans | OC-3, OC-4 | – | OC-a | false | 0 | done (#4088 → b48e63e3; Linux 39637279724; Belt-Slice-Done posted) | – | – |
 | OC-u | CropAspectPicker, gallery, journey, render budget | OC-5, OC-6 | SJ-OC | OC-a; document-setup:DS-u (merged #4309) | true | 0 | done: run 40109073275 green; Belt-Slice-Done posted 17:19Z | – | – |
-| OC-library-m | Library adopts orientation | OC-7, OC-8 | – | OC-m, suite-imaging:IM-z, clipboard-interop:CB-library (not started) (OC-8) | false | 0 | blocked | – | – |
+| OC-library-m | Library adopts orientation | OC-7, OC-8 | – | OC-m, suite-imaging:IM-z, clipboard-interop:CB-library (not started) (OC-8) | false | 0 | building (#5246) | – | – |
 | OC-library-u | Library crop UI | OC-9, OC-10 | – | OC-u, OC-library-m | true | 0 | blocked | – | – |
-| OC-photo-m | Photo adopts orientation and crop | OC-11, OC-12 | – | OC-m, document-setup:DS-photo (not started) (OC-12) | false | 0 | blocked | – | – |
+| OC-photo-m | Photo adopts orientation and crop | OC-11, OC-12 | – | OC-m, document-setup:DS-photo (not started) (OC-12) | false | 0 | building (#5244) | – | – |
 | OC-photo-u | Photo crop UI | OC-13, OC-14 | – | OC-u, OC-photo-m, area-selection:AR-photo-u (not started) | true | 0 | blocked | – | – |
 | OC-z | delete LibraryCrop and PhotoCropSize; status built; feature-done | OC-15, OC-16 | – | OC-library-u, OC-photo-u, clipboard-interop:CB-z | false | 0 | blocked | – | – |
 
