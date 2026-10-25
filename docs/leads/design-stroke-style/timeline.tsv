@@ -227,3 +227,4 @@ time	kind	note
 2026-10-25T11:11:55Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; no new lane runs since 10:40 (batch 090316 bisect idle after probe 9 linux green); ours queue for next batch
 2026-10-25T11:32:17Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; new batch 111803 (#4886 only, Linux running), ours not in it; queue for next batch
 2026-10-25T11:52:20Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; #4886 merged via batch 111803; batch 114830 (#4943) Linux running; ours queue behind
+2026-10-25T12:12:16Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; batch 114830 (#4943 only) Linux green, macOS gate pending; ours wait for next batch
