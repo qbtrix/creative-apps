@@ -17,10 +17,14 @@ public struct FormatChoice: Hashable, Sendable, Identifiable {
     public init(id: String, name: String, hasQuality: Bool) { (self.id, self.name, self.hasQuality) = (id, name, hasQuality) }
 }
 
-/// Export options as the sheet reads them: format id, scale and quality 0...1.
+/// Export options as the sheet reads them: format id, scale, quality 0...1 and the metadata policy
+/// (export-pack; nil: the host offers none).
 public struct ExportPick: Hashable, Sendable {
     public var format: String, scale: Double, quality: Double
-    public init(format: String, scale: Double = 1, quality: Double = 0.9) { (self.format, self.scale, self.quality) = (format, scale, quality) }
+    public var metadata: ExportMetadata? = nil
+    public init(format: String, scale: Double = 1, quality: Double = 0.9, metadata: ExportMetadata? = nil) {
+        (self.format, self.scale, self.quality, self.metadata) = (format, scale, quality, metadata)
+    }
 }
 
 /// A running export's steps, done clamped to 0...total and total at least 1.
