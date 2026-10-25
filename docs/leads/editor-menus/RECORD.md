@@ -129,3 +129,4 @@ Next: lane: probe batch-20261025023716-3 (holds #4988) resolves; once #4988 merg
 - 2026-10-25T06:23:57Z: batch-20261025054232 (not ours) still at probe -6; #4988 waits for the next batch
 - 2026-10-25T06:41:52Z: batch-20261025054232 probe -6 macOS gate still running (Linux green); #4988 waits for the next batch
 - 2026-10-25T06:59:49Z: batch-20261025054232 probe -6 macOS gate still running; #4988 waits for the next batch
+- 2026-10-25T07:17:50Z: batch-20261025054232 (not ours) bisecting at probe -3; #4988 waits for the next batch
