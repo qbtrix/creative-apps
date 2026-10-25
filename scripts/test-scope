@@ -133,7 +133,7 @@ def path_units(path):
             return [("SuiteKernelTests", None), CLI] + [(x + "ModelTests", None) for x in APPS.values()]
         if top in ("AfterGlowCLI", "AfterGlowCLICore"):
             return [CLI]
-        if top in ("AfterGlowApp", "SuiteShell"):
+        if top in ("AfterGlowApp", "SuiteShell", "SuiteText"):
             return app_units("suite")
         if top == "SuiteUI":
             return [("SuiteUITests", None), (SNAP, SNAPSHOTS["suiteui"])]
