@@ -231,3 +231,4 @@ time	kind	note
 2026-10-25T12:32:10Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; #4943 merged; batch 122638 (#4953 only) Linux running; ours wait
 2026-10-25T12:52:57Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; batch 122638 (#4953 only) Linux green; dev 58bb6d4d green; ours wait
 2026-10-25T13:13:00Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; #4953 merged to dev 930337d5; batch 125743 (#4962 only) Linux running; ours wait
+2026-10-25T13:34:40Z	3	heartbeat	#4916 #5002 #5011	lane sweep 13:10Z: #4916 #4922 #4963 #5002 eligible (marker + local-ci/prescreen), stacked PRs wait on base; 65 ready PRs queued behind single-PR batches; nothing to fix, waiting on lane

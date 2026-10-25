@@ -87,3 +87,7 @@ At 04:14Z the supervisor pulled #4864 from the lane for the batch -9 macOS failu
 ### 2026-10-25T05:54:44Z: stage
 
 #4888 merged 05:23Z; #4916 needs-split cleared by merging dev (192 lines/10 files), ci --changed PASS, Head 1910a216; #5002/#5011 queued
+
+### 2026-10-25T13:34:40Z: queue check
+
+lane sweep 13:10Z: #4916 #4922 #4963 #5002 eligible (marker + local-ci/prescreen), stacked PRs wait on base; 65 ready PRs queued behind single-PR batches; nothing to fix, waiting on lane
