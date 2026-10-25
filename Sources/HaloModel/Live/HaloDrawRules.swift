@@ -2,6 +2,7 @@
 // LiveFrameDrawing and FakeFrameDrawing so the two can't drift apart, plus
 // the draw list's summary and world boxes the viewer reads. Linux-safe.
 import FlareCore
+import SuiteKernel
 
 enum HaloDrawRules {
     /// Bottom first; nulls and out-of-span layers left out. A nil matrix or
@@ -16,17 +17,31 @@ enum HaloDrawRules {
                 shape: layer.shape, stroke: HaloOutlines.stroke(of: layer, in: c, at: frame),
                 placedAsset: layer.kind == .solid ? layer.placedAsset : nil, placedImage: layer.placedImage(in: c))
         }
-        return HaloDrawList(width: c.width, height: c.height, frame: frame, items: items)
+        return HaloDrawList(width: c.width, height: c.height, frame: frame, items: background(of: c).map { [$0] + items } ?? items)
     }
+
+    /// DS-12: a colour background as a full-frame solid under every layer; nil for white and transparent.
+    static func background(of c: HaloComposition) -> HaloDrawItem? {
+        guard case .color(let hex) = c.background, hex.hasPrefix("#"),
+              let rgb = UInt32(hex.dropFirst().prefix(6), radix: 16) else { return nil }
+        let color = HaloLayerColor(bytes: UInt8(truncatingIfNeeded: rgb >> 16), UInt8(truncatingIfNeeded: rgb >> 8), UInt8(truncatingIfNeeded: rgb))
+        return HaloDrawItem(layerID: HaloDrawItem.backgroundID, kind: .solid, bounds: HaloLayerRect(x: 0, y: 0, width: Double(c.width),
+            height: Double(c.height)), matrix: .identity, opacity: 1, color: color, blendMode: .normal)
+    }
+}
+
+extension HaloDrawItem {
+    public static let backgroundID = ""
 }
 
 extension HaloDrawList {
     /// "3 layers drawn", "1 layer drawn", "No layers drawn": the canvas's value.
     public var drawnSummary: String {
-        switch items.count {
+        let count = items.count { $0.layerID != HaloDrawItem.backgroundID }
+        return switch count {
         case 0: "No layers drawn"
         case 1: "1 layer drawn"
-        default: "\(items.count) layers drawn"
+        default: "\(count) layers drawn"
         }
     }
 

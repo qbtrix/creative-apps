@@ -1,7 +1,7 @@
 // HaloCompositionCommands.swift: Halo's Composition menu in the menu bar: New
 // ⌥⌘N (opens the New Composition sheet), Duplicate ⌘D and Delete ⌘⌫ for the
 // focused window's selected composition, each sent through `haloPerform` and
-// disabled with the catalog spec's reason as help (HaloMenuTarget.item). Command-Delete
+// disabled with the catalog spec's reason as help (HaloMenuTarget.item), and Settings… (DS-12). Command-Delete
 // while a text field has focus (renaming a composition in the sidebar) edits
 // the text, as it does in any field, and never deletes the composition: the
 // window's route asks HaloProject.compositionDeleteCommand with HaloTextFocus.
@@ -27,6 +27,7 @@ enum HaloTextFocus {
 struct HaloCompositionCommands: Commands {
     @FocusedValue(\.haloProject) private var model
     @FocusedValue(\.haloPerform) private var perform
+    @FocusedValue(\.haloCompositionSettings) private var settings
 
     private var target: HaloMenuTarget { HaloMenuTarget(model: model, perform: perform) }
 
@@ -37,6 +38,13 @@ struct HaloCompositionCommands: Commands {
                 shortcut: KeyboardShortcut("n", modifiers: [.command, .option]))
             target.item(.duplicateComposition, systemImage: "plus.square.on.square", shortcut: KeyboardShortcut("d"))
             target.item(.deleteComposition, systemImage: "trash", shortcut: KeyboardShortcut(.delete))
+            Divider()
+            MenuCommand(HaloMenuState.spec("document.set-settings"), on: HaloMenuState(project: settings == nil ? nil : model),
+                        title: "Composition Settings…", systemImage: "slider.horizontal.3") { settings?() }
         }
     }
+}
+
+extension FocusedValues {
+    @Entry var haloCompositionSettings: (@MainActor () -> Void)?
 }

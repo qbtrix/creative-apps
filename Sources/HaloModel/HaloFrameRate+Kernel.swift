@@ -25,7 +25,7 @@ extension HaloComposition {
     }
 
     enum CodingKeys: String, CodingKey {
-        case id, name, width, height, framesPerSecond, frameRate, durationFrames, layers, playheadFrame
+        case id, name, width, height, framesPerSecond, frameRate, durationFrames, layers, playheadFrame, background
     }
 
     /// Reads `frameRate` when the file has it, else the whole `framesPerSecond` every old file has. Keys are
@@ -41,6 +41,7 @@ extension HaloComposition {
             durationFrames: try c.decode(Int.self, forKey: .durationFrames),
             layers: try c.decode([HaloLayer].self, forKey: .layers))
         playheadFrame = try c.decode(Int.self, forKey: .playheadFrame)
+        background = try c.decodeIfPresent(DocumentBackground.self, forKey: .background) ?? .white
     }
 
     /// Writes the whole rate as `framesPerSecond`, and `frameRate` only when the rate isn't whole.
@@ -55,6 +56,7 @@ extension HaloComposition {
         try c.encode(durationFrames, forKey: .durationFrames)
         try c.encode(layers, forKey: .layers)
         try c.encode(playheadFrame, forKey: .playheadFrame)
+        if background != .white { try c.encode(background, forKey: .background) }
     }
 }
 

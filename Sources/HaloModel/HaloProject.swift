@@ -14,6 +14,7 @@
 // dismissed.
 import CoreRaster
 import FlareCore
+import SuiteImaging
 import SuiteKernel
 
 /// A composition: a sized, timed canvas that layers play in. Codable, so a
@@ -31,6 +32,7 @@ public struct HaloComposition: Identifiable, Codable, Sendable, Hashable {
     /// The frame the viewer shows, in 0..<durationFrames; HaloProject's
     /// `scrub(to:)` keeps it there.
     public var playheadFrame: Int = 0
+    public var background: DocumentBackground = .white
 
     public init(
         id: String, name: String, width: Int, height: Int, frameRate: FrameRate, durationFrames: Int,
@@ -94,6 +96,8 @@ public struct HaloProject: Sendable, Equatable {
     public internal(set) var refusedRename: RefusedRename?
     /// The spec the shape tool's next drag draws; written by `HaloShape+Kernel.swift`.
     public internal(set) var shapeTool = ShapeSpec.defaults(.rectangle)
+    /// The style panel's section while it shows, nil when closed (layer-styles HY-1); not an undo step.
+    public internal(set) var stylePanel: StyleKind?
 
     /// A project on the live services, as the app ships.
     public init() { self.init(services: .live) }
@@ -106,6 +110,7 @@ public struct HaloProject: Sendable, Equatable {
             && a.viewerDrag == b.viewerDrag && a.selectedKeys == b.selectedKeys && a.file == b.file
             && a.renderedFrame == b.renderedFrame && a.renderJob == b.renderJob && a.refusal == b.refusal
             && a.refusedRename == b.refusedRename && a.shapeTool == b.shapeTool
+            && a.stylePanel == b.stylePanel
     }
 
     /// The compositions, in sidebar order.
@@ -145,9 +150,10 @@ public struct HaloProject: Sendable, Equatable {
     public mutating func newComposition(_ settings: CompositionSettings) -> Bool {
         guard let frames = settings.durationFrames else { return false }
         return edit("New Composition", control: "halo.composition.new") { doc in
-            let comp = HaloComposition(
+            var comp = HaloComposition(
                 id: doc.takeCompositionID(), name: doc.uniqueName(settings.name.normalizedName), width: settings.width,
                 height: settings.height, frameRate: settings.frameRate, durationFrames: frames)
+            comp.background = settings.background
             doc.compositions.append(comp)
             doc.selectedCompositionID = comp.id
             doc.selectedLayerID = nil
