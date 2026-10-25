@@ -140,3 +140,4 @@ utc	stage	event	ref	note
 2026-10-25T16:28:26Z	3	check	-	16:28Z poll: 7 fast-lane PRs open, clean, eligible; dev took #5044; no needs-fix/needs-rebase, no dev-red, 0 findings.
 2026-10-25T16:49:11Z	3	check	-	16:49Z poll: dev-red #5321 (macos, range #4960 #5007 #5008 #5318, none ours) holds code batches; our 7 fast-lane PRs open, clean, eligible, wait; no needs-fix/needs-rebase, 0 findings.
 2026-10-25T17:11:47Z	3	check	-	17:11Z poll: no slice PR merged; all open/clean, no needs-fix/needs-rebase; dev 5b1d3a19 (#5074); dev-red #5321 open (macos, range not ours) holds code batches; 0 findings
+2026-10-25T17:32:22Z	3	check	-	17:32Z poll: no change; slice PRs open/clean, no needs-fix/needs-rebase; dev 5b1d3a19; dev-red #5321 still open (not ours) holds code batches; 0 findings
