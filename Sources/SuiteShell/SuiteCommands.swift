@@ -25,7 +25,7 @@ public struct SuiteCommands: Commands {
 
     public var body: some Commands {
         CommandGroup(after: .windowArrangement) {
-            Menu("Switch To") {
+            Menu("Switch To", systemImage: SwitchMenu.menuSymbol) {
                 ForEach(SwitchMenu.items(current: app, states: runStates()), id: \.app) { item in
                     Button(item.title) { switchTo(item.app) }
                         .keyboardShortcut(KeyEquivalent(Character(String(item.digit))), modifiers: [.control, .command])

@@ -80,6 +80,17 @@ stroke.read
 stroke.remove
 stroke.trim
 stroke.width
+style.add
+style.clear
+style.copy
+style.enable
+style.fill-opacity
+style.panel
+style.paste
+style.preset
+style.read
+style.remove
+style.set
 text.end-size-scrub
 text.set
 text.set-color
