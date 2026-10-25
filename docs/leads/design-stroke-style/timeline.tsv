@@ -209,3 +209,4 @@ time	kind	note
 2026-10-25T05:02:03Z	3	heartbeat	#4888	probe lane/batch-20261025023716-1 (#4888 alone) macOS gate 40159661924 still running; DK PRs open, nothing merged
 2026-10-25T05:22:01Z	3	heartbeat	#4888	probe lane/batch-20261025023716-1 macOS gate 40159661924 green: #4888 clean, waits on lane merge; DK PRs open
 2026-10-25T05:54:44Z	3	stage	#4916	#4888 merged 05:23Z; #4916 needs-split cleared by merging dev (192 lines/10 files), ci --changed PASS, Head 1910a216; #5002/#5011 queued
+2026-10-25T06:15:18Z	3	heartbeat	#4916 #5002 #5011	all open in the lane, no fix labels; batch 054232 bisecting other PRs
