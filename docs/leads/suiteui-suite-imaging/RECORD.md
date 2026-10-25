@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
 Stage: 3 wave 8
 Base: c16bcd16c (origin/dev)
-Next: 12:05Z: #4886 (IM-10 p1) merged 11:36Z as 5270bc4bc. #5153 (IM-10b) needs-rebase fixed: dev merged in (001f38939, branch side kept), scripts/ci --changed CI: PASS, pushed, Head: moved; waiting for the lane to drop the label. dev 5270bc4bc; no dev-red open. 0 open findings; no supervisor reply. IM-13 waits on #5151, #5163. Poll ~12:18Z.
+Next: 12:20Z: #5153 (IM-10b) clean at 001f38939 against dev 58bb6d4d5 (CI: PASS, Head: moved); needs-rebase label still on, waiting for the lane's sweep to drop it. dev 58bb6d4d5 (#4943, not ours); scoped library 40190110744 green on 5270bc4bc, library journeys running; no dev-red open. 0 open findings; no supervisor reply. IM-13 waits on #5151, #5163. Poll ~12:40Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a170cfbf58-pshm, feature issue #3715). This copy is refreshed with it after every stage.
 

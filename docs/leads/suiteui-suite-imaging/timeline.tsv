@@ -125,3 +125,4 @@ utc	stage	event	ref	note
 2026-10-25T11:59Z	merged	#4886 IM-10 p1 merged 5270bc4bc
 2026-10-25T11:59Z	fix	#5153 needs-rebase: merged dev, gate running
 2026-10-25T12:05Z	fix	#5153 dev merged in 001f38939, CI: PASS, Head moved
+2026-10-25T12:20Z	heartbeat	#5153 clean, awaiting lane label drop; scoped library green on 5270bc4bc
