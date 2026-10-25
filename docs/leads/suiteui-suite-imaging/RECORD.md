@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
 Stage: 3 wave 8
 Base: c16bcd16c (origin/dev)
-Next: 12:20Z: #5153 (IM-10b) clean at 001f38939 against dev 58bb6d4d5 (CI: PASS, Head: moved); needs-rebase label still on, waiting for the lane's sweep to drop it. dev 58bb6d4d5 (#4943, not ours); scoped library 40190110744 green on 5270bc4bc, library journeys running; no dev-red open. 0 open findings; no supervisor reply. IM-13 waits on #5151, #5163. Poll ~12:40Z.
+Next: 12:42Z: lane dropped needs-rebase on #5153 (IM-10b), clean at 001f38939 with fast-lane, waiting for a batch. #5148, #5151, #5295 clean; #5154, #5163, #5297, #5299 dirty (stacked); #5178 no-fast-lane. dev 58bb6d4d5, main 68bec9fe7; library journeys running; no dev-red open. 0 open suite-imaging findings (5093-5095 are fill-heal's); no supervisor reply. IM-13 waits on #5151, #5163. Poll ~13:02Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a170cfbf58-pshm, feature issue #3715). This copy is refreshed with it after every stage.
 
@@ -34,7 +34,7 @@ Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imag
 | IM-8d | IM-photo | live route into SuiteImaging (LiveLayerRoute); Photo adapter; PhotoLiveTone deleted | #5295, #5297 | open (Fast-Check, mutate 6/6 + 5/5; stacked on #5151) |
 | IM-9 | IM-library | Library imaging tests | #4591 | merged |
 | IM-10 p1 | IM-library | develop levels/curve points are SuiteImaging's | #4886 | merged 5270bc4bc (11:36Z) |
-| IM-10b | IM-library | LiveDevelop on the shared list | #5153 | open (dev merged in at 001f38939 after the #4886 squash, Fast-Check 001f389, mutate 8/8 + 4/4) |
+| IM-10b | IM-library | LiveDevelop on the shared list | #5153 | open, clean at 001f38939, needs-rebase dropped by the lane (Fast-Check 001f389, mutate 8/8 + 4/4) |
 | IM-11a | IM-library | loupe GPU frame (Model): LiveDevelop.steps, LiveLoupeImaging.gpuFrame, histogram from the CPU-developed preview | #5154 | open (fast-lane, Fast-Check 4d753ae, mutate 4/4; stacked on #5153) |
 | IM-11b | IM-library | loupe view writes the GPU frame (ImagingGPU.display into the CanvasHost resident texture); LibraryDevelopLatencyTests on the GPU route | #5163 | open; the lane dropped fast-lane (869 lines against dev while stacked) and its Belt-Lead sweep re-adds it once #4886, #5153 and #5154 merge; mutate 7/7, CI: PASS at 805e3850e |
 | IM-11c | IM-library | perf-suites line for LibraryDevelopLatencyTests; drop .disabled (supervisor-approved 6384762237) | #5178 | open, no-fast-lane (protected path), supervisor lands; stacked on #5163; CI: PASS |

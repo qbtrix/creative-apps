@@ -126,3 +126,4 @@ utc	stage	event	ref	note
 2026-10-25T11:59Z	fix	#5153 needs-rebase: merged dev, gate running
 2026-10-25T12:05Z	fix	#5153 dev merged in 001f38939, CI: PASS, Head moved
 2026-10-25T12:20Z	heartbeat	#5153 clean, awaiting lane label drop; scoped library green on 5270bc4bc
+2026-10-25T12:42Z	heartbeat	needs-rebase dropped on #5153; no merges; dev 58bb6d4d5; no dev-red; 0 findings
