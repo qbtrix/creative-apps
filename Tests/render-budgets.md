@@ -217,7 +217,7 @@ renderer's route. Release, M2 Pro, p50 / p95 per step, 30 steps:
 Before, Hue/Saturation had no GPU op: each band of the picture was read back,
 run through Photo's per-pixel colour matrix on the CPU and uploaded again. Any
 visible adjustment layer sent every redraw, a Move or a brush frame included,
-down the same read-back path. The live route (PhotoLiveTone.swift) keeps each
+down the same read-back path. The live route (SuiteImaging's LiveLayerRoute.swift) keeps each
 band's composite of the pixel layers on the GPU while they are unchanged. It
 runs adjustment layers as CoreRender tone-program passes and writes the picture
 through the image's adjustments in the same pass as the display encode. A

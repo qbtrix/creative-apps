@@ -60,7 +60,7 @@ final class CanvasRenderer {
     /// Layer tiles kept on the GPU route's backend between renders; a new set when the backend changes.
     @ObservationIgnored private var resident: ResidentTiles?
     /// What `use` dropped while a render drew from it: released when that render ends.
-    @ObservationIgnored private var retired: [(composites: PhotoCompositeCache, tiles: ResidentTiles?)] = []
+    @ObservationIgnored private var retired: [(composites: LiveCompositeCache<PixelRect>, tiles: ResidentTiles?)] = []
 
     /// No render is running or waiting, so nothing dropped is still held.
     var isIdle: Bool { !isRendering && waiting == nil }

@@ -18,12 +18,13 @@
 // resident tiles (`residentTiles`, the GPU route's ResidentSurfaces) a region
 // composites from them in one batch, so a frame uploads only the tiles that
 // changed, those across the cores, and `composites` keeps the live route's
-// base composites (PhotoLiveTone.swift). Export and `composite()` stay on
+// base composites (SuiteImaging's LiveLayerRoute). Export and `composite()` stay on
 // `rendered(_:)` (CoreRaster directly), the reference both routes are held
 // to. Linux-safe: the Metal backend is the app's to make.
 import CoreColor
 import CoreRaster
 import CoreRender
+import SuiteImaging
 
 /// Where Photo's canvas composite runs: on `preferred` where it can, else on the CPU.
 public struct PhotoRenderRoute: Sendable {
@@ -32,7 +33,7 @@ public struct PhotoRenderRoute: Sendable {
     /// Layer tiles kept on `preferred` between renders; nil uploads every tile a render composites.
     public let resident: ResidentSurfaces?
     /// The live route's base composites, one per region, kept while their layers are unchanged.
-    public let composites = PhotoCompositeCache()
+    public let composites = LiveCompositeCache<PixelRect>()
 
     public init(preferred: (any RenderBackend)? = nil, resident: ResidentSurfaces? = nil) {
         self.preferred = preferred
