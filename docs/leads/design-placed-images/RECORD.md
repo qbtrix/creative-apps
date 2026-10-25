@@ -1,10 +1,10 @@
 # placed-images lead record
 
 Issue: #3454 · Packet: docs/blueprints/design/features/placed-images.md
-Run: act-1a16cc9673d-cmzv · Session: claude/feature-lead-placed-images-dkjo55 · Started: 2026-10-24T07:20Z (prior runs act-1a16953aed5-oxsi, act-1a15da1b26c-9qo6, act-1a15ac70747-ky1f)
+Run: act-1a170488b43-wwo9 · resumed after Belt nudge 2026-10-25T00:11:38Z · Started: 2026-10-23
 Stage: 3 wave 1 (17:30Z): PD-a #3759 pushed 3fc0a384 (dev merge + format-ratchet fix), gate rerun waiting on load; PD-m #4922 open (stacked on #3759, gate PASS); PD-u gating on design/pd-u-place-canvas (PD-a + DK-u #4864)
 Base: 721168a8 (origin/dev); main verified at cb79cbb6
-Next: supervisor merges #3759; PD-u and PD-m slice PRs stacked on design/pd-a-placed-image-stubs; then PD-z
+Next: wait for the lane to batch our open PRs (batch-20261024235353 holds none of them); then slice-done on the first ci.yml run on dev that contains each slice's last PR
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
