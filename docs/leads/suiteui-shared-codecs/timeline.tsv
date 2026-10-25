@@ -103,3 +103,4 @@ utc	stage	event	ref	note
 2026-10-25T08:08:05Z	check	heartbeat	16 PRs open and clean; probe -3 macOS still running; dev 7e5bcd82 (#5287, not ours); no dev-red; no new findings on our features
 2026-10-25T08:27:58Z	check	heartbeat	16 PRs open and clean; probe -3 green (Linux+macOS), so the batch's first red is among #4960 #4962 #5006 (#5006 already fixed at f2963229); dev 7e5bcd82; no dev-red; new finding #5312 not ours
 2026-10-25T08:48:37Z	check	heartbeat	16 PRs open and clean; lane probe -4 macOS red, so #4960 (library LX-2, not ours) got needs-fix; #4953 (TC-6) was in the green prefix and should land with this batch; dev 8d3a12c4 (#5274); no dev-red
+2026-10-25T09:09:30Z	check	heartbeat	16 PRs open and clean; old batch's green prefix did not merge; new lane batch-20261025090316 (carries #4953 and #5006 at its fix) running Linux+macOS; dev 8d3a12c4 with full CI 40178111920 running; no dev-red
