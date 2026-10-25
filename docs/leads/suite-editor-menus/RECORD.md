@@ -101,3 +101,4 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-24T23:13:39Z: batch-20261024205137 bisect still at probe -1; #4988 queued.
 - 2026-10-24T23:32:05Z: batch-20261024205137 bisect still at probe -1; #4988 queued.
 - 2026-10-24T23:51:33Z: batch-20261024205137 bisect finished, no lane batch open; #4988 clean, waiting for next batch; #5164 body footer re-added by tooling on edit (lane strips it from the squash)
+- 2026-10-25T00:10:29Z: batch-20261024235353 (12 PRs, beta/p0) bisecting at probe -6 without #4988; added beta (the feature's label, #3774) to #4988 and #5164 so they queue in the beta tier
