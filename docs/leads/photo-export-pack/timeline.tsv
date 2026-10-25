@@ -237,3 +237,4 @@ utc	stage	event	ref	note
 2026-10-25T06:50Z	check-in	quiet: no findings, no merges; #5171/#5206 open clean; XP-9 #5074 new head 59608d3f (unstable, not ours); no XP-3/XP-4 PR; no supervisor reply on #5193
 2026-10-25T07:22Z	check-in	quiet: no findings, no merges; #5171/#5206 open clean; XP-9 #5074 clean on 59608d3f; no XP-3/XP-4 PR; no supervisor reply on #5193
 2026-10-25T07:55Z	check-in	quiet: no findings, no merges; #5171/#5206 open clean; no XP-3/XP-4 PR; no supervisor reply on #5193
+2026-10-25T08:26Z	check-in	new finding #5312 (recovery autosave re-encodes all layers; photo-documents, captain's #5311 in flight) not export/text, left; #5171/#5206 open clean; #5287 merged unrelated; no XP-3/XP-4 PR; no supervisor reply on #5193
