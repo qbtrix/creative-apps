@@ -77,3 +77,5 @@ utc	stage	event	ref	note
 2026-10-24T23:20Z	resume	run act-1a1702c569a-0puo resumes on dev afef017c
 2026-10-24T23:20Z	slice-done	SC-halo: full CI 40129856269 green, contains #4875; Belt-Slice-Done posted
 2026-10-24T23:20Z	wave	wave 4: SC-11, SC-8 (on #5069 + SC-4c), SC-10 (on #5071 + SC-4c)
+2026-10-25T01:20Z	3	pr-opened	#5232	SC-11 retire HaloFramePNG (SC-z part)
+2026-10-25T01:20Z	check	heartbeat	dev ae3efdb8; none of ours merged yet; all clean, no needs-fix; no open findings

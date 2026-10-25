@@ -2,20 +2,20 @@
 
 Issue: #3718 · Packet: docs/blueprints/suiteui/features/shared-codecs.md
 Run: act-1a1702c569a-0puo · Session: claude/suiteui-feature-lead-run-azjeoo · Started: 2026-10-24T23:00Z (earlier: act-1a16cae7989-hj12 (line lead: area-selection, shared-codecs, shared-raw) · Session: claude/feature-lead-playbook-bs72fe · Started: 2026-10-24T06:50Z (earlier act-1a1693a4009-hyio, act-1a1693a3ff0-mwrd))
-Stage: 3 wave 4
-Base: origin/dev afef017c (main ef37711d + #5059, #5222)
-Next: SC-halo done (full CI 40129856269; Belt-Slice-Done posted). Wave 4: SC-11 (SC-z part, on dev), SC-8 stacked on SC-7 #5069 with SC-4c #5101 merged in, and SC-10 stacked on SC-9 #5071 with SC-4c merged in; SC-12 folds into the last of those to merge. On the lane: #5073, #5076, #5098, #5101, #5069, #5071.
+Stage: 3 polling (wave 4 PRs on the lane)
+Base: origin/dev ae3efdb8
+Next: wait for the lane on #5073 #5076 #5098 #5101 #5069 #5071 #5232; build SC-8 (on #5069 + SC-4c #5101) and SC-10 (on #5071 + SC-4c), SC-12 folded into the last. Done checks read the CI run on dev that contains each slice's last PR.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | SC-f | one shared image-format list (SuiteImageFormats) every app and the CLI read | SC-13, SC-14, SC-15, SC-16 | photo open/export panels | – | yes | 0 | done (Belt-Slice-Done 2026-10-22) | – | – |
 | SC-a | core PNG parity proven; SuiteImageIO stubs in SuiteShell | SC-1, SC-2 | – | suite-imaging:IM-a (SC-2 only) | no | 0 | done: run 40005632479 green; Belt-Slice-Done posted 19:41Z (ui false, no critic panel) | – | – |
-| SC-photo | Photo's codec routes through SuiteImageIO | SC-3, SC-4 | rotated-photo | SC-a, IM-m (both done) | no | 0 | startable | – | – |
-| SC-halo | Halo frame PNG writes through core | SC-5, SC-6 | – | SC-a (done) | no | 0 | open (#4875, fast-lane, clean) | – | – |
-| SC-library | Library decode/JPEG through SuiteImageIO | SC-7, SC-8 | – | SC-a, SC-f (both done) | no | 0 | startable | – | – |
-| SC-raster | Design/Flare rasterizers write PNG through SuiteImageIO | SC-9, SC-10 | – | SC-a (done) | no | 0 | startable | – | – |
-| SC-z | HaloFramePNG retired, ImageIO baseline at its floor, feature built | SC-11, SC-12 | – | all slices, AK-z | no | 0 | planned | – | – |
+| SC-photo | Photo's codec routes through SuiteImageIO | SC-3, SC-4 | rotated-photo | SC-a, IM-m (both done) | no | 0 | building (#5073, #5076, #5098, #5101) | – | – |
+| SC-halo | Halo frame PNG writes through core | SC-5, SC-6 | – | SC-a (done) | no | 0 | done: full CI 40129856269 green; Belt-Slice-Done posted | – | – |
+| SC-library | Library decode/JPEG through SuiteImageIO | SC-7, SC-8 | – | SC-a, SC-f (both done) | no | 0 | building (#5069; SC-8 next) | – | – |
+| SC-raster | Design/Flare rasterizers write PNG through SuiteImageIO | SC-9, SC-10 | – | SC-a (done) | no | 0 | building (#5071; SC-10 next) | – | – |
+| SC-z | HaloFramePNG retired, ImageIO baseline at its floor, feature built | SC-11, SC-12 | – | all slices, AK-z | no | 0 | building (#5232; SC-12 folds into the last) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -26,15 +26,15 @@ Next: SC-halo done (full CI 40129856269; Belt-Slice-Done posted). Wave 4: SC-11 
 | SC-16 | SC-f | 4 | Library export lists from SuiteImageFormats | Sources/LibraryModel/Contracts/LibraryValues.swift, Sources/LibraryModel/Contracts/ExportFormats.swift, Sources/LibraryModel/Contracts/ExportPresets.swift, Sources/LibraryApp/Platform/JPEGWriter.swift | Library format tests | – | planned |
 | SC-1 | SC-a | 1 | core PNG parity + ImageIO import ratchet live | Tests/PhotoModelTests/CorePNGParityTests.swift, Tests/SuiteModelTests/ImageIOImportRatchetTests.swift, Tests/imageio-baseline.txt, Tests/AppSnapshotTests/SuiteImageIOTests.swift, Tests/PhotoModelTests/Fixtures/png-parity/ | CorePNGParityTests, ImageIOImportRatchetTests | #4020 | merged |
 | SC-2 | SC-a | 2 | SuiteImageIO stubs (supervisor merge: Package.swift) | Sources/SuiteShell/SuiteImageIO.swift, Package.swift, project.yml, docs/c4/parts/creative-apps/suite-shell/shell-imageio.json | SuiteImageIOTests | #4873 → 2f94f450 | merged |
-| SC-3 | SC-photo | 3 | Photo codec route tests first | Tests/PhotoModelTests/PhotoCodecRouteTests.swift, Tests/RealJobs/photo/rotated-photo/ | PhotoCodecRouteTests | – | planned |
-| SC-4 | SC-photo | 4 | Photo codec through SuiteImageIO | Sources/SuiteShell/SuiteImageIO.swift, Sources/PhotoApp/ImageIOCodec.swift, Sources/PhotoModel/CoreRasterImageCodec.swift, Sources/PhotoApp/PhotoPasteboard.swift | PhotoCodecRouteTests | – | planned |
+| SC-3 | SC-photo | 3 | Photo codec route tests first | Tests/PhotoModelTests/PhotoCodecRouteTests.swift, Tests/RealJobs/photo/rotated-photo/ | PhotoCodecRouteTests | #5073 | open |
+| SC-4 | SC-photo | 4 | Photo codec through SuiteImageIO | Sources/SuiteShell/SuiteImageIO.swift, Sources/PhotoApp/ImageIOCodec.swift, Sources/PhotoModel/CoreRasterImageCodec.swift, Sources/PhotoApp/PhotoPasteboard.swift | PhotoCodecRouteTests | #5076 #5098 #5101 | open |
 | SC-5 | SC-halo | 3 | Halo frame PNG core tests first | Tests/HaloModelTests/HaloFramePNGCoreTests.swift | HaloFramePNGCoreTests | #4875 5e275b64 | open |
 | SC-6 | SC-halo | 4 | Halo headless PNG through core | Sources/HaloModel/HaloHeadless.swift, Sources/HaloApp/HaloPNGWriter.swift, Tests/mutations/HaloModel.HaloHeadless.json | HaloFramePNGCoreTests | #4875 5e275b64 | open |
-| SC-7 | SC-library | 3 | Library ImageIO tests first | Tests/AppSnapshotTests/LibraryImageIOTests.swift, Tests/AppSnapshotTests/Fixtures/library-imageio-expected.json | LibraryImageIOTests | – | planned |
+| SC-7 | SC-library | 3 | Library ImageIO tests first | Tests/AppSnapshotTests/LibraryImageIOTests.swift, Tests/AppSnapshotTests/Fixtures/library-imageio-expected.json | LibraryImageIOTests | #5069 | open |
 | SC-8 | SC-library | 5 | Library decode/JPEG through SuiteImageIO | Sources/LibraryApp/Platform/ImageIODecoder.swift, Sources/LibraryApp/Platform/JPEGWriter.swift | LibraryImageIOTests | – | planned |
-| SC-9 | SC-raster | 3 | rasterizer PNG tests first | Tests/AppSnapshotTests/RasterizerPNGTests.swift | RasterizerPNGTests | – | planned |
+| SC-9 | SC-raster | 3 | rasterizer PNG tests first | Tests/AppSnapshotTests/RasterizerPNGTests.swift | RasterizerPNGTests | #5071 | open |
 | SC-10 | SC-raster | 5 | Design/Flare rasterizers through SuiteImageIO | Sources/DesignApp/DesignRasterizer.swift, Sources/FlareApp/StageRasterizer.swift | RasterizerPNGTests | – | planned |
-| SC-11 | SC-z | 5 | retire HaloFramePNG | Sources/HaloModel/HaloFramePNG.swift, Tests/mutations/HaloModel.HaloFramePNG.json, Tests/PhotoModelTests/CorePNGParityTests.swift, Tests/canonical-baseline.txt | CorePNGParityTests | – | planned |
+| SC-11 | SC-z | 5 | retire HaloFramePNG | Sources/HaloModel/HaloFramePNG.swift, Tests/mutations/HaloModel.HaloFramePNG.json, Tests/PhotoModelTests/CorePNGParityTests.swift, Tests/canonical-baseline.txt | CorePNGParityTests | #5232 | open |
 | SC-12 | SC-z | 6 | ImageIO baseline floor; feature-done | Tests/imageio-baseline.txt, Tests/SuiteModelTests/ImageIOImportRatchetTests.swift, docs/c4/parts/creative-apps/suite-shell/shell-imageio.json, docs/blueprints/suiteui/features/shared-codecs.wave.json | ImageIOImportRatchetTests | – | planned |
 
 Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent, disjoint files). 2 = SC-14 (waits SC-13: makes its disabled tests live), SC-2 (waits SC-1 and IM-a: links SuiteShell to CoreRaster beside IM-1's Package.swift edit), suite-imaging:IM-2. Later waves per the packet's Build waves.
