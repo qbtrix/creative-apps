@@ -144,3 +144,4 @@ utc	stage	event	ref	note
 2026-10-25T01:42:45Z	3	poll	-	poll 01:42Z: no run PR merged (dev c16bcd16c, #5156 from the bisected batch); probe -9 Linux green, macOS running; our PRs ready and queued; SC-f still open, AK-8 held; no new findings
 2026-10-25T01:58:48Z	3	poll	-	poll 01:58Z: no run PR merged (dev c16bcd16c); probe -9 macOS still running; all our PRs clean and queued; SC-f still open, AK-8 held; no new findings
 2026-10-25T02:15:21Z	3	poll	-	poll 02:14Z: no run PR merged (dev c16bcd16c); probe -9 macOS gate still running (~57 min); all our PRs clean and queued; SC-f still open, AK-8 held; no new findings
+2026-10-25T02:32:24Z	3	poll	-	poll 02:32Z: batch 20261024235353 resolved (dev 3db45eb45, #5238 lane fix); no run PR merged yet; our PRs clean and ready for the next batch; SC-f still open, AK-8 held; no new findings
