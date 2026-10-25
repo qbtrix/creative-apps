@@ -5,7 +5,7 @@ Run: act-1a171ab9e77-es26 · Session: claude/layer-styles-lead-2ph8nc · Started
 Wire: suiteui layer-styles:LS-a
 Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTests.glowReachesItsKeyedSize and glowIsNotClipped; add the no-padding mutation, origin dropped in LiveFrameRendering's styled composite)
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
-Stage: 3 polling (11:00Z): #5158 HY-m (333603baa) and #5174 LS-2 (cb6c0a2f8) ready and clean, sorted behind the p0 head. Old batch 054232 bisect: -3 green, -6 red (culprit in #4962/#5006/#5007, unlabelled); new batch 090316 holds the same p0 head, red, now marked lane/batch-090316-red (probes -6, -9). Follow-up question on #3936 at 09:29Z. Drafts #5157, #5161, #5218 wait on #5174; no dev-red
+Stage: 3 polling (12:31Z): lane moving again: #4886 merged 11:36Z, #4943 12:11Z, batch 122638 holds #4953 alone. #5158 HY-m (333603baa) and #5174 LS-2 (cb6c0a2f8) ready and clean, queued behind the remaining p0 PRs (#4962, #5006, #5007, ...). Drafts #5157, #5161, #5218 wait on #5174; no dev-red; no supervisor answer yet
 Base: 13fb2f591 (origin/dev; main 3db45eb verified at relaunch)
 Next: read the supervisor answer on #3936 (09:29Z follow-up), else wait for the lane. On #5174 merge: merge dev into #5157, #5161, #5218 in order, gate, push, Head, ready
 
