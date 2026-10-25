@@ -1,7 +1,8 @@
 // HaloTextLayoutTests.swift (text-style TS-10, slice TS-halo): a Halo text layer off the standard face, or of more
 // than one line, is set by the kernel's layout, so the viewer and the render draw the same lines. Measured with a
 // fixed face (each grapheme 0.5 em, ascent 0.8 em, descent 0.2 em): two lines sit a line height apart, centre leads
-// the shorter line in, tracking widens the run, and a one-line layer at the standard face keeps its old draw.
+// the shorter line in, tracking widens the run, and a one-line layer at the standard face keeps its old draw. The
+// rows' gestures, run on a text layer, set its face and paragraph as one step each.
 // Linux and macOS.
 import HaloModel
 import SuiteKernel
@@ -47,5 +48,18 @@ import Testing
         let tracked = try #require(Self.content("Title\nCard") { $0.paragraph.tracking = 50 }.laidOut(advances: Self.fixed))
         #expect(Self.content("Title") { $0.paragraph.tracking = 50 }.trackingPoints == 5)
         #expect(tracked.width > plain.width)
+    }
+
+    @Test func theRowsGesturesSetTheLayersStyle() throws {
+        var project = HaloProject(services: .fake, document: try #require(HaloFixtures.project("empty")))
+        project.newLayer(.text)
+        project.setText("Title\nCard")
+        for intent: TextIntent in [.font(family: "Avenir", weight: 700, italic: nil), .tracking(50, drag: nil), .alignment(.center)] {
+            project.runText(intent)
+        }
+        let style = try #require(project.selectedText?.style)
+        #expect(style.family == "Avenir" && style.weight == 700)
+        #expect(style.paragraph.tracking == 50 && style.paragraph.alignment == .center)
+        #expect(project.undoTitle == "Undo Alignment")
     }
 }

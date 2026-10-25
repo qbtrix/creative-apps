@@ -1,7 +1,8 @@
 // HaloText+Layout.swift (text-style TS-10, slice TS-halo): a text layer off the standard face, or of more than one
 // line, is set by the kernel's `TextStyleRules.layout`, so the rasterizer measures and draws one layout and the
 // viewer and the render show the same lines. `laidOut` gives each line's text, lead x and baseline and the extent;
-// Halo has no wrapping box, so lines break only at newlines. Linux-safe.
+// Halo has no wrapping box, so lines break only at newlines. `runText` runs one gesture of the shared text style
+// rows through the catalog's text commands. Linux-safe.
 import SuiteKernel
 
 /// One laid-out line of a Halo text layer: its text (no trailing space or newline), its lead x and its baseline y,
@@ -42,5 +43,13 @@ extension HaloTextContent {
             return HaloTextLine(text: text, x: line.x.first ?? 0, baseline: line.baseline)
         }
         return HaloTextSetting(lines: lines, width: layout.bounds.maxX, height: layout.bounds.maxY)
+    }
+}
+
+extension HaloProject {
+    /// Runs one text style rows gesture through the project's command catalog; a refused gesture changes nothing.
+    public mutating func runText(_ intent: TextIntent) {
+        let command = intent.command
+        _ = try? Self.catalog.run(command.id, params: command.params, on: &self)
     }
 }
