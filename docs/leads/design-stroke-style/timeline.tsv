@@ -200,3 +200,4 @@ time	kind	note
 2026-10-25T01:40:09Z	3	heartbeat	lane	dev ae3efdb8 unchanged; batch-20261024235353 bisect at probe -9; our 8 PRs clean, beta, no needs-fix
 2026-10-25T01:57:27Z	3	heartbeat	lane	dev c16bcd16; batch-20261024235353 bisect at probe -9; 8 PRs open, clean, beta; DK-z/PD-z held (findings>5)
 2026-10-25T02:14:13Z	3	heartbeat	lane	dev c16bcd16 unchanged; batch-20261024235353 bisect still at probe -9; 8 PRs open, clean, beta; DK-z/PD-z held (findings>5)
+2026-10-25T02:30:30Z	3	heartbeat	lane	batch-20261024235353 resolved: prefix merged (dev 3db45eb4, incl #5238 no batch on red dev); our 8 PRs not in it, still open/clean/beta, wait next batch; DK-z/PD-z held (findings>5)
