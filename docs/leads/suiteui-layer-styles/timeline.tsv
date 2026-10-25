@@ -128,3 +128,4 @@ utc	stage	event	ref	note
 2026-10-25T10:02Z	3	lane	lane	check: none of ours labelled; no merges since 09:30; dev-red #5316 still open, no bisect verdict yet
 2026-10-25T10:25Z	3	lane	lane	check: none of ours labelled; no merges since 09:30; dev-red #5316 closed 10:06 (green dev run promoted main)
 2026-10-25T10:47Z	3	lane	lane	check: none of ours labelled; no merges since 10:20; dev not red
+2026-10-25T11:09Z	3	lane	lane	check: none of ours labelled; #5307 (live text to SuiteText target) merged 11:06; dev not red
