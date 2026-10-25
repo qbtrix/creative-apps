@@ -43,3 +43,4 @@ utc	stage	event	ref	note
 2026-10-25T06:10Z	check	relaunch act-1a171ab9e77-es26	#5158	#5158/#5174 clean, not in lane/batch-20261025054232 (red, bisecting); Belt-Lead moved on 4 PRs; no dev-red, 0 findings
 2026-10-25T06:28Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane/batch-20261025054232 still bisecting at -6
 2026-10-25T06:47Z	check	third identical poll	#3936	Question for the supervisor posted (rule 23): #5158/#5174 unbatched while batch-20261025054232 -6 macOS probe runs since 05:56Z
+2026-10-25T07:05Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; batch-20261025054232 -6 macOS probe still running; no answer on #3936 yet
