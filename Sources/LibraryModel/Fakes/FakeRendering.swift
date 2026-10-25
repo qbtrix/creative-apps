@@ -24,7 +24,7 @@ public struct FakeLoupe: LoupeImaging {
     public func render(_ photo: PhotoItem, settings: DevelopSettings, longSide: Int,
                        quality: RenderQuality) async throws -> RenderedPhoto {
         try await FakeBehavior.perform(mode, failing: .renderFailed("the preview failed on purpose"))
-        guard let base = FakeBehavior.gradient(for: FakeBehavior.cropShaped(photo, settings.crop),
+        guard let base = FakeBehavior.gradient(for: FakeBehavior.cropShaped(photo, settings.crop, facing: settings.orientation),
                                                longSide: quality == .preview ? 512 : longSide) else {
             throw LibraryError.renderFailed("empty photo")
         }

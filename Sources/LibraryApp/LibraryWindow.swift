@@ -142,6 +142,8 @@ struct LibraryWindow: View {
         photo.cropTitle = crop.cropTitle
         photo.applyCrop = crop.applyCrop
         photo.resetCrop = crop.resetCrop
+        (photo.rotateLeft, photo.rotateRight) = (crop.rotateLeft, crop.rotateRight)
+        (photo.flipHorizontal, photo.flipVertical) = (crop.flipHorizontal, crop.flipVertical)
         return LibraryMenu(
             edit: editMenu, file: fileMenu, thumbnails: thumbnailsMenu, cull: cullMenu, persist: persistMenu,
             view: viewMenu, photo: photo, export: exportMenu, share: shareMenu,
