@@ -151,3 +151,4 @@ utc	stage	event	ref	note
 2026-10-25T00:11:38Z	3	heartbeat	-	resume after Belt nudge: dev afef017c (full CI 40137153379 green); batch-20261024235353 (12 PRs, none ours) bisecting, probe -6 running; our 8 PRs open, fast-lane, no needs-fix/needs-rebase
 2026-10-25T00:30:29Z	3	heartbeat	lane	batch-20261024235353 still bisecting (probe -6); dev afef017c; our 8 PRs unchanged, waiting for next sweep
 2026-10-25T00:47:09Z	3	heartbeat	lane	batch-20261024235353 probe -6: Linux 40145607006 green, macOS 40145609051 running; our 8 PRs unchanged, waiting for next sweep
+2026-10-25T01:04:15Z	3	question	lane	probe -6 macOS 40145609051 in_progress 54 min (no runner?); 4 identical blocked polls; asked supervisor on #3441/#3454; our PRs unchanged
