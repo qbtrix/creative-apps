@@ -26,3 +26,4 @@ utc	stage	event	ref	note
 2026-10-25T00:10Z	check	#4874/#5156/#5174 still open+clean; dev unchanged since afef017c2 (21:32Z); no new #3936 comments, no findings, no dev-red
 2026-10-25T00:28Z	check	#4874/#5156/#5174 still open+clean; dev still afef017c2; no new #3936 comments, no findings, no dev-red
 2026-10-25T01:05Z	fix	supervisor 00:46Z: batch-20261024235353 red on LayerStyleGalleryTests/aSwitchThatCantActYetSaysWhy; #5174 test passed Optional.none for LayerStyle.none; fixed at 5d52b331d, Head moved, replied on #3936
+2026-10-25T01:15Z	check	#4874 merged at 01:02Z (dev ae3efdb83); #5156 and #5174 (fix head 5d52b331d) open+clean, no needs-fix; stack unchanged; no new comments, no dev-red
