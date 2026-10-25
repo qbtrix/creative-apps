@@ -1,10 +1,10 @@
 # editor-menus lead record
 
 Issue: #3774 · Packet: docs/blueprints/suite/features/editor-menus.md
-Run: act-1a16db4d43e-gerb (relaunch; earlier act-1a16a37a3ed-0kyn, act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
-Stage: EM-flare-halo: #4817/#4988 in lane; #5164 (#2487, slider keeps arrows) stacked on #4988
-Base: 9f476af7419db0cc5753aa119ec0bd3b1a12899a (main; PRs target dev)
-Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to dev
+Run: act-1a17129eefa-0kqr (relaunch; earlier act-1a16db4d43e-gerb, act-1a16a37a3ed-0kyn, act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
+Stage: 3 polling (EM-flare-halo: #4988 in lane bisect probe batch-20261025023716-3; #5164 stacked on it)
+Base: afef017c27a56ec18983e58672a8a15c94083ce4 (main, verified at relaunch; PRs target dev 2e7d52649)
+Next: lane: probe batch-20261025023716-3 (holds #4988) resolves; once #4988 merges, retarget #5164 to dev, rerun scripts/ci --changed, move Head
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -113,3 +113,10 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-25T02:57:17Z: batch-20261025023716 (with #4988): Linux check green, macOS gate 40155151356 queued
 - 2026-10-25T03:16:07Z: batch-20261025023716 macOS gate red: type-check timeout in Tests/AppSnapshotTests/DesignPlaceSnapshots.swift:39 (Design-line commits, not #4988's files); lane bisecting (probe -6)
 - 2026-10-25T03:34:38Z: batch-20261025023716 bisect at probe -6 (macOS); #4988 waits
+
+## 2026-10-25T03:48:09Z relaunch act-1a17129eefa-0kqr
+- lead/editor-menus rebuilt on main afef017 (record files only; shallow clone had no merge base for a rebase).
+- #4988 is PR 3 of probe batch-20261025023716-3 (Linux + macOS gates running); -6 went red on Design commits. #4988 and #5164 merge clean with dev.
+- No critic panel for EM-flare-halo this run, as in earlier runs; Belt's done rule is a green ci.yml run holding the last PR.
+- 2026-10-25T04:07:19Z: probe -3 macOS red at DesignPlaceSnapshots.swift:39 (type-check timeout; not #4988 files); bisect now at probe -1 (#4888). #4988 waits.
+- 2026-10-25T04:17:23Z: Belt nudge: mirror lead/suite-editor-menus had stopped at 03:34Z; resynced. Probe -1 (#4888) macOS gate running; #4988 waits.

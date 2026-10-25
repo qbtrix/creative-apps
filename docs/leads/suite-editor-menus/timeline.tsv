@@ -110,43 +110,47 @@ utc	stage	event	ref	note
 2026-10-24T10:27Z	check	editor-menus	10:26Z: unchanged, lane stuck behind dev-red #5113	https://github.com/qbtrix/creative-apps/issues/5113
 2026-10-24T10:49Z	check	editor-menus	10:48Z: dev-red #5113 closed 10:38Z (main at 9f476af7); waiting for lane's next batch	https://github.com/qbtrix/creative-apps/actions/runs/40081823899
 2026-10-24T11:12Z	check	editor-menus	11:15Z batch 20261024110214 excludes #4817/#4988; reported limit-100 cause on #3774	https://github.com/qbtrix/creative-apps/issues/3774#issuecomment-6383506030
-2026-10-24T12:54:28Z	check	EM-flare-halo	mirror resynced from lead/editor-menus (run act-1a16db4d43e-gerb)
-2026-10-24T13:18:58Z	check	EM-flare-halo	no change; lane stalled since 12:11Z
-2026-10-24T13:37:37Z	check	EM-flare-halo	no change; batch bisect moving
-2026-10-24T13:56:16Z	check	EM-flare-halo	no change; batch still bisecting
-2026-10-24T14:14:50Z	check	EM-flare-halo	batch probe 3; #4817/#4988 ready behind it
-2026-10-24T14:33:32Z	check	EM-flare-halo	prior batch resolved; ours wait for the next
-2026-10-24T14:52:16Z	check	EM-flare-halo	batch-20261024144917 excludes ours
-2026-10-24T15:10:51Z	check	EM-flare-halo	no change; batch in flight
-2026-10-24T15:29:24Z	check	EM-flare-halo	no change; batch in flight
-2026-10-24T15:48:04Z	check	EM-flare-halo	no change; batch in flight
-2026-10-24T15:52:49Z	fix	EM-flare-halo	#4817 needs-rebase resolved locally; gate running
-2026-10-24T16:07:58Z	fix	EM-flare-halo	#4817 head 9e16d071c pushed, CI: PASS
-2026-10-24T16:12:26Z	check	EM-flare-halo	needs-rebase dropped; next batch excludes ours
-2026-10-24T16:30:57Z	check	EM-flare-halo	no change; batch in flight
-2026-10-24T16:49:37Z	check	EM-flare-halo	no change; batch in flight
-2026-10-24T17:08:15Z	check	EM-flare-halo	prior batch resolved; ours clean, waiting
-2026-10-24T17:26:57Z	check	EM-flare-halo	#4817 in batch-20261024172211
-2026-10-24T17:45:35Z	check	EM-flare-halo	batch macOS gate queued
-2026-10-24T18:04:08Z	check	EM-flare-halo	batch macOS gate running
-2026-10-24T18:20:39Z	merge	EM-flare-halo	#4817 merged
-2026-10-24T18:39:34Z	check	EM-flare-halo	#4988 queued
-2026-10-24T18:58:05Z	check	EM-flare-halo	#4988 queued
-2026-10-24T19:16:41Z	check	EM-flare-halo	#4988 queued
-2026-10-24T19:35:09Z	check	EM-flare-halo	#4988 queued
-2026-10-24T19:53:47Z	check	EM-flare-halo	#4988 queued
-2026-10-24T20:12:23Z	check	EM-flare-halo	#4988 queued
-2026-10-24T20:30:54Z	check	EM-flare-halo	#4988 queued
-2026-10-24T20:49:23Z	check	EM-flare-halo	#4988 next
-2026-10-24T21:08:03Z	check	EM-flare-halo	#4988 queued
-2026-10-24T21:26:31Z	check	EM-flare-halo	#4988 queued
-2026-10-24T21:45:03Z	check	EM-flare-halo	#4988 queued
-2026-10-24T22:03:32Z	check	EM-flare-halo	#4988 queued
-2026-10-24T22:22:08Z	check	EM-flare-halo	#4988 queued
-2026-10-24T22:36:44Z	check	EM-flare-halo	API 503; #4988 queued
-2026-10-24T22:55:12Z	check	EM-flare-halo	#4988 queued
-2026-10-24T23:13:39Z	check	EM-flare-halo	#4988 queued
-2026-10-24T23:32:05Z	check	EM-flare-halo	#4988 queued
+2026-10-24T11:46Z	stage	editor-menus	relaunch act-1a16db4d43e-gerb; #2487 building, stacked on #4988	https://github.com/qbtrix/creative-apps/issues/2487
+2026-10-24T12:02Z	stage	editor-menus	#5164 opened for #2487, stacked on #4988	https://github.com/qbtrix/creative-apps/pull/5164
+2026-10-24T12:22Z	check	editor-menus	#4817/#4988/#5164 open, fast-lane, no dev-red; lane ran 12:18Z	https://github.com/qbtrix/creative-apps/actions/runs/40093405050
+2026-10-24T12:41Z	check	editor-menus	#4817/#4988 eligible; batch 20261024110214 bisecting (probe 6), 119 ready PRs wait	https://github.com/qbtrix/creative-apps/actions/runs/40092907790
+2026-10-24T12:54:28Z	check	EM-flare-halo	#4817/#4988 clean, in lane (batch-20261024110214 still bisecting); #5164 waits on #4988; suite mirror resynced
+2026-10-24T13:18:58Z	check	EM-flare-halo	no change; last completed lane sweep 40092907790 (12:11Z); since then sweeps cancelled; batch-20261024110214 at probe 6
+2026-10-24T13:37:37Z	check	EM-flare-halo	no change; batch-20261024110214 bisect moving (probe 3 pushed)
+2026-10-24T13:56:16Z	check	EM-flare-halo	no change; batch-20261024110214 still bisecting
+2026-10-24T14:14:50Z	check	EM-flare-halo	sweep 40100183592: batch-20261024110214 probe 3 running; #4817/#4988 ready, 132 wait
+2026-10-24T14:33:32Z	check	EM-flare-halo	batch-20261024110214 resolved (branches gone); #4817/#4988 wait for the next batch
+2026-10-24T14:52:16Z	check	EM-flare-halo	new batch-20261024144917 (12 PRs) excludes #4817/#4988; they wait for the next
+2026-10-24T15:10:51Z	check	EM-flare-halo	no change; batch-20261024144917 in flight
+2026-10-24T15:29:24Z	check	EM-flare-halo	no change; batch-20261024144917 in flight
+2026-10-24T15:48:04Z	check	EM-flare-halo	no change; batch-20261024144917 in flight
+2026-10-24T15:52:49Z	fix	EM-flare-halo	#4817 needs-rebase (FlareWindow.swift vs dev place drop); merged dev, resolved, gate running
+2026-10-24T16:07:58Z	fix	EM-flare-halo	#4817 dev merged, CI: PASS, head 9e16d071c pushed, Head moved
+2026-10-24T16:12:26Z	check	EM-flare-halo	needs-rebase dropped on #4817; batch-20261024160327 (12 PRs) excludes ours
+2026-10-24T16:30:57Z	check	EM-flare-halo	no change; batch-20261024160327 in flight
+2026-10-24T16:49:37Z	check	EM-flare-halo	no change; batch-20261024160327 in flight
+2026-10-24T17:08:15Z	check	EM-flare-halo	batch-20261024160327 resolved; #4817/#4988 merge clean with dev, wait for next batch
+2026-10-24T17:26:57Z	check	EM-flare-halo	#4817 in batch-20261024172211 at 9e16d071c; #4988 next
+2026-10-24T17:45:35Z	check	EM-flare-halo	batch-20261024172211: Linux green, macOS gate queued
+2026-10-24T18:04:08Z	check	EM-flare-halo	batch-20261024172211 macOS gate running
+2026-10-24T18:20:39Z	merge	EM-flare-halo	#4817 merged as 18f35c38f2df21e6e0e23c6d949283099be54328
+2026-10-24T18:39:34Z	check	EM-flare-halo	#4988 clean, marker current; queued behind older PRs (not in batch-20261024183708)
+2026-10-24T18:58:05Z	check	EM-flare-halo	batch-20261024183708 in flight; #4988 queued
+2026-10-24T19:16:41Z	check	EM-flare-halo	batch-20261024183708 bisecting (not ours); #4988 queued
+2026-10-24T19:35:09Z	check	EM-flare-halo	batch-20261024183708 still bisecting; #4988 queued
+2026-10-24T19:53:47Z	check	EM-flare-halo	probe batch-20261024183708-6 macOS gate running; #4988 queued
+2026-10-24T20:12:23Z	check	EM-flare-halo	probe -6 macOS gate still running (64 min); lane sweeping; #4988 queued
+2026-10-24T20:30:54Z	check	EM-flare-halo	batch-20261024183708 bisect at probes -7/-9; #4988 queued
+2026-10-24T20:49:23Z	check	EM-flare-halo	batch-20261024183708 resolved; no batch in flight; #4988 next
+2026-10-24T21:08:03Z	check	EM-flare-halo	batch-20261024205137 (5 p0, 1 beta, 6 older) excludes #4988; queued
+2026-10-24T21:26:31Z	check	EM-flare-halo	batch-20261024205137 bisecting (not ours); #4988 queued
+2026-10-24T21:45:03Z	check	EM-flare-halo	batch-20261024205137 still bisecting; #4988 queued
+2026-10-24T22:03:32Z	check	EM-flare-halo	batch-20261024205137 still bisecting; #4988 queued
+2026-10-24T22:22:08Z	check	EM-flare-halo	probes -3/-6 macOS gates running; #4988 queued
+2026-10-24T22:36:44Z	check	EM-flare-halo	GitHub API 503; batch-20261024205137 probes still up; #4988 queued
+2026-10-24T22:55:12Z	check	EM-flare-halo	API back; batch-20261024205137 bisect at probe -1; #4988 queued
+2026-10-24T23:13:39Z	check	EM-flare-halo	batch-20261024205137 bisect at probe -1; #4988 queued
+2026-10-24T23:32:05Z	check	EM-flare-halo	batch-20261024205137 bisect at probe -1; #4988 queued
 2026-10-24T23:51:33Z	check	EM-flare-halo	batch-20261024205137 bisect finished, no lane batch open; #4988 clean, waiting for next batch; #5164 body footer re-added by tooling on edit (lane strips it from the squash)
 2026-10-25T00:10:29Z	check	EM-flare-halo	batch-20261024235353 (12 PRs, beta/p0) bisecting at probe -6 without #4988; added beta (the feature's label, #3774) to #4988 and #5164 so they queue in the beta tier
 2026-10-25T00:29:01Z	check	EM-flare-halo	batch-20261024235353 still at probe -6; #4988 (beta) queued for the next batch
@@ -160,3 +164,6 @@ utc	stage	event	ref	note
 2026-10-25T02:57:17Z	check	EM-flare-halo	batch-20261025023716 (with #4988): Linux check green, macOS gate 40155151356 queued
 2026-10-25T03:16:07Z	check	EM-flare-halo	batch-20261025023716 macOS gate red: type-check timeout in Tests/AppSnapshotTests/DesignPlaceSnapshots.swift:39 (Design-line commits, not #4988's files); lane bisecting (probe -6)
 2026-10-25T03:34:38Z	check	EM-flare-halo	batch-20261025023716 bisect at probe -6 (macOS); #4988 waits
+2026-10-25T03:48:09Z	3	stage-start	-	relaunch act-1a17129eefa-0kqr on main afef017
+2026-10-25T04:07:19Z	3	heartbeat	#4988	probe -3 red on Design snapshot, bisect at -1
+2026-10-25T04:17:23Z	3	heartbeat	#4988	mirror resynced; bisect at probe -1
