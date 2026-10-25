@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-25T06:47Z	check	third identical poll	#3936	Question for the supervisor posted (rule 23): #5158/#5174 unbatched while batch-20261025054232 -6 macOS probe runs since 05:56Z
 2026-10-25T07:05Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; batch-20261025054232 -6 macOS probe still running; no answer on #3936 yet
 2026-10-25T07:24Z	heartbeat	lane	#5158	batch-20261025054232 -6 macOS probe red 07:06Z (culprit in first 6, none ours), bisect continues; #5158/#5174 clean, unbatched; no answer on #3936
+2026-10-25T07:55Z	stage	lane	#5158	Belt nudge read; -3 probe macOS running since 07:07Z; #5158/#5174 clean, unbatched; no supervisor answer

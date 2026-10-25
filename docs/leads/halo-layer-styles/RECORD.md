@@ -5,7 +5,7 @@ Run: act-1a171ab9e77-es26 · Session: claude/layer-styles-lead-2ph8nc · Started
 Wire: suiteui layer-styles:LS-a
 Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTests.glowReachesItsKeyedSize and glowIsNotClipped; add the no-padding mutation, origin dropped in LiveFrameRendering's styled composite)
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
-Stage: 3 polling: #5156 HY-1 merged 01:41Z. #5158 HY-m (333603baa) and #5174 LS-2 (cb6c0a2f8) ready and clean, not in lane/batch-20261025054232 (red, bisecting at -6). Drafts #5157 HY-2, #5161 HY-u, #5218 HY-z wait on #5174
+Stage: 3 polling (07:56Z): #5156 HY-1 merged 01:41Z. #5158 HY-m (333603baa) and #5174 LS-2 (cb6c0a2f8) ready and clean, not in lane/batch-20261025054232 (red; -6 probe red 07:06Z, -3 probe Linux green, macOS gate running since 07:07Z). Drafts #5157 HY-2, #5161 HY-u, #5218 HY-z wait on #5174. No answer yet on #3936 (06:47Z question); no dev-red
 Base: 13fb2f591 (origin/dev; main 3db45eb verified at relaunch)
 Next: read the supervisor answer on #3936 (06:47Z question), else keep waiting for the lane batch holding #5158 and #5174. On #5174 merge: merge dev into #5157, #5161, #5218 in order, gate, push, Head, ready
 
