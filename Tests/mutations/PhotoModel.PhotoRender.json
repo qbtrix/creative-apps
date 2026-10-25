@@ -1,3 +1,4 @@
 [
-{"label": "a cancelled histogram count keeps counting", "file": "Sources/PhotoModel/PhotoRender.swift", "find": "            guard !Task.isCancelled else { return .empty }\n", "replace": "", "tests": "PhotoCurvesTests"}
+{"label": "a cancelled histogram count keeps counting", "file": "Sources/PhotoModel/PhotoRender.swift", "find": "            guard !Task.isCancelled else { return .empty }\n", "replace": "", "tests": "PhotoCurvesTests"},
+{"label": ".exportMatchesCanvas: export sharpens after tone and the sections, not the base first", "file": "Sources/PhotoModel/PhotoRender.swift", "find": "        if let s = sharpening { result = try result.unsharpMask(amount: s.amount, sigma: s.sigma, threshold: s.threshold) }\n        result = try runImaging(imagingSteps, on: result)\n", "replace": "        result = try runImaging(imagingSteps, on: result)\n        if let s = sharpening { result = try result.unsharpMask(amount: s.amount, sigma: s.sigma, threshold: s.threshold) }\n", "tests": "PhotoToneRenderTests"}
 ]

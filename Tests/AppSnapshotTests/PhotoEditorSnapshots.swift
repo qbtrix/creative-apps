@@ -127,8 +127,8 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
             name: "photo-status-message-dark", scheme: .dark)
     }
 
-    /// The palette's Eyedropper carries the sampling service's help: enabled
-    /// on `.live` once its sampler is built (eyedropper PE-5), and on `.fake`.
+    /// The palette's Eyedropper carries the workspace's help: enabled on
+    /// `.live` and `.fake`, since it reads the kernel's mean.
     @Test func paletteEyedropperHelp() {
         let live = PhotoWorkspace(services: .live)
         #expect(PhotoPaletteTool(.eyedropper, in: live).unavailableHelp == live.toolHelp(.eyedropper))
