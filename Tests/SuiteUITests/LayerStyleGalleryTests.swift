@@ -33,8 +33,8 @@ import Testing
 
     @Test func aSwitchThatCantActYetSaysWhy() {
         #expect(LayerStyleText.reason(style: nil, help: nil) == StyleRules.noLayerHelp)
-        #expect(LayerStyleText.reason(style: .none, help: "This layer is locked.") == "This layer is locked.")
-        #expect(LayerStyleText.reason(style: .none, help: nil) == LayerStyleText.pending)
+        #expect(LayerStyleText.reason(style: LayerStyle.none, help: "This layer is locked.") == "This layer is locked.")
+        #expect(LayerStyleText.reason(style: LayerStyle.none, help: nil) == LayerStyleText.pending)
         #expect(!LayerStyleText.pending.isEmpty)
     }
 
