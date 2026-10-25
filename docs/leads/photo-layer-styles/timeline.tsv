@@ -93,3 +93,4 @@ utc	stage	event	ref	note
 2026-10-24T23:14:59Z	W2	check	PY-1	no merges; bisect probe -1 macOS running (Linux green); full CI on dev running; our PRs and waits open and clean
 2026-10-24T23:43:19Z	W2	check	PY-1	check-in: no merges; batch-20261024205137 probe -1 macOS still running, full CI 40137153379 running; no scoped photo run
 2026-10-25T00:07:46Z	W2	check	PY-1	check-in: full CI 40137153379 green; LS-2 #5174 in batch-20261024235353 (running); #5177 clean, waits for next batch; PY-2 waits on #5174+#5177
+2026-10-25T00:31:24Z	W2	check	PY-1	check-in: batch-20261024235353 (has LS-2 #5174 at slot 11) red, bisecting (probe -6 macOS running); #5177 clean, waits for next batch
