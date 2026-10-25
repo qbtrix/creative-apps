@@ -264,3 +264,4 @@ utc	stage	event	ref	note
 2026-10-25T21:16Z	check-in	#5153 landed 21:04Z (older, oldest-first); #5171/#5206 clean, waiting; dev-red #5321 open, revert #5349 clean; no new findings
 2026-10-25T21:48Z	check-in	PT-4 revert #5349 landed 21:39Z (dev-red fix, ahead of us); #5155 landed 21:42Z; #5171/#5206 clean, waiting; mac-finish #5353 (export note size, PX-a) opened, no file overlap with #5171; dev-red #5321 still open
 2026-10-25T22:20Z	check-in	#5171 merged 22:07Z (batch of 1); #5206 clean, waiting; mac-finish #5353 waiting on red Linux (captain's, not touched); dev-red #5321 still open; no XP-3/XP-4
+2026-10-25T22:52Z	check-in	#5206 merged 22:48Z (batch of 1); no Photo export PRs of ours open; mac-finish #5353 clean, waiting; dev-red #5321 open; no XP-3/XP-4
