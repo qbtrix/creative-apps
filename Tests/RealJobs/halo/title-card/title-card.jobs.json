@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "app": "halo",
+  "why": "RJ-H04: sets a card's title to two lines in Bold, tracked 50 and centred, and renders frame 0 as a PNG.",
+  "inputs": ["input/*.halo"],
+  "steps": [
+    {"id": "layer.select", "params": {"id": "comp-1-layer-2"}},
+    {"id": "text.set", "params": {"text": "Title\nCard"}},
+    {"id": "text.set-font", "params": {"family": "System", "weight": 700}},
+    {"id": "text.set-tracking", "params": {"value": 50}},
+    {"id": "text.set-alignment", "params": {"alignment": "center"}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-0", "format": "png", "options": {}},
+  "expect": {
+    "out/card-0.png": {"pixels": {"tolerance": 2, "size": [320, 180]}}
+  },
+  "platforms": ["linux", "macos"]
+}
