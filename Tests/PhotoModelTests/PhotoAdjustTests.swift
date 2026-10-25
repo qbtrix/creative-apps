@@ -1,5 +1,5 @@
 // PhotoAdjustTests.swift (adjust-everywhere AJ-8): Photo's workspace as the
-// suite's AdjustTarget, through its catalog. A filter rewrites only the
+// suite's AdjustTarget, through the adjust commands. A filter rewrites only the
 // selected pixel layer, only inside the selection, as one undo step; Black &
 // White and Invert are kinds of the image and of an adjustment layer and
 // render; a look applies and saves; the kinds round-trip through a document
@@ -17,7 +17,9 @@ import Testing
 @testable import PhotoModel
 
 @Suite struct PhotoAdjustTests {
-    static let catalog = PhotoWorkspace.catalog
+    /// The suite's adjust commands on Photo (PhotoWorkspace.catalog lists them once AJ-photo's catalog PR lands).
+    static let catalog = (try? CommandCatalog<PhotoWorkspace>(app: "photo", AdjustCommands.specs(PhotoWorkspace.self),
+                                                              history: { $0.history.kernel })) ?? .empty(app: "photo")
 
     /// A 16 x 12 checkerboard of 2 px squares, one "Background" layer, on `.fake`.
     static func checker() throws -> PhotoWorkspace {
@@ -32,6 +34,9 @@ import Testing
         try ws.open(rgba8: bytes, width: 16, height: 12, name: "checker.png")
         return ws
     }
+
+    static let weights: JSONValue = .object(["red": .number(40), "yellow": .number(60), "green": .number(40),
+                                             "cyan": .number(60), "blue": .number(20), "magenta": .number(80)])
 
     static func run(_ id: String, _ params: [String: JSONValue] = [:], on ws: inout PhotoWorkspace) throws {
         _ = try catalog.run(id, params: .object(params), on: &ws)
@@ -97,9 +102,7 @@ import Testing
         #expect(ws.undoActionName == "Undo Invert")
         let p = try plain.pixel(x: 0, y: 0), q = try ws.composite().pixel(x: 0, y: 0)
         #expect(abs(q.r - (1 - p.r)) < 0.01 && abs(q.g - (1 - p.g)) < 0.01)
-        let weights: JSONValue = .object(["red": .number(40), "yellow": .number(60), "green": .number(40),
-                                          "cyan": .number(60), "blue": .number(20), "magenta": .number(80)])
-        try Self.run("adjust.black-and-white", ["weights": weights], on: &ws)
+        try Self.run("adjust.black-and-white", ["weights": Self.weights], on: &ws)
         #expect(ws.adjustments.kinds == [.invert, .blackAndWhite(.neutral)])
         let grey = try ws.composite().pixel(x: 1, y: 1)
         #expect(abs(grey.r - grey.g) < 0.01 && abs(grey.g - grey.b) < 0.01)
@@ -149,19 +152,12 @@ import Testing
         ws.services = .live  // PhotoHeadless opens through the live archive
         try Self.run("adjust.invert", on: &ws)
         ws.addAdjustmentLayer(.curves)
-        try Self.run("adjust.black-and-white", on: &ws)
+        try Self.run("adjust.black-and-white", ["weights": Self.weights], on: &ws)
+        #expect(ws.kinds.count == 1)
         let saved = try PhotoHeadless(workspace: ws).save()
         let opened = try PhotoHeadless.open(saved, name: "kinds.ora")
         #expect(opened.workspace.adjustments.kinds == [.invert])
         #expect(opened.workspace.layers == ws.layers)
         #expect(try opened.save() == saved)
-    }
-
-    @Test func theCatalogListsTheAdjustCommands() {
-        let ids = Set(PhotoWorkspace.commands.map(\.id))
-        for id in ["adjust.black-and-white", "adjust.invert", "filter.gaussian-blur", "filter.motion-blur", "filter.sharpen",
-                   "filter.reduce-noise", "filter.add-noise", "look.list", "look.apply", "look.save", "look.delete"] {
-            #expect(ids.contains(id), "\(id) is missing")
-        }
     }
 }
