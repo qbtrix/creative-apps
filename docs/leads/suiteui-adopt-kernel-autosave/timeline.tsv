@@ -139,3 +139,4 @@ utc	stage	event	ref	note
 2026-10-25T09:57:42Z	3	poll	-	09:57Z poll: no merges; dev-red #5316 open (timing, not ours); probe -6 macOS gate running; #4960 needs-fix awaits supervisor
 2026-10-25T10:14:37Z	3	poll	-	10:14Z poll: dev green again at 8d3a12c4b (#5316 closed); no merges; probe -6 macOS gate 55m running; noted green/red same-SHA on #4960
 2026-10-25T10:31:18Z	3	poll	-	10:31Z poll: no merges; dev green; probe -6 macOS 1h12m, probe -9 Linux running; #4960 needs-fix awaits supervisor
+2026-10-25T10:46:58Z	3	poll	-	10:47Z poll: probe -6 green (Linux+macOS), probe -9 Linux green (holds #5039); lane should land the prefix next; no merges yet
