@@ -1,0 +1,166 @@
+utc	stage	event	ref	note
+2026-10-23T03:08Z	0	stage-start	-	base e055e6713e4e852d6c19d98f7c2fd82c6758e67a
+2026-10-23T03:08Z	0	stage-end	-	lead branch created
+2026-10-23T03:08Z	1	stage-end	-	packet and code read; waits met
+2026-10-23T03:08Z	2	stage-end	-	wave plan in Tasks
+2026-10-23T03:08Z	3	stage-start	-	wave 1
+2026-10-23T03:12Z	3	heartbeat	-	wave 1 building
+2026-10-23T03:35Z	3	pr-opened	#4710	EM-a fast-lane, head 4d4a259
+2026-10-23T03:41Z	4	stage-start	-	wave 2: EM-flare-halo, EM-photo-design building
+2026-10-23T04:03Z	-	heartbeat	EM-a	#4710 lane macOS build-only run 39896014966 in progress; EM-flare-halo, EM-photo-design building
+2026-10-23T04:12Z	3	merged	#4710	EM-a merged by the fast lane
+2026-10-23T04:20Z	4	fix-sent	EM-flare-halo	builder sent back: ask persisted deny; real AIAccessCenter async ask + mutate
+2026-10-23T04:50Z	-	pr	C4	opened #4737 shell-adoption description
+2026-10-23T04:50Z	-	pr	EM-flare-halo	opened #4738
+2026-10-23T04:50Z	-	pr	EM-photo-design	opened #4739 stacked on #4738
+2026-10-23T04:52Z	-	heartbeat	EM-flare-halo	#4738 clean in lane; #4737 C4 in lane; #4739 waits on #4738
+2026-10-23T05:14Z	-	heartbeat	EM-flare-halo	#4738 and #4737 in lane
+2026-10-23T05:24Z	-	wave	EM-library	wave 3 builder started (EM-7..EM-10), stacked on EM-photo-design
+2026-10-23T06:20:27Z	-	pr	EM-library	#4761 opened (base EM-photo-design), fast-lane + feature-done, head 42dbd812d
+2026-10-23T06:20:27Z	-	fix	EM-flare-halo	#4738 needs-rebase: merged dev (FlareOpenQueue -> FlareShell.openQueue), CI: PASS, head 9d59908ec
+2026-10-23T06:40:59Z	-	merge	EM-flare-halo	#4738 merged into dev at 06:40:59Z
+2026-10-23T06:45:10Z	-	fix	EM-photo-design	#4739: merged dev after parent squash (FlareApp.swift taken from dev); diff vs dev is the slice only, 15 files +364/-28; gate running
+2026-10-23T06:51:45Z	-	pr	EM-photo-design	#4739 CI: PASS on b78892b7a, pushed, base retargeted to dev, Head line moved
+2026-10-23T06:51:45Z	-	check	EM-flare-halo	scoped flare/halo runs wanted after 42845c6d2; dispatch is 403, waiting on verify-dispatch (queue backed up)
+2026-10-23T06:56:28Z	-	pr	EM-library	#4761 merged #4739 new head, CI: PASS on 721213065, pushed, Head line moved (base stays EM-photo-design until #4739 merges)
+2026-10-23T07:19:48Z	-	check	EM-photo-design	#4739 macOS build 39914195694 red on dev break FlareStage.swift:81 (FlareOpenQueue, #4708 vs #4716); fix PR #4771 opened (f2840adf, CI: PASS); #4739 at 15-file cap so not ported
+2026-10-23T07:19:48Z	-	merge	NP-flare	#4735 merged 06:49 (feature-done); full CI 39914223799 pending on c2cc0c7c7
+2026-10-23T07:42:45Z	check	editor-menus	poll	#4771 open clean awaiting lane; CI 39914223799 pending; #4741 awaiting supervisor
+2026-10-23T07:50:02Z	event	editor-menus	#4771	lane: waiting on red = cancelled run 39919265005 jobs; Linux rerun 39920222222 in progress
+2026-10-23T08:07:56Z	wait	editor-menus	#4771 open, Linux check 39920222222 still running; #4739/#4761 wait on it	-
+2026-10-23T08:20:27Z	cascade	editor-menus	#4771 merged; #4739 merged dev -> 4ea37a264 (CI: PASS), #4761 merged #4739 -> bd47702da (CI: PASS); Head lines moved	https://github.com/qbtrix/creative-apps/pull/4739
+2026-10-23T08:30:52Z	check	editor-menus	#4739 (4ea37a264) clean, waiting on lane; #4761 stacked; scoped flare/halo 39916329868/39916334144 still queued on pre-#4771 c2cc0c7	https://github.com/qbtrix/creative-apps/pull/4739
+2026-10-23T08:53:19Z	check	editor-menus	#4739 clean at 4ea37a264, waiting on the lane; #4761 stacked. Scoped flare/halo still only on pre-#4771 c2cc0c7 (queued).	https://github.com/qbtrix/creative-apps/pull/4739
+2026-10-23T09:06:28Z	merge	editor-menus	#4739 (EM-photo-design) merged into dev.	https://github.com/qbtrix/creative-apps/pull/4739
+2026-10-23T09:06:28Z	wave	editor-menus	#4761 (EM-library, feature-done) merged origin/dev at e42863714, CI: PASS, retargeted to dev; Head moved, stacked note dropped.	https://github.com/qbtrix/creative-apps/pull/4761
+09:16Z	check	editor-menus	#4761 macOS build 39929804061 queued; scoped flare 39930432485 on post-#4771 dev 04140530e queued for the EM-flare-halo critics	https://github.com/qbtrix/creative-apps/actions/runs/39929804061
+09:38Z	check	editor-menus	#4761 macOS build 39929804061 in progress; scoped flare 39930432485 (04140530e) and scoped halo 39931655256 (138495f55) queued for the EM-flare-halo critics	https://github.com/qbtrix/creative-apps/actions/runs/39929804061
+09:39Z	lane	editor-menus	#4761 macOS build 39929804061 green on e42863714; waits on the lane's merge sweep	https://github.com/qbtrix/creative-apps/actions/runs/39929804061
+09:53Z	merge	editor-menus	#4761 (EM-library, feature-done) merged by the lane: every EM slice is on dev; EM done waits on a green full CI on a dev head with it	https://github.com/qbtrix/creative-apps/pull/4761
+09:54Z	check	editor-menus	dev CI: full 39931493361 (138495f55) pending, 39929490747 queued; scoped flare 39930432485 / halo 39931655256 queued; #4741 open (no-fast-lane, needs-split, clean)	https://github.com/qbtrix/creative-apps/actions/runs/39931493361
+09:59Z	check	editor-menus	heartbeat: full CI 39931493361 (138495f55, has #4771 but not #4761) still pending; scoped flare/halo queued; #4741 open	https://github.com/qbtrix/creative-apps/actions/runs/39931493361
+10:19Z	check	editor-menus	full CI 39931493361 cancelled (superseded); new full CI 39937843350 on 622f200f9 (has #4771 and #4761) pending, decides NP and EM done; scoped flare/halo still queued; #4741 open	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T10:42Z	check	editor-menus	full CI 39937843350 (622f200f9, has #4771 and #4761) still pending; scoped flare 39930432485 / halo 39931655256 still queued; #4741 open (clean, no-fast-lane)	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T11:05Z	check	editor-menus	full CI 39937843350 (622f200f9) still pending (macOS runners busy); scoped flare/halo still queued; #4741 open (clean, no-fast-lane)	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T11:27Z	check	editor-menus	full CI 39937843350 (622f200f9) still pending; new scoped flare 39943928043 / photo 39943932152 on 28e3a67de queued; #4741 open (clean, no-fast-lane)	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T11:51Z	check	editor-menus	scoped flare 39930432485 / halo 39931655256 success (both contain #4738); EM-flare-halo panel waits on their journeys 39941657825 (queued) / 39947432602 (pending) for ui-screens; full CI 39937843350 pending; #4741 open clean	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T12:17Z	check	editor-menus	full CI 39937843350 still queued; journeys 39941657825/39947432602 still queued/pending (EM panel waits); scoped flare 39943928043 red on RenderBudgetFlareLottieOpenTests (importNote, from #4786 lottie-open LO-u, not this lead's); #4741 open clean	https://github.com/qbtrix/creative-apps/actions/runs/39943928043
+2026-10-23T12:40Z	check	editor-menus	full CI 39937843350 still queued; journeys flare 39941657825 in progress, halo 39947432602 queued; #4741 open	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T13:04Z	check	editor-menus	full CI 39937843350 still queued; journeys flare 39941657825 in progress, halo 39947432602 queued; #4741 open, clean	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T13:26Z	check	editor-menus	full CI 39937843350 in progress; flare journeys 39941657825 success (screens downloaded), halo 39947432602 in progress; #4741 open, clean	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T13:49Z	check	editor-menus	full CI 39937843350 Linux green, macOS in progress; halo journeys 39947432602 in progress; #4741 open, clean	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T14:13Z	check	editor-menus	full CI 39937843350 macOS running (Linux green); halo journeys 39947432602 running; #4741 open clean	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T14:37Z	check	editor-menus	full CI 39937843350 red on macOS: only RenderBudgetFlareLottieOpenTests.openInThreeBodies (dev-red #4804, triage names #4786 lottie-open, not ours); done markers wait for next green full CI. Halo journeys 39947432602 green; critic panel wf_22cf6d5c-bda started for EM-flare-halo. #4741 open clean	https://github.com/qbtrix/creative-apps/issues/4804
+2026-10-23T14:40Z	check	editor-menus	critic panel wf_22cf6d5c-bda on EM-flare-halo: 11 confirmed, 2 refuted, filed #4805-#4813 (not clean); fix round 1 started (fix-batch wf_bac37a57-b28, base 8021b0f56)	https://github.com/qbtrix/creative-apps/issues/3774
+2026-10-23T14:59Z	check	editor-menus	next dev CI 39969916398 (8021b0f56) pending, 39962356466 queued; fix-batch wf_bac37a57-b28 running; #4741 open clean	https://github.com/qbtrix/creative-apps/actions/runs/39969916398
+2026-10-23T15:13Z	check	editor-menus	fix round 1 PRs open: #4816 #4817 #4818 (Fixes #4805-#4807 #4809-#4813); #4808 deferred; gap #4815 filed; bodies cleaned	https://github.com/qbtrix/creative-apps/pull/4816
+2026-10-23T15:21Z	check	editor-menus	full CI 39957675362 at cb79cbb61 (has #4771 #4761) green Linux+macOS, promoted main; journeys 39972233358 pending; done markers wait for it	https://github.com/qbtrix/creative-apps/actions/runs/39957675362
+2026-10-23T15:21Z	check	editor-menus	fix PRs #4816 #4817 #4818 open in fast lane (unmerged)	https://github.com/qbtrix/creative-apps/pull/4817
+2026-10-23T15:44Z	check	editor-menus	journeys 39972233358 pending; fix round 1 #4816 #4817 #4818 clean in fast lane, unmerged	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T16:09Z	check	editor-menus	journeys 39972233358 pending; #4816 #4817 #4818 clean in fast lane, unmerged (lane batches waiting on macOS slots)	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T16:30Z	check	editor-menus	journeys 39972233358 pending; #4816 #4817 #4818 clean in fast lane, unmerged; flare journeys 39987109228 (pre-fix head) pending	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T16:52Z	check	editor-menus	#4816 #4817 #4818 ready (fast-lane check success); lane bisecting batch 20261023155119, macOS gate probes queued; journeys 39972233358 queued	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T17:14Z	check	editor-menus	heartbeat: journeys 39972233358 still queued (macOS runners); #4816/#4817/#4818 clean in lane batch; #4741 open (supervisor, needs-split)	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T17:47Z	fix	editor-menus	#4817 needs-fix (macOS: LiveFront.release tuple closures non-Sendable); fixed at 7f787765a, gate PASS, Head moved; #4816 merged	https://github.com/qbtrix/creative-apps/pull/4817
+2026-10-23T17:47Z	check	editor-menus	heartbeat: journeys 39972233358 still queued; #4816 merged; #4817 fixed+pushed; #4818 in lane; #4741 open (supervisor)	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T18:10Z	fix	editor-menus	#4817 fix 7f787765a actually pushed now (17:47 push went to a scratch branch; branch is checked out in a worktree)	https://github.com/qbtrix/creative-apps/pull/4817
+2026-10-23T18:10Z	check	editor-menus	heartbeat: journeys 39972233358 in_progress; #4817 head now 7f787765a (needs-fix pending lane re-check); #4818 in lane; #4741 open (supervisor)	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T18:26Z	check	editor-menus	heartbeat: journeys 39972233358 in_progress; #4817 needs-fix dropped at 7f787765a, #4818 in lane; #4741 open (supervisor)	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T18:43Z	check	editor-menus	heartbeat: journeys 39972233358 in_progress; #4817 #4818 clean in lane; #4741 open (no-fast-lane,needs-split)	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T19:03Z	check	editor-menus	heartbeat: journeys 39972233358 still in_progress (macOS journeys since 17:49Z); #4817 #4818 clean in lane (lane run active); #4741 open	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T19:28Z	check	editor-menus	EM-a, EM-photo-design, EM-library done on 39983291011; EM-flare-halo waits on #4817 #4818 #4830	https://github.com/qbtrix/creative-apps/actions/runs/39983291011
+2026-10-23T20:44Z	check	editor-menus	#4988 open for #4830 (shared TextFieldEditRouting, Mutate 4/4); EM-a, EM-photo-design, EM-library done on 39983291011	https://github.com/qbtrix/creative-apps/pull/4988
+2026-10-23T21:09Z	check	editor-menus	check: EM-flare-halo PRs in lane	https://github.com/qbtrix/creative-apps/pull/4988
+2026-10-23T21:32Z	check	editor-menus	heartbeat: #4818 fix gating, #4883 closed	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-23T21:38Z	check	editor-menus	#4818 needs-fix fixed and pushed	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-23T21:55Z	check	editor-menus	heartbeat 21:55: lane state checked, dev unchanged at 61c481df	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-23T22:18Z	check	editor-menus	22:20Z #4818 needs-fix cleared on bfcbce5; #4817 #4818 #4988 clean, waiting on next batch	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-23T22:40Z	check	editor-menus	22:40Z #4817 #4818 #4988 still clean, queued behind batch #4870 (macOS gate running)	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-23T23:02Z	check	editor-menus	23:02Z unchanged; batch #4870 macOS gate still running	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-23T23:24Z	check	editor-menus	23:25Z unchanged; batch macOS gate 40029779505 still running	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-23T23:47Z	check	editor-menus	23:48Z batch macOS gate red on Design stroke tests from #4864, not ours; lane bisecting	https://github.com/qbtrix/creative-apps/actions/runs/40029779505
+2026-10-24T00:09Z	check	editor-menus	00:10Z no bisect probes yet; dev CI 40037716897 still running	https://github.com/qbtrix/creative-apps/actions/runs/40029779505
+2026-10-24T00:30Z	check	editor-menus	00:31Z lane bisecting: probe -6 Linux and macOS running	https://github.com/qbtrix/creative-apps/actions/runs/40044879600
+2026-10-24T00:51Z	check	editor-menus	00:52Z probe -6 Linux green, macOS running	https://github.com/qbtrix/creative-apps/actions/runs/40044879600
+2026-10-24T01:13Z	check	editor-menus	01:14Z probe -6 macOS gate still running	https://github.com/qbtrix/creative-apps/actions/runs/40044879600
+2026-10-24T01:36Z	check	editor-menus	01:36Z probe -6 green on Linux and macOS; probe -9 running	https://github.com/qbtrix/creative-apps/actions/runs/40044879600
+2026-10-24T01:57Z	check	editor-menus	01:58Z probe -9 Linux green, macOS running	https://github.com/qbtrix/creative-apps/actions/runs/40050012604
+2026-10-24T02:20Z	check	editor-menus	02:20Z: #4817/#4818/#4988 open clean, batch probe -9 macOS running	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-24T02:41Z	check	editor-menus	02:42Z: bisect probe -9 macOS red (culprit in #4837..#4864, not ours); #4818 in green prefix -6	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-24T03:04Z	check	editor-menus	03:04Z: bisect probe -7 macOS running; #4818 in green prefix -6	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-24T03:25Z	check	editor-menus	03:26Z: bisect probe -7 macOS still running; #4818 in green prefix -6	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-24T03:48Z	check	editor-menus	03:49Z: bisect probe -7 macOS green; next probe -8 decides culprit; #4818 in green prefix	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-24T04:11Z	check	editor-menus	04:12Z: bisect probe -8 (deciding probe) running; #4818 in green prefix	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-24T04:33Z	check	editor-menus	04:33Z: bisect probe -8 macOS running; #4818 in green prefix	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-24T04:54Z	check	editor-menus	04:55Z: bisect probe -8 macOS still running; #4818 in green prefix	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-24T05:17Z	check	editor-menus	05:18Z: probe -8 green -> culprit #4864; prefix incl #4818 not yet merged; new batch 20261024050226 started without it	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-24T05:40Z	check	editor-menus	05:40Z asked supervisor: batch 20261023215139 green prefix unmerged	https://github.com/qbtrix/creative-apps/issues/3774#issuecomment-6380477896
+2026-10-24T06:02Z	check	editor-menus	06:02Z prefix still unmerged; batch 20261024050226 macOS red, bisecting; no supervisor reply yet	https://github.com/qbtrix/creative-apps/issues/3774#issuecomment-6380477896
+2026-10-24T06:24Z	check	editor-menus	06:24Z prefix still unmerged; probe -6 macOS running; no supervisor reply yet	https://github.com/qbtrix/creative-apps/issues/3774#issuecomment-6380477896
+2026-10-24T06:46Z	check	editor-menus	06:46Z prefix still unmerged; batch 20261024050226 bisecting (probe -1 macOS queued); no supervisor reply	https://github.com/qbtrix/creative-apps/issues/3774#issuecomment-6380477896
+2026-10-24T07:08Z	check	editor-menus	07:08Z supervisor answered: landing #4818..#4837 by hand after re-proof; lane fixes #5048/#5053	https://github.com/qbtrix/creative-apps/issues/3774
+2026-10-24T07:29Z	check	editor-menus	07:29Z #4818 not yet merged; supervisor landing in progress	https://github.com/qbtrix/creative-apps/issues/3774
+2026-10-24T07:52Z	check	editor-menus	07:52Z prefix branch Linux green (40071878407), Mac gate pending; #4818 unmerged	https://github.com/qbtrix/creative-apps/issues/3774
+2026-10-24T08:14Z	check	editor-menus	08:14Z #4818 merged 08:01Z (supervisor prefix); #4817/#4988 ready, not in batch 20261024081307	https://github.com/qbtrix/creative-apps/pull/4818
+2026-10-24T08:36Z	check	editor-menus	08:36Z #4817/#4988 ready; batch 20261024081307 bisecting, no new batch yet	https://github.com/qbtrix/creative-apps/pull/4817
+2026-10-24T08:58Z	check	editor-menus	08:57Z: lane sweep running, no new batch yet	https://github.com/qbtrix/creative-apps/issues/3774
+2026-10-24T09:20Z	check	editor-menus	09:19Z: lane macOS gates blocked by dev-red #5113	https://github.com/qbtrix/creative-apps/issues/5113
+2026-10-24T09:42Z	check	editor-menus	09:42Z: still blocked by dev-red #5113	https://github.com/qbtrix/creative-apps/issues/5113
+2026-10-24T10:04Z	check	editor-menus	10:04Z: still blocked by dev-red #5113; lane stuck on batch 20261024081307	https://github.com/qbtrix/creative-apps/issues/5113
+2026-10-24T10:27Z	check	editor-menus	10:26Z: unchanged, lane stuck behind dev-red #5113	https://github.com/qbtrix/creative-apps/issues/5113
+2026-10-24T10:49Z	check	editor-menus	10:48Z: dev-red #5113 closed 10:38Z (main at 9f476af7); waiting for lane's next batch	https://github.com/qbtrix/creative-apps/actions/runs/40081823899
+2026-10-24T11:12Z	check	editor-menus	11:15Z batch 20261024110214 excludes #4817/#4988; reported limit-100 cause on #3774	https://github.com/qbtrix/creative-apps/issues/3774#issuecomment-6383506030
+2026-10-24T11:46Z	stage	editor-menus	relaunch act-1a16db4d43e-gerb; #2487 building, stacked on #4988	https://github.com/qbtrix/creative-apps/issues/2487
+2026-10-24T12:02Z	stage	editor-menus	#5164 opened for #2487, stacked on #4988	https://github.com/qbtrix/creative-apps/pull/5164
+2026-10-24T12:22Z	check	editor-menus	#4817/#4988/#5164 open, fast-lane, no dev-red; lane ran 12:18Z	https://github.com/qbtrix/creative-apps/actions/runs/40093405050
+2026-10-24T12:41Z	check	editor-menus	#4817/#4988 eligible; batch 20261024110214 bisecting (probe 6), 119 ready PRs wait	https://github.com/qbtrix/creative-apps/actions/runs/40092907790
+2026-10-24T12:54:28Z	check	EM-flare-halo	#4817/#4988 clean, in lane (batch-20261024110214 still bisecting); #5164 waits on #4988; suite mirror resynced
+2026-10-24T13:18:58Z	check	EM-flare-halo	no change; last completed lane sweep 40092907790 (12:11Z); since then sweeps cancelled; batch-20261024110214 at probe 6
+2026-10-24T13:37:37Z	check	EM-flare-halo	no change; batch-20261024110214 bisect moving (probe 3 pushed)
+2026-10-24T13:56:16Z	check	EM-flare-halo	no change; batch-20261024110214 still bisecting
+2026-10-24T14:14:50Z	check	EM-flare-halo	sweep 40100183592: batch-20261024110214 probe 3 running; #4817/#4988 ready, 132 wait
+2026-10-24T14:33:32Z	check	EM-flare-halo	batch-20261024110214 resolved (branches gone); #4817/#4988 wait for the next batch
+2026-10-24T14:52:16Z	check	EM-flare-halo	new batch-20261024144917 (12 PRs) excludes #4817/#4988; they wait for the next
+2026-10-24T15:10:51Z	check	EM-flare-halo	no change; batch-20261024144917 in flight
+2026-10-24T15:29:24Z	check	EM-flare-halo	no change; batch-20261024144917 in flight
+2026-10-24T15:48:04Z	check	EM-flare-halo	no change; batch-20261024144917 in flight
+2026-10-24T15:52:49Z	fix	EM-flare-halo	#4817 needs-rebase (FlareWindow.swift vs dev place drop); merged dev, resolved, gate running
+2026-10-24T16:07:58Z	fix	EM-flare-halo	#4817 dev merged, CI: PASS, head 9e16d071c pushed, Head moved
+2026-10-24T16:12:26Z	check	EM-flare-halo	needs-rebase dropped on #4817; batch-20261024160327 (12 PRs) excludes ours
+2026-10-24T16:30:57Z	check	EM-flare-halo	no change; batch-20261024160327 in flight
+2026-10-24T16:49:37Z	check	EM-flare-halo	no change; batch-20261024160327 in flight
+2026-10-24T17:08:15Z	check	EM-flare-halo	batch-20261024160327 resolved; #4817/#4988 merge clean with dev, wait for next batch
+2026-10-24T17:26:57Z	check	EM-flare-halo	#4817 in batch-20261024172211 at 9e16d071c; #4988 next
+2026-10-24T17:45:35Z	check	EM-flare-halo	batch-20261024172211: Linux green, macOS gate queued
+2026-10-24T18:04:08Z	check	EM-flare-halo	batch-20261024172211 macOS gate running
+2026-10-24T18:20:39Z	merge	EM-flare-halo	#4817 merged as 18f35c38f2df21e6e0e23c6d949283099be54328
+2026-10-24T18:39:34Z	check	EM-flare-halo	#4988 clean, marker current; queued behind older PRs (not in batch-20261024183708)
+2026-10-24T18:58:05Z	check	EM-flare-halo	batch-20261024183708 in flight; #4988 queued
+2026-10-24T19:16:41Z	check	EM-flare-halo	batch-20261024183708 bisecting (not ours); #4988 queued
+2026-10-24T19:35:09Z	check	EM-flare-halo	batch-20261024183708 still bisecting; #4988 queued
+2026-10-24T19:53:47Z	check	EM-flare-halo	probe batch-20261024183708-6 macOS gate running; #4988 queued
+2026-10-24T20:12:23Z	check	EM-flare-halo	probe -6 macOS gate still running (64 min); lane sweeping; #4988 queued
+2026-10-24T20:30:54Z	check	EM-flare-halo	batch-20261024183708 bisect at probes -7/-9; #4988 queued
+2026-10-24T20:49:23Z	check	EM-flare-halo	batch-20261024183708 resolved; no batch in flight; #4988 next
+2026-10-24T21:08:03Z	check	EM-flare-halo	batch-20261024205137 (5 p0, 1 beta, 6 older) excludes #4988; queued
+2026-10-24T21:26:31Z	check	EM-flare-halo	batch-20261024205137 bisecting (not ours); #4988 queued
+2026-10-24T21:45:03Z	check	EM-flare-halo	batch-20261024205137 still bisecting; #4988 queued
+2026-10-24T22:03:32Z	check	EM-flare-halo	batch-20261024205137 still bisecting; #4988 queued
+2026-10-24T22:22:08Z	check	EM-flare-halo	probes -3/-6 macOS gates running; #4988 queued
+2026-10-24T22:36:44Z	check	EM-flare-halo	GitHub API 503; batch-20261024205137 probes still up; #4988 queued
+2026-10-24T22:55:12Z	check	EM-flare-halo	API back; batch-20261024205137 bisect at probe -1; #4988 queued
+2026-10-24T23:13:39Z	check	EM-flare-halo	batch-20261024205137 bisect at probe -1; #4988 queued
+2026-10-24T23:32:05Z	check	EM-flare-halo	batch-20261024205137 bisect at probe -1; #4988 queued
+2026-10-24T23:51:33Z	check	EM-flare-halo	batch-20261024205137 bisect finished, no lane batch open; #4988 clean, waiting for next batch; #5164 body footer re-added by tooling on edit (lane strips it from the squash)
+2026-10-25T00:10:29Z	check	EM-flare-halo	batch-20261024235353 (12 PRs, beta/p0) bisecting at probe -6 without #4988; added beta (the feature's label, #3774) to #4988 and #5164 so they queue in the beta tier
+2026-10-25T00:29:01Z	check	EM-flare-halo	batch-20261024235353 still at probe -6; #4988 (beta) queued for the next batch
+2026-10-25T00:47:31Z	check	EM-flare-halo	batch-20261024235353 probe -6 still running (macOS gate); #4988 (beta) queued
+2026-10-25T01:06:07Z	check	EM-flare-halo	batch-20261024235353-6 macOS gate (run 40145609051) in progress since 00:09Z; #4988 (beta) queued
+2026-10-25T01:24:36Z	check	EM-flare-halo	batch-20261024235353 bisect moved to probe -9; #4988 (beta) queued for the next batch
+2026-10-25T01:43:07Z	check	EM-flare-halo	batch-20261024235353 bisect at probe -9; #4988 (beta) queued
+2026-10-25T02:01:37Z	check	EM-flare-halo	batch-20261024235353 bisect at probe -9; #4988 (beta) queued
+2026-10-25T02:20:09Z	check	EM-flare-halo	batch-20261024235353 bisect at probe -10; #4988 (beta) queued
+2026-10-25T02:38:46Z	check	EM-flare-halo	#4988 in lane/batch-20261025023716 (12 PRs, 10th); Linux + macOS gates running
+2026-10-25T02:57:17Z	check	EM-flare-halo	batch-20261025023716 (with #4988): Linux check green, macOS gate 40155151356 queued
+2026-10-25T03:16:07Z	check	EM-flare-halo	batch-20261025023716 macOS gate red: type-check timeout in Tests/AppSnapshotTests/DesignPlaceSnapshots.swift:39 (Design-line commits, not #4988's files); lane bisecting (probe -6)
+2026-10-25T03:34:38Z	check	EM-flare-halo	batch-20261025023716 bisect at probe -6 (macOS); #4988 waits
