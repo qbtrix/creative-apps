@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-X46, pending SC-4 (shared-codecs): opens rotated-6.jpg and rotated-6.heic, the same 4032 x 3024 stored frame (generated, not a camera's: a blue sky band on the stored left, a light horizon band, green ground, a red marker at the stored bottom left), the JPEG with Exif orientation 6, the HEIC with irot 90 degrees clockwise and Exif orientation 6 as a phone writes them, and exports each as PNG. Assertion: both exports are 3024 x 4032 upright, the sky band across the top (at 1500, 600) within 2 levels of its source colour 90, 150, 220, and the HEIC's export matches the JPEG's within 3 levels. Photo decodes neither upright before SC-4 (its HEIC path is ImageIO only, so the job is Cm), so platforms is [] and the harness skips the job on both; the turn-on sets platforms to macos.",
+  "pending": "SC-4",
+  "waits_on": "SC-4",
+  "inputs": ["input/*.jpg", "input/*.heic"],
+  "steps": [
+    {"id": "file.export", "params": {"format": "png"}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-{ext}", "format": "png", "options": {}},
+  "expect": {
+    "out/rotated-6-jpg.png": {"pixels": {"tolerance": 2, "size": [3024, 4032], "at": {"x": 1500, "y": 600, "rgb": [90, 150, 220]}}},
+    "out/rotated-6-heic.png": {"pixels": {"tolerance": 3, "size": [3024, 4032], "reference": "out/rotated-6-jpg.png"}}
+  },
+  "platforms": []
+}
