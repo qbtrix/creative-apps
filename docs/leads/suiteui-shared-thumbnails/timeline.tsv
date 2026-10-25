@@ -127,3 +127,4 @@ ts	kind	note
 2026-10-25T06:14Z	heartbeat	batch 20261025054232 (without #5133) red, bisecting (probe -6); #5133 clean at 502e566f9, no needs-fix/needs-rebase, waits for next batch; dev 13fb2f59; 0 findings
 2026-10-25T06:36Z	heartbeat	batch 20261025054232 still bisecting (probe -6); #5133 clean at 502e566f9 vs dev 13fb2f59, not merged; waits for next batch
 2026-10-25T06:57Z	heartbeat	batch 20261025054232 still on probe -6; #5133 clean at 502e566f9 vs dev 13fb2f59, not merged; waits for next batch
+2026-10-25T07:19Z	heartbeat	batch 20261025054232 still on probe -6; #5133 clean at 502e566f9 vs dev 13fb2f59, no lane labels, not merged; waits for next batch
