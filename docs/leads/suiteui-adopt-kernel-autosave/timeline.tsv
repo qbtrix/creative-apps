@@ -135,3 +135,4 @@ utc	stage	event	ref	note
 2026-10-25T08:51:55Z	3	poll	-	08:51Z poll: dev 8d3a12c4b; no merges of ours; no needs-fix on this feature; no dev-red, no new findings, SC-f not on dev
 2026-10-25T09:07:51Z	3	poll	-	09:07Z poll: no merges; batch 20261025090316 running; #4960 needs-fix awaits supervisor; #5308 still open; no dev-red
 2026-10-25T09:24:55Z	3	poll	-	09:24Z poll: no merges; batch 20261025090316 Linux red on HomeModelTests time limits (load), bisecting; evidence added on #4960
+2026-10-25T09:41:25Z	3	poll	-	09:41Z poll: no merges; dev-red #5316 = HomeModel/Onboarding time limits (not ours); probe -6 Linux green, macOS running; noted on #4960
