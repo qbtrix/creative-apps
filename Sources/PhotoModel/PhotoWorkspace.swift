@@ -26,7 +26,7 @@ import SuiteKernel
 
 /// The tools on Photo's floating tool palette.
 public enum PhotoTool: String, CaseIterable, Sendable {
-    case move, marquee, brush, eraser, clone, heal, crop, eyedropper, gradient, text
+    case move, marquee, brush, eraser, clone, heal, crop, eyedropper, gradient, text, pen
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every other tool works: the canvas sends its drags to
@@ -106,6 +106,8 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var services: PhotoServices = .live
     /// The selection's coverage when it isn't an exact rectangle (PhotoSelectionMask.swift).
     public internal(set) var selectionMask: Mask?
+    /// The selection's kernel recipe and Reselect's (PhotoArea+Kernel.swift).
+    var area = PhotoArea()
     /// The Marquee tool's shape and feather (PhotoSelectionMask.swift).
     public internal(set) var selectionOptions = SelectionOptions()
     /// Each masked layer's mask, its own size, coverage as gray, alpha 1 (PhotoMask.swift).
@@ -136,6 +138,8 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var progress: String?
     /// The file flow's recents, open path and requests for the window (PhotoFileFlow+Kernel.swift).
     public internal(set) var fileFlow = PhotoFileFlowState()
+    /// The document's paths and the Pen's view state (PhotoPaths+Kernel.swift).
+    var pathState = PhotoPathState()
     /// Test hook: how many times `layerGeometryChanged` ran, and its last call
     /// (PhotoMask.swift). Not part of `==`.
     var geometryChangeCount = 0
@@ -153,9 +157,9 @@ public struct PhotoWorkspace: Sendable {
     }
 
     /// Why the palette shows `tool` disabled, as its tooltip; nil once it works.
-    /// The eyedropper asks the sampling service, so `.fake` enables it.
+    /// The eyedropper reads the kernel's mean, so it is enabled on any services.
     public func toolHelp(_ tool: PhotoTool) -> String? {
-        tool == .eyedropper ? services.sampling.unavailableHelp : tool.unavailableHelp
+        tool == .eyedropper ? nil : tool.unavailableHelp
     }
 
     /// Drops the status line's message.
@@ -191,9 +195,11 @@ public struct PhotoWorkspace: Sendable {
         cloneSource = nil
         stroke = nil
         selectionMask = nil
+        area = PhotoArea()
         masks = [:]
         editsMask = false
         transformDraft = nil
+        pathState = PhotoPathState()
         statusMessage = nil
         fileKind = nil
         history = PhotoHistory()
@@ -383,13 +389,14 @@ extension PhotoWorkspace: Equatable {
             && lhs.eraserOptions == rhs.eraserOptions && lhs.adjustments == rhs.adjustments
             && lhs.selection == rhs.selection && lhs.pendingCrop == rhs.pendingCrop
             && lhs.cloneSource == rhs.cloneSource && lhs.stroke == rhs.stroke
-            && lhs.history == rhs.history && lhs.selectionMask == rhs.selectionMask
+            && lhs.history == rhs.history && lhs.selectionMask == rhs.selectionMask && lhs.area == rhs.area
             && lhs.selectionOptions == rhs.selectionOptions && lhs.editsMask == rhs.editsMask
             && lhs.cropAspect == rhs.cropAspect && lhs.transformDraft == rhs.transformDraft
             && lhs.sampleSize == rhs.sampleSize && lhs.exportOptions == rhs.exportOptions
             && lhs.exportRun == rhs.exportRun
             && lhs.fileKind == rhs.fileKind && lhs.savedStepID == rhs.savedStepID
             && lhs.statusMessage == rhs.statusMessage && lhs.textBox == rhs.textBox && lhs.progress == rhs.progress && lhs.masks == rhs.masks && lhs.pixels == rhs.pixels
+            && lhs.pathState == rhs.pathState
     }
 }
 

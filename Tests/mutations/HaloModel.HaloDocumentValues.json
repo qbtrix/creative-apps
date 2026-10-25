@@ -1,4 +1,4 @@
 [
   {"label": "h264RefusesTransparencyInExportRulesWords: a movie keeps alpha whatever its codec", "file": "Sources/HaloModel/Contracts/HaloDocumentValues.swift", "find": "        guard format == .movie, !codec.keepsAlpha else { return nil }\n", "replace": "        guard format == .movie, codec.keepsAlpha else { return nil }\n", "tests": "HaloProResTests.h264RefusesTransparencyInExportRulesWords"},
-  {"label": "proResIsRefusedWithItsReasonUntilHX3: ProRes 4444 can be picked before its plan rules", "file": "Sources/HaloModel/Contracts/HaloDocumentValues.swift", "find": "        case .prores4444: proResWaits\n", "replace": "        case .prores4444: nil\n", "tests": "HaloProResTests.proResIsRefusedWithItsReasonUntilHX3"}
+  {"label": "proResIsRefusedWithItsReasonUntilHX4: ProRes 4444 can be picked before its plan rules", "file": "Sources/HaloModel/Contracts/HaloDocumentValues.swift", "find": "        case .prores4444: proResWaits\n", "replace": "        case .prores4444: nil\n", "tests": "HaloProResTests.proResIsRefusedWithItsReasonUntilHX4"}
 ]

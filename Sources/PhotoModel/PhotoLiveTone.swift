@@ -12,7 +12,7 @@
 // `applied(to:)`'s step (exposure, levels, curves in sRGB), skipped at its identity, and Hue/Saturation is
 // Photo's own colour matrix and lightness (HueSaturation.swift) as a ToneProgram matrix operation, so the GPU
 // picture matches the CPU's. `liveStack` is nil, and the region takes the dispatcher route, when the image's
-// Blur is on (it reads neighbours), when a visible adjustment layer has an enabled mask, when a layer's opacity
+// Blur is on (it reads neighbours), when a visible layer has an enabled mask, when a layer's opacity
 // is outside 0...1, or when the services' adjustment layers are not the live ones. Linux-safe.
 import CoreRaster
 import CoreRender
@@ -63,8 +63,8 @@ extension PhotoWorkspace {
         guard shown.allSatisfy({ (0...1).contains(Float($0.opacity)) }) else { return nil }  // render-contract: cpu-op layer-opacity-range
         var operations: [PhotoLayer.ID: [ToneProgram.Operation]] = [:]
         for layer in shown {
+            guard shownMask(of: layer) == nil else { return nil }  // render-contract: cpu-op masked-layer
             guard case .adjustment(var settings) = layer.kind else { continue }
-            guard !(layer.isMaskEnabled && masks[layer.id] != nil) else { return nil }  // render-contract: cpu-op masked-adjustment-layer
             settings.apply(.setEnabled(.blur, false))  // a layer never blurs (LiveAdjustmentLayering)
             operations[layer.id] = settings.toneOperations ?? []
         }

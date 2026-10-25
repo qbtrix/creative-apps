@@ -5,7 +5,7 @@
 // the composite as `mergedimage.png` and at most 256 px long (a box filter
 // in linear light) as `Thumbnails/thumbnail.png`, `stack.xml` for other
 // OpenRaster readers, and `photo/document.json` with what OpenRaster has no
-// word for. A text layer's PNG is its rasterized words, and its stack.xml
+// word for (paths among them, omitted when there are none). A text layer's PNG is its rasterized words, and its stack.xml
 // entry carries their `afterglow:text` (PhotoTextLayer+ORA). Decode reads
 // the JSON, the images it names and, from stack.xml, only those text
 // attributes (the rest is never parsed back: the packet's "Reading"
@@ -61,7 +61,8 @@ struct LiveArchive: DocumentArchiving {
         files["stack.xml"] = Data(PhotoStackXML.stack(snapshot.canvas, entries, texts: texts).utf8)
         let document = DocumentEntry(
             format: formatVersion, canvas: SizeEntry(width: snapshot.canvas.width, height: snapshot.canvas.height),
-            layers: entries, adjustments: snapshot.adjustments, selected: snapshot.selectedLayerID)
+            layers: entries, adjustments: snapshot.adjustments, selected: snapshot.selectedLayerID,
+            paths: snapshot.paths.isEmpty ? nil : snapshot.paths)
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
         files[Self.documentPath] = try encoder.encode(document)
@@ -100,7 +101,7 @@ struct LiveArchive: DocumentArchiving {
         }
         return PhotoDocumentSnapshot(
             canvas: canvas, layers: layers, pixels: pixels, masks: masks, adjustments: document.adjustments,
-            selectedLayerID: document.selected)
+            selectedLayerID: document.selected, paths: document.paths ?? [])
     }
 
     func container(_ package: PhotoPackage) throws -> Data { try PhotoZip.container(package) }
@@ -142,6 +143,8 @@ private struct DocumentEntry: Codable {
     var layers: [LayerEntry]
     var adjustments: AdjustmentSettings
     var selected: String?
+    /// The path list; omitted when empty, so a document without paths writes the bytes it did before paths.
+    var paths: [PhotoPath]?
 }
 
 /// One layer as the JSON and stack.xml describe it.

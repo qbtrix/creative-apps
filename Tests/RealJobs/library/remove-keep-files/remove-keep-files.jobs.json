@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "app": "library",
+  "why": "RJ-L51, pending LC-7 (catalog-files): rate three photos 3, remove them from the catalog, then undo; the files stay on disk and the undo brings the photos back with their ratings. The trap is a remove that deletes the files, or an undo that loses the ratings. Until LC-7 the input is the four-photo shoot; LC-7 swaps in the 10-photo folder, checks the files are still there, and turns the job on.",
+  "pending": "LC-7",
+  "inputs": ["input/*.library"],
+  "steps": [
+    {"id": "edit.select", "params": {"ids": ["beach", "dock", "fog"]}},
+    {"id": "metadata.set-rating", "params": {"stars": 3}},
+    {"id": "photo.remove-from-catalog", "params": {}},
+    {"id": "edit.undo", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-catalog", "format": "json", "options": {}},
+  "expect": {
+    "out/shoot-catalog.json": {"json": {
+      "version": 1,
+      "photos": [
+        {"captureDate": 1760000000, "color": [0.902, 0.7843, 0.5882], "flag": "None", "id": "beach", "name": "beach", "path": "images/beach.png", "pixelSize": {"height": 3, "width": 4}, "rating": 3},
+        {"captureDate": 1760000060, "color": [0.3529, 0.2745, 0.1961], "flag": "None", "id": "dock", "name": "dock", "path": "images/dock.png", "pixelSize": {"height": 3, "width": 4}, "rating": 3},
+        {"captureDate": 1760000120, "color": [0.7843, 0.7843, 0.8039], "flag": "None", "id": "fog", "name": "fog", "path": "images/fog.png", "pixelSize": {"height": 3, "width": 4}, "rating": 3},
+        {"captureDate": 1760000180, "color": [0.2353, 0.3137, 0.4314], "flag": "None", "id": "pier", "name": "pier", "path": "images/pier.png", "pixelSize": {"height": 3, "width": 4}, "rating": 0}
+      ]
+    }}
+  },
+  "platforms": []
+}

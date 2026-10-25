@@ -4,17 +4,18 @@
 // they go into a file as they are. Linux-safe.
 import SuiteKernel
 
-/// A stroke drawn centered on the shape's outline.
-public struct DesignStroke: Sendable, Hashable, Codable {
-    public var color: DesignColor
-    /// Points; 0 draws nothing. The inspector clamps it to 0...1000.
-    public var width: Double
+/// A stroke drawn centered on the shape's outline: the kernel's, with its join, cap and dash (stroke-style DK-5).
+/// Points; 0 draws nothing. The inspector clamps the width to 0...1000.
+public typealias DesignStroke = VectorStroke
 
+extension VectorStroke {
+    /// A solid stroke of Design's opaque `color`, `width` points wide, with the default join and cap.
     public init(color: DesignColor, width: Double) {
-        (self.color, self.width) = (color, width)
+        self.init(color: color.kernelColor, width: width)
     }
 
-    public static let `default` = DesignStroke(color: .black, width: 1)
+    /// The 1 pt black stroke Add Stroke gives.
+    public static let `default` = VectorStroke()
 }
 
 /// A text layer's alignment: the kernel's `TextStyle.Alignment` (FlareCore's leading, center, trailing and
