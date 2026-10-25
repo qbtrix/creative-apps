@@ -129,3 +129,4 @@ Next: Lane: #4871 TS-a and #5047 TS-7 in the lane. After #4871 merges, merge dev
 - 2026-10-25T02:44:57Z (act-1a16fe1fad3-lsp3): poll: dev 3db45eb4 (batch landed through #5214, lane fix #5238 in), no slice merges yet; no needs-fix/needs-rebase on our PRs; findings 0
 - 2026-10-25T03:09:04Z (act-1a16fe1fad3-lsp3): poll: dev still 3db45eb4, no slice merges; no needs-fix/needs-rebase on our PRs; findings 0
 - 2026-10-25T03:32:45Z (act-1a16fe1fad3-lsp3): poll: dev still 3db45eb4, no slice merges; lane batch 20261025023716 bisecting (probe -6 up to #5174 running); no needs-fix/needs-rebase on our PRs; findings 0
+- 2026-10-25T03:57:42Z (act-1a16fe1fad3-lsp3): poll: dev at 2e7d5264 (#3935 docs only); no slice PR merged; no needs-fix/needs-rebase; 0 open findings
