@@ -117,3 +117,4 @@ utc	stage	event	ref	note
 2026-10-25T09:01Z	heartbeat	poll: bisect -4 red (culprit #4960, not ours); #4886 due to land; dev 8d3a12c4b
 2026-10-25T09:22Z	heartbeat	poll: #4960 needs-fix; rebatched 090316 (has #4886) red on Linux, bisecting
 2026-10-25T09:43Z	heartbeat	poll: probe 090316-6 Linux green, macOS running; dev CI red (not ours)
+2026-10-25T10:06Z	heartbeat	probe -6 macOS gate running; dev-red #5316 not ours; none merged
