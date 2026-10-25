@@ -21,8 +21,8 @@
 // their kind. Each successful open and save is noted in Open Recent and,
 // through SuiteDocumentsBridge (file-flow PF-4), in the suite's shared
 // recents: `.opened` or `.saved`, once each, with the file's suite type.
-// A document save that lands first publishes the file's thumbnail to the
-// suite's previews off the main actor (shared-thumbnails ST-7).
+// A document save that lands first publishes the file's thumbnail, off the
+// main actor, to the previews the bridge holds (shared-thumbnails ST-7).
 // `-PhotoOpenFile <path>` opens a file at launch; `-PhotoRecoveryDir
 // <folder>` keeps autosaves there. PhotoFileSession is the file state the
 // window and PhotoFileArea share. PhotoFileArea
@@ -120,16 +120,9 @@ final class PhotoFileSession {
         return SuiteDocumentsBridge(app: .photo, services: .live(support: support, app: .photo, arguments: arguments))
     }()
 
-    /// Where saved documents' previews go; nil uses the suite's (tests inject one).
-    @ObservationIgnored var thumbnails: (any ThumbnailPublishing)?
-
-    /// The suite's previews in the live support folder (`-SuiteSupportDir` moves it), made on first use.
-    static let suiteThumbnails: any ThumbnailPublishing = SuiteServices.liveThumbnails(
-        support: SuiteLocations.supportFolder(arguments: ProcessInfo.processInfo.arguments, home: NSHomeDirectory()))
-
-    /// Publishes the thumbnail of the document saved at `url` to the suite's previews, off the main actor (ST-7).
+    /// Publishes the thumbnail of the document saved at `url` to the bridge's previews, off the main actor (ST-7).
     func publishPreview(of url: URL, archive: any DocumentArchiving) async {
-        let (path, thumbnails) = (url.path(percentEncoded: false), thumbnails ?? Self.suiteThumbnails)
+        let (path, thumbnails) = (url.path(percentEncoded: false), (bridge ?? Self.suiteBridge).thumbnails)
         _ = await Task.detached(priority: .utility) {
             await PhotoSavedPreview.publish(documentAt: path, archive: archive, to: thumbnails)
         }.value
@@ -169,6 +162,13 @@ final class PhotoFileSession {
 extension PhotoWindow {
     /// The services a window runs on when no fixture is asked for: `.live`,
     /// its autosaves in `-PhotoRecoveryDir`'s folder when one is given.
+    /// Photo's `.live` services with the suite's live text (Core Text), so text layers draw their words.
+    nonisolated static var liveServices: PhotoServices {
+        var services = PhotoServices.live
+        services.text = LiveText()
+        return services
+    }
+
     nonisolated static func fileServices(_ live: PhotoServices) -> PhotoServices {
         guard let folder = UserDefaults.standard.string(forKey: "PhotoRecoveryDir") else { return live }
         return live.recovering(in: URL(fileURLWithPath: folder, isDirectory: true))
