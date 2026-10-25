@@ -130,3 +130,4 @@ utc	stage	event	ref	note
 2026-10-25T12:59:40Z	3	check	-	12:59 poll: lane batch 20261025125743 holds only #4962 (not ours). The 12:39 lane log marks all 7 of our slice PRs 'eligible' (Fast-Check marker, local-ci/prescreen); 63 ready PRs wait while batches run one at a time. No needs-fix/needs-rebase. No dev-red. Findings 0.
 2026-10-25T13:20:18Z	3	check	-	13:19 poll: no batch in flight; the #4962 batch resolved. None of our slice PRs merged yet. All are eligible with fast-lane; no needs-fix/needs-rebase. No dev-red. Findings 0.
 2026-10-25T13:41:51Z	3	check	-	13:41Z poll: #4887 #4901 #4918 #4891 #4958 #5047 #5226 still open, clean, fast-lane; dev head bbaedba6 (#4962); no needs-fix/needs-rebase, no dev-red, 0 findings; stacked #5228/#5301/#5302 wait on TS-7/TS-9.
+2026-10-25T14:02:16Z	3	check	-	14:02Z poll: our 7 fast-lane PRs still open, clean, queued (lane runs batches of one; dev took #5006 at 13:51); no needs-fix/needs-rebase, no dev-red, 0 findings.
