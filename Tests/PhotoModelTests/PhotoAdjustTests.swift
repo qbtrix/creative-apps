@@ -163,6 +163,21 @@ import Testing
         for id in AdjustCommands.specs(PhotoWorkspace.self).map(\.id) { #expect(ids.contains(id), "\(id) is missing") }
     }
 
+    @Test func thePreviewIsASmallCopyAndTheDocumentStaysAsItWas() throws {
+        var ws = try Self.checker()
+        ws.setSelection(PixelRect(x: 0, y: 0, width: 8, height: 12))
+        let before = ws
+        let shown = try #require(ws.adjustPreview("filter.gaussian-blur", ["radius": .number(2)], side: 8))
+        #expect(shown.width == 8 && shown.height == 6)
+        #expect(ws == before, "Preview changed the document")
+        let full = try #require(ws.adjustPreview("filter.gaussian-blur", ["radius": .number(2)]))
+        let plain = try ws.composite().rgba8()
+        #expect(full.width == 16 && full.rgba8 != plain, "the preview isn't blurred")
+        let grey = try #require(ws.adjustPreview("adjust.black-and-white", ["weights": Self.weights], side: 8))
+        #expect(grey.rgba8[0] == grey.rgba8[1] && grey.rgba8[1] == grey.rgba8[2])
+        #expect(PhotoWorkspace(services: .fake).adjustPreview("filter.sharpen", [:]) == nil)
+    }
+
     @Test func kindsRoundTripAndAFileWithoutThemSavesAsBefore() throws {
         let plain = try JSONEncoder().encode(AdjustmentSettings())
         #expect(!String(decoding: plain, as: UTF8.self).contains("kinds"))
