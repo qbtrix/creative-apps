@@ -248,3 +248,4 @@ utc	stage	event	ref	note
 2026-10-25T12:43Z	check-in	new finding #5317 (Tier1Tone Levels journey, same as #5289) not export/text, left alone; 5171/5206 clean; no XP-3/XP-4; no #5193 follow-up; no supervisor reply
 2026-10-25T13:16Z	check-in	quiet: 5171/5206 clean; no XP-3/XP-4; no #5193 follow-up; no supervisor reply; no new export/text findings; #4953 (suiteui) merged 12:49Z
 2026-10-25T13:48Z	check-in	quiet: 5171/5206 clean; no XP-3/XP-4; no #5193 follow-up; no supervisor reply; no new findings; #4962 (library LX-4) merged 13:18Z
+2026-10-25T14:20Z	check-in	quiet: 5171/5206 clean, unmerged; captain's lane fix #5318 (stale-proof batch of one) open; no XP-3/XP-4; no #5193 follow-up; no supervisor reply; no new findings
