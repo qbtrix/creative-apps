@@ -168,3 +168,4 @@ utc	stage	event	ref	note
 2026-10-25T04:17:23Z	3	heartbeat	#4999	mirror resynced
 2026-10-25T04:35:51Z	3	heartbeat	-	#4999 waits for the next batch; batch-20261025023716 still bisecting
 2026-10-25T04:53:45Z	3	heartbeat	-	#4999 waits for the next batch; batch-20261025023716 still at probe -1
+2026-10-25T05:11:37Z	3	heartbeat	-	#4999 waits for the next batch; batch-20261025023716 at probe -2

@@ -69,3 +69,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 2026-10-25T04:17:23Z: Belt nudge: mirror lead/suite-cli-bundle resynced. #4999 waits for the next batch (batch-20261025023716 at probe -1).
 - 2026-10-25T04:35:51Z: #4999 waits for the next batch; batch-20261025023716 still bisecting
 - 2026-10-25T04:53:45Z: #4999 waits for the next batch; batch-20261025023716 still at probe -1
+- 2026-10-25T05:11:37Z: #4999 waits for the next batch; batch-20261025023716 at probe -2
