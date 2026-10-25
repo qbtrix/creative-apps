@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-25T04:06Z	check	EP-z	#4943 open, mergeable clean, fast-lane; dev head 2e7d5264; waiting for a batch
 2026-10-25T04:26Z	check	EP-z	#4943 open, mergeable clean, fast-lane; dev head still 2e7d5264; waiting for a batch
 2026-10-25T04:45Z	check	EP-z	#4943 open, clean, fast-lane; dev moved to ee8ccd61 (#4877), EP-z still merges clean onto it; waiting for a batch
+2026-10-25T05:04Z	check	EP-z	#4943 open, clean, fast-lane; dev ee8ccd61, EP-z merges clean; waiting for a batch
