@@ -55,3 +55,4 @@ utc	stage	event	ref	note
 2026-10-24T07:12Z	3	wave	-	SR-6 waits on SC-4 (shared-codecs builder running now); SR PRs #4828 #4848 #4859 #4865 #4872 on the lane
 2026-10-24T23:20:00Z	lead	restack	dev rewritten (root 4f00afb8); fixer replaying #4848 #4859 #4865 #4872
 2026-10-25T01:20:00Z	3	pr-opened	stacks	replayed onto dev ae3efdb8, gated, fast-lane
+2026-10-25T01:15Z	3	stage-start	wave 2	SR-6 building on SR-5 (Wire shared-codecs:SC-photo)

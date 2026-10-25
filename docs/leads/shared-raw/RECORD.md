@@ -2,7 +2,7 @@
 
 Issue: #3737 · Packet: docs/blueprints/suiteui/features/shared-raw.md
 Run: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
-Stage: 3 wave 1 (stacks replayed; in the lane)
+Stage: 3 wave 2 (next slices stacked; wave 1 in the lane)
 Base: main ef37711d (verified) / dev ae3efdb8
 Next: wait for the lane to merge #4848, then retarget #4859 and #4872 to dev; build SR-6 on SR-5 (Wire shared-codecs:SC-photo).
 
@@ -30,6 +30,7 @@ Next: wait for the lane to merge #4848, then retarget #4859 and #4872 to dev; bu
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-25T01:15Z: wave 2: SR-6 building on SR-5 (Wire shared-codecs:SC-photo); 0 open findings.
 - 2026-10-25T01:20Z: replay done: #4848 (158 lines, 2 files), #4859 (160/7), #4865 (317/5, carries the approved perf line), #4872 (251/4), each gated CI: PASS and labelled fast-lane; dev already held SR-2a's commits byte for byte.
 - 2026-10-24T23:20Z: dev was rewritten to a new root (4f00afb8, #5150); old slice branches share no history with it, so fixers replay each PR's own commits onto the new dev, split to the 400-line/15-file cap, re-gate and force-with-lease push the lead/* branches (same PR numbers).
 - Status branch is lead/suiteui-shared-raw (the name Belt reads); lead/shared-raw kept as a mirror.
