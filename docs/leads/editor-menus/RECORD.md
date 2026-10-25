@@ -126,3 +126,4 @@ Next: lane: probe batch-20261025023716-3 (holds #4988) resolves; once #4988 merg
 - 2026-10-25T05:30:03Z: batch-20261025023716 resolved (#4888 merged); #4988 ready for next batch; PR bodies carry run act-1a17129eefa-0kqr, footer stripped from #5164
 - 2026-10-25T05:48:01Z: lane batch-20261025054232 (12 older PRs) running without #4988; waits for the next batch
 - 2026-10-25T06:06:02Z: batch-20261025054232 (not ours) red, bisecting at probe -6; #4988 waits for the next batch
+- 2026-10-25T06:23:57Z: batch-20261025054232 (not ours) still at probe -6; #4988 waits for the next batch
