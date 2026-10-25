@@ -190,3 +190,4 @@ utc	stage	event	ref	note
 2026-10-25T10:54:04Z	3	heartbeat	-	batch-20261025090316 (p0, not ours) bisect narrowing; #4999 waits
 2026-10-25T11:12:03Z	3	heartbeat	-	no batch in flight; #4999 clean, ready for the next batch
 2026-10-25T11:30:14Z	3	heartbeat	-	batch-20261025111803 (#4886 only) running; #4999 waits for the next batch
+2026-10-25T11:48:11Z	3	heartbeat	-	batch-20261025111803 resolved without #4999; still open, clean, fast-lane; waiting for next batch
