@@ -136,3 +136,4 @@ utc	stage	event	ref	note
 2026-10-25T12:58Z	3	lane	lane	check: none of our PRs labelled or merged; only #4953 merged since 12:30 (not ours); no open dev-red
 2026-10-25T13:20Z	3	lane	lane	check: none of our PRs labelled or merged; only #4962 merged since 12:55 (not ours); no open dev-red
 2026-10-25T13:41Z	3	lane	lane	check: none of our PRs labelled or merged; no merges since #4962 at 13:18; no open dev-red
+2026-10-25T14:04Z	3	lane	lane	check: none of our PRs labelled or merged; only #5006 merged since 13:35 (not ours); no open dev-red
