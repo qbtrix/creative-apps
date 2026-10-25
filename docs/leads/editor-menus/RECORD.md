@@ -134,3 +134,4 @@ Next: lane: probe batch-20261025023716-3 (holds #4988) resolves; once #4988 merg
 - 2026-10-25T07:53:37Z: batch-20261025054232 probe -3 macOS still running; #4988 waits for the next batch
 - 2026-10-25T08:11:29Z: batch-20261025054232 probe -3 macOS still running; #4988 waits for the next batch
 - 2026-10-25T08:29:24Z: batch-20261025054232 probe -3 green, probe -4 running; #4988 waits for the next batch
+- 2026-10-25T08:47:24Z: batch-20261025054232 resolved; no batch in flight; #4988 clean and ready for the next batch
