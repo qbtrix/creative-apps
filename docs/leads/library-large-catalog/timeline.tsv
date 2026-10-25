@@ -105,3 +105,4 @@
 2026-10-25T01:05Z	poll	probe -6 macOS at 56 min; #5050 open
 2026-10-25T01:26Z	poll	probe -6 green incl #5050; probing -9
 2026-10-25T01:46Z	poll	probe -9 macOS running; #5050 open
+2026-10-25T02:06Z	poll	probe -9 macOS at 48 min; #5050 open
