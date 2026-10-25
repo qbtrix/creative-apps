@@ -322,7 +322,12 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   compiles; a failed build waits for your next push. A `Mac-Check: <run url>`
   line a supervisor adds counts too. Batches then check Linux only.
 - Verify after merge, `LANE_VERIFY_AFTER=1` (a repo variable, off by
-  default): while a `dev-red` issue is open, the lane reverts the culprit
+  default): a code PR lands on its own as soon as its head has the Linux
+  proof above and a green `local-ci/prescreen` status (the supervisor's
+  pre-screen on the Mac), with no batch and no macOS run, also while `dev`
+  is red; without the pre-screen it waits. A proof `dev` moved under (a
+  ratchet or baseline change) is checked again on today's `dev` first.
+  While a `dev-red` issue is open, the lane reverts the culprit
   PR, the one the dev bisect names or the only PR in the issue's range. It
   opens a `lane-revert` PR from `lane/revert-<n>` and lands it on its own
   Linux check, then runs CI on `dev`. Your merged PR's feature-lead issue

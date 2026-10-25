@@ -147,7 +147,27 @@ is never marked, so it can't be dropped this way.
 
 The repo variable LANE_VERIFY_AFTER (fast-lane.yml passes it in; unset,
 empty or 0 is the lane described above) moves the checks from before the
-merge to after it: a red BASE_BRANCH is answered by reverting its culprit.
+merge to after it: a code PR lands on its own proof, and a red BASE_BRANCH
+is answered by reverting its culprit.
+
+Own-proof landing rides the LANE_MAC_PER_PR path with a different macOS
+proof. A code PR (BUILD_RE) needs, besides the Linux proof above, the
+supervisor's pre-screen on its head: the `local-ci/prescreen` commit status
+(PRESCREEN_CONTEXT, posted by the pre-screen loop on the Mac after it merges
+the PR into dev and runs compile and Model tests). decide judges it in
+build_gate's slot (prescreen_gate): success is proof, failure is red, missing
+or pending waits. It is left out of the generic check summary in both modes,
+so at 0 it changes nothing and a head whose only status it is still gets its
+Linux check. There is no per-PR macOS build and no batch for code:
+settle_ready hands each code PR to batch_start alone, whose lone-PR rule
+(shared with LANE_MAC_PER_PR=1) lands it on that proof unless proof_stale
+says dev moved under it; then it is a batch of one, checked on Linux on
+today's dev (batch_apps is empty in this mode), and lands on that. The
+pre-screen screens a head once, so a stale proof re-waits on that Linux
+check, not on a new pre-screen. A red dev holds no code PR here: red_holds
+exists because every batch probe on a red base is red, and an own-proof
+landing runs no probe (the pre-screen already excuses failures dev has on
+its own). PRs without code still batch, held by red_holds as above.
 
 Auto-revert (revert_sweep, after the batches so a revert waits for one in
 flight): while the dev-red issue is open (red_sweep; a Linux or a macOS red),
