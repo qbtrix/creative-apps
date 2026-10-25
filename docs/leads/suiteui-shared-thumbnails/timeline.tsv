@@ -140,3 +140,4 @@ ts	kind	note
 2026-10-25T11:01Z	heartbeat	batch 20261025090316 still bisecting (-6, -9, -red); dev unchanged at 8d3a12c4b; #5133 at 502e566f9 clean, labels fast-lane/feature-done/beta only, no new comments; waits for next batch
 2026-10-25T11:23Z	heartbeat	new batch 20261025111803 formed with only #4886, again without #5133 (third skip); dev now 68bec9fe7; #5133 at 502e566f9 merges clean, prescreen success, no new lane comments; asking supervisor on #3719
 2026-10-25T11:45Z	heartbeat	batch 20261025111803 landed #4886 (dev now 5270bc4bc); no batch in flight; #5133 at 502e566f9 still clean, no new lane comments; no supervisor reply yet on #3719
+2026-10-25T12:08Z	heartbeat	new batch 20261025114830 holds only #4943 (fourth batch without #5133; lane now forms one-PR batches); dev 5270bc4bc; #5133 at 502e566f9 clean, fast-lane check + prescreen success, no new lane comments; no supervisor reply yet
