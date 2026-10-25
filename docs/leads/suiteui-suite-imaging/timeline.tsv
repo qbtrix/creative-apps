@@ -121,3 +121,4 @@ utc	stage	event	ref	note
 2026-10-25T10:28Z	heartbeat	probe -6 macOS gate still running; dev-red #5316 closed; none merged
 2026-10-25T10:50Z	heartbeat	probe -6 green both (holds #4886); probe -9 Linux green; bisect continues
 2026-10-25T11:13Z	heartbeat	probe -9 macOS gate pending; dev 68bec9fe7 not ours; none merged
+2026-10-25T11:35Z	heartbeat	#4886 in batch 111803 alone; Linux check running
