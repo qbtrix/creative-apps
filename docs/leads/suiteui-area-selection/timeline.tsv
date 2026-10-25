@@ -88,3 +88,4 @@ time	task	event	note
 2026-10-24T07:05Z	3	resume	-	run act-1a16cae7989-hj12 resumes on dev 830af22d; records refreshed, contract-first waits applied, PR bodies cleaned
 2026-10-24T07:12Z	3	wave	-	wave 2 started: builder restacks #4877 on dev, then AR-11 and AR-12 (AR-photo-u) stacked on it
 2026-10-24T23:20:00Z	lead	restack	dev rewritten (root 4f00afb8); fixer replaying #4877 #5096 #5103
+2026-10-25T01:20:00Z	3	pr-opened	stacks	replayed onto dev ae3efdb8, gated, fast-lane
