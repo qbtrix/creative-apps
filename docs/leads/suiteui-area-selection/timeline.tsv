@@ -98,3 +98,4 @@ time	task	event	note
 2026-10-25T04:18:00Z	3	heartbeat	lane	batch-20261025023716 bisect: probe -1 macOS still running; nothing merged, no needs-fix; #4877 integrated head c7a1c05d Linux green
 2026-10-25T04:45Z	3	merge	lane	#4877 AR-photo-m merged; #5096 retargeted to dev
 2026-10-25T05:20Z	3	fix	lane	#5096 merged dev to shrink to 398 lines; head 7c7f27654
+2026-10-25T05:40Z	3	heartbeat	lane	no merges or lane flags; wave-2 PRs wait in the lane; no dev-red
