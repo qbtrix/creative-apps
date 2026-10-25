@@ -8,7 +8,7 @@
 # bisected by prefix; a proof gone stale on a ratchet or baseline change is
 # checked again on today's dev), the batch macOS gate (LANE_MAC_PER_PR=0: one macOS gate
 # per code batch scoped to its apps, priority order, slots, the timer, a red
-# base set aside per job on Linux and judged by failing test on macOS, the culprit's stacked PRs named), and the red-dev
+# base set aside per job on Linux and judged by failing test on macOS, the culprit's stacked PRs named), no batch forming on a red dev and a batch on a red base dropped once dev is green, and the red-dev
 # bisect, with its 2-of-3 vote mode for a timing budget test. No network,
 # needs bash, git and jq.
 #
@@ -1254,6 +1254,50 @@ expect "dev red: and says so" "$(grep -c '^pr comment 71 .*dev was red on its ow
 expect "dev red: no needs-fix" "$(grep -c -- '--add-label needs-fix' "$sw/calls")" 0
 expect "dev red: the branches are gone" "$(git -C "$sw/origin.git" for-each-ref 'refs/heads/lane/batch-*' | wc -l | tr -d ' ')" 0
 
+# A red dev (#5234): while an open dev-red issue names a red Linux job, no new
+# batch forms and ready PRs wait; once the issue closes, they batch.
+# redissue <sha or empty> [<failing jobs>]: the open dev-red issue #510 (jobs
+# default linux), its range main..<sha>, with a bisect verdict already posted
+# so red_bisect stays out of the way.
+redissue() {
+  jq -n --arg b "$(printf 'CI on dev is red.\n\n- Failing jobs: %s\n%s' "${2:-linux}" "${1:+- Culprit range: \`main..$1\`}")" \
+    '[{number: 510, body: $b, pull_request: null}]' >"$sw/red.json"
+  printf '%s\n' "$BISECT_MARK ${1:0:7} -->" >"$sw/510.comments"
+}
+redref() { git -C "$sw/origin.git" for-each-ref 'refs/heads/lane/batch-*-red' --format='%(refname:short)' | wc -l | tr -d ' '; }
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for n in 72 73; do pr_at "$n" "h$n" "$DOCS"; real_pr "$n"; done
+redissue ""; lane_sweep
+expect "red dev: no batch forms, nothing merges, nothing runs" "$(batch_tip),$(grep -oE "^pr merge [0-9]+" "$sw/calls" | paste -sd, -),$(grep -c '^workflow run' "$sw/calls")" ",,0"
+rm -f "$sw/red.json"; lane_sweep
+expect "red dev: once dev is green the ready PRs batch" "$(git -C "$sw/origin.git" log --first-parent --format=%s "dev..$(batch_tip)" | grep -oE '#[0-9]+' | paste -sd, -)" "#73,#72"
+
+# A batch in flight on a base that holds dev's red commit is marked
+# (<batch>-red) while dev is red; once dev is green again on a newer commit
+# it is dropped with its probes and marker, and the same sweep forms a fresh
+# batch on today's dev. Its PRs get no label and no comment.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for n in 74 75; do pr_at "$n" "h$n" "$DOCS"; real_pr "$n"; done
+lane_sweep; TIP=$(batch_tip); BASE=$(git -C "$sw/origin.git" rev-parse dev)
+redissue "$BASE"; lane_sweep
+expect "red base: a batch on dev's red commit is marked" "$(redref)" 1
+verdict "$TIP" failure; lane_sweep
+expect "red base: it bisects meanwhile" "$( [[ -n "$(probe_sha 1)" ]] && echo probe)" "probe"
+rm -f "$sw/red.json"; dev_moves docs/fix.md; FIX=$(git -C "$sw/origin.git" rev-parse dev); lane_sweep
+expect "red base: once dev is green the marked batch, its probes and marker are gone" \
+  "$(git -C "$sw/origin.git" for-each-ref 'refs/heads/lane/batch-*' --format='%(refname:short)' | grep -cvE '^lane/batch-[0-9]+$' || true),$(redref)" "0,0"
+expect "red base: a fresh batch forms on the fix" \
+  "$(git -C "$sw/origin.git" rev-parse "$(batch_tip)~2"),$(git -C "$sw/origin.git" log --first-parent --format=%s "dev..$(batch_tip)" | grep -oE '#[0-9]+' | paste -sd, -)" "$FIX,#75,#74"
+expect "red base: its PRs get no label and no comment" "$(grep -cE '^pr (edit|comment) (74|75) ' "$sw/calls")" 0
+
+# A batch whose base predates dev's red commit is never marked or dropped.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for n in 76 77; do pr_at "$n" "h$n" "$DOCS"; real_pr "$n"; done
+lane_sweep; TIP=$(batch_tip)
+dev_moves docs/red.md; redissue "$(git -C "$sw/origin.git" rev-parse dev)"; lane_sweep
+rm -f "$sw/red.json"; lane_sweep
+expect "red base: a batch on a base before the red commit is kept" "$(redref),$(batch_tip)" "0,$TIP"
+
 # Culprit by bisect on a red dev (rung 2c): main at the base, dev three
 # first-parent commits past it (#101 good, #102 bad, #103 good), the dev-red
 # issue #500 naming main..<dev tip> with a Linux red, and red-triage's comment
@@ -1676,6 +1720,24 @@ expect "dev red macOS: an unreadable log lands nothing and names nothing" "$(mer
 devred 116; printf 'macOS (photo)\tscripts/ci\t2026-10-23T04:39:07Z TEST PROCESS DIED\n' >"$sw/joblog.201"; mlog 202 Old.swift/a\(\); mlog 203 Old.swift/a\(\); lane_sweep
 expect "dev red macOS: a crash with no test named is red, never dev's" \
   "$(merges),$(grep -c '^pr edit 117 .*--add-label needs-fix' "$sw/calls"),$(grep -c "own proof" "$sw/calls")" "pr merge 116,1,0"
+# dev red on macOS only (#5183's "Failing jobs: macos"): a batch that would
+# run the macOS gate can't pass on that base, so none forms, and one in flight
+# on the red sha is marked and dropped once dev is green on a fix. A docs batch
+# runs no macOS gate and still forms.
+fresh; cpr 140 Sources/PhotoModel/A.swift; cpr 141 Sources/PhotoModel/B.swift
+redissue "" macos; lane_sweep
+expect "dev red macOS only: no code batch forms, nothing runs" "$(batch_tip),$(merges),$(grep -c '^workflow run' "$sw/calls")" ",,0"
+fresh; pr_at 142 h142 "$DOCS"; real_pr 142; pr_at 143 h143 "$DOCS"; real_pr 143
+redissue "" macos; lane_sweep
+expect "dev red macOS only: a docs batch (no macOS gate) still forms" "$( [[ -n "$(batch_tip)" ]] && echo formed)" "formed"
+fresh; cpr 144 Sources/PhotoModel/A.swift; cpr 145 Sources/PhotoModel/B.swift
+lane_sweep; BASE=$(git -C "$sw/origin.git" rev-parse dev)
+redissue "$BASE" macos; lane_sweep
+expect "dev red macOS only: a code batch on the red sha is marked" "$(redref)" 1
+rm -f "$sw/red.json"; dev_moves docs/fix.md; FIX=$(git -C "$sw/origin.git" rev-parse dev); lane_sweep
+expect "dev red macOS only: green on a fix drops it and forms a fresh batch there, no PR writes" \
+  "$(redref),$(git -C "$sw/origin.git" rev-parse "$(batch_tip)~2"),$(git -C "$sw/origin.git" log --first-parent --format=%s "dev..$(batch_tip)" | grep -oE '#[0-9]+' | paste -sd, -),$(grep -cE '^pr (edit|comment) (144|145) ' "$sw/calls")" \
+  "0,$FIX,#145,#144,0"
 LANE_MAC_PER_PR=1
 
 exit "$fail"
