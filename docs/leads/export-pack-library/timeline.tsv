@@ -94,3 +94,4 @@ time	event	task	note
 2026-10-25T01:59:20Z	heartbeat	all PRs open and clean; lane sweep 40150494762 marks them eligible, waiting on in-flight batch lane/batch-20261024235353 (128 ready)
 2026-10-25T02:20:53Z	heartbeat	no merges; dev c16bcd16; all PRs clean, queued behind in-flight lane batch
 2026-10-25T02:42:53Z	heartbeat	#4962 LX-4 needs-rebase (LibraryWindow.swift vs dev sidecars arg); merged origin/dev keeping JPEGWriter(metadata:) plus sidecars:, gate running
+2026-10-25T03:05:14Z	heartbeat	#4962 LX-4 merge of dev pushed at 3b22eae3 (gate CI: PASS), Head: moved; lane sweep running to drop needs-rebase
