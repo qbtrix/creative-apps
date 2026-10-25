@@ -75,3 +75,7 @@ Next: wait for the lane to batch our open PRs (batch-20261024235353 holds none o
 - beta added to #4888 #4916 #5002 #5011 #4922 #4963 #4964 #5001; all heads unchanged, no conflicts.
 - DK-z and PD-z stay held: open findings are still above 5 (the Fixes in the 8 PRs close them only on merge, e.g. #4925 #4926 #4927 #4928 #4989 #5009 #5010 #4919 #4940 #4941 #4934 #4966). Both slices also stack on two unmerged parents each, so a PR now would break the 400/15 cap (rule 22).
 - Next: wait for the next batch; then slice-done for DK-m, DK-u, PD-m and PD-u on the first design ci.yml run that contains them; then DK-z and PD-z.
+
+### 2026-10-25T04:42:20Z: stage
+
+PD-u #4963 was the culprit of red batch lane/batch-20261025023716 (macOS type-check timeout at DesignPlaceSnapshots.swift:39). Fixed in d709ee35, now 399 lines; restacked #4964 at 312c1dcb and #5001 at c0b36b50; all three pass scripts/ci --changed; Head lines moved; fast-lane restored on #4963. #4922 (PD-m) waits on the next batch. PD-z is held while more than 5 findings are open.
