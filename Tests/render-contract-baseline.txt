@@ -9,6 +9,5 @@ Sources/FlareApp/FlareStage.swift::FlareStage.drawingGroup
 Sources/FlareApp/FlareStage.swift::FlareStageArt.Canvas
 Sources/HaloApp/HaloViewerCanvas.swift::HaloDrawnLayers.Canvas
 Sources/HaloApp/HaloViewerCanvas.swift::HaloDrawnLayers.drawingGroup
-Sources/PhotoModel/PhotoRenderRoute.swift::applied.readback
 Sources/PhotoModel/PhotoRenderRoute.swift::composited.readback
 Sources/PhotoModel/PhotoRenderRoute.swift::residentComposited.gpu-nil
