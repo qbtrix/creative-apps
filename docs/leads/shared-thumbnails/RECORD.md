@@ -4,7 +4,7 @@ Issue: #3719 · Packet: docs/blueprints/suiteui/features/shared-thumbnails.md
 Run: act-1a170e37e52-d0q6 (relaunch 2026-10-25T02:35Z) · Started: 2026-10-23T15:30Z
 Stage: 3 polling (ST-a, ST-u, ST-m done; ST-z part 1 #5102 merged, part 2 #5133 open)
 Base: afef017c2 (origin/main, brief verified); origin/dev 3db45eb45
-Next: #5133 head 502e566f9 (dev merged in, scripts/ci --changed PASS, Head moved); the lane batches it. Then wait for a CI run (scoped suiteui or full) containing #5133, post Belt-Slice-Done ST-z, Mac-Finish-Wanted ST-z and Belt-Contact-Sheet.
+Next: #5133 ready at 502e566f9 (clean, needs-rebase dropped); the lane batches it once batch 20261025023716 resolves. Then wait for a CI run (scoped suiteui or full) containing #5133, post Belt-Slice-Done ST-z, Mac-Finish-Wanted ST-z and Belt-Contact-Sheet. Heartbeat every 20 min.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

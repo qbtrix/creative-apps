@@ -118,3 +118,4 @@ ts	kind	note
 2026-10-25T02:40:00Z	3	pr-update	ST-z	#5133 dev merged in (LibraryWindow.swift conflict resolved), scripts/ci --changed PASS, Head 502e566f9; open findings 0
 2026-10-25T03:03:00Z	3	heartbeat	ST-z	#5133 at 502e566f9 waits for the next batch (batch 20261025023716 in its macOS gate); no lane comment on the new head; open findings 0
 2026-10-25T03:30:00Z	3	heartbeat	ST-z	#5133 clean, needs-rebase dropped, ready; batch 20261025023716 is bisecting (probe -6), #5133 joins the next batch; open findings 0
+2026-10-25T04:01:00Z	3	heartbeat	ST-z	stall nudge answered; #5133 ready at 502e566f9, waiting for the next batch (batch 20261025023716 still bisecting: probes -1, -3, -6); dev 2e7d5264; open findings 0
