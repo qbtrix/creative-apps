@@ -248,7 +248,28 @@ running; debug build, 1024 x 576 in 60 layers (the dev rows are from a
 | CPU, dev | 1556 | 0 | the queued render, 22 regions |
 | CPU, now | 96 (one per region, 96 hits) | 7 | none |
 
-What still runs after the release is the Curves histogram recount (one row at
-a time through every layer, one core for seconds; a masked layer's tile is now
+What ran after the release was the Curves histogram recount (one row at a
+time through every layer, one core for seconds; a masked layer's tile is now
 masked only over the row, not the whole 256 px tile) and the autosave 5 s
 after the last edit.
+
+The histogram now keeps each sampled row's composite in a PhotoCompositeCache
+of the inspector's own (`curvesHistogram(composites:)`): a Levels or Exposure
+step recounts the kept rows with no layer composited, and a layer change lays
+that layer and the ones above it on each row's kept base. Its work counts as
+the reference path's (`rows`, `rowLayers`), apart from the canvas's regions
+and layers. `IdleWorkTests` drives the stress journey's Levels drag and eye
+toggles and the real-perf journey's Hue drag on the same document, debug
+build, both routes, and gates counts: it waits for the canvas's renders to
+drain and the counters to hold still, then checks the gesture's work and that
+3 s more show no region, picture, row or row layer:
+
+| Gesture | Histogram after the release, dev | now (GPU / CPU) |
+|---|---|---|
+| Levels Black, 30 steps | 192 rows x 60 layers, 7 to 17 rows a second for about 20 s on one core | 229 / 296 rows, 0 row layers (gated: no layer) |
+| Hue, 30 steps | no count (outside the key) | 0 rows (gated) |
+| 4 eyes hidden then shown | a count per click, the last 192 rows x 60 layers, about 20 s | 593 / 378 rows, 623 / 249 row layers over all the clicks' counts |
+
+Those tests drop the window's autosave after the gesture: it still flattens
+the picture through the reference path 5 s after the last edit, which would
+read as a recount.
