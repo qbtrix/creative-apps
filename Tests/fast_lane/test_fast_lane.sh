@@ -10,7 +10,8 @@
 # per code batch scoped to its apps, priority order, slots, the timer, a red
 # base set aside per job on Linux and judged by failing test on macOS, the culprit's stacked PRs named), no batch forming on a red dev and a batch on a red base dropped once dev is green, and the red-dev
 # bisect, with its 2-of-3 vote mode for a timing budget test, and the
-# auto-revert of a red dev's culprit and own-proof landing on the pre-screen
+# auto-revert of a red dev's culprit, own-proof landing on the pre-screen and a
+# stale proof's batch of one holding only its own PR
 # (LANE_VERIFY_AFTER=1). No network,
 # needs bash, git and jq.
 #
@@ -1894,6 +1895,51 @@ expect "verify after: and lands on that check" "$(merges)" "pr merge 164"
 fresh; cpr 165 Sources/PhotoModel/A.swift; prescreen "$(head_of 165)" success; redissue "" linux
 LANE_VERIFY_AFTER=1 lane_sweep
 expect "verify after: a red dev holds no code PR that has its own proof" "$(merges),$(batch_tip)" "pr merge 165,"
+# A stale proof's batch of one holds only its own PR (LANE_VERIFY_AFTER=1):
+# ready PRs with fresh proof land beside it, it never gets a second batch, and
+# a result on a base a landing made stale (proof_stale) is checked again on
+# today's dev, not merged. With LANE_VERIFY_AFTER=0 it holds the lane as before.
+held() {  # held <verify after 0|1>: #170 a batch of one on a stale proof, then #171 and #172 ready with fresh proof
+  fresh; cpr 170 Sources/PhotoModel/A.swift; prescreen "$(head_of 170)" success
+  dev_moves Tests/command-path-baseline/halo.txt; DEV=$(git -C "$sw/origin.git" rev-parse dev)
+  LANE_VERIFY_AFTER=$1 lane_sweep; verdict "$(batch_tip)" in_progress
+  cpr 171 Sources/DesignModel/B.swift; cpr 172 Sources/LibraryModel/C.swift
+  prescreen "$(head_of 171)" success; prescreen "$(head_of 172)" success
+  LANE_VERIFY_AFTER=$1 lane_sweep
+}
+held 1
+expect "verify after: a batch of one in flight holds no other ready PR: both land this sweep" \
+  "$(merges),$(git -C "$sw/origin.git" rev-parse "$(batch_tip)~1")" "pr merge 171,pr merge 172,$DEV"
+expect "verify after: the PR in the batch of one gets no second batch" \
+  "$(batch_br | wc -l | tr -d ' '),$(grep -c -- '-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls")" "1,1"
+OLD_TIP=$(batch_tip)
+dev_moves Tests/format-lists-baseline.txt; DEV=$(git -C "$sw/origin.git" rev-parse dev)
+verdict "$OLD_TIP" success; LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: its green result on a base a landing made stale is checked again on today's dev, not merged" \
+  "$(merges),$(git -C "$sw/origin.git" rev-parse "$(batch_tip)~1"),$(grep -c -- '-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls")" \
+  "pr merge 171,pr merge 172,$DEV,2"
+batch_green; LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: and lands on the new check" "$(merges)" "pr merge 171,pr merge 172,pr merge 170"
+held 0
+expect "verify after off: a batch of one in flight still holds every other ready PR" "$(merges),$(batch_br | wc -l | tr -d ' ')" ",1"
+# Several stale proofs re-check in parallel, each its own batch of one, at
+# most LANE_BATCH_MAX at once, and a sweep never sleeps for their verdicts.
+fresh; for n in 173 174 175; do cpr "$n" "Sources/PhotoModel/A$n.swift"; prescreen "$(head_of "$n")" success; done
+dev_moves Tests/command-path-baseline/halo.txt; DEV=$(git -C "$sw/origin.git" rev-parse dev)
+( sleep() { echo "sleep $*" >>"$sw/calls"; }; BATCH_WAIT=60 BATCH_POLL=60 LANE_BATCH_MAX=2 LANE_VERIFY_AFTER=1 lane_sweep )
+expect "verify after: stale proofs become batches of one on today's dev in one sweep, LANE_BATCH_MAX at most, no sleep" \
+  "$(merges),$(batch_br | wc -l | tr -d ' '),$(for t in $(batch_tip); do git -C "$sw/origin.git" rev-parse "$t~1"; done | sort -u),$(grep -c -- '-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls"),$(grep -c '^sleep' "$sw/calls")" \
+  ",2,$DEV,2,0"
+for t in $(batch_tip); do verdict "$t" success; done; LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: each lands on its own check, and the one that waited gets its batch" "$(merges),$(batch_br | wc -l | tr -d ' ')" "pr merge 173,pr merge 174,1"
+# A stale PR that changes a ratchet path itself goes stale under every landing
+# beside it (proof_stale), so its batch of one still holds the lane.
+fresh; pr_at 176 h176 '[{"filename": "Sources/PhotoModel/A.swift", "status": "modified"}]'; real_pr 176 Tests/placeholder-menu-baseline.txt
+prescreen "$(head_of 176)" success; dev_moves docs/other.md
+LANE_VERIFY_AFTER=1 lane_sweep; verdict "$(batch_tip)" in_progress
+cpr 177 Sources/DesignModel/B.swift; prescreen "$(head_of 177)" success
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: a batch of one changing a ratchet path still holds the lane" "$(merges),$(batch_br | wc -l | tr -d ' ')" ",1"
 LANE_MAC_PER_PR=1
 
 exit "$fail"
