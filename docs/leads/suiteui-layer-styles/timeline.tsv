@@ -131,3 +131,4 @@ utc	stage	event	ref	note
 2026-10-25T11:09Z	3	lane	lane	check: none of ours labelled; #5307 (live text to SuiteText target) merged 11:06; dev not red
 2026-10-25T11:31Z	3	lane	lane	check: none of our PRs labelled needs-fix/needs-rebase; no merges of ours since 11:05 (only #5307); dev-red #5316 closed
 2026-10-25T11:53Z	3	lane	lane	check: none of our PRs labelled; only #4886 merged since 11:30 (not ours); no open dev-red
+2026-10-25T12:15Z	3	lane	lane	check: none of our PRs labelled; only #4943 merged since 11:50 (not ours); no open dev-red; 1 open suiteui finding (#2848, needs-human), under the cap
