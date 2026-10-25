@@ -97,3 +97,4 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - 04:52Z heartbeat: all five PRs open and clean, no needs-fix or needs-rebase; dev full CI 40154669999 green at 3db45eb45 (contains none of ours); lane HY bisect probe -1 macOS gate still running; no slice done; 0 findings
 - 05:14Z heartbeat: all five PRs open and clean, now labelled beta (batch priority after p0); no needs-fix or needs-rebase; lane HY bisect probe -2 running; no slice done; 0 findings
 - 05:36Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; HY bisect resolved (probe -2 red), dev at 13fb2f591; next batch should take ours; no slice done; 0 findings
+- 05:58Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; new batch 20261025054232 (12 PRs, none of ours) red on Linux, lane bisecting (probe -6); no slice done; 0 findings
