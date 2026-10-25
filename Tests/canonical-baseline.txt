@@ -108,7 +108,6 @@ Sources/PhotoApp/PhotoWindow+Crop.swift
 Sources/PhotoApp/PhotoWindow+Export.swift
 Sources/PhotoApp/PhotoWindow+History.swift
 Sources/PhotoApp/PhotoWindow+Transform.swift
-Sources/PhotoApp/SelectionOverlay.swift
 Sources/PhotoApp/StraightenSheet.swift
 Sources/PhotoApp/TransformOptions.swift
 Sources/PhotoApp/TransformOverlay.swift
@@ -128,7 +127,6 @@ Sources/PhotoModel/Live/LiveCrop.swift
 Sources/PhotoModel/Live/LiveExportSizing.swift
 Sources/PhotoModel/Live/LiveRecovery.swift
 Sources/PhotoModel/Live/LiveSampling.swift
-Sources/PhotoModel/Live/LiveSelection.swift
 Sources/PhotoModel/Live/LiveTransform.swift
 Sources/PhotoModel/PhotoClipboard.swift
 Sources/PhotoModel/PhotoCropSize.swift
