@@ -66,3 +66,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - lead/cli-bundle rebuilt on main afef017 (record files only).
 - #4999 open, merges clean with dev, Head 941da48 current; not in batch-20261025023716 (bisecting). #5000 held (no-fast-lane, needs-split) until #4999 merges.
 - 2026-10-25T04:07:19Z: #4999 still waits; batch-20261025023716 bisecting.
+- 2026-10-25T04:17:23Z: Belt nudge: mirror lead/suite-cli-bundle resynced. #4999 waits for the next batch (batch-20261025023716 at probe -1).
