@@ -4,7 +4,7 @@ Issue: #3756 · Packet: docs/blueprints/suiteui/features/orientation-crop.md
 Run: act-1a1702c569a-0puo · Session: claude/suiteui-feature-lead-run-azjeoo · Started: 2026-10-24T23:00Z (earlier: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui: tone-controls, shared-codecs, orientation-crop) · Started: 2026-10-23T14:51Z)
 Stage: 3 polling (wave 4 PRs on the lane)
 Base: origin/dev ae3efdb8
-Next: wait for the lane on OC-library-m #5246 and OC-photo-m #5244; meanwhile build OC-library-u stacked on #5246 and OC-photo-u stacked on #5244 (OC-z folds into the last). Done checks read the CI run on dev that contains each.
+Next: lane on #5246 #5244 #5263; OC-library-u builder running (stacked on #5246); OC-z folds into the last OC adopt PR
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -15,7 +15,7 @@ Next: wait for the lane on OC-library-m #5246 and OC-photo-m #5244; meanwhile bu
 | OC-library-m | Library adopts orientation | OC-7, OC-8 | – | OC-m, suite-imaging:IM-z, clipboard-interop:CB-library (not started) (OC-8) | false | 0 | building (#5246) | – | – |
 | OC-library-u | Library crop UI | OC-9, OC-10 | – | OC-u, OC-library-m | true | 0 | blocked | – | – |
 | OC-photo-m | Photo adopts orientation and crop | OC-11, OC-12 | – | OC-m, document-setup:DS-photo (not started) (OC-12) | false | 0 | building (#5244) | – | – |
-| OC-photo-u | Photo crop UI | OC-13, OC-14 | – | OC-u, OC-photo-m, area-selection:AR-photo-u (not started) | true | 0 | blocked | – | – |
+| OC-photo-u | Photo crop UI | OC-13, OC-14 | – | OC-u, OC-photo-m, area-selection:AR-photo-u (not started) | true | 0 | building (#5263) | – | – |
 | OC-z | delete LibraryCrop and PhotoCropSize; status built; feature-done | OC-15, OC-16 | – | OC-library-u, OC-photo-u, clipboard-interop:CB-z | false | 0 | blocked | – | – |
 
 ## Tasks
@@ -56,3 +56,4 @@ Next: wait for the lane on OC-library-m #5246 and OC-photo-m #5244; meanwhile bu
 - lead/<feature> was rebuilt on main ef37711d (its old history shares no base with the rewritten main): records copied onto main and force-pushed with lease.
 - Contract-first waits (rule 12): every cross-feature wait is met, since each named feature's first slice has merged (checked by its owned files on dev).
 - The earlier run held OC-library-m, OC-photo-m, OC-photo-u and OC-z as blocked on IM-z, CB-library, DS-photo, AR-photo-u and CB-z. Under rule 12 those are met (IM-a, CB-a, DS-a and AR-a merged), so they are startable. Cross-line hand-offs LF-m, PT-m and PF-m are treated the same way, with Wire lines.
+- 2026-10-25T02:20Z: OC-photo-u opened as #5263 (OC-13, OC-14) on lead/orientation-crop-OC-photo-m. 13 files, +344/−53. Gate CI: PASS at f532b79d. It adds Image > Flip Canvas Horizontal/Vertical (image.flip) and puts CropAspectPicker in Photo's CropOptions. The lead added the missing `Wire: area-selection:AR-photo-u` line to the body. Unverified until the macOS gate: PhotoApp views, the snapshots, the flipCanvasInOneBody budget row and the PhotoCropJourneyTests journey.
