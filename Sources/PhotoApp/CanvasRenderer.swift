@@ -26,10 +26,10 @@
 import Combine
 import CoreGraphics
 import CoreRender
-import CoreRenderMetal
 import Foundation
 import Observation
 import PhotoModel
+import SuiteImaging
 
 @MainActor @Observable
 final class CanvasRenderer {
@@ -119,8 +119,8 @@ final class CanvasRenderer {
         redrawAll = false
         // The resident GPU path draws into the Metal presenter's texture; a new texture starts empty.
         var target: PhotoDisplayTarget?
-        if route.isGPU, route.residentTiles != nil, let metal = route.preferred as? MetalBackend,
-            let resident = tiles.residentTarget(width: canvas.width, height: canvas.height, on: metal)
+        if route.isGPU, route.residentTiles != nil, let gpu = route.preferred.flatMap(ImagingGPU.backend),
+            let resident = tiles.residentTarget(width: canvas.width, height: canvas.height, on: gpu)
         {
             target = resident.target
             if resident.isNew { since = nil }
