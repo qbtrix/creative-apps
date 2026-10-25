@@ -125,3 +125,4 @@ utc	stage	event	ref	note
 2026-10-25T08:56Z	3	lane	lane	check: none of ours labelled; #5274 (lane: Linux proof behind LANE_VERIFY_AFTER) merged 08:48; dev not red
 2026-10-25T09:18Z	3	lane	lane	check: none of ours labelled; no merges since 08:50; dev not red
 2026-10-25T09:40Z	3	lane	lane	check: none of ours labelled; no merges since 09:10; dev-red #5316 opened 09:37 (macos job, run 40179648854); in range only our docs PR #3935, not a code culprit; not fixing per rules
+2026-10-25T10:02Z	3	lane	lane	check: none of ours labelled; no merges since 09:30; dev-red #5316 still open, no bisect verdict yet

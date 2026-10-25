@@ -4,7 +4,7 @@ Issue: #3937 · Packet: docs/blueprints/suiteui/features/layer-styles.md
 Run: act-1a1705bc1ae-pb09 · Session: claude/feature-lead-suiteui-ebo2et · Resumed: 2026-10-25T00:03Z
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
-Next: lane check ~10:01: dev-red #5316 (macos, range #3935 #4877 #4888 #5274 #5287) holds code batches; our docs-only #3935 can't break macOS; watch for its close, merges, needs-fix/needs-rebase; open stacked PRs (AN-6, LS-3, LS-6, LS-7, LS-11) as parents merge
+Next: lane check ~10:23: dev-red #5316 (macos) still open, holds code batches; watch for its close, merges, needs-fix/needs-rebase; open stacked PRs (AN-6, LS-3, LS-6, LS-7, LS-11) as parents merge
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
