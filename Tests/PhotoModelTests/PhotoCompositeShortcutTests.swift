@@ -81,7 +81,7 @@ import Testing
             let below = try backdrop().cropped(x: 0, y: y, width: size, height: 1)
             let row = try PhotoLayerComposite.composite(
                 LayerContent(layer: layer, pixels: TiledPixels(pixels)), onto: below, origin: (0, y),
-                adjusting: LiveAdjustmentLayers.make(), masking: LiveSelection.masking())
+                adjusting: LiveAdjustmentLayers.make(), masking: LiveEdit.masking())
             #expect(try row == whole.cropped(x: 0, y: y, width: size, height: 1), "row \(y)")
         }
     }
@@ -102,7 +102,7 @@ import Testing
         layer.offsetY = offset.1
         return try PhotoLayerComposite.composite(
             LayerContent(layer: layer, pixels: TiledPixels(pixels)), onto: below, origin: (0, 0),
-            adjusting: LiveAdjustmentLayers.make(), masking: LiveSelection.masking())
+            adjusting: LiveAdjustmentLayers.make(), masking: LiveEdit.masking())
     }
 
     /// The whole layer onto `below` in one CoreRaster composite.
