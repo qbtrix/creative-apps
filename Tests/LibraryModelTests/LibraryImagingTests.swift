@@ -4,9 +4,10 @@
 // AdjustLevels and AdjustCurve and re-encodes byte for byte, so a catalog's
 // keys never change; LiveDevelop renders what ImagingProgram.adjustments
 // renders on the shared CPU backend; Saturation renders instead of waiting
-// on creative-core. Disabled until IM-10 makes DevelopLevels, ToneCurve and
-// DevelopCurvePoint SuiteImaging's types and LiveDevelop runs the shared
-// list. Runs on Linux and macOS.
+// on creative-core. IM-10 made DevelopLevels and DevelopCurvePoint
+// SuiteImaging's types and gave ToneCurve its AdjustCurve conversions, so the
+// catalog cases run; the LiveDevelop cases wait on IM-10b, which runs the
+// shared list. Runs on Linux and macOS.
 import CoreRaster
 import CoreRender
 import Foundation
@@ -14,7 +15,7 @@ import Foundation
 import SuiteImaging
 import Testing
 
-@Suite(.disabled("waits on IM-10")) struct LibraryImagingTests {
+struct LibraryImagingTests {
     /// Develop values as the catalog writes them today (sorted keys): a curve, levels off neutral, and both.
     static let developFixtures = [
         #"{"contrast":0,"curve":{"points":[{"x":0,"y":0},{"x":0.5,"y":0.6},{"x":1,"y":1}]},"exposure":0,"highlights":0,"shadows":0,"temperature":0,"tint":0}"#,
@@ -42,7 +43,7 @@ import Testing
             exposure: s.exposure,
             levels: AdjustLevels(inputBlack: l.value(.inBlack), inputWhite: l.value(.inWhite), gamma: l.value(.gamma),
                                  outputBlack: l.value(.outBlack), outputWhite: l.value(.outWhite)),
-            curve: AdjustCurve(points: s.curve.points.map { AdjustCurvePoint(x: $0.x, y: $0.y) }),
+            curve: s.curve.adjustCurve,
             hueSaturation: AdjustHueSaturation(hue: 0, saturation: s.saturation, lightness: 0))
     }
 
@@ -61,7 +62,37 @@ import Testing
         }
     }
 
-    @Test func liveDevelopRendersWhatTheSharedListRenders() throws {
+    /// Library's levels are SuiteImaging's: the catalog's five keys in 0...1,
+    /// and a row's 0...255 value is written as its 0...1 key.
+    @Test func catalogKeysUnchanged() throws {
+        #expect(DevelopLevels.self == AdjustLevels.self && DevelopCurvePoint.self == AdjustCurvePoint.self)
+        let rows = DevelopLevels.neutral.setting(.inBlack, row: 51).setting(.inWhite, row: 204)
+            .setting(.gamma, row: 1.5).setting(.outBlack, row: 25.5).setting(.outWhite, row: 229.5)
+        let json = String(decoding: try Self.sorted(rows), as: UTF8.self)
+        #expect(json == #"{"gamma":1.5,"inBlack":0.2,"inWhite":0.8,"outBlack":0.1,"outWhite":0.9}"#)
+        for field in DevelopLevels.Field.allCases {
+            #expect(abs(rows.row(field) - rows.value(field) * (field == .gamma ? 1 : 255)) < 1e-9, "\(field)")
+        }
+        #expect(try JSONDecoder().decode(DevelopLevels.self, from: Data(json.utf8)) == rows)
+        #expect(rows.inBlack == 0.2 && rows.inWhite == 0.8 && rows.outBlack == 0.1 && rows.outWhite == 0.9)
+    }
+
+    /// ToneCurve to AdjustCurve and back keeps every catalog curve's points;
+    /// an AdjustCurve's ends are pinned to x = 0 and 1 and its points under
+    /// ToneCurve's 0.01 gap dropped, as ToneCurve's own init does.
+    @Test func curveRoundTrip() throws {
+        for (_, settings) in try Self.catalogDevelops() {
+            let curve = settings.curve, adjust = curve.adjustCurve
+            #expect(adjust.points == curve.points)
+            #expect(ToneCurve(adjust) == curve)
+        }
+        let shared = AdjustCurve(points: [.init(x: 0.1, y: 0.2), .init(x: 0.5, y: 0.6), .init(x: 0.505, y: 0.7), .init(x: 0.9, y: 0.8)])
+        #expect(shared.points.count == 4)
+        #expect(ToneCurve(shared).points == [.init(x: 0, y: 0.2), .init(x: 0.5, y: 0.6), .init(x: 1, y: 0.8)])
+        #expect(ToneCurve(.identity) == .identity)
+    }
+
+    @Test(.disabled("waits on IM-10b")) func liveDevelopRendersWhatTheSharedListRenders() throws {
         let cpu = CPUBackend()
         let image = try developGradient()
         for (_, settings) in try Self.catalogDevelops() {
@@ -80,7 +111,7 @@ import Testing
         }
     }
 
-    @Test func saturationRenders() throws {
+    @Test(.disabled("waits on IM-10b")) func saturationRenders() throws {
         #expect(LiveDevelop.waiting[.saturation] == nil)
         let image = try developGradient()
         let grey = try LiveDevelop().render(image, settings: DevelopSettings.neutral.setting(.saturation, to: -100))

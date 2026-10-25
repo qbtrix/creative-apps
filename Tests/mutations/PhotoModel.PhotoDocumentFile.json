@@ -1,0 +1,3 @@
+[
+  {"label": "flatSaveDropsPaths: Save writes a flat file and loses the paths without asking", "file": "Sources/PhotoModel/PhotoDocumentFile.swift", "find": " || !paths.isEmpty\n", "replace": "\n", "tests": "PhotoPathsTests"}
+]

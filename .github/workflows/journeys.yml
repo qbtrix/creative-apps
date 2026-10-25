@@ -130,6 +130,9 @@ jobs:
       # through each app (UITests/) and exports a whole-window PNG per step,
       # uploaded as `ui-screens`. A failed journey fails this job (not the
       # run), and the log goes to Findings.
+      # On this hosted runner (RUNNER_ENVIRONMENT=github-hosted) it skips the
+      # journeys that post key events, which need Accessibility access the runner
+      # lacks; they run on the local Mac gate (docs/engineering.md).
       # XcodeGen is a pinned release, checked against its sha256 (Homebrew
       # can't pin a version). automationmodetool lets the test runner drive
       # the UI without a password prompt.
