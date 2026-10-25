@@ -129,3 +129,4 @@ utc	stage	event	ref	note
 2026-10-25T12:42Z	heartbeat	needs-rebase dropped on #5153; no merges; dev 58bb6d4d5; no dev-red; 0 findings
 2026-10-25T13:04Z	heartbeat	no merges of ours; dev 930337d52; no dev-red; 0 findings
 2026-10-25T13:27Z	heartbeat	no merges of ours; dev bbaedba66; no dev-red; 0 findings
+2026-10-25T13:49Z	heartbeat	no merges of ours; batch 20261025132815 holds #5006 only; dev bbaedba66; no dev-red; 0 findings

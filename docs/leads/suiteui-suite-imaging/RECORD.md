@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
 Stage: 3 wave 8
 Base: c16bcd16c (origin/dev)
-Next: 13:27Z: no suite-imaging merges. #5148, #5151, #5153, #5295 clean with fast-lane, waiting for a batch (no lane/batch branch live); #5154, #5163, #5297, #5299 dirty (stacked); #5178 no-fast-lane. PR bodies carry no attribution lines. dev bbaedba66 (#4962, not ours), Linux check and scoped library running; main 68bec9fe7; no dev-red open. 0 open suite-imaging findings; no supervisor reply. IM-13 waits on #5151, #5163. Poll ~13:47Z.
+Next: 13:49Z: no suite-imaging merges. #5148, #5151, #5153 clean with fast-lane, #5295 clean (label flapping), waiting for a batch; the live batch lane/batch-20261025132815 holds only #5006 (not ours), Linux check running. #5154, #5163, #5297, #5299 dirty (stacked); #5178 no-fast-lane. dev bbaedba66, scoped library running; main 68bec9fe7; no dev-red open. 0 open suite-imaging findings; no supervisor reply. IM-13 waits on #5151, #5163. Poll ~14:09Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a170cfbf58-pshm, feature issue #3715). This copy is refreshed with it after every stage.
 
