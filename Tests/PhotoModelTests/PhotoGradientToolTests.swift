@@ -174,11 +174,12 @@ import Testing
 
     @Test func selectRectSelectsThePixelsInsideTheImage() throws {
         var workspace = try Self.gray()
-        let rect: JSONValue = .object(["x": .number(-5), "y": .number(0), "width": .number(30), "height": .number(32)])
+        let rect: JSONValue = .object(["minX": .number(-5), "minY": .number(0), "maxX": .number(25), "maxY": .number(32)])
         _ = try PhotoWorkspace.catalog.run("select.rect", params: rect, on: &workspace)
         #expect(workspace.selection == PixelRect(x: 0, y: 0, width: 25, height: 32))
-        let outside: JSONValue = .object(["x": .number(100), "y": .number(0), "width": .number(4), "height": .number(4)])
-        #expect(throws: CatalogError.self) { try PhotoWorkspace.catalog.run("select.rect", params: outside, on: &workspace) }
+        let outside: JSONValue = .object(["minX": .number(100), "minY": .number(0), "maxX": .number(104), "maxY": .number(4)])
+        _ = try PhotoWorkspace.catalog.run("select.rect", params: outside, on: &workspace)
+        #expect(workspace.selection == nil) // a rectangle off the image selects nothing
     }
 
     // MARK: RJ-P19
