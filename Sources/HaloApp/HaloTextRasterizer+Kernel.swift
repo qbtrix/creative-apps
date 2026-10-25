@@ -1,4 +1,4 @@
-// HaloTextRasterizer+Style.swift (text-style TS-10, slice TS-halo): a Halo
+// HaloTextRasterizer+Kernel.swift (text-style TS-10, slice TS-halo): a Halo
 // text layer off the standard face, or of two lines, set by the kernel's
 // layout. The font is the layer's family at its weight and italic ("System"
 // is the system UI font with those traits; a family Core Text can't match
