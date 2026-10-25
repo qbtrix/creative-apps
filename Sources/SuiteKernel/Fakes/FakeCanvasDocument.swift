@@ -122,7 +122,9 @@ public struct FakeCanvasDocument: HeadlessDocument {
     /// Rect 1's fill: blue, white and black, left to right across its box.
     static let fixtureFill = Fill.linear(stops: [GradientStop(offset: 0, color: FillColor(r: 0, g: 0, b: 1)), GradientStop(offset: 0.5, color: .white),
                                                  GradientStop(offset: 1, color: .black)], start: Point(x: 0, y: 30), end: Point(x: 100, y: 30))
-    public static let app = "fake", openExtensions = ["fake"], exportFormats = ["json", "png", "jpeg"]
+    public static let app = "fake", openExtensions = ["fake"]
+    /// `json`, then each raster format FakeRaster has a writer for, by ExportFormats id.
+    public static let exportFormats = ["json"] + FakeRaster.writers.map(\.format)
 
     /// The selected rect, nil when nothing is selected.
     public var selected: FakeRect? { rects.first { $0.id == selection } }
@@ -197,7 +199,7 @@ public struct FakeCanvasDocument: HeadlessDocument {
     /// `options` asks for (`SuiteExportOptions(json:)`), its pixels from ExportRules, which refuses a bad option.
     public func export(_ format: String, options: JSONValue) throws -> [ExportedFile] {
         if format == "json" { return [ExportedFile(suggestedName: "canvas.json", format: "json", data: try save())] }
-        guard Self.exportFormats.contains(format), let spec = ExportFormats.spec(format) else {
+        guard let writer = FakeRaster.writers.first(where: { $0.format == format }), let spec = ExportFormats.spec(format) else {
             throw CatalogError.failed(id: "export", message: "The fake exports \(Self.exportFormats.joined(separator: ", ")), not \(format).")
         }
         let source = exportSource, pixels: (width: Int, height: Int)
@@ -205,8 +207,7 @@ public struct FakeCanvasDocument: HeadlessDocument {
             let asked = try SuiteExportOptions(json: options, defaults: SuiteExportOptions(format: format))
             pixels = try ExportRules.pixels(of: source, asked.size, evenSize: spec.needsEvenSize)
         } catch { throw CatalogError.failed(id: "export", message: String(describing: error)) }
-        let data = format == "png" ? FakeRaster.png(pixels) : FakeRaster.jpeg(pixels)
-        return [ExportedFile(suggestedName: "canvas.\(spec.fileExtension)", format: format, data: data)]
+        return [ExportedFile(suggestedName: "canvas.\(spec.fileExtension)", format: format, data: writer.encode(pixels))]
     }
     /// The artwork at 1x: the rects' frames together, whole pixels rounded up; 0 × 0 with no rects.
     var exportSource: (width: Int, height: Int) {
@@ -456,6 +457,16 @@ extension FakeCanvasDocument: PlacedImageTarget {
 /// The fake's raster files: a flat mid-grey frame of the asked size, written as the specs give it, so a reader
 /// decodes exactly that size. The fake paints no rects into it; only its size is the export's.
 enum FakeRaster {
+    /// One raster format the fake writes: its ExportFormats id and its encoder.
+    struct Writer: Sendable {
+        let format: String
+        let encode: @Sendable ((width: Int, height: Int)) -> Data
+    }
+    /// Each writer sits by itself, so the fake's formats are its encoders, not a list of its own (shared-codecs rule 20).
+    static let pngWriter = Writer(format: "png", encode: png)
+    static let jpegWriter = Writer(format: "jpeg", encode: jpeg)
+    /// The fake's raster writers, PNG first.
+    static let writers = [pngWriter, jpegWriter]
     /// A baseline greyscale JPEG (ITU T.81): every 8 × 8 block is grey 128, so each codes as DC difference 0 and EOB,
     /// one 1-bit code each from Huffman tables of one code; the scan's spare bits are 1s.
     static func jpeg(_ size: (width: Int, height: Int)) -> Data {
