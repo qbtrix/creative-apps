@@ -194,3 +194,4 @@ utc	stage	event	ref	note
 2026-10-25T12:07:06Z	3	heartbeat	-	#4999 lane decision pending: waiting for supervisor's local-ci/prescreen status on head 941da487; supervisor: please pre-screen #4999
 2026-10-25T12:25:07Z	3	heartbeat	-	#4999 still waiting for local-ci/prescreen on 941da487 (supervisor)
 2026-10-25T12:43:10Z	3	heartbeat	-	#4999 still waiting for local-ci/prescreen on 941da487 (supervisor)
+2026-10-25T13:01:08Z	3	heartbeat	-	#4999 still waiting for local-ci/prescreen on 941da487 (supervisor)
