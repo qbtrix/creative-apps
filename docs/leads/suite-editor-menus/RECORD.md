@@ -157,3 +157,4 @@ Next: lane: probe batch-20261025023716-3 (holds #4988) resolves; once #4988 merg
 - 2026-10-25T14:48:50Z: lane batch now #5008 (batch-20261025143843); #4988 queued behind p0
 - 2026-10-25T15:06:43Z: #4988 eligible, queued; no batch in flight
 - 2026-10-25T15:24:39Z: lane batch now #5039 (batch-20261025150758); #4988 queued behind p0
+- 2026-10-25T15:42:41Z: QUEUE: 50+ open p0 fast-lane PRs sort ahead of beta #4988; lane lands ~1 code PR per 20 min (serial, LANE_VERIFY_AFTER), so EM-flare-halo is many hours out. Supervisor: raise #4988 to p0 if this slice should land sooner
