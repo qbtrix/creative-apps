@@ -202,3 +202,4 @@ utc	stage	event	ref	note
 2026-10-25T14:30:56Z	3	heartbeat	-	#4999 eligible, queued; no batch in flight
 2026-10-25T14:48:50Z	3	heartbeat	-	#4999 eligible, queued behind p0
 2026-10-25T15:06:43Z	3	heartbeat	-	#4999 eligible, queued; no batch in flight
+2026-10-25T15:24:39Z	3	heartbeat	-	#4999 eligible, queued behind p0
