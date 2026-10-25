@@ -174,3 +174,4 @@ utc	stage	event	ref	note
 2026-10-25T05:48:01Z	3	heartbeat	-	lane batch-20261025054232 (12 older PRs) running without #4988; waits for the next batch
 2026-10-25T06:06:02Z	3	heartbeat	-	batch-20261025054232 (not ours) red, bisecting at probe -6; #4988 waits for the next batch
 2026-10-25T06:23:57Z	3	heartbeat	-	batch-20261025054232 (not ours) still at probe -6; #4988 waits for the next batch
+2026-10-25T06:41:52Z	3	heartbeat	-	batch-20261025054232 probe -6 macOS gate still running (Linux green); #4988 waits for the next batch
