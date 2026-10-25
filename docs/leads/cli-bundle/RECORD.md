@@ -98,3 +98,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 2026-10-25T13:01:08Z: #4999 still waiting for local-ci/prescreen on 941da487 (supervisor)
 - 2026-10-25T13:19:02Z: #4999 local-ci/prescreen now success on 941da487; eligible, waiting for the lane
 - 2026-10-25T13:37:13Z: #4999 prescreen green, eligible; waiting for the lane
+- 2026-10-25T13:55:08Z: #4999 eligible, queued behind p0 PRs; no batch in flight
