@@ -158,3 +158,4 @@ utc	stage	event	ref	note
 2026-10-25T06:00Z	3	lane	lane	check: no merges; no dev-red; all ten PRs fast-lane with no fix labels (#4904 needs-rebase dropped)
 2026-10-25T06:22Z	3	lane	lane	check: no merges since 05:30; no dev-red open; none of our ten PRs labelled needs-fix/needs-rebase; awaiting batches
 2026-10-25T06:44Z	3	lane	lane	check: no repo merges since 05:27 (lane quiet); no dev-red open; none of our ten PRs labelled needs-fix/needs-rebase; awaiting batches
+2026-10-25T07:06Z	3	lane	lane	check: no repo merges since 05:27 but lane sweeps are running (run 40170764273 in progress); no dev-red; none of ours labelled; awaiting batches
