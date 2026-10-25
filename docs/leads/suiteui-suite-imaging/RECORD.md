@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
 Stage: 3 wave 8
 Base: c16bcd16c (origin/dev)
-Next: 06:34Z: IM-12 opened as #5299 (stacked on #5297; HueSaturation deleted, GammaTrack/PhotoLevelsFormat kept as UI formatting). IM-13 waits on #5151, #5163 merging (stacks two chains + Package.swift). Poll ~06:48Z for merges and a dev Linux run.
+Next: 06:50Z: third identical poll (dev 13fb2f591, none merged; lane runs cancelled x3). Asked the supervisor on #3715 (issuecomment-6394562867, rule 23). IM-13 still waits on #5151, #5163. Poll ~07:10Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a170cfbf58-pshm, feature issue #3715). This copy is refreshed with it after every stage.
 
