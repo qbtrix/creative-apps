@@ -5,7 +5,7 @@
 // to the views, publishes the menu bar's LibraryMenu as a focused value, and
 // publishes the `library.controls` JSON (LibraryControls.swift).
 // The catalog starts from the launch arguments: a fixture's fakes and photos,
-// or the live services over the Platform adapters.
+// or the live services over the Platform adapters (XMPSidecarWriter among them).
 //
 // The sidebar has two sections: Library (All Photos, Picks, Recently
 // Added) and Collections (yours, with New Collection as its add button and a
@@ -48,7 +48,8 @@ struct LibraryWindow: View {
     init(arguments: [String] = ProcessInfo.processInfo.arguments) {
         let launch = LibraryLaunch(arguments: arguments)
         // The live grid keeps its thumbnails in <support>/Library/Thumbnails (ST-7); fixtures stay on fakes.
-        let services = launch.services(decoder: ImageIODecoder(), writer: JPEGWriter(), store: CatalogStore())
+        let services = launch.services(
+            decoder: ImageIODecoder(), writer: JPEGWriter(), store: CatalogStore(), sidecars: XMPSidecarWriter())
             .withThumbnailDisk(folder: LibraryServices.thumbnailFolder(arguments: arguments, home: NSHomeDirectory()))
         _model = State(initialValue: LibraryCatalog(launch: launch, services: services))
     }
@@ -116,10 +117,16 @@ struct LibraryWindow: View {
             persistAreaLaunch()
             filtersAreaLaunch()
         }
-        .onChange(of: model.saveRevision) { _, _ in persistAreaChanged() }
+        .onChange(of: model.saveRevision) { _, _ in
+            persistAreaChanged()
+            cullAreaChanged()
+        }
         .onChange(of: model.focusedItemID) { _, _ in loupeAreaFocusChanged() }
         .onChange(of: model.mode) { _, _ in loupeAreaFocusChanged() }
-        .onChange(of: model.catalogState) { _, _ in importAreaCatalogReady() }
+        .onChange(of: model.catalogState) { _, _ in
+            importAreaCatalogReady()
+            cullAreaCatalogReady()
+        }
         .onChange(of: model.collectionsRevision) { _, _ in filtersAreaChanged(areas.filters) }
         // The live command channel (editor-menus EM-7) reads this window's catalog and lands a result in it.
         .onAppear {
