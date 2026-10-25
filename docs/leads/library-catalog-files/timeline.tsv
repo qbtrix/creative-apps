@@ -92,3 +92,4 @@ utc	stage	event	ref	note
 2026-10-24T23:45:57Z	4	poll	#4923 #4924 #4937 #4938 #4949	lane checks all ok (size, paths, mergeable, marker); queued behind 122 ready PRs
 2026-10-25T00:06:17Z	4	poll	#4923 #4924 #4937 #4938 #4949	lane checks all ok (size, paths, mergeable, marker); queued behind 122 ready PRs
 2026-10-25T00:16:02Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
+2026-10-25T00:36:21Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected

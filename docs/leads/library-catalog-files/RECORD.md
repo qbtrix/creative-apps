@@ -133,3 +133,4 @@ Next: (2026-10-23T17:39:52Z) #4879 LC-a, #4924 LC-u, #4937 LC-5, #4938 LC-6 wait
 - 2026-10-24T23:45:57Z: poll: #4923 #4924 #4937 #4938 #4949 lane checks all ok (size, paths, mergeable, marker); queued behind 122 ready PRs
 - 2026-10-25T00:06:17Z: poll: #4923 #4924 #4937 #4938 #4949 lane checks all ok (size, paths, mergeable, marker); queued behind 122 ready PRs
 - 2026-10-25T00:16:02Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
+- 2026-10-25T00:36:21Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
