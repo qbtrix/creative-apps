@@ -1256,10 +1256,11 @@ expect "dev red: the branches are gone" "$(git -C "$sw/origin.git" for-each-ref 
 
 # A red dev (#5234): while an open dev-red issue names a red Linux job, no new
 # batch forms and ready PRs wait; once the issue closes, they batch.
-# redissue <sha or empty>: the open dev-red issue #510, its range main..<sha>,
-# with a bisect verdict already posted so red_bisect stays out of the way.
+# redissue <sha or empty> [<failing jobs>]: the open dev-red issue #510 (jobs
+# default linux), its range main..<sha>, with a bisect verdict already posted
+# so red_bisect stays out of the way.
 redissue() {
-  jq -n --arg b "$(printf 'CI on dev is red.\n\n- Failing jobs: linux\n%s' "${1:+- Culprit range: \`main..$1\`}")" \
+  jq -n --arg b "$(printf 'CI on dev is red.\n\n- Failing jobs: %s\n%s' "${2:-linux}" "${1:+- Culprit range: \`main..$1\`}")" \
     '[{number: 510, body: $b, pull_request: null}]' >"$sw/red.json"
   printf '%s\n' "$BISECT_MARK ${1:0:7} -->" >"$sw/510.comments"
 }
@@ -1719,6 +1720,24 @@ expect "dev red macOS: an unreadable log lands nothing and names nothing" "$(mer
 devred 116; printf 'macOS (photo)\tscripts/ci\t2026-10-23T04:39:07Z TEST PROCESS DIED\n' >"$sw/joblog.201"; mlog 202 Old.swift/a\(\); mlog 203 Old.swift/a\(\); lane_sweep
 expect "dev red macOS: a crash with no test named is red, never dev's" \
   "$(merges),$(grep -c '^pr edit 117 .*--add-label needs-fix' "$sw/calls"),$(grep -c "own proof" "$sw/calls")" "pr merge 116,1,0"
+# dev red on macOS only (#5183's "Failing jobs: macos"): a batch that would
+# run the macOS gate can't pass on that base, so none forms, and one in flight
+# on the red sha is marked and dropped once dev is green on a fix. A docs batch
+# runs no macOS gate and still forms.
+fresh; cpr 140 Sources/PhotoModel/A.swift; cpr 141 Sources/PhotoModel/B.swift
+redissue "" macos; lane_sweep
+expect "dev red macOS only: no code batch forms, nothing runs" "$(batch_tip),$(merges),$(grep -c '^workflow run' "$sw/calls")" ",,0"
+fresh; pr_at 142 h142 "$DOCS"; real_pr 142; pr_at 143 h143 "$DOCS"; real_pr 143
+redissue "" macos; lane_sweep
+expect "dev red macOS only: a docs batch (no macOS gate) still forms" "$( [[ -n "$(batch_tip)" ]] && echo formed)" "formed"
+fresh; cpr 144 Sources/PhotoModel/A.swift; cpr 145 Sources/PhotoModel/B.swift
+lane_sweep; BASE=$(git -C "$sw/origin.git" rev-parse dev)
+redissue "$BASE" macos; lane_sweep
+expect "dev red macOS only: a code batch on the red sha is marked" "$(redref)" 1
+rm -f "$sw/red.json"; dev_moves docs/fix.md; FIX=$(git -C "$sw/origin.git" rev-parse dev); lane_sweep
+expect "dev red macOS only: green on a fix drops it and forms a fresh batch there, no PR writes" \
+  "$(redref),$(git -C "$sw/origin.git" rev-parse "$(batch_tip)~2"),$(git -C "$sw/origin.git" log --first-parent --format=%s "dev..$(batch_tip)" | grep -oE '#[0-9]+' | paste -sd, -),$(grep -cE '^pr (edit|comment) (144|145) ' "$sw/calls")" \
+  "0,$FIX,#145,#144,0"
 LANE_MAC_PER_PR=1
 
 exit "$fail"
