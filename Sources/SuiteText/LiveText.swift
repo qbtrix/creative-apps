@@ -1,4 +1,5 @@
-// LiveText.swift: shell-text's live TextServices (ST-8). Joins the three
+// LiveText.swift: shell-text's live TextServices (ST-8), in SuiteText so the
+// apps (through SuiteShell) and headless tools share it. Joins the three
 // Core Text parts: CoreTextMeasurer measures, FontCatalog lists and
 // GlyphRasterizer draws. Each part validates its spans through TextRules, so
 // this only forwards. Layout stays in creative-core: callers place graphemes
