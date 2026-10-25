@@ -8,7 +8,7 @@ import Foundation
 import SuiteKernel
 import Testing
 
-@Suite(.disabled("waits on OC-12"))
+@Suite
 struct PhotoOrientationTests {
     static let size = (w: 48, h: 32), patch = PixelRect(x: 6, y: 4, width: 16, height: 10)
 

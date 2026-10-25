@@ -63,7 +63,8 @@ struct AllAppsCatalogTests {
         "The kernel's shape.draw names its step for the kind drawn (\"Draw Star\")": ["shape.draw: stepNamedTitle"],
         "Halo's drag end with no drag is a no-op edit that stays enabled": [
             "viewer.drag-end: stepNamedTitle", "viewer.drag-end: editRecordsOneStep", "viewer.drag-end: undoRestoresBytes"],
-        "The kernel's transform.flip is titled Flip while its step names the axis": ["transform.flip: stepNamedTitle"],
+        "The kernel's transform.flip and image.flip are titled Flip while their steps name the axis": [
+            "transform.flip: stepNamedTitle", "image.flip: stepNamedTitle"],
     ]
 
     /// `D`'s law problems on the real job input `path`, as "<id>: <law>", less an example that can't run because its
