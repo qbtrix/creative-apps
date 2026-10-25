@@ -69,3 +69,9 @@ Next: wait for the lane to batch our open PRs (batch-20261024235353 holds none o
 - #5001 is at 3ecf2a5e: 7 files, 113 lines, stacked on #4964. It fixes #4992, #4993 and #4994. CI: PASS. Mutations: DesignPlace+Canvas 14/14, DesignPlace+Inspector 11/11.
 - The PR body and the builder's three issue comments had the attribution footer. I rewrote them via MCP without it.
 - PD-u has used both of its fix rounds. Its leftovers are gaps #4996-#4998, and its SuiteUI parts are in #4985.
+
+## 2026-10-25T01:23:28Z supervisor answer, beta labels
+- Supervisor (#3441, 01:07Z): no runner problem. Each macOS bisect step of batch-20261024235353 takes 60-90 min; the likely culprit is #5174. Our 8 PRs need nothing; keep them clean and labelled beta.
+- beta added to #4888 #4916 #5002 #5011 #4922 #4963 #4964 #5001; all heads unchanged, no conflicts.
+- DK-z and PD-z stay held: open findings are still above 5 (the Fixes in the 8 PRs close them only on merge, e.g. #4925 #4926 #4927 #4928 #4989 #5009 #5010 #4919 #4940 #4941 #4934 #4966). Both slices also stack on two unmerged parents each, so a PR now would break the 400/15 cap (rule 22).
+- Next: wait for the next batch; then slice-done for DK-m, DK-u, PD-m and PD-u on the first design ci.yml run that contains them; then DK-z and PD-z.
