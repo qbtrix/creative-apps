@@ -125,3 +125,4 @@ Next: Lane: #4871 TS-a and #5047 TS-7 in the lane. After #4871 merges, merge dev
 - 2026-10-25T01:02:49Z (act-1a16fe1fad3-lsp3): poll: dev still afef017c, no slice merges; no needs-fix/needs-rebase on our PRs; lane batch 20261024235353 bisecting (probe -6 Linux green 40145607006, macOS gate 40145609051 running); findings 0
 - 2026-10-25T01:26:17Z (act-1a16fe1fad3-lsp3): poll: dev ae3efdb8 (#4874 landed from bisect), no slice merges; no needs-fix/needs-rebase on our PRs; findings 0
 - 2026-10-25T01:57:52Z (act-1a16fe1fad3-lsp3): fix: #5226 (TS-9) needs-rebase after #5156 (HY-1 style commands); merged dev, resolved catalog order (styles then texts then window), regenerated halo.list-commands golden; scripts/ci --changed PASS, AllAppsCatalogTests pass; pushed 4b6a6ead, Head moved
+- 2026-10-25T02:21:36Z (act-1a16fe1fad3-lsp3): poll: dev 03981d08 (#5192 #5207 #5208 landed), no slice merges; no needs-fix/needs-rebase on our PRs (#5226 label cleared); findings 0
