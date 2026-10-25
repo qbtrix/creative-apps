@@ -45,7 +45,7 @@ extension HaloProject: HeadlessDocument {
         let texts = ["text.read", "text.set-font", "text.set-italic", "text.set-alignment", "text.set-line-height", "text.set-tracking"]
         let files = FileFlowCommands.specs(HaloProject.self).map(\.id)  // HF-3: the suite's file flow, its file.open-recent too
         let filters = ["adjust.black-and-white", "adjust.invert"] + ImagingFilter.ids.map { "filter.\($0)" }
-            + ["filter.set-hidden", "filter.remove"]  // AJ-12: the layer's kinds, filters and list
+            + ["filter.set-hidden", "filter.remove", "filter.move"]  // AJ-12/13: the layer's kinds, filters and list
         let clip = ["edit.copy-frame", "edit.paste"]  // CB-10: Copy Frame and Paste
         let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
         let all = ids.filter { $0 != "file.open-recent" } + shapes + fills + strokes + history + transforms + rates + places + styles
@@ -146,7 +146,7 @@ extension HaloProject: HeadlessDocument {
             "adjust.black-and-white: stepNamedTitle", "adjust.black-and-white: editRecordsOneStep",
             "adjust.black-and-white: undoRestoresBytes"],
         "the list examples need a filter; Ball has none (HaloFiltersTests run them, AJ-12)": [
-            "filter.remove filter.set-hidden: exampleRuns"],
+            "filter.move filter.remove filter.set-hidden: exampleRuns"],
     ]
 
     @Test func conformance() {
