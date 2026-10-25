@@ -98,3 +98,4 @@ utc	stage	event	ref	note
 2026-10-25T00:03Z	poll	check	all	new batch 20261024235353 has none of ours; nothing merged
 2026-10-25T00:23Z	poll	check	all	other batch bisecting; nothing merged
 2026-10-25T00:45Z	poll	check	all	other batch still bisecting; nothing merged
+2026-10-25T01:06Z	poll	check	all	dev moved (#4874); nothing of ours merged
