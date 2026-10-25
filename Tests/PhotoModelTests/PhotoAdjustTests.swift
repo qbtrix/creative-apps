@@ -17,7 +17,7 @@ import Testing
 @testable import PhotoModel
 
 @Suite struct PhotoAdjustTests {
-    /// The suite's adjust commands on Photo (PhotoWorkspace.catalog lists them once AJ-photo's catalog PR lands).
+    /// The suite's adjust commands on Photo; PhotoWorkspace.catalog lists them too.
     static let catalog = (try? CommandCatalog<PhotoWorkspace>(app: "photo", AdjustCommands.specs(PhotoWorkspace.self),
                                                               history: { $0.history.kernel })) ?? .empty(app: "photo")
 
@@ -143,6 +143,24 @@ import Testing
         #expect(other.adjustments.kinds == look.kinds && other.adjustments.tone == look.tone)
         other.undo()
         #expect(other.adjustments == AdjustmentSettings())
+    }
+
+    @Test func newAdjustmentLayerOffersBlackAndWhiteAndInvert() throws {
+        var ws = try Self.checker()
+        ws.services.adjustmentLayers = LiveAdjustmentLayering()  // the fake brightens whatever the settings
+        let plain = try ws.composite()
+        ws.addAdjustmentLayer(.invert)
+        #expect(ws.selectedLayer?.name == "Invert 1" && ws.selectedLayer?.kind.label == "Invert adjustment layer")
+        #expect(ws.kinds == [.invert])
+        let p = try plain.pixel(x: 0, y: 0), q = try ws.composite().pixel(x: 0, y: 0)
+        #expect(abs(q.r - (1 - p.r)) < 0.01)
+        ws.addAdjustmentLayer(.blackAndWhite)
+        #expect(ws.selectedLayer?.name == "Black & White 1" && ws.kinds == [.blackAndWhite(.neutral)])
+    }
+
+    @Test func theCatalogListsTheAdjustCommands() {
+        let ids = Set(PhotoWorkspace.commands.map(\.id))
+        for id in AdjustCommands.specs(PhotoWorkspace.self).map(\.id) { #expect(ids.contains(id), "\(id) is missing") }
     }
 
     @Test func kindsRoundTripAndAFileWithoutThemSavesAsBefore() throws {

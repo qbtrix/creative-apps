@@ -29,7 +29,7 @@ import Testing
         #expect(menus[2].visibilityTitle == "Hide Layer" && menus[2].canDeleteLayer)
         #expect(menus[2].undoTitle == "Undo New Layer" && !menus[0].hasImage)
         for menu in menus {
-            #expect(menu.adjustmentLayerKinds == [.exposure, .levels, .curves, .hueSaturation])
+            #expect(menu.adjustmentLayerKinds == [.exposure, .levels, .curves, .hueSaturation, .blackAndWhite, .invert])
         }
         #expect(menus[0].addAdjustmentLayerHelp == "Open an image first.")
         #expect(menus[1].addAdjustmentLayerHelp == nil && menus[2].addAdjustmentLayerHelp == nil)
