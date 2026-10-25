@@ -14,10 +14,11 @@
 // region's kept base, a Levels recount lays no layer, a Hue drag recounts nothing, and once a gesture's work has
 // finished nothing renders or recounts again. A Free Transform step on a layer mid-stack, rendered straight
 // through the renderer (no window) on the CPU and Metal routes, lays that layer and the ones above it on each
-// region's kept base and makes no base. The CPU percent is printed, never gated (load moves it). The slider and
-// eye tests drop the window's autosave after the gesture: on this branch it still flattens the picture through
-// the reference path, which would read as a recount. Nested in BodyCountSuites, as every suite that reads a
-// process-wide counter is. macOS only.
+// region's kept base and makes no base, counted on a task-local tally so the suites running alongside never
+// count into it. The CPU percent is printed, never gated (load moves it). The slider and eye tests drop the
+// window's autosave after the gesture: on this branch it still flattens the picture through the reference path,
+// which would read as a recount. Nested in BodyCountSuites, as every suite that reads a process-wide counter
+// is. macOS only.
 #if canImport(AppKit)
 import AppKit
 import CoreRaster
@@ -355,10 +356,21 @@ extension BodyCountSuites {
                 let box = try #require(model.transformSelection)
                 try model.setTransform(TransformRules.rotated(box, by: 3), name: "Rotate", drag: nil)
             }
+            // This test's renders only (a task-local tally): suites running alongside draw too, and the
+            // process-wide counters would count their work as this step's.
+            func counted(_ render: () async throws -> PhotoTileUpdate) async throws -> [String: Int] {
+                #if DEBUG
+                let tally = PhotoRenderCount.Tally()
+                shown = try await PhotoRenderCount.$tally.withValue(tally) { try await render() }
+                return tally.snapshot
+                #else
+                shown = try await render()
+                return [:]
+                #endif
+            }
             try turn()
-            var before = Self.photoCounts()
-            shown = try await PhotoRenderer.update(model, since: shown.revision, route: route)
-            print("\(label): first step" + IdleWork.describe(IdleWork.delta(Self.photoCounts(), since: before)))
+            let first = try await counted { try await PhotoRenderer.update(model, since: shown.revision, route: route) }
+            print("\(label): first step" + IdleWork.describe(first))
 
             for step in 1...4 {
                 if step.isMultiple(of: 2) {
@@ -367,12 +379,10 @@ extension BodyCountSuites {
                 } else {
                     try turn()
                 }
-                before = Self.photoCounts()
-                shown = try await PhotoRenderer.update(model, since: shown.revision, route: route)
-                let step = IdleWork.delta(Self.photoCounts(), since: before)
+                let step = try await counted { try await PhotoRenderer.update(model, since: shown.revision, route: route) }
                 print("\(label): step" + IdleWork.describe(step))
                 #if DEBUG
-                #expect(step["bases"] == 0, Comment(rawValue: "\(label): a step made a base again" + IdleWork.describe(step)))
+                #expect(step["bases", default: 0] == 0, Comment(rawValue: "\(label): a step made a base again" + IdleWork.describe(step)))
                 #expect(step["hits"] == regions, Comment(rawValue: "\(label): a region missed its base" + IdleWork.describe(step)))
                 #expect(step["layers"] == regions * (above + 1),
                         Comment(rawValue: "\(label): a step laid other than the layer and the \(above) above it per region"
