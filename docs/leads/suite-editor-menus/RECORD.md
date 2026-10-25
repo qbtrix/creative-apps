@@ -112,3 +112,4 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-25T02:38:46Z: #4988 in lane/batch-20261025023716 (12 PRs, 10th); Linux + macOS gates running
 - 2026-10-25T02:57:17Z: batch-20261025023716 (with #4988): Linux check green, macOS gate 40155151356 queued
 - 2026-10-25T03:16:07Z: batch-20261025023716 macOS gate red: type-check timeout in Tests/AppSnapshotTests/DesignPlaceSnapshots.swift:39 (Design-line commits, not #4988's files); lane bisecting (probe -6)
+- 2026-10-25T03:34:38Z: batch-20261025023716 bisect at probe -6 (macOS); #4988 waits
