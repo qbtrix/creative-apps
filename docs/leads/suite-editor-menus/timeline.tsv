@@ -151,3 +151,4 @@ utc	stage	event	ref	note
 2026-10-25T00:10:29Z	check	EM-flare-halo	batch-20261024235353 (12 PRs, beta/p0) bisecting at probe -6 without #4988; added beta (the feature's label, #3774) to #4988 and #5164 so they queue in the beta tier
 2026-10-25T00:29:01Z	check	EM-flare-halo	batch-20261024235353 still at probe -6; #4988 (beta) queued for the next batch
 2026-10-25T00:47:31Z	check	EM-flare-halo	batch-20261024235353 probe -6 still running (macOS gate); #4988 (beta) queued
+2026-10-25T01:06:07Z	check	EM-flare-halo	batch-20261024235353-6 macOS gate (run 40145609051) in progress since 00:09Z; #4988 (beta) queued
