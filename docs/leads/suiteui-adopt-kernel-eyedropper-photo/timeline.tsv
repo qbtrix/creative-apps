@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-25T01:09Z	check	EP-z	EP-z: #4943 open, clean, head 69dedd1, no needs-fix, eligible; no batch yet
 2026-10-25T01:29Z	check	EP-z	EP-z: #4943 open, clean, head 69dedd1, no needs-fix, eligible; no batch yet
 2026-10-25T01:49Z	check	EP-z	#4943 open, clean, fast-lane; head 69dedd1e unchanged; waiting for a lane batch
+2026-10-25T02:09Z	check	EP-z	#4943 open, clean, fast-lane; head 69dedd1e unchanged; waiting for a lane batch
