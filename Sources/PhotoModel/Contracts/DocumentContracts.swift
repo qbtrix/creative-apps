@@ -75,6 +75,9 @@ public protocol DocumentArchiving: PhotoUseCase {
     var formatVersion: Int { get }
     /// The package for `snapshot`, every image through `codec` as PNG.
     func encode(_ snapshot: PhotoDocumentSnapshot, codec: any PhotoImageCodec) throws -> PhotoPackage
+    /// `encode(_:codec:)`, without `mergedimage.png` and the thumbnail when `merged` is false: the recovery
+    /// autosave's package, which only Photo reads and which must not flatten the picture 5 s after every edit.
+    func encode(_ snapshot: PhotoDocumentSnapshot, codec: any PhotoImageCodec, merged: Bool) throws -> PhotoPackage
     /// The snapshot in `package`. Throws `ArchiveError` and nothing else.
     func decode(_ package: PhotoPackage, codec: any PhotoImageCodec) throws -> PhotoDocumentSnapshot
     /// The file's bytes: a zip whose first entry is `mimetype`, every entry
@@ -84,6 +87,13 @@ public protocol DocumentArchiving: PhotoUseCase {
     /// (`.notADocument` for a non-zip or another mimetype, `.damaged` for a
     /// compressed entry, which v2 doesn't read).
     func package(fromContainer data: Data) throws -> PhotoPackage
+}
+
+extension DocumentArchiving {
+    /// An archive that writes no merged picture encodes the same package either way.
+    public func encode(_ snapshot: PhotoDocumentSnapshot, codec: any PhotoImageCodec, merged: Bool) throws -> PhotoPackage {
+        try encode(snapshot, codec: codec)
+    }
 }
 
 /// One autosaved document.

@@ -5,7 +5,9 @@
 // the composite as `mergedimage.png` and at most 256 px long (a box filter
 // in linear light) as `Thumbnails/thumbnail.png`, `stack.xml` for other
 // OpenRaster readers, and `photo/document.json` with what OpenRaster has no
-// word for (paths among them, omitted when there are none). A text layer's PNG is its rasterized words, and its stack.xml
+// word for (paths among them, omitted when there are none); a recovery write
+// (`merged: false`) leaves out the merged image and the thumbnail, which only
+// other readers use and which cost a whole-image composite. A text layer's PNG is its rasterized words, and its stack.xml
 // entry carries their `afterglow:text` (PhotoTextLayer+ORA). Decode reads
 // the JSON, the images it names and, from stack.xml, only those text
 // attributes (the rest is never parsed back: the packet's "Reading"
@@ -27,6 +29,10 @@ struct LiveArchive: DocumentArchiving {
     var formatVersion: Int { 1 }
 
     func encode(_ snapshot: PhotoDocumentSnapshot, codec: any PhotoImageCodec) throws -> PhotoPackage {
+        try encode(snapshot, codec: codec, merged: true)
+    }
+
+    func encode(_ snapshot: PhotoDocumentSnapshot, codec: any PhotoImageCodec, merged: Bool) throws -> PhotoPackage {
         var files: [String: Data] = [PhotoZip.mimetype: PhotoZip.mimetypeValue]
         var images: [(path: String, image: DecodedImage)] = []
         var entries: [LayerEntry] = [], contents: [LayerContent] = [], texts: [String: String] = [:]
@@ -52,9 +58,15 @@ struct LiveArchive: DocumentArchiving {
                 layer: layer, pixels: try snapshot.pixels[layer.id].map(Self.tiles),
                 mask: layer.isMaskEnabled ? try snapshot.masks[layer.id].map(Self.tiles) : nil))
         }
-        let picture = try LiveMerging().flatten(contents, canvas: snapshot.canvas, adjustments: snapshot.adjustments)
-        let merged = DecodedImage(rgba8: try picture.rgba8(), width: picture.width, height: picture.height)
-        let all = images + [("mergedimage.png", merged), ("Thumbnails/thumbnail.png", try Self.thumbnail(merged))]
+        let all: [(path: String, image: DecodedImage)]
+        if merged {
+            // The picture for other readers: a whole-image composite, so a recovery write leaves it out.
+            let picture = try LiveMerging().flatten(contents, canvas: snapshot.canvas, adjustments: snapshot.adjustments)
+            let flat = DecodedImage(rgba8: try picture.rgba8(), width: picture.width, height: picture.height)
+            all = images + [("mergedimage.png", flat), ("Thumbnails/thumbnail.png", try Self.thumbnail(flat))]
+        } else {
+            all = images
+        }
         // Every PNG at once, across the cores.
         let pngs = try PhotoLayerComposite.inParallel(all.count) { try codec.encode(all[$0].image, as: .png, quality: 1) }
         for (entry, png) in zip(all, pngs) { files[entry.path] = png }

@@ -82,7 +82,7 @@ extension LiveArchive {
 extension PhotoWorkspace {
     /// The autosave's bytes (history-panel PH-6): the open image's document
     /// package as one .ora container, its name inside (`photo/recovery.json`),
-    /// its PNGs through CoreRaster's codec. Throws with no image open.
+    /// its PNGs through CoreRaster's codec, no merged picture. Throws with no image open.
     public func recoveryBytes() throws -> Data {
         try recoveryBytes(codec: CoreRasterImageCodec())
     }
@@ -91,7 +91,8 @@ extension PhotoWorkspace {
     /// container through `services.archive`.
     public func recoveryBytes(codec: any PhotoImageCodec) throws -> Data {
         try LiveRecovery.container(
-            documentPackage(codec: codec), info: LiveRecovery.Info(documentName: documentName), archive: services.archive)
+            documentPackage(codec: codec, merged: false), info: LiveRecovery.Info(documentName: documentName),
+            archive: services.archive)
     }
 
     /// The autosave's encode for the window: the workspace is copied now,

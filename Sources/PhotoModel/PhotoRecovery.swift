@@ -2,7 +2,8 @@
 // When an autosave is due (`autosaveDue`, the kernel's DocumentSession rule
 // behind Photo's signature: PhotoRecovery+Kernel.swift), the entry an
 // autosave writes (`recoveryEntry`: the document package with the image's
-// name and the time), restoring one (`restore`: the image comes back dirty
+// name and the time, without the merged picture and thumbnail only other
+// readers use, so a write never flattens the picture), restoring one (`restore`: the image comes back dirty
 // and unsaved, so Save asks where; `restore(_:decoded:)` takes a package the
 // window decoded off the main actor) and the launch offer's Photo words
 // (`RecoveryOffer`; `kernelOffer` is the kernel's). Times are seconds passed
@@ -54,7 +55,8 @@ extension PhotoWorkspace {
     ) throws -> RecoveryEntry? {
         guard isDirty else { return nil }
         return RecoveryEntry(
-            documentName: documentName, savedAt: now, package: try documentPackage(archive: archive, codec: codec))
+            documentName: documentName, savedAt: now,
+            package: try documentPackage(archive: archive, codec: codec, merged: false))
     }
 
     /// What an autosave at `now` writes, through `services.archive`.

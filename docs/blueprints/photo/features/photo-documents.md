@@ -231,6 +231,7 @@ encode(snapshot, codec):                             # D-2, M/Live/LiveArchive.s
   files["mimetype"] = "image/openraster"
   for pixel layer i (bottom-up in stack.xml): files["data/layer-<i>.png"] = codec.encode(png)
   for each mask: files["photo/masks/layer-<i>.png"]; files["mergedimage.png"], thumbnail (longest side 256)
+  (Save only: a recovery autosave encodes with `merged: false` and leaves both out, so it never flattens the picture)
   files["stack.xml"] = OpenRaster stack: <image w h><stack><layer src name opacity visibility x y
                         composite-op="svg:multiply"...> (top first, pixel layers only)
   files["photo/document.json"] = { format: 1, canvas, layers:[{id,name,kind,adjustment?,visible,opacity,
