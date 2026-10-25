@@ -207,3 +207,4 @@ time	kind	note
 2026-10-25T03:41:55Z	3	heartbeat	lane/batch-20261025023716	macOS gate red (run 40155151356); bisect probe -6 red, probe -3 (through #4988) running; no needs-fix on ours yet
 2026-10-25T04:42:20Z	3	stage	#4888	#4888, #4916, #5002 and #5011 are clean and wait on the next batch. The batch red was #4963 (placed-images), not ours. DK-z is held while more than 5 findings are open.
 2026-10-25T05:02:03Z	3	heartbeat	#4888	probe lane/batch-20261025023716-1 (#4888 alone) macOS gate 40159661924 still running; DK PRs open, nothing merged
+2026-10-25T05:22:01Z	3	heartbeat	#4888	probe lane/batch-20261025023716-1 macOS gate 40159661924 green: #4888 clean, waits on lane merge; DK PRs open
