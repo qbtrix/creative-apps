@@ -165,8 +165,7 @@ extension BodyCountSuites {
             #endif
         }
 
-        @Test(.disabled("red on dev: a Move step composites the whole stack and its renders outlive the drag; the fix PR enables it"),
-              .timeLimit(.minutes(15)), arguments: [RenderingChoice.gpu, .cpu])
+        @Test(.timeLimit(.minutes(15)), arguments: [RenderingChoice.gpu, .cpu])
         func photoMoveSettlesAfterTheDrag(_ choice: RenderingChoice) async throws {
             var model = PhotoWorkspace(services: PhotoRenderBudgetTests.services)
             try model.openStress(width: 1024, height: 576, layers: 60)

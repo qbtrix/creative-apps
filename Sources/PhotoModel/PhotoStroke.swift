@@ -283,16 +283,22 @@ extension PhotoWorkspace {
         }
         let dx = end.x - current.start.x, dy = end.y - current.start.y
         guard dx.isFinite, dy.isFinite, abs(dx) < 1e7, abs(dy) < 1e7 else { return }
-        var moved = false
+        // Where the moved layers were and are: the canvas changes nowhere else.
+        var damage = PhotoDamage.none
         for at in targets {
             guard let before = current.layersBefore.first(where: { $0.id == layers[at].id }) else { continue }
             let x = before.offsetX + Int(dx.rounded()), y = before.offsetY + Int(dy.rounded())
             guard x != layers[at].offsetX || y != layers[at].offsetY else { continue }
+            let was = bounds(of: layers[at])
             layers[at].offsetX = x
             layers[at].offsetY = y
-            moved = true
+            if let was, let now = bounds(of: layers[at]) {
+                damage = damage.union(.region(was.union(now)))
+            } else {
+                damage = .all
+            }
         }
-        if moved { touch(.all) }
+        if damage != .none { touch(damage) }
     }
 
     /// Adds a pointer sample to the stroke (nil: the stroke ends) and paints

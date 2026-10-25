@@ -226,3 +226,29 @@ p95 for an adjustment step and 80 ms for a Move, and the target is 16 ms.
 Levels and Curves still build their tables on the CPU each step (about 2.5 ms),
 and a Move composites every layer again, so those rows sit over the target.
 Blur, a masked adjustment layer and the CPU route keep the old path.
+
+## Photo: a Move step on a many-layer picture
+
+A Move step used to damage the whole canvas and composite every visible layer
+over it again, on both routes. On the stress document (3840 x 2160, 100
+layers, a quarter adjustment layers and a quarter masked) one render took
+seconds, so the drag's renders ran on after the release and the stress gate
+read 472% / 489% CPU 3 s after it (#3663). The dispatcher route now keeps each
+region's composite of the layers the stack still shares with the last render
+(PhotoCompositeCache.composite) and composites only the changed layer and the
+ones above it, and a Move damages only where the layer was and is.
+`IdleWorkTests` (AppSnapshotTests) reports what a 30-sample drag leaves
+running; debug build, 1024 x 576 in 60 layers (the dev rows are from a
+1280 x 720, 100-layer run, where the dev build never finished one GPU render):
+
+| Route | Layer composites in the drag | Pictures in the drag | Rendering in the gate's readings |
+|---|---|---|---|
+| GPU, dev | 69, the first render still running 12 s later | 0 | yes, 12 s later too |
+| GPU, now | 9 (one per region, 9 cache hits) | 2 | none |
+| CPU, dev | 1556 | 0 | the queued render, 22 regions |
+| CPU, now | 96 (one per region, 96 hits) | 7 | none |
+
+What still runs after the release is the Curves histogram recount (one row at
+a time through every layer, one core for seconds; a masked layer's tile is now
+masked only over the row, not the whole 256 px tile) and the autosave 5 s
+after the last edit.
