@@ -589,6 +589,9 @@ final class PhotoWindowEditedView: NSView, PhotoUnsavedWindow {
         return files.saves != before
     }
 
+    /// Save through this window; true once it landed.
+    func save() async -> Bool { await Self.save(files: files, perform: send) }
+
     func discardChanges() { files?.autosave?.discard() }
 }
 
