@@ -114,3 +114,4 @@ utc	stage	event	ref	note
 2026-10-25T12:05:52Z	check	heartbeat	#5246 needs-rebase fixed: merged dev (#4886 DevelopValues import conflict), ci --changed PASS, Head 85a1b8bd; other 15 open+clean; dev 5270bc4b green; lane batch-20261025114830 running
 2026-10-25T12:25:59Z	check	heartbeat	all 16 open+clean (#5246 at 85a1b8bd, #5266 clean); none merged; dev 58bb6d4d (#4943) no dev-red; lane landing PRs one at a time
 2026-10-25T12:46:57Z	check	heartbeat	all 16 open+clean; none merged; dev 58bb6d4d no dev-red; new finding #5317 (Photo journey testTier1Tone, Levels Black drag, line:photo) not ours
+2026-10-25T13:07:36Z	check	heartbeat	#4953 (TC-m last PR) merged 930337d5, awaiting green dev ci.yml (full or scoped suiteui); other 15 open+clean; dev no dev-red; #5317 not ours
