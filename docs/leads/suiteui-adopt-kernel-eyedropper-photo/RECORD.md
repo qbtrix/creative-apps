@@ -2,23 +2,23 @@
 
 Issue: #3723 · Packet: docs/blueprints/suiteui/features/adopt-kernel-eyedropper-photo.md
 Run: act-1a1703c2617-uijr (relaunch) · Started: 2026-10-24T23:20Z
-Stage: 3 wave 2 (EP-m slice-done; EP-z #4943 Linux green, waiting for its batch)
+Stage: done (EP-m and EP-z slice-done; Belt-Contact-Sheet posted)
 Base: 1bbaba6c (origin/dev; brief main ef37711d verified)
-Next: #4943 (EP-z, head 69dedd1) lands through the lane batch macOS gate; Belt-Slice-Done EP-z on the first green ci.yml run on dev containing it; then Belt-Contact-Sheet.
+Next: none. Every slice is done. The UP-z Wire line still waits on the supervisor.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | EP-m | click and `color.sample` both read `SampleRules.mean` through Photo's kernel adapter; Photo's ColorSampling, SampledColor and FakeSampling gone | EP-1, EP-2 | MJ-EP | photo/eyedropper:PE-z (packet), adopt-kernel-export:AX-photo (EP-2), adopt-kernel-brush:AB-photo (EP-2) | false | 0 | done | – | run 40077009798 |
-| EP-z | PhotoEyedropper.swift and LiveSampling.swift deleted, baseline shrunk, built | EP-3, EP-4 | MJ-EP, PJ-EP | EP-m, adopt-kernel-unsaved-prompt:UP-z (EP-3) | false | 0 | building | – | – |
+| EP-z | PhotoEyedropper.swift and LiveSampling.swift deleted, baseline shrunk, built | EP-3, EP-4 | MJ-EP, PJ-EP | EP-m, adopt-kernel-unsaved-prompt:UP-z (EP-3) | false | 0 | done | 40192238595 | run 40192238595 |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | EP-1 | EP-m | 1 | PhotoSampleKernelTests (disabled), RJ-X49 job folder (mutation plan already on dev from PE-a) | Tests/PhotoModelTests/PhotoSampleKernelTests.swift, Tests/RealJobs/photo/sample-edge/*, Tests/mutations/PhotoModel.PhotoSample+Kernel.json | PhotoSampleKernelTests | #4579 | merged |
 | EP-2 | EP-m | 2 | sampleDrag on SampleRules.mean; ColorSampling, SampledColor, FakeSampling, PhotoServices.sampling removed | Sources/PhotoModel/PhotoSample+Kernel.swift, Contracts/OutputContracts.swift, Fakes/FakeOutput.swift, PhotoServices.swift, PhotoStroke.swift, Tests/PhotoModelTests/PhotoSample*Tests.swift | PhotoSampleKernelTests | #4837 | merged 08:02Z (fb09de4) |
-| EP-3 | EP-z | 3 | delete PhotoEyedropper.swift, LiveSampling.swift and their tests and plan; shrink canonical baseline | Sources/PhotoModel/PhotoEyedropper.swift, Live/LiveSampling.swift, Live/NotBuilt.swift, Tests/PhotoModelTests/LiveSamplingTests.swift, Tests/mutations/PhotoModel.LiveSampling.json, Tests/canonical-baseline.txt | scripts/check-dup-logic | #4943 | open, origin/dev merged (69dedd1), fast-lane |
-| EP-4 | EP-z | 4 | status built, feature-done | docs/blueprints/suiteui/features/adopt-kernel-eyedropper-photo.wave.json | waves render --dry-run | #4943 | open, same PR as EP-3 |
+| EP-3 | EP-z | 3 | delete PhotoEyedropper.swift, LiveSampling.swift and their tests and plan; shrink canonical baseline | Sources/PhotoModel/PhotoEyedropper.swift, Live/LiveSampling.swift, Live/NotBuilt.swift, Tests/PhotoModelTests/LiveSamplingTests.swift, Tests/mutations/PhotoModel.LiveSampling.json, Tests/canonical-baseline.txt | scripts/check-dup-logic | #4943 | merged 12:14Z (58bb6d4d5) |
+| EP-4 | EP-z | 4 | status built, feature-done | docs/blueprints/suiteui/features/adopt-kernel-eyedropper-photo.wave.json | waves render --dry-run | #4943 | merged with EP-3 (58bb6d4d5) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -109,3 +109,4 @@ Relaunched 2026-10-24T23:20Z on main ef37711d. #4943's `Belt-Lead:` line now nam
 - 2026-10-25T11:38Z: #4886 landed on dev as 5270bc4bc, a Linux batch of one (40188285508) with no macOS gate. The lane looks to be landing code PRs on their own proof (LANE_VERIFY_AFTER). #4943 has that proof on head 69dedd1e: local-ci/prescreen success (photo compile + Model tests) and Linux check 40078192845. It is still open and clean, with no needs-fix, and has no batch yet. On dev 68bec9fe7, the Linux check and scoped suite run are green; full CI 40187982934 and scoped photo 40187985143 are running.
 - 2026-10-25T11:58Z: EP-z #4943 is alone in lane batch 20261025114830 (9659692fe); its Linux check https://github.com/qbtrix/creative-apps/actions/runs/40190414289 is running. Dev is at 5270bc4bc (#4886), and its Linux check 40190113227 and scoped library run 40190110744 are running.
 - 2026-10-25T12:19Z: EP-z #4943 merged into dev as 58bb6d4d5. Waiting for a green ci.yml run on that head: scoped photo https://github.com/qbtrix/creative-apps/actions/runs/40192238595 and Linux check 40192240880 are both running. Belt-Slice-Done and Belt-Contact-Sheet get posted once one passes.
+- 2026-10-25T12:52Z: EP-z done. Scoped photo https://github.com/qbtrix/creative-apps/actions/runs/40192238595 (macOS) and Linux check 40192240880 are green on 58bb6d4d5. Posted Belt-Slice-Done: EP-z (#3723 comment 6397878663) and then Belt-Contact-Sheet (comment 6397879523). Every slice of adopt-kernel-eyedropper-photo is done.

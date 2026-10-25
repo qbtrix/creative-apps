@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-25T11:58Z	check	EP-z	batch 20261025114830 holds #4943 alone; Linux check 40190414289 running
 2026-10-25T12:19Z	merged	EP-z	#4943 merged as 58bb6d4d5; scoped photo 40192238595 running
 2026-10-25T12:35Z	check	EP-z	scoped photo 40192238595 and Linux 40192240880 on 58bb6d4d5 still running
+2026-10-25T12:52Z	slice-done	EP-z	Belt-Slice-Done + Belt-Contact-Sheet on #3723 (run 40192238595)
