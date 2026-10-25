@@ -112,3 +112,4 @@ utc	stage	event	ref	note
 2026-10-25T11:13:12Z	check	heartbeat	16 PRs open+clean; probe -6 green prefix (#4953 #5006) not merged yet, lane run 40187391992 in progress; dev 68bec9fe green; no dev-red
 2026-10-25T11:33:48Z	check	heartbeat	16 PRs open+clean; lane dropped batch-090316 (proofs stale after dev's scripts/ci change) and rechecks PRs one at a time; #4953 #5006 eligible (marker + local-ci/prescreen), queued behind #4886 (batch-111803); dev 68bec9fe green
 2026-10-25T12:05:52Z	check	heartbeat	#5246 needs-rebase fixed: merged dev (#4886 DevelopValues import conflict), ci --changed PASS, Head 85a1b8bd; other 15 open+clean; dev 5270bc4b green; lane batch-20261025114830 running
+2026-10-25T12:25:59Z	check	heartbeat	all 16 open+clean (#5246 at 85a1b8bd, #5266 clean); none merged; dev 58bb6d4d (#4943) no dev-red; lane landing PRs one at a time
