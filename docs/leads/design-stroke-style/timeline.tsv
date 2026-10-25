@@ -193,3 +193,4 @@ time	kind	note
 2026-10-24T22:44:07Z	3	check	-	poll: batch-20261024205137 bisect now at probe -1 (#5192 only; #4888 is the batch tip); dev unchanged at afef017c2; our 8 PRs clean, no needs-fix/needs-rebase
 2026-10-24T23:06:10Z	3	check	-	poll: batch-20261024205137 bisect probe -1 (#5192) macOS gate 40139723227 running since 22:42; full CI 40137153379 on afef017c2 running; dev unchanged; our 8 PRs clean, no labels
 2026-10-25T00:11:38Z	3	heartbeat	-	resume after Belt nudge: dev afef017c (full CI 40137153379 green); batch-20261024235353 (12 PRs, none ours) bisecting, probe -6 running; our 8 PRs open, fast-lane, no needs-fix/needs-rebase
+2026-10-25T00:30:29Z	3	heartbeat	lane	batch-20261024235353 still bisecting (probe -6); dev afef017c; our 8 PRs unchanged, waiting for next sweep
