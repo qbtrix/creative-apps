@@ -198,3 +198,4 @@ utc	stage	event	ref	note
 2026-10-25T13:01:08Z	3	heartbeat	-	lane serial batch now #4962 (batch-20261025125743); #4988 still queued
 2026-10-25T13:19:02Z	3	heartbeat	-	#4988 still queued in the serial lane; no batch in flight
 2026-10-25T13:37:13Z	3	heartbeat	-	#4988 eligible; lane batch now #5006 (batch-20261025132815), #4988 waits for a later sweep
+2026-10-25T13:55:08Z	3	heartbeat	-	#4988 eligible, queued behind p0 PRs; no batch in flight
