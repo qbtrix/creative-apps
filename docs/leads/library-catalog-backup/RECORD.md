@@ -145,3 +145,4 @@ Next: (2026-10-23T17:29:30Z) #4878 (BK-m) and #4923 (BK-z, stacked, feature-done
 - 2026-10-24T23:36:03Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
 - 2026-10-24T23:45:54Z: poll: #4923 #4924 #4937 #4938 #4949 lane checks all ok (size, paths, mergeable, marker); queued behind 122 ready PRs
 - 2026-10-25T00:06:14Z: poll: #4923 #4924 #4937 #4938 #4949 lane checks all ok (size, paths, mergeable, marker); queued behind 122 ready PRs
+- 2026-10-25T00:15:59Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
