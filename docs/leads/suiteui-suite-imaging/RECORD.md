@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
 Stage: 3 wave 8
 Base: c16bcd16c (origin/dev)
-Next: 16:00Z: no suite-imaging merges. #5148, #5151, #5153 clean with fast-lane, #5295 clean (label flapping), queued. #5154, #5163, #5297, #5299 dirty (stacked); #5178 no-fast-lane. dev a57210d15 (#5320); main d3323f6a7; no dev-red open. 0 open suite-imaging findings (#5093-5095 are fill-heal's); no supervisor reply. IM-13 waits on #5151, #5163. Poll ~16:20Z.
+Next: 16:22Z: no suite-imaging merges. #5148, #5151, #5153, #5295 clean with fast-lane, queued. #5154, #5163, #5297, #5299 dirty (stacked, label flapping); #5178 no-fast-lane. dev c2681786c (#5044); main d3323f6a7; no dev-red open. 0 open suite-imaging findings; no supervisor reply. IM-13 waits on #5151, #5163. Poll ~16:42Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a170cfbf58-pshm, feature issue #3715). This copy is refreshed with it after every stage.
 
