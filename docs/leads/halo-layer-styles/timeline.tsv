@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-25T01:15Z	check	#4874 merged at 01:02Z (dev ae3efdb83); #5156 and #5174 (fix head 5d52b331d) open+clean, no needs-fix; stack unchanged; no new comments, no dev-red
 2026-10-25T01:30Z	check	#5156/#5174 open+clean, no needs-fix; dev ae3efdb83; lane sweeping; stack unchanged; no new comments, no dev-red
 2026-10-25T01:58Z	stage	#5156 merged 01:41Z (dev c16bcd16c); #5158 merged dev (add/add -> ours, dev copies == HY-1 tip), scripts/ci --changed PASS, pushed 333603baa, Head moved, ready; #5174 open, unstable (gate running)
+2026-10-25T02:15Z	check	#5158 (333603baa) and #5174 (head now 6e467f797) open+clean, no needs-fix; no dev-red; no open findings; waiting on lane batch
