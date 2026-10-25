@@ -193,3 +193,4 @@ utc	stage	event	ref	note
 2026-10-25T14:35:05Z	3	heartbeat	#4922 #4963 #4964 #5001	dev 15237407 (#5007 landed); no batch in flight; all seven of ours ready, heads unchanged, no fix label; DK-z/PD-z held
 2026-10-25T14:55:33Z	3	heartbeat	#4922 #4963 #4964 #5001	dev 0e8ebba3 (#4960 landed); batch 20261025143843 holds only #5008; all seven of ours ready, heads unchanged, no fix label; DK-z/PD-z held
 2026-10-25T15:15:04Z	3	heartbeat	#4922 #4963 #4964 #5001	dev 15b2546e (#5008, #5318 landed); batch 20261025150758 holds only #5039; all seven of ours ready, heads unchanged, no fix label; DK-z/PD-z held
+2026-10-25T15:35:13Z	3	heartbeat	#4922 #4963 #4964 #5001	dev 15b2546e unchanged; batch 20261025150758 (#5039 only) still in flight; all seven of ours ready, heads unchanged, no fix label; DK-z/PD-z held
