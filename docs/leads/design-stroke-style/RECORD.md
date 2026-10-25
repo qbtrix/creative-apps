@@ -83,3 +83,7 @@ At 04:14Z the supervisor pulled #4864 from the lane for the batch -9 macOS failu
 ### 2026-10-25T04:42:20Z: stage
 
 #4888, #4916, #5002 and #5011 are clean and wait on the next batch. The batch red was #4963 (placed-images), not ours. DK-z is held while more than 5 findings are open.
+
+### 2026-10-25T05:54:44Z: stage
+
+#4888 merged 05:23Z; #4916 needs-split cleared by merging dev (192 lines/10 files), ci --changed PASS, Head 1910a216; #5002/#5011 queued
