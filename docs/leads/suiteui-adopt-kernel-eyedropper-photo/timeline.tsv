@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-25T03:27Z	check	EP-z	#4943 open, clean, fast-lane; head 69dedd1e unchanged; dev still 1bbaba6c; waiting for a lane batch
 2026-10-25T03:47Z	check	EP-z	dev moved 1bbaba6c..2e7d5264 (65 commits; #5238 lane no longer batches on red dev); #4943 head 69dedd1e test-merges clean onto new dev; waiting for a lane batch
 2026-10-25T04:06Z	check	EP-z	#4943 open, mergeable clean, fast-lane; dev head 2e7d5264; waiting for a batch
+2026-10-25T04:26Z	check	EP-z	#4943 open, mergeable clean, fast-lane; dev head still 2e7d5264; waiting for a batch
