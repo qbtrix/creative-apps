@@ -185,3 +185,4 @@ utc	stage	event	ref	note
 2026-10-25T12:58:50Z	3	poll	-	12:58Z poll: #4953 landed; supervisor marked #5043 (XP-3) needs-split (3397 lines vs base lx2 behind dev). Merged dev into feat/export-pack-lx2 (#4960 own diff 4 files/85 lines) and lx2 into XP-3 (own diff 5 files/227 lines, SuiteGallery conflict resolved: Crop then ExportPack); scripts/ci --changed running on both before push
 2026-10-25T13:14:12Z	3	poll	-	13:14Z poll: dev 930337d52, no merges of ours, no dev-red; scripts/ci --changed still building for #4960 (lx2) and #5043 (XP-3) restacks, push on PASS
 2026-10-25T13:16:20Z	3	poll	-	restacked #4960 (31529433a) and #5043 (54f518a86) on dev; needs-split dropped, CI: PASS both
+2026-10-25T13:29:59Z	3	poll	-	13:30Z poll: #4960 needs-fix cleared on 31529433a; #4960/#5043/#5044/#5074/#5104/#5106/#5128/#5065 queued in lane; dev bbaedba66 green
