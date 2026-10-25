@@ -98,3 +98,4 @@ utc	stage	event	ref	note
 2026-10-25T00:35:25Z	3	poll	-	dev still afef017c; batch probe -6 Linux green, macOS gate running; no flags on our PRs
 2026-10-25T01:02:49Z	3	poll	-	poll: dev still afef017c, no slice merges; no needs-fix/needs-rebase on our PRs; lane batch 20261024235353 bisecting (probe -6 Linux green 40145607006, macOS gate 40145609051 running); findings 0
 2026-10-25T01:26:17Z	3	poll	-	poll: dev ae3efdb8 (#4874 landed from bisect), no slice merges; no needs-fix/needs-rebase on our PRs; findings 0
+2026-10-25T01:57:52Z	3	poll	-	fix: #5226 (TS-9) needs-rebase after #5156 (HY-1 style commands); merged dev, resolved catalog order (styles then texts then window), regenerated halo.list-commands golden; scripts/ci --changed PASS, AllAppsCatalogTests pass; pushed 4b6a6ead, Head moved
