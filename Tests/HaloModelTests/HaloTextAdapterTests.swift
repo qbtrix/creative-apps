@@ -15,8 +15,10 @@ private final class RecordingText: TextServices, @unchecked Sendable {
     func measure(_ spans: [TextSpan]) throws(SuiteError) -> [SpanMetrics] {
         if refuse { throw .notAvailable("no") }
         measured += spans
-        return spans.map { SpanMetrics(advances: $0.string.map { _ in $0.fontSize / 2 }, ascent: $0.fontSize * 0.75,
-                                       descent: $0.fontSize * 0.2, resolvedFamily: FakeText.systemFamily) }
+        return spans.map { span in
+            SpanMetrics(advances: span.string.map { _ in span.fontSize / 2 }, ascent: span.fontSize * 0.75,
+                        descent: span.fontSize * 0.2, resolvedFamily: FakeText.systemFamily)
+        }
     }
 
     func families() -> [FontFamily] { [] }
