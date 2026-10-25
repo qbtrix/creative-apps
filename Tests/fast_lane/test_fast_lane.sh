@@ -9,7 +9,8 @@
 # checked again on today's dev), the batch macOS gate (LANE_MAC_PER_PR=0: one macOS gate
 # per code batch scoped to its apps, priority order, slots, the timer, a red
 # base set aside per job on Linux and judged by failing test on macOS, the culprit's stacked PRs named), no batch forming on a red dev and a batch on a red base dropped once dev is green, and the red-dev
-# bisect, with its 2-of-3 vote mode for a timing budget test. No network,
+# bisect, with its 2-of-3 vote mode for a timing budget test, and the
+# auto-revert of a red dev's culprit (LANE_VERIFY_AFTER=1). No network,
 # needs bash, git and jq.
 #
 # checks-green.json is a check rollup shaped like a green flare-core PR: the CI
