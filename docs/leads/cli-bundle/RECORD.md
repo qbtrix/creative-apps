@@ -73,3 +73,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 2026-10-25T05:30:03Z: batch-20261025023716 resolved; #4999 ready for next batch; body carries run act-1a17129eefa-0kqr
 - 2026-10-25T05:48:01Z: lane batch-20261025054232 running without #4999; waits for the next batch
 - 2026-10-25T06:06:02Z: batch-20261025054232 (not ours) bisecting; #4999 waits for the next batch
+- 2026-10-25T06:23:57Z: batch-20261025054232 (not ours) still bisecting; #4999 waits for the next batch
