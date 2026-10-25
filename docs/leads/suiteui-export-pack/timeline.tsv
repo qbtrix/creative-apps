@@ -181,3 +181,4 @@ utc	stage	event	ref	note
 2026-10-25T11:52:08Z	3	poll	-	11:52Z poll: #4886 landed on dev (5270bc4bc), none of ours yet; batch 20261025114830 Linux check running; no dev-red; #4960 still needs-fix awaiting supervisor
 2026-10-25T12:09:10Z	3	poll	-	12:09Z poll: no merges since #4886; batch 20261025114830 (#4943) Linux check running 20 min; no dev-red; #4960 still needs-fix awaiting supervisor; noted other-line PR feat/suite-problem-alert-apps touching autosave recovery, watch for AK conflicts
 2026-10-25T12:24:43Z	3	poll	-	12:24Z poll: #4943 landed (58bb6d4d5), none of ours yet; lane sweep pending; no dev-red; #4960 still needs-fix awaiting supervisor
+2026-10-25T12:41:18Z	3	poll	-	12:41Z poll: no merges of ours; batch 20261025122638 Linux check running; lane re-added fast-lane to needs-split #4965/#4961/#4982 (its sweep, not mine); no dev-red; #4960 still needs-fix awaiting supervisor
