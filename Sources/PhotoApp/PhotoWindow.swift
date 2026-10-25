@@ -255,6 +255,7 @@ struct PhotoWindow: View {
         case .sample(let intent): performSample(intent)
         case .place(let intent): performPlace(intent)
         case .text(let intent): performType(intent)
+        case .tone(let intent): performTone(intent)
         case .path(let intent): model.runPath(intent)
         case .confirm: if confirmTransform() {} else { model.applyCrop() }
         case .dismiss:

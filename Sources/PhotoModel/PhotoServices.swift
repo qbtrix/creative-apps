@@ -18,7 +18,7 @@ public struct PhotoServices: Sendable {
     public var transform: any LayerTransforming
     public var exportSizing: any ExportSizing
     /// Measures, lists and draws text layers' words. FakeText (a clear frame) by default; the window sets
-    /// SuiteShell's LiveText (`PhotoWindow.liveServices`), which this Linux-safe module can't reach.
+    /// SuiteText's LiveText (`PhotoWindow.liveServices`), which this Linux-safe module can't reach.
     public var text: any TextServices = FakeText()
 
     public init(archive: any DocumentArchiving, recovery: any RecoveryStoring, clipboard: any PixelClipboard,

@@ -1,5 +1,6 @@
 // ExportSheet.swift: SuiteExportSheet (EK-30), drawn over ExportSheetRows, a
-// readout of the kernel's ExportRun: Format chips, Size (unless the host draws
+// readout of the kernel's ExportRun: Format chips (one row of equal chips up
+// to four formats, else rows of three: formatColumns), Size (unless the host draws
 // its own scale) and (when the format takes one) Quality rows, 8 pt apart, then the host's own options rows (the slot, #1989),
 // a progress bar while running, the finished or failed line after, and the
 // actions that state offers (ExportSheetAction). Every control's identifier
@@ -17,10 +18,14 @@ public struct FormatChoice: Hashable, Sendable, Identifiable {
     public init(id: String, name: String, hasQuality: Bool) { (self.id, self.name, self.hasQuality) = (id, name, hasQuality) }
 }
 
-/// Export options as the sheet reads them: format id, scale and quality 0...1.
+/// Export options as the sheet reads them: format id, scale, quality 0...1 and the metadata policy
+/// (export-pack; nil: the host offers none).
 public struct ExportPick: Hashable, Sendable {
     public var format: String, scale: Double, quality: Double
-    public init(format: String, scale: Double = 1, quality: Double = 0.9) { (self.format, self.scale, self.quality) = (format, scale, quality) }
+    public var metadata: ExportMetadata? = nil
+    public init(format: String, scale: Double = 1, quality: Double = 0.9, metadata: ExportMetadata? = nil) {
+        (self.format, self.scale, self.quality, self.metadata) = (format, scale, quality, metadata)
+    }
 }
 
 /// A running export's steps, done clamped to 0...total and total at least 1.
@@ -44,6 +49,9 @@ public struct ExportSheetRows: Hashable, Sendable {
         if case .finished = line, canReveal { shown.append(.reveal) }
         return shown + [line == nil ? .cancel : .dismiss, .start]
     }
+
+    /// Columns for the Format chips: up to four formats fill one row (no empty column, no orphan chip), more wrap by three.
+    public static func formatColumns(_ count: Int) -> Int { count <= 4 ? max(count, 1) : 3 }
 
     /// `showsSize: false` leaves out the Size row, for a host that draws its own scale control.
     public init<Options: Hashable & Sendable>(
@@ -148,9 +156,9 @@ public struct SuiteExportSheet<Options: View>: View {
         case .format(let id):
             VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
                 Text("Format").font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.textSecondary)
-                ChoiceChips(
+                PresetGrid(
                     options: formats.map { InspectorOption(id: $0.id, title: $0.name, identifier: ids.format($0.id)) },
-                    selected: id, onSelect: onFormat)
+                    selected: id, columns: ExportSheetRows.formatColumns(formats.count), onSelect: onFormat)
                     .accessibilityElement(children: .contain)
                     .accessibilityLabel("Format")
                     .suiteControl(id: ids.formats, enabled: readout.editable, reason: readout.editable ? nil : "The export is under way or done.")
