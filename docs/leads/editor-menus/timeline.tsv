@@ -172,3 +172,4 @@ utc	stage	event	ref	note
 2026-10-25T05:11:37Z	3	heartbeat	-	lane bisect moved to probe -2 (#4963); #4988 is next after it
 2026-10-25T05:30:03Z	3	heartbeat	-	batch-20261025023716 resolved (#4888 merged); #4988 ready for next batch; PR bodies carry run act-1a17129eefa-0kqr, footer stripped from #5164
 2026-10-25T05:48:01Z	3	heartbeat	-	lane batch-20261025054232 (12 older PRs) running without #4988; waits for the next batch
+2026-10-25T06:06:02Z	3	heartbeat	-	batch-20261025054232 (not ours) red, bisecting at probe -6; #4988 waits for the next batch
