@@ -110,25 +110,26 @@ import Testing
         #expect(try ws.composite() == plain)
     }
 
-    @Test func blackAndWhiteAndInvertAreAdjustmentLayerKinds() throws {
+    @Test func blackAndWhiteAndInvertAreKindsOfAnAdjustmentLayer() throws {
         var ws = try Self.checker()
         ws.services.adjustmentLayers = LiveAdjustmentLayering()  // the fake brightens whatever the settings
-        #expect(ws.adjustmentLayerKinds.contains(.blackAndWhite) && ws.adjustmentLayerKinds.contains(.invert))
         let plain = try ws.composite()
-        ws.addAdjustmentLayer(.invert)
-        let layer = try #require(ws.selectedLayer)
-        #expect(layer.name == "Invert 1")
-        #expect(layer.kind.label == "Invert adjustment layer")
-        #expect(ws.kinds == [.invert])
-        let p = try plain.pixel(x: 0, y: 0), q = try ws.composite().pixel(x: 0, y: 0)
-        #expect(abs(q.r - (1 - p.r)) < 0.01)
+        ws.addAdjustmentLayer(.curves)
+        let id = try #require(ws.selectedLayerID)
         // The kind commands act on the selected adjustment layer, not the image.
         try Self.run("adjust.invert", on: &ws)
-        #expect(ws.kinds.isEmpty && ws.adjustments.kinds.isEmpty)
+        #expect(ws.kinds == [.invert] && ws.adjustments.kinds.isEmpty)
+        #expect(ws.undoActionName == "Undo Invert")
+        guard case .adjustment(let settings)? = ws.layers.first(where: { $0.id == id })?.kind else {
+            Issue.record("not an adjustment layer")
+            return
+        }
+        #expect(settings.kinds == [.invert] && settings.isEnabled(.invert))
+        let p = try plain.pixel(x: 0, y: 0), q = try ws.composite().pixel(x: 0, y: 0)
+        #expect(abs(q.r - (1 - p.r)) < 0.01)
         ws.undo()
-        #expect(ws.kinds == [.invert])
-        ws.addAdjustmentLayer(.blackAndWhite)
-        #expect(ws.kinds == [.blackAndWhite(.neutral)])
+        #expect(ws.kinds.isEmpty)
+        #expect(abs(try ws.composite().pixel(x: 0, y: 0).r - p.r) < 0.01)
     }
 
     @Test func aLookAppliesAsOneStepAndSaves() throws {
@@ -155,7 +156,8 @@ import Testing
         var ws = try Self.checker()
         ws.services = .live  // PhotoHeadless opens through the live archive
         try Self.run("adjust.invert", on: &ws)
-        ws.addAdjustmentLayer(.blackAndWhite)
+        ws.addAdjustmentLayer(.curves)
+        try Self.run("adjust.black-and-white", on: &ws)
         let saved = try PhotoHeadless(workspace: ws).save()
         let opened = try PhotoHeadless.open(saved, name: "kinds.ora")
         #expect(opened.workspace.adjustments.kinds == [.invert])
