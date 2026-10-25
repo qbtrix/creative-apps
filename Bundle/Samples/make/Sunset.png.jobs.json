@@ -13,7 +13,7 @@
       {"offset": 1, "r": 0.1, "g": 0.16, "b": 0.3, "a": 1}]}},
     {"id": "layer.new", "params": {}},
     {"id": "layer.rename", "params": {"name": "Sun"}},
-    {"id": "select.rect", "params": {"x": 46, "y": 40, "width": 36, "height": 21}},
+    {"id": "select.rect", "params": {"minX": 46, "minY": 40, "maxX": 82, "maxY": 61}},
     {"id": "image.gradient", "params": {"type": "radial", "from": {"x": 64, "y": 60}, "to": {"x": 82, "y": 60}, "stops": [
       {"offset": 0, "r": 1, "g": 0.92, "b": 0.6, "a": 1},
       {"offset": 0.75, "r": 1, "g": 0.7, "b": 0.35, "a": 1},

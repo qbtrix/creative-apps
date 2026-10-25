@@ -64,6 +64,8 @@ while IFS=/ read -r target class name; do
         && grep -qE "func[[:space:]]+${name}[[:space:]]*\(" "$f"; then found=1; break; fi
   done
   check "$target/$class/$name exists in UITests/" '[[ -n "$found" ]]'
-done < <(printf '%s\n' "$hosted_out" | sed -n 's/^ui-test: skipped: needs local key events: //p')
+# A here-string, not < <(...): under macOS bash 3.2 the first journey's glob came back
+# unexpanded while the process-substitution child was live (8 of 8 runs in a gate tree).
+done <<<"$(printf '%s\n' "$hosted_out" | sed -n 's/^ui-test: skipped: needs local key events: //p')"
 
 exit $fail

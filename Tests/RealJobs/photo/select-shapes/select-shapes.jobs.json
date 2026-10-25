@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-X70 (suiteui/area-selection AR-10): on a 96 x 96 portrait (a skin-toned face on grey), selects the ellipse around the face, subtracts a lasso triangle over the chin, inverts, feathers 8 px, fills the selection with the brush colour (black: no command sets it yet) and exports the PNG. The trap: Option adds instead of subtracting, the feather is ignored, or Invert selects the whole canvas. The assertion: the face centre is unchanged, the chin notch and the surround are filled, and the edge ramp from 10% to 90% filled is at least 6 px wide (PhotoAreaSelectionTests.selectShapesJobPasses).",
+  "inputs": ["input/*.png"],
+  "steps": [
+    {"id": "select.ellipse", "params": {"minX": 24, "minY": 16, "maxX": 72, "maxY": 68}},
+    {"id": "select.lasso", "params": {"points": [{"x": 40, "y": 60}, {"x": 56, "y": 60}, {"x": 48, "y": 74}], "mode": "subtract"}},
+    {"id": "select.invert", "params": {}},
+    {"id": "select.feather", "params": {"radius": 8}},
+    {"id": "edit.fill-selection", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-shapes", "format": "png", "options": {}},
+  "expect": {
+    "out/portrait-shapes.png": {"pixels": {"tolerance": 1, "reference": "expected/portrait-shapes.png"}}
+  },
+  "platforms": ["linux", "macos"]
+}
