@@ -65,3 +65,4 @@ utc	stage	event	ref	note
 2026-10-25T05:43Z	check	EP-z	#4943 open, p0+beta, clean onto dev 13fb2f59; no new lane comments; waiting for its batch
 2026-10-25T06:03Z	check	EP-z	#4943 in lane batch 20261025054232 (pos 2/12), batch under bisect (probe -6); still clean, no needs-fix
 2026-10-25T06:23Z	check	EP-z	probe -6 Linux green (40167306514); macOS gate 40167308409 running; #4943 clean
+2026-10-25T06:42Z	check	EP-z	probe -6 macOS gate 40167308409 still running; #4943 open, clean, no needs-fix
