@@ -1,13 +1,13 @@
 # layer-styles (Halo) lead record
 
 Issue: #3936 · Packet: docs/blueprints/halo/features/layer-styles.md
-Run: act-1a16e2f645b-47gj · Session: claude/layer-styles-lead-rsr0u8 · Started: 2026-10-24 (resumed 14:0xZ; earlier runs act-1a16c627cc6-nlss, act-1a1648ae75a-4dqz)
+Run: act-1a171ab9e77-es26 · Session: claude/layer-styles-lead-2ph8nc · Started: 2026-10-24 (resumed 2026-10-25T06:08Z; earlier runs act-1a16e2f645b-47gj, act-1a16c627cc6-nlss, act-1a1648ae75a-4dqz)
 Wire: suiteui layer-styles:LS-a
 Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTests.glowReachesItsKeyedSize and glowIsNotClipped; add the no-padding mutation, origin dropped in LiveFrameRendering's styled composite)
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
-Stage: 3 wave 5: #5156 HY-1 merged 01:41Z (dev c16bcd16c). #5158 HY-m: dev merged in (add/add took HY-m side), CI: PASS, head 333603baa, ready. Drafts #5157 HY-2, #5161 HY-u, #5218 HY-z wait on LS-2 #5174 (open, batch gate pending)
-Base: c16bcd16c (origin/dev)
-Next: watch #5158 batch and #5174 needs-fix. On #5174 merge: merge dev into #5157, #5161, #5218 in order, gate, push, Head, ready. Belt-Slice-Done per slice on green CI; HY-8 (feature-done) after HY-7 lands
+Stage: 3 polling: #5156 HY-1 merged 01:41Z. #5158 HY-m (333603baa) and #5174 LS-2 (cb6c0a2f8) ready and clean, not in lane/batch-20261025054232 (red, bisecting at -6). Drafts #5157 HY-2, #5161 HY-u, #5218 HY-z wait on #5174
+Base: 13fb2f591 (origin/dev; main 3db45eb verified at relaunch)
+Next: wait for the lane batch holding #5158 and #5174. On #5174 merge: merge dev into #5157, #5161, #5218 in order, gate, push, Head, ready. Belt-Slice-Done per slice on a green CI run (HY-a counted done by Belt); HY-8 (feature-done) after HY-7 lands
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: watch #5158 batch and #5174 needs-fix. On #5174 merge: merge dev into #515
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-25T06:08Z (relaunch act-1a171ab9e77-es26): Belt-Lead lines on #5157 #5158 #5161 #5218 moved to the new run id. Status channel stays lead/halo-layer-styles and PRs stay on dev, as decided earlier.
 - 2026-10-24T21:55Z (supervisor): every PR of this beta feature carries `beta` (lane order p0, beta, rest), stacked drafts included. Added to #5157 #5158 #5161 #5218. #5156/#5174 waited because dev-red #5183 (Design drag timing) failed every macOS gate until #5222.
 - 2026-10-24 (resume act-1a16e2f645b-47gj): the brief asks to rebase `lead/layer-styles` onto main and force-push. Not done: that branch is the SuiteUI layer-styles lead's live status channel (#3937, last push 13:56Z); this feature's channel stays `lead/halo-layer-styles`, as decided earlier. Work stays on `origin/dev` (the brief's main verified at 4f00afb; CLAUDE.md targets dev). PR bodies move to the new Belt-Lead id.
 - 2026-10-24: HY-7 follows the supervisor's 13:10Z answer on #3936: a shared SuiteUI GPU layer view keeps one `RenderDispatcher`, uploads a layer's raster only when its content changes, runs only `StyleRoute.draw` per step and draws the resident result; Halo's viewer passes style and layer. Wire: suiteui layer-styles:LS-9 (StyleRoute body).
