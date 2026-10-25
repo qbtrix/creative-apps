@@ -1,0 +1,6 @@
+[
+{"label":"the dash is dropped: the outline paints solid","file":"Sources/DesignModel/DesignStrokeOutline.swift","find":"return try? StrokeRules.paintedPath(outline, stroke)","replace":"return outline","tests":"DesignStrokeOutlineTests"},
+{"label":"a stroke with no width still paints","file":"Sources/DesignModel/DesignStrokeOutline.swift","find":"stroke.width.isFinite, stroke.width > 0, let outline","replace":"stroke.width.isFinite, stroke.width >= 0, let outline","tests":"DesignStrokeOutlineTests"},
+{"label":"a shape traces its box, not its spec","file":"Sources/DesignModel/DesignStrokeOutline.swift","find":"if let drawn = path(in: frame) { return drawn }","replace":"","tests":"DesignStrokeOutlineTests"},
+{"label":"an ellipse traces its box","file":"Sources/DesignModel/DesignStrokeOutline.swift","find":"box = ShapeSpec(kind: .ellipse)","replace":"box = ShapeSpec(kind: .rectangle)","tests":"DesignStrokeOutlineTests"}
+]
