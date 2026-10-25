@@ -124,3 +124,4 @@ utc	stage	event	ref	note
 2026-10-25T05:49:39Z	3	poll	-	05:49Z poll: none merged yet; batch 20261025054232 holds ours #5039, #5044, #5074, #4960 (Linux + macOS gate running); other p0 PRs next; #4965/#4961 dirty, #4982 clean, wait on #4939; SC-f not on dev; no new findings, no dev-red
 2026-10-25T06:07:15Z	3	poll	-	batch 20261025054232 red (Linux+macOS); bisecting, probe -6 holds #4960 (not #5039/#5044/#5074); none of ours merged; no dev-red; SC-f not on dev
 2026-10-25T06:37:57Z	3	poll	-	batch 20261025054232 red on FormatListRatchetTests (XP-9 #5074's fake listed png+jpeg); fixed on lead/export-pack-XP-9 at 59608d3f5, scripts/ci --changed PASS, Head moved; bisect probe -6 Linux green, macOS running; none merged; SC-f not on dev
+2026-10-25T06:38:40Z	3	poll	-	bisect probe 20261025054232-6 macOS gate still running (42m); #5074 waits on fixed head 59608d3f5; none merged; no dev-red; SC-f not on dev
