@@ -108,3 +108,4 @@ Next: lane: batch #4817/#4988 (#5150 fixed the limit), then retarget #5164 to de
 - 2026-10-25T01:24:36Z: batch-20261024235353 bisect moved to probe -9; #4988 (beta) queued for the next batch
 - 2026-10-25T01:43:07Z: batch-20261024235353 bisect at probe -9; #4988 (beta) queued
 - 2026-10-25T02:01:37Z: batch-20261024235353 bisect at probe -9; #4988 (beta) queued
+- 2026-10-25T02:20:09Z: batch-20261024235353 bisect at probe -10; #4988 (beta) queued
