@@ -4,10 +4,14 @@
 // kind, capture date and camera Exif that Fixtures/library-imageio-expected.json records from the files' own
 // bytes; the orientation-6 still decodes upright; RJ-X46's camera pair (added by SC-3) decodes 3024 x 4032
 // with its JPEG and HEIC within 3 levels. The tests call the entry points SC-8 keeps, `ImageIODecoder`'s
-// `scan(folder:)` and `decode(path:maxLongSide:)`. Written first, disabled until SC-8. macOS only.
+// `scan(folder:)` and `decode(path:maxLongSide:)`. SC-8 adds the writer's side: `JPEGWriter` offers exactly
+// the export formats `SuiteImageIO` writes, and its lossless files decode back. Written first, disabled until
+// SC-8. macOS only.
 #if os(macOS)
 import Foundation
 import LibraryModel
+import SuiteModel
+import SuiteShell
 import Testing
 
 @testable import LibraryApp
@@ -147,6 +151,31 @@ import Testing
                 let (a, b) = (pixel(jpeg, x, y), pixel(heic, x, y))
                 #expect(near(a, b, pair.pairTolerance), "(\(x), \(y)): JPEG \(a), HEIC \(b)")
             }
+        }
+    }
+
+    /// JPEGWriter offers exactly the export formats SuiteImageIO writes, and a PNG and a TIFF it writes decode
+    /// back through ImageIODecoder at their size, every sample within 1 level.
+    @Test(.disabled("waits on SC-8")) func writerFilesRoundTripThroughSuiteImageIO() async throws {
+        let writable = ExportFormat.allCases.filter { format in
+            SuiteImageFormat(fileName: "a." + format.fileExtension).map { SuiteImageIO.writable.contains($0) } ?? false
+        }
+        #expect(JPEGWriter.writableFormats() == Set(writable))
+        let folder = FileManager.default.temporaryDirectory.appending(path: "LibraryImageIOTests-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let (width, height) = (12, 8)
+        var bytes: [UInt8] = []
+        for y in 0..<height {
+            for x in 0..<width { bytes += [UInt8(x * 20), UInt8(y * 30), UInt8((x + y) * 10), 255] }
+        }
+        let image = try #require(DisplayImage(size: PixelSize(width: width, height: height), rgba8: bytes))
+        for name in ["round.png", "round.tif"] {
+            try await JPEGWriter().write(image, quality: 90, folder: folder.path, fileName: name)
+            let back = try await decoder.decode(path: folder.appending(path: name).path, maxLongSide: nil)
+            #expect(back.size == image.size, "\(name)")
+            let worst = zip(back.rgba8, bytes).map { abs(Int($0) - Int($1)) }.max() ?? 255
+            #expect(back.rgba8.count == bytes.count && worst <= 1, "\(name) reads back within 1 level, worst \(worst)")
         }
     }
 }
