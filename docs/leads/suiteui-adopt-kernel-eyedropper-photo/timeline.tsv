@@ -81,3 +81,4 @@ utc	stage	event	ref	note
 2026-10-25T10:58Z	check	EP-z	probe -6 green both gates; #4943 in green prefix; dev-red closed
 2026-10-25T11:18Z	check	EP-z	old batch dropped; new batch #4886 only; #4943 waits
 2026-10-25T11:38Z	check	EP-z	#4886 landed alone; #4943 has prescreen+linux proof, waits for lane
+2026-10-25T11:58Z	check	EP-z	batch 20261025114830 holds #4943 alone; Linux check 40190414289 running
