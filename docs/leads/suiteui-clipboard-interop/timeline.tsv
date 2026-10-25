@@ -161,3 +161,4 @@ utc	stage	event	ref	note
 2026-10-25T07:06Z	3	lane	lane	check: no repo merges since 05:27 but lane sweeps are running (run 40170764273 in progress); no dev-red; none of ours labelled; awaiting batches
 2026-10-25T07:28Z	3	lane	lane	check: still no repo merges since 05:27 (lane sweeps running, no batch landed); no dev-red; none of ours labelled; awaiting batches
 2026-10-25T07:49Z	3	lane	lane	check: still no repo merges since 05:27; no dev-red; none of ours labelled; awaiting batches
+2026-10-25T08:11Z	3	lane	lane	check: lane moving again (#5287 merged 08:06); none of ours merged or labelled; no dev-red; awaiting batches
