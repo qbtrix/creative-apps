@@ -22,6 +22,7 @@
 import AppKit
 import Foundation
 import LibraryModel
+import SuiteModel
 import SuiteShell
 import SuiteUI
 import SwiftUI
@@ -49,7 +50,8 @@ struct LibraryWindow: View {
         let launch = LibraryLaunch(arguments: arguments)
         // The live grid keeps its thumbnails in <support>/Library/Thumbnails (ST-7); fixtures stay on fakes.
         let services = launch.services(
-            decoder: ImageIODecoder(), writer: JPEGWriter(), store: CatalogStore(), sidecars: XMPSidecarWriter())
+            decoder: ImageIODecoder(), writer: JPEGWriter(metadata: LibraryShell.services.metadata),
+            store: CatalogStore(), sidecars: XMPSidecarWriter())
             .withThumbnailDisk(folder: LibraryServices.thumbnailFolder(arguments: arguments, home: NSHomeDirectory()))
         _model = State(initialValue: LibraryCatalog(launch: launch, services: services))
     }
