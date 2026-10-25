@@ -107,3 +107,4 @@ utc	stage	event	ref	note
 2026-10-25T03:02Z	3	lane	lane	#4905 needs-rebase dropped by the lane; batch-20261025023716 Linux green, macOS queued; full CI on dev 3db45eb queued; no dev-red; none of ours merged yet
 2026-10-25T03:25Z	3	lane	lane	batch-20261025023716 macOS gate failed, bisect pending; no needs-fix/needs-rebase on ours; no dev-red; no merges since 02:30Z; full CI dev 3db45eb in progress
 2026-10-25T03:46Z	3	lane	lane	no needs-fix/needs-rebase on ours; no dev-red; #3935 (layer-styles wave-4 docs) merged 03:45Z; none of our slice PRs merged; full CI dev 3db45eb still in progress
+2026-10-25T04:07Z	3	lane	lane	no needs-fix/needs-rebase on ours; no dev-red; no merges since 03:45Z; full CI dev 3db45eb still in progress
