@@ -168,3 +168,4 @@ utc	stage	event	ref	note
 2026-10-25T09:40Z	3	lane	lane	check: none of ours labelled; no merges since 09:10; dev-red #5316 opened 09:37 (macos job, run 40179648854); in range only our docs PR #3935, not a code culprit; not fixing per rules
 2026-10-25T10:02Z	3	lane	lane	check: none of ours labelled; no merges since 09:30; dev-red #5316 still open, no bisect verdict yet
 2026-10-25T10:25Z	3	lane	lane	check: none of ours labelled; no merges since 09:30; dev-red #5316 closed 10:06 (green dev run promoted main)
+2026-10-25T10:47Z	3	lane	lane	check: none of ours labelled; no merges since 10:20; dev not red
