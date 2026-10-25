@@ -121,3 +121,4 @@ Next: lane: probe batch-20261025023716-3 (holds #4988) resolves; once #4988 merg
 - 2026-10-25T04:07:19Z: probe -3 macOS red at DesignPlaceSnapshots.swift:39 (type-check timeout; not #4988 files); bisect now at probe -1 (#4888). #4988 waits.
 - 2026-10-25T04:17:23Z: Belt nudge: mirror lead/suite-editor-menus had stopped at 03:34Z; resynced. Probe -1 (#4888) macOS gate running; #4988 waits.
 - 2026-10-25T04:35:51Z: batch-20261025023716 probe -1 (#4888) macOS gate still running; #4988 waits
+- 2026-10-25T04:53:45Z: probe -1 (#4888) macOS gate still running; #4988 waits
