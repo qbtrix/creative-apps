@@ -22,6 +22,7 @@
 import AppKit
 import Foundation
 import LibraryModel
+import SuiteModel
 import SuiteShell
 import SuiteUI
 import SwiftUI
@@ -48,7 +49,8 @@ struct LibraryWindow: View {
     init(arguments: [String] = ProcessInfo.processInfo.arguments) {
         let launch = LibraryLaunch(arguments: arguments)
         let services = launch.services(
-            decoder: ImageIODecoder(), writer: JPEGWriter(), store: CatalogStore(), sidecars: XMPSidecarWriter())
+            decoder: ImageIODecoder(), writer: JPEGWriter(metadata: LibraryShell.services.metadata),
+            store: CatalogStore(), sidecars: XMPSidecarWriter())
         _model = State(initialValue: LibraryCatalog(launch: launch, services: services))
     }
 
