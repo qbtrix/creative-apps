@@ -65,7 +65,7 @@ extension LibraryCatalog {
         let sliders = group?.sliders ?? ToneSlider.allCases
         return developStep(group.map { "Reset " + $0.rawValue } ?? "Reset Develop") { settings in
             let reset = sliders.reduce(settings) { $0.setting($1, to: $1.neutral) }
-            return group == nil ? reset.setting(curve: .identity).setting(levels: .neutral) : reset
+            return group == nil ? reset.setting(curve: .identity).setting(levels: .neutral).setting(kinds: []) : reset
         }
     }
     /// One slider back to 0: "Reset Exposure".
@@ -104,7 +104,7 @@ extension LibraryCatalog {
     /// `change` on `ids` (every target by default) as ONE step `name` of its
     /// own, closed at once (an open drag ends first); drops the changed photos'
     /// thumbnails and returns their ids, none when nothing changed.
-    private mutating func developStep(
+    mutating func developStep(
         _ name: String, ids: Set<String>? = nil, _ change: (DevelopSettings) -> DevelopSettings
     ) -> Set<String> {
         endDevelopDrag()
@@ -129,6 +129,8 @@ extension LibraryCatalog {
             .map { "\($0.title) " + Self.developText(copied.value($0), $0) }
         if !copied.curve.isIdentity { parts.append("Curve") }
         if copied.levels != .neutral { parts.append("Levels") }
+        if copied.bw != nil { parts.append("Black & White") }
+        if copied.invert { parts.append("Invert") }
         return parts.isEmpty ? "No adjustments" : parts.joined(separator: ", ")
     }
 
