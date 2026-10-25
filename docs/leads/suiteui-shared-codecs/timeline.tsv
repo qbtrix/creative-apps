@@ -80,3 +80,4 @@ utc	stage	event	ref	note
 2026-10-25T01:20Z	3	pr-opened	#5232	SC-11 retire HaloFramePNG (SC-z part)
 2026-10-25T01:20Z	check	heartbeat	dev ae3efdb8; none of ours merged yet; all clean, no needs-fix; no open findings
 2026-10-25T01:52Z	check	no merges yet (12 PRs open on lane, all clean, no needs-fix); dev ae3efdb8 runs green (Linux check, scoped halo); no open findings
+2026-10-25T02:00Z	3	pr-opened	#5261	SC-10 (SC-raster) on SC-9; SC-4 chain dev-drift fix started
