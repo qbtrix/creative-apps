@@ -107,3 +107,4 @@ utc	stage	event	ref	note
 2026-10-25T06:12Z	3	pr-opened	#5297	IM-8d 2/2 Photo on the route, PhotoLiveTone deleted
 2026-10-25T06:12Z	3	stage-start	IM-12	builder stacked on #5297
 2026-10-25T06:27Z	3	heartbeat	-	poll: #4886:clean #5148:clean #5151:clean #5153:clean #5154:clean #5163:dirty #5178:dirty #5295:clean #5297:dirty  findings 0
+2026-10-25T06:34Z	3	pr-opened	#5299	IM-12 HueSaturation deleted, stacked on #5297
