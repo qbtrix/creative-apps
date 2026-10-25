@@ -121,3 +121,4 @@ utc	stage	event	ref	note
 2026-10-25T07:30Z	3	heartbeat	lane	bisect probe -3 Linux green, macOS running; no flags on ours; no dev-red; no dev ci run
 2026-10-25T07:52Z	3	heartbeat	lane	bisect probe -3 macOS still running; culprit is among #4886-#5006, none ours; no dev-red; no dev ci run
 2026-10-25T08:14Z	3	heartbeat	lane	dev at 7e5bcd82f (#5287, not ours); bisect probe -3 macOS still running; no flags on ours; no dev-red
+2026-10-25T08:36Z	3	heartbeat	lane	bisect probe -3 green, probe -4 running (culprit in #4960-#5006, none ours); dev 7e5bcd82f Linux green; no flags on ours; no dev-red
