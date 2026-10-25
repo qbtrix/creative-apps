@@ -113,3 +113,4 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - 11:08Z heartbeat: #4894 #4936 #5092 #4917 #4942 open, no needs-fix/needs-rebase; dev at 68bec9fe7 (SuiteText refactor, not ours); lane still bisecting batch 20261025090316 (none of ours); no slice done, 0 findings
 - 11:30Z heartbeat: all five PRs open and clean, no needs-fix/needs-rebase; new batch 20261025111803 holds none of ours; full CI on dev 68bec9fe7 running; no slice done, 0 findings
 - 11:52Z heartbeat: all five PRs open and clean, no needs-fix/needs-rebase; lane now runs LANE_VERIFY_AFTER=1 (#5274) and checks stale-proof PRs one at a time (batch 20261025114830 holds none of ours), so #4894 #4917 #5092 queue behind others; dev at 5270bc4bc; no slice done, 0 findings
+- 12:15Z heartbeat: all five PRs open, no needs-fix/needs-rebase; lane landing stale-proof PRs one at a time (#4886, #4943 merged; dev at 58bb6d4d5); ours still queued; no slice done, 0 findings
