@@ -123,3 +123,4 @@ utc	stage	event	ref	note
 2026-10-25T08:11Z	3	lane	lane	check: lane moving again (#5287 merged 08:06); none of ours merged or labelled; no dev-red; awaiting batches
 2026-10-25T08:34Z	3	lane	lane	check: none of ours labelled, no merges since 08:10, dev not red (#5183 closed)
 2026-10-25T08:56Z	3	lane	lane	check: none of ours labelled; #5274 (lane: Linux proof behind LANE_VERIFY_AFTER) merged 08:48; dev not red
+2026-10-25T09:18Z	3	lane	lane	check: none of ours labelled; no merges since 08:50; dev not red
