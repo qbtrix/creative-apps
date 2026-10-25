@@ -28,7 +28,7 @@ struct FlareCommandPathTests {
     static let controls = [
         Control(name: "FlareRecovery Restore", id: "recovery.restore", params: .object(["data": .string(recovered)])),
         Control(name: "FlareRecovery Discard", id: "recovery.discard", params: .object([:])),
-        Control(name: "FlareNewSheet Create", id: "file.new", params: created),
+        Control(name: "NewDocumentSheet Create", id: "file.new", params: created),
         Control(name: "FlareTimelineEdit Add Label", id: "frame.label", params: .object(["name": .string("Intro")])),
         Control(name: "FlareTimelineEdit Remove Label", id: "frame.label", params: .object([:])),
         Control(name: "FlareTimelineEdit Select All Keys", id: "timeline.select-all-keys", params: .object([:])),
