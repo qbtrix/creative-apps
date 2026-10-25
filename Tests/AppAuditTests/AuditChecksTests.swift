@@ -101,6 +101,20 @@ private func count(
     #expect(report.samples.map(\.measure.limit) == [4.5, 4.5, 3])
 }
 
+/// A popover or menu over a window's text hides it, so the text's pixels are the popover's, not its own
+/// (Halo's shape popover over the inspector read 1.00:1, #3926). One off to the side still lets it be measured.
+@Test func pixelChecksSkipWindowTextUnderAPopover() {
+    let text = Node(type: "staticText", frame: rect(10, 40, 60, 14), name: "covered")
+    var fixture = AppAudit.Fixture(nodes: [text], paint: [(rect(12, 42, 30, 10), 0xAA)])
+    fixture.nodes.append(Node(type: "popover", frame: rect(150, 30, 100, 60)))
+    #expect(AppAudit.report(AppAudit.TextContrast(), on: fixture).counts["contrast"] == 1)
+    fixture.nodes.append(Node(type: "popover", frame: rect(0, 30, 100, 60)))
+    #expect(AppAudit.report(AppAudit.TextContrast(), on: fixture).counts["contrast"] == 0)
+    fixture.nodes.removeLast()
+    fixture.nodes.append(Node(type: "menu", frame: rect(40, 45, 80, 40)))
+    #expect(AppAudit.report(AppAudit.TextContrast(), on: fixture).counts["contrast"] == 0)
+}
+
 @Test func textInADisabledControlOrOffTheWindowIsNotMeasured() {
     var off = button("off", rect(10, 30, 40, 12), enabled: false)
     off.children = [Node(type: "staticText", frame: rect(10, 30, 40, 12), name: "Undo")]

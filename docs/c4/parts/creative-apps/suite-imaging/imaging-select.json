@@ -1,0 +1,10 @@
+{
+  "id": "imaging-select",
+  "name": "Select",
+  "description": "Select/ (docs/blueprints/suiteui/features/area-selection.md): AreaMask turns SuiteKernel's AreaRecipe into a CoreRaster Mask. Each shape renders to its own mask (rectangle and ellipse from core's statics, lasso and polygon by Mask.polygon, the magic wand by floodMask on the target layer or, with All Layers, the composite) and joins the area by replace, add, subtract or intersect; invert, feather and expand (a disk max of the coverage, a min for contract) apply where they sit in the steps. The outline for the marching ants is the mask's contours at 0.5. area-selection AR-5 declares it as a stub; AR-6 fills the body.",
+  "technology": "Swift 6, CoreRaster and SuiteKernel, Linux and macOS",
+  "paths": [
+    "Sources/SuiteImaging/Select/"
+  ],
+  "order": 120
+}
