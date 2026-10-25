@@ -5,7 +5,8 @@
 // waiting. A refresh drops every file gone from disk from the shared list. Reopening a file this app last used
 // goes straight to its document host: a hand-off to itself through Launch Services can reach another copy of the
 // app, or none, when this one runs outside AfterGlow.app (#4332). Open In's targets and its refusal come from
-// the services' routing slot.
+// the services' routing slot. `thumbnails` is the services' shared previews, the one store a process's saves
+// publish to.
 import Foundation
 import Observation
 import SuiteKernel
@@ -21,6 +22,8 @@ import SuiteModel
     /// The host a reopen of this app's own file goes to; nil uses the suite delegate's (tests inject one).
     @ObservationIgnored public var host: (any SuiteDocumentHost)?
     @ObservationIgnored private let services: SuiteServices
+    /// The suite's previews this process publishes saved documents' thumbnails to.
+    public var thumbnails: any ThumbnailPublishing { services.thumbnails }
     @ObservationIgnored private let now: @Sendable () -> Date
     @ObservationIgnored private let exists: @Sendable (String) -> Bool
 
