@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
 Stage: 3 wave 8
 Base: c16bcd16c (origin/dev)
-Next: 09:01Z: bisect probe -3 green, -4 red on macOS (40176391007): the culprit is the 5th PR in the batch (#4960, not ours), so #4886 should land with the first four. dev 8d3a12c4b (#5274, not ours). No needs-fix/needs-rebase; no supervisor reply. IM-13 waits on #5151, #5163. Poll ~09:20Z.
+Next: 09:22Z: old bisect ended with #4960 needs-fix, but the green prefix did not land; the lane re-batched as lane/batch-20261025090316 (14 PRs incl. #4886), red on Linux, now bisecting (probe -6). dev 8d3a12c4b; no needs-fix/needs-rebase on ours; no supervisor reply. IM-13 waits on #5151, #5163. Poll ~09:42Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a170cfbf58-pshm, feature issue #3715). This copy is refreshed with it after every stage.
 
