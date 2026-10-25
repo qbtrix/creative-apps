@@ -2,7 +2,7 @@
 
 Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/features/fill-heal.md
 Run: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
-Stage: 3 wave 1 (stacks replayed; in the lane)
+Stage: 3 wave 2 (next slices stacked; wave 1 in the lane)
 Base: main ef37711d (verified) / dev ae3efdb8
 Next: wait for the lane to merge #4889 / #5121 / #5137, then retarget #4896, #5245 to dev; FH-9 and FH-10 after FH-7 merges.
 
@@ -30,6 +30,7 @@ Next: wait for the lane to merge #4889 / #5121 / #5137, then retarget #4896, #52
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-25T01:15Z: wave 2: FH-9 (C4-only, on dev) and FH-10 (feature-done, on FH-8) building; 0 open findings.
 - 2026-10-25T01:20Z: replay done: #5107 split into #5245 (FH-7a, 10 files, on FH-3) and #5107 (FH-7b, 7 files, on FH-7a); #5108, #5129 on FH-7; #5109 on lead/fill-heal-FH-8-base (FH-7b + FH-4 merged), retarget to dev once both land; #5121 #5137 on dev. All CI: PASS.
 - 2026-10-24T23:20Z: dev was rewritten to a new root (4f00afb8, #5150); old slice branches share no history with it, so fixers replay each PR's own commits onto the new dev, split to the 400-line/15-file cap, re-gate and force-with-lease push the lead/* branches (same PR numbers).
 - 2026-10-24T06:54Z: relaunch (16 h limit; captain: full capacity). FH-7 built ahead now, stacked on #4577 (FH-6) and #4889 (FH-3), rule 22/23: AJ-photo is a shared-file order wait (catalog, ledger), not code; the lane integrates the conflict if AJ-photo lands first.

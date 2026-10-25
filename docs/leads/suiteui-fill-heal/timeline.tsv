@@ -105,3 +105,4 @@ utc	stage	event	ref	note
 2026-10-24T22:35:26Z	lane	poll	batch 20261024205137 still bisecting (lane alive, dev CI 40137153379 running); fill-heal PRs queued
 2026-10-24T23:20:00Z	lead	restack	dev rewritten (root 4f00afb8); fixer replaying #5107 #5108 #5109 #5129 #5121
 2026-10-25T01:20:00Z	3	pr-opened	stacks	replayed onto dev ae3efdb8, gated, fast-lane
+2026-10-25T01:15Z	3	stage-start	wave 2	FH-9 (C4-only, on dev) and FH-10 (feature-done, on FH-8) building
