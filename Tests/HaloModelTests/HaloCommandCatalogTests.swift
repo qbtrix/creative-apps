@@ -42,9 +42,11 @@ extension HaloProject: HeadlessDocument {
         let places = ["place.read", "place.image", "place.replace", "place.reset-size", "place.focus"]  // PH-6: the five place commands
         let styles = StyleCommands.specs(HaloProject.self).map(\.id)  // HY-1: then the eleven style commands
         let files = FileFlowCommands.specs(HaloProject.self).map(\.id)  // HF-3: the suite's file flow, its file.open-recent too
+        let filters = ["adjust.black-and-white", "adjust.invert"] + ImagingFilter.ids.map { "filter.\($0)" }
+            + ["filter.set-hidden", "filter.remove"]  // AJ-12: the layer's kinds, filters and list
         let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
         let all = ids.filter { $0 != "file.open-recent" } + shapes + fills + strokes + history + transforms + rates + places + styles
-            + files + window
+            + files + filters + window
         #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
     }
 
@@ -137,6 +139,11 @@ extension HaloProject: HeadlessDocument {
         "the examples need a placed image; Ball shows none (HaloPlaceTests run them, PH-6)": ["place.focus place.read place.replace place.reset-size: exampleRuns"],
         "Ball has no recent files and no other app opens a .halo (HaloFileFlowTests run them, HF-3)": ["file.clear-recent file.open-in: exampleRuns"],
         "the style commands are LS-a's stubs until LS-6; Ball has no style to copy or clear (HY-5)": ["style.add style.clear style.copy style.enable style.fill-opacity style.panel style.paste style.preset style.read style.remove style.set: exampleRuns"],
+        "the black-and-white example ({}) clears it, and Ball has none, so nothing changes (AJ-12)": [
+            "adjust.black-and-white: stepNamedTitle", "adjust.black-and-white: editRecordsOneStep",
+            "adjust.black-and-white: undoRestoresBytes"],
+        "the list examples need a filter; Ball has none (HaloFiltersTests run them, AJ-12)": [
+            "filter.remove filter.set-hidden: exampleRuns"],
     ]
 
     @Test func conformance() {

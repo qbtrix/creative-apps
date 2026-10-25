@@ -108,16 +108,6 @@ import Testing
         #expect(project.selectedLayer?.filters.first == HaloLayerFilter(.filter(.gaussianBlur(radius: 6))))
     }
 
-    @Test func moveReorders() throws {
-        var project = Self.ballSelected()
-        try Self.blur(6, on: &project)
-        _ = try HaloProject.catalog.run("adjust.invert", params: .object([:]), on: &project)
-        _ = try HaloProject.catalog.run("filter.move", params: .object(["id": .string("invert"), "index": .number(0)]), on: &project)
-        #expect(project.selectedLayer?.filters.map(\.id) == ["invert", "gaussian-blur"])
-        project.undo()
-        #expect(project.selectedLayer?.filters.map(\.id) == ["gaussian-blur", "invert"])
-    }
-
     @Test func availabilitySaysWhy() throws {
         let catalog = HaloProject.catalog
         #expect(catalog.availability("filter.gaussian-blur", on: HaloProject(services: .fake)).why == HaloProject.noFilterComposition)

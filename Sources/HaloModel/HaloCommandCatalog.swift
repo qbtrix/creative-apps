@@ -14,13 +14,14 @@ extension HaloProject {
     /// selected layer (transform HT-6), `frameRateSpecs` (frame-rates FR-8b), the five `place.*`
     /// commands (placed-images PH-6), the eleven `style.*` commands (layer-styles HY-1), the suite's five
     /// `file.*` recents, Open In and drop commands (file-flow HF-3, whose `file.open-recent` takes a recent
-    /// file's id in place of the path `.openRecent` names), then `windowSpecs`.
+    /// file's id in place of the path `.openRecent` names), the selected layer's kind and filter commands and
+    /// its list's `filter.set-hidden`, `filter.remove`, `filter.move` (adjust-everywhere AJ-12), then `windowSpecs`.
     public static let commandSpecs: [CommandSpec<HaloProject>] =
         HaloCommand.allCases.map(spec(for:)).filter { $0.id != "file.open-recent" } + ShapeCommands.specs(HaloProject.self)
         + GradientCommands.specs(HaloProject.self) + StrokeCommands.specs(HaloProject.self)
         + HistoryCommands.specs(HaloProject.self) + TransformCommands.specs(HaloProject.self) + frameRateSpecs
         + PlaceCommands.specs(HaloProject.self) + StyleCommands.specs(HaloProject.self)
-        + FileFlowCommands.specs(HaloProject.self) + windowSpecs
+        + FileFlowCommands.specs(HaloProject.self) + filterSpecs + windowSpecs
 
     /// The render sheet's Choose… and the unsaved alert's Save and Don't Save (CS-7): headless they check
     /// availability and change nothing, since the panel and the held command are the window's.

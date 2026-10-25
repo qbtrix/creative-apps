@@ -14,7 +14,8 @@ enum HaloDrawRules {
                 opacity: placing.value(.opacity, of: layer.id, in: c, at: frame) ?? layer.opacity,
                 color: layer.color, blendMode: layer.blendMode, text: layer.text, gradient: layer.gradient,
                 shape: layer.shape, stroke: HaloOutlines.stroke(of: layer, in: c, at: frame),
-                placedAsset: layer.kind == .solid ? layer.placedAsset : nil, placedImage: layer.placedImage(in: c))
+                placedAsset: layer.kind == .solid ? layer.placedAsset : nil, placedImage: layer.placedImage(in: c),
+                filters: layer.filters)
         }
         return HaloDrawList(width: c.width, height: c.height, frame: frame, items: items)
     }
