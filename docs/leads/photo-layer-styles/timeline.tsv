@@ -99,3 +99,4 @@ utc	stage	event	ref	note
 2026-10-25T01:43:02Z	W2	check	PY-1	check-in: dev moved (HY-1 #5156 merged); probe -9 macOS running; LS-2 #5174 head 6e467f79 clean; #5177 clean
 2026-10-25T02:07:17Z	W2	check	PY-1	check-in: no change; probe -9 macOS still running; #5174 and #5177 clean
 2026-10-25T02:31:26Z	W2	check	PY-1	check-in: probe -9 macOS red, probe -10 running (LS-2 #5174 at slot 11 still waits); full CI 40154669999 queued; #5177 clean
+2026-10-25T02:55:09Z	W2	check	PY-1	check-in: LS-2 #5174 in new batch-20261025023716 (Linux running, macOS queued); #5177 clean, not in it
