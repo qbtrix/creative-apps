@@ -111,3 +111,4 @@ utc	stage	event	ref	note
 2026-10-25T02:31Z	check	heartbeat	no lane merges of ours; dev 3db45eb4 (full CI queued); 15 PRs open (+#5263 OC-photo-u, #5265 SC-8), #5266 OC-library-u just opened; no needs-fix/needs-rebase; no finding on our features
 2026-10-25T02:35Z	3	pr-opened	#5266	OC-library-u (OC-9, OC-10) on #5246; rebuild + X clash fix requested
 2026-10-25T02:41:26Z	check	heartbeat	#5266 OC-library-u rebuilt (15 files, aa03993b, X/Reject clash fixed); footers stripped; dev 3db45eb4 full CI queued; no merges, no needs-fix, no finding
+2026-10-25T02:51:41Z	check	heartbeat	no merges of ours; lane batch-20261025023716 (12 PRs, none ours) in its gates; dev 3db45eb4 Linux check green, full CI still queued; 16 PRs open with fast-lane (lane kept it on #5261/#5265), no needs-fix/needs-rebase; no finding on our features; both fixers done and contract-checked
