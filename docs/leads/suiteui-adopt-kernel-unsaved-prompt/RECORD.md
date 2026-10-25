@@ -1,10 +1,10 @@
 # Lead record: adopt-kernel-unsaved-prompt
 
-Run: act-1a16ca8dead-fbso (resumes act-1a1647fe637-pfga, act-1a15e33396b-eo15, act-1a15b69feea-et92). Feature issue #4502 (was #3721). Packet: docs/blueprints/suiteui/features/adopt-kernel-unsaved-prompt.md (v3, slices).
-Integration branch: dev (main only takes dev SHAs that passed full CI). Base: origin/dev e5dcf93.
-Stage: 3 wave 1
-Base: e5dcf93
-Next: UP-photo #5088, UP-flare #5089, UP-halo #5091 stacked (all fast-lane, gate PASS); poll the lane and post Belt-Slice-Done per slice once a green ci.yml run contains it. Earlier: UP-photo is #5088 (fast-lane, gate PASS at b33630f9). Restack UP-flare (built at 11eed166) on UP-photo and UP-halo (47d29734) on UP-flare, resolve the suite journey's `live` set to Design, Photo, Flare, Halo, gate, open their PRs. UP-z waits on shared-codecs SC-f (contract) and the app slices.
+Run: act-1a1701f664c-e58p (resumes act-1a16ca8dead-fbso, act-1a1647fe637-pfga, act-1a15e33396b-eo15, act-1a15b69feea-et92). Feature issue #3721. Packet: docs/blueprints/suiteui/features/adopt-kernel-unsaved-prompt.md (v3, slices).
+Integration branch: dev (main only takes dev SHAs that passed full CI). Base: origin/dev afef017c.
+Stage: 4 watching
+Base: afef017c
+Next: every slice is built and in the lane: #5088 (base dev) → #5089 → #5091 → #5231 (UP-z, feature-done). Poll the lane; fix any needs-fix or needs-rebase first; post Belt-Slice-Done per slice once a green scoped-suiteui or full ci.yml run on dev holds its PR, then Belt-Contact-Sheet.
 
 ## Plan
 
@@ -16,15 +16,22 @@ Next: UP-photo #5088, UP-flare #5089, UP-halo #5091 stacked (all fast-lane, gate
 | UP-photo | UP-7, UP-8 | in lane (#5088, head b33630f9) | shared-thumbnails:ST-z (met by contract ST-a #4840), UP-design |
 | UP-flare | UP-9, UP-10 | in lane (#5089, head a981f4a4, base UP-photo) | adopt-kernel-autosave:AK-flare (on dev 5ecec459), UP-photo |
 | UP-halo | UP-11, UP-12 | in lane (#5091, head 67110503, base UP-flare) | UP-flare (shared journey file) |
-| UP-z | UP-13, UP-14 | blocked | the four app slices (#5088, #5089, #5091 in lane); shared-codecs:SC-z (`canonical-baseline.txt` chain SC-z → UP-13; SC-f, SC-a merged, SC-photo/halo/library/raster PRs open) |
+| UP-z | UP-13, UP-14 | in lane (#5231, head d3b3389e, base UP-halo; fast-lane + feature-done) | the four app slices (in lane); shared-codecs:SC-z (built ahead, Wire below) |
 
 One PR per slice: each app slice's PR holds its test-first task and its adoption task, so an app slice starts only once its external wait clears.
 
 ## Wires
 
 - [ ] Wire: shared-thumbnails:ST-z (UP-photo built on ST-a's contract, #4840)
+- [ ] Wire: shared-codecs:SC-z (UP-z built ahead; its wait only orders Tests/canonical-baseline.txt, which the lane's integration resolves)
 
 ## Decisions
+
+- 2026-10-25 00:20Z: Belt nudge: this run's record pushes went to lead/adopt-kernel-unsaved-prompt by mistake; carried them here, the branch Belt reads. State unchanged: dev afef017c, #5088/#5089/#5091/#5231 open, fast-lane only, no needs-*; no open findings.
+
+- 2026-10-24 23:40Z: wave 2 done: UP-z is #5231 (head d3b3389e, +14/-230, 6 files, fast-lane + feature-done, base the UP-halo branch). It deletes DesignClosePrompt and PhotoUnsavedPrompt (and its text test), drops their two canonical-baseline lines, and runs SJ-UP with no skipped leg; the wave reads built, #3721. scripts/ci --changed: CI: PASS. Built ahead of SC-z under the never-wait rule (Wire above).
+
+- 2026-10-24 23:00Z: relaunch act-1a1701f664c-e58p on #3721 (supervisor relaunch 22:49Z). #5088 eligible and queued behind a batch; #5089, #5091 stacked; no open findings.
 
 - 2026-10-24 22:33Z: hb40: dev still afef017c (#5222), no new merges; #5118 (p0, not ours) got needs-fix at 22:30Z, so the lane's p0 queue is clearing; #5088/#5089/#5091 open, fast-lane only, no needs-*; #3721 still 13 comments, no supervisor answer; UP-z still waits.
 

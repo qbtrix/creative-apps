@@ -95,3 +95,6 @@ ts	kind	note
 2026-10-24T21:48:52Z	poll	hb38: no change; dev afef017c (#5222) without #5088; no supervisor answer
 2026-10-24T22:10:30Z	poll	hb39: no change; dev afef017c; slice PRs open; no supervisor answer
 2026-10-24T22:32:11Z	poll	hb40: no change for us; #5118 needs-fix; dev afef017c; no supervisor answer
+2026-10-24T23:00:00Z	relaunch	run act-1a1701f664c-e58p on #3721; wave 2 UP-z built ahead (Wire SC-z)
+2026-10-24T23:40:00Z	pr	UP-z #5231 opened (stacked on #5091), CI: PASS; all slices built
+2026-10-25T00:20:00Z	nudge	Belt nudge; record carried to the branch Belt reads; no change in the lane
