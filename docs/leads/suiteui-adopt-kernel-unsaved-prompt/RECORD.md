@@ -27,6 +27,7 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 
 ## Decisions
 
+- 2026-10-25 02:01Z: hb45 (Belt nudge 2): lane run 40150494762 says #5088 eligible (371 lines, 8 files, CLEAN, Fast-Check marker, no code) but a batch is in flight (lane/batch-20261024235353 bisecting) with 128 ready PRs queued; nothing to fix, waiting for the next sweep.
 - 2026-10-25 02:00Z: hb44: no change; dev c16bcd16 feat(halo): layers carry a style; the five style p; #5088/#5089/#5091/#5231 open, fast-lane only, no needs-*; no open findings.
 
 - 2026-10-25 01:30Z: hb43: no change; dev ae3efdb8 feat(halo): plan refuses alpha on H.264 and keeps ; #5088/#5089/#5091/#5231 open, fast-lane only, no needs-*; no open findings.
