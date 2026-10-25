@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a16d523b32-v6tj (resumes act-1a164d620b2-ve0e and earlier) · Started: 2026-10-24
 Stage: 3 wave 7
 Base: 9f476af (origin/dev)
-Next: 01:28Z poll: batch 20261024235353 (none of ours) bisect: -6 green, -9 running. Dev ae3efdb83. All 7 PRs open, no needs-fix/needs-rebase; #5163/#5178 dirty. #3723 open; supervisor q 6383016723 unanswered. Poll again ~01:47Z.
+Next: 01:48Z poll: dev c16bcd16c (#5156, not ours). Batch 20261024235353 (none of ours) bisect: -9 Linux green, macOS running. All 7 PRs open, no needs-fix/needs-rebase; #5163/#5178 dirty. #3723 open; supervisor q 6383016723 unanswered. Poll again ~02:08Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a16d523b32-v6tj, feature issue #3715). This copy is refreshed with it after every stage.
 
