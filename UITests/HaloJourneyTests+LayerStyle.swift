@@ -36,7 +36,7 @@ final class HaloLayerStyleJourneyTests: XCTestCase {
         halo.shot("layer-style-1-glow-on")
         halo.element("halo.style.done").click()
 
-        // 2. Glow Size has a stopwatch; 0 at frame 0, stopwatch on; 20 at frame 30: two keys.
+        // 2. Glow Size has a stopwatch; 0 at frame 0, stopwatch on (keys 0 and the last frame); 20 at frame 30: three keys.
         let size = halo.element("halo.inspector.row.glowSize")
         XCTAssert(size.waitForExistence(timeout: 5), "LAYER STYLE shows no Glow Size row")
         let stopwatch = halo.element("suite.inspector").buttons.matching(NSPredicate(format: "label == %@", "Animate Glow Size")).firstMatch
@@ -47,7 +47,7 @@ final class HaloLayerStyleJourneyTests: XCTestCase {
         XCTAssert(waitUntil { (stopwatch.value as? String) == "Keyed at this frame" }, "the stopwatch didn't key Glow Size at 0")
         goTo(frame: 30, halo)
         type("20", into: size, halo)
-        XCTAssert(waitUntil { halo.laneKeys("Badge").contains("2 keyframes") }, "Badge's lane reads \(halo.laneKeys("Badge")), not 2 keyframes")
+        XCTAssert(waitUntil { halo.laneKeys("Badge").contains("3 keyframes") }, "Badge's lane reads \(halo.laneKeys("Badge")), not 3 keyframes")
         halo.shot("layer-style-2-keys")
 
         // 3. Scrub back: the glow grows from nothing at 0 to 20 px at 30.
