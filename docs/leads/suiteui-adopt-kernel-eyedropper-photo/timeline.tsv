@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-25T11:18Z	check	EP-z	old batch dropped; new batch #4886 only; #4943 waits
 2026-10-25T11:38Z	check	EP-z	#4886 landed alone; #4943 has prescreen+linux proof, waits for lane
 2026-10-25T11:58Z	check	EP-z	batch 20261025114830 holds #4943 alone; Linux check 40190414289 running
+2026-10-25T12:19Z	merged	EP-z	#4943 merged as 58bb6d4d5; scoped photo 40192238595 running
