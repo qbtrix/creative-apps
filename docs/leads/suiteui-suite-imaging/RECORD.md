@@ -4,7 +4,7 @@ Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-im
 Run: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
 Stage: 3 wave 8
 Base: c16bcd16c (origin/dev)
-Next: 05:43Z poll: dev 13fb2f591. All 7 PRs open, none merged, no needs-fix/needs-rebase (#5163/#5178 dirty, the lane integrates). IM-8d re-cut: lift the Photo live route (liveStack fold, liveRegion, PhotoCompositeCache) into SuiteImaging as a Linux-safe route over ToneRendering, then delete PhotoLiveTone; builder stacked on IM-8b. Poll again ~06:05Z.
+Next: 06:05Z poll: dev 13fb2f591. PRs #4886:clean #5148:clean #5151:clean #5153:clean #5154:clean #5163:dirty #5178:dirty . Findings 0. IM-8d builder running (lift the live route into SuiteImaging, stacked on IM-8b). Poll again ~06:25Z.
 
 Mirror: the live record is docs/leads/suite-imaging/RECORD.md on lead/suite-imaging (run act-1a170cfbf58-pshm, feature issue #3715). This copy is refreshed with it after every stage.
 
