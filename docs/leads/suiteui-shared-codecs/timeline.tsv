@@ -97,3 +97,4 @@ utc	stage	event	ref	note
 2026-10-25T05:57:39Z	check	heartbeat	05:57Z: all 16 PRs open and clean; lane batch-20261025054232 (has #4953 TC-6, #5006 TC-u) is bisecting, probe -6 (prefix through #5006) on Linux + macOS gate; dev 13fb2f59; no new findings, no dev-red
 2026-10-25T06:17:04Z	check	heartbeat	06:16Z: all 16 PRs open and clean; lane probe batch-20261025054232-6 (through #5006 TC-u) still running Linux + macOS gate; dev 13fb2f59; no new findings, no dev-red
 2026-10-25T06:37:20Z	check	heartbeat	06:37Z: all 16 PRs open and clean; lane probe batch-20261025054232-6 (through #5006 TC-u): Linux green, macOS gate running; dev 13fb2f59; no new findings, no dev-red
+2026-10-25T06:56:50Z	check	heartbeat	06:56Z: all 16 PRs open and clean; lane probe batch-20261025054232-6 (through #5006 TC-u): Linux green, macOS gate still running; dev 13fb2f59; no new findings, no dev-red
