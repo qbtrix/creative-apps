@@ -44,3 +44,5 @@ utc	stage	event	ref	note
 2026-10-24T22:06Z	check	EP-z	EP-z: #4943 open, clean, head 69dedd1, no needs-fix, no batch yet (unchanged since 08:28Z)
 2026-10-24T22:33Z	check	EP-z	EP-z: #4943 open, clean, head 69dedd1, no needs-fix, no batch yet (unchanged since 08:28Z)
 2026-10-24T22:59Z	check	EP-z	EP-z: #4943 open, clean, head 69dedd1, no needs-fix, no batch yet (unchanged since 08:28Z)
+2026-10-24T23:20Z	relaunch	-	act-1a1703c2617-uijr relaunched on main ef37711d
+2026-10-25T00:15Z	check	EP-z	EP-z: #4943 open, clean, head 69dedd1, no needs-fix, eligible behind lane batch (120 ready)

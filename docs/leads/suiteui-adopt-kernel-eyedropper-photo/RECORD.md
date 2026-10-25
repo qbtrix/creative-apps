@@ -1,9 +1,9 @@
 # adopt-kernel-eyedropper-photo lead record
 
 Issue: #3723 · Packet: docs/blueprints/suiteui/features/adopt-kernel-eyedropper-photo.md
-Run: act-1a16cc5a05a-lc3g (relaunch) · Started: 2026-10-24T06:40Z
+Run: act-1a1703c2617-uijr (relaunch) · Started: 2026-10-24T23:20Z
 Stage: 3 wave 2 (EP-m slice-done; EP-z #4943 Linux green, waiting for its batch)
-Base: 721168a8f (origin/dev; brief main cb79cbb6 verified)
+Base: 1bbaba6c (origin/dev; brief main ef37711d verified)
 Next: #4943 (EP-z, head 69dedd1) lands through the lane batch macOS gate; Belt-Slice-Done EP-z on the first green ci.yml run on dev containing it; then Belt-Contact-Sheet.
 
 ## Slices
@@ -86,3 +86,9 @@ Relaunched 2026-10-24T06:40Z on main 654fb36. The supervisor is hand-landing the
 
 - Status channel is this file on lead/suiteui-adopt-kernel-eyedropper-photo (Belt reads it); the copy on lead/adopt-kernel-eyedropper-photo is a stale mirror.
 - 08:10Z: #4837 merged as fb09de4. origin/dev merged into #4943 (modify/delete conflicts on the three EP-3 deletions resolved as deletions); the diff vs dev is EP-z's 10 files. Every lint passes; swift build can't run here, so the Fast-Check line was removed and fast-lane added; the lane's Linux run and the batch macOS gate are its proof.
+
+## Run act-1a1703c2617-uijr
+Relaunched 2026-10-24T23:20Z on main ef37711d. #4943's `Belt-Lead:` line now names this run, and the lane's Linux check 40078192845 is its proof. The lane log (run 40139701011, 22:52Z) reads `eligible`, "build gate: no code", waiting behind a batch in flight with 120 ready PRs.
+
+- Between 23:20Z and 00:10Z this run's heartbeats went to the mirror lead/adopt-kernel-eyedropper-photo by mistake. From 00:15Z they go here again.
+- 00:10Z: #4943 is open, clean and fast-lane, with no needs-fix or needs-rebase; head 69dedd1, dev 1bbaba6c. The UP-z Wire line stays open.
