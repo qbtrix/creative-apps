@@ -8,6 +8,8 @@
 // a render that needs either throws `.renderFailed` with that reason. After
 // the tone, a crop (crop CR-4) turns the buffer by its angle and cuts
 // `LiveCrop`'s frame for the buffer's own size out of the turned pixels.
+// The photo's orientation (orientation-crop OC-8) faces the pixels first, so
+// the crop's rect is in the oriented photo.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -67,10 +69,11 @@ public struct LiveDevelop: DevelopRendering {
                 throw LibraryError.renderFailed("\(error)")
             }
         }
+        b = b.oriented(settings.orientation)
         guard let crop = settings.crop else { return b }
         do {
             let turned = crop.angle == 0 ? b : try b.rotated(degrees: crop.angle, filter: .lanczos3)
-            let f = try LiveCrop().frame(crop, photo: PixelSize(width: buffer.width, height: buffer.height))
+            let f = try LiveCrop().frame(crop, photo: PixelSize(width: b.width, height: b.height))
             return try turned.cropped(x: f.x, y: f.y, width: f.width, height: f.height)
         } catch let error as RasterError {
             throw LibraryError.renderFailed("\(error)")

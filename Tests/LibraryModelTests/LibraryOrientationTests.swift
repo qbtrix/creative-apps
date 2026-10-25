@@ -35,7 +35,7 @@ private func photo(_ catalog: LibraryCatalog, _ id: String = "scan") throws -> P
     try #require(catalog.items.first { $0.id == id })
 }
 
-@Suite(.disabled("waits on OC-8")) struct LibraryOrientationTests {
+@Suite struct LibraryOrientationTests {
     @Test func rotateAndFlipComposeAsOneStepEach() throws {
         var catalog = landscape()
         #expect(try run("image.rotate-cw", on: &catalog) == "Rotate Right")

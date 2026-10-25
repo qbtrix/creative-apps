@@ -9,6 +9,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
+import SuiteKernel
 import SuiteModel
 
 /// One develop slider. The raw value is the row's label.
@@ -173,6 +174,8 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
     public private(set) var levels = DevelopLevels.neutral
     /// Nil: the whole photo, upright.
     public private(set) var crop: CropSettings?
+    /// How the photo faces before its crop (orientation-crop OC-8); up writes no key.
+    public private(set) var orientation: Orientation = .up
 
     public static let neutral = DevelopSettings()
     public init() {}
@@ -236,10 +239,17 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         return copy
     }
 
-    /// Every adjustment of `other` with this crop: Paste Settings never pastes a crop.
+    public func setting(orientation: Orientation) -> DevelopSettings {
+        var copy = self
+        copy.orientation = orientation
+        return copy
+    }
+
+    /// Every adjustment of `other` with this crop and orientation: Paste Settings never pastes either.
     public func pastingAdjustments(from other: DevelopSettings) -> DevelopSettings {
         var copy = other
         copy.crop = crop
+        copy.orientation = orientation
         return copy
     }
 
@@ -254,7 +264,7 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
 
     private enum CodingKeys: String, CodingKey {
         case exposure, contrast, highlights, shadows, temperature, tint, crop
-        case whites, blacks, vibrance, saturation, curve, levels
+        case whites, blacks, vibrance, saturation, curve, levels, orientation
     }
 
     /// The six original sliders are required, as the synthesized coding had them;
@@ -275,6 +285,7 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         let decodedCurve = try c.decodeIfPresent(ToneCurve.self, forKey: .curve) ?? .identity
         curve = decodedCurve.isIdentity ? .identity : decodedCurve
         levels = try c.decodeIfPresent(DevelopLevels.self, forKey: .levels) ?? .neutral
+        orientation = try c.decodeIfPresent(Orientation.self, forKey: .orientation) ?? .up
     }
 
     /// The six original sliders always and the crop when set (so persist's golden
@@ -294,6 +305,7 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         if saturation != 0 { try c.encode(saturation, forKey: .saturation) }
         if !curve.isIdentity { try c.encode(curve, forKey: .curve) }
         if levels != .neutral { try c.encode(levels, forKey: .levels) }
+        if orientation != .up { try c.encode(orientation, forKey: .orientation) }
     }
 }
 
@@ -306,24 +318,20 @@ public struct UnitRect: Hashable, Sendable, Codable {
     }
 }
 
-/// The crop's aspect. The raw value is the chip's title.
-public enum CropAspect: String, CaseIterable, Sendable, Codable {
-    case original = "Original", free = "Free", square = "1:1"
-    case fourFive = "4:5", threeTwo = "3:2", sixteenNine = "16:9"
+/// The crop's aspect: the kernel's (orientation-crop OC-8), whose raw values are the stored keys.
+public typealias CropAspect = SuiteKernel.CropAspect
+
+extension SuiteKernel.CropAspect {
+    public static let square = CropAspect.ratio(width: 1, height: 1)
+    public static let fourFive = CropAspect.ratio(width: 4, height: 5)
+    public static let threeTwo = CropAspect.ratio(width: 3, height: 2)
+    public static let sixteenNine = CropAspect.ratio(width: 16, height: 9)
+    /// Library's chips, in order.
+    public static let allCases: [CropAspect] = [.original, .free, .square, .fourFive, .threeTwo, .sixteenNine]
 
     /// Width over height for a photo of `size` (a 3:2 on a portrait photo is 2:3); nil for Free.
     public func ratio(for size: PixelSize) -> Double? {
-        let portrait = size.height > size.width
-        let base: Double? = switch self {
-        case .free: nil
-        case .original: size.height > 0 ? Double(size.width) / Double(size.height) : nil
-        case .square: 1
-        case .fourFive: 4.0 / 5.0
-        case .threeTwo: 3.0 / 2.0
-        case .sixteenNine: 16.0 / 9.0
-        }
-        guard let base, self != .original, self != .square else { return base }
-        return portrait == (base > 1) ? 1 / base : base
+        ratio(for: (Double(size.width), Double(size.height)), orientation: nil)
     }
 }
 
