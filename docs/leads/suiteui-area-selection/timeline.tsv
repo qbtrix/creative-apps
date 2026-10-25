@@ -93,3 +93,4 @@ time	task	event	note
 2026-10-25T01:45:00Z	3	pr-opened	AR-z	#5254 head fb70b0ab; #5256 head ea17435d (feature-done), CI: PASS
 2026-10-25T02:50:00Z	3	pr-opened	AR-z C4	#5268 head b0022ba4, docs-only, CI: PASS
 2026-10-25T03:12:00Z	3	heartbeat	lane	batch-20261025023716 (holds #4848, #4877): Linux green, macOS gate running; nothing merged, no needs-fix
+2026-10-25T03:35:00Z	3	heartbeat	lane	batch-20261025023716 macOS red: DesignPlaceSnapshots.swift:39 type-check timeout (#4963's file, not ours); lane bisecting (probe -6); our PRs wait for the next batch
