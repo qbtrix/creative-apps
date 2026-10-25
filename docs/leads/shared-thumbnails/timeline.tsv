@@ -145,3 +145,4 @@ ts	kind	note
 2026-10-25T12:52Z	heartbeat	#4953 landed (dev 930337d52); no batch in flight; #5133 at 502e566f9 clean, no new lane comments; no supervisor reply yet
 2026-10-25T13:15Z	heartbeat	batch 20261025125743 holds #4962 (one-PR batches in PR order); dev 930337d52; #5133 at 502e566f9 clean, no new lane comments; no supervisor reply yet
 2026-10-25T13:46Z	fix	#4962 landed (dev bbaedba66) and conflicted #5133 in LibraryWindow.swift (lane: needs-rebase); merged dev, kept both (JPEGWriter(metadata:) + withThumbnailDisk), scripts/ci --changed PASS, pushed 90eb5fab2, Head: moved; no supervisor reply yet
+2026-10-25T14:07Z	heartbeat	#5006 landed (dev d3323f6a7); batch 20261025140134 holds #5007; #5133 at 90eb5fab2 merges clean, fast-lane check in progress, no new lane comments; no supervisor reply yet
