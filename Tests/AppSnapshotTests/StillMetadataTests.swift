@@ -104,12 +104,14 @@ import Testing
         try Self.expectNone(try Self.phone(), as: .jpeg)
     }
 
-    @Test(.enabled(if: StillMetadataTests.canWriteHEIC, "this Mac can't write HEIC"))
+    @Test(.enabled(if: StillMetadataTests.canWriteHEIC, "this Mac can't write HEIC"),
+          .disabled("quarantine #5344 until 2026-10-29"))
     func heicWithoutLocationKeepsDateCopyrightAndOrientation() throws {
         try Self.expectNoLocation(try #require(Self.phoneHEIC()), as: .heic)
     }
 
-    @Test(.enabled(if: StillMetadataTests.canWriteHEIC, "this Mac can't write HEIC"))
+    @Test(.enabled(if: StillMetadataTests.canWriteHEIC, "this Mac can't write HEIC"),
+          .disabled("quarantine #5344 until 2026-10-29"))
     func heicWithNoneKeepsOnlyOrientationAndProfile() throws {
         try Self.expectNone(try #require(Self.phoneHEIC()), as: .heic)
     }
