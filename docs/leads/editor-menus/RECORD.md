@@ -140,3 +140,4 @@ Next: lane: probe batch-20261025023716-3 (holds #4988) resolves; once #4988 merg
 - 2026-10-25T09:41:54Z: batch-20261025090316 (p0, not ours) probe -6 macOS running; #4988 waits
 - 2026-10-25T09:59:52Z: batch-20261025090316 (p0, not ours) still bisecting (probe -6 macOS running); #4988 waits
 - 2026-10-25T10:17:58Z: batch-20261025090316 (p0, not ours) probe -6 macOS still running; #4988 waits
+- 2026-10-25T10:35:57Z: batch-20261025090316 (p0, not ours) bisecting: probe -6 macOS running, probe -9 Linux running; #4988 waits
