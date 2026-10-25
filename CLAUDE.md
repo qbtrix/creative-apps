@@ -321,6 +321,15 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   shared code builds everything), comments its URL, and merges when it
   compiles; a failed build waits for your next push. A `Mac-Check: <run url>`
   line a supervisor adds counts too. Batches then check Linux only.
+- Verify after merge, `LANE_VERIFY_AFTER=1` (a repo variable, off by
+  default): while a `dev-red` issue is open, the lane reverts the culprit
+  PR, the one the dev bisect names or the only PR in the issue's range. It
+  opens a `lane-revert` PR from `lane/revert-<n>` and lands it on its own
+  Linux check, then runs CI on `dev`. Your merged PR's feature-lead issue
+  (or the PR) gets a comment saying why and how to bring the change back
+  (a new PR that reverts the revert, plus the fix), and a `finding` is filed
+  for your app. One revert per `dev-red` issue, never a revert of a revert.
+  Details: `docs/fast-lane.md`.
 - A crew PR into `dev` whose body has a `Belt-Lead:` line but no `fast-lane`
   label gets the label from the lane's next sweep, with one comment, and is
   evaluated in that sweep under the same rules. `no-fast-lane` or

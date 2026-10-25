@@ -7,7 +7,8 @@
 #
 # Each sweep: red_sweep reads the open dev-red issue (bisecting a Linux red
 # to its culprit), a batch left in flight resumes (batch_resume: land, bisect
-# by prefix, or drop), every open fast-lane PR is evaluated (decide, the pure
+# by prefix, or drop), with LANE_VERIFY_AFTER=1 revert_sweep reverts a red
+# dev's culprit, every open fast-lane PR is evaluated (decide, the pure
 # decision function), and settle_ready lands the ready ones or forms the next
 # `lane/batch-<id>` (BATCH_PREFIX). Invariants a change must keep:
 # - One batch at a time; while one is in flight nothing else merges.
@@ -16,6 +17,7 @@
 #   marks a base that held dev's red commit (dropped once dev is green).
 # - No batch forms while dev is red on a job it would run (red_holds).
 # - A dropped batch never labels or comments on its PRs.
+# - One revert call per dev-red issue (REVERT_MARK), never of a revert.
 # - Merge drivers and helper scripts come from this checkout (main), never
 #   from a PR.
 # Rules for agents: CLAUDE.md, "Fast lane". How the gate, batches, bisects
@@ -161,6 +163,8 @@ NEEDS_FIX_LABEL="needs-fix"
 # The batch macOS gate. fast-lane.yml sets these from the repo variables of the
 # same names; unset or empty means the default here.
 case "${LANE_MAC_PER_PR:-0}" in 0) LANE_MAC_PER_PR=0 ;; *) LANE_MAC_PER_PR=1 ;; esac  # 1: the rollback (per-PR macOS build, Linux-only batches)
+# 1: verify after merge (docs/fast-lane.md): a red dev's culprit is reverted (revert_sweep).
+case "${LANE_VERIFY_AFTER:-0}" in 0) LANE_VERIFY_AFTER=0 ;; *) LANE_VERIFY_AFTER=1 ;; esac
 LANE_MAC_SLOTS="${LANE_MAC_SLOTS:-4}"            # lane macOS runs queued or running before no batch forms (5 hosted runners, one kept for dev)
 LANE_BATCH_MAX="${LANE_BATCH_MAX:-12}"           # PRs per batch, and probes per bisect (12 PRs need at most 4)
 LANE_BATCH_WAIT_MIN="${LANE_BATCH_WAIT_MIN:-10}" # with no slot just freed, form once the oldest ready head is this old (minutes)
@@ -195,6 +199,12 @@ MAX_BISECT_BUDGET="${FAST_LANE_MAX_BISECT_BUDGET:-12}"  # Linux runs per red in 
 BUDGET_NEAR="0.15"          # a measured value at most this far past its budget makes the culprit "likely"
 CLEF_MIN="0.80"             # a red-triage culprit guess at or above this is probed first
 BISECT_MARK="<!-- lane-bisect"  # the culprit comment's marker: "<!-- lane-bisect <red7> -->"
+BASE_RED_RUN=""  # the dev-red issue's "- Run:" URL
+# Auto-revert (revert_sweep, LANE_VERIFY_AFTER=1).
+REVERT_PREFIX="lane/revert-"    # the revert's branch: lane/revert-<culprit PR>
+REVERT_LABEL="lane-revert"      # on the lane's revert PR (never fast-lane: revert_land lands it)
+REVERT_MARK="<!-- lane-revert"  # the lane's one revert call on a dev-red issue: "<!-- lane-revert <sha7|none> -->"
+FINDING_LABEL="finding"
 # Where integrate fetches and pushes; tests point it at a local bare repo.
 REMOTE="${FAST_LANE_REMOTE:-https://github.com/${GH_REPO:-qbtrix/creative-apps}.git}"
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -213,6 +223,7 @@ DRY_RUN=0
 MERGED_ANY=0
 DISPATCH_FEATURE=0  # merged a FEATURE_LABEL PR this run
 DISPATCH_UI=0       # merged a PR touching UI_RE this run
+DISPATCH_REVERT=0   # merged a REVERT_LABEL PR this run
 MERGED_RUN=0        # PRs merged this run
 # A merged PR touching these paths needs the macOS job (Belt v2 lessons 49, 73).
 UI_RE='^(Sources/[A-Za-z0-9_]+App/|Sources/SuiteUI/|Tests/App|UITests/)'
@@ -1320,6 +1331,7 @@ red_sweep() {
   bad=$(grep -oE '^- Culprit range: `main\.\.[0-9a-f]{40}`' <<<"$body" | grep -oE '[0-9a-f]{40}' | head -1 || true)
   BASE_RED="$issue"; BASE_RED_SHA="$bad"
   BASE_RED_JOBS=$(grep -iE '^- Failing jobs:' <<<"$body" | head -1 | tr '[:upper:]' '[:lower:]' || true)
+  BASE_RED_RUN=$(grep -oE '^- Run: [^ ]+' <<<"$body" | head -1 | cut -c8- || true)
   grep -qiE '^- Failing jobs:.*linux' <<<"$body" || { log "dev-red #$issue: not a Linux red; nothing to bisect"; return 0; }
   pin=$(git ls-remote --heads "$REMOTE" "refs/heads/${BISECT_PREFIX}*" 2>/dev/null | sed -E 's:.*refs/heads/'"$BISECT_PREFIX"'([0-9a-f]+)-[0-9]+$:\1:' | sort -u | head -1 || true)
   [[ -z "$pin" ]] || bad="$pin"
@@ -1435,7 +1447,7 @@ red_bisect() {
 # "likely <m> <op> <b>" (vote mode, the value near its budget: not certain).
 bisect_post() {
   local issue="$1" red7="$2" lo="$3" hi="$4" runs="$5" gv="$6" rv="$7" mode="$8"; shift 8
-  local chain=("$@") c subj n body fid lead head="Bisect:" is="is" note
+  local chain=("$@") c subj n lead head="Bisect:" is="is" note
   c="${chain[hi]}"; subj=$(git -C "$SCRATCH" log -1 --format=%s "$c")
   n=$(grep -oE '\(#[0-9]+\)$' <<<"$subj" | tr -dc 0-9 || true)
   note=$(vote_note "$mode")
@@ -1443,13 +1455,20 @@ bisect_post() {
   log "bisect: culprit ${c:0:7} $subj (green at ${chain[lo]:0:7}, $runs runs${mode:+, $mode})"
   write gh issue comment "$issue" -R "$REPO" --body "$head ${c:0:7} $subj $is the first commit on $BASE_BRANCH whose Linux job fails. Green at ${chain[lo]:0:7} (${gv#green|}), red at ${c:0:7} (${rv#red|}); $runs Linux run(s) on ci/bisect branches, now deleted.$note $BISECT_MARK $red7 -->"
   [[ -n "$n" ]] || return 0
-  body=$(gh api "repos/$REPO/pulls/$n" --jq '.body // ""' 2>/dev/null) || return 0
+  lead=$(feature_lead "$n")
+  [[ -n "$lead" ]] || return 0
+  write gh issue comment "$lead" -R "$REPO" --body "Bisect on dev-red #$issue: your PR #$n ($subj) $is the first commit that turns $BASE_BRANCH's Linux job red: ${rv#red|}. $BISECT_MARK $red7 -->"
+}
+
+# feature_lead <PR n>: the open feature-lead issue the PR body's `Feature:`
+# line names, or nothing.
+feature_lead() {
+  local body fid
+  body=$(gh api "repos/$REPO/pulls/$1" --jq '.body // ""' 2>/dev/null) || return 0
   fid=$(grep -E '^[[:space:]]*\**Feature:' <<<"$body" | head -1 | sed -E 's/^[[:space:]]*\**Feature:\**[[:space:]]*`?#?//; s/`.*//; s/[[:space:]].*//' || true)
   [[ -n "$fid" ]] || return 0
-  lead=$(gh api "search/issues?q=repo:$REPO+label:$FEATURE_ISSUE_LABEL+state:open+in:title+%22Feature:+$fid%22" \
-    --jq "[.items[] | select(.title == \"Feature: $fid\" or (.title | endswith(\"($fid)\")))] | first // empty | .number" 2>/dev/null) || return 0
-  [[ -n "$lead" ]] || { log "bisect: no open $FEATURE_ISSUE_LABEL issue for $fid"; return 0; }
-  write gh issue comment "$lead" -R "$REPO" --body "Bisect on dev-red #$issue: your PR #$n ($subj) $is the first commit that turns $BASE_BRANCH's Linux job red: ${rv#red|}. $BISECT_MARK $red7 -->"
+  gh api "search/issues?q=repo:$REPO+label:$FEATURE_ISSUE_LABEL+state:open+in:title+%22Feature:+$fid%22" \
+    --jq "[.items[] | select(.title == \"Feature: $fid\" or (.title | endswith(\"($fid)\")))] | first // empty | .number" 2>/dev/null || true
 }
 
 # bisect_drop <red7>: deletes that red's probe branches at REMOTE.
@@ -1457,6 +1476,149 @@ bisect_drop() {
   local names
   names=$(git ls-remote --heads "$REMOTE" "refs/heads/${BISECT_PREFIX}$1-*" 2>/dev/null | sed 's:.*refs/heads/::' | paste -sd' ' -)
   [[ -z "$names" ]] || git -C "$SCRATCH" push -q origin --delete $names 2>/dev/null || log "bisect: could not delete $names"
+}
+
+# revert_sweep: with LANE_VERIFY_AFTER=1, lands the lane's open revert PR
+# (revert_land), or while a dev-red issue is open (red_sweep) makes the lane's
+# one revert call on it: a revert of the culprit revert_culprit names
+# (revert_open), or a note on why there is none. REVERT_MARK on the issue
+# records that call, so no sweep opens more than one revert and a dev still red
+# after one waits for a human. Never reverts a revert.
+revert_sweep() {
+  (( LANE_VERIFY_AFTER )) || return 0
+  local open comments got c subj n
+  # The lane's revert PR: a bot's (the lane's token) on a REVERT_PREFIX branch with REVERT_LABEL.
+  open=$(open_list 2>/dev/null | jq -r --arg l "$REVERT_LABEL" --arg p "$REVERT_PREFIX" 'first(.[]
+    | select(.author.is_bot == true and ((.headRefName // "") | startswith($p)) and any(.labels[]?; .name == $l)))
+    | "\(.number)|\(.headRefOid)|\(.headRefName)"' 2>/dev/null || true)
+  if [[ -n "$open" ]]; then revert_land "$open"; return 0; fi
+  [[ -n "$BASE_RED" ]] || return 0
+  if ! comments=$(gh api "repos/$REPO/issues/$BASE_RED/comments" --paginate --jq '.[].body' 2>/dev/null); then
+    log "auto-revert: could not read dev-red #$BASE_RED's comments; the next sweep looks again"; return 0
+  fi
+  if grep -qF -- "$REVERT_MARK " <<<"$comments"; then
+    log "auto-revert: dev-red #$BASE_RED already had its revert call; waiting for CI on $BASE_BRANCH or a human"; return 0
+  fi
+  [[ -n "$BASE_RED_SHA" ]] || { log "auto-revert: dev-red #$BASE_RED names no culprit range"; return 0; }
+  if ! scratch main "$BASE_BRANCH"; then log "auto-revert: could not fetch main and $BASE_BRANCH"; return 0; fi
+  got=$(revert_culprit "$comments") || return 0
+  c="${got%%|*}"
+  if [[ "$c" == - ]]; then revert_note none "${got#*|}"; return 0; fi
+  subj=$(git -C "$SCRATCH" log -1 --format=%s "$c")
+  n=$(grep -oE '\(#[0-9]+\)$' <<<"$subj" | tr -dc 0-9 || true)
+  if [[ "$subj" == 'Revert "'* ]]; then revert_note "${c:0:7}" "the culprit ${c:0:7} ($subj) is a revert itself, and the lane never reverts a revert, so a human looks"; return 0; fi
+  [[ -n "$n" ]] || { revert_note "${c:0:7}" "the culprit ${c:0:7} ($subj) is no PR's squash commit, so a human looks"; return 0; }
+  revert_open "$c" "$n" "$subj" "${got#*|}"
+}
+
+# revert_culprit <dev-red issue comments>: the culprit as <sha>|<how it was
+# found>: red_bisect's verdict on the issue (a certain one: "likely" means a
+# timing budget test on its line), else the only PR commit in
+# main..BASE_RED_SHA. A Linux red the bisect hasn't judged yet waits
+# (non-zero). Anything else prints -|<why none>: red_bisect runs only on
+# Linux, and reverting newest first would hit innocent PRs, each step a full
+# macOS run on dev to read.
+revert_culprit() {
+  local s c prs np
+  s=$(grep -oE '^Bisect: [0-9a-f]{7} ' <<<"$1" | tail -1 | cut -d' ' -f2 || true)
+  if [[ -n "$s" ]] && c=$(git -C "$SCRATCH" rev-parse --verify -q "$s^{commit}" 2>/dev/null); then
+    echo "$c|the bisect on dev-red #$BASE_RED named it"; return 0
+  fi
+  prs=$(git -C "$SCRATCH" log --first-parent --format='%H %s' "origin/main..$BASE_RED_SHA" 2>/dev/null | grep -E '\(#[0-9]+\)$' || true)
+  np=$(grep -c . <<<"$prs" || true)
+  if (( np == 1 )); then echo "${prs%% *}|it is the only PR in main..${BASE_RED_SHA:0:7}"; return 0; fi
+  if [[ "$BASE_RED_JOBS" == *linux* ]] && ! grep -qF -- "$BISECT_MARK " <<<"$1"; then
+    log "auto-revert: $np PRs in main..${BASE_RED_SHA:0:7}; waiting for the bisect"; return 1
+  fi
+  echo "-|$np PRs in main..${BASE_RED_SHA:0:7} and no bisect verdict names one of them (red: ${BASE_RED_JOBS#*: }), so a human picks the culprit"
+}
+
+# revert_note <sha7|none> <text>: the lane's one revert call on the dev-red
+# issue, logged and posted with REVERT_MARK.
+revert_note() {
+  log "auto-revert: $2"
+  write gh issue comment "$BASE_RED" -R "$REPO" --body "Auto-revert: $2. $REVERT_MARK $1 -->" || log "could not comment on #$BASE_RED"
+}
+
+# red_tests <sha>: the tests failing in <sha>'s red Linux and macOS logs
+# (mac_tests), joined by ", "; nothing when no log names one.
+red_tests() {
+  local v t=""
+  for v in "$(check_verdict "$1")" "$(mac_verdict "$1")"; do
+    [[ "$v" != red* ]] || t+="$(mac_tests "$v" || true)"$'\n'
+  done
+  grep . <<<"$t" | LC_ALL=C sort -u | paste -sd, - | sed 's/,/, /g' || true
+}
+
+# revert_open <sha> <PR n> <subject> <how>: `git revert` of the culprit's
+# squash commit on today's BASE_BRANCH, pushed as REVERT_PREFIX<n> and opened
+# as a PR with REVERT_LABEL and p0 (never fast-lane: revert_land lands it on
+# its Linux check alone), then the issue's REVERT_MARK note. The culprit PR is
+# merged, so its feature-lead issue (or the PR) is told why and how to bring
+# it back, and a `finding` issue is filed for its app (line:<app>, line:suite
+# for shared code).
+revert_open() {
+  local c="$1" n="$2" subj="$3" how="$4" br="$REVERT_PREFIX$2" d="$SCRATCH" why tests url m lead f app
+  local bot=(-c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com")
+  if (( DRY_RUN )); then log "dry-run, would revert #$n (${c:0:7}: $how) on $br"; return 0; fi
+  if ! git -C "$d" checkout -q -B revert "origin/$BASE_BRANCH" 2>/dev/null || ! bash "$HERE/install-merge-drivers" "$d" >/dev/null 2>&1 \
+      || ! git -C "$d" "${bot[@]}" revert --no-edit "$c" >/dev/null 2>&1; then
+    git -C "$d" revert --abort >/dev/null 2>&1 || true
+    revert_note "${c:0:7}" "#$n (${c:0:7}) is the culprit ($how), but it does not revert cleanly on today's $BASE_BRANCH, so a human reverts it"; return 0
+  fi
+  if ! git -C "$d" push -q -f origin "HEAD:refs/heads/$br" 2>/dev/null; then log "auto-revert: could not push $br; the next sweep tries again"; return 0; fi
+  tests=$(red_tests "$BASE_RED_SHA")
+  why="$BASE_BRANCH went red on ${BASE_RED_JOBS#*: } at ${BASE_RED_SHA:0:7} (dev-red #$BASE_RED, run ${BASE_RED_RUN:-not named})${tests:+, failing $tests}"
+  write gh label create "$REVERT_LABEL" -R "$REPO" --color b60205 --force --description "The fast lane's revert of a red dev's culprit" >/dev/null 2>&1 || true
+  if ! url=$(gh pr create -R "$REPO" --base "$BASE_BRANCH" --head "$br" --label "$REVERT_LABEL" --label p0 --title "Revert \"$subj\"" \
+      --body "Reverts #$n ($subj): $why. The culprit is ${c:0:7}: $how.
+
+Refs #$BASE_RED. This reverts commit $c. The fast lane opened this PR and lands it on its Linux check alone, since it puts back code $BASE_BRANCH already ran; CI on $BASE_BRANCH runs once it lands. To bring the change back, open a new PR that reverts this revert and adds the fix." 2>/dev/null); then
+    revert_note "${c:0:7}" "#$n (${c:0:7}) is the culprit ($how). The lane pushed its revert to $br but could not open the PR (can GitHub Actions create PRs in this repo?), so a human opens it"; return 0
+  fi
+  m="${url##*/}"
+  revert_note "${c:0:7}" "#$n (${c:0:7}) is the culprit ($how); the lane opened #$m to revert it"
+  lead=$(feature_lead "$n")
+  write gh issue comment "${lead:-$n}" -R "$REPO" --body "Fast lane: #$n was reverted by #$m. $why, and the lane found #$n as the culprit ($how). Nothing is lost: to bring it back, open a new PR that reverts #$m's commit and fixes the failure, run scripts/ci --changed, and send it through the lane again." \
+    || log "could not comment on #${lead:-$n}"
+  f=$(mktemp); git -C "$d" diff --no-renames --name-only "$c^" "$c" >"$f" 2>/dev/null || true
+  app=$(build_apps "$f"); rm -f "$f"
+  [[ "$app" =~ ^[a-z]+$ && "$app" != all ]] || app=suite
+  write gh issue create -R "$REPO" --title "Reverted #$n: $BASE_BRANCH red on ${BASE_RED_JOBS#*: }" --label "$FINDING_LABEL" --label "line:$app" \
+    --body "#$n ($subj) was reverted by #$m. $why. The lane found it as the culprit: $how. Fix the failure and bring the change back in a new PR that reverts #$m's commit." >/dev/null \
+    || log "could not file the finding for #$n"
+}
+
+# revert_land <n>|<head>|<branch>: the lane's open revert PR, while dev is red
+# and no batch is in flight (HOLD), lands on its own Linux check (started once
+# per head, its comment the record). A stale check (proof_stale) gets the
+# revert rebuilt on today's BASE_BRANCH, checked again; a red one, or a green
+# dev, leaves it to a human.
+revert_land() {
+  local m head br v stale
+  IFS='|' read -r m head br <<<"$1"
+  [[ -n "$BASE_RED" ]] || { log "auto-revert: #$m is open and no dev-red issue is; a human closes or lands it"; return 0; }
+  v=$(check_verdict "$head")
+  case "$v" in
+    none)
+      if has_comment "$m" "started a Linux check on head $head"; then log "auto-revert: #$m: its Linux check on $head started; waiting"; return 0; fi
+      dispatch_linux "$br"
+      comment_once "$m" "Fast lane: started a Linux check on head $head; this revert lands once it passes." ;;
+    running) log "auto-revert: #$m: its Linux check is running" ;;
+    red*) comment_once "$m" "Fast lane: the Linux check on this revert is red (${v#red|}), so a human looks." ;;
+    green*)
+      if (( HOLD )); then log "auto-revert: #$m waits for the batch in flight"; return 0; fi
+      if ! scratch "$BASE_BRANCH" "$br"; then log "auto-revert: could not fetch $br; the next sweep looks again"; return 0; fi
+      stale=$(proof_stale "$(git -C "$SCRATCH" merge-base "$head" "origin/$BASE_BRANCH" 2>/dev/null || true)" "$head")
+      if [[ -z "$stale" ]]; then land "$m" "$head" "its own Linux check, ${v#green|}" || true; return 0; fi
+      log "auto-revert: #$m's Linux check is stale ($stale); rebuilding it on today's $BASE_BRANCH"
+      if ! git -C "$SCRATCH" checkout -q -B revert "origin/$BASE_BRANCH" 2>/dev/null \
+          || ! git -C "$SCRATCH" -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" cherry-pick "$head" >/dev/null 2>&1 \
+          || ! git -C "$SCRATCH" push -q -f origin "HEAD:refs/heads/$br" 2>/dev/null; then
+        git -C "$SCRATCH" cherry-pick --abort >/dev/null 2>&1 || true
+        comment_once "$m" "Fast lane: this revert's Linux check is stale ($stale) and the lane could not rebuild it on $BASE_BRANCH, so a human looks."
+      fi ;;
+  esac
 }
 
 # has_comment <pr> <text>: a comment on the PR contains <text>.
@@ -1728,6 +1890,7 @@ land() {
     DISPATCH_FEATURE=1
   fi
   if grep -qE "$UI_RE" "$tmp/files.txt"; then DISPATCH_UI=1; fi
+  if jq -e --arg l "$REVERT_LABEL" '[.labels[]?.name] | index($l) != null' "$tmp/pr.json" >/dev/null; then DISPATCH_REVERT=1; fi
   # GitHub does not auto-close linked issues when GITHUB_TOKEN merges, so close them here.
   # For a lead's PR only issues known not to be feature-lead: GitHub may still list one
   # whose keyword lead_refs just rewrote, or one linked by hand.
@@ -1748,9 +1911,11 @@ land() {
 }
 
 # dispatch_reason <feature 0|1> <ui 0|1> <merged PRs since the last CI run, or
-# empty when unknown>: why CI on the base should run now, nothing when it
-# shouldn't. Pure, so the self-tests can call it.
+# empty when unknown> [<revert 0|1>]: why CI on the base should run now,
+# nothing when it shouldn't. A landed lane revert needs the run that closes
+# dev-red. Pure, so the self-tests can call it.
 dispatch_reason() {
+  if (( ${4:-0} )); then echo "merged a revert of a red $BASE_BRANCH's culprit"; return; fi
   if (( $1 )); then echo "merged a $FEATURE_LABEL PR"; return; fi
   if (( $2 )); then echo "merged a UI change"; return; fi
   if [[ "$3" =~ ^[0-9]+$ ]] && (( $3 >= DISPATCH_EVERY )); then echo "$3 merged PRs since the last CI run"; fi
@@ -1769,7 +1934,7 @@ merges_since_ci() {
 
 # Every open PR, one call: the sweep's labelled PRs and the Belt leads to label both come from it.
 open_list() {
-  gh pr list -R "$REPO" --state open --limit 1000 --json number,labels,author,baseRefName,body
+  gh pr list -R "$REPO" --state open --limit 1000 --json number,labels,author,baseRefName,body,headRefName,headRefOid
 }
 
 # lane_prs <open_list json>: open fast-lane PRs on any base, oldest first (decide retargets main and skips the rest).
@@ -1828,15 +1993,19 @@ main() {
     batch_resume "$br"
     if [[ "$BATCH_STATE" == waiting ]]; then HOLD=1; else SLOT_FREED=1; fi
   done < <(batch_branches)
+  # With LANE_VERIFY_AFTER=1 a red dev gets its culprit reverted; after the
+  # batches, so a revert waits for one in flight (HOLD).
+  revert_sweep
   local explicit=${#prs[@]}
   if (( explicit == 0 )); then
     local list; list=$(open_list)
     belt_label "$list"
     while read -r n; do [[ -n "$n" ]] && prs+=("$n"); done < <({ lane_prs "$list"; belt_unlabelled "$list"; } | sort -un)
   fi
-  (( ${#prs[@]} )) || { (( HOLD || MERGED_RUN )) || echo "fast-lane: no open $LABEL PRs" >&2; return 0; }
+  # A sweep that only landed a revert still goes on to dispatch CI on dev.
+  (( ${#prs[@]} )) || { (( HOLD || MERGED_RUN )) || echo "fast-lane: no open $LABEL PRs" >&2; (( MERGED_RUN )) || return 0; }
   local n pass
-  for n in "${prs[@]}"; do evaluate "$n"; done
+  for n in ${prs[@]+"${prs[@]}"}; do evaluate "$n"; done
   settle_ready
   # A merge changes every other PR's mergeable state, and GitHub reports
   # UNKNOWN until it recomputes. Sweep again after any merge (or a lane
@@ -1850,8 +2019,8 @@ main() {
   # At most one dispatch per run, and only after a run that merged something.
   (( MERGED_RUN )) || return 0
   local since="" why
-  (( DISPATCH_FEATURE || DISPATCH_UI )) || since=$(merges_since_ci)
-  why=$(dispatch_reason "$DISPATCH_FEATURE" "$DISPATCH_UI" "$since")
+  (( DISPATCH_FEATURE || DISPATCH_UI || DISPATCH_REVERT )) || since=$(merges_since_ci)
+  why=$(dispatch_reason "$DISPATCH_FEATURE" "$DISPATCH_UI" "$since" "$DISPATCH_REVERT")
   if [[ -n "$why" ]]; then
     log "dispatching CI on $BASE_BRANCH: $why"
     write gh workflow run "$CI_FILE" -R "$REPO" --ref "$BASE_BRANCH" || log "could not dispatch CI on $BASE_BRANCH"
