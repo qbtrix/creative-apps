@@ -254,3 +254,4 @@ utc	stage	event	ref	note
 2026-10-25T15:56Z	check-in	#5171/#5206 still clean, unmerged an hour after #5318, no lane comment (other beta PRs #5044/#5074/#5305/#5309 sit too); dev took #5320 (journeys ci), #5039 (library); no XP-3/XP-4, no findings, no supervisor comment
 2026-10-25T16:28Z	check-in	lane moving again (#5044 XP-7 merged 16:19Z, not a Photo wire); #5171/#5206 clean, queued; no XP-3/XP-4, no new findings, no dev-red, no supervisor comments
 2026-10-25T16:59Z	check-in	dev-red #5321 (macos; range #4960 #5007 #5008 #5318, triage likely flaky; tone-controls PRs, not export-pack): not ours; #5171/#5206 clean, queued; no merges since 16:25Z; no XP-3/XP-4, findings or supervisor comments
+2026-10-25T17:32Z	check-in	lane landing beta/p0 one by one, oldest first (#5074 XP-9 16:59Z); #5171 then #5206 next, markers match heads; dev-red #5321 still open, not ours; no XP-3/XP-4, findings or supervisor comments
