@@ -104,3 +104,4 @@ utc	stage	event	ref	note
 2026-10-25T03:42:29Z	W2	check	PY-1	#5174 LS-2 still in bisecting batch-20261025023716 (probe -6 red, -3 running); #5176 #5177 clean, unmerged
 2026-10-25T04:06:21Z	W2	check	PY-1	#5174 LS-2 at slot 6, after the batch culprit (probe -3 red); #5176 #5177 clean, unmerged
 2026-10-25T04:30:41Z	W2	check	PY-1	#5174 LS-2 got needs-fix 04:16Z (supervisor: LayerStyleGalleryTests/aSwitchThatCantActYetSaysWhy red on macOS, held out of batches; SuiteUI line owns the fix); PY-2 stays blocked; #5176 #5177 unflagged
+2026-10-25T04:55:29Z	W2	check	PY-1	#5177 needs-rebase (golden + command-ids/photo.txt); merged dev as f0a54e9d, gate running; #5174 LS-2 new head cb6c0a2f, needs-fix dropped
