@@ -104,3 +104,4 @@ utc	stage	event	ref	note
 2026-10-25T03:09:04Z	3	poll	-	poll: dev still 3db45eb4, no slice merges; no needs-fix/needs-rebase on our PRs; findings 0
 2026-10-25T03:32:45Z	3	poll	-	poll: dev still 3db45eb4, no slice merges; lane batch 20261025023716 bisecting (probe -6 up to #5174 running); no needs-fix/needs-rebase on our PRs; findings 0
 2026-10-25T03:57:42Z	3	poll	-	poll: dev at 2e7d5264 (#3935 docs only); no slice PR merged; no needs-fix/needs-rebase; 0 open findings
+2026-10-25T04:20:46Z	3	poll	-	poll: dev still 2e7d5264; no slice PR merged; no needs-fix/needs-rebase; 0 open findings
