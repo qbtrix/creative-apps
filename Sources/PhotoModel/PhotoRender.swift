@@ -159,9 +159,9 @@ extension PhotoWorkspace {
     /// there), so every pixel blends exactly as it would from the whole layer.
     func composited(_ rect: PixelRect) throws -> PixelBuffer {
         var result = try PixelBuffer(width: rect.width, height: rect.height)
-        PhotoRenderCount.region()
+        PhotoRenderCount.row()
         for layer in layers.reversed() where layer.isVisible && layer.opacity > 0 {
-            PhotoRenderCount.layers(1)
+            PhotoRenderCount.rowLayers(1)
             let content = LayerContent(layer: layer, pixels: pixels[layer.id], mask: shownMask(of: layer))
             result = try PhotoLayerComposite.composite(
                 content, onto: result, origin: (x: rect.x, y: rect.y),
