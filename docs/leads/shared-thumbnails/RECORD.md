@@ -4,7 +4,7 @@ Issue: #3719 · Packet: docs/blueprints/suiteui/features/shared-thumbnails.md
 Run: act-1a170e37e52-d0q6 (relaunch 2026-10-25T02:35Z) · Started: 2026-10-23T15:30Z
 Stage: 3 polling (ST-a, ST-u, ST-m done; ST-z part 1 #5102 merged, part 2 #5133 open)
 Base: afef017c2 (origin/main, brief verified); origin/dev 3db45eb45
-Next: get #5133 (ST-z2, feature-done) merged: merged dev into it (LibraryWindow.swift conflict with the sidecars arg); then wait for a CI run (scoped suiteui or full) whose Linux job contains #5133, post Belt-Slice-Done ST-z, Mac-Finish-Wanted ST-z and Belt-Contact-Sheet.
+Next: #5133 head 502e566f9 (dev merged in, scripts/ci --changed PASS, Head moved); the lane batches it. Then wait for a CI run (scoped suiteui or full) containing #5133, post Belt-Slice-Done ST-z, Mac-Finish-Wanted ST-z and Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: get #5133 (ST-z2, feature-done) merged: merged dev into it (LibraryWindow.
 | ST-a | SuiteShell and LibraryModel link CoreAsset; `ThumbnailPublishing.preview(for:)`; `FakeThumbnails`; `ThumbnailWriter` and `LiveThumbnailStoreAdapter` stubs; tests written, disabled | ST-1, ST-2 | MJ-ST | shared-codecs:SC-a (ST-2) | false | 0 | done | 40070077878 | – |
 | ST-u | home Recent cards show `preview(for:)` on the fake, app mark when nil, within the render budget | ST-3, ST-4 | HJ-ST | ST-a | true | 0 | done | – | – |
 | ST-m | writer stores and reads previews in `AfterGlow/Thumbnails/` within budget; Library reads disk before decoding | ST-5, ST-6 | MJ-ST | ST-a; adopt-kernel-autosave:AK-a (ST-5); library spine (ST-6) | false | 0 | done | – | – |
-| ST-z | slot live, Photo publishes on save, Library over the shared store, feature built | ST-7, ST-8 | HJ-ST, MJ-ST | ST-u, ST-m; adopt-kernel-autosave:AK-photo (ST-7) | true | 0 | building (#5102 merged 2026-10-24T18:19Z; #5133 open, merge of dev pushed) | – | – |
+| ST-z | slot live, Photo publishes on save, Library over the shared store, feature built | ST-7, ST-8 | HJ-ST, MJ-ST | ST-u, ST-m; adopt-kernel-autosave:AK-photo (ST-7) | true | 0 | building (#5102 merged 2026-10-24T18:19Z; #5133 open, dev merged in at 502e566f9, waiting on the lane) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
