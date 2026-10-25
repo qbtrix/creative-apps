@@ -143,3 +143,4 @@ utc	stage	event	ref	note
 2026-10-25T00:55:08Z	W4	check	PT-4	check-in: no change; batch-20261024235353 bisect probe -6 macOS still running; our PRs clean
 2026-10-25T01:19:18Z	W4	check	PT-4	check-in: batch-20261024235353 probe -6 green, probe -9 running; our PRs clean, not in it
 2026-10-25T01:43:02Z	W4	check	PT-4	check-in: dev moved (batch head #5156 merged); probe -9 Linux green, macOS running; our PRs still clean after dev moved
+2026-10-25T02:07:17Z	W4	check	PT-4	check-in: no change; probe -9 macOS still running (since 01:18Z); our PRs clean
