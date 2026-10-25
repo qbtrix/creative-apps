@@ -90,3 +90,4 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - 02:40Z heartbeat: lane run 40152661631 rates #4917 eligible (Fast-Check marker), #4942 skips until its base HX-4 merges. Not in batch 20261025023716; waiting for the next batch. 0 open findings.
 - 03:02Z heartbeat: all PRs clean and unmerged; no needs-fix/needs-rebase; 0 open findings. Lane batch 20261025023716 (HY stack) waits on a macOS runner behind dev's scoped runs at 3db45eb45; ours ride the next batch.
 - 03:24Z heartbeat: #4894 #4936 #5092 #4917 #4942 open, clean, no needs-fix; lane bisecting HY batch 20261025023716 (macOS gate red, probe -6 running); no slice done; 0 findings
+- 03:46Z heartbeat: all five PRs open, no needs-fix or needs-rebase; lane still bisecting HY batch 20261025023716 (probe -3 running); dev at 2e7d52649; no slice done; 0 findings
