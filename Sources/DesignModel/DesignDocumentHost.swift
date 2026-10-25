@@ -1,41 +1,55 @@
-// DesignDocumentHost.swift (#5200): Design's `SuiteDocumentHost`, the one
-// `.suiteEditor(.design, host:)` hands every received hand-off to. An `.open`
-// (Open In from the launcher, the home's Recent, a .design opened in Finder)
-// hands each document's path to `deliver`, which the app opens in an empty
-// window or a new one; an open with nothing in it is refused. Every other verb
-// is refused with Design's reason and delivers nothing. Linux-safe, Sendable.
+// DesignDocumentHost.swift (#5200, #3333): Design's `SuiteDocumentHost`, the
+// one `.suiteEditor(.design, host:)` hands every received hand-off to. An
+// `.open` (Open In from the launcher, the home's Recent, a .design opened in
+// Finder) delivers one `.open(path:)` per document, which the app opens in an
+// empty window or a new one; an open with nothing in it is refused. A `.new`
+// (the home's New Design, the welcome's Blank) delivers one `.newFile`, which
+// starts an untitled design the same way. Every other verb is refused with
+// Design's reason and delivers nothing. Linux-safe, Sendable.
 import SuiteModel
 
 public struct DesignDocumentHost: SuiteDocumentHost {
-    /// Why Design refuses a verb other than open.
+    /// Why Design refuses a verb other than open and new.
     public static let verbRefusal = SuiteError.notAvailable("\(SuiteApp.design.displayName) can't do that yet.")
     /// Why an open hand-off with no document is refused.
     public static let openNeedsDocument = SuiteError.notAvailable("Choose a design to open.")
 
-    private let deliver: @Sendable ([String]) async -> Void
+    /// What an accepted hand-off asks the app for: a file to open, or a new file.
+    public enum Request: Equatable, Sendable {
+        case open(path: String)
+        case newFile
+    }
 
-    /// A host that hands each accepted open's file paths, oldest first, to `deliver`.
-    public init(deliver: @escaping @Sendable ([String]) async -> Void) {
+    private let deliver: @Sendable ([Request]) async -> Void
+
+    /// A host that hands each accepted hand-off's requests, oldest first, to `deliver`.
+    public init(deliver: @escaping @Sendable ([Request]) async -> Void) {
         self.deliver = deliver
     }
 
-    /// The paths an open hand-off asks Design to open, or why Design refuses `handOff`.
-    public static func paths(for handOff: HandOff) -> Result<[String], SuiteError> {
-        guard handOff.verb == .open else { return .failure(verbRefusal) }
-        guard !handOff.documents.isEmpty else { return .failure(openNeedsDocument) }
-        return .success(handOff.documents.map(\.path))
+    /// What `handOff` asks Design for, or why Design refuses it.
+    public static func requests(for handOff: HandOff) -> Result<[Request], SuiteError> {
+        switch handOff.verb {
+        case .open:
+            guard !handOff.documents.isEmpty else { return .failure(openNeedsDocument) }
+            return .success(handOff.documents.map { .open(path: $0.path) })
+        case .new:
+            return .success([.newFile])
+        case .place, .edit, .importAnimation, .returnEdit, .openSettings:
+            return .failure(verbRefusal)
+        }
     }
 
     public func refusal(for handOff: HandOff) async -> SuiteError? {
-        if case .failure(let reason) = Self.paths(for: handOff) { return reason }
+        if case .failure(let reason) = Self.requests(for: handOff) { return reason }
         return nil
     }
 
     public func accept(_ handOff: HandOff) async throws(SuiteError) -> HandOffState {
-        switch Self.paths(for: handOff) {
+        switch Self.requests(for: handOff) {
         case .failure(let reason): throw reason
-        case .success(let paths):
-            await deliver(paths)
+        case .success(let requests):
+            await deliver(requests)
             return .accepted
         }
     }
