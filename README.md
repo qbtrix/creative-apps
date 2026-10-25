@@ -12,8 +12,9 @@ SwiftUI for macOS 26:
 The engines (animation document, color, raster) live in
 [creative-core](https://github.com/qbtrix/creative-core). This repo holds each
 app's Model (Linux-safe state and logic), its SwiftUI shell, and SuiteUI, the
-shared design system. Today each app opens a window with its sidebar, canvas
-or empty state, and inspector; the features come next.
+shared design system. The suite is in beta: most of each
+app's everyday loop has landed, and the rest is in progress. What is in
+the beta, what is missing and what comes next: [ROADMAP.md](ROADMAP.md).
 
 ## How it is built
 

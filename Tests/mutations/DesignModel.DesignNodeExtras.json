@@ -1,0 +1,16 @@
+[
+  {
+    "label": "aCopyKeepsItsOwnBoxedFields: a write to a shared box changes every node that shares it",
+    "file": "Sources/DesignModel/DesignNodeExtras.swift",
+    "find": "if !isKnownUniquelyReferenced(&storage) { storage = Storage(storage.value) }",
+    "replace": "_ = isKnownUniquelyReferenced(&storage)",
+    "tests": "DesignNodeStackTests"
+  },
+  {
+    "label": "aCopyKeepsItsOwnBoxedFields: two nodes with different gradients or shapes compare equal",
+    "file": "Sources/DesignModel/DesignNodeExtras.swift",
+    "find": "static func == (lhs: Self, rhs: Self) -> Bool { lhs.storage.value == rhs.storage.value }",
+    "replace": "static func == (lhs: Self, rhs: Self) -> Bool { true }",
+    "tests": "DesignNodeStackTests"
+  }
+]
