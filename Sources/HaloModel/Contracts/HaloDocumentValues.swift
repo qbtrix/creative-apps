@@ -113,8 +113,8 @@ public struct HaloPlaybackTick: Sendable, Hashable {
 }
 
 /// What Render… writes (tier 2, #429). HX-1 (export-pack) adds the movie's
-/// codec and whether frames keep their transparency; the plan and the writers
-/// read them from HX-3 and HX-4, so until then a render is what it was.
+/// codec and whether frames keep their transparency; the plan reads them from
+/// HX-3 (HaloRenderJob.swift) and the writers from HX-4.
 public struct HaloRenderSettings: Sendable, Hashable {
     public enum Format: String, CaseIterable, Sendable { case pngSequence, movie }
     public var format: Format
@@ -131,8 +131,8 @@ public struct HaloRenderSettings: Sendable, Hashable {
 
     /// The Codec row's choices, in order.
     public static let codecs: [MovieCodec] = [.h264, .hevc, .prores4444]
-    /// Why ProRes 4444 can't be picked yet: the plan's alpha rules are HX-3's.
-    public static let proResWaits = "ProRes 4444 lands with HX-3."
+    /// Why ProRes 4444 can't be picked yet: Halo's own writer is H.264 only until HX-4.
+    public static let proResWaits = "ProRes 4444 lands with HX-4."
     /// Why HEVC can't be picked yet: Halo's own writer is H.264 only until HX-4.
     public static let hevcWaits = "HEVC lands with HX-4."
 
@@ -213,12 +213,17 @@ public struct HaloRenderPlan: Sendable, Hashable {
     public var frameRate: FrameRate
     /// Composition frames in order, 0 through the last.
     public var frames: [Int]
-    /// "Intro_0001.png" for each frame of a PNG sequence; one "Intro.mp4" for a movie.
+    /// "Intro_0001.png" for each frame of a PNG sequence; one "Intro.mp4" or "Intro.mov" for a movie.
     public var fileNames: [String]
-    public init(width: Int, height: Int, framesPerSecond: Int, frameRate: FrameRate? = nil, frames: [Int], fileNames: [String]) {
+    /// Whether each frame is flattened over opaque black before it is written: a movie without alpha (HX-3).
+    public var opaque: Bool
+    public init(
+        width: Int, height: Int, framesPerSecond: Int, frameRate: FrameRate? = nil, frames: [Int], fileNames: [String],
+        opaque: Bool = false
+    ) {
         self.width = width; self.height = height; self.framesPerSecond = framesPerSecond
         self.frameRate = frameRate ?? FrameRate(whole: framesPerSecond)
-        self.frames = frames; self.fileNames = fileNames
+        self.frames = frames; self.fileNames = fileNames; self.opaque = opaque
     }
 }
 
