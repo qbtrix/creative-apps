@@ -180,3 +180,4 @@ utc	stage	event	ref	note
 2026-10-25T10:11:03Z	3	heartbeat	#4922 #4963 #4964 #5001	all open, no fix labels; batch 090316 probe 6 macOS gate still running; ours queue for next batch
 2026-10-25T10:31:09Z	3	heartbeat	#4922 #4963 #4964 #5001	all open, no fix labels; batch 090316 bisect at probe 9 (#5044); ours queue for next batch
 2026-10-25T10:51:32Z	3	heartbeat	#4922 #4963 #4964 #5001	all open, no fix labels; batch 090316 bisect: probe 6 mac + probe 9 linux green; ours queue for next batch
+2026-10-25T11:11:55Z	3	heartbeat	#4922 #4963 #4964 #5001	all open, no fix labels; no new lane runs since 10:40 (batch 090316 bisect idle after probe 9 linux green); ours queue for next batch
