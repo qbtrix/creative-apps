@@ -4,11 +4,13 @@
 // call, every control set runs the packet's pass order and equals the
 // CoreRaster calls run by hand bit for bit (QB-LIB-V2), the histogram is of
 // the rendered buffer (QB-LIB-V3), and MJ3 walks all of it. `HandPass` is the
-// packet's pass list (DV-6 pseudocode) written out here, and
+// packet's pass list (DV-6 pseudocode) written out here, levels before the
+// curve as SuiteImaging's shared list runs them (suite-imaging IM-10b), and
 // `LiveDevelop.passes(for:)` must name the same passes in the same order.
 // Runs on Linux and macOS.
 @testable import LibraryModel
 import CoreRaster
+import CoreRender
 import Testing
 
 /// A gradient in sRGB bytes: red across, green down, blue fixed at 128, opaque.
@@ -23,7 +25,7 @@ func developGradient(width: Int = 64, height: Int = 48) throws -> PixelBuffer {
     return try PixelBuffer(rgba8: bytes, width: width, height: height)
 }
 
-/// Every control set but Vibrance and Saturation (they wait on creative-core, DV-12).
+/// Every control set but Vibrance and Saturation (DV-11 checks those).
 func everyControlButColor() -> DevelopSettings {
     let curve = ToneCurve(points: [DevelopCurvePoint(x: 0, y: 0), DevelopCurvePoint(x: 0.5, y: 0.6),
                                    DevelopCurvePoint(x: 1, y: 1)]) ?? .identity
@@ -38,7 +40,7 @@ func everyControlButColor() -> DevelopSettings {
 
 /// The packet's pass list, in render order.
 enum HandPass: CaseIterable {
-    case whiteBalance, exposure, contrast, highlightsShadows, whitesBlacks, curve, levels
+    case whiteBalance, exposure, contrast, highlightsShadows, whitesBlacks, levels, curve
 
     /// The passes `s` needs, in render order; empty when neutral.
     static func passes(for s: DevelopSettings) -> [HandPass] {
@@ -49,8 +51,8 @@ enum HandPass: CaseIterable {
             case .contrast: s.contrast != 0
             case .highlightsShadows: s.highlights != 0 || s.shadows != 0
             case .whitesBlacks: s.whites != 0 || s.blacks != 0
-            case .curve: !s.curve.isIdentity
             case .levels: s.levels != .neutral
+            case .curve: !s.curve.isIdentity
             }
         }
     }
@@ -85,17 +87,18 @@ enum HandPass: CaseIterable {
 }
 
 extension LiveDevelop.Pass {
-    /// The hand list's name for this pass; nil for `.color` (DV-12).
+    /// The hand list's name for this pass; nil for `.color` (DV-12) and the shared hue/saturation step.
     var hand: HandPass? {
         switch self {
         case .whiteBalance: .whiteBalance
-        case .exposure: .exposure
         case .contrast: .contrast
         case .highlightsShadows: .highlightsShadows
         case .whitesBlacks: .whitesBlacks
         case .color: nil
-        case .curve: .curve
-        case .levels: .levels
+        case .shared(.exposure): .exposure
+        case .shared(.levels): .levels
+        case .shared(.curves): .curve
+        case .shared: nil
         }
     }
 }
@@ -151,12 +154,14 @@ func handHistogram(_ buffer: PixelBuffer) throws -> HistogramBins {
         let gradient = try developGradient()
         let settings = everyControlButColor()
         let order = HandPass.passes(for: settings)
-        #expect(order == [.whiteBalance, .exposure, .contrast, .highlightsShadows, .whitesBlacks, .curve, .levels])
+        #expect(order == [.whiteBalance, .exposure, .contrast, .highlightsShadows, .whitesBlacks, .levels, .curve])
         #expect(livePasses(settings) == order)
         let rendered = try live.render(gradient, settings: settings)
         #expect(rendered == (try HandPass.runByHand(gradient, settings, order: order)))
-        let swapped: [HandPass] = [.whiteBalance, .contrast, .exposure, .highlightsShadows, .whitesBlacks, .curve, .levels]
+        let swapped: [HandPass] = [.whiteBalance, .contrast, .exposure, .highlightsShadows, .whitesBlacks, .levels, .curve]
         #expect(rendered != (try HandPass.runByHand(gradient, settings, order: swapped)))
+        let curveFirst: [HandPass] = [.whiteBalance, .exposure, .contrast, .highlightsShadows, .whitesBlacks, .curve, .levels]
+        #expect(rendered != (try HandPass.runByHand(gradient, settings, order: curveFirst)))
     }
 
     @Test func exposurePlusOneDoublesLinearGrey() throws {
@@ -182,10 +187,11 @@ func handHistogram(_ buffer: PixelBuffer) throws -> HistogramBins {
         #expect(try blacker.pixel(x: 0, y: 0).g < dark.pixel(x: 0, y: 0).g)
     }
 
-    /// DV-6 compares the message with `LiveDevelop.waiting[slider]`; DV-12 turns this into "every control set".
-    @Test func vibranceAndSaturationThrowTheirWaitingReason() throws {
+    /// DV-6 compares the message with `LiveDevelop.waiting[slider]`; Saturation
+    /// renders since suite-imaging IM-10b; DV-12 turns this into "every control set".
+    @Test func vibranceThrowsItsWaitingReason() throws {
         let gradient = try developGradient()
-        for slider in [DevelopSlider.vibrance, .saturation] {
+        for slider in [DevelopSlider.vibrance] {
             let error = #expect(throws: LibraryError.self) {
                 try live.render(gradient, settings: DevelopSettings.neutral.setting(slider, to: 20))
             }
