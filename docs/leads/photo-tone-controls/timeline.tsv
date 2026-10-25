@@ -147,3 +147,4 @@ utc	stage	event	ref	note
 2026-10-25T02:31:26Z	W4	check	PT-4	check-in: dev moved (#5050 #5219 #5216 #5238 merged); probe -9 macOS red, probe -10 running; full CI 40154669999 queued on dev; our PRs clean
 2026-10-25T02:55:09Z	W4	check	PT-4	check-in: new batch-20261025023716 (12 PRs, none ours) running; old batch probe -10 macOS running; full CI 40154669999 queued; our PRs clean
 2026-10-25T03:18:53Z	W4	check	PT-4	check-in: batch-20261025023716 macOS red (a Design PR: DesignPlaceSnapshots.swift:39 type-check timeout), bisecting, probe -6 running; full CI 40154669999 running; our PRs clean
+2026-10-25T03:42:29Z	W4	check	PT-4	no merges; ours clean; lane batch-20261025023716 probe -6 macOS red, probe -3 running; full CI 40154669999 still running
