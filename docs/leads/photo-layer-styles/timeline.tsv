@@ -97,3 +97,4 @@ utc	stage	event	ref	note
 2026-10-25T00:55:08Z	W2	check	PY-1	check-in: no change; batch-20261024235353 bisect probe -6 macOS still running; #5174 and #5177 clean
 2026-10-25T01:19:18Z	W2	check	PY-1	check-in: probe -6 green, probe -9 running; LS-2 #5174 got a new head 5d52b331 (its lead), still clean; #5177 clean
 2026-10-25T01:43:02Z	W2	check	PY-1	check-in: dev moved (HY-1 #5156 merged); probe -9 macOS running; LS-2 #5174 head 6e467f79 clean; #5177 clean
+2026-10-25T02:07:17Z	W2	check	PY-1	check-in: no change; probe -9 macOS still running; #5174 and #5177 clean
