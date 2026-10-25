@@ -1,6 +1,6 @@
 // FlareStageGuides.swift: the stage's guides (stage-edit SE-2, J14) as ViewportGuideMarks over the artboard, any drag
 // under way drawn where it is. Each guide is a hidden `flare.stage.guide.<i>` probe ("y 300") and a hit strip that
-// drags it; released over its ruler it is removed. The document changes on release, via FlareGuideDrag's intents.
+// drags it, under the guide's resize pointer; released over its ruler it is removed. The document changes on release, via FlareGuideDrag's intents.
 import FlareCore
 import FlareModel
 import SuiteUI
@@ -52,6 +52,7 @@ struct FlareStageGuides: View {
         return Color.clear
             .frame(width: box.width, height: box.height)
             .contentShape(Rectangle())
+            .pointerStyle(Self.mark(guide).pointer.style)
             .gesture(
                 DragGesture(minimumDistance: 1, coordinateSpace: .named(Self.space))
                     .onChanged { value in

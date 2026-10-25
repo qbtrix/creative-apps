@@ -1,0 +1,4 @@
+[
+{"label": "a horizontal guide shows the column-resize pointer", "file": "Sources/SuiteUI/CanvasMarks+Path.swift", "find": "        case .horizontal: .rowResize", "replace": "        case .horizontal: .columnResize", "tests": "CanvasPathMarksTests"},
+{"label": "the top ruler shows the column-resize pointer", "file": "Sources/SuiteUI/CanvasMarks+Path.swift", "find": "        self = ruler == .horizontal ? .rowResize : .columnResize", "replace": "        self = ruler == .vertical ? .rowResize : .columnResize", "tests": "CanvasPathMarksTests"}
+]

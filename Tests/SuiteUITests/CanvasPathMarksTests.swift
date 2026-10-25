@@ -1,6 +1,7 @@
 // CanvasPathMarksTests.swift (CM-5): PathMarks draws a corner anchor and a
 // smooth anchor as different shapes, at one on-screen size at any zoom, and
-// ViewportGuideMarks' lines span the viewport. Geometry only. macOS only.
+// ViewportGuideMarks' lines span the viewport; a guide, and the ruler it comes
+// out of, show the resize pointer it drags along. Geometry only. macOS only.
 import SuiteUI
 import SwiftUI
 import Testing
@@ -64,4 +65,12 @@ func anchorMarksKeepTheirSizeOnScreen(zoom: Double) {
     #expect(ViewportGuideMarks.lines(guides: [.vertical(x: .nan), .horizontal(y: .infinity)], zoom: 1, viewport: viewport).isEmpty)
     #expect(ViewportGuideMarks.lines(guides: [.vertical(x: 5)], zoom: 1, viewport: .zero).isEmpty)
     #expect(ViewportGuideMarks.lines(guides: [.vertical(x: 5)], zoom: .nan, viewport: viewport).first?.start.x == 5)
+}
+
+@Test func guidesAndTheirRulersShowTheResizePointerTheyDragAlong() {
+    // A horizontal guide comes out of the top ruler and moves up and down; a vertical one, left and right.
+    #expect(ViewportGuide.horizontal(y: 40).pointer == .rowResize)
+    #expect(ViewportGuide.vertical(x: 50).pointer == .columnResize)
+    #expect(GuidePointer(ruler: .horizontal) == .rowResize)
+    #expect(GuidePointer(ruler: .vertical) == .columnResize)
 }

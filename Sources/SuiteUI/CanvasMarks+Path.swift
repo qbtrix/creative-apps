@@ -8,7 +8,7 @@
 // pixels at the canvas zoom; mark sizes are fixed on screen (`SuiteSize.anchor`
 // at any zoom). Black and white, or the accent for guides, so they read on any
 // pixels. Marks are hidden from accessibility and never take a click; the
-// canvas gesture does. The geometry is static, plain and nonisolated, so
+// canvas gesture does, and its hit strip shows the guide's `GuidePointer`. The geometry is static, plain and nonisolated, so
 // tests read it off the main actor without tripping the View isolation check.
 // Built from the kernel's contours (pen-paths PN-3), selected anchors fill
 // with the accent and show their handles, and the hovered anchor or handle
@@ -217,6 +217,33 @@ extension PathMarks {
 public enum ViewportGuide: Equatable, Sendable {
     case vertical(x: Double)
     case horizontal(y: Double)
+
+    /// The pointer over this guide's hit strip: the direction it drags.
+    public nonisolated var pointer: GuidePointer {
+        switch self {
+        case .horizontal: .rowResize
+        case .vertical: .columnResize
+        }
+    }
+}
+
+/// The resize pointer that says a guide can be dragged: over the guide, and over
+/// the ruler it comes out of. A horizontal guide (out of the top ruler) moves up
+/// and down, so it gets row-resize; a vertical one gets column-resize.
+public enum GuidePointer: Equatable, Sendable {
+    case rowResize, columnResize
+
+    /// The pointer over a ruler along `ruler` (.horizontal: the top one).
+    public nonisolated init(ruler: Axis) {
+        self = ruler == .horizontal ? .rowResize : .columnResize
+    }
+
+    public var style: PointerStyle {
+        switch self {
+        case .rowResize: .rowResize
+        case .columnResize: .columnResize
+        }
+    }
 }
 
 /// One guide's line in view points.

@@ -27,7 +27,8 @@
 // environment's `canvasFitScale` (EditorDetail's palette-clear fit) when set.
 // `showsRulers: false` drops the rulers and their corner; the canvas keeps
 // an empty band where they were (CanvasLayout's `inset`), so the artboard
-// doesn't jump. A drag that starts on a ruler goes to `onRulerDrag`, never
+// doesn't jump. With `onRulerDrag`, a ruler shows the resize pointer of the
+// guide it gives (GuidePointer), and a drag that starts on it goes there, never
 // `onDrag`: a RulerDrag per move and one on release, carrying the ruler's axis
 // (.horizontal for the top one), the document coordinate across it and, on
 // release, whether the pointer is back over the ruler (the host removes the
@@ -265,6 +266,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         let origin = axis == .horizontal ? layout.origin.x - scrolled.x : layout.origin.y - scrolled.y
         return Ruler(axis: axis, origin: origin, scale: layout.scale)
             .gesture(rulerDrag(axis, layout), isEnabled: onRulerDrag != nil)
+            .pointerStyle(onRulerDrag == nil ? nil : GuidePointer(ruler: axis).style)
     }
 
     /// A drag from a ruler: each move and the release, in the viewport's points (the rulers' band is negative).
