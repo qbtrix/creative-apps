@@ -1,0 +1,16 @@
+[
+  {
+    "label": "a movie frame fills every pixel, not just the first",
+    "file": "Sources/FlareModel/Fakes/FakeRasterizer.swift",
+    "find": "        while rgba.count < count * 4 {",
+    "replace": "        while rgba.count < 0 {",
+    "tests": "FlareVideoWriteTests"
+  },
+  {
+    "label": "a transparent movie frame keeps the background's alpha",
+    "file": "Sources/FlareModel/Fakes/FakeRasterizer.swift",
+    "find": "transparent ? 0 : c.a]",
+    "replace": "c.a]",
+    "tests": "FlareVideoWriteTests"
+  }
+]
