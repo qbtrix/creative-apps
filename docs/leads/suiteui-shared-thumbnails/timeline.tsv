@@ -131,3 +131,4 @@ ts	kind	note
 2026-10-25T07:43Z	heartbeat	batch 20261025054232 bisect: probe -6 macOS red, probe -3 macOS gate running since 07:07; #5133 clean at 502e566f9 vs dev 13fb2f59, no lane labels; waits for next batch
 2026-10-25T08:04Z	heartbeat	batch 20261025054232 bisect: probe -3 macOS gate still running (since 07:07); #5133 clean at 502e566f9 vs dev 13fb2f59, no lane labels; waits for next batch
 2026-10-25T08:26Z	heartbeat	batch 20261025054232 bisect now on probe -4 (67d888bc4); dev 7e5bcd82f; #5133 clean at 502e566f9, no lane labels or new comments; waits for next batch
+2026-10-25T08:48Z	heartbeat	batch 20261025054232 resolved (probe -4 macOS red, branches gone); no new batch yet; #5133 at 502e566f9 merges clean onto dev 7e5bcd82f, no lane labels; waits for next batch
