@@ -2,9 +2,9 @@
 
 Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a16ee71e35-s8g5 · Session: claude/large-catalog-lead-4ijm0b (earlier act-1a16c627c84-u86z, act-1a1693fbf6d-ap2g, act-1a15df37b73-k199) · Started: 2026-10-21T10:19Z (resumed 2026-10-23T14:20Z, 2026-10-24T05:10Z, 2026-10-24T17:15Z)
-Stage: 3 wave 3 done: Belt-Slice-Done LG-grid posted 03:07Z on full CI 40154669999 (Linux green at 3db45eb4, contains 7d301de7); critic panel running on scoped library run 40154658752 snapshots
+Stage: 3 fix round 1: LG-grid merged-done (40154669999); Mac-Finish-Wanted LG-grid posted 03:22Z; finding #5230 (LJ-LG paint clock included the harness settle wait and launch) fixed in #5273 (round 1 of 2)
 Base: da62659fc9460750cd2c1d1483b253c2d9a02375 (origin/dev)
-Next: critic panel (mouse, taste, job, first-use clarity) on 40154658752 snapshots and journeys 40156889770 ui-screens, file findings; then Belt-Contact-Sheet on 40154669999 and Mac-Finish-Wanted LG-grid
+Next: Belt-Contact-Sheet on the newest run containing #5273 (or 40154669999 with #5230 carried if it lands red); journeys 40156889770 at 3db45eb4 shows LJ-LG; then RECORD Next: beta-hardening lane verifies LG-grid, stop
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -70,6 +70,7 @@ Next: critic panel (mouse, taste, job, first-use clarity) on 40154658752 snapsho
 - 02:06Z: probe -9 macOS gate still running (48 min). #5050 open, no needs-fix.
 - 02:22Z: #5050 merged as 7d301de7 (batch 20261024235353 green prefix). LG-grid's PRs are all on dev. No ci.yml run on dev at 7d301de7 yet.
 - 02:33Z: CI on dev at 3db45eb4 (contains 7d301de7): scoped library 40154658752 running, full CI 40154669999 queued.
+- 03:22Z: critic panel on 40154658752 snapshots: no new findings on LG-grid's PNGs (LG-5 changed none; the loupe has a Grid back button; the unlabeled badges predate this feature). Open finding #5230 taken as fix round 1: PR #5273 (head 4ea4afc1, CI: PASS). Mac-Finish-Wanted LG-grid posted (6392888535).
 - 03:07Z: scoped library 40154658752 green; full CI 40154669999 Linux green (macOS running); Linux check 40154675623 green. Posted Belt-Slice-Done LG-grid on full CI (first post on the scoped run deleted: rule 6 needs a Linux job). Stripped attribution footers from three #3790 comments.
 - 02:46Z: scoped library 40154658752 running; full CI 40154669999 queued.
 - 16:09Z: #5050 (LG-5) got needs-rebase (conflict with #4951 disk tier in LiveThumbnails.swift). Merged origin/dev into -lg5, kept the cancel check first then the disk read/store; scripts/ci --changed running (fix round 1).
