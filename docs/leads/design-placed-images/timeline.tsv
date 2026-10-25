@@ -172,3 +172,4 @@ utc	stage	event	ref	note
 2026-10-25T07:31:55Z	3	heartbeat	#4922 #4963 #4964 #5001	all open in the lane, no fix labels
 2026-10-25T07:51:52Z	3	heartbeat	#4922 #4963 #4964 #5001	all open, no fix labels; lane bisecting batch 054232 (probe -3 macOS running)
 2026-10-25T08:12:09Z	3	heartbeat	#4922 #4963 #4964 #5001	all open, no fix labels; lane still bisecting batch 054232 (probe -3 macOS gate running since 07:07Z)
+2026-10-25T08:32:05Z	3	heartbeat	#4922 #4963 #4964 #5001	all open, no fix labels; lane bisecting batch 054232 (probe -3 done, probe -4 #4960 running)
