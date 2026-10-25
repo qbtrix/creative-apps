@@ -101,7 +101,9 @@ page).
   export run, a document session or a stroke uses SuiteKernel's module and
   converts its own types in an adapter file named `<X>+Kernel.swift` (or
   `<X>Adapter.swift`), such as `FlareLayers+Kernel.swift` or
-  `DesignSession+Kernel.swift`. It never keeps its own copy. A missing kernel
+  `DesignSession+Kernel.swift`. The adapter extends the Model's types onto
+  the kernel; it declares no concept type of its own (`check-dup-logic` judges
+  an adapter file by its primary type, never its name). It never keeps its own copy. A missing kernel
   behaviour is a `gap` issue on `line:suiteui`. The `adopt-kernel-*` features
   (undo, selection, layers, easing, transform, export, session, brush) move
   the apps' remaining copies onto the kernel and delete them. Gate:

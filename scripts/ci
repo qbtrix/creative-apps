@@ -100,8 +100,8 @@
 # a Swift file under Sources/<X>Model or Sources/<X>App (SuiteModel aside)
 # whose name or primary type names a concept in Tests/canonical-concepts.txt
 # (undo, history, selection, layers, easing, export, crop, ...) must be listed
-# in Tests/canonical-baseline.txt, the grandfathered copies, unless it is an
-# adapter (+Kernel or Adapter). The baseline only shrinks (lead.md rule 20).
+# in Tests/canonical-baseline.txt, the grandfathered copies. An adapter (+Kernel
+# or Adapter) is judged by its primary type only. The baseline only shrinks (lead.md rule 20).
 #
 # The SuiteUI-first check runs Tests/canonical/test_check_dup_views.sh, then
 # scripts/check-dup-views: an app View struct (Sources/*App) that copies a SuiteUI
