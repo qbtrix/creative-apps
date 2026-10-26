@@ -210,3 +210,7 @@ Batch 20261026052705 landed (dev at c480d84). #4988, #5164, #5364, #4999 and #50
 ## 2026-10-26T06:25:50Z poll
 
 #4988, #5164, #5364, #4999 and #5000 are unchanged: open, mergeable, with no needs-fix or needs-rebase and no red or running check. They wait for a lane batch.
+
+## 2026-10-26T06:51:21Z poll
+
+dev gained #5239 and #5244 from recent batches; none of ours yet. #4988, #5164 (base lead/editor-menus-4830), #5364 and #4999 are open, clean, fast-lane+beta, with no needs-fix or needs-rebase. #5000 is held (no-fast-lane, needs-split) until #4999 lands. Bodies are clean. Next: retarget #5164 after #4988 merges, and rebuild #5000 after #4999.
