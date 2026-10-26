@@ -1,8 +1,8 @@
 // PhotoRenderCount.swift: debug-only counts of the render work Photo does, for the idle-work and budget
 // tests (AppSnapshotTests' IdleWorkTests). `regions` is every region a canvas route composites (a CPU tile,
 // a GPU band) and `layerComposites` every layer laid onto one; `rows` and `rowLayers` are the same for the
-// reference path (a Curves histogram row, an export, a snapshot); `bases` and `hits` are the canvas's
-// PhotoCompositeCache's. The histogram composites its rows through the canvas routes' seam with a cache of its
+// reference path (a Curves histogram row, an export, a snapshot); `bases` and `hits` are the canvas's kept
+// bases (LiveCompositeCache). The histogram composites its rows through the canvas routes' seam with a cache of its
 // own, so it counts inside `asRows`, where a region, a layer and a cache lookup land on the reference path's
 // counters: a test tells a drag's work from a recount's. The counters are process-wide, so a suite that reads
 // them nests in BodyCountSuites like the body counters. In release the calls compile to nothing. Linux-safe.
@@ -15,7 +15,7 @@ public enum PhotoRenderCount {
     /// Regions the reference path composited (histogram rows, export, snapshots) and the layers laid onto them,
     /// apart from the canvas routes' so a test can tell a drag's work from a recount's.
     public static let rows = Mutex(0), rowLayers = Mutex(0)
-    /// The canvas's PhotoCompositeCache bases made, and regions served from a kept base.
+    /// Dispatcher-route bases made (LiveCompositeCache), and regions served from a kept base.
     public static let bases = Mutex(0), hits = Mutex(0)
     /// True inside `asRows`.
     @TaskLocal static var countingRows = false

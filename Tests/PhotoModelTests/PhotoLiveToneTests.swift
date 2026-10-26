@@ -1,4 +1,4 @@
-// PhotoLiveToneTests.swift: the live route (PhotoLiveTone.swift) on the resident GPU route with a target that
+// PhotoLiveToneTests.swift: the live route (SuiteImaging's LiveLayerRoute through PhotoImagingAdapter.swift) on the resident GPU route with a target that
 // runs tone programs. A whole-image slider step (levels, curves, Photo's hue/saturation matrix) gives the
 // CoreRaster reference within 2 display levels and composites nothing after the first picture; an adjustment
 // layer at the top, one under a pixel layer, and one at 50 % Multiply all take the live route (layer tiles stay
@@ -129,6 +129,31 @@ private final class TonedSink: @unchecked Sendable {
         _ = try await PhotoRenderer.update(workspace, since: first.revision, route: route, target: sink.target)
         #expect(route.composites.made == made, "a step on the layer composited the layers under it again")
         #expect(try await Self.worst(sink.bytes, workspace) <= 2, "position \(position) after a step")
+    }
+
+    @Test func aMovedLayerUnderAnAdjustmentLayerCompositesTheBaseAgain() async throws {
+        var workspace = try Self.document()
+        workspace.addAdjustmentLayer(.levels)
+        workspace.adjustLayer(try #require(workspace.selectedLayerID), .gamma(1.4))
+        let canvas = try #require(workspace.canvas)
+        let (route, _, gpu) = Self.route()
+        let sink = TonedSink(backend: gpu, width: canvas.width, height: canvas.height)
+        _ = try await PhotoRenderer.update(workspace, since: nil, route: route, target: sink.target)
+        let made = route.composites.made
+        let bottom = try #require(workspace.layers.indices.last)
+        workspace.layers[bottom].offsetX += 40
+        _ = try await PhotoRenderer.update(workspace, since: nil, route: route, target: sink.target)
+        #expect(route.composites.made > made, "a moved layer kept the stale base composite")
+        #expect(try await Self.worst(sink.bytes, workspace) <= 2)
+    }
+
+    @Test func aMaskedAdjustmentLayerTakesTheDispatcherRoute() throws {
+        var workspace = try Self.document()
+        workspace.addAdjustmentLayer(.levels)
+        let id = try #require(workspace.selectedLayerID)
+        #expect(workspace.liveStack() != nil)
+        workspace.masks[id] = try TiledPixels(width: 600, height: 400, fill: RGBA(r: 1, g: 1, b: 1, a: 1))
+        #expect(workspace.liveStack() == nil)
     }
 
     @Test func blurTakesTheDispatcherRoute() async throws {

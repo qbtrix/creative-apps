@@ -135,7 +135,6 @@ Sources/PhotoModel/PhotoDocumentFile.swift
 Sources/PhotoModel/PhotoHistory.swift
 Sources/PhotoModel/PhotoKeepLayers.swift
 Sources/PhotoModel/PhotoLevelsFormat.swift
-Sources/PhotoModel/PhotoLiveTone.swift
 Sources/PhotoModel/PhotoRecovery.swift
 Sources/PhotoModel/PhotoRenderRoute.swift
 Sources/PhotoModel/PhotoSaveStatusHelp.swift
