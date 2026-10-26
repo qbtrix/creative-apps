@@ -1,0 +1,5 @@
+[
+  {"label": ".alphaSkipsBackground: a frame with alpha is flattened over black", "file": "Sources/HaloModel/HaloRenderFrame.swift", "find": "        guard !keepingAlpha else { return self }\n", "replace": "", "tests": "HaloRenderAlphaTests"},
+  {"label": "aMovieWithoutAlphaIsOpaqueBlackThere: a movie without alpha keeps its clear background", "file": "Sources/HaloModel/HaloRenderFrame.swift", "find": "        guard !keepingAlpha else { return self }\n", "replace": "        guard keepingAlpha else { return self }\n", "tests": "HaloRenderAlphaTests"},
+  {"label": "aMovieWithoutAlphaIsOpaqueBlackThere: the plan of a movie without alpha isn't opaque", "file": "Sources/HaloModel/Live/HaloRenderRules.swift", "find": "opaque: s.format == .movie && !s.alpha)", "replace": "opaque: false)", "tests": "HaloRenderAlphaTests.aMovieWithoutAlphaIsOpaqueBlackThere"}
+]

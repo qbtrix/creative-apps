@@ -9,7 +9,7 @@ import Foundation
 import SuiteKernel
 import Testing
 
-@Suite(.disabled("waits on AR-10")) struct PhotoAreaSelectionTests {
+@Suite struct PhotoAreaSelectionTests {
     static func run(_ id: String, _ params: [String: JSONValue] = [:], on workspace: inout PhotoWorkspace) throws {
         _ = try PhotoWorkspace.catalog.run(id, params: .object(params), on: &workspace)
     }
@@ -114,7 +114,8 @@ import Testing
         let (before, after) = try (CoreRasterImageCodec.readPNG(input).rgba8(), CoreRasterImageCodec.readPNG(data).rgba8())
         func red(_ bytes: [UInt8], _ x: Int, _ y: Int) -> Int { bytes.indices.contains((y * 96 + x) * 4) ? Int(bytes[(y * 96 + x) * 4]) : -1 }
         #expect(red(after, 48, 40) == red(before, 48, 40)) // the face centre
-        #expect([red(after, 48, 66), red(after, 2, 2), red(after, 93, 93)] == [Int](repeating: 0, count: 3)) // the chin notch and the surround
+        #expect([red(after, 2, 2), red(after, 93, 93)] == [0, 0] as [Int]) // the surround
+        #expect(red(after, 48, 66) < red(before, 48, 66) / 3) // the chin notch, filled though the feather softens it
         let ramp = (0..<48).filter { x in
             let filled = 1 - Double(red(after, x, 42)) / Double(max(red(before, x, 42), 1))
             return filled > 0.1 && filled < 0.9

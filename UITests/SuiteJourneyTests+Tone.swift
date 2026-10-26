@@ -1,14 +1,12 @@
 // SuiteJourneyTests+Tone.swift: the gallery's `tone-rows` page (Sources/SuiteUI/Gallery/GalleryToneRows.swift),
 // Journey steps 1 to 6 of docs/blueprints/suiteui/features/tone-controls.md (numbered below), in Library, shot under
-// `suiteui`. Written by TC-2: its SJ0 part (the index lists `tone-rows` and the page opens) runs now; the steps after it
-// drive TC-3's rows (`suite.tone.<slider>`, `suite.tone.auto`, the sections' `suite.inspector.section.<group>.reset`)
-// and stay skipped until TC-4 turns them on. The page logs `<command id> <intent>` to `suite.gallery.log`.
+// `suiteui`. TC-2 wrote it with its SJ0 part (the index lists `tone-rows` and the page opens); TC-4 turned on the steps
+// after it, which drive TC-3's rows (`suite.tone.<slider>`, `suite.tone.auto`, the sections'
+// `suite.inspector.section.<group>.reset`). A row's label is its title and its value the number, so VoiceOver reads
+// "Shadows, 35". The page logs `<command id> <intent>` to `suite.gallery.log`.
 import XCTest
 
 final class SuiteToneJourneyTests: XCTestCase {
-    /// Off until TC-4 lands the view these steps drive (TC-3) and its identifiers.
-    private static let toneRowsViewLanded = false
-
     @MainActor func testToneRowsSetAndReset() throws {
         let gallery = Journey("Library", self, name: "suiteui", arguments: ["-SuiteGallery", "index"])
         XCTAssert(gallery.element("suite.gallery.index").waitForExistence(timeout: 30), "no gallery index")
@@ -18,7 +16,6 @@ final class SuiteToneJourneyTests: XCTestCase {
         XCTAssert(gallery.element("suite.gallery.tone-rows").waitForExistence(timeout: 10), "no root suite.gallery.tone-rows")
         XCTAssert(gallery.element("suite.tone").waitForExistence(timeout: 5), "the page shows no suite.tone rows")
         gallery.shot("tone-rows-open")
-        guard Self.toneRowsViewLanded else { throw XCTSkip("waits on TC-4") }
 
         // 1. Four sections, every slider at 0, Vibrance dimmed with its reason as help.
         for slider in ["temperature", "tint", "exposure", "brightness", "contrast", "highlights", "shadows", "whites",
@@ -54,8 +51,10 @@ final class SuiteToneJourneyTests: XCTestCase {
         // 6. TONE's Reset: its rows read 0, the other sections keep theirs; rows read "<Title>, <value>".
         toneReset.click()
         expectToneLog(gallery, "tone.reset", "TONE's Reset logged no tone.reset")
-        XCTAssertEqual(gallery.element("suite.tone.shadows").label, "Shadows, 0", "Shadows didn't reset")
-        XCTAssertEqual(gallery.element("suite.tone.sharpenAmount").label, "Amount, 80", "TONE's Reset cleared Sharpen")
+        let shadows = gallery.element("suite.tone.shadows")
+        XCTAssertEqual(shadows.label, "Shadows", "the Shadows row isn't labelled with its title")
+        XCTAssertEqual(shadows.value as? String, "0", "Shadows didn't reset")
+        XCTAssertEqual(gallery.element("suite.tone.sharpenAmount").value as? String, "80", "TONE's Reset cleared Sharpen")
         gallery.shot("tone-rows-reset")
     }
 
