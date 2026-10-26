@@ -11,7 +11,7 @@ Next: once #5321 closes and the lane lands our PRs, post Belt-Slice-Done for PD-
 |---|---|---|---|---|---|---|---|---|---|
 | PD-a | picture fields and PlacedImageTarget stubs, CoreRaster linked | PD-1, PD-2 | MJ-PD | PL-a and the Design contracts | no | 0 | done (#3759 merged) | – | – |
 | PD-u | Place… and drop, canvas draws by cover, inspector rows | PD-3, PD-4 | DJ-P1 | PD-a; DK-u and the Design u-slices | yes | 2 | #4963, #4964 (stacked), #5001 (round 2, stacked) open; rounds spent; gaps #4996 #4997 #4998, needs-ui #4985 | – | – |
-| PD-m | fill into frame, focus as one step, SVG crop | PD-5, PD-6 | MJ-PD | PD-a; DK-m and the Design m-slices | no | 2 | #4922 open; rounds spent | – | – |
+| PD-m | fill into frame, focus as one step, SVG crop | PD-5, PD-6 | MJ-PD | PD-a; DK-m and the Design m-slices | no | 2 | #4922 open; rounds spent; needs-rebase 21:53Z, dev merged in (golden union), gate running | – | – |
 | PD-z | live journey, blueprint, feature-done | PD-7, PD-8 | DJ-P1 | PD-u, PD-m; DG-z | yes | 0 | held: open findings > 5 (rule 7) | – | – |
 
 ## Tasks
