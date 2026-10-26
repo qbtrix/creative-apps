@@ -710,10 +710,10 @@ gh() {
       (cd "$sw/refs/$u" 2>/dev/null && find . -type f | sed 's:^\./::') | jq -R '{path: ., type: "blob"}' | jq -s '{truncated: false, tree: .}' ;;
     "api "*"/contents/"*) u="${!#}"; u="${u#*/contents/}"; cat "$sw/refs/${u##*\?ref=}/${u%%\?*}" ;;
     "api "*"/issues/"*"/comments "*) n="${2#*/issues/}"; cat "$sw/${n%%/*}.comments" 2>/dev/null || true ;;
-    "api repos/"*"/issues/"*)  # an issue's labels: $sw/labels.<n>, none if absent, a failure if .fail
+    "api repos/"*"/issues/"*)  # an issue's state ($sw/state.<n>, OPEN if absent) and labels ($sw/labels.<n>, none if absent, a failure if .fail)
       n="${2##*/}"; echo "labels $n" >>"$sw/lookups"
       [[ ! -e "$sw/labels.$n.fail" ]] || return 1
-      jq -c '{labels: map({name: .})}' <<<"$(cat "$sw/labels.$n" 2>/dev/null || echo '[]')" | jq -r "${!#}" ;;
+      jq -c --arg s "$(cat "$sw/state.$n" 2>/dev/null || echo OPEN)" '{state: $s, labels: map({name: .})}' <<<"$(cat "$sw/labels.$n" 2>/dev/null || echo '[]')" | jq -r "${!#}" ;;
     "pr comment "*|"issue comment "*) echo "$a" >>"$sw/calls"; printf '%s\n' "${!#}" >>"$sw/$3.comments" ;;
     "pr merge "*) [[ ! -e "$sw/merge.fail.$3" ]] || return 1  # $sw/merge.fail.<n>: GitHub refuses the merge
       echo "$a" >>"$sw/calls"; touch "$sw/$3.merged"; printf '%s\n' "${!#}" >"$sw/$3.squash" ;;
@@ -738,6 +738,7 @@ gh() {
         author: {login: "app/github-actions", is_bot: true}, additions: 1, deletions: 1, changedFiles: 1,
         mergeable: "MERGEABLE", mergeStateStatus: "CLEAN", body: $body}' >"$sw/$n.json"
       echo "https://github.com/qbtrix/creative-apps/pull/$n" ;;
+    "pr close "*) echo "$a" >>"$sw/calls"; touch "$sw/$3.merged" ;;  # a closed PR leaves the open list like a merged one
     *) echo "$a" >>"$sw/calls" ;;
   esac
 }
@@ -2070,8 +2071,9 @@ LANE_MAC_PER_PR=1
 # the lane's one lane/quarantine PR (lane-quarantine, p0, never fast-lane),
 # landed on its own Linux check: the one protected-path change the lane lands,
 # keyed on the bot author, the branch, the label and the file set being exactly
-# that file. Never more than 5 tests per sweep, never a security, billing or
-# auth test, one call per red sha.
+# that file. Past its expiry the owner is labelled blocker and the entry stays;
+# once the owner closes, the same PR path removes it. Never more than 5 tests
+# per sweep, never a security, billing or auth test, one call per red sha.
 quardev() {  # quardev <jobs> <spec>...: rvdev, then dev gains the red tests' real files and an empty quarantine; the red is that tip
   rvdev "$@"
   local w="$sw/work"
@@ -2121,6 +2123,28 @@ expect "auto-quarantine: then one Linux check on it, once; no second PR, issue o
 verdict "$(head_of 600)" success; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
 expect "auto-quarantine: it lands on that check alone (no prescreen, no batch, dev red and all) and CI on dev runs" \
   "$(merges),$(batch_tip),$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref dev$' "$sw/calls")" "pr merge 600,,1"
+# Expiry: past `until` with the owner open, the owner is labelled blocker and told once; the entry stays.
+git -C "$sw/origin.git" update-ref refs/heads/dev "$(qbranch)"  # the merge landed on dev
+FAST_LANE_NOW=2026-10-27T10:00:01Z LANE_VERIFY_AFTER=1 lane_sweep
+expect "expiry: past its expiry with the issue open, the owner gets the blocker label and a comment, and the entry stays" \
+  "$(grep -c '^issue edit 700 -R qbtrix/creative-apps --add-label blocker$' "$sw/calls"),$(grep -c '^issue comment 700 .*expired at 2026-10-27T10:00:00Z.*stays skipped' "$sw/calls"),$(quarantines)" "1,1,1"
+echo '["p0", "blocker"]' >"$sw/labels.700"
+FAST_LANE_NOW=2026-10-27T10:00:01Z LANE_VERIFY_AFTER=1 lane_sweep
+expect "expiry: said once" "$(grep -c -- '--add-label blocker' "$sw/calls"),$(grep -c '^issue comment 700 ' "$sw/calls")" "1,1"
+# Removal: once the owner closes, the lane's PR removes the entry; its Linux check runs the test again.
+rm -f "$sw/red.json"; echo CLOSED >"$sw/state.700"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal: a closed owner gets a lane-quarantine PR removing its entry, off today's dev" \
+  "$(quarantines),$(qjson | jq length),$(grep -c -- '^pr create .*--head lane/quarantine --label lane-quarantine --label p0 --title test(quarantine): run PhotoModelTests.OpenTests/opens again ' "$sw/calls"),$(git -C "$sw/origin.git" rev-parse "$(qbranch)~1")" "2,0,1,$(git -C "$sw/origin.git" rev-parse dev)"
+verdict "$(head_of 601)" failure; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal: a red check means the fix didn't hold: the owner is reopened and told, the PR closed, nothing merged" \
+  "$(grep -c '^issue reopen 700 ' "$sw/calls"),$(grep -c '^issue comment 700 .*still fails without its quarantine entry' "$sw/calls"),$(grep -c '^pr close 601 ' "$sw/calls"),$(merges)" "1,1,1,pr merge 600"
+echo OPEN >"$sw/state.700"; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal: with the owner open again nothing is opened" "$(quarantines)" 2
+echo CLOSED >"$sw/state.700"; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+verdict "$(head_of 602)" success; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal: a green check lands it and CI on dev runs" \
+  "$(quarantines),$(merges),$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref dev$' "$sw/calls")" "3,pr merge 600,pr merge 602,2"
 # A Linux red whose bisect stopped short (no `Bisect:` verdict) has no certain culprit either.
 quardev linux "${TWO[@]}"
 printf '%s\n' "Bisect on dev stopped after 8 Linux runs: the Linux job is green at aaaaaaa and red at ${RED:0:7}; the culprit is one of the 2 commits between them. $BISECT_MARK ${RED:0:7} -->" >>"$sw/520.comments"
