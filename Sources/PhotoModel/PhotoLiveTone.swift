@@ -8,8 +8,8 @@
 // with its blend mode and opacity when those aren't normal and 1) and a pixel layer as one batched composite;
 // then the adjustment layers at the top (normal, opacity 1) and the image's adjustments, folded into the one
 // program the target writes the picture through. A whole-image slider step is that write over the cached
-// composite: no compositing, no upload, no readback. Each section is CoreRender's tone operation of
-// `applied(to:)`'s step (exposure, levels, curves in sRGB), skipped at its identity, and Hue/Saturation is
+// composite: no compositing, no upload, no readback. The program is SuiteImaging's step list, the one
+// `applied(to:)` runs (exposure, levels with its output, curves in sRGB), skipped at identity, and Hue/Saturation is
 // Photo's own colour matrix and lightness (HueSaturation.swift) as a ToneProgram matrix operation, so the GPU
 // picture matches the CPU's. `liveStack` is nil, and the region takes the dispatcher route, when the image's
 // Blur is on (it reads neighbours), when a visible layer has an enabled mask, when a layer's opacity
@@ -19,23 +19,15 @@ import CoreRender
 import Synchronization
 
 extension AdjustmentSettings {
-    /// The enabled tone steps that change the image, in `applied(to:)`'s order; nil while Blur would run.
+    /// The enabled tone steps that change the image: ImagingProgram's steps as `applied(to:)` runs them, with
+    /// Hue/Saturation as Photo's own matrix (`runImaging`); nil while Blur would run.
     var toneOperations: [ToneProgram.Operation]? {
         guard blurMargin == 0 else { return nil }
-        var steps: [ToneAdjustment] = []
-        if isEnabled(.exposure), exposure != 0 { steps.append(.exposure(stops: exposure)) }
-        if isEnabled(.levels), [blackPoint, whitePoint, gamma] != [0, 1, 1] {
-            steps.append(.levels(inBlack: blackPoint, inWhite: whitePoint, gamma: gamma, outBlack: 0, outWhite: 1, encoding: .sRGB))
+        return imagingSteps.map { step in
+            guard case .hueSaturation = step else { return .adjustment(step) }
+            return .matrix(rows: PixelBuffer.colorMatrix(hue: hue, saturation: saturation),
+                           lightness: Float(min(max(lightness, -100), 100) / 100))
         }
-        if isEnabled(.curves), !curvePoints.allSatisfy({ $0.x == $0.y }) {
-            steps.append(.curves(points: curvePoints, encoding: .sRGB))
-        }
-        var operations = steps.map(ToneProgram.Operation.adjustment)
-        if isEnabled(.hueSaturation), hue != 0 || saturation != 0 || lightness != 0 {
-            operations.append(.matrix(rows: PixelBuffer.colorMatrix(hue: hue, saturation: saturation),
-                                      lightness: Float(min(max(lightness, -100), 100) / 100)))
-        }
-        return operations
     }
 }
 
@@ -102,6 +94,7 @@ extension PhotoWorkspace {
         func owned() throws {
             if picture == base { picture = try tone.adjusted(base, tone: ToneProgram([])) }
         }
+        PhotoRenderCount.layers(stack.steps.count)
         for step in stack.steps {
             switch step {
             case .adjustment(let layer, let program):

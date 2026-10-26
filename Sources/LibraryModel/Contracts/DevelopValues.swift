@@ -14,6 +14,7 @@ import Foundation
 #endif
 import CoreRaster
 import SuiteImaging
+import SuiteKernel
 import SuiteModel
 
 /// The develop slider is the suite's tone slider. LT-2 drops this name with the
@@ -125,6 +126,8 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
     public private(set) var levels = DevelopLevels.neutral
     /// Nil: the whole photo, upright.
     public private(set) var crop: CropSettings?
+    /// How the photo faces before its crop (orientation-crop OC-8); up writes no key.
+    public private(set) var orientation: Orientation = .up
 
     public static let neutral = DevelopSettings()
     public init() {}
@@ -162,10 +165,17 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         return copy
     }
 
-    /// Every adjustment of `other` with this crop: Paste Settings never pastes a crop.
+    public func setting(orientation: Orientation) -> DevelopSettings {
+        var copy = self
+        copy.orientation = orientation
+        return copy
+    }
+
+    /// Every adjustment of `other` with this crop and orientation: Paste Settings never pastes either.
     public func pastingAdjustments(from other: DevelopSettings) -> DevelopSettings {
         var copy = other
         copy.crop = crop
+        copy.orientation = orientation
         return copy
     }
 
@@ -178,14 +188,14 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         return bytes.reduce(0xcbf2_9ce4_8422_2325 as UInt64) { ($0 ^ UInt64($1)) &* 0x0000_0100_0000_01b3 }
     }
 
-    /// A slider's raw value, or crop, curve or levels: the develop object's flat keys.
+    /// A slider's raw value, or crop, curve, levels or orientation: the develop object's flat keys.
     private struct Key: CodingKey {
         let stringValue: String
         init(_ name: String) { stringValue = name }
         init?(stringValue: String) { self.stringValue = stringValue }
         var intValue: Int? { nil }
         init?(intValue: Int) { nil }
-        static let crop = Key("crop"), curve = Key("curve"), levels = Key("levels")
+        static let crop = Key("crop"), curve = Key("curve"), levels = Key("levels"), orientation = Key("orientation")
         static func slider(_ s: ToneSlider) -> Key { Key(s.rawValue) }
     }
 
@@ -206,6 +216,7 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         let decodedCurve = try c.decodeIfPresent(ToneCurve.self, forKey: .curve) ?? .identity
         curve = decodedCurve.isIdentity ? .identity : decodedCurve
         levels = try c.decodeIfPresent(DevelopLevels.self, forKey: .levels) ?? .neutral
+        orientation = try c.decodeIfPresent(Orientation.self, forKey: .orientation) ?? .up
     }
 
     /// The six original sliders always and the crop when set (so persist's golden
@@ -218,6 +229,7 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         try c.encodeIfPresent(crop, forKey: .crop)
         if !curve.isIdentity { try c.encode(curve, forKey: .curve) }
         if levels != .neutral { try c.encode(levels, forKey: .levels) }
+        if orientation != .up { try c.encode(orientation, forKey: .orientation) }
     }
 }
 
@@ -230,24 +242,20 @@ public struct UnitRect: Hashable, Sendable, Codable {
     }
 }
 
-/// The crop's aspect. The raw value is the chip's title.
-public enum CropAspect: String, CaseIterable, Sendable, Codable {
-    case original = "Original", free = "Free", square = "1:1"
-    case fourFive = "4:5", threeTwo = "3:2", sixteenNine = "16:9"
+/// The crop's aspect: the kernel's (orientation-crop OC-8), whose raw values are the stored keys.
+public typealias CropAspect = SuiteKernel.CropAspect
+
+extension SuiteKernel.CropAspect {
+    public static let square = CropAspect.ratio(width: 1, height: 1)
+    public static let fourFive = CropAspect.ratio(width: 4, height: 5)
+    public static let threeTwo = CropAspect.ratio(width: 3, height: 2)
+    public static let sixteenNine = CropAspect.ratio(width: 16, height: 9)
+    /// Library's chips, in order.
+    public static let allCases: [CropAspect] = [.original, .free, .square, .fourFive, .threeTwo, .sixteenNine]
 
     /// Width over height for a photo of `size` (a 3:2 on a portrait photo is 2:3); nil for Free.
     public func ratio(for size: PixelSize) -> Double? {
-        let portrait = size.height > size.width
-        let base: Double? = switch self {
-        case .free: nil
-        case .original: size.height > 0 ? Double(size.width) / Double(size.height) : nil
-        case .square: 1
-        case .fourFive: 4.0 / 5.0
-        case .threeTwo: 3.0 / 2.0
-        case .sixteenNine: 16.0 / 9.0
-        }
-        guard let base, self != .original, self != .square else { return base }
-        return portrait == (base > 1) ? 1 / base : base
+        ratio(for: (Double(size.width), Double(size.height)), orientation: nil)
     }
 }
 

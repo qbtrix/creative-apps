@@ -64,8 +64,11 @@ struct AllAppsCatalogTests {
         "Halo's drag end with no drag is a no-op edit that stays enabled": [
             "viewer.drag-end: stepNamedTitle", "viewer.drag-end: editRecordsOneStep", "viewer.drag-end: undoRestoresBytes"],
         "The kernel's transform.flip is titled Flip while its step names the axis": ["transform.flip: stepNamedTitle"],
-        "Photo's tone.* runs throw notBuilt until TC-6 (#4953) builds ToneCommands' bodies":
-            ["tone.auto: exampleRuns", "tone.read: exampleRuns", "tone.set: exampleRuns"],
+        // PY-5 (layer-styles) fills Photo's style adapter and drops this entry.
+        "Photo's style.* runs throw notBuilt until layer-styles PY-5": [
+            "style.add: exampleRuns", "style.enable: exampleRuns", "style.fill-opacity: exampleRuns", "style.panel: exampleRuns",
+            "style.paste: exampleRuns", "style.preset: exampleRuns", "style.read: exampleRuns", "style.remove: exampleRuns",
+            "style.set: exampleRuns"],
     ]
 
     /// `D`'s law problems on the real job input `path`, as "<id>: <law>", less an example that can't run because its
