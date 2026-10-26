@@ -79,3 +79,4 @@ utc	stage	event	ref	note
 2026-10-26T08:19Z	3	check-in	#5064,#5233,#5235,#5236	dev 3e26fbe4; wave 2 still queued; 0 findings
 2026-10-26T08:39Z	3	check-in	#5064,#5233,#5235,#5236	dev 1960c2d9; wave 2 eligible, queued behind one-PR batches; 0 findings
 2026-10-26T08:59Z	3	check-in	#5064,#5233,#5235,#5236	dev be5f2c00; wave 2 queued; 0 findings
+2026-10-26T09:19Z	3	check-in	#5064,#5233,#5235,#5236	dev 1b843d15; wave 2 queued behind #5065; 0 findings
