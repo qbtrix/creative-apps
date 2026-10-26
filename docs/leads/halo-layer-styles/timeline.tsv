@@ -121,3 +121,4 @@ utc	stage	event	ref	note
 2026-10-26T14:17Z	heartbeat	lane	#5158	#5158/#5174 eligible, unmerged; no answer yet on #3936; dev-red #5321 open
 2026-10-26T14:44Z	heartbeat	lane	#5158	dev f86f72f79; #5158/#5174 eligible, unmerged; no answer on #3936; dev-red #5321 open
 2026-10-26T15:04Z	heartbeat	lane	#5158	dev f86f72f79; batch 20261026150314 holds #5267 only; #5158/#5174 eligible, unmerged; no answer on #3936; dev-red #5321 open
+2026-10-26T15:25Z	heartbeat	lane	#5158	dev f86f72f79; batch 20261026150314 (#5267) in flight; #5158/#5174 eligible, unmerged; no answer on #3936; dev-red #5321 open
