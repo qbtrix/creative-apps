@@ -3,6 +3,7 @@
 // over the window, with its Done button. Light and Dark. Writes photo-layer-style-panel-light.png and
 // photo-layer-style-panel-dark.png. macOS only.
 import PhotoModel
+import SuiteImaging
 import SuiteUI
 import SwiftUI
 import Testing

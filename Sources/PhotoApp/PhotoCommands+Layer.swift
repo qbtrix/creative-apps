@@ -5,11 +5,13 @@
 // (Command-J), Merge Down (Command-E) and Flatten Image (no shortcut), each
 // disabled with the workspace's reason as its help when it can't run;
 // Rename…, Show/Hide, Bring Forward, Send Backward, Select Layer Above and
-// Below. The items are a view, PhotoLayerMenu, so the snapshot tests can draw
+// Below; Layer Style… (the style panel at Drop Shadow), Copy, Paste and Clear
+// Layer Style, each disabled with its reason. The items are a view, PhotoLayerMenu, so the snapshot tests can draw
 // them; shortcuts and symbols are tables the tests read, and `symbol(_:)` is
 // shared with the Layers panel's bar and row menus (PhotoLayerList).
 import AppKit
 import PhotoModel
+import SuiteImaging
 import SuiteUI
 import SwiftUI
 
@@ -53,6 +55,23 @@ struct PhotoLayerMenu: View {
         menu.item("layer.select-below", systemImage: "arrow.down", shortcut: KeyboardShortcut("[", modifiers: [.command, .option])) {
             menu.perform(.selectLayerBelow)
         }
+        Divider()
+        styleItems
+    }
+
+    /// Layer Style… (the panel at Drop Shadow), Copy, Paste and Clear Layer Style; Paste reads the style pasteboard.
+    @ViewBuilder private var styleItems: some View {
+        menu.item("style.panel", systemImage: Self.symbol("style.panel")) { menu.perform(.style(.panel(.show(.dropShadow)))) }
+        menu.item("style.copy", systemImage: Self.symbol("style.copy")) { menu.perform(.style(.copy)) }
+        menu.item("style.paste", systemImage: Self.symbol("style.paste"), in: pasteState) { menu.perform(.style(.paste)) }
+        menu.item("style.clear", systemImage: Self.symbol("style.clear")) { menu.perform(.style(.clear)) }
+    }
+
+    /// The menu's state with whether the style pasteboard holds a style, which Paste Layer Style reads.
+    private var pasteState: PhotoMenuState {
+        var state = menu.state()
+        state.pasteboardHasStyle = LayerStylePasteboard.read() != nil
+        return state
     }
 
     /// Command-J and Command-E; Flatten Image has none (QB-F4).
@@ -90,6 +109,10 @@ struct PhotoLayerMenu: View {
         case "layer.duplicate": systemImage(.duplicateLayer)
         case "layer.merge-down": systemImage(.mergeDown)
         case "layer.flatten": systemImage(.flattenImage)
+        case "style.panel": "fx"
+        case "style.copy": "doc.on.doc"
+        case "style.paste": "doc.on.clipboard"
+        case "style.clear": "xmark.circle"
         default: "square.stack"
         }
     }

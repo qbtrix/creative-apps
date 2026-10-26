@@ -168,6 +168,7 @@ struct PhotoWindow: View {
             .modifier(PhotoTransformArea(model: model, perform: perform, canvasSize: canvasSizeDraft))
             .modifier(PhotoExportArea(model: model, perform: perform))
             .modifier(PhotoSampleArea(model: model, perform: perform))
+            .modifier(PhotoStyleArea(model: model, perform: perform))
     }
 
     func perform(_ intent: PhotoIntent) {
@@ -257,6 +258,7 @@ struct PhotoWindow: View {
         case .text(let intent): performType(intent)
         case .tone(let intent): performTone(intent)
         case .path(let intent): model.runPath(intent)
+        case .style(let intent): performStyle(intent)
         case .confirm: if confirmTransform() {} else { model.applyCrop() }
         case .dismiss:
             if dismissTransform() {} else if model.pendingCrop != nil { model.cancelCrop() } else { model.deselect() }

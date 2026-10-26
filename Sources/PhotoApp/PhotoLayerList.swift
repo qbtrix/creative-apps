@@ -2,7 +2,7 @@
 // the stack top first, each row with its eye, kind symbol and caption (info
 // line, blend summary), a drop reordering through `layerListMove`. Under it
 // SuiteUI's LayerActionBar: New Layer, Duplicate Layer, Delete Layer, fx
-// (waiting on layer styles), Show/Hide Layer and Rename Layer…
+// (Layer Style…, the style panel at Drop Shadow), Show/Hide Layer and Rename Layer…
 // (`photo.layer.new`, `.duplicate`, `.delete`, `.fx`, `.visibility`,
 // `.rename`). A row's context menu holds Rename, Duplicate, Delete, Merge
 // Down, Flatten Image, Bring Forward, Send Backward and Show/Hide. Every item
@@ -14,6 +14,7 @@
 // picked layer draws selected, and a row click leaves as `pickLayer` with its
 // mode (multi-layer-select PM-3). Values in, intents out.
 import PhotoModel
+import SuiteImaging
 import SuiteKernel
 import SuiteUI
 import SwiftUI
@@ -66,10 +67,10 @@ struct PhotoLayerList: View {
     /// One panel command: its catalog id, its id suffix after `photo.layer.`, and its intent.
     typealias Command = (id: String, part: String, intent: PhotoIntent?)
 
-    /// The bar's commands, then fx after the third.
+    /// The bar's commands; fx opens the style panel at Drop Shadow, as Layer > Layer Style… does.
     nonisolated static func barCommands(selected: PhotoLayer.ID?) -> [Command] {
         [("layer.new", "new", .addLayer), ("layer.duplicate", "duplicate", .edit(.duplicateLayer)),
-         ("layer.delete", "delete", .deleteLayer),
+         ("layer.delete", "delete", .deleteLayer), ("style.panel", "fx", .style(.panel(.show(.dropShadow)))),
          ("layer.toggle-visibility", "visibility", selected.map(PhotoIntent.toggleVisibility)),
          ("layer.rename", "rename", .renameLayer)]
     }
@@ -83,12 +84,10 @@ struct PhotoLayerList: View {
          ("layer.toggle-visibility", "visibility", .toggleVisibility(row))]
     }
 
-    /// The bar: each command as its Layer menu item on the selection, fx disabled until layer styles land.
+    /// The bar: each command as its Layer menu item on the selection.
     // view-static: main-actor
     static func bar(_ menu: PhotoMenu) -> [ToolbarAction] {
-        var actions = barCommands(selected: menu.selectedLayer).map { action(menu, $0, in: menu.state()) }
-        actions.insert(LayerActionBar.effects(identifier: "photo.layer.fx"), at: 3)
-        return actions
+        barCommands(selected: menu.selectedLayer).map { action(menu, $0, in: menu.state()) }
     }
 
     /// Row `id`'s context menu: each item as the Layer menu shows it with that row selected; a pick selects it

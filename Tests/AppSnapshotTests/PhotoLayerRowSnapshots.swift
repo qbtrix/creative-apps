@@ -5,6 +5,7 @@
 // same state, and a row's menu reads that row as selected and selects it
 // before it runs. Writes photo-layer-list-light.png and photo-layer-list-dark.png.
 import PhotoModel
+import SuiteImaging
 import SuiteUI
 import SwiftUI
 import Testing
@@ -45,19 +46,30 @@ import Testing
 
     /// The bar is the Layer menu's items on the selection: same title, enablement and reason.
     @Test func barMatchesTheLayerMenu() throws {
-        let menu = PhotoMenu(model: try twoLayers(), perform: { _ in })
+        var model = try twoLayers()
+        var sent: [PhotoIntent] = []
+        let menu = PhotoMenu(model: model, perform: { sent.append($0) })
         let commands = PhotoLayerList.barCommands(selected: menu.selectedLayer) + PhotoLayerList.rowCommands(row: "x")
         for id in Set(commands.map(\.id)) {
             #expect(PhotoWorkspace.catalog.spec(id) != nil, "\(id) is not a Photo catalog command")
         }
-        for (command, action) in zip(PhotoLayerList.barCommands(selected: menu.selectedLayer),
-                                     PhotoLayerList.bar(menu).filter { $0.identifier != "photo.layer.fx" }) {
+        let bar = PhotoLayerList.bar(menu)
+        #expect(bar.count == PhotoLayerList.barCommands(selected: menu.selectedLayer).count)
+        for (command, action) in zip(PhotoLayerList.barCommands(selected: menu.selectedLayer), bar) {
             let item = menu.item(command.id) {}
             #expect(action.title == item.title && action.isEnabled == item.isEnabled, "\(command.id)")
             #expect(action.help == (item.isEnabled ? item.title : item.help), "\(command.id)")
         }
-        let fx = try #require(PhotoLayerList.bar(menu).first { $0.identifier == "photo.layer.fx" })
-        #expect(!fx.isEnabled && fx.help == LayerActionBar.effectsPending)
+        // fx is Layer Style…: enabled on a layer, and it opens the style panel at Drop Shadow.
+        let fx = try #require(bar.first { $0.identifier == "photo.layer.fx" })
+        #expect(fx.isEnabled && fx.title == "Layer Style…")
+        fx.perform()
+        guard case .style(.panel(let intent))? = sent.last else {
+            Issue.record("fx sent \(sent)")
+            return
+        }
+        try model.runStyleIntent(intent)
+        #expect(model.stylePanel == .dropShadow)
     }
 
     /// A row's menu reads that row as selected (Background, at the bottom, can't merge down), and a pick selects it first.

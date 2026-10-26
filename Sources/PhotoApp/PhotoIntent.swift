@@ -49,6 +49,8 @@ enum PhotoIntent {
     case tone(ToneIntent)
     /// One Pen or point-editor gesture from PhotoPenOverlay, run through the catalog.
     case path(PathIntent)
+    /// Layer Style…, its panel's intents, and Copy, Paste and Clear Layer Style (PhotoWindow+Styling).
+    case style(PhotoStyleIntent)
     /// Return: commits a free transform, else applies a pending crop.
     case confirm
     /// Escape: cancels a free transform, else cancels a pending crop or deselects.
