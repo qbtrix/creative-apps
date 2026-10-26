@@ -1,10 +1,10 @@
 # shared-raw lead record
 
 Issue: #3737 · Packet: docs/blueprints/suiteui/features/shared-raw.md
-Run: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
+Run: act-1a175f402e7-kwji (relaunch 2026-10-26T02:00Z) · Started: 2026-10-26T02:00Z (earlier act-1a1702c56e8-b6cq, act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
-Base: main ef37711d (verified) / dev ae3efdb8
-Next: lane merges #4848, then retarget #4859, #4872 to dev; #4865 after #4859; #5262 rides on #4872.
+Base: origin/dev 8987427d8
+Next: lane merges #4848 (code batches wait on dev-red #5321), then retarget #4859 and #4872 to dev; #4865 after #4859; #5262 rides on #4872. SR-z waits on SR-m, SR-photo, TC-a, PN-a.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -38,7 +38,10 @@ Next: lane merges #4848, then retarget #4859, #4872 to dev; #4865 after #4859; #
 - SR-2 (~530 lines) split into SR-2a and SR-2b; the stale SR-3..5 remote branches were overwritten (force-with-lease on their old shas).
 - SR-4 asks the supervisor in its PR to add SystemRawDecoderTests.decodeTime to Tests/perf-suites.txt and run its macOS-only mutation plan.
 
+- 2026-10-26T02:20Z Relaunch act-1a175f402e7-kwji. No raw PR merged since the last record. #4848 #4859 #4865 #4872 #5262 open with fast-lane, each merges dev 8987427d8 cleanly. dev-red #5321 open (full CI 40251699354 macOS red, range main..cc5c6234a); while it names macOS no code batch forms, so code PRs wait.
+
 ## Open
 - SR-6 waits on shared-codecs SC-photo (SC-4), which this run builds now; SR-8 on tone-controls TC-a and pen-paths PN-a (contract-first: their contract slices).
 - Open findings for this feature: 0.
 - 2026-10-24T07:05Z: run act-1a16cae7989-hj12 resumes on dev 830af22d. Server-added footers removed from #4848, #4859, #4865, #4872 bodies so Head: is the last line again (#4828, #4861, #4875, #4876 already clean). Contract-first waits (rule 12) applied to the slice table.
+- 2026-10-26T02:20Z: relaunch check: 5 PRs open, clean; dev-red #5321 open (full CI 40251699354 macOS red, range main..cc5c6234a); while it names macOS no code batch forms, so code PRs wait; open findings 0
