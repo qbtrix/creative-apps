@@ -233,6 +233,8 @@ private final class LiveSink: @unchecked Sendable {
         let (route, _, sink) = Self.route(canvas)
         _ = try await PhotoRenderer.update(workspace, since: nil, route: route, target: sink.target)
         #expect(sink.toned == 0 && sink.plain > 0)
+        let export = PhotoRenderer.premultiplied(try await PhotoRenderer.render(workspace).rgba8)
+        #expect((zip(sink.bytes, export).map { abs(Int($0) - Int($1)) }.max() ?? 0) <= 2, "the dispatcher route sharpens as export does")
     }
 
     /// RJ-P12: Temperature -30 on a grey card under a mild tungsten cast reads neutral, |R - B| <= 3/255. The
