@@ -136,3 +136,8 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 
 - dev at 99ace703 (#5043 landed, not ours); wave 2 (#5064, #5233, #5235, #5236) still open with fast-lane, none merged. The lane's Belt-Lead sweep re-labelled #5260 again; it stays over the cap until wave 2 lands. No needs-fix or needs-rebase.
 - 0 open findings. Stage: 3 wave 3 (waiting for wave 2 to land).
+
+### 2026-10-26T07:37Z check-in
+
+- dev still at 99ace703; wave 2 (#5064, #5233, #5235, #5236) open with fast-lane, none merged. The lane's Belt-Lead sweep has re-labelled every wave 3 PR fast-lane; they stay over the size cap until wave 2 lands and dev is merged in. No needs-fix or needs-rebase.
+- 0 open findings. Stage: 3 wave 3 (waiting for wave 2 to land).
