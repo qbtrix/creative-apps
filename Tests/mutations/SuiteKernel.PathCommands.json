@@ -68,5 +68,26 @@
     "find": "guard let back = try? e.toDocument.inverted() else { throw refused(id, flatHelp) }",
     "replace": "let back = (try? e.toDocument.inverted()) ?? .identity",
     "tests": "PathCommandsTests"
+  },
+  {
+    "label": "openEndHandleRefuses: an open path's last out handle is taken, so the move reports a step the path drops",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "ref.index < contour.anchors.count - 1",
+    "replace": "ref.index < contour.anchors.count",
+    "tests": "PathCommandsTests"
+  },
+  {
+    "label": "openEndHandleRefuses: an open path's first in handle is taken",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "p.end == .handleIn ? ref.index > 0 :",
+    "replace": "p.end == .handleIn ? ref.index >= 0 :",
+    "tests": "PathCommandsTests"
+  },
+  {
+    "label": "openEndHandleRefuses: a closed path's end handles refused too",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "guard contour.closed ||",
+    "replace": "guard false ||",
+    "tests": "PathCommandsTests"
   }
 ]
