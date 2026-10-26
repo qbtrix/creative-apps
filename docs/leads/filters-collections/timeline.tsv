@@ -9,3 +9,4 @@ utc	stage	event	ref	note
 2026-10-17T06:33Z	3	pr-opened	-	FC-2 part 1 (state, UserCollection, refreshShown), head in PR body
 2026-10-26T03:13:58Z	UP	heartbeat	waiting on lane
 2026-10-26T03:30:20Z	all	blocked-dev-red	#5321
+2026-10-26T03:48:06Z	all	heartbeat	dev-red #5321 open
