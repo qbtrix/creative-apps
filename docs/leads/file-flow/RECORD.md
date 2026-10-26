@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 23:33Z poll: no change; #4936 waits on prescreen + sweep; #5092/#5123/#5801 unchanged; dev-red #5818 open (not ours); full CI 40411399952 running on 9810d71b.
 - 23:11Z poll: scoped halo run 40408726021 GREEN on c4cf4a75 (contains #4894); HF-m's last PR is still #5801, so no slice-done yet. #4936 waits on prescreen + sweep. #5092/#5123/#5801 unchanged. dev-red #5818 open (not ours).
 - 22:48Z poll: #4936 lane Linux check 40412395828 passed (waits on prescreen + sweep). Scoped halo 40408726021 still running on c4cf4a75. #5092/#5123/#5801 unchanged. dev-red #5818 open (not ours).
 - 22:27Z poll: #4936 now base dev at 4f8863ff; lane's Linux check 40412395828 is its proof (plus prescreen). Scoped halo run 40408726021 in progress on c4cf4a75. #5092/#5123/#5801 unchanged. dev-red #5818 open (not ours).
