@@ -48,6 +48,7 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 2026-10-26T09:37Z no change: #4894 #4936 #5092 open and clean; dev-red #5321 open (run 40290214719, 16 comments); no supervisor answer on #3474
 - 2026-10-26T09:21Z no change: #4894 #4936 #5092 open and clean; dev-red #5321 open (run 40290214719, 16 comments); no supervisor answer on #3474
 - 2026-10-26T09:04Z no change: #4894 #4936 #5092 open and clean; dev-red #5321 still open, new red run 40290214719 (range main..3e26fbe4, our PRs not in it); no supervisor answer on #3474
 - 2026-10-26T08:47Z no change: #4894 #4936 #5092 open, dev-red #5321 still open (16 comments), no supervisor answer on #3474
