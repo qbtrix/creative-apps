@@ -209,3 +209,4 @@ utc	stage	event	ref	note
 2026-10-26T05:44Z	wait	heartbeat	#5321	dev-red still macos (not ours); 7 PRs clean, unchanged; no supervisor reply
 2026-10-26T06:09Z	wait	heartbeat	#5321	dev-red still macos (not ours); 7 PRs clean, unchanged; no supervisor reply
 2026-10-26T06:31Z	wait	heartbeat	#5321	dev-red still macos (not ours); 7 PRs clean, unchanged; no supervisor reply
+2026-10-26T06:54Z	wait	heartbeat	#5321	dev-red still macos (run 40277933712, range main..c480d848, none of ours); 7 PRs clean, unchanged; no supervisor reply
