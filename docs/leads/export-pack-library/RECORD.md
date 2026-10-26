@@ -2,7 +2,7 @@
 
 Issue: #3478 · Packet: docs/blueprints/library/features/export-pack.md
 Run: act-1a1782c1961-n1cv (line lead, line:library) · resumed 2026-10-26T12:20Z · earlier act-1a175ea5531-x1ci (line lead, line:library) · resumed 2026-10-26T01:59:55Z · earlier act-1a170488aff-41nk (line lead, line:library) · resumed 2026-10-24T23:40Z (earlier act-1a16cc967d9-mcuv, act-1a16953af22-wvhu, act-1a15e4969c2-pa6e)
-Stage: 3 polling: LX-u #5128 at 6f966c25, LX-z #5242/#5243 stacked, in the lane; code batches held by dev-red #5321 (not Library); checked 18:03Z
+Stage: 3 polling: LX-u #5128 at 6f966c25, LX-z #5242/#5243 stacked, in the lane; code batches held by dev-red #5321 (not Library); checked 18:26Z
 Base: origin/dev 8eff8ab85
 Next: lane lands LX-u then LX-z (retarget #5242 to dev when #5128 merges, #5243 when #5242 merges); Belt-Slice-Done LX-u, LX-z on a green library run with their last PR; critics on LX-u screens; Belt-Contact-Sheet
 
