@@ -262,3 +262,7 @@ Heads unchanged. Lane run 40308651429 (10:37-10:57) decides eligible for #4988 (
 ## 2026-10-26T11:30:25Z poll
 
 Heads unchanged; none of #4988, #5364, #4999 on dev (dev head c6700db, #5727). New batch lane/batch-20261026111622 again holds only #5266. No supervisor answer. Still queued.
+
+## 2026-10-26T11:54:35Z poll
+
+Heads unchanged; #4988, #5164, #5364, #4999 open with fast-lane and beta only (no needs-fix, needs-rebase). Dev head still c6700db. Batch lane/batch-20261026115104 holds only #5146. No supervisor answer. Still queued.

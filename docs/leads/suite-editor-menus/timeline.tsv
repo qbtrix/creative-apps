@@ -232,3 +232,4 @@ utc	stage	event	ref	note
 2026-10-26T10:43:04Z	poll	unbatched; batch bdde122 holds #5266 only; #5725 lane fix landed; no supervisor answer
 2026-10-26T11:07:57Z	poll	all three eligible; queued behind 118 ready PRs
 2026-10-26T11:30:25Z	poll	still queued; batch 111622 holds only #5266
+2026-10-26T11:54:35Z	poll	still queued; batch 115104 holds only #5146
