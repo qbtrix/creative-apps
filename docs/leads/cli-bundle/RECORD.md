@@ -1,9 +1,9 @@
 # cli-bundle lead record
 
 Issue: #3773 · Packet: docs/blueprints/suite/features/cli-bundle.md
-Run: act-1a17129eefa-0kqr (relaunch; earlier act-1a16daeb4e8-vghz, act-1a16a37a3ed-0kyn, act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
-Stage: 3 polling (CB-z: #4999 eligible, waits for a lane batch; #5000 waits on #4999)
-Base: afef017c27a56ec18983e58672a8a15c94083ce4 (main, verified at relaunch; PRs target dev)
+Run: act-1a175f7cc55-xlmt (relaunch; earlier act-1a17129eefa-0kqr, act-1a16daeb4e8-vghz, act-1a16a37a3ed-0kyn, act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
+Stage: 3 polling (CB-z: #4999 queued in the lane; #5000 waits on #4999)
+Base: d3323f6a7dc523e1986e1693b640cf377e362f08 (main, verified at relaunch; PRs target dev 8987427d8)
 Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) batches #4999; once it merges, rebuild #5000 on dev (3 docs files + feature_issue #3773), drop no-fast-lane, move Head.
 
 ## Slices
@@ -106,3 +106,6 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 2026-10-25T15:24:39Z: #4999 eligible, queued behind p0
 - 2026-10-25T15:42:41Z: QUEUE: 50+ open p0 fast-lane PRs sort ahead of beta #4999; ~1 code PR per 20 min. Supervisor: raise #4999 to p0 if CB-z should land sooner
 - 2026-10-25T16:00:37Z: #4999 still beta, queued behind p0
+
+## 2026-10-26T02:12:53Z relaunch act-1a175f7cc55-xlmt
+- main d3323f6 verified. #4999 open, clean, Head 941da48 current; #5000 held (no-fast-lane, needs-split) until #4999 merges. Belt-Lead line moved to this run.
