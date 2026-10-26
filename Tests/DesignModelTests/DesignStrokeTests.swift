@@ -1,9 +1,16 @@
 // DesignStrokeTests.swift (stroke-style DK-1 written, DK-6 turns on): Design's stroke as the kernel's. A node's
-// `vectorStroke` keeps its colour and width with the default join and cap; the workspace as a `StrokeTarget` says
-// why nothing can be stroked and why trim never runs in Design; the inspector's bridge turns the editor's intents
-// into style changes until DK-6 runs them through the catalog. The stroke commands on Design (one step for the
-// whole selection, a locked layer skipped, the width clamped, trim refused) are disabled until DK-6 registers them.
-// MJ-DK, the Model walk of the packet's journey, on Linux.
+// `vectorStroke` is its stroke; the workspace as a `StrokeTarget` says why nothing can be stroked and why trim never
+// runs in Design; the inspector's bridge turns each editor intent (join, cap and dash included) into a style change
+// through the kernel's command. The stroke commands on Design are one step for the whole selection, skip a locked
+// layer, clamp the width and refuse trim. MJ-DK, the Model walk of the packet's journey, on Linux.
+// DesignStrokeMigrationTests (DK-5): a file saved before the feature, its strokes `{color, width}` in 0...255 bytes,
+// opens with each stroke's colour and width and the default join and cap; a file saved now round-trips the join, the
+// cap and the dash.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 @testable import DesignModel
 import SuiteKernel
 import Testing
@@ -61,11 +68,15 @@ import Testing
         let green = try #require(w.strokeChange(.color(FillColor(r: 0, g: 1, b: 0), drag: "c1")))
         #expect(green.change == .stroke(DesignStroke(color: DesignColor(0, 255, 0), width: 2)))
         #expect(green.scrub, "a colour scrub's sample is previewed, not one undo step each")
-        #expect(w.strokeChange(.cap(.round)) == nil, "caps wait on DK-5's stroke type")
+        let round = try #require(w.strokeChange(.cap(.round)), "a cap is the kernel's command now")
+        #expect(round.change == .stroke(VectorStroke(color: FillColor(r: 1, g: 0, b: 0), width: 2, cap: .round)))
+        let dashed = try #require(w.strokeChange(.dash(.dashed, pattern: nil)))
+        #expect(dashed.change == .stroke(VectorStroke(color: FillColor(r: 1, g: 0, b: 0), width: 2, dash: [8, 4])))
+        #expect(w.strokeChange(.trim(start: 0, end: 0.5, offset: 0, drag: nil)) == nil, "no trim in Design")
     }
 
-    /// No dead controls (#3865): on a stroked layer every Join and Cap chip either changes the stroke or is disabled
-    /// with the Model's reason; the reason goes once the bridge runs them.
+    /// No dead controls (#3865): on a stroked layer every Join, Cap and Dash chip changes the stroke, so none needs a
+    /// reason.
     @Test func everyEnabledEditorRowActs() throws {
         var w = DesignFixtures.cards
         w.selectItem("node-2")
@@ -73,21 +84,12 @@ import Testing
         try w.setStyle(.stroke(DesignStroke(color: DesignColor(255, 0, 0), width: 2)))
         let intents = StrokeJoin.allCases.map(StrokeIntent.join) + StrokeCap.allCases.map(StrokeIntent.cap)
         for intent in intents {
-            #expect(w.strokeChange(intent) != nil || w.strokeStyleHelp != nil, "\(intent) is enabled and does nothing")
+            #expect(w.strokeChange(intent) != nil, "\(intent) is enabled and does nothing")
         }
-        #expect(w.strokeStyleHelp == DesignWorkspace.joinCapHelp)
-        #expect(w.strokeChange(.dash(.dashed, pattern: nil)) != nil || w.strokeDashHelp != nil)
-    }
-
-    /// The Dash chips wait on DK-5 too, and say so in the user's words with the same reason as Join and Cap, so the
-    /// editor shows one note, not a second one about core's fields and trim, which Design never shows.
-    @Test func dashWaitsWithJoinAndCapsReason() throws {
-        var w = DesignFixtures.cards
-        w.selectItem("node-2")
-        try w.setStyle(.stroke(DesignStroke(color: DesignColor(255, 0, 0), width: 2)))
-        #expect(w.strokeDashHelp == w.strokeStyleHelp)
-        #expect(w.strokeDashHelp != StrokeRules.waitingCore)
-        #expect(!DesignWorkspace.joinCapHelp.contains("creative-core"))
+        for preset in [DashPreset.solid, .dashed, .dotted] {
+            #expect(w.strokeChange(.dash(preset, pattern: nil)) != nil, "\(preset) is enabled and does nothing")
+        }
+        #expect(w.strokeStyleHelp == nil && w.strokeDashHelp == nil)
     }
 
     @Test func designColorClampsOutOfRangeAndNaN() {
@@ -107,7 +109,7 @@ import Testing
         #expect(node.fill(in: node.frame.kernelRect) == .solid(node.fill.kernelColor))
     }
 
-    @Test(.disabled("waits on DK-6")) func eachCommandIsOneStepForTheSelection() throws {
+    @Test func eachCommandIsOneStepForTheSelection() throws {
         var w = Self.threeSelected
         let runs: [(String, JSONValue)] = [
             ("stroke.add", .object([:])), ("stroke.width", .object(["width": .number(2)])),
@@ -122,7 +124,7 @@ import Testing
         }
     }
 
-    @Test(.disabled("waits on DK-6")) func oneStepPerGesture() throws {
+    @Test func oneStepPerGesture() throws {
         var w = Self.threeSelected
         _ = try DesignWorkspace.catalog.run("stroke.add", params: .object([:]), on: &w)
         for sample in 0..<120 {
@@ -134,26 +136,122 @@ import Testing
         #expect(Self.stroke(w, "node-3")?.width == 1)
     }
 
-    @Test(.disabled("waits on DK-6")) func aLockedLayerIsSkipped() throws {
+    @Test func aLockedLayerIsSkipped() throws {
         var w = DesignFixtures.cards
         w.selectItem("node-2")
-        w.toggleSelection("node-9")
+        w.toggleSelection("node-3")
+        try w.setNodeLocked("node-2", true)
+        #expect(Set(w.selectedNodeIDs) == ["node-2", "node-3"] && w.strokeHelp == nil, "locked A stays selected behind B")
         _ = try DesignWorkspace.catalog.run("stroke.add", params: .object([:]), on: &w)
-        #expect(Self.stroke(w, "node-2") != nil)
-        #expect(Self.stroke(w, "node-9") == nil, "the locked layer took a stroke")
+        #expect(Self.stroke(w, "node-3") != nil)
+        #expect(Self.stroke(w, "node-2") == nil, "the locked layer took a stroke")
     }
 
-    @Test(.disabled("waits on DK-6")) func widthClamps() throws {
+    /// The catalog's schema refuses a width outside 0...1000, so the clamp is the editor's: its over-range width lands
+    /// as the nearest bound on every selected layer (#4920).
+    @Test func widthClamps() throws {
         var w = Self.threeSelected
         _ = try DesignWorkspace.catalog.run("stroke.add", params: .object([:]), on: &w)
-        _ = try? DesignWorkspace.catalog.run("stroke.width", params: .object(["width": .number(5000)]), on: &w)
-        #expect((Self.stroke(w, "node-2")?.width ?? 0) <= StrokeRules.widths.upperBound)
+        for (width, landed) in [(5000.0, StrokeRules.widths.upperBound), (-3, StrokeRules.widths.lowerBound)] {
+            let edit = try #require(w.strokeChange(.width(width, drag: nil)), "\(width) is refused, not clamped")
+            try w.setStyle(edit.change)
+            for id in ["node-2", "node-3", "node-4"] {
+                #expect(Self.stroke(w, id)?.width == landed, "\(id) at \(width)")
+            }
+        }
     }
 
-    @Test(.disabled("waits on DK-6")) func trimIsUnavailableWithTheTrimHelp() throws {
+    /// The inspector's stroke edit skips a locked layer behind the primary, as the catalog does, and keeps it selected
+    /// (#4919).
+    @Test func theInspectorSkipsALockedLayerToo() throws {
+        var w = DesignFixtures.cards
+        w.selectItem("node-2")
+        w.toggleSelection("node-3")
+        try w.setNodeLocked("node-2", true)
+        let add = try #require(w.strokeChange(.add), "the editor is enabled")
+        try w.setStyle(add.change)
+        #expect(Self.stroke(w, "node-3") == .default)
+        #expect(Self.stroke(w, "node-2") == nil, "the locked layer took a stroke")
+        #expect(Set(w.selectedNodeIDs) == ["node-2", "node-3"])
+    }
+
+    /// A hidden layer takes no stroke from either path, and the editor says why (#4919).
+    @Test func aHiddenLayerRefusesWithItsHelp() throws {
+        var w = DesignFixtures.cards
+        w.selectItem("node-2")
+        try w.setNodeHidden("node-2", true)
+        #expect(w.strokeHelp == "Show A to change it.")
+        #expect(DesignWorkspace.catalog.availability("stroke.add", on: w) == .unavailable("Show A to change it."))
+        #expect(throws: (any Error).self) { try DesignWorkspace.catalog.run("stroke.add", params: .object([:]), on: &w) }
+        #expect(throws: DesignRefusal.hidden("A")) { try w.setStyle(.stroke(.default)) }
+        #expect(Self.stroke(w, "node-2") == nil)
+        w.toggleSelection("node-3")
+        #expect(w.strokeHelp == "Show A to change it.", "a hidden layer behind the primary refuses too")
+    }
+
+    @Test func trimIsUnavailableWithTheTrimHelp() throws {
         var w = Self.threeSelected
         _ = try DesignWorkspace.catalog.run("stroke.add", params: .object([:]), on: &w)
         #expect(DesignWorkspace.catalog.availability("stroke.trim", on: w)
             == .unavailable("Trim paths are for animation, in Flare and Halo."))
+    }
+}
+
+@Suite struct DesignStrokeMigrationTests {
+    /// A rectangle node as a file holds it, with `stroke` as the given JSON (or none).
+    static func node(stroke: String?) -> String {
+        let field = stroke.map { #","stroke":\#($0)"# } ?? ""
+        return #"{"children":[],"fill":{"blue":217,"green":217,"red":217},"frame":{"height":80,"width":100,"x":0,"y":0},"#
+            + #""id":"node-2","isHidden":false,"isLocked":false,"kind":"rectangle","name":"A","text":""\#(field)}"#
+    }
+
+    static func decode(_ json: String) throws -> DesignNode {
+        try JSONDecoder().decode(DesignNode.self, from: Data(json.utf8))
+    }
+
+    @Test func anOldStrokeKeepsItsColourAndWidth() throws {
+        let old = try Self.decode(Self.node(stroke: #"{"color":{"red":255,"green":0,"blue":0},"width":3}"#))
+        #expect(old.stroke == VectorStroke(color: FillColor(r: 1, g: 0, b: 0), width: 3))
+        #expect(old.stroke?.join == .miter && old.stroke?.cap == .butt && old.stroke?.dash == [])
+        let grey = try Self.decode(Self.node(stroke: #"{"color":{"red":51,"green":102,"blue":204},"width":0.5}"#))
+        #expect(grey.stroke == DesignStroke(color: DesignColor(51, 102, 204), width: 0.5))
+    }
+
+    @Test func noStrokeStaysNone() throws {
+        #expect(try Self.decode(Self.node(stroke: nil)).stroke == nil)
+    }
+
+    @Test func aSavedStrokeRoundTripsJoinCapAndDash() throws {
+        let stroke = VectorStroke(color: FillColor(r: 0, g: 0.5, b: 1), width: 2, join: .round, cap: .round,
+                                  dash: [8, 4], dashPhase: 2)
+        let saved = DesignNode(id: "node-2", name: "A", kind: .rectangle,
+                               frame: DesignRect(x: 0, y: 0, width: 100, height: 80), stroke: stroke)
+        let opened = try JSONDecoder().decode(DesignNode.self, from: JSONEncoder().encode(saved))
+        #expect(opened.stroke == stroke)
+        #expect(opened == saved)
+    }
+
+    @Test func aNewStrokeInAFileDecodes() throws {
+        let json = #"{"color":{"r":0,"g":0,"b":1,"a":1},"width":2,"join":"bevel","cap":"square","dash":[8,4]}"#
+        let opened = try Self.decode(Self.node(stroke: json))
+        #expect(opened.stroke == VectorStroke(color: FillColor(r: 0, g: 0, b: 1), width: 2, join: .bevel, cap: .square,
+                                              dash: [8, 4]))
+    }
+}
+
+/// The stroke lives in DesignNode's copy-on-write extras box (DesignNodeStackTests pins the node's size); it must
+/// still behave as a value.
+@Suite struct DesignStrokeBoxTests {
+    @Test func aCopyKeepsItsOwnStroke() {
+        let frame = DesignRect(x: 0, y: 0, width: 1, height: 1)
+        var original = DesignNode(id: "a", name: "R", kind: .rectangle, frame: frame)
+        #expect(original.stroke == nil)
+        original.stroke = DesignStroke(color: .black, width: 3)
+        var copy = original
+        copy.stroke?.width = 5
+        #expect(original.stroke?.width == 3)
+        #expect(copy.stroke?.width == 5)
+        #expect(DesignNode(id: "dup", copying: original).stroke == original.stroke)
+        #expect(DesignNode(id: "s", name: "R", kind: .rectangle, frame: frame, stroke: original.stroke).stroke?.width == 3)
     }
 }

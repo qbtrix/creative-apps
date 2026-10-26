@@ -33,7 +33,7 @@ extension HaloProject: StrokeTarget {
     /// track keys at the playhead. Throws off shape layers, changing nothing.
     public mutating func setStroke(_ stroke: VectorStroke?, name: String, drag: String?) throws {
         if let strokeHelp { throw CatalogError.failed(id: "stroke", message: strokeHelp) }
-        let key = drag.flatMap { drag in selectedLayerID.map { "\($0).stroke.\(drag)" } }
+        let key = drag.flatMap { drag in selectedLayerID.map { CoalesceKey.key("stroke", on: [$0], drag: drag) } }
         let set = edit(name, control: "halo.stroke", coalesceKey: key) { doc in
             let (c, l) = try doc.selectedLayerIndices()
             let comp = doc.compositions[c]

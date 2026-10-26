@@ -49,7 +49,8 @@ import Testing
         var project = commandProject("keyed", .fake)
         project.selectLayer("comp-1-layer-2")
         let lifted = CatalogConformance.check(HaloHeadless.self, fixture: HaloHeadless(workspace: project)).map(key)
-        #expect(Set(lifted) == Set(CatalogConformance.check(HaloProject.self, fixture: project).map(key)))
+        // The CLI leaves file commands to itself, so the drop the project runs is refused there (HF-3).
+        #expect(Set(lifted) == Set(CatalogConformance.check(HaloProject.self, fixture: project).map(key) + ["file.drop: exampleRuns"]))
     }
 
     @Test func renderFrameDrawsTheAskedFrameAtTheAskedScale() throws {

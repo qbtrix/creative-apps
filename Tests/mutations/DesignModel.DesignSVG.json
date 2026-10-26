@@ -30,8 +30,8 @@
   {
     "label": "strokeWritten: stroke-width is dropped",
     "file": "Sources/DesignModel/Live/DesignSVG.swift",
-    "find": "let width = stroke.width == 1 ? \"\" : \" stroke-width=\\\"\\(number(stroke.width))\\\"\"",
-    "replace": "let width = \"\"",
+    "find": "\"stroke-width\": \"1\", ",
+    "replace": "\"stroke-width\": \"2.5\", ",
     "tests": "DesignSVGTests|DesignSVGWalkTests"
   },
   {
@@ -95,6 +95,41 @@
     "file": "Sources/DesignModel/Live/DesignSVG.swift",
     "find": "return parts.joined(separator: \" \")",
     "replace": "return parts.joined(separator: \" \") + (parts.last == \"Z\" ? \"\" : \" Z\")",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": ".strokeWritesDash: the stroke writes only its colour, opacity and width (the old writer)",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "StrokeSVG.attributes(stroke).map",
+    "replace": "StrokeSVG.attributes(stroke).prefix(3).map",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": ".capAttribute: a round cap is taken for the default and left out",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "\"stroke-linecap\": \"butt\"",
+    "replace": "\"stroke-linecap\": \"round\"",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": ".dashedEllipsePath: a dashed ellipse writes SVG's <ellipse>, its dashes from 3 o'clock (#4940)",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "if node.stroke?.dash.isEmpty == false, let path",
+    "replace": "if node.stroke?.dash.isEmpty == true, let path",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": ".miterLimitWritten: a miter join writes no limit, so SVG's 4 bevels what the canvas points (#4941)",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "&& $0.value == \"miter\" ? limit",
+    "replace": "&& $0.value == \"bevel\" ? limit",
+    "tests": "DesignSVGTests|DesignSVGWalkTests"
+  },
+  {
+    "label": ".miterLimitValue: the limit written is SVG's default 4, not the canvas's 10 (#4941)",
+    "file": "Sources/DesignModel/Live/DesignSVG.swift",
+    "find": "static let miterLimit = 10.0",
+    "replace": "static let miterLimit = 4.0",
     "tests": "DesignSVGTests|DesignSVGWalkTests"
   }
 ]

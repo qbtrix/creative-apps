@@ -1,6 +1,6 @@
 # PhotoApp's menu items and buttons built without a command spec (command-catalog CC-11).
 # max: 4
-Sources/PhotoApp/CanvasSizeSheet.swift: Button("OK", action: resize).keyboardShortcut(.defaultAction)
+Sources/PhotoApp/CanvasSizeSheet+Suite.swift: action: MenuCommand("OK", help: "Resize the canvas to \(draft.newSize.width) × \(draft.newSize.height) px.", perform: resize),
 Sources/PhotoApp/PhotoCommands+File.swift: Button("Close") { NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil) }
 Sources/PhotoApp/PhotoCommands+View.swift: MenuCommand("History", help: historyHelp, isEnabled: menu.hasImage) {
 Sources/PhotoApp/PhotoWindow.swift: Button("OK", role: .cancel) {}

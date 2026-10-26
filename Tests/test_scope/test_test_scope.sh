@@ -118,8 +118,8 @@ while read -r app id; do
   target=${id%%.*} rest=${id#*.}
   IFS=/ read -ra parts <<<"$rest"
   n=${#parts[@]} last=${parts[$((${#parts[@]} - 1))]}
-  if [[ $n -eq 1 ]]; then
-    grep -rqE "(struct|func) $last[[:space:](<:]" "$root/Tests/$target" || missing="$missing $id"
+  if [[ $n -eq 1 ]]; then  # a suite (a serialized parent is an enum) or a free test
+    grep -rqE "(struct|enum|func) $last[[:space:](<:]" "$root/Tests/$target" || missing="$missing $id"
     continue
   fi
   # Every part before the last is a suite (a nested one has its parent enum first).
@@ -172,15 +172,46 @@ func expectP95(_ step: Step, atMost budget: Double, target: Double) { #expect(st
 func expectBodies(_ step: Step, atMost budget: Int, target: Int) { #expect(step.bodies <= budget) }
 EOF
 printf '%s\n' '@Test func untimedMedian() { #expect(copies.median <= 2) }' >"$tmp/tree/PhotoModelTests/B.swift"
+# Ratios: a test whose own body reads a clock (Date() counts, in a nested func
+# too) and bounds a ratio under 10x is a timing test; 10x passes, an abs()
+# tolerance passes, a ratio in a test that reads no clock passes (a shared
+# helper reading one doesn't count), and a Date() file's named bound is a bound.
+cat >"$tmp/tree/PhotoModelTests/C.swift" <<'EOF'
+import Testing
+func render() -> Double { let start = Date(); return Date().timeIntervalSince(start) }
+@Test func tightRatio() {
+    func seconds(_ work: () -> Void) -> Double { let start = Date(); work(); return Date().timeIntervalSince(start) }
+    let narrow = seconds {}
+    let wide = seconds {}
+    #expect(wide < narrow * 3 + 0.1, "wide \(wide) s, narrow \(narrow) s")
+}
+@Test func wideRatio() {
+    let start = Date(); let narrow = Date().timeIntervalSince(start); let wide = Date().timeIntervalSince(start)
+    #expect(wide < narrow * 10)
+}
+@Test func tolerance() { let g = Date().timeIntervalSince(Date()); #expect(abs(back - g) <= g * 1e-12) }
+@Test func countRatio() { let disabled = render(); let enabled = render(); #expect(disabled < enabled * 0.8, "dimmer") }
+@Test func divided() {
+    let start = Date(); let narrow = Date().timeIntervalSince(start); let wide = Date().timeIntervalSince(start)
+    #expect(wide / narrow <= 2.5, "ratio")
+}
+@Test func dateBudget() { let elapsed = render(); #expect(elapsed < 0.5) }
+EOF
 printf '%s\n' 'photo PhotoModelTests.ListedTests' >"$tmp/listed.txt"
 : >"$tmp/no-baseline.txt"
 printf '%s\n' '# grandfathered' 'PhotoModelTests.unlisted' 'PhotoModelTests.gone' >"$tmp/baseline.txt"
-check "timing names each unlisted bound: a Duration, a timing name or a frames-drawn floor in a file that reads a clock, or a call to a helper that asserts one" \
-  'PhotoModelTests.timedMedian;PhotoModelTests.unlisted;PhotoModelTests.helperP95;PhotoModelTests.framesDrawn' \
+check "timing names each unlisted bound: a Duration, a timing name or a frames-drawn floor in a file that reads a clock, a ratio under 10x in a test that reads one, or a call to a helper that asserts one" \
+  'PhotoModelTests.timedMedian;PhotoModelTests.unlisted;PhotoModelTests.helperP95;PhotoModelTests.framesDrawn;PhotoModelTests.tightRatio;PhotoModelTests.divided;PhotoModelTests.dateBudget' \
   "$(TESTS_DIR="$tmp/tree" PERF_SUITES="$tmp/listed.txt" TIMING_BASELINE="$tmp/no-baseline.txt" python3 "$ts" timing | cut -d' ' -f1 | paste -sd';' -)"
 check "timing passes a baselined test and names a baseline line that no longer times (the baseline only shrinks)" \
-  'PhotoModelTests.timedMedian;PhotoModelTests.helperP95;PhotoModelTests.framesDrawn;PhotoModelTests.gone' \
+  'PhotoModelTests.timedMedian;PhotoModelTests.helperP95;PhotoModelTests.framesDrawn;PhotoModelTests.tightRatio;PhotoModelTests.divided;PhotoModelTests.dateBudget;PhotoModelTests.gone' \
   "$(TESTS_DIR="$tmp/tree" PERF_SUITES="$tmp/listed.txt" TIMING_BASELINE="$tmp/baseline.txt" python3 "$ts" timing | cut -d' ' -f1 | paste -sd';' -)"
+
+# ids: each @Test of a file as a perf-list id (the fast lane's quarantine resolves a red test's file this way).
+printf '%s\n' 'import Testing' '@Suite struct OpenTests {' '    @Test func opens() {}' '    enum Nested {' '        @Test func inner() {}' '    }' '}' '@Test func freeOne() {}' >"$tmp/Ids.swift"
+check "ids prints Target.Suite/test, nested suites joined, and Target.freeTest" \
+  'PhotoModelTests.OpenTests/opens;PhotoModelTests.OpenTests/Nested/inner;PhotoModelTests.freeOne' \
+  "$(python3 "$ts" ids PhotoModelTests "$tmp/Ids.swift" | paste -sd';' -)"
 
 # The perf regex: exactly the listed tests, by suite, one test or free test.
 perf=$(python3 "$ts" perf)
@@ -228,6 +259,17 @@ check "heavy within a changed filter keeps that target's" '^(PhotoModelTests\.Ph
 check "heavy within a filter that takes none is empty, never a match-all regex" "" \
   "$(HEAVY_SUITES="$tmp/heavy.txt" python3 "$ts" heavy '^(SuiteModelTests)\.')"
 check "an empty heavy list gives no regex" "" "$(HEAVY_SUITES="$tmp/empty.txt" python3 "$ts" heavy)"
+
+# shard K/N: the sorted distinct top-level suites (a nested suite stays with its
+# parent; free tests on their own) go round-robin; every shard agrees, nothing
+# is listed twice or dropped, and the snapshot suites come on the second line.
+ids=$'FlareModelTests.A/t1()\nFlareModelTests.A/t2(x:)\nFlareModelTests.free()\nAppSnapshotTests.BodyCountSuites/RenderBudgetX/t()\nAppSnapshotTests.S/t()\nPhotoModelTests.B/t()\nwarning: not a test'
+check "shard 1/2 takes units 0, 2 and 4 of the sorted list" \
+  $'^(FlareModelTests\\.A|PhotoModelTests\\.B)(/|\\()\n^(AppSnapshotTests\\.BodyCountSuites)(/|\\()' "$(printf '%s\n' "$ids" | python3 "$ts" shard 1/2)"
+check "shard 2/2 takes units 1 and 3" $'^(FlareModelTests\\.free)(/|\\()\n^(AppSnapshotTests\\.S)(/|\\()' "$(printf '%s\n' "$ids" | python3 "$ts" shard 2/2)"
+check "a shard with no suite prints two empty lines, never a match-all regex" "" "$(printf '%s\n' 'T.A/t()' | python3 "$ts" shard 2/2 | tr -d '\n')"
+printf '%s\n' "$ids" | python3 "$ts" shard 3/2 >/dev/null 2>&1
+check "shard K past N is refused" 1 "$?"
 
 # perf-report: what Swift Testing prints for a missed bound, both ways it
 # shows the values, and a test that only says "failed".

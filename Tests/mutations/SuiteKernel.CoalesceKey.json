@@ -1,0 +1,23 @@
+[
+  {
+    "label": "targetOrderDoesNotMatter: the key keeps the targets in the order given",
+    "file": "Sources/SuiteKernel/History/CoalesceKey.swift",
+    "find": "targets.sorted().joined(separator: \"\\u{1F}\")",
+    "replace": "targets.joined(separator: \"\\u{1F}\")",
+    "tests": "CoalesceKeyTests"
+  },
+  {
+    "label": "aNewPropertyTargetSetOrTokenIsANewStep: the token is dropped, so two drags fold into one step",
+    "file": "Sources/SuiteKernel/History/CoalesceKey.swift",
+    "find": "return token.map { run + \"\\u{1E}\" + $0 } ?? run",
+    "replace": "return run",
+    "tests": "CoalesceKeyTests"
+  },
+  {
+    "label": "aGestureKeepsItsFirstToken: every sample mints a new token, so a drag is many steps",
+    "file": "Sources/SuiteKernel/History/CoalesceKey.swift",
+    "find": "open ?? UUID().uuidString",
+    "replace": "UUID().uuidString",
+    "tests": "CoalesceKeyTests"
+  }
+]
