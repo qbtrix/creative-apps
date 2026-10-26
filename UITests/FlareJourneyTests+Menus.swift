@@ -5,7 +5,8 @@
 // its 3.4 items in order and every one of them once. Open Sample lists
 // Bounce, Character, Button and Keyed Ball, and each one opens: Character
 // shows Body in LAYERS, Bounce Ball, Shadow and Background, Button drops
-// Ball. testKeys presses the menu keys
+// Ball. Open Recent ends in Clear Menu, or reads No Recent Files on the
+// fixture's empty fake recents. testKeys presses the menu keys
 // on bounce: End reads 47, Home 0, → steps one, Space plays and pauses, and
 // ⌘Z undoes the sidebar's New Layer. One shot per step. testNoBetaTwoItems
 // (no-placeholders NP-4, FJ-NP) finds none of the items the beta hides in View,
@@ -48,7 +49,13 @@ final class FlareMenuJourneys: XCTestCase {
         XCTAssertEqual(
             flare.menuTitles("Animate", submenu: "Easing"),
             ["Linear", "Ease", "Ease In", "Ease Out", "Ease In-Out", "Hold"], "Animate > Easing isn't the presets")
-        XCTAssert(flare.menuTitles("File", submenu: "Open Recent").contains("Clear Menu"), "Open Recent has no Clear Menu")
+        // The suite's Open Recent (SuiteFileCommands) ends in Clear Menu, or reads a disabled No Recent Files while
+        // there are none: on `-FlareFixture` the documents bridge runs on the suite's fakes (FlareShell.bridge),
+        // whose recents start empty.
+        let recent = flare.menuTitles("File", submenu: "Open Recent")
+        XCTAssert(
+            recent.last == "Clear Menu" || recent == ["No Recent Files"],
+            "Open Recent ends in neither Clear Menu nor No Recent Files: \(recent)")
 
         let sidebar = flare.element("suite.sidebar")
         flare.openSample("Character")

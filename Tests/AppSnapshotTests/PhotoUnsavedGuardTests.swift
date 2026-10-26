@@ -56,7 +56,7 @@ import Testing
     private func beach(edited: Bool) throws -> PhotoWorkspace {
         let white = DecodedImage(rgba8: [UInt8](repeating: 255, count: 4 * 3 * 4), width: 4, height: 3)
         var workspace = PhotoWorkspace(services: .fake)
-        try workspace.openImage(try RawCodec().encode(white, as: .png, quality: 1), name: "beach.png", codec: RawCodec())
+        try workspace.openImage(try ImageIOCodec().encode(white, as: .png, quality: 1), name: "beach.png", codec: ImageIOCodec())
         if edited { workspace.addLayer() }
         return workspace
     }

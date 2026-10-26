@@ -29,7 +29,7 @@ extension BodyCountSuites {
             return workspace
         }
 
-        @Test(.timeLimit(.minutes(2)), .disabled("quarantine #3268 until 2026-10-22")) func anOptionDragRunsTheEditorAtMostThreeTimes() async throws {
+        @Test(.timeLimit(.minutes(2))) func anOptionDragRunsTheEditorAtMostThreeTimes() async throws {
             #if DEBUG
             let seed = try Self.seed()
             let host = OptionDragHost(model: seed)

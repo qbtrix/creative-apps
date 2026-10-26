@@ -29,17 +29,19 @@ public actor LiveThumbnails: ThumbnailProviding {
     let decoder: any PhotoDecoding
     let develop: any DevelopRendering
     let cacheLimit: Int
+    /// The disk tier read before a decode and written after (shared-thumbnails ST-6), nil for memory only.
+    let disk: LiveThumbnailStoreAdapter?
     private var cache: [Key: Entry] = [:]
     private var clock: UInt64 = 0
     /// Bytes of display images held in the cache; never above `cacheLimit` after a call.
     private(set) var cachedBytes = 0
 
-    public init(decoder: any PhotoDecoding, develop: any DevelopRendering) {
-        self.init(decoder: decoder, develop: develop, cacheLimit: ThumbnailBucket.cacheBytes)
+    public init(decoder: any PhotoDecoding, develop: any DevelopRendering, disk: LiveThumbnailStoreAdapter? = nil) {
+        self.init(decoder: decoder, develop: develop, cacheLimit: ThumbnailBucket.cacheBytes, disk: disk)
     }
 
-    init(decoder: any PhotoDecoding, develop: any DevelopRendering, cacheLimit: Int) {
-        self.decoder = decoder; self.develop = develop; self.cacheLimit = cacheLimit
+    init(decoder: any PhotoDecoding, develop: any DevelopRendering, cacheLimit: Int, disk: LiveThumbnailStoreAdapter? = nil) {
+        self.decoder = decoder; self.develop = develop; self.cacheLimit = cacheLimit; self.disk = disk
     }
 
     public func thumbnail(for photo: PhotoItem, longSide: Int) async throws -> DisplayImage {
@@ -50,7 +52,13 @@ public actor LiveThumbnails: ThumbnailProviding {
             cache[key]?.lastUse = clock
             return hit.image
         }
-        let image = try await render(photo, longSide: side)
+        // A request the grid scrolled past (large-catalog LG-5) decodes nothing.
+        if Task.isCancelled { throw LibraryError.cancelled }
+        let image: DisplayImage
+        if let stored = disk?.image(for: photo, longSide: side) { image = stored } else {
+            image = try await render(photo, longSide: side)
+            disk?.store(image, for: photo, longSide: side)
+        }
         insert(image, for: key)
         return image
     }
