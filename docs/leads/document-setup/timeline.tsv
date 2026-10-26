@@ -216,3 +216,4 @@ utc	stage	event	ref	note
 2026-10-26T06:54:55Z	3	poll	-	06:54Z poll: #4901 DS-photo needs-rebase after #5244: merged dev, regenerated photo golden, CI: PASS, pushed e82df3df, Head moved. #4887/#4918/#4891 clean; dev-red #5321 open; 0 findings.
 2026-10-26T07:25:51Z	3	poll	-	07:25Z poll: no merges of ours; #4901 needs-rebase dropped on e82df3df, fast-lane check running, prescreen pending; #4887/#4918/#4891 clean; dev-red #5321 open; 0 findings.
 2026-10-26T07:47:53Z	3	poll	-	07:47Z poll: no merges of ours; #4901 prescreen success on e82df3df, eligible; #4887/#4918/#4891 clean; #5267 dirty again (lane integrates); dev-red #5321 open; 0 findings.
+2026-10-26T08:15:49Z	3	poll	-	08:15Z poll: no merges; dev unchanged; #4887/#4918/#4891/#4901 eligible; #5267 (other feature, p0) needs-rebase, DS-z still waits on it; dev-red #5321 open; 0 findings.
