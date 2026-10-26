@@ -226,3 +226,4 @@ utc	stage	event	ref	note
 2026-10-26T12:21Z	wait	heartbeat	#5321	7 PRs open+clean, heads unchanged; dev-red #5321 open (macos, run 40305635285, range main..2eab5aeb), not ours; 76 design findings open so DK-z/PD-z held; no supervisor reply
 2026-10-26T12:45Z	wait	heartbeat	#5321	7 PRs open+clean, heads unchanged; dev-red #5321 open (macos, run 40305635285, range main..2eab5aeb), not ours; 76 design findings open so DK-z/PD-z held; no supervisor reply
 2026-10-26T13:24Z	resume	stage-start	#5321	run act-1a1786023d9-dg65 resumed; #4922 #4963 #4964 #5001 open+clean, Belt-Lead moved; dev-red #5321 open (linux, run 40327156097, range main..57dd31ff), not ours; 11 placed-images findings open so PD-z held
+2026-10-26T13:47Z	wait	heartbeat	#5321	#4922 #4963 #4964 #5001 open, no needs-fix/needs-rebase; dev-red #5321 open (linux, run 40327156097, range main..57dd31ff), not ours; 11 findings open so PD-z held
