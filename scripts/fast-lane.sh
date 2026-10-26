@@ -231,10 +231,11 @@ QUAR_FILE="UITests/quarantine.json"  # PROTECTED; the lane's own PR is the one e
 QUAR_BRANCH="lane/quarantine"        # the lane's one quarantine PR at a time (adds or removes entries)
 QUAR_LABEL="lane-quarantine"         # on it (never fast-lane: quarantine_land lands it on its Linux check)
 QUAR_MARK="<!-- lane-quarantine"     # one quarantine call per red sha on the dev-red issue: "<!-- lane-quarantine <red7> -->"
-QUAR_LINE="Lane-Quarantine:"         # the PR body's kind line: "Lane-Quarantine: add"
+QUAR_LINE="Lane-Quarantine:"         # the PR body's kind line: "Lane-Quarantine: add" or "Lane-Quarantine: remove #<owner> ..."
 QUAR_MAX=5                           # more failing tests than this is a broad break: today's red handling stands
-QUAR_HOURS=24                        # an entry's expiry (its `until`), written for the owner to see
+QUAR_HOURS=24                        # an entry's expiry; past it the owner issue is labelled BLOCKER_LABEL and the entry stays
 QUAR_NEVER_RE='security|billing|auth|licen[cs]e|payment|keychain|entitlement'  # never quarantined (in the test's path or id, any case)
+BLOCKER_LABEL="blocker"
 quar_now() { echo "${FAST_LANE_NOW:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"; }  # the sweep's clock; tests pin it
 RED_UNRESOLVED=0  # revert_sweep: the red stands and the lane has no revert to make or land for it (quarantine_sweep acts)
 # Where integrate fetches and pushes; tests point it at a local bare repo.
@@ -1916,9 +1917,11 @@ rebuild_lane_pr() {
 }
 
 # quarantine_sweep: with LANE_VERIFY_AFTER=1, lands the lane's open
-# QUAR_BRANCH PR (quarantine_land), else, when revert_sweep left the red
-# unresolved (RED_UNRESOLVED), quarantines the red's failing tests
-# (quarantine_add) into QUAR_FILE as read from BASE_BRANCH. One PR at a time.
+# QUAR_BRANCH PR (quarantine_land), else reads the lane's entries in QUAR_FILE
+# on BASE_BRANCH: an owner past its `until` gets BLOCKER_LABEL and a comment
+# (quarantine_expiry), a closed owner gets the PR that removes its entries,
+# and, when revert_sweep left the red unresolved (RED_UNRESOLVED), the red's
+# failing tests are quarantined (quarantine_add). One PR at a time.
 quarantine_sweep() {
   (( LANE_VERIFY_AFTER )) || return 0
   local all open json
@@ -1926,13 +1929,42 @@ quarantine_sweep() {
       | select(.author.is_bot == true and .headRefName == $b and any(.labels[]?; .name == $l))]' 2>/dev/null); then
     log "auto-quarantine: could not list open PRs; the next sweep looks again"; return 0
   fi
-  open=$(jq -r 'first(.[]) | "\(.number)|\(.headRefOid)|\(.headRefName)"' <<<"$all" 2>/dev/null || true)
+  open=$(jq -r --arg q "$QUAR_LINE" 'first(.[]) | "\(.number)|\(.headRefOid)|\(.headRefName)|\((.body // "") | capture($q + " (?<k>add|remove)(?<o>[#0-9 ]*)") // {k: "add", o: ""} | "\(.k)|\(.o)")"' <<<"$all" 2>/dev/null || true)
   if [[ -n "$open" ]]; then quarantine_land "$open"; return 0; fi
   if ! scratch main "$BASE_BRANCH"; then log "auto-quarantine: could not fetch $BASE_BRANCH"; return 0; fi
   json=$(git -C "$SCRATCH" show "origin/$BASE_BRANCH:$QUAR_FILE" 2>/dev/null) || json='[]'
   jq -e 'type == "array"' <<<"$json" >/dev/null 2>&1 || { log "auto-quarantine: $QUAR_FILE on $BASE_BRANCH is not a JSON array; a human looks"; return 0; }
+  quarantine_expiry "$json" || return 0
   (( RED_UNRESOLVED )) && [[ -n "$BASE_RED" && -n "$BASE_RED_SHA" ]] || return 0
   quarantine_add "$json"
+}
+
+# quarantine_expiry <quarantine json>: each lane entry's owner is read once:
+# closed, its entries go into one removal PR (returns 1 once that is open);
+# open and past the entry's `until`, it gets BLOCKER_LABEL and a comment, once.
+# The entry stays either way: an expired quarantine never comes back as a red.
+quarantine_expiry() {
+  local json="$1" owner until tests st labels closed="" new ids
+  while IFS=$'\t' read -r owner until tests; do
+    [[ -n "$owner" ]] || continue
+    st=$(gh api "repos/$REPO/issues/${owner#\#}" --jq '"\(.state)\t\([.labels[]?.name] | join(","))"' 2>/dev/null) || { log "auto-quarantine: could not read $owner; the next sweep looks again"; continue; }
+    labels="${st#*$'\t'}"; st="${st%%$'\t'*}"
+    if [[ "$st" != OPEN ]]; then closed+="${closed:+ }$owner"; continue; fi
+    [[ "$until" < "$(quar_now)" ]] || continue
+    [[ ",$labels," != *",$BLOCKER_LABEL,"* ]] || continue
+    log "auto-quarantine: $owner is past its quarantine expiry ($until); labelling it $BLOCKER_LABEL"
+    write gh label create "$BLOCKER_LABEL" -R "$REPO" --color b60205 --force --description "A quarantined test whose fix is overdue" >/dev/null 2>&1 || true
+    write gh issue edit "${owner#\#}" -R "$REPO" --add-label "$BLOCKER_LABEL" || log "could not label $owner"
+    write gh issue comment "${owner#\#}" -R "$REPO" --body "Blocker: the quarantine of $tests expired at $until and this issue is still open. The test stays skipped on $BASE_BRANCH until this closes (the lane never un-quarantines into a red); \`scripts/quarantine release\` fails while it is in. Fix it, close this issue, and the lane removes the entry." \
+      || log "could not comment on $owner"
+  done < <(jq -r '[.[] | select((.lane | type) == "object")] | group_by(.owner)[] | [.[0].owner, .[0].lane.until, ([.[].test] | join(", "))] | @tsv' <<<"$json")
+  [[ -n "$closed" ]] || return 0
+  ids=$(jq -r --arg o " $closed " '[.[] | .owner as $w | select((.lane | type) == "object" and ($o | contains(" " + $w + " "))) | .test] | join(", ")' <<<"$json")
+  new=$(jq --arg o " $closed " 'map(.owner as $w | select(((.lane | type) == "object" and ($o | contains(" " + $w + " "))) | not))' <<<"$json")
+  log "auto-quarantine: $closed closed; removing $ids from the quarantine"
+  quarantine_pr remove "$new" "test(quarantine): run $ids again" "$QUAR_LINE remove $closed
+Removes the fast lane's quarantine entries of $ids: their owner issue ($closed) closed, so the fix should be on $BASE_BRANCH. This PR's own Linux check runs the test again; red, the lane reopens the owner and closes this PR." >/dev/null || return 0
+  return 1
 }
 
 # quarantine_add <quarantine json>: one call per red sha (QUAR_MARK on the
@@ -1972,7 +2004,7 @@ quarantine_add() {
   for e in "${ids[@]}"; do
     id="${e%%|*}"; path="${e#*|}"
     app=$(build_apps <(printf '%s\n' "$path")); [[ "$app" =~ ^[a-z]+$ && "$app" != all ]] || app=suite
-    issue=$(quarantine_issue "$id" "$app" "The fast lane quarantined \`$id\` ($path): $BASE_BRANCH is red on ${BASE_RED_JOBS#*: } at $red7 (dev-red #$BASE_RED, run ${BASE_RED_RUN:-not named}) and the lane found no culprit to revert. PRs in the culprit range main..$red7: ${list:-none found}; their leads own the fix. The test is skipped on $BASE_BRANCH until $until, and stays skipped until the fix lands and this issue closes. \`scripts/quarantine release\` fails while the entry is in.") || continue
+    issue=$(quarantine_issue "$id" "$app" "The fast lane quarantined \`$id\` ($path): $BASE_BRANCH is red on ${BASE_RED_JOBS#*: } at $red7 (dev-red #$BASE_RED, run ${BASE_RED_RUN:-not named}) and the lane found no culprit to revert. PRs in the culprit range main..$red7: ${list:-none found}; their leads own the fix. The test is skipped on $BASE_BRANCH until $until; past that this issue is a \`$BLOCKER_LABEL\`, and the test stays skipped until the fix lands and this issue closes, when the lane removes the entry (its PR's Linux check runs the test again). \`scripts/quarantine release\` fails while the entry is in.") || continue
     entry=$(jq -nc --arg t "$id" --arg o "#$issue" --arg r "Quarantined by the fast lane: fails on $BASE_BRANCH at $red7 (dev-red #$BASE_RED) with no culprit to revert; #$issue owns the fix" \
       --arg x "${until:0:10}" --arg red "#$BASE_RED" --arg range "main..$red7" --arg u "$until" \
       '{test: $t, owner: $o, reason: $r, expires: $x, lane: {red: $red, range: $range, until: $u}}')
@@ -1985,7 +2017,7 @@ quarantine_add() {
 Quarantines $added for $QUAR_HOURS h: $BASE_BRANCH is red on ${BASE_RED_JOBS#*: } at $red7 and the lane has no culprit to revert (range main..$red7: ${list:-no PR}). Each entry's owner issue is the p0 finding for its line; the fix lands through a normal PR, then its owner closes and the lane removes the entry.
 
 Refs #$BASE_RED. The fast lane opened this PR and lands it on its Linux check alone: it changes only $QUAR_FILE, the one protected path the lane may edit itself (quarantine_land in scripts/fast-lane.sh). CI on $BASE_BRANCH runs once it lands.") || { quarantine_note "$red7" "the lane could not open its quarantine PR for $added (each has its issue); a human adds the entries"; return 0; }
-  quarantine_note "$red7" "quarantined $added for $QUAR_HOURS h in #$m, which lands on its own Linux check; then CI on $BASE_BRANCH runs green and normal batching resumes"
+  quarantine_note "$red7" "quarantined $added for $QUAR_HOURS h in #$m, which lands on its own Linux check; then CI on $BASE_BRANCH runs green and normal batching resumes. Past the expiry each open owner is a $BLOCKER_LABEL"
 }
 
 # quarantine_issue <id> <app> <body>: the test's `Quarantined: <id>` finding,
@@ -2032,15 +2064,16 @@ quarantine_note() {
   write gh issue comment "$BASE_RED" -R "$REPO" --body "Auto-quarantine: $2. $QUAR_MARK $1 -->" || log "could not comment on #$BASE_RED"
 }
 
-# quarantine_land <n>|<head>|<branch>: the lane's open quarantine PR lands on
-# its own Linux check, once no batch holds the lane. THE protected-path
-# exception, and all of it: the PR is the lane's bot's on QUAR_BRANCH with
-# QUAR_LABEL (quarantine_sweep's filter) AND changes exactly QUAR_FILE;
-# anything else is never landed. A red check waits for a human. A merge dev
-# moved under is rebuilt.
+# quarantine_land <n>|<head>|<branch>|<add|remove>|<owners>: the lane's open
+# quarantine PR lands on its own Linux check, once no batch holds the lane.
+# THE protected-path exception, and all of it: the PR is the lane's bot's on
+# QUAR_BRANCH with QUAR_LABEL (quarantine_sweep's filter) AND changes exactly
+# QUAR_FILE; anything else is never landed. A red check on a removal means the
+# fix didn't hold: the owners are reopened and the PR closed (the entries
+# stay); on an add a human looks. A merge dev moved under is rebuilt.
 quarantine_land() {
-  local m head br files v
-  IFS='|' read -r m head br <<<"$1"
+  local m head br kind owners files v o
+  IFS='|' read -r m head br kind owners <<<"$1"
   files=$(gh api "repos/$REPO/pulls/$m/files" --paginate --jq '.[].filename' 2>/dev/null) || { log "auto-quarantine: could not read #$m's files; the next sweep looks again"; return 0; }
   if [[ "$files" != "$QUAR_FILE" ]]; then
     comment_once "$m" "Fast lane: this $QUAR_LABEL PR changes more than $QUAR_FILE ($(paste -sd, - <<<"$files" | sed 's/,/, /g')), so the lane will not land it; a human looks."; return 0
@@ -2052,7 +2085,16 @@ quarantine_land() {
       dispatch_linux "$br"
       comment_once "$m" "Fast lane: started a Linux check on head $head; this quarantine change lands once it passes." ;;
     running) log "auto-quarantine: #$m: its Linux check is running" ;;
-    red*) comment_once "$m" "Fast lane: the Linux check on this quarantine change is red (${v#red|}), so a human looks." ;;
+    red*)
+      if [[ "$kind" == remove ]]; then
+        for o in $owners; do
+          write gh issue reopen "${o#\#}" -R "$REPO" >/dev/null || log "could not reopen $o"
+          write gh issue comment "${o#\#}" -R "$REPO" --body "Reopened: the test still fails without its quarantine entry (#$m's Linux check: ${v#red|}), so the fix didn't hold. The entry stays until this closes again." || log "could not comment on $o"
+        done
+        write gh pr close "$m" -R "$REPO" --comment "Fast lane: the Linux check is red (${v#red|}), so the test still fails; its owner is reopened and the entry stays." >/dev/null || log "could not close #$m"
+      else
+        comment_once "$m" "Fast lane: the Linux check on this quarantine change is red (${v#red|}), so a human looks."
+      fi ;;
     green*)
       if (( HOLD )); then log "auto-quarantine: #$m waits for the batch in flight"; return 0; fi
       if ! scratch "$BASE_BRANCH" "$br"; then log "auto-quarantine: could not fetch $br; the next sweep looks again"; return 0; fi
@@ -2439,7 +2481,7 @@ main() {
   # With LANE_VERIFY_AFTER=1 a red dev gets its culprit reverted; after the
   # batches, so a revert waits for one holding the lane (HOLD).
   revert_sweep
-  # A red the revert left standing gets its failing tests quarantined.
+  # A red the revert left standing gets its failing tests quarantined; expired and closed entries are swept every time.
   quarantine_sweep
   local explicit=${#prs[@]}
   if (( explicit == 0 )); then

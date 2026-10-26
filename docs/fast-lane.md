@@ -286,11 +286,16 @@ range main..<red> already holds that revert (dev is still red with it). A red
 whose revert is open, or whose CI run after the revert hasn't reported, is
 not unresolved: nothing is quarantined while a fix is in flight.
 
-quarantine_sweep runs after revert_sweep (LANE_VERIFY_AFTER=1 only), one PR
-at a time on QUAR_BRANCH (`lane/quarantine`). First it lands an open lane
-quarantine PR (quarantine_land, below). Else, when the red is unresolved and
-the dev-red issue has no `<!-- lane-quarantine <red7> -->` mark yet,
-quarantine_add quarantines
+quarantine_sweep runs after revert_sweep (LANE_VERIFY_AFTER=1 only) and does
+three things, one PR at a time on QUAR_BRANCH (`lane/quarantine`). First it
+lands an open lane quarantine PR (quarantine_land, below). Else it reads the
+lane's entries in UITests/quarantine.json on BASE_BRANCH (those with a `lane`
+block): an owner issue past the entry's `until` gets the `blocker` label and
+one comment, and the entry stays, since an expired quarantine must never come
+back as a red; a closed owner (the fix merged and its issue closed) gets its
+entries removed in one PR titled `test(quarantine): run <ids> again`
+(quarantine_expiry). Then, when the red is unresolved and the dev-red issue
+has no `<!-- lane-quarantine <red7> -->` mark yet, quarantine_add quarantines
 the failing tests: red_tests names them as `<File>.swift/<test>()`; each file
 is placed under Tests/<Target>/ in the tree (test_paths) and resolved to its
 perf-list id, `Target.Suite/test` or `Target.freeTest`, with
@@ -313,8 +318,8 @@ feature leads, and the expiry), writes the entry
 
 (the owner is that issue, `until` QUAR_HOURS = 24 h out, `expires` its date)
 and opens one PR from QUAR_BRANCH with QUAR_LABEL (`lane-quarantine`) and
-`p0`, never `fast-lane`, its body starting `Lane-Quarantine: add` and
-`Refs #<dev-red>`. The mark goes
+`p0`, never `fast-lane`, its body starting `Lane-Quarantine: add` (a removal
+says `Lane-Quarantine: remove #<owner>`) and `Refs #<dev-red>`. The mark goes
 on the dev-red issue, so each red sha gets one call. scripts/ci skips the live
 swift-test entries through `scripts/quarantine skip`, a `--skip` regex that
 rides with the perf list's, so the PR's own Linux check and dev's next run are
@@ -332,14 +337,18 @@ Linux-only check (dispatched once, its comment the record), with no prescreen,
 batch or macOS run, while the dev-red issue holds batches; a merge GitHub
 refuses as conflicting is cherry-picked onto today's BASE_BRANCH
 (rebuild_lane_pr) and checked again. The landing dispatches CI on BASE_BRANCH
-(UITests/ is a UI_RE path). A red check waits for a human.
+(UITests/ is a UI_RE path). A red check on a removal means the fix didn't
+hold: the owners are reopened with a comment, the PR is closed and the
+entries stay; a red check on an add waits for a human.
 
 `scripts/quarantine release` is the release gate: it fails while any lane
 entry is in the file, naming each test, owner and `until`. There is no
 release or promote script to wire it into yet (ci.yml's `promote` moves main
 to the last green dev sha, which is not a release, and gating it would grow
 every culprit range), so run it by hand, or from the release step once one
-exists.
+exists. `scripts/quarantine check` passes a lane entry past its expiry or
+with a closed owner, with a note, since the lane owns both ends of its
+lifecycle; a hand entry fails as before.
 
 ## CI dispatch on dev
 
