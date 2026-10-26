@@ -258,3 +258,4 @@ time	kind	note
 2026-10-26T07:21Z	wait	heartbeat	#5321	dev-red still macos (not ours); 7 PRs clean, unchanged; no supervisor reply
 2026-10-26T07:43Z	wait	heartbeat	#5321	dev-red still macos (not ours); 7 PRs clean, unchanged; 72 design findings open, DK-z/PD-z held; no supervisor reply
 2026-10-26T08:06Z	wait	heartbeat	#5321	dev-red still macos (not ours); 7 PRs clean, unchanged; no supervisor reply
+2026-10-26T08:29Z	wait	heartbeat	#5321	7 PRs open+clean, heads unchanged; dev-red #5321 open (macos, run 40277933712), not ours; 72 findings open so DK-z/PD-z held; no supervisor reply
