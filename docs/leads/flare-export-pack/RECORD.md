@@ -1,5 +1,7 @@
 # flare export-pack lead record
 
+> Stale copy. The Flare export-pack record is docs/leads/flare-export-pack/RECORD.md on lead/flare-export-pack (Belt watches that branch).
+
 Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
 Run: act-1a178432d03-7n20 (feature lead, line:flare; FV-z only)
 Stage: FV-z #4854 at 98239ba3 (step 4 on fakes, GIF hover), gate PASS, Head moved; #5025 at 921d412b; both held by dev-red #5321
