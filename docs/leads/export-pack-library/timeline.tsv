@@ -109,3 +109,4 @@ time	event	task	note
 2026-10-25T07:28:04Z	heartbeat	no merges; dev 13fb2f59; all PRs clean, queued in lane
 2026-10-25T07:49:50Z	heartbeat	no merges; dev 13fb2f59; all PRs clean, queued in lane
 2026-10-26T01:59:55Z	resume	run act-1a175ea5531-x1ci; dev 8eff8ab85; dev-red #5321 holds code batches
+2026-10-26T02:11:21Z	restack	#5128 LX-u dev merged in, pushed 6f966c25 (CI: PASS), Head moved
