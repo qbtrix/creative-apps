@@ -20,8 +20,9 @@
 // overlay, a canvas drag moves the handle under its press (or the whole
 // frame), Escape cancels and the arrows nudge the frame 1 px (Shift 10);
 // otherwise the artboard is the photo at its stored crop (`crop.artboard`).
-// The crop controls come from the window through `\.libraryCrop`. Values
-// in, closures out; LibraryCatalog holds the state.
+// The crop controls come from the window through `\.libraryCrop`. The photo
+// carries Photo's Rotate Left and Rotate Right as accessibility actions
+// (orientation-crop OC-9). Values in, closures out; LibraryCatalog holds the state.
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -112,6 +113,8 @@ struct LibraryLoupe: View {
         .accessibilityValue(model.loupeValue ?? "")
         .accessibilityHint(model.loupeHelp ?? "")
         .accessibilityIdentifier("library.loupe.photo")
+        .accessibilityAction(named: "Rotate Left") { menu.photo.rotateLeft?() }
+        .accessibilityAction(named: "Rotate Right") { menu.photo.rotateRight?() }
     }
 
     /// A drag sample while cropping: the handle under the press (held until

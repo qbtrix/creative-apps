@@ -154,6 +154,8 @@ struct LibraryWindow: View {
         photo.cropTitle = crop.cropTitle
         photo.applyCrop = crop.applyCrop
         photo.resetCrop = crop.resetCrop
+        (photo.rotateLeft, photo.rotateRight) = (crop.rotateLeft, crop.rotateRight)
+        (photo.flipHorizontal, photo.flipVertical) = (crop.flipHorizontal, crop.flipVertical)
         return LibraryMenu(
             edit: editMenu, file: fileMenu, thumbnails: thumbnailsMenu, cull: cullMenu, persist: persistMenu,
             view: viewMenu, photo: photo, export: exportMenu, share: shareMenu,
@@ -169,7 +171,8 @@ struct LibraryWindow: View {
         let action: LibraryMenu.Action?
         switch key {
         case .rating, .pick, .reject, .unflag, .label:
-            guard let cull = current.cull.key else { return .ignored }
+            // X with a crop draft open falls through to the aspect picker's swap.
+            guard let cull = current.cull.key, model.cullChange(forKey: key) != nil else { return .ignored }
             cull(key)
             return .handled
         case .first: action = current.view.first
