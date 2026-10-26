@@ -202,3 +202,64 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 
 - Batch 111622 (#5266 alone) gone without merging again; no batch in flight. dev c6700dba4, main d3323f6a7, both unchanged. Wave 2 (#5064, #5233, #5235, #5236) still open and ready behind the p0.
 - No needs-fix or needs-rebase on our PRs. 0 open findings. Stage: 3 wave 3 (waiting for wave 2 to land).
+
+### 2026-10-26T12:40Z check-in (run act-1a1782c1a0b-jam7)
+
+- Packet review on #3777 answered item by item (issuecomment-6416018594). Items 1, 2, 3, 5 and 7 were already handled in code, so only the packet text changes, on branch lead/adjust-everywhere-packet-review (docs-only PR once the gate passes). Item 4 names the windows that pass SuiteLocations to PresetStore. Item 6 (FilterSheet off SuiteSheet/InspectorSliderRow) is filed as finding #5789 on AJ-u and is the next wave's first task.
+- Wave 2 (#5064, #5233, #5235, #5236) is still open and clean, with no lane batch in flight. dev is at 746be6b1, main at d3323f6a.
+- 1 open finding (#5789). Stage: 3 wave 3, fixing the finding while wave 2 waits in the lane.
+
+### 2026-10-26T12:42Z check-in
+
+- Finding #5789 is fixed in #5236 at head 4388fad4: dev merged in, FilterSheet now uses SuiteSheet with one InspectorSliderRow per value, and FilterSheetTests.okIsTheCommandOnTheTarget is added. Linux gate PASS; the Head line was moved. The PR is still 393 lines.
+- Packet amendment PR #5790 (docs only, fast-lane, Slice AJ-z) is open with the gate passing at its head.
+- Wave 2/3 PR bodies now carry Belt-Lead act-1a1782c1a0b-jam7.
+- 1 open finding (#5789, closes with #5236). Stage: 3 wave 3, with wave 2 waiting in the lane.
+
+### 2026-10-26T12:54Z check-in
+
+- Wave 2 (#5064, #5233, #5235, #5236) and packet PR #5790 are still open, clean and labelled fast-lane + beta. No lane batch is in flight. dev is at 57dd31ff.
+- No needs-fix or needs-rebase. 1 open finding (#5789, closes with #5236). Stage: 3 wave 3, waiting for wave 2 to land before restacking wave 3.
+
+### 2026-10-26T13:03Z check-in
+
+- Lane sweep 40323409808: #5064, #5233, #5235 eligible (Fast-Check marker plus local-ci/prescreen), #5790 eligible (no code). #5236 waits for local-ci/prescreen on its new head 4388fad4. A batch was in flight with 125 ready PRs queued behind it; later sweeps have been cancelled by concurrency.
+- The lane flagged a footer line in our PR bodies. The GitHub proxy in this session appends it on every body edit, so it cannot be removed from here; the lane strips it from the squash commit, so no merge waits on it.
+- No needs-fix or needs-rebase. 1 open finding (#5789). Stage: 3 wave 3, waiting for wave 2 to land.
+
+### 2026-10-26T13:22Z check-in
+
+- The lane landed #5266 (dev 01600e46); sweep 40329591299 is running. Wave 2 (#5064, #5233, #5235, #5236) and #5790 are still open, ready and unlabelled by needs-*.
+- 1 open finding (#5789). Stage: 3 wave 3, waiting for wave 2 to land.
+
+### 2026-10-26T13:43Z check-in
+
+- The lane runs one PR per batch (batch 20261026133530: #5104). dev is at 01600e46; dev-red #5321 is still open. Wave 2 and #5790 are queued, clean and ready, with no needs-* label.
+- 1 open finding (#5789). Stage: 3 wave 3, waiting for wave 2 to land.
+
+### 2026-10-26T14:04Z check-in
+
+- The lane is still on batch 20261026133530 (#5104 alone); dev unchanged at 01600e46. Wave 2 and #5790 remain clean and ready, with no needs-* label.
+- 1 open finding (#5789). Stage: 3 wave 3, waiting for wave 2 to land.
+
+### 2026-10-26T14:26Z check-in
+
+- dev is at 68be32fc (#5104 landed). Batch 20261026141727 (#5267) is marked red-base. Wave 2 and #5790 stay queued, with no needs-* label.
+- AJ-14 (RJ-X60, pending form) is committed on lead/adjust-everywhere-AJ-14 from dev and running scripts/ci --changed; it opens as a docs-free test-data PR that needs no macOS gate.
+- 1 open finding (#5789). Stage: 3 wave 3, waiting for wave 2 to land.
+
+### 2026-10-26T14:49Z check-in
+
+- The lane landed #5780 (dev f86f72f7). Wave 2 (#5064, #5233, #5235, #5236), #5790 and #5800 (AJ-14, RJ-X60 pending) are clean and queued, with no needs-* label.
+- 1 open finding (#5789). Stage: 3 wave 3, waiting for wave 2 to land.
+
+### 2026-10-26T15:10Z check-in
+
+- The lane re-batched #5267 on dev f86f72f7 (batch 20261026150314). Wave 2, #5790 and #5800 are clean and queued, with no needs-* label.
+- 1 open finding (#5789). Stage: 3 wave 3, waiting for wave 2 to land.
+
+### 2026-10-26T15:20Z check-in (Belt stall read)
+
+- From 12:40Z to 15:10Z the check-ins went to lead/adjust-everywhere (docs/leads/adjust-everywhere/) instead of this branch, so Belt saw no commit here; the work did not stall. Those check-ins are copied above, and every check-in from now on goes to both branches.
+- Since 11:45Z: #5266, #5104 and #5780 landed (dev f86f72f7). Wave 2 (#5064, #5233, #5235, #5236), #5790 (packet) and #5800 (AJ-14: RJ-X60 job, pending form) are clean, labelled fast-lane and beta, with no needs-* label. Lane batch 20261026150314 runs #5267 alone.
+- 1 open finding (#5789, fixed by #5236). Stage: 3 wave 3, waiting for wave 2 to land; wave 3 (#5247-#5260) restacks after it.

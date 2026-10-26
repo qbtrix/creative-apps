@@ -87,3 +87,14 @@ utc	stage	event	ref	note
 2026-10-26T11:00Z	3	check-in	#5064,#5233,#5235,#5236	lane idle, #5266 batch dropped; wave 2 ready; 0 findings
 2026-10-26T11:25Z	3	check-in	#5064,#5233,#5235,#5236	batch 111622 (#5266) in flight; wave 2 ready; 0 findings
 2026-10-26T11:45Z	3	check-in	#5064,#5233,#5235,#5236	batch 111622 dropped; lane idle; wave 2 ready; 0 findings
+2026-10-26T12:40Z	3	review	#3777,#5789	packet review answered; finding #5789 filed (AJ-u FilterSheet); wave 2 ready
+2026-10-26T12:42Z	3	fix	#5236,#5790	#5789 fixed in #5236 (4388fad4); packet PR #5790 open
+2026-10-26T12:54Z	3	check-in	#5064,#5233,#5235,#5236,#5790	no batch in flight; all clean and ready; dev 57dd31ff
+2026-10-26T13:03Z	3	check-in	#5064,#5233,#5235,#5236,#5790	lane: 5064/5233/5235/5790 eligible, 5236 waits local-ci/prescreen on 4388fad4; 125 ready PRs queued
+2026-10-26T13:22Z	3	check-in	#5064,#5233,#5235,#5236,#5790	lane landed #5266 (dev 01600e46); wave 2 still queued
+2026-10-26T13:43Z	3	check-in	#5064,#5233,#5235,#5236,#5790	lane batch 133530 runs #5104 alone; wave 2 queued; dev 01600e46
+2026-10-26T14:04Z	3	check-in	#5064,#5233,#5235,#5236,#5790	lane still on batch 133530 (#5104); wave 2 queued; dev 01600e46
+2026-10-26T14:26Z	3	check-in	#5064,#5233,#5235,#5236,#5790	lane batch 141727 (#5267) marked red-base; dev 68be32fc; AJ-14 job prepared
+2026-10-26T14:49Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane landed #5780 (dev f86f72f7); wave 2, #5790, #5800 queued
+2026-10-26T15:10Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane batch 150314 retries #5267 on dev f86f72f7; ours queued
+2026-10-26T15:20Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	status back on lead/suiteui-adjust-everywhere; batch 150314 (#5267) in flight; ours queued
