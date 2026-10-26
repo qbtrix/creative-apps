@@ -115,7 +115,7 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var masks: [PhotoLayer.ID: TiledPixels] = [:]
     /// Brush and eraser paint on the selected layer's mask (PhotoMask.swift).
     public internal(set) var editsMask = false
-    /// The crop's aspect lock (PhotoCropSize.swift).
+    /// The crop's aspect lock (PhotoCropTool+Kernel.swift).
     public internal(set) var cropAspect = CropAspect.free
     /// Free Transform in progress (PhotoTransform.swift).
     public internal(set) var transformDraft: TransformDraft?
