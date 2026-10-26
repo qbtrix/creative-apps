@@ -119,3 +119,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 2026-10-26T13:30:40Z: #5794 CLI --bundle (drift #5643), stacked on #5793; gate PASS at 11fc8017; Arguments plan 6/8 (2 pre-existing CLI.swift entries escape on stacked base, checking on dev)
 - 2026-10-26T13:37:08Z: Arguments-plan escapes reproduce on dev (3/5), not #5794's: filed gap #5797 (p2, line:suite)
 - 2026-10-26T13:39:58Z: 13:39: #4999 open fast-lane beta, mergeable, waiting; #5793 lost fast-lane (stacked size 519/21 counts #4999) and conflicted with dev in ShellHelpProvider betaNotes: merged dev, gate running; re-label after #4999 lands; #5794 fast-lane, unmergeable until #5793 resolves; #5000 unchanged
+- 2026-10-26T14:01:51Z: #5793 merged dev (conflict resolved), gate PASS, Head 9c361148; #5794 merged #5793, gate PASS, Head moved
