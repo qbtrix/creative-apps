@@ -124,3 +124,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 2026-10-26T14:27:02Z: 14:26: #4999 still queued (fast-lane beta, mergeable); lane kept re-labelling then dropping #5793/#5794 on stacked size, so parked both with no-fast-lane until #4999 merges; #5000 waits
 - 2026-10-26T14:49:11Z: 14:49: no change; #4999 queued (fast-lane beta, mergeable), #5793/#5794 parked no-fast-lane, #5000 waits
 - 2026-10-26T15:19:59Z: 15:20: Belt nudge: record now also at docs/leads/suite-cli-bundle/ on the mirror. #4999 ready (Fast-Check+Head match 941da487, local-ci/prescreen success), queued behind p0; #5793/#5794 parked no-fast-lane; #5000 waits
+- 2026-10-26T15:37:49Z: 15:37 heartbeat: #4999 still queued (fast-lane, clean, prescreen green) behind p0 PRs; #5793/#5794 parked no-fast-lane, clean; #5000 awaiting docs-only rework after #4999.
