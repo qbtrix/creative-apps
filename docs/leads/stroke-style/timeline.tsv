@@ -292,3 +292,4 @@ utc	stage	event	ref	note
 2026-10-26T19:24Z	wait	heartbeat	#5321	19:24 poll: lane batching; awaiting #4916/#5002
 2026-10-26T19:37Z	wait	heartbeat	#5321	19:37 poll: lane batch in macOS gate; awaiting #4916/#5002
 2026-10-26T19:52Z	wait	heartbeat	#5321	19:52 poll: #4916/#5002 eligible, awaiting lane batch
+2026-10-26T20:06Z	wait	heartbeat	#5321	20:06 poll: #4916/#5002 queued in lane backlog
