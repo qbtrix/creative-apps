@@ -220,3 +220,4 @@ utc	stage	event	ref	note
 2026-10-26T20:56Z	3	poll	-	dev moved, none ours; AN-6 waits on #4893, AN-10 on #4902 and #4891
 2026-10-26T21:15Z	3	poll	-	dev unchanged; AN-6 waits on #4893, AN-10 on #4902 and #4891
 2026-10-26T21:32Z	3	poll	-	dev unchanged; AN-6 waits on #4893, AN-10 on #4902 and #4891
+2026-10-26T21:35Z	3	poll	-	dev unchanged; AN-6 waits on #4893, AN-10 on #4902 and #4891
