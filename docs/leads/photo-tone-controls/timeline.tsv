@@ -194,3 +194,4 @@ utc	stage	event	ref	note
 2026-10-26T09:11:01Z	check	#5363 5260e203 prescreen still pending (~80m); dev be5f2c00 clean with PT-3/4/5/7 heads
 2026-10-26T09:30:33Z	check	#5363 5260e203 prescreen still pending (~100m); dev 1b843d15 clean with PT-3/4/5/7 heads
 2026-10-26T09:50:50Z	check	#5363 prescreen still pending (~2h); dev 2ed77a2e: c176d2c3 (Move composite cache) conflicts with PT-3/PT-7 in PhotoLiveTone.swift; merging dev into PT-3, gate running
+2026-10-26T09:56:01Z	merge	PT-3 merged dev 2ed77a2e (PhotoLiveTone Entry/Key conflict resolved), gate PASS, pushed 5e09f02c; PT-7 merged PT-3 cleanly, gate running
