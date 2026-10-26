@@ -222,3 +222,7 @@ dev gained #5043 (07:08), none of ours. #4988, #5364 and #4999 are open, clean, 
 ## 2026-10-26T07:40:12Z poll
 
 No dev merges since 07:10. #4988, #5364 and #4999 are open, clean, fast-lane+beta, with no needs-fix or needs-rebase. #5164 and #5000 still wait on them. Bodies are clean.
+
+## 2026-10-26T08:03:47Z poll
+
+dev gained #5264 (07:45), none of ours. #4988, #5364 and #4999 are open, clean, fast-lane+beta; no new checks or labels. #5164 and #5000 still wait. Bodies are clean.
