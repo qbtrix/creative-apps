@@ -115,3 +115,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 2026-10-26T12:38:54Z: relaunch act-1a178358362-etn1; scoping CB-z follow-up
 - 2026-10-26T12:39:40Z: builder started: CB-z follow-up (in-app help.install-cli shares the CLI install plan), stacked on #4999; #4999 still beta, queued
 - 2026-10-26T13:10:03Z: #5793 opened: in-app help.install-cli shares the CLI install plan (drift #5642), stacked on #4999; next: CLI --bundle builder (drift #5643)
+- 2026-10-26T13:10:53Z: #4999 and #5793 open, fast-lane, beta, no lane comments since; --bundle builder running
