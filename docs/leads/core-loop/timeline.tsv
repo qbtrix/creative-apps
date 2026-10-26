@@ -258,3 +258,4 @@ utc	stage	event	ref	note
 2026-10-26T09:26Z	3	check-in	no change	40281086269 cancelled before Halo; 40295735868 running
 2026-10-26T11:30Z	3	check-in	no change	40295735868, 40301120476 cancelled before Halo
 2026-10-26T13:41Z	3	check-in	no halo coverage	full 40318165855 timed out before Halo; #4283/#4282 open
+2026-10-26T15:43Z	3	check-in	no halo coverage	full 40337198403 cancelled 0 Halo; 40349518184 waiting
