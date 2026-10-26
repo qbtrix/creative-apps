@@ -5,7 +5,7 @@
 // and applies to the local value (a set or a reset; Auto only logs), so the
 // rows follow with no History yet. TC-8 runs the intents through ToneCommands
 // on a local target with a History instead. The page is its own area in
-// `SuiteGallery.areas`.
+// `SuiteGallery.areas`. The rows scroll, the log stays under them.
 import SuiteImaging
 import SwiftUI
 
@@ -45,12 +45,20 @@ struct GalleryToneRowsPage: View {
         let text = log.joined(separator: "\n")
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             Text("Tone rows").font(SuiteFont.sectionCaps).foregroundStyle(SuiteColor.secondaryText).accessibilityAddTraits(.isHeader)
-            ToneRows(settings: settings, help: nil) { intent in
-                settings = GalleryToneRows.applied(intent, to: settings)
-                log.append(GalleryToneRows.line(intent))
-                if log.count > 40 { log.removeFirst(log.count - 40) }
+            // Scrolls: the four sections run past a 768-pt runner's window (#5324).
+            ScrollView {
+                ToneRows(settings: settings, help: nil) { intent in
+                    settings = GalleryToneRows.applied(intent, to: settings)
+                    log.append(GalleryToneRows.line(intent))
+                    if log.count > 40 { log.removeFirst(log.count - 40) }
+                }
+                .frame(width: SuiteSize.editorPanelWidth, alignment: .leading)
             }
-            .frame(width: SuiteSize.editorPanelWidth, alignment: .leading)
+            // No scroller: a legacy scroller's page area is an unnamed button
+            // with no identifier to the app audit, as in GalleryGradientEditor.
+            .scrollIndicators(.never)
+            .frame(width: SuiteSize.editorPanelWidth)
+            .accessibilityIdentifier("suite.gallery.tone-rows.scroll")
             Text(log.last ?? "Nothing yet").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText).lineLimit(1)
                 .accessibilityLabel(text).accessibilityValue(text)
                 .accessibilityIdentifier("suite.gallery.log")
