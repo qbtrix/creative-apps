@@ -226,3 +226,4 @@ utc	stage	event	ref	note
 2026-10-26T16:26Z	poll	unchanged: #4854 and #5025 open, heads unchanged, no blocking label; dev-red #5321 open (run 40342241864); no reply to 6419835895 (identical poll 2 of 3)
 2026-10-26T16:46Z	poll	unchanged: #4854 and #5025 open, heads unchanged, no blocking label; dev-red #5321 open (run 40342241864); no reply to 6419835895 (identical poll 3 of 3; nothing new to ask, so no further comment)
 2026-10-26T17:09Z	poll	unchanged: #4854 and #5025 open, heads unchanged, no blocking label; dev-red #5321 open, touched 16:51Z with the same run 40342241864 and range; no reply to 6419835895
+2026-10-26T17:29Z	poll	#4854 and #5025 open, heads unchanged, no blocking label; dev-red #5321 now macOS run 40357785665, range main..527676af (neither PR in it); no reply to 6419835895
