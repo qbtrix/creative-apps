@@ -24,7 +24,7 @@ public enum LiveLayerKind: Equatable, Sendable {
     case pixels
     /// An adjustment layer: its tone operations, run over everything under it.
     case adjustment([ToneProgram.Operation])
-    /// A layer the route can't draw (a masked adjustment layer, say): the whole stack takes the dispatcher route.
+    /// A layer the route can't draw (a masked layer, say): the whole stack takes the dispatcher route.
     case unsupported
 }
 
@@ -63,7 +63,7 @@ public struct LiveLayerStack<Layer: LiveLayer>: Sendable {
     // render-contract: gpu-route
     public static func folding(_ shown: [Layer], image: [ToneProgram.Operation]) -> Self? {
         guard shown.allSatisfy({ (0...1).contains(Float($0.opacity)) }) else { return nil }  // render-contract: cpu-op layer-opacity-range
-        guard !shown.contains(where: { $0.liveKind == .unsupported }) else { return nil }  // render-contract: cpu-op masked-adjustment-layer
+        guard !shown.contains(where: { $0.liveKind == .unsupported }) else { return nil }  // render-contract: cpu-op masked-layer
         let split = shown.firstIndex { if case .adjustment = $0.liveKind { true } else { false } } ?? shown.endIndex
         var above = Array(shown[split...])
         var folded: [ToneProgram.Operation] = []
