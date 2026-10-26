@@ -72,6 +72,8 @@ struct PhotoCommandCatalogTests {
             // A jump moves the image to another step, as Undo does, so its bytes change (history-panel PH-5).
             if id == "history.jump" && problem.contains("queryOrViewChangesNoBytes") { return false }
             guard problem.hasPrefix("\(id): exampleRuns") else { return true }
+            // style.* runs throw notBuilt until layer-styles PY-5 fills the adapter; PhotoLayerStyleTests waits on it.
+            if id.hasPrefix("style.") && problem.contains("not built yet") { return false }
             let off = PhotoLawsDocument.catalog.availability(id, on: fixture).why != nil
             return !(off || needsFiles.contains(id))
         }
@@ -157,6 +159,7 @@ struct PhotoCommandCatalogTests {
         !$0.hasPrefix("tool.") && !$0.hasPrefix("transform.") && !noMenu.contains($0) && !fileFlowIDs.contains($0)
             && !placeIDs.contains($0) && !$0.hasPrefix("history.") && !$0.hasPrefix("text.")
             && !$0.hasPrefix("layer.mask-") // masks-clipping PK-2 adds their Layer menu items.
+            && !$0.hasPrefix("style.") // layer-styles PY-2 adds their Layer menu items.
             && !$0.hasPrefix("path.") && !$0.hasPrefix("paths.") // the Pen and its overlay run them (#5072); no menu yet.
     }
     /// The place commands (place-image PP-5): File > Place… runs place.image through PhotoPlace+Menu, not a catalog row.
