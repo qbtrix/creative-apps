@@ -199,14 +199,21 @@ struct PhotoPenOverlay: View {
     let zoom: Double
     var perform: PhotoPerform = { _ in }
     @State private var editsPoints = false
+    /// Edits points without Command held: the render budget test's way in, since a scripted event can't hold a key.
+    @Environment(\.photoPenEditsPoints) private var alwaysEditsPoints
 
     var body: some View {
         PathEditOverlay(draft: model.penDraft, path: model.pathInEdit, selection: model.anchorSelection,
-                        tool: editsPoints ? .directSelect : .pen, zoom: zoom) { perform(.path($0)) }
+                        tool: editsPoints || alwaysEditsPoints ? .directSelect : .pen, zoom: zoom) { perform(.path($0)) }
             .holdsPressesUntilRelease()
             .onModifierKeysChanged(mask: .command) { _, keys in editsPoints = keys.contains(.command) }
             .accessibilityIdentifier("photo.canvas.pen")
     }
+}
+
+extension EnvironmentValues {
+    /// True: the Pen's overlay edits points as if Command were held (RenderBudgetPhotoPenAnchorTests).
+    @Entry var photoPenEditsPoints = false
 }
 
 extension PixelRect {
