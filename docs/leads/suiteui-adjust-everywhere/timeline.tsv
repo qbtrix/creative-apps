@@ -116,3 +116,4 @@ utc	stage	event	ref	note
 20:40Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 696d37fe; new round in flight: #5802 + beta #4848..#4903; ours clean, next in beta order
 21:00Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 3ebc8d43 (#5802, #5812 landed); beta round #4848..#4903 in flight; ours clean, next
 21:20Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 3ebc8d43 unchanged; lane re-batched #4848..#4891 on new dev, bisecting #4899; ours clean, queued
+21:40Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane batching #4848-#4916 (beta, one PR each); ours still queued, all clean; dev 3ebc8d43; findings: #5789
