@@ -1,6 +1,6 @@
-// DesignCommands.swift: Design's menu bar. File: New File, Open…, Close, Save, Save As…,
-// Export… ⇧⌘E (the export sheet, DesignExportArea), then the suite's Open Recent ▸ and Open In ▸
-// (SuiteFileCommands over DesignShell.bridge; Open In gets the focused window's saved file);
+// DesignCommands.swift: Design's menu bar. File: New File, Open…, the suite's Open Recent ▸ and Open In ▸
+// (SuiteFileCommands over DesignShell.bridge; Open In gets the focused window's saved file), then Close, Save,
+// Save As… and Export… ⇧⌘E (the export sheet, DesignExportArea), the order Photo's and Flare's File menus keep;
 // Edit: Undo and Redo named for the edit, then after the stock Cut, Copy, Paste,
 // Delete and Select All, Duplicate (DesignEditMenu); Page: Add Page,
 // Rename Page…, Delete Page; Object: Group, Ungroup, Arrange, Align and
@@ -145,10 +145,10 @@ struct DesignCommands: Commands {
     }
 
     var body: some Commands {
-        CommandGroup(replacing: .newItem) { DesignFileMenu(menu: menu) }
+        CommandGroup(replacing: .newItem) { DesignFileMenu(menu: menu, part: .open) }
         SuiteFileCommands(app: .design, bridge: DesignShell.bridge, document: menu.workspace.suiteDocument)
         // `.saveItem` holds the system's Close, which DesignFileMenu's own Close replaces.
-        CommandGroup(replacing: .saveItem) {}
+        CommandGroup(replacing: .saveItem) { DesignFileMenu(menu: menu, part: .save) }
         CommandGroup(replacing: .undoRedo) { DesignHistoryMenu(menu: menu, field: DesignFieldUndo.shared.state) }
         CommandGroup(after: .pasteboard) {
             Divider()
@@ -166,15 +166,26 @@ struct DesignCommands: Commands {
 
 /// File: New File and Open…, then Close, Save, Save As… and Export….
 struct DesignFileMenu: View {
+    /// One of File's two groups, which the suite's Open Recent ▸ and Open In ▸ sit between; nil draws both.
+    enum Part { case open, save }
     let menu: DesignMenu
+    var part: Part?
 
     var body: some View {
+        if part != .save { openItems }
+        if part != .open { saveItems }
+    }
+
+    @ViewBuilder private var openItems: some View {
         menu.item("file.new", systemImage: DesignToolbarItem.newFile.systemImage, shortcut: KeyboardShortcut("n")) {
             menu.perform(.newFile)
         }
         menu.item("file.open", systemImage: DesignToolbarItem.open.systemImage, shortcut: KeyboardShortcut("o")) {
             menu.perform(.open)
         }
+    }
+
+    @ViewBuilder private var saveItems: some View {
         Divider()
         Button("Close", systemImage: "xmark") { NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil) }
             .keyboardShortcut("w")
