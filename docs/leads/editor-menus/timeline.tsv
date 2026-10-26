@@ -226,3 +226,4 @@ utc	stage	event	ref	note
 2026-10-26T08:25:15Z	question	asked supervisor why #4988/#5364/#4999 are unbatched
 2026-10-26T08:48:15Z	poll	unchanged; awaiting supervisor answer on lane hold
 2026-10-26T09:12:58Z	poll	lane hold explained (red_scope fix on dev 08:53); awaiting batch
+2026-10-26T09:35:16Z	poll	unchanged; awaiting batch
