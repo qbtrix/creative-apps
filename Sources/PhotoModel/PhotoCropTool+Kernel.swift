@@ -1,11 +1,13 @@
-// PhotoCropSize.swift: the crop tool's drag, typed fields and aspect lock
-// (PV-3, #544; this file is PV-3's). The drag from the press to the pointer
-// is the pending crop, keeping the locked aspect, and a click drops it; the
-// four fields (X, Y, W, H) set it by number; an aspect lock reshapes it about
-// its center and Swap turns 3:2 into 2:3. All the geometry is
-// `services.crop`'s. None of this is an undo step: only Apply Crop records
+// PhotoCropTool+Kernel.swift: the crop tool's drag, typed fields and aspect
+// lock (PV-3, #544), on the kernel's CropRules (orientation-crop OC-12; one
+// file since OC-z, #3117). The drag from the press to the pointer is the
+// pending crop, keeping the locked aspect, and a click drops it; the four
+// fields (X, Y, W, H) set it by number; an aspect lock reshapes it about its
+// center and Swap turns 3:2 into 2:3 about its centre, filling the same share
+// of the canvas. None of this is an undo step: only Apply Crop records
 // "Crop". Linux-safe.
 import CoreRaster
+import SuiteKernel
 
 extension PhotoWorkspace {
     /// The crop's drag from the stroke's press to `end`, in canvas pixels.
@@ -66,7 +68,7 @@ extension PhotoWorkspace {
     }
 
     /// Swaps the locked aspect's sides (3:2 becomes 2:3) and reshapes the
-    /// pending crop to it on the kernel's CropRules (PhotoCrop+Kernel.swift).
+    /// pending crop to it on the kernel's CropRules (`kernelSwapped`).
     public mutating func swapCropAspect() {
         guard let canvas else { return }
         let was = cropAspect
@@ -77,6 +79,27 @@ extension PhotoWorkspace {
     private mutating func reapplyCropAspect() {
         guard cropAspect != .free, let canvas else { return }
         pendingCrop = services.crop.applying(cropAspect, to: pendingCrop, canvas: canvas)
+    }
+}
+
+// MARK: The crop frame on the kernel's CropRules (OC-12)
+
+// A pending crop in whole pixels becomes a kernel Rect in canvas pixels and
+// back, rounded to the nearest pixel, at least 1 x 1 and inside the canvas.
+extension PhotoWorkspace {
+    /// `crop` turned to the other orientation by the kernel's `CropRules.swapped`.
+    func kernelSwapped(_ crop: PixelRect, canvas: CanvasSize) -> PixelRect {
+        let bounds = Rect(minX: 0, minY: 0, maxX: Double(canvas.width), maxY: Double(canvas.height))
+        let frame = Rect(minX: Double(crop.x), minY: Double(crop.y), maxX: Double(crop.maxX), maxY: Double(crop.maxY))
+        return Self.pixels(of: CropRules.swapped(frame, in: bounds), canvas: canvas)
+    }
+
+    /// `r` rounded to whole pixels, at least 1 x 1, moved inside the canvas.
+    static func pixels(of r: Rect, canvas: CanvasSize) -> PixelRect {
+        let cw = max(canvas.width, 1), ch = max(canvas.height, 1)
+        let w = min(max(Int(r.width.rounded()), 1), cw), h = min(max(Int(r.height.rounded()), 1), ch)
+        let x = min(max(Int(r.minX.rounded()), 0), cw - w), y = min(max(Int(r.minY.rounded()), 0), ch - h)
+        return PixelRect(x: x, y: y, width: w, height: h)
     }
 }
 
