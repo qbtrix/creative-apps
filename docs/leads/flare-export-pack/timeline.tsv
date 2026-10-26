@@ -230,3 +230,4 @@ utc	stage	event	ref	note
 2026-10-26T17:48Z	poll	unchanged: #4854 and #5025 open, heads unchanged, no blocking label; dev-red #5321 open (run 40357785665); no reply to 6419835895
 2026-10-26T18:14Z	poll	#4854 and #5025 open, heads unchanged, no blocking label; dev-red #5321 now macOS run 40366795361, range main..df48c0ba (neither PR in it); no reply to 6419835895
 2026-10-26T18:34Z	poll	unchanged: #4854/#5025 open, dev-red #5321 run 40366795361 main..df48c0ba, #3481 25 comments
+2026-10-26T18:54Z	poll	dev-red #5321 closed (dev green fef52e66); #4854/#5025 open, waiting on lane batch; #3481 25 comments
