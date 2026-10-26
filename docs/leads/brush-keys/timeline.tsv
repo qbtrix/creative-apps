@@ -215,3 +215,4 @@ utc	stage	event	ref	note
 2026-10-26T18:37Z	3	poll	-	dev unchanged; #4939 and #5799 await the lane
 2026-10-26T18:54Z	3	poll	-	no merges of ours (only #5295 SuiteImaging route); #4939 and #5799 await the lane
 2026-10-26T19:13Z	3	poll	-	dev unchanged; #4939 and #5799 await the lane
+2026-10-26T19:30Z	3	poll	-	no merges of ours (only #5334); #4939 and #5799 await the lane
