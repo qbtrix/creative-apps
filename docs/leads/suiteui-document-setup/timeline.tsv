@@ -225,3 +225,4 @@ utc	stage	event	ref	note
 2026-10-26T10:30:58Z	3	poll	-	10:30Z poll: no merges of ours; dev 2eab5aeb (#5163, p0); ours clean and queued; dev-red #5321 open; 0 findings. #5267 still needs-rebase (other lead).
 2026-10-26T10:54:32Z	3	poll	-	10:54Z poll: no merges of ours; dev f3af1c00 (supervisor lane fixes #5725, quarantine #5778); ours clean and queued; dev-red #5321 open; 0 findings. #5267 rebased, clean.
 2026-10-26T13:39:43Z	3	poll	-	13:39Z poll: no merges of ours; dev 01600e46; 0 findings
+2026-10-26T14:04:02Z	3	poll	-	14:04Z poll: no merges of ours; DS PRs queued; #5267 open. No drift issue for document-setup. Open findings 0.
