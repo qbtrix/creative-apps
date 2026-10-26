@@ -130,3 +130,4 @@ utc	stage	event	ref	note
 2026-10-26T04:25:51Z	3	check	PY-a	#5371 #5174 #5176 open, clean, unflagged; dev-red #5321 open (none ours), code batches held; PY-2 builder running
 2026-10-26T04:40:30Z	3	built	PY-a	PY-2 on lead/photo-layer-styles-PY-a a879850e9 (CI: PASS, Mutate 12/12); waits on #5174 to open
 2026-10-26T04:54:59Z	3	check	PY-u	#5371 #5174 #5176 open, unflagged; dev-red #5321 open (none ours); PY-u builder running stacked on PY-a
+2026-10-26T04:56:11Z	3	built	PY-u	PY-3+PY-4 on lead/photo-layer-styles-PY-u cd4ed5935 (3 files +334/-11, CI: PASS); waits on PY-a PR

@@ -4,7 +4,7 @@ Issue: #3793 · Packet: docs/blueprints/photo/features/layer-styles.md
 Run: act-1a16f6941b7-zb0r · Session: claude/feature-lead-tone-layer-styles-v57ny4 · Started: 2026-10-24T19:30Z (takes over from act-1a16cd04539-4jc0)
 Stage: W1 shipped (PY-1 #5177 in the lane); W2 waiting on LS-a's LS-2 #5174 (PY-2) and LS-m #5176 (PY-5, PY-6)
 Base: 78983bc33 (PY-1); dev 6f66ca334 at 19:39Z
-Next: open the PY-a PR (PY-2 + panel snapshot) when LS-2 #5174 merges; then PY-3/PY-4 stacked on it; PY-6 when LS-5 #5176 / LS-8 land; watch #5371
+Next: open PY-a PR when LS-2 #5174 merges, then PY-u PR stacked on it; PY-6 when LS-5 #5176 / LS-8 land; watch #5371
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -21,8 +21,8 @@ Next: open the PY-a PR (PY-2 + panel snapshot) when LS-2 #5174 merges; then PY-3
 | PY-2 | PY-a | 2 | Layer menu items by id; panel sheet while `stylePanel` is set; pasteboard via `LayerStylePasteboard` | Sources/PhotoApp/PhotoCommands+Layer.swift, Sources/PhotoApp/PhotoWindow+Styling.swift, Sources/PhotoApp/PhotoWindow.swift | PhotoLayerStyleSnapshots.panel | – | built on lead/photo-layer-styles-PY-a (head a879850e9, LS-2 merge c70c6b6ef; own diff 12 files +277/−16, Mutate 12/12 PhotoMenuState, CI: PASS, SwiftUI unbuilt); PR opens once #5174 lands |
 | PY-5 | PY-m | 2 | adapter bodies; tests on | Sources/PhotoModel/PhotoStyle+Kernel.swift, Tests/PhotoModelTests/PhotoLayerStyleTests.swift, Tests/mutations/PhotoModel.PhotoStyle+Kernel.json | PhotoLayerStyleTests | #5371 | PR open, fast-lane (head c62112564, CI: PASS, Mutate 7/7); catalog-level tests wait on LS-6 |
 | PY-6 | PY-m | 2 | styles in composite and `.ora`; RJ-P44, RJ-X51 | Sources/PhotoModel/PhotoLayerComposite.swift, Sources/PhotoModel/PhotoDocumentFile.swift, Tests/PhotoModelTests/PhotoStyleRenderTests.swift, Tests/mutations/PhotoModel.PhotoLayerComposite.json, Tests/mutations/PhotoModel.PhotoDocumentFile.json, Tests/RealJobs/photo/outline-cutout/, Tests/RealJobs/photo/style-drop-shadow/ | PhotoStyleRenderTests | – | waiting (PY-1, LS-m) |
-| PY-3 | PY-u | 3 | snapshots, render budget | Tests/AppSnapshotTests/PhotoLayerStyleSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoLayerStyleTests.swift | RenderBudgetPhotoLayerStyleTests.distanceScrubInThreeBodies | – | waiting (PY-2) |
-| PY-4 | PY-u | 3 | journey written, skipped | UITests/PhotoJourneyTests+LayerStyle.swift | compiles, skipped | – | waiting (PY-2) |
+| PY-3 | PY-u | 3 | snapshots, render budget | Tests/AppSnapshotTests/PhotoLayerStyleSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoLayerStyleTests.swift | RenderBudgetPhotoLayerStyleTests.distanceScrubInThreeBodies | – | built on lead/photo-layer-styles-PY-u (cd4ed5935, stacked on PY-a); budget test disabled (waits on LS-6), canvas snapshot disabled (waits on PY-6) |
+| PY-4 | PY-u | 3 | journey written, skipped | UITests/PhotoJourneyTests+LayerStyle.swift | compiles, skipped | – | built on lead/photo-layer-styles-PY-u; XCTSkip("waits on PY-8") |
 | PY-7 | PY-z | 4 | live canvas via `StyleRoute`; journey on | Sources/PhotoModel/PhotoRenderRoute.swift, UITests/PhotoJourneyTests+LayerStyle.swift | PhotoLayerStyleJourneyTests.testDropShadowAndStroke | – | waiting (PY-4..6, LS-gpu, IM-photo) |
 | PY-8 | PY-z | 5 | photo.md row; `status: built`; `feature-done` | docs/blueprints/photo.md, docs/blueprints/photo/features/layer-styles.wave.json | scripts/waves render --dry-run | – | waiting (PY-7, PY-3, TX-z) |
 
