@@ -1,17 +1,23 @@
 # tone-controls lead record
 
 Issue: #3476 · Packet: docs/blueprints/suiteui/features/tone-controls.md
-Run: act-1a1702c569a-0puo · Session: claude/suiteui-feature-lead-run-azjeoo · Started: 2026-10-24T23:00Z (earlier: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui) · Started: 2026-10-23T14:52Z (earlier runs act-1a16469734c-d0s8, act-1a15821c836-93pf))
-Stage: 3 polling (wave 4 PRs on the lane)
-Base: origin/dev ae3efdb8
-Next: wait for the lane to merge TC-6 #4953, TC-u #5006 and TC-z #5239 (feature-done, stacked on #5006; GitHub retargets it to dev once #5006 merges), then a CI run on dev with a green Linux job that contains them; post Belt-Slice-Done for TC-m, TC-u, TC-z, then the contact sheet. Critic panel for TC-u once a suiteui scoped run shows its screens.
+Run: act-1a175ea55b7-729d (line lead, line:suiteui; relaunch 2026-10-26) · earlier: act-1a1702c569a-0puo · Session: claude/suiteui-feature-lead-run-azjeoo · Started: 2026-10-24T23:00Z (earlier: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui) · Started: 2026-10-23T14:52Z (earlier runs act-1a16469734c-d0s8, act-1a15821c836-93pf))
+Stage: 3 wave 5: TC-z #5239 restack on dev
+Base: origin/dev 8eff8ab85
+Next: TC-u done (run 40247461868 contains #5006): post Belt-Slice-Done and Mac-Finish-Wanted. Merge origin/dev into #5239 (TC-z, stale stack on the old TC-u branch), gate, move Head; once it merges and a green run contains it, TC-z done and the contact sheet.
 
+
+## Run act-1a175ea55b7-729d decisions
+- Brief rule 1: main checked out at d3323f6a7; main was rewritten, so each lead branch is rebuilt as origin/main plus this record (no merge base with the old branch), pushed --force-with-lease.
+- PR base stays `dev` (CLAUDE.md; BASE_BRANCH=dev in scripts/fast-lane.sh; the lane retargets main PRs).
+- Stacked PRs whose parent squash-merged carry the parent's commits (size FAIL, dirty): merge origin/dev into each branch, gate, move Head.
+- TC-u #5006 merged 13:51Z (e8a888296); scoped suiteui run 40247461868 at 30096d710 green and contains it.
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | TC-a | Tone module stubs, placeholder ToneRows on a gallery page, checks disabled | TC-1, TC-2 | SJ0 | suite-imaging:IM-a, gradient-fill:GF-a, autosave-history:AH-a, placed-images:PL-a (all met on dev) | no | 0 | done: run 40029042081 green; Belt-Slice-Done posted 23:24Z | – | – |
-| TC-u | ToneRows view, snapshots, budget, journey | TC-3, TC-4 | tone journey | TC-a | yes | 0 | building (#5006) | – | – |
-| TC-m | ToneRules, ToneCommands, ToneSettings bodies | TC-5, TC-6, TC-7 | KJ-tone | TC-a | no | 0 | waiting | – | – |
+| TC-u | ToneRows view, snapshots, budget, journey | TC-3, TC-4 | tone journey | TC-a | yes | 0 | done (run 40247461868) | 40247461868 | wanted |
+| TC-m | ToneRules, ToneCommands, ToneSettings bodies | TC-5, TC-6, TC-7 | KJ-tone | TC-a | no | 0 | done: run 40195226753 | 40195226753 | – |
 | TC-z | Gallery live through ToneCommands; fake app takes tone (RJ-X41); built | TC-8, TC-9, TC-10 | tone journey, KJ-tone | TC-u, TC-m, GF-z, AH-z, TT-z, EY-z, SH-z, SS-d, PL-z | no | 0 | building (#5239) | – | – |
 
 ## Tasks
