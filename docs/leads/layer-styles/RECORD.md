@@ -4,7 +4,7 @@ Issue: #3937 · Packet: docs/blueprints/suiteui/features/layer-styles.md
 Run: act-1a175e3e61f-9qd4 · Session: claude/layer-styles-lead-u8mk3r · Resumed: 2026-10-26T03:00Z (previous run act-1a1705bc1ae-pb09)
 Stage: 3 wave check
 Base: 8eff8ab8501bca4fcd020a4a5c1d22a4df69e1eb (origin/dev; main at d3323f6a7, dev-red #5321 open)
-Next: packet-review docs PR; LS-10 #4903 amendment push; lane check
+Next: push LS-10 at its gated head and move #4903's Head; lane check; LS-3/LS-6/LS-7/LS-11 as parents merge
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: packet-review docs PR; LS-10 #4903 amendment push; lane check
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-26: Packet docs PR #5362 (head e6dd4480). The waves check refused canonical-concepts.txt, SuitePasteboardCoding.swift and SuiteTypes.swift as slice-owned, because other features' open slices own or append to them. They are left out of the wave data's `owned` lists and the plan says so; they are one-line registry appends. LS-10 head 41114e5c: Mutate SuiteKernel.ClipRules 8/8 (+groupBaseSkipped, groupRefusesClips, notClippedHelpText). LS-11 reworked locally (merges LS-10; canUnclip reads ClipRules.notClippedHelp; ClipCommands.notClippedHelp removed; primary-layer doc). Finding #5327 commented with the LS-3/LS-13 plan.
 - 2026-10-26: Packet-Review 1 (d2bbb8c7) applied in the plan, one docs PR (branch lead/layer-styles-packet-review): #1 BevelShape/BevelTechnique lines replaced by the core-owned comment (LS-1 already uses core's); #2 angle prose is distance·(−cos θ, sin θ), light's angle, matching LS-7/LS-8 tests; #3 LayerStylePasteboard dropped from the plan: LS-3 deletes LS-2's no-op and registers a style SuiteTypeID in SuitePasteboardCoding through PasteboardBridge/PasteboardChangeWatch (files added to LS-3's owned list; #5174 keeps its no-op so the open PR doesn't change); #4 LS-1 marked landed, bump #3825 merged; #5 command table matches the shipped specs (style.enable {kind, on} "Toggle Layer Style", style.fill-opacity {value, drag}, style.panel "Layer Style Panel"); #6 style.add refused when the kind is present, on or off, and the adding note added (LS-6 to be checked against it before its PR); #7 Fill points are unit-box, mapped with GradientRules.mapped (LS-7/LS-8 follow); #8 group sibling is a valid base, never entered (already LS-10's behavior; test renamed case added); #9 multi-select note and ClipRules.notClippedHelp "This layer isn't clipped." (constant on LS-10, LS-11 switches to it); #10 Clipping concept line added in LS-10, canonical-concepts.txt in its owned list.
 - 2026-10-26: finding #5327 (effectsPending never retired): LS-3 adds the fx item built from style.panel's spec beside effects(identifier:); LS-13 deletes effects/effectsPending once no app calls them; Photo's adopt switches its fx. LayerActionBar.swift added to LS-u's owned list.
 - 2026-10-26: asked the supervisor on #3937 for a core bump to d1a3ebb+ (LE-cpu #789/#791/#798/#800/#804 and LE-metal #792/#794/#796 are on core main); LS-8 and LS-9 wait on it. No bump PR opened by the lead (supervisor merges bumps).
