@@ -4,8 +4,8 @@
 // exactly the last preview (which is also the reference render of the committed layer), Escape gives the
 // picture back, and a step after the first makes no new base under the draft's layer (PhotoCompositeCache).
 // A drag's frames (`PhotoRenderer.update(live: true)`) draw the draft through its matrix on each region, bilinear,
-// and never resample the whole layer (`CountingTransform` counts `applied`); the exact frame after the drag is
-// Return's pixels. The per-layer composite counts are IdleWorkTests' (AppSnapshotTests). Live transform
+// and never resample the whole layer (`CountingTransform` counts `applied`), on the GPU route's resident batch too;
+// the exact frame after the drag is Return's pixels. The per-layer composite counts are IdleWorkTests' (AppSnapshotTests). Live transform
 // services, so the preview is the real lanczos3 resample. Runs on Linux and macOS.
 import CoreRaster
 import CoreRender
@@ -35,8 +35,16 @@ import Testing
         return workspace
     }
 
-    /// A fresh route on `shared`'s backend, so no other test's kept composites count here.
-    static func route(_ shared: PhotoRenderRoute) -> PhotoRenderRoute { PhotoRenderRoute(preferred: shared.preferred) }
+    /// A fresh route on `shared`'s backend (with resident tiles of its own when `shared` has them), so no other
+    /// test's kept composites or tiles count here.
+    static func route(_ shared: PhotoRenderRoute) -> PhotoRenderRoute {
+        PhotoRenderRoute(preferred: shared.preferred, resident: shared.resident.map { ResidentSurfaces(backend: $0.backend) })
+    }
+
+    /// The GPU route with resident layer tiles (its whole-stack batch), a CPU backend standing in.
+    static let resident = PhotoRenderRoute(
+        preferred: PhotoRenderRouteTests.standIn.preferred,
+        resident: ResidentSurfaces(backend: PhotoRenderRouteTests.standIn.preferred!))
 
     static func turned(_ workspace: inout PhotoWorkspace, by degrees: Double) throws {
         let box = try #require(workspace.transformSelection)
@@ -110,7 +118,7 @@ import Testing
 
     /// A drag's frames never resample the whole layer: each draws the draft through its matrix and changes the
     /// canvas; the exact frame after the drag resamples once, and Return lays exactly that frame.
-    @Test(arguments: [PhotoRenderRoute.cpu, PhotoRenderRouteTests.standIn])
+    @Test(arguments: [PhotoRenderRoute.cpu, PhotoRenderRouteTests.standIn, resident])
     func aDragFrameDrawsTheDraftWithoutResamplingTheLayer(route shared: PhotoRenderRoute) async throws {
         let counting = CountingTransform()
         var workspace = try Self.transforming(transform: counting)
@@ -134,9 +142,11 @@ import Testing
                 "Return laid other pixels than the frame after the drag showed")
     }
 
-    /// The first drag frame makes the base under the Logo once per region; every frame after lays the Logo and
-    /// the wash on that base, makes nothing, and still changes the canvas (the draft is in the base's key).
-    @Test(arguments: [PhotoRenderRoute.cpu, PhotoRenderRouteTests.standIn])
+    /// The drag's first frames make the base under the Logo once per region (on a route whose open took the
+    /// resident batch, the cache learns the stack on the first frame and splits it on the second, as a Move does);
+    /// every frame after lays the Logo and the wash on that base, makes nothing, and still changes the canvas (the
+    /// draft is in the base's key).
+    @Test(arguments: [PhotoRenderRoute.cpu, PhotoRenderRouteTests.standIn, resident])
     func aDragFrameAfterTheFirstMakesNoBase(route shared: PhotoRenderRoute) async throws {
         var workspace = try Self.transforming()
         let route = Self.route(shared)
@@ -144,16 +154,20 @@ import Testing
         let tiles = PhotoRenderer.tiles(of: canvas, in: .all)
         let regions = route.isGPU ? Set(tiles.map(\.y)).count : tiles.count
         var shown = try await PhotoRenderer.update(workspace, since: nil, route: route)
-        try Self.turned(&workspace, by: 5)
-        shown = try await PhotoRenderer.update(workspace, since: shown.revision, route: route, live: true)
-        #expect(route.composites.made == regions * 2, "the first drag frame makes the base under the Logo once per region")
-        for step in 2...4 {
+        let opened = route.composites.made
+        for _ in 1...2 {
+            try Self.turned(&workspace, by: 5)
+            shown = try await PhotoRenderer.update(workspace, since: shown.revision, route: route, live: true)
+        }
+        let settled = route.composites.made
+        #expect(settled <= opened + 2 * regions, "the first two drag frames made more than the base under the Logo per region")
+        for step in 3...5 {
             try Self.turned(&workspace, by: 5)
             let frame = try await PhotoRenderer.update(workspace, since: shown.revision, route: route, live: true)
             #expect(PhotoRenderRouteTests.laid(frame) != PhotoRenderRouteTests.laid(shown), "drag step \(step) drew the kept base as it was")
             shown = frame
         }
-        #expect(route.composites.made == regions * 2, "a later drag frame composited the layers under the Logo again")
+        #expect(route.composites.made == settled, "a later drag frame composited the layers under the Logo again")
     }
 }
 
@@ -182,4 +196,6 @@ final class CountingTransform: LayerTransforming {
     }
 
     func flipped(_ content: PlacedPixels, _ axis: PhotoModel.FlipAxis) throws -> PlacedPixels { try live.flipped(content, axis) }
+
+    func matrix(_ draft: TransformDraft, origin: (x: Int, y: Int)) throws -> AffineMatrix { try live.matrix(draft, origin: origin) }
 }
