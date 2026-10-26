@@ -3,6 +3,7 @@
 // fixture catalog), and with no backups yet, in Light and Dark: library-backup and
 // library-backup-empty. macOS only.
 import LibraryModel
+import AppKit
 import SwiftUI
 import Testing
 
@@ -31,6 +32,14 @@ import Testing
         #expect(LibraryBackupSheet.blocked(restoreHelp: nil, selected: "a", canRestore: true) == nil)
         let confirm = LibraryBackupSheet.confirmText(row)
         #expect(confirm.contains("backs up the current catalog first, then replaces it") && confirm.contains("1 photo"))
+    }
+
+    /// The list has a fixed height, so a tall window can't push Cancel and Restore… away from the rows.
+    @Test func sheetKeepsItsHeight() {
+        let rows = (0..<5).map { LibraryBackupRow(name: "b\($0).json", date: Double($0), photos: $0) }
+        let host = NSHostingController(rootView: LibraryBackupSheet(rows: rows, restoreHelp: nil))
+        let tall = host.sizeThatFits(in: CGSize(width: 1440, height: 2000)).height
+        #expect(tall < 600, "the sheet grew to \(tall) pt")
     }
 
     @Test func stubsDisableRestore() {
