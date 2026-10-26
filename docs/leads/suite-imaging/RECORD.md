@@ -33,6 +33,7 @@ Next: IM-13 PR (supervisor merge: Package.swift), then IM-14
 - 10:26 heartbeat: #5163 merged; #5178 with supervisor; IM-13 started (ST-a done)
 - 10:47 heartbeat: IM-13 built (Library develop steps from SuiteImaging, Metal rule with no baseline); gate rerun, PR next
 - 11:32 heartbeat: #5297/#5299 restacked on dev (PhotoCompositeCache alias over LiveCompositeCache for dev's Curves histogram cache); IM-13 PR #5780 opened
+- 2026-10-26T12:00:09Z heartbeat: all PRs open and clean; #5780 needs captain review (Package.swift); batches held while dev-red #5321 is open (not ours)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
