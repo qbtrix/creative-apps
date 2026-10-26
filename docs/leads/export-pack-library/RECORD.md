@@ -2,7 +2,7 @@
 
 Issue: #3478 · Packet: docs/blueprints/library/features/export-pack.md
 Run: act-1a1782c1961-n1cv (line lead, line:library) · resumed 2026-10-26T12:20Z · earlier act-1a175ea5531-x1ci (line lead, line:library) · resumed 2026-10-26T01:59:55Z · earlier act-1a170488aff-41nk (line lead, line:library) · resumed 2026-10-24T23:40Z (earlier act-1a16cc967d9-mcuv, act-1a16953af22-wvhu, act-1a15e4969c2-pa6e)
-Stage: 3 polling: LX-u #5128 at 6f966c25, LX-z #5242/#5243 stacked, in the lane; code batches held by dev-red #5321 (not Library); checked 14:08Z
+Stage: 3 polling: LX-u #5128 at 6f966c25, LX-z #5242/#5243 stacked, in the lane; code batches held by dev-red #5321 (not Library); checked 14:30Z
 Base: origin/dev 8eff8ab85
 Next: lane lands LX-u then LX-z (retarget #5242 to dev when #5128 merges, #5243 when #5242 merges); Belt-Slice-Done LX-u, LX-z on a green library run with their last PR; critics on LX-u screens; Belt-Contact-Sheet
 
@@ -47,6 +47,7 @@ Next: lane lands LX-u then LX-z (retarget #5242 to dev when #5128 merges, #5243 
 - 2026-10-26T01:59:55Z (run act-1a175ea5531-x1ci): main verified at d3323f6a. lead/export-pack is the SuiteUI export-pack lead's live record (relaunched 2026-10-26, already on main), so it is not rebased or written; this record stays here. PRs keep targeting dev. Findings with Feature: export-pack: 0 (#5270, the export sheet onto SuiteExportSheet, names no feature; left to its owner). dev-red #5321 (macOS) blocks code batches; red-triage names #5112/#5044, not a Library PR, so it is not fixed here.
 - 2026-10-26T12:28Z (run act-1a1782c1961-n1cv): main verified at d3323f6a. Re-read every PR: all slice PRs are open, clean and in the lane with proof on their heads (#5130's head c9d68d72 has the lane's green Linux check 40109534004). dev-red #5321 (Onboarding test timeouts, not Library) still open, so code batches wait. Open findings for this feature: 0. Nothing left to build; polling every 10 min. lead/export-pack stays the SuiteUI lead's record (#3477) and is not written.
 - 2026-10-26T14:07Z Library-scoped run 40329990478 on dev 01600e46 failed: RenderBudgetLibraryTests.rotateInLoupe (3 bodies vs budget 2), added by #5266 (orientation-crop OC-library-u, lead act-1a175ee1051-o29l), not this feature's code; none of our slice PRs is on dev. That run can't count for Belt-Slice-Done; wait for a green library run containing our PRs.
+- 2026-10-26T14:30Z Full CI 40328390857 on dev 5f8925a3 red: macOS tests 1/3, SuiteTimelineScrubWindowTests.aScrubRedrawsOnlyThePlayhead (shared timeline, not Library); the Onboarding timeout did not recur. dev-red #5321 stays open, code batches still held; nothing of ours to fix.
 
 ## Open
 - XP-2 waits on shell-media SM-a; XP-3 waits on tone-controls TC-a and PL-a (SuiteUI lead's record).
