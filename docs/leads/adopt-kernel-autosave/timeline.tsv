@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-26T13:01:19Z	all	heartbeat	dev-red #5321 open
 2026-10-26T13:38:58Z	all	heartbeat	dev-red #5321 open
 2026-10-26T14:00:10Z	all	heartbeat	dev-red #5321 open; OC-library-u awaiting run
+2026-10-26T14:40:25Z	all	resume	-	run act-1a178a4b1c2-ibn1 resumed; AK-8 blocked on SC-f
