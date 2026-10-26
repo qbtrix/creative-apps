@@ -40,5 +40,33 @@
     "find": "guard anchors.count >= 2 else",
     "replace": "guard anchors.count >= 1 else",
     "tests": "PathCommandsTests"
+  },
+  {
+    "label": "moveIsADocumentDeltaOnATransformedLayer: a move maps its delta through the layer's translation too",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "o = back.apply(Point(x: 0, y: 0))",
+    "replace": "o = Point(x: 0, y: 0)",
+    "tests": "PathCommandsTests"
+  },
+  {
+    "label": "handleIsADocumentPointOnATransformedLayer: a handle drag lands its document point in path space unmapped",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "to: try local(e, \"path.handle-move\").apply(Point(x: p.x, y: p.y))",
+    "replace": "to: Point(x: p.x, y: p.y)",
+    "tests": "PathCommandsTests"
+  },
+  {
+    "label": "readIsDocumentSpaceOnATransformedLayer: path.read writes the path's own space",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "t.pathInEdit.map({ $0.path.transformed(by: $0.toDocument).contours })",
+    "replace": "t.pathInEdit.map({ $0.path.contours })",
+    "tests": "PathCommandsTests"
+  },
+  {
+    "label": "aLayerScaledToNothingRefusesPointEdits: a singular layer edits in document space instead of refusing",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "guard let back = try? e.toDocument.inverted() else { throw refused(id, flatHelp) }",
+    "replace": "let back = (try? e.toDocument.inverted()) ?? .identity",
+    "tests": "PathCommandsTests"
   }
 ]
