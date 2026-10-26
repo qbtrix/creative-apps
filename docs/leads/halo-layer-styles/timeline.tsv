@@ -131,3 +131,4 @@ utc	stage	event	ref	note
 2026-10-26T17:54Z	heartbeat	lane	#5158	dev fef52e668; dev-red #5321 open (macOS), code batches held; #5158/#5174 eligible, unmerged; no answer on #3936
 2026-10-26T18:16Z	heartbeat	lane	#5158	dev e69582e70; dev-red #5321 open (macOS), code batches held; #5158/#5174 eligible, unmerged; no answer on #3936
 2026-10-26T18:38Z	heartbeat	lane	#5158	dev e69582e70; dev-red #5321 open (macOS), code batches held; #5158/#5174 eligible, unmerged; no answer on #3936
+2026-10-26T18:40Z	question	lane	#5174	queue depth, not dev-red, holds #5158/#5174; asked supervisor re p0 (6424372363)
