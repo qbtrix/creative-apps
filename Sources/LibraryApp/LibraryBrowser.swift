@@ -162,12 +162,15 @@ struct LibraryBrowser: View {
                 .libraryShare(model)
         } else {
             // Top-aligned, so a short grid (an import's first batch) starts under the rows above.
+            // Share ends the toolbar row, so it covers no photo and no toolbar control.
             VStack(spacing: 0) {
-                LibraryGridToolbar(model: model, menu: menu)
+                HStack(spacing: 0) {
+                    LibraryGridToolbar(model: model, menu: menu)
+                    LibrarySharePill(model: model).padding(.trailing, SuiteSpacing.m)
+                }
                 LibraryGrid(model: model, menu: menu, thumbnails: thumbnails, onSelect: onSelect, onOpen: onOpen)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .libraryShare(model)
         }
     }
 }

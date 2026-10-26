@@ -1,6 +1,6 @@
 // LibraryBackupSnapshots.swift: the Restore Catalog Backup sheet (catalog-backup
-// BK-4) on the stubs, five backups listed with Restore disabled ("Backups arrive
-// with BK-3."), and with no backups yet, in Light and Dark: library-backup and
+// BK-4), five backups listed with Restore disabled (no backups attached to the
+// fixture catalog), and with no backups yet, in Light and Dark: library-backup and
 // library-backup-empty. macOS only.
 import LibraryModel
 import SwiftUI
@@ -25,8 +25,8 @@ import Testing
     @Test func sheetTexts() {
         let row = LibraryBackupRow(name: "a.json", date: 0, photos: 1)
         #expect(LibraryBackupSheet.photos(1) == "1 photo" && LibraryBackupSheet.photos(60) == "60 photos")
-        #expect(LibraryBackupSheet.blocked(restoreHelp: "Backups arrive with BK-3.", selected: "a", canRestore: true)
-            == "Backups arrive with BK-3.")
+        #expect(LibraryBackupSheet.blocked(restoreHelp: LibraryBackups.noBackups, selected: "a", canRestore: true)
+            == LibraryBackups.noBackups)
         #expect(LibraryBackupSheet.blocked(restoreHelp: nil, selected: nil, canRestore: true) == "Choose a backup to restore.")
         #expect(LibraryBackupSheet.blocked(restoreHelp: nil, selected: "a", canRestore: true) == nil)
         let confirm = LibraryBackupSheet.confirmText(row)
@@ -35,7 +35,7 @@ import Testing
 
     @Test func stubsDisableRestore() {
         let catalog = LibraryCatalog(services: .fake())
-        #expect(LibraryWindow.backups.availability("catalog.restore-backup", on: catalog).why == "Backups arrive with BK-3.")
+        #expect(LibraryWindow.backups.availability("catalog.restore-backup", on: catalog).why == LibraryBackups.noBackups)
         #expect(LibraryWindow.backups.ids == ["catalog.backups", "catalog.restore-backup"])
     }
 }
