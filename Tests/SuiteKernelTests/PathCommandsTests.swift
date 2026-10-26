@@ -111,7 +111,7 @@ struct PathDoc: PathEditTarget {
         var closed = PathDoc.editing
         closed.pathInEdit?.path = VectorPath(contours: [VectorContour(anchors: AnchorEditTests.path().contours[0].anchors, closed: true)])
         _ = try Self.run(.handle(AnchorRef(contour: 0, index: 2), .handleOut, to: Point(x: 9, y: 9), breaking: true, drag: nil), &closed)
-        #expect(closed.history.undoSteps.count == 1 && closed.pathInEdit?.path.contours.first?.anchors.last?.handleOut == Point(x: 9, y: 9))
+        #expect(closed.history.undoSteps.count == 1 && closed.pathInEdit?.path.contours.first?.anchors.dropFirst(2).first?.handleOut == Point(x: 9, y: 9))
         var drawn = PathDoc()
         let catalog = try #require(Self.catalog)
         _ = try catalog.run("path.draw", params: try #require(catalog.spec("path.draw")).example, on: &drawn)
