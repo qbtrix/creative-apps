@@ -66,11 +66,12 @@ extension PhotoWorkspace {
     }
 
     /// Swaps the locked aspect's sides (3:2 becomes 2:3) and reshapes the
-    /// pending crop to it.
+    /// pending crop to it on the kernel's CropRules (PhotoCrop+Kernel.swift).
     public mutating func swapCropAspect() {
         guard let canvas else { return }
+        let was = cropAspect
         cropAspect = services.crop.swapped(cropAspect, canvas: canvas)
-        reapplyCropAspect()
+        if cropAspect != was, let crop = pendingCrop { pendingCrop = kernelSwapped(crop, canvas: canvas) } else { reapplyCropAspect() }
     }
 
     private mutating func reapplyCropAspect() {
