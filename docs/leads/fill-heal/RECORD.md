@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main ef37711d (verified) / dev ae3efdb8
 Next: #4889 (FH-u) re-integrated at 5a1a54b2 (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #4896 (add fast-lane) and #5245 to dev, then the FH-7 chain, #5109, #5251; FH-c waits on fix PRs #5121, #5129, #5137.
-Polled: 2026-10-26T21:23Z · fill-heal: #5093 is a spec conflict (core's antiAlias ring vs RJ-P51 'logo unchanged'); asked the supervisor on #3778 (comment 6427660298); repro test saved, no code change pending the answer
+Polled: 2026-10-26T21:28Z · area-selection: #5254 (AR-z) conflicted with AR-11-ui after its dev merge; merged and resolved (kept dev's LiveMasking, dropped the selection stand-in), gate running; #5125 needs-rebase cleared
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
