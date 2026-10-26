@@ -4,13 +4,13 @@
 // switch), the selected kind's rows by field (`distance`, `angle`, `altitude`, `opacity`, `blend`,
 // `position.<inside|outside|center>`, `fill.gradient`), `presets`, `done` and `help`; the shared editor is
 // `suite.gradient.bar`. The preview is `suite.gallery.layer-style.preview`, its value the enabled kinds ("no style",
-// "dropShadow, outerGlow"); the page logs `<command id> <intent>` to `suite.gallery.log`. Written in LS-2, skipped
-// until LS-4 turns it on. SJ0 (testGalleryOpensEveryPage) opens the page meanwhile.
+// "dropShadow, stroke"); the page logs `<command id> <intent>` to `suite.gallery.log`. Written in LS-2, on since LS-4
+// (the page applies each intent through StyleRules). SJ0 (testGalleryOpensEveryPage) opens the page meanwhile.
 import XCTest
 
 final class SuiteLayerStyleJourneyTests: XCTestCase {
-    @MainActor func testLayerStylePanelEditsAStyle() throws {
-        throw XCTSkip("waits on LS-4") // LS-4 turns it on: `walkTheLayerStylePanel()` in place of this line.
+    @MainActor func testLayerStylePanelEditsAStyle() {
+        walkTheLayerStylePanel()
     }
 
     /// Steps 1 to 7 on the page.
@@ -51,7 +51,7 @@ final class SuiteLayerStyleJourneyTests: XCTestCase {
         gallery.app.menuItems["Lifted"].click()
         expectStyleLog(gallery, "style.preset", "Lifted logged no style.preset")
         XCTAssertEqual(logLines(gallery).filter { $0.hasPrefix("style.preset") }.count, 1, "Lifted logged more than one step")
-        XCTAssertEqual(preview.value as? String, "dropShadow, outerGlow", "Lifted didn't set a shadow and a glow")
+        XCTAssertEqual(preview.value as? String, "dropShadow", "Lifted (a drop shadow) didn't replace the style")
         gallery.shot("layer-style-preset")
 
         gallery.element("suite.style.kind.stroke").click() // 5. Stroke outside, then a gradient fill shows the editor.
