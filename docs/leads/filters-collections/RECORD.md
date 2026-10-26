@@ -72,3 +72,4 @@ Next: FC-2 part 2: stub the catalog methods and FilterBar/collection APIs, and a
 - 2026-10-26T12:36:23Z Check-in: dev-red #5321 still open (not ours); 6 open PRs clean, none merged.
 - 2026-10-26T13:01:19Z Check-in: dev-red #5321 still labelled (not ours); 6 open PRs clean, none merged.
 - 2026-10-26T13:38:58Z OC-library-u merged: #5266 squash-merged as 01600e46c. Belt-Slice-Done waits for a green scoped-suiteui or full run on dev holding it. dev-red #5321 still open (not ours).
+- 2026-10-26T14:00:10Z Check-in: dev-red #5321 still open (not ours); 5 open PRs clean, none merged; OC-library-u (01600e46c) has only a Linux check so far, no scoped-suiteui or full run yet.

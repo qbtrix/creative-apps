@@ -37,3 +37,4 @@ utc	stage	event	ref	note
 2026-10-26T12:36:23Z	all	heartbeat	dev-red #5321 open
 2026-10-26T13:01:19Z	all	heartbeat	dev-red #5321 open
 2026-10-26T13:38:58Z	OC-library-u	merged	#5266 01600e46c
+2026-10-26T14:00:10Z	all	heartbeat	dev-red #5321 open; OC-library-u awaiting run
