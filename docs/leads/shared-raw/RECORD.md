@@ -73,3 +73,4 @@ Next: lane merges #4848 (code batches wait on dev-red #5321), then retarget #485
 - 2026-10-26T11:52Z: heartbeat: dev c6700dba (#5727 quarantine expiry); dev-red #5321 open; Linux check 40316903931 running; no Feature: shared PR moved; #5133 ST-z still queued
 - 2026-10-26T12:23Z: heartbeat: dev 746be6b1 (#5775 sharded macOS); full CI 40321924466 queued; Linux check 40316903931 on c6700dba green; dev-red #5321 open; no Feature: shared PR moved; #5133 ST-z queued
 - 2026-10-26T12:55Z: heartbeat: SR-3 #4859 gains the fitted quality and the described refusal (local head 4fb41f90, CI: PASS; mutate running); SR-6 #5262 gains PhotoHeadless RAW (3e395410, 2ba1df55, gate next); dev 746be6b1; dev-red #5321 open; findings 0
+- 2026-10-26T13:07Z: heartbeat: SR-6 golden list-apps.json now names Photo's RAW extensions (4c017e13), re-gate queued; SR-4 gate re-queued (stale module cache after a worktree move, not the code); dev 57dd31ff (#5146); dev-red #5321 open; findings 0
