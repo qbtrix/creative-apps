@@ -113,6 +113,8 @@ extension PhotoWorkspace {
     /// of their pixels.
     func residentComposited(_ rect: PixelRect, layers: [PhotoLayer], on dispatcher: RenderDispatcher,
                             resident: ResidentSurfaces) throws -> RenderSurface {
+        PhotoRenderCount.region()
+        PhotoRenderCount.layers(layers.count)
         let steps = try residentSteps(layers, in: rect, resident: resident)
         var picture = try dispatcher.blank(width: rect.width, height: rect.height)
         do {
@@ -150,8 +152,10 @@ extension PhotoWorkspace {
     /// The visible layers over transparency in `rect`, bottom first.
     func composited(_ rect: PixelRect, on dispatcher: RenderDispatcher) throws -> RenderSurface {
         var picture = try dispatcher.surface(PixelBuffer(width: rect.width, height: rect.height))
+        PhotoRenderCount.region()
         do {
             for layer in layers.reversed() where layer.isVisible && layer.opacity > 0 {
+                PhotoRenderCount.layers(1)
                 let onCPU: Bool
                 if case .adjustment = layer.kind { onCPU = true } else { onCPU = shownMask(of: layer) != nil }
                 if onCPU {

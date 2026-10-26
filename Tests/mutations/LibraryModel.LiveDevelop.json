@@ -37,8 +37,8 @@
   {
     "label": "the frame is taken from the buffer's sides swapped",
     "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
-    "find": "photo: PixelSize(width: buffer.width, height: buffer.height))",
-    "replace": "photo: PixelSize(width: buffer.height, height: buffer.width))",
+    "find": "photo: PixelSize(width: b.width, height: b.height))",
+    "replace": "photo: PixelSize(width: b.height, height: b.width))",
     "tests": "LibraryCropRenderTests"
   },
   {
