@@ -88,3 +88,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-26T19:55:17Z OC-z #5802 open (p0, beta-less); journeys 40386821306 for OC-photo-u critics still running; no dev-red
 - 2026-10-26T20:18:07Z OC-z #5802 open; journeys 40386821306 (OC-photo-u critics) still running; no dev-red
 - 2026-10-26T20:40:25Z OC-z #5802 open; journeys 40386821306 (OC-photo-u critics) still running; no dev-red
+- 2026-10-26T21:02:53Z OC-z #5802 merged 20:45 (b59575ef); Linux check 40398735354 running; awaiting scoped/full ci.yml run on it for Belt-Slice-Done + contact sheet

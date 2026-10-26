@@ -163,3 +163,4 @@ utc	stage	event	ref	note
 2026-10-26T19:55:17Z	waiting	poll	#5802	OC-z #5802 open (p0, beta-less); journeys 40386821306 for OC-photo-u critics still running; no dev-red
 2026-10-26T20:18:07Z	waiting	poll	#5802	OC-z #5802 open; journeys 40386821306 (OC-photo-u critics) still running; no dev-red
 2026-10-26T20:40:25Z	waiting	poll	#5802	OC-z #5802 open; journeys 40386821306 (OC-photo-u critics) still running; no dev-red
+2026-10-26T21:02:53Z	waiting	poll	#5802	OC-z #5802 merged 20:45 (b59575ef); Linux check 40398735354 running; awaiting scoped/full ci.yml run on it for Belt-Slice-Done + contact sheet
