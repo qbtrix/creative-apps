@@ -226,7 +226,9 @@ private final class LiveSink: @unchecked Sendable {
     /// Blur reads neighbours: with a tone section set, a region still takes the dispatcher route.
     @Test func blurStillFallsBack() async throws {
         var workspace = try Self.picture()
-        // Sharpen reads further than Blur here, so a region that reads only Blur's margin shows its seams.
+        // Sharpen reads further than Blur here, and an edge sits 3 px left of the tile seam at x 256, so a
+        // region that reads only Blur's margin shows the seam.
+        Self.fill(&workspace, (40, 40, 40), Mask.Point(x: 230, y: 0), Mask.Point(x: 253, y: 400))
         workspace.adjust(.tone(warm.setting(.sharpenAmount, to: 80).setting(.sharpenRadius, to: 3)))
         workspace.adjust(.blurSigma(0.3))
         #expect(workspace.liveStack() == nil)
