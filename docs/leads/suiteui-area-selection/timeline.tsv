@@ -156,3 +156,4 @@ time	task	event	note
 2026-10-26T14:31Z	3	heartbeat	lane	poll 2026-10-26T14:31Z: quiet; none of our 12 PRs merged (all clean, fast-lane); lane last merged #5104 14:03Z; dev-red #5321 open (not ours); findings 3 open
 2026-10-26T14:54Z	3	heartbeat	lane	poll 2026-10-26T14:54Z: quiet; none of our 12 PRs merged (all clean, fast-lane); lane last merged #5780 14:35Z (one PR per batch); dev-red #5321 open (not ours); findings 3 open
 2026-10-26T15:25Z	3	heartbeat	lane	poll 2026-10-26T15:25Z: quiet; none of our 12 PRs merged; lane one batch at a time (last merge #5780 14:35Z); dev-red #5321 open (not ours); RECORD Polled line updated
+2026-10-26T15:40Z	3	heartbeat	lane	poll 2026-10-26T15:40Z: none of our 12 PRs merged; all clean, fast-lane, eligible; lane one batch at a time, last merge #5285 15:27Z; dev-red #5321 open (not ours); 3 findings open; stage unchanged.
