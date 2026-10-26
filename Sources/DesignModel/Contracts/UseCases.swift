@@ -106,7 +106,7 @@ public protocol StyleEditing: Sendable {
     func setOpacity(_ opacity: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
     /// Coalescing "stroke". nil removes the stroke; width clamped to 0...1000.
     func setStroke(_ stroke: DesignStroke?, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
-    /// Coalescing "text-style". Size clamped to 1...1000, weight to 100...900. Text layers take it;
+    /// Coalescing "text-style". Size clamped to 1...1600, weight to 100...900. Text layers take it;
     /// others in a mixed selection are skipped, and a selection with none throws `.notText`.
     func setTextStyle(_ style: DesignTextStyle, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
 }

@@ -12,5 +12,19 @@
     "find": "family != other.family || weight != other.weight",
     "replace": "weight != other.weight",
     "tests": "DesignTextStyleTests"
+  },
+  {
+    "label": "aMixedSelectionTakesOnlyTheChangedField: every field applied",
+    "file": "Sources/DesignModel/DesignTextStyle+Kernel.swift",
+    "find": "if base?.family != s.family { style.family = s.family }",
+    "replace": "style.family = s.family",
+    "tests": "DesignTextStyleTests"
+  },
+  {
+    "label": "aMixedSelectionTakesOnlyTheChangedField: Design's old 1000 cap",
+    "file": "Sources/DesignModel/DesignTextStyle+Kernel.swift",
+    "find": "if base?.size != s.size, s.size.isFinite { style.size = kept.size }",
+    "replace": "if base?.size != s.size, s.size.isFinite { style.size = Swift.min(kept.size, 1000) }",
+    "tests": "DesignTextStyleTests"
   }
 ]
