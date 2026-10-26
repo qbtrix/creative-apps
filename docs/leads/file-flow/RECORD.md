@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 2026-10-26T13:52Z poll: no change; #4894/#4936/#5092 open, clean, eligible, queued. No lane merge since #5266 13:21Z. 27 open line:halo findings, none on file-flow (newest are drift reports for stroke-style, transform, placed-images). No supervisor answer.
 - 2026-10-26T13:31Z poll: no change. Lane run 40323409808 rates #4894 and #5092 eligible (Fast-Check marker + local-ci/prescreen); 125 ready PRs wait behind one-at-a-time batches. Other PRs landed (#5266 13:21Z, #5781, #5146). No supervisor answer; dev-red #5321 open (macOS); no file-flow findings.
 - 2026-10-26T13:06Z poll: no change. #4894 d9c7c9d2, #4936 a713dc26, #5092 a95e7b0e still open, clean, eligible; lane busy (ci.yml runs on dev 57dd31ff: Linux check, scoped photo). No supervisor answer to the 04:06Z question. dev-red #5321 open (macOS). No file-flow findings. Record mirrored on lead/file-flow and here (Belt reads this branch).
 - 2026-10-26T12:45Z resume (act-1a1783581a6-fo4a): #4894 (d9c7c9d2, prescreen green), #4936 (a713dc26, on HF-m) and #5092 (a95e7b0e) open, clean, fast-lane, beta. Lane run 40320708539 rates #4894 and #5092 eligible; it lands one PR at a time (LANE_VERIFY_AFTER=1) behind a long queue. dev-red #5321 open (macOS, not ours). Question on #3474 (04:06Z, why #4894 doesn't land) has no answer yet.
