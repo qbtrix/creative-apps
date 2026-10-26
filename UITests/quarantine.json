@@ -15,8 +15,8 @@
   {
     "test": "HaloJourneyTests/HaloJourneyTests/testEveryControlActsOrSaysWhy",
     "owner": "#3318",
-    "reason": "H-J13: halo.transport.play is enabled but clicking it changes nothing (HaloJourneyTests.swift:205), the viewer-playback lead's transport. Scoped run 38857364213 showed it; its overlap failure (#1282) is fixed by #1322 (scoped run 38874911359). Was owned by #1035, closed as done 2026-10-19; #3318 owns it now.",
-    "expires": "2026-10-27",
+    "reason": "H-J13: the History panel covers its own button and the timeline end, so the playhead pill reads 1.00:1 (run 40263528127); fix needs the lead's layout call (#3318).",
+    "expires": "2026-10-29",
     "scope": "full"
   },
   {
@@ -39,5 +39,17 @@
     "reason": "PJ-7: Layer > Merge Down's reason read failed in full run 38841439320, the last that reached the journeys. #1284 changed the read after that run and no run has reached Photo's journeys since, so it is unproven; the scoped photo run decides.",
     "expires": "2026-10-27",
     "scope": "full"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/SuiteTimelineScrubWindowTests/aScrubRedrawsOnlyThePlayhead",
+    "owner": "#5804",
+    "reason": "Dev macOS shard 1/3 counts about 18,169 lane bodies during the scrub (run 40357785665) even after #5803's warm-up; it passes alone and in a local shard 1/3, so shared state from another suite in the heavy-pass process re-renders the lane. #5804 finds and resets it.",
+    "expires": "2026-10-29"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryTests/rotateInLoupe",
+    "owner": "#5807",
+    "reason": "Dev macOS shard 1/3 (run 40357785665) reads 3 bodies against a budget of 2 since the heavy tests moved into one heavy-pass process (#5781). #5807 finds the third body.",
+    "expires": "2026-10-29"
   }
 ]

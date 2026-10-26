@@ -1,0 +1,51 @@
+[
+  {
+    "label": "the GPU frame's histogram is the undeveloped picture's, not the decoded base developed on the CPU",
+    "file": "Sources/LibraryModel/Live/LiveLoupeImaging.swift",
+    "find": "let developed = try await render(photo, settings: settings, longSide: longSide, quality: .preview)",
+    "replace": "let developed = try await render(photo, settings: .neutral, longSide: longSide, quality: .preview)",
+    "tests": "LibraryLoupeGPURouteTests"
+  },
+  {
+    "label": "the route ignores the View > Rendering CPU choice",
+    "file": "Sources/LibraryModel/Live/LiveLoupeImaging.swift",
+    "find": "ImagingRoute.choose(preferGPU: preferGPU, steps: steps) == .gpu",
+    "replace": "ImagingRoute.choose(preferGPU: true, steps: steps) == .gpu",
+    "tests": "LibraryLoupeGPURouteTests"
+  },
+  {
+    "label": "a crop no longer keeps the CPU route",
+    "file": "Sources/LibraryModel/Live/LiveLoupeImaging.swift",
+    "find": "guard settings.crop == nil else { return nil }",
+    "replace": "",
+    "tests": "LibraryLoupeGPURouteTests"
+  },
+  {
+    "label": "whites and blacks become linear levels on both routes",
+    "file": "Sources/SuiteImaging/Tone/ToneRules.swift",
+    "find": "outWhite: Float(outWhite),\n                               encoding: .sRGB))",
+    "replace": "outWhite: Float(outWhite),\n                               encoding: .linear))",
+    "tests": "LibraryDevelopRenderTests"
+  },
+  {
+    "label": "a CPU render leaves the GPU frame's steps on the picture",
+    "file": "Sources/LibraryModel/LibraryLoupeImage.swift",
+    "find": "        loupeRender = render\n        loupeSteps = nil\n",
+    "replace": "        loupeRender = render\n",
+    "tests": "LibraryLoupeFrameTests"
+  },
+  {
+    "label": "a stale GPU frame lands over a newer picture",
+    "file": "Sources/LibraryModel/LibraryLoupeImage.swift",
+    "find": "        guard token >= loupeShownToken, token <= loupeRenderToken else { return }\n        loupeRender = RenderedPhoto(image: frame.base",
+    "replace": "        loupeRender = RenderedPhoto(image: frame.base",
+    "tests": "LibraryLoupeFrameTests"
+  },
+  {
+    "label": "a focus change keeps the last photo's steps",
+    "file": "Sources/LibraryModel/LibraryLoupeImage.swift",
+    "find": "        loupeSteps = nil\n        loupeShownToken = loupeRenderToken\n",
+    "replace": "        loupeShownToken = loupeRenderToken\n",
+    "tests": "LibraryLoupeFrameTests"
+  }
+]
