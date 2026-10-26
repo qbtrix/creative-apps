@@ -1,0 +1,220 @@
+utc	stage	event	ref	note
+2026-10-23T03:08Z	0	stage-start	-	base e055e6713e4e852d6c19d98f7c2fd82c6758e67a
+2026-10-23T03:08Z	0	stage-end	-	lead branch created
+2026-10-23T03:08Z	1	stage-end	-	packet and code read; waits met
+2026-10-23T03:08Z	2	stage-end	-	wave plan in Tasks
+2026-10-23T03:08Z	3	stage-start	-	wave 1
+2026-10-23T03:12Z	3	heartbeat	-	wave 1 building
+2026-10-23T03:38Z	3	pr-opened	#4715	CB-a fast-lane, head 9c61d71
+2026-10-23T03:41Z	4	stage-start	-	wave 2: CB-u, CB-m building
+2026-10-23T04:03Z	-	heartbeat	CB-a	#4715 open in lane; CB-u gate running; CB-m building
+2026-10-23T04:28Z	-	heartbeat	CB-a	#4715 open, clean; CB-u pushed 2cc1981 (split to test-first pending, PR on CB-a base); CB-m gate running
+2026-10-23T04:50Z	3	merged	#4715	CB-a merged by the fast lane
+2026-10-23T04:50Z	-	pr	CB-m	opened #4740, #4741 (CB-3 supervisor)
+2026-10-23T04:50Z	-	pr	CB-u	opened #4743
+2026-10-23T04:52Z	-	heartbeat	CB-m	#4715 merged; #4740/#4741/#4743 gates on dev-merged heads running; suite-packaging C4 gate running
+2026-10-23T05:04Z	-	pr	C4	opened #4755 suite-packaging description
+2026-10-23T05:14Z	-	retarget	CB-m	#4740 dev merged, CI: PASS, base dev, head 84c323cff
+2026-10-23T05:14Z	-	heartbeat	CB-u	CB-u gate on dev-merged head running; then CB-m-bundle
+2026-10-23T05:22Z	-	retarget	CB-u	#4743 dev merged, only #3856 red, base dev, head 6bc5db5ed
+2026-10-23T05:22Z	-	retarget	CB-m-bundle	#4741 dev merged, CI: PASS, base dev, head 184f3f888
+2026-10-23T05:24Z	-	wave	CB-z	wave 3 builder started (CB-6..CB-8), on CB-u + CB-m + CB-m-bundle
+2026-10-23T05:24Z	-	check	CB-m-bundle	#4741 needs-split from stale base count; replied: 3 files ~63 lines on dev
+2026-10-23T06:20:27Z	-	merge	CB-m	#4740 merged
+2026-10-23T06:20:27Z	-	merge	CB-u	#4743 merged
+2026-10-23T06:20:27Z	-	merge	C4	#4755 merged
+2026-10-23T06:20:27Z	-	split	CB-z	code branch lead/cli-bundle-CB-z 0e6a426b1 (13 files; gate fails only #3856); docs branch lead/cli-bundle-CB-z-docs f6a22109b (3 files, CI: PASS). PRs open once #4741 (scripts/bundle-apps, supervisor) merges, so the code PR has no protected path in its diff
+2026-10-23T06:20:27Z	-	gap	CB-z	#4762 bundle runner for RJ-X62; pending set to #4762
+2026-10-23T07:42:45Z	check	cli-bundle	poll	#4771 open clean awaiting lane; CI 39914223799 pending; #4741 awaiting supervisor
+2026-10-23T08:07:56Z	wait	cli-bundle	#4741 still open (no-fast-lane, needs-split), supervisor merge	-
+2026-10-23T08:30:52Z	check	cli-bundle	#4741 still open (no-fast-lane, needs-split); CB-z waits on it	https://github.com/qbtrix/creative-apps/pull/4741
+2026-10-23T08:53:19Z	check	cli-bundle	#4741 still open (no-fast-lane, needs-split), supervisor merge; CB-z waits on it.	https://github.com/qbtrix/creative-apps/pull/4741
+09:16Z	check	cli-bundle	#4741 (CB-3, supervisor merge) still open, no-fast-lane + needs-split; CB-z waits	https://github.com/qbtrix/creative-apps/pull/4741
+09:38Z	check	cli-bundle	#4741 (CB-3, supervisor merge) open, mergeable clean; CB-z waits	https://github.com/qbtrix/creative-apps/pull/4741
+09:54Z	check	cli-bundle	dev CI: full 39931493361 (138495f55) pending, 39929490747 queued; scoped flare 39930432485 / halo 39931655256 queued; #4741 open (no-fast-lane, needs-split, clean)	https://github.com/qbtrix/creative-apps/actions/runs/39931493361
+09:59Z	check	cli-bundle	heartbeat: full CI 39931493361 (138495f55, has #4771 but not #4761) still pending; scoped flare/halo queued; #4741 open	https://github.com/qbtrix/creative-apps/actions/runs/39931493361
+10:19Z	check	cli-bundle	full CI 39931493361 cancelled (superseded); new full CI 39937843350 on 622f200f9 (has #4771 and #4761) pending, decides NP and EM done; scoped flare/halo still queued; #4741 open	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T10:42Z	check	cli-bundle	full CI 39937843350 (622f200f9, has #4771 and #4761) still pending; scoped flare 39930432485 / halo 39931655256 still queued; #4741 open (clean, no-fast-lane)	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T11:05Z	check	cli-bundle	full CI 39937843350 (622f200f9) still pending (macOS runners busy); scoped flare/halo still queued; #4741 open (clean, no-fast-lane)	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T11:27Z	check	cli-bundle	full CI 39937843350 (622f200f9) still pending; new scoped flare 39943928043 / photo 39943932152 on 28e3a67de queued; #4741 open (clean, no-fast-lane)	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T11:51Z	check	cli-bundle	scoped flare 39930432485 / halo 39931655256 success (both contain #4738); EM-flare-halo panel waits on their journeys 39941657825 (queued) / 39947432602 (pending) for ui-screens; full CI 39937843350 pending; #4741 open clean	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T12:17Z	check	cli-bundle	full CI 39937843350 still queued; journeys 39941657825/39947432602 still queued/pending (EM panel waits); scoped flare 39943928043 red on RenderBudgetFlareLottieOpenTests (importNote, from #4786 lottie-open LO-u, not this lead's); #4741 open clean	https://github.com/qbtrix/creative-apps/actions/runs/39943928043
+2026-10-23T12:40Z	check	cli-bundle	full CI 39937843350 still queued; journeys flare 39941657825 in progress, halo 39947432602 queued; #4741 open	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T13:04Z	check	cli-bundle	full CI 39937843350 still queued; journeys flare 39941657825 in progress, halo 39947432602 queued; #4741 open, clean	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T13:26Z	check	cli-bundle	full CI 39937843350 in progress; flare journeys 39941657825 success (screens downloaded), halo 39947432602 in progress; #4741 open, clean	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T13:49Z	check	cli-bundle	full CI 39937843350 Linux green, macOS in progress; halo journeys 39947432602 in progress; #4741 open, clean	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T14:13Z	check	cli-bundle	full CI 39937843350 macOS running (Linux green); halo journeys 39947432602 running; #4741 open clean	https://github.com/qbtrix/creative-apps/actions/runs/39937843350
+2026-10-23T14:37Z	check	cli-bundle	full CI 39937843350 red on macOS: only RenderBudgetFlareLottieOpenTests.openInThreeBodies (dev-red #4804, triage names #4786 lottie-open, not ours); done markers wait for next green full CI. Halo journeys 39947432602 green; critic panel wf_22cf6d5c-bda started for EM-flare-halo. #4741 open clean	https://github.com/qbtrix/creative-apps/issues/4804
+2026-10-23T14:59Z	check	cli-bundle	next dev CI 39969916398 (8021b0f56) pending, 39962356466 queued; fix-batch wf_bac37a57-b28 running; #4741 open clean	https://github.com/qbtrix/creative-apps/actions/runs/39969916398
+2026-10-23T15:21Z	check	cli-bundle	#4741 (supervisor) still open, labels no-fast-lane,needs-split; CB-z waits	https://github.com/qbtrix/creative-apps/pull/4741
+2026-10-23T15:44Z	check	cli-bundle	#4741 (CB-3, supervisor) open clean, no-fast-lane+needs-split; CB-z waits on its merge	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T16:09Z	check	cli-bundle	#4741 still open, no-fast-lane+needs-split; CB-z waits	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T16:30Z	check	cli-bundle	#4741 still open, no-fast-lane+needs-split; CB-z waits	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T16:52Z	check	cli-bundle	#4741 still open, no-fast-lane+needs-split; CB-z waits	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T17:14Z	check	cli-bundle	heartbeat: journeys 39972233358 still queued (macOS runners); #4816/#4817/#4818 clean in lane batch; #4741 open (supervisor, needs-split)	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T17:47Z	check	cli-bundle	heartbeat: journeys 39972233358 still queued; #4816 merged; #4817 fixed+pushed; #4818 in lane; #4741 open (supervisor)	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T18:10Z	check	cli-bundle	heartbeat: journeys 39972233358 in_progress; #4817 head now 7f787765a (needs-fix pending lane re-check); #4818 in lane; #4741 open (supervisor)	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T18:26Z	check	cli-bundle	heartbeat: journeys 39972233358 in_progress; #4817 needs-fix dropped at 7f787765a, #4818 in lane; #4741 open (supervisor)	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T18:43Z	check	cli-bundle	heartbeat: journeys 39972233358 in_progress; #4817 #4818 clean in lane; #4741 open (no-fast-lane,needs-split)	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T19:03Z	check	cli-bundle	heartbeat: journeys 39972233358 still in_progress (macOS journeys since 17:49Z); #4817 #4818 clean in lane (lane run active); #4741 open	https://github.com/qbtrix/creative-apps/actions/runs/39972233358
+2026-10-23T19:28Z	check	cli-bundle	CB-a, CB-u, CB-m done on 39983291011; CB-z waits on #4741	https://github.com/qbtrix/creative-apps/actions/runs/39983291011
+2026-10-23T20:45Z	check	cli-bundle	#4741 merged to dev (bccdc0f20); CB-z rebuilt on dev, gate running	https://github.com/qbtrix/creative-apps/pull/4741
+2026-10-23T21:09Z	check	cli-bundle	pr-opened #4999 CB-z	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-23T21:32Z	check	cli-bundle	heartbeat: #4999 mutate 7/7, CB-z-docs gating	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-23T21:38Z	check	cli-bundle	CB-z-docs PR #5000 opened	https://github.com/qbtrix/creative-apps/pull/5000
+2026-10-23T21:55Z	check	cli-bundle	heartbeat 21:55: dev unchanged	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-23T22:18Z	check	cli-bundle	22:20Z #4999 clean awaiting batch; #5000 held with no-fast-lane	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-23T22:40Z	check	cli-bundle	22:40Z #4999 clean, queued behind batch #4870; #5000 held	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-23T23:02Z	check	cli-bundle	23:02Z unchanged; queued behind batch #4870	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-23T23:25Z	check	cli-bundle	23:25Z unchanged; queued in lane	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-23T23:47Z	check	cli-bundle	23:48Z unchanged; queued for next batch	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T00:09Z	check	cli-bundle	00:10Z unchanged; queued for next batch	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T00:30Z	check	cli-bundle	00:31Z unchanged; waits for next batch	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T00:51Z	check	cli-bundle	00:52Z unchanged; waits for next batch	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T01:14Z	check	cli-bundle	01:14Z unchanged; waits for next batch	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T01:36Z	check	cli-bundle	01:36Z unchanged; waits for next batch	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T01:58Z	check	cli-bundle	01:58Z unchanged; waits for next batch	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T02:20Z	check	cli-bundle	02:20Z: #4999 open clean, #5000 held	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T02:41Z	check	cli-bundle	02:42Z: #4999 open clean, #5000 held	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T03:04Z	check	cli-bundle	03:04Z: #4999 open clean, #5000 held	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T03:26Z	check	cli-bundle	03:26Z: #4999 open clean, #5000 held	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T03:48Z	check	cli-bundle	03:49Z: #4999 open clean, #5000 held	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T04:11Z	check	cli-bundle	04:12Z: #4999 open clean, #5000 held	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T04:33Z	check	cli-bundle	04:33Z: #4999 open clean, #5000 held	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T04:54Z	check	cli-bundle	04:55Z: #4999 open clean, #5000 held	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T05:17Z	check	cli-bundle	05:18Z: #4999 open clean, #5000 held	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T05:40Z	check	cli-bundle	05:40Z #4999 open clean, waiting on lane	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T06:02Z	check	cli-bundle	06:02Z #4999 open clean, waiting on lane	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T06:24Z	check	cli-bundle	06:24Z #4999 open, waiting on lane	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T06:46Z	check	cli-bundle	06:46Z #4999 open, waiting on lane	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T07:08Z	check	cli-bundle	07:08Z #4999 open clean, waiting on lane	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T07:29Z	check	cli-bundle	07:29Z #4999 open clean, waiting on lane	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T07:52Z	check	cli-bundle	07:52Z #4999 open, waiting on lane	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T08:14Z	check	cli-bundle	08:14Z #4999 ready, not in batch 20261024081307	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T08:36Z	check	cli-bundle	08:36Z #4999 ready; waiting for next batch	https://github.com/qbtrix/creative-apps/pull/4999
+2026-10-24T08:58Z	check	cli-bundle	08:57Z: #4999 ready, waiting for next batch	https://github.com/qbtrix/creative-apps/issues/3773
+2026-10-24T09:20Z	check	cli-bundle	09:19Z: lane macOS gates blocked by dev-red #5113	https://github.com/qbtrix/creative-apps/issues/5113
+2026-10-24T09:42Z	check	cli-bundle	09:42Z: still blocked by dev-red #5113	https://github.com/qbtrix/creative-apps/issues/5113
+2026-10-24T10:04Z	check	cli-bundle	10:04Z: still blocked by dev-red #5113; lane stuck on batch 20261024081307	https://github.com/qbtrix/creative-apps/issues/5113
+2026-10-24T10:27Z	check	cli-bundle	10:26Z: unchanged, lane stuck behind dev-red #5113	https://github.com/qbtrix/creative-apps/issues/5113
+2026-10-24T10:49Z	check	cli-bundle	10:48Z: dev-red #5113 closed 10:38Z; waiting for lane's next batch	https://github.com/qbtrix/creative-apps/actions/runs/40081823899
+2026-10-24T11:13Z	check	cli-bundle	11:15Z batch 20261024110214 excludes #4999; limit-100 cause reported on #3774	https://github.com/qbtrix/creative-apps/issues/3774#issuecomment-6383506030
+2026-10-24T11:35Z	0	stage-start	act-1a16daeb4e8-vghz	relaunch; rebased on main 9f476af; waiting for #5150 promote
+2026-10-24T11:34Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI in_progress/null; main 9f476af74
+2026-10-24T11:54Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI in_progress/null; main 9f476af74
+2026-10-24T12:03Z	3	heartbeat	lead/suite-cli-bundle	mirror resynced from lead/cli-bundle; #4999 open clean, CI 40087964618 in progress
+2026-10-24T12:04Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI in_progress/null; main 9f476af74
+2026-10-24T12:12Z	3	ci-run	40087964618	full CI green; main promoted to 4f00afb with lane fix #5150
+2026-10-24T12:12Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main 4f00afb81
+2026-10-24T12:28Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main 4f00afb81
+2026-10-24T12:44Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main 4f00afb81
+2026-10-24T13:01Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main 4f00afb81
+2026-10-24T13:17Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main 4f00afb81
+2026-10-24T13:33Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main 4f00afb81
+2026-10-24T13:49Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main 4f00afb81
+2026-10-24T14:05Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main 4f00afb81
+2026-10-24T14:13Z	3	lane	#4999	eligible; queued behind batch 20261024110214 (probe 3)
+2026-10-24T14:31Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main 4f00afb81
+2026-10-24T14:47Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main 4f00afb81
+2026-10-24T15:04Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main 4f00afb81
+2026-10-24T15:05Z	3	lane	#4999	not in batch 20261024144917 (12 older PRs); waits for next
+2026-10-24T15:21Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main 4f00afb81
+2026-10-24T15:37Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main 4f00afb81
+2026-10-24T15:54Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T16:11Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T16:28Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T16:44Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T17:01Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T17:18Z	3	heartbeat	#4999	open merged=false unknown labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T17:36Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T17:52Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T18:09Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T18:25Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T18:42Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T18:59Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T19:15Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T19:32Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T19:49Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T20:06Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T20:23Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T20:40Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T20:57Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T21:13Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T21:30Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T21:46Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main e79e9afcb
+2026-10-24T22:04Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main ef37711de
+2026-10-24T22:21Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main ef37711de
+2026-10-24T22:37Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main ef37711de
+2026-10-24T22:38Z	3	note	lane	batch 20261024205137 probes resolved 21:17Z (-6 green, -3 macOS red) but fast-lane runs since 22:21Z cancelled/skipped; #4999 queued behind it; supervisor-side
+2026-10-24T22:54Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main ef37711de
+2026-10-24T23:11Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main ef37711de
+2026-10-24T23:28Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main ef37711de
+2026-10-24T23:44Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main ef37711de
+2026-10-25T00:02Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main afef017c2
+2026-10-25T00:19Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main afef017c2
+2026-10-25T00:35Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main afef017c2
+2026-10-25T00:53Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main afef017c2
+2026-10-25T01:10Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main afef017c2
+2026-10-25T01:27Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main afef017c2
+2026-10-25T01:43Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main afef017c2
+2026-10-25T01:59Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main afef017c2
+2026-10-25T02:16Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main afef017c2
+2026-10-25T02:33Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main afef017c2
+2026-10-25T02:50Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main afef017c2
+2026-10-25T03:07Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main afef017c2
+2026-10-25T03:23Z	3	heartbeat	#4999	open merged=false clean labels=fast-lane; CI completed/success; main afef017c2
+2026-10-25T03:48:09Z	3	stage-start	-	relaunch act-1a17129eefa-0kqr on main afef017
+2026-10-25T04:07:19Z	3	heartbeat	#4999	waits for next batch
+2026-10-25T04:17:23Z	3	heartbeat	#4999	mirror resynced
+2026-10-25T04:35:51Z	3	heartbeat	-	#4999 waits for the next batch; batch-20261025023716 still bisecting
+2026-10-25T04:53:45Z	3	heartbeat	-	#4999 waits for the next batch; batch-20261025023716 still at probe -1
+2026-10-25T05:11:37Z	3	heartbeat	-	#4999 waits for the next batch; batch-20261025023716 at probe -2
+2026-10-25T05:30:03Z	3	heartbeat	-	batch-20261025023716 resolved; #4999 ready for next batch; body carries run act-1a17129eefa-0kqr
+2026-10-25T05:48:01Z	3	heartbeat	-	lane batch-20261025054232 running without #4999; waits for the next batch
+2026-10-25T06:06:02Z	3	heartbeat	-	batch-20261025054232 (not ours) bisecting; #4999 waits for the next batch
+2026-10-25T06:23:57Z	3	heartbeat	-	batch-20261025054232 (not ours) still bisecting; #4999 waits for the next batch
+2026-10-25T06:41:52Z	3	heartbeat	-	batch-20261025054232 probe -6 macOS still running; #4999 waits for the next batch
+2026-10-25T06:59:49Z	3	heartbeat	-	batch-20261025054232 probe -6 macOS still running; #4999 waits for the next batch
+2026-10-25T07:17:50Z	3	heartbeat	-	batch-20261025054232 (not ours) at probe -3; #4999 waits for the next batch
+2026-10-25T07:35:44Z	3	heartbeat	-	batch-20261025054232 probe -3 macOS running; #4999 waits for the next batch
+2026-10-25T07:53:37Z	3	heartbeat	-	batch-20261025054232 probe -3 macOS still running; #4999 waits for the next batch
+2026-10-25T08:11:29Z	3	heartbeat	-	batch-20261025054232 probe -3 macOS still running; #4999 waits for the next batch
+2026-10-25T08:29:24Z	3	heartbeat	-	batch-20261025054232 probe -4 running; #4999 waits for the next batch
+2026-10-25T08:47:24Z	3	heartbeat	-	no batch in flight; #4999 clean and ready for the next batch
+2026-10-25T09:06:07Z	3	heartbeat	-	batch-20261025090316 (p0 PRs) running without #4999; waits for the next batch. Same body-footer note as editor-menus
+2026-10-25T09:24:02Z	3	heartbeat	-	batch-20261025090316 (p0, not ours) bisecting; #4999 waits
+2026-10-25T09:41:54Z	3	heartbeat	-	batch-20261025090316 (p0, not ours) probe -6 macOS running; #4999 waits
+2026-10-25T09:59:52Z	3	heartbeat	-	batch-20261025090316 (p0, not ours) still bisecting; #4999 waits
+2026-10-25T10:17:58Z	3	heartbeat	-	batch-20261025090316 (p0, not ours) still bisecting; #4999 waits
+2026-10-25T10:35:57Z	3	heartbeat	-	batch-20261025090316 (p0, not ours) bisecting; #4999 waits
+2026-10-25T10:54:04Z	3	heartbeat	-	batch-20261025090316 (p0, not ours) bisect narrowing; #4999 waits
+2026-10-25T11:12:03Z	3	heartbeat	-	no batch in flight; #4999 clean, ready for the next batch
+2026-10-25T11:30:14Z	3	heartbeat	-	batch-20261025111803 (#4886 only) running; #4999 waits for the next batch
+2026-10-25T11:48:11Z	3	heartbeat	-	batch-20261025111803 resolved without #4999; still open, clean, fast-lane; waiting for next batch
+2026-10-25T12:07:06Z	3	heartbeat	-	#4999 lane decision pending: waiting for supervisor's local-ci/prescreen status on head 941da487; supervisor: please pre-screen #4999
+2026-10-25T12:25:07Z	3	heartbeat	-	#4999 still waiting for local-ci/prescreen on 941da487 (supervisor)
+2026-10-25T12:43:10Z	3	heartbeat	-	#4999 still waiting for local-ci/prescreen on 941da487 (supervisor)
+2026-10-25T13:01:08Z	3	heartbeat	-	#4999 still waiting for local-ci/prescreen on 941da487 (supervisor)
+2026-10-25T13:19:02Z	3	heartbeat	-	#4999 local-ci/prescreen now success on 941da487; eligible, waiting for the lane
+2026-10-25T13:37:13Z	3	heartbeat	-	#4999 prescreen green, eligible; waiting for the lane
+2026-10-25T13:55:08Z	3	heartbeat	-	#4999 eligible, queued behind p0 PRs; no batch in flight
+2026-10-25T14:13:03Z	3	heartbeat	-	#4999 eligible, queued behind p0
+2026-10-25T14:30:56Z	3	heartbeat	-	#4999 eligible, queued; no batch in flight
+2026-10-25T14:48:50Z	3	heartbeat	-	#4999 eligible, queued behind p0
+2026-10-25T15:06:43Z	3	heartbeat	-	#4999 eligible, queued; no batch in flight
+2026-10-25T15:24:39Z	3	heartbeat	-	#4999 eligible, queued behind p0
+2026-10-25T15:42:41Z	3	heartbeat	-	QUEUE: 50+ open p0 fast-lane PRs sort ahead of beta #4999; ~1 code PR per 20 min. Supervisor: raise #4999 to p0 if CB-z should land sooner
+2026-10-25T16:00:37Z	3	heartbeat	-	#4999 still beta, queued behind p0
+2026-10-26T02:12:53Z	relaunch	act-1a175f7cc55-xlmt
+2026-10-26T12:38:54Z	relaunch	heartbeat	-	relaunch act-1a178358362-etn1; scoping CB-z follow-up
+2026-10-26T12:39:40Z	build	heartbeat	-	builder started: CB-z follow-up (in-app help.install-cli shares the CLI install plan), stacked on #4999; #4999 still beta, queued
+2026-10-26T13:10:03Z	pr-opened	heartbeat	-	#5793 opened: in-app help.install-cli shares the CLI install plan (drift #5642), stacked on #4999; next: CLI --bundle builder (drift #5643)
+2026-10-26T13:10:53Z	3	heartbeat	-	#4999 and #5793 open, fast-lane, beta, no lane comments since; --bundle builder running
+2026-10-26T13:30:40Z	pr-opened	heartbeat	-	#5794 CLI --bundle (drift #5643), stacked on #5793; gate PASS at 11fc8017; Arguments plan 6/8 (2 pre-existing CLI.swift entries escape on stacked base, checking on dev)
+2026-10-26T13:37:08Z	gap-filed	heartbeat	-	Arguments-plan escapes reproduce on dev (3/5), not #5794's: filed gap #5797 (p2, line:suite)
+2026-10-26T13:39:58Z	heartbeat	heartbeat	-	13:39: #4999 open fast-lane beta, mergeable, waiting; #5793 lost fast-lane (stacked size 519/21 counts #4999) and conflicted with dev in ShellHelpProvider betaNotes: merged dev, gate running; re-label after #4999 lands; #5794 fast-lane, unmergeable until #5793 resolves; #5000 unchanged
+2026-10-26T14:01:51Z	pushed	heartbeat	-	#5793 merged dev (conflict resolved), gate PASS, Head 9c361148; #5794 merged #5793, gate PASS, Head moved
+2026-10-26T14:03:09Z	heartbeat	heartbeat	-	14:02: #4999 open fast-lane beta mergeable, queued behind ~30 open p0 fast-lane PRs (lane merging ~1 per 20-40 min); #5793/#5794 mergeable, lane drops fast-lane on stacked size until #4999 lands; #5000 waits on #4999
+2026-10-26T14:27:02Z	heartbeat	heartbeat	-	14:26: #4999 still queued (fast-lane beta, mergeable); lane kept re-labelling then dropping #5793/#5794 on stacked size, so parked both with no-fast-lane until #4999 merges; #5000 waits
+2026-10-26T14:49:11Z	heartbeat	heartbeat	-	14:49: no change; #4999 queued (fast-lane beta, mergeable), #5793/#5794 parked no-fast-lane, #5000 waits
+2026-10-26T15:19:59Z	heartbeat	heartbeat	-	15:20: Belt nudge: record now also at docs/leads/suite-cli-bundle/ on the mirror. #4999 ready (Fast-Check+Head match 941da487, local-ci/prescreen success), queued behind p0; #5793/#5794 parked no-fast-lane; #5000 waits
