@@ -3,17 +3,19 @@
 // under 10%). `IdleWork.watch` reads the process's CPU seconds and the debug counters once a second after the
 // gesture, the way scripts/realperf-watch reads the app with `ps -o time=`, so a loop, a queued render or a
 // recount that outlives the gesture shows as work in a second where nothing moves. Flare drags a marquee over
-// the showcase document and counts its window bodies. Photo drags the Move tool 30 samples over a stress-shaped
-// document (PhotoFixtures' `openStress` at a size a debug build composites in seconds: 60 layers, a quarter
-// adjustment layers, a third masked) on the GPU and CPU routes, after one step that makes the cached base under
-// the moved layer (the first step after any other change pays one full composite, as the open did), and counts
-// the editor's bodies, the renderer's pictures and PhotoRenderCount's regions, layer composites, bases and hits.
-// The gates are counts, never clocks, so a loaded Mac passes or fails the same way: every step waits for the
-// work before it to drain (a deadline poll, not a sleep); the drag's renders drain, each region came from a kept
-// base and laid one layer on it, a picture landed, and once drained nothing renders again. The CPU percent and
-// the histogram's rows are printed, never gated (load moves the one, and the recount and the autosave 5 s after
-// the last edit run on their own). Nested in BodyCountSuites, as every suite that reads a process-wide counter
-// is. macOS only.
+// the showcase document and counts its window bodies. Photo opens a stress-shaped document (PhotoFixtures'
+// `openStress` at a size a debug build composites in seconds: 60 layers, a quarter adjustment layers, a third
+// masked) on the GPU and CPU routes and drives the stress and real-perf journeys' gestures: the Move tool for 30
+// samples (after steps that make the cached base under the moved layer), the Levels Black and Hue sliders for 30
+// steps, and the top eyes toggled hidden then shown. It counts the editor's bodies, the renderer's pictures and
+// PhotoRenderCount's regions, layer composites, bases and hits (the canvas) and rows and row layers (the Curves
+// histogram's recount). The gates are counts, never clocks, so a loaded Mac passes or fails the same way: every
+// step waits for the work before it to finish (a deadline poll, not a sleep); a Move step lays one layer on each
+// region's kept base, a Levels recount lays no layer, a Hue drag recounts nothing, and once a gesture's work has
+// finished nothing renders or recounts again. The CPU percent is printed, never gated (load moves it). The
+// slider and eye tests drop the window's autosave after the gesture: on this branch it still flattens the
+// picture through the reference path, which would read as a recount. Nested in BodyCountSuites, as every suite
+// that reads a process-wide counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
 import FlareModel
@@ -165,22 +167,83 @@ extension BodyCountSuites {
             #endif
         }
 
-        @Test(.timeLimit(.minutes(15)), arguments: [RenderingChoice.gpu, .cpu])
-        func photoMoveSettlesAfterTheDrag(_ choice: RenderingChoice) async throws {
+        static func label(_ gesture: String, _ choice: RenderingChoice) -> String {
+            "IDLE-WORK photo \(gesture) \(choice) 1024x576 60 layers \(PhotoRenderBudgetTests.config)"
+        }
+
+        /// The counters a gesture's work moves: the canvas's renders and the histogram's recount. Not the editor's
+        /// bodies, which a window's once-a-second tick runs on its own, so a wait on them would never go quiet.
+        static func workCounts() -> [String: Int] {
+            photoCounts().filter { ["regions", "layers", "pictures", "rows", "rowLayers"].contains($0.key) }
+        }
+
+        /// The stress document (1024 x 576 in 60 layers) open in a window on `choice`'s route with the Move tool
+        /// picked, once the open's work has finished, on deadlines, so a loaded Mac waits rather than starting a
+        /// gesture on top of it: its picture landed, its renders drained, and the histogram's first count (which
+        /// keeps every row) went quiet. With the hook that sends intents, the window's edited view and the model.
+        static func stressWindow(_ choice: RenderingChoice, _ label: String) async throws
+            -> (window: RenderBudgetWindow<AnyView>, send: PhotoPerform, edited: PhotoWindowEditedView, model: PhotoWorkspace)
+        {
             var model = PhotoWorkspace(services: PhotoRenderBudgetTests.services)
             try model.openStress(width: 1024, height: 576, layers: 60)
             model.selectTool(.move)
             let rendering = PhotoRendering(preference: FakeRenderingPreference(choice: choice))
-            let opened = Self.photoCounts()
-            let w = RenderBudgetWindow(PhotoWindow(model: model).environment(\.photoRendering, rendering))
-            let label = "IDLE-WORK photo move \(choice) 1024x576 60 layers \(PhotoRenderBudgetTests.config)"
-            // The open's picture lands and its renders drain, on deadlines, so a loaded Mac waits rather than
-            // starting a step on top of the open's render.
-            #expect(try await Self.until(w) { (Self.photoCounts()["pictures"] ?? 0) > (opened["pictures"] ?? 0) },
+            let opened = photoCounts()
+            let w = RenderBudgetWindow(AnyView(PhotoWindow(model: model).environment(\.photoRendering, rendering)))
+            #expect(try await until(w) { (photoCounts()["pictures"] ?? 0) > (opened["pictures"] ?? 0) },
                     Comment(rawValue: "\(label): the open's picture never landed"))
-            #expect(try await Self.rendered(w), Comment(rawValue: "\(label): the open's renders never drained"))
+            #expect(try await rendered(w), Comment(rawValue: "\(label): the open's renders never drained"))
+            #expect(try await drained(w, workCounts), Comment(rawValue: "\(label): the open's histogram count never went quiet"))
             let edited = try #require(await w.first(PhotoWindowEditedView.self))
-            let send = try #require(edited.send)
+            return (w, try #require(edited.send), edited, model)
+        }
+
+        /// Opens the stress window, runs `gesture` on it, and waits on deadlines for its work to finish: the
+        /// canvas's renders drain, then the work counters hold still (the histogram's recount has no in-flight
+        /// signal of its own). `check` gets every counter's change over the gesture and its work. Once finished,
+        /// 3 s of readings may show no region, picture, histogram row or row layer. The window's autosave is
+        /// dropped after the gesture (and again once the renders drain, for an edit noted late): it writes 5 s
+        /// after the last edit and flattens the picture through the reference path, which counts rows.
+        static func expectSettled(
+            _ choice: RenderingChoice, _ name: String, _ failure: String, check: ([String: Int]) -> Bool,
+            gesture: (RenderBudgetWindow<AnyView>, PhotoPerform, PhotoWorkspace) async throws -> Void
+        ) async throws {
+            let label = Self.label(name, choice)
+            let (w, send, edited, model) = try await stressWindow(choice, label)
+            let before = photoCounts()
+            try await gesture(w, send, model)
+            w.host.layoutSubtreeIfNeeded()
+            w.window.displayIfNeeded()
+            edited.files?.autosave?.discard()
+            let rendered = try await Self.rendered(w)
+            edited.files?.autosave?.discard()
+            let drained = try await Self.drained(w, Self.workCounts)
+            let work = IdleWork.delta(photoCounts(), since: before)
+            let idle = try await IdleWork.watch(seconds: 3, counters: photoCounts)
+            print("\(label): the gesture and its work" + IdleWork.describe(work))
+            for reading in idle { print("\(label): \(reading)") }
+
+            #expect(rendered, Comment(rawValue: "\(label): the gesture's renders never drained"))
+            #expect(drained, Comment(rawValue: "\(label): the gesture's work never went quiet"))
+            #expect(check(work), Comment(rawValue: "\(label): \(failure)" + IdleWork.describe(work)))
+            let after = IdleWork.total(idle)
+            #expect(["regions", "pictures", "rows", "rowLayers"].allSatisfy { after[$0] == 0 },
+                    Comment(rawValue: "\(label): work ran again after the gesture's had finished" + IdleWork.describe(after)))
+            // The renderer outlives its window: let it finish before the next case counts.
+            _ = try await Self.rendered(w)
+            w.close()
+        }
+
+        /// A bar slider's drag: 30 steps of `edit` at 120 Hz, then the gesture's end (one undo step).
+        static func slide(_ w: RenderBudgetWindow<AnyView>, _ send: PhotoPerform, _ edit: (Int) -> AdjustmentEdit) async throws {
+            try await w.ticks(30) { i in send(.adjust(edit(i))) }
+            send(.endAdjust)
+        }
+
+        @Test(.timeLimit(.minutes(15)), arguments: [RenderingChoice.gpu, .cpu])
+        func photoMoveSettlesAfterTheDrag(_ choice: RenderingChoice) async throws {
+            let label = Self.label("move", choice)
+            let (w, send, _, _) = try await Self.stressWindow(choice, label)
 
             // A step after an unchanged picture makes the base under the moved layer once per region (one full
             // composite, as the open's render was), and the first render into a new presenter texture is a full
@@ -220,6 +283,42 @@ extension BodyCountSuites {
             // The renderer outlives its window: let it finish before the next case counts.
             _ = try await Self.rendered(w)
             w.close()
+        }
+
+        /// The Levels Black slider (the stress journey's `levels`): each step changes the histogram's key, so it
+        /// recounts after the release, and that recount finds every row kept: it lays no layer.
+        @Test(.timeLimit(.minutes(15)), arguments: [RenderingChoice.gpu, .cpu])
+        func photoLevelsDragSettles(_ choice: RenderingChoice) async throws {
+            try await Self.expectSettled(
+                choice, "levels", "the histogram's recount after a tone edit composited layers, or never ran",
+                check: { ($0["rows"] ?? 0) > 0 && $0["rowLayers"] == 0 }
+            ) { w, send, _ in try await Self.slide(w, send) { .blackPoint(Float($0) / 200) } }
+        }
+
+        /// The Hue slider (the real-perf journey's `hue-sat`): outside the histogram's key, so nothing recounts.
+        @Test(.timeLimit(.minutes(15)), arguments: [RenderingChoice.gpu, .cpu])
+        func photoHueSatDragSettles(_ choice: RenderingChoice) async throws {
+            try await Self.expectSettled(
+                choice, "hue-sat", "the histogram recounted after an edit outside its key", check: { $0["rows"] == 0 }
+            ) { w, send, _ in try await Self.slide(w, send) { .hue(Double($0) * 2) } }
+        }
+
+        /// The stress journey's `toggle-visibility`: the top eyes clicked twice each, hidden then shown, about
+        /// 300 ms apart. Each click changes the stack, so the histogram recounts; once the last count and render
+        /// finish, nothing runs again.
+        @Test(.timeLimit(.minutes(15)), arguments: [RenderingChoice.gpu, .cpu])
+        func photoToggleVisibilitySettles(_ choice: RenderingChoice) async throws {
+            try await Self.expectSettled(
+                choice, "toggle-visibility", "the histogram never recounted after the eyes changed the stack",
+                check: { ($0["rows"] ?? 0) > 0 }
+            ) { _, send, model in
+                for id in model.layers.prefix(4).map(\.id) {
+                    for _ in 0..<2 {
+                        send(.toggleVisibility(id))
+                        try await Task.sleep(for: .milliseconds(300))
+                    }
+                }
+            }
         }
     }
 }
