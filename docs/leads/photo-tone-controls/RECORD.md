@@ -1,28 +1,28 @@
 # tone-controls lead record
 
 Issue: #3468 · Packet: docs/blueprints/photo/features/tone-controls.md
-Run: act-1a16f6941b7-zb0r · Session: claude/feature-lead-tone-layer-styles-v57ny4 · Started: 2026-10-24T19:30Z (takes over from act-1a16cd04539-4jc0)
-Stage: build W4 in the lane (PT-2 #5007, PT-3 #5105 clean; PT-4 #5112, PT-6 #5008 re-merged with dev after needs-rebase); PT-5 waits on TC-3 #5006
-Base: 830af22de (dev now 6f66ca334)
-Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #4880 / TC-6 #4953 merge; critic panel on PT-m once a scoped photo run shows it; PT-7/PT-8 after PT-u and PT-m land
+Run: act-1a178602311-syy6 · Started: 2026-10-26T13:23Z (takes over from act-1a175ea563c-tbc1)
+Stage: 3 build; PT-a slice-done (run 40250716357); PT-4 re-land #5363 prescreened, waiting on the lane
+Base: dev 01600e46
+Next: when #5363 merges, merge dev into -pt3/-pt5/-pt7, gate, open PT-3 follow-up (PT-m), PT-5 (PT-u), PT-7 (PT-z); PT-8 after those land; Belt-Slice-Done per slice from a green photo ci.yml run
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| PT-a | AdjustmentSettings.tone and the ToneTarget adapter as stubs; Adjust panel shows ToneRows | PT-1, PT-2 | MJ-PT | suiteui tone-controls TC-a (TC-1 #4555 merged; TC-2 building) | yes | 0 | building | – | – |
-| PT-u | snapshots, render budget, journey written | PT-5, PT-6 | PJ-T1 | PT-a; TC-3 (PT-5) | yes | 0 | waiting | – | – |
-| PT-m | live route and export path; adapter bodies; catalog; RJ-P12–14 | PT-3, PT-4 | MJ-PT | PT-a; IM-photo (on dev), TC-5, TC-6 (stubs, rule 12); catalog chain (all built) | no | 0 | in lane (#5105, #5112) | – | – |
-| PT-z | journey on live, feature-done | PT-7, PT-8 | PJ-T1 | PT-u, PT-m; PG-z (PT-8) | yes | 0 | waiting | – | – |
+| PT-a | AdjustmentSettings.tone and the ToneTarget adapter as stubs; Adjust panel shows ToneRows | PT-1, PT-2 | MJ-PT | suiteui tone-controls TC-a (TC-1 #4555 merged; TC-2 building) | yes | 0 | done | 40250716357 | – |
+| PT-u | snapshots, render budget, journey written | PT-5, PT-6 | PJ-T1 | PT-a; TC-3 (PT-5) | yes | 0 | building (PT-6 merged; PT-5 on -pt5) | – | – |
+| PT-m | live route and export path; adapter bodies; catalog; RJ-P12–14 | PT-3, PT-4 | MJ-PT | PT-a; IM-photo (on dev), TC-5, TC-6 (stubs, rule 12); catalog chain (all built) | no | 0 | PT-3 merged; PT-4 #5363 in lane; sharpen follow-up on -pt3 | – | – |
+| PT-z | journey on live, feature-done | PT-7, PT-8 | PJ-T1 | PT-u, PT-m; PG-z (PT-8) | yes | 0 | PT-7 built on -pt7 (stacked on -pt3); PT-8 on -pt8 | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | PT-1 | PT-a | 2 | tone in AdjustmentSettings; adapter stubs; PhotoToneTests disabled | Sources/PhotoModel/AdjustmentSettings.swift, PhotoTone+Kernel.swift, Tests/PhotoModelTests/PhotoToneTests.swift | PhotoToneTests | #4845 | merged |
-| PT-2 | PT-a | 3 | Adjust panel ToneRows | Sources/PhotoApp/AdjustmentsInspector.swift | PhotoToneSnapshots.panel | #5007 | in lane |
-| PT-3 | PT-m | 4 | live route and export | PhotoAdjust+Imaging.swift, PhotoRender.swift | PhotoToneTests | #5105 | in lane |
-| PT-4 | PT-m | 4 | adapter bodies, catalog, jobs | PhotoTone+Kernel.swift, PhotoCommandCatalog.swift, RealJobs | PhotoToneCommandTests | #5112 | in lane |
+| PT-2 | PT-a | 3 | Adjust panel ToneRows | Sources/PhotoApp/AdjustmentsInspector.swift | PhotoToneSnapshots.panel | #5007 | merged |
+| PT-3 | PT-m | 4 | live route and export | PhotoAdjust+Imaging.swift, PhotoRender.swift | PhotoToneTests | #5105 | merged |
+| PT-4 | PT-m | 4 | adapter bodies, catalog, jobs | PhotoTone+Kernel.swift, PhotoCommandCatalog.swift, RealJobs | PhotoToneCommandTests | #5112 → #5363 | reverted (#5349), re-land in lane |
 | PT-5 | PT-u | 4 | snapshots, budget | Tests/AppSnapshotTests/PhotoToneSnapshots.swift, RenderBudgetPhotoToneTests.swift | snapshots | – | waiting |
-| PT-6 | PT-u | 4 | journey skipped | UITests/PhotoJourneyTests+Tone.swift | compiles | #5008 | in lane (stacked on #5007) |
+| PT-6 | PT-u | 4 | journey skipped | UITests/PhotoJourneyTests+Tone.swift | compiles | #5008 | merged |
 | PT-7 | PT-z | 5 | journey on live | UITests/PhotoJourneyTests+Tone.swift | journey | – | waiting |
 | PT-8 | PT-z | 6 | photo.md, built, feature-done | docs/blueprints/photo.md, tone-controls.wave.json | scripts/ci | – | waiting |
 
