@@ -178,3 +178,7 @@ No change: #4988, #5164, #4999 and #5364 are still open in the lane, with no fix
 ## 2026-10-26T03:31:19Z poll
 
 No change: #4988, #5164, #4999 and #5364 are still open in the lane, with no fix labels.
+
+## 2026-10-26T03:52:42Z poll
+
+No change: #4988, #5164, #4999 and #5364 are still open in the lane, with no fix labels; #5000 still waits on #4999.
