@@ -162,3 +162,7 @@ Next: lane: probe batch-20261025023716-3 (holds #4988) resolves; once #4988 merg
 
 ## 2026-10-26T02:12:53Z relaunch act-1a175f7cc55-xlmt
 - main d3323f6 verified. #4988 and #5164 open, clean, Head markers current; no lane batch in flight. Belt-Lead lines moved to this run, footer stripped.
+
+## 2026-10-26T02:25:05Z #4808 fix round 1: PR #5364
+
+EM-flare-halo fix round 1. In PR #5364, the Flare and Halo SuiteMenus journeys call the live socket (grant, then `live/run`) and check that the reply's undo step reaches Edit > Undo and the window. scripts/ci --changed printed CI: PASS. Open: #4988, #5164 (stacked), #5364; findings #4803 and #2492 are still open.
