@@ -1,5 +1,6 @@
 // RenderBudgetToneRowsTests.swift (tone-controls TC-4): ToneRows in a real window, hosted like the gallery page.
-// 120 Temperature steps send 120 `tone.set` in at most 3 window bodies; one Auto click one `tone.auto` in at most 2
+// 120 Temperature steps send one `tone.set` per step until the top of the range (100; a step there changes
+// nothing and sends nothing) in at most 3 window bodies; one Auto click one `tone.auto` in at most 2
 // (target 0: only the page redraws). The p95 (packet: ≤ 8 ms) is printed, not gated. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -12,6 +13,9 @@ import Testing
 extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetToneRowsTests {
         static let samples = 120
+        /// The steps that change Temperature: from neutral up to the top of its range, then clamped.
+        static let moving = min(samples, Int((ToneSlider.temperature.range.upperBound - ToneSlider.temperature.neutral)
+            / ToneSlider.temperature.step))
 
         private static func bodies() -> Int? {
             #if DEBUG
@@ -31,7 +35,7 @@ extension BodyCountSuites {
                 let found = try await w.adjust("suite.tone.temperature", steps: Self.samples)
                 #expect(found, "Temperature can't be adjusted")
             }
-            #expect(ToneRowsBudgetPage.sets - sets == Self.samples,
+            #expect(ToneRowsBudgetPage.sets - sets == Self.moving,
                     "\(Self.samples) Temperature steps sent \(ToneRowsBudgetPage.sets - sets) tone.set intents")
             expectBodies(step, atMost: 3, target: 0)
         }

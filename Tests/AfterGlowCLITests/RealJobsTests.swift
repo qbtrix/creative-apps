@@ -72,7 +72,7 @@ enum RealJobsHarness {
 struct RealJobsLayoutTests {
     @Test func theTreesHoldTheFakeJobsAndTheBrokenFixture() {
         #expect(RealJobsHarness.jobs(in: RealJobsHarness.jobsTree).filter { $0.hasPrefix("Tests/RealJobs/fake/") }
-            == ["Tests/RealJobs/fake/add-rect", "Tests/RealJobs/fake/dash-trim", "Tests/RealJobs/fake/draw-star",
+            == ["Tests/RealJobs/fake/add-rect", "Tests/RealJobs/fake/dash-trim", "Tests/RealJobs/fake/draw-star", "Tests/RealJobs/fake/export-pack",
                "Tests/RealJobs/fake/file-flow",
                "Tests/RealJobs/fake/gradient-fill", "Tests/RealJobs/fake/history-jump", "Tests/RealJobs/fake/move-each",
                "Tests/RealJobs/fake/place-image",

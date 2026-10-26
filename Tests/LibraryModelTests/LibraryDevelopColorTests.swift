@@ -9,6 +9,7 @@
 // calls by hand. Runs on Linux and macOS.
 @testable import LibraryModel
 import CoreRaster
+import CoreRender
 import Testing
 
 /// A 2 x 2 opaque patch of one sRGB colour.
@@ -82,7 +83,7 @@ private func near(_ a: RGBA, _ b: RGBA, _ tolerance: Float = 1e-4) -> Bool {
         let passes = LiveDevelop.passes(for: settings)
         let colorAt = passes.firstIndex(of: .color(vibrance: 30, saturation: -20))
         let whitesAt = passes.firstIndex { if case .whitesBlacks = $0 { true } else { false } }
-        let curveAt = passes.firstIndex { if case .curve = $0 { true } else { false } }
+        let curveAt = passes.firstIndex { if case .shared(.curves) = $0 { true } else { false } }
         #expect(passes.count == 3)
         #expect(whitesAt == 0 && colorAt == 1 && curveAt == 2)
         #expect(!LiveDevelop.passes(for: .neutral).contains { if case .color = $0 { true } else { false } })

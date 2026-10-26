@@ -762,6 +762,27 @@
             ]
           },
           {
+            "id": "suite-text",
+            "name": "SuiteText",
+            "description": "The live text service on Core Text: LiveText, SuiteModel's TextServices made real (measure spans, list the Mac's font families, draw placed glyphs). Its own module so a headless tool can draw text without SuiteShell's UI glue; SuiteShell re-exports it for the apps. Imports SuiteModel only.",
+            "technology": "Swift 6, Core Text and AppKit, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "components": [
+              {
+                "id": "shell-text",
+                "name": "Text on Core Text",
+                "description": "The live half of SuiteModel's text contract, reached as SuiteServices.text through LiveText: measures spans on Core Text into one advance per grapheme (ligatures split evenly, an emoji whole), ascent and descent, and names the fallback family; lists the Mac's font families with their faces; and draws placed glyphs at their origins and angles into an sRGB MediaFrame. It measures and draws only: line breaks, alignment and type on a path are creative-core text-engine's, so an app Model measures here, lays out in core, and draws here.",
+                "technology": "Swift 6, Core Text and AppKit, macOS 26",
+                "paths": [
+                  "Sources/SuiteText/"
+                ]
+              }
+            ]
+          },
+          {
             "id": "suite-shell",
             "name": "SuiteShell",
             "description": "macOS glue every app process links: live conformances needing AppKit or Launch Services, shared menu commands, the adoption modifier.",
@@ -882,15 +903,6 @@
                 "technology": "Swift 6, AVFoundation, VideoToolbox and CoreGraphics, macOS 26",
                 "paths": [
                   "Sources/SuiteShell/Media/"
-                ]
-              },
-              {
-                "id": "shell-text",
-                "name": "Text on Core Text",
-                "description": "The live half of SuiteModel's text contract, reached as SuiteServices.text through LiveText: measures spans on Core Text into one advance per grapheme (ligatures split evenly, an emoji whole), ascent and descent, and names the fallback family; lists the Mac's font families with their faces; and draws placed glyphs at their origins and angles into an sRGB MediaFrame. It measures and draws only: line breaks, alignment and type on a path are creative-core text-engine's, so an app Model measures here, lays out in core, and draws here.",
-                "technology": "Swift 6, Core Text and AppKit, macOS 26",
-                "paths": [
-                  "Sources/SuiteShell/Text/"
                 ]
               },
               {
@@ -1426,6 +1438,12 @@
         "style": "sync"
       },
       {
+        "source": "suite-text",
+        "target": "suite-model",
+        "description": "implements SuiteModel's text contract (TextServices)",
+        "style": "sync"
+      },
+      {
         "source": "suite-shell",
         "target": "suite-model",
         "description": "implements the live conformances of SuiteModel's contracts",
@@ -1435,6 +1453,12 @@
         "source": "suite-shell",
         "target": "suiteui",
         "description": "builds the Switch To and Open In menus and small views from SuiteUI parts",
+        "style": "sync"
+      },
+      {
+        "source": "suite-shell",
+        "target": "suite-text",
+        "description": "re-exports the live text service and serves it as SuiteServices.text",
         "style": "sync"
       },
       {
