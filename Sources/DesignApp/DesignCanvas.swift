@@ -20,8 +20,12 @@
 // canvas without running the window (D0-8a); keys and text editing read `model`.
 // The canvas lists itself in `suite.controls` as `design.canvas.page`
 // (DesignControlID.canvas) without replacing CanvasViewport's identifier.
+// A digit key sets the selection's opacity through ToolKeys.brushAction (brush-keys BK-10): 5 is 50%, 0 is 100%,
+// two digits typed fast the exact percent, one step (DesignOpacityKeys+Kernel); the digits wait in a box.
 // Content, not chrome: flat, no glass.
+import AppKit
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -35,6 +39,8 @@ struct DesignCanvas: View {
     var perform: DesignPerform = { _ in }
     /// The window's live drag box; nil when the canvas is hosted alone.
     @Environment(\.designLiveDrag) private var live
+    /// The opacity digits typed so far; a box, so typing one changes no state the body reads.
+    @State private var opacityKeys = DesignOpacityKeyBuffer()
 
     var body: some View {
         let shown = live?.workspace ?? model
@@ -91,10 +97,34 @@ struct DesignCanvas: View {
             }
             return .handled
         }
+        if opacityKey(press) { return .handled }
         // The rail shows Pen disabled; its letter must not pick it either.
         guard let tool = DesignTool.picked(byTyped: press.characters) else { return .ignored }
         perform(.tool(tool))
         return .handled
+    }
+
+    /// A digit sets every selected layer's opacity: a pair's first digit ends the run, its second joins it.
+    private func opacityKey(_ press: KeyPress) -> Bool {
+        let now = ProcessInfo.processInfo.systemUptime
+        let action = ToolKeys.brushAction(
+            forKey: press.characters, modifiers: KeyModifiers(press.modifiers), at: now,
+            firstResponder: NSApplication.shared.keyWindow?.firstResponder, settings: nil, digits: &opacityKeys.digits)
+        guard let key = DesignWorkspace.opacityKey(action, after: opacityKeys.digits, at: now) else { return false }
+        if key.startsStep { perform(.endEditRun) }
+        perform(.setStyle(.opacity(key.opacity)))
+        return true
+    }
+}
+
+/// The canvas's opacity digits typed so far.
+@MainActor final class DesignOpacityKeyBuffer { var digits = OpacityDigits() }
+
+extension KeyModifiers {
+    /// Shift, Option and Command of a key press; the rest are dropped.
+    init(_ modifiers: EventModifiers) {
+        let pairs: [(EventModifiers, KeyModifiers)] = [(.shift, .shift), (.option, .option), (.command, .command)]
+        self = pairs.reduce(into: KeyModifiers()) { held, pair in if modifiers.contains(pair.0) { held.insert(pair.1) } }
     }
 }
 

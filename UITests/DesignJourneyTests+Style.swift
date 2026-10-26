@@ -14,6 +14,9 @@
 // each as a slider by its `design.inspector.<name>` id (DesignControlID), its
 // value spoken with the unit ("12 points", "50 percent"); a click without a
 // drag opens its typing field, and Escape closes it and gives the bar the keys.
+// DJ-BK (brush-keys BK-10): a marquee from page (80, 80) to (820, 240) picks A, B
+// and C and gives the canvas the keys; 5 sets all three to 50% as one "Undo
+// Change Opacity" step, and 0, typed after the pair window, to 100%.
 import XCTest
 
 final class DesignStyleJourneyTests: XCTestCase {
@@ -90,6 +93,39 @@ final class DesignStyleJourneyTests: XCTestCase {
             NSPredicate(format: "label == %@ OR value == %@", Self.hiddenHint, Self.hiddenHint)).firstMatch
         XCTAssert(reason.waitForExistence(timeout: 5), "the disabled style rows don't say \"\(Self.hiddenHint)\"")
         design.shot("style-hidden-refused")
+    }
+
+    /// DJ-BK: digits typed on the canvas set every selected layer's opacity.
+    @MainActor func testDigitsSetOpacity() {
+        let design = Journey("Design", self, arguments: Self.arguments)
+        XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        let artboard = design.element("suite.canvas.artboard")
+        XCTAssert(artboard.waitForExistence(timeout: 10), "the cards fixture showed no page (suite.canvas.artboard)")
+        let undo = design.element("design.bar.undo"), count = design.element("design.status.selection")
+
+        // 1. A marquee over A, B and C on Desktop: three layers, the canvas has the keys.
+        point((80, 80), on: artboard).press(forDuration: 0.1, thenDragTo: point((820, 240), on: artboard))
+        XCTAssert(Self.waitUntil { count.exists && Self.text(count) == "3 Layers" }, "the marquee picked \(Self.text(count)), not 3 Layers")
+
+        // 2. 5: every selected layer at 50%, one Change Opacity step.
+        design.press(character: "5")
+        let opacity = control(design, Self.opacity)
+        XCTAssert(opacity.waitForExistence(timeout: 5), "no Opacity bar in the inspector (\(Self.opacity))")
+        XCTAssert(Self.waitUntil { Self.number(opacity) == 50 }, "after 5 Opacity reads \(Self.text(opacity)), not 50% for all three")
+        XCTAssert(Self.waitForLabel(undo, "Undo Change Opacity"), "5 made no Change Opacity step (Undo reads \(undo.label))")
+        design.shot("style-digits-opacity-50")
+
+        // 3. 0, past the pair window: 100%.
+        Thread.sleep(forTimeInterval: 1)
+        design.press(character: "0")
+        XCTAssert(Self.waitUntil { Self.number(opacity) == 100 }, "after 0 Opacity reads \(Self.text(opacity)), not 100%")
+        design.shot("style-digits-opacity-100")
+    }
+
+    /// The screen point of page point `page`: the artboard's corner plus the point at its scale (`cards` is 1440 wide).
+    @MainActor private func point(_ page: (Double, Double), on artboard: XCUIElement) -> XCUICoordinate {
+        let scale = artboard.frame.width / 1440
+        return artboard.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: page.0 * scale, dy: page.1 * scale))
     }
 
     /// The inspector's control with the id `identifier`.
