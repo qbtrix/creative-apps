@@ -122,3 +122,4 @@ utc	stage	event	ref	note
 2026-10-25T10:49:49Z	W2	check	PY-1	all 9 PRs open, clean, unflagged; batch-20261025090316 probe -6 (#4886 #4943 #4953 #4962 #5006 #5007) green on Linux and macOS; probe -9 (adds #5008 #5039 #5044) Linux green; awaiting lane merge; dev-red #5316 open, none ours
 2026-10-25T11:07:31Z	W2	check	PY-1	all 9 PRs open, clean, unflagged; dev moved to 68bec9fe (SuiteText target refactor, direct), our PRs still mergeable; batch-20261025090316 probes -6 green, -9 Linux green, nothing merged yet; dev-red #5316 open, none ours
 2026-10-25T11:27:38Z	W2	check	PY-1	all 9 PRs open, clean, unflagged; old batch's green prefix did not land; lane started batch-20261025111803 with only #4886 (Linux check running); dev 68bec9fe: Linux, scoped photo and scoped suite runs in progress
+2026-10-26T01:50:49Z	W2	stage-start	PY-m	run act-1a175e3e605-92wn resumed; PY-5 setStyle body building stacked on PY-1 (#5177); PY-2 waits on LS-2 #5174
