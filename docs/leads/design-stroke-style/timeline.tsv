@@ -243,3 +243,4 @@ time	kind	note
 2026-10-26T02:06:05Z	3	heartbeat	#4916 #5002 #5011	dev-red #5321 open; heads unchanged; DK-z held
 2026-10-26T02:27:42Z	3	heartbeat	#4916 #5002 #5011	dev-red #5321 open; heads unchanged, clean; DK-z held
 2026-10-26T02:35:52Z	3	resume	Belt nudge	dev-red #5321 open; all slice PRs clean, heads unchanged; z slice held (findings > 5); record mirrored to lead/design-stroke-style
+2026-10-26T02:49:07Z	3	heartbeat	slice PRs	dev-red #5321 open; heads unchanged, clean; z slice held; no supervisor reply on status branch yet
