@@ -4,7 +4,7 @@ Issue: #3793 · Packet: docs/blueprints/photo/features/layer-styles.md
 Run: act-1a16155057c-20lg · Session: claude/layer-styles-lead-hdzmvt · Started: 2026-10-22T02:00Z
 Stage: 0 setup, ended by the supervisor (#3793 comments at 02:42Z and 03:16Z); the supervisor relaunches by hand once #3937 merges
 Base: 66a8458 (origin/dev)
-Next: re-read suiteui layer-styles (#3937) for LS-a merged (`LayerStyle`, `LayerStyleTarget`, `StyleCommands.specs` on dev); once it is, start wave 1 (PY-1)
+Next: open the PY-m PR from lead/photo-layer-styles-PY-m once its gate passes; then PY-2 when LS-2 #5174 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -19,7 +19,7 @@ Next: re-read suiteui layer-styles (#3937) for LS-a merged (`LayerStyle`, `Layer
 |---|---|---|---|---|---|---|---|
 | PY-1 | PY-a | 1 | `PhotoLayer.style`; adapter stubs (`showStylePanel` real); catalog specs and ids; tests disabled | Sources/PhotoModel/PhotoLayer.swift, Sources/PhotoModel/PhotoStyle+Kernel.swift, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/PhotoModelTests/PhotoLayerStyleTests.swift | PhotoLayerStyleTests (disabled), command-id list | – | blocked (LS-a) |
 | PY-2 | PY-a | 2 | Layer menu items by id; panel sheet while `stylePanel` is set; pasteboard via `LayerStylePasteboard` | Sources/PhotoApp/PhotoCommands+Layer.swift, Sources/PhotoApp/PhotoWindow+Styling.swift, Sources/PhotoApp/PhotoWindow.swift | PhotoLayerStyleSnapshots.panel | – | waiting (PY-1) |
-| PY-5 | PY-m | 2 | adapter bodies; tests on | Sources/PhotoModel/PhotoStyle+Kernel.swift, Tests/PhotoModelTests/PhotoLayerStyleTests.swift, Tests/mutations/PhotoModel.PhotoStyle+Kernel.json | PhotoLayerStyleTests | – | building ahead on lead/photo-layer-styles-PY-5 (stacked on PY-1); command-level tests wait on LS-6 |
+| PY-5 | PY-m | 2 | adapter bodies; tests on | Sources/PhotoModel/PhotoStyle+Kernel.swift, Tests/PhotoModelTests/PhotoLayerStyleTests.swift, Tests/mutations/PhotoModel.PhotoStyle+Kernel.json | PhotoLayerStyleTests | – | built (Mutate 7/7); rebased onto dev as lead/photo-layer-styles-PY-m, gate running, PR next; catalog-level tests wait on LS-6 |
 | PY-6 | PY-m | 2 | styles in composite and `.ora`; RJ-P44, RJ-X51 | Sources/PhotoModel/PhotoLayerComposite.swift, Sources/PhotoModel/PhotoDocumentFile.swift, Tests/PhotoModelTests/PhotoStyleRenderTests.swift, Tests/mutations/PhotoModel.PhotoLayerComposite.json, Tests/mutations/PhotoModel.PhotoDocumentFile.json, Tests/RealJobs/photo/outline-cutout/, Tests/RealJobs/photo/style-drop-shadow/ | PhotoStyleRenderTests | – | waiting (PY-1, LS-m) |
 | PY-3 | PY-u | 3 | snapshots, render budget | Tests/AppSnapshotTests/PhotoLayerStyleSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoLayerStyleTests.swift | RenderBudgetPhotoLayerStyleTests.distanceScrubInThreeBodies | – | waiting (PY-2) |
 | PY-4 | PY-u | 3 | journey written, skipped | UITests/PhotoJourneyTests+LayerStyle.swift | compiles, skipped | – | waiting (PY-2) |
@@ -35,6 +35,7 @@ Next: re-read suiteui layer-styles (#3937) for LS-a merged (`LayerStyle`, `Layer
 - No task starts: PY-1 needs SuiteImaging's `LayerStyle`, `LayerStyleTarget` and `StyleCommands`, none of which exist on dev (no SuiteImaging target yet). Rule 20 forbids a Photo copy, and LS-a is the suiteui line's work, so nothing is stubbed here.
 
 ## Open
+- PY-1 #5177 merged 8987427d; PY-a waits only on PY-2 (needs LS-2 #5174, open). PY-5 (+99/−25, 3 files) reuses recordLayers(named:coalescing:) and movableSelectedLayers; PR opens once `scripts/ci --changed` passes on the dev-based branch.
 - 2026-10-26 (run act-1a175e3e605-92wn): resumed; main d3323f6 verified, base dev 8eff8ab. #5177 (PY-1, head 9aa01d737, Linux run 40237322830 green, prescreen success), #5174 (LS-2) and #5176 (LS-5) all open, clean, in the lane; dev-red #5321 (macOS, none ours). PY-5's Photo-side `setStyle` body needs nothing from LS-6, so it is built now, stacked on PY-1; the PR opens once #5177 lands.
 - Blocked on suiteui layer-styles LS-a (#3937, still `waiting-on-prereq` at 03:13Z). LS-a waits on suite-imaging:IM-a (IM-1 #4028 still open: Linux green at 02:30Z, macOS job skipped, awaiting the supervisor macOS run and merge; IM-2 stacked), brush-keys:BK-u, gradient-fill:GF-a, and core types from LE-a. Bump #3825 (7966e5a) merged 2026-10-21 but carries only Flare core PRs. No `SuiteImaging` target or `LayerStyle` types on dev 66a8458.
 - Belt watches `lead/photo-layer-styles` (with `docs/leads/photo-layer-styles/`). This record is mirrored there; `lead/layer-styles` is the brief's original channel and stays in sync.
