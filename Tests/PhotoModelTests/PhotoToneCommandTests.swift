@@ -1,9 +1,9 @@
 // PhotoToneCommandTests.swift (tone-controls PT-4): the workspace's ToneTarget bodies, tested on the adapter
 // itself. A tone edit goes to the selected adjustment layer, else the image, as one named undo step; steps
 // under one drag token fold into one; Sharpen on an adjustment layer is off with its help; Auto reads the
-// composite without a step; the four tone.* ids are in the catalog and the ledger. Runs through tone.* command
-// runs wait on TC-6 (#4953: ToneCommands' bodies; today's runs throw notBuilt). Mutations:
-// PhotoModel.PhotoTone+Kernel (`.layerTone`, `.dragIsOneStep`). Runs on Linux and macOS.
+// composite without a step; the kernel's exposure folds into Photo's Exposure; the four tone.* ids are in the
+// catalog and the ledger, and their runs (TC-6) do the same. Mutations: PhotoModel.PhotoTone+Kernel (`.layerTone`,
+// `.dragIsOneStep`, `.exposureFolds`). Runs on Linux and macOS.
 import Foundation
 import PhotoModel
 import SuiteImaging
@@ -126,8 +126,8 @@ private func toneOf(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> ToneSet
         #expect(PhotoWorkspace.catalog.availability("tone.set", on: PhotoWorkspace(services: .fake)).why == "Open an image first.")
     }
 
-    /// The same layer edit through the command: waits on ToneCommands' bodies.
-    @Test(.disabled("waits on TC-6 #4953")) func toneSetCommandOnALayerChangesTheLayerOnly() throws {
+    /// The same layer edit through the command.
+    @Test func toneSetCommandOnALayerChangesTheLayerOnly() throws {
         var workspace = try withLayer()
         let params = JSONValue.object(["slider": .string("contrast"), "value": .number(20)])
         _ = try PhotoWorkspace.catalog.run("tone.set", params: params, on: &workspace)
@@ -135,13 +135,42 @@ private func toneOf(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> ToneSet
         #expect(workspace.historySteps.count == 3)
     }
 
-    /// A drag through the command is one step: waits on ToneCommands' bodies.
-    @Test(.disabled("waits on TC-6 #4953")) func toneSetCommandDragIsOneStep() throws {
+    /// A drag through the command is one step.
+    @Test func toneSetCommandDragIsOneStep() throws {
         var workspace = try image()
         for value in stride(from: 1.0, through: 10, by: 1) {
             let params = JSONValue.object(["slider": .string("tint"), "value": .number(value), "drag": .string("d1")])
             _ = try PhotoWorkspace.catalog.run("tone.set", params: params, on: &workspace)
         }
         #expect(workspace.historySteps.count == 2 && workspace.undoActionName == "Undo Tint")
+    }
+
+    /// Photo has one exposure: the kernel's folds into Exposure's stops (turned on) and the tone keeps 0.
+    @Test func kernelExposureFoldsIntoPhotosExposure() throws {
+        var workspace = try image()
+        workspace.adjust(.setEnabled(.exposure, false))
+        try workspace.setTone(.neutral.setting(.exposure, to: 0.5).setting(.whites, to: 10), name: "Auto Tone", drag: nil)
+        #expect(workspace.adjustments.exposure == 0.5 && workspace.adjustments.isEnabled(.exposure))
+        #expect(workspace.toneSettings == .neutral.setting(.whites, to: 10))
+        #expect(workspace.undoActionName == "Undo Auto Tone")
+        workspace.undo()
+        #expect(workspace.adjustments.exposure == 0 && workspace.toneSettings == .neutral)
+    }
+
+    /// tone.set exposure is refused with the reason, and the row says it too.
+    @Test func toneSetExposureIsRefused() throws {
+        var workspace = try image()
+        #expect(workspace.toneSliderHelp(.exposure) == "Use Photo's Exposure.")
+        let params = JSONValue.object(["slider": .string("exposure"), "value": .number(1)])
+        #expect(throws: CatalogError.self) { _ = try PhotoWorkspace.catalog.run("tone.set", params: params, on: &workspace) }
+        #expect(workspace.adjustments.exposure == 0 && workspace.historySteps.count == 1)
+    }
+
+    /// tone.auto on the sample picture, which has a range of tones, is one step named "Auto Tone".
+    @Test func toneAutoIsOneNamedStep() throws {
+        var workspace = try PhotoWorkspace.fixture(.sample)
+        let steps = workspace.historySteps.count
+        _ = try PhotoWorkspace.catalog.run("tone.auto", params: .object([:]), on: &workspace)
+        #expect(workspace.historySteps.count == steps + 1 && workspace.undoActionName == "Undo Auto Tone")
     }
 }

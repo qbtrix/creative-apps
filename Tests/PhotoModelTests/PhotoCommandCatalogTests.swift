@@ -72,16 +72,22 @@ struct PhotoCommandCatalogTests {
             // A jump moves the image to another step, as Undo does, so its bytes change (history-panel PH-5).
             if id == "history.jump" && problem.contains("queryOrViewChangesNoBytes") { return false }
             guard problem.hasPrefix("\(id): exampleRuns") else { return true }
-            // tone.* runs throw notBuilt until TC-6 (#4953) builds ToneCommands' bodies; PhotoToneCommandTests tests the adapter.
-            if id.hasPrefix("tone.") && problem.contains("not built yet") { return false }
             let off = PhotoLawsDocument.catalog.availability(id, on: fixture).why != nil
             return !(off || needsFiles.contains(id))
         }
         #expect(problems == Self.tolerated)
     }
     /// The kernel's transform.flip is titled "Flip" while its step names the axis ("Flip Horizontal"), as the
-    /// transform packet asks. (Free Transform's commit and cancel refuse without a draft: the filter above drops them.)
-    static let tolerated = ["transform.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\""]
+    /// transform packet asks; tone.set likewise names its step for the slider ("Temperature"). On this flat fill
+    /// tone.auto has nothing to suggest, so it records no step; PhotoToneCommandTests runs it on a range of tones.
+    /// (Free Transform's commit and cancel refuse without a draft: the filter above drops them.)
+    static let tolerated = [
+        "tone.auto: stepNamedTitle: its undo step reads \"Delete\", not \"Auto Tone\"",
+        "tone.auto: editRecordsOneStep: it recorded 0 undo steps, not one",
+        "tone.auto: undoRestoresBytes: edit.undo after it leaves save() bytes unlike those before it",
+        "tone.set: stepNamedTitle: its undo step reads \"Temperature\", not \"Tone\"",
+        "transform.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\"",
+    ]
 
     @Test func ledger() throws {
         let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../command-ids/photo.txt")
