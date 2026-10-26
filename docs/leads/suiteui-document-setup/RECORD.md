@@ -10,8 +10,8 @@ Next: lane merges DS-photo #4901, DS-design #4887, DS-halo #4918, DS-flare #4891
 - Brief rule 1: main checked out at d3323f6a. The old lead branches share no history with main, so each lead branch is now origin/main plus one commit carrying docs/leads/ (the tree a rebase gives), pushed --force-with-lease.
 - PR base stays dev (CLAUDE.md, scripts/fast-lane.sh BASE_BRANCH=dev); the lane retargets main PRs to dev anyway.
 - PR bodies: the session's GitHub relay re-adds a generated-by footer on every edit; the lane strips it from the squash commit.
-- 02:30Z: dev-red #5321 (macOS, range main..cc5c6234, none ours) holds every code batch; no open finding names this feature.
-- 02:40Z: #4901 needs-rebase fixed: merged origin/dev (photo.list-commands golden regenerated with afterglow; only file.new differs from dev), scripts/ci --changed PASS, head 38abf707, Head line moved.
+- 02:20Z: dev-red #5321 (macOS, range main..cc5c6234, none ours) holds every code batch; no open finding names this feature.
+- 02:15Z: #4901 needs-rebase fixed: merged origin/dev (photo.list-commands golden regenerated with afterglow; only file.new differs from dev), scripts/ci --changed PASS, head 38abf707, Head line moved.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
