@@ -31,6 +31,7 @@ Next: Belt-Contact-Sheet once journeys run 40279283359 (suiteui at c480d848) fin
 - 2026-10-26T09:22:44Z heartbeat: journeys 40288150154 still in Journeys wait; Contact Sheet follows it
 - 2026-10-26T10:03:23Z heartbeat: contact sheet waits on suiteui journeys run 40288150154 (queued for a macOS runner)
 - 10:26 heartbeat: journeys run 40288150154 in progress, contact sheet next
+- 10:47 heartbeat: waiting on fast lane; dev-red #5321 open
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
