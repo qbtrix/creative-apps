@@ -187,3 +187,4 @@ utc	stage	event	ref	note
 2026-10-25T08:01:16Z	heartbeat	lane HOLD: probe -6 macOS gate failed 07:06Z (~70 min run); probe -3 (74829566) Linux green, macOS gate 40171578102 running since 07:07Z; #4854/#5025 wait for next batch
 2026-10-26T02:01:36Z	stage-start	act-1a175ee12a5-4niu resumed: FV-z only; #4854/#5025 ready but held, dev-red #5321 (macOS) blocks batches
 2026-10-26T02:23:09Z	heartbeat	blocked poll 2/3: dev-red #5321 open (macOS, run 40251699354); #4854 (565669e7) and #5025 (9c2bc627) clean, unmerged, no needs-fix/needs-rebase
+2026-10-26T02:45:30Z	question	blocked poll 3/3 identical: posted Question for the supervisor on #3481 (dev-red #5321 holds #4854/#5025)
