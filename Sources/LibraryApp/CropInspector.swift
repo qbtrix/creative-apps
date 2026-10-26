@@ -1,6 +1,8 @@
 // CropInspector.swift: the CROP section the Develop tab shows while a crop
-// draft is open (crop CR-6). The aspect chips (`library.crop.aspect.<title>`,
-// "library.crop.aspect.1:1"), three to a row so all six share one width;
+// draft is open (crop CR-6). SuiteUI's CropAspectPicker (orientation-crop
+// OC-9): the aspect chips (`suite.crop.aspect-<title>`, "suite.crop.aspect-1-1"),
+// Custom W:H, and the landscape/portrait toggle (`suite.crop.orientation`, X),
+// standing as the draft's frame stands; each pick goes to `crop.pick`;
 // Straighten, a scrub row from -45° to 45° with one decimal that takes a
 // typed angle (`library.crop.straighten`); Auto (`library.crop.auto`), off
 // with `levelHelp` until a leveler is connected; Apply, the primary action
@@ -9,6 +11,7 @@
 // the whole photo at 0°. Values in, closures out: every change goes through
 // `LibraryMenu.Crop`'s closures; it never writes LibraryCatalog.
 import LibraryModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -20,7 +23,10 @@ struct CropInspector: View {
         let cancel = action("Cancel", "cancel", systemImage: "xmark", crop.cancel)
         let reset = action("Reset Crop", "reset", systemImage: "arrow.counterclockwise", crop.reset, help: crop.resetHelp)
         InspectorSection("Crop") {
-            ChoiceChips(options: Self.aspects, selected: crop.draft?.aspect, onSelect: { crop.setAspect?($0) })
+            CropAspectPicker(
+                aspect: crop.draft?.aspect ?? .original, orientation: Self.orientation(of: crop.frame),
+                onPick: { crop.pick?($0) })
+                .disabled(crop.pick == nil)
             InspectorSliderRow(
                 "Straighten", value: crop.draft?.angle ?? 0, in: CropSettings.angleRange, unit: "°", decimals: 1,
                 onChange: { crop.setAngle?($0) })
@@ -39,9 +45,10 @@ struct CropInspector: View {
         }
     }
 
-    /// The six aspects, each chip identified by its title.
-    nonisolated static let aspects = CropAspect.allCases.map {
-        InspectorOption(id: $0, title: $0.rawValue, identifier: "library.crop.aspect.\($0.rawValue)")
+    /// The way the draft's frame stands: taller than wide is portrait.
+    nonisolated static func orientation(of frame: PixelRect?) -> CropOrientation {
+        guard let frame, frame.height > frame.width else { return .landscape }
+        return .portrait
     }
 
     nonisolated static let noDraft = "Press R in the loupe to crop."

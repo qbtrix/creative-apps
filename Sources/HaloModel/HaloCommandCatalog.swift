@@ -13,13 +13,14 @@ extension HaloProject {
     /// `history.read` and `history.jump` (autosave-history HA-6), the six `transform.*` commands on the
     /// selected layer (transform HT-6), `frameRateSpecs` (frame-rates FR-8b), the five `place.*`
     /// commands (placed-images PH-6), the eleven `style.*` commands (layer-styles HY-1), `textStyleSpecs`
-    /// (text-style TS-9), then `windowSpecs`.
+    /// (text-style TS-9), the suite's five `file.*` recents, Open In and drop commands (file-flow HF-3, whose
+    /// `file.open-recent` takes a recent file's id in place of the path `.openRecent` names), then `windowSpecs`.
     public static let commandSpecs: [CommandSpec<HaloProject>] =
-        HaloCommand.allCases.map(spec(for:)) + ShapeCommands.specs(HaloProject.self)
+        HaloCommand.allCases.map(spec(for:)).filter { $0.id != "file.open-recent" } + ShapeCommands.specs(HaloProject.self)
         + GradientCommands.specs(HaloProject.self) + StrokeCommands.specs(HaloProject.self)
         + HistoryCommands.specs(HaloProject.self) + TransformCommands.specs(HaloProject.self) + frameRateSpecs
         + PlaceCommands.specs(HaloProject.self) + StyleCommands.specs(HaloProject.self) + textStyleSpecs
-        + windowSpecs
+        + FileFlowCommands.specs(HaloProject.self) + windowSpecs
 
     /// The kernel's text commands but `text.set-size`: Halo's own (`HaloCommand.setFontSize`, which the
     /// inspector's size row runs) keeps that id, so the catalog holds it once.
