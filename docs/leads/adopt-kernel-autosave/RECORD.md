@@ -168,3 +168,4 @@ Next: AK side ended (parked by the supervisor): #4427 and #4428 on dev; relaunch
 - 2026-10-26T17:21:40Z AK-photo/AK-z blocked: SC-f PRs #5262 #5265 still open
 - 2026-10-26T17:43:14Z AK-photo/AK-z blocked: SC-f PRs #5262 #5265 still open
 - 2026-10-26T18:05:43Z 18:05 poll: none merged, no needs-fix, dev-red #5321 open; SC-f open
+- 2026-10-26T18:27:38Z 18:27 poll: no needs-fix, dev-red #5321 open; SC-f open
