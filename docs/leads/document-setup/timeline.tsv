@@ -237,3 +237,4 @@ utc	stage	event	ref	note
 2026-10-26T16:33Z	3	poll	-	no merges of ours; DS-z waits on #4918, #4891, #5267
 2026-10-26T16:51Z	3	poll	-	no merges of ours, dev unchanged; DS-z waits on #4918, #4891, #5267; dev-red #5321 open
 2026-10-26T17:12Z	3	poll	-	#5267 merged (df48c0ba, renamed FlareNewSheet/NewCompositionSheet to +Suite). Merged dev into lead/document-setup-DS-z-a (clean, 19187ed5) and that into lead/document-setup-DS-z (b0369b78): the +Suite sheets deleted as DS-15 intends, canonical-ui-baseline takes dev's side (LibraryBackupSheet rows gone); no references left. Gate not run (no swift here): run scripts/ci --changed before opening. Next: DS-z PRs open once #4918 and #4891 land
+2026-10-26T17:28Z	3	poll	-	dev unchanged; DS-z (b0369b78) waits on #4918 and #4891
