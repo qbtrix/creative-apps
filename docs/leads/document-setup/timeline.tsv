@@ -232,3 +232,4 @@ utc	stage	event	ref	note
 2026-10-26T15:02Z	3	poll	-	no merges of ours; #4918, #4891, #5267 queued; DS-z waits. Open findings 0.
 2026-10-26T15:21Z	3	poll	-	no merges of ours (#4887, #4901, #4918, #4891, #5267 open); DS-z waits on #4918, #4891, #5267; dev-red #5321 open
 2026-10-26T15:39Z	3	poll	-	no merges of ours (#4887, #4901, #4918, #4891, #5267 open); DS-z waits on #4918, #4891, #5267; dev-red #5321 open
+2026-10-26T15:56Z	3	poll	-	no merges of ours, dev unchanged; DS-z waits on #4918, #4891, #5267; dev-red #5321 open
