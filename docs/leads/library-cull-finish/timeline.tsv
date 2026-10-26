@@ -194,3 +194,4 @@
 2026-10-26T09:47Z	poll	dev-red #5321 open; dev at 2ed77a2e (SuiteUI XP-4 #5065 landed); slice PRs open and clean; #5128 and #4923 still await the prescreen; no Library findings
 2026-10-26T10:13Z	poll	dev-red #5321 open; dev at 2eab5aeb (#5163 library loupe GPU landed); #4899 and #4923 test-merge clean with dev; slice PRs open; #5128 and #4923 still await the prescreen; no Library findings
 2026-10-26T10:35Z	poll	dev-red #5321 open; dev at 2eab5aeb; slice PRs open and clean; #5128 and #4923 still await the prescreen; no Library findings
+2026-10-26T10:57Z	poll	dev-red #5321 open; dev at f3af1c00 (lane quarantine fix #5725); slice PRs open and clean; #5128 and #4923 still await the prescreen; no Library findings
