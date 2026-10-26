@@ -165,3 +165,4 @@ Next: lane merges DS-photo #4901, DS-design #4887, DS-halo #4918, DS-flare #4891
 - 2026-10-26T22:29Z (act-1a177ff0916-4jm7): poll: dev 9810d71b; Belt-Slice-Done + Mac-Finish-Wanted posted for DS-design (#4887) and DS-flare (#4891) on run 40408730728 (green Linux, dev c4cf4a75); #4901 DS-photo, #4918 DS-halo open; DS-z waits on #4918
 - 2026-10-26T22:48Z (act-1a177ff0916-4jm7): poll: dev 3d94856c; merged dev into #4918 DS-halo (golden: dev's file-flow entries + DS-halo's document.* entries, sorted by id; catalog test: files then document setup then window steps), head f015cd99; #4901 DS-photo in lane
 - 2026-10-26T23:07Z (act-1a177ff0916-4jm7): poll: dev 3d94856c; #4918 DS-halo in lane at f015cd99 (needs-rebase cleared); #4901 DS-photo in lane
+- 2026-10-26T23:23Z (act-1a177ff0916-4jm7): poll: dev 22d07ab9; #4918 DS-halo (f015cd99) and #4901 DS-photo in lane, no return labels
