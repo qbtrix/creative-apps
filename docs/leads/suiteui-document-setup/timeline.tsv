@@ -247,3 +247,4 @@ utc	stage	event	ref	note
 2026-10-26T18:03Z	3	poll	-	dev unchanged; no return label on #4887, #4901, #4918, #4891; DS-z (b0369b78) waits on #4918 and #4891
 2026-10-26T18:20Z	3	poll	-	no merges of ours (only #5263 photo); DS-z (b0369b78) waits on #4918 and #4891
 2026-10-26T18:37Z	3	poll	-	dev unchanged; DS-z (b0369b78) waits on #4918 and #4891
+2026-10-26T18:54Z	3	poll	-	no merges of ours (only #5295); DS-z (b0369b78) waits on #4918 and #4891
