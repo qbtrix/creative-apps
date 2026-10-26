@@ -263,3 +263,8 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - From 12:40Z to 15:10Z the check-ins went to lead/adjust-everywhere (docs/leads/adjust-everywhere/) instead of this branch, so Belt saw no commit here; the work did not stall. Those check-ins are copied above, and every check-in from now on goes to both branches.
 - Since 11:45Z: #5266, #5104 and #5780 landed (dev f86f72f7). Wave 2 (#5064, #5233, #5235, #5236), #5790 (packet) and #5800 (AJ-14: RJ-X60 job, pending form) are clean, labelled fast-lane and beta, with no needs-* label. Lane batch 20261026150314 runs #5267 alone.
 - 1 open finding (#5789, fixed by #5236). Stage: 3 wave 3, waiting for wave 2 to land; wave 3 (#5247-#5260) restacks after it.
+
+### 2026-10-26T15:30Z check-in
+
+- The lane landed #5285 (dev 310d7d14); batch 20261026150314 (#5267) still in flight. The latest sweep logs all of ours eligible (#5064 etc. with Fast-Check and local-ci/prescreen; #5790 and #5800 no code), each waiting while a batch of one is in flight. No needs-* label.
+- 1 open finding (#5789, fixed by #5236). Stage: 3 wave 3, waiting for wave 2 to land.
