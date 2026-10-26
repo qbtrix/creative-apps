@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-P12 (photo/tone-controls PT-7): input/tungsten-grey.png is a neutral grey card shot under 3200 K light, so it reads orange. The job: tone.set temperature -30 and tint 5 on the image, then a PNG export. The trap: white balance works only on the whole image, not on an adjustment layer. The assertion: the export matches expected/tungsten-grey-balanced.png, where the card reads neutral (|R - B| <= 3/255), the job's own export recorded when PT-7 added the fixtures.",
+  "inputs": ["input/*.png"],
+  "steps": [
+    {"id": "tone.set", "params": {"slider": "temperature", "value": -30}},
+    {"id": "tone.set", "params": {"slider": "tint", "value": 5}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-balanced", "format": "png", "options": {}},
+  "expect": {
+    "out/tungsten-grey-balanced.png": {"pixels": {"tolerance": 3, "reference": "expected/tungsten-grey-balanced.png"}}
+  },
+  "platforms": ["linux", "macos"]
+}

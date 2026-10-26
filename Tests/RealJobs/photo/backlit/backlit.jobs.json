@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-P13 (photo/tone-controls PT-7): input/backlit.png is a subject in shadow against a bright sky. The job: a new adjustment layer, then tone.set shadows 50, highlights -40 and contrast 15 on it, then a PNG export. The trap: the edit lands on the pixel layer instead of the adjustment layer. The assertion: the export matches expected/backlit-lifted.png, the job's own export recorded when PT-7 added the fixtures; PhotoToneCommandTests checks the steps land on the adjustment layer.",
+  "inputs": ["input/*.png"],
+  "steps": [
+    {"id": "layer.new-adjustment", "params": {"kind": "levels"}},
+    {"id": "tone.set", "params": {"slider": "shadows", "value": 50}},
+    {"id": "tone.set", "params": {"slider": "highlights", "value": -40}},
+    {"id": "tone.set", "params": {"slider": "contrast", "value": 15}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-lifted", "format": "png", "options": {}},
+  "expect": {
+    "out/backlit-lifted.png": {"pixels": {"tolerance": 3, "reference": "expected/backlit-lifted.png"}}
+  },
+  "platforms": ["linux", "macos"]
+}
