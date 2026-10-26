@@ -208,3 +208,4 @@ utc	stage	event	ref	note
 2026-10-26T18:15:11Z	wait	nudge	-	queued PRs clean+prescreened; cadence 20m
 2026-10-26T18:37:06Z	wait	poll	-	lane queue unchanged
 2026-10-26T18:59:23Z	wait	poll	#5321	dev-red closed
+2026-10-26T19:21:41Z	wait	poll	-	lane sweep running
