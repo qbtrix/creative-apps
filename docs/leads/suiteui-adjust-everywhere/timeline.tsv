@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-24T23:10Z	stage	wave 2 start	run act-1a1702c5766-a1ju; all outside waits met (contract-first); builders on AJ-c (AJ-6, stacked on #5064) and AJ-u (AJ-3+AJ-4); no open findings
 2026-10-25T00:26Z	stage	wave 3 start	wave 2 in lane: #5064 AJ-k, #5233 AJ-c, #5235 #5236 AJ-u; builders on AJ-photo, AJ-library, AJ-halo; no open findings
 2026-10-26T02:11Z	3	resume	#5064	run act-1a175f7cbe0-4gv1; wave 2+3 PRs queued in the lane, 0 findings
+2026-10-26T02:41Z	3	lane-check	#5064,#5233,#5235,#5236	all eligible in 01:45Z sweep; waiting on lane
