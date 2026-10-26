@@ -183,3 +183,4 @@ utc	stage	event	ref	note
 2026-10-26T22:10:52Z	3	gate	TS-halo	#5226 TS-9 merge b406cca0616b8ccfe4c8876f0858698018855f00: scripts/ci --changed CI: PASS (Halo catalog tests + AllAppsCatalogTests); pushed, Head: moved
 2026-10-26T22:17:38Z	3	poll	all	20-min poll: #5047 #5226 re-gated heads pushed, awaiting lane; #4958 #5772 queued; no supervisor reply; 0 findings
 2026-10-26T22:30:16Z	3	lane	all	lane dropped needs-rebase on #5047 (31b358be) and #5226 (b406cca0); both back in the queue with #4958 #5772
+2026-10-26T22:37:48Z	3	poll	all	20-min poll: #4958 #5047 #5226 #5772 queued in lane; stacked PRs wait; no supervisor reply; 0 findings
