@@ -1,0 +1,5 @@
+[
+  {"label": "the document's provider loses --bundle", "file": "Sources/AfterGlowCLICore/HelpReports.swift", "find": "host: file.host ?? \"\", bundleFlag: bundle)", "replace": "host: file.host ?? \"\", bundleFlag: nil)", "tests": "BundleFlagTests"},
+  {"label": "open drops --bundle", "file": "Sources/AfterGlowCLICore/HelpReports.swift", "find": "try document(decoder.decode(File.self, from: data), bundle: bundle)", "replace": "try document(decoder.decode(File.self, from: data), bundle: nil)", "tests": "BundleFlagTests"},
+  {"label": "the init drops bundleFlag", "file": "Sources/AfterGlowCLICore/HelpReports.swift", "find": "(now, home, user, host, bundleFlag)", "replace": "(now, home, user, host, nil)", "tests": "BundleFlagTests"}
+]

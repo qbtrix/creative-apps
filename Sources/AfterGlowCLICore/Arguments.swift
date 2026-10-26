@@ -69,6 +69,7 @@ enum Arguments {
     afterglow <app> list-commands | describe <command> | open <file>
     afterglow <app> new --out <file> [--json '{…}'] [--force]
     afterglow <app> <command> --in <file> (--out <file> | --in-place) [--json '{…}'] [--force]
+    afterglow suite <command> --in <file> (--out <file> | --in-place) --bundle <AfterGlow.app> [--json '{…}'] [--force]
     afterglow <app> export <file> --format <fmt> --out <path> [--json '{options}'] [--force]
     afterglow run <script.jobs.json> [--dry-run] [--force]
     afterglow mcp [...]
@@ -116,8 +117,9 @@ enum Arguments {
             return .export(app, file: file, format: format, out: try flags.required("--out"), options: try flags.json(), force: flags.has("--force"))
         default:
             try known(form, in: app)
-            let flags = try Flags(tail, values: ["--in", "--out", "--json"], switches: ["--in-place", "--force"])
+            let flags = try Flags(tail, values: ["--in", "--out", "--json", "--bundle"], switches: ["--in-place", "--force"])
             try flags.none()
+            let app = try bundled(app, flags.value("--bundle"))
             let input = try flags.required("--in"), output = flags.value("--out")
             switch (output, flags.has("--in-place")) {
             case (nil, false): throw .usage("\(form) needs --out <file> or --in-place")
@@ -127,6 +129,14 @@ enum Arguments {
             let step = CommandEnvelope(id: form, params: try flags.json())
             return .command(app, step: step, input: input, output: output, force: flags.has("--force"))
         }
+    }
+
+    /// `app`, or for `--bundle <path>` the suite's Help commands answering for that AfterGlow.app; any other app
+    /// refuses the flag.
+    static func bundled(_ app: HeadlessApp, _ bundle: String?) throws(Refusal) -> HeadlessApp {
+        guard let bundle else { return app }
+        guard app.name == Apps.suite.name else { throw .usage("--bundle is only for afterglow suite's commands, not \(app.name)'s") }
+        return Apps.suite(bundle: bundle)
     }
 
     static func known(_ id: String, in app: HeadlessApp) throws(Refusal) {

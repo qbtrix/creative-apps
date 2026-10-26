@@ -48,9 +48,9 @@ public struct MCPConfig: Sendable, Hashable {
     }
 }
 
-/// The suite app's provider answers the assistant commands for the bundle this CLI runs from.
+/// The suite app's provider answers the assistant commands for `--bundle`'s AfterGlow.app, else the one this CLI runs from.
 extension HelpReports {
-    public var bundle: String? { MCPConfig.bundle(flag: nil, executable: MCPConfig.ownExecutable()) }
+    public var bundle: String? { MCPConfig.bundle(flag: bundleFlag, executable: MCPConfig.ownExecutable()) }
     var config: MCPConfig { MCPConfig(bundle: bundle, home: ProcessInfo.processInfo.environment["HOME"] ?? home) }
     public func connectAssistant() -> JSONValue { config.connectAssistant() }
     public func installCLI(confirm: Bool) -> JSONValue { config.installCLI(confirm: confirm, existing: CommandLineInstall.linkTarget) }
