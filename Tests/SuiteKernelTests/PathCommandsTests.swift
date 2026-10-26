@@ -97,6 +97,28 @@ struct PathDoc: PathEditTarget {
         _ = try Self.run(.handle(AnchorRef(contour: 0, index: 0), .handleOut, to: Point(x: 9, y: 9), breaking: true, drag: nil), &doc)
         #expect(doc.history.undoSteps.count == 1)
     }
+    /// #5284: an open path's first in handle and last out handle shape no segment, so the path can't keep them. The
+    /// move refuses, even breaking, and records nothing; a closed path's ends keep theirs; the example edits the path.
+    @Test func openEndHandleRefuses() throws {
+        var doc = PathDoc.editing
+        let why = "An open path's end point has no segment on that side, so it can't keep a handle there."
+        for (index, end) in [(2, HandleEnd.handleOut), (0, HandleEnd.handleIn)] {
+            #expect(throws: CatalogError.unavailable(id: "path.handle-move", why: why)) {
+                try Self.run(.handle(AnchorRef(contour: 0, index: index), end, to: Point(x: 9, y: 9), breaking: true, drag: nil), &doc)
+            }
+        }
+        #expect(doc.history.undoSteps.isEmpty && doc.pathInEdit == PathDoc.editing.pathInEdit)
+        var closed = PathDoc.editing
+        closed.pathInEdit?.path = VectorPath(contours: [VectorContour(anchors: AnchorEditTests.path().contours[0].anchors, closed: true)])
+        _ = try Self.run(.handle(AnchorRef(contour: 0, index: 2), .handleOut, to: Point(x: 9, y: 9), breaking: true, drag: nil), &closed)
+        #expect(closed.history.undoSteps.count == 1 && closed.pathInEdit?.path.contours.first?.anchors.last?.handleOut == Point(x: 9, y: 9))
+        var drawn = PathDoc()
+        let catalog = try #require(Self.catalog)
+        _ = try catalog.run("path.draw", params: try #require(catalog.spec("path.draw")).example, on: &drawn)
+        let before = drawn.pathInEdit?.path
+        _ = try catalog.run("path.handle-move", params: try #require(catalog.spec("path.handle-move")).example, on: &drawn)
+        #expect(drawn.pathInEdit?.path != before && drawn.history.undoSteps.map(\.name) == ["Add Path", "Move Handle"])
+    }
     @Test func drawRefusesFewerThanTwo() throws {
         var doc = PathDoc()
         let one: JSONValue = .object(["contours": .array([.object(["closed": .bool(false), "anchors": .array([.object(["x": .number(0), "y": .number(0), "kind": .string("corner")])])])])])
