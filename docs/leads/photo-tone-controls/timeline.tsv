@@ -224,3 +224,4 @@ utc	stage	event	ref	note
 2026-10-26T19:09Z	check	#5363 still open (clean, p0); dev-red #5321 open; no supervisor reply
 2026-10-26T19:31Z	check	#5363 still open (clean, p0); dev-red #5321 open; no supervisor reply
 2026-10-26T19:53Z	check	#5363 still open (clean, p0); dev-red #5321 open; no supervisor reply
+2026-10-26T20:15Z	stage	#5363 (PT-4 re-land) merged 20:14Z; dev 9919d325 merged into -pt3 (5 files +122/-29) and -pt5 (6 files +89/-12) clean; -pt3 into -pt7 (20 files vs dev, opens after PT-m lands); gating pt3/pt5
