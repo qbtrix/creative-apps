@@ -151,3 +151,4 @@ utc	stage	event	ref	note
 2026-10-26T05:54Z	3	heartbeat	lane	05:55Z poll: dev 7e13ba02, main d3323f6a; no merges or relabels of ours; #5116 crash was a stale build (clean rebuild passes, clean dev also fine), gate rerunning; open findings 3 (#5093-#5095, fill-heal), under the cap; no supervisor reply on #3752
 2026-10-26T06:23Z	3	heartbeat	lane	06:21Z poll: dev c480d848, main d3323f6a; no merges of ours; no needs-* labels on ours; #5116 at 0e1cc330 awaiting lane; open findings 3 (#5093-#5095); Packet-Review 2 on #3752 answered (already on dev); no supervisor reply to the 05:05Z question
 2026-10-26T06:45Z	3	heartbeat	lane	06:44Z poll: dev 798f1f0a (#5244), main d3323f6a; no merges of ours; no needs-* labels; heads unchanged; open findings 3; no supervisor reply on #3752
+2026-10-26T07:14Z	3	heartbeat	lane	07:30Z: #5096, #4889, #5125 needs-rebase again (photo list-commands golden); dev merged, golden regenerated, gate running. #5129 stays on its FH-7 base.
