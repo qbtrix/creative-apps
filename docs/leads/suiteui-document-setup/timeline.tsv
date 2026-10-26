@@ -257,3 +257,4 @@ utc	stage	event	ref	note
 2026-10-26T22:11Z	3	poll	-	no tracked merges; #4901 DS-photo, #4918 DS-halo open; no green ci.yml yet contains 00b6f85f/7b0f5eac for DS-design/DS-flare Slice-Done
 2026-10-26T22:29Z	3	poll	-	Belt-Slice-Done + Mac-Finish-Wanted posted for DS-design (#4887) and DS-flare (#4891) on run 40408730728 (green Linux, dev c4cf4a75); #4901 DS-photo, #4918 DS-halo open; DS-z waits on #4918
 2026-10-26T22:48Z	3	poll	-	merged dev into #4918 DS-halo (golden: dev's file-flow entries + DS-halo's document.* entries, sorted by id; catalog test: files then document setup then window steps), head f015cd99; #4901 DS-photo in lane
+2026-10-26T23:07Z	3	poll	-	#4918 DS-halo in lane at f015cd99 (needs-rebase cleared); #4901 DS-photo in lane
