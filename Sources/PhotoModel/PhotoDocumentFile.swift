@@ -102,13 +102,17 @@ extension PhotoWorkspace {
     /// pixel layer's and mask's pixels as 8-bit straight-alpha sRGB, the
     /// whole-image adjustments and the selected layer. Throws
     /// `RasterError.invalid` with no image open.
-    public func snapshot() throws -> PhotoDocumentSnapshot {
+    public func snapshot() throws -> PhotoDocumentSnapshot { try snapshot(images: true) }
+
+    /// `snapshot()`, with no pixels or masks unless `images` (a caller that encodes them itself).
+    func snapshot(images: Bool) throws -> PhotoDocumentSnapshot {
         guard let canvas else { throw RasterError.invalid("no image is open") }
         func image(_ tiles: TiledPixels) throws -> DecodedImage {
             DecodedImage(rgba8: try tiles.rgba8(), width: tiles.width, height: tiles.height)
         }
         return PhotoDocumentSnapshot(
-            canvas: canvas, layers: layers, pixels: try pixels.mapValues(image), masks: try masks.mapValues(image),
+            canvas: canvas, layers: layers, pixels: images ? try pixels.mapValues(image) : [:],
+            masks: images ? try masks.mapValues(image) : [:],
             adjustments: adjustments, selectedLayerID: selectedLayerID, paths: paths)
     }
 

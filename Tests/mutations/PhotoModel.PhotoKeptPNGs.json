@@ -1,0 +1,6 @@
+[
+{"label": "a kept PNG is reused though its layer's pixels changed", "file": "Sources/PhotoModel/PhotoKeptPNGs.swift", "find": "if let kept = old[key], kept.pixels == tiles { return kept.png }", "replace": "if let kept = old[key] { return kept.png }", "tests": "PhotoKeptPNGsTests"},
+{"label": "nothing is kept for the next write", "file": "Sources/PhotoModel/PhotoKeptPNGs.swift", "find": "            kept[key] = (tiles, png)\n", "replace": "", "tests": "PhotoKeptPNGsTests"},
+{"label": "a removed layer's PNG stays kept", "file": "Sources/PhotoModel/PhotoKeptPNGs.swift", "find": "        kept = [:]\n", "replace": "", "tests": "PhotoKeptPNGsTests"},
+{"label": "a mask's PNG is kept under its layer's pixels", "file": "Sources/PhotoModel/PhotoKeptPNGs.swift", "find": "masks.map { (Key(id: $0.key, mask: true), $0.value) }", "replace": "masks.map { (Key(id: $0.key, mask: false), $0.value) }", "tests": "PhotoKeptPNGsTests"}
+]

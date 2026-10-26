@@ -4,7 +4,9 @@
 // the timing and the off-main calls. When `model.autosaveDue` says so, `tick`
 // builds `recoveryEntry` and writes it in one detached task, once per edit
 // (the main actor only copies the workspace value); a write that fails waits
-// for the next edit, so an unchanged document is never encoded twice. A write
+// for the next edit, so an unchanged document is never encoded twice, and a
+// write reuses the PNG of every layer the last landed write encoded whose
+// pixels are unchanged (PhotoKeptPNGs), so it encodes what changed. A write
 // that lands after a save or a discard is removed again. `launch` reads
 // `leftBehind()` off the main actor (a damaged file is already dropped) and
 // offers the newest; Restore decodes the offer off the main actor (`decode`),
@@ -27,6 +29,8 @@ final class PhotoAutosave {
     @ObservationIgnored private var writtenEdit: Double?
     /// Counts saves and discards, so a write that lands after one is removed again.
     @ObservationIgnored private var resets = 0
+    /// The PNGs of the last write that landed, so the next encodes only the layers that changed since.
+    @ObservationIgnored private var kept = PhotoKeptPNGs()
 
     init(window: String, delay: Double, store: any RecoveryStoring) {
         self.window = window
@@ -115,13 +119,17 @@ final class PhotoAutosave {
 
     /// Builds `model`'s entry and writes it in one detached task, off the main
     /// actor; whether it landed. A clean image has no entry and writes nothing.
+    /// Only a write that landed keeps its PNGs: a failed one leaves `kept` as it was.
     private func write(_ model: PhotoWorkspace, now: Double, codec: any PhotoImageCodec) async -> Bool {
-        let (store, window) = (store, window)
-        let task = Task.detached(priority: .utility) { () throws -> Bool in
-            guard let entry = try model.recoveryEntry(now: now, codec: codec) else { return false }
+        let (store, window, kept) = (store, window, kept)
+        let task = Task.detached(priority: .utility) { () throws -> PhotoKeptPNGs? in
+            var kept = kept
+            guard let entry = try model.recoveryEntry(now: now, codec: codec, reusing: &kept) else { return nil }
             try store.write(entry, window: window)
-            return true
+            return kept
         }
-        return (try? await task.value) ?? false
+        guard let landed = try? await task.value else { return false }
+        self.kept = landed
+        return true
     }
 }

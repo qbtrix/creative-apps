@@ -7,7 +7,9 @@
 // OpenRaster readers, and `photo/document.json` with what OpenRaster has no
 // word for (paths among them, omitted when there are none); a recovery write
 // (`merged: false`) leaves out the merged image and the thumbnail, which only
-// other readers use and which cost a whole-image composite. A text layer's PNG is its rasterized words, and its stack.xml
+// other readers use and which cost a whole-image composite, and takes a
+// layer's PNG from the snapshot's `pixelPNGs` / `maskPNGs` when it is
+// already encoded (PhotoKeptPNGs). A text layer's PNG is its rasterized words, and its stack.xml
 // entry carries their `afterglow:text` (PhotoTextLayer+ORA). Decode reads
 // the JSON, the images it names and, from stack.xml, only those text
 // attributes (the rest is never parsed back: the packet's "Reading"
@@ -35,31 +37,43 @@ struct LiveArchive: DocumentArchiving {
     func encode(_ snapshot: PhotoDocumentSnapshot, codec: any PhotoImageCodec, merged: Bool) throws -> PhotoPackage {
         var files: [String: Data] = [PhotoZip.mimetype: PhotoZip.mimetypeValue]
         var images: [(path: String, image: DecodedImage)] = []
-        var entries: [LayerEntry] = [], contents: [LayerContent] = [], texts: [String: String] = [:]
+        var entries: [LayerEntry] = [], texts: [String: String] = [:]
         for (index, layer) in snapshot.layers.enumerated() {
             let number = snapshot.layers.count - index
             var src: String?, mask: String?
             let text = layer.kind.textLayer
             if layer.kind == .pixels || text != nil {
-                guard let image = snapshot.pixels[layer.id] else { throw RasterError.invalid("\(layer.name) has no pixels") }
                 let path = "data/layer-\(number).png"
-                images.append((path, image))
+                if let png = snapshot.pixelPNGs[layer.id] {
+                    files[path] = png
+                } else {
+                    guard let image = snapshot.pixels[layer.id] else { throw RasterError.invalid("\(layer.name) has no pixels") }
+                    images.append((path, image))
+                }
                 src = path
                 if let text { texts[path] = try text.oraValue() }
             }
-            if let image = snapshot.masks[layer.id] {
-                let path = "photo/masks/layer-\(number).png"
-                images.append((path, image))
-                mask = path
+            let maskPath = "photo/masks/layer-\(number).png"
+            if let png = snapshot.maskPNGs[layer.id] {
+                files[maskPath] = png
+                mask = maskPath
+            } else if let image = snapshot.masks[layer.id] {
+                images.append((maskPath, image))
+                mask = maskPath
             }
             entries.append(LayerEntry(layer, src: src, mask: mask))
-            // As the renderer lays it: a disabled mask is kept but not applied.
-            contents.append(LayerContent(
-                layer: layer, pixels: try snapshot.pixels[layer.id].map(Self.tiles),
-                mask: layer.isMaskEnabled ? try snapshot.masks[layer.id].map(Self.tiles) : nil))
         }
         let all: [(path: String, image: DecodedImage)]
         if merged {
+            guard snapshot.pixelPNGs.isEmpty, snapshot.maskPNGs.isEmpty else {
+                throw RasterError.invalid("the merged picture needs every layer's pixels, not its PNG")
+            }
+            // As the renderer lays it: a disabled mask is kept but not applied.
+            let contents = try snapshot.layers.map { layer in
+                LayerContent(
+                    layer: layer, pixels: try snapshot.pixels[layer.id].map(Self.tiles),
+                    mask: layer.isMaskEnabled ? try snapshot.masks[layer.id].map(Self.tiles) : nil)
+            }
             // The picture for other readers: a whole-image composite, so a recovery write leaves it out.
             let picture = try LiveMerging().flatten(contents, canvas: snapshot.canvas, adjustments: snapshot.adjustments)
             let flat = DecodedImage(rgba8: try picture.rgba8(), width: picture.width, height: picture.height)

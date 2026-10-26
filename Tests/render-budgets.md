@@ -275,4 +275,6 @@ The autosave 5 s after the last edit used to flatten the whole picture for
 the reference path (a whole-picture composite, every visible layer, tile by
 tile). A recovery write now encodes the
 layers and masks only (`merged: false`), and IdleWorkTests waits for it after
-each gesture and gates that it composites nothing: no row, no row layer.
+each gesture and gates that it composites nothing: no row, no row layer. It also
+reuses the PNG of every layer whose pixels haven't changed since the last
+write (PhotoKeptPNGs), so the write after one stroke encodes one layer, not 60.
