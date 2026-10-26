@@ -1,13 +1,13 @@
 # layer-styles (Halo) lead record
 
 Issue: #3936 · Packet: docs/blueprints/halo/features/layer-styles.md
-Run: act-1a171ab9e77-es26 · Session: claude/layer-styles-lead-2ph8nc · Started: 2026-10-24 (resumed 2026-10-25T06:08Z; earlier runs act-1a16e2f645b-47gj, act-1a16c627cc6-nlss, act-1a1648ae75a-4dqz)
+Run: act-1a175e3e638-skn9 · Session: claude/layer-styles-lead-s46uof · Started: 2026-10-24 (resumed 2026-10-26T02:00Z; earlier runs act-1a171ab9e77-es26, act-1a16c627cc6-nlss, act-1a1648ae75a-4dqz)
 Wire: suiteui layer-styles:LS-a
 Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTests.glowReachesItsKeyedSize and glowIsNotClipped; add the no-padding mutation, origin dropped in LiveFrameRendering's styled composite)
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
-Stage: 3 Packet-Review 1 (21:30Z): 11 amendments read (#3936, 21:15Z, packet f7c2ab5bb); fixes for 1, 6, 7, 8, 10 being built test first on #5158 HY-m, 2 on #5161 HY-u. dev-red #5321 still open (not ours); #5158 and #5174 still unbatched
-Base: 13fb2f591 (origin/dev; main 3db45eb verified at relaunch)
-Next: gate and push HY-m's amendment commit, move its Head:; journey fix on HY-u; then wait for the lane. On #5174 merge: merge dev into #5157, #5161, #5218 in order, gate, push, Head, ready
+Stage: 3 polling (02:10Z): Packet-Review 1 applied: HY-m amendments on #5158 (b84d8cb4, gated, ready, prescreen green); amendment 2 (3 keyframes) on HY-u #5161. dev-red #5321 open (macOS, Photo/Library range, not ours)
+Base: 8eff8ab85 (origin/dev; main d3323f6a7 verified at relaunch)
+Next: wait for the lane to land #5158 (HY-m) and #5174 (LS-2); on #5174 merge: merge dev into #5157, #5161, #5218 in order, gate, push, Head, ready
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: gate and push HY-m's amendment commit, move its Head:; journey fix on HY-u
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-26T02:00Z (relaunch act-1a175e3e638-skn9): Belt-Lead lines on #5157 #5158 #5161 #5218 moved to the new run id; attribution footers dropped from those bodies. Status channel and PR base unchanged (lead/halo-layer-styles, dev). Amendment 2 committed on HY-u: the journey expects 3 keyframes.
 - 2026-10-25T21:30Z Packet-Review 1 (#3936, 21:15Z), each amendment:
   1. `Param.property` lists `HaloProperty.keyable` (`allCases + styles`), so `inspector.set-property` / `inspector.toggle-animation` take a style property; on HY-m (#5158), since HY-1 is merged. RJ-H43's job uses `timeline.scrub` + `inspector.*`, not `key.set`, when it is written (HY-z).
   2. Three keys (0, 30 and the stopwatch's last-frame key holding 0): HY-u's journey now expects "3 keyframes"; RJ-H43's expected track lists all three; packet line 60's wording rides HY-8's packet edit.
