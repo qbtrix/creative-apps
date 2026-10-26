@@ -9,8 +9,8 @@
   {
     "label": "contrast runs before exposure",
     "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
-    "find": "        if s.exposure != 0 { p.append(.exposure(Float(s.exposure))) }\n        if s.contrast != 0 { p.append(.contrast(Float(s.contrast))) }",
-    "replace": "        if s.contrast != 0 { p.append(.contrast(Float(s.contrast))) }\n        if s.exposure != 0 { p.append(.exposure(Float(s.exposure))) }",
+    "find": "        p += exposure\n        if s.contrast != 0 { p.append(.contrast(Float(s.contrast))) }",
+    "replace": "        if s.contrast != 0 { p.append(.contrast(Float(s.contrast))) }\n        p += exposure",
     "tests": "LibraryDevelopRenderTests"
   },
   {
@@ -37,8 +37,22 @@
   {
     "label": "the frame is taken from the buffer's sides swapped",
     "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
-    "find": "photo: PixelSize(width: buffer.width, height: buffer.height))",
-    "replace": "photo: PixelSize(width: buffer.height, height: buffer.width))",
+    "find": "photo: PixelSize(width: b.width, height: b.height))",
+    "replace": "photo: PixelSize(width: b.height, height: b.width))",
     "tests": "LibraryCropRenderTests"
+  },
+  {
+    "label": "the shared steps after exposure are dropped: levels, the curve and saturation never run",
+    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "find": "return p + shared.dropFirst(exposure.count)",
+    "replace": "return p",
+    "tests": "LibraryImagingTests"
+  },
+  {
+    "label": "Saturation still waits on creative-core",
+    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "find": "        .vibrance: \"Vibrance waits on creative-core (CoreRaster vibrance)\",\n",
+    "replace": "        .vibrance: \"Vibrance waits on creative-core (CoreRaster vibrance)\",\n        .saturation: \"Saturation waits on creative-core (CoreRaster saturation)\",\n",
+    "tests": "LibraryImagingTests"
   }
 ]

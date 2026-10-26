@@ -1,6 +1,7 @@
 // HaloHeadless.swift (adopt-command-catalog AC-h2): Halo's document with no window, for the afterglow CLI, MCP and
 // the real jobs. It opens and saves .halo files, runs `HaloProject.catalog` lifted onto itself, and renders one frame
-// of the selected composition for a PNG export; movies stay on macOS through shell-media. Linux-safe: no UI imports.
+// of the selected composition for a PNG export; movies stay on macOS through shell-media. Linux-safe: no UI imports,
+// so `.live` has no text rasterizer: a host that can reach Core Text passes its services to `open`/`new(services:)`.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -9,7 +10,8 @@ import Foundation
 import CoreRaster
 import SuiteKernel
 
-/// Halo's headless document: one `HaloProject` on the live services.
+/// Halo's headless document: one `HaloProject` on the live services, or on the caller's (`open(_:name:services:)`,
+/// `new(_:services:)`): HaloModel can't reach Core Text, so a host that can passes its text rasterizer in.
 public struct HaloHeadless: HeadlessDocument {
     public static let app = "halo", openExtensions = ["halo"], exportFormats = ["png"]
     /// Why the window's file and render commands refuse here: the CLI opens, saves and exports instead.
@@ -27,7 +29,12 @@ public struct HaloHeadless: HeadlessDocument {
 
     /// The .halo file `data`, named `name`; throws `HaloFileError` for a file Halo can't read.
     public static func open(_ data: Data, name: String) throws -> HaloHeadless {
-        var project = HaloProject(services: .live)
+        try open(data, name: name, services: .live)
+    }
+
+    /// `open(_:name:)` on `services`.
+    public static func open(_ data: Data, name: String, services: HaloServices) throws -> HaloHeadless {
+        var project = HaloProject(services: services)
         let state = try project.services.files.decode(data)
         project.beginOpen(name: name, path: name)
         project.finishOpen(.success(state))
@@ -36,13 +43,18 @@ public struct HaloHeadless: HeadlessDocument {
 
     /// A project with one composition: `name`, `width`, `height`, `fps` and `seconds`, each optional.
     public static func new(_ options: JSONValue) throws -> HaloHeadless {
+        try new(options, services: .live)
+    }
+
+    /// `new(_:)` on `services`.
+    public static func new(_ options: JSONValue, services: HaloServices) throws -> HaloHeadless {
         let o = try options.decode(NewOptions.self)
-        var project = HaloProject(services: .live)
+        var project = HaloProject(services: services)
         let settings = o.settings(over: project.suggestedSettings)
         guard project.newComposition(settings) else {
             throw CatalogError.failed(id: "new", message: settings.problems.joined(separator: " "))
         }
-        return HaloHeadless(workspace: HaloProject(services: .live, document: project.document))
+        return HaloHeadless(workspace: HaloProject(services: services, document: project.document))
     }
 
     /// The .halo file's bytes, as the window's Save writes them.
@@ -55,7 +67,13 @@ public struct HaloHeadless: HeadlessDocument {
         }
         let rendered = try renderFrame(options)
         let name = "\(workspace.selectedComposition?.name ?? "frame")-\(rendered.frame).png"
-        return [ExportedFile(suggestedName: name, format: format, data: try HaloFramePNG.data(rendered.pixels))]
+        return [ExportedFile(suggestedName: name, format: format, data: try Self.png(rendered))]
+    }
+
+    /// `frame` as a PNG: CoreRaster's `PNG.write` bytes, 8-bit sRGB RGBA with straight alpha. The CLI's export and
+    /// the render's PNG sequence both write it, so a file and the viewer agree.
+    public static func png(_ frame: HaloRenderedFrame) throws -> Data {
+        try PNG.write(frame.pixels, bitsPerChannel: 8)
     }
 
     /// The selected composition at `frame` (the playhead when absent) at 1/`scale` size (1 when absent), drawn as

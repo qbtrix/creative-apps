@@ -1,6 +1,7 @@
 // ToneCommands.swift (tone-controls TC-1 specs, TC-6 bodies): the four tone.* commands a ToneTarget
-// registers and the intents views send. Ids, schemas and availability are the contract; TC-1 runs
-// throw `notBuilt`. Each run calls `setTone` once, the drag token passed through. Linux-safe.
+// registers and the intents views send. Ids, schemas and availability are the contract. Each edit
+// reads `toneSettings`, applies one rule and calls `setTone` once, the drag token passed through, so
+// the target's History folds a drag into one step. Linux-safe.
 import CoreRaster
 import SuiteKernel
 
@@ -21,9 +22,16 @@ public protocol ToneTarget: Sendable {
 public enum ToneIntent: Hashable, Sendable {
     case set(ToneSlider, Double, drag: String?), reset(ToneGroup?), auto
 
-    /// The command id and its JSON params. Stub: the id with empty params until TC-6.
+    /// The command id and its JSON params; a nil drag or group is omitted.
     public var command: (id: String, params: JSONValue) {
-        switch self { case .set: ("tone.set", .object([:])); case .reset: ("tone.reset", .object([:])); case .auto: ("tone.auto", .object([:])) }
+        switch self {
+        case .set(let slider, let value, let drag):
+            var params: [String: JSONValue] = ["slider": .string(slider.rawValue), "value": .number(value)]
+            if let drag { params["drag"] = .string(drag) }
+            return ("tone.set", .object(params))
+        case .reset(let group): return ("tone.reset", .object(group.map { ["group": .string($0.rawValue)] } ?? [:]))
+        case .auto: return ("tone.auto", .object([:]))
+        }
     }
 }
 
@@ -36,8 +44,30 @@ public enum ToneCommands {
     /// `tone.read` and `tone.auto` take nothing.
     public struct NoParams: Codable, Sendable {}
 
-    /// The feature whose task fills the runs.
-    static let notBuilt = CatalogError.notBuilt(id: "tone", feature: "tone-controls TC-6")
+    /// Why Radius and Threshold can't be set: the unsharp pass is off.
+    static let sharpenOff = "Sharpen is off at Amount 0."
+    /// Why a target with no settings can't be adjusted, when it gives no `toneHelp` of its own.
+    static let nothingToAdjust = "There is no picture to adjust."
+
+    /// The target's settings, or `unavailable` for `id` when it has none.
+    static func settings<T: ToneTarget>(_ t: T, _ id: String) throws -> ToneSettings {
+        guard let s = t.toneSettings else { throw CatalogError.unavailable(id: id, why: nothingToAdjust) }
+        return s
+    }
+    /// Why `slider` can't be set on `s`: a `waiting` slider's reason, or Radius and Threshold at Amount 0.
+    static func whyNot(_ slider: ToneSlider, on s: ToneSettings) -> String? {
+        if let why = ToneRules.waiting[slider] { return why }
+        let needsAmount = slider == .sharpenRadius || slider == .sharpenThreshold
+        return needsAmount && s.value(.sharpenAmount) == 0 ? sharpenOff : nil
+    }
+    /// Every slider off neutral, by its key: `tone.read`'s result and every edit's.
+    static func reading(_ s: ToneSettings) -> JSONValue {
+        .object(Dictionary(uniqueKeysWithValues: ToneSlider.allCases.compactMap { slider in
+            s.value(slider) == slider.neutral ? nil : (slider.rawValue, JSONValue.number(s.value(slider)))
+        }))
+    }
+    /// `reset`'s undo step: "Reset White Balance", or "Reset Tone" for every group.
+    static func resetName(_ g: ToneGroup?) -> String { "Reset " + (g?.title ?? "Tone") }
 
     static let dragSchema = ParamSchema.optional(.string("A drag's token; steps under one token are one undo step.", maxLength: 64))
     /// Every slider off neutral, by its key.
@@ -55,7 +85,7 @@ public enum ToneCommands {
         return [
             .typed("tone.read", title: "Tone", summary: "Reads every tone and sharpen slider off neutral.", kind: .query,
                    params: NoParams.self, schema: ParamSchema.none, result: readingSchema, example: .object([:]),
-                   availability: can) { (_: inout T, _: NoParams) throws -> JSONValue in throw notBuilt },
+                   availability: can) { (t: inout T, _: NoParams) throws -> JSONValue in reading(try settings(t, "tone.read")) },
             .typed("tone.set", title: "Tone",
                    summary: "Sets one tone or sharpen slider; the undo step is named for the slider (\"Temperature\").",
                    kind: .edit, params: SetParams.self,
@@ -63,16 +93,35 @@ public enum ToneCommands {
                                     "value": .number("The value, clamped to the slider's range."), "drag": dragSchema],
                                    required: ["slider", "value", "drag"]),
                    result: readingSchema, example: .object(["slider": .string("temperature"), "value": .number(30)]),
-                   availability: can) { (_: inout T, _: SetParams) throws -> JSONValue in throw notBuilt },
+                   availability: can) { (t: inout T, p: SetParams) throws -> JSONValue in
+                let s = try settings(t, "tone.set")
+                if let why = whyNot(p.slider, on: s) { throw CatalogError.unavailable(id: "tone.set", why: why) }
+                let next = s.setting(p.slider, to: p.value)
+                try t.setTone(next, name: p.slider.title, drag: p.drag)
+                return reading(next)
+            },
             .typed("tone.reset", title: "Reset Tone", summary: "Sets one group's sliders, or every slider, back to neutral.",
                    kind: .edit, params: ResetParams.self,
                    schema: .object(["group": .optional(.string("The group; every group when omitted.",
                                                                oneOf: ToneGroup.allCases.map(\.rawValue)))], required: ["group"]),
                    result: readingSchema, example: .object([:]),
-                   availability: canReset) { (_: inout T, _: ResetParams) throws -> JSONValue in throw notBuilt },
+                   availability: canReset) { (t: inout T, p: ResetParams) throws -> JSONValue in
+                let s = try settings(t, "tone.reset")
+                let group = p.group.flatMap(ToneGroup.init(rawValue:))
+                if p.group != nil && group == nil {
+                    throw CatalogError.malformedParams(id: "tone.reset", [SchemaIssue(path: "/group", message: "is not a tone group")])
+                }
+                let next = s.reset(group)
+                try t.setTone(next, name: resetName(group), drag: nil)
+                return reading(next)
+            },
             .typed("tone.auto", title: "Auto Tone", summary: "Sets white balance, exposure, whites and blacks from the picture.",
                    kind: .edit, params: NoParams.self, schema: ParamSchema.none, result: readingSchema, example: .object([:]),
-                   availability: can) { (_: inout T, _: NoParams) throws -> JSONValue in throw notBuilt },
+                   availability: can) { (t: inout T, _: NoParams) throws -> JSONValue in
+                let next = ToneRules.auto(try t.autoToneSuggestion(), keeping: try settings(t, "tone.auto"))
+                try t.setTone(next, name: "Auto Tone", drag: nil)
+                return reading(next)
+            },
         ]
     }
 }
