@@ -121,3 +121,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 2026-10-26T13:39:58Z: 13:39: #4999 open fast-lane beta, mergeable, waiting; #5793 lost fast-lane (stacked size 519/21 counts #4999) and conflicted with dev in ShellHelpProvider betaNotes: merged dev, gate running; re-label after #4999 lands; #5794 fast-lane, unmergeable until #5793 resolves; #5000 unchanged
 - 2026-10-26T14:01:51Z: #5793 merged dev (conflict resolved), gate PASS, Head 9c361148; #5794 merged #5793, gate PASS, Head moved
 - 2026-10-26T14:03:09Z: 14:02: #4999 open fast-lane beta mergeable, queued behind ~30 open p0 fast-lane PRs (lane merging ~1 per 20-40 min); #5793/#5794 mergeable, lane drops fast-lane on stacked size until #4999 lands; #5000 waits on #4999
+- 2026-10-26T14:27:02Z: 14:26: #4999 still queued (fast-lane beta, mergeable); lane kept re-labelling then dropping #5793/#5794 on stacked size, so parked both with no-fast-lane until #4999 merges; #5000 waits
