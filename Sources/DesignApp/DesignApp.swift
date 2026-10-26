@@ -21,6 +21,12 @@
 // Open In reaches DesignShell.host (a DesignDocumentHost), which hands each
 // file to DesignShell.openQueue (SuiteUI's SuiteOpenQueue): an empty window
 // opens it in place, else it opens in a new window.
+//
+// File-flow (#5215): File gets the suite's Open Recent ▸ and Open In ▸
+// (SuiteFileCommands, in DesignCommands) over DesignShell.bridge, Photo's and
+// Halo's SuiteDocumentsBridge on the suite's recents (fakes under
+// `-DesignServices fake`). Each window notes its opens and saves there, and
+// DesignAppDelegate starts the bridge watching the shared list at launch.
 import DesignModel
 import SuiteModel
 import SuiteShell
@@ -40,8 +46,30 @@ struct DesignLaunch: Codable, Hashable, Sendable {
     var file: URL?
 }
 
-/// The suite's side of the app: the hand-off host and the live command channel.
+/// The suite's side of the app: the hand-off host, the documents bridge and the live command channel.
 @MainActor enum DesignShell {
+    /// The suite's recents and routing, which Open Recent, Open In and each window's opens and saves use.
+    static var bridge: SuiteDocumentsBridge {
+        #if DEBUG
+        if let bridgeOverride { return bridgeOverride }
+        #endif
+        return suiteBridge
+    }
+
+    #if DEBUG
+    /// A test's bridge in place of the process's (DesignFileRecentsTests).
+    static var bridgeOverride: SuiteDocumentsBridge?
+    #endif
+
+    private static let suiteBridge: SuiteDocumentsBridge = {
+        let arguments = ProcessInfo.processInfo.arguments
+        let services: SuiteServices = DesignWindowOptions(arguments: arguments).services.name == DesignServices.fake.name
+            ? .fake()
+            : .live(support: SuiteLocations.supportFolder(arguments: arguments, home: NSHomeDirectory()),
+                    app: .design, arguments: arguments)
+        return SuiteDocumentsBridge(app: .design, services: services)
+    }()
+
     /// The files waiting for a window: an empty window takes one in place, else a new window opens.
     static let openQueue = SuiteOpenQueue(windowID: DesignLaunch.windowID)
 
@@ -70,7 +98,7 @@ struct DesignLaunch: Codable, Hashable, Sendable {
 
 @main
 struct DesignApp: App {
-    @NSApplicationDelegateAdaptor private var delegate: SuiteAppDelegate
+    @NSApplicationDelegateAdaptor private var delegate: DesignAppDelegate
 
     var body: some Scene {
         WindowGroup(id: DesignLaunch.windowID, for: DesignLaunch.self) { launch in
@@ -84,5 +112,12 @@ struct DesignApp: App {
             DesignCommands()
         }
         .suiteEditor(.design, host: DesignShell.host, live: DesignShell.live)
+    }
+}
+
+/// Suite hand-offs (SuiteAppDelegate), and watching the suite's recents once the app has launched.
+@MainActor final class DesignAppDelegate: SuiteAppDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        Task { await DesignShell.bridge.watch() }
     }
 }

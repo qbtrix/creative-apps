@@ -2,7 +2,9 @@
 // SuiteDocumentHost (UC-18) and as SuiteKernel's file-flow target (Open Recent, Open In, drop), the
 // shapes DesignFileFlowTests specify for DF-3. The stubs answer like FakeDocumentHost(app: .design,
 // verbs: [.open]) and hold no recents; every mutating member does nothing until DF-3. The app's live
-// hand-off host is DesignDocumentHost, not this conformance. Linux-safe.
+// hand-off host is DesignDocumentHost, not this conformance. `DesignWorkspace.suiteDocument` is the
+// open file as the suite names it, which the window notes in the suite's recents and File > Open In ▸
+// hands on. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -47,4 +49,14 @@ extension DesignDocument: FileFlowTarget {
     public mutating func openIn(_ app: String) throws {}
     /// Does nothing until DF-3.
     public mutating func perform(_ actions: [DropAction]) throws {}
+}
+
+extension DesignWorkspace {
+    /// The open file as a suite ref; nil with no file open or before it is opened from or saved to disk.
+    public var suiteDocument: SuiteDocumentRef? {
+        guard isOpen, let url = documentURL else { return nil }
+        let path = url.path(percentEncoded: false)
+        return SuiteDocumentRef(path: path, fileID: SuiteDocumentRef.fileID(forPath: path), app: .design,
+                                type: .designDocument, displayName: url.lastPathComponent)
+    }
 }

@@ -36,6 +36,10 @@ final class DesignExportJourneyTests: XCTestCase {
         file.click()
         let export = file.menuItems["Export…"]
         XCTAssert(export.waitForExistence(timeout: 3), "the File menu shows no Export…")
+        // Open Recent ▸ and Open In ▸ sit right under Open…, before Close, as in Photo and Flare (#5224).
+        let titles = file.menuItems.allElementsBoundByIndex.map(\.title).filter { !$0.isEmpty }
+        let order = ["Open…", "Open Recent", "Open In", "Close"].map { titles.firstIndex(of: $0) ?? -1 }
+        XCTAssertEqual(order.map { $0 - order[0] }, [0, 1, 2, 3], "File reads \(titles)")
         export.click()
         let sheet = design.element(Self.sheetID), items = design.element(Self.itemsID)
         XCTAssert(sheet.waitForExistence(timeout: 5), "File > Export… opened no sheet")
