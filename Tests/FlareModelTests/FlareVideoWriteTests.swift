@@ -104,6 +104,15 @@ struct FlareVideoWriteTests {
         #expect(clear.width == 6 && clear.height == 4 && clear.rgba[3] == 0 && opaque.rgba[3] == 255)
     }
 
+    @Test(arguments: [(1, 1, true), (3, 5, false), (3, 5, true), (550, 400, false)])
+    func theFakeRasterizersFrameIsThePixelAtEverySpot(width: Int, height: Int, transparent: Bool) throws {
+        let list = StageDrawList(width: 10, height: 10, background: FlareColor(r: 0.2, g: 0.4, b: 0.6), items: [])
+        let frame = try FakeRasterizer().frame(list, width: width, height: height, transparent: transparent)
+        let pixel: [UInt8] = [51, 102, 153, transparent ? 0 : 255]
+        #expect(frame.rgba.count == width * height * 4)
+        #expect(stride(from: 0, to: frame.rgba.count, by: 4).allSatisfy { Array(frame.rgba[$0..<$0 + 4]) == pixel })
+    }
+
     @Test func anUnavailableFakeExportWritesNothing() async throws {
         let w = bounce(.mp4)
         let plan = try w.exportVideoPlan(), document = try #require(w.document), media = FakeVideoMedia()

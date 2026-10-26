@@ -17,7 +17,8 @@ public struct PhotoServices: Sendable {
     public var adjustmentLayers: any AdjustmentLayering
     public var transform: any LayerTransforming
     public var exportSizing: any ExportSizing
-    /// Measures, lists and draws text layers' words; the fake until TX-7 wires the live one.
+    /// Measures, lists and draws text layers' words. FakeText (a clear frame) by default; the window sets
+    /// SuiteText's LiveText (`PhotoWindow.liveServices`), which this Linux-safe module can't reach.
     public var text: any TextServices = FakeText()
 
     public init(archive: any DocumentArchiving, recovery: any RecoveryStoring, clipboard: any PixelClipboard,

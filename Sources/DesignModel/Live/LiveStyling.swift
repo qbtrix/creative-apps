@@ -63,9 +63,10 @@ public struct LiveStyling: StyleEditing {
 
     public func setStroke(_ stroke: DesignStroke?, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
         try change("stroke", "Change Stroke", ids, on: page) { node in
-            if let stroke {
+            if var stroke {
                 guard stroke.width.isFinite else { return }
-                node.stroke = DesignStroke(color: stroke.color, width: Swift.min(Swift.max(stroke.width, 0), 1000))
+                stroke.width = Swift.min(Swift.max(stroke.width, 0), 1000)
+                node.stroke = stroke
             } else {
                 node.stroke = nil
             }

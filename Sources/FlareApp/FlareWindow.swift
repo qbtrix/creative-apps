@@ -23,6 +23,7 @@
 // files, Loop and the selection's Edit reasons, and File > Place…'s reason and
 // action; the window takes SVG drops (FlarePlace.swift).
 import FlareModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -41,7 +42,9 @@ struct FlareWindow: View {
     @State var exportTask: Task<Void, Never>? = nil
     /// The first file the last export wrote, for Reveal in Finder.
     @State var exportedFile: URL? = nil
-    let launch = FlareLaunch(arguments: ProcessInfo.processInfo.arguments)
+    /// The process's flags; a hosted-window test passes its own, so `-FlareExportTo` reaches the export and no
+    /// folder panel opens.
+    var launch = FlareLaunch(arguments: ProcessInfo.processInfo.arguments)
 
     #if DEBUG
     /// How many times a window's body ran; RenderBudgetFlareTests counts an interaction's.
@@ -102,7 +105,7 @@ struct FlareWindow: View {
         .modifier(FlareOpenStatus(model: model))
         .suiteOpenQueue(FlareShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .modifier(FlareAutosaveAdapter(model: model, restore: { try model.restoreRecovery($0) }))
-        .modifier(FlareLiveRegistration(read: { model }, write: { model.takeLive($0) }))
+        .suiteLiveWindow(FlareLive.front, read: { FlareHeadless(workspace: model) }, write: { model.takeLive($0) })
         .placeDropTarget(formats: model.placeFormats) { files, _ in place(files) }
         .focusedSceneValue(
             \.flareMenu,
