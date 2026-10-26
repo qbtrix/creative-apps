@@ -1,5 +1,5 @@
 // FlarePathCommandTests.swift (pen-paths FP-1, on in FP-6): the twelve path commands in Flare's catalog, one step each;
-// `path.draw` adds "Path 1" as one "Add Path" and `path.read` reads it back.
+// `path.draw` adds "Path 1" as one "Add Path" and `path.read` reads it back in the same document points.
 import FlareCore
 @testable import FlareModel
 import SuiteKernel
@@ -59,7 +59,7 @@ import Testing
         }
         let points = anchors.compactMap { anchor -> Point? in
             guard case .object(let a) = anchor, case .number(let x)? = a["x"], case .number(let y)? = a["y"] else { return nil }
-            return workspace.pathInEdit?.toDocument.apply(Point(x: x, y: y))
+            return Point(x: x, y: y)
         }
         #expect(contours.count == 1 && contour["closed"] == .bool(true))
         #expect(points == [Point(x: 10, y: 10), Point(x: 50, y: 10), Point(x: 50, y: 40), Point(x: 10, y: 40)])

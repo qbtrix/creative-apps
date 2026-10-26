@@ -1,0 +1,4 @@
+[
+  {"label": "offsetsMirror: a flip mirrors each layer's pixels but leaves its offset, so a patch layer lands on the wrong side", "file": "Sources/PhotoModel/PhotoOrientation+Kernel.swift", "find": "case .flip(let axis): axis == .horizontal ? (w - (x + lw), y) : (x, h - (y + lh))", "replace": "case .flip: (x, y)", "tests": "PhotoOrientationTests/flipCanvasMirrorsBothLayersWithOffsetsAndMasks"},
+  {"label": "masksFlip: a turn or flip leaves each layer's mask as it was, so the mask no longer lines up with its pixels", "file": "Sources/PhotoModel/PhotoOrientation+Kernel.swift", "find": "TiledPixels(Self.faced(mask, step))", "replace": "TiledPixels(mask)", "tests": "PhotoOrientationTests/flipCanvasMirrorsBothLayersWithOffsetsAndMasks"}
+]
