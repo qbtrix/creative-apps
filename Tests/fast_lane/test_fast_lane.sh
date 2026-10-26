@@ -658,7 +658,7 @@ gh() {
     "api repos/"*"/issues?labels=dev-red&state=closed"*) jq -r "${!#}" "$sw/redclosed.json" 2>/dev/null || true ;;  # the last closed dev-red issue (flake_closed)
     "api repos/"*"/issues?labels=dev-red"*) jq -r "${!#}" "$sw/red.json" 2>/dev/null || true ;;  # the open dev-red issue
     "issue list "*) cat "$sw/issues.json" 2>/dev/null || echo '[]' ;;  # the open finding issues (flake_finding)
-    "issue create "*) echo "$a" >>"$sw/calls"; echo "https://github.com/qbtrix/creative-apps/issues/700" ;;
+    "issue create "*) echo "$a" >>"$sw/calls"; echo "https://github.com/qbtrix/creative-apps/issues/$((699 + $(grep -c '^issue create' "$sw/calls")))" ;;  # #700, #701, ...
     "api search/issues"*) jq -r "${!#}" "$sw/search.json" 2>/dev/null || true ;;
     "run view --job "*) cat "$sw/joblog.$4" 2>/dev/null || return 1 ;;  # a job's failed-step log (budget_failure)
     "run view "*) cat "$sw/run.$3.json" 2>/dev/null || return 1 ;;
@@ -710,10 +710,10 @@ gh() {
       (cd "$sw/refs/$u" 2>/dev/null && find . -type f | sed 's:^\./::') | jq -R '{path: ., type: "blob"}' | jq -s '{truncated: false, tree: .}' ;;
     "api "*"/contents/"*) u="${!#}"; u="${u#*/contents/}"; cat "$sw/refs/${u##*\?ref=}/${u%%\?*}" ;;
     "api "*"/issues/"*"/comments "*) n="${2#*/issues/}"; cat "$sw/${n%%/*}.comments" 2>/dev/null || true ;;
-    "api repos/"*"/issues/"*)  # an issue's labels: $sw/labels.<n>, none if absent, a failure if .fail
+    "api repos/"*"/issues/"*)  # an issue's state ($sw/state.<n>, OPEN if absent) and labels ($sw/labels.<n>, none if absent, a failure if .fail)
       n="${2##*/}"; echo "labels $n" >>"$sw/lookups"
       [[ ! -e "$sw/labels.$n.fail" ]] || return 1
-      jq -c '{labels: map({name: .})}' <<<"$(cat "$sw/labels.$n" 2>/dev/null || echo '[]')" | jq -r "${!#}" ;;
+      jq -c --arg s "$(cat "$sw/state.$n" 2>/dev/null || echo OPEN)" '{state: $s, labels: map({name: .})}' <<<"$(cat "$sw/labels.$n" 2>/dev/null || echo '[]')" | jq -r "${!#}" ;;
     "pr comment "*|"issue comment "*) echo "$a" >>"$sw/calls"; printf '%s\n' "${!#}" >>"$sw/$3.comments" ;;
     "pr merge "*) [[ ! -e "$sw/merge.fail.$3" ]] || return 1  # $sw/merge.fail.<n>: GitHub refuses the merge
       echo "$a" >>"$sw/calls"; touch "$sw/$3.merged"; printf '%s\n' "${!#}" >"$sw/$3.squash" ;;
@@ -727,13 +727,18 @@ gh() {
       jq '.labels += [{"name": "needs-fix"}]' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
     "pr edit "*"--remove-label needs-fix"*) echo "$a" >>"$sw/calls"
       jq '.labels |= map(select(.name != "needs-fix"))' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
-    "pr create "*)  # the lane's revert PR: fixture #600 on the branch it pushed, by the lane's bot
+    "pr create "*)  # a lane PR (a revert or a quarantine change): the next fixture from #600 on the branch it pushed, by the
+      # lane's bot, with the command's labels; its files are the branch's diff against dev
       echo "$a" >>"$sw/calls"; u="${a#*--head }"; u="${u%% *}"
-      jq -n --arg b "$u" --arg h "$(git -C "$sw/origin.git" rev-parse "refs/heads/$u")" --arg body "${!#}" '{number: 600, state: "OPEN",
-        isDraft: false, baseRefName: "dev", headRefName: $b, headRefOid: $h, labels: [{name: "lane-revert"}, {name: "p0"}],
+      n=600; while [[ -e "$sw/$n.json" ]]; do n=$((n + 1)); done
+      git -C "$sw/origin.git" diff --name-only dev "refs/heads/$u" | jq -R '{filename: ., status: "modified"}' | jq -s . >"$sw/files.$n.json"
+      jq -n --argjson n "$n" --arg b "$u" --arg h "$(git -C "$sw/origin.git" rev-parse "refs/heads/$u")" --arg body "${!#}" \
+        --argjson labels "$(grep -oE -- '--label [^ ]+' <<<"$a" | cut -d' ' -f2 | jq -R '{name: .}' | jq -s .)" '{number: $n, state: "OPEN",
+        isDraft: false, baseRefName: "dev", headRefName: $b, headRefOid: $h, labels: $labels,
         author: {login: "app/github-actions", is_bot: true}, additions: 1, deletions: 1, changedFiles: 1,
-        mergeable: "MERGEABLE", mergeStateStatus: "CLEAN", body: $body}' >"$sw/600.json"
-      echo "https://github.com/qbtrix/creative-apps/pull/600" ;;
+        mergeable: "MERGEABLE", mergeStateStatus: "CLEAN", body: $body}' >"$sw/$n.json"
+      echo "https://github.com/qbtrix/creative-apps/pull/$n" ;;
+    "pr close "*) echo "$a" >>"$sw/calls"; touch "$sw/$3.merged" ;;  # a closed PR leaves the open list like a merged one
     *) echo "$a" >>"$sw/calls" ;;
   esac
 }
@@ -2057,5 +2062,115 @@ cpr 198 Sources/PhotoModel/B.swift; prescreen "$(head_of 198)" success
 LANE_VERIFY_AFTER=1 lane_sweep
 expect "scoped hold: verify after still lands a code PR on its own proof, red module or not" "$(merges)" "pr merge 198"
 LANE_MAC_PER_PR=1
+
+# Auto-quarantine (LANE_VERIFY_AFTER=1, "trunk never stops"): a real red the
+# lane has no revert for (revert_sweep ended in a note, or its revert is in
+# the red range and dev is still red) gets its failing tests quarantined: one
+# `Quarantined: <id>` p0 finding per test as owner, a `lane` entry in
+# UITests/quarantine.json (dev-red issue, culprit range, expiry 24 h out) on
+# the lane's one lane/quarantine PR (lane-quarantine, p0, never fast-lane),
+# landed on its own Linux check: the one protected-path change the lane lands,
+# keyed on the bot author, the branch, the label and the file set being exactly
+# that file. Past its expiry the owner is labelled blocker and the entry stays;
+# once the owner closes, the same PR path removes it. Never more than 5 tests
+# per sweep, never a security, billing or auth test, one call per red sha.
+quardev() {  # quardev <jobs> <spec>...: rvdev, then dev gains the red tests' real files and an empty quarantine; the red is that tip
+  rvdev "$@"
+  local w="$sw/work"
+  mkdir -p "$w/Tests/PhotoModelTests" "$w/UITests"
+  printf '%s\n' 'import Testing' '@Suite struct OpenTests {' '    @Test func opens() {}' '    @Test func saves() {}' '}' >"$w/Tests/PhotoModelTests/OpenTests.swift"
+  printf '%s\n' 'import Testing' '@Suite struct AuthTests {' '    @Test func login() {}' '}' >"$w/Tests/PhotoModelTests/AuthTests.swift"
+  echo '[]' >"$w/UITests/quarantine.json"
+  git -C "$w" add -A; git -C "$w" commit -qm "test(photo): fixtures"; git -C "$w" push -q "$sw/origin.git" dev
+  RED=$(git -C "$w" rev-parse dev)
+  jq --arg r "$RED" '.[0].body |= sub("main\\.\\.[0-9a-f]+"; "main..\($r)")' "$sw/red.json" >"$sw/x" && mv "$sw/x" "$sw/red.json"
+  tip_red "$RED" 4343 '✘ Test opens() recorded an issue at OpenTests.swift:9:5: Expectation failed: (doc.layers.count → 3) == (4 → 4)'
+  printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
+  jq -n '{body: "Adds b.\n\nFeature: easing"}' >"$sw/pull.202.json"
+}
+qbranch() { git -C "$sw/origin.git" rev-parse --verify -q refs/heads/lane/quarantine || true; }
+qjson() { git -C "$sw/origin.git" show "refs/heads/lane/quarantine:UITests/quarantine.json" 2>/dev/null || echo '[]'; }
+quarantines() { grep -c -- '^pr create .*--label lane-quarantine ' "$sw/calls" || true; }
+qnotes() { grep -c '^issue comment 520 .*Auto-quarantine' "$sw/calls" || true; }
+NOW=2026-10-26T10:00:00Z
+TWO=("Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Sources/DesignModel/B.swift|feat(design): b (#202)")
+check "a human PR touching the quarantine stays refused (the lane's exception is its own PR only)" \
+  "not-eligible|touches protected paths: UITests/quarantine.json" . $'UITests/quarantine.json\nTests/PhotoModelTests/OpenTests.swift' .
+quardev macos "${TWO[@]}"
+FAST_LANE_NOW=$NOW lane_sweep
+expect "auto-quarantine: off with LANE_VERIFY_AFTER=0: a red with no revert quarantines nothing" "$(quarantines),$(qbranch),$(qnotes)" "0,,0"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: no certain culprit (a macOS red, two PRs): the failing test is quarantined on lane/quarantine, off today's dev, that file only" \
+  "$(git -C "$sw/origin.git" diff --name-only dev "$(qbranch)" | paste -sd, -),$(git -C "$sw/origin.git" rev-parse "$(qbranch)~1")" "UITests/quarantine.json,$RED"
+expect "auto-quarantine: the entry carries the test id, its p0 issue as owner, the dev-red issue, the culprit range and a 24 h expiry" \
+  "$(qjson | jq -c '[.[] | .test, .owner, .expires, .lane.red, .lane.range, .lane.until]')" \
+  "[\"PhotoModelTests.OpenTests/opens\",\"#700\",\"2026-10-27\",\"#520\",\"main..${RED:0:7}\",\"2026-10-27T10:00:00Z\"]"
+expect "auto-quarantine: one p0 finding per test, labelled for its line, naming the run, the range's PRs with their leads, and the expiry" \
+  "$(grep -c -- "^issue create -R qbtrix/creative-apps --title Quarantined: PhotoModelTests.OpenTests/opens --label p0 --label finding --label line:photo --body .*runs/9500.*#201 (lead #78), #202 (lead #78).*2026-10-27T10:00:00Z" "$sw/calls")" 1
+expect "auto-quarantine: opened as a lane-quarantine p0 PR, never fast-lane, that refs dev-red without closing it" \
+  "$(quarantines),$(grep -c -- '^pr create .*--head lane/quarantine --label lane-quarantine --label p0 --title test(quarantine): skip PhotoModelTests.OpenTests/opens ' "$sw/calls"),$(grep -c -- '--label fast-lane' "$sw/calls"),$(jq -r .body "$sw/600.json" | grep -c 'Refs #520'),$(jq -r .body "$sw/600.json" | grep -cE '([Cc]loses|[Ff]ixes) #520')" "1,1,0,1,0"
+expect "auto-quarantine: the dev-red issue records the one call" \
+  "$(grep -c "^issue comment 520 .*Auto-quarantine: .*quarantined PhotoModelTests.OpenTests/opens (#700) for 24 h in #600.*<!-- lane-quarantine ${RED:0:7} -->" "$sw/calls")" 1
+# The exception is exactly that file: a lane-quarantine PR changing anything else is never landed.
+cp "$sw/files.600.json" "$sw/x"; jq '. + [{filename: "Sources/PhotoModel/A.swift", status: "modified"}]' "$sw/x" >"$sw/files.600.json"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a lane-quarantine PR touching more than the quarantine file gets no check, no merge, one comment" \
+  "$(grep -c -- '--ref lane/quarantine$' "$sw/calls"),$(merges),$(grep -c '^pr comment 600 .*changes more than UITests/quarantine.json (UITests/quarantine.json, Sources/PhotoModel/A.swift), so the lane will not land it' "$sw/calls")" "0,,1"
+mv "$sw/x" "$sw/files.600.json"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: then one Linux check on it, once; no second PR, issue or note" \
+  "$(grep -c -- '-f linux_only=true --ref lane/quarantine$' "$sw/calls"),$(quarantines),$(grep -c '^issue create' "$sw/calls"),$(qnotes)" "1,1,1,1"
+verdict "$(head_of 600)" success; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: it lands on that check alone (no prescreen, no batch, dev red and all) and CI on dev runs" \
+  "$(merges),$(batch_tip),$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref dev$' "$sw/calls")" "pr merge 600,,1"
+# Expiry: past `until` with the owner open, the owner is labelled blocker and told once; the entry stays.
+git -C "$sw/origin.git" update-ref refs/heads/dev "$(qbranch)"  # the merge landed on dev
+FAST_LANE_NOW=2026-10-27T10:00:01Z LANE_VERIFY_AFTER=1 lane_sweep
+expect "expiry: past its expiry with the issue open, the owner gets the blocker label and a comment, and the entry stays" \
+  "$(grep -c '^issue edit 700 -R qbtrix/creative-apps --add-label blocker$' "$sw/calls"),$(grep -c '^issue comment 700 .*expired at 2026-10-27T10:00:00Z.*stays skipped' "$sw/calls"),$(quarantines)" "1,1,1"
+echo '["p0", "blocker"]' >"$sw/labels.700"
+FAST_LANE_NOW=2026-10-27T10:00:01Z LANE_VERIFY_AFTER=1 lane_sweep
+expect "expiry: said once" "$(grep -c -- '--add-label blocker' "$sw/calls"),$(grep -c '^issue comment 700 ' "$sw/calls")" "1,1"
+# Removal: once the owner closes, the lane's PR removes the entry; its Linux check runs the test again.
+rm -f "$sw/red.json"; echo CLOSED >"$sw/state.700"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal: a closed owner gets a lane-quarantine PR removing its entry, off today's dev" \
+  "$(quarantines),$(qjson | jq length),$(grep -c -- '^pr create .*--head lane/quarantine --label lane-quarantine --label p0 --title test(quarantine): run PhotoModelTests.OpenTests/opens again ' "$sw/calls"),$(git -C "$sw/origin.git" rev-parse "$(qbranch)~1")" "2,0,1,$(git -C "$sw/origin.git" rev-parse dev)"
+verdict "$(head_of 601)" failure; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal: a red check means the fix didn't hold: the owner is reopened and told, the PR closed, nothing merged" \
+  "$(grep -c '^issue reopen 700 ' "$sw/calls"),$(grep -c '^issue comment 700 .*still fails without its quarantine entry' "$sw/calls"),$(grep -c '^pr close 601 ' "$sw/calls"),$(merges)" "1,1,1,pr merge 600"
+echo OPEN >"$sw/state.700"; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal: with the owner open again nothing is opened" "$(quarantines)" 2
+echo CLOSED >"$sw/state.700"; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+verdict "$(head_of 602)" success; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal: a green check lands it and CI on dev runs" \
+  "$(quarantines),$(merges),$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref dev$' "$sw/calls")" "3,pr merge 600,pr merge 602,2"
+# A Linux red whose bisect stopped short (no `Bisect:` verdict) has no certain culprit either.
+quardev linux "${TWO[@]}"
+printf '%s\n' "Bisect on dev stopped after 8 Linux runs: the Linux job is green at aaaaaaa and red at ${RED:0:7}; the culprit is one of the 2 commits between them. $BISECT_MARK ${RED:0:7} -->" >>"$sw/520.comments"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a Linux red with an inconclusive bisect quarantines the test and reverts nothing" \
+  "$(quarantines),$(grep -c -- '--label lane-revert' "$sw/calls"),$(qjson | jq -r '.[0].test')" "1,0,PhotoModelTests.OpenTests/opens"
+# Never more than 5 tests in one sweep: more means something broke broadly, so today's red handling stands.
+quardev macos "${TWO[@]}"
+for t in a b c d e f; do echo "✘ Test $t() recorded an issue at OpenTests.swift:9:5: x"; done >"$sw/joblog.4343"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: 6 failing tests quarantine nothing and say so on the dev-red issue, once" \
+  "$(quarantines),$(grep -c "^issue comment 520 .*Auto-quarantine: 6 tests fail at ${RED:0:7}.*more than 5, so something broke broadly; nothing is quarantined.*<!-- lane-quarantine ${RED:0:7} -->" "$sw/calls")" "0,1"
+# Never a test on a security, billing or auth path.
+quardev macos "${TWO[@]}"
+printf '%s\n' '✘ Test login() recorded an issue at AuthTests.swift:3:5: x' 'CI: FAIL' >"$sw/joblog.4343"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a test on a protected path is never quarantined, and the issue says why" \
+  "$(quarantines),$(grep -c '^issue comment 520 .*Auto-quarantine: nothing to quarantine: PhotoModelTests.AuthTests/login: a security, billing or auth test is never quarantined.*<!-- lane-quarantine' "$sw/calls")" "0,1"
+# A failing test whose file isn't in the tree (rvdev's bare fixtures) can't be placed: a note, no PR.
+rvdev macos "${TWO[@]}"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a test the lane can't place in the tree is noted, not quarantined" \
+  "$(quarantines),$(grep -c '^issue comment 520 .*Auto-quarantine: nothing to quarantine: OpenTests.swift/opens(): its file is not under Tests/ on dev' "$sw/calls")" "0,1"
+# A certain culprit is reverted, never quarantined.
+quardev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a certain culprit gets the revert and no quarantine" "$(creates),$(quarantines),$(qnotes)" "1,0,0"
 
 exit "$fail"
