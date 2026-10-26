@@ -1,8 +1,8 @@
 # export-pack (Library) lead record
 
 Issue: #3478 · Packet: docs/blueprints/library/features/export-pack.md
-Run: act-1a175ea5531-x1ci (line lead, line:library) · resumed 2026-10-26T01:59:55Z · earlier act-1a170488aff-41nk (line lead, line:library) · resumed 2026-10-24T23:40Z (earlier act-1a16cc967d9-mcuv, act-1a16953af22-wvhu, act-1a15e4969c2-pa6e)
-Stage: 3 wave 3: LX-a, LX-m done; LX-u #5128 dev merged in, pushed 6f966c25 (CI: PASS), LX-z #5242/#5243 stacked; code batches held by dev-red #5321 (macOS, not Library); checked 2026-10-26T11:44Z
+Run: act-1a1782c1961-n1cv (line lead, line:library) · resumed 2026-10-26T12:20Z · earlier act-1a175ea5531-x1ci (line lead, line:library) · resumed 2026-10-26T01:59:55Z · earlier act-1a170488aff-41nk (line lead, line:library) · resumed 2026-10-24T23:40Z (earlier act-1a16cc967d9-mcuv, act-1a16953af22-wvhu, act-1a15e4969c2-pa6e)
+Stage: 3 polling: LX-u #5128 at 6f966c25, LX-z #5242/#5243 stacked, in the lane; code batches held by dev-red #5321 (not Library); checked 12:28Z
 Base: origin/dev 8eff8ab85
 Next: lane lands LX-u then LX-z (retarget #5242 to dev when #5128 merges, #5243 when #5242 merges); Belt-Slice-Done LX-u, LX-z on a green library run with their last PR; critics on LX-u screens; Belt-Contact-Sheet
 
@@ -45,6 +45,7 @@ Next: lane lands LX-u then LX-z (retarget #5242 to dev when #5128 merges, #5243 
 - Tests/RealJobs/library/no-location/ is deferred until XP-7's input/gps-phone.jpg is on dev (it goes with LX-4).
 - Gap: export presets don't store the policy, so applying one resets it to noLocation (noted in #3696). This is a gap for LX-2's follow-up.
 - 2026-10-26T01:59:55Z (run act-1a175ea5531-x1ci): main verified at d3323f6a. lead/export-pack is the SuiteUI export-pack lead's live record (relaunched 2026-10-26, already on main), so it is not rebased or written; this record stays here. PRs keep targeting dev. Findings with Feature: export-pack: 0 (#5270, the export sheet onto SuiteExportSheet, names no feature; left to its owner). dev-red #5321 (macOS) blocks code batches; red-triage names #5112/#5044, not a Library PR, so it is not fixed here.
+- 2026-10-26T12:28Z (run act-1a1782c1961-n1cv): main verified at d3323f6a. Re-read every PR: all slice PRs are open, clean and in the lane with proof on their heads (#5130's head c9d68d72 has the lane's green Linux check 40109534004). dev-red #5321 (Onboarding test timeouts, not Library) still open, so code batches wait. Open findings for this feature: 0. Nothing left to build; polling every 10 min. lead/export-pack stays the SuiteUI lead's record (#3477) and is not written.
 
 ## Open
 - XP-2 waits on shell-media SM-a; XP-3 waits on tone-controls TC-a and PL-a (SuiteUI lead's record).
