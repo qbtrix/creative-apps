@@ -2,7 +2,7 @@
 
 Issue: #3458 · Packet: docs/blueprints/library/features/cull-finish.md
 Run: act-1a1782c1961-n1cv (line lead, line:library) · resumed 2026-10-26T12:20Z · earlier act-1a175ea5531-x1ci (line lead, line:library) · resumed 2026-10-26T01:59:55Z · earlier act-1a170488aff-41nk (line lead, line:library) · resumed 2026-10-24T23:40Z · earlier act-1a16cc967d9-mcuv, act-1a16953af22-wvhu, act-1a15995d319-aamb
-Stage: 3 polling: DR-u #5130, DR-m #4899/#5100, DR-z #5237/#5240/#5241 open in the lane; code batches held by dev-red #5321 (not Library); checked 16:11Z
+Stage: 3 polling: DR-u #5130, DR-m #4899/#5100, DR-z #5237/#5240/#5241 open in the lane; code batches held by dev-red #5321 (not Library); checked 16:34Z
 Base: origin/dev 8eff8ab85
 Next: lane lands #5130, #4899, then retarget #5100 to dev; #5237 to dev after #5130, #5240 after #5237; Belt-Slice-Done DR-u, DR-m, DR-z on a green library run with each slice's last PR; critics on DR-u screens; Belt-Contact-Sheet
 
