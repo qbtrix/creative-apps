@@ -116,16 +116,12 @@ extension LibraryWindow {
         let service = model.services.loupe
         let deliver = state.deliver
         let queue = state.queue
+        let preferGPU = loupeGPU?.prefersGPU ?? false
         Task.detached(priority: .userInitiated) {
             await queue.submit(token: request.token) {
-                let result: Result<RenderedPhoto, LibraryError>
-                do {
-                    let photo = try await service.render(
-                        request.photo, settings: settings, longSide: request.longSide, quality: request.quality)
-                    result = .success(photo)
-                } catch {
-                    result = .failure(error as? LibraryError ?? .renderFailed("the develop edit couldn't be drawn"))
-                }
+                let result = await LoupePicture.make(
+                    request, settings: settings, preferGPU: preferGPU, service: service,
+                    failure: "the develop edit couldn't be drawn")
                 deliver.yield(LoupeRenderResult(token: request.token, result: result))
             }
         }

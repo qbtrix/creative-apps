@@ -122,7 +122,7 @@ final class PhotoRecoveryJourneyTests: XCTestCase {
         XCTAssert(entry.waitForExistence(timeout: 5), "the \(menu) menu has no \(item)")
         XCTAssert(entry.isEnabled, "\(menu) > \(item) is disabled")
         entry.click()
-        // Closed menus stay in the tree with empty frames (#1222, HaloJourneyTests+Menus.swift).
+        // Closed menus stay in the tree with empty frames (#1222, Journey+Menus.swift).
         XCTAssert(waitFor { !photo.app.menus.allElementsBoundByIndex.contains { !$0.frame.isEmpty } }, "the \(menu) menu stayed open")
     }
 
