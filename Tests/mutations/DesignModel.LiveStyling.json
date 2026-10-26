@@ -2,8 +2,8 @@
   {
     "label": "the text size clamp's floor is dropped, so size 0 stays 0",
     "file": "Sources/DesignModel/Live/LiveStyling.swift",
-    "find": "clamped.size = Swift.max(1, Swift.min(style.size, 1000))",
-    "replace": "clamped.size = Swift.min(style.size, 1000)",
+    "find": "clamped.size = Swift.max(sizes.lowerBound, Swift.min(style.size, sizes.upperBound))",
+    "replace": "clamped.size = Swift.min(style.size, sizes.upperBound)",
     "tests": "DesignStyleTests"
   },
   {
