@@ -183,3 +183,4 @@ time	task	event	note
 2026-10-26T21:23Z	3	heartbeat	lane	poll 2026-10-26T21:23Z: fill-heal: #5093 is a spec conflict (core's antiAlias ring vs RJ-P51 'logo unchanged'); asked the supervisor on #3778 (comment 6427660298); repro test saved, no code change pending the answer
 2026-10-26T21:28Z	3	heartbeat	lane	poll 2026-10-26T21:28Z: area-selection: #5254 (AR-z) conflicted with AR-11-ui after its dev merge; merged and resolved (kept dev's LiveMasking, dropped the selection stand-in), gate running; #5125 needs-rebase cleared
 2026-10-26T21:43Z	3	heartbeat	lane	poll 2026-10-26T21:43Z: 21:43Z: #5254 gate died on container restart, rerunning on 4092a855; no merges; #5093 awaits supervisor; dev-red #5818 open (not ours)
+2026-10-26T21:48Z	3	heartbeat	lane	poll 2026-10-26T21:48Z: 21:5xZ: #5254 gate CI: PASS on 4092a855, pushed to lead/area-selection-AR-z, Head moved; #5256 still clean; #5093 awaits supervisor

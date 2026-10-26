@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main ef37711d (verified) / dev ae3efdb8
 Next: #5096 (AR-photo-u) re-integrated at 4d85628f (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #5103, then #5254, #5256; Belt-Slice-Done on a green main run that contains the last AR-photo-u/AR-z PR.
-Polled: 2026-10-26T21:43Z · 21:43Z: #5254 gate died on container restart, rerunning on 4092a855; no merges; #5093 awaits supervisor; dev-red #5818 open (not ours)
+Polled: 2026-10-26T21:48Z · 21:5xZ: #5254 gate CI: PASS on 4092a855, pushed to lead/area-selection-AR-z, Head moved; #5256 still clean; #5093 awaits supervisor
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
