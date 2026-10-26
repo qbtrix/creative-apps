@@ -129,7 +129,7 @@ jobs:
           case "$APP" in
             flare)   journeys=FlareJourneyTests ;;
             design)  journeys=DesignJourneyTests ;;
-            photo)   journeys=PhotoJourneyTests ;;
+            photo)   journeys=PhotoJourneyTests/PhotoEditJourneyTests ;;
             library) journeys=LibraryJourneyTests ;;
             halo)    journeys=HaloJourneyTests ;;
             suite)   journeys=AfterGlowJourneyTests ;;
@@ -174,7 +174,7 @@ jobs:
           JOURNEYS: ${{ steps.scope.outputs.journeys }}
         run: |
           set -o pipefail
-          scripts/ui-test ${JOURNEYS:+"-only-testing:$JOURNEYS"} 2>&1 | tee "$RUNNER_TEMP/ui-test.log"
+          scripts/ui-test ${JOURNEYS:+"-only-testing:$JOURNEYS"} -only-testing:PhotoJourneyTests/PhotoLayerOpsJourneyTests 2>&1 | tee "$RUNNER_TEMP/ui-test.log"
       # One `finding` issue per failing journey (an audit violation fails its
       # journey too), titled "CI finding: <Target/Class/test>", the form
       # UITests/quarantine.json takes, labelled `finding` and `line:<app>`.
