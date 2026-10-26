@@ -5,7 +5,8 @@
 // (steps under one drag token fold into one) and refits each box (#3339): with a measurer (`services.text`) an
 // auto-width box re-measures on a face, size, line height or tracking change and keeps its leading edge, centre or
 // trailing edge by alignment, and a fixed-width one keeps its width and reflows its height; without one a size
-// change scales the box, as the inspector's row does. Linux-safe.
+// change scales the box, as the inspector's row does. Each layer takes only the fields the command changed, so a
+// size change on a mixed selection keeps every layer's family. Linux-safe.
 import SuiteKernel
 import SuiteModel
 
@@ -46,14 +47,20 @@ extension DesignTextStyle {
                   paragraph: ParagraphStyle(alignment: alignment, lineHeight: lineHeight, tracking: tracking, boxWidth: boxWidth))
     }
 
-    /// This style with `s`'s face, size and paragraph; its width mode and the layer's colour stay. Size keeps
-    /// Design's 1...1000, line height and tracking the kernel's ranges.
-    func taking(_ s: TextStyle) -> DesignTextStyle {
+    /// This style with each field of `s` that differs from `base` (every field when `base` is nil), so a
+    /// multi-selection takes only the edited field; its width mode and the layer's colour stay. Size, line height
+    /// and tracking keep the kernel's ranges (`TextStyleRules.range`).
+    func taking(_ s: TextStyle, over base: TextStyle?) -> DesignTextStyle {
         var style = self
-        (style.family, style.weight, style.italic, style.alignment) = (s.family, Swift.min(Swift.max(s.weight, 100), 900), s.italic, s.paragraph.alignment)
-        if s.size.isFinite { style.size = Swift.min(Swift.max(s.size, 1), 1000) }
-        let kept = TextStyleRules.setting(TextStyleRules.setting(s, .lineHeight, to: s.paragraph.lineHeight), .tracking, to: s.paragraph.tracking)
-        (style.lineHeight, style.tracking) = (kept.paragraph.lineHeight, kept.paragraph.tracking)
+        let kept = TextStyleRules.setting(TextStyleRules.setting(TextStyleRules.setting(s, .size, to: s.size),
+                                                                 .lineHeight, to: s.paragraph.lineHeight), .tracking, to: s.paragraph.tracking)
+        if base?.family != s.family { style.family = s.family }
+        if base?.weight != s.weight { style.weight = Swift.min(Swift.max(s.weight, 100), 900) }
+        if base?.italic != s.italic { style.italic = s.italic }
+        if base?.paragraph.alignment != s.paragraph.alignment { style.alignment = s.paragraph.alignment }
+        if base?.size != s.size, s.size.isFinite { style.size = kept.size }
+        if base?.paragraph.lineHeight != s.paragraph.lineHeight { style.lineHeight = kept.paragraph.lineHeight }
+        if base?.paragraph.tracking != s.paragraph.tracking { style.tracking = kept.paragraph.tracking }
         return style
     }
 
@@ -93,18 +100,19 @@ extension DesignWorkspace: TextStyleTarget {
         return family.isEmpty ? [] : stride(from: 100, through: 900, by: 100).flatMap { [($0, false), ($0, true)] }
     }
 
-    /// Sets every selected unlocked text layer's face, size and paragraph as one step named `name`, refitting
-    /// each box; steps under one `drag` fold into one. A style that changes nothing refuses with `.unchanged`.
+    /// Sets the fields `s` changes from the primary text layer's style on every selected unlocked text layer as
+    /// one step named `name`, refitting each box; steps under one `drag` fold into one. A style that changes
+    /// nothing refuses with `.unchanged`.
     public mutating func setTextStyle(_ s: TextStyle, name: String, drag: String?) throws {
         if let why = textHelp { throw CatalogError.failed(id: "text", message: why) }
         guard gesture == nil else { throw CatalogError.failed(id: "text", message: "Finish the drag first.") }
         let ids = selectedNodeIDs.filter { findNode($0)?.kind == .text && !isLockedInTree($0) }
-        let before = snapshot
+        let (before, base) = (snapshot, textStyle)
         let measurer = services.text
         for id in ids {
             _ = pages.update(id) { node in
                 let old = node.textStyle
-                node.textStyle = old.taking(s)
+                node.textStyle = old.taking(s, over: base)
                 node.frame = Self.refitted(node, from: old, measurer)
             }
         }

@@ -86,7 +86,7 @@ private let bold = DesignTextStyle(family: "System", size: 32, weight: 700, alig
         #expect(layer(ID.title, edit)?.textStyle == DesignTextStyle(family: "Serif", size: 1, weight: 900, alignment: .trailing))
         #expect(edit.name == "Change Text Style" && edit.coalescingKey == DesignEdit.runKey("text-style", [ID.title]))
         let huge = try live.setTextStyle(DesignTextStyle(family: "Serif", size: 5000, weight: 50, alignment: .leading), [ID.title], on: page)
-        #expect(layer(ID.title, huge)?.textStyle.size == 1000 && layer(ID.title, huge)?.textStyle.weight == 100)
+        #expect(layer(ID.title, huge)?.textStyle.size == 1600 && layer(ID.title, huge)?.textStyle.weight == 100)
         let both = try live.setTextStyle(bold, [ID.title, ID.a], on: page)
         #expect(layer(ID.title, both)?.textStyle == bold && layer(ID.a, both)?.textStyle == .default)
         #expect(live.styleHelp(.textStyle, [ID.title, ID.a], on: page) == nil)

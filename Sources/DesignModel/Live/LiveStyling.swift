@@ -9,7 +9,7 @@
 // `.noCorners` / `.notText`, named by the last selected, when none take it;
 // nothing changed `.unchanged`. Clamps: opacity 0...1, stroke width 0...1000
 // (nil removes it), radius 0...half the shorter side, width and height at least
-// 1, text size 1...1000, weight 100...900; a non-finite value changes nothing.
+// 1, text size 1...1600 (the kernel's), weight 100...900; a non-finite value changes nothing.
 // Help law: nil exactly when the write succeeds or only reports `.unchanged`;
 // it depends on the selection, never on the value. A text style keeps each
 // layer's own `fixedWidth` unless the style differs from that layer's only in
@@ -18,6 +18,7 @@
 // auto width both sides, fixed width the height, rounded up, at least 1. A
 // switch to auto keeps the width until the next edit measures the text.
 // Linux-safe.
+import SuiteKernel
 
 public struct LiveStyling: StyleEditing {
     public init() {}
@@ -77,7 +78,8 @@ public struct LiveStyling: StyleEditing {
         try change("text-style", "Change Text Style", ids, on: page, reach: .text) { node in
             guard style.size.isFinite else { return }
             var clamped = style
-            clamped.size = Swift.max(1, Swift.min(style.size, 1000))
+            let sizes = TextStyleRules.range(.size)
+            clamped.size = Swift.max(sizes.lowerBound, Swift.min(style.size, sizes.upperBound))
             clamped.weight = Swift.min(Swift.max(style.weight, 100), 900)
             clamped.fixedWidth = Self.widthMode(style, over: node.textStyle)
             let old = node.textStyle.size
