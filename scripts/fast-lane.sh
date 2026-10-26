@@ -5,7 +5,8 @@
 # from the trusted main branch. It reads PR metadata and file contents through
 # the GitHub API and never checks out or runs PR code.
 #
-# Each sweep: red_sweep reads the open dev-red issue (bisecting a Linux red
+# Each sweep: red_sweep reads the open dev-red issue (flake_check reruns a
+# new red's failed jobs once before it counts; a real Linux red is bisected
 # to its culprit), a batch left in flight resumes (batch_resume: land, bisect
 # by prefix, or drop), with LANE_VERIFY_AFTER=1 revert_sweep reverts a red
 # dev's culprit, every open fast-lane PR is evaluated (decide, the pure
@@ -16,7 +17,10 @@
 # - The batch branch is the whole state: its merge commits (BATCH_SUBJECT_RE)
 #   name each PR and head, `<batch>-<i>` are its probes and `<batch>-red`
 #   marks a base that held dev's red commit (dropped once dev is green).
-# - No batch forms while dev is red on a job it would run (red_holds).
+# - A red's failed jobs are rerun at most once per sha (RERUN_MARK on the
+#   dev-red issue); until that rerun is judged, dev is not red to the lane.
+# - While dev is red on a job a batch would run (red_holds), a PR touching
+#   the red module (BASE_RED_SCOPE) waits; with no module placed, no batch forms.
 # - A dropped batch never labels or comments on its PRs.
 # - One revert call per culprit on a dev-red issue (REVERT_MARK <sha7|none>),
 #   at most one revert per sweep, never two for one PR, never of a revert.
@@ -207,6 +211,12 @@ BUDGET_NEAR="0.15"          # a measured value at most this far past its budget 
 CLEF_MIN="0.80"             # a red-triage culprit guess at or above this is probed first
 BISECT_MARK="<!-- lane-bisect"  # the culprit comment's marker: "<!-- lane-bisect <red7> -->"
 BASE_RED_RUN=""  # the dev-red issue's "- Run:" URL
+# Flake check (flake_check): a red run's failed jobs are rerun once at the red
+# sha before dev counts as red; the dev-red issue carries one mark per sha:
+# "<!-- lane-rerun <sha7> started|flake|red -->".
+RERUN_MARK="<!-- lane-rerun"
+FLAKY_LABEL="flaky"
+BASE_RED_SCOPE=""  # the red's module as a path regex (red_scope); a ready PR touching it waits, the rest batch. Empty: the whole queue waits.
 # Auto-revert (revert_sweep, LANE_VERIFY_AFTER=1).
 REVERT_PREFIX="lane/revert-"    # the revert's branch: lane/revert-<culprit PR>
 REVERT_LABEL="lane-revert"      # on the lane's revert PR (never fast-lane: revert_land lands it)
@@ -1033,7 +1043,22 @@ settle_ready() {
   if (( ! LANE_MAC_PER_PR )); then
     for it in "${items[@]}"; do IFS='|' read -r _ _ _ _ apps _ <<<"$it"; [[ -z "$apps" ]] || need=1; done
   fi
-  if red_holds "$need"; then log "$BASE_BRANCH is red on a job this batch runs (dev-red #$BASE_RED: ${BASE_RED_JOBS#*: }): no batch forms; ${#items[@]} ready PR(s) wait"; return 0; fi
+  if red_holds "$need"; then
+    if [[ -z "$BASE_RED_SCOPE" ]]; then log "$BASE_BRANCH is red on a job this batch runs (dev-red #$BASE_RED: ${BASE_RED_JOBS#*: }): no batch forms; ${#items[@]} ready PR(s) wait"; return 0; fi
+    # A red the lane could place (red_scope) holds only the PRs touching its
+    # module (READY's last field, set by evaluate); the rest batch as usual.
+    local keep=() hit held=0
+    for it in "${items[@]}"; do
+      IFS='|' read -r _ _ _ _ _ _ _ hit <<<"$it"
+      if [[ "$hit" == 1 ]]; then held=$((held + 1)); else keep+=("$it"); fi
+    done
+    log "$BASE_BRANCH is red in $BASE_RED_SCOPE (dev-red #$BASE_RED: ${BASE_RED_JOBS#*: }): $held ready PR(s) touching it wait; ${#keep[@]} batch"
+    (( ${#keep[@]} )) || return 0
+    items=("${keep[@]}"); need=0
+    if (( ! LANE_MAC_PER_PR )); then
+      for it in "${items[@]}"; do IFS='|' read -r _ _ _ _ apps _ <<<"$it"; [[ -z "$apps" ]] || need=1; done
+    fi
+  fi
   if (( need )); then
     busy=$(mac_slots_busy)
     if (( busy >= LANE_MAC_SLOTS )); then
@@ -1048,7 +1073,7 @@ settle_ready() {
   batch_start "${items[@]}"
 }
 
-# batch_start <rank|n|head|branch|apps|since|proof>...: BASE_BRANCH plus the
+# batch_start <rank|n|head|branch|apps|since|proof|hit>...: BASE_BRANCH plus the
 # ready PRs in order on a scratch branch, pushed as lane/batch-<id>, then
 # batch_resume on it (which starts its checks). A PR whose branch can't be
 # fetched or moved past its head, or that conflicts with an earlier PR in the
@@ -1079,7 +1104,7 @@ batch_start() {
     fi
   done
   (( ${#merged[@]} )) || { log "batch: no PR could join; no batch"; return 0; }
-  IFS='|' read -r _ n head _ apps _ proof <<<"${merged[0]}"
+  IFS='|' read -r _ n head _ apps _ proof _ <<<"${merged[0]}"
   if (( ${#merged[@]} == 1 )) && { (( LANE_MAC_PER_PR || LANE_VERIFY_AFTER )) || [[ -z "$apps" ]]; }; then
     stale=$(proof_stale "$(git -C "$d" merge-base "$head" "origin/$BASE_BRANCH" 2>/dev/null || true)" "$head")
     if [[ -z "$stale" ]]; then
@@ -1391,23 +1416,173 @@ failure_log() {
   gh run view --job "${BASH_REMATCH[1]}" --log-failed -R "$REPO" 2>/dev/null || true
 }
 
-# red_sweep: when a dev-red issue for a red Linux job is open, bisects its
-# culprit range. Probes an earlier sweep left pin the red they bisect, since
-# ci.yml rewrites the issue body for every newer red run.
+# red_sweep: reads the open dev-red issue. A red the flake check hasn't judged
+# (flake_check) is not red yet: nothing is held, bisected or reverted. A real
+# red sets BASE_RED and its scope (red_scope), and a red Linux job gets its
+# culprit range bisected. Probes an earlier sweep left pin the red they
+# bisect, since ci.yml rewrites the issue body for every newer red run.
 red_sweep() {
-  local issue body bad pin
+  local issue body bad pin jobs run
   { read -r issue || true; body=$(cat); } < <(gh api "repos/$REPO/issues?labels=$RED_LABEL&state=open&per_page=5" \
       --jq 'first(.[] | select(.pull_request == null)) | .number, (.body // "")' 2>/dev/null || true)
-  [[ -n "${issue:-}" ]] || return 0
+  [[ -n "${issue:-}" ]] || { flake_closed; return 0; }
   bad=$(grep -oE '^- Culprit range: `main\.\.[0-9a-f]{40}`' <<<"$body" | grep -oE '[0-9a-f]{40}' | head -1 || true)
-  BASE_RED="$issue"; BASE_RED_SHA="$bad"
-  BASE_RED_JOBS=$(grep -iE '^- Failing jobs:' <<<"$body" | head -1 | tr '[:upper:]' '[:lower:]' || true)
-  BASE_RED_RUN=$(grep -oE '^- Run: [^ ]+' <<<"$body" | head -1 | cut -c8- || true)
+  jobs=$(grep -iE '^- Failing jobs:' <<<"$body" | head -1 | tr '[:upper:]' '[:lower:]' || true)
+  run=$(grep -oE '^- Run: [^ ]+' <<<"$body" | head -1 | cut -c8- || true)
+  flake_check "$issue" "$run" "$bad" "${jobs#*: }" || return 0
+  BASE_RED="$issue"; BASE_RED_SHA="$bad"; BASE_RED_JOBS="$jobs"; BASE_RED_RUN="$run"
+  # scratch runs here, in the sweep's shell: red_scope runs in a subshell, which must not be the one that creates SCRATCH.
+  BASE_RED_SCOPE=""; [[ -z "$bad" ]] || ! scratch "$BASE_BRANCH" || BASE_RED_SCOPE=$(red_scope "$bad")
+  [[ -z "$BASE_RED_SCOPE" ]] || log "dev-red #$issue: red in $BASE_RED_SCOPE; only ready PRs touching it wait"
   grep -qiE '^- Failing jobs:.*linux' <<<"$body" || { log "dev-red #$issue: not a Linux red; nothing to bisect"; return 0; }
   pin=$(git ls-remote --heads "$REMOTE" "refs/heads/${BISECT_PREFIX}*" 2>/dev/null | sed -E 's:.*refs/heads/'"$BISECT_PREFIX"'([0-9a-f]+)-[0-9]+$:\1:' | sort -u | head -1 || true)
   [[ -z "$pin" ]] || bad="$pin"
   [[ -n "$bad" ]] || { log "dev-red #$issue: no culprit range in the body"; return 0; }
   red_bisect "$issue" main "$bad" "$BASE_BRANCH"
+}
+
+# rerun_state <run id>: the run's state as one word: running, success, red
+# (any other finished conclusion) or unknown (the API could not be read).
+rerun_state() {
+  local json st
+  json=$(gh run view "$1" -R "$REPO" --json status,conclusion 2>/dev/null) || { echo unknown; return; }
+  st=$(jq -r '((.status // "") | ascii_downcase) + " " + ((.conclusion // "") | ascii_downcase)' <<<"$json" 2>/dev/null || echo unknown)
+  case "$st" in "completed success") echo success ;; completed*) echo "red|${st#completed }" ;; unknown) echo unknown ;; *) echo running ;; esac
+}
+
+# flake_check <issue> <run url> <red sha> <jobs>: true when dev is red for
+# real, false when the lane must not treat it as red this sweep. A red sha not
+# yet checked gets the run's failed jobs rerun once (gh run rerun --failed) and
+# a RERUN_MARK <sha7> started comment naming the run and the failing tests
+# (red_tests, read now: the rerun overwrites the logs). A running rerun waits;
+# a passing one is a flake (flake_finding, mark flake); a failing one is real
+# (mark red). An issue with no run, or comments the lane can't read, is red as
+# before: that never reruns, so a sha is rerun at most once. A judged sha is
+# never rerun or read again.
+flake_check() {
+  local issue="$1" url="$2" sha7="${3:0:7}" jobs="$4" id comments tests st
+  id=$(mac_run_id "$url"); [[ -n "$id" && -n "$3" ]] || return 0
+  comments=$(gh api "repos/$REPO/issues/$issue/comments" --paginate --jq '.[].body' 2>/dev/null) || return 0
+  if ! grep -qF -- "$RERUN_MARK $sha7 " <<<"$comments"; then
+    tests=$(red_tests "$3")
+    if ! write gh run rerun "$id" -R "$REPO" --failed; then log "flake check: could not rerun the failed jobs of run $id; $BASE_BRANCH counts as red"; return 0; fi
+    log "flake check: rerunning the failed jobs ($jobs) of run $id once at $sha7${tests:+ (failing $tests)}; $BASE_BRANCH is not held meanwhile"
+    write gh issue comment "$issue" -R "$REPO" --body "Flake check: re-running the failed jobs ($jobs) of $url once at $sha7${tests:+; failing $tests}. A pass makes this red a flake (the lane files a finding for the test and holds nothing); a second failure makes it real. $RERUN_MARK $sha7 started -->" \
+      || log "could not comment on #$issue"
+    return 1
+  fi
+  if grep -qF -- "$RERUN_MARK $sha7 red -->" <<<"$comments"; then return 0; fi
+  if grep -qF -- "$RERUN_MARK $sha7 flake -->" <<<"$comments"; then log "flake check: $sha7 was a flake; waiting for CI on $BASE_BRANCH to close dev-red #$issue"; return 1; fi
+  st=$(rerun_state "$id")
+  case "$st" in
+    success) flake_finding "$issue" "$sha7" "$url" "$comments"; return 1 ;;
+    red*)
+      log "flake check: the rerun of run $id failed too (${st#red|}); $BASE_BRANCH is red"
+      write gh issue comment "$issue" -R "$REPO" --body "Flake check: the rerun of $url failed too (${st#red|}), so this red is real. $RERUN_MARK $sha7 red -->" || log "could not comment on #$issue"
+      return 0 ;;
+    *) log "flake check: the rerun of run $id is $st; $BASE_BRANCH is not held meanwhile"; return 1 ;;
+  esac
+}
+
+# flake_closed: ci.yml's promote reruns with the passed jobs and closes the
+# dev-red issue, usually before a sweep sees the pass. With no open issue, the
+# last closed one is read: a started mark with no verdict whose rerun passed
+# gets its finding and mark there; one whose rerun failed gets the red mark.
+flake_closed() {
+  local issue comments sha7 line url st
+  issue=$(gh api "repos/$REPO/issues?labels=$RED_LABEL&state=closed&sort=updated&per_page=1" \
+    --jq 'first(.[] | select(.pull_request == null)) | .number' 2>/dev/null || true)
+  [[ -n "$issue" ]] || return 0
+  comments=$(gh api "repos/$REPO/issues/$issue/comments" --paginate --jq '.[].body' 2>/dev/null) || return 0
+  for sha7 in $(grep -oE -- "$RERUN_MARK [0-9a-f]{7} started -->" <<<"$comments" | awk '{ print $3 }' | sort -u); do
+    grep -qE -- "$RERUN_MARK $sha7 (flake|red) -->" <<<"$comments" && continue
+    line=$(grep -F -- "$RERUN_MARK $sha7 started -->" <<<"$comments" | head -1)
+    url=$(grep -oE 'https://[^ ]+/actions/runs/[0-9]+' <<<"$line" | head -1); [[ -n "$(mac_run_id "$url")" ]] || continue
+    st=$(rerun_state "$(mac_run_id "$url")")
+    case "$st" in
+      success) flake_finding "$issue" "$sha7" "$url" "$comments" ;;
+      red*) write gh issue comment "$issue" -R "$REPO" --body "Flake check: the rerun of $url failed too (${st#red|}), so that red was real. $RERUN_MARK $sha7 red -->" || log "could not comment on #$issue" ;;
+    esac
+  done
+}
+
+# flake_finding <issue> <sha7> <run url> <issue comments>: the flake's one
+# finding, for a fixer: an open FINDING_LABEL issue with the same title gets a
+# comment, else one is filed with FINDING_LABEL, FLAKY_LABEL and line:<app>
+# (build_apps over the tests' files; shared or unknown: line:suite). The tests
+# and jobs come from the sha's started mark. Then the mark on the dev-red
+# issue says flake. A finding list that fails files nothing (a duplicate
+# otherwise); the next sweep tries again.
+flake_finding() {
+  local issue="$1" sha7="$2" url="$3" line tests jobs title paths app n what body plural=""
+  line=$(grep -F -- "$RERUN_MARK $sha7 started -->" <<<"$4" | head -1)
+  tests=$(sed -nE 's/.*; failing (.*)\. A pass makes.*/\1/p' <<<"$line")
+  jobs=$(sed -nE 's/.*failed jobs \(([^)]*)\) of .*/\1/p' <<<"$line")
+  if [[ -n "$tests" ]]; then
+    [[ "$tests" != *,* ]] || plural=s
+    title="Flaky test$plural: $tests"
+  else
+    title="Flaky ${jobs:-CI} job on $BASE_BRANCH, no test named"
+  fi
+  scratch "$BASE_BRANCH" || true  # here, not in test_paths' subshell, so SCRATCH outlives it
+  paths=$(test_paths "$tests"); app=suite
+  if [[ -n "$paths" ]]; then app=$(build_apps <(printf '%s\n' "$paths")); [[ "$app" =~ ^[a-z]+$ && "$app" != all ]] || app=suite; fi
+  body="The ${jobs:-CI} job on $BASE_BRANCH failed in $url at $sha7${tests:+, failing $tests}, and passed when the fast lane reran the failed jobs once at the same sha, so the test is flaky. The lane held nothing on it. Make the assertion runner-speed proof (a wall-clock ratio needs 10x of slack, see Tests/perf-suites.txt), or ask the supervisor to move the test to Tests/perf-suites.txt so it runs nightly instead of in the gate."
+  if ! n=$(gh issue list -R "$REPO" --state open --label "$FINDING_LABEL" --limit 1000 --json number,title 2>/dev/null \
+      | jq -r --arg t "$title" 'first(.[] | select(.title == $t)) | .number // empty' 2>/dev/null); then
+    log "flake check: could not list the open findings; the next sweep files the flake"; return 0
+  fi
+  if [[ -n "$n" ]]; then
+    write gh issue comment "$n" -R "$REPO" --body "Flaked again: $body" || log "could not comment on #$n"
+    what="updated #$n"
+  else
+    write gh label create "$FLAKY_LABEL" -R "$REPO" --color fbca04 --force --description "A test that failed on dev and passed one rerun at the same sha" >/dev/null 2>&1 || true
+    what=$(write gh issue create -R "$REPO" --title "$title" --label "$FINDING_LABEL" --label "$FLAKY_LABEL" --label "line:$app" --body "$body" 2>/dev/null) || what=""
+    what="filed ${what:-a finding}"
+  fi
+  log "flake check: $sha7 was a flake ($title); $what"
+  write gh issue comment "$issue" -R "$REPO" --body "Flake check: the rerun of $url passed at $sha7, so that red was a flake and the lane held nothing on it; $what. $RERUN_MARK $sha7 flake -->" || log "could not comment on #$issue"
+}
+
+# test_files <tests>: the file names in red_tests' list (<File>.swift/<test>,
+# comma-separated), one per line, each once.
+test_files() {
+  # shellcheck disable=SC2086 # the comma list splits into words
+  printf '%s\n' ${1//,/ } | sed 's:/.*::' | grep '\.swift$' | sort -u || true
+}
+
+# test_paths <tests>: the Tests/ paths of the files red_tests named, from the
+# tree of origin/BASE_BRANCH in the scratch clone (trees only, so blob:none is
+# enough), one per line; a file not in the tree prints nothing. Callers run it
+# in a subshell, so they call scratch first: a SCRATCH made here would die with it.
+test_paths() {
+  local f tree
+  [[ -n "$1" ]] && scratch "$BASE_BRANCH" || return 0
+  tree=$(git -C "$SCRATCH" ls-tree -r --name-only "origin/$BASE_BRANCH" -- Tests 2>/dev/null) || return 0
+  while IFS= read -r f; do
+    [[ -z "$f" ]] || grep -E "^Tests/[^/]+/(.*/)?${f//./\\.}\$" <<<"$tree" || true
+  done < <(test_files "$1") | sort -u
+}
+
+# red_scope <red sha>: the paths a PR must not touch while that red stands, as
+# a regex: for each failing test's file (red_tests) under Tests/<Target>/,
+# Tests/<Target>/ and Sources/<Target minus Tests>/. Nothing (the whole queue
+# waits, as before) when no test is named, a file is not in the tree, or a
+# target has no such Sources module (AppSnapshotTests, AppAuditTests).
+red_scope() {
+  local tests paths f p target module re=""
+  tests=$(red_tests "$1"); [[ -n "$tests" ]] || return 0
+  paths=$(test_paths "$tests")
+  while IFS= read -r f; do
+    grep -qE "(^|/)${f//./\\.}\$" <<<"$paths" || return 0
+  done < <(test_files "$tests")
+  while IFS= read -r p; do
+    [[ -n "$p" ]] || return 0
+    target=$(cut -d/ -f2 <<<"$p"); module="${target%Tests}"
+    [[ "$module" != "$target" && -n "$(git -C "$SCRATCH" ls-tree -d "origin/$BASE_BRANCH" -- "Sources/$module" 2>/dev/null)" ]] || return 0
+    [[ "$re" == *"Sources/$module/|"* ]] || re+="${re:+|}Sources/$module/|Tests/$target/"
+  done <<<"$paths"
+  echo "^($re)"
 }
 
 # red_bisect <issue> <good> <bad> <branch>: finds the first commit in the
@@ -1929,15 +2104,17 @@ evaluate() {
       ;;
     eligible)
       # settle_ready lands it, or batches it with the pass's other eligible PRs:
-      # rank|n|head|branch|apps|ready since|proof. rank orders p0, beta, the
-      # rest; apps is what it needs on macOS (mac_scope; empty: nothing).
+      # rank|n|head|branch|apps|ready since|proof|hit. rank orders p0, beta, the
+      # rest; apps is what it needs on macOS (mac_scope; empty: nothing); hit is
+      # 1 when it touches the red module (BASE_RED_SCOPE), so a red dev holds it.
       # ponytail: "ready since" is the head commit's date (no state is kept),
       # unreadable counts as old: a smaller batch, never a stuck one.
-      local apps="" rank since
+      local apps="" rank since hit=0
       apps=$(mac_scope "$tmp/files.txt")
       rank=$(jq -r '[.labels[]?.name] as $l | if ($l | index("p0")) then 0 elif ($l | index("beta")) then 1 else 2 end' "$tmp/pr.json")
       since=$(jq -r '(.commits // [] | last // {} | .committedDate // "") as $d | if $d == "" then 0 else ($d | try fromdateiso8601 catch 0) end' "$tmp/pr.json" 2>/dev/null || echo 0)
-      READY+=("$rank|$n|$head|$(jq -r '.headRefName // ""' "$tmp/pr.json")|$apps|$since|${rest#*|*|}")
+      [[ -z "$BASE_RED_SCOPE" ]] || ! grep -qE -- "$BASE_RED_SCOPE" "$tmp/files.txt" || hit=1
+      READY+=("$rank|$n|$head|$(jq -r '.headRefName // ""' "$tmp/pr.json")|$apps|$since|${rest#*|*|}|$hit")
       ;;
   esac
   rm -rf "$tmp"

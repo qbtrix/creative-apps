@@ -655,7 +655,10 @@ gh() {
       if [[ -e "$sw/files.$n.json" ]]; then jq -r "${!#}" "$sw/files.$n.json"
       else jq -rn '[{filename: "Sources/FlareModel/FlareWorkspace.swift", status: "modified"}]' | jq -r "${!#}"; fi ;;
     "api "*"/pulls/"*) n="${2##*/}"; jq -r "${!#}" "$sw/pull.$n.json" 2>/dev/null || true ;;  # a PR's body (bisect_post)
+    "api repos/"*"/issues?labels=dev-red&state=closed"*) jq -r "${!#}" "$sw/redclosed.json" 2>/dev/null || true ;;  # the last closed dev-red issue (flake_closed)
     "api repos/"*"/issues?labels=dev-red"*) jq -r "${!#}" "$sw/red.json" 2>/dev/null || true ;;  # the open dev-red issue
+    "issue list "*) cat "$sw/issues.json" 2>/dev/null || echo '[]' ;;  # the open finding issues (flake_finding)
+    "issue create "*) echo "$a" >>"$sw/calls"; echo "https://github.com/qbtrix/creative-apps/issues/700" ;;
     "api search/issues"*) jq -r "${!#}" "$sw/search.json" 2>/dev/null || true ;;
     "run view --job "*) cat "$sw/joblog.$4" 2>/dev/null || return 1 ;;  # a job's failed-step log (budget_failure)
     "run view "*) cat "$sw/run.$3.json" 2>/dev/null || return 1 ;;
@@ -1329,7 +1332,7 @@ git -C "$w" push -q "$sw/origin.git" main dev
 M=$(git -C "$w" rev-parse main); C1=$(git -C "$w" rev-parse dev~2); C2=$(git -C "$w" rev-parse dev~1); C3=$(git -C "$w" rev-parse dev)
 R7=${C3:0:7}
 jq -n --arg b "$(printf 'CI on dev is red.\n\n- Run: https://github.com/qbtrix/creative-apps/actions/runs/9001\n- Failing jobs: linux\n- Culprit range: `main..%s`\n' "$C3")" '[{number: 500, body: $b, pull_request: null}]' >"$sw/red.json"
-printf '%s\n' "Likely cause: #102 feat(b): two (Clef 0.93). Flaky: 0.10." >"$sw/500.comments"
+printf '%s\n' "Likely cause: #102 feat(b): two (Clef 0.93). Flaky: 0.10." "$RERUN_MARK $R7 red -->" >"$sw/500.comments"
 jq -n '{body: "Adds two.\n\nFeature: easing\nFast-Check: pass"}' >"$sw/pull.102.json"
 jq -n '{items: [{number: 70, title: "Feature: easing (old)"}, {number: 78, title: "Feature: easing"}]}' >"$sw/search.json"
 verdict "$M" success; verdict "$C3" failure
@@ -1351,6 +1354,7 @@ expect "bisect dev: a red with its verdict posted is not redone (two runs, two c
 # the issue already has its verdict, so nothing is bisected again.
 echo c4 >"$w/c4.md"; git -C "$w" add -A; git -C "$w" commit -qm "docs: four (#104)"; git -C "$w" push -q "$sw/origin.git" dev
 C4=$(git -C "$w" rev-parse dev); verdict "$C4" failure
+printf '%s\n' "$RERUN_MARK ${C4:0:7} red -->" >>"$sw/500.comments"
 jq --arg b "$(printf 'CI on dev is red.\n\n- Run: https://github.com/qbtrix/creative-apps/actions/runs/9002\n- Failing jobs: linux\n- Culprit range: `main..%s`\n' "$C4")" '.[0].body = $b' "$sw/red.json" >"$sw/x" && mv "$sw/x" "$sw/red.json"
 lane_sweep
 expect "bisect dev: a newer red run on the same issue starts no second bisect" \
@@ -1771,6 +1775,8 @@ rvdev() {  # rvdev <jobs> <path|subject>...: main at a base, dev one commit per 
   jq -n --arg b "$(printf 'CI on dev is red.\n\n- Run: https://github.com/qbtrix/creative-apps/actions/runs/9500\n- Failing jobs: %s\n- Culprit range: `main..%s`\n' "$jobs" "$RED")" \
     '[{number: 520, body: $b, pull_request: null}]' >"$sw/red.json"
   tip_red "$RED" 4343 '✘ Test opens() recorded an issue at OpenTests.swift:9:5: Expectation failed: (doc.layers.count → 3) == (4 → 4)'
+  # The flake check already judged this red real (its rerun failed), so these cases start where today's lane does.
+  printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
   jq -n '{body: "Adds a.\n\nFeature: easing"}' >"$sw/pull.201.json"
   jq -n '{items: [{number: 78, title: "Feature: easing"}]}' >"$sw/search.json"
 }
@@ -1816,7 +1822,7 @@ expect "auto-revert: never reverts a revert, and says so once on the issue" \
 rvdev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
 LANE_VERIFY_AFTER=1 lane_sweep; verdict "$(jq -r .headRefOid "$sw/600.json")" success
 jq '.[0].number = 530' "$sw/red.json" >"$sw/x" && mv "$sw/x" "$sw/red.json"
-printf '%s\n' "Auto-revert: an earlier call. <!-- lane-revert none -->" >"$sw/530.comments"
+printf '%s\n' "Auto-revert: an earlier call. <!-- lane-revert none -->" "$RERUN_MARK ${RED:0:7} red -->" >"$sw/530.comments"
 LANE_VERIFY_AFTER=1 lane_sweep
 expect "auto-revert: a revert from an older dev-red issue is never checked or landed under a new one" \
   "$(merges),$(grep -c -- '--ref lane/revert-201$' "$sw/calls"),$(creates)" ",0,1"
@@ -1848,7 +1854,7 @@ expect "auto-revert: once the bisect names #201, only #201 is reverted" \
 # whose first call was a no-culprit note still reverts the PR a later bisect
 # names, once; later sweeps on the same culprit open none.
 rvdev linux "docs/a.md|docs: a (#201)" "Sources/PhotoModel/B.swift|feat(photo): b (#202)"
-printf '%s\n' "Auto-revert: 2 PRs in main..abc1234 and no bisect verdict names one of them (red: macos), so a human picks the culprit. <!-- lane-revert none -->" >"$sw/520.comments"
+printf '%s\n' "Auto-revert: 2 PRs in main..abc1234 and no bisect verdict names one of them (red: macos), so a human picks the culprit. <!-- lane-revert none -->" >>"$sw/520.comments"
 LANE_VERIFY_AFTER=1 lane_sweep
 verdict "$(git -C "$sw/origin.git" rev-parse dev~1)" failure; C201=$(git -C "$sw/origin.git" rev-parse dev~1); LANE_VERIFY_AFTER=1 lane_sweep
 expect "auto-revert: after a no-culprit note, a certain Linux culprit still gets exactly one revert" \
@@ -1953,6 +1959,103 @@ LANE_VERIFY_AFTER=1 lane_sweep; verdict "$(batch_tip)" in_progress
 cpr 177 Sources/DesignModel/B.swift; prescreen "$(head_of 177)" success
 LANE_VERIFY_AFTER=1 lane_sweep
 expect "verify after: a batch of one changing a ratchet path still holds the lane" "$(merges),$(batch_br | wc -l | tr -d ' ')" ",1"
+
+# Flake check (dev red 10 h on a 3.1x-vs-3x timing ratio, 2026-10-26): before
+# the lane treats dev as red it reruns the red run's failed jobs once at the
+# red sha (gh run rerun --failed) and records that on the dev-red issue
+# (RERUN_MARK <sha7> started). While the rerun runs nothing is held, bisected
+# or reverted; a pass is a flake (one finding naming the tests, no hold, the
+# mark says flake); a failure makes the red real (the mark says red) and the
+# lane goes on as before. One rerun per sha, never a second.
+runstate() { jq -n --arg s "$1" --arg c "${2:-}" '{status: $s, conclusion: $c}' >"$sw/run.9500.json"; }
+bisects() { git -C "$sw/origin.git" for-each-ref 'refs/heads/ci/bisect-*' | wc -l | tr -d ' '; }
+reruns() { grep -c '^run rerun 9500 -R qbtrix/creative-apps --failed$' "$sw/calls" || true; }
+findings() { grep -c -- '^issue create .*--label flaky ' "$sw/calls" || true; }  # the lane's flake findings (a revert files one too)
+FLAKE_RUN="https://github.com/qbtrix/creative-apps/actions/runs/9500"
+flakedev() {  # flakedev <jobs> <spec>...: rvdev with the red's test file in the tree (no PR's commit) and no flake check done yet
+  rvdev "$1" "Tests/PhotoModelTests/OpenTests.swift|test(photo): opens" "${@:2}"
+  : >"$sw/520.comments"; rm -f "$sw/run.9500.json"
+}
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+cpr 190 docs/flake.md
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a new red gets one rerun of its failed jobs, recorded on the dev-red issue with the failing tests" \
+  "$(reruns),$(grep -c "^issue comment 520 .*Flake check: re-running the failed jobs (linux) of $FLAKE_RUN once at ${RED:0:7}; failing OpenTests.swift/opens(). .* <!-- lane-rerun ${RED:0:7} started -->" "$sw/calls")" "1,1"
+expect "flake check: meanwhile dev is not red: no bisect, no revert, the ready docs PR lands" "$(bisects),$(creates),$(merges)" "0,0,pr merge 190"
+runstate in_progress; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a running rerun is waited for, never a second rerun, still no hold" "$(reruns),$(bisects),$(creates)" "1,0,0"
+runstate completed success; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a passing rerun files one finding naming the test, labelled for a fixer and the app" \
+  "$(findings),$(grep -c -- "^issue create -R qbtrix/creative-apps --title Flaky test: OpenTests.swift/opens() --label finding --label flaky --label line:photo --body .*$FLAKE_RUN.*${RED:0:7}" "$sw/calls")" "1,1"
+expect "flake check: and marks the issue as a flake, with no bisect or revert" \
+  "$(grep -c "^issue comment 520 .*Flake check: the rerun of $FLAKE_RUN passed at ${RED:0:7}, so that red was a flake and the lane held nothing on it; filed https://github.com/qbtrix/creative-apps/issues/700\. <!-- lane-rerun ${RED:0:7} flake -->" "$sw/calls"),$(bisects),$(creates)" "1,0,0"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a judged flake is not rerun, refiled or held on later sweeps" "$(reruns),$(findings),$(bisects)" "1,1,0"
+# An open finding with that title is updated, never duplicated.
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+jq -n '[{number: 701, title: "Flaky test: OpenTests.swift/opens()"}]' >"$sw/issues.json"
+LANE_VERIFY_AFTER=1 lane_sweep; runstate completed success; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: an open finding for the test gets a comment, not a duplicate" \
+  "$(findings),$(grep -c "^issue comment 701 .*Flaked again: .*$FLAKE_RUN.*${RED:0:7}" "$sw/calls"),$(grep -c "updated #701\. <!-- lane-rerun ${RED:0:7} flake -->" "$sw/calls")" "0,1,1"
+# A rerun that fails too: the red is real, and the lane holds, bisects and reverts as today.
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+LANE_VERIFY_AFTER=1 lane_sweep; runstate completed failure; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a failing rerun makes the red real: marked once, then the culprit is reverted as before" \
+  "$(reruns),$(grep -c "^issue comment 520 .*Flake check: the rerun of $FLAKE_RUN failed too (failure), so this red is real\. <!-- lane-rerun ${RED:0:7} red -->" "$sw/calls"),$(creates),$(findings)" "1,1,1,0"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a judged red is never rerun again" "$(reruns)" 1
+# ci.yml's promote reruns with the passed jobs and closes the issue, usually
+# before a sweep sees the pass: the finding is still filed, off the closed issue.
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+LANE_VERIFY_AFTER=1 lane_sweep
+mv "$sw/red.json" "$sw/redclosed.json"; runstate completed success; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a flake whose issue promote closed first still gets its one finding and mark" \
+  "$(findings),$(grep -c "<!-- lane-rerun ${RED:0:7} flake -->" "$sw/calls")" "1,1"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: and only one" "$(findings),$(grep -c "<!-- lane-rerun ${RED:0:7} flake -->" "$sw/calls")" "1,1"
+# A dev-red issue without a run to rerun is red at once, as today.
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+jq '.[0].body |= sub("- Run: [^\n]*\n"; "")' "$sw/red.json" >"$sw/x" && mv "$sw/x" "$sw/red.json"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: no run named, nothing to rerun: red as today" "$(reruns),$(creates)" "0,1"
+
+# Scoped hold: a red dev holds only the ready PRs that touch the failing
+# module (red_scope: the failing tests' files in the tree give Tests/<Target>/
+# and Sources/<Target minus Tests>/); the rest batch as if dev were green. A
+# red whose module can't be placed (no test named, or a target with no
+# Sources module) holds the whole queue as before. LANE_VERIFY_AFTER=0 batches
+# code; code PRs on their own proof under LANE_VERIFY_AFTER=1 land as before.
+LANE_MAC_PER_PR=0
+batch_prs() { git -C "$sw/origin.git" log --first-parent --format=%s "dev..$(batch_tip)" 2>/dev/null | grep -oE '#[0-9]+' | sort | paste -sd, -; }
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"; printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
+cpr 191 Sources/PhotoModel/B.swift; cpr 192 Sources/DesignModel/C.swift; cpr 193 docs/scope.md
+lane_sweep
+expect "scoped hold: PRs off the red module batch; the one touching it waits" "$(batch_prs),$(merges)" "#192,#193,"
+expect "scoped hold: the held PR gets no label and no comment" "$(grep -cE '^pr (edit|comment) 191 ' "$sw/calls")" 0
+# The module is read from the fixture remote's tree, never from the checkout
+# the tests run in: FooModel exists only at the fixture (a SCRATCH made in a
+# subshell died with it and the lane read this repo instead, which passed on a
+# Mac and failed on Linux).
+rvdev linux "Tests/FooModelTests/OpenTests.swift|test(foo): opens" "Sources/FooModel/A.swift|feat(foo): a (#201)"
+printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"; rm -f "$sw/run.9500.json"
+cpr 1001 Sources/FooModel/B.swift; cpr 1002 docs/scope.md
+lane_sweep
+expect "scoped hold: the red module comes from the remote's tree, not this checkout: the lone docs PR lands, the FooModel one waits" "$(batch_prs),$(merges)" ",pr merge 1002"
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"; printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
+printf 'error: compile failed\nCI: FAIL\n' >"$sw/joblog.4343"
+cpr 194 Sources/DesignModel/C.swift; cpr 195 docs/scope.md
+lane_sweep
+expect "scoped hold: a red naming no test holds the whole queue as before" "$(batch_tip),$(merges)" ","
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Tests/AppSnapshotTests/SnapTests.swift|test(snap): s (#202)"
+printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
+tip_red "$RED" 4343 '✘ Test snaps() recorded an issue at SnapTests.swift:9:5: Expectation failed: (a → 3) == (4 → 4)'
+cpr 196 Sources/DesignModel/C.swift; cpr 197 docs/scope.md
+lane_sweep
+expect "scoped hold: a test target with no Sources module holds the whole queue as before" "$(batch_tip),$(merges)" ","
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"; printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
+cpr 198 Sources/PhotoModel/B.swift; prescreen "$(head_of 198)" success
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "scoped hold: verify after still lands a code PR on its own proof, red module or not" "$(merges)" "pr merge 198"
 LANE_MAC_PER_PR=1
 
 exit "$fail"

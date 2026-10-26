@@ -364,8 +364,14 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   `Head:` line; the lane drops the label on the new head. When `dev` alone is
   red on every job the batch is red on, the batch lands on each PR's own proof
   so a fix can get through; a job red only with the batch is still bisected.
-  While a `dev-red` issue names a job a batch would run (Linux always,
-  macOS when the batch has code), no new batch forms and ready PRs wait. A
+  A new `dev-red` first gets its run's failed jobs rerun once at the same
+  sha (the lane's flake check): a pass is a flake, which files a `finding`
+  labelled `flaky` for the test and holds nothing; a failure makes the red
+  real. While a real `dev-red` issue names a job a batch would run (Linux
+  always, macOS when the batch has code), ready PRs that touch the failing
+  module (its test target's `Tests/<X>Tests/` and `Sources/<X>/`) wait and
+  the rest batch as usual; when the lane can't place the red, no new batch
+  forms and every ready PR waits. A
   batch already in flight on a base that holds the red commit is marked
   (`lane/batch-<id>-red`); once `dev` is green again on a newer commit the
   lane drops it and its probes, with no label or comment on its PRs, and
