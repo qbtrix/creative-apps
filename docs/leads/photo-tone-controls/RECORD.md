@@ -100,3 +100,11 @@ Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #48
   - First commit is the failing test, `BodyCountSuites.RenderBudgetPhotoToneTests.temperatureDragInThreeBodies`. It steps the Temperature row 120 times and expects at most 3 editor bodies, Temperature at 100 and "Undo Temperature". The p95 is printed only.
   - Second commit: a tone row's drag samples (`tone.set` with a drag token) run on the window's live copy, the same way Free Transform's do (`runLive`). `perform` keeps the copy through tone samples, and the Adjust panel reads `live?.shown`, so each step reads the value it just set.
   - `scripts/ci --changed` PASS. The view code is macOS-only and was written blind. The PR opens once #5363 merges.
+- PT-z, PT-7 (live): branch `claude/tone-controls-lead-gms6yu-pt7` (on top of PT-3's 9d80855d, 15 files, +96/−73).
+  - First commit, 8beacef6: the failing test `PhotoToneJobsTests.runsLiveAndWritesWhatItExpects`. For each of the white-balance, backlit and sharpen-web jobs, there is one live `.jobs.json` with no pending entry. The job exits 0 and either passes or waits only on pixels. Every output and reference it names exists.
+  - Second commit: the three jobs are no longer pending, with `platforms` set to linux and macos.
+    - Deterministic inputs: tungsten-grey 480x320, backlit 480x320 and soft-edge 2400x1600.
+    - References are the jobs' own exports. The card goes from (134,128,121) to (129,128,128), and the backlit shadow lifts from 69 to 78.
+    - Sharpen-web's output is `.jpeg`, which is what JPEG export writes.
+    - RJ-P12..14 in jobs.json now have `baseline: pass` and no waits_on.
+    - The PJ-T1 journey's skip flag is removed.
