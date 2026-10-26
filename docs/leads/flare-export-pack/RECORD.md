@@ -2,7 +2,7 @@
 
 Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
 Run: act-1a178432d03-7n20 (relaunched 2026-10-26T12:41Z; before it act-1a175ee12a5-4niu, relaunched 2026-10-26T02:05Z; before it act-1a16fe1fa9f-sqqi, relaunched 2026-10-24T21:39Z after act-1a16c619006-nour hit the 16-hour limit; before it act-1a1695ebf10-z0v8; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T02:26Z
-Stage: 3 build (#4854 merged 21:48Z as 9e1cc26b; #5025 queued; dev-red #5818 open, not ours)
+Stage: 3 build (#4854 merged 21:48Z as 9e1cc26b; #5025 in lane/batch-20261026234912, checks running; dev-red #5818 open, not ours)
 Base: 721168a (origin/dev)
 Next: #4854 (FV-z, 98239ba3) and #5025 (fix round 1, 921d412b) are ready (marker on head, no blocking label) and dev-red #5321 closed 18:52Z (dev green at fef52e66, run 40369651916), and lane sweep 40386832050 rates both eligible (marker + local-ci/prescreen); they wait in a queue of 122 ready PRs. Once both merge and a green flare-scoped or full run contains them: Belt-Slice-Done FV-z and Mac-Finish-Wanted FV-z on #3481, then the FJ-X1 critic panel and Belt-Contact-Sheet.
 
