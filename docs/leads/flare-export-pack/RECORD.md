@@ -1,10 +1,10 @@
 # export-pack (Flare) lead record
 
 Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
-Run: act-1a16fe1fa9f-sqqi (relaunched 2026-10-24T21:39Z after act-1a16c619006-nour hit the 16-hour limit; before it act-1a1695ebf10-z0v8; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T02:26Z
-Stage: 3 build (fix round 1 in lane)
+Run: act-1a175ee12a5-4niu (relaunched 2026-10-26T02:05Z; before it act-1a16fe1fa9f-sqqi, relaunched 2026-10-24T21:39Z after act-1a16c619006-nour hit the 16-hour limit; before it act-1a1695ebf10-z0v8; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T02:26Z
+Stage: 3 build (FV-z and fix round 1 held by dev-red #5321)
 Base: 721168a (origin/dev)
-Next: #4854 (FV-z, 565669e7) and #5025 (fix round 1, frame drawing) wait in the lane. Once both merge and a green flare-scoped or full run contains them: Belt-Slice-Done FV-z on #3481, then the FJ-X1 critic panel and Belt-Contact-Sheet. Findings open: no new feature work.
+Next: #4854 (FV-z, 565669e7) and #5025 (fix round 1, 9c2bc627) are ready (marker on head, prescreen green, no blocking label) but no batch forms while dev-red #5321 (macOS; triage names #5112/#5044, not this line) is open. Once both merge and a green flare-scoped or full run contains them: Belt-Slice-Done FV-z on #3481, then the FJ-X1 critic panel and Belt-Contact-Sheet. Findings open (6): no new feature work.
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -29,6 +29,7 @@ Loop: v3 (the packet has a `## Slices` table).
 | FV-8 | FV-z | 5 | flare.md: MP4 and GIF; wave status built | docs/blueprints/flare.md, export-pack.wave.json | waves render | #4854 | open |
 
 ## Decisions
+- 2026-10-26T02:05Z (act-1a175ee12a5-4niu): resumed for FV-z only. #4854 and #5025 wait on dev-red #5321, which is not this line's to fix (CLAUDE.md: don't fix another merge's red in our PR); poll and heartbeat.
 - 2026-10-23T17:03Z (act-1a1695ebf10-z0v8): Belt watches lead/flare-export-pack; this run had pushed status to lead/export-pack. From now the record and timeline live on lead/flare-export-pack (timeline rows from both branches merged, in order).
 - 2026-10-23T15:46Z: Wire: suiteui/export-pack:XP-a (pixel and long-edge Size modes, XP-3/XP-4). FV-2 uses the shared scale row; the Model already takes .pixels and .longEdge.
 - 2026-10-23T15:59Z: FV-u's run total is the plan's frame count for MP4/GIF (first-use clarity: the bar sat at 0 of 1). FV-u's PR is based on lead/export-pack-fv2 because a dev-based diff would be 418 lines, over the cap; it retargets to dev when #4843 merges.
