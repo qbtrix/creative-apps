@@ -158,7 +158,7 @@ public struct NewDocumentForm: Sendable {
     public static func parameter(_ name: String, _ mode: NewDocumentMode) -> String { "\(mode.command) \(name)" }
 }
 
-/// The New Document sheet, and Document Settings in `.settings` mode. Return creates, Escape cancels.
+/// The New Document sheet, and Document Settings in `.settings` mode, on SuiteSheet. Return creates, Escape cancels.
 public struct NewDocumentSheet: View {
     private let mode: NewDocumentMode
     private let onDone: @MainActor (DocumentSetup, BoxAnchor) -> Void
@@ -173,8 +173,13 @@ public struct NewDocumentSheet: View {
 
     public var body: some View {
         let sections = NewDocumentForm.sections(mode, limits: form.limits)
-        VStack(alignment: .leading, spacing: SuiteSpacing.l) {
-            Text(mode.command == "file.new" ? "New Document" : "Document Settings").font(SuiteFont.headline)
+        let creates = mode.command == "file.new"
+        SuiteSheet(
+            creates ? "New Document" : "Document Settings", cancelID: "suite.newdoc.cancel", onCancel: onCancel,
+            action: MenuCommand(creates ? "Create" : "Apply", help: "Makes the document at this size") { onDone(form.setup, form.anchor) },
+            actionID: "suite.newdoc.create",
+            reason: form.canCreate ? nil : form.problems.first?.text ?? "Fix the settings above first."
+        ) {
             Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: SuiteSpacing.m, verticalSpacing: SuiteSpacing.s) {
                 if sections.contains(.presets) { presetRow }
                 sizeRows
@@ -182,18 +187,7 @@ public struct NewDocumentSheet: View {
                 if sections.contains(.background) { backgroundRow }
                 if sections.contains(.timing) { timingRows }
             }
-            HStack(spacing: SuiteSpacing.s) {
-                Spacer()
-                Button("Cancel", role: .cancel) { onCancel() }
-                    .keyboardShortcut(.cancelAction).accessibilityIdentifier("suite.newdoc.cancel")
-                Button(mode.command == "file.new" ? "Create" : "Apply") { onDone(form.setup, form.anchor) }
-                    .buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction)
-                    .disabled(!form.canCreate).help(form.problems.first?.text ?? "Makes the document at this size")
-                    .accessibilityIdentifier("suite.newdoc.create")
-            }
         }
-        .padding(SuiteSpacing.xl)
-        .frame(width: SuiteSize.contentMinimum.width)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("suite.newdoc")
     }
