@@ -1,11 +1,17 @@
 # suite-imaging lead record
 
 Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-imaging.md
-Run: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
-Stage: 3 wave 8
-Base: c16bcd16c (origin/dev)
-Next: 17:49Z: no suite-imaging merges. #5148, #5151, #5153, #5295 clean with fast-lane, queued. #5154, #5163, #5297, #5299 dirty (stacked); #5178 no-fast-lane. dev e821acd0d (#5075); main d3323f6a7. dev-red #5321 open (macos, likely flaky, none ours). 0 open suite-imaging findings; no supervisor reply. IM-13 waits on #5151, #5163. Poll ~18:09Z.
+Run: act-1a175ea55b7-729d (line lead, line:suiteui; relaunch 2026-10-26) · earlier: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
+Stage: 3 wave 9: restack stale chains on dev
+Base: origin/dev 8eff8ab85
+Next: #5148, #5151, #5153 merged. Merge origin/dev into #5295 → #5297 → #5299 and #5154 → #5163 → #5178, gate, move Head. IM-13 (Package.swift, supervisor) once #5163 merges.
 
+
+## Run act-1a175ea55b7-729d decisions
+- Brief rule 1: main checked out at d3323f6a7; main was rewritten, so each lead branch is rebuilt as origin/main plus this record (no merge base with the old branch), pushed --force-with-lease.
+- PR base stays `dev` (CLAUDE.md; BASE_BRANCH=dev in scripts/fast-lane.sh; the lane retargets main PRs).
+- Stacked PRs whose parent squash-merged carry the parent's commits (size FAIL, dirty): merge origin/dev into each branch, gate, move Head.
+- #5148 (f4463d48c), #5151 (5eb2fa737), #5153 (f7c2ab5bb) merged; IM-photo still needs IM-8d (#5295, #5297), IM-library IM-11 (#5154, #5163, #5178).
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|

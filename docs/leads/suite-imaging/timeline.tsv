@@ -143,3 +143,4 @@ utc	stage	event	ref	note
 2026-10-25T17:05Z	heartbeat	no merges of ours; dev 5b1d3a19b; dev-red #5321 likely flaky, not ours; main d3323f6a7; 0 findings
 2026-10-25T17:27Z	heartbeat	no merges of ours; dev 5b1d3a19b; dev-red #5321 open, not ours; main d3323f6a7; 0 findings
 2026-10-25T17:49Z	heartbeat	no merges of ours; dev e821acd0d; dev-red #5321 open, not ours; main d3323f6a7; 0 findings
+2026-10-26T01:58:55Z	relaunch	run act-1a175ea55b7-729d: lead branch rebuilt on main d3323f6a7; #5148 #5151 #5153 merged
