@@ -2,9 +2,9 @@
 
 Issue: #3476 · Packet: docs/blueprints/suiteui/features/tone-controls.md
 Run: act-1a175ea55b7-729d (line lead, line:suiteui; relaunch 2026-10-26) · earlier: act-1a1702c569a-0puo · Session: claude/suiteui-feature-lead-run-azjeoo · Started: 2026-10-24T23:00Z (earlier: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui) · Started: 2026-10-23T14:52Z (earlier runs act-1a16469734c-d0s8, act-1a15821c836-93pf))
-Stage: All slices done: TC-a, TC-m, TC-u, TC-z (Belt-Slice-Done TC-z run 40276982587, Linux check 40276985896 green). TC-z critic review clean (snapshots: shared InspectorSliderRow track offset is suite-wide, not filed). #5375 (Fixes #5324) restacked on dev at 26ead271, gate PASS. Note: the session proxy appends a tool footer to every PR body and comment write; it can't be stripped from here.
+Stage: Done: all slices (TC-a, TC-m, TC-u, TC-z) Belt-Slice-Done; Belt-Contact-Sheet posted 2026-10-26T11:59:52Z. Open: #5375 (fixes finding #5324) in the lane.
 Base: origin/dev 8eff8ab85
-Next: Belt-Contact-Sheet once journeys run 40279283359 (suiteui at c480d848) finishes, with its journey lines and audit counts
+Next: None. Feature closed for this lead; the journeys belong to beta-hardening (Verified).
 
 
 ## Run act-1a175ea55b7-729d decisions
@@ -33,6 +33,7 @@ Next: Belt-Contact-Sheet once journeys run 40279283359 (suiteui at c480d848) fin
 - 10:26 heartbeat: journeys run 40288150154 in progress, contact sheet next
 - 10:47 heartbeat: waiting on fast lane; dev-red #5321 open
 - 11:32 heartbeat: Contact Sheet waits on journeys run 40307195503 (suiteui)
+- 2026-10-26T11:59:52Z contact sheet: Belt-Contact-Sheet posted on #3476 (issuecomment-6415463147, run 40276982587; journeys 40307195503): testToneRowsSetAndReset red, finding #5324 with fix #5375 open; testToneCurveAddMoveRemove red; suiteui audit identifier 10, offscreen 4
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
