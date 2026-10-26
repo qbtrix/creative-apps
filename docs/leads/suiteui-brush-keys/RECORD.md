@@ -78,3 +78,4 @@ Next: wait for the lane to merge BK-u #4939; then merge dev into #4965, #4961, #
 - 2026-10-26T18:37Z (act-1a177ff0916-4jm7): poll: dev e69582e7; dev unchanged; #4939 and #5799 await the lane
 - 2026-10-26T18:54Z (act-1a177ff0916-4jm7): poll: dev 5cffd4cf; no merges of ours (only #5295 SuiteImaging route); #4939 and #5799 await the lane
 - 2026-10-26T19:13Z (act-1a177ff0916-4jm7): poll: dev 5cffd4cf; dev unchanged; #4939 and #5799 await the lane
+- 2026-10-26T19:30Z (act-1a177ff0916-4jm7): poll: dev 17a7848b; no merges of ours (only #5334); #4939 and #5799 await the lane
