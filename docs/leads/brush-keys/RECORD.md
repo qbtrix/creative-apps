@@ -1,10 +1,16 @@
 # brush-keys lead record
 
 Issue: #3758 (#4531 closed as duplicate) · Packet: docs/blueprints/suiteui/features/brush-keys.md
-Run: act-1a16fe1fa73-5x3s (line lead, line:suiteui; relaunch) · earlier: act-1a16c619037-500v (resumed from act-1a16958d72f-a4mg)
-Stage: 3 wave 3 (BK app slices: conflicts resolved ahead of BK-u merge)
-Base: 654fb36328cdb049dfd1bcda411a126d316c639c (main at resume)
-Next: wait for the lane to merge BK-u #4939; then merge dev into #4965, #4961, #4982 (diff drops to their own slice) and add fast-lane; BK-z folds into the last adopt slice
+Run: act-1a175f403b9-j4z9 (line lead, line:suiteui; resume) · earlier: act-1a16fe1fa73-5x3s, act-1a16c619037-500v
+Stage: 3 wave 3 (BK app slices wait on BK-u #4939; lane held by dev-red #5321)
+Base: d3323f6a7dc523e1986e1693b640cf377e362f08 (main at resume; dev 8987427d)
+Next: wait for the lane to merge BK-u #4939; then merge dev into #4965, #4961, #4982 (diff drops to their own slice), gate, move Head, drop needs-split; BK-z folds into the last adopt slice
+
+## Run act-1a175f403b9-j4z9 decisions
+- Brief rule 1: main checked out at d3323f6a. The old lead branches share no history with main, so each lead branch is now origin/main plus one commit carrying docs/leads/ (the tree a rebase gives), pushed --force-with-lease.
+- PR base stays dev (CLAUDE.md, scripts/fast-lane.sh BASE_BRANCH=dev); the lane retargets main PRs to dev anyway.
+- PR bodies: the session's GitHub relay re-adds a generated-by footer on every edit; the lane strips it from the squash commit.
+- 02:30Z: dev-red #5321 (macOS, range main..cc5c6234, none ours) holds every code batch; no open finding names this feature.
 
 ## Run act-1a16fe1fa73-5x3s decisions
 - 22:59Z: the 22:27Z poll was one-shot, so no heartbeat ran from 22:28Z to 22:59Z. Each poll now schedules the next one 15 min out.
