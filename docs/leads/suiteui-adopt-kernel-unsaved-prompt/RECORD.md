@@ -263,3 +263,4 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 - 2026-10-26T14:40:44Z Resume, run act-1a178a4b1c2-ibn1. UP stack #5088/#5089/#5091/#5231 clean; waiting on the lane (dev-red #5321).
 - 2026-10-26T15:00:28Z poll: dev-red #5321 open (macos); ci.yml at f86f72f79 running; no needs-fix/needs-rebase on our PRs; #5088 prescreen+Linux green, unstable only from running fast-lane check
 - 2026-10-26T15:26:50Z poll 15:26: dev-red #5321 open; full CI 40342241864 + scoped library at f86f72f79 still running; none of ours merged or labelled needs-fix
+- 2026-10-26T15:50:37Z poll 15:55: dev-red #5321 open; no green ci.yml since 68be32fc6 (scoped photo 40350541067 red, full 40342241864 red); our PRs still open
