@@ -243,3 +243,4 @@ utc	stage	event	ref	note
 2026-10-26T22:24Z	poll	5025 still queued; no new batch with it; dev-red 5818 open; 3481 no new comments
 2026-10-26T22:46Z	poll	5025 still queued; no new lane batch since 22:07Z, sweep 40413703841 running; dev-red 5818 open; 3481 no new comments
 2026-10-26T23:08Z	poll	5025 still queued; batches now 4903/5817/5369; dev-red 5818 open; 3481 no new comments
+2026-10-26T23:30Z	poll	5025 still queued; last batches 4903/5817/5369 green; recent lane sweeps cancelled (no log); dev-red 5818 open; 3481 no new comments
