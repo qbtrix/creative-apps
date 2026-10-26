@@ -161,3 +161,4 @@ Next: AK side ended (parked by the supervisor): #4427 and #4428 on dev; relaunch
 - 2026-10-26T14:40:25Z Resume, run act-1a178a4b1c2-ibn1. AK-8 still blocked on shared-codecs SC-f (not on dev); AK-11 waits AK-8. dev-red #5321 open (not ours).
 - 2026-10-26T15:00:31Z poll: dev-red #5321 open (macos); ci.yml at f86f72f79 running; no needs-fix/needs-rebase on our PRs; AK-photo/AK-z wait on SC-f
 - 2026-10-26T15:26:56Z poll 15:26: dev-red #5321 open; full CI 40342241864 + scoped library at f86f72f79 still running; none of ours merged or labelled needs-fix; SC-f still open (SC-15/16 unmerged, packet review #5798 open)
+- 2026-10-26T15:50:40Z AK-photo/AK-z blocked: SC-f PRs #5262 #5265 still open
