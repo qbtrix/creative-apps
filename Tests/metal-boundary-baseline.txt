@@ -1,3 +1,0 @@
-# Metal outside SuiteImaging that predates the rule; shrink-only (see
-# Tests/SuiteImagingTests/ImagingBoundaryTests.swift). IM-13 deletes this file.
-Package.swift: appEngines["Photo"]
