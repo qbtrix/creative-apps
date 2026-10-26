@@ -220,3 +220,4 @@ utc	stage	event	ref	note
 2026-10-26T21:32Z	3	poll	-	dev unchanged; #4939 clean in the lane, #5799 waits; #4965 still needs-split until #4939 lands
 2026-10-26T21:35Z	3	poll	-	dev unchanged; removed attribution footers from #4961 and #4982; #4939 waits in the lane
 2026-10-26T21:50Z	3	poll	-	no brush-keys merges; #4939 still in the lane; #4965, #4961, #4982 wait on it
+2026-10-26T22:11Z	3	poll	-	no tracked merges; #4939 BK-u open; #4965/#4961/#4982 wait on it
