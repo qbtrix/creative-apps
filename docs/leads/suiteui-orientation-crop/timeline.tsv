@@ -158,3 +158,4 @@ utc	stage	event	ref	note
 2026-10-26T18:05:33Z	waiting	poll	#5263,#5802	18:05 poll: none merged, no needs-fix, dev-red #5321 open
 2026-10-26T18:27:28Z	waiting	poll	#5263	OC-photo-u #5263 merged e69582e7; awaiting scoped photo run 40376163429; OC-z #5802 open. 18:27 poll: no needs-fix, dev-red #5321 open
 2026-10-26T18:48:49Z	waiting	poll	#5263	OC-photo-u merged e69582e7; scoped photo run 40376163429 in progress; OC-z #5802 open. 18:48 poll: no needs-fix, dev-red #5321 open
+2026-10-26T19:11:34Z	waiting	poll	#5263	OC-photo-u merged e69582e7; scoped photo run 40376163429 in progress; OC-z #5802 open. 19:11 poll: dev-red #5321 closed, no needs-fix
