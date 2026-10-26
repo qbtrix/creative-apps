@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 18:15Z Belt nudge: stage unchanged (wait for lane). #4894 d9c7c9d2 and #5092 a95e7b0e mergeable/clean with green local-ci/prescreen, no needs-* label; #4936/#5123/#5801 stacked. dev fef52e66 full CI running. Poll cadence now 20 min.
 - 17:44Z poll: no change on slice PRs; dev fef52e66 full CI pending; #5321 open.
 - 17:17Z poll: no change on slice PRs; dev at df48c0ba (scoped halo run queued, none of ours in it); dev-red #5321 still open.
 - 16:48Z poll: no change; #4894/#5092 queued with prescreen, #4936/#5123/#5801 stacked; full CI on dev 527676af in progress.
