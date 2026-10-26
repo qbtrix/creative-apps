@@ -175,6 +175,23 @@ private func block(on semaphore: DispatchSemaphore) {
         #expect(codec.encodes.withLock { $0 } == model.layers.count, "a write encoded more than one PNG per layer")
     }
 
+    /// The write after a stroke encodes the stroked layer only: the others reuse the last write's PNGs (#5312).
+    @Test func theNextWriteEncodesOnlyTheChangedLayer() async throws {
+        var model = try edited()
+        let autosave = makeAutosave()
+        let codec = CountingCodec()
+        autosave.noteEdit(at: 0)
+        await autosave.tick(model: model, now: 5, codec: codec)
+        let once = codec.encodes.withLock { $0 }
+        model.selectTool(.brush)
+        model.drag(from: Mask.Point(x: 0, y: 0), to: Mask.Point(x: 3, y: 2))
+        model.endDrag()
+        autosave.noteEdit(at: 10)
+        await autosave.tick(model: model, now: 15, codec: codec)
+        #expect(autosave.autosaved)
+        #expect(codec.encodes.withLock { $0 } == once + 1, "the write after one stroke encoded more than that layer")
+    }
+
     /// The 8K budget fixture's window autosaves while the zoom budget runs; that must land in a temp
     /// folder, or the user's next Photo launch offers to restore a test image.
     @Test func budgetFixtureAutosavesOutsideTheUsersRecoveryFolder() async throws {

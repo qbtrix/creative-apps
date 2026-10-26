@@ -36,6 +36,10 @@ public struct PhotoDocumentSnapshot: Sendable, Equatable {
     public var selectedLayerID: PhotoLayer.ID?
     /// The path list, in canvas pixels; a file from before paths has none.
     public var paths: [PhotoPath]
+    /// A layer's image already encoded as PNG (a recovery write reusing an earlier one, PhotoKeptPNGs), in
+    /// place of its entry in `pixels` or `masks`. Only a write without the merged picture takes them.
+    public var pixelPNGs: [PhotoLayer.ID: Data] = [:]
+    public var maskPNGs: [PhotoLayer.ID: Data] = [:]
     public init(canvas: CanvasSize, layers: [PhotoLayer], pixels: [PhotoLayer.ID: DecodedImage],
                 masks: [PhotoLayer.ID: DecodedImage] = [:], adjustments: AdjustmentSettings = AdjustmentSettings(),
                 selectedLayerID: PhotoLayer.ID? = nil, paths: [PhotoPath] = []) {
@@ -90,9 +94,15 @@ public protocol DocumentArchiving: PhotoUseCase {
 }
 
 extension DocumentArchiving {
-    /// An archive that writes no merged picture encodes the same package either way.
+    /// An archive that writes no merged picture encodes the same package either way, the snapshot's
+    /// already encoded PNGs decoded back to images first.
     public func encode(_ snapshot: PhotoDocumentSnapshot, codec: any PhotoImageCodec, merged: Bool) throws -> PhotoPackage {
-        try encode(snapshot, codec: codec)
+        var whole = snapshot
+        for (id, png) in snapshot.pixelPNGs { whole.pixels[id] = try codec.decode(png, longestSide: nil) }
+        for (id, png) in snapshot.maskPNGs { whole.masks[id] = try codec.decode(png, longestSide: nil) }
+        whole.pixelPNGs = [:]
+        whole.maskPNGs = [:]
+        return try encode(whole, codec: codec)
     }
 }
 

@@ -3,7 +3,8 @@
 // behind Photo's signature: PhotoRecovery+Kernel.swift), the entry an
 // autosave writes (`recoveryEntry`: the document package with the image's
 // name and the time, without the merged picture and thumbnail only other
-// readers use, so a write never flattens the picture), restoring one (`restore`: the image comes back dirty
+// readers use, so a write never flattens the picture; `reusing:` keeps each
+// layer's PNG for the next write, PhotoKeptPNGs), restoring one (`restore`: the image comes back dirty
 // and unsaved, so Save asks where; `restore(_:decoded:)` takes a package the
 // window decoded off the main actor) and the launch offer's Photo words
 // (`RecoveryOffer`; `kernelOffer` is the kernel's). Times are seconds passed
@@ -53,15 +54,34 @@ extension PhotoWorkspace {
     public func recoveryEntry(
         now: Double, archive: any DocumentArchiving, codec: any PhotoImageCodec
     ) throws -> RecoveryEntry? {
-        guard isDirty else { return nil }
+        var fresh = PhotoKeptPNGs()
+        return try recoveryEntry(now: now, archive: archive, codec: codec, reusing: &fresh)
+    }
+
+    /// What an autosave at `now` writes, reusing each PNG in `kept` whose layer's pixels haven't changed
+    /// since and leaving `kept` holding this write's PNGs, so a write after one stroke encodes one layer.
+    public func recoveryEntry(
+        now: Double, archive: any DocumentArchiving, codec: any PhotoImageCodec, reusing kept: inout PhotoKeptPNGs
+    ) throws -> RecoveryEntry? {
+        guard isDirty, canvas != nil else { return nil }
+        let pngs = try kept.pngs(pixels: pixels, masks: masks, codec: codec)
+        var document = try snapshot(images: false)
+        document.pixelPNGs = pngs.pixels
+        document.maskPNGs = pngs.masks
         return RecoveryEntry(
-            documentName: documentName, savedAt: now,
-            package: try documentPackage(archive: archive, codec: codec, merged: false))
+            documentName: documentName, savedAt: now, package: try archive.encode(document, codec: codec, merged: false))
     }
 
     /// What an autosave at `now` writes, through `services.archive`.
     public func recoveryEntry(now: Double, codec: any PhotoImageCodec) throws -> RecoveryEntry? {
         try recoveryEntry(now: now, archive: services.archive, codec: codec)
+    }
+
+    /// `recoveryEntry(now:archive:codec:reusing:)` through `services.archive`.
+    public func recoveryEntry(
+        now: Double, codec: any PhotoImageCodec, reusing kept: inout PhotoKeptPNGs
+    ) throws -> RecoveryEntry? {
+        try recoveryEntry(now: now, archive: services.archive, codec: codec, reusing: &kept)
     }
 
     /// Opens the autosaved document in `entry` through `services.archive`.

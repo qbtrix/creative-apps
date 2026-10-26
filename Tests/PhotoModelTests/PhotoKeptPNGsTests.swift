@@ -9,7 +9,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
-import PhotoModel
+@testable import PhotoModel
 import Synchronization
 import Testing
 
@@ -79,7 +79,8 @@ private final class CountingCodec: PhotoImageCodec {
         let moved = try #require(try workspace.recoveryEntry(now: 2, archive: archive, codec: codec, reusing: &kept))
         #expect(codec.count == 4, "a move encoded \(codec.count - 4) PNGs")
         #expect(moved.package == (try fresh(workspace)))
-        #expect(workspace.removeLayer("layer-2"))
+        let gone = workspace.removeLayer("layer-2")
+        #expect(gone)
         let removed = try #require(try workspace.recoveryEntry(now: 3, archive: archive, codec: codec, reusing: &kept))
         #expect(removed.package == (try fresh(workspace)))
         workspace.undo()
