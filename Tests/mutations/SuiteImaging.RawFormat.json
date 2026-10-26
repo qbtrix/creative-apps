@@ -1,0 +1,44 @@
+[
+  {
+    "label": ".upperCase: the extension kept as typed, so a refusal reads (dng)",
+    "file": "Sources/SuiteImaging/Raw/RawFormat.swift",
+    "find": "fileExtension = fileName[fileName.index(after: dot)...].uppercased()",
+    "replace": "fileExtension = String(fileName[fileName.index(after: dot)...])",
+    "tests": "RawFormatTests"
+  },
+  {
+    "label": ".cameraRawOnly: family check dropped, a TIFF passes",
+    "file": "Sources/SuiteImaging/Raw/RawFormat.swift",
+    "find": "format.family == .cameraRaw,",
+    "replace": "format.family == format.family,",
+    "tests": "RawFormatTests"
+  },
+  {
+    "label": ".previewCovers: >= to > in the preview cover",
+    "file": "Sources/SuiteImaging/Raw/RawFormat.swift",
+    "find": "preview.longSide >= want || !info.developable",
+    "replace": "preview.longSide > want || !info.developable",
+    "tests": "RawDecodePlanTests"
+  },
+  {
+    "label": ".fullIsNotDraft: draft true for .full",
+    "file": "Sources/SuiteImaging/Raw/RawFormat.swift",
+    "find": "return info.developable ? .develop(scale: 1, draft: false) : refused",
+    "replace": "return info.developable ? .develop(scale: 1, draft: true) : refused",
+    "tests": "RawDecodePlanTests"
+  },
+  {
+    "label": ".fittedIsNotDraft: draft true for .fitted",
+    "file": "Sources/SuiteImaging/Raw/RawFormat.swift",
+    "find": "return info.developable ? .develop(scale: scale(want, of: full), draft: false) : refused",
+    "replace": "return info.developable ? .develop(scale: scale(want, of: full), draft: true) : refused",
+    "tests": "RawDecodePlanTests"
+  },
+  {
+    "label": ".refusalDescribed: errorDescription dropped, the alert shows Foundation's text",
+    "file": "Sources/SuiteImaging/Raw/RawFormat.swift",
+    "find": "    public var errorDescription: String? { message }",
+    "replace": "    public var errorDescription: String? { nil }",
+    "tests": "RawFormatTests"
+  }
+]
