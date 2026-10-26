@@ -122,12 +122,13 @@ public struct TextStyle: Hashable, Codable, Sendable {
     public var paragraph: ParagraphStyle          // FlareCore: alignment (incl. .justified), lineHeight, tracking,
                                                  // paragraphSpacing, boxWidth
     public static let standard: TextStyle        // System, 400, upright, 24 pt, leading, 1.2, 0
+    public typealias Alignment = FlareCore.TextAlignment   // leading, center, trailing, justified
 }
 // Sources/SuiteKernel/Text/TextStyleRules.swift (TS-1 stubs, TS-5 bodies)
-public enum TextField: String, CaseIterable, Codable, Sendable { case size, lineHeight, tracking }
+public enum TextStyleField: String, CaseIterable, Codable, Sendable { case size, lineHeight, tracking }
 public enum TextStyleRules {
-    public static func range(_ f: TextField) -> ClosedRange<Double>   // size 1...1600; lineHeight 0.5...4; tracking −100...500
-    public static func setting(_ s: TextStyle, _ f: TextField, to v: Double) -> TextStyle   // clamped; NaN keeps
+    public static func range(_ f: TextStyleField) -> ClosedRange<Double>   // size 1...1600; lineHeight 0.5...4; tracking −100...500
+    public static func setting(_ s: TextStyle, _ f: TextStyleField, to v: Double) -> TextStyle   // clamped; NaN keeps
     /// FlareCore's layout with `advances(span)` from the app's measurer (shell-text's TextMeasuring or FakeText).
     public static func layout(_ string: String, style: TextStyle,
                               advances: ([String]) -> (advances: [Double], ascent: Double, descent: Double)) -> TextLayout
@@ -140,8 +141,8 @@ public protocol TextStyleTarget: Sendable {
     mutating func setTextStyle(_ s: TextStyle, name: String, drag: String?) throws
 }
 public enum TextIntent: Hashable, Sendable {
-    case font(family: String, weight: Int, italic: Bool), size(Double, drag: String?),
-         alignment(TextAlignment), lineHeight(Double, drag: String?), tracking(Double, drag: String?)
+    case font(family: String, weight: Int?, italic: Bool?), size(Double, drag: String?)   // nil: keep, or the nearest face
+    case alignment(TextStyle.Alignment), lineHeight(Double, drag: String?), tracking(Double, drag: String?)
     public var command: (id: String, params: JSONValue) { get }
 }
 public enum TextCommands { public static func specs<T: TextStyleTarget>(_ t: T.Type) -> [CommandSpec<T>] }
@@ -186,7 +187,7 @@ public struct TextStyleRows: View {
 |---|---|---|---|---|---|
 | TS-1 | – | **Checks first, then the stubs.** `TextStyleRulesTests`, `TextStyleLayoutTests` and `TextCommandsTests` written, disabled by name; `TextStyle`, `TextStyleRules`, `TextStyleLayout`, `TextStyleTarget`, `TextIntent` and `TextCommands` (real ids, schemas and availability, runs throwing `NotBuilt`); the C4 part | `Sources/SuiteKernel/Text/TextStyle.swift`, `Sources/SuiteKernel/Text/TextStyleRules.swift`, `Sources/SuiteKernel/Text/TextCommands.swift`, `Tests/SuiteKernelTests/TextStyleRulesTests.swift`, `Tests/SuiteKernelTests/TextStyleLayoutTests.swift`, `Tests/SuiteKernelTests/TextCommandsTests.swift`, `docs/c4/parts/creative-apps/suite-kernel/kernel-text.json` | – | ~240, 7 |
 | TS-2 | – | SuiteUI `TextStyleRows` as a placeholder with its final signature (font picker, weight and italic, size, alignment, line height, letter spacing), emitting intents; `TextStyleRowsTests` | `Sources/SuiteUI/TextStyleRows.swift`, `Tests/SuiteUITests/TextStyleRowsTests.swift` | TS-1 | ~150, 2 |
-| TS-3 | – | **Reachable first.** Design's text inspector swaps its family, size, weight and alignment rows for `TextStyleRows` (each intent a command, unavailable on the stubs with "Text styles arrive with TS-5."); `DesignTextStyleJourneyTests` written, skipped until TS-8 | `Sources/DesignApp/DesignInspectorText.swift`, `UITests/DesignJourneyTests+TextStyle.swift` | TS-2 | ~160, 2 |
+| TS-3 | – | **Reachable first.** Design's text inspector swaps its family, size, weight and alignment rows for `TextStyleRows` (each intent a command, unavailable with "Text styles aren't connected in this window yet." until TS-8 routes them); `DesignTextStyleJourneyTests` written, skipped until TS-8 | `Sources/DesignApp/DesignInspectorText.swift`, `UITests/DesignJourneyTests+TextStyle.swift` | TS-2 | ~160, 2 |
 | TS-4 | – | Halo's text inspector shows `TextStyleRows` above its colour row; a multi-line words field; `HaloTextStyleJourneyTests` written, skipped until TS-10; render budget test | `Sources/HaloApp/HaloTextInspector.swift`, `UITests/HaloJourneyTests+TextStyle.swift`, `Tests/AppSnapshotTests/RenderBudgetTextStyleTests.swift` | TS-2 | ~200, 3 |
 | TS-5 | – | `TextStyleRules` and `TextStyleLayout` bodies: ranges (size 1...1600, line height 0.5...4, tracking −100...500 in thousandths of an em), the paragraph handed to FlareCore's `TextLayout` with the measured advances; turns on both suites | `Sources/SuiteKernel/Text/TextStyle.swift`, `Sources/SuiteKernel/Text/TextStyleRules.swift`, `Tests/SuiteKernelTests/TextStyleRulesTests.swift`, `Tests/SuiteKernelTests/TextStyleLayoutTests.swift`, `Tests/mutations/SuiteKernel.TextStyleRules.json` | TS-1 | ~220, 5 |
 | TS-6 | – | `TextCommands` bodies over `TextStyleTarget`: `text.read`, `text.set-font`, `text.set-size`, `text.set-italic`, `text.set-alignment`, `text.set-line-height`, `text.set-tracking`; a scrub under one drag token is one step; turns on `TextCommandsTests` | `Sources/SuiteKernel/Text/TextCommands.swift`, `Tests/SuiteKernelTests/TextCommandsTests.swift`, `Tests/mutations/SuiteKernel.TextCommands.json` | TS-5 | ~180, 3 |
