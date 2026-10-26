@@ -275,11 +275,77 @@ check on the revert, a rebuild that conflicts, or a revert left open after
 its issue closed waits for a human. GitHub Actions must be allowed to create pull requests in the repo
 settings, or the call records that the revert was pushed but not opened.
 
+### Auto-quarantine (trunk never stops)
+
+A real red the lane has no revert for must not hold the lane for more than
+one sweep. revert_sweep marks that state (RED_UNRESOLVED) when it ends in a
+revert_note (no bisect verdict, a "likely" one, a culprit on a protected path,
+a revert of a revert, no PR commit, a revert that won't apply or push, one
+already open or on dev) or when its one revert call is done and the red sha's
+range main..<red> already holds that revert (dev is still red with it). A red
+whose revert is open, or whose CI run after the revert hasn't reported, is
+not unresolved: nothing is quarantined while a fix is in flight.
+
+quarantine_sweep runs after revert_sweep (LANE_VERIFY_AFTER=1 only), one PR
+at a time on QUAR_BRANCH (`lane/quarantine`). First it lands an open lane
+quarantine PR (quarantine_land, below). Else, when the red is unresolved and
+the dev-red issue has no `<!-- lane-quarantine <red7> -->` mark yet,
+quarantine_add quarantines
+the failing tests: red_tests names them as `<File>.swift/<test>()`; each file
+is placed under Tests/<Target>/ in the tree (test_paths) and resolved to its
+perf-list id, `Target.Suite/test` or `Target.freeTest`, with
+`scripts/test-scope ids <Target> <file>`. It stops, with one note on the
+dev-red issue carrying the mark, when the logs name no test, when more than
+QUAR_MAX (5) fail (something broke broadly: today's red handling stands and a
+human picks the culprit), or when none is left after dropping a test whose
+path or id matches QUAR_NEVER_RE (security, billing, auth, licence, payment,
+keychain, entitlement), one already quarantined, or one it can't place. For
+each test left it files, or comments on, the test's `Quarantined: <id>` issue
+(quarantine_issue: the open `finding` of that title, else a new one with
+`p0`, `finding` and `line:<app>`, naming the run, the range's PRs with their
+feature leads, and the expiry), writes the entry
+
+```json
+{"test": "PhotoModelTests.OpenTests/opens", "owner": "#700",
+ "reason": "Quarantined by the fast lane: ...", "expires": "2026-10-27",
+ "lane": {"red": "#520", "range": "main..abc1234", "until": "2026-10-27T10:00:00Z"}}
+```
+
+(the owner is that issue, `until` QUAR_HOURS = 24 h out, `expires` its date)
+and opens one PR from QUAR_BRANCH with QUAR_LABEL (`lane-quarantine`) and
+`p0`, never `fast-lane`, its body starting `Lane-Quarantine: add` and
+`Refs #<dev-red>`. The mark goes
+on the dev-red issue, so each red sha gets one call. scripts/ci skips the live
+swift-test entries through `scripts/quarantine skip`, a `--skip` regex that
+rides with the perf list's, so the PR's own Linux check and dev's next run are
+green and normal batching resumes.
+
+**The protected-path exception, exactly.** UITests/quarantine.json is in
+PROTECTED and decide refuses every PR that touches it, the lane's own
+included: the lane's quarantine PR never goes through decide. quarantine_land
+lands a PR only when all of these hold: the author is a bot (the lane's
+token), the head branch is QUAR_BRANCH, the PR carries QUAR_LABEL
+(quarantine_sweep's filter), and `gh api pulls/<n>/files` lists exactly
+UITests/quarantine.json. A PR that changes anything else gets one comment and
+is never landed, whatever its labels. Like a revert, it lands on its own
+Linux-only check (dispatched once, its comment the record), with no prescreen,
+batch or macOS run, while the dev-red issue holds batches; a merge GitHub
+refuses as conflicting is cherry-picked onto today's BASE_BRANCH
+(rebuild_lane_pr) and checked again. The landing dispatches CI on BASE_BRANCH
+(UITests/ is a UI_RE path). A red check waits for a human.
+
+`scripts/quarantine release` is the release gate: it fails while any lane
+entry is in the file, naming each test, owner and `until`. There is no
+release or promote script to wire it into yet (ci.yml's `promote` moves main
+to the last green dev sha, which is not a release, and gating it would grow
+every culprit range), so run it by hand, or from the release step once one
+exists.
+
 ## CI dispatch on dev
 
 A lead's PR (a `Feature:` body line) never closes a `feature-lead` issue
 (lead_refs). After its merges the lane dispatches CI on BASE_BRANCH at most
-once per run (dispatch_reason): a lane revert, a FEATURE_LABEL PR, a UI_RE change, or
+once per run (dispatch_reason): a lane revert, a FEATURE_LABEL PR, a UI_RE change (a lane quarantine PR is one), or
 DISPATCH_EVERY merged PRs since the last CI run. Promotion of main is
 ci.yml's job.
 
