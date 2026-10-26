@@ -1,6 +1,7 @@
 // ClipRules.swift (layer-styles LS-10): the clipping rule on the kernel's
 // layer tree. A clipped layer draws only where its base has alpha; its base
-// is the nearest unclipped layer below it among its siblings. The walk never
+// is the nearest unclipped layer below it among its siblings, one parent's
+// children. A group sibling is a valid base, and the walk never enters it or
 // leaves the sibling list, so a clip never reaches out of its group.
 // Linux-safe: no Foundation API is needed.
 
@@ -8,6 +9,8 @@
 public enum ClipRules {
     /// The help a clip command shows when the layer has nothing below to clip to.
     public static let noBaseHelp = "There is no layer below to clip to."
+    /// The help an unclip command shows when the layer isn't clipped.
+    public static let notClippedHelp = "This layer isn't clipped."
 
     /// The id `id` clips to among `siblings` (back to front): the nearest
     /// layer below it that isn't clipped. Nil for the bottom layer, a layer
