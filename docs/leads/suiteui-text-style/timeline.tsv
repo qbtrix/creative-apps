@@ -163,3 +163,4 @@ utc	stage	event	ref	note
 2026-10-26T17:11:51Z	3	poll	TS-u	17:11Z poll: dev df48c0ba; #4958 m=false clean #5047 m=false clean #5226 m=false clean #5772 m=false clean ; queued in the lane. 0 findings.
 2026-10-26T17:32:05Z	3	poll	TS-u	17:32Z poll: dev df48c0ba; #4958 m=false clean #5047 m=false clean #5226 m=false clean #5772 m=false clean ; queued in the lane. 0 findings.
 2026-10-26T17:52:19Z	3	poll	TS-u	17:52Z poll: dev fef52e66; #4958 m=false clean #5047 m=false clean #5226 m=false clean #5772 m=false clean ; queued in the lane. 0 findings.
+2026-10-26T17:52:37Z	3	question	TS-u	Posted Question for the supervisor on #3779: four eligible dev-based PRs unlanded for ~6h (docs-only #5772 included) while dev moves; asked whether they can move up the queue.
