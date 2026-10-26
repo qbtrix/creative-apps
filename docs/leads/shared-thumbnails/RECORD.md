@@ -94,3 +94,4 @@ Next: #5133 (90eb5fab2) is clean and merges dev cleanly; it waits for the lane, 
 - 2026-10-26T02:31Z: heartbeat: no change; no PR of this feature merged; dev 8987427d8; dev-red #5321 open (code batches held); open findings 0
 - 2026-10-26T02:54Z: heartbeat: dev 6d5f8b92; dev-red #5321 open (code batches held); no PR of this feature merged; open findings 0
 - 2026-10-26T03:16Z: heartbeat: dev d0859e01 (#5346); full CI 40262284734 in progress on it, a green run would close dev-red #5321 and reopen code batches; no PR of this feature changed or merged; open findings 0
+- 2026-10-26T03:38Z: heartbeat: full CI 40262284734 on dev d0859e01: Linux job failed (scripts/ci), macOS still running, so dev-red #5321 stays open and code batches stay held; no PR of this feature changed or merged; open findings 0
