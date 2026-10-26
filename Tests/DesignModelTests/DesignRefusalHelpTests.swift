@@ -3,6 +3,7 @@
 // DesignEdit.runKey sorts its ids so a run's key never depends on selection
 // order. Runs on Linux and macOS.
 import DesignModel
+import SuiteKernel
 import Testing
 
 @Suite struct DesignRefusalHelpTests {
@@ -41,7 +42,7 @@ import Testing
     }
 
     @Test func runKeyIsIndependentOfOrder() {
-        #expect(DesignEdit.runKey("move", ["node-4", "node-3"]) == "move-node-3,node-4")
-        #expect(DesignEdit.runKey("move", ["node-3", "node-4"]) == "move-node-3,node-4")
+        #expect(DesignEdit.runKey("move", ["node-4", "node-3"]) == CoalesceKey.key("move", on: ["node-3", "node-4"]))
+        #expect(DesignEdit.runKey("move", ["node-3", "node-4"]) == CoalesceKey.key("move", on: ["node-3", "node-4"]))
     }
 }
