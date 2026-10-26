@@ -88,3 +88,4 @@ Run act-1a1695ebfeb-d54n, 2026-10-23T15:30Z; supersedes the tables' PR/state col
 - 2026-10-26T13:39:43Z (act-1a177ff0916-4jm7): 13:39Z poll: dev 01600e46; dev-red #5321 still open (not ours); no merges of ours. AN-u #4893 fast-lane, queued; CB-8 #4902 and DS-flare #4891 open, so AN-6 and AN-10 wait. Next: unchanged. No needs-fix/needs-rebase; 0 findings.
 - 2026-10-26T14:04:02Z (act-1a177ff0916-4jm7): 14:04Z poll: dev 68be32fc; dev-red #5321 open (linux, range not ours); no merges of ours; #4893, #4902, #4891 open. No drift issue for anchor-parenting. Open findings 1 (#5367, kernel gap, filed earlier).
 - 2026-10-26T14:05Z (act-1a177ff0916-4jm7): poll: dev 68be32fc; #4893, #4887, #4901, #4902 not merged yet; AN-6/AN-10 wait. Open findings 1 (#5367).
+- 2026-10-26T14:27Z (act-1a177ff0916-4jm7): poll: dev 68be32fc; no merges; #4893, #4887, #4901, #4902 queued; AN-6/AN-10 wait. Open findings 1 (#5367).
