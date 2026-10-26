@@ -1,7 +1,7 @@
 # placed-images lead record (Design)
 
 Issue: #3454 · Packet: docs/blueprints/design/features/placed-images.md
-Run: act-1a175ee11f8-jfg2 · Started: 2026-10-20 (this run resumed 2026-10-26T02:04:31Z)
+Run: act-1a1786023d9-dg65 · Started: 2026-10-20 (this run resumed 2026-10-26T13:24Z; before it act-1a175ee11f8-jfg2)
 Stage: 3 wave 2: every slice PR is open, clean and labelled fast-lane; the lane holds batches while dev-red #5321 is open (not ours)
 Base: origin/dev; main verified at d3323f6a
 Next: once #5321 closes and the lane lands our PRs, post Belt-Slice-Done for PD-u and PD-m on the first green design ci.yml run that holds each slice's last PR; PD-z once findings are 5 or fewer
@@ -38,6 +38,7 @@ Next: once #5321 closes and the lane lands our PRs, post Belt-Slice-Done for PD-
 - Contract-first waits (rule 12): every other feature's contract slice has merged, so PD-u and PD-m started stacked on PD-a.
 
 ## Open
-- dev-red #5321 (range main..cc5c6234a; not ours) holds every batch. Nothing to fix here.
+- 2026-10-26T13:24Z run act-1a1786023d9-dg65 resumed: main at d3323f6a; #4922, #4963, #4964, #5001 open and clean, Belt-Lead lines moved to this run; 11 placed-images findings open (all named by those PRs' Fixes lines), so PD-z stays held.
+- dev-red #5321 (linux, run 40327156097, range main..57dd31ff; not ours) holds every batch. Nothing to fix here.
 - [ ] Wire: stroke-style:DK-m (merged #4888): recheck DesignNode.swift picture fields against VectorStroke when #4922 lands.
 - 2026-10-26T02:06:05Z: findings past the round cap that no open PR fixes were closed into their gaps (#4932→#4991, #4971→#4996, #4973→#4998, #4975→#4997, #4970 and #4972→new gap #5359 after needs-ui #4985). The 26 findings still open are each closed by an open slice PR on merge (Fixes lines), so PD-z/DK-z start once those land.
