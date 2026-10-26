@@ -289,3 +289,8 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - dev unchanged at 527676af. Batch 20261026163022 is #5267 alone, its third batch today (141727, 150314, 163022), and it holds the lane while it runs. Wave 2, #5790 and #5800 stay clean, eligible and queued, with no needs-* label.
 - For the supervisor: our two docs/test-data PRs (#5790, #5800) have no code yet wait behind the one-at-a-time code batches.
 - 1 open finding (#5789, fixed by #5236). Stage: 3 wave 3, waiting for wave 2 to land.
+
+### 2026-10-26T17:16Z check-in
+
+- The lane landed #5267 on its third try (dev df48c0ba); no batch in flight. Wave 2, #5790 and #5800 stay clean, eligible and queued, with no needs-* label.
+- 1 open finding (#5789, fixed by #5236). Stage: 3 wave 3, waiting for wave 2 to land.
