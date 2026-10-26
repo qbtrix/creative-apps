@@ -73,7 +73,7 @@ struct AdjustmentsPanel: View {
 
     /// The histogram over `composites`, counted off the main actor (a nonisolated async function runs on the
     /// global executor) inside the calling task, so cancelling that task stops the count.
-    static func count(over composites: PhotoCompositeCache) -> @Sendable (PhotoWorkspace) async -> ToneHistogram {
+    nonisolated static func count(over composites: PhotoCompositeCache) -> @Sendable (PhotoWorkspace) async -> ToneHistogram {
         { workspace in await Self.count(workspace, composites: composites) }
     }
 
