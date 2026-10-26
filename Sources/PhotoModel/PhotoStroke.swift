@@ -108,9 +108,12 @@ extension PhotoWorkspace {
     /// The Move tool's instruction line: how to move the selected layer, or
     /// why an adjustment layer (which has no place on the canvas) can't move.
     public var moveHint: String {
-        if case .adjustment? = selectedLayer?.kind { return Self.moveRefusal }
-        return "Drag over the image to move the selected layer."
+        canMoveSelection ? "Drag over the image to move the selected layer." : Self.moveRefusal
     }
+
+    /// Whether a picked layer can move: at least one is an image layer. The
+    /// Move tool's transform rows show only then.
+    public var canMoveSelection: Bool { !movableSelectedLayers.isEmpty }
 
     static let moveRefusal = "Select an image layer in the sidebar to move it."
 
