@@ -30,3 +30,144 @@
 2026-10-20T22:35:23Z	heartbeat	waiting	DR-2 #3625 still open, macOS green; lane active (run 39508948550); DR-3/6/7 still blocked on MD-c/MD-e
 2026-10-20T22:41:48Z	DR-a	done	#3625 merged (daee0e736); Belt-Slice-Done posted, proof run 39507806909; DR-3/6/7 wait on MD-c (MD-10,13) and MD-e (MD-20..22)
 2026-10-23T15:20:01Z	resume	building	run act-1a16953af22-wvhu; contract-first unpark; wave 2: DR-6 (DR-m), DR-3+DR-4 (DR-u)
+2026-10-23T16:33:18Z	DR-6	pr-opened	#4844 head 22bef36a, Mutate 4/4
+2026-10-23T16:33:18Z	DR-u	pr-opened	#4838 (DR-3+DR-4); lead fix: Delete Rejects ⌥⌘⌫
+2026-10-23T16:33:18Z	record	moved	lead/library-cull-finish is the record branch
+2026-10-23T16:35:10Z	wave-3	building	DR-7+DR-8 builder on feat/cull-finish-dr7-8; #4838 head 1be77364; attribution footers stripped from #4838/#4844 bodies
+2026-10-23T17:32:30Z	pr-opened	#4899 DR-7+8
+2026-10-23T17:32:30Z	check	#4838 shortcut catalog: none exists, no clash
+2026-10-23T17:32:30Z	heartbeat	wave 3
+2026-10-23T17:44:50Z	heartbeat	#4844 head 52603087 (fixer A: largeBudget in perf-suites), restacking #4899; #4838 1be77364 unchanged; none merged
+2026-10-23T17:49:02Z	fix	#4844 52603087 largeBudget in perf-suites; #4899 f1071bc8 restacked
+2026-10-23T17:49:02Z	question	supervisor lands #4844 (protected path); shortcut catalog gap?
+2026-10-23T17:58:33Z	decision	supervisor lands #4844; shortcut catalog gap #4945
+2026-10-23T18:14:47Z	fix	#4838 needs-fix (internal LibraryFixtures.shoot) fixed at 110671fc
+2026-10-23T18:27:21Z	heartbeat	#4838 on lane at 110671fc; #4844 waits on supervisor; #4899 refused by lane until #4844 lands (440/16 incl. perf-suites); dev 98589662, no ci.yml run with DR PRs
+2026-10-23T18:38:55Z	merged	#4844 DR-6 (dev 0d4645bf); #4899 now 9 files/223 lines on the lane
+2026-10-23T18:54:15Z	heartbeat	poll at dev 0d4645bf; #4838 #4899 #4948 on the lane
+2026-10-23T19:07:23Z	heartbeat	dev 0d4645bf unchanged; #4838 #4899 #4948 open clean on the lane (macOS runs queued); TC-2 not on dev; LX-2/LX-4 builders running
+2026-10-23T19:19:17Z	heartbeat	dev 0d4645bf; #4838 #4899 #4948 #4960 open on the lane; scoped: library run 40009734956 queued at 0d4645bf (contains none of our open PRs); TC-2 not on dev; LX-4 builder running
+2026-10-23T19:31:06Z	heartbeat	dev 8419a4a6 (#3581 MD-10 merged, not ours); #4838 #4899 #4948 #4960 #4962 open clean on the lane; TC-2 not on dev; no ci.yml run contains our PRs
+2026-10-23T19:56Z	fix	DR-u fix round 2 of 2: command-path spec fix (photo.delete-rejects control spec), #4838 head ad5deded; local gate test step segfaults on dev bccdc0f2 too, so no Fast-Check; the lane Linux run is the proof
+2026-10-23T20:09Z	split	#4838 needs-split (453 lines): render budget + journey moved to branch feat/cull-finish-dr-u-tests (PR after #4838 lands); #4838 head 84be0634, 310 lines/7 files, needs-split removed
+2026-10-23T20:21Z	heartbeat	lane bisecting batch 20261023192105; no PR merged yet; TC-2 not on dev
+2026-10-23T20:33Z	heartbeat	lane bisect: probe -1 (#4818, not ours) red on Linux; our PRs wait for the next batch; TC-2 not on dev
+2026-10-23T20:44Z	heartbeat	bisect ended on #4818 (not ours); our PRs wait for the next batch; TC-2 not on dev
+2026-10-23T20:57Z	heartbeat	lane batch 20261023204921 (#4841-#4862) in flight, 58 ready PRs queued; #4899 #4948 #4960 #4962 eligible; #4838 awaits its lane Linux run; TC-2 not on dev
+2026-10-23T21:11Z	heartbeat	batch 20261023204921 macOS gate running; our PRs queued, none merged
+2026-10-23T21:22Z	heartbeat	lane batch 20261023204921 macOS gate still running; our PRs queued
+2026-10-23T21:33Z	heartbeat	scoped library run 40018964074 green on 61c481df (none of our open PRs in it); lane macOS gate still running
+2026-10-23T21:45Z	heartbeat	batch 20261023204921 merged; #4838 lane Linux check 40028953909 running; TC-2 placeholder on dev
+2026-10-23T21:57Z	heartbeat	batch 20261023215139 (#4818..#4870) running, none of ours; #4838 lane Linux check still running; no supervisor answer on #3475 yet
+2026-10-23T22:10Z	heartbeat	#4838 lane Linux check 40028953909 green on 84be0634; batch 20261023215139 still running; no supervisor answer on #3475
+2026-10-23T22:21Z	heartbeat	batch 20261023215139 macOS gate queued (none of ours); our PRs ready, waiting for next batch
+2026-10-23T22:32Z	heartbeat	batch 20261023215139 macOS gate still queued; our PRs ready for next batch; no supervisor answer on #3475
+2026-10-23T22:44Z	heartbeat	batch 20261023215139 macOS gate running (none of ours); scoped library 40029034328 green on 491ec546 (none of our open PRs)
+2026-10-23T22:56Z	heartbeat	poll: #4838 #4899 #4948 #4960 #4962 open on lane; batch 20261023215139 macOS gate running; no supervisor reply on #3475; no dev-red
+2026-10-23T23:08Z	heartbeat	poll: all five PRs open on lane, batch 20261023215139 macOS gate still running; no reply on #3475; no dev-red
+2026-10-23T23:19Z	heartbeat	poll: all five PRs open on lane, batch 20261023215139 macOS gate still running; no reply on #3475; no dev-red
+2026-10-23T23:31Z	heartbeat	poll: all five PRs open on lane; batch 20261023215139 macOS job running since 22:35Z; no reply on #3475; no dev-red
+2026-10-23T23:43Z	heartbeat	poll: all five PRs open on lane; batch 20261023215139 macOS job still running; no reply on #3475; no dev-red
+2026-10-23T23:55Z	heartbeat	poll: all five PRs open on lane; batch 20261023215139 (none of ours) macOS gate red, lane will bisect; no reply on #3475; no dev-red
+2026-10-24T00:07Z	heartbeat	poll: all five PRs open on lane; red batch 20261023215139 awaiting bisect, full CI on dev 654fb363 running; no reply on #3475; no dev-red
+2026-10-24T00:19Z	heartbeat	poll: all five PRs open; red batch 20261023215139 not yet bisected, no fast-lane run since 23:10Z; no reply on #3475; no dev-red
+2026-10-24T00:31Z	heartbeat	poll: all five PRs open; lane bisecting red batch 20261023215139 (probe -6); full CI dev 654fb363 green (none of our slice-closing PRs in it); no reply on #3475; no dev-red
+2026-10-24T00:43Z	heartbeat	poll: all five PRs open; lane bisect probe 20261023215139-6 running; no reply on #3475; no dev-red
+2026-10-24T00:56Z	heartbeat	no change; lane bisect probe -6 macOS running; PRs waiting for next batch
+2026-10-24T01:08Z	heartbeat	no change; lane bisect probe -6 macOS still running; PRs waiting for next batch
+2026-10-24T01:20Z	heartbeat	no change; lane probe -6 macOS still in scripts/ci; PRs waiting for next batch
+2026-10-24T01:31Z	heartbeat	lane probe -6 green; bisect now on probe -9 (838ab36f); PRs waiting for next batch
+2026-10-24T01:44Z	heartbeat	no change; lane probe -9 Linux+macOS running; PRs waiting for next batch
+2026-10-24T01:56Z	heartbeat	lane probe -9 Linux green, macOS running; PRs waiting for next batch
+2026-10-24T02:08Z	heartbeat	no change; lane probe -9 macOS running; PRs waiting for next batch
+2026-10-24T02:20Z	heartbeat	no change; lane probe -9 macOS running; PRs waiting for next batch
+2026-10-24T02:32Z	heartbeat	no change; lane probe -9 macOS running; PRs waiting for next batch
+2026-10-24T02:50Z	heartbeat	no change; lane probe -9 macOS red, probe -7 running; PRs waiting for next batch
+2026-10-24T03:06Z	heartbeat	no change; lane probe -7 Linux green, macOS running; PRs waiting for next batch
+2026-10-24T03:24Z	heartbeat	no change; lane probe -7 macOS still running; PRs waiting for next batch
+2026-10-24T03:41Z	heartbeat	no change; lane probe -7 macOS still running; PRs waiting for next batch
+2026-10-24T03:57Z	heartbeat	no change; lane probe -7 green, bisect continues (-8 next); PRs waiting for next batch
+2026-10-24T04:14Z	heartbeat	no change; lane probe -8 running (decides batch culprit); PRs waiting for next batch
+2026-10-24T04:31Z	heartbeat	no change; lane probe -8 Linux green, macOS running; PRs waiting for next batch
+2026-10-24T04:48Z	heartbeat	no change; lane probe -8 macOS still running; PRs waiting for next batch
+2026-10-24T05:06Z	heartbeat	PRs open on lane; batch 20261024050226 (none of ours) running
+2026-10-24T05:23Z	heartbeat	PRs still on lane; batch 20261024050226 macOS gate running (none of ours)
+2026-10-24T05:39Z	heartbeat	PRs still on lane; batch 20261024050226 macOS gate running (none of ours)
+2026-10-24T05:57Z	heartbeat	PRs still on lane; batch 20261024050226 red on macOS, bisecting (probe -6), none of ours
+2026-10-24T06:13Z	heartbeat	PRs still on lane; batch 20261024050226 bisect probe -6 macOS running, none of ours
+2026-10-24T06:31Z	heartbeat	PRs still on lane; batch 20261024050226 bisecting (probes -1,-3), none of ours; dev CI 40070365168 running (none of ours merged)
+2026-10-24T06:47Z	heartbeat	PRs still on lane; batch 20261024050226 still bisecting (probe -1), none of ours
+2026-10-24T07:05Z	heartbeat	PRs still on lane, none merged; dev at 830af22d
+2026-10-24T07:25Z	resume	act-1a16cc967d9-mcuv; #4838 and #4899 on lane, clean, no needs-fix
+2026-10-24T07:48Z	heartbeat	#4838, #4899 clean on lane, not merged; excludedPaths wiring builder running
+2026-10-24T08:06Z	build	DR-m #5100 excludedPaths wiring opened, stacked on #4899
+2026-10-24T08:11Z	heartbeat	#4838 #4899 #5100 clean, waiting for a lane batch (other lines batching)
+2026-10-24T08:33Z	heartbeat	lane: #4838 #4899 eligible, 57 ready PRs queued behind batch 20261024081307 (bisecting); #5100 skips until its base is dev
+2026-10-24T08:56Z	wave	DR-u tests rebuilt as one commit on #4838 head (2 files, +143); gate running; lane queue unchanged
+2026-10-24T09:18Z	heartbeat	no lane merges since 08:05Z; #4838 #4899 #5100 waiting; DR-u tests gate in tests
+2026-10-24T09:21Z	build	DR-u tests #5130 opened, stacked on #4838
+2026-10-24T09:40Z	heartbeat	lane merging others (last dev 09:24Z); #4838 #4899 #5100 #5130 waiting
+2026-10-24T10:03:06Z	heartbeat	all PRs open+clean; lane batch in flight, 51 ready wait; dev head #5117
+2026-10-24T10:24:51Z	heartbeat	no merges since #5117 (09:24Z); all PRs open+clean, lane batch in flight
+2026-10-24T10:46:06Z	heartbeat	dev moved to #4616; ours all open+clean on the lane; XP-3/XP-7 not merged
+2026-10-24T11:08:51Z	heartbeat	lane fix #5150 (lists every open PR, not newest 100) merged 10:55Z: our older PRs now visible to the lane; all open+clean
+2026-10-24T11:30:09Z	check	lane sweep sees only newest ~100 PRs (lowest #5005): #4838/#4899/#4960/#4962 invisible until main promotes past #5150 (lane runs scripts from main); stacked PRs wait on them. All open+clean
+2026-10-24T11:52:04Z	heartbeat	main still #5117; full CI 40087964618 on dev 4f00afb8 (#5150) running, green promotes main and the lane then sees our older PRs. All open+clean
+2026-10-24T12:14:22Z	check	full CI 40087964618 green; main promoted to #5150: lane now lists every open PR, our older PRs enter its queue. All open+clean
+2026-10-24T12:36:35Z	heartbeat	main has the --limit 1000 fix; last finished sweep predates it (96 PRs, ours absent); next sweep 40094613224 pending. All open, no needs-fix
+2026-10-24T12:58:00Z	check	lane sweep 40092907790 now lists all 233 PRs: #4838 #4899 #4960 #4962 decision eligible; batch probe in flight, 119 ready wait
+2026-10-24T13:19:51Z	heartbeat	lane still bisecting batch-20261024110214 (probe 6); ours eligible, waiting for the next batch
+2026-10-24T13:41:31Z	heartbeat	lane still bisecting batch-20261024110214 (probe 3); ours eligible, all open+clean
+2026-10-24T14:04:22Z	heartbeat	no merges; lane still bisecting batch-20261024110214 (probe 3), 131 ready PRs queued; all PRs clean fast-lane, no needs-fix, no findings
+2026-10-24T14:26:18Z	heartbeat	bisect landed a prefix of batch-20261024110214 on dev (14:16-14:20Z); our PRs not in it, all still open fast-lane, no needs-fix; 132 ready queued
+2026-10-24T14:48:20Z	heartbeat	batch-20261024110214 resolved (no lane/batch branches left); lane sweep 40103574354 running since 14:40Z, next batch forming; all our PRs clean fast-lane, no needs-fix
+2026-10-24T15:10:43Z	heartbeat	#4838 (DR-u) is PR 12/12 in lane/batch-20261024144917 (formed 14:49Z, Linux+macOS checks running); #4899 #4960 #4962 #5044 wait for the next batch; no needs-fix
+2026-10-24T15:32:24Z	heartbeat	batch-20261024144917 (with #4838 DR-u): Linux green, macOS running; other PRs unchanged, no needs-fix
+2026-10-24T15:54:25Z	heartbeat	#4838 (DR-u) merged 15:48Z; #5130 now on dev; #4899 needs-rebase (command-id goldens), fixer started; DR-u Belt-Slice-Done waits for a green scoped/full run containing #4838 and #5130
+2026-10-24T16:16:28Z	heartbeat	batch-20261024160327 in flight (none of ours); #4899 fixer running its gate; #5130 #4960 #4962 #5044 clean, wait next batch
+2026-10-24T16:19:37Z	fix	#4899 merged dev at ffe411ac, CI: PASS; photo.delete-rejects stays window-only per #4838 (confirm before Trash), PR test now asserts that
+2026-10-24T16:37:48Z	heartbeat	#4899 needs-rebase dropped, clean at ffe411ac; batch-20261024160327 still in flight (none of ours); #4899 #4960 #4962 #5130 #5044 wait next batch
+2026-10-24T16:59:01Z	heartbeat	no change: batch-20261024160327 still in flight (none of ours); all 8 PRs clean fast-lane
+2026-10-24T17:21:02Z	heartbeat	batch-20261024160327 resolved; no batch in flight, next sweep forms one; our 8 PRs clean fast-lane
+2026-10-24T17:43:03Z	heartbeat	batch-20261024172211 in flight (12 PRs, none ours); our 8 PRs clean fast-lane, #5044 now clean; waiting for next batch
+2026-10-24T18:05:25Z	heartbeat	batch-20261024172211 still in flight (none ours); our 8 PRs clean fast-lane, queued for next batch
+2026-10-24T18:27:01Z	heartbeat	batch-20261024172211 resolved; no batch in flight; our 8 PRs open fast-lane (#5130/#5044 mergeable recomputing), due in next batch
+2026-10-24T18:49:33Z	heartbeat	batch-20261024183708 in flight (12 PRs up to #4897, none ours); ours next by age; #5130/#5044 test-merge clean on dev
+2026-10-24T19:11:20Z	heartbeat	batch-20261024183708 red, bisecting (probe -6); none ours; our 8 PRs all clean fast-lane, waiting for next batch
+2026-10-24T19:33:02Z	heartbeat	batch-20261024183708 still bisecting (probe -6); none ours; our 8 PRs clean fast-lane
+2026-10-24T19:55:07Z	heartbeat	batch-20261024183708 still bisecting (probe -6); none ours; our 8 PRs clean fast-lane
+2026-10-24T20:16:49Z	heartbeat	batch-20261024183708 macOS red; probe -6 macOS in progress since 19:14Z; none ours; our 8 PRs clean fast-lane
+2026-10-24T20:38:38Z	heartbeat	batch-20261024183708 bisect advancing (probes -6,-7,-9); none ours; our 8 PRs clean fast-lane
+2026-10-24T21:00:19Z	heartbeat	batch-20261024205137 in flight (p0/beta + older PRs, none ours); our 8 PRs clean fast-lane, queued
+2026-10-24T21:22:03Z	heartbeat	batch-20261024205137 red, bisecting (probes -3,-6); none ours; our 8 PRs clean fast-lane
+2026-10-24T21:45:08Z	heartbeat	batch-20261024205137 still bisecting (probes -3,-6), none ours; all 8 PRs open, clean, fast-lane
+2026-10-24T22:07:12Z	heartbeat	batch-20261024205137 probes -3,-6 macOS gates in progress since 21:17Z (Linux green); none ours; 8 PRs open, clean
+2026-10-24T22:29:33Z	heartbeat	batch-20261024205137: probe -6 macOS green, -3 macOS still running; none ours; 8 PRs open, clean
+2026-10-24T22:50:42Z	heartbeat	batch-20261024205137 still bisecting (new probe -1); none ours; 8 PRs open, clean
+2026-10-24T23:12:29Z	heartbeat	batch-20261024205137: -3 macOS red, probe -1 macOS running; dev full CI running since 22:06Z; none ours; 8 PRs open, clean
+2026-10-24T23:42:58Z	resume	act-1a170488aff-41nk resumed; #4838 merged; #5130 (dev), #4899, #5100 waiting for a batch; batch-20261024205137 probe -1 macOS running, none ours
+2026-10-24T23:47:17Z	decision	C4 description edit for the Trash split into its own docs/c4-only PR (docs/cull-finish-c4-trash), since a PR that edits a part description must change nothing else
+2026-10-24T23:54:17Z	pr	DR-9 #5237 opened (15011b45), stacked on #5130; gate CI: PASS on Swift 6.3.3
+2026-10-25T00:07:45Z	pr	DR-10 #5240 (feature-done, stacked on #5237) and C4-only #5241 (base dev) opened; gates CI: PASS
+2026-10-25T00:29:39Z	heartbeat	all PRs open and clean; lane bisecting batch-20261024235353, dev at afef017c; no dev-red
+2026-10-25T00:51:57Z	note	the session proxy appends a "Generated by Claude Code" footer to PR bodies sent via gh api and re-adds it on every PATCH (tried #5241); the lane strips it from the squash and says nothing waits on it, so left as is; all PRs open and clean, dev still afef017c, lane on batch-20261024235353 probe -6
+2026-10-25T01:13:54Z	heartbeat	all PRs open and clean; dev ae3efdb8 (halo); lane still on batch-20261024235353 probe -6; no dev-red
+2026-10-25T01:36:29Z	heartbeat	all PRs open and clean; dev ae3efdb8; lane bisecting batch-20261024235353 probe -9; no dev-red
+2026-10-25T01:59:20Z	heartbeat	all PRs open and clean; lane sweep 40150494762 marks them eligible, waiting on in-flight batch lane/batch-20261024235353 (128 ready)
+2026-10-25T02:20:53Z	heartbeat	no merges; dev c16bcd16; all PRs clean, queued behind in-flight lane batch
+2026-10-25T02:42:53Z	heartbeat	no merges; dev 3db45eb4; PRs clean, queued in lane
+2026-10-25T03:05:14Z	heartbeat	no merges; dev 3db45eb4; PRs clean, queued in lane
+2026-10-25T03:26:52Z	heartbeat	no merges; dev 3db45eb4; PRs clean, queued in lane
+2026-10-25T03:48:07Z	heartbeat	no merges of ours; dev 2e7d5264; no lane labels on our PRs
+2026-10-25T04:10:23Z	heartbeat	no merges; dev 2e7d5264; all PRs clean, queued in lane
+2026-10-25T04:32:58Z	heartbeat	no merges; dev ee8ccd61; lane bisecting lane/batch-20261025023716, 128 ready PRs (ours included) wait
+2026-10-25T04:54:58Z	heartbeat	no merges; dev ee8ccd61; all PRs clean, queued in lane
+2026-10-25T05:17:43Z	heartbeat	no merges; dev ee8ccd61; all PRs clean, queued in lane
+2026-10-25T05:39:03Z	heartbeat	no merges of ours; dev 13fb2f59 (#4888 + lane fixes); all PRs clean, queued in lane
+2026-10-25T06:00:51Z	heartbeat	no merges; dev 13fb2f59; all PRs clean, queued in lane
+2026-10-25T06:22:24Z	heartbeat	no merges; dev 13fb2f59; all PRs clean, lane sweep in progress since 06:09Z
+2026-10-25T06:44:00Z	heartbeat	no merges; dev 13fb2f59; all PRs clean, queued in lane
+2026-10-25T07:06:25Z	heartbeat	no merges; dev 13fb2f59; all PRs clean, queued in lane
+2026-10-25T07:28:04Z	heartbeat	no merges; dev 13fb2f59; all PRs clean, queued in lane
+2026-10-25T07:49:50Z	heartbeat	no merges; dev 13fb2f59; all PRs clean, queued in lane
+2026-10-26T01:59:55Z	resume	run act-1a175ea5531-x1ci; dev 8eff8ab85; dev-red #5321 holds code batches
