@@ -231,3 +231,4 @@ utc	stage	event	ref	note
 2026-10-26T13:54Z	wait	heartbeat	#5321	Belt nudge answered: record mirrored from lead/placed-images; #4922 #4963 #4964 #5001 open, no needs-fix/needs-rebase; dev-red #5321 open (linux, run 40327156097), not ours; 11 placed-images findings open so PD-z held
 2026-10-26T14:10Z	heartbeat	wait	#5321	dev-red still open; #4922 #4963 #4964 #5001 open, clean, no needs-fix/needs-rebase; findings 11 (close on merge); PD-z held
 2026-10-26T14:37Z	heartbeat	wait	#5321	dev-red now macos (run 40328390857, range to 5f8925a3); #4922 #4963 #4964 #5001 open, clean, no needs-fix/needs-rebase; findings 11; PD-z held
+2026-10-26T14:59Z	heartbeat	wait	#5321	dev-red still open (macos); #4922 #4963 #4964 #5001 unchanged since 13:24Z, no needs-fix/needs-rebase; findings 11; PD-z held
