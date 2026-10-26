@@ -17,6 +17,7 @@ import Musl
 import Darwin
 #endif
 import CoreRaster
+import SuiteImaging
 
 public struct FakeLoupe: LoupeImaging {
     let mode: FakeMode
@@ -24,7 +25,7 @@ public struct FakeLoupe: LoupeImaging {
     public func render(_ photo: PhotoItem, settings: DevelopSettings, longSide: Int,
                        quality: RenderQuality) async throws -> RenderedPhoto {
         try await FakeBehavior.perform(mode, failing: .renderFailed("the preview failed on purpose"))
-        guard let base = FakeBehavior.gradient(for: FakeBehavior.cropShaped(photo, settings.crop),
+        guard let base = FakeBehavior.gradient(for: FakeBehavior.cropShaped(photo, settings.crop, facing: settings.orientation),
                                                longSide: quality == .preview ? 512 : longSide) else {
             throw LibraryError.renderFailed("empty photo")
         }
@@ -32,7 +33,7 @@ public struct FakeLoupe: LoupeImaging {
         // slider move. Each step of any slider (0.01 EV, or 1), each curve
         // point off the diagonal and each levels field off neutral lifts by
         // one byte level, clamped to the byte range.
-        let sliderSteps = DevelopSlider.allCases.map { settings.value($0) / $0.step }.reduce(0, +)
+        let sliderSteps = ToneSlider.develop.map { settings.value($0) / $0.step }.reduce(0, +)
         let curveSteps = settings.curve.points.filter { $0.x != $0.y }.count
         let levelSteps = DevelopLevels.Field.allCases.filter {
             settings.levels.value($0) != DevelopLevels.neutral.value($0)

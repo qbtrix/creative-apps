@@ -13,6 +13,7 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteImaging
 import SuiteKernel
 
 /// The catalog's undo history as the kernel reads it.
@@ -61,6 +62,7 @@ extension LibraryCatalog {
     public static let commands: [CommandSpec<LibraryCatalog>] = fileAndEditSpecs + viewSpecs + photoSpecs + metadataSpecs
         + FileFlowCommands.specs(LibraryCatalog.self)
         + folderSpecs + exportSheetSpecs + noticeSpecs + resetSliderSpecs + [sharePrepareSpec, thumbnailStatsSpec] + backupSpecs
+        + LibraryCropDocument.specs
 
     /// The specs as a catalog whose history is the catalog's own.
     public static let catalog: CommandCatalog<LibraryCatalog> =
@@ -317,9 +319,9 @@ extension LibraryCatalog {
     ]
 
     /// Develop's Reset <slider>: that one slider of the targets back to 0, one step each.
-    public static func resetSliderID(_ slider: DevelopSlider) -> String { "photo.reset-" + slider.rawValue.lowercased() }
-    static let resetSliderSpecs: [CommandSpec<LibraryCatalog>] = DevelopSlider.allCases.map { slider in
-        photo(resetSliderID(slider), "Reset " + slider.rawValue, "Sets the targets' \(slider.rawValue.lowercased()) back to 0.", .edit,
+    public static func resetSliderID(_ slider: ToneSlider) -> String { "photo.reset-" + slider.rawValue.lowercased() }
+    static let resetSliderSpecs: [CommandSpec<LibraryCatalog>] = ToneSlider.develop.map { slider in
+        photo(resetSliderID(slider), "Reset " + slider.title, "Sets the targets' \(slider.title.lowercased()) back to 0.", .edit,
               "develop", "Develop isn't connected yet.", on: { $0.canEditDevelop }, run: { $0.resetDevelop(slider) })
     }
 }

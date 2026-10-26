@@ -12,7 +12,7 @@
 // stroke draws on LiveStroke's LiveCopy and comes back once, at its end or before
 // any other intent, so drawing never re-runs the panels; a Free Transform
 // handle drag or row scrub runs on LiveTransformCopy the same way. Its workspace runs on
-// `fileServices(.live)`, or under `-PhotoFixture` on the fixture's fakes
+// `fileServices(liveServices)`, or under `-PhotoFixture` on the fixture's fakes
 // (`launchOptions`, read once from the process; S-12), whose picture it
 // renders and keeps fitted while the window settles, until the user zooms. Open, Save, Save As and their
 // launch arguments live in PhotoWindow+File.swift, Export's write in
@@ -85,9 +85,9 @@ struct PhotoWindow: View {
     /// This process's `-PhotoFixture`, read once.
     nonisolated static let launchOptions = PhotoLaunchOptions(arguments: ProcessInfo.processInfo.arguments)
 
-    /// The fixture on the fakes under `-PhotoFixture`, else a workspace on `fileServices(.live)`.
+    /// The fixture on the fakes under `-PhotoFixture`, else a workspace on `fileServices(liveServices)`.
     nonisolated static func launchWorkspace() -> PhotoWorkspace {
-        PhotoWorkspace.launch(launchOptions) ?? PhotoWorkspace(services: fileServices(.live))
+        PhotoWorkspace.launch(launchOptions) ?? PhotoWorkspace(services: fileServices(liveServices))
     }
 
     /// A window on `model`: the launch workspace in the app, a test's own in tests, at `zoom`.
@@ -187,6 +187,7 @@ struct PhotoWindow: View {
         case .saveAs: saveAs()
         case .imageSize: isResizing = model.canvas != nil
         case .rotate(let turn): model.rotateImage(turn)
+        case .flipCanvas(let axis): run("image.flip", ["axis": .string(axis.rawValue)], failing: "The image can't be flipped.")
         case .straighten: straightenDraft = model.canvas == nil ? nil : StraightenDraft()
         case .applyStraighten(let degrees, let cropToFit): straighten(degrees: degrees, cropToFit: cropToFit)
         case .undo: model.undo()
@@ -255,6 +256,7 @@ struct PhotoWindow: View {
         case .sample(let intent): performSample(intent)
         case .place(let intent): performPlace(intent)
         case .text(let intent): performType(intent)
+        case .tone(let intent): performTone(intent)
         case .path(let intent): model.runPath(intent)
         case .confirm: if confirmTransform() {} else { model.applyCrop() }
         case .dismiss:
