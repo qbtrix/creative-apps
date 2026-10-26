@@ -193,3 +193,4 @@ utc	stage	event	ref	note
 2026-10-26T03:51:19Z	heartbeat	poll 03:50Z: unchanged; no supervisor answer; dev-red #5321 open; #4854/#5025 open, clean, no needs-fix/needs-rebase
 2026-10-26T04:16:08Z	packet-review-2	amendments 3,5 applied (#5025,#4854); 4,6 -> gaps #5380,#5381
 2026-10-26T04:51:24Z	poll	blocked: dev-red #5321 open (run 40266495039); #4854 b2f91717 and #5025 921d412b clean, unmerged; no supervisor answer
+2026-10-26T05:14:09Z	poll	blocked: dev-red #5321 open (run 40266495039); #4854 b2f91717 and #5025 921d412b clean, unmerged; #3481 unchanged at 23 comments
