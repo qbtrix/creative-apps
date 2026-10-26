@@ -10,6 +10,7 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteModel
 
 public struct DesignServices: Sendable, Equatable {
     public let name: String
@@ -27,6 +28,9 @@ public struct DesignServices: Sendable, Equatable {
     public var pen: any PathDrawing
     public var components: any ComponentLibrary
     public var variables: any VariableEditing
+    /// The measurer a text style change refits a box by (text-style TS-7); nil until a live one is wired, when
+    /// a size change scales the box instead.
+    public var text: (any TextServices)? = nil
 
     public static func == (a: DesignServices, b: DesignServices) -> Bool { a.name == b.name }
 

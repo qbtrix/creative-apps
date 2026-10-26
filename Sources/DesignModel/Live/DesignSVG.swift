@@ -106,7 +106,7 @@ enum DesignSVG {
     private static func text(_ node: DesignNode, x: Double, y: Double, turned: String) -> String {
         let style = node.textStyle
         let (anchorX, anchor): (Double, String?) = switch style.alignment {
-        case .leading: (x, nil)
+        case .leading, .justified: (x, nil)
         case .center: (x + node.frame.width / 2, "middle")
         case .trailing: (x + node.frame.width, "end")
         }

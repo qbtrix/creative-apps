@@ -27,7 +27,8 @@ struct DesignCatalogDoc: HeadlessDocument {
 
 @Suite struct DesignCommandCatalogTests {
     /// Design's states: no file, nothing selected, one layer, a locked and a hidden layer, a group, several layers,
-    /// two pages, an edit to undo, an undone edit, mid-drag, mid text edit, a gradient, a stroke and an entered group.
+    /// two pages, an edit to undo, an undone edit, mid-drag, mid text edit, a gradient, a stroke, an entered group and a
+    /// text layer.
     static var states: [(String, DesignWorkspace)] {
         let cards = DesignFixtures.cards
         func with(_ base: DesignWorkspace = cards, _ change: (inout DesignWorkspace) -> Void) -> DesignWorkspace {
@@ -46,6 +47,7 @@ struct DesignCatalogDoc: HeadlessDocument {
             ("gradient", with(one) { $0.runFill(.type(.linear)); $0.runFill(.add(offset: 0.5)) }),
             ("stroked", with(one) { try? $0.setStyle(.stroke(.default)) }),
             ("entered group", with { $0.selectItem("node-6"); $0.enterGroup() }),
+            ("text layer", with { $0.selectItem("node-5") }),
         ]
     }
 
@@ -88,8 +90,10 @@ struct DesignCatalogDoc: HeadlessDocument {
     @Test func availabilityMatchesHelp() {
         // The fill and stroke commands had no help before the catalog: their rules are GradientCommands' and
         // StrokeCommands' (DesignGradientTests, DesignStrokeTests); nor had the group picks, whose rules are
-        // GroupPick's (DesignGroupPickTests, AR-14).
-        for id in DesignWorkspace.catalog.ids where !id.hasPrefix("fill.") && !id.hasPrefix("stroke.") && !id.hasPrefix("select.") {
+        // GroupPick's (DesignGroupPickTests, AR-14), nor the text style's, whose rules are TextCommands'
+        // (DesignTextStyleTests, TS-7).
+        for id in DesignWorkspace.catalog.ids
+        where !id.hasPrefix("fill.") && !id.hasPrefix("stroke.") && !id.hasPrefix("select.") && !id.hasPrefix("text.") {
             #expect(Self.oldHelp(id, DesignWorkspace()) != nil, "\(id) has no old help to match")
             for (state, w) in Self.states {
                 let old = Self.oldHelp(id, w) ?? nil
@@ -226,5 +230,12 @@ struct DesignCatalogDoc: HeadlessDocument {
         "history.read | Read History | on", "history.jump | Jump in History | There are no steps yet.",
         "view.zoom-in | Zoom In | on", "view.zoom-out | Zoom Out | on", "view.fit | Fit Page | on",
         "view.zoom-to-selection | Zoom to Selection | on",
+        "text.read | Read Text Style | Select a text layer first.",
+        "text.set-font | Font | Select a text layer first.",
+        "text.set-size | Text Size | Select a text layer first.",
+        "text.set-italic | Italic | Select a text layer first.",
+        "text.set-alignment | Alignment | Select a text layer first.",
+        "text.set-line-height | Line Height | Select a text layer first.",
+        "text.set-tracking | Letter Spacing | Select a text layer first.",
     ]
 }
