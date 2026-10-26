@@ -42,6 +42,6 @@ Next: wait for the lane to land #4916, #5002, #5011 once dev-red #5321 closes, t
 
 ## Open
 - 2026-10-26T13:35Z run act-1a178669406-n4me: asked the supervisor on #3441 whether DK-z may start stacked on #4916/#5011 while its 7 open findings each close with an open PR.
-- dev-red #5321 (range main..cc5c6234a; not ours) holds every batch. Nothing to fix here.
+- 2026-10-26T22:14Z: #4916 (DK-m's last PR) merged as 9810d71b; #4919 closed. Full CI run https://github.com/qbtrix/creative-apps/actions/runs/40411399952 on 9810d71b holds it: green there marks DK-m done. dev-red #5818 (macOS, range main..696d37fe; not ours) still holds code batches; #5002/#5011 wait in the lane. Open findings: 6.
 - Open stroke-style findings past the round cap (#4925 #4926 #4927 #4919 #4940 #4941 #4989 #5009 #5010) are partly fixed in #5002/#5011; the rest go to gaps once those PRs merge.
 - 2026-10-26T02:06:05Z: every open stroke-style finding is fixed by an open PR (#4916, #5002, #5011 Fixes lines); DK-z starts once they land and the combined open count is 5 or fewer.
