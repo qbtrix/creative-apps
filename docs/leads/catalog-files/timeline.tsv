@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-24T19:05:23Z	4	gate	#4937 #4938 #4949	lc-m5 gate hit a SIGSEGV in SampleOpenTests.testSunset (LibraryCatalog init copy); checking lc-m6 gate, which carries the same change, to tell a flake from a fault
 2026-10-26T02:18Z	0	stage-start	#3786	resume run act-1a175fe2de5-qdc7; lead branch rebuilt on main d3323f6a
 2026-10-26T02:18Z	3	heartbeat	#4924,#4937	eligible in lane queue; #4938,#4949 stacked
+2026-10-26T02:40Z	heartbeat	LC-u,LC-m	#4924 #4937 still queued; lc-m6 vs dev conflicts mapped (crop/image commands)
