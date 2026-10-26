@@ -125,6 +125,15 @@ public protocol LoupeImaging: Sendable {
                 quality: RenderQuality) async throws -> RenderedPhoto
     /// Decodes `photos` ahead (the neighbours of the focused photo).
     func prefetch(_ photos: [PhotoItem], longSide: Int) async
+    /// The GPU route's frame for `render(.full)` (suite-imaging IM-11), or nil
+    /// for the CPU route; a loupe with no GPU route (the default) hands back nil.
+    func gpuFrame(_ photo: PhotoItem, settings: DevelopSettings, longSide: Int,
+                  preferGPU: Bool) async throws -> LoupeGPUFrame?
+}
+
+extension LoupeImaging {
+    public func gpuFrame(_ photo: PhotoItem, settings: DevelopSettings, longSide: Int,
+                         preferGPU: Bool) async throws -> LoupeGPUFrame? { nil }
 }
 
 /// J5, J7. Develop settings to pixels. Live: `LiveDevelop` over CoreRaster:
