@@ -89,3 +89,4 @@ utc	stage	event	ref	note
 2026-10-26T02:00Z	3	push	#5161	HY-u fa7e3ca6c: journey expects 3 keyframes (amendment 2); gate PASS; Head moved
 2026-10-26T02:22Z	heartbeat	lane	#5158	#5158/#5174 open, ready, prescreen green; dev-red #5321 open; lane batch-20261026021314 is #5309 alone (not ours)
 2026-10-26T02:43Z	heartbeat	lane	#5158	no change: #5158/#5174 open; dev-red #5321 open; batch-20261026021314 (#5309) still in flight
+2026-10-26T03:05Z	heartbeat	lane	#5158	no change: #5158/#5174 open; dev-red #5321 open (code batches held); lane batch-20261026025626 is #5334 alone
