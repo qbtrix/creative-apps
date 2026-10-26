@@ -163,3 +163,4 @@ Next: AK side ended (parked by the supervisor): #4427 and #4428 on dev; relaunch
 - 2026-10-26T15:26:56Z poll 15:26: dev-red #5321 open; full CI 40342241864 + scoped library at f86f72f79 still running; none of ours merged or labelled needs-fix; SC-f still open (SC-15/16 unmerged, packet review #5798 open)
 - 2026-10-26T15:50:40Z AK-photo/AK-z blocked: SC-f PRs #5262 #5265 still open
 - 2026-10-26T16:15:10Z AK-photo/AK-z blocked: SC-f PRs #5262 #5265 still open
+- 2026-10-26T16:37:01Z AK-photo/AK-z blocked: SC-f PRs #5262 #5265 still open
