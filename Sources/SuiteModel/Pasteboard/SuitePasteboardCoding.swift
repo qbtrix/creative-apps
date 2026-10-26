@@ -88,6 +88,12 @@ public struct SuitePasteboardCoding: PasteboardCoding {
         }
     }
 
+    /// A copied style's JSON as it goes on the pasteboard, alone, so Paste in a canvas never takes it as a layer.
+    public static func style(_ json: Data) -> [TypedData] { [TypedData(type: .layerStyle, data: json)] }
+
+    /// The style JSON on offer, nil when the pasteboard holds none: what enables Paste Layer Style.
+    public static func style(in offered: [TypedData]) -> Data? { offered.first { $0.type == .layerStyle }?.data }
+
     /// The pixel size in a PNG's IHDR chunk (big-endian width and height at bytes 16 and 20), or 0 by 0.
     static func pngSize(_ data: Data) -> (width: Int, height: Int) {
         let bytes = [UInt8](data.prefix(24))
