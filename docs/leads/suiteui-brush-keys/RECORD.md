@@ -57,3 +57,5 @@ Next: wait for the lane to merge BK-u #4939; then merge dev into #4965, #4961, #
 
 ## Open
 - BK-u blocked: anchor-parenting:AN-u (feature not started).
+
+- 2026-10-26T13:39:43Z (act-1a177ff0916-4jm7): 13:39Z poll: dev 01600e46; dev-red #5321 still open (not ours); no merges of ours. BK-u #4939 fast-lane, queued; #4965/#4961/#4982 keep needs-split until #4939 lands (then merge dev, gate, move Head, drop needs-split). Next: unchanged. No needs-fix/needs-rebase; 0 findings.
