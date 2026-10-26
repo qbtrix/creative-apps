@@ -100,3 +100,4 @@ Run act-1a1695ebfeb-d54n, 2026-10-23T15:30Z; supersedes the tables' PR/state col
 - 2026-10-26T17:28Z (act-1a177ff0916-4jm7): poll: dev df48c0ba; dev unchanged; AN-6 waits on #4893, AN-10 on #4902 and #4891
 - 2026-10-26T17:46Z (act-1a177ff0916-4jm7): poll: dev fef52e66; no merges of ours (only #5808 quarantine); AN-6 waits on #4893, AN-10 on #4902 and #4891
 - 2026-10-26T18:03Z (act-1a177ff0916-4jm7): poll: dev fef52e66; dev unchanged; no return label on #4893 or #4902; AN-6 waits on #4893, AN-10 on #4902 and #4891
+- 2026-10-26T18:20Z (act-1a177ff0916-4jm7): poll: dev e69582e7; no merges of ours (only #5263 photo); AN-6 waits on #4893, AN-10 on #4902 and #4891
