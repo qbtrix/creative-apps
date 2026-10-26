@@ -241,3 +241,4 @@ utc	stage	event	ref	note
 2026-10-26T21:39Z	poll	4854 in batch 20261026211959 (Linux green, mac pending); 5025 queued; dev-red 5818 open; 3481 no new comments
 2026-10-26T22:02Z	poll	4854 merged 9e1cc26b (batch 20261026211959); 5025 queued; dev-red 5818 open; 3481 no new comments
 2026-10-26T22:24Z	poll	5025 still queued; no new batch with it; dev-red 5818 open; 3481 no new comments
+2026-10-26T22:46Z	poll	5025 still queued; no new lane batch since 22:07Z, sweep 40413703841 running; dev-red 5818 open; 3481 no new comments
