@@ -37,7 +37,7 @@ struct AllAppsCatalogTests {
         let named = listed.compactMap { app -> String? in
             if case .object(let f) = app, case .string(let name)? = f["name"] { name } else { nil }
         }
-        #expect(named == Self.names + ["suite", "fake"], "list-apps lists the five in registry order, the suite, then the fake")
+        #expect(named == Self.names + ["suite", "fake", "fake-tone"], "list-apps lists the five in registry order, the suite, then the fakes")
     }
 
     @Test(arguments: names)
