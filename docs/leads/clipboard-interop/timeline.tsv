@@ -188,3 +188,4 @@ utc	stage	event	ref	note
 2026-10-26T03:13Z	3	heartbeat	lane	03:15Z poll: no merges of ours since 02:30Z (dev d0859e01, main d3323f6a); none of our PRs carry needs-rebase or needs-fix; 0 open findings
 2026-10-26T03:35Z	3	heartbeat	lane	03:36Z poll: no merges of ours (dev d0859e01, main d3323f6a); lane batch lane/batch-20261026032432 in flight; full CI 40262284734 on dev running (holds none of our PRs); no needs-rebase/needs-fix on ours; 0 open findings
 2026-10-26T03:57Z	3	heartbeat	lane	03:57Z poll: dev 75292afd (#5040, #5378 merged, none ours), main d3323f6a; full CI 40266495039 queued on dev (holds none of our PRs); no needs-rebase/needs-fix on ours; 0 open findings
+2026-10-26T04:19Z	3	heartbeat	lane	04:19Z poll: dev 75292afd, main d3323f6a, no merges of ours; full CI 40266495039 and scoped suiteui 40267267454 running on dev (hold none of our PRs); no needs-rebase/needs-fix on ours; 0 open findings
