@@ -26,5 +26,19 @@
     "find": "let siblings = ancestors.last.flatMap { tree.node($0)?.children } ?? tree.roots",
     "replace": "let siblings = ancestors.isEmpty ? tree.roots : tree.roots",
     "tests": "ClipCommandsTests"
+  },
+  {
+    "label": "unclipHelpSwapped: layer.unclip shows the clip command's help",
+    "file": "Sources/SuiteKernel/Layers/ClipCommands.swift",
+    "find": "return s.isClipped ? .available : .unavailable(ClipRules.notClippedHelp)",
+    "replace": "return s.isClipped ? .available : .unavailable(ClipRules.noBaseHelp)",
+    "tests": "ClipCommandsTests"
+  },
+  {
+    "label": "clipHelpSwapped: layer.clip shows the unclip command's help",
+    "file": "Sources/SuiteKernel/Layers/ClipCommands.swift",
+    "find": "guard s.hasBase else { return .unavailable(ClipRules.noBaseHelp) }",
+    "replace": "guard s.hasBase else { return .unavailable(ClipRules.notClippedHelp) }",
+    "tests": "ClipCommandsTests"
   }
 ]
