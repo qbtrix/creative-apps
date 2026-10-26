@@ -131,3 +131,5 @@ Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #48
 - 06:50Z: #5244 (flip canvas) landed and conflicted #5363 in both catalog tables and the photo list-commands golden. Merged dev into #5363 (merge commit), kept both image.flip and tone.* tolerations, regenerated the golden from the CLI; scripts/ci --changed PASS; head 5260e203, Head line moved. Needs a fresh pre-screen. PT-3, PT-5, PT-7 re-merged on it; gates running.
 
 - 07:07Z: gates PASS after re-merge and pushed: PT-5 b1e44767, PT-3 e7544ba8, PT-7 a825b8de. #5363 (5260e203) waits on a fresh prescreen.
+
+- 07:27Z: the lane had flagged #5363 needs-rebase at 06:47Z (old head); fix at 5260e203 cleared it. Mergeable clean, waiting on the prescreen. dev 99ace703 merges clean with all heads.
