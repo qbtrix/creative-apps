@@ -108,3 +108,9 @@ Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #48
     - Sharpen-web's output is `.jpeg`, which is what JPEG export writes.
     - RJ-P12..14 in jobs.json now have `baseline: pass` and no waits_on.
     - The PJ-T1 journey's skip flag is removed.
+- PT-7 gate: `scripts/ci --changed` PASS at 46e6878e. Branch -pt7 pushed. The PR waits for #5363 and PT-3.
+- PT-z, PT-8 (feature-done): branch `claude/tone-controls-lead-gms6yu-pt8` (from dev, b8704e52, 2 files).
+  - photo.md: a Tone row in the v2 line, listing White Balance, Tone with Auto, Presence and Sharpen as the code names them in `ToneSlider`.
+  - photo.md: a PJ-T1 row in the Tier-2 journeys.
+  - wave.json: `status: built` and feature_issue #3468.
+  - It is docs-only and the lane would land it at once, so its PR opens only after PT-3, PT-5 and PT-7 have merged.

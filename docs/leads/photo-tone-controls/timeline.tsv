@@ -173,3 +173,5 @@ utc	stage	event	ref	note
 2026-10-26T02:57:34Z	W5	build	PT-3	live and dispatcher routes sharpen as export does; branch -pt3 at 42fbe440, CI PASS, mutations 13/13; PR waits for #5363 to land
 2026-10-26T03:09:20Z	W5	build	PT-5	tone drag samples on the live copy; branch -pt5 at c1fb913b, CI PASS; PR waits for #5363
 2026-10-26T03:19:21Z	W5	build	PT-7	jobs live on fixtures, journey on; branch -pt7, test-first; PR waits for #5363, PT-3
+2026-10-26T03:23:47Z	W5	gate	PT-7	CI PASS at 46e6878e, pushed
+2026-10-26T03:23:47Z	W6	build	PT-8	photo.md tone row and PJ-T1, wave built; held until the code PRs land
