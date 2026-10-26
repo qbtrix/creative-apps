@@ -236,3 +236,4 @@ utc	stage	event	ref	note
 2026-10-26T19:50Z	poll	no dev-red; #4854/#5025 open, clean, not in batches 193102..193833 (single PRs #5762 #5802 #3313 #3645 #3651); lane sweep 40386832050 running
 2026-10-26T20:13Z	poll	no dev-red; lane sweep 40386832050: #4854 and #5025 eligible, 122 ready PRs queued; #3481 25 comments
 2026-10-26T20:35Z	poll	no dev-red; #4854/#5025 open, clean, queued (batch 202926 holds #5802); #3481 25 comments
+2026-10-26T20:57Z	poll	no dev-red; #4854 in lane/batch-20261026203644 (Linux check running); #5025 queued; #3481 25 comments
