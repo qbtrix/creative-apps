@@ -22,9 +22,9 @@
   },
   {
     "label": "whites and blacks become linear levels on the GPU route",
-    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
-    "find": "steps.append(.levels(inBlack: inBlack, inWhite: inWhite, gamma: 1, outBlack: outBlack, outWhite: outWhite, encoding: .sRGB))",
-    "replace": "steps.append(.levels(inBlack: inBlack, inWhite: inWhite, gamma: 1, outBlack: outBlack, outWhite: outWhite, encoding: .linear))",
+    "file": "Sources/SuiteImaging/Tone/ToneRules.swift",
+    "find": "outWhite: Float(outWhite),\n                               encoding: .sRGB))",
+    "replace": "outWhite: Float(outWhite),\n                               encoding: .linear))",
     "tests": "LibraryLoupeGPURouteTests"
   },
   {
