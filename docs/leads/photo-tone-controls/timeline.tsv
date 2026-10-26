@@ -230,3 +230,4 @@ utc	stage	event	ref	note
 2026-10-26T20:48Z	check	#5816 and #5817 open, clean, no lane comment yet; stripped a tool-added attribution footer from both bodies; PT-7 still waits on #5816
 2026-10-26T21:11Z	check	#5816, #5817 still open and clean, waiting for a lane batch (#5817 now p0/beta); dev at 3ebc8d43 (#5812) does not conflict; PT-7 waits on #5816
 2026-10-26T21:33Z	check	#5816, #5817 open, no label or comment; lane is draining a backlog of single-PR batches (#4848..#4916, 21:19-21:28Z); dev still 3ebc8d43; PT-7 waits on #5816
+2026-10-26T21:56Z	check	#5816 PT-m and #5817 PT-u open, clean, no needs-fix; lane still on backlog batches (#4905, #4916)
