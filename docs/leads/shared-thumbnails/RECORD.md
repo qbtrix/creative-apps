@@ -1,7 +1,7 @@
 # shared-thumbnails lead record
 
 Issue: #3719 · Packet: docs/blueprints/suiteui/features/shared-thumbnails.md
-Run: act-1a175f402e7-kwji (relaunch 2026-10-26T02:00Z; earlier act-1a170e37e52-d0q6) · Started: 2026-10-23T15:30Z
+Run: act-1a17835827e-1edk (relaunch 2026-10-26T12:40Z; earlier act-1a175f402e7-kwji) · Started: 2026-10-23T15:30Z
 Stage: 3 polling (ST-a, ST-u, ST-m done; ST-z part 1 #5102 merged, part 2 #5133 open)
 Base: origin/dev 8987427d8
 Next: #5133 (90eb5fab2) is clean and merges dev cleanly; it waits for the lane, which forms no code batch while dev-red #5321 open (full CI 40251699354 macOS red, range main..cc5c6234a) is open. Then a green scoped suiteui or full run containing #5133 gets Belt-Slice-Done ST-z and Mac-Finish-Wanted ST-z; the supervisor posts the contact sheet (#3719). Heartbeat every 20 min.
@@ -46,6 +46,8 @@ Next: #5133 (90eb5fab2) is clean and merges dev cleanly; it waits for the lane, 
 - 2026-10-25T02:35Z Relaunch act-1a170e37e52-d0q6. The brief targets main; lead/shared-thumbnails was recreated on origin/main afef017c2 with this record (its old history was 2.4k dev commits; the timeline keeps the events). Supervisor merged #5219 (Photo publishes through the bridge's thumbnails) and #5209 (end-to-end Recent-card test), and is holding #3719 for them; #5133 still carries feature-done and the slice.
 
 - 2026-10-26T02:20Z Relaunch act-1a175f402e7-kwji. Nothing of this feature merged since the last record. #5133 open (fast-lane, feature-done, beta; clean; trial merge of dev 8987427d8 clean). dev-red #5321 open (full CI 40251699354 macOS red, range main..cc5c6234a); while it names macOS no code batch forms, so code PRs wait. Supervisor holds #3719 for #5219.
+
+- 2026-10-26T12:55Z Relaunch act-1a17835827e-1edk. Packet-Review 2 (#3719, 999895c8): (1, blocker) answered: `LibraryHeadless.swift` building `LiveThumbnails` over the disk adapter is not in ST-z's files and the 400-line cap leaves no room; filed gap #5791 and moved RJ-X47's `pending`/`waits_on` to #5791 (`why` names it). ST-z closes with gap #5791. (2) applied: the packet's RJ-X47 row names the real steps (`input/*.library`, `edit.select` beach, `photo.reset-develop`) and counts 4/0, 0/4, 1/4. Both ride #5133 (local 26055191).
 
 ## Wire
 - [x] Wire: shared-codecs:SC-a (ST-2 built ahead; when SC-2 merges, merge dev into the ST-a branch, keeping both Package.swift/project.yml link changes)
@@ -117,3 +119,4 @@ Next: #5133 (90eb5fab2) is clean and merges dev cleanly; it waits for the lane, 
 - 2026-10-26T11:26Z: heartbeat: dev-red #5321 open; dev 7aa95f57 (generated C4/waves) after b200af5b (#5726 lane auto-quarantine for a red dev with no culprit); Linux check on f3af1c00 green, Linux check 40313117666 and scoped photo running; no Feature: shared PR updated since 10:55Z; #5133 ST-z waits in lane; codec and raw stacks unchanged; findings 0
 - 2026-10-26T11:52Z: heartbeat: dev c6700dba (#5727 quarantine expiry); dev-red #5321 open; Linux check 40316903931 running; no Feature: shared PR moved; #5133 ST-z still queued
 - 2026-10-26T12:23Z: heartbeat: dev 746be6b1 (#5775 sharded macOS); full CI 40321924466 queued; Linux check 40316903931 on c6700dba green; dev-red #5321 open; no Feature: shared PR moved; #5133 ST-z queued
+- 2026-10-26T12:55Z: heartbeat: #5133 ST-z2 gains the RJ-X47 gap and packet fixes (local 26055191, gate queued); dev 746be6b1; dev-red #5321 open; findings 0
