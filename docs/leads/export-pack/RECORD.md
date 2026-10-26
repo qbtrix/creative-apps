@@ -25,6 +25,7 @@ Next: Belt-Slice-Done XP-a once a suiteui-scoped or full run contains 99ace7038;
 - 2026-10-26T07:15:52Z heartbeat: #5043 XP-3 merged; #5065/#5104/#5106 restacked and Head moved
 - 2026-10-26T07:34:19Z heartbeat: XP-a scoped suiteui run 40284902781 at 99ace7038 in progress; #5065 restacked to 273 lines, lane re-evaluating; #5104/#5106 clean
 - 2026-10-26T07:56:21Z heartbeat: Belt-Slice-Done XP-a posted (run 40284902781, comment 6411020269); XP-u #5065/#5104 and XP-z #5106 clean in fast-lane queue
+- 2026-10-26T08:22:21Z heartbeat: no merges; dev-red #5321 (macos) holds code batches; red-triage blamed #5044, verified macOS failure is OnboardingModelTests timeouts, noted on #5321 (comment 6411461028)
 
 ## Run act-1a16fe1fa73-5x3s decisions
 - 22:59Z: the 22:27Z poll was one-shot, so no heartbeat ran from 22:28Z to 22:59Z. Each poll now schedules the next one 15 min out.
