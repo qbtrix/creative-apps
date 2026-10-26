@@ -21,6 +21,8 @@ struct ToolOptionsSection: View {
     static let gradientHint = "Drag across the image to draw a gradient from the press to the release."
     /// The Type tool's one-line hint.
     static let typeHint = "Click the image to type. Return adds the text; Escape cancels it."
+    /// The Pen's one-line hint.
+    static let penHint = "Click for corners, drag for curves, click the first point to close; Return leaves the path open. Hold Command to move points."
 
     var body: some View {
         let options = model.toolOptions
@@ -74,6 +76,8 @@ struct ToolOptionsSection: View {
                 PhotoFillToolOptions(model: model, perform: perform)
             case .text:
                 hint(Self.typeHint)
+            case .pen:
+                hint(Self.penHint)
             }
         }
     }

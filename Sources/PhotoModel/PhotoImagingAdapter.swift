@@ -75,8 +75,11 @@ extension PhotoWorkspace {
         tone: any ToneRendering, cache: LiveCompositeCache<PixelRect>,
         write: (_ surface: RenderSurface, _ rect: PixelRect, _ tone: ToneProgram) throws -> Void
     ) throws {
+        PhotoRenderCount.layers(stack.steps.count)
         try stack.draw(rect, on: dispatcher, resident: resident, tone: tone, cache: cache, tiles: { layers, rect, resident in
-            try residentSteps(layers.map(\.layer), in: rect, resident: resident)
+            PhotoRenderCount.region()  // a base composite, as residentComposited counts one
+            PhotoRenderCount.layers(layers.count)
+            return try residentSteps(layers.map(\.layer), in: rect, resident: resident)
         }, write: write)
     }
 }

@@ -1,0 +1,6 @@
+[
+  {"label": "adjustmentHasStyle: an adjustment layer reports a style to edit", "file": "Sources/PhotoModel/PhotoStyle+Kernel.swift", "find": "if case .adjustment = layer.kind { return nil }", "replace": "", "tests": "PhotoLayerStyleTests"},
+  {"label": "adjustmentHelpless: an adjustment layer's style commands say nothing", "file": "Sources/PhotoModel/PhotoStyle+Kernel.swift", "find": "if case .adjustment = layer.kind { return Self.styleOnAdjustment }", "replace": "", "tests": "PhotoLayerStyleTests"},
+  {"label": "noLayerHelpless: with no layer the style commands say nothing", "file": "Sources/PhotoModel/PhotoStyle+Kernel.swift", "find": "guard let layer = selectedLayer else { return StyleRules.noLayerHelp }", "replace": "guard let layer = selectedLayer else { return nil }", "tests": "PhotoLayerStyleTests"},
+  {"label": "panelStuck: showStylePanel never opens the panel", "file": "Sources/PhotoModel/PhotoStyle+Kernel.swift", "find": "{ stylePanel = kind }", "replace": "{ }", "tests": "PhotoLayerStyleTests"}
+]
