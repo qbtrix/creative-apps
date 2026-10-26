@@ -4,7 +4,7 @@ Issue: #3477 · Packet: docs/blueprints/suiteui/features/export-pack.md
 Run: act-1a175ea55b7-729d (line lead, line:suiteui; relaunch 2026-10-26) · earlier: act-1a16fe1fa73-5x3s (line lead, line:suiteui; relaunch) · earlier: act-1a16c618fe7-h4fd (line lead, line:suiteui; unparked by the supervisor 2026-10-24)
 Stage: XP-3 #5043 merged (99ace7038, dev tip 07:1xZ): XP-a merged; XP-4 #5065 restacked (add/add from the squash, ours kept) at b0f81dc6f; XP-5 #5104 and XP-8 #5106 restacked on it; all gates PASS; #5374 in lane
 Base: origin/dev 8eff8ab85
-Next: XP-u Belt-Slice-Done once a green dev run contains 68be32fc6; XP-10 after #5106 merges
+Next: XP-10 after #5106 merges; XP-z Belt-Slice-Done then
 
 
 ## Run act-1a175ea55b7-729d decisions
@@ -39,6 +39,7 @@ Next: XP-u Belt-Slice-Done once a green dev run contains 68be32fc6; XP-10 after 
 - 2026-10-26T13:38:34Z heartbeat: no change: all PRs open and clean; batches held while dev-red #5321 is open (not ours)
 - 2026-10-26T14:12:29Z heartbeat: #5104 (XP-5, XP-u's last PR) merged 14:03Z as 68be32fc6; XP-u Belt-Slice-Done waits on a green suiteui or full dev run containing it. #5106 (XP-8) integrated with dev by the lane, base now dev
 - 2026-10-26T14:32:38Z heartbeat: scoped suiteui run 40337540609 at 68be32fc6 (contains XP-u's #5104) in progress; XP-u line follows if green
+- 2026-10-26T14:52:37Z heartbeat: Belt-Slice-Done XP-u posted (scoped suiteui run 40337540609 at 68be32fc6, green). XP-z: #5106 (XP-8) in the lane
 
 ## Run act-1a16fe1fa73-5x3s decisions
 - 22:59Z: the 22:27Z poll was one-shot, so no heartbeat ran from 22:28Z to 22:59Z. Each poll now schedules the next one 15 min out.
