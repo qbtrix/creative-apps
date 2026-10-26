@@ -48,6 +48,7 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 2026-10-26T07:16Z no change (resumed on Belt nudge; 07:04Z check never fired): #4894/#4936/#5092 open and clean, dev-red #5321 open (run 40277933712), no supervisor answer
 - 2026-10-26T06:45Z no change: #4894/#4936/#5092 open and clean (#4894 prescreen green), dev-red #5321 still open (new run 40277933712, range to c480d848), no supervisor answer
 - 2026-10-26T06:25Z no change: #4894/#4936/#5092 open and clean, dev-red #5321 open, no supervisor answer
 - 2026-10-26T06:06Z no change: #4894/#4936/#5092 open and clean, dev-red #5321 open, no supervisor answer
