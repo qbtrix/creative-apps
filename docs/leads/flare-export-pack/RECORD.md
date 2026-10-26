@@ -1,10 +1,10 @@
 # export-pack (Flare) lead record
 
 Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
-Run: act-1a175ee12a5-4niu (relaunched 2026-10-26T02:05Z; before it act-1a16fe1fa9f-sqqi, relaunched 2026-10-24T21:39Z after act-1a16c619006-nour hit the 16-hour limit; before it act-1a1695ebf10-z0v8; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T02:26Z
+Run: act-1a178432d03-7n20 (relaunched 2026-10-26T12:41Z; before it act-1a175ee12a5-4niu, relaunched 2026-10-26T02:05Z; before it act-1a16fe1fa9f-sqqi, relaunched 2026-10-24T21:39Z after act-1a16c619006-nour hit the 16-hour limit; before it act-1a1695ebf10-z0v8; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T02:26Z
 Stage: 3 build (FV-z and fix round 1 held by dev-red #5321)
 Base: 721168a (origin/dev)
-Next: #4854 (FV-z, 565669e7) and #5025 (fix round 1, 9c2bc627) are ready (marker on head, prescreen green, no blocking label) but no batch forms while dev-red #5321 (macOS; triage names #5112/#5044, not this line) is open. Once both merge and a green flare-scoped or full run contains them: Belt-Slice-Done FV-z on #3481, then the FJ-X1 critic panel and Belt-Contact-Sheet. Findings open (6): no new feature work.
+Next: #4854 (FV-z, 98239ba3) and #5025 (fix round 1, 921d412b) are ready (marker on head, no blocking label) but no batch forms while dev-red #5321 (now linux, run 40327156097, range main..57dd31ff; neither PR in it) is open. Once both merge and a green flare-scoped or full run contains them: Belt-Slice-Done FV-z and Mac-Finish-Wanted FV-z on #3481, then the FJ-X1 critic panel and Belt-Contact-Sheet.
 
 Loop: v3 (the packet has a `## Slices` table).
 
@@ -14,7 +14,7 @@ Loop: v3 (the packet has a `## Slices` table).
 | FV-a | MP4 and GIF with frame rate and loop on stubs; sheet chips and Size row | FV-1, FV-2 | MJ-FV | XP-a, shell-media SM-a | yes | 1 | merged-done; review 1 filed #5012-#5021 (10); fix round 1 PR #5025 (clean, in lane; on #5012 #5013 #5014 #5015 #5017 #5018 #5020); #5016/#5019 wait on needs-ui #4819, #5021 on #5023, #5012's unit on #5022 | https://github.com/qbtrix/creative-apps/actions/runs/40029025919 | |
 | FV-u | snapshots, render budget, journey written | FV-5, FV-6 | FJ-X1 | FV-a; XP-4 | yes | 0 | merged-done (#4852, 9c276b81); Belt-Slice-Done + Mac-Finish-Wanted posted | https://github.com/qbtrix/creative-apps/actions/runs/40114485052 | wanted |
 | FV-m | frame plan, alpha, even size; live adapter streams to the writers | FV-3, FV-4 | MJ-FV | FV-a; XP-6 (merged), SM-w | no | 0 | done (Belt-Slice-Done posted) | https://github.com/qbtrix/creative-apps/actions/runs/39957675362 | n/a |
-| FV-z | real files on live, journey passes, blueprint | FV-7, FV-8 | FJ-X1 | FV-u, FV-m; gradient-fill:FG-z; svg-place:PF-z | no | 0 | PR #4854 (base dev, Head 565669e7, feature-done, in lane) | | |
+| FV-z | real files on live, journey passes, blueprint | FV-7, FV-8 | FJ-X1 | FV-u, FV-m; gradient-fill:FG-z; svg-place:PF-z | no | 0 | PR #4854 (base dev, Head 98239ba3, feature-done, in lane) | | |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -29,6 +29,7 @@ Loop: v3 (the packet has a `## Slices` table).
 | FV-8 | FV-z | 5 | flare.md: MP4 and GIF; wave status built | docs/blueprints/flare.md, export-pack.wave.json | waves render | #4854 | open |
 
 ## Decisions
+- 2026-10-26T13:3xZ (act-1a178432d03-7n20): resumed for FV-z. #4854 moved to 98239ba3: journey step 4 (Cancel on a running MP4) relaunches on `-FlareFixture bounce`, since live frames have no pause (as in FlareExportErrorJourneys), and step 1b hovers flare.export.format.gif with its own shot (Refs #5019, Flare half). `scripts/ci --changed` PASS; Head and Belt-Lead lines moved. #5025 unchanged. This run first wrote its record to docs/leads/flare-export-pack/ on lead/export-pack (12:57Z-13:03Z, commits 0289a9e6, 9449172f); that copy is stale, this branch is the record.
 - 2026-10-26T02:05Z (act-1a175ee12a5-4niu): resumed for FV-z only. #4854 and #5025 wait on dev-red #5321, which is not this line's to fix (CLAUDE.md: don't fix another merge's red in our PR); poll and heartbeat.
 - 2026-10-23T17:03Z (act-1a1695ebf10-z0v8): Belt watches lead/flare-export-pack; this run had pushed status to lead/export-pack. From now the record and timeline live on lead/flare-export-pack (timeline rows from both branches merged, in order).
 - 2026-10-23T15:46Z: Wire: suiteui/export-pack:XP-a (pixel and long-edge Size modes, XP-3/XP-4). FV-2 uses the shared scale row; the Model already takes .pixels and .longEdge.
