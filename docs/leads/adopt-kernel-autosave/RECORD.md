@@ -132,3 +132,4 @@ Next: AK side ended (parked by the supervisor): #4427 and #4428 on dev; relaunch
 - 2026-10-26T03:30:20Z Blocked on lane: dev-red #5321 (macos) is open, so no code batch forms. Bisect/triage name #5112 (reverted in #5349) and #5044, not ours. All 8 run PRs (#5040 #5088 #5089 #5091 #5231 #5244 #5263 #5266) are gated, fast-lane, no needs-fix/needs-rebase. Waiting; will not fix dev-red in our PRs.
 - 2026-10-26T03:48:06Z Heartbeat: dev-red #5321 still open; dev unmoved; our 8 PRs clean (no needs-fix/needs-rebase). Waiting on the lane.
 - 2026-10-26T04:08:24Z AK-9 #5040 merged to dev (0ce906f7). AK-z not done: Photo leg and AK-11 wait on AK-8 (SC-15/16). Check-in: dev-red #5321 still open; our 7 open PRs clean (no needs-fix/needs-rebase).
+- 2026-10-26T04:27:32Z Check-in: dev-red #5321 still open (latest run red on linux, range to d0859e01, not ours); 7 open PRs clean, no needs-fix/needs-rebase.
