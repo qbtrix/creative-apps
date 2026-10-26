@@ -214,3 +214,4 @@ utc	stage	event	ref	note
 2026-10-26T15:21Z	check	#5363 still open and clean; dev-red #5321 open (macOS), lane holds code batches; slice branches waiting
 2026-10-26T15:43Z	check	#5363 still open and clean; dev-red #5321 open (macOS), lane holds code batches; slice branches waiting
 2026-10-26T16:10Z	check	#5363 still open and clean, held by dev-red #5321 (macOS) ~4h; posted status to supervisor on #3468; slice branches waiting
+2026-10-26T16:32Z	check	#5363 still open (clean, p0); dev-red #5321 (macos) open; no supervisor reply; slice branches wait
