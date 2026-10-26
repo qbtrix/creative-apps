@@ -4,7 +4,7 @@ Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
 Run: act-1a178432d03-7n20 (relaunched 2026-10-26T12:41Z; before it act-1a175ee12a5-4niu, relaunched 2026-10-26T02:05Z; before it act-1a16fe1fa9f-sqqi, relaunched 2026-10-24T21:39Z after act-1a16c619006-nour hit the 16-hour limit; before it act-1a1695ebf10-z0v8; earlier act-1a160bffba1-bvv3) · Session: claude/feature-lead-export-pack-rpvio0 · Started: 2026-10-21T02:26Z
 Stage: 3 build (FV-z and fix round 1 held by dev-red #5321)
 Base: 721168a (origin/dev)
-Next: #4854 (FV-z, 98239ba3) and #5025 (fix round 1, 921d412b) are ready (marker on head, no blocking label) but no batch forms while dev-red #5321 (now macOS, run 40357785665, range main..527676af; neither PR in it) is open. Once both merge and a green flare-scoped or full run contains them: Belt-Slice-Done FV-z and Mac-Finish-Wanted FV-z on #3481, then the FJ-X1 critic panel and Belt-Contact-Sheet.
+Next: #4854 (FV-z, 98239ba3) and #5025 (fix round 1, 921d412b) are ready (marker on head, no blocking label) but no batch forms while dev-red #5321 (now macOS, run 40366795361, range main..df48c0ba; neither PR in it) is open. Once both merge and a green flare-scoped or full run contains them: Belt-Slice-Done FV-z and Mac-Finish-Wanted FV-z on #3481, then the FJ-X1 critic panel and Belt-Contact-Sheet.
 
 Loop: v3 (the packet has a `## Slices` table).
 
