@@ -47,3 +47,4 @@ Next: FC-2 part 2: stub the catalog methods and FilterBar/collection APIs, and a
 - 2026-10-26T03:30:20Z Blocked on lane: dev-red #5321 (macos) is open, so no code batch forms. Bisect/triage name #5112 (reverted in #5349) and #5044, not ours. All 8 run PRs (#5040 #5088 #5089 #5091 #5231 #5244 #5263 #5266) are gated, fast-lane, no needs-fix/needs-rebase. Waiting; will not fix dev-red in our PRs.
 - 2026-10-26T03:48:06Z Heartbeat: dev-red #5321 still open; dev unmoved; our 8 PRs clean (no needs-fix/needs-rebase). Waiting on the lane.
 - 2026-10-26T04:08:24Z Check-in: dev-red #5321 still open; our 7 open PRs clean (no needs-fix/needs-rebase).
+- 2026-10-26T04:27:32Z Check-in: dev-red #5321 still open (latest run red on linux, range to d0859e01, not ours); 7 open PRs clean, no needs-fix/needs-rebase.
