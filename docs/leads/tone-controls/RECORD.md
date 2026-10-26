@@ -2,9 +2,9 @@
 
 Issue: #3476 · Packet: docs/blueprints/suiteui/features/tone-controls.md
 Run: act-1a175ea55b7-729d (line lead, line:suiteui; relaunch 2026-10-26) · earlier: act-1a1702c569a-0puo · Session: claude/suiteui-feature-lead-run-azjeoo · Started: 2026-10-24T23:00Z (earlier: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui) · Started: 2026-10-23T14:52Z (earlier runs act-1a16469734c-d0s8, act-1a15821c836-93pf))
-Stage: 3: TC-z #5239 open; finding #5324 fixed in #5375
+Stage: waves built; waiting on lane
 Base: origin/dev 8eff8ab85
-Next: Lane lands #5239 and #5375; then Belt-Slice-Done TC-z and the contact sheet.
+Next: post Belt-Slice-Done as PRs merge
 
 
 ## Run act-1a175ea55b7-729d decisions
@@ -13,6 +13,7 @@ Next: Lane lands #5239 and #5375; then Belt-Slice-Done TC-z and the contact shee
 - Stacked PRs whose parent squash-merged carry the parent's commits (size FAIL, dirty): merge origin/dev into each branch, gate, move Head.
 - TC-u #5006 merged 13:51Z (e8a888296); scoped suiteui run 40247461868 at 30096d710 green and contains it.
 - 2026-10-26T03:07:58Z: #5324 (Sharpen offscreen on the 768-pt runner): the gallery page's rows scroll and the journey reveals each row (#5375).
+- 2026-10-26T03:30:04Z heartbeat: #5239 (TC-z) and #5375 open and clean; waiting on lane
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

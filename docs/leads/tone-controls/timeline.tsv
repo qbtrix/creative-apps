@@ -198,3 +198,4 @@ utc	stage	event	ref	note
 2026-10-25T13:49:56Z	check	heartbeat	15 PRs open+clean, dev bbaedba6, no dev-red, no findings on our features
 2026-10-26T01:58:55Z	relaunch	-	run act-1a175ea55b7-729d: lead branch rebuilt on main d3323f6a7; TC-u merged-done in 40247461868
 2026-10-26T03:07:58Z	heartbeat	#5375 opened for finding #5324; #5239 clean on dev d0859e017
+2026-10-26T03:30:04Z	heartbeat	#5239 (TC-z) and #5375 open and clean; waiting on lane
