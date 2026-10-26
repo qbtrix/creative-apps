@@ -2,9 +2,9 @@
 
 Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-imaging.md
 Run: act-1a175ea55b7-729d (line lead, line:suiteui; relaunch 2026-10-26) · earlier: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
-Stage: 3 wave 9: stale chains restacked, waiting on the lane
+Stage: waves built; waiting on lane
 Base: origin/dev 8eff8ab85
-Next: #5295 → #5297 → #5299 and #5154 → #5163 → #5178 are on dev d0859e017 with Heads moved. IM-13 (Package.swift, supervisor) once #5163 merges; IM-14 after.
+Next: post Belt-Slice-Done as PRs merge
 
 
 ## Run act-1a175ea55b7-729d decisions
@@ -13,6 +13,7 @@ Next: #5295 → #5297 → #5299 and #5154 → #5163 → #5178 are on dev d0859e0
 - Stacked PRs whose parent squash-merged carry the parent's commits (size FAIL, dirty): merge origin/dev into each branch, gate, move Head.
 - #5148 (f4463d48c), #5151 (5eb2fa737), #5153 (f7c2ab5bb) merged; IM-photo still needs IM-8d (#5295, #5297), IM-library IM-11 (#5154, #5163, #5178).
 - 2026-10-26T03:07:58Z: masked-layer cpu op (#5216) merged into IM-8d; liveStack treats any masked layer as unsupported on IM-8d-photo; IM-11a/b take dev (LG-6 decodes ahead kept on the GPU loupe render).
+- 2026-10-26T03:30:04Z heartbeat: #5295 #5297 #5299 #5154 #5163 #5178 open and clean; IM-13 after #5163
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

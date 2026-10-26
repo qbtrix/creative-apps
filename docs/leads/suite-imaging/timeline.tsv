@@ -145,3 +145,4 @@ utc	stage	event	ref	note
 2026-10-25T17:49Z	heartbeat	no merges of ours; dev e821acd0d; dev-red #5321 open, not ours; main d3323f6a7; 0 findings
 2026-10-26T01:58:55Z	relaunch	run act-1a175ea55b7-729d: lead branch rebuilt on main d3323f6a7; #5148 #5151 #5153 merged
 2026-10-26T03:07:58Z	heartbeat	restacked 6 PRs on dev d0859e017; gates pass; 0 open findings for suite-imaging
+2026-10-26T03:30:04Z	heartbeat	#5295 #5297 #5299 #5154 #5163 #5178 open and clean; IM-13 after #5163
