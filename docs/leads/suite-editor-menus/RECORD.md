@@ -202,3 +202,7 @@ No change: #4988, #5164, #4999 and #5364 are open and clean, with no fix labels.
 ## 2026-10-26T05:42:51Z poll
 
 lane/batch-20261026052705 (tip #5239) holds none of #4988, #5164, #5364, #4999, #5000. All five unchanged: open, clean, no needs-fix or needs-rebase. They wait for the next batch.
+
+## 2026-10-26T06:04:46Z poll
+
+Batch 20261026052705 landed (dev at c480d84). #4988, #5164, #5364, #4999 and #5000 are still open, with no needs-fix or needs-rebase, and no footer in a body. They wait for the next batch.
