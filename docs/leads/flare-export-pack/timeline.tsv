@@ -1,3 +1,5 @@
 utc	stage	event	ref	note
 2026-10-26T12:57Z	FV-z	stage-start	#4854	run act-1a178432d03-7n20 resumes FV-z on the existing PRs
 2026-10-26T12:57Z	FV-z	fix	#4854	step 4 on fakes, GIF hover shot (#5019)
+2026-10-26T13:03Z	FV-z	push	#4854	98239ba3 gate PASS
+2026-10-26T13:03Z	FV-z	heartbeat	#5321	held by dev-red
