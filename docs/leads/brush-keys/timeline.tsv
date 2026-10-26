@@ -168,3 +168,4 @@ utc	stage	event	ref	note
 2026-10-25T13:30:12Z	3	poll	-	13:30Z poll: #4939 (BK-u) still queued; #4965/#4961/#4982 wait on it for restack; dev bbaedba66 green
 2026-10-25T13:47:03Z	3	poll	-	13:46Z poll: no merges; lane batch-20261025132815 Linux check running; dev bbaedba66 green; SC-f not on dev
 2026-10-26T02:20:02Z	3	resume	-	resume act-1a175f403b9-j4z9: lead branch rebuilt on main d3323f6a; dev-red #5321 holds code batches; no open findings; BK-u #4939 clean in lane
+2026-10-26T02:43:01Z	3	poll	-	02:44Z poll: no merges of ours; dev-red #5321 open; no findings
