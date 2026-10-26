@@ -201,3 +201,4 @@ Next: Lane: #4871 TS-a and #5047 TS-7 in the lane. After #4871 merges, merge dev
 - 2026-10-26T11:46:53Z (act-1a1774f754d-5cse): 11:48Z poll: unchanged; four dev-based PRs eligible and queued, dev c6700dba. 0 findings.
 - 2026-10-26T12:07:11Z (act-1a1774f754d-5cse): 12:08Z poll: unchanged (2nd identical); lane runs active, dev c6700dba since 11:16; our four eligible PRs queued. 0 findings.
 - 2026-10-26T12:28:04Z (act-1a1774f754d-5cse): 12:30Z poll: dev moved to 746be6b1 (#5775, 12:13Z), so not a third identical poll; lane batching one PR at a time, 124 ready. #4958 #5047 #5226 #5772 clean, queued. 0 findings.
+- 2026-10-26T12:58:28Z (act-1a1774f754d-5cse): 12:58Z poll: dev moved to 57dd31ff (#5146, 12:52Z); lane ~1 PR per 40 min. #4958 #5047 #5226 #5772 clean, still queued. 0 findings.
