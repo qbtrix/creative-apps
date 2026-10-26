@@ -141,3 +141,4 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-26T13:29Z: heartbeat: Packet-Review 2 waves fixed with cross-feature waits, full gate running; codec PRs unchanged; dev 01600e46; dev-red #5321 open; findings 0
 - 2026-10-26T13:41Z: PR #5798 opened (Packet-Review 2 amendments 1-8 plus cross-feature waits), head 4e73d49d, full scripts/ci PASS; fast-lane, beta
 - 2026-10-26T13:41Z: heartbeat: #5798 open; codec PRs unchanged; dev 01600e46; dev-red #5321 open; findings 0
+- 2026-10-26T14:03Z: heartbeat: #5798 and codec PRs open, lane sweep 40335838403 running; dev 01600e46; dev-red #5321 open; findings 0
