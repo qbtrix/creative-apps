@@ -77,3 +77,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-26T15:50:31Z poll 15:55: dev-red #5321 open; no green ci.yml since 68be32fc6 (scoped photo 40350541067 red, full 40342241864 red); our PRs still open
 - 2026-10-26T16:14:59Z poll 16:15: dev-red #5321 open (macos); Linux check 40350547209 green on 310d7d14a, no new suiteui/full green; our PRs open, no needs-fix
 - 2026-10-26T16:36:52Z poll 16:36: dev-red #5321 still labelled; none of our PRs merged, no needs-fix
+- 2026-10-26T16:58:54Z poll 16:58: dev-red #5321 open; none of our PRs merged, no needs-fix
