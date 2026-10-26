@@ -9,3 +9,4 @@ utc	stage	event	ref	note
 2026-10-17T06:33Z	3	pr-opened	-	FC-2 part 1 (state, UserCollection, refreshShown), head in PR body
 2026-10-26T03:04:31Z	OC-photo-m	needs-rebase-merge	#5244 af77ecb8
 2026-10-26T03:13:58Z	OC-photo-m	head-moved	#5244 af77ecb8 / #5263 9b2bdefc
+2026-10-26T03:30:20Z	all	blocked-dev-red	#5321
