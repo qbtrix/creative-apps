@@ -126,3 +126,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 2026-10-26T15:19:59Z: 15:20: Belt nudge: record now also at docs/leads/suite-cli-bundle/ on the mirror. #4999 ready (Fast-Check+Head match 941da487, local-ci/prescreen success), queued behind p0; #5793/#5794 parked no-fast-lane; #5000 waits
 - 2026-10-26T15:37:49Z: 15:37 heartbeat: #4999 still queued (fast-lane, clean, prescreen green) behind p0 PRs; #5793/#5794 parked no-fast-lane, clean; #5000 awaiting docs-only rework after #4999.
 - 2026-10-26T15:58:57Z: 15:58 heartbeat: #4999 still queued (fast-lane, clean) behind p0 PRs; #5793/#5794 parked no-fast-lane, clean; #5000 awaits docs-only rework after #4999.
+- 2026-10-26T16:21:40Z: 16:21 heartbeat: #4999 still queued (fast-lane, clean) behind p0 PRs; #5793/#5794 parked no-fast-lane, clean; #5000 awaits docs-only rework after #4999.
