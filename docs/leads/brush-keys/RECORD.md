@@ -87,3 +87,4 @@ Next: wait for the lane to merge BK-u #4939; then merge dev into #4965, #4961, #
 - 2026-10-26T21:15Z (act-1a177ff0916-4jm7): poll: dev 3ebc8d43; dev unchanged; #4939 and #5799 await the lane
 - 2026-10-26T21:32Z (act-1a177ff0916-4jm7): poll: dev 3ebc8d43; dev unchanged; #4939 clean in the lane, #5799 waits; #4965 still needs-split until #4939 lands
 - 2026-10-26T21:35Z (act-1a177ff0916-4jm7): poll: dev 3ebc8d43; dev unchanged; removed attribution footers from #4961 and #4982; #4939 waits in the lane
+- 2026-10-26T21:50Z (act-1a177ff0916-4jm7): poll: dev c4cf4a75; no brush-keys merges; #4939 still in the lane; #4965, #4961, #4982 wait on it
