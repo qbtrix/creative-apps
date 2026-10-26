@@ -299,3 +299,4 @@ time	kind	note
 2026-10-26T20:48Z	wait	heartbeat	#5321	20:48 poll: #4916/#5002 queued in lane backlog
 2026-10-26T21:02Z	wait	heartbeat	#5321	21:02 poll: #4916/#5002 queued in lane backlog
 2026-10-26T21:17Z	wait	heartbeat	#5321	21:17 poll: #4916/#5002 still queued in lane backlog
+2026-10-26T21:31Z	wait	heartbeat	#5321	21:31 poll: lane held by dev-red #5818; slice PRs queued
