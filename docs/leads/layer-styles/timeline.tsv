@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-26T11:17:12Z	3	check	PY-a	re-read: #5174 idle since 2026-10-25T04:44Z after failing the macOS gate (LayerStyleGalleryTests/aSwitchThatCantActYetSaysWhy, SuiteUI line); #5176 #5371 open; no supervisor reply; dev-red #5321 open
 2026-10-26T11:44:02Z	3	check	PY-a	re-read: #5174 (cb6c0a2f) #5176 #5371 heads unchanged, open; no supervisor reply; dev-red #5321 open
 2026-10-26T12:11:00Z	3	check	PY-a	re-read: #5174 #5176 #5371 heads unchanged, open; no supervisor reply; dev-red #5321 open
+2026-10-26T12:37:56Z	3	check	PY-a	re-read: #5174 #5176 #5371 heads unchanged, open; no supervisor reply; dev-red #5321 open
