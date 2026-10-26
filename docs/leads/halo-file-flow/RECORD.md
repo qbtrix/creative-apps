@@ -31,12 +31,24 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-26 Packet-Review 2 (6d5f8b92, #3474 comment 6407188805), rule 24:
+  1. Host stays HaloDocumentHost: already so in HF-m's code; packet lines 8 and 54 fixed in HF-z (#5092).
+  2. Retire Halo's file.open-recent spec, add the four ids: already done in HF-m (#4894: filter in specs, halo.txt). Packet HF-3 row says so.
+  3. PNG off the canvas hands off to Photo: HF-m's tests already expect that; packet fixed. Deleting the unused `imageRefusal` goes to one fix PR after HF-4 lands, because pushing the queued #4894 would drop its prescreen.
+  4. Canvas places images through PH-3: packet and journey step 3 fixed. The step asserts only that no window opens; the PNG drop mark claim was dropped. The S20 comments and the mutation label get fixed in the same follow-up fix PR.
+  5. .flare hands off to Flare: HF-z had already changed step 4. Rule 20 and accept line now say FH-1.
+  6. .suiteEditor, and HF-2 landed: packet fixed.
+  7. Dropped .halo opens in this window (host sends .openRecent): taken as written. The journey step 2 now expects the same window count, steps 3 and 4 too. No openWindow task.
+  8. HaloRecentFile stays for takeOldRecents: packet line 3 fixed (code already keeps it).
+  9. Import in the window via takeOldRecents: HF-4 (#4936) already does it; packet pseudocode and HF-4 row fixed.
+  10. HaloFiles' own recent list: no menu reads it after HF-4, but it isn't removed yet. Removal (pending open into file.opening, plus HaloProject, availability and recovery) goes in the same follow-up fix PR after HF-4 lands.
 - Record lives on lead/halo-file-flow at docs/leads/halo-file-flow/: lead/file-flow already belongs to the suite file-flow lead (#3480). Other Halo leads use the same lead/halo-<feature> naming.
 - HF-a rebuilt on dev rather than on the placed-images stack: SF-a, HT-a and HS-a are on dev, and HF-a needs none of PH-u's code. The old branch (a5ba7569, no PR) was replaced by force-with-lease.
 - HF-a carries HF-5's snapshots (halo-open-recent, halo-drop-mark) so the menu and drop are seen in the slice that adds them; HF-u adds the budget test and journey.
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 2026-10-26T04:01Z check: Packet-Review 2 answered under Decisions; HF-z journey + packet amendments committed, scripts/ci --changed running; #4894 #4936 #5092 still queued
 - 03:27Z check: #4894 (HF-m), #4936 (HF-4, base the HF-m branch) and #5092 (HF-z) are unchanged and still queued (beta, clean, markers on their heads). All three merge cleanly with dev d0859e01. No needs-fix, needs-rebase or findings. Next check about 03:45Z.
 - 02:46Z check: #4894 (HF-m), #4936 (HF-4) and #5092 (HF-z) are still open and queued in the lane (beta, one at a time). Each has its marker; #4894 has its prescreen. All three still merge cleanly with dev 6d5f8b92 (#5309 halo text adapter landed 02:44Z). No needs-fix, needs-rebase or findings. Next check about 03:05Z.
 - 2026-10-24T21:20Z: run act-1a16fbc5164-vi4c. HF-m #4894 (Linux 40035628317 green, 236 lines / 15 files) and HF-z #5092 (Fast-Check marker) are lane-eligible and wait for a batch; #4936 waits on its base, the HF-m branch. No needs-fix, no file-flow findings. The record stays on lead/halo-file-flow: lead/file-flow belongs to the suite lead (#3480).
