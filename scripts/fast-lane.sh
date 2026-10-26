@@ -1447,7 +1447,8 @@ red_sweep() {
   run=$(grep -oE '^- Run: [^ ]+' <<<"$body" | head -1 | cut -c8- || true)
   flake_check "$issue" "$run" "$bad" "${jobs#*: }" || return 0
   BASE_RED="$issue"; BASE_RED_SHA="$bad"; BASE_RED_JOBS="$jobs"; BASE_RED_RUN="$run"
-  BASE_RED_SCOPE=""; [[ -z "$bad" ]] || BASE_RED_SCOPE=$(red_scope "$bad")
+  # scratch runs here, in the sweep's shell: red_scope runs in a subshell, which must not be the one that creates SCRATCH.
+  BASE_RED_SCOPE=""; [[ -z "$bad" ]] || ! scratch "$BASE_BRANCH" || BASE_RED_SCOPE=$(red_scope "$bad")
   [[ -z "$BASE_RED_SCOPE" ]] || log "dev-red #$issue: red in $BASE_RED_SCOPE; only ready PRs touching it wait"
   grep -qiE '^- Failing jobs:.*linux' <<<"$body" || { log "dev-red #$issue: not a Linux red; nothing to bisect"; return 0; }
   pin=$(git ls-remote --heads "$REMOTE" "refs/heads/${BISECT_PREFIX}*" 2>/dev/null | sed -E 's:.*refs/heads/'"$BISECT_PREFIX"'([0-9a-f]+)-[0-9]+$:\1:' | sort -u | head -1 || true)
@@ -1539,6 +1540,7 @@ flake_finding() {
   else
     title="Flaky ${jobs:-CI} job on $BASE_BRANCH, no test named"
   fi
+  scratch "$BASE_BRANCH" || true  # here, not in test_paths' subshell, so SCRATCH outlives it
   paths=$(test_paths "$tests"); app=suite
   if [[ -n "$paths" ]]; then app=$(build_apps <(printf '%s\n' "$paths")); [[ "$app" =~ ^[a-z]+$ && "$app" != all ]] || app=suite; fi
   body="The ${jobs:-CI} job on $BASE_BRANCH failed in $url at $sha7${tests:+, failing $tests}, and passed when the fast lane reran the failed jobs once at the same sha, so the test is flaky. The lane held nothing on it. Make the assertion runner-speed proof (a wall-clock ratio needs 10x of slack, see Tests/perf-suites.txt), or ask the supervisor to move the test to Tests/perf-suites.txt so it runs nightly instead of in the gate."
@@ -1567,7 +1569,8 @@ test_files() {
 
 # test_paths <tests>: the Tests/ paths of the files red_tests named, from the
 # tree of origin/BASE_BRANCH in the scratch clone (trees only, so blob:none is
-# enough), one per line; a file not in the tree prints nothing.
+# enough), one per line; a file not in the tree prints nothing. Callers run it
+# in a subshell, so they call scratch first: a SCRATCH made here would die with it.
 test_paths() {
   local f tree
   [[ -n "$1" ]] && scratch "$BASE_BRANCH" || return 0
