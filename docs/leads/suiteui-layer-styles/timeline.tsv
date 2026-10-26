@@ -150,3 +150,4 @@ utc	stage	event	ref	note
 2026-10-26T03:40Z	3	pr	LS-u	LS-3b opened as #5377: gate pass, Mutate 5/5, head 0406716c
 2026-10-26T03:23Z	3	stage	LS-u	LS-4 drafted (snapshots, Distance budget, journey on, page applies intents); waits on LS-3 and #5176
 2026-10-26T03:50Z	3	wait	all	heartbeat: dev-red #5321 open; #4903 #5174 #5176 #5357 #5362 #5377 unmerged; LS-8 core-bump question unanswered
+2026-10-26T04:20Z	3	wait	all	heartbeat: still blocked (dev-red #5321; parents unmerged; LS-8 core bump unanswered)
