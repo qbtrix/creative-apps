@@ -48,4 +48,5 @@ Next: wait for the lane to land #4924 (LC-u) and #4937 (LC-5); then merge origin
 - 2026-10-26T02:46:59Z: heartbeat: #4924,#4937 open, clean, queued in the lane (last merges #5177 02:03Z, #5309 02:44Z); #4938,#4949 stay stacked. Record mirrored to lead/library-catalog-files (the branch Belt watches). Findings 0.
 - 2026-10-26T03:03:12Z: heartbeat: #4924,#4937 still queued (lane landing 1 PR per batch; last #5269 02:56Z, #5368); #4938,#4949 stacked. Findings 0.
 - 2026-10-26T03:24:54Z: heartbeat: lane run 40259104647 lists #4924 and #4937 eligible (marker + prescreen, CLEAN) among 104 ready; one batch at a time. #4938,#4949 skipped as stacked. Findings 0.
+- 2026-10-26T03:46:31Z: heartbeat: no change; #4924,#4937 eligible in lane queue; dev at d0859e01. Findings 0.
 - Candidate gaps after LC-z: relinked id keeps the old path; re-importing a folder with copy makes new copies.
