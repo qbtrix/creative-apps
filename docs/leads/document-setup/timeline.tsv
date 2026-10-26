@@ -205,3 +205,4 @@ utc	stage	event	ref	note
 2026-10-26T02:43:05Z	3	poll	-	02:44Z poll: no merges of ours; dev-red #5321 open; no findings
 2026-10-26T03:08:06Z	3	poll	-	03:08Z poll: none of ours landed; queued behind batch (107 ready); dev-red #5321 open; no findings
 2026-10-26T03:30:03Z	3	poll	-	03:30Z poll: none of ours landed; dev d0859e01 unchanged; #4901 prescreen green on 38abf707; dev-red #5321 open; no findings
+2026-10-26T03:52:11Z	3	poll	-	03:52Z poll: none of ours landed; dev d0859e01 unchanged; lane batch of 1 in flight, 108 ready wait (ours eligible); dev-red #5321 open; no findings
