@@ -289,7 +289,11 @@ jobs:
   # The macOS gate's test half, on the compile job's build. A full run: N
   # shards (the matrix below is N), each its own runner and `swift test`
   # process (scripts/ci --shard K/N: the K-th of the sorted suites, run as a
-  # --changed scope is). Separate processes, so a MainActor hog in one shard
+  # --changed scope is). Three, not more: the hosted macOS pool is 5 slots
+  # shared with the lane's gates and the journeys, so with the compile and
+  # bundles jobs a run peaks at 3 of them, and the long pole is the shard
+  # holding the serialized BodyCountSuites (16 min) at any N.
+  # Separate processes, so a MainActor hog in one shard
   # can't time out the suites in another (run 40266495039: every
   # HomeModelTests test hit its 60 s limit inside the one 8,500-test
   # process). fail-fast off: a red shard never cancels the others, so one run
@@ -309,7 +313,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: ${{ fromJSON(inputs.app && '[1]' || '[1, 2, 3, 4]') }}
+        shard: ${{ fromJSON(inputs.app && '[1]' || '[1, 2, 3]') }}
     env:
       APP: ${{ inputs.app }}
       JOURNEYS_NOTE: ${{ inputs.mac_only && 'none (a lane batch gate runs no journeys)' || format('the `macOS journeys ({0})` job of the journeys.yml run this run starts on dev', inputs.app) }}
