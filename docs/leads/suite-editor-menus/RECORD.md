@@ -242,3 +242,7 @@ The PRs are unchanged and there is no supervisor answer yet. Dev shows the cause
 ## 2026-10-26T09:35:16Z poll
 
 The PRs are unchanged: no batch, no new check on #4988. The only dev commit is c176d2c (Photo, 09:34). There is no supervisor answer yet. Next poll in 20 min.
+
+## 2026-10-26T09:58:30Z poll
+
+Still unbatched: #4988 (e986396), #5364 (4073e00) and #4999 (941da48). All three are open and clean, with fast-lane and beta and no needs-fix or needs-rebase. Since the last poll, dev has landed #5065 (2ed77a2). lane/batch-20261026091205 (611f8c7) held only #5065, and lane/batch-20261026095316 (2042459) holds only #5163; neither has our heads. The supervisor question on #3774 (issuecomment-6411516660) is still unanswered. #5164 still waits on #4988, and #5000 waits on #4999. Next: poll in 20 minutes.
