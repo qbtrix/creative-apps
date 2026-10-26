@@ -273,3 +273,8 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 
 - dev unchanged at 310d7d14; lane batch 20261026154903 runs #5106 alone. Wave 2, #5790 and #5800 stay clean, eligible and queued, with no needs-* label.
 - 1 open finding (#5789, fixed by #5236). Stage: 3 wave 3, waiting for wave 2 to land.
+
+### 2026-10-26T16:16Z check-in
+
+- The lane landed #5106 (dev e14f65fa); no batch in flight right now. Wave 2, #5790 and #5800 stay clean, eligible and queued, with no needs-* label.
+- 1 open finding (#5789, fixed by #5236). Stage: 3 wave 3, waiting for wave 2 to land.
