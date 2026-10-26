@@ -62,6 +62,13 @@ private func layer(_ id: String, clipped: Bool = false, children: [LayerNode<Cli
         #expect(Self.base("C", tree.roots) == "G")
     }
 
+    @Test func aClippedLayerAboveAGroupHasThatGroupAsItsBase() {
+        let group = layer("G", children: [layer("X")])
+        #expect(Self.base("C", [layer("A"), group, layer("C", clipped: true)]) == "G")
+        #expect(Self.clipped("G", [layer("A"), group, layer("C", clipped: true)]) == ["C"])
+        #expect(ClipRules.notClippedHelp == "This layer isn't clipped.")
+    }
+
     @Test func anUnknownIdHasNoBase() {
         #expect(Self.base("Z", Self.stack) == nil)
         #expect(Self.clipped("Z", Self.stack).isEmpty)
