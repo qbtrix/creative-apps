@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/ci [--changed [BASE]]: the one gate. Runs the no-crash lint, the isa-swizzle lint, the
 # app-state rule, the design lint, the C4 ownership and descriptions checks, the duplicate-code
-# check, the canonical-first check, the SuiteUI-first view check, the render contract, the app-marks check, the CI scripts' fixture tests, the journey quarantine check, the
+# check, the canonical-first check, the SuiteUI-first view check, the render contract, the app-marks check, the CI scripts' fixture tests, the test quarantine check, the
 # real-jobs check, the mutation anchors, swift build of every target with its tests, and swift
 # test, then prints PASS or FAIL and exits with the real status. swift build takes its dependencies only
 # from the committed Package.resolved (--force-resolved-versions): a
@@ -78,12 +78,15 @@
 # The fixture tests: Tests/contact_sheet, audit_lower, test_died, ci_findings, jetsam, roadmap_numbers,
 # sample_surfaces, test_scope and bump_core test the scripts of the same names (some need jq).
 #
-# The journey quarantine check runs Tests/quarantine, then scripts/quarantine
-# check on UITests/quarantine.json: every entry names a journey that exists in
-# UITests/, an owner issue (#<number>, open when gh can tell), a reason, and
-# an expiry no more than 7 days out that hasn't passed. scripts/ui-test skips
-# the live entries, and Tests/ui_test checks it skips the local-key journeys
-# on hosted runners only. Needs jq.
+# The test quarantine check runs Tests/quarantine, then scripts/quarantine
+# check on UITests/quarantine.json: every entry names a journey in UITests/ or
+# a swift test in Tests/, an owner issue (#<number>, open when gh can tell), a
+# reason, and an expiry no more than 7 days out that hasn't passed (a fast-lane
+# entry, with a `lane` block, may be past it: the lane labels its owner a
+# blocker and removes it). scripts/ui-test skips the live journeys, the test
+# passes below skip the live swift tests (`scripts/quarantine skip`), and
+# Tests/ui_test checks the local-key journeys are skipped on hosted runners
+# only. Needs jq.
 #
 # The mutation anchors check runs Tests/mutate, then scripts/mutate --validate:
 # every `find` in Tests/mutations/*.json occurs exactly once in its file, so a
@@ -408,10 +411,10 @@ echo "== sample surfaces (Tests/sample_surfaces)"
 bash Tests/sample_surfaces/test_sample_surfaces.sh || fail "sample surfaces: scripts/sample-surfaces broke its fixture test"
 echo "== test scope (Tests/test_scope)"
 bash Tests/test_scope/test_test_scope.sh || fail "test scope: scripts/test-scope or Tests/perf-suites.txt broke its tests"
-echo "== journey quarantine (UITests/quarantine.json)"
-bash Tests/quarantine/test_quarantine.sh || fail "journey quarantine: scripts/quarantine broke its fixture test"
+echo "== test quarantine (UITests/quarantine.json)"
+bash Tests/quarantine/test_quarantine.sh || fail "test quarantine: scripts/quarantine broke its fixture test"
 bash Tests/ui_test/test_local_keys.sh || fail "local-key journeys: scripts/ui-test no longer skips them on hosted runners only"
-scripts/quarantine check || fail "journey quarantine: fix, renew or remove the entries above (the supervisor edits UITests/quarantine.json)"
+scripts/quarantine check || fail "quarantine: fix, renew or remove the entries above (the supervisor edits UITests/quarantine.json; the fast lane adds and removes its own entries)"
 echo "== bump core (Tests/bump_core)"
 bash Tests/bump_core/test_bump_core.sh || fail "bump core: scripts/bump-core broke its tests"
 echo "== merge drivers (Tests/merge_drivers)"
@@ -502,6 +505,13 @@ run_tests() {
 # The perf and timing tests run nightly (perf-nightly), never here. An empty
 # regex would skip every test, so the flag goes in only when there is one.
 perf=$(python3 scripts/test-scope perf) || fail "Tests/perf-suites.txt: fix the line above"
+# Quarantined swift tests (UITests/quarantine.json entries in the perf list's
+# form, the supervisor's or the fast lane's) ride the same --skip regex.
+quarantined=$(scripts/quarantine skip) || fail "UITests/quarantine.json: unreadable (scripts/quarantine check)"
+if [[ -n "$quarantined" ]]; then
+  echo "CI: skipping quarantined tests: $quarantined"
+  perf="$perf${perf:+|}$quarantined"
+fi
 # CI_LOCAL_SKIP: an opt-in swift-testing --skip regex for a local gate whose
 # toolchain differs from CI's. It rides with the perf regex into every pass.
 if [[ -n "${CI_LOCAL_SKIP:-}" ]]; then

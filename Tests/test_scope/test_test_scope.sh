@@ -182,6 +182,12 @@ check "timing passes a baselined test and names a baseline line that no longer t
   'PhotoModelTests.timedMedian;PhotoModelTests.helperP95;PhotoModelTests.framesDrawn;PhotoModelTests.gone' \
   "$(TESTS_DIR="$tmp/tree" PERF_SUITES="$tmp/listed.txt" TIMING_BASELINE="$tmp/baseline.txt" python3 "$ts" timing | cut -d' ' -f1 | paste -sd';' -)"
 
+# ids: each @Test of a file as a perf-list id (the fast lane's quarantine resolves a red test's file this way).
+printf '%s\n' 'import Testing' '@Suite struct OpenTests {' '    @Test func opens() {}' '    enum Nested {' '        @Test func inner() {}' '    }' '}' '@Test func freeOne() {}' >"$tmp/Ids.swift"
+check "ids prints Target.Suite/test, nested suites joined, and Target.freeTest" \
+  'PhotoModelTests.OpenTests/opens;PhotoModelTests.OpenTests/Nested/inner;PhotoModelTests.freeOne' \
+  "$(python3 "$ts" ids PhotoModelTests "$tmp/Ids.swift" | paste -sd';' -)"
+
 # The perf regex: exactly the listed tests, by suite, one test or free test.
 perf=$(python3 "$ts" perf)
 takes() { grep -qE "$perf" <<<"$1" && echo yes || echo no; }

@@ -11,6 +11,8 @@
 #   scripts/test-scope perf-report LOG     a perf run's swift test log as a markdown report
 #   scripts/test-scope heavy [FILTER]      the CPU-heavy correctness tests, all or those FILTER takes
 #   scripts/test-scope timing              the tests that assert a wall-clock bound and aren't in the perf list
+#   scripts/test-scope ids TARGET FILE     each @Test in FILE as a perf-list id, Target.Suite/test (nested suites
+#                                          joined by /) or Target.freeTest; the fast lane's quarantine reads these
 #
 # app and changed print two lines (app with a comma list: the union, as the
 # lane's batch macOS gate asks for): the regex for the tests outside
@@ -427,8 +429,11 @@ def main(argv):
     elif cmd == "timing" and not args:
         for test, where, bound in unlisted_timing():
             print(f"{test}  ({where}: {bound})")
+    elif cmd == "ids" and len(args) == 2:
+        for suites, name, _, _ in swift_tests(args[1]):
+            print("/".join([args[0] + "." + (suites[0] if suites else name)] + suites[1:] + ([name] if suites else [])))
     else:
-        sys.exit("usage: scripts/test-scope app APP[,APP...] | changed [--linux] | build-apps | scopes | perf [APP] | heavy [FILTER] | perf-report LOG | timing")
+        sys.exit("usage: scripts/test-scope app APP[,APP...] | changed [--linux] | build-apps | scopes | perf [APP] | heavy [FILTER] | perf-report LOG | timing | ids TARGET FILE")
 
 
 if __name__ == "__main__":
