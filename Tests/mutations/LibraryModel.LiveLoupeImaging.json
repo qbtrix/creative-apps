@@ -21,10 +21,31 @@
     "tests": "LibraryLoupeGPURouteTests"
   },
   {
-    "label": "whites and blacks become linear levels on the GPU route",
-    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
-    "find": "steps.append(.levels(inBlack: inBlack, inWhite: inWhite, gamma: 1, outBlack: outBlack, outWhite: outWhite, encoding: .sRGB))",
-    "replace": "steps.append(.levels(inBlack: inBlack, inWhite: inWhite, gamma: 1, outBlack: outBlack, outWhite: outWhite, encoding: .linear))",
-    "tests": "LibraryLoupeGPURouteTests"
+    "label": "whites and blacks become linear levels on both routes",
+    "file": "Sources/SuiteImaging/Tone/ToneRules.swift",
+    "find": "outWhite: Float(outWhite),\n                               encoding: .sRGB))",
+    "replace": "outWhite: Float(outWhite),\n                               encoding: .linear))",
+    "tests": "LibraryDevelopRenderTests"
+  },
+  {
+    "label": "a CPU render leaves the GPU frame's steps on the picture",
+    "file": "Sources/LibraryModel/LibraryLoupeImage.swift",
+    "find": "        loupeRender = render\n        loupeSteps = nil\n",
+    "replace": "        loupeRender = render\n",
+    "tests": "LibraryLoupeFrameTests"
+  },
+  {
+    "label": "a stale GPU frame lands over a newer picture",
+    "file": "Sources/LibraryModel/LibraryLoupeImage.swift",
+    "find": "        guard token >= loupeShownToken, token <= loupeRenderToken else { return }\n        loupeRender = RenderedPhoto(image: frame.base",
+    "replace": "        loupeRender = RenderedPhoto(image: frame.base",
+    "tests": "LibraryLoupeFrameTests"
+  },
+  {
+    "label": "a focus change keeps the last photo's steps",
+    "file": "Sources/LibraryModel/LibraryLoupeImage.swift",
+    "find": "        loupeSteps = nil\n        loupeShownToken = loupeRenderToken\n",
+    "replace": "        loupeShownToken = loupeRenderToken\n",
+    "tests": "LibraryLoupeFrameTests"
   }
 ]

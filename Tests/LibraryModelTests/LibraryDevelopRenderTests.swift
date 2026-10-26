@@ -7,10 +7,12 @@
 // packet's pass list (DV-6 pseudocode) written out here, levels before the
 // curve as SuiteImaging's shared list runs them (suite-imaging IM-10b), and
 // `LiveDevelop.passes(for:)` must name the same passes in the same order.
+// Whites and Blacks are two levels calls, ToneRules' rule (IM-13).
 // Runs on Linux and macOS.
 @testable import LibraryModel
 import CoreRaster
 import CoreRender
+import SuiteImaging
 import Testing
 
 /// A gradient in sRGB bytes: red across, green down, blue fixed at 128, opaque.
@@ -40,7 +42,7 @@ func everyControlButColor() -> DevelopSettings {
 
 /// The packet's pass list, in render order.
 enum HandPass: CaseIterable {
-    case whiteBalance, exposure, contrast, highlightsShadows, whitesBlacks, levels, curve
+    case whiteBalance, exposure, contrast, highlightsShadows, whites, blacks, levels, curve
 
     /// The passes `s` needs, in render order; empty when neutral.
     static func passes(for s: DevelopSettings) -> [HandPass] {
@@ -50,7 +52,8 @@ enum HandPass: CaseIterable {
             case .exposure: s.exposure != 0
             case .contrast: s.contrast != 0
             case .highlightsShadows: s.highlights != 0 || s.shadows != 0
-            case .whitesBlacks: s.whites != 0 || s.blacks != 0
+            case .whites: s.whites != 0
+            case .blacks: s.blacks != 0
             case .levels: s.levels != .neutral
             case .curve: !s.curve.isIdentity
             }
@@ -64,13 +67,14 @@ enum HandPass: CaseIterable {
         case .exposure: return try b.exposure(stops: Float(s.exposure))
         case .contrast: return try b.contrast(Float(s.contrast))
         case .highlightsShadows: return try b.highlightsShadows(highlights: Float(s.highlights), shadows: Float(s.shadows))
-        case .whitesBlacks:
+        case .whites:
             let inWhite = s.whites > 0 ? 1 - 0.25 * s.whites / 100 : 1
             let outWhite = s.whites < 0 ? 1 + 0.25 * s.whites / 100 : 1
+            return try b.levels(inBlack: 0, inWhite: Float(inWhite), gamma: 1, outBlack: 0, outWhite: Float(outWhite), encoding: .sRGB)
+        case .blacks:
             let inBlack = s.blacks < 0 ? 0.25 * -s.blacks / 100 : 0
             let outBlack = s.blacks > 0 ? 0.25 * s.blacks / 100 : 0
-            return try b.levels(inBlack: Float(inBlack), inWhite: Float(inWhite), gamma: 1,
-                                outBlack: Float(outBlack), outWhite: Float(outWhite), encoding: .sRGB)
+            return try b.levels(inBlack: Float(inBlack), inWhite: 1, gamma: 1, outBlack: Float(outBlack), outWhite: 1, encoding: .sRGB)
         case .curve:
             return try b.curves(points: s.curve.points.map { CurvePoint(x: Float($0.x), y: Float($0.y)) }, encoding: .sRGB)
         case .levels:
@@ -88,15 +92,16 @@ enum HandPass: CaseIterable {
 
 extension LiveDevelop.Pass {
     /// The hand list's name for this pass; nil for `.color` (DV-12) and the shared hue/saturation step.
+    /// A levels step with gamma 1 moving only the white or only the black point is Whites or Blacks.
     var hand: HandPass? {
         switch self {
-        case .whiteBalance: .whiteBalance
-        case .contrast: .contrast
-        case .highlightsShadows: .highlightsShadows
-        case .whitesBlacks: .whitesBlacks
+        case .shared(.whiteBalance): .whiteBalance
+        case .shared(.contrast): .contrast
+        case .shared(.highlightsShadows): .highlightsShadows
         case .color: nil
         case .shared(.exposure): .exposure
-        case .shared(.levels): .levels
+        case .shared(.levels(let inBlack, let inWhite, let gamma, let outBlack, let outWhite, _)):
+            gamma != 1 ? .levels : inBlack == 0 && outBlack == 0 ? .whites : inWhite == 1 && outWhite == 1 ? .blacks : .levels
         case .shared(.curves): .curve
         case .shared: nil
         }
@@ -136,8 +141,8 @@ func handHistogram(_ buffer: PixelBuffer) throws -> HistogramBins {
             (DevelopSettings.neutral.setting(.contrast, to: 30), .contrast),
             (DevelopSettings.neutral.setting(.highlights, to: -50), .highlightsShadows),
             (DevelopSettings.neutral.setting(.shadows, to: 50), .highlightsShadows),
-            (DevelopSettings.neutral.setting(.whites, to: 50), .whitesBlacks),
-            (DevelopSettings.neutral.setting(.blacks, to: -50), .whitesBlacks),
+            (DevelopSettings.neutral.setting(.whites, to: 50), .whites),
+            (DevelopSettings.neutral.setting(.blacks, to: -50), .blacks),
             (DevelopSettings.neutral.setting(curve: curve), .curve),
             (DevelopSettings.neutral.setting(levels: DevelopLevels.neutral.setting(.gamma, to: 1.5)), .levels),
         ]
@@ -154,14 +159,28 @@ func handHistogram(_ buffer: PixelBuffer) throws -> HistogramBins {
         let gradient = try developGradient()
         let settings = everyControlButColor()
         let order = HandPass.passes(for: settings)
-        #expect(order == [.whiteBalance, .exposure, .contrast, .highlightsShadows, .whitesBlacks, .levels, .curve])
+        #expect(order == [.whiteBalance, .exposure, .contrast, .highlightsShadows, .whites, .blacks, .levels, .curve])
         #expect(livePasses(settings) == order)
         let rendered = try live.render(gradient, settings: settings)
         #expect(rendered == (try HandPass.runByHand(gradient, settings, order: order)))
-        let swapped: [HandPass] = [.whiteBalance, .contrast, .exposure, .highlightsShadows, .whitesBlacks, .levels, .curve]
+        let swapped: [HandPass] = [.whiteBalance, .contrast, .exposure, .highlightsShadows, .whites, .blacks, .levels, .curve]
         #expect(rendered != (try HandPass.runByHand(gradient, settings, order: swapped)))
-        let curveFirst: [HandPass] = [.whiteBalance, .exposure, .contrast, .highlightsShadows, .whitesBlacks, .curve, .levels]
+        let curveFirst: [HandPass] = [.whiteBalance, .exposure, .contrast, .highlightsShadows, .whites, .blacks, .curve, .levels]
         #expect(rendered != (try HandPass.runByHand(gradient, settings, order: curveFirst)))
+    }
+
+    /// IM-13: the tone sliders are ToneRules' steps (whites and blacks its two
+    /// levels), then ImagingProgram's levels, curve and saturation; Library
+    /// writes none of its own.
+    @Test func theStepsAreSuiteImagingsTwoLists() throws {
+        let s = everyControlButColor().setting(.saturation, to: -20)
+        let tone = ToneRules.adjustments(s.tone.setting(.saturation, to: 0))
+        var adjust = s.adjustSettings
+        adjust.exposure = 0
+        let shared = ImagingProgram.adjustments(adjust, tone: tone)
+        #expect(LiveDevelop.steps(for: s) == shared)
+        #expect(tone.count == 6 && shared.count == 9)
+        #expect(LiveDevelop.passes(for: s) == shared.map(LiveDevelop.Pass.shared))
     }
 
     @Test func exposurePlusOneDoublesLinearGrey() throws {

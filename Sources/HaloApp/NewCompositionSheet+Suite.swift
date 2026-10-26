@@ -1,11 +1,11 @@
-// NewCompositionSheet.swift: the sheet New Composition opens: name, width,
+// NewCompositionSheet+Suite.swift: the sheet New Composition opens: name, width,
 // height, frame rate and duration in seconds, in a system Form. The sheet owns
 // only its draft (presentation state). The numeric fields bind through text
 // (HaloModel's CompositionDraft), so validation and Create always see the
 // latest keystroke, not the value from the last Return or focus change.
 // CompositionSettings says what is valid and why not, and Create stays
 // disabled until it is. Each problem shows right under the field it's about
-// (CompositionDraft.problems(for:)), in stateError with the error circle.
+// (CompositionDraft.problems(for:)), as error InspectorNotes.
 // Width and Height end in "px", their unit, inset beside the field. Create,
 // `composition.new`'s spec on the window's state (command-state CS-8), hands the settings to `onCreate`; the window turns them into a composition.
 // Each field is a form row of its own whose accessibility label is its column
@@ -13,6 +13,7 @@
 // LabeledContent wraps it, and every control has a
 // `halo.composition.sheet.*` identifier (#290). The rate is SuiteUI's
 // FrameRateMenu over the kernel's list (frame-rates FR-8), held beside the draft.
+// The frame and Cancel / Create are SuiteUI's SuiteSheet.
 import HaloModel
 import SuiteKernel
 import SuiteUI
@@ -38,8 +39,13 @@ struct NewCompositionSheet: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: SuiteSpacing.l) {
-            Text("New Composition").font(SuiteFont.title)
+        SuiteSheet(
+            "New Composition", cancelID: "halo.composition.sheet.cancel", onCancel: onCancel,
+            action: MenuCommand(HaloMenuState.spec("composition.new"), on: state, title: "Create") {
+                if draft.isValid { onCreate(draft.settings.withFrameRate(frameRate)) }
+            },
+            actionID: "halo.composition.sheet.create", reason: draft.isValid ? nil : createHelp
+        ) {
             Form {
                 // Each field is the form row itself, as before #1009: wrapping it
                 // in LabeledContent took "Width" off the field's own accessibility
@@ -69,22 +75,7 @@ struct NewCompositionSheet: View {
                 problems(for: .duration)
             }
             .formStyle(.columns)
-            HStack {
-                Spacer()
-                Button("Cancel", role: .cancel) { onCancel() }
-                    .keyboardShortcut(.cancelAction)
-                    .haloControl(id: "halo.composition.sheet.cancel", enabled: true, help: nil)
-                MenuCommand(HaloMenuState.spec("composition.new"), on: state, title: "Create") {
-                    if draft.isValid { onCreate(draft.settings.withFrameRate(frameRate)) }
-                }
-                    .keyboardShortcut(.defaultAction)
-                    .disabled(!draft.isValid)
-                    .help(createHelp)
-                    .haloControl(id: "halo.composition.sheet.create", enabled: draft.isValid, help: createHelp)
-            }
         }
-        .padding(SuiteSpacing.xl)
-        .frame(width: SuiteSize.contentMinimum.width)
     }
 
     /// The problems about `field`, one line each, or nothing while it's valid.
@@ -92,18 +83,11 @@ struct NewCompositionSheet: View {
         let lines = draft.problems(for: field)
         if !lines.isEmpty {
             VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
-                ForEach(lines, id: \.self) { problem in
-                    // An error, not a warning: stateError with the circle, like HaloRefusalCaption.
-                    Label(problem, systemImage: "exclamationmark.circle")
-                        .font(SuiteFont.caption)
-                        .foregroundStyle(SuiteColor.stateError)
-                }
+                ForEach(lines, id: \.self) { InspectorNote($0, kind: .error) }
             }
         }
     }
 
-    /// Create's tooltip: the first problem while the settings can't be used.
-    private var createHelp: String {
-        draft.isValid ? "Create the composition" : draft.problems.first ?? "Fix the settings above to create it."
-    }
+    /// Why Create is off: the first problem while the settings can't be used.
+    private var createHelp: String { draft.problems.first ?? "Fix the settings above to create it." }
 }

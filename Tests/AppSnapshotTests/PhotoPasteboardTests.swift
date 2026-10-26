@@ -1,6 +1,8 @@
 // PhotoPasteboardTests.swift: PhotoPasteboard round-trips 8-bit straight RGBA
 // through a pasteboard, reads an image offered only as TIFF, and finds nothing
-// on an empty pasteboard (photo-edit E-6). Each test uses its own private named
+// on an empty pasteboard (photo-edit E-6). PhotoCopySource gives Photo's own
+// copy its source rect back until another write moves the pasteboard on, so
+// an in-app paste lands in place (PJ-5). Each test uses its own private named
 // pasteboard, released after, so the general pasteboard is never touched.
 // macOS only.
 import AppKit
@@ -48,6 +50,26 @@ import Testing
                 #expect(PhotoPasteboard.read(from: tiffOnly)?.image == image)
             }
         }
+    }
+
+    @Test func photosOwnCopyPastesBackOnItsSourceUntilAnotherWrite() throws {
+        try withThrowingPasteboard { pasteboard in
+            let copy = ClipboardImage(image: image, source: PixelRect(x: 4, y: 5, width: 3, height: 2))
+            PhotoCopySource.write(copy, to: pasteboard)
+            let own = try #require(PhotoPasteboard.read(from: pasteboard))
+            #expect(PhotoCopySource.restored(own, from: pasteboard) == copy)
+
+            // Another app writes the same picture: it carries no place, so it pastes centered.
+            PhotoPasteboard.write(ClipboardImage(image: image, source: nil), to: pasteboard)
+            let other = try #require(PhotoPasteboard.read(from: pasteboard))
+            #expect(PhotoCopySource.restored(other, from: pasteboard).source == nil)
+        }
+    }
+
+    private func withThrowingPasteboard(_ body: (NSPasteboard) throws -> Void) throws {
+        let pasteboard = NSPasteboard(name: .init("photo-edit-test-\(UUID().uuidString)"))
+        defer { pasteboard.releaseGlobally() }
+        try body(pasteboard)
     }
 
     @Test func anEmptyPasteboardHasNoImage() {
