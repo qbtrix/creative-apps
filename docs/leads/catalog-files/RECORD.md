@@ -45,4 +45,5 @@ Next: wait for the lane to land #4924 (LC-u) and #4937 (LC-5); then merge origin
 - 2026-10-24T21:02:20Z: Belt-Slice-Done: LC-a on run 40129102226.
 - 2026-10-26T02:20Z: run act-1a175fe2de5-qdc7 resumed. Lane (LANE_VERIFY_AFTER=1) lists #4924 and #4937 eligible (Fast-Check marker + local-ci/prescreen green) among 107 eligible PRs; batches of one at a time. dev-red #5321 (macOS, not ours) open. Open findings for catalog-files: 0.
 - 2026-10-26T02:40Z: probe merge of origin/dev into feat/library-lc-m6 conflicts in LibraryCommandCatalog.swift, its test, library.txt and the list-commands golden: dev added image.* and crop.* (LibraryCropDocument.specs). Resolution when #4937 lands: keep both sides (catalogFileSpecs after LibraryCropDocument.specs order per dev, ids appended, golden regenerated sorted).
+- 2026-10-26T02:46:59Z: heartbeat: #4924,#4937 open, clean, queued in the lane (last merges #5177 02:03Z, #5309 02:44Z); #4938,#4949 stay stacked. Record mirrored to lead/library-catalog-files (the branch Belt watches). Findings 0.
 - Candidate gaps after LC-z: relinked id keeps the old path; re-importing a folder with copy makes new copies.
