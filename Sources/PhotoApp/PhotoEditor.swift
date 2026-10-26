@@ -6,8 +6,8 @@
 // (PhotoLayerList), the canvas with its rulers in EditorDetail with the
 // floating tool palette over its leading edge while an image is open (each
 // tool a PhotoPaletteTool carrying the workspace's `toolHelp`) and the status
-// line under it (PhotoStatusLine, with the save status `photo.bar.saved`
-// beside it), and PhotoPanel in the inspector. Values in, intents out: it
+// line under it (SuiteUI's ViewerStatusBar with the workspace's refusal, which
+// the window clears after 4 s, and the save status `photo.bar.saved` beside it), and PhotoPanel in the inspector. Values in, intents out: it
 // reads the workspace and sends every action to `perform`, so the same view
 // draws the live window and the snapshots. A control that can't act now is
 // disabled with a tooltip saying why, and a disabled tool's shortcut key does
@@ -24,6 +24,18 @@ import SuiteUI
 import SwiftUI
 
 struct PhotoEditor: View {
+    /// What the "Preview data" pill means, as its tooltip and accessibility hint.
+    static let previewHelp = "This window shows built-in sample data, not a file on disk."
+
+    /// "12 ms render", or with a backend "GPU (Metal) · 12 ms render" (the View > Rendering menu's titles).
+    nonisolated static func renderText(_ milliseconds: Double, backend: String?) -> String {
+        let time = "\(Int(milliseconds.rounded())) ms render"
+        guard let backend else { return time }
+        // CoreRenderMetal names its backend "Metal (<device>)"; anything else is the CPU.
+        let choice: RenderingChoice = backend.hasPrefix("Metal") ? .gpu : .cpu
+        return "\(RenderingMenuItem.title(choice)) · \(time)"
+    }
+
     let model: PhotoWorkspace
     var tiles: CanvasTiles?
     var renderMilliseconds: Double?
@@ -80,9 +92,20 @@ struct PhotoEditor: View {
                             saveStatus.editorState, title: saveStatus.title,
                             help: saveStatus.help(fileName: model.documentName), identifier: "photo.bar.saved")
                     }
-                    PhotoStatusLine(
-                        model: model, zoom: zoom, note: note, renderMilliseconds: renderMilliseconds,
-                        renderBackend: renderBackend)
+                    // The refusal, then zoom, image size, the note, the tool, the render
+                    // time and, on the fakes (`-PhotoFixture`), the "Preview data" pill.
+                    ViewerStatusBar(
+                        zoom: model.canvas == nil ? 0 : zoom, size: model.viewerSizeText,
+                        message: model.statusMessage.map { ($0, "photo.status.message") },
+                        preview: model.isPreviewData ? (Self.previewHelp, "photo.status.preview") : nil
+                    ) {
+                        if let note { Text(note) }
+                        if model.canvas != nil { Text(model.tool.title) }
+                        if let renderMilliseconds {
+                            Text(Self.renderText(renderMilliseconds, backend: renderBackend))
+                                .accessibilityIdentifier("photo.status.render")
+                        }
+                    }
                 }
                 .background(SuiteColor.panel)
             }

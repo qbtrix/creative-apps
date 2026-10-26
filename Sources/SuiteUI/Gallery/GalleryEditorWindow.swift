@@ -78,7 +78,9 @@ private struct GalleryEditorWindowPage: View {
             } palette: {
                 ToolbarGroup(palette, axis: .vertical)
             } status: {
-                ViewerStatusBar(zoom: zoom, size: "1600 × 1000 px") { Text(tool) }
+                ViewerStatusBar(
+                    zoom: zoom, size: "1600 × 1000 px",
+                    preview: ("This page draws built-in sample data.", "suite.gallery.status.preview")) { Text(tool) }
             }
         } inspector: {
             InspectorHeader(

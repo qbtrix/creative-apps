@@ -28,7 +28,6 @@ A Sources/LibraryApp/LibraryBrowser.swift::LibraryNoticeRow Notice
 A Sources/LibraryApp/LibraryExportSheet.swift::LibraryExportSheet Sheet
 A Sources/LibraryApp/LibraryStatusBar.swift::LibraryStatusBar StatusBar
 A Sources/PhotoApp/PhotoLayerList.swift::PhotoLayerList LayerList
-A Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine StatusBar
 A Sources/PhotoApp/StraightenSheet.swift::StraightenSheet Sheet
 B Sources/AfterGlowApp/HomeGrid.swift::HomeGrid caps-header
 B Sources/AfterGlowApp/HomeRunningStrip.swift::HomeRunningStrip caps-header
@@ -64,6 +63,4 @@ B Sources/LibraryApp/LibraryBrowser.swift::LibraryImportNoticeRow error-label
 B Sources/LibraryApp/LibraryBrowser.swift::LibraryNoticeRow error-label
 B Sources/LibraryApp/LibraryControls.swift::* app-inventory
 B Sources/LibraryApp/LibraryExportSheet.swift::LibraryExportSheet sheet-buttons
-B Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine error-label
-B Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine preview-pill
 B Sources/PhotoApp/StraightenSheet.swift::StraightenSheet sheet-buttons
