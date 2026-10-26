@@ -2,7 +2,7 @@
 
 Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-imaging.md
 Run: act-1a175ea55b7-729d (line lead, line:suiteui; relaunch 2026-10-26) · earlier: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
-Stage: IM-library: IM-11a merged
+Stage: waves built; waiting on lane
 Base: origin/dev 8eff8ab85
 Next: post Belt-Slice-Done as PRs merge
 
@@ -17,6 +17,7 @@ Next: post Belt-Slice-Done as PRs merge
 - 2026-10-26T04:01:17Z heartbeat: #5295..#5299 #5154..#5178 open and clean; ratchet checked; IM-13 after #5163
 - 2026-10-26T04:22:59Z heartbeat: all PRs open and clean, no labels; batches held while dev-red #5321 is open (not ours)
 - 2026-10-26T04:53:11Z heartbeat: #5154 (IM-11a) merged; #5163 and #5178 merged origin/dev (mutation plan add/add kept ours, a superset), gate PASS, Heads moved
+- 2026-10-26T05:15:11Z heartbeat: all open PRs clean, no needs-fix/needs-rebase; #5297/#5299 over the size cap until #5295 lands; dev-red #5321 open (not ours)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
