@@ -218,3 +218,4 @@ utc	stage	event	ref	note
 2026-10-26T15:40Z	3	heartbeat	lane	poll 2026-10-26T15:40Z: none of our 12 PRs merged; all clean, fast-lane, eligible; lane one batch at a time, last merge #5285 15:27Z; dev-red #5321 open (not ours); 3 findings open; stage unchanged.
 2026-10-26T15:55Z	3	heartbeat	lane	poll 2026-10-26T15:55Z: none of our 12 PRs merged; all clean, fast-lane, eligible; lane one batch at a time, last merge #5285 15:27Z; dev-red #5321 open (not ours); 3 findings open; stage unchanged.
 2026-10-26T16:18Z	3	heartbeat	lane	poll 2026-10-26T16:18Z: 12 PRs open clean in lane queue; dev merged #5106 16:15Z; dev-red #5321 open (not ours); no release
+2026-10-26T16:32Z	3	heartbeat	lane	poll 2026-10-26T16:32Z: 12 PRs open clean in lane queue; dev merged #5803 16:18Z; dev-red #5321 open (not ours); no release
