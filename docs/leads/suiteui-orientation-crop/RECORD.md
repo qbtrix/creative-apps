@@ -59,3 +59,14 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-25T02:20Z: OC-photo-u opened as #5263 (OC-13, OC-14) on lead/orientation-crop-OC-photo-m. 13 files, +344/−53. Gate CI: PASS at f532b79d. It adds Image > Flip Canvas Horizontal/Vertical (image.flip) and puts CropAspectPicker in Photo's CropOptions. The lead added the missing `Wire: area-selection:AR-photo-u` line to the body. Unverified until the macOS gate: PhotoApp views, the snapshots, the flipCanvasInOneBody budget row and the PhotoCropJourneyTests journey.
 - 2026-10-25T02:35Z: OC-library-u opened as #5266 (OC-9, OC-10) on lead/orientation-crop-OC-library-m. Gate CI: PASS at 7063fc44. Its diff carried a dev merge (26 files, +404/−59), so the builder is rebuilding it on library-m alone. Lead finding: the picker's bare-X swap clashes with Library's X Reject while a draft is open, and a crop-mode X must never reject the photo. The builder fixes it in the same PR, either by suppressing Reject during a crop draft or by giving the Library picker no X shortcut. Known until OC-z: Library's crop math frames the unturned pixel size.
 - 2026-10-25T02:41Z: #5266 rebuilt on library-m by cherry-pick (15 files, +280/-27, head aa03993b, gate CI: PASS, 959 tests). X fix, option (a): LibraryCatalog.cullChange(forKey:) returns nil for X while cropDraft is set, so the window route and the cull handler leave X to the picker's swap; LibraryFakeOrientationTests.xNeverRejectsWhileACropDraftIsOpen proves it. Option (b) was out because SuiteUI's CropAspectPicker hard-codes the X shortcut. Footers stripped from #5244, #5246, #5263 and #5266 via the GitHub MCP.
+
+## Run act-1a175ee1051-o29l
+- 2026-10-26T02:59Z: resumed from Belt's nudge; status now pushed here as well as lead/orientation-crop.
+- OC-library-m done: #5246 merged as 1487382d; Belt-Slice-Done: OC-library-m posted on #3756 (scoped suiteui run 40247461868).
+- #5244 (OC-photo-m): lane-integrated head fabf6717, Linux check green, waiting in the lane.
+- #5263 (OC-photo-u): merged fabf6717 from its base, no conflicts; CI: PASS; Head 9b8cf01c; Belt-Lead moved to this run.
+- #5266 (OC-library-u): went dirty after #5246's squash (lane read it as 684 lines/29 files and dropped fast-lane). Merged origin/dev (one import conflict in DevelopValues.swift, kept SuiteImaging); back to 15 files +280/-27; CI: PASS (981 tests); Head 2432646a; fast-lane re-added.
+- 0 open findings for this feature.
+
+## Open
+- OC-photo-m, OC-photo-u, OC-library-u in the lane; critics for the u slices once a scoped run shows their screens; OC-z (OC-15/16) after both u slices land.
