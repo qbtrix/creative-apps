@@ -2,7 +2,7 @@
 
 Issue: #3458 · Packet: docs/blueprints/library/features/cull-finish.md
 Run: act-1a1782c1961-n1cv (line lead, line:library) · resumed 2026-10-26T12:20Z · earlier act-1a175ea5531-x1ci (line lead, line:library) · resumed 2026-10-26T01:59:55Z · earlier act-1a170488aff-41nk (line lead, line:library) · resumed 2026-10-24T23:40Z · earlier act-1a16cc967d9-mcuv, act-1a16953af22-wvhu, act-1a15995d319-aamb
-Stage: 3 polling: DR-u #5130, DR-m #4899/#5100, DR-z #5237/#5240/#5241 open in the lane; code batches held by dev-red #5321 (not Library); checked 14:08Z
+Stage: 3 polling: DR-u #5130, DR-m #4899/#5100, DR-z #5237/#5240/#5241 open in the lane; code batches held by dev-red #5321 (not Library); checked 14:30Z
 Base: origin/dev 8eff8ab85
 Next: lane lands #5130, #4899, then retarget #5100 to dev; #5237 to dev after #5130, #5240 after #5237; Belt-Slice-Done DR-u, DR-m, DR-z on a green library run with each slice's last PR; critics on DR-u screens; Belt-Contact-Sheet
 
@@ -70,4 +70,5 @@ Next: lane lands #5130, #4899, then retarget #5100 to dev; #5237 to dev after #5
 - 2026-10-26T01:59:55Z (run act-1a175ea5531-x1ci): main verified at d3323f6a. lead/cull-finish rebased onto main (brief rule 3) and mirrors this record. #4899's Mac prescreen failed liveListsAReasonForEveryStub and liveStubsSayWhyUntilBuilt: they expected the Trash unavailable, but DR-8 makes LiveTrash live on macOS (unavailable nil). The tests now expect the trash reason only where LiveTrash.unavailable is set. Fix round 1 of 2 for DR-m. Findings with Feature: cull-finish: 0.
 - 2026-10-26T12:28Z (run act-1a1782c1961-n1cv): main verified at d3323f6a. Re-read every PR: all slice PRs are open, clean and in the lane with proof on their heads (#5130's head c9d68d72 has the lane's green Linux check 40109534004). dev-red #5321 (Onboarding test timeouts, not Library) still open, so code batches wait. Open findings for this feature: 0. Nothing left to build; polling every 10 min.
 - 2026-10-26T14:07Z Library-scoped run 40329990478 on dev 01600e46 failed: RenderBudgetLibraryTests.rotateInLoupe (3 bodies vs budget 2), added by #5266 (orientation-crop OC-library-u, lead act-1a175ee1051-o29l), not this feature's code; none of our slice PRs is on dev. That run can't count for Belt-Slice-Done; wait for a green library run containing our PRs.
+- 2026-10-26T14:30Z Full CI 40328390857 on dev 5f8925a3 red: macOS tests 1/3, SuiteTimelineScrubWindowTests.aScrubRedrawsOnlyThePlayhead (shared timeline, not Library); the Onboarding timeout did not recur. dev-red #5321 stays open, code batches still held; nothing of ours to fix.
 
