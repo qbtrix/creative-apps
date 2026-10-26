@@ -145,3 +145,4 @@ utc	stage	event	ref	note
 2026-10-26T11:52Z	3	heartbeat	lane	dev c6700dba (#5727 quarantine expiry); dev-red #5321 open; Linux check 40316903931 running; no Feature: shared PR moved; #5133 ST-z still queued
 2026-10-26T12:23Z	3	heartbeat	lane	dev 746be6b1 (#5775 sharded macOS); full CI 40321924466 queued; Linux check 40316903931 on c6700dba green; dev-red #5321 open; no Feature: shared PR moved; #5133 ST-z queued
 2026-10-26T12:55Z	3	decision	review	Packet-Review 2 applied (8/8) on lead/shared-codecs-review-2; SC-f closed with gap #5792
+2026-10-26T13:07Z	3	heartbeat	lane	dev 57dd31ff (#5146); dev-red #5321 open; gates running (SR-4, SR-6, ST-z2, codecs review 2); no Feature: shared PR moved
