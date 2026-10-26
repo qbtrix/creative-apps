@@ -86,3 +86,4 @@ utc	stage	event	ref	note
 2026-10-26T10:40Z	3	check-in	#5064,#5233,#5235,#5236	wave 2 ready, queued behind p0 #5266; 0 findings
 2026-10-26T11:00Z	3	check-in	#5064,#5233,#5235,#5236	lane idle, #5266 batch dropped; wave 2 ready; 0 findings
 2026-10-26T11:25Z	3	check-in	#5064,#5233,#5235,#5236	batch 111622 (#5266) in flight; wave 2 ready; 0 findings
+2026-10-26T11:45Z	3	check-in	#5064,#5233,#5235,#5236	batch 111622 dropped; lane idle; wave 2 ready; 0 findings
