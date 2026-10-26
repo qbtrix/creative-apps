@@ -13,7 +13,7 @@
 // isn't a text layer."). Values in, intents out. Below them, while a text
 // layer is selected, SuiteUI's TextStyleRows (text-style TS-3) over the
 // layer's style as the kernel's TextStyle, the font picker listing this
-// Mac's families; disabled with `textStylesHelp` until TS-5 routes their
+// Mac's families; disabled with `textStylesHelp` until TS-8 routes their
 // intents to Design's text commands, when they replace the rows above.
 import AppKit
 import DesignModel
@@ -104,8 +104,8 @@ struct DesignInspectorText: View {
         }
     }
 
-    /// Why the shared text style rows can't act yet: their intents reach Design's text commands in TS-5.
-    nonisolated static let textStylesHelp = "Text styles arrive with TS-5."
+    /// Why the shared text style rows can't act yet: their intents reach Design's text commands in TS-8.
+    nonisolated static let textStylesHelp = "Text styles aren't connected in this window yet."
 
     /// The font families the shared rows' picker lists: this Mac's, read once.
     nonisolated static let fontFamilies = FontCatalog().families()
