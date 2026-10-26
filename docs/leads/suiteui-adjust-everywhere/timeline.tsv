@@ -107,3 +107,4 @@ utc	stage	event	ref	note
 2026-10-26T17:36Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane landed #5808 (dev fef52e66); batch 171803 runs #5263; ours queued
 2026-10-26T17:56Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev fef52e66 unchanged; batch 175022 retries #5263; ours queued
 18:19Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev e69582e7 (#5263 landed from batch 175022); ours clean, eligible, beta; next batch pending
+18:39Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev e69582e7 unchanged; batch 182514 runs #5295 alone; ours clean, beta, queued
