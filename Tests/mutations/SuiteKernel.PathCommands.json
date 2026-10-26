@@ -16,8 +16,8 @@
   {
     "label": "oneStepPerRun: setPath called per anchor in anchor-move, so moving three points records three steps",
     "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
-    "find": "{ t, p in try edit(&t, \"Move Points\", drag: p.drag) { AnchorEdit.moved($0.path, $1, dx: p.dx, dy: p.dy) } }",
-    "replace": "{ t, p in for ref in t.anchorSelection.ordered { _ = try edit(&t, \"Move Points\", drag: p.drag) { e, _ in AnchorEdit.moved(e.path, [ref], dx: p.dx, dy: p.dy) } }; return .object([:]) }",
+    "find": "                  try edit(&t, \"Move Points\", drag: p.drag) { e, refs in\n                      let back = try local(e, \"path.anchor-move\"), o = back.apply(Point(x: 0, y: 0)), d = back.apply(Point(x: p.dx, y: p.dy))\n                      return AnchorEdit.moved(e.path, refs, dx: d.x - o.x, dy: d.y - o.y)\n                  }\n",
+    "replace": "                  for ref in t.anchorSelection.ordered {\n                      _ = try edit(&t, \"Move Points\", drag: p.drag) { e, _ in\n                          let back = try local(e, \"path.anchor-move\"), o = back.apply(Point(x: 0, y: 0)), d = back.apply(Point(x: p.dx, y: p.dy))\n                          return AnchorEdit.moved(e.path, [ref], dx: d.x - o.x, dy: d.y - o.y)\n                      }\n                  }\n                  return .object([:])\n",
     "tests": "PathCommandsTests"
   },
   {
