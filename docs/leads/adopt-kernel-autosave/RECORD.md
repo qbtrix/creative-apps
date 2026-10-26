@@ -138,3 +138,4 @@ Next: AK side ended (parked by the supervisor): #4427 and #4428 on dev; relaunch
 - 2026-10-26T05:27:48Z Check-in: dev-red #5321 still open (not ours); 7 open PRs clean, no needs-fix/needs-rebase.
 - 2026-10-26T05:48:49Z Check-in: dev-red #5321 still open (not ours); 7 open PRs clean, no needs-fix/needs-rebase.
 - 2026-10-26T06:19:47Z Check-in: dev-red #5321 still open (not ours); 7 open PRs clean, no needs-fix/needs-rebase.
+- 2026-10-26T06:53:46Z Check-in: #5244 (OC-photo-m) merged 06:37 as 798f1f0a. Restacked #5263 (OC-photo-u) on dev: the dev merge put image.flip back in PhotoCatalog noMenu, fixed in 79ed59ec, gate PASS, Head moved. dev-red #5321 still open (not ours). 6 open PRs, none needs-fix or needs-rebase.
