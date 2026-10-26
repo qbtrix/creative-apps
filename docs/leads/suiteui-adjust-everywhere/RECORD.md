@@ -182,3 +182,8 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - #5163 landed on dev (2eab5aeb2); no lane batch in flight right now. Wave 2 (#5064, #5233, #5235, #5236) still open with fast-lane + beta, next in line; main d3323f6a7.
 - Wave 3 PRs touched at 10:12Z by the lane's Belt-Lead relabel sweep only. No attribution lines in any open PR body.
 - No needs-fix or needs-rebase on our PRs. 0 open findings. Stage: 3 wave 3 (waiting for wave 2 to land).
+
+### 2026-10-26T10:40Z check-in
+
+- Lane batch lane/batch-20261026102509 carries #5266 (p0, so ahead of our beta PRs). Wave 2 (#5064, #5233, #5235, #5236) still open and ready: #5064 mergeable clean, Head marker matches bfa7700e, prescreen success. dev f3af1c007; main d3323f6a7.
+- No needs-fix or needs-rebase on our PRs. 0 open findings. Stage: 3 wave 3 (waiting for wave 2 to land).
