@@ -67,3 +67,4 @@ Next: FC-2 part 2: stub the catalog methods and FilterBar/collection APIs, and a
 - 2026-10-26T11:05:20Z Check-in: dev-red #5321 still open (not ours); 6 open PRs clean, none merged; OC-photo-m waits on a green dev run.
 - 2026-10-26T11:26:08Z Check-in: dev-red #5321 still open (not ours); 6 open PRs clean, none merged; OC-photo-m waits on a green dev run.
 - 2026-10-26T11:45:59Z Check-in: dev-red #5321 still open (not ours); 6 open PRs clean, none merged.
+- 2026-10-26T12:07:48Z Check-in: dev-red #5321 still open (not ours); 6 open PRs clean, none merged.
