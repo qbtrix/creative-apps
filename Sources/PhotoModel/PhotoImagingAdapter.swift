@@ -50,6 +50,8 @@ struct PhotoLiveLayer: LiveLayer {
 }
 
 typealias PhotoLiveStack = LiveLayerStack<PhotoLiveLayer>
+/// The canvas routes' kept composites, per tile or band (SuiteImaging's cache); the Curves histogram keeps one too.
+public typealias PhotoCompositeCache = LiveCompositeCache<PixelRect>
 
 extension PhotoWorkspace {
     /// The live route's plan for this stack; nil when it needs the dispatcher route (see the header).

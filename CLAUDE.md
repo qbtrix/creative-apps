@@ -254,7 +254,10 @@ something. One that can't act yet is disabled and says why:
   `docs/blueprints/*/features/waves.md` or `docs/blueprints/*/jobs.md` at all:
   edit your component's part in docs/c4/parts/, your feature's .wave.json or
   the app's jobs.json, and the generated workflow rewrites them on dev. Only
-  the supervisor edits the journey quarantine, `UITests/quarantine.json`, and
+  the supervisor edits the test quarantine, `UITests/quarantine.json`, with
+  one narrow exception: the fast lane adds and removes its own entries there
+  (a lane-quarantine PR from its bot on lane/quarantine that changes that
+  file and nothing else; Fast lane below), and only the supervisor edits
   the perf list the gate skips,
   `Tests/perf-suites.txt`.
   `scripts/` means all of it, the gate included. Every target already exists.
@@ -334,6 +337,19 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   (or the PR) gets a comment saying why and how to bring the change back
   (a new PR that reverts the revert, plus the fix), and a `finding` is filed
   for your app. One revert per `dev-red` issue, never a revert of a revert.
+  A real red the lane has no certain culprit to revert for (an inconclusive
+  bisect, a culprit on a protected path, a revert that didn't fix it) gets
+  its failing tests quarantined instead, so trunk never stops: one
+  `Quarantined: <id>` issue per test (`p0`, `finding`, `line:<app>`, naming
+  the run, the range's PRs and their leads, and a 24 h expiry) owns the fix,
+  and a `lane-quarantine` PR from `lane/quarantine` adds the entries to
+  `UITests/quarantine.json` (the one protected path the lane may change
+  itself: that file alone, on that branch, by the lane's bot) and lands on
+  its own Linux check; `scripts/ci` then skips those tests and dev's next
+  run is green. Past the expiry the issue is a `blocker`; the entry stays
+  until the issue closes, when the lane's PR removes it (red again: the issue
+  is reopened). Never more than 5 tests per sweep, never a security, billing
+  or auth test. `scripts/quarantine release` fails while a lane entry is in.
   Details: `docs/fast-lane.md`.
 - A crew PR into `dev` whose body has a `Belt-Lead:` line but no `fast-lane`
   label gets the label from the lane's next sweep, with one comment, and is
@@ -454,15 +470,19 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
 - A journey that keeps failing on `dev` for a known reason can be quarantined,
   by the supervisor only, in `UITests/quarantine.json`: entries of
   `{"test": "Target/Class/testName", "owner": "#<open issue>", "reason": ..., "expires": "YYYY-MM-DD", "scope": "all"|"full"}`,
-  at most 7 days out. `scope` is optional: `all` (the default) skips the
+  at most 7 days out. A swift test goes in the same file as
+  `Target.Suite/test` or `Target.freeTest` (the `Tests/perf-suites.txt`
+  form) and `scripts/ci` skips it; the fast lane's own entries carry a
+  `lane` block (Fast lane above). `scope` is optional: `all` (the default) skips the
   journey in every run; `full` skips it only in full runs, so a full run can
   go green and promote `main` while the owner's scoped run (`app=<app>`)
   still runs it and shows the truth. `scripts/ui-test` skips each live entry
   that applies and lists every entry, with where it is skipped, in its output
   and the job summary. `scripts/ci` fails on an expired entry, a closed or
   missing owner issue, an empty reason, a scope other than `all` or `full`, or
-  a test that isn't in `UITests/`. When the owner's fix merges, the
-  supervisor removes the entry and the next `dev` run proves it.
+  a test that isn't in `UITests/` or `Tests/`. When the owner's fix merges, the
+  supervisor removes the entry and the next `dev` run proves it (the lane
+  removes its own once the owner issue closes).
 
 ## Commands
 
@@ -475,7 +495,9 @@ swift test --filter "$(scripts/test-scope perf photo)" --no-parallel   # Photo's
 swift test --filter FlareModelTests          # one suite while iterating
 bash Tests/fast_lane/test_fast_lane.sh       # fast-lane decision tests (needs jq)
 bash Tests/audit_lower/test_audit_lower.sh   # decision tests for scripts/audit-lower, CI's baseline lowering (needs jq)
-scripts/quarantine check                     # the journey quarantine's entries: owned, reasoned, unexpired (needs jq; gh for owner state)
+scripts/quarantine check                     # the test quarantine's entries: owned, reasoned, unexpired (needs jq; gh for owner state)
+scripts/quarantine release                   # the release gate: fails while the fast lane's own quarantine entries are in
+bash Tests/quarantine/test_quarantine.sh     # scripts/quarantine's fixture tests (needs jq)
 scripts/bump-core [<core sha>]               # move the creative-core pin (default: core main's head): checks, then the bump PR
 bash Tests/bump_core/test_bump_core.sh       # scripts/bump-core against a fake gh and swift (needs jq)
 scripts/install-merge-drivers                # once per clone: .gitattributes merge drivers (JSON by key) and rebase.updateRefs; cloud-setup.sh runs it
