@@ -118,8 +118,8 @@ while read -r app id; do
   target=${id%%.*} rest=${id#*.}
   IFS=/ read -ra parts <<<"$rest"
   n=${#parts[@]} last=${parts[$((${#parts[@]} - 1))]}
-  if [[ $n -eq 1 ]]; then
-    grep -rqE "(struct|func) $last[[:space:](<:]" "$root/Tests/$target" || missing="$missing $id"
+  if [[ $n -eq 1 ]]; then  # a suite (a serialized parent is an enum) or a free test
+    grep -rqE "(struct|enum|func) $last[[:space:](<:]" "$root/Tests/$target" || missing="$missing $id"
     continue
   fi
   # Every part before the last is a suite (a nested one has its parent enum first).
@@ -207,6 +207,12 @@ check "timing passes a baselined test and names a baseline line that no longer t
   'PhotoModelTests.timedMedian;PhotoModelTests.helperP95;PhotoModelTests.framesDrawn;PhotoModelTests.tightRatio;PhotoModelTests.divided;PhotoModelTests.dateBudget;PhotoModelTests.gone' \
   "$(TESTS_DIR="$tmp/tree" PERF_SUITES="$tmp/listed.txt" TIMING_BASELINE="$tmp/baseline.txt" python3 "$ts" timing | cut -d' ' -f1 | paste -sd';' -)"
 
+# ids: each @Test of a file as a perf-list id (the fast lane's quarantine resolves a red test's file this way).
+printf '%s\n' 'import Testing' '@Suite struct OpenTests {' '    @Test func opens() {}' '    enum Nested {' '        @Test func inner() {}' '    }' '}' '@Test func freeOne() {}' >"$tmp/Ids.swift"
+check "ids prints Target.Suite/test, nested suites joined, and Target.freeTest" \
+  'PhotoModelTests.OpenTests/opens;PhotoModelTests.OpenTests/Nested/inner;PhotoModelTests.freeOne' \
+  "$(python3 "$ts" ids PhotoModelTests "$tmp/Ids.swift" | paste -sd';' -)"
+
 # The perf regex: exactly the listed tests, by suite, one test or free test.
 perf=$(python3 "$ts" perf)
 takes() { grep -qE "$perf" <<<"$1" && echo yes || echo no; }
@@ -253,6 +259,17 @@ check "heavy within a changed filter keeps that target's" '^(PhotoModelTests\.Ph
 check "heavy within a filter that takes none is empty, never a match-all regex" "" \
   "$(HEAVY_SUITES="$tmp/heavy.txt" python3 "$ts" heavy '^(SuiteModelTests)\.')"
 check "an empty heavy list gives no regex" "" "$(HEAVY_SUITES="$tmp/empty.txt" python3 "$ts" heavy)"
+
+# shard K/N: the sorted distinct top-level suites (a nested suite stays with its
+# parent; free tests on their own) go round-robin; every shard agrees, nothing
+# is listed twice or dropped, and the snapshot suites come on the second line.
+ids=$'FlareModelTests.A/t1()\nFlareModelTests.A/t2(x:)\nFlareModelTests.free()\nAppSnapshotTests.BodyCountSuites/RenderBudgetX/t()\nAppSnapshotTests.S/t()\nPhotoModelTests.B/t()\nwarning: not a test'
+check "shard 1/2 takes units 0, 2 and 4 of the sorted list" \
+  $'^(FlareModelTests\\.A|PhotoModelTests\\.B)(/|\\()\n^(AppSnapshotTests\\.BodyCountSuites)(/|\\()' "$(printf '%s\n' "$ids" | python3 "$ts" shard 1/2)"
+check "shard 2/2 takes units 1 and 3" $'^(FlareModelTests\\.free)(/|\\()\n^(AppSnapshotTests\\.S)(/|\\()' "$(printf '%s\n' "$ids" | python3 "$ts" shard 2/2)"
+check "a shard with no suite prints two empty lines, never a match-all regex" "" "$(printf '%s\n' 'T.A/t()' | python3 "$ts" shard 2/2 | tr -d '\n')"
+printf '%s\n' "$ids" | python3 "$ts" shard 3/2 >/dev/null 2>&1
+check "shard K past N is refused" 1 "$?"
 
 # perf-report: what Swift Testing prints for a missed bound, both ways it
 # shows the values, and a test that only says "failed".
