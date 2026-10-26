@@ -188,6 +188,7 @@ struct DesignWindow: View {
             try? model.setNodeFrame(id, x: x, y: y, width: width, height: height)
         case .setFill(let id, let color): try? model.setFill(id, color)
         case .fill(let intent): model.runFill(intent)
+        case .text(let intent): model.runText(intent)
         case .transform(let intent): model.runTransform(intent)
         case .shape(let intent): model.runShape(intent)
         case .align(let edge): model.alignLayer(edge)

@@ -10,9 +10,15 @@
 // an arrow key and at the end of a drag, never per drag sample (rule 1;
 // DW-b's live preview replaces the wait). The rows are disabled with the
 // Model's `styleHelp(.textStyle)` as their tooltip and as a hint line ("A
-// isn't a text layer."). Values in, intents out.
+// isn't a text layer."). Values in, intents out. Below them, while a text
+// layer is selected, SuiteUI's TextStyleRows (text-style TS-3) over the
+// layer's style as the kernel's TextStyle, the font picker listing this
+// Mac's families; each intent runs as Design's text command (`.text`, one
+// step each, text-style TS-8), disabled with the Model's `textHelp`.
 import AppKit
 import DesignModel
+import SuiteKernel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -91,9 +97,18 @@ struct DesignInspectorText: View {
                     commit { $0.fixedWidth = fixed }
                 }
                 if let help { InspectorNote(help) }
+                if let kernel = textStyle {
+                    TextStyleRows(style: kernel, families: Self.fontFamilies, help: model.textHelp) { perform(.text($0)) }
+                }
             }
         }
     }
+
+    /// The font families the shared rows' picker lists: this Mac's, read once.
+    nonisolated static let fontFamilies = FontCatalog().families()
+
+    /// The primary selected text layer's style as the kernel's (DesignWorkspace.textStyle); nil with no text layer.
+    var textStyle: TextStyle? { model.textStyle }
 
     /// The Family picker; a mixed selection shows "Mixed" until a family is picked.
     private func familyRow(_ style: DesignTextStyle?, help: String?) -> some View {

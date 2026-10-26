@@ -30,6 +30,8 @@ enum DesignIntent {
     case setFill(String, DesignColor)
     /// A Fill section gesture (type switch, stop, angle), run as its kernel fill command (`runFill`).
     case fill(GradientIntent)
+    /// A shared text style row's change (font, size, alignment, line height, tracking), run as its text command (`runText`).
+    case text(TextIntent)
     /// A turn or flip from the inspector or the Object menu, run as its kernel command (`runTransform`).
     case transform(TransformIntent)
     /// A change from the Shape tool's options in the inspector, applied to the tool's next spec (`runShape`).
