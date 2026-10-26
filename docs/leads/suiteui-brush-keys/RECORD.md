@@ -63,3 +63,4 @@ Next: wait for the lane to merge BK-u #4939; then merge dev into #4965, #4961, #
 - 2026-10-26T14:05Z (act-1a177ff0916-4jm7): poll: dev 68be32fc; drift #5745 items 6-7: packet fix PR #5799 (docs-only, fast-lane; no swift here so lane Linux check is the proof); items 1-5 ride #4939/#4965/#4961/#4982. None merged yet; open findings 1.
 - 2026-10-26T14:27Z (act-1a177ff0916-4jm7): poll: dev 68be32fc; no merges; #4939 and packet fix #5799 queued in lane (dev-red #5321 open, lane check on #5799 pending). Open findings 1.
 - 2026-10-26T14:45Z (act-1a177ff0916-4jm7): poll: dev f86f72f7; no merges of ours (dev moved by #5780 only); #4939 and packet fix #5799 queued, lane check on #5799 not started; dev-red #5321 open. Open findings 1.
+- 2026-10-26T15:02Z (act-1a177ff0916-4jm7): poll: dev f86f72f7; no merges of ours; lane Linux check on packet fix #5799 running (run 40343265441); #4939 queued; dev-red #5321 open. Open findings 1.
