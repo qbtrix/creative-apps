@@ -68,3 +68,10 @@ Next: wave 2 in lane: AJ-k #5064 (bfa7700e), AJ-c #5233 (a01fdf51, stacked on #5
 
 ### 2026-10-26T02:41Z lane check
 Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the lane ruled #5064, #5233, #5235 and #5236 all `eligible`: Fast-Check marker plus local-ci/prescreen, CLEAN, sizes 174/396/324/393. They waited only behind the single-PR batch for #5177, which has since merged (dev 8987427d). Wave 3 PRs (#5247 ... #5260) fail the size check only because they stack on wave 2. That clears once wave 2 lands and dev is merged in. Nothing to fix. Lane runs since 02:20Z keep being cancelled by newer PR events. 0 findings. Stage: 3 wave 3 (waiting for wave 2 to land).
+
+### 2026-10-26T03:10Z check-in
+- dev d0859e01 (#5346 merged after #5368). None of wave 2 (#5064, #5233, #5235, #5236) merged yet; still eligible and queued.
+- I removed the trailing attribution footer from 12 open PR bodies (#5233, #5235, #5236, #5247, #5248, #5249, #5250, #5252, #5257, #5258, #5259, #5260), as the brief requires. The Head lines are unchanged.
+- #5250, #5252, #5257, #5258, #5259 and #5260 show mergeable_state dirty against dev. They will be merged with dev once wave 2 lands.
+- Findings: 0 open.
+- Stage: 3 wave 3 (waiting for wave 2 to land).
