@@ -9,4 +9,3 @@
 # Only the supervisor edits this file. Line: <Target>.<Suite path>/<test>.
 AppSnapshotTests.BodyCountSuites/HaloWindowPlaybackTests/playbackRedrawsTheViewerNotTheWindow
 AppSnapshotTests.BodyCountSuites/RenderBudgetHaloProbeTests/bodies
-SuiteUITests.aWideRangeRendersAsFastAsANarrowOne
