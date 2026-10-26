@@ -45,7 +45,7 @@ import Testing
         var w = try DesignSampleTests.shapes()
         let outcome = try DesignWorkspace.catalog.run("color.pick", params: Self.point(350, 350, to: "stroke"), on: &w)
         #expect(outcome.undoStep == "Stroke")
-        #expect(w.treeNode("node-2")?.stroke?.color == DesignColor(255, 0, 0))
+        #expect(w.treeNode("node-2")?.stroke == DesignStroke(color: DesignColor(255, 0, 0), width: 1))
         #expect(w.treeNode("node-2")?.fill == DesignColor.shape)
     }
 

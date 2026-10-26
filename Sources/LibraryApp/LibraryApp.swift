@@ -24,14 +24,16 @@ import SwiftUI
 
 /// The process's documents bridge: the suite's recents and routing, on fakes for a `-LibraryFixture` launch.
 @MainActor enum LibraryShell {
-    static let bridge: SuiteDocumentsBridge = {
+    /// The suite's services: live, or fakes for a `-LibraryFixture` launch. The export writer takes `metadata`.
+    static let services: SuiteServices = {
         let arguments = ProcessInfo.processInfo.arguments
-        let services: SuiteServices = LibraryLaunch(arguments: arguments).fixture == nil
+        return LibraryLaunch(arguments: arguments).fixture == nil
             ? .live(support: SuiteLocations.supportFolder(arguments: arguments, home: NSHomeDirectory()),
                     app: .library, arguments: arguments)
             : .fake()
-        return SuiteDocumentsBridge(app: .library, services: services)
     }()
+
+    static let bridge = SuiteDocumentsBridge(app: .library, services: services)
 
     /// The hand-off host; the catalog's file-flow answers don't depend on its photos until LF-3.
     static let host = LibraryCatalog(services: .fake())
