@@ -128,3 +128,4 @@ Next: AK side ended (parked by the supervisor): #4427 and #4428 on dev; relaunch
 ## Open
 
 - AK-6 on the library spine; AK-8 on SC-f; AK-9 on AK-6, AK-8, DA-z, HA-z; AK-11 on AK-9, AK-10.
+- 2026-10-26T03:03:42Z AK-z: #5040 gated (CI: PASS) on head 78f6ac0b; body Head and Belt-Lead moved. Waiting on the lane batch.
