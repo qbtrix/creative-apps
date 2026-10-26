@@ -249,3 +249,4 @@ utc	stage	event	ref	note
 2026-10-26T20:05Z	3	poll	-	dev unchanged; no suiteui PR updated since 18:00Z; DS-z (b0369b78) waits on #4918 and #4891
 2026-10-26T20:22Z	3	poll	-	dev moved, none ours; DS-z (b0369b78) waits on #4918 and #4891
 2026-10-26T20:38Z	3	poll	-	dev unchanged; DS-z (b0369b78) waits on #4918 and #4891
+2026-10-26T20:56Z	3	poll	-	dev moved, none ours; DS-z (b0369b78) waits on #4918 and #4891
