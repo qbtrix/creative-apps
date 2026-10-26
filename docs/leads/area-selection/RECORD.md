@@ -1,10 +1,10 @@
 # area-selection lead record
 
 Issue: #3752 · Packet: docs/blueprints/suiteui/features/area-selection.md
-Run: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
+Run: act-1a175f7cb67-l7rh (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26) · earlier: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main ef37711d (verified) / dev ae3efdb8
-Next: #5096 (AR-photo-u) back in the fast lane at 7c7f27654 (387+/11-, 11 files); when it merges retarget #5103, then #5254, #5256. AR-photo-m done (run 40179648854).
+Next: #5096 (AR-photo-u) needs-rebase on the 10-26 dev: merging origin/dev (photo CLI golden regenerated), gate, push, move Head:; when it merges retarget #5103, then #5254, #5256.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -32,6 +32,7 @@ Next: #5096 (AR-photo-u) back in the fast lane at 7c7f27654 (387+/11-, 11 files)
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-26T02:14Z: Run act-1a175f7cb67-l7rh resumed. #5096 got needs-rebase (photo.list-commands.json conflict); fixing by merging origin/dev and regenerating the golden from `afterglow photo list-commands`.
 - 2026-10-25T05:20Z: #5096 lost fast-lane at 578 lines after #4877 squash-merged; merged origin/dev (PhotoStroke/PhotoWorkspace both-sides fields, setArea kept, golden union by id), scripts/ci --changed PASS, pushed 7c7f27654, body Head moved and footer stripped, fast-lane re-added.
 - 2026-10-25T04:45Z: #4877 merged; retargeted #5096 to dev (REST PATCH base=dev).
 - 2026-10-25T02:50Z: Opened #5268 (docs-only C4, kernel-selection names AreaShape/AreaRecipe/GroupPick, head b0022ba4, CI: PASS, fast-lane). The 01:45Z stamps above were written at about 02:45Z.
