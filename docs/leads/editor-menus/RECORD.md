@@ -194,3 +194,7 @@ No change: #4988, #5164, #4999 and #5364 are open and clean, with no fix labels.
 ## 2026-10-26T04:58:12Z poll
 
 #4988, #5164, #5364, #4999 and #5000 are unchanged: open, clean, fast-lane and beta, no fix labels. No scheduled fast-lane sweep has run since 01:20Z (40253768128, cancelled). Asked the supervisor on #3774.
+
+## 2026-10-26T05:20:31Z poll
+
+#4988, #5364 and #4999: still open and clean, no fix labels. The lane resumed (sweep 40272598879 running, #5154 merged about 05:07Z). Removed the auto-added footer from the #3774 question and noted the resume there.
