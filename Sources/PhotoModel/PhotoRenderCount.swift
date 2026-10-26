@@ -5,7 +5,9 @@
 // PhotoCompositeCache's. The histogram composites its rows through the canvas routes' seam with a cache of its
 // own, so it counts inside `asRows`, where a region, a layer and a cache lookup land on the reference path's
 // counters: a test tells a drag's work from a recount's. The counters are process-wide, so a suite that reads
-// them nests in BodyCountSuites like the body counters. In release the calls compile to nothing. Linux-safe.
+// them nests in BodyCountSuites like the body counters. A test that drives the renderer itself reads a `Tally`
+// instead: bound with `$tally.withValue` around its renders, it counts only the work done in that task and its
+// child tasks, so suites running alongside never move it. In release the calls compile to nothing. Linux-safe.
 import Synchronization
 
 public enum PhotoRenderCount {
@@ -19,6 +21,18 @@ public enum PhotoRenderCount {
     public static let bases = Mutex(0), hits = Mutex(0)
     /// True inside `asRows`.
     @TaskLocal static var countingRows = false
+
+    /// One test's counts, under the same names IdleWorkTests reads: "regions", "layers", "bases", "hits", "rows",
+    /// "rowLayers".
+    public final class Tally: Sendable {
+        private let counts = Mutex<[String: Int]>([:])
+        public init() {}
+        public var snapshot: [String: Int] { counts.withLock { $0 } }
+        func add(_ name: String, _ count: Int = 1) { counts.withLock { $0[name, default: 0] += count } }
+    }
+
+    /// The tally the current task's renders also count into; nil outside a `$tally.withValue`.
+    @TaskLocal public static var tally: Tally?
     #endif
 
     /// Runs `body` with the canvas routes' counts taken as the reference path's: a region composited is the row
@@ -35,7 +49,9 @@ public enum PhotoRenderCount {
     /// One more region composited.
     @inline(__always) static func region() {
         #if DEBUG
-        if !countingRows { regions.withLock { $0 += 1 } }
+        guard !countingRows else { return }
+        regions.withLock { $0 += 1 }
+        tally?.add("regions")
         #endif
     }
 
@@ -43,6 +59,7 @@ public enum PhotoRenderCount {
     @inline(__always) static func row() {
         #if DEBUG
         rows.withLock { $0 += 1 }
+        tally?.add("rows")
         #endif
     }
 
@@ -50,6 +67,7 @@ public enum PhotoRenderCount {
     @inline(__always) static func rowLayers(_ count: Int) {
         #if DEBUG
         rowLayers.withLock { $0 += count }
+        tally?.add("rowLayers", count)
         #endif
     }
 
@@ -58,13 +76,20 @@ public enum PhotoRenderCount {
         #if DEBUG
         guard !countingRows else { return }
         if made { bases.withLock { $0 += 1 } } else { hits.withLock { $0 += 1 } }
+        tally?.add(made ? "bases" : "hits")
         #endif
     }
 
     /// `count` more layers laid onto a region.
     @inline(__always) static func layers(_ count: Int) {
         #if DEBUG
-        if countingRows { rowLayers.withLock { $0 += count } } else { layerComposites.withLock { $0 += count } }
+        if countingRows {
+            rowLayers.withLock { $0 += count }
+            tally?.add("rowLayers", count)
+        } else {
+            layerComposites.withLock { $0 += count }
+            tally?.add("layers", count)
+        }
         #endif
     }
 }

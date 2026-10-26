@@ -233,6 +233,12 @@ Commands (ids go in each adopter's `Tests/command-ids/<app>.txt`):
 | `path.anchor-remove` | edit | Delete Points | – | no anchor selected |
 | `path.anchor-convert` | edit | Convert Points | `{kind}` | no anchor selected |
 
+One coordinate rule: every param (`dx`/`dy`, a handle's `x`/`y`, an insert
+point, a select rect, a Pen point) and `path.read`'s contours are in document
+space. `PathCommands` maps them into the path's own space through
+`toDocument` once (a delta through its linear part only), so an app never
+maps them itself, and a layer scaled to nothing refuses point edits.
+
 Every spec reads and writes through `PathEditTarget`, so an app adds the
 twelve with one line (`+ PathCommands.specs(<X>Workspace.self)`) and its
 `<X>Pen+Kernel.swift` conformance. Each app keeps its own `tool.pen` and
@@ -257,8 +263,8 @@ twelve with one line (`+ PathCommands.specs(<X>Workspace.self)`) and its
   keeps its length, symmetric takes the new length); `breaking` makes it a
   corner with both handles kept.
 - **moved:** each selected anchor and its handles shift by (dx, dy) in the
-  path's own space (the caller maps the document offset through the inverse
-  of `toDocument`).
+  path's own space (`PathCommands` maps the document offset through the
+  inverse of `toDocument`'s linear part).
 - **inserting / removing / converting:** FlareCore's `inserting(at:)`,
   `removingAnchor`, `converting`; `inserting` returns the new anchor's ref by
   walking elements to `location.element` (a `move` starts a contour) so the
