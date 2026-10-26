@@ -43,3 +43,4 @@ Next: once #5321 closes and the lane lands our PRs, post Belt-Slice-Done for DK-
 ## Open
 - dev-red #5321 (range main..cc5c6234a; not ours) holds every batch. Nothing to fix here.
 - Open stroke-style findings past the round cap (#4925 #4926 #4927 #4919 #4940 #4941 #4989 #5009 #5010) are partly fixed in #5002/#5011; the rest go to gaps once those PRs merge.
+- 2026-10-26T02:06:05Z: every open stroke-style finding is fixed by an open PR (#4916, #5002, #5011 Fixes lines); DK-z starts once they land and the combined open count is 5 or fewer.
