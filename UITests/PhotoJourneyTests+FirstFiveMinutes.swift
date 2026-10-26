@@ -57,7 +57,7 @@ final class PhotoFirstFiveJourneys: XCTestCase {
         let photo = try open(exportTo: exports)
         photo.timeBox()
         photo.choose(menu: ["File", "Export…"])
-        let jpeg = photo.app.sheets.radioButtons["JPEG"]
+        let jpeg = photo.element("photo.export.format.jpeg")
         XCTAssert(jpeg.waitForExistence(timeout: 5), "the Export sheet offers no JPEG")
         jpeg.click()
         photo.snap("first5-export-sheet")
