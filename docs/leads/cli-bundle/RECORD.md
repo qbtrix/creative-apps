@@ -129,3 +129,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 2026-10-26T16:21:40Z: 16:21 heartbeat: #4999 still queued (fast-lane, clean) behind p0 PRs; #5793/#5794 parked no-fast-lane, clean; #5000 awaits docs-only rework after #4999.
 - 2026-10-26T16:42:41Z: 16:42 heartbeat: lane moving (last dev merge #5803 16:18, all p0); #4999 still queued (fast-lane, clean); #5793/#5794 parked no-fast-lane, clean; #5000 awaits docs-only rework after #4999.
 - 2026-10-26T17:05:42Z: 17:05 heartbeat: no dev merges since #5803 at 16:18; #4999 still queued (fast-lane, clean); #5793/#5794 parked no-fast-lane, clean; #5000 awaits docs-only rework after #4999.
+- 2026-10-26T17:27:10Z: 17:27 heartbeat: lane merged #5267 at 17:07; #4999 still queued (fast-lane, clean); #5793/#5794 parked no-fast-lane, clean; #5000 awaits docs-only rework after #4999.
