@@ -80,9 +80,18 @@ struct PhotoCommandCatalogTests {
         #expect(problems == Self.tolerated)
     }
     /// The kernel's transform.flip is titled "Flip" while its step names the axis ("Flip Horizontal"), as the
-    /// transform packet asks. (Free Transform's commit and cancel refuse without a draft: the filter above drops them.)
-    static let tolerated = ["image.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\"",
-                             "transform.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\""]
+    /// transform packet asks, and image.flip does the same; tone.set likewise names its step for the slider
+    /// ("Temperature"). On this flat fill tone.auto has nothing to suggest, so it records no step;
+    /// PhotoToneCommandTests runs it on a range of tones.
+    /// (Free Transform's commit and cancel refuse without a draft: the filter above drops them.)
+    static let tolerated = [
+        "image.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\"",
+        "tone.auto: stepNamedTitle: its undo step reads \"Delete\", not \"Auto Tone\"",
+        "tone.auto: editRecordsOneStep: it recorded 0 undo steps, not one",
+        "tone.auto: undoRestoresBytes: edit.undo after it leaves save() bytes unlike those before it",
+        "tone.set: stepNamedTitle: its undo step reads \"Temperature\", not \"Tone\"",
+        "transform.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\"",
+    ]
 
     @Test func ledger() throws {
         let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../command-ids/photo.txt")
@@ -159,6 +168,7 @@ struct PhotoCommandCatalogTests {
         !$0.hasPrefix("tool.") && !$0.hasPrefix("transform.") && !noMenu.contains($0) && !fileFlowIDs.contains($0)
             && !placeIDs.contains($0) && !$0.hasPrefix("history.") && !$0.hasPrefix("text.")
             && !$0.hasPrefix("layer.mask-") // masks-clipping PK-2 adds their Layer menu items.
+            && !$0.hasPrefix("tone.") // tone-controls PT-4: the inspector's Tone rows run them; no menu items.
             && !$0.hasPrefix("style.") // layer-styles PY-2 adds their Layer menu items.
             && !$0.hasPrefix("path.") && !$0.hasPrefix("paths.") // the Pen and its overlay run them (#5072); no menu yet.
     }
