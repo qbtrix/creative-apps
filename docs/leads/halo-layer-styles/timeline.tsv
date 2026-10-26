@@ -143,3 +143,4 @@ utc	stage	event	ref	note
 2026-10-26T21:55Z	heartbeat	lane	#5174	dev c4cf4a758; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
 2026-10-26T21:57Z	heartbeat	lane	#5174	dev c4cf4a758; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
 2026-10-26T21:59:09Z	rebase	lane	#5174	merged origin/dev c4cf4a758 locally (SuiteGallery areas union, ae52b60c2); toolchain lost on container restart, reinstalling before scripts/ci --changed
+2026-10-26T22:05:56Z	push	lane	#5174	merged origin/dev into LS-2, scripts/ci --changed PASS, pushed ae52b60c2; Head: moved
