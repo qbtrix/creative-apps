@@ -23,6 +23,7 @@ Next: Belt-Slice-Done XP-a once a suiteui-scoped or full run contains 99ace7038;
 - 2026-10-26T06:28:20Z heartbeat: no change; lane holding (dev-red #5321 open)
 - 2026-10-26T06:53:25Z heartbeat: no change; lane holding (dev-red #5321 open); drift sweep has filed nothing on this feature yet
 - 2026-10-26T07:15:52Z heartbeat: #5043 XP-3 merged; #5065/#5104/#5106 restacked and Head moved
+- 2026-10-26T07:34:19Z heartbeat: XP-a scoped suiteui run 40284902781 at 99ace7038 in progress; #5065 restacked to 273 lines, lane re-evaluating; #5104/#5106 clean
 
 ## Run act-1a16fe1fa73-5x3s decisions
 - 22:59Z: the 22:27Z poll was one-shot, so no heartbeat ran from 22:28Z to 22:59Z. Each poll now schedules the next one 15 min out.
