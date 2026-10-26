@@ -206,3 +206,4 @@ utc	stage	event	ref	note
 2026-10-25T15:24:39Z	3	heartbeat	-	lane batch now #5039 (batch-20261025150758); #4988 queued behind p0
 2026-10-25T15:42:41Z	3	heartbeat	-	QUEUE: 50+ open p0 fast-lane PRs sort ahead of beta #4988; lane lands ~1 code PR per 20 min (serial, LANE_VERIFY_AFTER), so EM-flare-halo is many hours out. Supervisor: raise #4988 to p0 if this slice should land sooner
 2026-10-25T16:00:37Z	3	heartbeat	-	#4988 still beta, queued behind p0 (batch-20261025154953 in flight)
+2026-10-26T02:12:53Z	relaunch	act-1a175f7cc55-xlmt

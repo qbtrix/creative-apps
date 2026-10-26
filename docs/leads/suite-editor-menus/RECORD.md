@@ -1,9 +1,9 @@
 # editor-menus lead record
 
 Issue: #3774 · Packet: docs/blueprints/suite/features/editor-menus.md
-Run: act-1a17129eefa-0kqr (relaunch; earlier act-1a16db4d43e-gerb, act-1a16a37a3ed-0kyn, act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
-Stage: 3 polling (EM-flare-halo: #4988 in lane bisect probe batch-20261025023716-3; #5164 stacked on it)
-Base: afef017c27a56ec18983e58672a8a15c94083ce4 (main, verified at relaunch; PRs target dev 2e7d52649)
+Run: act-1a175f7cc55-xlmt (relaunch; earlier act-1a17129eefa-0kqr, act-1a16db4d43e-gerb, act-1a16a37a3ed-0kyn, act-1a166b69fd0-x9m8) · Started: 2026-10-23T03:08Z
+Stage: 3 polling (EM-flare-halo: #4988 queued in the lane; #5164 stacked on it)
+Base: d3323f6a7dc523e1986e1693b640cf377e362f08 (main, verified at relaunch; PRs target dev 8987427d8)
 Next: lane: probe batch-20261025023716-3 (holds #4988) resolves; once #4988 merges, retarget #5164 to dev, rerun scripts/ci --changed, move Head
 
 ## Slices
@@ -159,3 +159,6 @@ Next: lane: probe batch-20261025023716-3 (holds #4988) resolves; once #4988 merg
 - 2026-10-25T15:24:39Z: lane batch now #5039 (batch-20261025150758); #4988 queued behind p0
 - 2026-10-25T15:42:41Z: QUEUE: 50+ open p0 fast-lane PRs sort ahead of beta #4988; lane lands ~1 code PR per 20 min (serial, LANE_VERIFY_AFTER), so EM-flare-halo is many hours out. Supervisor: raise #4988 to p0 if this slice should land sooner
 - 2026-10-25T16:00:37Z: #4988 still beta, queued behind p0 (batch-20261025154953 in flight)
+
+## 2026-10-26T02:12:53Z relaunch act-1a175f7cc55-xlmt
+- main d3323f6 verified. #4988 and #5164 open, clean, Head markers current; no lane batch in flight. Belt-Lead lines moved to this run, footer stripped.
