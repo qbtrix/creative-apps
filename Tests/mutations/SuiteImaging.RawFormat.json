@@ -26,5 +26,19 @@
     "find": "return info.developable ? .develop(scale: 1, draft: false) : refused",
     "replace": "return info.developable ? .develop(scale: 1, draft: true) : refused",
     "tests": "RawDecodePlanTests"
+  },
+  {
+    "label": ".fittedIsNotDraft: draft true for .fitted",
+    "file": "Sources/SuiteImaging/Raw/RawFormat.swift",
+    "find": "return info.developable ? .develop(scale: scale(want, of: full), draft: false) : refused",
+    "replace": "return info.developable ? .develop(scale: scale(want, of: full), draft: true) : refused",
+    "tests": "RawDecodePlanTests"
+  },
+  {
+    "label": ".refusalDescribed: errorDescription dropped, the alert shows Foundation's text",
+    "file": "Sources/SuiteImaging/Raw/RawFormat.swift",
+    "find": "    public var errorDescription: String? { message }",
+    "replace": "    public var errorDescription: String? { nil }",
+    "tests": "RawFormatTests"
   }
 ]
