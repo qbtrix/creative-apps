@@ -18,6 +18,9 @@ public struct CompositionSettings: Sendable, Hashable {
     /// The exact rate, one of `FrameRate.common` while valid.
     public var frameRate: FrameRate
     public var durationSeconds: Double
+    public var background: DocumentBackground = .white
+    /// Halo's limits for the shared setup: 8192 px a side, the nine rates, 24 hours.
+    public static let limits = DocumentLimits(maxSide: sizeRange.upperBound, rates: FrameRate.common, maxSeconds: maxDurationSeconds)
 
     public init(name: String, width: Int = 1920, height: Int = 1080, frameRate: FrameRate, durationSeconds: Double = 10) {
         self.name = name
@@ -45,6 +48,19 @@ public struct CompositionSettings: Sendable, Hashable {
         return copy
     }
 
+    /// The settings of a shared `DocumentSetup`, its size in whole pixels; no rate is 30, no duration 10 s.
+    public init(name: String, setup: DocumentSetup) {
+        let size = setup.pixelSize
+        self.init(name: name, width: size.width, height: size.height, frameRate: setup.frameRate ?? FrameRate(whole: 30),
+                  durationSeconds: setup.durationSeconds ?? 10)
+        background = setup.background
+    }
+
+    public var setup: DocumentSetup {
+        DocumentSetup(width: Double(width), height: Double(height), background: background, frameRate: frameRate,
+                      durationSeconds: durationSeconds)
+    }
+
     /// The rate problem in words, naming every rate on the list.
     static var frameRateProblem: String {
         let names = FrameRate.common.map { String($0.description.dropLast(" fps".count)) }
@@ -67,6 +83,7 @@ public struct CompositionSettings: Sendable, Hashable {
         if !(durationSeconds > 0 && durationSeconds <= Self.maxDurationSeconds) {
             problems.append(.init(.duration, "Duration must be more than 0 seconds and at most 24 hours."))
         }
+        for p in setup.problems(Self.limits) where p.field == .background { problems.append(.init(.background, p.text)) }
         return problems
     }
 
@@ -82,7 +99,7 @@ public struct CompositionSettings: Sendable, Hashable {
 
 /// A field of the New Composition sheet.
 public enum CompositionField: Sendable, Hashable, CaseIterable {
-    case name, width, height, frameRate, duration
+    case name, width, height, frameRate, duration, background
 }
 
 /// One reason the settings can't make a composition, and the field it's about.

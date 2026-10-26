@@ -42,7 +42,8 @@ extension HaloProject: HeadlessDocument {
         let places = ["place.read", "place.image", "place.replace", "place.reset-size", "place.focus"]  // PH-6: the five place commands
         let styles = StyleCommands.specs(HaloProject.self).map(\.id)  // HY-1: then the eleven style commands
         let files = FileFlowCommands.specs(HaloProject.self).map(\.id)  // HF-3: the suite's file flow, its file.open-recent too
-        let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
+        let window = ["document.read-settings", "document.set-settings"]  // DS-12: the document setup, then
+            + ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
         let all = ids.filter { $0 != "file.open-recent" } + shapes + fills + strokes + history + transforms + rates + places + styles
             + files + window
         #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
