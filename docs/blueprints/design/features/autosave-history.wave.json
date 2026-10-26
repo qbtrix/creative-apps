@@ -2,7 +2,7 @@
   "title": "Autosave, crash recovery and the History panel in Design, on the shared schedule, folder and panel",
   "wave": 3,
   "order": 20,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "design/autosave-history (adopter of S12); RJ-D20, RJ-D33",

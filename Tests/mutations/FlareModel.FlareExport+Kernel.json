@@ -40,5 +40,40 @@
     "find": "        case .idle: nil\n        case .editing(let o), .running(let o, _, _), .finished(let o, _), .failed(let o, _): o\n",
     "replace": "        case .idle, .running: nil\n        case .editing(let o), .finished(let o, _), .failed(let o, _): o\n",
     "tests": "ExportScanTests.swift"
+  },
+  {
+    "label": ".everyFrame: the plan drops the last frame",
+    "file": "Sources/FlareModel/FlareExport+Kernel.swift",
+    "find": "        for i in (0..<count) {\n",
+    "replace": "        for i in (0..<(count - 1)) {\n",
+    "tests": "FlareVideoExportTests"
+  },
+  {
+    "label": ".gifKeepsAlpha: a GIF's frames fill the background",
+    "file": "Sources/FlareModel/FlareExport+Kernel.swift",
+    "find": "fillsBackground: format == .mp4, frames: frames)",
+    "replace": "fillsBackground: true, frames: frames)",
+    "tests": "FlareVideoExportTests"
+  },
+  {
+    "label": ".mp4IsEven: MP4 skips the even rounding",
+    "file": "Sources/FlareModel/FlareExport+Kernel.swift",
+    "find": "evenSize: format == .mp4)",
+    "replace": "evenSize: false)",
+    "tests": "FlareVideoExportTests"
+  },
+  {
+    "label": "a video run counts its file, not its frames",
+    "file": "Sources/FlareModel/FlareExport+Kernel.swift",
+    "find": "        return exportState.start(total: exportRunTotal)\n",
+    "replace": "        return exportState.start(total: exportFileCount)\n",
+    "tests": "FlareVideoExportTests"
+  },
+  {
+    "label": "a video run counts the scene's frames, not the planned rate's",
+    "file": "Sources/FlareModel/FlareExport+Kernel.swift",
+    "find": "        return plan.frames.count\n",
+    "replace": "        return selectedScene?.durationFrames ?? plan.frames.count\n",
+    "tests": "FlareVideoExportTests"
   }
 ]

@@ -6,8 +6,9 @@
 // reads "Undo Change Corner Radius"; drag the Opacity bar to 50%: "Undo
 // Change Opacity"; click Add Stroke: the Width bar reads 1
 // (DesignStroke.default); give the Width bar the keys and press → three
-// times: it reads 4, and the three presses are one "Undo Change Stroke" step,
-// so one Undo puts the width back to 1 (three steps would leave 3); click
+// times: it reads 2.5 (the editor's Width steps by 0.5), and the three quick
+// presses are one "Undo Change Stroke" step (the run lands once the keys
+// rest), so one Undo puts the width back to 1 (three steps would leave 2); click
 // Hidden's row in Layers: Opacity, Radius and Add Stroke are disabled and the
 // hint reads "Show Hidden to change it." The bars are ScrubFields: XCUI finds
 // each as a slider by its `design.inspector.<name>` id (DesignControlID), its
@@ -23,7 +24,8 @@ final class DesignStyleJourneyTests: XCTestCase {
     static let desktopRow = "design.layer.node-1"
     /// The style rows of DesignInspectorStyle, by their DesignControlID.
     static let radius = "design.inspector.corner-radius", opacity = "design.inspector.opacity"
-    static let strokeWidth = "design.inspector.stroke-width", addStroke = "design.inspector.stroke-add"
+    /// The Stroke section is SuiteUI's StrokeEditor alone, so its rows are `suite.stroke.*` (#3864).
+    static let strokeWidth = "suite.stroke.width", addStroke = "suite.stroke.add"
     static let hiddenHint = "Show Hidden to change it."
 
     /// J10: radius typed, opacity dragged, a stroke stepped by keys as one step, and Hidden refused.
@@ -65,13 +67,13 @@ final class DesignStyleJourneyTests: XCTestCase {
         XCTAssert(Self.waitUntil { Self.number(width) == 1 }, "a new stroke's Width reads \(Self.text(width)), not 1")
         XCTAssert(Self.waitForLabel(undo, "Undo Change Stroke"), "Add Stroke made no step (Undo reads \(undo.label))")
 
-        // 4. The Width bar takes the keys (a click opens typing; Escape closes it), then → three times: 4.
+        // 4. The Width bar takes the keys (a click opens typing; Escape closes it), then → three times: 2.5.
         width.click()
         design.press(.escape)
         for _ in 0..<3 { design.press(.rightArrow) }
-        XCTAssert(Self.waitUntil { Self.number(width) == 4 }, "→ three times left Width at \(Self.text(width)), not 4")
+        XCTAssert(Self.waitUntil { Self.number(width) == 2.5 }, "→ three times left Width at \(Self.text(width)), not 2.5")
         XCTAssertEqual(undo.label, "Undo Change Stroke", "the → run made no Change Stroke step")
-        design.shot("style-stroke-width-4")
+        design.shot("style-stroke-width-stepped")
 
         // 5. One Undo takes back the whole → run: Width reads 1, the Add Stroke step's width.
         undo.click()

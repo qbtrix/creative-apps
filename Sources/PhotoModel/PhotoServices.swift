@@ -4,6 +4,8 @@
 // member from its Live file, where a feature that isn't built yet returns
 // its NotBuilt stand-in, whose `unavailableHelp` disables the controls that
 // need it. Linux-safe.
+import SuiteModel
+
 public struct PhotoServices: Sendable {
     public var archive: any DocumentArchiving
     public var recovery: any RecoveryStoring
@@ -15,16 +17,18 @@ public struct PhotoServices: Sendable {
     public var adjustmentLayers: any AdjustmentLayering
     public var transform: any LayerTransforming
     public var exportSizing: any ExportSizing
-    public var sampling: any ColorSampling
+    /// Measures, lists and draws text layers' words. FakeText (a clear frame) by default; the window sets
+    /// SuiteText's LiveText (`PhotoWindow.liveServices`), which this Linux-safe module can't reach.
+    public var text: any TextServices = FakeText()
 
     public init(archive: any DocumentArchiving, recovery: any RecoveryStoring, clipboard: any PixelClipboard,
                 merging: any LayerMerging, crop: any CropSizing, selection: any SelectionShaping,
                 masking: any LayerMasking, adjustmentLayers: any AdjustmentLayering,
-                transform: any LayerTransforming, exportSizing: any ExportSizing, sampling: any ColorSampling) {
+                transform: any LayerTransforming, exportSizing: any ExportSizing) {
         self.archive = archive; self.recovery = recovery; self.clipboard = clipboard; self.merging = merging
         self.crop = crop; self.selection = selection; self.masking = masking
         self.adjustmentLayers = adjustmentLayers; self.transform = transform
-        self.exportSizing = exportSizing; self.sampling = sampling
+        self.exportSizing = exportSizing
     }
 
     /// Every use case on its fake: deterministic, instant, no file system.
@@ -33,8 +37,7 @@ public struct PhotoServices: Sendable {
         PhotoServices(
             archive: FakeArchive(), recovery: FakeRecovery(), clipboard: FakeClipboard(), merging: FakeMerging(),
             crop: FakeCrop(), selection: FakeSelection(), masking: FakeMasking(),
-            adjustmentLayers: FakeAdjustmentLayers(), transform: FakeTransform(), exportSizing: FakeExportSizing(),
-            sampling: FakeSampling())
+            adjustmentLayers: FakeAdjustmentLayers(), transform: FakeTransform(), exportSizing: FakeExportSizing())
     }
 
     /// Every use case on its live conformance, each from its feature's file
@@ -45,6 +48,6 @@ public struct PhotoServices: Sendable {
             archive: LiveDocuments.archive(), recovery: LiveDocuments.recovery(), clipboard: LiveEdit.clipboard(),
             merging: LiveEdit.merging(), crop: LiveCrop.make(), selection: LiveSelection.selection(),
             masking: LiveSelection.masking(), adjustmentLayers: LiveAdjustmentLayers.make(),
-            transform: LiveTransform.make(), exportSizing: LiveExportSizing.make(), sampling: LiveSampling.make())
+            transform: LiveTransform.make(), exportSizing: LiveExportSizing.make())
     }
 }

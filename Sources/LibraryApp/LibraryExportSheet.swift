@@ -1,6 +1,12 @@
 // LibraryExportSheet.swift: File > Export… (export EX-6): editing, the progress
 // row, the summary. Values in, closures out; a nil action disables its control.
+// Each control but the dismiss-only Cancel and Done, and the name alert's Save
+// (#4208), is its catalog command's MenuCommand on the window's catalog
+// (command-state CS-6), so it is off with the command's reason too. The
+// Metadata row (export-pack LX-2) picks the kernel's ExportMetadata policy,
+// read through the shared ExportPick (`pick`).
 import LibraryModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -14,14 +20,17 @@ struct LibraryExportSheet: View {
 
     let state: ExportState, count: Int, preview: String?, writable: Set<ExportFormat>, exportHelp: String?
     let presets: [ExportPreset], actions: Actions, progressDelay: Duration
+    /// The window's catalog, which the controls' specs read; nil (a snapshot) leaves the actions alone to decide.
+    var catalog: LibraryCatalog?
     @State private var longEdgeText: String
     @State private var qualityText: String
     @State private var savingPreset = false
     @State private var presetName = ""
 
     init(state: ExportState, count: Int, preview: String?, writable: Set<ExportFormat>, exportHelp: String?,
-         presets: [ExportPreset], actions: Actions = Actions(), progressDelay: Duration = .milliseconds(100)) {
-        (self.state, self.count, self.preview, self.writable) = (state, count, preview, writable)
+         presets: [ExportPreset], actions: Actions = Actions(), progressDelay: Duration = .milliseconds(100),
+         catalog: LibraryCatalog? = nil) {
+        (self.state, self.count, self.preview, self.writable, self.catalog) = (state, count, preview, writable, catalog)
         (self.exportHelp, self.presets, self.actions, self.progressDelay) = (exportHelp, presets, actions, progressDelay)
         let options = Self.options(state)
         _longEdgeText = State(initialValue: options?.longEdge.map(String.init) ?? "")
@@ -67,7 +76,8 @@ struct LibraryExportSheet: View {
                 HStack(spacing: SuiteSpacing.s) {
                     Text(URL(fileURLWithPath: options.folder).lastPathComponent).lineLimit(1).truncationMode(.middle)
                         .help(options.folder).accessibilityIdentifier("library.export.folder")
-                    Button("Choose…") { actions.chooseFolder?() }.disabled(actions.chooseFolder == nil)
+                    MenuCommand("export.set-folder", on: catalog, title: "Choose…", action: actions.chooseFolder,
+                                reason: Self.notEditing)
                         .accessibilityIdentifier("library.export.chooseFolder")
                 }
             }
@@ -77,11 +87,20 @@ struct LibraryExportSheet: View {
                 }
                 .help(formatHelp)
             }
+            LabeledContent("Metadata") {
+                ChoiceChips(options: Self.metadataOptions, selected: Self.pick(options).metadata) {
+                    (policy: ExportMetadata) -> Void in change { $0.metadata = policy }
+                }
+                .help("What the exported files keep of each photo's metadata.")
+            }
             TextField("Name", text: Binding(get: { options.naming.template }, set: { setTemplate($0) }))
                 .help(options.naming.help ?? "Tokens: {name}, {date}, {seq}, {rating}.")
                 .accessibilityIdentifier("library.export.name")
             Menu("Preset") {
-                ForEach(presets) { (preset: ExportPreset) in Button(preset.name) { actions.applyPreset?(preset) } }
+                ForEach(presets) { (preset: ExportPreset) in
+                    MenuCommand("export.apply-preset", on: catalog, title: preset.name, action: apply(preset),
+                                reason: ExportPresets.unavailable ?? Self.notEditing)
+                }
             }
             .disabled(actions.applyPreset == nil || presets.isEmpty)
             .help(ExportPresets.unavailable ?? "Apply a saved preset.")
@@ -94,14 +113,14 @@ struct LibraryExportSheet: View {
         Text(preview ?? "").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText)
             .accessibilityIdentifier("library.export.preview")
         HStack {
-            Button("Save as Preset…") { savingPreset = true }.disabled(actions.savePreset == nil)
-                .help(ExportPresets.unavailable ?? "Save these settings under a name.")
+            MenuCommand("export.save-preset", on: catalog, title: "Save as Preset…", action: askPresetName,
+                        reason: ExportPresets.unavailable ?? Self.notEditing)
                 .accessibilityIdentifier("library.export.savePreset")
             Spacer()
             Button("Cancel") { actions.close?() }.keyboardShortcut(.cancelAction)
                 .accessibilityIdentifier("library.export.cancel")
-            Button("Export") { actions.export?() }.keyboardShortcut(.defaultAction)
-                .disabled(actions.export == nil || blocked != nil).help(blocked ?? "Export")
+            MenuCommand("file.export", on: catalog, title: "Export", action: blocked == nil ? actions.export : nil,
+                        reason: blocked ?? Self.notEditing, shortcut: .defaultAction)
                 .accessibilityIdentifier("library.export.export")
         }
         .alert("Save as Preset", isPresented: $savingPreset) {
@@ -116,7 +135,8 @@ struct LibraryExportSheet: View {
                  fraction: (done, total), delay: progressDelay)
         HStack {
             Spacer()
-            Button("Cancel") { actions.cancel?() }.keyboardShortcut(.cancelAction).disabled(actions.cancel == nil)
+            MenuCommand("export.cancel", on: catalog, title: "Cancel", action: actions.cancel,
+                        reason: "No export is running.", shortcut: .cancelAction)
                 .accessibilityIdentifier("library.export.cancel")
         }
     }
@@ -134,12 +154,14 @@ struct LibraryExportSheet: View {
         }
         HStack {
             if !summary.failedIDs.isEmpty {
-                Button("Try Again") { actions.retry?() }.disabled(actions.retry == nil)
+                MenuCommand("export.retry", on: catalog, title: "Try Again", action: actions.retry,
+                            reason: "No photos failed to export.")
                     .accessibilityIdentifier("library.export.retry")
             }
             Spacer()
             if !summary.written.isEmpty {
-                Button("Show in Finder") { actions.showInFinder?() }.disabled(actions.showInFinder == nil)
+                MenuCommand("export.show-in-finder", on: catalog, title: "Show in Finder", action: actions.showInFinder,
+                            reason: "Nothing has been exported yet.")
                     .accessibilityIdentifier("library.export.showInFinder")
             }
             Button("Done") { actions.close?() }.keyboardShortcut(.defaultAction)
@@ -148,6 +170,32 @@ struct LibraryExportSheet: View {
     }
 
     nonisolated static let sizes = [1024, 2048, 4096, 0]
+
+    /// The Metadata row's chips: the kernel's policies under their own titles.
+    nonisolated static let metadataOptions: [InspectorOption<ExportMetadata>] = ExportMetadata.allCases.map {
+        InspectorOption(id: $0, title: $0.title, identifier: "library.export.metadata.\($0.rawValue)")
+    }
+
+    /// The options as the shared sheet rows read them (SuiteUI's ExportPick): format, quality 0...1 and the
+    /// metadata policy; the long edge is Library's own field, so the scale stays 1.
+    nonisolated static func pick(_ options: ExportOptions) -> ExportPick {
+        ExportPick(format: options.format.rawValue, quality: Double(options.quality) / 100, metadata: options.metadata)
+    }
+
+    /// Why an editing control is off with no action: the sheet isn't editing.
+    nonisolated static let notEditing = "The export sheet isn't editing."
+
+    /// Apply Preset's action for `preset`, nil while presets can't apply.
+    private func apply(_ preset: ExportPreset) -> LibraryMenu.Action? {
+        guard let applyPreset = actions.applyPreset else { return nil }
+        return { applyPreset(preset) }
+    }
+
+    /// Save as Preset…'s action: asks for the name, then Save runs the window's save; nil while it can't save.
+    private var askPresetName: LibraryMenu.Action? {
+        guard actions.savePreset != nil else { return nil }
+        return { savingPreset = true }
+    }
 
     nonisolated static func title(_ count: Int) -> String { count == 1 ? "Export 1 Photo" : "Export \(count) Photos" }
 

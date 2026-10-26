@@ -1,0 +1,16 @@
+[
+  {
+    "label": "brushColorSwapsRedBlue: a picked hex color becomes a brush color edit with red and blue swapped",
+    "file": "Sources/PhotoApp/PhotoToolOptions.swift",
+    "find": ".color(red: hex.red, green: hex.green, blue: hex.blue)",
+    "replace": ".color(red: hex.blue, green: hex.green, blue: hex.red)",
+    "tests": "PhotoHexColorBridgeTests"
+  },
+  {
+    "label": "hexOutSwapsGreenBlue: the brush color shows in the color row with green and blue swapped",
+    "file": "Sources/PhotoApp/PhotoToolOptions.swift",
+    "find": "var hex: HexColor { HexColor(red, green, blue) }",
+    "replace": "var hex: HexColor { HexColor(red, blue, green) }",
+    "tests": "PhotoHexColorBridgeTests"
+  }
+]

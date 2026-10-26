@@ -1,17 +1,23 @@
 // FlareJourneyTests+Recovery.swift: J28 of layers-files (LF-5;
 // docs/blueprints/flare/features/layers-files.md, Journey step 5). On
 // `-FlareSample bounce` with `-FlareSaveTo` a folder the test made read-only
-// and `-FlareRecoveryFile` in this test's temp folder: New Layer, then the
-// toolbar's Save shows the save alert, and after OK `flare.saveStatus` still
-// reads "Not saved" (in the error color; the shot shows it). Then Select
-// drags Ball (at (80, 100) on frame 0) 100 scene points right; the autosave
-// writes the recovery file 30 s after that last edit. `app.terminate()`
-// stands in for a crash; a relaunch on the same recovery file with no
-// document offers "Restore the unsaved animation from <time>?" with
-// `flare.recovery.restore` and `flare.recovery.discard`. Restore brings back
-// the document, edited and untitled, with Ball at the moved spot: a click
-// there selects Ball's track, a click where Ball was doesn't. One shot per
-// step, `flare-recovery-<step>`.
+// and `-SuiteSupportDir` in this test's temp folder (a store of its own keeps
+// recovery on under the Journey's `-ApplePersistenceIgnoreState`; AK-4): New
+// Layer, then the toolbar's Save shows the save alert, and after OK
+// `flare.saveStatus` still reads "Not saved" (in the error color; the shot
+// shows it). Then Select drags Ball (at (80, 100) on frame 0) 100 scene
+// points right; the suite's `.autosaveRecovery` writes `flare.main.flare`
+// and then `flare.main.json` under `<support>/Flare/Recovery/` 30 s after
+// that last edit. A second drag moves Ball 100 points further, and ⌘Q
+// quits well inside the next 30 s, so only the quit's own write can keep it.
+// A relaunch on the same store with no document offers "Restore the
+// autosaved changes to “<name>”?" with "Autosaved <time>." and its Restore
+// and Discard buttons, found by `suite.recovery.restore` and
+// `suite.recovery.discard` or, since SwiftUI drops an alert button's
+// identifier, by their titles. Restore brings back
+// the document, edited and untitled, with Ball where the second drag left
+// it: a click there selects Ball's track, a click at the first drag's spot
+// doesn't. One shot per step, `flare-recovery-<step>`.
 import XCTest
 
 final class FlareRecoveryJourneys: XCTestCase {
@@ -26,8 +32,10 @@ final class FlareRecoveryJourneys: XCTestCase {
             try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: locked.path)
             try? FileManager.default.removeItem(at: folder)
         }
-        let recovery = folder.appending(path: "Recovery.flare")
-        let recoveryFlag = ["-FlareRecoveryFile", recovery.path]
+        let support = folder.appending(path: "support")
+        // The JSON is written after the bytes, so its file means a whole copy.
+        let recovery = support.appending(path: "Flare/Recovery/flare.main.json")
+        let recoveryFlag = ["-SuiteSupportDir", support.path]
 
         // 1. An edit, then Save into a read-only folder: the alert, then "Not saved" in the window.
         var flare = launch(["-FlareSample", "bounce", "-FlareSaveTo", locked.path] + recoveryFlag)
@@ -66,21 +74,34 @@ final class FlareRecoveryJourneys: XCTestCase {
         XCTAssertGreaterThanOrEqual(waited, 25, "it autosaved \(waited) s after the drag; the delay is 30 s")
         flare.shot("recovery-2-autosaved")
 
-        // 3. A crash, then a launch with no document: the offer with its time, Restore and Discard.
-        flare.app.terminate()
+        // 3. A second drag, ⌘Q before its autosave is due, then a launch with no document: the offer with its
+        // time, Restore and Discard.
+        point(180, 100, on: canvas).press(forDuration: 0.1, thenDragTo: point(280, 100, on: canvas))
+        let movedAgain = Date()
+        flare.press(character: "q", .command)
+        XCTAssert(flare.app.wait(for: .notRunning, timeout: 15), "⌘Q didn't quit Flare")
+        let quitAfter = Date().timeIntervalSince(movedAgain)
+        XCTAssertLessThan(quitAfter, 25, "the quit came \(quitAfter) s after the second drag, near its autosave")
         flare = launch(recoveryFlag)
         let offer = flare.app.staticTexts.matching(NSPredicate(
             format: "label BEGINSWITH %@ OR value BEGINSWITH %@",
-            "Restore the unsaved animation from ", "Restore the unsaved animation from ")).firstMatch
+            "Restore the autosaved changes to ", "Restore the autosaved changes to ")).firstMatch
         XCTAssert(offer.waitForExistence(timeout: 30), "the relaunch offered no restore")
         let text = [offer.label, offer.value as? String ?? ""].first { $0.hasPrefix("Restore ") } ?? offer.label
-        XCTAssert(text.hasSuffix("?") && text.contains { $0.isNumber }, "the offer reads \(text), not one with a time")
-        let restore = flare.app.buttons["flare.recovery.restore"]
-        XCTAssert(restore.waitForExistence(timeout: 5), "the offer has no Restore (flare.recovery.restore)")
-        XCTAssert(flare.app.buttons["flare.recovery.discard"].exists, "the offer has no Discard (flare.recovery.discard)")
+        XCTAssert(text.hasSuffix("?"), "the offer reads \(text), not a question")
+        let time = flare.app.staticTexts.matching(NSPredicate(
+            format: "label BEGINSWITH %@ OR value BEGINSWITH %@", "Autosaved ", "Autosaved ")).firstMatch
+        XCTAssert(time.waitForExistence(timeout: 5), "the offer doesn't say when the copy was autosaved")
+        let when = [time.label, time.value as? String ?? ""].first { $0.hasPrefix("Autosaved ") } ?? time.label
+        XCTAssert(when.contains { $0.isNumber }, "the offer's message reads \(when), not one with a time")
+        // SwiftUI drops an alert button's accessibility identifier, so the suite's offer is found by its title
+        // too (Photo's NSAlert offer sets its own; PhotoWindow+File.swift).
+        let restore = offerButton("suite.recovery.restore", "Restore", flare)
+        XCTAssert(restore.waitForExistence(timeout: 5), "the offer has no Restore (suite.recovery.restore)")
+        XCTAssert(offerButton("suite.recovery.discard", "Discard", flare).exists, "the offer has no Discard (suite.recovery.discard)")
         flare.shot("recovery-3-offer")
 
-        // 4. Restore: edited and untitled, Ball where the drag left it.
+        // 4. Restore: edited and untitled, Ball where the second drag left it.
         restore.click()
         XCTAssert(offer.waitForNonExistence(timeout: 10), "the offer stayed up after Restore")
         let stage = flare.element("suite.canvas")
@@ -94,14 +115,19 @@ final class FlareRecoveryJourneys: XCTestCase {
         let ball = flare.element("flare.timeline").buttons.matching(
             NSPredicate(format: "label == 'Ball'")).firstMatch
         XCTAssert(ball.waitForExistence(timeout: 5), "no Ball track in the timeline")
-        point(80, 100, on: stage).click()
-        XCTAssert(waitFor { !ball.isSelected }, "a click where Ball was still hits Ball after Restore")
         point(180, 100, on: stage).click()
-        XCTAssert(waitFor { ball.isSelected }, "Restore lost the move: Ball isn't at the moved spot")
+        XCTAssert(waitFor { !ball.isSelected }, "Ball is at the first drag's spot: the quit didn't write the second")
+        point(280, 100, on: stage).click()
+        XCTAssert(waitFor { ball.isSelected }, "Restore lost the second drag: Ball isn't where it was left")
         flare.shot("recovery-4-restored")
     }
 
     // MARK: - Helpers
+
+    /// The offer's button called `id`, or titled `title` when SwiftUI dropped the identifier.
+    @MainActor private func offerButton(_ id: String, _ title: String, _ flare: Journey) -> XCUIElement {
+        flare.app.buttons.matching(NSPredicate(format: "identifier == %@ OR label == %@", id, title)).firstMatch
+    }
 
     @MainActor private func launch(_ arguments: [String]) -> Journey {
         let flare = Journey("Flare", self, arguments: arguments)

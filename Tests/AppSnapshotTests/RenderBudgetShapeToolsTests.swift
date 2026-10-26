@@ -5,9 +5,11 @@
 // and logs it, and counts the window's own bodies: 120 increments of
 // `suite.shape.points` (the way VoiceOver and XCUI adjust it) run at most 3
 // window bodies (target 0: only the page and the row redraw). The star drag
-// row waits on SH-7: the page's canvas gesture ignores the harness's
-// window-activation presses until it opts in. Nested in BodyCountSuites: it
-// reads a global body counter. macOS only.
+// (SH-8, quality row "render: 120-sample star drag") hosts the gallery page
+// itself on Star and drags 120 samples across its canvas: at most 3 window
+// bodies (target 0: the canvas keeps the live shape in its own state), and the
+// page logs one `shape.draw` "Draw Star". Nested in BodyCountSuites: it reads
+// a global body counter. macOS only.
 #if canImport(AppKit)
 import AppKit
 import SuiteKernel
@@ -36,15 +38,37 @@ extension BodyCountSuites {
             }
             expectBodies(step, atMost: 3, target: 0)
         }
+
+        @Test(.timeLimit(.minutes(2))) func starDragInThreeBodies() async throws {
+            let w = RenderBudgetWindow(ShapeToolsBudgetWindow(drawing: true))
+            defer { w.close() }
+            let bodies = { () -> Int? in
+                #if DEBUG
+                return ShapeToolsBudgetWindow.bodyRuns
+                #else
+                return nil
+                #endif
+            }
+            try await w.settle(untilStable: bodies)
+            let canvas = try #require(await w.element("suite.gallery.shape-canvas"), "the page shows no shape canvas")
+            let start = CGPoint(x: canvas.minX + 40, y: canvas.maxY - 40)
+            let step = try await w.measure("shape-tools star drag, 120 samples", bodies: bodies) {
+                try await w.drag(from: start, by: CGVector(dx: 160, dy: -120))
+            }
+            let log = w.label("suite.gallery.log") ?? ""
+            #expect(log.contains("drag star") && log.contains("Draw Star"), "the drag drew no star: \(log)")
+            expectBodies(step, atMost: 3, target: 0)
+        }
     }
 }
 
-/// The counted window: a header over the page, which owns the spec.
+/// The counted window: a header over the page, which owns the spec; `drawing` hosts the gallery page on Star instead.
 private struct ShapeToolsBudgetWindow: View {
     #if DEBUG
     // view-static: main-actor
     static var bodyRuns = 0
     #endif
+    var drawing = false
 
     var body: some View {
         #if DEBUG
@@ -52,7 +76,7 @@ private struct ShapeToolsBudgetWindow: View {
         #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             Text("Shape tool").font(SuiteFont.sectionCaps).foregroundStyle(SuiteColor.secondaryText)
-            ShapeToolsBudgetPage()
+            if drawing { GalleryShapeToolsPage(tool: .defaults(.star)) } else { ShapeToolsBudgetPage() }
         }
         .padding(SuiteSpacing.m)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

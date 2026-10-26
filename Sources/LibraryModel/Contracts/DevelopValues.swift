@@ -1,5 +1,7 @@
 // Contracts/DevelopValues.swift: a photo's develop settings (ten sliders, a
 // tone curve, levels), its crop, and the histogram the develop panel draws.
+// Levels and curve points are SuiteImaging's types; ToneCurve stays Library's
+// own (its ends pinned to 0 and 1, a 0.01 gap) with AdjustCurve conversions.
 // Settings are edit instructions, never pixels; neutral settings render the
 // photo unchanged. Coded by hand so a catalog written before a field existed
 // opens with it neutral, and a neutral new field adds no key.
@@ -9,6 +11,9 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
+import SuiteImaging
+import SuiteKernel
+import SuiteModel
 
 /// One develop slider. The raw value is the row's label.
 public enum DevelopSlider: String, CaseIterable, Sendable, Codable {
@@ -38,11 +43,9 @@ public enum DevelopGroup: String, CaseIterable, Sendable {
     public var sliders: [DevelopSlider] { DevelopSlider.allCases.filter { $0.group == self } }
 }
 
-/// One point of the tone curve, both coordinates sRGB values in 0...1.
-public struct DevelopCurvePoint: Hashable, Sendable, Codable {
-    public var x: Double, y: Double
-    public init(x: Double, y: Double) { self.x = x; self.y = y }
-}
+/// One point of the tone curve, both coordinates sRGB values in 0...1:
+/// SuiteImaging's point, with the catalog's `x` and `y` keys.
+public typealias DevelopCurvePoint = AdjustCurvePoint
 
 /// The develop tone curve: a monotone cubic through its points (CoreRaster
 /// `curves`), applied to sRGB values. Always valid: built only through `init?`.
@@ -105,59 +108,10 @@ public struct ToneCurve: Hashable, Sendable, Codable {
     }
 }
 
-/// The develop levels, CoreRaster `levels` on sRGB values.
-public struct DevelopLevels: Hashable, Sendable, Codable {
-    /// The raw value is the row's label.
-    public enum Field: String, CaseIterable, Sendable {
-        case inBlack = "Black Point", gamma = "Midtones", inWhite = "White Point"
-        case outBlack = "Output Black", outWhite = "Output White"
-    }
-    public static let neutral = DevelopLevels()
-    public static let gammaRange: ClosedRange<Double> = 0.1...9.99
-    /// The least gap between the black and white points: one byte level.
-    public static let pointGap = 1.0 / 255
-    /// sRGB values in 0...1 (the rows show them as 0...255); gamma over 1 brightens.
-    public private(set) var inBlack = 0.0, inWhite = 1.0, gamma = 1.0, outBlack = 0.0, outWhite = 1.0
-    public init() {}
-
-    /// A decoded file goes through `setting`, so damaged levels can't reach the renderer.
-    public init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        var levels = DevelopLevels.neutral
-        for (field, key) in [(Field.outBlack, CodingKeys.outBlack), (.outWhite, .outWhite), (.gamma, .gamma),
-                             (.inWhite, .inWhite), (.inBlack, .inBlack)] {
-            if let value = try container.decodeIfPresent(Double.self, forKey: key) {
-                levels = levels.setting(field, to: value)
-            }
-        }
-        self = levels
-    }
-
-    public func value(_ field: Field) -> Double {
-        switch field {
-        case .inBlack: inBlack
-        case .gamma: gamma
-        case .inWhite: inWhite
-        case .outBlack: outBlack
-        case .outWhite: outWhite
-        }
-    }
-
-    /// Clamped to the field's range; NaN or infinity gives the neutral value. The
-    /// black and white points stay at least `pointGap` apart: the one being moved stops there.
-    public func setting(_ field: Field, to value: Double) -> DevelopLevels {
-        let wanted = value.isFinite ? value : Self.neutral.value(field)
-        var copy = self
-        switch field {
-        case .inBlack: copy.inBlack = min(max(wanted, 0), inWhite - Self.pointGap)
-        case .gamma: copy.gamma = min(max(wanted, Self.gammaRange.lowerBound), Self.gammaRange.upperBound)
-        case .inWhite: copy.inWhite = min(max(wanted, inBlack + Self.pointGap), 1)
-        case .outBlack: copy.outBlack = min(max(wanted, 0), 1)
-        case .outWhite: copy.outWhite = min(max(wanted, 0), 1)
-        }
-        return copy
-    }
-}
+/// The develop levels, CoreRaster `levels` on sRGB values: SuiteImaging's
+/// levels, which read and write the catalog's keys (`inBlack` ... `outWhite`,
+/// 0...1). The rows, `Field` and the setters are LibraryDevelop+Imaging.swift.
+public typealias DevelopLevels = AdjustLevels
 
 public struct DevelopSettings: Hashable, Sendable, Codable {
     public private(set) var exposure: Double = 0
@@ -172,6 +126,8 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
     public private(set) var levels = DevelopLevels.neutral
     /// Nil: the whole photo, upright.
     public private(set) var crop: CropSettings?
+    /// How the photo faces before its crop (orientation-crop OC-8); up writes no key.
+    public private(set) var orientation: Orientation = .up
 
     public static let neutral = DevelopSettings()
     public init() {}
@@ -235,10 +191,17 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         return copy
     }
 
-    /// Every adjustment of `other` with this crop: Paste Settings never pastes a crop.
+    public func setting(orientation: Orientation) -> DevelopSettings {
+        var copy = self
+        copy.orientation = orientation
+        return copy
+    }
+
+    /// Every adjustment of `other` with this crop and orientation: Paste Settings never pastes either.
     public func pastingAdjustments(from other: DevelopSettings) -> DevelopSettings {
         var copy = other
         copy.crop = crop
+        copy.orientation = orientation
         return copy
     }
 
@@ -253,7 +216,7 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
 
     private enum CodingKeys: String, CodingKey {
         case exposure, contrast, highlights, shadows, temperature, tint, crop
-        case whites, blacks, vibrance, saturation, curve, levels
+        case whites, blacks, vibrance, saturation, curve, levels, orientation
     }
 
     /// The six original sliders are required, as the synthesized coding had them;
@@ -274,6 +237,7 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         let decodedCurve = try c.decodeIfPresent(ToneCurve.self, forKey: .curve) ?? .identity
         curve = decodedCurve.isIdentity ? .identity : decodedCurve
         levels = try c.decodeIfPresent(DevelopLevels.self, forKey: .levels) ?? .neutral
+        orientation = try c.decodeIfPresent(Orientation.self, forKey: .orientation) ?? .up
     }
 
     /// The six original sliders always and the crop when set (so persist's golden
@@ -293,6 +257,7 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         if saturation != 0 { try c.encode(saturation, forKey: .saturation) }
         if !curve.isIdentity { try c.encode(curve, forKey: .curve) }
         if levels != .neutral { try c.encode(levels, forKey: .levels) }
+        if orientation != .up { try c.encode(orientation, forKey: .orientation) }
     }
 }
 
@@ -305,24 +270,20 @@ public struct UnitRect: Hashable, Sendable, Codable {
     }
 }
 
-/// The crop's aspect. The raw value is the chip's title.
-public enum CropAspect: String, CaseIterable, Sendable, Codable {
-    case original = "Original", free = "Free", square = "1:1"
-    case fourFive = "4:5", threeTwo = "3:2", sixteenNine = "16:9"
+/// The crop's aspect: the kernel's (orientation-crop OC-8), whose raw values are the stored keys.
+public typealias CropAspect = SuiteKernel.CropAspect
+
+extension SuiteKernel.CropAspect {
+    public static let square = CropAspect.ratio(width: 1, height: 1)
+    public static let fourFive = CropAspect.ratio(width: 4, height: 5)
+    public static let threeTwo = CropAspect.ratio(width: 3, height: 2)
+    public static let sixteenNine = CropAspect.ratio(width: 16, height: 9)
+    /// Library's chips, in order.
+    public static let allCases: [CropAspect] = [.original, .free, .square, .fourFive, .threeTwo, .sixteenNine]
 
     /// Width over height for a photo of `size` (a 3:2 on a portrait photo is 2:3); nil for Free.
     public func ratio(for size: PixelSize) -> Double? {
-        let portrait = size.height > size.width
-        let base: Double? = switch self {
-        case .free: nil
-        case .original: size.height > 0 ? Double(size.width) / Double(size.height) : nil
-        case .square: 1
-        case .fourFive: 4.0 / 5.0
-        case .threeTwo: 3.0 / 2.0
-        case .sixteenNine: 16.0 / 9.0
-        }
-        guard let base, self != .original, self != .square else { return base }
-        return portrait == (base > 1) ? 1 / base : base
+        ratio(for: (Double(size.width), Double(size.height)), orientation: nil)
     }
 }
 
@@ -357,11 +318,9 @@ public struct HistogramBins: Hashable, Sendable {
         self.red = red; self.green = green; self.blue = blue
         self.shadowClipped = shadowClipped; self.highlightClipped = highlightClipped
     }
-    /// Each channel scaled to 0...1 by the tallest bin of all three; all 0 (never NaN) when empty.
-    public var heights: (red: [Double], green: [Double], blue: [Double]) {
-        let tallest = Double(max(red.max() ?? 0, green.max() ?? 0, blue.max() ?? 0))
-        let scale: ([Int]) -> [Double] = { bins in bins.map { tallest > 0 ? Double($0) / tallest : 0 } }
-        return (scale(red), scale(green), scale(blue))
+    /// The suite's display shape: the three channels summed per bin, the tallest at 1, with the clip flags.
+    public var tone: ToneHistogram {
+        ToneHistogram(channels: [red, green, blue], shadowClipped: shadowClipped, highlightClipped: highlightClipped)
     }
 }
 
@@ -369,12 +328,16 @@ public struct HistogramBins: Hashable, Sendable {
 /// way; full is the screen-size render it settles to.
 public enum RenderQuality: String, Sendable, Hashable { case preview, full }
 
-/// The loupe's picture and its histogram.
+/// The loupe's picture and its histogram. `tone`, the histogram's display
+/// shape, is made where the render is (LiveLoupeImaging's actor, off the main
+/// thread), once per render, so the window only reads it.
 public struct RenderedPhoto: Hashable, Sendable {
     public var image: DisplayImage
-    public var histogram: HistogramBins
+    public var histogram: HistogramBins { didSet { tone = histogram.tone } }
+    public private(set) var tone: ToneHistogram
     public var quality: RenderQuality
     public init(image: DisplayImage, histogram: HistogramBins, quality: RenderQuality) {
         self.image = image; self.histogram = histogram; self.quality = quality
+        tone = histogram.tone
     }
 }

@@ -2,11 +2,12 @@
 // DV-2 landed every signature with a body that changes nothing, so the panel
 // (DV-8 to DV-10) builds over them; DV-3 fills the slider, curve and levels
 // edits, the drag's end, the resets and the helps, and DV-4 copy, paste,
-// sync and the histogram helpers. Every edit goes through `recordEdit`, the
+// sync and the histogram (the loupe render's shared ToneHistogram). Every edit goes through `recordEdit`, the
 // catalog's undo history; a drag's samples share one coalesce key, and the
 // grid's thumbnails of the changed photos drop once, when the drag ends.
 // Paste and sync are each one step over every photo they change, and never
 // touch a crop. Linux-safe.
+import SuiteModel
 
 extension LibraryCatalog {
     /// The loupe photo in the loupe, else the selection.
@@ -155,18 +156,8 @@ extension LibraryCatalog {
 
     /// The loupe's render error, shown in the panel.
     public var developError: String? { loupeError }
-    /// "Shadows clipped", "Highlights clipped" while any pixel clips.
-    public var histogramClips: [String] {
-        let bins = loupeRender?.histogram ?? .empty
-        return (bins.shadowClipped > 0 ? ["Shadows clipped"] : []) + (bins.highlightClipped > 0 ? ["Highlights clipped"] : [])
-    }
-    /// The loupe histogram's three channels summed per bin, scaled 0...1, for the curve's backdrop.
-    public var curveHistogram: [Double] {
-        let bins = loupeRender?.histogram ?? .empty
-        let sums = zip(zip(bins.red, bins.green), bins.blue).map { $0.0 + $0.1 + $1 }
-        let tallest = Double(sums.max() ?? 0)
-        return sums.map { tallest > 0 ? Double($0) / tallest : 0 }
-    }
+    /// The loupe render's histogram as the suite's shape (made with the render); empty with none yet.
+    public var toneHistogram: ToneHistogram { loupeRender?.tone ?? .empty }
 
     /// Exposure as "+1.00" (signed, two places); the rest as whole numbers.
     private static func developText(_ value: Double, _ slider: DevelopSlider) -> String {

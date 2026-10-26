@@ -2,8 +2,8 @@
   "title": "Text for the suite: measure spans, list fonts and draw placed glyphs on Core Text",
   "wave": 5,
   "order": 20,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#3725",
   "beta": true,
   "covers": "beta-80 plan row E8, the macOS half (suite-shell shell-text, contract in suite-model); Halo's Core Text rasterizer as the code to move",
   "waits_on": "suite-contracts (built); the shell-media slice SM-a first, for the two SuiteServices files (soft, a slice wait); creative-core text-engine's layout feeds on these metrics (soft: nothing here imports FlareCore)",
@@ -32,11 +32,11 @@
     "Sources/SuiteModel/Values/Text+Rules.swift",
     "Tests/mutations/SuiteModel.TextRules.json",
     "Tests/mutations/SuiteModel.FakeText.json",
-    "Sources/SuiteShell/Text/CoreTextMeasurer.swift",
-    "docs/c4/parts/creative-apps/suite-shell/shell-text.json",
-    "Sources/SuiteShell/Text/FontCatalog.swift",
-    "Sources/SuiteShell/Text/GlyphRasterizer.swift",
-    "Sources/SuiteShell/Text/LiveText.swift",
+    "Sources/SuiteText/CoreTextMeasurer.swift",
+    "docs/c4/parts/creative-apps/suite-text/shell-text.json",
+    "Sources/SuiteText/FontCatalog.swift",
+    "Sources/SuiteText/GlyphRasterizer.swift",
+    "Sources/SuiteText/LiveText.swift",
     "Tests/AppSnapshotTests/ShellTextLiveTests.swift",
     "docs/blueprints/suite/features/shell-text.wave.json"
   ],
@@ -118,12 +118,12 @@
       },
       "ui": false,
       "owned": [
-        "Sources/SuiteShell/Text/CoreTextMeasurer.swift",
+        "Sources/SuiteText/CoreTextMeasurer.swift",
         "Tests/AppSnapshotTests/ShellTextMeasureTests.swift",
-        "docs/c4/parts/creative-apps/suite-shell/shell-text.json",
-        "Sources/SuiteShell/Text/FontCatalog.swift",
+        "docs/c4/parts/creative-apps/suite-text/shell-text.json",
+        "Sources/SuiteText/FontCatalog.swift",
         "Tests/AppSnapshotTests/ShellFontListTests.swift",
-        "Sources/SuiteShell/Text/GlyphRasterizer.swift",
+        "Sources/SuiteText/GlyphRasterizer.swift",
         "Tests/AppSnapshotTests/ShellTextDrawTests.swift"
       ]
     },
@@ -147,10 +147,10 @@
       },
       "ui": false,
       "owned": [
-        "Sources/SuiteShell/Text/LiveText.swift",
+        "Sources/SuiteText/LiveText.swift",
         "Sources/SuiteShell/Live/TextSlot.swift",
         "Tests/AppSnapshotTests/ShellTextLiveTests.swift",
-        "docs/c4/parts/creative-apps/suite-shell/shell-text.json",
+        "docs/c4/parts/creative-apps/suite-text/shell-text.json",
         "docs/blueprints/suite/features/shell-text.wave.json"
       ]
     }

@@ -19,5 +19,152 @@
     "find": "history.record(\"Place\", rects)",
     "replace": "_ = rects",
     "tests": "FakeCanvasFileFlowTests"
+  },
+  {
+    "label": "fillSkipsLock: setFill finds the selected rect without the locked check, so a locked rect takes a fill",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "let index = try editableIndex(\"fill\")",
+    "replace": "guard let index = rects.firstIndex(where: { $0.id == selection }) else { return }",
+    "tests": "FakeCanvasFillTests"
+  },
+  {
+    "label": "nilFillEncoded: a rect with no fill writes \"fill\":null, so old JSON changes",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "try c.encodeIfPresent(fill, forKey: .fill)",
+    "replace": "try c.encode(fill, forKey: .fill)",
+    "tests": "FakeCanvasFillTests"
+  },
+  {
+    "label": "fillUndoKeyDropped: every stop-move sample is its own step, so a drag takes many undos",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "history.record(name, rects, key: drag.map { \"\\(name):\\($0)\" })",
+    "replace": "history.record(name, rects, key: nil)",
+    "tests": "FakeCanvasFillTests"
+  },
+  {
+    "label": "fakeJumpRecordsNothing: the fake's jump records a step of its own, so the panel grows a row and redo is lost",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "history.jumpEndingRun(to: index) { old in defer { current = old }; return current }",
+    "replace": "history.record(\"Jump\", rects); history.jumpEndingRun(to: index) { old in defer { current = old }; return current }",
+    "tests": "FakeHistoryTests"
+  },
+  {
+    "label": "fakeBaseIsOpen: the base row is named \"\", so the panel's first row is blank",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "history.listing(base: \"Open\")",
+    "replace": "history.listing(base: \"\")",
+    "tests": "FakeHistoryTests"
+  },
+  {
+    "label": "fakeJumpKeepsRun: the plain jump leaves the run open, so a drag after a jump to the current step folds into it",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "history.jumpEndingRun(to: index) { old in",
+    "replace": "history.jump(to: index) { old in",
+    "tests": "FakeHistoryTests"
+  },
+  {
+    "label": "lockedRefusesTurn: setTransform finds the selected rect without the locked check, so a locked rect turns",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "let index = try editableIndex(\"transform\")",
+    "replace": "guard let index = rects.firstIndex(where: { $0.id == selection }) else { return }",
+    "tests": "FakeTransformTests"
+  },
+  {
+    "label": "oldJSONUnchanged: a rect at no turn writes \"degrees\":0, so old JSON changes",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "if degrees != 0 { try c.encode(degrees, forKey: .degrees) }",
+    "replace": "try c.encode(degrees, forKey: .degrees)",
+    "tests": "FakeTransformTests"
+  },
+  {
+    "label": "turnUndoKeyDropped: every rotate sample is its own step, so RJ-X32's drag takes 60 undos",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "key: drag.map { \"transform.\\(name):\\($0)\" }",
+    "replace": "key: nil",
+    "tests": "FakeTransformTests"
+  },
+  {
+    "label": "strokeSaved: a rect's stroke is never encoded, so a dashed, trimmed stroke is lost on save",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "try c.encodeIfPresent(stroke, forKey: .stroke)",
+    "replace": "_ = stroke",
+    "tests": "FakeStrokeTests"
+  },
+  {
+    "label": "trimDragIsOneStep: every trim sample is its own step, so RJ-X35's scrub takes 60 undos",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "history.record(name, rects, key: drag.map { \"stroke:\\(name):\\($0)\" })",
+    "replace": "history.record(name, rects, key: nil)",
+    "tests": "FakeStrokeTests"
+  },
+  {
+    "label": "strokeSkipsLock: setStroke finds the selected rect without the locked check, so a locked rect takes a stroke",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "let index = try editableIndex(\"stroke\")",
+    "replace": "guard let index = rects.firstIndex(where: { $0.id == selection }) else { return }",
+    "tests": "FakeStrokeTests"
+  },
+  {
+    "label": "sampleTopmost: the sample reads the bottom rect under the point first, so RJ-X33's overlap reads the gradient, not red",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "guard let top = rects.last(where: holds) else { return nil }",
+    "replace": "guard let top = rects.first(where: holds) else { return nil }",
+    "tests": "FakeSampleTests"
+  },
+  {
+    "label": "sampleGradientAtPoint: a gradient reads as one solid colour, its first stop, wherever the point is",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "return GradientRules.color(of: fill, at: Self.offset(of: fill, at: local(top)))",
+    "replace": "return GradientRules.color(of: fill, at: 0)",
+    "tests": "FakeSampleTests"
+  },
+  {
+    "label": "oldJSONUnchanged: a file with no picture saves as an object with an empty assets list, so the add-rect job's JSON changes",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "guard !shown.byID.isEmpty else { return try encoder.encode(rects) }",
+    "replace": "",
+    "tests": "FakeCanvasPlaceTests"
+  },
+  {
+    "label": "lockedRefuses: a locked rect takes a picture instead of refusing with its reason",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "let index = try editableIndex(\"place\")",
+    "replace": "guard let index = rects.firstIndex(where: { $0.id == selection }) else { return }",
+    "tests": "FakeCanvasPlaceTests"
+  },
+  {
+    "label": "saveDropsOrphanAssets: save keeps the bytes of a picture no rect shows, so an undone place still lands in the file",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "let shown = assets.pruned(keeping: Set(rects.compactMap { $0.placed?.assetID }))",
+    "replace": "let shown = assets",
+    "tests": "FakeCanvasPlaceTests"
+  },
+  {
+    "label": "shapeSpecSaved",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "        try c.encodeIfPresent(shape, forKey: .shape)\n",
+    "replace": "",
+    "tests": "FakeShapeTests"
+  },
+  {
+    "label": "shapeOldJSONUnchanged",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "        try c.encodeIfPresent(shape, forKey: .shape)\n",
+    "replace": "        try c.encode(shape, forKey: .shape)\n",
+    "tests": "FakeShapeTests"
+  },
+  {
+    "label": "optionsIgnored: the fake writes its 1x size whatever the options ask (.exportsAtSize)",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "pixels = try ExportRules.pixels(of: source, asked.size, evenSize: spec.needsEvenSize)",
+    "replace": "pixels = try ExportRules.pixels(of: source, .scale(1), evenSize: spec.needsEvenSize)",
+    "tests": "FakeCanvasExportTests"
+  },
+  {
+    "label": "refusalSwallowed: a refused size writes the 1x file instead of saying why (.refusesBadShape)",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "} catch { throw CatalogError.failed(id: \"export\", message: String(describing: error)) }",
+    "replace": "} catch { pixels = source }",
+    "tests": "FakeCanvasExportTests"
   }
 ]

@@ -63,6 +63,7 @@ struct LibraryMenu {
         var actualSize: Action?
         var setSort: (@MainActor (LibrarySort) -> Void)?
         var sort: LibrarySort = .captureDate
+        var setCellSize: (@MainActor (Int) -> Void)?  // the grid toolbar's Size bar
         var first: Action?
         var last: Action?
         var zoomInTitle: String = "Zoom In"
@@ -106,6 +107,14 @@ struct LibraryMenu {
         var exportHelp: String?  // why Export… can't act, before the services' reason
     }
 
+    /// Photo > Delete Rejected Photos… (cull-finish, LibraryWindow+Trash.swift): the Model's
+    /// title, and the action that opens the confirm, nil while `help` says why it can't run.
+    struct Trash {
+        var deleteRejects: Action?
+        var title: String = "Delete Rejected Photos…"
+        var help: String?
+    }
+
     var edit = Edit()
     var file = File()
     var thumbnails = Thumbnails()
@@ -114,6 +123,7 @@ struct LibraryMenu {
     var view = Viewing()
     var photo = Photo()
     var export = Export()
+    var share = Share()
     /// The services' reasons by member ("importer", "loupe", ...): `LibraryCatalog.help(for:)`.
     var reasons: [String: String] = [:]
 
@@ -126,4 +136,6 @@ struct LibraryMenu {
 
 extension FocusedValues {
     @Entry var libraryMenu: LibraryMenu?
+    /// Published by the trash area, which owns the confirm's presented flag.
+    @Entry var libraryTrash: LibraryMenu.Trash?
 }

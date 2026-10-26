@@ -1,0 +1,23 @@
+[
+  {
+    "label": "keysFollowClamp: the keys move by the asked frames, not the clamped delta",
+    "file": "Sources/SuiteKernel/Keys/SpanRules.swift",
+    "find": "try KeyRules.moveKeys(&tracks, keyed, by: delta, clampedTo: 0...lastFrame)",
+    "replace": "try KeyRules.moveKeys(&tracks, keyed, by: by, clampedTo: 0...lastFrame)",
+    "tests": "SpanRulesTests"
+  },
+  {
+    "label": "staysInComp: the delta is not clamped at frame 0",
+    "file": "Sources/SuiteKernel/Keys/SpanRules.swift",
+    "find": "let delta = max(earliest, min(by, latest))",
+    "replace": "let delta = min(by, latest)",
+    "tests": "SpanRulesTests"
+  },
+  {
+    "label": "spanStays: the span does not move with its keys",
+    "file": "Sources/SuiteKernel/Keys/SpanRules.swift",
+    "find": "span = (span.lowerBound + delta)...(span.upperBound + delta)",
+    "replace": "span = span.lowerBound...span.upperBound",
+    "tests": "SpanRulesTests"
+  }
+]

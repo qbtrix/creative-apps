@@ -3,9 +3,15 @@
 // sheet; Duplicate, Delete, select and rename call the Model, which refuses
 // what it can't do. Composition > Delete while a text field has focus (renaming in
 // the sidebar) edits the text instead (HaloProject.compositionDeleteCommand).
-// `viewerScene(_:)` is a pass-through: HaloViewerCanvas reads the draw list
-// and the selection from the Model itself (#37), so this file keeps only routes.
+// HaloViewerCanvas reads the draw list and the selection from the Model itself
+// (#37). `viewerScene(_:)` hands the viewer the window's shape tool and points
+// its draw at the Model's `drawShape` (shape-tools HS-3): one call per release.
+// It also hands the handles `haloCommitTransform`: a handle drag's release
+// reaches `setTransform` as one step (transform HT-3). It supplies
+// `haloPlace` (placed-images PH-3) as `runPlace`, to the window's views and as
+// the focused value File > Place… reads.
 import HaloModel
+import SuiteKernel
 import SwiftUI
 
 extension HaloWindow {
@@ -26,5 +32,31 @@ extension HaloWindow {
         }
     }
 
-    func viewerScene(_ content: some View) -> some View { content }
+    func viewerScene(_ content: some View) -> some View {
+        content
+            .environment(\.haloShapeDrawing, shapes)
+            .environment(\.haloCommitTransform, commitTransform)
+            // The viewer's drops and the inspector read it; File > Place… reads the focused value.
+            .environment(\.haloPlace, { runPlace($0, fill: $1) })
+            .focusedSceneValue(\.haloPlace, { runPlace($0, fill: $1) })
+            .onAppear {
+                shapes.draw = {
+                    takePlayback()
+                    _ = model.drawShape($0)
+                }
+            }
+    }
+
+    /// The window's `haloPlace` (HaloPlace.swift): a place intent through the Model's catalog, Fill riding on a
+    /// `.place`; the Model refuses what it can't do.
+    func runPlace(_ intent: PlaceIntent, fill: Bool) {
+        takePlayback()
+        model.runPlace(intent, fill: fill)
+    }
+
+    /// A handle drag's release, as one step; the Model refuses what it can't do.
+    func commitTransform(_ t: TransformBox, name: String) {
+        takePlayback()
+        try? model.setTransform(t, name: name, drag: nil)
+    }
 }

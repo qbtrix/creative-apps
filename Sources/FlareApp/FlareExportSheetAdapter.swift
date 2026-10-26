@@ -1,10 +1,11 @@
 // FlareExportSheetAdapter.swift: Flare's export run on SuiteUI's export sheet.
 // The sheet shows while the Model's run isn't idle (`exportingOptions`), with the kernel
-// rows (`ExportSheetRows`) for Flare's three formats and the run's scale as the
-// Size row; Flare has no quality. Its ids hang off `flare.export`. The options
-// slot holds FlareExportOptionRows: the Frame row (SVG) or From, To and Step
-// (PNG sequence), 1x and 2x scale chips and the Transparent background
-// checkbox (both but Lottie), the scan's warnings, the PNG file count and, in
+// rows (`ExportSheetRows`) for Flare's five formats and `sheetScale` as the
+// Size row (the shared size for MP4 and GIF, `setSize`); Flare has no quality.
+// Its ids hang off `flare.export`. The options slot holds FlareExportOptionRows:
+// the Frame row (SVG), From, To and Step (PNG sequence), or Frame rate and, for
+// GIF, Loop forever (MP4 and GIF); 1x and 2x scale chips and the Transparent
+// background checkbox (SVG and PNG), the scan's warnings, the PNG file count and, in
 // the error color, `exportProblem`, which Export is refused on. A finished run
 // reads `exportSummary`. Every control sends a FlareIntent.Export: a format
 // pick `setFormat`, Size or a chip `setScale`, a frame row `setFrames` (moving
@@ -20,8 +21,9 @@ struct FlareExportSheetAdapter: ViewModifier {
     let model: FlareWorkspace
     let perform: @MainActor (FlareIntent) -> Void
 
-    /// The format menu: one choice per ExportFormat, its id the raw value.
-    nonisolated static let formats = ExportFormat.allCases.map { FormatChoice(id: $0.rawValue, name: title($0), hasQuality: false) }
+    /// The format menu: one choice per built ExportFormat, its id the raw value.
+    nonisolated static let formats = ExportFormat.allCases.filter { $0.unbuiltReason == nil }
+        .map { FormatChoice(id: $0.rawValue, name: title($0), hasQuality: false) }
 
     /// A format's name in the menu.
     nonisolated static func title(_ format: ExportFormat) -> String {
@@ -29,6 +31,8 @@ struct FlareExportSheetAdapter: ViewModifier {
         case .svgFrame: "SVG frame"
         case .lottie: "Lottie"
         case .pngSequence: "PNG sequence"
+        case .mp4: "MP4"
+        case .gif: "GIF"
         }
     }
 
@@ -49,11 +53,11 @@ struct FlareExportSheetAdapter: ViewModifier {
     /// The sheet's content on the Model's run; FlareExportSnapshots renders it on its own.
     @MainActor var sheet: some View {
         SuiteExportSheet(
-            ExportSheetRows(run, formats: Self.formats) { ExportPick(format: $0.format.rawValue, scale: $0.scale) },
+            ExportSheetRows(run, formats: Self.formats) { ExportPick(format: $0.format.rawValue, scale: $0.sheetScale) },
             formats: Self.formats,
             idPrefix: "flare.export",
             onFormat: { id in if let format = ExportFormat(rawValue: id) { perform(.export(.setFormat(format))) } },
-            onScale: { perform(.export(.setScale($0))) },
+            onScale: { scale in perform(.export(model.exportingOptions?.format.writesVideo == true ? .setSize(scale) : .setScale(scale))) },
             onQuality: { _ in },
             onExport: { perform(.export(.start)) },
             onClose: close,
@@ -94,10 +98,22 @@ struct FlareExportOptionRows: View {
                     perform(.export(.setStep(Int($0.rounded()))))
                 }
                 .accessibilityIdentifier("flare.export.step")
+            case .mp4, .gif:
+                InspectorStepperRow("Frame rate", value: Double(model.exportFrameRate ?? 30), in: 1...60) {
+                    perform(.export(.setFrameRate(Int($0.rounded()))))
+                }
+                .accessibilityIdentifier("flare.export.fps")
+                if options.format == .gif {
+                    InspectorRow("") {
+                        Toggle("Loop forever", isOn: Binding(get: { options.loop }, set: { perform(.export(.setLoop($0))) }))
+                            .toggleStyle(.checkbox)
+                            .accessibilityIdentifier("flare.export.loop")
+                    }
+                }
             case .lottie:
                 EmptyView()
             }
-            if options.format != .lottie {
+            if options.format != .lottie, !options.format.writesVideo {
                 ChoiceChips(
                     options: [1.0, 2.0].map { InspectorOption(id: $0, title: "\(Int($0))x", identifier: "flare.export.scale.\(Int($0))x") },
                     selected: options.scale

@@ -5,9 +5,12 @@
 // its 3.4 items in order and every one of them once. Open Sample lists
 // Bounce, Character, Button and Keyed Ball, and each one opens: Character
 // shows Body in LAYERS, Bounce Ball, Shadow and Background, Button drops
-// Ball. testKeys presses the menu keys
+// Ball. Open Recent ends in Clear Menu, or reads No Recent Files on the
+// fixture's empty fake recents. testKeys presses the menu keys
 // on bounce: End reads 47, Home 0, → steps one, Space plays and pauses, and
-// ⌘Z undoes the sidebar's New Layer. One shot per step.
+// ⌘Z undoes the sidebar's New Layer. One shot per step. testNoBetaTwoItems
+// (no-placeholders NP-4, FJ-NP) finds none of the items the beta hides in View,
+// Window, Object or Animate, and no Library tab in the inspector.
 import XCTest
 
 final class FlareMenuJourneys: XCTestCase {
@@ -15,18 +18,15 @@ final class FlareMenuJourneys: XCTestCase {
     static let menus: [(menu: String, items: [String], exact: Bool)] = [
         ("File", ["New", "Open…", "Open Recent", "Open Sample", "Save", "Save As…", "Export…", "Close"], false),
         ("Edit", ["Undo", "Redo", "Cut", "Copy", "Paste", "Duplicate", "Delete", "Select All", "Deselect"], false),
-        ("View", ["Zoom In", "Zoom Out", "Fit", "Actual Size", "Onion Skin", "Motion Path", "Show Rulers",
-                  "Show Guides", "Clear Guides"], false),
+        ("View", ["Zoom In", "Zoom Out", "Fit", "Actual Size", "Show Rulers", "Show Guides", "Clear Guides"], false),
         // Finish Path is Return's item for the mouse (#1893).
-        ("Object", ["Convert to Symbol", "Edit Symbol", "Exit Symbol", "Bring Forward", "Send Backward",
-                    "Finish Path"], true),
+        ("Object", ["Bring Forward", "Send Backward", "Finish Path"], true),
         ("Animate", ["Play/Pause", "Loop", "Next Frame", "Previous Frame", "Next Keyframe", "Previous Keyframe",
                      "Go to Start", "Go to End", "Add Keyframe", "Remove Keyframe", "Auto-Key", "Insert Frame",
-                     "Remove Frame", "Add Label", "Easing", "Animate with Assist…"], true),
-        ("Window", ["Interactions"], false),
+                     "Remove Frame", "Add Label", "Easing"], true),
     ]
 
-    /// J1: every menu opens and lists section 3.4's items; nothing is hidden.
+    /// J1: every menu opens and lists section 3.4's items, less the ones the beta hides.
     @MainActor func testEveryMenuOpens() {
         let flare = Journey("Flare", self, arguments: ["-FlareFixture", "bounce"])
         XCTAssert(flare.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
@@ -49,7 +49,13 @@ final class FlareMenuJourneys: XCTestCase {
         XCTAssertEqual(
             flare.menuTitles("Animate", submenu: "Easing"),
             ["Linear", "Ease", "Ease In", "Ease Out", "Ease In-Out", "Hold"], "Animate > Easing isn't the presets")
-        XCTAssert(flare.menuTitles("File", submenu: "Open Recent").contains("Clear Menu"), "Open Recent has no Clear Menu")
+        // The suite's Open Recent (SuiteFileCommands) ends in Clear Menu, or reads a disabled No Recent Files while
+        // there are none: on `-FlareFixture` the documents bridge runs on the suite's fakes (FlareShell.bridge),
+        // whose recents start empty.
+        let recent = flare.menuTitles("File", submenu: "Open Recent")
+        XCTAssert(
+            recent.last == "Clear Menu" || recent == ["No Recent Files"],
+            "Open Recent ends in neither Clear Menu nor No Recent Files: \(recent)")
 
         let sidebar = flare.element("suite.sidebar")
         flare.openSample("Character")
@@ -100,6 +106,33 @@ final class FlareMenuJourneys: XCTestCase {
     @MainActor private func wait(_ condition: () -> Bool) -> Bool {
         for _ in 0..<25 where !condition() { Thread.sleep(forTimeInterval: 0.2) }
         return condition()
+    }
+}
+
+final class FlareMenusJourneyTests: XCTestCase {
+    /// The titles the beta hides (FlareWorkspace.menuHidden), by menu.
+    static let hidden: [String: [String]] = [
+        "View": ["Onion Skin", "Motion Path"], "Window": ["Interactions"],
+        "Object": ["Convert to Symbol", "Edit Symbol", "Exit Symbol"], "Animate": ["Animate with Assist…"],
+    ]
+
+    @MainActor func testNoBetaTwoItems() {
+        let flare = Journey("Flare", self, arguments: ["-FlareFixture", "bounce"])
+        XCTAssert(flare.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        for (menu, titles) in Self.hidden.sorted(by: { $0.key < $1.key }) {
+            let shown = flare.menuTitles(menu)
+            XCTAssertFalse(shown.isEmpty, "the \(menu) menu didn't open")
+            for title in titles {
+                XCTAssertFalse(shown.contains(title), "the \(menu) menu still shows \(title): \(shown)")
+            }
+        }
+        let view = flare.app.menuBars.firstMatch.menuBarItems["View"]
+        view.click()
+        XCTAssert(view.menus.firstMatch.waitForExistence(timeout: 3), "the View menu didn't open")
+        flare.shot("menu-view", screen: true)
+        flare.press(.escape)
+        XCTAssert(flare.element("flare.inspector.header").waitForExistence(timeout: 10), "the inspector shows no Properties")
+        XCTAssertFalse(flare.app.radioButtons["Library"].exists, "the inspector still offers a Library tab")
     }
 }
 

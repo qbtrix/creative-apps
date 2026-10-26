@@ -1,0 +1,23 @@
+[
+ {
+  "label": ".trackingPerGrapheme: tracking added once per span",
+  "file": "Sources/SuiteModel/Fakes/FakeText.swift",
+  "find": "let advance = span.fontSize * 0.5 + span.tracking",
+  "replace": "let advance = span.fontSize * 0.5 + span.tracking / Double(max(span.string.count, 1))",
+  "tests": "FakeTextTests"
+ },
+ {
+  "label": ".matchesCoreNumbers: ascent 0.75 em",
+  "file": "Sources/SuiteModel/Fakes/FakeText.swift",
+  "find": "ascent: span.fontSize * 0.8",
+  "replace": "ascent: span.fontSize * 0.75",
+  "tests": "FakeTextTests"
+ },
+ {
+  "label": ".refusesWhatTheRulesRefuse: draw records spans the rules refuse",
+  "file": "Sources/SuiteModel/Fakes/FakeText.swift",
+  "find": "for placed in spans { _ = try TextRules.validated(placed) }",
+  "replace": "",
+  "tests": "FakeTextTests"
+ }
+]

@@ -4,9 +4,12 @@
 // non-destructive). `blendMode` is CoreRaster's BlendMode, never a mirror of
 // it. The pixels themselves live in PhotoWorkspace.pixels under the layer's
 // id, so a layer stays a small Hashable value. A layer is pixels or an
-// adjustment applied to the layers below (`kind`, PV-6), and may have a mask
-// in PhotoWorkspace.masks (`hasMask`, PV-5). Linux-safe.
+// adjustment applied to the layers below (`kind`, PV-6) or text drawn into
+// its pixels (`PhotoTextLayer`, text-layers TX-1), and may have a mask in
+// PhotoWorkspace.masks (`hasMask`, PV-5), and a layer style (`style`,
+// layer-styles PY-1). Linux-safe.
 import CoreRaster
+import SuiteImaging
 
 public struct PhotoLayer: Identifiable, Sendable, Hashable {
     public let id: String
@@ -18,12 +21,16 @@ public struct PhotoLayer: Identifiable, Sendable, Hashable {
     /// Where the layer's top-left pixel sits on the canvas.
     public internal(set) var offsetX = 0
     public internal(set) var offsetY = 0
-    /// Pixels, or an adjustment applied to the layers below (PV-6).
+    /// Pixels, an adjustment applied to the layers below (PV-6), or text (TX-1).
     public internal(set) var kind = PhotoLayerKind.pixels
     /// Whether the layer has a mask in `PhotoWorkspace.masks` (PV-5).
     public internal(set) var hasMask = false
     /// A disabled mask is kept but not applied (Shift-click its badge).
     public internal(set) var isMaskEnabled = true
+    /// Clipped to the layer below: shows only where that layer has pixels (masks-clipping PK-8).
+    public internal(set) var isClipped = false
+    /// Effects drawn with the layer: pixel and text layers; an adjustment layer keeps `.none` (layer-styles PY-1).
+    public internal(set) var style: LayerStyle = .none
 
     /// Clamps `opacity` to 0...1; a NaN opacity falls back to 1, the default.
     public init(id: String, name: String, isVisible: Bool = true, opacity: Double = 1, blendMode: BlendMode = .normal) {
@@ -42,6 +49,8 @@ public struct PhotoLayer: Identifiable, Sendable, Hashable {
 public enum PhotoLayerKind: Hashable, Sendable {
     case pixels
     case adjustment(AdjustmentSettings)
+    /// Pixels drawn from words and a style, which stay editable (text-layers).
+    case text(PhotoTextLayer)
 }
 
 extension BlendMode {

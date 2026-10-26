@@ -40,6 +40,7 @@ public struct FakePasteboard: PasteboardCoding {
             return representations(of: .envelope(e))
         case .text(let t): return [TypedData(type: .plainText, data: Data(t.utf8))]
         case .files(let refs): return refs.map { TypedData(type: .fileURL, data: Data(("file://" + $0.path).utf8)) }
+        case .appLayers(let type, let data): return [TypedData(type: type, data: data)]
         }
     }
 

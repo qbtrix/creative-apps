@@ -1,7 +1,7 @@
 // PhotoPlaceTests.swift (place-image PP-1 written, PP-5 turns on): MJ-PP, the Model walk of File > Place…
 // in Photo. A placed PNG or JPEG becomes a pixel layer above the selection, fitted inside the canvas by the
 // kernel's `PlaceRules.fitted` and centred or at the drop point, in one undo step; SVG is refused. The stub
-// contract runs now; the walk is disabled by name until PP-5 builds PhotoPlace+Kernel's bodies. Linux and macOS.
+// contract and the walk run now (PP-5 built PhotoPlace+Kernel's bodies). Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -34,10 +34,6 @@ private func place(_ asset: PlacedAsset, on workspace: inout PhotoWorkspace, at:
     return try workspace.insertPlaced(asset, PlacedImage(assetID: asset.id, box: box), name: "Place Image")
 }
 
-/// The place commands on Photo, as PP-6 registers them in its catalog.
-private let catalog = try? CommandCatalog<PhotoWorkspace>(app: "photo", PlaceCommands.specs(PhotoWorkspace.self),
-                                                          history: { $0.history.kernel })
-
 @Suite struct PhotoPlaceTests {
     // The stub contract: what PP-5 keeps.
 
@@ -66,8 +62,7 @@ private let catalog = try? CommandCatalog<PhotoWorkspace>(app: "photo", PlaceCom
 
     // MJ-PP: the place walk.
 
-    @Test(.disabled("PP-5: builds PhotoPlace+Kernel's bodies"))
-    func centredOnCanvas() throws {
+    @Test func centredOnCanvas() throws {
         var workspace = try opened()
         let id = try place(try asset("logo.png", 200, 100), on: &workspace)
         let layer = try #require(workspace.layers.first { $0.id == id })
@@ -77,16 +72,14 @@ private let catalog = try? CommandCatalog<PhotoWorkspace>(app: "photo", PlaceCom
         #expect(workspace.placeHelp == nil)
     }
 
-    @Test(.disabled("PP-5: builds PhotoPlace+Kernel's bodies"))
-    func aboveSelection() throws {
+    @Test func aboveSelection() throws {
         var workspace = try opened()
         let background = try #require(workspace.selectedLayerID)
         let id = try place(try asset("logo.png", 200, 100), on: &workspace)
         #expect(workspace.layers.map(\.id) == [id, background])
     }
 
-    @Test(.disabled("PP-5: builds PhotoPlace+Kernel's bodies"))
-    func largeFitsCanvas() throws {
+    @Test func largeFitsCanvas() throws {
         var workspace = try opened()
         let id = try place(try asset("photo-4000x3000.jpg", 4000, 3000, format: .jpeg), on: &workspace)
         let tiles = try #require(workspace.pixels[id])
@@ -94,31 +87,52 @@ private let catalog = try? CommandCatalog<PhotoWorkspace>(app: "photo", PlaceCom
         #expect(workspace.statusMessage == "Placed at 20%.")
     }
 
-    @Test(.disabled("PP-5: builds PhotoPlace+Kernel's bodies"))
-    func dropNearTheEdgeStaysInside() throws {
+    @Test func dropNearTheEdgeStaysInside() throws {
         var workspace = try opened()
         let id = try place(try asset("logo.png", 200, 100), on: &workspace, at: Point(x: 790, y: 590))
         let layer = try #require(workspace.layers.first { $0.id == id })
         #expect((layer.offsetX, layer.offsetY) == (600, 500))
     }
 
-    @Test(.disabled("PP-5: builds PhotoPlace+Kernel's bodies"))
-    func oneUndoStep() throws {
+    @Test func oneUndoStep() throws {
         var workspace = try opened()
         try place(try asset("logo.png", 200, 100), on: &workspace)
         workspace.undo()
         #expect(workspace.layers.map(\.name) == ["Background"])
     }
 
-    @Test(.disabled("PP-5: builds PhotoPlace+Kernel's bodies"), arguments: [
+    @Test(arguments: [
         ("logo.svg", #"<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"/>"#),
         ("notes.txt", "not an image"),
     ])
     func svgAndTextRefused(_ name: String, _ text: String) throws {
         var workspace = try opened()
         let params = PlaceIntent.place(name: name, data: Data(text.utf8), at: nil).command.params
-        #expect(throws: CatalogError.self) { try #require(catalog).run("place.image", params: params, on: &workspace) }
+        #expect(throws: CatalogError.self) { try PhotoWorkspace.catalog.run("place.image", params: params, on: &workspace) }
         #expect(workspace.layers.count == 1)
+    }
+
+    @Test func svgRefusalNamesPhotosFormats() throws {
+        var workspace = try opened()
+        workspace.place([(name: "logo.svg", data: Data(#"<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"/>"#.utf8))], at: nil)
+        #expect(workspace.statusMessage == "Photo places PNG or JPEG files.")
+        #expect(workspace.layers.count == 1)
+    }
+
+    @Test func placesThroughPhotosCatalog() throws {
+        var workspace = try opened()
+        let png = try asset("logo.png", 200, 100)
+        workspace.place([(name: png.name, data: png.data)], at: nil)
+        #expect(workspace.layers.map(\.name) == ["logo", "Background"])
+        #expect(PhotoWorkspace.catalog.spec("place.image") != nil)
+    }
+
+    @Test func smallKeepsItsPixelsAndClearsTheNote() throws {
+        var workspace = try opened()
+        let id = try place(try asset("logo.png", 200, 100), on: &workspace)
+        let tiles = try #require(workspace.pixels[id])
+        #expect((tiles.width, tiles.height) == (200, 100))
+        #expect(workspace.statusMessage == nil)
     }
 
     /// PP-5 moves Paste's insert into a shared helper; Paste keeps 100% and the view centre.

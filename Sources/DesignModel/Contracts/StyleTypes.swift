@@ -2,18 +2,20 @@
 // (corner radius, opacity, stroke, text style) and the tier-2 values (paths,
 // components, variables) that D2-1 adds to the file. Value types, Codable, so
 // they go into a file as they are. Linux-safe.
+import SuiteKernel
 
-/// A stroke drawn centered on the shape's outline.
-public struct DesignStroke: Sendable, Hashable, Codable {
-    public var color: DesignColor
-    /// Points; 0 draws nothing. The inspector clamps it to 0...1000.
-    public var width: Double
+/// A stroke drawn centered on the shape's outline: the kernel's, with its join, cap and dash (stroke-style DK-5).
+/// Points; 0 draws nothing. The inspector clamps the width to 0...1000.
+public typealias DesignStroke = VectorStroke
 
+extension VectorStroke {
+    /// A solid stroke of Design's opaque `color`, `width` points wide, with the default join and cap.
     public init(color: DesignColor, width: Double) {
-        (self.color, self.width) = (color, width)
+        self.init(color: color.kernelColor, width: width)
     }
 
-    public static let `default` = DesignStroke(color: .black, width: 1)
+    /// The 1 pt black stroke Add Stroke gives.
+    public static let `default` = VectorStroke()
 }
 
 public enum DesignTextAlignment: String, CaseIterable, Sendable, Codable { case leading, center, trailing }
@@ -116,22 +118,26 @@ public struct DesignVariable: Sendable, Hashable, Codable, Identifiable {
     public func value(in mode: DesignMode) -> DesignVariableValue { mode == .light ? light : dark }
 }
 
-public enum DesignExportFormat: String, CaseIterable, Sendable { case png, svg, pdf }
+/// What an export writes. Its file extension and rules are the kernel's (`fileExtension`, DesignExport+Kernel).
+public enum DesignExportFormat: String, CaseIterable, Sendable { case png, jpeg, svg, pdf }
 
 /// One file an export writes.
 public struct DesignExportItem: Sendable, Equatable {
     public var nodeID: String
     /// "Card.png", "Card 2.png": unique in the folder.
     public var fileName: String
-    /// The item's size in points, and in pixels at the export scale (equal for SVG and PDF).
+    /// The item's size in points, and the exact pixels the file is (equal for SVG and PDF).
     public var width: Double
     public var height: Double
     public var pixelWidth: Int
     public var pixelHeight: Int
+    /// The color a format without alpha (JPEG) flattens onto; nil keeps transparency.
+    public var background: DesignColor?
 
-    public init(nodeID: String, fileName: String, width: Double, height: Double, pixelWidth: Int, pixelHeight: Int) {
+    public init(nodeID: String, fileName: String, width: Double, height: Double, pixelWidth: Int, pixelHeight: Int,
+                background: DesignColor? = nil) {
         (self.nodeID, self.fileName, self.width, self.height) = (nodeID, fileName, width, height)
-        (self.pixelWidth, self.pixelHeight) = (pixelWidth, pixelHeight)
+        (self.pixelWidth, self.pixelHeight, self.background) = (pixelWidth, pixelHeight, background)
     }
 }
 

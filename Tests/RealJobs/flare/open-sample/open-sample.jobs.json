@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "app": "flare",
+  "why": "RJ-X66 (sample-files SS-7): opens the tour's Flare sample, Bundle/Samples/Bounce.flare (the input is a link to it, so the job follows the shipped file), selects everything and exports frame 15 as SVG; the bytes are checked.",
+  "inputs": ["input/*.flare"],
+  "steps": [
+    {"id": "edit.select-all", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-frame-15", "format": "svg", "options": {"frames": [15]}},
+  "expect": {
+    "out/Bounce-frame-15.svg": {"sha256": "37a73a7ee8b07fcd7c804c134e9f01e02a37f095b0b29874e28629238ff5b7b5"}
+  },
+  "platforms": ["linux", "macos"]
+}

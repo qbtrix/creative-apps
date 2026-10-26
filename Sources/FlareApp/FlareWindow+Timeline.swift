@@ -20,6 +20,7 @@ extension FlareWindow {
         case .insertFrames(let count): model.insertFrames(count)
         case .removeFrames(let count): model.removeFrames(count)
         case .setLabel(let name): model.setLabel(name)
+        case .selectAllKeys: model.selectAllKeys()
         case .nextKeyframe, .previousKeyframe, .addKey, .removeKey:
             break
         }
@@ -37,6 +38,7 @@ extension FlareWindow {
         case .selectKey, .insertFrames, .removeFrames: return noDocument
         case .moveKeys, .removeKeys: return noDocument ?? (model.selectedKeys.isEmpty ? FlareWorkspace.selectKeyFirst : nil)
         case .endKeyDrag: return nil
+        case .selectAllKeys: return model.selectAllKeysHelp
         case .setLabel(let name?): return noDocument ?? (name.isEmpty ? "Name the label first." : nil)
         // The Animate menu's Add Label sends no name, so it points at the context menu, which asks for one.
         case .setLabel(nil): return noDocument ?? "Name a label from the timeline's context menu (Add Label…)."

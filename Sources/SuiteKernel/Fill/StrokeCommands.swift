@@ -1,6 +1,7 @@
 // StrokeCommands.swift (stroke-style SS-1 specs with real ids, schemas and availability; SS-6 bodies but dash and
-// trim, whose runs throw `StrokeRules.notBuilt`; SS-7 those two): the nine stroke commands every app registers
-// with one line, `+ StrokeCommands.specs(<X>Workspace.self)`, and the stroke editor's gestures as those commands.
+// trim; SS-7 those two): the nine stroke commands every app registers with one line,
+// `+ StrokeCommands.specs(<X>Workspace.self)`, and the stroke editor's gestures as those commands.
+import FlareCore
 
 /// A document the stroke commands run on: it reads the selection's stroke and sets it back as one undo step.
 public protocol StrokeTarget: Sendable {
@@ -54,6 +55,8 @@ public enum StrokeCommands {
 
     /// Why `stroke.add` can't run on a stroked layer, and why the rest need a stroke.
     static let strokedHelp = "The layer already has a stroke.", noStrokeHelp = "Add a stroke first."
+    /// Why `stroke.dash` refuses its params.
+    static let dashHelp = "Give a dash preset, or a pattern of at most 64 lengths of 0 or more with a positive sum."
 
     static let unit = ParamSchema.number("0 to 1.", minimum: 0, maximum: 1)
     static let drag = ParamSchema.optional(.string("A drag's token; edits under one token are one undo step.", maxLength: 64))
@@ -107,13 +110,18 @@ public enum StrokeCommands {
                    schema: .object(["preset": .optional(.string("The dash preset.", oneOf: DashPreset.allCases.map(\.rawValue))),
                                     "pattern": .optional(pattern), "phase": .optional(.number("Points."))],
                                    required: ["preset", "pattern", "phase"]),
-                   example: .object(["preset": .string("dashed")]), availability: { waiting($0) }) { _, _ in try stub() },
+                   example: .object(["preset": .string("dashed")]), availability: { stroked($0) }) { t, p in try dash(&t, p) },
             .typed("stroke.trim", title: "Trim Path", summary: "Trims the stroke to start and end fractions, turned by an offset in turns; a scrub under one drag token is one undo step.",
                    kind: .edit, params: TrimParams.self,
                    schema: .object(["start": unit, "end": unit, "offset": .optional(.number("Turns.")), "drag": drag],
                                    required: ["start", "end", "offset", "drag"]),
                    example: .object(["start": .number(0), "end": .number(0.5)]),
-                   availability: { waiting($0, trims: true) }) { _, _ in try stub() },
+                   availability: { trimmable($0) }) { t, p in
+                       try edit(&t, "stroke.trim", "Trim Path", drag: p.drag) { stroke in
+                           let mode = stroke.trim?.mode ?? .together
+                           stroke.trim = StrokeTrim(start: p.start, end: p.end, offset: p.offset ?? stroke.trim?.offset ?? 0, mode: mode)
+                       }
+                   },
         ]
     }
 
@@ -131,12 +139,24 @@ public enum StrokeCommands {
         guard ready(target) == .available else { return ready(target) }
         return target.selectedStroke == nil ? .unavailable(noStrokeHelp) : .available
     }
-    /// `ready`, `trimHelp` when `trims`, a stroke, and `StrokeRules.waitingCore` until SS-7.
-    static func waiting<T: StrokeTarget>(_ target: T, trims: Bool = false) -> Availability {
+    /// `ready`, no `trimHelp`, and the selection has a stroke.
+    static func trimmable<T: StrokeTarget>(_ target: T) -> Availability {
         guard ready(target) == .available else { return ready(target) }
-        if trims, let why = target.trimHelp { return .unavailable(why) }
-        guard stroked(target) == .available else { return stroked(target) }
-        return .unavailable(StrokeRules.waitingCore)
+        if let why = target.trimHelp { return .unavailable(why) }
+        return stroked(target)
+    }
+    /// `stroke.dash`: a pattern and phase in points as given, else the preset's pattern at the stroke's width (a dotted
+    /// preset also rounds the cap, since a zero dash with a butt cap draws nothing), one step named "Stroke Dash". The
+    /// phase stays unless given; a solid stroke drops it.
+    static func dash<T: StrokeTarget>(_ target: inout T, _ p: DashParams) throws -> JSONValue {
+        guard p.pattern != nil || (p.preset != nil && p.preset != .custom),
+              StrokeRules.isValidPattern(p.pattern ?? []) else { throw CatalogError.failed(id: "stroke.dash", message: dashHelp) }
+        return try edit(&target, "stroke.dash", "Stroke Dash") { stroke in
+            let preset = p.preset ?? .custom
+            stroke.dash = p.pattern ?? StrokeRules.pattern(preset, width: stroke.width)
+            stroke.dashPhase = stroke.dash.isEmpty ? 0 : p.phase ?? stroke.dashPhase
+            if p.pattern == nil, preset == .dotted { stroke.cap = .round }
+        }
     }
     /// `stroke.add`: a 1 pt black stroke with a miter join and a butt cap, one step named "Add Stroke".
     static func add<T: StrokeTarget>(_ target: inout T) throws -> JSONValue {
@@ -170,6 +190,4 @@ public enum StrokeCommands {
                         "cap": .string(stroke.cap.rawValue), "dash": .array(pattern.map(JSONValue.number)),
                         "dashPhase": .number(phase), "trim": trim ?? .null])
     }
-    /// `stroke.dash` and `stroke.trim` until SS-7 (their availability already refuses with `waitingCore`).
-    static func stub() throws -> JSONValue { throw StrokeRules.notBuilt }
 }

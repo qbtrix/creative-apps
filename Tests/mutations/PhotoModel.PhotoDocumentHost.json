@@ -1,0 +1,12 @@
+[
+  {"label": "an accepted open delivers nothing", "file": "Sources/PhotoModel/PhotoDocumentHost.swift", "find": "if !requests.isEmpty { await deliver(requests) }", "replace": "_ = requests", "tests": "PhotoDocumentHostTests"},
+  {"label": "an empty open is not refused", "file": "Sources/PhotoModel/PhotoDocumentHost.swift", "find": "guard !handOff.documents.isEmpty else { return .failure(openNeedsImage) }", "replace": "", "tests": "PhotoDocumentHostTests"},
+  {"label": "other verbs are accepted", "file": "Sources/PhotoModel/PhotoDocumentHost.swift", "find": "            return .failure(verbRefusal)", "replace": "            return .success([])", "tests": "PhotoDocumentHostTests"},
+  {"label": "an open opens only the first image", "file": "Sources/PhotoModel/PhotoDocumentHost.swift", "find": "handOff.documents.map { .open(path: $0.path) }", "replace": "handOff.documents.prefix(1).map { .open(path: $0.path) }", "tests": "PhotoDocumentHostTests"},
+  {"label": "New Photo opens nothing (#3648)", "file": "Sources/PhotoModel/PhotoDocumentHost.swift", "find": "            return .success([newImage(for: handOff.preset)])", "replace": "            return .success([])", "tests": "PhotoDocumentHostTests"},
+  {"label": "a new image ignores the preset's size", "file": "Sources/PhotoModel/PhotoDocumentHost.swift", "find": "return .newImage(width: side(\"width\", newImageSize.width), height: side(\"height\", newImageSize.height))", "replace": "return .newImage(width: newImageSize.width, height: newImageSize.height)", "tests": "PhotoDocumentHostTests"},
+  {"label": "a zero side is taken", "file": "Sources/PhotoModel/PhotoDocumentHost.swift", "find": "value > 0 else", "replace": "value >= 0 else", "tests": "PhotoDocumentHostTests"},
+  {"label": "place makes a new image", "file": "Sources/PhotoModel/PhotoDocumentHost.swift", "find": "        case .place:\n            return .success([])", "replace": "        case .place:\n            return .success([newImage(for: handOff.preset)])", "tests": "PhotoDocumentHostTests"},
+  {"label": "a live result is never adopted", "file": "Sources/PhotoModel/PhotoDocumentHost.swift", "find": "        self = result\n", "replace": "        _ = result\n", "tests": "PhotoLiveCommandTests"},
+  {"label": "an older copy overwrites newer edits", "file": "Sources/PhotoModel/PhotoDocumentHost.swift", "find": "        guard result.revision >= revision else { return }\n", "replace": "", "tests": "PhotoLiveCommandTests"}
+]

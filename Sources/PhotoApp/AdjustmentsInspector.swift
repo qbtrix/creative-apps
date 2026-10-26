@@ -7,24 +7,33 @@
 // rows. Numbers show whole degrees and percents, one decimal for EV and px,
 // and Black and White as a percent of the tonal range (PhotoLevelsFormat),
 // at places that keep distinct points reading distinct.
-// Curves (CurvesEditor) sits between Levels and Hue/Saturation, over
-// `histogram`. The end of every gesture, a curve drag or a bar slider's drag,
+// Levels opens with SuiteUI's HistogramView of `histogram` (the image as it
+// enters Curves, with its clipping markers), and Curves (CurvesEditor) sits
+// between Levels and Hue/Saturation, over the same `histogram`. The end of every gesture, a curve drag or a bar slider's drag,
 // key step or typed value, goes out as onEditEnd, so each is one undo step.
 // `sections` picks which sections show, in the order above (the inspector
 // passes adjustSections), and `showsEnable` false drops the enable checkboxes, for
 // an adjustment layer, whose row's eye turns it off. The defaults are the
 // whole image's inspector, unchanged.
+// Under Exposure sit the suite's tone rows (tone-controls PT-2): White
+// Balance, Tone, Presence and Sharpen from `settings.tone`, Exposure hidden
+// since Photo's own section shows it, each change out as a ToneIntent through
+// `onTone` and `toneHelp` saying why the rows are off.
 import PhotoModel
+import SuiteImaging
+import SuiteModel
 import SuiteUI
 import SwiftUI
 
 struct AdjustmentsInspector: View {
     let settings: AdjustmentSettings
     var onEdit: @MainActor (AdjustmentEdit) -> Void = { _ in }
-    var histogram: [Double] = []
+    var histogram = ToneHistogram.empty
     var onEditEnd: @MainActor () -> Void = {}
     var sections: [AdjustmentKind] = AdjustmentKind.allCases
     var showsEnable = true
+    var toneHelp: String? = nil
+    var onTone: (ToneIntent) -> Void = { _ in }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -33,7 +42,11 @@ struct AdjustmentsInspector: View {
                     .exposure(Float($0))
                 }
             }
+            if sections.contains(.exposure) {
+                ToneRows(settings: settings.tone, help: toneHelp, hidden: [.exposure], onIntent: onTone)
+            }
             section(.levels) {
+                HistogramView(histogram, emptyMessage: "No histogram yet.", id: "photo.levels.histogram")
                 levelsRow("Black", settings.blackPoint) { .blackPoint($0) }
                 levelsRow("White", settings.whitePoint) { .whitePoint($0) }
                 gammaRow

@@ -2,9 +2,10 @@
 // the component that owns the tool (S-7a). Shift reaches the marquee's
 // selectionDrag; today's `sampling:` wrappers are drags with Option; the
 // eyedropper sets the brush color without a history step; a transform in
-// progress takes every drag. Runs on Linux and macOS.
+// progress takes every drag and moves its box. Runs on Linux and macOS.
 import CoreRaster
 @testable import PhotoModel
+import SuiteKernel
 import Testing
 
 @Suite struct PhotoDragRoutingTests {
@@ -45,19 +46,26 @@ import Testing
         model.drag(from: Self.a, to: Self.b)
         model.endDrag()
         #expect(model.historySteps == steps && !model.canUndo)
+        // The kernel's mean of the composite under the drag's end, not a fake's colour (EP-2).
+        let want = try #require(model.sampledColor(at: Point(x: Self.b.x, y: Self.b.y), size: model.sampleSize))
         let options = model.brushOptions
-        #expect((options.red, options.green, options.blue) == (255, 204, 0))
+        #expect([options.red, options.green, options.blue].map(Int.init) == [want.r, want.g, want.b].map(SampleRules.byte))
     }
 
-    @Test func theLiveEyedropperRefusesWithoutAChange() throws {
+    /// On `.live` (its sampler built, eyedropper PE-5) a drag picks the white
+    /// canvas into the brush colour, still with no history step.
+    @Test func theLiveEyedropperPicksWithNoHistoryStep() throws {
         var model = PhotoWorkspace()
         try model.newCanvas(width: 64, height: 64)
+        model.setToolOption(.color(red: 10, green: 20, blue: 30))
         model.selectTool(.eyedropper)
-        let before = model
+        let steps = model.historySteps
         model.drag(from: Mask.Point(x: 8, y: 8), to: Mask.Point(x: 40, y: 40))
         model.endDrag()
-        #expect(model == before)
-        #expect(model.toolHelp(.eyedropper)?.isEmpty == false)
+        #expect(model.historySteps == steps)
+        let options = model.brushOptions
+        #expect((options.red, options.green, options.blue) == (255, 255, 255))
+        #expect(model.toolHelp(.eyedropper) == nil)
     }
 
     @Test func aTransformInProgressTakesTheDrag() throws {
@@ -65,9 +73,12 @@ import Testing
         model.selectTool(.brush)
         let id = try #require(model.selectedLayerID)
         model.transformDraft = TransformDraft(layerID: id, box: PixelRect(x: 0, y: 0, width: 800, height: 600))
-        let before = model
+        let pixels = model.pixels
         model.drag(from: Self.a, to: Self.b)
         model.endDrag()
-        #expect(model == before)
+        #expect(model.pixels == pixels, "the brush doesn't paint")
+        #expect(model.stroke == nil)
+        let moved = try #require(model.transformDraft?.transform)
+        #expect(moved.dx == 80 && moved.dy == 80, "the drag moves the transform box")
     }
 }

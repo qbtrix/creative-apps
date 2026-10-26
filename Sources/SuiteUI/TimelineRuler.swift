@@ -11,6 +11,7 @@
 // TL-18: labels read in the host's unit, spaced from the widest label
 // (TimelineRulerLabels); the work area is a bar on the lower 6 pt with two
 // 16 pt handles (TimelineWorkAreaBar, laid over the playhead by the strip).
+import SuiteKernel
 import SwiftUI
 
 struct TimelineRuler: View {
@@ -21,6 +22,8 @@ struct TimelineRuler: View {
     let playhead: Int
     let unit: TimeUnit
     let fps: Int
+    /// The document's rate, when the host knows it: labels read its timecode.
+    var rate: FrameRate? = nil
     let onScrub: @MainActor (Int) -> Void
     @Environment(\.suiteSnapshotRendering) private var snapshot
     @State private var sender = TimelineScrubSender()
@@ -34,7 +37,7 @@ struct TimelineRuler: View {
         // The content x at the ruler's leading edge.
         let scrollX = snapshot ? 0 : (visibleX?.lowerBound ?? -Double(timelineInset)) + Double(timelineInset)
         return GeometryReader { proxy in
-            TimelineRulerMarks(mapping: mapping, visibleX: visibleX, unit: unit, fps: fps).equatable()
+            TimelineRulerMarks(mapping: mapping, visibleX: visibleX, unit: unit, fps: fps, rate: rate).equatable()
                 .frame(width: snapshot ? max(proxy.size.width, 0) : CGFloat(mapping.contentWidth) + SuiteSpacing.xl,
                        alignment: .leading)
                 .offset(x: -CGFloat(scrollX))
@@ -68,6 +71,7 @@ struct TimelineRulerMarks: View {
     let visibleX: ClosedRange<Double>?
     let unit: TimeUnit
     let fps: Int
+    var rate: FrameRate? = nil
 
     var body: some View {
         #if DEBUG
@@ -75,7 +79,7 @@ struct TimelineRulerMarks: View {
         #endif
         let mapping = mapping
         let visibleX = visibleX
-        let rules = TimelineRulerLabels(mapping: mapping, unit: unit, fps: fps)
+        let rules = TimelineRulerLabels(mapping: mapping, unit: unit, fps: fps, rate: rate)
         return Canvas { context, size in
             let shown = visibleX ?? 0...Double(min(size.width, SuiteSize.timelineRulerSpan))
             let marks = mapping.rulerMarks(
@@ -110,6 +114,7 @@ struct TimelineRulerMarks: View {
 extension TimelineRulerMarks: Equatable {
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.mapping == rhs.mapping && lhs.visibleX == rhs.visibleX && lhs.unit == rhs.unit && lhs.fps == rhs.fps
+            && lhs.rate == rhs.rate
     }
 }
 
@@ -126,11 +131,13 @@ struct TimelineRulerLabels: Equatable, Sendable {
     let mapping: FrameMapping
     let unit: TimeUnit
     let fps: Int
+    /// The document's rate, when the host knows it: labels read its timecode, as its readout does.
+    var rate: FrameRate? = nil
 
     static let digit = Double(SuiteSize.timelineLabelDigit), padding = Double(SuiteSpacing.xxs)
 
     func text(_ frame: Int) -> String {
-        TimelineTime.label(frame: frame, fps: fps, unit: unit)
+        TimelineTime.label(frame: frame, fps: fps, rate: rate, unit: unit)
     }
 
     /// The room the widest label needs, plus one character of gap.

@@ -1,12 +1,12 @@
 // CompositionSettings.swift: what the New Composition sheet asks for (name,
 // size, frame rate, duration in seconds) and the rules that make it valid.
 // Linux-safe: no UI imports. The sheet edits a copy as a draft; HaloProject
-// only ever builds a composition from settings that pass `isValid`.
+// only ever builds a composition from settings that pass `isValid`. The rate
+// is one of SuiteKernel's `FrameRate.common` (frame-rates FR-8).
+import SuiteKernel
 
 /// The settings a new composition is made from.
 public struct CompositionSettings: Sendable, Hashable {
-    /// The frame rates a composition can play at.
-    public static let frameRates = [24, 25, 30, 60]
     /// The width and height a composition can have, in pixels.
     public static let sizeRange = 1...8192
     /// The longest composition, 24 hours; keeps the frame count far from Int.max.
@@ -15,15 +15,40 @@ public struct CompositionSettings: Sendable, Hashable {
     public var name: String
     public var width: Int
     public var height: Int
-    public var framesPerSecond: Int
+    /// The exact rate, one of `FrameRate.common` while valid.
+    public var frameRate: FrameRate
     public var durationSeconds: Double
 
-    public init(name: String, width: Int = 1920, height: Int = 1080, framesPerSecond: Int = 30, durationSeconds: Double = 10) {
+    public init(name: String, width: Int = 1920, height: Int = 1080, frameRate: FrameRate, durationSeconds: Double = 10) {
         self.name = name
         self.width = width
         self.height = height
-        self.framesPerSecond = framesPerSecond
+        self.frameRate = frameRate
         self.durationSeconds = durationSeconds
+    }
+
+    /// Settings at a whole rate, as before rates were rational.
+    public init(name: String, width: Int = 1920, height: Int = 1080, framesPerSecond: Int = 30, durationSeconds: Double = 10) {
+        self.init(name: name, width: width, height: height, frameRate: FrameRate(whole: framesPerSecond), durationSeconds: durationSeconds)
+    }
+
+    /// The whole rate, 30 for 29.97, for old callers; setting it makes the rate whole.
+    public var framesPerSecond: Int {
+        get { frameRate.nominal }
+        set { frameRate = FrameRate(whole: newValue) }
+    }
+
+    /// These settings at `rate`, as the sheet's rate menu picks it.
+    public func withFrameRate(_ rate: FrameRate) -> CompositionSettings {
+        var copy = self
+        copy.frameRate = rate
+        return copy
+    }
+
+    /// The rate problem in words, naming every rate on the list.
+    static var frameRateProblem: String {
+        let names = FrameRate.common.map { String($0.description.dropLast(" fps".count)) }
+        return "Frame rate must be \(names.dropLast().joined(separator: ", ")) or \(names.last ?? "") fps."
     }
 
     /// Why the settings can't make a composition, one line per problem, in
@@ -38,9 +63,7 @@ public struct CompositionSettings: Sendable, Hashable {
         let sizes = "\(Self.sizeRange.lowerBound) to \(Self.sizeRange.upperBound)"
         if !Self.sizeRange.contains(width) { problems.append(.init(.width, "Width must be \(sizes) pixels.")) }
         if !Self.sizeRange.contains(height) { problems.append(.init(.height, "Height must be \(sizes) pixels.")) }
-        if !Self.frameRates.contains(framesPerSecond) {
-            problems.append(.init(.frameRate, "Frame rate must be 24, 25, 30 or 60 fps."))
-        }
+        if !FrameRate.common.contains(frameRate) { problems.append(.init(.frameRate, Self.frameRateProblem)) }
         if !(durationSeconds > 0 && durationSeconds <= Self.maxDurationSeconds) {
             problems.append(.init(.duration, "Duration must be more than 0 seconds and at most 24 hours."))
         }
@@ -53,7 +76,7 @@ public struct CompositionSettings: Sendable, Hashable {
     /// The duration in whole frames, at least 1; nil while invalid.
     public var durationFrames: Int? {
         guard isValid else { return nil }
-        return max(1, Int((durationSeconds * Double(framesPerSecond)).rounded()))
+        return max(1, frameRate.frames(forDuration: durationSeconds))
     }
 }
 

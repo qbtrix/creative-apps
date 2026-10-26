@@ -1,0 +1,23 @@
+[
+ {
+  "label": ".tiffBothExtensions: tif dropped from TIFF",
+  "file": "Sources/SuiteModel/Values/SuiteImageFormats.swift",
+  "find": "extensions: [\"tif\", \"tiff\"], writes: [8, 16])",
+  "replace": "extensions: [\"tiff\"], writes: [8, 16])",
+  "tests": "SuiteImageFormatsTests"
+ },
+ {
+  "label": ".writableIsFour: EXR marked writable",
+  "file": "Sources/SuiteModel/Values/SuiteImageFormats.swift",
+  "find": "extensions: [\"exr\"], family: .highDynamicRange)",
+  "replace": "extensions: [\"exr\"], family: .highDynamicRange, writes: [16])",
+  "tests": "SuiteImageFormatsTests"
+ },
+ {
+  "label": ".anyCase: the extension compared case-sensitively",
+  "file": "Sources/SuiteModel/Values/SuiteImageFormats.swift",
+  "find": "let ext = fileName[fileName.index(after: dot)...].lowercased()",
+  "replace": "let ext = String(fileName[fileName.index(after: dot)...])",
+  "tests": "SuiteImageFormatsTests"
+ }
+]

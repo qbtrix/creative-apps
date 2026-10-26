@@ -6,6 +6,7 @@
 // dialogs an area's route asks the window to show (`HaloWindowRequest`).
 // Linux-safe: no UI imports.
 import CoreRaster
+import SuiteKernel
 
 /// The nine areas, one availability file each.
 public enum HaloCommandArea: Sendable, CaseIterable {
@@ -36,6 +37,10 @@ public enum HaloCommand: Hashable, Sendable, CaseIterable {
     case setEasing(HaloEasingPreset), selectKey(HaloKeyRef, extending: Bool)
     case selectLaneKeys(layerID: String, frame: Int, extending: Bool), clearKeySelection, deleteKeys
     case setCustomEasing(HaloEasing), moveEasingHandle(index: Int, x: Double, y: Double), endEasingDrag
+    // key editing (key-editing KE-1): a nil frame is a press on the lane's bed, which clears the pick;
+    // `by` is frames since the last move and `dragStart` folds one drag into one step.
+    case pickLaneKeys(layerID: String, frame: Int?, mode: Pick), selectAllKeys
+    case moveKeys(by: Int, dragStart: Int), endKeyDrag
     // render
     case renderFrame, openRenderSheet, startRender(HaloRenderSettings), cancelRender, closeRenderSheet
     // text
@@ -58,6 +63,8 @@ public enum HaloCommand: Hashable, Sendable, CaseIterable {
         .setEasing(.easeInOut), .selectKey(HaloKeyRef(layerID: "comp-1-layer-2", property: .x, frame: 0), extending: false),
         .selectLaneKeys(layerID: "comp-1-layer-2", frame: 0, extending: false), .clearKeySelection, .deleteKeys,
         .setCustomEasing(HaloEasingPreset.easeIn.easing), .moveEasingHandle(index: 0, x: 0.3, y: 0), .endEasingDrag,
+        .pickLaneKeys(layerID: "comp-1-layer-2", frame: 0, mode: .replace), .selectAllKeys,
+        .moveKeys(by: 6, dragStart: 0), .endKeyDrag,
         .renderFrame, .openRenderSheet, .startRender(HaloRenderSettings(format: .pngSequence)), .cancelRender,
         .closeRenderSheet,
         .setText("Hello"), .setFontSize(48), .endTextSizeScrub, .setLayerColor(HaloLayerColor(red: 1, green: 0, blue: 0)),
@@ -80,7 +87,7 @@ public enum HaloCommand: Hashable, Sendable, CaseIterable {
         case .undo, .redo: .history
         case .save, .saveAs, .open, .openRecent: .files
         case .setEasing, .selectKey, .selectLaneKeys, .clearKeySelection, .deleteKeys, .setCustomEasing,
-            .moveEasingHandle, .endEasingDrag:
+            .moveEasingHandle, .endEasingDrag, .pickLaneKeys, .selectAllKeys, .moveKeys, .endKeyDrag:
             .easing
         case .renderFrame, .openRenderSheet, .startRender, .cancelRender, .closeRenderSheet: .render
         case .setText, .setFontSize, .endTextSizeScrub, .setLayerColor: .text
@@ -129,7 +136,10 @@ public enum HaloCommand: Hashable, Sendable, CaseIterable {
         case .openRecent(let path): path.split(separator: "/").last.map(String.init) ?? path
         case .setEasing(let preset): preset.title
         case .selectKey: "Select Key"
-        case .selectLaneKeys: "Select Keys"
+        case .selectLaneKeys, .pickLaneKeys: "Select Keys"
+        case .selectAllKeys: "Select All Keys"
+        case .moveKeys: "Move Keyframes"
+        case .endKeyDrag: "End Key Drag"
         case .clearKeySelection: "Clear Key Selection"
         case .deleteKeys: "Delete Keyframes"
         case .setCustomEasing: "Custom Easing"

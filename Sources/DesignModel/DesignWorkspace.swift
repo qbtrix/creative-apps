@@ -56,15 +56,16 @@ public struct DesignPage: Identifiable, Sendable, Hashable, Codable {
 
 /// The tools on Design's tool palette.
 public enum DesignTool: String, CaseIterable, Sendable {
-    case move, frame, rectangle, ellipse, text, pen, eyedropper
+    case move, frame, rectangle, ellipse, shape, text, pen, eyedropper
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Set it to nil in the change that makes `drag` do something.
+    /// The palette shows it in place of "Title (Key)", so an icon-only tool's
+    /// reason names the tool and its key itself.
     public var unavailableHelp: String? {
         switch self {
-        case .move, .frame, .rectangle, .ellipse, .text: nil
+        case .move, .frame, .rectangle, .ellipse, .shape, .text, .eyedropper: nil
         case .pen: "Drawing paths isn't built yet."
-        case .eyedropper: "Picking a color from the canvas isn't built yet."
         }
     }
 
@@ -77,6 +78,7 @@ public enum DesignTool: String, CaseIterable, Sendable {
         case .rectangle: .rectangle
         case .ellipse: .ellipse
         case .text: .text
+        case .shape: .shape
         case .move, .pen, .eyedropper: nil
         }
     }
@@ -98,8 +100,16 @@ public struct DesignWorkspace: Sendable, Equatable {
         get { selectedNodeIDs.last }
         set { selectedNodeIDs = newValue.map { [$0] } ?? [] }
     }
+    /// The groups a click picks inside (DesignGroupPick+Kernel); the root when none is entered. View state.
+    public internal(set) var groupScope = GroupScope.root
     public internal(set) var expandedNodeIDs: Set<String> = []
     public internal(set) var tool: DesignTool = .move
+    /// The Shape tool's options, the spec its next drag draws: view state, never an undo step (DesignShape+Kernel).
+    public internal(set) var shapeTool: ShapeSpec = .defaults(.star)
+    /// The Eyedropper's options (DesignLoupe): the square it reads, and whether a plain click picks the
+    /// stroke (Option inverts it). View state, never an undo step.
+    public internal(set) var sampleSize = SampleSize.point
+    public internal(set) var sampleToStroke = false
     /// The text node being edited inline, and its live text (DesignText).
     public internal(set) var editingTextID: String?
     public internal(set) var textDraft = ""
@@ -247,11 +257,12 @@ public struct DesignWorkspace: Sendable, Equatable {
         expandAncestors(of: id, in: page.nodes)
     }
 
-    /// Clears the node selection, every selected layer (Escape, a click on empty canvas); the page stays selected.
+    /// Clears the node selection, every selected layer (Escape, a click on empty canvas), and leaves every entered
+    /// group; the page stays selected.
     public mutating func deselect() {
         commitTextEdit()
         endEditRun()
-        selectedNodeID = nil
+        (selectedNodeID, groupScope) = (nil, .root)
     }
 
     /// Expands every node that encloses `id` in `nodes`, so `id`'s own Layers row shows.
