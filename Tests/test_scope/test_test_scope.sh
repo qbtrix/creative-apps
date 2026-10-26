@@ -172,15 +172,46 @@ func expectP95(_ step: Step, atMost budget: Double, target: Double) { #expect(st
 func expectBodies(_ step: Step, atMost budget: Int, target: Int) { #expect(step.bodies <= budget) }
 EOF
 printf '%s\n' '@Test func untimedMedian() { #expect(copies.median <= 2) }' >"$tmp/tree/PhotoModelTests/B.swift"
+# Ratios: a test whose own body reads a clock (Date() counts, in a nested func
+# too) and bounds a ratio under 10x is a timing test; 10x passes, an abs()
+# tolerance passes, a ratio in a test that reads no clock passes (a shared
+# helper reading one doesn't count), and a Date() file's named bound is a bound.
+cat >"$tmp/tree/PhotoModelTests/C.swift" <<'EOF'
+import Testing
+func render() -> Double { let start = Date(); return Date().timeIntervalSince(start) }
+@Test func tightRatio() {
+    func seconds(_ work: () -> Void) -> Double { let start = Date(); work(); return Date().timeIntervalSince(start) }
+    let narrow = seconds {}
+    let wide = seconds {}
+    #expect(wide < narrow * 3 + 0.1, "wide \(wide) s, narrow \(narrow) s")
+}
+@Test func wideRatio() {
+    let start = Date(); let narrow = Date().timeIntervalSince(start); let wide = Date().timeIntervalSince(start)
+    #expect(wide < narrow * 10)
+}
+@Test func tolerance() { let g = Date().timeIntervalSince(Date()); #expect(abs(back - g) <= g * 1e-12) }
+@Test func countRatio() { let disabled = render(); let enabled = render(); #expect(disabled < enabled * 0.8, "dimmer") }
+@Test func divided() {
+    let start = Date(); let narrow = Date().timeIntervalSince(start); let wide = Date().timeIntervalSince(start)
+    #expect(wide / narrow <= 2.5, "ratio")
+}
+@Test func dateBudget() { let elapsed = render(); #expect(elapsed < 0.5) }
+EOF
 printf '%s\n' 'photo PhotoModelTests.ListedTests' >"$tmp/listed.txt"
 : >"$tmp/no-baseline.txt"
 printf '%s\n' '# grandfathered' 'PhotoModelTests.unlisted' 'PhotoModelTests.gone' >"$tmp/baseline.txt"
-check "timing names each unlisted bound: a Duration, a timing name or a frames-drawn floor in a file that reads a clock, or a call to a helper that asserts one" \
-  'PhotoModelTests.timedMedian;PhotoModelTests.unlisted;PhotoModelTests.helperP95;PhotoModelTests.framesDrawn' \
+check "timing names each unlisted bound: a Duration, a timing name or a frames-drawn floor in a file that reads a clock, a ratio under 10x in a test that reads one, or a call to a helper that asserts one" \
+  'PhotoModelTests.timedMedian;PhotoModelTests.unlisted;PhotoModelTests.helperP95;PhotoModelTests.framesDrawn;PhotoModelTests.tightRatio;PhotoModelTests.divided;PhotoModelTests.dateBudget' \
   "$(TESTS_DIR="$tmp/tree" PERF_SUITES="$tmp/listed.txt" TIMING_BASELINE="$tmp/no-baseline.txt" python3 "$ts" timing | cut -d' ' -f1 | paste -sd';' -)"
 check "timing passes a baselined test and names a baseline line that no longer times (the baseline only shrinks)" \
-  'PhotoModelTests.timedMedian;PhotoModelTests.helperP95;PhotoModelTests.framesDrawn;PhotoModelTests.gone' \
+  'PhotoModelTests.timedMedian;PhotoModelTests.helperP95;PhotoModelTests.framesDrawn;PhotoModelTests.tightRatio;PhotoModelTests.divided;PhotoModelTests.dateBudget;PhotoModelTests.gone' \
   "$(TESTS_DIR="$tmp/tree" PERF_SUITES="$tmp/listed.txt" TIMING_BASELINE="$tmp/baseline.txt" python3 "$ts" timing | cut -d' ' -f1 | paste -sd';' -)"
+
+# ids: each @Test of a file as a perf-list id (the fast lane's quarantine resolves a red test's file this way).
+printf '%s\n' 'import Testing' '@Suite struct OpenTests {' '    @Test func opens() {}' '    enum Nested {' '        @Test func inner() {}' '    }' '}' '@Test func freeOne() {}' >"$tmp/Ids.swift"
+check "ids prints Target.Suite/test, nested suites joined, and Target.freeTest" \
+  'PhotoModelTests.OpenTests/opens;PhotoModelTests.OpenTests/Nested/inner;PhotoModelTests.freeOne' \
+  "$(python3 "$ts" ids PhotoModelTests "$tmp/Ids.swift" | paste -sd';' -)"
 
 # The perf regex: exactly the listed tests, by suite, one test or free test.
 perf=$(python3 "$ts" perf)
