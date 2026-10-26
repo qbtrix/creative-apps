@@ -61,3 +61,5 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-25T02:41Z: #5266 rebuilt on library-m by cherry-pick (15 files, +280/-27, head aa03993b, gate CI: PASS, 959 tests). X fix, option (a): LibraryCatalog.cullChange(forKey:) returns nil for X while cropDraft is set, so the window route and the cull handler leave X to the picker's swap; LibraryFakeOrientationTests.xNeverRejectsWhileACropDraftIsOpen proves it. Option (b) was out because SuiteUI's CropAspectPicker hard-codes the X shortcut. Footers stripped from #5244, #5246, #5263 and #5266 via the GitHub MCP.
 
 - 2026-10-26T02:04:14Z run act-1a175ee1051-o29l: OC-library-m slice done (run 40247461868); #5266 dev merged, gate running; #5244/#5263 in lane
+
+- 2026-10-26T02:28:27Z run act-1a175ee1051-o29l: #5266 dev merged, CI: PASS, Head 2432646a, fast-lane relabelled (15 files +280/-27); #5263 restacked on fabf6717, CI: PASS, Head 9b8cf01c; OC-z follows when both u slices land
