@@ -147,3 +147,4 @@ utc	stage	event	ref	note
 2026-10-26T03:07:58Z	heartbeat	restacked 6 PRs on dev d0859e017; gates pass; 0 open findings for suite-imaging
 2026-10-26T03:30:04Z	heartbeat	#5295 #5297 #5299 #5154 #5163 #5178 open and clean; IM-13 after #5163
 2026-10-26T04:01:17Z	heartbeat	#5295..#5299 #5154..#5178 open and clean; ratchet checked; IM-13 after #5163
+2026-10-26T04:22:59Z	heartbeat	all PRs open and clean, no labels; batches held while dev-red #5321 is open (not ours)
