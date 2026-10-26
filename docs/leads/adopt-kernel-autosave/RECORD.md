@@ -129,3 +129,4 @@ Next: AK side ended (parked by the supervisor): #4427 and #4428 on dev; relaunch
 
 - AK-6 on the library spine; AK-8 on SC-f; AK-9 on AK-6, AK-8, DA-z, HA-z; AK-11 on AK-9, AK-10.
 - 2026-10-26T03:03:42Z AK-z: #5040 gated (CI: PASS) on head 78f6ac0b; body Head and Belt-Lead moved. Waiting on the lane batch.
+- 2026-10-26T03:30:20Z Blocked on lane: dev-red #5321 (macos) is open, so no code batch forms. Bisect/triage name #5112 (reverted in #5349) and #5044, not ours. All 8 run PRs (#5040 #5088 #5089 #5091 #5231 #5244 #5263 #5266) are gated, fast-lane, no needs-fix/needs-rebase. Waiting; will not fix dev-red in our PRs.
