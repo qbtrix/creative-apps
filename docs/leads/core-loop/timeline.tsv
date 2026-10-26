@@ -257,3 +257,4 @@ utc	stage	event	ref	note
 2026-10-26T07:24Z	3	check-in	H-J12 + PlayHittable pass	halo 40263528127 at 6d5f8b92; 13 baseline fails, none new
 2026-10-26T09:26Z	3	check-in	no change	40281086269 cancelled before Halo; 40295735868 running
 2026-10-26T11:30Z	3	check-in	no change	40295735868, 40301120476 cancelled before Halo
+2026-10-26T13:41Z	3	check-in	no halo coverage	full 40318165855 timed out before Halo; #4283/#4282 open
