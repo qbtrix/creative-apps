@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-26T02:41Z	3	lane-check	#5064,#5233,#5235,#5236	all eligible in 01:45Z sweep; waiting on lane
 2026-10-26T03:10Z	3	check-in	#5064,#5233,#5235,#5236	wave 2 still queued; attribution footers stripped from 12 PR bodies
 2026-10-26T03:30Z	3	check-in	#5064,#5233,#5235,#5236	wave 2 still queued; no needs-fix, 0 findings
+2026-10-26T03:46Z	3	check-in	#5064,#5233,#5235,#5236	wave 2 still queued; dev unmoved; 0 findings
