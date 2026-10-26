@@ -123,3 +123,4 @@ utc	stage	event	ref	note
 2026-10-26T15:04Z	heartbeat	lane	#5158	dev f86f72f79; batch 20261026150314 holds #5267 only; #5158/#5174 eligible, unmerged; no answer on #3936; dev-red #5321 open
 2026-10-26T15:25Z	heartbeat	lane	#5158	dev f86f72f79; batch 20261026150314 (#5267) in flight; #5158/#5174 eligible, unmerged; no answer on #3936; dev-red #5321 open
 2026-10-26T15:46Z	heartbeat	lane	#5158	dev 310d7d14a; lane forms only no-code (Linux-only) batches while dev-red #5321 names macOS, so code PRs #5158/#5174 wait for #5321 to close or the local Mac gate
+2026-10-26T16:06Z	heartbeat	waiting: dev-red #5321 (macOS) blocks code batches; #5174/#5158 eligible; no supervisor answer
