@@ -82,3 +82,7 @@ Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #48
 - 18:19Z: dev-red #5183 opened 17:56Z for the full macOS job, range main..33cd6e97c (#3621 ... #4951). None of our PRs is in it; the lane keeps merging.
 
 - 18:55Z: #4880 (TC-5) is on dev. The Pen PR #5134 conflicted with PT-2, PT-6 and PT-4 (PhotoIntent, PhotoWindow, catalog, command-ids, photo.list-commands golden). Resolved by keeping both; the golden is dev plus our tone.* entries, sorted by id.
+
+- Run act-1a175ea563c-tbc1 (2026-10-26T02:00Z) takes over, with the same base-dev and status-branch choices. Brief step one checked main at d3323f6a7. Dev state: PT-1 #4845, PT-2 #5007, PT-3 #5105 and PT-6 #5008 are merged. PT-4 #5112 merged as eb2e2409 and was reverted by #5349 (19de4b93): the catalog laws said tone.auto's step read "Delete" and tone.set failed stepNamedTitle, once TC-6 #4953 made the runs real. TC-3 #5006, TC-5 and TC-6 are all on dev, so no Wire waits remain except TC-z #5239 (live rows, open).
+- PT-a slice-done: scoped photo run 40250716357 at cc5c6234a (green) contains #5007.
+- PT-m: PT-4 re-lands on `claude/tone-controls-lead-gms6yu` (a revert of the revert, then the law fixes, with the TC-6 tolerations dropped), and Packet-Review amendments 2, 3 and 8 go into it.
