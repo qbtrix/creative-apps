@@ -235,3 +235,4 @@ utc	stage	event	ref	note
 2026-10-26T22:40Z	check	#5816/#5817 still unmerged, clean; heads lack local-ci/prescreen (landed PRs carry it) -> noted to supervisor on #3468 (6429030603); stripped tool footers from 4 lead comments on #3468
 2026-10-26T23:02Z	check	#5817 (PT-u) in lane/batch-20261026225859; #5816 (PT-m) open, clean, no prescreen yet, not batched; no supervisor reply on #3468; -pt7 waits on #5816
 2026-10-26T23:24Z	check	dev 22d07ab9 (#5369 landed); #5817 (PT-u) still in lane/batch-20261026225859, no needs-fix; #5816 (PT-m) open, clean, unbatched; no supervisor reply; -pt7 waits on #5816
+2026-10-26T23:46Z	check	batch 225859 dropped without label/comment; #5817 (PT-u) rebatched in lane/batch-20261026234054; #5816 (PT-m) open, clean, unbatched; no supervisor reply; dev 22d07ab9
