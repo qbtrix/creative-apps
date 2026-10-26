@@ -136,3 +136,4 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-26T11:52Z: heartbeat: dev c6700dba (#5727 quarantine expiry); dev-red #5321 open; Linux check 40316903931 running; no Feature: shared PR moved; #5133 ST-z still queued
 - 2026-10-26T12:23Z: heartbeat: dev 746be6b1 (#5775 sharded macOS); full CI 40321924466 queued; Linux check 40316903931 on c6700dba green; dev-red #5321 open; no Feature: shared PR moved; #5133 ST-z queued
 - 2026-10-26T12:55Z: heartbeat: Packet-Review 2 branch lead/shared-codecs-review-2 ready for its gate; codec PRs unchanged (#5073 #5076 #5098 #5101 #5069 #5071 #5232 #5261 #5265); dev 746be6b1; dev-red #5321 open; findings 0
+- 2026-10-26T13:07Z: heartbeat: Packet-Review 2 branch gate queued behind ST-z2; codec PRs unchanged; dev 57dd31ff; dev-red #5321 open; findings 0
