@@ -141,3 +141,13 @@ Next: Lane: #5039 AK-6 in the lane; #5040 AK-9 stacked on it. AK-8 waits SC-f (r
 ## Open
 
 - AK-6 on the library spine; AK-8 on SC-f; AK-9 on AK-6, AK-8, DA-z, HA-z; AK-11 on AK-9, AK-10.
+
+## Run act-1a175ee1051-o29l
+- 2026-10-26T02:59Z: resumed from Belt's nudge. This run's status had gone to lead/adopt-kernel-autosave; from now on it is pushed here too.
+- AK-library done: #5039 (AK-6) merged as e1872962; Belt-Slice-Done: AK-library posted on #3713 with scoped suiteui run 40247461868 (green, dev 30096d71).
+- AK-photo (AK-8) still blocked: supervisor guard on PhotoWindow+File.swift until shared-codecs SC-f lands. SC-13 #4019 and SC-14 #4238 merged; SC-15/SC-16 not on dev (Tests/format-lists-baseline.txt 28 lines).
+- AK-z: #5040 (AK-9) open, clean, in the lane (head 78f6ac0b); Photo leg skips "waits on AK-8". AK-11 follows AK-8.
+- 0 open findings for this feature.
+
+## Open
+- AK-8 on SC-f (SC-15, SC-16); AK-9 Photo leg and AK-11 after AK-8.

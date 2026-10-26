@@ -151,3 +151,4 @@ utc	stage	event	ref	note
 2026-10-25T13:14:17Z	3	poll	-	13:14Z poll: dev 930337d52, no merges of ours, no dev-red; scripts/ci --changed still building for #4960 (lx2) and #5043 (XP-3) restacks, push on PASS
 2026-10-25T13:30:08Z	3	poll	-	13:30Z poll: #5039 and #5040 still queued in lane; dev bbaedba66 green; SC-f not yet on dev
 2026-10-25T13:46:58Z	3	poll	-	13:46Z poll: no merges; lane batch-20261025132815 Linux check running; dev bbaedba66 green; SC-f not on dev
+2026-10-26T02:59:27Z	-	resume	-	run act-1a175ee1051-o29l resumed after Belt nudge; state synced from lead/adopt-kernel-autosave
