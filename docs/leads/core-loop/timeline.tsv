@@ -261,3 +261,4 @@ utc	stage	event	ref	note
 2026-10-26T15:43Z	3	check-in	no halo coverage	full 40337198403 cancelled 0 Halo; 40349518184 waiting
 2026-10-26T17:46Z	3	check-in	no halo coverage	full 40349518184 cancelled 0 Halo; 40366709443 waiting
 2026-10-26T19:48Z	3	check-in	no halo coverage	full 40366709443/40374073442 cancelled 0 Halo; halo 40373872016 waiting
+2026-10-26T20:50Z	3	check-in	no halo coverage	halo 40373872016 and full 40381545455 still waiting
