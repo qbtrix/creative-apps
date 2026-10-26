@@ -1,0 +1,23 @@
+[
+  {
+    "label": "anAnchorDragShowsEachSampleAndCommitsAsOneStep: an intent the copy runs is not held, so the release hands the app nothing",
+    "file": "Sources/SuiteKernel/Paths/PathLiveDrag.swift",
+    "find": "        held.append(intent)\n",
+    "replace": "",
+    "tests": "PathLiveDragTests"
+  },
+  {
+    "label": "anAnchorDragShowsEachSampleAndCommitsAsOneStep: the copy keeps the path it began with, so a drag shows no move",
+    "file": "Sources/SuiteKernel/Paths/PathLiveDrag.swift",
+    "find": "        pathInEdit?.path = path\n",
+    "replace": "",
+    "tests": "PathLiveDragTests"
+  },
+  {
+    "label": "aHandleDragShowsWhereItIsAndCommitsTheSamePath: the copy runs another command than the intent's, so it shows the wrong edit",
+    "file": "Sources/SuiteKernel/Paths/PathLiveDrag.swift",
+    "find": "Self.specs.first(where: { $0.id == command.id })",
+    "replace": "Self.specs.first(where: { $0.id != command.id })",
+    "tests": "PathLiveDragTests"
+  }
+]
