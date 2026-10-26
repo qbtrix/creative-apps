@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 19:43Z poll: slice PRs unchanged (queued/stacked, no needs-* label); dev 17a7848b, no dev-red.
 - 19:21Z poll: no dev-red open; #4894/#5092 markers match heads, prescreen green; lane sweep in progress. Slice PRs unchanged.
 - 18:59Z poll: dev-red #5321 closed (dev green); slice PRs unchanged, #4894/#5092 should batch next; dev 5cffd4cf.
 - 18:37Z poll: no change on slice PRs; dev e69582e7 (scoped photo); full CI fef52e66 running; #5321 open.
