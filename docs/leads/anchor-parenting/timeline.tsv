@@ -1,0 +1,126 @@
+utc	stage	event	ref	note
+2026-10-21T11:25Z	0	stage-start	0	lead started, waits checked
+2026-10-21T11:27Z	3	wave-start	AN-a	wave 1 launched (AN-a contract slice)
+2026-10-21T12:15Z	3	resume	AN-a	resumed after restart; AN-a built on lead/anchor-parenting-AN-a, gate blocked by dev-red #3856, now fixed on dev
+2026-10-21T12:17Z	3	heartbeat	-	gates running on wave-1 slices after merging dev (#4008 fixed dev-red)
+2026-10-21T12:19Z	3	wave-start	wf_8d28fdb1-88d	AN-m building stacked on lead/anchor-parenting-AN-a
+2026-10-21T12:36Z	3	check	ed1efa599	AN-a gate failed only a LibraryModel timing budget under CPU load; re-gating
+2026-10-21T12:57Z	3	check	ed1efa599	AN-a re-gate failed only Library timing budgets under load (5 gates running); queued for an idle-machine gate. AN-m at 29ba5ba6a
+2026-10-21T13:04Z	3	wave	AN	wave 2 builders returned; dev's perf list now skips the Library timing tests; merged dev into the slice branches and re-gating one at a time
+2026-10-21T13:08Z	build	pr-opened	#4076	AN-a gate PASS on 516c4d7e3, PR #4076 opened with fast-lane
+2026-10-21T13:22Z	build	heartbeat	#4076	heartbeat: #4076 open, waiting on the lane
+2026-10-21T13:43Z	build	heartbeat	-	contract PR open; macOS build pending
+2026-10-21T15:29Z	wave-2	merged	#4076	AN-a merged as 2494ab415; restacking AN-m on dev
+2026-10-21T15:30Z	wave-2	gate	ANm	dev (with #4076) merged into AN-m at 29cb5980b; serial gate running
+2026-10-21T15:50Z	wave-2	check	fe3faa1d1	AN-m re-gate running after conflict-marker fix
+2026-10-21T15:54Z	wave-2	pr-open	#4107	AN-m opened (fast-lane, Fast-Check pass on fe3faa1d1)
+2026-10-21T16:12Z	build	heartbeat	#4107	AN-a merged; AN-m PR open, gate PASS fe3faa1d1
+2026-10-21T16:33Z	build	heartbeat	#4107	no change since 16:12
+2026-10-21T16:53Z	wave2	heartbeat	#4107	no change; macOS queue backed up
+2026-10-21T17:14Z	build	merge	#4107	AN-m merged as 0f44e804e
+2026-10-21T17:45Z	build	check	39643409752	AN-m Belt-Slice-Done posted
+2026-10-21T18:07Z	blocked	heartbeat	AN-u	AN-u blocked on orientation-crop; AN-m done
+2026-10-21T18:29Z	blocked	heartbeat	AN-u	AN-u blocked on orientation-crop; AN-m done
+2026-10-21T18:43Z	blocked	heartbeat	AN-u	AN-m done; AN-u blocked on orientation-crop:OC-u
+2026-10-21T18:43Z	blocked	heartbeat	AN-u	mirror to lead/anchor-parenting
+2026-10-21T19:12Z	blocked	heartbeat	AN-u	still blocked on OC-u
+2026-10-21T19:38Z	blocked	heartbeat	AN-u	still blocked on OC-u
+2026-10-21T20:01Z	blocked	heartbeat	AN-u	OC-u not on dev at 606e8212a
+2026-10-21T20:25Z	build	heartbeat	AN-u	OC-u still not on dev
+2026-10-21T20:48Z	build	heartbeat	AN-u	OC-u not on dev
+2026-10-21T21:11Z	wait-dep	heartbeat	AN-u	OC-u not on dev yet
+2026-10-22T03:31Z	resume	resume, new run id	-	act-1a161a658a7-2jql
+2026-10-22T06:55Z	wait-upstream	heartbeat: AN-7 #4308, AN-9 #4303 merged	-	act-1a161a658a7-2jql
+2026-10-22T07:23Z	wait-upstream	heartbeat: waits unchanged	-	act-1a161a658a7-2jql
+2026-10-22T07:56Z	wait-upstream	asked supervisor (3rd blocked poll)	-	act-1a161a658a7-2jql
+2026-10-22T07:57Z	wait-upstream	asked supervisor (3rd blocked poll)	-	act-1a161a658a7-2jql
+2026-10-22T07:58Z	parked	parked per supervisor	-	act-1a161a658a7-2jql
+2026-10-22T16:24Z	3	resume	#4522	new run act-1a16469734c-d0s8; all open tasks wait on upstream
+2026-10-23T15:30Z	3	stage-start	#3755	wave 1: AN-u (run act-1a1695ebfeb-d54n)
+2026-10-23T15:36Z	3 wave 1	heartbeat	-	wave-1 builders running
+2026-10-23T16:00Z	3 wave 1	heartbeat	-	wave-1 builders gating
+2026-10-23T16:20Z	3 wave 1	heartbeat	-	wave-1 builders gating (6 concurrent swift builds)
+2026-10-23T16:49Z	3 wave 1	heartbeat	-	wave-1 builders gating; LS-1 on post-rebase gate
+2026-10-23T16:54Z	3 wave 1	pr-opened	#4893	AN-u/AN-5 head 855d46c6; AN-6 stacked lead/anchor-parenting-AN-u-6
+2026-10-23T17:11Z	3 wave 2	blocked	AN-10	AN-10 file wait on DS-flare #4891 (open)
+2026-10-23T17:48Z	3 wave 1	heartbeat	#4893	AN-u #4893 open; AN-6 stacked; AN-10 waits DS-flare #4891
+2026-10-23T17:49Z	3 wave 1	check	#4891	DS-flare #4891 needs captain review; AN-10 still waits
+2026-10-23T18:40Z	3 wave 1	check	#4893	18:39Z: #4893 queued in lane (lane merging older PRs); AN-6 stacked; AN-10 waits #4891
+2026-10-23T19:05Z	check	heartbeat	-	19:05Z: no lane merge of ours since 18:38Z; PRs queued
+2026-10-23T19:27Z	check	heartbeat	-	19:27Z: lane active (merged #3581 19:25Z); ours queued
+2026-10-23T19:50Z	check	heartbeat	-	19:49Z: lane merged #4741 19:32Z; ours queued, no lane comments
+2026-10-23T20:11Z	check	heartbeat	-	20:11Z: lane bisecting batch 20261023192105 (probe -3 macOS gate queued); ours queued
+2026-10-23T20:33Z	check	heartbeat	-	20:33Z: lane bisecting batch 20261023192105 (#4818..#4842, none ours); ours wait the next batch, no needs-fix
+2026-10-23T20:56Z	check	heartbeat	-	20:56Z: lane batch 20261023204921 (#4841..#4862) running; ours (#4891+) next in line, no needs-fix
+2026-10-23T21:18Z	check	heartbeat	-	21:18Z: lane batch 20261023204921 Linux green, macOS gate running; ours next, no needs-fix
+2026-10-23T21:40Z	check	heartbeat	-	21:4xZ check: #4893 #4902-#4905 #4911 #4891 open, fast-lane, no needs-fix; batch 20261023204921 macOS gate running, ours queue for next batch; stacked tasks wait parents
+2026-10-23T22:05Z	check	heartbeat	-	22:1xZ check: #4893 needs-rebase (SuiteGallery.swift areas list): merged origin/dev, kept GalleryAnchor + GalleryToneRows; regating
+2026-10-23T22:17Z	fix	rebase	#4893	#4893 needs-rebase resolved: merged origin/dev (SuiteGallery areas keep GalleryAnchor + GalleryToneRows), scripts/ci --changed PASS, pushed 822efac, Head: moved
+2026-10-23T22:26Z	check	heartbeat	-	22:27Z check: #4893 needs-rebase dropped by lane at 822efac; open fast-lane
+2026-10-23T22:50Z	check	heartbeat	-	22:50Z check: #4893 AN-u open fast-lane (batch 20261023215139 macOS gate running); AN-6 stacked
+2026-10-23T23:11Z	check	heartbeat	-	23:12Z check: #4893 AN-u open fast-lane, batch 20261023215139 macOS gate still running; AN-6 stacked
+2026-10-23T23:34Z	check	heartbeat	-	23:35Z check: #4893 AN-u open fast-lane, batch 20261023215139 macOS job running since 22:35Z; AN-6 stacked
+2026-10-23T23:55Z	check	heartbeat	-	23:56Z check: #4893 AN-u open fast-lane, queued behind batch 20261023215139 (red macOS gate, not ours, lane bisecting); AN-6 stacked
+2026-10-24T00:17Z	check	heartbeat	-	00:17Z check: #4893 AN-u open fast-lane; lane has not yet bisected red batch 20261023215139 (not ours); AN-6 stacked
+2026-10-24T00:38Z	check	heartbeat	-	00:39Z check: #4893 AN-u open fast-lane; dev full CI green; lane bisecting red batch 20261023215139 (probe -6, not ours); AN-6 stacked
+2026-10-24T01:01Z	check	heartbeat	-	01:01Z check: #4893 AN-u open fast-lane; lane bisect probe -6 macOS gate running (not ours); AN-6 stacked
+2026-10-24T01:22Z	check	heartbeat	-	01:23Z check: #4893 AN-u open fast-lane; lane bisect probe -6 macOS gate still running (not ours); AN-6 stacked
+2026-10-24T01:45Z	check	heartbeat	-	01:46Z check: #4893 AN-u open fast-lane; lane bisect probe -6 green, probe -9 running (not ours); AN-6 stacked
+2026-10-24T02:06Z	check	heartbeat	-	02:07Z check: #4893 AN-u open fast-lane; lane bisect probe -9 macOS running (not ours); AN-6 stacked
+2026-10-24T02:29Z	check	heartbeat	-	02:29Z check: #4893 AN-u open fast-lane; lane bisect probe -9 macOS still running (not ours); AN-6 stacked
+2026-10-24T02:50Z	check	heartbeat	-	02:51Z check: #4893 AN-u open fast-lane; lane bisect narrowing (probe -9 red, -7 running; not ours); AN-6 stacked
+2026-10-24T03:12Z	check	heartbeat	-	03:12Z check: #4893 AN-u open fast-lane; lane bisect probe -7 macOS still running (not ours); AN-6 stacked
+2026-10-24T03:34Z	check	heartbeat	-	03:34Z check: #4893 AN-u open fast-lane; lane bisect probe -7 macOS running 50 min (not ours); AN-6 stacked
+2026-10-24T03:55Z	check	heartbeat	-	03:56Z check: #4893 AN-u open fast-lane; lane bisect probe -7 green, -9 red, culprit likely PR 8 or 9 of batch (not ours); AN-6 stacked
+2026-10-24T04:18Z	check	heartbeat	-	04:18Z check: #4893 AN-u open fast-lane; lane bisect last probe -8 macOS running (not ours); AN-6 stacked
+2026-10-24T04:39Z	check	heartbeat	-	04:40Z check: #4893 AN-u open fast-lane; lane bisect probe -8 macOS still running (not ours); AN-6 stacked
+2026-10-24T05:01Z	check	heartbeat	-	05:02Z check: #4893 AN-u open fast-lane; lane bisect probe -8 macOS running 60 min (not ours); AN-6 stacked
+2026-10-24T05:24Z	check	heartbeat	-	05:25Z check: #4893 AN-u open fast-lane; old bisect done, new batch 20261024050226 (PRs 4839-4875, not ours) Linux green, macOS running; AN-6 stacked
+2026-10-24T05:46Z	check	heartbeat	-	05:47Z check: #4893 AN-u open fast-lane; batch 20261024050226 (not ours) red on macOS, bisect probe -6 running; AN-6 stacked
+2026-10-24T06:08Z	check	heartbeat	-	06:08Z check: #4893 AN-u open fast-lane; batch 20261024050226 (not ours) bisect probe -6 macOS running; AN-6 stacked
+2026-10-24T06:29Z	check	heartbeat	-	06:30Z check: #4893 AN-u open fast-lane; batch 20261024050226 (not ours) bisect at probes -3/-1; dev full CI running; AN-6 stacked
+2026-10-24T06:50Z	check	heartbeat	-	06:52Z check: #4893 AN-u open fast-lane; batch 20261024050226 (not ours) bisect: -6 red, -3 macOS running, -1 macOS queued; dev CI running; AN-6 stacked
+2026-10-24T07:14Z	check	heartbeat	-	07:14Z check: #4893 open fast-lane, lane bisecting batch 20261024050226 (not ours), AN-halo AN-flare-u AN-6 wait #4893, AN-10 waits #4891
+2026-10-24T08:14Z	3	heartbeat	#4893	relaunch act-1a16cdcb4a5-trd4; #4893 queued on lane
+2026-10-24T08:17Z	3	stage-start	-	wave 2: nothing startable (AN-6/AN-8 wait #4893, AN-10 waits #4891 and #4902, AN-z waits TT-z)
+2026-10-24T09:47Z	3	heartbeat	-	resumed after restart; wave 2 builders CB-12, CB-14, LS-4 finished
+2026-10-24T09:50Z	3	check	-	#4893 open clean, waits next lane sweep (51 ready)
+2026-10-24T10:12Z	3	heartbeat	-	check 10:12Z: all PRs open clean, lane batch lane/batch-20261024081307 still in flight; 0 open findings; CB-13 building
+2026-10-24T10:35Z	3	check	10:34Z	no merges yet (lane queue; dev full CI 40081823899 in progress); 0 open findings for feature
+2026-10-24T10:57Z	3	check	10:56Z	no merges yet; dev full CI 40081823899 green at 9f476af7; lane fix #5150 (list all open PRs) landed 10:55Z, queue should now see our PRs; 0 findings for feature
+2026-10-24T11:19Z	3	check	11:18Z	no merges; lane run 40087724110 ruled #5116 #5149 eligible but batch-20261024110214 was full (12); #4891-#4911 absent from lane listing until #5150 reaches main (dev CI 10:57 in progress); 0 findings for feature
+2026-10-24T11:42Z	3	check	11:41Z	no merges; main still 9f476af7, dev CI 40087964618 on 4f00afb8 in progress; lane 40089822850 lists #5116 #5125 #5149 only; 0 findings for feature
+2026-10-24T12:05Z	3	check	12:04Z	no merges; lane runs scripts from main (fast-lane.yml checkout ref: main), main still 9f476af7 so #5150 not live: lane 40091581655 saw 94 PRs, lowest #5036, so #4891-#4911 invisible; dev CI 40087964618 (4f00afb8) still running; 0 findings for feature
+2026-10-24T12:27Z	3	check	12:26Z	main moved to 4f00afb8 (lane PR-list fix live); no merges for feature yet; 0 findings
+2026-10-24T12:50Z	3	check	12:49Z	no new merges; LS-2 PR #5174 opened by builder (LS-5 builder running CI); lane sweep 40094798603 in progress, none completed since main moved; 0 findings for feature
+2026-10-24T13:13Z	3	check	13:13Z	lane sweep 40094798603 (post-#5150) lists our PRs and rates them ready; 126 ready PRs wait while batch-20261024110214 bisects; no merges; 0 findings
+2026-10-24T13:36Z	3	check	13:36Z	no merges since 78983bc3; all 11 lead PRs open, clean, fast-lane, eligible in lane; 0 findings
+2026-10-24T13:58Z	3	check	13:59Z	no merges; lane still bisecting batch-20261024110214 (probe 3, since 11:02), 131 ready PRs queued incl all 11 of ours; 0 findings
+2026-10-24T14:20Z	3	check	14:21Z	lane batch-20261024110214 landed (dev e6185fdf); none of our 11 PRs in it; they await the next batch (mergeable recomputing); 0 findings
+2026-10-24T14:43Z	3	check	14:44Z	all 11 lead PRs clean again on dev e79e9afc; no batch in flight yet, ours eligible for the next; 0 findings
+2026-10-24T15:06Z	3	check	15:06Z	lane batch-20261024144917 in flight (12 older/priority PRs #3621..#4951, none ours); our 11 PRs clean, eligible for a later batch; 0 findings
+2026-10-24T15:27Z	3	check	15:28Z	no change: batch-20261024144917 (none ours) still running; our 11 PRs clean; 0 findings
+2026-10-24T15:50Z	3	check	15:51Z	batch-20261024144917 landed (dev 33cd6e97); #4891 (DS-flare) now dirty: lane integrates conflicts itself, fixer only on needs-rebase; #4893 clean; 0 findings
+2026-10-24T16:14Z	3	check	#4893	16:20Z #4891 merged dev at 15:55 (e32f8d35), clean, awaits label drop; #4893 #4902 clean, queued for next batch. findings 0.
+2026-10-24T16:35Z	3	check	#4891	16:36Z #4891 needs-rebase dropped, clean; #4893 #4902-#4905 clean, queued. batch-20261024160327 (not ours) still in flight. findings 0.
+2026-10-24T16:58Z	3	check	lane	16:58Z all 11 PRs clean, no needs-rebase left. batch-20261024160327 (#5110,#4839-#4871, not ours) still in flight; ours next. findings 0.
+2026-10-24T17:20Z	3	check	lane	17:20Z ours all clean (except #4904, fixer out). batch-160327 resolved, dev c0920138; no batch in flight yet. findings 0.
+2026-10-24T17:41Z	3	check	lane	17:42Z all 11 PRs clean, no labels pending. batch-20261024172211 (#5134,#5042,#5054,#5102,#4817,#4875-#4882; not ours) in flight; ours next by age. findings 0.
+2026-10-24T18:04Z	3	check	lane	18:04Z no change: all 11 PRs clean; batch-20261024172211 (not ours) still in flight. findings 0.
+2026-10-24T18:25Z	3	check	lane	18:26Z batch-172211 resolved, no batch in flight; ours next. #4904 dirty again after dev moved (lane integrates; fixer only on needs-rebase). others clean/recomputing. findings 0.
+2026-10-24T18:49Z	3	check	batch-20261024183708	18:49Z #4891 and #4893 in batch-20261024183708 (12 PRs). #4902 #4903 #4905 clean, queued. findings 0.
+2026-10-24T19:12Z	3	check	#4891,#4893	19:12Z: #4891/#4893 still in batch-20261024183708 (bisect probe -6 running on prefix before them); #4902 clean; 0 findings
+2026-10-24T19:34Z	3	check	#4891,#4893	19:35Z: #4891/#4893 still in batch-20261024183708 (bisect -6 probe); dev 6f66ca33; 0 findings
+2026-10-24T19:57Z	3	check	lane	19:57Z: all 11 PRs clean, no labels; #4891/#4893 still in batch-20261024183708 (-6 probe); dev 6f66ca33; 0 findings
+2026-10-24T20:18Z	3	check	lane	20:19Z: all 11 PRs clean, no labels; batch-20261024183708 -6 probe: Linux pass, macOS gate run 40123913661 in progress since 19:08Z; dev ef37711d; 0 findings
+2026-10-24T20:41Z	3	check	lane	20:41Z: batch-20261024183708 resolved: culprit #4887 (not ours, needs-fix), prefix 5050..4886 merging; #4891/#4893 wait for next batch; all 11 of ours clean; 0 findings
+2026-10-24T21:03Z	3	check	lane	21:03Z: new batch-20261024205137 (5192 5207 5208 5209 5213 5050 4236 4854 4884 4885 4886 4888) has none of ours; all 11 clean, queued; dev 1a98629c; 0 findings
+2026-10-24T21:24Z	3	check	lane	21:25Z: batch-20261024205137 (none of ours) red, bisecting (-3, -6 probes); all 11 of ours clean, queued; 0 findings
+2026-10-24T21:47Z	3	check	lane	21:47Z: batch-20261024205137 (none of ours) still bisecting; all 11 of ours clean, queued; dev afef017c; 0 findings
+2026-10-24T22:10Z	3	check	lane	22:10Z: batch-20261024205137 (none of ours) still bisecting; all 11 of ours clean, queued; #5174 now labelled beta (priority); 0 findings
+2026-10-24T22:32Z	3	check	lane	22:32Z: all 11 PRs clean+queued, none merged; batch-20261024205137 (none ours) still bisecting (-3,-6); 0 findings; dev afef017c
+2026-10-24T22:55Z	3	check	lane	22:55Z: all 11 PRs clean+queued, none merged; batch-20261024205137 (none ours) bisecting, now probe -1 (#5192 alone); 0 findings; dev afef017c
+2026-10-24T23:17Z	3	check	lane	23:17Z: all 11 PRs clean+queued, none merged; batch-20261024205137 (none ours) probe -1 (#5192) macOS gate running, lane sweeping; 0 findings; dev afef017c
+2026-10-24T23:39Z	3	check	lane	23:39Z: all 11 PRs clean+queued, none merged; batch-20261024205137 branches gone, nothing landed (dev afef017c), no new batch yet; 0 findings
+2026-10-25T00:03Z	3	check	lane	00:03Z: run act-1a1705bc1ae-pb09 resumed; lead branch rebased on main afef017c; all 11 PRs clean+queued, none merged; lane batch-20261024235353 (#4236, none ours) gating; no dev-red; 0 findings for this feature
+2026-10-25T00:27Z	3	check	lane	00:27Z: batch-20261024235353 (incl. our #5174 LS-2) red on macOS gate run 40144578021; lane bisecting, probe -6 (through #5214, before #5174); no merges; no needs-fix on ours; 0 findings; dev afef017c
