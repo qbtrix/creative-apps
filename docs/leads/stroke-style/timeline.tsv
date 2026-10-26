@@ -291,3 +291,4 @@ utc	stage	event	ref	note
 2026-10-26T19:10Z	wait	heartbeat	#5321	19:10 poll: dev-red cleared; awaiting lane batch for #4916/#5002
 2026-10-26T19:24Z	wait	heartbeat	#5321	19:24 poll: lane batching; awaiting #4916/#5002
 2026-10-26T19:37Z	wait	heartbeat	#5321	19:37 poll: lane batch in macOS gate; awaiting #4916/#5002
+2026-10-26T19:52Z	wait	heartbeat	#5321	19:52 poll: #4916/#5002 eligible, awaiting lane batch
