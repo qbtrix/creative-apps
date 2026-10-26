@@ -1,10 +1,17 @@
 # anchor-parenting lead record
 
-Issue: #4522 · Packet: docs/blueprints/suiteui/features/anchor-parenting.md
-Run: act-1a1705bc1ae-pb09 · Session: claude/feature-lead-suiteui-ebo2et · Resumed: 2026-10-25T00:03Z
-Stage: 3 wave check
-Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
-Next: next check 00:47Z
+Issue: #3755 (record began on #4522) · Packet: docs/blueprints/suiteui/features/anchor-parenting.md
+Run: act-1a175f403b9-j4z9 (line lead, line:suiteui; resume) · earlier: act-1a1705bc1ae-pb09, act-1a1695ebfeb-d54n
+Stage: 3 wave check (AN-u #4893 in the lane)
+Base: d3323f6a7dc523e1986e1693b640cf377e362f08 (main at resume; dev 8987427d)
+Next: lane merges AN-u #4893, then open AN-6 (lead/anchor-parenting-AN-u-6); AN-10 starts after CB-8's PR #4902 (open); AN-halo after AN-u; Belt-Slice-Done on green runs
+
+## Run act-1a175f403b9-j4z9 decisions
+- Brief rule 1: main checked out at d3323f6a. The old lead branches share no history with main, so each lead branch is now origin/main plus one commit carrying docs/leads/ (the tree a rebase gives), pushed --force-with-lease.
+- PR base stays dev (CLAUDE.md, scripts/fast-lane.sh BASE_BRANCH=dev); the lane retargets main PRs to dev anyway.
+- PR bodies: the session's GitHub relay re-adds a generated-by footer on every edit; the lane strips it from the squash commit.
+- 02:30Z: dev-red #5321 (macOS, range main..cc5c6234, none ours) holds every code batch; no open finding names this feature.
+- LS-3/LS-6/LS-7/LS-11 in the old Next belong to layer-styles (another run); dropped from this record's Next.
 
 
 

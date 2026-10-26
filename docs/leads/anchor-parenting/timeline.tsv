@@ -124,3 +124,50 @@ utc	stage	event	ref	note
 2026-10-24T23:39Z	3	check	lane	23:39Z: all 11 PRs clean+queued, none merged; batch-20261024205137 branches gone, nothing landed (dev afef017c), no new batch yet; 0 findings
 2026-10-25T00:03Z	3	check	lane	00:03Z: run act-1a1705bc1ae-pb09 resumed; lead branch rebased on main afef017c; all 11 PRs clean+queued, none merged; lane batch-20261024235353 (#4236, none ours) gating; no dev-red; 0 findings for this feature
 2026-10-25T00:27Z	3	check	lane	00:27Z: batch-20261024235353 (incl. our #5174 LS-2) red on macOS gate run 40144578021; lane bisecting, probe -6 (through #5214, before #5174); no merges; no needs-fix on ours; 0 findings; dev afef017c
+2026-10-25T00:33Z	3	check	lane	00:33Z: status now pushed to lead/suiteui-<feature> (Belt-watched; 00:03Z/00:27Z lines went to lead/<feature> only); none of our 10 PRs changed since 00:00Z, none merged, no needs-fix; batch-20261024235353 (incl. #5174 LS-2) bisect probe -6 macOS run 40145609051 still running; no dev-red; 0 findings; dev afef017c
+2026-10-25T00:48Z	3	check	lane	00:48Z: none of our 10 PRs changed since 00:00Z, none merged, no needs-fix/needs-rebase; batch-20261024235353 (incl. #5174 LS-2) bisect probe -6 Linux 40145607006 green, macOS 40145609051 still running; last dev CI 40137153379 green at afef017c (none of ours in it); no dev-red; 0 findings for this feature
+2026-10-25T01:12Z	3	check	lane	no change on our 10 PRs; batch-20261024235353 bisect: probe -6 macOS 40145609051 still running; no dev-red, no findings
+2026-10-25T01:33Z	3	check	lane	no change on our 10 PRs; batch-20261024235353 bisect now at probe -9 (through #5050, before #5174): Linux 40150114209 + macOS 40150116582 running; no dev-red, no findings
+2026-10-25T01:54Z	3	check	lane	#5156 (Halo HY-1) merged 01:41Z; lane integrated dev into #5174 (head 6e467f79), Linux check 40151633219 running; probe -9 Linux green, macOS 40150116582 running; our other 9 PRs unchanged; no dev-red, no findings
+2026-10-25T02:18:24Z	3	fix	lane	#4905 (CB-10) needs-rebase: merged origin/dev, resolved catalog + golden + 2 count tests (styles + clip both kept); toolchain reinstalled, scripts/ci --changed running; probe -9 macOS still running
+2026-10-25T02:31:43Z	3	fix	lane	#4905 (CB-10) needs-rebase fixed: dev merged, scripts/ci --changed PASS, pushed 86a73634, Head: moved
+2026-10-25T02:41Z	3	lane	lane	batch-20261024235353 resolved: #5192..#5050 merged, #5174 clean and waits for the next batch; no dev-red; none of ours merged yet
+2026-10-25T03:02Z	3	lane	lane	#4905 needs-rebase dropped by the lane; batch-20261025023716 Linux green, macOS queued; full CI on dev 3db45eb queued; no dev-red; none of ours merged yet
+2026-10-25T03:25Z	3	lane	lane	batch-20261025023716 macOS gate failed, bisect pending; no needs-fix/needs-rebase on ours; no dev-red; no merges since 02:30Z; full CI dev 3db45eb in progress
+2026-10-25T03:46Z	3	lane	lane	no needs-fix/needs-rebase on ours; no dev-red; #3935 (layer-styles wave-4 docs) merged 03:45Z; none of our slice PRs merged; full CI dev 3db45eb still in progress
+2026-10-25T04:07Z	3	lane	lane	no needs-fix/needs-rebase on ours; no dev-red; no merges since 03:45Z; full CI dev 3db45eb still in progress
+2026-10-25T04:29Z	3	fix	LS-2	#5174 needs-fix: LayerStyleGalleryTests/aSwitchThatCantActYetSaysWhy passed LayerStyle.none as LayerStyle? (read as Optional.none); test now uses a typed unstyled value; gate running
+2026-10-25T04:33Z	3	lane	lane	#5174 LS-2 fix pushed cb6c0a2f (typed LayerStyle? in the reason test), gate PASS, Head moved
+2026-10-25T04:54Z	3	lane	lane	dev full CI 40154669999 green at 3db45eb; #5174 needs-fix dropped; #5125 needs-rebase resolved (golden), gate running; #4893 #4902-#4905 open, fast-lane, clean
+2026-10-25T05:01Z	3	lane	lane	#5125 merge with origin/dev pushed (df1da94), gate PASS, Head line moved; waiting for the lane to drop needs-rebase
+2026-10-25T05:17Z	3	lane	lane	check: no merges; no dev-red; #5125 clean at df1da94, awaits lane sweep; others fast-lane
+2026-10-25T05:39Z	3	lane	lane	check: no merges of ours; no dev-red; #5125 needs-rebase dropped; #4904 (CB-design) needs-rebase after #4888 stroke merge: merged dev, resolved catalog comment + golden union, gate running
+2026-10-25T06:00Z	3	lane	lane	check: no merges; no dev-red; all ten PRs fast-lane with no fix labels (#4904 needs-rebase dropped)
+2026-10-25T06:22Z	3	lane	lane	check: no merges since 05:30; no dev-red open; none of our ten PRs labelled needs-fix/needs-rebase; awaiting batches
+2026-10-25T06:44Z	3	lane	lane	check: no repo merges since 05:27 (lane quiet); no dev-red open; none of our ten PRs labelled needs-fix/needs-rebase; awaiting batches
+2026-10-25T07:06Z	3	lane	lane	check: no repo merges since 05:27 but lane sweeps are running (run 40170764273 in progress); no dev-red; none of ours labelled; awaiting batches
+2026-10-25T07:28Z	3	lane	lane	check: still no repo merges since 05:27 (lane sweeps running, no batch landed); no dev-red; none of ours labelled; awaiting batches
+2026-10-25T07:49Z	3	lane	lane	check: still no repo merges since 05:27; no dev-red; none of ours labelled; awaiting batches
+2026-10-25T08:11Z	3	lane	lane	check: lane moving again (#5287 merged 08:06); none of ours merged or labelled; no dev-red; awaiting batches
+2026-10-25T08:34Z	3	lane	lane	check: none of ours labelled, no merges since 08:10, dev not red (#5183 closed)
+2026-10-25T08:56Z	3	lane	lane	check: none of ours labelled; #5274 (lane: Linux proof behind LANE_VERIFY_AFTER) merged 08:48; dev not red
+2026-10-25T09:18Z	3	lane	lane	check: none of ours labelled; no merges since 08:50; dev not red
+2026-10-25T09:40Z	3	lane	lane	check: none of ours labelled; no merges since 09:10; dev-red #5316 opened 09:37 (macos job, run 40179648854); in range only our docs PR #3935, not a code culprit; not fixing per rules
+2026-10-25T10:02Z	3	lane	lane	check: none of ours labelled; no merges since 09:30; dev-red #5316 still open, no bisect verdict yet
+2026-10-25T10:25Z	3	lane	lane	check: none of ours labelled; no merges since 09:30; dev-red #5316 closed 10:06 (green dev run promoted main)
+2026-10-25T10:47Z	3	lane	lane	check: none of ours labelled; no merges since 10:20; dev not red
+2026-10-25T11:09Z	3	lane	lane	check: none of ours labelled; #5307 (live text to SuiteText target) merged 11:06; dev not red
+2026-10-25T11:31Z	3	lane	lane	check: none of our PRs labelled needs-fix/needs-rebase; no merges of ours since 11:05 (only #5307); dev-red #5316 closed
+2026-10-25T11:53Z	3	lane	lane	check: none of our PRs labelled; only #4886 merged since 11:30 (not ours); no open dev-red
+2026-10-25T12:15Z	3	lane	lane	check: none of our PRs labelled; only #4943 merged since 11:50 (not ours); no open dev-red; 1 open suiteui finding (#2848, needs-human), under the cap
+2026-10-25T12:36Z	3	lane	lane	check: none of our 10 PRs labelled or merged (all fast-lane+beta, last updated ~05:00); only #4943 merged since 12:10; no open dev-red
+2026-10-25T12:58Z	3	lane	lane	check: none of our PRs labelled or merged; only #4953 merged since 12:30 (not ours); no open dev-red
+2026-10-25T13:20Z	3	lane	lane	check: none of our PRs labelled or merged; only #4962 merged since 12:55 (not ours); no open dev-red
+2026-10-25T13:41Z	3	lane	lane	check: none of our PRs labelled or merged; no merges since #4962 at 13:18; no open dev-red
+2026-10-25T14:04Z	3	lane	lane	check: none of our PRs labelled or merged; only #5006 merged since 13:35 (not ours); no open dev-red
+2026-10-25T14:26Z	3	lane	lane	check: no fix labels on ours, no merges since 14:00, no dev-red
+2026-10-25T14:47Z	3	lane	lane	check: no fix labels on ours, #5007 and #4960 merged (not ours), no dev-red
+2026-10-25T15:10Z	3	lane	lane	check: no fix labels on ours, #5318 and #5008 merged (not ours), no dev-red
+2026-10-25T15:32Z	3	lane	lane	check: no fix labels on ours, no merges since 15:08, no dev-red
+2026-10-25T15:55Z	3	lane	lane	check: no fix labels on ours, #5320 and #5039 merged (not ours), no dev-red
+2026-10-26T02:20:02Z	3	resume	-	resume act-1a175f403b9-j4z9: lead branch rebuilt on main d3323f6a; AN-u #4893 clean in lane; dev-red #5321 holds code batches; CB-8 #4902 open so AN-10 waits
