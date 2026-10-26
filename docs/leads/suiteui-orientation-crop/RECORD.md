@@ -90,3 +90,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-26T20:40:25Z OC-z #5802 open; journeys 40386821306 (OC-photo-u critics) still running; no dev-red
 - 2026-10-26T21:02:53Z OC-z #5802 merged 20:45 (b59575ef); Linux check 40398735354 running; awaiting scoped/full ci.yml run on it for Belt-Slice-Done + contact sheet
 - 2026-10-26T21:25:36Z OC-z merged (b59575ef); scoped library run 40401666951 on 3ebc8d43 in progress -> Belt-Slice-Done when green. dev-red #5818 (range incl #5263) fails AfterGlowHomeSnapshots only, not crop
+- 2026-10-26T21:47:39Z OC-z: scoped library 40401666951 on 3ebc8d43 failed; no green scoped/full run contains b59575ef yet. Journeys 40386821306 cancelled (no ui-screens to critique). dev-red #5818 flake rerun in progress, no bisect yet.
