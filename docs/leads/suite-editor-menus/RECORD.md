@@ -166,3 +166,7 @@ Next: lane: probe batch-20261025023716-3 (holds #4988) resolves; once #4988 merg
 ## 2026-10-26T02:25:05Z #4808 fix round 1: PR #5364
 
 EM-flare-halo fix round 1. In PR #5364, the Flare and Halo SuiteMenus journeys call the live socket (grant, then `live/run`) and check that the reply's undo step reaches Edit > Undo and the window. scripts/ci --changed printed CI: PASS. Open: #4988, #5164 (stacked), #5364; findings #4803 and #2492 are still open.
+
+## 2026-10-26T02:47:14Z poll
+
+No merges yet. #4988, #5164, #4999 and #5364 are open with fast-lane and beta, and none has needs-fix or needs-rebase. I removed a footer the server added to #5364's body.
