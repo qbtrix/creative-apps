@@ -5,11 +5,7 @@
 // an app's own arguments keep the real folder. The last test is the guard:
 // this very process's arguments must not resolve to the real folder, so a
 // change in how SwiftPM launches tests fails here instead of writing there.
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
 import Foundation
-#endif
 import SuiteModel
 import Testing
 
