@@ -71,3 +71,4 @@ Next: wait for the lane to merge BK-u #4939; then merge dev into #4965, #4961, #
 - 2026-10-26T16:33Z (act-1a177ff0916-4jm7): poll: dev 527676af; no merges of ours; #4939 and #5799 await the lane; dev-red #5321 last seen open
 - 2026-10-26T16:51Z (act-1a177ff0916-4jm7): poll: dev 527676af; no merges of ours, dev unchanged; #4939 and #5799 await the lane; dev-red #5321 open; removed an attribution footer from lead comment 6411461028 on #5321
 - 2026-10-26T17:12Z (act-1a177ff0916-4jm7): poll: dev df48c0ba; no merges of ours; #4939 and #5799 await the lane; dev-red #5321 open
+- 2026-10-26T17:28Z (act-1a177ff0916-4jm7): poll: dev df48c0ba; dev unchanged; #4939 and #5799 await the lane
