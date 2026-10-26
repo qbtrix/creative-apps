@@ -4,7 +4,7 @@ Issue: #4512 (was #3753) · Packet: docs/blueprints/suiteui/features/clipboard-i
 Run: act-1a175f7cb67-l7rh (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26) · earlier: act-1a1705bc1ae-pb09 · Session: claude/feature-lead-suiteui-ebo2et · Resumed: 2026-10-25T00:03Z
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
-Next: #5116 (CB-library) re-integrated at 4681e30b and #5125 (CB-photo) at a7ee90c7 (merged origin/dev, goldens regenerated, scripts/ci --changed PASS, Head moved); #4902, #4904, #4905, #5149 in the lane; Belt-Slice-Done on green main runs.
+Next: wait for the lane to batch #5116 (re-integrated at 0e1cc330, Fast-Check pass) and the other CB PRs; on merge, check main runs for Belt-Slice-Done.
 
 
 
