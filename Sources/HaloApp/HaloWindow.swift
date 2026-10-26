@@ -27,6 +27,7 @@
 // state lives in HaloModel (scripts/ci checks this).
 import AppKit
 import HaloModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -117,7 +118,7 @@ struct HaloWindow: View {
         .environment(\.haloLiveEdit, live)
         .onAppear { live.current = { model } }
         .modifier(RefreshLinkHandoff(live: live))
-        .modifier(HaloLiveTaking(project: { model }, land: { model.landLive($0) }))
+        .suiteLiveWindow(HaloLive.front, read: { HaloHeadless(workspace: model) }, write: { model.landLive($0.workspace) })
         .focusedSceneValue(\.haloPerform, perform)
         .focusedSceneValue(\.haloProject, model)
         .unsavedChangesGuard(Self.unsavedHooks(model: { model }, perform: perform))
