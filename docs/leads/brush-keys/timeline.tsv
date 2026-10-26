@@ -227,3 +227,4 @@ utc	stage	event	ref	note
 2026-10-26T21:50Z	3	poll	-	no brush-keys merges; #4939 still in the lane; #4965, #4961, #4982 wait on it
 2026-10-26T22:11Z	3	poll	-	no tracked merges; #4939 BK-u open; #4965/#4961/#4982 wait on it
 2026-10-26T22:29Z	3	poll	-	9810d71b (#4916 not ours); no tracked merges; #4939 BK-u open; #4965/#4961/#4982 wait on it
+2026-10-26T22:48Z	3	poll	-	merged dev into #4939 BK-u (SuiteGallery conflict: kept GalleryAnchor+GalleryBrushKeys), head 2ea13868; #4965/#4961/#4982 wait on it
