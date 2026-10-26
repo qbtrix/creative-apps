@@ -61,4 +61,5 @@ Next: wait for the lane to land #4924 (LC-u) and #4937 (LC-5); then merge origin
 - 2026-10-26T07:28:52Z: heartbeat: #4924/#4937 queued clean; dev 99ace703.
 - 2026-10-26T07:52:11Z: heartbeat: #4924/#4937 queued clean; dev 3e26fbe4 (#5264 moved Library's backup sheet to SuiteSheet; recheck lc-z on its merge).
 - 2026-10-26T08:17:18Z: heartbeat: no change; #4924/#4937 queued clean, dev 3e26fbe4.
+- 2026-10-26T08:39:04Z: heartbeat: #4924/#4937 queued clean; dev 1960c2d9.
 - Candidate gaps after LC-z: relinked id keeps the old path; re-importing a folder with copy makes new copies.
