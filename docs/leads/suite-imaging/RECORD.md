@@ -44,6 +44,7 @@ Next: IM-13 PR (supervisor merge: Package.swift), then IM-14
 - 2026-10-26T15:38:29Z heartbeat: no change: open PRs clean, no needs-fix/needs-rebase; dev-red #5321 open (not ours)
 - 2026-10-26T16:09:52Z heartbeat: #5299 (IM-12) needs-fix from the Mac pre-screen (ambiguous ?? in LiveLayerRoute); fix committed, gate running
 - 2026-10-26T16:41:43Z heartbeat: #5299 (IM-12) fix pushed as 11d1608e1 (typed stacks instead of an ambiguous ??), needs-fix dropped; its size note counts the unmerged parent #5297 (stack #5295 -> #5297 -> #5299)
+- 2026-10-26T17:01:58Z heartbeat: #5295 clean in the lane, held by macOS dev-red #5321; #5297 and #5299 wait on it (their diffs carry the parent); #5178 waits on the supervisor; full CI 40357785665 running at 527676af6
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
