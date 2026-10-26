@@ -13,7 +13,8 @@
 // tenth; a modifier change re-anchors so nothing jumps), click or press
 // Return to type (Return or a click away commits, Escape cancels; after
 // Return or Escape the field has the keys again), arrows step with the same
-// modifiers, and the bar takes Home and End. A click or drag gives it the
+// modifiers, and the bar takes Home and End; while it has focus a host's
+// menu leaves it those keys (FocusedControlKeys). A click or drag gives it the
 // keys (focus interactions `.edit`), with or without keyboard navigation. Hover shows a dotted underline under the
 // value; focus draws the 2 pt accent ring 1 pt outside; disabled draws at 40%.
 // A ScrubTrack lets the bar move along a non-linear track (Photo's log gamma);
@@ -141,6 +142,8 @@ public struct ScrubField: View {
         .modifier(ScrubAccessibility(
             label: label, spoken: NumericInput.spoken(value, decimals: decimals, unit: unit), isBar: bar != nil,
             editing: editing, track: track, position: track.position(value), adjust: adjust))
+        // Tells the host's menus the bar or its field has the step keys (FocusedControlKeys, #2487).
+        .focusedValue(\.controlHasKeys, true)
     }
 
     /// The bar slider, drawn as the Studio editor's number row (Flare's easing
