@@ -161,3 +161,4 @@ utc	stage	event	ref	note
 2026-10-26T16:59:04Z	blocked	poll	SC-f #5262 #5265	AK-photo/AK-z blocked: SC-f PRs #5262 #5265 still open
 2026-10-26T17:21:40Z	blocked	poll	SC-f #5262 #5265	AK-photo/AK-z blocked: SC-f PRs #5262 #5265 still open
 2026-10-26T17:43:14Z	blocked	poll	SC-f #5262 #5265	AK-photo/AK-z blocked: SC-f PRs #5262 #5265 still open
+2026-10-26T18:05:43Z	blocked	poll	#5262,#5265	18:05 poll: none merged, no needs-fix, dev-red #5321 open; SC-f open
