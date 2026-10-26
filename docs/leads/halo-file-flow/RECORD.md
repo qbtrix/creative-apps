@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 21:38Z poll: slice PRs unchanged; dev-red #5818 still open (not ours); no new #3474 comments.
 - 21:15Z poll: slice PRs unchanged (#4894/#5092 queued in lane); dev-red #5818 (macOS, range main..696d37fe, none of ours); no new #3474 comments.
 - 20:50Z poll: slice PRs unchanged (eligible, lane backlog); dev b59575ef; no dev-red.
 - 20:27Z poll: slice PRs unchanged (eligible, lane backlog); dev 696d37fe with scoped halo run queued (none of ours in it).
