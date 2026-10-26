@@ -1,10 +1,10 @@
 # clipboard-interop lead record
 
 Issue: #4512 (was #3753) · Packet: docs/blueprints/suiteui/features/clipboard-interop.md
-Run: act-1a1705bc1ae-pb09 · Session: claude/feature-lead-suiteui-ebo2et · Resumed: 2026-10-25T00:03Z
+Run: act-1a175f7cb67-l7rh (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26) · earlier: act-1a1705bc1ae-pb09 · Session: claude/feature-lead-suiteui-ebo2et · Resumed: 2026-10-25T00:03Z
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
-Next: lane check ~16:15: watch for merges and new needs-fix/needs-rebase; open stacked PRs (AN-6, LS-3, LS-6, LS-7, LS-11) as parents merge; Belt-Slice-Done on green main runs. Supervisor: our 10 fast-lane+beta PRs are unlabelled and untouched since ~05:00; since 15:08 the lane merged #5320 and #5039, neither ours
+Next: #5116 (CB-library) and #5125 (CB-photo) needs-rebase on the 10-26 dev: merging origin/dev (LibraryCommandCatalog and CLI goldens), gate, push, move Head:; #4902, #4904, #4905, #5149 ready in the lane; Belt-Slice-Done on green main runs.
 
 
 
@@ -61,6 +61,7 @@ Run act-1a1695ebfeb-d54n, 2026-10-23T15:30Z; supersedes the tables' PR/state col
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-26T02:14Z: Run act-1a175f7cb67-l7rh resumed. #5116 and #5125 got needs-rebase; fixing by merging origin/dev (catalog keeps both sides: crop specs plus copySpec) and regenerating goldens.
 - 2026-10-23: wave 1 PRs: CB-8 #4902 (11 files, +292/-47; Paste as Image stays out of Flare, edit.copy-as added; LiveStageBudgetTests.nestedDrawListWithinBudget failed locally under load, outside the gate, watch it), CB-6 #4904 (12 files, +303/-57; catalog PNG is clear on Linux, JPEG paste-as-image refused, paste centres on the page), CB-10 #4905 (11 files, +294/-35; Halo owns its pasteboard menu group; two count tests outside its file list gained one line each). The server footer was stripped from all three bodies.
 - 2026-10-23 (act-1a1695ebfeb-d54n): feature issue is #3753 per the brief (#4512 also tracks it); PRs carry `Refs #3753`.
 - 2026-10-23: wave 1 = CB-6, CB-8, CB-10 with LS-1 (layer-styles); owned files are disjoint. AN-flare-m waits a wave because it shares FlareCommandCatalog, flare.txt and the flare golden with CB-8.
