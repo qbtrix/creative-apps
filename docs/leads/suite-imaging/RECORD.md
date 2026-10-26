@@ -42,6 +42,7 @@ Next: IM-13 PR (supervisor merge: Package.swift), then IM-14
 - 2026-10-26T14:52:37Z heartbeat: #5780 (IM-13) merged 14:35Z as f86f72f79; IM-z waits on #5299 (IM-12), then IM-14
 - 2026-10-26T15:18:44Z heartbeat: no change: open PRs clean, no needs-fix/needs-rebase; dev-red #5321 open (not ours)
 - 2026-10-26T15:38:29Z heartbeat: no change: open PRs clean, no needs-fix/needs-rebase; dev-red #5321 open (not ours)
+- 2026-10-26T16:09:52Z heartbeat: #5299 (IM-12) needs-fix from the Mac pre-screen (ambiguous ?? in LiveLayerRoute); fix committed, gate running
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
