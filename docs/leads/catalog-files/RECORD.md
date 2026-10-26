@@ -80,4 +80,5 @@ Next: wait for the lane to land #4924 (LC-u) and #4937 (LC-5); then merge origin
 - 2026-10-26T15:05:35Z: heartbeat: no change; #4924/#4937 clean, queued; dev f86f72f7; dev-red #5321 open (not ours).
 - 2026-10-26T15:27:23Z: heartbeat: #4924 (389/12) and #4937 (209/9) clean, within cap, prescreen green, queued; fast-lane run in progress; dev f86f72f7; dev-red #5321 open (not ours).
 - 2026-10-26T15:50:15Z: heartbeat: #4924/#4937 clean, queued; dev 310d7d14 (#5285 landed); dev-red #5321 open (not ours).
+- 2026-10-26T16:15:51Z: heartbeat: #4924/#4937 clean, queued; dev e14f65fa (#5106 landed); dev-red #5321 open (not ours).
 - Candidate gaps after LC-z: relinked id keeps the old path; re-importing a folder with copy makes new copies.
