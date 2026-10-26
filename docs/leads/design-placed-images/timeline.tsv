@@ -205,3 +205,4 @@ utc	stage	event	ref	note
 2026-10-26T03:53:35Z	3	heartbeat	slice PRs	dev-red #5321 open; heads unchanged, clean; z slice held; no supervisor reply yet
 2026-10-26T04:16Z	wait	heartbeat	#5321	dev-red now linux (run 40262284734, HomeModelTests 60s timeouts, range main..d0859e01): not ours; 7 PRs clean, unchanged
 2026-10-26T04:38Z	wait	heartbeat	#5321	dev-red still open (linux, not ours); 7 PRs clean, unchanged; no supervisor reply
+2026-10-26T05:00Z	wait	heartbeat	#5321	dev-red moved to macos (run 40266495039, Linux green, range main..75292afd, none of ours); 7 PRs clean, unchanged; no supervisor reply
