@@ -10,7 +10,7 @@ Next: lane merges AN-u #4893, then open AN-6 (lead/anchor-parenting-AN-u-6); AN-
 - Brief rule 1: main checked out at d3323f6a. The old lead branches share no history with main, so each lead branch is now origin/main plus one commit carrying docs/leads/ (the tree a rebase gives), pushed --force-with-lease.
 - PR base stays dev (CLAUDE.md, scripts/fast-lane.sh BASE_BRANCH=dev); the lane retargets main PRs to dev anyway.
 - PR bodies: the session's GitHub relay re-adds a generated-by footer on every edit; the lane strips it from the squash commit.
-- 02:30Z: dev-red #5321 (macOS, range main..cc5c6234, none ours) holds every code batch; no open finding names this feature.
+- 02:20Z: dev-red #5321 (macOS, range main..cc5c6234, none ours) holds every code batch; no open finding names this feature.
 - LS-3/LS-6/LS-7/LS-11 in the old Next belong to layer-styles (another run); dropped from this record's Next.
 
 
