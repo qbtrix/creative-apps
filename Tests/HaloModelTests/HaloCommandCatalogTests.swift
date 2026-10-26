@@ -2,6 +2,7 @@
 // on the `keyed` states, runs do what the routes do, ids keep the ledger, conformance holds but for the gaps in `exempt`.
 import Foundation
 @testable import HaloModel
+import SuiteImaging
 import SuiteKernel
 import Testing
 
@@ -39,8 +40,9 @@ extension HaloProject: HeadlessDocument {
         let transforms = TransformCommands.specs(HaloProject.self).map(\.id)  // HT-6: then the six transform commands
         let rates = ["composition.set-frame-rate"]  // FR-8b: the composition's rate
         let places = ["place.read", "place.image", "place.replace", "place.reset-size", "place.focus"]  // PH-6: the five place commands
+        let styles = StyleCommands.specs(HaloProject.self).map(\.id)  // HY-1: then the eleven style commands
         let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
-        let all = ids + shapes + fills + strokes + history + transforms + rates + places + window
+        let all = ids + shapes + fills + strokes + history + transforms + rates + places + styles + window
         #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
     }
 
@@ -131,6 +133,7 @@ extension HaloProject: HeadlessDocument {
         "the jump example needs steps; the fixture has none (HA-6)": ["history.jump: exampleRuns"],
         "flipping isn't in Halo yet; the flip refuses with flipHelp (HT-6)": ["transform.flip: exampleRuns"],
         "the examples need a placed image; Ball shows none (HaloPlaceTests run them, PH-6)": ["place.focus place.read place.replace place.reset-size: exampleRuns"],
+        "the style commands are LS-a's stubs until LS-6; Ball has no style to copy or clear (HY-5)": ["style.add style.clear style.copy style.enable style.fill-opacity style.panel style.paste style.preset style.read style.remove style.set: exampleRuns"],
     ]
 
     @Test func conformance() {

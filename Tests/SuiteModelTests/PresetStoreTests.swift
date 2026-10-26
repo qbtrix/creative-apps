@@ -1,8 +1,8 @@
 // PresetStoreTests.swift: the preset store (adjust-everywhere AJ-2, AJ-7).
-// The PresetStore checks hold the behaviour AJ-7 builds and stay disabled
-// by name until it lands; the FakePresetStore checks run now, so the fake
-// every adopter's tests use already keeps the same rules. A fresh temp
-// folder per test.
+// The PresetStore checks hold the behaviour AJ-7 builds over FileStore; the
+// FakePresetStore checks hold the fake every adopter's tests use to the same
+// rules. A fresh temp folder per test. Mutations: SuiteModel.PresetStore
+// (`.namesUniqueIgnoringCase`, `.relaunchKeepsLooks`).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -21,12 +21,12 @@ import Testing
 
     // MARK: PresetStore (AJ-7)
 
-    @Test(.disabled("waits on AJ-7")) func saveThenListRoundTripsAcrossARelaunch() throws {
+    @Test func saveThenListRoundTripsAcrossARelaunch() throws {
         try PresetStore(folder: folder).save(look("a", "Mine"))
         #expect(PresetStore(folder: folder).list(kind: "look") == [look("a", "Mine")])
     }
 
-    @Test(.disabled("waits on AJ-7")) func deleteRemoves() throws {
+    @Test func deleteRemoves() throws {
         let store = PresetStore(folder: folder)
         try store.save(look("a", "Mine"))
         try store.save(look("b", "Other"))
@@ -34,7 +34,7 @@ import Testing
         #expect(store.list(kind: "look") == [look("b", "Other")])
     }
 
-    @Test(.disabled("waits on AJ-7")) func listFiltersByKind() throws {
+    @Test func listFiltersByKind() throws {
         let store = PresetStore(folder: folder)
         try store.save(look("a", "Mine"))
         try store.save(look("b", "Brush", kind: "brush"))
@@ -42,14 +42,14 @@ import Testing
         #expect(store.list(kind: "brush") == [look("b", "Brush", kind: "brush")])
     }
 
-    @Test(.disabled("waits on AJ-7")) func aTakenNameIgnoringCaseIsRefused() throws {
+    @Test func aTakenNameIgnoringCaseIsRefused() throws {
         let store = PresetStore(folder: folder)
         try store.save(look("a", "Mine"))
         #expect(throws: SuiteError.self) { try store.save(look("b", "mine")) }
         #expect(store.list(kind: "look") == [look("a", "Mine")])
     }
 
-    @Test(.disabled("waits on AJ-7")) func aSaveThatCannotWriteThrows() throws {
+    @Test func aSaveThatCannotWriteThrows() throws {
         // A regular file where the folder should be: nothing can be written under it.
         #expect(FileManager.default.createFile(atPath: folder, contents: Data()))
         #expect(throws: SuiteError.self) { try PresetStore(folder: folder).save(look("a", "Mine")) }
@@ -80,10 +80,19 @@ import Testing
         #expect(store.list(kind: "look").isEmpty)
     }
 
-    @Test func storeStubRefusesUntilAJ7() {
+    // MARK: PresetStore edges (AJ-7)
+
+    /// Saving an id again replaces it (a rename is not a clash); a name taken in another kind is fine;
+    /// deleting an id that isn't stored is refused; the file is the shared presets/looks.json.
+    @Test func storeReplacesByIdAndRefusesAMissingDelete() throws {
         let store = PresetStore(folder: folder)
-        #expect(throws: SuiteError.self) { try store.save(look("a", "Mine")) }
         #expect(store.list(kind: "look").isEmpty)
+        try store.save(look("a", "Mine"))
+        try store.save(look("a", "mine"))
+        try store.save(look("b", "MINE", kind: "brush"))
+        #expect(store.list(kind: "look") == [look("a", "mine")])
+        #expect(throws: SuiteError.notAvailable("This preset was removed.")) { try store.delete(id: "z", kind: "look") }
         #expect(PresetStore.file == "presets/looks.json")
+        #expect(FileManager.default.fileExists(atPath: folder + "/" + PresetStore.file))
     }
 }

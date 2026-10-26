@@ -93,7 +93,7 @@ struct CLIArgsTests {
         (["fake", "rect.add", "--in", "a.fake", "--out", "b.fake", "--in-place", "--json", rect], 64, "usage", "--in-place"),
         (["fake", "rect.add", "--in", "a.fake", "--out"], 64, "usage", "--out"),
         (["fake", "rect.add", "--in", "a.fake", "--out", "b.fake", "--out", "c.fake", "--json", rect], 64, "usage", "--out"),
-        (["fake", "export", "a.fake", "--format", "png", "--out", "a.png"], 64, "usage", "png"),
+        (["fake", "export", "a.fake", "--format", "gif", "--out", "a.gif"], 64, "usage", "gif"),
         (["run"], 64, "usage", "missing"),
         (["fake", "rect.add", "--in", "a.fake", "--out", "b.fake", "--json", "{x:1"], 65, "data", "--json"),
         (["fake", "rect.add", "--in", "a.fake", "--out", "b.fake", "--json", #"{"x":1}"#], 65, "data", "rect.add"),
