@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 15:53Z poll: no change; #4894/#5092 prescreen still success, waiting in the lane; stacked PRs unlabelled; #3474 quiet.
 - 15:25Z poll: no change; all five PRs open and unlabelled for fixes; full CI on dev in progress (f86f72f7); #3474 quiet; #5321 open.
 - 14:52Z poll: no change; #4894/#5092 queued, #4936/#5123/#5801 stacked; full CI on dev in progress; #3474 quiet.
 - 14:45Z: #5123 fixed (stale HaloFilesCommandTests.aSavedProjectIsRecent failed with Halo's list gone; now puts the project in the suite's recents), head 0fb13ae9, body gets Belt-Lead/Feature/Slice/Fast-Check/Head. Follow-up #5801 opened, stacked on #5123: imageRefusal removed, S20 notes say PH-3, mutation renamed +2 (7/7). Packet line 95 still names .imagesRefusedUntilS20: update after #5092 lands. Slices still queued in the lane.
