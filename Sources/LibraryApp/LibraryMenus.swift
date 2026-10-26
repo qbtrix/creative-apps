@@ -99,12 +99,22 @@ struct LibraryMenu {
         var cropTitle: String = "Crop"
         var applyCrop: Action?
         var resetCrop: Action?
+        /// image.rotate-ccw, image.rotate-cw and image.flip on the selection (orientation-crop OC-9).
+        var rotateLeft, rotateRight, flipHorizontal, flipVertical: Action?
     }
 
     /// File > Export… (export).
     struct Export {
         var export: Action?
         var exportHelp: String?  // why Export… can't act, before the services' reason
+    }
+
+    /// Photo > Delete Rejected Photos… (cull-finish, LibraryWindow+Trash.swift): the Model's
+    /// title, and the action that opens the confirm, nil while `help` says why it can't run.
+    struct Trash {
+        var deleteRejects: Action?
+        var title: String = "Delete Rejected Photos…"
+        var help: String?
     }
 
     var edit = Edit()
@@ -128,4 +138,6 @@ struct LibraryMenu {
 
 extension FocusedValues {
     @Entry var libraryMenu: LibraryMenu?
+    /// Published by the trash area, which owns the confirm's presented flag.
+    @Entry var libraryTrash: LibraryMenu.Trash?
 }

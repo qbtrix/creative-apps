@@ -143,20 +143,9 @@ public struct SuiteHelpCommands: Commands {
         notes?.makeKeyAndOrderFront(nil)
     }
 
-    /// ShellHelpProvider's report object back as a ProblemReport; "" for a field it lacks.
+    /// ShellHelpProvider's report object back as a ProblemReport; an empty one when it doesn't decode.
     static func report(_ value: JSONValue) -> ProblemReport {
-        guard case .object(let fields) = value else {
-            return ProblemReport(app: "", version: "", build: "", macOS: "", model: "", crashes: [])
-        }
-        func string(_ value: JSONValue?) -> String? {
-            if case .string(let text)? = value { return text }
-            return nil
-        }
-        var crashes: [String] = []
-        if case .array(let list)? = fields["crashes"] { crashes = list.compactMap(string) }
-        return ProblemReport(
-            app: string(fields["app"]) ?? "", version: string(fields["version"]) ?? "", build: string(fields["build"]) ?? "",
-            macOS: string(fields["macOS"]) ?? "", model: string(fields["model"]) ?? "", crashes: crashes)
+        (try? value.decode(ProblemReport.self)) ?? ProblemReport(app: "", version: "", build: "", macOS: "", model: "", crashes: [])
     }
 }
 

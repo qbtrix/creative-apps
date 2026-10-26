@@ -14,6 +14,7 @@ import FlareModel
 import HaloModel
 import LibraryModel
 import PhotoModel
+import SuiteImaging
 
 /// One app's headless document type, erased so the router can list it and open files with it.
 public struct HeadlessApp: Sendable {
@@ -103,6 +104,8 @@ public enum Apps {
     }
     /// The fake app ("fake", SuiteKernel's FakeCanvasDocument). Never in `all`; the tests add it.
     public static let fake = HeadlessApp(FakeCanvasDocument.self)
+    /// The tone fake ("fake-tone", SuiteImaging's FakeToneDocument): one picture's tone settings, for RJ-X41.
+    public static let fakeTone = HeadlessApp(FakeToneDocument.self)
 
     /// The app called `name` in `apps`, nil when there is none.
     public static func named(_ name: String, in apps: [HeadlessApp]) -> HeadlessApp? { apps.first { $0.name == name } }

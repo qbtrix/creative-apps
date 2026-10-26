@@ -111,7 +111,7 @@
                 "id": "design-model-sources",
                 "name": "DesignModel sources",
                 "description": "Linux-safe state and logic behind Design's window: DesignWorkspace (pages, the selected page and node, the tool, the open file's URL), the multi-layer selection (DesignSelection: the ordered selected layers with the last as primary, Shift-click toggling, the box around them), DesignNode (the node tree on a page, each node with a fill and text, in absolute page points) and the tree flattened into rows under the expanded set, DesignHistory (the model-owned undo and redo, one named step per edit; New File's step carries the replaced document's file URL, which Undo puts back), the canvas gestures (hit testing, the handles a selection shows, draw, move, resize, nudge, delete, in DesignCanvasEditing and DesignDrawing), what the canvas shows before a click (DesignCanvasHints: the hover answer, the Text tool's placement box, the size badge and where it hangs), what an arrow, Delete, Escape or Return pressed on the canvas does, ignoring the numeric-pad flag every arrow carries (DesignCanvasKeys), the inline text edit, whose commit fits the box to the measured text in the same step (DesignText), where the canvas puts a frame's name, above the frame or inside it at the artboard's top (DesignFrameLabel), the inspector's header lines (DesignInspectorContent), the lock that covers a node's subtree and the line saying why (DesignLocking), the Layers row's eye and lock toggles, the hidden-in-tree check and the move target a drop above, below or into a row maps to and the insertion line a pointer over a row draws (DesignLayerToggles), the held-id index id minting reads (DesignHeldIDs), aligning the selected layer to its enclosing frame or page with the reason a command is off (DesignAlign), the window toolbar's eight commands with their titles, symbols, identifiers and the reason each can't run (DesignToolbarItems), the page's size as one undo step, its visible content bounds and which layers reach past its edge (DesignPageSize), the file codec (DesignFile), the open document as SuiteKernel's DocumentSession over the history's step serials, a save setting its saved token and ending the edit run, and the file version read through VersionedJSON.probe (DesignSession+Kernel), the export contract (DesignExport+Kernel: the scope and options, the workspace's export targets, plan and SVG readouts over the export slot, and the remembered options, never a history step), what the export sheet reads (DesignExportSheet+Kernel: the scope chips' titles, the options it opens with, a whole 1x to 3x scale, the run's shown options and the file list with skipped hidden layers) and the SVG text of nodes inside a box (Live/DesignSVG), what a PNG of a planned export item draws (DesignRaster: the item's nodes moved to the origin on a page its whole-point size, the plan's pixel size and scale, a side over its max refused), the eyedropper's sample adapter onto SuiteKernel's SampleTarget (DesignSample+Kernel: why nothing can be sampled, the colour of the topmost visible painted layer at a point, and applying it to the selection's fill or stroke as one step), the stroke adapter (DesignStroke+Kernel: a node's stroke as the kernel's VectorStroke, the workspace as SuiteKernel's StrokeTarget with its help, trim refused in Design, and the stroke editor's intents as the inspector's style change), the loupe the eyedropper shows at the pointer and a click's pick (DesignLoupe: the pointer's page point, the colour read there and whether Option sends it to the stroke), the layer tree adapter onto SuiteKernel's LayerTree (DesignNode+Kernel: a node as the kernel's layer payload and back; Live/LiveOrdering's Move Layer and Arrange, Live/LiveGrouping's Group and Ungroup, Live/LiveDuplicating's Duplicate, the Layers rows and the lock cascade run on it, and the refusals map to Design's by layer name), and the use cases a workspace runs on (DesignServices, whose `.live` set is NotBuilt in every slot until each feature lands: each help says the feature isn't built yet and each write refuses; `.fake` is the fixture fakes in Fakes/ that snapshots and fake-mode journeys use), and the workspace actions the window, menus and canvas call (DesignActions: each command's help and run through the services as one named undo step, one-layer delete, nudge and align on today's methods, Zoom to Selection and Select All; DesignActions+Edit: Copy, Cut and Paste, with Paste into the selected frame, Move Layer, and the inspector's style rows as DesignStyleChange, one-layer frame, fill and corner radius on today's methods), the command catalog (DesignCommandCatalog: every DesignCommand, palette tool, page and file action as a SuiteKernel CommandSpec whose availability is today's help and whose run is today's method, under ids kept in Tests/command-ids/design.txt), what the menu bar's items read (DesignMenuState: those specs over the focused window's workspace, with the menus' own rules for Open, a focused field's Undo and Redo, Rename Page and Align), Design's document with no window for the CLI and the real jobs (DesignHeadless: open and save through the file codec, the catalog lifted onto the workspace, SVG export of every page's top-level frames), and DesignLiveEdit: the copy a canvas drag or inspector scrub shows until it ends, then replays into the workspace as one step, and the gradient fill (DesignFill+Kernel: a node's kernel Fill in its unit box, the workspace as SuiteKernel's GradientFillTarget, and runFill, which sends a fill gesture through the catalog).",
-                "technology": "Swift 6, Foundation",
+                "technology": "Swift 6, Foundation, CoreRaster",
                 "paths": [
                   "Sources/DesignModel/"
                 ]
@@ -600,7 +600,7 @@
               {
                 "id": "kernel-place",
                 "name": "Place",
-                "description": "Place/: the suite's one picture model. Size, PlacedFormat (png, jpeg, svg), PlacedAsset (a file's bytes, embedded once per document), PlacedImage (an asset shown in a layer's box with a cover focus), PlacedAssets (one copy per id, pruned on save), PlacedVector (an SVG flattened into paint items) and the PlacedImageTarget protocol an app's workspace conforms to; PlaceRules (the format sniff, the content id, the 32 MB cap, the contain fit, the cover crop and the reset box) and PlaceRules.vector (an SVG as a PlacedVector); PlaceIntent (the place gestures as commands) and PlaceCommands (the five place.* command specs every app registers). placed-images PL-1 declares them as stubs (specs with real ids, schemas and availability); PL-5, PL-6 and PL-7 fill the bodies.",
+                "description": "Place/: the suite's one picture model. Size, PlacedFormat (png, jpeg, svg), PlacedAsset (a file's bytes, embedded once per document), PlacedImage (an asset shown in a layer's box with a cover focus), PlacedAssets (one copy per id, pruned on save), PlacedVector (an SVG flattened into paint items) and the PlacedImageTarget protocol an app's workspace conforms to; PlaceRules (the format sniff, the content id, the 32 MB cap, the contain fit, the cover crop and the reset box) and PlaceRules.vector (an SVG as a PlacedVector); PlaceIntent (the place gestures as commands) and PlaceCommands (the five place.* command specs every app registers). The place commands are how an agent places a picture the way a person does: SuiteUI's Place… panel, its drop target, PlacedImageView and the placed-image rows run their gestures through PlaceCommands, the gallery's place-image page on a live target, and the fake canvas (FakeCanvasDocument, each rect's placed image and its one copy of every asset) takes them, so RJ-X36 runs on the CLI. placed-images PL-1 declares them as stubs (specs with real ids, schemas and availability); PL-5, PL-6 and PL-7 fill the bodies; PL-8 wires the gallery and PL-9 makes the fake a target.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Place/"
@@ -659,6 +659,15 @@
                 "paths": [
                   "Sources/SuiteKernel/Text/"
                 ]
+              },
+              {
+                "id": "kernel-zoom",
+                "name": "Zoom",
+                "description": "Zoom/: ViewZoom, the suite's one zoom model (#5070): ZoomSteps (the 10% to 3200% clamp, Zoom In and Zoom Out over the suite's stops or an app's own table, the snap that lands a pinch near 100% on 100%, the fit scale, the anchor that keeps the point under the pointer still, the percent text), ZoomLevel (fit, 100% or a scale; fit follows the viewport) and ZoomKey (Command-plus, minus, 0 and 1). SuiteUI's ZoomMath, ViewerZoom and CanvasViewport wrap it; Flare's stage and Library's loupe step their own tables on it.",
+                "technology": "Swift 6, FlareCore, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Zoom/"
+                ]
               }
             ]
           },
@@ -674,12 +683,26 @@
               {
                 "id": "imaging-adjust",
                 "name": "Adjust",
-                "description": "Adjust/ and the SuiteImaging namespace: AdjustSettings (exposure, levels, curve, hue and saturation) with its clamps and its one Codable form Photo and Library both read, and ImagingProgram, which compiles settings to CoreRender's tone adjustments (CPU) and tone program (GPU) in one fixed order. suite-imaging IM-2 declares them as stubs; IM-3 and IM-4 fill the bodies.",
+                "description": "Adjust/, the SuiteImaging namespace and RasterSize (the one PNG/JPEG size reader): AdjustSettings (exposure, levels, curve, hue and saturation) with its clamps and its one Codable form Photo and Library both read, and ImagingProgram, which compiles settings to CoreRender's tone adjustments (CPU) and tone program (GPU) in one fixed order. suite-imaging IM-2 declares them as stubs; IM-3 and IM-4 fill the bodies.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), CoreColor, CoreRaster and CoreRender, Linux and macOS",
                 "paths": [
-                  "Sources/SuiteImaging/Adjust/",
+                  "Sources/SuiteImaging/Adjust/AdjustSettings.swift",
+                  "Sources/SuiteImaging/Adjust/ImagingProgram.swift",
                   "Sources/SuiteImaging/Color/",
+                  "Sources/SuiteImaging/RasterSize.swift",
                   "Sources/SuiteImaging/SuiteImaging.swift"
+                ]
+              },
+              {
+                "id": "imaging-adjust-kinds",
+                "name": "Adjust kinds, filters and looks",
+                "description": "The adjust-everywhere part of Adjust/: AdjustKinds (GrayWeights, ImagingKind's Black & White and Invert compiled to a GPU tone program and its CPU twin, and ImagingFilter's five filters with their ranges), FilterRules (each filter over creative-core on a layer's padded bounds, mixed by a selection's coverage), LookPresets (LookPreset and the six BuiltInLooks) and AdjustCommands, the adjust.*, filter.* and look.* commands an app adds on an AdjustTarget, each edit one undo step. adjust-everywhere AJ-1 and AJ-2 declare them as stubs; AJ-5, AJ-5f and AJ-6 fill the bodies.",
+                "technology": "Swift 6, CoreRaster, CoreRender and SuiteKernel, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Adjust/AdjustKinds.swift",
+                  "Sources/SuiteImaging/Adjust/FilterRules.swift",
+                  "Sources/SuiteImaging/Adjust/AdjustCommands.swift",
+                  "Sources/SuiteImaging/Adjust/LookPresets.swift"
                 ]
               },
               {
@@ -701,12 +724,61 @@
                 ]
               },
               {
+                "id": "imaging-select",
+                "name": "Select",
+                "description": "Select/ (docs/blueprints/suiteui/features/area-selection.md): AreaMask turns SuiteKernel's AreaRecipe into a CoreRaster Mask. Each shape renders to its own mask (rectangle and ellipse from core's statics, lasso and polygon by Mask.polygon, the magic wand by floodMask on the target layer or, with All Layers, the composite) and joins the area by replace, add, subtract or intersect; invert, feather and expand (a disk max of the coverage, a min for contract) apply where they sit in the steps. The outline for the marching ants is the mask's contours at 0.5. area-selection AR-5 declares it as a stub; AR-6 fills the body.",
+                "technology": "Swift 6, CoreRaster and SuiteKernel, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Select/"
+                ]
+              },
+              {
                 "id": "imaging-tone",
                 "name": "Tone",
                 "description": "Tone/ (docs/blueprints/suiteui/features/tone-controls.md): the suite's one tone and sharpen adjustment. ToneSlider and ToneGroup (White Balance, Tone, Presence, Sharpen), ToneSettings with Library's Develop keys, ToneRules (the settings as one CoreRender tone program, the same CPU steps, one unsharp pass and Auto from CoreRaster's AutoTone, with the sliders still waiting on the engine), and ToneCommands: the ToneTarget protocol, the ToneIntents the SuiteUI tone rows send and the tone.read, tone.set, tone.reset and tone.auto specs every adopting app registers. tone-controls TC-1 declares them as stubs; TC-5 to TC-7 fill the bodies.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), SuiteKernel's command catalog, CoreRender and CoreRaster, Linux and macOS",
                 "paths": [
-                  "Sources/SuiteImaging/Tone/"
+                  "Sources/SuiteImaging/Tone/",
+                  "Sources/SuiteImaging/Fakes/FakeToneDocument.swift"
+                ]
+              },
+              {
+                "id": "imaging-raw",
+                "name": "Raw",
+                "description": "Raw/ (docs/blueprints/suiteui/features/shared-raw.md): the suite's one camera RAW decode. RawFormat (a file is RAW when the format registry's camera RAW row names its extension), RawRefusal's four sentences, RawSize, RawFileInfo, RawQuality and RawDecodePlan (the embedded preview, a draft develop or every pixel), SuiteRaw (info and decode into the working space's Float32 buffer, the file's baseline applied as one exposure step, no clamp), the RawDecoding seam, FakeRawDecoder's fixed table for tests on every platform and, on macOS, SystemRawDecoder over Core Image's CIRAWFilter. Imports no ImageIO and no Metal. shared-raw SR-2 declares them as stubs; SR-3 and SR-4 fill the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and CoreRaster, Linux and macOS; Core Image on macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Raw/"
+                ]
+              },
+              {
+                "id": "imaging-style",
+                "name": "Style",
+                "description": "Style/ (docs/blueprints/suiteui/features/layer-styles.md): the suite's one layer style. LayerStyle with its eight StyleKinds (drop and inner shadow, outer and inner glow, stroke, colour and gradient overlay, bevel), StyleRules (ranges, defaults, paint order, reach, presets, the copy and paste JSON), StyleProgram (the one mapping to and from CoreRaster's LayerStyleStack and the CPU render), LayerStyleSVG (a style as one SVG filter with warnings) and StyleCommands: the LayerStyleTarget protocol, the StyleIntents views send and the eleven style.* specs every adopting app registers. layer-styles LS-1 declares them as stubs; LS-5 to LS-8 fill the bodies.",
+                "technology": "Swift 6, SuiteKernel's command catalog, CoreRaster, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteImaging/Style/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "suite-text",
+            "name": "SuiteText",
+            "description": "The live text service on Core Text: LiveText, SuiteModel's TextServices made real (measure spans, list the Mac's font families, draw placed glyphs). Its own module so a headless tool can draw text without SuiteShell's UI glue; SuiteShell re-exports it for the apps. Imports SuiteModel only.",
+            "technology": "Swift 6, Core Text and AppKit, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "components": [
+              {
+                "id": "shell-text",
+                "name": "Text on Core Text",
+                "description": "The live half of SuiteModel's text contract, reached as SuiteServices.text through LiveText: measures spans on Core Text into one advance per grapheme (ligatures split evenly, an emoji whole), ascent and descent, and names the fallback family; lists the Mac's font families with their faces; and draws placed glyphs at their origins and angles into an sRGB MediaFrame. It measures and draws only: line breaks, alignment and type on a path are creative-core text-engine's, so an app Model measures here, lays out in core, and draws here.",
+                "technology": "Swift 6, Core Text and AppKit, macOS 26",
+                "paths": [
+                  "Sources/SuiteText/"
                 ]
               }
             ]
@@ -724,7 +796,7 @@
               {
                 "id": "shell-live",
                 "name": "Live services",
-                "description": "SuiteServices.live and one slot file per member; each feature swaps only its own slot.",
+                "description": "SuiteServices.live and one slot file per member; each feature swaps only its own slot. SuiteLocations.processSupportFolder is the support folder a real process uses.",
                 "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
                 "paths": [
                   "Sources/SuiteShell/SuiteServices+Live.swift",
@@ -832,15 +904,6 @@
                 "technology": "Swift 6, AVFoundation, VideoToolbox and CoreGraphics, macOS 26",
                 "paths": [
                   "Sources/SuiteShell/Media/"
-                ]
-              },
-              {
-                "id": "shell-text",
-                "name": "Text on Core Text",
-                "description": "The live half of SuiteModel's text contract, reached as SuiteServices.text through LiveText: measures spans on Core Text into one advance per grapheme (ligatures split evenly, an emoji whole), ascent and descent, and names the fallback family; lists the Mac's font families with their faces; and draws placed glyphs at their origins and angles into an sRGB MediaFrame. It measures and draws only: line breaks, alignment and type on a path are creative-core text-engine's, so an app Model measures here, lays out in core, and draws here.",
-                "technology": "Swift 6, Core Text and AppKit, macOS 26",
-                "paths": [
-                  "Sources/SuiteShell/Text/"
                 ]
               },
               {
@@ -1376,6 +1439,12 @@
         "style": "sync"
       },
       {
+        "source": "suite-text",
+        "target": "suite-model",
+        "description": "implements SuiteModel's text contract (TextServices)",
+        "style": "sync"
+      },
+      {
         "source": "suite-shell",
         "target": "suite-model",
         "description": "implements the live conformances of SuiteModel's contracts",
@@ -1385,6 +1454,12 @@
         "source": "suite-shell",
         "target": "suiteui",
         "description": "builds the Switch To and Open In menus and small views from SuiteUI parts",
+        "style": "sync"
+      },
+      {
+        "source": "suite-shell",
+        "target": "suite-text",
+        "description": "re-exports the live text service and serves it as SuiteServices.text",
         "style": "sync"
       },
       {
