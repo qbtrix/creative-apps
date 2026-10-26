@@ -1,10 +1,10 @@
 # cull-finish lead record
 
 Issue: #3458 · Packet: docs/blueprints/library/features/cull-finish.md
-Run: act-1a175ea5531-x1ci (line lead, line:library) · resumed 2026-10-26T01:59:55Z · earlier act-1a170488aff-41nk (line lead, line:library) · resumed 2026-10-24T23:40Z · earlier act-1a16cc967d9-mcuv, act-1a16953af22-wvhu, act-1a15995d319-aamb
-Stage: DR-u #5130 ready; DR-m #4899 fix round 1 pushed 9b8152ce (CI: PASS); DR-z #5237/#5240 stacked, C4 #5241 ready; code batches held by dev-red #5321 (macOS, not Library); checked 2026-10-26T11:44Z
+Run: act-1a1782c1961-n1cv (line lead, line:library) · resumed 2026-10-26T12:20Z · earlier act-1a175ea5531-x1ci (line lead, line:library) · resumed 2026-10-26T01:59:55Z · earlier act-1a170488aff-41nk (line lead, line:library) · resumed 2026-10-24T23:40Z · earlier act-1a16cc967d9-mcuv, act-1a16953af22-wvhu, act-1a15995d319-aamb
+Stage: 3 polling: DR-u #5130, DR-m #4899/#5100, DR-z #5237/#5240/#5241 open in the lane; code batches held by dev-red #5321 (not Library); checked 12:27Z
 Base: origin/dev 8eff8ab85
-Next: push #4899's fix, move Head:; lane lands #5130, #4899, then retarget #5100 to dev; #5237 to dev after #5130, #5240 after #5237; Belt-Slice-Done DR-u, DR-m, DR-z on a green library run with each slice's last PR; critics on DR-u screens; Belt-Contact-Sheet
+Next: lane lands #5130, #4899, then retarget #5100 to dev; #5237 to dev after #5130, #5240 after #5237; Belt-Slice-Done DR-u, DR-m, DR-z on a green library run with each slice's last PR; critics on DR-u screens; Belt-Contact-Sheet
 
 ## Slices
 | slice | behavior | tasks | waits on | ui | rounds | state | run |
@@ -68,3 +68,5 @@ Next: push #4899's fix, move Head:; lane lands #5130, #4899, then retarget #5100
 
 - 2026-10-24T23:42:58Z: resumed by act-1a170488aff-41nk. The brief says to rebase lead/cull-finish onto main; it is retired (records live here on lead/library-cull-finish), so it is left as is. PRs keep targeting dev: scripts/fast-lane.sh merges only into dev, and main takes dev SHAs after full CI. #4838 merged 2026-10-24T15:48Z; #5130 already targets dev. DR-u is done once #5130 is on dev and a library run covers it.
 - 2026-10-26T01:59:55Z (run act-1a175ea5531-x1ci): main verified at d3323f6a. lead/cull-finish rebased onto main (brief rule 3) and mirrors this record. #4899's Mac prescreen failed liveListsAReasonForEveryStub and liveStubsSayWhyUntilBuilt: they expected the Trash unavailable, but DR-8 makes LiveTrash live on macOS (unavailable nil). The tests now expect the trash reason only where LiveTrash.unavailable is set. Fix round 1 of 2 for DR-m. Findings with Feature: cull-finish: 0.
+- 2026-10-26T12:28Z (run act-1a1782c1961-n1cv): main verified at d3323f6a. Re-read every PR: all slice PRs are open, clean and in the lane with proof on their heads (#5130's head c9d68d72 has the lane's green Linux check 40109534004). dev-red #5321 (Onboarding test timeouts, not Library) still open, so code batches wait. Open findings for this feature: 0. Nothing left to build; polling every 10 min.
+
