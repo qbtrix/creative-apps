@@ -76,7 +76,7 @@ struct DevelopInspector: View {
         let set = develop.set
         let endEdit = develop.endEdit
         return InspectorSliderRow(
-            slider.rawValue, value: value?.shared ?? 0, in: slider.range, step: slider.step,
+            slider.title, value: value?.shared ?? 0, in: slider.range, step: slider.step,
             unit: slider == .exposure ? "EV" : "", decimals: slider == .exposure ? 2 : 0, mixed: value == .mixed,
             onChange: { set?(slider, $0) }, onEnd: { endEdit?() }
         )
