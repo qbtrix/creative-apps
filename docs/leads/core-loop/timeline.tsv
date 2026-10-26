@@ -252,3 +252,4 @@ utc	stage	event	ref	note
 2026-10-25T22:21Z	3	check-in	no change	40227601183, 40231839911 cancelled before Halo; 40237230599 running
 2026-10-26T00:23Z	3	check-in	no change	40237230599 cancelled before Halo; 40246223952 running
 2026-10-26T02:25Z	3	check-in	no change	40246223952, 40253015658 cancelled before Halo; halo 40255059131 and full 40255288598 pending
+2026-10-26T04:27Z	3	check-in	no change	halo 40255059131 cancelled mid-run, 6 baseline fails, targets not reached; full 40255288598 cancelled
