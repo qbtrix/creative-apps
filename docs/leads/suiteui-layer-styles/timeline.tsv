@@ -156,3 +156,4 @@ utc	stage	event	ref	note
 2026-10-26T05:21Z	3	wait	all	heartbeat: still blocked (dev-red #5321; parents unmerged; core bump unanswered)
 2026-10-26T05:52Z	3	wait	all	heartbeat: still blocked (dev-red #5321; parents unmerged; core bump unanswered)
 2026-10-26T06:22Z	3	wait	all	heartbeat: still blocked (dev-red #5321; parents unmerged; core bump unanswered)
+2026-10-26T06:52Z	3	wait	all	heartbeat: still blocked (dev-red #5321; parents unmerged; core bump unanswered)
