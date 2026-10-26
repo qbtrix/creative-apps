@@ -193,7 +193,9 @@ public final class LiveCompositeCache<Region: LiveRegion>: Sendable {
         if let held = buffers.withLock({ $0[rect] }), let key = held.key as? [Key], stack.starts(with: key) {
             return (try dispatcher.surface(held.pixels), key.count, false)
         }
-        let last = (entries.withLock { $0[rect]?.stack } ?? buffers.withLock { $0[rect]?.stack }) as? [Key]
+        let gpuStack: (any Sendable)? = entries.withLock { entries in entries[rect]?.stack }
+        let cpuStack: (any Sendable)? = buffers.withLock { buffers in buffers[rect]?.stack }
+        let last = (gpuStack ?? cpuStack) as? [Key]
         let laid = Self.shared(stack, with: last)
         let made = try make(laid)
         makes.withLock { $0 += 1 }
