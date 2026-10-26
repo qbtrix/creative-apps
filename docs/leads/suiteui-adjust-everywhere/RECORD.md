@@ -192,3 +192,8 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 
 - No lane batch in flight; batch 102509 (#5266, p0) gone without merging and #5266 still open with no needs-fix, so the lane will re-form. dev-red #5321 still open (lane keeps merging). Wave 2 (#5064, #5233, #5235, #5236) still open and ready; dev f3af1c007; main d3323f6a7.
 - No needs-fix or needs-rebase on our PRs. 0 open findings. Stage: 3 wave 3 (waiting for wave 2 to land).
+
+### 2026-10-26T11:25Z check-in
+
+- Lane batch lane/batch-20261026111622 in flight with #5266 (p0) alone. dev c6700dba4 (#5727, #5726 merged); main d3323f6a7. Wave 2 (#5064, #5233, #5235, #5236) still open and ready, next in line after the p0.
+- No needs-fix or needs-rebase on our PRs. 0 open findings. Stage: 3 wave 3 (waiting for wave 2 to land).
