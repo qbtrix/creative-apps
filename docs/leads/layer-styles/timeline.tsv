@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-26T02:49:20Z	3	pr-opened	#5371	PY-5 setStyle body, slice PY-m (99+/25-, 3 files)
 2026-10-26T03:56:43Z	3	stage-start	PY-a	PY-2 build-ahead on dev+LS-2 (#5174); adds fx button move per #5327
 2026-10-26T04:25:51Z	3	check	PY-a	#5371 #5174 #5176 open, clean, unflagged; dev-red #5321 open (none ours), code batches held; PY-2 builder running
+2026-10-26T04:40:30Z	3	built	PY-a	PY-2 on lead/photo-layer-styles-PY-a a879850e9 (CI: PASS, Mutate 12/12); waits on #5174 to open
