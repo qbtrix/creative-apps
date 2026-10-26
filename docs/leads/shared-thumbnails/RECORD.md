@@ -121,3 +121,4 @@ Next: #5133 (90eb5fab2) is clean and merges dev cleanly; it waits for the lane, 
 - 2026-10-26T12:23Z: heartbeat: dev 746be6b1 (#5775 sharded macOS); full CI 40321924466 queued; Linux check 40316903931 on c6700dba green; dev-red #5321 open; no Feature: shared PR moved; #5133 ST-z queued
 - 2026-10-26T12:55Z: heartbeat: #5133 ST-z2 gains the RJ-X47 gap and packet fixes (local 26055191, gate queued); dev 746be6b1; dev-red #5321 open; findings 0
 - 2026-10-26T13:07Z: heartbeat: ST-z2 gate running on 26055191 (#5133); dev 57dd31ff (#5146); dev-red #5321 open; no Feature: shared PR moved; findings 0
+- 2026-10-26T13:29Z: heartbeat: #5133 ST-z2 on 26055191 waiting for the lane (dev-red holds code batches); dev 01600e46; dev-red #5321 open; findings 0
