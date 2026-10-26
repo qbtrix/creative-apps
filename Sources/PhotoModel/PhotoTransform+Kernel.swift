@@ -2,7 +2,9 @@
 // (transform PT-1 contract, PT-5 bodies), and Free Transform's begin, commit
 // and cancel. The box the kernel sees is the draft's box
 // (scaled about its top-left and moved, turned about its centre), else the
-// selected pixel layer's bounds, cut to the selection when one is set.
+// bounds of the selected pixel layer's painted pixels (alpha above 0), cut to
+// the selection when one is set; a clear layer refuses "Nothing to transform.".
+// Availability reads only `transformArea` (layer and selection, no pixel scan).
 // A scale, turn or move edits the draft as one step whose undo puts the
 // previous draft back (a drag's steps fold under its token). The canvas shows
 // the draft live: each render draws `transformPreview`, the workspace with the
@@ -15,7 +17,8 @@ import SuiteKernel
 
 extension PhotoWorkspace: TransformTarget {
     /// The draft's box while Free Transform is up, else the selected pixel
-    /// layer's bounds (or the selection's part of it); nil with no pixel layer.
+    /// layer's painted bounds (in the selection when one is set); nil with no
+    /// pixel layer or nothing painted there.
     public var transformSelection: TransformBox? {
         if let draft = transformDraft {
             let b = draft.box, t = draft.transform
@@ -31,7 +34,7 @@ extension PhotoWorkspace: TransformTarget {
     /// Why Free Transform and the flips can't run: no pixel layer selected,
     /// else the transform service's help; nil when they can.
     public var transformHelp: String? {
-        guard transformBounds != nil else { return "Select a pixel layer to transform." }
+        guard transformArea != nil else { return "Select a pixel layer to transform." }
         return services.transform.unavailableHelp
     }
 
@@ -81,9 +84,19 @@ extension PhotoWorkspace: TransformTarget {
         touch(.all)
     }
 
-    /// The box Free Transform starts from: the selected pixel layer's bounds,
-    /// cut to the selection when one is set; nil without either.
+    /// The box Free Transform starts from: the bounds of the selected pixel
+    /// layer's pixels with alpha above 0 inside `transformArea`, on the canvas;
+    /// nil without a pixel layer or when nothing is painted there.
     var transformBounds: PixelRect? {
+        guard let layer = selectedLayer, let area = transformArea, let tiles = pixels[layer.id],
+            let painted = try? tiles.paintedBounds(in: area.offsetBy(-layer.offsetX, -layer.offsetY))
+        else { return nil }
+        return painted.offsetBy(layer.offsetX, layer.offsetY)
+    }
+
+    /// Where Free Transform looks for pixels: the selected pixel layer's
+    /// bounds, cut to the selection when one is set; nil without either.
+    var transformArea: PixelRect? {
         guard let layer = selectedLayer, layer.kind == .pixels, let bounds = bounds(of: layer), !bounds.isEmpty else {
             return nil
         }
@@ -94,10 +107,12 @@ extension PhotoWorkspace: TransformTarget {
 
 extension PhotoWorkspace {
     /// Edit > Free Transform: starts a draft on the selected pixel layer's box,
-    /// no step. Throws the help when it can't; a draft already up stays.
+    /// no step. Throws the help when it can't, "Nothing to transform." when no
+    /// pixel there is painted; a draft already up stays.
     public mutating func beginTransform() throws {
         if let help = transformHelp { throw PhotoRefusal(help) }
-        guard transformDraft == nil, let id = selectedLayerID, let box = transformBounds else { return }
+        guard transformDraft == nil, let id = selectedLayerID else { return }
+        guard let box = transformBounds else { throw PhotoRefusal("Nothing to transform.") }
         transformDraft = TransformDraft(layerID: id, box: box)
     }
 

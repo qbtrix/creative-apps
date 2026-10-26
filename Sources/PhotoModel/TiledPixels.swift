@@ -5,6 +5,8 @@
 // what its dabs touch however many copies are alive (SwiftUI's State keeps
 // one). Tiles of one fill share a buffer until written. `flattened()` is the
 // whole layer, for whole-image operations and tests, never per event.
+// `paintedBounds` is the box of its pixels with alpha above 0 (Free
+// Transform's box), skipping tiles that share a clear buffer.
 // Invariants: `tiles` is row-major, `columns * rows` long, each tile the size
 // of its `tileRect`. Linux-safe.
 import CoreRaster
@@ -72,6 +74,31 @@ public struct TiledPixels: Sendable, Equatable {
             throw RasterError.invalid("pixel (\(x), \(y)) is outside \(width)x\(height)")
         }
         return try tiles[i].pixel(x: x % size, y: y % size)
+    }
+
+    /// The smallest rectangle (layer pixels) holding every pixel with alpha
+    /// above 0 inside `window` (layer pixels; nil reads the whole layer); nil
+    /// when that part is clear. Each tile is `PhotoLayerComposite.paintedRect`'s
+    /// scan, except a tile equal to a clear tile already seen: one fill's tiles
+    /// share a buffer, so a brush layer's untouched tiles cost one compare each.
+    /// ponytail: a clear tile that shares no buffer is still read in full; an
+    /// edge-inward tile walk is the upgrade if a big, mostly clear layer is slow.
+    func paintedBounds(in window: PixelRect? = nil) throws -> PixelRect? {
+        let whole = PixelRect(x: 0, y: 0, width: width, height: height)
+        guard let area = (window ?? whole).intersection(whole) else { return nil }
+        var clear: [PixelBuffer] = [], found: PixelRect?
+        for i in tileIndices(in: area) where tiles.indices.contains(i) {
+            let tile = tiles[i], rect = tileRect(i)
+            if clear.contains(tile) { continue }
+            guard let painted = try PhotoLayerComposite.paintedRect(of: tile, in: area.offsetBy(-rect.x, -rect.y))
+            else {
+                if area.intersection(rect) == rect { clear.append(tile) }
+                continue
+            }
+            let r = painted.offsetBy(rect.x, rect.y)
+            found = found?.union(r) ?? r
+        }
+        return found
     }
 
     /// The whole layer as one buffer.
