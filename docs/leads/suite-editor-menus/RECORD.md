@@ -186,3 +186,7 @@ No change: #4988, #5164, #4999 and #5364 are still open in the lane, with no fix
 ## 2026-10-26T04:14:31Z poll
 
 No change on ours: #4988, #5164, #4999 and #5364 are open with no fix labels. #4988 is mergeable_state clean, with its fast-lane check and local-ci/prescreen green. The lane is still merging (#5040 and #5378 at 03:55), so ours wait in the queue. #5000 still waits on #4999.
+
+## 2026-10-26T04:35:48Z poll
+
+No change: #4988, #5164, #4999 and #5364 are open and clean, with no fix labels. #5000 still waits on #4999.
