@@ -208,3 +208,4 @@ utc	stage	event	ref	note
 2026-10-26T13:24:16Z	check	run act-1a178602311-syy6 takes over; #5363 prescreened, open; dev 01600e46, all heads merge clean
 2026-10-26T13:43:29Z	check	#5363 still open (prescreened); dev 01600e46 unchanged; -pt3 dev-merged + CI PASS (pushed); -pt5/-pt7 gating
 2026-10-26T14:13:44Z	check	#5363 still open (prescreened, clean); lane merging others (dev 68be32fc); -pt3/-pt5/-pt7 dev-merged at 01600e46, CI PASS, pushed
+2026-10-26T14:29:03Z	check	-pt3/-pt5/-pt7 re-merged with dev 68be32fc, CI PASS, pushed (32d5683a/b3c8792a/f4fbe959); #5363 still awaiting lane
