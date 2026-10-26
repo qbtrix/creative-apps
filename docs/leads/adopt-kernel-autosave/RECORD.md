@@ -157,3 +157,4 @@ Next: AK side ended (parked by the supervisor): #4427 and #4428 on dev; relaunch
 - 2026-10-26T12:36:23Z Check-in: dev-red #5321 still open (not ours); 6 open PRs clean, none merged.
 - 2026-10-26T13:01:19Z Check-in: dev-red #5321 still labelled (not ours); 6 open PRs clean, none merged.
 - 2026-10-26T13:38:58Z Check-in: dev-red #5321 still open (not ours); this feature's open PRs clean, none merged.
+- 2026-10-26T14:00:10Z Check-in: dev-red #5321 still open (not ours); 5 open PRs clean, none merged; OC-library-u (01600e46c) has only a Linux check so far, no scoped-suiteui or full run yet.
