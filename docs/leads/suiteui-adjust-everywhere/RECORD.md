@@ -106,3 +106,8 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 
 - dev still 999895c8; wave 2 (#5064, #5233, #5235, #5236) still queued with fast-lane (#5233 head a01fdf51 has local-ci/prescreen success). No needs-fix or needs-rebase on any adjust-everywhere PR.
 - 0 open findings. Stage: 3 wave 3 (waiting for wave 2 to land).
+
+### 2026-10-26T05:25Z check-in
+
+- dev at 7e13ba02 (#4948 landed); wave 2 (#5064, #5233, #5235, #5236) still open with fast-lane, none merged. No needs-fix or needs-rebase on any adjust-everywhere PR.
+- 0 open findings. Stage: 3 wave 3 (waiting for wave 2 to land).
