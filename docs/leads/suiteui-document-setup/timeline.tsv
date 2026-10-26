@@ -218,3 +218,4 @@ utc	stage	event	ref	note
 2026-10-26T07:47:53Z	3	poll	-	07:47Z poll: no merges of ours; #4901 prescreen success on e82df3df, eligible; #4887/#4918/#4891 clean; #5267 dirty again (lane integrates); dev-red #5321 open; 0 findings.
 2026-10-26T08:15:49Z	3	poll	-	08:15Z poll: no merges; dev unchanged; #4887/#4918/#4891/#4901 eligible; #5267 (other feature, p0) needs-rebase, DS-z still waits on it; dev-red #5321 open; 0 findings.
 2026-10-26T08:37:09Z	3	poll	-	08:37Z poll: no merges of ours; dev 1960c2d9 (#4956 p0); #4887/#4918/#4891/#4901 eligible; #5267 needs-rebase (other lead); dev-red #5321 open; 0 findings.
+2026-10-26T08:59:34Z	3	poll	-	08:59Z poll: no merges of ours; dev be5f2c00 (supervisor lane fixes: red-dev rerun + hold only the red module); dev-red #5321 open; 0 findings. #4887/#4918/#4891/#4901 eligible; #5267 needs-rebase (other lead).
