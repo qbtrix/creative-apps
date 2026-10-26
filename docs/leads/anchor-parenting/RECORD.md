@@ -108,3 +108,4 @@ Run act-1a1695ebfeb-d54n, 2026-10-23T15:30Z; supersedes the tables' PR/state col
 - 2026-10-26T19:47Z (act-1a177ff0916-4jm7): poll: dev 17a7848b; dev unchanged; AN-6 waits on #4893, AN-10 on #4902 and #4891
 - 2026-10-26T20:05Z (act-1a177ff0916-4jm7): poll: dev 17a7848b; dev unchanged; no suiteui PR updated since 18:00Z; AN-6 waits on #4893, AN-10 on #4902 and #4891
 - 2026-10-26T20:22Z (act-1a177ff0916-4jm7): poll: dev 696d37fe; dev moved, none ours; AN-6 waits on #4893, AN-10 on #4902 and #4891
+- 2026-10-26T20:38Z (act-1a177ff0916-4jm7): poll: dev 696d37fe; dev unchanged; AN-6 waits on #4893, AN-10 on #4902 and #4891
