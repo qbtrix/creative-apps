@@ -3,8 +3,8 @@
 // window whose page owns the style and applies each `.lineHeight` intent through TextStyleRules, runs at most 3
 // window bodies (target 0: only the page and the rows redraw), and sends at least one intent. Then the rows where a
 // person reaches them: Design's text inspector on `cards` with Title (node-5) selected, and Halo's TEXT section on
-// `empty` with a "Hello" text layer, each listing every `suite.text.*` control, disabled with "Text styles arrive
-// with TS-5." until TS-5 routes them, written as design-inspector-text-style-rows-{light,dark}.png and
+// `empty` with a "Hello" text layer, each listing every `suite.text.*` control, disabled with "Text styles
+// aren't connected in this window yet." until TS-8 and TS-10 route them, written as design-inspector-text-style-rows-{light,dark}.png and
 // halo-text-style-rows-{light,dark}.png. Design shows no rows for a layer that isn't text. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -90,7 +90,7 @@ private struct TextStyleBudgetPage: View {
 
 @MainActor
 @Suite struct TextStyleRowsInAppsSnapshots {
-    static let help = "Text styles arrive with TS-5."
+    static let help = "Text styles aren't connected in this window yet."
 
     /// `cards` on `.live` with `id` selected.
     private func cards(_ id: String) -> DesignWorkspace {
@@ -119,7 +119,7 @@ private struct TextStyleBudgetPage: View {
         return store.inventory.document().controls.filter { $0.id.hasPrefix("suite.text.") }.sorted { $0.id < $1.id }
     }
 
-    /// Every row's control is listed, disabled with the TS-5 reason.
+    /// Every row's control is listed, disabled with the not-connected reason.
     private func expectRows(_ controls: [ControlEntry]) {
         let ids = Set(controls.map(\.id))
         for id in TextStyleRows.controlIDs + ["leading", "center", "trailing", "justified"].map({ "suite.text.alignment.\($0)" }) {

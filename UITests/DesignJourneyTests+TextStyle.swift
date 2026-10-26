@@ -4,7 +4,7 @@
 // canvas reflows, a family change refits the box, and Undo steps back one
 // control at a time. Skipped by name until TS-8 draws the new fields and
 // routes the shared text style rows (`suite.text.*`) to Design's commands;
-// TS-3 only shows the rows, disabled with "Text styles arrive with TS-5.".
+// TS-3 only shows the rows, disabled with "Text styles aren't connected in this window yet.".
 import XCTest
 
 final class DesignTextStyleJourneyTests: XCTestCase {
