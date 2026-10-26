@@ -230,3 +230,7 @@ dev gained #5264 (07:45), none of ours. #4988, #5364 and #4999 are open, clean, 
 ## 2026-10-26T08:25:15Z poll
 
 No dev merges since 07:45. Ours are still unbatched after about 6h (open, clean, fast-lane+beta). Posted a supervisor question on #3774 (issuecomment-6411516660; footer stripped).
+
+## 2026-10-26T08:48:15Z poll
+
+#4988, #5364 and #4999 are still open: fast-lane and beta, no needs-fix or needs-rebase, unbatched. #5164 and #5000 wait on them. dev landed #4956 (1960c2d, 08:29) and 7f585b7 (08:44). No supervisor answer yet to issuecomment-6411516660. No footers found. Next poll in 20 min.
