@@ -46,6 +46,20 @@ extension BodyCountSuites {
             #expect(hosted.frame(of: "suite.history") == nil, "the History button didn't hide the panel")
         }
 
+        /// #3318: shown over the window's corner, the panel covered its own button and the timeline's end
+        /// (the playhead at the last frame), so a click on History couldn't hide it. At the journeys' 1000 x 640.
+        @Test(.timeLimit(.minutes(2))) func thePanelCoversNeitherItsButtonNorTheTimeline() async throws {
+            let hosted = try await HostedHaloWindow(try Self.edited(4), size: CGSize(width: 1000, height: 640))
+            defer { hosted.close() }
+            let shown = try await hosted.press("halo.history.show")
+            #expect(shown, "no halo.history.show button by the transport")
+            let panel = try #require(hosted.frame(of: "suite.history"), "the History button didn't show the panel")
+            for id in ["halo.history.show", "halo.transport.end", "halo.timeline"] {
+                let frame = try #require(hosted.frame(of: id), "no \(id) with the panel shown")
+                #expect(!panel.intersects(frame), "the History panel \(panel) covers \(id) \(frame)")
+            }
+        }
+
         @Test(.timeLimit(.minutes(2))) func aRowPressSendsOneJump() async throws {
             let hosted = try await HostedHaloWindow(try Self.edited(4))
             defer { hosted.close() }
