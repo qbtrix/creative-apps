@@ -66,9 +66,11 @@ extension PhotoRenderer {
     /// open or when an adjustment fails, and `RenderError` when a backend does.
     /// With resident tiles on the route (`residentTiles`) and a `target`, the GPU composites from them and
     /// writes each damaged region to `target`: no bytes come back, and `tiles` is empty.
+    /// `live` is a drag sample's frame: Free Transform's draft draws through its matrix on each region (bilinear,
+    /// no whole-layer resample), and the exact frame, Return's pixels, comes with the next plain update.
     public static func update(
         _ workspace: PhotoWorkspace, since revision: Int?, route: PhotoRenderRoute = .cpu,
-        target: PhotoDisplayTarget? = nil
+        target: PhotoDisplayTarget? = nil, live: Bool = false
     ) async throws -> PhotoTileUpdate {
         guard let canvas = workspace.canvas else { throw RasterError.invalid("no image is open") }
         let clock = ContinuousClock()
