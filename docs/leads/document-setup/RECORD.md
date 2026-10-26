@@ -144,3 +144,4 @@ Next: lane merges DS-photo #4901, DS-design #4887, DS-halo #4918, DS-flare #4891
 - 2026-10-26T16:33Z (act-1a177ff0916-4jm7): poll: dev 527676af; no merges of ours; DS-z waits on #4918, #4891, #5267
 - 2026-10-26T16:51Z (act-1a177ff0916-4jm7): poll: dev 527676af; no merges of ours, dev unchanged; DS-z waits on #4918, #4891, #5267; dev-red #5321 open
 - 2026-10-26T17:12Z (act-1a177ff0916-4jm7): poll: dev df48c0ba; #5267 merged (df48c0ba, renamed FlareNewSheet/NewCompositionSheet to +Suite). Merged dev into lead/document-setup-DS-z-a (clean, 19187ed5) and that into lead/document-setup-DS-z (b0369b78): the +Suite sheets deleted as DS-15 intends, canonical-ui-baseline takes dev's side (LibraryBackupSheet rows gone); no references left. Gate not run (no swift here): run scripts/ci --changed before opening. Next: DS-z PRs open once #4918 and #4891 land
+- 2026-10-26T17:28Z (act-1a177ff0916-4jm7): poll: dev df48c0ba; dev unchanged; DS-z (b0369b78) waits on #4918 and #4891
