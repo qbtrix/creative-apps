@@ -117,3 +117,4 @@ utc	stage	event	ref	note
 2026-10-26T12:55Z	relaunch	lane	#5158	dev 57dd31ff; run act-1a178432d32-jxt0; #5158/#5174 queued; dev-red #5321 open
 2026-10-26T13:15Z	heartbeat	lane	#5158	dev 5f8925a35; batch 20261026130542 holds #5266 only; #5158/#5174 queued; dev-red #5321 open
 2026-10-26T13:36Z	heartbeat	lane	#5158	dev 01600e46c; lane sweep 40323409808: #5158 and #5174 eligible (marker + prescreen), queued behind 1-PR batches; dev-red #5321 open
+2026-10-26T13:57Z	question	lane	#5158	dev 01600e46c; 4th identical poll; Question for the supervisor posted on #3936 (land #5174 then #5158 via local Mac gate?); batch 20261026133530 (#5104) marked red
