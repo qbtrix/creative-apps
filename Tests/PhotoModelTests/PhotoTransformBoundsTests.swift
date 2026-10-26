@@ -1,6 +1,6 @@
 // PhotoTransformBoundsTests.swift: Free Transform's box frames the layer's painted pixels (alpha above 0),
 // not the whole layer: a canvas-sized brush layer with a small square gets the square's box, paint across
-// tiles gets their union, a selection cuts the painted box, an offset layer's box sits on the canvas where
+// tiles gets their union (also past clear tiles), a selection cuts the painted box, an offset layer's box sits on the canvas where
 // its paint does, an opaque layer keeps its whole bounds, and a clear layer (or a selection over clear
 // pixels) refuses with "Nothing to transform.". Commit and the live preview place the moved square on its
 // new box. Runs on Linux and macOS.
@@ -46,6 +46,13 @@ import Testing
         var workspace = try painted([square, crossing])
         try workspace.beginTransform()
         #expect(workspace.transformDraft?.box == PixelRect(x: 100, y: 80, width: 200, height: 200))
+    }
+
+    @Test func paintPastClearTilesIsFound() throws {
+        let corner = PixelRect(x: 300, y: 270, width: 40, height: 20)
+        var workspace = try painted([corner])
+        try workspace.beginTransform()
+        #expect(workspace.transformDraft?.box == corner, "three clear tiles first, the paint in the last")
     }
 
     @Test func aClearLayerRefuses() throws {
