@@ -1,26 +1,26 @@
 # export-pack (Library) lead record
 
 Issue: #3478 · Packet: docs/blueprints/library/features/export-pack.md
-Run: act-1a170488aff-41nk (line lead, line:library) · resumed 2026-10-24T23:40Z (earlier act-1a16cc967d9-mcuv, act-1a16953af22-wvhu, act-1a15e4969c2-pa6e)
-Stage: 3 wave 2; LX-2 #4960, LX-4 #4962, LX-u #5128 on the lane; LX-z: LX-7 #5242, LX-8 #5243 stacked; checked 2026-10-25T07:49:50Z
-Base: origin/dev 830af22d
-Next: lane merges #4960 then retarget LX-u #5128 to dev; #4962 on lane; LX-z (LX-7 live journey, LX-8 built) after LX-u and LX-m; Wire XP-7 swaps in when #5044 merges
+Run: act-1a175ea5531-x1ci (line lead, line:library) · resumed 2026-10-26T01:59:55Z · earlier act-1a170488aff-41nk (line lead, line:library) · resumed 2026-10-24T23:40Z (earlier act-1a16cc967d9-mcuv, act-1a16953af22-wvhu, act-1a15e4969c2-pa6e)
+Stage: 3 wave 3: LX-a, LX-m done; LX-u #5128 dev merged in (conflict resolved), LX-z #5242/#5243 stacked; code batches held by dev-red #5321 (macOS, not Library); checked 2026-10-26T01:59:55Z
+Base: origin/dev 8eff8ab85
+Next: gate and push #5128's merge, move Head:; lane lands LX-u then LX-z (retarget #5242 to dev when #5128 merges, #5243 when #5242 merges); Belt-Slice-Done LX-u, LX-z on a green library run with their last PR; critics on LX-u screens; Belt-Contact-Sheet
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| LX-a | options hold a metadata policy (default All but location); the sheet shows the shared Metadata row | LX-1, LX-2 | MX-LX | XP-a; export (built, #1554 closed) | no | 0 | LX-1 #3696 merged 7f3959c; LX-2 waits XP-3 | - | - |
-| LX-u | snapshots, render budget, journey written | LX-5, LX-6 | LJ-X1 | LX-a | yes | 0 | waiting | - | - |
-| LX-m | sidecar drops the policy's tags; writer carries metadata minus them | LX-3, LX-4 | MX-LX | LX-a; XP-6 (merged), XP-7 | yes | 0 | LX-3 merged f1e49054d; LX-4 waits XP-2 + XP-7 | - | - |
+| LX-a | options hold a metadata policy (default All but location); the sheet shows the shared Metadata row | LX-1, LX-2 | MX-LX | XP-a; export | no | 0 | done (#4960 merged 0e8ebba3) | https://github.com/qbtrix/creative-apps/actions/runs/40203780621 | - |
+| LX-u | snapshots, render budget, journey written | LX-5, LX-6 | LJ-X1 | LX-a | yes | 0 | #5128 open; dev merged in (LibraryExportPackSnapshots header conflict) | - | - |
+| LX-m | sidecar drops the policy's tags; writer carries metadata minus them | LX-3, LX-4 | MX-LX | LX-a; XP-6, XP-7 | yes | 0 | done (#4962 merged bbaedba6) | https://github.com/qbtrix/creative-apps/actions/runs/40197513224 | - |
 | LX-z | live services, journey on, feature-done | LX-7, LX-8 | LJ-X1 | LX-u, LX-m | no | 0 | waiting | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | LX-1 | LX-a | 1 | ExportOptions.metadata (default noLocation, old files read it), sidecar xmp(for:metadata:) signature; LibraryExportMetadataTests written, disabled | LibraryContracts.swift, ExportSidecar.swift, LibraryExportMetadataTests.swift | old file reads noLocation | #3696 c6102dd | merged 7f3959c |
-| LX-2 | LX-a | 2 | sheet Metadata row + ExportPick.metadata stub (SuiteUI) | LibraryExportSheet.swift, ExportSheet.swift | LibraryExportPackSnapshots.metadata | #4960 | open, fast-lane, Fast-Check efabeb8d |
+| LX-2 | LX-a | 2 | sheet Metadata row + ExportPick.metadata stub (SuiteUI) | LibraryExportSheet.swift, ExportSheet.swift | LibraryExportPackSnapshots.metadata | #4960 | merged 0e8ebba3 |
 | LX-3 | LX-m | 2 | sidecar policy; LiveExporter passes the policy; RJ-L16/RJ-X03 folder; tests on | ExportSidecar.swift, LiveExporter.swift, tests, mutation plans, Tests/RealJobs/library/no-location/ | LibraryExportMetadataTests; Mutate ExportSidecar 7/7, LiveExporter 6/6 | #3699 f1e49054d | merged |
-| LX-4 | LX-m | 2 | JPEGWriter carries metadata via services.metadata (FakeMetadata) | JPEGWriter.swift, LibraryExportMetadataWriteTests.swift | macOS | #4962 | open, fast-lane |
+| LX-4 | LX-m | 2 | JPEGWriter carries metadata via services.metadata (FakeMetadata) | JPEGWriter.swift, LibraryExportMetadataWriteTests.swift | macOS | #4962 | merged bbaedba6 |
 | LX-5..LX-6 | LX-u | - | see packet | | | #5128 | open |
 | LX-7 | LX-z | 4 | journey on | LibraryJourneyTests+ExportPack.swift | LJ-X1 | #5242 | open, stacked on #5128 |
 | LX-8 | LX-z | 5 | status built | export-pack.wave.json | waves render | #5243 | open, feature-done, stacked on #5242 |
@@ -44,6 +44,7 @@ Next: lane merges #4960 then retarget LX-u #5128 to dev; #4962 on lane; LX-z (LX
 - Photos carry no GPS or serial fields, so the GPS drop is tested on ExportSidecar.kept(_:metadata:) with a tag list.
 - Tests/RealJobs/library/no-location/ is deferred until XP-7's input/gps-phone.jpg is on dev (it goes with LX-4).
 - Gap: export presets don't store the policy, so applying one resets it to noLocation (noted in #3696). This is a gap for LX-2's follow-up.
+- 2026-10-26T01:59:55Z (run act-1a175ea5531-x1ci): main verified at d3323f6a. lead/export-pack is the SuiteUI export-pack lead's live record (relaunched 2026-10-26, already on main), so it is not rebased or written; this record stays here. PRs keep targeting dev. Findings with Feature: export-pack: 0 (#5270, the export sheet onto SuiteExportSheet, names no feature; left to its owner). dev-red #5321 (macOS) blocks code batches; red-triage names #5112/#5044, not a Library PR, so it is not fixed here.
 
 ## Open
 - XP-2 waits on shell-media SM-a; XP-3 waits on tone-controls TC-a and PL-a (SuiteUI lead's record).
