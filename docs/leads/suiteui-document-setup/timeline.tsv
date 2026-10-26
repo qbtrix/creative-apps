@@ -227,3 +227,4 @@ utc	stage	event	ref	note
 2026-10-26T11:38:04Z	3	poll	-	11:38Z poll: no merges of ours; dev c6700dba (#5727 lane quarantine expiry); #4939 and #4891 still open with fast-lane; BK app PRs keep needs-split; dev-red #5321 open (range not ours); 0 findings. #4891 DS-flare still queued; DS-z holds for DS-halo, DS-flare, #5267.
 2026-10-26T11:55:51Z	3	poll	-	11:55Z poll: no merges of ours; dev still c6700dba, lane has merged nothing since 11:16Z; dev-red #5321 still labelled; ours queued; 0 findings.
 2026-10-26T12:23:00Z	3	poll	-	12:23Z poll: no merges of ours; dev 746be6b1 (#5775 supervisor macOS sharding); ours queued; dev-red #5321 open; 0 findings.
+2026-10-26T12:45:19Z	3	poll	-	12:45Z poll: no merges of ours; dev 746be6b1 unchanged; none of ours carries needs-fix/needs-rebase; dev-red #5321 open; 0 findings.
