@@ -169,3 +169,4 @@ utc	stage	event	ref	note
 2026-10-25T11:07:31Z	W4	check	PT-4	all 9 PRs open, clean, unflagged; dev moved to 68bec9fe (SuiteText target refactor, direct), our PRs still mergeable; batch-20261025090316 probes -6 green, -9 Linux green, nothing merged yet; dev-red #5316 open, none ours
 2026-10-25T11:27:38Z	W4	check	PT-4	all 9 PRs open, clean, unflagged; old batch's green prefix did not land; lane started batch-20261025111803 with only #4886 (Linux check running); dev 68bec9fe: Linux, scoped photo and scoped suite runs in progress
 2026-10-26T01:58:06Z	W5	takeover	PT-4	run act-1a175ea563c-tbc1; PT-a slice-done (run 40250716357); PT-4 re-land started
+2026-10-26T02:21:44Z	W5	ship	PT-4	#5363 re-land opened (fast-lane), Fast-Check pass at 500006ca
