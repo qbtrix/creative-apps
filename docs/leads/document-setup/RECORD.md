@@ -1,10 +1,17 @@
 # document-setup lead record
 
 Issue: #3757 (relaunch) · Packet: docs/blueprints/suiteui/features/document-setup.md
-Run: act-1a16c619037-500v (resumed from act-1a16958d72f-a4mg) · Session: cloud line lead (line:suiteui; brush-keys + document-setup) · Resumed: 2026-10-24
-Stage: 3 wave 3 (resume triage: fixers on needs-rebase PRs)
-Base: 654fb36328cdb049dfd1bcda411a126d316c639c (main at resume)
-Next: wait for the lane to merge DS-photo #4901, DS-design #4887, DS-halo #4918, DS-flare #4891; then DS-z folded into the last adopt slice
+Run: act-1a175f403b9-j4z9 (line lead, line:suiteui; resume) · earlier: act-1a16fe1fa73-5x3s, act-1a16c619037-500v
+Stage: 3 wave 3 (adopt PRs in the lane; DS-z stacked)
+Base: d3323f6a7dc523e1986e1693b640cf377e362f08 (main at resume; dev 8987427d)
+Next: lane merges DS-photo #4901, DS-design #4887, DS-halo #4918, DS-flare #4891; then open DS-z (lead/document-setup-DS-z-a, -DS-z) after #5267
+
+## Run act-1a175f403b9-j4z9 decisions
+- Brief rule 1: main checked out at d3323f6a. The old lead branches share no history with main, so each lead branch is now origin/main plus one commit carrying docs/leads/ (the tree a rebase gives), pushed --force-with-lease.
+- PR base stays dev (CLAUDE.md, scripts/fast-lane.sh BASE_BRANCH=dev); the lane retargets main PRs to dev anyway.
+- PR bodies: the session's GitHub relay re-adds a generated-by footer on every edit; the lane strips it from the squash commit.
+- 02:30Z: dev-red #5321 (macOS, range main..cc5c6234, none ours) holds every code batch; no open finding names this feature.
+- 02:40Z: #4901 needs-rebase fixed: merged origin/dev (photo.list-commands golden regenerated with afterglow; only file.new differs from dev), scripts/ci --changed PASS, head 38abf707, Head line moved.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
