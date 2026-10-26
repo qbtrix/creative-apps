@@ -11,9 +11,9 @@
 // color, with the same blend and opacity. An outline, mask or composite that fails draws nothing
 // and isn't counted. A text item (VP-5) is its TextRasterizing raster, top
 // left on bounds.origin (so its baseline sits at height - descent), resized by
-// HaloTextPlacement's scale, turned by its degrees about its center and
-// composited at its world center; with no rasterizer, a mirror or any refusal
-// it is skipped and counted. Nulls are never in the list, so they never
+// HaloTextPlacement's scale (a mirror flips it top to bottom), turned by its
+// degrees about its center and composited at its world center; with no
+// rasterizer, a flat matrix or any refusal it is skipped and counted. Nulls are never in the list, so they never
 // count. Linux-safe.
 import CoreRaster
 
@@ -50,7 +50,7 @@ public struct LiveFrameRendering: FrameRendering {
     }
 
     /// `out` with `item`'s text composited at its placement, or nil (skipped)
-    /// with no rasterizer, a mirrored or non-finite matrix, or any refusal.
+    /// with no rasterizer, a flat or non-finite matrix, or any refusal.
     static func drawText(
         _ item: HaloDrawItem, onto out: PixelBuffer, rasterizer: (any TextRasterizing)?,
         scaleX sx: Double, scaleY sy: Double
@@ -62,6 +62,7 @@ public struct LiveFrameRendering: FrameRendering {
         else { return nil }
         do {
             if w != px.width || h != px.height { px = try px.resized(width: w, height: h, filter: .bilinear) }
+            if p.scaleY < 0 { px = px.flipped(.vertical) }
             px = try px.rotated(degrees: p.degrees, filter: .bilinear)
             guard let x = whole(p.center.x * sx - Double(px.width) / 2, allowsNegative: true),
                   let y = whole(p.center.y * sy - Double(px.height) / 2, allowsNegative: true)

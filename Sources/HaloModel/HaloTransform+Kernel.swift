@@ -8,8 +8,9 @@
 // static value when not), only the rows that change, as one step named
 // `name`; writes under one `drag` token fold into that step. The turn keeps
 // its winding (370 turned 10 more is 380). A parent's matrix places the
-// centre; the size and turn are the layer's own. Flip is refused. The turn
-// and scale rules are the kernel's TransformRules; the matrices FlareCore's.
+// centre; the size and turn are the layer's own. Flip is the kernel's: the
+// flipped box writes a negative Scale on its axis and the negated turn. The
+// turn and scale rules are the kernel's TransformRules; the matrices FlareCore's.
 // Linux-safe.
 import FlareCore
 import SuiteKernel
@@ -37,9 +38,6 @@ extension HaloProject: TransformTarget {
     public var transformHelp: String? {
         selectedLayer == nil ? "Select a layer to transform." : nil
     }
-
-    /// Halo has no mirrored layers yet.
-    public var flipHelp: String? { "Flipping isn't in Halo yet." }
 
     /// Writes `t` to the selected layer's Scale, Rotation and Position at the
     /// playhead, keyed where animated, as one step named `name` (merged with

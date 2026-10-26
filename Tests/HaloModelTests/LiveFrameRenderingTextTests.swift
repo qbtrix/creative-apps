@@ -1,8 +1,8 @@
 // LiveFrameRenderingTextTests.swift: VP-5, text pixels in the live renderer
 // on a 400 x 200 composition. "Hi" at 50 measures 60 x 50, centered at
 // (200, 100), so its box is 170...230 by 75...125. The raster is resized by
-// the item's scale, turned by its rotation about its center and composited
-// at its world center; the raster's top-left is the item's bounds.origin, so
+// the item's scale (a mirror draws mirrored), turned by its rotation about
+// its center and composited at its world center; the raster's top-left is the item's bounds.origin, so
 // its baseline row sits at height - descent. Runs on Linux and macOS.
 import CoreRaster
 import FlareCore
