@@ -12,13 +12,18 @@
 // histogram's recount). The gates are counts, never clocks, so a loaded Mac passes or fails the same way: every
 // step waits for the work before it to finish (a deadline poll, not a sleep); a Move step lays one layer on each
 // region's kept base, a Levels recount lays no layer, a Hue drag recounts nothing, and once a gesture's work has
-// finished nothing renders or recounts again. The CPU percent is printed, never gated (load moves it). The
-// slider and eye tests drop the window's autosave after the gesture: on this branch it still flattens the
-// picture through the reference path, which would read as a recount. Nested in BodyCountSuites, as every suite
-// that reads a process-wide counter is. macOS only.
+// finished nothing renders or recounts again. A Free Transform step on a layer mid-stack, rendered straight
+// through the renderer (no window) on the CPU and Metal routes, lays that layer and the ones above it on each
+// region's kept base and makes no base, counted on a task-local tally so the suites running alongside never
+// count into it. The CPU percent is printed, never gated (load moves it). The slider and eye tests drop the
+// window's autosave after the gesture: on this branch it still flattens the picture through the reference path,
+// which would read as a recount. Nested in BodyCountSuites, as every suite that reads a process-wide counter
+// is. macOS only.
 #if canImport(AppKit)
 import AppKit
+import CoreRaster
 import FlareModel
+import SuiteKernel
 import SwiftUI
 import Testing
 
@@ -319,6 +324,72 @@ extension BodyCountSuites {
                     }
                 }
             }
+        }
+
+        /// A Free Transform step on a layer in the middle of the stack, rendered straight through the renderer
+        /// on the CPU route and the Metal route (no window, so no histogram rows): after the first step, which
+        /// makes the base under the layer, each step lays the transformed layer and the four above it on each
+        /// region's kept base, and makes no base.
+        @Test(.timeLimit(.minutes(5)), arguments: [false, true])
+        func photoFreeTransformStepLaysTheLayerAndTheOnesAbove(gpu: Bool) async throws {
+            guard !gpu || PhotoRenderBackendTests.device != nil else { return }
+            let route = gpu ? PhotoRenderRoute(preferred: try PhotoRenderBackendTests.metal()) : PhotoRenderRoute()
+            // A 600 x 400 white image under eight translucent full-canvas layers; Free Transform on the fifth from the top.
+            var model = PhotoWorkspace(services: .live)
+            try model.newCanvas(width: 600, height: 400)
+            for n in 0..<8 {
+                let color = RGBA(r: Float(n % 3) * 0.1, g: Float(n % 2) * 0.15, b: 0.2, a: 0.3)
+                _ = model.insertLayer(named: "Wash \(n)", pixels: TiledPixels(try PixelBuffer(width: 600, height: 400, fill: color)),
+                                      kind: .pixels, at: 0)
+            }
+            let above = 4
+            model.selectLayer(model.layers[above].id)
+            model.selectTool(.move)
+            try model.beginTransform()
+            let canvas = try #require(model.canvas)
+            let tiles = PhotoRenderer.tiles(of: canvas, in: .all)
+            let regions = gpu ? Set(tiles.map(\.y)).count : tiles.count
+            let label = "IDLE-WORK photo free transform \(gpu ? "gpu" : "cpu") 600x400 9 layers"
+
+            var shown = try await PhotoRenderer.update(model, since: nil, route: route)
+            func turn() throws {
+                let box = try #require(model.transformSelection)
+                try model.setTransform(TransformRules.rotated(box, by: 3), name: "Rotate", drag: nil)
+            }
+            // This test's renders only (a task-local tally): suites running alongside draw too, and the
+            // process-wide counters would count their work as this step's.
+            func counted(_ render: () async throws -> PhotoTileUpdate) async throws -> [String: Int] {
+                #if DEBUG
+                let tally = PhotoRenderCount.Tally()
+                shown = try await PhotoRenderCount.$tally.withValue(tally) { try await render() }
+                return tally.snapshot
+                #else
+                shown = try await render()
+                return [:]
+                #endif
+            }
+            try turn()
+            let first = try await counted { try await PhotoRenderer.update(model, since: shown.revision, route: route) }
+            print("\(label): first step" + IdleWork.describe(first))
+
+            for step in 1...4 {
+                if step.isMultiple(of: 2) {
+                    model.drag(from: Mask.Point(x: 300, y: 200), to: Mask.Point(x: 300 + Double(step) * 5, y: 200))
+                    model.endDrag()
+                } else {
+                    try turn()
+                }
+                let step = try await counted { try await PhotoRenderer.update(model, since: shown.revision, route: route) }
+                print("\(label): step" + IdleWork.describe(step))
+                #if DEBUG
+                #expect(step["bases", default: 0] == 0, Comment(rawValue: "\(label): a step made a base again" + IdleWork.describe(step)))
+                #expect(step["hits"] == regions, Comment(rawValue: "\(label): a region missed its base" + IdleWork.describe(step)))
+                #expect(step["layers"] == regions * (above + 1),
+                        Comment(rawValue: "\(label): a step laid other than the layer and the \(above) above it per region"
+                            + IdleWork.describe(step)))
+                #endif
+            }
+            route.composites.removeAll()
         }
     }
 }

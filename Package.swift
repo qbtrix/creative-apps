@@ -123,11 +123,9 @@ targets += [
             + apps.flatMap { [.target(name: "\($0)App"), .target(name: "\($0)Model")] }
     ),
 ]
-// Photo draws its canvas through CoreRender's dispatcher, on the Metal backend when the View > Rendering choice allows.
-let appEngines: [String: [Target.Dependency]] = ["Photo": [.product(name: "CoreRenderMetal", package: core)]]
 targets += apps.map {
     .executableTarget(name: "\($0)App",
-                      dependencies: ["SuiteUI", "SuiteShell", .target(name: "\($0)Model")] + appEngines[$0, default: []])
+                      dependencies: ["SuiteUI", "SuiteShell", .target(name: "\($0)Model")])
 }
 #endif
 
