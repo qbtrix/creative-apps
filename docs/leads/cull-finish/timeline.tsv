@@ -209,3 +209,4 @@
 2026-10-26T15:38Z	3	heartbeat	-	polling: no change; lane queue and prescreen still pending; dev-red #5321 open
 2026-10-26T15:50Z	3	heartbeat	-	polling: no change; lane queue and prescreen still pending; dev-red #5321 open
 2026-10-26T16:11Z	3	heartbeat	-	polling: no change; lane queue and prescreen still pending; dev-red #5321 open
+2026-10-26T16:34Z	3	heartbeat	-	polling: no change; lane merging others (#5106, #5803); prescreen pending; dev-red #5321 open
