@@ -15,8 +15,8 @@
   {
     "test": "HaloJourneyTests/HaloJourneyTests/testEveryControlActsOrSaysWhy",
     "owner": "#3318",
-    "reason": "H-J13: halo.transport.play is enabled but clicking it changes nothing (HaloJourneyTests.swift:205), the viewer-playback lead's transport. Scoped run 38857364213 showed it; its overlap failure (#1282) is fixed by #1322 (scoped run 38874911359). Was owned by #1035, closed as done 2026-10-19; #3318 owns it now.",
-    "expires": "2026-10-27",
+    "reason": "H-J13: the History panel covers its own button and the timeline end, so the playhead pill reads 1.00:1 (run 40263528127); fix needs the lead's layout call (#3318).",
+    "expires": "2026-10-29",
     "scope": "full"
   },
   {
