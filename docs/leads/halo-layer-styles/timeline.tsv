@@ -108,3 +108,4 @@ utc	stage	event	ref	note
 2026-10-26T09:02Z	heartbeat	lane	#5158	dev be5f2c008 (lane fixes: red-dev rerun); batch 20261026083929 still #5065; #5158/#5174 queued; dev-red #5321 open
 2026-10-26T09:23Z	heartbeat	lane	#5158	dev 1b843d159 (#5383); lane retrying #5065 in batch 20261026091205; #5158/#5174 queued; dev-red #5321 open
 2026-10-26T09:45Z	heartbeat	lane	#5158	#5065 merged (dev 2ed77a2e5); no batch in flight; #5158/#5174 queued; dev-red #5321 open
+2026-10-26T10:07Z	heartbeat	lane	#5158	dev 2ed77a2e5; lane batch 20261026095316 holds #5163; #5158/#5174 queued; dev-red #5321 open
