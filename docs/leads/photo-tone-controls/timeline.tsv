@@ -175,3 +175,4 @@ utc	stage	event	ref	note
 2026-10-26T03:19:21Z	W5	build	PT-7	jobs live on fixtures, journey on; branch -pt7, test-first; PR waits for #5363, PT-3
 2026-10-26T03:23:47Z	W5	gate	PT-7	CI PASS at 46e6878e, pushed
 2026-10-26T03:23:47Z	W6	build	PT-8	photo.md tone row and PJ-T1, wave built; held until the code PRs land
+2026-10-26T03:46Z	check: #5363 open, clean, unmerged (dev at d0859e01); PT-3/5/7/8 branches gated and waiting on it
