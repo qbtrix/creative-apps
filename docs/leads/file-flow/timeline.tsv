@@ -218,3 +218,4 @@ utc	stage	event	ref	note
 2026-10-26T21:38:20Z	wait	poll	-	no change
 2026-10-26T22:06:44Z	merge	HF-m	#4894	merged c4cf4a75; #4936 retargeted by lane
 2026-10-26T22:27:41Z	wait	poll	#4936	lane linux check 40412395828
+2026-10-26T22:48:55Z	wait	poll	#4936	linux proof green
