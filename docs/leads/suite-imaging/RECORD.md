@@ -14,6 +14,7 @@ Next: post Belt-Slice-Done as PRs merge
 - #5148 (f4463d48c), #5151 (5eb2fa737), #5153 (f7c2ab5bb) merged; IM-photo still needs IM-8d (#5295, #5297), IM-library IM-11 (#5154, #5163, #5178).
 - 2026-10-26T03:07:58Z: masked-layer cpu op (#5216) merged into IM-8d; liveStack treats any masked layer as unsupported on IM-8d-photo; IM-11a/b take dev (LG-6 decodes ahead kept on the GPU loupe render).
 - 2026-10-26T03:30:04Z heartbeat: #5295 #5297 #5299 #5154 #5163 #5178 open and clean; IM-13 after #5163
+- 2026-10-26T04:01:17Z heartbeat: #5295..#5299 #5154..#5178 open and clean; ratchet checked; IM-13 after #5163
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
