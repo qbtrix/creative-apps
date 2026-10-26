@@ -3,7 +3,8 @@
 // DevelopCurvePoint its AdjustCurvePoint (typealiases in
 // Contracts/DevelopValues.swift), so a catalog's keys never change; this file
 // gives the levels Library's rows (the five fields, their 0...255 row units,
-// the clamping setters) and ToneCurve its conversions to and from AdjustCurve.
+// the clamping setters), ToneCurve its conversions to and from AdjustCurve,
+// and DevelopSettings the AdjustSettings LiveDevelop's shared list runs.
 // Linux-safe.
 import SuiteImaging
 
@@ -70,5 +71,14 @@ extension ToneCurve {
     /// finite points, so the identity fallback never shows.
     public init(_ curve: AdjustCurve) {
         self = ToneCurve(points: curve.points) ?? .identity
+    }
+}
+
+extension DevelopSettings {
+    /// The SuiteImaging value for these settings' exposure, levels, curve and
+    /// saturation, the parts `ImagingProgram.adjustments` runs (IM-10b).
+    public var adjustSettings: AdjustSettings {
+        AdjustSettings(exposure: exposure, levels: levels, curve: curve.adjustCurve,
+                       hueSaturation: AdjustHueSaturation(hue: 0, saturation: saturation, lightness: 0))
     }
 }
