@@ -126,3 +126,4 @@ Next: #5133 (90eb5fab2) is clean and merges dev cleanly; it waits for the lane, 
 - 2026-10-26T14:03Z: heartbeat: #5133 ST-z2 waits for the lane; dev 01600e46; dev-red #5321 open; findings 0
 - 2026-10-26T14:29Z: heartbeat: #5133 ST-z2 queued, lane backlog 123; dev 68be32fc; dev-red #5321 open; findings 0
 - 2026-10-26T14:52Z: heartbeat: #5133 ST-z2 clean, queued; dev f86f72f7; dev-red #5321 open; findings 0
+- 2026-10-26T15:19Z: rule 23: three identical blocked polls (14:28Z, 14:51Z, 15:18Z); Question for the supervisor posted on #3737 (issuecomment-6419749547); all shared PRs clean, none merged; dev f86f72f7; dev-red #5321 open; findings 0
