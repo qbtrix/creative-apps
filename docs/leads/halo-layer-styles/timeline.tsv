@@ -147,3 +147,4 @@ utc	stage	event	ref	note
 2026-10-26T22:06:25Z	heartbeat	lane	#5174	dev c4cf4a758; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
 2026-10-26T22:26:31Z	heartbeat	lane	#5174	dev 9810d71ba; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
 2026-10-26T22:48:34Z	fix	body	#5157,#5158,#5161,#5174,#5218	lane flagged an attribution footer on #5174; the session proxy appends it on gh api PATCH; removed from all five bodies via the GitHub MCP update (no footer); later Head: moves go that way; #5161 gains its Mutate: line
+2026-10-26T22:48:43Z	heartbeat	lane	#5174	dev 3d94856cd; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
