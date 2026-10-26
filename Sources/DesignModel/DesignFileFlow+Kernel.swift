@@ -1,7 +1,8 @@
-// DesignFileFlow+Kernel.swift (file-flow DF-1 stubs, DF-3 bodies): Design's document as the suite's
-// hand-off host (SuiteDocumentHost, UC-18) and as SuiteKernel's file-flow target (Open Recent, Open In,
-// drop). The stubs answer like FakeDocumentHost(app: .design, verbs: [.open]) and hold no recents; every
-// mutating member does nothing until DF-3. Linux-safe.
+// DesignFileFlow+Kernel.swift (file-flow DF-1 stubs, DF-3 bodies): Design's document as a
+// SuiteDocumentHost (UC-18) and as SuiteKernel's file-flow target (Open Recent, Open In, drop), the
+// shapes DesignFileFlowTests specify for DF-3. The stubs answer like FakeDocumentHost(app: .design,
+// verbs: [.open]) and hold no recents; every mutating member does nothing until DF-3. The app's live
+// hand-off host is DesignDocumentHost, not this conformance. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "app": "library",
+  "why": "RJ-L70 (orientation-crop OC-7), pending #3756 and waits on OC-8: stands up a sideways 4000x3000 scan (no orientation tag) with Rotate Right, crops it 4:5 portrait and exports a 3000x3750 JPEG whose top row is the scan's left column. The trap: 4:5 on the landscape original gives 5:4, or export ignores the turn. The CLI's Library also has no JPEG import or export yet; LibraryOrientationTests runs these steps on Linux.",
+  "pending": "#3756",
+  "waits_on": "OC-8",
+  "inputs": ["input/sideways.jpg"],
+  "steps": [
+    {"id": "edit.select", "params": {"ids": ["sideways"]}},
+    {"id": "view.loupe", "params": {}},
+    {"id": "image.rotate-cw", "params": {}},
+    {"id": "crop.set-aspect", "params": {"aspect": "4:5", "orientation": "portrait"}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-stood-up", "format": "jpeg", "options": {}},
+  "expect": {
+    "out/sideways-stood-up.jpg": {"pixels": {"tolerance": 2, "reference": "expected/sideways.png"}}
+  },
+  "platforms": []
+}
