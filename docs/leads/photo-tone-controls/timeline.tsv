@@ -204,3 +204,4 @@ utc	stage	event	ref	note
 2026-10-26T11:47:11Z	check	#5363 open, 0 statuses (no pre-screen); dev c6700dba unchanged, all heads merge clean
 2026-10-26T12:16:44Z	check	#5363 local-ci/prescreen success 12:15Z, awaiting lane sweep; dev 746be6b1, all heads merge clean
 2026-10-26T12:29:10Z	check	#5363 prescreened, still open (no lane sweep since); dev 746be6b1, heads merge clean
+2026-10-26T12:45:01Z	check	#5363 prescreened, still open; lane sweeping (12:42Z), dev 746be6b1; heads merge clean
