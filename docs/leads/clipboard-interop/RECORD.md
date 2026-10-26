@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
 Next: wait for the lane to batch #5116 (re-integrated at 0e1cc330, Fast-Check pass) and the other CB PRs; on merge, check main runs for Belt-Slice-Done.
-Polled: 2026-10-26T21:15Z · fill-heal: finding #5093 (bucket edge tint) taken as FH-c fix round 1 on lead/fill-heal-FH-c-5093; #5121/#5137 cover #5095/#5094; #4577 merged so #5137 is on dev
+Polled: 2026-10-26T21:23Z · fill-heal: #5093 is a spec conflict (core's antiAlias ring vs RJ-P51 'logo unchanged'); asked the supervisor on #3778 (comment 6427660298); repro test saved, no code change pending the answer
 
 
 
