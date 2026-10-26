@@ -17,7 +17,7 @@ struct CLIStubTests {
         #expect(Apps.named("fake", in: Apps.all) == nil)
         #expect(Apps.named("fake", in: Apps.all + [Apps.fake])?.name == "fake")
         #expect(Apps.fake.openExtensions == ["fake"])
-        #expect(Apps.fake.exportFormats == ["json"])
+        #expect(Apps.fake.exportFormats == ["json", "png", "jpeg"])
     }
 
     @Test func theFakeOpensAndSummarizesThroughItsSession() throws {

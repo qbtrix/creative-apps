@@ -1,13 +1,17 @@
 // ExportSheet.swift: SuiteExportSheet (EK-30), drawn over ExportSheetRows, a
-// readout of the kernel's ExportRun: Format chips, Size (unless the host draws
-// its own scale) and (when the format takes one) Quality rows, 8 pt apart, then the host's own options rows (the slot, #1989),
+// readout of the kernel's ExportRun: Format chips (one row of equal chips up
+// to four formats, else rows of three: formatColumns), Size (unless the host draws
+// its own scale), (when the format takes one) Quality and (when the host passes
+// a policy) Metadata rows, 8 pt apart, then the host's own options rows (the slot, #1989),
 // a progress bar while running, the finished or failed line after, and the
 // actions that state offers (ExportSheetAction). Every control's identifier
 // hangs off the host's prefix (ExportSheetIDs, "suite.export" by default) and
 // registers in `suite.controls`. When the progress row appears it marks
 // `progress-shown` on the prefix's series in the window's `suite.perf`
 // (HB-U5, QB-L9). It holds no state; every edit goes to the host, which
-// moves its run.
+// moves its run. A pick with a `size` (export-pack XP-3) shows the Size row as
+// a placeholder that reads it, and a pick with a `metadata` policy shows the
+// Metadata row as a placeholder too; XP-4 makes both controls.
 import SuiteKernel
 import SwiftUI
 
@@ -17,10 +21,17 @@ public struct FormatChoice: Hashable, Sendable, Identifiable {
     public init(id: String, name: String, hasQuality: Bool) { (self.id, self.name, self.hasQuality) = (id, name, hasQuality) }
 }
 
-/// Export options as the sheet reads them: format id, scale and quality 0...1.
+/// Export options as the sheet reads them: format id, scale, quality 0...1, the metadata policy
+/// (export-pack; nil: the host offers none) and the kernel's size (nil: the Scale row as before).
 public struct ExportPick: Hashable, Sendable {
     public var format: String, scale: Double, quality: Double
-    public init(format: String, scale: Double = 1, quality: Double = 0.9) { (self.format, self.scale, self.quality) = (format, scale, quality) }
+    public var metadata: ExportMetadata? = nil
+    public var size: SuiteExportSize? = nil
+    public init(
+        format: String, scale: Double = 1, quality: Double = 0.9, metadata: ExportMetadata? = nil, size: SuiteExportSize? = nil
+    ) {
+        (self.format, self.scale, self.quality, self.metadata, self.size) = (format, scale, quality, metadata, size)
+    }
 }
 
 /// A running export's steps, done clamped to 0...total and total at least 1.
@@ -32,7 +43,12 @@ public struct ExportProgress: Hashable, Sendable {
 
 /// What the sheet shows for a run; only editing is `editable`.
 public struct ExportSheetRows: Hashable, Sendable {
-    public enum Row: Hashable, Sendable { case format(String), size(Double), quality(Double) }
+    public enum Row: Hashable, Sendable {
+        case format(String), size(Double), quality(Double)
+        /// The kernel's size on an artwork `source` pixels big at 1x (XP-3 placeholder; XP-4 the modes).
+        case pixels(SuiteExportSize, source: Int, Int)
+        case metadata(ExportMetadata)
+    }
     public enum Line: Hashable, Sendable { case finished(String), failed(String) }
     public let rows: [Row], editable: Bool, progress: ExportProgress?, line: Line?
 
@@ -45,14 +61,29 @@ public struct ExportSheetRows: Hashable, Sendable {
         return shown + [line == nil ? .cancel : .dismiss, .start]
     }
 
-    /// `showsSize: false` leaves out the Size row, for a host that draws its own scale control.
+    /// Columns for the Format chips: up to four formats fill one row (no empty column, no orphan chip), more wrap by three.
+    public static func formatColumns(_ count: Int) -> Int { count <= 4 ? max(count, 1) : 3 }
+
+    /// The Size placeholder's text: "1080 × 1350 px", "Long edge 2048 px", "2x of 1000 × 1250 px".
+    public static func sizeText(_ size: SuiteExportSize, source width: Int, _ height: Int) -> String {
+        switch size {
+        case .scale(let s): "\(s.formatted(.number.precision(.fractionLength(0...2))))x of \(width) × \(height) px"
+        case .pixels(let w, let h, let stretch): "\(w) × \(h) px" + (stretch ? ", stretched" : "")
+        case .longEdge(let n): "Long edge \(n) px"
+        }
+    }
+
+    /// `showsSize: false` leaves out the Size row, for a host that draws its own scale control; `source` is the
+    /// artwork's pixels at 1x, which a pick's `size` reads against.
     public init<Options: Hashable & Sendable>(
-        _ run: ExportRun<Options>, formats: [FormatChoice], showsSize: Bool = true, pick: (Options) -> ExportPick
+        _ run: ExportRun<Options>, formats: [FormatChoice], showsSize: Bool = true,
+        source: (width: Int, height: Int) = (0, 0), pick: (Options) -> ExportPick
     ) {
         func shown(_ options: Options) -> [Row] {
             let p = pick(options)
             let quality = formats.first { $0.id == p.format }?.hasQuality ?? false
-            return [.format(p.format)] + (showsSize ? [.size(p.scale)] : []) + (quality ? [.quality(p.quality)] : [])
+            let size: [Row] = !showsSize ? [] : p.size.map { [.pixels($0, source: source.width, source.height)] } ?? [.size(p.scale)]
+            return [.format(p.format)] + size + (quality ? [.quality(p.quality)] : []) + (p.metadata.map { [.metadata($0)] } ?? [])
         }
         var progress: ExportProgress?, line: Line?, editable = false
         switch run {
@@ -148,15 +179,21 @@ public struct SuiteExportSheet<Options: View>: View {
         case .format(let id):
             VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
                 Text("Format").font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.textSecondary)
-                ChoiceChips(
+                PresetGrid(
                     options: formats.map { InspectorOption(id: $0.id, title: $0.name, identifier: ids.format($0.id)) },
-                    selected: id, onSelect: onFormat)
+                    selected: id, columns: ExportSheetRows.formatColumns(formats.count), onSelect: onFormat)
                     .accessibilityElement(children: .contain)
                     .accessibilityLabel("Format")
                     .suiteControl(id: ids.formats, enabled: readout.editable, reason: readout.editable ? nil : "The export is under way or done.")
             }
         case .size(let scale): StudioScrubRow(label: "Size", value: scale, range: 0.25...4, step: 0.25, onChange: onScale)
         case .quality(let q): StudioScrubRow(label: "Quality", value: q, range: 0...1, step: 0.05, onChange: onQuality)
+        case .pixels(let size, let w, let h):
+            LabeledContent("Size", value: ExportSheetRows.sizeText(size, source: w, h))
+                .accessibilityElement(children: .combine).accessibilityIdentifier(ids.prefix + ".size")
+        case .metadata(let policy):
+            LabeledContent("Metadata", value: policy.title)
+                .accessibilityElement(children: .combine).accessibilityIdentifier(ids.prefix + ".metadata")
         }
     }
 }
