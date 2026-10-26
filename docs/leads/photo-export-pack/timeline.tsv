@@ -267,3 +267,4 @@ utc	stage	event	ref	note
 2026-10-25T22:52Z	check-in	#5206 merged 22:48Z (batch of 1); no Photo export PRs of ours open; mac-finish #5353 clean, waiting; dev-red #5321 open; no XP-3/XP-4
 2026-10-25T23:23Z	check-in	quiet: no merges since #5206; mac-finish #5353 clean, waiting; dev-red #5321 open; no XP-3/XP-4, no findings, no supervisor reply
 2026-10-25T23:56Z	check-in	red-triage on #5321 now names #5044 (XP-7, SuiteUI's slice; captain's #5345/#5346 own it), not Photo; mac-finish #5353 clean, waiting; no XP-3/XP-4, no findings
+2026-10-26T00:27Z	check-in	quiet: #5255 (SuiteUI SuiteSheet) landed; mac-finish #5353 clean, waiting; dev-red #5321 open (XP-7 side, captain's); no XP-3/XP-4, no findings
