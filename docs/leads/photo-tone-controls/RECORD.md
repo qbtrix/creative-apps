@@ -117,3 +117,4 @@ Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #48
 
 - 03:46Z: #5363 still open (mergeable clean; lane merged #5346, #5368 since). PT-3 9d80855d, PT-5 c1fb913b, PT-7 46e6878e, PT-8 b8704e52 (gate PASS) all wait on it; next check 04:05Z.
 - 04:07Z: #5363 still open. Code PRs land on Linux proof plus the supervisor's local-ci/prescreen status (#5346 landed that way); be2ad8ae has none yet. Nothing for the lead to push; next check 04:27Z.
+- 04:28Z: #5363 still waits on the pre-screen (no status, no comments); dev at 75292afd. Next check 04:48Z.
