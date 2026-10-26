@@ -18,7 +18,8 @@
 #   marks a base that held dev's red commit (dropped once dev is green).
 # - No batch forms while dev is red on a job it would run (red_holds).
 # - A dropped batch never labels or comments on its PRs.
-# - One revert call per dev-red issue (REVERT_MARK), never of a revert.
+# - One revert call per culprit on a dev-red issue (REVERT_MARK <sha7|none>),
+#   at most one revert per sweep, never two for one PR, never of a revert.
 # - Merge drivers and helper scripts come from this checkout (main), never
 #   from a PR.
 # Rules for agents: CLAUDE.md, "Fast lane". How the gate, batches, bisects
@@ -209,7 +210,7 @@ BASE_RED_RUN=""  # the dev-red issue's "- Run:" URL
 # Auto-revert (revert_sweep, LANE_VERIFY_AFTER=1).
 REVERT_PREFIX="lane/revert-"    # the revert's branch: lane/revert-<culprit PR>
 REVERT_LABEL="lane-revert"      # on the lane's revert PR (never fast-lane: revert_land lands it)
-REVERT_MARK="<!-- lane-revert"  # the lane's one revert call on a dev-red issue: "<!-- lane-revert <sha7|none> -->"
+REVERT_MARK="<!-- lane-revert"  # the lane's one revert call per culprit on a dev-red issue: "<!-- lane-revert <sha7|none> -->"
 FINDING_LABEL="finding"
 # Where integrate fetches and pushes; tests point it at a local bare repo.
 REMOTE="${FAST_LANE_REMOTE:-https://github.com/${GH_REPO:-qbtrix/creative-apps}.git}"
@@ -1549,38 +1550,46 @@ bisect_drop() {
 }
 
 # revert_sweep: with LANE_VERIFY_AFTER=1, lands the lane's open revert PR
-# (revert_land), or while a dev-red issue is open (red_sweep) makes the lane's
-# one revert call on it: a revert of the culprit revert_culprit names
-# (revert_open), or a note on why there is none. REVERT_MARK on the issue
-# records that call, so no sweep opens more than one revert and a dev still red
-# after one waits for a human. Never reverts a revert.
+# (revert_land), or while a dev-red issue is open (red_sweep) makes one revert
+# call per verdict revert_culprit gives: a revert of that culprit
+# (revert_open), or a note on why there is none. REVERT_MARK <sha7|none> on
+# the issue records each call, so a culprit (or "none") is called once, and a
+# later bisect naming a different culprit in the same issue gets its own call.
+# At most one revert per sweep, never two for one PR (an open lane revert of
+# it, or a revert of it on dev), never a revert of a revert.
 revert_sweep() {
   (( LANE_VERIFY_AFTER )) || return 0
-  local open comments got c subj n
+  local all open comments got c c7 subj n
   [[ -n "$BASE_RED" ]] || return 0
-  # The lane's revert PR for this dev-red issue: a bot's (the lane's token) on
-  # a REVERT_PREFIX branch with REVERT_LABEL, whose body refs the issue. One
+  # The lane's revert PRs: a bot's (the lane's token) on a REVERT_PREFIX branch
+  # with REVERT_LABEL. The one whose body refs this dev-red issue lands; one
   # left from an older red is never landed under a new one; a human closes it.
-  open=$(open_list 2>/dev/null | jq -r --arg l "$REVERT_LABEL" --arg p "$REVERT_PREFIX" --arg r "Refs #$BASE_RED." 'first(.[]
-    | select(.author.is_bot == true and ((.headRefName // "") | startswith($p)) and any(.labels[]?; .name == $l)
-        and ((.body // "") | contains($r))))
-    | "\(.number)|\(.headRefOid)|\(.headRefName)"' 2>/dev/null || true)
+  if ! all=$(open_list 2>/dev/null | jq -ce --arg l "$REVERT_LABEL" --arg p "$REVERT_PREFIX" '[.[]
+      | select(.author.is_bot == true and ((.headRefName // "") | startswith($p)) and any(.labels[]?; .name == $l))]' 2>/dev/null); then
+    log "auto-revert: could not list open PRs; the next sweep looks again"; return 0
+  fi
+  open=$(jq -r --arg r "Refs #$BASE_RED." 'first(.[] | select((.body // "") | contains($r)))
+    | "\(.number)|\(.headRefOid)|\(.headRefName)"' <<<"$all" 2>/dev/null || true)
   if [[ -n "$open" ]]; then revert_land "$open"; return 0; fi
   if ! comments=$(gh api "repos/$REPO/issues/$BASE_RED/comments" --paginate --jq '.[].body' 2>/dev/null); then
     log "auto-revert: could not read dev-red #$BASE_RED's comments; the next sweep looks again"; return 0
   fi
-  if grep -qF -- "$REVERT_MARK " <<<"$comments"; then
-    log "auto-revert: dev-red #$BASE_RED already had its revert call; waiting for CI on $BASE_BRANCH or a human"; return 0
-  fi
   [[ -n "$BASE_RED_SHA" ]] || { log "auto-revert: dev-red #$BASE_RED names no culprit range"; return 0; }
   if ! scratch main "$BASE_BRANCH"; then log "auto-revert: could not fetch main and $BASE_BRANCH"; return 0; fi
   got=$(revert_culprit "$comments") || return 0
-  c="${got%%|*}"
+  c="${got%%|*}"; c7=none; [[ "$c" == - ]] || c7="${c:0:7}"
+  if grep -qF -- "$REVERT_MARK $c7 -->" <<<"$comments"; then
+    log "auto-revert: dev-red #$BASE_RED already had its revert call on $c7; waiting for CI on $BASE_BRANCH or a human"; return 0
+  fi
   if [[ "$c" == - ]]; then revert_note none "${got#*|}"; return 0; fi
   subj=$(git -C "$SCRATCH" log -1 --format=%s "$c")
   n=$(grep -oE '\(#[0-9]+\)$' <<<"$subj" | tr -dc 0-9 || true)
-  if [[ "$subj" == 'Revert "'* ]]; then revert_note "${c:0:7}" "the culprit ${c:0:7} ($subj) is a revert itself, and the lane never reverts a revert, so a human looks"; return 0; fi
-  [[ -n "$n" ]] || { revert_note "${c:0:7}" "the culprit ${c:0:7} ($subj) is no PR's squash commit, so a human looks"; return 0; }
+  if [[ "$subj" == 'Revert "'* ]]; then revert_note "$c7" "the culprit $c7 ($subj) is a revert itself, and the lane never reverts a revert, so a human looks"; return 0; fi
+  [[ -n "$n" ]] || { revert_note "$c7" "the culprit $c7 ($subj) is no PR's squash commit, so a human looks"; return 0; }
+  if jq -e --arg b "$REVERT_PREFIX$n" 'any(.[]; .headRefName == $b)' <<<"$all" >/dev/null 2>&1 \
+      || [[ "$(git -C "$SCRATCH" log --format=%B "origin/main..origin/$BASE_BRANCH" 2>/dev/null)" == *"This reverts commit $c"* ]]; then
+    revert_note "$c7" "#$n ($c7) is the culprit (${got#*|}), but a revert of it is already open or on $BASE_BRANCH, so a human looks"; return 0
+  fi
   revert_open "$c" "$n" "$subj" "${got#*|}"
 }
 
@@ -1606,8 +1615,8 @@ revert_culprit() {
   echo "-|$np PRs in main..${BASE_RED_SHA:0:7} and no bisect verdict names one of them (red: ${BASE_RED_JOBS#*: }), so a human picks the culprit"
 }
 
-# revert_note <sha7|none> <text>: the lane's one revert call on the dev-red
-# issue, logged and posted with REVERT_MARK.
+# revert_note <sha7|none> <text>: the lane's one revert call on that culprit
+# (or on none), logged and posted on the dev-red issue with REVERT_MARK.
 revert_note() {
   log "auto-revert: $2"
   write gh issue comment "$BASE_RED" -R "$REPO" --body "Auto-revert: $2. $REVERT_MARK $1 -->" || log "could not comment on #$BASE_RED"
