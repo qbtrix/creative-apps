@@ -119,3 +119,43 @@ ts	kind	note
 2026-10-25T03:03:00Z	3	heartbeat	ST-z	#5133 at 502e566f9 waits for the next batch (batch 20261025023716 in its macOS gate); no lane comment on the new head; open findings 0
 2026-10-25T03:30:00Z	3	heartbeat	ST-z	#5133 clean, needs-rebase dropped, ready; batch 20261025023716 is bisecting (probe -6), #5133 joins the next batch; open findings 0
 2026-10-25T04:01:00Z	3	heartbeat	ST-z	stall nudge answered; #5133 ready at 502e566f9, waiting for the next batch (batch 20261025023716 still bisecting: probes -1, -3, -6); dev 2e7d5264; open findings 0
+2026-10-25T04:24Z	heartbeat	#5133 still clean at 502e566f9, waiting; batch 20261025023716 bisecting (probes -1,-3,-6); dev 2e7d5264; lane alive; 0 findings
+2026-10-25T04:46Z	heartbeat	#5133 clean at 502e566f9 (merge-tree vs dev ee8ccd61 clean); batch 20261025023716 still bisecting; 0 findings
+2026-10-25T05:08Z	heartbeat	#5133 clean at 502e566f9, no needs-fix/needs-rebase; batch 20261025023716 bisecting (new probe -2); dev ee8ccd61; 0 findings
+2026-10-25T05:30Z	heartbeat	batch 20261025023716 resolved (branches gone; dev 13fb2f59); #5133 clean at 502e566f9, no lane comment, waiting for next batch; 0 findings
+2026-10-25T05:52Z	heartbeat	new batch 20261025054232 (12 PRs, #4886..#5075) formed without #5133; #5133 clean at 502e566f9 vs dev 13fb2f59, waits for the next batch; 0 findings
+2026-10-25T06:14Z	heartbeat	batch 20261025054232 (without #5133) red, bisecting (probe -6); #5133 clean at 502e566f9, no needs-fix/needs-rebase, waits for next batch; dev 13fb2f59; 0 findings
+2026-10-25T06:36Z	heartbeat	batch 20261025054232 still bisecting (probe -6); #5133 clean at 502e566f9 vs dev 13fb2f59, not merged; waits for next batch
+2026-10-25T06:57Z	heartbeat	batch 20261025054232 still on probe -6; #5133 clean at 502e566f9 vs dev 13fb2f59, not merged; waits for next batch
+2026-10-25T07:19Z	heartbeat	batch 20261025054232 still on probe -6; #5133 clean at 502e566f9 vs dev 13fb2f59, no lane labels, not merged; waits for next batch
+2026-10-25T07:43Z	heartbeat	batch 20261025054232 bisect: probe -6 macOS red, probe -3 macOS gate running since 07:07; #5133 clean at 502e566f9 vs dev 13fb2f59, no lane labels; waits for next batch
+2026-10-25T08:04Z	heartbeat	batch 20261025054232 bisect: probe -3 macOS gate still running (since 07:07); #5133 clean at 502e566f9 vs dev 13fb2f59, no lane labels; waits for next batch
+2026-10-25T08:26Z	heartbeat	batch 20261025054232 bisect now on probe -4 (67d888bc4); dev 7e5bcd82f; #5133 clean at 502e566f9, no lane labels or new comments; waits for next batch
+2026-10-25T08:48Z	heartbeat	batch 20261025054232 resolved (probe -4 macOS red, branches gone); no new batch yet; #5133 at 502e566f9 merges clean onto dev 7e5bcd82f, no lane labels; waits for next batch
+2026-10-25T09:10Z	heartbeat	new batch 20261025090316 (12 PRs: prior set minus #4960 plus #5105) formed without #5133; #5133 at 502e566f9 merges clean onto dev 8d3a12c4b, no lane labels; waits for next batch
+2026-10-25T09:33Z	heartbeat	batch 20261025090316 (without #5133) red on Linux+macOS, bisecting (probe -6 at #5007 running); #5133 at 502e566f9 clean onto dev 8d3a12c4b, local-ci/prescreen success, no lane labels; waits for next batch
+2026-10-25T09:56Z	heartbeat	batch 20261025090316 still bisecting (-6 probe, -red branch now); #5133 at 502e566f9 clean onto dev 8d3a12c4b, prescreen success, no lane labels or new comments; waits for next batch
+2026-10-25T10:17Z	heartbeat	batch 20261025090316 still bisecting (-6, -red); dev unchanged at 8d3a12c4b; #5133 at 502e566f9 clean, prescreen success, no lane labels or new comments; waits for next batch
+2026-10-25T10:38Z	heartbeat	batch 20261025090316 still bisecting (new probe -9); dev unchanged at 8d3a12c4b; #5133 at 502e566f9 clean, no new lane comments; waits for next batch
+2026-10-25T11:01Z	heartbeat	batch 20261025090316 still bisecting (-6, -9, -red); dev unchanged at 8d3a12c4b; #5133 at 502e566f9 clean, labels fast-lane/feature-done/beta only, no new comments; waits for next batch
+2026-10-25T11:23Z	heartbeat	new batch 20261025111803 formed with only #4886, again without #5133 (third skip); dev now 68bec9fe7; #5133 at 502e566f9 merges clean, prescreen success, no new lane comments; asking supervisor on #3719
+2026-10-25T11:45Z	heartbeat	batch 20261025111803 landed #4886 (dev now 5270bc4bc); no batch in flight; #5133 at 502e566f9 still clean, no new lane comments; no supervisor reply yet on #3719
+2026-10-25T12:08Z	heartbeat	new batch 20261025114830 holds only #4943 (fourth batch without #5133; lane now forms one-PR batches); dev 5270bc4bc; #5133 at 502e566f9 clean, fast-lane check + prescreen success, no new lane comments; no supervisor reply yet
+2026-10-25T12:30Z	heartbeat	#4943 landed (dev 58bb6d4d5); lane now runs one-PR batches in PR order (#4886, #4943, now #4953 in batch 20261025122638); #5133 at 502e566f9 clean, no new lane comments; no supervisor reply yet
+2026-10-25T12:52Z	heartbeat	#4953 landed (dev 930337d52); no batch in flight; #5133 at 502e566f9 clean, no new lane comments; no supervisor reply yet
+2026-10-25T13:15Z	heartbeat	batch 20261025125743 holds #4962 (one-PR batches in PR order); dev 930337d52; #5133 at 502e566f9 clean, no new lane comments; no supervisor reply yet
+2026-10-25T13:46Z	fix	#4962 landed (dev bbaedba66) and conflicted #5133 in LibraryWindow.swift (lane: needs-rebase); merged dev, kept both (JPEGWriter(metadata:) + withThumbnailDisk), scripts/ci --changed PASS, pushed 90eb5fab2, Head: moved; no supervisor reply yet
+2026-10-25T14:07Z	heartbeat	#5006 landed (dev d3323f6a7); batch 20261025140134 holds #5007; #5133 at 90eb5fab2 merges clean, fast-lane check in progress, no new lane comments; no supervisor reply yet
+2026-10-25T14:28Z	heartbeat	#5007 landed (dev 152374076); no batch in flight; #5133 at 90eb5fab2 merges clean, needs-rebase dropped by lane, labels fast-lane/feature-done/beta; no new lane comments; no supervisor reply yet
+2026-10-25T14:50Z	heartbeat	#4960 landed (dev 0e8ebba37); batch 20261025143843 holds #5008 (PR order); #5133 at 90eb5fab2 merges clean, no new lane comments; no supervisor reply yet
+2026-10-25T15:12Z	heartbeat	#5008 and #5318 landed (dev 15b2546ec); batch 20261025150758 holds #5039 (PR order); #5133 at 90eb5fab2 merges clean, no new lane comments; no supervisor reply yet
+2026-10-25T15:35Z	heartbeat	dev still 15b2546ec; batch 20261025150758 holds #5039 (PR order); #5133 at 90eb5fab2 merges clean, labels fast-lane/feature-done/beta, no new lane comments; no supervisor reply yet
+2026-10-25T15:56Z	heartbeat	#5039 and #5320 landed (dev a57210d15); batch 20261025154953 holds #5044 (PR order); #5133 at 90eb5fab2 merges clean, no new lane comments; no supervisor reply yet
+2026-10-25T16:18Z	heartbeat	dev still a57210d15; batch 20261025154953 holds #5044 (PR order); #5133 at 90eb5fab2 merges clean, labels unchanged, no new lane comments; no supervisor reply yet
+2026-10-25T16:39Z	heartbeat	#5044 landed (dev c2681786c); batch 20261025162747 holds #5074 (PR order); #5133 at 90eb5fab2 merges clean, labels unchanged, no new lane comments; no supervisor reply yet
+2026-10-25T17:02Z	heartbeat	#5074 landed (dev 5b1d3a19b); no lane batch in flight; #5133 at 90eb5fab2 merges clean, labels unchanged, no new lane comments; no supervisor reply yet
+2026-10-25T17:23Z	heartbeat	dev still 5b1d3a19b; batch 20261025171159 holds #5075 (PR order); #5133 at 90eb5fab2 merges clean, labels unchanged, no new lane comments; no supervisor reply yet
+2026-10-25T17:45Z	heartbeat	dev still 5b1d3a19b; batch 20261025171159 still holds #5075; #5133 at 90eb5fab2 merges clean, labels unchanged, no new lane comments; no supervisor reply yet
+2026-10-25T18:08Z	heartbeat	dev 2a1c9c71f (#5075 landed); batch 20261025175740 holds #5105 (PR order); #5133 at 90eb5fab2 merges clean, labels unchanged, no new lane comments; no supervisor reply yet
+2026-10-25T18:29Z	heartbeat	dev 0f880e4e6 (#5105 landed); batch 20261025182309 holds #5112 (PR order); #5133 at 90eb5fab2 merges clean, no new lane comments; no supervisor reply yet
+2026-10-26T02:20Z	3	relaunch	lane	act-1a175f402e7-kwji; no merges since last record; dev 8987427d8; dev-red #5321 (macOS) holds code batches; open findings 0
