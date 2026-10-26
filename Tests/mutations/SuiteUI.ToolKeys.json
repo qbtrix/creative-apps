@@ -33,5 +33,19 @@
     "find": "if flags.contains(.command) { insert(.command) }",
     "replace": "_ = flags",
     "tests": "DesignSnapSettingTests"
+  },
+  {
+    "label": "fieldTakesBrushKeys: a digit typed in a text field also sets the brush's opacity",
+    "file": "Sources/SuiteUI/ToolKeys.swift",
+    "find": "if responder is NSText { return true }",
+    "replace": "if responder is NSText { return false }",
+    "tests": "BrushKeyRouteTests"
+  },
+  {
+    "label": "commandTaken: Command-[ (Send Backward) also steps the brush size down",
+    "file": "Sources/SuiteUI/ToolKeys.swift",
+    "find": "modifiers.isDisjoint(with: [.command, .option]),",
+    "replace": "modifiers.isDisjoint(with: []),",
+    "tests": "BrushKeyRouteTests"
   }
 ]

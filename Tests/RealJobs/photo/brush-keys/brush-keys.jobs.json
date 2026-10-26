@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-X76, pending BK-8 (suiteui/brush-keys): Photo's catalog has the brush keys' commands but no stroke by command yet, so platforms is [] and the harness skips the job on both. Picks the Brush, steps its size up twice from 20 px, sets its opacity to 50%, paints a black horizontal stroke from (20, 50) to (180, 50) across a white 200 x 100 image and exports the PNG. The trap: a step lands on another tool's settings, or the opacity digit goes to the layer instead of the brush. The assertion: the stroke's vertical extent is 30 px within 1, and its centre pixel is 50% grey within 3 levels. The turn-on sets platforms to linux and macos once BK-8's stroke command lands.",
+  "pending": "BK-8",
+  "waits_on": "BK-8",
+  "inputs": ["input/*.png"],
+  "steps": [
+    {"id": "tool.brush", "params": {}},
+    {"id": "brush.size-up", "params": {}},
+    {"id": "brush.size-up", "params": {}},
+    {"id": "brush.set-opacity", "params": {"percent": 50}},
+    {"id": "paint.stroke", "params": {"points": [{"x": 20, "y": 50}, {"x": 180, "y": 50}]}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-stroke", "format": "png", "options": {}},
+  "expect": {
+    "out/white-200x100-stroke.png": {"pixels": {"tolerance": 3, "reference": "expected/white-200x100-stroke.png"}}
+  },
+  "platforms": []
+}

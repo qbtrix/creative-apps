@@ -124,3 +124,8 @@ path.anchor-remove
 path.anchor-convert
 paths.list
 paths.edit
+brush.hardness-down
+brush.hardness-up
+brush.set-opacity
+brush.size-down
+brush.size-up

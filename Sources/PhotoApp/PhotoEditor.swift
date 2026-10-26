@@ -19,6 +19,7 @@
 // file goes to that app; the mark at the bottom says which before the drop.
 // With the Pen, PhotoPenOverlay puts SuiteUI's PathEditOverlay over the canvas.
 import PhotoModel
+import SuiteKernel
 import SuiteShell
 import SuiteUI
 import SwiftUI
@@ -114,7 +115,8 @@ struct PhotoEditor: View {
 
 /// The canvas: the rendered picture (CanvasTiles on SuiteUI's EmbeddedCanvasHost) on the checkerboard with PhotoCanvasOverlay's
 /// marks over it (fed the pointer's document point), or the empty state. Drags go to the active tool;
-/// with the canvas focused, V M B E S J C I G T P pick enabled tools, Delete clears the selection
+/// with the canvas focused, `[`, `]`, Shift and digits are brush keys (PhotoBrushKeys, with BrushKeyReadout),
+/// V M B E S J C I G T P pick enabled tools, Delete clears the selection
 /// (Shift-Delete fills it), Return sends `confirm` (apply a crop) and Escape `dismiss` (cancel it
 /// or deselect). Drops land on the whole editor (PhotoEditor's `suiteFileDrop`), not here. While the
 /// Straighten sheet is open the picture turns by its angle under StraightenMarks.
@@ -128,6 +130,10 @@ struct PhotoCanvas: View {
     var straighten: StraightenDraft?
     /// The document point under the pointer, for the brush cursor; nil once it leaves.
     @State private var hover: CGPoint?
+    /// The last brush key and its count, for the readout, and the opacity digits typed so far (PhotoBrushKeys).
+    @State private var brushKey: BrushKeyAction?
+    @State private var brushKeySerial = 0
+    @State private var brushKeys = PhotoBrushKeyBuffer()
     /// The app's View > Rendering; nil (the tile layers) in tests.
     @Environment(\.photoRendering) private var rendering
     /// The window's live drag line (LiveDragLine.swift); only the overlay reads its line.
@@ -162,6 +168,9 @@ struct PhotoCanvas: View {
                         PhotoPenOverlay(model: model, zoom: zoom, perform: perform)
                             .frame(width: size.width * zoom, height: size.height * zoom, alignment: .topLeading)
                     }
+                    BrushKeyReadout(action: brushKey, serial: brushKeySerial)
+                        .padding(SuiteSpacing.s)
+                        .frame(width: size.width * zoom, height: size.height * zoom, alignment: .top)
                 }
             } else {
                 EmptyStateView(
@@ -182,6 +191,11 @@ struct PhotoCanvas: View {
         case .escape:
             perform(.dismiss)
         default:
+            if let action = PhotoBrushKeys.route(press, model: model, buffer: brushKeys, perform: perform) {
+                brushKey = action
+                brushKeySerial += 1
+                return .handled
+            }
             // A disabled tool's key does nothing, as its palette button does.
             guard let tool = PhotoTool.picked(byTyped: press.characters, help: model.toolHelp) else { return .ignored }
             perform(.tool(tool))

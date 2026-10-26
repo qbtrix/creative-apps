@@ -26,9 +26,8 @@ extension PhotoWorkspace {
         public var type: String; public var stops: [Stop]; public var from, to: XY
     }
     public struct AdjustmentParams: Codable, Sendable { public var kind: String }
-    /// layer.pick's layer and click ("replace", "extend" or "toggle"); layer.set-opacity's percent.
+    /// layer.pick's layer and click ("replace", "extend" or "toggle").
     public struct PickParams: Codable, Sendable { public var id, mode: String }
-    public struct OpacityParams: Codable, Sendable { public var percent: Double }
     /// layer.move-by's offset, in canvas pixels.
     public struct MoveParams: Codable, Sendable { public var dx, dy: Int }
     /// layer.mask-add's start ("reveal", "hide" or "selection"); layer.mask-enable's state; layer.mask-edit's target.
@@ -115,6 +114,8 @@ extension PhotoWorkspace {
                 gate { $0.toolHelp(tool) }) { $0.selectTool(tool) }
         }
         + HistoryCommands.specs(PhotoWorkspace.self) + SampleCommands.specs(PhotoWorkspace.self) + textCommands + pathCommands
+        // The brush keys' steps and opacity, and layer.set-opacity (brush-keys BK-8, PhotoBrushKeys+Kernel.swift).
+        + BrushKeyCommands.specs(PhotoWorkspace.self)
 
     static let fileCommands: [CommandSpec<PhotoWorkspace>] = [
         .typed("file.new", title: "New Image", summary: "Opens a new white image of the given size.", kind: .file,
@@ -250,12 +251,6 @@ extension PhotoWorkspace {
             w.pickLayer(p.id, pick); return JSONValue.object([:])
         },
         act("layer.select-all", "Select All Layers", "Picks every layer.", .view, menu()) { $0.selectAllLayers() },
-        .typed("layer.set-opacity", title: "Layer Opacity", summary: "Sets the selected layers' opacity, 0 to 100 percent.", kind: .edit,
-               params: OpacityParams.self, schema: .object(["percent": .number("Opacity in percent.", minimum: 0, maximum: 100)], required: ["percent"]),
-               example: .object(["percent": .number(50)]), availability: menu { $0.canEditSelectedLayer ? nil : noLayer }) { w, p in
-            let id = try w.selectedID("layer.set-opacity")
-            w.endAdjust(); w.setOpacity(id, percent: p.percent); w.endAdjust(); return JSONValue.object([:])
-        },
         .typed("layer.move-by", title: "Move Layer", summary: "Moves the selected layers by dx, dy pixels.", kind: .edit,
                params: MoveParams.self, schema: .object(["dx": .integer("Pixels right.", minimum: -10_000_000, maximum: 10_000_000),
                                                          "dy": .integer("Pixels down.", minimum: -10_000_000, maximum: 10_000_000)], required: ["dx", "dy"]),
