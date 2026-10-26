@@ -21,11 +21,11 @@
     "tests": "LibraryLoupeGPURouteTests"
   },
   {
-    "label": "whites and blacks become linear levels on the GPU route",
+    "label": "whites and blacks become linear levels on both routes",
     "file": "Sources/SuiteImaging/Tone/ToneRules.swift",
     "find": "outWhite: Float(outWhite),\n                               encoding: .sRGB))",
     "replace": "outWhite: Float(outWhite),\n                               encoding: .linear))",
-    "tests": "LibraryLoupeGPURouteTests"
+    "tests": "LibraryDevelopRenderTests"
   },
   {
     "label": "a CPU render leaves the GPU frame's steps on the picture",
