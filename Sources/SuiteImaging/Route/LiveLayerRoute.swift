@@ -129,13 +129,21 @@ public struct LiveLayerStack<Layer: LiveLayer>: Sendable {
     }
 }
 
-/// Each region's composite of the live route's base layers, kept on the GPU between renders while those layers
-/// are unchanged, so a slider step re-encodes it instead of compositing again. A region is kept under its layers'
-/// keys; keeping one under a new key releases every region kept under another. Thread-safe: bands render in
-/// parallel.
+/// Each region's composite of the layers under the ones being edited, kept between renders while those layers
+/// are unchanged, so a step composites what changed and what lies above it, never the whole stack. The live
+/// route keeps its base (the pixel layers under the lowest adjustment layer) as GPU surfaces the cache owns
+/// (`surface`); an app's dispatcher route keeps the layers its stack still shares, from the bottom, with the
+/// last render, as a surface on a GPU backend or as the pixels themselves on the CPU, whose backend lives one
+/// render, and gets a copy to draw on (`composite`). A region is kept under its layers' keys; the live route's
+/// regions all share one key, and keeping one under a new key releases every region kept under another.
+/// Thread-safe: bands and tiles render in parallel, and a kept surface is copied or released only under the lock.
+/// ponytail: the kept regions are one picture's worth of memory (about 265 MB at 8K); cap them if a profile shows it.
 public final class LiveCompositeCache<Region: LiveRegion>: Sendable {
     private struct Entry: Sendable {
+        /// The layers composited into `surface`, bottom first.
         let key: any Sendable
+        /// The whole stack at the render that made it (`composite` picks the next base from it).
+        var stack: (any Sendable)?
         let surface: RenderSurface
         let backend: any RenderBackend
 
@@ -144,15 +152,68 @@ public final class LiveCompositeCache<Region: LiveRegion>: Sendable {
         }
     }
 
+    /// The CPU route's regions: its backend lives one render, so the pixels are kept, not a surface.
+    private struct Pixels: Sendable {
+        let key: any Sendable, stack: any Sendable
+        let pixels: PixelBuffer
+    }
+
     private let entries = Mutex<[Region: Entry]>([:])
+    private let buffers = Mutex<[Region: Pixels]>([:])
     private let makes = Mutex(0)
 
     public init() {}
 
     /// Regions kept.
-    public var count: Int { entries.withLock { $0.count } }
+    public var count: Int { entries.withLock { $0.count } + buffers.withLock { $0.count } }
     /// Composites made so far (a region not kept, or kept under other layers).
     public var made: Int { makes.withLock { $0 } }
+
+    /// `rect`'s composite of the first `laid` layers of `stack`, a surface the caller lays the rest on and
+    /// releases: the kept base copied while `stack` still starts with its layers (`made` false), else a new one
+    /// made by `make(laid)` and kept, where `laid` is how many layers `stack` shares, from the bottom, with the
+    /// last render's (all of them for the first). So the layer a gesture changes step after step, and the ones
+    /// above it, are all that composite again, and a step that changes none of them composites nothing. A region
+    /// is kept as a surface only when its composite lives on the GPU (`preferred`, healthy); while the GPU's
+    /// kernels still compile, or on the CPU route, the composite lands on the CPU backend, which lives one
+    /// render, so the pixels are kept instead, and a lookup reads both.
+    public func composite<Key: Equatable & Sendable>(
+        _ rect: Region, stack: [Key], on dispatcher: RenderDispatcher, make: (Int) throws -> RenderSurface
+    ) throws -> (surface: RenderSurface, laid: Int, made: Bool) {
+        let gpu = dispatcher.preferred.flatMap { $0.isHealthy ? $0 : nil }
+        let copy = { (kept: RenderSurface) in try dispatcher.cropped(kept, x: 0, y: 0, width: rect.width, height: rect.height) }
+        if let gpu {
+            let hit: (RenderSurface, Int)? = try entries.withLock { entries in
+                guard let held = entries[rect], held.backend.name == gpu.name, let key = held.key as? [Key],
+                    stack.starts(with: key) else { return nil }
+                return (try copy(held.surface), key.count)
+            }
+            if let hit { return (hit.0, hit.1, false) }
+        }
+        if let held = buffers.withLock({ $0[rect] }), let key = held.key as? [Key], stack.starts(with: key) {
+            return (try dispatcher.surface(held.pixels), key.count, false)
+        }
+        let last = (entries.withLock { $0[rect]?.stack } ?? buffers.withLock { $0[rect]?.stack }) as? [Key]
+        let laid = Self.shared(stack, with: last)
+        let made = try make(laid)
+        makes.withLock { $0 += 1 }
+        if let gpu, made.backend == gpu.name {
+            return try entries.withLock { entries in
+                if let old = entries[rect] { old.backend.release(old.surface) }
+                entries[rect] = Entry(key: Array(stack[..<laid]), stack: stack, surface: made, backend: gpu)
+                return (try copy(made), laid, true)
+            }
+        }
+        let pixels = try dispatcher.read(made)  // render-contract: allow the CPU backend's own buffer, no GPU readback
+        buffers.withLock { $0[rect] = Pixels(key: Array(stack[..<laid]), stack: stack, pixels: pixels) }
+        return (made, laid, true)
+    }
+
+    /// How many layers `stack` shares, from the bottom, with `last`; all of them with no last render.
+    static func shared<Key: Equatable>(_ stack: [Key], with last: [Key]?) -> Int {
+        guard let last else { return stack.count }
+        return zip(stack, last).prefix { $0 == $1 }.count
+    }
 
     /// The kept composite of `rect` under `key` on `backend`, else `make()`'s, kept. The cache owns it: the
     /// caller never releases it.
@@ -165,7 +226,7 @@ public final class LiveCompositeCache<Region: LiveRegion>: Sendable {
         let stale: [Entry] = entries.withLock { entries in
             let old = entries.filter { $0.key == rect || !$0.value.holds(key, on: backend) }
             for gone in old.keys { entries[gone] = nil }
-            entries[rect] = Entry(key: key, surface: made, backend: backend)
+            entries[rect] = Entry(key: key, stack: nil, surface: made, backend: backend)
             return Array(old.values)
         }
         for entry in stale { entry.backend.release(entry.surface) }
@@ -174,6 +235,7 @@ public final class LiveCompositeCache<Region: LiveRegion>: Sendable {
 
     /// Releases every kept region.
     public func removeAll() {
+        buffers.withLock { $0 = [:] }
         let all = entries.withLock { entries -> [Entry] in
             defer { entries = [:] }
             return Array(entries.values)
