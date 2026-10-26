@@ -214,3 +214,4 @@ utc	stage	event	ref	note
 2026-10-26T03:52:42Z	poll	no merges; 4 open
 2026-10-26T04:14:31Z	poll	no merges of ours; lane active; 4 open
 2026-10-26T04:35:48Z	poll	no merges; 4 open
+2026-10-26T04:58:12Z	poll	no lane sweep since 01:20Z; supervisor asked on #3774

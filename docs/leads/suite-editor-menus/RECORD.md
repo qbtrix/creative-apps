@@ -190,3 +190,7 @@ No change on ours: #4988, #5164, #4999 and #5364 are open with no fix labels. #4
 ## 2026-10-26T04:35:48Z poll
 
 No change: #4988, #5164, #4999 and #5364 are open and clean, with no fix labels. #5000 still waits on #4999.
+
+## 2026-10-26T04:58:12Z poll
+
+#4988, #5164, #5364, #4999 and #5000 are unchanged: open, clean, fast-lane and beta, no fix labels. No scheduled fast-lane sweep has run since 01:20Z (40253768128, cancelled). Asked the supervisor on #3774.
