@@ -75,3 +75,4 @@ Next: wait for the lane to merge BK-u #4939; then merge dev into #4965, #4961, #
 - 2026-10-26T17:46Z (act-1a177ff0916-4jm7): poll: dev fef52e66; no merges of ours (only #5808 quarantine); #4939 and #5799 await the lane
 - 2026-10-26T18:03Z (act-1a177ff0916-4jm7): poll: dev fef52e66; dev unchanged; no return label on #4939 or #5799; #4965/#4961/#4982 keep needs-split until #4939 lands
 - 2026-10-26T18:20Z (act-1a177ff0916-4jm7): poll: dev e69582e7; no merges of ours (only #5263 photo); #4939 and #5799 await the lane
+- 2026-10-26T18:37Z (act-1a177ff0916-4jm7): poll: dev e69582e7; dev unchanged; #4939 and #5799 await the lane
