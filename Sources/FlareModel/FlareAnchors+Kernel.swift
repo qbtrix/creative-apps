@@ -49,7 +49,8 @@ extension FlareWorkspace: PathEditTarget {
             if folds { try engine.undo() }
             try engine.group(name) { try shapes.setPath(path, of: address, in: &$0) }
         }
-        if let layerError { throw layerError }
+        // A refusal the catalog passes through in the same words, as Photo's.
+        if let layerError { throw CatalogError.unavailable(id: "path", why: layerError.message) }
         pathDrag = key.flatMap { key in engine.map { (key, $0.document) } }
     }
 
