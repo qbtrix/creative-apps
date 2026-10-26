@@ -425,3 +425,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 11:50Z check-in: #3482 quiet, no open file-flow findings. Gaps #4764 and #1829 still open.
 
 - 12:44Z check-in: #3482 quiet, no open file-flow findings. Gaps #4764 and #1829 still open.
+- Note: lead/file-flow now holds the Halo file-flow lead record (reset at 12:37Z), so the flare mirror there ends. This branch, lead/flare-file-flow, is the flare file-flow record.
