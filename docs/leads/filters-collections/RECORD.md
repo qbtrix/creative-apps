@@ -48,3 +48,4 @@ Next: FC-2 part 2: stub the catalog methods and FilterBar/collection APIs, and a
 - 2026-10-26T04:08:24Z Check-in: dev-red #5321 still open; our 7 open PRs clean (no needs-fix/needs-rebase).
 - 2026-10-26T04:27:32Z Check-in: dev-red #5321 still open (latest run red on linux, range to d0859e01, not ours); 7 open PRs clean, no needs-fix/needs-rebase.
 - 2026-10-26T04:46:45Z Check-in: dev-red #5321 still open (not ours); 7 open PRs clean, no needs-fix/needs-rebase.
+- 2026-10-26T05:07:56Z Check-in: dev-red #5321 still open (not ours); 7 open PRs clean, no needs-fix/needs-rebase.
