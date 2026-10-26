@@ -119,3 +119,4 @@ Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #48
 - 04:07Z: #5363 still open. Code PRs land on Linux proof plus the supervisor's local-ci/prescreen status (#5346 landed that way); be2ad8ae has none yet. Nothing for the lead to push; next check 04:27Z.
 - 04:28Z: #5363 still waits on the pre-screen (no status, no comments); dev at 75292afd. Next check 04:48Z.
 - 04:49Z: #5363 still waits on the pre-screen; the lane landed #5154 (dev 999895c8). Next check 05:09Z.
+- 05:11Z: #5363 got local-ci/prescreen success at 05:05Z (compile + every Model suite). Awaiting the lane sweep; next check 05:21Z.
