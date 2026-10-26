@@ -187,3 +187,4 @@ utc	stage	event	ref	note
 2026-10-26T19:12Z	3	heartbeat	lane	poll 2026-10-26T19:12Z: 12 PRs open clean in lane queue; lane batch 20261026190158 in flight with #5334; no dev-red open; no release
 2026-10-26T19:26Z	3	heartbeat	lane	poll 2026-10-26T19:26Z: 12 PRs open clean in lane queue; dev merged #5334 19:18Z; no batch in flight; no dev-red; no release
 2026-10-26T19:40Z	3	heartbeat	lane	poll 2026-10-26T19:40Z: 12 PRs open clean in lane queue; 5 single-PR lane batches in flight (none ours); no dev-red; no release
+2026-10-26T19:56Z	3	heartbeat	lane	poll 2026-10-26T19:56Z: 12 PRs ready in lane (Fast-Check + prescreen ok); lane reports 134 ready PRs waiting behind in-flight single-PR batches; no dev-red; no release
