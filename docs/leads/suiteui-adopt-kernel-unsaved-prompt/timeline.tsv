@@ -168,3 +168,4 @@ ts	kind	note
 2026-10-26T18:27:33Z	waiting	poll	#5088-#5231	18:27 poll: no needs-fix, dev-red #5321 open; none merged
 2026-10-26T18:48:54Z	waiting	poll	#5088-#5231	18:48 poll: no needs-fix, dev-red #5321 open; none merged
 2026-10-26T19:11:40Z	waiting	poll	#5088-#5231	19:11 poll: dev-red #5321 closed, no needs-fix; none merged yet, batches unblocked
+2026-10-26T19:33:50Z	waiting	poll	#5088	UP-photo/flare/halo/z (#5088 #5089 #5091 #5231) open, none merged or needs-fix; no dev-red
