@@ -224,3 +224,4 @@ utc	stage	event	ref	note
 2026-10-26T10:09:36Z	3	poll	-	10:09Z poll: no merges; dev unchanged 2ed77a2e; ours clean and queued; dev-red #5321 open; 0 findings. #5267 needs-rebase (other lead).
 2026-10-26T10:30:58Z	3	poll	-	10:30Z poll: no merges of ours; dev 2eab5aeb (#5163, p0); ours clean and queued; dev-red #5321 open; 0 findings. #5267 still needs-rebase (other lead).
 2026-10-26T10:54:32Z	3	poll	-	10:54Z poll: no merges of ours; dev f3af1c00 (supervisor lane fixes #5725, quarantine #5778); ours clean and queued; dev-red #5321 open; 0 findings. #5267 rebased, clean.
+2026-10-26T11:38:04Z	3	poll	-	11:38Z poll: no merges of ours; dev c6700dba (#5727 lane quarantine expiry); #4939 and #4891 still open with fast-lane; BK app PRs keep needs-split; dev-red #5321 open (range not ours); 0 findings. #4891 DS-flare still queued; DS-z holds for DS-halo, DS-flare, #5267.
