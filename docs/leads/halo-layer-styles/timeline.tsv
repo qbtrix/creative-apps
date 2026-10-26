@@ -85,3 +85,4 @@ utc	stage	event	ref	note
 2026-10-25T20:45Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025204511 batch-20261025204511-red 
 2026-10-25T21:04Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025204511 batch-20261025204511-0 batch-20261025204511-red 
 2026-10-26T02:10Z	3	stage-start	#3936	relaunch act-1a175e3e638-skn9; Belt-Lead lines moved; amendment 2 on HY-u
+2026-10-26T01:51Z	heartbeat	lane	#5158	#5158/#5174 open, dev-red #5321 open; container lost swift, reinstalled 6.3.3; HY-u gate rerunning
