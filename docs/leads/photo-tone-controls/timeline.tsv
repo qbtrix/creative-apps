@@ -226,3 +226,4 @@ utc	stage	event	ref	note
 2026-10-26T19:53Z	check	#5363 still open (clean, p0); dev-red #5321 open; no supervisor reply
 2026-10-26T20:15Z	stage	#5363 (PT-4 re-land) merged 20:14Z; dev 9919d325 merged into -pt3 (5 files +122/-29) and -pt5 (6 files +89/-12) clean; -pt3 into -pt7 (20 files vs dev, opens after PT-m lands); gating pt3/pt5
 2026-10-26T20:16Z	stage	#5363 merged; record stage updated; scripts/ci --changed running on -pt3 and -pt5 after dev merge
+2026-10-26T20:26Z	pr	opened #5816 (PT-m, PT-3 sharpen follow-up) and #5817 (PT-u, PT-5) with fast-lane; PT-7 waits on #5816
