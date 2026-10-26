@@ -471,7 +471,7 @@ jobs:
             echo
             echo "| job | result | minutes |"
             echo "|---|---|---|"
-            gh api "$run/jobs?per_page=100" --jq '.jobs[] | select(.name | startswith("macOS ")) | "| \(.name) | \(.conclusion // .status) | \(if .completed_at and .started_at then (((.completed_at | fromdate) - (.started_at | fromdate)) / 60 | floor) else "-" end) |"'
+            gh api "$run/jobs?per_page=100" --jq '.jobs[] | select((.name | startswith("macOS ")) and .conclusion != "skipped") | "| \(.name) | \(.conclusion // .status) | \(if .completed_at and .started_at then (((.completed_at | fromdate) - (.started_at | fromdate)) / 60 | floor) else "-" end) |"'
           } | tee -a "$GITHUB_STEP_SUMMARY"
           [[ "$BUILD" == success && "$TESTS" == success && "$BUNDLES" =~ ^(success|skipped)$ ]] && exit 0
           for id in $(gh api "$run/artifacts" --jq '.artifacts[] | select(.name == "app-builds") | .id'); do
