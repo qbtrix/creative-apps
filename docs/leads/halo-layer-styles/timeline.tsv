@@ -93,3 +93,4 @@ utc	stage	event	ref	note
 2026-10-26T03:27Z	heartbeat	lane	#5158	no change; lane is in verify-after mode, landing code PRs one per batch, p0 first (#5309, #5334, #5040 were p0); #5158/#5174 (beta, clean, prescreen green) queue behind them
 2026-10-26T03:49Z	heartbeat	lane	#5158	no change; batch-20261026032432 (#5040, p0) still in flight; #5158/#5174 queued behind p0
 2026-10-26T04:11Z	heartbeat	lane	#5158	no change; lane batch-20261026040750 is #5154 alone; #5158/#5174 still queued
+2026-10-26T04:33Z	heartbeat	lane	#5158	no change: #5158/#5174 ready+clean, lane batch 20261026040750 (#5154) red, bisecting; dev-red #5321 open
