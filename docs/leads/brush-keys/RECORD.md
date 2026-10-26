@@ -11,6 +11,7 @@ Next: wait for the lane to merge BK-u #4939; then merge dev into #4965, #4961, #
 - PR base stays dev (CLAUDE.md, scripts/fast-lane.sh BASE_BRANCH=dev); the lane retargets main PRs to dev anyway.
 - PR bodies: the session's GitHub relay re-adds a generated-by footer on every edit; the lane strips it from the squash commit.
 - 02:20Z: dev-red #5321 (macOS, range main..cc5c6234, none ours) holds every code batch; no open finding names this feature.
+- 03:08Z: three polls with nothing of ours landed; lane sweep shows #4939/#4887/#4893 eligible (marker + prescreen) behind a batch in flight, 107 ready PRs ordered p0/beta/oldest, dev-red #5321 open. Queue depth, not a blocker: no supervisor question. BK app PRs restack once #4939 lands (not twice).
 
 ## Run act-1a16fe1fa73-5x3s decisions
 - 22:59Z: the 22:27Z poll was one-shot, so no heartbeat ran from 22:28Z to 22:59Z. Each poll now schedules the next one 15 min out.
