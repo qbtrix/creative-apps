@@ -25,6 +25,9 @@
 // command catalog: `MenuCommand(id, on: catalog)` takes the spec's title and
 // availability on the focused window's catalog, and runs the window's action
 // for that command; the collections and filter items follow in their slice.
+// Photo: Rotate Left ⌘[, Rotate Right ⌘], Flip Horizontal and Flip Vertical
+// (orientation-crop OC-9), the catalog's image.rotate-* and image.flip on the
+// selection; the grid's context menu shows the same four (`orientItems`).
 import LibraryModel
 import SuiteKernel
 import SuiteUI
@@ -106,6 +109,23 @@ struct LibraryCommands: Commands {
                 "metadata.set-label", on: catalog, title: label.rawValue, action: bound(cull.setLabel, label),
                 reason: reason, key: cull.key == nil ? nil : key)
         }
+    }
+
+    /// Rotate Left ⌘[, Rotate Right ⌘], Flip Horizontal and Flip Vertical: the catalog's image commands,
+    /// disabled with `reason` while the window's action is nil, else with the spec's why.
+    static func orientItems(_ photo: LibraryMenu.Photo, on catalog: LibraryCatalog?, reason: String) -> [MenuCommand] {
+        [
+            MenuCommand("image.rotate-ccw", on: catalog, title: "Rotate Left", systemImage: "rotate.left",
+                action: photo.rotateLeft, reason: reason, shortcut: KeyboardShortcut("[")),
+            MenuCommand("image.rotate-cw", on: catalog, title: "Rotate Right", systemImage: "rotate.right",
+                action: photo.rotateRight, reason: reason, shortcut: KeyboardShortcut("]")),
+            MenuCommand("image.flip", on: catalog, title: "Flip Horizontal",
+                systemImage: "arrow.left.and.right.righttriangle.left.righttriangle.right",
+                action: photo.flipHorizontal, reason: reason),
+            MenuCommand("image.flip", on: catalog, title: "Flip Vertical",
+                systemImage: "arrow.up.and.down.righttriangle.up.righttriangle.down",
+                action: photo.flipVertical, reason: reason),
+        ]
     }
 
     /// Photo > Delete Rejected Photos… ⌥⌘⌫: the Model's title, disabled with its help (no window says so).
@@ -226,6 +246,9 @@ struct LibraryCommands: Commands {
         MenuCommand("photo.crop", on: catalog, title: photo.cropTitle, systemImage: "crop",
             action: photo.toggleCrop, reason: crop, key: "R")
         MenuCommand("photo.reset-crop", on: catalog, title: "Reset Crop", action: photo.resetCrop, reason: crop)
+        Divider()
+        let turns = Self.orientItems(photo, on: catalog, reason: develop)
+        ForEach(Array(turns.enumerated()), id: \.offset) { $0.element }
         Divider()
         collectionPhotoItems
         Divider()

@@ -38,6 +38,7 @@ has to end up.
 | Design | drag a shape on `crowd`, 120 samples | 3 / 3 / 3 | 4.1 / 6 / 8.3 ms | none in flight; at design-window DW-b's bound |
 | Design | marquee select on `crowd`, 120 samples | 3 / 3 / 3 | 2.7 / 4 / 8.3 ms | none in flight; at DW-b's bound |
 | Library | scroll the grid, 120 steps of 12 pt (`samples`) | 0 / 0 / 0 | 6.6 / 10 / 8.3 ms | none in flight |
+| Library | step the Develop tab's Midtones handle 120 times at 120 Hz (`samples`, first photo in the loupe; `RenderBudgetLibraryLevelsTests`) | 120 / 120 / 0 | 24.7 ms p95, printed, not judged | each step reruns the window body once; a Levels edit should only touch the inspector and the loupe. The histogram is counted once per loupe render off the main thread (`LibraryHistogramBudgetTests`) |
 | Library | select, 10 clicks on grid cells | 10 / 10 / 10 | 80 / 120 / 33 ms | none in flight |
 | Library | loupe step | not driven | not driven | the loupe's arrow keys need a key window, which a test process can't have |
 | Flare | step the easing X1 scrub row 60 times | 60 / 60 / 60 | 11–13 ms p95 release, 12 ms debug / 20 / 8.3 ms | #1471 removed the per-step ticks; measured on the finisher's Mac (busy, not quiet), over the 8.3 ms target and under the 20 ms report bound |
@@ -226,3 +227,50 @@ p95 for an adjustment step and 80 ms for a Move, and the target is 16 ms.
 Levels and Curves still build their tables on the CPU each step (about 2.5 ms),
 and a Move composites every layer again, so those rows sit over the target.
 Blur, a masked adjustment layer and the CPU route keep the old path.
+
+## Photo: a Move step on a many-layer picture
+
+A Move step used to damage the whole canvas and composite every visible layer
+over it again, on both routes. On the stress document (3840 x 2160, 100
+layers, a quarter adjustment layers and a quarter masked) one render took
+seconds, so the drag's renders ran on after the release and the stress gate
+read 472% / 489% CPU 3 s after it (#3663). The dispatcher route now keeps each
+region's composite of the layers the stack still shares with the last render
+(PhotoCompositeCache.composite) and composites only the changed layer and the
+ones above it, and a Move damages only where the layer was and is.
+`IdleWorkTests` (AppSnapshotTests) reports what a 30-sample drag leaves
+running; debug build, 1024 x 576 in 60 layers (the dev rows are from a
+1280 x 720, 100-layer run, where the dev build never finished one GPU render):
+
+| Route | Layer composites in the drag | Pictures in the drag | Rendering in the gate's readings |
+|---|---|---|---|
+| GPU, dev | 69, the first render still running 12 s later | 0 | yes, 12 s later too |
+| GPU, now | 9 (one per region, 9 cache hits) | 2 | none |
+| CPU, dev | 1556 | 0 | the queued render, 22 regions |
+| CPU, now | 96 (one per region, 96 hits) | 7 | none |
+
+What ran after the release was the Curves histogram recount (one row at a
+time through every layer, one core for seconds; a masked layer's tile is now
+masked only over the row, not the whole 256 px tile) and the autosave 5 s
+after the last edit.
+
+The histogram now keeps each sampled row's composite in a PhotoCompositeCache
+of the inspector's own (`curvesHistogram(composites:)`): a Levels or Exposure
+step recounts the kept rows with no layer composited, and a layer change lays
+that layer and the ones above it on each row's kept base. Its work counts as
+the reference path's (`rows`, `rowLayers`), apart from the canvas's regions
+and layers. `IdleWorkTests` drives the stress journey's Levels drag and eye
+toggles and the real-perf journey's Hue drag on the same document, debug
+build, both routes, and gates counts: it waits for the canvas's renders to
+drain and the counters to hold still, then checks the gesture's work and that
+3 s more show no region, picture, row or row layer:
+
+| Gesture | Histogram after the release, dev | now (GPU / CPU) |
+|---|---|---|
+| Levels Black, 30 steps | 192 rows x 60 layers, 7 to 17 rows a second for about 20 s on one core | 229 / 296 rows, 0 row layers (gated: no layer) |
+| Hue, 30 steps | no count (outside the key) | 0 rows (gated) |
+| 4 eyes hidden then shown | a count per click, the last 192 rows x 60 layers, about 20 s | 593 / 378 rows, 623 / 249 row layers over all the clicks' counts |
+
+Those tests drop the window's autosave after the gesture: it still flattens
+the picture through the reference path 5 s after the last edit, which would
+read as a recount.
