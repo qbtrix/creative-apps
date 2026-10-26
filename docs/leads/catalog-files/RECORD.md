@@ -52,4 +52,5 @@ Next: wait for the lane to land #4924 (LC-u) and #4937 (LC-5); then merge origin
 - 2026-10-26T04:08:23Z: heartbeat: lane lands p0 PRs first (#5040, #5346, #5378 all p0); #4924,#4937 (beta) wait behind them. dev at 75292afd. Findings 0.
 - 2026-10-26T04:30:20Z: heartbeat: no change; #4924,#4937 queued behind p0; dev 75292afd. Findings 0.
 - 2026-10-26T04:52:18Z: heartbeat: #4924/#4937 still queued (beta behind p0); dev at 999895c8 (#5154 landed); #4938/#4949 stacked; 0 catalog-files findings.
+- 2026-10-26T05:14:20Z: heartbeat: no change; #4924/#4937 queued, dev 999895c8.
 - Candidate gaps after LC-z: relinked id keeps the old path; re-importing a folder with copy makes new copies.
