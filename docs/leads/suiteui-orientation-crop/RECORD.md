@@ -82,3 +82,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-26T17:43:04Z poll 17:43: dev-red #5321 open; none of our PRs merged, no needs-fix
 - 2026-10-26T18:05:33Z 18:05 poll: none merged, no needs-fix, dev-red #5321 open
 - 2026-10-26T18:27:28Z OC-photo-u #5263 merged e69582e7; awaiting scoped photo run 40376163429; OC-z #5802 open. 18:27 poll: no needs-fix, dev-red #5321 open
+- 2026-10-26T18:48:49Z OC-photo-u merged e69582e7; scoped photo run 40376163429 in progress; OC-z #5802 open. 18:48 poll: no needs-fix, dev-red #5321 open
