@@ -101,3 +101,4 @@ utc	stage	event	ref	note
 2026-10-26T15:30Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane landed #5285 (dev 310d7d14); ours eligible, waiting on one-at-a-time batches
 2026-10-26T15:50Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	batch 154903 runs #5106 alone; dev 310d7d14; ours eligible and queued
 2026-10-26T16:16Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane landed #5106 (dev e14f65fa); no batch in flight; ours eligible and queued
+2026-10-26T16:36Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane landed #5803 (dev 527676af); batch 163022 retries #5267; 131 ready PRs queued
