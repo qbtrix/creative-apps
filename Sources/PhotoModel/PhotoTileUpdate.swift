@@ -7,8 +7,9 @@
 // update says it is complete. The full-frame `render` stays the reference: the
 // tiles laid where they belong equal its bytes, premultiplied the same way
 // (`premultiplied(_:)`). While Free Transform is up, both draw the draft's
-// layer through the draft (`transformPreview`, resampled once per update), so
-// the cached base under it stands and only it and the layers above composite.
+// layer through the draft: a still frame resampled once (`transformPreview`),
+// a drag frame (`live`) through its matrix on each region, so the cached base
+// under it stands and only it and the layers above composite.
 // The live canvas renders through a PhotoRenderRoute
 // (CoreRender's dispatcher, CPU or GPU) and the update names the backend whose
 // display encode made its bytes; `completeUpdate` (snapshots) stays on
@@ -58,6 +59,9 @@ public struct PhotoTileUpdate: Sendable {
     public let backend: String
     /// The damaged canvas tiles were written to a display target instead: `tiles` is empty.
     public var wroteTarget = false
+    /// The tiles show Free Transform's draft as a drag frame (through its matrix, bilinear): the next plain
+    /// update draws the exact frame.
+    public var liveDraft = false
 }
 
 extension PhotoRenderer {
@@ -74,8 +78,8 @@ extension PhotoRenderer {
     ) async throws -> PhotoTileUpdate {
         guard let canvas = workspace.canvas else { throw RasterError.invalid("no image is open") }
         let clock = ContinuousClock()
-        // Free Transform's draft draws live: its layer resampled once per update, then composited as any layer.
-        let workspace = workspace.transformPreview
+        // Free Transform's draft draws live: a still frame's layer resampled once, a drag frame's through its matrix.
+        let workspace = workspace.transformPreview(live: live)
         let started = clock.now
         let damage = revision.map { workspace.damage(since: $0) } ?? .all
         // A new picture or size: the kept composites belong to the old regions.
@@ -96,6 +100,7 @@ extension PhotoRenderer {
             milliseconds: Double(elapsed.components.seconds) * 1000 + Double(elapsed.components.attoseconds) / 1e15,
             backend: backend)
         update.wroteTarget = written
+        update.liveDraft = workspace.liveDraft
         return update
     }
 

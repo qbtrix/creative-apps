@@ -137,6 +137,9 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var cropAspect = CropAspect.free
     /// Free Transform in progress (PhotoTransform.swift).
     public internal(set) var transformDraft: TransformDraft?
+    /// A drag frame: the routes draw the draft's layer through its matrix at composite time instead of its
+    /// resample (`transformPreview(live:)`, PhotoTransform+Kernel.swift). Set on a render's copy, never the document.
+    var liveDraft = false
     /// The eyedropper's sample size (PhotoSample+Kernel.swift).
     public internal(set) var sampleSize = SampleSize.point
     /// The Export sheet's last choices (PhotoExportOptions.swift).

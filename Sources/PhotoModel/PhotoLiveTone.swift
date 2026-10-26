@@ -72,7 +72,11 @@ extension PhotoWorkspace {
             settings.apply(.setEnabled(.blur, false))  // a layer never blurs (LiveAdjustmentLayering)
             operations[layer.id] = settings.toneOperations ?? []
         }
-        let split = shown.firstIndex { if case .adjustment = $0.kind { true } else { false } } ?? shown.endIndex
+        // The base ends under the lowest adjustment layer, and under a drag frame's draft (drawn through its matrix).
+        let split = shown.firstIndex { layer in
+            if case .adjustment = layer.kind { return true }
+            return layer.id == liveDraftLayer
+        } ?? shown.endIndex
         var above = Array(shown[split...])
         var folded: [ToneProgram.Operation] = []
         let unsharp = adjustments.unsharp
@@ -140,7 +144,11 @@ extension PhotoWorkspace {
                 }
             case .pixels(let layer):
                 try owned()
-                try dispatcher.composite(residentSteps([layer], in: work, resident: resident), onto: &picture)
+                if layer.id == liveDraftLayer, let draft = transformDraft, let tiled = pixels[layer.id] {
+                    try compositeDraft(draft, tiled, of: layer, onto: &picture, at: work, on: dispatcher)
+                } else {
+                    try dispatcher.composite(residentSteps([layer], in: work, resident: resident), onto: &picture)
+                }
             }
         }
         if work != rect {
@@ -165,6 +173,8 @@ public final class PhotoCompositeCache: Sendable {
         let layer: PhotoLayer
         let pixels: TiledPixels?
         let mask: TiledPixels?
+        /// The draft a drag frame draws this layer through; nil for a layer drawn as it is.
+        var draft: TransformDraft? = nil
     }
 
     /// The layers a region composites, and the unsharp pass it keeps sharpened, if any.
@@ -205,8 +215,8 @@ public final class PhotoCompositeCache: Sendable {
     public var made: Int { makes.withLock { $0 } }
 
     static func key(_ layers: [PhotoLayer], pixels: [PhotoLayer.ID: TiledPixels],
-                    masks: [PhotoLayer.ID: TiledPixels] = [:]) -> [LayerKey] {
-        layers.map { LayerKey(layer: $0, pixels: pixels[$0.id], mask: masks[$0.id]) }
+                    masks: [PhotoLayer.ID: TiledPixels] = [:], draft: TransformDraft? = nil) -> [LayerKey] {
+        layers.map { LayerKey(layer: $0, pixels: pixels[$0.id], mask: masks[$0.id], draft: $0.id == draft?.layerID ? draft : nil) }
     }
 
     /// `rect`'s composite of the first `laid` layers of `stack`, a surface the caller lays the rest on and
