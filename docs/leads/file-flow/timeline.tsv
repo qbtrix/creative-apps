@@ -194,3 +194,4 @@ utc	stage	event	ref	note
 2026-10-26T11:35Z	check	no change: #4894 #4936 #5092 open and clean, dev-red #5321 open (16 comments), no supervisor answer on #3474 (20 comments)
 2026-10-26T11:52Z	check	no change: #4894 #4936 #5092 open and clean, dev-red #5321 open (16 comments), no supervisor answer on #3474 (20 comments)
 2026-10-26T12:45Z	3	stage-start	-	run act-1a1783581a6-fo4a resumed; record on lead/file-flow (rebuilt on main); #4894 #4936 #5092 queued in lane
+2026-10-26T13:06Z	3	poll	#4894	no change; lane busy on 57dd31ff; waiting for HF-3/HF-z to land; record mirrored on lead/file-flow

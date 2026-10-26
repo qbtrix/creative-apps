@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 2026-10-26T13:06Z poll: no change. #4894 d9c7c9d2, #4936 a713dc26, #5092 a95e7b0e still open, clean, eligible; lane busy (ci.yml runs on dev 57dd31ff: Linux check, scoped photo). No supervisor answer to the 04:06Z question. dev-red #5321 open (macOS). No file-flow findings. Record mirrored on lead/file-flow and here (Belt reads this branch).
 - 2026-10-26T12:45Z resume (act-1a1783581a6-fo4a): #4894 (d9c7c9d2, prescreen green), #4936 (a713dc26, on HF-m) and #5092 (a95e7b0e) open, clean, fast-lane, beta. Lane run 40320708539 rates #4894 and #5092 eligible; it lands one PR at a time (LANE_VERIFY_AFTER=1) behind a long queue. dev-red #5321 open (macOS, not ours). Question on #3474 (04:06Z, why #4894 doesn't land) has no answer yet.
 - Record moved back to lead/file-flow at docs/leads/file-flow/ (brief): the suite lead moved its record to lead/suite-file-flow on 10-21, so the name is free. lead/file-flow was rebuilt on origin/main (its old history is unrelated to main's, so it could not rebase). lead/halo-file-flow keeps the history up to 11:52Z.
 - Follow-up fix after HF-m lands (Packet-Review 2 items 3, 4): delete unused `imageRefusal`, fix the S20 comments and the mutation label. Item 10 (HaloFiles' own recent list) is #5123, stacked on HF-4.
