@@ -230,3 +230,4 @@ utc	stage	event	ref	note
 2026-10-26T12:45:19Z	3	poll	-	12:45Z poll: no merges of ours; dev 746be6b1 unchanged; none of ours carries needs-fix/needs-rebase; dev-red #5321 open; 0 findings.
 2026-10-26T13:06:57Z	3	poll	-	13:06Z poll: no merges of ours; lane landed #5146 (dev 57dd31ff), so batches are moving again; ours queued; 0 findings.
 2026-10-26T13:39:43Z	3	poll	-	13:39Z poll: no merges of ours; dev 01600e46; 0 findings
+2026-10-26T14:04:02Z	3	poll	-	14:04Z poll: no merges of ours; DS PRs queued; #5267 open. No drift issue for document-setup. Open findings 0.
