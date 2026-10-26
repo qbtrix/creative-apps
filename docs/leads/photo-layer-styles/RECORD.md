@@ -4,7 +4,7 @@ Issue: #3793 · Packet: docs/blueprints/photo/features/layer-styles.md
 Run: act-1a16f6941b7-zb0r · Session: claude/feature-lead-tone-layer-styles-v57ny4 · Started: 2026-10-24T19:30Z (takes over from act-1a16cd04539-4jc0)
 Stage: W1 shipped (PY-1 #5177 in the lane); W2 waiting on LS-a's LS-2 #5174 (PY-2) and LS-m #5176 (PY-5, PY-6)
 Base: 78983bc33 (PY-1); dev 6f66ca334 at 19:39Z
-Next: open the PY-m PR from lead/photo-layer-styles-PY-m once its gate passes; then PY-2 when LS-2 #5174 merges
+Next: PY-2 when LS-2 #5174 merges; PY-6 when LS-5 #5176 / LS-8 land; watch #5371 in the lane
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -19,7 +19,7 @@ Next: open the PY-m PR from lead/photo-layer-styles-PY-m once its gate passes; t
 |---|---|---|---|---|---|---|---|
 | PY-1 | PY-a | 1 | `PhotoLayer.style`; adapter stubs (`showStylePanel` real); catalog specs and ids; tests disabled | Sources/PhotoModel/PhotoLayer.swift, Sources/PhotoModel/PhotoStyle+Kernel.swift, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/PhotoModelTests/PhotoLayerStyleTests.swift | PhotoLayerStyleTests (disabled), command-id list | #5177 | merged 8987427d (2026-10-26T02:03Z) |
 | PY-2 | PY-a | 2 | Layer menu items by id; panel sheet while `stylePanel` is set; pasteboard via `LayerStylePasteboard` | Sources/PhotoApp/PhotoCommands+Layer.swift, Sources/PhotoApp/PhotoWindow+Styling.swift, Sources/PhotoApp/PhotoWindow.swift | PhotoLayerStyleSnapshots.panel | – | waiting (PY-1 #5177, LS-2 #5174) |
-| PY-5 | PY-m | 2 | adapter bodies; tests on | Sources/PhotoModel/PhotoStyle+Kernel.swift, Tests/PhotoModelTests/PhotoLayerStyleTests.swift, Tests/mutations/PhotoModel.PhotoStyle+Kernel.json | PhotoLayerStyleTests | – | built (Mutate 7/7); rebased onto dev as lead/photo-layer-styles-PY-m, gate running, PR next; catalog-level tests wait on LS-6 |
+| PY-5 | PY-m | 2 | adapter bodies; tests on | Sources/PhotoModel/PhotoStyle+Kernel.swift, Tests/PhotoModelTests/PhotoLayerStyleTests.swift, Tests/mutations/PhotoModel.PhotoStyle+Kernel.json | PhotoLayerStyleTests | #5371 | PR open, fast-lane (head c62112564, CI: PASS, Mutate 7/7); catalog-level tests wait on LS-6 |
 | PY-6 | PY-m | 2 | styles in composite and `.ora`; RJ-P44, RJ-X51 | Sources/PhotoModel/PhotoLayerComposite.swift, Sources/PhotoModel/PhotoDocumentFile.swift, Tests/PhotoModelTests/PhotoStyleRenderTests.swift, Tests/mutations/PhotoModel.PhotoLayerComposite.json, Tests/mutations/PhotoModel.PhotoDocumentFile.json, Tests/RealJobs/photo/outline-cutout/, Tests/RealJobs/photo/style-drop-shadow/ | PhotoStyleRenderTests | – | waiting (PY-1, LS-m) |
 | PY-3 | PY-u | 3 | snapshots, render budget | Tests/AppSnapshotTests/PhotoLayerStyleSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoLayerStyleTests.swift | RenderBudgetPhotoLayerStyleTests.distanceScrubInThreeBodies | – | waiting (PY-2) |
 | PY-4 | PY-u | 3 | journey written, skipped | UITests/PhotoJourneyTests+LayerStyle.swift | compiles, skipped | – | waiting (PY-2) |
