@@ -54,3 +54,7 @@ Next: #5096 (AR-photo-u) re-integrated at 4d85628f (merged origin/dev, scripts/c
 
 - 2026-10-25T09:42Z: dev-red #5316 names #4877 in range; failures are Suite Home/Onboarding model timeouts, not Photo selection. AR-photo-m waits for a green full or scoped run containing #4877.
 - 2026-10-25T10:06Z: AR-photo-m merged-done per lead.md rule 6 (newest dev CI containing #4877, 40179648854, Linux green); Belt-Slice-Done posted on #3752. ui:false, no Mac-Finish-Wanted.
+
+## Packet-Review 2 (7e13ba02, 05:56Z)
+
+Answered on #3752: both amendments (AreaSelectTarget Sendable with areaHelp and a mutating setter; AreaRecipe init() and isEmpty) are already on dev c480d848. Only the packet text is stale; AR-photo-u and AR-z need no change.
