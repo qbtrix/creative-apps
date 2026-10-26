@@ -180,3 +180,4 @@ utc	stage	event	ref	note
 2026-10-26T04:57:36Z	3	poll	-	04:57Z poll: none of ours landed; dev 999895c8 (p0 #5154 ahead, ordering correct); dev-red #5321 open; no findings
 2026-10-26T05:19:21Z	3	poll	-	05:19Z poll: none of ours landed; dev 7e13ba02 (p0 #4948 ahead, ordering correct); dev-red #5321 open; no findings
 2026-10-26T05:41:24Z	3	poll	-	05:41Z poll: none of ours landed; dev 7e13ba02 unchanged; dev-red #5321 open; no findings
+2026-10-26T06:03:46Z	3	poll	-	06:03Z poll: none of ours landed; dev c480d848 (p0 #5239 ahead, ordering correct); dev-red #5321 open; no findings
