@@ -16,8 +16,8 @@
   {
     "label": "oneStepForSeveral: each selected layer records its own step",
     "file": "Sources/DesignModel/DesignFill+Kernel.swift",
-    "find": "        for id in ids { _ = pages.update(id) { $0.paint(unit) } }\n        guard snapshot != before else { throw DesignRefusal.unchanged }\n        record(name, before: before, coalescing: drag.map { \"gradient-\" + $0 })\n",
-    "replace": "        for id in ids {\n            let one = snapshot\n            _ = pages.update(id) { $0.paint(unit) }\n            record(name, before: one, coalescing: drag.map { \"gradient-\" + $0 + id })\n        }\n        guard snapshot != before else { throw DesignRefusal.unchanged }\n",
+    "find": "        for id in ids { _ = pages.update(id) { $0.paint(unit) } }\n        guard snapshot != before else { throw DesignRefusal.unchanged }\n        record(name, before: before, coalescing: drag.map { CoalesceKey.key(\"fill\", on: ids, drag: $0) })\n",
+    "replace": "        for id in ids {\n            let one = snapshot\n            _ = pages.update(id) { $0.paint(unit) }\n            record(name, before: one, coalescing: drag.map { CoalesceKey.key(\"fill\", on: [id], drag: $0) })\n        }\n        guard snapshot != before else { throw DesignRefusal.unchanged }\n",
     "tests": "DesignGradientTests"
   }
 ]
