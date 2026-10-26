@@ -7,7 +7,7 @@
 # Read by scripts/check-dup-views; the id is what `Allow-Dup-View:` names.
 sheet-buttons | \.keyboardShortcut\(\.cancelAction\) | use SuiteSheet
 busy-glass | GlassPanel\s*\{ ; ProgressView\( | use BusyNote
-error-label | Label\( ; SuiteColor\.stateError | use NoticeRow / InspectorNote
+error-label | Label\( ; SuiteColor\.stateError | use InlineNotice / InspectorNote
 caps-header | SuiteFont\.sectionCaps ; \.textCase\(\.uppercase\) | use InspectorSectionHeader
 probe-element | Color\.clear ; \.accessibilityElement\(\) ; \.accessibilityIdentifier\( | use ProbeElement
 keyed-row | InspectorSliderRow\( ; KeyframeButton\( | use KeyframedSliderRow
