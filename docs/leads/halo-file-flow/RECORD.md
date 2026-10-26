@@ -48,6 +48,7 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 2026-10-26T04:46Z check: dev 999895c8; #4894 #4936 #5092 unmerged; dev-red #5321 still open (macos, range main..75292afd); no supervisor answer
 - 2026-10-26T04:26Z check: #4894 #4936 #5092 unmerged (dev 75292afd); dev-red #5321 open since 10-25 16:34 holds code batches; no supervisor answer yet
 - 2026-10-26T04:06Z stage: HF-z a95e7b0e pushed (CI: PASS, review 2 applied), #5092 Head moved; review answered on #3474 (6407980319); supervisor asked why #4894 doesn't land (6407980974)
 - 2026-10-26T04:01Z check: Packet-Review 2 answered under Decisions; HF-z journey + packet amendments committed, scripts/ci --changed running; #4894 #4936 #5092 still queued
