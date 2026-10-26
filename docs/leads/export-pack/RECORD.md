@@ -1,11 +1,17 @@
 # export-pack lead record
 
 Issue: #3477 · Packet: docs/blueprints/suiteui/features/export-pack.md
-Run: act-1a16fe1fa73-5x3s (line lead, line:suiteui; relaunch) · earlier: act-1a16c618fe7-h4fd (line lead, line:suiteui; unparked by the supervisor 2026-10-24)
-Stage: 3 wave 4 PR open (XP-8 #5106 stacked on #5104); open #5043, #5044, #5065, #5074, #5104, #5106
-Base: origin/dev 830af22de
-Next: Lane: chain #4960 → #5043 → #5065 → #5104 → #5106; #5044 and #5074 in the lane. XP-10 (C4 part, wave.json built, feature-done) once XP-7, XP-8 and XP-9 merge. Critics once a scoped suiteui run shows the export-pack screens.
+Run: act-1a175ea55b7-729d (line lead, line:suiteui; relaunch 2026-10-26) · earlier: act-1a16fe1fa73-5x3s (line lead, line:suiteui; relaunch) · earlier: act-1a16c618fe7-h4fd (line lead, line:suiteui; unparked by the supervisor 2026-10-24)
+Stage: 3 wave 5: restack #5043 chain on dev
+Base: origin/dev 8eff8ab85
+Next: XP-m done (run 40247461868 contains #5044, #5074): post Belt-Slice-Done. Merge origin/dev into #5043 → #5065 → #5104 → #5106 (stale stack), gate, move Head. XP-10 once XP-3, XP-8 merge.
 
+
+## Run act-1a175ea55b7-729d decisions
+- Brief rule 1: main checked out at d3323f6a7; main was rewritten, so each lead branch is rebuilt as origin/main plus this record (no merge base with the old branch), pushed --force-with-lease.
+- PR base stays `dev` (CLAUDE.md; BASE_BRANCH=dev in scripts/fast-lane.sh; the lane retargets main PRs).
+- Stacked PRs whose parent squash-merged carry the parent's commits (size FAIL, dirty): merge origin/dev into each branch, gate, move Head.
+- XP-7 #5044 merged 16:19Z (c2681786c), XP-9 #5074 merged 16:59Z (5b1d3a19b), #4960 merged; scoped suiteui run 40247461868 at 30096d710 green and contains them.
 ## Run act-1a16fe1fa73-5x3s decisions
 - 22:59Z: the 22:27Z poll was one-shot, so no heartbeat ran from 22:28Z to 22:59Z. Each poll now schedules the next one 15 min out.
 - Brief rule 1: main checked out at e79e9afc; lead/export-pack and lead/brush-keys rebased onto origin/main and pushed (--force-with-lease).
@@ -17,7 +23,7 @@ Next: Lane: chain #4960 → #5043 → #5065 → #5104 → #5106; #5044 and #5074
 |---|---|---|---|---|---|---|---|---|---|
 | XP-a | Export options, rules and format list as stubs; metadata contract and fake; Size and Metadata rows on a gallery page; checks written, disabled | XP-1, XP-2, XP-3 | SJ0 | AH-a (XP-1, shared C4 part), shell-media:SM-a (XP-2), tone-controls:TC-a + PL-a (XP-3) | no | 0 | building (XP-1 merged) | – | – |
 | XP-u | Size modes with ratio lock and readout, Metadata picker, identified, within budget | XP-4, XP-5 | XJ1 | XP-a | yes | 0 | waiting | – | – |
-| XP-m | Exact pixels, dropped tags, refusals; live metadata copy on JPEG and HEIC | XP-6, XP-7 | KJ-export, StillMetadataTests | XP-1 (XP-6); XP-2 + shell-media:SM-w (XP-7) | no | 0 | building (XP-6 merged; XP-7 waits XP-2, SM-w) | – | – |
+| XP-m | Exact pixels, dropped tags, refusals; live metadata copy on JPEG and HEIC | XP-6, XP-7 | KJ-export, StillMetadataTests | XP-1 (XP-6); XP-2 + shell-media:SM-w (XP-7) | no | 0 | done (run 40247461868) | 40247461868 | – |
 | XP-z | Gallery sheet plans through the rules; fake app exports at a size (RJ-X42); built | XP-8, XP-9, XP-10 | XJ1, KJ-export | XP-u, XP-m, tone-controls:TC-z, AH-z, TT-z, EY-z, SH-z, SS-d, PL-z | no | 0 | waiting | – | – |
 
 ## Tasks
