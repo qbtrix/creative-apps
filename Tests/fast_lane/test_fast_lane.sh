@@ -2032,6 +2032,15 @@ cpr 191 Sources/PhotoModel/B.swift; cpr 192 Sources/DesignModel/C.swift; cpr 193
 lane_sweep
 expect "scoped hold: PRs off the red module batch; the one touching it waits" "$(batch_prs),$(merges)" "#192,#193,"
 expect "scoped hold: the held PR gets no label and no comment" "$(grep -cE '^pr (edit|comment) 191 ' "$sw/calls")" 0
+# The module is read from the fixture remote's tree, never from the checkout
+# the tests run in: FooModel exists only at the fixture (a SCRATCH made in a
+# subshell died with it and the lane read this repo instead, which passed on a
+# Mac and failed on Linux).
+rvdev linux "Tests/FooModelTests/OpenTests.swift|test(foo): opens" "Sources/FooModel/A.swift|feat(foo): a (#201)"
+printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"; rm -f "$sw/run.9500.json"
+cpr 1001 Sources/FooModel/B.swift; cpr 1002 docs/scope.md
+lane_sweep
+expect "scoped hold: the red module comes from the remote's tree, not this checkout: the lone docs PR lands, the FooModel one waits" "$(batch_prs),$(merges)" ",pr merge 1002"
 flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"; printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
 printf 'error: compile failed\nCI: FAIL\n' >"$sw/joblog.4343"
 cpr 194 Sources/DesignModel/C.swift; cpr 195 docs/scope.md
