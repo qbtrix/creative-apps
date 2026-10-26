@@ -1,0 +1,242 @@
+utc	stage	event	ref	note
+2026-10-20T15:00Z	setup	lead record created; wave 1 starts
+2026-10-20T19:15:51Z	stage	start	-	run act-1a15abb305f-lc8g on dev a48992b7; DK-a builder (wave 1 with eyedropper DY-a)
+2026-10-20T19:18:03Z	3	build-wave started	DK-a	workflow wf_c18b376e-723
+2026-10-20T19:31:00Z	3	PR opened	DK-a #3690	head 6bb9960e, Fast-Check pass
+2026-10-20T20:15Z	3	check	#3690	macOS build 39484764814 queued on 6bb9960e; no needs-fix; scoped design run 39490030243 on dev predates DK-a
+2026-10-20T20:36Z	-	check	#3690	macOS build 39484764814 still queued (61m)
+2026-10-20T20:58Z	-	check	#3690	macOS build 39484764814 still queued; mac runners busy with older builds
+2026-10-20T21:20Z	-	check	#3690	macOS build 39484764814 still queued (105m)
+2026-10-20T21:42Z	-	check	#3690	macOS build 39484764814 still queued (127m)
+2026-10-20T22:10Z	-	fix	#3690	needs-rebase (C4 part design-model-sources); merged dev, kept both clauses, gate PASS, head 5790b916, Head line moved
+2026-10-20T22:35Z	check	needs-rebase cleared	#3690 #3691	lane dropped label; macOS builds dispatched 22:21 on 5790b916 / 344cbd8f; lane asked to drop attribution footer: session proxy re-appends it on every PATCH (retried, re-added), lane strips it at squash
+2026-10-21T00:06Z	check	needs-rebase again on #3690	#3690	C4 part conflict with DY-a squash; merged dev, resolved, gate PASS, pushed badfdf22, Head moved, mergeable clean
+2026-10-21T00:29Z	check	lane waits macOS build	#3690	head badfdf22 clean; macOS build dispatched 00:07
+2026-10-21T00:54Z	stage	DK-a merged	#3690	lane batch 00:45Z, squash 3785460f; slice-done waits a scoped design run with screens
+2026-10-21T01:16Z	check	waiting screens	#3690	full dev CI 39524928486 at 4bdf0bbd pending; critic panel when it shows screens. dev Linux red at 4bdf0bbd too (dev-red #3386)
+2026-10-21T01:38Z	check	waiting screens	#3690	full dev CI 39524928486 at 4bdf0bbd still pending; no scoped design run; critic panel deferred
+2026-10-21T02:00Z	check	waiting screens	#3690	full dev CI 39524928486 at 4bdf0bbd still pending behind the mac queue; no scoped design run
+2026-10-21T02:22Z	check	waiting screens	#3690	full dev CI 39524928486 at 4bdf0bbd still pending; no scoped design run
+2026-10-21T02:44Z	check	waiting screens	#3690	full dev CI 39524928486 cancelled; new full CI 39534644387 at 2ab0eb96 (has DY-a, DK-a) pending
+2026-10-21T03:06Z	check	waiting screens	#3690	full dev CI 39534644387 at 2ab0eb96 queued; no scoped design run
+2026-10-21T03:27Z	check	waiting screens	#3690	full dev CI 39534644387 at 2ab0eb96 still queued; no scoped design run
+2026-10-21T03:50Z	check	waiting screens	39534644387	full dev CI still queued
+2026-10-21T04:13Z	check	scoped design 39541665044 queued at 842e62ec	39541665044	waiting screens
+2026-10-21T04:35Z	check	scoped design 39541665044 in progress	39541665044	waiting screens
+2026-10-21T04:59Z	check	critic panel DK-a started on scoped run 39541665044 snapshots	39541665044	DK-u/DK-m still wait on DS-u/DS-m
+2026-10-21T05:03Z	check	critic panel DK-a: 22 confirmed, 2 refuted; filed #3864-#3874 (1 blocker, 4 major)	wf_65d869d1-502	11 open findings > 5: no new stroke wave; fix round 1 started on 0eca6ab5
+2026-10-21T05:25Z	check	DK-a fix round 1 running (wf_c119b89b-6de)	-	no new stroke wave while 11 findings open
+2026-10-21T05:47Z	wave	DK-a fix round 1 done: #3884 (fixes #3864), #3886 (#3868 #3869 #3870, mutate 4/4), #3882 (#3867 #3872 #3874), #3883 (#3866)	wf_c119b89b-6de	still open: #3865 deferred, #3871 (needs DesignInspector.swift), #3873 (needs SuiteUI glyph support); round 2 next
+2026-10-21T05:49Z	check	lane	#3882,#3883,#3884,#3886	DK-a round-1 fix PRs clean, fast-lane, not merged; round 2 (#3865,#3871,#3873) waits for them
+2026-10-21T06:16Z	check	lane	#3882,#3883,#3884,#3886	DK-a round-1 fix PRs clean, queued in lane; round 2 waits for their merge
+2026-10-21T06:39Z	check	lane	#3882,#3883,#3884,#3886	clean, queued; lane bisecting batch-20261021061843; round 2 waits
+2026-10-21T07:01Z	check	lane	#3882,#3883,#3884,#3886	clean, queued; dev at b64cbb8c (core bump #3784); round 2 waits
+2026-10-21T07:23Z	check	lane	#3882,#3883,#3884,#3886	clean, queued; dev still b64cbb8c; round 2 waits
+2026-10-21T07:45Z	check	lane	#3882,#3883,#3884,#3886	not yet merged, lane landing a batch; round 2 waits
+2026-10-21T08:10Z	check	lane	#3882 #3883 #3884 #3886	DK-a round-1 open in lane; round 2 (#3865 #3871 #3873) held
+2026-10-21T08:32Z	check	lane	#3882 #3883 #3884 #3886	DK-a round-1 Linux checks running in lane; round 2 held
+2026-10-21T09:00Z	merge	DK-a fixes	#3882 #3883 #3886	merged 08:48Z; #3884 mac build red, fixed 65cd7d9c, Head moved
+2026-10-21T09:25Z	check	lane	#3884	macOS build 39574365736 queued at 65cd7d9c; round 2 (#3865 #3871 #3873) waits on it
+2026-10-21T09:47Z	check	lane	#3884	macOS build 39574365736 green; waits on a lane batch
+2026-10-21T10:06Z	fix	DK-a round 2 started	wf_c31c3a4f-5b2	#3884 merged (7b1207a8); findings #3865 #3871 #3873
+2026-10-21T10:09Z	check	DK-a round 2 running	wf_c31c3a4f-5b2	waiting on fixer PR
+2026-10-21T10:17Z	fix	DK-a round 2 done	#4001	fixes #3865 (Join/Cap disabled with Model reason until DK-5); #3871 #3873 -> gap p2 (rounds spent; #3873 waits on #3999 needs-ui). DK-a done once #4001 merges + dev Linux green
+2026-10-21T10:30Z	check	lane	#4001	clean, waiting on a batch
+2026-10-21T11:00Z	check	line-fix	#4001	SuiteUI StrokeEditor edits removed (line rule); Model-only, head 1923f406, ci --changed PASS; StrokeEditor styleHelp filed as #4014 needs-ui; #3865 stays open
+2026-10-21T13:12Z	start	run act-1a15e909498-4bkk	-	resumed DK and DY; status stays on lead/design-*
+2026-10-21T13:12Z	check	DK-a rounds spent	#4001	merged 73754132; #3865 -> gap p2 (waits #4014)
+2026-10-21T13:12Z	check	dev red	39601343733	LibraryFoldersTests.tenThousandPaths timing, not ours
+2026-10-21T21:05Z	start	run act-1a1605b0534-rn47	-	resumed DK; main verified 0dd23d65
+2026-10-21T21:05Z	done	DK-a	39670298178	Belt-Slice-Done gaps #3865 #3871 #3873; Mac-Finish-Wanted posted
+2026-10-21T21:20Z	check	waits	-	DS-u (DT-u building), DS-m (DT-m #4187, DY-m) not merged
+2026-10-21T22:05Z	check	waits (poll 2)	-	DT-u #4159, DT-m #4187, DG-m #4189 open; DS-u/DS-m waiting; #4081 mac build 39680406979 queued
+2026-10-21T22:21Z	check	waits (poll 3)	-	unchanged; asked the supervisor (#4187 #4189 mac green but unmerged; dev Linux red on CommandPathTests launcher)
+2026-10-21T22:52Z	check	waits	-	DT-5 #4187 and DG-m #4189 merged 22:42Z; DT-6 and DT-u #4159 pending; supervisor: keep going
+2026-10-21T23:18Z	DK-u	waiting DS-u (DT-u #4159 still queued on Mac gate)
+2026-10-21T23:41Z	DK-u	DT-u #4159 merged 23:38Z; waiting DS-u
+2026-10-22T00:03Z	DK-u	still waiting DS-u (no shape-tools progress on #3440)
+2026-10-22T00:35Z	DK-u	still waiting DS-u (#3440 unchanged)
+2026-10-22T00:57Z	DK-u	still waiting DS-u
+2026-10-22T01:18Z	DK-u	still waiting DS-u
+2026-10-22T01:40Z	DK-u	still waiting DS-u
+2026-10-22T02:02Z	heartbeat	#4081 lane-eligible, waits on lane batch (dev red #3856 FormatListRatchetTests); DT-6 #4255 and DT-u fix #4254 in lane; DS-u not started
+2026-10-22T02:23Z	heartbeat	#4081 still lane-eligible, unmerged; dev Linux b5a6e7e0 running; #4255/#4254 unmerged; DS-u not started
+2026-10-22T02:44Z	heartbeat	DK-u waits on DS-u (not started)
+2026-10-22T03:06Z	heartbeat	full CI 39714642994 on 66a84588 (contains #4081) pending; #4255 unmerged; DS-u not started
+2026-10-22T03:33Z	heartbeat	full CI 39714642994 on 66a84588 still pending (macOS runner backlog); Linux 66a84588 green; #4255 unmerged; DS-u not started
+2026-10-22T03:54Z	heartbeat	full CI 39714642994 (66a84588) still pending; scoped design on e9933116 (pre-#4081) running; #4255 unmerged; DS-u not started
+2026-10-22T04:16Z	heartbeat	full CI 39714642994 cancelled (superseded); waiting on scoped design 39720061887 / full CI 39720939785 on 6e19f406 (contains #4081); #4255 unmerged; DS-u not started
+2026-10-22T04:39Z	heartbeat	scoped design 39720061887 (6e19f406, contains #4081) queued; DT-6 #4255 merged 04:17Z, DT-m slice-done not yet on #3436; DS-u not started
+2026-10-22T05:01Z	heartbeat	macOS backlog: scoped design 39720061887 and CI 39722978870 (both contain #4081) still queued; no DT-m slice-done; DS-u not started
+2026-10-22T05:23Z	heartbeat	macOS backlog: scoped design 39720061887 and CI 39722978870 still queued; transform lead relaunched by supervisor 05:14Z (DT-m pending); DS-u not started
+2026-10-22T05:45Z	heartbeat	macOS backlog persists: scoped design 39720061887 and CI 39722978870 queued; no DT-m slice-done; DS-u not started
+2026-10-22T06:16Z	heartbeat	DK-u waits on shape-tools DS-u (#3440 not started)
+2026-10-22T06:37Z	heartbeat	DY-m waits on DT-m (#3436); DK-u waits on DS-u (#3440)
+2026-10-22T07:00Z	heartbeat	DY-m waits on DT-m (#3436); DK-u waits on DS-u (#3440)
+2026-10-22T07:24Z	resume	run act-1a1627ce3b4-ayhz takes over	-	DK-u waits DS-u; DK-m waits DS-m
+2026-10-22T08:20Z	poll	DK-u waits shape-tools:DS-u, DK-m waits DS-m (only DS-a merged; #3440 prereq-priority)	-	blocked poll 2
+2026-10-22T08:59Z	question	blocked poll 3: asked supervisor on #3441 (DS-u/DS-m unbuilt)	-	-
+2026-10-22T09:21Z	parked	supervisor answer: waiting-on-prereq shape-tools DS-u/DS-m (own lead #3440)	-	-
+2026-10-22T10:45Z	heartbeat	still parked (waiting-on-prereq) per supervisor 09:03Z on #3441; Belt nudge named lead/stroke-style (SuiteUI #3450, another run); asked supervisor on #3438	#3438	-
+2026-10-22T11:05Z	end	run act-1a1627ce3b4-ayhz ends; stroke-style stays parked (waiting-on-prereq) for the supervisor relaunch of DK-u, DK-m, DK-z	#3441	-
+2026-10-22T11:42Z	heartbeat	Belt nudge after run end; still parked (waiting-on-prereq) per supervisor 09:03Z on #3441	#3441	-
+2026-10-22T13:00Z	heartbeat	parked until shape-tools DS-u and DS-m land (supervisor 09:03Z)	-	-
+2026-10-22T13:30Z	heartbeat	parked until shape-tools DS-u and DS-m land (supervisor 09:03Z)	-	-
+2026-10-23T15:20Z	-	start	-	run act-1a16953aed5-oxsi took over; wave 1 DK-u, DK-m
+2026-10-23T15:50Z	DK-u	build	design/dk-u-stroke-canvas	DK-3 committed (97439dd8); gate pending
+2026-10-23T15:50Z	DK-m	build	design/dk-m-stroke-model	builder running from dev 721168a8
+2026-10-23T16:17Z	DK-u,DK-m	gate	-	both builders in scripts/ci --changed; PRs open on CI: PASS
+2026-10-23T16:25Z	DK-u	pr	#4864	CI: PASS at 97439dd8, 7 files +352\/-8; critic panel (correctness, first-use clarity) started
+2026-10-23T16:36Z	DK-m	gate	design/dk-m-stroke-model	builder in gate; DK-u critic panel running
+2026-10-23T16:50Z	DK-m	pr	#4888	CI: PASS at 60acae85, 15 files +199/-93; DK-7 split to design/dk-m-stroke-svg (file cap); critic started
+2026-10-23T16:58Z	DK-m	build	design/dk-m-stroke-svg	DK-7 building; critics on #4864 #4888 running
+2026-10-23T17:20Z	DK-m	gate	design/dk-m-stroke-svg	DK-7 in gate; #4864 #4888 queued in lane, critics running, 0 findings so far
+2026-10-23T17:24Z	DK-m	pr	#4916	DK-7 SVG stroke attrs, stacked on #4888, gate PASS, mutations 16/16
+2026-10-23T17:30Z	DK-m	critic	#4888	findings #4919 #4920; fix round 1 started
+2026-10-23T17:35Z	DK-u	critic	#4864	findings #4925 #4926 #4927 #4928; fix round 1 started; 6 open findings > 5: DK-z held
+2026-10-23T17:42Z	DK-u	fix	#4864	load 59; fix round 1 on #4864 and #4888; #4916 critic running; no needs-fix labels
+2026-10-23T18:04Z	DK-m	fix	#4888	fixers building on #4864 and #4888; #4916 critic building; no needs-fix
+2026-10-23T18:16Z	DK-m	fix	#4916	critic filed #4940 (dashed ellipse phase) and #4941 (miter limit); fix round 1 on #4916 started
+2026-10-23T18:25Z	DK-m	fix	#4888	heartbeat: fixers on #4864, #4888, #4916 building; no new heads; no needs-fix
+2026-10-23T18:46Z	DK-m	fix	#4888	heartbeat: fixers on #4864, #4888, #4916 still building; no new heads; no needs-fix
+2026-10-23T18:51Z	DK-m	fix	#4888	#4919/#4920 fixed at 5251a341 but #4888 is 17 files; moving the locked-layer parity into #4916 to get back under 15
+2026-10-23T19:08Z	DK-m	fix	#4888	split done: #4888 at 7710b7cf, 15 files, CI: PASS, Head moved; locked-layer parity f40eb6ef on design/dk-m-locked-parity goes into #4916 after its fixer pushes
+2026-10-23T19:08Z	DK-u	fix	#4864	heartbeat: #4864 and #4916 fixers still building (load 30); #4888 at 7710b7cf; no needs-fix
+2026-10-23T19:26Z	DK-m	fix	#4916	#4940/#4941 fixed at bed28599 (DesignSVG 19/19); merged design/dk-m-locked-parity (10 files vs #4888); gate running before push
+2026-10-23T19:29Z	DK-m	gate	#4916	heartbeat: locked-parity merged into #4916 locally (9a65ac65), gate running; #4864 fixer running; no needs-fix
+2026-10-23T19:51Z	DK-m	gate	#4916	heartbeat: merge gate on 9a65ac65 in tests (load 28); #4864 fixer running; no needs-fix
+2026-10-23T20:00Z	DK-m	fix	#4916	merged locked-layer parity into #4916, pushed 9a65ac65 (10 files +168/-24 vs #4888), CI: PASS, DesignStroke+Kernel 9/9, DesignActions+Edit 9/9; Fixes #4919 #4940 #4941; body moved through the MCP tool (no footer)
+2026-10-23T20:00Z	DK-m	critic	#4888 #4916	critic round 2 started
+2026-10-23T20:14Z	DK-u	fix	#4864	heartbeat: #4864 fixer running; #4888/#4916 critic round 2 running; no needs-fix
+2026-10-23T20:26Z	DK-m	critic	#4888 #4916	critic round 2: #4919 #4920 #4940 #4941 fixes hold at 9a65ac65 (59 tests pass); new #4989 (canvas drops stroke alpha, SVG writes stroke-opacity), sent to the #4864 fixer since the canvas code is DK-u
+2026-10-23T20:36Z	DK-u	fix-round-1	#4864	fixer on #4925-#4928 and #4989 (stroke alpha); DK-7 #4916 at 9a65ac65 holds; DK-z held (>5 findings)
+2026-10-23T20:58Z	DK-u	heartbeat	#4864	fixer still on #4925-#4928 #4989 (head 97439dd8); no slice PR merged; DK-z held
+2026-10-23T21:20Z	DK-u	heartbeat	#4864	fixer still running, head 97439dd8; status asked; DK-z held
+2026-10-23T21:57Z	DK-u	fix-round-1	#5002	round-1 fixes for #4925 #4926 #4927 #4989 split into #5002 (stacked on #4864); #4864 reset to b17f9002c (371 lines, #4928 tests); needs-core ask on #3441
+2026-10-23T22:01Z	DK-u	critic-round-2	#4864 #5002	#4864 gate PASS at b17f9002c, body Head moved, needs-split dropped (379 lines/7 files); round-2 critic started on da662ed8
+2026-10-23T22:01Z	DK-m	needs-rebase	#4888	merged dev into design/dk-m-stroke-model (catalog, catalog tests, CLI golden resolved: union of stroke.* and select.*); gate running on d6494151
+2026-10-23T22:19Z	DK-m	heartbeat	#4888	rebase gate building; DK-u round-2 critic running; no slice PR merged
+2026-10-23T22:22Z	DK-m	rebased	#4888	dev merged at d6494151; CI: PASS; pushed; Head moved
+2026-10-23T22:23Z	DK-u	critic-round-2	#5002	3 fixed, 2 partial (#4927, #4928); new findings #5009 #5010; footers stripped
+2026-10-23T22:33Z	DK-u	fix-round-2	#5011	circular fill corners (#5009), dash-phase test (#5010), corner mutation (#4928); 10/10 mutations; gate running
+2026-10-23T22:31Z	DK-u	gated	#5011	CI: PASS at 1110e183; Fast-Check and Head added
+2026-10-23T22:41Z	-	heartbeat	-	no slice PR merged; #4888 needs-rebase dropped; no needs-fix; dev scoped design run at 491ec546 in progress
+2026-10-23T23:03Z	-	heartbeat	-	all 9 PRs clean, none merged, no needs-fix; 32 open findings (z slices held); dev scoped design green at 491ec546 (no slice PR in it)
+2026-10-23T23:24Z	-	heartbeat	-	all 9 PRs clean, none merged; lane sweep running; full CI on dev at 654fb363 in progress (no slice PR in it)
+2026-10-23T23:47Z	-	heartbeat	-	no merges; #4864 #4888 base dev clean, waiting on a lane batch; PD stack waits on #3759 (supervisor); full CI 654fb363 running
+2026-10-24T00:10Z	-	heartbeat	-	no merges; all 9 PRs clean, no needs-fix/needs-rebase; full CI 40037716897 still running; 32 findings open, z slices held
+2026-10-24T00:31Z	-	heartbeat	-	no merges; 9 PRs clean, no needs-fix/needs-rebase; full CI 40037716897 green at 654fb363 (no slice PR in it); lane run 40044859262 in progress; 32 findings open, z slices held
+2026-10-24T00:54Z	-	heartbeat	-	no merges; 9 PRs clean, Head markers current on #4864/#4888, waiting on lane batch; 32 findings open, z slices held
+2026-10-24T01:15Z	-	heartbeat	-	no merges; 9 PRs clean, no needs-fix/needs-rebase; waiting on lane batch; 32 findings open, z slices held
+2026-10-24T01:37Z	-	heartbeat	-	no merges; 9 PRs clean; lane bisecting batch 20261023215139 (macOS gate red at 9180338f, probe -9 running); 32 findings open, z slices held
+2026-10-24T01:58Z	-	heartbeat	-	no merges; 9 PRs clean; bisect probe batch-20261023215139-9 ends at #4864 (old head 97439dd8), Linux green, macOS running; 32 findings open, z slices held
+2026-10-24T02:20Z	-	heartbeat	-	no merges; 9 PRs clean; bisect probe -9 macOS gate still running; 32 findings open, z slices held
+2026-10-24T02:44Z	DK-u	fix	#4864	seed strokes nested node-3 (macOS gate red) 2bd18bb86
+2026-10-24T03:06Z	-	heartbeat	-	9 PRs open clean; #4864 Head 2bd18bb86 gate PASS, stacks #5002 6f071d1c #5011 b5011388 merged base, gating; 32 findings open, z held
+2026-10-24T03:22Z	DK-u	gate	#5002 #5011	base merge of #4864 fix gated PASS; Head: 6f071d1c / b5011388
+2026-10-24T03:28Z	-	heartbeat	-	9 PRs open; #4864 Linux green on 2bd18bb86, lane run in progress; no slice merged yet; 32 findings open, z held
+2026-10-24T03:50Z	-	heartbeat	-	9 PRs open clean, no needs-fix; lane bisect probe -7 green, -9 red (#4864 old head, fixed on 2bd18bb86); 32 findings, z held
+2026-10-24T04:13Z	-	heartbeat	-	9 PRs open clean; lane probe -8 running (Linux + macOS); 32 findings, z held
+2026-10-24T04:35Z	DK-u	needs-fix	#4864	supervisor pulled for old-head macOS fails; fix 2bd18bb86 already on head; fast-lane re-added
+2026-10-24T04:57Z	-	heartbeat	-	needs-fix cleared on #4864 (head 2bd18bb8, fast-lane); 9 PRs open, none merged; probe -8 macOS running; findings 32
+2026-10-24T05:19Z	-	heartbeat	-	#4864@2bd18bb8 in lane batch 20261024050226 (Linux green, macOS gate 40064703313 running); probe -8 green; 9 PRs open, none merged; findings 32
+2026-10-24T05:41Z	-	heartbeat	-	#4864 batch 20261024050226 macOS gate 40064703313 still running; 9 PRs open, none merged; findings 32
+2026-10-24T06:04Z	-	heartbeat	-	batch 20261024050226 macOS red: Flare RenderBudgetFlareExportPackTests.progressInOneBodyPerTick time limit then AppSnapshotTests hang (not stroke code); bisect probe -6 at #4864 running (40067473896); findings 32
+2026-10-24T06:28Z	-	heartbeat	-	probe -6 (whole batch #4846,#4852,#4858,#4861,#4864) red on the Flare export-pack budget test that #4852 adds; RenderBudgetDesignStrokeTests and DesignStroke suites passed; #4864 not named; findings 32
+2026-10-24T06:49Z	-	heartbeat	-	lane bisecting batch 20261024050226 (probe -1 macOS queued); #3759 got a dev merge 1611484f (Linux check running); #4864 waits, no needs-fix; findings 32
+2026-10-24T07:12Z	-	heartbeat	-	probe -1 macOS 40070370339 running; #3759 kept current with dev by the supervisor (4f3e1ba3); #4864 waits, no needs-fix; findings 32
+2026-10-24T07:22Z	3	stage-start	-	run act-1a16cc9673d-cmzv resumed; #4864 #4888 #4916 #5002 clean on fast-lane, #3759 supervisor; scoped design run 40072347300 on dev 830af22d running
+2026-10-24T07:26Z	3	heartbeat	-	closed #4931 dup of gap #4990; slice PRs waiting on lane
+2026-10-24T07:48Z	3	heartbeat	-	scoped design 40072347300 green on dev 830af22d (no lead slice in it yet); all slice PRs clean, none needs-fix; lane batch 20261024050226 bisecting
+2026-10-24T08:10Z	3	heartbeat	-	dev 1bbaba6c (batch 20261024050226 landed, no lead PR in it); #4864 #4888 #3759 still merge clean into dev; none needs-fix
+2026-10-24T08:32:49Z	3	check	-	dev 1bbaba6c; lane batch 20261024081307 (#4903-#4952) bisecting, no lead PR in it; lead PRs clean, fast-lane, none needs-fix
+2026-10-24T08:53:52Z	3	check	-	dev 1bbaba6c unchanged; lane batch 20261024081307 still bisecting (probes 0,1,3,6), no lead PR in it
+2026-10-24T09:15:08Z	3	check	-	dev 1bbaba6c unchanged; lane batch 20261024081307 still bisecting (no lead PR in it); lead PRs waiting
+2026-10-24T09:36:45Z	3	check	-	dev 9f476af7 (#5117 dev-red fix, scripts only); #4864/#4888/#3759 merge clean; lane batch 20261024081307 still bisecting
+2026-10-24T09:57:57Z	3	check	-	dev 9f476af7 unchanged; lane batch 20261024081307 still in flight since 08:13 (no lead PR in it); lead PRs waiting
+2026-10-24T10:20:22Z	3	check	-	dev 9f476af7 unchanged; lane active (Linux checks running) but batch 20261024081307 unresolved since 08:13; lead PRs waiting
+2026-10-24T10:42:10Z	3	check	-	dev 9f476af7 unchanged; lane batch 20261024081307 still open; lead PRs waiting
+2026-10-24T11:04:11Z	3	check	-	dev 6ad8cadb; lane fix #5150 (lists all open PRs) merged; new batch 20261024110214 (#5006-#5144) has no lead PR; #4864/#4888/#3759 merge clean
+2026-10-24T11:26:15Z	3	check	-	dev 6ad8cadb unchanged; batch 20261024110214 in flight, no lead PR in it; lead PRs waiting
+2026-10-24T11:48:12Z	3	check	-	dev 6ad8cadb unchanged; batch 20261024110214 still in flight, no lead PR in it
+2026-10-24T12:10:58Z	3	check	-	dev 6ad8cadb unchanged; batch 20261024110214 bisecting (probe -6), no lead PR in it; #4864 #4888 #3759 clean, no needs-fix
+2026-10-24T12:32:51Z	3	check	-	dev 78983bc3 (#4911 landed); no lead PR in a batch; #4864 #4888 #3759 clean, no needs-fix/needs-rebase
+2026-10-24T12:53:39Z	3	check	-	dev 6be19b34; no lead PR in any batch; #4864 #4888 #3759 clean
+2026-10-24T13:15:17Z	3	check	-	dev 6be19b34 unchanged; lane active (Linux integration runs), no lead PR batched yet; #4864 #4888 #3759 clean
+2026-10-24T13:36:56Z	3	check	-	dev 6be19b34 unchanged; batch 20261024110214 bisecting (probe -3); no lead PR batched; #4864 #4888 #3759 clean
+2026-10-24T13:58:47Z	3	check	-	dev 6be19b34 unchanged; batch 20261024110214 still bisecting; no lead PR batched; #4864 #4888 #3759 clean
+2026-10-24T14:20:02Z	3	check	-	dev 366cf36e (#5138 #5097 #5087 landed); PD-a #3759 now conflicts in DesignNode/Extras/StackTests, fixer dispatched; #4864 #4888 clean
+2026-10-24T14:38:05Z	3	fix	-	PD-a #3759 merged dev 366cf36e, head 8b376993, CI: PASS; stacked PD branches merge clean on it
+2026-10-24T14:41:36Z	3	check	-	dev e79e9afc (#5046); no slice merged; #4864 #4888 #3759 clean, no needs-fix/needs-rebase; batch 20261024110214 still probing
+2026-10-24T15:03:09Z	3	check	-	dev e79e9afc unchanged; new batch 20261024144917 (12 older PRs, ends at #4838) so #4864 #4888 are next in queue; all slice PRs clean, no needs-fix
+2026-10-24T15:25:16Z	3	check	-	dev e79e9afc unchanged; batch 20261024144917 in flight; slice PRs clean, queued next, no needs-fix
+2026-10-24T15:46:49Z	3	check	-	dev e79e9afc unchanged; PD-a #3759 now at f32aa3ec (dev merged in, supervisor-side); batch 20261024144917 in flight; slice PRs clean, no needs-fix
+2026-10-24T16:08:27Z	3	check	-	dev 33cd6e97 (batch 20261024144917 landed); DK-u #4864 now in batch 20261024160327; #4888 #3759 clean, no needs-fix
+2026-10-24T16:29:39Z	3	check	-	dev 33cd6e97 unchanged; batch 20261024160327 (with #4864) in flight; PD-a at d1e9200a; all clean
+2026-10-24T16:50:56Z	3	check	-	dev 33cd6e97 unchanged; batch 20261024160327 (with #4864) still in flight; all slice PRs clean
+2026-10-24T17:14:16Z	3	check	-	DK-u #4864 merged to dev 2ca935a4; #4888 needs-rebase; fixer restacking DK-m and DK-u stacks; PD-a #3759 awaits supervisor
+2026-10-24T17:36:19Z	3	check	-	dev c0920138; fixer restacking #4888/#4916 and #5002/#5011; PD-a #3759 clean at 346de227, awaits supervisor; no slice done
+2026-10-24T17:57:37Z	3	check	-	#4888 restacked f75a597f clean vs dev; fixer on #4916 and #5002/#5011; PD-a #3759 awaits supervisor
+2026-10-24T18:19:24Z	3	check	-	#4888 f75a597f, #4916 36c3b4b2, #5002 af79946f restacked clean vs dev; #5011 in progress; PD-a #3759 awaits supervisor
+2026-10-24T18:22:29Z	3	fix	-	fixer done: #4888 f75a597f (stroke boxed for nodeStaysSmall), #4916 36c3b4b2, #5002 af79946f, #5011 98a7c4f0; all CI: PASS, Head lines moved
+2026-10-24T18:41:52Z	3	check	-	PD-a #3759 merged to dev 674461187; scoped design run 40120669902 is on d13c3ff2 (pre-PD-a); #4888 conflicts with PD-a in DesignNode/Extras; fixers restacking DK-m and PD-m/PD-u stacks
+2026-10-24T19:04:41Z	3	check	-	PD-a merged 674461187; scoped design 40123009289 queued; 40120669902 red only on DesignWindowDragTests.withoutTheBoxTheEditorRunsPerSample 180s timeout (un-quarantined by #4983, ~117s locally; not our slices); fixers A/B restacking DK-m and PD stacks
+2026-10-24T19:25:47Z	3	check	-	dev 6f66ca334; scoped design 40123009289 (674461187) in progress; restacks underway: dk-m-stroke-model, pd-m, pd-u1 clean vs dev; dk-m-svg, pd-u2, pd-u3 pending; dk-u2/u3 clean, waiting on lane
+2026-10-24T19:47:51Z	3	check	-	scoped design 40123009289 (674461187) red only on withoutTheBoxTheEditorRunsPerSample 180s timeout; filed #5212 (blocks all design slice-done); DK-m #4888/#4916 and PD #4922/#4963/#4964/#5001 restacked, CI: PASS, waiting on lane; DK-u #5002/#5011 waiting on lane
+2026-10-24T20:10:28Z	3	check	-	poll: no new design run since 40123009289 (red, #5212 timeout, no reply); lane idle on our PRs, none needs-fix/needs-rebase
+2026-10-24T20:31:57Z	3	check	-	poll: full CI 40129856269 queued on dev ef37711de (contains PD-a); #5212 open, no reply; our 10 PRs clean, no needs-fix/needs-rebase, none merged
+2026-10-24T20:54:14Z	3	check	-	poll: full CI 40129856269 Linux green, macOS running; #4888 in lane/batch-20261024205137; #5212 open, no reply; no needs-fix/needs-rebase
+2026-10-24T21:16:28Z	3	check	-	poll: full CI 40129856269 macOS still running; #4888 still in lane/batch-20261024205137; #5212 open, no reply; no needs-fix/needs-rebase
+2026-10-24T21:38:22Z	3	check	-	poll: #5222 (drag-test time limits, for #5212) on dev afef017c2; full CI 40129856269 macOS still running; lane bisecting batch-20261024205137 (#4888 in prefix); no needs-fix/needs-rebase
+2026-10-24T22:00:38Z	3	check	-	poll: full CI 40129856269 green (contains 674461187); lane batch-20261024205137 still bisecting (#4888); no needs-fix/needs-rebase
+2026-10-24T22:22:22Z	3	check	-	poll: scoped design 40135075233 on afef017c2 green, #5212 closed; batch-20261024205137 macOS gate red on #4888 tip (dev was red then), probes -3/-6 macOS gates queued since 21:17; no needs-fix/needs-rebase
+2026-10-24T22:44:07Z	3	check	-	poll: batch-20261024205137 bisect now at probe -1 (#5192 only; #4888 is the batch tip); dev unchanged at afef017c2; our 8 PRs clean, no needs-fix/needs-rebase
+2026-10-24T23:06:10Z	3	check	-	poll: batch-20261024205137 bisect probe -1 (#5192) macOS gate 40139723227 running since 22:42; full CI 40137153379 on afef017c2 running; dev unchanged; our 8 PRs clean, no labels
+2026-10-25T00:11:38Z	3	heartbeat	-	resume after Belt nudge: dev afef017c (full CI 40137153379 green); batch-20261024235353 (12 PRs, none ours) bisecting, probe -6 running; our 8 PRs open, fast-lane, no needs-fix/needs-rebase
+2026-10-25T00:30:29Z	3	heartbeat	lane	batch-20261024235353 still bisecting (probe -6); dev afef017c; our 8 PRs unchanged, waiting for next sweep
+2026-10-25T00:47:09Z	3	heartbeat	lane	batch-20261024235353 probe -6: Linux 40145607006 green, macOS 40145609051 running; our 8 PRs unchanged, waiting for next sweep
+2026-10-25T01:04:15Z	3	question	lane	probe -6 macOS 40145609051 in_progress 54 min (no runner?); 4 identical blocked polls; asked supervisor on #3441/#3454; our PRs unchanged
+2026-10-25T01:22:53Z	3	heartbeat	lane	supervisor: PRs need nothing; added beta label to all 8 PRs; batch-20261024235353 still bisecting
+2026-10-25T01:40:09Z	3	heartbeat	lane	dev ae3efdb8 unchanged; batch-20261024235353 bisect at probe -9; our 8 PRs clean, beta, no needs-fix
+2026-10-25T01:57:27Z	3	heartbeat	lane	dev c16bcd16; batch-20261024235353 bisect at probe -9; 8 PRs open, clean, beta; DK-z/PD-z held (findings>5)
+2026-10-25T02:14:13Z	3	heartbeat	lane	dev c16bcd16 unchanged; batch-20261024235353 bisect still at probe -9; 8 PRs open, clean, beta; DK-z/PD-z held (findings>5)
+2026-10-25T02:30:30Z	3	heartbeat	lane	batch-20261024235353 resolved: prefix merged (dev 3db45eb4, incl #5238 no batch on red dev); our 8 PRs not in it, still open/clean/beta, wait next batch; DK-z/PD-z held (findings>5)
+2026-10-25T02:46:41Z	3	heartbeat	lane/batch-20261025023716	new batch (12 PRs) holds #4888 #5002 #4963; #4922 and stacked #4916 #5011 #4964 #5001 wait next batch; no needs-fix; DK-z/PD-z held
+2026-10-25T03:02:43Z	3	heartbeat	lane/batch-20261025023716	batch with #4888 #5002 #4963 still running (dev 3db45eb4); no needs-fix/needs-rebase; DK-z/PD-z held
+2026-10-25T03:18:54Z	3	heartbeat	lane/batch-20261025023716-6	batch red, bisecting; probe -6 (through #5174) contains #4888 #4963 #5002; no needs-fix on ours; DK-z/PD-z held
+2026-10-25T03:41:55Z	3	heartbeat	lane/batch-20261025023716	macOS gate red (run 40155151356); bisect probe -6 red, probe -3 (through #4988) running; no needs-fix on ours yet
+2026-10-25T04:42:20Z	3	stage	#4888	#4888, #4916, #5002 and #5011 are clean and wait on the next batch. The batch red was #4963 (placed-images), not ours. DK-z is held while more than 5 findings are open.
+2026-10-25T05:02:03Z	3	heartbeat	#4888	probe lane/batch-20261025023716-1 (#4888 alone) macOS gate 40159661924 still running; DK PRs open, nothing merged
+2026-10-25T05:22:01Z	3	heartbeat	#4888	probe lane/batch-20261025023716-1 macOS gate 40159661924 green: #4888 clean, waits on lane merge; DK PRs open
+2026-10-25T05:54:44Z	3	stage	#4916	#4888 merged 05:23Z; #4916 needs-split cleared by merging dev (192 lines/10 files), ci --changed PASS, Head 1910a216; #5002/#5011 queued
+2026-10-25T06:15:18Z	3	heartbeat	#4916 #5002 #5011	all open in the lane, no fix labels; batch 054232 bisecting other PRs
+2026-10-25T06:34:50Z	3	heartbeat	#4916 #5002 #5011	all open in the lane, no fix labels
+2026-10-25T06:53:44Z	3	heartbeat	#4916 #5002 #5011	all open in the lane, no fix labels
+2026-10-25T07:12:43Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; lane still bisecting batch 054232 (probe -3)
+2026-10-25T07:31:55Z	3	heartbeat	#4916 #5002 #5011	all open in the lane, no fix labels
+2026-10-25T07:51:52Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; lane bisecting batch 054232 (probe -3 macOS running)
+2026-10-25T08:12:09Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; lane still bisecting batch 054232 (probe -3 macOS gate running since 07:07Z)
+2026-10-25T08:32:05Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; lane bisecting batch 054232 (probe -3 done, probe -4 #4960 running)
+2026-10-25T08:51:53Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; batch 054232 probe -4 (#4960) macOS red, bisect near its end
+2026-10-25T09:11:27Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; old batch resolved, new batch 090316 (12 PRs, none ours) running; ours queue for the next
+2026-10-25T09:31:47Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; batch 090316 red (none ours), bisecting at probe 6; ours queue for the next batch
+2026-10-25T09:51:02Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; batch 090316 bisect at probe 6 (macOS running); scheduled dev CI 40179648854 red (not ours); ours queue
+2026-10-25T10:11:03Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; batch 090316 probe 6 macOS gate still running; ours queue for next batch
+2026-10-25T10:31:09Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; batch 090316 bisect at probe 9 (#5044); ours queue for next batch
+2026-10-25T10:51:32Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; batch 090316 bisect: probe 6 mac + probe 9 linux green; ours queue for next batch
+2026-10-25T11:11:55Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; no new lane runs since 10:40 (batch 090316 bisect idle after probe 9 linux green); ours queue for next batch
+2026-10-25T11:32:17Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; new batch 111803 (#4886 only, Linux running), ours not in it; queue for next batch
+2026-10-25T11:52:20Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; #4886 merged via batch 111803; batch 114830 (#4943) Linux running; ours queue behind
+2026-10-25T12:12:16Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; batch 114830 (#4943 only) Linux green, macOS gate pending; ours wait for next batch
+2026-10-25T12:32:10Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; #4943 merged; batch 122638 (#4953 only) Linux running; ours wait
+2026-10-25T12:52:57Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; batch 122638 (#4953 only) Linux green; dev 58bb6d4d green; ours wait
+2026-10-25T13:13:00Z	3	heartbeat	#4916 #5002 #5011	all open, no fix labels; #4953 merged to dev 930337d5; batch 125743 (#4962 only) Linux running; ours wait
+2026-10-25T13:34:40Z	3	heartbeat	#4916 #5002 #5011	lane sweep 13:10Z: #4916 #4922 #4963 #5002 eligible (marker + local-ci/prescreen), stacked PRs wait on base; 65 ready PRs queued behind single-PR batches; nothing to fix, waiting on lane
+2026-10-25T13:54:02Z	3	heartbeat	#4916 #5002 #5011	all seven open, no fix labels; #5006 merged (dev d3323f6a); no batch in flight; ours eligible, waiting on lane
+2026-10-25T14:15:00Z	3	heartbeat	#4916 #5002 #5011	batch 20261025140134 holds only #5007 (photo); all seven of ours still ready (fast-lane, line:design, beta), no fix label; dev d3323f6a; DK-z/PD-z held
+2026-10-25T14:35:05Z	3	heartbeat	#4916 #5002 #5011	dev 15237407 (#5007 landed); no batch in flight; all seven of ours ready, heads unchanged, no fix label; DK-z/PD-z held
+2026-10-25T14:55:33Z	3	heartbeat	#4916 #5002 #5011	dev 0e8ebba3 (#4960 landed); batch 20261025143843 holds only #5008; all seven of ours ready, heads unchanged, no fix label; DK-z/PD-z held
+2026-10-25T15:15:04Z	3	heartbeat	#4916 #5002 #5011	dev 15b2546e (#5008, #5318 landed); batch 20261025150758 holds only #5039; all seven of ours ready, heads unchanged, no fix label; DK-z/PD-z held
+2026-10-25T15:35:13Z	3	heartbeat	#4916 #5002 #5011	dev 15b2546e unchanged; batch 20261025150758 (#5039 only) still in flight; all seven of ours ready, heads unchanged, no fix label; DK-z/PD-z held
+2026-10-26T02:04:31Z	0	stage-start	#3441	run act-1a175ee11f8-jfg2 resumed; main d3323f6a verified; lead/stroke-style rebuilt on main (old tip archived)
+2026-10-26T02:04:31Z	3	heartbeat	#4916 #5002 #5011	all open, clean, fast-lane; dev-red #5321 holds batches; DK-z held (findings > 5)
