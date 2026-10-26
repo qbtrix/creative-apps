@@ -11,7 +11,7 @@ import Testing
         HaloLayerKind.allCases.map(HaloCommand.newLayer)
         + [.duplicateLayer, .beginRenameLayer, .deleteLayer, .bringLayerForward, .sendLayerBackward,
            .newComposition, .duplicateComposition, .deleteComposition, .undo, .redo,
-           .open, .openRecent("/tmp/Bounce.halo"), .openRecent(""), .save, .saveAs, .openRenderSheet, .renderFrame,
+           .open, .save, .saveAs, .openRenderSheet, .renderFrame,
            .playPause, .toggleLoop, .nextFrame, .previousFrame, .goToStart, .goToEnd, .setInPoint, .setOutPoint]
         + HaloEasingPreset.allCases.map(HaloCommand.setEasing)
 
@@ -41,7 +41,7 @@ import Testing
 
     @Test func noRecentsSaysWhy() {
         let state = HaloMenuState(project: HaloCommandCatalogTests.ballSelected())
-        #expect(HaloMenuState.spec("file.open-recent").availability(state).why == "No recent projects.")
+        #expect(HaloMenuState.spec("file.clear-recent").availability(state).why == "No Recent Files")
     }
 
     @Test func runGoesThroughTheCatalog() throws {
