@@ -275,3 +275,4 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 - 2026-10-26T19:11:40Z 19:11 poll: dev-red #5321 closed, no needs-fix; none merged yet, batches unblocked
 - 2026-10-26T19:33:50Z UP-photo/flare/halo/z (#5088 #5089 #5091 #5231) open, none merged or needs-fix; no dev-red
 - 2026-10-26T19:55:28Z UP stack #5088 #5089 #5091 #5231 open, none merged/needs-fix; no dev-red
+- 2026-10-26T20:18:12Z UP stack #5088 #5089 #5091 #5231 open, none merged/needs-fix; no dev-red
