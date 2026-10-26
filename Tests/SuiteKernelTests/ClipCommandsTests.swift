@@ -73,7 +73,7 @@ private func layer(_ id: String, clipped: Bool = false, children: [LayerNode<Cli
     @Test func unclipOnAnUnclippedLayerIsUnavailable() throws {
         let catalog = try ClipDoc.catalog()
         var doc = ClipDoc(tree: Self.stack, selected: ["B"])
-        #expect(catalog.availability("layer.unclip", on: doc).why == ClipCommands.notClippedHelp)
+        #expect(catalog.availability("layer.unclip", on: doc).why == ClipRules.notClippedHelp)
         #expect(throws: CatalogError.self) { try catalog.run("layer.unclip", params: .object([:]), on: &doc) }
         #expect(doc.history.steps.isEmpty)
     }

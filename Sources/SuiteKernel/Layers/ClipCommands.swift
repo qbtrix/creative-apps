@@ -9,9 +9,10 @@ public typealias ClipSelection = (id: String, isClipped: Bool, hasBase: Bool)
 
 /// What an app gives the clip commands: the selection and the edit that clips or releases it.
 public protocol ClipTarget: Sendable {
-    /// The selected layer; nil when nothing is selected. `ClipCommands.selection` builds it from a tree.
+    /// The primary selected layer; nil when nothing is selected. With several layers selected,
+    /// availability reads this one. `ClipCommands.selection` builds it from a tree.
     var clipSelection: ClipSelection? { get }
-    /// Clips (or releases) every selected layer as one undo step named `name`.
+    /// Clips (or releases) every selected layer that has a base, as one undo step named `name`.
     mutating func setClipped(_ clipped: Bool, name: String) throws
 }
 
@@ -22,8 +23,6 @@ public enum ClipCommands {
 
     /// The help both commands show when no layer is selected.
     public static let nothingSelectedHelp = "Select a layer first."
-    /// The help `layer.unclip` shows when the selected layer isn't clipped.
-    public static let notClippedHelp = "The selected layer isn't clipped."
 
     /// The selection for `id` in `tree`: nil for an unknown id; its base comes from ClipRules on
     /// its own sibling list, so a clip never reaches out of its group.
@@ -43,7 +42,7 @@ public enum ClipCommands {
     /// `layer.unclip` needs a clipped selection.
     static func canUnclip<T: ClipTarget>(_ t: T) -> Availability {
         guard let s = t.clipSelection else { return .unavailable(nothingSelectedHelp) }
-        return s.isClipped ? .available : .unavailable(notClippedHelp)
+        return s.isClipped ? .available : .unavailable(ClipRules.notClippedHelp)
     }
 
     /// The two specs, for an app whose layers clip.

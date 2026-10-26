@@ -16,7 +16,7 @@
   {
     "label": "unclipNeedsClipped: layer.unclip runs on an unclipped layer",
     "file": "Sources/SuiteKernel/Layers/ClipCommands.swift",
-    "find": "return s.isClipped ? .available : .unavailable(notClippedHelp)",
+    "find": "return s.isClipped ? .available : .unavailable(ClipRules.notClippedHelp)",
     "replace": "return .available",
     "tests": "ClipCommandsTests"
   },
