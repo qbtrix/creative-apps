@@ -284,3 +284,4 @@ time	kind	note
 2026-10-26T17:15Z	wait	heartbeat	#5321	17:16 poll: slice PRs open and clean; waiting on dev-red #5321 and full CI 40357785665
 2026-10-26T17:30Z	wait	heartbeat	#5321	17:30 poll: slice PRs open and clean; waiting on dev-red #5321 and full CI 40366795361
 2026-10-26T17:43Z	wait	heartbeat	#5321	17:43 poll: slice PRs open and clean; waiting on dev-red #5321 and full CI 40366795361
+2026-10-26T17:57Z	wait	heartbeat	#5321	17:57 poll: slice PRs open and clean; waiting on dev-red #5321 and full CI
