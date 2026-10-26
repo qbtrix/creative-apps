@@ -71,4 +71,5 @@ Next: wait for the lane to land #4924 (LC-u) and #4937 (LC-5); then merge origin
 - 2026-10-26T11:22:31Z: heartbeat: #4924/#4937 queued clean; dev c6700dba.
 - 2026-10-26T11:44:14Z: heartbeat: #4924/#4937 queued clean; dev c6700dba.
 - 2026-10-26T12:08:37Z: heartbeat: #4924/#4937 queued clean; dev c6700dba; dev-red #5321 (macOS, onboarding timeouts) open, not ours; lane sweeping.
+- 2026-10-26T12:31:14Z: heartbeat: #4924/#4937 queued clean; dev 746be6b1 (macOS CI sharded); dev-red #5321 still open.
 - Candidate gaps after LC-z: relinked id keeps the old path; re-importing a folder with copy makes new copies.
