@@ -75,3 +75,9 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - #5250, #5252, #5257, #5258, #5259 and #5260 show mergeable_state dirty against dev. They will be merged with dev once wave 2 lands.
 - Findings: 0 open.
 - Stage: 3 wave 3 (waiting for wave 2 to land).
+
+### 2026-10-26T03:30Z check-in
+
+- dev still d0859e01; wave 2 (#5064, #5233, #5235, #5236) still queued with fast-lane, no needs-fix or needs-rebase.
+- Wave 3 PRs (#5247-#5260) wait for wave 2; no lane labels to act on.
+- 0 open findings. Stage: 3 wave 3 (waiting for wave 2 to land).
