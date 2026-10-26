@@ -1,18 +1,18 @@
 # cull-finish lead record
 
 Issue: #3458 · Packet: docs/blueprints/library/features/cull-finish.md
-Run: act-1a170488aff-41nk (line lead, line:library) · resumed 2026-10-24T23:40Z · earlier act-1a16cc967d9-mcuv, act-1a16953af22-wvhu, act-1a15995d319-aamb
-Stage: DR-u #5130, DR-m #4899+#5100 on the lane; DR-z: DR-9 #5237, DR-10 #5240 stacked, C4 #5241 on dev; checked 2026-10-25T07:49:50Z
-Base: origin/dev 830af22d
-Next: lane merges #4838, #4899; DR-u tests PR (feat/cull-finish-dr-u-tests) opens once #4838 is on dev; builder wires excludedPaths into headless and window save (RJ-L06), stacked on #4899; then scoped run app=library for Belt-Slice-Done DR-u, DR-m; then DR-z
+Run: act-1a175ea5531-x1ci (line lead, line:library) · resumed 2026-10-26T01:59:55Z · earlier act-1a170488aff-41nk (line lead, line:library) · resumed 2026-10-24T23:40Z · earlier act-1a16cc967d9-mcuv, act-1a16953af22-wvhu, act-1a15995d319-aamb
+Stage: DR-u #5130 ready; DR-m #4899 needs-fix round 1 (services tests assumed the Trash unavailable on macOS) + #5100 stacked; DR-z #5237/#5240 stacked, C4 #5241 ready; code batches held by dev-red #5321 (macOS, not Library); checked 2026-10-26T01:59:55Z
+Base: origin/dev 8eff8ab85
+Next: push #4899's fix, move Head:; lane lands #5130, #4899, then retarget #5100 to dev; #5237 to dev after #5130, #5240 after #5237; Belt-Slice-Done DR-u, DR-m, DR-z on a green library run with each slice's last PR; critics on DR-u screens; Belt-Contact-Sheet
 
 ## Slices
 | slice | behavior | tasks | waits on | ui | rounds | state | run |
 |---|---|---|---|---|---|---|---|
 | DR-a | contract: Trash service, label keys 6-9, Delete Rejects stubs, tests written disabled | DR-1, DR-2 | FC-a (on dev), MD-a (on dev) | no | 0 | done | 39507806909 |
-| DR-u | confirm dialog, ⌥⌘⌫, Set Label 6-9; snapshots; journey skipped | DR-3, DR-4 | DR-a, FC-a, MD-d/e (met: MD-a merged) | yes | 0 | PR #4838 open | - |
-| DR-m | label cull, deleteRejects body + undo, excludedPaths coding, LiveTrash | DR-5..DR-8 | DR-a; MD-c, MD-e (met: MD-a merged) | no | 0 | DR-6 #4844 merged, DR-7+8 #4899 open | - |
-| DR-z | journey on, docs, C4, feature-done | DR-9, DR-10 | DR-u, DR-m | no | 0 | waiting | - |
+| DR-u | confirm dialog, ⌥⌘⌫, Set Label 6-9; snapshots; journey skipped | DR-3, DR-4 | DR-a | yes | 2 | #4838 merged 33cd6e97; #5130 ready (Linux green, prescreen green) | - |
+| DR-m | label cull, deleteRejects body + undo, excludedPaths coding, LiveTrash | DR-5..DR-8 | DR-a | no | 1 | DR-6 #4844 merged; #4899 needs-fix (Mac prescreen: LibraryServicesTests) fixed in round 1; #5100 stacked | - |
+| DR-z | journey on, docs, C4, feature-done | DR-9, DR-10 | DR-u, DR-m | no | 0 | #5237, #5240 stacked on #5130; #5241 ready | - |
 
 ## Tasks
 | id | slice | wave | behavior | PR | state |
@@ -67,3 +67,4 @@ Next: lane merges #4838, #4899; DR-u tests PR (feat/cull-finish-dr-u-tests) open
 - 2026-10-24T09:21Z: DR-u tests (render budget + J-DR1 journey skipped "waits on DR-9") are PR #5130, base feat/cull-finish-dr-u (#4838), 2 files +143, CI: PASS. Retarget to dev when #4838 merges.
 
 - 2026-10-24T23:42:58Z: resumed by act-1a170488aff-41nk. The brief says to rebase lead/cull-finish onto main; it is retired (records live here on lead/library-cull-finish), so it is left as is. PRs keep targeting dev: scripts/fast-lane.sh merges only into dev, and main takes dev SHAs after full CI. #4838 merged 2026-10-24T15:48Z; #5130 already targets dev. DR-u is done once #5130 is on dev and a library run covers it.
+- 2026-10-26T01:59:55Z (run act-1a175ea5531-x1ci): main verified at d3323f6a. lead/cull-finish rebased onto main (brief rule 3) and mirrors this record. #4899's Mac prescreen failed liveListsAReasonForEveryStub and liveStubsSayWhyUntilBuilt: they expected the Trash unavailable, but DR-8 makes LiveTrash live on macOS (unavailable nil). The tests now expect the trash reason only where LiveTrash.unavailable is set. Fix round 1 of 2 for DR-m. Findings with Feature: cull-finish: 0.
