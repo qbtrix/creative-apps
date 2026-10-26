@@ -250,3 +250,4 @@ utc	stage	event	ref	note
 2026-10-26T21:18Z	heartbeat	waiting	#5321	dev-red #5321 open; #4922 #4963 #4964 #5001 open, unchanged since 13:24Z; findings >5, PD-z held
 2026-10-26T21:39Z	heartbeat	waiting	#5321	dev-red #5321 open; #4922 #4963 #4964 #5001 open, unchanged since 13:24Z; findings >5, PD-z held
 2026-10-26T22:01Z	fix	needs-rebase	#4922	lane: golden design.list-commands.json conflicts with dev (file.new summary); merged origin/dev, kept place.* + dev summary; scripts/ci --changed running
+2026-10-26T22:10Z	fix	pushed	#4922	dev merged in, scripts/ci --changed CI: PASS, pushed 5a06395b, Head: moved; waiting for lane to drop needs-rebase
