@@ -172,3 +172,4 @@ utc	stage	event	ref	note
 2026-10-25T15:55Z	3	lane	lane	check: no fix labels on ours, #5320 and #5039 merged (not ours), no dev-red
 2026-10-26T02:20:02Z	3	resume	-	resume act-1a175f403b9-j4z9: lead branch rebuilt on main d3323f6a; AN-u #4893 clean in lane; dev-red #5321 holds code batches; CB-8 #4902 open so AN-10 waits
 2026-10-26T02:42:57Z	3	poll	-	02:44Z poll: no merges of ours; dev-red #5321 open; AN-10 built and pushed (lead/anchor-parenting-AN-flare-m 149649c8, unopened until #4902 and #4891 land); gap #5367 filed
+2026-10-26T03:08:06Z	3	poll	-	03:08Z poll: none of ours landed; queued behind batch (107 ready); dev-red #5321 open; no findings

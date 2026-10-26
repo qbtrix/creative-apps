@@ -13,6 +13,7 @@ Next: lane merges AN-u #4893, then open AN-6 (lead/anchor-parenting-AN-u-6); AN-
 - 02:20Z: dev-red #5321 (macOS, range main..cc5c6234, none ours) holds every code batch; no open finding names this feature.
 - 02:44Z: AN-10 built ahead (shared files with #4902, #4891 kept it unopened). Kernel gap: layer.set-parent schema refuses parent: null; filed #5367 (gap, line:suiteui), Flare widens its own copy meanwhile.
 - LS-3/LS-6/LS-7/LS-11 in the old Next belong to layer-styles (another run); dropped from this record's Next.
+- 03:08Z: three polls with nothing of ours landed; lane sweep shows #4939/#4887/#4893 eligible (marker + prescreen) behind a batch in flight, 107 ready PRs ordered p0/beta/oldest, dev-red #5321 open. Queue depth, not a blocker: no supervisor question. BK app PRs restack once #4939 lands (not twice).
 
 
 
