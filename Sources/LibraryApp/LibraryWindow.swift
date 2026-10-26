@@ -44,6 +44,8 @@ final class LibraryAreas {
 struct LibraryWindow: View {
     @State var model: LibraryCatalog
     @State var areas = LibraryAreas()
+    /// The loupe's GPU route (suite-imaging IM-11); nil in a test window.
+    @Environment(\.libraryLoupeGPU) var loupeGPU
 
     /// `arguments` are the launch arguments (LibraryLaunch); a test passes a fixture's.
     init(arguments: [String] = ProcessInfo.processInfo.arguments) {
@@ -132,6 +134,7 @@ struct LibraryWindow: View {
         .onAppear {
             LibraryShell.read = { model }
             LibraryShell.take = { model.takeLive($0) }
+            loupeGPU?.onFailure = { loupeAreaRender(.full) }
         }
         .onDisappear {
             LibraryShell.read = nil
@@ -151,6 +154,8 @@ struct LibraryWindow: View {
         photo.cropTitle = crop.cropTitle
         photo.applyCrop = crop.applyCrop
         photo.resetCrop = crop.resetCrop
+        (photo.rotateLeft, photo.rotateRight) = (crop.rotateLeft, crop.rotateRight)
+        (photo.flipHorizontal, photo.flipVertical) = (crop.flipHorizontal, crop.flipVertical)
         return LibraryMenu(
             edit: editMenu, file: fileMenu, thumbnails: thumbnailsMenu, cull: cullMenu, persist: persistMenu,
             view: viewMenu, photo: photo, export: exportMenu, share: shareMenu,
@@ -166,7 +171,8 @@ struct LibraryWindow: View {
         let action: LibraryMenu.Action?
         switch key {
         case .rating, .pick, .reject, .unflag, .label:
-            guard let cull = current.cull.key else { return .ignored }
+            // X with a crop draft open falls through to the aspect picker's swap.
+            guard let cull = current.cull.key, model.cullChange(forKey: key) != nil else { return .ignored }
             cull(key)
             return .handled
         case .first: action = current.view.first

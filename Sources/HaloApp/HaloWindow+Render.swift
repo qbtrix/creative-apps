@@ -6,7 +6,7 @@
 // while it isn't idle (HaloRenderSheetHost), with Halo's rows in the options
 // slot (HaloRenderOptionRows): the Size label over Full and Half chips (the
 // sheet's own 0.25x-4x Size row is off: Halo renders at those two only), the
-// Codec and Transparent background rows (HaloRenderSheet.swift, HX-2), the
+// Codec and Transparent background rows (HaloRenderSheet+Suite.swift, HX-2), the
 // Folder label over the folder's name (`-HaloRenderTo`, one line, its path the
 // help, in the secondary text colour while the sheet is off) and Choose… (its `render.choose-folder` spec's
 // MenuCommand, its disabled help the sheet's Export wording), and one note at

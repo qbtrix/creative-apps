@@ -115,6 +115,7 @@ extension PhotoWorkspace {
                 gate { $0.toolHelp(tool) }) { $0.selectTool(tool) }
         }
         + HistoryCommands.specs(PhotoWorkspace.self) + SampleCommands.specs(PhotoWorkspace.self) + textCommands + pathCommands
+        + ToneCommands.specs(PhotoWorkspace.self)
 
     static let fileCommands: [CommandSpec<PhotoWorkspace>] = [
         .typed("file.new", title: "New Image", summary: "Opens a new white image of the given size.", kind: .file,

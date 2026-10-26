@@ -1,12 +1,12 @@
-// LibraryBackupSheet.swift: File > Restore Catalog Backup…'s sheet
+// LibraryBackupSheet+Suite.swift: File > Restore Catalog Backup…'s sheet
 // (catalog-backup BK-4). It lists the catalog's backups, newest first, as
 // SuiteUI sidebar rows (the date as the title, the photo count as the badge),
 // the newest selected. Restore asks first in a confirmation dialog whose text
 // says what happens to the current catalog: Library backs it up, then replaces
 // it. Values in, closures out, as the export sheet does: a nil action disables
 // its button, and `restoreHelp` is the reason Restore can't run (on the
-// stubs, "Backups arrive with BK-3."). Its frame and button row are a plain
-// SwiftUI placeholder until SuiteUI's SuiteSheet lands (#3964).
+// stubs, "Backups arrive with BK-3."). Its frame, message line and Cancel /
+// Restore… row are SuiteUI's SuiteSheet.
 import Foundation
 import LibraryModel
 import SuiteUI
@@ -29,8 +29,14 @@ struct LibraryBackupSheet: View {
 
     var body: some View {
         let blocked = Self.blocked(restoreHelp: restoreHelp, selected: selected, canRestore: actions.restore != nil)
-        VStack(alignment: .leading, spacing: SuiteSpacing.m) {
-            Text("Restore Catalog Backup").font(SuiteFont.headline)
+        SuiteSheet(
+            "Restore Catalog Backup", message: message, messageID: "library.backup.message", width: SuiteSize.contentIdealWidth,
+            cancelID: "library.backup.cancel", onCancel: { actions.close?() },
+            action: MenuCommand(LibraryCatalog.restoreControlSpec, on: LibraryRestoreControl(help: blocked), title: "Restore…") {
+                confirming = true
+            },
+            actionID: "library.backup.restore"
+        ) {
             if rows.isEmpty {
                 Text(Self.emptyText).foregroundStyle(SuiteColor.secondaryText)
                     .accessibilityIdentifier("library.backup.empty")
@@ -46,20 +52,7 @@ struct LibraryBackupSheet: View {
                 }
                 .frame(minHeight: SuiteSize.contentMinimum.height)
             }
-            if let message {
-                Text(message).foregroundStyle(SuiteColor.secondaryText).accessibilityIdentifier("library.backup.message")
-            }
-            HStack {
-                Spacer()
-                Button("Cancel") { actions.close?() }.keyboardShortcut(.cancelAction)
-                    .accessibilityIdentifier("library.backup.cancel")
-                MenuCommand(LibraryCatalog.restoreControlSpec, on: LibraryRestoreControl(help: blocked), title: "Restore…",
-                            shortcut: .defaultAction) { confirming = true }
-                    .accessibilityIdentifier("library.backup.restore")
-            }
         }
-        .padding(SuiteSpacing.l)
-        .frame(width: SuiteSize.contentIdealWidth)
         .confirmationDialog("Restore This Backup?", isPresented: $confirming, titleVisibility: .visible) {
             MenuCommand(LibraryCatalog.restoreControlSpec, on: LibraryRestoreControl(help: blocked), title: "Restore",
                         role: .destructive) { if let selected { actions.restore?(selected) } }
