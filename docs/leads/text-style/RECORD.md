@@ -223,3 +223,4 @@ Next: Lane: #4871 TS-a and #5047 TS-7 in the lane. After #4871 merges, merge dev
 - 2026-10-26T19:13:32Z (act-1a1774f754d-5cse): 19:13Z poll: dev 5cffd4cf; #4958 m=false clean #5047 m=false clean #5226 m=false clean #5772 m=false clean ; no supervisor reply yet. 0 findings.
 - 2026-10-26T19:33:48Z (act-1a1774f754d-5cse): 19:33Z poll: dev 17a7848b; #4958 m=false clean #5047 m=false clean #5226 m=false clean #5772 m=false clean ; no supervisor reply yet. 0 findings.
 - 2026-10-26T19:54:02Z (act-1a1774f754d-5cse): 19:54Z poll: dev 17a7848b; #4958 m=false clean #5047 m=false clean #5226 m=false clean #5772 m=false clean ; no supervisor reply yet. 0 findings.
+- 2026-10-26T20:00:08Z (act-1a1774f754d-5cse): poll after container restart: dev 17a7848b; #4958 #5047 #5226 #5772 clean, fast-lane, queued; stacked #5228 #5301 #5302 #5773 wait on their bases; no supervisor reply to 6423382889; 0 findings
