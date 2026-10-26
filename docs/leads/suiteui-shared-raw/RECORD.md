@@ -48,3 +48,4 @@ Next: lane merges #4848 (code batches wait on dev-red #5321), then retarget #485
 - 2026-10-26T02:31Z: heartbeat: no change; no PR of this feature merged; dev 8987427d8; dev-red #5321 open (code batches held); open findings 0
 - 2026-10-26T02:54Z: heartbeat: dev 6d5f8b92; dev-red #5321 open (code batches held); no PR of this feature merged; supervisor (02:46Z on #4865) will land SR-4 through the Linux check and the local Mac gate (its perf-suites.txt line approved); #4865 is still based on lead/shared-raw-SR-3; open findings 0
 - 2026-10-26T03:16Z: heartbeat: dev d0859e01 (#5346); full CI 40262284734 in progress on it, a green run would close dev-red #5321 and reopen code batches; no PR of this feature changed or merged; open findings 0
+- 2026-10-26T03:38Z: heartbeat: full CI 40262284734 on dev d0859e01: Linux job failed (scripts/ci), macOS still running, so dev-red #5321 stays open and code batches stay held; no PR of this feature changed or merged; open findings 0
