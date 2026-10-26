@@ -126,3 +126,4 @@ utc	stage	event	ref	note
 2026-10-26T02:46:16Z	3	pr-merged	#5177	PY-1 merged 8987427d
 2026-10-26T02:46:16Z	3	stage-start	PY-m	PY-5 built (Mutate 7/7), gate running on dev-based branch
 2026-10-26T02:49:20Z	3	pr-opened	#5371	PY-5 setStyle body, slice PY-m (99+/25-, 3 files)
+2026-10-26T03:56:43Z	3	stage-start	PY-a	PY-2 build-ahead on dev+LS-2 (#5174); adds fx button move per #5327
