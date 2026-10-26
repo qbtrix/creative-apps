@@ -1,8 +1,8 @@
 // LayerStylePanel.swift (layer-styles LS-2 placeholder, LS-3 view): the one layer style panel. Left, the eight kinds
 // in StyleKind's order, a switch each; right, the selected kind's LayerStyleRows; under them the host's reason when
 // the style commands can't run. Every control sends one StyleIntent through `onIntent`; the panel never edits a
-// document. LS-3: a button per kind shows its rows, then Fill Opacity, the Presets menu and Done.
-import AppKit
+// document. LS-3: a button per kind shows its rows, then Fill Opacity, the Presets menu and Done. A copied style
+// goes on the pasteboard as `SuiteTypeID.layerStyle` through SuiteShell's PasteboardBridge (SuitePasteboardCoding).
 import SuiteImaging
 import SuiteKernel
 import SwiftUI
@@ -115,18 +115,4 @@ public struct LayerStylePanel: View {
         let menu = presetActions(presets, blocked: nil) { _ in }.compactMap(\.identifier)
         return kinds + [fillOpacityID] + rows + [presetsID] + menu + [done { _ in }.identifier ?? ""]
     }
-}
-
-/// The one place a style's JSON goes on and comes off the pasteboard (its own type), so no app writes its own.
-@MainActor public enum LayerStylePasteboard {
-    static let type = NSPasteboard.PasteboardType("org.creative-apps.layer-style")
-
-    /// Puts `style` (StyleRules.json's form) on the general pasteboard; one that won't encode leaves it as it is.
-    public static func write(_ style: JSONValue) {
-        guard let data = try? style.json() else { return }
-        NSPasteboard.general.declareTypes([type], owner: nil)
-        NSPasteboard.general.setData(data, forType: type)
-    }
-    /// The style on the pasteboard, nil when it holds none.
-    public static func read() -> JSONValue? { NSPasteboard.general.data(forType: type).flatMap { try? JSONValue(json: $0) } }
 }
