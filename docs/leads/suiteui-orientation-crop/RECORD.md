@@ -72,3 +72,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - OC-photo-m, OC-photo-u, OC-library-u in the lane; critics for the u slices once a scoped run shows their screens; OC-z (OC-15/16) after both u slices land.
 - 2026-10-26T14:40:34Z Resume, run act-1a178a4b1c2-ibn1. Belt-Slice-Done: OC-library-u posted (run 40337540609). OC-photo-u #5263 clean, waiting on the lane.
 - 2026-10-26T14:57:20Z OC-z: PR #5802 opened (stacked on #5263), head 8bc91414, fast-lane + feature-done
+- 2026-10-26T15:00:24Z poll: dev-red #5321 open (macos); ci.yml at f86f72f79 running; no needs-fix/needs-rebase on our PRs; OC-photo-u/OC-z await batch

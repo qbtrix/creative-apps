@@ -147,3 +147,4 @@ utc	stage	event	ref	note
 2026-10-26T02:59:30Z	-	resume	-	run act-1a175ee1051-o29l resumed after Belt nudge; state synced from lead/orientation-crop
 2026-10-26T14:40:34Z	all	resume	#3756	OC-library-u done run 40337540609; #5263 clean
 2026-10-26T14:57:20Z	build	pr-opened	#5802	OC-z PR opened, stacked on #5263, CI: PASS at 8bc91414
+2026-10-26T15:00:24Z	poll	waiting	#5263,#5802	poll: dev-red #5321 open (macos); ci.yml at f86f72f79 running; no needs-fix/needs-rebase on our PRs; OC-photo-u/OC-z await batch
