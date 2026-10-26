@@ -205,3 +205,4 @@ utc	stage	event	ref	note
 2026-10-26T05:15:11Z	heartbeat	all open PRs clean, no needs-fix/needs-rebase; #5297/#5299 over the size cap until #5295 lands; dev-red #5321 open (not ours)
 2026-10-26T05:37:33Z	heartbeat	no change: all open PRs clean, no labels to fix; dev-red #5321 open (not ours)
 2026-10-26T06:00:09Z	heartbeat	#5239 TC-z merged; scoped suiteui run 40276982587 on c480d848 running
+2026-10-26T06:28:20Z	heartbeat	TC-z Belt-Slice-Done posted; critic review clean; #5375 conflict resolved and pushed

@@ -2,9 +2,9 @@
 
 Issue: #3476 · Packet: docs/blueprints/suiteui/features/tone-controls.md
 Run: act-1a175ea55b7-729d (line lead, line:suiteui; relaunch 2026-10-26) · earlier: act-1a1702c569a-0puo · Session: claude/suiteui-feature-lead-run-azjeoo · Started: 2026-10-24T23:00Z (earlier: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui) · Started: 2026-10-23T14:52Z (earlier runs act-1a16469734c-d0s8, act-1a15821c836-93pf))
-Stage: TC-z merged (#5239, c480d848, 05:55Z); scoped suiteui run 40276982587 in progress
+Stage: All slices done: TC-a, TC-m, TC-u, TC-z (Belt-Slice-Done TC-z run 40276982587, Linux check 40276985896 green). TC-z critic review clean (snapshots: shared InspectorSliderRow track offset is suite-wide, not filed). #5375 (Fixes #5324) restacked on dev at 26ead271, gate PASS. Note: the session proxy appends a tool footer to every PR body and comment write; it can't be stripped from here.
 Base: origin/dev 8eff8ab85
-Next: Belt-Slice-Done TC-z when run 40276982587 is green; critic panel on its screens; #5375 fix waits in lane
+Next: Belt-Contact-Sheet once journeys run 40279283359 (suiteui at c480d848) finishes, with its journey lines and audit counts
 
 
 ## Run act-1a175ea55b7-729d decisions
@@ -20,6 +20,7 @@ Next: Belt-Slice-Done TC-z when run 40276982587 is green; critic panel on its sc
 - 2026-10-26T05:15:11Z heartbeat: all open PRs clean, no needs-fix/needs-rebase; #5297/#5299 over the size cap until #5295 lands; dev-red #5321 open (not ours)
 - 2026-10-26T05:37:33Z heartbeat: no change: all open PRs clean, no labels to fix; dev-red #5321 open (not ours)
 - 2026-10-26T06:00:09Z heartbeat: #5239 TC-z merged; scoped suiteui run 40276982587 on c480d848 running
+- 2026-10-26T06:28:20Z heartbeat: TC-z Belt-Slice-Done posted; critic review clean; #5375 conflict resolved and pushed
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
