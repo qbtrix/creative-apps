@@ -124,3 +124,4 @@ Next: #5133 (90eb5fab2) is clean and merges dev cleanly; it waits for the lane, 
 - 2026-10-26T13:29Z: heartbeat: #5133 ST-z2 on 26055191 waiting for the lane (dev-red holds code batches); dev 01600e46; dev-red #5321 open; findings 0
 - 2026-10-26T13:41Z: heartbeat: #5133 ST-z2 queued for the lane; dev 01600e46; dev-red #5321 open; findings 0
 - 2026-10-26T14:03Z: heartbeat: #5133 ST-z2 waits for the lane; dev 01600e46; dev-red #5321 open; findings 0
+- 2026-10-26T14:29Z: heartbeat: #5133 ST-z2 queued, lane backlog 123; dev 68be32fc; dev-red #5321 open; findings 0
