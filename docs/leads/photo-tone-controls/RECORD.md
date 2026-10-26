@@ -94,3 +94,9 @@ Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #48
   - Tests: liveMatchesExportWithSharpenOn, liveMatchesExportWithSharpenUnderALayer, sharpenStepKeepsTheComposite and blurStillFallsBack, which puts an edge by the y 256 seam between rows of tiles.
   - Mutations: PhotoLiveTone 9/9 and PhotoRenderRoute 4/4. `scripts/ci --changed` PASS.
   - The PR opens once #5363 merges, so its diff holds only PT-3.
+- PT-3 head moved to 9d80855d: the margin mutation now uses a horizontal edge, and the plans are still all caught.
+- #5363 snapshot fix at be2ad8ae: `PhotoToneSnapshots.panel` expected the rows' "off" help with an image open, so it now expects none. The PR body's Head: line was moved to that commit.
+- PT-u, PT-5 (render budget): branch `claude/tone-controls-lead-gms6yu-pt5` (head c1fb913b, on top of be2ad8ae, 6 files, +88/−11).
+  - First commit is the failing test, `BodyCountSuites.RenderBudgetPhotoToneTests.temperatureDragInThreeBodies`. It steps the Temperature row 120 times and expects at most 3 editor bodies, Temperature at 100 and "Undo Temperature". The p95 is printed only.
+  - Second commit: a tone row's drag samples (`tone.set` with a drag token) run on the window's live copy, the same way Free Transform's do (`runLive`). `perform` keeps the copy through tone samples, and the Adjust panel reads `live?.shown`, so each step reads the value it just set.
+  - `scripts/ci --changed` PASS. The view code is macOS-only and was written blind. The PR opens once #5363 merges.
