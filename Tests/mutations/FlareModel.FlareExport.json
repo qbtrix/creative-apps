@@ -68,5 +68,19 @@
     "find": "        return ExportWriteRefusal.alreadyThere(name: name, folder: folder)\n",
     "replace": "        return error\n",
     "tests": "FlareVideoExportTests"
+  },
+  {
+    "label": "a GIF at 51 frames a second passes",
+    "file": "Sources/FlareModel/FlareExport.swift",
+    "find": "let fps = o.fps, fps > 50 {",
+    "replace": "let fps = o.fps, fps > 51 {",
+    "tests": "FlareVideoExportTests"
+  },
+  {
+    "label": "MP4 is held to the GIF rate cap",
+    "file": "Sources/FlareModel/FlareExport.swift",
+    "find": "if o.format == .gif, let fps = o.fps, fps > 50",
+    "replace": "if o.format.writesVideo, let fps = o.fps, fps > 50",
+    "tests": "FlareVideoExportTests"
   }
 ]

@@ -33,7 +33,7 @@ extension FlareWorkspace {
 
     /// Nil when Export can start; otherwise why not, in the sheet's words: no document, a scene that's gone, frames
     /// outside the scene, a step under 1, MP4 or GIF on an exporter that can't draw them yet, an MP4 or GIF rate under
-    /// 1, a scale other than 1x or 2x (in that order). Nil while idle with a document.
+    /// 1, a GIF rate over 50, a scale other than 1x or 2x (in that order). Nil while idle with a document.
     public var exportProblem: String? {
         guard document != nil else { return "Open or create an animation first." }
         guard let o = exportingOptions else { return nil }
@@ -44,6 +44,7 @@ extension FlareWorkspace {
         if o.step < 1 { return Self.exportMessage(PNGExportError.invalidStep(o.step)) }
         if o.format.writesVideo, let reason = services.export.videoUnbuiltReason { return reason }
         if o.format.writesVideo, let fps = o.fps, fps < 1 { return "The frame rate must be 1 or more." }
+        if o.format == .gif, let fps = o.fps, fps > 50 { return "A GIF runs at 1 to 50 frames a second." }
         if o.scale != 1, o.scale != 2 { return "Scale must be 1x or 2x." }
         return nil
     }

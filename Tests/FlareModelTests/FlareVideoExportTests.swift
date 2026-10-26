@@ -146,6 +146,20 @@ struct FlareVideoExportTests {
         #expect(w.exportProblem == nil && w.exportFileCount == 1)
     }
 
+    /// Packet-Review 2: a GIF runs at 1 to 50 frames a second (MediaRules), so the sheet refuses 51 before Export
+    /// instead of the writer failing mid-run; MP4 still takes 60.
+    @Test func aGIFAbove50FramesASecondIsRefusedButMP4IsNot() throws {
+        var w = bounce(); _ = w.openExport(); w.setExportFormat(.gif)
+        w.setExportFrameRate(50)
+        #expect(w.exportProblem == nil)
+        w.setExportFrameRate(51)
+        #expect(w.exportProblem == "A GIF runs at 1 to 50 frames a second." && w.exportFileCount == 0)
+        w.setExportFormat(.mp4)
+        #expect(w.exportProblem == nil, "MP4 takes up to 120")
+        w.setExportFrameRate(60)
+        #expect(w.exportProblem == nil)
+    }
+
     /// FV-5: an MP4 or GIF run counts the plan's frames, so the sheet's bar moves through one file; a file run
     /// still counts files.
     @Test(arguments: [ExportFormat.mp4, .gif])

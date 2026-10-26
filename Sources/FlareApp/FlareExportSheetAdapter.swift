@@ -102,7 +102,7 @@ struct FlareExportOptionRows: View {
                 .accessibilityIdentifier("flare.export.step")
             case .mp4, .gif:
                 sizeRows
-                InspectorStepperRow("Frame rate", value: Double(model.exportFrameRate ?? 30), in: 1...60, unit: "fps") {
+                InspectorStepperRow("Frame rate", value: Double(model.exportFrameRate ?? 30), in: 1...(options.format == .gif ? 50 : 60), unit: "fps") {
                     perform(.export(.setFrameRate(Int($0.rounded()))))
                 }
                 .accessibilityIdentifier("flare.export.fps")
