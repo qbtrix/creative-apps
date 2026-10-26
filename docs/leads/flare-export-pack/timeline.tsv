@@ -220,3 +220,4 @@ utc	stage	event	ref	note
 2026-10-26T14:21Z	poll	#4854 98239ba3 and #5025 921d412b open, no needs-fix/needs-rebase; dev-red #5321 now macOS (run 40328390857, main..5f8925a3), neither PR in range; no supervisor reply
 2026-10-26T14:42Z	poll	#4854 98239ba3 and #5025 921d412b open, no needs-fix/needs-rebase; dev-red #5321 open (macOS, run 40328390857), unchanged since 14:10Z; no supervisor reply
 2026-10-26T15:02Z	poll	#4854 98239ba3 and #5025 921d412b open, no needs-fix/needs-rebase; dev-red #5321 open (macOS, run 40328390857), unchanged since 14:10Z; no supervisor reply
+2026-10-26T15:23Z	poll	#4854 98239ba3 and #5025 921d412b open, no blocking label; dev-red #5321 unchanged (macOS, run 40328390857); third identical poll, so posted supervisor follow-up 6419835895 on #3481
