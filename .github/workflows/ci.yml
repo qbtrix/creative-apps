@@ -303,7 +303,7 @@ jobs:
     needs: mac-compile
     if: ${{ !inputs.build_only && !inputs.linux_only }}
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: read
     strategy:

@@ -118,8 +118,8 @@ while read -r app id; do
   target=${id%%.*} rest=${id#*.}
   IFS=/ read -ra parts <<<"$rest"
   n=${#parts[@]} last=${parts[$((${#parts[@]} - 1))]}
-  if [[ $n -eq 1 ]]; then
-    grep -rqE "(struct|func) $last[[:space:](<:]" "$root/Tests/$target" || missing="$missing $id"
+  if [[ $n -eq 1 ]]; then  # a suite (a serialized parent is an enum) or a free test
+    grep -rqE "(struct|enum|func) $last[[:space:](<:]" "$root/Tests/$target" || missing="$missing $id"
     continue
   fi
   # Every part before the last is a suite (a nested one has its parent enum first).

@@ -544,12 +544,15 @@ skip_perf=()
 # model suites timed out together (#2971).
 heavy=$(python3 scripts/test-scope heavy) || fail "Tests/heavy-suites.txt: fix the line above"
 
-# run_heavy [FILTER]: the heavy tests, all or those FILTER takes; nothing when none.
+# run_heavy [FILTER]: the heavy tests, all or those FILTER takes; nothing when
+# none. Snapshot suites listed heavy run here, beside each other, instead of
+# in the one-at-a-time pass, which skips them.
 run_heavy() {
   local tests
   tests=$(python3 scripts/test-scope heavy ${1:+"$1"}) || fail "Tests/heavy-suites.txt: fix the line above"
   [[ -z "$tests" ]] || run_tests "the heavy tests (Tests/heavy-suites.txt)" --filter "$tests" ${skip_perf[@]+"${skip_perf[@]}"}
 }
+skip_heavy="$perf${perf:+${heavy:+|}}$heavy"
 
 # run_all: every test but the perf ones.
 run_all() {
@@ -562,25 +565,23 @@ run_all() {
     # parallel. Each run prints its wall time.
     run_tests "all but AppSnapshotTests and the heavy tests" --skip "^AppSnapshotTests\.${perf:+|$perf}${heavy:+|$heavy}"
     run_heavy
-    run_tests "AppSnapshotTests, one at a time" --filter '^AppSnapshotTests\.' ${skip_perf[@]+"${skip_perf[@]}"} --no-parallel
+    run_tests "AppSnapshotTests, one at a time" --filter '^AppSnapshotTests\.' ${skip_heavy:+--skip "$skip_heavy"} --no-parallel
   else
-    local skip="$perf${perf:+${heavy:+|}}$heavy"
-    run_tests "all but the heavy tests" ${skip:+--skip "$skip"}
+    run_tests "all but the heavy tests" ${skip_heavy:+--skip "$skip_heavy"}
     run_heavy
   fi
 }
 
 # run_scope LABEL TESTS SNAPS: the parallel pass of TESTS without the perf and
-# heavy tests, TESTS's heavy tests in a pass of their own, then SNAPS one at a
-# time; nothing for an empty regex (a --changed scope and a shard).
+# heavy tests, the heavy tests of TESTS and SNAPS in a pass of their own, then
+# the rest of SNAPS one at a time; nothing for an empty regex (a --changed
+# scope and a shard).
 run_scope() {
-  local skip
-  if [[ -n "$2" ]]; then
-    skip="$perf${perf:+${heavy:+|}}$heavy"
-    run_tests "$1" --filter "$2" ${skip:+--skip "$skip"}
-    run_heavy "$2"
-  fi
-  [[ -z "$3" ]] || run_tests "$1, snapshots one at a time" --filter "$3" ${skip_perf[@]+"${skip_perf[@]}"} --no-parallel
+  local both
+  [[ -z "$2" ]] || run_tests "$1" --filter "$2" ${skip_heavy:+--skip "$skip_heavy"}
+  both="$2${2:+${3:+|}}$3"
+  [[ -z "$both" ]] || run_heavy "$both"
+  [[ -z "$3" ]] || run_tests "$1, snapshots one at a time" --filter "$3" ${skip_heavy:+--skip "$skip_heavy"} --no-parallel
 }
 
 if [[ -n "$shard" ]]; then

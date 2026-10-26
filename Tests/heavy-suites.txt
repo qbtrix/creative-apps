@@ -21,6 +21,13 @@ photo PhotoModelTests.PhotoExportPackTests/rjP01sPlanHalfCropsToFourByFiveAndKee
 photo PhotoModelTests.PhotoPlaceTests/largeFitsCanvas
 photo AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoPlaceTests
 
+# Snapshot suites the heavy pass takes out of the one-at-a-time pass: a shard
+# ran the three below for 973, 633 and 362 s in a row (run 40287317276) and
+# hit its cap; in the heavy pass they run beside each other.
+suiteui AppSnapshotTests.BodyCountSuites
+library AppSnapshotTests.LibraryExportFidelityTests
+halo AppSnapshotTests.HaloMovieWriterTests
+
 library LibraryModelTests.matchesFullPipeline
 library LibraryModelTests.loupePreviewIsCappedAndFullKeepsTheLongSide
 
