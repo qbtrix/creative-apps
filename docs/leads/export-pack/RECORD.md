@@ -2,9 +2,9 @@
 
 Issue: #3477 · Packet: docs/blueprints/suiteui/features/export-pack.md
 Run: act-1a175ea55b7-729d (line lead, line:suiteui; relaunch 2026-10-26) · earlier: act-1a16fe1fa73-5x3s (line lead, line:suiteui; relaunch) · earlier: act-1a16c618fe7-h4fd (line lead, line:suiteui; unparked by the supervisor 2026-10-24)
-Stage: XP-3 #5043, XP-4 #5065, XP-5 #5104, XP-8 #5106, #5374 in lane
+Stage: XP-3 #5043 merged (99ace7038, dev tip 07:1xZ): XP-a merged; XP-4 #5065 restacked (add/add from the squash, ours kept) at b0f81dc6f; XP-5 #5104 and XP-8 #5106 restacked on it; all gates PASS; #5374 in lane
 Base: origin/dev 8eff8ab85
-Next: XP-10 after #5043 and #5106 merge
+Next: Belt-Slice-Done XP-a once a suiteui-scoped or full run contains 99ace7038; XP-10 after #5106 merges
 
 
 ## Run act-1a175ea55b7-729d decisions
@@ -22,6 +22,7 @@ Next: XP-10 after #5043 and #5106 merge
 - 2026-10-26T06:00:09Z heartbeat: no change; lane holding (dev-red #5321 open)
 - 2026-10-26T06:28:20Z heartbeat: no change; lane holding (dev-red #5321 open)
 - 2026-10-26T06:53:25Z heartbeat: no change; lane holding (dev-red #5321 open); drift sweep has filed nothing on this feature yet
+- 2026-10-26T07:15:52Z heartbeat: #5043 XP-3 merged; #5065/#5104/#5106 restacked and Head moved
 
 ## Run act-1a16fe1fa73-5x3s decisions
 - 22:59Z: the 22:27Z poll was one-shot, so no heartbeat ran from 22:28Z to 22:59Z. Each poll now schedules the next one 15 min out.
