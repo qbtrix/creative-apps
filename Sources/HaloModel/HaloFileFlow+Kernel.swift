@@ -4,8 +4,9 @@
 // SuiteDocumentHost the shell hands every hand-off to stays HaloDocumentHost
 // (A-HA-1, #865): HaloProject is a value the window owns, so the host hands
 // its command to the window instead of a second conformance here.
-// Halo places nothing into a composition (image layers are S20, so an image
-// goes to the app that reads it), offers the readers the suite's routing
+// A file dropped on the window places nothing (the canvas places an image
+// through placed-images' PH-3, so one dropped off it goes to the app that
+// reads it), offers the readers the suite's routing
 // names for Open In once the project is saved, leaves what only the window
 // can do as `HaloFileRequest`s, and hands its old Open Recent list to the
 // suite's once. Linux-safe.
@@ -33,14 +34,11 @@ public struct HaloFileFlowState: Sendable, Equatable {
 }
 
 extension HaloProject: FileFlowTarget {
-    /// What a dropped image reads until image layers (S20) land.
-    public static let imageRefusal = "Halo can't place images yet."
-
     public var appID: String { SuiteApp.halo.rawValue }
     public var recentFiles: [RecentFileEntry] { fileFlow.recents }
     /// A composition to take content; the drop rule reads it.
     public var hasDocument: Bool { selectedComposition != nil }
-    /// Nothing is placed into a composition until image layers (S20).
+    /// None: the canvas places an image (PH-3), so a file dropped off it goes to its reader.
     public var placesExtensions: Set<String> { [] }
 
     /// The other apps that read a .halo, from the suite's routing.
