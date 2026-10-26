@@ -161,3 +161,4 @@ utc	stage	event	ref	note
 2026-10-26T07:53Z	3	wait	all	heartbeat: ours queued in the lane; core bump unanswered
 2026-10-26T08:24Z	3	question	all	asked supervisor about lane priority (24 p0 ahead); core bump still open
 2026-10-26T08:55Z	3	wait	all	heartbeat: ours queued (beta); priority and core-bump questions open
+2026-10-26T09:25Z	3	wait	all	heartbeat: ours queued (beta); priority and core-bump questions open
