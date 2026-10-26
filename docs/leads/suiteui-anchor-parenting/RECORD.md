@@ -84,3 +84,5 @@ Run act-1a1695ebfeb-d54n, 2026-10-23T15:30Z; supersedes the tables' PR/state col
 - AN-u waits on orientation-crop:OC-u, which is still planned.
 - AN-a at 516c4d7e3 (dev merged): dev #4050 moved both Library timing tests into perf-suites; merged dev and re-gating serially (serialgate.sh).
 
+
+- 2026-10-26T13:39:43Z (act-1a177ff0916-4jm7): 13:39Z poll: dev 01600e46; dev-red #5321 still open (not ours); no merges of ours. AN-u #4893 fast-lane, queued; CB-8 #4902 and DS-flare #4891 open, so AN-6 and AN-10 wait. Next: unchanged. No needs-fix/needs-rebase; 0 findings.
