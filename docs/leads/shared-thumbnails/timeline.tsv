@@ -188,3 +188,4 @@ ts	kind	note
 2026-10-26T12:55Z	3	decision	review	Packet-Review 2: blocker 1 to gap #5791, amendment 2 applied in #5133
 2026-10-26T13:07Z	3	heartbeat	lane	dev 57dd31ff (#5146); dev-red #5321 open; gates running (SR-4, SR-6, ST-z2, codecs review 2); no Feature: shared PR moved
 2026-10-26T13:29Z	3	heartbeat	lane	#5133 ST-z2 on 26055191 waiting for the lane (dev-red holds code batches); dev 01600e46; dev-red #5321 open; findings 0
+2026-10-26T13:41Z	3	heartbeat	lane	dev 01600e46, dev-red #5321 open, no shared PR merged
