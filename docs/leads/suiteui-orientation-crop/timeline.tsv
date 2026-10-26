@@ -146,3 +146,4 @@ utc	stage	event	ref	note
 2026-10-25T13:49:56Z	check	heartbeat	15 PRs open+clean, dev bbaedba6, no dev-red, no findings on our features
 2026-10-26T02:59:30Z	-	resume	-	run act-1a175ee1051-o29l resumed after Belt nudge; state synced from lead/orientation-crop
 2026-10-26T14:40:34Z	all	resume	#3756	OC-library-u done run 40337540609; #5263 clean
+2026-10-26T14:57:20Z	build	pr-opened	#5802	OC-z PR opened, stacked on #5263, CI: PASS at 8bc91414
