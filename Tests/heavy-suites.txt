@@ -13,14 +13,37 @@
 #
 # Same format as Tests/perf-suites.txt: <app> <id>, id is Target.Suite,
 # Target.Suite/test or Target.freeTest. Tests/test_scope checks each id exists.
+#
+# The snapshot suites listed here (BodyCountSuites, LibraryExportFidelityTests,
+# HaloMovieWriterTests) also leave the one-at-a-time snapshot pass, where a
+# shard ran them for 973, 633 and 362 s in a row and hit its cap (run
+# 40287317276). The tests that cost 17 s to 279 s alone in the shared pass
+# starved HomeModelTests and OnboardingModelTests again in #5321.
+# One entry per line, sorted, no duplicates.
 
-photo PhotoModelTests.PhotoRenderRouteTests
-photo PhotoModelTests.PhotoResidentRouteTests
+halo AppSnapshotTests.HaloMovieWriterTests
+halo HaloModelTests.HaloGradientRenderTests/fullFrameCost
+halo HaloModelTests.HaloPlaceRenderTests/fullFrameCost
+halo HaloModelTests.HaloStrokeJobTests/theStarStrokeJobPassesAndShowsTheStrokeOverTheGradient
+halo HaloModelTests.theLargestCompositionRendersAtPreviewSize
+library AppSnapshotTests.LibraryExportFidelityTests
+library LibraryModelTests.LibraryCropRenderTests/aSquareAtTenDegreesIsOpaqueEverywhere
+library LibraryModelTests.LibraryCropRenderTests/theRenderIsTheFramesSize
+library LibraryModelTests.LibraryHeadlessTests/realJobPasses
+library LibraryModelTests.LibraryThumbnailDiskTests/relaunchDecodesNothing
+library LibraryModelTests.LibraryThumbnailDiskTests/staleAfterDevelop
+library LibraryModelTests.aLevelsDragCountsOneHistogramPerPreviewRenderOffTheMainThread
+library LibraryModelTests.loupePreviewIsCappedAndFullKeepsTheLongSide
+library LibraryModelTests.matchesFullPipeline
+photo AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoPlaceTests
+photo PhotoModelTests.PhotoCanvasSizeTests/canvasBorderRealJob
 photo PhotoModelTests.PhotoClipboardTests/oversizedPasteIsScaledToFit
 photo PhotoModelTests.PhotoExportPackTests/rjP01sPlanHalfCropsToFourByFiveAndKeepsTheSubjectFramed
-photo AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoPlaceTests
-
-library LibraryModelTests.matchesFullPipeline
-library LibraryModelTests.loupePreviewIsCappedAndFullKeepsTheLongSide
-
-halo HaloModelTests.theLargestCompositionRendersAtPreviewSize
+photo PhotoModelTests.PhotoHeadlessTests/realJobPasses
+photo PhotoModelTests.PhotoPlaceTests/largeFitsCanvas
+photo PhotoModelTests.PhotoRenderRouteTests
+photo PhotoModelTests.PhotoResidentRouteTests
+suite AfterGlowCLITests.AllAppsCatalogTests/everyAppsRealJobIsGreenOrPendingWithAGap
+suite AfterGlowCLITests.AllAppsCatalogTests/everyCatalogKeepsTheLawsOnARealFile
+suite AfterGlowCLITests.RealJobsTests/everyRealJobPassesOrIsSkippedWithItsReason
+suiteui AppSnapshotTests.BodyCountSuites
