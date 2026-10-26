@@ -1,6 +1,6 @@
 // HaloTransformCommandIDTests.swift (transform HT-6): Halo's catalog lists the
-// kernel's six `transform.*` commands, headless too; Flip is refused with
-// Halo's sentence; and RJ-H34 (`Tests/RealJobs/halo/key-turn/`) animates a
+// kernel's six `transform.*` commands, headless too; Flip mirrors a new
+// layer from the CLI path and undo gives the bytes back; and RJ-H34 (`Tests/RealJobs/halo/key-turn/`) animates a
 // shape's Rotation and Scale, turns it 30 degrees and doubles it about its
 // centre at frame 12, saves and reopens to keys at 12 between the toggle's
 // base keys at 0 and 47, the centre where it was. Linux and macOS.
@@ -31,13 +31,19 @@ import Testing
         #expect(HaloProject.catalog.spec("transform.rotate")?.kind == .edit)
     }
 
-    @Test func flipIsRefusedWithHalosSentence() throws {
-        var doc = try Self.edited()
+    /// #5281's job: a new solid, then `transform.flip`, headless on the live
+    /// services as the CLI runs it. The layer mirrors; undo restores the bytes.
+    @Test func flipMirrorsANewLayerHeadless() throws {
+        var doc = try HaloHeadless.new(.object([:]), services: .live)
+        _ = try HaloHeadless.catalog.run("layer.new", params: .object(["kind": .string("solid")]), on: &doc)
         let before = try doc.save()
-        #expect(HaloHeadless.catalog.availability("transform.flip", on: doc).why == "Flipping isn't in Halo yet.")
-        #expect(throws: CatalogError.self) {
-            try HaloHeadless.catalog.run("transform.flip", params: .object(["axis": .string("horizontal")]), on: &doc)
-        }
+        #expect(HaloHeadless.catalog.availability("transform.flip", on: doc).why == nil)
+        let start = try #require(doc.workspace.transformSelection)
+        _ = try HaloHeadless.catalog.run("transform.flip", params: .object(["axis": .string("horizontal")]), on: &doc)
+        let flipped = try #require(doc.workspace.transformSelection)
+        #expect(flipped.flipX && !flipped.flipY && flipped.box == start.box)
+        #expect(try doc.save() != before)
+        _ = try HaloHeadless.catalog.run("edit.undo", params: .object([:]), on: &doc)
         #expect(try doc.save() == before)
         let empty = HaloProject(services: .fake)
         #expect(HaloProject.catalog.availability("transform.rotate", on: empty).why == "Select a layer to transform.")

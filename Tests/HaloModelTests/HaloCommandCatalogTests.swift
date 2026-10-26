@@ -131,7 +131,7 @@ extension HaloProject: HeadlessDocument {
         "the stop and angle examples need a gradient; Ball's fill is solid": ["fill.angle fill.stop-add fill.stop-move fill.stop-remove: exampleRuns"],
         "strokes are for shape layers; Ball is a solid (HaloStrokeTests run them)": ["stroke.add stroke.cap stroke.color stroke.dash stroke.join stroke.read stroke.remove stroke.trim stroke.width: exampleRuns"],
         "the jump example needs steps; the fixture has none (HA-6)": ["history.jump: exampleRuns"],
-        "flipping isn't in Halo yet; the flip refuses with flipHelp (HT-6)": ["transform.flip: exampleRuns"],
+        "the kernel's transform.flip is titled Flip while its step names the axis (\"Flip Horizontal\")": ["transform.flip: stepNamedTitle"],
         "the examples need a placed image; Ball shows none (HaloPlaceTests run them, PH-6)": ["place.focus place.read place.replace place.reset-size: exampleRuns"],
         "the style commands are LS-a's stubs until LS-6; Ball has no style to copy or clear (HY-5)": ["style.add style.clear style.copy style.enable style.fill-opacity style.panel style.paste style.preset style.read style.remove style.set: exampleRuns"],
     ]

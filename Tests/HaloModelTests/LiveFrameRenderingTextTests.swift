@@ -101,8 +101,20 @@ private struct BaselineRasterizer: TextRasterizing {
     #expect(frame.skippedLayerCount == 1)
 }
 
-@Test func aMirroredTextIsSkippedAndCounted() throws {
-    let frame = try render(textItem(.scale(x: -1, y: 1)))
-    #expect(try extent(frame.pixels) == nil)
-    #expect(frame.skippedLayerCount == 1)
+@Test func aMirroredTextDrawsMirroredInItsBox() throws {
+    let frame = try render(textItem(.scale(x: -1, y: 1)), text: BaselineRasterizer())
+    // The top-left ink pixel lands top right; the baseline row stays put.
+    #expect(try covered(frame.pixels, 229, 75))
+    #expect(try !covered(frame.pixels, 170, 75))
+    #expect(try covered(frame.pixels, 200, 115) && !covered(frame.pixels, 200, 114))
+    #expect(frame.skippedLayerCount == 0)
+}
+
+@Test func aVerticallyMirroredTextDrawsUpsideDown() throws {
+    let frame = try render(textItem(.scale(x: 1, y: -1)), text: BaselineRasterizer())
+    // The top-left ink pixel lands bottom left; the baseline row lands 10 rows below the top.
+    #expect(try covered(frame.pixels, 170, 124))
+    #expect(try !covered(frame.pixels, 170, 75))
+    #expect(try covered(frame.pixels, 200, 84) && !covered(frame.pixels, 200, 115))
+    #expect(frame.skippedLayerCount == 0)
 }

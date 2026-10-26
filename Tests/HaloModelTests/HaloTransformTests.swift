@@ -1,6 +1,7 @@
 // HaloTransformTests.swift: transform HT-1 and HT-5. HaloProject as a
-// SuiteKernel TransformTarget. On the stubs (HT-1) nothing selected says why,
-// Flip says it isn't in Halo yet and the selected layer reads its drawn box.
+// SuiteKernel TransformTarget. Nothing selected says why, the selected layer
+// reads its drawn box, and Flip mirrors it about its centre (a negative scale,
+// the turn negated, one named step).
 // HT-5: a turn at 12 on an animated Rotation keys 12, on a static one sets
 // the value, a scale about the centre keeps the centre and a 120-sample drag
 // is one step. On `-HaloFixture keyed` Ball. Linux and macOS.
@@ -29,10 +30,39 @@ private func centre(_ t: TransformBox) -> (Double, Double) {
 }
 
 @Suite struct HaloTransformTests {
-    /// Flip is refused with the same sentence whatever is selected.
-    @Test func flipSaysItIsNotInHaloYet() throws {
-        #expect(HaloProject(services: .fake).flipHelp == "Flipping isn't in Halo yet.")
-        #expect(try ballProject().flipHelp == "Flipping isn't in Halo yet.")
+    /// Flip Horizontal on a turned layer mirrors it in place: the box and its
+    /// centre stay, the turn negates, Scale X goes negative, one named step.
+    @Test func flipMirrorsTheLayerAboutItsCentre() throws {
+        var project = try ballProject()
+        #expect(project.flipHelp == nil)
+        let start = try #require(project.transformSelection)
+        try project.setTransform(TransformRules.rotated(start, by: 30), name: "Rotate", drag: nil)
+        let turned = try #require(project.transformSelection)
+        _ = try HaloProject.catalog.run("transform.flip", params: .object(["axis": .string("horizontal")]), on: &project)
+        let flipped = try #require(project.transformSelection)
+        #expect(flipped.flipX && !flipped.flipY)
+        #expect(abs(flipped.degrees + 30) < 1e-6)
+        let (bx, by) = centre(turned), (ax, ay) = centre(flipped)
+        #expect(abs(ax - bx) < 1e-6 && abs(ay - by) < 1e-6)
+        #expect(abs(flipped.box.width - turned.box.width) < 1e-6 && abs(flipped.box.height - turned.box.height) < 1e-6)
+        #expect((row(.scaleX, in: project)?.value ?? 0) < 0 && (row(.scaleY, in: project)?.value ?? 0) > 0)
+        #expect(project.history.undoTitle == "Undo Flip Horizontal")
+    }
+
+    /// Flip Vertical mirrors the other axis, and a second flip puts the layer back.
+    @Test func flipVerticalTwiceIsTheLayerAgain() throws {
+        var project = try ballProject()
+        let start = try #require(project.transformSelection)
+        let vertical: JSONValue = .object(["axis": .string("vertical")])
+        _ = try HaloProject.catalog.run("transform.flip", params: vertical, on: &project)
+        let once = try #require(project.transformSelection)
+        #expect(!once.flipX && once.flipY)
+        #expect((row(.scaleY, in: project)?.value ?? 0) < 0)
+        _ = try HaloProject.catalog.run("transform.flip", params: vertical, on: &project)
+        let twice = try #require(project.transformSelection)
+        #expect(!twice.flipX && !twice.flipY)
+        #expect(abs(twice.box.minX - start.box.minX) < 1e-6 && abs(twice.box.minY - start.box.minY) < 1e-6)
+        #expect(row(.scaleY, in: project)?.value == row(.scaleX, in: project)?.value)
     }
 
     /// With no layer selected there is no box and the help says what to do.
