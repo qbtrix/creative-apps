@@ -183,6 +183,7 @@ extension PhotoWorkspace {
         act("image.rotate-cw", "Rotate", "Rotates the image 90° clockwise.", .edit, menu()) { $0.rotateImage(.degrees90) },
         act("image.rotate-ccw", "Rotate", "Rotates the image 90° counterclockwise.", .edit, menu()) { $0.rotateImage(.degrees270) },
         act("image.rotate-180", "Rotate", "Rotates the image 180°.", .edit, menu()) { $0.rotateImage(.degrees180) },
+    ] + CropCommands.orientationSpecs(PhotoWorkspace.self).filter { $0.id == "image.flip" } + [
         .typed("image.straighten", title: "Straighten", summary: "Rotates the image by an angle, cropped to fit or grown.", kind: .edit, params: StraightenParams.self,
                schema: .object(["degrees": .number("The angle.", minimum: -45, maximum: 45), "cropToFit": .boolean], required: ["degrees", "cropToFit"]),
                example: .object(["degrees": .number(3), "cropToFit": .bool(false)]), availability: menu()) { w, p in

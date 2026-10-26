@@ -80,10 +80,12 @@ struct PhotoCommandCatalogTests {
         #expect(problems == Self.tolerated)
     }
     /// The kernel's transform.flip is titled "Flip" while its step names the axis ("Flip Horizontal"), as the
-    /// transform packet asks; tone.set likewise names its step for the slider ("Temperature"). On this flat fill
-    /// tone.auto has nothing to suggest, so it records no step; PhotoToneCommandTests runs it on a range of tones.
+    /// transform packet asks, and image.flip does the same; tone.set likewise names its step for the slider
+    /// ("Temperature"). On this flat fill tone.auto has nothing to suggest, so it records no step;
+    /// PhotoToneCommandTests runs it on a range of tones.
     /// (Free Transform's commit and cancel refuse without a draft: the filter above drops them.)
     static let tolerated = [
+        "image.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\"",
         "tone.auto: stepNamedTitle: its undo step reads \"Delete\", not \"Auto Tone\"",
         "tone.auto: editRecordsOneStep: it recorded 0 undo steps, not one",
         "tone.auto: undoRestoresBytes: edit.undo after it leaves save() bytes unlike those before it",
@@ -156,7 +158,7 @@ struct PhotoCommandCatalogTests {
     /// (Select menu, PM-3) and opacity (multi-layer-select PM-5); the eyedropper's sample query (PE-6), a tool's.
     /// The area commands (area-selection AR-10) get their Select menu items in AR-photo-u.
     static let noMenu: Set = ["select.rect", "select.ellipse", "select.lasso", "select.polygon", "select.wand", "select.invert",
-                              "select.feather", "select.expand", "select.contract", "select.reselect", "image.gradient", "layer.pick", "layer.select-all", "layer.set-opacity", "layer.move-by",
+                              "select.feather", "select.expand", "select.contract", "select.reselect", "image.gradient", "image.flip", "layer.pick", "layer.select-all", "layer.set-opacity", "layer.move-by",
                               "color.sample"]
     /// Every non-tool command but the menu-less ones, the shared file-flow ones, the place ones and Free Transform's
     /// (transform PT-5, ahead of its menu items) and the History panel's (history-panel PH-5) and text layers' (the Type tool and inspector run them), in menu order (the catalog lists them as the menus do).
