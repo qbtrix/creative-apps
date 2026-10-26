@@ -153,3 +153,4 @@ utc	stage	event	ref	note
 2026-10-25T21:48:12Z	3	poll	TS-z	21:45Z poll: #5349 revert merged; TS PRs still in lane, no merges. 0 findings.
 2026-10-25T22:09:50Z	3	poll	TS-z	22:10Z poll: unchanged; lane held by dev-red #5321. 0 findings.
 2026-10-25T22:29:56Z	3	poll	TS-z	22:30Z poll: unchanged; lane held by dev-red #5321. 0 findings.
+2026-10-26T08:32:11Z	stage3	decision	-	run act-1a1774f754d-5cse started; Packet-Review 2 amendments 1-9 recorded

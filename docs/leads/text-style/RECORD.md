@@ -1,7 +1,7 @@
 # text-style lead record
 
 Issue: #3779 (relaunch #4519) · Packet: docs/blueprints/suiteui/features/text-style.md
-Run: act-1a16c618fe7-h4fd (line lead, line:suiteui) · earlier run act-1a16958d72f-a4mg
+Run: act-1a1774f754d-5cse (line lead, line:suiteui) · earlier act-1a171c8932a-sa22, act-1a16c618fe7-h4fd · earlier run act-1a16958d72f-a4mg
 Stage: 3 wave 1 PRs open (TS-7 #5047); TS-8 waits on TS-u #4958, TS-9 blocked on AJ-a
 Base: origin/dev 830af22de
 Next: Lane: #4871 TS-a and #5047 TS-7 in the lane. After #4871 merges, merge dev into #4958, rerun gate, move Head and add fast-lane. TS-8 after TS-u; TS-9 after AJ-a merges.
@@ -105,6 +105,14 @@ Next: Lane: #4871 TS-a and #5047 TS-7 in the lane. After #4871 merges, merge dev
 - 2026-10-21T12:52Z heartbeat: #3844 TS-5 held while dev red (#3856, photo line); #3847 stacked
 - 2026-10-22T16:40Z: run act-1a164697376-dv7u on new issue #4519. TS-1 #3836, TS-5 #3844, TS-6 #3847 merged and in green dev Linux run 39808732641 (401242a59): Belt-Slice-Done TS-m posted on #4519.
 - 2026-10-23T15:25Z (act-1a16958d72f-a4mg): contract-first waits (lead.md rule 12, #4814): a wait on another feature is met once that feature's first slice merged; each wait built ahead of its slice is listed under Wire. Merged-done = green `Linux` on a dev CI run containing the slice's last PR.
+- 2026-10-26T08:32:11Z (act-1a1774f754d-5cse): run act-1a1774f754d-5cse started. TS-a and TS-m are done; this run takes TS-u, TS-design and TS-halo. Integration base is dev. Packet-Review 2 read; its 9 amendments are recorded below (rule 24).
+- 2026-10-26T08:32:11Z (act-1a1774f754d-5cse): PR2 amendment 1 (stub reason): TS-u drops the TS-5 stub reason; Design and Halo say "Text styles aren't connected in this window yet." until TS-8 (Design) and TS-10 (Halo) route the intents, since the targets exist only after TS-7 and TS-9.
+- 2026-10-26T08:32:11Z (act-1a1774f754d-5cse): PR2 amendment 2 (Photo rows): PhotoTextInspector is photo-line code, so no edit here; a photo-line gap issue carries it.
+- 2026-10-26T08:32:11Z (act-1a1774f754d-5cse): PR2 amendment 3 (TS-9 duplicate ids): TS-9 filters text.set-size out of TextCommands.specs and keeps Halo's setFontSize/endTextSizeScrub, so no id appears twice; answered on the review.
+- 2026-10-26T08:32:11Z (act-1a1774f754d-5cse): PR2 amendments 4 and 5 (packet names: TextStyleField; weight: Int?, italic: Bool?; TextStyle.Alignment): packet text is brought in line with the kernel in the TS-z PR.
+- 2026-10-26T08:32:11Z (act-1a1774f754d-5cse): PR2 amendment 6 (Halo fontSize): Halo keeps fontSize stored with the style separate, and the file format keeps the fontSize key; answered on the review.
+- 2026-10-26T08:32:11Z (act-1a1774f754d-5cse): PR2 amendments 7 and 8 (Design clamps and mixed selections): TS-7b (stacked on TS-7) clamps size/line height/tracking through TextStyleRules.setting, LiveStyling and UseCases use 1...1600, and a mixed selection takes only the changed field (test aMixedSelectionTakesOnlyTheChangedField, 2 new mutations).
+- 2026-10-26T08:32:11Z (act-1a1774f754d-5cse): PR2 amendment 9 (no-selection words): TextStyleRows says the kernel's "Select a text layer first." (TS-u); the kernel already has uprightHelp.
 
 ## Open
 
