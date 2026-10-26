@@ -109,3 +109,4 @@ utc	stage	event	ref	note
 18:19Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev e69582e7 (#5263 landed from batch 175022); ours clean, eligible, beta; next batch pending
 18:39Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev e69582e7 unchanged; batch 182514 runs #5295 alone; ours clean, beta, queued
 18:59Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 5cffd4cf (#5295 landed); dev-red #5321 closed; no batch in flight; ours clean, beta, queued
+19:20Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 17a7848b (#5334 landed); lane lands one PR per batch; ours eligible (marker + prescreen), queued
