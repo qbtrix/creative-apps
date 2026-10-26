@@ -1,7 +1,7 @@
 [
 {"label": "the live route runs core's hue/saturation instead of Photo's matrix", "file": "Sources/PhotoModel/PhotoImagingAdapter.swift", "find": "guard case .hueSaturation = step else { return .adjustment(step) }", "replace": "return .adjustment(step)", "tests": "PhotoLiveToneProgramTests"},
 {"label": "the live route maps every enabled section, Blur's too", "file": "Sources/PhotoModel/PhotoImagingAdapter.swift", "find": "        guard blurMargin == 0 else { return nil }\n        return imagingSteps.map", "replace": "        return imagingSteps.map", "tests": "PhotoLiveToneProgramTests"},
-{"label": "a masked adjustment layer draws on the live route unmasked", "file": "Sources/PhotoModel/PhotoImagingAdapter.swift", "find": "kind = layer.isMaskEnabled && masks[layer.id] != nil ? .unsupported : .adjustment(settings.toneOperations ?? [])", "replace": "kind = .adjustment(settings.toneOperations ?? [])", "tests": "PhotoLiveToneTests"},
+{"label": "a masked layer draws on the live route unmasked", "file": "Sources/PhotoModel/PhotoImagingAdapter.swift", "find": "if shownMask(of: layer) != nil { kind = .unsupported }", "replace": "if false { kind = .unsupported }", "tests": "PhotoLiveToneTests"},
 {"label": "a moved layer keeps the stale base composite", "file": "Sources/PhotoModel/PhotoImagingAdapter.swift", "find": "opacity: layer.opacity, offsetX: layer.offsetX,", "replace": "opacity: layer.opacity, offsetX: 0,", "tests": "PhotoLiveToneTests"},
 {"label": "the live route draws the adjustment layers' tiles too", "file": "Sources/PhotoModel/PhotoImagingAdapter.swift", "find": "try residentSteps(layers.map(\\.layer), in: rect, resident: resident)", "replace": "try residentSteps(self.layers, in: rect, resident: resident)", "tests": "PhotoLiveToneTests"}
 ]

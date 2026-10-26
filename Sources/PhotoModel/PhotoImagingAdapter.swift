@@ -9,7 +9,7 @@
 // (HueSaturation.swift) as a ToneProgram matrix operation, so the GPU picture
 // matches the CPU's. `liveStack` is nil, and the region takes the dispatcher
 // route, when the image's Blur is on (it reads neighbours), when a visible
-// adjustment layer has an enabled mask, when a layer's opacity is outside
+// layer has an enabled mask (#5216), when a layer's opacity is outside
 // 0...1, or when the services' adjustment layers are not the live ones.
 // Linux-safe.
 import CoreRaster
@@ -60,8 +60,9 @@ extension PhotoWorkspace {
             var kind = LiveLayerKind.pixels
             if case .adjustment(var settings) = layer.kind {
                 settings.apply(.setEnabled(.blur, false))  // a layer never blurs (LiveAdjustmentLayering)
-                kind = layer.isMaskEnabled && masks[layer.id] != nil ? .unsupported : .adjustment(settings.toneOperations ?? [])
+                kind = .adjustment(settings.toneOperations ?? [])
             }
+            if shownMask(of: layer) != nil { kind = .unsupported }  // a masked layer runs on CoreRaster (#5216)
             return PhotoLiveLayer(layer: layer, liveKind: kind, liveKey: PhotoLiveLayer.Key(
                 id: layer.id, blendMode: layer.blendMode, opacity: layer.opacity, offsetX: layer.offsetX,
                 offsetY: layer.offsetY, pixels: pixels[layer.id]))
