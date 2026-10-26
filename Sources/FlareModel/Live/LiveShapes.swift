@@ -4,9 +4,9 @@
 // the kernel's `PenRules` through `ShapeDraft.penDraft` (pen-paths FP-5, FlarePen+Kernel.swift). A commit is one engine
 // group, "Add Rectangle", "Add Ellipse" or "Add Path", of `AddLayer` and `AddShape`, with the layer id and name
 // the fake gives ("rectangle-1", "Rectangle 1"), and throws `CommandError.layerLocked` above a locked layer. The same
-// group puts the layer's origin at the shape's centre, its path moved around that origin, and keys the position (`x`
-// and `y`, the centre) once at frame 0, so an auto-key edit at a later frame keeps 0 and the shape animates (#1731),
-// and a keyed rotation or scale turns the shape in place (B1; a stopgap until layers get an anchor point).
+// group keys the position and the anchor (`x`, `y`, `anchorX`, `anchorY`: the box's centre, FlarePlacement+Kernel)
+// once at frame 0, the path where it was drawn, so an auto-key edit at a later frame keeps 0 and the shape animates
+// (#1731), and a keyed rotation or scale turns the shape about its centre (AN-10, replacing B1's moved origin).
 // ST-8 and ST-9 add the box gestures and edits in their own files; ST-9 adds the `ShapeBuilding` conformance.
 import FlareCore
 import SuiteKernel
@@ -79,15 +79,12 @@ public struct LiveShapes: Sendable {
         var n = 1
         while taken.contains("\(kind.lowercased())-\(n)") || taken.contains("\(kind) \(n)") { n += 1 }
         let layer = Layer(id: "\(kind.lowercased())-\(n)", name: "\(kind) \(n)")
-        // Layers have no anchor point yet, so the origin is the pivot: put it at the shape's centre, with the path
-        // around it, and a keyed rotation or scale turns the shape in place instead of orbiting the canvas corner.
-        let box = draft.shape.bounds
-        let centre = box.map { Point(x: ($0.minX + $0.maxX) / 2, y: ($0.minY + $0.maxY) / 2) } ?? Point(x: 0, y: 0)
+        // The path stays where it was drawn; the position and the anchor both key the box's centre (AN-10), so a
+        // keyed rotation or scale turns the shape in place instead of orbiting the canvas corner.
         try engine.group("Add \(kind)") {
             try $0.perform(AddLayer(owner: owner, layer: layer, index: index))
             try $0.perform(AddShape(owner: owner, layerID: layer.id, shape: draft.shape))
-            try $0.perform(TranslateShape(owner: owner, layerID: layer.id, index: 0, dx: -centre.x, dy: -centre.y))
-            for (property, value) in zip(Self.positionKeys, [centre.x, centre.y]) {
+            for (property, value) in Self.newShapeKeys(in: draft.shape.bounds) {
                 try $0.perform(SetKeyframe(owner: owner, layerID: layer.id, property: property,
                                            keyframe: Keyframe(frame: 0, value: value)))
             }

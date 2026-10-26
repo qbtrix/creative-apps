@@ -2,7 +2,7 @@
 // follows its parent. A rectangle drawn with the tool and keyed 0 to 360 degrees keeps its centre at frame 12 of 24
 // (the spin no longer orbits the canvas's top-left corner); a hand parented to an arm through `layer.set-parent`
 // stays where it was and then follows the arm's turn; Flare's Lottie export writes `ks.a` and `parent` and reads
-// them back; and the fixtures, which have no anchor or parent, draw and save the same. Every test waits on AN-10
+// them back; and the fixtures, which have no anchor or parent, draw and save the same. AN-10 turned them on
 // (FlarePlacement+Kernel, the parent command in Flare's catalog, new shapes anchored at their centre).
 // Runs on Linux and macOS.
 import Foundation
@@ -63,7 +63,7 @@ import Testing
 
     /// A 200 × 200 rectangle drawn at (400, 300) and keyed 0 to 360 over 24 frames turns in place: its centre at
     /// frame 12 (half a turn) is within 1 px of frame 0's, and its anchor lands on that centre.
-    @Test(.disabled("waits on AN-10: new shapes anchored at their centre")) func drawnRectangleSpinsInPlace() throws {
+    @Test func drawnRectangleSpinsInPlace() throws {
         var w = FlareWorkspace(services: .built)
         w.newDocument()
         w.selectTool(.rectangle)
@@ -85,7 +85,7 @@ import Testing
 
     /// `layer.set-parent` hand to arm keeps the hand where it was at frame 0, is one undo step, and from then on
     /// the hand follows the arm's turn: its world matrix is the arm's turn times its own place before parenting.
-    @Test(.disabled("waits on AN-10: layer.set-parent in Flare's catalog")) func handFollowsTheArmWithNoJump() throws {
+    @Test func handFollowsTheArmWithNoJump() throws {
         var w = FlareWorkspace(services: .built)
         w.load(Self.armAndHand())
         let before = try #require(Self.world(w, "hand", at: 0))
@@ -107,7 +107,7 @@ import Testing
 
     /// Flare's Lottie export writes the arm's anchor as `ks.a` and the hand's `parent` as the arm's `ind`, and
     /// reading those bytes back gives the hand its parent and the arm its anchor.
-    @Test(.disabled("waits on AN-10: Flare's Lottie anchor and parent")) func lottieRoundTripsAnchorAndParent() async throws {
+    @Test func lottieRoundTripsAnchorAndParent() async throws {
         let document = Self.armAndHand(parented: true)
         let options = ExportOptions(format: .lottie, sceneID: "scene-1", frames: 0...0)
         let result = try await LiveExportAdapter(stage: LiveStage()).export(document, options: options, rasterizer: FakeRasterizer()) { _ in }
@@ -130,7 +130,7 @@ import Testing
 
     /// The fixtures have no anchor or parent: opened in Flare they draw the same items at frames 0, 12 and 24 as
     /// FlareCore draws them, and save the bytes they always did, with no anchor or parent written.
-    @Test(.disabled("waits on AN-10: FlarePlacement+Kernel"), arguments: FlareFixtures.all.map(\.name))
+    @Test(arguments: FlareFixtures.all.map(\.name))
     func oldFilesDrawTheSame(fixture: String) throws {
         let document = try #require(FlareFixtures.named(fixture))
         var w = FlareWorkspace(services: .built)

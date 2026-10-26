@@ -63,6 +63,7 @@ struct AllAppsCatalogTests {
         "The kernel's shape.draw names its step for the kind drawn (\"Draw Star\")": ["shape.draw: stepNamedTitle"],
         "Halo's drag end with no drag is a no-op edit that stays enabled": [
             "viewer.drag-end: stepNamedTitle", "viewer.drag-end: editRecordsOneStep", "viewer.drag-end: undoRestoresBytes"],
+        "The kernel's layer.set-parent example names a layer-2, which Flare's ball has not": ["layer.set-parent: exampleRuns"],
         "The kernel's transform.flip is titled Flip while its step names the axis": ["transform.flip: stepNamedTitle"],
         // PY-5 (layer-styles) fills Photo's style adapter and drops this entry.
         "Photo's style.* runs throw notBuilt until layer-styles PY-5": [

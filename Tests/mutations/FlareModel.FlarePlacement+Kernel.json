@@ -1,0 +1,30 @@
+[
+  {
+    "label": "newShapeAnchorCentre: a new shape's anchor is left at 0, so its spin orbits the canvas corner",
+    "file": "Sources/FlareModel/FlarePlacement+Kernel.swift",
+    "find": "static let anchorKeys = [\"anchorX\", \"anchorY\"]",
+    "replace": "static let anchorKeys: [String] = []",
+    "tests": "FlareAnchorParentTests.swift"
+  },
+  {
+    "label": "lottieParent: layer.set-parent never writes the parent, so Lottie gets none",
+    "file": "Sources/FlareModel/FlarePlacement+Kernel.swift",
+    "find": "try engine.perform(SetLayerParent(owner: owner, layerID: layer.id, parentID: first.layerTree.node(layer.id)?.followsID))",
+    "replace": "_ = first.layerTree.node(layer.id)",
+    "tests": "FlareAnchorParentTests.swift"
+  },
+  {
+    "label": "the parent is cleared at the playhead only, so the hand drops the arm's turn",
+    "file": "Sources/FlareModel/FlarePlacement+Kernel.swift",
+    "find": "frames.formUnion(layer.tracks.values.flatMap { $0.map(\\.frame) })",
+    "replace": "_ = layer",
+    "tests": "FlareAnchorParentTests.swift"
+  },
+  {
+    "label": "the kept place drops the turn",
+    "file": "Sources/FlareModel/FlarePlacement+Kernel.swift",
+    "find": "out.rotation = degrees + 360 * ((p.rotation - degrees) / 360).rounded()",
+    "replace": "out.rotation = p.rotation",
+    "tests": "FlareAnchorParentTests.swift"
+  }
+]

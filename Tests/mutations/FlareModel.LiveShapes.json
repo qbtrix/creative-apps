@@ -28,10 +28,10 @@
     "tests": "LiveShapesPositionKeyTests.swift"
   },
   {
-    "label": "B1: the new layer's origin stays at the canvas corner, so a keyed spin orbits it",
+    "label": "B1: the new layer's position and anchor stay at the canvas corner, so a keyed spin orbits it",
     "file": "Sources/FlareModel/Live/LiveShapes.swift",
-    "find": "            try $0.perform(TranslateShape(owner: owner, layerID: layer.id, index: 0, dx: -centre.x, dy: -centre.y))\n",
-    "replace": "",
+    "find": "Self.newShapeKeys(in: draft.shape.bounds)",
+    "replace": "Self.newShapeKeys(in: nil)",
     "tests": "LiveShapesPositionKeyTests.swift"
   },
   {

@@ -152,9 +152,8 @@ import Testing
         let path = VectorPath(polyline: [Point(x: 0, y: 0), Point(x: 50, y: 0), Point(x: 50, y: 50)], closed: true)
         let id = try workspace.addPath(path, name: "Add Path")
         #expect(workspace.layers.first?.id == id && workspace.undoActionName == "Undo Add Path")
-        // The new layer's origin is the path's centre (25, 25), so the path is kept around it (LiveShapes.commit).
-        let centred = VectorPath(polyline: [Point(x: -25, y: -25), Point(x: 25, y: -25), Point(x: 25, y: 25)], closed: true)
-        #expect(workspace.layers.first?.shapes.first?.path == centred)
+        // The path stays as drawn; its anchor and position key at its centre (25, 25) (LiveShapes.commit, AN-10).
+        #expect(workspace.layers.first?.shapes.first?.path == path)
         #expect(throws: (any Error).self) { try workspace.addPath(VectorPath(), name: "Add Path") }
     }
 }

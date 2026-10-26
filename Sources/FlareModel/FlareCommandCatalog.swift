@@ -25,7 +25,8 @@ extension FlareWorkspace {
     typealias Help = @Sendable (FlareWorkspace) -> String?
 
     /// The FlareCore commands, then the app's; empty only if an id broke the id rule.
-    public static let commands = coreCommands + appCommands
+    /// FlareCore's own layer.set-parent only links; the kernel's (`anchorCommands`) also keeps the layer in place.
+    public static let commands = coreCommands.filter { $0.id != "layer.set-parent" } + appCommands
     public static let catalog = (try? CommandCatalog<FlareWorkspace>(app: "flare", commands, history: FlareCoreHistory.init)) ?? .empty(app: "flare")
     static let noFile: Help = { $0.document == nil ? "Open or create an animation first." : nil }
     static let noScene: Help = { $0.document == nil ? FlareLayerError.noDocument.message : nil }
@@ -176,6 +177,7 @@ extension FlareWorkspace {
         + hiddenCommands  // the beta.2 items the menus hide (no-placeholders NP-3)
         + PathCommands.specs(FlareWorkspace.self)  // the twelve path.* commands, the Pen and Direct Select's points (pen-paths FP-6)
         + [importReportCommand]  // the last Lottie open's skipped parts (lottie-open LO-5, FlareLottieNote.swift)
+        + anchorCommands  // transform.set-anchor, layer.set-parent, layer.new-null (anchor-parenting AN-10, FlarePlacement+Kernel.swift)
 }
 
 extension FlareWorkspace {

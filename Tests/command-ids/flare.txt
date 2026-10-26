@@ -54,6 +54,7 @@ label.remove
 label.set
 layer.add
 layer.duplicate
+layer.new-null
 layer.remove
 layer.rename
 layer.reorder
@@ -139,6 +140,7 @@ tool.ellipse
 tool.pen
 tool.rectangle
 tool.select
+transform.set-anchor
 view.toggle-motion-path
 view.toggle-onion
 window.assist

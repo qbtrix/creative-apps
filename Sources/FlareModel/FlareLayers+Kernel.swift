@@ -33,11 +33,11 @@ extension FlareWorkspace {
         }
     }
 
-    /// The tree of `backToFront`, FlareCore's bottom-first layer list.
+    /// The tree of `backToFront`, FlareCore's bottom-first layer list; a layer's `parentID` is its follow link (AN-10).
     static func layerTree(_ backToFront: [Layer]) -> LayerTree<FlareLayerPayload> {
         LayerTree(backToFront.map {
             LayerNode(id: $0.id, name: $0.name, isHidden: !$0.isVisible, isLocked: $0.isLocked,
-                      payload: FlareLayerPayload())
+                      followsID: $0.parentID, payload: FlareLayerPayload())
         })
     }
 

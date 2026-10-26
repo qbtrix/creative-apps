@@ -62,7 +62,8 @@ struct FlareCommandCatalogTests {
     }
 
     @Test func conformance() {
-        #expect(FlareWorkspace.catalog.ids.count == FlareWorkspace.coreCommands.count + FlareWorkspace.appCommands.count)
+        // The kernel's layer.set-parent (AN-10) replaces FlareCore's.
+        #expect(FlareWorkspace.catalog.ids.count == FlareWorkspace.coreCommands.count - 1 + FlareWorkspace.appCommands.count)
         let appIDs = Set(FlareWorkspace.appCommands.map(\.id))
         var ws = Self.lawsFixture()
         // The drawn rectangle with a three-stop linear fill, so every fill.* example can run (gradient-fill FG-5).
@@ -78,13 +79,15 @@ struct FlareCommandCatalogTests {
     /// The file-flow examples need a recent file or a saved animation on disk: FlareFileFlowTests runs them.
     /// The path.* examples (pen-paths FP-6) need a Pen draft or a shape picked with Direct Select, which the fixture has
     /// not: FlarePathCommandTests runs them in Flare and SuiteKernelTests' PathCommandsTests runs each rule.
-    /// `import.report` needs a document opened from a Lottie: FlareLottieNoteTests runs it.
+    /// `import.report` needs a document opened from a Lottie: FlareLottieNoteTests runs it. The kernel's anchor
+    /// examples name layer-1 and layer-2, which the fixture has not: FlareAnchorParentTests runs them (AN-10).
     static func exempt(_ problem: String) -> Bool {
         let id = String(problem.prefix { $0 != ":" })
         // The beta.2 commands never run (FlareMenuVisibilityTests).
         if FlareWorkspace.menuHidden.contains(id) { return problem.contains("exampleRuns") }
         if id.hasPrefix("path.") { return problem.contains("exampleRuns") }
         if ["file.clear-recent", "file.open-in", "file.open-recent", "import.report"].contains(id) { return problem.contains("exampleRuns") }
+        if ["transform.set-anchor", "layer.set-parent"].contains(id) { return problem.contains("exampleRuns") }
         if ["recovery.restore", "recovery.discard", "timeline.delete-keys"].contains(id) { return problem.contains("exampleRuns") }
         return ["timeline.insert-frames", "timeline.remove-frames"].contains(id)
             && ["stepNamedTitle", "editRecordsOneStep", "undoRestoresBytes"].contains { problem.contains($0) }
