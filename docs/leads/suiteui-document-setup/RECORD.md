@@ -159,3 +159,4 @@ Next: lane merges DS-photo #4901, DS-design #4887, DS-halo #4918, DS-flare #4891
 - 2026-10-26T20:56Z (act-1a177ff0916-4jm7): poll: dev 3ebc8d43; dev moved, none ours; DS-z (b0369b78) waits on #4918 and #4891
 - 2026-10-26T21:15Z (act-1a177ff0916-4jm7): poll: dev 3ebc8d43; dev unchanged; DS-z (b0369b78) waits on #4918 and #4891
 - 2026-10-26T21:32Z (act-1a177ff0916-4jm7): poll: dev 3ebc8d43; dev unchanged; DS-z (b0369b78) waits on #4918 and #4891
+- 2026-10-26T21:35Z (act-1a177ff0916-4jm7): poll: dev 3ebc8d43; #4901 needs-rebase: merged dev into DS-photo (25847725, golden file.new summary resolved), no swift here so the lane's Linux run is its proof; footers removed from #4901 and #4887; DS-z waits on #4918 and #4891
