@@ -228,3 +228,4 @@ utc	stage	event	ref	note
 2026-10-26T11:55:51Z	3	poll	-	11:55Z poll: no merges of ours; dev still c6700dba, lane has merged nothing since 11:16Z; dev-red #5321 still labelled; ours queued; 0 findings.
 2026-10-26T12:23:00Z	3	poll	-	12:23Z poll: no merges of ours; dev 746be6b1 (#5775 supervisor macOS sharding); ours queued; dev-red #5321 open; 0 findings.
 2026-10-26T12:45:19Z	3	poll	-	12:45Z poll: no merges of ours; dev 746be6b1 unchanged; none of ours carries needs-fix/needs-rebase; dev-red #5321 open; 0 findings.
+2026-10-26T13:06:57Z	3	poll	-	13:06Z poll: no merges of ours; lane landed #5146 (dev 57dd31ff), so batches are moving again; ours queued; 0 findings.
