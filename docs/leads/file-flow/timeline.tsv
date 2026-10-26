@@ -216,3 +216,4 @@ utc	stage	event	ref	note
 2026-10-26T20:50:06Z	wait	poll	-	lane backlog
 2026-10-26T21:15:59Z	wait	poll	-	dev-red #5818 not ours; PRs queued
 2026-10-26T21:38:20Z	wait	poll	-	no change
+2026-10-26T22:06:44Z	merge	HF-m	#4894	merged c4cf4a75; #4936 retargeted by lane
