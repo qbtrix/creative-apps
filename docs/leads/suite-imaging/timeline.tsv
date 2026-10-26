@@ -159,3 +159,4 @@ utc	stage	event	ref	note
 2026-10-26T07:56:21Z	heartbeat	#5295/#5297/#5299/#5163/#5374 clean, fast-lane queue; #5178 supervisor; new drift issues none on suite-imaging
 2026-10-26T08:22:21Z	heartbeat	no merges; dev-red #5321 (macos) holds code batches; PRs clean
 2026-10-26T08:42:54Z	heartbeat	no merges; #5297/#5299 lost fast-lane (over cap only while stacked on #5295): restack and relabel when #5295 merges
+2026-10-26T09:03:26Z	heartbeat	no merges; #5297 relabelled fast-lane by lane, #5299 waits on #5295 restack
