@@ -1,0 +1,196 @@
+utc	stage	event	ref	note
+2026-10-20T23:47Z	0	stage-start	-	setup on 2cc149f57
+2026-10-20T23:47Z	3	stage-start	-	blocked: HF-a waits on HT-a, HS-a, PH-u
+2026-10-21T00:13Z	3	heartbeat	-	HF-a still blocked: HS-a in review #3676, PH-u not started
+2026-10-21T02:03Z	3	heartbeat	waits	HS-a #3676 open; placed-images PH-a still stage 0 waiting; blocked
+2026-10-21T02:21Z	3	heartbeat	waits	HS-a #3676 open; placed-images still stage 0; blocked
+2026-10-21T02:38Z	3	heartbeat	waits	HS-a #3676 open; placed-images still stage 0; blocked
+2026-10-21T02:54Z	3	heartbeat	waits	HS-a #3676 open; placed-images still stage 0; blocked
+2026-10-21T03:12Z	3	heartbeat	waits	HS-a #3676 open; placed-images still stage 0; blocked
+2026-10-21T03:29Z	3	heartbeat	waits	HS-a #3676 merged 03:14Z; placed-images still stage 0 (PH-a/PH-u not started); blocked
+2026-10-21T03:46Z	3	heartbeat	waits	placed-images still stage 0; blocked
+2026-10-21T04:03Z	3	heartbeat	waits	placed-images still stage 0; blocked
+2026-10-21T04:20:14Z	3	heartbeat	-	placed-images still Stage 0 (PH-a waiting on HS-a, key-editing contract, PL-a); still blocked
+2026-10-21T04:38:36Z	3	heartbeat	-	placed-images still Stage 0; still blocked
+2026-10-21T04:57:41Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images still Stage 0)
+2026-10-21T05:16:18Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T05:35:56Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T05:55:06Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T06:20:44Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T06:36:49Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T06:55:49Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T07:11:41Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T07:23:58Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T07:41:49Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T07:59:57Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T08:16:58Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T08:35:21Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T08:55:17Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T09:12:24Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T09:29:42Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T09:56:56Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T10:15:29Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T10:39:27Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T10:57:22Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T11:19:10Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T11:36:40Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T11:54:28Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T12:15:02Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T12:32:54Z	3	heartbeat	-	blocked: HF-a waits placed-images PH-u (placed-images Stage 0)
+2026-10-21T12:50:55Z	3	heartbeat	-	blocked on placed-images PH-u/PH-a (Stage 0)
+2026-10-21T13:21:08Z	3	heartbeat	-	blocked: halo placed-images still Stage 0 (PH-a/PH-u)
+2026-10-21T13:42:11Z	heartbeat	check-in: still blocked; placed-images is at Stage 0, PH-a waits on HS-a (#3676), HK-a (key-editing) and PL-a.
+2026-10-22T16:37:55Z	takeover	run act-1a16474bd28-v3ht starts
+2026-10-23T15:26:44Z	3	takeover	-	run act-1a16958d5fe-8dxu starts; HF-a rebuilt on dev
+2026-10-23T16:03:12Z	3	pr	HF-a	#4855 opened, Fast-Check pass at db25024f
+2026-10-23T16:30:00Z	3	pr	HF-u	#4868 opened, stacked on HF-a
+2026-10-23T17:12:00Z	3	heartbeat	HF-m	HF-3 code, tests, RJ-H42 committed; Mutate 5/5; gate running
+2026-10-23T16:56:46Z	3	pr	HF-m	#4894 opened (HF-3), stacked on HF-a, Fast-Check pass at 015f68dc
+2026-10-23T17:52:00Z	3	pr	HF-m	#4936 opened (HF-4), stacked on HF-3, Mutate n/a (macOS window wiring)
+2026-10-23T18:15:00Z	3	heartbeat	HF-z	all 4 PRs open in the lane, no lane comments, no findings; HF-7 waits on #4868
+2026-10-23T18:40:00Z	3	heartbeat	HF-z	all 4 PRs open; #4855 mergeable clean, no checks, waiting on a lane batch; HF-7 waits on #4868
+2026-10-23T19:00:00Z	3	heartbeat	HF-z	lane still bisecting batch-20261023174522 (#4818-#4850); #4855 queued for a later batch, no lane comments
+2026-10-23T19:22:00Z	3	heartbeat	HF-z	batch-20261023192105 holds 12 PRs up to #4842; #4855 next in line, no lane comments, no findings
+2026-10-23T19:43:00Z	3	heartbeat	HF-z	batch-20261023192105 still running; #4855 waits for the next batch; no lane comments
+2026-10-23T20:04:00Z	3	heartbeat	HF-z	batch-20261023192105 red, lane bisecting (probes -3, -6); #4855 waits for the next batch
+2026-10-23T20:27:00Z	3	heartbeat	HF-z	no merges; lane batch-20261023192105 still bisecting (probes -1 -3 -6); HF-7 waits on #4868
+2026-10-23T20:49:00Z	3	heartbeat	HF-z	no merges; batch-20261023192105 branches gone, no dev merge since 19:45Z, no lane comment; #4855 waits for next batch
+2026-10-23T21:11:00Z	3	heartbeat	HF-z	#4855 in lane batch-20261023204921 (12 PRs, #4862..#4841); no merges, no lane comments
+2026-10-23T21:32:00Z	3	heartbeat	HF-z	#4855 still in lane batch-20261023204921 (running, no probes); no merges, no lane comments
+2026-10-23T21:58:00Z	3	merged	HF-a	#4855 on dev as f2955985 (batch-20261023204921); merging dev into HF-u #4868 and HF-m #4894 (add/add conflicts resolved to HF-m side, dev==HF-a blobs), gate running, then retarget to dev
+2026-10-23T22:35:00Z	3	stage	HF-a	HF-a merged; HF-u retargeted to dev (c0ef74ef); HF-m dev merged, gate crash in unrelated AfterGlowCLITests under check
+2026-10-23T22:50:00Z	3	stage	HF-m	HF-m retargeted to dev (19fa9f3e); dev Linux crash in LibraryHeadless reported to supervisor
+2026-10-23T23:05:00Z	3	done	HF-a	Belt-Slice-Done HF-a run 40029046141; Mac-Finish-Wanted posted
+2026-10-23T23:20:00Z	3	stage	HF-m	lane Linux check green on #4894; waiting on batch; findings 0
+2026-10-23T23:40:00Z	3	stage	HF-m	waiting on lane batch (macOS gate run 40029779505 busy)
+2026-10-24T00:02Z	3	stage	-	heartbeat: waiting on next lane batch
+2026-10-24T00:25Z	3	stage	-	heartbeat: waiting on next lane batch
+2026-10-24T00:47Z	3	stage	-	heartbeat: lane bisecting prior batch
+2026-10-24T01:09Z	3	stage	-	heartbeat: lane bisecting prior batch
+2026-10-24T01:30Z	3	stage	-	heartbeat: lane bisecting prior batch
+2026-10-24T01:54Z	3	stage	-	heartbeat: probe -9 Linux green, macOS running; slices wait for the next batch
+2026-10-24T02:15Z	3	stage	-	heartbeat: probe -9 macOS still running; slices queued
+2026-10-24T02:37Z	3	stage	-	heartbeat: probe -9 macOS red (culprit in #4836..#4864, not ours); slices queued
+2026-10-24T02:59Z	3	stage	-	heartbeat: bisect probe -7 running; slices queued
+2026-10-24T03:20Z	3	stage	-	heartbeat: bisect probe -7 macOS running; slices queued
+2026-10-24T03:41Z	3	stage	-	heartbeat: bisect probe -7 macOS running; slices queued
+2026-10-24T04:04Z	3	stage	-	heartbeat: probe -7 green, probe -8 running; our PRs wait for next batch
+2026-10-24T04:25Z	3	stage	-	heartbeat: probe -8 Linux green, macOS running; our PRs wait for next batch
+2026-10-24T04:47Z	3	stage	-	heartbeat: probe -8 macOS running; our PRs wait for next batch
+2026-10-24T05:10Z	3	stage	-	heartbeat: new batch 20261024050226 has HX-u #4858 and HF-u #4868; HF-m #4894 next batch; supervisor: crash is #5032, carry on
+2026-10-24T05:32Z	3	stage	-	heartbeat: batch Linux green, macOS gate running
+2026-10-24T05:56Z	3	stage	-	heartbeat: batch macOS red on a Flare hang; lane bisecting
+2026-10-24T06:17Z	3	stage	-	heartbeat: bisect probe -6 Linux green, macOS running
+2026-10-24T06:42Z	3	stage	-	heartbeat: probe -6 red on Flare export-pack hang (on dev); waiting on lane bisect
+2026-10-24T07:02Z	3	stage	-	heartbeat: lane bisect probes -3/-1 macOS running
+2026-10-24T07:32Z	3	stage	-	takeover by act-1a16cd045be-qv3g; HF-u #4868, HF-3 #4894, HF-4 #4936 in lane; building HF-z
+2026-10-24T07:37Z	4	wave	-	HF-z (HF-7 live journey, step 4 now the Flare hand-off per rule 20; HF-8 docs, built) built on lead/halo-file-flow-HF-z, stacked on HF-u; gate running
+2026-10-24T07:53Z	5	ship	HF-z	#5092 opened (feature-done), head a1b66ac9, CI: PASS
+2026-10-24T08:17:32Z	poll	lane merging #4828-#4837 oldest first; our PRs queued, clean, no needs-fix/needs-rebase; no file-flow/export-pack findings
+2026-10-24T08:40:14Z	poll	dev unmoved since 08:05; lane bisecting lane/batch-20261024081307 (#4903-#4952); our base PRs eligible on marker, queued behind ~62 ready PRs; no needs-fix/needs-rebase; no new findings
+2026-10-24T09:02:13Z	poll	dev unmoved (1bbaba6c); lane still bisecting lane/batch-20261024081307; all 8 PRs open, no needs-fix/needs-rebase
+2026-10-24T09:23:46Z	poll	dev unmoved (1bbaba6c); lane still bisecting lane/batch-20261024081307; our PRs queued
+2026-10-24T09:45:03Z	poll	dev at 9f476af7 (#5117); 8 PRs open, no needs-fix/needs-rebase; lane batch 20261024081307 still bisecting
+2026-10-24T10:08:04Z	poll	dev at 9f476af7; 8 PRs open, no needs-fix/needs-rebase; lane batch 20261024081307 still bisecting
+2026-10-24T10:30:09Z	poll	dev at 9f476af7; 8 PRs open, no needs-fix/needs-rebase; lane batch 20261024081307 still bisecting
+2026-10-24T10:52:09Z	poll	dev at fffff7c1; batch 20261024081307 resolved; 8 PRs open, no needs-fix/needs-rebase; waiting for next batch
+2026-10-24T11:13:51Z	poll	dev at 6ad8cadb; batch 20261024110214 in flight (12 PRs, none ours); 8 PRs open, no needs-fix/needs-rebase
+2026-10-24T11:35:19Z	poll	dev at 6ad8cadb; batch 20261024110214 in flight (none ours); 8 PRs open, no needs-fix/needs-rebase
+2026-10-24T11:56:50Z	poll	dev at 6ad8cadb; batch 20261024110214 in flight (none ours); 8 PRs open, no needs-fix/needs-rebase
+2026-10-24T12:17:49Z	poll	dev at 6ad8cadb; batch 20261024110214 bisecting (none ours); 8 PRs open, no needs-fix/needs-rebase
+2026-10-24T12:39:14Z	poll	dev at 6be19b34; batch 20261024110214 bisecting (none ours); 8 PRs open, no needs-fix/needs-rebase
+2026-10-24T13:00:51Z	poll	dev at 6be19b34; batch 20261024110214 bisecting (none ours); 8 PRs open, no needs-fix/needs-rebase
+2026-10-24T13:22:15Z	poll	queued; batch 20261024110214 (12 others) still bisecting at -6; no labels
+2026-10-24T13:43:54Z	poll	queued; batch 20261024110214 (12 others) still bisecting (-3/-6); no labels
+2026-10-24T14:04:53Z	poll	queued; batch 20261024110214 (12 others) still bisecting (-3/-6); no labels
+2026-10-24T14:26:02Z	poll	batch 20261024110214 resolved (dev e79e9afc); ours not in it; no batch in flight; no labels
+2026-10-24T14:47:46Z	poll	dev e79e9afc; no batch in flight; ours unmerged, unlabelled
+2026-10-24T15:10:20Z	poll	batch 20261024144917 in flight (12 older PRs, none ours); ours queued, unlabelled
+2026-10-24T15:32:08Z	poll	batch 20261024144917 (12 others) still in flight; ours queued, unlabelled
+2026-10-24T15:54:14Z	poll	batch 20261024144917 landed (dev 33cd6e97); ours next in queue, unlabelled
+2026-10-24T16:16:35Z	poll	#4868 (HF-u) in lane batch 20261024160327; awaiting batch CI
+2026-10-24T16:37:30Z	poll	#4868 (HF-u) still in batch 20261024160327 (CI running, no probes)
+2026-10-24T16:59:17Z	poll	#4868 (HF-u) in batch 20261024160327, CI running; dev 33cd6e97
+2026-10-24T17:28:23Z	merge	#4868 (HF-u) merged 10642721; stacked PRs on dev; #5092 needs-rebase fixed: dev merged in, head 63616302, CI --changed PASS
+2026-10-24T17:50:46Z	slice-done	HF-u Belt-Slice-Done + Mac-Finish-Wanted on #3474 (https://github.com/qbtrix/creative-apps/actions/runs/40116034771, Linux check green on c0920138); no open findings for this feature
+2026-10-24T18:12:34Z	poll	dev c0920138 unchanged; open PRs unlabelled, not in batch; no findings for this feature
+2026-10-24T18:34:10Z	poll	dev d13c3ff2; batch landed without ours; open PRs unlabelled; no new findings
+2026-10-24T18:56:28Z	poll	dev 67446118; no labels; no new findings; #4894 (HF-m) in lane/batch-20261024183708
+2026-10-24T19:18:10Z	poll	dev 67446118; no labels; no new findings; batch-20261024183708 red, bisecting (probe -6); #4894 is 11/12
+2026-10-24T19:39:58Z	poll	dev 6f66ca33; no labels; no new findings; batch-20261024183708 still bisecting (probe -6); #4894 waits
+2026-10-24T20:02:06Z	poll	dev 6f66ca33; no labels; no new findings; batch-20261024183708 probe -6 macOS gate (run 40123913661) still running; #4894 waits
+2026-10-24T20:24:06Z	poll	dev ef37711d; no labels; no new findings; batch-20261024183708 still bisecting at -6; #4894 waits
+2026-10-24T21:20Z	5	poll	-	#4894, #5092 eligible, waiting for a batch; no findings
+2026-10-24T21:56Z	5	poll	-	no merges; lane bisecting batch 20261024205137; no new findings for this feature
+2026-10-24T22:18Z	check	22:18Z check-in: #4894 HF-m, #4936 HF-4, #5092 HF-z open, clean, fast-lane, no needs-fix; waiting for a batch. No green dev ci.yml run holds a slice's last PR yet (40137153379 in progress at afef017c holds none). No new findings.
+2026-10-24T22:41Z	check	22:41Z check-in: all six PRs still open with fast-lane and no needs-fix (REST pulls returned 503, so states came from search). No green dev ci.yml run holds a slice's last PR (40137153379 still running at afef017c). No new findings.
+2026-10-24T23:03Z	check	23:03Z check-in: all six PRs open, clean, fast-lane, no needs-fix. Lane still bisecting batch 20261024205137 (probe -1 Linux 40139721202 + macOS gate 40139723227 running); dev unchanged at afef017c, full CI 40137153379 still running. No slice-done yet, no new findings.
+2026-10-24T23:25Z	check	23:25Z check-in: no change. All six PRs open, clean, fast-lane, no needs-fix. Lane bisect probe 20261024205137-1 macOS gate 40139723227 still running; dev at afef017c, full CI 40137153379 running. No slice-done, no new findings.
+2026-10-24T23:46Z	check	23:46Z check-in: all six PRs open, clean, fast-lane, no needs-fix. Full CI 40137153379 green at afef017c (holds none of ours). Lane bisect probe 20261024205137-1 macOS gate 40139723227 still running (over 1 h). No slice-done, no new findings.
+2026-10-25T00:08Z	check	00:08Z check-in: all six PRs open, clean, fast-lane, no needs-fix. Old batch resolved; new batch 20261024235353 (Linux 40144575552, macOS gate 40144578021) holds none of our heads, so ours wait for the next one. No slice-done, no new findings.
+2026-10-25T00:30Z	check	00:30Z check-in: all six PRs open, clean, fast-lane, no needs-fix. Batch 20261024235353 (none of ours) is red and bisecting (probe -6 macOS gate 40145609051); dev still afef017c. No slice-done, no new findings.
+2026-10-25T00:52Z	check	00:52Z check-in: no change. All six PRs open, clean, fast-lane, no needs-fix. Lane still bisecting batch 20261024235353 (probe -6 macOS gate 40145609051); dev still afef017c. No slice-done, no new findings.
+2026-10-25T01:24Z	check	01:24Z heartbeat: #4894 (HF-m) clean on dev, #4936 (HF-4) clean stacked on HF-m, #5092 (HF-z) clean on dev; none merged yet, no needs-fix or needs-rebase; 0 open findings. Belt nudge received, resuming polling.
+2026-10-25T01:56Z	stage	01:56Z: #4894 (HF-m) went dirty after HY-1 (#5156) landed on dev (catalog, HaloProject, golden, two tests). Merged dev in, styles before file commands, golden as the sorted union; gate CI: PASS (987) + AfterGlowCLITests 165 pass; pushed d9c7c9d20, body gets Fast-Check/Head and this run's Belt-Lead. #4936 (HF-4): HF-m merged in cleanly, gate running.
+2026-10-25T02:04Z	stage	02:04Z: #4936 (HF-4) with HF-m's dev merge merged in: gate CI: PASS + AfterGlowCLITests 165 pass; pushed a713dc260, Head and Belt-Lead moved. #5092 (HF-z) still clean with dev.
+2026-10-25T02:18Z	check	02:18Z heartbeat: #4894, #4936, #5092 all clean, none merged; no needs-fix/needs-rebase; 0 open findings. Lane waits on bisect probe lane/batch-20261024235353-9 macOS gate (40150116582, running since 01:18Z).
+2026-10-25T02:40Z	check	02:40Z heartbeat: lane run 40152661631 rates #4894 and #5092 eligible (Fast-Check marker), #4936 skips until its base HF-m merges. Not in batch 20261025023716 (layer-styles HY stack); waiting for the next batch. 0 open findings.
+2026-10-25T03:02Z	check	03:02Z heartbeat: all PRs clean and unmerged; no needs-fix/needs-rebase; 0 open findings. Lane batch 20261025023716 (HY stack) waits on a macOS runner behind dev's scoped runs at 3db45eb45; ours ride the next batch.
+2026-10-25T03:24Z	check	03:24Z heartbeat: #4894 #4936 #5092 #4917 #4942 open, clean, no needs-fix; lane bisecting HY batch 20261025023716 (macOS gate red, probe -6 running); no slice done; 0 findings
+2026-10-25T03:46Z	check	03:46Z heartbeat: all five PRs open, no needs-fix or needs-rebase; lane still bisecting HY batch 20261025023716 (probe -3 running); dev at 2e7d52649; no slice done; 0 findings
+2026-10-25T04:08Z	check	04:08Z heartbeat: all five PRs open and clean, no needs-fix or needs-rebase; lane on HY bisect probe -1; dev full CI 40154669999 macOS still running; no dev-red; no slice done; 0 findings
+2026-10-25T04:30Z	check	04:30Z heartbeat: all five PRs open, no needs-fix or needs-rebase; lane on HY bisect probe -1 (macOS gate running); dev at ee8ccd61a; dev full CI 40154669999 still running; no slice done; 0 findings
+2026-10-25T04:52Z	check	04:52Z heartbeat: all five PRs open and clean, no needs-fix or needs-rebase; dev full CI 40154669999 green at 3db45eb45 (contains none of ours); lane HY bisect probe -1 macOS gate still running; no slice done; 0 findings
+2026-10-25T05:14Z	check	05:14Z heartbeat: all five PRs open and clean, now labelled beta (batch priority after p0); no needs-fix or needs-rebase; lane HY bisect probe -2 running; no slice done; 0 findings
+2026-10-25T05:36Z	check	05:36Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; HY bisect resolved (probe -2 red), dev at 13fb2f591; next batch should take ours; no slice done; 0 findings
+2026-10-25T05:58Z	check	05:58Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; new batch 20261025054232 (12 PRs, none of ours) red on Linux, lane bisecting (probe -6); no slice done; 0 findings
+2026-10-25T06:19Z	check	06:19Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; lane bisecting batch 20261025054232 (none of ours), probe -6 macOS gate running; no slice done; 0 findings
+2026-10-25T06:42Z	check	06:42Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; batch 20261025054232 bisect probe -6 macOS gate still running (46 min); dev 13fb2f591 unchanged; no slice done; 0 findings
+2026-10-25T07:04Z	check	07:04Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; batch 20261025054232 probe -6 macOS gate still running (68 min); dev 13fb2f591 unchanged; no slice done; 0 findings
+2026-10-25T07:26Z	check	07:26Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; batch 20261025054232 probe -6 macOS red, probe -3 Linux+macOS running (no Halo PR in batch); dev 13fb2f591; no slice done; 0 findings
+2026-10-25T07:48Z	check	07:48Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; batch 20261025054232 probe -3 Linux green, macOS gate running; dev 13fb2f591; no slice done; 0 findings
+2026-10-25T08:11Z	check	08:11Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; dev 7e5bcd82f (#5287, scripts only); batch 20261025054232 probe -3 macOS gate still running; no slice done; 0 findings
+2026-10-25T08:33Z	check	08:33Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; batch 20261025054232 bisect at probe -4 (Linux+macOS running); dev 7e5bcd82f; no slice done; 0 findings
+2026-10-25T08:55Z	check	08:55Z heartbeat: all five PRs open (beta), no needs-fix or needs-rebase; dev 8d3a12c4b (#5274 lane change), full CI 40178111920 running on it; batch 20261025054232 probe -4 macOS red, bisect continues; no slice done; 0 findings
+2026-10-25T09:17Z	check	09:17Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; new batch 20261025090316 running, none of ours in it; dev 8d3a12c4b, full CI running; no slice done; 0 findings
+2026-10-25T09:39Z	check	09:39Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; dev-red #5316 (macOS, range main..8d3a12c4b: #3935 #4877 #4888 #5274 #5287, none ours, not ours to fix); batch 20261025090316 bisecting (probe -6), none of ours; no slice done; 0 findings
+2026-10-25T10:01Z	check	10:01Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; dev-red #5316 still open (not ours); batch 20261025090316 probe -6 macOS gate running; dev 8d3a12c4b; no slice done; 0 findings
+2026-10-25T10:23Z	check	10:23Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; full CI 40178111920 on dev 8d3a12c4b green, dev-red #5316 closed; batch 20261025090316 probe -6 macOS gate running (none of ours); no slice done; 0 findings
+2026-10-25T10:45Z	check	10:45Z heartbeat: all five PRs open and clean (beta), no needs-fix or needs-rebase; batch 20261025090316 bisect: probe -6 green, probe -9 Linux green (none of ours); dev 8d3a12c4b, no dev-red; no slice done; 0 findings
+2026-10-25T11:08Z	check	11:08Z heartbeat: #4894 #4936 #5092 #4917 #4942 open, no needs-fix/needs-rebase; dev at 68bec9fe7 (SuiteText refactor, not ours); lane still bisecting batch 20261025090316 (none of ours); no slice done, 0 findings
+2026-10-25T11:30Z	check	11:30Z heartbeat: all five PRs open and clean, no needs-fix/needs-rebase; new batch 20261025111803 holds none of ours; full CI on dev 68bec9fe7 running; no slice done, 0 findings
+2026-10-25T11:52Z	check	11:52Z heartbeat: all five PRs open and clean, no needs-fix/needs-rebase; lane now runs LANE_VERIFY_AFTER=1 (#5274) and checks stale-proof PRs one at a time (batch 20261025114830 holds none of ours), so #4894 #4917 #5092 queue behind others; dev at 5270bc4bc; no slice done, 0 findings
+2026-10-25T12:15Z	check	12:15Z heartbeat: all five PRs open, no needs-fix/needs-rebase; lane landing stale-proof PRs one at a time (#4886, #4943 merged; dev at 58bb6d4d5); ours still queued; no slice done, 0 findings
+2026-10-25T12:38Z	check	12:38Z heartbeat: all five PRs open and clean, no needs-fix/needs-rebase; lane batch 20261025122638 (one at a time) holds none of ours; dev at 58bb6d4d5; no slice done, 0 findings
+2026-10-25T13:00Z	check	13:00Z heartbeat: all five PRs open and clean, no needs-fix/needs-rebase; lane landed #4953 (dev 930337d52), batch 20261025125743 holds none of ours; no slice done, 0 findings
+2026-10-26T02:08Z	check	02:08Z resume (run act-1a175f40239-xop3): #4894 HF-m (head d9c7c9d2, local-ci/prescreen green), #4936 HF-4 (stacked on HF-m) and #5092 HF-z (feature-done) are open, clean, fast-lane, beta, no needs-fix/needs-rebase, and merge clean with dev 8987427d; the lane is landing beta PRs one at a time, ours queued. 0 file-flow findings (26 open line:halo findings, none touch file-flow files). Rerunning the gate on HF-m + today's dev.
+2026-10-26T02:14Z	check	02:14Z check: scripts/ci --changed on #4894 (HF-m) merged with dev 8987427d: CI: PASS (989 tests). No push needed; the PR merges clean, so its Fast-Check/Head marker stands. #4936, #5092 still queued in the lane; 0 file-flow findings.
+2026-10-26T02:46:37Z	check	check: #4894 (HF-m), #4936 (HF-4) and #5092 (HF-z) are still open and queued in the lane (beta, one at a time). Each has its marker; #4894 has its prescreen. All three still merge cleanly with dev 6d5f8b92 (#5309 halo text adapter landed 02:44Z). No needs-fix, needs-rebase or findings. Next check about 03:05Z.
+2026-10-26T03:27:08Z	check	check: #4894 (HF-m), #4936 (HF-4, base the HF-m branch) and #5092 (HF-z) are unchanged and still queued (beta, clean, markers on their heads). All three merge cleanly with dev d0859e01. No needs-fix, needs-rebase or findings. Next check about 03:45Z.
+2026-10-26T04:01Z	check	check: Packet-Review 2 answered under Decisions; HF-z journey + packet amendments committed, scripts/ci --changed running; #4894 #4936 #5092 still queued
+2026-10-26T04:06Z	stage	stage: HF-z a95e7b0e pushed (CI: PASS, review 2 applied), #5092 Head moved; review answered on #3474 (6407980319); supervisor asked why #4894 doesn't land (6407980974)
+2026-10-26T04:26Z	check	check: #4894 #4936 #5092 unmerged (dev 75292afd); dev-red #5321 open since 10-25 16:34 holds code batches; no supervisor answer yet
+2026-10-26T04:46Z	check	check: dev 999895c8; #4894 #4936 #5092 unmerged; dev-red #5321 still open (macos, range main..75292afd); no supervisor answer
+2026-10-26T05:06Z	check	no change: #4894/#4936/#5092 open and clean, dev-red #5321 open, no supervisor answer
+2026-10-26T05:25Z	check	no change: #4894/#4936/#5092 open and clean, dev-red #5321 open, no supervisor answer
+2026-10-26T05:44Z	check	no change: #4894/#4936/#5092 open and clean, dev-red #5321 open, no supervisor answer
+2026-10-26T06:06Z	check	no change: #4894/#4936/#5092 open and clean, dev-red #5321 open, no supervisor answer
+2026-10-26T06:25Z	check	no change: #4894/#4936/#5092 open and clean, dev-red #5321 open, no supervisor answer
+2026-10-26T06:45Z	check	no change: #4894/#4936/#5092 open and clean (#4894 prescreen green), dev-red #5321 still open (new run 40277933712, range to c480d848), no supervisor answer
+2026-10-26T07:16Z	check	no change (resumed on Belt nudge; 07:04Z check never fired): #4894/#4936/#5092 open and clean, dev-red #5321 open (run 40277933712), no supervisor answer
+2026-10-26T07:33Z	check	check: #4894 d9c7c9d2, #4936 a713dc26, #5092 a95e7b0e all open and clean, none merged; dev-red #5321 still open (macos); no new #3474 comment (20). Waiting on the lane, no push.
+2026-10-26T07:53Z	check	check: #4894 d9c7c9d2, #4936 a713dc26, #5092 a95e7b0e still open and clean, none merged; dev-red #5321 still open (macos); no new #3474 comment (20). Waiting on the lane, no push.
+2026-10-26T08:12Z	check	check: #4894 d9c7c9d2, #4936 a713dc26, #5092 a95e7b0e still open and clean, none merged; dev-red #5321 still open (macos); no new #3474 comment (20). Waiting on the lane, no push.
+2026-10-26T08:28Z	check	check: #4894, #4936, #5092 still open and clean, none merged; dev-red #5321 open (another lead reads its macos failure as OnboardingModelTests timeouts under load, not a halo PR); no new #3474 comment (20). Waiting on the lane, no push.
+2026-10-26T08:47Z	check	no change: #4894 #4936 #5092 open, dev-red #5321 still open (16 comments), no supervisor answer on #3474
+2026-10-26T09:04Z	check	no change: #4894 #4936 #5092 open and clean; dev-red #5321 still open, new red run 40290214719 (range main..3e26fbe4, our PRs not in it); no supervisor answer on #3474
+2026-10-26T09:21Z	check	no change: #4894 #4936 #5092 open and clean; dev-red #5321 open (run 40290214719, 16 comments); no supervisor answer on #3474
+2026-10-26T09:37Z	check	no change: #4894 #4936 #5092 open and clean; dev-red #5321 open (run 40290214719, 16 comments); no supervisor answer on #3474
+2026-10-26T09:55Z	check	no change: #4894 #4936 #5092 open and clean, dev-red #5321 open (16 comments), no supervisor answer on #3474 (20 comments)
+2026-10-26T10:15Z	check	no change: #4894 #4936 #5092 open and clean, dev-red #5321 open (16 comments), no supervisor answer on #3474 (20 comments)
+2026-10-26T10:32Z	check	no change: #4894 #4936 #5092 open and clean, dev-red #5321 open (16 comments), no supervisor answer on #3474 (20 comments)
+2026-10-26T10:50Z	check	no change: #4894 #4936 #5092 open and clean, dev-red #5321 open (16 comments), no supervisor answer on #3474 (20 comments)
+2026-10-26T11:18Z	check	no change: #4894 #4936 #5092 open (mergeable state recomputing after a dev move), dev-red #5321 open (16 comments), no supervisor answer on #3474 (20 comments)
+2026-10-26T11:35Z	check	no change: #4894 #4936 #5092 open and clean, dev-red #5321 open (16 comments), no supervisor answer on #3474 (20 comments)
+2026-10-26T11:52Z	check	no change: #4894 #4936 #5092 open and clean, dev-red #5321 open (16 comments), no supervisor answer on #3474 (20 comments)
+2026-10-26T12:45Z	3	stage-start	-	run act-1a1783581a6-fo4a resumed; record on lead/file-flow (rebuilt on main); #4894 #4936 #5092 queued in lane
