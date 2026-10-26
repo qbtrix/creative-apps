@@ -179,3 +179,4 @@ time	task	event	note
 2026-10-26T20:10Z	3	heartbeat	lane	poll 2026-10-26T20:10Z: 12 PRs ready in lane queue; no dev merge since #5334 19:18Z; 12 single-PR lane batches in flight (none ours); no dev-red; no release
 2026-10-26T20:28Z	3	heartbeat	lane	poll 2026-10-26T20:28Z: needs-rebase fixes: merged dev into CB-13 (#5149, PhotoWindow+Edit.swift), AR-11 (#5096), FH-3 (#4889), CB-14 (#5125) (photo.list-commands golden, 3-way by id); gates running
 2026-10-26T20:42Z	3	heartbeat	lane	poll 2026-10-26T20:42Z: CB-13 #5149 rebased, gate PASS, pushed 73184786, Head moved; AR-11/FH-3/CB-14 gates running
+2026-10-26T20:58Z	3	heartbeat	lane	poll 2026-10-26T20:58Z: AR-11 #5096 and FH-3 #4889 rebased, PASS, pushed, Head moved; CB-14 gate running; #5103 merged AR-11 in (catalog test conflict), gate queued
