@@ -44,6 +44,7 @@ Next: XP-z Belt-Slice-Done once #5805 and #5806 merge and a green suiteui or ful
 - 2026-10-26T15:38:29Z heartbeat: no change: open PRs clean, no needs-fix/needs-rebase; dev-red #5321 open (not ours)
 - 2026-10-26T16:09:52Z heartbeat: #5106 (XP-8) clean in the lane; code batches held by dev-red #5321
 - 2026-10-26T16:41:43Z #5106 (XP-8) merged as e14f65fa9. XP-10 opened as #5805 (wave.json status built, feature_issue #3477, feature-done) and #5806 (C4-only description: the sheet's Size and Metadata rows), both docs-only, scripts/ci --changed PASS
+- 2026-10-26T17:01:58Z heartbeat: #5805 and #5806 (XP-10, docs-only) clean in the lane; scoped suiteui run 40358775932 green at 527676af6 (has XP-8)
 
 ## Run act-1a16fe1fa73-5x3s decisions
 - 22:59Z: the 22:27Z poll was one-shot, so no heartbeat ran from 22:28Z to 22:59Z. Each poll now schedules the next one 15 min out.
