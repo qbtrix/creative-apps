@@ -226,8 +226,9 @@ private final class LiveSink: @unchecked Sendable {
     /// Blur reads neighbours: with a tone section set, a region still takes the dispatcher route.
     @Test func blurStillFallsBack() async throws {
         var workspace = try Self.picture()
-        workspace.adjust(.tone(warm.setting(.sharpenAmount, to: 80)))
-        workspace.adjust(.blurSigma(1))
+        // Sharpen reads further than Blur here, so a region that reads only Blur's margin shows its seams.
+        workspace.adjust(.tone(warm.setting(.sharpenAmount, to: 80).setting(.sharpenRadius, to: 3)))
+        workspace.adjust(.blurSigma(0.3))
         #expect(workspace.liveStack() == nil)
         let canvas = try #require(workspace.canvas)
         let (route, _, sink) = Self.route(canvas)
