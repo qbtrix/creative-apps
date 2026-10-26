@@ -1,0 +1,145 @@
+utc	stage	event	ref	note
+2026-10-21T10:52Z	0	stage-start	#3715	base 1191940
+2026-10-21T10:52Z	2	stage-end	#3715	combined plan with shared-codecs; wave 1 IM-1
+2026-10-21T10:52Z	3	stage-start	wave1	IM-1 builder launched
+2026-10-21T19:24Z	3	heartbeat	wave1	#4028 IM-1 supervisor-approved, Mac gate queued
+2026-10-21T20:09Z	status-channel	RECORD also pushed to lead/suiteui-suite-imaging (the branch Belt reads) from now on
+2026-10-21T20:10Z	stage	IM-2 restacked on IM-1 5b40c257
+2026-10-21T20:26Z	gate	IM-2 775148e3 gated CI: PASS and pushed to lead/suite-imaging-IM-2; PR opens once #4028 merges
+2026-10-21T20:49Z	check-in	check-in: #4028 (IM-1, Package.swift) still on the supervisor's Mac gate. IM-2 gated on lead/suite-imaging-IM-2.
+2026-10-21T21:11Z	check-in	check-in: #4028 still open (supervisor merge; lane re-labels it each sweep). IM-2 gated.
+2026-10-21T21:33Z	check-in	check-in: #4028 still open on the supervisor's Mac gate. IM-2 gated.
+2026-10-21T21:56Z	check-in	#4028 (IM-1) still waiting for the supervisor merge (Package.swift). IM-2 is ready on lead/suite-imaging-IM-2 (775148e3).
+2026-10-21T22:18Z	check-in	#4028 (IM-1) still waiting for the supervisor merge. IM-2 is held.
+2026-10-21T22:48Z	check-in	#4028 (IM-1) still waiting for the supervisor merge. IM-2 is held.
+2026-10-21T23:12Z	check-in	IM-1 #4028 still waits on supervisor merge (Package.swift); IM-2 gated (head 775148e3), PR opens once IM-1 lands.
+2026-10-21T23:35Z	check-in	IM-1 #4028 still waits on supervisor merge; IM-2 ready (775148e3).
+2026-10-22T00:00Z	check-in	IM-1 #4028 still waits on supervisor merge; IM-2 ready (775148e3).
+2026-10-22T00:22Z	check-in	IM-1 #4028 still waits on the supervisor (Package.swift). IM-2 is gated on lead/suite-imaging-IM-2 (775148e3), and its PR opens once #4028 is on dev.
+2026-10-22T00:44Z	check-in	IM-1 #4028 now has dev merged in (head c5ab15b) and still waits on the supervisor. IM-2 is merged onto that head and pushed (26ba4c88); the scripts/ci --changed re-gate is running.
+2026-10-22T00:55Z	check-in	IM-2 re-gate on IM-1 c5ab15b: CI FAIL only on dev's red FormatListRatchetTests (fixed by #4258, not IM-2's). Merge dev and re-gate once #4258 and #4028 land, then open the PR.
+2026-10-22T01:06Z	check-in	IM-1 #4028 still waits on the supervisor; IM-2 holds at 26ba4c88 until #4028 and #4258 land.
+2026-10-22T01:28Z	check-in	IM-1 #4028 still waits on the supervisor; IM-2 holds at 26ba4c88.
+2026-10-22T01:35Z	check-in	IM-2 ready on 26ba4c888, waits for IM-1 #4028 (supervisor merge, Package.swift).
+2026-10-22T01:50Z	check-in	IM-1 #4028 still open (supervisor merge); IM-2 ready on 26ba4c888.
+2026-10-22T02:10Z	check-in	IM-1 #4028 still open (supervisor merge); IM-2 ready on 26ba4c888.
+2026-10-22T02:30Z	check-in	IM-1 #4028 still open (supervisor merge); IM-2 ready on 26ba4c888.
+2026-10-22T02:43Z	check-in	IM-1 #4028 is still open (head 4c8262db). It edits a protected path, so it needs a supervisor merge; the lane relabels it on every sweep. IM-2 is ready on 26ba4c888 and opens after IM-1 merges.
+2026-10-22T03:04Z	check-in	Rule 23: IM-1 #4028 has been unchanged for three polls (mergeable and clean, head 4c8262dbb). I posted a Question for the supervisor on #3715 (comment 6331661077). IM-2 is still ready on 26ba4c888.
+2026-10-22T03:24Z	check-in	No supervisor reply yet on #3715. IM-1 #4028 is still open (clean, head 4c8262dbb). IM-2 is held.
+2026-10-22T03:45Z	check-in	Unchanged. No reply on #3715, #4028 is still open, and dev is still at b5a6e7e0a. IM-2 is held.
+2026-10-22T04:06Z	check-in	Unchanged. No reply on #3715, and #4028 is still open. IM-2 is held.
+2026-10-22T04:23Z	check-in	Supervisor answered on #3715 at 03:06Z. #4028 is 4th in the local Mac gate queue, and they merge it once it passes. No pushes to it in the meantime. IM-2 is held until it merges.
+2026-10-22T04:44Z	check-in	#4028 is still open. Its head moved to e48f3225 (not my push; base is now dev 8a1d65345), and it is in the supervisor's Mac gate queue. IM-2 is held until it merges.
+2026-10-22T05:05Z	check-in	#4028 is still open on head e48f3225, in the supervisor's Mac gate queue. IM-2 is held.
+2026-10-22T05:25Z	check-in	#4028 is still open, clean on head e48f3225, in the supervisor's Mac gate queue. IM-2 is held.
+2026-10-22T05:47Z	check-in	#4028 (IM-1) open and clean at e48f3225, in the supervisor's Mac gate queue; IM-2 waits on its merge.
+2026-10-22T10:00Z	3	pr-merged	#4028	IM-1 merged by the supervisor; IM-2 restacked on dev 122cbbb
+2026-10-22T10:20Z	3	wave-start	wave 3	IM-3, IM-4, IM-15 builders stacked on lead/suite-imaging-IM-2 (c2091c6)
+2026-10-22T16:50Z	3	relaunch	#4498	run act-1a1647fe637-pfga; IM-a done (run 39811900368)
+2026-10-22T16:50Z	3	wave-start	wave 4	IM-5, IM-6+IM-7, IM-9+IM-10 via wf_13e8c7bf-e3f on 3578eae; fixer on #4390, #4389
+2026-10-22T17:13Z	check-in	-	#4390 (1e298a84), #4389 (971da1e8) open, fixer gating; wave 4 builders running, no PRs yet
+2026-10-22T17:30Z	3	wave-done	wave 4	#4590 IM-5, #4593 IM-6+IM-7, #4591 IM-9; IM-10 blocked on #4390
+2026-10-22T17:34Z	check-in	-	#4390 #4590 #4591 #4593 in lane, none merged; #4389 fixer splitting
+2026-10-22T17:40Z	fix-done	#4389 #4390	fixer merged dev into both; #4389 +259/4 files head 54233b8f, #4390 head 844fd682; both CI PASS, back in fast-lane
+2026-10-22T17:55Z	check-in	-	none merged; lane on per-PR macOS builds, IM PR builds queued (runner backlog); dev Linux 39826514621 running at 1dd51a3e
+2026-10-22T18:18Z	check-in	-	none merged; lane Linux run 39829914426 on #4590 head 1fe5b534; other IM PRs await macOS builds
+2026-10-22T18:40Z	3	relaunch	act-1a164d620b2-ve0e	issue #3715; wave 5 starts: IM-10 on #4390+#4591, IM-8 on #4593+#4590
+2026-10-22T18:50Z	3	wave5-blocked	IM-8,IM-10	both builders stopped (packet conflicts); #4590 IM-5 merged; re-cut next
+2026-10-24T00:00Z	3	relaunch	act-1a16d523b32-v6tj	IM-a, IM-m done; wave 7: IM-8a gating, #4886 open
+2026-10-24T10:13Z	3	pr-open	IM-8a	#5148 Photo canvas files off Metal; gate pass; mutate unmeasurable on Linux
+2026-10-24T10:16Z	3	build	IM-8b	test-first + toneOperations from imagingSteps, mutate 5/5, gate running; supervisor question on LiveToneSurface vs resident route
+2026-10-24T10:21Z	3	pr-open	IM-8b	#5151 stacked on #5148, CI: PASS, mutate 5/5
+2026-10-24T10:24Z	3	question	IM-10b/IM-11	curve/levels order asked on #3715 (6383074009); all remaining tasks open or blocked; polling
+2026-10-24T10:52Z	3	build	IM-10b	order ruled (a): Library adopts exposure, levels, curve; test-first commit, LiveDevelop on ImagingProgram.adjustments, tests running
+2026-10-24T11:02Z	3	build	IM-10b	feat committed 32ff1ed; LibraryModelTests segfault reproduces on dev sources too (container build), clean rebuild; mirror to lead/suiteui-suite-imaging for Belt
+2026-10-24T11:07Z	3	build	IM-11a	IM-11 split: IM-11a Model (LiveDevelop.steps, LiveLoupeImaging.gpuFrame, 4-mutation plan) committed 2d0ef01 on IM-10b; clean rebuild for LibraryModelTests still compiling
+2026-10-24T11:22Z	3	check	IM-10b	mutate LiveDevelop 8/8, LibraryDevelop+Imaging 4/4; test fix 65fa4fe; scripts/ci --changed running; IM-11a rebased to e7b0234
+2026-10-24T11:27Z	3	open	IM-10b	#5153 opened (fast-lane, 65fa4fe); IM-11a 4d753ae mutate 4/4, gate running
+2026-10-24T11:29Z	3	open	IM-11a	#5154 opened (fast-lane, 4d753ae, mutate 4/4, CI: PASS); IM-11b started
+2026-10-24T11:43Z	3	check	IM-11b	catalog half f6083f3 (showLoupeFrame, loupeSteps, LoupeImaging.gpuFrame); LibraryCatalog tests signal 11 at the dev base too, clean rebuild running; app half next
+2026-10-24T11:50Z	IM-library	build	IM-11b	app half committed fe06ec95e; gating
+2026-10-24T12:01Z	IM-library	pr	IM-11b	#5163 opened (7/7, CI PASS); perf line asked
+2026-10-24T12:18Z	IM-library	check	poll	nothing merged; #5163 off lane for stacked size
+2026-10-24T12:38Z	IM-library	check	poll	nothing merged; lane waiting on macOS slot
+2026-10-24T12:59Z	IM-library	check	poll	nothing merged; waiting on lane batch
+2026-10-24T13:19Z	IM-library	check	poll	lane bisect probe macOS gate running
+2026-10-24T13:42Z	IM-library	pr	IM-11c	#5178 perf line, supervisor lands
+2026-10-24T14:02Z	poll	check	all	no merges; lane batch pending
+2026-10-24T14:22Z	poll	check	all	dev batch landed, ours queued
+2026-10-24T14:43Z	poll	check	all	queued behind scoped runs
+2026-10-24T15:03Z	poll	check	all	no merges
+2026-10-24T15:22Z	poll	check	all	not in current batch
+2026-10-24T15:43Z	poll	check	all	queued behind batch
+2026-10-24T16:03Z	poll	check	all	batch landed without ours
+2026-10-24T16:23Z	poll	check	all	next batch likely
+2026-10-24T16:42Z	poll	check	all	no merges
+2026-10-24T17:03Z	poll	check	all	batch landed; ours next
+2026-10-24T17:23Z	poll	check	all	no merges; batch 20261024172211 excludes ours; #3723 open
+2026-10-24T17:42Z	poll	check	all	no merges; batch 20261024172211 in flight without ours; #3723 open
+2026-10-24T18:02Z	poll	check	all	no merges; 6 PRs fast-lane ready; batch 20261024172211 on macOS without ours
+2026-10-24T18:22Z	poll	check	all	batch landed without ours; #5163 dirty, lane integrates
+2026-10-24T18:42Z	poll	check	all	#4886 in batch 20261024183708
+2026-10-24T19:02Z	poll	check	all	#4886 batch on macOS; #5163 conflicts with #5042 in Loupe.swift
+2026-10-24T19:22Z	poll	check	all	batch red on DesignApp (not ours), bisect probe ends at #4886
+2026-10-24T19:42Z	poll	check	all	probe -6 with #4886 on macOS; design red on dev itself
+2026-10-24T20:02Z	poll	check	all	probe -6 macOS still running
+2026-10-24T20:23Z	poll	check	all	probe -6 macOS gate still running; nothing merged; no needs-rebase/needs-fix
+2026-10-24T20:42Z	poll	check	all	probe -6 green (through #4886), -7 red on #4887; awaiting prefix merge
+2026-10-24T21:02Z	poll	check	all	#4886 re-batched in 20261024205137; awaiting gate
+2026-10-24T21:22Z	poll	check	all	batch 20261024205137 red on Onboarding timeouts (not ours); bisecting
+2026-10-24T21:41Z	poll	check	all	bisect probes -3/-6 macOS running; nothing merged
+2026-10-24T22:01Z	poll	check	all	bisect probes still running; nothing merged
+2026-10-24T22:21Z	poll	check	all	bisect probes still running; nothing merged
+2026-10-24T22:41Z	poll	check	all	probe -6 green, -3 red (flaky); #4886 not reached
+2026-10-24T23:01Z	poll	check	all	bisect at probe -1; #4886 not reached
+2026-10-24T23:21Z	poll	check	all	probe -1 macOS running; nothing merged
+2026-10-24T23:42Z	poll	check	all	probe -1 macOS still running; nothing merged
+2026-10-25T00:03Z	poll	check	all	new batch 20261024235353 has none of ours; nothing merged
+2026-10-25T00:23Z	poll	check	all	other batch bisecting; nothing merged
+2026-10-25T00:45Z	poll	check	all	other batch still bisecting; nothing merged
+2026-10-25T01:06Z	poll	check	all	dev moved (#4874); nothing of ours merged
+2026-10-25T01:27Z	poll	check	all	other batch bisect at -9; nothing merged
+2026-10-25T01:48Z	poll	check	all	other batch bisect at -9; nothing of ours merged
+2026-10-25T02:10Z	relaunch	stage	all	act-1a170cfbf58-pshm; lead rebased on main; EP-z, ST-a waits met
+2026-10-25T02:11Z	wave	start	IM-photo	wave 8: IM-8d builder on lead/suite-imaging-IM-8d (stacked on #5151)
+2026-10-25T05:43Z	3	heartbeat	-	poll: 7 PRs open, none merged; IM-8d re-cut to lift the live route into SuiteImaging
+2026-10-25T06:05Z	3	heartbeat	-	poll: #4886:clean #5148:clean #5151:clean #5153:clean #5154:clean #5163:dirty #5178:dirty  findings 0
+2026-10-25T06:12Z	3	pr-opened	#5295	IM-8d 1/2 LiveLayerRoute in SuiteImaging
+2026-10-25T06:12Z	3	pr-opened	#5297	IM-8d 2/2 Photo on the route, PhotoLiveTone deleted
+2026-10-25T06:12Z	3	stage-start	IM-12	builder stacked on #5297
+2026-10-25T06:27Z	3	heartbeat	-	poll: #4886:clean #5148:clean #5151:clean #5153:clean #5154:clean #5163:dirty #5178:dirty #5295:clean #5297:dirty  findings 0
+2026-10-25T06:34Z	3	pr-opened	#5299	IM-12 HueSaturation deleted, stacked on #5297
+2026-10-25T06:50Z	heartbeat	poll: dev 13fb2f591, 0 merged; question to supervisor on #3715
+2026-10-25T07:12Z	heartbeat	poll: dev 13fb2f591, 0 merged; labels restored; lane run in progress; awaiting supervisor
+2026-10-25T07:35Z	heartbeat	poll: dev 13fb2f591; lane bisecting batch-20261025054232 (has #4886); follow-up on #3715
+2026-10-25T07:57Z	heartbeat	poll: dev 13fb2f591; bisect probe -3 macOS still running
+2026-10-25T08:18Z	heartbeat	poll: dev 7e5bcd82f (#5287 not ours); bisect probe -3 macOS still running
+2026-10-25T08:39Z	heartbeat	poll: bisect probe -3 green (has #4886); probe -4 running
+2026-10-25T09:01Z	heartbeat	poll: bisect -4 red (culprit #4960, not ours); #4886 due to land; dev 8d3a12c4b
+2026-10-25T09:22Z	heartbeat	poll: #4960 needs-fix; rebatched 090316 (has #4886) red on Linux, bisecting
+2026-10-25T09:43Z	heartbeat	poll: probe 090316-6 Linux green, macOS running; dev CI red (not ours)
+2026-10-25T10:06Z	heartbeat	probe -6 macOS gate running; dev-red #5316 not ours; none merged
+2026-10-25T10:28Z	heartbeat	probe -6 macOS gate still running; dev-red #5316 closed; none merged
+2026-10-25T10:50Z	heartbeat	probe -6 green both (holds #4886); probe -9 Linux green; bisect continues
+2026-10-25T11:13Z	heartbeat	probe -9 macOS gate pending; dev 68bec9fe7 not ours; none merged
+2026-10-25T11:35Z	heartbeat	#4886 in batch 111803 alone; Linux check running
+2026-10-25T11:59Z	merged	#4886 IM-10 p1 merged 5270bc4bc
+2026-10-25T11:59Z	fix	#5153 needs-rebase: merged dev, gate running
+2026-10-25T12:05Z	fix	#5153 dev merged in 001f38939, CI: PASS, Head moved
+2026-10-25T12:20Z	heartbeat	#5153 clean, awaiting lane label drop; scoped library green on 5270bc4bc
+2026-10-25T12:42Z	heartbeat	needs-rebase dropped on #5153; no merges; dev 58bb6d4d5; no dev-red; 0 findings
+2026-10-25T13:04Z	heartbeat	no merges of ours; dev 930337d52; no dev-red; 0 findings
+2026-10-25T13:27Z	heartbeat	no merges of ours; dev bbaedba66; no dev-red; 0 findings
+2026-10-25T13:49Z	heartbeat	no merges of ours; batch 20261025132815 holds #5006 only; dev bbaedba66; no dev-red; 0 findings
+2026-10-25T14:11Z	heartbeat	no merges of ours; #5006 landed, batch holds #5007; dev d3323f6a7; no dev-red; 0 findings
+2026-10-25T14:33Z	heartbeat	no merges of ours; #5007 landed; full CI on d3323f6a7 macOS running; no dev-red; 0 findings
+2026-10-25T14:55Z	heartbeat	no merges of ours; #4960 landed, batch holds #5008; full CI on d3323f6a7 running; no dev-red; 0 findings
+2026-10-25T15:17Z	heartbeat	no merges of ours; #5008, #5318 landed, batch holds #5039; full CI on d3323f6a7 running; no dev-red; 0 findings
+2026-10-25T15:39Z	heartbeat	no merges of ours; #5039 landed; full CI 40199840550 green, main d3323f6a7; no dev-red; 0 findings
+2026-10-25T16:00Z	heartbeat	no merges of ours; dev a57210d15; main d3323f6a7; no dev-red; 0 findings
+2026-10-25T16:22Z	heartbeat	no merges of ours; dev c2681786c; main d3323f6a7; no dev-red; 0 findings
+2026-10-25T16:44Z	heartbeat	no merges of ours; dev-red #5321 not ours (#4960 #5007 #5008 #5318); main d3323f6a7; 0 findings
+2026-10-25T17:05Z	heartbeat	no merges of ours; dev 5b1d3a19b; dev-red #5321 likely flaky, not ours; main d3323f6a7; 0 findings
+2026-10-25T17:27Z	heartbeat	no merges of ours; dev 5b1d3a19b; dev-red #5321 open, not ours; main d3323f6a7; 0 findings
+2026-10-25T17:49Z	heartbeat	no merges of ours; dev e821acd0d; dev-red #5321 open, not ours; main d3323f6a7; 0 findings
