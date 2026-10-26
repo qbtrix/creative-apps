@@ -188,3 +188,4 @@ utc	stage	event	ref	note
 2026-10-26T02:01:36Z	stage-start	act-1a175ee12a5-4niu resumed: FV-z only; #4854/#5025 ready but held, dev-red #5321 (macOS) blocks batches
 2026-10-26T02:23:09Z	heartbeat	blocked poll 2/3: dev-red #5321 open (macOS, run 40251699354); #4854 (565669e7) and #5025 (9c2bc627) clean, unmerged, no needs-fix/needs-rebase
 2026-10-26T02:45:30Z	question	blocked poll 3/3 identical: posted Question for the supervisor on #3481 (dev-red #5321 holds #4854/#5025)
+2026-10-26T03:07:45Z	heartbeat	poll 03:06Z: no supervisor answer yet; dev-red #5321 open; #4854 (565669e7) and #5025 (9c2bc627) open, clean, no needs-fix/needs-rebase
