@@ -226,3 +226,7 @@ No dev merges since 07:10. #4988, #5364 and #4999 are open, clean, fast-lane+bet
 ## 2026-10-26T08:03:47Z poll
 
 dev gained #5264 (07:45), none of ours. #4988, #5364 and #4999 are open, clean, fast-lane+beta; no new checks or labels. #5164 and #5000 still wait. Bodies are clean.
+
+## 2026-10-26T08:25:15Z poll
+
+No dev merges since 07:45. Ours are still unbatched after about 6h (open, clean, fast-lane+beta). Posted a supervisor question on #3774 (issuecomment-6411516660; footer stripped).
