@@ -202,7 +202,7 @@ final class HaloLayersJourneyTests: XCTestCase {
 
     /// The open `menu` fades out within 2 s, so the next shot shows the window alone. On macOS
     /// `app.menus` still matches the menu bar items' menus once they close, so `menusClosed`
-    /// counts only a menu with a frame (HaloJourneyTests+Menus.swift).
+    /// counts only a menu with a frame (Journey+Menus.swift).
     @MainActor private func expectClosed(_ menu: String, _ halo: Journey) {
         XCTAssert(halo.menusClosed(), "the \(menu) menu stayed open")
     }

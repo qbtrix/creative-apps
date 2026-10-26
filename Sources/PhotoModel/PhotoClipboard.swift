@@ -129,7 +129,8 @@ extension PhotoWorkspace {
     /// Test hook: while set (`$pasteLimit.withValue`), the most pixels a
     /// paste keeps, in place of `maxOpenPixels`, so the scaled path runs on a
     /// small image (a 24 MP lanczos3 resize takes minutes in a debug build).
-    @TaskLocal static var pasteLimit = maxOpenPixels
+    /// The window sets it from `-PhotoPasteLimit` for the journeys.
+    @TaskLocal public static var pasteLimit = maxOpenPixels
 
     /// `image` as premultiplied pixels, scaled to fit `pasteLimit` (each side
     /// rounded down) when larger, with the scale in whole percent then.

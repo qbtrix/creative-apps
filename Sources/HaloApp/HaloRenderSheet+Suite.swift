@@ -1,4 +1,4 @@
-// HaloRenderSheet.swift: the render sheet's codec and transparency rows
+// HaloRenderSheet+Suite.swift: the render sheet's codec and transparency rows
 // (export-pack HX-2), in HaloRenderOptionRows under the Size chips. A movie
 // shows the Codec row, a system Picker over `HaloRenderSettings.codecs`
 // (`halo.render.codec`) whose refused codecs are disabled items, their

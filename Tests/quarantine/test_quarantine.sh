@@ -95,8 +95,8 @@ run "a test under the wrong class fails" "[$(entry HaloJourneyTests/HaloJourneyT
   1 "HaloJourneyTests/HaloJourneyTests/testLayerHousekeeping: no such test in $tmp/UITests"
 run "a target without its main file fails" "[$(entry LibraryJourneyTests/LibraryShellJourneyTests/testLaunch '#1' 'x' 2026-10-20)]" \
   1 "LibraryJourneyTests/LibraryShellJourneyTests/testLaunch: no such test in $tmp/UITests"
-run "a test that isn't Target/Class/testName fails" "[$(entry HaloJourneyTests.testLayoutAtWidths '#1' 'x' 2026-10-20)]" \
-  1 'HaloJourneyTests.testLayoutAtWidths: test must be Target/Class/testName'
+run "a test that is neither a journey nor a swift test id fails" "[$(entry 'HaloJourneyTests testLayoutAtWidths' '#1' 'x' 2026-10-20)]" \
+  1 'HaloJourneyTests testLayoutAtWidths: test must be Target/Class/testName (a journey) or Target.Suite/test (a swift test)'
 
 run "a closed owner fails" "[$GOOD]" 1 'owner #1177 is CLOSED, not open: remove its entries or name an open owner' CLOSED
 run "a missing owner fails" "[$GOOD]" 1 'owner #1177 is MISSING, not open: remove its entries or name an open owner' missing
@@ -142,5 +142,53 @@ run "live prints each entry's scope" "[$FULL, $(scoped '"all"')]" 0 \
 HaloJourneyTests/HaloJourneyTests/testParentAndBlend\t#1035\t2026-10-18\tall\tH-J13 play changes nothing')" \
   nogh live
 run "live on an empty quarantine prints nothing" '[]' 0 '' nogh live
+
+# Swift tests (the fast lane's auto-quarantine, and a supervisor's hand entry):
+# an id in Tests/perf-suites.txt's form, Target.Suite/test or Target.freeTest,
+# skipped by scripts/ci through `skip` (a --skip regex) and never by `live`.
+# A lane entry carries a `lane` block (the dev-red issue, the culprit range,
+# the expiry timestamp): past its expiry or with a closed owner it stays and
+# the gate passes with a note, since the lane labels the owner a blocker and
+# removes the entry itself. `release` fails while any lane entry is in.
+mkdir -p "$tmp/Tests/PhotoModelTests"
+printf '%s\n' 'import Testing' '@Suite struct OpenTests {' '    @Test func opens() {}' '}' '@Test func freeOne() {}' \
+  >"$tmp/Tests/PhotoModelTests/OpenTests.swift"
+SWIFT=$(entry PhotoModelTests.OpenTests/opens '#700' 'fails on dev since #201' 2026-10-17)
+lane() { # lane <entry> <until>: the entry as the lane writes it
+  jq -c --arg u "$2" '. + {lane: {red: "#520", range: "main..abc1234", until: $u}}' <<<"$1"
+}
+LANE=$(lane "$SWIFT" 2026-10-17T09:00:00Z)
+run "a swift test id passes when Tests/<Target> holds its suite and func" "[$SWIFT]" 0 '1 quarantined, all owned and unexpired'
+run "a free swift test passes" "[$(entry PhotoModelTests.freeOne '#700' 'x' 2026-10-17)]" 0 '1 quarantined, all owned and unexpired'
+run "a swift test id naming no test fails" "[$(entry PhotoModelTests.OpenTests/gone '#700' 'x' 2026-10-17)]" \
+  1 "PhotoModelTests.OpenTests/gone: no such test in $tmp/Tests"
+run "a swift test under a suite that isn't there fails" "[$(entry PhotoModelTests.Nope/opens '#700' 'x' 2026-10-17)]" \
+  1 "PhotoModelTests.Nope/opens: no such test in $tmp/Tests"
+run "a lane entry is counted and passes" "[$GOOD, $LANE]" 0 '2 quarantined, all owned and unexpired, 1 by the lane'
+run "a lane entry past its expiry passes with a note: the lane labels its owner a blocker" \
+  "[$(lane "$(entry PhotoModelTests.OpenTests/opens '#700' 'x' 2026-10-16)" 2026-10-16T09:00:00Z)]" 0 \
+  'note: PhotoModelTests.OpenTests/opens: the lane quarantine expired 2026-10-16T09:00:00Z and #700 is still open, so #700 is a blocker (scripts/fast-lane.sh labels it)
+1 quarantined, all owned and unexpired, 1 by the lane'
+run "a lane entry whose owner closed passes with a note: the lane removes it" "[$LANE]" 0 \
+  'note: PhotoModelTests.OpenTests/opens: its owner #700 is CLOSED; the lane opens the PR that removes this entry
+1 quarantined, all owned and unexpired, 1 by the lane' CLOSED
+run "a lane entry without its dev-red issue or expiry timestamp fails" \
+  "[$(jq -c '.lane = {range: "main..abc1234"}' <<<"$LANE")]" 1 \
+  'PhotoModelTests.OpenTests/opens: a lane entry needs lane.red (#<dev-red issue>) and lane.until (an ISO timestamp)'
+run "a lane entry still needs an open owner shape and a reason" "[$(jq -c '.owner = "lane" | .reason = ""' <<<"$LANE")]" 1 \
+  'PhotoModelTests.OpenTests/opens: owner must be an open issue, #<number>
+PhotoModelTests.OpenTests/opens: reason is empty: say why it fails'
+run "live lists journeys only, never a swift test" "[$GOOD, $SWIFT]" 0 \
+  "$(printf 'HaloJourneyTests/HaloLayersJourneyTests/testLayerHousekeeping\t#1177\t2026-10-23\tall\tH-J9 reorders the duplicated row')" nogh live
+run "skip prints the live swift tests as one --skip regex, in test-scope's form" \
+  "[$GOOD, $SWIFT, $(entry PhotoModelTests.freeOne '#700' 'x' 2026-10-17)]" 0 \
+  '^(PhotoModelTests\.OpenTests/opens|PhotoModelTests\.freeOne)(/|\()' nogh skip
+run "skip drops an expired hand entry but keeps a lane entry past its expiry" \
+  "[$(entry PhotoModelTests.freeOne '#700' 'x' 2026-10-16), $(lane "$(entry PhotoModelTests.OpenTests/opens '#700' 'x' 2026-10-16)" 2026-10-16T09:00:00Z)]" 0 \
+  '^(PhotoModelTests\.OpenTests/opens)(/|\()' nogh skip
+run "skip prints nothing with no swift test" "[$GOOD]" 0 '' nogh skip
+run "release fails while a lane entry is in" "[$GOOD, $LANE]" 1 \
+  'release: 1 lane quarantine entry still skips a test: PhotoModelTests.OpenTests/opens (owner #700, until 2026-10-17T09:00:00Z); fix it or let the supervisor own it before a release' nogh release
+run "release passes with hand entries only" "[$GOOD, $SWIFT]" 0 'release: no lane quarantine entries' nogh release
 
 exit $fail

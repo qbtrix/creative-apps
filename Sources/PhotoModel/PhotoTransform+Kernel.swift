@@ -4,9 +4,11 @@
 // (scaled about its top-left and moved, turned about its centre), else the
 // selected pixel layer's bounds, cut to the selection when one is set.
 // A scale, turn or move edits the draft as one step whose undo puts the
-// previous draft back (a drag's steps fold under its token); commit resamples
-// the layer once as one "Free Transform" step; a flip mirrors the layer's
-// pixels in place at once, never a draft. Canvas Size is PhotoImageOps'.
+// previous draft back (a drag's steps fold under its token). The canvas shows
+// the draft live: each render draws `transformPreview`, the workspace with the
+// draft's layer resampled (`draftPlaced`), and commit lays that same resample
+// as one "Free Transform" step, so Return shows nothing new. A flip mirrors
+// the layer's pixels in place at once, never a draft. Canvas Size is PhotoImageOps'.
 // Linux-safe.
 import CoreRaster
 import SuiteKernel
@@ -104,12 +106,11 @@ extension PhotoWorkspace {
     /// A resample that fails keeps the draft and throws.
     public mutating func commitTransform() throws {
         guard let draft = transformDraft else { return }
-        guard draft.transform != .identity, let at = index(of: draft.layerID), let tiles = pixels[draft.layerID] else {
+        guard let done = try draftPlaced() else {
             transformDraft = nil
             return touch(.all)
         }
-        let content = PlacedPixels(pixels: tiles, x: layers[at].offsetX, y: layers[at].offsetY)
-        let placed = try services.transform.applied(draft, to: content)
+        let (at, placed) = done
         record(.group([.stack(stackState), .draft(draft)]), named: "Free Transform")
         pixels[draft.layerID] = placed.pixels
         layers[at].offsetX = placed.x
@@ -124,5 +125,32 @@ extension PhotoWorkspace {
         guard transformDraft != nil else { return }
         transformDraft = nil
         touch(.all)
+    }
+
+    /// The draft's layer resampled through the draft into its new bounds (`services.transform.applied`), with
+    /// the layer's index: what Return lays and what the canvas previews. Nil with no draft, the identity, or a
+    /// layer without pixels.
+    func draftPlaced() throws -> (at: Int, placed: PlacedPixels)? {
+        guard let draft = transformDraft, draft.transform != .identity, let at = index(of: draft.layerID),
+            let tiles = pixels[draft.layerID]
+        else { return nil }
+        let content = PlacedPixels(pixels: tiles, x: layers[at].offsetX, y: layers[at].offsetY)
+        return (at, try services.transform.applied(draft, to: content))
+    }
+
+    /// The workspace as the canvas shows it while Free Transform is up: the draft's layer swapped for
+    /// `draftPlaced()`, so every route draws the draft and Return lays the same pixels. The revision and
+    /// history stay as they are. Self with no draft, and when the resample fails (the layer shows as it is,
+    /// and Return reports the failure).
+    /// ponytail: one full-layer resample per render (renders coalesce to the newest); a GPU affine composite
+    /// in CoreRender is the upgrade if a 12 MP layer drags too slowly.
+    var transformPreview: PhotoWorkspace {
+        guard let done = (try? draftPlaced()) ?? nil else { return self }
+        let (at, placed) = done
+        var shown = self
+        shown.pixels[layers[at].id] = placed.pixels
+        shown.layers[at].offsetX = placed.x
+        shown.layers[at].offsetY = placed.y
+        return shown
     }
 }
