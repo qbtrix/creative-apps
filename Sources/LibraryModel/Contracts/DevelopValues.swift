@@ -1,10 +1,12 @@
-// Contracts/DevelopValues.swift: a photo's develop settings (ten sliders, a
-// tone curve, levels), its crop, and the histogram the develop panel draws.
-// Levels and curve points are SuiteImaging's types; ToneCurve stays Library's
-// own (its ends pinned to 0 and 1, a 0.01 gap) with AdjustCurve conversions.
-// Settings are edit instructions, never pixels; neutral settings render the
-// photo unchanged. Coded by hand so a catalog written before a field existed
-// opens with it neutral, and a neutral new field adds no key.
+// Contracts/DevelopValues.swift: a photo's develop settings (SuiteImaging's
+// tone settings, a tone curve, levels), its crop, and the histogram the
+// develop panel draws. Levels and curve points are SuiteImaging's types;
+// ToneCurve stays Library's own (its ends pinned to 0 and 1, a 0.01 gap) with
+// AdjustCurve conversions. Settings are edit instructions, never pixels;
+// neutral settings render the photo unchanged. Coded by hand so a catalog
+// written before a field existed opens with it neutral, and a neutral new
+// field adds no key. The tone is flattened (tone-controls LT-1): each slider
+// is its own key in the develop object, as before, never a nested "tone".
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -15,32 +17,25 @@ import SuiteImaging
 import SuiteKernel
 import SuiteModel
 
-/// One develop slider. The raw value is the row's label.
-public enum DevelopSlider: String, CaseIterable, Sendable, Codable {
-    // The panel's order: TONE, then COLOR.
-    case exposure = "Exposure", contrast = "Contrast", highlights = "Highlights", shadows = "Shadows"
-    case whites = "Whites", blacks = "Blacks"
-    case temperature = "Temperature", tint = "Tint"
-    case vibrance = "Vibrance", saturation = "Saturation"
+/// The develop slider is the suite's tone slider. LT-2 drops this name with the
+/// develop rows, once LibraryApp's callers say `ToneSlider`.
+public typealias DevelopSlider = ToneSlider
 
-    /// The inspector section the row sits in; a section's Reset resets its group.
-    public var group: DevelopGroup {
-        switch self {
-        case .exposure, .contrast, .highlights, .shadows, .whites, .blacks: .tone
-        case .temperature, .tint, .vibrance, .saturation: .color
-        }
-    }
-
-    /// Exposure in stops, -5...5; the rest -100...100 (CoreRaster's slider range).
-    public var range: ClosedRange<Double> { self == .exposure ? -5...5 : -100...100 }
-    /// One arrow-key step; Shift is ten, Option a tenth (docs/design.md, Scrub fields).
-    public var step: Double { self == .exposure ? 0.01 : 1 }
+extension ToneSlider {
+    /// Develop's ten rows, TONE then COLOR: the sliders the panel shows today.
+    public static let develop: [ToneSlider] = DevelopGroup.allCases.flatMap(\.sliders)
 }
 
 /// A develop section. The raw value is its header.
 public enum DevelopGroup: String, CaseIterable, Sendable {
     case tone = "Tone", color = "Color"
-    public var sliders: [DevelopSlider] { DevelopSlider.allCases.filter { $0.group == self } }
+    /// The section's rows, in panel order; a section's Reset resets them.
+    public var sliders: [ToneSlider] {
+        switch self {
+        case .tone: [.exposure, .contrast, .highlights, .shadows, .whites, .blacks]
+        case .color: [.temperature, .tint, .vibrance, .saturation]
+        }
+    }
 }
 
 /// One point of the tone curve, both coordinates sRGB values in 0...1:
@@ -114,13 +109,18 @@ public struct ToneCurve: Hashable, Sendable, Codable {
 public typealias DevelopLevels = AdjustLevels
 
 public struct DevelopSettings: Hashable, Sendable, Codable {
-    public private(set) var exposure: Double = 0
-    public private(set) var temperature: Double = 0
-    public private(set) var tint: Double = 0
-    public private(set) var contrast: Double = 0
-    public private(set) var highlights: Double = 0
-    public private(set) var shadows: Double = 0
-    public private(set) var whites = 0.0, blacks = 0.0, vibrance = 0.0, saturation = 0.0
+    /// Every slider, as SuiteImaging stores it: a neutral slider is never stored.
+    public private(set) var tone = ToneSettings.neutral
+    public var exposure: Double { tone.value(.exposure) }
+    public var temperature: Double { tone.value(.temperature) }
+    public var tint: Double { tone.value(.tint) }
+    public var contrast: Double { tone.value(.contrast) }
+    public var highlights: Double { tone.value(.highlights) }
+    public var shadows: Double { tone.value(.shadows) }
+    public var whites: Double { tone.value(.whites) }
+    public var blacks: Double { tone.value(.blacks) }
+    public var vibrance: Double { tone.value(.vibrance) }
+    public var saturation: Double { tone.value(.saturation) }
     /// Never an identity curve other than `ToneCurve.identity`, so equal pictures compare equal.
     public private(set) var curve = ToneCurve.identity
     public private(set) var levels = DevelopLevels.neutral
@@ -133,43 +133,17 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
     public init() {}
 
     public var isNeutral: Bool { self == .neutral }
-    /// True when no slider is off zero, the curve is the identity and levels are
-    /// neutral (the crop may still be set).
-    public var isAdjustmentNeutral: Bool {
-        DevelopSlider.allCases.allSatisfy { value($0) == 0 } && curve.isIdentity && levels == .neutral
-    }
+    /// True when every slider is neutral, the curve is the identity and levels
+    /// are neutral (the crop may still be set).
+    public var isAdjustmentNeutral: Bool { tone.isNeutral(nil) && curve.isIdentity && levels == .neutral }
 
-    public func value(_ slider: DevelopSlider) -> Double {
-        switch slider {
-        case .exposure: exposure
-        case .temperature: temperature
-        case .tint: tint
-        case .contrast: contrast
-        case .highlights: highlights
-        case .shadows: shadows
-        case .whites: whites
-        case .blacks: blacks
-        case .vibrance: vibrance
-        case .saturation: saturation
-        }
-    }
+    public func value(_ slider: ToneSlider) -> Double { tone.value(slider) }
 
-    /// A copy with `slider` at `value`, clamped to its range; NaN and infinity give 0.
-    public func setting(_ slider: DevelopSlider, to value: Double) -> DevelopSettings {
-        let clamped = value.isFinite ? min(max(value, slider.range.lowerBound), slider.range.upperBound) : 0
+    /// A copy with `slider` at `value`, clamped to its range; NaN and infinity give its neutral.
+    public func setting(_ slider: ToneSlider, to value: Double) -> DevelopSettings {
+        let r = slider.range
         var copy = self
-        switch slider {
-        case .exposure: copy.exposure = clamped
-        case .temperature: copy.temperature = clamped
-        case .tint: copy.tint = clamped
-        case .contrast: copy.contrast = clamped
-        case .highlights: copy.highlights = clamped
-        case .shadows: copy.shadows = clamped
-        case .whites: copy.whites = clamped
-        case .blacks: copy.blacks = clamped
-        case .vibrance: copy.vibrance = clamped
-        case .saturation: copy.saturation = clamped
-        }
+        copy.tone = tone.setting(slider, to: value.isFinite ? min(max(value, r.lowerBound), r.upperBound) : slider.neutral)
         return copy
     }
 
@@ -214,26 +188,31 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         return bytes.reduce(0xcbf2_9ce4_8422_2325 as UInt64) { ($0 ^ UInt64($1)) &* 0x0000_0100_0000_01b3 }
     }
 
-    private enum CodingKeys: String, CodingKey {
-        case exposure, contrast, highlights, shadows, temperature, tint, crop
-        case whites, blacks, vibrance, saturation, curve, levels, orientation
+    /// A slider's raw value, or crop, curve, levels or orientation: the develop object's flat keys.
+    private struct Key: CodingKey {
+        let stringValue: String
+        init(_ name: String) { stringValue = name }
+        init?(stringValue: String) { self.stringValue = stringValue }
+        var intValue: Int? { nil }
+        init?(intValue: Int) { nil }
+        static let crop = Key("crop"), curve = Key("curve"), levels = Key("levels"), orientation = Key("orientation")
+        static func slider(_ s: ToneSlider) -> Key { Key(s.rawValue) }
     }
+
+    /// The six sliders the first catalog wrote: always written, required on read.
+    private static let required: Set<ToneSlider> = [.exposure, .contrast, .highlights, .shadows, .temperature, .tint]
 
     /// The six original sliders are required, as the synthesized coding had them;
     /// every newer key decodes as its default when missing, so an older catalog opens.
     public init(from decoder: any Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        exposure = try c.decode(Double.self, forKey: .exposure)
-        contrast = try c.decode(Double.self, forKey: .contrast)
-        highlights = try c.decode(Double.self, forKey: .highlights)
-        shadows = try c.decode(Double.self, forKey: .shadows)
-        temperature = try c.decode(Double.self, forKey: .temperature)
-        tint = try c.decode(Double.self, forKey: .tint)
+        let c = try decoder.container(keyedBy: Key.self)
+        for slider in ToneSlider.allCases {
+            let key = Key.slider(slider)
+            let value = Self.required.contains(slider)
+                ? try c.decode(Double.self, forKey: key) : try c.decodeIfPresent(Double.self, forKey: key)
+            if let value { tone = tone.setting(slider, to: value) }
+        }
         crop = try c.decodeIfPresent(CropSettings.self, forKey: .crop)
-        whites = try c.decodeIfPresent(Double.self, forKey: .whites) ?? 0
-        blacks = try c.decodeIfPresent(Double.self, forKey: .blacks) ?? 0
-        vibrance = try c.decodeIfPresent(Double.self, forKey: .vibrance) ?? 0
-        saturation = try c.decodeIfPresent(Double.self, forKey: .saturation) ?? 0
         let decodedCurve = try c.decodeIfPresent(ToneCurve.self, forKey: .curve) ?? .identity
         curve = decodedCurve.isIdentity ? .identity : decodedCurve
         levels = try c.decodeIfPresent(DevelopLevels.self, forKey: .levels) ?? .neutral
@@ -241,20 +220,13 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
     }
 
     /// The six original sliders always and the crop when set (so persist's golden
-    /// stays byte-equal); every newer field only when off its default.
+    /// stays byte-equal); every other slider and field only when off its default.
     public func encode(to encoder: any Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(exposure, forKey: .exposure)
-        try c.encode(contrast, forKey: .contrast)
-        try c.encode(highlights, forKey: .highlights)
-        try c.encode(shadows, forKey: .shadows)
-        try c.encode(temperature, forKey: .temperature)
-        try c.encode(tint, forKey: .tint)
+        var c = encoder.container(keyedBy: Key.self)
+        for slider in ToneSlider.allCases where Self.required.contains(slider) || tone.value(slider) != slider.neutral {
+            try c.encode(tone.value(slider), forKey: .slider(slider))
+        }
         try c.encodeIfPresent(crop, forKey: .crop)
-        if whites != 0 { try c.encode(whites, forKey: .whites) }
-        if blacks != 0 { try c.encode(blacks, forKey: .blacks) }
-        if vibrance != 0 { try c.encode(vibrance, forKey: .vibrance) }
-        if saturation != 0 { try c.encode(saturation, forKey: .saturation) }
         if !curve.isIdentity { try c.encode(curve, forKey: .curve) }
         if levels != .neutral { try c.encode(levels, forKey: .levels) }
         if orientation != .up { try c.encode(orientation, forKey: .orientation) }
