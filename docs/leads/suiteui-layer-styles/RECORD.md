@@ -4,7 +4,7 @@ Issue: #3937 · Packet: docs/blueprints/suiteui/features/layer-styles.md
 Run: act-1a175e3e61f-9qd4 · Session: claude/layer-styles-lead-u8mk3r · Resumed: 2026-10-26T03:00Z (previous run act-1a1705bc1ae-pb09)
 Stage: 3 wave check
 Base: 8eff8ab8501bca4fcd020a4a5c1d22a4df69e1eb (origin/dev; main at d3323f6a7, dev-red #5321 open)
-Next: open LS-3b (lead/layer-styles-LS-u-3b, off dev) once its gate passes; open LS-11 once #4903 merges, LS-3 once #5174 merges, LS-6 (2af2188e, gated) and LS-7 once #5176 merges; LS-8 waits on the core bump
+Next: LS-3b is #5377 (fast-lane, waits on dev-red #5321 like the rest). Open LS-11 once #4903 merges, LS-3 once #5174 merges (recheck the 400-line cap), and LS-6 (2af2188e, gated) and LS-7 (f98355e4, gated) once #5176 merges. LS-8 waits on the core bump (asked 01:50Z). Then LS-4, LS-9, LS-9b, LS-12 and LS-13.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

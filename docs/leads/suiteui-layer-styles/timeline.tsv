@@ -147,3 +147,4 @@ utc	stage	event	ref	note
 2026-10-26T04:45Z	3	stage	LS-clip	#4903 pushed 41114e5c (review 8/9/10, Mutate 8/8); LS-11 branch f3692d14 pushed, Mutate 6/6; dev-red #5321 open; #5357 overlaps #5362
 2026-10-26T03:03Z	3	stage	LS-u	LS-6 gated 2af2188e; LS-7 unit-box fix Mutate 6/6, gating; LS-3 split, LS-3b off dev (0406716c) mutating+gating, LS-3 e7d8b5a4; dev-red #5321 open
 2026-10-26T03:16Z	3	stage	status	Belt stall nudge: record moved to lead/suiteui-layer-styles (this run had pushed to lead/layer-styles); LS-7 f98355e4 CI pass; LS-3b Mutate 5/5, gating
+2026-10-26T03:40Z	3	pr	LS-u	LS-3b opened as #5377: gate pass, Mutate 5/5, head 0406716c
