@@ -2,7 +2,7 @@
 
 Issue: #3788 · Packet: docs/blueprints/library/features/catalog-backup.md
 Run: act-1a1782c1961-n1cv (line lead, line:library) · resumed 2026-10-26T12:20Z · earlier act-1a175ea5531-x1ci (line lead, line:library) · resumed 2026-10-26T01:59:55Z · earlier act-1a1695ec091-ilfv · Started: 2026-10-23T15:31:04Z (relaunch; earlier runs act-1a15f2277a5-6xyv)
-Stage: 3 polling: BK-z #4923 in the lane at 3c50a2da (feature-done); code batches held by dev-red #5321 (not Library); checked 20:00Z
+Stage: 3 polling: BK-z #4923 in the lane at 3c50a2da (feature-done); code batches held by dev-red #5321 (not Library); checked 20:11Z
 Base: 8eff8ab85 (origin/dev)
 Next: lane lands #4923 once dev-red clears; Belt-Slice-Done BK-z on a green library run containing it; critics on BK-z screens; Mac-Finish-Wanted BK-z; Belt-Contact-Sheet
 
@@ -42,6 +42,7 @@ Next: lane lands #4923 once dev-red clears; Belt-Slice-Done BK-z on a green libr
 - 2026-10-26T14:30Z Full CI 40328390857 on dev 5f8925a3 red: macOS tests 1/3, SuiteTimelineScrubWindowTests.aScrubRedrawsOnlyThePlayhead (shared timeline, not Library); the Onboarding timeout did not recur. dev-red #5321 stays open, code batches still held; nothing of ours to fix.
 - 2026-10-26T15:16Z Lane sweep 40341940444 (14:41-15:15Z): #5128 and #4923 pending on local-ci/prescreen (supervisor's Mac pre-screen, verify-after mode); #4899, #5130, #5241 eligible but queued behind ~60 PRs while the lane re-checks stale proofs one batch of one at a time (dev changed scripts/ci and ci.yml since); stacked PRs skipped until their base merges, as planned. Nothing for this lead to push; waiting on the lane and the supervisor's pre-screen.
 - 2026-10-26T18:52Z dev-red #5321 closed 18:52Z after full CI 40369651916 green at fef52e66; none of our slice PRs is in it, so no Belt-Slice-Done yet; batches can form again.
+- 2026-10-26T20:11Z lane sweep 40386832050: #4899, #4923 (prescreen now green), #5130, #5241 eligible; #5128 still waiting for local-ci/prescreen; a batch is in flight and 122 ready PRs wait, so landing will take several batches.
 
 ## Wire
 - [ ] file-flow:LF-m (LF-m 7/8 on dev): BK-5m backs up after the catalog save path as it stands; re-check once LF-m is done.
