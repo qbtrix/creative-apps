@@ -14,10 +14,9 @@ enum GalleryExportPack {
     static let name = "export-pack"
     /// The artwork's pixels at 1x.
     static let source = (width: 1000, height: 1250)
-    static let formats = [
-        FormatChoice(id: "png", name: "PNG", hasQuality: false), FormatChoice(id: "jpeg", name: "JPEG", hasQuality: true),
-        FormatChoice(id: "heic", name: "HEIC", hasQuality: true), FormatChoice(id: "svg", name: "SVG", hasQuality: false),
-    ]
+    /// The kernel's still and vector formats; the suite names its formats once (FormatListRatchetTests).
+    static let formats = ExportFormats.all.filter { $0.kind == .still || $0.kind == .vector }
+        .map { FormatChoice(id: $0.id, name: $0.name, hasQuality: $0.hasQuality) }
     static let pick = ExportPick(format: "jpeg", quality: 0.9, metadata: .all, size: .pixels(width: 1080, height: 1350))
 
     @MainActor static let pages: GalleryPages = [name: { AnyView(GalleryExportPackPage()) }]
