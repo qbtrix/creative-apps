@@ -208,3 +208,4 @@ utc	stage	event	ref	note
 2026-10-26T18:03Z	3	poll	-	dev unchanged; no return label on #4939 or #5799; #4965/#4961/#4982 keep needs-split until #4939 lands
 2026-10-26T18:20Z	3	poll	-	no merges of ours (only #5263 photo); #4939 and #5799 await the lane
 2026-10-26T18:37Z	3	poll	-	dev unchanged; #4939 and #5799 await the lane
+2026-10-26T18:54Z	3	poll	-	no merges of ours (only #5295 SuiteImaging route); #4939 and #5799 await the lane
