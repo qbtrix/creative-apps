@@ -4,7 +4,7 @@ Issue: #3793 · Packet: docs/blueprints/photo/features/layer-styles.md
 Run: act-1a16155057c-20lg · Session: claude/layer-styles-lead-hdzmvt · Started: 2026-10-22T02:00Z
 Stage: 0 setup, ended by the supervisor (#3793 comments at 02:42Z and 03:16Z); the supervisor relaunches by hand once #3937 merges
 Base: 66a8458 (origin/dev)
-Next: open PY-a PR when LS-2 #5174 merges, then PY-u PR stacked on it; PY-6 when LS-5 #5176 / LS-8 land; watch #5371
+Next: asked the supervisor (#3793 comment 6409228130) after 3 identical blocked polls; open PY-a PR when LS-2 #5174 merges, then PY-u; PY-6 when LS-5 #5176 / LS-8 land; watch #5371
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

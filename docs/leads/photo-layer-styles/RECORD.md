@@ -4,7 +4,7 @@ Issue: #3793 · Packet: docs/blueprints/photo/features/layer-styles.md
 Run: act-1a16f6941b7-zb0r · Session: claude/feature-lead-tone-layer-styles-v57ny4 · Started: 2026-10-24T19:30Z (takes over from act-1a16cd04539-4jc0)
 Stage: W1 shipped (PY-1 #5177 in the lane); W2 waiting on LS-a's LS-2 #5174 (PY-2) and LS-m #5176 (PY-5, PY-6)
 Base: 78983bc33 (PY-1); dev 6f66ca334 at 19:39Z
-Next: open PY-a PR when LS-2 #5174 merges, then PY-u PR stacked on it; PY-6 when LS-5 #5176 / LS-8 land; watch #5371
+Next: asked the supervisor (#3793 comment 6409228130) after 3 identical blocked polls; open PY-a PR when LS-2 #5174 merges, then PY-u; PY-6 when LS-5 #5176 / LS-8 land; watch #5371
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
