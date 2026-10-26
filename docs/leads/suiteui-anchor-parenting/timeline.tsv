@@ -182,3 +182,4 @@ utc	stage	event	ref	note
 2026-10-26T05:41:24Z	3	poll	-	05:41Z poll: none of ours landed; dev 7e13ba02 unchanged; dev-red #5321 open; no findings
 2026-10-26T06:03:46Z	3	poll	-	06:03Z poll: none of ours landed; dev c480d848 (p0 #5239 ahead, ordering correct); dev-red #5321 open; no findings
 2026-10-26T06:25:33Z	3	poll	-	06:25Z poll: no merges of ours; dev still c480d848; all 7 slice PRs clean+eligible; dev-red #5321 open; 0 findings. Queue depth.
+2026-10-26T06:54:55Z	3	poll	-	06:54Z poll: no merges of ours; dev 798f1f0a (#5244 p0); #4893/#4902 clean+eligible; dev-red #5321 open; 0 findings.
