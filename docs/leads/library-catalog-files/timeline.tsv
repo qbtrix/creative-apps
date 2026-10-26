@@ -42,94 +42,12 @@ utc	stage	event	ref	note
 2026-10-24T06:45:20Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; dev now e5dcf939 (#4840, #5048; none of ours); bisect of batch 20261024050226: probe -6 red on macOS, probes -3 and -1 running; scoped library at 4446461e has no slice of ours, so no critics yet
 2026-10-24T07:07:26Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; dev now 830af22d (none of ours); bisect of batch 20261024050226: probes -1 and -3 Linux green, macOS running; ours queue for the next batch
 2026-10-24T07:28:47Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; dev 830af22d (none of ours); bisect of batch 20261024050226: probe -3 red on macOS, -1 macOS running; ours queue for the next batch
-2026-10-24T08:15:35Z	3	check	#4879,#4924,#4937,#4938,#4949	all open, no needs-fix/needs-rebase, no PR activity since 07:00; base PRs merge clean into dev 1bbaba6c (lane landed #4818-#4837, #5034; none of ours); ours queue for the next batch; 0 open findings. Note: 07:45 and 08:08 heartbeats went to lead/catalog-* by mistake; this branch is the record again
-2026-10-24T08:30:14Z	3	check	#4879,#4924,#4937,#4938,#4949	all open, no needs-fix/needs-rebase, no PR activity since 08:00; base PRs merge clean into dev 1bbaba6c (unchanged); ours queue for the next batch; 0 open findings
-2026-10-24T08:52:01Z	3	check	#4879,#4924,#4937,#4938,#4949	all open, no needs-fix/needs-rebase, no PR activity since 08:25; base PRs merge clean into dev 1bbaba6c (unchanged since 08:08, no batch landed); ours queue for the next batch; 0 open findings
-2026-10-24T09:15:39Z	3	check	#4879,#4924,#4937,#4938,#4949	lane sweep lists only newest 100 of 209 open PRs (fast-lane.sh:1850 --limit 100), so #4878/#4879 are never evaluated; reported to supervisor on #3788 (comment 6382420373); dev 1bbaba6c; 0 findings open
-2026-10-24T09:37:01Z	3	check	#4879,#4924,#4937,#4938,#4949	no slice PR merged or labelled needs-fix/needs-rebase; still starved by lane --limit 100; no supervisor reply on #3788 yet; dev 9f476af7; 0 findings open; no slice qualifies for Belt-Slice-Done
-2026-10-24T09:59:28Z	3	check	#4879,#4924,#4937,#4938,#4949	no change: slice PRs open, no needs-fix/needs-rebase; open PRs now 222 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 9f476af7, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-2026-10-24T10:21:26Z	3	check	#4879,#4924,#4937,#4938,#4949	no change: slice PRs untouched since 10/23; open PRs 229 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 9f476af7, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-2026-10-24T10:42:59Z	3	check	#4879,#4924,#4937,#4938,#4949	no change: slice PRs untouched; open PRs 229 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev fffff7c1, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-2026-10-24T11:05:05Z	3	check	#4879,#4924,#4937,#4938,#4949	no change: no library PR updates since 10:40; open PRs 227 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 6ad8cadb, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-2026-10-24T11:27:17Z	3	check	#4879,#4924,#4937,#4938,#4949	no change: no library PR updates since 11:00; open PRs 228 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 6ad8cadb, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-2026-10-24T11:48:45Z	3	check	#4879,#4924,#4937,#4938,#4949	no change: no library PR updates since 11:20; open PRs 232 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 6ad8cadb, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-2026-10-24T12:10:59Z	3	check	#4879,#4924,#4937,#4938,#4949	no change: no library PR updates since 11:40; open PRs 241 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 6ad8cadb, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-2026-10-24T12:33:22Z	3	check	#4879,#4924,#4937,#4938,#4949	no change: no library PR updates since 12:00; open PRs 242 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 78983bc3, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-2026-10-24T12:55:02Z	3	check	#4879,#4924,#4937,#4938,#4949	no change: no library PR updates since 12:25; open PRs 248 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 6be19b34, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-2026-10-24T13:16:31Z	3	check	#4879,#4924,#4937,#4938,#4949	no change: no library PR updates since 12:50; open PRs 249 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 6be19b34, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-2026-10-24T13:38:38Z	3	check	#4879,#4924,#4937,#4938,#4949	no change: no library PR updates since 13:10; open PRs 249 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 6be19b34, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-2026-10-24T14:00:11Z	3	check	#4879,#4924,#4937,#4938,#4949	no change: no library PR updates since 13:35; open PRs 250 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 6be19b34, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-2026-10-24T14:21:30Z	3	check	#4879,#4924,#4937,#4938,#4949	no change: no library PR updates since 13:58; open PRs 246 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev e79e9afc, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-2026-10-24T14:43:15Z	3	check	#4879,#4924,#4937,#4938,#4949	no change: no library PR updates since 14:19; open PRs 246 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev e79e9afc, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-2026-10-24T15:05:10Z	3	check	#4879,#4924,#4937,#4938,#4949	no change: no library PR updates since 14:40; open PRs 246 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev e79e9afc, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-2026-10-24T15:26:55Z	3	check	#4879,#4924,#4937,#4938,#4949	no change: no library PR updates since 15:02; open PRs 246 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev e79e9afc, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-2026-10-24T15:48:48Z	3	check	#4879,#4924,#4937,#4938,#4949	no change: no library PR updates since 15:24; open PRs 235 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 33cd6e97, feat/library-bk-m:CONFLICT feat/library-lc-a:clean; 0 findings open
-2026-10-24T16:08:59Z	3	stage	#4879,#4924,#4937,#4938,#4949	stage: dev 33cd6e97 (#4838 DR-u) conflicted with BK-m #4878 (lane labelled needs-rebase, so it now evaluates #4878). Merged origin/dev into feat/library-bk-m keeping both thumbnails.stats and the backup commands; scripts/ci --changed CI: PASS (941 tests); pushed 623908de, Head: moved, Belt-Lead set to this run. BK-z #4923 merges clean on it; LC-a #4879 clean with dev.
-2026-10-24T16:10:28Z	3	check	#4879,#4924,#4937,#4938,#4949	no merges; #4878 needs-rebase (lane 15:51 named the 3 files resolved in 623908de; label drops on next sweep); no supervisor reply on #3788 (lane now reaches #4878); 0 open findings; dev 33cd6e97; feat/library-bk-m:clean feat/library-lc-a:clean
-2026-10-24T16:32:22Z	3	check	#4879,#4924,#4937,#4938,#4949	no merges; lane dropped needs-rebase on #4878 at 16:11 (ready, waits for a batch); no supervisor reply on #3788; 0 open findings; dev 33cd6e97; feat/library-bk-m:clean feat/library-lc-a:clean
-2026-10-24T16:54:29Z	3	check	#4879,#4924,#4937,#4938,#4949	no merges; lane batch-20261024160327 in flight (#5110, #4839..#4871, 12 PRs), #4878 ready and next in age order; no supervisor reply on #3788; 0 open findings; dev 33cd6e97; feat/library-bk-m:clean feat/library-lc-a:clean
-2026-10-24T17:16:44Z	3	check	#4879,#4924,#4937,#4938,#4949	batch 20261024160327 landed (dev c0920138); #4878 ready and clean, #4879 clean, body fixed to this run's Belt-Lead and footer removed; stacked PRs wait on parents; no needs-fix/needs-rebase; no supervisor reply on #3788; no slice merged so no Belt-Slice-Done; 0 open findings
-2026-10-24T17:38:28Z	3	check	#4879,#4924,#4937,#4938,#4949	#4878 at 623908de and #4879 at c131cf63 are in lane/batch-20261024172211 (12 PRs) on its Linux+macOS gate; stacked PRs wait on them; no needs-fix/needs-rebase; starvation question moot, no supervisor reply on #3788; no slice merged so no Belt-Slice-Done; 0 open findings
-2026-10-24T17:59:54Z	3	check	#4879,#4924,#4937,#4938,#4949	lane/batch-20261024172211 (#4878, #4879 and 10 others): Linux check passed (run 40115809737), macOS gate running (run 40115812591); stacked PRs wait on parents; no supervisor reply on #3788; no slice merged so no Belt-Slice-Done; 0 open findings
-2026-10-24T19:16:37Z	4	stage	#4924,#4937,#4938,#4949	LC-a (#4879) merged to dev at 095e65e1. Lane ejected #4924 (LC-u) and #4937 (LC-5) as too big (stacked diffs carried LC-a's pre-squash commits). Rebuilt each as dev plus only its own commits, conflicts with DR-6, thumbnail stats and backup specs kept both. LC-u CI: PASS, pushed 48e845ae, fast-lane back. lc-m5/lc-m6 gates crashed (SIGSEGV in SampleOpenTests.testSunset); a clean rebuild of LibraryModel passes it, so it was a stale incremental build. Re-gating lc-m5, lc-m6, lc-mu, lc-z on clean build dirs. Scoped run 40120685023 holds LC-a (queued). 0 open findings.
-2026-10-24T19:21:39Z	4	stage	#4937	LC-5 rebuilt on dev with only its own commits: clean-build scripts/ci --changed CI: PASS; pushed 5adfdbfc (9 files, +188/-21), Head moved, needs-split removed, fast-lane back. LC-6, lc-mu, LC-z gates running.
-2026-10-24T19:25:54Z	4	stage	#4938	LC-6 rebuilt on the new LC-5: clean-build scripts/ci --changed CI: PASS; pushed e300c574 (over LC-5: 11 files, +177/-43), Head moved. lc-mu and LC-z gates running.
-2026-10-24T19:31:04Z	4	stage	#4924,#4949	lc-mu (LC-6 + LC-u) gate red: LC-u's fileCommandsAreOffWithTheReason expects the stub reason, which LC-6's bodies replace, so whichever of #4924/#4938 lands second would turn its batch red until LC-z. LC-u's test now checks each control is off with a reason on an empty catalog (true for stubs and bodies); LC-z's tree is unchanged. Gating LC-u and the new lc-mu after the LC-z gate.
-2026-10-24T19:34:37Z	4	check	#4949	LC-z (cp/lc-z, tree 26f9e88f) clean-build scripts/ci --changed CI: PASS; push waits on the LC-u test fix and new lc-mu gates (running). Scoped library run 40120685023 (LC-a) macOS (library) in progress. 0 open findings.
-2026-10-24T19:43:38Z	4	stage	#4924,#4949	LC-u test fix (f1fc4a65) and new lc-mu (LC-6 + LC-u) both clean-build CI: PASS. Pushed LC-u #4924 at f1fc4a65 (12 files, +389), lc-mu at 8116fe3b, LC-z #4949 at 650cc5ff (over lc-mu: 15 files, +300/-92), Head lines moved, fast-lane on all. Whole LC stack is ready: #4937 then #4938 stacked; #4924 on dev; #4949 on lc-mu, to retarget to dev once #4924 and #4938 land. 0 open findings.
-2026-10-24T20:11:41Z	4	ci	run 40120685023	scoped library run lost its macOS runner mid-test (no test failed); re-ran failed jobs once
-2026-10-24T20:11:57Z	4	blocked	run 40120685023	re-run refused (403); BK-m/LC-a slice-done waits for the next green scoped library or full run on dev; supervisor please dispatch ci.yml app=library if none follows the next library merge
-2026-10-24T20:13:54Z	4	poll	#4923 #4924 #4937 #4938 #4949	all in fast-lane, none ejected; waiting on lane batch and a green scoped library run
-2026-10-24T20:44:30Z	4	poll	#4923 #4924 #4937 #4938 #4949	all clean and ready; lane is bisecting batch-20261024183708 with 115 ready PRs queued behind it
-2026-10-24T21:02:24Z	4	slice-done	#4879	LC-a done in scoped library run 40129102226
-2026-10-24T21:14:41Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
-2026-10-24T21:44:58Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
-2026-10-24T22:15:13Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
-2026-10-24T22:45:28Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
-2026-10-24T23:01:52Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
-2026-10-24T23:15:47Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
-2026-10-24T23:36:06Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
-2026-10-24T23:45:57Z	4	poll	#4923 #4924 #4937 #4938 #4949	lane checks all ok (size, paths, mergeable, marker); queued behind 122 ready PRs
-2026-10-25T00:06:17Z	4	poll	#4923 #4924 #4937 #4938 #4949	lane checks all ok (size, paths, mergeable, marker); queued behind 122 ready PRs
-2026-10-25T00:16:02Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
-2026-10-25T00:36:21Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
-2026-10-25T00:46:06Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
-2026-10-25T01:06:26Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
-2026-10-25T01:16:19Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued; lane bisecting batch-20261024235353, 127 ready PRs waiting
-2026-10-25T01:36:40Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued; lane bisecting batch-20261024235353, 127 ready PRs waiting
-2026-10-25T01:46:23Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
-2026-10-25T02:06:44Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
-2026-10-25T02:16:28Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
-2026-10-25T02:36:47Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
-2026-10-25T02:46:32Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
-2026-10-25T03:06:52Z	4	poll	#4923 #4924 #4937 #4938 #4949	still queued in the lane, none ejected
-2026-10-25T03:16:51Z	4	poll	#4923 #4924 #4937 #4938 #4949	queued behind p0/beta PRs (lane order); none ejected
-2026-10-25T03:37:11Z	4	poll	#4923 #4924 #4937 #4938 #4949	queued behind p0/beta PRs (lane order); none ejected
-2026-10-25T03:46:58Z	4	poll	#4923 #4924 #4937 #4938 #4949	queued behind p0/beta PRs (lane order); none ejected
-2026-10-25T04:07:18Z	4	poll	#4923 #4924 #4937 #4938 #4949	queued behind p0/beta PRs (lane order); none ejected
-2026-10-25T04:17:02Z	4	poll	#4923 #4924 #4937 #4938 #4949	queued behind p0/beta PRs (lane order); none ejected
-2026-10-25T04:37:21Z	4	poll	#4923 #4924 #4937 #4938 #4949	queued behind p0/beta PRs (lane order); none ejected
-2026-10-25T04:47:06Z	4	poll	#4923 #4924 #4937 #4938 #4949	queued behind p0/beta PRs (lane order); none ejected
-2026-10-25T05:07:26Z	4	poll	#4923 #4924 #4937 #4938 #4949	queued behind p0/beta PRs (lane order); none ejected
-2026-10-25T05:17:19Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
-2026-10-25T05:37:41Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
-2026-10-25T05:47:16Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
-2026-10-25T06:07:36Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
-2026-10-25T06:17:29Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; lane bisecting batch-20261025054232, ours wait for the next
-2026-10-25T06:37:50Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; lane bisecting batch-20261025054232, ours wait for the next
-2026-10-25T06:47:34Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
-2026-10-25T07:07:54Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
-2026-10-25T07:17:39Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
-2026-10-25T07:37:59Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
-2026-10-25T07:47:52Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; lane still bisecting batch-20261025054232 (probe 3)
-2026-10-25T08:08:13Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; lane still bisecting batch-20261025054232 (probe 3)
-2026-10-25T08:17:58Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
-2026-10-25T08:38:19Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
-2026-10-25T08:48:03Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
-2026-10-25T09:08:25Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
-2026-10-25T09:18:12Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; lane still bisecting batch-20261025054232 (probe 4)
-2026-10-25T09:38:33Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; lane still bisecting batch-20261025054232 (probe 4)
-2026-10-25T09:48:17Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
-2026-10-25T10:08:38Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
-2026-10-25T10:18:24Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
-2026-10-25T10:38:45Z	4	poll	#4923 #4924 #4937 #4938 #4949	labelled beta; waiting for the next lane batch
+2026-10-24T07:45:26Z	3	check	#4879,#4924,#4937,#4938,#4949	all open, no needs-fix/needs-rebase, base PRs merge clean into dev f58e119 (#4132 merged; none of ours); ours queue for the next batch; 0 open findings
+2026-10-24T08:08:10Z	3	check	#4879,#4924,#4937,#4938,#4949	all open, no needs-fix/needs-rebase, base PRs merge clean into dev 1bbaba6 (lane landed #4818-#4837 and #5034; none of ours); ours queue for the next batch; 0 open findings
+2026-10-24T18:50:06Z	4	stage	#4924,#4937,#4938,#4949	Run act-1a16f3a3e2b-xivc: lead branch rebased on main e79e9afc. LC-a (#4879) merged to dev at 095e65e1. Lane ejected #4924 (LC-u) and #4937 (LC-5) as too big: stacked diffs still carried LC-a's pre-squash commits. Rebuilding each as a merge of dev with only its own commits (conflicts with DR-6, thumbnail stats and backup specs resolved keeping both); gate running. Scoped library run 40120685023 at d13c3ff2 holds LC-a.
+2026-10-24T19:05:23Z	4	gate	#4937 #4938 #4949	lc-m5 gate hit a SIGSEGV in SampleOpenTests.testSunset (LibraryCatalog init copy); checking lc-m6 gate, which carries the same change, to tell a flake from a fault
+2026-10-26T02:18Z	0	stage-start	#3786	resume run act-1a175fe2de5-qdc7; lead branch rebuilt on main d3323f6a
+2026-10-26T02:18Z	3	heartbeat	#4924,#4937	eligible in lane queue; #4938,#4949 stacked
+2026-10-26T02:40Z	heartbeat	LC-u,LC-m	#4924 #4937 still queued; lc-m6 vs dev conflicts mapped (crop/image commands)
+2026-10-26T02:42Z	heartbeat	LC-u,LC-m	no change; lane lands ~1 PR/30min (last #5177 02:03Z); #4924 #4937 queued (beta)
+2026-10-26T02:46:59Z	heartbeat	LC-u,LC-m	queued; mirror to lead/library-catalog-files

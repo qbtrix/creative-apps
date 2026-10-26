@@ -1,30 +1,30 @@
 # catalog-files lead record
 
 Issue: #3786 · Packet: docs/blueprints/library/features/catalog-files.md
-Run: act-1a1695ec091-ilfv · Started: 2026-10-23T15:31:23Z
-Stage: 3 wave 3
-Base: 721168a8 (origin/dev)
-Next: (2026-10-23T17:39:52Z) #4879 LC-a, #4924 LC-u, #4937 LC-5, #4938 LC-6 wait on the lane; LC-z builder (LC-7, LC-8) running on lc-m6 + lc-u.
+Run: act-1a175fe2de5-qdc7 · Started: 2026-10-23T15:31:23Z (this run 2026-10-26T02:20Z)
+Stage: 3 polling
+Base: 8987427d (origin/dev); main d3323f6a
+Next: wait for the lane to land #4924 (LC-u) and #4937 (LC-5); then merge origin/dev into feat/library-lc-m6, retarget #4938 to dev, rerun scripts/ci --changed, move Head:; same for #4949 (LC-z) once #4938 and #4924 merge.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| LC-a | copy plan, remove and relink rules and specs as stubs, checks written and disabled | LC-1, LC-2 | MJ-LC | cull-finish:DR-m (contract-first met) | no | 0 | #4879 open (fast-lane) | – | – |
-| LC-u | import options, Remove from Catalog, missing badge on stubs, render budget | LC-3, LC-4 | LJ-LC | LC-a | yes | 0 | #4924 open at 006a476 (stacked on #4879) | – | – |
-| LC-m | copy on import, remove and relink bodies and commands | LC-5, LC-6 | MJ-LC | LC-a; metadata-more:MD-a, file-flow:LF-m (contract-first met) | no | 0 | #4937 (LC-5) + #4938 (LC-6) open, stacked on #4879 | – | – |
-| LC-z | live wiring, journeys and jobs on, built | LC-7, LC-8 | LJ-LC, MJ-LC | LC-u, LC-m | yes | 0 | building (wave 3, on lc-m6 + lc-u) | – | – |
+| LC-a | copy plan, remove and relink rules and specs as stubs, checks written and disabled | LC-1, LC-2 | MJ-LC | cull-finish:DR-m (contract-first met) | no | 0 | done | 40129102226 | – |
+| LC-u | import options, Remove from Catalog, missing badge on stubs, render budget | LC-3, LC-4 | LJ-LC | LC-a | yes | 0 | building: #4924 eligible, in lane queue | – | – |
+| LC-m | copy on import, remove and relink bodies and commands | LC-5, LC-6 | MJ-LC | LC-a; metadata-more:MD-a, file-flow:LF-m (contract-first met) | no | 0 | building: #4937 eligible in lane queue; #4938 stacked on it | – | – |
+| LC-z | live wiring, journeys and jobs on, built | LC-7, LC-8 | LJ-LC, MJ-LC | LC-u, LC-m | yes | 0 | building: #4949 stacked on lc-mu | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| LC-1 | LC-a | 1 | ImportCopyPlan, CatalogFileRules, specs stubs; tests disabled | ImportCopyPlan.swift, CatalogFileRules.swift, LibraryCatalogFiles+Kernel.swift, LibraryImport.swift, tests | compiles, disabled | #4879 | open at df5c4fa |
-| LC-2 | LC-a | 1 | journey skipped, RJ-L50/51/52 jobs disabled | UITests/LibraryJourneyTests+Files.swift, Tests/RealJobs/library/* | – | #4879 | open at df5c4fa |
-| LC-3 | LC-u | 2 | import options, remove, missing badge | LibraryApp files | ids | #4924 | open at 006a476 |
-| LC-4 | LC-u | 2 | render budget | RenderBudgetLibraryFilesTests.swift | missingBadgeScroll | #4924 | open at 006a476 |
-| LC-5 | LC-m | 2 | copy plan body, live importer | ImportCopyPlan.swift, LiveImporter.swift | ImportCopyTests | #4937 | open at 5376128, Mutate 3/3 ImportCopyPlan |
-| LC-6 | LC-m | 2 | remove/relink bodies and commands | CatalogFileRules.swift, LibraryCommandCatalog.swift, ledger | CatalogRemoveTests, RelinkTests | #4938 | open at 58cadbb, Mutate 2/2 CatalogFileRules |
-| LC-7 | LC-z | 3 | live wiring, journeys and jobs on | – | LJ-LC | – | queued |
-| LC-8 | LC-z | 4 | feature-done | catalog-files.wave.json | – | – | queued |
+| LC-1 | LC-a | 1 | ImportCopyPlan, CatalogFileRules, specs stubs; tests disabled | ImportCopyPlan.swift, CatalogFileRules.swift, LibraryCatalogFiles+Kernel.swift, LibraryImport.swift, tests | compiles, disabled | #4879 | merged 095e65e1 |
+| LC-2 | LC-a | 1 | journey skipped, RJ-L50/51/52 jobs disabled | UITests/LibraryJourneyTests+Files.swift, Tests/RealJobs/library/* | – | #4879 | merged 095e65e1 |
+| LC-3 | LC-u | 2 | import options, remove, missing badge | LibraryApp files | ids | #4924 | open at f1fc4a65, prescreen green, eligible |
+| LC-4 | LC-u | 2 | render budget | RenderBudgetLibraryFilesTests.swift | missingBadgeScroll | #4924 | open at f1fc4a65 |
+| LC-5 | LC-m | 2 | copy plan body, live importer | ImportCopyPlan.swift, LiveImporter.swift | ImportCopyTests | #4937 | open at 5adfdbfc, prescreen green, eligible; Mutate 3/3 |
+| LC-6 | LC-m | 2 | remove/relink bodies and commands | CatalogFileRules.swift, LibraryCommandCatalog.swift, ledger | CatalogRemoveTests, RelinkTests | #4938 | open at e300c574, base lc-m5; Mutate 2/2 |
+| LC-7 | LC-z | 3 | live wiring, journeys and jobs on | LibraryLaunch etc. | LJ-LC | #4949 | open at 650cc5ff, base lc-mu; Mutate 3/3 |
+| LC-8 | LC-z | 3 | feature-done | catalog-files.wave.json | – | #4949 | open (folded into LC-7's PR) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -33,144 +33,17 @@ Next: (2026-10-23T17:39:52Z) #4879 LC-a, #4924 LC-u, #4937 LC-5, #4938 LC-6 wait
 ## Decisions
 - 2026-10-23: the brief says base main; CLAUDE.md and fast-lane.sh (BASE_BRANCH=dev; PRs on main are retargeted) say dev. Slice PRs base and target dev.
 - 2026-10-23: rule 12 (#4814, contract-first): cull-finish DR-m, metadata-more MD-a and file-flow LF-m have first slices on dev, so the waits are met; Wire lines record the re-checks.
+- 2026-10-26: origin/main shares no history with the old lead branch (rewritten), so lead/catalog-files was rebuilt as origin/main plus this record and the timeline.
+- 2026-10-26: #4938 and #4949 stay on their stacked bases until their parents squash-merge; retargeting now would carry the parents' diffs and break the 400/15 cap (as #4924 and #4937 did on 10-24).
 
 ## Wire
 - [ ] cull-finish:DR-m (14/17 on dev): LC-a builds on what DR-m has merged; re-check when DR-m is done.
-- [ ] metadata-more:MD-a (#1555 open): LC-5 reads capture dates as they stand; re-check.
+- [ ] metadata-more:MD-a: LC-5 reads capture dates as they stand; re-check.
 - [ ] file-flow:LF-m (7/8 on dev): LC-6 builds on the current ledger and catalog; re-check.
 
 ## Open
-- 2026-10-23T15:31:23Z: started. Open findings for catalog-files: 0. Open PRs: 0.
-- 2026-10-23T16:34:40Z: LC-a #4879 opened (df5c4fa, 14 files +399/-1, CI: PASS). LC-u and LC-m builders launched on it. Record mirrored to lead/library-catalog-files.
-- 2026-10-23T17:29:30Z: LC-u #4924 opened (006a476, 12 files +390, CI: PASS), base feat/library-lc-a. SuiteUI ask #4914 (grid cell badge + context menu). Open findings: 0.
-- 2026-10-23T17:39:52Z: LC-m split over the 15-file cap: #4937 LC-5 (5376128, 9 files +188/-21) on lc-a, #4938 LC-6 (58cadbb, 11 files +178/-44) on lc-m5; both CI: PASS. LC-z builder launched. Open: relinked id keeps the old path; re-importing a folder with copy makes new copies (candidate gaps after LC-z).
-- 2026-10-23T17:51:06Z: heartbeat: #4879,#4924,#4937,#4938 open, no needs-fix; dev Linux check 39997290881 (8a54f64) running; findings 0.
-- 2026-10-23T18:07:23Z: LC-z PR #4949 opened (fast-lane, feature-done), base feat/library-lc-mu = merge of #4938 and #4924; retarget to dev after both merge. Mutate 3/3 LibraryModel.LibraryLaunch. RJ-L50/L52 pending #3741. UI not compiled yet (batch macOS gate). Next: all four slices built; wait for lane, then scoped library run and critics.
-- 2026-10-23T18:15:01Z: heartbeat: #4879,#4924,#4937,#4938,#4949 open, clean, no needs-fix; dev Linux check 40000080882 (98589662) running; findings for this feature 0. PR bodies carry a server-added attribution footer that a PATCH cannot remove; the lane strips it from the squash commit.
-- 2026-10-23T18:37:22Z: heartbeat: #4879,#4924,#4937,#4938,#4949 ready and clean; lane busy bisecting batch 20261023174522 (not ours), 60 ready PRs queued behind it. Nothing to fix.
-- 2026-10-23T18:59:21Z: #4879 got needs-rebase (conflict in LibraryImport.swift with cull-finish DR-6). Merged origin/dev, kept both sides; gate running, then push and move Head:.
-- 2026-10-23T19:23:23Z: #4879 integrated with dev at c131cf6383805ea79efebc2c743792d8be48e1b5 (CI: PASS), Head: moved. Stacked children still target the parent branch; retarget to dev once it merges.
-- 2026-10-23T19:45:33Z: heartbeat: lane dropped needs-rebase; #4879,#4924,#4937,#4938,#4949 ready, waiting for a batch. No needs-fix, findings 0.
-- 2026-10-23T20:07:26Z: heartbeat: #4879,#4924,#4937,#4938,#4949 ready and clean, waiting for a lane batch.
-- 2026-10-23T20:29:20Z: heartbeat: #4879,#4924,#4937,#4938,#4949 ready and clean; lane bisecting another batch without them. Waiting.
-- 2026-10-23T20:52:18Z: heartbeat: #4879,#4924,#4937,#4938,#4949 open, clean, unmerged; lane batch 20261023204921 in flight without them; scoped library run 40018964074 in progress at 61c481df; 27 open library findings, so no new feature task (none left to start).
-- 2026-10-23T21:13:50Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean); lane batch 20261023204921 still in flight; scoped library run 40018964074 in progress, dev CI 40024093736 queued at 61c481df.
-- 2026-10-23T21:36:23Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Scoped library run 40018964074 finished green at 61c481df; that head has none of our slices, so its screens cannot be critiqued for them. Journeys 40027427921 and dev CI 40024093736 running; lane batch 20261023204921 still in flight.
-- 2026-10-23T21:58:21Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Dev now 491ec546; per-app scoped runs queued there. Lane batch 20261023215139 runs PRs #4818..#4870; ours (#4878 up) wait for the next batch.
-- 2026-10-23T22:19:52Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Lane batch 20261023215139 still in flight; ours wait for the next one. Dev Linux check 40029046141 green at 491ec546.
-- 2026-10-23T22:42:04Z: heartbeat: #4879,#4924,#4937,#4938,#4949 open, no needs-fix/needs-rebase (dev-based heads show mergeable state unknown while GitHub recomputes). Lane batch 20261023215139 still in flight; dev still 491ec546.
-- 2026-10-23T23:04:34Z: heartbeat: #4879,#4924,#4937,#4938,#4949 open, clean, no fix/rebase labels. Dev moved only by the generated-docs commit 654fb363. Lane batch 20261023215139 (#4818..#4870) still in flight; ours wait for the next.
-- 2026-10-23T23:25:42Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Lane batch 20261023215139 still in flight; dev CI 40037716897 running at 654fb363.
-- 2026-10-23T23:47:12Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Lane batch 20261023215139 (PRs #4818..#4870, none ours) failed its macOS gate 40029779505; no bisect probe branch yet. Ours wait for the next batch. Dev CI 40037716897 still running at 654fb363.
-- 2026-10-24T00:09:34Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). No Fast Lane sweep since run 40038169143 (~23:25Z); batch 20261023215139 still red on its macOS gate with no bisect probe. Lane-side, not ours; ours wait for the next batch. Dev CI 40037716897 still running.
-- 2026-10-24T00:30:57Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Lane sweeping again (run 40044859262) and bisecting batch 20261023215139 (probe lane/batch-20261023215139-6). Dev full CI 40037716897 green at 654fb363, which holds none of our slices.
-- 2026-10-24T00:52:54Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Lane is still bisecting batch 20261023215139 at probe -6, which holds none of ours. Dev is still 654fb363 and green; the full journeys run 40044846192 is pending.
-- 2026-10-24T01:15:29Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Bisect probe lane/batch-20261023215139-6 passed Linux; its macOS gate 40044879600 has run since 00:25Z. That batch holds none of ours. Dev 654fb363 is green.
-- 2026-10-24T01:37:12Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Bisect probe -6 passed both gates; the lane has moved on to probe lane/batch-20261023215139-9 (Fast Lane 40049986432 running). That batch holds none of ours. Dev 654fb363 is green.
-- 2026-10-24T01:58:55Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Lane still bisecting batch 20261023215139 at probe -9; that batch holds none of ours. Dev 654fb363 is green.
-- 2026-10-24T02:21:09Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Probe lane/batch-20261023215139-9 passed Linux; its macOS gate 40050012604 has run since 01:29Z. That batch holds none of ours. Dev 654fb363 green; full journeys 40044846192 now running.
-- 2026-10-24T02:42:51Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Probe -9 macOS gate 40050012604 failed (probe -6 was green), so the culprit of batch 20261023215139 lies in PRs 7 to 9 of that batch, none ours. Waiting for the lane to finish the bisect and form the next batch. Dev 654fb363 green.
-- 2026-10-24T03:05:07Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Lane bisect moved to probe lane/batch-20261023215139-7; that batch holds none of ours. Dev 654fb363 green.
-- 2026-10-24T03:26:54Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Probe lane/batch-20261023215139-7 passed Linux; its macOS gate has run since 02:44Z. That batch holds none of ours. Dev 654fb363 green.
-- 2026-10-24T03:49:09Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Probe -7 passed both gates, so the culprit of batch 20261023215139 is its 8th or 9th PR, none ours. Next lane sweep should probe -8. Dev 654fb363 green.
-- 2026-10-24T04:11:01Z: heartbeat: #4879,#4924,#4937,#4938,#4949 unchanged (open, clean). Lane now on the last probe, lane/batch-20261023215139-8 (Fast Lane 40060686633 running); that batch holds none of ours. Dev 654fb363 green.
-- 2026-10-24T04:34:07Z: heartbeat: #4879,#4924,#4937,#4938,#4949 all open+clean, none merged; lane bisect probe lane/batch-20261023215139-8 macOS gate running (none of ours); dev 654fb363 green, no slice of ours
-- 2026-10-24T04:56:15Z: heartbeat: #4879,#4924,#4937,#4938,#4949 all open+clean, none merged; lane bisect probe -8 macOS gate still running (none of ours); dev 654fb363 green, no slice of ours
-- 2026-10-24T05:18:02Z: heartbeat: #4879,#4924,#4937,#4938,#4949 all open+clean, none merged; bisect of batch 20261023215139 done (probe -8 green); new lane/batch-20261024050226 (12 PRs #4839-#4875, none of ours) Linux+macOS running; ours queue for the next batch; dev 654fb363 green
-- 2026-10-24T05:39:42Z: heartbeat: #4879,#4924,#4937,#4938,#4949 all open+clean, none merged; lane/batch-20261024050226 (none of ours) Linux green, macOS gate running; ours queue for the next batch; dev 654fb363 green
-- 2026-10-24T06:00:53Z: heartbeat: #4879,#4924,#4937,#4938,#4949 all open+clean, none merged; lane/batch-20261024050226 (none of ours) red on macOS gate, bisecting (probe -6); ours queue for the next batch; dev 654fb363 green
-- 2026-10-24T06:23:38Z: heartbeat: #4879,#4924,#4937,#4938,#4949 all open+clean, none merged; lane bisect of batch 20261024050226 (none of ours): probe -6 Linux green, macOS running; ours queue for the next batch; dev 654fb363 green
-- 2026-10-24T06:45:20Z: heartbeat: #4879,#4924,#4937,#4938,#4949 all open+clean, none merged; dev now e5dcf939 (#4840, #5048; none of ours); bisect of batch 20261024050226: probe -6 red on macOS, probes -3 and -1 running; scoped library at 4446461e has no slice of ours, so no critics yet
-- 2026-10-24T07:07:26Z: heartbeat: #4879,#4924,#4937,#4938,#4949 all open+clean, none merged; dev now 830af22d (none of ours); bisect of batch 20261024050226: probes -1 and -3 Linux green, macOS running; ours queue for the next batch
-- 2026-10-24T07:28:47Z: heartbeat: #4879,#4924,#4937,#4938,#4949 all open+clean, none merged; dev 830af22d (none of ours); bisect of batch 20261024050226: probe -3 red on macOS, -1 macOS running; ours queue for the next batch
-- 2026-10-24T08:15:35Z: heartbeat: #4879,#4924,#4937,#4938,#4949 all open, no needs-fix/needs-rebase, no PR activity since 07:00; base PRs merge clean into dev 1bbaba6c (lane landed #4818-#4837, #5034; none of ours); ours queue for the next batch; 0 open findings. Note: 07:45 and 08:08 heartbeats went to lead/catalog-* by mistake; this branch is the record again
-- 2026-10-24T08:30:14Z: heartbeat: #4879,#4924,#4937,#4938,#4949 all open, no needs-fix/needs-rebase, no PR activity since 08:00; base PRs merge clean into dev 1bbaba6c (unchanged); ours queue for the next batch; 0 open findings
-- 2026-10-24T08:52:01Z: heartbeat: #4879,#4924,#4937,#4938,#4949 all open, no needs-fix/needs-rebase, no PR activity since 08:25; base PRs merge clean into dev 1bbaba6c (unchanged since 08:08, no batch landed); ours queue for the next batch; 0 open findings
-- 2026-10-24T09:15:39Z: check: #4879,#4924,#4937,#4938,#4949 lane sweep lists only newest 100 of 209 open PRs (fast-lane.sh:1850 --limit 100), so #4878/#4879 are never evaluated; reported to supervisor on #3788 (comment 6382420373); dev 1bbaba6c; 0 findings open
-- 2026-10-24T09:37:01Z: check: #4879,#4924,#4937,#4938,#4949 no slice PR merged or labelled needs-fix/needs-rebase; still starved by lane --limit 100; no supervisor reply on #3788 yet; dev 9f476af7; 0 findings open; no slice qualifies for Belt-Slice-Done
-- 2026-10-24T09:59:28Z: check: #4879,#4924,#4937,#4938,#4949 no change: slice PRs open, no needs-fix/needs-rebase; open PRs now 222 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 9f476af7, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-- 2026-10-24T10:21:26Z: check: #4879,#4924,#4937,#4938,#4949 no change: slice PRs untouched since 10/23; open PRs 229 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 9f476af7, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-- 2026-10-24T10:42:59Z: check: #4879,#4924,#4937,#4938,#4949 no change: slice PRs untouched; open PRs 229 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev fffff7c1, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-- 2026-10-24T11:05:05Z: check: #4879,#4924,#4937,#4938,#4949 no change: no library PR updates since 10:40; open PRs 227 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 6ad8cadb, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-- 2026-10-24T11:27:17Z: check: #4879,#4924,#4937,#4938,#4949 no change: no library PR updates since 11:00; open PRs 228 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 6ad8cadb, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-- 2026-10-24T11:48:45Z: check: #4879,#4924,#4937,#4938,#4949 no change: no library PR updates since 11:20; open PRs 232 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 6ad8cadb, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-- 2026-10-24T12:10:59Z: check: #4879,#4924,#4937,#4938,#4949 no change: no library PR updates since 11:40; open PRs 241 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 6ad8cadb, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-- 2026-10-24T12:33:22Z: check: #4879,#4924,#4937,#4938,#4949 no change: no library PR updates since 12:00; open PRs 242 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 78983bc3, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-- 2026-10-24T12:55:02Z: check: #4879,#4924,#4937,#4938,#4949 no change: no library PR updates since 12:25; open PRs 248 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 6be19b34, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-- 2026-10-24T13:16:31Z: check: #4879,#4924,#4937,#4938,#4949 no change: no library PR updates since 12:50; open PRs 249 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 6be19b34, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-- 2026-10-24T13:38:38Z: check: #4879,#4924,#4937,#4938,#4949 no change: no library PR updates since 13:10; open PRs 249 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 6be19b34, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-- 2026-10-24T14:00:11Z: check: #4879,#4924,#4937,#4938,#4949 no change: no library PR updates since 13:35; open PRs 250 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 6be19b34, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-- 2026-10-24T14:21:30Z: check: #4879,#4924,#4937,#4938,#4949 no change: no library PR updates since 13:58; open PRs 246 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev e79e9afc, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-- 2026-10-24T14:43:15Z: check: #4879,#4924,#4937,#4938,#4949 no change: no library PR updates since 14:19; open PRs 246 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev e79e9afc, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-- 2026-10-24T15:05:10Z: check: #4879,#4924,#4937,#4938,#4949 no change: no library PR updates since 14:40; open PRs 246 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev e79e9afc, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-- 2026-10-24T15:26:55Z: check: #4879,#4924,#4937,#4938,#4949 no change: no library PR updates since 15:02; open PRs 246 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev e79e9afc, feat/library-bk-m:clean feat/library-lc-a:clean; 0 findings open
-- 2026-10-24T15:48:48Z: check: #4879,#4924,#4937,#4938,#4949 no change: no library PR updates since 15:24; open PRs 235 so lane --limit 100 still skips #4878/#4879; no supervisor reply on #3788; dev 33cd6e97, feat/library-bk-m:CONFLICT feat/library-lc-a:clean; 0 findings open
-- 2026-10-24T16:08:59Z: stage: dev 33cd6e97 (#4838 DR-u) conflicted with BK-m #4878 (lane labelled needs-rebase, so it now evaluates #4878). Merged origin/dev into feat/library-bk-m keeping both thumbnails.stats and the backup commands; scripts/ci --changed CI: PASS (941 tests); pushed 623908de, Head: moved, Belt-Lead set to this run. BK-z #4923 merges clean on it; LC-a #4879 clean with dev.
-- 2026-10-24T16:10:28Z: check: #4879,#4924,#4937,#4938,#4949 no merges; #4878 needs-rebase (lane 15:51 named the 3 files resolved in 623908de; label drops on next sweep); no supervisor reply on #3788 (lane now reaches #4878); 0 open findings; dev 33cd6e97; feat/library-bk-m:clean feat/library-lc-a:clean
-- 2026-10-24T16:32:22Z: check: #4879,#4924,#4937,#4938,#4949 no merges; lane dropped needs-rebase on #4878 at 16:11 (ready, waits for a batch); no supervisor reply on #3788; 0 open findings; dev 33cd6e97; feat/library-bk-m:clean feat/library-lc-a:clean
-- 2026-10-24T16:54:29Z: check: #4879,#4924,#4937,#4938,#4949 no merges; lane batch-20261024160327 in flight (#5110, #4839..#4871, 12 PRs), #4878 ready and next in age order; no supervisor reply on #3788; 0 open findings; dev 33cd6e97; feat/library-bk-m:clean feat/library-lc-a:clean
-- 2026-10-24T17:16:44Z: check: #4879,#4924,#4937,#4938,#4949 batch 20261024160327 landed (dev c0920138); #4878 ready and clean, #4879 clean, body fixed to this run's Belt-Lead and footer removed; stacked PRs wait on parents; no needs-fix/needs-rebase; no supervisor reply on #3788; no slice merged so no Belt-Slice-Done; 0 open findings
-- 2026-10-24T17:38:28Z: check: #4879,#4924,#4937,#4938,#4949 #4878 at 623908de and #4879 at c131cf63 are in lane/batch-20261024172211 (12 PRs) on its Linux+macOS gate; stacked PRs wait on them; no needs-fix/needs-rebase; starvation question moot, no supervisor reply on #3788; no slice merged so no Belt-Slice-Done; 0 open findings
-- 2026-10-24T17:59:54Z: check: #4879,#4924,#4937,#4938,#4949 lane/batch-20261024172211 (#4878, #4879 and 10 others): Linux check passed (run 40115809737), macOS gate running (run 40115812591); stacked PRs wait on parents; no supervisor reply on #3788; no slice merged so no Belt-Slice-Done; 0 open findings
-- 2026-10-24T19:16:37Z: stage: #4924,#4937,#4938,#4949 LC-a (#4879) merged to dev at 095e65e1. Lane ejected #4924 (LC-u) and #4937 (LC-5) as too big (stacked diffs carried LC-a's pre-squash commits). Rebuilt each as dev plus only its own commits, conflicts with DR-6, thumbnail stats and backup specs kept both. LC-u CI: PASS, pushed 48e845ae, fast-lane back. lc-m5/lc-m6 gates crashed (SIGSEGV in SampleOpenTests.testSunset); a clean rebuild of LibraryModel passes it, so it was a stale incremental build. Re-gating lc-m5, lc-m6, lc-mu, lc-z on clean build dirs. Scoped run 40120685023 holds LC-a (queued). 0 open findings.
-- 2026-10-24T19:21:39Z: stage: #4937 LC-5 rebuilt on dev with only its own commits: clean-build scripts/ci --changed CI: PASS; pushed 5adfdbfc (9 files, +188/-21), Head moved, needs-split removed, fast-lane back. LC-6, lc-mu, LC-z gates running.
-- 2026-10-24T19:25:54Z: stage: #4938 LC-6 rebuilt on the new LC-5: clean-build scripts/ci --changed CI: PASS; pushed e300c574 (over LC-5: 11 files, +177/-43), Head moved. lc-mu and LC-z gates running.
-- 2026-10-24T19:31:04Z: stage: #4924,#4949 lc-mu (LC-6 + LC-u) gate red: LC-u's fileCommandsAreOffWithTheReason expects the stub reason, which LC-6's bodies replace, so whichever of #4924/#4938 lands second would turn its batch red until LC-z. LC-u's test now checks each control is off with a reason on an empty catalog (true for stubs and bodies); LC-z's tree is unchanged. Gating LC-u and the new lc-mu after the LC-z gate.
-- 2026-10-24T19:34:37Z: check: #4949 LC-z (cp/lc-z, tree 26f9e88f) clean-build scripts/ci --changed CI: PASS; push waits on the LC-u test fix and new lc-mu gates (running). Scoped library run 40120685023 (LC-a) macOS (library) in progress. 0 open findings.
-- 2026-10-24T19:43:38Z: stage: #4924,#4949 LC-u test fix (f1fc4a65) and new lc-mu (LC-6 + LC-u) both clean-build CI: PASS. Pushed LC-u #4924 at f1fc4a65 (12 files, +389), lc-mu at 8116fe3b, LC-z #4949 at 650cc5ff (over lc-mu: 15 files, +300/-92), Head lines moved, fast-lane on all. Whole LC stack is ready: #4937 then #4938 stacked; #4924 on dev; #4949 on lc-mu, to retarget to dev once #4924 and #4938 land. 0 open findings.
-- 2026-10-24T20:11:41Z: ci: run 40120685023 scoped library run lost its macOS runner mid-test (no test failed); re-ran failed jobs once
-- 2026-10-24T20:11:57Z: blocked: run 40120685023 re-run refused (403); BK-m/LC-a slice-done waits for the next green scoped library or full run on dev; supervisor please dispatch ci.yml app=library if none follows the next library merge
-- 2026-10-24T20:13:54Z: poll: #4923 #4924 #4937 #4938 #4949 all in fast-lane, none ejected; waiting on lane batch and a green scoped library run
-- 2026-10-24T20:44:30Z: poll: #4923 #4924 #4937 #4938 #4949 all clean and ready; lane is bisecting batch-20261024183708 with 115 ready PRs queued behind it
-- 2026-10-24T21:02:24Z: slice-done: #4879 LC-a done in scoped library run 40129102226
-- 2026-10-24T21:14:41Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
-- 2026-10-24T21:44:58Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
-- 2026-10-24T22:15:13Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
-- 2026-10-24T22:45:28Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
-- 2026-10-24T23:01:52Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
-- 2026-10-24T23:15:47Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
-- 2026-10-24T23:36:06Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
-- 2026-10-24T23:45:57Z: poll: #4923 #4924 #4937 #4938 #4949 lane checks all ok (size, paths, mergeable, marker); queued behind 122 ready PRs
-- 2026-10-25T00:06:17Z: poll: #4923 #4924 #4937 #4938 #4949 lane checks all ok (size, paths, mergeable, marker); queued behind 122 ready PRs
-- 2026-10-25T00:16:02Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
-- 2026-10-25T00:36:21Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
-- 2026-10-25T00:46:06Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
-- 2026-10-25T01:06:26Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
-- 2026-10-25T01:16:19Z: poll: #4923 #4924 #4937 #4938 #4949 still queued; lane bisecting batch-20261024235353, 127 ready PRs waiting
-- 2026-10-25T01:36:40Z: poll: #4923 #4924 #4937 #4938 #4949 still queued; lane bisecting batch-20261024235353, 127 ready PRs waiting
-- 2026-10-25T01:46:23Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
-- 2026-10-25T02:06:44Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
-- 2026-10-25T02:16:28Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
-- 2026-10-25T02:36:47Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
-- 2026-10-25T02:46:32Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
-- 2026-10-25T03:06:52Z: poll: #4923 #4924 #4937 #4938 #4949 still queued in the lane, none ejected
-- 2026-10-25T03:16:51Z: poll: #4923 #4924 #4937 #4938 #4949 queued behind p0/beta PRs (lane order); none ejected
-- 2026-10-25T03:37:11Z: poll: #4923 #4924 #4937 #4938 #4949 queued behind p0/beta PRs (lane order); none ejected
-- 2026-10-25T03:46:58Z: poll: #4923 #4924 #4937 #4938 #4949 queued behind p0/beta PRs (lane order); none ejected
-- 2026-10-25T04:07:18Z: poll: #4923 #4924 #4937 #4938 #4949 queued behind p0/beta PRs (lane order); none ejected
-- 2026-10-25T04:17:02Z: poll: #4923 #4924 #4937 #4938 #4949 queued behind p0/beta PRs (lane order); none ejected
-- 2026-10-25T04:37:21Z: poll: #4923 #4924 #4937 #4938 #4949 queued behind p0/beta PRs (lane order); none ejected
-- 2026-10-25T04:47:06Z: poll: #4923 #4924 #4937 #4938 #4949 queued behind p0/beta PRs (lane order); none ejected
-- 2026-10-25T05:07:26Z: poll: #4923 #4924 #4937 #4938 #4949 queued behind p0/beta PRs (lane order); none ejected
-- 2026-10-25T05:17:19Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; waiting for the next lane batch
-- 2026-10-25T05:37:41Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; waiting for the next lane batch
-- 2026-10-25T05:47:16Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; waiting for the next lane batch
-- 2026-10-25T06:07:36Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; waiting for the next lane batch
-- 2026-10-25T06:17:29Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; lane bisecting batch-20261025054232, ours wait for the next
-- 2026-10-25T06:37:50Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; lane bisecting batch-20261025054232, ours wait for the next
-- 2026-10-25T06:47:34Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; waiting for the next lane batch
-- 2026-10-25T07:07:54Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; waiting for the next lane batch
-- 2026-10-25T07:17:39Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; waiting for the next lane batch
-- 2026-10-25T07:37:59Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; waiting for the next lane batch
-- 2026-10-25T07:47:52Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; lane still bisecting batch-20261025054232 (probe 3)
-- 2026-10-25T08:08:13Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; lane still bisecting batch-20261025054232 (probe 3)
-- 2026-10-25T08:17:58Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; waiting for the next lane batch
-- 2026-10-25T08:38:19Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; waiting for the next lane batch
-- 2026-10-25T08:48:03Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; waiting for the next lane batch
-- 2026-10-25T09:08:25Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; waiting for the next lane batch
-- 2026-10-25T09:18:12Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; lane still bisecting batch-20261025054232 (probe 4)
-- 2026-10-25T09:38:33Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; lane still bisecting batch-20261025054232 (probe 4)
-- 2026-10-25T09:48:17Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; waiting for the next lane batch
-- 2026-10-25T10:08:38Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; waiting for the next lane batch
-- 2026-10-25T10:18:24Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; waiting for the next lane batch
-- 2026-10-25T10:38:45Z: poll: #4923 #4924 #4937 #4938 #4949 labelled beta; waiting for the next lane batch
+- 2026-10-24T21:02:20Z: Belt-Slice-Done: LC-a on run 40129102226.
+- 2026-10-26T02:20Z: run act-1a175fe2de5-qdc7 resumed. Lane (LANE_VERIFY_AFTER=1) lists #4924 and #4937 eligible (Fast-Check marker + local-ci/prescreen green) among 107 eligible PRs; batches of one at a time. dev-red #5321 (macOS, not ours) open. Open findings for catalog-files: 0.
+- 2026-10-26T02:40Z: probe merge of origin/dev into feat/library-lc-m6 conflicts in LibraryCommandCatalog.swift, its test, library.txt and the list-commands golden: dev added image.* and crop.* (LibraryCropDocument.specs). Resolution when #4937 lands: keep both sides (catalogFileSpecs after LibraryCropDocument.specs order per dev, ids appended, golden regenerated sorted).
+- 2026-10-26T02:46:59Z: heartbeat: #4924,#4937 open, clean, queued in the lane (last merges #5177 02:03Z, #5309 02:44Z); #4938,#4949 stay stacked. Record mirrored to lead/library-catalog-files (the branch Belt watches). Findings 0.
+- Candidate gaps after LC-z: relinked id keeps the old path; re-importing a folder with copy makes new copies.
