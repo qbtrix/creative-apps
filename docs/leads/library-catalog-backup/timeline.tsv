@@ -184,3 +184,4 @@ utc	stage	event	ref	note
 2026-10-26T12:28Z	3	heartbeat	-	resume, #4923 in lane
 2026-10-26T12:40Z	3	heartbeat	-	polling: no change; all slice PRs open, clean, fast-lane; dev-red #5321 open
 2026-10-26T13:03Z	3	heartbeat	-	polling: no change; all slice PRs open, clean, fast-lane; dev-red #5321 open
+2026-10-26T13:22Z	3	heartbeat	-	polling: dev moved to new heads, slice PRs still open and mergeable; dev-red #5321 open
