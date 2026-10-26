@@ -37,6 +37,7 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 02:46Z check: #4894 (HF-m), #4936 (HF-4) and #5092 (HF-z) are still open and queued in the lane (beta, one at a time). Each has its marker; #4894 has its prescreen. All three still merge cleanly with dev 6d5f8b92 (#5309 halo text adapter landed 02:44Z). No needs-fix, needs-rebase or findings. Next check about 03:05Z.
 - 2026-10-24T21:20Z: run act-1a16fbc5164-vi4c. HF-m #4894 (Linux 40035628317 green, 236 lines / 15 files) and HF-z #5092 (Fast-Check marker) are lane-eligible and wait for a batch; #4936 waits on its base, the HF-m branch. No needs-fix, no file-flow findings. The record stays on lead/halo-file-flow: lead/file-flow belongs to the suite lead (#3480).
 - HF-a blocked (2026-10-21T00:13Z): transform:HT-a likely in (#3702 adapter bodies merged), shape-tools:HS-a in review (#3676), placed-images:PH-u not started (PH-a still waiting).
 - 2026-10-21T13:42:11Z check-in: still blocked; placed-images is at Stage 0, PH-a waits on HS-a (#3676), HK-a (key-editing) and PL-a.
