@@ -2,7 +2,7 @@
 
 Issue: #3458 · Packet: docs/blueprints/library/features/cull-finish.md
 Run: act-1a1782c1961-n1cv (line lead, line:library) · resumed 2026-10-26T12:20Z · earlier act-1a175ea5531-x1ci (line lead, line:library) · resumed 2026-10-26T01:59:55Z · earlier act-1a170488aff-41nk (line lead, line:library) · resumed 2026-10-24T23:40Z · earlier act-1a16cc967d9-mcuv, act-1a16953af22-wvhu, act-1a15995d319-aamb
-Stage: 3 polling: DR-u #5130, DR-m #4899/#5100, DR-z #5237/#5240/#5241 open in the lane; code batches held by dev-red #5321 (not Library); checked 19:59Z
+Stage: 3 polling: DR-u #5130, DR-m #4899/#5100, DR-z #5237/#5240/#5241 open in the lane; code batches held by dev-red #5321 (not Library); checked 20:11Z
 Base: origin/dev 8eff8ab85
 Next: lane lands #5130, #4899, then retarget #5100 to dev; #5237 to dev after #5130, #5240 after #5237; Belt-Slice-Done DR-u, DR-m, DR-z on a green library run with each slice's last PR; critics on DR-u screens; Belt-Contact-Sheet
 
@@ -73,4 +73,5 @@ Next: lane lands #5130, #4899, then retarget #5100 to dev; #5237 to dev after #5
 - 2026-10-26T14:30Z Full CI 40328390857 on dev 5f8925a3 red: macOS tests 1/3, SuiteTimelineScrubWindowTests.aScrubRedrawsOnlyThePlayhead (shared timeline, not Library); the Onboarding timeout did not recur. dev-red #5321 stays open, code batches still held; nothing of ours to fix.
 - 2026-10-26T15:15Z Lane sweep 40341940444 (14:41-15:15Z): #5128 and #4923 pending on local-ci/prescreen (supervisor's Mac pre-screen, verify-after mode); #4899, #5130, #5241 eligible but queued behind ~60 PRs while the lane re-checks stale proofs one batch of one at a time (dev changed scripts/ci and ci.yml since); stacked PRs skipped until their base merges, as planned. Nothing for this lead to push; waiting on the lane and the supervisor's pre-screen.
 - 2026-10-26T18:52Z dev-red #5321 closed 18:52Z after full CI 40369651916 green at fef52e66; none of our slice PRs is in it, so no Belt-Slice-Done yet; batches can form again.
+- 2026-10-26T20:11Z lane sweep 40386832050: #4899, #4923 (prescreen now green), #5130, #5241 eligible; #5128 still waiting for local-ci/prescreen; a batch is in flight and 122 ready PRs wait, so landing will take several batches.
 
