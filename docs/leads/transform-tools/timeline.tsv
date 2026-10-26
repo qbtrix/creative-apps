@@ -97,3 +97,4 @@ utc	stage	event	ref	note
 2026-10-22T21:41Z	3	merged	TT-z	#4429 merged 434b1d1d; full CI 39858933900 pending
 2026-10-22T22:09Z	3	poll	TT-u	#4632 #4633 merged; #4625 #4627 closed
 2026-10-22T22:36Z	3	poll	TT-u	#4634 merged; #4626 #4629 closed
+2026-10-26T05:25Z	3	stopped	#4525	run act-1a176a90b4c-u2kx on duplicate issue; #3446 done
