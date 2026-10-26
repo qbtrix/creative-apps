@@ -1,10 +1,11 @@
 // RawDecodePlanTests.swift: how much picture a RAW request decodes (shared-raw
 // SR-3, slice SR-m, journey MJ-SR). The embedded preview stands in for a
 // thumbnail only where it covers the size, a preview drafts at the scale it
-// needs, `.full` is every pixel and never draft, and a camera the system
+// needs, `.fitted` scales to a size but never drafts (Photo past its pixel
+// cap), `.full` is every pixel and never draft, and a camera the system
 // can't develop gives its preview for thumbnails and a refusal otherwise.
 // Written by SR-1/SR-2 against the stubs, turned on by SR-3. Mutations:
-// SuiteImaging.SuiteRaw (`.previewCovers`, `.fullIsNotDraft`).
+// SuiteImaging.RawFormat (`.previewCovers`, `.fullIsNotDraft`, `.fittedIsNotDraft`).
 import CoreRaster
 import Foundation
 import SuiteImaging
@@ -36,6 +37,14 @@ import Testing
         let info = try Self.info()
         #expect(RawDecodePlan.plan(.preview(longestSide: 32), info: info) == .develop(scale: 0.5, draft: true))
         #expect(RawDecodePlan.plan(.preview(longestSide: 4000), info: info) == .develop(scale: 1, draft: true))
+    }
+
+    @Test func fittedScalesButNeverDrafts() throws {
+        let info = try Self.info()
+        #expect(RawDecodePlan.plan(.fitted(longestSide: 32), info: info) == .develop(scale: 0.5, draft: false))
+        #expect(RawDecodePlan.plan(.fitted(longestSide: 4000), info: info) == .develop(scale: 1, draft: false))
+        #expect(RawDecodePlan.plan(.fitted(longestSide: 32), info: try Self.info(developable: false))
+            == .refuse(.undevelopable(camera: "AfterGlow Test")))
     }
 
     @Test func fullIsEveryPixelNeverDraft() throws {

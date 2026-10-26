@@ -3,6 +3,7 @@
 // the registry's camera RAW row (`SuiteImageFormat.cameraRaw`), never a list
 // of this file's. Written by SR-1/SR-2 against the stubs, turned on by SR-3.
 // Mutations: SuiteImaging.RawFormat (`.anyCase`, `.cameraRawOnly`).
+import Foundation
 import SuiteImaging
 import SuiteModel
 import Testing
@@ -32,6 +33,8 @@ import Testing
             == "macOS can't develop raw files from Unreleased X1 yet.")
         #expect(RawRefusal.unavailable.message == "This build can't read raw files. Open it on a Mac.")
         #expect(RawRefusal.tooLarge(pixels: 300_000_000).message == "This raw file is larger than 256 megapixels.")
+        // A caller that shows `localizedDescription` (an open-failure alert, the CLI) gets the sentence.
+        #expect(RawRefusal.unavailable.localizedDescription == "This build can't read raw files. Open it on a Mac.")
     }
 
     @Test func aFormatNamesItsOwnExtension() throws {
