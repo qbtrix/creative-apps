@@ -21,8 +21,9 @@ layer-keys (the viewer drag and keying), core-loop.
 
 **Rule 20.** No Halo transform maths: `HaloTransform+Kernel.swift` maps the
 kernel's `TransformBox` onto the layer's rect and its sampled `scaleX`,
-`scaleY` and `rotation`; the anchor point stays Halo's own rows. `flipHelp`
-is "Flipping isn't in Halo yet."
+`scaleY` and `rotation`; the anchor point stays Halo's own rows. Flip is the
+kernel's (#5281): the flipped box writes a negative Scale on its axis and the
+negated turn, and `flipHelp` is the protocol's nil.
 
 **Render path.** None new: the frame renderer already draws `scaleX`,
 `scaleY` and `rotation` through `HaloMatrix`; a drag previews through
@@ -77,7 +78,7 @@ rotation track has a key of 30 at frame 12 and the base at 0 kept; scale keys
 extension HaloProject: TransformTarget {
     public var transformSelection: TransformBox? { get }   // the selected layer at the playhead, composition pixels
     public var transformHelp: String? { get }              // "Select a layer to transform." / a null or text-only refusal
-    public var flipHelp: String? { get }                   // "Flipping isn't in Halo yet."
+    // flipHelp: the protocol's default, nil (#5281)
     public mutating func setTransform(_ t: TransformBox, name: String, drag: String?) throws
 }
 ```
@@ -115,7 +116,7 @@ Longest chain: HT-1 → HT-2 → HT-3 → HT-4 → HT-7 → HT-8 (6). Chain of 6
 | HT-3 | `HaloViewerHandlesTests`: a corner drag previews through `HaloLiveEdit` and commits once on release; the knob turns the box | the drag commits per sample | – (UI) |
 | HT-4 | `HaloTransformSnapshots`; `RenderBudgetHaloTransformTests.knobDragInThreeBodies` | budget over | – (UI) |
 | HT-5 | `HaloTransformTests`: a turn at frame 12 on an animated rotation adds a key there; on a static one it sets the value; a scale about the centre keeps the centre; a 120-sample drag is one step | a key, a value or a step is wrong | `HaloModel.HaloTransform+Kernel`: base written when animated → `.keysWhenAnimated`; scale about the top-left → `.scaleAboutCentre` |
-| HT-6 | the six specs listed; `transform.flip` is unavailable with `flipHelp`; RJ-H34 passes on Linux | an id is missing | – (registration) |
+| HT-6 | the six specs listed; `transform.flip` mirrors a new solid headless and undo restores the bytes (#5281); RJ-H34 passes on Linux | an id is missing, or the flip is refused | `HaloModel.HaloTransform+Kernel`: flip dropped → `.flipWritesNegativeScale`; mirror not read → `.mirrorReadsNegativeScale` |
 | HT-7 | `testRotateAndScaleInViewer` steps 1 to 4 on live | a step fails | – |
 | HT-8 | `scripts/waves render --dry-run` | status not built | – |
 
@@ -136,4 +137,5 @@ Linux job; HT-u's feel gate and `Mac-Finish:`; HT-z's journey on live. Then
 
 ## Not in this packet
 
-Flips, a draggable anchor point in the viewer, several layers at once.
+A draggable anchor point in the viewer, several layers at once. (Flips
+landed after the packet, #5281.)

@@ -5,5 +5,6 @@
 {"label": "text layers allowed a gradient", "file": "Sources/HaloModel/HaloFill+Kernel.swift", "find": "        case .text: return Self.textFillHelp\n", "replace": "        case .text: return nil\n", "tests": "HaloGradientTests"},
 {"label": "drag key dropped: each move is its own step", "file": "Sources/HaloModel/HaloFill+Kernel.swift", "find": "coalesceKey: key)", "replace": "coalesceKey: nil)", "tests": "HaloGradientTests"},
 {"label": "stroke drawn as the fill's outline, not the band", "file": "Sources/HaloModel/Live/LiveFrameRendering.swift", "find": "let outline = HaloOutlines.strokeOutline(of: item", "replace": "let outline = HaloOutlines.outline(of: item", "tests": "HaloStrokeRenderTests"},
-{"label": "stroke pass skipped: only the fill draws", "file": "Sources/HaloModel/Live/LiveFrameRendering.swift", "find": "Self.strokeFill(item, width: width, height: height, scaleX: sx, scaleY: sy)]", "replace": "nil as PixelBuffer?]", "tests": "HaloStrokeRenderTests"}
+{"label": "stroke pass skipped: only the fill draws", "file": "Sources/HaloModel/Live/LiveFrameRendering.swift", "find": "Self.strokeFill(item, width: width, height: height, scaleX: sx, scaleY: sy)]", "replace": "nil as PixelBuffer?]", "tests": "HaloStrokeRenderTests"},
+{"label": "a mirrored text draws unmirrored: the raster isn't flipped for a negative scale", "file": "Sources/HaloModel/Live/LiveFrameRendering.swift", "find": "if p.scaleY < 0 { px = px.flipped(.vertical) }", "replace": "_ = p.scaleY", "tests": "LiveFrameRenderingTextTests"}
 ]
