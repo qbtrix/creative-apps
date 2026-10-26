@@ -11,6 +11,7 @@
 @testable import LibraryModel
 import CoreRaster
 import CoreRender
+import SuiteImaging
 import Testing
 
 /// A gradient in sRGB bytes: red across, green down, blue fixed at 128, opaque.
@@ -162,6 +163,20 @@ func handHistogram(_ buffer: PixelBuffer) throws -> HistogramBins {
         #expect(rendered != (try HandPass.runByHand(gradient, settings, order: swapped)))
         let curveFirst: [HandPass] = [.whiteBalance, .exposure, .contrast, .highlightsShadows, .whitesBlacks, .curve, .levels]
         #expect(rendered != (try HandPass.runByHand(gradient, settings, order: curveFirst)))
+    }
+
+    /// IM-13: the tone sliders are ToneRules' steps (whites and blacks its two
+    /// levels), then ImagingProgram's levels, curve and saturation; Library
+    /// writes none of its own.
+    @Test func theStepsAreSuiteImagingsTwoLists() throws {
+        let s = everyControlButColor().setting(.saturation, to: -20)
+        let tone = ToneRules.adjustments(s.tone.setting(.saturation, to: 0))
+        var adjust = s.adjustSettings
+        adjust.exposure = 0
+        let shared = ImagingProgram.adjustments(adjust, tone: tone)
+        #expect(LiveDevelop.steps(for: s) == shared)
+        #expect(tone.count == 6 && shared.count == 9)
+        #expect(LiveDevelop.passes(for: s) == shared.map(LiveDevelop.Pass.shared))
     }
 
     @Test func exposurePlusOneDoublesLinearGrey() throws {
