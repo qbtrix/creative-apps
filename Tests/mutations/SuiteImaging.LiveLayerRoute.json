@@ -4,5 +4,5 @@
 {"label": "a faded or blended adjustment layer replaces the picture", "file": "Sources/SuiteImaging/Route/LiveLayerRoute.swift", "find": "                if layer.opacity == 1, layer.blendMode == .normal {", "replace": "                if true {", "tests": "LiveLayerRouteTests"},
 {"label": "a slider step composites the layers again", "file": "Sources/SuiteImaging/Route/LiveLayerRoute.swift", "find": "held.holds(key, on: backend) { return held.surface }", "replace": "held.holds(key, on: backend), false { return held.surface }", "tests": "LiveLayerRouteTests"},
 {"label": "a changed layer keeps the stale composite", "file": "Sources/SuiteImaging/Route/LiveLayerRoute.swift", "find": "(self.key as? Key) == key && self.backend.name == backend.name", "replace": "self.backend.name == backend.name", "tests": "LiveLayerRouteTests"},
-{"label": "a masked adjustment layer draws on the live route", "file": "Sources/SuiteImaging/Route/LiveLayerRoute.swift", "find": "        guard !shown.contains(where: { $0.liveKind == .unsupported }) else { return nil }", "replace": "", "tests": "LiveLayerRouteTests"}
+{"label": "a masked layer draws on the live route", "file": "Sources/SuiteImaging/Route/LiveLayerRoute.swift", "find": "        guard !shown.contains(where: { $0.liveKind == .unsupported }) else { return nil }", "replace": "", "tests": "LiveLayerRouteTests"}
 ]
