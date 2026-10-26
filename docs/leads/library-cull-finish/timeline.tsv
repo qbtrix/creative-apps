@@ -216,3 +216,4 @@
 2026-10-26T18:03Z	3	heartbeat	-	polling: no change; lane queue and prescreen still pending; dev-red #5321 open
 2026-10-26T18:25Z	3	heartbeat	-	polling: no change; lane queue and prescreen still pending; dev-red #5321 open
 2026-10-26T18:37Z	3	heartbeat	-	lane sweep 40375597431: #4899/#5130 wait behind batch-of-one re-checks; #5241 eligible; #5128/#4923 waiting for local-ci/prescreen; dev-red #5321 open
+2026-10-26T18:52Z	3	dev-green	-	dev-red #5321 closed
