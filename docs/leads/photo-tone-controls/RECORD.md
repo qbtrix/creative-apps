@@ -125,3 +125,5 @@ Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #48
 - 05:39Z: #5363 still open (prescreen green, no lane comment, dev 7e13ba02). PT-3, PT-5, PT-7 branches ready; PRs open when it lands.
 
 - 05:55Z: #5363 still open; dev moved to c480d848 (#5239), merges clean with #5363 and PT-5. Waiting on the lane.
+
+- 06:19Z: #5363 still open, no lane comment; dev unchanged at c480d848 since 05:55Z; dev-red #5321 still open. Waiting on the lane.
