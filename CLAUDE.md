@@ -22,12 +22,12 @@ for your PR alone, and you never start one yourself for routine work. So:
   that already builds. A UI mistake the batch gate catches comes back as
   `needs-fix` on your PR; one only the full run sees shows up in the next
   feature CI as a "dev is red" issue whose culprit range names your PR.
-- The `macOS` job uploads the `snapshots` artifact (PNGs written by
-  `Tests/AppSnapshotTests`), and the report-only `macOS journeys` job (its
+- The `macOS tests K/N` jobs upload the `snapshots-K` artifacts (PNGs written
+  by `Tests/AppSnapshotTests`; `macOS` is the gate job over them), and the report-only `macOS journeys` job (its
   own workflow, journeys.yml, which each CI run on `dev` dispatches) clicks
   through every app (`UITests/<X>JourneyTests.swift`), uploading
   whole-window screenshots as `ui-screens`. Find a run with `gh run list --workflow ci.yml --branch dev`
-  (`--workflow journeys.yml` for the journeys), then `gh run download <id> -n snapshots`
+  (`--workflow journeys.yml` for the journeys), then `gh run download <id> -p 'snapshots-*'`
   (`-n ui-screens` from a journeys run). A user-facing
   feature adds or extends its app's journey test (docs/engineering.md,
   Human-like UI tests).
@@ -424,7 +424,8 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
 - A PR that breaks a hard rule (author, size outside the docs tier, protected
   path, a looser app audit) loses the label with a comment saying why and
   waits for review.
-- Full CI (`Linux`; `macOS`, scripts/ci with the snapshots) runs on `dev`
+- Full CI (`Linux`; `macOS`: `macOS compile` then the `macOS tests K/N`
+  shards, scripts/ci with the snapshots) runs on `dev`
   once a feature is built, not per merge: when the supervisor or Belt
   dispatches it, when the lane merges a PR labelled `feature-done` or one
   touching `Sources/*App`, `Sources/SuiteUI`, `Tests/App*` or `UITests`, after
@@ -504,7 +505,7 @@ scripts/install-merge-drivers                # once per clone: .gitattributes me
 bash Tests/merge_drivers/test_merge_drivers.sh # the merge drivers on scratch repos (needs git, jq)
 gh run list --workflow ci.yml --branch dev    # feature CI runs on dev
 gh run list --workflow journeys.yml          # the UI journeys runs that follow them
-gh run download <run-id> -n snapshots        # the PNGs from a macOS CI run
+gh run download <run-id> -p 'snapshots-*'    # the PNGs from a CI run's macOS test shards
 gh run download <run-id> -n ui-screens       # whole-window PNGs from a journeys.yml run
 scripts/ui-test                              # macOS + Xcode + xcodegen: run the UI journeys locally
 scripts/contact-sheet                        # after ui-test: .build/ui-screens/contact-sheet.html, the page to review per run
