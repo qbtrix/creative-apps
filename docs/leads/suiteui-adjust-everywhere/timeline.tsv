@@ -112,3 +112,4 @@ utc	stage	event	ref	note
 19:20Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 17a7848b (#5334 landed); lane lands one PR per batch; ours eligible (marker + prescreen), queued
 19:41Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 17a7848b; lane now runs parallel one-PR batches (12 in flight: p0 then beta by number, at #3651); ours eligible, next in the beta order
 20:00Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 17a7848b unchanged; the same 12 one-PR batches in flight; ours eligible, queued in beta order
+20:20Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 696d37fe (11 PRs landed, #5358..#3651); no batch in flight; ours clean, beta, next in order
