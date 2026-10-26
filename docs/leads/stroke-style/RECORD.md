@@ -1,10 +1,10 @@
 # stroke-style lead record (Design)
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
-Run: act-1a175ee11f8-jfg2 · Started: 2026-10-23 (this run resumed 2026-10-26T02:04:31Z)
-Stage: 3 wave 2: every slice PR is open, clean and labelled fast-lane; the lane holds batches while dev-red #5321 is open (not ours)
+Run: act-1a178669406-n4me · Started: 2026-10-23 (this run resumed 2026-10-26T13:30Z)
+Stage: 3 polling: every slice PR is open, clean (#4916 192 lines/10 files) and labelled fast-lane; the lane forms no batch while dev-red #5321 is open (not ours)
 Base: origin/dev; main verified at d3323f6a
-Next: once #5321 closes and the lane lands our PRs, post Belt-Slice-Done for DK-u and DK-m on the first green design ci.yml run that holds each slice's last PR; DK-z once findings are 5 or fewer
+Next: wait for the lane to land #4916, #5002, #5011 once dev-red #5321 closes, then a green design ci.yml run that holds each slice's last PR: Belt-Slice-Done for DK-u and DK-m; DK-z starts once open findings are 5 or fewer (7 open, all with Fixes lines in those PRs)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -41,6 +41,7 @@ Next: once #5321 closes and the lane lands our PRs, post Belt-Slice-Done for DK-
 - Contract-first waits (rule 12): shape-tools is built, so DK-u and DK-m started on its contract.
 
 ## Open
+- 2026-10-26T13:35Z run act-1a178669406-n4me: asked the supervisor on #3441 whether DK-z may start stacked on #4916/#5011 while its 7 open findings each close with an open PR.
 - dev-red #5321 (range main..cc5c6234a; not ours) holds every batch. Nothing to fix here.
 - Open stroke-style findings past the round cap (#4925 #4926 #4927 #4919 #4940 #4941 #4989 #5009 #5010) are partly fixed in #5002/#5011; the rest go to gaps once those PRs merge.
 - 2026-10-26T02:06:05Z: every open stroke-style finding is fixed by an open PR (#4916, #5002, #5011 Fixes lines); DK-z starts once they land and the combined open count is 5 or fewer.
