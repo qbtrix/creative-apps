@@ -9,7 +9,11 @@
 // active app, so its press is a window-activation click, which a SwiftUI
 // gesture drops unless it opts in (RenderBudgetHarness.swift): the host opts
 // in, as HaloWindowLiveDragTests' does, and the press is placed from the
-// host's frame in window points (#1728). macOS only.
+// host's frame in window points (#1728). Counting starts only after a
+// warm-up scrub and once no body has run for 300 ms: in a cold process (the
+// first body-count suite in a CI test shard) the 300 lanes were still being
+// laid out half a second in, and 18,170 lane bodies landed in the count
+// (#5321). PhotoWindowStrokeTests warms its window the same way. macOS only.
 import AppKit
 import SwiftUI
 import Testing
@@ -33,6 +37,15 @@ extension BodyCountSuites {
             // The ruler runs along the top of the strip, right of the names column (window y is up).
             let box = host.convert(host.bounds, to: nil)
             let start = CGPoint(x: box.minX + SuiteSize.timelineLabelColumn + 40, y: box.maxY - SuiteSize.timelineRuler / 2)
+            // Warm up: one short scrub, then wait until the lanes have stopped laying out, then count.
+            send(.leftMouseDown, at: start, to: window)
+            for i in 1...12 {
+                try await Task.sleep(for: .milliseconds(8))
+                send(.leftMouseDragged, at: CGPoint(x: start.x + 5 * Double(i), y: start.y), to: window)
+            }
+            send(.leftMouseUp, at: CGPoint(x: start.x + 60, y: start.y), to: window)
+            try await settled()
+            scrubs.frames.removeAll()
             let before = (bodies(), host.layouts)
             send(.leftMouseDown, at: start, to: window)
             var xs = [start.x]
@@ -62,6 +75,18 @@ extension BodyCountSuites {
             #expect(runs[3] <= crossed + 2, "the strip ran more than once per frame: \(report)")
             #expect(scrubs.frames.count == crossed, "onScrub calls aren't one per frame crossed: \(report)")
             #expect(zip(scrubs.frames, scrubs.frames.dropFirst()).allSatisfy { $0 != $1 }, "a frame was sent twice: \(report)")
+        }
+
+        /// Returns once no lane, ruler, playhead or strip body has run for 300 ms (10 s at most): a cold
+        /// process lays the 300 lanes out well past the first half second.
+        private func settled() async throws {
+            var last = bodies(), idle = 0
+            for _ in 0..<100 {
+                try await Task.sleep(for: .milliseconds(100))
+                let now = bodies()
+                if now == last { idle += 1 } else { last = now; idle = 0 }
+                if idle == 3 { return }
+            }
         }
 
         /// Lane, ruler, playhead and strip body runs so far; zeros in release, which has no counters.

@@ -1,4 +1,4 @@
-// ToneCommandsTests.swift (tone-controls TC-1 written disabled, TC-6 turns it on):
+// ToneCommandsTests.swift (tone-controls TC-1 written, TC-6 turns it on):
 // the four tone.* commands on a test target with a History. Mutations (TC-6):
 // SuiteImaging.ToneCommands (`.dragIsOneStep`, `.vibranceUnavailable`, `.autoIsOneStep`).
 import CoreRaster
@@ -32,7 +32,7 @@ func toneCatalog() throws -> CommandCatalog<ToneTestTarget> {
     try CommandCatalog(app: "test", ToneCommands.specs(ToneTestTarget.self)) { $0.history }
 }
 
-@Suite(.disabled("waits on TC-6")) struct ToneCommandsTests {
+@Suite struct ToneCommandsTests {
     /// The four ids and kinds; `toneHelp` blocks every one; reset on neutral is unavailable.
     @Test func contractShape() throws {
         let catalog = try toneCatalog()
@@ -69,15 +69,32 @@ func toneCatalog() throws -> CommandCatalog<ToneTestTarget> {
         #expect(doc.undo() && doc.tone?.value(.shadows) == 0 && doc.tone?.value(.temperature) == 35)
     }
 
-    /// Vibrance is refused while it waits; Radius is off at Amount 0. Neither records a step.
+    /// Vibrance is refused with `waiting`'s reason; Radius and Threshold are off at Amount 0. None records a step.
     @Test func vibranceUnavailable() throws {
         let catalog = try toneCatalog()
         var doc = ToneTestTarget()
-        for slider in ["vibrance", "sharpenRadius"] {
+        let reasons = ["vibrance": ToneRules.waiting[.vibrance] ?? "", "sharpenRadius": "Sharpen is off at Amount 0.",
+                       "sharpenThreshold": "Sharpen is off at Amount 0."]
+        for (slider, why) in reasons {
             let params = JSONValue.object(["slider": .string(slider), "value": .number(2)])
-            #expect(throws: CatalogError.self) { try catalog.run("tone.set", params: params, on: &doc) }
+            #expect(throws: CatalogError.unavailable(id: "tone.set", why: why)) { try catalog.run("tone.set", params: params, on: &doc) }
         }
         #expect(doc.history.steps.isEmpty && ToneRules.waiting[.vibrance] != nil)
+        _ = try catalog.run("tone.set", params: .object(["slider": .string("sharpenAmount"), "value": .number(50)]), on: &doc)
+        _ = try catalog.run("tone.set", params: .object(["slider": .string("sharpenRadius"), "value": .number(2)]), on: &doc)
+        #expect(doc.history.steps == ["Amount", "Radius"] && doc.tone?.value(.sharpenRadius) == 2)
+    }
+
+    /// Each intent's command is the id and params its spec reads; a nil drag and a nil group are omitted.
+    @Test func intentCommands() {
+        let set = ToneIntent.set(.shadows, 10, drag: "k").command
+        #expect(set.id == "tone.set" && set.params == .object(["slider": .string("shadows"), "value": .number(10), "drag": .string("k")]))
+        let typed = ToneIntent.set(.contrast, 20, drag: nil).command
+        #expect(typed.params == .object(["slider": .string("contrast"), "value": .number(20)]))
+        let reset = ToneIntent.reset(.whiteBalance).command
+        #expect(reset.id == "tone.reset" && reset.params == .object(["group": .string("whiteBalance")]))
+        #expect(ToneIntent.reset(nil).command.params == .object([:]))
+        #expect(ToneIntent.auto.command.id == "tone.auto" && ToneIntent.auto.command.params == .object([:]))
     }
 
     /// Auto records one "Auto Tone" step; each intent's command runs and records its step.
@@ -86,9 +103,9 @@ func toneCatalog() throws -> CommandCatalog<ToneTestTarget> {
         var doc = ToneTestTarget()
         #expect(try catalog.run("tone.auto", params: .object([:]), on: &doc).undoStep == "Auto Tone")
         #expect(doc.history.steps == ["Auto Tone"] && doc.tone?.value(.temperature) == 12)
-        for intent in [ToneIntent.set(.contrast, 20, drag: nil), .set(.shadows, 10, drag: "k"), .reset(.tone)] {
+        for intent in [ToneIntent.set(.contrast, 20, drag: nil), .set(.shadows, 10, drag: "k"), .reset(.tone), .reset(nil)] {
             _ = try catalog.run(intent.command.id, params: intent.command.params, on: &doc)
         }
-        #expect(doc.history.steps == ["Auto Tone", "Contrast", "Shadows", "Reset Tone"])
+        #expect(doc.history.steps == ["Auto Tone", "Contrast", "Shadows", "Reset Tone", "Reset Tone"] && doc.tone == .neutral)
     }
 }

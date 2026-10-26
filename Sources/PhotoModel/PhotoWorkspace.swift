@@ -22,6 +22,7 @@
 // `drag(from:to:)`; a tool that does nothing there stays disabled with
 // `unavailableHelp` (PhotoToolsTests checks this).
 import CoreRaster
+import SuiteImaging
 import SuiteKernel
 
 /// The tools on Photo's floating tool palette.
@@ -31,7 +32,7 @@ public enum PhotoTool: String, CaseIterable, Sendable {
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every other tool works: the canvas sends its drags to
     /// `drag`. The eyedropper's text is the fallback; the workspace's
-    /// `toolHelp` asks its sampling service instead.
+    /// `toolHelp` enables it, since it reads the kernel's mean.
     public var unavailableHelp: String? {
         switch self {
         case .eyedropper: "Not built yet (PV-9)."
@@ -114,11 +115,11 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var masks: [PhotoLayer.ID: TiledPixels] = [:]
     /// Brush and eraser paint on the selected layer's mask (PhotoMask.swift).
     public internal(set) var editsMask = false
-    /// The crop's aspect lock (PhotoCropSize.swift).
+    /// The crop's aspect lock (PhotoCropTool+Kernel.swift).
     public internal(set) var cropAspect = CropAspect.free
     /// Free Transform in progress (PhotoTransform.swift).
     public internal(set) var transformDraft: TransformDraft?
-    /// The eyedropper's sample size (PhotoEyedropper.swift).
+    /// The eyedropper's sample size (PhotoSample+Kernel.swift).
     public internal(set) var sampleSize = SampleSize.point
     /// The Export sheet's last choices (PhotoExportOptions.swift).
     public internal(set) var exportOptions = ExportOptions()
@@ -138,6 +139,8 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var progress: String?
     /// The file flow's recents, open path and requests for the window (PhotoFileFlow+Kernel.swift).
     public internal(set) var fileFlow = PhotoFileFlowState()
+    /// The layer style panel's open section, nil when closed (PhotoStyle+Kernel.swift).
+    public internal(set) var stylePanel: StyleKind?
     /// The document's paths and the Pen's view state (PhotoPaths+Kernel.swift).
     var pathState = PhotoPathState()
     /// Test hook: how many times `layerGeometryChanged` ran, and its last call
@@ -393,7 +396,7 @@ extension PhotoWorkspace: Equatable {
             && lhs.selectionOptions == rhs.selectionOptions && lhs.editsMask == rhs.editsMask
             && lhs.cropAspect == rhs.cropAspect && lhs.transformDraft == rhs.transformDraft
             && lhs.sampleSize == rhs.sampleSize && lhs.exportOptions == rhs.exportOptions
-            && lhs.exportRun == rhs.exportRun
+            && lhs.exportRun == rhs.exportRun && lhs.stylePanel == rhs.stylePanel
             && lhs.fileKind == rhs.fileKind && lhs.savedStepID == rhs.savedStepID
             && lhs.statusMessage == rhs.statusMessage && lhs.textBox == rhs.textBox && lhs.progress == rhs.progress && lhs.masks == rhs.masks && lhs.pixels == rhs.pixels
             && lhs.pathState == rhs.pathState

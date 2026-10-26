@@ -12,12 +12,15 @@ extension HaloProject {
     /// (gradient-fill HG-7), its nine `stroke.*` commands (stroke-style HK-6), the History panel's
     /// `history.read` and `history.jump` (autosave-history HA-6), the six `transform.*` commands on the
     /// selected layer (transform HT-6), `frameRateSpecs` (frame-rates FR-8b), the five `place.*`
-    /// commands (placed-images PH-6), the eleven `style.*` commands (layer-styles HY-1), then `windowSpecs`.
+    /// commands (placed-images PH-6), the eleven `style.*` commands (layer-styles HY-1), the suite's five
+    /// `file.*` recents, Open In and drop commands (file-flow HF-3, whose `file.open-recent` takes a recent
+    /// file's id in place of the path `.openRecent` names), then `windowSpecs`.
     public static let commandSpecs: [CommandSpec<HaloProject>] =
-        HaloCommand.allCases.map(spec(for:)) + ShapeCommands.specs(HaloProject.self)
+        HaloCommand.allCases.map(spec(for:)).filter { $0.id != "file.open-recent" } + ShapeCommands.specs(HaloProject.self)
         + GradientCommands.specs(HaloProject.self) + StrokeCommands.specs(HaloProject.self)
         + HistoryCommands.specs(HaloProject.self) + TransformCommands.specs(HaloProject.self) + frameRateSpecs
-        + PlaceCommands.specs(HaloProject.self) + StyleCommands.specs(HaloProject.self) + windowSpecs
+        + PlaceCommands.specs(HaloProject.self) + StyleCommands.specs(HaloProject.self)
+        + FileFlowCommands.specs(HaloProject.self) + windowSpecs
 
     /// The render sheet's Choose… and the unsaved alert's Save and Don't Save (CS-7): headless they check
     /// availability and change nothing, since the panel and the held command are the window's.
