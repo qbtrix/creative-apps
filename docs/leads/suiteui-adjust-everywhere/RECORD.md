@@ -151,3 +151,8 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 
 - dev still at 3e26fbe4; wave 2 (#5064, #5233, #5235, #5236) still open with fast-lane, none merged. Wave 3 waits on them. No needs-fix or needs-rebase.
 - 0 open findings. Stage: 3 wave 3 (waiting for wave 2 to land).
+
+### 2026-10-26T08:39Z check-in
+
+- dev at 1960c2d9 (#4956 landed, not ours). Wave 2 (#5064, #5233, #5235, #5236) still open. #5064 checked: mergeable clean, Head marker matches bfa7700e, local-ci/prescreen success, no lane comment since the 10-24 label. The lane is landing one PR per batch (lane/batch-20261026083929 holds #5065 only), so wave 2 is queued behind other beta PRs, not blocked. No needs-fix or needs-rebase.
+- 0 open findings. Stage: 3 wave 3 (waiting for wave 2 to land).
