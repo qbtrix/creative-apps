@@ -43,6 +43,13 @@ Loop: v3 (the packet has a `## Slices` table).
 
 - 2026-10-24T22:21:55Z: act-1a16fe1fa9f-sqqi wrote its first hour to the stale lead/export-pack record (FV-u Belt-Slice-Done posted 21:50Z) and pushed a duplicate StageRasterizer.frame onto #4854; reverted #4854 to the batch-tested 565669e7. #5025 (nour's fix round 1) stays the frame fix and keeps its Belt-Lead line. From here this record is the only one.
 - 2026-10-24: the FV-u budget test hang is #4852's own defect (stack: FlareFileDialogs.chooseFolder from startExport), not a flake: fixed on its branch rather than waiting for the bisect's needs-fix.
+- 2026-10-26, Packet-Review 2 (comment 6407878783), rule 24:
+  1. StageRasterizer.frame (blocker): already done in #5025; the protocol default stays as the `videoUnbuiltReason` hook. No plan change.
+  2. setSize carries SuiteExportSize (blocker): already done in #5025 (`FlareIntent.setSize`, `setExportSize`). No plan change.
+  3. GIF rates over 50 (blocker): applied in #5025. `exportProblem` refuses a GIF over 50 fps with "A GIF runs at 1 to 50 frames a second.", and the GIF stepper caps at 50. The test is `aGIFAbove50FramesASecondIsRefusedButMP4IsNot`, with 2 mutations in FlareModel.FlareExport.json.
+  4. Headless GIF/MP4 through writeVideo (major): deferred to gap #5380. It needs a rasterizer injected into headless, which is beyond FV-z's cap. RJ-F07 and RJ-F08 stay pending.
+  5. Packet journey text (major): applied in #4854. The steps now name `-FlareSample bounce` (24 fps, 48 frames), scene-1.gif and scene-1.mp4, matching the journey test.
+  6. FlareVideoWriteTests.cost (major): deferred to gap #5381. The perf list is supervisor-only, and a timing test outside it would run in the gate.
 
 ## Open
 - shell-media (docs/blueprints/suite/features/shell-media.md) is `planned` with feature_issue "file when ready"; SM-a and SM-w are not on dev. All four slices wait on it. Noted on #3481.
