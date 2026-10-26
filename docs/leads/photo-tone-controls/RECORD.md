@@ -120,3 +120,4 @@ Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #48
 - 04:28Z: #5363 still waits on the pre-screen (no status, no comments); dev at 75292afd. Next check 04:48Z.
 - 04:49Z: #5363 still waits on the pre-screen; the lane landed #5154 (dev 999895c8). Next check 05:09Z.
 - 05:11Z: #5363 got local-ci/prescreen success at 05:05Z (compile + every Model suite). Awaiting the lane sweep; next check 05:21Z.
+- 05:22Z: #5363 has its pre-screen but no lane decision yet; the lane landed #4948 (dev 7e13ba02). Next check 05:37Z.
