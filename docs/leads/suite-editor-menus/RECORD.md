@@ -250,3 +250,7 @@ Still unbatched: #4988 (e986396), #5364 (4073e00) and #4999 (941da48). All three
 ## 2026-10-26T10:20:20Z poll
 
 Still unbatched: #4988 (e986396), #5364 (4073e00) and #4999 (941da48), each open and clean with fast-lane and beta and no fix labels. Since the last poll, dev has landed #5163 (2eab5ae, from batch 2042459). No lane/batch-* branch is in flight. The supervisor question on #3774 is still unanswered. #5164 and #5000 still wait on their bases. Next: poll in 20 minutes.
+
+## 2026-10-26T10:43:04Z poll
+
+Still unbatched: #4988 (e986396), #5364 (4073e00) and #4999 (941da48), with their heads unchanged. Since the last poll, dev has landed #5778 (quarantine extension) and #5725 (lane quarantine-skip fix, f3af1c0). lane/batch-20261026102509 (bdde122) holds only #5266, none of ours. The supervisor question on #3774 is still unanswered. #5164 and #5000 still wait on their bases. Next: poll in 20 minutes.
