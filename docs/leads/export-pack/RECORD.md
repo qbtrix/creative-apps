@@ -17,6 +17,7 @@ Next: post Belt-Slice-Done as PRs merge
 - 2026-10-26T04:01:17Z heartbeat: #5043 needs-fix (FormatListRatchet: gallery listed formats) fixed at d32cc2e2a, formats now from ExportFormats; #5065 #5104 #5106 restacked, gate PASS, Heads moved
 - 2026-10-26T04:22:59Z heartbeat: all PRs open and clean, no labels; batches held while dev-red #5321 is open (not ours)
 - 2026-10-26T04:53:11Z heartbeat: all PRs open and clean, no labels
+- 2026-10-26T05:15:11Z heartbeat: all open PRs clean, no needs-fix/needs-rebase; #5297/#5299 over the size cap until #5295 lands; dev-red #5321 open (not ours)
 
 ## Run act-1a16fe1fa73-5x3s decisions
 - 22:59Z: the 22:27Z poll was one-shot, so no heartbeat ran from 22:28Z to 22:59Z. Each poll now schedules the next one 15 min out.
