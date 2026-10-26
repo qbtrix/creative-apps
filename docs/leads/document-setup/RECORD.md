@@ -21,9 +21,9 @@ Next: lane merges DS-photo #4901, DS-design #4887, DS-halo #4918, DS-flare #4891
 | DS-m | DocumentSetup + commands bodies, mutation plans | DS-3, DS-4 | – | DS-a | false | 0 | done #4184 | – | – |
 | DS-u | shared NewDocumentSheet in the gallery; journey + render budget | DS-5, DS-6 | SuiteJourneyTests+DocumentSetup | DS-a, frame-rates:FR-u, area-selection:AR-u | true | 0 | done #4309 c0f2c506 | 39746353013 | wanted |
 | DS-photo | Photo new image on the setup | DS-7, DS-8 | PhotoJourneyTests+Documents | DS-u, DS-m, CB-s, AC-zoom, CB-photo | true | 0 | pr #4901 | – | – |
-| DS-design | Design new document on the setup | DS-9, DS-10 | DesignJourneyTests+Page | DS-u, DS-m, CB-design | true | 0 | pr #4887 (dev merged in, head 2d92107d, clean) | – | – |
+| DS-design | Design new document on the setup | DS-9, DS-10 | DesignJourneyTests+Page | DS-u, DS-m, CB-design | true | 0 | done: merged #4887, Slice-Done run 40408730728 | – | – |
 | DS-halo | Halo composition settings on the setup | DS-11, DS-12 | HaloJourneyTests+Settings | DS-a (DS-11); DS-u, DS-m, FR-halo, UP-halo, CB-halo (DS-12) | true | 0 | pr #4918 | – | – |
-| DS-flare | Flare document setup on the setup | DS-13, DS-14 | FlareJourneyTests+NewSheet | DS-u, DS-m, FR-flare, CB-flare | true | 0 | pr #4891 | – | – |
+| DS-flare | Flare document setup on the setup | DS-13, DS-14 | FlareJourneyTests+NewSheet | DS-u, DS-m, FR-flare, CB-flare | true | 0 | done: merged #4891, Slice-Done run 40408730728 | – | – |
 | DS-z | delete old sheets; status built; feature-done | DS-15, DS-16 | – | DS-halo, DS-flare, DS-photo, DS-design | true | 0 | blocked | – | – |
 
 ## Tasks
@@ -162,3 +162,4 @@ Next: lane merges DS-photo #4901, DS-design #4887, DS-halo #4918, DS-flare #4891
 - 2026-10-26T21:35Z (act-1a177ff0916-4jm7): poll: dev 3ebc8d43; #4901 needs-rebase: merged dev into DS-photo (25847725, golden file.new summary resolved), no swift here so the lane's Linux run is its proof; footers removed from #4901 and #4887; DS-z waits on #4918 and #4891
 - 2026-10-26T21:50Z (act-1a177ff0916-4jm7): poll: dev c4cf4a75; DS-design #4887 and DS-flare #4891 merged (00b6f85f, 7b0f5eac); Belt-Slice-Done waits on a green ci.yml containing them; DS-z waits on #4918 (DS-halo); #4901 waits on the lane's Linux run
 - 2026-10-26T22:11Z (act-1a177ff0916-4jm7): poll: dev c4cf4a75; no tracked merges; #4901 DS-photo, #4918 DS-halo open; no green ci.yml yet contains 00b6f85f/7b0f5eac for DS-design/DS-flare Slice-Done
+- 2026-10-26T22:29Z (act-1a177ff0916-4jm7): poll: dev 9810d71b; Belt-Slice-Done + Mac-Finish-Wanted posted for DS-design (#4887) and DS-flare (#4891) on run 40408730728 (green Linux, dev c4cf4a75); #4901 DS-photo, #4918 DS-halo open; DS-z waits on #4918
