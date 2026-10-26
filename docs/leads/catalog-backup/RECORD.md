@@ -1,8 +1,8 @@
 # catalog-backup lead record
 
 Issue: #3788 · Packet: docs/blueprints/library/features/catalog-backup.md
-Run: act-1a175ea5531-x1ci (line lead, line:library) · resumed 2026-10-26T01:59:55Z · earlier act-1a1695ec091-ilfv · Started: 2026-10-23T15:31:04Z (relaunch; earlier runs act-1a15f2277a5-6xyv)
-Stage: 3 wave 4: BK-z #4923 ready (prescreen green, 13 files +229/-17); code batches held by dev-red #5321 (macOS, not Library); checked 2026-10-26T11:44Z
+Run: act-1a1782c1961-n1cv (line lead, line:library) · resumed 2026-10-26T12:20Z · earlier act-1a175ea5531-x1ci (line lead, line:library) · resumed 2026-10-26T01:59:55Z · earlier act-1a1695ec091-ilfv · Started: 2026-10-23T15:31:04Z (relaunch; earlier runs act-1a15f2277a5-6xyv)
+Stage: 3 polling: BK-z #4923 in the lane at 3c50a2da (feature-done); code batches held by dev-red #5321 (not Library); checked 12:28Z
 Base: 8eff8ab85 (origin/dev)
 Next: lane lands #4923 once dev-red clears; Belt-Slice-Done BK-z on a green library run containing it; critics on BK-z screens; Mac-Finish-Wanted BK-z; Belt-Contact-Sheet
 
@@ -37,6 +37,7 @@ Next: lane lands #4923 once dev-red clears; Belt-Slice-Done BK-z on a green libr
 - Base and PR target are dev, not main (packets live on dev; the lane merges into dev).
 - BK-1 edits SuiteModel, outside line:library: the packet assigns it (rule 20, the rotation is a store service), so it is built here.
 - 2026-10-26T01:59:55Z (run act-1a175ea5531-x1ci): main verified at d3323f6a. lead/catalog-backup rebased onto main (brief rule 4) and mirrors this record. #4923 is now within the cap (13 files, 246 lines). Findings with Feature: catalog-backup: 0.
+- 2026-10-26T12:28Z (run act-1a1782c1961-n1cv): main verified at d3323f6a. Re-read every PR: all slice PRs are open, clean and in the lane with proof on their heads (#5130's head c9d68d72 has the lane's green Linux check 40109534004). dev-red #5321 (Onboarding test timeouts, not Library) still open, so code batches wait. Open findings for this feature: 0. Nothing left to build; polling every 10 min.
 
 ## Wire
 - [ ] file-flow:LF-m (LF-m 7/8 on dev): BK-5m backs up after the catalog save path as it stands; re-check once LF-m is done.
