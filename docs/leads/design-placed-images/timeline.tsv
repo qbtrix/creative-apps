@@ -253,3 +253,4 @@ utc	stage	event	ref	note
 2026-10-26T22:01Z	fix	needs-rebase	#4922	lane: golden design.list-commands.json conflicts with dev (file.new summary); merged origin/dev, kept place.* + dev summary; scripts/ci --changed running
 2026-10-26T22:10Z	fix	pushed	#4922	dev merged in, scripts/ci --changed CI: PASS, pushed 5a06395b, Head: moved; waiting for lane to drop needs-rebase
 2026-10-26T22:24Z	heartbeat	waiting	#5321	dev-red #5321 open; #4922 at 5a06395b awaits lane sweep to drop needs-rebase; #4963 #4964 #5001 unchanged since 13:24Z; findings >5, PD-z held
+2026-10-26T22:50Z	PD-m	needs-rebase fixed	#4922	DesignSVG mutation plan union; CI: PASS; Head e8e62394
