@@ -238,3 +238,7 @@ No dev merges since 07:45. Ours are still unbatched after about 6h (open, clean,
 ## 2026-10-26T09:12:58Z poll
 
 The PRs are unchanged and there is no supervisor answer yet. Dev shows the cause: while dev was red, the lane held the whole queue. red_scope ran in a subshell, so its scratch clone was gone by the time the scope was read, and the scope came out empty on Linux. The fixes are 3a2010d and be5f2c0 (08:53) and #5383 (1b843d1, 09:12). The next sweeps should batch #4988, #5364 and #4999. Next poll in 20 min.
+
+## 2026-10-26T09:35:16Z poll
+
+The PRs are unchanged: no batch, no new check on #4988. The only dev commit is c176d2c (Photo, 09:34). There is no supervisor answer yet. Next poll in 20 min.
