@@ -161,3 +161,4 @@ Next: lane merges DS-photo #4901, DS-design #4887, DS-halo #4918, DS-flare #4891
 - 2026-10-26T21:32Z (act-1a177ff0916-4jm7): poll: dev 3ebc8d43; dev unchanged; DS-z (b0369b78) waits on #4918 and #4891
 - 2026-10-26T21:35Z (act-1a177ff0916-4jm7): poll: dev 3ebc8d43; #4901 needs-rebase: merged dev into DS-photo (25847725, golden file.new summary resolved), no swift here so the lane's Linux run is its proof; footers removed from #4901 and #4887; DS-z waits on #4918 and #4891
 - 2026-10-26T21:50Z (act-1a177ff0916-4jm7): poll: dev c4cf4a75; DS-design #4887 and DS-flare #4891 merged (00b6f85f, 7b0f5eac); Belt-Slice-Done waits on a green ci.yml containing them; DS-z waits on #4918 (DS-halo); #4901 waits on the lane's Linux run
+- 2026-10-26T22:11Z (act-1a177ff0916-4jm7): poll: dev c4cf4a75; no tracked merges; #4901 DS-photo, #4918 DS-halo open; no green ci.yml yet contains 00b6f85f/7b0f5eac for DS-design/DS-flare Slice-Done
