@@ -1,0 +1,16 @@
+[
+  {
+    "label": ".overlapKeepsMax: overlapping dabs summed instead of keeping the larger coverage",
+    "file": "Sources/SuiteKernel/Stroke/DabCoverage.swift",
+    "find": "values[i] = max(values[i], d.values[k])",
+    "replace": "values[i] = min(1, values[i] + d.values[k])",
+    "tests": "DabCoverageTests/overlappingDabsKeepTheMax"
+  },
+  {
+    "label": ".boundsHoldDabs: the grid's far edge one pixel short clips the outermost dab",
+    "file": "Sources/SuiteKernel/Stroke/DabCoverage.swift",
+    "find": "(x1, y1) = (max(x1, d.originX + d.width), max(y1, d.originY + d.height))",
+    "replace": "(x1, y1) = (max(x1, d.originX + d.width - 1), max(y1, d.originY + d.height - 1))",
+    "tests": "DabCoverageTests/boundsHoldEveryDab"
+  }
+]

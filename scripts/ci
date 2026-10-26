@@ -75,14 +75,15 @@
 # docs/blueprints/suite/feature-map.json, and each jobs.md renders without
 # being written (the Generated workflow writes them on dev).
 #
-# The fixture tests: Tests/contact_sheet, audit_lower, test_died, ci_findings, jetsam,
+# The fixture tests: Tests/contact_sheet, audit_lower, test_died, ci_findings, jetsam, roadmap_numbers,
 # sample_surfaces, test_scope and bump_core test the scripts of the same names (some need jq).
 #
 # The journey quarantine check runs Tests/quarantine, then scripts/quarantine
 # check on UITests/quarantine.json: every entry names a journey that exists in
 # UITests/, an owner issue (#<number>, open when gh can tell), a reason, and
 # an expiry no more than 7 days out that hasn't passed. scripts/ui-test skips
-# the live entries. Needs jq.
+# the live entries, and Tests/ui_test checks it skips the local-key journeys
+# on hosted runners only. Needs jq.
 #
 # The mutation anchors check runs Tests/mutate, then scripts/mutate --validate:
 # every `find` in Tests/mutations/*.json occurs exactly once in its file, so a
@@ -397,14 +398,19 @@ echo "== test died (Tests/test_died)"
 bash Tests/test_died/test_test_died.sh || fail "test died: scripts/test-died broke its fixture test"
 echo "== ci findings (Tests/ci_findings)"
 bash Tests/ci_findings/test_ci_findings.sh || fail "ci findings: scripts/ci-findings broke its stub-gh tests"
+echo "== journeys wait (Tests/journeys_wait)"
+bash Tests/journeys_wait/test_journeys_wait.sh || fail "journeys wait: scripts/journeys-wait broke its decision tests"
 echo "== jetsam summary (Tests/jetsam)"
 bash Tests/jetsam/test_jetsam_summary.sh || fail "jetsam summary: scripts/jetsam-summary broke its fixture test"
+echo "== roadmap numbers (Tests/roadmap_numbers)"
+bash Tests/roadmap_numbers/test_roadmap_numbers.sh || fail "roadmap numbers: scripts/roadmap-numbers broke its fixture test"
 echo "== sample surfaces (Tests/sample_surfaces)"
 bash Tests/sample_surfaces/test_sample_surfaces.sh || fail "sample surfaces: scripts/sample-surfaces broke its fixture test"
 echo "== test scope (Tests/test_scope)"
 bash Tests/test_scope/test_test_scope.sh || fail "test scope: scripts/test-scope or Tests/perf-suites.txt broke its tests"
 echo "== journey quarantine (UITests/quarantine.json)"
 bash Tests/quarantine/test_quarantine.sh || fail "journey quarantine: scripts/quarantine broke its fixture test"
+bash Tests/ui_test/test_local_keys.sh || fail "local-key journeys: scripts/ui-test no longer skips them on hosted runners only"
 scripts/quarantine check || fail "journey quarantine: fix, renew or remove the entries above (the supervisor edits UITests/quarantine.json)"
 echo "== bump core (Tests/bump_core)"
 bash Tests/bump_core/test_bump_core.sh || fail "bump core: scripts/bump-core broke its tests"

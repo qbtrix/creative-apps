@@ -6,7 +6,9 @@
 // the before list back and redo the after list (FC-3), and undoing a delete
 // selects the deleted collection again when it was selected (FC-9). A drop's
 // "Import" step (LF-3) takes its photos out on undo and adds them back,
-// selected, on redo. Edits sharing an open coalesce key (one slider drag) stay
+// selected, on redo. A "Delete Rejects" step (DR-6) holds the photos it
+// trashed: undo puts each file back and the photo at its index, redo trashes
+// the ones that came back again. Edits sharing an open coalesce key (one slider drag) stay
 // one step. The 100-step limit is the kernel's. Undo and redo never move the
 // loupe (#426). Linux-safe.
 
@@ -14,7 +16,8 @@ import SuiteKernel
 
 /// One step's payload: the photos to put back, for a collections step
 /// your collections before and after it (nil on a photo step), and for an
-/// import step (LF-3) the photos its move takes out or adds back.
+/// import step (LF-3) the photos its move takes out or adds back, and for a
+/// Delete Rejects step (DR-6) the photos to put back or to trash again.
 public struct CatalogChange: Hashable, Sendable {
     public internal(set) var photos: [PhotoItem]
     public internal(set) var collectionsBefore: [UserCollection]?
@@ -24,11 +27,18 @@ public struct CatalogChange: Hashable, Sendable {
     public internal(set) var selectedBefore: String?
     public internal(set) var removing: [PhotoItem]?
     public internal(set) var adding: [PhotoItem]?
+    /// Photos a Delete Rejects step took out, which applying the step puts back.
+    public internal(set) var trashed: [TrashedPhoto]?
+    /// Photos an undone Delete Rejects step put back, which applying it trashes again.
+    public internal(set) var untrashed: [TrashedPhoto]?
 
     init(
         photos: [PhotoItem], collectionsBefore: [UserCollection]? = nil, collectionsAfter: [UserCollection]? = nil,
-        selectedBefore: String? = nil, removing: [PhotoItem]? = nil, adding: [PhotoItem]? = nil
+        selectedBefore: String? = nil, removing: [PhotoItem]? = nil, adding: [PhotoItem]? = nil,
+        trashed: [TrashedPhoto]? = nil, untrashed: [TrashedPhoto]? = nil
     ) {
+        self.trashed = trashed
+        self.untrashed = untrashed
         self.photos = photos
         self.collectionsBefore = collectionsBefore
         self.collectionsAfter = collectionsAfter
@@ -142,7 +152,9 @@ extension LibraryCatalog {
     ) {
         var kernel = history.kernel
         let current = items
+        let trash = services.trash
         var applied: CatalogChange?
+        var trashing: (done: [TrashedPhoto], failed: [String])?
         let moved = move(&kernel) { change in
             applied = change
             let ids = Set(change.photos.map(\.id))
@@ -151,6 +163,13 @@ extension LibraryCatalog {
             let out = Set((change.removing ?? []).map(\.id))
             swapped.adding = change.removing.map { _ in current.filter { out.contains($0.id) } }
             swapped.removing = change.adding
+            if let trashed = change.trashed {
+                trashing = Self.putBack(trashed, with: trash)
+                (swapped.trashed, swapped.untrashed) = (nil, trashing?.done)
+            } else if let untrashed = change.untrashed {
+                trashing = Self.trashAgain(untrashed, in: current, with: trash)
+                (swapped.trashed, swapped.untrashed) = (trashing?.done, nil)
+            }
             return swapped
         }
         guard moved, let applied else { return }
@@ -164,6 +183,61 @@ extension LibraryCatalog {
             appendImported(adding)
             select(Set(adding.map(\.id)))
         }
+        if let trashing {
+            if applied.trashed != nil { insertPutBack(trashing.done) } else { takeOutTrashed(trashing.done) }
+            cullError = trashing.failed.isEmpty ? nil : trashing.failed.joined(separator: " ")
+        }
+    }
+
+    /// Takes the trashed photos out and remembers their paths, so a re-import skips them.
+    mutating func takeOutTrashed(_ trashed: [TrashedPhoto]) {
+        excludedPaths.formUnion(trashed.compactMap(\.photo.path))
+        removePhotos(Set(trashed.map(\.photo.id)))
+    }
+
+    /// Puts the photos whose files came back at their indices, lowest first, and forgets their paths.
+    private mutating func insertPutBack(_ back: [TrashedPhoto]) {
+        for item in back.sorted(by: { $0.index < $1.index }) {
+            items.insert(item.photo, at: min(max(item.index, 0), items.count))
+            if let path = item.photo.path { excludedPaths.remove(path) }
+        }
+        recount()
+        rebuildOrder()
+        select(selection)
+        saveRevision += 1
+    }
+
+    /// Moves each file back from the Trash; the ones that came back, and a line per one that didn't.
+    private static func putBack(_ trashed: [TrashedPhoto], with trash: any PhotoTrashing)
+        -> (done: [TrashedPhoto], failed: [String]) {
+        var done: [TrashedPhoto] = [], failed: [String] = []
+        for item in trashed {
+            if let trashedPath = item.trashedPath, let path = item.photo.path {
+                do { try trash.putBack(trashedPath, to: path) } catch {
+                    failed.append(trashFailure("Couldn't put back", item.photo, error))
+                    continue
+                }
+            }
+            done.append(item)
+        }
+        return (done, failed)
+    }
+
+    /// Trashes again the photos an undo put back, each at its index in `current`.
+    private static func trashAgain(_ photos: [TrashedPhoto], in current: [PhotoItem], with trash: any PhotoTrashing)
+        -> (done: [TrashedPhoto], failed: [String]) {
+        let ids = Set(photos.map(\.photo.id))
+        var done: [TrashedPhoto] = [], failed: [String] = []
+        for (index, photo) in current.enumerated() where ids.contains(photo.id) {
+            guard let path = photo.path else {
+                done.append(TrashedPhoto(photo: photo, index: index, trashedPath: nil))
+                continue
+            }
+            do { done.append(TrashedPhoto(photo: photo, index: index, trashedPath: try trash.moveToTrash(path))) } catch {
+                failed.append(trashFailure("Couldn't move", photo, error))
+            }
+        }
+        return (done, failed)
     }
 
     /// Takes the photos with `ids` out (an import's undo); a loupe on one of them goes back to the grid.
