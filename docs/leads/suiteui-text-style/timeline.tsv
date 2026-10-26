@@ -186,3 +186,4 @@ utc	stage	event	ref	note
 2026-10-26T22:37:48Z	3	poll	all	20-min poll: #4958 #5047 #5226 #5772 queued in lane; stacked PRs wait; no supervisor reply; 0 findings
 2026-10-26T22:58:00Z	3	poll	all	20-min poll: #4958 #5047 #5226 #5772 queued in lane; stacked PRs wait; no supervisor reply; 0 findings
 2026-10-26T23:18:14Z	3	poll	all	20-min poll: #4958 #5047 #5226 #5772 queued in lane; stacked PRs wait; no supervisor reply; 0 findings
+2026-10-26T23:30:04Z	3	lane	all	lane sweep 40416936117: #4958 #5772 eligible; #5047 (31b358be) and #5226 (b406cca0) pending on local-ci/prescreen for their merged heads (red=[], cancelled check not counted); 98 ready PRs queued
