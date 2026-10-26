@@ -136,7 +136,8 @@ public enum HaloFixtures {
         case .y, .anchorY: Double(seed % 1080)
         case .scaleX, .scaleY: Double(1 + seed % 2)
         case .rotation: Double(seed % 360)
-        case .opacity, .trimStart, .trimEnd, .trimOffset: Double(seed % 2)
+        case .opacity, .trimStart, .trimEnd, .trimOffset, .shadowOpacity, .glowOpacity: Double(seed % 2)
+        case .shadowDistance, .shadowSize, .glowSize: Double(seed % 250)
         }
     }
 }

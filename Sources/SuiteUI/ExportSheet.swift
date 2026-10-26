@@ -1,5 +1,6 @@
 // ExportSheet.swift: SuiteExportSheet (EK-30), drawn over ExportSheetRows, a
-// readout of the kernel's ExportRun: Format chips, Size (unless the host draws
+// readout of the kernel's ExportRun: Format chips (one row of equal chips up
+// to four formats, else rows of three: formatColumns), Size (unless the host draws
 // its own scale), (when the format takes one) Quality and (when the host passes
 // a policy) Metadata rows, 8 pt apart, then the host's own options rows (the slot, #1989),
 // a progress bar while running, the finished or failed line after, and the
@@ -71,6 +72,9 @@ public struct ExportSheetRows: Hashable, Sendable {
         if case .finished = line, canReveal { shown.append(.reveal) }
         return shown + [line == nil ? .cancel : .dismiss, .start]
     }
+
+    /// Columns for the Format chips: up to four formats fill one row (no empty column, no orphan chip), more wrap by three.
+    public static func formatColumns(_ count: Int) -> Int { count <= 4 ? max(count, 1) : 3 }
 
     /// The Size placeholder's text: "1080 × 1350 px", "Long edge 2048 px", "2x of 1000 × 1250 px".
     public static func sizeText(_ size: SuiteExportSize, source width: Int, _ height: Int) -> String {
@@ -270,9 +274,9 @@ public struct SuiteExportSheet<Options: View>: View {
         case .format(let id):
             VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
                 Text("Format").font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.textSecondary)
-                ChoiceChips(
+                PresetGrid(
                     options: formats.map { InspectorOption(id: $0.id, title: $0.name, identifier: ids.format($0.id)) },
-                    selected: id, onSelect: onFormat)
+                    selected: id, columns: ExportSheetRows.formatColumns(formats.count), onSelect: onFormat)
                     .accessibilityElement(children: .contain)
                     .accessibilityLabel("Format")
                     .suiteControl(id: ids.formats, enabled: readout.editable, reason: readout.editable ? nil : "The export is under way or done.")
