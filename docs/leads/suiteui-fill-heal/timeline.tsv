@@ -140,3 +140,4 @@ utc	stage	event	ref	note
 2026-10-25T14:33Z	3	heartbeat	lane	no change; 7 PRs fast-lane ready, lane merging older beta PRs first; dev 152374076, no dev-red
 2026-10-25T14:55Z	3	heartbeat	lane	no change; 7 PRs fast-lane ready, lane merging older beta PRs first; dev 0e8ebba37, no dev-red
 2026-10-26T02:14Z	3	heartbeat	lane	resumed under act-1a175f7cb67-l7rh; #4889 needs-rebase, integrating dev; main d3323f6a
+2026-10-26T02:49Z	3	heartbeat	lane	re-integrated needs-rebase PRs; heads moved
