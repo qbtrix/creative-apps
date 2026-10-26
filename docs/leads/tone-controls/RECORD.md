@@ -24,6 +24,7 @@ Next: Belt-Contact-Sheet once journeys run 40279283359 (suiteui at c480d848) fin
 - 2026-10-26T06:53:25Z heartbeat: journeys run 40279283359 still running; Contact Sheet waits on it; #5375 clean in lane
 - 2026-10-26T07:15:52Z heartbeat: journeys run 40279283359 still running; Contact Sheet waits on it
 - 2026-10-26T07:34:19Z heartbeat: all slices done; waiting on journeys 40279283359 for Contact Sheet
+- 2026-10-26T07:56:21Z heartbeat: journeys 40279283359 cancelled (superseded); Contact Sheet waits on suiteui journeys 40288150154 at 99ace7038 (contains TC-z)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
