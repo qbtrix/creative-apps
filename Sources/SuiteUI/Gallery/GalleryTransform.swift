@@ -16,13 +16,12 @@ struct GalleryTransformBoard: TransformTarget {
     private(set) var history = History<TransformBox>()
     private var drag: String?
     private var turnSoFar = 0.0
-    private var drags = 0
 
     var transformSelection: TransformBox? { item }
     var transformHelp: String? { nil }
 
     mutating func setTransform(_ t: TransformBox, name: String, drag: String?) throws {
-        history.record(name, item, key: drag.map { "transform:\($0)" })
+        history.record(name, item, key: drag.map { CoalesceKey.key("transform", drag: $0) })
         item = t
     }
 
@@ -44,7 +43,7 @@ struct GalleryTransformBoard: TransformTarget {
 
     /// The release: closes the drag's run, so the next drag is its own step.
     mutating func end() -> String {
-        let line = "\(drag ?? "drag") ends, \(history.steps.count) in History"
+        let line = "drag ends, \(history.steps.count) in History"
         (drag, turnSoFar) = (nil, 0)
         history.endRun()
         return line
@@ -75,10 +74,9 @@ struct GalleryTransformBoard: TransformTarget {
 
     /// The open drag's token, or a new one on its first sample.
     private mutating func dragToken() -> String {
-        if let drag { return drag }
-        drags += 1
-        drag = "drag-\(drags)"
-        return "drag-\(drags)"
+        let token = CoalesceKey.token(drag)
+        drag = token
+        return token
     }
 }
 

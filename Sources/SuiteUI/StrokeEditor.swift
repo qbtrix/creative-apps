@@ -107,7 +107,7 @@ public struct StrokeEditor: View {
 
     /// One gesture sample: the open token (opened on the first sample), then the one intent it asks for.
     private func sample(_ intent: (String) -> StrokeIntent?) {
-        let token = StrokeEditorRules.token(drag)
+        let token = CoalesceKey.token(drag)
         if drag == nil { drag = token }
         send(intent(token))
     }
@@ -240,9 +240,6 @@ struct StrokeEditorRules: Sendable {
         default: return nil
         }
     }
-
-    /// The open gesture's token, or a new one for its first sample.
-    nonisolated static func token(_ open: String?) -> String { open ?? UUID().uuidString }
 
     /// A chip row's tooltip: why it can't act, or one line per option saying what it draws.
     func chipsHelp(_ row: StrokeEditorRow) -> String {
