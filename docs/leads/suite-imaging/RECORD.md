@@ -37,6 +37,7 @@ Next: IM-13 PR (supervisor merge: Package.swift), then IM-14
 - 2026-10-26T12:33:28Z heartbeat: no change: all PRs open and clean, no needs-fix/needs-rebase; batches held while dev-red #5321 is open (not ours)
 - 2026-10-26T13:09:30Z heartbeat: no change: all PRs open and clean; batches held while dev-red #5321 is open (not ours)
 - 2026-10-26T13:38:34Z heartbeat: no change: all PRs open and clean; batches held while dev-red #5321 is open (not ours)
+- 2026-10-26T14:12:29Z heartbeat: no change: all PRs open and clean; #5780 back on fast-lane; dev-red #5321 open (not ours)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
