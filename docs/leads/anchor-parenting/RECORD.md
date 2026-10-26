@@ -113,3 +113,4 @@ Run act-1a1695ebfeb-d54n, 2026-10-23T15:30Z; supersedes the tables' PR/state col
 - 2026-10-26T20:56Z (act-1a177ff0916-4jm7): poll: dev 3ebc8d43; dev moved, none ours; AN-6 waits on #4893, AN-10 on #4902 and #4891
 - 2026-10-26T21:15Z (act-1a177ff0916-4jm7): poll: dev 3ebc8d43; dev unchanged; AN-6 waits on #4893, AN-10 on #4902 and #4891
 - 2026-10-26T21:32Z (act-1a177ff0916-4jm7): poll: dev 3ebc8d43; dev unchanged; AN-6 waits on #4893, AN-10 on #4902 and #4891
+- 2026-10-26T21:35Z (act-1a177ff0916-4jm7): poll: dev 3ebc8d43; dev unchanged; AN-6 waits on #4893, AN-10 on #4902 and #4891
