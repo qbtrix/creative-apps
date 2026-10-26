@@ -213,3 +213,4 @@ utc	stage	event	ref	note
 2026-10-26T12:42Z	3	heartbeat	lane	poll 12:42Z: quiet; only #5775 (ci) merged; #5096, #4889, #5125 wait on a lane batch; findings 3 open
 2026-10-26T14:22Z	3	heartbeat	lane	poll 2026-10-26T14:22Z: run act-1a1786024b0-c5o9 resumed on Belt's 30-min nudge; mirror record docs/leads/suiteui-<f>/ synced to the primary record (new run id). None of our 12 PRs merged (all clean, fast-lane, eligible); lane last merged #5104 14:03Z; dev-red #5321 open (not ours); findings 3 open
 2026-10-26T14:31Z	3	heartbeat	lane	poll 2026-10-26T14:31Z: quiet; none of our 12 PRs merged (all clean, fast-lane); lane last merged #5104 14:03Z; dev-red #5321 open (not ours); findings 3 open
+2026-10-26T14:54Z	3	heartbeat	lane	poll 2026-10-26T14:54Z: quiet; none of our 12 PRs merged (all clean, fast-lane); lane last merged #5780 14:35Z (one PR per batch); dev-red #5321 open (not ours); findings 3 open
