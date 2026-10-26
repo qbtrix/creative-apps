@@ -40,3 +40,4 @@ Next: once #5321 closes and the lane lands our PRs, post Belt-Slice-Done for PD-
 ## Open
 - dev-red #5321 (range main..cc5c6234a; not ours) holds every batch. Nothing to fix here.
 - [ ] Wire: stroke-style:DK-m (merged #4888): recheck DesignNode.swift picture fields against VectorStroke when #4922 lands.
+- 2026-10-26T02:06:05Z: findings past the round cap that no open PR fixes were closed into their gaps (#4932→#4991, #4971→#4996, #4973→#4998, #4975→#4997, #4970 and #4972→new gap #5359 after needs-ui #4985). The 26 findings still open are each closed by an open slice PR on merge (Fixes lines), so PD-z/DK-z start once those land.
