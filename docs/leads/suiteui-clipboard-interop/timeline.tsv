@@ -237,3 +237,4 @@ utc	stage	event	ref	note
 2026-10-26T20:28Z	3	heartbeat	lane	poll 2026-10-26T20:28Z: needs-rebase fixes: merged dev into CB-13 (#5149, PhotoWindow+Edit.swift), AR-11 (#5096), FH-3 (#4889), CB-14 (#5125) (photo.list-commands golden, 3-way by id); gates running
 2026-10-26T20:42Z	3	heartbeat	lane	poll 2026-10-26T20:42Z: CB-13 #5149 rebased, gate PASS, pushed 73184786, Head moved; AR-11/FH-3/CB-14 gates running
 2026-10-26T20:58Z	3	heartbeat	lane	poll 2026-10-26T20:58Z: AR-11 #5096 and FH-3 #4889 rebased, PASS, pushed, Head moved; CB-14 gate running; #5103 merged AR-11 in (catalog test conflict), gate queued
+2026-10-26T21:12Z	3	heartbeat	lane	poll 2026-10-26T21:12Z: all 4 needs-rebase fixes pushed (CB-13, AR-11, FH-3, CB-14) plus #5103 re-merged on AR-11; stripped attribution footers from #5103/#5121/#5137 bodies; #4896 body to be cleaned when retargeted

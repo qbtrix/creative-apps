@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
 Next: wait for the lane to batch #5116 (re-integrated at 0e1cc330, Fast-Check pass) and the other CB PRs; on merge, check main runs for Belt-Slice-Done.
-Polled: 2026-10-26T20:58Z · AR-11 #5096 and FH-3 #4889 rebased, PASS, pushed, Head moved; CB-14 gate running; #5103 merged AR-11 in (catalog test conflict), gate queued
+Polled: 2026-10-26T21:12Z · all 4 needs-rebase fixes pushed (CB-13, AR-11, FH-3, CB-14) plus #5103 re-merged on AR-11; stripped attribution footers from #5103/#5121/#5137 bodies; #4896 body to be cleaned when retargeted
 
 
 
