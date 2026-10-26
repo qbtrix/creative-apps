@@ -234,3 +234,7 @@ No dev merges since 07:45. Ours are still unbatched after about 6h (open, clean,
 ## 2026-10-26T08:48:15Z poll
 
 #4988, #5364 and #4999 are still open: fast-lane and beta, no needs-fix or needs-rebase, unbatched. #5164 and #5000 wait on them. dev landed #4956 (1960c2d, 08:29) and 7f585b7 (08:44). No supervisor answer yet to issuecomment-6411516660. No footers found. Next poll in 20 min.
+
+## 2026-10-26T09:12:58Z poll
+
+The PRs are unchanged and there is no supervisor answer yet. Dev shows the cause: while dev was red, the lane held the whole queue. red_scope ran in a subshell, so its scratch clone was gone by the time the scope was read, and the scope came out empty on Linux. The fixes are 3a2010d and be5f2c0 (08:53) and #5383 (1b843d1, 09:12). The next sweeps should batch #4988, #5364 and #4999. Next poll in 20 min.
