@@ -27,11 +27,11 @@ extension HaloProject {
 
     /// The name a render takes in a folder holding `existing`: a new folder
     /// for a PNG sequence ("Bounce", then "Bounce 2"), one file for a movie
-    /// ("Bounce.mp4", then "Bounce 2.mp4"). Nil with no composition.
+    /// ("Bounce.mp4", then "Bounce 2.mp4"; "Bounce.mov" for ProRes 4444). Nil
+    /// with no composition.
     public func renderOutputName(_ settings: HaloRenderSettings, existing: Set<String>) -> String? {
         guard let comp = selectedComposition else { return nil }
-        let ext = settings.format == .movie ? "mp4" : ""
-        return UniqueFileNames.name(comp.name, extension: ext, among: existing)
+        return UniqueFileNames.name(comp.name, extension: settings.outputExtension, among: existing)
     }
 
     /// What a finished render wrote into `output` (its folder or movie
@@ -46,5 +46,21 @@ extension HaloProject {
         case .movie:
             return output
         }
+    }
+}
+
+extension HaloRenderSettings {
+    /// The movie's file extension, "mov" for ProRes 4444 and "mp4" for the
+    /// rest (HX-3); empty for a PNG sequence, which writes into a folder.
+    var outputExtension: String {
+        guard format == .movie else { return "" }
+        return codec == .prores4444 ? "mov" : "mp4"
+    }
+
+    /// Throws `.refused` in `alphaRefusal`'s words when alpha is on and the
+    /// codec can't keep it ("H.264 can't keep transparency. Choose ProRes
+    /// 4444."), so no plan has alpha its movie would drop.
+    func plannable() throws {
+        if alpha, let refusal = alphaRefusal { throw HaloEditError.refused(refusal) }
     }
 }

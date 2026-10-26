@@ -135,6 +135,8 @@ struct DesignWindow: View {
         .task { start() }
         // The key window is the one live commands act on (EM-4).
         .suiteLiveWindow(DesignShell.front, read: { DesignHeadless(model) }, write: { perform(.adoptLive($0.workspace)) })
+        // A file handed to Design (Finder, the home's Recent, Open In) opens here while the window is empty (#5200).
+        .suiteOpenQueue(DesignShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .unsavedChangesGuard(Self.unsavedHooks(model: { model }, perform: perform))
         .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }))
         .modifier(DesignHistoryArea(model: model, jump: { try model.jumpHistory(to: $0) }, restore: { try model.restoreRecovered(from: $0, name: $1) }, onNote: { note = $0 }))

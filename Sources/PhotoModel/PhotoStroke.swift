@@ -7,7 +7,8 @@
 // `drags(_:)` stay as wrappers (`sampling` is Option, zoom 1).
 //
 // Drags route by component: with a Free Transform in progress every drag goes
-// to `transformDrag` (PhotoTransform.swift); otherwise by tool, marquee to
+// to `transformDrag` (PhotoTransform.swift), which moves, scales or turns the
+// box and records one step on release; otherwise by tool, marquee to
 // `selectionDrag` (PhotoSelectionMask.swift), crop to `cropDrag`
 // (PhotoCropSize.swift), eyedropper to `sampleDrag` (PhotoSample+Kernel.swift),
 // a Pen drag adds a draft point on release (`runPath`, PhotoPaths+Kernel.swift),
@@ -40,7 +41,7 @@
 //   crop           the same rectangle is the pending crop (Apply Crop commits
 //                  it); a click drops it (PhotoCropSize.swift).
 //   eyedropper     the color under the pointer becomes the brush color, never
-//                  an undo step (PhotoEyedropper.swift).
+//                  an undo step (PhotoSample+Kernel.swift).
 //   move           shifts every picked image layer by the drag, in whole
 //                  pixels, as one step ("Move Layer", "Move Layers" for several).
 //
@@ -89,6 +90,9 @@ struct PhotoStroke: Sendable, Equatable {
     var points: [Mask.Point] = []
     var zoom: Double = 1
     var areaBefore: PhotoAreaBefore?
+    /// Free Transform: the draft at the press and the handle the press took (nil off the box).
+    var transformFrom: TransformDraft?
+    var transformHandle: TransformHandle?
 }
 
 extension PhotoWorkspace {
@@ -108,9 +112,12 @@ extension PhotoWorkspace {
     /// The Move tool's instruction line: how to move the selected layer, or
     /// why an adjustment layer (which has no place on the canvas) can't move.
     public var moveHint: String {
-        if case .adjustment? = selectedLayer?.kind { return Self.moveRefusal }
-        return "Drag over the image to move the selected layer."
+        canMoveSelection ? "Drag over the image to move the selected layer." : Self.moveRefusal
     }
+
+    /// Whether a picked layer can move: at least one is an image layer. The
+    /// Move tool's transform rows show only then.
+    public var canMoveSelection: Bool { !movableSelectedLayers.isEmpty }
 
     static let moveRefusal = "Select an image layer in the sidebar to move it."
 
@@ -212,7 +219,7 @@ extension PhotoWorkspace {
     /// Whether the drag under way only moves a line over the canvas until its
     /// release draws (the Gradient tool's), so the window can keep its later
     /// samples off the workspace the panels read.
-    public var dragShowsLineOnly: Bool { stroke?.tool == .gradient }
+    public var dragShowsLineOnly: Bool { stroke?.tool == .gradient && transformDraft == nil }
 
     /// Becomes `live`: a copy of this workspace a stroke drew on
     /// (`dragPaintsOnly`). Ignored when `live` is another image (another
@@ -232,6 +239,10 @@ extension PhotoWorkspace {
     public mutating func endDrag() {
         guard var done = stroke else { return }
         stroke = nil
+        if let before = done.transformFrom {
+            if transformDraft != before { record(.draft(before), named: "Transform") }
+            return
+        }
         switch done.tool {
         case .brush, .eraser:
             paint(&done, adding: nil, pressure: 1)
@@ -278,16 +289,22 @@ extension PhotoWorkspace {
         }
         let dx = end.x - current.start.x, dy = end.y - current.start.y
         guard dx.isFinite, dy.isFinite, abs(dx) < 1e7, abs(dy) < 1e7 else { return }
-        var moved = false
+        // Where the moved layers were and are: the canvas changes nowhere else.
+        var damage = PhotoDamage.none
         for at in targets {
             guard let before = current.layersBefore.first(where: { $0.id == layers[at].id }) else { continue }
             let x = before.offsetX + Int(dx.rounded()), y = before.offsetY + Int(dy.rounded())
             guard x != layers[at].offsetX || y != layers[at].offsetY else { continue }
+            let was = bounds(of: layers[at])
             layers[at].offsetX = x
             layers[at].offsetY = y
-            moved = true
+            if let was, let now = bounds(of: layers[at]) {
+                damage = damage.union(.region(was.union(now)))
+            } else {
+                damage = .all
+            }
         }
-        if moved { touch(.all) }
+        if damage != .none { touch(damage) }
     }
 
     /// Adds a pointer sample to the stroke (nil: the stroke ends) and paints

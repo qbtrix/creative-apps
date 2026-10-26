@@ -1,5 +1,6 @@
 // SegmentedTabs.swift: the tab switch at the top of an editor's right panel
-// (Adjust | Layers), a system segmented Picker filling the panel's width on a
+// (Adjust | Layers), a system segmented Picker filling the panel's width
+// (`buttonSizing(.flexible)`; a frame alone leaves it label-wide) on a
 // flat band that ends in a hairline. It draws as a capsule (docs/design.md,
 // Tabs): a `row` capsule with 2 pt padding round `chip`-tall segments, the
 // selected one on the `stateSelected` tint, the capsule on `rowHover` under
@@ -114,6 +115,9 @@ public struct SegmentedTabs<ID: Hashable & Sendable>: View {
                 .labelsHidden()
                 .controlSize(SuiteSize.compactControl)
                 .tint(SuiteColor.selectedTint)
+                // A frame alone leaves the system control label-wide in the middle of the capsule.
+                .buttonSizing(.flexible)
+                .buttonBorderShape(.capsule)
                 .frame(maxWidth: .infinity)
                 .frame(height: SuiteSize.chip)
                 .padding(SuiteSpacing.xxs)
