@@ -2,7 +2,7 @@
 
 Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-imaging.md
 Run: act-1a175ea55b7-729d (line lead, line:suiteui; relaunch 2026-10-26) · earlier: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
-Stage: #5295/#5297/#5299, #5178 open; IM-13 built
+Stage: #5295/#5297/#5299 open (fast lane), #5178 and #5780 (IM-13, Package.swift) await the supervisor
 Base: origin/dev 8eff8ab85
 Next: IM-13 PR (supervisor merge: Package.swift), then IM-14
 
@@ -32,6 +32,7 @@ Next: IM-13 PR (supervisor merge: Package.swift), then IM-14
 - 2026-10-26T10:03:23Z heartbeat: #5297 merged dev (resolved: dispatcher-route kept bases from dev's Move fix now live in LiveCompositeCache), gate pass, head e27f0956d; #5299 restacked, head 1dbc6c5e4
 - 10:26 heartbeat: #5163 merged; #5178 with supervisor; IM-13 started (ST-a done)
 - 10:47 heartbeat: IM-13 built (Library develop steps from SuiteImaging, Metal rule with no baseline); gate rerun, PR next
+- 11:32 heartbeat: #5297/#5299 restacked on dev (PhotoCompositeCache alias over LiveCompositeCache for dev's Curves histogram cache); IM-13 PR #5780 opened
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

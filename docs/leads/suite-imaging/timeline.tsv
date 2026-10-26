@@ -164,3 +164,4 @@ utc	stage	event	ref	note
 2026-10-26T10:03:23Z	heartbeat	#5297 merged dev (resolved: dispatcher-route kept bases from dev's Move fix now live in LiveCompositeCache), gate pass, head e27f0956d; #5299 restacked, head 1dbc6c5e4
 2026-10-26T10:26:52Z	heartbeat	#5163 merged; #5178 with supervisor; IM-13 started (ST-a done)
 2026-10-26T10:47:39Z	heartbeat	IM-13 built (Library develop steps from SuiteImaging, Metal rule with no baseline); gate rerun, PR next
+2026-10-26T11:33:02Z	heartbeat	#5297/#5299 restacked on dev (PhotoCompositeCache alias over LiveCompositeCache for dev's Curves histogram cache); IM-13 PR #5780 opened
