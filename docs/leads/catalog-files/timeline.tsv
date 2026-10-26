@@ -1,0 +1,50 @@
+utc	stage	event	ref	note
+2026-10-23T15:31:23Z	3	start	-	run act-1a1695ec091-ilfv on dev 721168a; LC-a builder starts
+2026-10-23T16:34:40Z	3	pr	#4879	LC-a opened at df5c4fa; LC-u, LC-m builders launched
+2026-10-23T17:29:30Z	3	pr	#4924	LC-u opened at 006a476
+2026-10-23T17:39:52Z	3	pr	#4937,#4938	LC-m opened (LC-5, LC-6); LC-z builder launched
+2026-10-23T17:51:06Z	3	check	#4879,#4924,#4937,#4938	all open, none merged, no needs-fix/needs-rebase; dev 8a54f64 Linux check 39997290881 running; findings 0
+2026-10-23T18:07:23Z	3	pr	#4949	LC-z (LC-7+LC-8) opened, head 5c9a3767, base feat/library-lc-mu (lc-m6+lc-u merge), 15 files +300/-92, Mutate 3/3 LibraryLaunch; retarget to dev once #4924 and #4938 merge
+2026-10-23T18:15:01Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged, no needs-fix/needs-rebase; dev 98589662 Linux check 40000080882 running; feature findings 0; posting path re-adds an attribution footer to PR bodies on every PATCH, lane strips it from the squash
+2026-10-23T18:37:22Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, no needs-fix; lane bisecting lane/batch-20261023174522 (12 PRs, probe 3), 60 ready PRs incl. ours wait for next sweep; dev Linux check 40000080882 green at 98589662
+2026-10-23T18:59:21Z	3	needs-rebase	#4879	lane: conflict with dev in LibraryImport.swift (DR-6 excludedPaths); merged origin/dev, kept both sides; scripts/ci --changed running
+2026-10-23T19:23:23Z	3	fix	#4879	dev merged in, scripts/ci --changed CI: PASS, pushed c131cf6383805ea79efebc2c743792d8be48e1b5, Head: moved; clean, lane to drop needs-rebase
+2026-10-23T19:45:33Z	3	check	#4879,#4924,#4937,#4938,#4949	needs-rebase dropped by lane; none merged yet, no needs-fix; dev bccdc0f2 Linux check 40012401000 running
+2026-10-23T20:07:26Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged, no needs-fix/needs-rebase; dev at 61c481df; findings 0
+2026-10-23T20:29:20Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; lane bisecting lane/batch-20261023192105 (ours not in it); scoped library 40018964074 queued at 61c481df
+2026-10-23T20:52:18Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; lane batch 20261023204921 holds none of ours; 27 open library findings (no new feature task; all slices already in PRs)
+2026-10-23T21:13:50Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; lane batch 20261023204921 still in flight (none of ours); scoped library run 40018964074 still running
+2026-10-23T21:36:23Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; scoped library run 40018964074 green at 61c481df but holds none of our slices, so no critic panel yet
+2026-10-23T21:58:21Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; dev moved to 491ec546 (#4862); lane batch 20261023215139 covers PRs up to #4870, ours next
+2026-10-23T22:19:52Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; lane batch 20261023215139 (#4818..#4870) still in flight; dev Linux check green at 491ec546
+2026-10-23T22:42:04Z	3	check	#4879,#4924,#4937,#4938,#4949	all open, no fix/rebase labels; lane batch 20261023215139 still in flight; dev 491ec546
+2026-10-23T23:04:34Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; dev 654fb363 (generated only); lane batch 20261023215139 still in flight
+2026-10-23T23:25:42Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; lane batch 20261023215139 still in flight; dev CI 40037716897 running at 654fb363
+2026-10-23T23:47:12Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; lane batch 20261023215139 (#4818..#4870, not ours) red on macOS gate 40029779505, no bisect probe yet; ours wait
+2026-10-24T00:09:34Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; no Fast Lane run since 40038169143 (~23:25Z); batch 20261023215139 red on macOS, unbisected; ours wait
+2026-10-24T00:30:57Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; lane resumed (run 40044859262), bisecting batch 20261023215139 (probe -6); dev full CI 40037716897 green at 654fb363 (none of ours)
+2026-10-24T00:52:54Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; lane bisect of batch 20261023215139 still on probe -6 (not ours); dev at 654fb363 green; full journeys 40044846192 pending
+2026-10-24T01:15:29Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; bisect probe batch-20261023215139-6: Linux green, macOS gate 40044879600 running since 00:25Z (not ours); dev 654fb363 green
+2026-10-24T01:37:12Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; probe -6 green both gates, lane now on probe batch-20261023215139-9 (Fast Lane 40049986432 running; not ours); dev 654fb363 green
+2026-10-24T01:58:55Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; lane still bisecting batch 20261023215139 at probe -9 (not ours); dev 654fb363 green
+2026-10-24T02:21:09Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; probe batch-20261023215139-9 Linux green, macOS gate 40050012604 running since 01:29Z (not ours); dev 654fb363 green; full journeys 40044846192 running
+2026-10-24T02:42:51Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; probe batch-20261023215139-9 macOS gate 40050012604 red, so culprit sits between probes 6 and 9 (not ours); awaiting next lane sweep; dev 654fb363 green
+2026-10-24T03:05:07Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; lane bisect now on probe batch-20261023215139-7 (not ours); dev 654fb363 green
+2026-10-24T03:26:54Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; probe batch-20261023215139-7 Linux green, macOS gate running since 02:44Z (not ours); dev 654fb363 green
+2026-10-24T03:49:09Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; probe batch-20261023215139-7 green both gates, culprit is PR 8 or 9 of that batch (not ours); awaiting next lane sweep; dev 654fb363 green
+2026-10-24T04:11:01Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean; lane probing batch-20261023215139-8 (last probe; not ours), Fast Lane 40060686633 running; dev 654fb363 green
+2026-10-24T04:34:07Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; lane bisect probe lane/batch-20261023215139-8 macOS gate running (none of ours); dev 654fb363 green, no slice of ours
+2026-10-24T04:56:15Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; lane bisect probe -8 macOS gate still running (none of ours); dev 654fb363 green, no slice of ours
+2026-10-24T05:18:02Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; bisect of batch 20261023215139 done (probe -8 green); new lane/batch-20261024050226 (12 PRs #4839-#4875, none of ours) Linux+macOS running; ours queue for the next batch; dev 654fb363 green
+2026-10-24T05:39:42Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; lane/batch-20261024050226 (none of ours) Linux green, macOS gate running; ours queue for the next batch; dev 654fb363 green
+2026-10-24T06:00:53Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; lane/batch-20261024050226 (none of ours) red on macOS gate, bisecting (probe -6); ours queue for the next batch; dev 654fb363 green
+2026-10-24T06:23:38Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; lane bisect of batch 20261024050226 (none of ours): probe -6 Linux green, macOS running; ours queue for the next batch; dev 654fb363 green
+2026-10-24T06:45:20Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; dev now e5dcf939 (#4840, #5048; none of ours); bisect of batch 20261024050226: probe -6 red on macOS, probes -3 and -1 running; scoped library at 4446461e has no slice of ours, so no critics yet
+2026-10-24T07:07:26Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; dev now 830af22d (none of ours); bisect of batch 20261024050226: probes -1 and -3 Linux green, macOS running; ours queue for the next batch
+2026-10-24T07:28:47Z	3	check	#4879,#4924,#4937,#4938,#4949	all open+clean, none merged; dev 830af22d (none of ours); bisect of batch 20261024050226: probe -3 red on macOS, -1 macOS running; ours queue for the next batch
+2026-10-24T07:45:26Z	3	check	#4879,#4924,#4937,#4938,#4949	all open, no needs-fix/needs-rebase, base PRs merge clean into dev f58e119 (#4132 merged; none of ours); ours queue for the next batch; 0 open findings
+2026-10-24T08:08:10Z	3	check	#4879,#4924,#4937,#4938,#4949	all open, no needs-fix/needs-rebase, base PRs merge clean into dev 1bbaba6 (lane landed #4818-#4837 and #5034; none of ours); ours queue for the next batch; 0 open findings
+2026-10-24T18:50:06Z	4	stage	#4924,#4937,#4938,#4949	Run act-1a16f3a3e2b-xivc: lead branch rebased on main e79e9afc. LC-a (#4879) merged to dev at 095e65e1. Lane ejected #4924 (LC-u) and #4937 (LC-5) as too big: stacked diffs still carried LC-a's pre-squash commits. Rebuilding each as a merge of dev with only its own commits (conflicts with DR-6, thumbnail stats and backup specs resolved keeping both); gate running. Scoped library run 40120685023 at d13c3ff2 holds LC-a.
+2026-10-24T19:05:23Z	4	gate	#4937 #4938 #4949	lc-m5 gate hit a SIGSEGV in SampleOpenTests.testSunset (LibraryCatalog init copy); checking lc-m6 gate, which carries the same change, to tell a flake from a fault
+2026-10-26T02:18Z	0	stage-start	#3786	resume run act-1a175fe2de5-qdc7; lead branch rebuilt on main d3323f6a
+2026-10-26T02:18Z	3	heartbeat	#4924,#4937	eligible in lane queue; #4938,#4949 stacked
