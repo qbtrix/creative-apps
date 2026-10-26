@@ -2,9 +2,9 @@
 
 Issue: #3780 · Packet: docs/blueprints/suiteui/features/timeline-keys.md
 Run: act-1a1620043af-tzh0 · Started: 2026-10-22T05:00Z (resumed from act-1a15fddd101-68r5)
-Stage: stopped per supervisor 06:19Z (TK-flare done 09:57Z; TK-6, TK-z waiting-on-prereq; TK-u critics filed #4416-#4420, fix rounds held per supervisor stop; 12:43Z)
+Stage: stopped (waiting-on-prereq; TK-6, TK-z)
 Base: 0dd23d659f4dbd8a0120aa85a321259327518251 (main); dev 8cf02113
-Next: supervisor (06:19Z): stop after TK-flare (#4328) lands; post TK-flare Belt-Slice-Done + Mac-Finish-Wanted, run TK-u critic panel on full journeys 39751426611 at 71987f72 (flare journeys 39734406363 tested 6e19f406, before TK-u; the scoped suite run 39721019643 passed with no screens), then stop. TK-6, TK-z wait for a relaunch (waiting-on-prereq) once AJ-halo, TS-halo, AN-halo land.
+Next: relaunch on #3780 once adjust-everywhere:AJ-halo, text-style:TS-halo and anchor-parenting:AN-halo land (supervisor 2026-10-22T06:19Z); finding #4420 (TK-u) still open, fix rounds held
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -33,6 +33,7 @@ Next: supervisor (06:19Z): stop after TK-flare (#4328) lands; post TK-flare Belt
 | TK-u | 39754262667 | 4f2b89eb | clarity, journey, design, mouse, taste | #4416, #4417, #4418, #4419, #4420 (8 confirmed, 0 refuted) | 0 |
 
 ## Decisions
+- 2026-10-26T05:25Z Run act-1a176a90b4c-u2kx launched on #4524, which the supervisor closed as a duplicate of #3780 ("a lead running on this issue should stop"). Re-read the waits: AJ-halo building (lead/adjust-everywhere wave 3), TS-halo planned, AN-halo planned, so TK-6 and TK-z still cannot start. No work started; stopped.
 - PR base is `dev` (CLAUDE.md; the lane retargets `main` to `dev` anyway).
 - TK-1 and TK-2 ship as one TK-a slice PR (rule 22).
 - TK-m is split: TK-5 (kernel bodies) ships now as its own PR stacked on TK-a, since TK-6 waits on AJ-halo, TS-halo and AN-halo, which are far off; TK-6 follows as the slice's second PR.
