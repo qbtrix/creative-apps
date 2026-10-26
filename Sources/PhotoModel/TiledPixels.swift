@@ -6,7 +6,8 @@
 // one). Tiles of one fill share a buffer until written. `flattened()` is the
 // whole layer, for whole-image operations and tests, never per event.
 // `paintedBounds` is the box of its pixels with alpha above 0 (Free
-// Transform's box), skipping tiles that share a clear buffer.
+// Transform's box), skipping tiles that share a clear buffer; `replace`
+// writes a buffer over part of the layer, touching only the tiles under it.
 // Invariants: `tiles` is row-major, `columns * rows` long, each tile the size
 // of its `tileRect`. Linux-safe.
 import CoreRaster
@@ -99,6 +100,26 @@ public struct TiledPixels: Sendable, Equatable {
             found = found?.union(r) ?? r
         }
         return found
+    }
+
+    /// `buffer` written exactly over these pixels with its top-left at (`x`,
+    /// `y`) (layer pixels), clipped to the layer. Only the tiles under it are
+    /// written; a tile it covers whole becomes its crop, the rest pixel by pixel.
+    mutating func replace(with buffer: PixelBuffer, x: Int, y: Int) throws {
+        let placed = PixelRect(x: x, y: y, width: buffer.width, height: buffer.height)
+        for i in tileIndices(in: placed) where tiles.indices.contains(i) {
+            let rect = tileRect(i)
+            guard let part = placed.intersection(rect) else { continue }
+            if part == rect {
+                tiles[i] = try buffer.cropped(x: part.x - x, y: part.y - y, width: part.width, height: part.height)
+                continue
+            }
+            for py in part.y..<part.maxY {
+                for px in part.x..<part.maxX {
+                    try tiles[i].setPixel(x: px - rect.x, y: py - rect.y, buffer.pixel(x: px - x, y: py - y))
+                }
+            }
+        }
     }
 
     /// The whole layer as one buffer.

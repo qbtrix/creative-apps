@@ -9,7 +9,8 @@
 // previous draft back (a drag's steps fold under its token). The canvas shows
 // the draft live: each render draws `transformPreview`, the workspace with the
 // draft's layer resampled (`draftPlaced`), and commit lays that same resample
-// as one "Free Transform" step, so Return shows nothing new. A flip mirrors
+// as one "Free Transform" step, so Return shows nothing new; a box on part of
+// the layer keeps the layer's extent, so later strokes outside it still land. A flip mirrors
 // the layer's pixels in place at once, never a draft. Canvas Size is PhotoImageOps'.
 // Linux-safe.
 import CoreRaster
@@ -117,7 +118,8 @@ extension PhotoWorkspace {
     }
 
     /// Return: resamples the layer once into its new bounds as one "Free
-    /// Transform" step; the identity records nothing. No draft: nothing.
+    /// Transform" step; a box on part of the layer keeps the layer's extent
+    /// (grown to the new bounds). The identity records nothing. No draft: nothing.
     /// A resample that fails keeps the draft and throws.
     public mutating func commitTransform() throws {
         guard let draft = transformDraft else { return }
@@ -125,7 +127,17 @@ extension PhotoWorkspace {
             transformDraft = nil
             return touch(.all)
         }
-        let (at, placed) = done
+        let at = done.at
+        var placed = done.placed
+        // A box on part of the layer (its painted pixels) keeps the layer's extent, so later strokes outside
+        // the box still land: the placed pixels go, exactly, onto a clear layer over both bounds.
+        if let was = bounds(of: layers[at]), draft.box != was {
+            let all = was.union(PixelRect(x: placed.x, y: placed.y, width: placed.pixels.width,
+                                          height: placed.pixels.height))
+            var kept = try TiledPixels(width: all.width, height: all.height)
+            try kept.replace(with: placed.pixels.flattened(), x: placed.x - all.x, y: placed.y - all.y)
+            placed = PlacedPixels(pixels: kept, x: all.x, y: all.y)
+        }
         record(.group([.stack(stackState), .draft(draft)]), named: "Free Transform")
         pixels[draft.layerID] = placed.pixels
         layers[at].offsetX = placed.x
