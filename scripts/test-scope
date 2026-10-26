@@ -66,9 +66,11 @@
 # shard reads `swift test list` ids on stdin and prints the two lines of
 # shard K (1-based) of N, in the format of app and changed: the regex for the
 # tests outside AppSnapshotTests, then the one for AppSnapshotTests. The unit is
-# a suite (Target.Suite, or Target.Parent/Suite when nested) or a free test
-# (Target.freeTest); the distinct units are sorted and unit i goes to shard
-# i mod N, so on one commit every shard agrees and a suite lands in one shard.
+# a top-level suite (Target.Suite; a nested suite stays with its parent, since
+# BodyCountSuites' children count body runs a cold process inflates: run
+# 40282193954) or a free test (Target.freeTest); the distinct units are sorted
+# and unit i goes to shard i mod N, so on one commit every shard agrees and a
+# suite lands in one shard.
 # scripts/ci --shard runs the lines like a --changed scope. CI's macOS test
 # shards use it (ci.yml).
 #
@@ -257,7 +259,7 @@ def shard(ids, k, n):
     for i in ids:
         u = re.sub(r"\(.*\)$", "", i.strip())  # Target.Suite/test(a:) -> Target.Suite/test
         if re.fullmatch(r"\w+\.[\w/]+", u):
-            units.add(u.rsplit("/", 1)[0] if "/" in u else u)
+            units.add(u.split("/", 1)[0])  # Target.Suite, or Target.freeTest
     mine = [u for j, u in enumerate(sorted(units)) if j % n == k - 1]
     def regex(us):
         return "^(%s)(/|\\()" % "|".join(u.replace(".", r"\.") for u in us) if us else ""
