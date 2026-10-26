@@ -1,9 +1,9 @@
 # file-flow lead record
 
 Issue: #3474 (runs before used #4514) · Packet: docs/blueprints/halo/features/file-flow.md
-Run: act-1a16fbc5164-vi4c · Started: 2026-10-24T21:10Z (resumed)
+Run: act-1a175f40239-xop3 · Started: 2026-10-26T02:08Z (resumed after auto-relaunch)
 Stage: 5 (every task in a PR: HF-u #4868, HF-3 #4894, HF-4 #4936, HF-z #5092 feature-done)
-Base: 721168a8, PR base 35a0b5e7 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
+Base: 8987427d (origin/dev); main d3323f6a checked (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
 Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev holds its last PR, then Belt-Contact-Sheet
 
 ## Slices
@@ -117,3 +117,4 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - 12:15Z heartbeat: all five PRs open, no needs-fix/needs-rebase; lane landing stale-proof PRs one at a time (#4886, #4943 merged; dev at 58bb6d4d5); ours still queued; no slice done, 0 findings
 - 12:38Z heartbeat: all five PRs open and clean, no needs-fix/needs-rebase; lane batch 20261025122638 (one at a time) holds none of ours; dev at 58bb6d4d5; no slice done, 0 findings
 - 13:00Z heartbeat: all five PRs open and clean, no needs-fix/needs-rebase; lane landed #4953 (dev 930337d52), batch 20261025125743 holds none of ours; no slice done, 0 findings
+- 02:08Z resume (run act-1a175f40239-xop3): #4894 HF-m (head d9c7c9d2, local-ci/prescreen green), #4936 HF-4 (stacked on HF-m) and #5092 HF-z (feature-done) are open, clean, fast-lane, beta, no needs-fix/needs-rebase, and merge clean with dev 8987427d; the lane is landing beta PRs one at a time, ours queued. 0 file-flow findings (26 open line:halo findings, none touch file-flow files). Rerunning the gate on HF-m + today's dev.
