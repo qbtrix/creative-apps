@@ -287,3 +287,4 @@ utc	stage	event	ref	note
 2026-10-26T10:03Z	check-in	XP-4 #5065 merged; PX-5 re-pointed to wait PX-9 (Size row off); #5758/#5763 still in lane; #5353 open
 2026-10-26T10:35Z	check-in	quiet: #5758/#5763 still in lane, #5353 open, no new findings
 2026-10-26T11:19Z	check-in	quiet: #5353 open; #5758/#5763 in lane, no labels; no new findings; dev-red #5321 not ours
+2026-10-26T11:53Z	check-in	quiet: #5353 open (clean); #5758 unstable only from the 08:11Z cancelled lane run, prescreen green; #5763 clean; no new findings
