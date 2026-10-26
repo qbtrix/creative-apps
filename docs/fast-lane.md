@@ -185,7 +185,7 @@ its own). PRs without code still batch, held by red_holds as above.
 
 Auto-revert (revert_sweep, after the batches so a revert waits for one
 holding the lane): while the dev-red issue is open (red_sweep; a Linux or a macOS red),
-the lane makes one revert call on it. The culprit (revert_culprit) is
+the lane makes one revert call per culprit on it. The culprit (revert_culprit) is
 red_bisect's verdict on the issue (a certain one: a "likely" verdict from a
 timing budget test is not enough), else the only PR commit (a subject ending
 `(#N)`; generated commits have none) in the issue's range main..<red sha>. A
@@ -203,13 +203,19 @@ PR's `Feature:` line, feature_lead), or the PR itself, gets one comment with
 the failure and how to bring the change back (a new PR that reverts the
 revert, plus the fix), and a `finding` issue labelled `line:<app>` is filed
 (build_apps over the culprit's files; shared code or several apps:
-`line:suite`). The call ends with a REVERT_MARK comment on the dev-red issue,
-which also records a call that found nothing to revert: the culprit is a
-revert itself (never reverted), not a PR's commit, does not revert cleanly,
-or no culprit was named, touches a protected path (captain review only, and
-the lane's token can't push workflows), or its revert could not be pushed or
-opened. With one call per issue no sweep opens two reverts,
-and a dev still red after its revert waits for a human.
+`line:suite`). The call ends with a REVERT_MARK comment on the dev-red issue
+naming the culprit's sha7 (or `none`), which also records a call that found
+nothing to revert: the culprit is a revert itself (never reverted), not a
+PR's commit, already has a lane revert open or a revert on dev (never two for
+one PR), does not revert cleanly, or no culprit was named, touches a
+protected path (captain review only, and the lane's token can't push
+workflows), or its revert could not be pushed or opened. The mark is keyed on
+the verdict, not the issue: a sha7 (or `none`) already marked is never called
+again, so a dev still red on the same culprit after its revert waits for a
+human, but a second, different red inside the same open issue (an earlier
+`none` note for a macOS-only red, then a Linux bisect that names a culprit)
+gets its own call. A sweep opens at most one revert, and while the lane's
+revert for the issue is open it only lands that one.
 
 The revert PR (a bot author on a REVERT_PREFIX branch with REVERT_LABEL,
 its body saying `Refs #<the open dev-red issue>.`; one from an older issue is
