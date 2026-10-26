@@ -185,3 +185,4 @@ utc	stage	event	ref	note
 2026-10-26T06:54:55Z	3	poll	-	06:54Z poll: no merges of ours; dev 798f1f0a (#5244 p0); #4893/#4902 clean+eligible; dev-red #5321 open; 0 findings.
 2026-10-26T07:25:51Z	3	poll	-	07:25Z poll: no merges of ours; dev 99ace703 (#5043 p0); #4893/#4902 clean+eligible; dev-red #5321 open; 0 findings.
 2026-10-26T07:47:53Z	3	poll	-	07:47Z poll: no merges of ours; dev 3e26fbe4 (#5264 p0); #4893/#4902 clean+eligible; dev-red #5321 open; 0 findings.
+2026-10-26T08:15:49Z	3	poll	-	08:15Z poll: no merges; dev unchanged 3e26fbe4; #4893/#4902 eligible; dev-red #5321 open; 0 findings.
