@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main ef37711d (verified) / dev ae3efdb8
 Next: #4889 (FH-u) re-integrated at 5a1a54b2 (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #4896 (add fast-lane) and #5245 to dev, then the FH-7 chain, #5109, #5251; FH-c waits on fix PRs #5121, #5129, #5137.
-Polled: 2026-10-26T21:12Z · all 4 needs-rebase fixes pushed (CB-13, AR-11, FH-3, CB-14) plus #5103 re-merged on AR-11; stripped attribution footers from #5103/#5121/#5137 bodies; #4896 body to be cleaned when retargeted
+Polled: 2026-10-26T21:15Z · fill-heal: finding #5093 (bucket edge tint) taken as FH-c fix round 1 on lead/fill-heal-FH-c-5093; #5121/#5137 cover #5095/#5094; #4577 merged so #5137 is on dev
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
