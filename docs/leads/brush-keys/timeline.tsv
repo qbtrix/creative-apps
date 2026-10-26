@@ -208,3 +208,4 @@ utc	stage	event	ref	note
 2026-10-26T16:33Z	3	poll	-	no merges of ours; #4939 and #5799 await the lane; dev-red #5321 last seen open
 2026-10-26T16:51Z	3	poll	-	no merges of ours, dev unchanged; #4939 and #5799 await the lane; dev-red #5321 open; removed an attribution footer from lead comment 6411461028 on #5321
 2026-10-26T17:12Z	3	poll	-	no merges of ours; #4939 and #5799 await the lane; dev-red #5321 open
+2026-10-26T17:28Z	3	poll	-	dev unchanged; #4939 and #5799 await the lane
