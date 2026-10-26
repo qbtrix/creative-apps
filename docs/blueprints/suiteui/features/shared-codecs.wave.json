@@ -131,7 +131,14 @@
         "Sources/LibraryApp/Platform/XMPSidecarWriter.swift",
         "Sources/LibraryModel/Fakes/FakeSidecars.swift"
       ],
-      "waits": {},
+      "waits": {
+        "shared-thumbnails:ST-m": [
+          "SC-16"
+        ],
+        "clipboard-interop:CB-library": [
+          "SC-16"
+        ]
+      },
       "ui": true
     },
     {
@@ -312,6 +319,15 @@
         ],
         "adopt-kernel-autosave:AK-z": [
           "SC-11"
+        ],
+        "clipboard-interop:CB-s": [
+          "SC-12"
+        ],
+        "placed-images:PL-u": [
+          "SC-12"
+        ],
+        "placed-images:PL-z": [
+          "SC-12"
         ]
       },
       "ui": false
