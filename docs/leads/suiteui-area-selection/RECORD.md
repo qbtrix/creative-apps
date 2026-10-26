@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main ef37711d (verified) / dev ae3efdb8
 Next: #5096 (AR-photo-u) re-integrated at 4d85628f (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #5103, then #5254, #5256; Belt-Slice-Done on a green main run that contains the last AR-photo-u/AR-z PR.
-Polled: 2026-10-26T21:15Z · fill-heal: finding #5093 (bucket edge tint) taken as FH-c fix round 1 on lead/fill-heal-FH-c-5093; #5121/#5137 cover #5095/#5094; #4577 merged so #5137 is on dev
+Polled: 2026-10-26T21:23Z · fill-heal: #5093 is a spec conflict (core's antiAlias ring vs RJ-P51 'logo unchanged'); asked the supervisor on #3778 (comment 6427660298); repro test saved, no code change pending the answer
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
