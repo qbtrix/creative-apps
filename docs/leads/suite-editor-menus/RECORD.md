@@ -206,3 +206,7 @@ lane/batch-20261026052705 (tip #5239) holds none of #4988, #5164, #5364, #4999, 
 ## 2026-10-26T06:04:46Z poll
 
 Batch 20261026052705 landed (dev at c480d84). #4988, #5164, #5364, #4999 and #5000 are still open, with no needs-fix or needs-rebase, and no footer in a body. They wait for the next batch.
+
+## 2026-10-26T06:25:50Z poll
+
+#4988, #5164, #5364, #4999 and #5000 are unchanged: open, mergeable, with no needs-fix or needs-rebase and no red or running check. They wait for a lane batch.
