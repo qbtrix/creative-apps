@@ -6,7 +6,10 @@
 // With no revision shown (a new image, a new size) every tile comes, and the
 // update says it is complete. The full-frame `render` stays the reference: the
 // tiles laid where they belong equal its bytes, premultiplied the same way
-// (`premultiplied(_:)`). The live canvas renders through a PhotoRenderRoute
+// (`premultiplied(_:)`). While Free Transform is up, both draw the draft's
+// layer through the draft (`transformPreview`, resampled once per update), so
+// the cached base under it stands and only it and the layers above composite.
+// The live canvas renders through a PhotoRenderRoute
 // (CoreRender's dispatcher, CPU or GPU) and the update names the backend whose
 // display encode made its bytes; `completeUpdate` (snapshots) stays on
 // CoreRaster. A GPU route with resident tiles and a PhotoDisplayTarget writes
@@ -69,6 +72,8 @@ extension PhotoRenderer {
     ) async throws -> PhotoTileUpdate {
         guard let canvas = workspace.canvas else { throw RasterError.invalid("no image is open") }
         let clock = ContinuousClock()
+        // Free Transform's draft draws live: its layer resampled once per update, then composited as any layer.
+        let workspace = workspace.transformPreview
         let started = clock.now
         let damage = revision.map { workspace.damage(since: $0) } ?? .all
         // A new picture or size: the kept composites belong to the old regions.
@@ -191,6 +196,7 @@ extension PhotoRenderer {
     /// thread, for a picture that can wait (snapshots). Throws as `update` does.
     public static func completeUpdate(_ workspace: PhotoWorkspace) throws -> PhotoTileUpdate {
         guard let canvas = workspace.canvas else { throw RasterError.invalid("no image is open") }
+        let workspace = workspace.transformPreview
         let tiles = try tiles(of: canvas, in: .all).map { rect in
             var bytes = try workspace.rendered(rect).rgba8()
             premultiply(&bytes)
