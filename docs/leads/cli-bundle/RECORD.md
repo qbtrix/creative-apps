@@ -116,3 +116,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 - 2026-10-26T12:39:40Z: builder started: CB-z follow-up (in-app help.install-cli shares the CLI install plan), stacked on #4999; #4999 still beta, queued
 - 2026-10-26T13:10:03Z: #5793 opened: in-app help.install-cli shares the CLI install plan (drift #5642), stacked on #4999; next: CLI --bundle builder (drift #5643)
 - 2026-10-26T13:10:53Z: #4999 and #5793 open, fast-lane, beta, no lane comments since; --bundle builder running
+- 2026-10-26T13:30:40Z: #5794 CLI --bundle (drift #5643), stacked on #5793; gate PASS at 11fc8017; Arguments plan 6/8 (2 pre-existing CLI.swift entries escape on stacked base, checking on dev)
