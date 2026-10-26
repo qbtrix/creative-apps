@@ -2,9 +2,9 @@
 
 Issue: #3477 · Packet: docs/blueprints/suiteui/features/export-pack.md
 Run: act-1a175ea55b7-729d (line lead, line:suiteui; relaunch 2026-10-26) · earlier: act-1a16fe1fa73-5x3s (line lead, line:suiteui; relaunch) · earlier: act-1a16c618fe7-h4fd (line lead, line:suiteui; unparked by the supervisor 2026-10-24)
-Stage: 3 wave 5: restack #5043 chain on dev
+Stage: 3: XP-a/XP-u/XP-z PRs open; finding #5326 fixed in #5374
 Base: origin/dev 8eff8ab85
-Next: XP-m done (run 40247461868 contains #5044, #5074): post Belt-Slice-Done. Merge origin/dev into #5043 → #5065 → #5104 → #5106 (stale stack), gate, move Head. XP-10 once XP-3, XP-8 merge.
+Next: Lane lands #5043 → #5065 → #5104 → #5106 and #5374; then XP-10 (C4 part, wave built, feature-done).
 
 
 ## Run act-1a175ea55b7-729d decisions
@@ -12,6 +12,8 @@ Next: XP-m done (run 40247461868 contains #5044, #5074): post Belt-Slice-Done. M
 - PR base stays `dev` (CLAUDE.md; BASE_BRANCH=dev in scripts/fast-lane.sh; the lane retargets main PRs).
 - Stacked PRs whose parent squash-merged carry the parent's commits (size FAIL, dirty): merge origin/dev into each branch, gate, move Head.
 - XP-7 #5044 merged 16:19Z (c2681786c), XP-9 #5074 merged 16:59Z (5b1d3a19b), #4960 merged; scoped suiteui run 40247461868 at 30096d710 green and contains them.
+- 2026-10-26T03:07:58Z: #5326 (packet's shape tolerance) fixed in the packet; the code's half-pixel rule stays, with a boundary test and two mutations (#5374).
+
 ## Run act-1a16fe1fa73-5x3s decisions
 - 22:59Z: the 22:27Z poll was one-shot, so no heartbeat ran from 22:28Z to 22:59Z. Each poll now schedules the next one 15 min out.
 - Brief rule 1: main checked out at e79e9afc; lead/export-pack and lead/brush-keys rebased onto origin/main and pushed (--force-with-lease).
