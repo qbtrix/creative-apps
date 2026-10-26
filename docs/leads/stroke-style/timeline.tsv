@@ -284,3 +284,4 @@ utc	stage	event	ref	note
 2026-10-26T17:30Z	wait	heartbeat	#5321	17:30 poll: slice PRs open and clean; waiting on dev-red #5321 and full CI 40366795361
 2026-10-26T17:43Z	wait	heartbeat	#5321	17:43 poll: slice PRs open and clean; waiting on dev-red #5321 and full CI 40366795361
 2026-10-26T17:57Z	wait	heartbeat	#5321	17:57 poll: slice PRs open and clean; waiting on dev-red #5321 and full CI
+2026-10-26T18:13Z	wait	heartbeat	#5321	18:12 poll: waiting on dev-red #5321 (not ours); slice PRs clean
