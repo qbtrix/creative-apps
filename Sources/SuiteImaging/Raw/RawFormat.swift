@@ -3,7 +3,12 @@
 // row (`SuiteImageFormat.cameraRaw`), never a list of this module's; why a
 // file can't be read is one of `RawRefusal`'s four sentences; and
 // `RawDecodePlan` says how much picture a request decodes: the camera's
-// embedded preview, a draft develop or every pixel. Linux-safe.
+// embedded preview, a draft develop, a scaled develop or every pixel. Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 import SuiteModel
 
 /// A camera RAW file's extension, upper case as the refusals name it ("NEF"). Which extensions are RAW is
@@ -79,6 +84,7 @@ public struct RawFileInfo: Hashable, Sendable {
 public enum RawQuality: Hashable, Sendable {
     case thumbnail(longestSide: Int)          // the embedded preview may stand in
     case preview(longestSide: Int)            // a draft decode at that size
+    case fitted(longestSide: Int)             // a full-quality develop scaled to that size: Photo past its pixel cap
     case full                                 // every pixel, never draft: the loupe at 100 %, Photo, export
 }
 
@@ -89,13 +95,14 @@ public enum RawDecodePlan: Hashable, Sendable {
     case refuse(RawRefusal)
 
     /// The embedded preview for a thumbnail it covers (or any thumbnail of a file the system can't
-    /// develop), a draft develop at the size a thumbnail or preview needs, every pixel for `.full`.
+    /// develop), a draft develop at the size a thumbnail or preview needs, a full-quality develop scaled
+    /// to `.fitted`'s size, every pixel for `.full`.
     /// A file that can't be developed and has no preview to stand in is refused. Scale is never above 1.
     public static func plan(_ quality: RawQuality, info: RawFileInfo) -> RawDecodePlan {
         let full = info.size.longSide
         let want: Int
         switch quality {
-        case .thumbnail(let side), .preview(let side): want = max(1, min(side, full))
+        case .thumbnail(let side), .preview(let side), .fitted(let side): want = max(1, min(side, full))
         case .full: want = full
         }
         let refused = RawDecodePlan.refuse(.undevelopable(camera: info.camera))
@@ -107,6 +114,8 @@ public enum RawDecodePlan: Hashable, Sendable {
             return info.developable ? .develop(scale: scale(want, of: full), draft: true) : refused
         case .preview:
             return info.developable ? .develop(scale: scale(want, of: full), draft: true) : refused
+        case .fitted:
+            return info.developable ? .develop(scale: scale(want, of: full), draft: false) : refused
         case .full:
             return info.developable ? .develop(scale: 1, draft: false) : refused
         }
@@ -121,3 +130,9 @@ public enum RawDecodePlan: Hashable, Sendable {
 
 /// Hashable on top of the contract's Equatable, so `RawDecodePlan.refuse` can be.
 extension RawRefusal: Hashable {}
+
+/// `localizedDescription` is `message`, so a caller that shows any error's description (Photo's
+/// open-failure alert, the headless CLI) shows the sentence, never Foundation's generic text.
+extension RawRefusal: LocalizedError {
+    public var errorDescription: String? { message }
+}
