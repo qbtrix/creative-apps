@@ -9,8 +9,8 @@
   {
     "label": "refusalIsSuccess: startExport reports true when the kernel's start refuses (no sheet open)",
     "file": "Sources/PhotoModel/PhotoExportRun+Kernel.swift",
-    "find": "        guard isExportSheetOpen else { return false }\n",
-    "replace": "        guard isExportSheetOpen else { return true }\n",
+    "find": "        guard isExportSheetOpen else { return false }\n        _ = exportRun.begin(o)\n",
+    "replace": "        guard isExportSheetOpen else { return true }\n        _ = exportRun.begin(o)\n",
     "tests": "PhotoExportRunTests"
   },
   {

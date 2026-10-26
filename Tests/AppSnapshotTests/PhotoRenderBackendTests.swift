@@ -16,7 +16,7 @@ import CoreRaster
 import CoreRender
 import CoreRenderMetal
 import Metal
-import PhotoModel
+@testable import PhotoModel
 import SuiteUI
 import Testing
 
@@ -87,7 +87,10 @@ import Testing
 
     @Test(.enabled(if: device != nil)) func theResidentPathDrawsTheReferenceIntoATextureAndUploadsOnlyChanges() async throws {
         var workspace = try Self.document()
-        for layer in workspace.layers { if case .adjustment = layer.kind { workspace.toggleVisibility(layer.id) } }
+        for layer in workspace.layers {
+            if case .adjustment = layer.kind { workspace.toggleVisibility(layer.id) }
+            workspace.masks[layer.id] = nil  // a masked layer takes the dispatcher route
+        }
         let canvas = try #require(workspace.canvas)
         let metal = try Self.metal()
         let resident = ResidentSurfaces(backend: metal)
@@ -117,7 +120,10 @@ import Testing
 
     @MainActor @Test(.enabled(if: device != nil)) func theLiveHostShowsTheResidentPictureInThePresentersTexture() async throws {
         var workspace = try Self.document()
-        for layer in workspace.layers { if case .adjustment = layer.kind { workspace.toggleVisibility(layer.id) } }
+        for layer in workspace.layers {
+            if case .adjustment = layer.kind { workspace.toggleVisibility(layer.id) }
+            workspace.masks[layer.id] = nil  // a masked layer takes the dispatcher route
+        }
         let canvas = try #require(workspace.canvas)
         // As the app wires it: the host on the system device, the backend on MetalBackend.defaultDevice.
         let host = CanvasHostView(frame: CGRect(x: 0, y: 0, width: 400, height: 300))

@@ -5,7 +5,10 @@
 // and runs them, and keeps the stored form Photo's: the same keys, Floats
 // written as Floats, `enabled` in AdjustmentKind order, and output levels
 // written only when they move off 0 and 1, so a file from before them opens
-// with neutral output levels and saves again byte for byte. Hue/saturation
+// with neutral output levels and saves again byte for byte; `tone` likewise
+// only when off neutral (tone-controls PT-1). Tone's steps (ToneRules) run
+// before every section, and its sharpen is one unsharp pass over the base
+// before them (tone-controls PT-3). Hue/saturation
 // stays Photo's own matrix (HueSaturation.swift): the GPU route and the live
 // tone route run that matrix, and they move together (IM-8). Linux-safe.
 import CoreRaster
@@ -32,15 +35,25 @@ extension AdjustmentSettings {
         AdjustCurve(points: points.map { AdjustCurvePoint(x: Double($0.x), y: Double($0.y)) })
     }
 
-    /// ImagingProgram's steps for the enabled sections among `kinds`.
-    func imagingSteps(_ kinds: Set<AdjustmentKind> = Set(AdjustmentKind.allCases)) -> [ToneAdjustment] {
+    /// The tone section's steps (temperature, tint, vibrance and the rest), which run before every section.
+    var toneSteps: [ToneAdjustment] { ToneRules.adjustments(tone) }
+
+    /// The tone section's sharpen: one unsharp pass over the base before every step, nil when off.
+    var unsharp: (amount: Double, sigma: Double, threshold: Double)? { ToneRules.unsharp(tone) }
+
+    /// ImagingProgram's steps: `tone` (the tone section's own steps when nil) first, then the enabled
+    /// sections among `kinds`.
+    func imagingSteps(
+        _ kinds: Set<AdjustmentKind> = Set(AdjustmentKind.allCases), tone: [ToneAdjustment]? = nil
+    ) -> [ToneAdjustment] {
         let on = kinds.intersection(enabled)
         let neutral = AdjustSettings.neutral
-        return ImagingProgram.adjustments(AdjustSettings(
+        let sections = AdjustSettings(
             exposure: on.contains(.exposure) ? imaging.exposure : neutral.exposure,
             levels: on.contains(.levels) ? imaging.levels : neutral.levels,
             curve: on.contains(.curves) ? imaging.curve : neutral.curve,
-            hueSaturation: on.contains(.hueSaturation) ? imaging.hueSaturation : neutral.hueSaturation))
+            hueSaturation: on.contains(.hueSaturation) ? imaging.hueSaturation : neutral.hueSaturation)
+        return ImagingProgram.adjustments(sections, tone: tone ?? toneSteps)
     }
 
     /// Every enabled section's step, as the render runs them.
@@ -76,7 +89,7 @@ extension AdjustmentSettings {
 extension AdjustmentSettings: Codable {
     private enum CodingKeys: String, CodingKey {
         case exposure, blackPoint, whitePoint, gamma, outputBlack, outputWhite, curvePoints, blurSigma
-        case hue, saturation, lightness, enabled
+        case hue, saturation, lightness, enabled, tone
     }
 
     public init(from decoder: any Decoder) throws {
@@ -97,7 +110,8 @@ extension AdjustmentSettings: Codable {
                 curve: Self.imagingCurve(try c.decode([CurvePoint].self, forKey: .curvePoints)),
                 hueSaturation: hueSaturation),
             blurSigma: try c.decode(Double.self, forKey: .blurSigma),
-            enabled: Set(try c.decode([AdjustmentKind].self, forKey: .enabled)))
+            enabled: Set(try c.decode([AdjustmentKind].self, forKey: .enabled)),
+            tone: try c.decodeIfPresent(ToneSettings.self, forKey: .tone) ?? .neutral)
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -114,5 +128,6 @@ extension AdjustmentSettings: Codable {
         try c.encode(saturation, forKey: .saturation)
         try c.encode(lightness, forKey: .lightness)
         try c.encode(AdjustmentKind.allCases.filter(enabled.contains), forKey: .enabled)
+        if !tone.isNeutral(nil) { try c.encode(tone, forKey: .tone) }
     }
 }

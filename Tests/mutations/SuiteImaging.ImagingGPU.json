@@ -1,0 +1,6 @@
+[
+{"label": "displayStepsLast: the display step is skipped", "file": "Sources/SuiteImaging/Route/ImagingGPU.swift", "find": "        program + displaySteps.gpu\n", "replace": "        program\n", "tests": "ImagingGPUTests/displayStepsLast"},
+{"label": "programInWrite: the program is left out of the write", "file": "Sources/SuiteImaging/Route/ImagingGPU.swift", "find": "premultiplied: true, tone: tone)", "replace": "premultiplied: true, tone: nil)", "tests": "ImagingGPUTests/programInWrite"},
+{"label": "targetRunsTheTone: the target write drops the tone", "file": "Sources/SuiteImaging/Route/ImagingGPU+Target.swift", "find": "premultiplied: true,\n                                      tone: tone)", "replace": "premultiplied: true,\n                                      tone: nil)", "tests": "ImagingGPUTargetTests/targetRunsTheTone"},
+{"label": "backendBehindARoute: no GPU backend is found", "file": "Sources/SuiteImaging/Route/ImagingGPU+Target.swift", "find": "        return Backend(metal)\n", "replace": "        _ = metal\n        return nil\n", "tests": "ImagingGPUTargetTests/backendBehindARoute"}
+]

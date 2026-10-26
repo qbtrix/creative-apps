@@ -15,7 +15,8 @@ import Testing
 @Suite struct DesignTextDrawTests {
     private let zoom = 2.0
 
-    /// Title (node-5) on `cards`, `.fake`, with `change` applied to its style as one step.
+    /// Title (node-5) on `cards`, `.fake`, with `change` applied to its style as one step (none when
+    /// it leaves the style as it is).
     private func title(_ change: (inout DesignTextStyle) -> Void) throws -> DesignNode {
         var model = DesignWorkspace()
         model.useServices(.fake)
@@ -23,8 +24,11 @@ import Testing
         #expect(opened)
         model.selectItem("node-5")
         var style = try #require(model.selectedNode).textStyle
+        let before = style
         change(&style)
-        try model.setStyle(.textStyle(style))
+        // Title's own style (16 pt Regular, leading) is already one of the cases; setting it again
+        // is refused as `.unchanged`, so only a real change goes through.
+        if style != before { try model.setStyle(.textStyle(style)) }
         let node = try #require(model.selectedNode)
         #expect(node.textStyle == style)
         return node
@@ -52,20 +56,20 @@ import Testing
                       width: Double(maxX - minX + 1) / zoom, height: Double(maxY - minY + 1) / zoom)
     }
 
-    @Test(.disabled("quarantine #3265 until 2026-10-22")) func size32DrawsAboutTwiceAsTallAs16() throws {
+    @Test func size32DrawsAboutTwiceAsTallAs16() throws {
         let small = try ink(title { $0.size = 16 })
         let large = try ink(title { $0.size = 32 })
         #expect(large.height >= 1.8 * small.height, "32 pt ink \(large.height) pt tall, 16 pt \(small.height) pt")
         #expect(large.width > small.width)
     }
 
-    @Test(.disabled("quarantine #3267 until 2026-10-22")) func boldDrawsWiderThanRegular() throws {
+    @Test func boldDrawsWiderThanRegular() throws {
         let regular = try ink(title { $0.weight = 400 })
         let bold = try ink(title { $0.weight = 700 })
         #expect(bold.width > regular.width, "Bold \(bold.width) pt wide, Regular \(regular.width) pt")
     }
 
-    @Test(.disabled("quarantine #3266 until 2026-10-22")) func centerPutsTheInkInTheBoxsMiddle() throws {
+    @Test func centerPutsTheInkInTheBoxsMiddle() throws {
         let node = try title { $0.alignment = .center }
         let drawn = try ink(node)
         #expect(abs(drawn.midX - node.frame.cgRect.midX) <= 1, "ink middle \(drawn.midX), box middle \(node.frame.cgRect.midX)")
