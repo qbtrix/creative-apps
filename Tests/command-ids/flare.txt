@@ -9,6 +9,8 @@ color-key.move
 color-key.remove
 color-key.set
 document.metadata
+document.read-settings
+document.set-settings
 edit.copy
 edit.cut
 edit.delete
