@@ -306,3 +306,4 @@ time	kind	note
 2026-10-26T22:26Z	wait	heartbeat	#5321	22:26 poll: lane held by dev-red #5818; slice PRs queued
 2026-10-26T22:27Z	DK-m	merged	#4916 as 9810d71b; full CI 40411399952 queued
 2026-10-26T22:40Z	wait	heartbeat	#5321	22:40 poll: full CI 40411399952 on 9810d71b pending; #5002/#5011 queued
+2026-10-26T22:53Z	wait	heartbeat	#5321	22:53 poll: DK-m runs on 9810d71b in flight; #5002/#5011 queued
