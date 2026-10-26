@@ -29,7 +29,7 @@ import SuiteKernel
     @Test func aHandleDragShowsWhereItIsAndCommitsTheSamePath() throws {
         var doc = PathDoc.editing
         var live = PathLiveDrag(draft: nil, path: doc.pathInEdit, selection: doc.anchorSelection)
-        live.run(.handle(AnchorEditTests.mid, .handleOut, to: Point(x: 100, y: 40), breaking: true, drag: "h"))
+        live.run(.handle(AnchorEditTests.mid, .handleOut, to: Point(x: 100, y: 40), breaking: false, drag: "h"))
         live.run(.handle(AnchorEditTests.mid, .handleOut, to: Point(x: 100, y: 20), breaking: false, drag: "h"))
         #expect(live.pathInEdit?.path.contours.first?.anchors.dropFirst().first == AnchorEditTests.dragged())
         try Self.commit(live.held, on: &doc)
