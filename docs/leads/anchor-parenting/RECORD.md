@@ -117,3 +117,4 @@ Run act-1a1695ebfeb-d54n, 2026-10-23T15:30Z; supersedes the tables' PR/state col
 - 2026-10-26T21:50Z (act-1a177ff0916-4jm7): poll: dev c4cf4a75; AN-5 #4893 merged (d4cdad3a); opened AN-6 as #5819 (9dfc99f3, cherry-picked onto dev, fast-lane, no local gate: no swift); AN-u done once #5819 lands and a green ci.yml contains it; AN-10 waits on #4902
 - 2026-10-26T22:11Z (act-1a177ff0916-4jm7): poll: dev c4cf4a75; no tracked merges; #5819 AN-u open; AN-10 waits on #4902
 - 2026-10-26T22:29Z (act-1a177ff0916-4jm7): poll: dev 9810d71b; no tracked merges; #5819 AN-u open; AN-10 waits on #4902
+- 2026-10-26T22:48Z (act-1a177ff0916-4jm7): poll: dev 3d94856c; #5819 AN-u in lane; AN-10 waits on #4902

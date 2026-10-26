@@ -225,3 +225,4 @@ utc	stage	event	ref	note
 2026-10-26T21:50Z	3	poll	-	AN-5 #4893 merged (d4cdad3a); opened AN-6 as #5819 (9dfc99f3, cherry-picked onto dev, fast-lane, no local gate: no swift); AN-u done once #5819 lands and a green ci.yml contains it; AN-10 waits on #4902
 2026-10-26T22:11Z	3	poll	-	no tracked merges; #5819 AN-u open; AN-10 waits on #4902
 2026-10-26T22:29Z	3	poll	-	no tracked merges; #5819 AN-u open; AN-10 waits on #4902
+2026-10-26T22:48Z	3	poll	-	#5819 AN-u in lane; AN-10 waits on #4902
