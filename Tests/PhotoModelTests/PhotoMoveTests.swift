@@ -1,8 +1,10 @@
-// PhotoMoveTests.swift: the move tool moves the selected layer (#197). Runs
-// on Linux and macOS.
+// PhotoMoveTests.swift: the move tool moves the selected layer (#197), and a
+// move damages the canvas only where the layer was and is. Runs on Linux and
+// macOS.
 import CoreRaster
-import PhotoModel
 import Testing
+
+@testable import PhotoModel
 
 @Suite struct PhotoMoveTests {
     /// A white image with a top layer holding a red square at (8, 8)-(20, 20).
@@ -39,6 +41,20 @@ import Testing
         #expect(workspace.selectedLayer?.offsetX == 5 && workspace.selectedLayer?.offsetY == 3)
         workspace.undo()
         #expect(workspace.selectedLayer?.offsetX == 0 && workspace.selectedLayer?.offsetY == 0)
+    }
+
+    @Test func aMoveDamagesWhereTheLayerWasAndIs() throws {
+        var workspace = try whiteImage(256, 160)
+        let red = TiledPixels(try PixelBuffer(width: 16, height: 16, fill: RGBA(r: 1, g: 0, b: 0, a: 1)))
+        let id = workspace.insertLayer(named: "Square", pixels: red, kind: .pixels, at: 0)
+        let at = try #require(workspace.index(of: id))
+        (workspace.layers[at].offsetX, workspace.layers[at].offsetY) = (8, 8)
+        workspace.selectLayer(id)
+        let start = workspace.revision
+        stroke(&workspace, .move, from: point(10, 10), to: point(50, 30))
+        // The square was at (8, 8) and is at (48, 28): the canvas changed in the box around both, nowhere else.
+        #expect(workspace.damage(since: start) == .region(PixelRect(x: 8, y: 8, width: 56, height: 36)))
+        #expect(workspace.selectedLayer?.offsetX == 48 && workspace.selectedLayer?.offsetY == 28)
     }
 
     @Test func aMoveAfterACropKeepsTheLayerAligned() throws {

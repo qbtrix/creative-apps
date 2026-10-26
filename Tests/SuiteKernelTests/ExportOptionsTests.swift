@@ -66,6 +66,16 @@ import SuiteKernel
         #expect(wide == (2047, 1638))
     }
 
+    /// The tolerance is half the source's long side on `|w·sh − h·sw|` (#5326): for 3 × 7,
+    /// 1000 × 2333 (2333.3 rounded) and 1000 × 2334 keep the shape, 1000 × 2335 doesn't.
+    @Test func theShapeToleranceIsHalfThePixelOfRounding() throws {
+        #expect(try ExportRules.pixels(of: (3, 7), .pixels(width: 1000, height: 2333), evenSize: false) == (1000, 2333))
+        #expect(try ExportRules.pixels(of: (3, 7), .pixels(width: 1000, height: 2334), evenSize: false) == (1000, 2334))
+        #expect(throws: ExportOptionRefusal.self) {
+            try ExportRules.pixels(of: (3, 7), .pixels(width: 1000, height: 2335), evenSize: false)
+        }
+    }
+
     @Test func aShapeThatDoesNotKeepTheRatioIsRefused() {
         #expect(throws: ExportOptionRefusal.invalid(
             "1080 × 1351 doesn't keep the artwork's 4:5 shape. Unlock the ratio to stretch.")) {
