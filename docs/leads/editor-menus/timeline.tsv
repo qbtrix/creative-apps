@@ -227,3 +227,4 @@ utc	stage	event	ref	note
 2026-10-26T08:48:15Z	poll	unchanged; awaiting supervisor answer on lane hold
 2026-10-26T09:12:58Z	poll	lane hold explained (red_scope fix on dev 08:53); awaiting batch
 2026-10-26T09:35:16Z	poll	unchanged; awaiting batch
+2026-10-26T09:58:30Z	poll	unbatched; batches 611f8c7 (#5065) and 2042459 (#5163) skip ours; no supervisor answer
