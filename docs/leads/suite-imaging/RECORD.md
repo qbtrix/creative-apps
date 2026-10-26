@@ -28,6 +28,7 @@ Next: IM-13 after #5163 merges, then IM-14
 - 2026-10-26T08:22:21Z heartbeat: no merges; dev-red #5321 (macos) holds code batches; PRs clean
 - 2026-10-26T08:42:54Z heartbeat: no merges; #5297/#5299 lost fast-lane (over cap only while stacked on #5295): restack and relabel when #5295 merges
 - 2026-10-26T09:03:26Z heartbeat: no merges; #5297 relabelled fast-lane by lane, #5299 waits on #5295 restack
+- 2026-10-26T09:22:44Z heartbeat: no merges; dev-red holds code batches; #5297/#5299 wait on #5295 restack
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
