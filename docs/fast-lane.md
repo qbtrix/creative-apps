@@ -119,7 +119,37 @@ with no test to name (a build error, a crash) is never the base's.
 
 ## A red dev
 
-A red BASE_BRANCH gets its culprit found the same way (red_sweep): while a
+### The flake check
+
+A new `dev-red` issue is not red to the lane until its flake check is in
+(flake_check, first thing in red_sweep). The issue's `- Run:` line names the
+red run and its culprit range the red sha; the lane reruns that run's failed
+jobs once at that sha (`gh run rerun <id> --failed`; fast-lane.yml has
+`actions: write`) and posts one comment on the issue naming the run, the
+failing jobs and the failing tests read from the red logs (red_tests, read
+then, since the rerun overwrites them), ending in `<!-- lane-rerun <sha7>
+started -->`. That mark is the record: a sha with one is never rerun again,
+whatever the issue body says later, and an issue whose comments can't be read
+is red as before, so nothing can rerun twice. While the rerun runs the sweep
+returns before BASE_RED is set: nothing is held, bisected or reverted.
+
+A rerun that passes was a flake. The lane files one finding for a fixer
+(flake_finding): an open `finding` issue titled `Flaky test: <File>.swift/<test>`
+(`Flaky tests:` for several; `Flaky <jobs> job on dev, no test named` when the
+logs named none) gets a "Flaked again" comment, else one is created with the
+labels `finding`, `flaky` and `line:<app>` (build_apps over the tests' files;
+shared or unknown is `line:suite`), and the issue gets `<!-- lane-rerun <sha7>
+flake -->`. ci.yml's `promote` job reruns with the passed jobs and closes the
+dev-red issue, usually before a sweep sees the pass, so a sweep that finds no
+open dev-red issue reads the last closed one (flake_closed): a `started` mark
+with no verdict whose run passed gets its finding and mark there. A rerun that
+fails too makes the red real: the issue gets `<!-- lane-rerun <sha7> red -->`
+and the sweep goes on exactly as below. An issue with no `- Run:` line is red
+at once. `--dry-run` reruns nothing.
+
+### Holding, scoped to the red module
+
+A real red BASE_BRANCH gets its culprit found the same way (red_sweep): while a
 `dev-red` issue for a red Linux job is open, each sweep bisects main..<red sha>
 by first-parent commit with `ci/bisect-<red7>-<i>` probe branches and
 Linux-only runs (at most MAX_BISECT per red), testing red-triage's confident
@@ -134,9 +164,23 @@ value within BUDGET_NEAR of its budget posts the culprit as "likely".
 
 While the dev-red issue names a job a batch would run (red_holds: Linux
 always, macOS when the batch runs the macOS gate; the issue never names the
-failing app, so any macOS gate counts), no new batch forms and ready PRs
-wait: every probe of a batch on a red base is red, so its bisect only burns
-runs and can blame an innocent PR. A docs batch, which runs no macOS gate,
+failing app, so any macOS gate counts), the ready PRs that touch the red
+module wait and the rest batch as usual (settle_ready). The module comes from
+the failing tests (red_scope): each `<File>.swift` red_tests names is found
+in the tree of origin/BASE_BRANCH under `Tests/<Target>/`, and the scope
+(BASE_RED_SCOPE, a path regex) is `Tests/<Target>/` plus `Sources/<Target
+minus Tests>/` for each, so a red in SuiteUITests holds Sources/SuiteUI and
+Tests/SuiteUITests; evaluate marks each eligible PR that touches it (READY's
+last field). When the lane can't place the red (no test named, a build error
+or a crash; a file not in the tree; a target with no such Sources module,
+AppSnapshotTests or AppAuditTests) the scope is empty and no new batch forms:
+every ready PR waits, as before, since every probe of a batch on a red base
+is red, so its bisect only burns runs and can blame an innocent PR. A batch
+that does form on a red base, its PRs off the module, still fails a Linux red
+(scripts/ci runs every Model test) and lands on the PRs' own proof through
+the base-red rule above; a macOS gate scoped to other apps passes. Every
+other gate stays: a PR with a red check or proof never lands, protected paths
+stay refused. A docs batch, which runs no macOS gate,
 still forms on a macOS-only red. A batch already in flight whose base holds
 the issue's red sha gets a `lane/batch-<id>-red` marker branch; once the
 issue is closed and BASE_BRANCH has moved past that base, a marked batch is
