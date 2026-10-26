@@ -1,7 +1,13 @@
 // HaloFilesCommandTests.swift: HF-7 (history-files packet). Open…, Open
 // Recent, Save and Save As… act or say why: no composition to save, no
-// recent project, or a project opening. Runs on Linux and macOS.
+// recent project in the suite's list, or a project opening. Runs on Linux and macOS.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 import HaloModel
+import SuiteKernel
 import Testing
 
 private let fileCommands: [HaloCommand] = [.open, .openRecent("/t/Spot.halo"), .save, .saveAs]
@@ -23,9 +29,13 @@ struct HaloFilesCommandTests {
         #expect(project.unavailableHelp(for: .openRecent("/t/Spot.halo")) == "No recent projects.")
     }
 
-    @Test func aSavedProjectIsRecent() throws {
+    @Test func aProjectInTheSuitesRecentsIsRecent() throws {
         var project = HaloProject(services: .live, document: try #require(HaloFixtures.project("empty")))
         project.didSave(name: "Spot", path: "/t/Spot.halo")
+        #expect(project.unavailableHelp(for: .openRecent("/t/Spot.halo")) == "No recent projects.",
+                "a save filled Halo's own list; Open Recent reads only the suite's")
+        project.updateFileFlow(recents: [RecentFileEntry(fileID: "path:/t/Spot.halo", name: "Spot.halo", path: "/t/Spot.halo",
+                                                         app: "halo", lastUsed: Date(timeIntervalSince1970: 0))])
         #expect(project.unavailableHelp(for: .openRecent("/t/Spot.halo")) == nil)
     }
 
