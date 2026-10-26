@@ -199,3 +199,4 @@ utc	stage	event	ref	note
 2026-10-26T10:21:15Z	check	#5363 open, no prescreen status (~2h50m); all heads (PT-4 5260e203, PT-3 5e09f02c, PT-5 b1e44767, PT-7 131c8a3c) clean vs dev 2eab5aeb
 2026-10-26T10:41:08Z	check	#5363 open, still no prescreen status (~3h10m); all heads clean vs dev f3af1c00
 2026-10-26T11:01:43Z	merge	#5363 still no prescreen (~3h30m). Dev b200af5b (Curves histogram composite cache) conflicted with PT-5 in CurvesSection.swift; merged dev into PT-5 keeping both (live copy env + composites cache), gate running. PT-3/PT-7 clean
+2026-10-26T11:11:25Z	merge	PT-5 dev merge gate PASS (first run segfaulted in SampleOpenTests from a stale LibraryModel build; clean rebuild fixed it, passes on dev too), pushed 38204202
