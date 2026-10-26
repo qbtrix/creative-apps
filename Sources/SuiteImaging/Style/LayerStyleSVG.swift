@@ -17,6 +17,9 @@ import CoreRaster
 import SuiteKernel
 
 public enum LayerStyleSVG {
+    /// The unit box a style's `Fill` points are in.
+    static let unit = Rect(minX: 0, minY: 0, maxX: 1, maxY: 1)
+
     /// A `<filter>` for `style` on a shape whose box is `box`, and the styles it wrote approximately or not at all.
     /// The region is `box` grown by `StyleRules.reach` on every side; "" and no warnings when nothing is visible.
     public static func filter(_ style: LayerStyle, id: String, box: Rect) -> (svg: String, warnings: [String]) {
@@ -180,7 +183,7 @@ public enum LayerStyleSVG {
         }
 
         /// `fill` at `opacity` inside `mask`: a flood for a solid, an image of the box filled by
-        /// `GradientSVG.definition` for a gradient.
+        /// `GradientSVG.definition` for a gradient, its unit-box points mapped to `box`.
         mutating func painted(_ fill: Fill, opacity: Double, mask: String) -> String {
             let n = LayerStyleSVG.number
             if case .solid(let c) = fill {
@@ -190,7 +193,7 @@ public enum LayerStyleSVG {
             }
             let gradient = "\(id)-gradient", (x, y, w, h) = (n(box.minX), n(box.minY), n(box.width), n(box.height))
             let image = #"<svg xmlns="http://www.w3.org/2000/svg" viewBox="\#(x) \#(y) \#(w) \#(h)" preserveAspectRatio="none">"#
-                + GradientSVG.definition(fill, id: gradient)
+                + GradientSVG.definition(GradientRules.mapped(fill, from: LayerStyleSVG.unit, to: box), id: gradient)
                 + #"<rect x="\#(x)" y="\#(y)" width="\#(w)" height="\#(h)" fill="url(#\#(gradient))"/></svg>"#
             let placed = add("feImage", #"x="\#(x)" y="\#(y)" width="\#(w)" height="\#(h)" preserveAspectRatio="none" "#
                 + #"href="data:image/svg+xml;utf8,\#(LayerStyleSVG.escaped(image))""#)

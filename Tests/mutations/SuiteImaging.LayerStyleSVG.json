@@ -26,5 +26,19 @@
     "find": "let pad = Double(StyleRules.reach(style)), n = number",
     "replace": "let pad = 0.0, n = number",
     "tests": "LayerStyleSVGTests"
+  },
+  {
+    "label": "gradientMapsUnitBox: unit-box points written unmapped",
+    "file": "Sources/SuiteImaging/Style/LayerStyleSVG.swift",
+    "find": "GradientSVG.definition(GradientRules.mapped(fill, from: LayerStyleSVG.unit, to: box), id: gradient)",
+    "replace": "GradientSVG.definition(fill, id: gradient)",
+    "tests": "LayerStyleSVGTests"
+  },
+  {
+    "label": "unitBoxIsUnit: the unit box grown",
+    "file": "Sources/SuiteImaging/Style/LayerStyleSVG.swift",
+    "find": "static let unit = Rect(minX: 0, minY: 0, maxX: 1, maxY: 1)",
+    "replace": "static let unit = Rect(minX: 0, minY: 0, maxX: 2, maxY: 2)",
+    "tests": "LayerStyleSVGTests"
   }
 ]

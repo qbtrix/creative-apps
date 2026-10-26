@@ -49,13 +49,15 @@ import SuiteKernel
         #expect(svg.contains(#"filterUnits="userSpaceOnUse" x="-10" y="10" width="90" height="60""#))
     }
 
-    /// A gradient overlay paints an image of the box filled by `GradientSVG.definition`, clipped to the shape.
+    /// A gradient overlay paints an image of the box filled by `GradientSVG.definition`, clipped to the shape;
+    /// its unit-box points land on the box.
     @Test func gradientOverlayWritesItsPoints() {
-        let ramp = GradientRules.rotated(GradientRules.converted(.solid(.black), to: .linear, in: Self.box), to: 90, in: Self.box)
+        let unit = Rect(minX: 0, minY: 0, maxX: 1, maxY: 1)
+        let ramp = GradientRules.rotated(GradientRules.converted(.solid(.black), to: .linear, in: unit), to: 90, in: unit)
         var overlay = StyleRules.defaults(.gradientOverlay)
         overlay.parameters = .overlay(StyleOverlay(fill: ramp))
         let (svg, warnings) = LayerStyleSVG.filter(LayerStyle(effects: [overlay], fillOpacity: 1), id: "s1", box: Self.box)
-        let definition = GradientSVG.definition(ramp, id: "s1-gradient")
+        let definition = GradientSVG.definition(GradientRules.mapped(ramp, from: unit, to: Self.box), id: "s1-gradient")
         #expect(!definition.isEmpty && warnings.isEmpty && svg.contains("<feImage"))
         #expect(svg.contains(escaped(definition)) && svg.contains("operator=\"in\""))
     }
