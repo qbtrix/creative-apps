@@ -200,3 +200,4 @@ utc	stage	event	ref	note
 2026-10-26T21:59:43Z	stage3	fix	TS-halo	#5226 TS-9 needs-rebase: merged origin/dev at b406cca0; kept both textStyleSpecs and dev's FileFlowCommands in HaloCommandCatalog + its two tests, halo.list-commands golden merged by id (118 commands); gating
 2026-10-26T22:08:36Z	stage3	gate	TS-design	#5047 TS-7 merge 31b358be: scripts/ci --changed CI: PASS (AllAppsCatalogTests included); pushed, Head: moved
 2026-10-26T22:10:52Z	stage3	gate	TS-halo	#5226 TS-9 merge b406cca0616b8ccfe4c8876f0858698018855f00: scripts/ci --changed CI: PASS (Halo catalog tests + AllAppsCatalogTests); pushed, Head: moved
+2026-10-26T22:17:38Z	stage3	poll	all	20-min poll: #5047 #5226 re-gated heads pushed, awaiting lane; #4958 #5772 queued; no supervisor reply; 0 findings
