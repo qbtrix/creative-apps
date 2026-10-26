@@ -9,10 +9,10 @@
 //      SuiteImaging's macOS dependencies (`imagingMetal`) or the
 //      AppSnapshotTests test target.
 //
-// Tests/metal-boundary-baseline.txt grandfathers what predates the rule:
-// Photo's three canvas files and `appEngines["Photo"]`. It only shrinks: a
-// listed entry that no longer occurs fails too, so a fix deletes its line.
-// IM-8 moves Photo's files off it; IM-13 deletes it and appEngines["Photo"].
+// The tree runs with no baseline (suite-imaging IM-13): the grandfathered
+// Photo canvas files moved onto SuiteImaging (IM-8) and `appEngines["Photo"]`
+// left Package.swift, so Tests/metal-boundary-baseline.txt is gone. `check`
+// keeps its baseline argument for the rule's own tests.
 import Foundation
 import Testing
 import SuiteImaging
@@ -207,14 +207,12 @@ enum ImagingBoundary {
         #expect(result.stale.isEmpty)
     }
 
-    @Test func theTreePassesWithTheBaseline() throws {
-        let baseline = ImagingBoundary.baseline(try Self.read("Tests/metal-boundary-baseline.txt"))
-        #expect(baseline.count == 1)
+    @Test func theTreePassesWithNoBaseline() throws {
+        #expect(!FileManager.default.fileExists(atPath: Self.root.appendingPathComponent("Tests/metal-boundary-baseline.txt").path))
         let files = try Self.sourceTree()
         #expect(files.count > 100 && files["Sources/SuiteImaging/SuiteImaging.swift"] != nil)
-        let result = ImagingBoundary.check(files: files, manifest: try Self.read("Package.swift"), baseline: baseline)
-        #expect(result.new == [], "import Metal or link CoreRenderMetal only in SuiteImaging (Tests/metal-boundary-baseline.txt)")
-        #expect(result.stale == [], "delete these lines from Tests/metal-boundary-baseline.txt: it only shrinks")
+        let result = ImagingBoundary.check(files: files, manifest: try Self.read("Package.swift"), baseline: [])
+        #expect(result.new == [], "import Metal or link CoreRenderMetal only in SuiteImaging")
     }
 
     /// SuiteImaging names CoreRenderMetal only inside `#if os(macOS)`, so the

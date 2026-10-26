@@ -128,3 +128,7 @@ path.anchor-remove
 path.anchor-convert
 paths.list
 paths.edit
+tone.read
+tone.set
+tone.reset
+tone.auto
