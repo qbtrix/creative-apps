@@ -216,3 +216,4 @@ utc	stage	event	ref	note
 2026-10-26T04:35:48Z	poll	no merges; 4 open
 2026-10-26T04:58:12Z	poll	no lane sweep since 01:20Z; supervisor asked on #3774
 2026-10-26T05:20:31Z	poll	lane resumed (40272598879); our PRs still open
+2026-10-26T05:42:51Z	poll	batch 20261026052705 without our PRs; all unchanged

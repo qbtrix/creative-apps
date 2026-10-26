@@ -198,3 +198,7 @@ No change: #4988, #5164, #4999 and #5364 are open and clean, with no fix labels.
 ## 2026-10-26T05:20:31Z poll
 
 #4988, #5364 and #4999: still open and clean, no fix labels. The lane resumed (sweep 40272598879 running, #5154 merged about 05:07Z). Removed the auto-added footer from the #3774 question and noted the resume there.
+
+## 2026-10-26T05:42:51Z poll
+
+lane/batch-20261026052705 (tip #5239) holds none of #4988, #5164, #5364, #4999, #5000. All five unchanged: open, clean, no needs-fix or needs-rebase. They wait for the next batch.
