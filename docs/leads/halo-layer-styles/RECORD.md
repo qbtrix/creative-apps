@@ -5,7 +5,7 @@ Run: act-1a175e3e638-skn9 · Session: claude/layer-styles-lead-s46uof · Started
 Wire: suiteui layer-styles:LS-a
 Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTests.glowReachesItsKeyedSize and glowIsNotClipped; add the no-padding mutation, origin dropped in LiveFrameRendering's styled composite)
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
-Stage: 3 polling (02:10Z): Packet-Review 1 applied: HY-m amendments on #5158 (b84d8cb4, gated, ready, prescreen green); amendment 2 (3 keyframes) on HY-u #5161. dev-red #5321 open (macOS, Photo/Library range, not ours)
+Stage: 3 polling (02:00Z): Packet-Review 1 applied: HY-m amendments on #5158 (b84d8cb4, gated, ready, prescreen green); amendment 2 (3 keyframes) on HY-u #5161 (fa7e3ca6c, gated, Head moved). dev-red #5321 open (macOS, Photo/Library range, not ours)
 Base: 8eff8ab85 (origin/dev; main d3323f6a7 verified at relaunch)
 Next: wait for the lane to land #5158 (HY-m) and #5174 (LS-2); on #5174 merge: merge dev into #5157, #5161, #5218 in order, gate, push, Head, ready
 
