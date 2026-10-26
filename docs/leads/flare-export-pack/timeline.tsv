@@ -233,3 +233,4 @@ utc	stage	event	ref	note
 2026-10-26T18:54Z	poll	dev-red #5321 closed (dev green fef52e66); #4854/#5025 open, waiting on lane batch; #3481 25 comments
 2026-10-26T19:13Z	poll	no dev-red; #4854/#5025 open, clean, markers on head; lane batch-20261026190158 holds only #5334; #3481 25 comments
 2026-10-26T19:30Z	poll	no dev-red; #4854/#5025 open, clean; lane sweep 40381579837 running since 18:52Z, later sweeps cancelled behind it
+2026-10-26T19:50Z	poll	no dev-red; #4854/#5025 open, clean, not in batches 193102..193833 (single PRs #5762 #5802 #3313 #3645 #3651); lane sweep 40386832050 running
