@@ -10,6 +10,7 @@ import Testing
         #expect(ImportProgress(done: 10, total: 40, elapsed: 30).secondsLeft == 90)
         #expect(ImportProgress(done: 10, total: 40, elapsed: 30).text == "Importing 11 of 40, about 2 minutes left")
         #expect(ImportProgress(done: 20, total: 40, elapsed: 60).text == "Importing 21 of 40, about 1 minute left")
+        #expect(ImportProgress(done: 10, total: 17, elapsed: 100).text == "Importing 11 of 17, about 2 minutes left")
         #expect(ImportProgress(done: 30, total: 40, elapsed: 30).text == "Importing 31 of 40, less than a minute left")
     }
 

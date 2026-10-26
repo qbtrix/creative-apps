@@ -128,11 +128,24 @@ public struct FolderScan: Hashable, Sendable {
 public struct ImportProgress: Hashable, Sendable {
     public var done: Int
     public var total: Int
-    public init(done: Int, total: Int) {
-        self.done = done; self.total = total
+    /// Seconds since the import began; the window sets it as each progress arrives.
+    public var elapsed: Double
+    public init(done: Int, total: Int, elapsed: Double = 0) {
+        self.done = done; self.total = total; self.elapsed = elapsed
     }
-    /// "Importing 3 of 27".
-    public var text: String { "Importing \(min(done + 1, max(total, 1))) of \(max(total, 1))" }
+    /// "Importing 3 of 27", then ", about 2 minutes left" once there is a pace.
+    public var text: String {
+        let count = "Importing \(min(done + 1, max(total, 1))) of \(max(total, 1))"
+        guard let left = secondsLeft else { return count }
+        if left < 60 { return count + ", less than a minute left" }
+        let minutes = Int((left / 60).rounded(.up))
+        return count + (minutes == 1 ? ", about 1 minute left" : ", about \(minutes) minutes left")
+    }
+    /// The rest at the pace so far; nil before a file is done or a second has passed, and once all are.
+    public var secondsLeft: Double? {
+        guard done > 0, done < total, elapsed >= 1 else { return nil }
+        return elapsed * Double(total - done) / Double(done)
+    }
 }
 
 public struct ImportResult: Hashable, Sendable {
