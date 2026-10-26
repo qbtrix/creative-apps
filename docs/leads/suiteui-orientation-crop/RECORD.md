@@ -94,3 +94,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-26T22:10:38Z OC-z: candidates scoped photo 40407350095 (3ebc8d43, queued) and scoped flare/design/suiteui/halo on c4cf4a75 (running). dev-red #5818 flake rerun still running, no bisect.
 - 2026-10-26T22:32:36Z OC-z: scoped flare 40408713400 (c4cf4a75, contains b59575ef) green; waiting on scoped photo 40407350095 (running, tests OC-z's Photo files) as the proof, flare run is the fallback. dev-red #5818: flake rerun red too, no bisect verdict, lane leaves culprit to a human; not ours.
 - 2026-10-26T22:49:29Z OC-z Belt-Slice-Done + Belt-Contact-Sheet posted on scoped photo 40407350095; journeys photo 40414264597 pending for critics
+- 2026-10-26T23:09:12Z OC complete; journeys photo 40414264597 still running (waiting for macOS runner) for critics
