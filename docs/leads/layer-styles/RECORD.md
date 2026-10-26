@@ -1,10 +1,10 @@
 # layer-styles lead record
 
 Issue: #3937 · Packet: docs/blueprints/suiteui/features/layer-styles.md
-Run: act-1a1705bc1ae-pb09 · Session: claude/feature-lead-suiteui-ebo2et · Resumed: 2026-10-25T00:03Z
+Run: act-1a175e3e61f-9qd4 · Session: claude/layer-styles-lead-u8mk3r · Resumed: 2026-10-26T03:00Z (previous run act-1a1705bc1ae-pb09)
 Stage: 3 wave check
-Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
-Next: next check 00:47Z
+Base: 8eff8ab8501bca4fcd020a4a5c1d22a4df69e1eb (origin/dev; main at d3323f6a7, dev-red #5321 open)
+Next: packet-review docs PR; LS-10 #4903 amendment push; lane check
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -19,11 +19,11 @@ Next: next check 00:47Z
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| LS-1 | LS-a | 1 | The Style module as stubs, the C4 part, four suites written and disabled | Sources/SuiteImaging/Style/*.swift, Sources/SuiteImaging/Route/StyleRoute.swift, Tests/SuiteImagingTests/{LayerStyleRules,StyleCommands,LayerStyleSVG,StyleProgram}Tests.swift, docs/c4/parts/creative-apps/suite-imaging/imaging-style.json | the suites compile, disabled; ImagingBoundaryTests | #4911 | pr-open |
-| LS-2 | LS-a | 2 | Placeholder panel, rows, pasteboard; gallery layer-style page; journey skipped | Sources/SuiteUI/{LayerStylePanel,LayerStyleRows}.swift, Sources/SuiteUI/Gallery/GalleryLayerStyle.swift, Sources/SuiteUI/SuiteGallery.swift, UITests/SuiteJourneyTests+LayerStyle.swift | SJ0 lists layer-style | lead/layer-styles-LS-a-2 @82d118e | stacked, gate pass |
-| LS-10 | LS-clip | 1 | ClipRules with its tests; the C4 part | Sources/SuiteKernel/Layers/ClipRules.swift, Tests/SuiteKernelTests/ClipRulesTests.swift, Tests/mutations/SuiteKernel.ClipRules.json | ClipRulesTests | #4903 | pr-open |
-| LS-11 | LS-clip | 2 | ClipTarget, ClipCommands (layer.clip, layer.unclip) | Sources/SuiteKernel/Layers/ClipCommands.swift, Tests/SuiteKernelTests/ClipCommandsTests.swift | ClipCommandsTests | lead/layer-styles-LS-clip-11 @511155a | stacked, gate pass, 4/4 mutations |
-| LS-5 | LS-m | 2 | StyleRules bodies; LayerStyleRulesTests turned on | Sources/SuiteImaging/Style/StyleRules.swift, its tests, mutation plan | LayerStyleRulesTests | lead/layer-styles-LS-m @c15bf38 | stacked, gate pass, 4/4 mutations |
+| LS-1 | LS-a | 1 | The Style module as stubs, the C4 part, four suites written and disabled | Sources/SuiteImaging/Style/*.swift, Sources/SuiteImaging/Route/StyleRoute.swift, Tests/SuiteImagingTests/{LayerStyleRules,StyleCommands,LayerStyleSVG,StyleProgram}Tests.swift, docs/c4/parts/creative-apps/suite-imaging/imaging-style.json | the suites compile, disabled; ImagingBoundaryTests | #4911 | merged |
+| LS-2 | LS-a | 2 | Placeholder panel, rows, pasteboard; gallery layer-style page; journey skipped | Sources/SuiteUI/{LayerStylePanel,LayerStyleRows}.swift, Sources/SuiteUI/Gallery/GalleryLayerStyle.swift, Sources/SuiteUI/SuiteGallery.swift, UITests/SuiteJourneyTests+LayerStyle.swift | SJ0 lists layer-style | #5174 | pr-open (held by dev-red #5321) |
+| LS-10 | LS-clip | 1 | ClipRules with its tests; the C4 part | Sources/SuiteKernel/Layers/ClipRules.swift, Tests/SuiteKernelTests/ClipRulesTests.swift, Tests/mutations/SuiteKernel.ClipRules.json | ClipRulesTests | #4903 | pr-open (held by dev-red #5321); review #8/#9/#10 push |
+| LS-11 | LS-clip | 2 | ClipTarget, ClipCommands (layer.clip, layer.unclip) | Sources/SuiteKernel/Layers/ClipCommands.swift, Tests/SuiteKernelTests/ClipCommandsTests.swift | ClipCommandsTests | lead/layer-styles-LS-clip-11 @511155a | stacked, gate pass, 4/4 mutations; rework for review #9 |
+| LS-5 | LS-m | 2 | StyleRules bodies; LayerStyleRulesTests turned on | Sources/SuiteImaging/Style/StyleRules.swift, its tests, mutation plan | LayerStyleRulesTests | #5176 | pr-open (held by dev-red #5321) |
 | LS-3 | see packet | 3 | LS-2 | per packet | per packet | lead/layer-styles-LS-u @e6baf6c | stacked, gate pass |
 | LS-6 | see packet | 3 | LS-5 | per packet | per packet | lead/layer-styles-LS-m-6 @b99d9f8 | stacked, gate pass, 4/4 mutations |
 | LS-7 | see packet | 3 | LS-5, GF-m | per packet | per packet | lead/layer-styles-LS-m-7 @d364612 | stacked, gate pass, 4/4 mutations |
@@ -34,6 +34,10 @@ Next: next check 00:47Z
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-26: Packet-Review 1 (d2bbb8c7) applied in the plan, one docs PR (branch lead/layer-styles-packet-review): #1 BevelShape/BevelTechnique lines replaced by the core-owned comment (LS-1 already uses core's); #2 angle prose is distance·(−cos θ, sin θ), light's angle, matching LS-7/LS-8 tests; #3 LayerStylePasteboard dropped from the plan: LS-3 deletes LS-2's no-op and registers a style SuiteTypeID in SuitePasteboardCoding through PasteboardBridge/PasteboardChangeWatch (files added to LS-3's owned list; #5174 keeps its no-op so the open PR doesn't change); #4 LS-1 marked landed, bump #3825 merged; #5 command table matches the shipped specs (style.enable {kind, on} "Toggle Layer Style", style.fill-opacity {value, drag}, style.panel "Layer Style Panel"); #6 style.add refused when the kind is present, on or off, and the adding note added (LS-6 to be checked against it before its PR); #7 Fill points are unit-box, mapped with GradientRules.mapped (LS-7/LS-8 follow); #8 group sibling is a valid base, never entered (already LS-10's behavior; test renamed case added); #9 multi-select note and ClipRules.notClippedHelp "This layer isn't clipped." (constant on LS-10, LS-11 switches to it); #10 Clipping concept line added in LS-10, canonical-concepts.txt in its owned list.
+- 2026-10-26: finding #5327 (effectsPending never retired): LS-3 adds the fx item built from style.panel's spec beside effects(identifier:); LS-13 deletes effects/effectsPending once no app calls them; Photo's adopt switches its fx. LayerActionBar.swift added to LS-u's owned list.
+- 2026-10-26: asked the supervisor on #3937 for a core bump to d1a3ebb+ (LE-cpu #789/#791/#798/#800/#804 and LE-metal #792/#794/#796 are on core main); LS-8 and LS-9 wait on it. No bump PR opened by the lead (supervisor merges bumps).
+- 2026-10-26: the container lost its Swift toolchain; reinstalled with scripts/cloud-setup.sh before gating.
 - 2026-10-23: LS-3 built stacked on LS-a-2 (3 files, +359/-26): the panel emits one StyleIntent per control (toggle on change, scrub under one drag token, preset, Done), gradient editor for gradient fills, suite.style.* ids, LayerStylePasteboard on org.creative-apps.layer-style. SwiftUI not compiled here; the batch macOS gate is its first build. Wire: LayerActionBar fx button (effectsPending) and the app row menus Copy/Paste Style are hand-offs. Presets menu stays disabled until LS-5 lands on the same base. PR opens from scratchpad ls3-body.md once LS-2 merges.
 - 2026-10-23: LS-7 built stacked on LS-m (3 files, +291/-3): LayerStyleSVG.filter. Shadow angle follows LS-8 (light direction, 135deg 8px -> 5.66,5.66 down-right). Modes outside SVG 1.1 feBlend write their Filter Effects 1 name plus one warning (no linear dodge/burn in core). Own 2-decimal number writer (StrokeSVG.number is internal and writes 4 decimals). Gradient overlay is an feImage of GradientSVG.definition. Bevel is a lighting approximation with a warning; bevel, inner shadow and inner glow output are untested; critics should look. PR opens from scratchpad ls7-body.md once LS-5 merges.
 - 2026-10-23: LS-6 built stacked on LS-m (3 files, +295/-33): StyleCommands bodies, edits one setStyle step each with drag passed through, refusals throw unavailable with a reason at run time, paste checks each decoded effect. style.panel with no kind toggles; titles follow the packet; param names stay as LS-1 shipped (kind/on, value/drag). PR opens from scratchpad ls6-body.md (drop its title line) once LS-5 merges.

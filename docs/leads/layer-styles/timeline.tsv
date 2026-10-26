@@ -96,3 +96,4 @@ utc	stage	event	ref	note
 2026-10-24T23:40Z	3	check	lane	23:39Z: all 11 PRs clean+queued, none merged; batch-20261024205137 branches gone, nothing landed (dev afef017c), no new batch yet; 0 findings
 2026-10-25T00:03Z	3	check	lane	00:03Z: run act-1a1705bc1ae-pb09 resumed; lead branch rebased on main afef017c; all 11 PRs clean+queued, none merged; lane batch-20261024235353 (#4236, none ours) gating; no dev-red; 0 findings for this feature
 2026-10-25T00:27Z	3	check	lane	00:27Z: batch-20261024235353 (incl. our #5174 LS-2) red on macOS gate run 40144578021; lane bisecting, probe -6 (through #5214, before #5174); no merges; no needs-fix on ours; 0 findings; dev afef017c
+2026-10-26T03:00Z	3	resume	lane	run act-1a175e3e61f-9qd4 resumed; LS-1 #4911 merged; #4903 #5174 #5176 clean+fast-lane, held by dev-red #5321 (not ours); finding #5327 planned into LS-3/LS-13; packet review 1 being applied; core bump asked
