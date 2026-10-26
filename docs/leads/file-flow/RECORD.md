@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 16:20Z poll: no change; slices still queued in the lane; full CI on dev queued (527676af); #3474 quiet.
 - 15:53Z poll: no change; #4894/#5092 prescreen still success, waiting in the lane; stacked PRs unlabelled; #3474 quiet.
 - 15:25Z poll: no change; all five PRs open and unlabelled for fixes; full CI on dev in progress (f86f72f7); #3474 quiet; #5321 open.
 - 14:52Z poll: no change; #4894/#5092 queued, #4936/#5123/#5801 stacked; full CI on dev in progress; #3474 quiet.
