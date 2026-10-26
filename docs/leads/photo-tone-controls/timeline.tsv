@@ -202,3 +202,4 @@ utc	stage	event	ref	note
 2026-10-26T11:11:25Z	merge	PT-5 dev merge gate PASS (first run segfaulted in SampleOpenTests from a stale LibraryModel build; clean rebuild fixed it, passes on dev too), pushed 38204202
 2026-10-26T11:28:17Z	check	#5363 open, clean, no pre-screen; dev c6700dba merges clean with PT-4/3/5/7 heads
 2026-10-26T11:47:11Z	check	#5363 open, 0 statuses (no pre-screen); dev c6700dba unchanged, all heads merge clean
+2026-10-26T12:16:44Z	check	#5363 local-ci/prescreen success 12:15Z, awaiting lane sweep; dev 746be6b1, all heads merge clean
