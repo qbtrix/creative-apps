@@ -1,4 +1,4 @@
-// ImageSizeSheet.swift: Image > Image Size… asks for the new width and height
+// ImageSizeSheet+Suite.swift: Image > Image Size… asks for the new width and height
 // in pixels, keeping the proportions while the box is checked
 // (CanvasSize.height(forWidth:) and width(forHeight:)); checking the box again
 // re-derives the height from the width. Resize resamples every layer. The
@@ -10,7 +10,8 @@
 // disabled, saying why, until both are whole numbers. Its controls carry
 // `photo.size.*` accessibility identifiers, and the Form's fields are named
 // for VoiceOver (a Form row's title doesn't name its field). Resize is the
-// catalog's `image.resize` item (command-state CS-10).
+// catalog's `image.resize` item (command-state CS-10). The frame, message
+// line and Cancel / Resize row are SuiteUI's SuiteSheet.
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -37,8 +38,12 @@ struct ImageSizeSheet: View {
 
     var body: some View {
         let typed = Self.side(width) != nil && Self.side(height) != nil
-        VStack(alignment: .leading, spacing: SuiteSpacing.m) {
-            Text("Image Size").font(SuiteFont.headline)
+        SuiteSheet(
+            "Image Size", message: "Now \(size.width) × \(size.height) px. Each side can be 1 to \(PhotoWorkspace.maxSide) px.",
+            width: SuiteSize.inspectorWidth.max, cancelID: "photo.size.cancel", onCancel: onCancel,
+            action: MenuCommand(PhotoMenuState.spec("image.resize"), on: PhotoMenuState(workspace: workspace), title: "Resize", perform: resize),
+            actionID: "photo.size.resize", reason: typed ? nil : "Type each side as a whole number of pixels."
+        ) {
             Form {
                 TextField("Width", text: Binding(get: { width }, set: { setWidth($0) }))
                     .accessibilityLabel("Width")
@@ -50,27 +55,11 @@ struct ImageSizeSheet: View {
                     .toggleStyle(.checkbox)
                     .accessibilityIdentifier("photo.size.keep-proportions")
             }
-            Text("Now \(size.width) × \(size.height) px. Each side can be 1 to \(PhotoWorkspace.maxSide) px.")
-                .font(SuiteFont.caption)
-                .foregroundStyle(SuiteColor.secondaryText)
-            HStack {
-                Spacer()
-                Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
-                    .accessibilityIdentifier("photo.size.cancel")
-                if let spec = PhotoWorkspace.catalog.spec("image.resize") {
-                    MenuCommand(spec, on: workspace, title: "Resize", shortcut: .defaultAction, perform: resize)
-                        .disabled(!typed)
-                        .help(typed ? spec.summary : "Type each side as a whole number of pixels.")
-                        .accessibilityIdentifier("photo.size.resize")
-                }
-            }
         }
-        .padding(SuiteSpacing.l)
-        .frame(width: SuiteSize.inspectorWidth.max)
     }
 
     /// A typed side as a whole number, or nil.
-    private static func side(_ text: String) -> Int? {
+    nonisolated private static func side(_ text: String) -> Int? {
         Int(text.trimmingCharacters(in: .whitespaces))
     }
 

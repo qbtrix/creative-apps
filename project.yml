@@ -5,8 +5,8 @@
 # launches .build/apps/<X>App.app by path, which scripts/bundle-apps builds.
 #
 # The Release scheme (route R1, docs/blueprints/suite.md 2.5) builds the
-# targets of AfterGlow.app from the same folders as Package.swift: six
-# frameworks (SuiteUI, SuiteModel, SuiteKernel, SuiteImaging, SuiteShell, and
+# targets of AfterGlow.app from the same folders as Package.swift: seven
+# frameworks (SuiteUI, SuiteModel, SuiteKernel, SuiteImaging, SuiteText, SuiteShell, and
 # CreativeEngines, which compiles only Bundle/Engines/CreativeEngines.swift and
 # is the only target linking the creative-core products; SuiteKernel and
 # SuiteUI read FlareCore's geometry through it, SuiteImaging the raster and
@@ -63,7 +63,7 @@ targetTemplates:
         LD_RUNPATH_SEARCH_PATHS: "@executable_path/../../../../Frameworks"
     dependencies:
       [{ target: SuiteUI, embed: false }, { target: SuiteShell, embed: false }, { target: SuiteModel, embed: false },
-       { target: SuiteKernel, embed: false }, { target: SuiteImaging, embed: false },
+       { target: SuiteKernel, embed: false }, { target: SuiteImaging, embed: false }, { target: SuiteText, embed: false },
        { target: CreativeEngines, embed: false }]
   Journey:
     type: bundle.ui-testing
@@ -107,12 +107,18 @@ targets:
     platform: macOS
     sources: [Sources/SuiteUI]
     dependencies: [{ target: SuiteModel }, { target: SuiteKernel }, { target: SuiteImaging }, { target: CreativeEngines }]
+  # The live text service on Core Text, re-exported by SuiteShell.
+  SuiteText:
+    type: framework
+    platform: macOS
+    sources: [Sources/SuiteText]
+    dependencies: [{ target: SuiteModel }]
   SuiteShell:
     type: framework
     platform: macOS
     sources: [Sources/SuiteShell]
     # CreativeEngines carries CoreRaster for SuiteImageIO (shared-codecs SC-2) and CoreAsset for ThumbnailWriter.
-    dependencies: [{ target: SuiteUI }, { target: SuiteModel }, { target: SuiteKernel }, { target: CreativeEngines }]
+    dependencies: [{ target: SuiteUI }, { target: SuiteModel }, { target: SuiteKernel }, { target: SuiteText }, { target: CreativeEngines }]
   FlareModel: { templates: [Model] }
   # Every Model but Flare's links SuiteImaging (appended to the template's).
   DesignModel: { templates: [Model], dependencies: [{ target: SuiteImaging }] }
@@ -154,7 +160,7 @@ targets:
         LD_RUNPATH_SEARCH_PATHS: "@executable_path/../Frameworks"
     dependencies:
       [{ target: SuiteUI, embed: false }, { target: SuiteShell, embed: false }, { target: SuiteModel, embed: false },
-       { target: SuiteKernel, embed: false }, { target: SuiteImaging, embed: false }]
+       { target: SuiteKernel, embed: false }, { target: SuiteImaging, embed: false }, { target: SuiteText, embed: false }]
   FlareJourneyTests: { templates: [Journey] }
   DesignJourneyTests: { templates: [Journey] }
   PhotoJourneyTests: { templates: [Journey] }

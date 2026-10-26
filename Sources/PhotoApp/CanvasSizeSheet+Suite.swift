@@ -1,4 +1,4 @@
-// CanvasSizeSheet.swift: Image > Canvas Size… (transform PT-3) asks for a
+// CanvasSizeSheet+Suite.swift: Image > Canvas Size… (transform PT-3) asks for a
 // width and height in pixels, absolute or Relative (added to the image's
 // size, the default), and where the image sits in the new canvas: a 3 x 3
 // grid of SuiteKernel's BoxAnchor. A smaller side brings "The canvas will be
@@ -7,7 +7,8 @@
 // window; it is off, with the reason as its help, while the size is the
 // image's own. Values in, closures out; the fields are text fields whose every
 // keystroke updates the draft, as in StraightenSheet, and Return in a field is
-// OK. Controls carry `photo.canvas-size.*` identifiers.
+// OK. Controls carry `photo.canvas-size.*` identifiers. The frame, the size
+// line and Cancel / OK are SuiteUI's SuiteSheet.
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -32,8 +33,13 @@ struct CanvasSizeSheet: View {
     var cropNote: String? { draft.cropNote }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: SuiteSpacing.m) {
-            Text("Canvas Size").font(SuiteFont.headline)
+        SuiteSheet(
+            "Canvas Size",
+            message: "Now \(draft.old.width) × \(draft.old.height) px. New size \(draft.newSize.width) × \(draft.newSize.height) px.",
+            width: SuiteSize.inspectorWidth.max, cancelID: "photo.canvas-size.cancel", onCancel: onCancel,
+            action: MenuCommand("OK", help: "Resize the canvas to \(draft.newSize.width) × \(draft.newSize.height) px.", perform: resize),
+            actionID: "photo.canvas-size.ok", reason: draft.help
+        ) {
             Form {
                 field("Width", text: typedWidth ?? String(draft.width), id: "photo.canvas-size.width", type: typeWidth)
                 field("Height", text: typedHeight ?? String(draft.height), id: "photo.canvas-size.height", type: typeHeight)
@@ -43,27 +49,13 @@ struct CanvasSizeSheet: View {
             }
             Text("Anchor").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText)
             PresetGrid(options: Self.anchorOptions, selected: draft.anchor, columns: 3, onSelect: chooseAnchor)
-            Text("Now \(draft.old.width) × \(draft.old.height) px. New size \(draft.newSize.width) × \(draft.newSize.height) px.")
-                .font(SuiteFont.caption)
-                .foregroundStyle(SuiteColor.secondaryText)
             if let note = cropNote {
                 Label(note, systemImage: "exclamationmark.triangle")
                     .font(SuiteFont.caption)
                     .foregroundStyle(SuiteColor.stateWarning)
                     .accessibilityIdentifier("photo.canvas-size.crop-note")
             }
-            HStack {
-                Spacer()
-                Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
-                    .accessibilityIdentifier("photo.canvas-size.cancel")
-                Button("OK", action: resize).keyboardShortcut(.defaultAction)
-                    .disabled(draft.help != nil)
-                    .help(draft.help ?? "Resize the canvas to \(draft.newSize.width) × \(draft.newSize.height) px.")
-                    .accessibilityIdentifier("photo.canvas-size.ok")
-            }
         }
-        .padding(SuiteSpacing.l)
-        .frame(width: SuiteSize.inspectorWidth.max)
     }
 
     /// One pixel field: a label, the number and "px".

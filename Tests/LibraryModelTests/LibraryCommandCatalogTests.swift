@@ -89,6 +89,9 @@ struct LibraryCatalogDoc: HeadlessDocument {
             .some(menu(c.canEditDevelop, "develop", "Develop isn't connected yet."))
         case "view.show-original": .some(c.services.unavailable["develop"] ?? c.developHelp
             ?? (c.canShowOriginal ? nil : "Open a photo in the loupe to see its original."))
+        case "image.rotate-cw", "image.rotate-ccw", "image.rotate-180", "image.flip":  // OC-8: the develop settings' reason
+            .some(c.services.unavailable["develop"] ?? c.developHelp)
+        case "crop.set-aspect", "crop.swap", "crop.set-frame", "crop.apply", "crop.reset": .some(c.cropHelp)
         case "file.recent", "file.open-recent", "file.drop": .some(nil)
         case "file.clear-recent": .some("No Recent Files")
         case "file.open-in": .some(c.openInHelp)
@@ -165,12 +168,15 @@ struct LibraryCatalogDoc: HeadlessDocument {
                     .contains { problem.contains(": \($0):") }
                 // Library has no recent files, so Open Recent's example names one it can't find.
                 let needsFile = id == "file.open-recent" && problem.contains("exampleRuns")
-                return !((off || needsFile) && problem.contains("exampleRuns")) && !noOpEdit
+                // The kernel's image.flip is titled Flip while its step names the axis (OC-8).
+                let flipStep = problem == "image.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\""
+                return !((off || needsFile) && problem.contains("exampleRuns")) && !noOpEdit && !flipStep
             }
             #expect(problems.isEmpty, "\(state): \(problems.joined(separator: "\n"))")
             for spec in LibraryCatalog.commands where spec.kind == .edit && spec.availability(c).why == nil {
                 var ran = c
-                if (try? Self.catalog.run(spec.id, params: spec.example, on: &ran).undoStep) == spec.title { stepped.insert(spec.id) }
+                let step = try? Self.catalog.run(spec.id, params: spec.example, on: &ran).undoStep
+                if step == spec.title || (spec.id == "image.flip" && step == "Flip Horizontal") { stepped.insert(spec.id) }
             }
         }
         let edits = Set(LibraryCatalog.commands.filter { $0.kind == .edit }.map(\.id))
@@ -223,4 +229,8 @@ struct LibraryCatalogDoc: HeadlessDocument {
     ] + DevelopSlider.allCases.map { "\(LibraryCatalog.resetSliderID($0)) | Reset \($0.rawValue) | on" } + ["file.share-prepare | Share | on", "edit.copy | Copy | on",
         "thumbnails.stats | Thumbnail Stats | Thumbnails aren't kept on disk yet."]
         + ["catalog.backups | Catalog Backups | on", "catalog.restore-backup | Restore Catalog Backup | \(LibraryBackups.noBackups)"]
+        + ["image.rotate-cw | Rotate Right | on", "image.rotate-ccw | Rotate Left | on", "image.rotate-180 | Rotate 180° | on",
+           "image.flip | Flip | on"]
+        + ["crop.set-aspect | Crop Ratio", "crop.swap | Swap Crop", "crop.set-frame | Crop Frame", "crop.apply | Crop",
+           "crop.reset | Reset Crop"].map { "\($0) | Open a photo in the loupe to crop it." }
 }
