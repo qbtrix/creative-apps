@@ -137,3 +137,4 @@ Next: lane merges DS-photo #4901, DS-design #4887, DS-halo #4918, DS-flare #4891
 - 2026-10-26T14:27Z (act-1a177ff0916-4jm7): poll: dev 68be32fc; no merges; #4918, #4891, #5267 queued; DS-z waits. Open findings 0.
 - 2026-10-26T14:45Z (act-1a177ff0916-4jm7): poll: dev f86f72f7; no merges of ours; #4918, #4891, #5267 queued; DS-z waits. Open findings 0.
 - 2026-10-26T15:02Z (act-1a177ff0916-4jm7): poll: dev f86f72f7; no merges of ours; #4918, #4891, #5267 queued; DS-z waits. Open findings 0.
+- 2026-10-26T15:21Z (act-1a177ff0916-4jm7): poll: dev f86f72f7; no merges of ours (#4887, #4901, #4918, #4891, #5267 open); DS-z waits on #4918, #4891, #5267; dev-red #5321 open
