@@ -231,3 +231,4 @@ utc	stage	event	ref	note
 2026-10-26T22:29Z	3	poll	-	no tracked merges; #5819 AN-u open; AN-10 waits on #4902
 2026-10-26T22:48Z	3	poll	-	#5819 AN-u in lane; AN-10 waits on #4902
 2026-10-26T23:07Z	3	poll	-	#5819 AN-u in lane; AN-10 waits on #4902 (needs-rebase, not ours)
+2026-10-26T23:23Z	3	poll	-	#5819 AN-u in lane; AN-10 waits on #4902
