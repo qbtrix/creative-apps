@@ -4,7 +4,7 @@ Issue: #3937 · Packet: docs/blueprints/suiteui/features/layer-styles.md
 Run: act-1a175e3e61f-9qd4 · Session: claude/layer-styles-lead-u8mk3r · Resumed: 2026-10-26T03:00Z (previous run act-1a1705bc1ae-pb09)
 Stage: 3 wave check
 Base: 8eff8ab8501bca4fcd020a4a5c1d22a4df69e1eb (origin/dev; main at d3323f6a7, dev-red #5321 open)
-Next: lane check; open LS-11 (branch lead/layer-styles-LS-clip-11 f3692d14, body to write fresh) once #4903 merges; LS-3/LS-6/LS-7 reworks as parents merge
+Next: open LS-3b (lead/layer-styles-LS-u-3b, off dev) once its gate passes; open LS-11 once #4903 merges, LS-3 once #5174 merges, LS-6 (2af2188e, gated) and LS-7 once #5176 merges; LS-8 waits on the core bump
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -55,6 +55,9 @@ Next: lane check; open LS-11 (branch lead/layer-styles-LS-clip-11 f3692d14, body
 - 2026-10-23: LS-a is two PRs (LS-1 ~380 lines, LS-2 ~220): together they pass the 400-line cap. LS-2 stacks on LS-1 and opens once LS-1 merges.
 - 2026-10-23: core LE-a (LayerStyleStack) isn't on the pin (7966e5a, bump #3825). LS-1 declares every type but leaves StyleProgram's two LayerStyleStack signatures out; LS-8 adds them once the LE bump lands. No core type is copied.
 
+- LS-6 reworked for packet review: style.add refuses a kind the layer has turned off and points to style.enable (2af2188e, Mutate 6/6, CI pass).
+- LS-7 reworked for amendment #7: the SVG writer maps a gradient's unit-box points to the shape box with GradientRules.mapped (lead/layer-styles-LS-m-7, Mutate 6/6).
+- LS-3 split under the 400-line cap (441 with everything): LS-3b, off dev, adds `SuiteTypeID.layerStyle`, `SuitePasteboardCoding.style(_:)`/`style(in:)` and `LayerActionBar.styles(on:identifier:perform:)` built from style.panel's spec; LS-3 keeps the panel and deletes `LayerStylePasteboard`. SuiteUI cannot import SuiteShell, so apps carry the style through PasteboardBridge with those coder helpers. The type is not in `declaredOnly`, since no plist exports it.
 ## Wire
 - [ ] Wire: core layer-style-engine:LE-a (StyleProgram.stack and style(_ stack:) declared once the bump PR carries LayerStyleStack; LS-8)
 - [ ] Wire: brush-keys:BK-u (LS-2 builds on BK-a; SuiteGallery.swift's last owner; swap in when it merges)
