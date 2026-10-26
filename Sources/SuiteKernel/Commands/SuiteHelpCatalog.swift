@@ -88,6 +88,13 @@ public enum SuiteHelpCatalog {
     static let planResult = ParamSchema.object(
         ["plan": .string(oneOf: ["link", "alreadyLinked", "refuse"]), "at": .optional(.string()), "to": .optional(.string()),
          "reason": .optional(.string()), "linked": .boolean], required: ["plan", "at", "to", "reason", "linked"])
+    /// A `planResult` value, a nil field left out: the one mapping the CLI's and the app's providers both answer with
+    /// (SuiteModel's CommandLineInstall.run decides the fields).
+    public static func planAnswer(plan: String, at: String?, to: String?, reason: String?, linked: Bool) -> JSONValue {
+        var fields: [String: JSONValue] = ["plan": .string(plan), "linked": .bool(linked)]
+        for (key, value) in [("at", at), ("to", to), ("reason", reason)] { if let value { fields[key] = .string(value) } }
+        return .object(fields)
+    }
     /// Why the assistant commands can't run: no AfterGlow.app to name.
     static let needsBundle = "Connecting an assistant needs AfterGlow.app: run the bundled afterglow, or pass --bundle <path to AfterGlow.app>."
     static func bundled(_ doc: SuiteHelpDocument) -> Availability { doc.provider.bundle == nil ? .unavailable(needsBundle) : .available }

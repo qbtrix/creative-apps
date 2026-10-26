@@ -127,10 +127,10 @@ import Testing
         defer { try? FileManager.default.removeItem(atPath: home) }
         let config = MCPConfig(bundle: Self.bundle, home: home)
         let at = home + "/.local/bin/afterglow"
-        #expect(Self.field(config.installCLI(confirm: false, existing: MCPConfig.linkTarget), "plan") == .string("link"))
-        #expect(MCPConfig.linkTarget(at) == nil, "the plan alone writes nothing")
-        #expect(Self.field(config.installCLI(confirm: true, existing: MCPConfig.linkTarget), "linked") == .bool(true))
+        #expect(Self.field(config.installCLI(confirm: false, existing: CommandLineInstall.linkTarget), "plan") == .string("link"))
+        #expect(CommandLineInstall.linkTarget(at) == nil, "the plan alone writes nothing")
+        #expect(Self.field(config.installCLI(confirm: true, existing: CommandLineInstall.linkTarget), "linked") == .bool(true))
         #expect(try FileManager.default.destinationOfSymbolicLink(atPath: at) == Self.cli)
-        #expect(Self.field(config.installCLI(confirm: true, existing: MCPConfig.linkTarget), "plan") == .string("alreadyLinked"))
+        #expect(Self.field(config.installCLI(confirm: true, existing: CommandLineInstall.linkTarget), "plan") == .string("alreadyLinked"))
     }
 }
