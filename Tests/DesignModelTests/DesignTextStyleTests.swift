@@ -124,4 +124,26 @@ private func run(_ id: String, _ params: [String: JSONValue], _ workspace: inout
         let frame = try #require(w.treeNode("node-5")?.frame)
         #expect(frame.x == 100 && frame.width == 200, "\(frame)")
     }
+
+    @Test func aMixedSelectionTakesOnlyTheChangedField() throws {
+        var serif = DesignTextStyle.default
+        serif.family = "Serif"
+        let page = DesignPage(id: "page-1", name: "Page 1", frameWidth: 800, frameHeight: 600, nodes: [
+            DesignNode(id: "t1", name: "One", kind: .text, frame: DesignRect(x: 0, y: 0, width: 40, height: 20), text: "One"),
+            DesignNode(id: "t2", name: "Two", kind: .text, frame: DesignRect(x: 0, y: 40, width: 40, height: 20), text: "Two",
+                       textStyle: serif),
+        ])
+        var w = DesignWorkspace()
+        w.load([page])
+        w.selectItem("t1")
+        w.toggleSelection("t2")
+        try run("text.set-size", ["size": .number(1500)], &w)
+        let one = try #require(w.treeNode("t1")?.textStyle), two = try #require(w.treeNode("t2")?.textStyle)
+        #expect(one.size == 1500 && two.size == 1500, "the kernel's 1...1600 keeps 1500")
+        #expect(one.family == "System" && two.family == "Serif", "a size change keeps each layer's family")
+        var huge = try #require(w.textStyle)
+        huge.size = 5000
+        try w.setTextStyle(huge, name: "Text Size", drag: nil)
+        #expect(w.treeNode("t1")?.textStyle.size == 1600 && w.treeNode("t2")?.textStyle.family == "Serif")
+    }
 }
