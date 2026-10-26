@@ -2,7 +2,7 @@
 
 Issue: #3788 · Packet: docs/blueprints/library/features/catalog-backup.md
 Run: act-1a1782c1961-n1cv (line lead, line:library) · resumed 2026-10-26T12:20Z · earlier act-1a175ea5531-x1ci (line lead, line:library) · resumed 2026-10-26T01:59:55Z · earlier act-1a1695ec091-ilfv · Started: 2026-10-23T15:31:04Z (relaunch; earlier runs act-1a15f2277a5-6xyv)
-Stage: 3 polling: BK-z #4923 in the lane at 3c50a2da (feature-done); code batches held by dev-red #5321 (not Library); checked 14:08Z
+Stage: 3 polling: BK-z #4923 in the lane at 3c50a2da (feature-done); code batches held by dev-red #5321 (not Library); checked 14:30Z
 Base: 8eff8ab85 (origin/dev)
 Next: lane lands #4923 once dev-red clears; Belt-Slice-Done BK-z on a green library run containing it; critics on BK-z screens; Mac-Finish-Wanted BK-z; Belt-Contact-Sheet
 
@@ -39,6 +39,7 @@ Next: lane lands #4923 once dev-red clears; Belt-Slice-Done BK-z on a green libr
 - 2026-10-26T01:59:55Z (run act-1a175ea5531-x1ci): main verified at d3323f6a. lead/catalog-backup rebased onto main (brief rule 4) and mirrors this record. #4923 is now within the cap (13 files, 246 lines). Findings with Feature: catalog-backup: 0.
 - 2026-10-26T12:28Z (run act-1a1782c1961-n1cv): main verified at d3323f6a. Re-read every PR: all slice PRs are open, clean and in the lane with proof on their heads (#5130's head c9d68d72 has the lane's green Linux check 40109534004). dev-red #5321 (Onboarding test timeouts, not Library) still open, so code batches wait. Open findings for this feature: 0. Nothing left to build; polling every 10 min.
 - 2026-10-26T14:07Z Library-scoped run 40329990478 on dev 01600e46 failed: RenderBudgetLibraryTests.rotateInLoupe (3 bodies vs budget 2), added by #5266 (orientation-crop OC-library-u, lead act-1a175ee1051-o29l), not this feature's code; none of our slice PRs is on dev. That run can't count for Belt-Slice-Done; wait for a green library run containing our PRs.
+- 2026-10-26T14:30Z Full CI 40328390857 on dev 5f8925a3 red: macOS tests 1/3, SuiteTimelineScrubWindowTests.aScrubRedrawsOnlyThePlayhead (shared timeline, not Library); the Onboarding timeout did not recur. dev-red #5321 stays open, code batches still held; nothing of ours to fix.
 
 ## Wire
 - [ ] file-flow:LF-m (LF-m 7/8 on dev): BK-5m backs up after the catalog save path as it stands; re-check once LF-m is done.
