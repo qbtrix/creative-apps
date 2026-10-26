@@ -3,8 +3,8 @@
 // tracking 50, centre; scrub and render a frame; the viewer and the render
 // show the same two lines. Skipped by name until TS-10 draws the style
 // through the kernel's layout; TS-4 only shows the shared text style rows
-// (`suite.text.*`) in the TEXT section, disabled with "Text styles arrive
-// with TS-5.".
+// (`suite.text.*`) in the TEXT section, disabled with "Text styles aren't
+// connected in this window yet.".
 import XCTest
 
 final class HaloTextStyleJourneyTests: XCTestCase {
