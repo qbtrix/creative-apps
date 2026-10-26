@@ -205,3 +205,4 @@ utc	stage	event	ref	note
 2026-10-26T08:38:40Z	poll	blocked: dev-red #5321 open; #4854 b2f91717 and #5025 921d412b clean, unmerged; #3481 unchanged at 23 comments
 2026-10-26T09:00:33Z	poll	blocked: dev-red #5321 open (now run 40290214719, macos, range main..3e26fbe4); #4854 b2f91717 and #5025 921d412b clean, unmerged; #3481 unchanged at 23 comments
 2026-10-26T09:22:02Z	poll	blocked: dev-red #5321 open (run 40290214719, macos, range main..3e26fbe4, 16 comments); #4854 b2f91717 and #5025 921d412b clean, unmerged; #3481 unchanged at 23 comments
+2026-10-26T09:43:42Z	poll	blocked: dev-red #5321 open (run 40290214719, macos, range main..3e26fbe4); #4854 b2f91717 and #5025 921d412b clean, unmerged; #3481 unchanged at 23 comments
