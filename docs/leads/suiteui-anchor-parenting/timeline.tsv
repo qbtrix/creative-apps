@@ -188,3 +188,4 @@ utc	stage	event	ref	note
 2026-10-26T08:15:49Z	3	poll	-	08:15Z poll: no merges; dev unchanged 3e26fbe4; #4893/#4902 eligible; dev-red #5321 open; 0 findings.
 2026-10-26T08:37:09Z	3	poll	-	08:37Z poll: no merges of ours; dev 1960c2d9 (#4956 p0); #4893/#4902 eligible; dev-red #5321 open; 0 findings.
 2026-10-26T08:59:34Z	3	poll	-	08:59Z poll: no merges of ours; dev be5f2c00 (supervisor lane fixes: red-dev rerun + hold only the red module); dev-red #5321 open; 0 findings. #4893/#4902 eligible.
+2026-10-26T09:21:25Z	3	poll	-	09:21Z poll: no merges of ours; dev 1b843d15 (#5383 p0); dev-red #5321 open; 0 findings. #4893/#4902 eligible.
