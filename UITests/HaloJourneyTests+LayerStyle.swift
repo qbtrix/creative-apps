@@ -3,7 +3,8 @@
 // runs on `-HaloSample three-layers` with Badge (a shape, frames 0 to 71; Title starts at 24): Layer > Layer Style…,
 // Outer Glow on (`suite.style.toggle.outerGlow`), Done (`halo.style.done`); LAYER STYLE shows Glow Size
 // (`halo.inspector.row.glowSize`) with its stopwatch, "Animate Glow Size"; at frame 0 it types 0 and turns the
-// stopwatch on, at frame 30 types 20: Badge's lane reads 2 keyframes. A click on the bar opens its field, as on
+// stopwatch on, at frame 30 types 20: Badge's lane reads 3 keyframes (0, 30 and the stopwatch's last-frame key
+// holding 0, Packet-Review 1 amendment 2). A click on the bar opens its field, as on
 // TRANSFORM's rows (HaloJourneyTests+Inspector.swift). Steps 3 and 4 shoot the viewer at frames 15 and 30, and at 0
 // (`halo.viewer.canvas`); the PNG render of frames 0 and 30 is RJ-H43's (HY-6). One shot per step,
 // `layer-style-<step>`. Skipped until HY-7 draws styles in the viewer.
@@ -36,7 +37,8 @@ final class HaloLayerStyleJourneyTests: XCTestCase {
         halo.shot("layer-style-1-glow-on")
         halo.element("halo.style.done").click()
 
-        // 2. Glow Size has a stopwatch; 0 at frame 0, stopwatch on; 20 at frame 30: two keys.
+        // 2. Glow Size has a stopwatch; 0 at frame 0, stopwatch on; 20 at frame 30: three keys (the stopwatch also keys
+        // the last frame, holding 0).
         let size = halo.element("halo.inspector.row.glowSize")
         XCTAssert(size.waitForExistence(timeout: 5), "LAYER STYLE shows no Glow Size row")
         let stopwatch = halo.element("suite.inspector").buttons.matching(NSPredicate(format: "label == %@", "Animate Glow Size")).firstMatch
@@ -47,7 +49,7 @@ final class HaloLayerStyleJourneyTests: XCTestCase {
         XCTAssert(waitUntil { (stopwatch.value as? String) == "Keyed at this frame" }, "the stopwatch didn't key Glow Size at 0")
         goTo(frame: 30, halo)
         type("20", into: size, halo)
-        XCTAssert(waitUntil { halo.laneKeys("Badge").contains("2 keyframes") }, "Badge's lane reads \(halo.laneKeys("Badge")), not 2 keyframes")
+        XCTAssert(waitUntil { halo.laneKeys("Badge").contains("3 keyframes") }, "Badge's lane reads \(halo.laneKeys("Badge")), not 3 keyframes")
         halo.shot("layer-style-2-keys")
 
         // 3. Scrub back: the glow grows from nothing at 0 to 20 px at 30.
