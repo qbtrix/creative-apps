@@ -4,7 +4,9 @@
 // the item's help). The beta hides the items of FlareWorkspace.menuHidden
 // (onion skin, motion path, the symbol edits, Interactions, Assist), keys and all. The keys of section 3.4 (Space, the
 // arrows, Home, End, K, ⌥K and the ⌘ keys) live only here; no view binds them
-// again. Return and Escape stay the stage's (toolKey); Object > Finish Path is
+// again. While an inspector bar has focus the arrows (⌥ too), Home, End and
+// Space are the bar's: each item drops that key (FocusedControlKeys, #2487),
+// so → steps the value, and the frame step keeps → on the canvas or timeline. Return and Escape stay the stage's (toolKey); Object > Finish Path is
 // Return's item for the mouse, with no key of its own. Undo and Redo are
 // titled by the step, as in "Undo Set Keyframe Easing". File > Open Sample
 // lists Bounce, Character, Button and Keyed Ball, the keyed document the
@@ -68,6 +70,8 @@ struct FlareCommands: Commands {
     @FocusedValue(\.flarePasteboardChange) private var pasteboardChange
     /// The focused timeline strip's Select All Keys; nil unless the strip has focus.
     @FocusedValue(\.timelineSelectAll) private var timelineSelectAll
+    /// True while an inspector bar or its field has focus: the step keys are its, not Animate's (#2487).
+    @FocusedValue(\.controlHasKeys) private var controlHasKeys
 
     private var menu: FlareMenu {
         _ = pasteboardChange
@@ -197,7 +201,8 @@ struct FlareCommands: Commands {
     /// One menu item: `intent`'s title (or `title`) on its catalog spec (`FlareWorkspace.menuSpec(for:)`, command-state
     /// CS-12), acting through the focused window and disabled with its reason while it can't act.
     private func item(_ intent: FlareIntent, title: String? = nil, key: KeyboardShortcut? = nil) -> some View {
-        MenuCommand(FlareWorkspace.menuSpec(for: intent), on: menu.help(intent), title: title ?? intent.title, shortcut: key) {
+        MenuCommand(FlareWorkspace.menuSpec(for: intent), on: menu.help(intent), title: title ?? intent.title,
+                    shortcut: FocusedControlKeys.menuShortcut(key, controlHasKeys: controlHasKeys)) {
             menu.perform(intent)
         }
     }
