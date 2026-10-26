@@ -206,3 +206,4 @@ Next: Lane: #4871 TS-a and #5047 TS-7 in the lane. After #4871 merges, merge dev
 - 2026-10-26T21:57:19Z (act-1a1774f754d-5cse): #5047 TS-7 needs-rebase: merged origin/dev, resolved design.list-commands.json golden (our text.* commands + dev's file.new summary) at 31b358be; gating
 - 2026-10-26T21:59:43Z (act-1a1774f754d-5cse): #5226 TS-9 needs-rebase: merged origin/dev at b406cca0; kept both textStyleSpecs and dev's FileFlowCommands in HaloCommandCatalog + its two tests, halo.list-commands golden merged by id (118 commands); gating
 - 2026-10-26T22:08:36Z (act-1a1774f754d-5cse): #5047 TS-7 merge 31b358be: scripts/ci --changed CI: PASS (AllAppsCatalogTests included); pushed, Head: moved
+- 2026-10-26T22:10:52Z (act-1a1774f754d-5cse): #5226 TS-9 merge b406cca0616b8ccfe4c8876f0858698018855f00: scripts/ci --changed CI: PASS (Halo catalog tests + AllAppsCatalogTests); pushed, Head: moved
