@@ -261,3 +261,4 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 ## Open
 - The UP stack lands bottom up through the lane; UP-z carries feature-done. Then Belt-Slice-Done lines and Belt-Contact-Sheet on #3721.
 - 2026-10-26T14:40:44Z Resume, run act-1a178a4b1c2-ibn1. UP stack #5088/#5089/#5091/#5231 clean; waiting on the lane (dev-red #5321).
+- 2026-10-26T15:00:28Z poll: dev-red #5321 open (macos); ci.yml at f86f72f79 running; no needs-fix/needs-rebase on our PRs; #5088 prescreen+Linux green, unstable only from running fast-lane check
