@@ -41,7 +41,7 @@
 //   crop           the same rectangle is the pending crop (Apply Crop commits
 //                  it); a click drops it (PhotoCropSize.swift).
 //   eyedropper     the color under the pointer becomes the brush color, never
-//                  an undo step (PhotoEyedropper.swift).
+//                  an undo step (PhotoSample+Kernel.swift).
 //   move           shifts every picked image layer by the drag, in whole
 //                  pixels, as one step ("Move Layer", "Move Layers" for several).
 //
@@ -108,9 +108,12 @@ extension PhotoWorkspace {
     /// The Move tool's instruction line: how to move the selected layer, or
     /// why an adjustment layer (which has no place on the canvas) can't move.
     public var moveHint: String {
-        if case .adjustment? = selectedLayer?.kind { return Self.moveRefusal }
-        return "Drag over the image to move the selected layer."
+        canMoveSelection ? "Drag over the image to move the selected layer." : Self.moveRefusal
     }
+
+    /// Whether a picked layer can move: at least one is an image layer. The
+    /// Move tool's transform rows show only then.
+    public var canMoveSelection: Bool { !movableSelectedLayers.isEmpty }
 
     static let moveRefusal = "Select an image layer in the sidebar to move it."
 
@@ -280,16 +283,22 @@ extension PhotoWorkspace {
         }
         let dx = end.x - current.start.x, dy = end.y - current.start.y
         guard dx.isFinite, dy.isFinite, abs(dx) < 1e7, abs(dy) < 1e7 else { return }
-        var moved = false
+        // Where the moved layers were and are: the canvas changes nowhere else.
+        var damage = PhotoDamage.none
         for at in targets {
             guard let before = current.layersBefore.first(where: { $0.id == layers[at].id }) else { continue }
             let x = before.offsetX + Int(dx.rounded()), y = before.offsetY + Int(dy.rounded())
             guard x != layers[at].offsetX || y != layers[at].offsetY else { continue }
+            let was = bounds(of: layers[at])
             layers[at].offsetX = x
             layers[at].offsetY = y
-            moved = true
+            if let was, let now = bounds(of: layers[at]) {
+                damage = damage.union(.region(was.union(now)))
+            } else {
+                damage = .all
+            }
         }
-        if moved { touch(.all) }
+        if damage != .none { touch(damage) }
     }
 
     /// Adds a pointer sample to the stroke (nil: the stroke ends) and paints

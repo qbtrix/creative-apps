@@ -2,8 +2,10 @@
 # `scripts/test-scope timing` passes these and fails on any other unlisted timing test,
 # and on a line here whose test no longer times, so this file only shrinks: split the
 # bound into a test of its own and list that in Tests/perf-suites.txt, or make the
-# bound runner-speed proof, then drop the line in the same PR. Never add a line; a new
-# timing test lands .disabled and asks the supervisor for its perf-suites line.
+# bound runner-speed proof (a ratio needs 10x of slack), then drop the line in the same
+# PR. Never add a line for a new test; one lands .disabled and asks the supervisor for
+# its perf-suites line. The one exception: the PR that widens the detector lists what
+# it newly finds, so the ratchet starts from today's offenders.
 # Only the supervisor edits this file. Line: <Target>.<Suite path>/<test>.
 AppSnapshotTests.BodyCountSuites/HaloWindowPlaybackTests/playbackRedrawsTheViewerNotTheWindow
 AppSnapshotTests.BodyCountSuites/RenderBudgetHaloProbeTests/bodies
