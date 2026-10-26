@@ -128,3 +128,4 @@ time	task	event	note
 2026-10-26T02:14Z	3	heartbeat	lane	resumed under act-1a175f7cb67-l7rh; #5096 needs-rebase, integrating dev; main d3323f6a, full CI 40251699354 red (not ours)
 2026-10-26T02:49Z	3	heartbeat	lane	re-integrated needs-rebase PRs; heads moved
 2026-10-26T03:13Z	3	heartbeat	lane	03:15Z poll: no merges of ours since 02:30Z (dev d0859e01, main d3323f6a); none of our PRs carry needs-rebase or needs-fix; 0 open findings
+2026-10-26T03:35Z	3	heartbeat	lane	03:36Z poll: no merges of ours (dev d0859e01, main d3323f6a); lane batch lane/batch-20261026032432 in flight; full CI 40262284734 on dev running (holds none of our PRs); no needs-rebase/needs-fix on ours; 0 open findings
