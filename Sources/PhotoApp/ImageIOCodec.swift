@@ -5,23 +5,42 @@
 // Accelerate, because the model takes straight alpha. Encoding writes PNG
 // (with alpha) or JPEG (opaque, at the given quality) through
 // CGImageDestination. Errors say what went wrong in words a person can act on.
+// `decodeLinear` (shared-raw SR-6) is the float route Photo opens every file
+// through: camera RAW through `SuiteRaw`, any other format SuiteImageIO reads
+// through `SuiteImageIO.decode` into the working space; until SuiteImageIO
+// reads a format (shared-codecs SC-4) that file takes the 8-bit `decode`.
 import Accelerate
 import CoreGraphics
+import CoreRaster
 import Foundation
 import ImageIO
 import PhotoModel
+import SuiteImaging
+import SuiteModel
+import SuiteShell
 import UniformTypeIdentifiers
 
 struct ImageIOCodec: PhotoImageCodec {
     enum Failure: Error, CustomStringConvertible {
         case unreadable, unwritable
+        /// A RAW file `SuiteRaw` refused; the sentence names the format or the camera.
+        case refused(RawRefusal)
 
         var description: String {
             switch self {
             case .unreadable: "Photo can't read this kind of file."
             case .unwritable: "The image couldn't be written."
+            case .refused(let refusal): refusal.message
             }
         }
+    }
+
+    func decodeLinear(_ data: Data, fileName: String, longestSide: Int?) throws -> PixelBuffer? {
+        let raw: PixelBuffer?
+        do { raw = try decodeRaw(data, fileName: fileName, longestSide: longestSide) } catch { throw Failure.refused(error) }
+        if let raw { return raw }
+        guard let format = SuiteImageFormat(fileName: fileName), SuiteImageIO.readable.contains(format) else { return nil }
+        return try SuiteImageIO.decode(data, longestSide: longestSide)
     }
 
     /// The pixel size ImageIO reports for the file's first image.

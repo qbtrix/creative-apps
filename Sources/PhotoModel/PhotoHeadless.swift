@@ -1,5 +1,6 @@
 // PhotoHeadless.swift (adopt-command-catalog AC-p2): Photo's document with no window, for the afterglow CLI, MCP and
-// the real jobs. It opens Photo's own file (OpenRaster .ora), PNG and JPEG through `CoreRasterImageCodec`, saves .ora,
+// the real jobs. It opens Photo's own file (OpenRaster .ora), PNG and JPEG through `CoreRasterImageCodec`, and a
+// camera RAW file (the registry's RAW row) through its RAW route (shared-raw SR-6), saves .ora,
 // exports the flattened image as PNG or JPEG on the suite's export options (export-pack PX-3), and runs `PhotoWorkspace.catalog` lifted
 // onto itself. Linux-safe: no UI imports.
 #if canImport(FoundationEssentials)
@@ -7,11 +8,15 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteImaging
 import SuiteKernel
+import SuiteModel
 
 /// Photo's headless document: one `PhotoWorkspace` on the live services.
 public struct PhotoHeadless: HeadlessDocument {
-    public static let app = "photo", openExtensions = ["ora", "png", "jpg", "jpeg"], exportFormats = ["png", "jpeg"]
+    public static let app = "photo", exportFormats = ["png", "jpeg"]
+    /// Photo's document, PNG, JPEG and every camera RAW extension the format registry lists.
+    public static let openExtensions = ["ora", "png", "jpg", "jpeg"] + SuiteImageFormat.cameraRaw.extensions
     /// Why the window's file commands refuse here: the CLI opens, saves and exports instead.
     public static let fileCommandHelp = "The CLI opens, saves and exports the file."
     /// Every `PhotoWorkspace.catalog` command, run on the wrapped workspace; file commands are unavailable.
@@ -28,13 +33,18 @@ public struct PhotoHeadless: HeadlessDocument {
     public init(workspace: PhotoWorkspace) { self.workspace = workspace }
 
     /// The file `data`, named `name`, by its extension: a Photo document (.ora) with its layers, or a flat PNG or
-    /// JPEG. Throws `ArchiveError` for a bad document, `CodecError` for an image core can't read yet.
+    /// JPEG, or a camera RAW file as one float layer. Throws `ArchiveError` for a bad document, `CodecError` for an
+    /// image core can't read yet, `RawRefusal` for a RAW file this build can't develop.
     public static func open(_ data: Data, name: String) throws -> PhotoHeadless {
         var workspace = PhotoWorkspace(services: .live)
         switch name.split(separator: ".").last.map({ $0.lowercased() }) ?? "" {
         case "ora": try workspace.openDocument(workspace.services.archive.package(fromContainer: data), name: name, codec: codec)
         case "png", "jpg", "jpeg": try workspace.openImage(data, name: name, codec: codec)
-        default: throw CatalogError.unavailable(id: "open", why: "Photo opens .ora, .png, .jpg and .jpeg files.")
+        default:
+            guard RawFormat(fileName: name) != nil else {
+                throw CatalogError.unavailable(id: "open", why: "Photo opens .ora, .png, .jpg, .jpeg and camera RAW files.")
+            }
+            try workspace.openImage(data, name: name, codec: codec)
         }
         return PhotoHeadless(workspace: workspace)
     }

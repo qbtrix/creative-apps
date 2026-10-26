@@ -19,5 +19,19 @@
     "find": "start(with: try Self.tiles(width: document.canvas.width, height: document.canvas.height, what: \"the canvas\"), name: name)",
     "replace": "start(with: try stack.pixels.values.min { $0.width < $1.width } ?? Self.tiles(width: document.canvas.width, height: document.canvas.height, what: \"the canvas\"), name: name)",
     "tests": "PhotoHeadlessTests"
+  },
+  {
+    "label": "theCLIOpensTheRegistrysRAWExtensions: the CLI keeps its own list without the registry's RAW row",
+    "file": "Sources/PhotoModel/PhotoHeadless.swift",
+    "find": "openExtensions = [\"ora\", \"png\", \"jpg\", \"jpeg\"] + SuiteImageFormat.cameraRaw.extensions",
+    "replace": "openExtensions = [\"ora\", \"png\", \"jpg\", \"jpeg\"]",
+    "tests": "PhotoRawOpenTests"
+  },
+  {
+    "label": "theCLIRefusesARAWOnLinux: a RAW name falls to the unknown-extension refusal, not the RAW route",
+    "file": "Sources/PhotoModel/PhotoHeadless.swift",
+    "find": "guard RawFormat(fileName: name) != nil else {",
+    "replace": "guard false else {",
+    "tests": "PhotoRawOpenTests"
   }
 ]

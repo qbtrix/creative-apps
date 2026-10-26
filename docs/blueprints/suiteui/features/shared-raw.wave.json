@@ -38,6 +38,8 @@
     "Tests/RealJobs/photo/raw-develop/input/tiny-bayer.dng",
     "Sources/PhotoModel/PhotoImageFile.swift",
     "Tests/mutations/PhotoModel.PhotoImageFile.json",
+    "Sources/PhotoModel/PhotoHeadless.swift",
+    "Tests/mutations/PhotoModel.PhotoHeadless.json",
     "Tests/AppSnapshotTests/PhotoRawSnapshots.swift",
     "Tests/RealJobs/photo/raw-develop/expected/tiny-bayer-ev-1.png",
     "Tests/canonical-concepts.txt",
@@ -131,6 +133,8 @@
         "Tests/RealJobs/photo/raw-develop/input/tiny-bayer.dng",
         "Sources/PhotoModel/PhotoImageFile.swift",
         "Tests/mutations/PhotoModel.PhotoImageFile.json",
+        "Sources/PhotoModel/PhotoHeadless.swift",
+        "Tests/mutations/PhotoModel.PhotoHeadless.json",
         "Sources/PhotoApp/ImageIOCodec.swift"
       ],
       "waits": {
