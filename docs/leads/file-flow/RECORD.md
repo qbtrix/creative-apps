@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 14:45Z: #5123 fixed (stale HaloFilesCommandTests.aSavedProjectIsRecent failed with Halo's list gone; now puts the project in the suite's recents), head 0fb13ae9, body gets Belt-Lead/Feature/Slice/Fast-Check/Head. Follow-up #5801 opened, stacked on #5123: imageRefusal removed, S20 notes say PH-3, mutation renamed +2 (7/7). Packet line 95 still names .imagesRefusedUntilS20: update after #5092 lands. Slices still queued in the lane.
 - 14:25Z poll: no change on #4894/#4936/#5092 (lane queue). Building the follow-up fix (drop imageRefusal, S20 comments to PH-3, mutation label, +2 mutations) on fix/halo-file-flow-s20-notes, stacked on #5123.
 - 2026-10-26T13:52Z poll: no change; #4894/#4936/#5092 open, clean, eligible, queued. No lane merge since #5266 13:21Z. 27 open line:halo findings, none on file-flow (newest are drift reports for stroke-style, transform, placed-images). No supervisor answer.
 - 2026-10-26T13:31Z poll: no change. Lane run 40323409808 rates #4894 and #5092 eligible (Fast-Check marker + local-ci/prescreen); 125 ready PRs wait behind one-at-a-time batches. Other PRs landed (#5266 13:21Z, #5781, #5146). No supervisor answer; dev-red #5321 open (macOS); no file-flow findings.

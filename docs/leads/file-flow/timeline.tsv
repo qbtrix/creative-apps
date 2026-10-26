@@ -198,3 +198,4 @@ utc	stage	event	ref	note
 2026-10-26T13:31Z	3	poll	#4894	no change; eligible, 125 ready PRs in lane queue
 2026-10-26T13:52Z	3	poll	#4894	no change; queued in lane
 2026-10-26T14:25:06Z	3	follow-up	fix/halo-file-flow-s20-notes	building PR-2 items 3/4 fix
+2026-10-26T14:45:33Z	3	follow-up	#5801	PR-2 items 3/4; #5123 test fix 0fb13ae9
