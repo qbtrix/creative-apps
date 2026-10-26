@@ -120,3 +120,4 @@ utc	stage	event	ref	note
 22:00Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane landed #4848-#4894 (dev c4cf4a758); bisecting #4904/#4905, #4916 in flight; ours next, all clean; findings: #5789
 22:20Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	#4916 landed (dev 9810d71ba); lane on p0 #5369 then #4903 retry; ours next in beta order, all clean; findings: #5789
 22:40Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane holding all ready PRs: dev-red #5818 (macos, real after rerun, no culprit placed, no revert/quarantine); none of ours in its range; ours clean+queued
+23:00Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane batching again despite #5818: p0 #5369,#5817 and beta #4903 in flight; ours next, all clean
