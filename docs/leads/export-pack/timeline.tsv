@@ -190,3 +190,4 @@ utc	stage	event	ref	note
 2026-10-26T01:58:55Z	3	relaunch	-	run act-1a175ea55b7-729d: lead branch rebuilt on main d3323f6a7; XP-m merged-done in 40247461868
 2026-10-26T03:07:58Z	heartbeat	#5374 opened for finding #5326; XP chain clean on dev d0859e017
 2026-10-26T03:30:04Z	heartbeat	all 7 PRs open and clean (#5043 #5065 #5104 #5106 #5374); waiting on lane; XP-10 after #5043+#5106
+2026-10-26T04:01:17Z	heartbeat	#5043 needs-fix (FormatListRatchet: gallery listed formats) fixed at d32cc2e2a, formats now from ExportFormats; #5065 #5104 #5106 restacked, gate PASS, Heads moved
