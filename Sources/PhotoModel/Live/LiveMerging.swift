@@ -47,6 +47,7 @@ struct LiveMerging: LayerMerging {
     func flatten(_ layers: [LayerContent], canvas: CanvasSize, adjustments: AdjustmentSettings) throws -> TiledPixels {
         var picture = try TiledPixels(width: canvas.width, height: canvas.height)
         for content in layers.reversed() where content.layer.isVisible && content.layer.opacity > 0 {
+            PhotoRenderCount.layers(1)
             picture = try Self.composite(content, onto: picture, origin: (0, 0))
         }
         guard adjustments.blurMargin == 0 else { return TiledPixels(try adjustments.applied(to: picture.flattened())) }

@@ -12,10 +12,9 @@
 // histogram's recount). The gates are counts, never clocks, so a loaded Mac passes or fails the same way: every
 // step waits for the work before it to finish (a deadline poll, not a sleep); a Move step lays one layer on each
 // region's kept base, a Levels recount lays no layer, a Hue drag recounts nothing, and once a gesture's work has
-// finished nothing renders or recounts again. The CPU percent is printed, never gated (load moves it). The
-// slider and eye tests drop the window's autosave after the gesture: on this branch it still flattens the
-// picture through the reference path, which would read as a recount. Nested in BodyCountSuites, as every suite
-// that reads a process-wide counter is. macOS only.
+// finished nothing renders or recounts again, and the autosave 5 s after the last edit lays no layer (it keeps
+// the layers' pixels, never a flattened picture). The CPU percent is printed, never gated (load moves it).
+// Nested in BodyCountSuites, as every suite that reads a process-wide counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
 import FlareModel
@@ -201,9 +200,8 @@ extension BodyCountSuites {
         /// Opens the stress window, runs `gesture` on it, and waits on deadlines for its work to finish: the
         /// canvas's renders drain, then the work counters hold still (the histogram's recount has no in-flight
         /// signal of its own). `check` gets every counter's change over the gesture and its work. Once finished,
-        /// 3 s of readings may show no region, picture, histogram row or row layer. The window's autosave is
-        /// dropped after the gesture (and again once the renders drain, for an edit noted late): it writes 5 s
-        /// after the last edit and flattens the picture through the reference path, which counts rows.
+        /// 3 s of readings may show no region, picture, histogram row or row layer, and the window's autosave
+        /// (5 s after the last edit, waited for on a deadline) may composite nothing: no row, no row layer.
         static func expectSettled(
             _ choice: RenderingChoice, _ name: String, _ failure: String, check: ([String: Int]) -> Bool,
             gesture: (RenderBudgetWindow<AnyView>, PhotoPerform, PhotoWorkspace) async throws -> Void
@@ -212,16 +210,16 @@ extension BodyCountSuites {
             let (w, send, edited, model) = try await stressWindow(choice, label)
             let before = photoCounts()
             try await gesture(w, send, model)
-            w.host.layoutSubtreeIfNeeded()
-            w.window.displayIfNeeded()
-            edited.files?.autosave?.discard()
             let rendered = try await Self.rendered(w)
-            edited.files?.autosave?.discard()
             let drained = try await Self.drained(w, Self.workCounts)
             let work = IdleWork.delta(photoCounts(), since: before)
             let idle = try await IdleWork.watch(seconds: 3, counters: photoCounts)
             print("\(label): the gesture and its work" + IdleWork.describe(work))
             for reading in idle { print("\(label): \(reading)") }
+            let saving = photoCounts()
+            let autosaved = try await Self.until(w) { edited.files?.autosave?.autosaved == true }
+            let save = IdleWork.delta(photoCounts(), since: saving)
+            print("\(label): the autosave" + IdleWork.describe(save))
 
             #expect(rendered, Comment(rawValue: "\(label): the gesture's renders never drained"))
             #expect(drained, Comment(rawValue: "\(label): the gesture's work never went quiet"))
@@ -229,6 +227,9 @@ extension BodyCountSuites {
             let after = IdleWork.total(idle)
             #expect(["regions", "pictures", "rows", "rowLayers"].allSatisfy { after[$0] == 0 },
                     Comment(rawValue: "\(label): work ran again after the gesture's had finished" + IdleWork.describe(after)))
+            #expect(autosaved, Comment(rawValue: "\(label): the autosave never wrote"))
+            #expect(save["rows"] == 0 && save["rowLayers"] == 0,
+                    Comment(rawValue: "\(label): the autosave composited layers" + IdleWork.describe(save)))
             // The renderer outlives its window: let it finish before the next case counts.
             _ = try await Self.rendered(w)
             w.close()

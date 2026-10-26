@@ -270,6 +270,9 @@ drain and the counters to hold still, then checks the gesture's work and that
 | Hue, 30 steps | no count (outside the key) | 0 rows (gated) |
 | 4 eyes hidden then shown | a count per click, the last 192 rows x 60 layers, about 20 s | 593 / 378 rows, 623 / 249 row layers over all the clicks' counts |
 
-Those tests drop the window's autosave after the gesture: it still flattens
-the picture through the reference path 5 s after the last edit, which would
-read as a recount.
+The autosave 5 s after the last edit used to flatten the whole picture for
+`mergedimage.png` and its thumbnail, two PNGs Photo never reads back, through
+the reference path (a whole-picture composite, every visible layer, tile by
+tile). A recovery write now encodes the
+layers and masks only (`merged: false`), and IdleWorkTests waits for it after
+each gesture and gates that it composites nothing: no row, no row layer.

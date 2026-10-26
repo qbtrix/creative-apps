@@ -112,14 +112,17 @@ extension PhotoWorkspace {
             adjustments: adjustments, selectedLayerID: selectedLayerID, paths: paths)
     }
 
-    /// The open image's document package, encoded through `archive`.
-    public func documentPackage(archive: any DocumentArchiving, codec: any PhotoImageCodec) throws -> PhotoPackage {
-        try archive.encode(snapshot(), codec: codec)
+    /// The open image's document package, encoded through `archive`; without the merged picture and its
+    /// thumbnail when `merged` is false (a recovery write).
+    public func documentPackage(
+        archive: any DocumentArchiving, codec: any PhotoImageCodec, merged: Bool = true
+    ) throws -> PhotoPackage {
+        try archive.encode(snapshot(), codec: codec, merged: merged)
     }
 
     /// The open image's document package, through `services.archive`.
-    public func documentPackage(codec: any PhotoImageCodec) throws -> PhotoPackage {
-        try documentPackage(archive: services.archive, codec: codec)
+    public func documentPackage(codec: any PhotoImageCodec, merged: Bool = true) throws -> PhotoPackage {
+        try documentPackage(archive: services.archive, codec: codec, merged: merged)
     }
 
     /// Opens the document in `package`, named `name`, through

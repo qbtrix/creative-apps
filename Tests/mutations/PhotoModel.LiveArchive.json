@@ -1,0 +1,4 @@
+[
+{"label": "a recovery write flattens the picture anyway", "file": "Sources/PhotoModel/Live/LiveArchive.swift", "find": "        if merged {\n", "replace": "        if true {\n", "tests": "PhotoRecoveryTests"},
+{"label": "Save leaves out the merged image and the thumbnail", "file": "Sources/PhotoModel/Live/LiveArchive.swift", "find": "        try encode(snapshot, codec: codec, merged: true)\n", "replace": "        try encode(snapshot, codec: codec, merged: false)\n", "tests": "PhotoDocumentRoundTripTests"}
+]
