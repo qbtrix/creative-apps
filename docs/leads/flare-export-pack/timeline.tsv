@@ -215,3 +215,4 @@ utc	stage	event	ref	note
 2026-10-26T12:57Z	FV-z	resume: act-1a178432d03-7n20 on #4854 and #5025
 2026-10-26T13:03Z	FV-z	push: #4854 98239ba3 (step 4 on fakes, GIF hover shot), gate PASS, Head moved
 2026-10-26T13:22:18Z	poll	blocked: dev-red #5321 open (run 40327156097, linux, range main..57dd31ff); #4854 98239ba3 and #5025 921d412b unmerged, no blocking label; #3481 no answer to 6407071650
+2026-10-26T13:28:41Z	poll	blocked: dev-red #5321 open (run 40327156097, linux, range main..57dd31ff); #4854 98239ba3 and #5025 921d412b unmerged, no blocking label; #3481 unchanged at 24 comments
