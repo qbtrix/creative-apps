@@ -306,3 +306,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 1 open finding (#5789, fixed by #5236). Stage: 3 wave 3, waiting for wave 2 to land.
 - 18:19Z check-in: dev at e69582e7 after #5263. Wave 2 (#5064 #5233 #5235 #5236), #5790 and #5800 are clean with fast-lane+beta and waiting for the next batch. One open finding (#5789, fixed by #5236). dev-red #5321 is still open.
 - 18:39Z check-in: dev is unchanged at e69582e7. Batch 20261026182514 holds #5295 alone. Wave 2, #5790 and #5800 are still clean with fast-lane+beta and queued. Finding #5789 is open (fixed by #5236). dev-red #5321 is open.
+- 18:59Z check-in: dev is at 5cffd4cf after #5295. dev-red #5321 is closed and no batch is in flight. Wave 2, #5790 and #5800 are clean with fast-lane+beta and queued for the next batch. Finding #5789 is open (fixed by #5236).
