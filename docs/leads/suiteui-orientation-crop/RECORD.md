@@ -74,3 +74,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-26T14:57:20Z OC-z: PR #5802 opened (stacked on #5263), head 8bc91414, fast-lane + feature-done
 - 2026-10-26T15:00:24Z poll: dev-red #5321 open (macos); ci.yml at f86f72f79 running; no needs-fix/needs-rebase on our PRs; OC-photo-u/OC-z await batch
 - 2026-10-26T15:26:45Z poll 15:26: dev-red #5321 open; full CI 40342241864 + scoped library at f86f72f79 still running; none of ours merged or labelled needs-fix
+- 2026-10-26T15:50:31Z poll 15:55: dev-red #5321 open; no green ci.yml since 68be32fc6 (scoped photo 40350541067 red, full 40342241864 red); our PRs still open
