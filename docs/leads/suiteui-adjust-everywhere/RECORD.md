@@ -121,3 +121,8 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 
 - dev at c480d848 (#5239 landed, not ours); wave 2 (#5064, #5233, #5235, #5236) still open with fast-lane, none merged. The lane dropped fast-lane from the stacked wave 3 PRs again (over the cap until wave 2 lands), as expected. No needs-fix or needs-rebase.
 - 0 open findings. Stage: 3 wave 3 (waiting for wave 2 to land).
+
+### 2026-10-26T06:28Z check-in
+
+- dev still c480d848; wave 2 (#5064, #5233, #5235, #5236) still open with fast-lane, none merged. Every wave 2 head has local-ci/prescreen success and no attribution lines in its body, so each is eligible and waiting on the lane's batch order. No needs-fix or needs-rebase.
+- 0 open findings. Stage: 3 wave 3 (waiting for wave 2 to land).
