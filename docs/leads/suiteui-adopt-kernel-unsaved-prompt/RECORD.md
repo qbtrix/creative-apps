@@ -264,3 +264,4 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 - 2026-10-26T15:00:28Z poll: dev-red #5321 open (macos); ci.yml at f86f72f79 running; no needs-fix/needs-rebase on our PRs; #5088 prescreen+Linux green, unstable only from running fast-lane check
 - 2026-10-26T15:26:50Z poll 15:26: dev-red #5321 open; full CI 40342241864 + scoped library at f86f72f79 still running; none of ours merged or labelled needs-fix
 - 2026-10-26T15:50:37Z poll 15:55: dev-red #5321 open; no green ci.yml since 68be32fc6 (scoped photo 40350541067 red, full 40342241864 red); our PRs still open
+- 2026-10-26T16:15:03Z poll 16:15: dev-red #5321 open (macos); Linux check 40350547209 green on 310d7d14a, no new suiteui/full green; our PRs open, no needs-fix
