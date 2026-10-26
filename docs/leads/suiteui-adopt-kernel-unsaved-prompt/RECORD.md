@@ -250,3 +250,13 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 - 2026-10-21T09:49Z: rule 23: posted Question for the supervisor on #3721 (three identical blocked polls); polling hourly
 
 - 2026-10-21T10:12Z: Released per supervisor answer on #3721 (issuecomment 09:53Z). Resume state: UP-a, UP-u done (Belt-Slice-Done posted). Next: UP-design once adopt-suiteui-chrome:AC-zoom is on dev; UP-photo after shared-thumbnails:ST-z and UP-design; UP-flare after #3713 AK-flare and UP-photo; UP-halo after UP-flare; UP-z after all four and shared-codecs:SC-z; then Belt-Contact-Sheet on #3721. No open findings, no open PRs.
+
+## Run act-1a175ee1051-o29l
+- 2026-10-26T02:59Z: resumed from Belt's nudge; status now pushed here as well as lead/adopt-kernel-unsaved-prompt.
+- Since the last entry here: UP-design done in an earlier run; UP-photo #5088, UP-flare #5089, UP-halo #5091 and UP-z #5231 opened as a stack.
+- #5088 (UP-photo) got needs-fix from the batch macOS gate: "cannot find 'RawCodec' in scope" (RawCodec is a PhotoModelTests helper). Fix round 1: PhotoUnsavedGuardTests opens through PhotoApp's ImageIOCodec. CI: PASS, Head 0bc623ff, needs-fix dropped.
+- Restacked: #5089 merged UP-photo (FlareWindow.swift header-comment conflict, kept both notes) Head c9490f9e; #5091 Head d435b016; #5231 Head c8c2bc5f. Each CI: PASS; Belt-Lead moved to this run; footers removed.
+- 0 open findings for this feature.
+
+## Open
+- The UP stack lands bottom up through the lane; UP-z carries feature-done. Then Belt-Slice-Done lines and Belt-Contact-Sheet on #3721.
