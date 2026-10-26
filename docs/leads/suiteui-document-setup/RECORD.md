@@ -12,6 +12,7 @@ Next: lane merges DS-photo #4901, DS-design #4887, DS-halo #4918, DS-flare #4891
 - PR bodies: the session's GitHub relay re-adds a generated-by footer on every edit; the lane strips it from the squash commit.
 - 02:20Z: dev-red #5321 (macOS, range main..cc5c6234, none ours) holds every code batch; no open finding names this feature.
 - 02:15Z: #4901 needs-rebase fixed: merged origin/dev (photo.list-commands golden regenerated with afterglow; only file.new differs from dev), scripts/ci --changed PASS, head 38abf707, Head line moved.
+- 03:08Z: three polls with nothing of ours landed; lane sweep shows #4939/#4887/#4893 eligible (marker + prescreen) behind a batch in flight, 107 ready PRs ordered p0/beta/oldest, dev-red #5321 open. Queue depth, not a blocker: no supervisor question. BK app PRs restack once #4939 lands (not twice).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

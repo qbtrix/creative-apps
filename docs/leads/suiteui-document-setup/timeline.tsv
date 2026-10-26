@@ -203,3 +203,4 @@ utc	stage	event	ref	note
 2026-10-25T22:29:50Z	3	poll	DS-photo	22:30Z poll: unchanged; dev 077c3d5e, dev-red #5321 open, #5346 pending. 0 findings.
 2026-10-26T02:20:02Z	3	resume	-	resume act-1a175f403b9-j4z9: lead branch rebuilt on main d3323f6a; dev-red #5321 holds code batches; no open findings; #4901 needs-rebase fixed (head 38abf707)
 2026-10-26T02:43:05Z	3	poll	-	02:44Z poll: no merges of ours; dev-red #5321 open; no findings
+2026-10-26T03:08:06Z	3	poll	-	03:08Z poll: none of ours landed; queued behind batch (107 ready); dev-red #5321 open; no findings
