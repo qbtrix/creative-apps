@@ -29,6 +29,7 @@ Next: Belt-Slice-Done XP-a once a suiteui-scoped or full run contains 99ace7038;
 - 2026-10-26T08:42:54Z heartbeat: no merges; dev-red #5321 (macos) still holds code batches; #5065/#5104/#5106 clean
 - 2026-10-26T09:03:26Z heartbeat: no merges; dev-red #5321 (macos) still holds code batches; PRs clean
 - 2026-10-26T09:22:44Z heartbeat: no merges; dev-red #5321 (macos) still holds code batches; PRs clean
+- 2026-10-26T10:03:23Z heartbeat: XP-4 #5065 merged; #5104 (XP-5) and #5106 (XP-8) restacked on dev, gate pass; dev-red #5321 holds code batches
 
 ## Run act-1a16fe1fa73-5x3s decisions
 - 22:59Z: the 22:27Z poll was one-shot, so no heartbeat ran from 22:28Z to 22:59Z. Each poll now schedules the next one 15 min out.
