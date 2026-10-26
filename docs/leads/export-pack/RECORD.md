@@ -40,6 +40,7 @@ Next: XP-10 after #5106 merges; XP-z Belt-Slice-Done then
 - 2026-10-26T14:12:29Z heartbeat: #5104 (XP-5, XP-u's last PR) merged 14:03Z as 68be32fc6; XP-u Belt-Slice-Done waits on a green suiteui or full dev run containing it. #5106 (XP-8) integrated with dev by the lane, base now dev
 - 2026-10-26T14:32:38Z heartbeat: scoped suiteui run 40337540609 at 68be32fc6 (contains XP-u's #5104) in progress; XP-u line follows if green
 - 2026-10-26T14:52:37Z heartbeat: Belt-Slice-Done XP-u posted (scoped suiteui run 40337540609 at 68be32fc6, green). XP-z: #5106 (XP-8) in the lane
+- 2026-10-26T15:18:44Z heartbeat: no change: open PRs clean, no needs-fix/needs-rebase; dev-red #5321 open (not ours)
 
 ## Run act-1a16fe1fa73-5x3s decisions
 - 22:59Z: the 22:27Z poll was one-shot, so no heartbeat ran from 22:28Z to 22:59Z. Each poll now schedules the next one 15 min out.
