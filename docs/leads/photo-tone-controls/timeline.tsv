@@ -178,3 +178,4 @@ utc	stage	event	ref	note
 2026-10-26T03:46Z	check: #5363 open, clean, unmerged (dev at d0859e01); PT-3/5/7/8 branches gated and waiting on it
 2026-10-26T04:07Z	check: #5363 open, clean; no local-ci/prescreen status on be2ad8ae yet (landed PRs carry one); waiting on the supervisor's pre-screen
 2026-10-26T04:28Z	check: #5363 open, still no local-ci/prescreen on be2ad8ae; dev unchanged at 75292afd
+2026-10-26T04:49Z	check: #5363 open, no prescreen on be2ad8ae; dev at 999895c8 (#5154 landed)
