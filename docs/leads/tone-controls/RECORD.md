@@ -17,6 +17,7 @@ Next: post Belt-Slice-Done as PRs merge
 - 2026-10-26T04:01:17Z heartbeat: #5239 #5375 open and clean; ratchet checked
 - 2026-10-26T04:22:59Z heartbeat: all PRs open and clean, no labels; batches held while dev-red #5321 is open (not ours)
 - 2026-10-26T04:53:11Z heartbeat: all PRs open and clean, no labels
+- 2026-10-26T05:15:11Z heartbeat: all open PRs clean, no needs-fix/needs-rebase; #5297/#5299 over the size cap until #5295 lands; dev-red #5321 open (not ours)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
