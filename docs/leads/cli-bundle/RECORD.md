@@ -113,3 +113,4 @@ Next: the lane (now listing every PR after main promoted to 4f00afb with #5150) 
 ## 2026-10-26T12:38:54Z relaunch act-1a178358362-etn1
 - main d3323f6 verified. #4999 open, clean, beta, Head 941da48; Belt-Lead moved to this run. #5000 held until #4999 merges. Next: follow-up CB-z PR for the drift gaps (ShellHelpProvider.installCLI, CLI --bundle on help commands).
 - 2026-10-26T12:38:54Z: relaunch act-1a178358362-etn1; scoping CB-z follow-up
+- 2026-10-26T12:39:40Z: builder started: CB-z follow-up (in-app help.install-cli shares the CLI install plan), stacked on #4999; #4999 still beta, queued
