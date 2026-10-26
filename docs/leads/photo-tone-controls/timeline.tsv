@@ -191,3 +191,4 @@ utc	stage	event	ref	note
 2026-10-26T08:10:44Z	check	#5363 5260e203 prescreen still pending; dev 3e26fbe4 clean with PT-3/4/5/7 heads
 2026-10-26T08:29:39Z	check	#5363 5260e203 prescreen still pending; dev 1960c2d9 clean with PT-3/4/5/7 heads
 2026-10-26T08:49:33Z	check	#5363 5260e203 prescreen still pending (~1h); dev 7f585b7a clean with PT-3/4/5/7 heads
+2026-10-26T09:11:01Z	check	#5363 5260e203 prescreen still pending (~80m); dev be5f2c00 clean with PT-3/4/5/7 heads
