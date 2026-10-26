@@ -1,7 +1,7 @@
 # adjust-everywhere lead record
 
 Issue: #3777 · Packet: docs/blueprints/suiteui/features/adjust-everywhere.md
-Run: act-1a1702c5766-a1ju (this run; earlier runs act-1a15cb4e0f5-ipbr, act-1a15c4e2e3b-zh3u) · Session: claude/adjust-everywhere-lead-hyr1cx · Started: 2026-10-24T23:10Z
+Run: act-1a175f7cbe0-4gv1 (this run; earlier runs act-1a1702c5766-a1ju, act-1a15cb4e0f5-ipbr, act-1a15c4e2e3b-zh3u) · Session: claude/adjust-everywhere-lead-hyr1cx · Started: 2026-10-24T23:10Z
 Stage: 3 wave 3
 Base: afef017c (origin/dev)
 Next: wave 2 in lane: AJ-k #5064 (bfa7700e), AJ-c #5233 (a01fdf51, stacked on #5064), AJ-u #5235 look grid (039167d6) + #5236 filter sheet and menu (6240072f). Wave 3 building AJ-photo, AJ-library, AJ-halo on AJ-6 + both AJ-u branches; their PRs get fast-lane once wave 2 merges and each diff is its own. Then AJ-z.
@@ -62,3 +62,6 @@ Next: wave 2 in lane: AJ-k #5064 (bfa7700e), AJ-c #5233 (a01fdf51, stacked on #5
 - 2026-10-24T17:19Z: #4846 (AJ-a) merged 17:02:08Z, #4867 (AJ-7) merged 17:03:20Z. #5064 is on base dev with 509 lines (squash), so I merged origin/dev into lead/adjust-everywhere-AJ-5f-v2 (add/add conflicts in FilterRules.swift and FilterRulesTests.swift; dev's copies equal the AJ-1b stubs, kept ours); own diff 3 files +162/-12; gating.
 - 2026-10-24T17:31Z: #5064 gate CI: PASS at bfa7700e; pushed, Head updated, fast-lane added (base dev, 3 files +162/-12).
 - 2026-10-24T18:26Z: scoped suiteui run 40114493184 (da62659, contains #4846) green; Belt-Slice-Done: AJ-a posted on #3777. AJ-k #5064 still in lane. New findings #5184-#5191 are Halo/Photo journeys, none on this feature.
+
+## Run act-1a175f7cbe0-4gv1
+- 2026-10-26T02:11Z: resume after the supervisor's relaunch (#3777, 01:47Z). main d3323f6a, dev 8987427d. None of AJ-u, AJ-k, AJ-c, AJ-photo, AJ-library, AJ-halo has merged. The lane's 23:48Z sweep reads #5064 (AJ-k) eligible (Fast-Check marker + local-ci/prescreen). The lane is merging one PR at a time from a long eligible queue, and that sweep died on a GitHub 502, so this is queue time, not a defect. Open PRs: #5064, #5233, #5235, #5236 (wave 2); #5247, #5250, #5259, #5260 (AJ-photo); #5248, #5252 (AJ-library); #5249, #5257, #5258 (AJ-halo). All carry fast-lane + beta, none needs-fix or needs-rebase. Open findings: 0. Next: Belt-Slice-Done per slice once its last PR is in a green ci.yml run on main; AJ-z after the adopters.
