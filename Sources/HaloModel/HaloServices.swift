@@ -15,8 +15,8 @@ public struct HaloServices: Sendable {
     public var clock: any PlaybackClock
     public var rendering: any FrameRendering
     public var compositionRendering: any CompositionRendering
-    /// Draws and measures text layers; nil until HaloApp sets it at launch
-    /// (HaloLaunch), so Linux tests run with the fake or without text.
+    /// Draws and measures text layers; nil in `.live` (HaloModel can't reach Core Text). HaloApp sets it at
+    /// launch (HaloLaunch); a headless host passes it through `HaloHeadless.open`/`new(services:)`.
     public var text: (any TextRasterizing)?
 
     public init(

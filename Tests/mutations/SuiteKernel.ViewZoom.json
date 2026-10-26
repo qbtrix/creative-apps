@@ -1,0 +1,44 @@
+[
+  {
+    "label": "zoomInTolerance: Zoom In from a stop lands on that same stop",
+    "file": "Sources/SuiteKernel/Zoom/ViewZoom.swift",
+    "find": "stops.first { $0 > zoom * 1.001 }",
+    "replace": "stops.first { $0 >= zoom }",
+    "tests": "ViewZoomTests.swift"
+  },
+  {
+    "label": "zoomOutClamp: Zoom Out reaches the 5% stop below the range",
+    "file": "Sources/SuiteKernel/Zoom/ViewZoom.swift",
+    "find": "return clamped(stops.last { $0 < zoom / 1.001 } ?? stops[0])",
+    "replace": "return stops.last { $0 < zoom / 1.001 } ?? stops[0]",
+    "tests": "ViewZoomTests.swift"
+  },
+  {
+    "label": "anchorClamp: a zoom held at the range end still moves the origin",
+    "file": "Sources/SuiteKernel/Zoom/ViewZoom.swift",
+    "find": "let ratio = clamped(new) / clamped(old)",
+    "replace": "let ratio = new / old",
+    "tests": "ViewZoomTests.swift"
+  },
+  {
+    "label": "snapBand: a pinch never snaps to 100%",
+    "file": "Sources/SuiteKernel/Zoom/ViewZoom.swift",
+    "find": "return abs(z - 1) < Self.snapShare ? 1 : z",
+    "replace": "return z",
+    "tests": "ViewZoomTests.swift"
+  },
+  {
+    "label": "keyModifiers: Option-Command-1 still zooms to 100%",
+    "file": "Sources/SuiteKernel/Zoom/ViewZoom.swift",
+    "find": "guard command, !option, !control else { return nil }",
+    "replace": "guard command, !control else { return nil }",
+    "tests": "ViewZoomTests.swift"
+  },
+  {
+    "label": "actualLevel: a scale of 1 stays a scale, not 100%",
+    "file": "Sources/SuiteKernel/Zoom/ViewZoom.swift",
+    "find": "self = scale == 1 ? .actual : .scale(scale)",
+    "replace": "self = .scale(scale)",
+    "tests": "ViewZoomTests.swift"
+  }
+]

@@ -91,6 +91,8 @@ struct DesignCanvas: View {
             case .deleteSelection?: perform(.deleteSelection)
             case .deselect?: perform(.deselect)
             case .editText(let id)?: perform(.editText(id))
+            case .enterGroup?: perform(.enterGroup)
+            case .exitGroup?: perform(.exitGroup)
             case nil: return .ignored
             }
             return .handled
