@@ -144,3 +144,4 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-26T14:03Z: heartbeat: #5798 and codec PRs open, lane sweep 40335838403 running; dev 01600e46; dev-red #5321 open; findings 0
 - 2026-10-26T14:29Z: heartbeat: #5798 ready, clean; lane has a batch in flight with 123 ready PRs queued; codec PRs unchanged; dev 68be32fc; dev-red #5321 open; findings 0
 - 2026-10-26T14:52Z: heartbeat: all codec PRs and #5798 clean against dev f86f72f7 (#5780 IM-13); dev-red #5321 open; findings 0
+- 2026-10-26T15:19Z: rule 23: three identical blocked polls (14:28Z, 14:51Z, 15:18Z); Question for the supervisor posted on #3737 (issuecomment-6419749547); all shared PRs clean, none merged; dev f86f72f7; dev-red #5321 open; findings 0
