@@ -131,6 +131,17 @@ import Testing
         #expect(Self.anchors(workspace) == before)
     }
 
+    @Test func aSaveEndsTheDragTokensStep() throws {
+        var workspace = Self.picked()
+        workspace.runPath(.select(anchors: [AnchorRef(contour: 0, index: 1)], rect: nil, extend: false))
+        workspace.runPath(.move(dx: 3, dy: 0, drag: "d1"))
+        let saved = Self.anchors(workspace)
+        workspace.sessionDidSave()
+        workspace.runPath(.move(dx: 3, dy: 0, drag: "d1"))
+        workspace.undo()
+        #expect(Self.anchors(workspace) == saved, "the saved step stays the saved one")
+    }
+
     @Test func shiftAddsAnchorsToTheSelection() throws {
         var workspace = Self.picked()
         let before = Self.anchors(workspace)
