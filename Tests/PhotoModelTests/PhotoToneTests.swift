@@ -75,7 +75,7 @@ private let warm = ToneSettings.neutral.setting(.temperature, to: 30)
     }
 }
 
-@Suite(.disabled("waits on PT-4: setTone and autoToneSuggestion bodies")) struct PhotoToneTargetTests {
+struct PhotoToneTargetTests {
     /// MJ-PT step 2: one `setTone` under a drag token is one step named for it.
     @Test func dragIsOneStep() throws {
         var workspace = try image()
