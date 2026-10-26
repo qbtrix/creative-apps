@@ -2,7 +2,7 @@
 
 Issue: #3477 · Packet: docs/blueprints/suiteui/features/export-pack.md
 Run: act-1a175ea55b7-729d (line lead, line:suiteui; relaunch 2026-10-26) · earlier: act-1a16fe1fa73-5x3s (line lead, line:suiteui; relaunch) · earlier: act-1a16c618fe7-h4fd (line lead, line:suiteui; unparked by the supervisor 2026-10-24)
-Stage: XP-a needs-fix fixed; chain restacked
+Stage: waves built; waiting on lane
 Base: origin/dev 8eff8ab85
 Next: post Belt-Slice-Done as PRs merge
 
@@ -15,6 +15,7 @@ Next: post Belt-Slice-Done as PRs merge
 - 2026-10-26T03:07:58Z: #5326 (packet's shape tolerance) fixed in the packet; the code's half-pixel rule stays, with a boundary test and two mutations (#5374).
 - 2026-10-26T03:30:04Z heartbeat: all 7 PRs open and clean (#5043 #5065 #5104 #5106 #5374); waiting on lane; XP-10 after #5043+#5106
 - 2026-10-26T04:01:17Z heartbeat: #5043 needs-fix (FormatListRatchet: gallery listed formats) fixed at d32cc2e2a, formats now from ExportFormats; #5065 #5104 #5106 restacked, gate PASS, Heads moved
+- 2026-10-26T04:22:59Z heartbeat: all PRs open and clean, no labels; batches held while dev-red #5321 is open (not ours)
 
 ## Run act-1a16fe1fa73-5x3s decisions
 - 22:59Z: the 22:27Z poll was one-shot, so no heartbeat ran from 22:28Z to 22:59Z. Each poll now schedules the next one 15 min out.
