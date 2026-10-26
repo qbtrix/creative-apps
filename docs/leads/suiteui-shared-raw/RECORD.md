@@ -79,3 +79,4 @@ Next: lane merges #4848 (code batches wait on dev-red #5321), then retarget #485
 - 2026-10-26T14:03Z: heartbeat: SR PRs unchanged; dev 01600e46; dev-red #5321 open holds code batches; findings 0
 - 2026-10-26T14:29Z: heartbeat: SR PRs unchanged; lane backlog 123 ready PRs; dev 68be32fc; dev-red #5321 open; findings 0
 - 2026-10-26T14:52Z: heartbeat: SR PRs clean against dev f86f72f7; dev-red #5321 open; findings 0
+- 2026-10-26T15:19Z: rule 23: three identical blocked polls (14:28Z, 14:51Z, 15:18Z); Question for the supervisor posted on #3737 (issuecomment-6419749547); all shared PRs clean, none merged; dev f86f72f7; dev-red #5321 open; findings 0
