@@ -194,3 +194,4 @@ utc	stage	event	ref	note
 2026-10-26T14:04:02Z	3	poll	-	14:04Z poll: no merges of ours; #4939 queued. Drift #5745 (finding, 7 items): items 1-5 are BK-u #4939 and the BK app PRs #4965/#4961/#4982 (open); items 6-7 are packet drift: corrected the packet to BrushKeyTarget: Sendable (mutating, layerOpacityHelp) and specs(_:) on lead/brush-keys-drift-5745, gating, then a docs-only PR. Open findings 1.
 2026-10-26T14:05Z	3	poll	-	drift #5745 items 6-7: packet fix PR #5799 (docs-only, fast-lane; no swift here so lane Linux check is the proof); items 1-5 ride #4939/#4965/#4961/#4982. None merged yet; open findings 1.
 2026-10-26T14:27Z	3	poll	-	no merges; #4939 and packet fix #5799 queued in lane (dev-red #5321 open, lane check on #5799 pending). Open findings 1.
+2026-10-26T14:45Z	3	poll	-	no merges of ours (dev moved by #5780 only); #4939 and packet fix #5799 queued, lane check on #5799 not started; dev-red #5321 open. Open findings 1.
