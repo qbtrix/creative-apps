@@ -26,5 +26,19 @@
     "find": "guard style.effect(p.kind) == nil else {",
     "replace": "guard style.effect(p.kind) == nil || true else {",
     "tests": "StyleCommandsTests"
+  },
+  {
+    "label": "addSkipsOff: style.add re-adds a kind that is turned off",
+    "file": "Sources/SuiteImaging/Style/StyleCommands.swift",
+    "find": "guard style.effect(p.kind) == nil else {",
+    "replace": "guard style.effect(p.kind)?.isEnabled != true else {",
+    "tests": "StyleCommandsTests"
+  },
+  {
+    "label": "addHelpPointsToEnable: the refusal stops naming style.enable",
+    "file": "Sources/SuiteImaging/Style/StyleCommands.swift",
+    "find": "; use style.enable to turn it on or off.\")",
+    "replace": ".\")",
+    "tests": "StyleCommandsTests"
   }
 ]

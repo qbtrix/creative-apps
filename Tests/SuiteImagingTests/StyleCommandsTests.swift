@@ -78,12 +78,24 @@ struct StyleCommandsTests {
         #expect(target.history.steps == ["Add Layer Style", "Fill Opacity"] && target.style.fillOpacity == 0.3)
     }
 
+    /// A kind that is present but turned off still refuses `style.add`; its settings stay.
+    @Test func addRefusesAKindTurnedOff() throws {
+        var target = StyleTestTarget()
+        _ = try run("style.add", Self.shadow, on: &target)
+        _ = try run("style.enable", Self.shadow.merging(["on": .bool(false)]) { a, _ in a }, on: &target)
+        let before = target.style
+        #expect(throws: CatalogError.unavailable(id: "style.add", why: "This layer already has a dropShadow; use style.enable to turn it on or off.")) {
+            try run("style.add", Self.shadow, on: &target)
+        }
+        #expect(target.style == before)
+    }
+
     /// A kind already on, a kind absent, an unknown preset: each refused with its reason, the target unchanged.
     @Test func everyWhyNot() throws {
         var target = StyleTestTarget()
         _ = try run("style.add", Self.shadow, on: &target)
         let before = target
-        #expect(throws: CatalogError.unavailable(id: "style.add", why: "This layer already has a dropShadow.")) {
+        #expect(throws: CatalogError.unavailable(id: "style.add", why: "This layer already has a dropShadow; use style.enable to turn it on or off.")) {
             try run("style.add", Self.shadow, on: &target)
         }
         let glow: [String: JSONValue] = ["kind": .string("outerGlow")]

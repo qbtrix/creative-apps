@@ -150,11 +150,11 @@ public enum StyleCommands {
         let read: @Sendable (inout T, NoParams) throws -> JSONValue = { t, _ in StyleRules.json(t.styleSelection ?? .none) }
         return [
             spec("style.read", "Read Layer Style", "Reads the selected layer's style.", .query, NoParams.self, .none, .object([:]), can, read),
-            spec("style.add", "Add Layer Style", "Adds one style at its defaults; refused when the layer has it.",
+            spec("style.add", "Add Layer Style", "Adds one style at its defaults; refused when the layer has it, on or off.",
                  .edit, KindParams.self, kindOnly, shadow, can) { t, p in
                 try edit(&t, "Add Layer Style") { style in
                     guard style.effect(p.kind) == nil else {
-                        throw CatalogError.unavailable(id: "style.add", why: "This layer already has a \(p.kind.rawValue).")
+                        throw CatalogError.unavailable(id: "style.add", why: "This layer already has a \(p.kind.rawValue); use style.enable to turn it on or off.")
                     }
                     return StyleRules.adding(p.kind, to: style)
                 }
