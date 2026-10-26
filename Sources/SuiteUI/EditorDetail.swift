@@ -11,8 +11,11 @@
 // tested on its own (EditorDetailLayoutTests): a host fits its artboard with
 // `fitScale(artboard:)` so a fitted page's handles stay clear of the palette,
 // and EditorDetail hands the same fit to CanvasViewport's Command-0 through
-// `\.canvasFitScale` (read through `ZoomMath.fit(document:in:using:)`).
+// `\.canvasFitScale` (read through `ZoomMath.fit(document:in:using:)`);
+// `paletteFit(toolCount:)` builds that closure, and `ZoomMath.scale` draws a
+// host's ZoomLevel through it.
 // Owns no model state; it only measures its palette.
+import enum SuiteKernel.ZoomLevel
 import SwiftUI
 
 public struct EditorDetail<Canvas: View, Palette: View, Status: View>: View {
@@ -118,6 +121,12 @@ public struct EditorDetailLayout: Equatable, Sendable {
         guard scale.isFinite else { return smallest }
         return max(scale, smallest)
     }
+
+    /// The palette-clear fit for an editor whose palette shows `toolCount` tools, as the
+    /// `(viewport, artboard) -> zoom` closure `ZoomMath.scale` and `\.canvasFitScale` take.
+    public static func paletteFit(toolCount: Int) -> @Sendable (CGSize, CGSize) -> Double {
+        { viewport, artboard in EditorDetailLayout(viewport: viewport, toolCount: toolCount).fitScale(artboard: artboard) }
+    }
 }
 
 extension ZoomMath {
@@ -128,6 +137,15 @@ extension ZoomMath {
     ) -> Double {
         guard let fitScale else { return fit(document: document, in: viewport) }
         return fitScale(viewport, document)
+    }
+
+    /// The zoom a canvas draws `level` at: the fit (the host's `fitScale` when it has one) for
+    /// `.fit`, which follows `viewport` as it resizes, 1 for `.actual`, else the scale; clamped to
+    /// 10%...3200%. A host keeps a ZoomLevel and reads its zoom here, with no fit bookkeeping of its own.
+    public static func scale(
+        _ level: ZoomLevel, document: CGSize, in viewport: CGSize, using fitScale: (@Sendable (CGSize, CGSize) -> Double)?
+    ) -> Double {
+        clamped(level.scale(fit: fit(document: document, in: viewport, using: fitScale)))
     }
 }
 

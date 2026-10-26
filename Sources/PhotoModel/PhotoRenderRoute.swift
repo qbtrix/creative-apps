@@ -9,9 +9,10 @@
 // an opaque normal tile that covers the region replaces it, PhotoLayerComposite's
 // two shortcuts); the adjustments are ImagingProgram's steps, the suite's
 // shared list (`imagingSteps`), each `adjusted` in its order, blur is
-// `gaussianBlur`, and the bytes come from `display`. An adjustment layer
-// reads the picture back, runs on CoreRaster and uploads it again, and a step
-// the preferred backend lacks (Hue/Saturation on Metal) runs on the CPU; a section at its identity has no step, as CoreRaster
+// `gaussianBlur`, and the bytes come from `display`. An adjustment layer and
+// a layer with an enabled mask read the picture back, run on CoreRaster
+// (PhotoLayerComposite) and upload it again, and a step the preferred backend
+// lacks (Hue/Saturation on Metal) runs on the CPU; a section at its identity has no step, as CoreRaster
 // returns the buffer itself there. The CPU
 // route renders each damaged tile on its own task; the GPU route renders each
 // row of damaged tiles as one region, the rows on their own tasks. With
@@ -94,8 +95,8 @@ extension PhotoWorkspace {
     }
 
     /// The visible layers over transparency in `rect`, bottom first, from `resident` (`residentComposited(_:layers:
-    /// on:resident:)`). Nil when a visible layer needs the other path: an adjustment layer, or an opacity
-    /// CoreRaster rejects.
+    /// on:resident:)`). Nil when a visible layer needs the other path: an adjustment layer, a masked layer, or
+    /// an opacity CoreRaster rejects.
     func residentComposited(_ rect: PixelRect, on dispatcher: RenderDispatcher, resident: ResidentSurfaces) throws
         -> RenderSurface?
     {
@@ -103,7 +104,7 @@ extension PhotoWorkspace {
         guard
             shown.allSatisfy({ layer in
                 if case .adjustment = layer.kind { return false }
-                return (0...1).contains(Float(layer.opacity))
+                return shownMask(of: layer) == nil && (0...1).contains(Float(layer.opacity))
             })
         else { return nil }
         return try residentComposited(rect, layers: shown, on: dispatcher, resident: resident)
@@ -114,6 +115,8 @@ extension PhotoWorkspace {
     /// of their pixels.
     func residentComposited(_ rect: PixelRect, layers: [PhotoLayer], on dispatcher: RenderDispatcher,
                             resident: ResidentSurfaces) throws -> RenderSurface {
+        PhotoRenderCount.region()
+        PhotoRenderCount.layers(layers.count)
         let steps = try residentSteps(layers, in: rect, resident: resident)
         var picture = try dispatcher.blank(width: rect.width, height: rect.height)
         do {
@@ -151,12 +154,15 @@ extension PhotoWorkspace {
     /// The visible layers over transparency in `rect`, bottom first.
     func composited(_ rect: PixelRect, on dispatcher: RenderDispatcher) throws -> RenderSurface {
         var picture = try dispatcher.surface(PixelBuffer(width: rect.width, height: rect.height))
+        PhotoRenderCount.region()
         do {
             for layer in layers.reversed() where layer.isVisible && layer.opacity > 0 {
-                if case .adjustment = layer.kind {
-                    // No RenderOp runs an adjustment layer: read back, CoreRaster, upload again.
-                    let content = LayerContent(
-                        layer: layer, pixels: pixels[layer.id], mask: layer.isMaskEnabled ? masks[layer.id] : nil)
+                PhotoRenderCount.layers(1)
+                let onCPU: Bool
+                if case .adjustment = layer.kind { onCPU = true } else { onCPU = shownMask(of: layer) != nil }
+                if onCPU {
+                    // No RenderOp runs an adjustment layer or a layer mask: read back, CoreRaster, upload again.
+                    let content = LayerContent(layer: layer, pixels: pixels[layer.id], mask: shownMask(of: layer))
                     let done = try PhotoLayerComposite.composite(
                         content, onto: dispatcher.read(picture), origin: (x: rect.x, y: rect.y),
                         adjusting: services.adjustmentLayers, masking: services.masking)
@@ -173,7 +179,7 @@ extension PhotoWorkspace {
     }
 
     /// `layer`'s tiles under `rect` composited onto `picture`, a surface of
-    /// `rect`. Masks are ignored, as PhotoLayerComposite ignores them until PV-5.
+    /// `rect`. Only an unmasked layer comes here; a masked one goes through PhotoLayerComposite.
     private func composite(
         _ tiled: TiledPixels, of layer: PhotoLayer, onto picture: inout RenderSurface, at rect: PixelRect,
         on dispatcher: RenderDispatcher

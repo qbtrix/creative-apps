@@ -19,6 +19,8 @@ enum DesignIntent {
     case endDrag
     case nudge(DesignDirection, shift: Bool)
     case deleteSelection, deselect
+    /// Edit > Enter Group or Return; Edit > Exit Group or Escape inside a group (select.enter-group, select.exit-group).
+    case enterGroup, exitGroup
     case select(String)
     /// Shift-click: add the layer to the selection or take it out.
     case toggleSelect(String)
@@ -145,9 +147,14 @@ extension DesignColor {
 }
 
 extension DesignModifiers {
-    /// The modifier keys held right now and View > Snap to Layers, for the drag the pointer is making.
+    /// The modifier keys held right now and View > Snap to Layers, for the drag the pointer is making; ⌘ also
+    /// picks the deepest layer (`.deep`) and the second press of a double-click enters the picked group (`.enter`).
     static var current: DesignModifiers {
-        make(flags: NSEvent.modifierFlags, defaults: .standard)
+        var modifiers = make(flags: NSEvent.modifierFlags, defaults: .standard)
+        if KeyModifiers(flags: NSEvent.modifierFlags).contains(.command) { modifiers.insert(.deep) }
+        // clickCount is only read on a mouse-down: AppKit raises on a non-mouse event.
+        if let event = NSApp.currentEvent, event.type == .leftMouseDown, event.clickCount >= 2 { modifiers.insert(.enter) }
+        return modifiers
     }
 
     /// Shift and Option as held; `.noSnap` when ⌘ is held or Snap to Layers is off in `defaults` (snapping SN-8).
