@@ -2,9 +2,9 @@
 
 Issue: #3715 (#4498 closed) · Packet: docs/blueprints/suiteui/features/suite-imaging.md
 Run: act-1a175ea55b7-729d (line lead, line:suiteui; relaunch 2026-10-26) · earlier: act-1a170cfbf58-pshm (resumes act-1a16d523b32-v6tj and earlier) · Started: 2026-10-24
-Stage: 3 wave 9: restack stale chains on dev
+Stage: 3 wave 9: stale chains restacked, waiting on the lane
 Base: origin/dev 8eff8ab85
-Next: #5148, #5151, #5153 merged. Merge origin/dev into #5295 → #5297 → #5299 and #5154 → #5163 → #5178, gate, move Head. IM-13 (Package.swift, supervisor) once #5163 merges.
+Next: #5295 → #5297 → #5299 and #5154 → #5163 → #5178 are on dev d0859e017 with Heads moved. IM-13 (Package.swift, supervisor) once #5163 merges; IM-14 after.
 
 
 ## Run act-1a175ea55b7-729d decisions
@@ -12,6 +12,8 @@ Next: #5148, #5151, #5153 merged. Merge origin/dev into #5295 → #5297 → #529
 - PR base stays `dev` (CLAUDE.md; BASE_BRANCH=dev in scripts/fast-lane.sh; the lane retargets main PRs).
 - Stacked PRs whose parent squash-merged carry the parent's commits (size FAIL, dirty): merge origin/dev into each branch, gate, move Head.
 - #5148 (f4463d48c), #5151 (5eb2fa737), #5153 (f7c2ab5bb) merged; IM-photo still needs IM-8d (#5295, #5297), IM-library IM-11 (#5154, #5163, #5178).
+- 2026-10-26T03:07:58Z: masked-layer cpu op (#5216) merged into IM-8d; liveStack treats any masked layer as unsupported on IM-8d-photo; IM-11a/b take dev (LG-6 decodes ahead kept on the GPU loupe render).
+
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
