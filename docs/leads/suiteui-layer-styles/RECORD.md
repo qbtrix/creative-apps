@@ -4,7 +4,7 @@ Issue: #3937 · Packet: docs/blueprints/suiteui/features/layer-styles.md
 Run: act-1a175e3e61f-9qd4 · Session: claude/layer-styles-lead-u8mk3r · Resumed: 2026-10-26T03:00Z (previous run act-1a1705bc1ae-pb09)
 Stage: 3 wave check
 Base: 8eff8ab8501bca4fcd020a4a5c1d22a4df69e1eb (origin/dev; main at d3323f6a7, dev-red #5321 open)
-Next: LS-3b is #5377 (fast-lane, waits on dev-red #5321 like the rest). Open LS-11 once #4903 merges, LS-3 once #5174 merges (recheck the 400-line cap), and LS-6 (2af2188e, gated) and LS-7 (f98355e4, gated) once #5176 merges. LS-8 waits on the core bump (asked 01:50Z). Then LS-4, LS-9, LS-9b, LS-12 and LS-13.
+Next: LS-3b is #5377 (fast-lane, waits on dev-red #5321 like the rest). Open LS-11 once #4903 merges, LS-3 once #5174 merges (recheck the 400-line cap), and LS-6 (2af2188e, gated) and LS-7 (f98355e4, gated) once #5176 merges. LS-8 waits on the core bump (asked 01:50Z). LS-4 is drafted on lead/layer-styles-LS-u-4 (draft head on LS-3 plus a cherry-pick of LS-5; rebuild on dev, regate and open once LS-3 and #5176 merge). Then LS-9, LS-9b, LS-12 and LS-13.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -58,6 +58,7 @@ Next: LS-3b is #5377 (fast-lane, waits on dev-red #5321 like the rest). Open LS-
 - LS-6 reworked for packet review: style.add refuses a kind the layer has turned off and points to style.enable (2af2188e, Mutate 6/6, CI pass).
 - LS-7 reworked for amendment #7: the SVG writer maps a gradient's unit-box points to the shape box with GradientRules.mapped (lead/layer-styles-LS-m-7, Mutate 6/6).
 - LS-3 split under the 400-line cap (441 with everything): LS-3b, off dev, adds `SuiteTypeID.layerStyle`, `SuitePasteboardCoding.style(_:)`/`style(in:)` and `LayerActionBar.styles(on:identifier:perform:)` built from style.panel's spec; LS-3 keeps the panel and deletes `LayerStylePasteboard`. SuiteUI cannot import SuiteShell, so apps carry the style through PasteboardBridge with those coder helpers. The type is not in `declaredOnly`, since no plist exports it.
+- LS-4 amendment: at LS-4 the page only logged intents, so the journey (preview "dropShadow" after the switch) and the budget's applied style couldn't pass. LS-4 adds `GalleryLayerStyle.applied(_:to:)` (StyleRules: toggle, set, preset, fill opacity, clamped), the way `GalleryGradientEditor.applied` serves GF-4, and the page uses it. That is one file beyond LS-4's list, `GalleryLayerStyle.swift`, which LS-12 already owns. LS-12 still swaps it for StyleCommands on a target. The LS-2 journey expected "dropShadow, outerGlow" after Lifted, but LS-5's Lifted is a drop shadow alone, so the journey expects "dropShadow".
 - Status branch: Belt watches lead/suiteui-layer-styles (docs/leads/suiteui-layer-styles/), the branch the previous run used. This run pushed to lead/layer-styles until 03:15Z and Belt saw a stall. From now on RECORD.md and timeline.tsv go here first. lead/layer-styles is a mirror.
 ## Wire
 - [ ] Wire: core layer-style-engine:LE-a (StyleProgram.stack and style(_ stack:) declared once the bump PR carries LayerStyleStack; LS-8)
