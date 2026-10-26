@@ -208,3 +208,4 @@ utc	stage	event	ref	note
 2026-10-26T02:12:53Z	relaunch	act-1a175f7cc55-xlmt
 2026-10-26T12:38:54Z	relaunch	heartbeat	-	relaunch act-1a178358362-etn1; scoping CB-z follow-up
 2026-10-26T12:39:40Z	build	heartbeat	-	builder started: CB-z follow-up (in-app help.install-cli shares the CLI install plan), stacked on #4999; #4999 still beta, queued
+2026-10-26T13:10:03Z	pr-opened	heartbeat	-	#5793 opened: in-app help.install-cli shares the CLI install plan (drift #5642), stacked on #4999; next: CLI --bundle builder (drift #5643)
