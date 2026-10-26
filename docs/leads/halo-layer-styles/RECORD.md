@@ -1,12 +1,12 @@
 # layer-styles (Halo) lead record
 
 Issue: #3936 · Packet: docs/blueprints/halo/features/layer-styles.md
-Run: act-1a175e3e638-skn9 · Session: claude/layer-styles-lead-s46uof · Started: 2026-10-24 (resumed 2026-10-26T02:00Z; earlier runs act-1a171ab9e77-es26, act-1a16c627cc6-nlss, act-1a1648ae75a-4dqz)
+Run: act-1a178432d32-jxt0 · Session: claude/layer-styles-lead-nm0aoi · Started: 2026-10-24 (resumed 2026-10-26T12:45Z; earlier runs act-1a175e3e638-skn9, act-1a171ab9e77-es26, act-1a16c627cc6-nlss, act-1a1648ae75a-4dqz)
 Wire: suiteui layer-styles:LS-a
 Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTests.glowReachesItsKeyedSize and glowIsNotClipped; add the no-padding mutation, origin dropped in LiveFrameRendering's styled composite)
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
-Stage: 3 polling (02:00Z): Packet-Review 1 applied: HY-m amendments on #5158 (b84d8cb4, gated, ready, prescreen green); amendment 2 (3 keyframes) on HY-u #5161 (fa7e3ca6c, gated, Head moved). dev-red #5321 open (macOS, Photo/Library range, not ours)
-Base: 8eff8ab85 (origin/dev; main d3323f6a7 verified at relaunch)
+Stage: 3 polling (12:55Z): #5156 (HY-1) merged; #5158 (HY-m, b84d8cb4) and #5174 (LS-2, cb6c0a2f) clean and queued; drafts #5157, #5161, #5218 wait on LS-2. dev-red #5321 open (macOS, Onboarding timeouts, not ours) holds code batches
+Base: 57dd31ff (origin/dev; main d3323f6a7 verified at relaunch)
 Next: wait for the lane to land #5158 (HY-m) and #5174 (LS-2); on #5174 merge: merge dev into #5157, #5161, #5218 in order, gate, push, Head, ready
 
 ## Slices
@@ -63,6 +63,7 @@ Next: wait for the lane to land #5158 (HY-m) and #5174 (LS-2); on #5174 merge: m
 - 2026-10-24 (revised): the supervisor answered (#3936, 10:55Z) that building HY-7 ahead on the StyleRoute stub with a Wire line is right, superseding the earlier "not built ahead". Open point asked on #3936: the viewer draws items in a SwiftUI Canvas and no app holds a RenderDispatcher yet; feeding StyleRoute a layer RenderSurface per frame means a PixelBuffer upload per step (render-contract rule 3). HY-7 is built once the route shape is answered; until then the viewer draws styled layers unstyled and the journey stays skipped.
 
 ## Open
+- 2026-10-26T12:55Z: relaunched as act-1a178432d32-jxt0; Belt-Lead lines on #5157, #5158, #5161, #5218 moved to it and the attribution footers removed from their bodies.
 - 2026-10-24T21:50Z: HY-7 draft #5218 (head 70a00b2f; SuiteImaging StyleLayerResident/StyleLayerGPU, SuiteUI StyleLayerView, Halo HaloStyledRuns + viewer; journey skip now `waits on LS-9`; Wire: suiteui layer-styles:LS-9). Not compiled on macOS yet. Limits listed in the PR (normal blend only, scale 1, CPU repaint on content change). #5156 still unbatched (in the newest-100 window): `Question for the supervisor:` posted on #3936.
 - 2026-10-24T20:15Z: container restart lost the first HY-7 builder (nothing pushed); restarted. #5156 still clean and unmerged (only the fast-lane check on 0e12bffd): the lane is bisecting batch 20261024183708 (probe -6 macOS gate running, #5156 not in it) with dev-red #5183 open. If #5156 isn't batched once that batch resolves: `Question for the supervisor:` on #3936.
 - 2026-10-24: draft PRs opened per the supervisor: #5156 (HY-1), #5157 (HY-2), #5158 (HY-m), #5161 (HY-u). They go ready once #4911 and LS-2 are on dev and dev is merged in.
