@@ -2,15 +2,15 @@
   {
     "label": "an old catalog without whites fails to decode",
     "file": "Sources/LibraryModel/Contracts/DevelopValues.swift",
-    "find": "whites = try c.decodeIfPresent(Double.self, forKey: .whites) ?? 0",
-    "replace": "whites = try c.decode(Double.self, forKey: .whites)",
+    "find": ": try c.decodeIfPresent(Double.self, forKey: key)",
+    "replace": ": try c.decode(Double.self, forKey: key)",
     "tests": "LibraryDevelopValuesTests"
   },
   {
     "label": "a neutral whites adds a key to every encoded settings",
     "file": "Sources/LibraryModel/Contracts/DevelopValues.swift",
-    "find": "if whites != 0 { try c.encode(whites, forKey: .whites) }",
-    "replace": "try c.encode(whites, forKey: .whites)",
+    "find": "where Self.required.contains(slider) || tone.value(slider) != slider.neutral {",
+    "replace": "where !slider.rawValue.isEmpty {",
     "tests": "LibraryDevelopValuesTests"
   },
   {
