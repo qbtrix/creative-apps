@@ -303,3 +303,4 @@ utc	stage	event	ref	note
 2026-10-26T19:29Z	check-in	quiet: #5353 open (clean); #5758/#5763 in lane, no labels; no new findings; dev green
 2026-10-26T20:02Z	check-in	quiet: #5353 open (clean); #5758/#5763 in lane, no labels; no new findings; no merges; dev green
 2026-10-26T20:34Z	check-in	batch of 11 landed 20:13-20:16Z (#5374 suiteui packet tolerance, photo #5762/#5371/#5363), ours not in it; #5353 open (clean); #5758/#5763 in lane, no labels; no new findings
+2026-10-26T21:06Z	check-in	no change: #5353 open (p0, clean); #5758 unstable (cancelled lane run only), #5763 clean; no new findings; dev green; PX-9 still waits on #5353
