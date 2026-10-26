@@ -19,6 +19,7 @@ file.recent
 file.save
 file.save-as
 image.canvas-size
+image.flip
 image.gradient
 image.resize
 image.rotate-180
