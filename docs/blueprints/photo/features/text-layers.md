@@ -1,7 +1,7 @@
 # Feature packet: text-layers
 
 **Feature:** type over a photo. Photo gets a **Type** tool (T): click to
-place a text layer, type, press Esc or click away to commit. A text layer
+place a text layer, type, press Return or click away to commit (Esc drops the box). A text layer
 holds its words and the suite's `TextStyle` (font, weight, italic, size,
 colour, alignment, line height, letter spacing) and is drawn into pixels by
 the shared glyph rasterizer every time it changes, so blend modes, opacity,
@@ -77,7 +77,7 @@ TX-5 follows the other Photo packets' last owner (the waits data).
 ## Journey steps
 
 `MJ-TX` on Linux (`PhotoTextLayerTests`, `PhotoTextORATests`), then:
-1. Open `beach.png`, press T, click the sky, type SUMMER SALE, Esc: a text layer above the photo (TX-3, TX-7).
+1. Open `beach.png`, press T, click the sky, type SUMMER SALE, Return: a text layer above the photo (TX-3, TX-7).
 2. In the inspector pick a heavy weight, size 120, Center; the text redraws; Undo steps back one control at a time (TX-4, TX-7).
 3. Save, close, reopen: the layer is still text; double-click it, change SALE to DEALS (TX-6, TX-7; `PJ-TX`, `PhotoTextJourneyTests.testTitleOverPhoto`).
 
@@ -138,8 +138,10 @@ extension PhotoWorkspace {
 - **File.** The `.ora` stack entry keeps `src` (the PNG) and adds
   `afterglow:text` (JSON of `PhotoTextLayer`); on read, a valid attribute
   makes a text layer, else a pixel layer, never an error.
-- **Commit.** The overlay's text field commits on Esc, Return with ⌘, or a
-  click outside; an empty field on a new layer removes it, as one step.
+- **Commit.** The box's text field commits on Return or when it loses focus
+  (a click outside, another tool), and Esc drops the box with nothing added;
+  an empty box just closes. A commit is one step. The box is one line, so
+  Return commits rather than starting a paragraph (drift #5741).
 
 ## Tasks
 
@@ -147,8 +149,8 @@ extension PhotoWorkspace {
 |---|---|---|---|---|---|
 | TX-1 | – | **Checks first, then the kind.** `PhotoTextLayerTests` and `PhotoTextORATests` written, disabled by name (`waits on TX-5`, `TX-6`); `PhotoLayerKind.text(PhotoTextLayer)` with `PhotoTextLayer` (words, `TextStyle`, origin, box width); `PhotoDocumentFile` reads and writes the case through a stub that refuses with `NotBuilt` | `Sources/PhotoModel/PhotoLayer.swift`, `Sources/PhotoModel/PhotoTextLayer.swift`, `Sources/PhotoModel/PhotoDocumentFile.swift`, `Tests/PhotoModelTests/PhotoTextLayerTests.swift`, `Tests/PhotoModelTests/PhotoTextORATests.swift` | – | ~200, 5 |
 | TX-2 | – | `PhotoText+Kernel.swift` conforms `PhotoWorkspace` to `TextStyleTarget` (stubbed bodies) and declares `text.add` and `text.set-words` specs with real ids, schemas and availability; `PhotoTextJourneyTests` written, skipped until TX-7 | `Sources/PhotoModel/PhotoText+Kernel.swift`, `UITests/PhotoJourneyTests+Text.swift` | TX-1 | ~140, 2 |
-| TX-3 | – | **Reachable first.** `PhotoTool.text` in the palette (T); a click on the canvas opens an in-place text box (a SwiftUI text field over the canvas at the zoom), Esc or a click away commits through `text.add` (unavailable on the stubs with "Text arrives with TX-5.") | `Sources/PhotoModel/PhotoWorkspace.swift`, `Sources/PhotoApp/PhotoPaletteTool.swift`, `Sources/PhotoApp/PhotoTextEditorOverlay.swift` | TX-2 | ~200, 3 |
-| TX-4 | – | The inspector shows `TextStyleRows` for a text layer (the font list from `services.text`); double-click a text layer edits its words; render budget test | `Sources/PhotoApp/PhotoTextInspector.swift`, `Sources/PhotoApp/PhotoPanel.swift`, `Tests/AppSnapshotTests/RenderBudgetPhotoTextTests.swift` | TX-3 | ~170, 3 |
+| TX-3 | – | **Reachable first.** `PhotoTool.text` in the palette (T); a click on the canvas opens an in-place text box (a SwiftUI text field over the canvas at the zoom), Return or a click away commits through `text.add`, Esc cancels (unavailable on the stubs with "Text arrives with TX-5.") | `Sources/PhotoModel/PhotoWorkspace.swift`, `Sources/PhotoModel/PhotoTextBox.swift`, `Sources/PhotoApp/PhotoPaletteTool.swift`, `Sources/PhotoApp/PhotoWindow+Text.swift` (`PhotoTextBoxOverlay`), `Tests/mutations/PhotoModel.PhotoTextBox.json` | TX-2 | ~200, 3 |
+| TX-4 | – | The inspector shows `TextStyleRows` for a text layer (the font list from `services.text`); a Type tool click on a text layer edits its words (`PhotoTextEdit.swift`; double-click with any tool is gap #5760); render budget test | `Sources/PhotoApp/PhotoTextInspector.swift`, `Sources/PhotoApp/PhotoPanel.swift`, `Sources/PhotoModel/PhotoTextEdit.swift`, `Tests/mutations/PhotoModel.PhotoTextEdit.json`, `Tests/AppSnapshotTests/RenderBudgetPhotoTextTests.swift` | TX-3 | ~170, 3 |
 | TX-5 | – | `PhotoText+Kernel` bodies: `text.add`, `text.set-words` and the kernel's text specs; each edit lays out with `TextStyleRules.layout` (advances from `services.text`), rasterizes through `GlyphRasterizing` into the layer's tiles, one undo step; the catalog appends the specs; ids in the ledger; turns on `PhotoTextLayerTests` | `Sources/PhotoModel/PhotoText+Kernel.swift`, `Sources/PhotoModel/PhotoCommandCatalog.swift`, `Tests/command-ids/photo.txt`, `Tests/PhotoModelTests/PhotoTextLayerTests.swift`, `Tests/mutations/PhotoModel.PhotoText+Kernel.json` | TX-2 | ~250, 5 |
 | TX-6 | – | `PhotoTextLayer+ORA.swift`: a text layer saves as its PNG plus an `afterglow:text` attribute (words and style JSON); reading it restores an editable layer; another editor's file without it reads as pixels; turns on `PhotoTextORATests` | `Sources/PhotoModel/PhotoTextLayer+ORA.swift`, `Sources/PhotoModel/PhotoDocumentFile.swift`, `Tests/PhotoModelTests/PhotoTextORATests.swift`, `Tests/mutations/PhotoModel.PhotoTextLayer+ORA.json` | TX-1 | ~160, 4 |
 | TX-7 | – | The window on live: the overlay commits through `text.add`, the inspector's intents run the kernel's commands; `PhotoTextJourneyTests` on; RJ-P02 re-pointed and enabled | `Sources/PhotoApp/PhotoWindow+Text.swift`, `UITests/PhotoJourneyTests+Text.swift`, `Tests/RealJobs/photo/sale-title/sale-title.jobs.json` | TX-4, TX-5, TX-6 | ~150, 3 |
@@ -186,7 +188,7 @@ Longest chain: TX-1 → TX-2 → TX-3 → TX-4 → TX-7 → TX-8 (6). Chain of 6
 | render: size scrub on a text layer | 120-sample drag ≤ 3 window bodies | `RenderBudgetPhotoTextTests.sizeScrub` |
 | one gesture, one step | add, edit words, each style control | `PhotoTextLayerTests` |
 | no dead controls | the tool and every row are catalog commands | `CommandPathTests` |
-| keyboard parity | T, Esc to commit, ⌘B and ⌘I in the box | `PhotoTextJourneyTests` |
+| keyboard parity | T, Return to commit, Esc to cancel, ⌘B and ⌘I in the box | `PhotoTextJourneyTests` |
 | behaviour preserved | every existing `.ora` fixture opens and re-saves unchanged | `PhotoTextORATests` |
 
 ## Done check
