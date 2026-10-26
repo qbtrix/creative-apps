@@ -6,7 +6,7 @@
 // `<command id> [<step>, <n> in History] <intent>` (or `[refused: <why>]`), to
 // `suite.gallery.log`, so a drag shows as one undo step. `applied` and `line`
 // stay for the render budget's local rows. The page is its own area in
-// `SuiteGallery.areas`.
+// `SuiteGallery.areas`. The rows scroll, the log stays under them.
 import SuiteImaging
 import SuiteKernel
 import SwiftUI
@@ -65,11 +65,19 @@ struct GalleryToneRowsPage: View {
         let text = log.joined(separator: "\n")
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             Text("Tone rows").font(SuiteFont.sectionCaps).foregroundStyle(SuiteColor.secondaryText).accessibilityAddTraits(.isHeader)
-            ToneRows(settings: board.settings, help: nil) { intent in
-                log.append(board.send(intent))
-                if log.count > 40 { log.removeFirst(log.count - 40) }
+            // Scrolls: the four sections run past a 768-pt runner's window (#5324).
+            ScrollView {
+                ToneRows(settings: board.settings, help: nil) { intent in
+                    log.append(board.send(intent))
+                    if log.count > 40 { log.removeFirst(log.count - 40) }
+                }
+                .frame(width: SuiteSize.editorPanelWidth, alignment: .leading)
             }
-            .frame(width: SuiteSize.editorPanelWidth, alignment: .leading)
+            // No scroller: a legacy scroller's page area is an unnamed button
+            // with no identifier to the app audit, as in GalleryGradientEditor.
+            .scrollIndicators(.never)
+            .frame(width: SuiteSize.editorPanelWidth)
+            .accessibilityIdentifier("suite.gallery.tone-rows.scroll")
             Text(log.last ?? "Nothing yet").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText).lineLimit(1)
                 .accessibilityLabel(text).accessibilityValue(text)
                 .accessibilityIdentifier("suite.gallery.log")
