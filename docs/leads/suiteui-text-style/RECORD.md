@@ -208,3 +208,4 @@ Next: Lane: #4871 TS-a and #5047 TS-7 in the lane. After #4871 merges, merge dev
 - 2026-10-26T22:08:36Z (act-1a1774f754d-5cse): #5047 TS-7 merge 31b358be: scripts/ci --changed CI: PASS (AllAppsCatalogTests included); pushed, Head: moved
 - 2026-10-26T22:10:52Z (act-1a1774f754d-5cse): #5226 TS-9 merge b406cca0616b8ccfe4c8876f0858698018855f00: scripts/ci --changed CI: PASS (Halo catalog tests + AllAppsCatalogTests); pushed, Head: moved
 - 2026-10-26T22:17:38Z (act-1a1774f754d-5cse): 20-min poll: #5047 #5226 re-gated heads pushed, awaiting lane; #4958 #5772 queued; no supervisor reply; 0 findings
+- 2026-10-26T22:30:16Z (act-1a1774f754d-5cse): lane dropped needs-rebase on #5047 (31b358be) and #5226 (b406cca0); both back in the queue with #4958 #5772
